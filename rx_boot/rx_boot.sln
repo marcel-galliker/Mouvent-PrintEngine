@@ -1,0 +1,57 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rx_common_lib", "..\rx_common_lib\rx_common_lib.vcxproj", "{23DE4F53-96A4-44A2-9A16-FFC6CCB25311}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rx_boot", "rx_boot.vcxproj", "{8FCB91B6-1469-458E-AE97-5C1BB0677EB1}"
+	ProjectSection(ProjectDependencies) = postProject
+		{23DE4F53-96A4-44A2-9A16-FFC6CCB25311} = {23DE4F53-96A4-44A2-9A16-FFC6CCB25311}
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Linux Integration", "Linux Integration", "{77D9EBD2-8F4B-4FE6-8B93-BAB7F0668147}"
+	ProjectSection(SolutionItems) = preProject
+		rx_boot\info = rx_boot\info
+		rx_boot\radex.sh = rx_boot\radex.sh
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Debug-lx|Win32 = Debug-lx|Win32
+		Debug-soc|Win32 = Debug-soc|Win32
+		Release|Win32 = Release|Win32
+		Release-lx|Win32 = Release-lx|Win32
+		Release-soc|Win32 = Release-soc|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{23DE4F53-96A4-44A2-9A16-FFC6CCB25311}.Debug|Win32.ActiveCfg = Debug|Win32
+		{23DE4F53-96A4-44A2-9A16-FFC6CCB25311}.Debug|Win32.Build.0 = Debug|Win32
+		{23DE4F53-96A4-44A2-9A16-FFC6CCB25311}.Debug-lx|Win32.ActiveCfg = Debug-lx|Win32
+		{23DE4F53-96A4-44A2-9A16-FFC6CCB25311}.Debug-lx|Win32.Build.0 = Debug-lx|Win32
+		{23DE4F53-96A4-44A2-9A16-FFC6CCB25311}.Debug-soc|Win32.ActiveCfg = Debug-soc|Win32
+		{23DE4F53-96A4-44A2-9A16-FFC6CCB25311}.Debug-soc|Win32.Build.0 = Debug-soc|Win32
+		{23DE4F53-96A4-44A2-9A16-FFC6CCB25311}.Release|Win32.ActiveCfg = Release|Win32
+		{23DE4F53-96A4-44A2-9A16-FFC6CCB25311}.Release|Win32.Build.0 = Release|Win32
+		{23DE4F53-96A4-44A2-9A16-FFC6CCB25311}.Release-lx|Win32.ActiveCfg = Release-lx|Win32
+		{23DE4F53-96A4-44A2-9A16-FFC6CCB25311}.Release-lx|Win32.Build.0 = Release-lx|Win32
+		{23DE4F53-96A4-44A2-9A16-FFC6CCB25311}.Release-soc|Win32.ActiveCfg = Release-soc|Win32
+		{23DE4F53-96A4-44A2-9A16-FFC6CCB25311}.Release-soc|Win32.Build.0 = Release-soc|Win32
+		{8FCB91B6-1469-458E-AE97-5C1BB0677EB1}.Debug|Win32.ActiveCfg = Debug|Win32
+		{8FCB91B6-1469-458E-AE97-5C1BB0677EB1}.Debug|Win32.Build.0 = Debug|Win32
+		{8FCB91B6-1469-458E-AE97-5C1BB0677EB1}.Debug-lx|Win32.ActiveCfg = Debug-lx|Win32
+		{8FCB91B6-1469-458E-AE97-5C1BB0677EB1}.Debug-lx|Win32.Build.0 = Debug-lx|Win32
+		{8FCB91B6-1469-458E-AE97-5C1BB0677EB1}.Debug-soc|Win32.ActiveCfg = Debug-soc|Win32
+		{8FCB91B6-1469-458E-AE97-5C1BB0677EB1}.Debug-soc|Win32.Build.0 = Debug-soc|Win32
+		{8FCB91B6-1469-458E-AE97-5C1BB0677EB1}.Release|Win32.ActiveCfg = Release-lx|Win32
+		{8FCB91B6-1469-458E-AE97-5C1BB0677EB1}.Release|Win32.Build.0 = Release-lx|Win32
+		{8FCB91B6-1469-458E-AE97-5C1BB0677EB1}.Release-lx|Win32.ActiveCfg = Release-lx|Win32
+		{8FCB91B6-1469-458E-AE97-5C1BB0677EB1}.Release-lx|Win32.Build.0 = Release-lx|Win32
+		{8FCB91B6-1469-458E-AE97-5C1BB0677EB1}.Release-soc|Win32.ActiveCfg = Release-soc|Win32
+		{8FCB91B6-1469-458E-AE97-5C1BB0677EB1}.Release-soc|Win32.Build.0 = Release-soc|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

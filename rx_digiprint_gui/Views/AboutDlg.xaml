@@ -1,0 +1,67 @@
+﻿<Window x:Class="RX_DigiPrint.Views.AboutDlg"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="About RX-DigiPrint" 
+        Height="350" 
+        Width="350"
+        ResizeMode="NoResize"
+        Loaded="Window_Loaded"
+        >
+    <Window.Resources>
+        <ResourceDictionary>
+            <Style TargetType="TextBlock">
+                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}"/>
+            </Style>
+        </ResourceDictionary>    
+    </Window.Resources>
+    <Grid >
+        <Image Source="..\Resources\Bitmaps\radex_bg.jpg" HorizontalAlignment="Right" />
+        <Grid VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Margin="5">
+            <Image Source="..\Resources\Bitmaps\Mouvent_Logo.png" />
+            <TextBlock Text="A Bobst Group company  " VerticalAlignment="Bottom" HorizontalAlignment="Right" FontSize="8"/>
+        </Grid>
+        <StackPanel Margin="10,30,10,0" >
+            <TextBlock Text="RX-DigiPrint"
+                     Margin="0,5"
+                     HorizontalAlignment="Center" 
+                     VerticalAlignment="Center" 
+                     Foreground="#FF77A337"
+                     Background="Transparent"
+                     FontSize="20" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <TextBlock Text="Version:  "/>
+                <TextBlock HorizontalAlignment="Center" Text=" "/>
+                <TextBlock Text="{Binding Version}"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <TextBlock Text="Publish:  "/>
+                <TextBlock HorizontalAlignment="Center" Text=" "/>
+                <TextBlock Text="{Binding PublishVersion}"/>
+            </StackPanel>
+
+            <StackPanel Margin="0,10,0,0">
+                <TextBlock HorizontalAlignment="Center" Text="Copyright"/>
+                <TextBlock HorizontalAlignment="Center" Text="©2017 Mouvent AG, Switzerland"/>
+                <TextBlock HorizontalAlignment="Center" Text="www.mouvent.com"/>
+                <TextBlock HorizontalAlignment="Center" Text="All rights reserved"/>
+                <TextBlock HorizontalAlignment="Center" Text=" " FontSize="4"/>
+                <Border BorderBrush="LightGray" BorderThickness="1" >
+                    <StackPanel>
+                        <TextBlock HorizontalAlignment="Center" Text="Credits" FontSize="8"/>
+                        <TextBlock HorizontalAlignment="Center" Text=" " FontSize="4"/>
+                        <TextBlock HorizontalAlignment="Center" Text="Portions of this software are copyright" FontSize="8"/>
+                        <TextBlock HorizontalAlignment="Center" Text="©2014 The FreeType Project (www.freetype.org)." FontSize="8"/>
+                        <TextBlock HorizontalAlignment="Center" Text="©2013 The TinyXML Project (www.sourceforge.net/projects/tinyxml)." FontSize="8"/>
+                        <TextBlock HorizontalAlignment="Center" Text="All rights reserved." FontSize="8"/>
+                    </StackPanel>
+                </Border>
+                
+                <TextBlock HorizontalAlignment="Center" Text=" "/>
+                <TextBlock HorizontalAlignment="Center" Text="Distribution Partner" />
+                <!--
+                <TextBlock HorizontalAlignment="Center" Text="Graph-Tech AG (Switzerland)"/>
+                -->
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>

@@ -1,0 +1,235 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug-baw|Win32">
+      <Configuration>Debug-baw</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug-lx|Win32">
+      <Configuration>Debug-lx</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug-soc|Win32">
+      <Configuration>Debug-soc</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release-baw|Win32">
+      <Configuration>Release-baw</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release-soc|Win32">
+      <Configuration>Release-soc</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{F3D0BE1B-1F74-4EC5-8233-7C204F0FEEED}</ProjectGuid>
+    <ProjectName>rx_stepper_ctrl</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-baw|Win32'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-soc|Win32'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-baw|Win32'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-soc|Win32'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug-lx|Win32'">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-baw|Win32'">
+    <NMakeBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /build "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /rebuild "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /clean "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeCleanCommandLine>
+    <NMakeOutput>$(ProjectDir)rx_stepper_ctrl-Release-baw.vgdbsettings</NMakeOutput>
+    <NMakeIncludeSearchPath>f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1;f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1\arm-linux-gnueabi;f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1\backward;f:\compiler\linaro-tools\lib\gcc\arm-linux-gnueabi\4.7.1\include;f:\compiler\linaro-tools\lib\gcc\arm-linux-gnueabi\4.7.1\include-fixed;f:\compiler\linaro-tools\arm-linux-gnueabi\include;f:\compiler\linaro-tools\arm-linux-gnueabi\libc\usr\include\arm-linux-gnueabi;f:\compiler\linaro-tools\arm-linux-gnueabi\libc\usr\include;$(ProjectDir)\../rx_common_lib;f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1;f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1\arm-linux-gnueabi;f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1\backward;f:\compiler\linaro-tools\lib\gcc\arm-linux-gnueabi\4.7.1\include;f:\compiler\linaro-tools\lib\gcc\arm-linux-gnueabi\4.7.1\include-fixed;f:\compiler\linaro-tools\arm-linux-gnueabi\include;f:\compiler\linaro-tools\arm-linux-gnueabi\libc\usr\include\arm-linux-gnueabi;f:\compiler\linaro-tools\arm-linux-gnueabi\libc\usr\include;$(ProjectDir)\../Common;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeForcedIncludes>$(ProjectDir)\gcc_Release-baw.h;$(VISUALGDB_DIR)\gcc_compat.h;$(NMakeForcedIncludes)</NMakeForcedIncludes>
+    <OutDir>$(SolutionDir)_out\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)_temp\$(MSBuildProjectName)\$(Configuration)\</IntDir>
+    <IncludePath />
+    <ReferencePath />
+    <LibraryPath />
+    <LibraryWPath />
+    <NMakePreprocessorDefinitions>__VisualGDB_CFG_Release_baw;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-soc|Win32'">
+    <NMakeBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /build "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /rebuild "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /clean "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeCleanCommandLine>
+    <NMakeOutput>$(ProjectDir)rx_stepper_ctrl-Release-soc.vgdbsettings</NMakeOutput>
+    <NMakeIncludeSearchPath>f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1;f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1\arm-linux-gnueabi;f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1\backward;f:\compiler\linaro-tools\lib\gcc\arm-linux-gnueabi\4.7.1\include;f:\compiler\linaro-tools\lib\gcc\arm-linux-gnueabi\4.7.1\include-fixed;f:\compiler\linaro-tools\arm-linux-gnueabi\include;f:\compiler\linaro-tools\arm-linux-gnueabi\libc\usr\include\arm-linux-gnueabi;f:\compiler\linaro-tools\arm-linux-gnueabi\libc\usr\include;../rx_common_lib;../rx_common_lib/VisualGDBCache;../rx_ink_lib;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeForcedIncludes>$(ProjectDir)\gcc_Release-soc.h;$(VISUALGDB_DIR)\gcc_compat.h;$(NMakeForcedIncludes)</NMakeForcedIncludes>
+    <OutDir>$(SolutionDir)_out\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)_temp\$(MSBuildProjectName)\$(Configuration)\</IntDir>
+    <IncludePath />
+    <ReferencePath />
+    <LibraryPath />
+    <LibraryWPath />
+    <NMakePreprocessorDefinitions>__VisualGDB_CFG_Release_soc;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-baw|Win32'">
+    <NMakeBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /build "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /rebuild "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /clean "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeCleanCommandLine>
+    <NMakeOutput>$(ProjectDir)rx_stepper_ctrl-Debug-baw.vgdbsettings</NMakeOutput>
+    <NMakeIncludeSearchPath>f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1;f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1\arm-linux-gnueabi;f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1\backward;f:\compiler\linaro-tools\lib\gcc\arm-linux-gnueabi\4.7.1\include;f:\compiler\linaro-tools\lib\gcc\arm-linux-gnueabi\4.7.1\include-fixed;f:\compiler\linaro-tools\arm-linux-gnueabi\include;f:\compiler\linaro-tools\arm-linux-gnueabi\libc\usr\include\arm-linux-gnueabi;f:\compiler\linaro-tools\arm-linux-gnueabi\libc\usr\include;$(ProjectDir)\../Common;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeForcedIncludes>$(ProjectDir)\gcc_Debug-baw.h;$(VISUALGDB_DIR)\gcc_compat.h;$(NMakeForcedIncludes)</NMakeForcedIncludes>
+    <OutDir>$(SolutionDir)_out\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)_temp\$(MSBuildProjectName)\$(Configuration)\</IntDir>
+    <IncludePath />
+    <ReferencePath />
+    <LibraryPath />
+    <LibraryWPath />
+    <NMakePreprocessorDefinitions>__VisualGDB_CFG_Debug_baw;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-soc|Win32'">
+    <NMakeBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /build "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /rebuild "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /clean "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeCleanCommandLine>
+    <NMakeOutput>$(ProjectDir)rx_stepper_ctrl-Debug-soc.vgdbsettings</NMakeOutput>
+    <NMakeIncludeSearchPath>f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1;f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1\arm-linux-gnueabi;f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1\backward;f:\compiler\linaro-tools\lib\gcc\arm-linux-gnueabi\4.7.1\include;f:\compiler\linaro-tools\lib\gcc\arm-linux-gnueabi\4.7.1\include-fixed;f:\compiler\linaro-tools\arm-linux-gnueabi\include;f:\compiler\linaro-tools\arm-linux-gnueabi\libc\usr\include\arm-linux-gnueabi;f:\compiler\linaro-tools\arm-linux-gnueabi\libc\usr\include;C:\Develop\RX-Project\rx_common_lib;C:\Develop\RX-Project\rx_ink_lib;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeForcedIncludes>$(ProjectDir)\gcc_Debug-soc.h;$(VISUALGDB_DIR)\gcc_compat.h;$(NMakeForcedIncludes)</NMakeForcedIncludes>
+    <OutDir>$(SolutionDir)_out\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)_temp\$(MSBuildProjectName)\$(Configuration)\</IntDir>
+    <IncludePath />
+    <ReferencePath />
+    <LibraryPath />
+    <LibraryWPath />
+    <NMakePreprocessorDefinitions>__VisualGDB_CFG_Debug_soc;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-lx|Win32'">
+    <NMakeBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /build "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeBuildCommandLine>
+    <NMakeCleanCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /clean "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeCleanCommandLine>
+    <NMakeReBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /rebuild "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeReBuildCommandLine>
+    <NMakeOutput>$(ProjectDir)rx_stepper_ctrl-Debug-lx.vgdbsettings</NMakeOutput>
+    <IncludePath />
+    <ReferencePath />
+    <LibraryPath />
+    <NMakeIncludeSearchPath>$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.125.7\0003\include\c++\4.8;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.125.7\0003\include\x86_64-linux-gnu\c++\4.8;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.125.7\0003\include\c++\4.8\backward;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.125.7\0004\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.125.7\0006\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.125.7\0005\include-fixed;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.125.7\0003\include\x86_64-linux-gnu;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.125.7\0003\include;$(ProjectDir)\..\Common;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeForcedIncludes>$(ProjectDir)\gcc_Debug-lx.h;$(VISUALGDB_DIR)\gcc_compat.h;$(NMakeForcedIncludes)</NMakeForcedIncludes>
+    <OutDir>$(SolutionDir)_out\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)_temp\$(MSBuildProjectName)\$(Configuration)\</IntDir>
+    <NMakePreprocessorDefinitions>__VisualGDB_CFG_Debug_lx;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)_out\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)_temp\$(MSBuildProjectName)\$(Configuration)\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\rx_common_lib</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <SDLCheck>true</SDLCheck>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>$(OutDir)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Ws2_32.lib;rx_common_lib.lib</AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <None Include="debug-soc.mak" />
+    <None Include="debug.mak" />
+    <None Include="Makefile" />
+    <None Include="release-soc.mak" />
+    <None Include="release.mak" />
+    <None Include="rx_stepper_ctrl-Debug-soc.vgdbsettings" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="args.c" />
+    <ClCompile Include="cleaf.c" />
+    <ClCompile Include="cln.c" />
+    <ClCompile Include="dp803.c" />
+    <ClCompile Include="fpga_stepper.c" />
+    <ClCompile Include="lb701.c" />
+    <ClCompile Include="lb702.c" />
+    <ClCompile Include="lbrob.c" />
+    <ClCompile Include="motor.c" />
+    <ClCompile Include="power_step.c" />
+    <ClCompile Include="rx_stepper_ctrl.c" />
+    <ClCompile Include="stepper_ctrl.c" />
+    <ClCompile Include="slide.c" />
+    <ClCompile Include="test.c" />
+    <ClCompile Include="test_table.c" />
+    <ClCompile Include="tx801.c" />
+    <ClCompile Include="txrob.c" />
+    <ClCompile Include="version.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="args.h" />
+    <ClInclude Include="cleaf.h" />
+    <ClInclude Include="cln.h" />
+    <ClInclude Include="dp803.h" />
+    <ClInclude Include="fpga_def_stepper.h" />
+    <ClInclude Include="fpga_stepper.h" />
+    <ClInclude Include="gcc_Debug-soc.h" />
+    <ClInclude Include="gcc_Debug.h" />
+    <ClInclude Include="gcc_Release-soc.h" />
+    <ClInclude Include="lb701.h" />
+    <ClInclude Include="lb702.h" />
+    <ClInclude Include="lbrob.h" />
+    <ClInclude Include="motor.h" />
+    <ClInclude Include="motor_cfg.h" />
+    <ClInclude Include="PowerStep\motor.h" />
+    <ClInclude Include="PowerStep\motor_arrays.h" />
+    <ClInclude Include="PowerStep\motor_comm.h" />
+    <ClInclude Include="PowerStep\powerstep01.h" />
+    <ClInclude Include="PowerStep\powerstep01_config_all_motors.h" />
+    <ClInclude Include="power_step.h" />
+    <ClInclude Include="ps_common.h" />
+    <ClInclude Include="ps_motor.h" />
+    <ClInclude Include="stepper_ctrl.h" />
+    <ClInclude Include="slide.h" />
+    <ClInclude Include="test.h" />
+    <ClInclude Include="test_table.h" />
+    <ClInclude Include="tx801.h" />
+    <ClInclude Include="txrob.h" />
+    <ClInclude Include="web.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

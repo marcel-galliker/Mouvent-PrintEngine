@@ -1,0 +1,24 @@
+﻿using System.Windows;
+
+namespace RX_Common.Resources
+{
+    partial class   RxBasics : ResourceDictionary
+    {
+        public RxBasics()
+        {
+            InitializeComponent();
+
+            RxScreen screen=new RxScreen();
+            if (screen.Surface)
+            {
+                this["FontSize"]      = 20.0;   
+                this["FontSizeLarge"] = 25.0;   
+            }
+            else
+            {
+                this["FontSize"]      = 14.66;            
+                this["FontSizeLarge"] = 20.0;   
+            }
+        }
+    }
+}

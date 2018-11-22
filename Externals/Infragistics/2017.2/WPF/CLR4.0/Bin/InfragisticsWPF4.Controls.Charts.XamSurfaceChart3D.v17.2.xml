@@ -1,0 +1,1905 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>InfragisticsWPF4.Controls.Charts.XamSurfaceChart3D.v17.2</name>
+    </assembly>
+    <members>
+        <member name="T:Infragistics.Controls.Charts.AxisFlags3D">
+            <summary>
+            Describes visibility of crosshair axes in a surface chart 
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.AxisFlags3D.None">
+            <summary>
+            Specifies no axes 
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.AxisFlags3D.X">
+            <summary>
+            Specifies only X-axis.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.AxisFlags3D.Y">
+            <summary>
+            Specifies only Y-axis.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.AxisFlags3D.Z">
+            <summary>
+            Specifies only Z-axis.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.AxisFlags3D.XY">
+            <summary>
+            Specifies X and Y axes.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.AxisFlags3D.XZ">
+            <summary>
+            Specifies X and Z axes.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.AxisFlags3D.XYZ">
+            <summary>
+            Specifies X, Y, and Z axes.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.AxisFlags3D.YZ">
+            <summary>
+            Specifies Y and Z axes.
+            </summary>
+        </member>
+        <member name="T:Infragistics.Controls.Charts.VisualData.SurfaceChartVisualData">
+            <summary>Represents visual data of a surface chart </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.VisualData.SurfaceChartVisualData.Shininess">
+            <summary> Gets or sets Shininess </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.VisualData.SurfaceChartVisualData.Perspective">
+            <summary> Gets or sets Perspective </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.VisualData.SurfaceChartVisualData.Scale">
+            <summary> Gets or sets Scale </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.VisualData.SurfaceChartVisualData.LightIntensity">
+            <summary> Gets or sets LightIntensity </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.VisualData.SurfaceChartVisualData.LightDirection">
+            <summary> Gets or sets LightIntensity </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.VisualData.SurfaceChartVisualData.Aspect">
+            <summary> Gets or sets Aspect Ratio </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.VisualData.SurfaceChartVisualData.Rotation">
+            <summary> Gets or sets Rotation </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.VisualData.SurfaceChartVisualData.FloorMaterial">
+            <summary> Gets or sets MeshMaterial </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.VisualData.SurfaceChartVisualData.WireframeMaterial">
+            <summary> Gets or sets WireframeMaterial </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.VisualData.SurfaceChartVisualData.CubeMaterial">
+            <summary> Gets or sets CubeMaterial </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.VisualData.SurfaceChartVisualData.Series">
+            <summary> Gets or sets Series </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.VisualData.SurfaceChartVisualData.Markers">
+            <summary> Gets or sets Series </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.VisualData.SurfaceChartVisualData.#ctor">
+            <summary>Creates an instance of visual data </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.VisualData.SurfaceChartVisualData.Serialize">
+            <summary>Serializes visual data to a string </summary>
+        </member>
+        <member name="T:Infragistics.Controls.Charts.VisualData.SurfacePrimitiveVisualData">
+            <summary>Represents visual data of a primitive element of a surface chart  </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.VisualData.SurfacePrimitiveVisualData.Type">
+            <summary> The type of the visual element. </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.VisualData.SurfacePrimitiveVisualData.Name">
+            <summary> The name of the visual element. </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.VisualData.SurfacePrimitiveVisualData.#ctor(System.String)">
+            <summary>Creates an instance of visual data </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.VisualData.SurfacePrimitiveVisualData.#ctor">
+            <summary>Creates an instance of visual data </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.VisualData.SurfacePrimitiveVisualData.Serialize">
+            <summary>Serializes visual data to a string </summary>
+        </member>
+        <member name="T:Infragistics.Controls.Charts.VisualData.GeometryVisualData">
+            <summary>Represents base class for geometry visual data in a surface chart </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.VisualData.GeometryVisualData.#ctor(System.String)">
+            <summary>Creates an instance of visual data </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.VisualData.GeometryVisualData.Serialize">
+            <summary>Serializes visual data to a string </summary>
+        </member>
+        <member name="T:Infragistics.Controls.Charts.VisualData.MeshGeometryVisualData">
+            <summary>Represents visual data of mesh geometry on series surface  </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.VisualData.MeshGeometryVisualData.TextureCoordinates">
+            <summary> Gets or sets MeshTextureCoordinates </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.VisualData.MeshGeometryVisualData.TriangleIndices">
+            <summary> Gets or sets MeshTriangleIndices </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.VisualData.MeshGeometryVisualData.Normals">
+            <summary> Gets or sets MeshNormals </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.VisualData.MeshGeometryVisualData.Positions">
+            <summary> Gets or sets MeshPositions </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.VisualData.MeshGeometryVisualData.Bounds">
+            <summary> Gets or sets MeshBounds </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.VisualData.MeshGeometryVisualData.#ctor">
+            <summary>Creates an instance of visual data </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.VisualData.MeshGeometryVisualData.Serialize">
+            <summary>Serializes visual data to a string </summary>
+        </member>
+        <member name="T:Infragistics.Controls.Charts.VisualData.SeriesVisualData">
+            <summary>Represents visual data of series surface </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.VisualData.SeriesVisualData.Mesh">
+            <summary> Gets or sets Mesh </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.VisualData.SeriesVisualData.Material">
+            <summary> Gets or sets Material </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.VisualData.SeriesVisualData.BackMaterial">
+            <summary> Gets or sets BackMaterial </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.VisualData.SeriesVisualData.#ctor">
+            <summary>Creates an instance of visual data </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.VisualData.SeriesVisualData.Serialize">
+            <summary>Serializes visual data to a string </summary>
+        </member>
+        <member name="T:Infragistics.Controls.Charts.VisualData.MarkerVisualData">
+            <summary>Represents visual data of Markers  </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.VisualData.MarkerVisualData.Material">
+            <summary> Gets or sets Material </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.VisualData.MarkerVisualData.Geometry">
+            <summary> Gets or sets Geometry </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.VisualData.MarkerVisualData.Serialize">
+            <summary>Serializes visual data to a string </summary>
+        </member>
+        <member name="T:Infragistics.Controls.Charts.VisualData.MaterialVisualData">
+            <summary>Represents visual data of Material </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.VisualData.MaterialVisualData.Serialize">
+            <summary>Serializes visual data to a string </summary>
+        </member>
+        <member name="T:Infragistics.Controls.Charts.VisualData.RotationVisualData">
+            <summary>Represents visual data of base rotation </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.VisualData.RotationVisualData.#ctor(System.String)">
+            <summary>Creates an instance of visual data </summary>
+        </member>
+        <member name="T:Infragistics.Controls.Charts.VisualData.EulerRotationVisualData">
+            <summary>Represents visual data of axis rotation </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.VisualData.EulerRotationVisualData.Angle">
+            <summary> Gets or sets Angle </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.VisualData.EulerRotationVisualData.Axis">
+            <summary> Gets or sets Axis </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.VisualData.EulerRotationVisualData.#ctor">
+            <summary>Creates an instance of visual data </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.VisualData.EulerRotationVisualData.Serialize">
+            <summary>Serializes visual data to a string </summary>
+        </member>
+        <member name="T:Infragistics.Controls.Charts.VisualData.QuaternionRotationVisualData">
+            <summary>Represents visual data of quaternion rotation </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.VisualData.QuaternionRotationVisualData.Quaternion">
+            <summary> Gets or sets Quaternion </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.VisualData.QuaternionRotationVisualData.#ctor">
+            <summary>Creates an instance of visual data </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.VisualData.QuaternionRotationVisualData.Serialize">
+            <summary>Serializes visual data to a string </summary>
+        </member>
+        <member name="T:Infragistics.Controls.Charts.VisualData.ScaleVisualData">
+            <summary>Represents visual data of base scale </summary>
+        </member>
+        <member name="T:Infragistics.Controls.Charts.VisualData.VisualDataConverter">
+            <summary>Represents a class for converting visual data of a surface chart </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.VisualData.VisualDataConverter.ToVisualData(System.Collections.Generic.IEnumerable{System.Windows.Point})">
+            <summary> </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.VisualData.VisualDataConverter.ToVisualData(System.Collections.Generic.IEnumerable{System.Windows.Media.Media3D.Point3D})">
+            <summary> </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.VisualData.VisualDataConverter.ToVisualData(System.Collections.Generic.IEnumerable{System.Windows.Media.Media3D.Vector3D})">
+            <summary> </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.VisualData.VisualDataConverter.ToVisualData(System.Collections.Generic.IEnumerable{System.Int32})">
+            <summary> </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.VisualData.VisualDataConverter.ToVisualData(System.Windows.Media.Media3D.Material)">
+            <summary> </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.VisualData.VisualDataConverter.ToVisualData(System.Windows.Media.Media3D.Rotation3D)">
+            <summary> </summary>
+        </member>
+        <member name="T:Infragistics.Controls.Charts.SurfaceChartToolTipDataContext">
+            <summary>
+            Class to hold contextual information about a surface chart tooltip.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.SurfaceChartToolTipDataContext.Location">
+            <summary>
+            The location, in data value coordinates, of the mouse pointer which caused the tooltip to open.
+            </summary>
+        </member>
+        <member name="T:Infragistics.Controls.Charts.XamChart3D">
+            <summary>
+            Represents base class for 3-dimensional charts.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamChart3D.Viewport">
+            <summary>
+            The Viewport3D object which contains the 3D graphics for this chart.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamChart3D.CrosshairModel">
+            <summary>
+            The GeometryModel3D object which represents the X and Y crosshairs.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.XamChart3D.OnApplyTemplate">
+            <summary>
+            Method invoked whenever application code or internal processes call ApplyTemplate.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.XamChart3D.OnMouseLeftButtonDown(System.Windows.Input.MouseButtonEventArgs)">
+            <summary>
+            Method invoked whenever the left mouse button is depressed over the control.
+            </summary>
+            <param name="e">The MouseButtonEventArgs in context.</param>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.XamChart3D.OnMouseMove(System.Windows.Input.MouseEventArgs)">
+            <summary>
+            Method invoked whenever the mouse is moved over the control.
+            </summary>
+            <param name="e">The MouseEventArgs in context.</param>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.XamChart3D.OnMouseLeftButtonUp(System.Windows.Input.MouseButtonEventArgs)">
+            <summary>
+            Method invoked whenever the left mouse button is released after being depressed over the control.
+            </summary>
+            <param name="e">The MouseButtonEventArgs in context.</param>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.XamChart3D.OnKeyDown(System.Windows.Input.KeyEventArgs)">
+            <summary>
+            Method invoked whenever a key is depressed in the context of this control.
+            </summary>
+            <param name="e">The KeyEventArgs in context.</param>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.XamChart3D.OnMouseEnter(System.Windows.Input.MouseEventArgs)">
+            <summary>
+            Method invoked whenever the mouse cursor enters the area of this control.
+            </summary>
+            <param name="e">The MouseEventArgs in context.</param>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.XamChart3D.OnMouseLeave(System.Windows.Input.MouseEventArgs)">
+            <summary>
+            Method invoked whenever the mouse cursor leaves the area of this control.
+            </summary>
+            <param name="e">The MouseEventArgs in context.</param>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.XamChart3D.OnMouseWheel(System.Windows.Input.MouseWheelEventArgs)">
+            <summary>
+            Method invoked whenever the mouse wheel is moved in the context of this control.
+            </summary>
+            <param name="e">The MouseWheelEventArgs in context.</param>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.XamChart3D.RefreshChartTransform">
+            <summary>
+            Refresh the 3D position of the chart.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.XamChart3D.RefreshAxes">
+            <summary>
+            Redraw all visual elements related to chart axes, including the cube which surrounds the chart.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamChart3D.CrosshairRamp">
+            <summary>
+            The Brush which, when overlaid upon the series mesh, will represent the Z-crosshair.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.XamChart3D.OnPropertyUpdated(System.ComponentModel.PropertyChangedEventArgs)">
+            <summary>
+            Method called when certain properties are changed on this XamChart3D object.
+            </summary>
+            <param name="e">The PropertyChangedEventArgs in context.</param>
+            <remarks>
+            This method will raise the PropertyChanged event.
+            </remarks>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.XamChart3D.Pick(System.Windows.Point)">
+            <summary>
+            Returns a SurfaceChart3DMouseHit object, when applicable, given a particualr mouse position.
+            </summary>
+            <param name="mousePosition">The mouse position in context.</param>
+            <returns>A SurfaceChart3DMouseHit object containing contextual information about the surface chart with respect to the given mouse position.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.XamChart3D.OnGotFocus(System.Windows.RoutedEventArgs)">
+            <summary>
+            Notifies about an unhandled GotFocus event reaches this element in its route.
+            </summary>
+            <param name="e">The RoutedEventArgs that contains the event data.</param>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.XamChart3D.OnLostFocus(System.Windows.RoutedEventArgs)">
+            <summary>
+            Notifies about an unhandled LostFocus event reaches this element in its route.
+            </summary>
+            <param name="e">The RoutedEventArgs that contains the event data.</param>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamChart3D.ViewportRect">
+            <summary>
+            Gets a rectangle representing the current position and size of the viewport.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.XamChart3D.ProvideContainer(System.Object)">
+            <summary>
+            Notifies when this object is added to a UI container.
+            </summary>
+            <param name="container">The UI container for this object.</param>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.XamChart3D.CrosshairAxesProperty">
+            <summary>
+            Identifies the CrosshairAxes dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamChart3D.CrosshairAxes">
+            <summary>
+            Gets or sets whether to show all three crosshairs or some of them when a user hover of the series surface
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.XamChart3D.ToolTipTemplateProperty">
+            <summary>
+            Identifies the TooltipTemplate dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamChart3D.ToolTipTemplate">
+            <summary>
+            Gets or sets DataTemplate to use for the appearance of the chart tooltip.
+            </summary>
+            <remarks>
+            The runtime DataContext for this DataTemplate will be a SurfaceChartToolTipDataContext object containing Location information about the current mouse point.
+            </remarks>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.XamChart3D.ToolTipVisibilityProperty">
+            <summary>
+            Identifies the TooltipVisibility dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamChart3D.ToolTipVisibility">
+            <summary>
+            Gets or sets whether to show tooltip when a user hovers over the series surface.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.XamChart3D.OnManipulationDelta(System.Windows.Input.ManipulationDeltaEventArgs)">
+            <summary>
+            Called when a manipulation is occurring.
+            </summary>
+            <param name="e">ManipulationDeltaEventArgs in context.</param>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.XamChart3D.OnManipulationStarted(System.Windows.Input.ManipulationStartedEventArgs)">
+            <summary>
+            Called when a manipulation has started.
+            </summary>
+            <param name="e">ManipulationStartedEventArgs in context.</param>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.XamChart3D.OnManipulationCompleted(System.Windows.Input.ManipulationCompletedEventArgs)">
+            <summary>
+            Called when a manipulation has completed.
+            </summary>
+            <param name="e">ManipulationCompletedEventArgs in context.</param>
+        </member>
+        <member name="E:Infragistics.Controls.Charts.XamChart3D.SeriesMouseDown">
+            <summary>
+            Event raised when the mouse button is depressed over the series mesh.
+            </summary>
+        </member>
+        <member name="E:Infragistics.Controls.Charts.XamChart3D.SeriesMouseMove">
+            <summary>
+            Event raised when the mouse is moved over the series mesh.
+            </summary>
+        </member>
+        <member name="E:Infragistics.Controls.Charts.XamChart3D.SeriesMouseUp">
+            <summary>
+            Event raised when the mouse button is raised after being depressed over the series mesh.
+            </summary>
+        </member>
+        <member name="E:Infragistics.Controls.Charts.XamChart3D.PointMarkerMouseDown">
+            <summary>
+            Event raised when the mouse button is depressed over a point marker.
+            </summary>
+        </member>
+        <member name="E:Infragistics.Controls.Charts.XamChart3D.PointMarkerMouseMove">
+            <summary>
+            Event raised when the mouse is moved over a point marker.
+            </summary>
+        </member>
+        <member name="E:Infragistics.Controls.Charts.XamChart3D.PointMarkerMouseUp">
+            <summary>
+            Event raised when the mouse button is raised after being depressed over a point marker.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.XamChart3D.RimThicknessProperty">
+            <summary>
+            Identifies the RimThickness dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamChart3D.RimThickness">
+            <summary>
+            Gets or sets thickness of the rim or ridge surrounding the chart's background cube.
+            </summary>
+            <remarks>
+            This is a value between 0 and 1, relative to the size of the entire cube.  
+            The value will also be scaled according to aspect ratio, in order to 
+            achieve a consistent size for all sides of the cube, regardless of aspect ratio.
+            </remarks>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamChart3D.LogicalChildren">
+            <summary>
+            Gets logical children in this control.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.XamChart3D.ToolTipHorizontalOffsetProperty">
+            <summary>
+            Identifies the ToolTipHorizontalOffset dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamChart3D.ToolTipHorizontalOffset">
+            <summary>
+            Gets or sets horizontal offset for the chart's tooltip 
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.XamChart3D.ToolTipVerticalOffsetProperty">
+            <summary>
+            Identifies the ToolTipVerticalOffset dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamChart3D.ToolTipVerticalOffset">
+            <summary>
+            Gets or sets vertical offset for the chart's tooltip 
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.XamChart3D.ActualAspectProperty">
+            <summary>
+            Identifies the <see cref="P:Infragistics.Controls.Charts.XamChart3D.ActualAspect"/> dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamChart3D.ActualAspect">
+            <summary>
+            Gets current aspect ratio of the surface chart, calculated from the setting of the Aspect property and/or the actual size of the control.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.XamChart3D.ActualXAxisProperty">
+            <summary>
+            Identifies the <see cref="P:Infragistics.Controls.Charts.XamChart3D.ActualXAxis"/> dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamChart3D.ActualXAxis">
+            <summary>
+            Gets the X-axis being used by this chart.
+            </summary>
+            <remarks>
+            This property will return the value of the XAxis property.  
+            If the XAxis property is not set, it will return the Axis object being used as the default X-axis.
+            </remarks>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.XamChart3D.ActualYAxisProperty">
+            <summary>
+            Identifies the <see cref="P:Infragistics.Controls.Charts.XamChart3D.ActualYAxis"/> dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamChart3D.ActualYAxis">
+            <summary>
+            Gets the Y-axis being used by this chart.
+            </summary>
+            <remarks>
+            This property will return the value of the YAxis property.  
+            If the YAxis property is not set, it will return the Axis object being used as the default Y-axis.
+            </remarks>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.XamChart3D.ActualZAxisProperty">
+            <summary>
+            Identifies the <see cref="P:Infragistics.Controls.Charts.XamChart3D.ActualZAxis"/> dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamChart3D.ActualZAxis">
+            <summary>
+            Gets the Z-axis being used by this chart.
+            </summary>
+            <remarks>
+            This property will return the value of the ZAxis property.  
+            If the ZAxis property is not set, it will return the Axis object being used as the default Z-axis.
+            </remarks>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.XamChart3D.AspectProperty">
+            <summary>
+            Identifies the <see cref="P:Infragistics.Controls.Charts.XamChart3D.Aspect"/> dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamChart3D.Aspect">
+            <summary>
+            Gets or sets 3-dimensional vector specifying the aspect ratio of X, Y, and Z dimensions in the the surface chart.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.XamChart3D.CrosshairBrushProperty">
+            <summary>
+            Identifies the <see cref="P:Infragistics.Controls.Charts.XamChart3D.CrosshairBrush"/> dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamChart3D.CrosshairBrush">
+            <summary>
+            Gets or sets the a brush used for rendering crosshair lines
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.XamChart3D.CrosshairThicknessProperty">
+            <summary>
+            Identifies the <see cref="P:Infragistics.Controls.Charts.XamChart3D.CrosshairThickness"/> dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamChart3D.CrosshairThickness">
+            <summary>
+            Gets or sets the thickness for rendering crosshair lines.
+            </summary>
+            <remarks>This is a value relative to the size of the surface chart.</remarks>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.XamChart3D.CubeMaterialProperty">
+            <summary>
+            Identifies the <see cref="P:Infragistics.Controls.Charts.XamChart3D.CubeMaterial"/> dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamChart3D.CubeMaterial">
+            <summary>
+            Gets or sets the material for rendering cube sides
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.XamChart3D.ItemsSourceProperty">
+            <summary>
+            Identifies the <see cref="P:Infragistics.Controls.Charts.XamChart3D.ItemsSource"/> dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamChart3D.ItemsSource">
+            <summary>
+            Gets or sets items source for the surface chart. 
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.XamChart3D.LightDirectionProperty">
+            <summary>
+            Identifies the <see cref="P:Infragistics.Controls.Charts.XamChart3D.LightDirection"/> dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamChart3D.LightDirection">
+            <summary>
+            Gets or sets 3-dimensional vector specifying the direction of a directional light which lights the series surface and surface projection on the floor of chart cube.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.XamChart3D.LightIntensityProperty">
+            <summary>
+            Identifies the <see cref="P:Infragistics.Controls.Charts.XamChart3D.LightIntensity"/> dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamChart3D.LightIntensity">
+            <summary>
+            Gets or sets the lighting intensity for the series surface and surface projection on the floor of chart cube.
+            </summary>
+            <remarks>
+            Valid values for this property are between 0 and 1
+            </remarks>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.XamChart3D.PerspectiveProperty">
+            <summary>
+            Identifies the <see cref="P:Infragistics.Controls.Charts.XamChart3D.Perspective"/> dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamChart3D.Perspective">
+            <summary>
+            Gets or sets the perspective for this chart.  
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.XamChart3D.RotationProperty">
+            <summary>
+            Identifies the <see cref="P:Infragistics.Controls.Charts.XamChart3D.Rotation"/> dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamChart3D.Rotation">
+            <summary>
+            Gets or sets the rotation for the surface chart.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.XamChart3D.ScaleProperty">
+            <summary>
+            Identifies the <see cref="P:Infragistics.Controls.Charts.XamChart3D.Scale"/> dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamChart3D.Scale">
+            <summary>
+            Gets or sets the scale used for zooming the view in or out from the surface chart.
+            </summary>
+            <remarks>
+            This is a value relative to the size of the control.
+            A value of 1 would cause the surface cube to occupy 100% of the space available in the control.
+            </remarks>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.XamChart3D.XAxisProperty">
+            <summary>
+            Identifies the <see cref="P:Infragistics.Controls.Charts.XamChart3D.XAxis"/> dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamChart3D.XAxis">
+            <summary>
+            Gets or sets the X axis for the surface chart.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.XamChart3D.YAxisProperty">
+            <summary>
+            Identifies the <see cref="P:Infragistics.Controls.Charts.XamChart3D.YAxis"/> dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamChart3D.YAxis">
+            <summary>
+            Gets or sets the Y axis for the surface chart.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.XamChart3D.ZAxisProperty">
+            <summary>
+            Identifies the <see cref="P:Infragistics.Controls.Charts.XamChart3D.ZAxis"/> dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamChart3D.ZAxis">
+            <summary>
+            Gets or sets the Z axis for the surface chart.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.XamChart3D.OnPropertyChanged(System.String)">
+            <summary>
+            Used to invoke the <see cref="E:Infragistics.Controls.Charts.XamChart3D.PropertyChanged"/> event.
+            </summary>
+            <param name="propertyName">The name of the property that was changed</param>
+            <seealso cref="T:System.ComponentModel.PropertyChangedEventArgs"/>
+            <seealso cref="E:Infragistics.Controls.Charts.XamChart3D.PropertyChanged"/>
+        </member>
+        <member name="E:Infragistics.Controls.Charts.XamChart3D.PropertyChanged">
+            <summary>
+            Event raised when certain properties are changed on this 3-dimensional chart.
+            </summary>
+        </member>
+        <member name="T:Infragistics.Controls.Charts.XamScatterSurface3D">
+            <summary>
+            Control class for plotting 3D (XYZ) scatter data as a surface chart.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.XamScatterSurface3D.OnApplyTemplate">
+            <summary>
+            Method invoked whenever application code or internal processes call ApplyTemplate.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.XamScatterSurface3D.Pick(System.Windows.Point)">
+            <summary>
+            Returns a SurfaceChart3DMouseHit object, when applicable, given a particualr mouse position.
+            </summary>
+            <param name="mousePosition">The mouse position in context.</param>
+            <returns>A SurfaceChart3DMouseHit object containing contextual information about the surface chart with respect to the given mouse position.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.XamScatterSurface3D.RefreshChartTransform">
+            <summary>
+            Refresh the 3D position of the chart and markers.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.XamScatterSurface3D.OnPropertyUpdated(System.ComponentModel.PropertyChangedEventArgs)">
+            <summary>
+            Method called when certain properties are changed on this XamScatterSurface3D object.
+            </summary>
+            <param name="e">The PropertyChangedEventArgs in context.</param>
+            <remarks>
+            This method will raise the PropertyChanged event.
+            </remarks>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.XamScatterSurface3D.PointMarkerTemplateProperty">
+            <summary>
+            Identifies the PointMarkerTemplate dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamScatterSurface3D.PointMarkerTemplate">
+            <summary>
+            Gets or sets DataTemplate used for rendering data point markers.
+            </summary>
+            <remarks>
+            This DataTemplate is not required.  When set, the MarkerMaterial should have the Viewport2DVisual3D.IsVisualHostMaterial attached property set to True; otherwise, the DataTemplate will not be visible.
+            </remarks>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.XamScatterSurface3D.PointMarkerMeshProperty">
+            <summary>
+            Identifies the PointMarkerMesh dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamScatterSurface3D.PointMarkerMesh">
+            <summary>
+            Gets or sets 3-dimensional mesh geometry used for representing shape of data point markers.
+            </summary>
+            <remarks>
+            The coordinate system to use in this mesh is a cube sized equally to the chart, ranging from 0 to 1 in all 3 directions.
+            </remarks>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.XamScatterSurface3D.PointMarkerMaterialProperty">
+            <summary>
+            Identifies the PointMarkerMaterial dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamScatterSurface3D.PointMarkerMaterial">
+            <summary>
+            Gets or sets material used for rendering the data point markers.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.XamScatterSurface3D.ShowPointMarkersProperty">
+            <summary>
+            Identifies the ShowPointMarkers dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamScatterSurface3D.ShowPointMarkers">
+            <summary>
+            Gets or sets the whether to show markers on the series surface.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.XamScatterSurface3D.ExportVisualData">
+            <summary>
+            Exports visual data representing current state of the surface chart
+            </summary> 
+            <remarks>This value can be used for testing of the surface chart</remarks>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.XamScatterSurface3D.RefreshContourRamp">
+            <summary>
+            Redraw the Z-crosshair, which is overlaid upon the series mesh.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.XamScatterSurface3D.#ctor">
+            <summary>
+            ScatterSurface3D constructor.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.XamScatterSurface3D.ActualSeriesMaterialProperty">
+            <summary>
+            Identifies the <see cref="P:Infragistics.Controls.Charts.XamScatterSurface3D.ActualSeriesMaterial"/> dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamScatterSurface3D.ActualSeriesMaterial">
+            <summary>
+            Gets actual series material used in the series mesh.
+            </summary>
+            <remarks>
+            This property will return a Material which is a composite of the SeriesMaterial or SeriesColors, 
+            along with some default materials applied by the surface chart.
+            </remarks>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.XamScatterSurface3D.FloorMaterialProperty">
+            <summary>
+            Identifies the <see cref="P:Infragistics.Controls.Charts.XamScatterSurface3D.FloorMaterial"/> dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamScatterSurface3D.FloorMaterial">
+            <summary>
+            Gets or sets material to use for the 3-dimensional model projected onto the floor of the surface chart at the minimum of Z axis.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.XamScatterSurface3D.NormalizeTriangulationProperty">
+            <summary>
+            Identifies the <see cref="P:Infragistics.Controls.Charts.XamScatterSurface3D.NormalizeTriangulation"/> dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamScatterSurface3D.NormalizeTriangulation">
+            <summary>
+            Determines whether to normalize XY values before sending them to triangulation.
+            </summary>
+            <remarks>
+            XY values with dissimilar magnitude can have an undesirable effect on triangulation.  Set this property to true to normalize all x and y values using the formula (x(i) - xMin) / (xMax - xMin).
+            </remarks>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.XamScatterSurface3D.SamplingThresholdProperty">
+            <summary>
+            Identifies the <see cref="P:Infragistics.Controls.Charts.XamScatterSurface3D.SamplingThreshold"/> dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamScatterSurface3D.SamplingThreshold">
+            <summary>
+            Gets or sets the maximum points which the surface chart will allow to render in the series mesh.
+            <remarks>
+            If the count of items in the ItemsSource exceeds MaximumPoints, then 
+            sampling will be turned on, and the points will be consolidated into a regular grid 
+            with Sqrt(MaximumPoints) rows and Sqrt(MaximumPoints) columns.</remarks>
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.XamScatterSurface3D.SeriesColorInterpolationProperty">
+            <summary>
+            Identifies the <see cref="P:Infragistics.Controls.Charts.XamScatterSurface3D.SeriesColorInterpolation"/> dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamScatterSurface3D.SeriesColorInterpolation">
+            <summary>
+            Gets or sets mode for selecting colors from the SeriesColors.
+            </summary>
+            <remarks>
+            Note color interpolation is not used if SeriesMaterial is specified on this control
+            </remarks>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.XamScatterSurface3D.SeriesColorsProperty">
+            <summary>
+            Identifies the <see cref="P:Infragistics.Controls.Charts.XamScatterSurface3D.SeriesColors"/> dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamScatterSurface3D.SeriesColors">
+            <summary>
+            Gets or sets a collection of colors to use in coloring series surface of the chart.
+            </summary>
+            <remarks>
+            Note that SeriesColors are not used if SeriesMaterial is specified on this control
+            </remarks>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.XamScatterSurface3D.SeriesMaterialProperty">
+            <summary>
+            Identifies the <see cref="P:Infragistics.Controls.Charts.XamScatterSurface3D.SeriesMaterial"/> dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamScatterSurface3D.SeriesMaterial">
+            <summary>
+            Gets or sets material used for rendering the series mesh.
+            </summary>
+            <remarks>
+            Note that SeriesMaterial takes precedence over value specified in SeriesColors 
+            </remarks>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.XamScatterSurface3D.ShininessProperty">
+            <summary>
+            Identifies the <see cref="P:Infragistics.Controls.Charts.XamScatterSurface3D.Shininess"/> dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamScatterSurface3D.Shininess">
+            <summary>
+            Gets or sets the shininess for the series surface.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.XamScatterSurface3D.ShowFloorProjectionProperty">
+            <summary>
+            Identifies the <see cref="P:Infragistics.Controls.Charts.XamScatterSurface3D.ShowFloorProjection"/> dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamScatterSurface3D.ShowFloorProjection">
+            <summary>
+            Gets or sets the whether or not to show a 2-dimensional projection of the series mesh on the floor of the cube, at the minimum value of Z scale
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.XamScatterSurface3D.WireframeMaterialProperty">
+            <summary>
+            Identifies the <see cref="P:Infragistics.Controls.Charts.XamScatterSurface3D.WireframeMaterial"/> dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamScatterSurface3D.WireframeMaterial">
+            <summary>
+            Gets or sets the material used for rendering the series wireframe.
+            </summary>
+            <remarks>
+            The wireframe will only be seen when WireframeThickness is set to a value greater than zero.
+            </remarks>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.XamScatterSurface3D.WireframeThicknessProperty">
+            <summary>
+            Identifies the <see cref="P:Infragistics.Controls.Charts.XamScatterSurface3D.WireframeThickness"/> dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamScatterSurface3D.WireframeThickness">
+            <summary>
+            Gets or sets the thickness used for rendering the series wireframe.
+            </summary>
+            <remarks>
+            This property value is relative to the size of the surface chart. 
+            Sensible values for wireframe thickness are between 0 and 0.01.
+            </remarks>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.XamScatterSurface3D.XMemberPathProperty">
+            <summary>
+            Identifies the <see cref="P:Infragistics.Controls.Charts.XamScatterSurface3D.XMemberPath"/> dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamScatterSurface3D.XMemberPath">
+            <summary>
+            Gets or sets name of the member on each item in the ItemsSource which should be translated to the X location of the corresponding data point.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.XamScatterSurface3D.YMemberPathProperty">
+            <summary>
+            Identifies the <see cref="P:Infragistics.Controls.Charts.XamScatterSurface3D.YMemberPath"/> dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamScatterSurface3D.YMemberPath">
+            <summary>
+            Gets or sets name of the member on each item in the ItemsSource which should be translated to the Y location of the corresponding data point.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.XamScatterSurface3D.ZMemberPathProperty">
+            <summary>
+            Identifies the <see cref="P:Infragistics.Controls.Charts.XamScatterSurface3D.ZMemberPath"/> dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.XamScatterSurface3D.ZMemberPath">
+            <summary>
+            Gets or sets name of the member on each item in the ItemsSource which should be translated to the Z location of the corresponding data point.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.Chart3D.#ctor">
+            <summary>
+            Chart3D constructor.
+            </summary>
+        </member>
+        <member name="E:Infragistics.Controls.Charts.Chart3D.PropertyChanged">
+            <summary>
+            Event raised when certain properties are changed on this 3-dimensional chart.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.Chart3D.OnPropertyUpdated(System.ComponentModel.PropertyChangedEventArgs)">
+            <summary>
+            Notifies about changes to certain property values by raising the PropertyChanged event. 
+            </summary>
+            <param name="e">The PropertyChangedEventArgs in context.</param> 
+        </member>
+        <member name="P:Infragistics.Controls.Charts.Chart3D.XAxis">
+            <summary>
+            Gets or sets the X axis for the surface chart.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.Chart3D.XAxisPropertyName">
+            <summary>
+            Identifies the name of the XAxis dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.Chart3D.YAxis">
+            <summary>
+            Gets or sets the Y axis for the surface chart.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.Chart3D.YAxisPropertyName">
+            <summary>
+            Identifies the name of the YAxis dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.Chart3D.ZAxis">
+            <summary>
+            Gets or sets the Z axis for the surface chart.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.Chart3D.ItemsSource">
+            <summary>
+            Gets or sets items source for the surface chart. 
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.Chart3D.ItemsSourcePropertyName">
+            <summary>
+            Identifies the name of the ItemsSource dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.Chart3D.Perspective">
+            <summary>
+            Gets or sets the perspective for this chart.  
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.Chart3D.PerspectivePropertyName">
+            <summary>
+            Identifies the name of the Perspective dependency property.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.Chart3D.AspectPropertyName">
+            <summary>
+            Identifies the name of the Aspect dependency property.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.Chart3D.LightDirectionPropertyName">
+            <summary>
+            Identifies the name of the LightDirection dependency property.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.Chart3D.RotationPropertyName">
+            <summary>
+            Identifies the name of the Rotation dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.Chart3D.ActualAspect">
+            <summary>
+            Gets current aspect ratio of the surface chart, calculated from the setting of the Aspect property and/or the actual size of the control.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.Chart3D.Rotation">
+            <summary>
+            Gets or sets the rotation for the surface chart.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.Chart3D.Aspect">
+            <summary>
+            Gets or sets 3-dimensional vector specifying the aspect ratio of X, Y, and Z dimensions in the the surface chart.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.Chart3D.LightDirection">
+            <summary>
+            Gets or sets 3-dimensional vector specifying the direction of a directional light which lights the series surface and surface projection on the floor of chart cube.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.Chart3D.LightIntensityPropertyName">
+            <summary>
+            Identifies the name of the Lighting dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.Chart3D.LightIntensity">
+            <summary>
+            Gets or sets the lighting intensity for the series surface and surface projection on the floor of chart cube.
+            </summary>
+            <remarks>
+            Valid values for this property are between 0 and 1
+            </remarks>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.Chart3D.ActualXAxis">
+            <summary>
+            Gets the X-axis being used by this chart.
+            </summary>
+            <remarks>
+            This property will return the value of the XAxis property.  
+            If the XAxis property is not set, it will return the Axis object being used as the default X-axis.
+            </remarks>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.Chart3D.ActualYAxis">
+            <summary>
+            Gets the Y-axis being used by this chart.
+            </summary>
+            <remarks>
+            This property will return the value of the YAxis property.  
+            If the YAxis property is not set, it will return the Axis object being used as the default Y-axis.
+            </remarks>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.Chart3D.ActualZAxis">
+            <summary>
+            Gets the Z-axis being used by this chart.
+            </summary>
+            <remarks>
+            This property will return the value of the ZAxis property.  
+            If the ZAxis property is not set, it will return the Axis object being used as the default Z-axis.
+            </remarks>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.Chart3D.Scale">
+            <summary>
+            Gets or sets the scale used for zooming the view in or out from the surface chart.
+            </summary>
+            <remarks>
+            This is a value relative to the size of the control.
+            A value of 1 would cause the surface cube to occupy 100% of the space available in the control.
+            </remarks>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.Chart3D.CrosshairBrush">
+            <summary>
+            Gets or sets the a brush used for rendering crosshair lines
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.Chart3D.CrosshairThickness">
+            <summary>
+            Gets or sets the thickness for rendering crosshair lines.
+            </summary>
+            <remarks>This is a value relative to the size of the surface chart.</remarks>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.Chart3D.CubeMaterial">
+            <summary>
+            Gets or sets the material for rendering cube sides
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.ScatterSurface3D.#ctor">
+            <summary>
+            ScatterSurface3D constructor.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.ScatterSurface3D.XMemberPath">
+            <summary>
+            Gets or sets name of the member on each item in the ItemsSource which should be translated to the X location of the corresponding data point.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.ScatterSurface3D.YMemberPath">
+            <summary>
+            Gets or sets name of the member on each item in the ItemsSource which should be translated to the Y location of the corresponding data point.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.ScatterSurface3D.ZMemberPath">
+            <summary>
+            Gets or sets name of the member on each item in the ItemsSource which should be translated to the Z location of the corresponding data point.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.ScatterSurface3D.Shininess">
+            <summary>
+            Gets or sets the shininess for the series surface.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.ScatterSurface3D.OnPropertyUpdated(System.ComponentModel.PropertyChangedEventArgs)">
+            <summary>
+            Method called when certain properties are changed on this surface chart object.
+            </summary>
+            <param name="e">The PropertyChangedEventArgs in context.</param>
+            <remarks>
+            This method will raise the PropertyChanged event.
+            </remarks>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.ScatterSurface3D.SeriesColors">
+            <summary>
+            Gets or sets a collection of colors to use in coloring series surface of the chart.
+            </summary>
+            <remarks>
+            Note that SeriesColors are not used if SeriesMaterial is specified on this control
+            </remarks>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.ScatterSurface3D.SeriesColorInterpolation">
+            <summary>
+            Gets or sets mode for selecting colors from the SeriesColors.
+            </summary>
+            <remarks>
+            Note color interpolation is not used if SeriesMaterial is specified on this control
+            </remarks>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.ScatterSurface3D.SeriesMaterial">
+            <summary>
+            Gets or sets material used for rendering the series mesh.
+            </summary>
+            <remarks>
+            Note that SeriesMaterial takes precedence over value specified in SeriesColors 
+            </remarks>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.ScatterSurface3D.FloorMaterial">
+            <summary>
+            Gets or sets material to use for the 3-dimensional model projected onto the floor of the surface chart at the minimum of Z axis.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.ScatterSurface3D.ActualSeriesMaterial">
+            <summary>
+            Gets actual series material used in the series mesh.
+            </summary>
+            <remarks>
+            This property will return a Material which is a composite of the SeriesMaterial or SeriesColors, 
+            along with some default materials applied by the surface chart.
+            </remarks>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.ScatterSurface3D.WireframeMaterial">
+            <summary>
+            Gets or sets the material used for rendering the series wireframe.
+            </summary>
+            <remarks>
+            The wireframe will only be seen when WireframeThickness is set to a value greater than zero.
+            </remarks>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.ScatterSurface3D.WireframeThickness">
+            <summary>
+            Gets or sets the thickness used for rendering the series wireframe.
+            </summary>
+            <remarks>
+            This property value is relative to the size of the surface chart. 
+            Sensible values for wireframe thickness are between 0 and 0.01.
+            </remarks>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.ScatterSurface3D.ShowFloorProjection">
+            <summary>
+            Gets or sets the whether or not to show a 2-dimensional projection of the series mesh on the floor of the cube, at the minimum value of Z scale
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.ScatterSurface3D.SamplingThreshold">
+            <summary>
+            Gets or sets the maximum points which the surface chart will allow to render in the series mesh.
+            <remarks>
+            If the count of items in the ItemsSource exceeds MaximumPoints, then 
+            sampling will be turned on, and the points will be consolidated into a regular grid 
+            with Sqrt(MaximumPoints) rows and Sqrt(MaximumPoints) columns.</remarks>
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.ScatterSurface3D.NormalizeTriangulation">
+            <summary>
+            Determines whether to normalize XY values before sending them to triangulation.
+            </summary>
+            <remarks>
+            XY values with dissimilar magnitude can have an undesirable effect on triangulation.  Set this property to true to normalize all x and y values using the formula (x(i) - xMin) / (xMax - xMin).
+            </remarks>
+        </member>
+        <member name="T:Infragistics.Controls.Charts.SeriesColorPaletteInterpolation">
+            <summary>
+            Enum for modes of color palette interpolation available in the surface chart.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.SeriesColorPaletteInterpolation.None">
+            <summary>
+            Select a color from the palette; do not interpolate between colors.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.SeriesColorPaletteInterpolation.ARGB">
+            <summary>
+            Interpolate between colors using ARGB color interpolation.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.SeriesColorPaletteInterpolation.AHSV">
+            <summary>
+            Interpolate between colors using AHSV color interpolation.
+            </summary>
+        </member>
+        <member name="T:Infragistics.Controls.Charts.ColorCollection">
+            <summary>
+            Represents a collection of colors
+            </summary>
+        </member>
+        <member name="T:Infragistics.Controls.Charts.Chart3DMouseButtonEventArgs">
+            <summary>
+            Represents arguments for mouse button events in 3-dimensional chart.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.Chart3DMouseButtonEventArgs.#ctor(System.Windows.Input.MouseButtonEventArgs,System.Windows.Media.Media3D.Point3D)">
+            <summary>
+            Initializes a new instance of the Chart3DMouseButtonEventArgs class.
+            </summary>
+            <param name="args">MouseButtonEventArgs which were the origin of this event.</param>
+            <param name="hitPoint">The point in context, in 3D space.</param>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.Chart3DMouseButtonEventArgs.#ctor(System.Windows.Input.MouseButtonEventArgs,System.Windows.Media.Media3D.Point3D,System.Object)">
+            <summary>
+            Initializes a new instance of the Chart3DMouseButtonEventArgs class.
+            </summary>
+            <param name="args">MouseButtonEventArgs which were the origin of this event.</param>
+            <param name="hitPoint">The point in context, in 3D space.</param>
+            <param name="item">The data item in context.</param>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.Chart3DMouseButtonEventArgs.X">
+            <summary>
+            Gets the X-coordinate of the point in context.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.Chart3DMouseButtonEventArgs.Y">
+            <summary>
+            Gets the Y-coordinate of the point in context.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.Chart3DMouseButtonEventArgs.Value">
+            <summary>
+            Gets the Value or Z-coordinate of the point in context.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.Chart3DMouseButtonEventArgs.Item">
+            <summary>
+            Gets the data item in context.
+            </summary>
+        </member>
+        <member name="T:Infragistics.Controls.Charts.Chart3DMouseEventArgs">
+            <summary>
+            Represents arguments for mouse events in 3-dimensional chart. 
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.Chart3DMouseEventArgs.#ctor(System.Windows.Input.MouseEventArgs,System.Windows.Media.Media3D.Point3D,System.Object)">
+            <summary>
+            Initializes a new instance of the Chart3DMouseEventArgs class.
+            </summary>
+            <param name="args">MouseEventArgs which were the origin of this event.</param>
+            <param name="hitPoint">The point in context, in 3D space.</param>
+            <param name="item">The data item in context.</param>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.Chart3DMouseEventArgs.#ctor(System.Windows.Input.MouseEventArgs,System.Windows.Media.Media3D.Point3D)">
+            <summary>
+            Initializes a new instance of the Chart3DMouseEventArgs class.
+            </summary>
+            <param name="args">MouseEventArgs which were the origin of this event.</param>
+            <param name="hitPoint">The point in context, in 3D space.</param>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.Chart3DMouseEventArgs.X">
+            <summary>
+            Gets the X-coordinate of the point in context.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.Chart3DMouseEventArgs.Y">
+            <summary>
+            Gets the Y-coordinate of the point in context.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.Chart3DMouseEventArgs.Value">
+            <summary>
+            Gets the Value or Z-coordinate of the point in context.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.Chart3DMouseEventArgs.Item">
+            <summary>
+            Gets the data item in context.
+            </summary>
+        </member>
+        <member name="T:Infragistics.Controls.Charts.LinearAxis">
+            <summary>
+            Represents linear numeric scale in a surface chart
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.LinearAxis.MinimumValue">
+            <summary>
+            Gets or sets the minimum value where this scale starts.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.LinearAxis.MinimumValueProperty">
+            <summary>
+            Identifies the ActualMinimumValue dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.LinearAxis.MaximumValue">
+            <summary>
+            Gets or sets the maximum value where this scale ends. 
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.LinearAxis.MaximumValueProperty">
+            <summary>
+            Identifies the ActualMaximumValue dependency property.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.LinearAxis.GetScaledValue(System.Double)">
+            <summary>
+            Converts a data value to a scale position.
+            </summary>
+            <param name="unscaledValue">The data value to convert to a scale position.</param>
+            <returns>The given value, converted to a scale position.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.LinearAxis.GetUnscaledValue(System.Double)">
+            <summary>
+            Converts a scale position to a data value.
+            </summary>
+            <param name="scaledValue">The scale position to convert to a data value.</param>
+            <returns>The given scale position, converted to a data value.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.LinearAxis.DoAutoRange">
+            <summary>
+            Calculates the range for this scale based on the setting of the MinimumValue and MaximumValue properties, and sets the ActualMinimumValue and ActualMaximumValue properties accordingly.
+            </summary>
+            <returns>True if the range changed, otherwise False.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.LinearAxis.OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs)">
+            <summary>
+            Notifies about changes to certain property values by raising the PropertyChanged event.
+            </summary>
+            <param name="e">The PropertyChangedEventArgs in context.</param>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.LinearAxis.IntervalProperty">
+            <summary>
+            Identifies the Interval dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.LinearAxis.Interval">
+            <summary>
+            Gets or sets an interval at which to render labels and gridlines along the scale.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.LinearAxis.TickmarkMinimumValueProperty">
+            <summary>
+            Identifies the TickmarkMinimumValue dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.LinearAxis.TickmarkMinimumValue">
+            <summary>
+            Gets or sets numeric value at which labels and gridlines start on this scale
+            </summary>
+            <remarks>
+            Not to be confused with the MinimumValue property, which defines where the scale begins, independent of tickmarks.
+            </remarks>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.LinearAxis.TickmarkMaximumValueProperty">
+            <summary>
+            Identifies the TickmarkMaximumValue dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.LinearAxis.TickmarkMaximumValue">
+            <summary>
+            Gets or sets numeric value at which labels and gridlines end on this scale
+            </summary>
+            <remarks>
+            Not to be confused with the MaximumValue property, which defines where the scale ends, independent of tickmarks.
+            </remarks>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.LinearAxis.MajorValues">
+            <summary>
+            Gets the numbers at which labels and tickmarks should be rendered along this scale.
+            </summary>
+            <returns>An enumerable set of numbers at which labels and tickmarks should be rendered.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.LinearAxis.GetInterval">
+            <summary>
+            Gets the interval at which labels and gridlines should be spaced along the scale.
+            </summary>
+            <returns>The interval at which to render labels and gridlines along the scale.</returns>
+            <remarks>If the Interval property is set to a valid value, this function will return the value of the Interval property.  Otherwise, this function will calculate an ideal interval based on ActualMinimumValue and ActualMaximumValue.</remarks>
+        </member>
+        <member name="T:Infragistics.Controls.Charts.LogarithmicAxis">
+            <summary>
+            Represents logarithmic scale in a surface chart
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.LogarithmicAxis.MinimumValue">
+            <summary>
+            Gets or sets the minimum value where this scale starts.
+            </summary>
+            <remarks>
+            Since log 0 is undefined, this must be a non-zero value.
+            </remarks>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.LogarithmicAxis.MinimumValueProperty">
+            <summary>
+            Identifies the ActualMinimumValue dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.LogarithmicAxis.MaximumValue">
+            <summary>
+            Gets or sets the maximum value where this scale ends. 
+            </summary>
+            <remarks>
+            Since log 0 is undefined, this must be a non-zero value.
+            </remarks>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.LogarithmicAxis.MaximumValueProperty">
+            <summary>
+            Identifies the ActualMaximumValue dependency property.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.LogarithmicAxis.GetScaledValue(System.Double)">
+            <summary>
+            Converts a data value to a scale position.
+            </summary>
+            <param name="unscaledValue">The data value to convert to a scale position.</param>
+            <returns>The given value, converted to a scale position.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.LogarithmicAxis.GetUnscaledValue(System.Double)">
+            <summary>
+            Converts a scale position to a data value.
+            </summary>
+            <param name="scaledValue">The scale position to convert to a data value.</param>
+            <returns>The given scale position, converted to a data value.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.LogarithmicAxis.DoAutoRange">
+            <summary>
+            Calculates the range for this scale based on the setting of the MinimumValue and MaximumValue properties, and sets the ActualMinimumValue and ActualMaximumValue properties accordingly.
+            </summary>
+            <returns>True if the range changed, otherwise False.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.LogarithmicAxis.OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs)">
+            <summary>
+            Notifies about changes to certain property values by raising the PropertyChanged event.
+            </summary>
+            <param name="e">The PropertyChangedEventArgs in context.</param>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.LogarithmicAxis.LogarithmBaseProperty">
+            <summary>
+            Identifies the LogarithmBase dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.LogarithmicAxis.LogarithmBase">
+            <summary>
+            Gets or sets the base number for this logarithmic scale. This is the number which increases exponentially along the length of the scale.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.LogarithmicAxis.MajorValues">
+            <summary>
+            Gets the numbers at which labels and tickmarks should be rendered along this scale.
+            </summary>
+            <returns>An enumerable set of numbers at which labels and tickmarks should be rendered.</returns>
+        </member>
+        <member name="T:Infragistics.Controls.Charts.SurfaceChartAxis">
+            <summary>
+            Represents a base class for all scales or axes in a surface chart.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.SurfaceChartAxis.Title">
+            <summary>
+            Gets or sets the title text to display beyond the scale labels.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.SurfaceChartAxis.TitleProperty">
+            <summary>
+            Identifies the Title dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.SurfaceChartAxis.LabelFormat">
+            <summary>
+            Gets or sets the format string for labels on this scale.
+            </summary>
+            <remarks>
+            This can be a string in the format {0} or {0:n}, following the .NET standards for numeric format strings.
+            </remarks>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.SurfaceChartAxis.LabelFormatProperty">
+            <summary>
+            Identifies the LabelFormat dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.SurfaceChartAxis.ActualMinimumValue">
+            <summary>
+            Gets or sets a value corresponding to actual start of this scale.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.SurfaceChartAxis.ActualMaximumValue">
+            <summary>
+            Gets or sets a value corresponding to actual end of this scale.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.SurfaceChartAxis.IsInverted">
+            <summary>
+            Gets or sets whether this scale should be oriented backwards, running from ActualMaximumValue to ActualMinimumValue.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.SurfaceChartAxis.IsInvertedProperty">
+            <summary>
+            Identifies the ActualIsInverted dependency property.
+            </summary>
+        </member>
+        <member name="E:Infragistics.Controls.Charts.SurfaceChartAxis.PropertyChanged">
+            <summary>
+            Event raised when certain property values are changed on this scale object.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.SurfaceChartAxis.OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs)">
+            <summary>
+            Notifies about changes to certain property values by raising the PropertyChanged event.
+            </summary>
+            <param name="e">The PropertyChangedEventArgs in context.</param>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.SurfaceChartAxis.GetScaledValue(System.Double)">
+            <summary>
+            Converts a data value to a scale position.
+            </summary>
+            <param name="unscaledValue">The data value to convert to a scale position.</param>
+            <returns>The given value, converted to a scale position.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.SurfaceChartAxis.GetUnscaledValue(System.Double)">
+            <summary>
+            Converts a scale position to a data value.
+            </summary>
+            <param name="scaledValue">The scale position to convert to a data value.</param>
+            <returns>The given scale position, converted to a data value.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.SurfaceChartAxis.DoAutoRange">
+            <summary>
+            Calculates the range for this scale.
+            </summary>
+            <returns>True if the range changed, otherwise False.</returns>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.SurfaceChartAxis.LabelOffsetProperty">
+            <summary>
+            Identifies the LabelOffset dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.SurfaceChartAxis.LabelOffset">
+            <summary>
+            Gets or sets the distance to offset the labels away from the edge of the cube.
+            </summary>
+            <remarks>
+            This is a value relative to the size of the chart cube, where 1 is the entire span of the cube.  A typical value for LabelOffset is 0.02.
+            </remarks>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.SurfaceChartAxis.TitleOffsetProperty">
+            <summary>
+            Identifies the TitleOffset dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.SurfaceChartAxis.TitleOffset">
+            <summary>
+            Gets or sets the distance to offset the title away from the edge of the cube.
+            </summary>
+            <remarks>
+            This is a value relative to the size of the chart cube, where 1 is the entire span of the cube.  A typical value for TitleOffset is 0.02.
+            </remarks>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.SurfaceChartAxis.StrokeProperty">
+            <summary>
+            Identifies the Stroke dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.SurfaceChartAxis.Stroke">
+            <summary> 
+            Gets or sets a brush used for rendering stroke of axis line.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.SurfaceChartAxis.StrokeThicknessProperty">
+            <summary>
+            Identifies the StrokeThickness dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.SurfaceChartAxis.StrokeThickness">
+            <summary>
+            Gets or sets the thickness of the axis line.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.SurfaceChartAxis.GridStrokeProperty">
+            <summary>
+            Identifies the GridStroke dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.SurfaceChartAxis.GridStroke">
+            <summary>
+            Gets or sets a brush used for rendering gridlines on this scale.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.SurfaceChartAxis.GridStrokeThicknessProperty">
+            <summary>
+            Identifies the GridStrokeThickness dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.SurfaceChartAxis.GridStrokeThickness">
+            <summary>
+            Gets or sets the thickness of gridlines on this scale.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.SurfaceChartAxis.TitleFontSizeProperty">
+            <summary>
+            Identifies the TitleFontSize dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.SurfaceChartAxis.TitleFontSize">
+            <summary>
+            Gets or sets the font size used for rendering axis title.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.SurfaceChartAxis.TitleFontFamilyProperty">
+            <summary>
+            Identifies the TitleFontFamily dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.SurfaceChartAxis.TitleFontFamily">
+            <summary>
+            Gets or sets the font family used for rendering axis title.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.SurfaceChartAxis.TitleFontWeightProperty">
+            <summary>
+            Identifies the TitleFontWeight dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.SurfaceChartAxis.TitleFontWeight">
+            <summary>
+            Gets or sets the font weight used for rendering axis title.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.SurfaceChartAxis.TitleForegroundProperty">
+            <summary>
+            Identifies the TitleForeground dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.SurfaceChartAxis.TitleForeground">
+            <summary>
+            Gets or sets a brush used for rendering foreground of axis title.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.SurfaceChartAxis.TitleOpacityProperty">
+            <summary>
+            Identifies the TitleOpacity dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.SurfaceChartAxis.TitleOpacity">
+            <summary>
+            Gets or sets the opacity used for rendering axis title.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.SurfaceChartAxis.TitleVisibilityProperty">
+            <summary>
+            Identifies the TitleVisibility dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.SurfaceChartAxis.TitleVisibility">
+            <summary>
+            Gets or sets whether the axis title is visible.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.SurfaceChartAxis.TitleBackgroundProperty">
+            <summary>
+            Identifies the TitleBackground dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.SurfaceChartAxis.TitleBackground">
+            <summary>
+            Gets or sets a brush used for rendering background of axis title.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.SurfaceChartAxis.LabelFontSizeProperty">
+            <summary>
+            Identifies the LabelFontSize dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.SurfaceChartAxis.LabelFontSize">
+            <summary>
+            Gets or sets the font size used for rendering each label.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.SurfaceChartAxis.LabelFontFamilyProperty">
+            <summary>
+            Identifies the LabelFontFamily dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.SurfaceChartAxis.LabelFontFamily">
+            <summary>
+            Gets or sets the font family used for rendering each label.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.SurfaceChartAxis.LabelFontWeightProperty">
+            <summary>
+            Identifies the LabelFontWeight dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.SurfaceChartAxis.LabelFontWeight">
+            <summary>
+            Gets or sets the font weight used for rendering each label.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.SurfaceChartAxis.LabelForegroundProperty">
+            <summary>
+            Identifies the LabelForeground dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.SurfaceChartAxis.LabelForeground">
+            <summary>
+            Gets or sets a brush used for rendering foreground of each label.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.SurfaceChartAxis.LabelOpacityProperty">
+            <summary>
+            Identifies the LabelOpacity dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.SurfaceChartAxis.LabelOpacity">
+            <summary>
+            Gets or sets the opacity used for rendering each label.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.SurfaceChartAxis.LabelVisibilityProperty">
+            <summary>
+            Identifies the LabelVisibility dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.SurfaceChartAxis.LabelVisibility">
+            <summary>
+            Gets or sets whether axis labels are visible along this scale.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.SurfaceChartAxis.LabelBackgroundProperty">
+            <summary>
+            Identifies the LabelBackground dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.SurfaceChartAxis.LabelBackground">
+            <summary>
+            Gets or sets a brush used for rendering background of each label.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.SurfaceChartAxis.MajorValues">
+            <summary>
+            Gets the numbers at which labels and tickmarks should be rendered along this scale.
+            </summary>
+            <returns>An enumerable set of numbers at which labels and tickmarks should be rendered.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.SurfaceChartAxis.GetInterval">
+            <summary>
+            Gets the interval at which to render labels and gridlines along the scale.
+            </summary>
+            <returns>The interval at which to render labels and gridlines along the scale.</returns>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.SurfaceChartAxis.LabelTemplateProperty">
+            <summary>
+            Identifies the LabelTemplate dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.SurfaceChartAxis.LabelTemplate">
+            <summary>
+            Gets or sets DataTemplate used for rendering each label along this scale.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.SurfaceChartAxis.TitleTemplateProperty">
+            <summary>
+            Identifies the TitleTemplate dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.SurfaceChartAxis.TitleTemplate">
+            <summary>
+            Gets or sets DataTemplate used for rendering the title.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.SurfaceChartAxis.ScaleChanged">
+            <summary>
+            Method to invoke when the scale has changed in a way that requires a refresh of its related components.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.SurfaceChartAxis.CrossingValueProperty">
+            <summary>
+            Identifies the CrossingValue dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.SurfaceChartAxis.CrossingValue">
+            <summary>
+            Gets or sets a value on the adjacent axis at which this axis line should cross.
+            </summary>
+            <remarks>
+            Each axis in a 3D chart can render 4 lines, 2 for each adjacent axis.  If CrossingValue is set to double.NaN, the lines will be rendered along the edges of the cube.
+            </remarks>
+        </member>
+        <member name="T:Infragistics.Controls.Charts.PickResult">
+            <summary>
+            Class for contextual information about a mouse hit in a ScatterSurface3D.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.PickResult.Hit">
+            <summary>
+            True if a mouse hit occurred, otherwise False.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.PickResult.HitPoint">
+            <summary>
+            The mouse hit point, in data value coordinates.
+            </summary>
+        </member>
+        <member name="T:Infragistics.Controls.Charts.SurfaceChart3DMouseHit">
+            <summary>
+            Class for holding contextual information about a mouse hit in a surface chart.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.SurfaceChart3DMouseHit.HitScaled">
+            <summary>
+            The hit location, expressed in chart coordinates.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.SurfaceChart3DMouseHit.HitUnscaled">
+            <summary>
+            The hit location, expressed in data value coordinates.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.SurfaceChart3DMouseHit.Item">
+            <summary>
+            The data item, if any, in context.
+            </summary>
+            <remarks>
+            This property will return null unless the hit element is a point marker.
+            </remarks>
+        </member>
+        <member name="T:XamlGeneratedNamespace.GeneratedInternalTypeHelper">
+            <summary>
+            GeneratedInternalTypeHelper
+            </summary>
+        </member>
+        <member name="M:XamlGeneratedNamespace.GeneratedInternalTypeHelper.CreateInstance(System.Type,System.Globalization.CultureInfo)">
+            <summary>
+            CreateInstance
+            </summary>
+        </member>
+        <member name="M:XamlGeneratedNamespace.GeneratedInternalTypeHelper.GetPropertyValue(System.Reflection.PropertyInfo,System.Object,System.Globalization.CultureInfo)">
+            <summary>
+            GetPropertyValue
+            </summary>
+        </member>
+        <member name="M:XamlGeneratedNamespace.GeneratedInternalTypeHelper.SetPropertyValue(System.Reflection.PropertyInfo,System.Object,System.Object,System.Globalization.CultureInfo)">
+            <summary>
+            SetPropertyValue
+            </summary>
+        </member>
+        <member name="M:XamlGeneratedNamespace.GeneratedInternalTypeHelper.CreateDelegate(System.Type,System.Object,System.String)">
+            <summary>
+            CreateDelegate
+            </summary>
+        </member>
+        <member name="M:XamlGeneratedNamespace.GeneratedInternalTypeHelper.AddEventHandler(System.Reflection.EventInfo,System.Object,System.Delegate)">
+            <summary>
+            AddEventHandler
+            </summary>
+        </member>
+    </members>
+</doc>

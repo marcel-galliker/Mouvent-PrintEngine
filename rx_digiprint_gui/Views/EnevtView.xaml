@@ -1,0 +1,56 @@
+﻿<UserControl
+             x:Class="RX_DigiPrint.Views.EventView"
+ 
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:igGrids="http://infragistics.com/DataPresenter"
+             xmlns:ig="http://schemas.infragistics.com/xaml"
+             xmlns:Infragistics="clr-namespace:Infragistics;assembly=InfragisticsWPF4.Controls.Grids.XamGrid.v13.2"
+             xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="1200">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- toolbar LEFT _______________________________________________________ -->
+        <rx_uc:CommandButtons/>
+        
+        <!-- toolbar RIGHT _______________________________________________________ -->
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button x:Name="Button_Confirm" Style="{DynamicResource ToolButtonStyle}" ToolTip="Confirm all Events" Click="Confirm_clicked" >
+                <Image Source="../Resources/Bitmaps/confirm.ico"/>
+            </Button>
+            <rx_uc:SetupButtons HorizontalAlignment="Right"/>
+        </StackPanel>
+
+        <ig:XamGrid 
+			x:Name="EventsGrid"
+            Grid.Row="1"
+            AutoGenerateColumns="False"  
+            HeaderStyle="{DynamicResource XamGridHeaderStyle}" 
+            CellControlAttached="EventsGrid_CellControlAttached"
+            CellStyle="{DynamicResource XamGridLogCellControlStyle}"
+            Background="Transparent"
+            >
+            <ig:XamGrid.SelectionSettings>
+                <ig:SelectionSettings CellClickAction="SelectRow"/>
+            </ig:XamGrid.SelectionSettings>
+            <ig:XamGrid.Columns>
+                <ig:TextColumn Key="LogTypeStr" HeaderText="Type"/>
+           <!-- <ig:TextColumn Key="TimeStr"    HeaderText="Time"    Width="100"/> -->
+                <ig:TextColumn Key="TimeStr"    HeaderText="Time"    Width="auto"/>
+                <ig:TextColumn Key="DeviceStr"  HeaderText="Device"  Width="100"/>
+                <ig:TextColumn Key="Error"      HeaderText="No"      HorizontalContentAlignment="Right"/>
+                <ig:TextColumn Key="Message"    HeaderText="Message" Width="*"/>
+                <ig:TextColumn Key="File"       HeaderText="File"    Width="auto"/>
+                <ig:TextColumn Key="Line"       HeaderText="Line"    Width="auto" HorizontalContentAlignment="Right"/>
+            </ig:XamGrid.Columns>
+        </ig:XamGrid>
+        
+    </Grid>
+</UserControl>

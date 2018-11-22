@@ -1,0 +1,94 @@
+﻿<UserControl
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:igGrids="http://infragistics.com/DataPresenter"
+             xmlns:ig="http://schemas.infragistics.com/xaml"
+             xmlns:Infragistics="clr-namespace:Infragistics;assembly=InfragisticsWPF4.Controls.Grids.XamGrid.v13.2" 
+             xmlns:igPrim="http://schemas.infragistics.com/xaml/primitives"
+             xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
+             xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+
+             x:Class="RX_DigiPrint.Views.LogView"
+ 
+             mc:Ignorable="d" 
+             d:DesignHeight="300" 
+             d:DesignWidth="1100"
+            >
+    
+    <UserControl.Resources>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="auto"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- toolbar LEFT _______________________________________________________ -->
+        <rx_uc:CommandButtons Grid.ColumnSpan="2"/>
+
+        <StackPanel Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right">
+            <common:RxButton x:Name="SearchButton" Click="Search_clicked">
+                <Image Source="../Resources/Bitmaps/Search.ico"/>
+            </common:RxButton>
+            <TextBox x:Name="SearchText" Width="200" VerticalAlignment="Center" Padding="5" Text="Search"/>
+
+            <common:RxButton x:Name="SearchUp" ToolTip="Go to oldest Message" Click="SearchUp_clicked" >
+                <Image Source="../Resources/Bitmaps/SearchUp.ico"/>
+            </common:RxButton>
+
+            <common:RxButton x:Name="SearchDown" ToolTip="Go to oldest Message" Click="SearchDown_clicked" >
+                <Image Source="../Resources/Bitmaps/SearchDown.ico"/>
+            </common:RxButton>
+
+            <common:RxButton x:Name="MoveTop" ToolTip="Go to oldest Message" Click="Top_clicked" >
+                <Image Source="../Resources/Bitmaps/Top.ico"/>
+            </common:RxButton>
+
+            <common:RxButton x:Name="MoveBottom" ToolTip="Go to latest Message" Click="Bottom_clicked" >
+                <Image Source="../Resources/Bitmaps/Bottom.ico"/>
+            </common:RxButton>
+        </StackPanel>
+        <ig:XamGrid 
+			x:Name="LogGrid"
+			Grid.Row="1"
+			AutoGenerateColumns="False"  
+			HeaderStyle="{DynamicResource XamGridHeaderStyle}" 
+			CellControlAttached="LogGrid_CellControlAttached"
+			CellStyle="{DynamicResource XamGridLogCellControlStyle}" 
+            SizeChanged="LogGrid_SizeChanged" 
+			BorderThickness="1"
+            >
+            <!--
+            Style="{DynamicResource XamGrid-NoVScroll-Style}"
+            -->
+            <ig:XamGrid.SelectionSettings>
+                <ig:SelectionSettings CellClickAction="SelectRow"/>
+            </ig:XamGrid.SelectionSettings>
+            <ig:XamGrid.Columns>
+                <ig:TextColumn Key="LogTypeStr" HeaderText="Type"/>
+           <!-- <ig:TextColumn Key="TimeStr"    HeaderText="Time"    Width="200"/> -->
+                <ig:TextColumn Key="TimeStr"    HeaderText="Time"    Width="auto"/>
+                <ig:TextColumn Key="DeviceStr"  HeaderText="Device"  Width="100"/>
+                <ig:TextColumn Key="Error"      HeaderText="No"      HorizontalContentAlignment="Right"/>
+                <ig:TextColumn Key="Message"    HeaderText="Message" Width="*"/>
+                <ig:TextColumn Key="File"       HeaderText="File"    Width="auto"/>
+                <ig:TextColumn Key="Line"       HeaderText="Line"    Width="auto" HorizontalContentAlignment="Right"/>
+            </ig:XamGrid.Columns>
+        </ig:XamGrid>
+        <ScrollBar x:Name="Scroll" 
+			Grid.Row="1" 
+			Grid.Column="1" 
+			Width="20" 
+			HorizontalAlignment="Left" 
+			VerticalAlignment="Stretch"
+			ValueChanged="Scroll_ValueChanged"/>
+    </Grid>
+</UserControl>

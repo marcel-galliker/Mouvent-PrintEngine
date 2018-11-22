@@ -1,0 +1,26 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rx="clr-namespace:RxWfTool.Helpers"
+                    xmlns:igPrim="http://schemas.infragistics.com/xaml/primitives"
+                    xmlns:System="clr-namespace:System;assembly=mscorlib"
+                    >
+
+    <System:Double x:Key="FontSize">14.66</System:Double>
+
+    <!-- TextBlock ____________________________________________________________-->
+    <Style x:Key="{x:Type TextBlock}" TargetType="{x:Type TextBlock}" >
+        <Setter Property="FontSize" Value="{StaticResource FontSize}" />
+    </Style>
+
+    <!-- TextBox ______________________________________________________________-->
+    <Style x:Key="{x:Type TextBox}" TargetType="{x:Type TextBox}" >
+        <Setter Property="FontSize" Value="{StaticResource FontSize}" />
+    </Style>
+
+    <!-- RX_NumBox _____________________________________________________________________-->
+    <Style x:Key="RxNumBox" TargetType="{x:Type rx:RxNumBox}">
+        <Setter Property="TextAlignment" Value="Right" />
+        <Setter Property="FontSize"      Value="{StaticResource FontSize}" />
+    </Style>
+
+</ResourceDictionary>

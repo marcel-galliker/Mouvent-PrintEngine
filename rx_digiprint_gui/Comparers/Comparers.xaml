@@ -1,0 +1,8 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:comparers="clr-namespace:RX_DigiPrint.Comparers"  
+                    >
+
+    <comparers:Date_Comparer          x:Key="Date_Comparer"/>
+    <comparers:FileName_Comparer      x:Key="FileName_Comparer"/>
+</ResourceDictionary>

@@ -1,0 +1,24 @@
+<WaveForm>
+  <Ink Name="Magenta 109" ColorCode="2" Description="TX130 Magenta-109" ColorRGB="#FFE40FEC" Temp="30" TempMax="45" GreyLevel="8 12 13 15 " MaxFreq="51052" />
+  <item Position="0" Voltage="0" />
+  <item Position="26" Voltage="0" />
+  <item Position="67" Voltage="22" />
+  <item Position="195" Voltage="22" />
+  <item Position="236" Voltage="0" />
+  <item Position="379" Voltage="0" />
+  <item Position="404" Voltage="15" />
+  <item Position="548" Voltage="15" />
+  <item Position="573" Voltage="0" />
+  <item Position="732" Voltage="0" />
+  <item Position="788" Voltage="30" />
+  <item Position="901" Voltage="30" />
+  <item Position="957" Voltage="0" />
+  <item Position="1085" Voltage="0" />
+  <item Position="1096" Voltage="5" />
+  <item Position="1254" Voltage="5" />
+  <item Position="1260" Voltage="7" />
+  <item Position="1434" Voltage="7" />
+  <item Position="1449" Voltage="0" />
+  <item Position="1562" Voltage="0" />
+  <check>63EC43D6D1BAAF73096E9AF392AEB940731D5F1E</check>
+</WaveForm>

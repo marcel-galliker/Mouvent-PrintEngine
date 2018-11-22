@@ -1,0 +1,68 @@
+﻿<UserControl x:Class="RX_DigiPrint.Views.UserControls.StepperMotorCtrl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d"
+             Width="auto"
+             Height="auto"
+             VerticalAlignment="Top" 
+             d:DesignWidth="300" d:DesignHeight="300">
+    
+    <GroupBox Loaded="GroupBox_Loaded" Style="{StaticResource RxGroupBox}" Background="#4CFFFFFF">
+        <Grid Height="auto" VerticalAlignment="Top">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+            </Grid.ColumnDefinitions>
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
+                <common:RxButton Grid.Row="0" Click="Up_Clicked" x:Name="UpButton">
+                    <Image Source="../../Resources/Bitmaps/Up.ico"/>
+                </common:RxButton>
+
+                <common:RxButton Grid.Row="1" Click="Down_Clicked" x:Name="DownButton">
+                    <Image Source="../../Resources/Bitmaps/Down.ico"/>
+                </common:RxButton>
+            </Grid>
+
+            <Grid Grid.Column="1" VerticalAlignment="Center" Margin="10,0,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="80"/>
+                    <ColumnDefinition Width="90"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
+
+
+                <TextBlock Grid.Row="0" Grid.Column="1" Text="State"/>
+                <!--        <Image     Grid.Row="0" Grid.Column="2"  Source="{Binding State,   Converter={StaticResource StepperStateImg_Converter}}" HorizontalAlignment="Left" Height="20"/> -->
+                <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding State,   Converter={StaticResource StepperStateImg_Converter}}"/>
+
+                <TextBlock Grid.Row="1" Grid.Column="1" Text="End"/>
+                <Image     Grid.Row="1" Grid.Column="2"  Source="{Binding EndSwitch,   Converter={StaticResource LedImg_Converter}}" HorizontalAlignment="Left" Height="20"/>
+
+                <TextBlock Grid.Row="2" Grid.Column="1" Text="Motor"/>
+                <StackPanel Grid.Row="2" Grid.Column="2" Orientation="Horizontal">
+                    <TextBlock Text="{Binding MotorPos, Converter={StaticResource ToString_Converter}, ConverterParameter=1}"/>
+                    <TextBlock Text=" mm" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Bottom"/>
+                </StackPanel>
+
+                <TextBlock Grid.Row="3" Grid.Column="1" Text="Encoder"/>
+                <StackPanel Grid.Row="3" Grid.Column="2" Orientation="Horizontal" Background="{Binding EncoderColor}">
+                    <TextBlock Text="{Binding EncoderPos, Converter={StaticResource ToString_Converter}, ConverterParameter=1}"/>
+                    <TextBlock Text=" mm" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Bottom"/>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </GroupBox>
+</UserControl>

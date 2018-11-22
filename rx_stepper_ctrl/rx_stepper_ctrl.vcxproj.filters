@@ -1,0 +1,187 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source files">
+      <UniqueIdentifier>{e3a89e03-7524-464c-9b82-b4dc0c3820ba}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header files">
+      <UniqueIdentifier>{f348d1b4-553f-47af-9024-2fdc988b6ca3}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource files">
+      <UniqueIdentifier>{43b02dca-60e6-4322-bce8-1559a4afd599}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+    <Filter Include="Make files">
+      <UniqueIdentifier>{65e3a8cb-a50d-44e1-ad13-4704be6c5d86}</UniqueIdentifier>
+      <Extensions>*.mak</Extensions>
+    </Filter>
+    <Filter Include="PowerStep">
+      <UniqueIdentifier>{db58114a-04f9-4255-80c1-6bf85c651ac7}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Makefile" />
+    <None Include="debug.mak">
+      <Filter>Make files</Filter>
+    </None>
+    <None Include="release.mak">
+      <Filter>Make files</Filter>
+    </None>
+    <None Include="release-soc.mak">
+      <Filter>Make files</Filter>
+    </None>
+    <None Include="rx_stepper_ctrl-Debug-soc.vgdbsettings">
+      <Filter>Make files</Filter>
+    </None>
+    <None Include="debug-soc.mak">
+      <Filter>Make files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="rx_stepper_ctrl.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="version.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="fpga_stepper.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="args.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="stepper_ctrl.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="motor.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="power_step.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="test_table.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="slide.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="test.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="cln.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="cleaf.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="lb701.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="lb702.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="lbrob.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="tx801.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="txrob.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="dp803.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="gcc_Debug.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="gcc_Debug-soc.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="gcc_Release-soc.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="fpga_stepper.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="fpga_def_stepper.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="args.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="stepper_ctrl.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="motor.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="PowerStep\motor.h">
+      <Filter>PowerStep</Filter>
+    </ClInclude>
+    <ClInclude Include="PowerStep\motor_arrays.h">
+      <Filter>PowerStep</Filter>
+    </ClInclude>
+    <ClInclude Include="PowerStep\motor_comm.h">
+      <Filter>PowerStep</Filter>
+    </ClInclude>
+    <ClInclude Include="PowerStep\powerstep01.h">
+      <Filter>PowerStep</Filter>
+    </ClInclude>
+    <ClInclude Include="PowerStep\powerstep01_config_all_motors.h">
+      <Filter>PowerStep</Filter>
+    </ClInclude>
+    <ClInclude Include="power_step.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="ps_common.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="ps_motor.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="test_table.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="slide.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="motor_cfg.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="test.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="cln.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="cleaf.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="web.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="lb702.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="lb701.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="lbrob.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="tx801.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="txrob.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="dp803.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,41 @@
+﻿<UserControl x:Class="RX_DigiPrint.Views.UserControls.ConsumablesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:views_ml="clr-namespace:RX_DigiPrint.Views.MiniLabelView"
+             xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" 
+             d:DesignWidth="300"
+             Height="auto"
+             MinHeight="200"
+             IsVisibleChanged="UserControl_IsVisibleChanged">
+
+    <Grid x:Name="MainGrid">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+        </Grid.ColumnDefinitions>
+        <!--
+        <rx_uc:RxProgress x:Name="_Unwinder" Grid.Column="0" Color="#FFF7F7F7" Text="Unwinder"/>
+        <rx_uc:RxProgress x:Name="_Rewinder" Grid.Column="1" Color="#FFF7F7F7" Text="Rewinder"/>
+        -->
+    </Grid>
+</UserControl>

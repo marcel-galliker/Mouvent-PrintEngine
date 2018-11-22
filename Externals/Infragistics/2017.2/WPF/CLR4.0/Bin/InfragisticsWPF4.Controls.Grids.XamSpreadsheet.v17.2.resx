@@ -1,0 +1,466 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<!-- 
+		Microsoft ResX Schema
+
+    Version 2.0
+
+		The primary goals of this format is to allow a simple XML format 
+		that is mostly human readable. The generation and parsing of the 
+		various data types are done through the TypeConverter classes 
+		associated with the data types.
+
+		Example:
+
+		... ado.net/XML headers & schema ...
+		<resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+		<resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+		<resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+		<data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+		<data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+		</data>
+		<data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+		</data>
+
+		There are any number of "resheader" rows that contain simple 
+		name/value pairs.
+
+		Each data row contains a name, and value. The row also contains a 
+		type or mimetype. Type corresponds to a .NET class that support 
+		text/value conversion through the TypeConverter architecture. 
+		Classes that don't support this are serialized and stored with the 
+		mimetype set.
+
+		The mimetype is used for serialized objects, and tells the 
+		ResXResourceReader how to depersist the object. This is currently not 
+		extensible. For a given mimetype the value must be set accordingly:
+
+		Note - application/x-microsoft.net.object.binary.base64 is the format 
+		that the ResXResourceWriter will generate, however the reader can 
+		read any of the formats listed below.
+
+		mimetype: application/x-microsoft.net.object.binary.base64
+		value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+			: and then encoded with base64 encoding.
+
+		mimetype: application/x-microsoft.net.object.soap.base64
+		value   : The object must be serialized with 
+			: System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+			: and then encoded with base64 encoding.
+
+		mimetype: application/x-microsoft.net.object.bytearray.base64
+		value   : The object must be serialized into a byte array 
+			: using a System.ComponentModel.TypeConverter
+			: and then encoded with base64 encoding.
+	-->
+	<xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+		<xsd:element name="root" msdata:IsDataSet="true">
+			<xsd:complexType>
+				<xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+					<xsd:element name="data">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+								<xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+							</xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+							<xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+							<xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="resheader">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" use="required" />
+						</xsd:complexType>
+					</xsd:element>
+				</xsd:choice>
+			</xsd:complexType>
+		</xsd:element>
+	</xsd:schema>
+	<resheader name="resmimetype">
+		<value>text/microsoft-resx</value>
+	</resheader>
+	<resheader name="version">
+    <value>2.0</value>
+	</resheader>
+	<resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+  <data name="Undo_EditCell" xml:space="preserve">
+		<value>Typing '{1}' in {0}</value>
+	</data>
+  <data name="Undo_ClearCellContents" xml:space="preserve">
+		<value>Clear {0}</value>
+	</data>
+  <data name="Undo_ClearCellFormats" xml:space="preserve">
+		<value>Clear</value>
+	</data>
+	<data name="Undo_ClearHyperlinks" xml:space="preserve">
+		<value>Clear Hyperlinks</value>
+	</data>
+  <data name="Undo_RemoveHyperlinks" xml:space="preserve">
+		<value>Remove Hyperlinks</value>
+	</data>
+	<data name="Undo_ClearTables" xml:space="preserve">
+		<value>Clear Tables</value>
+	</data>
+	<data name="Undo_CreateTable" xml:space="preserve">
+		<value>Create Table</value>
+	</data>
+	<data name="Undo_RemoveTable" xml:space="preserve">
+		<value>Remove Table</value>
+	</data>
+	<data name="Undo_Cut" xml:space="preserve">
+		<value>Cut</value>
+	</data>
+  <data name="Undo_ResizeRow" xml:space="preserve">
+		<value>Row Height</value>
+	</data>
+  <data name="Undo_ResizeColumn" xml:space="preserve">
+		<value>Column Width</value>
+	</data>
+  <data name="Undo_MergeCells" xml:space="preserve">
+		<value>Merge Cells</value>
+	</data>
+  <data name="Undo_Hyperlink" xml:space="preserve">
+		<value>Hyperlink</value>
+	</data>
+  <data name="Undo_Zoom" xml:space="preserve">
+		<value>Zoom</value>
+	</data>
+	<data name="Undo_CreateNamedReference" xml:space="preserve">
+		<value>Define Name</value>
+	</data>
+	<data name="Undo_TabColor" xml:space="preserve">
+		<value>Tab Color</value>
+	</data>
+	<data name="NewSheetName" xml:space="preserve">
+		<value>Sheet{0}</value>
+	</data>
+  <data name="SheetNameError_Message_Invalid" xml:space="preserve">
+		<value>You entered an invalid name '{0}' for the sheet. Make sure that:
+* The name is not blank.
+* There are no more than 31 characters in the name.
+* The name does not start or end with a single quote (').
+* The name does not contain any of the following characters: : \ / ? * [ ]</value>
+	</data>
+  <data name="SheetNameError_Message_NameIsUsed" xml:space="preserve">
+		<value>A worksheet with the name '{0}' already exists in the workbook.</value>
+	</data>
+  <data name="DeleteWorksheets_Message" xml:space="preserve">
+		<value>Deleting a worksheet cannot be undone and you may be removing some data. If you don't need it then click Ok.</value>
+	</data>
+  <data name="InvalidCommand_MixedSelection_Message" xml:space="preserve">
+		<value>That command cannot be used with selections that contain a mix of entire rows/columns with other cells. Try selecting only entire rows, only entire columns or just groups of cells.</value>
+	</data>
+  <data name="InvalidCommand_OverlappingSelection_Message" xml:space="preserve">
+		<value>Cannot use that command on overlapping selections.</value>
+	</data>
+  <data name="InvalidCommand_MultipleSelection_Message" xml:space="preserve">
+		<value>That command cannot be used with multiple selections.
+Select a single range and invoke the command again.</value>
+	</data>
+  <data name="InvalidCommand_TableChangeWithMultipleSheetSelection_Message" xml:space="preserve">
+		<value>Cannot make changes to a table when multiple sheets are selected.</value>
+	</data>
+  <data name="InvalidNameBoxValue_Message" xml:space="preserve">
+		<value>You must enter a valid reference you want to go to or type a valid name for the selection.</value>
+	</data>
+  <data name="Error_InvalidHyperlinkAddress_Message" xml:space="preserve">
+		<value>Cannot open the specified file.</value>
+	</data>
+	<data name="Error_InvalidHyperlinkReference_Message" xml:space="preserve">
+		<value>Reference is not valid.</value>
+	</data>
+	<data name="PasteError_CellRangeSize_Message" xml:space="preserve">
+		<value>The paste operation cannot be performed because the copy area and paste area are not the same size.
+Try one of the following:
+* Click one cell, then paste
+* Select a rectangle that's the same size, then paste.</value>
+	</data>
+  <data name="PasteError_MultipleSourceAndTargetRanges_Message" xml:space="preserve">
+		<value>The paste operation cannot be performed because there are multiple selections in the source and target worksheets.</value>
+	</data>
+  <data name="PasteError_InvalidSourceRanges_Message" xml:space="preserve">
+		<value>The paste operation cannot be performed on the copy areas provided.</value>
+	</data>
+	<data name="PasteError_InvalidSelectedSheetCount_Message" xml:space="preserve">
+		<value>The paste operation cannot be performed because the number of worksheets in the copy and paste areas are not the same size.</value>
+	</data>
+	<data name="PasteError_IntersectsMergedCells_Message" xml:space="preserve">
+		<value>The paste operation cannot be performed because the paste area intersects with a merged cell.</value>
+	</data>
+	<data name="PasteError_General_Message" xml:space="preserve">
+		<value>An error occurred during the paste operation:
+{0}</value>
+	</data>
+	<data name="Error_IntersectsMergedCells_Message" xml:space="preserve">
+		<value>The operation cannot be performed because the selection intersects with a merged cell.</value>
+	</data>
+	<data name="CopyError_InvalidSelection_Message" xml:space="preserve">
+		<value>The operation cannot be performed on the current selection. If there are multiple selections ensure they form a rectangular region and do not overlap.</value>
+	</data>
+	<data name="Error_InvalidProtectedWorksheetChange_Message" xml:space="preserve">
+		<value>The cell you're trying to change is on a protected sheet.</value>
+	</data>
+	<data name="Error_NoSingleAllowedEditRange_Message" xml:space="preserve">
+		<value>Some of the cells you are trying to change are password protected but no single password will allow access to all of the cells.</value>
+	</data>
+	<data name="Error_InvalidArrayFormulaLockedState_Message" xml:space="preserve">
+		<value>Cannot enter an array formula into a range of cells which are not all locked or unlocked.</value>
+	</data>
+	<data name="Error_ChangePartOfDataTableError_Message" xml:space="preserve">
+		<value>Cannot change part of a data table.</value>
+	</data>
+	<data name="Error_DeletingLockedColumnCells_Message" xml:space="preserve">
+		<value>You are trying to delete a column that contains a locked cell. Locked cells cannot be deleted while the worksheet is protected.</value>
+	</data>
+	<data name="Error_DeletingLockedRowCells_Message" xml:space="preserve">
+		<value>You are trying to delete a row that contains a locked cell. Locked cells cannot be deleted while the worksheet is protected.</value>
+	</data>
+	<data name="Undo_Bold" xml:space="preserve">
+		<value>Bold</value>
+	</data>
+  <data name="Undo_Italic" xml:space="preserve">
+		<value>Italic</value>
+	</data>
+  <data name="Undo_Strikethrough" xml:space="preserve">
+		<value>Strikethrough</value>
+	</data>
+  <data name="Undo_WrapText" xml:space="preserve">
+		<value>Wrap Text</value>
+	</data>
+  <data name="Undo_Filter" xml:space="preserve">
+		<value>Filter</value>
+	</data>
+  <data name="Undo_FormatCells" xml:space="preserve">
+		<value>Format Cells</value>
+	</data>
+  <data name="Undo_FontSize" xml:space="preserve">
+		<value>Font Size</value>
+	</data>
+  <data name="Undo_CenterAlignment" xml:space="preserve">
+		<value>Center Alignment</value>
+	</data>
+  <data name="Undo_Group" xml:space="preserve">
+		<value>Group</value>
+	</data>
+  <data name="Undo_LeftAlignment" xml:space="preserve">
+		<value>Left Alignment</value>
+	</data>
+  <data name="Undo_RightAlignment" xml:space="preserve">
+		<value>Right Alignment</value>
+	</data>
+  <data name="Undo_Sort" xml:space="preserve">
+		<value>Sort</value>
+	</data>
+  <data name="Undo_Style" xml:space="preserve">
+		<value>Style</value>
+	</data>
+  <data name="Undo_JustifyAlignment" xml:space="preserve">
+		<value>Justify Alignment</value>
+	</data>
+  <data name="Undo_TopAlignment" xml:space="preserve">
+		<value>Top Alignment</value>
+	</data>
+  <data name="Undo_BottomAlignment" xml:space="preserve">
+		<value>Bottom Alignment</value>
+	</data>
+  <data name="Undo_MiddleAlignment" xml:space="preserve">
+		<value>Center Vertically Alignment</value>
+	</data>
+  <data name="Undo_Font" xml:space="preserve">
+		<value>Font</value>
+	</data>
+  <data name="Undo_Underline" xml:space="preserve">
+		<value>Underline</value>
+	</data>
+  <data name="Undo_Borders" xml:space="preserve">
+		<value>Borders</value>
+	</data>
+  <data name="Undo_Delete" xml:space="preserve">
+		<value>Delete</value>
+	</data>
+  <data name="Undo_InsertCells" xml:space="preserve">
+		<value>Insert Cells</value>
+	</data>
+  <data name="Undo_InsertColumns" xml:space="preserve">
+		<value>Insert Columns</value>
+	</data>
+	<data name="Undo_InsertRows" xml:space="preserve">
+		<value>Insert Rows</value>
+	</data>
+	<data name="Undo_ResetOptions" xml:space="preserve">
+		<value>Reset Options</value>
+	</data>
+	<data name="Undo_View" xml:space="preserve">
+		<value>View Change</value>
+	</data>
+	<data name="LE_MissingTemplatePart" xml:space="preserve">
+    <value>A template part with a name of '{0}' and type '{1}' is required in the '{2}' template.</value>
+  </data>
+  <data name="ToolTip_FormulaBarCancelButton" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="ToolTip_FormulaBarEnterButton" xml:space="preserve">
+    <value>Enter</value>
+  </data>
+  <data name="ToolTip_FormulaBarNameBox" xml:space="preserve">
+    <value>Name Box</value>
+  </data>
+  <data name="ToolTip_FormulaBarTextEditor" xml:space="preserve">
+    <value>Formula Bar</value>
+  </data>
+	<data name="Undo_Paste">
+		<value>Paste</value>
+	</data>
+	<data name="MenuItem_Cut">
+		<value>Cut</value>
+	</data>
+	<data name="MenuItem_Copy">
+		<value>Copy</value>
+	</data>
+	<data name="MenuItem_Paste">
+		<value>Paste</value>
+	</data>
+	<data name="MenuItem_InsertWorksheets">
+		<value>Insert</value>
+	</data>
+	<data name="MenuItem_DeleteWorksheets">
+		<value>Delete</value>
+	</data>
+	<data name="MenuItem_RenameWorksheet">
+		<value>Rename</value>
+	</data>
+	<data name="MenuItem_SelectAllWorksheets">
+		<value>Select All Sheets</value>
+	</data>
+	<data name="MenuItem_UnselectWorksheets">
+		<value>Ungroup Sheets</value>
+	</data>
+	<data name="MenuItem_InsertCells">
+		<value>Insert</value>
+	</data>
+	<data name="MenuItem_InsertCells_ShiftRight">
+		<value>Shift cells right</value>
+	</data>
+	<data name="MenuItem_InsertCells_ShiftDown">
+		<value>Shift cells down</value>
+	</data>
+	<data name="MenuItem_InsertCells_Row">
+		<value>Entire row</value>
+	</data>
+	<data name="MenuItem_InsertCells_Column">
+		<value>Entire column</value>
+	</data>
+	<data name="MenuItem_DeleteCells">
+		<value>Delete</value>
+	</data>
+	<data name="MenuItem_DeleteCells_ShiftLeft">
+		<value>Shift cells left</value>
+	</data>
+	<data name="MenuItem_DeleteCells_ShiftUp">
+		<value>Shift cells up</value>
+	</data>
+	<data name="MenuItem_DeleteCells_Row">
+		<value>Entire row</value>
+	</data>
+	<data name="MenuItem_DeleteCells_Column">
+		<value>Entire column</value>
+	</data>
+	<data name="MenuItem_ClearContents">
+		<value>Clear Contents</value>
+	</data>
+	<data name="MenuItem_Insert">
+		<value>Insert</value>
+	</data>
+	<data name="MenuItem_Delete">
+		<value>Delete</value>
+	</data>
+	<data name="MenuItem_Hide">
+		<value>Hide</value>
+	</data>
+	<data name="MenuItem_Unhide">
+		<value>Unhide</value>
+	</data>
+	<data name="MenuItem_AutoFit_Rows">
+		<value>AutoFit Row Height</value>
+	</data>
+	<data name="MenuItem_AutoFit_Columns">
+		<value>AutoFit Column Width</value>
+	</data>
+	<data name="MenuItem_OpenHyperlink">
+		<value>Open Hyperlink</value>
+	</data>
+	<data name="MenuItem_RemoveHyperlink">
+		<value>Remove Hyperlink</value>
+	</data>
+	<data name="MenuItem_RemoveHyperlinks">
+		<value>Remove Hyperlinks</value>
+	</data>
+	<data name="DefaultHyperlinkToolTip">
+		<value>{0} - Click once to follow. Click and hold to select this cell.</value>
+	</data>
+	<data name="InvalidDateTimeToolTip">
+		<value>Dates and times that are negative or too large display as #####.</value>
+	</data>
+	<data name="DefaultValidationInformationMessage">
+		<value>The value you entered is not valid.
+
+A user has restricted values that can be entered into this cell.</value>
+	</data>
+	<data name="DefaultValidationWarningMessage">
+		<value>The value you entered is not valid.
+
+A user has restricted values that can be entered into this cell.
+
+Continue?</value>
+	</data>
+	<data name="DefaultValidationStopMessage">
+		<value>The value you entered is not valid.
+
+A user has restricted values that can be entered into this cell.</value>
+	</data>
+	<data name="CustomValidationInformationMessage">
+		<value>{0}</value>
+	</data>
+	<data name="CustomValidationWarningMessage">
+		<value>{0}
+
+Continue?</value>
+	</data>
+	<data name="CustomValidationStopMessage">
+		<value>{0}</value>
+	</data>
+</root>

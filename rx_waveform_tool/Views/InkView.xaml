@@ -1,0 +1,69 @@
+﻿<UserControl
+             x:Class="RxWfTool.Views.InkView" 
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:ig="http://schemas.infragistics.com/xaml" 
+             xmlns:igWPF="http://schemas.infragistics.com/xaml/wpf"
+             xmlns:rx="clr-namespace:RxWfTool.Helpers"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="600">
+        
+    <Grid Margin="0,5,2,5" >
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="120"/>
+            <ColumnDefinition Width="70"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="Ink Name"/>
+        <TextBox   Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Width="140" HorizontalAlignment="Left" Text="{Binding Name, Mode=TwoWay}" />
+
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="Color Code" VerticalAlignment="Center"/>
+        <igWPF:XamComboEditor Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Width="140" 
+                    HorizontalAlignment="Left"
+                    ItemsSource="{Binding ColorCodeList}"
+                    Value="{Binding ColorCode}"
+                    DisplayMemberPath="Display"
+                    ValuePath="Value" 
+                    DropDownResizeMode="None"
+                    />
+
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="Description" />
+        <TextBox   Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="10" Text="{Binding Description, Mode=TwoWay}" />
+
+        <TextBlock Grid.Row="3" Grid.Column="0" Text="Color" />
+        <ig:XamColorPicker  Grid.Row="3" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Top" SelectedColor="{Binding ColorRGB, Mode=TwoWay}" />
+        
+        <TextBlock   Grid.Row="3" Grid.Column="2" Text="Volume" Margin="5,0"/>
+        <rx:RxNumBox Grid.Row="3" Grid.Column="3" Text="{Binding DropletVolume}" Width="70"/>
+
+        <TextBlock   Grid.Row="3" Grid.Column="4" Text="Viscosity" Margin="5,0"/>
+        <rx:RxNumBox Grid.Row="3" Grid.Column="5" Text="{Binding Viscosity}" Width="70"/>
+        <TextBlock   Grid.Row="3" Grid.Column="6" Text="Meniscus" Margin="5,0"/>
+        <rx:RxNumBox Grid.Row="3" Grid.Column="7" Text="{Binding Meniscus}" Width="70"/>
+
+        <TextBlock   Grid.Row="4" Grid.Column="0" Text="Temperature [°C]" />
+        <rx:RxNumBox Grid.Row="4" Grid.Column="1" Text="{Binding Temp}" />
+        <TextBlock   Grid.Row="4" Grid.Column="2" Text="Max" Margin="5,0"/>
+        <rx:RxNumBox Grid.Row="4" Grid.Column="3" Text="{Binding TempMax}" Width="70"/>
+        <TextBlock   Grid.Row="4" Grid.Column="4" Text="Density" Margin="5,0"/>
+        <rx:RxNumBox Grid.Row="4" Grid.Column="5" Text="{Binding Density}" Width="70"/>
+
+
+    </Grid>
+</UserControl>

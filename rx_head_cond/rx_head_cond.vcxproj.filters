@@ -1,0 +1,123 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source files">
+      <UniqueIdentifier>{91a06b49-b51e-4a64-8fc7-ba70d6249e4f}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header files">
+      <UniqueIdentifier>{6c804560-e10e-4d57-a0e9-4e7fcfbefe3d}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource files">
+      <UniqueIdentifier>{c7a66319-d271-4096-a81d-a93fd0805f61}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+    <Filter Include="VisualGDB settings">
+      <UniqueIdentifier>{06aff6a4-5287-4652-9b9c-fbb6d128c30c}</UniqueIdentifier>
+      <Extensions>*.vgdbsettings</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="rx_head_cond-Debug.vgdbsettings">
+      <Filter>VisualGDB settings</Filter>
+    </None>
+    <None Include="rx_head_cond-Release.vgdbsettings">
+      <Filter>VisualGDB settings</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="source\average.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\debug_printf.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\eeprom.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\i2c.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\i2c_bitbang.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\iomux.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\main.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\pdl_user.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\pres.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\pump_ctrl.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\pumptime.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\temp_ctrl.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\uart.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\watchdog.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\work_flash_operation.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="source\average.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\debug_printf.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\eeprom.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\i2c.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\i2c_bitbang.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\iomux.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\main.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\pres.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\pump_ctrl.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\pumptime.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\temp_ctrl.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\uart.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\version.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\watchdog.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\work_flash_operation.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

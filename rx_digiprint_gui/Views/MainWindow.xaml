@@ -1,0 +1,217 @@
+﻿<Window x:Class="RX_DigiPrint.Views.MainWindow"
+        xmlns:ig="http://schemas.infragistics.com/xaml"
+        xmlns:igWPF="http://schemas.infragistics.com/xaml/wpf"
+		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
+        xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
+        xmlns:views="clr-namespace:RX_DigiPrint.Views"
+        xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+		xmlns:views_ml="clr-namespace:RX_DigiPrint.Views.MiniLabelView"
+		xmlns:views_dp="clr-namespace:RX_DigiPrint.Views.DP803View"
+		xmlns:views_tex="clr-namespace:RX_DigiPrint.Views.TexView"
+		xmlns:views_tt="clr-namespace:RX_DigiPrint.Views.TestTableView"
+		xmlns:views_cleaf="clr-namespace:RX_DigiPrint.Views.CleafView"
+        xmlns:views_pq="clr-namespace:RX_DigiPrint.Views.PrintQueueView"
+		xmlns:views_ps="clr-namespace:RX_DigiPrint.Views.PrintSystemView"
+		xmlns:views_rip="clr-namespace:rx_rip_gui.Views;assembly=rx_rip_gui"
+		xmlns:views_settings="clr-namespace:RX_DigiPrint.Views.Settings"     
+        xmlns:converters="clr-namespace:RX_DigiPrint.Converters"
+        xmlns:Custom="http://infragistics.com/Windows" 
+        mc:Ignorable="d"
+        d:DesignWidth="1200"
+        WindowStyle="None"
+        WindowState="Maximized"
+        ResizeMode="NoResize"
+        Loaded="Window_Loaded"
+        Closed="Window_Closed"
+        x:Name="Main"
+        >
+    <!--
+        Height="600"
+        Width="800"
+        WindowState="Maximized"
+        WindowStartupLocation="CenterScreen"
+    -->
+    <!-- 
+    Resolutions:
+    1. 800x600
+    2. 1280x800
+    3. 1440x900
+    4. 1680x1050
+    5. 1920x1200
+    -->
+
+    <Window.Resources>
+        <!--
+        <Style x:Key="{x:Type rx:RxTabItem}" TargetType="{x:Type rx:RxTabItem}" >
+            <Setter Property="Height" Value="50" />
+        </Style>
+        -->
+    </Window.Resources>
+
+  <!--  <Grid DataContext="{StaticResource Windows1ViewModel}"> -->
+    <Grid>
+            <Grid.Background>
+            <ImageBrush ImageSource="/RX_DigiPrint;component/Resources/Bitmaps/radex_bg.jpg" Stretch="Uniform" AlignmentX="Right"/>
+        </Grid.Background>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+        
+        <Grid Grid.RowSpan="3" Margin="0,0,100,8" Height="30" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+            <Image Source="..\Resources\Bitmaps\Mouvent_Logo.png" />
+        <!--  <TextBlock Text="A Bobst Group company  " VerticalAlignment="Bottom" HorizontalAlignment="Right" FontSize="16"/> -->
+        </Grid>
+        
+        <!-- ROW 0: Status line _______________________________________________________________________________________-->
+        <!--
+        <Grid>
+            <TextBlock 
+				Grid.Column="0" 
+				Text="RX DigiPrint" 
+				Foreground="{DynamicResource RX.DarkGreen}" 
+				FontSize="20"
+				HorizontalAlignment="Left"
+            />
+            <TextBlock x:Name="PrinterName" DataContext="{Binding ElementName=Main}" Text="{Binding Name}" HorizontalAlignment="Center" FontSize="20"/>
+        </Grid>
+        -->
+        <TextBlock x:Name="PrinterName" Text="{Binding Host_Name}" HorizontalAlignment="Right" Margin="0,10,100,0" FontSize="20" FontWeight="SemiBold"/>
+
+        <!-- ROW 0: Main Screen _______________________________________________________________________________________-->
+        <Grid Grid.Row="0">
+            <Custom:XamTabControl 
+				HorizontalAlignment="Stretch" 
+				VerticalAlignment="Stretch"
+                x:Name="TabCtrl"
+                >
+                <Custom:XamTabControl.Background>
+                    <SolidColorBrush Color="#40FFFFFF" />
+                </Custom:XamTabControl.Background>
+
+                <rx:RxTabItem x:Name="TabPrintQueue" Header="Print Queue" >
+                    <views_pq:PrintQueueView x:Name="PrintQueueView" Loaded="PrintQueueView_Loaded"/>
+                </rx:RxTabItem>
+
+                <rx:RxTabItem x:Name="TabMiniLabel" Header="Label Press" >
+                    <views_ml:MiniLabelView/>
+                </rx:RxTabItem>
+
+                <rx:RxTabItem x:Name="TabDP803" Header="DP 803" >
+                    <views_dp:DP803View/>
+                </rx:RxTabItem>
+
+                <rx:RxTabItem x:Name="TabTex" Header="Textile Press">
+                    <views_tex:TexView/>
+                </rx:RxTabItem>
+
+                <rx:RxTabItem x:Name="TabTestTable" Header="Test Table">
+                    <views_tt:TestTableView/>
+                </rx:RxTabItem>
+
+                <rx:RxTabItem x:Name="TabCleaf" Header="CLEAF" >
+                    <views_cleaf:CleafView/>
+                </rx:RxTabItem>
+
+                <rx:RxTabItem x:Name="TabEvents" Header="Events">
+                    <Grid>
+                        <views:EventView x:Name="Events"/>
+                    </Grid>
+                </rx:RxTabItem>
+
+                <rx:RxTabItem x:Name="TabLog" Header="Log">
+                    <Grid>
+                        <views:LogView x:Name="Log"/>
+                    </Grid>
+                </rx:RxTabItem>
+
+                <rx:RxTabItem x:Name="Network" Header="Network">
+                    <Grid>
+                        <views:NetworkView x:Name="NetworkView"/>
+                    </Grid>
+                </rx:RxTabItem>
+                
+                <rx:RxTabItem x:Name="TabRip" Header="Rip" Visibility="Collapsed">
+                <!--    <views_rip:RipView Loaded="RipView_Loaded"/> -->
+                </rx:RxTabItem>
+                
+                <rx:RxTabItem x:Name="TabPrintSystem" Header="Print System">
+                    <Grid>
+                        <views_ps:PrintSystemView x:Name="PrintSystemView"/>
+                    </Grid>
+                </rx:RxTabItem>
+
+            </Custom:XamTabControl>
+            
+            <!-- NO Connection _______________________________________________________________________-->
+            <TextBlock x:Name="MainNotConnected"
+                Grid.Row="1" 
+                Text="MAIN-CTRL NOT CONNECTED" 
+                FontSize="80" 
+                HorizontalAlignment="Center" 
+                VerticalAlignment="Center" 
+                Foreground="Red" 
+                FontWeight="Bold"
+                Visibility="{Binding Connected, Converter={StaticResource IntToInVisible_Converter}}"
+                RenderTransformOrigin="0.5,0.5" >
+                <TextBlock.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform/>
+                        <SkewTransform/>
+                        <RotateTransform Angle="-20"/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+                </TextBlock.RenderTransform>
+            </TextBlock>
+
+        </Grid>
+        
+        <!-- ROW 1: Status line _______________________________________________________________________________________-->
+        <StackPanel 
+            x:Name="Status"
+            Grid.Row="1" 
+            Orientation="Horizontal" 
+            >
+            <TextBlock Text="User" Width="50" VerticalAlignment="Center"/>
+            <igWPF:XamComboEditor x:Name="User"
+                Width="100"
+                VerticalAlignment="Center"
+                Value="{Binding UserType}"
+                DisplayMemberPath="Display"
+                ValuePath="Value"
+                PreviewMouseDown="User_PreviewMouseDown"
+                />
+            <StackPanel x:Name="BlueTooth" Orientation="Horizontal">
+                <common:RxButton Height="40" Margin="20,0,0,0" Click="Bluetooth_Clicked">
+                    <Image x:Name="Bluetooth_Img" Source="{Binding IsConnected, Converter={StaticResource BluetoothImg_Converter}}" />
+                </common:RxButton>
+                <TextBlock Text="{Binding UserStr}" VerticalAlignment="Center" FontSize="{StaticResource FontSize}" Margin="10,0"/>
+            </StackPanel>
+        </StackPanel>
+        <!-- ROW 1: Status line _______________________________________________________________________________________-->
+        <StackPanel 
+            Grid.Row="1" 
+            Orientation="Horizontal"
+            HorizontalAlignment="Right"
+            Margin="0,2,0,0"
+            >
+            <rx_uc:PrinterImage x:Name="PrinterStatus" />
+        </StackPanel>
+        
+        <!-- Settings -->
+        <views_settings:Settings
+            x:Name="Settings"
+            Grid.Row="0"
+            Grid.RowSpan="3"
+            HorizontalAlignment="Right"
+            />
+
+        <Grid Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Top" Width="50" MouseDown="Settings_Clicked" Margin="0,5,0,0">
+            <TextBlock Text="" FontFamily="Segoe MDL2 Assets" FontSize="30" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="{DynamicResource RadioButton.Disabled.Glyph}" />
+        </Grid>
+    </Grid>
+</Window>

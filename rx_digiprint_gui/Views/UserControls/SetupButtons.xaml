@@ -1,0 +1,61 @@
+﻿<UserControl x:Class="RX_DigiPrint.Views.UserControls.SetupButtons"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d"
+             d:DesignHeight="70" 
+             d:DesignWidth="900"
+             >
+    <Grid>
+        <StackPanel x:Name="ButtonsPanel" Orientation="Horizontal" Background="{DynamicResource Brush03}" Height="auto">
+
+            <common:RxButton x:Name="CMD_WEBIN"  Click="WebIn_Clicked" IsVisibleChanged="WebIn_IsVisibleChanged">
+                <Image Source="../../Resources/Bitmaps/WebIn.ico"/>
+            </common:RxButton>
+
+            <common:RxButton  Grid.Row="1" Grid.Column="0" x:Name="CMD_JOG_BWD" 
+                                      PreviewMouseDown="Jog_PreviewMouseDown" 
+                                      PreviewMouseUp="Jog_PreviewMouseUp"
+                                      >
+                <Image Source="../../Resources/Bitmaps/Left.ico"/>
+            </common:RxButton>
+
+            <common:RxButton  Grid.Row="1" Grid.Column="1" x:Name="CMD_JOG_FWD" 
+                                      PreviewMouseDown="Jog_PreviewMouseDown" 
+                                      PreviewMouseUp="Jog_PreviewMouseUp"
+                                      >
+                <Image Source="../../Resources/Bitmaps/Right.ico"/>
+            </common:RxButton>
+
+        <!--
+            <common:RxButton Click="Clean_Clicked" ToolTip="Clean" >
+                <Image Source="../../Resources/Bitmaps/clean.ico"/>
+            </common:RxButton>
+        -->
+            <common:RxButton Click="Washing_Clicked" x:Name="Button_Wash">
+                <StackPanel>
+                    <TextBlock Text="Belt"      HorizontalAlignment="Center"/>
+                    <TextBlock Text="Washing"   HorizontalAlignment="Center"/>
+                </StackPanel>
+            </common:RxButton>
+            
+            <!--
+            <common:RxButton Click="Warmup_Clicked">
+                <StackPanel>
+                    <TextBlock Text="Belt"      HorizontalAlignment="Center"/>
+                    <TextBlock Text="Warmup"    HorizontalAlignment="Center"/>
+                </StackPanel>
+            </common:RxButton>
+            -->
+            <common:RxButton Click="Gluing_Clicked" x:Name="Button_Glue">
+                <StackPanel>
+                    <TextBlock Text="Belt"      HorizontalAlignment="Center"/>
+                    <TextBlock Text="Gluing"    HorizontalAlignment="Center"/>
+                </StackPanel>
+            </common:RxButton>
+
+        </StackPanel>
+    </Grid>
+</UserControl>

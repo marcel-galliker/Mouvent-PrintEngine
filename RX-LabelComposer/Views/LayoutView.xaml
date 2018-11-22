@@ -1,0 +1,226 @@
+﻿<UserControl x:Class="RX_LabelComposer.Views.LayoutView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:igDP="http://infragistics.com/DataPresenter"
+        xmlns:igWPF="http://schemas.infragistics.com/xaml/wpf"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:common="clr-namespace:RX_LabelComposer.Common"
+        xmlns:models="clr-namespace:RX_LabelComposer.Models"
+        xmlns:views="clr-namespace:RX_LabelComposer.Views"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+        mc:Ignorable="d"
+        d:DesignHeight="400" 
+        d:DesignWidth="700"
+        Loaded="Page_Loaded"
+        Unloaded="Page_Unloaded"
+	  >
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+<!--                <ResourceDictionary Source="/Resources/styles/DataGridNo.xaml" /> -->
+                <ResourceDictionary Source="/RX_LabelComposer;component/Resources/Styles/RX_Styles.xaml" />
+                <ResourceDictionary Source="/RX_LabelComposer;component/Converters/Converters.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <DockPanel LastChildFill="True">
+        <DockPanel
+            DockPanel.Dock="Right"
+            Width="300">
+            <DockPanel x:Name="LayoutProperties"
+                       LastChildFill="True">
+
+                <Expander   x:Name="LabelProperties"
+                            BorderBrush="Gray"
+                            BorderThickness="2"
+                            DockPanel.Dock="Top"
+                            Expanded="LabelProperties_Expanded"
+                            Header="Label">
+                    <views:LabelPropertiesView DataContext="{Binding}"/>
+                </Expander>
+
+                <Expander   x:Name="BoxProperties"
+                            BorderThickness="2"
+                            BorderBrush="Gray"
+                            DockPanel.Dock="Bottom"
+                            ExpandDirection="Up"
+                            Expanded="BoxProperties_Expanded"
+                            Header="Box Properties">
+                    <views:BoxPropertiesView    x:Name="BoxPropertiesView"
+                                                DataContext="{Binding Path=ActiveBox}"/>
+                </Expander>
+
+                <TabControl x:Name="TabCtrl"
+                            DockPanel.Dock="Top">
+                    <TabItem Header="Boxes">
+                        <Grid VerticalAlignment="Stretch">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <StackPanel x:Name="BoxListToolbar" Orientation="Horizontal">
+                                <Button Command="{Binding BoxInsBeforeCommand}">
+                                    <Image Source="../Resources/Bitmaps/FieldAddBefore.bmp"/>
+                                </Button>
+                                <Button Command="{Binding BoxInsAfterCommand}">
+                                    <Image Source="../Resources/Bitmaps/FieldAddAfter.bmp"/>
+                                </Button>
+                                <Button Command="{Binding BoxRemoveCommand}">
+                                    <Image Source="../Resources/Bitmaps/FieldDelete.bmp"/>
+                                </Button>
+                            </StackPanel>
+                            <igWPF:XamDataGrid 
+                    		    x:Name="BoxDefGrid"
+                                Grid.Row="1"
+                                Theme="Metro"
+                    		    DataSource="{Binding BoxList}"
+                    		    GroupByAreaLocation="None"
+                    		    RecordActivated="BoxDefGrid_RecordActivated" 
+                                IsNestedDataDisplayEnabled="False" 
+                                ScrollViewer.VerticalScrollBarVisibility="Auto" 
+                                ScrollViewer.HorizontalScrollBarVisibility="Hidden" 
+                                IsManipulationEnabled="False"
+                                >
+
+                                <igWPF:XamDataGrid.FieldLayoutSettings>
+                                    <igWPF:FieldLayoutSettings AutoGenerateFields="False" MaxSelectedRecords="1" SelectionTypeRecord="Single">
+                                    </igWPF:FieldLayoutSettings>
+                                </igWPF:XamDataGrid.FieldLayoutSettings>
+                                <igWPF:XamDataGrid.FieldLayouts>
+                                    <igWPF:FieldLayout>
+
+                                        <!--
+                                        <igWPF:Field Name="No" Label="#"  Width="auto">
+                                            <igWPF:Field.Settings>
+                                                <igWPF:FieldSettings EditorType="{x:Type igWPF:XamComboEditor}" AllowEdit="False" CellClickAction="SelectRecord"/>
+                                            </igWPF:Field.Settings>
+                                        </igWPF:Field>
+                                        -->
+
+                                        <igWPF:Field Name="Type" Label="Type"  Width="auto">
+                                            <igWPF:Field.Settings>
+                                                <igWPF:FieldSettings EditorType="{x:Type igWPF:XamComboEditor}" AllowEdit="False" CellClickAction="SelectRecord"/>
+                                            </igWPF:Field.Settings>
+                                        </igWPF:Field>
+
+                                        <igWPF:Field Name="PosX" Label="PosX"  Width="auto">
+                                            <igWPF:Field.Settings>
+                                                <igWPF:FieldSettings AllowEdit="False"/>
+                                            </igWPF:Field.Settings>
+                                        </igWPF:Field>
+
+                                        <igWPF:Field Name="PosY" Label="PosY"  Width="auto">
+                                            <igWPF:Field.Settings>
+                                                <igWPF:FieldSettings AllowEdit="False"/>
+                                            </igWPF:Field.Settings>
+                                        </igWPF:Field>
+
+                                        <igWPF:Field Name="Content" Label="Content"  Width="*">
+                                            <igWPF:Field.Settings>
+                                                <igWPF:FieldSettings AllowEdit="False"/>
+                                            </igWPF:Field.Settings>
+                                        </igWPF:Field>
+                                    </igWPF:FieldLayout>
+                                </igWPF:XamDataGrid.FieldLayouts>
+                            </igWPF:XamDataGrid>
+
+                        </Grid>
+                    </TabItem>
+
+                    <TabItem x:Name="TabItem_Data"  Header="Data">
+                        <Frame Content="{Binding FieldsPage}" NavigationUIVisibility="Hidden" />
+                    </TabItem>
+
+                    <TabItem x:Name="TabItem_Counter"  Header="Counter">
+                        <views:CountersPage x:Name="CountersPage"/>
+                    </TabItem>
+                </TabControl>
+            </DockPanel>
+        </DockPanel>
+
+        <!-- Label Preview _______________________________________ -->
+        <GroupBox
+            BorderThickness="2" 
+            BorderBrush="Gray"
+            DockPanel.Dock="Left"
+            Header="Label Preview"
+            Height="{Binding ElementName=LayoutProperties, Path=ActualHeight}">
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="20" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <!-- toolbar -->
+                <StackPanel Orientation="Horizontal" Grid.ColumnSpan="2">
+                    <StackPanel x:Name="ZoomToolbar" Orientation="Horizontal">
+                        <ToggleButton x:Name="Res_1_2"          Content="1:2"   Click="Res_1_2_Click"   Style="{StaticResource RX_ToggleButton}" />
+                        <ToggleButton x:Name="Res_1_1"          Content="1:1"   Click="Res_1_1_Click"   Style="{StaticResource RX_ToggleButton}"/>
+                        <ToggleButton x:Name="Res_2_1"          Content="2:1"   Click="Res_2_1_Click"   Style="{StaticResource RX_ToggleButton}"/>
+                        <ToggleButton x:Name="Res_pixel"        Content="Pixel" Click="Res_pixel_Click" Style="{StaticResource RX_ToggleButton}"/>
+                    </StackPanel>
+                    <ToggleButton x:Name="ShowBoxBorders"   Content="c"     FontFamily="Webdings" Click="ShowBoxBorders_Click" Style="{StaticResource RX_ToggleButton}"/>
+                </StackPanel>
+                <Canvas 
+                    x:Name="RulerH"
+                    Grid.Row="1" 
+                    Grid.Column="1"
+                    Background="GhostWhite"
+                    >
+                    <!--Background="#FF00AADE" -->
+                </Canvas>
+                <Canvas 
+                    x:Name="RulerV"
+                    Grid.Row="2" 
+                    Grid.Column="0" 
+                    Background="GhostWhite"
+                    >
+                </Canvas>
+                <ScrollViewer 
+                    x:Name="LabelFrame"
+                    Grid.Row="2"
+                    Grid.Column="1"
+                    HorizontalAlignment="Stretch"      
+                    VerticalAlignment="Stretch"
+                    VerticalScrollBarVisibility="Visible"
+                    HorizontalScrollBarVisibility="Visible"
+                    ScrollChanged="LabelFrame_ScrollChanged"
+                    Background="Beige"
+                    >
+
+                    <!--
+                    <ScrollViewer.Background>
+                        <LinearGradientBrush EndPoint="0.5,1" MappingMode="RelativeToBoundingBox" StartPoint="0.5,0">
+                            <GradientStop Color="#FFE6E6E6"/>
+                            <GradientStop Color="#FFBBBBBB" Offset="1"/>
+                        </LinearGradientBrush>
+                    </ScrollViewer.Background>
+                    -->
+                    <common:LabelArea
+                        x:Name="LabelAera"
+                        Background="AliceBlue" 
+                        HorizontalAlignment="Left" 
+                        VerticalAlignment="Top"
+                        Width="{Binding WebWidthPx}"
+                        Height="{Binding LabelBmpHeight}"
+                        >
+                        <!-- Width ="{Binding ElementName=VariableDataImg, Path=ActualWidth}" -->
+
+                        <Canvas x:Name="Images"/>
+
+
+                    </common:LabelArea>
+                </ScrollViewer>
+            </Grid>
+        </GroupBox>
+    </DockPanel>
+</UserControl>

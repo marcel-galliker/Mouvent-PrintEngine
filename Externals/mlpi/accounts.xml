@@ -1,0 +1,339 @@
+<?xml version="1.0"?>
+<!--
+
+
+This is the template manifest "accounts.xml".
+
+
+Attention:  + This 'accounts.xml' maybe contains permissions which are not desired by the system integrator and
+              the customer!
+
+            + Do not leave this original 'accounts.xml' without desired adaption, particularly the empty user,
+              on the OEM partition of the control!
+
+            + Do not modify the 'accounts.xml' on the SYSTEM partition of the control!
+
+
+Notes:      + This 'accounts.xml' is designated for for testing and individually adaption by the system integrator.
+
+            + Store an adapted version of this 'accounts.xml' on the OEM partition of the control.
+
+            + Take a complete copy of the account 'administrator' or of account of the empty user and adapt the
+              user name, the hash value and the permissions regarding your requirements.
+
+            + The tool ..\MLPI-SDK\mlpiCore\bin\hashmaker.exe supports you on generating hash values based on
+              your own pass phrase.
+
+            + The adaption of the 'accounts.xml' will be supported by the XML scheme file 'accounts.xsd'.
+
+            + The user and the pass phrase may not contains spaces.
+
+            + Use a safe and secred pass phrase, use a hash instead a password.
+
+            + Do not delete or change the permissions and hash values of following accounts because otherwise the
+              regarding functionality could not guaranteed.
+
+              ... for IndraWorks / IndraLogic:
+              - indraworks
+              - indraworksonline
+              - indraworksadministrator
+
+              ... for WinView (MlcTrending):
+              - MlcTrending
+
+            + Validate your adapted 'accounts.xml' with a proper tool (e.g. http://validator.w3.org/).
+
+            + Please mind the notes of the MLPI-SDK regarding accounts and permissions.
+
+-->
+<accounts version="2" type="mlpi" xmlns="http://www.boschrexroth.com/mlpi/accounts.xsd">
+  <account user="administrator" hash="39bbd7d5a1c56d847b6b38a2e294a402d61089cf37408baf4e4e96ea6605fc84bc1cc2fda96fd2fa6352521dd1ed25e293ac152cce66f6627da8a557f2a0f4f7" userMaxNumber="1" protection="2">
+    <library name="mlpiApiLib">
+      <permission name="MLPI_APILIB_PERMISSION_ALL">true</permission>
+    </library>
+    <library name="mlpiParameterLib">
+      <permission name="MLPI_PARAMETERLIB_PERMISSION_ALL">true</permission>
+    </library>
+    <library name="mlpiSystemLib">
+      <permission name="MLPI_SYSTEMLIB_PERMISSION_ALL">true</permission>
+    </library>
+    <library name="mlpiIoLib">
+      <permission name="MLPI_IOLIB_PERMISSION_ALL">true</permission>
+    </library>
+    <library name="mlpiMotionLib">
+      <permission name="MLPI_MOTIONLIB_PERMISSION_ALL">true</permission>
+    </library>
+    <library name="mlpiTaskLib">
+      <permission name="MLPI_TASKLIB_PERMISSION_ALL">true</permission>
+    </library>
+    <library name="mlpiLogicLib">
+      <permission name="MLPI_LOGICLIB_PERMISSION_ALL">true</permission>
+    </library>
+    <library name="mlpiWatchdogLib">
+      <permission name="MLPI_WATCHDOGLIB_PERMISSION_ALL">true</permission>
+    </library>
+    <library name="mlpiRobotLib">
+      <permission name="MLPI_ROBOTLIB_PERMISSION_ALL">true</permission>
+    </library>
+    <library name="mlpiTraceLib">
+      <permission name="MLPI_TRACELIB_PERMISSION_ALL">true</permission>
+    </library>
+    <library name="mlpiContainerLib">
+      <permission name="MLPI_CONTAINERLIB_PERMISSION_ALL">true</permission>
+    </library>
+  </account>
+  <account user="indraworks" hash="a7e71317147b07473490b3de8e8357a3bf9e430b6a8f42196903e6eebb32b0525354e88649187a9d23a94c09fb3a4f3674151005b474580cf8b2f20c2ab18105">
+    <library name="mlpiApiLib">
+      <permission name="MLPI_APILIB_PERMISSION_ALL">true</permission>
+      <permission name="MLPI_APILIB_PERMISSION_CONNECTION_CLOSE">false</permission>
+    </library>
+    <library name="mlpiParameterLib">
+      <permission name="MLPI_PARAMETERLIB_PERMISSION_ALL">true</permission>
+    </library>
+    <library name="mlpiSystemLib">
+      <permission name="MLPI_SYSTEMLIB_PERMISSION_ALL">true</permission>
+    </library>
+    <library name="mlpiIoLib">
+      <permission name="MLPI_IOLIB_PERMISSION_ALL">true</permission>
+    </library>
+    <library name="mlpiMotionLib">
+      <permission name="MLPI_MOTIONLIB_PERMISSION_ALL">true</permission>
+    </library>
+    <library name="mlpiTaskLib">
+      <permission name="MLPI_TASKLIB_PERMISSION_ALL">true</permission>
+    </library>
+    <library name="mlpiLogicLib">
+      <permission name="MLPI_LOGICLIB_PERMISSION_ALL">true</permission>
+    </library>
+    <library name="mlpiWatchdogLib">
+      <permission name="MLPI_WATCHDOGLIB_PERMISSION_ALL">true</permission>
+    </library>
+    <library name="mlpiRobotLib">
+      <permission name="MLPI_ROBOTLIB_PERMISSION_ALL">true</permission>
+    </library>
+    <library name="mlpiTraceLib">
+      <permission name="MLPI_TRACELIB_PERMISSION_ALL">true</permission>
+    </library>
+    <library name="mlpiContainerLib">
+      <permission name="MLPI_CONTAINERLIB_PERMISSION_ALL">true</permission>
+    </library>
+  </account>
+  <account user="indraworksonline" hash="fc2c49e344535514996e9fc49299d5b77fff6b07724954451b9dffe47797ebb91c6449a447e89b3885fb75b42b381980b8597dca5726f6d8838cf5b0dd7d73db" userMaxNumber="1">
+    <library name="mlpiApiLib">
+      <permission name="MLPI_APILIB_PERMISSION_ALL">true</permission>
+      <permission name="MLPI_APILIB_PERMISSION_CONNECTION_CLOSE">false</permission>
+    </library>
+    <library name="mlpiParameterLib">
+      <permission name="MLPI_PARAMETERLIB_PERMISSION_ALL">true</permission>
+    </library>
+    <library name="mlpiSystemLib">
+      <permission name="MLPI_SYSTEMLIB_PERMISSION_ALL">true</permission>
+    </library>
+    <library name="mlpiIoLib">
+      <permission name="MLPI_IOLIB_PERMISSION_ALL">true</permission>
+    </library>
+    <library name="mlpiMotionLib">
+      <permission name="MLPI_MOTIONLIB_PERMISSION_ALL">true</permission>
+    </library>
+    <library name="mlpiTaskLib">
+      <permission name="MLPI_TASKLIB_PERMISSION_ALL">true</permission>
+    </library>
+    <library name="mlpiLogicLib">
+      <permission name="MLPI_LOGICLIB_PERMISSION_ALL">true</permission>
+    </library>
+    <library name="mlpiWatchdogLib">
+      <permission name="MLPI_WATCHDOGLIB_PERMISSION_ALL">true</permission>
+    </library>
+    <library name="mlpiRobotLib">
+      <permission name="MLPI_ROBOTLIB_PERMISSION_ALL">true</permission>
+    </library>
+    <library name="mlpiTraceLib">
+      <permission name="MLPI_TRACELIB_PERMISSION_ALL">true</permission>
+    </library>
+    <library name="mlpiContainerLib">
+      <permission name="MLPI_CONTAINERLIB_PERMISSION_ALL">true</permission>
+    </library>
+  </account>
+  <account user="indraworksadministrator" hash="0b7342ca263e36ef5a4ba21b6d42d473d62f4350a9f6060de9b2ee3a7d7363d43a14204773d5e3e86b8d2958ea0b691867a1ffad281a618b4bdfb7a26d61d400" userMaxNumber="1" protection="2">
+    <library name="mlpiApiLib">
+      <permission name="MLPI_APILIB_PERMISSION_ALL">true</permission>
+    </library>
+    <library name="mlpiParameterLib">
+      <permission name="MLPI_PARAMETERLIB_PERMISSION_ALL">true</permission>
+    </library>
+    <library name="mlpiSystemLib">
+      <permission name="MLPI_SYSTEMLIB_PERMISSION_ALL">true</permission>
+    </library>
+    <library name="mlpiIoLib">
+      <permission name="MLPI_IOLIB_PERMISSION_ALL">true</permission>
+    </library>
+    <library name="mlpiMotionLib">
+      <permission name="MLPI_MOTIONLIB_PERMISSION_ALL">true</permission>
+    </library>
+    <library name="mlpiTaskLib">
+      <permission name="MLPI_TASKLIB_PERMISSION_ALL">true</permission>
+    </library>
+    <library name="mlpiLogicLib">
+      <permission name="MLPI_LOGICLIB_PERMISSION_ALL">true</permission>
+    </library>
+    <library name="mlpiWatchdogLib">
+      <permission name="MLPI_WATCHDOGLIB_PERMISSION_ALL">true</permission>
+    </library>
+    <library name="mlpiRobotLib">
+      <permission name="MLPI_ROBOTLIB_PERMISSION_ALL">true</permission>
+    </library>
+    <library name="mlpiTraceLib">
+      <permission name="MLPI_TRACELIB_PERMISSION_ALL">true</permission>
+    </library>
+    <library name="mlpiContainerLib">
+      <permission name="MLPI_CONTAINERLIB_PERMISSION_ALL">true</permission>
+    </library>
+  </account>
+  <account user="MlcTrending" hash="a6065850339455c411e01d13c9bc0634efa222af40c18a0017fa1919da862ef8938b540a00b81fb0660242aa9ec58b26eb0ccbd8cd2c9f9503bf8d4b6182ef52">
+    <library name="mlpiApiLib">
+      <permission name="MLPI_APILIB_PERMISSION_ALL">false</permission>
+      <permission name="MLPI_APILIB_PERMISSION_MLPI_INFO">true</permission>
+    </library>
+    <library name="mlpiParameterLib">
+      <permission name="MLPI_PARAMETERLIB_PERMISSION_ALL">false</permission>
+      <permission name="MLPI_PARAMETERLIB_PERMISSION_DATA_INFO">true</permission>
+      <permission name="MLPI_PARAMETERLIB_PERMISSION_COMMAND">true</permission>
+      <permission name="MLPI_PARAMETERLIB_PERMISSION_PARAMETER_INFO">true</permission>
+      <permission name="MLPI_PARAMETERLIB_PERMISSION_DATA_READ">true</permission>
+      <permission name="MLPI_PARAMETERLIB_PERMISSION_DATA_WRITE">true</permission>
+      <permission name="MLPI_PARAMETERLIB_PERMISSION_DEFAULT_READ">true</permission>
+    </library>
+    <library name="mlpiSystemLib">
+      <permission name="MLPI_SYSTEMLIB_PERMISSION_ALL">false</permission>
+      <permission name="MLPI_SYSTEMLIB_PERMISSION_DEVICE_INFO">true</permission>
+    </library>
+    <library name="mlpiIoLib">
+      <permission name="MLPI_IOLIB_PERMISSION_ALL">false</permission>
+    </library>
+    <library name="mlpiMotionLib">
+      <permission name="MLPI_MOTIONLIB_PERMISSION_ALL">false</permission>
+      <permission name="MLPI_MOTIONLIB_PERMISSION_INFO">true</permission>
+    </library>
+    <library name="mlpiTaskLib">
+      <permission name="MLPI_TASKLIB_PERMISSION_ALL">false</permission>
+    </library>
+    <library name="mlpiLogicLib">
+      <permission name="MLPI_LOGICLIB_PERMISSION_ALL">false</permission>
+      <permission name="MLPI_LOGICLIB_PERMISSION_APPLICATION_INFO">true</permission>
+      <permission name="MLPI_LOGICLIB_PERMISSION_SYMBOL_INFO">true</permission>
+      <permission name="MLPI_LOGICLIB_PERMISSION_VARIABLE_READ">true</permission>
+      <permission name="MLPI_LOGICLIB_PERMISSION_VARIABLE_WRITE">true</permission>
+    </library>
+    <library name="mlpiWatchdogLib">
+      <permission name="MLPI_WATCHDOGLIB_PERMISSION_ALL">false</permission>
+    </library>
+    <library name="mlpiRobotLib">
+      <permission name="MLPI_ROBOTLIB_PERMISSION_ALL">false</permission>
+    </library>
+    <library name="mlpiTraceLib">
+      <permission name="MLPI_TRACELIB_PERMISSION_ALL">false</permission>
+    </library>
+    <library name="mlpiContainerLib">
+      <permission name="MLPI_CONTAINERLIB_PERMISSION_ALL">false</permission>
+    </library>
+  </account>
+  <account user="" password="">
+    <library name="mlpiApiLib">
+      <permission name="MLPI_APILIB_PERMISSION_ALL">false</permission>
+      <permission name="MLPI_APILIB_PERMISSION_CONNECTION_INFO">true</permission>
+      <permission name="MLPI_APILIB_PERMISSION_MLPI_INFO">true</permission>
+      <permission name="MLPI_APILIB_PERMISSION_CONNECTION_OWN_DESCRIPTION">true</permission>
+      <permission name="MLPI_APILIB_PERMISSION_CONNECTION_ALL_DESCRIPTION">true</permission>
+      <permission name="MLPI_APILIB_PERMISSION_CONNECTION_CLOSE">true</permission>
+      <permission name="MLPI_APILIB_PERMISSION_USER_ACCOUNT_CONTROL_RELOAD">true</permission>
+      <permission name="MLPI_APILIB_PERMISSION_USER_ACCOUNT_CONTROL_LOAD">true</permission>
+      <permission name="MLPI_APILIB_PERMISSION_USER_ACCOUNT_CONTROL_ACCESS">true</permission>
+    </library>
+    <library name="mlpiParameterLib">
+      <permission name="MLPI_PARAMETERLIB_PERMISSION_ALL">false</permission>
+      <permission name="MLPI_PARAMETERLIB_PERMISSION_DATA_INFO">true</permission>
+      <permission name="MLPI_PARAMETERLIB_PERMISSION_COMMAND">true</permission>
+      <permission name="MLPI_PARAMETERLIB_PERMISSION_PARAMETER_INFO">true</permission>
+      <permission name="MLPI_PARAMETERLIB_PERMISSION_DATA_READ">true</permission>
+      <permission name="MLPI_PARAMETERLIB_PERMISSION_DATA_WRITE">true</permission>
+      <permission name="MLPI_PARAMETERLIB_PERMISSION_DEFAULT_READ">true</permission>
+    </library>
+    <library name="mlpiSystemLib">
+      <permission name="MLPI_SYSTEMLIB_PERMISSION_ALL">false</permission>
+      <permission name="MLPI_SYSTEMLIB_PERMISSION_DEVICE_INFO">true</permission>
+      <permission name="MLPI_SYSTEMLIB_PERMISSION_LANGUAGE">true</permission>
+      <permission name="MLPI_SYSTEMLIB_PERMISSION_NAME">true</permission>
+      <permission name="MLPI_SYSTEMLIB_PERMISSION_ENGINEERING_PORT">true</permission>
+      <permission name="MLPI_SYSTEMLIB_PERMISSION_TARGET_MODE">true</permission>
+      <permission name="MLPI_SYSTEMLIB_PERMISSION_DATE_AND_TIME">true</permission>
+      <permission name="MLPI_SYSTEMLIB_PERMISSION_CLEAR_ERROR">true</permission>
+      <permission name="MLPI_SYSTEMLIB_PERMISSION_REBOOT">true</permission>
+      <permission name="MLPI_SYSTEMLIB_PERMISSION_CLEANUP">true</permission>
+      <permission name="MLPI_SYSTEMLIB_PERMISSION_DIAGNOSIS_INFO">true</permission>
+      <permission name="MLPI_SYSTEMLIB_PERMISSION_DIAGNOSIS">true</permission>
+    </library>
+    <library name="mlpiIoLib">
+      <permission name="MLPI_IOLIB_PERMISSION_ALL">false</permission>
+      <permission name="MLPI_IOLIB_PERMISSION_INFO">true</permission>
+      <permission name="MLPI_IOLIB_PERMISSION_IO_READ">true</permission>
+      <permission name="MLPI_IOLIB_PERMISSION_IO_WRITE">true</permission>
+      <permission name="MLPI_IOLIB_PERMISSION_UPDATE">true</permission>
+    </library>
+    <library name="mlpiMotionLib">
+      <permission name="MLPI_MOTIONLIB_PERMISSION_ALL">false</permission>
+      <permission name="MLPI_MOTIONLIB_PERMISSION_INFO">true</permission>
+      <permission name="MLPI_MOTIONLIB_PERMISSION_SETUP">true</permission>
+      <permission name="MLPI_MOTIONLIB_PERMISSION_MOVE">true</permission>
+    </library>
+    <library name="mlpiTaskLib">
+      <permission name="MLPI_TASKLIB_PERMISSION_ALL">false</permission>
+      <permission name="MLPI_TASKLIB_PERMISSION_EVENT_SINK">true</permission>
+      <permission name="MLPI_TASKLIB_PERMISSION_TASK_SETUP">true</permission>
+      <permission name="MLPI_TASKLIB_PERMISSION_TASKVIEWER_USE">true</permission>
+    </library>
+    <library name="mlpiLogicLib">
+      <permission name="MLPI_LOGICLIB_PERMISSION_ALL">false</permission>
+      <permission name="MLPI_LOGICLIB_PERMISSION_APPLICATION_INFO">true</permission>
+      <permission name="MLPI_LOGICLIB_PERMISSION_APPLICATION_LOAD">true</permission>
+      <permission name="MLPI_LOGICLIB_PERMISSION_APPLICATION_STOP">true</permission>
+      <permission name="MLPI_LOGICLIB_PERMISSION_APPLICATION_START">true</permission>
+      <permission name="MLPI_LOGICLIB_PERMISSION_APPLICATION_RUN_SINGLE_CYCLE">true</permission>
+      <permission name="MLPI_LOGICLIB_PERMISSION_APPLICATION_RESET">true</permission>
+      <permission name="MLPI_LOGICLIB_PERMISSION_RETAIN_DATA">true</permission>
+      <permission name="MLPI_LOGICLIB_PERMISSION_EVENT_SINK">true</permission>
+      <permission name="MLPI_LOGICLIB_PERMISSION_SYMBOL_INFO">true</permission>
+      <permission name="MLPI_LOGICLIB_PERMISSION_POU_EXTENSION">true</permission>
+      <permission name="MLPI_LOGICLIB_PERMISSION_OP_CAPABILITY">true</permission>
+      <permission name="MLPI_LOGICLIB_PERMISSION_VARIABLE_READ">true</permission>
+      <permission name="MLPI_LOGICLIB_PERMISSION_VARIABLE_WRITE">true</permission>
+      <permission name="MLPI_LOGICLIB_PERMISSION_MEMORY_READ">true</permission>
+      <permission name="MLPI_LOGICLIB_PERMISSION_MEMORY_WRITE">true</permission>
+      <permission name="MLPI_LOGICLIB_PERMISSION_SYMBOL_ADDRESS">true</permission>
+    </library>
+    <library name="mlpiWatchdogLib">
+      <permission name="MLPI_WATCHDOGLIB_PERMISSION_ALL">false</permission>
+      <permission name="MLPI_WATCHDOGLIB_PERMISSION_USE">true</permission>
+    </library>
+    <library name="mlpiRobotLib">
+      <permission name="MLPI_ROBOTLIB_PERMISSION_ALL">false</permission>
+      <permission name="MLPI_ROBOTLIB_PERMISSION_INFO">true</permission>
+      <permission name="MLPI_ROBOTLIB_PERMISSION_CLEAR">true</permission>
+      <permission name="MLPI_ROBOTLIB_PERMISSION_CONFIG">true</permission>
+      <permission name="MLPI_ROBOTLIB_PERMISSION_MOVE">true</permission>
+      <permission name="MLPI_ROBOTLIB_PERMISSION_TEACHIN">true</permission>
+    </library>
+    <library name="mlpiTraceLib">
+      <permission name="MLPI_TRACELIB_PERMISSION_ALL">false</permission>
+      <permission name="MLPI_TRACELIB_PERMISSION_SETUP">true</permission>
+      <permission name="MLPI_TRACELIB_PERMISSION_INFO">true</permission>
+      <permission name="MLPI_TRACELIB_PERMISSION_USE">true</permission>
+    </library>
+    <library name="mlpiContainerLib">
+      <permission name="MLPI_CONTAINERLIB_PERMISSION_ALL">false</permission>
+      <permission name="MLPI_CONTAINERLIB_PERMISSION_INFO">true</permission>
+      <permission name="MLPI_CONTAINERLIB_PERMISSION_SETUP">true</permission>
+      <permission name="MLPI_CONTAINERLIB_PERMISSION_BROWSE">true</permission>
+      <permission name="MLPI_CONTAINERLIB_PERMISSION_UPDATE">true</permission>
+    </library>
+  </account>
+</accounts>

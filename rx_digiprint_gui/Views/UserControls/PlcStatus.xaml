@@ -1,0 +1,35 @@
+﻿<UserControl x:Class="RX_DigiPrint.Views.UserControls.PlcStatus"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
+             mc:Ignorable="d"
+             d:DesignHeight="400" d:DesignWidth="300"
+             HorizontalAlignment="Left">
+
+    <UserControl.Resources>
+        <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">32</sys:Double>
+    </UserControl.Resources>
+
+    <GroupBox Header="PLC Info" MinWidth="300" Style="{StaticResource RxGroupBox}">
+        <ScrollViewer ScrollViewer.VerticalScrollBarVisibility="Auto">
+            <rx_uc:PlcParPanel UnitID="PLC" ReadOnly="True" LabelWidth="200">
+                <rx_uc:PlcParCtrl ID="display"          Label="Display"             HCA="Left" ContentBack="LightGreen"/>
+                <rx_uc:PlcParCtrl ID="serialNo"         Label="Serial No"           HCA="Left"/>
+                <rx_uc:PlcParCtrl ID="tempAct [°C]"     Label="Temparature"         HCA="Left" Format='n'/>
+                <rx_uc:PlcParCtrl ID="tempMax [°C]"     Label="Temparature Max"     HCA="Left" Format='n'/>
+                <rx_uc:PlcParCtrl ID="versionHardware"  Label="Version HW"          HCA="Left"/>
+                <rx_uc:PlcParCtrl ID="versionFirmware"  Label="Version FW"          HCA="Left"/>
+                <rx_uc:PlcParCtrl ID="versionLogic"     Label="Version Logic"       HCA="Left"/>
+                <rx_uc:PlcParCtrl ID="versionBsp"       Label="Version BSP"         HCA="Left"/>
+                <rx_uc:PlcParCtrl ID="versionMlpi"      Label="Version MLPI"        HCA="Left"/>
+                <rx_uc:PlcParCtrl ID="hardwareDetails"  Label="Hardware Details"    HCA="Left"/>
+                <rx_uc:PlcParCtrl ID="localBusConfig"   Label="Local Bus Config"    HCA="Left" Format='l'/>
+                <rx_uc:PlcParCtrl ID="modulBusConfig"   Label="Modul Bus Config"    HCA="Left"/>
+                <rx_uc:PlcParCtrl ID="modulHwDetails"   Label="Modul HW Details"    HCA="Left"/>
+            </rx_uc:PlcParPanel>
+        </ScrollViewer>
+    </GroupBox>
+</UserControl>

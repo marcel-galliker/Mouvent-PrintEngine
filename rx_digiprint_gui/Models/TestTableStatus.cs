@@ -1,0 +1,264 @@
+﻿using RX_Common;
+using RX_DigiPrint.Services;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Media;
+
+namespace RX_DigiPrint.Models
+{
+    public class TestTableStatus : RxBindable
+    {
+        private StepperMotor[] _Motors = new StepperMotor[5];
+
+        //--- creator ----------------------
+        public TestTableStatus()
+        {
+            int i;
+            for (i=0; i<_Motors.Length; i++) _Motors[i]=new StepperMotor(){No=i};
+            RxGlobals.PrintSystem.PropertyChanged += PrintSystem_PropertyChanged;
+        }
+
+        void PrintSystem_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB701) cmd_enabled=cap_enabled=true;
+        }
+       
+        //--- Property RefDone ---------------------------------------
+        private bool _RefDone;
+        public bool RefDone
+        {
+            get { return _RefDone; }
+            set { SetProperty(ref _RefDone, value); }
+        }
+
+        //--- Property Mooving ---------------------------------------
+        private bool _Moving;
+        public bool Moving
+        {
+            get { return _Moving; }
+            set { SetProperty(ref _Moving, value); }
+        }
+
+        //--- Property Status ---------------------------------------
+        private int _State;
+        public int State
+        {
+            get { return _State; }
+            set { SetProperty(ref _State, value); }
+        }
+        
+        //--- Property PosX ---------------------------------------
+        private Int32 _PosX;
+        public Int32 PosX
+        {
+            get { return _PosX; }
+            set { SetProperty(ref _PosX, value); }
+        }
+
+        //--- Property PosY ---------------------------------------
+        private Int32 _PosY;
+        public Int32 PosY
+        {
+            get { return _PosY; }
+            set { SetProperty(ref _PosY, value); }
+        }
+
+        //--- Property PosZ ---------------------------------------
+        private Int32 _PosZ;
+        public Int32 PosZ
+        {
+            get { return _PosZ; }
+            set { SetProperty(ref _PosZ, value); }
+        }
+
+        //--- Property Error ---------------------------------------
+        private UInt32 _Error;
+        public UInt32 Error
+        {
+            get { return _Error; }
+            set { SetProperty(ref _Error, value); }
+        }
+
+        //--- Property UV_On ---------------------------------------
+        private bool _UV_On;
+        public bool UV_On
+        {
+            get { return _UV_On; }
+            set 
+            { 
+                if (SetProperty(ref _UV_On, value)) 
+                    UV_Busy= _UV_On && !_UV_Ready; 
+            }
+        }
+
+        //--- Property UV_Ready ---------------------------------------
+        private bool _UV_Ready;
+        public bool UV_Ready
+        {
+            get { return _UV_Ready; }
+            set 
+            { 
+                if (SetProperty(ref _UV_Ready, value)) 
+                    UV_Busy= _UV_On && !_UV_Ready; 
+            }
+        }
+
+        //--- Property UV_Busy ---------------------------------------
+        private bool _UV_Busy=false;
+        public bool UV_Busy
+        {
+            get { return _UV_Busy; }
+            set { SetProperty(ref _UV_Busy, value); }
+        }
+
+        //--- Property _CoverOpen ---------------------------------------
+        private bool _CoverOpen;
+        public bool CoverOpen
+        {
+            get { return _CoverOpen; }
+            set { SetProperty(ref _CoverOpen, value); }
+        }
+
+        //--- Property Z_in_ref ---------------------------------------
+        private bool _Z_in_ref;
+        public bool Z_in_ref
+        {
+            get { return _Z_in_ref; }
+            set { SetProperty(ref _Z_in_ref, value); }
+        }
+
+        //--- Property Z_in_print ---------------------------------------
+        private bool _Z_in_print;
+        public bool Z_in_print
+        {
+            get { return _Z_in_print; }
+            set { SetProperty(ref _Z_in_print, value); }
+        }
+
+        //--- Property Z_in_cap ---------------------------------------
+        private bool _Z_in_cap;
+        public bool Z_in_cap
+        {
+            get { return _Z_in_cap; }
+            set { SetProperty(ref _Z_in_cap, value); }
+        }
+
+        //--- Property X_in_cap ---------------------------------------
+        private bool _X_in_cap;
+        public bool X_in_cap
+        {
+            get { return _X_in_cap; }
+            set { SetProperty(ref _X_in_cap, value); }
+        }
+
+        //--- Property _HeadUpInput_0 ---------------------------------------
+        private bool _HeadUpInput_0;
+        public bool HeadUpInput_0
+        {
+            get { return _HeadUpInput_0; }
+            set { SetProperty(ref _HeadUpInput_0, value); }
+        }
+
+        //--- Property _HeadUpInput_1 ---------------------------------------
+        private bool _HeadUpInput_1;
+        public bool HeadUpInput_1
+        {
+            get { return _HeadUpInput_1; }
+            set { SetProperty(ref _HeadUpInput_1, value); }
+        }
+
+        //--- Property _HeadUpInput_2 ---------------------------------------
+        private bool _HeadUpInput_2;
+        public bool HeadUpInput_2
+        {
+            get { return _HeadUpInput_2; }
+            set { SetProperty(ref _HeadUpInput_2, value); }
+        }
+
+        //--- Property _HeadUpInput_3 ---------------------------------------
+        private bool _HeadUpInput_3;
+        public bool HeadUpInput_3
+        {
+            get { return _HeadUpInput_3; }
+            set { SetProperty(ref _HeadUpInput_3, value); }
+        }
+
+        //--- Property cmd_enabled ---------------------------------------
+        private bool _cmd_enabled;
+        public bool cmd_enabled
+        {
+            get { return _cmd_enabled; }
+            set { SetProperty(ref _cmd_enabled, value); }
+        }
+        
+        //--- Property cmd_enabled ---------------------------------------
+        private bool _cap_enabled;
+        public bool cap_enabled
+        {
+            get { return _cap_enabled; }
+            set { SetProperty(ref _cap_enabled, value); }
+        }
+
+        //--- Property Motors ---------------------------------------
+        public StepperMotor[] Motors
+        {
+            get { return _Motors; }
+            set { SetProperty(ref _Motors, value); }
+        }
+        
+        //--- Update -----------------------------------
+        public void Update(TcpIp.STestTableStat msg)
+        {
+            RefDone   = (msg.info & 0x00000001)!=0;
+            Moving    = (msg.info & 0x00000002)!=0;
+            UV_On     = (msg.info & 0x00000004)!=0;
+            UV_Ready  = (msg.info & 0x00000008)!=0;
+            Z_in_ref  = (msg.info & 0x00000010)!=0;
+            Z_in_print= (msg.info & 0x00000020)!=0;
+            Z_in_cap  = (msg.info & 0x00000040)!=0;
+//          info_07   = (msg.info & 0x00000080)!=0;
+            X_in_cap  = (msg.info & 0x00000100)!=0 || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB701;
+//          printing  = (msg.info & 0x00000200)!=0;
+//          curing    = (msg.info & 0x00000400)!=0;
+            CoverOpen = (msg.info & 0x00000800)!=0;
+//            cmd_enabled = !Moving;
+            cmd_enabled = true;
+//            cap_enabled = X_in_cap && !Moving;
+            cap_enabled =  X_in_cap || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB701 || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf;
+//          cln_in_stored = (msg.info & 0x00001000)!=0;
+//          cln_in_toofar = (msg.info & 0x00002000)!=0;
+//          cln_screw_0   = (msg.info & 0x00004000)!=0;
+//          cln_screw_1   = (msg.info & 0x00008000)!=0;
+//          cln_screw_2   = (msg.info & 0x00010000)!=0;
+//          cln_screw_3   = (msg.info & 0x00020000)!=0;
+            HeadUpInput_0 = (msg.info & 0x00040000)!=0;
+            HeadUpInput_1 = (msg.info & 0x00080000)!=0;
+            HeadUpInput_2 = (msg.info & 0x00100000)!=0;
+            HeadUpInput_3 = (msg.info & 0x00200000)!=0;
+
+            PosX    = msg.posX;
+            PosY    = msg.posY;
+            PosZ    = msg.posZ;
+            Error   = msg.err;
+
+            State   = msg.state;
+
+            {
+                int i;
+                for (i=0; i<_Motors.Length; i++)
+                {
+                    _Motors[i].State        = msg.motor[i].state;
+                    _Motors[i].MotorPos     = msg.motor[i].motor_pos/1000.0;
+                    _Motors[i].EncoderPos   = msg.motor[i].encoder_pos/1000.0;
+                    _Motors[i].EncoderColor = Math.Abs(msg.motor[i].motor_pos - msg.motor[i].encoder_pos) < 100 ? Colors.Transparent : Colors.Red;
+                    _Motors[i].EndSwitch    = (msg.inputs & (1<<i))!=0;
+                  //  _Motors[i].SendBt(null);
+                }
+            
+            }
+        }
+    }
+}

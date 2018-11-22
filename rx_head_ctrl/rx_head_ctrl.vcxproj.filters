@@ -1,0 +1,174 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source files">
+      <UniqueIdentifier>{e3a89e03-7524-464c-9b82-b4dc0c3820ba}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header files">
+      <UniqueIdentifier>{f348d1b4-553f-47af-9024-2fdc988b6ca3}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource files">
+      <UniqueIdentifier>{43b02dca-60e6-4322-bce8-1559a4afd599}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+    <Filter Include="Make files">
+      <UniqueIdentifier>{65e3a8cb-a50d-44e1-ad13-4704be6c5d86}</UniqueIdentifier>
+      <Extensions>*.mak</Extensions>
+    </Filter>
+    <Filter Include="rx_ink_lib">
+      <UniqueIdentifier>{9bc2ad00-9399-4d1b-aef2-37f4401cae0b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="debug.mak">
+      <Filter>Make files</Filter>
+    </None>
+    <None Include="release.mak">
+      <Filter>Make files</Filter>
+    </None>
+    <None Include="debug-soc.mak">
+      <Filter>Make files</Filter>
+    </None>
+    <None Include="debug-lx.mak">
+      <Filter>Make files</Filter>
+    </None>
+    <None Include="Makefile">
+      <Filter>Make files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="version.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="rx_head_ctrl.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="fpga.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="head_ctrl.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="nios.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="args.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="udp_test.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="mem_test.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="crc_calc.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="conditioner.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rx_ink_lib\rx_ink_common.c">
+      <Filter>rx_ink_lib</Filter>
+    </ClCompile>
+    <ClCompile Include="EEprom.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="tse.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="firepulse.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rx_ink_lib\nios_def_head.c">
+      <Filter>rx_ink_lib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rx_ink_lib\comm.c">
+      <Filter>rx_ink_lib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rx_ink_lib\fifo.c">
+      <Filter>rx_ink_lib</Filter>
+    </ClCompile>
+    <ClCompile Include="putty.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="DataSrv.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="gcc_Debug.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="gcc_Debug-soc.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="gcc_Release-soc.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="version.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="fpga.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="fpga_simu.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="head_ctrl.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="nios.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="args.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="udp_test.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="mem_test.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="fpga_msg.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="crc_calc.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="conditioner.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\rx_ink_lib\rx_ink_common.h">
+      <Filter>rx_ink_lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\rx_ink_lib\cond_def_head.h">
+      <Filter>rx_ink_lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\rx_ink_lib\nios_def_head.h">
+      <Filter>rx_ink_lib</Filter>
+    </ClInclude>
+    <ClInclude Include="EEprom.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="tse.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="tse_regs.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="firepulse.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="cond_comm.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="putty.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="rx_head_ctrl.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

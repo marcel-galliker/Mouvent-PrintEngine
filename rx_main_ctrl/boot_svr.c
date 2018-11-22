@@ -1,0 +1,199 @@
+// ****************************************************************************
+//
+//	boot_srv.cpp
+//
+//	needs linux V19++ on the boards
+//
+// ****************************************************************************
+//
+//	Copyright 2013 by Radex AG, Switzerland. All rights reserved.
+//	Written by Marcel Galliker 
+//
+// ****************************************************************************
+
+//--- includes ----------------------------------------------------------------
+
+#include "rx_common.h"
+#include "rx_threads.h"
+#include "rx_trace.h"
+#include "rx_sok.h"
+#include "rx_error.h"
+#include "errno.h"
+#include "rfs.h"
+#include "tcp_ip.h"
+#include "network.h"
+#include "rx_mac_address.h"
+#include "boot_svr.h"
+
+//--- Defines -----------------------------------------------------------------
+
+
+//--- Externals ---------------------------------------------------------------
+
+
+//--- Modlue Globals -----------------------------------------------------------------
+
+HANDLE  _BoorSvr=NULL;
+RX_SOCKET _BootClient=0;
+
+//--- Prototypes ------------------------------------------------------
+static int _handle_boot_msg(RX_SOCKET socket, void *msg, int len, struct sockaddr *sender, void *par);
+static int _open_bot_srv   (RX_SOCKET socket, const char *peerName);
+static int _close_bot_srv   (RX_SOCKET socket, const char *peerName);
+
+static void _do_boot_info  (RX_SOCKET socket, struct sockaddr *sender, SBootInfoMsg* msg);
+static void _do_ping_reply (RX_SOCKET socket, struct sockaddr *sender, SBootInfoMsg* msg);
+static void _start_app     (RX_SOCKET socket, struct sockaddr *sender, SBootInfoMsg* msg);
+
+//--- boot_start -------------------------------------------------------
+void boot_start(void)
+{
+	if (_BoorSvr == NULL)
+	{
+		sok_start_server(&_BoorSvr, NULL, PORT_UDP_BOOT_SVR, SOCK_DGRAM, 0, _handle_boot_msg, NULL, NULL);
+		rx_sleep(100);
+		sok_open_client(&_BootClient, RX_CTRL_MAIN, PORT_UDP_BOOT_SVR, SOCK_DGRAM);
+
+		boot_request(CMD_BOOT_INFO_REQ);
+	}
+};
+
+static int _open_bot_srv   (RX_SOCKET socket, const char *peerName)
+{
+	TrPrintf(TRUE, "Server opened: >>%s<<", peerName);
+	return REPLY_OK;
+}
+
+static int _close_bot_srv   (RX_SOCKET socket, const char *peerName)
+{
+	TrPrintf(TRUE, "Server closed: >>%s<<", peerName);
+	return REPLY_OK;
+}
+
+//--- boot_end ----------------------------------------------------------, 
+void boot_end(void)
+{
+	
+};
+
+//--- boot_request --------------------------------------------------------
+void boot_request(UINT32 msgId)
+{
+	SBootInfoReqCmd		msg;
+	int len;
+	msg.cmd = msgId;
+//	TrPrintfL(TRUE, "PING REQUEST");
+	len = sok_broadcast(_BootClient, (char*)&msg, sizeof(msg), RX_CTRL_BROADCAST, PORT_UDP_BOOT_CLNT);
+}
+
+//--- _handle_boot_msg --------------------------------------------------------
+static int _handle_boot_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sender, void *par)
+{
+//	UINT32 *pcmd = (UINT32*)msg;
+	SBootInfoMsg msg;		// for old boards!
+
+	memset(&msg, 0, sizeof(msg));
+	msg.item.rfsPort = PORT_REMOTE_FILE_SERVER;
+	memcpy(&msg, pmsg, len);
+
+//	TrPrintfL(TRUE, "Boot:  Received cmd=0x%08x", *pcmd);
+	switch(msg.id)
+	{
+	case REP_BOOT_INFO:	_do_boot_info (socket, sender, &msg);			
+						break;
+
+	case REP_BOOT_PING:	_do_ping_reply(socket, sender, &msg);
+						if (msg.item.rfsPort) _start_app (socket, sender, &msg);
+						break;
+	}
+	return REPLY_OK;
+};
+
+//--- _do_boot_info -------------------------------------------------------------
+static void _do_boot_info(RX_SOCKET socket, struct sockaddr *sender, SBootInfoMsg* msg)
+{
+	SBootAddrSetCmd	cmd;
+	int		len;
+	char	exe_str[64];
+
+	if ((msg->item.macAddr & MAC_ID_MASK)==MAC_ENCODER_CTRL)
+		printf("encoder\n");
+	sok_mac_addr_str(msg->item.macAddr, exe_str, sizeof(exe_str));
+	TrPrintfL(TRUE, "BOOT INFO >>%s serialNo:%s<<: mac=>>%s<< act=>>%s<<", msg->item.deviceTypeStr, msg->item.serialNo, exe_str, msg->item.ipAddr);
+	if (!strcmp(msg->item.deviceTypeStr, "Spooler"))
+		printf("Spooler\n");
+
+	//---  get address --------------------
+	cmd.id		= CMD_BOOT_ADDR_SET;
+	cmd.macAddr = msg->item.macAddr;
+	net_get_ip_addr(&msg->item, cmd.ipAddr);
+	
+	if (*cmd.ipAddr==0)
+	{
+		printf("net_get_ip_addr(%s[%d]): ERROR", msg->item.deviceTypeStr, msg->item.deviceNo);			
+		return;
+	}
+	
+	net_register(&msg->item);
+	sok_mac_addr_str(msg->item.macAddr, exe_str, sizeof(exe_str));
+	TrPrintfL(TRUE, "BOOT INFO >>%s serialNo:%s<<: mac=>>%s<< act=>>%s<< new=>>%s<< rfsPort=%d appPort=%d", msg->item.deviceTypeStr, msg->item.serialNo, exe_str, msg->item.ipAddr, cmd.ipAddr, msg->item.rfsPort, msg->item.ports[0]);
+	if (!strcmp(msg->item.deviceTypeStr, "Spooler"))
+		printf("Spooler\n");
+
+	//--- send answer ------------- 
+	len = sok_broadcast(socket, (char*)&cmd, sizeof(cmd), RX_CTRL_BROADCAST, PORT_UDP_BOOT_CLNT); // change Address if needed and start the Renote File Server
+	if (len != sizeof(cmd))
+	{
+		char err[100];
+		#ifdef WIN32
+		TrPrintf(1, "Error >>%s<<", err_system_error(WSAGetLastError(), err, sizeof(err)));
+		#else
+		TrPrintf(1, "Error >>%s<<", err_system_error(errno, err, sizeof(err)));
+		#endif
+	}
+
+	//---  start applicaiton if address is ok ----
+	if (strcmp(cmd.ipAddr, msg->item.ipAddr)) 
+		rfs_reset(cmd.ipAddr);
+	else if (msg->item.rfsPort)
+	{
+		exe_name(msg->item.deviceTypeStr, exe_str, sizeof(exe_str));
+		rfs_update_start(cmd.ipAddr, msg->item.rfsPort, PATH_BIN, msg->item.deviceTypeStr, PATH_BIN_LX, exe_str);
+	}
+};
+
+//--- _start_app -----------------------------------------------------
+static void _start_app(RX_SOCKET socket, struct sockaddr *sender, SBootInfoMsg* msg)
+{
+	char	exe_str[64];
+	if (msg->item.rfsPort)
+	{
+		exe_name(msg->item.deviceTypeStr, exe_str, sizeof(exe_str));
+		rfs_update_start(msg->item.ipAddr, msg->item.rfsPort, PATH_BIN, msg->item.deviceTypeStr, PATH_BIN_LX, exe_str);
+	}
+};
+
+//--- _do_ping_reply --------------------------------------------------------------
+static void _do_ping_reply(RX_SOCKET socket, struct sockaddr *sender, SBootInfoMsg* msg)
+{
+	char str[32];
+	sok_get_addr_str(sender, str, sizeof(str));
+	if (!strcmp(msg->item.deviceTypeStr, "Spooler"))
+		printf("Spooler %s\n", msg->item.ipAddr);
+
+//	TrPrintfL(TRUE, "Got ping: %s: >>%s serialNo=%s<<", str, msg->item.deviceTypeStr, msg->item.serialNo);
+	net_register(&msg->item);
+}
+
+
+//--- boot_set_flashing --------------------------------------
+void boot_set_flashing(UINT64  macAddr)
+{
+	SBootAddrSetCmd	cmd;
+	int len;
+
+	memset(&cmd, 0, sizeof(cmd));
+	cmd.id			 = CMD_BOOT_FLASH_ON;
+	cmd.macAddr		 = macAddr;
+	len = sok_broadcast(_BootClient, (char*)&cmd, sizeof(cmd), RX_CTRL_BROADCAST, PORT_UDP_BOOT_CLNT);
+}

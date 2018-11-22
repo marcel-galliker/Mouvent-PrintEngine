@@ -1,0 +1,66 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2016
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rx_common_lib", "..\rx_common_lib\rx_common_lib.vcxproj", "{23DE4F53-96A4-44A2-9A16-FFC6CCB25311}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rx_head_ctrl", "rx_head_ctrl.vcxproj", "{55419B30-3C89-4522-AB6A-1E4ACD506AB4}"
+	ProjectSection(ProjectDependencies) = postProject
+		{23DE4F53-96A4-44A2-9A16-FFC6CCB25311} = {23DE4F53-96A4-44A2-9A16-FFC6CCB25311}
+		{21DD6C9C-813D-43D1-9C17-7428BED26DE5} = {21DD6C9C-813D-43D1-9C17-7428BED26DE5}
+		{531D50FB-5C99-4DF6-B152-8A0CFB84D4C7} = {531D50FB-5C99-4DF6-B152-8A0CFB84D4C7}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TinyXML", "..\Externals\TinyXML\TinyXML.vcxproj", "{531D50FB-5C99-4DF6-B152-8A0CFB84D4C7}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rx_tif_lib", "..\rx_tif_lib\rx_tif_lib.vcxproj", "{21DD6C9C-813D-43D1-9C17-7428BED26DE5}"
+	ProjectSection(ProjectDependencies) = postProject
+		{23DE4F53-96A4-44A2-9A16-FFC6CCB25311} = {23DE4F53-96A4-44A2-9A16-FFC6CCB25311}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug-soc|Win32 = Debug-soc|Win32
+		Debug-soc|x64 = Debug-soc|x64
+		Release-soc|Win32 = Release-soc|Win32
+		Release-soc|x64 = Release-soc|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{23DE4F53-96A4-44A2-9A16-FFC6CCB25311}.Debug-soc|Win32.ActiveCfg = Debug-soc|Win32
+		{23DE4F53-96A4-44A2-9A16-FFC6CCB25311}.Debug-soc|Win32.Build.0 = Debug-soc|Win32
+		{23DE4F53-96A4-44A2-9A16-FFC6CCB25311}.Debug-soc|x64.ActiveCfg = Debug-soc|x64
+		{23DE4F53-96A4-44A2-9A16-FFC6CCB25311}.Debug-soc|x64.Build.0 = Debug-soc|x64
+		{23DE4F53-96A4-44A2-9A16-FFC6CCB25311}.Release-soc|Win32.ActiveCfg = Release-soc|Win32
+		{23DE4F53-96A4-44A2-9A16-FFC6CCB25311}.Release-soc|Win32.Build.0 = Release-soc|Win32
+		{23DE4F53-96A4-44A2-9A16-FFC6CCB25311}.Release-soc|x64.ActiveCfg = Release-soc|x64
+		{23DE4F53-96A4-44A2-9A16-FFC6CCB25311}.Release-soc|x64.Build.0 = Release-soc|x64
+		{55419B30-3C89-4522-AB6A-1E4ACD506AB4}.Debug-soc|Win32.ActiveCfg = Debug-soc|Win32
+		{55419B30-3C89-4522-AB6A-1E4ACD506AB4}.Debug-soc|Win32.Build.0 = Debug-soc|Win32
+		{55419B30-3C89-4522-AB6A-1E4ACD506AB4}.Debug-soc|x64.ActiveCfg = Debug-soc|Win32
+		{55419B30-3C89-4522-AB6A-1E4ACD506AB4}.Release-soc|Win32.ActiveCfg = Release-soc|Win32
+		{55419B30-3C89-4522-AB6A-1E4ACD506AB4}.Release-soc|Win32.Build.0 = Release-soc|Win32
+		{55419B30-3C89-4522-AB6A-1E4ACD506AB4}.Release-soc|x64.ActiveCfg = Release|Win32
+		{531D50FB-5C99-4DF6-B152-8A0CFB84D4C7}.Debug-soc|Win32.ActiveCfg = Debug-soc|x64
+		{531D50FB-5C99-4DF6-B152-8A0CFB84D4C7}.Debug-soc|x64.ActiveCfg = Debug-soc|x64
+		{531D50FB-5C99-4DF6-B152-8A0CFB84D4C7}.Debug-soc|x64.Build.0 = Debug-soc|x64
+		{531D50FB-5C99-4DF6-B152-8A0CFB84D4C7}.Release-soc|Win32.ActiveCfg = Release-soc|Win32
+		{531D50FB-5C99-4DF6-B152-8A0CFB84D4C7}.Release-soc|Win32.Build.0 = Release-soc|Win32
+		{531D50FB-5C99-4DF6-B152-8A0CFB84D4C7}.Release-soc|x64.ActiveCfg = Release-soc|x64
+		{531D50FB-5C99-4DF6-B152-8A0CFB84D4C7}.Release-soc|x64.Build.0 = Release-soc|x64
+		{21DD6C9C-813D-43D1-9C17-7428BED26DE5}.Debug-soc|Win32.ActiveCfg = Debug-soc|Win32
+		{21DD6C9C-813D-43D1-9C17-7428BED26DE5}.Debug-soc|Win32.Build.0 = Debug-soc|Win32
+		{21DD6C9C-813D-43D1-9C17-7428BED26DE5}.Debug-soc|x64.ActiveCfg = Debug-soc|x64
+		{21DD6C9C-813D-43D1-9C17-7428BED26DE5}.Debug-soc|x64.Build.0 = Debug-soc|x64
+		{21DD6C9C-813D-43D1-9C17-7428BED26DE5}.Release-soc|Win32.ActiveCfg = Release-soc|Win32
+		{21DD6C9C-813D-43D1-9C17-7428BED26DE5}.Release-soc|Win32.Build.0 = Release-soc|Win32
+		{21DD6C9C-813D-43D1-9C17-7428BED26DE5}.Release-soc|x64.ActiveCfg = Release-soc|x64
+		{21DD6C9C-813D-43D1-9C17-7428BED26DE5}.Release-soc|x64.Build.0 = Release-soc|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7C98B3C3-CE1D-45A9-A9DB-50E6A4510184}
+	EndGlobalSection
+EndGlobal

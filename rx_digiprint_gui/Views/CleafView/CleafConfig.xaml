@@ -1,0 +1,43 @@
+﻿<UserControl x:Class="RX_DigiPrint.Views.CleafView.CleafConfig"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+             xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
+             xmlns:igWPF="http://schemas.infragistics.com/xaml/wpf"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="350"
+             Width="250">
+    <Grid>
+        <!-- the settings _______________________________ -->
+        <GroupBox Header="Configuration" Style="{StaticResource RxGroupBox}">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <rx_uc:PlcParPanel x:Name="ParPanel" UnitID="Application.GUI_00_001_Main" ReadOnly="False" PreviewKeyDown="ParPanel_PreviewKeyDown">
+                    <rx_uc:PlcTitle Header="Diameter Offset"/>
+
+                    <rx_uc:PlcTitle Header="Tension Offset"/>
+
+                    <rx_uc:PlcParCtrl ID="CFG_TENSION_SENSOR_OFFSET_1"           Label="Unwinder"  Unit="N" UnitWidth="30" Format="1"/>
+                    <rx_uc:PlcParCtrl ID="CFG_TENSION_SENSOR_OFFSET_2"           Label="Rewinder"  Unit="N" UnitWidth="30" Format="1"/>
+                    <rx_uc:PlcParCtrl ID="CFG_TENSION_SENSOR_OFFSET_3"           Label="NIP"       Unit="N" UnitWidth="30" Format="1"/>
+                    <!--
+        <common:RxButton x:Name="Button_Save" Click="Save_Clicked"  Visibility="{Binding ElementName=ParPanel, Path=Changed, Converter={StaticResource IntToVisible_Converter}}">
+            <Image Source="{Staticresource save_ico}"/>
+        </common:RxButton>
+        -->
+                    <Grid Margin="20,0">
+                        <common:RxButton Click="Save_Clicked" 
+                                     HorizontalAlignment="Left"
+                                     Visibility="{Binding ElementName=ParPanel, Path=Changed, Converter={StaticResource IntToVisible_Converter}}">
+                            <Image Source="{StaticResource Yes_ico}"/>
+                        </common:RxButton>
+                        <common:RxButton Click="Reload_Clicked" HorizontalAlignment="Right">
+                            <Image Source="{StaticResource No_ico}"/>
+                        </common:RxButton>
+                    </Grid>
+                </rx_uc:PlcParPanel>
+            </ScrollViewer>
+        </GroupBox>
+    </Grid>
+</UserControl>

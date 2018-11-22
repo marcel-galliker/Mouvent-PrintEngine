@@ -1,0 +1,58 @@
+﻿<UserControl x:Class="RX_DigiPrint.Views.FrontPage.FrontPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+		     xmlns:views_ml="clr-namespace:RX_DigiPrint.Views.MiniLabelView"
+             mc:Ignorable="d"
+             d:DesignHeight="500" 
+             d:DesignWidth="1000"
+             Background="Gainsboro">
+    
+    <Grid  Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="40"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="3*"/>
+            <ColumnDefinition Width="2*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- TITLE ______________________________________________________________________________________________-->
+        <Grid Grid.Row="0" Grid.ColumnSpan="2">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock VerticalAlignment="Bottom" Text="radex" FontSize="30" Foreground="#FFACDE42" FontWeight="Bold" />
+                <TextBlock VerticalAlignment="Bottom" Text="RAPID M108" Margin="10,0"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- MAIN _______________________________________________________________________________________________-->
+        <Grid Grid.Row="1" Margin="0, 10, 5, 10">
+            <Grid Background="White">
+
+                <views_ml:MiniLabelView x:Name="LabelPress"/>
+                
+                <TextBlock Text="Machine" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="40" />
+            </Grid>     
+        </Grid>
+
+        <Grid Grid.Row="1" Grid.Column="1" Margin="5, 10, 0, 10">
+            <Grid Background="White">
+                <TextBlock Text="Preview" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="40" />
+            </Grid>
+        </Grid>
+
+        <!-- STATUS _____________________________________________________________________________________________-->
+        <Grid Grid.Row="2" Grid.ColumnSpan="2" Background="White">
+            <StackPanel Orientation="Horizontal" Margin="10,2">
+                <TextBlock VerticalAlignment="Center" Text="Status"/>
+                <Rectangle Width="2" HorizontalAlignment="Stretch" Fill="#FFACDE42" Margin="10,2"/>
+                <TextBlock VerticalAlignment="Center" Text="Logs  Events"/>
+                <Rectangle Width="2" HorizontalAlignment="Stretch" Fill="#FFACDE42" Margin="10,2"/>
+                <TextBlock VerticalAlignment="Center" Text="Eventuell Zeile unterteilen in zwei Bereich, weil lauftext zu lange läuft"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>

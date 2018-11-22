@@ -1,0 +1,572 @@
+// ****************************************************************************
+//
+//	DIGITAL PRINTING - nios.c
+//
+//
+// ****************************************************************************
+//
+//	Copyright 2013 by Radex AG, Switzerland. All rights reserved.
+//	Written by Marcel Galliker
+//
+// ****************************************************************************
+
+//--- includes ----------------------------------------------------------------
+#ifdef soc
+	#include <sys/mman.h>
+	#include <stdio.h>
+	#include <math.h>
+#endif
+#include "rx_def.h"
+#include "rx_error.h"
+#include "rx_file.h"
+#include "rx_fpga.h"
+#include "rx_term.h"
+#include "rx_trace.h"
+#include "fpga_def_head.h"
+#include "hex2bin.h"
+#include "args.h"
+#include "firepulse.h"
+#include "fpga.h"
+#include "nios.h"
+#include "tse.h"
+#include "crc_calc.h"
+#include "rx_threads.h"
+#include "rx_head_ctrl.h"
+#include "version.h"
+#include "conditioner.h"
+
+#define	NIOS_EXE_ADDR	0xc0000000
+#define NIOS_EXE_SIZE	0x00010000
+
+#define NIOS_MEM_ADDR	0xc0060000
+#define NIOS_MEM_SIZE	(20*1024)   //0x00010000
+
+#define NIOS_RESET_ADDR	0xFF220000	// 0xFF220010
+#define NIOS_RESET_SIZE	0x00001000
+
+//--- external variables (also used in conditioner) -----
+SNiosCfg			*_NiosCfg;	
+SNiosStat			*_NiosStat;
+SNiosMemory			*_NiosMem;
+
+//--- module globals ---------------------------------------
+static int _NiosInit   = FALSE;
+static int _NiosLoaded = FALSE;
+
+static UINT8			_GreyLevel[MAX_HEADS_BOARD][MAX_DROP_SIZES];
+static UINT32			_FPWarning;
+int						NIOS_FixedDropSize=0;
+int						NIOS_Droplets=0;
+static int				_NiosReady=FALSE;
+
+//--- prototypes -----------------------------------
+
+static void _nios_copy_status(void);
+
+//#define FASTLOG
+#ifdef FASTLOG	
+	static FILE	*_FastLog_File = NULL;
+	static void _nios_fastlog_start(void);
+	static void _nios_fastlog(void);
+#endif
+
+//--- nios_shutdown --------------------------------
+void nios_shutdown(void)
+{
+	if (rx_fpga_running())
+	{
+		int fd = open("/dev/mem", O_RDWR); 
+		_NiosMem  = (SNiosMemory*)mmap(NULL, NIOS_MEM_SIZE, PROT_READ|PROT_WRITE, MAP_SHARED, fd, NIOS_MEM_ADDR);
+		_NiosCfg  = &_NiosMem->cfg;
+		close(fd);		
+		nios_end();		
+	}
+}
+
+//--- nios_init ---------------------------------
+int nios_init(void)
+{
+	int tio;
+	_NiosInit = TRUE;
+
+	nios_load(PATH_BIN_HEAD FIELNAME_HEAD_NIOS);
+	
+	_NiosMem = NULL;
+	_FPWarning = 0;
+	memset(_GreyLevel, 0, sizeof(_GreyLevel));
+
+	#ifdef soc
+	if (_NiosLoaded)
+	{
+		int fd = open("/dev/mem", O_RDWR); 
+		_NiosMem  = (SNiosMemory*)mmap(NULL, NIOS_MEM_SIZE, PROT_READ|PROT_WRITE, MAP_SHARED, fd, NIOS_MEM_ADDR);
+		close(fd);
+	}
+	#endif
+	
+	if (_NiosMem==NULL) 
+	{
+		_NiosMem = (SNiosMemory*)rx_malloc(sizeof(SNiosMemory));
+		_NiosMem->stat.info.is_shutdown = TRUE;	
+	}
+	if (sizeof(SNiosMemory)>NIOS_MEM_SIZE) return Error(ERR_ABORT, 0, "NIOS DP-Memory too small. (NIOS_MEM_SIZE=%d, SNiosMemory.size=%d)", NIOS_MEM_SIZE, sizeof(SNiosMemory));
+	
+	_NiosCfg  = &_NiosMem->cfg;
+	_NiosStat = &_NiosMem->stat;
+
+	//--- wait until nios ready ----------------------
+	for (tio=0; !_NiosMem->stat.info.nios_ready && tio<10; tio++) 
+	{
+		rx_sleep(100);
+	}
+	if (!_NiosMem->stat.info.nios_ready)
+	{
+		TrPrintfL(TRUE,"NIOS NOT READY");
+		Error(WARN, 0, "NIOS NOT READY");
+	}
+	
+	TrPrintfL(TRUE, "Nios Version = %d.%d.%d.%d", _NiosStat->version.major, _NiosStat->version.minor, _NiosStat->version.revision, _NiosStat->version.build);
+	RX_HBStatus[0].niosVersion.major	= _NiosStat->version.major;
+	RX_HBStatus[0].niosVersion.minor	= _NiosStat->version.minor;
+	RX_HBStatus[0].niosVersion.revision	= _NiosStat->version.revision;
+	RX_HBStatus[0].niosVersion.build	= _NiosStat->version.build;
+	
+#ifdef FASTLOG	
+	_nios_fastlog_start();
+#endif
+	return REPLY_OK;
+}
+
+//--- nios_end -------------------------------------
+int nios_end(void)
+{
+	// required to not damage Print Heads !
+	_NiosCfg->cmd.shutdown = TRUE;
+	rx_sleep(300);
+	_NiosInit = FALSE;
+
+	#ifdef soc
+		munmap(_NiosMem, NIOS_MEM_SIZE); 
+	#endif
+	_NiosMem = NULL;
+	_NiosLoaded = FALSE;
+	return REPLY_OK;
+}
+
+//--- nios_loaded ------------------------------------
+int  nios_loaded(void)
+{
+	return _NiosLoaded;
+}
+
+//--- nios_load --------------------------------------
+void nios_load(const char *exepath)
+{
+	TrPrintfL(TRUE, "nios_load >>%s<< ***", exepath);
+	_NiosReady = FALSE;
+	if (!fpga_is_init()) return;
+
+#ifdef soc
+	int		fd;
+	INT32	size, read, tio;
+	UINT32	*exeMem;
+	UINT32  data;
+	BYTE	buffer[0x10000];
+
+	hex2bin(exepath, buffer, sizeof(buffer), &size);
+	if (size)
+	{
+		if (_NiosMem)
+		{
+			_NiosMem->cfg.cmd.shutdown = TRUE;
+			tio=0;
+			while (!_NiosMem->stat.info.is_shutdown)
+			{
+				if (++tio>200)
+				{
+					Error(WARN, 0, "nios_load: Timeout on waiting for nios-shutdown");
+					break;
+	//				return;
+				}
+
+				rx_sleep(10);
+			}
+		}
+
+		if (fpga_nios_reset(TRUE)!=REPLY_OK) return;
+
+		if (_NiosMem) _NiosMem->cfg.cmd.shutdown = FALSE;
+
+		/* Map Physical address of NIOS RAM to virtual address segment with Read/Write Access */ 
+		fd = open("/dev/mem", O_RDWR);
+		exeMem  = (UINT32*)mmap(NULL, NIOS_EXE_SIZE, PROT_READ|PROT_WRITE, MAP_SHARED, fd, NIOS_EXE_ADDR);
+		memcpy(exeMem, buffer, size);
+		mprotect(exeMem, NIOS_EXE_SIZE, PROT_READ);  
+		munmap(exeMem,  NIOS_EXE_SIZE); 
+		close(fd);
+	
+		if (arg_offline)
+		{
+			printf("\nPress <ENTER> when NIOS loaded.\n");
+			getchar();
+		}
+
+		fpga_nios_reset(FALSE);
+		_NiosLoaded = TRUE;
+	}
+#endif
+}
+
+//--- nios_NiosLoaded -----------------------------------------
+int  nios_NiosLoaded(void)
+{
+	return _NiosLoaded;
+}
+
+//--- _sample_wf ----------------------------------------
+
+#define WF_OFFSET		-20
+#define ON_OFFSET		  0 // 0.6 µs
+#define OFF_OFFSET		 48 // 0.6 µs
+// #define ALL_ON_OFFSET	 -9	// ALL-ON has to be set 9 cycles before last sub-pulse starts
+#define ALL_ON_OFFSET	 -50	// ALL-ON has to be set 50 cycles before last sub-pulse starts
+#define FP_VALUE_30		1564
+
+static void _sample_wf(int head, SInkDefinition *pink, int subPulses, int fpVoltage, SFpgaHeadCfg *cfg)
+{
+#define MAX_TIME_WF 8000
+	SWfPoint pts[MAX_WF_POINTS];
+	int i, n, pos, mhz;
+	int shift;			// to add leading zeros
+	int cut;			// to remove sub pulses (length of removed sub pulses)	
+	int allOnDroplet;
+	int startAllOn=0;	// position of the "all on" subpulse
+	int v0, v1;
+	int p0, p1;
+	int subPulsCnt;
+	int voltageCnt;
+	int dropletNo;
+	int trace=FALSE;
+	int load;
+	int ret;
+	int levels;
+	int value30V;
+	UINT16	voltage[VOLTAGE_SIZE];
+
+	if (!_NiosLoaded) return;
+	
+	fpga_enable(FALSE);	
+	
+//	if (!strcmp(pink->fileName, _InkDef[head].fileName) && (subPulses==_MaxDropSize[head]) && (fpVoltage==_FpVoltage[head])) return
+	
+	if (fpVoltage && fpVoltage<30) ErrorFlag(WARN, &_FPWarning, 1<<head, 0, "Head[%d]: Firepulse Voltage=%d%, head not print", head, fpVoltage);
+		
+	memcpy(&_GreyLevel[head], pink->greyLevel, sizeof(_GreyLevel[head]));
+	
+	mhz=fpga_fp_clock_mhz();
+	for (i=0; i<MAX_WF_POINTS; i++)
+	{
+		pts[i].pos  = ((UINT32)pink->wf[i].pos*mhz)/160;
+		pts[i].volt = pink->wf[i].volt;		
+	}
+		
+	printf("\n");
+	printf("FIRST_PULSE_POS = %d\n", WF_FIRST_PULSE_POS);
+	printf("WF_OFFSET       = %d\n", WF_OFFSET);
+	printf("ON_OFFSET       = %d\n", ON_OFFSET);
+	printf("OFF_OFFSET      = %d\n", OFF_OFFSET);
+	printf("ALL_ON_OFFSET   = %d\n", ALL_ON_OFFSET);
+	printf("\n");
+
+	memset(voltage, 0, sizeof(voltage));
+	levels = pink->greyLevel[subPulses];
+	allOnDroplet = 0;
+	for (i=0; i<8; i++)
+	{
+		if (pink->greyLevel[0] & (1<<i)) allOnDroplet=i;
+	}
+	for (i=0; i<SIZEOF(cfg->fp); i++) cfg->fp[i].on = cfg->fp[i].off = 0;
+	
+	pos = 0;
+	p0 = 0;
+	v0 = 0;
+	shift=0;
+	cut=0;
+	voltageCnt = 0;
+	subPulsCnt = 0;
+	dropletNo  = 0;
+	
+	if (_NiosMem->cfg.cond[head].mode == ctrl_print) 
+	{
+		if (fpVoltage) 	value30V = (FP_VALUE_30*fpVoltage)/100;
+		else			value30V = FP_VALUE_30;
+	}
+	else value30V = 0;
+		
+	for (i=0; i<MAX_WF_POINTS; i++)
+	{
+		p1 = pts[i].pos+shift-cut;
+		v1 = pts[i].volt*10;	// calculate in 1/10V to avoid rounding problems
+
+		if (v0==0 && v1>0)
+		{
+//			if (subPulsCnt>=subPulses)
+			dropletNo++;
+			if (subPulsCnt>=allOnDroplet)
+			{
+				if (!startAllOn) startAllOn = p0;
+				cut = p0-startAllOn;
+			}
+			if (subPulsCnt==0)
+			{
+				while (pos<=WF_FIRST_PULSE_POS)
+				{
+					voltage[pos++]=0;
+					p0++;
+					p1++;
+					shift++;
+				}
+				if (trace && shift) printf("wf[%d]: p=%d, pcorr=%d, v=%d --- corrected\n", i-1, pts[i-1].pos, pts[i-1].pos+shift, pts[i-1].volt);
+			}
+			if (startAllOn)
+			{				
+				p0 = pos = startAllOn;
+				p1 = startAllOn + (pts[i].pos-pts[i-1].pos);
+			}
+			cfg->fp[subPulsCnt].on = pos;
+			cfg->fp_allOn		   = pos+ALL_ON_OFFSET; // All on for the last sub-pulse!
+		}
+		else if (v0!=0 && v1==0)
+		{
+			cfg->fp[subPulsCnt].off = p1+OFF_OFFSET;
+			if (subPulsCnt<subPulses && !startAllOn)
+				subPulsCnt++;
+			voltageCnt = p1+1+WF_OFFSET;
+		}
+		if (trace) printf("wf[%d]: p=%d, pcorr=%d, v=%d\n", i, pts[i].pos, pts[i].pos+shift, pts[i].volt);
+		if (p1<p0) break;
+		if (p1!=p0)
+		{
+			if (!dropletNo || (levels & (0x01<<(dropletNo-1))))
+			{
+				for (n=0; pos<=p1; n++, pos++)
+				{
+					if (pos+WF_OFFSET>0) voltage[pos+WF_OFFSET] = ((v0 + (v1-v0) * (pos-p0)/(p1-p0)) * value30V) / 300;					
+				}
+			}	
+			else
+			{
+				cut += p1-pos;
+				p1=p0;
+			}
+		}
+		p0 = p1;
+		v0 = v1;
+	}
+	if (trace) printf("\n");
+		
+	//--- set FPGA values -------------------------
+	cfg->fp_length	  = voltageCnt;
+	cfg->fp_subPulses = subPulsCnt;
+	printf("seq-length: %d\n", cfg->fp_length);
+	printf("sub-pulses: %d\n", cfg->fp_subPulses);
+	
+	nios_fixed_grey_levels(0, subPulses);
+	
+	if (TRUE || trace)
+	{
+		for (i=0; i<4; i++)
+		{
+			printf("gl[%d]=0x%02x\n", i, cfg->gl_2_pulse[i]);
+		}
+		printf("\n");
+		for (i=0; i<SIZEOF(cfg->fp); i++)
+		{
+			printf("firepulse[%d]: on=%lu, off=%lu\n", i, cfg->fp[i].on, cfg->fp[i].off);
+		}
+		printf("AllOn: %d\n", cfg->fp_allOn);
+
+		if (FALSE)
+		{
+			printf("Waveform Sample\n");
+			for (i=0; i<voltageCnt; i++) printf("wf[%d].volt=%d\n", i, voltage[i]);
+			printf("\n");
+		}
+		printf("\n");
+	}
+	
+	fp_set_waveform(head, voltageCnt, voltage);
+}
+
+//--- nios_fixed_grey_levels ----------------------------
+void nios_fixed_grey_levels(int fixedDropSize, int maxDropSize)
+{
+	int head, i, n, level;
+	int droplet;
+	if (fixedDropSize>3) fixedDropSize=3;
+	if (fixedDropSize<0) fixedDropSize=0;
+	if (maxDropSize>3)   maxDropSize=3;
+	if (maxDropSize<1)	 maxDropSize=1;
+	NIOS_FixedDropSize = fixedDropSize;
+	for (head=0; head<SIZEOF(FpgaCfg.head); head++)
+	{
+		SFpgaHeadCfg *cfg = FpgaCfg.head[head];
+		if (fixedDropSize == 0)
+		{	
+			for (i=0; i<SIZEOF(cfg->gl_2_pulse); i++)
+			{
+				for (n=0, level=0, droplet=0; n<8; n++)
+				{
+					if (_GreyLevel[head][maxDropSize] & (1<<n)) 
+					{
+						if (_GreyLevel[head][i] & (1<<n)) level |= (0x01<<droplet);
+						droplet++;
+					}
+				}
+				cfg->gl_2_pulse[i] = level;					
+			}
+		}
+		else
+		{
+			Error(WARN, 0, "TEST Fix Greylevel");		
+			cfg->gl_2_pulse[0] = _GreyLevel[head][fixedDropSize];			
+		}
+	}
+}
+
+//--- nios_setInk ---------------------------------------------
+void nios_setInk(int no, SInkDefinition *pink, int maxDropSize, int fpVoltage)
+{
+	if (no>=0 && no<HEAD_CNT)
+	{
+		NIOS_Droplets = maxDropSize;
+		printf("\nSample WaveForm [%d]\n", no);
+		_sample_wf(no, pink, maxDropSize, fpVoltage, FpgaCfg.head[no]);
+		cond_heater_set(no, pink->temp, pink->tempMax);
+		cond_presout_set(no, pink->meniscus);
+				
+		RX_RGB[no] = pink->colorRGB;
+	}
+}
+
+//--- nios_main --------------------------------
+int  nios_main(int ticks, int menu)
+{	
+#ifdef FASTLOG	
+	_nios_fastlog();
+#endif
+	
+	cond_main(ticks);
+		
+	if (menu) 	
+	{
+		tse_check_errors();
+		nios_check_errors();		
+		_nios_copy_status();			
+	}
+	return REPLY_OK;
+}
+
+//--- _nios_copy_status -----------------------------------
+static void _nios_copy_status(void)
+{
+	memcpy(&RX_NiosStat, _NiosStat, sizeof(RX_NiosStat));			
+}
+
+//--- nios_check_errors ---------------------------
+void nios_check_errors(void)
+{	
+	if (fpga_is_ready())
+	{
+		if (_NiosStat->error.fpga_incompatible)	    ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err, err_nios_incompatible, 0, "Conditioner NIOS NOT compatible");
+		if (_NiosStat->error.u_plus_2v5)			ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err, err_2_5volt, 0, "2.5Volt Power Supply Error");
+		if (_NiosStat->error.u_plus_3v3)			ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err, err_3_3_volt, 0, "3.3Volt Power Supply Error");
+		if (_NiosStat->error.u_plus_5v)				ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err, err_5volt, 0, "5Volt Power Supply Error");
+		if (_NiosStat->error.u_minus_5v)			ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err, err_min_5volt, 0, "-5Volt Power Supply Error");
+		if (_NiosStat->error.u_minus_36v)			ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err, err_36volt, 0, "-36Volt Power Supply Error");
+		if (_NiosStat->error.amc7891)				ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err, err_amc7891, 0, "AMC7891 could not be initialized");
+		if (_NiosStat->error.power_all_off_timeout)	ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err, err_pwr_all_off, 0, "power_all_off_timeout");
+		if (_NiosStat->error.power_amp_on_timeout)	ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err, err_amp_all_on, 0, "power_amp_on_timeout");
+		if (_NiosStat->error.power_all_on_timeout)	ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err, err_pwr_all_on, 0, "power_all_on_timeout");
+    	if (_NiosStat->error.fpga_overheated)		ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err, err_fpga_overheated, 0, "FPGA Overheated Error");
+    	if (_NiosStat->error.head_pcb_overheated)   ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err, err_head_pcb_overheated, 0, "Head PCB overheated");
+		
+		// TODO: re-enable after simu-chiller and cable problem is solved
+		//if (_NiosStat->error.chiller_overheated)    ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err, err_chiller_overheated, 0, "Chiller Overheated Error");
+				
+		if (_NiosStat->info.cooler_pcb_present)
+		{
+			if (_NiosStat->error.cooler_pressure_hw)	ErrorFlag(ERR_STOP,  (UINT32*)&RX_HBStatus[0].err, err_cooler_pressure, 0, "Cooler pressure sensor hardware");
+			if (_NiosStat->error.cooler_overpressure)	ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err, err_cooler_pressure, 0, "Cooler overpressure");
+			if (_NiosStat->error.cooler_temp_hw)		ErrorFlag(ERR_CONT,  (UINT32*)&RX_HBStatus[0].err, err_therm_cooler,    0, "Cooler Thermistor hardware");
+    		if (_NiosStat->error.cooler_overheated)		ErrorFlag(WARN,		 (UINT32*)&RX_HBStatus[0].err, err_therm_cooler,    0, "Cooler Thermistor too hot (%d°C)", _NiosStat->cooler_temp / 1000);
+		}
+		else
+		{
+			ErrorFlag(WARN, (UINT32*)&RX_HBStatus[0].info, info_cooler_pcb_present, 0, "No Cooler PCB present");
+		}
+
+		cond_error_check();		
+	}
+}
+
+//--- nios_error_reset ---------------------------
+void nios_error_reset(void)
+{
+	cond_error_reset();
+	_FPWarning = 0;
+	if (_NiosLoaded) _NiosCfg->cmd.error_reset = TRUE;
+}
+
+//--- _nios_fastlog_start --------------------------------------------------------------------
+#ifdef FASTLOG
+static void _nios_fastlog_start(void)
+{
+	int i = 0;
+	// cee
+	_FastLog_File  = fopen(PATH_BIN_HEAD "fast_log.csv", "w");
+	for (i = 0; i < SIZEOF(RX_HBStatus->head); i++)
+		fprintf(_FastLog_File, "Alive %d;Temp %d;Temp Heater %d;Temp Head %d;Heater %% %d;Pres In %d;Pres Out %d;Pump %d;Feedback %d;", i, i, i, i, i, i, i, i, i);
+	
+	fprintf(_FastLog_File, "Cylinder Pressure;Ink Pump;Feedback;Env Temp\n");
+}
+#endif
+
+//--- _nios_fastlog ---------------------------------------------------------------
+#ifdef FASTLOG	
+static void _nios_fastlog(void)
+{
+	int i = 0;
+	int fastlog = 0;
+	int t_fastlog = 0;
+		
+	// 10ms fastlog for finding problems during scan
+	int ticks = rx_get_ticks();
+	fastlog = ticks > t_fastlog;
+	if (fastlog && RX_HBStatus[0].head[0].ctrlMode == ctrl_print)
+	{
+		t_fastlog = 10*(1 + ticks / 10);
+			
+		for (i = 0; i < MAX_HEADS_BOARD; i++)
+		{
+			fprintf(_FastLog_File, "%d;", _NiosStat->cond[i].alive);
+			fprintf(_FastLog_File, "%d;", _NiosStat->cond[i].tempIn);
+			fprintf(_FastLog_File, "%d;", _NiosStat->cond[i].tempHeater);
+			fprintf(_FastLog_File, "%d;", _NiosStat->head_temp[i]);
+			fprintf(_FastLog_File, "%s;", value_str_u(_NiosStat->cond[i].heater_percent));
+			fprintf(_FastLog_File, "%d;", _NiosStat->cond[i].pressure_in);
+			fprintf(_FastLog_File, "%d;", _NiosStat->cond[i].pressure_out);
+			fprintf(_FastLog_File, "%d;", _NiosStat->cond[i].pump);
+			fprintf(_FastLog_File, "%d;", _NiosStat->cond[i].pump_measured);
+		}
+
+		fprintf(_FastLog_File, "%d;", RX_FluidStat[0].cylinderPressure);
+		fprintf(_FastLog_File, "%d;", RX_FluidStat[0].inkPump);
+		fprintf(_FastLog_File, "%d;", RX_FluidStat[0].inkPumpFeedback);
+		fprintf(_FastLog_File, "%d;", RX_FluidStat[0].amcTemp);
+			
+		fprintf(_FastLog_File, "\n");
+		fflush(_FastLog_File);
+	}				  
+}
+#endif // FASTLOG

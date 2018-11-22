@@ -1,0 +1,14 @@
+
+# install libusb ???   
+sudo apt-get install libusb-1.0-0-dev
+
+# copy the file to linux
+cp libmxlin64.so.2.6.0 /usr/lib
+
+# make it executable
+cd /usr/lib
+
+# create symbolic links
+sudo ln -s /usr/lib/libmxlin64.so.2.6.0 /usr/lib/libmxlin64.so.2.6
+sudo ln -s /usr/lib/libmxlin64.so.2.6   /usr/lib/libmxlin64.so
+sudo ln -s /usr/lib/libmxlin64.so       /usr/lib/libmatrix64.so

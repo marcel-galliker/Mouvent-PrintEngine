@@ -1,0 +1,6 @@
+17:09:35 **** Build of configuration Nios II for project rx_head_nios ****
+make mem_init_generate 
+makefile:250: *** BSP directory does not exist: ../SAPE_65_bsp.  Stop.
+
+17:09:35 Build Finished (took 239ms)
+

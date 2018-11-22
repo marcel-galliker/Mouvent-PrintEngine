@@ -1,0 +1,394 @@
+Info: Starting: Create block symbol file (.bsf)
+Info: qsys-generate /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc.qsys --block-symbol-file --output-directory=/home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc --family="Cyclone V" --part=5CSEBA2U23C8
+Progress: Loading fluid_board_soc/fluid_board_soc.qsys
+Progress: Reading input file
+Progress: Adding avalon2fpga_slave_0 [avalon2fpga_slave 5.1]
+Progress: Parameterizing module avalon2fpga_slave_0
+Progress: Adding avalon_spi_amc7891_0 [avalon_spi_amc7891 14.0]
+Progress: Parameterizing module avalon_spi_amc7891_0
+Progress: Adding avalon_spi_amc7891_1 [avalon_spi_amc7891 14.0]
+Progress: Parameterizing module avalon_spi_amc7891_1
+Progress: Adding avalon_spi_max31865_0 [avalon_spi_max31865 1.0]
+Progress: Parameterizing module avalon_spi_max31865_0
+Progress: Adding avalon_spi_max31865_1 [avalon_spi_max31865 1.0]
+Progress: Parameterizing module avalon_spi_max31865_1
+Progress: Adding avalon_spi_max31865_2 [avalon_spi_max31865 1.0]
+Progress: Parameterizing module avalon_spi_max31865_2
+Progress: Adding avalon_spi_max31865_3 [avalon_spi_max31865 1.0]
+Progress: Parameterizing module avalon_spi_max31865_3
+Progress: Adding avalon_spi_max31865_4 [avalon_spi_max31865 1.0]
+Progress: Parameterizing module avalon_spi_max31865_4
+Progress: Adding avalon_spi_max31865_5 [avalon_spi_max31865 1.0]
+Progress: Parameterizing module avalon_spi_max31865_5
+Progress: Adding avalon_spi_max31865_6 [avalon_spi_max31865 1.0]
+Progress: Parameterizing module avalon_spi_max31865_6
+Progress: Adding avalon_spi_max31865_7 [avalon_spi_max31865 1.0]
+Progress: Parameterizing module avalon_spi_max31865_7
+Progress: Adding axi_lw_slave_register_0 [axi_lw_slave_register 15.1]
+Progress: Parameterizing module axi_lw_slave_register_0
+Progress: Adding clk_fpga [clock_source 15.1]
+Progress: Parameterizing module clk_fpga
+Progress: Adding clk_i [clock_source 15.1]
+Progress: Parameterizing module clk_i
+Progress: Adding flush_pump_pwm_duty_cycle [altera_avalon_pio 15.1]
+Progress: Parameterizing module flush_pump_pwm_duty_cycle
+Progress: Adding flush_pump_pwm_freq [altera_avalon_pio 15.1]
+Progress: Parameterizing module flush_pump_pwm_freq
+Progress: Adding fpga_only_master [altera_jtag_avalon_master 15.1]
+Progress: Parameterizing module fpga_only_master
+Progress: Adding hps_0 [altera_hps 15.1]
+Progress: Parameterizing module hps_0
+Progress: Adding i2c_master_d [i2c_master 14.1]
+Progress: Parameterizing module i2c_master_d
+Progress: Adding i2c_master_f [i2c_master 14.1]
+Progress: Parameterizing module i2c_master_f
+Progress: Adding i2c_master_is1 [i2c_master 14.1]
+Progress: Parameterizing module i2c_master_is1
+Progress: Adding i2c_master_is2 [i2c_master 14.1]
+Progress: Parameterizing module i2c_master_is2
+Progress: Adding i2c_master_is3 [i2c_master 14.1]
+Progress: Parameterizing module i2c_master_is3
+Progress: Adding i2c_master_is4 [i2c_master 14.1]
+Progress: Parameterizing module i2c_master_is4
+Progress: Adding i2c_master_p [i2c_master 14.1]
+Progress: Parameterizing module i2c_master_p
+Progress: Adding jtag_uart [altera_avalon_jtag_uart 15.1]
+Progress: Parameterizing module jtag_uart
+Progress: Adding nios2_qsys_0 [altera_nios2_gen2 15.1]
+Progress: Parameterizing module nios2_qsys_0
+Progress: Adding onchip_memory_nios_arm [altera_avalon_onchip_memory2 15.1]
+Progress: Parameterizing module onchip_memory_nios_arm
+Progress: Adding onchip_memory_nios_cpu [altera_avalon_onchip_memory2 15.1]
+Progress: Parameterizing module onchip_memory_nios_cpu
+Progress: Adding pio_input [altera_avalon_pio 15.1]
+Progress: Parameterizing module pio_input
+Progress: Adding pio_output [altera_avalon_pio 15.1]
+Progress: Parameterizing module pio_output
+Progress: Adding pio_reset_nios [altera_avalon_pio 15.1]
+Progress: Parameterizing module pio_reset_nios
+Progress: Adding pio_watchdog_cnt [altera_avalon_pio 15.1]
+Progress: Parameterizing module pio_watchdog_cnt
+Progress: Adding pio_watchdog_freq [altera_avalon_pio 15.1]
+Progress: Parameterizing module pio_watchdog_freq
+Progress: Adding pll_0 [altera_pll 15.1]
+Progress: Parameterizing module pll_0
+Progress: Adding sld_hub_controller_system_0 [altera_sld_hub_controller_system 15.1]
+Progress: Parameterizing module sld_hub_controller_system_0
+Progress: Adding sysid [altera_avalon_sysid_qsys 15.1]
+Progress: Parameterizing module sysid
+Progress: Adding timer_0 [altera_avalon_timer 15.1]
+Progress: Parameterizing module timer_0
+Progress: Adding timer_1 [altera_avalon_timer 15.1]
+Progress: Parameterizing module timer_1
+Progress: Adding timer_2 [altera_avalon_timer 15.1]
+Progress: Parameterizing module timer_2
+Progress: Building connections
+Progress: Parameterizing connections
+Progress: Validating
+Progress: Done reading input file
+Info: fluid_board_soc.hps_0: HPS Main PLL counter settings: n = 0  m = 47
+Info: fluid_board_soc.hps_0: HPS peripherial PLL counter settings: n = 0  m = 39
+Info: fluid_board_soc.pio_input: PIO inputs are not hardwired in test bench. Undefined values will be read from PIO inputs during simulation.
+Info: fluid_board_soc.pll_0: The legal reference clock frequency is 5.0 MHz..650.0 MHz
+Info: fluid_board_soc.pll_0: Able to implement PLL with user settings
+Info: fluid_board_soc.sysid: System ID is not assigned automatically. Edit the System ID parameter to provide a unique ID
+Info: fluid_board_soc.sysid: Time stamp will be automatically updated when this component is generated.
+Info: qsys-generate succeeded.
+Info: Finished: Create block symbol file (.bsf)
+Info: 
+Info: Starting: Create HDL design files for synthesis
+Info: qsys-generate /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc.qsys --synthesis=VHDL --output-directory=/home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis --family="Cyclone V" --part=5CSEBA2U23C8
+Progress: Loading fluid_board_soc/fluid_board_soc.qsys
+Progress: Reading input file
+Progress: Adding avalon2fpga_slave_0 [avalon2fpga_slave 5.1]
+Progress: Parameterizing module avalon2fpga_slave_0
+Progress: Adding avalon_spi_amc7891_0 [avalon_spi_amc7891 14.0]
+Progress: Parameterizing module avalon_spi_amc7891_0
+Progress: Adding avalon_spi_amc7891_1 [avalon_spi_amc7891 14.0]
+Progress: Parameterizing module avalon_spi_amc7891_1
+Progress: Adding avalon_spi_max31865_0 [avalon_spi_max31865 1.0]
+Progress: Parameterizing module avalon_spi_max31865_0
+Progress: Adding avalon_spi_max31865_1 [avalon_spi_max31865 1.0]
+Progress: Parameterizing module avalon_spi_max31865_1
+Progress: Adding avalon_spi_max31865_2 [avalon_spi_max31865 1.0]
+Progress: Parameterizing module avalon_spi_max31865_2
+Progress: Adding avalon_spi_max31865_3 [avalon_spi_max31865 1.0]
+Progress: Parameterizing module avalon_spi_max31865_3
+Progress: Adding avalon_spi_max31865_4 [avalon_spi_max31865 1.0]
+Progress: Parameterizing module avalon_spi_max31865_4
+Progress: Adding avalon_spi_max31865_5 [avalon_spi_max31865 1.0]
+Progress: Parameterizing module avalon_spi_max31865_5
+Progress: Adding avalon_spi_max31865_6 [avalon_spi_max31865 1.0]
+Progress: Parameterizing module avalon_spi_max31865_6
+Progress: Adding avalon_spi_max31865_7 [avalon_spi_max31865 1.0]
+Progress: Parameterizing module avalon_spi_max31865_7
+Progress: Adding axi_lw_slave_register_0 [axi_lw_slave_register 15.1]
+Progress: Parameterizing module axi_lw_slave_register_0
+Progress: Adding clk_fpga [clock_source 15.1]
+Progress: Parameterizing module clk_fpga
+Progress: Adding clk_i [clock_source 15.1]
+Progress: Parameterizing module clk_i
+Progress: Adding flush_pump_pwm_duty_cycle [altera_avalon_pio 15.1]
+Progress: Parameterizing module flush_pump_pwm_duty_cycle
+Progress: Adding flush_pump_pwm_freq [altera_avalon_pio 15.1]
+Progress: Parameterizing module flush_pump_pwm_freq
+Progress: Adding fpga_only_master [altera_jtag_avalon_master 15.1]
+Progress: Parameterizing module fpga_only_master
+Progress: Adding hps_0 [altera_hps 15.1]
+Progress: Parameterizing module hps_0
+Progress: Adding i2c_master_d [i2c_master 14.1]
+Progress: Parameterizing module i2c_master_d
+Progress: Adding i2c_master_f [i2c_master 14.1]
+Progress: Parameterizing module i2c_master_f
+Progress: Adding i2c_master_is1 [i2c_master 14.1]
+Progress: Parameterizing module i2c_master_is1
+Progress: Adding i2c_master_is2 [i2c_master 14.1]
+Progress: Parameterizing module i2c_master_is2
+Progress: Adding i2c_master_is3 [i2c_master 14.1]
+Progress: Parameterizing module i2c_master_is3
+Progress: Adding i2c_master_is4 [i2c_master 14.1]
+Progress: Parameterizing module i2c_master_is4
+Progress: Adding i2c_master_p [i2c_master 14.1]
+Progress: Parameterizing module i2c_master_p
+Progress: Adding jtag_uart [altera_avalon_jtag_uart 15.1]
+Progress: Parameterizing module jtag_uart
+Progress: Adding nios2_qsys_0 [altera_nios2_gen2 15.1]
+Progress: Parameterizing module nios2_qsys_0
+Progress: Adding onchip_memory_nios_arm [altera_avalon_onchip_memory2 15.1]
+Progress: Parameterizing module onchip_memory_nios_arm
+Progress: Adding onchip_memory_nios_cpu [altera_avalon_onchip_memory2 15.1]
+Progress: Parameterizing module onchip_memory_nios_cpu
+Progress: Adding pio_input [altera_avalon_pio 15.1]
+Progress: Parameterizing module pio_input
+Progress: Adding pio_output [altera_avalon_pio 15.1]
+Progress: Parameterizing module pio_output
+Progress: Adding pio_reset_nios [altera_avalon_pio 15.1]
+Progress: Parameterizing module pio_reset_nios
+Progress: Adding pio_watchdog_cnt [altera_avalon_pio 15.1]
+Progress: Parameterizing module pio_watchdog_cnt
+Progress: Adding pio_watchdog_freq [altera_avalon_pio 15.1]
+Progress: Parameterizing module pio_watchdog_freq
+Progress: Adding pll_0 [altera_pll 15.1]
+Progress: Parameterizing module pll_0
+Progress: Adding sld_hub_controller_system_0 [altera_sld_hub_controller_system 15.1]
+Progress: Parameterizing module sld_hub_controller_system_0
+Progress: Adding sysid [altera_avalon_sysid_qsys 15.1]
+Progress: Parameterizing module sysid
+Progress: Adding timer_0 [altera_avalon_timer 15.1]
+Progress: Parameterizing module timer_0
+Progress: Adding timer_1 [altera_avalon_timer 15.1]
+Progress: Parameterizing module timer_1
+Progress: Adding timer_2 [altera_avalon_timer 15.1]
+Progress: Parameterizing module timer_2
+Progress: Building connections
+Progress: Parameterizing connections
+Progress: Validating
+Progress: Done reading input file
+Info: fluid_board_soc.hps_0: HPS Main PLL counter settings: n = 0  m = 47
+Info: fluid_board_soc.hps_0: HPS peripherial PLL counter settings: n = 0  m = 39
+Info: fluid_board_soc.pio_input: PIO inputs are not hardwired in test bench. Undefined values will be read from PIO inputs during simulation.
+Info: fluid_board_soc.pll_0: The legal reference clock frequency is 5.0 MHz..650.0 MHz
+Info: fluid_board_soc.pll_0: Able to implement PLL with user settings
+Info: fluid_board_soc.sysid: System ID is not assigned automatically. Edit the System ID parameter to provide a unique ID
+Info: fluid_board_soc.sysid: Time stamp will be automatically updated when this component is generated.
+Info: fluid_board_soc: Generating fluid_board_soc "fluid_board_soc" for QUARTUS_SYNTH
+Info: Inserting clock-crossing logic between cmd_demux.src24 and cmd_mux_024.sink0
+Info: Inserting clock-crossing logic between rsp_demux_024.src0 and rsp_mux.sink24
+Warning: hps_0.f2h_irq0: Cannot connect clock for irq_mapper.sender
+Warning: hps_0.f2h_irq0: Cannot connect reset for irq_mapper.sender
+Warning: hps_0.f2h_irq1: Cannot connect clock for irq_mapper_001.sender
+Warning: hps_0.f2h_irq1: Cannot connect reset for irq_mapper_001.sender
+Info: avalon2fpga_slave_0: "fluid_board_soc" instantiated avalon2fpga_slave "avalon2fpga_slave_0"
+Info: avalon_spi_amc7891_1: "fluid_board_soc" instantiated avalon_spi_amc7891 "avalon_spi_amc7891_1"
+Info: avalon_spi_max31865_0: "fluid_board_soc" instantiated avalon_spi_max31865 "avalon_spi_max31865_0"
+Info: axi_lw_slave_register_0: "fluid_board_soc" instantiated axi_lw_slave_register "axi_lw_slave_register_0"
+Info: flush_pump_pwm_duty_cycle: Starting RTL generation for module 'fluid_board_soc_flush_pump_pwm_duty_cycle'
+Info: flush_pump_pwm_duty_cycle:   Generation command is [exec /opt/altera/15.1/quartus/linux64/perl/bin/perl -I /opt/altera/15.1/quartus/linux64/perl/lib -I /opt/altera/15.1/quartus/sopc_builder/bin/europa -I /opt/altera/15.1/quartus/sopc_builder/bin/perl_lib -I /opt/altera/15.1/quartus/sopc_builder/bin -I /opt/altera/15.1/quartus/../ip/altera/sopc_builder_ip/common -I /opt/altera/15.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio -- /opt/altera/15.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio/generate_rtl.pl --name=fluid_board_soc_flush_pump_pwm_duty_cycle --dir=/tmp/alt7602_5475660713572948225.dir/0005_flush_pump_pwm_duty_cycle_gen/ --quartus_dir=/opt/altera/15.1/quartus --verilog --config=/tmp/alt7602_5475660713572948225.dir/0005_flush_pump_pwm_duty_cycle_gen//fluid_board_soc_flush_pump_pwm_duty_cycle_component_configuration.pl  --do_build_sim=0  ]
+Info: flush_pump_pwm_duty_cycle: Done RTL generation for module 'fluid_board_soc_flush_pump_pwm_duty_cycle'
+Info: flush_pump_pwm_duty_cycle: "fluid_board_soc" instantiated altera_avalon_pio "flush_pump_pwm_duty_cycle"
+Info: fpga_only_master: "fluid_board_soc" instantiated altera_jtag_avalon_master "fpga_only_master"
+Info: hps_0: "Running  for module: hps_0"
+Info: hps_0: HPS Main PLL counter settings: n = 0  m = 47
+Info: hps_0: HPS peripherial PLL counter settings: n = 0  m = 39
+Info: hps_0: "fluid_board_soc" instantiated altera_hps "hps_0"
+Info: i2c_master_d: "fluid_board_soc" instantiated i2c_master "i2c_master_d"
+Info: jtag_uart: Starting RTL generation for module 'fluid_board_soc_jtag_uart'
+Info: jtag_uart:   Generation command is [exec /opt/altera/15.1/quartus/linux64/perl/bin/perl -I /opt/altera/15.1/quartus/linux64/perl/lib -I /opt/altera/15.1/quartus/sopc_builder/bin/europa -I /opt/altera/15.1/quartus/sopc_builder/bin/perl_lib -I /opt/altera/15.1/quartus/sopc_builder/bin -I /opt/altera/15.1/quartus/../ip/altera/sopc_builder_ip/common -I /opt/altera/15.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_jtag_uart -- /opt/altera/15.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_jtag_uart/generate_rtl.pl --name=fluid_board_soc_jtag_uart --dir=/tmp/alt7602_5475660713572948225.dir/0007_jtag_uart_gen/ --quartus_dir=/opt/altera/15.1/quartus --verilog --config=/tmp/alt7602_5475660713572948225.dir/0007_jtag_uart_gen//fluid_board_soc_jtag_uart_component_configuration.pl  --do_build_sim=0  ]
+Info: jtag_uart: Done RTL generation for module 'fluid_board_soc_jtag_uart'
+Info: jtag_uart: "fluid_board_soc" instantiated altera_avalon_jtag_uart "jtag_uart"
+Info: nios2_qsys_0: "fluid_board_soc" instantiated altera_nios2_gen2 "nios2_qsys_0"
+Info: onchip_memory_nios_arm: Starting RTL generation for module 'fluid_board_soc_onchip_memory_nios_arm'
+Info: onchip_memory_nios_arm:   Generation command is [exec /opt/altera/15.1/quartus/linux64/perl/bin/perl -I /opt/altera/15.1/quartus/linux64/perl/lib -I /opt/altera/15.1/quartus/sopc_builder/bin/europa -I /opt/altera/15.1/quartus/sopc_builder/bin/perl_lib -I /opt/altera/15.1/quartus/sopc_builder/bin -I /opt/altera/15.1/quartus/../ip/altera/sopc_builder_ip/common -I /opt/altera/15.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_onchip_memory2 -- /opt/altera/15.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_onchip_memory2/generate_rtl.pl --name=fluid_board_soc_onchip_memory_nios_arm --dir=/tmp/alt7602_5475660713572948225.dir/0008_onchip_memory_nios_arm_gen/ --quartus_dir=/opt/altera/15.1/quartus --verilog --config=/tmp/alt7602_5475660713572948225.dir/0008_onchip_memory_nios_arm_gen//fluid_board_soc_onchip_memory_nios_arm_component_configuration.pl  --do_build_sim=0  ]
+Info: onchip_memory_nios_arm: Done RTL generation for module 'fluid_board_soc_onchip_memory_nios_arm'
+Info: onchip_memory_nios_arm: "fluid_board_soc" instantiated altera_avalon_onchip_memory2 "onchip_memory_nios_arm"
+Info: onchip_memory_nios_cpu: Starting RTL generation for module 'fluid_board_soc_onchip_memory_nios_cpu'
+Info: onchip_memory_nios_cpu:   Generation command is [exec /opt/altera/15.1/quartus/linux64/perl/bin/perl -I /opt/altera/15.1/quartus/linux64/perl/lib -I /opt/altera/15.1/quartus/sopc_builder/bin/europa -I /opt/altera/15.1/quartus/sopc_builder/bin/perl_lib -I /opt/altera/15.1/quartus/sopc_builder/bin -I /opt/altera/15.1/quartus/../ip/altera/sopc_builder_ip/common -I /opt/altera/15.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_onchip_memory2 -- /opt/altera/15.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_onchip_memory2/generate_rtl.pl --name=fluid_board_soc_onchip_memory_nios_cpu --dir=/tmp/alt7602_5475660713572948225.dir/0009_onchip_memory_nios_cpu_gen/ --quartus_dir=/opt/altera/15.1/quartus --verilog --config=/tmp/alt7602_5475660713572948225.dir/0009_onchip_memory_nios_cpu_gen//fluid_board_soc_onchip_memory_nios_cpu_component_configuration.pl  --do_build_sim=0  ]
+Info: onchip_memory_nios_cpu: Done RTL generation for module 'fluid_board_soc_onchip_memory_nios_cpu'
+Info: onchip_memory_nios_cpu: "fluid_board_soc" instantiated altera_avalon_onchip_memory2 "onchip_memory_nios_cpu"
+Info: pio_input: Starting RTL generation for module 'fluid_board_soc_pio_input'
+Info: pio_input:   Generation command is [exec /opt/altera/15.1/quartus/linux64/perl/bin/perl -I /opt/altera/15.1/quartus/linux64/perl/lib -I /opt/altera/15.1/quartus/sopc_builder/bin/europa -I /opt/altera/15.1/quartus/sopc_builder/bin/perl_lib -I /opt/altera/15.1/quartus/sopc_builder/bin -I /opt/altera/15.1/quartus/../ip/altera/sopc_builder_ip/common -I /opt/altera/15.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio -- /opt/altera/15.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio/generate_rtl.pl --name=fluid_board_soc_pio_input --dir=/tmp/alt7602_5475660713572948225.dir/0010_pio_input_gen/ --quartus_dir=/opt/altera/15.1/quartus --verilog --config=/tmp/alt7602_5475660713572948225.dir/0010_pio_input_gen//fluid_board_soc_pio_input_component_configuration.pl  --do_build_sim=0  ]
+Info: pio_input: Done RTL generation for module 'fluid_board_soc_pio_input'
+Info: pio_input: "fluid_board_soc" instantiated altera_avalon_pio "pio_input"
+Info: pio_output: Starting RTL generation for module 'fluid_board_soc_pio_output'
+Info: pio_output:   Generation command is [exec /opt/altera/15.1/quartus/linux64/perl/bin/perl -I /opt/altera/15.1/quartus/linux64/perl/lib -I /opt/altera/15.1/quartus/sopc_builder/bin/europa -I /opt/altera/15.1/quartus/sopc_builder/bin/perl_lib -I /opt/altera/15.1/quartus/sopc_builder/bin -I /opt/altera/15.1/quartus/../ip/altera/sopc_builder_ip/common -I /opt/altera/15.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio -- /opt/altera/15.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio/generate_rtl.pl --name=fluid_board_soc_pio_output --dir=/tmp/alt7602_5475660713572948225.dir/0011_pio_output_gen/ --quartus_dir=/opt/altera/15.1/quartus --verilog --config=/tmp/alt7602_5475660713572948225.dir/0011_pio_output_gen//fluid_board_soc_pio_output_component_configuration.pl  --do_build_sim=0  ]
+Info: pio_output: Done RTL generation for module 'fluid_board_soc_pio_output'
+Info: pio_output: "fluid_board_soc" instantiated altera_avalon_pio "pio_output"
+Info: pio_reset_nios: Starting RTL generation for module 'fluid_board_soc_pio_reset_nios'
+Info: pio_reset_nios:   Generation command is [exec /opt/altera/15.1/quartus/linux64/perl/bin/perl -I /opt/altera/15.1/quartus/linux64/perl/lib -I /opt/altera/15.1/quartus/sopc_builder/bin/europa -I /opt/altera/15.1/quartus/sopc_builder/bin/perl_lib -I /opt/altera/15.1/quartus/sopc_builder/bin -I /opt/altera/15.1/quartus/../ip/altera/sopc_builder_ip/common -I /opt/altera/15.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio -- /opt/altera/15.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio/generate_rtl.pl --name=fluid_board_soc_pio_reset_nios --dir=/tmp/alt7602_5475660713572948225.dir/0012_pio_reset_nios_gen/ --quartus_dir=/opt/altera/15.1/quartus --verilog --config=/tmp/alt7602_5475660713572948225.dir/0012_pio_reset_nios_gen//fluid_board_soc_pio_reset_nios_component_configuration.pl  --do_build_sim=0  ]
+Info: pio_reset_nios: Done RTL generation for module 'fluid_board_soc_pio_reset_nios'
+Info: pio_reset_nios: "fluid_board_soc" instantiated altera_avalon_pio "pio_reset_nios"
+Info: pll_0: "fluid_board_soc" instantiated altera_pll "pll_0"
+Info: sysid: "fluid_board_soc" instantiated altera_avalon_sysid_qsys "sysid"
+Info: timer_0: Starting RTL generation for module 'fluid_board_soc_timer_0'
+Info: timer_0:   Generation command is [exec /opt/altera/15.1/quartus/linux64//perl/bin/perl -I /opt/altera/15.1/quartus/linux64//perl/lib -I /opt/altera/15.1/quartus/sopc_builder/bin/europa -I /opt/altera/15.1/quartus/sopc_builder/bin/perl_lib -I /opt/altera/15.1/quartus/sopc_builder/bin -I /opt/altera/15.1/quartus/../ip/altera/sopc_builder_ip/common -I /opt/altera/15.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_timer -- /opt/altera/15.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_timer/generate_rtl.pl --name=fluid_board_soc_timer_0 --dir=/tmp/alt7602_5475660713572948225.dir/0015_timer_0_gen/ --quartus_dir=/opt/altera/15.1/quartus --verilog --config=/tmp/alt7602_5475660713572948225.dir/0015_timer_0_gen//fluid_board_soc_timer_0_component_configuration.pl  --do_build_sim=0  ]
+Info: timer_0: Done RTL generation for module 'fluid_board_soc_timer_0'
+Info: timer_0: "fluid_board_soc" instantiated altera_avalon_timer "timer_0"
+Info: avalon_st_adapter: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_001: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_002: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_003: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_004: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_005: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_006: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_007: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_008: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_009: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_010: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_011: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_012: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_013: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_014: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_015: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_016: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_017: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_018: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_019: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_020: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_021: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_022: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_023: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_024: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_025: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_026: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_027: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_028: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_029: Inserting error_adapter: error_adapter_0
+Info: mm_interconnect_0: "fluid_board_soc" instantiated altera_mm_interconnect "mm_interconnect_0"
+Info: avalon_st_adapter: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_001: Inserting error_adapter: error_adapter_0
+Info: mm_interconnect_1: "fluid_board_soc" instantiated altera_mm_interconnect "mm_interconnect_1"
+Info: irq_mapper: "fluid_board_soc" instantiated altera_irq_mapper "irq_mapper"
+Info: irq_mapper_001: "fluid_board_soc" instantiated altera_irq_mapper "irq_mapper_001"
+Info: irq_mapper_002: "fluid_board_soc" instantiated altera_irq_mapper "irq_mapper_002"
+Info: rst_controller: "fluid_board_soc" instantiated altera_reset_controller "rst_controller"
+Info: jtag_phy_embedded_in_jtag_master: "fpga_only_master" instantiated altera_jtag_dc_streaming "jtag_phy_embedded_in_jtag_master"
+Info: timing_adt: "fpga_only_master" instantiated timing_adapter "timing_adt"
+Info: fifo: "fpga_only_master" instantiated altera_avalon_sc_fifo "fifo"
+Info: b2p: "fpga_only_master" instantiated altera_avalon_st_bytes_to_packets "b2p"
+Info: p2b: "fpga_only_master" instantiated altera_avalon_st_packets_to_bytes "p2b"
+Info: transacto: "fpga_only_master" instantiated altera_avalon_packets_to_master "transacto"
+Info: b2p_adapter: "fpga_only_master" instantiated channel_adapter "b2p_adapter"
+Info: p2b_adapter: "fpga_only_master" instantiated channel_adapter "p2b_adapter"
+Info: fpga_interfaces: "hps_0" instantiated altera_interface_generator "fpga_interfaces"
+Info: hps_io: "hps_0" instantiated altera_hps_io "hps_io"
+Info: cpu: Starting RTL generation for module 'fluid_board_soc_nios2_qsys_0_cpu'
+Info: cpu:   Generation command is [exec /opt/altera/15.1/quartus/linux64//eperlcmd -I /opt/altera/15.1/quartus/linux64//perl/lib -I /opt/altera/15.1/quartus/sopc_builder/bin/europa -I /opt/altera/15.1/quartus/sopc_builder/bin/perl_lib -I /opt/altera/15.1/quartus/sopc_builder/bin -I /opt/altera/15.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2/cpu_lib -I /opt/altera/15.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2/nios_lib -I /opt/altera/15.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2 -I /opt/altera/15.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2 -- /opt/altera/15.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2/generate_rtl.epl --name=fluid_board_soc_nios2_qsys_0_cpu --dir=/tmp/alt7602_5475660713572948225.dir/0025_cpu_gen/ --quartus_bindir=/opt/altera/15.1/quartus/linux64/ --verilog --config=/tmp/alt7602_5475660713572948225.dir/0025_cpu_gen//fluid_board_soc_nios2_qsys_0_cpu_processor_configuration.pl  --do_build_sim=0  ]
+Info: cpu: # 2018.03.12 11:18:22 (*) Starting Nios II generation
+Info: cpu: # 2018.03.12 11:18:22 (*)   Checking for plaintext license.
+Info: cpu: # 2018.03.12 11:18:23 (*)   Plaintext license not found.
+Info: cpu: # 2018.03.12 11:18:23 (*)   Checking for encrypted license (non-evaluation).
+Info: cpu: # 2018.03.12 11:18:23 (*)   Encrypted license found.  SOF will not be time-limited.
+Info: cpu: # 2018.03.12 11:18:23 (*)   Elaborating CPU configuration settings
+Info: cpu: # 2018.03.12 11:18:23 (*)   Creating all objects for CPU
+Info: cpu: # 2018.03.12 11:18:23 (*)     Testbench
+Info: cpu: # 2018.03.12 11:18:23 (*)     Instruction decoding
+Info: cpu: # 2018.03.12 11:18:23 (*)       Instruction fields
+Info: cpu: # 2018.03.12 11:18:23 (*)       Instruction decodes
+Info: cpu: # 2018.03.12 11:18:24 (*)       Signals for RTL simulation waveforms
+Info: cpu: # 2018.03.12 11:18:24 (*)       Instruction controls
+Info: cpu: # 2018.03.12 11:18:24 (*)     Pipeline frontend
+Info: cpu: # 2018.03.12 11:18:24 (*)     Pipeline backend
+Info: cpu: # 2018.03.12 11:18:25 (*)   Generating RTL from CPU objects
+Info: cpu: # 2018.03.12 11:18:27 (*)   Creating encrypted RTL
+Info: cpu: # 2018.03.12 11:18:28 (*) Done Nios II generation
+Info: cpu: Done RTL generation for module 'fluid_board_soc_nios2_qsys_0_cpu'
+Info: cpu: "nios2_qsys_0" instantiated altera_nios2_gen2_unit "cpu"
+Info: nios2_qsys_0_data_master_translator: "mm_interconnect_0" instantiated altera_merlin_master_translator "nios2_qsys_0_data_master_translator"
+Info: jtag_uart_avalon_jtag_slave_translator: "mm_interconnect_0" instantiated altera_merlin_slave_translator "jtag_uart_avalon_jtag_slave_translator"
+Info: nios2_qsys_0_data_master_agent: "mm_interconnect_0" instantiated altera_merlin_master_agent "nios2_qsys_0_data_master_agent"
+Info: hps_0_h2f_lw_axi_master_agent: "mm_interconnect_0" instantiated altera_merlin_axi_master_ni "hps_0_h2f_lw_axi_master_agent"
+Info: axi_lw_slave_register_0_altera_axi4lite_slave_agent: "mm_interconnect_0" instantiated altera_merlin_axi_slave_ni "axi_lw_slave_register_0_altera_axi4lite_slave_agent"
+Info: Reusing file /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_avalon_sc_fifo.v
+Info: Reusing file /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_merlin_address_alignment.sv
+Info: jtag_uart_avalon_jtag_slave_agent: "mm_interconnect_0" instantiated altera_merlin_slave_agent "jtag_uart_avalon_jtag_slave_agent"
+Info: Reusing file /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_merlin_burst_uncompressor.sv
+Info: router: "mm_interconnect_0" instantiated altera_merlin_router "router"
+Info: router_001: "mm_interconnect_0" instantiated altera_merlin_router "router_001"
+Info: router_002: "mm_interconnect_0" instantiated altera_merlin_router "router_002"
+Info: router_003: "mm_interconnect_0" instantiated altera_merlin_router "router_003"
+Info: router_005: "mm_interconnect_0" instantiated altera_merlin_router "router_005"
+Info: router_007: "mm_interconnect_0" instantiated altera_merlin_router "router_007"
+Info: router_008: "mm_interconnect_0" instantiated altera_merlin_router "router_008"
+Info: router_015: "mm_interconnect_0" instantiated altera_merlin_router "router_015"
+Info: router_016: "mm_interconnect_0" instantiated altera_merlin_router "router_016"
+Info: router_017: "mm_interconnect_0" instantiated altera_merlin_router "router_017"
+Info: router_022: "mm_interconnect_0" instantiated altera_merlin_router "router_022"
+Info: router_029: "mm_interconnect_0" instantiated altera_merlin_router "router_029"
+Info: router_036: "mm_interconnect_0" instantiated altera_merlin_router "router_036"
+Info: fpga_only_master_master_limiter: "mm_interconnect_0" instantiated altera_merlin_traffic_limiter "fpga_only_master_master_limiter"
+Info: Reusing file /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_avalon_sc_fifo.v
+Info: Reusing file /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_avalon_st_pipeline_base.v
+Info: jtag_uart_avalon_jtag_slave_burst_adapter: "mm_interconnect_0" instantiated altera_merlin_burst_adapter "jtag_uart_avalon_jtag_slave_burst_adapter"
+Info: Reusing file /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_merlin_address_alignment.sv
+Info: Reusing file /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_avalon_st_pipeline_stage.sv
+Info: Reusing file /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_avalon_st_pipeline_base.v
+Info: cmd_demux: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "cmd_demux"
+Info: cmd_demux_001: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "cmd_demux_001"
+Info: cmd_demux_002: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "cmd_demux_002"
+Info: cmd_mux: "mm_interconnect_0" instantiated altera_merlin_multiplexer "cmd_mux"
+Info: cmd_mux_002: "mm_interconnect_0" instantiated altera_merlin_multiplexer "cmd_mux_002"
+Info: Reusing file /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: cmd_mux_010: "mm_interconnect_0" instantiated altera_merlin_multiplexer "cmd_mux_010"
+Info: Reusing file /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: cmd_mux_011: "mm_interconnect_0" instantiated altera_merlin_multiplexer "cmd_mux_011"
+Info: Reusing file /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: cmd_mux_012: "mm_interconnect_0" instantiated altera_merlin_multiplexer "cmd_mux_012"
+Info: Reusing file /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: rsp_demux: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "rsp_demux"
+Info: rsp_demux_002: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "rsp_demux_002"
+Info: rsp_demux_010: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "rsp_demux_010"
+Info: rsp_demux_011: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "rsp_demux_011"
+Info: rsp_demux_012: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "rsp_demux_012"
+Info: rsp_demux_024: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "rsp_demux_024"
+Info: rsp_mux: "mm_interconnect_0" instantiated altera_merlin_multiplexer "rsp_mux"
+Info: Reusing file /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: rsp_mux_001: "mm_interconnect_0" instantiated altera_merlin_multiplexer "rsp_mux_001"
+Info: Reusing file /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: rsp_mux_002: "mm_interconnect_0" instantiated altera_merlin_multiplexer "rsp_mux_002"
+Info: Reusing file /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: i2c_master_is1_avalon_slave_rsp_width_adapter: "mm_interconnect_0" instantiated altera_merlin_width_adapter "i2c_master_is1_avalon_slave_rsp_width_adapter"
+Info: Reusing file /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_merlin_address_alignment.sv
+Info: Reusing file /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_merlin_burst_uncompressor.sv
+Info: crosser: "mm_interconnect_0" instantiated altera_avalon_st_handshake_clock_crosser "crosser"
+Info: Reusing file /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_avalon_st_clock_crosser.v
+Info: Reusing file /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_avalon_st_pipeline_base.v
+Warning: Overwriting different file /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_std_synchronizer_nocut.v
+Info: avalon_st_adapter: "mm_interconnect_0" instantiated altera_avalon_st_adapter "avalon_st_adapter"
+Info: avalon_st_adapter_001: "mm_interconnect_0" instantiated altera_avalon_st_adapter "avalon_st_adapter_001"
+Info: avalon_st_adapter_015: "mm_interconnect_0" instantiated altera_avalon_st_adapter "avalon_st_adapter_015"
+Info: router: "mm_interconnect_1" instantiated altera_merlin_router "router"
+Info: router_002: "mm_interconnect_1" instantiated altera_merlin_router "router_002"
+Info: router_003: "mm_interconnect_1" instantiated altera_merlin_router "router_003"
+Info: cmd_demux: "mm_interconnect_1" instantiated altera_merlin_demultiplexer "cmd_demux"
+Info: cmd_mux: "mm_interconnect_1" instantiated altera_merlin_multiplexer "cmd_mux"
+Info: Reusing file /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: rsp_demux: "mm_interconnect_1" instantiated altera_merlin_demultiplexer "rsp_demux"
+Info: rsp_mux: "mm_interconnect_1" instantiated altera_merlin_multiplexer "rsp_mux"
+Info: Reusing file /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: border: "hps_io" instantiated altera_interface_generator "border"
+Info: error_adapter_0: "avalon_st_adapter" instantiated error_adapter "error_adapter_0"
+Info: error_adapter_0: "avalon_st_adapter_001" instantiated error_adapter "error_adapter_0"
+Info: error_adapter_0: "avalon_st_adapter_015" instantiated error_adapter "error_adapter_0"
+Info: fluid_board_soc: Done "fluid_board_soc" with 90 modules, 181 files
+Info: qsys-generate succeeded.
+Info: Finished: Create HDL design files for synthesis
