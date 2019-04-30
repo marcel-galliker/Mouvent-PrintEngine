@@ -40,6 +40,14 @@ namespace RX_DigiPrint.Models
         {
         }
 
+        //--- Property IsSelected ---------------------------------------
+        private bool _IsSelected=false;
+        public bool IsSelected
+        {
+            get { return _IsSelected; }
+            set { SetProperty(ref _IsSelected, value); }
+        }
+        
         //--- Property FileType ---------------------------------------
         private ENFileType _FileType;
         public ENFileType FileType

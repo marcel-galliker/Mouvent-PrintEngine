@@ -627,7 +627,7 @@ static void _write_log(void)
 			fprintf(_LogFile, "%lu;", _NiosStat->cooler_temp);
 			fprintf(_LogFile, "%ld;", _NiosStat->cooler_pressure);
 			
-			if (FpgaCfg.encoder->synth.value) fprintf(_LogFile, "%d;", 160000 / FpgaCfg.encoder->synth.value);
+			if (FpgaCfg.encoder->synth.value) fprintf(_LogFile, "%d;", 140000 / FpgaCfg.encoder->synth.value);
 			else                              fprintf(_LogFile, "%d;", 0);				
 									
 			for (i = 0; i < MAX_HEADS_BOARD; i++)

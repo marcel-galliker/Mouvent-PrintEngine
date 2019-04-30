@@ -781,6 +781,7 @@
 //../Externals/libtiff
 //../Externals/mlpi/include
 //../Externals/matrix/linux/include
+//../Externals/libxl/include_c
 // --- Include directories end --- //
 
 

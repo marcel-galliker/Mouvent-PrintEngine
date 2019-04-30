@@ -64,7 +64,7 @@ namespace RX_DigiPrint.Models
         public void send_quality(bool? quality)
         {
             TcpIp.SValue value = new TcpIp.SValue();
-            value.no = (UInt32)No;
+            value.no = No;
             switch(quality)
             {
                 case false: value.value=1; break;

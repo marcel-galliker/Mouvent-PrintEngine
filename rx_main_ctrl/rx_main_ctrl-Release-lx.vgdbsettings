@@ -29,6 +29,7 @@
       </FileMasks>
       <TransferNewFilesOnly>true</TransferNewFilesOnly>
       <IncludeSubdirectories>true</IncludeSubdirectories>
+      <SelectedDirectories />
       <DeleteDisappearedFiles>false</DeleteDisappearedFiles>
     </MainSourceTransferCommand>
     <AllowChangingHostForMainCommands>false</AllowChangingHostForMainCommands>
@@ -175,23 +176,6 @@
           <Transport>SSH</Transport>
           <UserName>root</UserName>
         </RemoteHost>
-        <LocalDirectory>$(ProjectDir)/../Externals/matrix/linux</LocalDirectory>
-        <RemoteDirectory>/tmp/VisualGDB/$(ProjectDirUnixStyle)/../Externals/matrix/linux</RemoteDirectory>
-        <FileMasks>
-          <string>*.*</string>
-        </FileMasks>
-        <TransferNewFilesOnly>true</TransferNewFilesOnly>
-        <IncludeSubdirectories>true</IncludeSubdirectories>
-        <SelectedDirectories />
-        <DeleteDisappearedFiles>false</DeleteDisappearedFiles>
-      </CustomActionBase>
-      <CustomActionBase xsi:type="SourceTransferAction">
-        <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
-        <RemoteHost>
-          <HostName>$(BuildHost)</HostName>
-          <Transport>SSH</Transport>
-          <UserName>root</UserName>
-        </RemoteHost>
         <LocalDirectory>$(ProjectDir)/../Externals/mlpi</LocalDirectory>
         <RemoteDirectory>/tmp/VisualGDB/$(ProjectDirUnixStyle)/../Externals/mlpi</RemoteDirectory>
         <FileMasks>
@@ -215,36 +199,38 @@
         <SourceFilePath>$(ProjectDir)\..\Externals\mlpi\bin\linux-gcc-x64\libmlpi.so.1</SourceFilePath>
         <DestinationFilePath>$(TargetDir)/libmlpi.so.1</DestinationFilePath>
       </CustomActionBase>
+      <CustomActionBase xsi:type="SourceTransferAction">
+        <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
+        <RemoteHost>
+          <HostName>$(BuildHost)</HostName>
+          <Transport>SSH</Transport>
+          <UserName>root</UserName>
+        </RemoteHost>
+        <LocalDirectory>$(ProjectDir)/../Externals/libxl</LocalDirectory>
+        <RemoteDirectory>/tmp/VisualGDB/$(ProjectDirUnixStyle)/../Externals/libxl</RemoteDirectory>
+        <FileMasks>
+          <string>*.*</string>
+        </FileMasks>
+        <TransferNewFilesOnly>true</TransferNewFilesOnly>
+        <IncludeSubdirectories>true</IncludeSubdirectories>
+        <SelectedDirectories />
+        <DeleteDisappearedFiles>false</DeleteDisappearedFiles>
+      </CustomActionBase>
+      <CustomActionBase xsi:type="FileTransferAction">
+        <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
+        <SourceHost>
+          <Transport>None</Transport>
+        </SourceHost>
+        <DestinationHost>
+          <HostName>$(BuildHost)</HostName>
+          <Transport>SSH</Transport>
+          <UserName>root</UserName>
+        </DestinationHost>
+        <SourceFilePath>$(ProjectDir)\..\Externals\libxl\lib64\libxl.so</SourceFilePath>
+        <DestinationFilePath>$(TargetDir)/libxl.so</DestinationFilePath>
+      </CustomActionBase>
     </PreBuildActions>
     <PostBuildActions>
-      <CustomActionBase xsi:type="FileTransferAction">
-        <SkipWhenRunningCommandList>true</SkipWhenRunningCommandList>
-        <SourceHost>
-          <HostName>$(BuildHost)</HostName>
-          <Transport>SSH</Transport>
-          <UserName>root</UserName>
-        </SourceHost>
-        <DestinationHost>
-          <HostName>BuildMachine</HostName>
-          <Transport>BuiltinShortcut</Transport>
-          <UserName />
-        </DestinationHost>
-        <SourceFilePath>$(TargetPath)</SourceFilePath>
-        <DestinationFilePath>$(ProjectDir)\..\bin\lx\$(TargetFileName)</DestinationFilePath>
-      </CustomActionBase>
-      <CustomActionBase xsi:type="FileTransferAction">
-        <SkipWhenRunningCommandList>true</SkipWhenRunningCommandList>
-        <SourceHost>
-          <HostName>$(BuildHost)</HostName>
-          <Transport>SSH</Transport>
-          <UserName>root</UserName>
-        </SourceHost>
-        <DestinationHost>
-          <Transport>None</Transport>
-        </DestinationHost>
-        <SourceFilePath>$(TargetPath)</SourceFilePath>
-        <DestinationFilePath>d:\Radex\bin\main\$(TargetFileName)</DestinationFilePath>
-      </CustomActionBase>
       <CustomActionBase xsi:type="FileTransferAction">
         <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
         <SourceHost>
@@ -277,23 +263,8 @@
         <DestinationHost>
           <Transport>None</Transport>
         </DestinationHost>
-        <SourceFilePath>$(ProjectDir)\..\Externals\matrix\linux\x86_64\libmxlin64.so.2.6.0</SourceFilePath>
-        <DestinationFilePath>$(ProjectDir)\..\bin\main\libmxlin64.so.2.6</DestinationFilePath>
-      </CustomActionBase>
-      <CustomActionBase xsi:type="FileTransferAction">
-        <SkipWhenRunningCommandList>true</SkipWhenRunningCommandList>
-        <SourceHost>
-          <HostName>BuildMachine</HostName>
-          <Transport>BuiltinShortcut</Transport>
-          <UserName />
-        </SourceHost>
-        <DestinationHost>
-          <HostName>BuildMachine</HostName>
-          <Transport>BuiltinShortcut</Transport>
-          <UserName />
-        </DestinationHost>
-        <SourceFilePath>$(ProjectDir)\..\Externals\mlpi\bin\linux-gcc-x64\libmlpi.so.1</SourceFilePath>
-        <DestinationFilePath>$(ProjectDir)\..\bin\main\libmlpi.so.1</DestinationFilePath>
+        <SourceFilePath>$(ProjectDir)\..\Externals\libxl\lib64\libxl.so</SourceFilePath>
+        <DestinationFilePath>$(ProjectDir)\..\bin\main\libxl.so</DestinationFilePath>
       </CustomActionBase>
     </PostBuildActions>
     <PreCleanActions />

@@ -45,7 +45,7 @@
         
         <ig:XamGrid x:Name="DirGrid"
                 Grid.Row="2" Grid.Column="1" Grid.RowSpan="2"
-                CellStyle="{DynamicResource XamGridCellControlStyle}"
+                CellStyle="{DynamicResource XamGridCellControlStyle-PrintQueue}"
                 HeaderStyle="{DynamicResource XamGridHeaderStyleSortable}"
                 AutoGenerateColumns="False"
                 RowHeight="Dynamic"

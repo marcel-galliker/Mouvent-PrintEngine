@@ -32,6 +32,7 @@
 #include "step_cleaf.h"
 #include "step_std.h"
 #include "chiller.h"
+#include "prod_log.h"
 #include "cleaf_orders.h"
 #include "bmp.h"
 #include "label.h"
@@ -59,6 +60,7 @@ static INT32			_PreloadCnt=0;
 static int				_SetPrintPar = TRUE;
 static int				_PrintGo;
 static int				_PrintDone[MAX_PAGES];
+static int				_PrintDoneNo[HEAD_BOARD_CNT];
 static int				ERR_z_in_print;
 
 //--- pc_init ----------------------------------------------------------------
@@ -126,7 +128,7 @@ int pc_start_printing(void)
 	if (RX_PrinterStatus.printState==ps_ready_power || RX_PrinterStatus.printState==ps_webin)
 	{
 		step_set_config();
-		if (!RX_TestTableStatus.info.z_in_print && 
+		if (!RX_StepperStatus.info.z_in_print && 
 			(RX_Config.printer.type==printer_TX801 
 		  || RX_Config.printer.type==printer_TX802
 			))
@@ -134,16 +136,16 @@ int pc_start_printing(void)
 			step_handle_gui_msg(INVALID_SOCKET, CMD_CAP_PRINT_POS, NULL, 0);				
 		}
 		
-		TrPrintfL(TRUE, "pc_start_printing: ref_done=%d", RX_TestTableStatus.info.ref_done);		
+		TrPrintfL(TRUE, "pc_start_printing: ref_done=%d", RX_StepperStatus.info.ref_done);		
 		
 		if ((rx_def_is_web(RX_Config.printer.type) || RX_Config.printer.type==printer_cleaf) && (RX_Config.stepper.ref_height||RX_Config.stepper.print_height))
 		{
-			if(!RX_TestTableStatus.info.ref_done)
+			if(!RX_StepperStatus.info.ref_done)
 			{
 				TrPrintfL(TRUE, "pc_start_printing: CMD_CAP_REFERENCE");		
 				step_handle_gui_msg(INVALID_SOCKET, CMD_CAP_REFERENCE, NULL, 0);					
 			}
-			else if (RX_TestTableStatus.info.z_in_cap)
+			else if (RX_StepperStatus.info.z_in_cap)
 			{
 				TrPrintfL(TRUE, "pc_start_printing: CMD_CAP_UP_POS");		
 				step_handle_gui_msg(INVALID_SOCKET, CMD_CAP_UP_POS, NULL, 0);										
@@ -163,6 +165,7 @@ int pc_start_printing(void)
 		RX_PrinterStatus.printState=ps_printing;
 		_PrintGo = 0;
 		memset(_PrintDone, 0, sizeof(_PrintDone));
+		memset(_PrintDoneNo, 0, sizeof(_PrintDoneNo));
 		_SetPrintPar   = TRUE;
 //		fluid_start_printing();
 		spool_start_printing();
@@ -200,6 +203,7 @@ int pc_stop_printing(void)
 //		Error(LOG, 0, "pc_stop_printing");
 		machine_stop_printing();	
 		ctrl_abort_printing();
+		pl_stop(&_Item);
 		pq_stop();
 		co_stop_printing();
 		if (RX_PrinterStatus.testMode) pc_off();
@@ -208,6 +212,7 @@ int pc_stop_printing(void)
 	{
 		RX_PrinterStatus.printState=ps_stopping;
 		pq_stopping(&_Item);
+		enc_stop_pg();
 		gui_send_printer_status(&RX_PrinterStatus);
 		machine_pause_printing();
 	}
@@ -239,6 +244,7 @@ int pc_abort_printing(void)
 	RX_PrinterStatus.testMode   = FALSE;
 	gui_send_printer_status(&RX_PrinterStatus);
 	machine_abort_printing();
+	pl_stop(&_Item);
 	pq_abort();
 	co_stop_printing();
 	return REPLY_OK;	
@@ -492,6 +498,7 @@ static int _print_next(void)
 				_Item.scansSent=0;
 				_CopiesStart = _Item.copiesPrinted;
 				pq_set_item(&_Item);
+				pl_start(&_Item, _FilePathLocal);
 				if (_SetPrintPar)
 				{
 					_SetPrintPar = FALSE;
@@ -637,6 +644,7 @@ static int _print_next(void)
 												
 						machine_set_scans(_Item.scans);
 						pq_set_item(&_Item);
+						pl_start(&_Item, _FilePathLocal);
 					}
 					spool_print_file(&_Item.id, _DataPath, _ScanOffset, _ScanLengthPx, &_Item, TRUE);
 				}
@@ -715,25 +723,27 @@ int pc_sent(SPageId *id)
 //--- pc_print_done ------------------------------
 int pc_print_done(int headNo, SPrintDoneMsg *pmsg)
 {	
-	TrPrintfL(TRUE, "**** PRINT-DONE[%d] PD=%d: id=%d, page=%d, scan=%d, copy=%d ****", headNo, pmsg->pd, pmsg->id.id, pmsg->id.page, pmsg->id.scan, pmsg->id.copy);	
+	int n=pmsg->pd%SIZEOF(_PrintDone);
+	_PrintDone[n]++;
 	
-	TrPrintf(TRUE, "PRINTED sent=%d, printed=%d, stopping=%d", RX_PrinterStatus.sentCnt, RX_PrinterStatus.printedCnt, RX_PrinterStatus.printState==ps_stopping);
-
+	TrPrintfL(TRUE, "Head[%d] PRINT-DONE: #d: PD=%d: id=%d, page=%d, scan=%d, copy=%d **** (%d/%d)", headNo, ++_PrintDoneNo[headNo], pmsg->pd, pmsg->id.id, pmsg->id.page, pmsg->id.scan, pmsg->id.copy, _PrintDone[n], spool_head_board_cnt());	
+	
 	if (RX_Config.printer.type==printer_cleaf)
 	{
 		co_printed();
-		if (!RX_TestTableStatus.info.z_in_print) 
+		if (!RX_StepperStatus.info.z_in_print) 
 		{
 			if (!ERR_z_in_print) Error(WARN, 0, "Printing while head not in print position");
 			ERR_z_in_print = TRUE;
 		}
 	}
 	
-	int n=pmsg->pd%SIZEOF(_PrintDone);
-	if (++_PrintDone[n] == spool_head_board_cnt())
+	if (_PrintDone[n] == spool_head_board_cnt())
 	{
 		SPrintQueueItem *pnext;
 		int pageDone, jobDone;
+
+		TrPrintf(TRUE, "*** PRINT-DONE #%d *** (id=%d, page=%d, scan=%d, copy=%d) sent=%d, printed=%d, stopping=%d", _PrintDoneNo[headNo], pmsg->id.id, pmsg->id.page, pmsg->id.scan, pmsg->id.copy, RX_PrinterStatus.sentCnt, RX_PrinterStatus.printedCnt, RX_PrinterStatus.printState==ps_stopping);
 
 		_PrintDone[n] = 0;
  

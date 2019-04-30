@@ -18,7 +18,7 @@ namespace RX_DigiPrint.Models
         public static EventList         Events            = new EventList();
         public static PrinterStatus     PrinterStatus     = new PrinterStatus();
         public static PrintQueue        PrintQueue        = new PrintQueue();
-        public static RxLanguage          Language          = new RxLanguage();
+        public static RxLanguage        Language          = new RxLanguage();
 //      public static EUserType         User              = EUserType.usr_operator;
         public static User              User              = new User();
         public static RxInterface       RxInterface       = new RxInterface();
@@ -33,7 +33,7 @@ namespace RX_DigiPrint.Models
         public static TestTableStatus   TestTableStatus   = new TestTableStatus();
         public static Plc               Plc               = new Plc();
         public static Chiller           Chiller           = new Chiller();
-        public static Encoder           Encoder           = new Encoder();
+        public static Encoder[]         Encoder           = new Encoder[2];
         public static NetworkList       Network           = new NetworkList();
         public static RxScreen          Screen            = new RxScreen();
         public static PreviewCash       PreviewCash       = new PreviewCash();

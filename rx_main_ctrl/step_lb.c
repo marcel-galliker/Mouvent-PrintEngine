@@ -28,7 +28,7 @@
 
 static RX_SOCKET		*_step_socket[STEPPER_CNT]={0};
 
-static STestTableStat	_status[STEPPER_CNT];
+static SStepperStat		_Status[STEPPER_CNT];
 static int				_AbortPrinting=FALSE;
 
 //--- steplb_init ---------------------------------------------------
@@ -38,7 +38,7 @@ void steplb_init(int no, RX_SOCKET *psocket)
 	{
 		_step_socket[no] = psocket;
 	}
-	memset(_status, 0, sizeof(_status));
+	memset(_Status, 0, sizeof(_Status));
 }
 
 //--- steplb_handle_gui_msg------------------------------------------------------------------
@@ -98,12 +98,12 @@ int	 steplb_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen
 	return REPLY_OK;
 }
 
-//--- steplb_handle_status ----------------------------------------------------------------------
-int steplb_handle_status(int no, STestTableStat *pStatus)
+//--- steplb_handle_Status ----------------------------------------------------------------------
+int steplb_handle_status(int no, SStepperStat *pStatus)
 {
 	int i;
 	ETestTableInfo info;
-	memcpy(&_status[no], pStatus, sizeof(_status[no]));
+	memcpy(&_Status[no], pStatus, sizeof(_Status[no]));
 
 	memset(&info, 0, sizeof(info));
 	info.ref_done	= TRUE;
@@ -112,43 +112,43 @@ int steplb_handle_status(int no, STestTableStat *pStatus)
 	info.z_in_cap	= TRUE;
 	info.x_in_cap	= TRUE;
 			
-//	TrPrintf(TRUE, "steplb_handle_status(%d)", no);
+//	TrPrintf(TRUE, "steplb_handle_Status(%d)", no);
 	
 	for (i=0; i<STEPPER_CNT; i++)
 	{
 		if (_step_socket[i] && *_step_socket[i]!=INVALID_SOCKET)
 		{
-//			TrPrintf(TRUE, "Stepper[%d]: ref_done=%d moving=%d  in_print=%d  up=%d", i, _status[i].info.ref_done, _status[i].info.moving, _status[i].info.z_in_print, _status[i].info.z_in_ref);
-			info.ref_done		&= _status[i].info.ref_done;
-			info.moving			|= _status[i].info.moving;
-			info.z_in_ref		&= _status[i].info.z_in_ref;
-			info.z_in_print		&= _status[i].info.z_in_print;
-			info.z_in_cap		&= _status[i].info.z_in_cap;
-			info.x_in_cap		&= _status[i].info.x_in_cap;
-			if (_status[i].info.moving) 
+//			TrPrintf(TRUE, "Stepper[%d]: ref_done=%d moving=%d  z_in_print=%d  z_in_ref=%d", i, _Status[i].info.ref_done, _Status[i].info.moving, _Status[i].info.z_in_print, _Status[i].info.z_in_ref);
+			info.ref_done		&= _Status[i].info.ref_done;
+			info.moving			|= _Status[i].info.moving;
+			info.z_in_ref		&= _Status[i].info.z_in_ref;
+			info.z_in_print		&= _Status[i].info.z_in_print;
+			info.z_in_cap		&= _Status[i].info.z_in_cap;
+			info.x_in_cap		&= _Status[i].info.x_in_cap;
+			if (_Status[i].info.moving) 
 			{
-				RX_TestTableStatus.posX = _status[i].posX;
-				RX_TestTableStatus.posY = _status[i].posY;
-				RX_TestTableStatus.posZ = _status[i].posZ;
+				RX_StepperStatus.posX = _Status[i].posX;
+				RX_StepperStatus.posY = _Status[i].posY;
+				RX_StepperStatus.posZ = _Status[i].posZ;
 			}
 		}
 	};
 	
-//	TrPrintf(TRUE, "STEPPER: ref_done=%d moving=%d  in_print=%d  up=%d", info.ref_done, info.moving, info.z_in_print, info.z_in_ref);
+//	TrPrintf(TRUE, "STEPPER: ref_done=%d moving=%d  z_in_print=%d  z_in_ref=%d", info.ref_done, info.moving, info.z_in_print, info.z_in_ref);
 	
 	if (!info.moving) 
 	{
-		RX_TestTableStatus.posX = _status[no].posX;
-		RX_TestTableStatus.posY = _status[no].posY;
-		RX_TestTableStatus.posZ = _status[no].posZ;
+		RX_StepperStatus.posX = _Status[no].posX;
+		RX_StepperStatus.posY = _Status[no].posY;
+		RX_StepperStatus.posZ = _Status[no].posZ;
 	}
 	
-	if (_AbortPrinting && RX_TestTableStatus.info.z_in_print) steplb_to_up_pos();
+	if (_AbortPrinting && RX_StepperStatus.info.z_in_print) steplb_to_up_pos();
 		
-	memcpy(&RX_TestTableStatus.info, &info, sizeof(RX_TestTableStatus.info));
-	RX_TestTableStatus.info.x_in_cap = plc_in_cap_pos();
+	memcpy(&RX_StepperStatus.info, &info, sizeof(RX_StepperStatus.info));
+	RX_StepperStatus.info.x_in_cap = plc_in_cap_pos();
 
-	gui_send_msg_2(0, REP_TT_STATUS, sizeof(RX_TestTableStatus), &RX_TestTableStatus);
+	gui_send_msg_2(0, REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);
 	return REPLY_OK;
 }
 
@@ -171,7 +171,7 @@ int	 steplb_to_print_pos(void)
 int  steplb_abort_printing(void)
 {
 	
-	if(RX_TestTableStatus.info.z_in_print) return steplb_to_up_pos();
+	if(RX_StepperStatus.info.z_in_print) return steplb_to_up_pos();
 	else _AbortPrinting = TRUE;
 	return REPLY_OK;
 }

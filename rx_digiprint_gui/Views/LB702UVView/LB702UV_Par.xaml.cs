@@ -21,7 +21,8 @@ namespace RX_DigiPrint.Views.LB702UVView
 
             CB_Material.ItemsSource   = RxGlobals.MaterialList.List;
 
-            CB_RotUW.ItemsSource      = CB_RotRW.ItemsSource = new EN_RotationList();
+            CB_RotUW.ItemsSource      = new EN_RotationList();
+            CB_RotRW.ItemsSource      = new EN_RotationList_OFF();
             CB_Corona.ItemsSource     = new EN_OnOff();
             CB_Pinning1.ItemsSource   = new EN_OnOffAuto();
             CB_Pinning2.ItemsSource   = new EN_OnOffAuto();

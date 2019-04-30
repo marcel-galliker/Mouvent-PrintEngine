@@ -72,6 +72,22 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _CanisterLevel, value); }
         }
 
+        //--- Property BarCode ---------------------------------------
+        private string _BarCode;
+        public string BarCode
+        {
+            get { return _BarCode; }
+            set { SetProperty(ref _BarCode, value); }
+        }
+
+        //--- Property ScannerSN ---------------------------------------
+        private string _ScannerSN;
+        public string ScannerSN
+        {
+            get { return _ScannerSN; }
+            set { SetProperty(ref _ScannerSN, value); }
+        }
+        
         //--- Property CylinderPresSet ---------------------------------------
         private Int32 _CylinderPresSet;
         public Int32 CylinderPresSet
@@ -239,7 +255,6 @@ namespace RX_DigiPrint.Models
             if (msg.err!=0)
                 Err             = msg.err;
 
-
             CylinderPresSet  = msg.cylinderPresSet;
             CylinderPres     = msg.cylinderPres;
             CylinderSetpoint = msg.cylinderSetpoint;
@@ -252,6 +267,8 @@ namespace RX_DigiPrint.Models
             PumpSpeed       = msg.pumpSpeed;
             CtrlMode        = msg.ctrlMode;
             CanisterLevel   = msg.canisterLevel;
+            ScannerSN       = msg.scannerSN;
+            BarCode         = msg.barcode.Replace("; ", "\n");
 
             Connected       = (msg.info & 0x00000001)!=0;
             BleedValve      = ((msg.info & 0x00000002)==0)? "--":"ON";

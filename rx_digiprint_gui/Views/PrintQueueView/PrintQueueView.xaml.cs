@@ -25,6 +25,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
         private Image _ActImage;
         double        _MaxWidth;
         double        _MaxHeight=250;
+        private int   _SelectedItems=0;
 
         //--- constructor -----------------------------------------------
         public PrintQueueView()
@@ -141,42 +142,53 @@ namespace RX_DigiPrint.Views.PrintQueueView
         private bool? _IsScanning=null;
         public void UpdateGridColumns()
         { 
-            if (_IsScanning!=null && _IsScanning==RxGlobals.PrintSystem.IsScanning) return;
-            
-            _IsScanning = RxGlobals.PrintSystem.IsScanning;
-            if (RxGlobals.PrintSystem.IsScanning)
+            if (_IsScanning!=RxGlobals.PrintSystem.IsScanning)
             {
-                PrintQueueGrid.Columns["PageStr"        ].Visibility = Visibility.Collapsed;        
-                PrintQueueGrid.Columns["Copies"         ].Visibility = Visibility.Collapsed;        
-                PrintQueueGrid.Columns["ScanLength"     ].Visibility = Visibility.Visible;        
+                _IsScanning = RxGlobals.PrintSystem.IsScanning;
+                if (RxGlobals.PrintSystem.IsScanning)
+                {
+                    PrintQueueGrid.Columns["PageStr"        ].Visibility = Visibility.Collapsed;        
+                    PrintQueueGrid.Columns["Copies"         ].Visibility = Visibility.Collapsed;        
+                    PrintQueueGrid.Columns["ScanLength"     ].Visibility = Visibility.Visible;        
 
-                PrintedQueueGrid.Columns["PageStr"      ].Visibility = Visibility.Collapsed;  
-                PrintedQueueGrid.Columns["Copies"       ].Visibility = Visibility.Collapsed;        
-                PrintedQueueGrid.Columns["ScanLength"   ].Visibility = Visibility.Visible;        
-                PrintedQueueGrid.Columns["ActPage"      ].Visibility = Visibility.Collapsed;        
-                PrintedQueueGrid.Columns["ActCopy"      ].Visibility = Visibility.Collapsed;        
-                PrintedQueueGrid.Columns["Scans"        ].Visibility = Visibility.Visible;        
-                PrintedQueueGrid.Columns["ScansPrinted" ].Visibility = Visibility.Visible;        
+                    PrintedQueueGrid.Columns["PageStr"      ].Visibility = Visibility.Collapsed;  
+                    PrintedQueueGrid.Columns["Copies"       ].Visibility = Visibility.Collapsed;        
+                    PrintedQueueGrid.Columns["ScanLength"   ].Visibility = Visibility.Visible;        
+                    PrintedQueueGrid.Columns["ActPage"      ].Visibility = Visibility.Collapsed;        
+                    PrintedQueueGrid.Columns["ActCopy"      ].Visibility = Visibility.Collapsed;        
+                    PrintedQueueGrid.Columns["Scans"        ].Visibility = Visibility.Visible;        
+                    PrintedQueueGrid.Columns["ScansPrinted" ].Visibility = Visibility.Visible;
+                }
+                else
+                {   
+                    PrintQueueGrid.Columns["FileName"       ].Visibility = Visibility.Visible;        
+                    PrintQueueGrid.Columns["PageStr"        ].Visibility = Visibility.Collapsed;      
+                    PrintQueueGrid.Columns["Copies"         ].Visibility = Visibility.Collapsed;      
+                    PrintQueueGrid.Columns["ScanLength"     ].Visibility = Visibility.Visible;        
+                    PrintQueueGrid.Columns["Ripped"         ].Visibility = Visibility.Collapsed;      
+                    PrintQueueGrid.Columns["Progress"       ].Visibility = Visibility.Visible;        
+
+                    PrintedQueueGrid.Columns["PageStr"      ].Visibility = Visibility.Visible;      
+                    PrintedQueueGrid.Columns["Copies"       ].Visibility = Visibility.Collapsed;      
+                    PrintedQueueGrid.Columns["ScanLength"   ].Visibility = Visibility.Visible;        
+                    PrintedQueueGrid.Columns["State"        ].Visibility = Visibility.Visible;        
+                    PrintedQueueGrid.Columns["ActPage"      ].Visibility = Visibility.Collapsed;      
+                    PrintedQueueGrid.Columns["ActCopy"      ].Visibility = Visibility.Collapsed;      
+                    PrintedQueueGrid.Columns["Scans"        ].Visibility = Visibility.Collapsed;      
+                    PrintedQueueGrid.Columns["ScansPrinted" ].Visibility = Visibility.Collapsed;      
+                    PrintedQueueGrid.Columns["ProgressStr"  ].Visibility = Visibility.Visible;     
+                }
+            }            
+
+            if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_UV)
+            {
+                ExpansionIndiator.Visibility = ExpansionIndiator2.Visibility = Visibility.Collapsed;
+                PrintSettings.Visibility = SettingsTitle.Visibility = Visibility.Visible;
             }
-            else
-            {   
-                PrintQueueGrid.Columns["FileName"       ].Visibility = Visibility.Visible;        
-                PrintQueueGrid.Columns["PageStr"        ].Visibility = Visibility.Collapsed;      
-                PrintQueueGrid.Columns["Copies"         ].Visibility = Visibility.Collapsed;      
-                PrintQueueGrid.Columns["ScanLength"     ].Visibility = Visibility.Visible;        
-                PrintQueueGrid.Columns["Ripped"         ].Visibility = Visibility.Collapsed;      
-                PrintQueueGrid.Columns["Progress"       ].Visibility = Visibility.Visible;        
-
-                PrintedQueueGrid.Columns["PageStr"      ].Visibility = Visibility.Visible;      
-                PrintedQueueGrid.Columns["Copies"       ].Visibility = Visibility.Collapsed;      
-                PrintedQueueGrid.Columns["ScanLength"   ].Visibility = Visibility.Visible;        
-                PrintedQueueGrid.Columns["State"        ].Visibility = Visibility.Visible;        
-                PrintedQueueGrid.Columns["ActPage"      ].Visibility = Visibility.Collapsed;      
-                PrintedQueueGrid.Columns["ActCopy"      ].Visibility = Visibility.Collapsed;      
-                PrintedQueueGrid.Columns["Scans"        ].Visibility = Visibility.Collapsed;      
-                PrintedQueueGrid.Columns["ScansPrinted" ].Visibility = Visibility.Collapsed;      
-                PrintedQueueGrid.Columns["ProgressStr"  ].Visibility = Visibility.Visible;     
-
+            else 
+            {
+                ExpansionIndiator.Visibility = ExpansionIndiator2.Visibility = Visibility.Visible;
+                PrintSettings.Visibility = SettingsTitle.Visibility = Visibility.Collapsed;
             }
         }
 
@@ -188,7 +200,6 @@ namespace RX_DigiPrint.Views.PrintQueueView
             Button_Down.Visibility   = visible;
         }        
 
-        
         //--- Add_Clicked -------------------------------------------------
         private void Add_Clicked1(object sender, RoutedEventArgs e)
         {
@@ -241,9 +252,30 @@ namespace RX_DigiPrint.Views.PrintQueueView
         }
 
         //--- Delete_Clicked -------------------------------------------------
+        private void Delete_Clicked_LB702(object sender, RoutedEventArgs e)
+        {
+            if (_SelectedItems==0) return;
+            if (RxMessageBox.YesNo("Delete", "Delete the Items",  MessageBoxImage.Question, false))
+            {
+                foreach(Row row in PrintQueueGrid.Rows)
+                {
+                    PrintQueueItem item = row.Data as PrintQueueItem;
+                    if (item!=null && item.IsSelected)
+                    {
+                        item.IsSelected = false;
+                        item.SendMsg(TcpIp.CMD_DEL_PRINT_QUEUE);
+                    }
+                }
+                AllButtons(Visibility.Collapsed);
+                _update_selected_items();
+            }
+        }
+
+        //--- Delete_Clicked -------------------------------------------------
         private void Delete_Clicked(object sender, RoutedEventArgs e)
         {
-            if (PrintQueueGrid.ActiveItem!=null)
+			if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_UV) Delete_Clicked_LB702(sender, e);
+			else if (PrintQueueGrid.ActiveItem!=null)
             {
                 if (RxMessageBox.YesNo("Delete", "Delete the Item",  MessageBoxImage.Question, false))
                 {
@@ -252,14 +284,22 @@ namespace RX_DigiPrint.Views.PrintQueueView
                     AllButtons(Visibility.Collapsed);
                 }
             }
-            else
-                Console.WriteLine("PrintQueueGrid.ActiveItem==null");
         }
 
         //--- Up_Clicked -------------------------------------------------
         private void Up_Clicked(object sender, RoutedEventArgs e)
         {
-            if (PrintQueueGrid.ActiveItem!=null) (PrintQueueGrid.ActiveItem as PrintQueueItem).SendMsg(TcpIp.CMD_UP_PRINT_QUEUE);
+			if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_UV)
+			{
+	            foreach(Row row in PrintQueueGrid.Rows)
+	            {
+	                PrintQueueItem item = row.Data as PrintQueueItem;
+	                if (item!=null && item.IsSelected)
+	                    item.SendMsg(TcpIp.CMD_UP_PRINT_QUEUE);
+	            }
+			}
+			else if (PrintQueueGrid.ActiveItem!=null) (PrintQueueGrid.ActiveItem as PrintQueueItem).SendMsg(TcpIp.CMD_UP_PRINT_QUEUE);
+
             if (PrintedQueueGrid.ActiveItem!=null) 
             {
                 PrintQueueItem item = PrintedQueueGrid.ActiveItem as PrintQueueItem;
@@ -272,17 +312,71 @@ namespace RX_DigiPrint.Views.PrintQueueView
         //--- Down_Clicked -------------------------------------------------
         private void Down_Clicked(object sender, RoutedEventArgs e)
         {
-            if (PrintQueueGrid.ActiveItem!=null) (PrintQueueGrid.ActiveItem as PrintQueueItem).SendMsg(TcpIp.CMD_DN_PRINT_QUEUE);
+			if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_UV)
+			{
+	            int row;
+	            for(row = PrintQueueGrid.Rows.Count; row>0; )
+	            {
+	                row--;
+	                if (row>=0)
+	                {
+	                    PrintQueueItem item = PrintQueueGrid.Rows[row].Data as PrintQueueItem;
+	                    if (item!=null && item.IsSelected)
+	                        item.SendMsg(TcpIp.CMD_DN_PRINT_QUEUE);
+	                }
+	            }
+			}
+			else if (PrintQueueGrid.ActiveItem!=null) (PrintQueueGrid.ActiveItem as PrintQueueItem).SendMsg(TcpIp.CMD_DN_PRINT_QUEUE);
         }
 
         //--- PrintQueueGrid_SelectedRowsCollectionChanged ---------------------------------------------------
         private void PrintQueueGrid_SelectedRowsCollectionChanged(object sender, SelectionCollectionChangedEventArgs<SelectedRowsCollection> e)
         {
-            AllButtons(Visibility.Visible);            
+            AllButtons(Visibility.Visible);
+			if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_UV)
+			{
+            	if (e.NewSelectedItems.Count>0) PrintSettings.DataContext = e.NewSelectedItems[0].Data;
+			}
+			
             if (e.NewSelectedItems.Count>0)
             {
                 foreach(Row row in PrintedQueueGrid.Rows) row.IsSelected = false;
                 PrintQueueGrid.ActiveItem = e.NewSelectedItems[0].Data;
+			}
+        }
+
+
+        //--- Grid_MouseDown ------------------------------------------------
+        private void Grid_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            PrintQueueItem selected = ((sender as Grid).DataContext) as PrintQueueItem;
+            foreach(Row row in PrintQueueGrid.Rows)
+            {
+                PrintQueueItem item = row.Data as PrintQueueItem;
+                if (item.Equals(selected))
+                {
+                    PrintSettings.DataContext = item;
+                    item.IsSelected = !item.IsSelected;
+                }
+            }
+            _update_selected_items();
+            e.Handled = true;
+        }
+
+        //--- _update_selected_items --------------------------------------------
+        private void _update_selected_items()
+        {
+            _SelectedItems = 0;
+            foreach(Row row in PrintQueueGrid.Rows)
+            {
+                PrintQueueItem item=row.Data as PrintQueueItem;   
+                if (item!=null && item.IsSelected && row.Control!=null) 
+                {
+                    _SelectedItems++;
+                    row.Control.Background =  Brushes.Transparent; // Application.Current.Resources["XamGrid_Selected"] as Brush;
+                }
+                else
+                    row.Control.Background = Brushes.Transparent;
             }
         }
 
@@ -340,7 +434,6 @@ namespace RX_DigiPrint.Views.PrintQueueView
                     }
                 }
             }
-
         }
 
         //--- PrintQueueGrid_InitializeRow ----------------------------------------------
@@ -349,7 +442,9 @@ namespace RX_DigiPrint.Views.PrintQueueView
             if (FileOpen.NewFile)
             {
                 FileOpen.NewFile = false;
-                e.Row.IsExpanded = true;
+                if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_UV)
+                     e.Row.IsExpanded = false;
+                else e.Row.IsExpanded = true;
            //     int row = e.Row.Index;
            //     PrintQueueGrid.Rows[row].IsExpanded = true; 
             }

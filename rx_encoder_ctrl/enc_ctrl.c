@@ -219,6 +219,7 @@ static int _handle_ctrl_msg(RX_SOCKET socket, void *pmsg)
 								break;
 	case CMD_ERROR_RESET:		tw8_reset_error(); break;
 	case CMD_ENCODER_PG_DIST:	_do_encoder_pg_dist(socket, (SEncoderPgDist*)&phdr[1]);	break;
+	case CMD_ENCODER_PG_STOP:	fpga_pg_stop();											break;
 	case CMD_ENCODER_STAT:		_do_encoder_stat(socket);								break;
 	case CMD_FPGA_SIMU_ENCODER:	_do_simu_encoder(socket, (int*)&phdr[1]);				break;
 	case CMD_STOP_PRINTING:		fpga_stop_printing();									break;

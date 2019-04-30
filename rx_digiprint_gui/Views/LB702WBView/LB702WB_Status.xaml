@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
-             xmlns:local="clr-namespace:RX_DigiPrint.Views.MiniLabelView"
+             xmlns:local="clr-namespace:RX_DigiPrint.Views.LB701UVView"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
 
@@ -22,7 +22,7 @@
                 <rx_uc:PlcParCtrl ID="STA_WINDER_DIAMETER_2"            Label="Rewinder Ø"                   Format="f"/>
                 -->
                 <rx_uc:PlcParCtrl ID="STA_PREPARE_ACTIVE"               Label="Prepare" Visibility="Collapsed"/>
-                <local:ML_Prepare x:Name="MlPrepare"/>
+                <local:LB701UV_Prepare x:Name="MlPrepare"/>
 
             </rx_uc:PlcParPanel>
         </Grid>

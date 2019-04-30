@@ -12,7 +12,7 @@
       <UserName>root</UserName>
     </BuildHost>
     <DeploymentHost>
-      <HostName>192.168.200.201</HostName>
+      <HostName>192.168.200.1</HostName>
       <Transport>SSH</Transport>
       <UserName>root</UserName>
     </DeploymentHost>
@@ -49,7 +49,8 @@
     <MakeConfigurationName>Debug-lx</MakeConfigurationName>
     <AdditionalMakeArguments />
     <Toolchain>
-      <Name>Default GCC toolchain on 192.168.200.124</Name>
+      <Name>Default GCC toolchain on localhost:2222</Name>
+      <UniqueID>com.sysprogs.toolchain.default-gcc</UniqueID>
       <UnixSystem>true</UnixSystem>
       <GCC>gcc</GCC>
       <GXX>g++</GXX>
@@ -67,9 +68,17 @@
           <BinaryToCheck>g++</BinaryToCheck>
         </TestableLinuxPackage>
         <TestableLinuxPackage>
+          <ID>gdb</ID>
           <UserFriendlyName>GDB</UserFriendlyName>
           <DefaultPackageName>gdb</DefaultPackageName>
           <BinaryToCheck>gdb</BinaryToCheck>
+          <AlternativeBinaries>
+            <string>ggdb</string>
+            <string>gdb-apple</string>
+          </AlternativeBinaries>
+          <AlternativeDirectories>
+            <string>/opt/local/bin</string>
+          </AlternativeDirectories>
         </TestableLinuxPackage>
         <TestableLinuxPackage>
           <UserFriendlyName>GNU Make</UserFriendlyName>
@@ -81,9 +90,8 @@
     <MakeCommandTemplate>
       <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
       <RemoteHost>
-        <HostName>192.168.200.124</HostName>
-        <Transport>SSH</Transport>
-        <UserName>root</UserName>
+        <HostName>BuildMachine</HostName>
+        <Transport>BuiltinShortcut</Transport>
       </RemoteHost>
       <Command>make</Command>
       <WorkingDirectory>$(BuildDir)</WorkingDirectory>
@@ -147,7 +155,38 @@
   </Debug>
   <CustomBuild>
     <PreSyncActions />
-    <PreBuildActions />
+    <PreBuildActions>
+      <CustomActionBase xsi:type="SourceTransferAction">
+        <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
+        <RemoteHost>
+          <HostName>$(BuildHost)</HostName>
+          <Transport>SSH</Transport>
+          <UserName>root</UserName>
+        </RemoteHost>
+        <LocalDirectory>$(ProjectDir)/../Externals/libxl</LocalDirectory>
+        <RemoteDirectory>/tmp/VisualGDB/$(ProjectDirUnixStyle)/../Externals/libxl</RemoteDirectory>
+        <FileMasks>
+          <string>*.*</string>
+        </FileMasks>
+        <TransferNewFilesOnly>true</TransferNewFilesOnly>
+        <IncludeSubdirectories>true</IncludeSubdirectories>
+        <SelectedDirectories />
+        <DeleteDisappearedFiles>false</DeleteDisappearedFiles>
+      </CustomActionBase>
+      <CustomActionBase xsi:type="FileTransferAction">
+        <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
+        <SourceHost>
+          <Transport>None</Transport>
+        </SourceHost>
+        <DestinationHost>
+          <HostName>$(DeployHost)</HostName>
+          <Transport>SSH</Transport>
+          <UserName>root</UserName>
+        </DestinationHost>
+        <SourceFilePath>$(ProjectDir)\..\Externals\libxl\lib64\libxl.so</SourceFilePath>
+        <DestinationFilePath>$(DeployDir)/libxl.so</DestinationFilePath>
+      </CustomActionBase>
+    </PreBuildActions>
     <PostBuildActions />
     <PreCleanActions />
     <PostCleanActions />

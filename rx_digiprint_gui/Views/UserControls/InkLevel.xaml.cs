@@ -31,30 +31,50 @@ namespace RX_DigiPrint.Views.UserControls
             Progress.Visibility = Visibility.Collapsed;
         }
 
+        //--- Property Enabled ---------------------------------------
+        private bool _Enabled = true;
+        public bool Enabled
+        {
+            get { return _Enabled; }
+            set 
+            { 
+                _Enabled = value;
+                Progress.ShowText = _Enabled;
+            }
+        }
+        
         //--- InkLevel_DataContextChanged ----------------------------------------------------------------
         private void InkLevel_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             _InkSupply = DataContext as InkSupply;
-            if (_InkSupply!=null) _InkSupply.PropertyChanged += _InkSupply_PropertyChanged;
+            if (_InkSupply!=null)
+            {
+                _InkSupply.PropertyChanged += _InkSupply_PropertyChanged;
+                _update_InkType();
+                _update_level();
+            }
         }
 
         //--- _InkSupply_PropertyChanged ------------------------------
         void _InkSupply_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (e.PropertyName.Equals("InkType"))
-            {
-                InkType ink = _InkSupply.InkType;
-                if (ink!=null)
-                {
-                    Progress.Visibility = Visibility.Visible;
-                    Progress.Text       = ink.Name;
-                    Progress.TextColor  = new SolidColorBrush(ink.ColorFG);
-                    Progress.Color      = new SolidColorBrush(ink.Color);
-                    _update_level();
-                }
-                else Progress.Visibility = Visibility.Collapsed;
-            }
+            if (e.PropertyName.Equals("InkType")) _update_InkType();
             else if (e.PropertyName.Equals("CanisterLevel")) _update_level();
+        }
+
+        //--- _update_InkType --------------------------
+        private void _update_InkType()
+        {
+            InkType ink = _InkSupply.InkType;
+            if (ink!=null)
+            {
+                Progress.Visibility = Visibility.Visible;
+                Progress.Text       = ink.Name;
+                Progress.TextColor  = new SolidColorBrush(ink.ColorFG);
+                Progress.Color      = new SolidColorBrush(ink.Color);
+                _update_level();
+            }
+            else Progress.Visibility = Visibility.Collapsed;
         }
 
         //--- _update_level ------------------------------
@@ -77,14 +97,12 @@ namespace RX_DigiPrint.Views.UserControls
         //--- UserControl_PreviewMouseDown --------------------------------
         private void UserControl_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            e.Handled = true;
-            if (RxGlobals.User.UserType<EUserType.usr_service) return;
-
-            if (RxMessageBox.YesNo("Set TARA", string.Format("Set Tara for {0}?", Progress.Text),  MessageBoxImage.Question, false))
+            if(_Enabled)
             {
-                TcpIp.SValue msg = new TcpIp.SValue(){no=(UInt32)_InkSupply.No-1};
-                RxGlobals.RxInterface.SendMsg(TcpIp.CMD_SCALES_TARA, ref msg);
+                InkInfoWnd wnd = new InkInfoWnd(_InkSupply);
+                wnd.ShowDialog();
             }
+            e.Handled = true;
         }
     }
 }

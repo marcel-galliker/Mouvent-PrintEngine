@@ -18,7 +18,7 @@ void steplb_init(int no, RX_SOCKET *psocket);
 
 int	 steplb_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen);
 
-int  steplb_handle_status(int no, STestTableStat *pStatus);
+int  steplb_handle_status(int no, SStepperStat *pStatus);
 
 int	 steplb_to_print_pos(void);
 int  steplb_abort_printing(void);

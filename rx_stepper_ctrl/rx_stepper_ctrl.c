@@ -43,7 +43,7 @@
 	
 
 //--- globals ------------------------------------------------------------
-STestTableStat	RX_TestTableStatus;
+SStepperStat	RX_StepperStatus;
 SStepperCfg		RX_StepperCfg;
 
 static int		_AppRunning;
@@ -142,7 +142,7 @@ static void _main_loop()
 ///--- main ---------------------------------------------------------------
 int main(int argc, char** argv)
 {
-	memset(&RX_TestTableStatus, 0, sizeof(RX_TestTableStatus));
+	memset(&RX_StepperStatus, 0, sizeof(RX_StepperStatus));
 	memset(&RX_StepperCfg,		0, sizeof(RX_StepperCfg));
 
 	args_init(argc, argv);
@@ -152,10 +152,10 @@ int main(int argc, char** argv)
 
 	TrPrintfL(1, "RxStepperCtrl %s started", version);
 	
-	get_version((int*)&RX_TestTableStatus.swVersion);
-	sscanf(version, "d.d.d.d", &RX_TestTableStatus.swVersion.major, &RX_TestTableStatus.swVersion.minor, &RX_TestTableStatus.swVersion.revision, &RX_TestTableStatus.swVersion.build);
-	sok_get_mac_address("eth0", &RX_TestTableStatus.macAddr);
-	RX_TestTableStatus.serialNo = swap_uint16((RX_TestTableStatus.macAddr>>32) & 0xffff);
+	get_version((int*)&RX_StepperStatus.swVersion);
+	sscanf(version, "d.d.d.d", &RX_StepperStatus.swVersion.major, &RX_StepperStatus.swVersion.minor, &RX_StepperStatus.swVersion.revision, &RX_StepperStatus.swVersion.build);
+	sok_get_mac_address("eth0", &RX_StepperStatus.macAddr);
+	RX_StepperStatus.serialNo = swap_uint16((RX_StepperStatus.macAddr>>32) & 0xffff);
 
 	rx_init();
 	err_init(0, 100);

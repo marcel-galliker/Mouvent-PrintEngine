@@ -141,6 +141,8 @@ static void _txrob_motor_test(int motor, int steps);
 //static void _txrob_turn_screw_to_pos(int screw, int steps);
 static void _txrob_error_reset(void);
 static void _txrob_send_status(RX_SOCKET);
+static void _txrob_do_ctrlMode(EnFluidCtrlMode ctrlMode);
+static void _txrob_control(void);
 
 static int  _rot_rev_2_steps(int rev);
 static int  _rot_steps_2_rev(int steps);
@@ -168,7 +170,7 @@ void txrob_init(void)
 	_ParRotRef.stop_level = 0;
 	_ParRotRef.estop_in = ROT_STORED_IN; // Check Input 0
 	_ParRotRef.estop_level = 1; // stopp when sensor on
-//	_ParRotRef.sensRef = TRUE;
+	_ParRotRef.sensRef = TRUE;
 	_ParRotRef.checkEncoder = TRUE;
 	
 	_ParRotSensRef.speed = 500; // speed with max tork: 3200/4
@@ -180,7 +182,7 @@ void txrob_init(void)
 	_ParRotSensRef.stop_level = 0;
 	_ParRotSensRef.estop_in = ROT_STORED_IN; // Check Input 0
 	_ParRotSensRef.estop_level = 1; // stopp when sensor on
-//	_ParRotSensRef.sensRef = TRUE;
+	_ParRotSensRef.sensRef = TRUE;
 	_ParRotSensRef.checkEncoder = TRUE;
 
 	_ParRotDrive.speed = 500; // speed with max tork:
@@ -192,7 +194,7 @@ void txrob_init(void)
 	_ParRotDrive.stop_level = 0;
 	_ParRotDrive.estop_in = ESTOP_UNUSED;
 	_ParRotDrive.estop_level = 1;
-//	_ParRotDrive.sensRef = FALSE;
+	_ParRotDrive.sensRef = FALSE;
 	_ParRotDrive.checkEncoder = TRUE;
 	
 	//--- movement parameters screws ----------------
@@ -324,34 +326,34 @@ void txrob_main(int ticks, int menu)
 	}
 	
 	// --- read Inputs ---
-	RX_TestTableStatus.info.z_in_ref = fpga_input(ROT_STORED_IN); // Reference Sensor Rotation
-	RX_TestTableStatus.info.x_in_ref = fpga_input(SHIFT_STORED_IN); // Reference Sensor Shift
+	RX_StepperStatus.info.z_in_ref = fpga_input(ROT_STORED_IN); // Reference Sensor Rotation
+	RX_StepperStatus.info.x_in_ref = fpga_input(SHIFT_STORED_IN); // Reference Sensor Shift
 	
-	RX_TestTableStatus.posZ = _rot_steps_2_rev(motor_get_step(MOTOR_ROT));
-	RX_TestTableStatus.posX = _shift_steps_2_micron(motor_get_step(MOTOR_SHIFT));
+	RX_StepperStatus.posZ = _rot_steps_2_rev(motor_get_step(MOTOR_ROT));
+	RX_StepperStatus.posX = _shift_steps_2_micron(motor_get_step(MOTOR_SHIFT));
 	
 	// --- Set Position Flags ---
-//	RX_TestTableStatus.info.z_in_ref = ((RX_TestTableStatus.info.ref_done == 1)
-//		&& (abs(RX_TestTableStatus.posZ - POS_STORED_UM) <= 10)
-//		&& (RX_TestTableStatus.info.x_in_ref == 1));
-//	RX_TestTableStatus.info.z_in_print = RX_TestTableStatus.info.z_in_ref;
-//	RX_TestTableStatus.info.z_in_cap = ((RX_TestTableStatus.info.ref_done == 1)
-//		&& (abs(RX_TestTableStatus.posZ - POS_PRINTHEADS_UM) <= 10)
-//		&& (RX_TestTableStatus.info.x_in_ref == 0));
+//	RX_StepperStatus.info.z_in_ref = ((RX_StepperStatus.info.ref_done == 1)
+//		&& (abs(RX_StepperStatus.posZ - POS_STORED_UM) <= 10)
+//		&& (RX_StepperStatus.info.x_in_ref == 1));
+//	RX_StepperStatus.info.z_in_print = RX_StepperStatus.info.z_in_ref;
+//	RX_StepperStatus.info.z_in_cap = ((RX_StepperStatus.info.ref_done == 1)
+//		&& (abs(RX_StepperStatus.posZ - POS_PRINTHEADS_UM) <= 10)
+//		&& (RX_StepperStatus.info.x_in_ref == 0));
 
 	// --- set positions False while moving ---
-	if (RX_TestTableStatus.info.moving) //  && (Fpga.stat->moving != 0))
+	if (RX_StepperStatus.info.moving) //  && (Fpga.stat->moving != 0))
 	{
-		//RX_TestTableStatus.info.z_in_ref = FALSE;
-		RX_TestTableStatus.info.z_in_print = FALSE;
-		RX_TestTableStatus.info.z_in_cap = FALSE;
-		RX_TestTableStatus.info.move_ok = FALSE;
+		//RX_StepperStatus.info.z_in_ref = FALSE;
+		RX_StepperStatus.info.z_in_print = FALSE;
+		RX_StepperStatus.info.z_in_cap = FALSE;
+		RX_StepperStatus.info.move_ok = FALSE;
 	}
 	if (_TimeCnt != 0) _TimeCnt--; // waiting time
 	// --- Executed after each move ---
 	if (_CmdRunning && motors_move_done(MOTOR_ALL_BITS) && (_TimeCnt == 0))
 	{
-		RX_TestTableStatus.info.moving = FALSE;
+		RX_StepperStatus.info.moving = FALSE;
 		int loc_move_pos = _NewCmdPos;
 		int loc_new_cmd = _NewCmd;
 		
@@ -365,7 +367,7 @@ void txrob_main(int ticks, int menu)
 			if (motors_error(MOTOR_ALL_BITS, &motor))
 			{
 				loc_new_cmd = FALSE;
-				RX_TestTableStatus.info.ref_done = FALSE;
+				RX_StepperStatus.info.ref_done = FALSE;
 				Error(ERR_CONT, 0, "Stepper: Command %s: Motor[%d] blocked", _CmdName, motor + 1);
 				_CmdRunning = FALSE;
 				_ResetRetried = 0;
@@ -374,7 +376,7 @@ void txrob_main(int ticks, int menu)
 			else if (_rot_pos_check_err(motor_get_step(MOTOR_ROT))) 
 			{
 				Error(ERR_CONT, 0, "CLN: Command %s: position corrupt, try referencing", _CmdName); 
-				RX_TestTableStatus.info.ref_done = FALSE; 
+				RX_StepperStatus.info.ref_done = FALSE; 
 				_CmdRunning = FALSE; 
 				loc_new_cmd = CMD_CLN_REFERENCE;
 			}
@@ -386,10 +388,10 @@ void txrob_main(int ticks, int menu)
 			if (motors_error(MOTOR_ROT_BITS, &motor))
 			//if(TRUE)
 			{
-				if (RX_TestTableStatus.info.z_in_ref)
+				if (RX_StepperStatus.info.z_in_ref)
 				{
 					motors_reset(MOTOR_ROT_BITS);
-					RX_TestTableStatus.posZ = _rot_steps_2_rev(motor_get_step(MOTOR_ROT));
+					RX_StepperStatus.posZ = _rot_steps_2_rev(motor_get_step(MOTOR_ROT));
 					loc_new_cmd = CMD_CLN_ROT_REF; //CMD_CLN_SHIFT_REF; // CMD_CLN_ROT_REF;
 				}
 				else
@@ -409,7 +411,7 @@ void txrob_main(int ticks, int menu)
 				if(TRUE)
 				{
 					motors_reset(MOTOR_ROT_BITS);
-					RX_TestTableStatus.posZ = _rot_steps_2_rev(motor_get_step(MOTOR_ROT));
+					RX_StepperStatus.posZ = _rot_steps_2_rev(motor_get_step(MOTOR_ROT));
 					loc_new_cmd = CMD_CLN_SHIFT_REF; 
 				}
 				else
@@ -420,13 +422,13 @@ void txrob_main(int ticks, int menu)
 		
 		if (_CmdRunning == CMD_CLN_SHIFT_REF && _NewCmd == FALSE)
 		{
-			if (RX_TestTableStatus.info.x_in_ref == TRUE)
+			if (RX_StepperStatus.info.x_in_ref == TRUE)
 			{
 				loc_new_cmd = CMD_CLN_SHIFT_MOV; 
 				loc_move_pos = 0; // Ref Pos
 				motors_reset(MOTOR_SHIFT_BITS);
-				RX_TestTableStatus.posX = _shift_steps_2_micron(motor_get_step(MOTOR_SHIFT));
-				RX_TestTableStatus.info.ref_done = TRUE;
+				RX_StepperStatus.posX = _shift_steps_2_micron(motor_get_step(MOTOR_SHIFT));
+				RX_StepperStatus.info.ref_done = TRUE;
 				_RobFunction = 1;
 			}
 			else
@@ -475,7 +477,7 @@ void txrob_main(int ticks, int menu)
 			{
 			case 0:	// Ref
 				motors_reset(MOTOR_SHIFT_BITS);
-				RX_TestTableStatus.posX = _shift_steps_2_micron(motor_get_step(MOTOR_SHIFT));
+				RX_StepperStatus.posX = _shift_steps_2_micron(motor_get_step(MOTOR_SHIFT));
 				break;
 
 			case 1:	// Center
@@ -536,15 +538,15 @@ void txrob_main(int ticks, int menu)
 		}
 		
 		// --- Set Position Flags after Commands ---
-		//RX_TestTableStatus.info.move_ok = (RX_TestTableStatus.info.ref_done && (abs(RX_TestTableStatus.posZ - _LastRobPosCmd) <= 10));
-		//RX_TestTableStatus.info.x_in_ref		= (RX_TestTableStatus.info.ref_done && (RX_TestTableStatus.info.x_in_ref == 1));
+		//RX_StepperStatus.info.move_ok = (RX_StepperStatus.info.ref_done && (abs(RX_StepperStatus.posZ - _LastRobPosCmd) <= 10));
+		//RX_StepperStatus.info.x_in_ref		= (RX_StepperStatus.info.ref_done && (RX_StepperStatus.info.x_in_ref == 1));
 		
 		// --- Toggle to mark end of move ---
 		if ((loc_new_cmd == FALSE) && (_CmdRunning != CMD_CLN_STOP) && (_CmdRunning != CMD_CLN_SET_WASTE_PUMP)) 
 		{
-			RX_TestTableStatus.info.move_tgl = !RX_TestTableStatus.info.move_tgl;
-			//RX_TestTableStatus.info.move_ok = (RX_TestTableStatus.info.ref_done
-			//	&& abs(RX_TestTableStatus.posX - _LastRobPosCmd) <= 10);
+			RX_StepperStatus.info.move_tgl = !RX_StepperStatus.info.move_tgl;
+			//RX_StepperStatus.info.move_ok = (RX_StepperStatus.info.ref_done
+			//	&& abs(RX_StepperStatus.posX - _LastRobPosCmd) <= 10);
 		}
 
 		// --- Reset Commands ---
@@ -571,13 +573,52 @@ void txrob_main(int ticks, int menu)
 		// _cln_send_status(0); // Push news of move end to main
 
 	}
+	
+	_txrob_control();
+
 	//// --- Executed after each move ---
 	//if (_CmdRunning  == CMD_CLN_STOP && Fpga.stat->moving == 0)
 	//{
-	////	RX_TestTableStatus.info.moving = FALSE;
+	////	RX_StepperStatus.info.moving = FALSE;
 	////	_CmdRunning = FALSE;
-	//	RX_TestTableStatus.info.x_in_ref = fpga_input(RO_STORED_IN); 
+	//	RX_StepperStatus.info.x_in_ref = fpga_input(RO_STORED_IN); 
 	//}
+}
+
+//--- _txrob_control ---------------------------------------------
+static void _txrob_control(void)
+{
+	switch(RX_StepperStatus.ctrlModeCfg)
+	{
+	case ctrl_purge:
+	case ctrl_purge_micro:
+	case ctrl_purge_soft:
+	case ctrl_purge_hard:	RX_StepperStatus.ctrlModeStat = RX_StepperStatus.ctrlModeCfg;
+							break;
+		
+	case ctrl_purge_step1:	RX_StepperStatus.ctrlModeStat = RX_StepperStatus.ctrlModeCfg;
+							break;
+
+	case ctrl_purge_step2:	RX_StepperStatus.ctrlModeStat = RX_StepperStatus.ctrlModeCfg;
+							break;
+
+	case ctrl_purge_step3:	RX_StepperStatus.ctrlModeStat = RX_StepperStatus.ctrlModeCfg;
+							break;
+	
+	case ctrl_flush_night:		
+	case ctrl_flush_weekend:		
+	case ctrl_flush_week:	RX_StepperStatus.ctrlModeStat = RX_StepperStatus.ctrlModeCfg;
+							break;
+	
+	case ctrl_flush_step1:	RX_StepperStatus.ctrlModeStat = RX_StepperStatus.ctrlModeCfg;
+							break;
+	case ctrl_flush_step2:	RX_StepperStatus.ctrlModeStat = RX_StepperStatus.ctrlModeCfg;
+							break;
+	case ctrl_flush_done:	RX_StepperStatus.ctrlModeStat = RX_StepperStatus.ctrlModeCfg;
+							break;
+	
+	default: break;
+	}
 }
 
 //--- txrob_display_status ---------------------------------------------------------
@@ -604,14 +645,14 @@ static void _txrob_display_status(void)
 	term_printf("\n");
 	
 	term_printf("FLO Robot Advanced mechref ---------------------------------\n");
-	term_printf("moving:              %d		cmd: %08x\n", RX_TestTableStatus.info.moving, _CmdRunning);
-	term_printf("Sensor Ref Rotation: %d\n", RX_TestTableStatus.info.z_in_ref);
-	term_printf("Sensor Ref Shift:    %d\n", RX_TestTableStatus.info.x_in_ref);
-	term_printf("Ref done:            %d\n", RX_TestTableStatus.info.ref_done);
-	term_printf("Rotation in rev:     %06d  ", RX_TestTableStatus.posZ);
+	term_printf("moving:              %d		cmd: %08x\n", RX_StepperStatus.info.moving, _CmdRunning);
+	term_printf("Sensor Ref Rotation: %d\n", RX_StepperStatus.info.z_in_ref);
+	term_printf("Sensor Ref Shift:    %d\n", RX_StepperStatus.info.x_in_ref);
+	term_printf("Ref done:            %d\n", RX_StepperStatus.info.ref_done);
+	term_printf("Rotation in rev:     %06d  ", RX_StepperStatus.posZ);
 	term_printf("Rotation in steps:   %06d\n", motor_get_step(MOTOR_ROT));
 	term_printf("Rotation in encsteps:%06d\n", Fpga.encoder[MOTOR_ROT].pos);
-	term_printf("Shift in um:         %06d  ", RX_TestTableStatus.posX);
+	term_printf("Shift in um:         %06d  ", RX_StepperStatus.posX);
 	term_printf("Shift in steps:      %06d\n", motor_get_step(MOTOR_SHIFT));
 	term_printf("Rotation RefOffset:  %06d\n", _RotRefOffset);
 	term_printf("Time Waste Vac [s]:  %06d\n", _TimeWastePump);
@@ -721,22 +762,29 @@ static int  _rot_steps_2_rev(int steps)
 	return (int)(steps * (1000000.0 / ROT_STEPS_PER_REV) + 0.5);
 }
 
+//--- _txrob_do_ctrlMode -----------------------------------------
+static void _txrob_do_ctrlMode(EnFluidCtrlMode ctrlMode)
+{
+	RX_StepperStatus.ctrlModeCfg = ctrlMode;
+//	sok_send_2(&socket, REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);
+}
 
 //--- txrob_handle_ctrl_msg -----------------------------------
 int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 {	
 	int i;
 	INT32 pos, steps;
+	EnFluidCtrlMode	ctrlMode;
 	
 	switch(msgId)
 	{
-	case CMD_TT_STATUS:				sok_send_2(&socket, REP_TT_STATUS, sizeof(RX_TestTableStatus), &RX_TestTableStatus);	
+	case CMD_TT_STATUS:				sok_send_2(&socket, REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);	
 									break;
 		
 	case CMD_CLN_STOP:				strcpy(_CmdName, "CMD_CLN_STOP");
 		motors_stop(MOTOR_ALL_BITS); // Stops Hub and Robot
 		Fpga.par->output &= ~RO_ALL_OUTPUTS; // set all output to off
-		RX_TestTableStatus.info.moving = TRUE;
+		RX_StepperStatus.info.moving = TRUE;
 		_CmdRunning = msgId;
 		// reset var
 		_TimeCnt = 0;
@@ -749,8 +797,8 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		motor_reset(MOTOR_ROT); // to recover from move count missalignment
 		motor_reset(MOTOR_SHIFT); // to recover from move count missalignment
 		Fpga.par->output &= ~RO_ALL_OUTPUTS;
-		RX_TestTableStatus.info.ref_done = FALSE;
-		RX_TestTableStatus.info.moving = TRUE;
+		RX_StepperStatus.info.ref_done = FALSE;
+		RX_StepperStatus.info.moving = TRUE;
 		_CmdRunning = msgId;
 		// reset var
 		_TimeCnt = 0;
@@ -767,8 +815,8 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		if (_CmdRunning){ txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_STOP, NULL); _NewCmd = CMD_CLN_ROT_REF; break; }
 		motor_reset(MOTOR_ROT); // to recover from move count missalignment
 		Fpga.par->output &= ~RO_ALL_OUTPUTS;
-		RX_TestTableStatus.info.ref_done = FALSE;
-		RX_TestTableStatus.info.moving = TRUE;
+		RX_StepperStatus.info.ref_done = FALSE;
+		RX_StepperStatus.info.moving = TRUE;
 		_CmdRunning = msgId;
 		// reset var
 		_TimeCnt = 0;
@@ -782,8 +830,8 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		if (_CmdRunning){ txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_STOP, NULL); _NewCmd = CMD_CLN_SHIFT_REF; break; }
 		motor_reset(MOTOR_SHIFT); // to recover from move count missalignment
 		Fpga.par->output &= ~RO_ALL_OUTPUTS;
-		RX_TestTableStatus.info.ref_done = FALSE;
-		RX_TestTableStatus.info.moving = TRUE;
+		RX_StepperStatus.info.ref_done = FALSE;
+		RX_StepperStatus.info.moving = TRUE;
 		_CmdRunning = msgId;
 		_NewCmd = FALSE;
 		if (fpga_input(SHIFT_STORED_IN) == TRUE){ motors_move_by_step(MOTOR_SHIFT_BITS, &_ParShiftDrive, SHIFT_STEPS_PER_METER * 0.01, TRUE); _NewCmd = CMD_CLN_SHIFT_REF; break; }
@@ -794,12 +842,12 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		if (!_CmdRunning)
 		{
 			_CmdRunning = msgId;
-			RX_TestTableStatus.info.moving = TRUE;
-			if (!RX_TestTableStatus.info.ref_done){ Error(LOG, 0, "CLN: Command %s: missing ref_done", _CmdName); break;}
+			RX_StepperStatus.info.moving = TRUE;
+			if (!RX_StepperStatus.info.ref_done){ Error(LOG, 0, "CLN: Command %s: missing ref_done", _CmdName); break;}
 			pos = *((INT32*)pdata);
 			if (pos < 0) {Error(LOG, 0, "CLN: Command %s: negative position not allowed", _CmdName); break;}
 			if (pos >= POS_ROT_CNT) {Error(LOG, 0, "CLN: Command %s: too high pos", _CmdName); break;}
-			if (_rot_pos_check_err(motor_get_step(MOTOR_ROT))) {Error(ERR_CONT, 0, "CLN: Command %s: position corrupt, cancel move", _CmdName); RX_TestTableStatus.info.ref_done = FALSE; break;}
+			if (_rot_pos_check_err(motor_get_step(MOTOR_ROT))) {Error(ERR_CONT, 0, "CLN: Command %s: position corrupt, cancel move", _CmdName); RX_StepperStatus.info.ref_done = FALSE; break;}
 			_RobFunction = pos;
 			pos = POS_ROT[pos];
 			Fpga.par->output &= ~VAC_ON; // VACUUM OFF
@@ -813,8 +861,8 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		if (!_CmdRunning)
 		{
 			_CmdRunning = msgId;
-			RX_TestTableStatus.info.moving = TRUE;
-			if (!RX_TestTableStatus.info.ref_done){ Error(LOG, 0, "CLN: Command %s: missing ref_done", _CmdName); break;}
+			RX_StepperStatus.info.moving = TRUE;
+			if (!RX_StepperStatus.info.ref_done){ Error(LOG, 0, "CLN: Command %s: missing ref_done", _CmdName); break;}
 			pos = *((INT32*)pdata);
 			if (pos < 0) {Error(LOG, 0, "CLN: Command %s: negative position not allowed", _CmdName); break;}
 			if (pos >= POS_ROT_CNT) {Error(LOG, 0, "CLN: Command %s: too high pos", _CmdName); break;}
@@ -840,7 +888,7 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		{
 			Fpga.par->output |= PUMP_FLUSH_CAP; // Flush Cap ON
 			_CmdRunning = msgId;
-			RX_TestTableStatus.info.moving = TRUE;
+			RX_StepperStatus.info.moving = TRUE;
 			_TimeCnt = _TimeFillCap * MAIN_PER_SEC;
 		}
 		break;
@@ -851,7 +899,7 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 			Fpga.par->output |= PUMP_WASTE_BASE; // Waste base ON
 			Fpga.par->output |= PUMP_WASTE_VAC; // Waste base ON
 			_CmdRunning = msgId;
-			RX_TestTableStatus.info.moving = TRUE;
+			RX_StepperStatus.info.moving = TRUE;
 			_TimeCnt = _TimeWastePump * MAIN_PER_SEC;
 		}
 		break;
@@ -859,6 +907,11 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 	case CMD_ERROR_RESET:		_txrob_error_reset();
 		fpga_stepper_error_reset();
 		break;
+		
+	case CMD_FLUID_CTRL_MODE:		
+		ctrlMode = (EnFluidCtrlMode) (*((INT32*)pdata));
+		_txrob_do_ctrlMode(ctrlMode);
+		break;	
 
 	default:						Error(ERR_CONT, 0, "CLN: Command 0x%08x not implemented", msgId); break;
 	}
@@ -895,7 +948,7 @@ static void _txrob_motor_test(int motorNo, int steps)
 	par.estop_in    = ESTOP_UNUSED;
 	par.estop_level = 0;
 	par.checkEncoder = FALSE;
-	RX_TestTableStatus.info.moving = TRUE;
+	RX_StepperStatus.info.moving = TRUE;
 	_CmdRunning = 1;
 	
 	motors_move_by_step(motors, &par, steps, FALSE);			
@@ -913,5 +966,5 @@ static void _txrob_send_status(RX_SOCKET socket)
 {
 	static RX_SOCKET _socket = INVALID_SOCKET;
 	if (socket != INVALID_SOCKET) _socket = socket;
-	if (_socket != INVALID_SOCKET) sok_send_2(&_socket, REP_TT_STATUS, sizeof(RX_TestTableStatus), &RX_TestTableStatus);
+	if (_socket != INVALID_SOCKET) sok_send_2(&_socket, REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);
 }

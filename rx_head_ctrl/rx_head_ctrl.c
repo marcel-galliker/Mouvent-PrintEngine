@@ -176,7 +176,7 @@ static void _main_loop(void)
 			putty_input(str, sizeof(str));
 			handle_menu(str);
 			t_menu = 500*(1+ticks/500);
-			_check_rx_boot();
+		//	_check_rx_boot();
 		}
 		time5 = rx_get_ticks();
 		{

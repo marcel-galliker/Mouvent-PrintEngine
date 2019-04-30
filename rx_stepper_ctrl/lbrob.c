@@ -188,46 +188,46 @@ void lbrob_main(int ticks, int menu)
 	motor_main(ticks, menu);
 	
 	// --- read Inputs ---
-	RX_TestTableStatus.info.x_in_ref = fpga_input(RO_STORED_IN); // Reference Sensor
-	RX_TestTableStatus.info.cln_screw_0 = fpga_input(RO_SCREW_DOWN_0); // Screwhead 0 is pressed down
-	RX_TestTableStatus.info.cln_screw_1 = fpga_input(RO_SCREW_DOWN_1); // Screwhead 1 is pressed down
-	RX_TestTableStatus.info.cln_screw_2 = fpga_input(RO_SCREW_DETECT_0); // Screwhead 0 is detected
-	RX_TestTableStatus.info.cln_screw_3 = fpga_input(RO_SCREW_DETECT_1); // Screwhead 1 is detected
-	//RX_TestTableStatus.info.cln_in_capping = fpga_input(RO_CAPPING_IN); // Sensor for cleaning station beeing in capping pos
-	RX_TestTableStatus.posZ = motor_get_step(MOTOR_CAP) * 1000000.0 / CAP_STEPS_PER_METER;
+	RX_StepperStatus.info.x_in_ref = fpga_input(RO_STORED_IN); // Reference Sensor
+	RX_StepperStatus.info.cln_screw_0 = fpga_input(RO_SCREW_DOWN_0); // Screwhead 0 is pressed down
+	RX_StepperStatus.info.cln_screw_1 = fpga_input(RO_SCREW_DOWN_1); // Screwhead 1 is pressed down
+	RX_StepperStatus.info.cln_screw_2 = fpga_input(RO_SCREW_DETECT_0); // Screwhead 0 is detected
+	RX_StepperStatus.info.cln_screw_3 = fpga_input(RO_SCREW_DETECT_1); // Screwhead 1 is detected
+	//RX_StepperStatus.info.cln_in_capping = fpga_input(RO_CAPPING_IN); // Sensor for cleaning station beeing in capping pos
+	RX_StepperStatus.posZ = motor_get_step(MOTOR_CAP) * 1000000.0 / CAP_STEPS_PER_METER;
 	
 	// --- Set Position Flags ---
-	RX_TestTableStatus.info.z_in_ref = ((RX_TestTableStatus.info.ref_done == 1)
-		&& (abs(RX_TestTableStatus.posZ - POS_STORED_UM) <= 10)
-		&& (RX_TestTableStatus.info.x_in_ref == 1));
-	RX_TestTableStatus.info.z_in_print = RX_TestTableStatus.info.z_in_ref;
-	RX_TestTableStatus.info.z_in_cap = ((RX_TestTableStatus.info.ref_done == 1)
-		&& (abs(RX_TestTableStatus.posZ - POS_PRINTHEADS_UM) <= 10)
-		&& (RX_TestTableStatus.info.x_in_ref == 0));
+	RX_StepperStatus.info.z_in_ref = ((RX_StepperStatus.info.ref_done == 1)
+		&& (abs(RX_StepperStatus.posZ - POS_STORED_UM) <= 10)
+		&& (RX_StepperStatus.info.x_in_ref == 1));
+	RX_StepperStatus.info.z_in_print = RX_StepperStatus.info.z_in_ref;
+	RX_StepperStatus.info.z_in_cap = ((RX_StepperStatus.info.ref_done == 1)
+		&& (abs(RX_StepperStatus.posZ - POS_PRINTHEADS_UM) <= 10)
+		&& (RX_StepperStatus.info.x_in_ref == 0));
 
 	// --- set positions False while moving ---
-	if (RX_TestTableStatus.info.moving) //  && (Fpga.stat->moving != 0))
+	if (RX_StepperStatus.info.moving) //  && (Fpga.stat->moving != 0))
 	{
-		RX_TestTableStatus.info.z_in_ref = FALSE;
-		RX_TestTableStatus.info.z_in_print = FALSE;
-		RX_TestTableStatus.info.z_in_cap = FALSE;
-		RX_TestTableStatus.info.move_ok = FALSE;
-		RX_TestTableStatus.info.screw_in_ref = FALSE;
-		RX_TestTableStatus.info.screw_done = FALSE;
-		if (_CmdRunning == CMD_CLN_SCREW_0_POS)			RX_TestTableStatus.adjustmentProgress = (int)(motor_get_step(MOTOR_SCREW_0) * 100.0 / (motor_get_end_step(0)));
-		//else											RX_TestTableStatus.adjustmentProgress = 0;
+		RX_StepperStatus.info.z_in_ref = FALSE;
+		RX_StepperStatus.info.z_in_print = FALSE;
+		RX_StepperStatus.info.z_in_cap = FALSE;
+		RX_StepperStatus.info.move_ok = FALSE;
+		RX_StepperStatus.info.screw_in_ref = FALSE;
+		RX_StepperStatus.info.screw_done = FALSE;
+		if (_CmdRunning == CMD_CLN_SCREW_0_POS)			RX_StepperStatus.adjustmentProgress = (int)(motor_get_step(MOTOR_SCREW_0) * 100.0 / (motor_get_end_step(0)));
+		//else											RX_StepperStatus.adjustmentProgress = 0;
 	}
 
 	if (_CmdRunning && motors_move_done(MOTOR_ALL_BITS))
 	{
-		RX_TestTableStatus.info.moving = FALSE;
+		RX_StepperStatus.info.moving = FALSE;
 
 		// --- tasks ater the deceleration period of the Stopp Command ---
 		if (_CmdRunning == CMD_CLN_STOP)
 		{
 			if (motor_error(MOTOR_CAP))
 			{
-				RX_TestTableStatus.info.ref_done = FALSE;
+				RX_StepperStatus.info.ref_done = FALSE;
 				Error(ERR_CONT, 0, "FLO_RO: Command 0x%08x: triggers motor_error", _CmdRunning);
 			}
 		}
@@ -236,19 +236,19 @@ void lbrob_main(int ticks, int menu)
 		if (_CmdRunning == CMD_CLN_REFERENCE)
 		{
 			rx_sleep(1000); // wait 1s on transport to stand still
-			RX_TestTableStatus.info.x_in_ref = fpga_input(RO_STORED_IN); // Reference Sensor
+			RX_StepperStatus.info.x_in_ref = fpga_input(RO_STORED_IN); // Reference Sensor
 
 			if (motor_error(MOTOR_CAP))
 			{
-				RX_TestTableStatus.info.ref_done = FALSE;
+				RX_StepperStatus.info.ref_done = FALSE;
 				Error(ERR_CONT, 0, "FLO_RO: Command 0x%08x: triggers motor_error", _CmdRunning);
 			}
-			else if (RX_TestTableStatus.info.x_in_ref)
+			else if (RX_StepperStatus.info.x_in_ref)
 			{
 				motor_reset(MOTOR_CAP);				// reset position after referencing
-				RX_TestTableStatus.info.ref_done = TRUE;
+				RX_StepperStatus.info.ref_done = TRUE;
 				_reset_retried = 0;
-				RX_TestTableStatus.posZ = motor_get_step(MOTOR_CAP) * 1000000.0 / CAP_STEPS_PER_METER;
+				RX_StepperStatus.posZ = motor_get_step(MOTOR_CAP) * 1000000.0 / CAP_STEPS_PER_METER;
 			}
 			else
 			{
@@ -273,13 +273,13 @@ void lbrob_main(int ticks, int menu)
 			{
 				Error(ERR_CONT, 0, "FLO_RO: Command 0x%08x: triggers motor_error", _CmdRunning);
 			}
-			else if (RX_TestTableStatus.info.cln_screw_0 == 0
-				&& RX_TestTableStatus.info.cln_screw_1 == 0
-				&& RX_TestTableStatus.info.cln_screw_2 == 0
-				&& RX_TestTableStatus.info.cln_screw_3 == 0)
+			else if (RX_StepperStatus.info.cln_screw_0 == 0
+				&& RX_StepperStatus.info.cln_screw_1 == 0
+				&& RX_StepperStatus.info.cln_screw_2 == 0
+				&& RX_StepperStatus.info.cln_screw_3 == 0)
 			{
 				motor_reset(MOTOR_SCREW_ALL_BITS);				// reset position after referencing
-				RX_TestTableStatus.info.screw_in_ref = TRUE;
+				RX_StepperStatus.info.screw_in_ref = TRUE;
 			}
 			else
 			{
@@ -299,8 +299,8 @@ void lbrob_main(int ticks, int menu)
 			}
 			else
 			{
-				RX_TestTableStatus.info.screw_done = TRUE;
-				RX_TestTableStatus.adjustmentProgress = (int)100;
+				RX_StepperStatus.info.screw_done = TRUE;
+				RX_StepperStatus.adjustmentProgress = (int)100;
 				if (_rescrew_pos != 0)
 				{
 					_new_cmd = CMD_CLN_SCREW_0_POS;
@@ -309,9 +309,9 @@ void lbrob_main(int ticks, int menu)
 		}
 
 		// --- tasks after move to pos 0 stored position, check ref sensor ---
-		if ((_CmdRunning == CMD_CLN_MOVE_POS) && (_lastPosCmd == 0))  //  && (RX_TestTableStatus.posZ == 0)
+		if ((_CmdRunning == CMD_CLN_MOVE_POS) && (_lastPosCmd == 0))  //  && (RX_StepperStatus.posZ == 0)
 		{
-			if (!RX_TestTableStatus.info.x_in_ref)
+			if (!RX_StepperStatus.info.x_in_ref)
 			{
 				_new_cmd = CMD_CLN_REFERENCE;
 				Error(LOG, 0, "FLO_RO: Command 0x%08x: triggers Referencing", _CmdRunning); //problem mit toggel move : do not toggle twice!
@@ -319,7 +319,7 @@ void lbrob_main(int ticks, int menu)
 		}
 		
 		// --- tasks after wipe ---
-		if ((_CmdRunning == CMD_CLN_WIPE))  //  && (RX_TestTableStatus.posZ == 0)
+		if ((_CmdRunning == CMD_CLN_WIPE))  //  && (RX_StepperStatus.posZ == 0)
 		{
 			Fpga.par->output &= ~RO_BLADE_UP_0;
 			Fpga.par->output &= ~RO_VACUUM_0;
@@ -327,20 +327,20 @@ void lbrob_main(int ticks, int menu)
 			Fpga.par->output &= ~RO_VACUUM_1;
 			if (motor_error(MOTOR_CAP))
 			{
-				RX_TestTableStatus.info.ref_done = FALSE;
+				RX_StepperStatus.info.ref_done = FALSE;
 				Error(ERR_CONT, 0, "FLO_RO: Command 0x%08x: triggers motor_error", _CmdRunning);
 			}
 		}
 
 
 		// --- Set Position Flags after Commands ---
-		RX_TestTableStatus.info.move_ok = ((_CmdRunning == CMD_CLN_REFERENCE || _CmdRunning == CMD_CLN_MOVE_POS || _CmdRunning == CMD_CLN_WIPE)
-			&& RX_TestTableStatus.info.ref_done
-			&& abs(RX_TestTableStatus.posZ - _lastPosCmd) <= 10);
+		RX_StepperStatus.info.move_ok = ((_CmdRunning == CMD_CLN_REFERENCE || _CmdRunning == CMD_CLN_MOVE_POS || _CmdRunning == CMD_CLN_WIPE)
+			&& RX_StepperStatus.info.ref_done
+			&& abs(RX_StepperStatus.posZ - _lastPosCmd) <= 10);
 
 		if (_new_cmd == FALSE)
 		{
-			RX_TestTableStatus.info.move_tgl = !RX_TestTableStatus.info.move_tgl;
+			RX_StepperStatus.info.move_tgl = !RX_StepperStatus.info.move_tgl;
 		}
 
 		// --- Reset Commands ---
@@ -363,9 +363,9 @@ void lbrob_main(int ticks, int menu)
 	//// --- Executed after each move ---
 	//if (_CmdRunning  == CMD_CLN_STOP && Fpga.stat->moving == 0)
 	//{
-	////	RX_TestTableStatus.info.moving = FALSE;
+	////	RX_StepperStatus.info.moving = FALSE;
 	////	_CmdRunning = FALSE;
-	//	RX_TestTableStatus.info.x_in_ref = fpga_input(RO_STORED_IN); 
+	//	RX_StepperStatus.info.x_in_ref = fpga_input(RO_STORED_IN); 
 	//}
 }
 
@@ -381,18 +381,18 @@ static void _lbrob_display_status(void)
 	int printhead_soll = POS_PRINTHEADS_UM;
 
 	term_printf("TX Robot ---------------------------------\n");
-	term_printf("moving:         %d		cmd: %08x\n", RX_TestTableStatus.info.moving, _CmdRunning);
-	term_printf("Sensor Reference Motor: %d\n", RX_TestTableStatus.info.x_in_ref);
-	term_printf("Sensor screw_down 0 to 3: %d\n", RX_TestTableStatus.info.cln_screw_0);
-	term_printf("z in reference: %d  ", RX_TestTableStatus.info.z_in_ref);
-	term_printf("z in print:     %d  ", RX_TestTableStatus.info.z_in_print);
-	term_printf("z in capping:   %d\n", RX_TestTableStatus.info.z_in_cap);
-	term_printf("Flag reference done: %d  ", RX_TestTableStatus.info.ref_done);
-	term_printf("Flag move OK: %d", RX_TestTableStatus.info.move_ok);
+	term_printf("moving:         %d		cmd: %08x\n", RX_StepperStatus.info.moving, _CmdRunning);
+	term_printf("Sensor Reference Motor: %d\n", RX_StepperStatus.info.x_in_ref);
+	term_printf("Sensor screw_down 0 to 3: %d\n", RX_StepperStatus.info.cln_screw_0);
+	term_printf("z in reference: %d  ", RX_StepperStatus.info.z_in_ref);
+	term_printf("z in print:     %d  ", RX_StepperStatus.info.z_in_print);
+	term_printf("z in capping:   %d\n", RX_StepperStatus.info.z_in_cap);
+	term_printf("Flag reference done: %d  ", RX_StepperStatus.info.ref_done);
+	term_printf("Flag move OK: %d", RX_StepperStatus.info.move_ok);
 	term_printf("Last pos cmd in um:   %d\n", _lastPosCmd);
 	term_printf("Pos0 in steps:   %d  ", motor_get_step(MOTOR_CAP));
 	//term_printf("Pos0 in steps SOLL:   %d\n", printhead_soll);
-	term_printf("Pos0 in um:   %d \n", RX_TestTableStatus.posZ);
+	term_printf("Pos0 in um:   %d \n", RX_StepperStatus.posZ);
 	term_printf("Enc0 in steps:   %d  ", Fpga.encoder[MOTOR_CAP].pos);
 	term_printf("Enc0 in um:   %d\n", enc0_mm);
 	term_printf("ScrewPos0 in steps:   %d  ", motor_get_step(MOTOR_SCREW_0));
@@ -461,13 +461,13 @@ int  lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 	
 	switch (msgId)
 	{
-	case CMD_TT_STATUS:				sok_send_2(&socket, REP_TT_STATUS, sizeof(RX_TestTableStatus), &RX_TestTableStatus);	
+	case CMD_TT_STATUS:				sok_send_2(&socket, REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);	
 		break;
 
 	case CMD_CLN_STOP:				motors_stop(MOTOR_ALL_BITS);
 		_CmdRunning = msgId;
 		Fpga.par->output &= ~RO_ALL_OUT; // set all output to off
-		RX_TestTableStatus.info.moving = TRUE;
+		RX_StepperStatus.info.moving = TRUE;
 		break;
 
 	case CMD_CLN_REFERENCE:
@@ -479,8 +479,8 @@ int  lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 			Fpga.par->output &= ~RO_ALL_OUT; // set all output to off
 			rx_sleep(1000); // wait ms
 		}
-		RX_TestTableStatus.info.ref_done = FALSE;
-		RX_TestTableStatus.info.moving = TRUE;
+		RX_StepperStatus.info.ref_done = FALSE;
+		RX_StepperStatus.info.moving = TRUE;
 		_lastPosCmd = 0;
 		motors_move_by_step(MOTOR_CAP_BITS, &_ParCap_ref, 1000000, TRUE);
 		break;
@@ -493,21 +493,21 @@ int  lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		{
 			_CmdRunning = msgId;
 			Fpga.par->output |= RO_SCREW_UP_0;
-			RX_TestTableStatus.info.moving = TRUE;
+			RX_StepperStatus.info.moving = TRUE;
 			motors_move_by_step(MOTOR_SCREW_0_BITS, &_ParScrew_ref[0], -500000, TRUE);
 		}
 		if (pos == 2)
 		{
 			_CmdRunning = msgId;
 			Fpga.par->output |= RO_SCREW_UP_1;
-			RX_TestTableStatus.info.moving = TRUE;
+			RX_StepperStatus.info.moving = TRUE;
 			motors_move_by_step(MOTOR_SCREW_1_BITS, &_ParScrew_ref[1], -500000, TRUE);
 		}
 		if (pos == 3)
 		{
 			_CmdRunning = msgId;
 			Fpga.par->output |= RO_SCREW_UP_ALL;
-			RX_TestTableStatus.info.moving = TRUE;
+			RX_StepperStatus.info.moving = TRUE;
 			for (i = 0; i < 2; i++) motor_move_by_step(i + 1, &_ParScrew_ref[i], -500000);											
 			motors_start(MOTOR_SCREW_ALL_BITS, TRUE);
 		}
@@ -521,11 +521,11 @@ int  lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 				rx_sleep(1000); // wait ms
 			}
 			_CmdRunning = msgId;
-			RX_TestTableStatus.info.moving = TRUE;
+			RX_StepperStatus.info.moving = TRUE;
 			pos = *((INT32*)pdata);
 			_lastPosCmd = pos;
-			if (!RX_TestTableStatus.info.ref_done) Error(LOG, 0, "CLN: Command 0x%08x: missing ref_done: triggers Referencing", _CmdRunning);
-			if (RX_TestTableStatus.info.ref_done) motors_move_to_step(MOTOR_CAP_BITS, &_ParCap_drive, -pos*CAP_STEPS_PER_METER / 1000000);
+			if (!RX_StepperStatus.info.ref_done) Error(LOG, 0, "CLN: Command 0x%08x: missing ref_done: triggers Referencing", _CmdRunning);
+			if (RX_StepperStatus.info.ref_done) motors_move_to_step(MOTOR_CAP_BITS, &_ParCap_drive, -pos*CAP_STEPS_PER_METER / 1000000);
 			else								  lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_REFERENCE, NULL);
 		}
 		break;
@@ -537,11 +537,11 @@ int  lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 			Fpga.par->output |= RO_BLADE_UP_1;
 			Fpga.par->output |= RO_VACUUM_1;
 			_CmdRunning = msgId;
-			RX_TestTableStatus.info.moving = TRUE;
+			RX_StepperStatus.info.moving = TRUE;
 			pos = *((INT32*)pdata);
 			_lastPosCmd = pos;
-			if (!RX_TestTableStatus.info.ref_done) Error(LOG, 0, "CLN: Command 0x%08x: missing ref_done: triggers Referencing", _CmdRunning);
-			if (RX_TestTableStatus.info.ref_done) motors_move_to_step(MOTOR_CAP_BITS, &_ParCap_wipe, -pos*CAP_STEPS_PER_METER / 1000000);
+			if (!RX_StepperStatus.info.ref_done) Error(LOG, 0, "CLN: Command 0x%08x: missing ref_done: triggers Referencing", _CmdRunning);
+			if (RX_StepperStatus.info.ref_done) motors_move_to_step(MOTOR_CAP_BITS, &_ParCap_wipe, -pos*CAP_STEPS_PER_METER / 1000000);
 			else								  lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_REFERENCE, NULL);
 		}
 		break;
@@ -550,7 +550,7 @@ int  lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		{
 			_CmdRunning = msgId;
 			Fpga.par->output |= RO_SCREW_UP_0;
-			RX_TestTableStatus.info.moving = TRUE;
+			RX_StepperStatus.info.moving = TRUE;
 			pos = *((INT32*)pdata);
 			if (pos < 0)
 			{
@@ -565,7 +565,7 @@ int  lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		{
 			_CmdRunning = msgId;
 			Fpga.par->output |= RO_SCREW_UP_1;
-			RX_TestTableStatus.info.moving = TRUE;
+			RX_StepperStatus.info.moving = TRUE;
 			pos = *((INT32*)pdata);
 			if (pos < 0)
 			{
@@ -584,11 +584,11 @@ int  lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 				Fpga.par->output &= ~RO_ALL_OUT; // set all output to off
 				rx_sleep(1000); // wait ms
 			}
-			RX_TestTableStatus.info.moving = TRUE;
+			RX_StepperStatus.info.moving = TRUE;
 			pos = *((INT32*)pdata);
 			_lastPosCmd = pos;
-			if (!RX_TestTableStatus.info.ref_done) Error(LOG, 0, "CLN: Command 0x%08x: missing ref_done: triggers Referencing", _CmdRunning);
-			if (RX_TestTableStatus.info.ref_done) motors_move_to_step(MOTOR_CAP_BITS, &_ParCap_detect[0], -pos*CAP_STEPS_PER_METER / 1000000);
+			if (!RX_StepperStatus.info.ref_done) Error(LOG, 0, "CLN: Command 0x%08x: missing ref_done: triggers Referencing", _CmdRunning);
+			if (RX_StepperStatus.info.ref_done) motors_move_to_step(MOTOR_CAP_BITS, &_ParCap_detect[0], -pos*CAP_STEPS_PER_METER / 1000000);
 			else								  lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_REFERENCE, NULL);
 		}
 		break;
@@ -600,11 +600,11 @@ int  lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 			{
 				Fpga.par->output &= ~RO_ALL_OUT; // set all output to off
 				rx_sleep(1000); // wait ms
-			}									RX_TestTableStatus.info.moving = TRUE;
+			}									RX_StepperStatus.info.moving = TRUE;
 			pos = *((INT32*)pdata);
 			_lastPosCmd = pos;
-			if (!RX_TestTableStatus.info.ref_done) Error(LOG, 0, "CLN: Command 0x%08x: missing ref_done: triggers Referencing", _CmdRunning);
-			if (RX_TestTableStatus.info.ref_done) motors_move_to_step(MOTOR_CAP_BITS, &_ParCap_detect[1], -pos*CAP_STEPS_PER_METER / 1000000);
+			if (!RX_StepperStatus.info.ref_done) Error(LOG, 0, "CLN: Command 0x%08x: missing ref_done: triggers Referencing", _CmdRunning);
+			if (RX_StepperStatus.info.ref_done) motors_move_to_step(MOTOR_CAP_BITS, &_ParCap_detect[1], -pos*CAP_STEPS_PER_METER / 1000000);
 			else								  lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_REFERENCE, NULL);
 		}
 		break;
@@ -613,19 +613,19 @@ int  lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		{
 			_CmdRunning = msgId;
 			Fpga.par->output &= ~RO_SCREW_UP_ALL; // turn off screws
-			RX_TestTableStatus.info.moving = TRUE;
+			RX_StepperStatus.info.moving = TRUE;
 			motors_move_by_step(MOTOR_SCREW_ALL_BITS, &_ParScrew_turn, -SCREW_DETACH_REV*SCREW_STEPS_PER_REV, FALSE);
 		}
 		break;
 								
 	case CMD_CLN_CAP:		if (!_CmdRunning)
 		{
-			if (!RX_TestTableStatus.info.ref_done)
+			if (!RX_StepperStatus.info.ref_done)
 			{
 				Error(LOG, 0, "CLN: Command 0x%08x: missing ref_done: triggers Referencing", _CmdRunning); 
 				lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_REFERENCE, NULL);
 			}
-			else if (RX_TestTableStatus.info.z_in_cap)
+			else if (RX_StepperStatus.info.z_in_cap)
 			{
 				Fpga.par->output |= RO_CAPP_INFLATE;
 			}
@@ -684,7 +684,7 @@ static void _lbrob_ro_motor_test(int motorNo, int steps)
 	par.estop_in = ESTOP_UNUSED;
 	par.estop_level = 0;
 	par.checkEncoder = FALSE;
-	RX_TestTableStatus.info.moving = TRUE;
+	RX_StepperStatus.info.moving = TRUE;
 	_CmdRunning = 1; // TEST
 
 	for (i = 0; i < MOTOR_CNT; i++) if (motor & (1 << i)) motor_config(i, CURRENT_HOLD, CAP_STEPS_PER_METER, CAP_INC_PER_METER);
@@ -703,5 +703,5 @@ static void _lbrob_ro_send_status(RX_SOCKET socket)
 {
 	static RX_SOCKET _socket = INVALID_SOCKET;
 	if (socket != INVALID_SOCKET) _socket = socket;
-	if (_socket != INVALID_SOCKET) sok_send_2(&_socket, REP_TT_STATUS, sizeof(RX_TestTableStatus), &RX_TestTableStatus);
+	if (_socket != INVALID_SOCKET) sok_send_2(&_socket, REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);
 }

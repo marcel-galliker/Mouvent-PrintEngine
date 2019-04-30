@@ -70,9 +70,9 @@ namespace RX_DigiPrint.Views.LB702UVView
                 str = RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_PREPARE_ACTIVE");
 
                 value=Rx.StrToInt32(str);
-                if (RxGlobals.PrinterStatus.DataReady)      value |= 1<<14;
-                if (RxGlobals.TestTableStatus.Z_in_print)   value |= 1<<15;
-                if (RxGlobals.TestTableStatus.RefDone)      value |= 1<<16;
+                if (RxGlobals.PrinterStatus.DataReady)      value |= 1<<16;
+                if (RxGlobals.TestTableStatus.Z_in_print)   value |= 1<<17;
+                if (RxGlobals.TestTableStatus.RefDone)      value |= 1<<18;
 
                 for (n=0; n<_Image.Count; n++)
                 {

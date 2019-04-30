@@ -249,13 +249,16 @@ namespace RX_DigiPrint.Services
         {
             TcpIp.SEncoderStat status;
             TcpIp.SMsgHdr hdr;
+            int i;
             int hdrlen = RxStructConvert.ToStruct(out hdr, buf);
-            int len=RxStructConvert.ToStruct(out status, buf, hdrlen);
-            if (hdrlen+len == hdr.msgLen)
+            for(i=0; i<2; i++)
             {
-                RxGlobals.Encoder.Update(status);
+                int len=RxStructConvert.ToStruct(out status, buf, hdrlen);
+                RxGlobals.Encoder[i].Update(status);
+                hdrlen += len;
             }
-            else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length")); 
+            if (hdrlen!=hdr.msgLen)
+                RxGlobals.Events.AddItem(new LogItem("Received invalid message Length"));
         }        
         
         //--- handle_head_stat -----------------------------------------
@@ -282,7 +285,7 @@ namespace RX_DigiPrint.Services
         //--- handle_tt_stat -----------------------------------------
         private void handle_tt_stat(Byte[] buf)
         {            
-            TcpIp.STestTableStat msg;
+            TcpIp.SStepperStat msg;
             int len=RxStructConvert.ToStruct(out msg, buf);
             if (len==msg.hdr.msgLen)
             {

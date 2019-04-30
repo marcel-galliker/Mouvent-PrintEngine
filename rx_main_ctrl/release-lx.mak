@@ -13,9 +13,9 @@ OBJCOPY := objcopy
 
 #Additional flags
 PREPROCESSOR_MACROS := NDEBUG release linux
-INCLUDE_DIRS := ../rx_ink_lib ../rx_common_lib ../Externals/TinyXML ./rx_rexroth_lib ../rx_rip_lib ../rx_tif_lib ../rx_pecore_lib ../Externals/libtiff ../Externals/mlpi/include ../Externals/matrix/linux/include
-LIBRARY_DIRS := /usr/local/lib
-LIBRARY_NAMES := mlpi
+INCLUDE_DIRS := ../rx_ink_lib ../rx_common_lib ../Externals/TinyXML ./rx_rexroth_lib ../rx_rip_lib ../rx_tif_lib ../rx_pecore_lib ../Externals/libtiff ../Externals/mlpi/include ../Externals/matrix/linux/include ../Externals/libxl/include_c
+LIBRARY_DIRS := /usr/lib ../Externals/libxl/lib64
+LIBRARY_NAMES := mlpi xl
 ADDITIONAL_LINKER_INPUTS := 
 MACOS_FRAMEWORKS := 
 

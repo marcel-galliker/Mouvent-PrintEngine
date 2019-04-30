@@ -48,6 +48,7 @@
     <ClInclude Include="cleaf_orders.h" />
     <ClInclude Include="ctr.h" />
     <ClInclude Include="pe_main.h" />
+    <ClInclude Include="prod_log.h" />
     <ClInclude Include="step_lb.h" />
     <ClInclude Include="args.h" />
     <ClInclude Include="boot_svr.h" />
@@ -87,6 +88,7 @@
     <ClCompile Include="cleaf_orders.c" />
     <ClCompile Include="ctr.c" />
     <ClCompile Include="pe_main.c" />
+    <ClCompile Include="prod_log.c" />
     <ClCompile Include="step_lb.c" />
     <ClCompile Include="args.c" />
     <ClCompile Include="boot_svr.c" />
@@ -99,7 +101,6 @@
     <ClCompile Include="gui_svr.c" />
     <ClCompile Include="label.c" />
     <ClCompile Include="machine_ctrl.c" />
-    <ClCompile Include="matrix.c" />
     <ClCompile Include="network.c" />
     <ClCompile Include="plc_ctrl.c" />
     <ClCompile Include="print_ctrl.c" />
@@ -271,7 +272,7 @@
     <NMakeReBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /rebuild "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeReBuildCommandLine>
     <NMakeCleanCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /clean "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeCleanCommandLine>
     <NMakeOutput>$(ProjectDir)rx_main_ctrl-Debug-lx.vgdbsettings</NMakeOutput>
-    <NMakeIncludeSearchPath>$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\c++\5;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\x86_64-linux-gnu\c++\5;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\c++\5\backward;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0001\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0003\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0002\include-fixed;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\x86_64-linux-gnu;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include;..\rx_ink_lib;..\rx_common_lib;..\Externals\TinyXML;.\rx_rexroth_lib;..\rx_rip_lib;..\rx_tif_lib;..\rx_pecore_lib;..\Externals\mlpi\include;..\Externals\matrix\linux\include;..\Externals\libtiff;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\c++\5;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\x86_64-linux-gnu\c++\5;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\c++\5\backward;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0001\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0003\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0002\include-fixed;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\x86_64-linux-gnu;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include;..\rx_ink_lib;..\rx_common_lib;..\Externals\TinyXML;.\rx_rexroth_lib;..\rx_rip_lib;..\rx_tif_lib;..\rx_pecore_lib;..\Externals\mlpi\include;..\Externals\matrix\linux\include;..\Externals\libtiff;..\Externals\libxl\include_c;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(ProjectDir)\gcc_Debug-lx.h;$(VISUALGDB_DIR)\gcc_compat.h;$(NMakeForcedIncludes)</NMakeForcedIncludes>
     <OutDir>$(SolutionDir)_out\$(Configuration)\</OutDir>
     <NMakePreprocessorDefinitions>__VisualGDB_CFG_Debug_lx;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
@@ -286,7 +287,7 @@
     <NMakeReBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /rebuild "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeReBuildCommandLine>
     <NMakeCleanCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /clean "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeCleanCommandLine>
     <NMakeOutput>$(ProjectDir)rx_main_ctrl-Release-lx.vgdbsettings</NMakeOutput>
-    <NMakeIncludeSearchPath>$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\c++\5;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\x86_64-linux-gnu\c++\5;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\c++\5\backward;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0001\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0003\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0002\include-fixed;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\x86_64-linux-gnu;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include;..\rx_ink_lib;..\rx_common_lib;..\Externals\TinyXML;.\rx_rexroth_lib;..\rx_rip_lib;..\rx_tif_lib;..\rx_pecore_lib;..\Externals\libtiff;..\Externals\mlpi\include;..\Externals\matrix\linux\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\c++\5;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\x86_64-linux-gnu\c++\5;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\c++\5\backward;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0001\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0003\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0002\include-fixed;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\x86_64-linux-gnu;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include;..\rx_ink_lib;..\rx_common_lib;..\Externals\TinyXML;.\rx_rexroth_lib;..\rx_rip_lib;..\rx_tif_lib;..\rx_pecore_lib;..\Externals\libtiff;..\Externals\mlpi\include;..\Externals\matrix\linux\include;..\Externals\libxl\include_c;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(ProjectDir)\gcc_Release-lx.h;$(VISUALGDB_DIR)\gcc_compat.h;$(NMakeForcedIncludes)</NMakeForcedIncludes>
     <OutDir>$(SolutionDir)_out\$(Configuration)\</OutDir>
     <NMakePreprocessorDefinitions>__VisualGDB_CFG_Release_lx;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
@@ -323,7 +324,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;MLPI_SERVER_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\rx_ink_lib;..\rx_common_lib;..\Externals\TinyXml;..\Externals\libtiff;..\rx_rip_lib;..\rx_tif_lib;..\rx_pecore_lib;rx_rexroth_lib;..\Externals\matrix\win\h;..\Externals\mlpi\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\rx_ink_lib;..\rx_common_lib;..\Externals\TinyXml;..\Externals\libtiff;..\rx_rip_lib;..\rx_tif_lib;..\rx_pecore_lib;rx_rexroth_lib;..\Externals\matrix\win\h;..\Externals\mlpi\include;..\Externals\libxl\include_c</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
@@ -460,7 +461,7 @@ Exit 0</Command>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\rx_ink_lib;..\rx_common_lib;..\Externals\TinyXml;..\rx_rip_lib;..\Externals\libtiff;..\rx_tif_lib;rx_rexroth_lib;..\rx_pecore_lib;..\Externals\matrix\win\h;..\Externals\mlpi\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\rx_ink_lib;..\rx_common_lib;..\Externals\TinyXml;..\rx_rip_lib;..\Externals\libtiff;..\rx_tif_lib;rx_rexroth_lib;..\rx_pecore_lib;..\Externals\matrix\win\h;..\Externals\mlpi\include;..\Externals\libxl\include_c</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
       <DebugInformationFormat>OldStyle</DebugInformationFormat>
       <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>

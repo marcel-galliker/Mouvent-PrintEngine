@@ -25,7 +25,10 @@ int	 step_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen);
 
 int	 step_do_test(SStepperMotorTest *pmsg);
 int  step_abort_printing(void);
-int	 step_slide_enabled(void);
+
+void setp_send_ctrlMode(EnFluidCtrlMode ctrlMode);
+int  step_all_in_ctrlMode(EnFluidCtrlMode ctrlMode);
+
 int	 step_to_purge_pos(int no);
 int  step_in_purge_pos(void);
 

@@ -73,6 +73,7 @@ static int _handle_main_ctrl_msg(RX_SOCKET socket, void *msg, int len, struct so
 
 static int _do_spool_cfg	(RX_SOCKET socket, SSpoolerCfg	  *cfg);
 static int _do_color_cfg	(RX_SOCKET socket, SColorSplitCfg *cfg);
+static int _do_disabled_jets(RX_SOCKET socket, SDisabledJets  *jets);
 static int _do_print_file	(RX_SOCKET socket, SPrintFileCmd  *msg);
 static void _do_start_sending(void);
 static int _do_print_abort	(RX_SOCKET socket);
@@ -213,6 +214,7 @@ static int _handle_main_ctrl_msg(RX_SOCKET socket, void *msg, int len, struct so
 	case CMD_SET_SPOOL_CFG:			_do_spool_cfg		(socket, (SSpoolerCfg*)		&phdr[1]);	break;
 	case CMD_HEAD_BOARD_CFG:		hc_head_board_cfg	(socket, (SHeadBoardCfg*)	&phdr[1]);	break;
 	case CMD_COLOR_CFG:				_do_color_cfg		(socket, (SColorSplitCfg*)	&phdr[1]);	break;
+	case CMD_DISABLED_JETS:			_do_disabled_jets	(socket, (SDisabledJets*)	&phdr[1]);	break;
 	case CMD_PRINT_FILE:			_MsgGot0++;
 									_PrintFile_Socket = socket;
 									memcpy(&_PrintFile_Msg, msg, sizeof(_PrintFile_Msg));
@@ -299,9 +301,15 @@ static int _do_color_cfg		(RX_SOCKET socket, SColorSplitCfg* cfg)
 			if (RX_Spooler.printerType==printer_DP803)	RX_ColorNameInit(cfg->inkSupplyNo, cfg->rectoVerso, cfg->color.fileName, cfg->color.colorCode);
 			else										RX_ColorNameInit(cfg->inkSupplyNo, rv_undef, cfg->color.fileName, cfg->color.colorCode);				
 		}
-		jc_set_disabled_jets(cfg->no, cfg->disabledJets);
 	}
 	else Error(ERR_CONT, 0, "CMD_COLOR_CFG no=%d out of range", cfg->no);
+	return REPLY_OK;
+}
+
+//--- _do_disabled_jets ---------------------------------------------------------------------
+static int _do_disabled_jets(RX_SOCKET socket, SDisabledJets *jets)
+{
+	jc_set_disabled_jets(jets);
 	return REPLY_OK;
 }
 

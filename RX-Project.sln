@@ -133,8 +133,8 @@ Global
 		{23DE4F53-96A4-44A2-9A16-FFC6CCB25311}.Release|x64.Build.0 = Release-soc|x64
 		{23DE4F53-96A4-44A2-9A16-FFC6CCB25311}.Release|x86.ActiveCfg = Release-soc|Win32
 		{23DE4F53-96A4-44A2-9A16-FFC6CCB25311}.Release|x86.Build.0 = Release-soc|Win32
-		{23DE4F53-96A4-44A2-9A16-FFC6CCB25311}.Release-lx|Win32.ActiveCfg = Release-soc|Win32
-		{23DE4F53-96A4-44A2-9A16-FFC6CCB25311}.Release-lx|Win32.Build.0 = Release-soc|Win32
+		{23DE4F53-96A4-44A2-9A16-FFC6CCB25311}.Release-lx|Win32.ActiveCfg = Release-lx|Win32
+		{23DE4F53-96A4-44A2-9A16-FFC6CCB25311}.Release-lx|Win32.Build.0 = Release-lx|Win32
 		{23DE4F53-96A4-44A2-9A16-FFC6CCB25311}.Release-lx|x64.ActiveCfg = Release-soc|x64
 		{23DE4F53-96A4-44A2-9A16-FFC6CCB25311}.Release-lx|x64.Build.0 = Release-soc|x64
 		{23DE4F53-96A4-44A2-9A16-FFC6CCB25311}.Release-lx|x86.ActiveCfg = Release-soc|Win32

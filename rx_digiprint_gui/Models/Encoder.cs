@@ -10,9 +10,12 @@ namespace RX_DigiPrint.Models
 {
     public class Encoder : RxBindable
     {
+        private int _no;
+
         //--- constructor ---
-        public Encoder()
+        public Encoder(int no)
         {
+            _no = no;
             RxGlobals.PrintSystem.PropertyChanged += PrintSystem_PropertyChanged;
             _printertype_changed();
         }
@@ -68,8 +71,7 @@ namespace RX_DigiPrint.Models
             get { return _Meters; }
             set { SetProperty(ref _Meters, value); }
         }
-        
-        
+              
         //--- Request ---------------------------------
         public void Request()
         {
@@ -79,7 +81,7 @@ namespace RX_DigiPrint.Models
         //--- Save ---------------------------------
         public void Save()
         {
-            RxGlobals.RxInterface.SendCommand(TcpIp.CMD_ENCODER_SAVE_PAR);
+            RxGlobals.RxInterface.SendCommand(TcpIp.CMD_ENCODER_SAVE_PAR+(uint)_no);
         }
 
         //--- Update -----------------------------------

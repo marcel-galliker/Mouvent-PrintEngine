@@ -64,6 +64,9 @@ static int _ALL=FALSE;	// show all registers
 #define UV_POS_LEFT		100000
 #define UV_POS_RIGHT	550000
 
+//--- IO in case it is not a TEST TABLE -------------------
+#define ENC_READY_OUT	0x0001		
+
 //--- structures ----------------------------
 
 static UINT32 _AVR_COEFF [][4]=
@@ -113,6 +116,7 @@ static int		_UV_Shutter = 0;
 static int		_UV_SimuCnt = 0;
 static int		_CorrRotative = FALSE;
 static int		_PrintGo_Locked;
+static int		_PrintGo_Enabled=FALSE;
 static int		_DistTelCnt = 0;
 static int		_Scanning = FALSE;
 static int		_IndexCheckDone=FALSE;
@@ -311,27 +315,36 @@ void  fpga_output(int no)
 //--- fpga_uv_on ------------------------------------
 void  fpga_uv_on(void)
 {
-	_UV_Power	  = UV_POWER_OUT;
-	FpgaQSys->out = UV_ISOLATOR_OUT | _UV_Power;
-	_UV_SimuCnt=0;
+	if (RX_EncoderCfg.printerType==printer_test_table)
+	{
+		_UV_Power	  = UV_POWER_OUT;
+		FpgaQSys->out = UV_ISOLATOR_OUT | _UV_Power;
+		_UV_SimuCnt=0;			
+	}
 }
 
 //--- fpga_uv_off -------------------------------------
 void  fpga_uv_off(void)
 {
-	_UV_Power	  = 0;
-	FpgaQSys->out = 0x0000;
+	if (RX_EncoderCfg.printerType==printer_test_table)
+	{
+		_UV_Power	  = 0;
+		FpgaQSys->out = 0x0000;		
+	}
 }
 
 //--- _uv_init --------------------------------------
 static void _uv_init(void)
 {
-	_UV_Speed   = 0;
-	_UV_LastPos = Fpga->stat.encIn[0].position;
-	_UV_Shutter = 0;
-	_UV_Stopping = FALSE;
-	_UV_Printing = TRUE;
-	_UV_BiDir	 = FALSE;
+	if (RX_EncoderCfg.printerType==printer_test_table)
+	{	
+		_UV_Speed   = 0;
+		_UV_LastPos = Fpga->stat.encIn[0].position;
+		_UV_Shutter = 0;
+		_UV_Stopping = FALSE;
+		_UV_Printing = TRUE;
+		_UV_BiDir	 = FALSE;
+	}
 }
 
 //--- _uv_ctrl --------------------------------------------------------
@@ -340,7 +353,7 @@ static void  _uv_ctrl(void)
 	int actPos;
 	int shutter = FALSE;
 	
-	if (!_Init) return;
+	if (!_Init || RX_EncoderCfg.printerType!=printer_test_table) return;
 	
 	RX_EncoderStatus.info.uv_on		= (FpgaQSys->out & UV_POWER_OUT)!=0;
 	if (arg_simu_uv) RX_EncoderStatus.info.uv_ready = _UV_SimuCnt>5;
@@ -380,6 +393,7 @@ void fpga_stop_printing(void)
 {
 //	_UV_Stopping = TRUE;
 //	_UV_BiDir    = TRUE;
+	if (RX_EncoderCfg.printerType!=printer_test_table) FpgaQSys->out = 0;
 	if (_Init)
 	{
 		int pgNo;
@@ -395,7 +409,9 @@ void fpga_stop_printing(void)
 void fpga_abort_printing(void)
 {
 	int i;
-	_UV_Stopping = TRUE;
+	if (RX_EncoderCfg.printerType==printer_test_table) 
+		_UV_Stopping = TRUE;
+	else FpgaQSys->out = 0;
 	for (i=0; i<SIZEOF(Fpga->cfg.encIn); i++) Fpga->cfg.encIn[i].enable = FALSE;
 }
 
@@ -495,7 +511,9 @@ void fpga_enc_config(int inNo, SEncoderCfg *pCfg, int outNo, int khz)
 		_corr_ctrl();		
 		Fpga->cfg.encIn[inNo].enable			= TRUE;
 	}
-	_uv_init();
+	if(RX_EncoderCfg.printerType == printer_test_table) _uv_init();
+	else FpgaQSys->out = ENC_READY_OUT;
+	
 //	_scan_check_init();
 	_ErrFlags = 0;
 	_PG_WindowError = 0;
@@ -784,18 +802,44 @@ void fpga_pg_init(void)
 		}
 	}
 	_DistTelCnt	= 0;
+	_PrintGo_Enabled = TRUE;
+
 	TrPrintfL(TRUE, "fpga_pg_init done");
+}
+
+//--- fpga_pg_stop -----------------------------------------------
+void  fpga_pg_stop(void)
+{
+	int tio=0;
+	_PrintGo_Enabled = FALSE;
+	Fpga->cfg.general.reset_fifos = TRUE;
+	while (FpgaQSys->printGo_status.fill_level)
+	{
+		Fpga->cfg.general.reset_fifos = TRUE;
+		rx_sleep(10);
+		tio += 10;
+		TrPrintfL(TRUE, "fpga_pg_init: reset_fifos level=%d, time=%d", FpgaQSys->printGo_status.fill_level, tio);
+		if (tio>100) 
+		{
+			Error(WARN, 0, "Reset PG-FIFO level=%d", FpgaQSys->printGo_status.fill_level);
+			fpga_init();
+			break;
+		}
+	}				
 }
 
 //--- fpga_pg_set_dist -------------------------------------------
 void  fpga_pg_set_dist(int cnt, int dist)
 {
-	int pgNo;
-	int incs = (int)(dist/_StrokeDist);
-	while (cnt-->0) FpgaQSys->printGo_fifo = incs;
-	for (pgNo=0; pgNo<SIZEOF(Fpga->cfg.pg); pgNo++) Fpga->cfg.pg[pgNo].fifos_ready = TRUE;
-	_DistTelCnt++;
-//	Error(LOG, 0, "fpga_pg_set_dist dist=%d, incs=%d", dist, incs);
+	if (_PrintGo_Enabled)
+	{
+		int pgNo;
+		int incs = (int)(dist/_StrokeDist);
+		while (cnt-->0) FpgaQSys->printGo_fifo = incs;
+		for (pgNo=0; pgNo<SIZEOF(Fpga->cfg.pg); pgNo++) Fpga->cfg.pg[pgNo].fifos_ready = TRUE;
+		_DistTelCnt++;
+	//	Error(LOG, 0, "fpga_pg_set_dist dist=%d, incs=%d", dist, incs);		
+	}
 }
 
 //--- fpga_set_printmark -------------------------------------------

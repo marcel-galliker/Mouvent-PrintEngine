@@ -68,6 +68,7 @@ namespace RX_DigiPrint.Views
       
             RxGlobals.License.Update();          
             _LicenseChanged();
+
             License.OnLicenseChanged     += _LicenseChanged;
             RxGlobals.PrinterStatus.Image = PrinterStatus;
             RxGlobals.PrinterStatus.ErrorTypeChangedEvent += _ErrorTypeChanged;

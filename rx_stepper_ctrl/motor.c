@@ -119,7 +119,7 @@ void  motor_main(int ticks, int menu)
 	{
 		Error(ERR_CONT, 0, "Motor Power Supply OFF");
 		_init_done=0;
-		RX_TestTableStatus.info.ref_done = FALSE;
+		RX_StepperStatus.info.ref_done = FALSE;
 	}
 }
 
@@ -210,9 +210,18 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
 	
 	if (par->checkEncoder)
 	{
-		Fpga.par->cfg[motor].enc_rel_steps0 = 200;
-		Fpga.par->cfg[motor].enc_rel_steps  = 100;
-		Fpga.par->cfg[motor].enc_rel_incs	= 20;					
+		if (par->sensRef)
+		{
+			Fpga.par->cfg[motor].enc_rel_steps0 = 10; // 20; // 50; // 100; // 200; // 1; //5;
+			Fpga.par->cfg[motor].enc_rel_steps  = 1; // 1; //5;
+			Fpga.par->cfg[motor].enc_rel_incs	= 1; // 1; //10;	
+		}
+		else
+		{
+			Fpga.par->cfg[motor].enc_rel_steps0 = 200;
+			Fpga.par->cfg[motor].enc_rel_steps  = 100;
+			Fpga.par->cfg[motor].enc_rel_incs	= 20;	
+		}				
 	}
 	else
 	{

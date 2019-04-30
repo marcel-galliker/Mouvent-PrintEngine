@@ -58,7 +58,7 @@ void rx_def_init();
 	#define PATH_RIPPED_DATA	PATH_HOME PATH_RIPPED_DATA_DIR
 	#define PATH_EMBRIP_PRENV	PATH_HOME PATH_EMBRIP_PRENV_DIR
 	#define PATH_FPGA_REGS		PATH_HOME "fpga-regs/"				
-	#define PATH_LOG			PATH_USER
+	#define PATH_LOG			PATH_USER "log/"
 #endif
 
 #define PATH_BIN			PATH_ROOT "bin/"
@@ -772,6 +772,7 @@ typedef struct SHeadBoardCfg
 {
 	UINT16		no;
 	EPresent	present;
+	EPrinterType printerType;
 
 	// tcp/ip adresses
 	UINT32		ctrlAddr;					// TCP (on ARM)
@@ -981,6 +982,7 @@ typedef struct SInkSupplyCfg
 	INT32			meniscusSet;
 	INT32			flushTime;
 	ERectoVerso		rectoVerso;
+	char			scannerSN[16];
 } SInkSupplyCfg;
 
 typedef struct SFluidBoardCfg
@@ -1128,6 +1130,8 @@ typedef struct SInkSupplyStat
 	UINT32	pumpSpeedSet;		//	Consumption pump speed
 	UINT32	pumpSpeed;			//	Consumption pump speed measured
 	INT32	canisterLevel;
+	char	scannerSN[16];
+	char	barcode[128];
 	EnFluidCtrlMode	ctrlMode;	//	EnFluidCtrlMode
 } SInkSupplyStat;
 
@@ -1176,6 +1180,8 @@ typedef struct SStepperCfg
 	INT32			wipe_height;	// in µm
 	INT32			cap_height;		// in µm
 	INT32			cap_pos;
+	INT32			adjust_pos;
+	INT32			use_printhead_en;	// if true use PRINTHEAD_EN to allow head going down
 	
 	SRobotOffsets	robot[4];
 } SStepperCfg;
@@ -1358,8 +1364,8 @@ typedef struct SStepperMotor
 	INT32	encoder_pos;	
 } SStepperMotor;
 
-//--- STestTableStat -------------------------------------- 
-typedef struct STestTableStat
+//--- SStepperStat -------------------------------------- 
+typedef struct SStepperStat
 {
 	//--- rom values, stored in head board ----
 	UINT64		macAddr;
@@ -1391,8 +1397,11 @@ typedef struct STestTableStat
 
 	INT32			inputs;
 	SStepperMotor	motor[MAX_STEPPER_MOTORS];
-	INT32		set_io_cnt;
-} STestTableStat;
+	INT32			set_io_cnt;
+	
+	EnFluidCtrlMode	ctrlModeCfg;
+	EnFluidCtrlMode	ctrlModeStat;	
+} SStepperStat;
 
 	
 //... robot ---------------------------------
@@ -1465,8 +1474,13 @@ typedef struct SColorSplitCfg
 	INT32			lastLine;
 	INT32			offsetPx;
 	SSplitCfg		split[MAX_HEADS_COLOR];
-	INT16			disabledJets[MAX_HEADS_COLOR*MAX_DISABLED_JETS/4];
 } SColorSplitCfg;
+
+typedef struct SDisabledJets
+{
+	int		color;
+	INT16	disabledJets[MAX_HEADS_COLOR][MAX_DISABLED_JETS];
+} SDisabledJets;
 
 typedef struct SPoint
 {
@@ -1488,7 +1502,7 @@ typedef struct SRxConfig
 	INT32			headDistBackMax;
 	INT32			colorOffset[INK_SUPPLY_CNT];
 	SPrinterCfg		printer;
-	SEncoderCfg		encoder;
+	SEncoderCfg		encoder[ENC_CNT];
 	SStepperCfg		stepper;
 	SInkSupplyCfg	inkSupply[INK_SUPPLY_CNT];
 	SHeadBoardCfg	headBoard[HEAD_BOARD_CNT];	
@@ -1545,6 +1559,9 @@ typedef struct
 		#define PM_SINGLE_PASS			2
 		#define PM_TEST					3
 		#define PM_TEST_SINGLE_COLOR	4
+		#define PM_TEST_JETS			5
+		#define PM_SCAN_MULTI_PAGE		6
+
 	INT32 scanCopies;
 	INT32 planes;		// number of planes
 	INT32 colorCode[MAX_COLORS];
@@ -1560,14 +1577,15 @@ extern SRxNetwork		RX_Network;
 extern int				RX_SpoolerNo;
 extern SSpoolerCfg		RX_Spooler;
 extern SColorSplitCfg	RX_Color[MAX_COLORS];
+extern SDisabledJets	RX_DisabledJets[MAX_COLORS];
 extern SHeadBoardCfg	RX_HBConfig;
 extern SHeadBoardStat	RX_HBStatus[];
 extern SPrinterStatus	RX_PrinterStatus;
 extern SEncoderStat		RX_EncoderStatus;
 extern SEncoderCfg		RX_EncoderCfg;
 extern SFluidBoardStat	RX_FluidBoardStatus;
-extern STestTableStat	RX_TestTableStatus;
-extern STestTableStat	RX_ClnStatus;
+extern SStepperStat	RX_StepperStatus;
+extern SStepperStat	RX_ClnStatus;
 extern SPrintQueueItem  RX_TestImage;
 extern char				RX_TestData[MAX_COLORS*MAX_HEADS_COLOR][MAX_TEST_DATA_SIZE];
 extern int				RX_HeadIsVerso[MAX_COLORS*MAX_HEADS_COLOR];

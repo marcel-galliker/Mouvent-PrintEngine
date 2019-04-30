@@ -17,6 +17,12 @@ namespace RX_DigiPrint.Views.UserControls
             RxGlobals.Timer.TimerFct  += Tick;
         }
 
+        //--- Property ShowText ---------------------------------------
+        public bool ShowText
+        {
+            set { if (!value) TextHeight.Height = new System.Windows.GridLength(0);}
+        }
+        
         //--- Property Color ---------------------------------------
         public Brush Color
         {

@@ -35,6 +35,7 @@ typedef struct
 	INT32	stop_level;
 	INT32	dis_mux_in;
 	INT32	checkEncoder;
+	INT32	sensRef;
 } SMovePar;
 
 void	motor_init(void);

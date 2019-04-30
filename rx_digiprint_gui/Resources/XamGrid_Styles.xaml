@@ -296,7 +296,7 @@
     <SolidColorBrush x:Key="XamGrid_Selected"       Color="#FFA7DFF4"/>
 
 
-    <!-- XamGrid CellControlStyle -->
+    <!-- XamGrid CellControlStyle --> 
     <Style x:Key="XamGridCellControlStyle" TargetType="{x:Type ig:CellControl}" BasedOn="{StaticResource XamGridCellStyle}" >
         <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="BorderBrush" Value="#FFC9CACA"/>
@@ -337,6 +337,64 @@
                                     </Storyboard>
                                 </VisualState>
                             </VisualStateGroup>
+                            <VisualStateGroup x:Name="ActiveStates">
+                                <VisualState x:Name="InActive"/>
+                                <VisualState x:Name="Active" />
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <Rectangle x:Name="AltMouseOver" Margin="{TemplateBinding BorderThickness}"/>
+                        <Border x:Name="ActiveSelected" BorderBrush="#FF6DBDD1"/>
+                        <ContentPresenter ContentTemplate="{TemplateBinding ContentTemplate}" Content="{TemplateBinding Content}" ContentStringFormat="{TemplateBinding ContentStringFormat}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- XamGrid CellControlStyle -->
+    <Style x:Key="XamGridCellControlStyle-PrintQueue" TargetType="{x:Type ig:CellControl}" BasedOn="{StaticResource XamGridCellStyle}" >
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="BorderBrush" Value="#FFC9CACA"/>
+        <!--    <Setter Property="BorderThickness" Value="0,0,1,1"/> -->
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        <Setter Property="Padding" Value="5"/>
+        <Setter Property="FontSize" Value="{DynamicResource FontSize}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ig:CellControl}">
+                    <Grid>
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal"/>
+                                <VisualState x:Name="MouseOver">
+                                    <Storyboard>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Fill" Storyboard.TargetName="AltMouseOver" Duration="0" >
+                                            <DiscreteObjectKeyFrame Value="{StaticResource XamGrid_MouseOver}"/>
+                                        </ObjectAnimationUsingKeyFrames>
+                                    </Storyboard>
+                                </VisualState>
+                                <VisualState x:Name="Alternate">
+                                    <Storyboard>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Fill" Storyboard.TargetName="AltMouseOver" Duration="0" >
+                                            <DiscreteObjectKeyFrame Value="{StaticResource XamGrid_Alternate}"/>
+                                        </ObjectAnimationUsingKeyFrames>
+                                    </Storyboard>
+                                </VisualState>
+                            </VisualStateGroup>
+                            <!--
+                            <VisualStateGroup x:Name="SelectedStates">
+                                <VisualState x:Name="NotSelected"/>
+
+                                <VisualState x:Name="Selected">
+                                    <Storyboard>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Background" Storyboard.TargetName="ActiveSelected" Duration="0" >
+                                            <DiscreteObjectKeyFrame Value="{StaticResource XamGrid_Selected}"/>
+                                        </ObjectAnimationUsingKeyFrames>
+                                    </Storyboard>
+                                </VisualState>
+                            </VisualStateGroup>
+                            -->
                             <VisualStateGroup x:Name="ActiveStates">
                                 <VisualState x:Name="InActive"/>
                                 <VisualState x:Name="Active" />

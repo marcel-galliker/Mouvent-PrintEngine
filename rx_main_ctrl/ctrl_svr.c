@@ -131,14 +131,13 @@ int  ctrl_is_connected(EDevice device, int no)
 static int _prepare_config()
 {
 	int color;
-	int n, i;
+	int n;
 	int overlap;
 	int jets;
 	int head;
 	int ethPortCnt;
 	int isNo;
 	int maxTemp;
-	int disabledJetsCnt;
 	SHeadBoardCfg	*pBoard;
 	
 	if (RX_Config.simulation) Error(WARN, 0, "Config Simulation");
@@ -149,16 +148,12 @@ static int _prepare_config()
 	
 	//--- ethernet ports on additional interface board -------------------
 	ethPortCnt=sok_get_ifcnt("p");
-	if (RX_Config.printer.type==printer_cleaf) ethPortCnt=4;
+	if (RX_Config.printer.type==printer_cleaf)		ethPortCnt=4;
+	if (RX_Config.printer.type==printer_test_table) ethPortCnt=0;	// historic
+	if (arg_hamster)								ethPortCnt=0;
 	
 	if(ethPortCnt) RX_Spooler.dataBlkSize = DATA_BLOCK_SIZE_JUMBO;
-	else           RX_Spooler.dataBlkSize = DATA_BLOCK_SIZE_STD;
-		
-	if (arg_hamster)
-	{
-		ethPortCnt=0;
-		RX_Spooler.dataBlkSize = DATA_BLOCK_SIZE_STD;	
-	}
+	else           RX_Spooler.dataBlkSize = DATA_BLOCK_SIZE_STD;		
 
 	if (arg_simuPLC)     Error(WARN, 0, "PLC in Simulation");
 	if (arg_simuEncoder) Error(WARN, 0, "Encoder in Simulation");
@@ -213,7 +208,6 @@ static int _prepare_config()
 			RX_Color[color].no = color;
 			RX_Color[color].inkSupplyNo = color;
 			memcpy(&RX_Color[color].color, &RX_Config.inkSupply[color].ink, sizeof(RX_Color[color].color));
-			disabledJetsCnt=0;
 			RX_Color[color].firstLine = 0;
 			RX_Color[color].lastLine  = 1000000;
 			if (RX_Config.printer.type == printer_DP803)
@@ -238,6 +232,7 @@ static int _prepare_config()
 				{
 					pBoard = &RX_Config.headBoard[head / MAX_HEADS_BOARD];
 					pBoard->present										= dev_on;
+					pBoard->printerType									= RX_Config.printer.type;
 					pBoard->reverseHeadOrder							= (RX_Config.printer.type==printer_TX801 || RX_Config.printer.type==printer_TX802);
 					pBoard->head[head % MAX_HEADS_BOARD].enabled   		= dev_on;
 					pBoard->head[head % MAX_HEADS_BOARD].inkSupply 		= isNo = color;
@@ -296,17 +291,14 @@ static int _prepare_config()
 					else                                             RX_Color[color].offsetPx = RX_Spooler.barWidthPx - (RX_Config.colorOffset[color] * 1200) / 25400;
 					if (RX_Color[color].offsetPx > RX_Spooler.maxOffsetPx)
 						RX_Spooler.maxOffsetPx = RX_Color[color].offsetPx;
+
 //					RX_Color[color].split[n].headNo	  = head+1;
 //					RX_Color[color].split[n].block0	  = (head%MAX_HEADS_BOARD)*RX_Spooler.dataBlkCnt;
 //					RX_Color[color].split[n].blockCnt = RX_Spooler.dataBlkCnt;
 					if (n > 0)									RX_Color[color].split[n].firstPx -= overlap;
 					if (n > 0 && n < RX_Config.headsPerColor)	RX_Color[color].split[n].widthPx += overlap;
 
-					for (i=0; i<SIZEOF(RX_Config.headDisabledJets[head]) && RX_Config.headDisabledJets[head][i]; i++)
-					{
-						if (disabledJetsCnt>=SIZEOF(RX_Color[color].disabledJets)) Error(WARN, 0, "Color[%s]: Too many disabled Jets", RX_Color[color].no);
-						else RX_Color[color].disabledJets[disabledJetsCnt++] = RX_Color[color].split[n].firstPx+RX_Config.headDisabledJets[head][i];
-					}
+					memcpy(RX_DisabledJets[color].disabledJets[n], RX_Config.headDisabledJets[head], sizeof(RX_DisabledJets[color].disabledJets[n]));
 				} 
 			}
 		}

@@ -18,6 +18,6 @@ void steptest_init(int no, RX_SOCKET *psocket);
 
 int	 steptest_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen);
 
-int  steptest_handle_status(int no, STestTableStat *pStatus);
+int  steptest_handle_status(int no, SStepperStat *pStatus);
 
 int	 steptest_to_print_pos(void);

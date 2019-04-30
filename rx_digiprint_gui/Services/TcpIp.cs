@@ -305,6 +305,7 @@ namespace RX_DigiPrint.Services
         public const UInt32 REP_ENCODER_STAT		= 0x02000112;
 
         public const UInt32 CMD_ENCODER_SAVE_PAR	= 0x01000119;
+        public const UInt32 CMD_ENCODER_SAVE_PAR_1	= 0x0100011A;
 
         public const UInt32  CMD_ENCODER_UV_ON		  = 0x01000113;
         public const UInt32  CMD_ENCODER_UV_OFF		  = 0x01000114;
@@ -328,6 +329,10 @@ namespace RX_DigiPrint.Services
         public const UInt32 CMD_SCALES_TARA		    = 0x01000143;
         public const UInt32 CMD_SCALES_STAT		    = 0x01000144;
         public const UInt32 REP_SCALES_STAT	        = 0x02000144;
+
+        public const UInt32 CMD_BCSCANNER_RESET	    = 0x01000145;
+        public const UInt32 CMD_BCSCANNER_IDENTIFY	= 0x01000146;
+        public const UInt32 CMD_BCSCANNER_TRIGGER	= 0x01000147;
 
         public const UInt32 REP_CHILLER_STAT		= 0x02000152;
 
@@ -455,7 +460,7 @@ namespace RX_DigiPrint.Services
         public struct SValue
         {
             public SMsgHdr hdr;
-	        public UInt32	no;
+	        public Int32	no;
 	        public Int32	value;
         };
 
@@ -764,7 +769,10 @@ namespace RX_DigiPrint.Services
 	        public Int32		print_height;
 	        public Int32		wipe_height;
 	        public Int32		cap_height;
+	        public Int32		cap_pos;
 	        public Int32		adjust_pos;
+	        public Int32		use_printhead_en;
+
             [MarshalAs(UnmanagedType.ByValArray, SizeConst =4)]
             public SRobotOffsets[] robot;
         }
@@ -814,6 +822,10 @@ namespace RX_DigiPrint.Services
 	        public UInt32	pumpSpeedSet;		//	Consumption pump speed
 	        public UInt32	pumpSpeed;			//	Consumption pump speed
 	        public Int32	canisterLevel;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+            public string   scannerSN;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
+            public string   barcode;
  	        public EFluidCtrlMode	ctrlMode;	//	EnFluidCtrlMode
         }
 
@@ -1010,7 +1022,7 @@ namespace RX_DigiPrint.Services
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        public struct STestTableStat
+        public struct SStepperStat
         {
 	        public SMsgHdr      hdr;
 	        public UInt64		macAddr;
@@ -1038,6 +1050,9 @@ namespace RX_DigiPrint.Services
 	        public SStepperMotor[]	motor;
 
             public Int32		set_io_cnt;
+
+            public EFluidCtrlMode	ctrlModeCfg;
+	        public EFluidCtrlMode	ctrlModeStat;	
         };
 
         //--- CLEAF Orders ------------------------------------------------------

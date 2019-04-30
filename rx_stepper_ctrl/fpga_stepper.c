@@ -52,6 +52,7 @@ SStepperFpga	Fpga;
 static int		_MemId=0;
 static int		_Init=FALSE;
 static HANDLE	_FpgaThread=NULL;
+static int		_PWM_Speed[6];
 
 #define WATCHDOG_CNT	0x7fffffff
 
@@ -101,10 +102,10 @@ void fpga_init()
 
 	printf("Version: %lu.%lu.%lu.%lu\n", Fpga.stat->version.major, Fpga.stat->version.minor, Fpga.stat->version.revision, Fpga.stat->version.build);
 
-	RX_TestTableStatus.fpgaVersion.major	   = Fpga.stat->version.major;
-	RX_TestTableStatus.fpgaVersion.minor	   = Fpga.stat->version.minor;
-	RX_TestTableStatus.fpgaVersion.revision	   = Fpga.stat->version.revision;
-	RX_TestTableStatus.fpgaVersion.build	   = Fpga.stat->version.build;
+	RX_StepperStatus.fpgaVersion.major	   = Fpga.stat->version.major;
+	RX_StepperStatus.fpgaVersion.minor	   = Fpga.stat->version.minor;
+	RX_StepperStatus.fpgaVersion.revision	   = Fpga.stat->version.revision;
+	RX_StepperStatus.fpgaVersion.build	   = Fpga.stat->version.build;
 
 	Fpga.par->watchdog_freq = 250000;
 	Fpga.par->watchdog_cnt  = WATCHDOG_CNT;
@@ -113,6 +114,8 @@ void fpga_init()
 	Fpga.par->adc_rst = TRUE; // restart adc
 	Fpga.par->min_in_pulse_width = 50000;	// in 20 ns!  
 
+	memset(_PWM_Speed, 0, sizeof(_PWM_Speed));
+	
 	_Init = TRUE;
 }
 
@@ -142,7 +145,7 @@ int  fpga_is_init(void)
 //--- fpga_input -----------------------------------
 int	fpga_input(int no)
 {
-	return (Fpga.stat->input & (1<<no)) != 0;			
+	return (Fpga.stat->input & (1<<no)) != 0;		
 }
 
 //--- fpga_display_status -----------------------------------------------
@@ -152,6 +155,8 @@ void _fpga_display_status(void)
 {
 	int i, v;
 	static UINT32 _lastPulseCnt[6];
+	       UINT32 cnt[6];
+
 	extern BYTE	_motor_start_cnt[MOTOR_CNT];
 
 	term_printf("\n");
@@ -200,10 +205,11 @@ void _fpga_display_status(void)
 	term_printf("\n");
 	
 	term_printf("Pulse Spd: ");
-	for (i=0; i<SIZEOF(Fpga.par->pwm_output); i++)
-	term_printf("%06d ", Fpga.stat->input_pulse_cnt[i]-_lastPulseCnt[i]);
+	memcpy(cnt, Fpga.stat->input_pulse_cnt, sizeof(cnt));	
+	for (i=0; i<SIZEOF(cnt); i++)
+		term_printf("%06d ", fpga_pwm_speed(i));
 	term_printf("\n");
-	memcpy(&_lastPulseCnt, &Fpga.stat->input_pulse_cnt, sizeof(_lastPulseCnt));	
+	memcpy(_lastPulseCnt, cnt, sizeof(_lastPulseCnt));	
 	
 	term_printf("\n");
 	term_printf("Motor:           "); PRINTF(MOTOR_CNT)("---%d---   ", i); term_printf("\n");
@@ -262,6 +268,9 @@ void fpga_display_error(void)
 void  fpga_main(int ticks, int menu)
 {
 	static int led=0;
+	static int _lastTicks=0;
+	static int _lastCnt[6]={0};
+	int i;
 
 	if (!_Init) return;
 
@@ -271,28 +280,40 @@ void  fpga_main(int ticks, int menu)
 	/*
 	{
 		int i;
-		RX_TestTableStatus.inputs = Fpga.stat->input;
+		RX_StepperStatus.inputs = Fpga.stat->input;
 		for (i=0; i<MAX_STEPPER_MOTORS; i++)
 		{
-			RX_TestTableStatus.motor[i].motor_pos	= Fpga.stat->statMot[i].position;
-			RX_TestTableStatus.motor[i].encoder_pos = Fpga.encoder[i].pos;
+			RX_StepperStatus.motor[i].motor_pos	= Fpga.stat->statMot[i].position;
+			RX_StepperStatus.motor[i].encoder_pos = Fpga.encoder[i].pos;
 			if (Fpga.stat->moving & (0x01<<i))
 			{
-				if(Fpga.par->mot_bwd & (0x01<<i)) RX_TestTableStatus.motor[i].state = MOTOR_STATE_MOVING_FWD;
-				else							  RX_TestTableStatus.motor[i].state = MOTOR_STATE_MOVING_BWD;
+				if(Fpga.par->mot_bwd & (0x01<<i)) RX_StepperStatus.motor[i].state = MOTOR_STATE_MOVING_FWD;
+				else							  RX_StepperStatus.motor[i].state = MOTOR_STATE_MOVING_BWD;
 			}
-			else if (Fpga.stat->statMot[i].err_estop & ENC_ESTOP_ENC) RX_TestTableStatus.motor[i].state = MOTOR_STATE_BLOCKED;
-			else RX_TestTableStatus.motor[i].state = MOTOR_STATE_IDLE;
+			else if (Fpga.stat->statMot[i].err_estop & ENC_ESTOP_ENC) RX_StepperStatus.motor[i].state = MOTOR_STATE_BLOCKED;
+			else RX_StepperStatus.motor[i].state = MOTOR_STATE_IDLE;
 		}		
 	}
 	*/
+	
+	if (ticks-_lastTicks>100)
+	{
+		for (i=0; i<SIZEOF(Fpga.stat->input_pulse_cnt); i++)
+		{
+			int cnt=Fpga.stat->input_pulse_cnt[i];
+			_PWM_Speed[i] = cnt-_lastCnt[i];
+			_lastCnt[i]   = cnt;
+		}
+		_lastTicks = ticks;
+	}
+	
 	if (menu)
 	{
 		//	FpgaCfg.head[0]->cmd_led = led;
 		led = !led;
-		RX_TestTableStatus.alive[0]++;
+		RX_StepperStatus.alive[0]++;
 		
-		if (RX_TestTableStatus.alive[0]>5) 
+		if (RX_StepperStatus.alive[0]>5) 
 			_check_errors();
 
 		//--- user interface ------------------------------				
@@ -301,6 +322,12 @@ void  fpga_main(int ticks, int menu)
 			_fpga_display_status();
 		}
 	}
+}
+
+//--- fpga_pwm_speed --------------------------------------
+int	  fpga_pwm_speed(int no)
+{
+	return _PWM_Speed[no];	
 }
 
 //--- _check_errors ---------------------------------------------------------------------

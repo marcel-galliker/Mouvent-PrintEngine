@@ -42,6 +42,7 @@ static int				_TestDataSent;
 static int				_HeadBoardCnt;
 static int				_TimeCompleted;
 static int				_BufState;
+static SPageId			_StopID;
 
 typedef struct 
 {
@@ -57,47 +58,11 @@ static char* _filename(char *path);
 int	pq_init(void)
 {
 	memset(_List, 0, sizeof(_List));
+	memset(&_StopID, 0, sizeof(_StopID));
 	_Item = 0;
 	_TimeCompleted    = 0;
 	_BufState		  = 0;
-	/*
-	{
-		strcpy_s(_List[_Size].filename, "D:\\Develop\\Data\\GT-Print-Data\\Samba\\Test_A_0.bmp");
-		_List[_Size].id			= ++_ID;
-		_List[_Size].firstPage	= 1;
-		_List[_Size].lastPage	= 1;
-		_List[_Size].copies		= 5;
-		_List[_Size].collate	= FALSE;
-
-		_List[_Size].state		= pq_STATE_QUEUED; 
-		_Size++;
-	}
-
-	{
-		strcpy_s(_List[_Size].filename, "D:\\Develop\\Data\\GT-Print-Data\\Samba\\Test_B_0.bmp");
-		_List[_Size].id			= ++_ID;
-		_List[_Size].firstPage	= 1;
-		_List[_Size].lastPage	= 1;
-		_List[_Size].copies		= 10;
-		_List[_Size].collate	= FALSE;
-
-		_List[_Size].state		= pq_STATE_QUEUED; 
-		_Size++;
-	}
-
-	{
-		strcpy_s(_List[_Size].filename, "D:\\Develop\\Data\\GT-Print-Data\\Samba\\Test_C_0.bmp");
-		_List[_Size].id			= ++_ID;
-		_List[_Size].firstPage	= 1;
-		_List[_Size].lastPage	= 1;
-		_List[_Size].copies		= 10;
-		_List[_Size].collate	= FALSE;
-
-		_List[_Size].state		= pq_STATE_QUEUED; 
-		_Size++;
-	}
-	*/
-
+	
 	return REPLY_OK;
 }
 
@@ -225,6 +190,7 @@ int	pq_start(void)
 	_TestDataSent	  = 0;
 	_TimeCompleted	  = 0;
 	_BufState		  = 0;
+	memset(&_StopID, 0, sizeof(_StopID));
 	memset(&_PrintedItem, 0, sizeof(_PrintedItem));
 	_HeadBoardCnt = spool_head_board_cnt();
 	return REPLY_OK;
@@ -555,11 +521,18 @@ int pq_sending(int spoolerNo, SPageId *pid)
 int pq_stopping(SPrintQueueItem *pitem)
 {
 	int i;
+	SPrintQueueItem item;
+//	Error(LOG, 0, "pq_stopping 1 (id=%d, page=%d, copy=%d, scan=%d)", pitem->id.id, pitem->id.page, pitem->id.copy, pitem->id.scan);
 	if (_find_item(pitem->id.id, &i)==REPLY_OK)
 	{
 		if (_List[i].state<PQ_STATE_STOPPING)
 		{
 			_List[i].state=PQ_STATE_STOPPING;
+			memcpy(&item, &_List[i], sizeof(item));
+	//		Error(LOG, 0, "pq_stopping 2 (id=%d, page=%d, copy=%d, scan=%d)", item.id.id, item.id.page, item.id.copy, item.id.scan);
+			pq_next_page(&_List[i], &item.id);
+			pq_next_page(&item, &_StopID);
+	//		Error(LOG, 0, "pq_stopping 3 (id=%d, page=%d, copy=%d, scan=%d)", _StopID.id, _StopID.page, _StopID.copy, _StopID.scan);
 			gui_send_print_queue(EVT_GET_PRINT_QUEUE, &_List[i]);
 		}
 		return REPLY_OK;
@@ -590,6 +563,7 @@ static char* _filename(char *path)
 //--- pq_next_page ----------------------------------------
 void pq_next_page(SPrintQueueItem *pitem, SPageId *pid)
 {
+	pid->id = pitem->id.id;
 	if(rx_def_is_scanning(RX_Config.printer.type))
 	{
 		if(pitem->srcPages>1)
@@ -630,6 +604,7 @@ void pq_next_page(SPrintQueueItem *pitem, SPageId *pid)
 	}
 	else // WEB
 	{
+		pid->scan = 1;
 		if (pitem->collate)
 		{
 			//--- copies of whole document ----------------------
@@ -759,8 +734,21 @@ int pq_printed(int headNo, SPageId *pid, int *pageDone, int *jobDone, SPrintQueu
 			}
 			else pitem->state   = PQ_STATE_PRINTING;
 		}
-		else TrPrintfL(TRUE, "PQ_STATE_STOPPING");
-
+		else 
+		{
+			TrPrintfL(TRUE, "PQ_STATE_STOPPING (id=%d, page=%d, copy=%d, scan=%d)", pid->id, pid->page, pid->copy, pid->scan);
+		}
+		
+		if (RX_PrinterStatus.printState==ps_stopping)
+		{
+		//	Error(LOG, 0, "RX_PrinterStatus.printState==ps_stopping (id=%d, page=%d, copy=%d, scan=%d)", pid->id, pid->page, pid->copy, pid->scan);
+			if (!memcmp(&_StopID, pid, sizeof(_StopID)))
+			{
+				Error(LOG, 0, "Stop after last page printed");
+				pc_abort_printing();				
+			}			
+		}
+		
 		memcpy(&_PrintedItem, pitem, sizeof(_PrintedItem));
 		return *pageDone || *jobDone;
 	}

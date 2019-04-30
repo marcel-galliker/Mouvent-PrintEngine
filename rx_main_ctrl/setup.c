@@ -147,7 +147,8 @@ int setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action)
 	//--- encoder ---
 	if (setup_chapter(file, "Encoder", -1, action)==REPLY_OK)
 	{
-		setup_int32_arr(file, "corrRotPar",  action, pcfg->encoder.corrRotPar, SIZEOF(pcfg->encoder.corrRotPar), 0);
+		setup_int32_arr(file, "corrRotPar",   action, pcfg->encoder[0].corrRotPar, SIZEOF(pcfg->encoder[0].corrRotPar), 0);
+		setup_int32_arr(file, "corrRotPar1",  action, pcfg->encoder[1].corrRotPar, SIZEOF(pcfg->encoder[1].corrRotPar), 0);
 		setup_chapter(file, "..", -1, action);
 	}
 
@@ -193,6 +194,7 @@ int setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action)
 			setup_int32_arr(file, "HeadDist",      action, &pcfg->headDist[i*pcfg->headsPerColor],		pcfg->headsPerColor,	0);
 			setup_int32_arr(file, "HeadDistBack",  action, &pcfg->headDistBack[i*pcfg->headsPerColor],	pcfg->headsPerColor,	0);
 			setup_int32(file, "ColorOffset",	   action, &pcfg->colorOffset[i], 0);
+			setup_str(file, "BarcodeScannerSN",	   action,  pcfg->inkSupply[i].scannerSN,	sizeof(pcfg->inkSupply[i].scannerSN),	"");
 					
 			setup_chapter(file, "..", -1, action);
 		}

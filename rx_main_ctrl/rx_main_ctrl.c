@@ -17,6 +17,7 @@
 #include "rx_common.h"
 #include "rx_error.h"
 #include "rx_file.h"
+#include "rx_term.h"
 #include "rx_trace.h"
 #include "rx_threads.h"
 #include "version.h"
@@ -36,6 +37,7 @@
 #include "machine_ctrl.h"
 #include "spool_svr.h"
 #include "print_ctrl.h"
+#include "prod_log.h"
 #include "fluid_ctrl.h"
 #include "rip_clnt.h"
 #include "step_ctrl.h"
@@ -54,12 +56,17 @@ SSpoolerCfg		RX_Spooler;
 //SRxStatus		RX_Status;
 SRxNetwork		RX_Network;
 SColorSplitCfg	RX_Color[MAX_COLORS];
+SDisabledJets	RX_DisabledJets[MAX_COLORS];
 SPrinterStatus	RX_PrinterStatus;
-STestTableStat	RX_TestTableStatus;
-STestTableStat	RX_ClnStatus;
+SStepperStat	RX_StepperStatus;
+SStepperStat	RX_ClnStatus;
 SPrintQueueItem RX_TestImage;
 SHeadBoardStat	RX_HBStatus[HEAD_BOARD_CNT];
 char			RX_Hostname[64];
+
+//--- prototypes --------------------------------------
+
+static void _menu(void);
 
 #ifdef WIN32
 
@@ -93,6 +100,24 @@ long WINAPI exception(LPEXCEPTION_POINTERS ExceptionInfo)
 	return EXCEPTION_EXECUTE_HANDLER;
 }
 #endif
+
+//--- _menu --------------------------------------------------------
+static void _menu(void)
+{
+	char str[32];
+	
+	term_get_str(str, sizeof(str));
+	if (str[0]) 
+	{
+		switch(str[0])
+		{
+		case 'i':	dl_identify(atoi(&str[1]));	break;
+		case 't':	dl_trigger (atoi(&str[1]));	break;
+		default:	break;
+		}
+	}
+}
+
 
 //--- main -------------------------------------------------------------------
 int main(int argc, char* argv[])
@@ -146,8 +171,6 @@ int main(int argc, char* argv[])
 
 //	mx_test();
 
-//	dl_test();
-
 	/*
 	if (FALSE)	
 	{
@@ -193,6 +216,8 @@ int main(int argc, char* argv[])
 	ctrl_start();
 	co_init();
 	ctr_init();
+	dl_init();
+	pl_init();
 	
 	spool_auto(TRUE);
 	
@@ -210,6 +235,7 @@ int main(int argc, char* argv[])
 		chiller_tick();
 		co_tick();
 		ctr_tick();
+		_menu();
 	}
 
 	//--- end libraries ----------------------------

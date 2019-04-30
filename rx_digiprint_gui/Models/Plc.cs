@@ -1,18 +1,12 @@
 ﻿using RX_Common;
 using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Services;
-using RX_DigiPrint.Views.UserControls;
 using RxRexrothGui.Models;
 using RxRexrothGui.Services;
-using SmartXLS;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Controls;
 
 namespace RX_DigiPrint.Models
 {

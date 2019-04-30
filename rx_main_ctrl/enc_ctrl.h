@@ -25,6 +25,7 @@ int	 enc_set_config(void);
 int  enc_start_printing(SPrintQueueItem *pitem);
 void enc_sent_document(int pages);
 int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId);
+int  enc_stop_pg(void);
 int  enc_stop_printing(void);
 int	 enc_abort_printing(void);
 int	 enc_enable_printing(int enable);
@@ -32,7 +33,7 @@ int  enc_ready(void);
 int	 enc_simu_encoder(int khz);
 void enc_error_reset(void);
 void enc_reply_stat(RX_SOCKET socket);
-void enc_save_par(void);
+void enc_save_par(int no);
 
 int  enc_uv_on(void);
 int  enc_uv_off(void);

@@ -250,7 +250,7 @@ namespace RX_DigiPrint.Models
         }
         
         //--- Update -----------------------------------
-        public void Update(TcpIp.STestTableStat msg)
+        public void Update(TcpIp.SStepperStat msg)
         {
             RefDone   = (msg.info & 0x00000001)!=0;
             Moving    = (msg.info & 0x00000002)!=0;

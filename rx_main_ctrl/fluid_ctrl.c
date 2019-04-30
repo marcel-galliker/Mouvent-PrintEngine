@@ -24,6 +24,7 @@
 #include "gui_svr.h"
 #include "step_ctrl.h"
 #include "chiller.h"
+#include "datalogic.h"
 #include "print_ctrl.h"
 #include "fluid_ctrl.h"
 
@@ -199,7 +200,7 @@ void fluid_set_config(void)
 						_FluidToScales[1] = 4;	// Magenta
 						_FluidToScales[2] = 3;	// Yellow 
 						_FluidToScales[3] = 2;	// black		
-						_FluidToScales[INK_SUPPLY_CNT]   = 1;		// flush		
+						_FluidToScales[INK_SUPPLY_CNT]   = 1;	// flush		
 						_FluidToScales[INK_SUPPLY_CNT+1] = 0;	// waste
 						break;
 		
@@ -386,7 +387,7 @@ static void _do_fluid_stat(int fluidNo, SFluidBoardStat *pstat)
 	*/
 	
 	memcpy(&_FluidStatus[fluidNo*INK_PER_BOARD], &pstat->stat[0], INK_PER_BOARD*sizeof(_FluidStatus[0]));
-	if (_FlushCtrlMode==ctrl_undef || _FlushCtrlMode>=ctrl_flush_night && _FlushCtrlMode<=ctrl_flush_done) _control_flush();
+	if (_FlushCtrlMode==ctrl_undef || (_FlushCtrlMode>=ctrl_flush_night && _FlushCtrlMode<=ctrl_flush_done)) _control_flush();
 	else _control(fluidNo);
 
 	//--- update overall state --------------------------
@@ -414,9 +415,23 @@ static void _do_fluid_stat(int fluidNo, SFluidBoardStat *pstat)
 //--- _do_scale_stat -------------------------------------------------------
 static void _do_scales_stat(SScalesMsg *pstat)
 {
+	int i, isno;
+	for (i=0; i<SIZEOF(_ScalesStatus); i++)
+	{
+		if (_ScalesStatus[i]<100 && pstat->val[i]>5000)
+		{
+			for (isno=0; isno<SIZEOF(_FluidToScales); isno++)
+			{
+				if (_FluidToScales[isno]==i)
+				{
+					dl_trigger(isno);
+					break;						
+				}
+			}
+		}
+	}
 	memcpy(_ScalesStatus, pstat->val, sizeof(_ScalesStatus));
 }
-
 
 //--- _do_scales_get_cfg ----------------------------------------
 static void _do_scales_get_cfg(SScalesMsg *pmsg)
@@ -440,7 +455,7 @@ static void _control(int fluidNo)
 //		if (_stat->ctrlMode==ctrl_shutdown_done)	
 //			_send_ctrlMode(no, ctrl_off,	TRUE);
 //		else 
-		if (ctrl_check_all_heads_in_fluidCtrlMode(no, _stat->ctrlMode))
+		if (ctrl_check_all_heads_in_fluidCtrlMode(no, _stat->ctrlMode) && step_all_in_ctrlMode(_stat->ctrlMode))
 		{
 	//		Error(LOG, 0, "Fluid[%d] in mode >>%s<<", no, FluidCtrlModeStr(_stat->ctrlMode));		
 			switch(_stat->ctrlMode)
@@ -543,6 +558,7 @@ void fluid_reply_stat(RX_SOCKET socket)	// to GUI
 	//		_FluidStatus[i].info.flushed   = ctrl_check_head_flushed(i);			
 		}	
 		_FluidStatus[i].canisterLevel  = _ScalesStatus[_FluidToScales[i]];
+		dl_get_barcode(i, _FluidStatus[i].scannerSN, _FluidStatus[i].barcode);
 		if (_HeadErr[i]) _FluidStatus[i].err |= err_printhead; 
 		_HeadErr[i]=0;
 	}
@@ -630,15 +646,15 @@ void _send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 				if (ctrlMode==ctrl_print && !RX_Config.inkSupply[i].ink.fileName[0]) continue;
 //				if (ctrlMode==ctrl_shutdown && _FluidStatus[i].ctrlMode<=ctrl_off)   continue;
 					
-				if (ctrlMode==ctrl_cal_start)
-				{
-					switch(RX_Config.printer.type)
-					{
-					case printer_TX801:	fluid_send_pressure(no, 150); break;
-					case printer_TX802:	fluid_send_pressure(no, 150); break;
-					default: break;
-					}
-				}
+//				if (ctrlMode==ctrl_cal_start)
+//				{
+//					switch(RX_Config.printer.type)
+//					{
+//					case printer_TX801:	fluid_send_pressure(no, 150); break;
+//					case printer_TX802:	fluid_send_pressure(no, 150); break;
+//					default: break;
+//					}
+//				}
 				
 				cmd.hdr.msgId	= CMD_FLUID_CTRL_MODE;
 				cmd.hdr.msgLen	= sizeof(cmd);
@@ -659,6 +675,7 @@ void _send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 					int head = ctrl_singleHead();
 					if (head<0) ctrl_send_all_heads_fluidCtrlMode(i, cmd.ctrlMode);				
 					else ctrl_send_head_fluidCtrlMode(head, cmd.ctrlMode, FALSE, FALSE);
+					setp_send_ctrlMode(cmd.ctrlMode);
 				}
 			}
 		}			

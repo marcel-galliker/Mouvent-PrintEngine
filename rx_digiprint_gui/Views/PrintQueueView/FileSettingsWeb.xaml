@@ -172,6 +172,7 @@
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="auto"/>
+                    <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
                 <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Text="Print Environment" Visibility="{Binding Ripped, Converter={StaticResource IntToInVisible_Converter}}"/>
@@ -221,7 +222,7 @@
                 <common:RxNumBox    Grid.Row="5" Grid.Column="1" Text="{Binding PrintGoDist}" HorizontalAlignment="Stretch"/>
                 <TextBlock          Grid.Row="5" Grid.Column="2" Text="mm" Margin="5,0,0,0" />              
 
-                <uc:PreviewWeb Grid.Row="1" Grid.Column="4" Grid.RowSpan="7" 
+                <uc:PreviewWeb Grid.Row="1" Grid.Column="4" Grid.RowSpan="8" 
                     Width="250"
                     HorizontalAlignment="Left" 
                     Margin="40,5,0,0"

@@ -146,6 +146,8 @@ static void _send_boot_info(UINT32 id)
 	rx_sleep(rx_get_ticks()%50); // sleep random to avoid collusions on ethernet
 	_enum_ports();
 
+	_send_msg(&msg, sizeof(msg));
+	/*
 	if (time-lastTime>1000 || memcmp(&msg, &last,sizeof(SBootInfoMsg)))
 	{
 		TrPrintfL(TRACE, "_send_boot_info");
@@ -153,6 +155,7 @@ static void _send_boot_info(UINT32 id)
 		memcpy(&last, &msg, sizeof(SBootInfoMsg));
 		lastTime = time;		
 	}
+	*/
 }
 
 //--- _handle_msg ---------------------------------------------------------

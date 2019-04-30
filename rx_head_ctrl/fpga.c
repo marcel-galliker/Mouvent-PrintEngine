@@ -1701,7 +1701,7 @@ static int _check_print_done(void)
 			if (time4>100) Error(WARN, 0, "_check_print_done[%d], t1=%d, t2=%d, t3=%d, t4=%d", head, time1, time2, time3, time4);
 			
 			//--- print done missed ? --------
-			if (!RX_HBConfig.reverseHeadOrder) // only for WEB machines
+			if (rx_def_is_web(RX_HBConfig.printerType))
 			{
 				int i=(Fpga.stat->print_done_ctr[head]) % MAX_PAGES;
 				if (_PrintDonePos[head][i] && RX_HBStatus[0].head[head].encPos > _PrintDonePos[head][i]+2000)

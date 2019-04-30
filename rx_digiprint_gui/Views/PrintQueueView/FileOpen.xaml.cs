@@ -6,11 +6,10 @@ using RX_DigiPrint.Services;
 using RX_DigiPrint.Views.UserControls;
 using System;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Threading;
 
 namespace RX_DigiPrint.Views.PrintQueueView
@@ -332,8 +331,17 @@ namespace RX_DigiPrint.Views.PrintQueueView
         private void Print_Clicked(object sender, RoutedEventArgs e)
         {
             Button button = sender as Button;
-            DirItem item = button.DataContext as DirItem;
-            _item_clicked(item);
+         //   DirItem item = button.DataContext as DirItem;
+            foreach(Row row in DirGrid.Rows)
+            {
+                DirItem item = row.Data as DirItem;
+                if (item!=null && item.IsSelected)
+                {
+                    _item_clicked(item);
+                    item.IsSelected = false;
+                }
+            }
+            _update_selected_items();
         }
 
         //--- Delete_Clicked ------------------------------------
@@ -347,23 +355,35 @@ namespace RX_DigiPrint.Views.PrintQueueView
         //---- DirGrid_SelectedRowsCollectionChanged -----------------------------------
         private void DirGrid_SelectedRowsCollectionChanged(object sender, SelectionCollectionChangedEventArgs<SelectedRowsCollection> e)
         {
-            foreach(var row in e.PreviouslySelectedItems)
-            {
-                DirItem item=row.Data as DirItem;
-                Console.WriteLine("Selection Changed: new={0}", row.Index);
-                if (item!=null)
-                {
-                    item.PrintButtonVisibility  = Visibility.Hidden;
-                    item.DeleteButtonVisibility = Visibility.Collapsed;
-                }
-            }
             foreach(var row in e.NewSelectedItems)
             {
                 DirItem item=row.Data as DirItem;
-                if (item!=null && !item.IsDirectory)
+                if (item!=null) item.IsSelected = !item.IsSelected;
+            }
+            e.NewSelectedItems.Clear(); // to get an event in click
+            _update_selected_items();
+        }
+
+        //--- _update_selected_items --------------------------------------------
+        private void _update_selected_items()
+        {
+            foreach(Row row in DirGrid.Rows)
+            {
+                DirItem item=row.Data as DirItem;   
+                if (item!=null && !item.IsDirectory && row.Control!=null)
                 {
-                    item.PrintButtonVisibility  = Visibility.Visible;
-                    item.DeleteButtonVisibility = (RxGlobals.User.UserType>=EUserType.usr_supervisor) ? Visibility.Visible : Visibility.Collapsed;
+                    if (item.IsSelected) 
+                    {
+                        row.Control.Background = Application.Current.Resources["XamGrid_Selected"] as Brush;
+                        item.PrintButtonVisibility  = Visibility.Visible;
+                        item.DeleteButtonVisibility = (RxGlobals.User.UserType>=EUserType.usr_supervisor) ? Visibility.Visible : Visibility.Collapsed;                    
+                    }
+                    else
+                    {
+                        row.Control.Background      = Brushes.Transparent;
+                        item.PrintButtonVisibility  = Visibility.Hidden;
+                        item.DeleteButtonVisibility = Visibility.Collapsed;
+                    }
                 }
             }
         }

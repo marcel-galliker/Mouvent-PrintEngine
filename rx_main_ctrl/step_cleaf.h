@@ -19,7 +19,7 @@ void stepc_error_reset();
 
 int	 stepc_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen);
 
-int  stepc_handle_status(int stepperNo, STestTableStat *pStatus);
+int  stepc_handle_status(int stepperNo, SStepperStat *pStatus);
 
 int	 stepc_to_print_pos(void);
 int  stepc_abort_printing(void);

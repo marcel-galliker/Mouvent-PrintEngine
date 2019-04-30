@@ -57,7 +57,7 @@ int	 step_init(void)
 {	
 	int i;
 	_step_ThreadRunning = TRUE;
-	memset(&RX_TestTableStatus, 0, sizeof(RX_TestTableStatus));
+	memset(&RX_StepperStatus, 0, sizeof(RX_StepperStatus));
 	//memset(&RX_ClnStatus, 0, sizeof(RX_ClnStatus));
 	for (i=0; i<SIZEOF(_step_Socket); i++)
 	{
@@ -78,14 +78,10 @@ int  step_end(void)
 void step_tick(void)
 {
 	int i;
-	char addr[32];
 	for (i=0; i<SIZEOF(_step_Socket); i++)
 	{
 		if (_step_Socket[i]!=INVALID_SOCKET) 
-		{
-			net_device_to_ipaddr(dev_stepper, i, addr, sizeof(addr));
 			sok_send_2(&_step_Socket[i], CMD_TT_STATUS, 0, NULL);			
-		}
 	}	
 }
 
@@ -122,7 +118,7 @@ static int _setp_socket_closed(RX_SOCKET socket, const char *peerName)
 		{
 			Error(ERR_CONT, 0, "Stepper %d Socket %d closed", i, socket);
 			sok_close(&_step_Socket[i]);
-			memset(&RX_TestTableStatus, 0, sizeof(RX_TestTableStatus));
+			memset(&RX_StepperStatus, 0, sizeof(RX_StepperStatus));
 			return REPLY_OK;				
 		}
 	}
@@ -147,11 +143,11 @@ static int _step_handle_msg(RX_SOCKET socket, void *msg, int len, struct sockadd
 				case CMD_PRINT_ABORT:pc_abort_printing(); break;
 				case REP_TT_STATUS:	switch(_StepperType)
 									{
-									case STEPPER_CLEAF: return stepc_handle_status		(no, (STestTableStat*)&phdr[1]);
-									case STEPPER_TX:	return steptx_handle_status		(no, (STestTableStat*)&phdr[1]);
-									case STEPPER_LB:	return steplb_handle_status		(no, (STestTableStat*)&phdr[1]);
-									case STEPPER_TEST:	return steptest_handle_status	(no, (STestTableStat*)&phdr[1]);
-									default:			return steps_handle_status		(	 (STestTableStat*)&phdr[1]);
+									case STEPPER_CLEAF: return stepc_handle_status		(no, (SStepperStat*)&phdr[1]);
+									case STEPPER_TX:	return steptx_handle_status		(no, (SStepperStat*)&phdr[1]);
+									case STEPPER_LB:	return steplb_handle_status		(no, (SStepperStat*)&phdr[1]);
+									case STEPPER_TEST:	return steptest_handle_status	(no, (SStepperStat*)&phdr[1]);
+									default:			return steps_handle_status		(	 (SStepperStat*)&phdr[1]);
 									}
 									break;
 			}
@@ -174,6 +170,7 @@ int	 step_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen)
 	}
 }
 
+/*
 //--- step_slide_enabled -----------------
 int	 step_slide_enabled(void)
 {
@@ -183,6 +180,7 @@ int	 step_slide_enabled(void)
 	default:			return TRUE;
 	}															
 }
+*/
 
 //--- step_to_purge_pos ----------------------------------
 int	 step_to_purge_pos(int no)
@@ -258,7 +256,7 @@ int	 step_do_test(SStepperMotorTest *pmsg)
 int step_set_vent(int speed)
 {
 	INT32 value;
-	if(speed) value=60;
+	if(speed) value=25;
 	else      value=0;
 	sok_send_2(&_step_Socket[0], CMD_CAP_VENT, sizeof(value), &value);
 	return REPLY_OK;			
@@ -285,6 +283,7 @@ static void _step_set_config(int no)
 
 	memcpy(&cfg, &RX_Config.stepper, sizeof(cfg));
 	cfg.printerType = RX_Config.printer.type;
+	cfg.use_printhead_en = arg_simuPLC;
 	cfg.boardNo=0;
 		
 	if (RX_Config.printer.type==printer_DP803 && !strcmp(RX_Hostname, "LB701-0001"))
@@ -315,8 +314,8 @@ int step_set_config(void)
 	case printer_LB702_UV:		_StepperType = STEPPER_LB;		break;		
 	case printer_LB702_WB:		_StepperType = STEPPER_LB;		break;		
 	case printer_DP803:			_StepperType = STEPPER_LB;		break;		
-//	case printer_TX801:			_StepperType = STEPPER_TX;		break;		
-//	case printer_TX802:			_StepperType = STEPPER_TX;		break;		
+	case printer_TX801:			_StepperType = STEPPER_TX;		break;		
+	case printer_TX802:			_StepperType = STEPPER_TX;		break;		
 	default:					_StepperType = STEPPER_STD;		break;
 	}
 
@@ -414,4 +413,37 @@ void step_error_reset(void)
 						break;
 	default:			break;
 	}
+}
+
+//--- setp_send_ctrlMode ------------------------------------
+void setp_send_ctrlMode(EnFluidCtrlMode ctrlMode)
+{
+	if (_StepperType == STEPPER_TX)
+	{
+		int i;
+		SFluidCtrlCmd cmd;
+	
+		cmd.hdr.msgId	= CMD_FLUID_CTRL_MODE;
+		cmd.hdr.msgLen	= sizeof(cmd);
+		cmd.no			= 0;
+		cmd.ctrlMode	= ctrlMode;
+
+		for (i=0; i<SIZEOF(_step_Socket); i++)
+		{
+			if (_step_Socket[i]!=INVALID_SOCKET) sok_send(&_step_Socket[i], &cmd);
+		}				
+	}
+}
+
+//--- step_all_in_ctrlMode ------------
+int  step_all_in_ctrlMode(EnFluidCtrlMode ctrlMode)
+{
+	switch(_StepperType)
+	{
+	case STEPPER_CLEAF:	return TRUE;
+	case STEPPER_TX:	return steptx_all_in_ctrlMode(ctrlMode);
+	case STEPPER_LB:	return TRUE;
+	case STEPPER_TEST:	return TRUE;
+	default: 			return TRUE;	
+	}	
 }

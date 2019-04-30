@@ -283,7 +283,6 @@ int  enc_start_printing(SPrintQueueItem *pitem)
 //	_WakeupLen = 0;
 //	if (wakeupLen) Error(LOG, 0, "Set WakeupLen for Lazy jets: %d strokes", wakeupLen);
 	
-	memcpy(msg.corrRotPar, RX_Config.encoder.corrRotPar, sizeof(msg.corrRotPar));
 		
 	msg.speed_mmin  = pitem->speed;
 	_IncPerMeter    = msg.incPerMeter;
@@ -291,6 +290,7 @@ int  enc_start_printing(SPrintQueueItem *pitem)
 	{
 		if (_Encoder[no].used)
 		{
+			memcpy(msg.corrRotPar, RX_Config.encoder[no].corrRotPar, sizeof(msg.corrRotPar));
 			msg.incPerMeter = _IncPerMeter+RX_Config.printer.offset.incPerMeter[no];
 			msg.pos_pg_fwd  = _Encoder[no].webOffset_mm*1000 + pitem->pageMargin - (_WakeupLen*25400/1200);
 			msg.pos_pg_bwd  = _Encoder[no].webOffset_mm*1000 + pitem->pageMargin + pitem->srcHeight + RX_Config.headDistMax + 13350 + (_WakeupLen*25400/1200);
@@ -309,9 +309,9 @@ int  enc_start_printing(SPrintQueueItem *pitem)
 			
 			case PQ_SCAN_BIDIR:		if (pitem->speed)
 									{
-										comp = 0.0050 * RX_TestTableStatus.posZ * pitem->speed;
+										comp = 0.0050 * RX_StepperStatus.posZ * pitem->speed;
 //										test = RX_Config.headDistBackMax-comp;
-										Error(LOG, 0, "Flightime Comp: height=%d speed=%d comp=%d", RX_TestTableStatus.posZ, pitem->speed, (int)comp);
+										Error(LOG, 0, "Flightime Comp: height=%d speed=%d comp=%d", RX_StepperStatus.posZ, pitem->speed, (int)comp);
 										msg.pos_pg_bwd += (int)comp;  
 									}
 									break;
@@ -437,6 +437,13 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 	return REPLY_OK;					
 }
 
+//--- enc_stop_pg ------------------------------
+int  enc_stop_pg(void)
+{
+	sok_send_2(&_Encoder[0].socket, CMD_ENCODER_PG_STOP, 0, NULL);
+	return REPLY_OK;
+}
+
 //--- enc_stop_printing ------------------------------
 int  enc_stop_printing(void)
 {
@@ -543,17 +550,16 @@ static void _handle_status(int no, SEncoderStat* pstat)
 //--- enc_reply_stat ---------------------------------------------------------------
 void enc_reply_stat(RX_SOCKET socket)
 {
-	int no=0;
-	sok_send_2(&socket, REP_ENCODER_STAT, sizeof(_EncoderStatus[no]), &_EncoderStatus[no]);
+	sok_send_2(&socket, REP_ENCODER_STAT, sizeof(_EncoderStatus), _EncoderStatus);
 }
 
 //--- enc_save_par ---------------------------------------------------
-void enc_save_par(void)
+void enc_save_par(int no)
 {
 	SRxConfig cfg;
 	setup_config(PATH_USER FILENAME_CFG, &cfg, READ);
-	memcpy(cfg.encoder.corrRotPar, _EncoderStatus[0].corrRotPar, sizeof(cfg.encoder.corrRotPar));
-	memcpy(RX_Config.encoder.corrRotPar, _EncoderStatus[0].corrRotPar, sizeof(cfg.encoder.corrRotPar));
+	memcpy(cfg.encoder[no].corrRotPar, _EncoderStatus[no].corrRotPar, sizeof(cfg.encoder[no].corrRotPar));
+	memcpy(RX_Config.encoder[no].corrRotPar, _EncoderStatus[no].corrRotPar, sizeof(cfg.encoder[no].corrRotPar));
 	setup_config(PATH_USER FILENAME_CFG, &cfg, WRITE);
 }
 

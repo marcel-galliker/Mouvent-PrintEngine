@@ -18,7 +18,7 @@ void steps_init(RX_SOCKET *psocket);
 
 int	 steps_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen);
 
-int  steps_handle_status(STestTableStat *pStatus);
+int  steps_handle_status(SStepperStat *pStatus);
 
 void steps_set_curing(int curing);
 

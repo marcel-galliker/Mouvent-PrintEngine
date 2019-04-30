@@ -35,6 +35,7 @@
 #include "rip_clnt.h"
 #include "step_ctrl.h"
 #include "boot_svr.h"
+#include "datalogic.h"
 #include "cleaf_orders.h"
 #include "gui_msg.h"
 
@@ -74,6 +75,10 @@ static void _do_head_fluidCtrlMode(RX_SOCKET socket, SFluidCtrlCmd* pmsg);
 static void _do_fluidCtrlMode	  (RX_SOCKET socket, SFluidCtrlCmd* pmsg);
 static void _do_fluid_pressure	  (RX_SOCKET socket, SValue*		pmsg);
 static void _do_scales_tara		  (RX_SOCKET socket, SValue*        pmsg);
+
+static void _do_bcscanner_reset	  (RX_SOCKET socket, SValue*        pmsg);
+static void _do_bcscanner_identify(RX_SOCKET socket, SValue*        pmsg);
+static void _do_bcscanner_trigger (RX_SOCKET socket, SValue*        pmsg);
 
 static void _do_get_printer_cfg	(RX_SOCKET socket);
 static void _do_set_printer_cfg	(RX_SOCKET socket, SPrinterCfgMsg *pmsg);
@@ -150,13 +155,18 @@ int handle_gui_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sende
 		case CMD_HEAD_STAT:			ctrl_reply_stat(socket);											break;
 
 		case CMD_ENCODER_STAT:		enc_reply_stat(socket);												break;
-		case CMD_ENCODER_SAVE_PAR:	enc_save_par();														break;
+		case CMD_ENCODER_SAVE_PAR:	enc_save_par(0);													break;
+		case CMD_ENCODER_SAVE_PAR_1:enc_save_par(1);													break;
 
 		case CMD_HEAD_FLUID_CTRL_MODE: _do_head_fluidCtrlMode(socket, (SFluidCtrlCmd*) pmsg);			break;
 		case CMD_FLUID_CTRL_MODE:	   _do_fluidCtrlMode(socket, (SFluidCtrlCmd*) pmsg);				break;
 		case CMD_FLUID_PRESSURE:	   _do_fluid_pressure(socket, (SValue*)&phdr[1]);					break;
 
 		case CMD_SCALES_TARA:		_do_scales_tara(socket, (SValue*)&phdr[1]);							break;				
+
+		case CMD_BCSCANNER_RESET:	_do_bcscanner_reset(socket, (SValue*)&phdr[1]);						break;				
+		case CMD_BCSCANNER_IDENTIFY:_do_bcscanner_identify(socket, (SValue*)&phdr[1]);					break;				
+		case CMD_BCSCANNER_TRIGGER:	_do_bcscanner_trigger(socket, (SValue*)&phdr[1]);					break;				
 			
 		case CMD_GET_PRINTER_CFG:	_do_get_printer_cfg(socket);										break;
 		case CMD_SET_PRINTER_CFG:	_do_set_printer_cfg(socket, (SPrinterCfgMsg*) pmsg);				break;
@@ -614,6 +624,25 @@ static void _do_scales_tara(RX_SOCKET socket, SValue* pmsg)
 	fluid_send_tara(pmsg->no);
 }
 
+//--- _do_bcscanner_reset---------------------------------
+static void _do_bcscanner_reset(RX_SOCKET socket, SValue* pmsg)
+{
+	dl_reset(pmsg->no);			
+}
+
+//--- _do_bcscanner_identify ---------------------------------
+static void _do_bcscanner_identify(RX_SOCKET socket, SValue* pmsg)
+{
+	dl_identify(pmsg->no);			
+}
+
+//--- _do_bcscanner_trigger ---------------------------------
+static void _do_bcscanner_trigger (RX_SOCKET socket, SValue* pmsg)
+{
+	dl_trigger(pmsg->no);
+}
+
+
 //--- _do_get_printer_cfg --------------------------------------
 static void _do_get_printer_cfg(RX_SOCKET socket)
 {
@@ -673,8 +702,14 @@ static void _do_set_printer_cfg(RX_SOCKET socket, SPrinterCfgMsg* pmsg)
 	memcpy(RX_Config.headFpVoltage, pmsg->headFpVoltage,	sizeof(RX_Config.headFpVoltage));
 	memcpy(RX_Config.headDist,		pmsg->headDist,			sizeof(RX_Config.headDist));
 	memcpy(RX_Config.headDistBack,	pmsg->headDistBack,		sizeof(RX_Config.headDistBack));
-	memcpy(RX_Config.colorOffset,	pmsg->colorOffset,		sizeof(RX_Config.colorOffset));	
-	memset(RX_Config.inkSupply, 0, sizeof(RX_Config.inkSupply));
+	memcpy(RX_Config.colorOffset,	pmsg->colorOffset,		sizeof(RX_Config.colorOffset));
+	for (i=0; i<SIZEOF(RX_Config.inkSupply); i++)
+	{
+		char str[32];
+		strcpy(str, RX_Config.inkSupply[i].scannerSN);
+		memset(&RX_Config.inkSupply[i],	0, sizeof(RX_Config.inkSupply[i]));
+		strcpy(RX_Config.inkSupply[i].scannerSN, str);			
+	}
 	start=pmsg->inkFileNames;
 	for (ch=pmsg->inkFileNames; ; ch++)
 	{

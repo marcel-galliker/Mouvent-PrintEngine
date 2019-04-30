@@ -187,6 +187,8 @@ time_t	FiletimeToTimet(const UINT64 pft);
 #endif
 void rx_get_system_time(UINT64 *pFileTime);
 void rx_get_system_time_str(char *str, char separator);
+void rx_get_system_hms(int *hour, int *min, int *sec);
+void rx_get_system_day_str(char *str, char separator);
 
 void BitSet  (UINT32 *pBitset, int bitNo);
 void BitClear(UINT32 *pBitset, int bitNo);

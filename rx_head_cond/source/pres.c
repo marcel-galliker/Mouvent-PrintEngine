@@ -19,11 +19,20 @@
 #include "debug_printf.h"
 
 //--- defines ---------------------------
-#define ADDR_SENSOR         0x78 	    // upper address of sensor
+#define ADDR_SENSOR         	0x78 	    // upper address of sensor
+#define ADDR_HONEY_1    		0x08
+#define ADDR_HONEY_100  		0x18
     
-static const INT32 ZERO_PRESSURE_OFFSET = 16500;
-//static const INT32 PRES_RAW_MIN         = 16095;
-//static const INT32 PRES_RAW_MAX         = 16905;
+// static const INT32 ZERO_PRESSURE_OFFSET_FIRST = 16500;
+//static const INT32 PRES_RAW_MIN_FIRST          = 16095;
+//static const INT32 PRES_RAW_MAX_FIRST          = 16905;
+static const INT32 FULL_SCALE_SPAN_FIRST = 27;   // 27000
+
+static const INT32 ZERO_PRESSURE_OFFSET_HONEY   = 81915;
+//static const INT32 PRES_RAW_MIN_HONEY		    = 7998;
+//static const INT32 PRES_RAW_MAX_HONEY         = 8392;
+static const INT32 HONEY_DIVIDOR				= 6553;
+
     
 //--- types ----------------------------------------
 
@@ -49,7 +58,8 @@ typedef struct
 	int				high_cnt;
 	int				error;
 	int				calibrating;
-        
+    uint8_t			addr;      
+	uint8_t	  		no_first_try_honey;     
     INT32           EE_ADDR_FACTORY;
     INT32           EE_ADDR_USER;
 } SSensor;
@@ -72,13 +82,14 @@ static void _sensor_read (SSensor *s);
 void pres_init(void)
 {
 	memset(&_PressureOut, 0, sizeof(_PressureOut));
-	_PressureOut.pi2c 	   		= (stc_mfsn_t*)FM4_MFS2_BASE;
-	_PressureOut.set_power 		= _PresOut_power;
-	_PressureOut.valFactor 		= 1;
-	_PressureOut.pPressure 		= &RX_Status.pressure_out;
-   *_PressureOut.pPressure 		= INVALID_VALUE;
-    _PressureOut.EE_ADDR_FACTORY = EE_ADDR_POUT_FACTORY_OFFSET;
-    _PressureOut.EE_ADDR_USER    = EE_ADDR_POUT_USER_OFFSET;
+	_PressureOut.pi2c 	   			= (stc_mfsn_t*)FM4_MFS2_BASE;
+	_PressureOut.set_power 			= _PresOut_power;
+	_PressureOut.valFactor 			= 1;
+	_PressureOut.pPressure 			= &RX_Status.pressure_out;
+   *_PressureOut.pPressure 			= INVALID_VALUE;
+    _PressureOut.EE_ADDR_FACTORY 	= EE_ADDR_POUT_FACTORY_OFFSET;
+    _PressureOut.EE_ADDR_USER    	= EE_ADDR_POUT_USER_OFFSET;
+	_PressureOut.addr				= ADDR_HONEY_100;
    
 	_sensor_reset(&_PressureOut);
 	eeprom_read_setting16(_PressureOut.EE_ADDR_FACTORY, &_PressureOut.offset_factory);
@@ -90,7 +101,8 @@ void pres_init(void)
 	_PressureIn.valFactor 		= 10;
 	_PressureIn.pPressure 		= &RX_Status.pressure_in;
    *_PressureIn.pPressure 		= INVALID_VALUE;
-    
+	_PressureIn.addr			= ADDR_HONEY_1;
+        
     _PressureIn.EE_ADDR_FACTORY = EE_ADDR_PIN_FACTORY_OFFSET;
     _PressureIn.EE_ADDR_USER    = EE_ADDR_PIN_USER_OFFSET;
     *_PressureIn.pPressure      = INVALID_VALUE;
@@ -125,13 +137,12 @@ static void _sensor_reset(SSensor *s)
 //--- _sensor_read -------------------------------
 static void _sensor_read(SSensor *s)
 {	
-    static const INT32 FULL_SCALE_SPAN = 27;       // 27000
-            
-	INT32	ret;
+    INT32	ret;
     INT32   offset = 0;
     INT32   pressure = 0;   
 	INT32   pressure10 = 0;   
 	UCHAR	*ppressure = (UCHAR*)&pressure;
+	UCHAR 	status;
 
 	//--- repower sensor ---
 	if (!s->power)
@@ -151,84 +162,155 @@ static void _sensor_read(SSensor *s)
     //if there is no read error at the moment
 	if (s->power)											
 	{
-		ret = I2cStartRead(s->pi2c, ADDR_SENSOR);
-		if (!ret) ret = I2cReceiveByteSeq(s->pi2c, &ppressure[1], FALSE);
-		if (!ret) ret = I2cReceiveByteSeq(s->pi2c, &ppressure[0], TRUE);
-		I2cStopWrite(s->pi2c);	// must be this!
+		// if we never tried to connect to honeywell sensor, we try firstsensor first for two power up cycles
+		if(s->no_first_try_honey<2)		
+		{
+			ret = I2cStartRead(s->pi2c, ADDR_SENSOR);
+			if (!ret) ret = I2cReceiveByteSeq(s->pi2c, &ppressure[1], FALSE);
+			if (!ret) ret = I2cReceiveByteSeq(s->pi2c, &ppressure[0], TRUE);
+			I2cStopWrite(s->pi2c);	// must be this!
         
-        // reset sensor on error
-		if (ret || pressure == 0xffff)				
-		{	           
-			s->set_power(FALSE); // DS1_3V3 OFF
-			s->power = FALSE;
-			s->power_timer = 4;
-			s->power_cnt++;
-			if (s->power_cnt>3)
-			{
-                s->power_cnt = 0;
-				*s->pPressure = INVALID_VALUE;
-				s->error = TRUE;
+			// reset sensor on error
+			if (ret || pressure == 0xffff)				
+			{	           
+				s->set_power(FALSE); // DS1_3V3 OFF
+				s->power = FALSE;
+				s->power_timer = 4;
+				s->power_cnt++;
+				if (s->power_cnt>3)
+				{
+					s->power_cnt = 0;
+					*s->pPressure = INVALID_VALUE;
+					//s->error = TRUE;
+					s->no_first_try_honey++;
+				}
 			}
-		}
-		else if (pressure==0)
-		{
-			if (++(s->low_cnt)>10) *s->pPressure = VAL_UNDERFLOW;
-		}
-		else if (pressure==0x7fff)
-		{
-			if (++(s->high_cnt)>10) *s->pPressure = VAL_OVERFLOW;
-		}
-		else
-		{	
-			if (s->low_cnt)  s->low_cnt--;
-			if (s->high_cnt) s->high_cnt--;
-			
-			s->power_cnt = 0;
-            
-			//--- save to buffer -----
-			s->buf10[s->buf_idx10++] = pressure;
-			if (s->buf_idx10 >= BUF_SIZE_10) s->buf_idx10   = 0;
-			
-			
-		//	s->buf_valid = TRUE;						
-		//	if (s->buf_valid)
-			{                
-				//--- filter (average without the two extreme values) -----------
+			else if (pressure==0)
+			{
+				if (++(s->low_cnt)>10) *s->pPressure = VAL_UNDERFLOW;
+			}
+			else if (pressure==0x7fff)
+			{
+				if (++(s->high_cnt)>10) *s->pPressure = VAL_OVERFLOW;
+			}
+			else
+			{	
+				if (s->low_cnt)  s->low_cnt--;
+				if (s->high_cnt) s->high_cnt--;
+				
+				s->power_cnt = 0;
+				
+				//--- save to buffer -----
+				s->buf10[s->buf_idx10++] = pressure;
+				if (s->buf_idx10 >= BUF_SIZE_10) s->buf_idx10   = 0;
+				
 				pressure10 = average(s->buf10,BUF_SIZE_10,0);
-			//??	what happens at startup, when the buffer has<10 values?
+				
+				s->buf_valid = TRUE;						
+				if (s->buf_valid)
+				{                
+					//--- save calibration -----------------------------
+					if (s->calibrating)
+					{
+						//--- select the offset by DEFINE --------------------
+						#if defined (FACTORY_OFFSET)
+							s->offset_factory = pressure; 
+							eeprom_write_setting16(s->EE_ADDR_FACTORY, s->offset_factory);
+						#else
+							/*
+							s->offset_user = pressure; 
+							eeprom_write_setting16(s->EE_ADDR_USER, s->offset_user);
+							*/
+						#endif
+						s->calibrating = FALSE;
+					}
+					
+					//--- convert value --------------
+					if (s->offset_factory)	
+						offset = s->offset_factory;
+					else
+					{					
+						RX_Status.error |= COND_ERR_sensor_offset;
+						offset = 0;
+					}
+					
+					*s->pPressure = ((pressure10 - offset) * s->valFactor * 2) / FULL_SCALE_SPAN_FIRST; // *13.5
+									
+				}
+			}
+			// end firstsensor
+		}
+		
+		// honeywell sensor
+		
+		else
+		{
+			ret = I2cStartRead(s->pi2c, s->addr);
+			if (!ret) ret = I2cReceiveByteSeq(s->pi2c, &ppressure[1], FALSE);
+			if (!ret) ret = I2cReceiveByteSeq(s->pi2c, &ppressure[0], TRUE);
+			I2cStopWrite(s->pi2c);	// must be this!
+					
+					// reset sensor on error
+			if (ret || pressure == 0xffff)				
+			{	           
+				s->set_power(FALSE); // DS1_3V3 OFF
+				s->power = FALSE;
+				s->power_timer = 4;
+				s->power_cnt++;
+				if (s->power_cnt>3)
+				{
+					s->power_cnt = 0;
+					*s->pPressure = INVALID_VALUE;
+					s->error= TRUE;
+				}
+			}
+			else
+			{	
+				s->power_cnt = 0;
+				status=ppressure[1]&0xC0;   // check status bit
+				if(status==0)
+				{					
+					//--- save to buffer -----
+					s->buf10[s->buf_idx10++] = pressure;
+					if (s->buf_idx10 >= BUF_SIZE_10) s->buf_idx10   = 0;
+					
+					pressure10 = average(s->buf10,BUF_SIZE_10,0);
+					
+					s->buf_valid = TRUE;
+					
+					if (s->buf_valid)
+					{                
+						//--- save calibration -----------------------------
+						if (s->calibrating)
+						{
+							//--- select the offset by DEFINE --------------------
+							#if defined (FACTORY_OFFSET)
+								s->offset_factory = pressure; 
+								eeprom_write_setting16(s->EE_ADDR_FACTORY, s->offset_factory);
+							#else
+								/*
+								s->offset_user = pressure; 
+								eeprom_write_setting16(s->EE_ADDR_USER, s->offset_user);
+								*/
+							#endif
+							s->calibrating = FALSE;
+						}					
 
-				//--- save calibration -----------------------------
-				if (s->calibrating)
-				{
-					//--- select the offset by DEFINE --------------------
-					#if defined (FACTORY_OFFSET)
-						s->offset_factory = pressure; 
-						eeprom_write_setting16(s->EE_ADDR_FACTORY, s->offset_factory);
-					#else
-						/*
-						s->offset_user = pressure; 
-						eeprom_write_setting16(s->EE_ADDR_USER, s->offset_user);
-						*/
-					#endif
-					s->calibrating = FALSE;
+						//--- convert value --------------
+						if (s->offset_factory)	
+							offset = s->offset_factory;
+						else
+						{					
+							RX_Status.error |= COND_ERR_sensor_offset;
+							offset = 0;
+						}
+						
+						*s->pPressure = (10 * pressure10 - ZERO_PRESSURE_OFFSET_HONEY + offset) * s->valFactor *100 / HONEY_DIVIDOR;
+					
+					}
 				}
-				
-				//--- convert value --------------
-				/*
-				if (s->offset_user) 		
-					offset = s->offset_user;
-				else 
-				*/
-				if (s->offset_factory)	
-					offset = ZERO_PRESSURE_OFFSET-s->offset_factory;
-				else
-				{
-					RX_Status.error |= COND_ERR_sensor_offset;
-					offset = ZERO_PRESSURE_OFFSET;
-				}
-				
-                *s->pPressure = ((pressure10 - offset) * s->valFactor * 2) / FULL_SCALE_SPAN; // *13.5								
-            }
+			}
+
 		}
 	}
 }

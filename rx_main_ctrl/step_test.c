@@ -26,7 +26,7 @@
 #define STEPPER_CNT		4
 
 static RX_SOCKET		*_step_socket[STEPPER_CNT]={0};
-static STestTableStat	_status[STEPPER_CNT];
+static SStepperStat	_status[STEPPER_CNT];
 
 //--- steptest_init ---------------------------------------------------
 void steptest_init(int no, RX_SOCKET *psocket)
@@ -91,7 +91,7 @@ int	 steptest_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataL
 }
 
 //--- steptest_handle_status ----------------------------------------------------------------------
-int steptest_handle_status(int no, STestTableStat *pStatus)
+int steptest_handle_status(int no, SStepperStat *pStatus)
 {
 	int i;
 	ETestTableInfo info;
@@ -119,9 +119,9 @@ int steptest_handle_status(int no, STestTableStat *pStatus)
 			info.x_in_cap		&= _status[i].info.x_in_cap;
 			if (_status[i].info.moving) 
 			{
-				RX_TestTableStatus.posX = _status[i].posX;
-				RX_TestTableStatus.posY = _status[i].posY;
-				RX_TestTableStatus.posZ = _status[i].posZ;
+				RX_StepperStatus.posX = _status[i].posX;
+				RX_StepperStatus.posY = _status[i].posY;
+				RX_StepperStatus.posZ = _status[i].posZ;
 			}
 		}
 	};
@@ -130,15 +130,15 @@ int steptest_handle_status(int no, STestTableStat *pStatus)
 	
 	if (!info.moving) 
 	{
-		RX_TestTableStatus.posX = _status[no].posX;
-		RX_TestTableStatus.posY = _status[no].posY;
-		RX_TestTableStatus.posZ = _status[no].posZ;
+		RX_StepperStatus.posX = _status[no].posX;
+		RX_StepperStatus.posY = _status[no].posY;
+		RX_StepperStatus.posZ = _status[no].posZ;
 	}
 	
-	memcpy(&RX_TestTableStatus.info, &info, sizeof(RX_TestTableStatus.info));
-	RX_TestTableStatus.info.x_in_cap = plc_in_cap_pos();
+	memcpy(&RX_StepperStatus.info, &info, sizeof(RX_StepperStatus.info));
+	RX_StepperStatus.info.x_in_cap = plc_in_cap_pos();
 
-	gui_send_msg_2(0, REP_TT_STATUS, sizeof(RX_TestTableStatus), &RX_TestTableStatus);
+	gui_send_msg_2(0, REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);
 	return REPLY_OK;
 }
 

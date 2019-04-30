@@ -141,6 +141,9 @@
     <ClInclude Include="ctr.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="prod_log.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="boot_svr.c">
@@ -183,9 +186,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="label.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="matrix.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="rx_rexroth_lib\app.cpp">
@@ -258,6 +258,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ctr.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="prod_log.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

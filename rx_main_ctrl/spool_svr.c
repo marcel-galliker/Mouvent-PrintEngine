@@ -38,6 +38,9 @@ typedef struct
 {
 	int			used;
 	RX_SOCKET	socket;
+	int			loadNo;
+	int			sendNo;
+	int			sentNo;
 } SSpoolerInfo;
 
 //--- Statics -----------------------------------------------------------------
@@ -230,7 +233,13 @@ int	spool_set_config(RX_SOCKET socket)
 	
 	_DelayPauseTimer = 0;
 
-	for (no=0; no<SIZEOF(_Spooler); no++) _Spooler[no].used=FALSE;
+	for (no=0; no<SIZEOF(_Spooler); no++)
+	{
+		_Spooler[no].used=FALSE;
+		_Spooler[no].loadNo=0;
+		_Spooler[no].sendNo=0;
+		_Spooler[no].sentNo=0;
+	}
 	_SpoolerCnt=0;
 	//--- send bitmap split config (all info) --------------------------
 	for (color=0; color<SIZEOF(RX_Color); color++)
@@ -256,7 +265,9 @@ int	spool_set_config(RX_SOCKET socket)
 	if (RX_Config.printer.type==printer_DP803) Error(LOG, 0, "Send CMD_COLOR_CFG only to used spooler");
 	for (color=0; color<SIZEOF(RX_Color); color++)
 	{
-		cnt=spool_send_msg_2(CMD_COLOR_CFG,	   sizeof(RX_Color[color]), &RX_Color[color], FALSE);
+		cnt=spool_send_msg_2(CMD_COLOR_CFG,		sizeof(RX_Color[color]),		&RX_Color[color],		 FALSE);
+		RX_DisabledJets[color].color = color;
+		cnt=spool_send_msg_2(CMD_DISABLED_JETS,	sizeof(RX_DisabledJets[color]), &RX_DisabledJets[color], FALSE);
 	}
 
 	//--- send head board configurations ------------------------
@@ -518,21 +529,21 @@ static int _do_print_file_rep(RX_SOCKET socket, SPrintFileRep *msg)
 //--- _do_print_file_evt ------------------------------------------------------
 static int _do_print_file_evt	(RX_SOCKET socket, SPrintFileMsg	*msg)
 {
-	TrPrintfL(TRUE, "Documment ID=%d  page=%d , copy=%d, scan=%d: EVENT %d",	msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->evt);
+//	TrPrintfL(TRUE, "Documment (id=%d, page=%d, scan=%d, copy=%d): EVENT %d",	msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->evt);
 	SPrintQueueItem *pitem;
 	switch (msg->evt)
 	{
-	case DATA_RIPPING:	TrPrintfL(TRUE, "SPOOLER %d: Documment ID=%d  page=%d: RIPPING,   copy=%d, scan=%d, bufReady=%d",	msg->spoolerNo, msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->bufReady); break;
-	case DATA_SCREENING:TrPrintfL(TRUE, "SPOOLER %d: Documment ID=%d  page=%d: SCREENING, copy=%d, scan=%d, bufReady=%d",	msg->spoolerNo, msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->bufReady); break;
-	case DATA_LOADING:	TrPrintfL(TRUE, "SPOOLER %d: Documment ID=%d  page=%d: LOADING,   copy=%d, scan=%d, bufReady=%d >>%s<<",	msg->spoolerNo, msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->bufReady, msg->txt);
+	case DATA_RIPPING:	TrPrintfL(TRUE, "SPOOLER %d: RIPPING (id=%d, page=%d, scan=%d, copy=%d), bufReady=%d",	msg->spoolerNo, msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->bufReady); break;
+	case DATA_SCREENING:TrPrintfL(TRUE, "SPOOLER %d: SCREENING (id=%d, page=%d, scan=%d, copy=%d), bufReady=%d",	msg->spoolerNo, msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->bufReady); break;
+	case DATA_LOADING:	TrPrintfL(TRUE, "SPOOLER %d: LOADING #%d: (id=%d, page=%d, scan=%d, copy=%d), bufReady=%d >>%s<<",	msg->spoolerNo, ++_Spooler[msg->spoolerNo].loadNo, msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->bufReady, msg->txt);
 						pq_loading(msg->spoolerNo, &msg->id, msg->txt);
 						break;
 
-	case DATA_SENDING:	TrPrintf(TRUE, "SPOOLER %d: Documment ID=%d  page=%d: SENDING,   copy=%d, scan=%d, bufReady=%d",	msg->spoolerNo, msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->bufReady); 
+	case DATA_SENDING:	TrPrintf(TRUE, "SPOOLER %d: SENDING #%d: (id=%d, page=%d, scan=%d, copy=%d), bufReady=%d",	msg->spoolerNo, ++_Spooler[msg->spoolerNo].sendNo, msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->bufReady); 
 						pq_sending(msg->spoolerNo, &msg->id); 
 						break;
 
-	case DATA_SENT:		TrPrintf(TRUE, "SPOOLER %d: Documment ID=%d  page=%d: SENT,      copy=%d, scan=%d, bufReady=%d,  _MsgSent=%d, _MsgGot=%d",		msg->spoolerNo, msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->bufReady, _MsgSent, _MsgGot);
+	case DATA_SENT:		TrPrintf(TRUE, "SPOOLER %d: SENT #%d: (id=%d, page=%d, scan=%d, copy=%d), bufReady=%d,  _MsgSent=%d, _MsgGot=%d",	msg->spoolerNo, ++_Spooler[msg->spoolerNo].sentNo, msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->bufReady, _MsgSent, _MsgGot);
 						pitem = pq_sent(&msg->id);							
 						if(RX_PrinterStatus.testMode)
 						{
@@ -544,6 +555,7 @@ static int _do_print_file_evt	(RX_SOCKET socket, SPrintFileMsg	*msg)
 						{
 							if (_SpoolerCnt==0 || (pitem->scansSent%_SpoolerCnt)==0)
 							{
+								TrPrintf(TRUE, "*** SENT #%d *** (id=%d, page=%d, scan=%d, copy=%d)", _Spooler[msg->spoolerNo].sentNo, msg->id.id, msg->id.page, msg->id.copy, msg->id.scan);							
 								RX_PrinterStatus.transferredCnt++;
 								pc_sent(&msg->id);
 								enc_set_pg(pitem, &msg->id);

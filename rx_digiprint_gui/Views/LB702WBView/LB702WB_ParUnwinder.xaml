@@ -7,7 +7,7 @@
              xmlns:igWPF="http://schemas.infragistics.com/xaml/wpf"
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
              xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
-             xmlns:local="clr-namespace:RX_DigiPrint.Views.MiniLabelView"
+             xmlns:local="clr-namespace:RX_DigiPrint.Views.LB701UVView"
              mc:Ignorable="d"
              d:DesignHeight="700" 
              d:DesignWidth="300"

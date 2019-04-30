@@ -107,7 +107,7 @@ int main(int argc, char** argv)
 	UINT32	serialNo;
 	UINT64	macAddr;
 	char str[64];
-
+	
 	//--- do not start on MAIN -----------------
 	sok_get_ip_address_str(DEVICE_NAME, str, sizeof(str));
 	if (!strcmp(str, RX_CTRL_MAIN)) 

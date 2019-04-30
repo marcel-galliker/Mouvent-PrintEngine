@@ -50,6 +50,7 @@ int setup_ink(const char *filepath, SInkDefinition *pink, EN_setup_Action  actio
 		setup_int32(file, "ColorCode",		action, &pink->colorCode, 0);
 		setup_int32(file, "Temp",			action, &pink->temp,	  0);
 		setup_int32(file, "TempMax",		action, &pink->tempMax,	  0);
+		setup_int32(file, "Meniscus",		action, &pink->meniscus, 150);
 		setup_int32(file, "CondPresOut",	action, &pink->condPresOut,  150);
 		setup_int32_arr(file, "FlushTime",  action, pink->flushTime, SIZEOF(pink->flushTime), 0);		
 		{

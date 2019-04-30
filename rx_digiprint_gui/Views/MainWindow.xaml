@@ -9,7 +9,7 @@
         xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
         xmlns:views="clr-namespace:RX_DigiPrint.Views"
         xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
-		xmlns:views_ml="clr-namespace:RX_DigiPrint.Views.MiniLabelView"
+		xmlns:views_ml="clr-namespace:RX_DigiPrint.Views.LB701UVView"
 		xmlns:views_dp="clr-namespace:RX_DigiPrint.Views.DP803View"
 		xmlns:views_lb702uv="clr-namespace:RX_DigiPrint.Views.LB702UVView"
 		xmlns:views_lb702wb="clr-namespace:RX_DigiPrint.Views.LB702WBView"
@@ -103,7 +103,7 @@
                 </rx:RxTabItem>
 
                 <rx:RxTabItem x:Name="TabMiniLabel" Header="Label Press" >
-                    <views_ml:MiniLabelView/>
+                    <views_ml:LB701UVView/>
                 </rx:RxTabItem>
                 
                 <rx:RxTabItem x:Name="TabLB702UV" Header="LB 702 UV" >

@@ -254,7 +254,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
             double pressure = (sender as RxNumBox).Value * 10;
             if (pressure!=_InkSupply.CylinderPresSet)
             {
-                TcpIp.SValue msg = new TcpIp.SValue(){no=(UInt32)_InkSupply.No-1, value=(Int32)pressure};
+                TcpIp.SValue msg = new TcpIp.SValue(){no=_InkSupply.No-1, value=(Int32)pressure};
                 RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_PRESSURE, ref msg);
                 RxGlobals.PrintSystem.Changed = true;
             }

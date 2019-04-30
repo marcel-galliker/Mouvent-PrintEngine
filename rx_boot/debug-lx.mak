@@ -13,7 +13,7 @@ OBJCOPY := objcopy
 
 #Additional flags
 PREPROCESSOR_MACROS := DEBUG linux
-INCLUDE_DIRS := ../rx_common_lib ../rx_ink_lib ../Externals/TinyXML
+INCLUDE_DIRS := ../rx_common_lib ../rx_ink_lib ../Externals/TinyXML ../Externals/libxl/include_c
 LIBRARY_DIRS := 
 LIBRARY_NAMES := 
 ADDITIONAL_LINKER_INPUTS := 

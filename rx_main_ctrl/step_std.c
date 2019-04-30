@@ -84,19 +84,19 @@ void steps_set_curing(int curing)
 }
 
 //--- steps_handle_status ----------------------------------------------------------------------
-int steps_handle_status(STestTableStat *pStatus)
+int steps_handle_status(SStepperStat *pStatus)
 {
-	memcpy(&RX_TestTableStatus, pStatus, sizeof(RX_TestTableStatus));
-	RX_TestTableStatus.info.uv_on    = enc_is_uv_on();
-	RX_TestTableStatus.info.uv_ready = enc_is_uv_ready();
-	RX_TestTableStatus.info.x_in_cap = plc_in_cap_pos();
+	memcpy(&RX_StepperStatus, pStatus, sizeof(RX_StepperStatus));
+	RX_StepperStatus.info.uv_on    = enc_is_uv_on();
+	RX_StepperStatus.info.uv_ready = enc_is_uv_ready();
+	RX_StepperStatus.info.x_in_cap = plc_in_cap_pos();
 		
-	if (_Curing && !RX_TestTableStatus.info.printing && !RX_TestTableStatus.info.curing)
+	if (_Curing && !RX_StepperStatus.info.printing && !RX_StepperStatus.info.curing)
 	{
 		_Curing = FALSE;
 		pc_abort_printing();									
 	}
-	gui_send_msg_2(0, REP_TT_STATUS, sizeof(RX_TestTableStatus), &RX_TestTableStatus);
+	gui_send_msg_2(0, REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);
 	return REPLY_OK;
 }
 

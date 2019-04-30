@@ -57,8 +57,8 @@ namespace RX_DigiPrint.Views.UserControls
                     }
                     else
                     {
-                        visible   = (RxGlobals.PrinterStatus.PrintState==EPrintState.ps_setup) ? Visibility.Visible   : Visibility.Collapsed; 
-                        invisible = (RxGlobals.PrinterStatus.PrintState==EPrintState.ps_setup) ? Visibility.Collapsed : Visibility.Visible; 
+                        visible   = (RxGlobals.PrinterStatus.PrintState==EPrintState.ps_setup || RxGlobals.PrinterStatus.PrintState==EPrintState.ps_webin) ? Visibility.Visible   : Visibility.Collapsed; 
+                        invisible = (RxGlobals.PrinterStatus.PrintState==EPrintState.ps_setup || RxGlobals.PrinterStatus.PrintState==EPrintState.ps_webin) ? Visibility.Collapsed : Visibility.Visible; 
                     }
 
                     CMD_JOG_FWD.Visibility = visible;

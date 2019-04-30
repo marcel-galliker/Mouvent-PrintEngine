@@ -158,6 +158,7 @@ static int				_ErrorFilter=0;
 static int				_ErrorFilterBuf[100];
 #define ERROR_FILTER_TIME	500
 static double			_StepDist;
+static int				_UnwinderLenMin;
 
 static int				_MpliStarting;
 static int				_UvUsed;
@@ -293,7 +294,7 @@ static void _plc_set_command(char *mode, char *cmd)
 	if (strstr(cmd, "WEBIN")) 
 	{
 		_plc_set_par_default();
-		if (!arg_simuEncoder && !RX_TestTableStatus.info.ref_done) 
+		if (!arg_simuEncoder && !RX_StepperStatus.info.ref_done) 
 		{
 			step_handle_gui_msg(INVALID_SOCKET, CMD_CAP_REFERENCE, NULL, 0);
 			_SendWebIn = TRUE;
@@ -320,6 +321,15 @@ static void _plc_set_par(SPrintQueueItem *pItem, SPlcPar *pPlcPar)
 	int		accDistmm=0;
 	
 	_plc_set_par_default();
+	
+	switch(RX_Config.printer.type)
+	{
+		case printer_LB701:		_UnwinderLenMin = 10; break;	
+		case printer_LB702_UV:	_UnwinderLenMin = 10; break;	
+		case printer_LB702_WB:	_UnwinderLenMin = 20; break;	
+		case printer_DP803:		_UnwinderLenMin = 30; break;	
+		default: _UnwinderLenMin = 0;			
+	}
 	
  	if(pItem->printGoMode == PG_MODE_MARK)	_PG_DIST_TEST = (pItem->printGoDist + 999) / 1000;
 	else _PG_DIST_TEST = 0;
@@ -447,7 +457,8 @@ int  plc_set_printpar(SPrintQueueItem *pItem)
 //--- plc_start_printing -----------------------------------------------
 int  plc_start_printing(void)
 {
-	if (_PlcState!=plc_run)	_StartPrinting = TRUE;
+	if (_PlcState!=plc_run)	_StartPrinting		= TRUE;
+
 	if (_CanRun && !_SimuPLC)
 	{
 		plc_error_reset();
@@ -530,7 +541,7 @@ int  plc_pause_printing(void)
 {
 	_StartPrinting = FALSE;
 	_SendRun       = FALSE;
-	if (_SimuEncoder) ctrl_simu_encoder(0);
+	if (_SimuEncoder && rx_def_is_scanning(RX_Config.printer.type)) ctrl_simu_encoder(0);
 
 	if (!_SimuPLC)
 	{
@@ -1169,8 +1180,8 @@ static void _plc_state_ctrl()
 		
 	//	if (_PlcState==plc_setup && RX_PrinterStatus.printState==ps_webin && RX_Config.printer.type!=printer_cleaf) _plc_set_command("CMD_SETUP", "CMD_WEBIN");
 		if ((RX_Config.stepper.ref_height==0 && RX_Config.stepper.print_height==0) 
-			|| RX_TestTableStatus.info.z_in_print 
-			|| RX_TestTableStatus.info.z_in_ref)
+			|| RX_StepperStatus.info.z_in_print 
+			|| RX_StepperStatus.info.z_in_ref)
 		{
 			lc_set_value_by_name_UINT32(APP "STA_HEAD_IS_UP", TRUE);						
 			if (_SendPause)
@@ -1254,9 +1265,9 @@ static void _plc_state_ctrl()
 
 		if(!_heads_to_print)
 		{			
-		//	TrPrintfL(TRUE, "_heads_to_print: printhead_en=%d, printState=%d (%d)", RX_TestTableStatus.info.printhead_en, RX_PrinterStatus.printState, ps_printing);
-		//	if (RX_Config.printer.type!=printer_cleaf || (RX_TestTableStatus.info.printhead_en && RX_PrinterStatus.printState==ps_printing))
-			if(RX_PrinterStatus.printState == ps_printing && (RX_Config.printer.type != printer_cleaf || RX_TestTableStatus.info.printhead_en))
+		//	TrPrintfL(TRUE, "_heads_to_print: printhead_en=%d, printState=%d (%d)", RX_StepperStatus.info.printhead_en, RX_PrinterStatus.printState, ps_printing);
+		//	if (RX_Config.printer.type!=printer_cleaf || (RX_StepperStatus.info.printhead_en && RX_PrinterStatus.printState==ps_printing))
+			if(RX_PrinterStatus.printState == ps_printing && (RX_Config.printer.type != printer_cleaf || RX_StepperStatus.info.printhead_en))
 			{
 				tt_cap_to_print_pos();
 				_heads_to_print = TRUE;													
@@ -1268,7 +1279,7 @@ static void _plc_state_ctrl()
 			&& enc_ready() 
 			&& pq_is_ready2print(&_StartEncoderItem) 
 			&& (RX_PrinterStatus.printState == ps_printing || RX_PrinterStatus.printState == ps_ready_power)
-			&& (RX_TestTableStatus.info.z_in_print 
+			&& (RX_StepperStatus.info.z_in_print 
 			|| _SimuPLC))
 		{
 			_StartPrinting = FALSE;
@@ -1278,12 +1289,19 @@ static void _plc_state_ctrl()
 			step_set_vent(_Speed);
 			memset(&_StartEncoderItem, 0, sizeof(_StartEncoderItem));
 			TrPrintfL(TRUE, "PLC: CMD_RUN sent");
-		}
-		
+		}		
 	}
 	else if (_PlcState==plc_run)
 	{
-		if (rx_def_is_web(RX_Config.printer.type)) lc_get_value_by_name_UINT32(APP "STA_PRINTING_SPEED", &RX_PrinterStatus.actSpeed);					
+		if (rx_def_is_web(RX_Config.printer.type)) 
+		{
+			UINT32 length;
+			int ret;
+			lc_get_value_by_name_UINT32(APP "STA_PRINTING_SPEED", &RX_PrinterStatus.actSpeed);
+			ret = lc_get_value_by_name_UINT32(APP "STA_PAPERLENGTH_IN", &length);
+
+			if (length>0 && (int)length<_UnwinderLenMin) ErrorFlag(WARN, &_ErrorFlags, 2, 0, "Unwinder Empty, length=%d, min=%d", length, _UnwinderLenMin);
+		}
 	}
 	else if (_PlcState==plc_stop) 
 	{

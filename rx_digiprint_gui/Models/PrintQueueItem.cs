@@ -35,6 +35,14 @@ namespace RX_DigiPrint.Models
             return (int)(val*100+0.5)/100.0;
         }
 
+        //--- Property IsSelected ---------------------------------------
+        private bool _IsSelected = false;
+        public bool IsSelected
+        {
+            get { return _IsSelected; }
+            set { SetProperty(ref _IsSelected, value); }
+        }
+        
         //--- Property Changed ---------------------------------------
         private bool _Changed=false;
         public bool Changed

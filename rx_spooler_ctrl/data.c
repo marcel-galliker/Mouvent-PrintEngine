@@ -61,6 +61,7 @@ static SPageId			_LastId;
 static char				_LastFilePath[MAX_PATH];
 static SBmpInfo			_LastBmpInfo;
 static int				_LastColorOffset[MAX_COLORS];
+static int				_LastOffset;
 static UINT32			_BlkNo[HEAD_BOARD_CNT][MAX_HEADS_BOARD];
 
 static BYTE*			_TestBuf[MAX_COLORS][MAX_HEADS_COLOR];	// buffered in case of same image
@@ -449,6 +450,9 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, int
 				if (RX_Color[color].offsetPx!=_LastColorOffset[color]) newOffsets =TRUE;
 				_LastColorOffset[color] = RX_Color[color].offsetPx;
 			}
+			if (rx_def_is_web(RX_Spooler.printerType)) newOffsets =TRUE;
+				if (offsetPx != _LastOffset) 
+			_LastOffset = offsetPx;
 		}
 		if (/*id->id!=_LastId.id || */ id->page!=_LastId.page || strcmp(filepath, _LastFilePath) || _WakeupLen!=_LastWakeupLen || newOffsets)
 		{
@@ -522,7 +526,7 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, int
 		_SmpBufSize = smp_bufSize;
 		_data_split(id, &bmpInfo, offsetPx, lengthPx, blkNo, flags, clearBlockUsed, same, &_PrintList[_InIdx]);
 
-		if (loaded)
+		if (loaded || printMode==PM_TEST || printMode==PM_TEST_JETS || printMode==PM_TEST_SINGLE_COLOR)
 		{
 			if (printMode==PM_TEST_JETS && id->id==PQ_TEST_JET_NUMBERS) jc_correction(&bmpInfo, &_PrintList[_InIdx], 4220);
 			else if (printMode!=PM_TEST && printMode!=PM_TEST_SINGLE_COLOR) jc_correction(&bmpInfo, &_PrintList[_InIdx], 0);
@@ -729,8 +733,8 @@ static int _data_split_scan(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 	int pixelPerByte;
 	int colorOffset;
 	int colorOffsetScans;	
-	SPrintListItem			*pItem;
-	struct SBmpSplitInfo	*pInfo;
+	SPrintListItem	*pItem;
+	SBmpSplitInfo	*pInfo;
 
 	if (pBmpInfo->bitsPerPixel==0) 
 		return REPLY_ERROR;

@@ -13,6 +13,8 @@
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="70"/>
+                <ColumnDefinition Width="70" x:Name="ColEncoder2"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
@@ -25,31 +27,27 @@
             </Grid.RowDefinitions>
 
             <TextBlock Grid.Row="0" Grid.Column="0" Text="Ampl Run"/>
-            <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
-                <TextBlock Text="{Binding AmplOld, Converter={StaticResource HeadVal_Converter10}}"/>
-            </StackPanel>
+            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding AmplOld, Converter={StaticResource HeadVal_Converter10}}" HorizontalAlignment="Right"/>
+            <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding AmplOld, Converter={StaticResource HeadVal_Converter10}}" HorizontalAlignment="Right" x:Name="TX_AmplOld_1"/>
 
             <TextBlock Grid.Row="1" Grid.Column="0" Text="Ampl New"/>
-            <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
-                <TextBlock Text="{Binding AmplNew, Converter={StaticResource HeadVal_Converter10}}"/>
-            </StackPanel>
+            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding AmplNew, Converter={StaticResource HeadVal_Converter10}}" HorizontalAlignment="Right"/>
+            <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding AmplNew, Converter={StaticResource HeadVal_Converter10}}" HorizontalAlignment="Right" x:Name="TX_AmplNew_1"/>
 
-            <TextBlock Grid.Row="2" Grid.Column="0" Text="Change"/>
-            <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
-                <TextBlock Text="{Binding Percentage, Converter={StaticResource HeadVal_Converter10}}"/>
-                <TextBlock Text=" %"/>
-           </StackPanel>
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="Change [%]"/>
+            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Percentage, Converter={StaticResource HeadVal_Converter10}}" HorizontalAlignment="Right"/>
+            <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding Percentage, Converter={StaticResource HeadVal_Converter10}}" HorizontalAlignment="Right" x:Name="TX_Percent_1"/>
 
-            <TextBlock Grid.Row="3" Grid.Column="0" Text="Distance"/>
-            <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal">
-                <TextBlock Text="{Binding Meters}"/>
-                <TextBlock Text=" m"/>
-            </StackPanel>
+            <TextBlock Grid.Row="3" Grid.Column="0" Text="Distance [m]"/>
+            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Meters}"/>
 
-            <common:RxButton Grid.Row="4" Grid.ColumnSpan="2" Click="Save_Clicked" Height="30">
+            <common:RxButton Grid.Row="4" Grid.Column="1" Click="Save_Clicked" Height="30" HorizontalAlignment="Center">
                 <Image Source="{StaticResource Yes_ico}"/>
             </common:RxButton>
-            
+            <common:RxButton Grid.Row="4" Grid.Column="2" Click="Save2_Clicked" Height="30" HorizontalAlignment="Center">
+                <Image Source="{StaticResource Yes_ico}"/>
+            </common:RxButton>
+
         </Grid>
     </GroupBox>
 </UserControl>

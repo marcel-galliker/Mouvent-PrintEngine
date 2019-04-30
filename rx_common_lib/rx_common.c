@@ -91,11 +91,27 @@ void rx_get_system_time(UINT64 *pFileTime)
 	*pFileTime = result;
 }
 
+void rx_get_system_hms(int *hour, int *min, int *sec)
+{
+	time_t t = time(NULL);
+	struct tm tm = *localtime(&t);
+	*hour = tm.tm_hour;
+	*min  = tm.tm_min;
+	*sec  = tm.tm_sec;
+}
+
 void rx_get_system_time_str(char *str, char separator)
 {
 	time_t t = time(NULL);
 	struct tm tm = *localtime(&t);
 	sprintf(str, "%d%c%s%c%d %d:%02d", tm.tm_mday, separator, RX_MonthStr[tm.tm_mon], separator, tm.tm_year + 1900, tm.tm_hour, tm.tm_min);
+}
+
+void rx_get_system_day_str(char *str, char separator)
+{
+	time_t t = time(NULL);
+	struct tm tm = *localtime(&t);
+	sprintf(str, "%d%c%s%c%d", tm.tm_mday, separator, RX_MonthStr[tm.tm_mon], separator, tm.tm_year + 1900);
 }
 #else
 void rx_get_system_time(UINT64 *pFileTime)
@@ -103,11 +119,27 @@ void rx_get_system_time(UINT64 *pFileTime)
 	GetSystemTimeAsFileTime((LPFILETIME) pFileTime);
 }
 
+void rx_get_system_hms(int *hour, int *min, int *sec)
+{
+	SYSTEMTIME time;
+	GetSystemTime(&time);
+	*hour = time.wHour;
+	*min  = time.wMinute;
+	*sec  = time.wSecond;
+}
+
 void rx_get_system_time_str(char *str, char separator)
 {
 	SYSTEMTIME time;
 	GetSystemTime(&time);
 	sprintf(str, "%d%c%s%c%d %d:%02d", time.wDay, separator, RX_MonthStr[time.wMonth-1], separator, time.wYear, time.wHour, time.wMinute);
+}
+
+void rx_get_system_day_str(char *str, char separator)
+{
+	SYSTEMTIME time;
+	GetSystemTime(&time);
+	sprintf(str, "%d%c%s%c%d", time.wDay, separator, RX_MonthStr[time.wMonth-1], separator, time.wYear);
 }
 #endif
 

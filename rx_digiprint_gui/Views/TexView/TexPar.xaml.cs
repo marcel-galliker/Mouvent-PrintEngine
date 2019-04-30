@@ -141,6 +141,13 @@ namespace RX_DigiPrint.Views.TexView
         private void Timer(int no)
         {
             string str = RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "CFG_REWINDER_TYPE");
+
+            if (str==null || str.Equals("ERROR")) 
+            {
+                _old_Timer(no);
+                return;
+            }
+
             int type = Rx.StrToInt32(str);
             type = 0;
             if (type!=_rewinderType)
@@ -192,6 +199,34 @@ namespace RX_DigiPrint.Views.TexView
                 RW_Flexibility.Visibility = visibility;
                 RW_Tension.Visibility     = visibility;
                 RW_Rotation.Visibility    = visibility;
+            }
+        }
+
+        private bool _speedcorrection = false;
+        private void _old_Timer(int no)
+        {
+            string str = "Application.GUI_00_001_Main"+"\n"+ "PAR_SPEED_CORRECTION_RW"+"\n";
+            RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_GET_VAR, str);
+
+            str = RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "PAR_SPEED_CORRECTION_RW");
+            bool sc = str!=null && !str.Equals("ERROR");
+            if (str!=null && sc!=_speedcorrection)
+            {
+                if (sc)
+                {
+                    RW_Flexibility.ID="PAR_SPEED_CORRECTION_RW";
+                    RW_Flexibility.Label="Speed Offset";
+                    RW_Flexibility.Unit="%";
+                    RW_Tension.Unit = "%";
+                }
+                else
+                {
+                    RW_Flexibility.ID="PAR_MATERIAL_FLEXIBILITY_RW";
+                    RW_Flexibility.Label="Mat Flexibility";
+                    RW_Flexibility.Unit="";
+                    RW_Tension.Unit = "N";
+                }
+                _speedcorrection = sc;
             }
         }
      }

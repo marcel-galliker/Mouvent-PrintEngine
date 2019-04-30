@@ -160,6 +160,8 @@
 #define CMD_HEAD_FLUID_CTRL_MODE 0x01000104
 #define REP_HEAD_FLUID_CTRL_MODE 0x02000104
 
+#define CMD_DISABLED_JETS		0x01000105
+
 #define CMD_ENCODER_CFG			0x01000111
 #define REP_ENCODER_CFG			0x02000111
 
@@ -171,11 +173,13 @@
 
 #define CMD_ENCODER_PG_INIT		0x01000115
 #define CMD_ENCODER_PG_DIST		0x01000116
+#define CMD_ENCODER_PG_STOP		0x01000117
 
-#define CMD_ENCODER_DISABLE		0x01000117	// temporary disable the encoder input (CLEAF Splice)
-#define CMD_ENCODER_ENABLE		0x01000118	// enable after temorary disable
+#define CMD_ENCODER_DISABLE		0x01000118	// temporary disable the encoder input (CLEAF Splice)
+#define CMD_ENCODER_ENABLE		0x01000119	// enable after temorary disable
 
-#define CMD_ENCODER_SAVE_PAR	0x01000119	// save correction parameters	
+#define CMD_ENCODER_SAVE_PAR	0x0100011a	// save correction parameters	
+#define CMD_ENCODER_SAVE_PAR_1	0x0100011b	// save correction parameters	
 
 #define CMD_FLUID_CFG			0x01000121
 #define REP_FLUID_CFG			0x02000121
@@ -199,6 +203,10 @@
 #define CMD_SCALES_TARA			0x01000143
 #define CMD_SCALES_STAT			0x01000144
 #define REP_SCALES_STAT			0x02000144
+
+#define CMD_BCSCANNER_RESET		0x01000145
+#define CMD_BCSCANNER_IDENTIFY	0x01000146
+#define CMD_BCSCANNER_TRIGGER	0x01000147
 
 #define REP_CHILLER_STAT		0x02000152
 
@@ -442,8 +450,6 @@
 #define REP_RFS_KILL_PROCESS	0x22000007
 #define CMD_RFS_START_PROCESS	0x21000008
 #define REP_RFS_START_PROCESS	0x21000008
-
-
 
 //--- defines ----------------------------------------------
 #define IP_ADDR_SIZE	32
