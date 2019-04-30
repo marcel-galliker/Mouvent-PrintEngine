@@ -61,10 +61,10 @@
             <TextBlock Grid.Row="0" Grid.Column="0" Text="Humidity"/>
             <TextBlock Grid.Row="0" Grid.Column="1" Padding="3,0,0,0" Text="%"/>
             -->
-            <TextBlock Grid.Row="1" Grid.Column="0" Text="Pressure Ink Tank"/>
+            <TextBlock Grid.Row="1" Grid.Column="0" Text="Pressure Inlet Cond." Height="20" VerticalAlignment="Top"/>
             <TextBlock Grid.Row="1" Grid.Column="1" Padding="3,0,0,0" Text="mbar"/>
 
-            <TextBlock Grid.Row="2" Grid.Column="0" Text="Pressure Outlet"/>
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="Pressure Ink Tank"/>
             <TextBlock Grid.Row="2" Grid.Column="1" Padding="3,0,0,0" Text="mbar"/>
 
             <TextBlock Grid.Row="3" Grid.Column="0" Text="Pump Speed"/>

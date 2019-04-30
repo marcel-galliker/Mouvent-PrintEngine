@@ -12,6 +12,7 @@
     <converters:CleafQuality_Converter      x:Key="CleafQuality_Converter" />
     <converters:ColorCode_Str               x:Key="ColorCode_Str"/>
     <converters:Copies_Converter            x:Key="Copies_Converter"/>
+    <converters:Counter_Converter           x:Key="Counter_Converter"/>
     <converters:CleaningState_Converter     x:Key="CleaningState_Converter"/>
     <converters:Connected_Converter         x:Key="Connected_Converter" />
     <converters:CtrlMode_Str                x:Key="CtrlMode_Str"/>
@@ -51,5 +52,6 @@
     <converters:StepperStateImg_Converter   x:Key="StepperStateImg_Converter"/>
     <converters:ToString_Converter          x:Key="ToString_Converter"/>
     <converters:Test_Converter              x:Key="Test_Converter"/>
+    <converters:UvLampImg_Converter         x:Key="UvLampImg_Converter"/>
     <converters:WlanQuality_Converter       x:Key="WlanQuality_Converter"/>
 </ResourceDictionary>

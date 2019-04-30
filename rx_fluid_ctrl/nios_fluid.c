@@ -83,6 +83,9 @@ static void _simu_fluidsystem(void);
 static int  _set_testmode(void);
 static void _nios_check_errors(void);
 
+static void _IS_cond_log(int ticks);
+
+
 //--- nios_init ---------------------------------
 int nios_init(void)
 {
@@ -146,14 +149,7 @@ void  nios_main(int ticks, int menu)
 	}
 
 	//---  log --------------------------------------------
-	int cnt=_LogCnt;
-	while (_LogFile!=NULL && _Stat->logOutIdx!=_Stat->logInIdx)
-	{
-		fwrite(_Stat->logStr[_Stat->logOutIdx], 1, strlen(_Stat->logStr[_Stat->logOutIdx]), _LogFile);
-		_Stat->logOutIdx = (_Stat->logOutIdx+1)%LOG_STR_CNT;
-		_LogCnt++;
-	}
-	if (cnt!=_LogCnt) fflush(_LogFile);
+	_IS_cond_log(ticks);
 	
 }
 
@@ -271,7 +267,7 @@ void nios_set_cfg(SFluidBoardCfgLight *pcfg)
 		_Cfg->ink_supply[i].condPresOutSet	= pcfg->condPresOutSet[i];
 		_Cfg->ink_supply[i].heaterTemp	    = pcfg->inkTemp[i] *1000;
 		_Cfg->ink_supply[i].heaterTempMax	= pcfg->inkTempMax[i] *1000;
-		_Cfg->ink_supply[i].fluid_P			= pcfg->fluid_P[i];
+		//_Cfg->ink_supply[i].fluid_P			= pcfg->fluid_P[i];
 		memcpy(_Cfg->ink_supply[i].flushTime, pcfg->flushTime[i], sizeof(_Cfg->ink_supply[i].flushTime));
 		
 		if (_Cfg->ink_supply[i].heaterTemp) _TempMax = _Cfg->ink_supply[i].heaterTemp;
@@ -409,10 +405,12 @@ void _update_status(void)
 		if (_Cfg->cmd.lung_enabled) pstat->presLung = _Stat->degass_pressure;
 		else						pstat->presLung = INVALID_VALUE;
 		pstat->condPresOut		= _Cfg->ink_supply[i].condPresOut;
+		pstat->condPresIn		= _Cfg->ink_supply[i].condPresIn;
 //		pstat->meniscus			= _Cfg->ink_supply[i].condMeniscus; //_Stat->ink_supply[i].meniscus;
 		pstat->ctrlMode			= _Stat->ink_supply[i].ctrl_state;
 		pstat->cylinderPresSet	= _Stat->ink_supply[i].cylinderPresSet;		
-		pstat->cylinderPres		= _Stat->ink_supply[i].cylinderPres;
+		pstat->cylinderSetpoint	= _Stat->ink_supply[i].IS_Pressure_Setpoint;
+		pstat->cylinderPres		= _Stat->ink_supply[i].IS_Pressure_Actual;
 		pstat->flushTime		= _Stat->ink_supply[i].flushTime;
 		pstat->airPressureTime	= _Stat->airPressureTime;
 		pstat->temp				= _Stat->ink_supply[i].heaterTemp;
@@ -471,9 +469,9 @@ static void _display_status(void)
 		term_printf("\n");
 		term_printf("pressure:          ");	
 		if (_Cfg->ink_supply[i].test_cylinderPres) 
-			for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("%5s(%03d)  ", value_str(_Stat->ink_supply[i].cylinderPres), _Cfg->ink_supply[i].test_cylinderPres);
+			for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("%5s(%03d)  ", value_str(_Stat->ink_supply[i].IS_Pressure_Actual), _Cfg->ink_supply[i].test_cylinderPres);
 		else 
-			for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("%5s(%03d)  ", value_str(_Stat->ink_supply[i].cylinderPres), _Cfg->ink_supply[i].cylinderPresSet);		
+			for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("%5s(%03d)  ", value_str(_Stat->ink_supply[i].IS_Pressure_Actual), _Cfg->ink_supply[i].cylinderPresSet);		
 		term_printf("\n");
 		term_printf("inkPump:           ");	for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("%4s(%3d%%)  ", value_str(_Stat->ink_supply[i].inkPumpSpeed_measured), _Stat->ink_supply[i].inkPumpSpeed_set); term_printf("\n");
 				
@@ -490,12 +488,13 @@ static void _display_status(void)
 		term_printf("flush time:        "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str(_Stat->ink_supply[i].flushTime)); term_printf("\n");	
 		term_printf("time:              "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str(_Stat->ink_supply[i].time)); term_printf("\n");	
 		term_printf("diff:              "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str(_Stat->ink_supply[i].diff)); term_printf("\n");	
-		term_printf("cylinderPresSet:   "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str(_Stat->ink_supply[i].cylinderPres)); term_printf("\n");	
+		term_printf("cylinderPresSet:   "); for (i = 0; i < NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str(_Stat->ink_supply[i].IS_Pressure_Actual)); term_printf("\n");	
 		
 		term_printf("Cond. Pump Speed   "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str(_Cfg->ink_supply[i].condPumpSpeed)); term_printf("\n");	
 		term_printf("Cond. Pump Feedback"); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str1(_Cfg->ink_supply[i].condPumpFeedback)); term_printf("\n");	
 		term_printf("Head Temp:         "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str_temp(_Cfg->ink_supply[i].headTemp)); term_printf("\n");	
-    	term_printf("PID:               "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str(_Stat->ink_supply[i].fluid_P)); term_printf("\n");	
+		term_printf("PID1-Setpoint  Kp  Ti: "); for (i = 0; i < NIOS_INK_SUPPLY_CNT; i++) term_printf("  %d %d ", _Stat->ink_supply[i].fluid_PIDsetpoint_P, _Stat->ink_supply[i].fluid_PIDsetpoint_I); term_printf("\n");	
+		term_printf("PID2-Pump  Kp  Ti:	"); for (i = 0; i < NIOS_INK_SUPPLY_CNT; i++) term_printf("  %d %d ", _Stat->ink_supply[i].fluid_PIDpump_P, _Stat->ink_supply[i].fluid_PIDpump_I); term_printf("\n");	
 		
     	if (!nios_is_heater_connected()) 
 		{
@@ -548,20 +547,99 @@ void nios_start_temp_log(void)
 	}
 }
 
+//--- _cond_log -----------------------------------------
+static int	_plog_on = FALSE;
+static FILE	*_plog_file_IS1 = NULL;
+static FILE	*_plog_file_IS2 = NULL;
+static FILE	*_plog_file_IS3 = NULL;
+static FILE	*_plog_file_IS4 = NULL;
+static int					_LogTimer;
+
 //--- nios_start_log --------------------------------------
 void nios_start_log(void)
 {
-	if (_Cfg->cmd.logging)
+	_plog_on = !_plog_on;
+}
+
+static void _IS_cond_log(int ticks)
+{	
+	if (!_plog_on) return;
+	
+	if (_plog_file_IS1 == NULL)
 	{
-		_Cfg->cmd.logging = FALSE;
-		fclose(_LogFile);
-		_LogFile = NULL;			
+		char name[100];
+		sprintf(name, PATH_TEMP "Regulators_IS1.csv");
+		_plog_file_IS1 = fopen(name, "w");
+		fprintf(_plog_file_IS1, "pump_ticks(ms);PID1_SP-PresINcond (mbar);PID1_FB-PresIN (mbar);PID1_Output-PID2-_P;meniscus cond(mbar);cond pump measured (ml/min x 10);PID1-P;PID1-I; ");
+		fprintf(_plog_file_IS1, "PID2_SP-PID1_Output;PID2_Feedback-ISpres (mbar);PID2_Output-PumpSpeed (%);PID2-P;PID2-I\n");
+		fflush(_plog_file_IS1);
+		_LogTimer = rx_get_ticks();
 	}
-	else
+	if (_plog_file_IS2 == NULL)
 	{
-		_LogFile = fopen(PATH_BIN_FLUID "fluid_log.csv", "w");
-		_Cfg->cmd.logging = TRUE;		
+		char name[100];
+		sprintf(name, PATH_TEMP "Regulators_IS2.csv");
+		_plog_file_IS2 = fopen(name, "w");
+		fprintf(_plog_file_IS2, "pump_ticks(ms);PID1_SP-PresINcond (mbar);PID1_FB-PresIN (mbar);PID1_Output-PID2-_P;meniscus cond(mbar);cond pump measured (ml/min x 10);PID1-P;PID1-I; ");
+		fprintf(_plog_file_IS2, "PID2_Setpoint(mbar);PID2_Feedback-ISpres (mbar);PID2_Output-PumpSpeed (%);PID2-P;PID2-I\n");
+		fflush(_plog_file_IS2);
 	}
+	if (_plog_file_IS3 == NULL)
+	{
+		char name[100];
+		sprintf(name, PATH_TEMP "Regulators_IS3.csv");
+		_plog_file_IS3 = fopen(name, "w");
+		fprintf(_plog_file_IS3, "pump_ticks(ms);PID1_SP-PresINcond (mbar);PID1_FB-PresIN (mbar);PID1_Output-PID2-_P;meniscus cond(mbar);cond pump measured (ml/min x 10);PID1-P;PID1-I; ");
+		fprintf(_plog_file_IS3, "PID2_SP-PID1_Output;PID2_Feedback-ISpres (mbar);PID2_Output-PumpSpeed (%);PID2-P;PID2-I\n");
+		fflush(_plog_file_IS3);
+	}
+	if (_plog_file_IS4 == NULL)
+	{
+		char name[100];
+		sprintf(name, PATH_TEMP "Regulators_IS4.csv");
+		_plog_file_IS4 = fopen(name, "w");
+		fprintf(_plog_file_IS4, "pump_ticks(ms);PID1_SP-PresINcond (mbar);PID1_FB-PresIN (mbar);PID1_Output-PID2-_P;meniscus cond(mbar);cond pump measured (ml/min x 10);PID1-P;PID1-I; ");
+		fprintf(_plog_file_IS4, "PID2_SP-PID1_Output;PID2_Feedback-ISpres (mbar);PID2_Output-PumpSpeed (%);PID2-P;PID2-I\n");
+		fflush(_plog_file_IS4);
+	}
+
+	int time = rx_get_ticks() - _LogTimer;
+	
+	if (!(ticks % 10))
+	{
+		int i, ISspeed, ISpressure, CondSpeed, Condpressure, Condpout, CondMeniscus;
+		for (i = 0; i < 4; i++)
+		{
+			ISspeed = _Stat->ink_supply[i].PIDpump_Output * 100 / 511;
+			if (ISspeed > 100) ISspeed = 100;
+			ISpressure = _Stat->ink_supply[i].IS_Pressure_Actual;
+			CondSpeed = _Cfg->ink_supply[i].condPumpFeedback;
+			if (CondSpeed > 5000) CondSpeed = 0;
+			Condpressure = _Cfg->ink_supply[i].condPresIn;
+			Condpout = _Cfg->ink_supply[i].condPresOut;
+			CondMeniscus = _Cfg->ink_supply[i].condMeniscus;
+			switch (i)
+			{
+			case 0 : 
+				fprintf(_plog_file_IS1, "%d;%d;%d;%d;%d;%d;%d;%d;", time, _Cfg->ink_supply[i].cylinderPresSet, Condpressure, _Stat->ink_supply[i].PIDsetpoint_Output, CondMeniscus, CondSpeed, _Stat->ink_supply[i].fluid_PIDsetpoint_P, _Stat->ink_supply[i].fluid_PIDsetpoint_I);
+				fprintf(_plog_file_IS1, "%d;%d;%d;%d;%d\n", _Stat->ink_supply[i].PIDsetpoint_Output, ISpressure, ISspeed, _Stat->ink_supply[i].fluid_PIDpump_P, _Stat->ink_supply[i].fluid_PIDpump_I); 
+				break;
+			case 1 : 
+				fprintf(_plog_file_IS2, "%d;%d;%d;%d;%d;%d;%d;%d;%d;", time, _Cfg->ink_supply[i].cylinderPresSet, Condpressure, _Stat->ink_supply[i].PIDsetpoint_Output, CondMeniscus, CondSpeed, _Stat->ink_supply[i].fluid_PIDsetpoint_P, _Stat->ink_supply[i].fluid_PIDsetpoint_I, _Stat->ink_supply[i].PIDairvalve_Output);
+				fprintf(_plog_file_IS2, "%d;%d;%d;%d;%d\n", _Stat->ink_supply[i].PIDsetpoint_Output, ISpressure, ISspeed, _Stat->ink_supply[i].fluid_PIDpump_P, _Stat->ink_supply[i].fluid_PIDpump_I); 
+				break;
+			case 2 : 
+				fprintf(_plog_file_IS3, "%d;%d;%d;%d;%d;%d;%d;%d;", time, _Cfg->ink_supply[i].cylinderPresSet, Condpressure, _Stat->ink_supply[i].PIDsetpoint_Output, CondMeniscus, CondSpeed, _Stat->ink_supply[i].fluid_PIDsetpoint_P, _Stat->ink_supply[i].fluid_PIDsetpoint_I);
+				fprintf(_plog_file_IS3, "%d;%d;%d;%d;%d\n", _Stat->ink_supply[i].PIDsetpoint_Output, ISpressure, ISspeed, _Stat->ink_supply[i].fluid_PIDpump_P, _Stat->ink_supply[i].fluid_PIDpump_I); 
+				break;
+			case 3 : 
+				fprintf(_plog_file_IS4, "%d;%d;%d;%d;%d;%d;%d;%d;", time, _Cfg->ink_supply[i].cylinderPresSet, Condpressure, _Stat->ink_supply[i].PIDsetpoint_Output, CondMeniscus, CondSpeed, _Stat->ink_supply[i].fluid_PIDsetpoint_P, _Stat->ink_supply[i].fluid_PIDsetpoint_I);
+				fprintf(_plog_file_IS4, "%d;%d;%d;%d;%d\n", _Stat->ink_supply[i].PIDsetpoint_Output, ISpressure, ISspeed, _Stat->ink_supply[i].fluid_PIDpump_P, _Stat->ink_supply[i].fluid_PIDpump_I); 
+				break;
+			} 
+		}
+	}
+	
 }
 
 // --- nios_is_heater_connected --------------------------------

@@ -41,7 +41,6 @@ static SFSDirEntry _RfsInfo[HEAD_BOARD_CNT];
 static int _do_head_stat		(RX_SOCKET socket, int headNo, SHeadBoardStat	*pstat);
 static int _do_trace_evt		(RX_SOCKET socket, STraceMsg		*msg);
 static void _do_fluidCtrlMode	(RX_SOCKET socket, SFluidCtrlCmd	*pmsg); 
-static int _do_print_file_evt	(RX_SOCKET socket, int headNo, SPrintFileMsg	*msg);
 static int _do_save_file_hdr	(RX_SOCKET socket, int headNo, SFSDirEntry		*msg); 
 static int _do_save_file_blk	(RX_SOCKET socket, int headNo, SDataBlockMsg	*msg); 
 
@@ -62,15 +61,15 @@ int handle_headCtrl_msg(RX_SOCKET socket, void *msg, int len, struct sockaddr *s
 	SMsgHdr *phdr = (SMsgHdr*)msg;
 	switch (phdr->msgId)
 	{
-	case REP_PING:					TrPrintf			(TRUE, "got REP_PING");				 break;
-	case REP_HEAD_BOARD_CFG:		ctrl_head_cfg_done	(headNo);							break;
-	case REP_HEAD_STAT:				_do_head_stat		(socket, headNo, (SHeadBoardStat*)&phdr[1]); break;
-	case CMD_FLUID_CTRL_MODE:		_do_fluidCtrlMode	(socket, (SFluidCtrlCmd*) msg);			break;
-	case EVT_TRACE:					_do_trace_evt		(socket, (STraceMsg*)	  msg);			break;
-	case EVT_GET_EVT:				ctrl_do_log_evt		(socket, (SLogMsg*)		  msg);			break;
-	case EVT_PRINT_FILE:			_do_print_file_evt	(socket, headNo, (SPrintFileMsg*) msg); break;
-	case CMD_RFS_SAVE_FILE_HDR:		_do_save_file_hdr	(socket, headNo, (SFSDirEntry*)   msg); break;
-	case CMD_RFS_SAVE_FILE_BLOCK:	_do_save_file_blk	(socket, headNo, (SDataBlockMsg*) msg); break;
+	case REP_PING:					TrPrintf			(TRUE, "got REP_PING");							break;
+	case REP_HEAD_BOARD_CFG:		ctrl_head_cfg_done	(headNo);										break;
+	case REP_HEAD_STAT:				_do_head_stat		(socket, headNo, (SHeadBoardStat*)&phdr[1]);	break;
+	case CMD_FLUID_CTRL_MODE:		_do_fluidCtrlMode	(socket, (SFluidCtrlCmd*) msg);					break;
+	case EVT_TRACE:					_do_trace_evt		(socket, (STraceMsg*)	  msg);					break;
+	case EVT_GET_EVT:				ctrl_do_log_evt		(socket, (SLogMsg*)		  msg);					break;
+	case EVT_PRINT_DONE:			pc_print_done		(headNo, (SPrintDoneMsg*) msg);					break;
+	case CMD_RFS_SAVE_FILE_HDR:		_do_save_file_hdr	(socket, headNo, (SFSDirEntry*)   msg);			break;
+	case CMD_RFS_SAVE_FILE_BLOCK:	_do_save_file_blk	(socket, headNo, (SDataBlockMsg*) msg);			break;
 	default:		if (!_err)
 					{
 						EDevice device;
@@ -153,16 +152,6 @@ int ctrl_do_log_evt(RX_SOCKET socket, SLogMsg *msg)
 	return REPLY_OK;
 }
 
-//--- _do_print_file_evt ------------------------------------------------
-static int _do_print_file_evt	(RX_SOCKET socket, int headNo, SPrintFileMsg	*msg)
-{	
-	if (msg->evt==DATA_PRINT_DONE)
-	{
-		pc_printed(&msg->id, headNo);
-	}
-	return REPLY_OK;
-}
-
 //--- _do_save_file_hdr ---------------------
 static int _do_save_file_hdr	(RX_SOCKET socket, int headNo, SFSDirEntry	*msg)
 {	
@@ -172,7 +161,7 @@ static int _do_save_file_hdr	(RX_SOCKET socket, int headNo, SFSDirEntry	*msg)
 	char		ext[10];
 	FILE		*f;
 	int i;
-	
+		
 	memcpy(&_RfsInfo[headNo], msg, sizeof(_RfsInfo[headNo]));
 	split_path(hdr->name, path, fname, ext);	
 	sprintf(path, PATH_FPGA_REGS "head_%d", headNo+1);

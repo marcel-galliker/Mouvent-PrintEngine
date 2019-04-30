@@ -37,24 +37,8 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _Enabled, value); }
         }
 
-        //--- Property Par1 ---------------------------------------
-        private int _Par1;
-        public int Par1
-        {
-            get { return _Par1; }
-            set { SetProperty(ref _Par1, value); }
-        }
-
-        //--- Property Par2 ---------------------------------------
-        private int _Par2;
-        public int Par2
-        {
-            get { return _Par2; }
-            set { SetProperty(ref _Par2, value); }
-        }
-
         //--- Property AmplOld ---------------------------------------
-        private int _AmplOld;
+        private int _AmplOld = (int)TcpIp.INVALID_VALUE;
         public int AmplOld
         {
             get { return _AmplOld; }
@@ -62,7 +46,7 @@ namespace RX_DigiPrint.Models
         }
 
         //--- Property AmplNew ---------------------------------------
-        private int _AmplNew;
+        private int _AmplNew = (int)TcpIp.INVALID_VALUE;
         public int AmplNew
         {
             get { return _AmplNew; }
@@ -70,7 +54,7 @@ namespace RX_DigiPrint.Models
         }
 
         //--- Property Percentage ---------------------------------------
-        private int _Percentage;
+        private int _Percentage = (int)TcpIp.INVALID_VALUE;
         public int Percentage
         {
             get { return _Percentage; }
@@ -101,13 +85,10 @@ namespace RX_DigiPrint.Models
         //--- Update -----------------------------------
         public void Update(TcpIp.SEncoderStat msg)
         {
-            Par1        = msg.corrRotPar[0];
-            Par2        = msg.corrRotPar[1];
             AmplOld     = msg.ampl_old;
             AmplNew     = msg.ampl_new;
             Percentage  = msg.percentage;
             Meters      = msg.meters;
         }
-
     }
 }

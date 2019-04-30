@@ -11,6 +11,7 @@
         xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
 		xmlns:views_ml="clr-namespace:RX_DigiPrint.Views.MiniLabelView"
 		xmlns:views_dp="clr-namespace:RX_DigiPrint.Views.DP803View"
+		xmlns:views_lb702uv="clr-namespace:RX_DigiPrint.Views.LB702UVView"
 		xmlns:views_lb702wb="clr-namespace:RX_DigiPrint.Views.LB702WBView"
 		xmlns:views_tex="clr-namespace:RX_DigiPrint.Views.TexView"
 		xmlns:views_tt="clr-namespace:RX_DigiPrint.Views.TestTableView"
@@ -105,6 +106,10 @@
                     <views_ml:MiniLabelView/>
                 </rx:RxTabItem>
                 
+                <rx:RxTabItem x:Name="TabLB702UV" Header="LB 702 UV" >
+                    <views_lb702uv:LB702UV_View/>
+                </rx:RxTabItem>
+                
                 <rx:RxTabItem x:Name="TabLB702WB" Header="LB 702 WB" >
                     <views_lb702wb:LB702WBView/>
                 </rx:RxTabItem>
@@ -195,7 +200,30 @@
                 </common:RxButton>
                 <TextBlock Text="{Binding UserStr}" VerticalAlignment="Center" FontSize="{StaticResource FontSize}" Margin="10,0"/>
             </StackPanel>
+
         </StackPanel>
+
+        <!-- Counters -->
+        <StackPanel x:Name="Counters" Grid.Row="1" HorizontalAlignment="Center" Orientation="Horizontal" Margin="5" >
+            <StackPanel Orientation="Horizontal" MinWidth="100">
+                <TextBlock Text="{Binding ActSpeed}"   FontWeight="Bold"     FontSize="{StaticResource FontSizeXL}"    VerticalAlignment="Bottom"/>
+                <TextBlock x:Name="CounterUnit1" Text=" m²/h   "                                   FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Bottom"/>
+            </StackPanel>
+            <Grid MinWidth="150" Margin="10,0">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <TextBlock Text="{Binding CounterAct, Converter={StaticResource Counter_Converter}}"   FontWeight="Bold"   FontSize="{StaticResource FontSizeLarge}" VerticalAlignment="Bottom"/>
+                    <TextBlock x:Name="CounterUnit2" Text=" m   "                                     FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Bottom"/>
+                </StackPanel>
+                <Rectangle Fill="Transparent" MouseDown="Counter_MouseDown" Stroke="LightGray" StrokeThickness="1"/>
+            </Grid>
+            <Grid MinWidth="150">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <TextBlock Text="{Binding CounterTotal, Converter={StaticResource Counter_Converter}}"   FontWeight="Bold" FontSize="{StaticResource FontSizeLarge}" VerticalAlignment="Bottom"/>
+                    <TextBlock x:Name="CounterUnit3" Text=" m tot" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Bottom"/>
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+
         <!-- ROW 1: Status line _______________________________________________________________________________________-->
         <StackPanel 
             Grid.Row="1" 

@@ -104,6 +104,10 @@ int steps_handle_status(STestTableStat *pStatus)
 int	 steps_to_print_pos(void)
 {
 	if (RX_Config.printer.type==printer_test_table) sok_send_2(_step_socket, CMD_CAP_PRINT_POS, sizeof(UINT32), &RX_Config.stepper.cap_height);
-	else											sok_send_2(_step_socket, CMD_CAP_PRINT_POS, sizeof(UINT32), &RX_Config.stepper.print_height);
+	else // TX801/TX802
+	{
+		INT32 height = RX_Config.stepper.print_height + plc_get_thickness();
+		sok_send_2(_step_socket, CMD_CAP_PRINT_POS, sizeof(height), &height);		
+	}
 	return REPLY_OK;									
 }

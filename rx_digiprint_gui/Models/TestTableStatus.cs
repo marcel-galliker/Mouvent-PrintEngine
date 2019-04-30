@@ -202,6 +202,46 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _cap_enabled, value); }
         }
 
+        //--- Property drip_pans_enabled ---------------------------------------
+        private bool _drip_pans_enabled;
+        public bool drip_pans_enabled
+        {
+            get { return _drip_pans_enabled; }
+            set { SetProperty(ref _drip_pans_enabled, value); }
+        }
+
+        //--- Property DripPans_InfeedUP ---------------------------------------
+        private bool _DripPans_InfeedUP;
+        public bool DripPans_InfeedUP
+        {
+            get { return _DripPans_InfeedUP; }
+            set { SetProperty(ref _DripPans_InfeedUP, value); }
+        }
+
+        //--- Property DripPans_InfeedDOWN ---------------------------------------
+        private bool _DripPans_InfeedDOWN;
+        public bool DripPans_InfeedDOWN
+        {
+            get { return _DripPans_InfeedDOWN; }
+            set { SetProperty(ref _DripPans_InfeedDOWN, value); }
+        }
+
+        //--- Property DripPans_OutfeedUP ---------------------------------------
+        private bool _DripPans_OutfeedUP;
+        public bool DripPans_OutfeedUP
+        {
+            get { return _DripPans_OutfeedUP; }
+            set { SetProperty(ref _DripPans_OutfeedUP, value); }
+        }
+
+        //--- Property DripPans_OutfeedDOWN ---------------------------------------
+        private bool _DripPans_OutfeedDOWN;
+        public bool DripPans_OutfeedDOWN
+        {
+            get { return _DripPans_OutfeedDOWN; }
+            set { SetProperty(ref _DripPans_OutfeedDOWN, value); }
+        }
+
         //--- Property Motors ---------------------------------------
         public StepperMotor[] Motors
         {
@@ -221,14 +261,20 @@ namespace RX_DigiPrint.Models
             Z_in_cap  = (msg.info & 0x00000040)!=0;
             X_in_cap  = (msg.info & 0x00000100)!=0 || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB701;
             CoverOpen = (msg.info & 0x00001000)!=0;
-//            cmd_enabled = !Moving;
-            cmd_enabled = RefDone;
-//            cap_enabled = X_in_cap && !Moving;
-            cap_enabled =  RefDone && (X_in_cap || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB701 || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf);
+            cap_enabled = RefDone && DripPans_InfeedUP && DripPans_OutfeedUP && (X_in_cap || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB701 || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_cleaf);
             HeadUpInput_0 = (msg.info & 0x00040000)!=0;
             HeadUpInput_1 = (msg.info & 0x00080000)!=0;
             HeadUpInput_2 = (msg.info & 0x00100000)!=0;
             HeadUpInput_3 = (msg.info & 0x00200000)!=0;
+
+            drip_pans_enabled = Z_in_ref;
+            DripPans_InfeedUP       = (msg.info & 0x10000000) != 0;
+            DripPans_InfeedDOWN     = (msg.info & 0x20000000) != 0;
+            DripPans_OutfeedUP      = (msg.info & 0x40000000) != 0;
+            DripPans_OutfeedDOWN    = (msg.info & 0x80000000) != 0;
+
+            if (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_cleaf) cmd_enabled = RefDone && DripPans_InfeedDOWN && DripPans_OutfeedDOWN && !DripPans_InfeedUP && !DripPans_OutfeedUP;
+            else cmd_enabled = RefDone;
 
             PosX    = msg.posX;
             PosY    = msg.posY;

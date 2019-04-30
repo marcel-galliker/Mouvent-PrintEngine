@@ -1359,7 +1359,7 @@ int _sok_send_2(RX_SOCKET *socket, INT32 id, UINT32 dataLen, void *data)
 //--- sok_send_2 ---------------------------------------------------
 int sok_send_2(RX_SOCKET *socket, INT32 id, UINT32 dataLen, void *data)
 {
-	BYTE	 buffer[2048];
+	BYTE	 buffer[4096];
 	SMsgHdr* pmsg;
 	int		 size, ret;
 	struct sockaddr sender;

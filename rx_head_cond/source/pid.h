@@ -22,19 +22,21 @@
 
 typedef struct
 {
+	INT32 Setpoint;				// Meniscus setpoint
 	INT32 P;                  	// Verstärkung
 	INT32 I;                   	// Integralanteil
-	INT32 D;                   	// Differenzieller Anteil
-	INT32 norm;
-    INT32 offset;
-
+	INT32 P_start;             	// P divide by P_start during phase OFF->PRINT
+	//INT32 norm;
+   
 	INT32 val;					// regulator value
 	INT32 val_min;
 	INT32 val_max;
+	
+	INT32 start_integrator;		// to start the integrator at the best time
 
 	//--- internal -----------------------------
-	INT32 diff_delay;		// tineout for I-value to rampup
-	INT32 diff_old;			// old value for D
+	//INT32 diff_delay;		// tineout for I-value to rampup
+	//INT32 diff_old;			// old value for D
 	INT32 diff_I;			// actual I-value
 } SPID_par;              	// Struktur PID_Einstellungen erzeugen
 
@@ -42,6 +44,6 @@ typedef struct
 /* Function prototype                                                        */
 /*****************************************************************************/
 void 	pid_reset(SPID_par* pPID);
-void 	pid_calc (INT32 actVal, const INT32 setVal, SPID_par* pPID);
+void 	pid_calc (INT32 actVal, SPID_par* pPID);
 
 #endif /* __PID_H__ */

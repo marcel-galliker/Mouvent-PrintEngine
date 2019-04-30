@@ -4,18 +4,18 @@ using System.Collections.Generic;
 
 namespace RX_DigiPrint.Models.Enums
 {
-    public class EN_OnOffAuto: IEnumerable
+    public class EN_DropSize: IEnumerable
     {
         private static List<RxEnum<int>> _List;
 
-        public EN_OnOffAuto()
+        public EN_DropSize()
         {
             if (_List==null)
             {
                 _List = new List<RxEnum<int>>();
-                _List.Add(new RxEnum<int>( 0,  "OFF"));
-                _List.Add(new RxEnum<int>( 1,  "ON"));
-                _List.Add(new RxEnum<int>( 2,  "AUTO"));
+                _List.Add(new RxEnum<int>( 1,  "S"));
+                _List.Add(new RxEnum<int>( 2,  "M"));
+                _List.Add(new RxEnum<int>( 3,  "L"));
             }
         }
 

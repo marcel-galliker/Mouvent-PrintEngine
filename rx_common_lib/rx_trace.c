@@ -29,7 +29,7 @@
 #define TRACE_FILE_SIZE_MAX	1000000
 
 #define TRACE_STR_LEN	270
-#define TRACE_STR_CNT	32
+#define TRACE_STR_CNT	128
 
 static HANDLE	 _Mutex		= NULL;
 static HANDLE	 _hServer	= NULL;
@@ -38,6 +38,7 @@ static  char	 _sAppName_org[32];
 static  char	 _sAppName[32];
 static int		 _TraceToScreen = TRUE;
 static int		 _TraceToFile   = TRUE;
+static char		 _TraceFilePath[MAX_PATH];
 static int		 _TraceFileSize;
 
 static char		_TraceStr[TRACE_STR_CNT][TRACE_STR_LEN];
@@ -127,8 +128,8 @@ static void _TraceFileOpen(const char *path, const char *appName)
 				sprintf(str1, "%s%s_%d.txt", path, name, no+1);
 				rename(str, str1);
 			}
-			sprintf(str,  "%s%s.txt", path, name);
-			_TraceFile = fopen(str, "w");
+			sprintf(_TraceFilePath,  "%s%s.txt", path, name);
+			_TraceFile = fopen(_TraceFilePath, "w");
 		#else
 			struct tm		tm;
 			__time64_t		time;
@@ -138,12 +139,19 @@ static void _TraceFileOpen(const char *path, const char *appName)
 			no = rx_remove_old_files(str, 2);
 			if (no)	no++;
 			else no = 1;
-			sprintf(str, "%s%s-%04d-%s-%02d_%03d.txt", path, name, 1900 + tm.tm_year, MonthStr[tm.tm_mon], tm.tm_mday, no);
-			_TraceFile = rx_fopen(str, "wt", _SH_DENYNO);
+			sprintf(_TraceFilePath, "%s%s-%04d-%s-%02d_%03d.txt", path, name, 1900 + tm.tm_year, MonthStr[tm.tm_mon], tm.tm_mday, no);
+			_TraceFile = rx_fopen(_TraceFilePath, "wt", _SH_DENYNO);
 		#endif
 		_TraceFileSize = 0;
 	}
 }
+
+//--- Trace_get_path -------------------------------------
+const char *Trace_get_path(void)
+{
+	return 	_TraceFilePath;				
+}
+
 
 //--- TrPrintf ------------------------------------------------------
 void TrPrintf(int level, const char *format, ...)

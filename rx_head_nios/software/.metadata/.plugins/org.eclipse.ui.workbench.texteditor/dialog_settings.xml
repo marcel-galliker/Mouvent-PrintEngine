@@ -8,6 +8,7 @@
 		<item value="true" key="wrap"/>
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
+			<item value="head_eeprom_write_user_data"/>
 			<item value="exe_valid"/>
 			<item value="_seq_read_eeprom"/>
 			<item value="_write_eeprom"/>
@@ -15,7 +16,6 @@
 			<item value="_read_eeprom"/>
 			<item value="read_eeprom"/>
 			<item value="pRX_Status-&gt;error"/>
-			<item value="_Cond"/>
 		</list>
 		<list key="replacehistory">
 		</list>

@@ -17,6 +17,7 @@
 #include "rx_trace.h"
 #include "gui_svr.h"
 #include "args.h"
+#include "ctr.h"
 #include "tcp_ip.h"
 #include "setup.h"
 #include "rx_setup_file.h"
@@ -144,6 +145,7 @@ static SNetworkItem		_NetItem;
 static ULONG			_LastLogIdx=0;
 static int				_StartPrinting=FALSE;
 static int				_SendPause=FALSE;
+static int				_SendRun=FALSE;
 static int				_SendWebIn=FALSE;
 static int				_Splicing=FALSE;
 static int				_CmdReleased=FALSE;
@@ -156,6 +158,7 @@ static int				_ErrorFilter=0;
 static int				_ErrorFilterBuf[100];
 #define ERROR_FILTER_TIME	500
 static double			_StepDist;
+
 static int				_MpliStarting;
 static int				_UvUsed;
 static int				_Speed;
@@ -290,7 +293,7 @@ static void _plc_set_command(char *mode, char *cmd)
 	if (strstr(cmd, "WEBIN")) 
 	{
 		_plc_set_par_default();
-		if (!RX_TestTableStatus.info.ref_done) 
+		if (!arg_simuEncoder && !RX_TestTableStatus.info.ref_done) 
 		{
 			step_handle_gui_msg(INVALID_SOCKET, CMD_CAP_REFERENCE, NULL, 0);
 			_SendWebIn = TRUE;
@@ -314,9 +317,7 @@ static void _plc_set_command(char *mode, char *cmd)
 //--- _plc_set_par ----------------------------------------------------------
 static void _plc_set_par(SPrintQueueItem *pItem, SPlcPar *pPlcPar)
 {
-	int		accDist=0;
-	double	stepWidth;
-	double	diff;
+	int		accDistmm=0;
 	
 	_plc_set_par_default();
 	
@@ -334,28 +335,36 @@ static void _plc_set_par(SPrintQueueItem *pItem, SPlcPar *pPlcPar)
 			Error(WARN, 0, "Set Speed to %d because flexo used", pPlcPar->speed);
 		}
 	}
-	stepWidth = RX_Config.printer.type==printer_TX802? (2.0*43.328) : (43.328);
-	pPlcPar->stepDist = stepWidth + ((double)(RX_Config.printer.offset.step))/1000.0;
+	_StepDist = 43.328;
+	if (RX_Config.printer.type==printer_TX802) _StepDist*=2;
 	
 	if (!RX_Config.printer.overlap) 
 	{
-		diff = 128.0*25.4/1200.0;
-		pPlcPar->stepDist -= diff;
+		_StepDist -= (128.0*25.4/1200.0);
 	}
-	if (pItem->passes>1) pPlcPar->stepDist /= pItem->passes;
-	if (pItem->testImage==PQ_TEST_SCANNING) pPlcPar->stepDist=0;
-	pPlcPar->startPos = WEB_OFFSET+(pItem->pageMargin)/1000.0-accDist;		
-	if (pItem->srcHeight<300)  pPlcPar->endPos = WEB_OFFSET+(pItem->pageMargin+300)/1000.0+accDist;
-	else                       pPlcPar->endPos = WEB_OFFSET+(pItem->pageMargin+pItem->srcHeight)/1000.0+accDist;
-	pPlcPar->endPos += RX_Config.headDistMax/1000.0;	
+		
+	if (pItem->passes>1) _StepDist /= pItem->passes;
+	if (pItem->testImage==PQ_TEST_SCANNING) _StepDist=0;
+	pPlcPar->startPos = WEB_OFFSET+(pItem->pageMargin)/1000.0-accDistmm;		
+	if (pItem->srcHeight<300)  pPlcPar->endPos = WEB_OFFSET+(pItem->pageMargin+300)/1000.0+accDistmm;
+	else                       pPlcPar->endPos = WEB_OFFSET+(pItem->pageMargin+pItem->srcHeight)/1000.0+accDistmm;
+	pPlcPar->endPos += RX_Config.headDistMax/1000.0;
 	pPlcPar->endPos += 10;
-	_StepDist = pPlcPar->stepDist;
+	pPlcPar->stepDist = _StepDist + ((double)(RX_Config.printer.offset.step))/1000.0;	
 }
 
 //--- plc_get_step_dist_mm ------------------------------------------------------
 double	 plc_get_step_dist_mm(void)
 {
 	return _StepDist;
+}
+
+//--- plc_get_thickness --------------------
+int	plc_get_thickness(void)
+{
+	UINT32 thickness;
+	lc_get_value_by_name_UINT32(APP"PAR_MATERIAL_THIKNESS",	&thickness);
+	return (int)thickness;
 }
 
 //--- _plc_send_par -------------------------------------
@@ -380,6 +389,13 @@ static void _plc_send_par(SPlcPar *pPlcPar)
 	}
 	*/
 	
+	switch(RX_Config.printer.type)
+	{
+	case printer_TX801:	lc_set_value_by_name_UINT32(APP"CFG_MACHINE_TYPE",	0);	break;
+	case printer_TX802:	lc_set_value_by_name_UINT32(APP"CFG_MACHINE_TYPE",	1);	break;
+	default:			break;
+	}
+
 	lc_set_value_by_name_UINT32(APP"PAR_PRINTING_SPEED",		pPlcPar->speed);
 	if(rx_def_is_scanning(RX_Config.printer.type))
 	{
@@ -435,8 +451,7 @@ int  plc_start_printing(void)
 	if (_CanRun && !_SimuPLC)
 	{
 		plc_error_reset();
-		_plc_set_command("CMD_PRODUCTION", "CMD_RUN");
-		step_set_vent(_Speed);
+		_SendRun = TRUE;
 	}
 	if (_SimuEncoder) ctrl_simu_encoder(_Speed);		
 	return REPLY_OK;
@@ -447,6 +462,7 @@ int  plc_stop_printing(void)
 {
 	if (_SimuEncoder) ctrl_simu_encoder(0);
 	_StartPrinting = FALSE;
+	_SendRun       = FALSE;
 	if (_SimuPLC)
 	{
 		RX_PrinterStatus.printState = ps_off;
@@ -513,6 +529,7 @@ int	plc_to_cap_pos(void)
 int  plc_pause_printing(void)
 {
 	_StartPrinting = FALSE;
+	_SendRun       = FALSE;
 	if (_SimuEncoder) ctrl_simu_encoder(0);
 
 	if (!_SimuPLC)
@@ -1193,54 +1210,84 @@ static void _plc_state_ctrl()
 	{
 		_plc_set_command("CMD_SETUP", "CMD_WEBIN");
 	}
-	if (_PlcState==plc_pause)
+	if(_PlcState == plc_pause)
 	{		
-		if (_WasInRun) 
-			RX_PrinterStatus.printState=ps_pause;
-		if (_StartEncoderItem.pageWidth)	// send position to encoder
+		if(_WasInRun)
 		{
+			RX_PrinterStatus.printState = ps_pause;
+			_WasInRun = FALSE;
+		}
+		if(_SendRun)
+		{
+			_SendRun = FALSE;
+			_plc_set_command("CMD_PRODUCTION", "CMD_RUN");
+			step_set_vent(_Speed);
+			RX_PrinterStatus.printState = ps_printing;
+		}
+		if(_StartEncoderItem.pageWidth)	// send position to encoder
+		{			
+			if(RX_Config.printer.type == printer_TX801 || RX_Config.printer.type == printer_TX802)
+			{ // calculate speed
+				UINT32 speed;
+				// speed = time for one scanner movement!
+				lc_get_value_by_name_UINT32(APP "STA_PRINTING_CYCLE_TIME", &speed);
+				if(speed == 0) RX_PrinterStatus.actSpeed = 0;
+				else
+				{
+					double stepArea = _StartEncoderItem.srcHeight / 1000000.0 * _StepDist/1000.0;
+					if (_StartEncoderItem.scanMode!=PQ_SCAN_BIDIR) stepArea /= 2; 
+					RX_PrinterStatus.actSpeed = (UINT32)(stepArea * 3600.0 / ((double)speed/1000.0));
+				}
+			}
+			
 			EnScanState scan_state;
-			if (_SimuPLC || !rx_def_is_scanning(RX_Config.printer.type)) 
+			if(_SimuPLC || !rx_def_is_scanning(RX_Config.printer.type)) 
 				scan_state = scan_start;
 			else lc_get_value_by_name_UINT32(APP "STA_SLIDE_POSITION", (UINT32*)&scan_state);
-			if (scan_state!=scan_moving)
+			if(scan_state != scan_moving)
 			{
 				enc_start_printing(&_StartEncoderItem);
-				_StartEncoderItem.pageWidth=0;
+				_StartEncoderItem.pageWidth = 0;
 				return;
 			}
 		}
 
-		if (!_heads_to_print)
+		if(!_heads_to_print)
 		{			
 		//	TrPrintfL(TRUE, "_heads_to_print: printhead_en=%d, printState=%d (%d)", RX_TestTableStatus.info.printhead_en, RX_PrinterStatus.printState, ps_printing);
-			if (RX_Config.printer.type!=printer_cleaf || (RX_TestTableStatus.info.printhead_en && RX_PrinterStatus.printState==ps_printing))
+		//	if (RX_Config.printer.type!=printer_cleaf || (RX_TestTableStatus.info.printhead_en && RX_PrinterStatus.printState==ps_printing))
+			if(RX_PrinterStatus.printState == ps_printing && (RX_Config.printer.type != printer_cleaf || RX_TestTableStatus.info.printhead_en))
 			{
 				tt_cap_to_print_pos();
-				_heads_to_print=TRUE;													
+				_heads_to_print = TRUE;													
 			}
 		}
 		
-		if (_StartPrinting
-			&& _StartEncoderItem.pageWidth==0 
+		if(_StartPrinting
+			&& _StartEncoderItem.pageWidth == 0 
 			&& enc_ready() 
 			&& pq_is_ready2print(&_StartEncoderItem) 
-			&& (RX_PrinterStatus.printState==ps_printing || RX_PrinterStatus.printState==ps_ready_power)
+			&& (RX_PrinterStatus.printState == ps_printing || RX_PrinterStatus.printState == ps_ready_power)
 			&& (RX_TestTableStatus.info.z_in_print 
 			|| _SimuPLC))
 		{
 			_StartPrinting = FALSE;
 			_CanRun = TRUE;
-			if (!_SimuPLC)    _plc_set_command("CMD_PRODUCTION", "CMD_RUN");
-			if (_SimuEncoder) ctrl_simu_encoder(_StartEncoderItem.speed);
+			if(!_SimuPLC)    _plc_set_command("CMD_PRODUCTION", "CMD_RUN");
+			if(_SimuEncoder) ctrl_simu_encoder(_StartEncoderItem.speed);
 			step_set_vent(_Speed);
 			memset(&_StartEncoderItem, 0, sizeof(_StartEncoderItem));
 			TrPrintfL(TRUE, "PLC: CMD_RUN sent");
 		}
 		
 	}
+	else if (_PlcState==plc_run)
+	{
+		if (rx_def_is_web(RX_Config.printer.type)) lc_get_value_by_name_UINT32(APP "STA_PRINTING_SPEED", &RX_PrinterStatus.actSpeed);					
+	}
 	else if (_PlcState==plc_stop) 
 	{
+		RX_PrinterStatus.actSpeed = 0;
 		_CanRun = FALSE;
 		_heads_to_print=FALSE;
 		_WasInRun = FALSE;
@@ -1364,7 +1411,7 @@ static void* _plc_thread(void *par)
 				ret = app_transfer_file(PATH_BIN_REXROTH NAME_ACCOUNTS, "ProjectData");
 				if (ret==0) 
 				{
-					ret = app_reload_user_rights();	// this command needs already the permission rights!
+					ret = app_reload_user_rights();	// this command need already the permission rights!
 					if (ret) ret = sys_reboot();				// this command needs already the permission rights!
 					if (ret) Error(ERR_CONT, 0, "Access rights to rexroth have changed. PLC has to be restarted manually.");
 				}

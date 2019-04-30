@@ -28,6 +28,7 @@ int				 pq_del_item(SPrintQueueItem *pitem);
 int				 pq_move_item(SPrintQueueItem *pitem, int d);
 
 int	pq_start(void);
+void pq_tick(void);
 int pq_stop(void);
 int pq_abort(void);
 
@@ -37,8 +38,10 @@ int pq_preflight(SPrintQueueItem *pitem);
 int pq_ripping(SPrintQueueItem *pitem);
 int pq_loading(int spoolerNo, SPageId *pid, char *txt);
 int pq_sending(int spoolerNo, SPageId *pid);
-int pq_printed(SPageId *pid, int *pageDone, int *jobDone, SPrintQueueItem **pnextItem);
+int pq_printed(int headNo, SPageId *pid, int *pageDone, int *jobDone, SPrintQueueItem **pnextItem);
 int pq_stopping(SPrintQueueItem *pitem);
+void pq_sent_document(int pages);
+
 SPrintQueueItem *pq_sent(SPageId *pid);
 SPrintQueueItem *pq_got_printGo(SPageId *pid);
 int  pq_is_ready2print(SPrintQueueItem *pitem);

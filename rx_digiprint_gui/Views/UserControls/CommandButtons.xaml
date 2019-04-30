@@ -38,7 +38,8 @@
                      Visibility="{Binding Visible}"
                      >
                 <Grid>
-                    <Image Source="../../Resources/Bitmaps/UV_Lamp.ico"/>
+                  <!--  <Image Source="../../Resources/Bitmaps/UV_Lamp.ico" /> -->
+                    <Image Source="{Binding Busy, Converter={StaticResource UvLampImg_Converter}}"   />
                     <StackPanel>
                         <TextBlock Text="{Binding ActionStr}" HorizontalAlignment="Center" FontSize="{StaticResource FontSizeLarge}"/>
                         <TextBlock Text="{Binding TimeStr}"   HorizontalAlignment="Center" FontSize="{StaticResource FontSizeLarge}"/>

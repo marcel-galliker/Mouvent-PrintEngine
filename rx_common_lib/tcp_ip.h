@@ -217,6 +217,8 @@
 #define CMD_EXTERNAL_DATA_ON	0x01000205
 #define CMD_EXTERNAL_DATA_OFF	0x01000206
 
+#define CMD_RESET_CTR			0x01000207
+
 #define CMD_CLEAN_START			0x01000210
 #define REP_CLEAN_START			0x02000210
 
@@ -334,6 +336,14 @@
 
 #define CMD_CLN_PURGE_TEST		0x01000720
 
+#define CMD_CLN_DRIP_PANS			0x01000721
+#define CMD_CLN_DRIP_PANS_EN		0x01000722		// Main ask board 0 for positions of drip pans
+#define CMD_CAP_ALLOW_MOVE_DOWN		0x01000723
+#define CMD_CAP_NOT_ALLOW_MOVE_DOWN	0x01000724
+
+#define CMD_CLN_ROT_REF			0x01000730
+#define CMD_CLN_SHIFT_REF		0x01000731
+#define CMD_CLN_SHIFT_MOV		0x01000732
 
 #define CMD_CLN_END				0x010007ff
 
@@ -346,10 +356,12 @@
 #define REP_PRINT_FILE			0x02003002
 #define EVT_PRINT_FILE			0x03003002
 
-#define CMD_PRINT_ABORT			0x01003003
-#define REP_PRINT_ABORT			0x02003003
+#define EVT_PRINT_DONE			0x03003003
 
-#define CMD_FONTS_UPDATED		0x01003004
+#define CMD_PRINT_ABORT			0x01003004
+#define REP_PRINT_ABORT			0x02003004
+
+#define CMD_FONTS_UPDATED		0x01003005
 
 #define BEG_SET_FILEDEF			0x04003010
 #define ITM_SET_FILEDEF			0x05003010	// header + data
@@ -618,7 +630,14 @@ typedef struct SPrintFileCmd
 	UINT32		offsetWidth;
 	UINT32		lengthPx;
 	UINT32		gapPx;
-	UINT32		mirror;		// for scanning
+	UINT32		flags;		// for scanning
+		#define FLAG_MIRROR			0x0001
+		#define FLAG_BIDIR			0x0002
+		#define FLAG_SMP_FIRST_PAGE 0x0004
+		#define FLAG_SMP_LAST_PAGE	0x0008	
+		#define FLAG_PASS_1OF2		0x0010	
+		#define FLAG_PASS_2OF2		0x0020	
+	
 	UINT8		printMode;	// see rx_def.h::SBmpInfo
 		#define PM_UNDEF				0
 		#define PM_SCANNING				1
@@ -627,13 +646,12 @@ typedef struct SPrintFileCmd
 		#define PM_TEST_SINGLE_COLOR	4
 		#define PM_TEST_JETS			5
 		#define PM_SCAN_MULTI_PAGE		6
-	UINT16		smp_flags;			// PM_SCAN_MULTI_PAGE: flags
-		#define SMP_FIRST_PAGE	0x0001
-		#define SMP_LAST_PAGE	0x0002	
+	
 	UINT16		smp_bufSize;		// PM_SCAN_MULTI_PAGE: buffer size
 	UINT8		variable;
 	UINT8		lengthUnit;	// see SPrintQueueItem.LengthUnit
-	UINT8		clearBlockUsed;				
+	UINT8		clearBlockUsed;
+	UINT8		wakeup;
 	char		filename[256];
 } SPrintFileCmd;
 
@@ -646,6 +664,7 @@ typedef struct SPrintFileRep
 	UINT32		lengthPx;
 	UINT8		bitsPerPixel;
 	UINT8		bufReady;
+	UINT8		clearBlockUsed;
 } SPrintFileRep;
 
 typedef struct SPrintFileMsg
@@ -659,10 +678,18 @@ typedef struct SPrintFileMsg
 			#define DATA_LOADING	3	// bufReady = progress
 			#define DATA_SENDING	4
 			#define DATA_SENT		5
-			#define DATA_PRINT_DONE	6
+	//		#define DATA_PRINT_DONE	6
 	UINT8		bufReady;
 	char		txt[64];
 } SPrintFileMsg;
+
+typedef struct SPrintDoneMsg
+{
+	SMsgHdr		hdr;
+	UINT32		pd;
+	SPageId		id;
+	UINT32		boardNo; // simulation from spooler
+} SPrintDoneMsg;
 
 //--- UDP message --------------------------------------------
 // #define MAX_UDP_MSG_SIZE	1472

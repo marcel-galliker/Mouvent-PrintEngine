@@ -143,6 +143,7 @@
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
                 </Grid.RowDefinitions>
 
                 <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Text="Print Environment" Visibility="{Binding Ripped, Converter={StaticResource IntToInVisible_Converter}}" />
@@ -174,14 +175,12 @@
                     />
                 <TextBlock   Grid.Row="3" Grid.Column="3" Text="m/min" Margin="5,0,0,0" FontSize="{DynamicResource FontSizeStd}" VerticalAlignment="Center"/>
 
-                <TextBlock Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Text="Orientation" Visibility="{Binding Ripped, Converter={StaticResource IntToInVisible_Converter}}"/>
-                <rx:RxComboBox x:Name="CB_Orientation"
+                <TextBlock Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Text="Wakeup"/>
+                <rx:RxComboBox x:Name="CB_Wakeup"
                     Grid.Row="4" Grid.Column="2"
-                    Visibility="{Binding Ripped, Converter={StaticResource IntToInVisible_Converter}}"
-                    SelectedValue="{Binding Orientation}"
+                    SelectedValue="{Binding Wakeup}"
                     HorizontalContentAlignment="Right"
                     />
-
                 
                 <!--
                 <TextBlock   Grid.Row="5" Grid.Column="0" Text="&#x0081;" FontFamily="Wingdings" />
@@ -195,16 +194,16 @@
                 <TextBlock   Grid.Row="6" Grid.Column="3" Text="mm" Margin="5,0,0,0" />
                 -->
                 
-                <TextBlock   Grid.Row="5" Grid.Column="0" Text="&#x0081;" FontFamily="Wingdings" />
-                <TextBlock   Grid.Row="5" Grid.Column="1" Text="Image Margin"/>
-                <common:RxNumBox Grid.Row="5" Grid.Column="2" Text="{Binding PageMargin}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Right"/>
-                <TextBlock   Grid.Row="5" Grid.Column="3" Text="mm" Margin="5,0,0,0" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center"/>
-
-                <TextBlock   Grid.Row="6" Grid.Column="0" Text="&#x0082;" FontFamily="Wingdings" />
-                <TextBlock   Grid.Row="6" Grid.Column="1" Text="Image Gap"/>
-                <common:RxNumBox Grid.Row="6" Grid.Column="2" Text="{Binding PrintGoDist}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Right"/>
+                <TextBlock   Grid.Row="6" Grid.Column="0" Text="&#x0081;" FontFamily="Wingdings" />
+                <TextBlock   Grid.Row="6" Grid.Column="1" Text="Image Margin"/>
+                <common:RxNumBox Grid.Row="6" Grid.Column="2" Text="{Binding PageMargin}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Right"/>
                 <TextBlock   Grid.Row="6" Grid.Column="3" Text="mm" Margin="5,0,0,0" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center"/>
-                
+
+                <TextBlock   Grid.Row="7" Grid.Column="0" Text="&#x0082;" FontFamily="Wingdings" />
+                <TextBlock   Grid.Row="7" Grid.Column="1" Text="Image Gap"/>
+                <common:RxNumBox Grid.Row="7" Grid.Column="2" Text="{Binding PrintGoDist}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Right"/>
+                <TextBlock   Grid.Row="7" Grid.Column="3" Text="mm" Margin="5,0,0,0" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center"/>
+
                 <uc:PreviewScan Grid.Row="1" Grid.Column="4" Grid.RowSpan="7" 
                 Width="250"
                 HorizontalAlignment="Left" 

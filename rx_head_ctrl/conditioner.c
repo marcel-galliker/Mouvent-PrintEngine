@@ -173,14 +173,8 @@ void cond_start_preslog(void)
 
 //--- _cond_preslog -----------------------------------------
 static void _cond_preslog(int ticks)
-{
-	int no=0;
-
-	if (!_plog_on || _NiosMem==NULL) return;
-	
-	//--- log while in print mode ---------------------
-	
-	if (RX_HBStatus[0].head[no].ctrlMode!=ctrl_print)
+{	
+	if (!_plog_on) 
 	{
 		if (_plog_file)
 		{
@@ -190,64 +184,23 @@ static void _cond_preslog(int ticks)
 		}
 		return;
 	}
-	
-	if (_plog_file==NULL)
+	int i;
+	if (_plog_file == NULL)
 	{
 		char name[100];
-		sprintf(name, PATH_TEMP "pump_%d.csv", ++_plog_fileNo);
+		sprintf(name, PATH_TEMP "Conditioners_Regulation.csv");
 		_plog_file = fopen(name, "w");
-		fprintf(_plog_file, "no\t" "PG\t" "Pos[cm]\t" "pressure-in\t" "pressure-out\t" "meniscus\t" "pump\t" "pump_ticks\t" "cylinder-pressure\t" "\n");
-		fflush(_plog_file);
-		_plog_time = rx_get_ticks();
-		_plog_idx = 0;
-		_plog_no  =-1;
-		Error(WARN, 0, "Logging Conditioner[%d] to >>%s<<", no, name);			
+		fprintf(_plog_file, "pump_ticks(ms)");
+		for (i = 0; i < 4; i++) fprintf(_plog_file, ";Pin %d; Meniscus %d;pump %d;P %d;I %d", i, i, i, i, i);
+		fprintf(_plog_file, "\n");
+		_LogTimer = rx_get_ticks();
 	}
 
-	int i=0;
-	int save=FALSE;
-	SCondLogItem *plog;
+	int time = rx_get_ticks() - _LogTimer;
 	
-	int time0 = rx_get_ticks();
-	
-	while(TRUE)
-	{
-		plog = &_NiosStat->cond[no].log[_plog_idx];
-		if(plog->no > _plog_no)
-		{
-			int pg = RX_HBStatus[0].head[no].printGoCnt;
-			int pos = (int)(fpga_enc_position(no) / 8 / 0.254 / 1200.0);
-			/* --- scanning
-			if (pg!=_plog_lastPg) _LogTimer=10;
-			if (pg && _LogTimer)
-			{
-				fprintf(_plog_file, "%03ld\t%d\t%03d\t%03ld\t%03ld\t%03ld\t%03ld\n", plog->no, pg, pos, plog->pressure_in, plog->pressure_out, plog->meniscus, plog->pump);
-				fflush(_plog_file);
-			}
-			else if (_plog_file && !_LogTimer)//(_lastPg) 
-			{
-				fclose(_plog_file);
-				_plog_file=NULL;
-			}
-			*/
-			//--- test system ------------
-			{
-				fprintf(_plog_file, "%03ld\t%d\t%03d\t%03ld\t%03ld\t%03ld\t%03ld\t%03ld\t%03ld\n", plog->no, pg, pos, plog->pressure_in, plog->pressure_out, plog->meniscus, plog->pump, plog->pump_ticks, RX_FluidStat[no].cylinderPressure);
-			}
-			save = TRUE;
-			_plog_lastPg = pg;
-			_plog_no = plog->no;
-			_plog_idx = (_plog_idx + 1) % SIZEOF(_NiosStat->cond[0].log);
-		}
-		else break;
-	}
-
-	int time=rx_get_ticks();
-	if (time-_plog_time>1000)
-	{
-		fflush(_plog_file);
-		_plog_time = time;
-	}
+	fprintf(_plog_file, "%d", time);
+	for (i = 0; i < 4; i++) fprintf(_plog_file, ";%d;%d;%d;%d;%d", _NiosStat->cond[i].pressure_in, _NiosStat->cond[i].meniscus, _NiosStat->cond[i].pump_measured, _NiosStat->cond[i].pid_P, _NiosStat->cond[i].pid_I);
+	fprintf(_plog_file, "\n");
 }
 
 //--- _set_fluid_off -------------------------------------------
@@ -273,7 +226,6 @@ void cond_error_check(void)
 	
 	for (head=0; head<MAX_HEADS_BOARD; head++)
 	{		
-
 		if (_NiosStat->cond[head].cmdConfirm.reset_errors)  _NiosMem->cfg.cond[head].cmd.reset_errors = FALSE;
 		if (_NiosStat->cond[head].cmdConfirm.resetPumpTime) _NiosMem->cfg.cond[head].cmd.resetPumpTime= FALSE;
 		if (_NiosStat->cond[head].cmdConfirm.del_offset)	_NiosMem->cfg.cond[head].cmd.del_offset   = FALSE;
@@ -313,7 +265,7 @@ void cond_error_check(void)
         	if (_NiosStat->cond[head].error&COND_ERR_p_in_too_high)				ErrorFlag(level=WARN,		pwrn, COND_ERR_p_in_too_high,			0, "Conditioner %s: input pressure too high", headName);
         	if (_NiosStat->cond[head].error&COND_ERR_p_out_too_high)			ErrorFlag(level=ERR_ABORT,	perr, COND_ERR_p_out_too_high,			0, "Conditioner %s: output pressure too high", headName);
         	if (_NiosStat->cond[head].error&COND_ERR_pump_no_ink)				
-	        	ErrorFlag(level=WARN,      perr, COND_ERR_pump_no_ink,				0, "Conditioner %s: no ink: actVal=%d, setVal=%d, delay=%d, sum=%d", headName, pstat->pressure_out, pstat->pid_setval, pstat->pid_delay, pstat->pid_sum);
+	        	ErrorFlag(level=WARN,      perr, COND_ERR_pump_no_ink,				0, "Conditioner %s: no ink: actVal=%d, setVal=%d, sum=%d", headName, pstat->pressure_out, pstat->pid_setval, pstat->pid_sum);
 	    	/*
 	    	if (_NiosStat->cond[head].error&COND_ERR_pump_no_ink)				
 	    	{
@@ -349,28 +301,47 @@ ELogItemType cond_err_level(void)
 	return _ErrLevel;	
 }
 
+//--- _update_counters -------------------------------------
+static void _update_counters(void)
+{
+	int condNo, n;
+	int clusterNo=-1;
+	int machineMeters=0;
+	int printing=FALSE;
+
+	for (condNo=0; condNo<MAX_HEADS_BOARD;  condNo++)
+	{
+		if (_NiosStat->cond[condNo].mode==ctrl_print) printing = TRUE;
+		if (_NiosStat->cond[condNo].clusterNo)									clusterNo = _NiosStat->cond[condNo].clusterNo;
+		if (_NiosStat->cond[condNo].clusterTime   > RX_HBStatus->clusterTime)   RX_HBStatus->clusterTime   = _NiosStat->cond[condNo].clusterTime;
+		if (_NiosStat->cond[condNo].machineMeters > machineMeters)				machineMeters = _NiosStat->cond[condNo].machineMeters;
+	}
+	if (printing) RX_HBStatus->clusterTime++;
+
+	RX_HBStatus->clusterNo     = clusterNo;
+	RX_HBStatus->machineMeters = machineMeters;
+
+	for (condNo=0; condNo<MAX_HEADS_BOARD;  condNo++)
+	{
+		_NiosCfg->cond[0].clusterNo			 = clusterNo;
+		_NiosCfg->cond[condNo].clusterTime   = RX_HBStatus->clusterTime;
+		if (RX_FluidStat[0].machineMeters!=INVALID_VALUE)// && RX_FluidStat[0].machineMeters>_NiosCfg->cond[condNo].machineMeters)
+			_NiosCfg->cond[condNo].machineMeters = RX_FluidStat[0].machineMeters;
+	}
+}
 
 //--- cond_main ---------------------------------------------
 void cond_main(int ticks)
 {	
-	/*
-    int headNo;
-        
-    // handle control modes which can only be changed from putty (not in the GUI) 
-    for (headNo = 0; headNo < HEAD_BOARD_CNT; headNo++)
-    {
-        if (RX_HBStatus[0].head[headNo].ctrlMode == ctrl_offset_cal)        cond_ctrlMode(headNo, ctrl_offset_cal_1); 
-        if (RX_HBStatus[0].head[headNo].ctrlMode == ctrl_offset_cal_1)      cond_ctrlMode(headNo, ctrl_offset_cal_done); 
-        if (RX_HBStatus[0].head[headNo].ctrlMode == ctrl_offset_cal_done)   cond_ctrlMode(headNo, ctrl_off);
-        
-        if (RX_HBStatus[0].head[headNo].ctrlMode == ctrl_del_user_offset)   cond_ctrlMode(headNo, ctrl_off);
-    }
-    */
-    
+	static int _ticks=0;
+	if (ticks-_ticks>1000)
+	{
+		_update_counters();
+		_ticks=ticks;
+	}	
 	_cond_preslog(ticks);
     
-    if (!(ticks%10))
-        _write_log();
+    if (!(ticks%10)) _write_log();
 }			
 
 //---_cond_load --------------------------------
@@ -515,59 +486,25 @@ void cond_offset_del(int headNo)
 	else for(i=0; i<MAX_HEADS_BOARD; i++) _NiosMem->cfg.cond[i].cmd.del_offset      = TRUE;
 }
 
-//--- cond_set_param --------------------------------------------------------------------
-void cond_set_param(int headNo, char param, int value)
-{
-    int i;
-    
-    if (headNo > MAX_HEADS_BOARD)
-        return;
-
-	for (i=0; i<MAX_HEADS_BOARD; i++)
-	{
-		_NiosMem->cfg.cond[i].pid_P		= RX_NiosStat.cond[i].pid_P;
-		_NiosMem->cfg.cond[i].pid_I		= RX_NiosStat.cond[i].pid_I;
-		_NiosMem->cfg.cond[i].pid_D		= RX_NiosStat.cond[i].pid_D;
-		_NiosMem->cfg.cond[i].pid_offset= RX_NiosStat.cond[i].pid_offset;		
-	}
-	
-	switch (param)
-    {
-    	case 'm':
-            if (headNo < MAX_HEADS_BOARD)              {_NiosMem->cfg.cond[headNo].pressure_out = value; }
-            else for (i = 0; i < MAX_HEADS_BOARD; i++) {_NiosMem->cfg.cond[     i].pressure_out = value; }
-            break;
-        case 'P':
-            if (headNo < MAX_HEADS_BOARD)		       {_NiosMem->cfg.cond[headNo].pid_P = value; _NiosMem->cfg.cond[headNo].cmd.set_pid = TRUE;}
-            else for (i = 0; i < MAX_HEADS_BOARD; i++) {_NiosMem->cfg.cond[     i].pid_P = value; _NiosMem->cfg.cond[     i].cmd.set_pid = TRUE;}
-			break;
-        case 'I':
-            if (headNo < MAX_HEADS_BOARD)		       {_NiosMem->cfg.cond[headNo].pid_I = value; _NiosMem->cfg.cond[headNo].cmd.set_pid = TRUE;}
-            else for (i = 0; i < MAX_HEADS_BOARD; i++) {_NiosMem->cfg.cond[     i].pid_I = value; _NiosMem->cfg.cond[     i].cmd.set_pid = TRUE;}
-            break;
-        case 'D':
-            if (headNo < MAX_HEADS_BOARD)		       {_NiosMem->cfg.cond[headNo].pid_D = value; _NiosMem->cfg.cond[headNo].cmd.set_pid = TRUE;}
-            else for (i = 0; i < MAX_HEADS_BOARD; i++) {_NiosMem->cfg.cond[     i].pid_D = value; _NiosMem->cfg.cond[     i].cmd.set_pid = TRUE;}
-            break;
-        case 'O':
-            if (headNo < MAX_HEADS_BOARD)		       {_NiosMem->cfg.cond[headNo].pid_offset = value; _NiosMem->cfg.cond[headNo].cmd.set_pid = TRUE;}
-            else for (i = 0; i < MAX_HEADS_BOARD; i++) {_NiosMem->cfg.cond[     i].pid_offset = value; _NiosMem->cfg.cond[     i].cmd.set_pid = TRUE;}
-            break;
-        }
-}
 
 //--- cond_set_config ---------------------------------------
 void cond_set_config(int headNo, SConditionerCfg *cfg)
 {	
 	if (headNo<0 || headNo>=MAX_HEADS_BOARD || _NiosMem==NULL) return;	
 	
-	_NiosMem->cfg.cond[headNo].pressure_out = cfg->pressure_out;		
-	_NiosMem->cfg.cond[headNo].pid_P		= cfg->pid_P;			
-    _NiosMem->cfg.cond[headNo].pid_I		= cfg->pid_I;	
-    _NiosMem->cfg.cond[headNo].pid_D		= cfg->pid_D;	
-	_NiosMem->cfg.cond[headNo].pid_offset	= cfg->pid_offset;
-	_NiosMem->cfg.cond[headNo].meniscus0	= cfg->menicus0;
+//	_NiosMem->cfg.cond[headNo].meniscus_setpoint = cfg->meniscus_setpoint;		
+	_NiosMem->cfg.cond[headNo].headsPerColor= cfg->headsPerColor;
 	_NiosMem->cfg.cond[headNo].cmd.set_pid	= TRUE;
+}
+
+//--- cond_setInk ---------------------------------------
+void cond_setInk(int headNo, SInkDefinition *pink)
+{
+	if (headNo<0 || headNo>=MAX_HEADS_BOARD || _NiosMem==NULL) return;	
+	
+	_NiosMem->cfg.cond[headNo].temp				 = pink->temp    *1000;
+	_NiosMem->cfg.cond[headNo].tempMax			 = pink->tempMax *1000;		
+	_NiosMem->cfg.cond[headNo].meniscus_setpoint = pink->meniscus;
 }
 
 //--- cond_volume_printed -----------------------------------
@@ -596,25 +533,6 @@ void cond_heater_test(int temp)
 			_NiosMem->cfg.cond[i].mode = ctrl_print;
 		}
 	}
-}
-
-//--- cond_heater_set ---------------------------------------------------
-void cond_heater_set(int headNo, int temp, int tempMax)
-{
-	if (_NiosMem && headNo>=0 && headNo<MAX_HEADS_BOARD)
-	{
-		_NiosMem->cfg.cond[headNo].temp    = 1000*temp;
-		_NiosMem->cfg.cond[headNo].tempMax = 1000*tempMax;		
-	}
-}
-
-//--- cond_presout_set -----------------------------------------------
-void cond_presout_set	(int headNo, int pressure)
-{
-	if (_NiosMem && headNo>=0 && headNo<MAX_HEADS_BOARD)
-	{
-		_NiosMem->cfg.cond[headNo].pressure_out  = pressure;
-	}			
 }
 
 //--- toggle_cond_meniscus_check ---------------------------

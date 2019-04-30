@@ -19,25 +19,22 @@
 int  csv_get_int(const char *str, int col)
 {
 	const char *ch;
-	char *val;
-	char value[32];
+	int value=0;
 	for (ch=str; *ch; ch++)
 	{
 		if (col==1)
 		{
 			if (*ch==SEPARATOR) return -1;
-			val = value;
 			while (*ch!=SEPARATOR)
 			{
-				if (*ch!=' ') *val++=*ch;
+				if (*ch>='0' && *ch<='9') value=10*value+*ch-'0';
 				ch++; 
 			}
-			val=0;
-			return atoi(value);
+			return value;
 		}
 		if (*ch==SEPARATOR) col--;
 	}
-	return 0;
+	return -1;
 }
 
 //--- csv_put -------------------------------------

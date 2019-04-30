@@ -19,7 +19,7 @@
 #include "debug_printf.h"
 #include "main.h"
 #include "average.h"
-#include "pumptime.h"
+#include "ctr.h"
 
 //--- defines --------------------
 #define IMPULSES_PER_REVOLUTION 6
@@ -37,11 +37,12 @@ static const INT32 MENISCUS_CHECK_TIME 	= 60*100;
 static const INT32 MENISCUS_CHECK_DELAY = 30*100;
 
 static const INT32 DEFAULT_P = 1000;
-static const INT32 DEFAULT_I = 50;
-static const INT32 DEFAULT_D = 0;
-static const INT32 DEFAULT_OFFSET = 1400; // ~34mL/min
+static const INT32 DEFAULT_I = 2000;
+static const INT32 DEFAULT_SETPOINT = 150;
 
-static const INT32 FLOW_RATE = 40000; // mL/min
+static const INT32 START_PID_OFF = 1;
+static const INT32 START_PID_P_REDUCED = 2;
+static const INT32 START_PID_P_NORMAL = 3;
 
 
 //--- prototypes -----------------
@@ -68,6 +69,10 @@ static INT32	_pin_min;
 static INT32	_pin_max;
 static INT32	_pout_min;
 static INT32	_pout_max;
+static INT32    _Start_PID;
+static INT32	_TimePIDstable;
+static INT32	_TimeSwitchingOFF;
+static INT32    _PhaseOFFMeniscusPre;
 
 
 static UINT64 _flow = 0;
@@ -89,13 +94,10 @@ int	_test1;
 
 SPID_par _PumpPID = 
 {
-	.P				= DEFAULT_P,
-	.I				= DEFAULT_I,
-	.D				= DEFAULT_D,
-	.norm			= 100,
-	.offset         = DEFAULT_OFFSET,   // value the pump should run in idle
- //   .I_rampup_to    = I_RAMPUP_TO,
-    
+	.Setpoint		= DEFAULT_SETPOINT,		// 150
+	.P				= DEFAULT_P,			// 1000
+	.I				= DEFAULT_I,			// 2000
+	.P_start		= 1,
 	.val_min		= 91,   // 91, => 0.22V start of linear pump function 
 	.val_max		= 4095, // 0xfff, 	//max value for pump DAC voltage
 							// Value for DAC, 0x0fff = 9.7V => max, 0x0000 => 32mV => min
@@ -161,15 +163,10 @@ void pump_tick_10ms(void)
 {
     static const UINT32 MBAR_500     = 5000;
     static const UINT32 MBAR_100     = 1000;
-//    static const UINT32 SD_PUMP_TIME = 2000;
 	static const INT32 cycle_time    = 10;
     
-	INT32  			max_pressure = MBAR_500; // save value in case of ctrl_off
-//    static UINT32 _sd_pump_time  = SD_PUMP_TIME;
+	INT32  max_pressure = MBAR_500; // save value in case of ctrl_off
 	
-	static UINT32 _pumpTime;
-	static UINT32 _prev_mode = ctrl_undef; 
-
 	_watchdog_check();
 
 	if (RX_Status.pressure_out == INVALID_VALUE) // || RX_Status.pressure_in == INVALID_VALUE)
@@ -183,41 +180,58 @@ void pump_tick_10ms(void)
 	
 	//--- PID Values --------------------------------
 	
-	if (RX_Config.cmd.set_pid)
-	{			
-		if (RX_Config.mode<ctrl_cal_step1 || RX_Config.mode>ctrl_cal_done)
-		{				
-			// update PID values
-			_PumpPID.P = RX_Config.pid_P;
-			_PumpPID.I = RX_Config.pid_I;
-			_PumpPID.D = RX_Config.pid_D;
-			_PumpPID.offset = RX_Config.pid_offset;
-		}
-		RX_Status.cmdConfirm.set_pid = TRUE;
-	}
+	if(RX_Config.meniscus_setpoint > 50) _PumpPID.Setpoint = RX_Config.meniscus_setpoint;
+	else _PumpPID.Setpoint	= DEFAULT_SETPOINT;
 	
-	RX_Status.pid_P 		= _PumpPID.P;	
-	RX_Status.pid_I 		= _PumpPID.I;
-	RX_Status.pid_D			= _PumpPID.D;
-	RX_Status.pid_offset	= _PumpPID.offset;
+	RX_Status.pid_P 			= _PumpPID.P;	
+	RX_Status.pid_I 			= _PumpPID.I;
+	RX_Status.meniscus_setpoint	= _PumpPID.Setpoint;
+	
 	//--- END PID Values -------------------------
 	
 	switch(RX_Config.mode)
 	{
 		case ctrl_off:
 		case ctrl_error:
-//		case ctrl_shutdown:               
-//		case ctrl_shutdown_done:         
-						temp_ctrl_on(FALSE);
-						turn_off_pump();
-						RX_Status.logCnt = 0;
-						_pump_ticks = 0;
-						if (RX_Status.mode>ctrl_off)
-                            save_pumptime(RX_Status.pumptime, TRUE);
-                        
-                        RX_Status.mode = RX_Config.mode;
-						break;		
-        
+		case ctrl_shutdown:               
+			if(RX_Status.mode == ctrl_shutdown)		// switching OFF phase : keep the meniscus between -10 and -13
+			{
+				_TimeSwitchingOFF++;
+				if(RX_Status.meniscus > -10) 
+				{
+					_set_valve(TO_FLUSH);
+					if(_PhaseOFFMeniscusPre == TO_INK) _TimeSwitchingOFF = 0;
+					_PhaseOFFMeniscusPre = TO_FLUSH;
+				}
+				else if(RX_Status.meniscus < -50) 
+				{
+					_set_valve(TO_INK);
+					if(_PhaseOFFMeniscusPre == TO_FLUSH) _TimeSwitchingOFF = 0;
+					_PhaseOFFMeniscusPre = TO_INK;
+				}
+				// when valve didn't change for than 5 seconds, mean that meniscus is stable : go to mode OFF
+				if(_TimeSwitchingOFF > 1000)
+				{
+					RX_Status.mode = ctrl_off;
+					_set_valve(TO_FLUSH);
+				}				
+			}
+			else 
+			{
+				temp_ctrl_on(FALSE);
+				turn_off_pump();
+				RX_Status.logCnt = 0;
+				_pump_ticks = 0;
+				if (RX_Status.mode > ctrl_off) ctr_save();
+				_PumpPID.start_integrator = 0;
+				if(RX_Status.mode == ctrl_print) RX_Status.mode = ctrl_shutdown; 	// shutdown phase if PRINT mode before OFF
+				else RX_Status.mode = ctrl_off;
+				_Start_PID = START_PID_OFF;
+				_TimePIDstable = 0;
+				_TimeSwitchingOFF = 0;
+			}
+			break;	
+			
 		case ctrl_warmup:
 						temp_ctrl_on(TRUE);
 						if (RX_Status.mode==ctrl_readyToPrint) break;
@@ -238,124 +252,54 @@ void pump_tick_10ms(void)
 						break;
 		
         //--- PRINT --------------------------------------------
+		case ctrl_cal_start:
+		case ctrl_cal_step2:    
+		case ctrl_cal_step1:	// calculate PID.offset to pump 40 ml/min                    
+        case ctrl_cal_step3:
 		case ctrl_print:   
 						temp_ctrl_on(TRUE);
-						if (RX_Status.mode!=ctrl_print)
+						
+						if ((RX_Status.mode!=ctrl_print)&&(RX_Status.mode!=ctrl_cal_start)&&(RX_Status.mode!=ctrl_cal_step1))
 						{
-							/*
-							_PumpPID.P 		= DEFAULT_P;
-							_PumpPID.I 		= DEFAULT_I;
-							_PumpPID.D 		= DEFAULT_D;
-							*/
+							_PumpPID.P 			= DEFAULT_P;
+							_PumpPID.I 			= DEFAULT_I;
 							
-							_PumpPID.P 		= RX_Config.pid_P;
-							_PumpPID.I 		= RX_Config.pid_I;
-							_PumpPID.D 		= RX_Config.pid_D;
-							_PumpPID.offset = RX_Config.pid_offset;
-
+							// Calculate the P reduced factor depending of number of heads per color
+							// NbHeads = 1 or 4 : P_start = 2 (P divide by 2)
+							// NbHeads = 8 : P_start = 3
+							// NbHeads = 12 : P_Start = 4
+							if(RX_Config.headsPerColor < 8) _PumpPID.P_start	= 2;
+							if(RX_Config.headsPerColor == 8) _PumpPID.P_start	= 3;
+							else _PumpPID.P_start	= 4;
+							_Start_PID = START_PID_P_REDUCED;
+							_PumpPID.start_integrator = 0;
 							pid_reset(&_PumpPID);
 							RX_Status.pressure_in_max=INVALID_VALUE;
 							RX_Status.error  &= ~(COND_ERR_meniscus | COND_ERR_pump_no_ink);
 							_meniscus_err_cnt=0;
-							_no_ink_err_cnt  =0;
+							_no_ink_err_cnt  =0;							
 						}
                         _set_valve(TO_INK);
                         max_pressure = MBAR_500;
         
 						_pump_pid();
                         
-                        RX_Status.mode = RX_Config.mode;
+                        RX_Status.mode = ctrl_print;
 						break;
         
-        //--- CALIBRATE ----------------------------------------
-        case ctrl_cal_start:
-						temp_ctrl_on(TRUE);
-                        _set_valve(TO_INK);
-                        _set_pump_speed(0);
-						pid_reset(&_PumpPID);
-						RX_Status.pressure_in_max=INVALID_VALUE;
-                        RX_Status.mode  = ctrl_cal_start;
-                        break;
-                                
-        case ctrl_cal_step2:    
-						if (_prev_mode!=RX_Config.mode) pid_reset(&_PumpPID);
-						temp_ctrl_on(TRUE);
-						_pump_pid();
-                        RX_Status.mode = RX_Config.mode;
-                        break;
-
-        case ctrl_cal_step1:	// calculate PID.offset to pump 40 ml/min                    
-        case ctrl_cal_step3:
-						if (_prev_mode!=RX_Config.mode) 
-						{
-							if (RX_Config.mode==ctrl_cal_step1)
-							{
-								_PumpPID.P 		= 0;
-								_PumpPID.I 		= 0;
-								_PumpPID.D 		= 0;
-								_PumpPID.offset = 1400;
-							}
-							else
-							{
-								/*
-								_PumpPID.P 		= DEFAULT_P;
-								_PumpPID.I 		= DEFAULT_I;
-								_PumpPID.D 		= DEFAULT_D;
-								*/
-								_PumpPID.P 		= RX_Config.pid_P;
-								_PumpPID.I 		= RX_Config.pid_I;
-								_PumpPID.D 		= RX_Config.pid_D;
-							}
-							pid_reset(&_PumpPID);
-							_pumpTime	   = RX_Status.pumptime;
-						}
-							
-						temp_ctrl_on(TRUE);
-						_pump_pid();
-						if (RX_Status.mode != RX_Config.mode)
-						{
-							if (RX_Status.pumptime>_pumpTime+2)
-							{
-								int flow = (int)RX_Status.pump_measured * 60;
-								if (abs(flow - FLOW_RATE) < 1000) RX_Status.mode = RX_Config.mode;
-								else 
-								{
-									int diff=(FLOW_RATE-flow) / 50;
-									if (diff>0 && diff<10)  diff=10;
-									if (diff<0 && diff>-10) diff=-10;
-									_PumpPID.offset = ((_PumpPID.offset+diff+9)/10)*10;
-									_pumpTime = RX_Status.pumptime;
-									if (_PumpPID.offset<1000) 
-									{
-										_PumpPID.offset = 1000;
-										RX_Status.mode = RX_Config.mode;
-									}
-									if (_PumpPID.offset>3000) 
-									{
-										_PumpPID.offset = 3000;
-										RX_Status.mode = RX_Config.mode;
-									}
-								}
-							}
-						}
-                        break;
-
-        case ctrl_cal_done:                
-						temp_ctrl_on(TRUE);
-						_pump_pid();
-                        RX_Status.mode = RX_Config.mode;
-                        break;
-	
-		//--- PURGE --------------------------------------------
+        //--- PURGE --------------------------------------------
 		case ctrl_purge_soft:
 		case ctrl_purge:
 		case ctrl_purge_hard:
 		case ctrl_purge_micro:
-						temp_ctrl_on(FALSE);
-						turn_off_pump();
-						RX_Status.pressure_in_max=INVALID_VALUE;
-						max_pressure = MBAR_500;
-                        RX_Status.mode = RX_Config.mode;
+						if(RX_Status.mode == ctrl_off)
+						{
+							temp_ctrl_on(FALSE);
+							turn_off_pump();
+							RX_Status.pressure_in_max=INVALID_VALUE;
+							max_pressure = MBAR_500;
+							RX_Status.mode = RX_Config.mode;
+						}
 						break;
 		
 		case ctrl_purge_step1:
@@ -394,9 +338,12 @@ void pump_tick_10ms(void)
 		case ctrl_flush_night:
 		case ctrl_flush_weekend:
 		case ctrl_flush_week:
-                        turn_off_pump(); // opens FLUSH valve
-						max_pressure 	= MBAR_500;
-                        RX_Status.mode 	= RX_Config.mode;
+                        if(RX_Status.mode == ctrl_off)
+						{
+							turn_off_pump(); // opens FLUSH valve
+							max_pressure 	= MBAR_500;
+							RX_Status.mode 	= RX_Config.mode;
+						}
                         break;
         
 		case ctrl_flush_step1:        
@@ -408,12 +355,15 @@ void pump_tick_10ms(void)
 		//--- EMPTY ------------------------------------------------
 		case ctrl_empty:
 		case ctrl_empty_step1:
-						temp_ctrl_on(FALSE);
-						_set_valve(TO_INK);
-                        // _set_pump_speed((_PumpPID.val_max + 1) / 2);
-						_pump_pid();
-						max_pressure = MBAR_500;
-                        RX_Status.mode = RX_Config.mode;
+						if(RX_Status.mode == ctrl_off)
+						{
+							temp_ctrl_on(FALSE);
+							_set_valve(TO_INK);
+							// _set_pump_speed((_PumpPID.val_max + 1) / 2);
+							_pump_pid();
+							max_pressure = MBAR_500;
+							RX_Status.mode = RX_Config.mode;
+						}
 						break;
         
 		case ctrl_empty_step2:
@@ -430,11 +380,14 @@ void pump_tick_10ms(void)
 		//--- FILL -------------------------------------------------------
 		case ctrl_fill:	
 		case ctrl_fill_step1:	
-						temp_ctrl_on(FALSE);
-						turn_off_pump();
-						RX_Status.error  &= ~(COND_ERR_meniscus | COND_ERR_pump_no_ink);
-						max_pressure = MBAR_100;
-                        RX_Status.mode = RX_Config.mode;
+						if(RX_Status.mode == ctrl_off)
+						{
+							temp_ctrl_on(FALSE);
+							turn_off_pump();
+							RX_Status.error  &= ~(COND_ERR_meniscus | COND_ERR_pump_no_ink);
+							max_pressure = MBAR_100;
+							RX_Status.mode = RX_Config.mode;
+						}
 						break;
 		
 		case ctrl_fill_step2:
@@ -447,24 +400,7 @@ void pump_tick_10ms(void)
 						||  (RX_Config.mode==ctrl_fill_step3 && RX_Status.pressure_in!=INVALID_VALUE && RX_Status.pressure_in>0)) 
 							RX_Status.mode = RX_Config.mode;
 						break;
-                
-		/*
-		//--- Shut Down -------------------------------------------------------
-		case ctrl_shutdown:               
-						temp_ctrl_on(FALSE);
-                        if (RX_Config.mode != RX_Status.mode)
-                            _sd_pump_time = SD_PUMP_TIME;
-                        
-                        if (--_sd_pump_time > 0)
-                            _set_pump_speed((_PumpPID.val_max + 1) / 2);
-                        else
-                            turn_off_pump();
-                        
-						temp_ctrl_on(FALSE);
-                        RX_Status.mode = RX_Config.mode;
-						break;
-          */
-						
+        				
         //--- SENSOR CALIBRATION ------------------------------------------------
         case ctrl_offset_cal:
 						temp_ctrl_on(FALSE);
@@ -483,8 +419,7 @@ void pump_tick_10ms(void)
 						RX_Status.mode = ctrl_undef;
 						break; 
 	}
-	_prev_mode = RX_Config.mode;
-        
+	    
     // machine safety
 	//--- check input sensor in all modes -------
 	if (pres_valid()
@@ -599,7 +534,6 @@ static void _error_cnt(int err, int *errcnt, int errflag, int timeout)
 static void _pump_pid(void)
 {       
     static const INT32 MENISCUS_MAX = 1;    // [0.1mbar]
-	INT32 setVal;
  		
 //	if (RX_Status.pressure_out == INVALID_VALUE || RX_Status.info.valve == TO_FLUSH || RX_Status.error & COND_ERR_meniscus)
 	if (RX_Status.pressure_out == INVALID_VALUE || RX_Status.info.valve == TO_FLUSH || RX_Status.error & (COND_ERR_meniscus|COND_ERR_pump_no_ink))
@@ -623,24 +557,40 @@ static void _pump_pid(void)
 			_error_cnt((RX_Status.meniscus > MENISCUS_MAX), 	&_meniscus_err_cnt, COND_ERR_meniscus, MENISCUS_TIMEOUT);			
         }
 
-		if (FALSE)
-		{ // regulate on meniscus
-			INT32 meniscus_target = -RX_Config.pressure_out; // read from presout.xml     
-			pid_calc(abs(RX_Status.meniscus), abs(meniscus_target), &_PumpPID);
+		// regulate on meniscus
+		// detection for the start of the integrator : when Meniscus pass over the setpoint
+		if(!_PumpPID.start_integrator)
+		{
+			if(-RX_Status.meniscus < _PumpPID.Setpoint) _PumpPID.start_integrator++;
 		}
-		else
-		{	// regulate on p_out
-			if (RX_Config.mode==ctrl_print && _rampup_time<RAMP_UP_TIME)
+		
+		// P parameter reduced during start-up
+		// Conditions to use P normal : Pinlet > 0  AND -1.5 < and Meniscus-setpoint < 1.5 for 1 second
+		if(_Start_PID == START_PID_P_REDUCED)
+		{
+			if((RX_Status.pressure_in > 0)&&(RX_Status.meniscus + _PumpPID.Setpoint > -15)&&(RX_Status.meniscus + _PumpPID.Setpoint < 15))
 			{
-				pid_calc(-RX_Status.pressure_out, setVal=(RX_Config.pressure_out*(RAMP_UP_TIME-_rampup_time)) / RAMP_UP_TIME, &_PumpPID);
-				_rampup_time++;
+				_TimePIDstable++;
+				if(_TimePIDstable > 100)
+				{
+					_Start_PID = START_PID_P_NORMAL;
+					// Recalculate the integrator with the new P parameter					
+					_PumpPID.diff_I /= _PumpPID.P_start;
+					_PumpPID.P = DEFAULT_P;
+				}
 			}
-			else pid_calc(-RX_Status.pressure_out, setVal=RX_Config.pressure_out, &_PumpPID);
-			RX_Status.pid_setval = setVal;
-			RX_Status.pid_sum	 = _PumpPID.diff_I;
-			RX_Status.pid_delay  = _PumpPID.diff_delay;
-			_set_pump_speed(_PumpPID.val);
-        }
+			else 
+			{
+				_PumpPID.P = DEFAULT_P / _PumpPID.P_start;			
+				_TimePIDstable = 0;
+			}
+		}
+		else _PumpPID.P = DEFAULT_P;
+		
+		pid_calc(-RX_Status.meniscus, &_PumpPID);
+		_rampup_time++;
+		RX_Status.pid_sum	 = _PumpPID.diff_I;
+		_set_pump_speed(_PumpPID.val);
 	
 		// --- log ------------------------------
 		{
@@ -685,8 +635,7 @@ void pump_tick_1000ms(void)
 		RX_Status.pumptime++;
 
         // Only save pump time to EEPROM, Flash write takes too long
-        if ((RX_Status.pumptime % 60) == 0)
-            save_pumptime(RX_Status.pumptime, FALSE);
+        if ((RX_Status.pumptime % 60) == 0) ctr_save();
 	}
 	            
     /* 

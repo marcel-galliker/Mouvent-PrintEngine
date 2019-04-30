@@ -70,8 +70,10 @@ namespace RX_DigiPrint.Views.PrintSystemView
             {
                 inkSupply = (int)((i*4)/RxGlobals.PrintSystem.HeadCnt);
                 if (RxGlobals.PrintSystem.Reverse) inkSupply = RxGlobals.PrintSystem.ColorCnt-1-inkSupply;
-            //  Panel.Children[i].Visibility = (RxGlobals.PrintSystem.AllInkSupplies || (inkSupply/headCnt)==(RxGlobals.PrintSystem.CheckedInkSupply/headCnt)) ? Visibility.Visible : Visibility.Collapsed;
-                Panel.Children[i].Visibility = (RxGlobals.PrintSystem.AllInkSupplies || inkSupply==RxGlobals.PrintSystem.CheckedInkSupply) ? Visibility.Visible : Visibility.Collapsed;
+                if (RxGlobals.PrintSystem.AllInkSupplies) 
+                    Panel.Children[i].Visibility = (RxGlobals.PrintSystem.AllInkSupplies || (inkSupply/headCnt)==(RxGlobals.PrintSystem.CheckedInkSupply/headCnt)) ? Visibility.Visible : Visibility.Collapsed;
+                else
+                    Panel.Children[i].Visibility = (RxGlobals.PrintSystem.AllInkSupplies || inkSupply==RxGlobals.PrintSystem.CheckedInkSupply) ? Visibility.Visible : Visibility.Collapsed;
             }
         }
     }

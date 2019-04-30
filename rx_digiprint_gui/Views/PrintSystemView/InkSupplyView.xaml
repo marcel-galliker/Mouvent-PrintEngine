@@ -211,10 +211,15 @@
 <!--                <TextBlock  Grid.Row="0" HorizontalAlignment="Right" Text="{Binding Humitity,       Converter={StaticResource HeadVal_Converter}}" /> -->
                 
                 <StackPanel Grid.Row="1" HorizontalAlignment="Right" Orientation="Horizontal">
-                    <TextBlock  Text="{Binding CylinderPres, Converter={StaticResource HeadVal_Converter}}" VerticalAlignment="Center" Padding="3,0"/>
-                    <common:RxNumBox Text="{Binding CylinderPresSet, Converter={StaticResource HeadVal_Converter}}" MinWidth="40" LostFocus="Pressure_LostFocus" HorizontalContentAlignment="Right"/>
+                    <TextBlock  Text="{Binding CondPresIn, Converter={StaticResource HeadVal_Converter10}}" VerticalAlignment="Center" Padding="3,0"/>
+                    <common:RxNumBox Text="{Binding CylinderPresSet, Converter={StaticResource HeadVal_Converter10}}" MinWidth="40" LostFocus="Pressure_LostFocus" HorizontalContentAlignment="Right"/>
                 </StackPanel>
-                <TextBlock Grid.Row="2" HorizontalAlignment="Right" Text="{Binding CondPresOut, Converter={StaticResource HeadVal_Converter10}}" />
+                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <TextBlock Text="{Binding CylinderPres,      Converter={StaticResource HeadVal_Converter}}" />
+                    <TextBlock Text=" ("/>
+                    <TextBlock Text="{Binding CylinderSetpoint,      Converter={StaticResource HeadVal_Converter}}"/>
+                    <TextBlock Text=")"/>
+                </StackPanel>
                 <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">                    
                     <TextBlock Text="{Binding PumpSpeed,      Converter={StaticResource HeadVal_Converter}}" />
                     <TextBlock Text=" ("/>

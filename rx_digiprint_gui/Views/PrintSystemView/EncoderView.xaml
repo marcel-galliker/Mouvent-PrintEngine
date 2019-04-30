@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="RX_DigiPrint.Views.UserControls.EncoderView"
+﻿<UserControl x:Class="RX_DigiPrint.Views.PrintSystemView.EncoderView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -22,51 +22,33 @@
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
             </Grid.RowDefinitions>
-            <TextBlock Grid.Row="0" Grid.Column="0" Text="Par1"/>
+
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="Ampl Run"/>
             <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
-                <TextBlock Text="{Binding Par1}"/>
-                <!--
-                <TextBlock Text=" ("/>
-                <TextBlock Text="{Binding TempSet, Converter={StaticResource HeadVal_Converter10}}"/>
-                <TextBlock Text=")"/>
-                -->
-            </StackPanel>
-
-            <TextBlock Grid.Row="1" Grid.Column="0" Text="Par2"/>
-            <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
-                <TextBlock Text="{Binding Par2}"/>
-            </StackPanel>
-
-            <TextBlock Grid.Row="2" Grid.Column="0" Text="Ampl Run"/>
-            <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
                 <TextBlock Text="{Binding AmplOld, Converter={StaticResource HeadVal_Converter10}}"/>
             </StackPanel>
 
-            <TextBlock Grid.Row="3" Grid.Column="0" Text="Ampl New"/>
-            <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal">
+            <TextBlock Grid.Row="1" Grid.Column="0" Text="Ampl New"/>
+            <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
                 <TextBlock Text="{Binding AmplNew, Converter={StaticResource HeadVal_Converter10}}"/>
             </StackPanel>
 
-            <TextBlock Grid.Row="4" Grid.Column="0" Text="Change"/>
-            <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal">
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="Change"/>
+            <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
                 <TextBlock Text="{Binding Percentage, Converter={StaticResource HeadVal_Converter10}}"/>
                 <TextBlock Text=" %"/>
            </StackPanel>
 
-            <TextBlock Grid.Row="5" Grid.Column="0" Text="Distance"/>
-            <StackPanel Grid.Row="5" Grid.Column="1" Orientation="Horizontal">
+            <TextBlock Grid.Row="3" Grid.Column="0" Text="Distance"/>
+            <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal">
                 <TextBlock Text="{Binding Meters}"/>
                 <TextBlock Text=" m"/>
             </StackPanel>
 
-            <!--
-            <common:RxButton Grid.Row="6" Grid.ColumnSpan="2" Click="Save_Clicked" Height="30">
+            <common:RxButton Grid.Row="4" Grid.ColumnSpan="2" Click="Save_Clicked" Height="30">
                 <Image Source="{StaticResource Yes_ico}"/>
             </common:RxButton>
-            -->
             
         </Grid>
     </GroupBox>

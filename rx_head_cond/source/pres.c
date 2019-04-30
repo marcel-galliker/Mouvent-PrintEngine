@@ -27,7 +27,7 @@ static const INT32 ZERO_PRESSURE_OFFSET = 16500;
     
 //--- types ----------------------------------------
 
-#define BUF_SIZE	        5
+#define BUF_SIZE_10	        10
 
 typedef void (*set_power_fct)	(int on);
 
@@ -39,8 +39,8 @@ typedef struct
 	INT32			offset_factory;
 //	INT32			offset_user;
 	INT32			valFactor;
-    INT32			buf[BUF_SIZE];
-	int				buf_idx;       
+    INT32			buf10[BUF_SIZE_10];
+	int				buf_idx10;       
 	int				buf_valid;
 	int				power;
 	int				power_timer;
@@ -119,7 +119,7 @@ static void _sensor_reset(SSensor *s)
 	s->buf_valid = FALSE;
   (*s->pPressure)= INVALID_VALUE;
     
-    s->buf_idx = 0;
+    s->buf_idx10 = 0;
 }
 
 //--- _sensor_read -------------------------------
@@ -130,6 +130,7 @@ static void _sensor_read(SSensor *s)
 	INT32	ret;
     INT32   offset = 0;
     INT32   pressure = 0;   
+	INT32   pressure10 = 0;   
 	UCHAR	*ppressure = (UCHAR*)&pressure;
 
 	//--- repower sensor ---
@@ -185,17 +186,16 @@ static void _sensor_read(SSensor *s)
 			s->power_cnt = 0;
             
 			//--- save to buffer -----
-			s->buf[s->buf_idx++] = pressure;
-			if (s->buf_idx >= BUF_SIZE)
-			{
-				s->buf_valid = TRUE;
-				s->buf_idx   = 0;
-			}
+			s->buf10[s->buf_idx10++] = pressure;
+			if (s->buf_idx10 >= BUF_SIZE_10) s->buf_idx10   = 0;
 			
-			if (s->buf_valid)
+			
+		//	s->buf_valid = TRUE;						
+		//	if (s->buf_valid)
 			{                
 				//--- filter (average without the two extreme values) -----------
-                pressure = average(s->buf, BUF_SIZE, 1);
+				pressure10 = average(s->buf10,BUF_SIZE_10,0);
+			//??	what happens at startup, when the buffer has<10 values?
 
 				//--- save calibration -----------------------------
 				if (s->calibrating)
@@ -211,8 +211,8 @@ static void _sensor_read(SSensor *s)
 						*/
 					#endif
 					s->calibrating = FALSE;
-				}					
-
+				}
+				
 				//--- convert value --------------
 				/*
 				if (s->offset_user) 		
@@ -222,12 +222,12 @@ static void _sensor_read(SSensor *s)
 				if (s->offset_factory)	
 					offset = ZERO_PRESSURE_OFFSET-s->offset_factory;
 				else
-				{					
+				{
 					RX_Status.error |= COND_ERR_sensor_offset;
 					offset = ZERO_PRESSURE_OFFSET;
 				}
 				
-                *s->pPressure = ((pressure - offset) * s->valFactor * 2) / FULL_SCALE_SPAN; // *13.5
+                *s->pPressure = ((pressure10 - offset) * s->valFactor * 2) / FULL_SCALE_SPAN; // *13.5								
             }
 		}
 	}
@@ -287,6 +287,6 @@ void pres_tick_10ms(void)
     }  
 	else
     {
-        RX_Status.meniscus = (INT32)(RX_Status.pressure_in - ((RX_Status.pressure_in - RX_Status.pressure_out) / 1.81)) - RX_Config.meniscus0;
+        RX_Status.meniscus = (INT32)(RX_Status.pressure_in - ((RX_Status.pressure_in - RX_Status.pressure_out) / 1.81));
     }
 }

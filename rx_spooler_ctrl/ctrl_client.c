@@ -24,6 +24,7 @@
 #include "data.h"
 #include "data_client.h"
 #include "bmp.h"
+#include "jet_correction.h"
 #include "rx_rip_lib.h"
 #include "spool_rip.h"
 #include "head_client.h"
@@ -55,6 +56,7 @@ static SFSDirEntry		_DirEntry;
 static FILE				*_File=NULL;
 static char				_LastFilename[MAX_PATH];
 static int				_LastPage;
+static int				_LastWakeup;
 static UINT16			_SMP_Flags;
 #define					BUFFER_CNT 2
 static int				_BufferNo;
@@ -92,6 +94,7 @@ int ctrl_start(const char *ipAddrMain)
 	memset(_Buffer, 0, sizeof(_Buffer));
 	memset(_LastFilename, 0, sizeof(_LastFilename));
 	_LastPage=0;
+	_LastWakeup = 0;
 	_SMP_Flags=0;
 
 	rx_mem_init(512*1024*1024);
@@ -136,7 +139,7 @@ void ctrl_start_printing(void)
 void ctrl_send_load_progress(SPageId *id, const char *colorSN, int progress)
 {
 	SPrintFileMsg msg;
-
+	
 	TrPrintfL(TRUE, "Loading >>%s<<, %d%%", colorSN, progress);
 	memset(&msg, 0, sizeof(msg));
 	msg.hdr.msgLen = sizeof(msg);
@@ -145,7 +148,8 @@ void ctrl_send_load_progress(SPageId *id, const char *colorSN, int progress)
 	msg.spoolerNo  = RX_SpoolerNo;
 	msg.bufReady   = data_ready();
 	memcpy(&msg.id, id, sizeof(SPageId));
-	snprintf(msg.txt, sizeof(msg.txt)-1, "%s %d%%", colorSN, progress);
+	if( id->page < 2) snprintf(msg.txt, sizeof(msg.txt) - 1, "%s %d%%", colorSN, progress);		
+	else			  snprintf(msg.txt, sizeof(msg.txt)-1, "page %d %s %d%%", id->page, colorSN, progress);
 	sok_send(&_RxCtrlSocket, &msg);
 }
 
@@ -257,6 +261,7 @@ static int _do_spool_cfg(RX_SOCKET socket, SSpoolerCfg *pmsg)
 	TrPrintfL(TRUE, "got REP_GET_SPOOL_CFG");
 	memcpy(&RX_Spooler, pmsg, sizeof(RX_Spooler));
 	sr_mnt_drive(RX_Spooler.dataRoot);
+	jc_init();
 	data_init(socket, RX_Spooler.colorCnt*RX_Spooler.headsPerColor);
 	{
 		int i;
@@ -267,7 +272,7 @@ static int _do_spool_cfg(RX_SOCKET socket, SSpoolerCfg *pmsg)
 	_Abort		 = FALSE;
 	_ReadyToSend = FALSE;
 	_Paused		 = FALSE;
-	_SMP_Flags=0;
+	_SMP_Flags	 = 0;
 	_MsgGot = _MsgSent = _MsgGot0 = 0;
 	sok_send_2(&socket, REP_SET_SPOOL_CFG, 0, NULL);
 	sr_reset();
@@ -294,6 +299,7 @@ static int _do_color_cfg		(RX_SOCKET socket, SColorSplitCfg* cfg)
 			if (RX_Spooler.printerType==printer_DP803)	RX_ColorNameInit(cfg->inkSupplyNo, cfg->rectoVerso, cfg->color.fileName, cfg->color.colorCode);
 			else										RX_ColorNameInit(cfg->inkSupplyNo, rv_undef, cfg->color.fileName, cfg->color.colorCode);				
 		}
+		jc_set_disabled_jets(cfg->no, cfg->disabledJets);
 	}
 	else Error(ERR_CONT, 0, "CMD_COLOR_CFG no=%d out of range", cfg->no);
 	return REPLY_OK;
@@ -303,7 +309,6 @@ static int _do_color_cfg		(RX_SOCKET socket, SColorSplitCfg* cfg)
 static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pmsg)
 {
 	SPrintFileCmd   msg;
-	SPrintFileMsg	evt;
 	int				ret=REPLY_OK;
 	int				same;
 	static SPrintFileRep	reply;
@@ -315,17 +320,23 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pmsg)
 	_Running = TRUE;
 	hc_start_printing();
 
-	same = (!strcmp(msg.filename, _LastFilename) && msg.id.page==_LastPage);
+	same = (!strcmp(msg.filename, _LastFilename) && msg.id.page==_LastPage && pmsg->wakeup==_LastWakeup);
 
-	TrPrintfL(TRUE, "_do_print_file >>%s<< id=%d, page=%d, copy=%d, same=%d", msg.filename, msg.id.id, msg.id.page, msg.id.copy, same);
+	TrPrintfL(TRUE, "_do_print_file[%d] >>%s<<  id=%d, page=%d, copy=%d, same=%d", _MsgGot, msg.filename, msg.id.id, msg.id.page, msg.id.copy, same);
 
-	if (pmsg->smp_flags & SMP_LAST_PAGE) Error(LOG, 0, "_do_print_file LAST PAGE >>%s<< id=%d, page=%d, copy=%d, same=%d", msg.filename, msg.id.id, msg.id.page, msg.id.copy, same); 
+//	if(pmsg->smp_flags & SMP_LAST_PAGE) Error(LOG, 0, "_do_print_file[%d] >>%s<< id=%d, page=%d, copy=%d, scan=%d, same=%d, LAST PAGE", _MsgGot, msg.filename, msg.id.id, msg.id.page, msg.id.copy, msg.id.scan, same); 
+//	else                                Error(LOG, 0, "_do_print_file[%d] >>%s<< id=%d, page=%d, copy=%d, scan=%d, same=%d", _MsgGot, msg.filename, msg.id.id, msg.id.page, msg.id.copy, msg.id.scan, same); 
 	
 	if (!same)
 	{
-		Error(LOG, 0, "load file >>%s<< id=%d, page=%d, copy=%d", msg.filename, msg.id.id, msg.id.page, msg.id.copy);
+	//	Error(LOG, 0, "load file >>%s<< id=%d, page=%d, copy=%d", msg.filename, msg.id.id, msg.id.page, msg.id.copy);
 		_BufferNo = (_BufferNo+1)%BUFFER_CNT;
 
+//		if(pmsg->printMode==PM_SCANNING || pmsg->printMode==PM_SINGLE_PASS) // test
+		if(pmsg->printMode==PM_SCANNING) // correct!
+			data_set_wakeuplen(WAKEUP_BAR_LEN*(RX_Spooler.colorCnt+1), pmsg->wakeup);
+		else			 
+			data_set_wakeuplen(0, FALSE);
 		memset(_LastFilename, 0, sizeof(_LastFilename));
 	//	sr_mnt_path(msg.filename, path);
 		data_cache(&msg.id, msg.filename, path, RX_Color, SIZEOF(RX_Color));
@@ -350,16 +361,12 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pmsg)
 			return REPLY_ERROR;
 		if (ret==REPLY_ERROR)
 			return Error(ERR_STOP, 0,     "Could not allocate memory file >>%s<<, page=%d, copy=%d, scan=%d", path, msg.id.page, msg.id.copy, msg.id.scan);
-		if (pmsg->smp_flags & SMP_LAST_PAGE) _SMP_Flags |= SMP_LAST_PAGE;
-//		is handled in main!
-//		if (msg.lengthUnit==PQ_LENGTH_COPIES)
-//			msg.lengthPx = msg.lengthPx*reply.widthPx; // scanning --> width!
 	}
 
 	//--- send feedback ---------------------------------------------------------------------
 	reply.hdr.msgId  = REP_PRINT_FILE;
 	reply.hdr.msgLen = sizeof(reply);
-	if (!msg.clearBlockUsed) reply.lengthPx=0;
+	reply.clearBlockUsed = msg.clearBlockUsed;
 	memcpy(&reply.id, &msg.id, sizeof(reply.id));
 	reply.bufReady   = data_ready();
 	ret=sok_send(&socket, &reply);
@@ -368,12 +375,16 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pmsg)
 	else
 		TrPrintfL(TRUE, "sok_send PRINT-REPLY=%d", ret);
 
-	TrPrintfL(TRUE, "_MsgGot0=%d, _MsgGot=%d, _MsgSent=%d", _MsgGot0, _MsgGot, _MsgSent);
+	TrPrintfL(TRUE, "REP_PRINT_FILE _MsgGot0=%d, _MsgGot=%d, _MsgSent=%d, widthPx=%d, lengthPx=%d, same=%d", _MsgGot0, _MsgGot, _MsgSent, reply.widthPx, reply.lengthPx, same);
 //	if (_PrintFileDone_Sem) 	rx_sem_post(_PrintFileDone_Sem);
 	 
 	if (ret==REPLY_OK || !*path)
 	{ 
-		if (data_load(&msg.id, path, msg.offsetWidth, msg.lengthPx, msg.gapPx, msg.blkNo, msg.printMode, msg.variable, msg.mirror, msg.clearBlockUsed, same, _SMP_Flags | (pmsg->smp_flags & SMP_FIRST_PAGE), msg.smp_bufSize, _Buffer[_BufferNo])!=REPLY_OK)
+		SPrintFileMsg	evt;
+
+		if (pmsg->flags & FLAG_SMP_LAST_PAGE) _SMP_Flags |= FLAG_SMP_LAST_PAGE;
+//		if (data_load(&msg.id, path, msg.offsetWidth, msg.lengthPx, msg.gapPx, msg.blkNo, msg.printMode, msg.variable, msg.flags, msg.clearBlockUsed, same, _SMP_Flags | (pmsg->flags & FLAH_SMP_FIRST_PAGE), msg.smp_bufSize, _Buffer[_BufferNo])!=REPLY_OK && !_Abort)
+		if (data_load(&msg.id, path, msg.offsetWidth, msg.lengthPx, msg.gapPx, msg.blkNo, msg.printMode, msg.variable, msg.flags, msg.clearBlockUsed, same, msg.smp_bufSize, _Buffer[_BufferNo])!=REPLY_OK && !_Abort)
 			return Error(ERR_STOP, 0, "Could not load file >>%s<<", str_start_cut(msg.filename, PATH_RIPPED_DATA));			
 		
 		//--- send spool state -------------------------------------------------------------
@@ -390,6 +401,7 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pmsg)
 		if (_ReadyToSend) hc_send_next();
 		memcpy(&_LastFilename, &msg.filename, sizeof(_LastFilename));
 		_LastPage = msg.id.page;
+		_LastWakeup = pmsg->wakeup;
 	}
 	return REPLY_OK;
 }

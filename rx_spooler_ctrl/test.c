@@ -91,7 +91,7 @@ static void _loadFiles(char *printEnv, char *fname)
 
 	ret = data_get_size(filePath, 0, 0, &reply.widthPx, &reply.lengthPx, &reply.bitsPerPixel);
 	if (ret==REPLY_OK) ret = data_malloc (FALSE, reply.widthPx, reply.lengthPx, reply.bitsPerPixel, RX_Color, SIZEOF(RX_Color), &_BufferSize, _Buffer);
-	if (ret==REPLY_OK) ret = tif_load(NULL, filePath, "", PM_SINGLE_PASS, 0, RX_Color, SIZEOF(RX_Color), _Buffer, &bmpInfo, NULL);
+	if (ret==REPLY_OK) ret = tif_load(NULL, filePath, "", PM_SINGLE_PASS, 0, 0, RX_Color, SIZEOF(RX_Color), _Buffer, &bmpInfo, NULL);
 	free2 = rx_mem_get_freeMB();
 	for (i=0; i<SIZEOF(_Buffer); i++) rx_mem_unuse(&_Buffer[i]);
 	printf("Memory: total=%04d  free1=%04d  free2=%04d  free3=%04d(MB)\n", total, free1, free2, rx_mem_get_freeMB());

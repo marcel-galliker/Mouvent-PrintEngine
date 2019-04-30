@@ -106,7 +106,6 @@ int main(int argc, char** argv)
 	char	deviceTypeStr[32];
 	UINT32	serialNo;
 	UINT64	macAddr;
-	int		cnt1, cnt;
 	char str[64];
 
 	//--- do not start on MAIN -----------------
@@ -123,11 +122,37 @@ int main(int argc, char** argv)
 	
 	if (!*deviceTypeStr) _read_info(PATH_ROOT "info", deviceTypeStr, sizeof(deviceTypeStr), &serialNo);
 
-	rx_startup(argv[0], FALSE);
-
 	TrPrintfL(1, "rx_boot >>%s %d<< starting",  deviceTypeStr, serialNo);
 	
-//	rx_sleep(2000);
+//	rx_startup(argv[0], argc==2 && !strcmp(argv[1], "-debug"));
+
+	{
+		int	cnt;
+		cnt = rx_process_running_cnt(argv[0], NULL);
+		TrPrintfL(1, "ProcessCnt >>%s<<=%d", argv[0], cnt);
+		if (argc==2 && !strcmp(argv[1], "-debug"))
+		{
+			TrPrintfL(1, "debug version");
+			while(1)
+			{
+				cnt = rx_process_running_cnt(argv[0], NULL);
+				if (cnt<2) break;
+				TrPrintfL(1, "Kill >>%s<<", argv[0]);
+				rx_process_kill(argv[0], NULL);
+			}
+		}
+		else
+		{
+			TrPrintfL(1, "background version");
+			if (cnt>1)
+			{
+				TrPrintfL(1, "rx_boot already running, cnt=%d", cnt);
+				return 0;
+			}
+			rx_run_in_backgrund();
+		}		
+	}
+		
 	rx_set_process_priority(0);
 
 	err_init(0, 0);
@@ -142,7 +167,7 @@ int main(int argc, char** argv)
 
 	while (1)
 	{
-		rx_sleep(60*1000);
+		rx_sleep(1000);
 	}
 
 	return 0;

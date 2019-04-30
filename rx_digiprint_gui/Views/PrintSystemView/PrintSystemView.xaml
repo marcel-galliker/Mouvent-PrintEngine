@@ -76,8 +76,8 @@
                             <rxView:OffsetsGrid x:Name="OffsetsGrid"/>
                             <rxView:StepperGrid x:Name="StepperGrid"/>
                             <rxView:CleafStepperGrid x:Name="CleafStepperGrid"/>
-                            <rx_uc:ChillerView/>
-                            <rx_uc:EncoderView/>
+                            <rxView:ChillerView/>
+                            <rxView:EncoderView/>
                         </StackPanel>
                     </StackPanel>
 

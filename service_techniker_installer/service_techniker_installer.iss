@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Mouvent_Service_Techniker_Installer"
-#define MyAppVersion "v1.0"
+#define MyAppVersion "v1.1"
 #define MyAppPublisher "Mouvent AG"
 #define MyAppURL "http://www.mouvent.com"
 
@@ -27,6 +27,13 @@ OutputBaseFilename=Mouvent_Service_Techniker_Installer
 Compression=lzma
 SolidCompression=yes
 AlwaysRestart=yes
+MinVersion=0,10.0.17134
+; we need at least Windows 10 (1803) 
+VersionInfoVersion=1.1
+VersionInfoCompany=Mouvent AG
+VersionInfoProductName=Mouvent Service Techniker Installer
+VersionInfoProductVersion=1.1
+VersionInfoProductTextVersion=only Win10 newer than Version 1803 is supported
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -48,10 +55,10 @@ Source: "..\bin\win10\rx_net_bridge.exe"; DestDir: "{pf32}\mouvent"
 Source: "..\bin\win10\rx_route.exe"; DestDir: "{pf32}\mouvent"
 Source: "..\ssh\id_rsa.ppk"; DestDir: "{pf32}\mouvent\ssh"
 Source: "..\ssh\id_rsa.pub"; DestDir: "{pf32}\mouvent\ssh"
+Source: "exe\check_if_teamviewer_is_installed.bat"; DestDir: "{pf32}\mouvent" 
 
 [Run]
-Filename: "{pf32}\mouvent\TeamViewer_Setup.exe"
-Filename: "{pf32}\mouvent\WinpkFilter.exe"
+Filename: "{pf32}\mouvent\check_if_teamviewer_is_installed.bat"
 
 [Icons]
 Name: "{userdesktop}\Putty"; Filename: "{pf32}\PuTTY\putty.exe"; WorkingDir: "{pf32}\PuTTY"
@@ -1371,3 +1378,4 @@ Root: HKCU; Subkey: Software\Martin Prikryl\WinSCP 2\SshHostKeys; ValueType: str
 Root: HKCU; Subkey: Software\Martin Prikryl\WinSCP 2\SshHostKeys; ValueType: string; ValueName: "ssh-ed25519@22:192.168.200.124"; ValueData: "0x7ddadc365ec6c340a0795fa9a34a4a56839954b3b9ddf9e36be9c3152dde87ed,0x331d3675f7314cf4456eede6be33163ae868b03daaf51dfe2a6d78a95ab2e06f"; Flags: uninsdeletekey;
 Root: HKCU; Subkey: Software\Martin Prikryl\WinSCP 2\SshHostKeys; ValueType: string; ValueName: "ssh-ed25519@22:192.168.200.4"; ValueData: "0x22d26096fc9d947258b94c68c746d25bdd82c91a393e39c5ddeeb49bb650297d,0x26c59a16cf8d67065af619b4d2ce30a2139e512797f74805196c6c13bb57ad63"; Flags: uninsdeletekey;
 Root: HKCU; Subkey: Software\Martin Prikryl\WinSCP 2\SshHostKeys; ValueType: string; ValueName: "ssh-ed25519@22:192.168.200.9"; ValueData: "0x22d26096fc9d947258b94c68c746d25bdd82c91a393e39c5ddeeb49bb650297d,0x26c59a16cf8d67065af619b4d2ce30a2139e512797f74805196c6c13bb57ad63"; Flags: uninsdeletekey;
+

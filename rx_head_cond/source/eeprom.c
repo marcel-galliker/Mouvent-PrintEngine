@@ -25,13 +25,6 @@
 const UINT32 EE_SETTINGS_PAGE = 0;
 const UINT32 EE_EMPTY_LONG    = 0xFFFFFFFF;
 
-const BYTE EE_ADDR_PUMPTIME            = 0x00;
-//const BYTE EE_ADDR_PIN_0_POUT          = 0x04; // -> unused
-const BYTE EE_ADDR_PIN_FACTORY_OFFSET  = 0x08;
-const BYTE EE_ADDR_PIN_USER_OFFSET     = 0x0c;
-const BYTE EE_ADDR_POUT_FACTORY_OFFSET = 0x10;
-const BYTE EE_ADDR_POUT_USER_OFFSET    = 0x14;
-
 static int _Init = FALSE;
 
 //--- eeprom_init ---------------------------
@@ -97,8 +90,7 @@ int eeprom_write_byte(const UINT32 pagenum, const BYTE byteaddress,
  *
  * \return 0 on success
  **/
-int eeprom_write_long(const UINT32 pagenum, const BYTE byteaddress,
-                      const UINT32 data)
+int eeprom_write_long(const UINT32 pagenum, const BYTE byteaddress, const UINT32 data)
 {
 	if (!_Init) return EEPROM_ERROR;
 

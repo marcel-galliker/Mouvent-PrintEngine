@@ -1,0 +1,47 @@
+﻿using RX_Common;
+using RX_DigiPrint.Models;
+using RX_DigiPrint.Models.Enums;
+using RX_DigiPrint.Services;
+using System.Collections.Generic;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+
+namespace RX_DigiPrint.Views.LB702UVView
+{
+    /// <summary>
+    /// Interaction logic for MainPar.xaml
+    /// </summary>
+    public partial class LB702UV_Cfg : UserControl
+    {
+        private List<RxEnum<int>> _Dist=new List<RxEnum<int>>();
+
+        public LB702UV_Cfg()
+        {
+            InitializeComponent();
+                      
+             _Dist.Add(new RxEnum<int>(240,  "240"));
+             _Dist.Add(new RxEnum<int>(260,  "260"));
+            CB_Dist.ItemsSource =  _Dist;
+        }
+
+        //--- Save_Clicked ---------------------------------------------
+        private void Save_Clicked(object sender, RoutedEventArgs e)
+        {
+           CfgPanel.Send(); 
+           RxGlobals.RxInterface.SendCommand(TcpIp.CMD_PLC_SAVE_PAR);
+        }
+
+        //--- Reload_Clicked ---------------------------------------------
+        private void Reload_Clicked(object sender, RoutedEventArgs e)
+        {
+           CfgPanel.Reset();
+        }
+
+        //--- ParPanel_PreviewKeyDown --------------------------------
+        private void ParPanel_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+       //    CfgPanel.Editing=true;
+        }
+    }
+}

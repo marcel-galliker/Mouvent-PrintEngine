@@ -14,7 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace RX_DigiPrint.Views.UserControls
+namespace RX_DigiPrint.Views.PrintSystemView
 {
     /// <summary>
     /// Interaction logic for Chiller.xaml

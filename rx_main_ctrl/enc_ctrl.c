@@ -55,10 +55,15 @@ static RX_SOCKET _TestSocket[ENC_CNT] = {0,0};
 static int		 _EncoderThreadRunning=FALSE;
 
 static int		_IncPerMeter;
+static int		_WakeupLen;
 static int		_PrintGo_Dist;
+static int		_PrintGo_Mode;
 static int		_Scanning=FALSE;
 static int		_DistTelCnt=0;
 static int		_TotalPgCnt;
+static int		_Printing=FALSE;
+static int		_Khz=0;
+static UINT32	_WarnMarkReaderPos;
 
 typedef struct
 {
@@ -86,14 +91,20 @@ static void _handle_event		(int no, SLogMsg *msg);
 //--- enc_init -------------------------------------------------
 void enc_init(void)
 {
-	int i;
+	int i, n;
 	memset(_Encoder, 0, sizeof(_Encoder));
+	memset(_EncoderStatus, 0, sizeof(_EncoderStatus));
 	memset(&_ID, 0, sizeof(_ID));
 	for (i=0; i<ENC_CNT; i++)
 	{
 		net_device_to_ipaddr(dev_enc, i, _Encoder[i].ipAddrStr, SIZEOF(_Encoder[i].ipAddrStr));
 		_Encoder[i].socket=INVALID_SOCKET;
 		_Encoder[i].used = (i==0);
+		
+		_EncoderStatus[i].ampl_new	 = INVALID_VALUE;
+		_EncoderStatus[i].ampl_old	 = INVALID_VALUE;
+		_EncoderStatus[i].percentage = INVALID_VALUE; 
+		for (n=0; n<SIZEOF(_EncoderStatus[i].corrRotPar); n++) _EncoderStatus[i].corrRotPar[n]=INVALID_VALUE;
 	}
 	if(!_EncoderThreadRunning)
 	{
@@ -171,7 +182,7 @@ int	 enc_set_config(void)
 {	
 	int no;
 	_Scanning = rx_def_is_scanning(RX_Config.printer.type);
-	
+		
 	if (arg_simuEncoder) Error(WARN, 0, "Encoder in Simulation");
 
 //	_Encoder[1].used = RX_Config.printer.type==printer_DP803;
@@ -191,13 +202,16 @@ int	 enc_set_config(void)
 	case printer_test_table:	_Encoder[0].webOffset_mm=110; break;
 	case printer_LB701:
 	case printer_LB702_UV:
-	case printer_LB702_WB:
 	case printer_cleaf:			_Encoder[0].webOffset_mm=10;  break;
+	case printer_LB702_WB:		_Encoder[0].webOffset_mm=10+RX_Config.printer.offset.versoDist;
+								break;
 	default:					_Encoder[0].webOffset_mm=5;   break;
 	}
 	_PrintGo_Dist	= 10000;
+	_PrintGo_Mode	= 0;
 	_DistTelCnt		= 0;
 	_TotalPgCnt		= 0;
+	_WarnMarkReaderPos = 9;
 	/*
 	memset(_PrintBuf, 0, sizeof(_PrintBuf));
 	_PrintBufIn = _PrintBufOut = 0;
@@ -207,6 +221,7 @@ int	 enc_set_config(void)
 		_Encoder[no].printGoCnt= -1;
 		if (_Encoder[no].used) sok_send_2(&_Encoder[no].socket, CMD_ENCODER_PG_INIT, 0, NULL);
 	}
+//	Error(LOG, 0, "CMD_ENCODER_PG_INIT");
 	return REPLY_OK;		
 }
 
@@ -229,10 +244,10 @@ int  enc_start_printing(SPrintQueueItem *pitem)
 	SEncoderCfg msg;
 	double comp;
 	memset(&msg, 0, sizeof(msg));
-			
+				
 	msg.printerType = RX_Config.printer.type;
 	msg.correction  = CORR_OFF; 
-
+	_WakeupLen = 0;
 	switch (RX_Config.printer.type)
 	{
 	case printer_test_table:	msg.orientation = TRUE;	msg.scanning=TRUE;  msg.incPerMeter=1000000; msg.pos_actual = machine_get_scanner_pos(); 
@@ -244,35 +259,31 @@ int  enc_start_printing(SPrintQueueItem *pitem)
 								break;
 			
 	case printer_TX801:			msg.orientation = FALSE;	msg.scanning=TRUE;  msg.incPerMeter=1000000; msg.pos_actual = machine_get_scanner_pos(); 
+								if (!pitem->testImage) _WakeupLen=WAKEUP_BAR_LEN*(RX_Config.inkSupplyCnt+1);
 								if (!arg_simuPLC) msg.correction=CORR_LINEAR;
 								break;
 			
 	case printer_TX802:			msg.orientation = FALSE;	msg.scanning=TRUE;  msg.incPerMeter=1000000; msg.pos_actual = machine_get_scanner_pos(); 
+								if (!pitem->testImage) _WakeupLen=WAKEUP_BAR_LEN*(RX_Config.inkSupplyCnt+1);
 								if (!arg_simuPLC) msg.correction=CORR_OFF; 
 								break;
 	case printer_LB701:			msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; 
 								msg.correction=CORR_ROTATIVE;
-								break;	
-//		case printer_LB702:		msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_ROTATIVE; break;	
-//	case printer_LB701:			msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_ROTATIVE; break;	
+								break;
+		
 	case printer_LB702_UV:		msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_ROTATIVE; break;	
 	case printer_LB702_WB:		msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_ROTATIVE; break;	
-	case printer_DP803:			msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_OFF;	break;	
+	case printer_DP803:			msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_ROTATIVE; break;	
 	case printer_cleaf:			msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter= 180200; msg.pos_actual = 0;	break;
 	default:					msg.orientation = TRUE;		msg.scanning=TRUE;  msg.incPerMeter=1000000; msg.pos_actual = 0;	break;
 	}
-	if (msg.correction==CORR_ROTATIVE)
-		memcpy(msg.corrRotPar, RX_Config.encoder.corrRotPar, sizeof(msg.corrRotPar));
-
-	/*
-#ifdef DEBUG
-if (RX_Config.printer.type==printer_LB701)
-{
-	Error(WARN, 0, "TEST Encoder resolution");
-	msg.incPerMeter /= 5;
-}
-#endif
-	*/
+	
+	if (arg_simuEncoder && msg.correction==CORR_ROTATIVE) msg.correction=CORR_OFF;
+	
+//	_WakeupLen = 0;
+//	if (wakeupLen) Error(LOG, 0, "Set WakeupLen for Lazy jets: %d strokes", wakeupLen);
+	
+	memcpy(msg.corrRotPar, RX_Config.encoder.corrRotPar, sizeof(msg.corrRotPar));
 		
 	msg.speed_mmin  = pitem->speed;
 	_IncPerMeter    = msg.incPerMeter;
@@ -281,10 +292,10 @@ if (RX_Config.printer.type==printer_LB701)
 		if (_Encoder[no].used)
 		{
 			msg.incPerMeter = _IncPerMeter+RX_Config.printer.offset.incPerMeter[no];
-			msg.pos_pg_fwd  = _Encoder[no].webOffset_mm*1000 + pitem->pageMargin;
-			msg.pos_pg_bwd  = _Encoder[no].webOffset_mm*1000 + pitem->pageMargin + pitem->srcHeight + RX_Config.headDistMax + 13350;
+			msg.pos_pg_fwd  = _Encoder[no].webOffset_mm*1000 + pitem->pageMargin - (_WakeupLen*25400/1200);
+			msg.pos_pg_bwd  = _Encoder[no].webOffset_mm*1000 + pitem->pageMargin + pitem->srcHeight + RX_Config.headDistMax + 13350 + (_WakeupLen*25400/1200);
 		//	msg.pos_pg_bwd  = _Encoder[no].webOffset_mm*1000 + pitem->pageMargin + pitem->srcHeight + 13150; // not tested!
-			
+						
 			if (_Scanning && arg_simuEncoder)
 			{
 				msg.scanning=FALSE;
@@ -314,15 +325,26 @@ if (RX_Config.printer.type==printer_LB701)
 				_Encoder[no].timeout = 2;
 				sok_send_2(&_Encoder[no].socket, CMD_ENCODER_CFG, sizeof(msg), &msg);
 			}
+//			Error(LOG, 0, "CMD_ENCODER_CFG");
 		}
 	}
+	_Printing = TRUE;
+	if (arg_simuEncoder)
+	{
+		for(no=0; no<ENC_CNT; no++) 
+		{
+			sok_send_2(&_Encoder[no].socket, CMD_FPGA_SIMU_ENCODER, sizeof(_Khz), &_Khz);						
+		}
+	}
+
 	return REPLY_OK;
 }
 
-//--- end_sent_document ------------------------
-void end_sent_document(int pages)
+//--- enc_sent_document ------------------------
+void enc_sent_document(int pages)
 {
 	_TotalPgCnt += pages;
+	TrPrintf(TRUE, "enc_sent_document(%d) _TotalPgCnt=%d", pages, _TotalPgCnt);
 }
 
 //--- enc_set_pg ----------------------------------------
@@ -347,7 +369,10 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 		memset(&dist, 0, sizeof(dist));
 		dist.cnt	= 1;
 		dist.dist	= _PrintGo_Dist;
-				
+		
+		TrPrintfL(TRUE, "enc_set_pg id=%d, page=%d, copy=%d, scan=%d", pId->id, pId->page, pId->copy, pId->scan);						
+	//	Error(LOG, 0, "enc_set_pg id=%d, page=%d, copy=%d, scan=%d, dist=%d", pId->id, pId->page, pId->copy, pId->scan, _PrintGo_Dist);						
+		
 		if (pitem->printGoMode!=PG_MODE_MARK) 
 		{
 			for(no=0; no<ENC_CNT; no++) 
@@ -356,6 +381,7 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 			}
 		}
 		_DistTelCnt++;
+		_PrintGo_Mode = pitem->printGoMode;
 		switch(pitem->printGoMode)
 		{
 		case PG_MODE_LENGTH: _PrintGo_Dist = pitem->printGoDist; break;
@@ -388,11 +414,24 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 		SEncoderPgDist dist;
 		memset(&dist, 0, sizeof(dist));
 		dist.cnt	= 1;
-		dist.dist	= pitem->pageHeight+1000;
+		dist.dist	= pitem->pageHeight+1000+2*(_WakeupLen*25400/1200);
 		for(no=0; no<ENC_CNT; no++) 
 		{
 			sok_send_2(&_Encoder[no].socket, CMD_ENCODER_PG_DIST, sizeof(dist), &dist);
 		}
+
+		/*
+		//--- bug in simulation? ---
+		if (_TotalPgCnt && pId->scan==_TotalPgCnt)
+		{
+			for(no=0; no<ENC_CNT; no++) 
+			{
+				sok_send_2(&_Encoder[no].socket, CMD_ENCODER_PG_DIST, sizeof(dist), &dist);
+			}			
+		}
+		*/
+		
+//		Error(LOG, 0, "CMD_ENCODER_PG_DIST: scan=%d", pId->scan);
 	}
 	memcpy(&_ID, pId, sizeof(_ID));
 	return REPLY_OK;					
@@ -402,6 +441,7 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 int  enc_stop_printing(void)
 {
 	int no;
+	_Printing = FALSE;
 	for(no=0; no<ENC_CNT; no++) sok_send_2(&_Encoder[no].socket, CMD_STOP_PRINTING, 0, NULL);
 	return REPLY_OK;
 }
@@ -410,6 +450,7 @@ int  enc_stop_printing(void)
 int  enc_abort_printing(void)
 {
 	int no;
+	_Printing = FALSE;
 	for(no=0; no<ENC_CNT; no++) sok_send_2(&_Encoder[no].socket, CMD_ABORT_PRINTING, 0, NULL);
 	return REPLY_OK;
 }
@@ -477,33 +518,26 @@ static void _handle_status(int no, SEncoderStat* pstat)
 {
 	SEncoderInfo info=_EncoderStatus[no].info;
 	//--- test ------------------
-	if (_DistTelCnt && pstat->PG_cnt!=_TotalPgCnt)
+	if (!_Scanning && !arg_simuEncoder)
 	{
-		if (pstat->fifoEmpty_PG> _EncoderStatus[no].fifoEmpty_PG)  ErrorEx(dev_enc, no, ERR_CONT, 0, "PrintGo FIFO empty (PG=%d, err=%d)", pstat->PG_cnt, pstat->fifoEmpty_PG);
-		if (pstat->fifoEmpty_IGN>_EncoderStatus[no].fifoEmpty_IGN) ErrorEx(dev_enc, no, ERR_CONT, 0, "PrintGo FIFO ignore (PG=%d, err==%d)", pstat->PG_cnt, pstat->fifoEmpty_IGN);
-		if (pstat->fifoEmpty_WND>_EncoderStatus[no].fifoEmpty_WND) ErrorEx(dev_enc, no, ERR_CONT, 0, "PrintGo FIFO window (PG=%d, err==%d)", pstat->PG_cnt, pstat->fifoEmpty_WND);		
+		if (_DistTelCnt && pstat->PG_cnt!=_TotalPgCnt)
+		{
+			if (pstat->fifoEmpty_PG> _EncoderStatus[no].fifoEmpty_PG)  ErrorEx(dev_enc, no, ERR_STOP, 0, "PrintGo FIFO empty (PG=%d, err=%d)", pstat->PG_cnt, pstat->fifoEmpty_PG);
+			if (pstat->fifoEmpty_IGN>_EncoderStatus[no].fifoEmpty_IGN) ErrorEx(dev_enc, no, ERR_STOP, 0, "PrintGo FIFO ignore (PG=%d, err==%d)", pstat->PG_cnt, pstat->fifoEmpty_IGN);
+			if (pstat->fifoEmpty_WND>_EncoderStatus[no].fifoEmpty_WND) ErrorEx(dev_enc, no, ERR_STOP, 0, "PrintGo FIFO window (PG=%d, err==%d)", pstat->PG_cnt, pstat->fifoEmpty_WND);		
+		}
+	//	if (pstat->PG_cnt>_EncoderStatus[no].PG_cnt) ErrorEx(dev_enc, no, LOG, 0, "PrintGo %d/%d", pstat->PG_cnt, _TotalPgCnt);			
 	}
-//	if (pstat->PG_cnt>_EncoderStatus[no].PG_cnt) ErrorEx(dev_enc, no, LOG, 0, "PrintGo %d/%d", pstat->PG_cnt, _TotalPgCnt);
 	
 	memcpy(&_EncoderStatus[no], pstat, sizeof(_EncoderStatus[no]));
-	if (_Encoder[no].printGoCnt==-1 && _EncoderStatus[no].PG_cnt==0) _Encoder[no].printGoCnt=0;
-	if (_Encoder[no].printGoCnt>=0 && _EncoderStatus[no].PG_cnt != _Encoder[no].printGoCnt)
+	if (_Encoder[no].printGoCnt==-1 && _EncoderStatus[no].PG_cnt==0)						_Encoder[no].printGoCnt = 0;
+	if (_Encoder[no].printGoCnt>=0 && _EncoderStatus[no].PG_cnt != _Encoder[no].printGoCnt)	_Encoder[no].printGoCnt = _EncoderStatus[no].PG_cnt;
+	if (_PrintGo_Mode==PG_MODE_MARK && _Encoder[no].printGoCnt==0 && _EncoderStatus[no].meters>_WarnMarkReaderPos)
 	{
-		_Encoder[no].printGoCnt = _EncoderStatus[no].PG_cnt;
-	//	Error(LOG, 0, "Got PrintGo #%d: scan=%d/%d", _PrintGo_Cnt[no], _PrintBuf[_PrintBufOut].id.scan, _PrintBuf[_PrintBufOut].scans);
-		/* --- special: set scanning positions to PLC! ----
-		if (_PrintBuf[_PrintBufOut].id.scan==_PrintBuf[_PrintBufOut].scans)
-		{
-			SPrintQueueItem *pnext;
-			pnext = pq_got_printGo(&_PrintBuf[_PrintBufOut].id);
-			if (pnext && RX_Config.printer.type==printer_TX801) 
-				machine_set_printpar(pnext);
-		}
-		_PrintBufOut = (_PrintBufOut+1) % PRINT_BUF_SIZE;
-		*/
+		Error(WARN, 0, "PrintGo triggered by PrintMark but NO MARK DETECTED after %d meters", _EncoderStatus[no].meters);
+		_WarnMarkReaderPos = _EncoderStatus[no].meters;
 	}
-	if (no==0 && _EncoderStatus[no].info.analog_encoder != info.analog_encoder) ctrl_set_max_speed();
-	
+	if (no==0 && _EncoderStatus[no].info.analog_encoder != info.analog_encoder) ctrl_set_max_speed();	
 }
 
 //--- enc_reply_stat ---------------------------------------------------------------
@@ -551,9 +585,12 @@ int  enc_ready(void)
 int	 enc_simu_encoder(int mmin)
 {
 	int no;
-	int khz_head = (int)(mmin/60.0/25.4*1200.0);
-	if (mmin) rx_sleep(500);
+	int khz_head = (int)(mmin/60.0/25.4*1200.0);	
+	_Khz = khz_head;
 	Error(WARN, 0, "CMD_FPGA_SIMU_ENCODER %d m/min %d kHz", mmin, khz_head);
-	for(no=0; no<ENC_CNT; no++) sok_send_2(&_Encoder[no].socket, CMD_FPGA_SIMU_ENCODER, sizeof(khz_head), &khz_head);	
+	if (_Printing || !_Khz)
+	{
+		for(no=0; no<ENC_CNT; no++) sok_send_2(&_Encoder[no].socket, CMD_FPGA_SIMU_ENCODER, sizeof(khz_head), &khz_head);						
+	}
 	return REPLY_OK;
 }

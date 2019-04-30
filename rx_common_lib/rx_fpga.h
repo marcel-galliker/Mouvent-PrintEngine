@@ -15,4 +15,6 @@
 
 int rx_fpga_load(char *path_rbf);
 int rx_fpga_running(void);
+int rx_fpga_linux_deployment(void);
+
 void* rx_fpga_map_page(int memId, UINT64 addr, UINT32 size, UINT32 size_expected);

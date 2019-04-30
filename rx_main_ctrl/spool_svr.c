@@ -45,11 +45,12 @@ static HANDLE	_HSpoolServer;
 static int		_Ready;
 static int		_Auto;
 static int		_BlkNo;
-static int		_AwaitReply;
 static int		_SpoolerCnt;
 static int		_MsgSent, _MsgGot;
 static int		_HeadBoardCnt;
 static int		_SlideIsRight;
+static int		_Pass;
+static int		_DelayPauseTimer=0;
 static SPrintFileCmd _PrintFileMsg;
 static SSpoolerInfo	 _Spooler[MAX_SPOOLERS];
 
@@ -62,6 +63,7 @@ static int _handle_spool_deconnected(RX_SOCKET socket, const char *peerName);
 static int _do_spool_cfg_rep	(RX_SOCKET socket);
 static int _do_print_file_rep	(RX_SOCKET socket, SPrintFileRep	*msg);
 static int _do_print_file_evt	(RX_SOCKET socket, SPrintFileMsg	*msg);
+static void _do_print_done_evt	(RX_SOCKET socket, SPrintDoneMsg	*msg);
 static int _do_log_evt			(RX_SOCKET socket, SLogMsg			*msg);
 static int _do_pause_printing	(RX_SOCKET socket);
 static int _do_start_printing	(RX_SOCKET socket);
@@ -94,6 +96,18 @@ int	spool_start(void)
 }
 
 
+//--- spool_tick ---------------------------------------
+void spool_tick(void)
+{
+	if (_DelayPauseTimer && rx_get_ticks()>_DelayPauseTimer)
+	{
+		_DelayPauseTimer = 0;
+		Error(LOG, 0, "PAUSE to load file");
+		plc_pause_printing();
+		pc_print_next();			
+	}
+}
+
 //--- spool_auto -------------------------------------------------------------------------
 void spool_auto(int enable)
 {
@@ -112,7 +126,8 @@ static int _handle_spool_msg(RX_SOCKET socket, void *msg, int len, struct sockad
 	case REP_PRINT_FILE:	_do_print_file_rep	(socket, (SPrintFileRep*)	msg);	break;
 	case REP_PRINT_ABORT:															break;
 	case EVT_PRINT_FILE:	_do_print_file_evt	(socket, (SPrintFileMsg*)	msg);	break;
-
+	case EVT_PRINT_DONE:	_do_print_done_evt	(socket, (SPrintDoneMsg*)	msg);	break;
+		
 	case EVT_GET_EVT:		_do_log_evt			(socket, (SLogMsg*)			phdr);	break;
 
 	case REP_RFS_SAVE_FILE_HDR:		label_rep_file_hdr();							break;
@@ -184,16 +199,22 @@ static int _do_spool_cfg_rep(RX_SOCKET socket)
 //--- _do_pause_printing -------------------------------------------------------------------
 static int _do_pause_printing	(RX_SOCKET socket)
 {
-	Error(LOG, 0, "PAUSE to load file");
-	plc_pause_printing();
-	pc_print_next();
+	if (arg_simuPLC)
+	{
+		Error(LOG, 0, "PAUSE to load file");
+		plc_pause_printing();
+		pc_print_next();			
+	}
+	else _DelayPauseTimer = rx_get_ticks()+1000;
 	return REPLY_OK;
 }
 
 //--- _do_start_printing ------------------------------------------------------------------
 static int _do_start_printing	(RX_SOCKET socket)
 {
-	Error(LOG, 0, "CONTINUE after file loaded");
+	_DelayPauseTimer = 0;
+	TrPrintfL(TRUE, "CONTINUE after file loaded");
+//	Error(LOG, 0, "CONTINUE after file loaded");
 	plc_start_printing();
 	pc_print_next();
 	return REPLY_OK;
@@ -206,6 +227,8 @@ int	spool_set_config(RX_SOCKET socket)
 	int hb, cnt, no;
 	char str[100];
 	int color;
+	
+	_DelayPauseTimer = 0;
 
 	for (no=0; no<SIZEOF(_Spooler); no++) _Spooler[no].used=FALSE;
 	_SpoolerCnt=0;
@@ -233,7 +256,7 @@ int	spool_set_config(RX_SOCKET socket)
 	if (RX_Config.printer.type==printer_DP803) Error(LOG, 0, "Send CMD_COLOR_CFG only to used spooler");
 	for (color=0; color<SIZEOF(RX_Color); color++)
 	{
-		cnt=spool_send_msg_2(CMD_COLOR_CFG, sizeof(RX_Color[color]), &RX_Color[color], FALSE);	
+		cnt=spool_send_msg_2(CMD_COLOR_CFG,	   sizeof(RX_Color[color]), &RX_Color[color], FALSE);
 	}
 
 	//--- send head board configurations ------------------------
@@ -259,7 +282,6 @@ int	spool_set_config(RX_SOCKET socket)
 	
 	_Ready		= TRUE;
 	_BlkNo		= 0;
-	_AwaitReply = 0;
 	_MsgSent	= _MsgGot=0;
 	RX_PrinterStatus.sentCnt=0;
 	RX_PrinterStatus.transferredCnt=0;
@@ -276,9 +298,9 @@ int spool_head_board_cnt(void)
 
 //--- spool_is_ready -------------------------------------------------------------------
 int spool_is_ready(void)
-{
-	TrPrintfL(TRUE, "spool_ready: _Ready=%d, _AwaitReply=%d, _MsgSent=%d, _MsgGot=%d", _Ready, _AwaitReply, _MsgSent, _MsgGot);
-	return (_Ready!=0) && (_AwaitReply==0);
+{	
+	TrPrintfL(TRUE, "spool_ready: _Ready=%d, _MsgSent=%d, _MsgGot=%d", _Ready, _MsgSent, _MsgGot);
+	return (_Ready!=0) && (_MsgSent==_MsgGot);
 }
 
 //--- spool_start_printing --------------------------------
@@ -296,6 +318,7 @@ void spool_start_printing(void)
 	}
 
 	_SlideIsRight = FALSE;
+	_Pass		  = 0;
 }
 
 //--- spool_start_sending --------------------------------
@@ -379,19 +402,19 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 	_PrintFileMsg.blkNo			= _BlkNo;
 	_PrintFileMsg.variable		= pitem->variable;
 	_PrintFileMsg.lengthUnit	= pitem->lengthUnit;
-	_PrintFileMsg.mirror		= FALSE;
-	_PrintFileMsg.smp_flags		= 0;
+	_PrintFileMsg.flags			= 0;
 	_PrintFileMsg.clearBlockUsed= clearBlockUsed;
+	_PrintFileMsg.wakeup		= pitem->wakeup;
 	strncpy(_PrintFileMsg.filename, filename, sizeof(_PrintFileMsg.filename));
 	memcpy(&_PrintFileMsg.id, pid, sizeof(_PrintFileMsg.id));
 	if (RX_PrinterStatus.testMode)
 	{
 		_PrintFileMsg.printMode     = PM_TEST;
-		if (RX_Config.printer.type==printer_test_table && RX_TestImage.testImage==PQ_TEST_JETS || RX_TestImage.testImage==PQ_TEST_ENCODER)
+		if (RX_Config.printer.type==printer_test_table && (RX_TestImage.testImage==PQ_TEST_JETS || RX_TestImage.testImage==PQ_TEST_JET_NUMBERS) || RX_TestImage.testImage==PQ_TEST_ENCODER)
 		{
 			_PrintFileMsg.printMode = PM_TEST_SINGLE_COLOR;
 		}
-		else if (RX_TestImage.testImage==PQ_TEST_JETS) 
+		else if (RX_TestImage.testImage==PQ_TEST_JETS || RX_TestImage.testImage==PQ_TEST_JET_NUMBERS) 
 		{
 			_PrintFileMsg.printMode = PM_TEST_JETS;
 		}
@@ -402,12 +425,13 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 	}
 	else if (rx_def_is_scanning(RX_Config.printer.type))
 	{
-		if(pitem->srcPages>2)
+		if(pitem->srcPages>1)
 		{
 			_PrintFileMsg.printMode=PM_SCAN_MULTI_PAGE;
-			if(pid->page==pitem->firstPage) _PrintFileMsg.smp_flags |= SMP_FIRST_PAGE;
-			if(pid->page==pitem->lastPage) 
-				_PrintFileMsg.smp_flags |= SMP_LAST_PAGE;
+			if(pid->page==pitem->start.page) 
+				_PrintFileMsg.flags |= FLAG_SMP_FIRST_PAGE;
+			if(pid->page==pitem->lastPage && pid->scan==pitem->scans) 
+				_PrintFileMsg.flags |= FLAG_SMP_LAST_PAGE;
 			_PrintFileMsg.smp_bufSize = pitem->scansStart;
 		}
 		else _PrintFileMsg.printMode = PM_SCANNING;
@@ -425,9 +449,16 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 	}
 	switch (pitem->scanMode)
 	{
-	case PQ_SCAN_BIDIR:	_PrintFileMsg.mirror = IMAGE_BIDIR | _SlideIsRight;	_SlideIsRight=!_SlideIsRight; break;
-	case PQ_SCAN_RTL:	_PrintFileMsg.mirror = TRUE;  _SlideIsRight=TRUE;	break;
-	default:			_PrintFileMsg.mirror = FALSE; _SlideIsRight=FALSE;	break;
+	case PQ_SCAN_BIDIR:	_PrintFileMsg.flags |= (FLAG_BIDIR | _SlideIsRight); _SlideIsRight=!_SlideIsRight;	break;
+	case PQ_SCAN_RTL:	_PrintFileMsg.flags |= FLAG_MIRROR;  _SlideIsRight=TRUE;							break;
+	default:			_SlideIsRight=FALSE;	break;
+	}
+	
+	if (pitem->virtualDoublePass) 
+	{
+		if (_Pass==0) _PrintFileMsg.flags |= FLAG_PASS_1OF2;
+		else	      _PrintFileMsg.flags |= FLAG_PASS_2OF2;
+		_Pass = (_Pass+1) % 2;
 	}
 		
 	TrPrintfL(TRUE, "send spool_print_file >>%s<<", filename);
@@ -438,39 +469,11 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 //	Error(LOG, 0, "Load File[%d] page=%d, scan=%d", RX_PrinterStatus.sentCnt, pid->page, pid->scan);
 	
 //	spool_send_msg_2(CMD_PING, 0, NULL, TRUE);	// needed in linux to send the command without timeout!
-	_AwaitReply += cnt;
 	_MsgSent+=cnt;
-	TrPrintfL(TRUE, "****** sent spool_print_file to %d spoolers: _AwaitReply=%d, _MsgSent=%d", _AwaitReply, _MsgSent);
+	TrPrintfL(TRUE, "****** sent spool_print_file to %d spoolers: _MsgSent=%d", _MsgSent);
 //	Error(LOG, 0, "spool_print_file Copy %d", pid->copy);
 	return REPLY_OK;
 }
-
-/*
-//--- spool_print_empty ----------------------------
-int spool_print_empty(void)
-{
-	int				cnt;
-
-//	if (_Ready<=0) 
-//		 Error(WARN, 0, "Spooler not ready");
-	_Ready--;
-		
-//	memset(&_PrintFileMsg.id, 0, sizeof(_PrintFileMsg.id));
-
-	Error(LOG, 0, "Bugfix: Send Extra Image");
-	_PrintFileMsg.id.scan = 0xffffffff;
-	cnt=spool_send_msg(&_PrintFileMsg);
-	// do not count!
-	if (cnt) RX_PrinterStatus.sentCnt += 0;// _HeadBoardCnt;
-	else     Error(ERR_CONT, 0, "No Spoolers connected");
-//	spool_send_msg_2(CMD_PING, 0, NULL, TRUE);	// needed in linux to send the command without timeout!
-	_AwaitReply += cnt;
-	_MsgSent+=cnt;
-	TrPrintfL(TRUE, "****** sent spool_print_file to %d spoolers: _AwaitReply=%d, _MsgSent=%d", cnt, _AwaitReply, _MsgSent);
-//	Error(LOG, 0, "spool_print_file Copy %d", pid->copy);
-	return REPLY_OK;
-}
-*/
 
 //--- spool_abort_printing --------------------------------------
 int spool_abort_printing(void)
@@ -484,16 +487,16 @@ static int _do_print_file_rep(RX_SOCKET socket, SPrintFileRep *msg)
 {
 	int size;
 
-	--_AwaitReply;
 	_MsgGot++;
 //	if (msg->bufReady)
 	{
-		TrPrintfL(TRUE, "****** rep_print_file id=%d, page=%d, copy=%d, scan=%d, width=%d, length=%d, bufReady=%d, _AwaitReply=%d, _MsgGot=%d", msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->widthPx, msg->lengthPx, msg->bufReady, _AwaitReply, _MsgGot);
+		TrPrintfL(TRUE, "****** rep_print_file id=%d, page=%d, copy=%d, scan=%d, width=%d, length=%d, bufReady=%d, _MsgSent=%d, _MsgGot=%d", msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->widthPx, msg->lengthPx, msg->bufReady, _MsgSent, _MsgGot);
 		size = ((RX_Spooler.headWidthPx+RX_Spooler.headOverlapPx)*msg->bitsPerPixel+7)/8;
 		size *= msg->lengthPx;
 		size = (size+RX_Spooler.dataBlkSize-1) / RX_Spooler.dataBlkSize;
 	
-		_BlkNo = (_BlkNo+size) % RX_Spooler.dataBlkCntHead;
+		if (msg->clearBlockUsed)
+			_BlkNo = (_BlkNo+size) % RX_Spooler.dataBlkCntHead;
 		
 		_Ready = msg->bufReady;
 		pc_print_next();
@@ -529,7 +532,7 @@ static int _do_print_file_evt	(RX_SOCKET socket, SPrintFileMsg	*msg)
 						pq_sending(msg->spoolerNo, &msg->id); 
 						break;
 
-	case DATA_SENT:		TrPrintf(TRUE, "SPOOLER %d: Documment ID=%d  page=%d: SENT,      copy=%d, scan=%d, bufReady=%d,  _AwaitReply=%d, _MsgGot=%d",		msg->spoolerNo, msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->bufReady, _AwaitReply, _MsgGot);
+	case DATA_SENT:		TrPrintf(TRUE, "SPOOLER %d: Documment ID=%d  page=%d: SENT,      copy=%d, scan=%d, bufReady=%d,  _MsgSent=%d, _MsgGot=%d",		msg->spoolerNo, msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->bufReady, _MsgSent, _MsgGot);
 						pitem = pq_sent(&msg->id);							
 						if(RX_PrinterStatus.testMode)
 						{
@@ -548,20 +551,26 @@ static int _do_print_file_evt	(RX_SOCKET socket, SPrintFileMsg	*msg)
 						}			
 						if (_Auto)  ctrl_print_page(&msg->id);																					
 						break;
-		
+	/*		
 	case DATA_PRINT_DONE:	// simu_write from spooler
 						for (int i=0; i<_HeadBoardCnt; i++)
 						{
 							pc_printed(&msg->id, i);
 						}
 						break;
-		
+	*/	
 	default:			TrPrintf(TRUE, "Documment ID=%d  page=%d , copy=%d, scan=%d: UNKNOWN EVENT %d",	msg->spoolerNo, msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->evt); break;
 	}
 	_Ready = msg->bufReady;
 	pc_print_next();
 	return REPLY_OK;
 }
+
+//--- _do_print_done_evt ---------------------
+static void _do_print_done_evt	(RX_SOCKET socket, SPrintDoneMsg *msg)
+{
+	pc_print_done(msg->boardNo, msg);
+}							
 
 //--- _do_log_evt -----------------------------------------------------
 static int _do_log_evt(RX_SOCKET socket, SLogMsg *msg)

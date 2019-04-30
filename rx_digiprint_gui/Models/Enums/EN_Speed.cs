@@ -36,7 +36,7 @@ namespace RX_DigiPrint.Models.Enums
 
                 if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX801 || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX802)
                 {
-                    int[] speeds={10,30,60,85,100};
+                    int[] speeds={30,60,85,100};
                     for (int i=0; i<speeds.Length; i++)
                     {
                         if (speeds[i]<=maxSpeed) _List.Add(new RxEnum<int>(speeds[i],  string.Format("{0}", speeds[i])));
@@ -45,7 +45,7 @@ namespace RX_DigiPrint.Models.Enums
                 else
                 {
                     if (RxGlobals.PrinterProperties.Host_Name.Equals("DropWatcher")) step=1;
-                    for (speed=10; ; speed+=step)
+                    for (speed=20; ; speed+=step)
                     {
                         if (speed>=_MaxSpeed)
                         {

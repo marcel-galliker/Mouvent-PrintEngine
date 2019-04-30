@@ -381,6 +381,7 @@ static int _do_print_abort(RX_SOCKET socket)
 static int _do_inkdef(RX_SOCKET socket, SInkDefMsg  *pmsg)
 {
 	nios_setInk(pmsg->headNo, &pmsg->ink, pmsg->dots, pmsg->fpVoltage);
+	
 	return REPLY_OK;
 }
 

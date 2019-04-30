@@ -88,12 +88,28 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _CylinderPres, value); }
         }
 
+        //--- Property PresIntTank ---------------------------------------
+        private Int32 _CylinderSetpoint;
+        public Int32 CylinderSetpoint
+        {
+            get { return _CylinderSetpoint; }
+            set { SetProperty(ref _CylinderSetpoint, value); }
+        }
+
         //--- Property CondPresOut ---------------------------------------
         private Int32 _CondPresOut;
         public Int32 CondPresOut
         {
             get { return _CondPresOut; }
             set { SetProperty(ref _CondPresOut, value); }
+        }
+
+        //--- Property CondPresOut ---------------------------------------
+        private Int32 _CondPresIn;
+        public Int32 CondPresIn
+        {
+            get { return _CondPresIn; }
+            set { SetProperty(ref _CondPresIn, value); }
         }
 
         //--- Property FlushTime ---------------------------------------
@@ -226,8 +242,10 @@ namespace RX_DigiPrint.Models
 
             CylinderPresSet  = msg.cylinderPresSet;
             CylinderPres     = msg.cylinderPres;
+            CylinderSetpoint = msg.cylinderSetpoint;
             PresLung        = msg.presLung;
             CondPresOut     = msg.condPresOut;
+            CondPresIn      = msg.condPresIn;
             FlushTime       = msg.flushTime;
             Temp            = msg.temp;
             PumpSpeedSet    = msg.pumpSpeedSet;

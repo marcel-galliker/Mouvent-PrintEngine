@@ -145,7 +145,7 @@ int nios_init(void)
 int nios_end(void)
 {
 	// required to not damage Print Heads !
-	putty_end();
+//	putty_end();
 	cond_end();
 	
 	_NiosCfg->cmd.shutdown = TRUE;
@@ -238,7 +238,7 @@ int  nios_NiosLoaded(void)
 #define OLD_ALL_ON_OFFSET	 -50	// ALL-ON has to be set 50 cycles before last sub-pulse starts
 #define FP_VALUE_30			1564
 
-static void _sample_wf(int head, SInkDefinition *pink, int subPulses, int fpVoltage, SFpgaHeadCfg *cfg)
+static void _sample_wf(int head, SInkDefinition *pink, char *dots, int fpVoltage, SFpgaHeadCfg *cfg)
 {
 	//--- cutting droplets -------------------
 	// the droplet waveform starts with the trailing edge and ends with the trailing edge of the next droplet
@@ -262,6 +262,7 @@ static void _sample_wf(int head, SInkDefinition *pink, int subPulses, int fpVolt
 	int value30V;
 	int lastOffPos;
 	int first;
+	int subPulses=1;
 	int	wf_first_pulse_pos = WF_FIRST_PULSE_POS;
 	int	wf_offset	  = OLD_WF_OFFSET;
 	int on_offset	  = OLD_ON_OFFSET;
@@ -278,6 +279,23 @@ static void _sample_wf(int head, SInkDefinition *pink, int subPulses, int fpVolt
 	if (fpVoltage && fpVoltage<30) ErrorFlag(WARN, &_FPWarning, 1<<head, 0, "Head[%d]: Firepulse Voltage=%d%, head not print", head, fpVoltage);
 		
 	memcpy(&_GreyLevel[head], pink->greyLevel, sizeof(_GreyLevel[head]));
+
+	{
+		int s;
+		char *ch;
+		for (ch=dots, subPulses=0; *ch; ch++)
+		{
+			s=0;
+			if(*ch=='S')	s=1;
+			if(*ch=='M')	s=2;
+			if(*ch=='L')	s=3;
+			if (s>subPulses) subPulses=s;
+		}
+		if (subPulses==0) subPulses=3;
+		NIOS_Droplets = subPulses;
+		if(dots[1] == 0) _DotSize1 = s;
+		else _DotSize1=0;
+	}
 	
 	if (RX_HBStatus[0].fpgaVersion.build>=1737)
 	{
@@ -410,7 +428,10 @@ static void _sample_wf(int head, SInkDefinition *pink, int subPulses, int fpVolt
 	double clock=12.500*160/140;
 	double khz=1000000/(voltageCnt*clock);
 	double mmin = khz*25.4/1200.0*60.0;
-	TrPrintfL(TRUE, "Head[%d]: sub-pulses: %d, seq-length: %d, max Speed; %d m/min", head, cfg->fp_subPulses, cfg->fp_length, (int)mmin);
+//	TrPrintfL(TRUE, "Head[%d]: dots: >>%s<< sub-pulses: %d, seq-length: %d, max Speed; %d m/min", head, dots, cfg->fp_subPulses, cfg->fp_length, (int)mmin);
+	TrPrintfL(TRUE, "Head[%d]: dots: >>%s<<, max Speed=%d m/min", head, dots, (int)mmin);
+	if (RX_HBConfig.ctrlAddr == sok_addr_32("192.168.200.11") && head==0) 
+		Error(LOG, 0, "Head[%d]: dots: >>%s<<, max Speed=%d m/min", head, dots, (int)mmin);
 	
 	if (mmin>_MaxSpeed) _MaxSpeed = mmin;
 	
@@ -485,26 +506,8 @@ void nios_setInk(int no, SInkDefinition *pink, char *dots, int fpVoltage)
 	if (no==0) _MaxSpeed=0;
 	if (no>=0 && no<HEAD_CNT)
 	{
-		int s, max;
-		char *ch;
-		for (ch=dots, max=0; *ch; ch++)
-		{
-			s=0;
-			if(*ch=='S')	s=1;
-			if(*ch=='M')	s=2;
-			if(*ch=='L')	s=3;
-			if (s>max) max=s;
-		}
-		if (max==0) max=3;
-
-		NIOS_Droplets = max;
-		if(dots[1] == 0) _DotSize1 = s;
-		else _DotSize1=0;
-		_sample_wf(no, pink, max, fpVoltage, FpgaCfg.head[no]);
-		cond_heater_set(no, pink->temp, pink->tempMax);
-		#ifndef USE_HEAD_PRESOUT
-		cond_presout_set(no, pink->meniscus);
-		#endif
+		_sample_wf(no, pink, dots, fpVoltage, FpgaCfg.head[no]);
+		cond_setInk(no, pink);
 		RX_RGB[no] = pink->colorRGB;
 	}
 //	if (no==HEAD_CNT-1) Error(LOG, 0, "MaxSpeed: %d m/min, Dotsize: %s", _MaxSpeed, dots);
@@ -513,8 +516,11 @@ void nios_setInk(int no, SInkDefinition *pink, char *dots, int fpVoltage)
 //--- nios_set_firepulse_on ----------------------------------
 void nios_set_firepulse_on(int on)
 {
-	if (_NiosMem && _NiosMem->cfg.cmd.firepulse_on!=on) 
+	if (_NiosMem && _NiosMem->cfg.cmd.firepulse_on!=on)
+	{
+		TrPrintfL(TRUE, "nios_set_firepulse_on(%d)", on);	
 		_NiosMem->cfg.cmd.firepulse_on = on;
+	}
 }
 
 //--- nios_is_firepulse_on ---------------------
@@ -524,6 +530,15 @@ int  nios_is_firepulse_on(void)
 	return FALSE;				
 }
 
+//--- nios_set_user_eeprom ------------------------------------
+void nios_set_user_eeprom(int no, char *data)
+{
+	if (_NiosMem)
+	{
+		strcpy(_NiosMem->cfg.user_eeprom[no], data);
+		_NiosMem->cfg.cmd.write_user_eeprom = TRUE;	
+	}
+}
 
 //--- nios_main --------------------------------
 int  nios_main(int ticks, int menu)

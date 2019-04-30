@@ -251,7 +251,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
         //--- Pressure_LostFocus ------------------------------------------------
         private void Pressure_LostFocus(object sender, RoutedEventArgs e)
         {
-            double pressure = (sender as RxNumBox).Value;
+            double pressure = (sender as RxNumBox).Value * 10;
             if (pressure!=_InkSupply.CylinderPresSet)
             {
                 TcpIp.SValue msg = new TcpIp.SValue(){no=(UInt32)_InkSupply.No-1, value=(Int32)pressure};

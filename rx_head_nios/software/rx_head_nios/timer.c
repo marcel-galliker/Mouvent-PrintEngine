@@ -27,6 +27,7 @@
 #include "adc_thermistor.h"
 #include "trprintf.h"
 #include "main.h"
+#include "head_eeprom.h"
 #include "nios_def_head.h"
 #include "pres.h"
 #include "cooler.h"

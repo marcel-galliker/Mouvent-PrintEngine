@@ -65,8 +65,12 @@ typedef struct
 	INT32	meniscusSet;
 	INT32	condPresOutSet;
 	INT32	flushTime[3];
-    INT32   fluid_P;
 
+	INT32	fluid_PIDsetpoint_P;
+	INT32	fluid_PIDsetpoint_I;
+	INT32	fluid_PIDpump_P;
+	INT32	fluid_PIDpump_I;
+	
 	UINT32	heaterTemp;
 	UINT32	heaterTempMax;
 	UINT32	headTemp;
@@ -181,7 +185,15 @@ typedef struct
 	UINT32	inkPumpSpeed_set;
 	UINT32	inkPumpSpeed_measured;
 	INT32   cylinderPresSet;
-	INT32   cylinderPres;
+	
+	INT32   IS_Pressure_Actual;
+	INT32   IS_Pressure_Setpoint;
+	INT32   COND_Pressure_Actual;
+	INT32   COND_Pressure_Setpoint;
+	INT32	PIDsetpoint_Output;
+	INT32	PIDpump_Output;
+	INT32	PIDairvalve_Output;
+	
 	INT32	condPresOut;
 	UINT32	heaterTemp;
 	INT32	flushTime;
@@ -190,7 +202,11 @@ typedef struct
 	UINT32  airValve:1;
 	UINT32  heaterOn:1;
 
-	INT32	fluid_P;
+	INT32	fluid_PIDsetpoint_P;
+	INT32	fluid_PIDsetpoint_I;
+	INT32	fluid_PIDpump_P;
+	INT32	fluid_PIDpump_I;
+	
 	INT32	time;
 	INT32	diff;
 } SNiosInkSupplyStat;

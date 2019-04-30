@@ -95,7 +95,7 @@ void udp_test_send_block(int headCnt, int blkCnt)
 		img.image.widthBytes	= widthPx/8;		
 		img.image.lengthPx		= (blkCnt*dataLen)/img.image.widthBytes;			
 		img.image.jetPx0		= 0;		
-		img.image.backward		= FALSE;	
+		img.image.flags			= 0;	
 		img.image.flipHorizontal= _FlipHorizontal;
 		img.image.clearBlockUsed= FALSE;
 
@@ -137,7 +137,7 @@ static void _send_image(int head, SBmpInfo *bmpInfo, int blkNo, int backwards)
 	img.image.widthBytes	= bmpInfo->lineLen;
 	img.image.lengthPx		= bmpInfo->lengthPx;			
 	img.image.jetPx0		= 0;		
-	img.image.backward		= backwards;	
+	img.image.flags			= backwards;	
 	img.image.flipHorizontal= _FlipHorizontal;		
 	img.image.blkCnt        = (img.image.widthBytes*img.image.lengthPx+RX_HBConfig.dataBlkSize-1) / RX_HBConfig.dataBlkSize; // for tests
 	/*
@@ -355,7 +355,7 @@ void udp_test_print_tif(char *fname)
 		}
 		else         
 		{
-			tif_load(NULL, PATH_BIN_LX, fname, FALSE, 0, &split, 1, &buffer, &info, NULL);
+			tif_load(NULL, PATH_BIN_LX, fname, FALSE, 0, 0, &split, 1, &buffer, &info, NULL);
 			fill=HEAD_OVERLAP_SAMBA;
 		}
 

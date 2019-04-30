@@ -24,7 +24,10 @@ void  fpga_init(void);
 int   fpga_is_init(void);
 void  fpga_end(void);
 
+void  fpga_cfg(void);
+
 void  fpga_main(int ticks, int menu);
+
 
 int   fpga_load(char *path_rbf);
 int	  fpga_qsys_id(void);

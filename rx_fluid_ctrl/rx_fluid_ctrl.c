@@ -102,7 +102,7 @@ static void main_menu()
 			
 		// Only for DEBUGGING purposes
 		// Parameters for tuning the Fluid's PID controller
-		case 'P': if (no < 4) _Cfg->ink_supply[no].fluid_P = atoi(&str[2]); break;
+		//case 'P': if (no < 4) _Cfg->ink_supply[no].fluid_P = atoi(&str[2]); break;
 			
 		case 'T': daisy_chain_do_tara(no);
 				  break;

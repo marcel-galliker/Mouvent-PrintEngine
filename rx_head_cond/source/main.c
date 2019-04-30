@@ -34,7 +34,7 @@
 #include "cond_def_head.h"
 #include "version.h"
 #include "comm.h"
-#include "pumptime.h"
+#include "ctr.h"
 #include "eeprom.h"
 #include "debug_printf.h"
 #include "i2c_bitbang.h"
@@ -180,7 +180,7 @@ int32_t main(void)
 	}		
 		
     // Read pumptime for Conditioner
-	RX_Status.pumptime = load_pumptime();      
+	ctr_load();      
 
 	while(1)
 	{
@@ -281,7 +281,11 @@ void RxMessage_Handler(void)
     if (RX_Config.cmd.del_offset && !RX_Status.cmdConfirm.del_offset) pres_del_user_offset();
 	RX_Status.cmdConfirm.del_offset = RX_Config.cmd.del_offset;
 	
-	if (RX_Config.cmd.resetPumpTime && !RX_Status.cmdConfirm.resetPumpTime) reset_pumptime();
+	if (RX_Config.cmd.resetPumpTime && !RX_Status.cmdConfirm.resetPumpTime)
+	{
+		RX_Status.pumptime = 0;
+		ctr_save();
+	}
 	RX_Status.cmdConfirm.resetPumpTime = RX_Config.cmd.resetPumpTime;
 
 	//--- pump watchdog ------------------------

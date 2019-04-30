@@ -128,6 +128,7 @@ static int				_WipeReady=0;
 static int				_printhead_en=FALSE;
 static int				_splicing=FALSE;
 static int				_enc_disabled=FALSE;
+static int				_allow_stepper_move_down = FALSE;	// if drip pans below the heads, disable the move down of the steppers motors
 
 //--- prorotypes -------------------------------------------------
 //static void _do_tt_status(STestTableStat *pStatus);
@@ -196,28 +197,34 @@ int	 stepc_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen)
 
 			case CMD_CAP_REFERENCE:
 				if (!arg_simuPLC) _cln_state_env[no].st_cmd = cmd;
+				if (no == 0) sok_send_2(_step_socket[0], CMD_CLN_DRIP_PANS_EN, 0, NULL);
 				break;
 
 			case CMD_CAP_UP_POS:
-				if (!arg_simuPLC) sok_send_2(_step_socket[no], CMD_CAP_UP_POS, 0, NULL);
+				if (!arg_simuPLC && RX_TestTableStatus.info.DripPans_InfeedDOWN && RX_TestTableStatus.info.DripPans_OutfeedDOWN) sok_send_2(_step_socket[no], CMD_CAP_UP_POS, 0, NULL);
 				break;
 
 			case CMD_CAP_PRINT_POS:
-				sok_send_2(_step_socket[no], CMD_CAP_PRINT_POS, sizeof(RX_Config.stepper.print_height), &RX_Config.stepper.print_height);			
+				if ( RX_TestTableStatus.info.DripPans_InfeedDOWN && RX_TestTableStatus.info.DripPans_OutfeedDOWN)sok_send_2(_step_socket[no], CMD_CAP_PRINT_POS, sizeof(RX_Config.stepper.print_height), &RX_Config.stepper.print_height);			
 				break;
 
 			case CMD_CAP_CAPPING_POS:
-				sok_send_2(_step_socket[no], CMD_CAP_CAPPING_POS, 0, NULL);			
+				sok_send_2(_step_socket[no], CMD_CAP_CAPPING_POS, 0, NULL);
 				break;
 
 				//--- cleaning ---------------------------------------------------------
 			case CMD_CLN_WIPE:
-				if (_cln_state_env[no].capCurrentState == ST_INIT || _cln_state_env[no].capCurrentState == ST_IDLE)
+				/*if (_cln_state_env[no].capCurrentState == ST_INIT || _cln_state_env[no].capCurrentState == ST_IDLE)
 				{
 					_cln_state_env[no].st_cmd = cmd;
-				}
+				}*/
 				break;
-
+			
+				// Drip pans moves
+			case CMD_CLN_DRIP_PANS:
+				if (no == 0) sok_send_2(_step_socket[0], CMD_CLN_DRIP_PANS, 0, NULL);
+				break;
+				
 			case CMD_CLN_WIPE_VACUUM:
 				if (_cln_state_env[no].capCurrentState == ST_INIT || _cln_state_env[no].capCurrentState == ST_IDLE)
 				{
@@ -261,6 +268,7 @@ int stepc_handle_status(int no, STestTableStat *pStatus)
 {
 	int i, cnt;
 	int change=FALSE;
+	int allowed = FALSE;
 	ETestTableInfo info;
 	
 	if (_status[no].info.splicing	  != pStatus->info.splicing)	 {TrPrintfL(TRUE, "Stepper[%d]: new info.splice=%d",	   no, pStatus->info.splicing); change=TRUE;}
@@ -271,6 +279,12 @@ int stepc_handle_status(int no, STestTableStat *pStatus)
 	memset(&info, 0, sizeof(info));
 	info.ref_done		= TRUE;
 	info.z_in_ref		= TRUE;
+	info.headUpInput_0	= TRUE;
+	info.headUpInput_1	= TRUE;
+	info.DripPans_InfeedDOWN	= TRUE;
+	info.DripPans_InfeedUP		= TRUE;
+	info.DripPans_OutfeedDOWN	= TRUE;
+	info.DripPans_OutfeedUP		= TRUE;
 	info.z_in_print		= TRUE;
 	info.z_in_cap		= TRUE;
 	info.x_in_ref		= TRUE;
@@ -294,6 +308,12 @@ int stepc_handle_status(int no, STestTableStat *pStatus)
 	RX_TestTableStatus.posX = 0;
 	RX_TestTableStatus.posY = 0;
 	RX_TestTableStatus.posZ = 0;
+	
+	info.DripPans_InfeedDOWN	= _status[0].info.DripPans_InfeedDOWN;
+	info.DripPans_InfeedUP		= _status[0].info.DripPans_InfeedUP;
+	info.DripPans_OutfeedDOWN	= _status[0].info.DripPans_OutfeedDOWN;
+	info.DripPans_OutfeedUP		= _status[0].info.DripPans_OutfeedUP;
+	allowed = info.DripPans_InfeedDOWN && info.DripPans_OutfeedDOWN && !info.DripPans_InfeedUP && !info.DripPans_OutfeedUP;
 
 	for (i = 0, cnt=0; i < STEPPER_CNT; i++)
 	{
@@ -302,6 +322,8 @@ int stepc_handle_status(int no, STestTableStat *pStatus)
 			//			TrPrintf(TRUE, "Stepper[%d]: ref_done=%d moving=%d  in_print=%d  up=%d", i, _status[i].info.ref_done, _status[i].info.moving, _status[i].info.z_in_print, _status[i].info.z_in_ref);
 			cnt++;
 			info.ref_done		&= _status[i].info.ref_done;
+			info.headUpInput_0	&= _status[i].info.headUpInput_0;
+			info.headUpInput_1	&= _status[i].info.headUpInput_1;
 			info.moving			|= _status[i].info.moving;
 			info.z_in_ref		&= _status[i].info.z_in_ref;
 			info.z_in_print		&= _status[i].info.z_in_print;
@@ -314,8 +336,15 @@ int stepc_handle_status(int no, STestTableStat *pStatus)
 			RX_TestTableStatus.posX += _status[i].posX;
 			RX_TestTableStatus.posY += _status[i].posY;
 			RX_TestTableStatus.posZ += _status[i].posZ;
+			
+			if (allowed != _allow_stepper_move_down)
+			{
+				if (allowed) sok_send_2(_step_socket[i], CMD_CAP_ALLOW_MOVE_DOWN, 0, NULL);
+				else sok_send_2(_step_socket[i], CMD_CAP_NOT_ALLOW_MOVE_DOWN, 0, NULL);
+			}
 		}
 	}
+	_allow_stepper_move_down = allowed;
 
 	if (cnt)
 	{

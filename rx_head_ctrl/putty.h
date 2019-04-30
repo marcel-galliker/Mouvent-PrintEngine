@@ -13,10 +13,7 @@
 #pragma once
 
 void putty_init(void);
-void putty_start(void);
-void putty_end(void);
 
-void putty_display_status(void);
 char *putty_input(char *str, int size);
 void putty_handle_menu(char *str);	
 

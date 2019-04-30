@@ -118,7 +118,12 @@
             </StackPanel>
             <TextBlock Grid.Row="6" HorizontalAlignment="Right"  Text="{Binding Valve, Converter={StaticResource HeadValve_Converter}}" />
             <TextBlock Grid.Row="7" HorizontalAlignment="Right"  Text="{Binding PrintingTime}" />
-            <TextBlock Grid.Row="8" HorizontalAlignment="Right"  Text="{Binding ImgInCnt}" />
+            <StackPanel Grid.Row="8" Orientation="Horizontal" HorizontalAlignment="Right">
+                <TextBlock Text="{Binding ImgInCnt}" />
+                <TextBlock Text=" ("/>
+                <TextBlock Text="{Binding ImgBuf}"/>
+                <TextBlock Text=")"/>
+            </StackPanel>
         </Grid>
 
         <!-- NO Connection _______________________________________________________________________-->

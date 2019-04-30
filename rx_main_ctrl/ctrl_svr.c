@@ -71,7 +71,7 @@ static int  _prepare_config();
 static void _headboard_config(int colorCnt, int headsPerColor, int ethPortCnt);	// SAMBA head, one color per headboard
 
 static void _ping_test(int cnt);
-static void _send_head_cfg(int headNo, char *dots);
+static void _send_head_cfg(int headNo);
 static void _send_ink_def(int headNo, char *drops);
 
 //static void Data_Test_TCP();
@@ -131,13 +131,14 @@ int  ctrl_is_connected(EDevice device, int no)
 static int _prepare_config()
 {
 	int color;
-	int n;
+	int n, i;
 	int overlap;
 	int jets;
 	int head;
 	int ethPortCnt;
 	int isNo;
 	int maxTemp;
+	int disabledJetsCnt;
 	SHeadBoardCfg	*pBoard;
 	
 	if (RX_Config.simulation) Error(WARN, 0, "Config Simulation");
@@ -212,6 +213,7 @@ static int _prepare_config()
 			RX_Color[color].no = color;
 			RX_Color[color].inkSupplyNo = color;
 			memcpy(&RX_Color[color].color, &RX_Config.inkSupply[color].ink, sizeof(RX_Color[color].color));
+			disabledJetsCnt=0;
 			RX_Color[color].firstLine = 0;
 			RX_Color[color].lastLine  = 1000000;
 			if (RX_Config.printer.type == printer_DP803)
@@ -230,7 +232,6 @@ static int _prepare_config()
 				//				2048________| |
  				//		2048____2048+128_____\|	
 				//					
-				
 				overlap = 128;
 				jets    = 2048;
 				for (n = 0; n < RX_Config.headsPerColor; n++, head++)
@@ -300,6 +301,12 @@ static int _prepare_config()
 //					RX_Color[color].split[n].blockCnt = RX_Spooler.dataBlkCnt;
 					if (n > 0)									RX_Color[color].split[n].firstPx -= overlap;
 					if (n > 0 && n < RX_Config.headsPerColor)	RX_Color[color].split[n].widthPx += overlap;
+
+					for (i=0; i<SIZEOF(RX_Config.headDisabledJets[head]) && RX_Config.headDisabledJets[head][i]; i++)
+					{
+						if (disabledJetsCnt>=SIZEOF(RX_Color[color].disabledJets)) Error(WARN, 0, "Color[%s]: Too many disabled Jets", RX_Color[color].no);
+						else RX_Color[color].disabledJets[disabledJetsCnt++] = RX_Color[color].split[n].firstPx+RX_Config.headDisabledJets[head][i];
+					}
 				} 
 			}
 		}
@@ -414,7 +421,7 @@ static void _headboard_config(int colorCnt, int headsPerColor, int ethPortCnt)
 				char str[32];
 				UCHAR no=(pBoard->ctrlAddr>>24)&0xff;
 				int   printbar = (no/10)-1;
-				if (i==0) Error(WARN, 0, "Check IP-Address assignment");
+		//		if (i==0) Error(WARN, 0, "Check IP-Address assignment");
 				if (ethPortCnt) sprintf(str, "%d.%d.%d.%d", 192, 168, 201+(2*head+i)%ethPortCnt, no);
 				pBoard->dataAddr[i]  = sok_addr_32(str);
 			}
@@ -457,21 +464,28 @@ static void _headboard_config(int colorCnt, int headsPerColor, int ethPortCnt)
 			if (!rx_def_is_scanning(RX_Config.printer.type)) pBoard->head[i].distBack = pBoard->head[i].dist;
 			pBoard->head[i].headHeight= RX_Config.stepper.print_height;
 			memcpy(&pBoard->head[i].cond, &RX_Config.cond[board*MAX_HEADS_BOARD+i], sizeof(SConditionerCfg));
+			pBoard->head[i].cond.headsPerColor = RX_Config.headsPerColor;
 			if (RX_PrinterStatus.testMode)
 			{
+				int inkSupply = pBoard->head[i].inkSupply;
+				int offset;
+				if (RX_Config.printer.type==printer_DP803) inkSupply=inkSupply%(RX_Config.inkSupplyCnt/2);	// recto/verso
 				if (RX_TestImage.testImage==PQ_TEST_ANGLE_SEPARATED)
 				{
-					pBoard->head[i].dist	 += 50000*pBoard->head[i].inkSupply;
-					pBoard->head[i].distBack =  25000*pBoard->head[i].inkSupply;
+					pBoard->head[i].dist	 += 50000*inkSupply;
+					pBoard->head[i].distBack =  25000*inkSupply;
 				}
 				if (!rx_def_is_scanning(RX_Config.printer.type))
 				{
-					if (RX_TestImage.testImage==PQ_TEST_JETS)		pBoard->head[i].dist += 210000*pBoard->head[i].inkSupply;
-					if (RX_TestImage.testImage==PQ_TEST_ENCODER)	pBoard->head[i].dist += 265000*pBoard->head[i].inkSupply;
-				}
+					if (RX_TestImage.testImage==PQ_TEST_JETS)		offset = 210000*inkSupply;
+					if (RX_TestImage.testImage==PQ_TEST_JET_NUMBERS)offset = 210000*inkSupply;
+					if (RX_TestImage.testImage==PQ_TEST_ENCODER)	offset = 265000*inkSupply;
+					pBoard->head[i].dist	 += offset;	// recto
+					pBoard->head[i].distBack += offset;	// verso				
+				}				
 			}
-			if (RX_Config.printer.type==printer_cleaf) pBoard->head[i].distBack = pBoard->head[i].dist;
-			if (pBoard->head[i].dist>RX_Config.headDistMax)		RX_Config.headDistMax = pBoard->head[i].dist;
+			if (RX_Config.printer.type==printer_cleaf)				pBoard->head[i].distBack = pBoard->head[i].dist;
+			if (pBoard->head[i].dist>RX_Config.headDistMax)			RX_Config.headDistMax = pBoard->head[i].dist;
 			if (pBoard->head[i].distBack>RX_Config.headDistBackMax) RX_Config.headDistBackMax = pBoard->head[i].distBack;
 		}
 	}
@@ -511,6 +525,7 @@ void ctrl_tick(void)
 					stat[head].cylinderPressure    = fluid_get_cylinderPres(inkSupply);
 					stat[head].cylinderPressureSet = fluid_get_cylinderPresSet(inkSupply);
 					stat[head].fluidErr            = fluid_get_error(inkSupply);
+					stat[head].machineMeters	   = (UINT32)RX_PrinterStatus.counterTotal;
 				}
 				sok_send_2(&_HeadCtrl[i].socket, CMD_HEAD_STAT, sizeof(stat), stat);
 			} //if (_HeadCtrl[i].aliveTime && ..
@@ -565,7 +580,7 @@ static void _send_ink_def(int headNo, char *dots)
 }
 
 //--- _send_head_cfg ----------------------------------------
-static void _send_head_cfg(int headNo, char *dots)
+static void _send_head_cfg(int headNo)
 {
 	int n;
 	int inksupply=-1;
@@ -574,7 +589,6 @@ static void _send_head_cfg(int headNo, char *dots)
 
 	if (_HeadCtrl[headNo].running && _HeadCtrl[headNo].socket!=INVALID_SOCKET)
 	{			
-		_send_ink_def(headNo, dots);
 		sok_send_2(&_HeadCtrl[headNo].socket, CMD_HEAD_BOARD_CFG, sizeof(SHeadBoardCfg), _HeadCtrl[headNo].cfg);
 		_AwaitHeadCfg |= (1<<headNo);
 
@@ -592,7 +606,6 @@ static void _send_head_cfg(int headNo, char *dots)
 		}
 	}
 }
-
 
 //--- ctrl_head_cfg_done ------------------------------------
 int ctrl_head_cfg_done(int headNo)
@@ -689,8 +702,8 @@ int ctrl_set_config(void)
 	_prepare_config();
 
 	TrPrintf(TRUE, "Send config to Heads");
-	Error(LOG, 0, "Send config to Heads");
-	for (i=0; i<SIZEOF(_HeadCtrl); i++) _send_head_cfg(i, "SML");	
+//	Error(LOG, 0, "Send config to Heads");
+	for (i=0; i<SIZEOF(_HeadCtrl); i++) _send_head_cfg(i);	
 
 	cnt=spool_set_config(INVALID_SOCKET);
 	TrPrintfL(TRUE, "Send Config to %d Spoolers",  cnt);
@@ -709,8 +722,10 @@ int ctrl_set_config(void)
 //--- ctrl_head_cal_done ---------------------
 void ctrl_head_cal_done(int inkSupply)
 {
+/*		
 	int head;
 	SHeadCfg *pcfg;
+
 	for (head=0; head<SIZEOF(RX_Config.headBoard)*MAX_HEADS_BOARD; head++)
 	{
 		pcfg = &RX_Config.headBoard[head/MAX_HEADS_BOARD].head[head%MAX_HEADS_BOARD];
@@ -719,14 +734,14 @@ void ctrl_head_cal_done(int inkSupply)
 			TrPrintfL(TRUE, "pid_offset[%d]=%d", head, RX_HBStatus[head/MAX_HEADS_BOARD].head[head%MAX_HEADS_BOARD].pid_offset);
 			RX_Config.cond[head].pid_offset = RX_HBStatus[head/MAX_HEADS_BOARD].head[head%MAX_HEADS_BOARD].pid_offset;	
 		}
-	}
-				
+	}*/		
 }
 
 //--- ctrl_send_firepulses -----------------------------------------
 void ctrl_send_firepulses(char *dots)
 {
 	int i;
+//	Error(LOG, 0, "ctrl_send_firepulses >>%s<<", dots);
 	for (i=0; i<SIZEOF(_HeadCtrl); i++) _send_ink_def(i, dots);
 }
 
@@ -785,7 +800,8 @@ static void* _head_ctrl_thread(void* lpParameter)
 				ErrorEx(dev_head,ppar->no,LOG,0,"Connected");
 				ppar->aliveTime = 0;
 				net_send_item(dev_head,ppar->no);
-				_send_head_cfg(ppar->no,"SML");
+				_send_head_cfg(ppar->no);
+				_send_ink_def(ppar->no,"SML");
 				sok_receiver(NULL,&ppar->socket,handle_headCtrl_msg,&ppar->no);
 				net_send_item(dev_head,ppar->no);
 				ErrorEx(dev_head,ppar->no,ERR_ABORT,0,"TCP/IP Connection lost");

@@ -17,9 +17,6 @@
 void pid_reset(SPID_par* pPID)
 {
 	pPID->diff_I = 0;
-	pPID->diff_suming = 0;
-	pPID->diff_old = INVALID_VALUE;
-	if (pPID->norm <= 0) pPID->norm = 1;
 }
 
 /**
@@ -31,48 +28,25 @@ void pid_reset(SPID_par* pPID)
  ** \param [in] pPID   Pointer to PID instance
  ** 
  ******************************************************************************/
-void pid_calc(const INT32 actVal, const INT32 setVal, SPID_par* pPID)
+void pid_calc(const INT32 actVal, SPID_par* pPID)
 {
 	INT32 diff;
 	INT32 val;
 	
-	diff = setVal - actVal;
-	if (diff == 0)
-		return;
-
 	// check fo valid values
-	if (actVal == INVALID_VALUE)
-		return;
-    
-	if (pPID->diff_old == INVALID_VALUE)
-		pPID->diff_old = diff;
+	if (actVal == INVALID_VALUE) diff = 0;
+	else diff = pPID->Setpoint - actVal;
 
-	if (pPID->I > 0)
+	if ((pPID->I > 0)&&(pPID->Start_Integrator))
     {
         // start integrating after timeout as in ramp up I value runs into anti windup
-        if (pPID->I_rampup_to)
-        {
-            pPID->I_rampup_to--;
-            pPID->diff_suming = 0;
-        }
-        else
-        {
-			if ((pPID->val > pPID->val_min) && (pPID->val < pPID->val_max))
-                pPID->diff_suming += diff; // dt = 10 mS
-        }
-        // integral
-        pPID->diff_I = pPID->diff_suming * pPID->I / 1000;
+        if (pPID->val < pPID->val_max) pPID->diff_I += (diff * 10);
     }
-	else
-    {
-		pPID->diff_suming	= 0;
-		pPID->diff_I		= 0;
-    }
-	// pid function
-	val = (pPID->P * diff) / pPID->norm + pPID->diff_I + (pPID->D * (diff - pPID->diff_old));
+	else pPID->diff_I = 0;
 
-	// regulate around the offset value
-	val += pPID->offset;
+	// pid function
+	val = pPID->P * (diff + (pPID->diff_I / pPID->I));  // + (pPID->D * (diff - pPID->diff_old)));
+	val /= 1000;
 
 	// check boundries
 	if (val < pPID->val_min)	val = pPID->val_min;
@@ -80,5 +54,4 @@ void pid_calc(const INT32 actVal, const INT32 setVal, SPID_par* pPID)
 
 	// set values
 	pPID->val = val;
-	pPID->diff_old = diff;
 }

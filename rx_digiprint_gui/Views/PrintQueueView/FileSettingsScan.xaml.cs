@@ -25,7 +25,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
 
             CB_ScanMode.ItemsSource     = new EN_ScanModeList(); 
             CB_Passes.ItemsSource       = new EN_PassesList();
-            CB_Orientation.ItemsSource  = new EN_OrientationList();
+            CB_Wakeup.ItemsSource       = new EN_OnOff();
         }  
 
         //--- UserControl_DataContextChanged ----------------------------------

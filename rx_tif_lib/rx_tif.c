@@ -45,11 +45,11 @@ typedef struct
 	int			y_to;
 	int			y;
 	HANDLE		sem_start;
-	HANDLE		sem_done;
 } STifThreadPar;
 
 static STifThreadPar	_ThreadPar[MAX_COLORS];
 static int				_ThreadRunning=TRUE;
+static HANDLE			_SemDone;
 static int				_Init=FALSE;
 
 static INT64			_FileBufSize=0;
@@ -106,7 +106,7 @@ static void _tif_init(void)
 	{
 		_ThreadPar[i].no = i;
 		_ThreadPar[i].sem_start = rx_sem_create();
-		_ThreadPar[i].sem_done  = rx_sem_create();
+//		_ThreadPar[i].sem_done  = rx_sem_create();
 		rx_thread_start(_tif_read_thread, &_ThreadPar[i], 0, "tif_read_thread");
 	}
 }
@@ -241,102 +241,6 @@ void tif_abort(void)
 	_Abort = TRUE;
 }
 
-//--- tif_load_st (single threaded) ------------------------------------------------------------------------------------------
-int tif_load(SPageId *id, const char *filedir, const char *filename, int printMode, UINT32 spacePx, SColorSplitCfg *psplit, int splitCnt, BYTE* buffer[MAX_COLORS], SBmpInfo *pinfo, progress_fct progress)
-{
-	int c;
-	INT32 h, height;
-	INT32 step;
-	int srcLen;
-	int spaceLen;
-	int	ok=FALSE;
-	char filepath[MAX_PATH];
-	TIFF *file;
-	BYTE *dst;
-	
-	_Abort = FALSE;
-	*_ErrorStr=0;
-	*_WarnStr=0;
-	_TIFFerrorHandler   = _tif_ErrorHandler;
-	_TIFFwarningHandler = _tif_WarningHandler;
-	memset(pinfo, 0, sizeof(SBmpInfo));
-	_tif_init();
-	for (c=0; c<MAX_COLORS && c<splitCnt; c++)
-	{
-		if (psplit[c].color.name[0] && psplit[c].lastLine)
-		{
-			pinfo->colorCode[c]=psplit[c].color.colorCode;
-			pinfo->inkSupplyNo[c] =psplit[c].inkSupplyNo;
-			if (*filename)
-			{
-				if (id->page>1) sprintf(filepath, "%s/%s_P%06d_%s.tif", filedir, filename, id->page, RX_ColorNameShort(pinfo->inkSupplyNo[c]));
-				else			sprintf(filepath, "%s/%s_%s.tif", filedir, filename, RX_ColorNameShort(pinfo->inkSupplyNo[c]));
-				file=TIFFOpen (filepath, "r");
-			}
-			else 
-			{
-				file=tif_stream_open(id->page, c);
-			}
-			if (file)
-			{
-				ok = TRUE;
-				TrPrintf(TRUE, "tif_load >>%s<<", filepath);
-				pinfo->printMode     = printMode;
-				if (!TIFFGetField (file, TIFFTAG_BITSPERSAMPLE, &pinfo->bitsPerPixel))	return Error(ERR_CONT, 0, "File %s: Could not get bit per sample value", filepath);
-				if (!TIFFGetField (file, TIFFTAG_IMAGEWIDTH,    &pinfo->srcWidthPx))	return Error(ERR_CONT, 0, "File %s: Could not get image width", filepath);
-				if (!TIFFGetField (file, TIFFTAG_IMAGELENGTH,   &pinfo->lengthPx))		return Error(ERR_CONT, 0, "File %s: Could not get image height", filepath);
-
-				srcLen				= (pinfo->srcWidthPx*pinfo->bitsPerPixel+7)/8; 
-				pinfo->srcWidthPx	+= spacePx; 
-				pinfo->lineLen		= (pinfo->srcWidthPx*pinfo->bitsPerPixel+7)/8;
-				pinfo->dataSize		= pinfo->lineLen*pinfo->lengthPx;
-				
-				spaceLen			= pinfo->lineLen-srcLen;
-				
-				pinfo->buffer[c] = &buffer[c];
-				dst = buffer[c];
-				if (dst==NULL) return REPLY_ERROR;
-				height = pinfo->lengthPx;
-				if (psplit[c].lastLine<height) height=psplit[c].lastLine;
-				step = height/10;
-				for (h=psplit[c].firstLine; h<height && !_Abort; h++)
-				{
-					if (progress!=NULL && h%step==0) 
-						progress(id, RX_ColorNameShort(pinfo->inkSupplyNo[c]), (101*h/height));
-										
-					TIFFReadScanline(file, dst, h, 1);					
-					
-					/*
-					//--- TEST ------------------
-					{
-						if (h%4==0) memset(dst, 0x55, srcLen);
-						int i;
-						for (i=0; i<srcLen; i+=128)
-						{
-							dst[i] |= 0x80;
-						}
-					}
-					//-------------------------------
-					*/
-					dst += srcLen;
-					if (spaceLen)
-					{
-						memset(dst, 0x00, spaceLen);
-						dst += spaceLen;
-					}
-				}
-				TIFFClose(file);
-			}
-			else
-			{
-				if (str_start(_ErrorStr, ": Cannot open") && !ok)  *_ErrorStr=0;
-				return REPLY_NOT_FOUND;				
-			}
-		}
-	}
-	return REPLY_OK;
-}
-
 //--- tif_load_mt (multi threaded) ------------------------------------------------------------------------------------------
 int tif_load_mt(SPageId *id, const char *filedir, const char *filename, int printMode, UINT32 spacePx, SColorSplitCfg *psplit, int splitCnt, BYTE* buffer[MAX_COLORS], SBmpInfo *pinfo, progress_fct progress)
 {
@@ -428,29 +332,48 @@ int tif_load_mt(SPageId *id, const char *filedir, const char *filename, int prin
 			}
 			_ThreadPar[threadCnt-1].y_to =height;				
 
+			_SemDone  = rx_sem_create();
 			for (i=0; i<threadCnt; i++) rx_sem_post(_ThreadPar[i].sem_start);
-
-			while (rx_sem_wait(_ThreadPar[0].sem_done, 500)!=REPLY_OK)
 			{
-				if (progress!=NULL && h!=0) progress(id, RX_ColorNameShort(pinfo->inkSupplyNo[c]), 101*_ThreadPar[0].y / h);					
+				int running = threadCnt;
+				int done;
+				while (running)
+				{
+					if(rx_sem_wait(_SemDone, 500) == REPLY_OK) running--;
+					else
+					{
+						if (progress!=NULL && height!=0) 
+						{
+							for (i=0, done=0; i<threadCnt; i++) done += _ThreadPar[i].y;
+							progress(id, "", 101*done / (height*threadCnt));
+						}
+					}
+				}
+				progress(id, "", 100);
 			}
-			if (progress!=NULL) progress(id, RX_ColorNameShort(pinfo->inkSupplyNo[c]), 100);					
-
-			for (i=1; i<threadCnt; i++) rx_sem_wait(_ThreadPar[i].sem_done, 0);
+			rx_sem_destroy(&_SemDone);
 		}
 	}
 	return REPLY_OK;
 }
 
-//--- tif_load_mt (multi threaded) ------------------------------------------------------------------------------------------
-int tif_load_mt2(SPageId *id, const char *filedir, const char *filename, int printMode, UINT32 spacePx, SColorSplitCfg *psplit, int splitCnt, BYTE* buffer[MAX_COLORS], SBmpInfo *pinfo, progress_fct progress)
+//--- tif_load (multi threaded) ------------------------------------------------------------------------------------------
+int tif_load(SPageId *id, const char *filedir, const char *filename, int printMode, UINT32 spacePx, INT32 wakeupLen, SColorSplitCfg *psplit, int splitCnt, BYTE* buffer[MAX_COLORS], SBmpInfo *pinfo, progress_fct progress)
 {
 	int c, i;
 	int threadCnt;
-	INT32 height;
+	int	wakeupOn;
+	int time;
+	INT32 height, lineLen;
 	char filepath[MAX_PATH];
 	STifThreadPar *ppar;
-		
+			
+	time = rx_get_ticks();
+	
+	wakeupOn = FALSE;
+	if(wakeupLen > 0) wakeupOn = TRUE;
+	else			  wakeupLen = -wakeupLen;
+	
 	_Abort = FALSE;
 	*_ErrorStr=0;
 	*_WarnStr=0;
@@ -471,6 +394,8 @@ int tif_load_mt2(SPageId *id, const char *filedir, const char *filename, int pri
 				if (id->page>1) sprintf(filepath, "%s/%s_P%06d_%s.tif", filedir, filename, id->page, RX_ColorNameShort(pinfo->inkSupplyNo[c]));
 				else			sprintf(filepath, "%s/%s_%s.tif", filedir, filename, RX_ColorNameShort(pinfo->inkSupplyNo[c]));							
 				ppar->file = TIFFOpen (filepath, "r");
+				if (!ppar->file)
+					Error(ERR_CONT, 0, "Could not open file >>%s<<", filepath);
 			}
 			else 
 			{
@@ -485,7 +410,7 @@ int tif_load_mt2(SPageId *id, const char *filedir, const char *filename, int pri
 			if (!TIFFGetField (ppar->file, TIFFTAG_IMAGELENGTH,   &pinfo->lengthPx))		return Error(ERR_CONT, 0, "File %s: Could not get image height", filepath);
 			
 			pinfo->srcWidthPx	+= spacePx; 
-			pinfo->lineLen		= (pinfo->srcWidthPx*pinfo->bitsPerPixel+7)/8;
+			pinfo->lineLen		= lineLen = (pinfo->srcWidthPx*pinfo->bitsPerPixel+7)/8;
 			pinfo->dataSize		= pinfo->lineLen*pinfo->lengthPx;								
 			pinfo->buffer[c]	= &buffer[c];
 			height = pinfo->lengthPx;
@@ -493,27 +418,61 @@ int tif_load_mt2(SPageId *id, const char *filedir, const char *filename, int pri
 			
 			ppar->no	   = threadCnt;	
 			ppar->pinfo    = pinfo;
-			ppar->buffer   = buffer[c];
+			ppar->buffer   = buffer[c]+wakeupLen*lineLen;
 			ppar->y_from   = psplit[c].firstLine;
 			ppar->y_to	   = height;
-
+			
 			threadCnt++;
 		}
 	}
 	
 	if (threadCnt)
 	{
+		_SemDone  = rx_sem_create();
+			
 		for (i=0; i<threadCnt; i++) rx_sem_post(_ThreadPar[i].sem_start);
 
-		while (rx_sem_wait(_ThreadPar[0].sem_done, 500)!=REPLY_OK)
+		//--- wait --------------------------
 		{
-			if (progress!=NULL && height!=0) progress(id, "", 101*_ThreadPar[0].y / height);					
+			int running = threadCnt;
+			int done;
+			while (running)
+			{
+				if(rx_sem_wait(_SemDone, 500) == REPLY_OK) running--;
+				else
+				{
+					if (progress!=NULL && height!=0) 
+					{
+						for (i=0, done=0; i<threadCnt; i++) done += _ThreadPar[i].y;
+						progress(id, "", 101*done / (height*threadCnt));
+					}
+				}
+			}
+			progress(id, "", 100);
 		}
-		if (progress!=NULL) progress(id, "", 100);					
-
-		for (i=1; i<threadCnt; i++) rx_sem_wait(_ThreadPar[i].sem_done, 0);		
+		rx_sem_destroy(&_SemDone);
+		
+		//--- add wakeup ----------------------
+		if (wakeupLen)
+		{
+			for (i=0; i<threadCnt; i++) 
+			{
+				int start;
+				start = -(INT32)wakeupLen;
+				memset(_ThreadPar[i].buffer+start*lineLen, 0x00, wakeupLen * lineLen);
+				memset(_ThreadPar[i].buffer+pinfo->lengthPx*lineLen, 0x00, wakeupLen * lineLen);
+				if (wakeupOn)
+				{
+					start=(-(INT32)wakeupLen+i*WAKEUP_BAR_LEN);
+					memset(_ThreadPar[i].buffer+start*lineLen, 0xff, WAKEUP_BAR_LEN * lineLen);
+					memset(_ThreadPar[i].buffer+(pinfo->lengthPx+wakeupLen-(i+1)*WAKEUP_BAR_LEN)*lineLen, 0xff, WAKEUP_BAR_LEN * lineLen);										
+				}
+			};				
+		}
+		pinfo->lengthPx += 2*wakeupLen;
 	}
 	
+	Error(LOG, 0, "Loaded, time=%d ms", rx_get_ticks()-time);
 	return REPLY_OK;
 }
 
@@ -524,7 +483,6 @@ static void *_tif_read_thread(void* lpParameter)
 	while (_ThreadRunning)
 	{
 		rx_sem_wait(par->sem_start, 0);
-
 		{			
 			TIFF *file;
 			BYTE *dst;
@@ -535,21 +493,21 @@ static void *_tif_read_thread(void* lpParameter)
 			par->result	= REPLY_ERROR;
 			
 			if(par->fileBuf) file = rx_mem_tif_open(par->fileBuf, par->fileSize);
-			else file = par->file;
+			else			 file = par->file;
 			
-			if (file)
+			if(file)
 			{				
-				srcLen				= (par->pinfo->srcWidthPx*par->pinfo->bitsPerPixel+7)/8; 			
-				spaceLen			= par->pinfo->lineLen-srcLen;
-				dst					= par->buffer+(par->y_from*par->pinfo->lineLen);
+				srcLen				= (par->pinfo->srcWidthPx*par->pinfo->bitsPerPixel + 7) / 8; 			
+				spaceLen			= par->pinfo->lineLen - srcLen;
+				dst					= par->buffer + (par->y_from*par->pinfo->lineLen);				
 								
-				for(par->y=par->y_from; par->y<=par->y_to && !_Abort; par->y++)
+				for(par->y = par->y_from; par->y <= par->y_to && !_Abort; par->y++)
 				{										
-					ret=TIFFReadScanline(file,dst,par->y,1);
+					ret = TIFFReadScanline(file, dst, par->y, 1);
 					dst += srcLen;
 					if(spaceLen)
 					{
-						memset(dst,0x00,spaceLen);
+						memset(dst, 0x00, spaceLen);
 						dst += spaceLen;
 					}
 				}					
@@ -559,7 +517,7 @@ static void *_tif_read_thread(void* lpParameter)
 			}
 		}
 		
-		rx_sem_post(par->sem_done);
+		rx_sem_post(_SemDone);
 	}
 	return NULL;
 }

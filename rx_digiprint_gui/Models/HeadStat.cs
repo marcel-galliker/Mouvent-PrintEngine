@@ -80,7 +80,7 @@ namespace RX_DigiPrint.Models
         {
             get 
             {
-                if (RxGlobals.PrinterProperties.Host_Name.StartsWith("TEST-")) return 0;
+                if (RxGlobals.PrinterProperties.Host_Name!=null && RxGlobals.PrinterProperties.Host_Name.StartsWith("TEST-")) return 0;
                 else return _Err; 
             }
             set { SetProperty(ref _Err, value); }
@@ -110,6 +110,13 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _ImgInCnt, value); }
         }
 
+        //--- Property ImgBuf ---------------------------------------
+        private UInt32 _ImgBuf;
+        public UInt32 ImgBuf
+        {
+            get { return _ImgBuf; }
+            set { SetProperty(ref _ImgBuf, value); }
+        }
 
         //--- Property PrintGoCnt ---------------------------------------
         private UInt32 _PrintGoCnt;
@@ -300,6 +307,7 @@ namespace RX_DigiPrint.Models
 
             DotCnt      = item.dotCnt;
             ImgInCnt    = item.imgInCnt;
+            ImgBuf      = item.imgBuf;
             PrintGoCnt  = item.printGoCnt;
             PrintDoneCnt= item.printDoneCnt;
 

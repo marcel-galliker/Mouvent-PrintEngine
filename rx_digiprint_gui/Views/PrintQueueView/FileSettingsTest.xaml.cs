@@ -26,8 +26,8 @@ namespace RX_DigiPrint.Views.PrintQueueView
             if (init) _Item = new PrintQueueItem(){TestImage=ETestImage.jets, Copies=1, LengthUnit=EPQLengthUnit.copies, Dots="S", DropSizes=1};
             this.DataContext = _Item;
             CB_TestImage.ItemsSource = new EN_TestImageList();
-            CB_ScanMode.ItemsSource = new EN_ScanModeList();
-            CB_DropSize.ItemsSource  = new EN_Numbers(1, 3, 1);
+            CB_ScanMode.ItemsSource  = new EN_ScanModeList();
+            CB_DropSize.ItemsSource  = new EN_DropSize();
             
             CB_ScanMode.Visibility = CT_ScanMode.Visibility = RxGlobals.PrintSystem.IsScanning? Visibility.Visible:Visibility.Collapsed;
 

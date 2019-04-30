@@ -193,23 +193,23 @@ typedef struct SConditionerCfg_mcu
 	UINT32	alive;
 	SCondCmd cmd;
 
-	//	INT32 	pressure_in;			// desired input pressure (1/10 mbar)
-    INT32 	pressure_out;			// desired input pressure (1/10 mbar)
-	INT32	meniscus0;
+	INT32	headsPerColor;			// FOR CALCULATION OF P PARAMETER during start-up phase (OFF->PRINT)
+    INT32 	meniscus_setpoint;		// DESIRED MENISCUS PRESSURE (1/10 mbar)
 	UINT32 	temp; 					// desired temperature (1/1000 °C)
 	UINT32 	tempMax; 				// desired temperature (1/1000 °C)
 	UINT32	tempHead;				// measured head temperature
 	UINT32	mode;					// EnFluidCtrlMode
 	UINT32	volume_printed;			// [ml/min]
-	INT32	pid_P;
-	INT32	pid_I;
-	INT32	pid_D;
-	INT32	pid_offset;
 		
 	//--- status of fluid system -------------------
     INT32   cylinderPressure;
     INT32   cylinderPressureSet;
     INT32   fluidErr;
+	
+	//--- Counters ----------------------------------
+	UINT32	clusterNo;
+	UINT32	clusterTime;
+	UINT32	machineMeters;
 } SConditionerCfg_mcu;
 
 typedef struct
@@ -237,6 +237,7 @@ typedef struct SConditionerStat_mcu
 	INT32			pressure_out_diff;
 	
 	INT32			meniscus;
+	INT32			meniscus_setpoint;
 	INT32			meniscus_diff;
 	
 	UINT32			pump;				// rpm (calculated based on actual/desired output pressure)
@@ -256,15 +257,15 @@ typedef struct SConditionerStat_mcu
 
 	UINT32			pid_P;
 	UINT32			pid_I;
-	UINT32			pid_D;
-	UINT32			pid_offset;
     
 	INT32			pid_setval;
 	INT32			pid_sum;
-	INT32			pid_delay;
 
 	//Saved values on Flash
 	UINT32 			pumptime;		// count seconds
+	UINT32			clusterNo;
+	UINT32			clusterTime;
+	UINT32			machineMeters;
 	
 	UINT32			logCnt;
 	SCondLogItem	log[6];

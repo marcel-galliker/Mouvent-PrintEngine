@@ -51,8 +51,23 @@
                 <CheckBox x:Name="Button_Up"    Grid.Row="3" Content="Up"    Style="{DynamicResource RxCommandButton}" Margin="10" Click="CapUp_clicked"          IsEnabled="{Binding cmd_enabled}"/>
                 <CheckBox x:Name="Button_Print" Grid.Row="4" Content="Print" Style="{DynamicResource RxCommandButton}" Margin="10" Click="CapPrint_clicked"       IsEnabled="{Binding cmd_enabled}"/>
                 <CheckBox x:Name="Button_Cap"   Grid.Row="5" Content="Cap"   Style="{DynamicResource RxCommandButton}" Margin="10,10,0,10" Click="CapCapping_clicked"     IsEnabled="{Binding cap_enabled}" HorizontalAlignment="Left" Width="80"/>
-                <CheckBox x:Name="Button_Wipe"  Grid.Row="6" Content="WIPE"  Style="{DynamicResource RxCommandButton}" Margin="10" Click="CapWiping_clicked"        IsEnabled="{Binding cap_enabled}"/>
+                <CheckBox x:Name="Button_DripPans"  Grid.Row="6" Content="DRIP PANS"  Style="{DynamicResource RxCommandButton}" Margin="10" Click="CapDripPans_clicked"        IsEnabled="{Binding drip_pans_enabled}"/>
 
+                <Grid x:Name="Leds_DripPans" Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2">
+                    <StackPanel Orientation="Horizontal">
+                        <Image  Source="../../Resources/Bitmaps/LED_GREEN.ico" Visibility="{Binding DripPans_InfeedDOWN,   Converter={StaticResource BoolToVisible_Converter}}" HorizontalAlignment="Left"/>
+                        <Image  Source="../../Resources/Bitmaps/LED_GREY.ico"  Visibility="{Binding DripPans_InfeedDOWN,   Converter={StaticResource BoolToInVisible_Converter}}" HorizontalAlignment="Left"/>
+
+                        <Image  Source="../../Resources/Bitmaps/LED_GREEN.ico" Visibility="{Binding DripPans_InfeedUP,   Converter={StaticResource BoolToVisible_Converter}}" HorizontalAlignment="Left"/>
+                        <Image  Source="../../Resources/Bitmaps/LED_GREY.ico"  Visibility="{Binding DripPans_InfeedUP,   Converter={StaticResource BoolToInVisible_Converter}}" HorizontalAlignment="Left"/>
+
+                        <Image  Source="../../Resources/Bitmaps/LED_GREEN.ico" Visibility="{Binding DripPans_OutfeedUP,   Converter={StaticResource BoolToVisible_Converter}}" HorizontalAlignment="Left"/>
+                        <Image  Source="../../Resources/Bitmaps/LED_GREY.ico"  Visibility="{Binding DripPans_OutfeedUP,   Converter={StaticResource BoolToInVisible_Converter}}" HorizontalAlignment="Left"/>
+
+                        <Image  Source="../../Resources/Bitmaps/LED_GREEN.ico" Visibility="{Binding DripPans_OutfeedDOWN,   Converter={StaticResource BoolToVisible_Converter}}" HorizontalAlignment="Left"/>
+                        <Image  Source="../../Resources/Bitmaps/LED_GREY.ico"  Visibility="{Binding DripPans_OutfeedDOWN,   Converter={StaticResource BoolToInVisible_Converter}}" HorizontalAlignment="Left"/>
+                    </StackPanel>
+                </Grid>
                 <TextBlock Grid.Row="7" Grid.Column="0" Text="Laser" VerticalAlignment="Center" FontSize="{StaticResource FontSizeStd}" Margin="5,0" x:Name="LaserTX"/>
                 <StackPanel Grid.Row="7" Grid.Column="1" Grid.ColumnSpan="3" Orientation="Horizontal" x:Name="LaserVal">
                     <TextBlock Text="{Binding PosY, Converter={StaticResource HeadVal_ConverterTemp}}" VerticalAlignment="Center" FontSize="{StaticResource FontSizeStd}"/>

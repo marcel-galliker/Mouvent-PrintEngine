@@ -22,8 +22,8 @@
 #include "version.h"
 #include "tcp_ip.h"
 #include "args.h"
+#include "ctr.h"
 #include "rfs.h"
-#include "balance_def.h"
 #include "chiller.h"
 #include "setup.h"
 #include "network.h"
@@ -50,6 +50,7 @@
 
 SRxConfig		RX_Config;
 SSpoolerCfg		RX_Spooler;
+
 //SRxStatus		RX_Status;
 SRxNetwork		RX_Network;
 SColorSplitCfg	RX_Color[MAX_COLORS];
@@ -59,8 +60,6 @@ STestTableStat	RX_ClnStatus;
 SPrintQueueItem RX_TestImage;
 SHeadBoardStat	RX_HBStatus[HEAD_BOARD_CNT];
 char			RX_Hostname[64];
-
-SScalesCalibration RX_ScalesCalibration[SCALES_CALIBRATION_CNT];
 
 #ifdef WIN32
 
@@ -193,6 +192,7 @@ int main(int argc, char* argv[])
 	spool_start();
 	ctrl_start();
 	co_init();
+	ctr_init();
 	
 	spool_auto(TRUE);
 	
@@ -201,12 +201,15 @@ int main(int argc, char* argv[])
 		rx_sleep(1000);
 		ctrl_tick();
 		enc_tick();
+		pq_tick();
 		fluid_tick();
 		step_tick();
 		machine_tick();
+		spool_tick();
 		net_tick();
 		chiller_tick();
 		co_tick();
+		ctr_tick();
 	}
 
 	//--- end libraries ----------------------------

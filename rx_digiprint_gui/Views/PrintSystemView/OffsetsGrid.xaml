@@ -45,7 +45,7 @@
                 <common:RxNumBox Text="{Binding OffsetIncPerMeterVerso}" HorizontalContentAlignment="Right" Width="70" HorizontalAlignment="Right"/>
             </Grid>
 
-            <Grid x:Name="Verso">
+            <Grid x:Name="DistVerso">
                 <TextBlock       Text="Dist Verso [mm]"/>
                 <common:RxNumBox Text="{Binding OffsetVerso}" HorizontalContentAlignment="Right" Width="70" HorizontalAlignment="Right"/>
             </Grid>

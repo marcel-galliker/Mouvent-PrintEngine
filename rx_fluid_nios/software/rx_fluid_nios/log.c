@@ -58,7 +58,7 @@ void log_tick_10ms(void)
 		{
 			len += valstr(&str[len], pRX_Config->ink_supply[i].condPresIn);
 			len += valstr(&str[len], pRX_Status->ink_supply[i].cylinderPresSet);
-			len += valstr(&str[len], pRX_Status->ink_supply[i].cylinderPres);
+			len += valstr(&str[len], pRX_Status->ink_supply[i].IS_Pressure_Actual);
 			len += valstr(&str[len], pRX_Status->ink_supply[i].inkPumpSpeed_set+110);
 //			len += valstr(&str[len], pRX_Status->ink_supply[i].inkPumpSpeed_measured);
 			len += sprintf(&str[len], "%d\t", pRX_Status->ink_supply[i].bleedValve);

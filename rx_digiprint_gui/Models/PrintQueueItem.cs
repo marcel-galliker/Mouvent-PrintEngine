@@ -477,11 +477,11 @@ namespace RX_DigiPrint.Models
             get { return _LengthUnit; }
             set 
             { 
+                _LengthUnit = value;
+                if (_LengthUnit==EPQLengthUnit.mm     && StartFrom==1) StartFrom=0;
+                if (_LengthUnit==EPQLengthUnit.copies && StartFrom==0) StartFrom=1;
                 if (value!=_LengthUnit)
                 {
-                    _LengthUnit = value;
-                    if (_LengthUnit==EPQLengthUnit.mm     && StartFrom==1) StartFrom=0;
-                    if (_LengthUnit==EPQLengthUnit.copies && StartFrom==0) StartFrom=1;
                     OnPropertyChanged("LengthUnitMM");
                     OnPropertyChanged("LengthUnitCopies");
                     Changed = true;
@@ -600,6 +600,14 @@ namespace RX_DigiPrint.Models
             private set { SetProperty(ref _Ripped, value); }
         }
 
+        //--- Property Wakeup ---------------------------------------
+        private int _Wakeup;
+        public int Wakeup
+        {
+            get { return _Wakeup; }
+            set { SetProperty(ref _Wakeup, value); }
+        }
+        
         //--- Property RipState ---------------------------------------
         private string _RipState;
         public string RipState
@@ -821,6 +829,7 @@ namespace RX_DigiPrint.Models
                     RxSettingsBase.SaveProperty(this, xml, "FirstPage");
                     RxSettingsBase.SaveProperty(this, xml, "LastPage");
                     RxSettingsBase.SaveProperty(this, xml, "SrcPages");
+                    RxSettingsBase.SaveProperty(this, xml, "Wakeup");
 
                 //  RxSettingsBase.SaveProperty(this, xml, "PrintChecks");
 
@@ -840,6 +849,8 @@ namespace RX_DigiPrint.Models
         public PrintQueueItem()
         {
         }
+
+        private int _PageOffset=0;
 
         //--- creator -------------------------------------------------
         public PrintQueueItem(TcpIp.sPrintQueueItem msg)
@@ -863,9 +874,11 @@ namespace RX_DigiPrint.Models
             StartPage       = msg.start.page;
             Copies          = msg.copies;
             DropSizes       = msg.dropSizes;
+            Wakeup          = msg.wakeup;
             Dots            = msg.dots;
             ScanMode        = (EScanMode)(msg.scanMode);
-            Passes          = msg.passes;
+            if (msg.virtualDoublePass!=0) Passes = 0x12;
+            else                          Passes = msg.passes;
             CuringPasses    = msg.curingPasses;
             Speed           = msg.speed;
             Collate         = msg.collate;
@@ -894,15 +907,31 @@ namespace RX_DigiPrint.Models
             {
                 ScanLength = msg.scanLength/1000.0;
                 LengthUnit = EPQLengthUnit.mm;
-                StartFrom  = msg.start.scan;
+                if (RxGlobals.PrintSystem.IsScanning) StartFrom = msg.start.scan;
+                else if (msg.copiesTotal!=0)          StartFrom = (int)(ScanLength * ((double)msg.copiesPrinted / (double)msg.copiesTotal));
+                else                                  StartFrom = 0;
             };
 
             if (LastPage > FirstPage)
             {
-                int total=(LastPage-FirstPage+1) * Copies;
-                if (total!=0) progress = 100.0 * msg.copiesPrinted / total;
-                Progress = (int)progress;
-                ProgressStr = string.Format("p{0} c{1} ({2}%)", ActPage, ActCopy, Progress);
+                if (RxGlobals.PrintSystem.IsScanning)
+                {
+                    if (msg.scansPrinted==1) _PageOffset = StartPage;
+                    int pages    = (LastPage-FirstPage+1);
+                    int skip     = (msg.scans-msg.scansStart+1)*(_PageOffset-1);
+                    Scans        = msg.scansTotal;
+
+                    if (Scans!=0 && ScansPrinted>msg.scansStart) progress = 100.0 * (ScansPrinted-msg.scansStart) / (Scans-msg.scansStart);
+                    Progress = (int)progress;
+                    ProgressStr = string.Format("p{0} ({1}%)", ActPage, Progress);
+                }
+                else
+                {
+                    int total=(LastPage-FirstPage+1) * Copies;
+                    if (total!=0) progress = 100.0 * msg.copiesPrinted / total;
+                    Progress = (int)progress;
+                    ProgressStr = string.Format("p{0} c{1} ({2}%)", ActPage, ActCopy, Progress);
+                }
             }
             else
             {
@@ -961,28 +990,46 @@ namespace RX_DigiPrint.Models
             msg.item.lengthUnit     = LengthUnit;
             msg.item.copies         = Copies;
             msg.item.testMessage    = TestMessage;
-            if (msg.item.lengthUnit == EPQLengthUnit.copies)
+            if(SrcPages>1)
             {
-                if (SrcPages<2 && ScanLength>0) msg.item.copies = (int)ScanLength;
+                if (RxGlobals.PrintSystem.IsScanning)
+                {
+                    msg.item.start.page  = StartFrom;
+                    msg.item.start.copy  = 1;
+                }
+                else
+                {
+                    msg.item.start.page  = StartPage;
+                    msg.item.start.copy  = StartFrom;
+                }
+                msg.item.start.scan  = 0;
+            }
+            else if (msg.item.lengthUnit == EPQLengthUnit.copies)
+            {
+                if (ScanLength>0) msg.item.copies = (int)ScanLength;
                 msg.item.start.copy = StartFrom;
                 msg.item.start.scan = 0;
             }
             else
             {
+                msg.item.start.scan = 0;
                 msg.item.start.copy = 0;
-                msg.item.start.page = 0;
+                msg.item.start.page = 0;  
                 msg.item.start.scan = StartFrom;
+                if (!RxGlobals.PrintSystem.IsScanning && SrcHeight!=0) msg.item.copiesPrinted = (int)((double)StartFrom*1000 / SrcHeight);
             }
             if (RxGlobals.PrintSystem.IsScanning)
             {
-                msg.item.scanMode       = ScanMode;
-                msg.item.passes         = Passes;
-                msg.item.curingPasses   = CuringPasses;
+                msg.item.scanMode           = ScanMode;
+                msg.item.passes             = (byte)(Passes&0x0f);
+                msg.item.virtualDoublePass  = (byte)(Passes>>8);
+                msg.item.curingPasses       = (byte)CuringPasses;
             }
             else
             {
                 msg.item.scanMode       = EScanMode.scan_std;
                 msg.item.passes         = 1;
+                msg.item.virtualDoublePass = 0;
                 msg.item.curingPasses   = 0;
             }
             msg.item.speed          = Speed;
@@ -990,6 +1037,7 @@ namespace RX_DigiPrint.Models
             msg.item.lengthUnit     = LengthUnit;
             msg.item.variable       = Convert.ToByte(Variable);
             msg.item.dropSizes      = Convert.ToByte(DropSizes);
+            msg.item.wakeup         = Convert.ToByte(Wakeup);
             msg.item.orientation    = Convert.ToByte(Orientation);
             msg.item.pageWidth      = (Int32)(1000*PageWidth);
             msg.item.pageHeight     = (Int32)(1000*PageHeight);

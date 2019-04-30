@@ -197,6 +197,8 @@ static int _set_if_addr(struct sockaddr *sender, char *deviceName, int group, in
 
 		TrPrintfL(1, "\n   *** Inferface[%s] Changing from >>%s<< to >>%s<< ***\n", deviceName, addr, newaddr);
 
+		TrPrintfL(1, "_set_if_addr Tets 1");
+
 		err=sok_set_ip_address_str(deviceName, newaddr);
 		if (err) 
 		{
@@ -204,10 +206,14 @@ static int _set_if_addr(struct sockaddr *sender, char *deviceName, int group, in
 			TrPrintfL(1, "Error >>%s<<", err_system_error(err, buffer, sizeof(buffer)));				
 		}
 		if (group==200) sok_get_ip_address_str(deviceName, _Item.ipAddr, sizeof(_Item.ipAddr));
+
+		TrPrintfL(1, "_set_if_addr Tets 2");
 			
 		//---- activate the new address with a PING -----
 		sok_get_addr_str(sender, addr, sizeof(addr));
+		TrPrintfL(1, "_set_if_addr Tets 3");
 		sok_ping(addr);
+		TrPrintfL(1, "_set_if_addr Tets END");
 		return TRUE;
 	}
 	return FALSE;

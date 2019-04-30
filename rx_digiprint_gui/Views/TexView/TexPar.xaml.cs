@@ -30,7 +30,7 @@ namespace RX_DigiPrint.Views.TexView
             InitializeComponent();
 
             CB_Material.ItemsSource   = RxGlobals.MaterialList.List;
-            CB_RotUW.ItemsSource      = CB_RotRW.ItemsSource = new EN_RotationList();
+            CB_RotUW.ItemsSource      = RW_Rotation.ItemsSource = new EN_RotationList();
 
             XML_MATERIAL.PropertyChanged += XML_MATERIAL_PropertyChanged;
             RxGlobals.Timer.TimerFct += Timer;
@@ -137,31 +137,61 @@ namespace RX_DigiPrint.Views.TexView
 
                         
         //--- Timer ---------------------------------------------
-        private bool _speedcorrection = false;
+        private int _rewinderType = -1;
         private void Timer(int no)
         {
-            string str = "Application.GUI_00_001_Main"+"\n"+ "PAR_SPEED_CORRECTION_RW"+"\n";
-            RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_GET_VAR, str);
-
-            str = RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "PAR_SPEED_CORRECTION_RW");
-            bool sc = str!=null && !str.Equals("ERROR");
-            if (str!=null && sc!=_speedcorrection)
+            string str = RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "CFG_REWINDER_TYPE");
+            int type = Rx.StrToInt32(str);
+            type = 0;
+            if (type!=_rewinderType)
             {
-                if (sc)
+                _rewinderType = type;
+                Visibility visibility = Visibility.Visible; 
+                switch(type)
                 {
-                    RW_Flexibility.ID="PAR_SPEED_CORRECTION_RW";
-                    RW_Flexibility.Label="Speed Offset";
-                    RW_Flexibility.Unit="%";
-                    RW_Tension.Unit = "%";
+                    case 0:     // first rewinder with buffer
+                                RW_Flexibility.ID="PAR_MATERIAL_FLEXIBILITY_RW";
+                                RW_Flexibility.Label="Mat Flexibility";
+                                RW_Flexibility.Unit="";
+                                RW_Tension.Unit = "N";
+                                break;
+
+                    case 1:     // rewinder without buffer, NO Laser, OLD diameter 
+                                RW_Flexibility.ID="PAR_SPEED_CORRECTION_RW";
+                                RW_Flexibility.Label="Speed Offset";
+                                RW_Flexibility.Unit="%";
+                                RW_Tension.Unit = "%";
+                                break;
+
+                    case 2:     // rewinder without buffer, NO Laser, NEW diameter 
+                                RW_Flexibility.ID="PAR_SPEED_CORRECTION_RW";
+                                RW_Flexibility.Label="Speed Offset";
+                                RW_Flexibility.Unit="%";
+                                RW_Tension.Unit = "%";
+                                break;
+
+                    case 3:     // rewinder without buffer, WITH Laser, OLD diameter 
+                                RW_Flexibility.ID="PAR_SPEED_CORRECTION_RW";
+                                RW_Flexibility.Label="Fabric Position";
+                                RW_Flexibility.Unit="mm";
+                                RW_Tension.Unit = "N";
+                                break;
+
+                    case 4:     // rewinder without buffer, WITH Laser, NEW diameter 
+                                RW_Flexibility.ID="PAR_SPEED_CORRECTION_RW";
+                                RW_Flexibility.Label="Fabric Position";
+                                RW_Flexibility.Unit="mm";
+                                RW_Tension.Unit = "N";
+                                break;
+
+                    case 10:    // no rewinder 0 = no RW, 1 = yes RW
+                                visibility = Visibility.Collapsed;
+                                break;
                 }
-                else
-                {
-                    RW_Flexibility.ID="PAR_MATERIAL_FLEXIBILITY_RW";
-                    RW_Flexibility.Label="Mat Flexibility";
-                    RW_Flexibility.Unit="";
-                    RW_Tension.Unit = "N";
-                }
-                _speedcorrection = sc;
+                RW_Title.Visibility       = visibility;
+                RW_Flexibility.Visibility = visibility;
+                RW_Tension.Visibility     = visibility;
+                RW_Rotation.Visibility    = visibility;
             }
         }
      }

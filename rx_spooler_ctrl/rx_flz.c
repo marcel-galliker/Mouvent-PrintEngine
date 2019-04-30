@@ -150,7 +150,8 @@ int flz_load(SPageId *id, const char *filedir, const char *filename, int printMo
 			{
 				if (id->page>1) sprintf(filepath, "%s/%s_P%06d_%s.flz", filedir, filename, id->page, RX_ColorNameShort(pinfo->inkSupplyNo[c]));
 				else			sprintf(filepath, "%s/%s_%s.flz", filedir, filename, RX_ColorNameShort(pinfo->inkSupplyNo[c]));
-								
+						
+				TrPrintfL(TRUE, "LOADING >>%s<<", filepath);
 				{
 					fileSize=rx_file_get_size(filepath);
 					if (fileSize>_FileBufSize)

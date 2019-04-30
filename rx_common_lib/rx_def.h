@@ -57,7 +57,7 @@ void rx_def_init();
 	#define PATH_SOURCE_DATA	PATH_HOME PATH_SOURCE_DATA_DIR
 	#define PATH_RIPPED_DATA	PATH_HOME PATH_RIPPED_DATA_DIR
 	#define PATH_EMBRIP_PRENV	PATH_HOME PATH_EMBRIP_PRENV_DIR
-	#define PATH_FPGA_REGS		PATH_HOME "fpga-regs/"								
+	#define PATH_FPGA_REGS		PATH_HOME "fpga-regs/"				
 	#define PATH_LOG			PATH_USER
 #endif
 
@@ -95,6 +95,7 @@ void rx_def_init();
 #define FILENAME_MATERIAL		"material.xml"
 #define FILENAME_SPLICE_PAR		"splicepar.xml"
 #define FILENAME_HEAD_PRESOUT	"head_presout.xml"
+#define FILENAME_COUNTERS		"counters.xml"
 
 //--- defines ---------------------------------
 
@@ -114,6 +115,7 @@ void rx_def_init();
 #define MAX_SCALES			(MAX_COLORS+2)
 #define MAX_HEADS_COLOR		48
 #define MAX_HEAD_DIST		128
+#define MAX_DISABLED_JETS	32
 	
 #define HEAD_BOARD_CNT		(MAX_HEAD_DIST/MAX_HEADS_BOARD) // head boards per print bar
 
@@ -127,6 +129,7 @@ void rx_def_init();
 #define MAX_DATA_SIZE		2048
 #define MAX_TEST_DATA_SIZE	256
 
+#define WAKEUP_BAR_LEN		128	// dots to wakeup lazy jets
 
 //--- simple value ----------------------------------------------	
 typedef struct SValue
@@ -296,9 +299,10 @@ typedef struct SPrintQueueItem
 			#define PQ_TEST_ANGLE_OVERLAP	1
 			#define PQ_TEST_ANGLE_SEPARATED	2
 			#define PQ_TEST_JETS			3
-			#define PQ_TEST_GRID			4
-			#define PQ_TEST_ENCODER			5
-			#define PQ_TEST_SCANNING		6
+			#define PQ_TEST_JET_NUMBERS		4
+			#define PQ_TEST_GRID			5
+			#define PQ_TEST_ENCODER			6
+			#define PQ_TEST_SCANNING		7
 
 	INT32	pageWidth;	// µm
 	INT32	pageHeight;	// µm
@@ -309,8 +313,9 @@ typedef struct SPrintQueueItem
 			#define PG_MODE_GAP		3	// gap getween images
 	INT32	printGoDist;
 	INT32	scanLength; // mm
-	INT32	passes;
-	INT32	curingPasses;
+	INT8	passes;
+	INT8	virtualDoublePass;
+	INT8	curingPasses;
 	INT32	scans;
 	INT32	speed;
 	INT32	copiesTotal;
@@ -318,11 +323,13 @@ typedef struct SPrintQueueItem
 	INT32	scansSent;
 	INT32	scansPrinted;
 	INT32	scansStart;
+	INT32	scansTotal;
 	INT32	progress;
 	SPageNumber pageNumber;
 	INT32	checks;
 
 	char    dots[4];
+	INT8	wakeup;
 
 //	UINT16	previewOrientation;
 } SPrintQueueItem;
@@ -386,6 +393,7 @@ typedef struct SInkDefinition
 	INT32	temp;
 	INT32	tempMax;
 	INT32	dropletVolume;
+	INT32	meniscus;
 	INT32	condPresOut;
 	INT32	flushTime[3];
 	INT32	maxSpeed[MAX_DROP_SIZES];
@@ -488,6 +496,9 @@ typedef struct SPrinterStatus
 	UINT32			inkSupilesOn;	
 	UINT32			maxSpeed[MAX_DROP_SIZES];	// [m/min]
 	UINT32			externalData;
+	UINT32			actSpeed;
+	double			counterAct;
+    double			counterTotal;
 }  SPrinterStatus;
 
 //--- SSpoolerCfg ----------------------------------
@@ -527,15 +538,8 @@ typedef struct SSpoolerCfg
 
 typedef struct SConditionerCfg
 {
-	INT32	pressure_out;
-	INT32	pid_P;
-	INT32	pid_I;
-	INT32	pid_D;
-	INT32   pid_offset;
-	INT32	menicus0;
-	INT32	cylinderPressure;
-	INT32	cylinderPressureSet;
-    INT32   fluidErr;
+	INT32	meniscus_setpoint;
+	INT32	headsPerColor;
 } SConditionerCfg;
 	
 //--- print head ---------------------------- 
@@ -722,7 +726,7 @@ typedef struct
 
 typedef struct
 {
-	INT16	disabledJets[16];
+	INT16	disabledJets[MAX_DISABLED_JETS];
 	UINT16	clusterNo;
 	UINT32	printed_ml;
 } SHeadEEpromMvt;
@@ -736,6 +740,9 @@ typedef struct SHeadStat
 	//-- job info ------------------------------------
 	UINT64	dotCnt;	// printed drops since last reset
 	UINT32	imgInCnt;
+	UINT32	imgBuf;
+	UINT32	encPos;
+	UINT32	encPgCnt;
 	UINT32	printGoCnt;
 	UINT32	printDoneCnt;
 
@@ -776,6 +783,7 @@ typedef struct SHeadBoardCfg
 	SHeadCfg	head[HEAD_CNT];
 	UINT16		reverseHeadOrder;
 	UINT16		spoolerNo;
+	UINT32		machineMeters;
 } SHeadBoardCfg;
 
 typedef struct SHeadBoardStat
@@ -791,8 +799,9 @@ typedef struct SHeadBoardStat
 	SVersion	niosVersion;
 
 	//--- values stored in head-board (no reset) ---------
-	UINT64		timePower;	// [sec] time the board was powered
-	UINT64		timePrint;	// [sec] time when ink was circulating
+	UINT32		clusterNo;
+	UINT32		clusterTime;
+	UINT32		machineMeters;
 
 	INT32		tempFpga;
 	UINT32		flow;
@@ -972,7 +981,6 @@ typedef struct SInkSupplyCfg
 	INT32			meniscusSet;
 	INT32			flushTime;
 	ERectoVerso		rectoVerso;
-    INT32           fluid_P;
 } SInkSupplyCfg;
 
 typedef struct SFluidBoardCfg
@@ -1012,6 +1020,7 @@ typedef struct SFluidStateLight
 	INT32			inkPumpFeedback;
 	INT32			amcTemp;
 	INT32			fluidErr;
+	UINT32			machineMeters;
 } SFluidStateLight;
 	
 typedef struct SInkSupplyInfo
@@ -1109,10 +1118,12 @@ typedef struct SInkSupplyStat
 	
 	INT32	cylinderPresSet;	//  Pressure intermediate Tank Set
 	INT32	cylinderPres;		//  Pressure intermediate Tank
+	INT32	cylinderSetpoint;		//  Pressure intermediate Tank
 	INT32	airPressureTime;
 	INT32	flushTime;
 	INT32   presLung;			//  Lung pressure
-	INT32	condPresOut;		//  
+	INT32	condPresOut;	
+	INT32	condPresIn;  
 	UINT32	temp;				//	Temperature
 	UINT32	pumpSpeedSet;		//	Consumption pump speed
 	UINT32	pumpSpeed;			//	Consumption pump speed measured
@@ -1292,10 +1303,10 @@ typedef struct ETestTableInfo
 	UINT32 screw_done		: 1;	//	0x02000000
 	UINT32 printhead_en		: 1;    //  0x04000000
 	UINT32 splicing			: 1;	//  0x08000000
-	UINT32 info_28			: 1;	//  0x10000000
-	UINT32 info_29			: 1;	//	0x20000000
-	UINT32 info_30			: 1;	//	0x40000000
-	UINT32 info_31			: 1;	//	0x80000000
+	UINT32 DripPans_InfeedUP			: 1;	//  0x10000000
+	UINT32 DripPans_InfeedDOWN			: 1;	//	0x20000000
+	UINT32 DripPans_OutfeedUP			: 1;	//	0x40000000
+	UINT32 DripPans_OutfeedDOWN			: 1;	//	0x80000000
 } ETestTableInfo;
 	
 typedef struct ETestTableWarn
@@ -1454,6 +1465,7 @@ typedef struct SColorSplitCfg
 	INT32			lastLine;
 	INT32			offsetPx;
 	SSplitCfg		split[MAX_HEADS_COLOR];
+	INT16			disabledJets[MAX_HEADS_COLOR*MAX_DISABLED_JETS/4];
 } SColorSplitCfg;
 
 typedef struct SPoint
@@ -1484,6 +1496,7 @@ typedef struct SRxConfig
 	SConditionerCfg	cond[MAX_HEAD_DIST];
 	INT32			headFpVoltage[MAX_HEAD_DIST];
 	INT32			scalesTara[MAX_SCALES];
+	INT32			headDisabledJets[MAX_HEAD_DIST][MAX_DISABLED_JETS];
 } SRxConfig;
 
 /*

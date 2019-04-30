@@ -31,57 +31,62 @@
     <Grid x:Name="MainGrid" Background="Transparent">
         <Border x:Name="Back" BorderBrush="#66808080" BorderThickness="100"/>
         <Canvas>
-            <Grid x:Name="Pad">
-                <StackPanel x:Name="Stack" MinWidth="400">
+            <Grid x:Name="Pad" SizeChanged="Pad_SizeChanged">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0">
+                    <Grid x:Name="TopRow">
+                        <Button x:Name="Display"
+                        Grid.ColumnSpan="3"
+                        Background="{StaticResource RX.Green}"
+                        BorderBrush="{StaticResource OptionMark.Pressed.Border}"
+                        HorizontalAlignment="Stretch"
+                        Width="auto"
+                        Margin="0,0,128,0"
+                        Content="{Binding Result}" 
+                        />
 
-                    <Grid>
-                        <Grid x:Name="TopRow">
-                            <Button x:Name="Display"
-                            Grid.ColumnSpan="3"
-                            Background="{StaticResource RX.Green}"
-                            BorderBrush="{StaticResource OptionMark.Pressed.Border}"
-                            HorizontalAlignment="Stretch"
-                            Width="auto"
-                            Margin="0,0,128,0"
-                            Content="{Binding Result}" 
-                            />
-
-                            <Button x:Name="ClearButton"
-                            Background="{StaticResource RX.CtrlKey}"
-                            Content="Clear"
-                            Click="button_Click"
-                            HorizontalAlignment="Right"
-                            Margin="0,0,64,0"
-                            />
+                        <Button x:Name="ClearButton"
+                        Background="{StaticResource RX.CtrlKey}"
+                        Content="Clear"
+                        Click="button_Click"
+                        HorizontalAlignment="Right"
+                        Margin="0,0,64,0"
+                        />
                             
-                            <Button 
-                            Background="{StaticResource RX.CtrlKey}"
-                            Content="Esc"
-                            Click="button_Click"
-                            HorizontalAlignment="Right"
-                            />
-                        </Grid>
-
-                        <Button x:Name="CloseButton"
-                            Background="{StaticResource RX.CtrlKey}"
-                            Click="close_Clicked"
-                            HorizontalAlignment="Right" FontFamily="Wingdings" FontSize="48"
-                            >
-                            <Image Source="{DynamicResource No_ico}"/>
-                        </Button>
+                        <Button 
+                        Background="{StaticResource RX.CtrlKey}"
+                        Content="Esc"
+                        Click="button_Click"
+                        HorizontalAlignment="Right"
+                        />
                     </Grid>
 
-                    <StackPanel Orientation="Horizontal"/>
-                    <StackPanel Orientation="Horizontal" Margin="16,0,0,0"/>
-                    <StackPanel Orientation="Horizontal" Margin="32,0,0,0"/>
-                    <StackPanel Orientation="Horizontal" />
-                    <Grid>
-                        <Button Content="Shift" Click="button_Click" HorizontalAlignment="Left"/>
-                        <Button Content=" "     Click="button_Click" HorizontalAlignment="Stretch" Margin="64,0" Width="auto"/>
-                        <Button Content="Shift" Click="button_Click" HorizontalAlignment="Right"/>
-                    </Grid>
+                    <Button x:Name="CloseButton"
+                        Background="{StaticResource RX.CtrlKey}"
+                        Click="close_Clicked"
+                        HorizontalAlignment="Right" FontFamily="Wingdings" FontSize="48"
+                        >
+                        <Image Source="{DynamicResource No_ico}"/>
+                    </Button>
+                </Grid>
 
-                </StackPanel>
+                <StackPanel Grid.Row="1" Orientation="Horizontal"/>
+                <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="16,0,0,0"/>
+                <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="32,0,0,0"/>
+                <StackPanel Grid.Row="4" Orientation="Horizontal" />
+                <Grid Grid.Row="5">
+                    <Button Content="Shift" Click="button_Click" HorizontalAlignment="Left"/>
+                    <Button Content=" "     Click="button_Click" HorizontalAlignment="Stretch" Margin="64,0" Width="auto"/>
+                    <Button Content="Shift" Click="button_Click" HorizontalAlignment="Right"/>
+                </Grid>
+
             </Grid>
         </Canvas>
     </Grid>

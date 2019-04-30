@@ -14,6 +14,7 @@
 #include "rx_def.h"
 #include "rx_error.h"
 #include "rx_term.h"
+#include "rx_head_ctrl.h"
 #include "nios.h"
 #include "EEprom.h"
 
@@ -66,7 +67,6 @@ void eeprom_init_data(int headNo, BYTE *eeprom, SHeadEEpromInfo *pInfo)
 
 	src=buf;
 	end=src+EEPROM_DATA_SIZE;
-	
 	while(!done && src<end)
 	{
 		if (*src++=='/')
@@ -131,7 +131,8 @@ void eeprom_init_data(int headNo, BYTE *eeprom, SHeadEEpromInfo *pInfo)
 	
 	//--- fill info ----------------------------
 	int i, n;
-	pInfo->serialNo			= 100*atoi(pdata->serialNo) + atoi(&pdata->serialNo[7]);
+	if (*pdata->serialNo) pInfo->serialNo = 100*atoi(pdata->serialNo) + atoi(&pdata->serialNo[7]);
+	else				  pInfo->serialNo = INVALID_VALUE;
 	pInfo->week				= (UINT8) pdata->week;
 	pInfo->year				= (UINT8)(pdata->year - 2000);
 	pInfo->flowResistance	= (UINT8) atoi(pdata->flowResistance);
@@ -149,46 +150,51 @@ void eeprom_display(void)
 {
 	int i;
 	int bad, anyBad;
-	
+	int no[MAX_HEADS_BOARD];
+		
+	for(i=0; i<MAX_HEADS_BOARD; i++) no[i]= RX_HBConfig.reverseHeadOrder? MAX_HEADS_BOARD-1-i:i;
+
 	term_printf("\n");
 	term_printf("--- EEPROM ---    "); for (i=0; i<4; i++) term_printf(" ----- %d ----  ", i); term_printf("\n");
-	term_printf("Format:           "); for (i=0; i<4; i++) term_printf("%12s   ", _Data[i].revisionNo); term_printf("\n");
-	term_printf("Part No:          "); for (i=0; i<4; i++) term_printf("%12s   ", _Data[i].partNo); term_printf("\n");
-	term_printf("Serial No:        "); for (i=0; i<4; i++) term_printf("%12s   ", _Data[i].serialNo); term_printf("\n");
-	term_printf("Data Code:        "); for (i=0; i<4; i++) term_printf("    w%02d/%d   ", _Data[i].week, _Data[i].year); term_printf("\n");
-	term_printf("Flex Side:        "); for (i=0; i<4; i++) term_printf("%12s   ", _Data[i].flexSide); term_printf("\n");
-	term_printf("Thermistor:       "); for (i=0; i<4; i++) term_printf("%12s   ", _Data[i].thermistor); term_printf("\n");
-	term_printf("Drive Voltage:    "); for (i=0; i<4; i++) term_printf("%12s   ", _Data[i].driveVoltage); term_printf("\n");
-	term_printf("Flow Resistance:  "); for (i=0; i<4; i++) term_printf("%12s   ", _Data[i].flowResistance); term_printf("\n");
-	term_printf("Drop Mass S:      "); for (i=0; i<4; i++) term_printf("%12s   ", _Data[i].dropMass[0]); term_printf("\n");
-	term_printf("Drop Mass M:      "); for (i=0; i<4; i++) term_printf("%12s   ", _Data[i].dropMass[1]); term_printf("\n");
-	term_printf("Drop Mass L:      "); for (i=0; i<4; i++) term_printf("%12s   ", _Data[i].dropMass[2]); term_printf("\n");
-	term_printf("Jet Straightness: "); for (i=0; i<4; i++) term_printf("%12s   ", _Data[i].jetStraightness); term_printf("\n");
-	term_printf("Volume Uniformity:");     for (i=0; i<4; i++) term_printf("%12s   ", _Data[i].volumeUniformity); term_printf("\n");
-	for (bad=0; bad<SIZEOF(_Data[i].badNozzleM); bad++)
+	term_printf("Format:           "); for (i=0; i<4; i++) term_printf("%12s   ", _Data[no[i]].revisionNo); term_printf("\n");
+	term_printf("Part No:          "); for (i=0; i<4; i++) term_printf("%12s   ", _Data[no[i]].partNo); term_printf("\n");
+	term_printf("Serial No:        "); for (i=0; i<4; i++) term_printf("%12s   ", _Data[no[i]].serialNo); term_printf("\n");
+	term_printf("Data Code:        "); for (i=0; i<4; i++) term_printf("    w%02d/%d   ", _Data[no[i]].week, _Data[no[i]].year); term_printf("\n");
+	term_printf("Flex Side:        "); for (i=0; i<4; i++) term_printf("%12s   ", _Data[no[i]].flexSide); term_printf("\n");
+	term_printf("Thermistor:       "); for (i=0; i<4; i++) term_printf("%12s   ", _Data[no[i]].thermistor); term_printf("\n");
+	term_printf("Drive Voltage:    "); for (i=0; i<4; i++) term_printf("%12s   ", _Data[no[i]].driveVoltage); term_printf("\n");
+	term_printf("Flow Resistance:  "); for (i=0; i<4; i++) term_printf("%12s   ", _Data[no[i]].flowResistance); term_printf("\n");
+	term_printf("Drop Mass S:      "); for (i=0; i<4; i++) term_printf("%12s   ", _Data[no[i]].dropMass[0]); term_printf("\n");
+	term_printf("Drop Mass M:      "); for (i=0; i<4; i++) term_printf("%12s   ", _Data[no[i]].dropMass[1]); term_printf("\n");
+	term_printf("Drop Mass L:      "); for (i=0; i<4; i++) term_printf("%12s   ", _Data[no[i]].dropMass[2]); term_printf("\n");
+	term_printf("Jet Straightness: "); for (i=0; i<4; i++) term_printf("%12s   ", _Data[no[i]].jetStraightness); term_printf("\n");
+	term_printf("Volume Uniformity:");     for (i=0; i<4; i++) term_printf("%12s   ", _Data[no[i]].volumeUniformity); term_printf("\n");
+	for (bad=0; bad<SIZEOF(_Data[no[i]].badNozzleM); bad++)
 	{
 		term_printf("Bad Nozzle M[%02d]: ", bad);
 		anyBad = FALSE;
 		for (i=0; i<4; i++) 
 		{
-			if (_Data[i].badNozzleM[bad]) {term_printf("%12d   ", _Data[i].badNozzleM[bad]); anyBad = TRUE; } 
+			if (_Data[i].badNozzleM[bad]) {term_printf("%12d   ", _Data[no[i]].badNozzleM[bad]); anyBad = TRUE; } 
 			else						  term_printf("%12s   ", "-");  						
 		}
 		term_printf("\n");
 		if (!anyBad) break;
 	}
-	for (bad=0; bad<SIZEOF(_Data[i].badNozzleE); bad++)
+	for (bad=0; bad<SIZEOF(_Data[no[i]].badNozzleE); bad++)
 	{
 		term_printf("Bad Nozzle E[%02d]: ", bad);
 		anyBad = FALSE;
 		for (i=0; i<4; i++) 
 		{
-			if (_Data[i].badNozzleE[bad]) {term_printf("%12d   ", _Data[i].badNozzleE[bad]); anyBad = TRUE; } 
+			if (_Data[i].badNozzleE[bad]) {term_printf("%12d   ", _Data[no[i]].badNozzleE[bad]); anyBad = TRUE; } 
 			else						  term_printf("%12s   ", "-");  						
 		}
 		term_printf("\n");
 		if (!anyBad) break;
 	}
+	
+//	term_printf("user: "); for (i=0; i<4; i++) term_printf("%12s   ", RX_NiosStat.user_eeprom[i]); term_printf("\n");
 }
 
 //--- _display_number --------------------------------------------

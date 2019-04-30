@@ -51,7 +51,7 @@ void fpga_display_error(void);
 void fpga_display_NiosStatus(void);
 void fpga_display_used_flags(void);
 
-void fpga_trace_registers(char *fname);
+void fpga_trace_registers(char *fname, int error);
 
 int	fpga_enc_position(int no);
 int fpga_temp(void);

@@ -21,6 +21,7 @@
 #include "machine_ctrl.h"
 #include "plc_ctrl.h"
 #include "es_rip.h"
+#include "ctr.h"
 #include "spool_svr.h"
 #include "print_queue.h"
 
@@ -30,6 +31,8 @@
 #define SPOOL_CNT		10
 
 static SPrintQueueItem	_List[LIST_SIZE];
+static SPrintQueueItem	_PrintedItem;
+
 static UINT32			_Loading[LIST_SIZE];
 static char				_ListText[LIST_SIZE][SPOOL_CNT][32];
 static int				_Size=0;
@@ -37,15 +40,14 @@ static INT32			_ID=0;
 static int				_Item;
 static int				_TestDataSent;
 static int				_HeadBoardCnt;
-static int				_ScanDone;
+static int				_TimeCompleted;
+static int				_BufState;
 
 typedef struct 
 {
 	SPageId	id;
 	int		pd;	
 } SPdListItem;
-
-SPdListItem				_ListPrintDone[LIST_SIZE];
 
 //--- prototypes -------------------------------------------------------------
 static int _find_item(int id, int *idx);
@@ -56,6 +58,8 @@ int	pq_init(void)
 {
 	memset(_List, 0, sizeof(_List));
 	_Item = 0;
+	_TimeCompleted    = 0;
+	_BufState		  = 0;
 	/*
 	{
 		strcpy_s(_List[_Size].filename, "D:\\Develop\\Data\\GT-Print-Data\\Samba\\Test_A_0.bmp");
@@ -125,6 +129,7 @@ static int setup_item(HANDLE file, int idx, SPrintQueueItem *item, EN_setup_Acti
 		setup_uchar		(file, "collate",		action, &item->collate,			1);
 		setup_uchar		(file, "variable",		action, &item->variable,		0);
 		setup_uchar 	(file, "dropSizes",		action, &item->dropSizes,		3);
+		setup_uchar 	(file, "wakeup",		action, &item->wakeup,			0);
 		setup_uchar		(file, "lengthUnit",	action, &item->lengthUnit,		PQ_LENGTH_MM);
 		setup_uchar 	(file, "orientation",	action, &item->orientation,		0);
 		setup_uint32	(file, "pageWidth",		action, &item->pageWidth,		0);
@@ -133,8 +138,9 @@ static int setup_item(HANDLE file, int idx, SPrintQueueItem *item, EN_setup_Acti
 		setup_uint32	(file, "printGoMode",	action, &item->printGoMode,		0);
 		setup_uint32	(file, "printGoDist",	action, &item->printGoDist,		0);
 		setup_uint32	(file, "scanLength",	action, &item->scanLength,		100);
-		setup_uint32	(file, "passes",		action, &item->passes,			1);
-		setup_uint32	(file, "curingPasses",	action, &item->curingPasses,	1);
+		setup_uchar		(file, "passes",		action, &item->passes,			1);
+		setup_uchar		(file, "virtualDoublePass",		action, &item->virtualDoublePass,			0);
+		setup_uchar		(file, "curingPasses",	action, &item->curingPasses,	1);
 		setup_uchar 	(file, "bidirectional",	action, &item->scanMode,		0);
 		setup_uint32	(file, "speed",			action, &item->speed,			4);
 		setup_uint32	(file, "checks",		action, &item->checks,			0);
@@ -216,17 +222,48 @@ int pq_save(const char *filepath)
 int	pq_start(void)
 {
 	_Item=0;
-	_TestDataSent=0;
-	memset(_ListPrintDone, 0, sizeof(_ListPrintDone));
+	_TestDataSent	  = 0;
+	_TimeCompleted	  = 0;
+	_BufState		  = 0;
+	memset(&_PrintedItem, 0, sizeof(_PrintedItem));
 	_HeadBoardCnt = spool_head_board_cnt();
 	return REPLY_OK;
+}
+
+//--- _send_PrintedItem -----------------------------------
+static void _send_PrintedItem(void)
+{			
+	if (*_PrintedItem.filepath)
+	{
+		gui_send_printer_status(&RX_PrinterStatus);
+		gui_send_print_queue(EVT_GET_PRINT_QUEUE, &_PrintedItem);
+		memset(&_PrintedItem, 0, sizeof(_PrintedItem));		
+	}
+}
+
+//--- pq_tick ---------------------------------------------
+void pq_tick(void)
+{
+	_send_PrintedItem();
+
+	if (_TimeCompleted && _TimeCompleted>rx_get_ticks())
+	{
+		Error(WARN, 0, "_TimeCompleted: Job stopped by timer");
+		machine_stop_printing();
+		_TimeCompleted = 0;
+	}
 }
 
 //--- pq_stop ---------------------------------------------------------------
 int pq_stop(void)
 {
 	int i;
-//	for (i=0; i<_Size;  i++)
+
+	_TimeCompleted = 0;
+	_send_PrintedItem();
+	
+	ctr_save();
+	
 	for (i=_Size-1; i>=0;  i--)
 	{
 		if (_List[i].state==PQ_STATE_STOPPING) 
@@ -251,6 +288,7 @@ int pq_abort(void)
 {
 	TrPrintfL(TRUE, "pq_abort");
 	int i;
+		
 	for (i=_Size-1; i>=0;  i--)
 	{
 		if ((_List[i].state>=PQ_STATE_PRINTING) && (_List[i].state<=PQ_STATE_STOPPED))
@@ -376,6 +414,10 @@ SPrintQueueItem *pq_set_item(SPrintQueueItem *pitem)
 		pitem->state = _List[i].state;
 //		pitem->scansPrinted = _List[i].scansPrinted;
 		memcpy(&_List[i], pitem, sizeof(_List[i]));		
+		if (_List[i].state<=PQ_STATE_RIPPING)
+		{
+			memset(&_ListText[i], 0, sizeof(_ListText[i]));
+		}
 		return pitem;
 	}
 	return NULL;
@@ -452,15 +494,18 @@ int pq_loading(int spoolerNo, SPageId *pid, char *txt)
 {
 	int i;
 	int n, l, len;
-	if (RX_PrinterStatus.printState!=ps_printing) return REPLY_OK;
+//	if (RX_PrinterStatus.printState!=ps_printing) return REPLY_OK;
 	if (_find_item(pid->id, &i)==REPLY_OK)
 	{
-		if (_List[i].state<=PQ_STATE_LOADING)
+		if (_List[i].state<=PQ_STATE_LOADING || *txt)
 		{			
-			_Loading[i] |= 1<<spoolerNo;
-			_List[i].state=PQ_STATE_LOADING;
-			_List[i].scansSent = 0;
-			_ScanDone = 0;
+//			if (_List[i].state<=PQ_STATE_LOADING)
+			if (_List[i].state!=PQ_STATE_LOADING)
+			{
+				_Loading[i] |= 1<<spoolerNo;
+				_List[i].state=PQ_STATE_LOADING;
+				// _List[i].scansSent = 0;
+			}
 			strncpy(_ListText[i][spoolerNo], txt, sizeof(_ListText[i][spoolerNo])-1);
 			_ListText[i][spoolerNo][sizeof(_ListText[i][spoolerNo])] = 0;
 			for (n=0, len=0; n<SPOOL_CNT; n++)
@@ -481,9 +526,15 @@ int pq_loading(int spoolerNo, SPageId *pid, char *txt)
 int pq_sending(int spoolerNo, SPageId *pid)
 {
 	int i;
+	int send=FALSE;
 	if (RX_PrinterStatus.printState!=ps_printing) return REPLY_OK;
 	if (_find_item(pid->id, &i)==REPLY_OK)
 	{		
+		if (*_List[i].ripState)
+		{
+			_List[i].ripState[0]=0;
+			send=TRUE;
+		}
 		if (_List[i].state<PQ_STATE_TRANSFER)
 		{
 			_Loading[i] &= ~(1<<spoolerNo);	
@@ -491,9 +542,10 @@ int pq_sending(int spoolerNo, SPageId *pid)
 			{
 				_List[i].ripState[0]=0;
 				_List[i].state=PQ_STATE_TRANSFER;
-				gui_send_print_queue(EVT_GET_PRINT_QUEUE, &_List[i]);
+				send=TRUE;
 			}
 		}
+		if (send) gui_send_print_queue(EVT_GET_PRINT_QUEUE, &_List[i]);
 		return REPLY_OK;
 	}
 	return REPLY_ERROR;
@@ -576,7 +628,7 @@ void pq_next_page(SPrintQueueItem *pitem, SPageId *pid)
 			}			
 		}
 	}
-	else
+	else // WEB
 	{
 		if (pitem->collate)
 		{
@@ -610,13 +662,11 @@ void pq_next_page(SPrintQueueItem *pitem, SPageId *pid)
 }
 
 //--- pq_printed ---------------------------------------------------------------
-int pq_printed(SPageId *pid, int *pageDone, int *jobDone, SPrintQueueItem **pnextItem)
+int pq_printed(int headNo, SPageId *pid, int *pageDone, int *jobDone, SPrintQueueItem **pnextItem)
 {
-	int idx=0, i;
+	int idx=0;
 	int printed;
-	double p;
 	SPrintQueueItem *pitem;
-	SPrintQueueItem	item;
 
 	*pageDone  = FALSE;
 	*jobDone   = FALSE;
@@ -634,15 +684,20 @@ int pq_printed(SPageId *pid, int *pageDone, int *jobDone, SPrintQueueItem **pnex
 		printed = pitem->copiesPrinted;
 		if(pitem->scans > 0)
 		{
-			if(++_ScanDone >= _HeadBoardCnt)
-			{
-				pitem->scansPrinted = pid->scan;
+			pitem->scansPrinted++;// = pid->scan;
+			*pageDone = TRUE;
+			if (pitem->srcPages>1 && (pid->scan==pitem->scans || (pitem->copiesPrinted && pid->scan==pitem->scans-pitem->scansStart)))
+			{	
 				*pageDone = TRUE;
-				_ScanDone = 0;
-				if ( pid->scan>=18)
-					printf("test\n");
-				if(pitem->scans<=pitem->scansStart || pid->scan<pitem->scansStart || !pitem->copies) p=0;
-				else p = (double)(pid->scan-pitem->scansStart) / ((double)(pitem->scans-pitem->scansStart) / (double)pitem->copies);
+				pitem->copiesPrinted = pitem->id.page;
+			}
+			else if (pitem->scans<=pitem->scansStart || pid->scan<pitem->scansStart || !pitem->copies) 
+			{
+			}
+			else
+			{
+				double p;
+				p = (double)(pid->scan-pitem->scansStart) / ((double)(pitem->scans-pitem->scansStart) / (double)pitem->copies);
 				if((int)p>printed)
 				{
 					*pageDone = TRUE;
@@ -652,49 +707,12 @@ int pq_printed(SPageId *pid, int *pageDone, int *jobDone, SPrintQueueItem **pnex
 		}
 		else
 		{
-			if(_HeadBoardCnt < 2) 
-			{
-				*pageDone = TRUE;
-				pitem->copiesPrinted++;
-			}
-			else
-			{
-				int found = FALSE;
-				for(i = 0; i < SIZEOF(_ListPrintDone); i++)
-				{
-					if(!memcmp(pid, &_ListPrintDone[i].id, sizeof(SPageId)))
-					{
-						found = TRUE;
-						_ListPrintDone[i].pd++;
-						if(_ListPrintDone[i].pd >= _HeadBoardCnt)
-						{
-							pitem->copiesPrinted++;
-							*pageDone = TRUE;
-							memset(&_ListPrintDone[i], 0, sizeof(_ListPrintDone[i]));
-						//	Error(LOG, 0, "Print Done %d, bufReady=%d", pitem->copiesPrinted, spool_is_ready());
-						}
-					}
-				}
-				if(!found)
-				{
-					for(i = 0; i < SIZEOF(_ListPrintDone); i++)
-					{
-						if(_ListPrintDone[i].id.page == 0)
-						{
-							found = TRUE;
-							memcpy(&_ListPrintDone[i].id, pid, sizeof(_ListPrintDone[i].id));
-							_ListPrintDone[i].pd = 1;
-							break;							
-						}
-					}
-				}
-				if(!found)
-					Error(ERR_CONT, 0, "_ListPrintDone ERROR");						
-			}
+			*pageDone = TRUE;
+			pitem->copiesPrinted++;
 		}
 		
 		TrPrintfL(TRUE, "pq_printed id=%d, scan=%d, scanTotal=%d, scansprinted=%d, copiesPrinted=%d, copies=%d, copiesTotal=%d, state=%d", pid->id, pid->scan, pitem->scans, pitem->scansPrinted, pitem->copiesPrinted, pitem->copies, pitem->copiesTotal, pitem->state);
-		
+				
 		//--- log ----------------------------------------
 		if(rx_def_is_scanning(RX_Config.printer.type))
 		{
@@ -708,16 +726,23 @@ int pq_printed(SPageId *pid, int *pageDone, int *jobDone, SPrintQueueItem **pnex
 				_printed = 0;
 				_time = rx_get_ticks();
 			}
-			int printed = (int)(plc_get_step_dist_mm()*pitem->scansPrinted / 1000);
-			int time    = rx_get_ticks();
-			if(printed > _printed)
-			{
-				_printed = printed;
-				Error(LOG, 0, "%s: printed %d m time=%d.%03d", _filename(pitem->filepath), _printed, (time - _time) / 1000, (time - _time) % 1000);
-				_time = time;
-			}			
+			double step=plc_get_step_dist_mm();
+			ctr_add(step / 1000.0);
+			
+			//--- LOG ---
+			{	
+				int printed = (int)(step*pitem->scansPrinted / 1000);
+				int time    = rx_get_ticks();
+				if(printed > _printed)
+				{
+					_printed = printed;			
+					Error(LOG, 0, "%s: printed %d m time=%d.%03d", _filename(pitem->filepath), _printed, (time - _time) / 1000, (time - _time) % 1000);
+					_time = time;
+				}				
+			}
 		}
-		
+		else ctr_add(pitem->srcHeight / 1000000.0);		
+
 		if(pitem->state < PQ_STATE_STOPPING)
 		{			
 			if((pitem->copiesTotal && pitem->copiesPrinted >= pitem->copiesTotal) 
@@ -736,10 +761,7 @@ int pq_printed(SPageId *pid, int *pageDone, int *jobDone, SPrintQueueItem **pnex
 		}
 		else TrPrintfL(TRUE, "PQ_STATE_STOPPING");
 
-		memcpy(&item, pitem, sizeof(item));
-		gui_send_print_queue(EVT_GET_PRINT_QUEUE, &item);
-			
-//		return (pitem->copiesPrinted != printed) || scanPrinted;
+		memcpy(&_PrintedItem, pitem, sizeof(_PrintedItem));
 		return *pageDone || *jobDone;
 	}
 	return FALSE;
@@ -788,6 +810,13 @@ int pq_is_ready2print(SPrintQueueItem *pitem)
 	}
 	return FALSE;
 }
+
+//--- pq_sent_document -----------------------------
+void pq_sent_document(int pages)
+{
+	_BufState = 4;
+}
+
 //--- pq_is_ready ----------------------------------
 int pq_is_ready(void)
 {
@@ -805,7 +834,45 @@ int pq_is_ready(void)
 			TrPrintfL(TRUE, "Buffer: sent=%d, transferred=%d, printed=%d, buffered=%d", RX_PrinterStatus.sentCnt, RX_PrinterStatus.transferredCnt, RX_PrinterStatus.printedCnt, RX_PrinterStatus.transferredCnt-RX_PrinterStatus.printedCnt);
 			sent=RX_PrinterStatus.sentCnt;
 			transferred=RX_PrinterStatus.transferredCnt;
-			printed=RX_PrinterStatus.printedCnt;	
+			printed=RX_PrinterStatus.printedCnt;
+			
+			{
+				int bufsize = RX_PrinterStatus.transferredCnt-RX_PrinterStatus.printedCnt;
+				switch(_BufState)
+				{
+				case 0: // filling
+						if (bufsize>15) _BufState = 1; 
+						break;
+			
+				case 1: // buffer full
+						if(bufsize < 10)	
+						{
+							Error(WARN, 0, "Buffer low");
+							_BufState = 2;
+						}
+						break;
+			
+				case 2:	// buffer low
+						if (bufsize>15)
+						{
+							Error(LOG, 0, "Buffer recovered");
+							_BufState = 1;							
+						}
+						else if (bufsize<3)	
+						{
+							Error(ERR_STOP, 0, "Buffer underflow");
+							_BufState=3;
+						}
+						break;
+			
+				case 3: // underflow
+						break;
+				
+				case 4:	// ENDING Document: check OFF 
+						break;
+				default: break;
+				}					
+			}
 		}		
 	}
 	

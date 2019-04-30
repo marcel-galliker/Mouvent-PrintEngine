@@ -37,8 +37,7 @@
 #include <sys/resource.h>
 
 //--- globals ------------------------------------------------------------
-int						RX_VersionLinux;
-
+int						RX_LinuxDeployment;
 RX_SOCKET				RX_MainSocket;
 SHeadBoardCfg			RX_HBConfig;
 int						RX_RGB[MAX_HEADS_BOARD];
@@ -62,6 +61,8 @@ static int		_AppRunning;
 
 //--- prototypes ---------------------------------------------------------
 static void _mem_test(void);
+static void	_check_rx_boot(void);
+
 
 //--- _do_waveform ----------------------------------------------
 static void _do_waveform(const char *fname)
@@ -112,7 +113,7 @@ void handle_menu(char *str)
 			
 	case 'o': cond_ctrlMode(atoi(&str[1]), ctrl_off);		break;
 	case 'w': cond_ctrlMode(atoi(&str[1]), ctrl_warmup);	break;
-	case 'R': fpga_trace_registers("registers");			break;
+	case 'R': fpga_trace_registers("registers", FALSE);		break;
 	case 'r': cond_ctrlMode(atoi(&str[1]), ctrl_print);		break;
 		
 	case 'i': cond_heater_test(atoi(&str[1]));			break;
@@ -126,14 +127,6 @@ void handle_menu(char *str)
 							
 	// Only for DEBUGGING purposes
 	// Parameters for tuning the Conditioner's PID controller
-
-    case 'm': 
-    case 'P':
-    case 'I':
-    case 'D':
-    case 'O':
-        cond_set_param(no, str[0], atoi(&str[2]));
-        break;
 
 	case 'u': if (no<=4) cond_offset_del(no);					break;
 	case 'z': if (no<=4) cond_ctrlMode2(no, ctrl_offset_cal);	break;	
@@ -178,12 +171,12 @@ static void _main_loop(void)
 		time3 = rx_get_ticks();
 		nios_main(ticks, menu);
 		time4 = rx_get_ticks();
-		if (menu) 
+		if (menu && fpga_is_init()) 
 		{
-			putty_display_status();
 			putty_input(str, sizeof(str));
 			handle_menu(str);
 			t_menu = 500*(1+ticks/500);
+			_check_rx_boot();
 		}
 		time5 = rx_get_ticks();
 		{
@@ -236,11 +229,20 @@ static void _mem_test(void)
 	else TrPrintfL(TRUE, "Error allocating buffer\n");
 }
 
+
+//--- _check_rx_boot --------------------------------------------------
+static void	_check_rx_boot(void)
+{
+	int cnt= rx_process_running_cnt("rx_boot_soc", NULL);
+	if (cnt==0) rx_process_start(PATH_ROOT_LX "rx_boot_soc", NULL);
+}
+
 ///--- main ---------------------------------------------------------------
 int main(int argc, char** argv)
 {
 	char ver[32];
-
+	
+	rx_process_name(argv[0]);
 	args_init(argc, argv);
 	rx_startup(argv[0], arg_debug);
 
@@ -295,7 +297,9 @@ int main(int argc, char** argv)
 	if (!arg_offline) ctrl_init();
 	
 //	DataSrv_init();
+	Trace_to_screen(FALSE);
 	_main_loop();
+	Trace_to_screen(TRUE);
 	
 	TrPrintfL(1, "Closing rx_head_ctrl\n");
 	ctrl_end();

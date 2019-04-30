@@ -23,7 +23,6 @@
 #include "ctrl_msg.h"
 #include "gui_svr.h"
 #include "step_ctrl.h"
-#include "balance_def.h"
 #include "chiller.h"
 #include "print_ctrl.h"
 #include "fluid_ctrl.h"
@@ -240,7 +239,7 @@ void fluid_set_config(void)
 				cfg.inkTempMax[n]	  = RX_Config.inkSupply[i*INK_PER_BOARD+n].ink.tempMax;
 				memcpy(cfg.flushTime[n], RX_Config.inkSupply[i*INK_PER_BOARD+n].ink.flushTime, sizeof(cfg.flushTime[n]));
     			// fluid board
-    			cfg.fluid_P[n] = RX_Config.inkSupply[i*INK_PER_BOARD+n].fluid_P;    
+    			//cfg.fluid_P[n] = RX_Config.inkSupply[i*INK_PER_BOARD+n].fluid_P;    
 			}
     				
 			cfg.headsPerColor = RX_Config.headsPerColor;
@@ -272,7 +271,7 @@ void fluid_tick(void)
 	int i;
 	int tol=2;
 	int time=rx_get_ticks();
-#define TIMEOUT 1000
+#define TIMEOUT 2000
 	SHeadStateLight state[INK_SUPPLY_CNT];
 
 	//---  calculate average value
@@ -301,8 +300,7 @@ void fluid_tick(void)
 		}
 			
 		if  (_HeadStateCnt[i].condPumpFeedback > 0)
-			//state[i].condPumpFeedback = _HeadState[i].condPumpFeedback / _HeadStateCnt[i].condPumpFeedback;
-			state[i].condPumpFeedback = _HeadState[i].condPumpFeedback;
+			state[i].condPumpFeedback = _HeadState[i].condPumpFeedback / _HeadStateCnt[i].condPumpFeedback;
 		else 
 			state[i].condPumpFeedback = INVALID_VALUE;
 		
@@ -483,18 +481,17 @@ static void _control(int fluidNo)
 			//	case ctrl_empty_step1:	wait for user input 
 				case ctrl_empty_step2:	_send_ctrlMode(no, ctrl_off, TRUE);			break;
 				
-				case ctrl_cal_start:	_send_ctrlMode(no, ctrl_cal_step1,	  TRUE);	
-										break;
-				
-				case ctrl_cal_step1:	_send_ctrlMode(no, ctrl_cal_step2,   TRUE);    break;
-				case ctrl_cal_step2:	ErrorEx(dev_fluid, fluidNo, LOG, 0, "Calibration complete: Save configuration!");
-										ctrl_head_cal_done(no);
-										_send_ctrlMode(no, ctrl_off,		  TRUE);    
-										break;
-			//	case ctrl_cal_step2:	_send_ctrlMode(no, ctrl_cal_step3,   TRUE);    break;
-			//	case ctrl_cal_step3:	ErrorEx(dev_fluid, fluidNo, LOG, 0, "Calibration complete: Save configuration!");
-			//							_send_ctrlMode(no, ctrl_cal_done,    TRUE);    
+			//	case ctrl_cal_start:	_send_ctrlMode(no, ctrl_cal_step1,	  TRUE);	
 			//							break;
+				
+			//	case ctrl_cal_step1:	_send_ctrlMode(no, ctrl_cal_step2,   TRUE);    break;
+			//	case ctrl_cal_step2:	ErrorEx(dev_fluid, fluidNo, LOG, 0, "Calibration complete: Save configuration!");
+			//							ctrl_head_cal_done(no);
+			//							_send_ctrlMode(no, ctrl_off,		  TRUE);    
+			//							break;
+			//	case ctrl_cal_step2:	_send_ctrlMode(no, ctrl_cal_step3,   TRUE);    break;
+				case ctrl_cal_done:	_send_ctrlMode(no, ctrl_print, TRUE);    
+										break;
 			}
 		}
 	}
@@ -772,6 +769,16 @@ INT32 fluid_get_cylinderPres(int no)
 	if (no >= 0 && no<SIZEOF(_FluidStatus))
 	{
 		return _FluidStatus[no].cylinderPres;
+	}
+	return INVALID_VALUE;
+}
+
+//--- fluid_get_cylinderSetpoint ---------------------------------------
+INT32 fluid_get_cylinderSetpoint(int no)
+{
+	if (no >= 0 && no < SIZEOF(_FluidStatus))
+	{
+		return _FluidStatus[no].cylinderSetpoint;
 	}
 	return INVALID_VALUE;
 }

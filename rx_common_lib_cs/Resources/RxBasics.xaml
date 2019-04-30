@@ -10,6 +10,7 @@
     <System:Double x:Key="FontSizeStd">14.66</System:Double>
     <System:Double x:Key="FontSize">14.66</System:Double>
     <System:Double x:Key="FontSizeLarge">20</System:Double>
+    <System:Double x:Key="FontSizeXL">32</System:Double>
     <System:Double x:Key="FontSizeSmall">12</System:Double>
 
     <System:Double x:Key="RxScrollBarWidth">32</System:Double>

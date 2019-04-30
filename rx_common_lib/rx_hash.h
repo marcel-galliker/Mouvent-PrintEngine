@@ -13,6 +13,6 @@
 
 #pragma once
 
-int rx_hash_file( const char *path,                        unsigned char output[20] );
-int rx_hash_mem ( const unsigned char *input, size_t ilen, unsigned char output[20] );
+int rx_hash_file	( const char *path,                        unsigned char output[20] );
+int rx_hash_mem		( const unsigned char *input, size_t ilen, unsigned char output[20] );
 int rx_hash_mem_str ( const unsigned char *input, size_t ilen, unsigned char output[41] );

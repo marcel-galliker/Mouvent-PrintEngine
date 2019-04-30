@@ -19,7 +19,7 @@
         <Grid>
             <Grid x:Name="BackGrid" Width="{Binding ElementName=MachineImg, Path=ActualWidth}"/>
 
-            <Image x:Name="MachineImg" Source="..\..\Resources\Bitmaps\LB702\LB702_WB2.png"/>
+            <Image x:Name="MachineImg" Source="..\..\Resources\Bitmaps\LB702\LB702_WB.png"/>
 
             <Grid x:Name="FrontGrid" Width="{Binding ElementName=MachineImg, Path=ActualWidth}">
                 <Grid.ColumnDefinitions>

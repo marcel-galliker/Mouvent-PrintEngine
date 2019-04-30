@@ -183,6 +183,7 @@
                             <RowDefinition Height="auto"/>
                             <RowDefinition Height="auto"/>
                             <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
                         </Grid.RowDefinitions>
                         <TextBlock Grid.Row="0" Text="Version" />
                         <TextBlock Grid.Row="0" Grid.Column="1" x:Name="Version" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center"/>

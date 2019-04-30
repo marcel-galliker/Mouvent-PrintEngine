@@ -328,9 +328,11 @@ int pem_print_file_evt	(RX_SOCKET socket, int headNo, SPrintFileMsg	*msg)
 						Error(LOG, 0, "Sent (id=%d, page=%d, copy=%d)", _Item.id.id, _Item.id.page, _Item.id.copy);
 						break;
 
+	/*		
 	case DATA_PRINT_DONE:
 						Error(LOG, 0, "Head[%d]: PrintDone (id=%d, page=%d, copy=%d)", headNo, _Item.id.id, _Item.id.page, _Item.id.copy);
 						break;	
+	*/
 		
 	default:			TrPrintf(TRUE, "Documment ID=%d  page=%d , copy=%d, scan=%d: UNKNOWN EVENT %d",	msg->spoolerNo, msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->evt); break;
 	}

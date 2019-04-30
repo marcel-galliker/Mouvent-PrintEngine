@@ -107,6 +107,12 @@
 #define RO_SCREW_DOWN_0		3
 #define RO_SCREW_DETECT_0	4
 
+// DRIP PAN FUNCTION
+#define DRIP_PANS_INFEED_DOWN		5
+#define DRIP_PANS_INFEED_UP			6
+#define DRIP_PANS_OUTFEED_DOWN		7
+#define DRIP_PANS_OUTFEED_UP		8
+
 #define PRINTHEAD_EN		11	// Input from SPS // '1' Allows Head to go down
 
 // Digital Outputs (max 12)
@@ -117,9 +123,14 @@
 #define RO_VACUUM_BLADE			0x020 //  5 // Y8 Vakuum Blade
 #define RO_VACUUM				0x040 //  6 // SY10 Vakuum
 #define RO_DRAIN_WASTE			0x080 // 7 // Y6 & Y7 // 1 == Waste Beh. Absaugen // 0 == Cable Chain absaugen 
-#define RO_FLUSH_VOLT			0x100
+//#define RO_FLUSH_VOLT			0x100
 #define RO_ALL_OUT_MECH			0x00E // ALL robot (blades and screws)
-#define RO_ALL_OUTPUTS			0x1FF //  ALL Outputs
+#define RO_ALL_OUTPUTS			0x2FF //  ALL Outputs
+
+// DRIP PAN FUNCTION
+#define DRIP_PANS_VALVE_ALL		0x300
+#define DRIP_PANS_VALVE_UP		0x100
+#define DRIP_PANS_VALVE_DOWN	0x200
 
 // Vectors
 static int	HEAD_UP_IN[MOTOR_Z_CNT] = {
@@ -144,6 +155,8 @@ static int	RO_SCREW_DOWN[MOTOR_SCREW_CNT] = {
 #define ROBOT_HEIGHT		RX_StepperCfg.robot[RX_StepperCfg.boardNo].robot_height
 #define ROBOT_ALIGN			RX_StepperCfg.robot[RX_StepperCfg.boardNo].robot_align
 
+#define CAPPING_HEIGHT		35000
+
 #define SLIDE_CAPPING_POS		630000
 
 #define LIFT_RESET				1000 // Reset height
@@ -162,6 +175,9 @@ static int	_NewCmdPos = 0;
 static int	_TimeCnt = 0;
 static int	_Step;
 static int	_PrintPos;
+static int	_DripPans_Connected = 0;
+static int  _AllowMoveDown = 0;
+static int  _DripPansPosition = 2;	// 2 = position unknown after start
 
 // Lift
 static SMovePar	_Par_Z_Ref[MOTOR_Z_CNT];
@@ -265,8 +281,8 @@ void cleaf_init(void)
 	_ParZ_down.stop_level	= 0;
 	_ParZ_down.dis_mux_in	= FALSE;
 
-	_ParZ_cap.speed			= 1000;
-	_ParZ_cap.accel			= 1000;
+	_ParZ_cap.speed			= 10000; // 1000;
+	_ParZ_cap.accel			=  5000; //1000;
 	_ParZ_cap.current		= 150.0;
 	_ParZ_cap.stop_mux		= FALSE;
 	_ParZ_cap.dis_mux_in	= 0;
@@ -387,7 +403,7 @@ void cleaf_init(void)
 	
 	//--- Outputs ----------------
 	Fpga.par->output &= ~RO_ALL_OUTPUTS; // ALL OUTPUTS
-	Fpga.par->output |= RO_FLUSH_VOLT;
+	//Fpga.par->output |= RO_FLUSH_VOLT;
 	
 	Fpga.par->adc_thresh[PUMP_0]    = PUMP_THRESH_LVL;
 }
@@ -421,6 +437,15 @@ void cleaf_main(int ticks, int menu)
 	RX_TestTableStatus.info.cln_screw_0 = fpga_input(RO_SCREW_DOWN_0); // Screwhead 0 is pressed down
 	RX_TestTableStatus.info.cln_screw_2 = fpga_input(RO_SCREW_DETECT_0); // Screwhead 0 is detected
 	RX_TestTableStatus.posX				= -_rob_steps_2_micron(motor_get_step(MOTOR_ROB_0));
+	
+	// Drip Pans : enabled when the main send a command CMD_CLN_DRIP_PANS
+	if (_DripPans_Connected)
+	{
+		RX_TestTableStatus.info.DripPans_InfeedDOWN		= fpga_input(DRIP_PANS_INFEED_DOWN);
+		RX_TestTableStatus.info.DripPans_InfeedUP		= fpga_input(DRIP_PANS_INFEED_UP);
+		RX_TestTableStatus.info.DripPans_OutfeedDOWN	= fpga_input(DRIP_PANS_OUTFEED_DOWN);
+		RX_TestTableStatus.info.DripPans_OutfeedUP		= fpga_input(DRIP_PANS_OUTFEED_UP);
+	}
 
 	// --- set positions False while moving ---
 	if (RX_TestTableStatus.info.moving)
@@ -524,7 +549,7 @@ void cleaf_main(int ticks, int menu)
 			switch(++_Step)
 			{
 			case 1:	// Error(LOG, 0, "CMD_CAP_UP_POS: Start");
-					motors_move_to_step(MOTOR_Z_BITS, &_ParZ_down, POS_UP);											
+					motors_move_to_step(MOTOR_Z_BITS, &_ParZ_down, POS_UP);
 					break;
 				
 			case 2:	// Error(LOG, 0, "CMD_CAP_UP_POS: Step 1 done");
@@ -548,14 +573,16 @@ void cleaf_main(int ticks, int menu)
 					motors_move_to_step(MOTOR_Z_BITS, &_ParZ_down, POS_UP);											
 					break;
 				
-			case 2:	// Error(LOG, 0, "CMD_CAP_CAPPING_POS: Step 1 done");
+			case 2:	Error(LOG, 0, "CMD_CAP_CAPPING_POS: Step 1 done");
 					motors_move_to_step(MOTOR_ROB_BITS, &_ParRob_drive, -_rob_micron_2_steps(SLIDE_CAPPING_POS));	
 					break;
 				
 			case 3:	// Error(LOG, 0, "CMD_CAP_CAPPING_POS: Step 2 done");
 					RX_TestTableStatus.info.x_in_cap = TRUE;					
-					motor_move_to_step(MOTOR_Z_0, &_ParZ_cap, _z_micron_2_steps(ROBOT_HEIGHT + 0           + 100));
-					motor_move_to_step(MOTOR_Z_1, &_ParZ_cap, _z_micron_2_steps(ROBOT_HEIGHT + ROBOT_ALIGN + 100));
+					//motor_move_to_step(MOTOR_Z_0, &_ParZ_cap, _z_micron_2_steps(ROBOT_HEIGHT + 0           + 100));
+					//motor_move_to_step(MOTOR_Z_1, &_ParZ_cap, _z_micron_2_steps(ROBOT_HEIGHT + ROBOT_ALIGN + 100));			
+					motor_move_to_step(MOTOR_Z_0, &_ParZ_cap, _z_micron_2_steps(CAPPING_HEIGHT));		
+					motor_move_to_step(MOTOR_Z_1, &_ParZ_cap, _z_micron_2_steps(CAPPING_HEIGHT));		
 					motors_start(MOTOR_Z_BITS, FALSE);
 					break;
 				
@@ -591,7 +618,7 @@ void cleaf_main(int ticks, int menu)
 				RX_TestTableStatus.info.ref_done = TRUE;
 				_ResetRetried = 0;
 				RX_TestTableStatus.posX = -_rob_steps_2_micron(motor_get_step(MOTOR_ROB_0));
-				Fpga.par->output |= RO_FLUSH_VOLT; // Enable Flush Pump
+			//	Fpga.par->output |= RO_FLUSH_VOLT; // Enable Flush Pump
 			//	loc_new_cmd = CMD_CLN_SCREW_REF; // ref all screws
 				loc_move_pos = FALSE;
 			}
@@ -857,6 +884,11 @@ void cleaf_display_status(void)
 		term_printf("z in print:     %d ", RX_TestTableStatus.info.z_in_print);
 		term_printf("z in capping:   %d\n", RX_TestTableStatus.info.z_in_cap);
 		term_printf("move tgl bit: %d \n", RX_TestTableStatus.info.move_tgl);
+		term_printf("allow move down: %d \n", _AllowMoveDown);
+		term_printf("drips pans connected: %d \n", _DripPans_Connected);
+		term_printf("drips pans valve: %d \n", _DripPansPosition);
+		term_printf("drips pans DOWN (Infeed Outfeed): %d %d \n", RX_TestTableStatus.info.DripPans_InfeedDOWN, RX_TestTableStatus.info.DripPans_OutfeedDOWN);
+		term_printf("drips pans UP (Infeed Outfeed): %d %d \n", RX_TestTableStatus.info.DripPans_InfeedUP, RX_TestTableStatus.info.DripPans_OutfeedUP);
 		term_printf("\n");
 	}
 	
@@ -1117,7 +1149,7 @@ int  cleaf_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		RX_TestTableStatus.info.z_in_ref	= FALSE;
 		RX_TestTableStatus.info.z_in_print	= FALSE;
 		RX_TestTableStatus.info.z_in_cap	= FALSE;
-		if(!_CmdRunning)
+		if (!_CmdRunning && _AllowMoveDown)
 		{
 			if(RX_TestTableStatus.info.ref_done)
 			{
@@ -1161,11 +1193,48 @@ int  cleaf_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		RX_TestTableStatus.info.z_in_ref	= FALSE;
 		RX_TestTableStatus.info.z_in_print	= FALSE;
 		RX_TestTableStatus.info.z_in_cap	= FALSE;		
-		if (!_CmdRunning && RX_TestTableStatus.info.z_ref_done)
+	//	if (!_CmdRunning && RX_TestTableStatus.info.z_ref_done)
+		if (!_CmdRunning)
 		{
 			_CmdRunning = msgId;
 			_Step = 0;
 		}
+		break;
+		
+	case CMD_CLN_DRIP_PANS:
+		_DripPans_Connected = 1;
+		if (RX_TestTableStatus.info.z_in_ref) 
+		{			
+			if (!_DripPansPosition)
+			{
+				// all stepper motors in reference
+				Fpga.par->output &= ~DRIP_PANS_VALVE_ALL;
+				Fpga.par->output |= DRIP_PANS_VALVE_UP;	
+				_DripPansPosition = 1;
+			}
+			else
+			{
+				// all stepper motors in reference
+				Fpga.par->output &= ~DRIP_PANS_VALVE_ALL;
+				Fpga.par->output |= DRIP_PANS_VALVE_DOWN;	
+				_DripPansPosition = 0;
+			}
+		}
+		break;
+		
+	case CMD_CLN_DRIP_PANS_EN:
+		_DripPans_Connected = 1;
+		if (fpga_input(DRIP_PANS_INFEED_UP) && fpga_input(DRIP_PANS_OUTFEED_UP)) _DripPansPosition = 1;
+		else _DripPansPosition = 0;
+		
+		break;
+		
+	case CMD_CAP_ALLOW_MOVE_DOWN:
+		_AllowMoveDown = 1;
+		break;
+		
+	case CMD_CAP_NOT_ALLOW_MOVE_DOWN:
+		_AllowMoveDown = 0;
 		break;
 				
 		// ============================================================== Robot ==============================================================

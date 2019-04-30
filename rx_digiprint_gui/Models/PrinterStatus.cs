@@ -29,6 +29,9 @@ namespace RX_DigiPrint.Models
             AllInkSupliesOff    = msg.status.inkSupilesOff!=0;
             AllInkSupliesOn     = msg.status.inkSupilesOn!=0;
             MaxSpeeds           = msg.status.maxSpeed;
+            ActSpeed            = (double)msg.status.actSpeed;
+            CounterAct          = msg.status.counterAct;
+            CounterTotal        = msg.status.counterTotal;
             DataReady           = (msg.status.dataReady!=0);
             ExternalData        = (msg.status.externalData!=0);
         }
@@ -121,6 +124,30 @@ namespace RX_DigiPrint.Models
             return _MaxSpeed[3];
         }
 
+        //--- Property ActSpeed ---------------------------------------
+        private double _ActSpeed;
+        public double ActSpeed
+        {
+            get { return _ActSpeed; }
+            set { SetProperty(ref _ActSpeed, value); }
+        }
+
+        //--- Property CounterAct ---------------------------------------
+        private double _CounterAct;
+        public double CounterAct
+        {
+            get { return _CounterAct; }
+            set { SetProperty(ref _CounterAct, value); }
+        }
+
+        //--- Property CounterTotal ---------------------------------------
+        private double _CounterTotal;
+        public double CounterTotal
+        {
+            get { return _CounterTotal; }
+            set { SetProperty(ref _CounterTotal, value); }
+        }
+        
         //--- Property DataReady ---------------------------------------
         private bool _DataReady;
         public bool DataReady

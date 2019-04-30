@@ -19,6 +19,7 @@
 #include "rx_trace.h"
 #include "tcp_ip.h"
 #include "gui_svr.h"
+#include "ctr.h"
 #include "print_queue.h"
 #include "print_ctrl.h"
 #include "machine_ctrl.h"
@@ -172,6 +173,12 @@ int handle_gui_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sende
 		case CMD_EXTERNAL_DATA_ON:	_do_external_data(socket, TRUE);									break;
 		case CMD_EXTERNAL_DATA_OFF:	_do_external_data(socket, FALSE);									break;
 
+		case CMD_RESET_CTR:			{
+										ctr_reset();
+										gui_send_printer_status(&RX_PrinterStatus);
+									}
+									break;
+				
 		case CMD_GET_PRN_STAT:		_do_get_prn_stat(socket);											break;
 
 		case CMD_TEST_START:		_do_test_start(socket, (SPrintQueueEvt*) pmsg);						break;
@@ -647,7 +654,6 @@ static void _do_set_printer_cfg(RX_SOCKET socket, SPrinterCfgMsg* pmsg)
 {
 	char			*ch, *start;
 	int				i;
-	int				fluid_P[SIZEOF(RX_Config.inkSupply)];
 
 	if (pmsg->hdr.msgLen != sizeof(SPrinterCfgMsg)) 
 	{
@@ -668,8 +674,6 @@ static void _do_set_printer_cfg(RX_SOCKET socket, SPrinterCfgMsg* pmsg)
 	memcpy(RX_Config.headDist,		pmsg->headDist,			sizeof(RX_Config.headDist));
 	memcpy(RX_Config.headDistBack,	pmsg->headDistBack,		sizeof(RX_Config.headDistBack));
 	memcpy(RX_Config.colorOffset,	pmsg->colorOffset,		sizeof(RX_Config.colorOffset));	
-	for (i=0; i<SIZEOF(RX_Config.inkSupply); i++)
-		fluid_P[i] = RX_Config.inkSupply[i].fluid_P;
 	memset(RX_Config.inkSupply, 0, sizeof(RX_Config.inkSupply));
 	start=pmsg->inkFileNames;
 	for (ch=pmsg->inkFileNames; ; ch++)
@@ -686,7 +690,6 @@ static void _do_set_printer_cfg(RX_SOCKET socket, SPrinterCfgMsg* pmsg)
 	RX_Config.headsPerColor = pmsg->headsPerColor;
 	for (i=0; i<RX_Config.inkSupplyCnt; i++)
 	{
-		RX_Config.inkSupply[i].fluid_P        = fluid_P[i];
 		RX_Config.inkSupply[i].cylinderPresSet = fluid_get_cylinderPresSet(i);	
 	}
 	RX_Config.externalData = pmsg->externalData;
@@ -764,7 +767,7 @@ static void _do_test_start	(RX_SOCKET socket, SPrintQueueEvt* pmsg)
 //	if (rx_def_is_scanning(RX_Config.printer.type) && (RX_TestImage.testImage==PQ_TEST_JETS || RX_TestImage.testImage==PQ_TEST_ENCODER) ) RX_TestImage.scans=RX_Config.inkSupplyCnt;
 //	if (rx_def_is_scanning(RX_Config.printer.type) && (RX_TestImage.testImage==PQ_TEST_JETS) ) RX_TestImage.scans=RX_Config.inkSupplyCnt;
 	if (RX_TestImage.testImage==PQ_TEST_SCANNING) RX_TestImage.scans=1;
-	if (RX_Config.printer.type==printer_test_table && RX_TestImage.testImage==PQ_TEST_JETS) RX_TestImage.scans=RX_Config.inkSupplyCnt;
+	if (RX_Config.printer.type==printer_test_table && (RX_TestImage.testImage==PQ_TEST_JETS || RX_TestImage.testImage==PQ_TEST_JET_NUMBERS)) RX_TestImage.scans=RX_Config.inkSupplyCnt;
 	if (RX_TestImage.scans<1) RX_TestImage.scans=1;
 //	RX_TestImage.scanMode = PQ_SCAN_STD;
 	RX_TestImage.id.id = RX_TestImage.testImage;

@@ -18,6 +18,7 @@
 #include "rx_common.h"
 #include "rx_def.h"
 #include "rx_error.h"
+#include "rx_file.h"
 #include "rx_trace.h"
 #include "rx_fpga.h"
 
@@ -49,6 +50,23 @@ static void _linux_version(void)
 		sscanf(str, "Linux version %d.%d.%d-%d", &_LinuxVersion.major, &_LinuxVersion.minor, &_LinuxVersion.revision, &_LinuxVersion.build);
 		fclose(file);
 	}
+}
+
+//--- rx_fpga_linux_deployment ----------------------------------------------
+int rx_fpga_linux_deployment(void)
+{
+	FILE *file;
+	int version=0;
+	if (!strcmp(RX_Process_Name, "rx_head_ctrl")) 	file = rx_fopen("/root/version_flash", "rt", _SH_DENYNO);
+	else											file = rx_fopen("/root/version_linux", "rt", _SH_DENYNO);
+
+	if (file!=NULL) 
+	{
+		fscanf(file, "%d", &version);
+		fclose(file);
+	}			
+
+	return version;
 }
 
 //--- rx_fpga_load -----------------------------------

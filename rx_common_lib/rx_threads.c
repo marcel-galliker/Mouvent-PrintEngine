@@ -791,7 +791,7 @@ int rx_startup(const char* name, int debug)
 {
 	int cnt;
 	cnt = rx_process_running_cnt(name, NULL);
-	TrPrintf(1, "ProcessCnt >>%s<<=%d", name, cnt);
+	TrPrintfL(1, "ProcessCnt >>%s<<=%d", name, cnt);
 
 	if (debug)
 	{
@@ -800,7 +800,7 @@ int rx_startup(const char* name, int debug)
 		{
 			cnt = rx_process_running_cnt(name, NULL);
 			if (cnt<2) break;
-			TrPrintf(1, "Kill >>%s<<", name);
+			TrPrintfL(1, "Kill >>%s<<", name);
 			rx_process_kill(name, NULL);
 		}
 	}

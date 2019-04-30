@@ -30,7 +30,7 @@ namespace RX_DigiPrint.Views.UserControls
             Button_Up.IsChecked     = (button==Button_Up);
             Button_Print.IsChecked  = (button==Button_Print);
             Button_Cap.IsChecked    = (button==Button_Cap);
-            Button_Wipe.IsChecked   = (button==Button_Wipe);
+            //Button_Wipe.IsChecked   = (button==Button_Wipe);
         }
 
         //--- PrintSystem_PropertyChanged -----------------------------------
@@ -42,11 +42,15 @@ namespace RX_DigiPrint.Views.UserControls
                 Button_Wipe.Visibility = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf 
                                        || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702)? 
                                         Visibility.Visible:Visibility.Collapsed;
-                */
+                
                 Button_Wipe.Visibility = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_UV || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_WB)? 
                                         Visibility.Visible:Visibility.Collapsed;
-
-                LaserTX.Visibility = LaserVal.Visibility = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf) ? Visibility.Visible : Visibility.Collapsed;
+                */
+                Visibility visibility = LaserVal.Visibility = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf) ? Visibility.Visible : Visibility.Collapsed;
+                Button_DripPans.Visibility = visibility;
+                Leds_DripPans.Visibility   = visibility;
+                LaserTX.Visibility         = visibility; 
+                LaserVal.Visibility        = visibility;
             }   
         }
 
@@ -94,6 +98,13 @@ namespace RX_DigiPrint.Views.UserControls
         {
             _button_active(sender as CheckBox);
             RxGlobals.RxInterface.SendCommand(TcpIp.CMD_CLN_WIPE);
+        }
+
+        //--- CapDripPans_clicked -------------------------------------------
+        private void CapDripPans_clicked(object sender, RoutedEventArgs e)
+        {
+            _button_active(sender as CheckBox);
+            RxGlobals.RxInterface.SendCommand(TcpIp.CMD_CLN_DRIP_PANS);
         }
     }
 }

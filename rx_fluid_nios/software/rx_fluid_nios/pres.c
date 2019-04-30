@@ -68,16 +68,16 @@ void pres_init(void)
 	memset(_Sensor, 0, sizeof(_Sensor));
 
 	_Sensor[IS1_SENSOR].i2c 		= I2C_MASTER_IS1_BASE;
-	_Sensor[IS1_SENSOR].pPressure 	= &pRX_Status->ink_supply[0].cylinderPres;
+	_Sensor[IS1_SENSOR].pPressure 	= &pRX_Status->ink_supply[0].IS_Pressure_Actual;
 
 	_Sensor[IS2_SENSOR].i2c 		= I2C_MASTER_IS2_BASE;
-	_Sensor[IS2_SENSOR].pPressure 	= &pRX_Status->ink_supply[1].cylinderPres;
+	_Sensor[IS2_SENSOR].pPressure 	= &pRX_Status->ink_supply[1].IS_Pressure_Actual;
 
 	_Sensor[IS3_SENSOR].i2c 		= I2C_MASTER_IS3_BASE;
-	_Sensor[IS3_SENSOR].pPressure 	= &pRX_Status->ink_supply[2].cylinderPres;
+	_Sensor[IS3_SENSOR].pPressure 	= &pRX_Status->ink_supply[2].IS_Pressure_Actual;
 
 	_Sensor[IS4_SENSOR].i2c 		= I2C_MASTER_IS4_BASE;
-	_Sensor[IS4_SENSOR].pPressure 	= &pRX_Status->ink_supply[3].cylinderPres;
+	_Sensor[IS4_SENSOR].pPressure 	= &pRX_Status->ink_supply[3].IS_Pressure_Actual;
 
 	_Sensor[F_SENSOR].i2c 			= I2C_MASTER_F_BASE;
 	_Sensor[F_SENSOR].pPressure 	= &pRX_Status->flush_pressure;

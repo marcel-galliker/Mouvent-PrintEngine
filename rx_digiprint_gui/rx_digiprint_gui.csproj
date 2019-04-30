@@ -124,7 +124,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug-Remote|x64'">
     <DebugSymbols>true</DebugSymbols>
-    <OutputPath>\\192.168.200.2\radex\_out\Debug-Remote_x64\</OutputPath>
+    <OutputPath>\\192.168.200.2\radex\_out\Debug-Remotex64\</OutputPath>
     <DefineConstants>DEBUG;TRACE;RX_DigiPrint;X64</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>x64</PlatformTarget>
@@ -308,6 +308,7 @@
     <Compile Include="Converters\CleaningState_Converter.cs" />
     <Compile Include="Converters\ColorCode_Str.cs" />
     <Compile Include="Converters\Copies_Converter.cs" />
+    <Compile Include="Converters\Counter_Converter.cs" />
     <Compile Include="Converters\CtrlMode_Str.cs" />
     <Compile Include="Converters\DeviceNoVisible_Converter.cs" />
     <Compile Include="Converters\EnumToInt_Converter.cs" />
@@ -342,6 +343,7 @@
     <Compile Include="Converters\Test_Converter.cs" />
     <Compile Include="Converters\ToString_Converter.cs" />
     <Compile Include="Converters\Percent_Converter.cs" />
+    <Compile Include="Converters\UvLampImg_Converter.cs" />
     <Compile Include="Converters\WlanQuality_Converter.cs" />
     <Compile Include="External\FastBitmap.cs" />
     <Compile Include="External\QuadDistort.cs" />
@@ -376,6 +378,7 @@
     <Compile Include="Models\Enums\EN_CleafCuttingInspection.cs" />
     <Compile Include="Models\Enums\EN_Collate.cs" />
     <Compile Include="Models\Enums\EN_DeviceNumbers.cs" />
+    <Compile Include="Models\Enums\EN_DropSize.cs" />
     <Compile Include="Models\Enums\EN_RectoVerso.cs" />
     <Compile Include="Models\Enums\EN_OnOffAuto.cs" />
     <Compile Include="Models\Enums\EN_CleafManualSplice.cs" />
@@ -500,6 +503,12 @@
     <Compile Include="Views\DP803View\DP803View.xaml.cs">
       <DependentUpon>DP803View.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\LB702UVView\LB702UV_Cfg.xaml.cs" />
+    <Compile Include="Views\LB702UVView\LB702UV_Cmd.xaml.cs" />
+    <Compile Include="Views\LB702UVView\LB702UV_Par.xaml.cs" />
+    <Compile Include="Views\LB702UVView\LB702UV_Prepare.xaml.cs" />
+    <Compile Include="Views\LB702UVView\LB702UV_Status.xaml.cs" />
+    <Compile Include="Views\LB702UVView\LB702UV_View.xaml.cs" />
     <Compile Include="Views\LB702WBView\LB702WBView.xaml.cs">
       <DependentUpon>LB702WBView.xaml</DependentUpon>
     </Compile>
@@ -648,7 +657,7 @@
     <Compile Include="Views\UserControls\BluetoothWindow.xaml.cs">
       <DependentUpon>BluetoothWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\UserControls\ChillerView.xaml.cs">
+    <Compile Include="Views\PrintSystemView\ChillerView.xaml.cs">
       <DependentUpon>ChillerView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\UserControls\CleaningView.xaml.cs">
@@ -660,7 +669,7 @@
     <Compile Include="Views\PrintQueueView\PageNumberView.xaml.cs">
       <DependentUpon>PageNumberView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\UserControls\EncoderView.xaml.cs">
+    <Compile Include="Views\PrintSystemView\EncoderView.xaml.cs">
       <DependentUpon>EncoderView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\UserControls\FlushWindow.xaml.cs">
@@ -917,6 +926,30 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Views\LB702UVView\LB702UV_Cfg.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LB702UVView\LB702UV_Cmd.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LB702UVView\LB702UV_Par.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LB702UVView\LB702UV_Prepare.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LB702UVView\LB702UV_Status.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LB702UVView\LB702UV_View.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Views\LB702WBView\LB702WBView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -1117,7 +1150,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\UserControls\ChillerView.xaml">
+    <Page Include="Views\PrintSystemView\ChillerView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -1137,7 +1170,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\UserControls\EncoderView.xaml">
+    <Page Include="Views\PrintSystemView\EncoderView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -1289,12 +1322,13 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Resource Include="Resources\Bitmaps\UV_Lamp_OFF.ico" />
+    <Resource Include="Resources\Bitmaps\LB702\LB702_WB.png" />
+    <Resource Include="Resources\Bitmaps\LB702\LB702_UV.jpg" />
     <Resource Include="Resources\Bitmaps\wash.ico" />
     <Resource Include="Resources\Bitmaps\glue.ico" />
     <Resource Include="Resources\Bitmaps\PageDown.ico" />
     <Resource Include="Resources\Bitmaps\PageUp.ico" />
-    <Resource Include="Resources\Bitmaps\LB702\LB702_WB2.png" />
-    <Resource Include="Resources\Bitmaps\LB702\LB702_WB.jpg" />
     <Resource Include="Resources\Bitmaps\DP803\DP803.jpg" />
     <Resource Include="mouvent.ico" />
     <EmbeddedResource Include="Properties\Licenses.licx" />

@@ -44,6 +44,7 @@
 
 //--- module globals ---------------------------------------
 static int				_Init=FALSE;
+static int				_LinuxDeployment=0;
 static SFpgaQSys		*_Qsys;
 static SFluidFpgaStatus	*_Stat;
 static int				_MemId=0;
@@ -60,6 +61,7 @@ void fpga_init()
 {
 	int reply, fpga_running;	
 	_Init = FALSE;
+	_LinuxDeployment = rx_fpga_linux_deployment();
 	if (rx_fpga_load (PATH_BIN_FLUID FIELNAME_FLUID_RBF)!=REPLY_OK) return;	
 
 	//--- map the meory ------------------
@@ -98,11 +100,19 @@ int	  fpga_qsys_timestamp(void)
 	return _Qsys->qsys_timestamp;			
 }
 
+//--- fpga_cfg -----------------
+void fpga_cfg(void)
+{
+	if (_LinuxDeployment<26) Error(WARN, 0, "LinuxDeloyment V%d, must be 26 or higher", _LinuxDeployment);		
+}
+
 //--- _fpga_display_status -----------------------------------------------
 static void _fpga_display_status(void)
 {
 	if (_Init)
 	{
+		term_printf("FPGA Version: %d.%d.%d.%d           Linux=%d\n", _Stat->version.major, _Stat->version.minor, _Stat->version.revision, _Stat->version.build, _LinuxDeployment);
+		term_printf("\n");			
 	}
 	else
 	{

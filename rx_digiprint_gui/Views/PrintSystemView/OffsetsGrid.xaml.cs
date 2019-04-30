@@ -43,7 +43,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                                                             Belt.Visibility         = Visibility.Visible;
                                                             Overlap.Visibility      = Visibility.Visible;
                                                             EncoderVerso.Visibility = Visibility.Collapsed;
-                                                            Verso.Visibility        = Visibility.Collapsed;
+                                                            DistVerso.Visibility    = Visibility.Collapsed;
                                                             break;
                 case EPrinterType.printer_TX801:            
                 case EPrinterType.printer_TX802:            this.Visibility         = Visibility.Visible;
@@ -52,7 +52,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                                                             Belt.Visibility         = Visibility.Visible; 
                                                             Overlap.Visibility      = Visibility.Visible;
                                                             EncoderVerso.Visibility = Visibility.Collapsed;
-                                                            Verso.Visibility        = Visibility.Collapsed;
+                                                            DistVerso.Visibility    = Visibility.Collapsed;
                                                             break;
 
                 case EPrinterType.printer_DP803:            this.Visibility         = Visibility.Visible;
@@ -61,7 +61,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                                                             Belt.Visibility         = Visibility.Collapsed;
                                                             Overlap.Visibility      = Visibility.Collapsed;
                                                             EncoderVerso.Visibility = Visibility.Visible;
-                                                            Verso.Visibility        = Visibility.Visible;
+                                                            DistVerso.Visibility    = Visibility.Visible;
                                                             break;
 
                 case EPrinterType.printer_LB701:
@@ -71,7 +71,16 @@ namespace RX_DigiPrint.Views.PrintSystemView
                                                             Belt.Visibility         = Visibility.Collapsed;
                                                             Overlap.Visibility      = Visibility.Collapsed; 
                                                             EncoderVerso.Visibility = Visibility.Collapsed;
-                                                            Verso.Visibility        = Visibility.Collapsed;
+                                                            DistVerso.Visibility    = Visibility.Collapsed;
+                                                            break;
+
+                case EPrinterType.printer_LB702_WB:         this.Visibility         = Visibility.Visible;
+                                                            Encoder.Visibility      = Visibility.Visible;
+                                                            Angle.Visibility        = Visibility.Collapsed;
+                                                            Belt.Visibility         = Visibility.Collapsed;
+                                                            Overlap.Visibility      = Visibility.Collapsed; 
+                                                            EncoderVerso.Visibility = Visibility.Collapsed;
+                                                            DistVerso.Visibility    = Visibility.Visible;
                                                             break;
 
                 default:                                    this.Visibility         = Visibility.Visible;
@@ -80,7 +89,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                                                             Belt.Visibility         = Visibility.Collapsed;
                                                             Overlap.Visibility      = Visibility.Collapsed; 
                                                             EncoderVerso.Visibility = Visibility.Collapsed;
-                                                            Verso.Visibility        = Visibility.Collapsed;
+                                                            DistVerso.Visibility    = Visibility.Collapsed;
                                                             break;
             }
         }

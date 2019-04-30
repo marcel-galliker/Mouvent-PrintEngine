@@ -67,7 +67,7 @@
             
             <TextBlock Grid.Row="7" Grid.Column="0" Text="Printing Time"/>
             
-            <TextBlock Grid.Row="8" Grid.Column="0" Text="Image In Cnt"/>
+            <TextBlock Grid.Row="8" Grid.Column="0" Text="Image In Cnt (Buffer)"/>
         </Grid>
 
         <ScrollViewer x:Name="HeadScroll"

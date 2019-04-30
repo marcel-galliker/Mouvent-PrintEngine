@@ -41,17 +41,40 @@ namespace RX_Common
 
         //-------------
 
-        private bool    _shift=false;
+        private int     _shift=0;
         private bool    _shuttingDown=false;
         private TextBox _Target;
+        private Point   _Position;
+        private double  _ObjWidth=0;
+        private double  _ObjHeight=0;
         RxScreen        _Screen =new RxScreen();
 
-        private List<List<string>> keys = new List<List<string>>()
+        static private List<List<List<string>>> _Keys = new List<List<List<string>>>()
         {
-            new List<string>{"1", "2", "3", "4", "5", "6", "7", "8", "9", "0","Back"},
-            new List<string>{"q", "w", "e", "r", "t", "z", "u", "i", "o", "p","ENTER"},
-            new List<string>{"a", "s", "d", "f", "g", "h", "j", "k", "l", "/"},
-            new List<string>{".", "y", "x", "c", "v", "b", "n", "m", "-", "_", "\\"}
+            //--- standard ----
+            new List<List<string>>
+            {
+                new List<string>{"1", "2", "3", "4", "5", "6", "7", "8", "9", "0","Back"},
+                new List<string>{"q", "w", "e", "r", "t", "z", "u", "i", "o", "p","ENTER"},
+                new List<string>{"a", "s", "d", "f", "g", "h", "j", "k", "l", "/"},
+                new List<string>{".", "y", "x", "c", "v", "b", "n", "m", "-", "_", "\\"}
+            },
+            //--- caps ---------
+            new List<List<string>>
+            {
+                new List<string>{"1", "2", "3", "4", "5", "6", "7", "8", "9", "0","Back"},
+                new List<string>{"Q", "W", "E", "R", "T", "Z", "U", "I", "O", "P","ENTER"},
+                new List<string>{"A", "S", "D", "F", "G", "H", "J", "K", "L", "/"},
+                new List<string>{".", "Y", "X", "C", "V", "B", "N", "M", "-", "_", "\\"}
+            },
+            //--- symbols ------------------
+            new List<List<string>>
+            {
+                new List<string>{"1", "2", "3", "4", "5", "6", "7", "8", "9", "0","Back"},
+                new List<string>{"@", "#", "°", "$", "€", "+", "-", "?", "&", "%","ENTER"},
+                new List<string>{"ä", "ö", "ü", "é", "è", "à", "â", "", "", "/"},
+                new List<string>{".", ",", ":", ";", "", "", "", "", "", "_", "\\"}
+            }
         };
       
         //--- creator -----------------------------------
@@ -64,15 +87,21 @@ namespace RX_Common
 //            KeyDown += RxTextPad_KeyDown;
 
             _Target = obj;
+            if (obj!=null)
+            {
+                _Position  = obj.PointToScreen(new Point(0, 0));
+                _ObjWidth  = obj.ActualWidth;
+                _ObjHeight = obj.ActualHeight;
+            }
 
             RxScreen screen =new RxScreen();
             screen.PlaceWindow(this);
 
             Pad.Visibility = Visibility.Hidden;
 
-            for (int i=0; i<keys.Count; i++)
+            for (int i=0; i<_Keys[0].Count; i++)
             {
-                _CreateKeys(1+i, keys[i]);
+                _CreateKeys(1+i, _Keys[0][i]);
             }
 
             if (obj!=null) 
@@ -153,6 +182,29 @@ namespace RX_Common
                 SizeToContent   = SizeToContent.WidthAndHeight;
         }
 
+        //--- Pad_SizeChanged ------------------------------
+        private void Pad_SizeChanged(object sender, SizeChangedEventArgs e)
+        {            
+            RxScreen screen =new RxScreen();
+            double left = _Position.X*screen.Scale;
+            double top  = _Position.Y*screen.Scale;
+            double border=2;
+            if (screen.Surface)
+            {
+                top  += _ObjHeight;
+                left -= 32;
+                border=10;
+            }
+            if (top  + Pad.ActualHeight > screen.Height*screen.Scale-border)
+            {
+               left += _ObjWidth;
+               top  = screen.Height*screen.Scale-Pad.ActualHeight-border;
+            }
+            if (left + Pad.ActualWidth  > screen.Width*screen.Scale-border )   left = screen.Width*screen.Scale-Pad.ActualWidth-border;
+            Canvas.SetLeft (Pad, left); 
+            Canvas.SetTop  (Pad, top);
+        }
+
         //--- Window_Loaded -------------------------------------
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {            
@@ -188,37 +240,25 @@ namespace RX_Common
             #if (!DEBUG) 
                 this.Topmost=true;
             #endif
-            double left=0;
-            double top=0;
             
             double width=(_Screen.Width-pt.X)*_Screen.Scale-_Target.ActualWidth*_Screen.FactX;
             double height=(_Screen.Height-pt.Y)*_Screen.Scale-_Target.ActualHeight*_Screen.FactY;
 
             Back.BorderThickness = new Thickness(pt.X*_Screen.Scale, pt.Y*_Screen.Scale, width, height);
-            left = pt.X*_Screen.Scale+_Target.ActualWidth-Pad.ActualWidth;
-            top  = pt.Y*_Screen.Scale+_Target.ActualHeight;
-
-            if (left + Pad.ActualWidth  > _Screen.Width ) left = _Screen.Width*_Screen.Scale-Pad.ActualWidth;
-            if (left<_Screen.Left)                        left = _Screen.Left*_Screen.Scale;
-            if (top  + Pad.ActualHeight > _Screen.Height) top  = _Screen.Height*_Screen.Scale-Pad.ActualHeight;            
-
-            Canvas.SetLeft (Pad, left);        
-            Canvas.SetTop  (Pad, top);
             Pad.Visibility = Visibility.Visible;
         }
 
         //--- _CreateKeys --------------------------------------------------
-        private void _CreateKeys(int childNo, List<string> keys)
+        private void _CreateKeys(int row, List<string> keys)
         {
             int pos;
-            StackPanel stack = Stack.Children[childNo] as StackPanel;
+            StackPanel stack = Pad.Children[row] as StackPanel;
 
             for (pos=0; pos<keys.Count; pos++)
             {
                 Button b = new Button();
                 if (keys[pos]==" ") HorizontalAlignment=HorizontalAlignment.Stretch;
                 if (keys[pos].Length>1) b.Background = ClearButton.Background;
-                b.CommandParameter = keys[pos];
                 b.Content = keys[pos].ToString();
                 b.Click += button_Click;
                 stack.Children.Add(b);
@@ -255,8 +295,7 @@ namespace RX_Common
             Button button = sender as Button;
             if (button==null) return;
 
-            if (button.CommandParameter==null)  _handle_key(button.Content.ToString(), (char)0);
-            else                                _handle_key(button.CommandParameter.ToString(), (char)0);
+            _handle_key(button.Content.ToString(), (char)0);
         }    
 
         //--- close_Clicked ----------------------
@@ -303,16 +342,8 @@ namespace RX_Common
             }
             else if (key.Length==1) 
             {
-                if (_Target==null) 
-                {
-                    if (_shift) _send(key.ToUpper());
-                    else        _send(key.ToLower());
-                }
-                else
-                {
-                    if (_shift) Result += key.ToUpper();
-                    else        Result += key.ToLower();
-                }                
+                if (_Target==null) _send(key);
+                else Result += key;
             }
             else if (key.Equals("Esc"))     
             {
@@ -328,8 +359,9 @@ namespace RX_Common
             }
             else if (key.Contains("Shift"))
             {
-                _shift = !_shift;
-                foreach (var item  in Stack.Children)
+                int row=0;
+                _shift = (_shift+1) % _Keys.Count;
+                foreach(var item  in Pad.Children)
                 {
                     StackPanel stk = item as StackPanel;
                     if (stk!=null)
@@ -337,12 +369,9 @@ namespace RX_Common
                         for(int i=0; i<stk.Children.Count; i++)
                         {
                             Button b = stk.Children[i] as Button;
-                            if (b!=null && b.Content.ToString().Length==1)
-                            {
-                                if (_shift) b.Content = b.Content.ToString().ToUpper();
-                                else        b.Content = b.Content.ToString().ToLower();
-                            }
+                            if (b!=null) b.Content = _Keys[_shift][row][i];
                         }
+                        row++;
                     }
                 }
             }

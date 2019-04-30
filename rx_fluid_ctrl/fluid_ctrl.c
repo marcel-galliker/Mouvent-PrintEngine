@@ -22,6 +22,7 @@
 #include "tcp_ip.h"
 #include "nios_fluid.h"
 #include "daisy_chain.h"
+#include "fpga_fluid.h"
 #include "fluid_ctrl.h"
 
 #ifdef linux
@@ -182,7 +183,9 @@ static int _handle_ctrl_msg(RX_SOCKET socket, void *msg)
 	{
 	case CMD_ERROR_RESET:		nios_error_reset();																		break;
 
-	case CMD_FLUID_CFG:			nios_set_cfg		((SFluidBoardCfgLight*) &phdr[1]);									break;
+	case CMD_FLUID_CFG:			nios_set_cfg		((SFluidBoardCfgLight*) &phdr[1]);									
+								fpga_cfg			();
+								break;
 	case CMD_FLUID_STAT:		_do_fluid_stat		(socket, (SHeadStateLight*)	&phdr[1]);								break;
 	case CMD_FLUID_CTRL_MODE:	_do_fluid_ctrlMode	(socket, (SFluidCtrlCmd*)msg);										break;
 	

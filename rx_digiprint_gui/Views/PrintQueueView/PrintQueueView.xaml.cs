@@ -263,6 +263,8 @@ namespace RX_DigiPrint.Views.PrintQueueView
             if (PrintedQueueGrid.ActiveItem!=null) 
             {
                 PrintQueueItem item = PrintedQueueGrid.ActiveItem as PrintQueueItem;
+                item.StartFrom=0;
+                item.LengthUnit = item.LengthUnit;
                 if (item!=null) item.SendMsg(TcpIp.CMD_ADD_PRINT_QUEUE);
             }
         }

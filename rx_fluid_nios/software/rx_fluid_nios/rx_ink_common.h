@@ -127,7 +127,7 @@ typedef struct SVersion
 typedef enum EnFluidCtrlMode
 {
     ctrl_undef,          // 0x000:
-//	ctrl_shutdown,	     //	0x001:
+	ctrl_shutdown,	     //	0x001:
 //	ctrl_shutdown_done,	 //	0x002:
 	ctrl_error		= 0x002,
     ctrl_off		= 0x003,            //	0x003:

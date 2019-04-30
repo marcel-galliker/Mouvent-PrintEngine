@@ -12,7 +12,7 @@
 #include "../rx_common_lib/version.h"
 #include "string.h"
 
-const char version[32]="1.0.1.731";
+const char version[32]="1.0.1.791";
 
 void get_version(int ver[4])
 {

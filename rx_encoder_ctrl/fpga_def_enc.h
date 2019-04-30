@@ -82,7 +82,7 @@ typedef struct
 {
 	UINT32	position;		// 0x0000:	// 20 Bit!
 	UINT32	speed;			// 0x0004:
-	UINT32	speed_min;		// 0x0008
+	UINT32	speed_min;		// 0x0008:	// * 50000000/2^31    OR *23/1000	
 	UINT32	speed_max;		// 0x000c:
 	UINT32	PG_cnt;			// 0x0010	// 10 bit!
 	UINT32	res_14;			// 0x0014
@@ -184,7 +184,18 @@ typedef struct
 	//(21)r_corr_frame_err.r_ident.r_ident_sin_add_overflow;
 	UINT32 		    rolcor_1_err_vec;			// 0x0550 // reset_min_max
 	UINT32 		    rolcor_0_delay_busy_max;	// 0x0554 // reset_min_max
-	UINT32			res[(0x0600 - 0x0558) / 4];	// 0x054c .. 0x0600
+	UINT32 		    str_corr;	// 0x0558 // reset_min_max
+	UINT32 		    str_corr_max;	// 0x055C // reset_min_max
+	UINT32 		    str_corr_min;	// 0x0560 // reset_min_max
+	UINT32 		    max_0_b1_ident_b1;	// 0x0564 // reset_min_max
+	UINT32 		    max_0_b1_ident_a1;	// 0x0568 // reset_min_max
+	UINT32 		    max_0_a1_ident_b1;	// 0x056C // reset_min_max
+	UINT32 		    max_0_a1_ident_a1;	// 0x0570 // reset_min_max
+	UINT32 		    max_1_b1_ident_b1;	// 0x0574 // reset_min_max
+	UINT32 		    max_1_b1_ident_a1;	// 0x0578 // reset_min_max
+	UINT32 		    max_1_a1_ident_b1;	// 0x057C // reset_min_max
+	UINT32 		    max_1_a1_ident_a1;	// 0x0580 // reset_min_max
+	UINT32			res[(0x0600 - 0x0584) / 4];	// 0x054c .. 0x0600
 	SEncErrStatus		err;					// 0x0600 - 0x0624: 
 	UINT32			res2[(0x0800 - 0x0628) / 4];// 0x0628 .. 0x0800
 } SEncFpgaStatus;
@@ -267,7 +278,7 @@ typedef struct
 	UINT32	avr_coeff_1_unused;		// 0x0010:	-- 0x6 -- 0x08 -- 0x0A -- 0x0C --  0x0E -- 0x010 -- 0x012 -- 0x014 -- 0x016 -- 0x0018 -- 0x001A
 	UINT32  avr_coeff_2_unused;		// 0x0014:	-- 0x8 -- 0x10 -- 0x20 -- 0x40 --  0x80 -- 0x100 -- 0x200 -- 0x400 -- 0x800 -- 0x1000 -- 0x2000
 	UINT32	ident_rol_en;			// 0x0018: enables coeff. identification logic in roller correction
-	UINT32	res_1c;					// 0x001c:
+	UINT32	reset_errors;					// 0x001c:
 	UINT32	max_a0_var_high;		// 0x0020: Threshold for the variation value, when to switch off correction
 	UINT32	max_a0_var_low;			// 0x0024: Threshold for the variation value, when to switch on correction
 	UINT32	rol_0_new_b1;			// 0x0028: a0 sin coeff for roller 0 correction, overwrites internal coeff ! -- s.16.15 -- if single_sin_en=1 => amp -- s.16.15
@@ -279,7 +290,7 @@ typedef struct
 
 	UINT32	single_sin_en;			// 0x0040: flag
 	UINT32	use_internal_ident_en;	// 0x0044: flag
-	UINT32	runnung_avg_coeff;		// 0x0048: flag
+	UINT32	clear_max_coeff;		// 0x0048: flag
 
 	UINT32	rol_2_first;			// 0x004C: flag
 	UINT32	rol_drift_mu_two;		// 0x0050:

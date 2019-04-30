@@ -56,6 +56,7 @@ namespace RX_DigiPrint.Views
 
             Status.DataContext            = RxGlobals.RxInterface;
             PrinterStatus.DataContext     = RxGlobals.RxInterface;
+            Counters.DataContext          = RxGlobals.PrinterStatus;
             TabMiniLabel.DataContext      = RxGlobals.PrintSystem;
             TabDP803.DataContext          = RxGlobals.PrintSystem;
             TabLB702WB.DataContext        = RxGlobals.PrintSystem;
@@ -64,6 +65,7 @@ namespace RX_DigiPrint.Views
             BlueTooth.Visibility          = RxGlobals.Bluetooth.IsSupported ? Visibility.Visible : Visibility.Collapsed;
             User.DataContext              = RxGlobals.User;
             CleafOrder.DataContext        = RxGlobals.CleafOrder;
+      
             RxGlobals.License.Update();          
             _LicenseChanged();
             License.OnLicenseChanged     += _LicenseChanged;
@@ -165,17 +167,32 @@ namespace RX_DigiPrint.Views
         {
             if (e.PropertyName.Equals("PrinterType"))
             {
+                bool tx = RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_TX801 || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX802;
+                bool lb = RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB701 
+                    ||    RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB702_UV
+                    ||    RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB702_WB
+                    ||    RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_DP803;
+
                 TabPrintQueue.Visibility = (RxGlobals.PrintSystem.PrinterType  == EPrinterType.printer_test_table 
                                           || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide
                                           || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide_only
                                           ) ? Visibility.Collapsed : Visibility.Visible;
+                                        
+                Counters.Visibility      = (tx || lb) ? Visibility.Visible : Visibility.Collapsed;
+
+                if (tx) CounterUnit1.Text=" m²/h   ";
+                else    CounterUnit1.Text=" m/min   ";
 
                 switch (RxGlobals.PrintSystem.PrinterType)
                 {
                     case EPrinterType.printer_LB701:  
-                    case EPrinterType.printer_LB702_UV:  
                         _activeView (TabMiniLabel);
                         break;
+
+                    case EPrinterType.printer_LB702_UV:  
+                        _activeView (TabLB702UV);
+                        break;
+
                     case EPrinterType.printer_LB702_WB:  
                         _activeView (TabLB702WB);
                         break;
@@ -252,6 +269,16 @@ namespace RX_DigiPrint.Views
         private void User_PreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             RxGlobals.License.Update();
+        }
+
+        //--- Counter_MouseDown -------------------------------------------
+        private void Counter_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (RxGlobals.PrinterStatus.PrintState != EPrintState.ps_printing)
+            {
+                if (RxMessageBox.YesNo("Reset", "Reset counter", MessageBoxImage.Question, false))
+                    RxGlobals.RxInterface.SendCommand(TcpIp.CMD_RESET_CTR);
+            }
         }
 
     }

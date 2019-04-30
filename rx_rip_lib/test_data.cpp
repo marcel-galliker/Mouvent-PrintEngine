@@ -45,12 +45,13 @@ int  rip_test_data	(RX_Bitmap *pBmp, char *text)
 	y=0;
 	line=text;
 	len=0;
-	bmp_clear(pBmp, X, y, 2048+128, 4*LINE_DIST);
 	while (*line)
 	{
 		if (!line[len]) break;
 		if (line[len]=='\n')
 		{
+			bmp_clear(pBmp, X, y, 2048+128, LINE_DIST);
+
 			len++;
 			#ifdef linux
 //				char_to_wchar32((const char*)line, (wchar_t*)wstr, len);

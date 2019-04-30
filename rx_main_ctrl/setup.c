@@ -14,7 +14,6 @@
 #include "rx_hash.h"
 #include "rx_setup_file.h"
 #include "rx_setup_ink.h"
-#include "balance_def.h"
 #include "setup.h"
 #include "network.h"
 
@@ -101,7 +100,7 @@ int setup_network(HANDLE file, SRxNetwork *pnet, EN_setup_Action  action)
 //--- setup_config ----------------------------------------------------------------------------
 int setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action)
 {
-	int i, n;
+	int i;
 	char path[MAX_PATH];
 	HANDLE file = setup_create();
 
@@ -195,18 +194,6 @@ int setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action)
 			setup_int32_arr(file, "HeadDistBack",  action, &pcfg->headDistBack[i*pcfg->headsPerColor],	pcfg->headsPerColor,	0);
 			setup_int32(file, "ColorOffset",	   action, &pcfg->colorOffset[i], 0);
 					
-			{
-				INT32 offset[MAX_HEAD_DIST];
-				if (action==WRITE)
-				{
-					for (n=0; n<pcfg->headsPerColor; n++) offset[n] = pcfg->cond[i*pcfg->headsPerColor+n].pid_offset;
-				}
-				setup_int32_arr(file, "pid_offset",  action, offset, pcfg->headsPerColor,	 1400);
-				if (action==READ)
-				{
-					for (n=0; n<pcfg->headsPerColor; n++) pcfg->cond[i*pcfg->headsPerColor+n].pid_offset = offset[n];
-				}
-			}
 			setup_chapter(file, "..", -1, action);
 		}
 	}
@@ -229,33 +216,13 @@ static void _head_pressure_out_override(SRxConfig *pcfg)
 		{		
 			for (i=0; i<SIZEOF(pcfg->cond); i++)
 			{
-    			// conditioner
 				if (setup_chapter(file, "head", i+1, READ)==REPLY_OK) 
-				{    				
-					setup_int32(file, "pressure",	READ, (int*)&pcfg->cond[i].pressure_out,	300);
-					setup_int32(file, "P",			READ, (int*)&pcfg->cond[i].pid_P,			1000);
-					setup_int32(file, "I",			READ, (int*)&pcfg->cond[i].pid_I,			50);
-					setup_int32(file, "D",			READ, (int*)&pcfg->cond[i].pid_D,			0);
-					setup_int32(file, "Meniscus0",	READ, (int*)&pcfg->cond[i].menicus0,		0);
-					{
-						int offset;
-						setup_int32(file, "Offset",		READ, &offset, 1400);
-						if (pcfg->cond[i].pid_offset==0 || pcfg->cond[i].pid_offset==1400) pcfg->cond[i].pid_offset=offset;						
-					}
+				{    									
+					setup_int32_arr(file, "disabledJets",  READ, pcfg->headDisabledJets[i],	sizeof(pcfg->headDisabledJets[i]),	0);					
 					setup_chapter(file, "..", -1, READ); 
 				}	
    			}
-    		
-    		// fluid
-    		for (i = 0; i < SIZEOF(pcfg->inkSupply); i++)
-    		{
-        		if (setup_chapter(file, "fluid", i+1, READ) == REPLY_OK) 
-        		{
-            		setup_int32(file, "P", READ, (int*)&pcfg->inkSupply[i].fluid_P, 7000);
-                    setup_chapter(file, "..", -1, READ);
-        		}
-    		}
-		}
+   		}
 	}
 	setup_destroy(file);	
 }

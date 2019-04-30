@@ -36,7 +36,6 @@ static int  _nios=TRUE;
 static int  _eeprom=FALSE;
 
 static HANDLE	hPuttyThread;
-static HANDLE	hPuttySem;
 static int		_PuttyRunning;
 
 //--- prototypes ----------------------------------------------------------
@@ -47,36 +46,8 @@ static void _main_menu(void);
 void putty_init(void)
 {
 	memset(_input, 0, sizeof(_input));
-	putty_start();
-}
-
-
-//--- putty_start -----------------------------
-void putty_start(void)
-{
-	if (!_PuttyRunning)
-	{
-		_PuttyRunning = TRUE;
-		hPuttySem    = rx_sem_create();
-		hPuttyThread = rx_thread_start(_putty_thread, NULL, 0, "Putty Thread");					
-	}
-}
-
-//--- putty_end ----------------------------------
-void putty_end(void)
-{
-	if (_PuttyRunning && hPuttySem)
-	{
-		_PuttyRunning = FALSE;		
-		rx_sem_post(hPuttySem);	
-		rx_sem_destroy(&hPuttySem);
-	}
-}
-
-//--- putty_display_status ----------------------------
-void putty_display_status(void)
-{
-	if(hPuttySem) rx_sem_post(hPuttySem);
+	_PuttyRunning = TRUE;
+	hPuttyThread = rx_thread_start(_putty_thread, NULL, 0, "Putty Thread");					
 }
 
 //--- _putty_thread ----------------------------------
@@ -85,13 +56,13 @@ static void* _putty_thread(void* lpParameter)
 //	rx_set_tread_priority(40);
 
 	while(_PuttyRunning)
-	{
-		rx_sem_wait(hPuttySem, 0);
+	{		
+		rx_sleep(500);
 		term_printf("\033[2J"); // Clear screen
 		term_printf("rx_head_ctrl %s (%s, %s)", version, __DATE__, __TIME__);
 		putty_display_fpga_error();
 		putty_display_fpga_status();
-		putty_display_nios_status(_nios,_status,_eeprom);
+		putty_display_nios_status(_nios, _status, _eeprom);
 		putty_display_cond_status(_cond, _status);			
 		_main_menu();
 	}
@@ -201,7 +172,7 @@ void putty_display_fpga_status(void)
 
 	term_printf("\n");
 	term_printf("--- FPGA Status -----------------------------------\n");
-	term_printf("Version: %d.%d.%d.%d                Linux: V%d\n",			RX_FpgaStat.version.major, RX_FpgaStat.version.minor, RX_FpgaStat.version.revision, RX_FpgaStat.version.build, RX_VersionLinux);
+	term_printf("Version: %d.%d.%d.%d                Linux: V%d\n",			RX_FpgaStat.version.major, RX_FpgaStat.version.minor, RX_FpgaStat.version.revision, RX_FpgaStat.version.build, RX_LinuxDeployment);
 	term_printf("Temp:    %d  Overheat.Error: %d  FPGA.cmd=0x%04x\n",		RX_FpgaStat.temp-128, RX_FpgaError.overheat_error, RX_FpgaCmd);
 	term_printf("Encoder:  linkEnable=%d, telCnt=%u, synthEnable=%d, synthKHz=%d\n", (RX_FpgaEncCfg.cmd & ENC_ENABLE)!=0, RX_FpgaError.enc_tel_cnt, RX_FpgaEncCfg.synth.enable, _speed_160(RX_FpgaEncCfg.synth.value*1000));
 //		term_printf("info:  0x%08x\n", RX_FpgaStat.info);
@@ -220,10 +191,10 @@ void putty_display_fpga_status(void)
 //		term_printf("FSM-state:      "); PRINTF(6)("%04x ", RX_FpgaStat.fsm_state[i]); term_printf("\n");
 //		term_printf("DDR-ARB-state:  %04x           DDR-ARB-err: %04d max: %04d\n", RX_FpgaStat.ddr3_arb_state, RX_FpgaStat.ddr3_arb_hang, RX_FpgaStat.ddr3_arb_max_ctr);
 		
-	term_printf("            ");
+	term_printf("             ");
 	for (i=0; i<MAX_HEADS_BOARD; i++)
 	{		
-		strcpy(line, "---------");
+		strcpy(line, "----------");
 		l= sprintf(str, " %d:%s ", no[i]+1, RX_HBConfig.head[no[i]].name);
 		memcpy(&line[(10-l)/2], str, l);			
 		term_color(RX_RGB[no[i]]);
@@ -233,27 +204,31 @@ void putty_display_fpga_status(void)
 	};		
 	term_printf("\n");
 
-//	term_printf("blockUsed: 0x%08x 0x%08x 0x%08x 0x%08x  cmd: 0x%08x  enc.cmd: 0x%08x\n",	Fpga.blockUsed[0],		Fpga.blockUsed[1*blkCnt],			Fpga.blockUsed[2*blkCnt],			Fpga.blockUsed[3*blkCnt], FpgaCfg.cfg->cmd, FpgaCfg.encoder->cmd);
-//	term_printf("blockUsed:   "); PRINTF(4)("%08x   ",	RX_BlockUsed[no[i]]);						term_printf("\n");
-	term_printf("blockCnt:    "); PRINTF(4)("%08d   ",	RX_FpgaData.blockCnt[no[i]]);			term_printf("\n");
-	term_printf("imgInIdx/buf:"); PRINTF(4)(" %03d %03d   ",  RX_FpgaPrint.imgInIdx[no[i]],    RX_HBStatus[0].head[no[i]].imgInCnt-RX_HBStatus[0].head[no[i]].printDoneCnt); term_printf("\n");
-	term_printf("imgOutIdx:   "); PRINTF(4)(" %03d %03d   ", RX_FpgaData.imgOutIdx[no[i]][0], RX_FpgaData.imgOutIdx[no[i]][1]); term_printf("\n");
+//	term_printf("blockUsed:  0x%08x 0x%08x 0x%08x 0x%08x  cmd: 0x%08x  enc.cmd: 0x%08x\n",	Fpga.blockUsed[0],		Fpga.blockUsed[1*blkCnt],			Fpga.blockUsed[2*blkCnt],			Fpga.blockUsed[3*blkCnt], FpgaCfg.cfg->cmd, FpgaCfg.encoder->cmd);
+//	term_printf("blockUsed:    "); PRINTF(4)("%08x   ",	RX_BlockUsed[no[i]]);						term_printf("\n");
+	term_printf("blockCnt:     "); PRINTF(4)("%09d   ",	RX_FpgaData.blockCnt[no[i]]);			term_printf("\n");
+	term_printf("imgInIdx/buf: "); PRINTF(4)("  %03d %03d   ",  RX_FpgaPrint.imgInIdx[no[i]],    RX_HBStatus[0].head[no[i]].imgInCnt-RX_HBStatus[0].head[no[i]].printDoneCnt); term_printf("\n");
+	term_printf("imgOutIdx:    "); PRINTF(4)("  %03d %03d   ", RX_FpgaData.imgOutIdx[no[i]][0], RX_FpgaData.imgOutIdx[no[i]][1]); term_printf("\n");
 
-	term_printf("Print GO:    "); PRINTF(4)("%08d   ", RX_FpgaStat.pg_ctr[no[i]]);				term_printf("\n");
-//	term_printf("Print GO Tel:"); PRINTF(4)("%08d   ", RX_FpgaStat.tel_pg_cnt[no[i]]);			term_printf("\n");
-//	term_printf("PG abort:    "); PRINTF(4)("%08d   ", RX_FpgaStat.pg_abort_ctr[no[i]]);		term_printf("\n");
-	term_printf("Print DONE:  "); PRINTF(4)("%08d   ", RX_FpgaStat.print_done_ctr[no[i]]);		term_printf("\n");
-//	term_printf("Blk0:        "); PRINTF(4)("%08d   ", FpgaCfg.udp->block[no[i]].blkNo0);		term_printf("\n");
-//	term_printf("BlkEnd:      "); PRINTF(4)("%08d   ", FpgaCfg.udp->block[no[i]].blkNoEnd);		term_printf("\n");
-//	term_printf("BlkOut:      "); PRINTF(4)("%08d   ", _BlockOutIdx[no[i]]);					term_printf("\n");
-//	term_printf("Udp ptr:     "); PRINTF(4)("%08d   ", RX_FpgaStat.blockOutNo[no[i]]);			term_printf("\n");
-//	term_printf("imgLineFP:   "); PRINTF(4)("%08d   ", RX_FpgaStat.img_line_fp[no[i]]);			term_printf("\n");
-	term_printf("Enc #:       "); PRINTF(4)("% 8d   ", RX_HBConfig.head[i].encoderNo);			term_printf("\n");
-	term_printf("Enc Position:"); PRINTF(4)("%06d.%d   ", RX_FpgaStat.enc_position[no[i]]/8, RX_FpgaStat.enc_position[no[i]]%8); term_printf("\n");
-//	term_printf("enc_fp_ct:   "); PRINTF(4)("%08d   ",    RX_FpgaStat.enc_fp_cnt[no[i]]);		term_printf("\n");
-	term_printf("head_fp_ct:  "); PRINTF(4)("%08d   ",		RX_FpgaStat.head_fp_cnt[no[i]]);	term_printf("\n");
-	term_printf("head_dt_ct:  "); PRINTF(4)("%08lld   ",	RX_HBStatus[0].head[no[i]].dotCnt);	term_printf("\n");
-		
+	term_printf("Print GO ENC: "); PRINTF(4)("%09d   ", RX_HBStatus[0].head[no[i]].encPgCnt); term_printf("\n");
+	term_printf("Print GO:     "); PRINTF(4)("%09d   ", RX_FpgaStat.pg_ctr[no[i]]);				term_printf("\n");
+//	term_printf("Print GO Tel: "); PRINTF(4)("%09d   ", RX_FpgaStat.tel_pg_cnt[no[i]]);			term_printf("\n");
+//	term_printf("PG abort:     "); PRINTF(4)("%09d   ", RX_FpgaStat.pg_abort_ctr[no[i]]);		term_printf("\n");
+	term_printf("Print DONE:   "); PRINTF(4)("%09d   ", RX_FpgaStat.print_done_ctr[no[i]]);		term_printf("\n");
+	term_printf("Print GO Pos: "); PRINTF(4)("%09d   ", RX_FpgaStat.pg_in_position[no[i]]);		term_printf("\n");
+	term_printf("Print Pos:    "); PRINTF(4)("%09d   ", RX_HBStatus[0].head[no[i]].encPos-RX_FpgaStat.pg_in_position[no[i]]);		term_printf("\n");
+//	term_printf("Blk0:         "); PRINTF(4)("%09d   ", FpgaCfg.udp->block[no[i]].blkNo0);		term_printf("\n");
+//	term_printf("BlkEnd:       "); PRINTF(4)("%09d   ", FpgaCfg.udp->block[no[i]].blkNoEnd);		term_printf("\n");
+//	term_printf("BlkOut:       "); PRINTF(4)("%09d   ", _BlockOutIdx[no[i]]);					term_printf("\n");
+//	term_printf("Udp ptr:      "); PRINTF(4)("%09d   ", RX_FpgaStat.blockOutNo[no[i]]);			term_printf("\n");
+//	term_printf("imgLineFP:    "); PRINTF(4)("%09d   ", RX_FpgaStat.img_line_fp[no[i]]);			term_printf("\n");
+	term_printf("Enc #:        "); PRINTF(4)("% 9d   ", RX_HBConfig.head[i].encoderNo);			term_printf("\n");
+	term_printf("Enc Position: "); PRINTF(4)(" %06d.%d   ", RX_FpgaStat.enc_position[no[i]]/8, RX_FpgaStat.enc_position[no[i]]%8); term_printf("\n");
+	term_printf("Enc Position: "); PRINTF(4)("%09d   ",    RX_HBStatus[0].head[no[i]].encPos); term_printf("\n");
+//	term_printf("enc_fp_ct:    "); PRINTF(4)("%09d   ",    RX_FpgaStat.enc_fp_cnt[no[i]]);		term_printf("\n");
+	term_printf("head_fp_ct:   "); PRINTF(4)("%09d   ",		RX_FpgaStat.head_fp_cnt[no[i]]);	term_printf("\n");
+	term_printf("head_dt_ct:   "); PRINTF(4)("%09lld   ",	RX_HBStatus[0].head[no[i]].dotCnt);	term_printf("\n");
+
 	if (FALSE)
 	{
 		term_printf("\n");
@@ -297,14 +272,6 @@ void putty_display_fpga_status(void)
 		term_printf("Encoder c0:  "); PRINTF(4)("%03d  ",  RX_FpgaError.encoder[i].err0);					term_printf("\n");
 		term_printf("Encoder c1:  "); PRINTF(4)("%03d  ",  RX_FpgaError.encoder[i].err1);					term_printf("\n");
 		term_printf("Encoder c2:  "); PRINTF(4)("%03d  ",  RX_FpgaError.encoder[i].err2);					term_printf("\n");
-
-		/*
-		term_printf("\n");
-		term_printf("img_line_err[0]: "); PRINTF(4)("%08d   ",    RX_FpgaError.img_line_err[0][i]);			term_printf("\n");
-		term_printf("img_line_err[1]: "); PRINTF(4)("%08d   ",    RX_FpgaError.img_line_err[1][i]);			term_printf("\n");
-		term_printf("img_line_err[2]: "); PRINTF(4)("%08d   ",    RX_FpgaError.img_line_err[2][i]);			term_printf("\n");
-		term_printf("img_line_err[3]: "); PRINTF(4)("%08d   ",    RX_FpgaError.img_line_err[3][i]);			term_printf("\n");		
-		*/
 			
 	//	term_printf("Debug Register : "); PRINTF(8)("0x%08x ", RX_FpgaStat.debug[i]);				term_printf("\n");
 
@@ -341,7 +308,20 @@ void  putty_display_fpga_error(void)
 //		term_printf("   latch_missed:   ");	PRINTF(4)("0x%04x ", RX_FpgaError.head[i].latch_missed);	term_printf("\n");
 	term_printf("   enc_crc:        ");	PRINTF(4)("0x%04x ", RX_FpgaError.encoder[i].crc);			term_printf("\n");
 //	term_printf("clear_area_32:  "); PRINTF(4)("%08d   ",    RX_FpgaError.clear_area_32[i]);			term_printf("\n");
-	term_printf("ETH.invalid.pyLdLen :%d UDP.PyldLenErr: %d UDP.FifoFlush: %d\n", RX_FpgaStat.udp_invalid_pyld_length, RX_FpgaError.udp_length_error, RX_FpgaError.udp_flush_fifo);
+//	term_printf("ETH.invalid.pyLdLen :%d UDP.PyldLenErr: %d UDP.FifoFlush: %d\n", RX_FpgaStat.udp_invalid_pyld_length, RX_FpgaError.udp_length_error, RX_FpgaError.udp_flush_fifo);
+
+	term_printf("\n");
+	term_printf("img_line_err[0]: "); PRINTF(4)("%08d   ",    RX_FpgaError.img_line_err[0][i]);			term_printf(" 1st line after gap\n");
+	term_printf("img_line_err[1]: "); PRINTF(4)("%08d   ",    RX_FpgaError.img_line_err[1][i]);			term_printf(" 1st line after overlap\n");
+	term_printf("img_line_err[2]: "); PRINTF(4)("%08d   ",    RX_FpgaError.img_line_err[2][i]);			term_printf(" 1st line after seamless\n");
+	term_printf("img_line_err[3]: "); PRINTF(4)("%08d   ",    RX_FpgaError.img_line_err[3][i]);			term_printf(" internal line missing\n");		
+	
+	term_printf("fifo_img_line:   "); PRINTF(4)("%08d   ",    RX_FpgaError.head[i].fifo_img_line);		term_printf("\n");
+	term_printf("write_img_line:  "); PRINTF(4)("%08d   ",    RX_FpgaError.head[i].write_img_line);		term_printf("\n");
+	term_printf("read_img_line:   "); PRINTF(4)("%08d   ",    RX_FpgaError.head[i].read_img_line);		term_printf("\n");
+	term_printf("prepare_img_line:"); PRINTF(4)("%08d   ",    RX_FpgaError.head[i].prepare_img_line);	term_printf("\n");
+	term_printf("enc_fp_missed:   "); PRINTF(4)("%08d   ",    RX_FpgaError.head[i].enc_fp_missed);		term_printf("\n");
+	term_printf("latch_missed:    "); PRINTF(4)("%08d   ",    RX_FpgaError.head[i].latch_missed);		term_printf("\n");
 }
 
 //--- putty_display_nios_status ----------------------------
@@ -350,6 +330,9 @@ void putty_display_nios_status(int nios, int status, int eeprom)
 	int speed0, speed1, i;
 	int temp;
 	char str[64];
+	int no[MAX_HEADS_BOARD];
+	
+	for(i=0; i<MAX_HEADS_BOARD; i++) no[i]= RX_HBConfig.reverseHeadOrder? MAX_HEADS_BOARD-1-i:i;
 				
 	if (nios_loaded())
 	{
@@ -358,8 +341,20 @@ void putty_display_nios_status(int nios, int status, int eeprom)
 		{
 			RX_HBStatus->head[i].tempHead = RX_NiosStat.head_temp[i];
 
-			if (RX_HBStatus->head[i].eeprom.serialNo == 0)
+			if (*RX_NiosStat.head_eeprom[i])
+			{
 				eeprom_init_data(i, RX_NiosStat.head_eeprom[i], &RX_HBStatus->head[i].eeprom);
+				/*
+				//--- test user eeprom -----------------------------------------------
+				{
+					static int test=0;
+					//            1234567890123456789012345678901 345678901234567890
+					sprintf(str, "TEST 0 1 2 3 4 5 6 7 8 9 ABCDE-%d%d%d%d-FGHIJKLMNOPQRSTUVWXYZ", test, test, test, test);
+					nios_set_user_eeprom(i, str);
+					test=(test+1)%10;
+				}
+				*/
+			}
 		}
 
 		term_printf("\n--- NIOS Status ----------------- FPGA-QSYS: id=%d time=%d\n", fpga_qsys_id(), fpga_qsys_timestamp());
@@ -393,9 +388,12 @@ void putty_display_nios_status(int nios, int status, int eeprom)
 			term_printf("Cooler:        PCB missing\n");
 		}
 
-		term_printf("Temp Head:      "); for (i=0; i<MAX_HEADS_BOARD; i++) term_printf("  %14s", value_str_temp(RX_NiosStat.head_temp[i])); term_printf("\n");
+		term_printf("Temp Head:      "); for (i=0; i<MAX_HEADS_BOARD; i++) term_printf("  %14s", value_str_temp(RX_NiosStat.head_temp[no[i]])); term_printf("\n");
 
-		if (eeprom) eeprom_display();
+		if (eeprom) 
+		{			
+			eeprom_display();
+		}
 	}		
 	else 
 	{
@@ -485,7 +483,6 @@ void putty_display_cond_status(int show, int status)
 				RX_HBStatus->head[i].presOut_diff		= RX_NiosStat.cond[i].pressure_out_diff;
 				RX_HBStatus->head[i].meniscus			= RX_NiosStat.cond[i].meniscus;
 				RX_HBStatus->head[i].meniscus_diff		= RX_NiosStat.cond[i].meniscus_diff;
-				RX_HBStatus->head[i].pid_offset			= RX_NiosStat.cond[i].pid_offset;
 				RX_HBStatus->head[i].pumpSpeed			= RX_NiosStat.cond[i].pump;
 				RX_HBStatus->head[i].pumpFeedback		= RX_NiosStat.cond[i].pump_measured * 60/100;	// in 0.1 ml
 				RX_HBStatus->head[i].printingSeconds	= RX_NiosStat.cond[i].pumptime;
@@ -517,6 +514,18 @@ void putty_display_cond_status(int show, int status)
 			}
 		}
 		
+		term_printf("Cluster:  No: %06d", RX_NiosStat.cond[0].clusterNo);
+		{
+			int h, m, s;
+			s = RX_NiosStat.cond[0].clusterTime%60;
+			h = RX_NiosStat.cond[0].clusterTime/3600;
+			m = (RX_NiosStat.cond[0].clusterTime%3600)/60;					
+			term_printf("  time: %d:%02d:%02d  ", h, m, s);
+		}
+		term_printf("  Machine Meters: %s", value_str(RX_HBStatus->machineMeters));
+		
+		term_printf("\n");
+
 		term_printf("\n-- Conditioner -- "); 		
 				
 		for (i=0; i<MAX_HEADS_BOARD; i++)
@@ -603,8 +612,8 @@ void putty_display_cond_status(int show, int status)
 			term_printf("\n");
     	}
 		
-		term_printf("Pressure out SET:"); PRINTF(MAX_HEADS_BOARD)(" %14s ", value_str1(_NiosMem->cfg.cond[no[i]].pressure_out)); term_printf("\n");
-
+		term_printf("meniscus setpoint:"); PRINTF(MAX_HEADS_BOARD)(" %14s ", value_str1(RX_NiosStat.cond[no[i]].meniscus_setpoint)); term_printf("\n");
+		
     	term_printf("Pressure out:    ");
     	{
         	int i, l;
@@ -654,16 +663,16 @@ void putty_display_cond_status(int show, int status)
 			else 
 			{
 				int h, m, s;
-				s = RX_NiosStat.cond[i].pumptime%60;
-				h = RX_NiosStat.cond[i].pumptime/3600;
-				m = (RX_NiosStat.cond[i].pumptime%3600)/60;					
+				s = RX_NiosStat.cond[no[i]].pumptime%60;
+				h = RX_NiosStat.cond[no[i]].pumptime/3600;
+				m = (RX_NiosStat.cond[no[i]].pumptime%3600)/60;					
 				term_printf("   %5d:%02d:%02d  ", h, m, s);
 			}
 		}
 		term_printf("\n");
 
 		for (i = 0; i < MAX_HEADS_BOARD; i++) if (RX_NiosStat.cond[no[i]].error&COND_ERR_temp_head_overheat) str[i]='E'; else str[i]=' ';
-		term_printf("Temp Head [C]:    "); PRINTF(MAX_HEADS_BOARD)("   %s(%02d<%02d)%c ", value_str_temp(_NiosCfg->cond[i].tempHead), _NiosCfg->cond[i].temp / 1000, _NiosCfg->cond[i].tempMax / 1000, str[i]); term_printf("\n"); 
+		term_printf("Temp Head [C]:    "); PRINTF(MAX_HEADS_BOARD)("   %s(%02d<%02d)%c ", value_str_temp(_NiosCfg->cond[no[i]].tempHead), _NiosCfg->cond[no[i]].temp / 1000, _NiosCfg->cond[no[i]].tempMax / 1000, str[no[i]]); term_printf("\n"); 
 		term_printf("Temp Inlet [C]:   "); PRINTF(MAX_HEADS_BOARD)("%14s  ",  value_str_temp(RX_NiosStat.cond[no[i]].tempIn)); term_printf("\n");
 		term_printf("Temp Heater [C]:  "); PRINTF(MAX_HEADS_BOARD)("%14s  ", value_str_temp(RX_NiosStat.cond[no[i]].tempHeater)); term_printf("\n");
 		term_printf("Heater:           "); PRINTF(MAX_HEADS_BOARD)("          %3d%%  ", RX_NiosStat.cond[no[i]].heater_percent); term_printf("\n");
@@ -681,7 +690,7 @@ void putty_display_cond_status(int show, int status)
 		
 		term_printf("Meniscus Check:   "); PRINTF(MAX_HEADS_BOARD)("%14s  ", STATUS_STRING[_NiosMem->cfg.cond[no[i]].cmd.disable_meniscus_check]); term_printf("\n"); 
 		term_printf("PID sum:          "); PRINTF(MAX_HEADS_BOARD)("%14d  ", _NiosMem->stat.cond[no[i]].pid_sum); term_printf("\n"); 
-		term_printf("PID: ");			   PRINTF(MAX_HEADS_BOARD)("(%4d %4d %4d %4d) ", RX_NiosStat.cond[no[i]].pid_P, RX_NiosStat.cond[no[i]].pid_I, RX_NiosStat.cond[no[i]].pid_D, RX_NiosStat.cond[no[i]].pid_offset); term_printf("\n");
+		term_printf("PID: ");			   PRINTF(MAX_HEADS_BOARD)("(%4d %4d) ", RX_NiosStat.cond[no[i]].pid_P, RX_NiosStat.cond[no[i]].pid_I); term_printf("\n");
 							
 		if (status)	{term_printf("Heater   pg/flg:   "); PRINTF(MAX_HEADS_BOARD)("            %d/%d ", RX_NiosStat.cond[no[i]].gpio_state.heater_pg, RX_NiosStat.cond[no[i]].gpio_state.heater_flg); term_printf("\n");}
 		if (status)	{term_printf("24V      pg/flg:   "); PRINTF(MAX_HEADS_BOARD)("            %d/%d ", RX_NiosStat.cond[no[i]].gpio_state.u_24v_pg, RX_NiosStat.cond[no[i]].gpio_state.u_24v_flg); term_printf("\n");}
@@ -724,7 +733,7 @@ void putty_display_cond_status(int show, int status)
 
 			term_printf("Head EEPROM:"); 
 			if (RX_NiosStat.error.head_eeprom_read) term_printf(" ERROR\n"); 
-			else                                   term_printf(" OK\n"); 
+			else                                    term_printf(" OK\n"); 
 
 			term_printf("ADC err. cnt: %d\n", RX_NiosStat.voltage_error); 
 
@@ -733,7 +742,7 @@ void putty_display_cond_status(int show, int status)
 			else
 			{
 				term_printf("Normal Mode, "); 
-				if (RX_NiosStat.info.watchdog_catch_fp_err)  term_printf("catch fp error");
+				if (RX_NiosStat.info.watchdog_catch_fp_err) term_printf("catch fp error");
 				else										term_printf("ignore fp error");
 			}
 			term_printf("\n");

@@ -34,6 +34,7 @@ void* fpga_map_page(UINT64 addr, UINT32 size, UINT32 size_expected);
 void  fpga_enc_config(int encNo, SEncoderCfg  *pCfg, int outNo, int synth);
 void  fpga_enc_config_test(void);
 void  fpga_encoder_enable(int enable);
+void  fpga_encoder_reset_reg(void);
 int   fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg);
 int   fpga_pg_config_fhnw(UINT32 posActual, UINT32 posFwd, UINT32 posBwd);
 

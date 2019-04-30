@@ -32,6 +32,7 @@
                         <RowDefinition Height="auto"/>
                         <RowDefinition Height="auto"/>
                         <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="250"/>
@@ -48,19 +49,23 @@
                     <rx_uc:PlcParCtrl Grid.Row="4"                      ID="PAR_SPEED_GLUE"                      Label="Glue Speed"          Format="f" UserEnabled="usr_service"/>
                     <TextBlock Grid.Row="4" Grid.Column="1"             Text="m/min" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center"/>
 
-                    <rx_uc:PlcTitle Grid.Row="5" Grid.ColumnSpan="3" Header="Spread Roller"/>
-                    <rx_uc:PlcParCtrl Grid.Row="6" Grid.ColumnSpan="2" ID="CFG_SPREADERROLLER_CONFIGURATION" Label="Active"  Type="Combo"      x:Name="CB_SpreadRoller" UserEnabled="usr_service"/>
+                    <rx_uc:PlcParCtrl Grid.Row="5"                      ID="CFG_BELTHEATER_MAX"                Label="Belt Heater Max"     Format="n" UserEnabled="usr_service"/>
+                    <TextBlock Grid.Row="5" Grid.Column="1"             Text="%" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center"/>
+                    <rx_uc:PlcParCtrl Grid.Row="5" Grid.Column="2"      ID="CFG_BELTHEATER_ON" Label="" Unit="" Type="Combo" UserEnabled="usr_supervisor" x:Name="CB_BeltHeaterOn" />
 
-                    <rx_uc:PlcTitle Grid.Row="7" Grid.ColumnSpan="3" Header="Slide"/>
-                    <rx_uc:PlcParCtrl Grid.Row="8" Grid.Column="0" ID="CFG_HEAD_REFERENCE"               Label="Head Reference"  Format="f" UserEnabled="usr_service" x:Name="HeadReference"/>
-                    <rx_uc:PlcParCtrl Grid.Row="8" Grid.Column="1" ID="STA_HEAD_REFERENCE_POSITION"      Label=""  Unit="mm"     Format="f" IsEnabled="False"/>
-                    <rx_uc:PlcCommand Grid.Row="8" Grid.Column="2" ID="CMD_REFERENCE_HEADS"              Label="SET" Padding="5,0" User="usr_service" PreviewMouseUp="Reference_Clicked"/>
-                    <Grid Grid.Row="8" Grid.ColumnSpan="3" Background="#7FD3D3D3" Margin="150,0,0,0" x:Name="HeadRefEnable">
+                    <rx_uc:PlcTitle Grid.Row="6" Grid.ColumnSpan="3" Header="Spread Roller"/>
+                    <rx_uc:PlcParCtrl Grid.Row="7" Grid.ColumnSpan="2" ID="CFG_SPREADERROLLER_CONFIGURATION" Label="Active"  Type="Combo"      x:Name="CB_SpreadRoller" UserEnabled="usr_service"/>
+
+                    <rx_uc:PlcTitle Grid.Row="8" Grid.ColumnSpan="3" Header="Slide"/>
+                    <rx_uc:PlcParCtrl Grid.Row="9" Grid.Column="0" ID="CFG_HEAD_REFERENCE"               Label="Head Reference"  Format="f" UserEnabled="usr_service" x:Name="HeadReference"/>
+                    <rx_uc:PlcParCtrl Grid.Row="9" Grid.Column="1" ID="STA_HEAD_REFERENCE_POSITION"      Label=""  Unit="mm"     Format="f" IsEnabled="False"/>
+                    <rx_uc:PlcCommand Grid.Row="9" Grid.Column="2" ID="CMD_REFERENCE_HEADS"              Label="SET" Padding="5,0" User="usr_service" PreviewMouseUp="Reference_Clicked"/>
+                    <Grid Grid.Row="9" Grid.ColumnSpan="3" Background="#7FD3D3D3" Margin="150,0,0,0" x:Name="HeadRefEnable">
                         <TextBlock Text="ONLY AVAILABLE IN ERROR STATE" HorizontalAlignment="Center" Foreground="Red" FontWeight="Bold"/>
                     </Grid>
-                    <rx_uc:PlcParCtrl Grid.Row="9" Grid.Column="0" ID="CFG_SLAVE_OFFSET"                 Label="Slave Offset"    Format="f" UserEnabled="usr_service" x:Name="SlaveOffset"/>
-                    <rx_uc:PlcParCtrl Grid.Row="9" Grid.Column="1" ID="STA_SLAVE_OFFSET"                 Label=""      Unit="mm" Format="f" IsEnabled="False"/>
-                    <rx_uc:PlcCommand Grid.Row="9" Grid.Column="2" ID="CMD_OFFSET_SLAVE"                 Label="SET"  Padding="5,0"  User="usr_service" PreviewMouseUp="Offset_Clicked"/>
+                    <rx_uc:PlcParCtrl Grid.Row="10" Grid.Column="0" ID="CFG_SLAVE_OFFSET"                 Label="Slave Offset"    Format="f" UserEnabled="usr_service" x:Name="SlaveOffset"/>
+                    <rx_uc:PlcParCtrl Grid.Row="10" Grid.Column="1" ID="STA_SLAVE_OFFSET"                 Label=""      Unit="mm" Format="f" IsEnabled="False"/>
+                    <rx_uc:PlcCommand Grid.Row="10" Grid.Column="2" ID="CMD_OFFSET_SLAVE"                 Label="SET"  Padding="5,0"  User="usr_service" PreviewMouseUp="Offset_Clicked"/>
                 </Grid>
             </rx_uc:PlcParPanel>
         </ScrollViewer>

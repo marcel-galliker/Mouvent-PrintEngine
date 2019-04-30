@@ -21,281 +21,552 @@
 #include "txrob.h"
 
 //--- defines ------------------------------------------------
-#define CURRENT_HOLD	   10.0 // 200 steps/rev // 2 mm/rev
-#define CURRENT_HOLD_SCREWS 7.0 // 200 steps/rev
 
-#define MOTOR_SCREW_CNT		1
-#define MOTOR_CAP			0
-#define MOTOR_SCREW_0		1
+// General
+#define MOTOR_ALL_BITS		0x03
+#define MAIN_PER_SEC		930			// Main executions per sec
+#define STEPS_REV			(200*16)	// steps per motor revolution * 16 microsteps
 
-#define MOTOR_CAP_BITS			0x01
-#define MOTOR_SCREW_ALL_BITS	0x02
-#define MOTOR_SCREW_0_BITS		0x02
-#define MOTOR_ALL_BITS			0x03
+// Rotation Motor // 200 steps/rev // max 4.2 Amp
+#define CURRENT_HOLD_ROT	200.0
 
-#define CAP_STEPS_PER_METER		1600000.0 // 200 steps *16 / 2mm * 1000mm = 1'600'000 steps/m // 1000 / (0.01 mm/step) *16 = 1'600'000
-#define CAP_INC_PER_METER		2000000.0 // 100'000 m / 0.8
-//#define CAP_ENC_RATIO			0.8 //
+#define MOTOR_ROT			0
+#define MOTOR_ROT_BITS		0x01
 
-#define SCREW_STEPS_PER_REV		 48000.0 // 200 * 16 * 15
-#define SCREW_INC_PER_REV		120000.0 //
-#define SCREW_ENC_RATIO			0.4
-#define SCREW_PLAY_REV			1 // 0.500 // 1=1rev // no negative value allowed!
+#define ROT_STEPS_PER_REV	3200.0 // 200 steps * 16
+#define ROT_INC_PER_REV		4000.0 // 3'200 m / 0.8
 
-#define SCREW_INC_PER_M		SCREW_INC_PER_REV*SCREW_REV_PER_M 
-#define RO_STORED_IN		0
-//#define RO_CAPPING_IN		1
-#define RO_SCREW_DOWN_0	1
+#define SCREW_MIN_UNIT		4.0 // 360/4.0 = 90° minimal turn
 
-#define POS_STORED_UM			0 // Ref
-#define POS_PRINTHEADS_UM	RX_StepperCfg.cap_pos // capping position
+// Shift Motor // 200 steps/rev // 2mm/rev // max 0.67 Amp
+#define CURRENT_HOLD_SHIFT  7.0
 
-static SMovePar	_ParCap_ref;
-static SMovePar	_ParCap_drive;
-static SMovePar	_ParCap_wipe;
+#define MOTOR_SHIFT			1
+#define MOTOR_SHIFT_BITS	0x02
 
-static SMovePar	_ParScrew_ref;
-static SMovePar	_ParScrew_turn;
+#define SHIFT_STEPS_PER_METER	1600000.0 // 200 * 16 * / 2mm * 1000mm
+#define SHIFT_INC_PER_METER		2000000.0 // 1600000.0 / 0.8
 
-static int		_CmdRunning = 0;
-static int		_lastPosCmd = 0;
-static int		_reset_retried = 0;
-static int		_new_cmd = FALSE;
-static int		_rescrew_pos = 0;
+// MOTOR_ROT Positions
+#define POS_ROT_CNT			4
+#define POS_ROT_WET			(ROT_STEPS_PER_REV/4.0*0)
+#define POS_ROT_VAC			(ROT_STEPS_PER_REV/4.0*1)
+#define POS_ROT_WIPE		(ROT_STEPS_PER_REV/4.0*2)
+#define POS_ROT_CAP			(ROT_STEPS_PER_REV/4.0*3)
+
+// ENCODER_ROT Positions
+#define POS_ENC_WET			(ROT_INC_PER_REV/4.0*0)
+#define POS_ENC_VAC			(ROT_INC_PER_REV/4.0*1)
+#define POS_ENC_WIPE		(ROT_INC_PER_REV/4.0*2)
+#define POS_ENC_CAP			(ROT_INC_PER_REV/4.0*3)
+
+// MOTOR_SHIFT Positions
+#define POS_SHIFT_CNT		4
+#define POS_SHIFT_REF		(SHIFT_STEPS_PER_METER*(0-0.001))
+#define POS_SHIFT_CENTER	(SHIFT_STEPS_PER_METER*(0.024+0))
+#define POS_SHIFT_START		(SHIFT_STEPS_PER_METER*(0.024+0.024))
+#define POS_SHIFT_END		(SHIFT_STEPS_PER_METER*(0.024-0.024))
+
+// Inputs
+#define ROT_STORED_IN		0
+#define SHIFT_STORED_IN		1
+
+// Outputs
+#define VAC_ON				0x001 // 0
+#define PUMP_FLUSH_CAP		0x010 // 3 Flush 2
+#define PUMP_WASTE_VAC		0x020 // 4 Waste 1
+#define PUMP_FLUSH_WET		0x040 // 5 Flush 1
+#define PUMP_WASTE_BASE		0x080 // 6 Waste 2
+//#define PUMP_FLUSH_CAP		3
+//#define PUMP_WASTE_VAC		4
+//#define PUMP_FLUSH_WET		5
+//#define PUMP_WASTE_BASE		6
+#define RO_ALL_OUTPUTS		0x1FF //  ALL Outputs
+
+// Vectors
+static int	POS_ROT[POS_ROT_CNT] = {
+	POS_ROT_CAP,	
+	POS_ROT_WET,
+	POS_ROT_VAC,
+	POS_ROT_WIPE
+};
+
+static int	POS_ENC_ROT[POS_ROT_CNT] = {
+	POS_ENC_CAP,	
+	POS_ENC_WET,
+	POS_ENC_VAC,
+	POS_ENC_WIPE
+};
+
+static int	POS_SHIFT[POS_SHIFT_CNT] = {
+	POS_SHIFT_REF,	
+	POS_SHIFT_CENTER,
+	POS_SHIFT_START,
+	POS_SHIFT_END
+};
+
+//--- global  variables -----------------------------------------------------------------------------------------------------------------
+static int	_CmdRunning = 0; 
+static char	_CmdName[32];
+static int	_ResetRetried = 0;
+static int  _LastRobPosCmd = 0;
+static int  _RobFunction = 0;
+static int  _ShowStatus = 0;
+static int	_NewCmd = 0;
+static int	_NewCmdPos = 0;
+static int	_TimeCnt = 0;
+//static int	_Step;
+//static int	_PrintPos;
+
+static SMovePar	_ParRotRef;
+static SMovePar	_ParRotSensRef;
+static SMovePar	_ParRotDrive;
+
+static SMovePar	_ParShiftSensRef;
+static SMovePar	_ParShiftDrive;
+static SMovePar	_ParShiftWet;
+static SMovePar	_ParShiftVac;
+static SMovePar	_ParShiftWipe;
 
 static UINT32	_txrob_Error[5];
 
+// Times
+static int	_RotRefOffset = 0; // in steps
+static int	_TimeWastePump = 5; //20; // in s
+static int	_TimeFillCap = 14; // in s
+static int	_SpeedShift = 21000; // in steps/s
+
 //--- prototypes --------------------------------------------
 static void _txrob_motor_test(int motor, int steps);
-static void _txrob_turn_screw_to_pos(int screw, int steps);
+//static void _txrob_turn_screw_to_pos(int screw, int steps);
 static void _txrob_error_reset(void);
 static void _txrob_send_status(RX_SOCKET);
+
+static int  _rot_rev_2_steps(int rev);
+static int  _rot_steps_2_rev(int steps);
+
+static int  _shift_micron_2_steps(int micron);
+static int  _shift_steps_2_micron(int steps);
+
+static int  _rot_pos_check(int steps);
 
 //--- txrob_init --------------------------------------
 void txrob_init(void)
 {
-	int i;
-
-	motor_config(MOTOR_CAP, CURRENT_HOLD, CAP_STEPS_PER_METER, CAP_INC_PER_METER);
-	motors_config(MOTOR_SCREW_ALL_BITS, CURRENT_HOLD_SCREWS, CAP_STEPS_PER_METER, CAP_INC_PER_METER);
-
-	//--- movement parameters screws ----------------
-
-	_ParScrew_ref.speed = 4000; // 21000; // speed with max tork: 21'333
-	_ParScrew_ref.accel = 1000;
-	_ParScrew_ref.current = 60.0; //  80.0; // max 134 = 1.34 A // Amps/Phase Parallel: 0.67 A
-	_ParScrew_ref.stop_mux = 0;
-	_ParScrew_ref.dis_mux_in = 0;
-	_ParScrew_ref.stop_in = ESTOP_UNUSED;
-	_ParScrew_ref.stop_level = 0; // stopp when sensor off
-	_ParScrew_ref.estop_in = RO_SCREW_DOWN_0;
-	_ParScrew_ref.estop_level = 0; // stopp when sensor off
-	_ParScrew_ref.checkEncoder = TRUE;
-
-	_ParScrew_turn.speed = 21000; // speed with max tork: 21'333
-	_ParScrew_turn.accel = 10000;
-	_ParScrew_turn.current = 80.0;  // max 134 = 1.34 A // Amps/Phase Parallel: 0.67 A // approx 0.9N; max 1.4 N
-	_ParScrew_turn.stop_mux = 0;
-	_ParScrew_turn.dis_mux_in = 0;
-	_ParScrew_turn.stop_in = ESTOP_UNUSED;
-	_ParScrew_turn.stop_level = 0;
-	_ParScrew_turn.estop_in = ESTOP_UNUSED;
-	_ParScrew_turn.estop_level = 0;
-	_ParScrew_turn.checkEncoder = TRUE;
+	// Init Motors
+	motor_config(MOTOR_ROT, CURRENT_HOLD_ROT, ROT_STEPS_PER_REV, ROT_INC_PER_REV);
+	motor_config(MOTOR_SHIFT, CURRENT_HOLD_SHIFT, SHIFT_STEPS_PER_METER, SHIFT_INC_PER_METER);
 
 	//--- movement parameters capping ----------------
 	
-	_ParCap_ref.speed = 16000; // speed with max tork: 16'000
-	_ParCap_ref.accel =  8000;
-	_ParCap_ref.current = 60.0; // max 134 = 1.34 A // Amps/Phase Parallel: 0.67 A
-	_ParCap_ref.stop_mux = 0;
-	_ParCap_ref.dis_mux_in = 0;
-	_ParCap_ref.stop_in = ESTOP_UNUSED; // Check Input 0
-	_ParCap_ref.stop_level = 0; // stopp when sensor on
-	_ParCap_ref.estop_in = RO_STORED_IN; // Check Input 0
-	_ParCap_ref.estop_level = 1; // stopp when sensor on
-	_ParCap_ref.checkEncoder = TRUE;
+	_ParRotRef.speed = 2; // 10; //90; // speed with max tork: 
+	_ParRotRef.accel =  1; // 2; // 10;
+	_ParRotRef.current = 150.0; // 200; // max 420 = 4.2 A
+	_ParRotRef.stop_mux = 0;
+	_ParRotRef.dis_mux_in = 1;
+	_ParRotRef.stop_in = ESTOP_UNUSED;
+	_ParRotRef.stop_level = 0;
+	_ParRotRef.estop_in = ROT_STORED_IN; // Check Input 0
+	_ParRotRef.estop_level = 1; // stopp when sensor on
+//	_ParRotRef.sensRef = TRUE;
+	_ParRotRef.checkEncoder = TRUE;
+	
+	_ParRotSensRef.speed = 500; // speed with max tork: 3200/4
+	_ParRotSensRef.accel =  500;
+	_ParRotSensRef.current = 200.0; // max 420 = 4.2 A
+	_ParRotSensRef.stop_mux = 0;
+	_ParRotSensRef.dis_mux_in = 1;
+	_ParRotSensRef.stop_in = ESTOP_UNUSED;
+	_ParRotSensRef.stop_level = 0;
+	_ParRotSensRef.estop_in = ROT_STORED_IN; // Check Input 0
+	_ParRotSensRef.estop_level = 1; // stopp when sensor on
+//	_ParRotSensRef.sensRef = TRUE;
+	_ParRotSensRef.checkEncoder = TRUE;
 
-	_ParCap_drive.speed = 32000; // speed with max tork: 16'000
-	_ParCap_drive.accel = 16000;
-	_ParCap_drive.current = 60.0; // max 134 = 1.34 A // Amps/Phase Parallel: 0.67 A
-	_ParCap_drive.stop_mux = 0;
-	_ParCap_drive.dis_mux_in = 0;
-	_ParCap_drive.stop_in = ESTOP_UNUSED;
-	_ParCap_drive.stop_level = 0;
-	_ParCap_drive.estop_in = ESTOP_UNUSED;
-	_ParCap_drive.estop_level = 1;
-	_ParCap_drive.checkEncoder = TRUE;
+	_ParRotDrive.speed = 500; // speed with max tork:
+	_ParRotDrive.accel = 500;
+	_ParRotDrive.current = 300.0; // max 420 = 4.2 A
+	_ParRotDrive.stop_mux = 0;
+	_ParRotDrive.dis_mux_in = 0;
+	_ParRotDrive.stop_in = ESTOP_UNUSED;
+	_ParRotDrive.stop_level = 0;
+	_ParRotDrive.estop_in = ESTOP_UNUSED;
+	_ParRotDrive.estop_level = 1;
+//	_ParRotDrive.sensRef = FALSE;
+	_ParRotDrive.checkEncoder = TRUE;
+	
+	//--- movement parameters screws ----------------
+	
+	_ParShiftSensRef.speed = 21000; // speed with max tork: 21'333
+	_ParShiftSensRef.accel = 10000;
+	_ParShiftSensRef.current = 67.0; //  max 67 = 0.67 A
+	_ParShiftSensRef.stop_mux = 0;
+	_ParShiftSensRef.dis_mux_in = 0;
+	_ParShiftSensRef.stop_in = ESTOP_UNUSED;
+	_ParShiftSensRef.stop_level = 0;
+	_ParShiftSensRef.estop_in = SHIFT_STORED_IN;
+	_ParShiftSensRef.estop_level = 1; // stopp when sensor on
+	_ParShiftSensRef.checkEncoder = TRUE;
 
-	_ParCap_wipe.speed = 25000; // speed with max tork: 16'000
-	_ParCap_wipe.accel = 12500;
-	_ParCap_wipe.current = 60.0; // max 134 = 1.34 A // Amps/Phase Parallel: 0.67 A
-	_ParCap_wipe.stop_mux = 0;
-	_ParCap_wipe.dis_mux_in = 0;
-	_ParCap_wipe.stop_in	= ESTOP_UNUSED;
-	_ParCap_wipe.stop_level = 0;
-	_ParCap_wipe.estop_in = ESTOP_UNUSED;
-	_ParCap_wipe.estop_level = 1;
-	_ParCap_wipe.checkEncoder = TRUE;
+	_ParShiftDrive.speed = 21000; // speed with max tork: 21'333
+	_ParShiftDrive.accel = 10000;
+	_ParShiftDrive.current = 67.0; //  max 67 = 0.67 A
+	_ParShiftDrive.stop_mux = 0;
+	_ParShiftDrive.dis_mux_in = 0;
+	_ParShiftDrive.stop_in = ESTOP_UNUSED;
+	_ParShiftDrive.stop_level = 0;
+	_ParShiftDrive.estop_in = ESTOP_UNUSED;
+	_ParShiftDrive.estop_level = 0; 
+	_ParShiftDrive.checkEncoder = TRUE;
+	
+	_ParShiftWet.speed = 21000; // speed with max tork: 21'333
+	_ParShiftWet.accel = 10000;
+	_ParShiftWet.current = 67.0; //  max 67 = 0.67 A
+	_ParShiftWet.stop_mux = 0;
+	_ParShiftWet.dis_mux_in = 0;
+	_ParShiftWet.stop_in = ESTOP_UNUSED;
+	_ParShiftWet.stop_level = 0;
+	_ParShiftWet.estop_in = ESTOP_UNUSED;
+	_ParShiftWet.estop_level = 0; // stopp when sensor on
+	_ParShiftWet.checkEncoder = TRUE;
+	
+	_ParShiftVac.speed = 21000; // 21000; // speed with max tork: 21'333
+	_ParShiftVac.accel = 10000;
+	_ParShiftVac.current = 67.0; //  80.0; // max 134 = 1.34 A // Amps/Phase Parallel: 0.67 A
+	_ParShiftVac.stop_mux = 0;
+	_ParShiftVac.dis_mux_in = 0;
+	_ParShiftVac.stop_in = ESTOP_UNUSED;
+	_ParShiftVac.stop_level = 0;
+	_ParShiftVac.estop_in = ESTOP_UNUSED;
+	_ParShiftVac.estop_level = 0; // stopp when sensor on
+	_ParShiftVac.checkEncoder = TRUE;
+	
+	_ParShiftWipe.speed = 21000; // 21000; // speed with max tork: 21'333
+	_ParShiftWipe.accel = 10000;
+	_ParShiftWipe.current = 67.0; //  80.0; // max 134 = 1.34 A // Amps/Phase Parallel: 0.67 A
+	_ParShiftWipe.stop_mux = 0;
+	_ParShiftWipe.dis_mux_in = 0;
+	_ParShiftWipe.stop_in = ESTOP_UNUSED;
+	_ParShiftWipe.stop_level = 0;
+	_ParShiftWipe.estop_in = ESTOP_UNUSED;
+	_ParShiftWipe.estop_level = 0; // stopp when sensor on
+	_ParShiftWipe.checkEncoder = TRUE;
+	
+	//--- Outputs ----------------
+	Fpga.par->output &= ~RO_ALL_OUTPUTS; // ALL OUTPUTS OFF
+}
 
+//---_rot_pos_check --------------------------------------------------------------
+static int  _rot_pos_check_err(int steps)
+{
+	if (abs(POS_ROT[0] - steps) <= 1)
+	{
+		if (abs(POS_ENC_ROT[0] - Fpga.encoder[MOTOR_ROT].pos) <= 10)
+		{
+			return FALSE;
+		}
+		else
+		{
+			Error(ERR_CONT, 0, "Stepper: Command %s: Motor Encoder at invalid position", _CmdName);
+		}
+	}
+	else if (abs(POS_ROT[1] - steps) <= 1)
+	{
+		if (abs(POS_ENC_ROT[1] - Fpga.encoder[MOTOR_ROT].pos) <= 10)
+		{
+			return FALSE;
+		}
+		else
+		{
+			Error(ERR_CONT, 0, "Stepper: Command %s: Motor Encoder at invalid position", _CmdName);
+		}
+	}
+	else if (abs(POS_ROT[2] - steps) <= 1)
+	{
+		if (abs(POS_ENC_ROT[2] - Fpga.encoder[MOTOR_ROT].pos) <= 10)
+		{
+			return FALSE;
+		}
+		else
+		{
+			Error(ERR_CONT, 0, "Stepper: Command %s: Motor Encoder at invalid position", _CmdName);
+		}
+	}
+	else if (abs(POS_ROT[3] - steps) <= 1)
+	{
+		if (abs(POS_ENC_ROT[3] - Fpga.encoder[MOTOR_ROT].pos) <= 10)
+		{
+			return FALSE;
+		}
+		else
+		{
+			Error(ERR_CONT, 0, "Stepper: Command %s: Motor Encoder at invalid position", _CmdName);
+		}
+	}
+	else
+	{
+		Error(ERR_CONT, 0, "Stepper: Command %s: Motor Steps at invalid position", _CmdName);
+	}
+	return TRUE;
 }
 
 //--- txrob_main ------------------------------------------------------------------
 void txrob_main(int ticks, int menu)
 {
+	int motor;
+	
 	motor_main(ticks, menu);
 	
+	if (!motors_init_done())
+	{
+		motor_config(MOTOR_ROT, CURRENT_HOLD_ROT, ROT_STEPS_PER_REV, ROT_INC_PER_REV);
+		motor_config(MOTOR_SHIFT, CURRENT_HOLD_SHIFT, SHIFT_STEPS_PER_METER, SHIFT_INC_PER_METER);
+	}
+	
 	// --- read Inputs ---
-	RX_TestTableStatus.info.x_in_ref = fpga_input(RO_STORED_IN); // Reference Sensor
-	RX_TestTableStatus.info.cln_screw_0 = fpga_input(RO_SCREW_DOWN_0); // Screwhead mot0 is pressed down
-	//RX_TestTableStatus.info.cln_in_capping = fpga_input(RO_CAPPING_IN); // Sensor for cleaning station beeing in capping pos
-	RX_TestTableStatus.posZ = motor_get_step(MOTOR_CAP) * 1000000.0 / CAP_STEPS_PER_METER;
+	RX_TestTableStatus.info.z_in_ref = fpga_input(ROT_STORED_IN); // Reference Sensor Rotation
+	RX_TestTableStatus.info.x_in_ref = fpga_input(SHIFT_STORED_IN); // Reference Sensor Shift
+	
+	RX_TestTableStatus.posZ = _rot_steps_2_rev(motor_get_step(MOTOR_ROT));
+	RX_TestTableStatus.posX = _shift_steps_2_micron(motor_get_step(MOTOR_SHIFT));
 	
 	// --- Set Position Flags ---
-	RX_TestTableStatus.info.z_in_ref = ((RX_TestTableStatus.info.ref_done == 1)
-		&& (abs(RX_TestTableStatus.posZ - POS_STORED_UM) <= 10)
-		&& (RX_TestTableStatus.info.x_in_ref == 1));
-	RX_TestTableStatus.info.z_in_print = RX_TestTableStatus.info.z_in_ref;
-	RX_TestTableStatus.info.z_in_cap = ((RX_TestTableStatus.info.ref_done == 1)
-		&& (abs(RX_TestTableStatus.posZ - POS_PRINTHEADS_UM) <= 10)
-		&& (RX_TestTableStatus.info.x_in_ref == 0));
+//	RX_TestTableStatus.info.z_in_ref = ((RX_TestTableStatus.info.ref_done == 1)
+//		&& (abs(RX_TestTableStatus.posZ - POS_STORED_UM) <= 10)
+//		&& (RX_TestTableStatus.info.x_in_ref == 1));
+//	RX_TestTableStatus.info.z_in_print = RX_TestTableStatus.info.z_in_ref;
+//	RX_TestTableStatus.info.z_in_cap = ((RX_TestTableStatus.info.ref_done == 1)
+//		&& (abs(RX_TestTableStatus.posZ - POS_PRINTHEADS_UM) <= 10)
+//		&& (RX_TestTableStatus.info.x_in_ref == 0));
 
 	// --- set positions False while moving ---
 	if (RX_TestTableStatus.info.moving) //  && (Fpga.stat->moving != 0))
 	{
-		RX_TestTableStatus.info.z_in_ref = FALSE;
+		//RX_TestTableStatus.info.z_in_ref = FALSE;
 		RX_TestTableStatus.info.z_in_print = FALSE;
 		RX_TestTableStatus.info.z_in_cap = FALSE;
 		RX_TestTableStatus.info.move_ok = FALSE;
-		RX_TestTableStatus.info.screw_in_ref = FALSE;
-		RX_TestTableStatus.info.screw_done = FALSE;
-		if (_CmdRunning == CMD_CLN_SCREW_0_POS)			RX_TestTableStatus.adjustmentProgress = (int)(motor_get_step(MOTOR_SCREW_0) * 100.0 / (motor_get_end_step(0)));
-		//else											RX_TestTableStatus.adjustmentProgress = 0;
 	}
-
-	if (_CmdRunning && motors_move_done(MOTOR_ALL_BITS))
+	if (_TimeCnt != 0) _TimeCnt--; // waiting time
+	// --- Executed after each move ---
+	if (_CmdRunning && motors_move_done(MOTOR_ALL_BITS) && (_TimeCnt == 0))
 	{
 		RX_TestTableStatus.info.moving = FALSE;
+		int loc_move_pos = _NewCmdPos;
+		int loc_new_cmd = _NewCmd;
+		
+		Fpga.par->output &= ~VAC_ON; // VACUUM OFF
+		Fpga.par->output &= ~PUMP_FLUSH_WET; // PUMP_FLUSH_WET OFF
+		Fpga.par->output &= ~PUMP_WASTE_VAC; // Waste OFF
 
-		// --- tasks ater the deceleration period of the Stopp Command ---
-		if (_CmdRunning == CMD_CLN_STOP)
-		{
-			if (motor_error(MOTOR_CAP))
+		// --- tasks after motor error ---
+		if ((_CmdRunning != CMD_CLN_REFERENCE) && (_CmdRunning != CMD_CLN_ROT_REF))
+		{		
+			if (motors_error(MOTOR_ALL_BITS, &motor))
 			{
+				loc_new_cmd = FALSE;
 				RX_TestTableStatus.info.ref_done = FALSE;
-				Error(ERR_CONT, 0, "FLO_RO: Command 0x%08x: triggers motor_error", _CmdRunning);
+				Error(ERR_CONT, 0, "Stepper: Command %s: Motor[%d] blocked", _CmdName, motor + 1);
+				_CmdRunning = FALSE;
+				_ResetRetried = 0;
+				Fpga.par->output &= ~RO_ALL_OUTPUTS; // set all output to off
+			}
+			else if (_rot_pos_check_err(motor_get_step(MOTOR_ROT))) 
+			{
+				Error(ERR_CONT, 0, "CLN: Command %s: position corrupt, try referencing", _CmdName); 
+				RX_TestTableStatus.info.ref_done = FALSE; 
+				_CmdRunning = FALSE; 
+				loc_new_cmd = CMD_CLN_REFERENCE;
 			}
 		}
-
-		// --- tasks ater reference cleaning station ---
+		
+		// --- tasks after motor ref ---
 		if (_CmdRunning == CMD_CLN_REFERENCE)
 		{
-			rx_sleep(1000); // wait 1s on transport to stand still
-			RX_TestTableStatus.info.x_in_ref = fpga_input(RO_STORED_IN); // Reference Sensor
-
-			if (motor_error(MOTOR_CAP))
+			if (motors_error(MOTOR_ROT_BITS, &motor))
+			//if(TRUE)
 			{
-				RX_TestTableStatus.info.ref_done = FALSE;
-				Error(ERR_CONT, 0, "FLO_RO: Command 0x%08x: triggers motor_error", _CmdRunning);
-			}
-			else if (RX_TestTableStatus.info.x_in_ref)
-			{
-				motor_reset(MOTOR_CAP);				// reset position after referencing
-				RX_TestTableStatus.info.ref_done = TRUE;
-				_reset_retried = 0;
-				RX_TestTableStatus.posZ = motor_get_step(MOTOR_CAP) * 1000000.0 / CAP_STEPS_PER_METER;
-			}
-			else
-			{
-				if (_reset_retried < 3)
+				if (RX_TestTableStatus.info.z_in_ref)
 				{
-					_reset_retried++;
-					_new_cmd = CMD_CLN_REFERENCE;
-					Error(LOG, 0, "FLO_RO: Command 0x%08x: Retry Reference CLN", _CmdRunning);
+					motors_reset(MOTOR_ROT_BITS);
+					RX_TestTableStatus.posZ = _rot_steps_2_rev(motor_get_step(MOTOR_ROT));
+					loc_new_cmd = CMD_CLN_ROT_REF; //CMD_CLN_SHIFT_REF; // CMD_CLN_ROT_REF;
 				}
 				else
 				{
-					Error(ERR_CONT, 0, "FLO_RO: Command 0x%08x: Referencing CLN failed", _CmdRunning);
-					_reset_retried = 0;
+					Error(ERR_CONT, 0, "Stepper: Command %s: No Sensor at reference deteced", _CmdName);
 				}
 			}
-		}
-
-		// --- tasks ater reference screws ---
-		if (_CmdRunning == CMD_CLN_SCREW_REF)
-		{
-			if (motor_error(MOTOR_SCREW_ALL_BITS))
-			{
-				Error(ERR_CONT, 0, "FLO_RO: Command 0x%08x: triggers motor_error", _CmdRunning);
-			}
-			else if (RX_TestTableStatus.info.cln_screw_0 == 0
-				&& RX_TestTableStatus.info.cln_screw_1 == 0
-				&& RX_TestTableStatus.info.cln_screw_2 == 0
-				&& RX_TestTableStatus.info.cln_screw_3 == 0)
-			{
-				motor_reset(MOTOR_SCREW_ALL_BITS);				// reset position after referencing
-				RX_TestTableStatus.info.screw_in_ref = TRUE;
-			}
 			else
 			{
-				Error(ERR_CONT, 0, "FLO_RO: Command 0x%08x: Referencing Screws failed", _CmdRunning);
+				Error(ERR_CONT, 0, "Stepper: Command %s: No mechanical reference deteced", _CmdName);
 			}
 		}
-
-		// --- tasks ater turning screws ---
-		if ((_CmdRunning == CMD_CLN_SCREW_0_POS)
-			|| (_CmdRunning == CMD_CLN_SCREW_1_POS)
-			|| (_CmdRunning == CMD_CLN_SCREW_2_POS)
-			|| (_CmdRunning == CMD_CLN_SCREW_3_POS))
-		{
-			if (motor_error(MOTOR_SCREW_ALL_BITS))
+		
+		if (_CmdRunning == CMD_CLN_ROT_REF)
 			{
-				Error(ERR_CONT, 0, "FLO_RO: Command 0x%08x: triggers motor_error", _CmdRunning);
-			}
-			else
-			{
-				RX_TestTableStatus.info.screw_done = TRUE;
-				RX_TestTableStatus.adjustmentProgress = (int)100;
-				if (_rescrew_pos != 0)
+				//if (motors_error(MOTOR_ROT_BITS, &motor))
+				if(TRUE)
 				{
-					_new_cmd = CMD_CLN_SCREW_0_POS;
+					motors_reset(MOTOR_ROT_BITS);
+					RX_TestTableStatus.posZ = _rot_steps_2_rev(motor_get_step(MOTOR_ROT));
+					loc_new_cmd = CMD_CLN_SHIFT_REF; 
+				}
+				else
+				{
+					Error(ERR_CONT, 0, "Stepper: Command %s: No mechanical reference deteced", _CmdName);
 				}
 			}
-		}
-
-		// --- tasks ater move to pos 0 stored position, check ref sensor ---
-		if ((_CmdRunning == CMD_CLN_MOVE_POS) && (_lastPosCmd == 0))  //  && (RX_TestTableStatus.posZ == 0)
+		
+		if (_CmdRunning == CMD_CLN_SHIFT_REF && _NewCmd == FALSE)
 		{
-			if (!RX_TestTableStatus.info.x_in_ref)
+			if (RX_TestTableStatus.info.x_in_ref == TRUE)
 			{
-				_new_cmd = CMD_CLN_REFERENCE;
-				Error(LOG, 0, "FLO_RO: Command 0x%08x: triggers Referencing", _CmdRunning); //problem mit toggel move : do not toggle twice!
+				loc_new_cmd = CMD_CLN_SHIFT_MOV; 
+				loc_move_pos = 0; // Ref Pos
+				motors_reset(MOTOR_SHIFT_BITS);
+				RX_TestTableStatus.posX = _shift_steps_2_micron(motor_get_step(MOTOR_SHIFT));
+				RX_TestTableStatus.info.ref_done = TRUE;
+				_RobFunction = 1;
+			}
+			else
+			{
+				Error(ERR_CONT, 0, "Stepper: Command %s: Shift reference Sensor not deteced", _CmdName);
 			}
 		}
 
-		// --- Set Position Flags after Commands ---
-		RX_TestTableStatus.info.move_ok = ((_CmdRunning == CMD_CLN_REFERENCE || _CmdRunning == CMD_CLN_MOVE_POS || _CmdRunning == CMD_CLN_WIPE)
-			&& RX_TestTableStatus.info.ref_done
-			&& abs(RX_TestTableStatus.posZ - _lastPosCmd) <= 10);
+		// --- tasks after motor stop ---
+		if (_CmdRunning == CMD_CLN_STOP)
+		{
+			_ResetRetried = 0;
+		}
+		
+		//========================================== rot ==========================================
+		if (_CmdRunning == CMD_CLN_MOVE_POS) 
+		{
+			switch (_RobFunction)
+			{
+			case 0:	// Cap
+				loc_new_cmd = CMD_CLN_SHIFT_MOV; 
+				loc_move_pos = 1; // center
+				break;
 
-		if (_new_cmd == FALSE)
+			case 1:	// Wet wipe
+				loc_new_cmd = CMD_CLN_SHIFT_MOV; 
+				loc_move_pos = 2; // start
+				break;
+	
+			case 2:	// Vacuum
+				loc_new_cmd = CMD_CLN_SHIFT_MOV; 
+				loc_move_pos = 2; // start
+				break;
+				
+			case 3: // Wipe
+				loc_new_cmd = CMD_CLN_SHIFT_MOV; 
+				loc_move_pos = 2; // start
+				break;
+			}
+		}
+		
+		//========================================== shift ==========================================
+		if (_CmdRunning == CMD_CLN_SHIFT_MOV) 
+		{
+			switch (_LastRobPosCmd)
+			{
+			case 0:	// Ref
+				motors_reset(MOTOR_SHIFT_BITS);
+				RX_TestTableStatus.posX = _shift_steps_2_micron(motor_get_step(MOTOR_SHIFT));
+				break;
+
+			case 1:	// Center
+				loc_new_cmd = CMD_CLN_FILL_CAP; 
+				break;
+	
+			case 2:	// Start
+				switch (_RobFunction)
+				{
+				case 0:	// Cap
+					break;
+
+				case 1:	// Wet wipe
+					Fpga.par->output |= PUMP_FLUSH_WET; // Flush Wet ON
+					break;
+	
+				case 2:	// Vacuum
+					Fpga.par->output |= VAC_ON; // VACUUM ON
+					Fpga.par->output |= PUMP_WASTE_VAC; // Waste ON
+					break;
+				
+				case 3: // Wipe
+					break;
+				}
+				break;
+				
+			case 3: // End
+				switch (_RobFunction)
+				{
+				case 0:	// Cap
+					break;
+
+				case 1:	// Wet wipe
+					//loc_new_cmd = CMD_CLN_EMPTY_WASTE; 
+					break;
+	
+				case 2:	// Vacuum
+					loc_new_cmd = CMD_CLN_EMPTY_WASTE; 
+					break;
+				
+				case 3: // Wipe
+					break;
+				}
+				break;
+			}
+		}
+		
+		//========================================== timers ==========================================
+		if (_CmdRunning == CMD_CLN_FILL_CAP) 
+		{
+			Fpga.par->output &= ~PUMP_FLUSH_CAP; // Flush Cap OFF
+		}
+		
+		if (_CmdRunning == CMD_CLN_EMPTY_WASTE) 
+		{
+			Fpga.par->output &= ~PUMP_WASTE_BASE; // Waste base OFF
+			Fpga.par->output &= ~PUMP_WASTE_VAC; // Waste base OFF
+		}
+		
+		// --- Set Position Flags after Commands ---
+		//RX_TestTableStatus.info.move_ok = (RX_TestTableStatus.info.ref_done && (abs(RX_TestTableStatus.posZ - _LastRobPosCmd) <= 10));
+		//RX_TestTableStatus.info.x_in_ref		= (RX_TestTableStatus.info.ref_done && (RX_TestTableStatus.info.x_in_ref == 1));
+		
+		// --- Toggle to mark end of move ---
+		if ((loc_new_cmd == FALSE) && (_CmdRunning != CMD_CLN_STOP) && (_CmdRunning != CMD_CLN_SET_WASTE_PUMP)) 
 		{
 			RX_TestTableStatus.info.move_tgl = !RX_TestTableStatus.info.move_tgl;
+			//RX_TestTableStatus.info.move_ok = (RX_TestTableStatus.info.ref_done
+			//	&& abs(RX_TestTableStatus.posX - _LastRobPosCmd) <= 10);
 		}
 
 		// --- Reset Commands ---
 		_CmdRunning = FALSE;
+		_NewCmdPos = 0;
+		_NewCmd = FALSE;
 
 		// --- Execute next Commands ---
-		switch (_new_cmd)
+		switch (loc_new_cmd)
 		{
-		case CMD_CLN_SCREW_0_POS: txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_SCREW_0_POS, &_rescrew_pos); break;
-		case CMD_CLN_REFERENCE:	txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_REFERENCE, NULL); break;
+		case CMD_CLN_REFERENCE: txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_REFERENCE, NULL); break;
+		case CMD_CLN_ROT_REF:	txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_ROT_REF, NULL); break;
+		case CMD_CLN_SHIFT_REF: txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_SHIFT_REF, NULL); break;
+		case CMD_CLN_MOVE_POS:	txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_MOVE_POS, &loc_move_pos); break;
+		case CMD_CLN_SHIFT_MOV: txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_SHIFT_MOV, &loc_move_pos); break;
+		case CMD_CLN_FILL_CAP :	txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_FILL_CAP, NULL); break;
+		case CMD_CLN_EMPTY_WASTE: txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_EMPTY_WASTE, NULL); break;
 		case 0: break;
-		default:				Error(ERR_CONT, 0, "FLO_RO_MAIN: Command 0x%08x not implemented", _new_cmd);	break;
+		default:				Error(ERR_CONT, 0, "LBROB_MAIN: Command 0x%08x not implemented", loc_new_cmd); break;
 		}
-		_new_cmd = FALSE;
-		_rescrew_pos = 0;
+		loc_new_cmd = FALSE;
+		loc_move_pos = 0;
 
 		// _cln_send_status(0); // Push news of move end to main
 
@@ -312,33 +583,41 @@ void txrob_main(int ticks, int menu)
 //--- txrob_display_status ---------------------------------------------------------
 static void _txrob_display_status(void)
 {
-	int enc0_mm;
-	int screwpos0_mm;
-	int screwenc0_mm;
-	enc0_mm = Fpga.encoder[MOTOR_CAP].pos * 1000000.0 / CAP_INC_PER_METER;
-	screwpos0_mm = motor_get_step(MOTOR_SCREW_0) * 1000000.0 / SCREW_STEPS_PER_REV;
-	screwenc0_mm = Fpga.encoder[MOTOR_SCREW_0].pos * 1000000.0 / SCREW_STEPS_PER_REV;
-	int printhead_soll = POS_PRINTHEADS_UM;
-
-	term_printf("FLO Robot ---------------------------------\n");
-	term_printf("moving:         %d		cmd: %08x\n", RX_TestTableStatus.info.moving, _CmdRunning);
-	term_printf("Sensor Reference Motor: %d\n", RX_TestTableStatus.info.x_in_ref);
-	term_printf("Sensor screw_down 0 to 3: %d\n", RX_TestTableStatus.info.cln_screw_0);
-	term_printf("z in reference: %d  ", RX_TestTableStatus.info.z_in_ref);
-	term_printf("z in print:     %d  ", RX_TestTableStatus.info.z_in_print);
-	term_printf("z in capping:   %d\n", RX_TestTableStatus.info.z_in_cap);
-	term_printf("Flag reference done: %d  ", RX_TestTableStatus.info.ref_done);
-	term_printf("Flag move OK: %d", RX_TestTableStatus.info.move_ok);
-	term_printf("Last pos cmd in um:   %d\n", _lastPosCmd);
-	term_printf("Pos0 in steps:   %d  ", motor_get_step(MOTOR_CAP));
-	//term_printf("Pos0 in steps SOLL:   %d\n", printhead_soll);
-	term_printf("Pos0 in um:   %d \n", RX_TestTableStatus.posZ);
-	term_printf("Enc0 in steps:   %d  ", Fpga.encoder[MOTOR_CAP].pos);
-	term_printf("Enc0 in um:   %d\n", enc0_mm);
-	term_printf("ScrewPos0 in steps:   %d  ", motor_get_step(MOTOR_SCREW_0));
-	term_printf("ScrewPos0 in mU:   %d\n", screwpos0_mm);
-	term_printf("ScrewEnc0 in steps:   %d  ", Fpga.encoder[MOTOR_SCREW_0].pos);
-	term_printf("ScrewEnc0 in mU:   %d\n", screwenc0_mm);
+	int i;
+	
+	term_printf("Inputs:       ");
+	for (i = 0; i < INPUT_CNT; i++)
+	{
+		if (Fpga.stat->input & (1 << i)) term_printf("*");
+		else                           term_printf("_");
+		if (i % 4 == 3)			   		   term_printf("   ");
+	}
+	term_printf("\n");
+	term_printf("Outputs:      ");
+	for (i = 0; i < OUTPUT_CNT; i++)
+	{
+		if (Fpga.par->output & (1 << i))  term_printf("*");
+		else                            term_printf("_");
+		if (i % 4 == 3)						term_printf("   ");
+	}
+	term_printf("\n");
+	term_printf("\n");
+	
+	term_printf("FLO Robot Advanced mechref ---------------------------------\n");
+	term_printf("moving:              %d		cmd: %08x\n", RX_TestTableStatus.info.moving, _CmdRunning);
+	term_printf("Sensor Ref Rotation: %d\n", RX_TestTableStatus.info.z_in_ref);
+	term_printf("Sensor Ref Shift:    %d\n", RX_TestTableStatus.info.x_in_ref);
+	term_printf("Ref done:            %d\n", RX_TestTableStatus.info.ref_done);
+	term_printf("Rotation in rev:     %06d  ", RX_TestTableStatus.posZ);
+	term_printf("Rotation in steps:   %06d\n", motor_get_step(MOTOR_ROT));
+	term_printf("Rotation in encsteps:%06d\n", Fpga.encoder[MOTOR_ROT].pos);
+	term_printf("Shift in um:         %06d  ", RX_TestTableStatus.posX);
+	term_printf("Shift in steps:      %06d\n", motor_get_step(MOTOR_SHIFT));
+	term_printf("Rotation RefOffset:  %06d\n", _RotRefOffset);
+	term_printf("Time Waste Vac [s]:  %06d\n", _TimeWastePump);
+	term_printf("Time fill Cap [s]:   %06d\n", _TimeFillCap);
+	term_printf("Speed Shift [mm/s]:  %06d\n", _SpeedShift * 2 / 200 / 16);
+	term_printf("Timer Count:         %06d\n", _TimeCnt);
 	term_printf("\n");
 }
 
@@ -353,14 +632,22 @@ int txrob_menu(void)
 
 	_txrob_display_status();
 	
-	term_printf("MENU FLO-ROBOT -------------------------\n");
+	term_printf("MENU FLO-ROBOT Advanced mechref -------------------------\n");
 	term_printf("s: STOP\n");
-	term_printf("r<n>: reset motor<n>\n");
+	//term_printf("r<n>: reset motor<n>\n");
 	term_printf("R: Reference\n");
-	term_printf("c: reference all screws\n");
-	term_printf("t: turn screw 0 for 1/1000000 rev\n");
-	term_printf("p: move to <rev>\n");
-	term_printf("m<n><steps>: move Motor<n> by <steps>\n");
+	//term_printf("y: move rot\n");
+	//term_printf("z: move shift\n");
+	term_printf("c: move to capping\n");
+	term_printf("e: move to wet wipe\n");
+	term_printf("u: move to vacuum\n");
+	term_printf("w: move to wipe\n");
+	term_printf("b: shift back\n");
+	term_printf("a<steps>: set Rotation RefOffset <steps>\n");
+	term_printf("t<sec>: set Time Waste Vac <sec>\n");
+	term_printf("f<sec>: set Time fill Cap <sec>\n");
+	term_printf("v<mm/s>: set Speed Shift <mm/s>\n");
+	//term_printf("m<n><steps>: move Motor<n> by <steps>\n");
 	term_printf("x: exit\n");
 	term_printf(">");
 	term_flush();
@@ -373,15 +660,65 @@ int txrob_menu(void)
 		case 'r': if (str[1] == 0) for (i = 0; i < MOTOR_CNT; i++) motor_reset(i);
 				  else           motor_reset(atoi(&str[1]));
 				  break;
+		case 'o' : Fpga.par->output ^= (1 << atoi(&str[1])); break;
 		case 'R': txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_REFERENCE, NULL); break;
-		case 'c': txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_SCREW_REF, NULL); break;
-		case 't' : pos = atoi(&str[1]); txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_SCREW_0_POS, &pos); break;
-		case 'p': pos = atoi(&str[1]); txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_MOVE_POS, &pos); break;
+		//case 'y': pos = atoi(&str[1]); txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_MOVE_POS, &pos); break;
+		//case 'z': pos = atoi(&str[1]); txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_SHIFT_MOV, &pos); break;
+		case 'c': pos = 0; txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_MOVE_POS, &pos); break;
+		case 'e': pos = 1; txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_MOVE_POS, &pos); break;
+		case 'u': pos = 2; txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_MOVE_POS, &pos); break;
+		case 'w': pos = 3; txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_MOVE_POS, &pos); break;
+		case 'b': pos = 3; txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_SHIFT_MOV, &pos); break;
+		case 'a' : pos = atoi(&str[1]); 
+			if (pos < 0) pos = 0;
+			if (pos > 800) pos = 800;
+			_RotRefOffset = pos;
+			break;
+		case 't' : pos = atoi(&str[1]); 
+			if (pos < 0) pos = 0;
+			if (pos > 300) pos = 300;
+			_TimeWastePump = pos;
+			break;
+		case 'f' : pos = atoi(&str[1]); 
+			if (pos < 0) pos = 0;
+			if (pos > 300) pos = 300;
+			_TimeFillCap = pos;
+			break;
+		case 'v' : pos  = (atoi(&str[1])) * 200 * 16 / 2; 
+			if (pos < 500) pos = 500;
+			if (pos > 21333) pos = 21333;
+			_SpeedShift = pos;
+			break;
 		case 'm': _txrob_motor_test(str[1] - '0', atoi(&str[2])); break;
 		case 'x': return FALSE;
 		}
 	}
 	return TRUE;
+}
+	
+//---_shift_micron_2_steps --------------------------------------------------------------
+static int  _shift_micron_2_steps(int micron)
+{
+	return (int)(0.5 + micron * (SHIFT_STEPS_PER_METER / 1000000.0));
+}
+
+//---_shift_steps_2_micron --------------------------------------------------------------
+static int  _shift_steps_2_micron(int steps)
+{
+	return (int)(steps * (1000000.0 / SHIFT_STEPS_PER_METER) + 0.5);
+}
+
+//---_rot_rev_2_steps --------------------------------------------------------------
+static int  _rot_rev_2_steps(int rev)
+{
+	INT32 round = rev*SCREW_MIN_UNIT / 1000000.0;
+	return (int)(0.5 + round / SCREW_MIN_UNIT * ROT_STEPS_PER_REV);
+}
+
+//---_rot_steps_2_rev --------------------------------------------------------------
+static int  _rot_steps_2_rev(int steps)
+{
+	return (int)(steps * (1000000.0 / ROT_STEPS_PER_REV) + 0.5);
 }
 
 
@@ -395,66 +732,129 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 	{
 	case CMD_TT_STATUS:				sok_send_2(&socket, REP_TT_STATUS, sizeof(RX_TestTableStatus), &RX_TestTableStatus);	
 									break;
-
-	case CMD_CLN_STOP:				motors_stop(MOTOR_ALL_BITS);
-		_CmdRunning = msgId;
+		
+	case CMD_CLN_STOP:				strcpy(_CmdName, "CMD_CLN_STOP");
+		motors_stop(MOTOR_ALL_BITS); // Stops Hub and Robot
+		Fpga.par->output &= ~RO_ALL_OUTPUTS; // set all output to off
 		RX_TestTableStatus.info.moving = TRUE;
+		_CmdRunning = msgId;
+		// reset var
+		_TimeCnt = 0;
+		_NewCmdPos = 0;
+		_NewCmd = FALSE;
 		break;
 
-	case CMD_CLN_REFERENCE:
-		if (_CmdRunning){ txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_STOP, NULL); _new_cmd = CMD_CLN_REFERENCE; break; }
-		motor_reset(MOTOR_CAP); // to recover from move count missalignment
-		_CmdRunning = msgId;
+	case CMD_CLN_REFERENCE:			strcpy(_CmdName, "CMD_CLN_REFERENCE");
+		if (_CmdRunning){ txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_STOP, NULL); _NewCmd = CMD_CLN_REFERENCE; break; }
+		motor_reset(MOTOR_ROT); // to recover from move count missalignment
+		motor_reset(MOTOR_SHIFT); // to recover from move count missalignment
+		Fpga.par->output &= ~RO_ALL_OUTPUTS;
 		RX_TestTableStatus.info.ref_done = FALSE;
 		RX_TestTableStatus.info.moving = TRUE;
-		_lastPosCmd = 0;
-		motors_move_by_step(MOTOR_CAP_BITS, &_ParCap_ref, -1000000, TRUE);
-		break;
-
-	case CMD_CLN_SCREW_REF:
-		if (_CmdRunning){ txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_STOP, NULL); break; }
 		_CmdRunning = msgId;
-		RX_TestTableStatus.info.moving = TRUE;
-		motors_move_by_step(MOTOR_SCREW_0_BITS, &_ParScrew_ref, -500000, TRUE);
+		// reset var
+		_TimeCnt = 0;
+		_NewCmdPos = 0;
+		_NewCmd = FALSE;
+		//Fpga.par->pwm_output[0]    = 0;
+		//Fpga.par->pwm_output[1]    = 0;
+		//Fpga.par->pwm_output[2]    = 0;
+		//Fpga.par->pwm_output[3]    = 0;
+		motors_move_by_step(MOTOR_ROT_BITS, &_ParRotSensRef, -ROT_STEPS_PER_REV, TRUE);
 		break;
-
-	case CMD_CLN_MOVE_POS:		if (!_CmdRunning)
-	{
-									_CmdRunning = msgId;
-									RX_TestTableStatus.info.moving = TRUE;
-									pos = *((INT32*)pdata);
-									_lastPosCmd = pos;
-									if (!RX_TestTableStatus.info.ref_done) Error(LOG, 0, "CLN: Command 0x%08x: missing ref_done: triggers Referencing", _CmdRunning);
-									if (RX_TestTableStatus.info.ref_done) motors_move_to_step(MOTOR_CAP_BITS, &_ParCap_drive, pos*CAP_STEPS_PER_METER / 1000000);
-		else								  txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_REFERENCE, NULL);
-	}
-								break;
-
-	case CMD_CLN_WIPE:		if (!_CmdRunning)
-	{
-								_CmdRunning = msgId;
-								RX_TestTableStatus.info.moving = TRUE;
-								pos = *((INT32*)pdata);
-								_lastPosCmd = pos;
-								if (!RX_TestTableStatus.info.ref_done) Error(LOG, 0, "CLN: Command 0x%08x: missing ref_done: triggers Referencing", _CmdRunning);
-								if (RX_TestTableStatus.info.ref_done) motors_move_to_step(MOTOR_CAP_BITS, &_ParCap_wipe, pos*CAP_STEPS_PER_METER / 1000000);
-		else								  txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_REFERENCE, NULL);
-	}
-							break;
-
-	case CMD_CLN_SCREW_0_POS:		if (!_CmdRunning)
-	{
-										_CmdRunning = msgId;
-										RX_TestTableStatus.info.moving = TRUE;
-										pos = *((INT32*)pdata);
-										if (pos < 0)
-										{
-											pos = pos - SCREW_PLAY_REV*1000000;    // turn more than the play down in addition to the turn change
-											_rescrew_pos = SCREW_PLAY_REV*1000000; // turn later more than the play up
-										}
-										motors_move_by_step(MOTOR_SCREW_0_BITS, &_ParScrew_turn, pos*SCREW_STEPS_PER_REV / 1000000.0, FALSE);
-	}
-									break;
+		
+	case CMD_CLN_ROT_REF:			strcpy(_CmdName, "CMD_CLN_ROT_REF");
+		if (_CmdRunning){ txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_STOP, NULL); _NewCmd = CMD_CLN_ROT_REF; break; }
+		motor_reset(MOTOR_ROT); // to recover from move count missalignment
+		Fpga.par->output &= ~RO_ALL_OUTPUTS;
+		RX_TestTableStatus.info.ref_done = FALSE;
+		RX_TestTableStatus.info.moving = TRUE;
+		_CmdRunning = msgId;
+		// reset var
+		_TimeCnt = 0;
+		_NewCmdPos = 0;
+		_NewCmd = FALSE;
+		//motors_move_by_step(MOTOR_ROT_BITS, &_ParRotRef, -ROT_STEPS_PER_REV, TRUE);
+		motors_move_by_step(MOTOR_ROT_BITS, &_ParRotDrive, _RotRefOffset, TRUE);
+		break;
+		
+	case CMD_CLN_SHIFT_REF:			strcpy(_CmdName, "CMD_CLN_SHIFT_REF");
+		if (_CmdRunning){ txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_STOP, NULL); _NewCmd = CMD_CLN_SHIFT_REF; break; }
+		motor_reset(MOTOR_SHIFT); // to recover from move count missalignment
+		Fpga.par->output &= ~RO_ALL_OUTPUTS;
+		RX_TestTableStatus.info.ref_done = FALSE;
+		RX_TestTableStatus.info.moving = TRUE;
+		_CmdRunning = msgId;
+		_NewCmd = FALSE;
+		if (fpga_input(SHIFT_STORED_IN) == TRUE){ motors_move_by_step(MOTOR_SHIFT_BITS, &_ParShiftDrive, SHIFT_STEPS_PER_METER * 0.01, TRUE); _NewCmd = CMD_CLN_SHIFT_REF; break; }
+		motors_move_by_step(MOTOR_SHIFT_BITS,&_ParShiftSensRef,-SHIFT_STEPS_PER_METER*0.06, TRUE);
+		break;
+		
+	case CMD_CLN_MOVE_POS:		strcpy(_CmdName, "CMD_CLN_MOVE_POS");
+		if (!_CmdRunning)
+		{
+			_CmdRunning = msgId;
+			RX_TestTableStatus.info.moving = TRUE;
+			if (!RX_TestTableStatus.info.ref_done){ Error(LOG, 0, "CLN: Command %s: missing ref_done", _CmdName); break;}
+			pos = *((INT32*)pdata);
+			if (pos < 0) {Error(LOG, 0, "CLN: Command %s: negative position not allowed", _CmdName); break;}
+			if (pos >= POS_ROT_CNT) {Error(LOG, 0, "CLN: Command %s: too high pos", _CmdName); break;}
+			if (_rot_pos_check_err(motor_get_step(MOTOR_ROT))) {Error(ERR_CONT, 0, "CLN: Command %s: position corrupt, cancel move", _CmdName); RX_TestTableStatus.info.ref_done = FALSE; break;}
+			_RobFunction = pos;
+			pos = POS_ROT[pos];
+			Fpga.par->output &= ~VAC_ON; // VACUUM OFF
+			Fpga.par->output &= ~PUMP_FLUSH_WET; // PUMP_FLUSH_WET OFF
+			Fpga.par->output &= ~PUMP_WASTE_VAC; // Waste OFF
+			motors_move_to_step(MOTOR_ROT_BITS, &_ParRotDrive, pos);
+		}
+		break;
+		
+	case CMD_CLN_SHIFT_MOV:		strcpy(_CmdName, "CMD_CLN_SHIFT_MOV");
+		if (!_CmdRunning)
+		{
+			_CmdRunning = msgId;
+			RX_TestTableStatus.info.moving = TRUE;
+			if (!RX_TestTableStatus.info.ref_done){ Error(LOG, 0, "CLN: Command %s: missing ref_done", _CmdName); break;}
+			pos = *((INT32*)pdata);
+			if (pos < 0) {Error(LOG, 0, "CLN: Command %s: negative position not allowed", _CmdName); break;}
+			if (pos >= POS_ROT_CNT) {Error(LOG, 0, "CLN: Command %s: too high pos", _CmdName); break;}
+			if (_RobFunction == 0 && pos != 1) {Error(LOG, 0, "CLN: Command %s: cancle shift, robot in capping", _CmdName); break;}
+			_LastRobPosCmd = pos;
+			if (pos == 3)
+			{
+				pos = POS_SHIFT[pos];
+				_ParShiftWet.speed = _SpeedShift;
+				motors_move_to_step(MOTOR_SHIFT_BITS, &_ParShiftWet, pos);
+			}
+			else
+			{
+				pos = POS_SHIFT[pos];
+				motors_move_to_step(MOTOR_SHIFT_BITS, &_ParShiftDrive, pos);
+			}
+		}
+		break;
+		
+		
+	case CMD_CLN_FILL_CAP :		strcpy(_CmdName, "CMD_CLN_FILL_CAP");
+		if (!_CmdRunning)
+		{
+			Fpga.par->output |= PUMP_FLUSH_CAP; // Flush Cap ON
+			_CmdRunning = msgId;
+			RX_TestTableStatus.info.moving = TRUE;
+			_TimeCnt = _TimeFillCap * MAIN_PER_SEC;
+		}
+		break;
+		
+	case CMD_CLN_EMPTY_WASTE :		strcpy(_CmdName, "CMD_CLN_EMPTY_WASTE");
+		if (!_CmdRunning)
+		{
+			Fpga.par->output |= PUMP_WASTE_BASE; // Waste base ON
+			Fpga.par->output |= PUMP_WASTE_VAC; // Waste base ON
+			_CmdRunning = msgId;
+			RX_TestTableStatus.info.moving = TRUE;
+			_TimeCnt = _TimeWastePump * MAIN_PER_SEC;
+		}
+		break;
 
 	case CMD_ERROR_RESET:		_txrob_error_reset();
 		fpga_stepper_error_reset();
@@ -462,39 +862,43 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 
 	default:						Error(ERR_CONT, 0, "CLN: Command 0x%08x not implemented", msgId); break;
 	}
+	
+	return TRUE;
 }
 
 //--- _txrob_motor_test ---------------------------------
 static void _txrob_motor_test(int motorNo, int steps)
 {
-	int motor = 1 << motorNo;
+	int motors = 1 << motorNo;
 	SMovePar par;
 	int i;
 
-	if (motorNo == MOTOR_CAP)
+	if (motorNo == 0)
 	{
-		par.speed = 10000; // 32000;//25000; // 8000;// 4000; // 2000;
-		par.accel = 5000; //16000;//12500;// 4000;//2000; // 1000;
-		par.current = 150.0; // 60.0;  // for Tests: 50
+		par.speed		= 1000;
+		par.accel		= 1000;
+		par.current		= 300.0;
+		motors_config(motors, CURRENT_HOLD_ROT, 0.0, 0.0);
 	}
 	else
 	{
 		par.speed	= 21000;		//21000;					//21000;				//21000;			//21000;			//21000;					
 		par.accel	= 10000;		//10000;					//10000;				//10000;			//10000;			//10000;				
-		par.current = 80.0;//134.0;	//40.0;	minimum for 0.3 Nm	// 60.0; for 0.4 Nm		// 80.0 for 0.5 Nm	// 100.0 for 0.6 Nm	// 120.0 for 0.7 Nm	// 134.0 for 0.8 Nm	
+		par.current = 67.0;//134.0;	//40.0;	minimum for 0.3 Nm	// 60.0; for 0.4 Nm		// 80.0 for 0.5 Nm	// 100.0 for 0.6 Nm	// 120.0 for 0.7 Nm	// 134.0 for 0.8 Nm	
+		motors_config(motors, CURRENT_HOLD_SHIFT, 0.0, 0.0);
 	}
-	par.stop_mux = 0;
-	par.dis_mux_in = 0;
-	par.stop_in	   = ESTOP_UNUSED;
-	par.stop_level = 0;
-	par.estop_in = ESTOP_UNUSED;
+	
+	par.stop_mux	= 0;
+	par.dis_mux_in	= 0;
+	par.stop_in		= ESTOP_UNUSED;
+	par.stop_level	= 0;
+	par.estop_in    = ESTOP_UNUSED;
 	par.estop_level = 0;
 	par.checkEncoder = FALSE;
 	RX_TestTableStatus.info.moving = TRUE;
-	_CmdRunning = 1; // TEST
-
-	for (i = 0; i < MOTOR_CNT; i++) if (motor & (1 << i)) motor_config(i, CURRENT_HOLD, CAP_STEPS_PER_METER, CAP_INC_PER_METER);
-	motors_move_by_step(motor, &par, steps, FALSE);
+	_CmdRunning = 1;
+	
+	motors_move_by_step(motors, &par, steps, FALSE);			
 }
 
 //--- _txrob_error_reset ------------------------------------

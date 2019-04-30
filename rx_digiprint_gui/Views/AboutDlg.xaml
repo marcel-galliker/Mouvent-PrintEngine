@@ -16,10 +16,10 @@
     </Window.Resources>
     <Grid >
         <Image Source="..\Resources\Bitmaps\radex_bg.jpg" HorizontalAlignment="Right" />
-        <Grid VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Margin="5">
+        <StackPanel VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Margin="5">
             <Image Source="..\Resources\Bitmaps\Mouvent_Logo.png" />
-            <TextBlock Text="A Bobst Group company  " VerticalAlignment="Bottom" HorizontalAlignment="Right" FontSize="8"/>
-        </Grid>
+            <TextBlock Text="A Bobst Group company  " HorizontalAlignment="Right" FontSize="8"/>
+        </StackPanel>
         <StackPanel Margin="10,30,10,0" >
             <TextBlock Text="RX-DigiPrint"
                      Margin="0,5"

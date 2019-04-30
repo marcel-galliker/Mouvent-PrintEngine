@@ -25,7 +25,7 @@ obj/default/timer.o: timer.c ../rx_head_nios_bsp/HAL/inc/alt_types.h \
  ../rx_head_nios_bsp/drivers/inc/altera_avalon_uart_fd.h \
  ../rx_head_nios_bsp/drivers/inc/altera_avalon_uart_fd.h \
  ../rx_head_nios_bsp/drivers/inc/altera_avalon_uart_regs.h \
- adc_thermistor.h trprintf.h main.h pres.h uart.h \
+ adc_thermistor.h trprintf.h main.h head_eeprom.h pres.h uart.h \
  ../rx_head_nios_bsp/HAL/inc/priv/alt_legacy_irq.h \
  ../rx_head_nios_bsp/drivers/inc/altera_avalon_jtag_uart_regs.h fifo.h \
  conditioner_bootloader.h
@@ -107,6 +107,8 @@ adc_thermistor.h:
 trprintf.h:
 
 main.h:
+
+head_eeprom.h:
 
 pres.h:
 

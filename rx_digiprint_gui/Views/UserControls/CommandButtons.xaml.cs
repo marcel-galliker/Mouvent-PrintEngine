@@ -105,6 +105,11 @@ namespace RX_DigiPrint.Views.UserControls
         private void Start_Clicked(object sender, RoutedEventArgs e)
         {
             if (StartClicked!=null && !StartClicked()) return;            
+            if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf && !(RxGlobals.TestTableStatus.DripPans_InfeedDOWN && RxGlobals.TestTableStatus.DripPans_OutfeedDOWN))
+            {
+                RxMessageBox.YesNo("Print System", "Drip Pans below the clusters. Move it out before printing", MessageBoxImage.Question, true);
+                return;
+            }
 
             if (!RxGlobals.PrinterStatus.AllInkSupliesOn)
             {
@@ -141,6 +146,11 @@ namespace RX_DigiPrint.Views.UserControls
         //--- Test_Clicked -------------------------------------------------
         private void Test_Clicked(object sender, RoutedEventArgs e)
         {
+            if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf && !(RxGlobals.TestTableStatus.DripPans_InfeedDOWN && RxGlobals.TestTableStatus.DripPans_OutfeedDOWN))
+            {
+                RxMessageBox.YesNo("Print System", "Drip Pans below the clusters. Move it out before printing", MessageBoxImage.Question, true);
+                return;
+            }
             PrintQueueAddTest dlg = new PrintQueueAddTest();     
             dlg.ShowDialog();      
         }

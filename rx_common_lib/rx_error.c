@@ -415,8 +415,8 @@ static int error(EDevice device, int no, ELogItemType type, const char *file, in
 		char timestr[64];
 		rx_get_system_time_str(timestr, '.');
 		compose_message((EDevice)log.deviceType, log.deviceNo, errNo, sErrorStrTemp, SIZEOF(sErrorStrTemp), (const char*)format, log.arg);
-		if (device==dev_undef)	TrPrintf(1, "{%s} %s:%s [%s:%d]", 							   timestr, LogItemTypeStr[type], sErrorStrTemp, log.file, log.line);
-		else					TrPrintf(1, "%s %d: {%s} %s: %s [%s:%d]", DeviceStr[device], no, timestr, LogItemTypeStr[type], sErrorStrTemp, log.file, log.line);
+		if (device==dev_undef)	TrPrintfL(1, "{%s} %s:%s [%s:%d]", 							   timestr, LogItemTypeStr[type], sErrorStrTemp, log.file, log.line);
+		else					TrPrintfL(1, "%s %d: {%s} %s: %s [%s:%d]", DeviceStr[device], no, timestr, LogItemTypeStr[type], sErrorStrTemp, log.file, log.line);
 	}
 
 	if (type>sErrorType || (type==sErrorType && sErrorType<LOG_TYPE_ERROR_CONT))

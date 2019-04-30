@@ -138,6 +138,9 @@
     <ClInclude Include="cleaf_orders.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ctr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="boot_svr.c">
@@ -168,9 +171,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="setup.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="spool_svr.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="rx_main_ctrl.c">
@@ -252,6 +252,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="cleaf_orders.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="spool_svr.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ctr.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

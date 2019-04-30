@@ -13,11 +13,13 @@ namespace RX_Common.Resources
             {
                 this["FontSize"]      = 20.0;   
                 this["FontSizeLarge"] = 25.0;   
+                this["FontSizeXL"]    = 40.0;   
             }
             else
             {
                 this["FontSize"]      = 14.66;            
                 this["FontSizeLarge"] = 20.0;   
+                this["FontSizeXL"]    = 32.0;   
             }
         }
     }

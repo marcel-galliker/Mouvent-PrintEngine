@@ -19,6 +19,8 @@
 
 int  spool_start(void);
 int  spool_end(void);
+void spool_tick(void);
+
 
 void spool_auto(int enable);
 

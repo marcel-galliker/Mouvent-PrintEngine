@@ -92,9 +92,15 @@ static BYTE		*_AXI_mem=NULL;
 
 static int		_Init=FALSE;
 static int		_Reload_FPGA = FALSE;
+static int		_FpgaErrorTrace=FALSE;
 static int		_Load_Time=0;
 static SPageId	_PageId[MAX_PAGES];
 static UINT32	_PageEnd[HEAD_CNT][MAX_PAGES];
+static UINT32	_PrintDonePos[HEAD_CNT][MAX_PAGES];
+static UINT32	_PrintGoPos[HEAD_CNT];
+static UINT32	_PrintGoPosBase[HEAD_CNT];
+static UINT32	_HeadFpCnt[HEAD_CNT];
+static UINT32	_HeadFpCntBase[HEAD_CNT];
 static UINT32	_BlockOutIdx[HEAD_CNT];
 static UINT32	_ImgOutIdx[HEAD_CNT];	// use for tests
 static UINT32	_AliveCnt[UDP_PORT_CNT];
@@ -105,8 +111,10 @@ static int		_TempErr=0;
 static UINT32	_ImgInIdx;
 static UINT32	_FirstImage;
 static UINT32	_PdCnt;
-static UINT32	_PgTestFlag;
-static UINT32	_PgTestCnt;
+static UINT32	_Enc_Flag[4];
+static UINT32	_Enc_PgCnt[4];
+static UINT32	_Enc_Pos[4];
+static UINT32	_Enc_PosBase[4];
 static UINT32	_PgSimuIn, _PgSimuOut;
 static int		_UdpIsLocal;
 static int		_SynthEncoder=FALSE;
@@ -122,6 +130,7 @@ static int		_TestPgTime[HEAD_CNT];
 static FILE		*_DataLog;
 static SFpgaImage _Img[HEAD_CNT][MAX_PAGES];	// for debugging
 
+
 //--- bidirectional: Changing offsets ----------------------- 
 static int		_Bidir;
 static int		_Direction;
@@ -129,7 +138,6 @@ static BYTE		_BidirCnt[HEAD_CNT];
 static UINT32	_PgOffset[HEAD_CNT][2];		// foreward/backward
 
 //--- prototypes -------------------------------------------
-static void  _read_linux_version(void);
 static void  _ethernet_config(void);
 static void  _fpga_enc_config(int synth);
 static void  _set_mac_addr(UINT64 macAddr, SFpgaEthCfg *ethcfg);
@@ -139,6 +147,7 @@ static char* _get_ip_addr(SFpgaEthCfg *ethcfg, char *str);
 static void  _write_srd(const char *srcName, int subPulses, int stroke, BYTE *data, int dataSize);
 
 static int   _check_print_done(void);
+static int   _check_encoder(void);
 static void  _handle_pd(int pd);
 static void  _check_errors(void);
 static void  _count_dots(void);
@@ -148,7 +157,7 @@ static int _check_block_used_flags(int head, int blkNo, int blkCnt);
 static int _check_block_used_flags_clear(int head, int imgNo, int blkNo, int blkCnt);
 static int _trace_used_flags(int head, int blkNo, int blkCnt, int blkEnd);
 static void _fpga_copy_status(void);
-static void _fpga_check_fp_errors(void);
+static void _fpga_check_fp_errors(int printDone);
 static void _fpga_set_pg_offsets(int bwd);
 
 //*** functions ********************************************
@@ -267,7 +276,7 @@ void fpga_init()
 			RX_HBConfig.head[head].blkCnt  = RX_HBConfig.dataBlkCntHead;
 			RX_HBConfig.head[head].blkNo0  = RX_HBConfig.head[head].blkCnt*head;
 		}
-		_read_linux_version();
+		RX_LinuxDeployment = rx_fpga_linux_deployment();
 	}
 #endif
 }
@@ -334,38 +343,28 @@ void _ethernet_config()
 	TrPrintfL(TRUE, "Data Block Size  =%d\n", RX_HBConfig.dataBlkSize);
 }
 
-//--- _read_linux_version ----------------------------------------------
-static void  _read_linux_version(void)
-{
-	FILE *file;
-	RX_VersionLinux = 0;
-	file = rx_fopen("/root/version_flash", "rt", _SH_DENYNO);
-	if (file!=NULL) 
-	{
-		fscanf(file, "%d", &RX_VersionLinux);
-		fclose(file);
-	}
-}
-
 //--- fpga_set_config ----------------------------------------------
 int  fpga_set_config(RX_SOCKET socket)
 {
 	int i, n, head;
 	char str[64];
 
+	TrPrintfL(TRUE, "fpga_set_config start");
 	fpga_abort();
 
 	_ethernet_config();
 
-	if (!RX_VersionLinux) Error(WARN, 0, "Head unreliable startup of operating system from SD-Card. CHANGE TO FLASH booting!");
+	if (!RX_LinuxDeployment) Error(WARN, 0, "Head unreliable startup of operating system from SD-Card. CHANGE TO FLASH booting!");
 
 	//--- general config -------------------------------------------------------
 	FpgaCfg.cfg->head_type = HEAD_TYPE_GEMINI;
 	FpgaCfg.cfg->err_reset = 0xffffffff;
+	memset(&RX_FpgaError, 0, sizeof(RX_FpgaError));
 	_TempWarn = 0;
 	_TempErr  = 0;
 	_PrintDoneError = 0;
-
+	_FpgaErrorTrace = FALSE;
+	
 	//--- head -----------------------------------------------------------------
 	nios_set_firepulse_on(FALSE);
 	_Bidir     = FALSE;
@@ -446,6 +445,11 @@ int  fpga_set_config(RX_SOCKET socket)
 	
 	memset(_PageId,	   0, sizeof(_PageId));
 	memset(_PageEnd,   0, sizeof(_PageEnd));
+	memset(_PrintDonePos, 0, sizeof(_PrintDonePos));
+	memset(_PrintGoPos, 0, sizeof(_PrintGoPos));
+	memset(_PrintGoPosBase, 0, sizeof(_PrintGoPosBase));
+	memset(_HeadFpCnt,      0, sizeof(_HeadFpCnt));
+	memset(_HeadFpCntBase,  0, sizeof(_HeadFpCntBase));
 	memset(_AliveCnt,  0, sizeof(_AliveCnt));
 	memset(_ImgOutIdx, 0, sizeof(_ImgOutIdx));
 	memset(_TestPgTime,0, sizeof(_TestPgTime));
@@ -458,6 +462,8 @@ int  fpga_set_config(RX_SOCKET socket)
 	for (i=0; i<SIZEOF(RX_HBStatus[0].head); i++)
 	{
 		RX_HBStatus[0].head[i].imgInCnt		= 0;
+		RX_HBStatus[0].head[i].imgBuf		= 0;
+		RX_HBStatus[0].head[i].encPgCnt     = 0;
 		RX_HBStatus[0].head[i].printGoCnt   = 0;
 		RX_HBStatus[0].head[i].printDoneCnt = 0;
 		RX_HBStatus[0].head[i].dotCnt       = 0;
@@ -473,8 +479,13 @@ int  fpga_set_config(RX_SOCKET socket)
 	}				
 
 	_PdCnt=0;
-	_PgTestCnt=0;
-	_PgTestFlag=Fpga.stat->enc_tel[0]&ENC_PG_FLAG;
+	for (i=0; i<SIZEOF(_Enc_Flag); i++)
+	{
+		_Enc_Flag[i]=Fpga.stat->enc_tel[i]&ENC_PG_FLAG;	
+		_Enc_PgCnt[i]=0;
+		_Enc_PosBase[i]=0;
+		_Enc_Pos[i]  =0;
+	}
 	_PgSimuIn=0;
 	_PgSimuOut=0;
 	_ImgInIdx = 0;
@@ -540,8 +551,8 @@ int  fpga_set_config(RX_SOCKET socket)
 
 	for (i=0; i<2; i++)
 	{
-		if (Fpga.error->eth_fifo_full[i]) { _Reload_FPGA=TRUE; if(ErrorFlag (ERR_ABORT, (UINT32*)&RX_HBStatus[0].err,  err_fifo_full_0<<i,  0, "ETH[%d]: FIFO Full PRESTART", i)) fpga_trace_registers("ETH-FIFO_FULL-PRESTART");}
-		if (Fpga.error->udp_fifo_full[i]) { _Reload_FPGA=TRUE; if(ErrorFlag (ERR_ABORT, (UINT32*)&RX_HBStatus[0].err,  err_fifo_full_0<<i,  0, "UDP[%d]: FIFO Full PRESTART", i)) fpga_trace_registers("UDP-FIFO_FULL-PRESTART");}			
+		if (Fpga.error->eth_fifo_full[i]) { _Reload_FPGA=TRUE; if(ErrorFlag (ERR_ABORT, (UINT32*)&RX_HBStatus[0].err,  err_fifo_full_0<<i,  0, "ETH[%d]: FIFO Full PRESTART", i)) fpga_trace_registers("ETH-FIFO_FULL-PRESTART", TRUE);}
+		if (Fpga.error->udp_fifo_full[i]) { _Reload_FPGA=TRUE; if(ErrorFlag (ERR_ABORT, (UINT32*)&RX_HBStatus[0].err,  err_fifo_full_0<<i,  0, "UDP[%d]: FIFO Full PRESTART", i)) fpga_trace_registers("UDP-FIFO_FULL-PRESTART", TRUE);}			
 	}
 	
 	/*
@@ -553,6 +564,9 @@ int  fpga_set_config(RX_SOCKET socket)
 	
 //	Error(LOG,  0, "fpga_set_config done");
 //	_TestFSM = 0;
+	
+	TrPrintfL(TRUE, "fpga_set_config done");
+
 	return REPLY_OK;
 }
 
@@ -652,6 +666,14 @@ static void _fpga_enc_config(int khz)
 	SET_FLAG(FpgaCfg.encoder->cmd, ENC_HEAD2_ENABLE, FpgaCfg.head[2]->cmd_enable);
 	SET_FLAG(FpgaCfg.encoder->cmd, ENC_HEAD3_ENABLE, FpgaCfg.head[3]->cmd_enable);
 	
+	for (i=0; i<SIZEOF(_Enc_Flag); i++)
+	{
+		_Enc_Flag[i]	=Fpga.stat->enc_tel[i]&ENC_PG_FLAG;	
+		_Enc_PgCnt[i]	=0;
+		_Enc_PosBase[i]	=0;
+		_Enc_Pos[i]		=0;
+	}				
+	
 	SET_FLAG(FpgaCfg.encoder->cmd, ENC_ENABLE, khz<=0);
 	 
 	RX_FpgaEncCfg.cmd          = FpgaCfg.encoder->cmd;
@@ -723,7 +745,7 @@ void  fpga_get_ip_addr (int udpNo, UINT32 *addr)
 }
 
 //--- fpga_trace_registers ----------------------------------------
-void fpga_trace_registers(char *fname)
+void fpga_trace_registers(char *fname, int error)
 {
 // #ifdef dasdasda
 	FILE *in;
@@ -735,6 +757,8 @@ void fpga_trace_registers(char *fname)
 	char str[256];
 	char strout[256];
 
+	if (error) _FpgaErrorTrace=TRUE;
+	
 	sprintf(str, PATH_BIN_HEAD "fpga_config_regs_unrolled.csv");
 	in  = fopen(str, "rt");
 
@@ -744,6 +768,7 @@ void fpga_trace_registers(char *fname)
 		if (!rx_file_exists(str)) break;
 	}
 
+	TrPrintfL(TRUE, "fpga_trace_registers >>%s<<", str);
 	strcpy(path, str);
 	out = fopen(str, "wt");
 	if (in!=NULL && out!=NULL)
@@ -854,7 +879,7 @@ static int _check_block_used_flags(int head, int blkNo, int blkCnt)
 	int blk, bit;
 	int min = FpgaCfg.udp->block[head].blkNo0;
 	int max = FpgaCfg.udp->block[head].blkNoEnd;
-	int err=FALSE;
+	int reply=REPLY_OK;
 	
 	UINT32 flags;
 	flags = Fpga.blockUsed[blkNo/32];
@@ -863,8 +888,9 @@ static int _check_block_used_flags(int head, int blkNo, int blkCnt)
 		if (blk>max) blk=min;
 		bit = blk%32;
 		if (!bit) flags = Fpga.blockUsed[blk/32];
-		if (!(flags & (1<<bit)) && !err) err=Error(ERR_CONT, 0, "DataBlock[%d] missing", blk);
+		if (!(flags & (1<<bit)) && !reply) reply=Error(ERR_CONT, 0, "DataBlock[%d] missing", blk);
 	}
+	return reply;
 }
 
 //--- _check_block_used_flags_clear --------------------------------------
@@ -887,7 +913,7 @@ static int _check_block_used_flags_clear(int head, int imgNo, int blkNo, int blk
 		if ((flags & (1<<bit)) && reply==REPLY_OK)
 		{
 			reply=Error(ERR_CONT, 0, "Head[%d]: image=%d BlockUsedFlag[%d] not cleared (from=%d, cnt=%d, blk=%d)", head, imgNo, blk, blkNo, blkCnt, n, Fpga.data->blockCnt[head]);		
-			fpga_trace_registers("BlockUsedFlag-not-cleared");
+			fpga_trace_registers("BlockUsedFlag-not-cleared", TRUE);
 		}
 	}
 	return reply;
@@ -959,13 +985,14 @@ int  fpga_image	(SFpgaImageCmd *msg)
 {
 	UINT8 idx;
 	int head = msg->head;
-	int trace = FALSE; // !arg_test_fire;
+	int trace = TRUE; // !arg_test_fire;
 
-	TrPrintfL(trace, "size=0x%x", sizeof(Fpga.print->image));
-	TrPrintfL(trace, "pos.image=0x%x", (BYTE*)&Fpga.print->image-(BYTE*)Fpga.print);
+	if (!_Init) return REPLY_ERROR;
+	
+//	TrPrintfL(trace, "size=0x%x", sizeof(Fpga.print->image));
+//	TrPrintfL(trace, "pos.image=0x%x", (BYTE*)&Fpga.print->image-(BYTE*)Fpga.print);
 //	TrPrintfL(trace, "pos.printGoInIdx=0x%x", (BYTE*)&Fpga.print->printGoInIdx-(BYTE*)Fpga.print);
-
-	TrPrintfL(trace, "head[%d].fpga_image(id=%d, page=%d, copy=%)", head, msg->id.id, msg->id.page, msg->id.copy);
+//	TrPrintfL(trace, "head[%d].fpga_image(id=%d, page=%d, copy=%d)", head, msg->id.id, msg->id.page, msg->id.copy);
 
 	if (_Init)
 	{
@@ -974,26 +1001,33 @@ int  fpga_image	(SFpgaImageCmd *msg)
 
 		if (head<0 || head>MAX_HEADS_BOARD) return Error(ERR_CONT, 0, "Head number %d out of range", head);
 
-//		_check_block_used_flags(head, msg->image.blkNo, msg->image.blkCnt);
+		if (_check_block_used_flags(head, msg->image.blkNo, msg->image.blkCnt)!=REPLY_OK) 
+		{
+			TrPrintfL(trace, "head[%d].fpga_image(id=%d, page=%d, copy=%d) Block not loaded", head, msg->id.id, msg->id.page, msg->id.copy);
+			return REPLY_ERROR;
+		}
 
-		TrPrintfL(trace, "imageListInIdx  = %d, %d, %d, %d", Fpga.print->imgInIdx[0], Fpga.print->imgInIdx[1], Fpga.print->imgInIdx[2], Fpga.print->imgInIdx[3]);
-		TrPrintfL(trace, "imageListOutIdx = %d, %d, %d, %d", Fpga.data->imgOutIdx[0][0], Fpga.data->imgOutIdx[1][0], Fpga.data->imgOutIdx[2][0], Fpga.data->imgOutIdx[3][0]);
+	//	TrPrintfL(trace, "imageListInIdx  = %d, %d, %d, %d", Fpga.print->imgInIdx[0], Fpga.print->imgInIdx[1], Fpga.print->imgInIdx[2], Fpga.print->imgInIdx[3]);
+	//	TrPrintfL(trace, "imageListOutIdx = %d, %d, %d, %d", Fpga.data->imgOutIdx[0][0], Fpga.data->imgOutIdx[1][0], Fpga.data->imgOutIdx[2][0], Fpga.data->imgOutIdx[3][0]);
 
 		idx = Fpga.print->imgInIdx[head];
+
+	//	if (head==0) Error(LOG, 0, "head[%d][%d].fpga_image(id=%d, page=%d, copy=%d) idx=%d, len=%d", head, idx, msg->id.id, msg->id.page, msg->id.copy, idx, msg->image.lengthPx);
+		
 		memcpy(&_PageId[idx], &msg->id, sizeof(SPageId));
 		memcpy(&_Img[head][idx], &msg->image, sizeof(SFpgaImage));
 		
-		if (msg->image.backward & IMAGE_BIDIR) _Bidir = TRUE;				
+		if (msg->image.flags & FLAG_BIDIR) _Bidir = TRUE;				
 		else
 		{
 			_Bidir=FALSE;
 		//	TrPrintf(TRUE, "fpga_image.fpga_set_offset(%d)", msg->image.backward);
-			_fpga_set_pg_offsets(msg->image.backward);			
+			_fpga_set_pg_offsets(msg->image.flags);			
 		}
 				
 		_PageEnd[head][idx] = RX_HBConfig.head[head].blkNo0 + (msg->image.blkNo-RX_HBConfig.head[head].blkNo0+msg->image.blkCnt-1) % RX_HBConfig.head[head].blkCnt;
 
-		TrPrintf(trace, "Image[hd=%d][%d] loaded: blocks %05d ... %05d, clearBlockUsed=%d", head, idx, msg->image.blkNo, _PageEnd[head][idx], msg->image.clearBlockUsed);
+		TrPrintf(trace, "head[%d].fpga_image[%d]:(id=%d, page=%d, copy=%d. scan=%d) blocks %05d ... %05d, clearBlockUsed=%d", head, idx,  msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->image.blkNo, _PageEnd[head][idx], msg->image.clearBlockUsed);
 
 //		if (head==0) 
 		if (FALSE)
@@ -1016,7 +1050,7 @@ int  fpga_image	(SFpgaImageCmd *msg)
 			Fpga.print->image[head].widthBytes		= msg->image.widthBytes;			
 			Fpga.print->image[head].lengthPx		= msg->image.lengthPx;
 			Fpga.print->image[head].jetPx0			= msg->image.jetPx0;
-			Fpga.print->image[head].backward		= !(msg->image.backward & 1);
+			Fpga.print->image[head].flags			= !(msg->image.flags & FLAG_MIRROR);	// backwards
 			Fpga.print->image[head].flipHorizontal	= msg->image.flipHorizontal;
 			Fpga.print->image[head].clearBlockUsed	= msg->image.clearBlockUsed;
 
@@ -1026,6 +1060,7 @@ int  fpga_image	(SFpgaImageCmd *msg)
 		//	TrPrintfL(TRUE, "Image.blkNo = %08d\n", Fpga.print->image.blkNo);
 			Fpga.print->imgInIdx[head] = idx;
 			RX_HBStatus[0].head[head].imgInCnt++;
+			RX_HBStatus[0].head[head].imgBuf = RX_HBStatus[0].head[head].imgInCnt - RX_HBStatus[0].head[head].printGoCnt;
 			if (head==0) _ImgInIdx++;
 
 			if (RX_HBStatus[0].head[head].imgInCnt==1) 
@@ -1040,38 +1075,69 @@ int  fpga_image	(SFpgaImageCmd *msg)
 }
 
 //--- _fpga_check_fp_errors -------------------------------------------
-static void _fpga_check_fp_errors(void)
+static void _fpga_check_fp_errors(int printDone)
 {
-	int i;
-	for (i=0; i<HEAD_CNT; i++) 
+	int head, n;
+	for (head=0; head<HEAD_CNT; head++) 
 	{
-		RX_FpgaData.wf_busy_warn[i] = Fpga.data->wf_busy_warn[i];
-		memcpy(&RX_FpgaError.enc_fp[i], &Fpga.error->enc_fp[i], sizeof(UINT32));
-		
-		{
-		//	if (Fpga.error->head[i].write_img_line)   {                    ErrorFlag (ERR_ABORT, (UINT32*)&RX_HBStatus[0].err,  err_printgo_but_no_data_0<<i,  0, "Head[%d]: Got Print Go but had no Data cnt=%d", i, Fpga.error->head[i].write_img_line);}
-		//	if (Fpga.error->head[i].write_img_line)   {                    ErrorFlag (WARN,      (UINT32*)&RX_HBStatus[0].err,  err_printgo_but_no_data_0<<i,  0, "Head[%d]: Got Print Go but had no Data cnt=%d", i, Fpga.error->head[i].write_img_line);}
-			if (Fpga.error->head[i].write_img_line || Fpga.error->img_line_err[0][i] || Fpga.error->img_line_err[1][i] || Fpga.error->img_line_err[2][i] || Fpga.error->img_line_err[3][i])
-			{                    
-				
-				if (*((UINT32*)&RX_HBStatus[0].err) & (err_printgo_but_no_data_0<<i))
-				{
-					*((UINT32*)&RX_HBStatus[0].err) |= (err_printgo_but_no_data_0<<i);
-					
-					fpga_trace_registers("write_img_line");
-					_trace_used_flags(i, _Img[0][0].blkNo, _Img[0][0].blkCnt, _PageEnd[0][0]);
-					
-					if (Fpga.error->head[i].write_img_line)   { Error(ERR_ABORT, 0, "Head[%d]: write-img-line.4: cnt=%d", i, Fpga.error->head[i].write_img_line);}
-					if (Fpga.error->img_line_err[0][i])		  { Error(ERR_ABORT, 0, "Head[%d]: write-img-line.0: cnt=%d", i, Fpga.error->img_line_err[0][i]);}
-					if (Fpga.error->img_line_err[1][i])		  { Error(ERR_ABORT, 0, "Head[%d]: write-img-line.1: cnt=%d", i, Fpga.error->img_line_err[1][i]);}
-					if (Fpga.error->img_line_err[2][i])		  { Error(ERR_ABORT, 0, "Head[%d]: write-img-line.2: cnt=%d", i, Fpga.error->img_line_err[2][i]);}
-					if (Fpga.error->img_line_err[3][i])		  { Error(ERR_ABORT, 0, "Head[%d]: write-img-line.3: cnt=%d", i, Fpga.error->img_line_err[3][i]);}
-				}
-			}			
+		memcpy(&RX_FpgaError.enc_fp[head], &Fpga.error->enc_fp[head], sizeof(UINT32));		
+
+		/*
+		if (Fpga.data->wf_busy_warn[head] && !Fpga.data->wf_busy_warn[head])
+		{ 
+			Error(ERR_CONT, 0, "head[%d]: wf_busy_warn", head);
+			fpga_trace_registers("wf_busy_warn",  FALSE);
 		}
-		if (Fpga.error->head[i].enc_fp_missed>1)   { if (ErrorFlag (WARN,	  (UINT32*)&RX_HBStatus[0].err,  err_firepulse_missed_0   <<i,  0, "Head[%d]: Firepulse missed", i)) fpga_trace_registers("FP-Missed");}
-		if (RX_FpgaError.enc_fp[i].waveform_busy>1){ if (ErrorFlag (ERR_CONT, (UINT32*)&RX_HBStatus[0].err,  err_overspeed               ,  0, "Firepulse overspeed"))			 fpga_trace_registers("FP-Overspeed");}
-	}	
+		RX_FpgaData.wf_busy_warn[head] = Fpga.data->wf_busy_warn[head];
+		*/
+		
+		if (Fpga.error->head[head].fifo_img_line && !RX_FpgaError.head[head].fifo_img_line)
+		{ 
+			fpga_trace_registers("fifo_img_line", TRUE);
+			Error(ERR_ABORT, 0, "Head[%d]: fifo_img_line: cnt=%d", head, Fpga.error->head[head].fifo_img_line);	
+		}
+		RX_FpgaError.head[head].fifo_img_line = Fpga.error->head[head].fifo_img_line;
+
+		if (Fpga.error->head[head].write_img_line && !RX_FpgaError.head[head].write_img_line)
+		{ 
+			fpga_trace_registers("write_img_line", TRUE);
+			Error(ERR_ABORT, 0, "Head[%d]: write_img_line: cnt=%d", head, Fpga.error->head[head].write_img_line);	
+		}
+		RX_FpgaError.head[head].write_img_line = Fpga.error->head[head].write_img_line;
+		
+		for (n=0; n<SIZEOF(Fpga.error->img_line_err[0]); n++)
+		{
+			if (Fpga.error->img_line_err[n][head]) 
+			{ 
+				if(!RX_FpgaError.img_line_err[n][head])
+				{
+					switch(n)
+					{
+					case 0: 	fpga_trace_registers("miss_line_after_gap_err", TRUE);
+								Error(ERR_ABORT, 0, "Head[%d]: 1st line after gap missing: cnt=%d, imgIn=%d, PG=%d", head, Fpga.error->img_line_err[n][head], RX_HBStatus[0].head[head].imgInCnt, RX_HBStatus[0].head[head].printGoCnt);
+								break;
+					case 1: 	fpga_trace_registers("miss_line_after_overlap_err", TRUE);
+								Error(ERR_ABORT, 0, "Head[%d]: 1st line after overlap missing: cnt=%d, imgIn=%d, PG=%d", head, Fpga.error->img_line_err[n][head], RX_HBStatus[0].head[head].imgInCnt, RX_HBStatus[0].head[head].printGoCnt);
+								break;
+					case 2: 	fpga_trace_registers("miss_line_after_seamlessp_err", TRUE);
+								Error(ERR_ABORT, 0, "Head[%d]: 1st line after seamless missing: cnt=%d, imgIn=%d, PG=%d", head, Fpga.error->img_line_err[n][head], RX_HBStatus[0].head[head].imgInCnt, RX_HBStatus[0].head[head].printGoCnt);
+								break;
+					case 3: 	fpga_trace_registers("miss_inner_line_err", TRUE);
+								Error(ERR_ABORT, 0, "Head[%d]: inner line missing: cnt=%d, imgIn=%d, PG=%d", head, Fpga.error->img_line_err[n][head], RX_HBStatus[0].head[head].imgInCnt, RX_HBStatus[0].head[head].printGoCnt);
+								break;	
+					}						
+				}
+				RX_FpgaError.img_line_err[n][head] = Fpga.error->img_line_err[n][head];
+			}
+		}
+		
+		if (Fpga.error->head[head].enc_fp_missed && !RX_FpgaError.head[head].enc_fp_missed)   
+		{ 
+			RX_FpgaError.head[head].enc_fp_missed = Fpga.error->head[head].enc_fp_missed;
+		//	Error(WARN,	 0, "Head[%d]: Firepulse missed", head);
+		//	fpga_trace_registers("FP-Missed", FALSE);
+		}
+	}
 }
 
 //--- _fpga_copy_status -----------------------------------------------
@@ -1094,6 +1160,8 @@ static void _fpga_copy_status(void)
 			UINT32 *dst=(UINT32*)&RX_FpgaStat;
 			for (i=0; i<sizeof(RX_FpgaStat); i+=4) *dst++ = *src++;
 		}
+		
+		
 
 		{
 			UINT32 *src=(UINT32*)Fpga.error;
@@ -1273,9 +1341,9 @@ void _write_srd(const char *srcName, int subPulses, int stroke, BYTE *data, int 
 
 		pimg = &_Img[0][Fpga.data->imgOutIdx[0][0]];
 
-		if (pimg->jetPx0>0)		sprintf(path, "%s%s+%d.%c%c.hex", PATH_TEMP, srcName, pimg->jetPx0, voreback[pimg->backward], flip[pimg->flipHorizontal]);
-		else if (pimg->jetPx0)	sprintf(path, "%s%s%d.%c%c.hex",  PATH_TEMP, srcName, pimg->jetPx0, voreback[pimg->backward], flip[pimg->flipHorizontal]);
-		else				sprintf(path, "%s%s.%c%c.hex",    PATH_TEMP, srcName, voreback[pimg->backward], flip[pimg->flipHorizontal]);
+		if (pimg->jetPx0>0)		sprintf(path, "%s%s+%d.%c%c.hex", PATH_TEMP, srcName, pimg->jetPx0, voreback[pimg->flags&FLAG_MIRROR], flip[pimg->flipHorizontal]);
+		else if (pimg->jetPx0)	sprintf(path, "%s%s%d.%c%c.hex",  PATH_TEMP, srcName, pimg->jetPx0, voreback[pimg->flags&FLAG_MIRROR], flip[pimg->flipHorizontal]);
+		else				sprintf(path, "%s%s.%c%c.hex",    PATH_TEMP, srcName, voreback[pimg->flags&FLAG_MIRROR], flip[pimg->flipHorizontal]);
 		hex_file = rx_fopen(path, "wb", _SH_DENYNO);
 		if (hex_file == NULL) 
 		{
@@ -1347,7 +1415,7 @@ int  fpga_abort(void)
 		{
 			if (Fpga.stat->pg_ctr[i]!=Fpga.stat->print_done_ctr[i]) _Reload_FPGA=TRUE;		
 		}
-		*/
+		*/		
 		int i;
 		int warn=FALSE;
 		for(i=0; i<SIZEOF(Fpga.error->enc_fp); i++)
@@ -1400,17 +1468,24 @@ int  fpga_abort(void)
 						err=TRUE;
 					}
 				}
-				if(err) fpga_trace_registers("Print-Done-missed");	
+				if(err) fpga_trace_registers("Print-Done-missed", TRUE);	
 			//	else     fpga_trace_registers("Print-Done-OK");	
 			}
 			//---
-			TrPrintf(TRUE,"fpga_abort CMD_MASTER_ENABLE=FALSE: blockCnt[0]=%d, imgInIdx[0]=%d, blockUsed=0x%08x",Fpga.data->blockCnt[0],Fpga.print->imgInIdx[0],Fpga.blockUsed[0]);
+			TrPrintf(TRUE, "fpga_abort CMD_MASTER_ENABLE=FALSE:\n");
+			TrPrintf(TRUE, "fpga_abort CMD_MASTER_ENABLE=FALSE: blockCnt[0]=%d", Fpga.data->blockCnt[0]);
+			TrPrintf(TRUE, "fpga_abort CMD_MASTER_ENABLE=FALSE: blockCnt[0]=%d, imgInIdx[0]=%d", Fpga.data->blockCnt[0], Fpga.print->imgInIdx[0]);
+			TrPrintf(TRUE, "fpga_abort CMD_MASTER_ENABLE=FALSE: blockCnt[0]=%d, imgInIdx[0]=%d, blockUsed=0x%08x", Fpga.data->blockCnt[0], Fpga.print->imgInIdx[0], Fpga.blockUsed[0]);
+			
+			memset(_PrintDonePos, 0, sizeof(_PrintDonePos));
 
+			TrPrintf(TRUE, "fpga_abort Save status\n");
+			
 			_fpga_copy_status();
 			term_save(PATH_TEMP "status.txt");
 			term_flush();
 
-			TrPrintfL(TRUE,"set CMD_MASTER_ENABLE=FALSE");				
+			TrPrintfL(TRUE,"set CMD_MASTER_ENABLE=FALSE");
 			SET_FLAG(FpgaCfg.cfg->cmd,CMD_MASTER_ENABLE,FALSE);
 		//	rx_sleep(5);
 		//	fpga_set_config(INVALID_SOCKET);
@@ -1418,15 +1493,26 @@ int  fpga_abort(void)
 
 		if(_Reload_FPGA)
 		{
+			TrPrintfL(TRUE, "RELOAD-FPGA");
 			Error(WARN,0,"RELOAD-FPGA");
-			putty_end();
 			nios_end();
 			fpga_end();
 			fpga_init();
+			TrPrintfL(TRUE, "fpga_init done");
 			nios_init();
+			TrPrintfL(TRUE, "nios_init done");
 			cond_init();
-			putty_init();	
+			TrPrintfL(TRUE, "cond_init done");
 			_Reload_FPGA = FALSE;
+			TrPrintfL(TRUE, "putty_init done");
+		}
+		
+		if (FALSE && _FpgaErrorTrace)
+		{			
+			Trace_end();			
+			ctrl_send_file(Trace_get_path());
+			Trace_init(RX_Process_Name);
+			_FpgaErrorTrace = FALSE;
 		}
 	}			
 	return REPLY_OK;
@@ -1525,6 +1611,7 @@ void  fpga_main(int ticks, int menu)
 	int time2=rx_get_ticks()-time;
 
 	pd = _check_print_done();
+	_check_encoder();
 
 	int time3=rx_get_ticks()-time;
 
@@ -1548,28 +1635,47 @@ static int _check_print_done(void)
 		if (FpgaCfg.head[head]->cmd_enable)
 		{			
 			int time1=rx_get_ticks()-time;
-			if (head==0 && RX_HBStatus[0].head[head].printGoCnt != Fpga.stat->pg_ctr[head])
+			
+			if (Fpga.stat->pg_ctr[head])
 			{
-				int t=rx_get_ticks();
-				// TrPrintfL(TRUE, "Head[%d].PrintGo=%d time=%d", head, Fpga.stat->pg_ctr[head], t-_TestPgTime[head]);
-				_TestPgTime[head]=t;
-				/*
-				if (Fpga.stat->pg_ctr[head] > Fpga.stat->print_done_ctr[head]+2)
+				int pos = Fpga.stat->pg_in_position[head]; 
+				if (pos<_PrintGoPos[head]) _PrintGoPosBase[head] += 0x100000;						
+				_PrintGoPos[head] = pos;		
+				RX_FpgaStat.pg_in_position[head] = _PrintGoPosBase[head]+pos;
+			}
+			
+			int cnt = Fpga.stat->head_fp_cnt[head]; 
+			if (cnt || _HeadFpCntBase[head])
+			{
+				if (cnt<_HeadFpCnt[head]) _HeadFpCntBase[head] += 0x1000000;						
+				_HeadFpCnt[head] = cnt;		
+				RX_FpgaStat.head_fp_cnt[head] = _HeadFpCntBase[head]+cnt;
+			}
+
+			if (RX_HBStatus[0].head[head].printGoCnt != Fpga.stat->pg_ctr[head])
+			{
+				int i   = (Fpga.stat->pg_ctr[head]-1)%MAX_PAGES;
+				_PrintDonePos[head][i] = RX_FpgaStat.pg_in_position[head] + _Img[head][i].lengthPx;
+				if (head==0)
 				{
-					Error(ERR_ABORT,0,"Head[%d]: Print-Done missing, #PrintGo=%d #Print-Done=%d",head,Fpga.stat->pg_ctr[head],Fpga.stat->print_done_ctr[head]); 
+					SPageId *pid = &_PageId[i];
+					TrPrintfL(TRUE, "PRINT GO  [%d]: id=%d, page=%d, copy=%d, scan=%d, pos=%d, donepos=%d", i, pid->id, pid->page, pid->copy, pid->scan,  RX_FpgaStat.pg_in_position[head], _PrintDonePos[head][i]);
 				}
-				*/
 			}
 			int time2=rx_get_ticks()-time;
-			
+						
 			RX_HBStatus[0].head[head].printGoCnt = Fpga.stat->pg_ctr[head];
+			RX_HBStatus[0].head[head].imgBuf	 = RX_HBStatus[0].head[head].imgInCnt - RX_HBStatus[0].head[head].printDoneCnt;
 			if(Fpga.stat->print_done_ctr[head]>RX_HBStatus[0].head[head].printDoneCnt) 
 			{
-				SFpgaImage	*img = &_Img[head][RX_HBStatus[0].head[head].printDoneCnt%MAX_PAGES];
-				_BlockOutIdx[head] = _PageEnd[head][RX_HBStatus[0].head[head].printDoneCnt%MAX_PAGES];	
+				int i=RX_HBStatus[0].head[head].printDoneCnt%MAX_PAGES;
+				SFpgaImage	*img       = &_Img[head][i];
+				_BlockOutIdx[head]     = _PageEnd[head][i];
+			//	_PrintDonePos[head][i] = 0;
 				RX_HBStatus[0].head[head].printDoneCnt++;
+
 			//	if (img->clearBlockUsed) _check_block_used_flags_clear(head, RX_HBStatus[0].head[head].printDoneCnt, img->blkNo, img->blkCnt);
-				_fpga_check_fp_errors();
+				_fpga_check_fp_errors(TRUE);
 				// TrPrintfL(TRUE, "Head[%d].PrintDone=%d", head, RX_HBStatus[0].head[head].printDoneCnt);
 			}
 			if (RX_HBStatus[0].head[head].printDoneCnt<pd) pd=RX_HBStatus[0].head[head].printDoneCnt;
@@ -1586,13 +1692,34 @@ static int _check_print_done(void)
 						RX_HBStatus[0].head[head].printGoCnt, 
 						RX_HBStatus[0].head[head].printDoneCnt))
 					{
-						_Reload_FPGA = TRUE;
-						fpga_trace_registers("Print-Done-missed");															
+					//	_Reload_FPGA = TRUE;
+						fpga_trace_registers("Print-Done-missed", TRUE);															
 					}
 				}
 			}
 			int time4=rx_get_ticks()-time;
 			if (time4>100) Error(WARN, 0, "_check_print_done[%d], t1=%d, t2=%d, t3=%d, t4=%d", head, time1, time2, time3, time4);
+			
+			//--- print done missed ? --------
+			if (!RX_HBConfig.reverseHeadOrder) // only for WEB machines
+			{
+				int i=(Fpga.stat->print_done_ctr[head]) % MAX_PAGES;
+				if (_PrintDonePos[head][i] && RX_HBStatus[0].head[head].encPos > _PrintDonePos[head][i]+2000)
+				{
+					_PrintDoneError |= (1<<head);
+//					Error(ERR_ABORT, 0, "Head[%d]: Print-Done missing, #PrintGo=%d #Print-Done=%d", head, 
+					if (ErrorFlag(ERR_CONT, (UINT32*)&RX_HBStatus[0].err, err_fifo_full_0, 0, "Head[%d][%d]: Print-Done timeout, #PrintGo=%d #Print-Done=%d, pos=%d (expected=%d)", head, i,
+						RX_HBStatus[0].head[head].printGoCnt,
+						RX_HBStatus[0].head[head].printDoneCnt,
+						RX_HBStatus[0].head[head].encPos,
+						_PrintDonePos[head][i]))
+					{
+					//	_Reload_FPGA = TRUE;
+						fpga_trace_registers("Print-Done-timeout", TRUE);														
+					}
+				}
+			}
+
 		}			
 	}
 	return pd;
@@ -1601,19 +1728,23 @@ static int _check_print_done(void)
 //--- _handle_pd --------------------------------------------------------
 static void _handle_pd(int pd)
 {
-	SPrintFileMsg	msg;
+	SPrintDoneMsg	msg;
+	int i;
 
 	while (pd!=(UINT32)-1 && pd>(int)_PdCnt)
 	{
 		//--- print done for all heads --------------
 		msg.hdr.msgLen  = sizeof(msg);
-		msg.hdr.msgId	= EVT_PRINT_FILE;
-
+		msg.hdr.msgId	= EVT_PRINT_DONE;
+		msg.pd			= _PdCnt;
+		msg.boardNo		= -1;
 		memcpy(&msg.id, &_PageId[_PdCnt%MAX_PAGES], sizeof(msg.id));
-		msg.evt			= DATA_PRINT_DONE;
-		msg.bufReady	= 0;
 		sok_send(&RX_MainSocket, &msg);
-//		TrPrintfL(TRUE, "PRINT DONE:  id=%d, page=%d, copy=%d, scan=%d", msg.id.id, msg.id.page, msg.id.copy, msg.id.scan);
+		
+		TrPrintfL(TRUE, "PRINT DONE[%d]: id=%d, page=%d, copy=%d, scan=%d, pos=%d", _PdCnt%MAX_PAGES, msg.id.id, msg.id.page, msg.id.copy, msg.id.scan, RX_HBStatus[0].head[0].encPos);
+	//	Error(LOG, 0, "PRINT DONE[%d]:id=%d, page=%d, copy=%d, scan=%d, pos=%d (expected %d)", _PdCnt%MAX_PAGES, msg.id.id, msg.id.page, msg.id.copy, msg.id.scan, RX_HBStatus[0].head[0].encPos, _PrintDonePos[0][_PdCnt%MAX_PAGES]);
+		for (i=0; i<HEAD_CNT; i++)
+			_PrintDonePos[i][_PdCnt%MAX_PAGES] = 0;
 				
 		if (_SynthEncoder)
 		{
@@ -1626,50 +1757,104 @@ static void _handle_pd(int pd)
 
 		_PdCnt++;
 	}
+}
+
+
+//--- _check_encoder --------------------------------------------------------
+static int _check_encoder(void)
+{
+	int i;
+	static INT32	_enc_tel_cnt=12345;
+	static BYTE		_enc_crc[SIZEOF(Fpga.error->encoder)];
 	
-	if (FALSE)
+	if(RX_HBConfig.present==dev_on && FpgaCfg.encoder->cmd & ENC_ENABLE)
 	{
-		//---  TEST Encoder-PG ----------------------------
-		UINT32 flag = Fpga.stat->enc_tel[0]&ENC_PG_FLAG;
-		if (flag != _PgTestFlag) 
+		if (nios_is_firepulse_on())
 		{
-			int i=0;
-			_PgTestFlag = flag;
-			_PgTestCnt++;
-		
-			if (_PgTestCnt > Fpga.stat->pg_ctr[i]+1)
+
+			if (_EncCheckDelay>0) _EncCheckDelay--;
+			else
 			{
-				Error(ERR_CONT, 0, "Head[%d]: Encoder PrintGO=%d > Head PrintGO=%d", i, _PgTestCnt, Fpga.stat->pg_ctr[i]); 
+				#ifdef DEBUG
+					if (Fpga.error->enc_tel_cnt==_enc_tel_cnt) ErrorFlag (WARN,      (UINT32*)&RX_HBStatus[0].err,  err_encoder_not_conected,  0, "Encoder not connected");
+				#else
+					if (Fpga.error->enc_tel_cnt==_enc_tel_cnt) ErrorFlag (ERR_ABORT, (UINT32*)&RX_HBStatus[0].err,  err_encoder_not_conected,  0, "Encoder not connected");
+				#endif
+				for (i=0; i<SIZEOF(Fpga.error->encoder); i++)
+				{
+					if (Fpga.error->encoder[i].crc != _enc_crc[i])
+					{
+						if (Fpga.error->encoder[i].crc) ErrorFlag (WARN, (UINT32*)&RX_HBStatus[0].err,  err_encoder_not_conected,  0, "Encoder CRC ");
+						_enc_crc[i] = Fpga.error->encoder[i].crc;				
+					}
+				}
 			}
-		}		
+			_enc_tel_cnt = Fpga.error->enc_tel_cnt;		
+		}
+		else 
+		{
+			for (i=0; i<SIZEOF(Fpga.error->encoder); i++)_enc_crc[i] = Fpga.error->encoder[i].crc;
+			_enc_tel_cnt++;
+		}
+
+		for(i = 0; i < SIZEOF(_Enc_Flag); i++)
+		{
+			//---  TEST Encoder-PG ----------------------------
+			UINT32 flag = Fpga.stat->enc_tel[i]&ENC_PG_FLAG;
+			if(flag != _Enc_Flag[i]) 
+			{
+				_Enc_Flag[i] = flag;
+				_Enc_PgCnt[i]++;
+			}
+			if(Fpga.stat->enc_position[i] && Fpga.stat->enc_position[i] < _Enc_Pos[i])
+				_Enc_PosBase[i] += 0x100000;
+			_Enc_Pos[i] = Fpga.stat->enc_position[i];
+			RX_HBStatus[0].head[i].encPos = _Enc_PosBase[i] + (Fpga.stat->enc_position[i] / 8);
+		}
+	
+		if(TRUE)
+		{
+			for(i = 0; i < HEAD_CNT; i++)
+			{
+				int enc = RX_HBConfig.head[i].encoderNo;
+				RX_HBStatus[0].head[i].encPgCnt = _Enc_PgCnt[enc];
+
+				if(RX_HBConfig.head[i].enabled==dev_on && _Enc_PgCnt[enc] > Fpga.stat->pg_ctr[i] + 5 && !(RX_HBStatus[0].err&(err_printgo_but_no_data_0<<i)))
+				{
+					RX_HBStatus[0].err |= (err_printgo_but_no_data_0<<i);
+					Error(ERR_CONT, 0, "Head[%d]: Encoder PrintGO=%d > Head PrintGO=%d", i, _Enc_PgCnt[enc], Fpga.stat->pg_ctr[i]); 
+				}			
+			}			
+		}
 	}
+	return REPLY_OK;
 }
 
 //--- _check_errors ---------------------------------------------------------------------
 static void _check_errors(void)
 {
 	int i, n, err;
-	static INT32	_enc_tel_cnt=12345;
-	static BYTE		_enc_crc[SIZEOF(Fpga.error->encoder)];
 	static UINT16	_udp_too_long[2];
 	
 	RX_FpgaError.enc_tel_cnt = Fpga.error->enc_tel_cnt;
-		
+	
+	_fpga_check_fp_errors(FALSE);
+
 	for (i=0; i<2; i++)
 	{
-		if (Fpga.error->eth_fifo_full[i]) { _Reload_FPGA=TRUE; if(ErrorFlag (ERR_ABORT, (UINT32*)&RX_HBStatus[0].err,  err_fifo_full_0<<i,  0, "ETH[%d]: FIFO Full", i)) fpga_trace_registers("ETH-FIFO_FULL");}
-		if (Fpga.error->udp_fifo_full[i]) { _Reload_FPGA=TRUE; if(ErrorFlag (ERR_ABORT, (UINT32*)&RX_HBStatus[0].err,  err_fifo_full_0<<i,  0, "UDP[%d]: FIFO Full", i)) fpga_trace_registers("UDP-FIFO_FULL");}
+		if (Fpga.error->eth_fifo_full[i]) { _Reload_FPGA=TRUE; if(ErrorFlag (ERR_ABORT, (UINT32*)&RX_HBStatus[0].err,  err_fifo_full_0<<i,  0, "ETH[%d]: FIFO Full", i)) fpga_trace_registers("ETH-FIFO_FULL", TRUE);}
+		if (Fpga.error->udp_fifo_full[i]) { _Reload_FPGA=TRUE; if(ErrorFlag (ERR_ABORT, (UINT32*)&RX_HBStatus[0].err,  err_fifo_full_0<<i,  0, "UDP[%d]: FIFO Full", i)) fpga_trace_registers("UDP-FIFO_FULL", TRUE);}
 		if (RX_FpgaError.dup_error[i].too_long!=_udp_too_long[i])
 		{
 			if (RX_FpgaError.dup_error[i].too_long)
 			{
 				Error(WARN, 0, "UDP[%d] Too Long", i);
-				fpga_trace_registers("UDP-TOO_LONG");				
+				fpga_trace_registers("UDP-TOO_LONG", TRUE);				
 			}
 			_udp_too_long[i] = RX_FpgaError.dup_error[i].too_long;
 		}
 	}
-	if (Fpga.error->udp_flush_fifo==0xffff) { _Reload_FPGA = TRUE; if(ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err, err_fifo_full_0, 0, "UDP[%d]: FIFO FLUSH Error", i)) fpga_trace_registers("UDP-FIFO_FLUSH"); }
+	if (Fpga.error->udp_flush_fifo==0xffff) { _Reload_FPGA = TRUE; if(ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err, err_fifo_full_0, 0, "UDP[%d]: FIFO FLUSH Error", i)) fpga_trace_registers("UDP-FIFO_FLUSH", TRUE); }
 	if (!fpga_is_ready()) return;	
 
 	/*
@@ -1707,52 +1892,6 @@ static void _check_errors(void)
 		set_err (udp_test_sent_alive(i)-Fpga.stat->udp_alive[i]>10, &RX_HBStatus[0].err, err_udp_alive_0+i, "UDP Alive missing");
 	}
 	*/
-	for (i=0; i<MAX_HEADS_BOARD; i++)
-	{		
-		if (Fpga.error->head[i].write_img_line || Fpga.error->img_line_err[0][i] || Fpga.error->img_line_err[1][i] || Fpga.error->img_line_err[2][i] || Fpga.error->img_line_err[3][i])
-		{                    				
-			if (*((UINT32*)&RX_HBStatus[0].err) & (err_printgo_but_no_data_0<<i))
-			{
-				*((UINT32*)&RX_HBStatus[0].err) |= (err_printgo_but_no_data_0<<i);
-					
-				fpga_trace_registers("write_img_line");
-				_trace_used_flags(i, _Img[0][0].blkNo, _Img[0][0].blkCnt, _PageEnd[0][0]);
-					
-				if (Fpga.error->head[i].write_img_line)   { Error(ERR_ABORT, 0, "Head[%d]: write-img-line.4: cnt=%d", i, Fpga.error->head[i].write_img_line);}
-				if (Fpga.error->img_line_err[0][i])		  { Error(ERR_ABORT, 0, "Head[%d]: write-img-line.0: cnt=%d", i, Fpga.error->img_line_err[0][i]);}
-				if (Fpga.error->img_line_err[1][i])		  { Error(ERR_ABORT, 0, "Head[%d]: write-img-line.1: cnt=%d", i, Fpga.error->img_line_err[1][i]);}
-				if (Fpga.error->img_line_err[2][i])		  { Error(ERR_ABORT, 0, "Head[%d]: write-img-line.2: cnt=%d", i, Fpga.error->img_line_err[2][i]);}
-				if (Fpga.error->img_line_err[3][i])		  { Error(ERR_ABORT, 0, "Head[%d]: write-img-line.3: cnt=%d", i, Fpga.error->img_line_err[3][i]);}
-			}
-		}
-	}
-
-	if ((FpgaCfg.encoder->cmd & ENC_ENABLE) && nios_is_firepulse_on())
-	{
-		if (_EncCheckDelay>0) _EncCheckDelay--;
-		else
-		{
-			#ifdef DEBUG
-				if (Fpga.error->enc_tel_cnt==_enc_tel_cnt) ErrorFlag (WARN,      (UINT32*)&RX_HBStatus[0].err,  err_encoder_not_conected,  0, "Encoder not connected");
-			#else
-				if (Fpga.error->enc_tel_cnt==_enc_tel_cnt) ErrorFlag (ERR_ABORT, (UINT32*)&RX_HBStatus[0].err,  err_encoder_not_conected,  0, "Encoder not connected");
-			#endif
-			for (i=0; i<SIZEOF(Fpga.error->encoder); i++)
-			{
-				if (Fpga.error->encoder[i].crc != _enc_crc[i])
-				{
-					if (Fpga.error->encoder[i].crc) ErrorFlag (WARN, (UINT32*)&RX_HBStatus[0].err,  err_encoder_not_conected,  0, "Encoder CRC ");
-					_enc_crc[i] = Fpga.error->encoder[i].crc;				
-				}
-			}
-		}
-		_enc_tel_cnt = Fpga.error->enc_tel_cnt;		
-	}
-	else 
-	{
-		for (i=0; i<SIZEOF(Fpga.error->encoder); i++)_enc_crc[i] = Fpga.error->encoder[i].crc;
-		_enc_tel_cnt++;
-	}
 }
 
 //--- _check_state_machines --------------------

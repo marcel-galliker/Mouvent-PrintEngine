@@ -28,6 +28,7 @@ namespace RX_DigiPrint.Views.TexView
         {
             InitializeComponent();
             CB_SpreadRoller.ItemsSource  = new EN_SpreadRollerList();
+            CB_BeltHeaterOn.ItemsSource  = new EN_OnOff();
         }
 
         //--- UserControl_IsVisibleChanged -----------------------------------

@@ -296,7 +296,7 @@ static void _step_set_config(int no)
 	{
 	case STEPPER_CLEAF:	stepc_init		(no, &_step_Socket[no]); cfg.boardNo = no; break;
 	case STEPPER_TX:	steptx_init		(no, &_step_Socket[no]); cfg.boardNo = no; break;
-	case STEPPER_LB:	steplb_init		(no, &_step_Socket[no]);				     break;
+	case STEPPER_LB:	steplb_init		(no, &_step_Socket[no]); break;
 	case STEPPER_TEST:	steptest_init	(no, &_step_Socket[no]); cfg.boardNo = no; break;
 	default: 			steps_init		(    &_step_Socket[0]);
 	}
@@ -311,7 +311,6 @@ int step_set_config(void)
 	switch(RX_Config.printer.type)
 	{
 	case printer_cleaf:			_StepperType = STEPPER_CLEAF;	break;
-//	case printer_LB701:			_StepperType = STEPPER_TEST;	break;		
 	case printer_LB701:			_StepperType = STEPPER_LB;		break;		
 	case printer_LB702_UV:		_StepperType = STEPPER_LB;		break;		
 	case printer_LB702_WB:		_StepperType = STEPPER_LB;		break;		

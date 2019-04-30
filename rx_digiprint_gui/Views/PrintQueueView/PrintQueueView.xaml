@@ -24,9 +24,9 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto" />
-            <RowDefinition Height="70*" MinHeight="100"/>
+            <RowDefinition Height="80*" MinHeight="100"/>
             <RowDefinition Height="auto"/>
-            <RowDefinition Height="30*" MinHeight="100" />
+            <RowDefinition Height="20*" MinHeight="100" />
         </Grid.RowDefinitions>
 
         <!-- toolbar LEFT _______________________________________________________ -->
@@ -127,6 +127,7 @@
                                     <GroupBox
                                         Header="Preview"
                                         HorizontalAlignment="Left"
+                                        VerticalAlignment="Top"
                                         Visibility="Visible"
                                         Margin="20,0,0,0"
                                         IsManipulationEnabled="True"

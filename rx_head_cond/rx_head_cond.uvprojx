@@ -493,11 +493,6 @@
               <FilePath>.\source\eeprom.c</FilePath>
             </File>
             <File>
-              <FileName>pumptime.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\source\pumptime.c</FilePath>
-            </File>
-            <File>
               <FileName>average.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\source\average.c</FilePath>
@@ -516,6 +511,11 @@
               <FileName>i2c_bitbang.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\source\i2c_bitbang.c</FilePath>
+            </File>
+            <File>
+              <FileName>ctr.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\source\ctr.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -613,14 +613,14 @@
               <FilePath>.\source\debug_printf.h</FilePath>
             </File>
             <File>
-              <FileName>pumptime.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\source\pumptime.h</FilePath>
-            </File>
-            <File>
               <FileName>pid.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\source\pid.h</FilePath>
+            </File>
+            <File>
+              <FileName>ctr.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\source\ctr.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -1156,11 +1156,6 @@
               <FilePath>.\source\eeprom.c</FilePath>
             </File>
             <File>
-              <FileName>pumptime.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\source\pumptime.c</FilePath>
-            </File>
-            <File>
               <FileName>average.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\source\average.c</FilePath>
@@ -1179,6 +1174,11 @@
               <FileName>i2c_bitbang.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\source\i2c_bitbang.c</FilePath>
+            </File>
+            <File>
+              <FileName>ctr.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\source\ctr.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1276,14 +1276,14 @@
               <FilePath>.\source\debug_printf.h</FilePath>
             </File>
             <File>
-              <FileName>pumptime.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\source\pumptime.h</FilePath>
-            </File>
-            <File>
               <FileName>pid.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\source\pid.h</FilePath>
+            </File>
+            <File>
+              <FileName>ctr.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\source\ctr.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -1819,11 +1819,6 @@
               <FilePath>.\source\eeprom.c</FilePath>
             </File>
             <File>
-              <FileName>pumptime.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\source\pumptime.c</FilePath>
-            </File>
-            <File>
               <FileName>average.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\source\average.c</FilePath>
@@ -1842,6 +1837,11 @@
               <FileName>i2c_bitbang.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\source\i2c_bitbang.c</FilePath>
+            </File>
+            <File>
+              <FileName>ctr.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\source\ctr.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1939,14 +1939,14 @@
               <FilePath>.\source\debug_printf.h</FilePath>
             </File>
             <File>
-              <FileName>pumptime.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\source\pumptime.h</FilePath>
-            </File>
-            <File>
               <FileName>pid.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\source\pid.h</FilePath>
+            </File>
+            <File>
+              <FileName>ctr.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\source\ctr.h</FilePath>
             </File>
           </Files>
         </Group>

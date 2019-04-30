@@ -1,4 +1,5 @@
-﻿using RX_DigiPrint.Models;
+﻿using RX_Common;
+using RX_DigiPrint.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +15,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace RX_DigiPrint.Views.UserControls
+namespace RX_DigiPrint.Views.PrintSystemView
 {
     /// <summary>
     /// Interaction logic for EncoderView.xaml
@@ -51,9 +52,9 @@ namespace RX_DigiPrint.Views.UserControls
         //--- Save_Clicked ---------------------------------------------
         private void Save_Clicked(object sender, RoutedEventArgs e)
         {
-            RxGlobals.Encoder.Save();
+            if (RxMessageBox.YesNo("Encoder Compensation", "Save new compensation parameters?", MessageBoxImage.Question, false))
+                RxGlobals.Encoder.Save();
         }
-
 
     }
 }

@@ -49,6 +49,7 @@ static void _dp803_motor_test  (int motor, int steps);
 static void _dp803_do_reference(void);
 static void _dp803_move_to_pos(int cmd, int pos);
 static int  _micron_2_steps(int micron);
+static void reinit(void);
 
 //--- dp803_init --------------------------------------
 void dp803_init(void)
@@ -189,13 +190,22 @@ int dp803_menu(void)
 		case 'p': dp803_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_PRINT_POS,	&pos); break;
 		case 'u': dp803_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_UP_POS,		NULL); break;
 		case 'z': _dp803_motor_z_test(atoi(&str[1]));break;
-		case 'm': _dp803_motor_test(str[1]-'0', atoi(&str[2]));break;								
+		case 'm': _dp803_motor_test(str[1]-'0', atoi(&str[2]));break;
+		case 'o': Fpga.par->adc_rst = FALSE; break;
+		case 'i': Fpga.par->adc_rst = TRUE; break;
 		case 'x': return FALSE;
 		}
 	}
 	return TRUE;
 }
 
+static void reinit(void)
+{
+	
+	
+	fpga_init();
+
+}
 
 //--- _dp803_do_reference ----------------------------------------------------------------
 static void _dp803_do_reference(void)

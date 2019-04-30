@@ -71,10 +71,17 @@ static int _do_stop_printing(RX_SOCKET socket);
 //--- ctrl_init --------------------------------------------------------------------
 int ctrl_init()
 {
+	int i;
+	
 	_MsgBufIn  = 0;
 	_MsgBufOut = 0;
 
 	memset(&RX_EncoderStatus, 0, sizeof(RX_EncoderStatus));
+	RX_EncoderStatus.ampl_old	= 0;
+	RX_EncoderStatus.ampl_new   = 0;
+	RX_EncoderStatus.percentage = INVALID_VALUE;
+	for (i=0; i<SIZEOF(RX_EncoderStatus.corrRotPar); i++)
+		RX_EncoderStatus.corrRotPar[i] = INVALID_VALUE;	
 
 	sok_start_server(&_HServer, NULL, PORT_CTRL_ENCODER, SOCK_STREAM, MAX_CONNECTIONS, _save_ctrl_msg, _ctrl_connected, _ctrl_deconnected);
 
@@ -290,7 +297,13 @@ static int _do_encoder_pg_dist(RX_SOCKET socket, SEncoderPgDist *pmsg)
 //--- _do_simu_encoder -----------------------------------------------
 static int _do_simu_encoder (RX_SOCKET socket, int *pkhz)
 {
-	fpga_enc_config(0, &RX_EncoderCfg, 0, *pkhz);
+	static int _actSpeed = 0;
+	if (*pkhz != _actSpeed)
+	{
+		fpga_enc_config(0, &RX_EncoderCfg, 0, *pkhz);
+		fpga_enc_config(1, &RX_EncoderCfg, 1, *pkhz);
+		_actSpeed = *pkhz;
+	}
 	return REPLY_OK;
 }
 

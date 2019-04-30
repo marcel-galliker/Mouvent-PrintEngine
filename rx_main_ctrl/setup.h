@@ -14,7 +14,6 @@
 #include "rx_common.h"
 #include "rx_def.h"
 #include "rx_setup_file.h"
-#include "balance_def.h"
 
 void setup_test();
 

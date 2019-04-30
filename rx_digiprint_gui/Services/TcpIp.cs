@@ -119,15 +119,16 @@ namespace RX_DigiPrint.Services
         angle_overlap,          // 01
         angle_separated,        // 02
         jets,                   // 03
-        grid,                   // 04
-        encoder,                // 05
-        scanning,               // 06
+        jet_numbers,            // 04
+        grid,                   // 05
+        encoder,                // 06
+        scanning,               // 07
     };
 
     public enum EFluidCtrlMode : int
     {
 	    ctrl_undef,				//  0x000:
- //       ctrl_shutdown,          //  0x001:
+        ctrl_shutdown,          //  0x001:
   //      ctrl_shutdown_done,     //  0x002:
         ctrl_error          = 0x002,
 	    ctrl_off            = 0x003,	//	0x003:
@@ -345,6 +346,8 @@ namespace RX_DigiPrint.Services
         public const UInt32 CMD_EXTERNAL_DATA_ON    = 0x01000205;
         public const UInt32 CMD_EXTERNAL_DATA_OFF   = 0x01000206;
 
+        public const UInt32 CMD_RESET_CTR			= 0x01000207;
+
         public const UInt32 CMD_CLEAN_START 	    = 0x01000210;
         public const UInt32 REP_CLEAN_SATRT	        = 0x02000210;
 
@@ -414,6 +417,8 @@ namespace RX_DigiPrint.Services
         public const UInt32 CMD_CLN_WIPE			= 0x01000709;
 
         public const UInt32 CMD_CLN_ADJUST			= 0x01000710;
+
+        public const UInt32 CMD_CLN_DRIP_PANS       = 0x01000721;
 
         public const UInt32 EVT_TRACE               = 0x03000100;
 
@@ -588,7 +593,6 @@ namespace RX_DigiPrint.Services
 	        public byte	    collate;
 	        public byte	    variable;
 	        public byte	    dropSizes;
-	  //      public byte	    testDotSize;
 
 	        public EPQState	     state;
             public EPQLengthUnit lengthUnit;
@@ -601,8 +605,9 @@ namespace RX_DigiPrint.Services
 	        public EPrintGoMode printGoMode;
 	        public Int32        printGoDist;
 	        public Int32	    scanLength;
-	        public Int32	    passes;
-	        public Int32	    curingPasses;
+	        public byte	        passes;
+            public byte         virtualDoublePass;
+	        public byte	        curingPasses;
 	        public Int32	    scans;
             public Int32        speed;
 
@@ -611,6 +616,7 @@ namespace RX_DigiPrint.Services
             public Int32   scansSent;
             public Int32   scansPrinted;
             public Int32   scansStart;
+            public Int32   scansTotal;
             public Int32   progress;
 
             public sPageNumber pageNumber;
@@ -619,6 +625,7 @@ namespace RX_DigiPrint.Services
 
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 4)]
             public string   dots;
+	        public byte	    wakeup;
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -648,7 +655,8 @@ namespace RX_DigiPrint.Services
             Int32	temp;
 	        Int32	tempMax;
 	        Int32	dropletVolume;
-	        Int32	condPresOut;
+	        Int32	meniscus;
+            Int32 condPresOut;
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
 	        public Int32[]	flushTime;
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
@@ -731,7 +739,10 @@ namespace RX_DigiPrint.Services
 	        public UInt32		inkSupilesOn;	
             [MarshalAs(UnmanagedType.ByValArray, SizeConst =4)]
             public UInt32[]     maxSpeed;   // [m/min]
-	        public UInt32		externalData;	
+	        public UInt32		externalData;
+            public UInt32		actSpeed;
+            public double       counterAct;
+            public double       counterTotal;
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -791,13 +802,14 @@ namespace RX_DigiPrint.Services
             public UInt32	warn;
 	        public UInt32	err;
 
-//	        public Int32	humidity;			//  Ventilation humidity (% Luftfeuchtigkeit)
 	        public Int32	cylinderPresSet;	//  Pressure intermediate Tank
 	        public Int32	cylinderPres;	    //  Pressure intermediate Tank
+            public Int32    cylinderSetpoint;	 //  Pressure intermediate Tank
             public Int32    airPressureTime;
             public Int32	flushTime;
 	        public Int32    presLung;			//  Lung pressure
-            public Int32    condPresOut;		//  
+            public Int32    condPresOut;  
+            public Int32    condPresIn;
 	        public UInt32	temp;				//	Temperature
 	        public UInt32	pumpSpeedSet;		//	Consumption pump speed
 	        public UInt32	pumpSpeed;			//	Consumption pump speed
@@ -899,7 +911,7 @@ namespace RX_DigiPrint.Services
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct SHeadEEpromMvt
         {
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
 	        public Int16[]			disabledJets;	
 	        public Int16	        clusterNo;
 	        public Int32	        printed_ml;
@@ -915,6 +927,9 @@ namespace RX_DigiPrint.Services
 	        //-- job info ------------------------------------
 	        public UInt64	        dotCnt;	// printed drops since last reset
             public UInt32	        imgInCnt;
+            public UInt32	        imgBuf;
+            public UInt32       	encPos;
+            public UInt32       	encPgCnt;
 	        public UInt32	        printGoCnt;
 	        public UInt32	        printDoneCnt;
 
@@ -954,8 +969,9 @@ namespace RX_DigiPrint.Services
 	        SVersion	niosVersion;
 
 	        //--- values stored in head-board (no reset) ---------
-	        public UInt64		timePower;	// [sec] time the board was powered
-	        public UInt64		timePrint;  // [sec] time when ink was circulating
+	        public UInt32		clusterNo;	
+	        public UInt32		clusterTime; 
+	        public UInt32		machineMeters; 
 
             public Int32        tempFpga;
             public Int32        flow;

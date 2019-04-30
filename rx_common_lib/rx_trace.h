@@ -20,6 +20,7 @@ extern "C"{
 
 	void Trace_init(const char *appName);
 	void Trace_end(void);
+	const char *Trace_get_path(void);
 	void Trace_set_server(HANDLE hServer);
 	void Trace_to_screen(int trace);
 	void Trace_to_file(int trace);

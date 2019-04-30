@@ -75,16 +75,13 @@ void fs_start(const char *deviceName)
 //--- fs_end ----------------------------------------------------------------
 void fs_end(void)
 {
-	static int _ending=FALSE;
-	if (!_ending)
-	{
-		_ending= TRUE;
-		if (_HFileServer) sok_stop_server(&_HFileServer);
-		_ending=FALSE;
-	}
-	else TrPrintfL(1, "stop\n");	
+	TrPrintfL(1, "fs_end 1");
 	if (_File) fclose(_File);
 	_File = NULL;
+	TrPrintfL(1, "fs_end 2");
+	if (_HFileServer) sok_stop_server(&_HFileServer);
+	TrPrintfL(1, "fs_end 3");	
+	TrPrintfL(1, "fs_end END");	
 }
 
 //--- fs_get_port ---------------------------------------
@@ -104,8 +101,6 @@ static int _client_connected(RX_SOCKET socket, const char *peerName)
 //--- _client_disconncted ---------------------------------------------------
 static int _client_disconncted(RX_SOCKET socket, const char *peerName)
 {			
-	TrPrintfL(TRUE, "RFS Client Disconnected >>%s<<", peerName);
-	fs_end();
 	return REPLY_OK;
 }
 
@@ -238,6 +233,7 @@ static int _do_start_process (RX_SOCKET socket, SFSDirCmd* msg)
 	cnt_proc = rx_process_running_cnt(msg->name, NULL);
 	cnt_gdb  = rx_process_running_cnt("gdbserver", msg->name);
 	TrPrintfL(1, "Count >>%s<<: proc=%d, gdb=%d", msg->name, cnt_proc,  cnt_gdb);
+	
 	if (!cnt_proc && !cnt_gdb) 
 	{
 		reply.reply = rx_process_start(msg->name, NULL);
@@ -280,6 +276,14 @@ static int _do_save_file_hdr(RX_SOCKET socket, SFSDirEntry *msg)
 	#ifdef linux
 		mode_t process_mask = umask(0);
 	#endif
+	
+	if (_File) 
+	{
+		TrPrintfL(TRUE, "CLOSE file");
+		fclose(_File);
+		_File = NULL;
+	}
+	
 	for (tries=0; _File==NULL && tries<5; tries++)
 	{
 		_File = fopen(msg->name, "w");

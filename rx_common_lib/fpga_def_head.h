@@ -287,8 +287,8 @@ typedef struct SFpgaImage
 	UINT32	widthBytes;			// 0x000c: height in bytes, used to update mem-pointer
 	UINT32	lengthPx;			// 0x0010: length in pixels
 	INT32	jetPx0;				// 0x0014: Jet number to witch Pixel 0 is mapped (range [-7..2048+127])
-	UINT32	backward;			// 0x0018: 0=forward, 1=backward, 
-		#define IMAGE_BIDIR	0x10	//	Bidirectional-Flag
+	UINT32	flags;				// 0x0018: Bit 0: 0=forward, 1=backward
+								//		   Bit 1: Bidirectional	
 	UINT32	flipHorizontal;		// 0x001c:
 	UINT32	clearBlockUsed;		// 0x0020: 1=clear the flag
 	UINT32  blkCnt;				// 0x0024: unused in FPGA
@@ -591,7 +591,7 @@ typedef struct SFpgaHeadError
 		UINT8	crc;
 	} encoder[4];
 	
-	UINT32 synch_test;				// 0x005c			
+	UINT32 synch_test;				// 0x005c	c_enc_tel_res_bits_error_addr		
 
 	struct                          // 0x0060 - 0x007F
 	{

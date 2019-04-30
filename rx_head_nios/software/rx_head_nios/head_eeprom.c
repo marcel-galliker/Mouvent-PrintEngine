@@ -7,6 +7,7 @@
 #include "i2c_master.h"
 #include "nios_def_head.h"
 #include "system.h"
+#include <string.h>
 #include "head_eeprom.h"
 
 
@@ -23,28 +24,16 @@ static int _seq_write_eeprom(alt_u8 * eeprom_data, alt_u32 number_of_byte_to_wri
 int head_eeprom_read(void)
 {
 	alt_u32 	head=0;
-	alt_u32		head_eeprom_ok=0;
 	// Read Data from Head eeprom
 	//0x50, 0x52, 0x54, 0x56 for head 0-4
 
 	for(head=0;head<MAX_HEADS_BOARD;head++)
 	{
 		//_seq_read_eeprom(alt_u8 * eeprom_data, alt_u32 number_of_byte_to_read, char chip_adr, char eeprom_adr0, char eeprom_adr1)
-		if(_seq_read_eeprom(pRX_Status->head_eeprom[head], EEPROM_DATA_SIZE, 0x50+(head*2), 0x00)==0)
-		{
-			head_eeprom_ok+=EEPROM_DATA_SIZE;
-		}
-		else
-		{
+		if(_seq_read_eeprom(pRX_Status->head_eeprom[head], EEPROM_DATA_SIZE, 0x50+(head*2), 0x00)!=0)
 			return(-1);
-		}
 	}
-	if(head_eeprom_ok==MAX_HEADS_BOARD*EEPROM_DATA_SIZE)
-	{
-		return (0);
-	}
-
-	return(-1);
+	return (0);
 }
 
 //--- _seq_read_eeprom --------------------------------------
@@ -80,7 +69,7 @@ static int _seq_read_eeprom(alt_u8 * eeprom_data, alt_u32 number_of_byte_to_read
 			}
 		}
 	}
-	return (-1);
+	return (-2);
 }
 
 
@@ -123,18 +112,33 @@ int head_eeprom_write_user_data(alt_u32 head, alt_u8 * eeprom_data, alt_u32 numb
 int head_eeprom_change_user_data(alt_u32 head, alt_u8 *act_data, alt_u8 * new_data, alt_u32 cnt, alt_u32 addr)
 {
 	int idx;
-	int len;
+	int len, l, end;
+	int ret=REPLY_OK;
+	int change=FALSE;
 
 	for (idx=0; idx<cnt; idx++)
 	{
 		if (new_data[idx] == act_data[idx]) continue;
 		for (len=0; idx+len<cnt && new_data[idx+len] != act_data[idx+len]; len++)
 		{
+
 		}
-//		write len bytes
-		idx+=len;
+		// write in blocks that end in 32-Byte borders!
+		while (ret==REPLY_OK && len)
+		{
+			change=TRUE;
+			if (len>32) l=32;
+			else		l=len;
+			end=(idx/32) * 32 + 32;
+			if (idx+l>=end) l=end-idx;
+			ret=_seq_write_eeprom(&new_data[idx], l, 0x50+(head*2), EEPROM_USER_DATA_START+addr+idx);
+			idx += l;
+			len -= l;
+		}
 	}
-	return REPLY_OK;
+	if (change)
+		_seq_read_eeprom(act_data, cnt, 0x50+(head*2), EEPROM_USER_DATA_START+addr);
+	return ret;
 }
 
 
@@ -153,7 +157,7 @@ static int _seq_write_eeprom(alt_u8 * eeprom_data, alt_u32 number_of_byte_to_wri
 	}
 	if (addr/32 != (addr+number_of_byte_to_write-1)/32)
 	{
-		return (-1);	// writing into multiple pages is not supported in a single seq. write!
+		return (-2);	// writing into multiple pages is not supported in a single seq. write!
 	}
 
 	if (I2C_start(I2C_MASTER_0_BASE,(chip_adr),WRITE)==I2C_ACK)						// set chip address and set to write(0)
@@ -166,23 +170,23 @@ static int _seq_write_eeprom(alt_u8 * eeprom_data, alt_u32 number_of_byte_to_wri
 				{
 					if(I2C_write(I2C_MASTER_0_BASE,*eeprom_data,!LAST_BYTE)!=I2C_ACK)	// write data to eeprom_adr
 					{
-						return (-1);
+						return (-3);
 					}
 					eeprom_data++;	//inc. adr. of pointer
 				}
 				if(I2C_write(I2C_MASTER_0_BASE,*eeprom_data,LAST_BYTE)!=I2C_ACK)	// write Last Byte to eeprom_adr
 				{
-					return (-1);
+					return (-4);
 				}
 				// wait till data is written into EEPROM (max. 5ms per Page)
 				for(timeout=50; (I2C_start(I2C_MASTER_0_BASE,(chip_adr),WRITE)==I2C_NOACK);)
 				{
-					if(!--timeout) return (-1);
+					if(!--timeout) return (-5);
 				}
 				return 0;
 			}
 		}
 	}
-	return (-1);
+	return (-6);
 }
 
