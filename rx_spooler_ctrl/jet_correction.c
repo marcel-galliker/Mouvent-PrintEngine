@@ -47,6 +47,8 @@ int jc_init(void)
 void jc_set_disabled_jets(SDisabledJets *jets)
 {
 	int h, n;
+	if (RX_Spooler.printerType==printer_TX801 || RX_Spooler.printerType==printer_TX802) return;
+
 	if (jets->color>=0 && jets->color<MAX_COLORS)
 	{
 		memcpy(&RX_DisabledJets[jets->color], jets, sizeof(RX_DisabledJets[jets->color]));

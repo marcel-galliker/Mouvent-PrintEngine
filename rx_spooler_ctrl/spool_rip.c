@@ -288,6 +288,8 @@ static void _load_buffer(const char *filedir, const char *filename, SBmpInfo *pi
 	int ret;
 	int i;
 	int width, length;
+	UINT8 multiCopy;
+
 	SPageId id;
 	int scanning = FALSE;
 	char path[MAX_PATH];
@@ -296,7 +298,7 @@ static void _load_buffer(const char *filedir, const char *filename, SBmpInfo *pi
 //	sr_mnt_path(filepath, path);
 	data_cache(&id, filedir, path, RX_Color, SIZEOF(RX_Color));
 
-	if (data_get_size(path, 0, 0, &width, &length, (UCHAR*)&pinfo->bitsPerPixel))
+	if (data_get_size(path, 0, 0, &width, &length, (UCHAR*)&pinfo->bitsPerPixel, &multiCopy))
 	{
 		memset(buffer, 0, MAX_COLORS*sizeof(BYTE*));
 		return;

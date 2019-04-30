@@ -1111,21 +1111,37 @@ static void _fpga_check_fp_errors(int printDone)
 			{ 
 				if(!RX_FpgaError.img_line_err[n][head])
 				{
+					int err=FALSE;
 					switch(n)
 					{
 					case 0: 	fpga_trace_registers("miss_line_after_gap_err", TRUE);
 								Error(ERR_ABORT, 0, "Head[%d]: 1st line after gap missing: cnt=%d, imgIn=%d, PG=%d", head, Fpga.error->img_line_err[n][head], RX_HBStatus[0].head[head].imgInCnt, RX_HBStatus[0].head[head].printGoCnt);
+								err=TRUE;
 								break;
 					case 1: 	fpga_trace_registers("miss_line_after_overlap_err", TRUE);
 								Error(ERR_ABORT, 0, "Head[%d]: 1st line after overlap missing: cnt=%d, imgIn=%d, PG=%d", head, Fpga.error->img_line_err[n][head], RX_HBStatus[0].head[head].imgInCnt, RX_HBStatus[0].head[head].printGoCnt);
+								err=TRUE;
 								break;
 					case 2: 	fpga_trace_registers("miss_line_after_seamlessp_err", TRUE);
 								Error(ERR_ABORT, 0, "Head[%d]: 1st line after seamless missing: cnt=%d, imgIn=%d, PG=%d", head, Fpga.error->img_line_err[n][head], RX_HBStatus[0].head[head].imgInCnt, RX_HBStatus[0].head[head].printGoCnt);
+								err=TRUE;
 								break;
 					case 3: 	fpga_trace_registers("miss_inner_line_err", TRUE);
 								Error(ERR_ABORT, 0, "Head[%d]: inner line missing: cnt=%d, imgIn=%d, PG=%d", head, Fpga.error->img_line_err[n][head], RX_HBStatus[0].head[head].imgInCnt, RX_HBStatus[0].head[head].printGoCnt);
+								err=TRUE;
 								break;	
-					}						
+					}
+					if (err)
+					{
+						Error(LOG, 0, "Head[%d]: imgInCnt=%d, imgInIdx=%d, buf=%d, imgOutIdx=%d/%d, PrintGO=%d, PrintDONE=%d",
+							head, 
+							RX_HBStatus[0].head[head].imgInCnt, 
+							RX_FpgaPrint.imgInIdx[head], 
+							RX_HBStatus[0].head[head].imgInCnt-RX_HBStatus[0].head[head].printDoneCnt,
+							RX_FpgaData.imgOutIdx[head][0], RX_FpgaData.imgOutIdx[head][1], 
+							RX_HBStatus[0].head[head].printGoCnt,
+							RX_FpgaStat.print_done_ctr[head]);
+					}
 				}
 				RX_FpgaError.img_line_err[n][head] = Fpga.error->img_line_err[n][head];
 			}

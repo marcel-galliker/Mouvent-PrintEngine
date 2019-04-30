@@ -55,9 +55,9 @@ static int _init_pq_item(SPrintQueueItem *pitem, struct mvt_prt_sync *settings)
 
 	if (RX_Config.externalData)
 	{
-		Error(WARN, 0, "Need to know SPEED");
+	//	Error(WARN, 0, "Need to know SPEED");
 	//	Error(WARN, 0, "Need to pageWidth");
-		Error(WARN, 0, "Need to pageHeight");			
+	//	Error(WARN, 0, "Need to pageHeight");			
 	}
 	
 	return REPLY_OK;

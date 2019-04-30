@@ -345,7 +345,6 @@ namespace RX_DigiPrint.Views.PrintQueueView
 			}
         }
 
-
         //--- Grid_MouseDown ------------------------------------------------
         private void Grid_MouseDown(object sender, MouseButtonEventArgs e)
         {
@@ -353,11 +352,15 @@ namespace RX_DigiPrint.Views.PrintQueueView
             foreach(Row row in PrintQueueGrid.Rows)
             {
                 PrintQueueItem item = row.Data as PrintQueueItem;
-                if (item.Equals(selected))
+                if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_UV)
                 {
-                    PrintSettings.DataContext = item;
-                    item.IsSelected = !item.IsSelected;
-                }
+                    if (item.Equals(selected))
+                    {
+                        PrintSettings.DataContext = item;
+                        item.IsSelected = !item.IsSelected;
+                    }
+                } 
+                else if (item!=null) item.IsSelected = false;
             }
             _update_selected_items();
             e.Handled = true;

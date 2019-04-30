@@ -74,6 +74,7 @@ static int  _data_split		           (SPageId *id, SBmpInfo *pBmpInfo, int offset
 static int  _data_split_scan           (SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int lengthPx, int blkNo, int clearBlockUsed, int same, SPrintListItem *pItem);
 static int  _data_split_scan_no_overlap(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int lengthPx, int blkNo, int clearBlockUsed, int same, SPrintListItem *pItem);
 static int  _data_split_test           (SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int lengthPx, int blkNo, int clearBlockUsed, int same, SPrintListItem *pItem);
+static void _data_multi_copy		   (SBmpInfo *pBmpInfo, UINT8 multiCopy);
 
 //--- data_init ------------------------------------------------------------------------
 void data_init(RX_SOCKET socket, int headCnt)
@@ -294,27 +295,43 @@ static int _copy_file(SPageId *pid, char *srcDir, char *fileName, char *dstDir)
 }
 
 //--- data_get_size ---------------------------------------------------------------
-int  data_get_size	(const char *path, UINT32 page, UINT32 spacePx, UINT32 *pwidth, UINT32 *plength, UINT8 *pbitsPerPixel)
+int  data_get_size	(const char *path, UINT32 page, UINT32 spacePx, UINT32 *pwidth, UINT32 *plength, UINT8 *pbitsPerPixel, UINT8 *multiCopy)
 {
 	int ret;
 	UINT32 memsize;
 	SFlzInfo info;
-
+			
 	if(flz_get_info(path, page, &info)==REPLY_OK)
 	{
 		*pwidth			= info.WidthPx+spacePx;
 		*plength		= info.lengthPx+2*abs(_WakeupLen);
-		*pbitsPerPixel	= info.bitsPerPixel; 
-		return REPLY_OK;
+		*pbitsPerPixel	= info.bitsPerPixel;
+		ret = REPLY_OK;
 	}
-	ret = tif_get_size(path, page, spacePx, pwidth, plength, pbitsPerPixel);
-	if (ret == REPLY_NOT_FOUND) 
+	else
 	{
-		char filepath[MAX_PATH];
-		bmp_color_path(path, RX_ColorNameShort(0), filepath);
-		ret = bmp_get_size(filepath, pwidth, plength, pbitsPerPixel, &memsize);
+		ret = tif_get_size(path, page, spacePx, pwidth, plength, pbitsPerPixel);
+		if (ret == REPLY_NOT_FOUND) 
+		{
+			char filepath[MAX_PATH];
+			bmp_color_path(path, RX_ColorNameShort(0), filepath);
+			ret = bmp_get_size(filepath, pwidth, plength, pbitsPerPixel, &memsize);
+		}
 	}
-	*plength += 2*abs(_WakeupLen);
+	
+	*multiCopy = 1;
+	if (ret==REPLY_OK)
+	{
+		*plength += 2*abs(_WakeupLen);
+		if (pbitsPerPixel && (RX_Spooler.printerType==printer_TX801 || RX_Spooler.printerType==printer_TX802))
+		{
+			int pixPByte = 8/(*pbitsPerPixel);
+			for ((*multiCopy)=1; ((*pwidth)*(*multiCopy)) % pixPByte; (*multiCopy)++)
+			{
+			};
+			*pwidth *= (*multiCopy);
+		}
+	}
 	return ret;
 }
 
@@ -330,13 +347,14 @@ void data_clear(BYTE* buffer[MAX_COLORS])
 int  data_malloc(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPixel, SColorSplitCfg *psplit, int splitCnt, UINT64 *pBufSize, BYTE* buffer[MAX_COLORS])
 {	
 	UINT64	memsize;
+	UINT64	memSizeUsed;
 	int i, found, error, lineLen;
 
 //	lineLen = (width*bitsPerPixel+7)/8;			// workes for TIFF
 //	lineLen = ((width*bitsPerPixel+15)/16)*2;	// used for BMP files!
 	lineLen = ((width*bitsPerPixel+31) & ~31)/8;	// used for BMP files!
 	_PrintMode = printMode;
-	memsize = (UINT64)lineLen*height;
+	memsize = memSizeUsed = (UINT64)lineLen*height;
 	switch(printMode)
 	{
 	case PM_TEST_JETS:			memsize*=RX_Spooler.headsPerColor; break;
@@ -405,7 +423,6 @@ int  data_malloc(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPixel,
 		*pBufSize=0;
 		return REPLY_ERROR;
 	}
-
 	return REPLY_OK;
 }
 
@@ -422,7 +439,7 @@ int  data_free(UINT64 *pBufSize, BYTE* buffer[MAX_COLORS])
 }
 
 //--- data_load ------------------------------------------------------------------------
-int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, int gapPx, int blkNo, int printMode, int variable, int flags, int clearBlockUsed, int same, int smp_bufSize, BYTE* buffer[MAX_COLORS])
+int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UINT8 multiCopy, int gapPx, int blkNo, int printMode, int variable, int flags, int clearBlockUsed, int same, int smp_bufSize, BYTE* buffer[MAX_COLORS])
 {
 	SBmpInfo		bmpInfo;
 	int ret;
@@ -512,10 +529,6 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, int
 			return REPLY_ERROR;
 		ctrl_start_printing();
 	}
-	memcpy(&_LastId, id, sizeof(_LastId));
-	memcpy(&_LastBmpInfo, &bmpInfo, sizeof(bmpInfo));
-	strcpy(_LastFilePath, filepath);
-	_LastWakeupLen = _WakeupLen;
 	TrPrintfL(TRUE, "data_load: File loaded, ret=%d", ret);
 
 //	if (ret == REPLY_NOT_FOUND) ret = bmp_load_all(filepath, RX_Color, SIZEOF(RX_Color), &bmpInfo);
@@ -524,6 +537,7 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, int
 		_PrintList[_InIdx].lengthPx = bmpInfo.lengthPx;
 		_SmpFlags   = flags;
 		_SmpBufSize = smp_bufSize;
+		_data_multi_copy(&bmpInfo, multiCopy);
 		_data_split(id, &bmpInfo, offsetPx, lengthPx, blkNo, flags, clearBlockUsed, same, &_PrintList[_InIdx]);
 
 		if (loaded || printMode==PM_TEST || printMode==PM_TEST_JETS || printMode==PM_TEST_SINGLE_COLOR)
@@ -551,10 +565,12 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, int
 	
 		TrPrintfL(TRUE, "data_load DONE idx=%d, id=%d, page=%d, copy=%d, scan=%d, data_load >>%s<<, COPY=%d", _InIdx, id->id, id->page, id->copy, id->scan, filepath, _PrintList[_InIdx].id.copy);
 		_InIdx = nextIdx;
-		return REPLY_OK;
 	}
-	TrPrintfL(TRUE, "data_load error");
-	return REPLY_ERROR;
+	memcpy(&_LastId, id, sizeof(_LastId));
+	memcpy(&_LastBmpInfo, &bmpInfo, sizeof(bmpInfo));
+	strcpy(_LastFilePath, filepath);
+	_LastWakeupLen = _WakeupLen;
+	return ret;
 }
 
 /*
@@ -602,6 +618,54 @@ SBmpSplitInfo*  data_get_next	(int *headCnt)
 	_SendIdx = (_SendIdx+1) % PRINT_LIST_SIZE;
 	*headCnt = _HeadCnt;
 	return _PrintList[idx].splitInfo;	
+}
+
+//--- _data_multi_copy ------------------------------------------------------------------
+static void _data_multi_copy(SBmpInfo *pBmpInfo, UINT8 multiCopy)
+{
+	if (multiCopy>1 && !pBmpInfo->multiCopy)
+	{
+		BYTE *src;
+		BYTE *dst;
+		int  buf;
+		int  x, y, m;
+		int srcLineBt  = (pBmpInfo->srcWidthPx*pBmpInfo->bitsPerPixel+7)/8;
+		int srcLinelen = pBmpInfo->lineLen;
+		int dstLineLen = ((pBmpInfo->srcWidthPx*multiCopy*pBmpInfo->bitsPerPixel+31) & ~31)/8;	
+		for (buf=0; buf<SIZEOF(pBmpInfo->buffer); buf++)
+		{
+			if (pBmpInfo->buffer[buf] && pBmpInfo->lengthPx>0)
+			{
+				src = (*pBmpInfo->buffer[buf]) + srcLinelen*pBmpInfo->lengthPx;
+				dst = (*pBmpInfo->buffer[buf]) + dstLineLen*pBmpInfo->lengthPx;
+				for (y=pBmpInfo->lengthPx; y>0;)
+				{
+					y--;
+					src -= srcLinelen;
+					dst -= dstLineLen;
+					memcpy(dst, src, srcLineBt);
+					if (y) memset(src, 0x00, srcLineBt);
+					int shr=pBmpInfo->bitsPerPixel*(pBmpInfo->srcWidthPx%(8/pBmpInfo->bitsPerPixel));
+					int shl;
+					for (m=1; m<multiCopy; m++)
+					{
+						shl = 8-shr;
+						BYTE *s = dst;
+						BYTE *d = dst + m*srcLineBt-1;
+						for (x=0; x<srcLineBt; x++)
+						{
+							*d++ |= (*s)>>shr; 
+							*d    = (*s++)<<shl;
+						}
+						shr -= 2;
+					}
+				}
+			}
+		}
+		pBmpInfo->srcWidthPx *= multiCopy;
+		pBmpInfo->lineLen     = dstLineLen;
+		pBmpInfo->multiCopy   = multiCopy;
+	}
 }
 
 //--- _data_split -----------------------------------------------------------------------

@@ -1568,6 +1568,7 @@ typedef struct
 	INT32 inkSupplyNo[MAX_COLORS];
 	PBYTE *buffer[MAX_COLORS];
 	UINT64 DropCount[MAX_COLORS][3]; //Drop count for drop size 1, 2, and 3 per plane
+	INT8 multiCopy;
 } SBmpInfo;
 
 //--- global variables -----------------------------
