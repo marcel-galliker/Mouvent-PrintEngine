@@ -127,9 +127,10 @@ typedef struct SVersion
 typedef enum EnFluidCtrlMode
 {
     ctrl_undef,          // 0x000:
-	ctrl_shutdown,	     //	0x001:
-	ctrl_shutdown_done,	 //	0x002:
-    ctrl_off,            //	0x003:
+//	ctrl_shutdown,	     //	0x001:
+//	ctrl_shutdown_done,	 //	0x002:
+	ctrl_error		= 0x002,
+    ctrl_off		= 0x003,            //	0x003:
     ctrl_warmup,         // 0x004:
     ctrl_readyToPrint,   // 0x005:
     ctrl_print,          // 0x006:
@@ -138,10 +139,12 @@ typedef enum EnFluidCtrlMode
     ctrl_09,        	 // 0x009:
     ctrl_0a,      		 //	0x00a:
     ctrl_0b, 		     // 0x00b:
-    ctrl_flush,	         //	0x00c:
-	ctrl_flush_step1,	 // 0x00d:
-	ctrl_flush_step2,	 // 0x00e:
-    ctrl_flush_done,     //	0x00f:
+    ctrl_flush_night,	 //	0x00c:
+    ctrl_flush_weekend,	 //	0x00d:
+    ctrl_flush_week,	 //	0x00e:	
+	ctrl_flush_step1,	 // 0x00f:
+	ctrl_flush_step2,	 // 0x010:
+    ctrl_flush_done,     //	0x011:
 
     ctrl_purge_soft = 0x100,  // 0x100:
     ctrl_purge,               // 0x101:
@@ -177,7 +180,7 @@ typedef enum EnFluidCtrlMode
     ctrl_test_watchdog = 0x10000,
     ctrl_test, 				// 0x10001
 	ctrl_offset_cal, 		// 0x10002
-	ctrl_offset_cal_done,	// 0x10003
+	ctrl_offset_cal_done,	// 
 } EnFluidCtrlMode;
 
 char *FluidCtrlModeStr(EnFluidCtrlMode mode);

@@ -9,10 +9,13 @@
 //
 // ****************************************************************************
 
+#include <time.h>
 #include "rx_common.h"
 #include "rx_def.h"
 #include "rx_error.h"
 #include "rx_log.h"
+#include "rx_setup_file.h"
+#include "rx_trace.h"
 #ifdef WIN32
 	#include <share.h>
 	#pragma warning(disable: 4996)
@@ -152,6 +155,21 @@ int  log_get_item_cnt(log_Handle handle)
 	return log->hdr.cnt;
 }
 
+//--- log_get_last_item_no ----------------------
+int	 log_get_last_item_no(log_Handle handle)
+{
+	SLogHandle	*log = (SLogHandle*)handle;
+	if (log->hdr.cnt<log->hdr.max_cnt) return log->hdr.cnt;
+	return (log->hdr.in+log->hdr.max_cnt-1) % log->hdr.max_cnt;			
+}
+
+//--- log_eof ----------------------------------------
+int log_eof(log_Handle handle, int itemNo)
+{
+	SLogHandle	*log = (SLogHandle*)handle;
+	return (itemNo+1) % log->hdr.max_cnt == log->hdr.in;				
+}
+
 //--- log_get_item ----------------------------------------------------------------
 int  log_get_item(log_Handle handle, UINT32 itemNo, SLogItem *item)
 {
@@ -163,14 +181,9 @@ int  log_get_item(log_Handle handle, UINT32 itemNo, SLogItem *item)
 	if (log->file == NULL) return REPLY_ERROR;
 
 	//--- save texts -----------------------------------------
-	if (itemNo<log->hdr.cnt)
+	if (itemNo<=log->hdr.cnt)
 	{
-//		if (log->hdr.cnt<log->hdr.max_cnt)  pos = itemNo;
-//		else								pos = (log->hdr.in + itemNo) % log->hdr.max_cnt;
-
-		if (log->hdr.cnt<log->hdr.max_cnt)  pos = log->hdr.cnt-itemNo-1;
-		else								pos = (log->hdr.in-itemNo-1) % log->hdr.max_cnt;
-
+		pos = itemNo % log->hdr.max_cnt;
 		pos = sizeof(log->hdr) + pos*sizeof(SLogItem);
 		fseek(log->file, pos, SEEK_SET);
 		l = (int)fread(item, 1, sizeof(SLogItem), log->file);
@@ -178,4 +191,46 @@ int  log_get_item(log_Handle handle, UINT32 itemNo, SLogItem *item)
 		return  REPLY_OK;
 	}
 	return REPLY_ERROR;
+}
+
+//--- log_save_as_xml --------------------------------------
+void log_save_as_xml(log_Handle handle, UINT32 itemNo, int no, HANDLE file)
+{
+	SLogHandle	*log;
+	log = (SLogHandle*)handle;
+	SLogItem item;
+	EN_setup_Action action = WRITE;	
+	char str[MAX_PATH];
+	
+	log_get_item(log, itemNo, &item);
+	
+	setup_chapter(file, "item", no, action);
+
+	//--- type ------------------------------
+	switch(item.logType)
+	{
+	case LOG_TYPE_WARN:			setup_str	(file, "Type",	action, "WARN",	32,	"");	break;
+	case LOG_TYPE_ERROR_CONT:	
+	case LOG_TYPE_ERROR_STOP:
+	case LOG_TYPE_ERROR_ABORT:	setup_str	(file, "Type",	action, "ERROR",32,	"");	break;
+	default:					setup_str	(file, "Type",	action, "LOG",	32,	"");	break;
+	}
+
+	//--- time ------------------------
+	time_t t = time((time_t*)&item.time);
+	struct tm *tmt = localtime(&t);
+	sprintf(str, "%d.%s.%d  %d:%02d:%02d", tmt->tm_mday, RX_MonthStr[tmt->tm_mon%12], 1900+tmt->tm_year, tmt->tm_hour, tmt->tm_min, tmt->tm_sec);
+	setup_str	(file, "Time",	action, str, sizeof(str),	"");
+	
+	//--- device --------------------------
+	sprintf(str, "%s %d", DeviceStr[item.deviceType%11], item.deviceNo);
+	setup_str	(file, "Device",	action, str,	sizeof(str),	"");
+	setup_int32	(file, "ErrNo",		action, &item.errNo, 0);	 
+ 
+	//--- message -----------------------
+	compose_message(item.deviceType, item.deviceNo, item.errNo, str, SIZEOF(str), item.formatStr, item.arg);
+
+	setup_str	(file, "Message",	action, str, sizeof(str), "");
+		
+	setup_chapter(file, "..", -1, action);
 }

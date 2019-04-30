@@ -45,6 +45,7 @@
   <ItemGroup>
     <ClInclude Include="..\rx_ink_lib\rx_ink_common.h" />
     <ClInclude Include="chiller.h" />
+    <ClInclude Include="cleaf_orders.h" />
     <ClInclude Include="pe_main.h" />
     <ClInclude Include="step_lb.h" />
     <ClInclude Include="args.h" />
@@ -83,6 +84,7 @@
   <ItemGroup>
     <ClCompile Include="..\rx_ink_lib\rx_ink_common.c" />
     <ClCompile Include="chiller.c" />
+    <ClCompile Include="cleaf_orders.c" />
     <ClCompile Include="pe_main.c" />
     <ClCompile Include="step_lb.c" />
     <ClCompile Include="args.c" />
@@ -196,6 +198,9 @@
     <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release-soc|x64'">
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">

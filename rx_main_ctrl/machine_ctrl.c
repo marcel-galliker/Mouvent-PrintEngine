@@ -40,7 +40,8 @@ static void set_interface(void)
 	case printer_TX801:				_MInterface=mi_plc;		break;
 	case printer_TX802:				_MInterface=mi_plc;		break;
 	case printer_LB701:				_MInterface=mi_plc;		break;
-	case printer_LB702:				_MInterface=mi_plc;		break;
+	case printer_LB702_UV:			_MInterface=mi_plc;		break;
+	case printer_LB702_WB:			_MInterface=mi_plc;		break;
 	case printer_DP803:				_MInterface=mi_plc;		break;
 	default:						_MInterface=mi_none;
 	}

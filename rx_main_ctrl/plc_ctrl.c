@@ -24,6 +24,7 @@
 #include "rx_rexroth.h"
 #include "enc_ctrl.h"
 #include "step_ctrl.h"
+#include "step_tx.h"
 #include "ctrl_svr.h"
 #include "print_ctrl.h"
 #include "chiller.h"
@@ -142,6 +143,8 @@ static ULONG			_LastLogIdx=0;
 static int				_StartPrinting=FALSE;
 static int				_SendPause=FALSE;
 static int				_SendWebIn=FALSE;
+static int				_Splicing=FALSE;
+static int				_CmdReleased=FALSE;
 static int				_CanRun=FALSE;
 static SPrintQueueItem	_StartEncoderItem;
 static int				_PauseCtrl=FALSE;
@@ -183,6 +186,8 @@ int	plc_init(void)
 	_ErrorFlags  = 0;
 	_ErrorFilter = 0;
 	_UvUsed = FALSE;
+	_Splicing = FALSE;
+	_CmdReleased = FALSE;
 	
 	if (_SimuPLC)     Error(WARN, 0, "PLC in Simulation");
 	if (_SimuEncoder) Error(WARN, 0, "Encoder in Simulation");
@@ -339,7 +344,7 @@ static void _plc_set_par(SPrintQueueItem *pItem, SPlcPar *pPlcPar)
 	if (pItem->srcHeight<300)  pPlcPar->endPos = WEB_OFFSET+(pItem->pageMargin+300)/1000.0+accDist;
 	else                       pPlcPar->endPos = WEB_OFFSET+(pItem->pageMargin+pItem->srcHeight)/1000.0+accDist;
 	pPlcPar->endPos += RX_Config.headDistMax/1000.0;	
-	pPlcPar->endPos += 100;
+	pPlcPar->endPos += 10;
 	_StepDist = pPlcPar->stepDist;
 }
 
@@ -362,12 +367,14 @@ static void _plc_send_par(SPlcPar *pPlcPar)
 		rx_sleep(200);
 	}
 	
+	/*
 	if (RX_Config.printer.type==printer_TX801 || RX_Config.printer.type==printer_TX802)
 	{
 		lc_get_value_by_name_UINT32(APP"PAR_BELT_ON", &_PAR_BELT_ON);
 		lc_get_value_by_name_UINT32(APP"PAR_WINDER_1_ON", &_PAR_WINDER_1_ON);
 		lc_get_value_by_name_UINT32(APP"PAR_WINDER_2_ON", &_PAR_WINDER_2_ON);		
 	}
+	*/
 	
 	lc_set_value_by_name_UINT32(APP"PAR_PRINTING_SPEED",		pPlcPar->speed);
 	if(rx_def_is_scanning(RX_Config.printer.type))
@@ -382,7 +389,7 @@ static void _plc_send_par(SPlcPar *pPlcPar)
 		}
 		lc_set_value_by_name_FLOAT(APP"PAR_PRINTING_START_POSITION", (float)pPlcPar->startPos);	
 		lc_set_value_by_name_FLOAT(APP"PAR_PRINTING_END_POSITION", (float)pPlcPar->endPos);
-		lc_set_value_by_name_UINT32(APP"PAR_DRYER_BLOWER_POWER", 75);				
+		lc_set_value_by_name_UINT32(APP"PAR_DRYER_BLOWER_POWER", 75);
 	}
 	else
 	{
@@ -404,7 +411,7 @@ int  plc_set_printpar(SPrintQueueItem *pItem)
 		tt_cap_to_print_pos();
 	}
 	
-	_UvUsed = (RX_Config.printer.type==printer_cleaf || RX_Config.printer.type==printer_LB701 || RX_Config.printer.type==printer_LB702);
+	_UvUsed = (RX_Config.printer.type==printer_cleaf || RX_Config.printer.type==printer_LB701 || RX_Config.printer.type==printer_LB702_UV);
 
 //	Error(LOG, 0, "PrintPar: PageMargin=%d.%03d", pItem->pageMargin/1000, pItem->pageMargin%1000);
 
@@ -424,6 +431,7 @@ int  plc_start_printing(void)
 	{
 		plc_error_reset();
 		_plc_set_command("CMD_PRODUCTION", "CMD_RUN");
+		steptx_set_vent(TRUE);
 	}
 //	if (_SimuEncoder) ctrl_simu_encoder(50);
 	return REPLY_OK;
@@ -444,13 +452,17 @@ int  plc_stop_printing(void)
 	{
 		Error(LOG, 0, "plc_stop_printing: send CMD_STOP");
 		_plc_set_command("CMD_PRODUCTION", "CMD_STOP");
+		steptx_set_vent(FALSE);
 
+
+		/*
 		if (RX_Config.printer.type==printer_TX801 || RX_Config.printer.type==printer_TX802)
 		{
 			lc_set_value_by_name_UINT32(APP"PAR_WINDER_1_ON", _PAR_WINDER_1_ON);
 			lc_set_value_by_name_UINT32(APP"PAR_WINDER_2_ON", _PAR_WINDER_2_ON);
 			lc_set_value_by_name_UINT32(APP"PAR_BELT_ON", _PAR_BELT_ON);	
 		}
+		*/
 	}
 	return REPLY_OK;
 }
@@ -466,6 +478,7 @@ int  plc_clean(void)
 {
 	Error(LOG, 0, "plc_clean: send CMD_STOP");
 	_plc_set_command("CMD_PRODUCTION", "CMD_STOP");
+	steptx_set_vent(FALSE);
 	return REPLY_OK;
 }
 
@@ -488,6 +501,7 @@ int	plc_to_cap_pos(void)
 {
 	Error(LOG, 0, "plc_to_cap_pos: send CMD_STOP");
 	_plc_set_command("CMD_PRODUCTION", "CMD_STOP");
+	steptx_set_vent(FALSE);
 	return REPLY_OK;
 }
 
@@ -570,11 +584,20 @@ static void _plc_load_par(void)
 	if (lc_get_value_by_name(APP "PAR_HEAD_HEIGHT", value)==REPLY_OK)
 		RX_Config.stepper.print_height=(UINT32)(1000*atof(value));
 
+	if (lc_get_value_by_name(APP "XML_ENC_OFFSET", value)==REPLY_OK)
+		RX_Config.printer.offset.incPerMeter[0] = atoi(value);
+
 	if (rx_def_is_scanning(RX_Config.printer.type))
 	{
 		lc_set_value_by_name_UINT32(APP"CFG_POSITION_PURGE",	90);				
 		lc_set_value_by_name_UINT32(APP"CFG_POSITION_CAPPING",	55);				
-		lc_set_value_by_name_UINT32(APP"CFG_POSITION_WIPE",		 0);						
+		lc_set_value_by_name_UINT32(APP"CFG_POSITION_WIPE",		 0);
+	}
+	switch(RX_Config.printer.type)
+	{
+	case printer_TX801:	lc_set_value_by_name_UINT32(APP"CFG_MACHINE_TYPE",	0);	break;
+	case printer_TX802:	lc_set_value_by_name_UINT32(APP"CFG_MACHINE_TYPE",	1);	break;
+	default:			break;
 	}
 
 	_plc_set_command("", "CMD_SET_PARAMETER");
@@ -656,6 +679,10 @@ static void _plc_get_var(RX_SOCKET socket, char *varList)
 	{
 		*end++=0; 
 		len += sprintf(&answer[len], "%s", str);
+		if (!strcmp(name, "XML_ENC_OFFSET"))
+		{
+			printf("found\n");
+		}
 		if (!name[0])
 		{
 			var = name+sprintf(name, "%s.", str);
@@ -712,6 +739,7 @@ static void _plc_set_var(RX_SOCKET socket, char *varList)
 				//---------------------------------------------------
 
 			//	Error(LOG, 0, "SET %s=%s", name, val);
+			//	TrPrintfL(TRUE, 0, "SET %s=%s", name, val);
 			//	TrPrintfL(!strcmp(name, "Application.GUI_00_001_Main.PAR_FLEXO_CONFIGURATION"), "_plc_set_var socket=%d >>%s=%s<< ret=%d", socket, name, val, ret);
 				if (ret)  ErrorFlag(ERR_CONT, &_ErrorFlags, 1, 0, "Writing >>%s<<: Error %s", name, mlpi_get_errmsg());
 				if (toWebin)
@@ -724,6 +752,10 @@ static void _plc_set_var(RX_SOCKET socket, char *varList)
 			//--- XML_STEPPER_PRINT_HEIGHT special -----------------------------------------------
 			if (!strcmp(var, "PAR_HEAD_HEIGHT")) 
 				RX_Config.stepper.print_height = (INT32)(0.5+1000*strtod(val, NULL));
+			
+			//--- XML_ special -----------------------------------------------
+			if (!strcmp(var, "XML_ENC_OFFSET")) 
+				RX_Config.printer.offset.incPerMeter[0] = atoi(val);
 		}
 		str = end;
 	}
@@ -925,7 +957,7 @@ static void _plc_set_config()
 		break;
 		
 	case printer_LB701:
-	case printer_LB702: // UV
+	case printer_LB702_UV:
 		sys_set_axes_name( 1, "Unwinder");
 		sys_set_axes_name( 2, "PrinterIN");
 		sys_set_axes_name( 3, "PrinterOut");
@@ -945,8 +977,7 @@ static void _plc_set_config()
 		break;
 		*/
 		
-		/*
-	case printer_LB702: // WB
+	case printer_LB702_WB:
 		sys_set_axes_name( 1, "Unwinder");
 		sys_set_axes_name( 2, "FlexoPreNip");
 		sys_set_axes_name( 3, "FlexoPreCylinder");
@@ -958,7 +989,6 @@ static void _plc_set_config()
 		sys_set_axes_name( 9, "FlexoPostCliche");		
 		sys_set_axes_name(10, "Rewinder");		
 		break;
-		*/
 
 	case printer_DP803:
 		sys_set_axes_name( 1, "Unwinder");
@@ -1060,6 +1090,12 @@ static void _plc_heart_beat()
 	ret=lc_set_value_by_name_UINT32(APP "USR_HEARTBEAT_IN", val);
 }
 
+//--- plc_is_splicing -------------------------------------
+int	plc_is_splicing(void)
+{
+	return 	_Splicing;					
+}
+
 //--- _plc_state_ctrl --------------------------------------------
 static void _plc_state_ctrl()
 {		
@@ -1067,6 +1103,26 @@ static void _plc_state_ctrl()
 	else
 	{
 		lc_get_value_by_name_UINT32(APP "STA_MACHINE_STATE", (UINT32*)&_PlcState);
+		{
+			UINT32 splicing;
+			if (lc_get_value_by_name_UINT32(APP "STA_SPLICING", &splicing)==REPLY_OK)
+			{
+				if ( splicing && !_Splicing) Error(LOG, 0, "Splicing started");
+				if (_Splicing &&  !splicing) Error(LOG, 0, "Splicing finished");
+			
+				_Splicing = splicing;					
+			}
+			
+			UINT32 released;
+			if (lc_get_value_by_name_UINT32(APP "STA_CMD_RELEASE", &released)==REPLY_OK)
+			{
+				if ( released && !_CmdReleased) Error(LOG, 0, "STA_CMD_RELEASE = TRUE");
+				if (_CmdReleased &&  !released) Error(LOG, 0, "STA_CMD_RELEASE = FALSE");
+			
+				_CmdReleased = splicing;					
+			}
+		}
+		
 	//	if (_PlcState==plc_setup && RX_PrinterStatus.printState==ps_webin && RX_Config.printer.type!=printer_cleaf) _plc_set_command("CMD_SETUP", "CMD_WEBIN");
 		if ((RX_Config.stepper.ref_height==0 && RX_Config.stepper.print_height==0) 
 			|| RX_TestTableStatus.info.z_in_print 
@@ -1078,6 +1134,7 @@ static void _plc_state_ctrl()
 				_SendPause = FALSE;
 				rx_sleep(200);
 				_plc_set_command("CMD_PRODUCTION", "CMD_PAUSE");
+				steptx_set_vent(FALSE);
 			}
 			if (_SendWebIn)
 			{
@@ -1129,7 +1186,7 @@ static void _plc_state_ctrl()
 
 		if (!_heads_to_print)
 		{			
-			TrPrintfL(TRUE, "_heads_to_print: printhead_en=%d, printState=%d (%d)", RX_TestTableStatus.info.printhead_en, RX_PrinterStatus.printState, ps_printing);
+		//	TrPrintfL(TRUE, "_heads_to_print: printhead_en=%d, printState=%d (%d)", RX_TestTableStatus.info.printhead_en, RX_PrinterStatus.printState, ps_printing);
 			if (RX_Config.printer.type!=printer_cleaf || (RX_TestTableStatus.info.printhead_en && RX_PrinterStatus.printState==ps_printing))
 			{
 				tt_cap_to_print_pos();
@@ -1149,8 +1206,9 @@ static void _plc_state_ctrl()
 			_CanRun = TRUE;
 			if (!_SimuPLC)    _plc_set_command("CMD_PRODUCTION", "CMD_RUN");
 			if (_SimuEncoder) ctrl_simu_encoder(_StartEncoderItem.speed);
+			steptx_set_vent(_StartEncoderItem.speed);
 			memset(&_StartEncoderItem, 0, sizeof(_StartEncoderItem));
-		//	Error(LOG, 0, "PLC: CMD_RUN sent");
+			TrPrintfL(TRUE, "PLC: CMD_RUN sent");
 		}
 		
 	}

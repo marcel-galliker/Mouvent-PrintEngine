@@ -97,7 +97,7 @@ namespace DigiPrint.Models
                     case EFluidCtrlMode.ctrl_shutdown:      CtrlModeStr = "SD";       break;
                     case EFluidCtrlMode.ctrl_off:           CtrlModeStr = "OFF";      break;
                     case EFluidCtrlMode.ctrl_print:         CtrlModeStr = "Print";    break;
-                    case EFluidCtrlMode.ctrl_flush:         CtrlModeStr = "Flush";    break;
+ //                   case EFluidCtrlMode.ctrl_flush:         CtrlModeStr = "Flush";    break;
                                                             
                     case EFluidCtrlMode.ctrl_purge_soft:    CtrlModeStr = "Prg S";   break;
                     case EFluidCtrlMode.ctrl_purge:         CtrlModeStr = "Purge";    break;

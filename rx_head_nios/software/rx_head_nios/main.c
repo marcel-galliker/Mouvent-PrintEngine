@@ -42,6 +42,7 @@ typedef struct {
 	int timer;
 	UINT32 alive;
 	UINT32 error;
+	UINT32 arm_alive;
 } _SConditioner;
 
 static _SConditioner _Cond[MAX_HEADS_BOARD];
@@ -105,9 +106,10 @@ void main_tick_1000ms(void) {
 					pRX_Status->cond[condNo].info.connected = FALSE;
 					pRX_Status->cond[condNo].error |= COND_ERR_connection_lost;
 				}
+				pRX_Status->error.arm_timeout = (_Cond[condNo].arm_alive == pRX_Config->cond[condNo].alive);
+				_Cond[condNo].arm_alive = pRX_Config->cond[condNo].alive;
 			}
 		}
-
 	}
 }
 
@@ -217,7 +219,7 @@ int main() {
 
 		timer_main();
 		UCHAR data;
-		for (condNo = 0; condNo < MAX_HEADS_BOARD; condNo++) {
+		for (condNo = 0; condNo < MAX_HEADS_BOARD; condNo++){
 			if (uart_read(condNo, &data)) {
 				if (comm_received(condNo, data)) {
 					int length;

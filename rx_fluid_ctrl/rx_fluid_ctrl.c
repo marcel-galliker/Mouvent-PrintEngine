@@ -26,8 +26,6 @@
 #include "rx_threads.h"
 #include "rx_trace.h"
 #include "args.h"
-#include "balance_def.h"
-#include "balance.h"
 #include "fluid_ctrl.h"
 #include "fpga_fluid.h"
 #include "daisy_chain.h"
@@ -36,7 +34,6 @@
 //--- globals ------------------------------------------------------------
 
 SFluidBoardStat	RX_FluidBoardStatus;
-SScaleStat	    RX_ScaleStatus[FLUID_MAX_SCALES];
 
 static int _AppRunning;
 static int _DisplayBalance=FALSE;
@@ -50,7 +47,6 @@ static void main_menu()
 	static int status=TRUE;
 	int i;
 	char str[MAX_PATH];
-	SScalesCalibrateCmd	cmd;
 
 	term_printf("\n");
 	term_printf("\nMENU -------------------------\n");
@@ -64,20 +60,14 @@ static void main_menu()
 	term_printf("p<mbar>:    Pressure to [mbar] (0=test off)\n");
 	term_printf("f<x>:       Flush\n");	
 	if (_DisplayBalance) 
+	{
+		term_printf("T<n<:       Tara balance <n>   \n");
 		term_printf("B:          hide balance       \n");
+	}
 	else         
 		term_printf("B:          show balance       \n");
 	
 	if(nios_is_heater_connected())	term_printf("t<n><temp>: set Heater[n] Temperature to [temp] (max. 60 degree)\n");
-
-	if (_DisplayBalance)
-	{
-		term_printf("--- Scales ----\n");
-		term_printf("w<n>:       Calibration weight (g)\n");
-		term_printf("c<n>:       Scale[n]: Calibrate  (sensor by sensor)\n");
-		term_printf("s:			 Save\n");
-		term_printf("r:			 Reload\n");
-	}
 
 	//term_printf("PID: %d %d %d %d\n", _Cfg->controller_P, _Cfg->controller_I, _Cfg->controller_D, _Cfg->controller_offset);
 	term_printf("q: start log\n");
@@ -108,13 +98,14 @@ static void main_menu()
 					cmd.weight  = atoi(&str[2]);
 					scl_calibrate(&cmd);					break;
 */
-		case 's':	scl_cfg_save();							break;
-		case 'r':	scl_cfg_reload();						break;
 		case 'x': _AppRunning=FALSE;						break;
 			
 		// Only for DEBUGGING purposes
 		// Parameters for tuning the Fluid's PID controller
 		case 'P': if (no < 4) _Cfg->ink_supply[no].fluid_P = atoi(&str[2]); break;
+			
+		case 'T': daisy_chain_do_tara(no);
+				  break;
 		/*
 		case 'I': if (no < 4) _Cfg->controller_I		= atoi(&str[2]); break;
 		case 'D': if (no < 4) _Cfg->controller_D		= atoi(&str[2]); break;
@@ -159,34 +150,14 @@ static void _main_loop(void)
 
 ///--- main ---------------------------------------------------------------
 int main(int argc, char** argv)
-{
+{	
+	args_init(argc, argv);
+	rx_startup(argv[0], arg_debug);
 	Trace_init(argv[0]);
 
 	TrPrintfL(1, "RxFluidCtrl %s started", version);
-	args_init(argc, argv);
 
-	if (rx_startup(argv[0], arg_debug)!=REPLY_OK) return REPLY_ERROR;
-	
-	/*
-	if (arg_debug) 
-	{
-		while(1)
-		{
-			int cnt;
-			cnt = rx_process_running_cnt(argv[0],  NULL);
-			if (cnt<2) break;
-			TrPrintf(1, "Kill >>%s<<", argv[0]);
-			rx_process_kill(argv[0], NULL);
-		}
-	}
-	else
-	{
-		rx_run_in_backgrund();
-	}
-	*/
-	
 	memset(&RX_FluidBoardStatus, 0, sizeof(RX_FluidBoardStatus));
-	memset(&RX_ScaleStatus,      0, sizeof(RX_ScaleStatus));
 
 	rx_init();
 	err_init(0, 100);

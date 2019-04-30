@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <VisualGDBProjectSettings2 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <ConfigurationName>Release</ConfigurationName>
+  <ConfigurationName>Release-soc</ConfigurationName>
   <Project xsi:type="com.visualgdb.project.windows">
     <CustomSourceDirectories>
       <Directories />
@@ -8,9 +8,36 @@
     </CustomSourceDirectories>
     <MainSourceDirectory>$(ProjectDir)</MainSourceDirectory>
   </Project>
-  <Build xsi:type="com.visualgdb.build.make">
-    <MakeFilePathRelativeToSourceDir>software\rx_head_nios\Makefile</MakeFilePathRelativeToSourceDir>
-    <MakeConfigurationName>Release</MakeConfigurationName>
+  <Build xsi:type="com.visualgdb.build.custom">
+    <BuildCommand>
+      <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
+      <RemoteHost>
+        <HostName>BuildMachine</HostName>
+        <Transport>BuiltinShortcut</Transport>
+      </RemoteHost>
+      <Command>cmd</Command>
+      <Arguments>/c ..\Externals\altera\build_nios_from_vs.bat $(ProjectDir)</Arguments>
+      <WorkingDirectory>$(ProjectDir)</WorkingDirectory>
+      <Environment>
+        <Records />
+        <EnvironmentSetupFiles />
+      </Environment>
+      <BackgroundMode xsi:nil="true" />
+    </BuildCommand>
+    <CleanCommand>
+      <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
+      <RemoteHost>
+        <HostName>BuildMachine</HostName>
+        <Transport>BuiltinShortcut</Transport>
+      </RemoteHost>
+      <Command />
+      <Arguments />
+      <WorkingDirectory />
+      <Environment>
+        <Records />
+      </Environment>
+      <BackgroundMode xsi:nil="true" />
+    </CleanCommand>
     <Toolchain>
       <Name>nios2-elf</Name>
       <Location>F:\Tools\Bin\Altera\15.1\nios2eds\bin\gnu\H-x86_64-mingw32</Location>
@@ -31,29 +58,9 @@
         <PathStyle>RemoteUnix</PathStyle>
       </SourceDirMapping>
     </Toolchain>
-    <MakeCommandTemplate>
-      <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
-      <RemoteHost>
-        <HostName>BuildMachine</HostName>
-        <Transport>BuiltinShortcut</Transport>
-      </RemoteHost>
-      <Command>cmd.exe</Command>
-      <Arguments>/c "F:\Tools\Bin\Altera\15.1\nios2eds\bin\gnu\H-x86_64-mingw32\bin\make.exe"</Arguments>
-      <WorkingDirectory>$(BuildDir)</WorkingDirectory>
-      <Environment>
-        <Records>
-          <Record>
-            <VariableName>LANG</VariableName>
-            <Value>en_US.UTF-8</Value>
-          </Record>
-          <Record>
-            <VariableName>PATH</VariableName>
-            <Value>F:\Tools\Bin\Altera\15.1\nios2eds\bin\gnu\H-x86_64-mingw32\bin;%PATH%</Value>
-          </Record>
-        </Records>
-      </Environment>
-      <BackgroundMode xsi:nil="true" />
-    </MakeCommandTemplate>
+    <MainBuildDirectory>$(ProjectDir)</MainBuildDirectory>
+    <AbsoluteTargetPath />
+    <AutoUpdateMakefiles>true</AutoUpdateMakefiles>
   </Build>
   <Debug xsi:type="com.visualgdb.debug.remote">
     <AdditionalStartupCommands />
@@ -100,8 +107,32 @@
   </Debug>
   <CustomBuild>
     <PreSyncActions />
-    <PreBuildActions />
-    <PostBuildActions />
+    <PreBuildActions>
+      <CustomActionBase xsi:type="CommandLineAction">
+        <SkipWhenRunningCommandList>true</SkipWhenRunningCommandList>
+        <Command>cmd</Command>
+        <Arguments>/C "copy ..\rx_ink_lib\*.h .\software\rx_head_nios\"</Arguments>
+        <WorkingDirectory>$(ProjectDir)</WorkingDirectory>
+        <Environment>
+          <Records />
+          <EnvironmentSetupFiles />
+        </Environment>
+        <BackgroundMode>false</BackgroundMode>
+      </CustomActionBase>
+    </PreBuildActions>
+    <PostBuildActions>
+      <CustomActionBase xsi:type="FileTransferAction">
+        <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
+        <SourceHost>
+          <Transport>None</Transport>
+        </SourceHost>
+        <DestinationHost>
+          <Transport>None</Transport>
+        </DestinationHost>
+        <SourceFilePath>$(ProjectDir)\software\rx_head_nios\mem_init\soc_system_onchip_memory_nios_cpu.hex</SourceFilePath>
+        <DestinationFilePath>$(ProjectDir)\..\bin\head\rx_head_nios</DestinationFilePath>
+      </CustomActionBase>
+    </PostBuildActions>
     <PreCleanActions />
     <PostCleanActions />
   </CustomBuild>
@@ -115,7 +146,15 @@
     <Shortcuts />
     <ShowMessageAfterExecuting>true</ShowMessageAfterExecuting>
   </CustomShortcuts>
-  <UserDefinedVariables />
+  <UserDefinedVariables>
+    <BuildVariable>
+      <Label />
+      <Description />
+      <Value>F:\Tools\Bin\Altera\15.1</Value>
+      <Name>AlteraRoot</Name>
+      <PromoteToEnvironment>false</PromoteToEnvironment>
+    </BuildVariable>
+  </UserDefinedVariables>
   <ImportedPropertySheets />
   <CodeSense>
     <Enabled>Unknown</Enabled>

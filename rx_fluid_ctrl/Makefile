@@ -34,7 +34,7 @@ error:
 	$(error Invalid configuration, please check your inputs)
 endif
 
-SOURCEFILES := ../rx_ink_lib/comm.c ../rx_ink_lib/rx_ink_common.c args.c daisy_chain.c fluid_ctrl.c fpga_fluid.c nios_fluid.c rx_fluid_ctrl.c scales.c version.c
+SOURCEFILES := ../rx_ink_lib/comm.c ../rx_ink_lib/rx_ink_common.c args.c daisy_chain.c fluid_ctrl.c fpga_fluid.c nios_fluid.c rx_fluid_ctrl.c version.c
 EXTERNAL_LIBS := ../rx_common_lib/$(BINARYDIR)/rx_common_lib.a
 EXTERNAL_LIBS_COPIED := $(foreach lib, $(EXTERNAL_LIBS),$(BINARYDIR)/$(notdir $(lib)))
 

@@ -21,6 +21,9 @@
 #include "motor.h"
 #include "tx801.h"
 
+#define TX_REF_HEIGHT		16000
+#define TX_PRINT_POS_MIN	 1200
+
 #define MOTOR_Z_0		0
 #define MOTOR_Z_CNT		4
 #define MOTOR_Z_BITS	0x0f
@@ -50,6 +53,7 @@ static void _tx801_motor_z_test(int steps);
 static void _tx801_motor_test  (int motor, int steps);
 static void _tx801_do_reference(void);
 static void _tx801_move_to_pos(int cmd, int pos);
+static void _tx801_set_ventilators(int value);
 static int  _micron_2_steps(int micron);// microns to motor steps
 static int  _steps_2_micron(int steps); // motor steps to microns
 static int  _incs_2_micron(int steps);  // encoder_incs to microns
@@ -66,6 +70,9 @@ void tx801_init(void)
 	_ParRef.accel		= 1000;
 	_ParRef.current		= 100.0;
 	_ParRef.stop_mux	= 0;
+	_ParRef.dis_mux_in	= 0;
+	_ParRef.stop_in		= ESTOP_UNUSED;
+	_ParRef.stop_level	= 0;
 	_ParRef.estop_in    = ESTOP_UNUSED;
 	_ParRef.estop_level = 0;
 	_ParRef.checkEncoder=TRUE;
@@ -74,6 +81,9 @@ void tx801_init(void)
 	_ParRef.accel		= 5000;
 	_ParRef.current		= 150.0;
 	_ParRef.stop_mux	= 0;
+	_ParRef.dis_mux_in	= 0;
+	_ParRef.stop_in		= ESTOP_UNUSED;
+	_ParRef.stop_level	= 0;
 	_ParRef.estop_in    = ESTOP_UNUSED;
 	_ParRef.estop_level = 0;
 	_ParRef.checkEncoder=TRUE;
@@ -82,6 +92,9 @@ void tx801_init(void)
 	_ParZ_down.accel		= 5000;
 	_ParZ_down.current		= 200.0; // 150.0;
 	_ParZ_down.stop_mux		= MOTOR_Z_BITS;
+	_ParZ_down.dis_mux_in	= 0;
+	_ParZ_down.stop_in		= ESTOP_UNUSED;
+	_ParZ_down.stop_level	= 0;
 	_ParZ_down.estop_in     = ESTOP_UNUSED;
 	_ParZ_down.estop_level  = 0;
 	_ParZ_down.checkEncoder = TRUE;
@@ -90,9 +103,14 @@ void tx801_init(void)
 	_ParZ_cap.accel			= 2000;
 	_ParZ_cap.current		= 100.0;
 	_ParZ_cap.stop_mux		= FALSE;
+	_ParZ_cap.dis_mux_in	= 0;
+	_ParZ_cap.stop_in       = ESTOP_UNUSED;
+	_ParZ_cap.stop_level    = 0;
 	_ParZ_cap.estop_in      = ESTOP_UNUSED;
 	_ParZ_cap.estop_level   = 0;
 	_ParZ_cap.checkEncoder  = TRUE;
+	
+	_tx801_set_ventilators(0);
 }
 
 //--- tx801_main ------------------------------------------------------------------
@@ -105,15 +123,15 @@ void tx801_main(int ticks, int menu)
 	RX_TestTableStatus.info.headUpInput_1 = fpga_input(HEAD_UP_IN_1);
 	RX_TestTableStatus.info.headUpInput_2 = fpga_input(HEAD_UP_IN_2);
 	RX_TestTableStatus.info.headUpInput_3 = fpga_input(HEAD_UP_IN_3);
-	RX_TestTableStatus.posZ				  = RX_StepperCfg.ref_height - _steps_2_micron(motor_get_step(MOTOR_Z_0));
+	RX_TestTableStatus.posZ				  = TX_REF_HEIGHT - _steps_2_micron(motor_get_step(MOTOR_Z_0));
 
 	{
 		int i;
 		RX_TestTableStatus.inputs = Fpga.stat->input;
 		for (i=0; i<MAX_STEPPER_MOTORS; i++)
 		{
-			RX_TestTableStatus.motor[i].motor_pos	= RX_StepperCfg.ref_height-_steps_2_micron(Fpga.stat->statMot[i].position);
-			RX_TestTableStatus.motor[i].encoder_pos = RX_StepperCfg.ref_height-_incs_2_micron(Fpga.encoder[i].pos);
+			RX_TestTableStatus.motor[i].motor_pos	= TX_REF_HEIGHT-_steps_2_micron(Fpga.stat->statMot[i].position);
+			RX_TestTableStatus.motor[i].encoder_pos = TX_REF_HEIGHT-_incs_2_micron(Fpga.encoder[i].pos);
 			if (Fpga.stat->moving & (0x01<<i))
 			{
 				if(Fpga.par->mot_bwd & (0x01<<i)) RX_TestTableStatus.motor[i].state = MOTOR_STATE_MOVING_FWD;
@@ -291,6 +309,15 @@ static void _tx801_move_to_pos(int cmd, int pos)
 	motors_move_to_step(MOTOR_Z_BITS, &_ParZ_down, pos);
 }
 
+//--- _tx801_set_ventilators ---------------------------------------------------------
+static void _tx801_set_ventilators(int value)
+{
+	Error(LOG, 0, "Set Ventilators to %d", value);
+
+	int i;
+	for (i=0; i<4; i++) Fpga.par->pwm_output[i] = value;
+}
+
 //--- tx801_handle_ctrl_msg -----------------------------------
 int  tx801_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 {	
@@ -311,10 +338,10 @@ int  tx801_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									break;
 
 	case CMD_CAP_PRINT_POS:			pos   = (*((INT32*)pdata));
-									steps = _micron_2_steps(RX_StepperCfg.ref_height - pos);
+									if (pos<TX_PRINT_POS_MIN) pos=TX_PRINT_POS_MIN;
 									if (!_CmdRunning && (!RX_TestTableStatus.info.z_in_print || steps!=_PrintPos_Act))
 									{
-										_PrintPos_New = _micron_2_steps(RX_StepperCfg.ref_height - pos);
+										_PrintPos_New = _micron_2_steps(TX_REF_HEIGHT - pos);
 										if (RX_TestTableStatus.info.ref_done) _tx801_move_to_pos(CMD_CAP_PRINT_POS, _PrintPos_New);
 										else								  _tx801_do_reference();
 									}
@@ -331,22 +358,27 @@ int  tx801_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									{
 										_CmdRunning  = msgId;
 										RX_TestTableStatus.info.moving = TRUE;
-										steps = _micron_2_steps(RX_StepperCfg.ref_height - RX_StepperCfg.cap_height);
+										steps = _micron_2_steps(TX_REF_HEIGHT - RX_StepperCfg.cap_height);
 										motors_move_to_step	(MOTOR_Z_BITS,  &_ParZ_cap, steps);
 									}
 									break;
-		
 	
 	case CMD_STEPPER_TEST:			if (!_CmdRunning)
 									{
 										SStepperMotorTest *ptest = (SStepperMotorTest*)pdata;
 										_CmdRunning  = msgId;
+										RX_TestTableStatus.info.z_in_print  = FALSE;
 										_tx801_motor_test(ptest->motorNo, -1*_micron_2_steps(ptest->microns));
 									}
 									break;
 		
+	case CMD_CAP_VENT:				pos   = (*((INT32*)pdata));
+									_tx801_set_ventilators(pos);				
+									break;
+		
 	default:						break;
 	}
+	return REPLY_OK;
 }
 
 //--- _tx801_motor_z_test ----------------------------------------------------------------------
@@ -368,6 +400,9 @@ static void _tx801_motor_test(int motorNo, int steps)
 	par.accel		= 1000;
 	par.current		= 250.0;
 	par.stop_mux	= 0;
+	par.dis_mux_in	= 0;
+	par.stop_in		= ESTOP_UNUSED;
+	par.stop_level	= 0;
 	par.estop_in    = ESTOP_UNUSED;
 	par.estop_level = 0;
 	par.checkEncoder= FALSE;

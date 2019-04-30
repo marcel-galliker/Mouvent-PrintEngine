@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include "rx_common.h"
 #include "rx_error.h"
+#include "rx_file.h"
 #include "rx_setup_file.h"
 #include "rx_setup_ink.h"
 #include "rx_sok.h"
@@ -31,6 +32,10 @@
 #include "putty.h"
 #include "nios_def_head.h"
 
+#include <pthread.h>
+#include <sys/time.h>
+#include <sys/resource.h>
+
 //--- globals ------------------------------------------------------------
 int						RX_VersionLinux;
 
@@ -49,7 +54,6 @@ SFpgaEncoderCfg			RX_FpgaEncCfg;
 UINT32					RX_BlockUsed[MAX_HEADS_BOARD];
 char					RX_MacAddr[2][32];
 char					RX_IpAddr[2][32];
-
 
 SNiosStat				RX_NiosStat;
 
@@ -72,9 +76,8 @@ static void _do_waveform(const char *fname)
 	if (setup_ink(path, &inkdef, READ)==REPLY_OK)
 	{
 		for (i=0; i<4; i++) nios_setInk(i, &inkdef, 3, 100);
-		printf("WaveForm >>%s<< loaded\n", path);
 	}
-	else printf("\nERROR WaveForm >>%s<< not found or incorrect\n", path);
+	else Error(WARN, 0, "ERROR WaveForm >>%s<< not found or incorrect", path);
 }
 
 //--- main_menu ----------------------------------------------------------
@@ -151,17 +154,30 @@ static void _main_loop(void)
 	int t_menu=0;
 	int menu;
 	int msg;
+	int printing;
+	int connected;
 	char str[64];
+	int time0=0, time1=0, time2=0, time3=0, time4=0, time5=0, time6=0;
 
-	rx_set_tread_priority(90);
+//	rx_set_tread_priority(50);
 	_AppRunning = TRUE;
+	connected=0;
 	while (_AppRunning)
 	{
+		printing = ctrl_printing();
 		ticks = rx_get_ticks();
+		
+		if (printing && ticks-time0>100) Error(WARN, 0, "MAIN cycletime=%d ,t1=%d, t2=%d, t3=%d, t4=%d, t5=%d, t6=%d", ticks-time0, time1-time0, time2-time0, time3-time0, time4-time0, time5-time0, time6-time0); 
+		
+		time0=ticks;
+		time1 = rx_get_ticks();		
 		menu = ticks>t_menu;
 		msg=ctrl_main(ticks, menu);
+		time2 = rx_get_ticks();
 		fpga_main(ticks, menu);
+		time3 = rx_get_ticks();
 		nios_main(ticks, menu);
+		time4 = rx_get_ticks();
 		if (menu) 
 		{
 			putty_display_status();
@@ -169,7 +185,15 @@ static void _main_loop(void)
 			handle_menu(str);
 			t_menu = 500*(1+ticks/500);
 		}
-		if (!msg) rx_sleep(1);
+		time5 = rx_get_ticks();
+		{
+			int c=ctrl_connected();
+			if (connected && !c) _AppRunning=FALSE;
+			connected=c;			
+		}
+		if (!connected) rx_sleep(500);
+		if (!msg) rx_sleep(10);
+		time6= rx_get_ticks();
 	}
 }
 
@@ -182,50 +206,74 @@ static void _mem_test(void)
 	int		i, ok, n;
 	long	*buffer;
 
-	printf("RX-Test\n");
+	TrPrintfL(TRUE, "RX-Test\n");
 
 	buffer = (long*)malloc(longCnt*4);
 	if (buffer)
 	{
 		t0=rx_get_ticks();
-		printf("Fill start\n");
+		TrPrintfL(TRUE, "Fill start\n");
 		for(n=0; n<loop; n++)
 		{
 			for (i=0; i<longCnt; i++)
 				buffer[i]=i;
 		}
-		printf("time=%d ms\n", rx_get_ticks()-t0);
+		TrPrintfL(TRUE, "time=%d ms\n", rx_get_ticks()-t0);
 
 		t0=rx_get_ticks();
-		printf("Test start\n");
+		TrPrintfL(TRUE, "Test start\n");
 		ok = 1;
 		for(n=0; n<loop; n++)
 		{
 			for (i=0; i<longCnt; i++)
 				if (buffer[i]!=i) ok=0;
 		}
-		if (ok) printf("OK, time=%d ms\n", rx_get_ticks()-t0);
-		else	printf("Error, time=%d ms\n", rx_get_ticks()-t0);
+		if (ok) TrPrintfL(TRUE, "OK, time=%d ms\n", rx_get_ticks()-t0);
+		else	TrPrintfL(TRUE, "Error, time=%d ms\n", rx_get_ticks()-t0);
 
 		free(buffer);
 	}
-	else printf("Error allocating buffer\n");
+	else TrPrintfL(TRUE, "Error allocating buffer\n");
 }
 
 ///--- main ---------------------------------------------------------------
 int main(int argc, char** argv)
 {
 	char ver[32];
-	Trace_init(argv[0]);
 
 	args_init(argc, argv);
 	rx_startup(argv[0], arg_debug);
+
+	Trace_init(argv[0]);
 
 	memset(&RX_HBConfig, 0, sizeof(RX_HBConfig));
 	memset(&RX_HBStatus, 0, sizeof(RX_HBStatus));
 	sscanf(version, "d.d.d.d", &RX_HBStatus[0].swVersion.major, &RX_HBStatus[0].swVersion.minor, &RX_HBStatus[0].swVersion.revision, &RX_HBStatus[0].swVersion.build);
 	
 	TrPrintfL(1, "rx_head_ctrl %s (%s, %s) started", version, __DATE__, __TIME__);
+	
+	/* test speed
+	{
+		struct sched_param params;
+		int policy;
+		pthread_getschedparam(pthread_self(), &policy, &params);
+		TrPrintfL(TRUE, "Thread Policy=%d, prio=%d", policy, params.sched_priority);
+		
+		TrPrintfL(TRUE, "priority User=%d, Group=%d, Process=%d", getpriority(PRIO_USER, 0), getpriority(PRIO_PGRP, 0), getpriority(PRIO_PROCESS, 0));
+		TrPrintfL(TRUE, "userID=%d", geteuid());
+	}
+	
+	setpriority(PRIO_USER,    0, -20);
+	setpriority(PRIO_PGRP,    0, -20);
+	setpriority(PRIO_PROCESS, 0, -20);
+	*/
+	
+	//--- remove test bitmaps ---------
+	{
+		char path[100];
+		sprintf(path, "%s*.bmp", PATH_TEMP);
+		rx_remove_old_files(path, 0);
+	}
 
 	rx_init();
 	err_init(0, 100);

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.40629.0
+VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rx_common_lib", "..\rx_common_lib\rx_common_lib.vcxproj", "{23DE4F53-96A4-44A2-9A16-FFC6CCB25311}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -13,6 +13,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rx_spooler_ctrl", "rx_spool
 		{23DE4F53-96A4-44A2-9A16-FFC6CCB25311} = {23DE4F53-96A4-44A2-9A16-FFC6CCB25311}
 		{21DD6C9C-813D-43D1-9C17-7428BED26DE5} = {21DD6C9C-813D-43D1-9C17-7428BED26DE5}
 		{67C98FEC-CEAA-4CF0-B8D2-D2941276E9F3} = {67C98FEC-CEAA-4CF0-B8D2-D2941276E9F3}
+		{531D50FB-5C99-4DF6-B152-8A0CFB84D4C7} = {531D50FB-5C99-4DF6-B152-8A0CFB84D4C7}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rx_rip_lib", "..\rx_rip_lib\rx_rip_lib.vcxproj", "{67C98FEC-CEAA-4CF0-B8D2-D2941276E9F3}"

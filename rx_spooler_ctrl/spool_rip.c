@@ -48,6 +48,8 @@ static SLayoutDef   _Layout;
 static SFileDef     _Filedef;
 static SBmpInfo		_BmpInfoLabel;
 static SBmpInfo		_BmpInfoColor;
+static UINT64		_BufferLabelSize=0;
+static UINT64		_BufferColorSize=0;
 static BYTE		   *_BufferLabel[MAX_COLORS];
 static BYTE		   *_BufferColor[MAX_COLORS];
 static int			_Column;
@@ -58,7 +60,7 @@ static int			_DataBufOut;
 
 //--- prototypes -------------------------------------------------
 static void _free_buffer();
-static void _load_buffer(const char *filedir, const char *filename, SBmpInfo *pinfo, BYTE *buffer[MAX_COLORS]);
+static void _load_buffer(const char *filedir, const char *filename, SBmpInfo *pinfo, UINT64 *pBufSize, BYTE *buffer[MAX_COLORS]);
 static void _multiply_image(SBmpInfo *pinfo, UINT32 width, BYTE *buffer[MAX_COLORS]);
 static void _rip_label();
 
@@ -175,12 +177,12 @@ void sr_set_layout_end  (RX_SOCKET socket, SMsgHdr *msg)
 	
 	split_path(_Layout.label, NULL, filename, NULL);
 
-	if (*_Layout.label) _load_buffer(_Layout.label,	filename, &_BmpInfoLabel, _BufferLabel);
+	if (*_Layout.label) _load_buffer(_Layout.label,	filename, &_BmpInfoLabel, &_BufferLabelSize, _BufferLabel);
 	
 	if (*_Layout.label && *_Layout.colorLayer) 
 	{
 		strcat(filename, "-Color");
-		_load_buffer(_Layout.label, filename, &_BmpInfoColor, _BufferColor);
+		_load_buffer(_Layout.label, filename, &_BmpInfoColor, &_BufferColorSize, _BufferColor);
 	}
 
 	info.width		  = _BmpInfoLabel.srcWidthPx;
@@ -281,7 +283,7 @@ static void _multiply_image(SBmpInfo *pinfo, UINT32 width, BYTE *buffer[MAX_COLO
 }
 
 //--- _load_buffer ------------------------------------------------------
-static void _load_buffer(const char *filedir, const char *filename, SBmpInfo *pinfo, BYTE *buffer[MAX_COLORS])
+static void _load_buffer(const char *filedir, const char *filename, SBmpInfo *pinfo, UINT64 *pBufSize, BYTE *buffer[MAX_COLORS])
 {
 	int ret;
 	int i;
@@ -300,7 +302,7 @@ static void _load_buffer(const char *filedir, const char *filename, SBmpInfo *pi
 		return;
 	}
 	
-	ret = data_malloc (scanning, pinfo->srcWidthPx, pinfo->lengthPx, pinfo->bitsPerPixel, RX_Color, SIZEOF(RX_Color), buffer);
+	ret = data_malloc (scanning, pinfo->srcWidthPx, pinfo->lengthPx, pinfo->bitsPerPixel, RX_Color, SIZEOF(RX_Color), pBufSize, buffer);
 	if (_Layout.columns>1 && width < pinfo->srcWidthPx) 
 	{
 		ret = tif_load(&id, filedir, filename, PM_SINGLE_PASS, pinfo->srcWidthPx - width+8/pinfo->bitsPerPixel, RX_Color, SIZEOF(RX_Color), buffer, pinfo, ctrl_send_load_progress);

@@ -17,7 +17,7 @@ namespace RX_DigiPrint.Models
             if (_MyList==null)
             {
                 _MyList  = new  ObservableCollection<InkSupply>();
-                for (int i=0; i<TcpIp.InkSupplyCnt; i++)
+                for (int i=0; i<TcpIp.InkSupplyCnt+2; i++)
                 {
                     _MyList.Add(new InkSupply());
                     _MyList[i].No=i+1;
@@ -64,20 +64,6 @@ namespace RX_DigiPrint.Models
             }
         }
                 
-        //--- CreateLog -------------------------------------
-        public void CreateLog(RxWorkBook wb, int row)
-        {
-            int i;
-
-            wb.setText(row, 0, "InkSupply");
-            for (i=0; i<_MyList.Count(); i++)
-            {
-                wb.setText(row, 1+i, i+1);
-                _MyList[i].CreateLog(wb, row+1, 1+i);
-            }
-            wb.HeaderRow(row);
-        }
-
         //--- Reset ---------------------------------------
         public void Reset()
         {

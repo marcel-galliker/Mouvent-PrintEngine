@@ -1,0 +1,22 @@
+﻿<UserControl x:Class="RX_DigiPrint.Views.LB702WBView.LB702WB_ParPrinter"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:igWPF="http://schemas.infragistics.com/xaml/wpf"
+             xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+             xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
+             xmlns:local="clr-namespace:RX_DigiPrint.Views.MiniLabelView"
+             mc:Ignorable="d"
+             d:DesignHeight="700" 
+             d:DesignWidth="300"
+             >
+    
+    <GroupBox Header="Printer" Style="{StaticResource RxGroupBox}">
+        <rx_uc:PlcParPanel x:Name="ParPanel" UnitID="Application.GUI_00_001_Main" ReadOnly="False" LabelWidth="120" Margin="0,1,0,0">
+            <rx_uc:PlcParCtrl ID="PAR_HEAD_HEIGHT"      Label="Print Height" Unit="mm"      UnitWidth="50" Format="1"/>
+            <rx_uc:PlcParCtrl ID="PAR_NIP_TENSION_1"    Label="Tension"      Unit="N/mm" UnitWidth="50" Format="1" />
+        </rx_uc:PlcParPanel>
+    </GroupBox>
+</UserControl>

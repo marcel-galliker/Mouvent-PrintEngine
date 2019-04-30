@@ -9,6 +9,7 @@
              xmlns:ig="http://schemas.infragistics.com/xaml"
              xmlns:Infragistics="clr-namespace:Infragistics;assembly=InfragisticsWPF4.Controls.Grids.XamGrid.v13.2"
              xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
+             xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="1200">
     <Grid>
@@ -22,9 +23,9 @@
         
         <!-- toolbar RIGHT _______________________________________________________ -->
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button x:Name="Button_Confirm" Style="{DynamicResource ToolButtonStyle}" ToolTip="Confirm all Events" Click="Confirm_clicked" >
+            <common:RxButton x:Name="Button_Confirm" Click="Confirm_clicked" >
                 <Image Source="../Resources/Bitmaps/confirm.ico"/>
-            </Button>
+            </common:RxButton>
             <rx_uc:SetupButtons HorizontalAlignment="Right"/>
         </StackPanel>
 

@@ -7,10 +7,8 @@ namespace RX_DigiPrint.Converters
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            Boolean val = (bool) value;
-
-            if(val) return "\\..\\Resources\\Bitmaps\\LED_GREEN.ico";
-            else    return "\\..\\Resources\\Bitmaps\\LED_GREY.ico";
+            if (value!=null && value.ToString().ToLower().Equals("true")) return "\\..\\Resources\\Bitmaps\\LED_GREEN.ico";
+            return "\\..\\Resources\\Bitmaps\\LED_GREY.ico";
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)

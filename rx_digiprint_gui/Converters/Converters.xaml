@@ -9,6 +9,7 @@
     <converters:BoolToVisible_Converter     x:Key="BoolToVisible_Converter"/>
     <converters:BoolToInVisible_Converter   x:Key="BoolToInVisible_Converter"/>
     <converters:CheckBox_Converter          x:Key="CheckBox_Converter" />
+    <converters:CleafQuality_Converter      x:Key="CleafQuality_Converter" />
     <converters:ColorCode_Str               x:Key="ColorCode_Str"/>
     <converters:Copies_Converter            x:Key="Copies_Converter"/>
     <converters:CleaningState_Converter     x:Key="CleaningState_Converter"/>
@@ -22,6 +23,7 @@
     <converters:Filler_Converter            x:Key="Filler_Converter"/>
     <converters:FileName_Converter          x:Key="FileName_Converter"/>
     <converters:FileTypeImage_Converter     x:Key="FileTypeImage_Converter"/>
+    <converters:FlashButtonVisible_Converter x:Key="FlashButtonVisible_Converter"/>
     <converters:HeadVal_Converter           x:Key="HeadVal_Converter"/>
     <converters:HeadVal_Converter10         x:Key="HeadVal_Converter10"/>
     <converters:HeadVal_ConverterTemp       x:Key="HeadVal_ConverterTemp"/>
@@ -42,6 +44,8 @@
     <converters:Percent_Converter           x:Key="Percent_Converter" />
     <converters:PlcLogState_Converter       x:Key="PlcLogState_Converter"/>
     <converters:PlcLogNo_Converter          x:Key="PlcLogNo_Converter"/>
+    <converters:PuttyVisible_Converter      x:Key="PuttyVisible_Converter"/>
+    <converters:PuttyDbgVisible_Converter   x:Key="PuttyDbgVisible_Converter"/>
     <converters:RotateRect_Converter        x:Key="RotateRect_Converter"/>
     <converters:ScanLength_Converter        x:Key="ScanLength_Converter"/>
     <converters:StepperStateImg_Converter   x:Key="StepperStateImg_Converter"/>

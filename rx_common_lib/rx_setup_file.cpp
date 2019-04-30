@@ -12,6 +12,7 @@
 #include "rx_common.h"
 #include "rx_file.h"
 #include "tinyxml.h"
+#include <stdlib.h> 
 
 #include "rx_setup_file.h"
 
@@ -296,25 +297,25 @@ void setup_int32(HANDLE hsetup, const char *name, EN_setup_Action action, INT32 
 }
 
 //--- setup_int32_arr ------------------------------------------------------------------
-void setup_int32_arr(HANDLE hsetup, const char *name, EN_setup_Action action, INT32  *val, int readcnt, int writecnt, INT32 def)
+void setup_int32_arr(HANDLE hsetup, const char *name, EN_setup_Action action, INT32  *val, int cnt, INT32 def)
 {
 	SSetupFile *setup=(SSetupFile*)hsetup;
 	if (action == WRITE)
 	{
 		int i, len;
-		int strsize = 10*writecnt;
+		int strsize = 10*cnt;
 		char *str = (char*)malloc(strsize);
 		memset(str, 0, strsize);
-		for (i=0, len=0; i<writecnt; i++) len+=snprintf(&str[len], strsize-len, "%d ", val[i]);
+		for (i=0, len=0; i<cnt; i++) len+=snprintf(&str[len], strsize-len, "%d ", val[i]);
 		setup->actChapter->SetAttribute(name, str);
 	}
 	else
 	{
 		int i, pos;
-		for (i=0; i<readcnt; i++) val[i]=def;
+		for (i=0; i<cnt; i++) val[i]=def;
 		const char *str = setup->actChapter->Attribute(name);
 		if (str==NULL) return;
-		for (i=0, pos=0; i<readcnt; i++)
+		for (i=0, pos=0; i<cnt; i++)
 		{
 			if (!str[pos]) break;
 			val[i] = atoi(&str[pos]);
@@ -332,9 +333,75 @@ void setup_uint32(HANDLE hsetup, const char *name, EN_setup_Action action, UINT3
 	else
 	{
 		int i = def;
-		// setup->actChapter->Attribute(name, &i);
 		setup->actChapter->Attribute(name, &i);
 		*val = i;
+	}
+}
+
+
+//--- setup_double -----------------------------------------------------------------------------
+void setup_double	(HANDLE hsetup, const char *name, EN_setup_Action action, double *val, double def)
+{
+	SSetupFile *setup=(SSetupFile*)hsetup;
+	if (action == WRITE) setup->actChapter->SetDoubleAttribute(name, *val);
+	else
+	{
+		double i = def;
+		setup->actChapter->Attribute(name, &i);
+		*val = i;
+	}
+}
+
+//--- setup_enum -----------------------------------------------
+void setup_enum(HANDLE hsetup, const char *name, EN_setup_Action action, INT32  *val, char *enumstr)
+{
+	// enumstr: each string ended by '|'
+	SSetupFile *setup=(SSetupFile*)hsetup;
+	if(action == WRITE)
+	{
+		int i;
+		char *ch, *pstr;
+		char str[32];
+		for(ch=enumstr,i=0,pstr=str; *ch; ch++)
+		{
+			if(*ch == '|')
+			{
+				if(i == *val)
+				{
+					*pstr = 0;
+					setup->actChapter->SetAttribute(name,str);
+					return;		
+				}
+				pstr = str;
+				i++;
+			}
+			else *pstr++=*ch;
+		}
+		setup->actChapter->SetAttribute(name, "???");
+		return;
+	}
+	else
+	{
+		*val=0;
+		const char *value = setup->actChapter->Attribute(name);
+		int i;
+		char *ch, *pstr;
+		char str[32];
+		for(ch=enumstr,i=0,pstr=str; *ch; ch++)
+		{
+			if(*ch == '|')
+			{
+				*pstr = 0;
+				if (!stricmp(value, str)) 
+				{						
+					*val=i;
+					return;		
+				}
+				pstr = str;
+				i++;
+			}
+			else *pstr++=*ch;
+		}
 	}
 }
 

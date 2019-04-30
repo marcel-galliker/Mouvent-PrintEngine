@@ -47,12 +47,11 @@ int setup_ink(const char *filepath, SInkDefinition *pink, EN_setup_Action  actio
 		setup_str   (file, "Description",	action,  pink->description,	sizeof(pink->description),	"description");
 		setup_str	(file, "ColorRGB",		action,  str, sizeof(str), "");
 		sscanf(str, "#%8X", &pink->colorRGB);
-		setup_uint32(file, "ColorCode",		action, &pink->colorCode, 0);
-		setup_uint32(file, "Temp",			action, &pink->temp,	  0);
-		setup_uint32(file, "TempMax",		action, &pink->tempMax,	  0);
-		setup_uint32(file, "Meniscus",		action, &pink->meniscus,  150);
-		setup_uint32(file, "Viscosity",		action, &pink->viscosity, 0);
-		setup_uint32(file, "Density",		action, &pink->density,   0);
+		setup_int32(file, "ColorCode",		action, &pink->colorCode, 0);
+		setup_int32(file, "Temp",			action, &pink->temp,	  0);
+		setup_int32(file, "TempMax",		action, &pink->tempMax,	  0);
+		setup_int32(file, "CondPresOut",	action, &pink->condPresOut,  150);
+		setup_int32_arr(file, "FlushTime",  action, pink->flushTime, SIZEOF(pink->flushTime), 0);		
 		{
 			UINT gl[4];
 			// default values ---
@@ -122,7 +121,7 @@ static void	_calc_maxFreq(SInkDefinition *pink)
 	int trace=FALSE;
 	int i, droplet, end;
 	int start[MAX_GREY_LEVELS];
-	double clock=12.5; // ns
+	double clock=2000/140.0; //12.5; // ns
 	double time;
 
 	memset(start, 0, sizeof(start));
@@ -134,16 +133,17 @@ static void	_calc_maxFreq(SInkDefinition *pink)
 		if (pink->wf[i].volt==0 && pink->wf[i+1].volt>0) 
 		{
 			if(trace) printf("   >>>");
-			start[droplet++]=pink->wf[i].pos;
+			start[droplet++]=pink->wf[i].pos*140/160;
 		}
 		if (i>0 && pink->wf[i].volt==0 && pink->wf[i-1].volt>0) 
 		{
 			if(trace) printf("   <<<");
-			end=pink->wf[i].pos;
+			end=pink->wf[i].pos*140/160;
 		}
 		if(trace) printf("\n");
 	}
-	start[droplet] = end;
+	while (droplet<MAX_GREY_LEVELS)
+		start[droplet++] = end;
 	if(trace)
 	{
 		printf("done\n");
@@ -156,19 +156,23 @@ static void	_calc_maxFreq(SInkDefinition *pink)
 	int len;
 	for (i=0; i<4; i++)
 	{
-		len=WF_FIRST_PULSE_POS;
+//		len=WF_FIRST_PULSE_POS+WF_FILLER;
+		len=0;
 		for (droplet=0; droplet<MAX_GREY_LEVELS; droplet++)
 		{
 			if (pink->greyLevel[i] & (1<<droplet)) 
 				len+=(start[droplet+1]-start[droplet]);
 		}
+		len  = len+WF_FILLER+20;
 		time = (int)(len*clock);
 		double khz=1000000/time;
         double mmin = khz*25.4/1200.0*60.0;
 //        double PulseLength = time/1000;
  //       double PulseFreq   = khz;
  //       double PulseSpeed  = mmin;
-		pink->maxFreq[i] = (int)(1000*khz);
-		if(trace) printf("pulse length[%d] %d Hz, %d m/min\n", i, pink->maxFreq[i], (int)(mmin*1000));
+//		pink->maxFreq[i] = (int)(1000*khz);
+//		if(trace) printf("pulse length[%d] %d Hz, %d m/min\n", i, pink->maxFreq[i], (int)(mmin*1000));
+		if (mmin>0) pink->maxSpeed[i] = (int)mmin;
+		else	    pink->maxSpeed[i] = 0;
 	}
 }

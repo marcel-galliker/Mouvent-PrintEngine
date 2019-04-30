@@ -27,7 +27,8 @@ typedef HANDLE err_Handle;
 #define ERR_CONT	LOG_TYPE_ERROR_CONT,	__FILE__,__LINE__
 #define ERR_STOP	LOG_TYPE_ERROR_STOP,	__FILE__,__LINE__
 #define ERR_ABORT	LOG_TYPE_ERROR_ABORT,	__FILE__,__LINE__
-
+#define ERR(TYPE)	TYPE,	                __FILE__,__LINE__ 
+	
 typedef void (*ErrorHandler)(ELogItemType errType);
 
 void err_SetHandler(ErrorHandler OnError);
@@ -43,13 +44,16 @@ SLogItem  *err_get_log_item(int no);
 
 void err_clear_all(void);
 
-int  Error(ELogItemType type, const char *file, int line, int errNo, const char *format, ...);
-int  ErrorEx(EDevice device, int no, ELogItemType type, const char *file, int line, int errNo, const char *format, ...);
-int  ErrorFlag(ELogItemType type, const char *file, int line, UINT32 *flags, UINT32 flag, int errNo, const char *format, ...);
+int  Error	    (						 ELogItemType type, const char *file, int line, int errNo, const char *format, ...);
+int  ErrorFlag  (						 ELogItemType type, const char *file, int line, UINT32 *flags, UINT32 flag, int errNo, const char *format, ...);
+int  ErrorEx	(EDevice device, int no, ELogItemType type, const char *file, int line, int errNo, const char *format, ...);
+int  ErrorExFlag(EDevice device, int no, ELogItemType type, const char *file, int line, UINT32 *flags, UINT32 flag, int errNo, const char *format, ...);
 
 int  SlaveError(EDevice device, int no, SLogItem *msg);
 
 void err_get_state(ELogItemType *pState, char *text, int size);
+	
+void compose_message(EDevice deviceType, int deviceNo, int errNo, char *str, int strSize, const char *format, const BYTE *arg);
 
 
 #ifdef __cplusplus

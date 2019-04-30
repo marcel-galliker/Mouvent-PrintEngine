@@ -118,23 +118,5 @@ namespace RX_DigiPrint.Models
 
             return title;
         }
-
-        //--- CreateLog -----------------------------------
-        public void CreateLog(RxWorkBook wb)
-        {
-            int row = 0;
-            int col;
-            foreach(NetworkItem item in _Network)
-            {
-                row++;
-                col=0;
-                wb.setText(0, col, "Device Type");     wb.setText(row, col++, item.DeviceType);
-                wb.setText(0, col, "No");              wb.setText(row, col++, item.DeviceNo);
-                wb.setText(0, col, "SerialNo");        wb.setText(row, col++, item.SerialNo);
-                wb.setText(0, col, "Mac Addredd");     wb.setText(row, col++, item.MacAddr);
-                wb.setText(0, col, "IP  Address");     wb.setText(row, col++, item.IpAddr);
-            }
-            wb.HeaderRow(0);
-        }
     }
 }

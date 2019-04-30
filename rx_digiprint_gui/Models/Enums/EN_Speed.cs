@@ -17,29 +17,43 @@ namespace RX_DigiPrint.Models.Enums
 
         public EN_SpeedList(UInt32 maxSpeed)
         {
+            if (RxGlobals.PrinterProperties.Host_Name.Equals("LB701-0001"))
+            {
+                int speed;
+                for (speed=20; speed<110; speed++)
+                {
+                    _List.Add(new RxEnum<int>(speed,  string.Format("{0}", speed)));
+                }
+                return;
+            }
+
             if (maxSpeed!=_MaxSpeed) 
             {
                 int speed;
                 int step=5;
                 while(_List.Count()>0) _List.RemoveAt(0);
                 _MaxSpeed = (int)maxSpeed;
-                /*
-                _List.Add(new RxEnum<int>(1,  string.Format("{0}", 1)));
-                _List.Add(new RxEnum<int>(2,  string.Format("{0}", 2)));
-                _List.Add(new RxEnum<int>(5,  string.Format("{0}", 5)));
-                */
-//                for (speed=10; ; speed+=10)
 
-                if (RxGlobals.PrinterProperties.Host_Name.Equals("DropWatcher")) step=1;
-
-                for (speed=10; ; speed+=step)
+                if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX801 || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX802)
                 {
-                    if (speed>=_MaxSpeed)
+                    int[] speeds={10,30,60,85,100};
+                    for (int i=0; i<speeds.Length; i++)
                     {
-                        _List.Add(new RxEnum<int>(_MaxSpeed,  string.Format("{0}", _MaxSpeed)));
-                        break;
+                        if (speeds[i]<=maxSpeed) _List.Add(new RxEnum<int>(speeds[i],  string.Format("{0}", speeds[i])));
                     }
-                    _List.Add(new RxEnum<int>(speed,  string.Format("{0}", speed)));
+                }
+                else
+                {
+                    if (RxGlobals.PrinterProperties.Host_Name.Equals("DropWatcher")) step=1;
+                    for (speed=10; ; speed+=step)
+                    {
+                        if (speed>=_MaxSpeed)
+                        {
+                            _List.Add(new RxEnum<int>(_MaxSpeed,  string.Format("{0}", _MaxSpeed)));
+                            break;
+                        }
+                        _List.Add(new RxEnum<int>(speed,  string.Format("{0}", speed)));
+                    }
                 }
             }
         }

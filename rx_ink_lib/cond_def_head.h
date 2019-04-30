@@ -195,16 +195,17 @@ typedef struct SConditionerCfg_mcu
 
 	//	INT32 	pressure_in;			// desired input pressure (1/10 mbar)
     INT32 	pressure_out;			// desired input pressure (1/10 mbar)
+	INT32	meniscus0;
 	UINT32 	temp; 					// desired temperature (1/1000 °C)
 	UINT32 	tempMax; 				// desired temperature (1/1000 °C)
 	UINT32	tempHead;				// measured head temperature
 	UINT32	mode;					// EnFluidCtrlMode
 	UINT32	volume_printed;			// [ml/min]
-	INT32	controller_P;
-	INT32	controller_I;
-	INT32	controller_D;
-	INT32	controller_offset;
-	
+	INT32	pid_P;
+	INT32	pid_I;
+	INT32	pid_D;
+	INT32	pid_offset;
+		
 	//--- status of fluid system -------------------
     INT32   cylinderPressure;
     INT32   cylinderPressureSet;
@@ -229,7 +230,8 @@ typedef struct SConditionerStat_mcu
 	SCondCmd		cmdConfirm;
 		
 	//actual values
-	INT32			pressure_in;		
+	INT32			pressure_in;
+	INT32			pressure_in_max;
 	INT32			pressure_in_diff;
 	INT32			pressure_out;		
 	INT32			pressure_out_diff;
@@ -248,17 +250,24 @@ typedef struct SConditionerStat_mcu
 	UINT32			error;
 	SCondInfo		info;
 	UINT32			alive;
+	
+	UINT32			aliveStat;
+	UINT32			aliveCfg;
 
-	UINT32			controller_P;
-	UINT32			controller_I;
-	UINT32			controller_D;
-	UINT32			controller_offset;
+	UINT32			pid_P;
+	UINT32			pid_I;
+	UINT32			pid_D;
+	UINT32			pid_offset;
     
+	INT32			pid_setval;
+	INT32			pid_sum;
+	INT32			pid_delay;
+
 	//Saved values on Flash
 	UINT32 			pumptime;		// count seconds
 	
 	UINT32			logCnt;
-	SCondLogItem	log[8];
+	SCondLogItem	log[6];
     
     char            pcb_rev;            // Hardware revision as lower ASCII char
 }SConditionerStat_mcu;

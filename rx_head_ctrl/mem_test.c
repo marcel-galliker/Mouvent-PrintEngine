@@ -57,9 +57,9 @@ void mem_test()
 		}
 	}
 	int i;
-	printf(  "Time:        "); for (i=0; i<MAX_LIST_LEN; i++) printf("%10d", _MemSizeList[i].time);
-	printf("\nMemTotal:    "); for (i=0; i<MAX_LIST_LEN; i++) printf("%10d", _MemSizeList[i].memTotal);
-	printf("\nMemFree:     "); for (i=0; i<MAX_LIST_LEN; i++) printf("%10d", _MemSizeList[i].memFree);
-	printf("\nMemAvailable:"); for (i=0; i<MAX_LIST_LEN; i++) printf("%10d", _MemSizeList[i].memAvailable);
-	printf("\n");
+	TrPrintfL(TRUE,  "Time:        "); for (i=0; i<MAX_LIST_LEN; i++) TrPrintfL(TRUE, "%10d", _MemSizeList[i].time);
+	TrPrintfL(TRUE, "MemTotal:    "); for (i=0; i<MAX_LIST_LEN; i++) TrPrintfL(TRUE, "%10d", _MemSizeList[i].memTotal);
+	TrPrintfL(TRUE, "MemFree:     "); for (i=0; i<MAX_LIST_LEN; i++) TrPrintfL(TRUE, "%10d", _MemSizeList[i].memFree);
+	TrPrintfL(TRUE, "MemAvailable:"); for (i=0; i<MAX_LIST_LEN; i++) TrPrintfL(TRUE, "%10d", _MemSizeList[i].memAvailable);
+	TrPrintfL(TRUE, "\n");
 }

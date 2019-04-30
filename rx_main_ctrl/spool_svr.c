@@ -28,10 +28,15 @@
 
 //--- Defines -----------------------------------------------------------------
 
-#define MAX_SPOOLERS	5	
+#define MAX_SPOOLERS	8	
 
 //--- Externals ---------------------------------------------------------------
 
+typedef struct
+{
+	int			used;
+	RX_SOCKET	socket;
+} SSpoolerInfo;
 
 //--- Statics -----------------------------------------------------------------
 static HANDLE	_HSpoolServer;
@@ -39,17 +44,18 @@ static int		_Ready;
 static int		_Auto;
 static int		_BlkNo;
 static int		_AwaitReply;
+static int		_SpoolerCnt;
 static int		_MsgSent, _MsgGot;
 static int		_HeadBoardCnt;
 static int		_SlideIsRight;
-static SPrintFileCmd	_PrintFileMsg;
-
+static SPrintFileCmd _PrintFileMsg;
+static SSpoolerInfo	 _Spooler[MAX_SPOOLERS];
 
 
 //--- Prototypes --------------------------------------------------------------
 static int _handle_spool_msg	(RX_SOCKET socket, void *msg, int len, struct sockaddr *sender, void *par);
-static int _handle_spool_open	(RX_SOCKET socket, const char *peerName);
-static int _handle_spool_close	(RX_SOCKET socket, const char *peerName);
+static int _handle_spool_connected	(RX_SOCKET socket, const char *peerName);
+static int _handle_spool_deconnected(RX_SOCKET socket, const char *peerName);
 
 static int _do_spool_cfg_rep	(RX_SOCKET socket);
 static int _do_print_file_rep	(RX_SOCKET socket, SPrintFileRep	*msg);
@@ -62,11 +68,19 @@ static int _do_log_evt			(RX_SOCKET socket, SLogMsg			*msg);
 //--- spool_start ----------------------------------------------------------------
 int	spool_start(void)
 {
-	int errNo;
+	int errNo, i;
+	char addr[32];
 
 	_Auto = FALSE;
 	TrPrintfL(TRUE, "Spool started");
-	errNo=sok_start_server(&_HSpoolServer, NULL, PORT_CTRL_MAIN, SOCK_STREAM, MAX_SPOOLERS, _handle_spool_msg, _handle_spool_open, _handle_spool_close);
+	memset(_Spooler, 0, sizeof(_Spooler));
+	for(i=0; i<SIZEOF(_Spooler); i++) 
+	{	
+		net_device_to_ipaddr(dev_spooler, i, addr, sizeof(addr));
+		_Spooler[i].socket = INVALID_SOCKET;
+	}
+	
+	errNo=sok_start_server(&_HSpoolServer, NULL, PORT_CTRL_MAIN, SOCK_STREAM, MAX_SPOOLERS, _handle_spool_msg, _handle_spool_connected, _handle_spool_deconnected);
 	if (errNo)
 	{
 		char str[256];
@@ -104,8 +118,8 @@ static int _handle_spool_msg(RX_SOCKET socket, void *msg, int len, struct sockad
 	return REPLY_OK;
 }
 
-//--- _handle_spool_open --------------------------------------------------------------------
-static int _handle_spool_open(RX_SOCKET socket, const char *peerName)
+//--- _handle_spool_connected --------------------------------------------------------------------
+static int _handle_spool_connected(RX_SOCKET socket, const char *peerName)
 {
     /*
 	if (str_start(peerName, "127.0.0.1"))
@@ -121,12 +135,16 @@ static int _handle_spool_open(RX_SOCKET socket, const char *peerName)
 		net_register(&item);
 	}
 	*/
+	EDevice device;
+	int no;
+	net_ipaddr_to_device(peerName, &device, &no);
+	if (no<SIZEOF(_Spooler)) _Spooler[no].socket = socket;
 	spool_set_config(socket);
 	return REPLY_OK;
 }
 
-//--- _handle_spool_close -------------------------------------------------------------------
-static int _handle_spool_close(RX_SOCKET socket, const char *peerName)
+//--- _handle_spool_deconnected -------------------------------------------------------------------
+static int _handle_spool_deconnected(RX_SOCKET socket, const char *peerName)
 {
     /*
 	if (str_start(peerName, "127.0.0.1"))
@@ -141,6 +159,10 @@ static int _handle_spool_close(RX_SOCKET socket, const char *peerName)
 		net_unregister(&item);
 	}
 	*/
+	EDevice device;
+	int no;
+	net_ipaddr_to_device(peerName, &device, &no);
+	if (no<SIZEOF(_Spooler)) _Spooler[no].socket = INVALID_SOCKET;
 	return REPLY_OK;
 }
 
@@ -154,8 +176,23 @@ static int _do_spool_cfg_rep(RX_SOCKET socket)
 // return: count of clients
 int	spool_set_config(RX_SOCKET socket)
 {
-	int hb, cnt;
+	int hb, cnt, no;
 	char str[100];
+	int color;
+
+	for (no=0; no<SIZEOF(_Spooler); no++) _Spooler[no].used=FALSE;
+	_SpoolerCnt=0;
+	//--- send bitmap split config (all info) --------------------------
+	for (color=0; color<SIZEOF(RX_Color); color++)
+	{
+		RX_Color[color].no=color;
+		no = RX_Color[color].spoolerNo;
+		if (no<SIZEOF(_Spooler))
+		{
+			if (!_Spooler[no].used) _SpoolerCnt++;
+			_Spooler[no].used = TRUE;
+		}
+	}
 
 	label_reset();
 	sok_get_srv_socket_name(_HSpoolServer, NULL, str, NULL);
@@ -163,32 +200,42 @@ int	spool_set_config(RX_SOCKET socket)
 	// data is always on MAIN
 	if (strcmp(str, "127.0.0.1")) sprintf(RX_Spooler.dataRoot, "\\\\%s\\%s", str, PATH_RIPPED_DATA_DIR);
 	else strcpy(RX_Spooler.dataRoot, PATH_RIPPED_DATA_DIR);
-	cnt=sok_send_to_clients_2(_HSpoolServer, CMD_SET_SPOOL_CFG, sizeof(RX_Spooler), &RX_Spooler);
+	cnt=spool_send_msg_2(CMD_SET_SPOOL_CFG, sizeof(RX_Spooler), &RX_Spooler, FALSE);
+
+	//--- send bitmap split config (all info) --------------------------
+	if (RX_Config.printer.type==printer_DP803) Error(LOG, 0, "Send CMD_COLOR_CFG only to used spooler");
+	for (color=0; color<SIZEOF(RX_Color); color++)
+	{
+		cnt=spool_send_msg_2(CMD_COLOR_CFG, sizeof(RX_Color[color]), &RX_Color[color], FALSE);	
+	}
 
 	//--- send head board configurations ------------------------
 	_HeadBoardCnt=0;
+	if (RX_Config.printer.type==printer_DP803) Error(LOG, 0, "Send CMD_HEAD_BOARD_CFG only to used spooler"); // RX_Config.headBoard[hb].spoolerNo
 	for (hb=0; hb<SIZEOF(RX_Config.headBoard); hb++)
 	{
 		if (RX_Config.headBoard[hb].present>=dev_on)
 		{
 			_HeadBoardCnt++;
-			cnt=sok_send_to_clients_2(_HSpoolServer, CMD_HEAD_BOARD_CFG, sizeof(SHeadBoardCfg), &RX_Config.headBoard[hb]);
+			cnt=spool_send_msg_2(CMD_HEAD_BOARD_CFG, sizeof(SHeadBoardCfg), &RX_Config.headBoard[hb], FALSE);
 		}
 	}
-
+	
+	/*
 	//--- send bitmap split config (all info) --------------------------
-	int color;
 	for (color=0; color<SIZEOF(RX_Color); color++)
 	{
 		RX_Color[color].no=color;
-		cnt=sok_send_to_clients_2(_HSpoolServer, CMD_COLOR_CFG, sizeof(RX_Color[color]), &RX_Color[color]);	
+		cnt=spool_send_msg_2(CMD_COLOR_CFG, sizeof(RX_Color[color]), &RX_Color[color], FALSE);	
 	}
-
+	*/
+	
 	_Ready		= TRUE;
 	_BlkNo		= 0;
 	_AwaitReply = 0;
-	_MsgSent = _MsgGot=0;
+	_MsgSent	= _MsgGot=0;
 	RX_PrinterStatus.sentCnt=0;
+	RX_PrinterStatus.transferredCnt=0;
 //	pc_print_next();
 
 	return cnt;
@@ -204,7 +251,7 @@ int spool_head_board_cnt(void)
 int spool_is_ready(void)
 {
 	TrPrintfL(TRUE, "spool_ready: _Ready=%d, _AwaitReply=%d, _MsgSent=%d, _MsgGot=%d", _Ready, _AwaitReply, _MsgSent, _MsgGot);
-	return (_Ready!=0) && (_AwaitReply==0);	
+	return (_Ready!=0) && (_AwaitReply==0);
 }
 
 //--- spool_start_printing --------------------------------
@@ -231,16 +278,16 @@ int spool_set_layout(SLayoutDef *playout, char *dataPath)
 	UCHAR *data;
 
 	TrPrintfL(TRUE, "send spool_set_layout");
-	sok_send_to_clients_2(_HSpoolServer, BEG_SET_LAYOUT, strlen(dataPath)+1, dataPath);
+	spool_send_msg_2(BEG_SET_LAYOUT, strlen(dataPath)+1, dataPath, TRUE);
 	for (len=sizeof(SLayoutDef), data=(UCHAR*)playout; len>0; )
 	{
 		if (len>2000) l=2000;
 		else l=len;
-		sok_send_to_clients_2(_HSpoolServer, ITM_SET_LAYOUT, l, data);
+		spool_send_msg_2(ITM_SET_LAYOUT, l, data, TRUE);
 		data += l;
 		len  -= l;
 	}
-	sok_send_to_clients_2(_HSpoolServer, END_SET_LAYOUT, 0, NULL);
+	spool_send_msg_2(END_SET_LAYOUT, 0, NULL, TRUE);
 	return REPLY_OK;
 }
 
@@ -251,16 +298,16 @@ int spool_set_filedef(SFileDef  *pfileDef)
 	UCHAR *data;
 
 	TrPrintfL(TRUE, "send spool_set_filedef");
-	sok_send_to_clients_2(_HSpoolServer, BEG_SET_FILEDEF, 0, NULL);
+	spool_send_msg_2(BEG_SET_FILEDEF, 0, NULL, TRUE);
 	for (len=sizeof(SFileDef), data=(UCHAR*)pfileDef; len>0; )
 	{
 		if (len>2000) l=2000;
 		else l=len;
-		sok_send_to_clients_2(_HSpoolServer, ITM_SET_FILEDEF, l, data);
+		spool_send_msg_2(ITM_SET_FILEDEF, l, data, TRUE);
 		data += l;
 		len  -= l;
 	}
-	sok_send_to_clients_2(_HSpoolServer, END_SET_FILEDEF, 0, NULL);
+	spool_send_msg_2(END_SET_FILEDEF, 0, NULL, TRUE);
 	return REPLY_OK;
 }
 
@@ -268,7 +315,7 @@ int spool_set_filedef(SFileDef  *pfileDef)
 int spool_set_counter(SCounterDef  *pctrDef)
 {
 	TrPrintfL(TRUE, "send spool_set_counter");
-	sok_send_to_clients_2(_HSpoolServer, CMD_SET_CTRDEF, sizeof(*pctrDef), pctrDef);
+	spool_send_msg_2(CMD_SET_CTRDEF, sizeof(*pctrDef), pctrDef, TRUE);
 	return REPLY_OK;
 }
 
@@ -281,13 +328,12 @@ int spool_send_test_data(int headNo, char *str)
 	msg.hdr.msgLen = sizeof(msg); 
 	msg.headNo = headNo;
 	strncpy(msg.data, str, sizeof(msg.data));
-	return sok_send_to_clients(_HSpoolServer, &msg);
+	return spool_send_msg(&msg);
 }
 
 //--- spool_print_file ---------------------------------------------------------------
 int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT32 lengthPx, INT32 pgMode, INT32 pgDist, UINT8 lengthUnit, int variable, int scanMode, int clearBlockUsed)
 {
-	int				cnt;
 //	if (_Ready<=0) 
 //		 Error(WARN, 0, "Spooler not ready");
 	_Ready--;
@@ -304,9 +350,13 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 	if (RX_PrinterStatus.testMode)
 	{
 		_PrintFileMsg.printMode     = PM_TEST;
-		if (RX_TestImage.testImage==PQ_TEST_JETS || RX_TestImage.testImage==PQ_TEST_ENCODER)
+		if (RX_Config.printer.type==printer_test_table && RX_TestImage.testImage==PQ_TEST_JETS || RX_TestImage.testImage==PQ_TEST_ENCODER)
 		{
-			if (RX_Config.printer.type==printer_test_table) _PrintFileMsg.printMode = PM_TEST_SINGLE_COLOR;
+			 _PrintFileMsg.printMode = PM_TEST_SINGLE_COLOR;
+		}
+		else if (RX_TestImage.testImage==PQ_TEST_JETS) 
+		{
+			_PrintFileMsg.printMode = PM_TEST_JETS;
 		}
 			
 		_PrintFileMsg.offsetWidth	= 0;
@@ -335,13 +385,14 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 	}
 		
 	TrPrintfL(TRUE, "send spool_print_file >>%s<<", filename);
-	cnt=sok_send_to_clients(_HSpoolServer, &_PrintFileMsg);
+	int cnt;
+	cnt=spool_send_msg(&_PrintFileMsg);
 	if (cnt) RX_PrinterStatus.sentCnt++;// = _HeadBoardCnt;
 	else     Error(ERR_CONT, 0, "No Spoolers connected");
-//	sok_send_to_clients_2(_HSpoolServer, CMD_PING, 0, NULL);	// needed in linux to send the command without timeout!
+//	spool_send_msg_2(CMD_PING, 0, NULL, TRUE);	// needed in linux to send the command without timeout!
 	_AwaitReply += cnt;
 	_MsgSent+=cnt;
-	TrPrintfL(TRUE, "****** sent spool_print_file to %d spoolers: _AwaitReply=%d, _MsgSent=%d", cnt, _AwaitReply, _MsgSent);
+	TrPrintfL(TRUE, "****** sent spool_print_file to %d spoolers: _AwaitReply=%d, _MsgSent=%d", _AwaitReply, _MsgSent);
 //	Error(LOG, 0, "spool_print_file Copy %d", pid->copy);
 	return REPLY_OK;
 }
@@ -360,11 +411,11 @@ int spool_print_empty(void)
 
 	Error(LOG, 0, "Bugfix: Send Extra Image");
 	_PrintFileMsg.id.scan = 0xffffffff;
-	cnt=sok_send_to_clients(_HSpoolServer, &_PrintFileMsg);
+	cnt=spool_send_msg(&_PrintFileMsg);
 	// do not count!
 	if (cnt) RX_PrinterStatus.sentCnt += 0;// _HeadBoardCnt;
 	else     Error(ERR_CONT, 0, "No Spoolers connected");
-//	sok_send_to_clients_2(_HSpoolServer, CMD_PING, 0, NULL);	// needed in linux to send the command without timeout!
+//	spool_send_msg_2(CMD_PING, 0, NULL, TRUE);	// needed in linux to send the command without timeout!
 	_AwaitReply += cnt;
 	_MsgSent+=cnt;
 	TrPrintfL(TRUE, "****** sent spool_print_file to %d spoolers: _AwaitReply=%d, _MsgSent=%d", cnt, _AwaitReply, _MsgSent);
@@ -376,7 +427,7 @@ int spool_print_empty(void)
 //--- spool_abort_printing --------------------------------------
 int spool_abort_printing(void)
 {	
-	sok_send_to_clients_2(_HSpoolServer, CMD_PRINT_ABORT, 0, NULL);
+	spool_send_msg_2(CMD_PRINT_ABORT, 0, NULL, FALSE);
 	return REPLY_OK;
 }
 
@@ -420,8 +471,8 @@ static int _do_print_file_evt	(RX_SOCKET socket, SPrintFileMsg	*msg)
 	SPrintQueueItem *pitem;
 	switch (msg->evt)
 	{
-	case DATA_RIPPING:	TrPrintf(TRUE, "SPOOLER %d: Documment ID=%d  page=%d: RIPPING,   copy=%d, scan=%d, bufReady=%d",	msg->spoolerNo, msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->bufReady); break;
-	case DATA_SCREENING:TrPrintf(TRUE, "SPOOLER %d: Documment ID=%d  page=%d: SCREENING, copy=%d, scan=%d, bufReady=%d",	msg->spoolerNo, msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->bufReady); break;
+	case DATA_RIPPING:	TrPrintfL(TRUE, "SPOOLER %d: Documment ID=%d  page=%d: RIPPING,   copy=%d, scan=%d, bufReady=%d",	msg->spoolerNo, msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->bufReady); break;
+	case DATA_SCREENING:TrPrintfL(TRUE, "SPOOLER %d: Documment ID=%d  page=%d: SCREENING, copy=%d, scan=%d, bufReady=%d",	msg->spoolerNo, msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->bufReady); break;
 	case DATA_LOADING:	TrPrintfL(TRUE, "SPOOLER %d: Documment ID=%d  page=%d: LOADING,   copy=%d, scan=%d, bufReady=%d >>%s<<",	msg->spoolerNo, msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->bufReady, msg->txt);
 						pq_loading(msg->spoolerNo, &msg->id, msg->txt);
 						break;
@@ -431,12 +482,32 @@ static int _do_print_file_evt	(RX_SOCKET socket, SPrintFileMsg	*msg)
 						break;
 
 	case DATA_SENT:		TrPrintf(TRUE, "SPOOLER %d: Documment ID=%d  page=%d: SENT,      copy=%d, scan=%d, bufReady=%d,  _AwaitReply=%d, _MsgGot=%d",		msg->spoolerNo, msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->bufReady, _AwaitReply, _MsgGot);
-						pitem = pq_sent(&msg->id);
-						pc_sent(&msg->id);
-						if (RX_PrinterStatus.testMode)	enc_set_pg(&RX_TestImage, &msg->id);
-						else							enc_set_pg(pitem, &msg->id);
-						if (_Auto)  ctrl_print_page(&msg->id);
+						pitem = pq_sent(&msg->id);							
+						if(RX_PrinterStatus.testMode)
+						{
+							RX_PrinterStatus.transferredCnt++;
+							pc_sent(&msg->id);
+							enc_set_pg(&RX_TestImage, &msg->id);
+						}
+						else
+						{
+							if (_SpoolerCnt==0 || (pitem->scansSent%_SpoolerCnt)==0)
+							{
+								RX_PrinterStatus.transferredCnt++;
+								pc_sent(&msg->id);
+								enc_set_pg(pitem, &msg->id);
+							}							
+						}			
+						if (_Auto)  ctrl_print_page(&msg->id);																					
 						break;
+		
+	case DATA_PRINT_DONE:	// simu_write from spooler
+						for (int i=0; i<_HeadBoardCnt; i++)
+						{
+							pc_printed(&msg->id, i);
+						}
+						break;
+		
 	default:			TrPrintf(TRUE, "Documment ID=%d  page=%d , copy=%d, scan=%d: UNKNOWN EVENT %d",	msg->spoolerNo, msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->evt); break;
 	}
 	_Ready = msg->bufReady;
@@ -458,12 +529,31 @@ static int _do_log_evt(RX_SOCKET socket, SLogMsg *msg)
 //--- spool_send_msg ----------------------------------------------
 int spool_send_msg(void *msg)
 {
-	return sok_send_to_clients(_HSpoolServer, msg);
+	int i, cnt;
+	for (i=0, cnt=0; i<SIZEOF(_Spooler); i++)
+	{
+		if(_Spooler[i].used)
+		{
+			if (_Spooler[i].socket!=INVALID_SOCKET && sok_send(&_Spooler[i].socket,msg)==REPLY_OK) cnt++; 
+			else ErrorEx(dev_spooler, i, ERR_ABORT, 0, "not connected");
+		}
+	}
+	return cnt;
 }
 
 //--- spool_send_msg_2 ----------------------------------------
-int spool_send_msg_2(UINT32 cmd, int dataSize, void *data)
+int spool_send_msg_2(UINT32 cmd, int dataSize, void *data, int errmsg)
 {
-	return sok_send_to_clients_2(_HSpoolServer, cmd, dataSize, data);								
+	int i, cnt;
+	for (i=0, cnt=0; i<SIZEOF(_Spooler); i++)
+	{
+		if(_Spooler[i].used)
+		{
+			if (_Spooler[i].socket!=INVALID_SOCKET && sok_send_2(&_Spooler[i].socket,INADDR_ANY,cmd,dataSize,data)==REPLY_OK) cnt++;
+			else if(errmsg) 
+				ErrorEx(dev_spooler, i, ERR_ABORT, 0, "not connected");
+		}
+	}
+	return cnt;
 }
 

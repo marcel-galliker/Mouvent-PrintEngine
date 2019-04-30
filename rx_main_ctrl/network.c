@@ -32,10 +32,13 @@
 //--- externals ----------------------------------------------------------------
 
 //--- statics ------------------------------------------------------------------
+#define MAX_DEVICES 64
 
 static int			_Flashing	= -1;
-static int			_Connected[64];
-static UCHAR		_Checked[64];
+static int			_Connected[MAX_DEVICES];
+static int			_ConnectTime[MAX_DEVICES];
+static int			_Checked[MAX_DEVICES];
+static UCHAR		_Booted[MAX_DEVICES];
 static int			_CheckTime;		
 static SRxNetwork	_Network;
 
@@ -52,7 +55,9 @@ void net_init(void)
 
 	file = setup_create();
 	memset(_Connected, 0, sizeof(_Connected));
+	memset(_ConnectTime, 0, sizeof(_ConnectTime));
 	memset(_Checked, 0, sizeof(_Checked));
+	memset(_Booted,  0, sizeof(_Booted));
 	_CheckTime=0;
 	setup_load(file, PATH_USER FILENAME_NETWORK);
 	setup_network(file, &RX_Network, READ);
@@ -117,6 +122,7 @@ static EDevice  _get_device(char *deviceStr, UINT64 mac)
 	if ((mac & MAC_OUI_MASK) != MAC_OUI_ALTERA && !strcmp(deviceStr, "Spooler")) return dev_spooler;
 	if ((mac & MAC_ID_MASK)  == MAC_HEAD_CTRL_ARM)	return dev_head;
 	if ((mac & MAC_ID_MASK)  == MAC_ENCODER_CTRL)	return dev_enc;
+	if ((mac & MAC_ID_MASK)  == MAC_ENC32_CTRL)		return dev_enc32;
 	if ((mac & MAC_ID_MASK)  == MAC_FLUID_CTRL)		return dev_fluid;
 	if ((mac & MAC_ID_MASK)  == MAC_STEPPER_CTRL)	return dev_stepper;
 	return dev_undef;
@@ -146,33 +152,38 @@ void net_get_ip_addr(SNetworkItem *item, char *ipAddr)
 }
 
 //---  net_register ------------------------------------------------------------
-void net_register(SNetworkItem *item)	// register and calculate IP-Address
+int net_register(SNetworkItem *item)	// register and calculate IP-Address
 {
 	int i;
+	int time=0;
 	char str[32];
 
+	if (item->macAddr==0) return 0;
+	
 	item->deviceType = _DevStrToDev(item->deviceTypeStr);
-	TrPrintfL(FALSE, "Register");
 	if (item->deviceType==dev_undef)
 	{
 		Error(ERR_CONT, 0, "MacAddr %s: Device >>%s %s<< not defined.", sok_mac_addr_str(item->macAddr, str, sizeof(str)), item->deviceTypeStr, item->serialNo);
-		return;
+		return FALSE;
 	}
 	
 	//---  check if already registered ---
 	for (i = 0; i < SIZEOF(_Network.item); i++)
 	{
 		if (item->macAddr == _Network.item[i].macAddr)
-		{			
-			_Checked[i]   = TRUE;
+		{	
+			time = _ConnectTime[i];
+			_Checked[i]   = rx_get_ticks();
+			_ConnectTime[i] = rx_get_ticks();
 			memcpy(&_Network.item[i].ports, item->ports, sizeof(_Network.item[i].ports));
 			// if (item->ports[0]!=0) printf("Port %s:%d Listening\n", item->ipAddr, item->ports[0]);
 			if (!_Connected[i])
 			{
 				_Connected[i] = TRUE;
 				_send_item(NO_SOCKET, i);
+				return time;
 			}
-			return;
+			return time;
 		}
 	}
 
@@ -184,15 +195,18 @@ void net_register(SNetworkItem *item)	// register and calculate IP-Address
 		if (_Network.item[i].macAddr == 0)
 		{
 			_Checked[i] = _Connected[i] = FALSE;
+			_ConnectTime[i] = rx_get_ticks();
+
 //			net_device_to_ipaddr((EDevice)_Network.item[i].deviceType, _Network.item[i].deviceNo, item->ipAddr, sizeof(item->ipAddr));
 			net_device_to_ipaddr(item->deviceType, item->deviceNo, item->ipAddr, sizeof(item->ipAddr));
 			memcpy	(&_Network.item[i], item, sizeof(_Network.item[0]));
 			_send_item(NO_SOCKET, i);
 			Error(LOG, 0, "Device >>%s %d (serial=%s)<<: connected", _Network.item[i].deviceTypeStr, _Network.item[i].deviceNo+1, _Network.item[i].serialNo);
-			return;
+			return time;
 		}
 	}
 	Error(ERR_CONT, 0, "Network list overflow!");
+	return 0;
 }
 
 //--- net_register_by_device --------------------------------------
@@ -203,7 +217,7 @@ void net_register_by_device(EDevice dev, int no)
 	{
 		if (dev == _Network.item[i].deviceType  && no==_Network.item[i].deviceNo )
 		{			
-			_Checked[i]   = TRUE;
+			_Checked[i]   = rx_get_ticks();
 			return;
 		}
 	}
@@ -240,6 +254,7 @@ void net_disconnnected(SNetworkItem *item)
 		{
 			_Network.item[i].connected = FALSE;
 			_Connected[i]=FALSE;
+			_Booted[i] = FALSE;
 			_send_item(NO_SOCKET, i);
 		}
 	}	
@@ -265,9 +280,9 @@ int  net_port_listening(EDevice dev, int no, int port)
 	int i, p;
 	for (i=0; i < SIZEOF(_Network.item); i++)
 	{
-		if (_Network.item[i].deviceType==dev && (_Network.item[i].deviceType==dev_enc || _Network.item[i].deviceNo==no))
+		if (_Network.item[i].deviceType==dev && _Network.item[i].deviceNo==no)
 		{
-			if (_Connected[i])
+			if (_Connected[i] && _Booted[i])
 			{
 				for (p=0; p<SIZEOF(_Network.item[i].ports); p++)
 				{
@@ -276,6 +291,32 @@ int  net_port_listening(EDevice dev, int no, int port)
 				}				
 			}
 		}
+	}
+	return FALSE;
+}
+
+//--- net_booted ----------------------------------------------------
+int	 net_booted(UINT64 macAddr)
+{
+	int i;
+	for (i=0; i < SIZEOF(_Network.item); i++)
+	{
+		if (_Network.item[i].macAddr == macAddr)
+		{
+			_Booted[i]=TRUE;
+			break;
+		}
+	}
+	return REPLY_OK;
+}
+
+//--- net_is_booted --------------------------------------------------
+int net_is_booted(UINT64 macAddr)
+{
+	int i;
+	for (i=0; i < SIZEOF(_Network.item); i++)
+	{
+		if (_Network.item[i].macAddr == macAddr) return _Booted[i];
 	}
 	return FALSE;
 }
@@ -342,7 +383,7 @@ int net_device_to_ipaddr(EDevice dev, int no, char *ipAddr, int size)
 	case dev_plc:	sprintf(ipAddr, RX_CTRL_PLC); 
 					break;
 
-	case dev_stepper:	if (RX_Config.printer.type==printer_LB701 || RX_Config.printer.type==printer_LB702 || RX_Config.printer.type==printer_DP803)
+	case dev_stepper:	if (RX_Config.printer.type == printer_LB701 || RX_Config.printer.type == printer_LB702_UV || RX_Config.printer.type == printer_LB702_WB || RX_Config.printer.type == printer_DP803 || RX_Config.printer.type == printer_cleaf)
 						{
 							if (no<0 || no>3)
 							{
@@ -359,8 +400,8 @@ int net_device_to_ipaddr(EDevice dev, int no, char *ipAddr, int size)
 						break;
 
 	case dev_spooler:
-					if (no==0)  sprintf(ipAddr, RX_CTRL_MAIN);
-					else		sprintf(ipAddr, "%s%d", RX_CTRL_SUBNET, 200+no); 
+					if (no<=0 || no>=255)	sprintf(ipAddr, "%s%d", RX_CTRL_SUBNET, 200); 
+					else					sprintf(ipAddr, "%s%d", RX_CTRL_SUBNET, 200+no); 
 					break;
 
 	default:		return REPLY_ERROR;
@@ -378,15 +419,14 @@ UINT32 net_head_ctrl_addr	(int headNo)
 }
 
 //--- net_head_data_addr -----------------------------------------------
-UINT32 net_head_data_addr	(int headNo, int udpNo, int portCnt, int headPerPort)
+UINT32 net_head_data_addr	(int headNo, int udpNo, int portCnt)
 {
 	char ipAddr[64];
 	int addr[4];
 	net_device_to_ipaddr(dev_head, headNo, ipAddr, sizeof(ipAddr));
 	sscanf(ipAddr, "%d.%d.%d.%d", &addr[0], &addr[1], &addr[2], &addr[3]);
-	if (headPerPort)	sprintf(ipAddr, "%d.%d.%d.%d", addr[0], addr[1], addr[2] + 1 + UDP_PORT_CNT*(headNo / headPerPort)+udpNo, addr[3]);
-	else if (portCnt)	sprintf(ipAddr, "%d.%d.%d.%d", addr[0], addr[1], addr[2] + 1 + ((headNo*UDP_PORT_CNT + udpNo) % portCnt), addr[3]);
-	else				sprintf(ipAddr, "%d.%d.%d.%d", addr[0], addr[1], addr[2], 20+10*udpNo+headNo);
+	if (portCnt)	sprintf(ipAddr, "%d.%d.%d.%d", addr[0], addr[1], addr[2] + 1 + ((headNo*UDP_PORT_CNT + udpNo) % portCnt), addr[3]);
+	else			sprintf(ipAddr, "%d.%d.%d.%d", addr[0], addr[1], addr[2], 20+10*udpNo+headNo);
 	return sok_addr_32(ipAddr);
 }
 
@@ -401,7 +441,12 @@ void net_ipaddr_to_device	(const char *ipAddr, EDevice *pdevice, int *pno)
 	if (i)
 	{
 		i = atoi(&ipAddr[i]);
-		if (i>200) 
+		if (i==1)
+		{
+			*pdevice = dev_spooler;
+			*pno     = 0;				
+		}
+		else if (i>200) 
 		{
 			*pdevice = dev_spooler;
 			*pno     = i-200;
@@ -474,29 +519,24 @@ static void _net_check(void)
 {
 	int i; 
 	UINT32 time = rx_get_ticks();
-
-	if (time-_CheckTime>1900)
+	
+	for (i=0; i<SIZEOF(_Network.item); i++)
 	{
-		TrPrintfL(FALSE, "_net_check");
-		for (i=0; i<SIZEOF(_Network.item); i++)
+		if (_Network.item[i].deviceType==dev_plc || _Network.item[i].deviceType==dev_main) _Checked[i]=time;
+		if (_Connected[i] && (time-_Checked[i])>10000)
 		{
-			if (_Network.item[i].deviceType==dev_plc || _Network.item[i].deviceType==dev_main) _Checked[i]=TRUE;
-			if (_Connected[i] && !_Checked[i])
+			ErrorEx(_Network.item[i].deviceType, _Network.item[i].deviceNo, ERR_CONT, 0, "connection lost");
+			_Connected[i]=FALSE;
+			_Booted[i]=FALSE;
+			_send_item(NO_SOCKET, i);
 			{
-				TrPrintfL(TRUE, "Device >>%s %d (serial=%s)<<: connection lost", _Network.item[i].deviceTypeStr, _Network.item[i].deviceNo+1, _Network.item[i].serialNo);
-				Error(LOG, 0, "Device >>%s %d (serial=%s)<<: connection lost", _Network.item[i].deviceTypeStr, _Network.item[i].deviceNo+1, _Network.item[i].serialNo);
-				_Connected[i]=FALSE;
-				_send_item(NO_SOCKET, i);
-				{
-					char addr[32];
-					net_device_to_ipaddr(_Network.item[i].deviceType, _Network.item[i].deviceNo, addr, sizeof(addr));
-					rfs_reset(addr);
-				}
+				char addr[32];
+				net_device_to_ipaddr(_Network.item[i].deviceType, _Network.item[i].deviceNo, addr, sizeof(addr));
+				rfs_reset(addr);
 			}
-			_Checked[i] = FALSE;
 		}
 	}
-
+	
 	if (_CheckTime==0 || time-_CheckTime>900)
 	{
 //		memset(_Checked, 0, sizeof(_Checked));
@@ -516,9 +556,10 @@ void net_send_config(RX_SOCKET socket)
 }
 
 //--- net_set_config --------------------------------
-void net_set_config	(SIfConfig *config)
+void net_set_config	(RX_SOCKET socket, SIfConfig *config)
 {
 	sok_set_ifconfig("em1", config); 			
+//	net_send_config(socket);
 }
 
 
@@ -567,13 +608,15 @@ int net_set_item(RX_SOCKET socket, SNetworkItem *item, int flash)
 			{
 				old=_Flashing;
 				_Flashing = -1;
-				boot_set_flashing(0);
+				if(item->deviceType==dev_main)	system("ipmitool chassis identify 0");
+				else							boot_set_flashing(0);
 				if (old>=0) _send_item(socket, old);
 			}
 			if (flash && _Flashing<0)
 			{
 				_Flashing  = i;
-				boot_set_flashing(item->macAddr);
+				if(item->deviceType==dev_main)	system("ipmitool chassis identify force");
+				else							boot_set_flashing(item->macAddr);					
 			}
 			_send_item(socket, i);
 			return REPLY_OK;

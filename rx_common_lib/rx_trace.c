@@ -28,6 +28,9 @@
 #define TRACE_FILE_CNT	5
 #define TRACE_FILE_SIZE_MAX	1000000
 
+#define TRACE_STR_LEN	270
+#define TRACE_STR_CNT	32
+
 static HANDLE	 _Mutex		= NULL;
 static HANDLE	 _hServer	= NULL;
 static FILE		 *_TraceFile	= NULL;
@@ -37,8 +40,18 @@ static int		 _TraceToScreen = TRUE;
 static int		 _TraceToFile   = TRUE;
 static int		 _TraceFileSize;
 
+static char		_TraceStr[TRACE_STR_CNT][TRACE_STR_LEN];
+static int		_TraceStrIn;
+static int		_TraceStrOut;
+
+
+static HANDLE	hTraceThread = NULL;
+static HANDLE	hTraceSem;
+static int		_TraceRunning;
+
 //--- prototypes --------------------------------------------
 static void _TraceFileOpen	(const char *path, const char *appName);
+static void* _trace_thread(void* lpParameter);
 
 //--- Trace_init ----------------------------------------------
 void Trace_init(const char *appName)
@@ -51,7 +64,15 @@ void Trace_init(const char *appName)
 		strcat(_sAppName, ": ");
 	}
 	else *_sAppName=0;
-	if (!_Mutex) _Mutex = rx_mutex_create();
+	if (!_Mutex)
+	{
+		_Mutex			= rx_mutex_create();
+		_TraceRunning	= TRUE;
+		_TraceStrIn		= 0;
+		_TraceStrOut	= 0;
+		hTraceSem		= rx_sem_create();
+		hTraceThread	= rx_thread_start(_trace_thread, NULL, 0, "Trace Thread");		
+	}
 }
 
 void Trace_set_server(HANDLE server)
@@ -129,41 +150,37 @@ void TrPrintf(int level, const char *format, ...)
 {
 	va_list ap;
 	int len;
-
+	char str[TRACE_STR_LEN];
+	
 	if (level && (_TraceToScreen || _TraceToFile))
 	{
-		if (_Mutex==NULL) _Mutex=rx_mutex_create();
-		rx_mutex_lock(_Mutex);
 		STraceMsg msg;
-		msg.hdr.msgId = EVT_TRACE;
-
-		// get time
-		msg.time = rx_get_ticks();
+		msg.hdr.msgId  = EVT_TRACE;
+		msg.hdr.msgLen = sizeof(msg);	//sizeof(msg.hdr) + strlen(msg.message)+1;
+		msg.time	   = rx_get_ticks();
 
 		va_start(ap, format);
-		len = vsnprintf(msg.message, sizeof(msg.message)-3, format, ap);
+		len = vsnprintf(str, sizeof(msg.message)-3, format, ap);
 		va_end(ap);
-		msg.hdr.msgLen = sizeof(msg);//sizeof(msg.hdr) + strlen(msg.message)+1;
-		sok_send_to_clients(_hServer, &msg);
-		msg.message[len++]   = '\n';
-		msg.message[len] = 0;
-		if (_TraceFile && _TraceToFile)
-		{
-			_TraceFileSize += (int)fwrite(msg.message, 1, len+2, _TraceFile);
-			if(_TraceFileSize < TRACE_FILE_SIZE_MAX) fflush(_TraceFile);
-			else 
-			{
-				fclose(_TraceFile);
-				_TraceFile = NULL;
-				_TraceFileOpen(PATH_TRACE, _sAppName_org);					
-			}
-		}
 		#ifdef SOC
-			msg.message[len++]   = '\r';
+			strcat(str, "\r\n");
+		#else
+			strcat(str, "\n");
 		#endif
-		if (_TraceToScreen) printf("%s", msg.message);
-		msg.message[len]=0;
-		rx_mutex_unlock(_Mutex);
+		
+		if(_Mutex)
+		{
+			rx_mutex_lock(_Mutex);
+			memcpy(_TraceStr[_TraceStrIn], str, sizeof(_TraceStr[0]));
+			len = (_TraceStrIn+1) % TRACE_STR_CNT;
+			if(len!=_TraceStrOut) _TraceStrIn = len;
+			rx_mutex_unlock(_Mutex);
+			rx_sem_post(hTraceSem);				
+		}
+		else printf(str, NULL);
+		
+		strncpy(msg.message, str, sizeof(msg.message)-3);
+		sok_send_to_clients(_hServer, &msg);
 	}
 } // end TrPrintf
 
@@ -172,29 +189,49 @@ void TrPrintfL(int level, const char *format, ...)
 {
 	va_list ap;
 	int		len;
-	char	str[270];
-
+	char   str[TRACE_STR_LEN];
+	
 	if (level && (_TraceToScreen || _TraceToFile))
-	{
-		if (_Mutex==NULL) _Mutex=rx_mutex_create();
-		rx_mutex_lock(_Mutex);
+	{		
 		long t = rx_get_ticks();
-		memset(str, 0, sizeof(str));
+		memset(str, 0, TRACE_STR_LEN);
 		len = sprintf(str, "%s%ld.%03ld: ", _sAppName, t/1000, t%1000);
 		va_start(ap, format);
 		vsnprintf(&str[len], sizeof(str)-len-3, format, ap);
+		va_end(ap);
 		#ifdef SOC
 			strcat(str, "\r\n");
 		#else
 			strcat(str, "\n");
 		#endif
-		if (_TraceToScreen) printf("%s", str);
-		if (_TraceFile && _TraceToFile)
+		
+		if(_Mutex)
 		{
-			fwrite(str, 1, strlen(str), _TraceFile);
-			fflush(_TraceFile);
+			rx_mutex_lock(_Mutex);
+			memcpy(_TraceStr[_TraceStrIn],str,sizeof(_TraceStr[0]));
+			len = (_TraceStrIn+1) % TRACE_STR_CNT;
+			if(len!=_TraceStrOut) _TraceStrIn = len;
+			rx_mutex_unlock(_Mutex);
+			rx_sem_post(hTraceSem);
 		}
-		va_end(ap);
-		rx_mutex_unlock(_Mutex);
+		else printf(str, NULL);
 	}
 } // end TrPrintf
+
+//--- _trace_thread ---------------------------------------------
+static void* _trace_thread(void* lpParameter)
+{
+	while (_TraceRunning)
+	{
+		rx_sem_wait(hTraceSem, 0);
+		char *str = _TraceStr[_TraceStrOut];
+		if (_TraceToScreen) printf(str, NULL);
+		if (_TraceFile && _TraceToFile)
+		{
+			fprintf(_TraceFile, str, NULL);
+			fflush(_TraceFile);
+		}
+		_TraceStrOut = (_TraceStrOut+1) % TRACE_STR_CNT;
+	}
+	return NULL;
+}

@@ -1,18 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|Win32">
-      <Configuration>Release</Configuration>
+    <ProjectConfiguration Include="Release-soc|Win32">
+      <Configuration>Release-soc</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{9CFACFD4-6EE4-432A-A687-D52259365D06}</ProjectGuid>
-    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -20,7 +19,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-soc|Win32'" Label="Configuration">
     <ConfigurationType>Makefile</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
@@ -31,7 +30,7 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release-soc|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
@@ -46,92 +45,22 @@
     <ReferencePath />
     <LibraryPath />
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-soc|Win32'">
     <NMakeForcedIncludes>$(ProjectDir)\gcc_Release.h;$(VISUALGDB_DIR)\gcc_compat.h;$(NMakeForcedIncludes)</NMakeForcedIncludes>
-    <NMakeBuildCommandLine>"$(VISUALGDB_DIR)VisualGDB.exe" /build "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeBuildCommandLine>
-    <NMakeCleanCommandLine>"$(VISUALGDB_DIR)VisualGDB.exe" /clean "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeCleanCommandLine>
-    <NMakeReBuildCommandLine>"$(VISUALGDB_DIR)VisualGDB.exe" /rebuild "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeReBuildCommandLine>
+    <NMakePreprocessorDefinitions>__VisualGDB_CFG_Release;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <NMakeBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /build "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeBuildCommandLine>
+    <NMakeCleanCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /clean "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeCleanCommandLine>
+    <NMakeReBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /rebuild "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeReBuildCommandLine>
     <NMakeOutput>$(ProjectDir)rx_fluid_nios-Release.vgdbsettings</NMakeOutput>
     <IncludePath />
     <ReferencePath />
     <LibraryPath />
-    <NMakeIncludeSearchPath />
-    <NMakePreprocessorDefinitions>__VisualGDB_CFG_Release;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
   </PropertyGroup>
   <ItemDefinitionGroup>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="..\Externals\altera\build_nios_from_vs.bat" />
     <None Include="rx_fluid_nios-Debug.vgdbsettings" />
     <None Include="rx_fluid_nios-Release.vgdbsettings" />
-    <None Include="software\rx_fluid_nios\.cproject" />
-    <None Include="software\rx_fluid_nios\.externalToolBuilders\Copy Binary.launch">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="software\rx_fluid_nios\.externalToolBuilders\Copy rx_ink_lib.launch" />
-    <None Include="software\rx_fluid_nios\.externalToolBuilders\VersionUpdate.launch">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="software\rx_fluid_nios\.force_relink" />
-    <None Include="software\rx_fluid_nios\.project" />
-    <None Include="software\rx_fluid_nios\create-this-app" />
-    <None Include="software\rx_fluid_nios\FluidBoard_V007.map" />
-    <None Include="software\rx_fluid_nios\Makefile" />
-    <None Include="software\rx_fluid_nios\rx_fluid_nios.elf" />
-    <None Include="software\rx_fluid_nios\rx_fluid_nios.map" />
-    <None Include="software\rx_fluid_nios\rx_fluid_nios.objdump" />
-    <None Include="software\rx_fluid_nios\rx_ink_lib.sln" />
-    <None Include="software\rx_fluid_nios_bsp\settings.bsp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="software\rx_fluid_nios\adc_thermistor.c" />
-    <ClCompile Include="software\rx_fluid_nios\AMC7891.c" />
-    <ClCompile Include="software\rx_fluid_nios\average.c" />
-    <ClCompile Include="software\rx_fluid_nios\comm.c" />
-    <ClCompile Include="software\rx_fluid_nios\fifo.c" />
-    <ClCompile Include="software\rx_fluid_nios\heater.c" />
-    <ClCompile Include="software\rx_fluid_nios\i2c.c" />
-    <ClCompile Include="software\rx_fluid_nios\ink_ctrl.c" />
-    <ClCompile Include="software\rx_fluid_nios\log.c" />
-    <ClCompile Include="software\rx_fluid_nios\main.c" />
-    <ClCompile Include="software\rx_fluid_nios\MAX31865.c" />
-    <ClCompile Include="software\rx_fluid_nios\nios_def_head.c" />
-    <ClCompile Include="software\rx_fluid_nios\pid.c" />
-    <ClCompile Include="software\rx_fluid_nios\pres.c" />
-    <ClCompile Include="software\rx_fluid_nios\rx_ink_common.c" />
-    <ClCompile Include="software\rx_fluid_nios\timer.c" />
-    <ClCompile Include="software\rx_fluid_nios\trprintf.c" />
-    <ClCompile Include="software\rx_fluid_nios\version.c" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="software\rx_fluid_nios\adc_thermistor.h" />
-    <ClInclude Include="software\rx_fluid_nios\AMC7891.h" />
-    <ClInclude Include="software\rx_fluid_nios\average.h" />
-    <ClInclude Include="software\rx_fluid_nios\balance_def.h" />
-    <ClInclude Include="software\rx_fluid_nios\comm.h" />
-    <ClInclude Include="software\rx_fluid_nios\cond_def_head.h" />
-    <ClInclude Include="software\rx_fluid_nios\fifo.h" />
-    <ClInclude Include="software\rx_fluid_nios\fpga_def_fluid.h" />
-    <ClInclude Include="software\rx_fluid_nios\heater.h" />
-    <ClInclude Include="software\rx_fluid_nios\i2c.h" />
-    <ClInclude Include="software\rx_fluid_nios\ink_ctrl.h" />
-    <ClInclude Include="software\rx_fluid_nios\log.h" />
-    <ClInclude Include="software\rx_fluid_nios\main.h" />
-    <ClInclude Include="software\rx_fluid_nios\MAX31865.h" />
-    <ClInclude Include="software\rx_fluid_nios\nios_def_fluid.h" />
-    <ClInclude Include="software\rx_fluid_nios\nios_def_head.h" />
-    <ClInclude Include="software\rx_fluid_nios\pid.h" />
-    <ClInclude Include="software\rx_fluid_nios\pid_old.h" />
-    <ClInclude Include="software\rx_fluid_nios\pio.h" />
-    <ClInclude Include="software\rx_fluid_nios\pres.h" />
-    <ClInclude Include="software\rx_fluid_nios\rx_ink_common.h" />
-    <ClInclude Include="software\rx_fluid_nios\timer.h" />
-    <ClInclude Include="software\rx_fluid_nios\trprintf.h" />
-    <ClInclude Include="software\rx_fluid_nios\version.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="software\rx_fluid_nios\readme.txt" />
-    <Text Include="software\rx_fluid_nios\version.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

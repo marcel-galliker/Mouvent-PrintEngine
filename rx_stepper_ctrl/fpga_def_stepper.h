@@ -54,33 +54,38 @@ typedef struct
 	UINT32	res_24;
 	UINT32	res_28;
 	UINT32	res_2c;
-
-	UINT32	pio_alarm;	//		0030:
+	
+	UINT32	res_30;		//		0030:
 	UINT32	res_34;
 	UINT32	res_38;
 	UINT32	res_3c;
 
-	UINT32	pio_st;		//		0040:
+	UINT32	pio_alarm;	//		0040:
 	UINT32	res_44;
 	UINT32	res_48;
 	UINT32	res_4c;
 
-	UINT32	res_50;		//		0050:
+	UINT32	pio_st;		//		0050:
 	UINT32	res_54;
 	UINT32	res_58;
 	UINT32	res_5c;
 
 	UINT32	spi_powerstep[MOTOR_CNT];	//	0060: 
+	UINT32	res_64;
+	UINT32	res_68;
+	UINT32	res_6c;
+	
+	UINT32	res_70;	//	0070: 
 	UINT32	res_74;
 	UINT32	res_78;
 	UINT32	res_7c;
-	
-	UINT32	pio_pwm_on;	//	0080: output 32 bit
+
+	UINT32	res_80;	//	0080: 
 	UINT32	res_84;
 	UINT32	res_88;
 	UINT32	res_8c;
-
-	UINT32	pio_pwm_off;	//	0090: output 32 bit
+	
+	UINT32	res_90;	//	0090: 
 	UINT32	res_94;
 	UINT32	res_98;
 	UINT32	res_9c;
@@ -153,8 +158,8 @@ typedef struct
 	BYTE	res_61;
 	BYTE	res_62;
 	BYTE	res_63;
-	UINT32	res_64;				//      0064	
-	UINT32  res_68;				//      0068 
+	INT32	pos_rising;			//      0064:
+	INT32	pos_falling;		//      0068:
 	UINT32	res_6c;				//      006c 				
 } SMotStat;
 
@@ -171,18 +176,21 @@ typedef struct
 	UINT32	input;			//      0010: [12 Bit]
 	UINT32	analog_in[4];	//      0014: [16 Bit]
 	UINT32	voltage_3v3;	//      0024: [16 Bit]	3.3V 
-	UINT32	voltage_24v;	//      0024: [16 Bit]	24.0V
-	UINT32	current_24v;	//      0024: [16 Bit]  24.0V Current
+	UINT32	voltage_24v;	//      0028: [16 Bit]	24.0V
+	UINT32	current_24v;	//      002C: [16 Bit]  24.0V Current
 	UINT32	temp;			//      0030: [16 Bit]
 	UINT32	moving;			//      0034: [ 1 Bit] 
-	UINT32	res_38;			//      0038 
+	UINT32	watchdog_err;	//      0038 
 	UINT32	res_3C;			//      003C
 	
 	//--- motor ----------------------------------
-	SMotStat	statMot[MOTOR_CNT];					//
+	SMotStat	statMot[MOTOR_CNT]; //	0040 // size 0x30*5=F0
+
+	//--- analog pulse counter -----------------------------
+	UINT32	adc_cnt[8];		//       130 // size 0x20
 
 	//--- reserved ------------------
-	UINT32	res_130_200[(0x200-0x130)/4];	// FF202130 - FF2021ff
+	UINT32	res_130_200[(0x200-0x150)/4];	// FF202130 - FF2021ff
 } SFpgaStat;
 
 //--- SMove -----------------------------------------
@@ -246,7 +254,8 @@ typedef struct
 	//--- moves ---------------------------------------
 	UINT32	moveCnt;			//	     0170: [8 Bit]
 	UINT32  stop_mux;			//	     0174: [5 Bit] choose other motors to stop also
-	UINT32  res_178;			//	     0178:
+	//--- Disable mux for sensor = 1
+	UINT32  disable_mux_in;		//	     0178: [1 Bit]
 	UINT32  res_17c;			//	     017c:
 } SMotCfg;
 
@@ -266,14 +275,18 @@ typedef struct
 	UINT32	v24_standby;	//       020: [ 1 Bit]
 	UINT32	mot_bwd;		//       024: [ 5 Bit] Direction of Motor movement, 5 bit for 5 motors
 	UINT32	adc_rst;		//       028: resets adc
-	UINT32	res_10C;		//       02C: 
-	UINT32	res_110;		//       030: 
+	UINT32	reset_err;		//       02C: 
+	UINT32	reset_cnt;		//       030: 
 	UINT32	res_114;		//       034: 
 	UINT32	res_118;		//       038: 
 	UINT32	res_11C;		//       03C:	
 	
 	//--- motor -----------------------------
-	SMotCfg	cfg		[MOTOR_CNT];	// 040 + 0x0080
+	SMotCfg	cfg		[MOTOR_CNT];	// 040 + 0x0060*5 // size 0x01E0
+
+	//--- analog pulse counter -----------------------------
+	UINT32	adc_thresh[8];		//       220 // size 0x20
+	UINT32	pwm_output[4];		//       240 // size 0x20 // pwm exits the highest 4 outputs
 } SFpgaPar;
 
 //--- SFpgaEncoder ---------------------------------------------
@@ -298,8 +311,8 @@ typedef struct
 typedef struct 
 {
 	SFpgaQSys		*qsys;
-	SFpgaStat		*stat;
-	SFpgaPar		*par;
+	SFpgaStat		*stat; // 0x200
+	SFpgaPar		*par;  // 0x220
 	SMove			*move;		// [MOTOR_CNT][MOVE_CNT];
 	SFpgaEncoder	*encoder;	// [ENCODER_CNT]
 } SStepperFpga;

@@ -29,7 +29,7 @@ int spool_set_layout(SLayoutDef *playout, char *dataPath);
 int spool_set_filedef(SFileDef  *pfileDef);
 int spool_set_counter(SCounterDef  *pctrDef);
 int spool_send_msg(void *msg);
-int spool_send_msg_2(UINT32 cmd, int dataSize, void *data);
+int spool_send_msg_2(UINT32 cmd, int dataSize, void *data, int errmsg);
 int spool_send_test_data(int headNo, char *str);
 int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT32 lengthPx, INT32 pgMode, INT32 pgDist, UINT8 lengthUnit, int variable, int scanMode, int clearBlockUsed);
 // int spool_print_empty(void);

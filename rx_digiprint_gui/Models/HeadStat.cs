@@ -78,7 +78,11 @@ namespace RX_DigiPrint.Models
         private UInt32 _Err;
         public UInt32 Err
         {
-            get { return _Err; }
+            get 
+            {
+                if (RxGlobals.PrinterProperties.Host_Name.StartsWith("TEST-")) return 0;
+                else return _Err; 
+            }
             set { SetProperty(ref _Err, value); }
         }
 
@@ -140,13 +144,14 @@ namespace RX_DigiPrint.Models
         }
 
         //--- Property Property -------------------------------------------
+        /*
         private UInt32 _TempFpga;
         public UInt32 TempFpga
         {
             get { return _TempFpga; }
             set { SetProperty(ref _TempFpga, value); }
         }
-        
+        */
         //--- Property Flow ---------------------------------------
         private Int32 _Flow;
         public Int32 Flow
@@ -163,12 +168,28 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _PresIn, value); }
         }
 
+        //--- Property PresMax ---------------------------------------
+        private Int32 _PresIn_max;
+        public Int32 PresIn_max
+        {
+            get { return _PresIn_max; }
+            set { SetProperty(ref _PresIn_max, value); }
+        }
+
         //--- Property PresIn ---------------------------------------
         private Int32 _PresIn_diff;
         public Int32 PresIn_diff
         {
             get { return _PresIn_diff; }
             set { SetProperty(ref _PresIn_diff, value); }
+        }
+
+        //--- Property PresIn_str ---------------------------------------
+        private string _PresIn_str;
+        public string PresIn_str
+        {
+            get { return _PresIn_str; }
+            set { SetProperty(ref _PresIn_str, value); }
         }
 
         //--- Property PresOut ---------------------------------------
@@ -202,7 +223,7 @@ namespace RX_DigiPrint.Models
             get { return _Meniscus_diff; }
             set { SetProperty(ref _Meniscus_diff, value); }
         }
-
+        
         //--- Property PumpSpeed ---------------------------------------
         private UInt32 _PumpSpeed;
         public UInt32 PumpSpeed
@@ -218,7 +239,7 @@ namespace RX_DigiPrint.Models
             get 
             {
                 if (_PumpFeedback==TcpIp.INVALID_VALUE) return TcpIp.INVALID_VALUE;
-                else                                    return _PumpFeedback * 60 / 100; 
+                else                                    return _PumpFeedback; 
             }
             set { SetProperty(ref _PumpFeedback, value); }
         }
@@ -247,7 +268,7 @@ namespace RX_DigiPrint.Models
 	    }
 
         //--- SetItem ----------------------------------------------
-        public void SetItem(int no, TcpIp.SHeadStat item, UInt32 tempFpga, Int32 flow)
+        public void SetItem(int no, TcpIp.SHeadStat item, Int32 tempFpga, Int32 flow)
         {   
             List<RxEnum<int>> list = new EN_ColorCodeList().List;
             HeadNo  = no;
@@ -286,10 +307,13 @@ namespace RX_DigiPrint.Models
             TempHead    = item.tempHead;
             TempCond    = item.tempCond;
             PresIn      = item.presIn;
+            PresIn_max  = item.presIn_max;
             PresIn_diff = item.presIn_diff;
+            if (item.presIn_max==TcpIp.INVALID_VALUE) PresIn_str = string.Format("~{0}", HeadVal_Converter10._convert(PresIn_diff));
+            else                                      PresIn_str = string.Format("^{0}", HeadVal_Converter10._convert(PresIn_max)); 
             PresOut     = item.presOut;
             PresOut_diff = item.presOut_diff;
-            Meniscus    = item.meniscus;
+            Meniscus     = item.meniscus;
             Meniscus_diff= item.meniscus_diff;
             PumpSpeed   = item.pumpSpeed; 
             PumpFeedback= item.pumpFeedback;
@@ -305,7 +329,7 @@ namespace RX_DigiPrint.Models
             }
             CtrlMode    = item.ctrlMode;
 
-            TempFpga    = tempFpga;
+   //         TempFpga    = tempFpga;
             Flow        = flow;
         }
 

@@ -209,7 +209,7 @@ namespace RX_DigiPrint.Models
                     string[] val = list[n].Split('=');
                     if (val[0].Equals("STA_MACHINE_STATE"))
                     {
-                        int state=Convert.ToInt32(val[1]);
+                        int state=Rx.StrToInt32(val[1]);
                         InReferencing = (state==13);
                         InWebIn       = (state==9);
                     }

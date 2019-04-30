@@ -34,6 +34,7 @@
 #include "rip_clnt.h"
 #include "step_ctrl.h"
 #include "boot_svr.h"
+#include "cleaf_orders.h"
 #include "gui_msg.h"
 
 //--- prototypes ---------------------------------------------------
@@ -70,6 +71,7 @@ static void _do_get_ink_def		(RX_SOCKET socket);
 static void _do_head_fluidCtrlMode(RX_SOCKET socket, SFluidCtrlCmd* pmsg);
 static void _do_fluidCtrlMode	  (RX_SOCKET socket, SFluidCtrlCmd* pmsg);
 static void _do_fluid_pressure	  (RX_SOCKET socket, SValue*		pmsg);
+static void _do_scales_tara		  (RX_SOCKET socket, SValue*        pmsg);
 
 static void _do_get_printer_cfg	(RX_SOCKET socket);
 static void _do_set_printer_cfg	(RX_SOCKET socket, SPrinterCfgMsg *pmsg);
@@ -148,9 +150,7 @@ int handle_gui_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sende
 		case CMD_FLUID_CTRL_MODE:	   _do_fluidCtrlMode(socket, (SFluidCtrlCmd*) pmsg);				break;
 		case CMD_FLUID_PRESSURE:	   _do_fluid_pressure(socket, (SValue*)&phdr[1]);					break;
 
-		case CMD_SCALES_CALIBRATE:	 fluid_scales_calibrate(socket, (SScalesCalibrateCmd* )pmsg);		break;
-		case CMD_SCALES_SAVE_CFG:	 fluid_scales_calibrate(socket, (SScalesCalibrateCmd* )pmsg);		break;
-		case CMD_SCALES_LOAD_CFG:	 fluid_scales_calibrate(socket, (SScalesCalibrateCmd* )pmsg);		break;
+		case CMD_SCALES_TARA:		_do_scales_tara(socket, (SValue*)&phdr[1]);							break;				
 			
 		case CMD_GET_PRINTER_CFG:	_do_get_printer_cfg(socket);										break;
 		case CMD_SET_PRINTER_CFG:	_do_set_printer_cfg(socket, (SPrinterCfgMsg*) pmsg);				break;
@@ -175,6 +175,10 @@ int handle_gui_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sende
 		case CMD_ENCODER_UV_ON:		enc_uv_on();														break;
 		case CMD_ENCODER_UV_OFF:	enc_uv_off();														break;
 
+		case CMD_CO_SET_ORDER:		co_set_order((char*)&phdr[1]);										break;
+		case CMD_CO_SET_ROLL:		co_set_roll((SValue*)&phdr[1]);										break;
+		case CMD_CO_SET_OPERATOR:	co_set_operator((char*)&phdr[1]);									break;
+			
 		default: Error(WARN, 0, "Unknown Command 0x%08x", phdr->msgId);
 		}
 	}
@@ -239,7 +243,8 @@ static void _do_evt_confirm(RX_SOCKET socket)
 //--- _do_restart_main -----------------------------------------------------------------------
 static void _do_restart_main(RX_SOCKET socket)
 {
-    TrPrintfL(TRUE, "_do_restart_main");              
+    TrPrintfL(TRUE, "_do_restart_main");
+	Error(LOG, 0, "Restarting main");
 #ifdef linux
     system("/bin/systemctl restart radex.service");
     exit(100);
@@ -271,6 +276,7 @@ static void _do_get_evt(RX_SOCKET socket)
 static void _do_req_log(RX_SOCKET socket, SLogReqMsg *pmsg)
 {
 	int i;
+	int last;
 	int cnt;
 	SLogReqMsg	reply;
 	SLogMsg		msg;
@@ -286,6 +292,7 @@ static void _do_req_log(RX_SOCKET socket, SLogReqMsg *pmsg)
 	reply.hdr.msgId	 = REP_REQ_LOG;
 	reply.first		 = pmsg->first;
 	reply.count		 = log_get_item_cnt(log); 
+	last			 = log_get_last_item_no(log);
 
 	if (*pmsg->find)
 	{
@@ -309,7 +316,7 @@ static void _do_req_log(RX_SOCKET socket, SLogReqMsg *pmsg)
 
 	msg.hdr.msgLen=sizeof(msg);
 	msg.hdr.msgId =EVT_GET_LOG;
-	for(i = reply.first, cnt = pmsg->count; cnt-- && log_get_item(log, i, &msg.log)==REPLY_OK; i++)
+	for(i = last-reply.first-1, cnt = pmsg->count; cnt-- && log_get_item(log, i, &msg.log)==REPLY_OK; i--)
 	{
 //		TrPrintf(TRUE, "_do_req_log >>%s<<, size=%d", msg.log.formatStr, sizeof(msg.log));
 		gui_send_msg(socket, &msg);
@@ -327,7 +334,8 @@ static void _do_get_network(RX_SOCKET socket)
 //--- _do_set_network_cfg -----------------------------------------
 static void _do_set_network_cfg	(RX_SOCKET socket, SIfConfig *pmsg)
 {
-	net_set_config(pmsg);			
+	net_set_config(socket, pmsg);
+	ctrl_update_hostname();
 }
 
 //--- _do_set_network -----------------------------------------
@@ -580,6 +588,13 @@ static void _do_fluid_pressure(RX_SOCKET socket, SValue* pmsg)
 {
 	fluid_send_pressure(pmsg->no, pmsg->value);
 }
+
+//--- _do_scales_tara ----------------------------------------------
+static void _do_scales_tara(RX_SOCKET socket, SValue* pmsg)
+{
+	fluid_send_tara(pmsg->no);
+}
+
 //--- _do_get_printer_cfg --------------------------------------
 static void _do_get_printer_cfg(RX_SOCKET socket)
 {
@@ -611,6 +626,8 @@ static void _do_get_printer_cfg(RX_SOCKET socket)
 
 	if (socket==INVALID_SOCKET) gui_send_msg(socket, &msg);
 	else						sok_send(&socket, &msg);
+	
+	if (RX_Config.printer.type==printer_cleaf) co_send_order(socket);
 }
 
 //--- _do_set_printer_cfg --------------------------------------
@@ -658,7 +675,7 @@ static void _do_set_printer_cfg(RX_SOCKET socket, SPrinterCfgMsg* pmsg)
 	for (i=0; i<RX_Config.inkSupplyCnt; i++)
 	{
 		RX_Config.inkSupply[i].fluid_P        = fluid_P[i];
-		RX_Config.inkSupply[i].inkPressureSet = fluid_get_inkPressureSet(i);	
+		RX_Config.inkSupply[i].cylinderPresSet = fluid_get_cylinderPresSet(i);	
 	}
 	RX_Config.externalData = pmsg->externalData;
 	memcpy(&RX_Config.printer.offset,		&pmsg->offset,				sizeof(RX_Config.printer.offset));

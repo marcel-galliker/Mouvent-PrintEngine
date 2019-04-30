@@ -177,7 +177,6 @@
             <!-- Printed Queue ______________________________________________________-->
             <ig:XamGrid 
 			    x:Name="PrintedQueueGrid"
-                Grid.Row="2"
                 AutoGenerateColumns="False"
                 Style="{DynamicResource XamGrid-WideScroll-Style}"
                 CellStyle="{DynamicResource XamGridCellControlStyle}"

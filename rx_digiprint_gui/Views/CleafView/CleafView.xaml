@@ -25,6 +25,7 @@
 
         <StackPanel x:Name="SettingsTab" Grid.Row="2" Orientation="Horizontal" Background="Transparent">
             <common:RxRadioButton x:Name="RB_Main"          Content="Main" IsChecked="True"/>
+            <common:RxRadioButton x:Name="RB_Order"         Content="Order"/>
             <common:RxRadioButton x:Name="RB_Log"           Content="Log" />
             <common:RxRadioButton x:Name="RB_Cfg"           Content="Configuration" />
             <common:RxRadioButton x:Name="RB_PlcInfo"       Content="Plc Info"  Last="True"/>
@@ -46,6 +47,13 @@
             <cleaf:CleafServiceCommands Grid.Row="2" Grid.Column="3" x:Name="ServiveCmmands"/>
             <rx_uc:CleaningView Grid.Column="4" Width="300"/>
         </Grid>
+
+        <!--- Order ___________________________________________________________-->
+        <cleaf:CleafOrderView Grid.Row="3" 
+                      HorizontalAlignment="Stretch"
+                      VerticalAlignment="Stretch"
+                      Visibility="{Binding ElementName=RB_Order, Path=IsChecked, Converter={StaticResource IntToVisible_Converter}}"
+                      />
 
         <!--- LOG ___________________________________________________________-->
         <rx_uc:PlcLog Grid.Row="3" 

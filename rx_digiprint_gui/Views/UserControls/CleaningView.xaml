@@ -7,7 +7,7 @@
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
              mc:Ignorable="d"
              d:DesignHeight="300" d:DesignWidth="300">
-    
+
     <Grid VerticalAlignment="Top">
         <GroupBox x:Name="CapGroup" Header="Cleaning" Style="{StaticResource RxGroupBox}">
             <Grid>
@@ -30,7 +30,7 @@
                     <TextBlock Text="State: "/>
                     <TextBlock Text="{Binding State, Converter={StaticResource CleaningState_Converter}}"/>
                 </StackPanel>
-                <CheckBox Grid.Row="1" Content="STOP"  Style="{DynamicResource RxCommandButton}" Margin="10" Click="CapStop_clicked" FontWeight="Bold"/>
+                <CheckBox x:Name="Button_Stop" Grid.Row="1" Content="STOP"  Style="{DynamicResource RxCommandButton}" Margin="10" Click="CapStop_clicked" FontWeight="Bold"/>
                 <Grid Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2">
                     <StackPanel Orientation="Horizontal">
                         <Image  Source="../../Resources/Bitmaps/LED_GREEN.ico" Visibility="{Binding HeadUpInput_0,   Converter={StaticResource BoolToVisible_Converter}}" HorizontalAlignment="Left"/>
@@ -47,15 +47,15 @@
                     </StackPanel>
                 </Grid>
 
-                <CheckBox Grid.Row="2" Content="Ref"   Style="{DynamicResource RxCommandButton}" Margin="10" Click="CapReference_clicked"   IsEnabled="{Binding cmd_enabled}"/>
-                <CheckBox Grid.Row="3" Content="Up"    Style="{DynamicResource RxCommandButton}" Margin="10" Click="CapUp_clicked"          IsEnabled="{Binding cmd_enabled}"/>
-                <CheckBox Grid.Row="4" Content="Print" Style="{DynamicResource RxCommandButton}" Margin="10" Click="CapPrint_clicked"       IsEnabled="{Binding cmd_enabled}"/>
-                <CheckBox Grid.Row="5" Content="Cap"   Style="{DynamicResource RxCommandButton}" Margin="10" Click="CapCapping_clicked"     IsEnabled="{Binding cap_enabled}"/>
-                <CheckBox Grid.Row="6" Content="WIPE"  Style="{DynamicResource RxCommandButton}" Margin="10" Click="CapWiping_clicked"      x:Name="Button_Wipe"/>
-                
+                <CheckBox x:Name="Button_Ref"   Grid.Row="2" Content="Ref"   Style="{DynamicResource RxCommandButton}" Margin="10" Click="CapReference_clicked" />
+                <CheckBox x:Name="Button_Up"    Grid.Row="3" Content="Up"    Style="{DynamicResource RxCommandButton}" Margin="10" Click="CapUp_clicked"          IsEnabled="{Binding cmd_enabled}"/>
+                <CheckBox x:Name="Button_Print" Grid.Row="4" Content="Print" Style="{DynamicResource RxCommandButton}" Margin="10" Click="CapPrint_clicked"       IsEnabled="{Binding cmd_enabled}"/>
+                <CheckBox x:Name="Button_Cap"   Grid.Row="5" Content="Cap"   Style="{DynamicResource RxCommandButton}" Margin="10,10,0,10" Click="CapCapping_clicked"     IsEnabled="{Binding cap_enabled}" HorizontalAlignment="Left" Width="80"/>
+                <CheckBox x:Name="Button_Wipe"  Grid.Row="6" Content="WIPE"  Style="{DynamicResource RxCommandButton}" Margin="10" Click="CapWiping_clicked"        IsEnabled="{Binding cap_enabled}"/>
+
                 <TextBlock Grid.Row="7" Grid.Column="0" Text="Laser" VerticalAlignment="Center" FontSize="{StaticResource FontSizeStd}" Margin="5,0" x:Name="LaserTX"/>
                 <StackPanel Grid.Row="7" Grid.Column="1" Grid.ColumnSpan="3" Orientation="Horizontal" x:Name="LaserVal">
-                    <TextBlock Text="{Binding PosX, Converter={StaticResource HeadVal_ConverterTemp}}" VerticalAlignment="Center" FontSize="{StaticResource FontSizeStd}"/>
+                    <TextBlock Text="{Binding PosY, Converter={StaticResource HeadVal_ConverterTemp}}" VerticalAlignment="Center" FontSize="{StaticResource FontSizeStd}"/>
                     <TextBlock Text="mm" Margin="5,0"/>
                 </StackPanel>
 

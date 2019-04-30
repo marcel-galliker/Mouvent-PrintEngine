@@ -2,7 +2,6 @@
 using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Services;
 using RX_DigiPrint.Views.UserControls;
-using rx_rip_gui.Models;
 using System;
 using System.Collections.Generic;
 using System.Windows;
@@ -25,7 +24,7 @@ namespace RX_DigiPrint.Models
         public static RxInterface       RxInterface       = new RxInterface();
         public static RxBluetooth       Bluetooth         = new RxBluetooth();
         public static RxBtProdState     BtProdState       = new RxBtProdState();
-        public static StepperCrg        Stepper           = new StepperCrg();
+        public static StepperCfg        Stepper           = new StepperCfg();
         public static PrintSystem       PrintSystem       = new PrintSystem();
         public static InkFamilyList     InkFamilies       = new InkFamilyList();
         public static InkTypeList       InkTypes          = new InkTypeList();
@@ -39,8 +38,6 @@ namespace RX_DigiPrint.Models
         public static PreviewCash       PreviewCash       = new PreviewCash();
         public static HeadAdjustment    HeadAdjustment    = new HeadAdjustment();
         public static MaterialList      MaterialList      = new MaterialList();
-        public static PrEnvList         PrintEnv          = new PrEnvList();
-        public static TcpIp.SScaleStat[] Scales           = new TcpIp.SScaleStat[TcpIp.ScalesCnt];
         public static RxTextPad         Keyboard          = new RxTextPad(null);
         public static RxTaskSwitch      TaskSwitch        = new RxTaskSwitch();
         public static RxPopup           Popup;
@@ -48,5 +45,6 @@ namespace RX_DigiPrint.Models
         public static Window            MainWindow;
         public static Window            BluetoothLoginWnd;
         public static License           License           = new License();
+        public static CleafOrder        CleafOrder        = new CleafOrder();
     }
 }

@@ -17,10 +17,11 @@
 void pid_reset(SPID_par* pPID)
 {
 	pPID->diff_delay= 200; // in 10 ms clocks
-	pPID->diff_I 	= 0;
+	if (pPID->I) pPID->diff_I 	= -pPID->offset*1000/pPID->I;
 	pPID->diff_old 	= INVALID_VALUE;
 	if (pPID->norm <= 0) pPID->norm = 1;
 }
+
 
 /**
  ******************************************************************************
@@ -31,6 +32,7 @@ void pid_reset(SPID_par* pPID)
  ** \param [in] pPID   Pointer to PID instance
  ** 
  ******************************************************************************/
+
 void pid_calc(INT32 actVal, const INT32 setVal, SPID_par* pPID)
 {
 	INT32 diff;
@@ -45,15 +47,20 @@ void pid_calc(INT32 actVal, const INT32 setVal, SPID_par* pPID)
 		pPID->diff_old = diff;
 
 	//--- I-Value ----------------
-	if (pPID->diff_delay>0) pPID->diff_delay--; // delay to avoid adding very unstable values
-	else
+	if (pPID->I)
 	{
-		if ((pPID->val > pPID->val_min) && (pPID->val < pPID->val_max))
+		if (pPID->diff_delay>0) pPID->diff_delay--; // delay to avoid adding very unstable values
+		else
+		{
+			INT32 max=(pPID->val_max * 1000) / pPID->I;
 			pPID->diff_I += diff; // dt = 10 mS	 
+			if (pPID->diff_I >  max) pPID->diff_I =  max;
+			if (pPID->diff_I < -max) pPID->diff_I = -max;
+ 		}
 	}
 	
 	// pid function
-	val = (pPID->P * diff) / pPID->norm + (pPID->diff_I * pPID->I / 1000) + (pPID->D * (diff - pPID->diff_old));
+	val = (pPID->P * diff) / pPID->norm + (pPID->I * pPID->diff_I )/ 1000 + (pPID->D * (diff - pPID->diff_old));
 			
 	// regulate around the offset value
 	val += pPID->offset;

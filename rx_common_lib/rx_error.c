@@ -44,7 +44,7 @@ static ErrorHandler _OnError = NULL;
 //--- prototypes ---------------------------------------------------------------------------
 
 // static int  setDeviceStr(char *str, EDevice deviceType, int deviceNo);
-static void compose_message(EDevice deviceType, int deviceNo, int errNo, char *str, int strSize, const char *format, const BYTE *arg);
+void compose_message(EDevice deviceType, int deviceNo, int errNo, char *str, int strSize, const char *format, const BYTE *arg);
 // static int	errExists(EDevice deviceType, int deviceNo, int errNo);
 
 
@@ -208,7 +208,7 @@ static int setDeviceStr(char *str, EDevice deviceType, int deviceNo)
 
 
 //--- compose_message ---------------------------------------------------------
-static void compose_message(EDevice deviceType, int deviceNo, int errNo, char *str, int strSize, const char *format, const BYTE *arg)
+void compose_message(EDevice deviceType, int deviceNo, int errNo, char *str, int strSize, const char *format, const BYTE *arg)
 {
 	const char	*ch;
 	char	*res	= str;
@@ -476,6 +476,20 @@ int  ErrorFlag(ELogItemType type, const char *file, int line, UINT32 *flags, UIN
 	return ret;
 }
 
+//--- ErrorExFlag ----------------------------------------------------------------------------------
+int  ErrorExFlag(EDevice device, int no, ELogItemType type, const char *file, int line, UINT32 *flags, UINT32 flag, int errNo, const char *format, ...)
+{
+	int ret = REPLY_OK;
+	if (!((*flags) & flag))
+	{
+		va_list arglist;
+		va_start(arglist, format);
+		ret=error(device, no, type, file, line, errNo, format, NULL, arglist);
+		va_end(arglist);			
+		(*flags) |= flag; 
+	}
+	return ret;
+}
 
 //--- SlaveError --------------------------------------------------------------
 int SlaveError(EDevice device, int no, SLogItem *log)

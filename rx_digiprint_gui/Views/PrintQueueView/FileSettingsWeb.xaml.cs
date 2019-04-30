@@ -37,12 +37,12 @@ namespace RX_DigiPrint.Views.PrintQueueView
                 if (item.Variable || item.SrcPages>1)
                 { 
                     Length_Settings.Visibility = Visibility.Collapsed;
-                    Page_Settings.Visibility   = Visibility.Visible;
+                    Page_Settings.Visibility   = StartPageTxt.Visibility = StartPageNum.Visibility = Visibility.Visible;
                 }
                 else
                 {
                     Length_Settings.Visibility = Visibility.Visible;
-                    Page_Settings.Visibility   = Visibility.Collapsed;
+                    Page_Settings.Visibility   = StartPageTxt.Visibility = StartPageNum.Visibility = Visibility.Collapsed;
                 }
             }
         }
@@ -50,28 +50,30 @@ namespace RX_DigiPrint.Views.PrintQueueView
         //--- Save_Click --------------------------------------------------------------------
         private void Save_Click(object sender, RoutedEventArgs e)
         {
-            if (DataContext!=null)
-                (DataContext as PrintQueueItem).SendMsg(TcpIp.CMD_SET_PRINT_QUEUE);
+            PrintQueueItem item = DataContext as PrintQueueItem;
+            if (item!=null)
+            {
+                if (Page_Settings.Visibility==Visibility.Visible) item.ScanLength = 0;
+                item.SendMsg(TcpIp.CMD_SET_PRINT_QUEUE);
+            }
         }
 
         //--- Cancel_Click --------------------------------------------------------------------
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {
-            if (DataContext!=null) 
-                (DataContext as PrintQueueItem).SendMsg(TcpIp.CMD_GET_PRINT_QUEUE_ITM);
+            PrintQueueItem item = DataContext as PrintQueueItem;
+            if (item!=null) item.SendMsg(TcpIp.CMD_GET_PRINT_QUEUE_ITM);
         }
         
         //--- Save_Default_Click --------------------------------------------------------------------
         private void Save_Default_Click(object sender, RoutedEventArgs e)
         {
-            if (DataContext!=null)
+            PrintQueueItem item = DataContext as PrintQueueItem;
+            if (item!=null)
             {
-                PrintQueueItem item = DataContext as PrintQueueItem;
-                if (item!=null)
-                {
-                    item.SendMsg(TcpIp.CMD_SET_PRINT_QUEUE);
-                    item.SaveDefaults(false);
-                }
+                if (Page_Settings.Visibility==Visibility.Visible) item.ScanLength = 0;
+                item.SendMsg(TcpIp.CMD_SET_PRINT_QUEUE);
+                item.SaveDefaults(false);
             }
         }
     }

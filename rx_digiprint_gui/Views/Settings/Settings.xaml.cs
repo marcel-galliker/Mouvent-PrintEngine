@@ -21,10 +21,6 @@ namespace RX_DigiPrint.Views.Settings
     /// </summary>
     public partial class Settings : UserControl
     {
-        //--- menu commands -------------------
-
-        public  ICommand         CreateLogCmd   { get; private set; }
-
         //--- Animations ---------------------
         private static double time=300;
         private Storyboard                      _sb         = new Storyboard();
@@ -76,9 +72,6 @@ namespace RX_DigiPrint.Views.Settings
             close(true);
             
             _Timer = new Timer(OnTimer, this, -1, 0);
-
-            //--- menu commands -------------------------------
-             CreateLogCmd    = new RxCommand(OnCreateLog);
         }
 
         //--- bind_animation --------------------------------------------------
@@ -106,7 +99,7 @@ namespace RX_DigiPrint.Views.Settings
             DataContext = _Settings;
 
             FileVersionInfo info = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location);
-            DateTime date=File.GetCreationTime(Assembly.GetExecutingAssembly().Location);
+            DateTime date=File.GetLastWriteTime(Assembly.GetExecutingAssembly().Location);
             Version.Text = info.FileVersion;
             Date.Text    = string.Format("{0} {1} {2}", date.Day, Rx.MonthName[date.Month], date.Year);
             LocalIpAddr.Text = RxGlobals.RxInterface.LocalAddress;
@@ -136,6 +129,7 @@ namespace RX_DigiPrint.Views.Settings
             */
             _sb.Begin();
             _isOpen = true;
+            Button_Save.IsEnabled = true;
             RxGlobals.Timer.TimerFct += WlanTimer;
         }
 
@@ -189,6 +183,7 @@ namespace RX_DigiPrint.Views.Settings
                 _sb.Begin();
             }
             _isOpen = false;
+            Button_Save.IsEnabled = false;
         }
         
         private static void OnTimer(object state)
@@ -278,25 +273,6 @@ namespace RX_DigiPrint.Views.Settings
             if (RxMessageBox.YesNo("Windows Update", "Updating Windows!",  MessageBoxImage.Question, false))
             { 
                 Rx.StartProcess("C:\\Windows\\System32\\control.exe", "/name Microsoft.WindowsUpdate");
-            }
-        }
-
-        //--- OnCreateLog ---------------------------------------------------
-        private void OnCreateLog(object obj)
-        {
-            if (!RxGlobals.RxInterface.Connected)
-            {
-                RxMessageBox.YesNo("Log", "Not connected to printer.",  MessageBoxImage.Information, true);
-                return;
-            }
-                
-            Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
-            dlg.DefaultExt="xls";
-            if (dlg.ShowDialog()==true)
-            {                 
-                Maintenance m = new Maintenance();
-                if (m.CreateLog(dlg.FileName)) MessageBox.Show("Log file failed");
-                else                           MessageBox.Show("Log file created");
             }
         }
 

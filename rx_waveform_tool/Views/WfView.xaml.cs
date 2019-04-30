@@ -34,10 +34,11 @@ namespace RxWfTool.Views
             set 
             { 
                 _WfDef = value; 
-                WfDefList.ItemsSource = _WfDef.List;
-                Graph.WfDef = _WfDef;
-                InkDef.DataContext = _WfDef.Ink;
-                GreyLevelDef.GreyLevel = _WfDef.Ink.GreyLevel;
+                WfDefList.ItemsSource   = _WfDef.List;
+                Graph.WfDef             = _WfDef;
+                InkDef.DataContext      = _WfDef.Ink;
+                FlushTime.DataContext   = _WfDef.Ink;
+                GreyLevelDef.GreyLevel  = _WfDef.Ink.GreyLevel;
                 Performance.DataContext = _WfDef;
             }
         }

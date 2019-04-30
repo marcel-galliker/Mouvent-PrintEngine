@@ -27,7 +27,7 @@
             <TextBlock Grid.Row="1" Grid.Column="0" Text="Pressure"/>
             <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
                 <TextBlock Text="{Binding Pressure, Converter={StaticResource HeadVal_Converter10}}"/>
-                <TextBlock Text=" mBar"/>
+                <TextBlock Text=" Bar"/>
             </StackPanel>
         </Grid>
     </GroupBox>

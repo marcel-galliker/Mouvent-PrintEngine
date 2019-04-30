@@ -47,7 +47,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\_out\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;RX_DigiPrint</DefineConstants>
+    <DefineConstants>DEBUG;TRACE;RX_DigiPrint</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -304,6 +304,7 @@
     <Compile Include="Converters\BluetoothImg_Converter.cs" />
     <Compile Include="Converters\BoolImg_Converter.cs" />
     <Compile Include="Converters\BoolToInVisible_Converter.cs" />
+    <Compile Include="Converters\CleafQuality_Converter.cs" />
     <Compile Include="Converters\CleaningState_Converter.cs" />
     <Compile Include="Converters\ColorCode_Str.cs" />
     <Compile Include="Converters\Copies_Converter.cs" />
@@ -316,6 +317,7 @@
     <Compile Include="Converters\CheckBox_Converter.cs" />
     <Compile Include="Converters\FileTypeImage_Converter.cs" />
     <Compile Include="Converters\Filler_Converter.cs" />
+    <Compile Include="Converters\FlashButtonVisible_Converter.cs" />
     <Compile Include="Converters\HeadValve_Converter.cs" />
     <Compile Include="Converters\HeadVal_Converter.cs" />
     <Compile Include="Converters\InkType_Color.cs" />
@@ -333,6 +335,7 @@
     <Compile Include="Converters\Or_Converter.cs" />
     <Compile Include="Converters\PagesVisible_Converter.cs" />
     <Compile Include="Converters\PlcLogState_Converter.cs" />
+    <Compile Include="Converters\PuttyVisible_Converter.cs" />
     <Compile Include="Converters\RotateRect_Converter.cs" />
     <Compile Include="Converters\ScanLengt_Converter.cs" />
     <Compile Include="Converters\StepperStateImg_Converter.cs" />
@@ -359,6 +362,9 @@
     <Compile Include="Helpers\RxWorkBook.cs" />
     <Compile Include="Helpers\RxXamGrid.cs" />
     <Compile Include="Models\Chiller.cs" />
+    <Compile Include="Models\CleafFlexo.cs" />
+    <Compile Include="Models\CleafOrder.cs" />
+    <Compile Include="Models\CleafRoll.cs" />
     <Compile Include="Models\Comsumables.cs" />
     <Compile Include="Models\DeviceNumbers.cs" />
     <Compile Include="Models\Dir.cs" />
@@ -367,6 +373,7 @@
     <Compile Include="Models\Enums\BarcodeType.cs" />
     <Compile Include="Models\Enums\BoxType.cs" />
     <Compile Include="Models\Enums\EN_CleafCuttingInspection.cs" />
+    <Compile Include="Models\Enums\EN_Collate.cs" />
     <Compile Include="Models\Enums\EN_DeviceNumbers.cs" />
     <Compile Include="Models\Enums\EN_RectoVerso.cs" />
     <Compile Include="Models\Enums\EN_OnOffAuto.cs" />
@@ -433,17 +440,30 @@
     <Compile Include="Services\RxBtDef.cs" />
     <Compile Include="Services\RxBtMsgHandler.cs" />
     <Compile Include="Services\RxCrypto.cs" />
+    <Compile Include="Services\RxFlz.cs" />
     <Compile Include="Views\CleafView\CleafCommands.xaml.cs">
       <DependentUpon>CleafCommands.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\CleafView\CleafConfig.xaml.cs">
       <DependentUpon>CleafConfig.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\CleafView\CleafFlexoView.xaml.cs">
+      <DependentUpon>CleafFlexoView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\CleafView\CleafMachine.xaml.cs">
       <DependentUpon>CleafMachine.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\CleafView\CleafOpenOrder.xaml.cs">
+      <DependentUpon>CleafOpenOrder.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\CleafView\CleafOrderView.xaml.cs">
+      <DependentUpon>CleafOrderView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\CleafView\CleafPrepare.xaml.cs">
       <DependentUpon>CleafPrepare.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\CleafView\CleafRolls.xaml.cs">
+      <DependentUpon>CleafRolls.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\CleafView\CleafServiceCommands.xaml.cs">
       <SubType>Code</SubType>
@@ -479,6 +499,39 @@
     <Compile Include="Views\DP803View\DP803View.xaml.cs">
       <DependentUpon>DP803View.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\LB702WBView\LB702WBView.xaml.cs">
+      <DependentUpon>LB702WBView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LB702WBView\LB702WB_Cmd.xaml.cs">
+      <DependentUpon>LB702WB_Cmd.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LB702WBView\LB702WB_Machine.xaml.cs">
+      <DependentUpon>LB702WB_Machine.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LB702WBView\LB702WB_ParDryer.xaml.cs">
+      <DependentUpon>LB702WB_ParDryer.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LB702WBView\LB702WB_ParFlexo.xaml.cs">
+      <DependentUpon>LB702WB_ParFlexo.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LB702WBView\LB702WB_ParMain.xaml.cs">
+      <DependentUpon>LB702WB_ParMain.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LB702WBView\LB702WB_ParPrinter.xaml.cs">
+      <DependentUpon>LB702WB_ParPrinter.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LB702WBView\LB702WB_ParRewinder.xaml.cs">
+      <DependentUpon>LB702WB_ParRewinder.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LB702WBView\LB702WB_ParUnwinder.xaml.cs">
+      <DependentUpon>LB702WB_ParUnwinder.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LB702WBView\LB702WB_Prepare.xaml.cs">
+      <DependentUpon>LB702WB_Prepare.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LB702WBView\LB702WB_Status.xaml.cs">
+      <DependentUpon>LB702WB_Status.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\MiniLabelView\MiniLabelView.xaml.cs">
       <DependentUpon>MiniLabelView.xaml</DependentUpon>
     </Compile>
@@ -509,6 +562,9 @@
     </Compile>
     <Compile Include="Views\PrintSystemView\AdjustmentHelp.xaml.cs">
       <DependentUpon>AdjustmentHelp.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PrintSystemView\CleafStepperGrid.xaml.cs">
+      <DependentUpon>CleafStepperGrid.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\PrintSystemView\HeadAdjustment.xaml.cs">
       <DependentUpon>HeadAdjustment.xaml</DependentUpon>
@@ -600,6 +656,12 @@
     <Compile Include="Views\PrintQueueView\PageNumberView.xaml.cs">
       <DependentUpon>PageNumberView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\UserControls\FlushWindow.xaml.cs">
+      <DependentUpon>FlushWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UserControls\InkLevel.xaml.cs">
+      <DependentUpon>InkLevel.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\UserControls\PlcStatus.xaml.cs">
       <DependentUpon>PlcStatus.xaml</DependentUpon>
     </Compile>
@@ -628,9 +690,6 @@
     </Compile>
     <Compile Include="Views\EnevtView.xaml.cs">
       <DependentUpon>EnevtView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\FrontPage\FrontPage.xaml.cs">
-      <DependentUpon>FrontPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\UserControls\ConsumablesView.xaml.cs">
       <DependentUpon>ConsumablesView.xaml</DependentUpon>
@@ -701,9 +760,6 @@
     </Compile>
     <Compile Include="Views\UserControls\RxTaskSwitch.xaml.cs">
       <DependentUpon>RxTaskSwitch.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\UserControls\ScaleCalibration.xaml.cs">
-      <DependentUpon>ScaleCalibration.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\UserControls\SetComputerNameWindow.xaml.cs">
       <DependentUpon>SetComputerNameWindow.xaml</DependentUpon>
@@ -782,13 +838,29 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Views\CleafView\CleafFlexoView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\CleafView\CleafMachine.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\CleafView\CleafOpenOrder.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\CleafView\CleafOrderView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\CleafView\CleafPrepare.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\CleafView\CleafRolls.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\CleafView\CleafServiceCommands.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -838,9 +910,49 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Views\FrontPage\FrontPage.xaml">
+    <Page Include="Views\LB702WBView\LB702WBView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LB702WBView\LB702WB_Cmd.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LB702WBView\LB702WB_Machine.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\LB702WBView\LB702WB_ParDryer.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LB702WBView\LB702WB_ParFlexo.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LB702WBView\LB702WB_ParMain.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LB702WBView\LB702WB_ParPrinter.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LB702WBView\LB702WB_ParRewinder.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LB702WBView\LB702WB_ParUnwinder.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LB702WBView\LB702WB_Prepare.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LB702WBView\LB702WB_Status.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\MiniLabelView\MiniLabelView.xaml">
       <SubType>Designer</SubType>
@@ -885,6 +997,10 @@
     <Page Include="Views\PrintSystemView\AdjustmentHelp.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\PrintSystemView\CleafStepperGrid.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\PrintSystemView\HeadAdjustment.xaml">
       <SubType>Designer</SubType>
@@ -1010,6 +1126,14 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\UserControls\FlushWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UserControls\InkLevel.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\UserControls\PlcLog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -1123,10 +1247,6 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\UserControls\ScaleCalibration.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Views\UserControls\SetComputerNameWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -1154,6 +1274,10 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Resource Include="Resources\Bitmaps\PageDown.ico" />
+    <Resource Include="Resources\Bitmaps\PageUp.ico" />
+    <Resource Include="Resources\Bitmaps\LB702\LB702_WB2.png" />
+    <Resource Include="Resources\Bitmaps\LB702\LB702_WB.jpg" />
     <Resource Include="Resources\Bitmaps\DP803\DP803.jpg" />
     <Resource Include="mouvent.ico" />
     <EmbeddedResource Include="Properties\Licenses.licx" />
@@ -1219,16 +1343,6 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Bitmaps\Confirm.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\rx_common_lib_cs\rx_common_lib_cs.csproj">
-      <Project>{97412d0e-6cd1-4e4e-92f9-1460deedb44a}</Project>
-      <Name>rx_common_lib_cs</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\rx_rip_gui\rx_rip_gui.csproj">
-      <Project>{9b1f3f26-48a5-4a6f-a21d-4461baf22ea8}</Project>
-      <Name>rx_rip_gui</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <PublishFile Include="InfragisticsWPF4.Controls.Editors.XamComboEditor.v17.2">
@@ -1420,6 +1534,12 @@
     <Resource Include="Resources\Bitmaps\Tex\TX801-CleaningStation.tif" />
     <Resource Include="Resources\Bitmaps\WinSCP.ico" />
     <Resource Include="Resources\Bitmaps\BarcodeFile.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\rx_common_lib_cs\rx_common_lib_cs.csproj">
+      <Project>{97412d0e-6cd1-4e4e-92f9-1460deedb44a}</Project>
+      <Name>rx_common_lib_cs</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

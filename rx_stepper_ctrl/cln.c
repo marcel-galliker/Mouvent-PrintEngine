@@ -104,6 +104,9 @@ void cln_init(void)
 		_ParScrew_ref[i].accel			= 10000;
 		_ParScrew_ref[i].current		= 7.0;
 		_ParScrew_ref[i].stop_mux		= 0;
+		_ParScrew_ref[i].dis_mux_in		= 0;
+		_ParScrew_ref[i].stop_in		= ESTOP_UNUSED;
+		_ParScrew_ref[i].stop_level		= 0; // stopp when sensor off
 		_ParScrew_ref[i].estop_in		= 2 + i;	// Check Inputs 2..5
 		_ParScrew_ref[i].estop_level	= 0; // stopp when sensor off
 		_ParScrew_ref[i].checkEncoder	= FALSE; //TRUE;
@@ -113,6 +116,9 @@ void cln_init(void)
 	_ParScrew_turn.accel		= 5000;
 	_ParScrew_turn.current		= 7.0; // approx 0.9N; max 1.4 N
 	_ParScrew_turn.stop_mux		= 0;
+	_ParScrew_turn.dis_mux_in	= 0;
+	_ParScrew_turn.stop_in		= ESTOP_UNUSED;
+	_ParScrew_turn.stop_level	= 0;
 	_ParScrew_turn.estop_in		= ESTOP_UNUSED;
 	_ParScrew_turn.estop_level	= 0;
 	_ParScrew_turn.checkEncoder	= FALSE; //TRUE;
@@ -123,6 +129,9 @@ void cln_init(void)
 	_ParCap_ref.accel		 = 500;
 	_ParCap_ref.current		 = 300.0; // 400.0 = 4A // Amps/Phase Parallel: 4.24A // fot Tests: 50
 	_ParCap_ref.stop_mux	 = 0;
+	_ParCap_ref.dis_mux_in	 = 0;
+	_ParCap_ref.stop_in      = ESTOP_UNUSED; // Check Input 0
+	_ParCap_ref.stop_level   = 0; // stopp when sensor on
 	_ParCap_ref.estop_in     = CLN_STORED_IN; // Check Input 0
 	_ParCap_ref.estop_level  = 1; // stopp when sensor on
 	_ParCap_ref.checkEncoder = TRUE;
@@ -131,6 +140,9 @@ void cln_init(void)
 	_ParCap_drive.accel			= 3000;
 	_ParCap_drive.current		= 400.0; // fot Tests: 50
 	_ParCap_drive.stop_mux		= 0;
+	_ParCap_drive.dis_mux_in	= 0;
+	_ParCap_drive.stop_in		= ESTOP_UNUSED;
+	_ParCap_drive.stop_level	= 0;
 	_ParCap_drive.estop_in		= ESTOP_UNUSED;
 	_ParCap_drive.estop_level	= 1;
 	_ParCap_drive.checkEncoder	= TRUE;
@@ -139,6 +151,9 @@ void cln_init(void)
 	_ParCap_wipe.accel			= 2000;
 	_ParCap_wipe.current		= 300.0; // fot Tests: 50
 	_ParCap_wipe.stop_mux		= 0;
+	_ParCap_wipe.dis_mux_in		= 0;
+	_ParCap_wipe.estop_in		= ESTOP_UNUSED;
+	_ParCap_wipe.estop_level	= 0;
 	_ParCap_wipe.estop_in		= ESTOP_UNUSED;
 	_ParCap_wipe.estop_level	= 1;
 	_ParCap_wipe.checkEncoder	= TRUE;
@@ -151,25 +166,25 @@ void cln_main(int ticks, int menu)
 	motor_main(ticks, menu);
 	
 	// --- read Inputs ---
-	RX_TestTableStatus.info.cln_in_stored = fpga_input(CLN_STORED_IN); // Reference Sensor
+	RX_TestTableStatus.info.x_in_ref	= fpga_input(CLN_STORED_IN); // Reference Sensor
 	RX_TestTableStatus.info.cln_screw_0 = fpga_input(CLN_SCREW_DOWN_0); // Screwhead mot0 is pressed down
 	RX_TestTableStatus.info.cln_screw_1 = fpga_input(CLN_SCREW_DOWN_1); // Screwhead mot1 is pressed down
 	RX_TestTableStatus.info.cln_screw_2 = fpga_input(CLN_SCREW_DOWN_2); // Screwhead mot2 is pressed down
 	RX_TestTableStatus.info.cln_screw_3 = fpga_input(CLN_SCREW_DOWN_3); // Screwhead mot3 is pressed down
-	RX_TestTableStatus.info.cln_in_capping = fpga_input(CLN_CAPPING_IN); // Sensor for cleaning station beeing in capping pos
+	RX_TestTableStatus.info.x_in_cap	= fpga_input(CLN_CAPPING_IN); // Sensor for cleaning station beeing in capping pos
 	RX_TestTableStatus.posZ = motor_get_step(MOTOR_CAP) * 1000000.0 / CAP_STEPS_PER_METER;
 	
 	
 	// --- Set Position Flags ---
 	RX_TestTableStatus.info.z_in_ref  = ((RX_TestTableStatus.info.ref_done == 1)
 											&& (abs(RX_TestTableStatus.posZ - POS_STORED_UM) <= 10) 
-											&& (RX_TestTableStatus.info.cln_in_stored == 1) 
-											&& (RX_TestTableStatus.info.cln_in_capping == 0));
+											&& (RX_TestTableStatus.info.x_in_ref == 1) 
+											&& (RX_TestTableStatus.info.x_in_cap == 0));
 	RX_TestTableStatus.info.z_in_print  = RX_TestTableStatus.info.z_in_ref;
 	RX_TestTableStatus.info.z_in_cap    = ((RX_TestTableStatus.info.ref_done == 1)
 											&& (abs(RX_TestTableStatus.posZ - POS_PRINTHEADS_UM) <= 10) 
-											&& (RX_TestTableStatus.info.cln_in_capping == 1) 
-											&& (RX_TestTableStatus.info.cln_in_stored == 0));
+											&& (RX_TestTableStatus.info.x_in_cap == 1) 
+											&& (RX_TestTableStatus.info.x_in_ref == 0));
 	
 	// --- set positions False while moving ---
 	if (RX_TestTableStatus.info.moving) //  && (Fpga.stat->moving != 0))
@@ -206,14 +221,14 @@ void cln_main(int ticks, int menu)
 		if (_CmdRunning == CMD_CLN_REFERENCE) 
 		{
 			rx_sleep(1000); // wait 1s on transport to stand still
-			RX_TestTableStatus.info.cln_in_stored = fpga_input(CLN_STORED_IN); // Reference Sensor
+			RX_TestTableStatus.info.x_in_ref = fpga_input(CLN_STORED_IN); // Reference Sensor
 
 			if (motor_error(MOTOR_CAP))
 			{
 				RX_TestTableStatus.info.ref_done = FALSE;
 				Error(ERR_CONT, 0, "CLN: Command 0x%08x: triggers motor_error", _CmdRunning);
 			}
-			else if (RX_TestTableStatus.info.cln_in_stored)
+			else if (RX_TestTableStatus.info.x_in_ref)
 			{
 				motor_reset(MOTOR_CAP);				// reset position after referencing
 				RX_TestTableStatus.info.ref_done = TRUE;
@@ -277,7 +292,7 @@ void cln_main(int ticks, int menu)
 		// --- tasks ater move to pos 0 stored position, check ref sensor ---
 		if ((_CmdRunning == CMD_CLN_MOVE_POS) && (_lastPosCmd == 0))  //  && (RX_TestTableStatus.posZ == 0)
 		{
-			if (!RX_TestTableStatus.info.cln_in_stored)
+			if (!RX_TestTableStatus.info.x_in_ref)
 			{
 				_new_cmd = CMD_CLN_REFERENCE;
 				Error(LOG, 0, "CLN: Command 0x%08x: triggers Referencing", _CmdRunning); //problem mit toggel move : do not toggle twice!
@@ -312,7 +327,7 @@ void cln_main(int ticks, int menu)
 }
 
 //--- cln_display_status ---------------------------------------------------------
-void cln_display_status(void)
+void _cln_display_status(void)
 {
 	int enc0_mm;
 	int screwpos0_mm;
@@ -324,8 +339,8 @@ void cln_display_status(void)
 	
 	term_printf("CLEANING Unit ---------------------------------\n");
 	term_printf("moving:         %d		cmd: %08x\n", RX_TestTableStatus.info.moving, _CmdRunning);	
-	term_printf("Sensor Reference Motor: %d\n", RX_TestTableStatus.info.cln_in_stored);
-	term_printf("Sensor Capping: %d\n", RX_TestTableStatus.info.cln_in_capping);
+	term_printf("Sensor Reference Motor: %d\n", RX_TestTableStatus.info.x_in_ref);
+	term_printf("Sensor Capping: %d\n", RX_TestTableStatus.info.x_in_cap);
 	term_printf("Sensor screw_down 0 to 3: %d  ", RX_TestTableStatus.info.cln_screw_0);
 	term_printf(" %d  ", RX_TestTableStatus.info.cln_screw_1);
 	term_printf(" %d  ", RX_TestTableStatus.info.cln_screw_2);
@@ -549,6 +564,9 @@ static void _cln_motor_test(int motorNo, int steps)
 		par.current		= 15.0;	// 7.0 // 5.0	 // 300				
 	}	
 	par.stop_mux	= 0;
+	par.dis_mux_in	= 0;
+	par.stop_in     = ESTOP_UNUSED;
+	par.stop_level  = 0;
 	par.estop_in    = ESTOP_UNUSED;
 	par.estop_level = 0;
 	par.checkEncoder = FALSE;

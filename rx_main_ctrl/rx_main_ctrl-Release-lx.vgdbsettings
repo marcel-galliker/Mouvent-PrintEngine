@@ -27,9 +27,8 @@
         <string>*.mak</string>
         <string>Makefile</string>
       </FileMasks>
-      <TransferNewFilesOnly>false</TransferNewFilesOnly>
+      <TransferNewFilesOnly>true</TransferNewFilesOnly>
       <IncludeSubdirectories>true</IncludeSubdirectories>
-      <SelectedDirectories />
       <DeleteDisappearedFiles>false</DeleteDisappearedFiles>
     </MainSourceTransferCommand>
     <AllowChangingHostForMainCommands>false</AllowChangingHostForMainCommands>

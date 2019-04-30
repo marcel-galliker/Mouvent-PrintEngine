@@ -29,6 +29,7 @@ SEncoderStat	RX_EncoderStatus;
 SEncoderCfg		RX_EncoderCfg;
 
 static int		_AppRunning;
+static int		_ShowCorrection=FALSE;
 
 //--- prototypes ---------------------------------------------------------
 
@@ -53,7 +54,7 @@ void main_menu()
 	term_printf("o<x>: Toggle Output <x> (0..n)\n");
 	term_printf("g<cnt> <dist>: PrintGo in x FP\n");	
 	term_printf("w: write CSV file with test data\n");
-//	term_printf("s: simulate startup\n");
+	term_printf("c: roll Correction\n");
 	term_printf("x: exit\n");
 	tw8_menu_print();
 	term_printf(">");
@@ -63,6 +64,7 @@ void main_menu()
 	{
 		switch (str[0])
 		{
+		case 'c':   _ShowCorrection = !_ShowCorrection; break;
 		case 'g':	ch=strstr(str, " ");
 					if (ch) fpga_pg_set_dist(atoi(&str[1]), atoi(ch));	
 					else    fpga_pg_set_dist(1,             atoi(&str[1])); 
@@ -82,8 +84,6 @@ void main_menu()
 					//	fpga_pg_config_fhnw(0, 200000, 420000);						
 					}
 					break;
-			
-//		case 's':	ctrl_simu();	break;
 			
 		case 'o':	fpga_output(atoi(&str[1]));	break;
 		case 'w':	test_write_csv("encoder_test.csv");	break;
@@ -144,7 +144,7 @@ static void _main_loop(void)
 		}
 
 		msg=ctrl_main(ticks, menu);
-		fpga_main(ticks, menu);
+		fpga_main(ticks, menu, _ShowCorrection);
 		tw8_main(ticks, menu);
 		if (menu) 
 		{
@@ -161,8 +161,8 @@ int main(int argc, char** argv)
 {
 	rx_process_name(argv[0]);
 	args_init(argc, argv);
-	Trace_init(argv[0]);
 	rx_startup(argv[0], arg_debug);
+	Trace_init(argv[0]);
 
 	TrPrintfL(1, "rx_encoder_ctrl %s started", version);
 

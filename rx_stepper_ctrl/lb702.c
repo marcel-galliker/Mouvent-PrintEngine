@@ -21,7 +21,7 @@
 #include "lb702.h"
 
 #define MOTOR_Z_0		0
-#define MOTOR_Z_BITS	0x0f
+#define MOTOR_Z_BITS	0x03
 
 #define CURRENT_HOLD	50
 
@@ -61,6 +61,9 @@ void lb702_init(void)
 //	_ParRef.current			= 150.0;
 	_ParRef.current			= 250.0;
 	_ParRef.stop_mux		= 0;
+	_ParRef.dis_mux_in		= 0;
+	_ParRef.stop_in			= ESTOP_UNUSED;
+	_ParRef.stop_level		= 0;
 	_ParRef.estop_in		= ESTOP_UNUSED;
 	_ParRef.estop_level		= 0;
 	_ParRef.checkEncoder	=TRUE;
@@ -69,6 +72,9 @@ void lb702_init(void)
 	_ParZ_down.accel		= 5000;
 	_ParZ_down.current		= 400.0;
 	_ParZ_down.stop_mux		= MOTOR_Z_BITS;
+	_ParZ_down.dis_mux_in	= 0;
+	_ParZ_down.stop_in		= ESTOP_UNUSED;
+	_ParZ_down.stop_level	= 0;
 	_ParZ_down.estop_in     = ESTOP_UNUSED;
 	_ParZ_down.estop_level  = 0;
 	_ParZ_down.checkEncoder = TRUE;
@@ -77,6 +83,9 @@ void lb702_init(void)
 	_ParZ_cap.accel			= 1000;
 	_ParZ_cap.current		= 100.0;
 	_ParZ_cap.stop_mux		= FALSE;
+	_ParZ_cap.dis_mux_in	= 0;
+	_ParZ_cap.stop_in		= ESTOP_UNUSED;
+	_ParZ_cap.stop_level	= 0;
 	_ParZ_cap.estop_in      = ESTOP_UNUSED;
 	_ParZ_cap.estop_level   = 0;
 	_ParZ_cap.checkEncoder  = TRUE;
@@ -288,6 +297,9 @@ static void _lb702_motor_test(int motorNo, int steps)
 	par.accel		= 2500;
 	par.current		= 400.0;
 	par.stop_mux	= 0;
+	par.dis_mux_in	= 0;
+	par.stop_in		= ESTOP_UNUSED;
+	par.stop_level	= 0;
 	par.estop_in    = ESTOP_UNUSED;
 	par.estop_level = 0;
 	par.checkEncoder= FALSE;

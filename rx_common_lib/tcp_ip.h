@@ -189,13 +189,12 @@
 #define CMD_SET_STEPPER_CFG		0x01000132
 #define REP_SET_STEPPER_CFG		0x02000132
 
-#define CMD_SCALES_LOAD_CFG		0x01000141
-#define REP_SCALES_LOAD_CFG		0x02000141
-#define CMD_SCALES_SAVE_CFG		0x01000142
-#define REP_SCALES_SAVE_CFG		0x02000142
-#define CMD_SCALES_CALIBRATE	0x01000143
-// #define CMD_SCALE_STAT			0x01000144
-#define REP_SCALE_STAT			0x02000144
+#define CMD_SCALES_SET_CFG		0x01000141
+#define CMD_SCALES_GET_CFG		0x01000142
+#define REP_SCALES_GET_CFG		0x02000142
+#define CMD_SCALES_TARA			0x01000143
+#define CMD_SCALES_STAT			0x01000144
+#define REP_SCALES_STAT			0x02000144
 
 #define REP_CHILLER_STAT		0x02000152
 
@@ -288,6 +287,12 @@
 #define CMD_CAP_MECH_ADJUST		0x01000607
 #define CMD_CAP_REFERENCE_2		0x01000608
 #define CMD_CAP_PURGE           0x01000609
+#define CMD_CAP_SET_PUMP		0x0100060a
+#define CMD_CAP_SET_VAC			0x0100060b
+#define CMD_CAP_FILL_CAP		0x0100060c
+#define CMD_CAP_EMPTY_CAP		0x0100060d
+#define CMD_CAP_ROB_Z_POS		0x0100060e
+#define CMD_CAP_VENT			0x0100060f
 #define CMD_CAP_END				0x010006ff
 
 //--- Cleaning Commands ---------------------------------------------------
@@ -301,12 +306,29 @@
 #define CMD_CLN_SCREW_2_POS		0x01000707
 #define CMD_CLN_SCREW_3_POS		0x01000708
 #define CMD_CLN_WIPE			0x01000709
-#define CMD_CLN_CAP				0x0100070a
+#define CMD_CLN_MOVE_POS_REL	0x0100070a
+#define CMD_CLN_WET_WIPE		0x0100070b
+#define CMD_CLN_FILL_CAP		0x0100070c
+#define CMD_CLN_EMPTY_CAP		0x0100070d
+#define CMD_CLN_DRAIN_WASTE		0x0100070e
+#define CMD_CLN_DRAIN_CHAIN		0x0100070f
 
 #define CMD_CLN_ADJUST			0x01000710
 #define CMD_CLN_DETECT_SCREW_0	0x01000711
 #define CMD_CLN_DETECT_SCREW_1	0x01000712
 #define CMD_CLN_SCREW_DETACH	0x01000713
+#define CMD_CLN_DRY_WIPE		0x01000714
+#define CMD_CLN_WIPE_VACUUM		0x01000715
+#define CMD_CLN_FLUSH_TEST		0x01000716
+#define CMD_CLN_SET_WASTE_PUMP	0x01000717
+#define CMD_CLN_EMPTY_WASTE		0x01000718
+#define CMD_CLN_WIPE_VAC		0x01000719
+#define CMD_CLN_CAP             0x0100071a
+#define CMD_CLN_SCREW_ATTACH	0x0100071b
+#define CMD_CLN_SCREW_TO_REF	0x0100071c
+#define CMD_CLN_SCREW_TO_POS	0x0100071d
+
+#define CMD_CLN_PURGE_TEST		0x01000720
 
 
 #define CMD_CLN_END				0x010007ff
@@ -350,7 +372,6 @@
 #define CMD_FPGA_SIMU_PRINT		0x01001013
 #define CMD_FPGA_SIMU_ENCODER	0x01001014
 
-
 #define EVT_TRACE				0x03000100	
 
 //--- Data Server ---------------------------------------------------------
@@ -360,6 +381,19 @@
 #define REP_DS_READ				0x02002001
 #define CMD_DS_CLOSE			0x01002002
 #define REP_DS_CLOSE			0x02002002
+
+//--- CLEAF Orders ----------------------------------------------------
+#define CMD_CO_SET_ORDER		0x01003000
+#define CMD_CO_GET_ORDER		0x01003001
+#define REP_CO_GET_ORDER		0x02003001
+#define CMD_CO_SET_OPERATOR		0x01003002
+#define REP_CO_SET_OPERATOR		0x02003002
+#define CMD_CO_GET_PRODUCTION	0x02003003
+#define REP_CO_GET_PRODUCTION	0x02003003
+#define CMD_CO_GET_ROLLS		0x01003004
+#define REP_CO_GET_ROLLS		0x02003004
+#define CMD_CO_SET_ROLL			0x01003005
+#define REP_CO_SET_ROLL			0x02003005
 
 //--- UDP Booting commands ----------------------------------------
 #define CMD_BOOT_INFO_REQ		0x11000001
@@ -584,6 +618,7 @@ typedef struct SPrintFileCmd
 		#define PM_SINGLE_PASS			2
 		#define PM_TEST					3
 		#define PM_TEST_SINGLE_COLOR	4
+		#define PM_TEST_JETS			5
 	UINT8		variable;
 	UINT8		lengthUnit;	// see SPrintQueueItem.LengthUnit
 	UINT8		clearBlockUsed;
@@ -677,12 +712,12 @@ typedef struct SFluidCtrlCmd
 	EnFluidCtrlMode	ctrlMode;
 } SFluidCtrlCmd;
 
-typedef struct SScalesCalibrateCmd
+//--- SScalesMsg ----------------------
+typedef struct SScalesMsg
 {
-	SMsgHdr     hdr;
-	INT32		no;
-	INT32		weight;
-} SScalesCalibrateCmd;
+	SMsgHdr			hdr;
+	INT32			val[MAX_SCALES];
+} SScalesMsg;
 
 //--- data server -------------------
 typedef struct SDsOpenCmd

@@ -2,20 +2,20 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="" key="selection"/>
+		<item value="pRX_Status-&gt;error" key="selection"/>
 		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
+			<item value="pRX_Status-&gt;error"/>
+			<item value="_Cond"/>
+			<item value="power_all_off_timeout"/>
+			<item value="_power_all_on_test"/>
 			<item value="pg"/>
 			<item value="cooler_pressure"/>
 			<item value="watch"/>
 			<item value="cooler_overheated"/>
-			<item value="cooler_pcb_present"/>
-			<item value="cooler_temp_hw"/>
-			<item value="watchdog_check_electronic_errors"/>
-			<item value="watchdog_toggle"/>
 		</list>
 		<list key="replacehistory">
 		</list>

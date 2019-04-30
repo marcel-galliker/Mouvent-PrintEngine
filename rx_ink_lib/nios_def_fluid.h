@@ -61,8 +61,10 @@ typedef struct SNiosFluidCmd
 typedef struct
 {
 	EnFluidCtrlMode	ctrl_mode;
-	INT32   inkPressureSet;
+	INT32   cylinderPresSet;
 	INT32	meniscusSet;
+	INT32	condPresOutSet;
+	INT32	flushTime[3];
     INT32   fluid_P;
 
 	UINT32	heaterTemp;
@@ -81,7 +83,7 @@ typedef struct
 	//--- tests ---------------
 	int		test_airValve;
 	int		test_bleedValve;
-	int		test_inkPressure;
+	int		test_cylinderPres;
 } SIsAdapterCfg;
 
 //--- SNiosFluidCfg ----------------------------------------
@@ -155,9 +157,10 @@ typedef enum ENiosFluidErr
 	err_fpga_incompatible	= 0x00000008,			
 	err_amc_fluid			= 0x00000010,
 	err_amc_heater			= 0x00000020,
-	err_overpressure		= 0x00000040,
+//	err_overpressure		= 0x00000040,
 	err_inkpres_not_reached = 0x00000080,
 	err_watchdog	        = 0x00000100,	
+	err_printhead	        = 0x00000200,	
 } ENiosFluidErr;
 
 typedef enum ENiosInkSupplyErr
@@ -165,6 +168,7 @@ typedef enum ENiosInkSupplyErr
 	err_ink_tank_pressure	= 0x00000001,
 	err_cal_inkpump_failed	= 0x00000002,
 	err_heater_board    	= 0x00000004,
+	err_overpressure		= 0x00000040,
 } ENiosInkSupplyErr;
 
 //--- SNiosInkSupplyStat -------------------------
@@ -176,10 +180,11 @@ typedef struct
 
 	UINT32	inkPumpSpeed_set;
 	UINT32	inkPumpSpeed_measured;
-	INT32   inkPressureSet;
-	INT32   inkPressure;
+	INT32   cylinderPresSet;
+	INT32   cylinderPres;
 	INT32	condPresOut;
 	UINT32	heaterTemp;
+	INT32	flushTime;
 	
 	UINT32	bleedValve:1;
 	UINT32  airValve:1;

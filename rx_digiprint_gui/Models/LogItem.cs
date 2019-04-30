@@ -158,12 +158,22 @@ namespace RX_DigiPrint.Models
                                                     {
                                                         int head0 = (_DevNo*(int)TcpIp.HEAD_CNT)%RxGlobals.PrintSystem.HeadCnt;
                                                         if (RxGlobals.PrintSystem.HeadCnt==TcpIp.HEAD_CNT) 
-                                                            return string.Format("Cluster {0}", InkType.ColorNameShort(RxGlobals.InkSupply.List[_DevNo].InkType.ColorCode), _DevNo+1, _DevNo+4);
-                                                        if (RxGlobals.PrintSystem.HeadCnt> TcpIp.HEAD_CNT)
-                                                            return string.Format("Cluster {0}-{1}..{2}", InkType.ColorNameShort(RxGlobals.InkSupply.List[_DevNo].InkType.ColorCode), head0+1, head0+4);
+                                                            return string.Format("CL {0}", InkType.ColorNameShort(RxGlobals.InkSupply.List[_DevNo].InkType.ColorCode), _DevNo+1, _DevNo+4);
+                                                        if (RxGlobals.PrintSystem.HeadCnt > TcpIp.HEAD_CNT)
+                                                        {
+                                                            int isNo=(int)((_DevNo*TcpIp.HEAD_CNT)/RxGlobals.PrintSystem.HeadCnt);
+                                                            string name = InkType.ColorNameShort(RxGlobals.InkSupply.List[isNo].InkType.ColorCode);
+                                                            switch(RxGlobals.InkSupply.List[isNo].RectoVerso)
+                                                            {
+                                                                case ERectoVerso.rv_recto: name= "R"+name; break;
+                                                                case ERectoVerso.rv_verso: name= "V"+name; break;
+                                                                default:                   name= "CL "+name; break;
+                                                            }
+                                                            return string.Format("{0}-{1}..{2}", name, head0+1, head0+4);
+                                                        }
                                                     }
                                                     catch(Exception){};
-                                                    return string.Format("Cluster{0}", noStr);
+                                                    return string.Format("CL{0}", noStr);
                     case EDeviceType.dev_spool:     return string.Format("Spooler{0}", noStr);
                     default:                        return "";
                 }

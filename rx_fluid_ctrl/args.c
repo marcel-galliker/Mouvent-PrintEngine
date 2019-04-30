@@ -28,6 +28,6 @@ void args_init(int argc, char** argv)
 	{
 		if		(!strcmp(argv[i], "-debug"))		arg_debug=TRUE;
 		else if (!strcmp(argv[i], "-offline"))		arg_offline=TRUE;
-		else printf("argument >>%s<< not known\n", argv[i]);	
+		else TrPrintfL(TRUE, "argument >>%s<< not known\n", argv[i]);	
 	}
 }

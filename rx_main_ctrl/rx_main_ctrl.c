@@ -43,6 +43,7 @@
 #include "es_rip.h"
 #include "enc_ctrl.h"
 #include "errno.h"
+#include "cleaf_orders.h"
 
 
 //--- global variables -----------------------------
@@ -105,14 +106,15 @@ int main(int argc, char* argv[])
 
 	rx_process_name(argv[0]);
 	args_init(argc, argv);
-	Trace_init(argv[0]);
 
 	if (rx_startup(argv[0], arg_debug)!=REPLY_OK) return REPLY_ERROR;
 
-	rx_set_process_priority(1);
-	
-	TrPrintfL(TRUE, "rx_main_ctrl V %s", version);
+	Trace_init(argv[0]);
 
+	rx_set_process_priority(1);
+		
+	TrPrintfL(TRUE, "rx_main_ctrl V %s", version);
+	
 	//--- initialize libraries ---------------------
 	rx_mkdir(PATH_ROOT);
 	rx_mkdir(PATH_TRACE);
@@ -133,11 +135,15 @@ int main(int argc, char* argv[])
 
 	rx_mkdir(PATH_LOG);
 
+	rx_remove_old_files(PATH_FPGA_REGS, 7);
+
 	err_init(TRUE, 100);
 	err_set_device(dev_main, 0);
 
 	rx_init();
 	rx_def_init();
+
+	Error(LOG, 0, "STARTUP rx_main_ctrl V %s", version);
 
 //	mx_test();
 
@@ -171,7 +177,6 @@ int main(int argc, char* argv[])
 	}
 	//--- main procedure ---------------------------
 	setup_config(PATH_USER FILENAME_CFG, &RX_Config, READ);
-	setup_scales(PATH_USER FILENAME_SCALES, RX_ScalesCalibration, SIZEOF(RX_ScalesCalibration), READ);
 	
 	net_init();
 	pq_init();
@@ -187,6 +192,7 @@ int main(int argc, char* argv[])
 	gui_start();
 	spool_start();
 	ctrl_start();
+	co_init();
 	
 	spool_auto(TRUE);
 	
@@ -200,6 +206,7 @@ int main(int argc, char* argv[])
 		machine_tick();
 		net_tick();
 		chiller_tick();
+		co_tick();
 	}
 
 	//--- end libraries ----------------------------

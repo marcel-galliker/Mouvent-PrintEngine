@@ -369,6 +369,14 @@ int rx_process_execute(const char *process, const char *outPath, int timeout)
 	return code;
 }
 
+//--- rx_core_cnt -----------------------
+int rx_core_cnt(void)
+{
+	SYSTEM_INFO sysinfo;
+	GetSystemInfo( &sysinfo );
+	return sysinfo.dwNumberOfProcessors;	
+}
+
 #else
 
 #include <unistd.h>
@@ -638,6 +646,16 @@ int rx_process_execute(const char *process, const char *outPath, int timeout)
 	*/
 }
 
+//--- rx_core_cnt -----------------------------
+int rx_core_cnt(void)
+{
+	char str[64];
+	FILE *file = popen("nproc", "r");
+	fgets(str, sizeof(str), file);
+	pclose(file);
+	return atoi(str);	
+}
+
 //--- rx_sleep ----------------------------------------
 int	rx_sleep(UINT32 ms)
 {
@@ -810,7 +828,10 @@ int rx_set_tread_priority(int priority)
 {
 	pthread_t this_thread = pthread_self();
 	struct sched_param params;
-	params.sched_priority = priority; //sched_get_priority_max(SCHED_FIFO);
+	int min=sched_get_priority_min(SCHED_FIFO);
+	int max=sched_get_priority_max(SCHED_FIFO);
+	if(priority < max) params.sched_priority = priority;
+	else               params.sched_priority = max;
 	return pthread_setschedparam(this_thread, SCHED_FIFO, &params);
 }
 

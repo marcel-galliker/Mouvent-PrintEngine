@@ -40,7 +40,7 @@ namespace RX_DigiPrint.Converters
     //--- HeadVal_Converter10 --------------------------------------------------------------------------------
     public class HeadVal_Converter10 : IValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        public static string _convert(object value)
         {
             try
             {
@@ -55,6 +55,11 @@ namespace RX_DigiPrint.Converters
             {
                 return null;
             }
+        }
+
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return _convert(value);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)

@@ -288,7 +288,12 @@ static char _get_pcb_revision()
 void RxMessage_Handler(void)
 {	
 	//--- handle command flags -------------------------    
-    if (RX_Config.cmd.reset_errors && !RX_Status.cmdConfirm.reset_errors) RX_Status.error = 0;
+    if (RX_Config.cmd.reset_errors && !RX_Status.cmdConfirm.reset_errors) 
+	{
+		RX_Status.error = 0;
+		RX_Status.aliveCfg = 0;
+		RX_Status.aliveStat = 0;
+	}
 	RX_Status.cmdConfirm.reset_errors = RX_Config.cmd.reset_errors;
     
     if (RX_Config.cmd.del_offset && !RX_Status.cmdConfirm.del_offset) pres_del_user_offset();

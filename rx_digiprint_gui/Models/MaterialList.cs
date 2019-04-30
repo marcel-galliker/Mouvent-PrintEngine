@@ -33,11 +33,7 @@ namespace RX_DigiPrint.Models
                 }
                 if (d==0)
                 {
-                    RxBindable.Invoke(() => 
-                    {
-                        _MyList.RemoveAt(idx);
-                        _MyList.Insert(idx, item);
-                    });
+                    RxBindable.Invoke(() => _MyList[idx] = item);
                     return;
                 }
                 idx++;

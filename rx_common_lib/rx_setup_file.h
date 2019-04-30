@@ -41,10 +41,13 @@ void setup_uint8	(HANDLE hsetup, const char *name, EN_setup_Action action, UINT8
 void setup_int16	(HANDLE hsetup, const char *name, EN_setup_Action action, INT16  *val, INT16  def);
 void setup_uint16	(HANDLE hsetup, const char *name, EN_setup_Action action, UINT16 *val, UINT16 def);
 void setup_int32	(HANDLE hsetup, const char *name, EN_setup_Action action, INT32  *val, INT32  def);
-void setup_int32_arr(HANDLE hsetup, const char *name, EN_setup_Action action, INT32  *val, int readcnt, int writecnt, INT32 def);
+void setup_int32_arr(HANDLE hsetup, const char *name, EN_setup_Action action, INT32  *val, int cnt, INT32 def);
 void setup_uint32	(HANDLE hsetup, const char *name, EN_setup_Action action, UINT32 *val, UINT32 def);
+void setup_double	(HANDLE hsetup, const char *name, EN_setup_Action action, double *val, double def);
+void setup_enum		(HANDLE hsetup, const char *name, EN_setup_Action action, INT32  *val, char *enumstr);
 void setup_int64	(HANDLE hsetup, const char *name, EN_setup_Action action, INT64  *val, INT64  def);
 void setup_uint64	(HANDLE hsetup, const char *name, EN_setup_Action action, UINT64 *val, UINT64 def);
+void setup_double	(HANDLE hsetup, const char *name, EN_setup_Action action, double *val, double def);
 void setup_mac_addr	(HANDLE hsetup, const char *name, EN_setup_Action action, INT64  *val, INT64  def);
 void setup_binary	(HANDLE hsetup, const char *name, EN_setup_Action action, void   *val, int size, int *len);
 	

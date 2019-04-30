@@ -38,7 +38,7 @@
 static SFSDirEntry _RfsInfo[HEAD_BOARD_CNT];
 
 //--- Prototypes ------------------------------------------------------
-static int _do_head_stat		(RX_SOCKET socket, SHeadBoardStat	*pstat);
+static int _do_head_stat		(RX_SOCKET socket, int headNo, SHeadBoardStat	*pstat);
 static int _do_trace_evt		(RX_SOCKET socket, STraceMsg		*msg);
 static void _do_fluidCtrlMode	(RX_SOCKET socket, SFluidCtrlCmd	*pmsg); 
 static int _do_print_file_evt	(RX_SOCKET socket, int headNo, SPrintFileMsg	*msg);
@@ -55,7 +55,7 @@ int handle_headCtrl_msg(RX_SOCKET socket, void *msg, int len, struct sockaddr *s
 	static int _err=FALSE;
 	
 	//--- handle the message --------------
-	ctrl_head_alive(headNo);
+//	ctrl_head_alive(headNo);
 	net_register_by_device(dev_head, headNo);
 	
 	reply = REPLY_OK;
@@ -63,7 +63,7 @@ int handle_headCtrl_msg(RX_SOCKET socket, void *msg, int len, struct sockaddr *s
 	switch (phdr->msgId)
 	{
 	case REP_PING:					TrPrintf			(TRUE, "got REP_PING");				 break;
-	case REP_HEAD_STAT:				_do_head_stat		(socket, (SHeadBoardStat*)&phdr[1]); break;
+	case REP_HEAD_STAT:				_do_head_stat		(socket, headNo, (SHeadBoardStat*)&phdr[1]); break;
 	case CMD_FLUID_CTRL_MODE:		_do_fluidCtrlMode	(socket, (SFluidCtrlCmd*) msg);			break;
 	case EVT_TRACE:					_do_trace_evt		(socket, (STraceMsg*)	  msg);			break;
 	case EVT_GET_EVT:				ctrl_do_log_evt		(socket, (SLogMsg*)		  msg);			break;
@@ -87,16 +87,15 @@ int handle_headCtrl_msg(RX_SOCKET socket, void *msg, int len, struct sockaddr *s
 }
 
 //--- _do_head_stat ----------------------------------------------------
-static int _do_head_stat(RX_SOCKET socket, SHeadBoardStat	*pstat)
+static int _do_head_stat(RX_SOCKET socket, int headNo, SHeadBoardStat	*pstat)
 {
-	EDevice device;
-	int no, i, inkSupply;
+	int i;
 	
-	ctrl_get_device(socket, &device, &no);
-	if (device==dev_head && no<HEAD_BOARD_CNT)
+	if (headNo<HEAD_BOARD_CNT)
 	{
-		memcpy(&RX_HBStatus[no], pstat, sizeof(RX_HBStatus[0]));
-		if (RX_HBStatus[no].err & 
+		ctrl_head_alive(headNo);
+		memcpy(&RX_HBStatus[headNo], pstat, sizeof(RX_HBStatus[0]));
+		if (RX_HBStatus[headNo].err & 
 			( err_fpga_overheated
 			| err_head_pcb_overheated
 			| err_amc7891
@@ -104,13 +103,21 @@ static int _do_head_stat(RX_SOCKET socket, SHeadBoardStat	*pstat)
 			| err_amp_all_on
 			| err_pwr_all_on))
 		{
-			fluid_send_ctrlMode(-1, ctrl_shutdown, TRUE);
-		}
-
+			fluid_send_ctrlMode(-1, ctrl_off, TRUE);
+		}			
+		
 		for (i=0; i<SIZEOF(pstat->head); i++)
 		{
-			inkSupply = RX_Config.headBoard[no].head[i].inkSupply;
-			fluid_set_head_state(inkSupply, &pstat->head[i]);
+			int inksupply = RX_Config.headBoard[headNo].head[i].inkSupply;
+			if (RX_Config.headBoard[headNo].head[i].enabled)
+			{
+				if (pstat->head[i].ctrlMode==ctrl_undef)
+				{
+					if (fluid_get_ctrlMode(inksupply)!=ctrl_undef)
+						ctrl_send_head_fluidCtrlMode(headNo*MAX_HEADS_BOARD+i, fluid_get_ctrlMode(inksupply), FALSE, FALSE);
+				}
+				fluid_set_head_state(inksupply, &pstat->head[i]);					
+			}
 		}
 	}
 	return REPLY_OK;

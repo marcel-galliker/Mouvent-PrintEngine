@@ -18,6 +18,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
+        <Rectangle Grid.RowSpan="10" Fill="Red" Visibility="{Binding Err, Converter={StaticResource IntToVisible_Converter}}"/>
         <TextBox  Text="{Binding Name}"
                     Background="{Binding Color}" 
                     Foreground="{Binding ColorFG}"
@@ -90,8 +91,8 @@
 
             <StackPanel  Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
                 <TextBlock Text="{Binding PresIn,  Converter={StaticResource HeadVal_Converter10}}"   />
-                <TextBlock Text=" (~" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
-                <TextBlock Text="{Binding PresIn_diff, Converter={StaticResource HeadVal_Converter10}}" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
+                <TextBlock Text=" (" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding PresIn_str}" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
                 <TextBlock Text=")" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
             </StackPanel>
 

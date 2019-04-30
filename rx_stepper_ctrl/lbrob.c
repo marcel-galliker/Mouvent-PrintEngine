@@ -112,6 +112,9 @@ void lbrob_init(void)
 		_ParScrew_ref[i].accel = 1000;
 		_ParScrew_ref[i].current = 60.0; // max 67 = 0.67 A
 		_ParScrew_ref[i].stop_mux = 0;
+		_ParScrew_ref[i].dis_mux_in = 0;
+		_ParScrew_ref[i].stop_in = ESTOP_UNUSED;
+		_ParScrew_ref[i].stop_level = 0; // stopp when sensor off
 		_ParScrew_ref[i].estop_in = RO_SCREW_DOWN_0 + i;
 		_ParScrew_ref[i].estop_level = 0; // stopp when sensor off
 		_ParScrew_ref[i].checkEncoder = FALSE; // TRUE;
@@ -121,6 +124,9 @@ void lbrob_init(void)
 		_ParScrew_turn.accel = 10000;
 		_ParScrew_turn.current = 80.0;  // max 95 = 0.95 A // Amps/Phase Parallel: 0.67 A // approx 0.9N; max 1.4 N
 		_ParScrew_turn.stop_mux = 0;
+		_ParScrew_turn.dis_mux_in = 0;
+		_ParScrew_turn.stop_in = ESTOP_UNUSED;
+		_ParScrew_turn.stop_level = 0;
 		_ParScrew_turn.estop_in = ESTOP_UNUSED;
 		_ParScrew_turn.estop_level = 0;
 	_ParScrew_turn.checkEncoder = FALSE; // TRUE;
@@ -131,6 +137,9 @@ void lbrob_init(void)
 	_ParCap_ref.accel =  4000; //8000;
 	_ParCap_ref.current = 400.0; // max 424 = 4.24 A
 	_ParCap_ref.stop_mux = 0;
+	_ParCap_ref.dis_mux_in = 0;
+	_ParCap_ref.stop_in		= ESTOP_UNUSED; // Check Input 0
+	_ParCap_ref.stop_level = 0; // stopp when sensor on
 	_ParCap_ref.estop_in = RO_STORED_IN; // Check Input 0
 	_ParCap_ref.estop_level = 1; // stopp when sensor on
 	_ParCap_ref.checkEncoder = FALSE; // TRUE;
@@ -139,6 +148,9 @@ void lbrob_init(void)
 	_ParCap_drive.accel = 8000; // 16000;
 	_ParCap_drive.current = 400.0; // max 424 = 4.24 A
 	_ParCap_drive.stop_mux = 0;
+	_ParCap_drive.dis_mux_in = 0;
+	_ParCap_drive.stop_in	= ESTOP_UNUSED;
+	_ParCap_drive.stop_level = 0;
 	_ParCap_drive.estop_in = ESTOP_UNUSED;
 	_ParCap_drive.estop_level = 1;
 	_ParCap_drive.checkEncoder = FALSE; // TRUE;
@@ -147,6 +159,9 @@ void lbrob_init(void)
 	_ParCap_wipe.accel = 4000;// 12500;
 	_ParCap_wipe.current = 300.0; // max 424 = 4.24 A
 	_ParCap_wipe.stop_mux = 0;
+	_ParCap_wipe.dis_mux_in = 0;
+	_ParCap_wipe.stop_in = ESTOP_UNUSED;
+	_ParCap_wipe.stop_level = 0;
 	_ParCap_wipe.estop_in = ESTOP_UNUSED;
 	_ParCap_wipe.estop_level = 1;
 	_ParCap_wipe.checkEncoder = FALSE; // TRUE;
@@ -157,6 +172,9 @@ void lbrob_init(void)
 		_ParCap_detect[i].accel = 8000; // 16000;
 		_ParCap_detect[i].current = 400.0; // max 424 = 4.24 A
 		_ParCap_detect[i].stop_mux = 0;
+		_ParCap_detect[i].dis_mux_in = 0;
+		_ParCap_detect[i].stop_in = ESTOP_UNUSED;
+		_ParCap_detect[i].stop_level = 1;
 		_ParCap_detect[i].estop_in = RO_SCREW_DETECT_0 + i;
 		_ParCap_detect[i].estop_level = 1;
 		_ParCap_detect[i].checkEncoder = FALSE; // TRUE;
@@ -170,7 +188,7 @@ void lbrob_main(int ticks, int menu)
 	motor_main(ticks, menu);
 	
 	// --- read Inputs ---
-	RX_TestTableStatus.info.cln_in_stored = fpga_input(RO_STORED_IN); // Reference Sensor
+	RX_TestTableStatus.info.x_in_ref = fpga_input(RO_STORED_IN); // Reference Sensor
 	RX_TestTableStatus.info.cln_screw_0 = fpga_input(RO_SCREW_DOWN_0); // Screwhead 0 is pressed down
 	RX_TestTableStatus.info.cln_screw_1 = fpga_input(RO_SCREW_DOWN_1); // Screwhead 1 is pressed down
 	RX_TestTableStatus.info.cln_screw_2 = fpga_input(RO_SCREW_DETECT_0); // Screwhead 0 is detected
@@ -181,11 +199,11 @@ void lbrob_main(int ticks, int menu)
 	// --- Set Position Flags ---
 	RX_TestTableStatus.info.z_in_ref = ((RX_TestTableStatus.info.ref_done == 1)
 		&& (abs(RX_TestTableStatus.posZ - POS_STORED_UM) <= 10)
-		&& (RX_TestTableStatus.info.cln_in_stored == 1));
+		&& (RX_TestTableStatus.info.x_in_ref == 1));
 	RX_TestTableStatus.info.z_in_print = RX_TestTableStatus.info.z_in_ref;
 	RX_TestTableStatus.info.z_in_cap = ((RX_TestTableStatus.info.ref_done == 1)
 		&& (abs(RX_TestTableStatus.posZ - POS_PRINTHEADS_UM) <= 10)
-		&& (RX_TestTableStatus.info.cln_in_stored == 0));
+		&& (RX_TestTableStatus.info.x_in_ref == 0));
 
 	// --- set positions False while moving ---
 	if (RX_TestTableStatus.info.moving) //  && (Fpga.stat->moving != 0))
@@ -218,14 +236,14 @@ void lbrob_main(int ticks, int menu)
 		if (_CmdRunning == CMD_CLN_REFERENCE)
 		{
 			rx_sleep(1000); // wait 1s on transport to stand still
-			RX_TestTableStatus.info.cln_in_stored = fpga_input(RO_STORED_IN); // Reference Sensor
+			RX_TestTableStatus.info.x_in_ref = fpga_input(RO_STORED_IN); // Reference Sensor
 
 			if (motor_error(MOTOR_CAP))
 			{
 				RX_TestTableStatus.info.ref_done = FALSE;
 				Error(ERR_CONT, 0, "FLO_RO: Command 0x%08x: triggers motor_error", _CmdRunning);
 			}
-			else if (RX_TestTableStatus.info.cln_in_stored)
+			else if (RX_TestTableStatus.info.x_in_ref)
 			{
 				motor_reset(MOTOR_CAP);				// reset position after referencing
 				RX_TestTableStatus.info.ref_done = TRUE;
@@ -293,7 +311,7 @@ void lbrob_main(int ticks, int menu)
 		// --- tasks after move to pos 0 stored position, check ref sensor ---
 		if ((_CmdRunning == CMD_CLN_MOVE_POS) && (_lastPosCmd == 0))  //  && (RX_TestTableStatus.posZ == 0)
 		{
-			if (!RX_TestTableStatus.info.cln_in_stored)
+			if (!RX_TestTableStatus.info.x_in_ref)
 			{
 				_new_cmd = CMD_CLN_REFERENCE;
 				Error(LOG, 0, "FLO_RO: Command 0x%08x: triggers Referencing", _CmdRunning); //problem mit toggel move : do not toggle twice!
@@ -347,7 +365,7 @@ void lbrob_main(int ticks, int menu)
 	//{
 	////	RX_TestTableStatus.info.moving = FALSE;
 	////	_CmdRunning = FALSE;
-	//	RX_TestTableStatus.info.cln_in_stored = fpga_input(RO_STORED_IN); 
+	//	RX_TestTableStatus.info.x_in_ref = fpga_input(RO_STORED_IN); 
 	//}
 }
 
@@ -364,7 +382,7 @@ static void _lbrob_display_status(void)
 
 	term_printf("TX Robot ---------------------------------\n");
 	term_printf("moving:         %d		cmd: %08x\n", RX_TestTableStatus.info.moving, _CmdRunning);
-	term_printf("Sensor Reference Motor: %d\n", RX_TestTableStatus.info.cln_in_stored);
+	term_printf("Sensor Reference Motor: %d\n", RX_TestTableStatus.info.x_in_ref);
 	term_printf("Sensor screw_down 0 to 3: %d\n", RX_TestTableStatus.info.cln_screw_0);
 	term_printf("z in reference: %d  ", RX_TestTableStatus.info.z_in_ref);
 	term_printf("z in print:     %d  ", RX_TestTableStatus.info.z_in_print);
@@ -658,6 +676,9 @@ static void _lbrob_ro_motor_test(int motorNo, int steps)
 		par.current = 80.0;//134.0;	//40.0;	minimum for 0.3 Nm	// 60.0; for 0.4 Nm		// 80.0 for 0.5 Nm	// 100.0 for 0.6 Nm	// 120.0 for 0.7 Nm	// 134.0 for 0.8 Nm	
 	}
 	par.stop_mux = 0;
+	par.dis_mux_in = 0;
+	par.stop_in		= ESTOP_UNUSED;
+	par.stop_level	= 0;
 	par.estop_in = ESTOP_UNUSED;
 	par.estop_level = 0;
 	par.checkEncoder = FALSE;

@@ -217,14 +217,16 @@ namespace RX_DigiPrint.Services
 	        ctrl_readyToPrint,		//  0x005:
 	        ctrl_print,				//  0x006:
 	        ctrl_bleed,				//  0x007:
-            ctrl_08,             // 0x008:
-            ctrl_09,        	 // 0x009:
-            ctrl_0a,      		 //	0x00a:
-            ctrl_0b, 		     // 0x00b:
-            ctrl_flush,	         //	0x00c:
-	        ctrl_flush_step1,	 // 0x00d:
-	        ctrl_flush_step2,	 // 0x00e:
-            ctrl_flush_done,     //	0x00f:
+            ctrl_08,                //  0x008:
+            ctrl_09,        	    //  0x009:
+            ctrl_0a,      		    //	0x00a:
+            ctrl_0b, 		        //  0x00b:
+            ctrl_flush_0,	        //	0x010:
+            ctrl_flush_1,	        //	0x011:
+            ctrl_flush_2,	        //	0x012:
+	        ctrl_flush_step1,	    //  0x013:
+	        ctrl_flush_step2,	    //  0x014:
+            ctrl_flush_done,        //	0x015:
 
 	        ctrl_purge_soft =0x100,	//	0x100:
 	        ctrl_purge,				//	0x101:

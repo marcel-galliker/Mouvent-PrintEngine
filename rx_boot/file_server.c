@@ -82,7 +82,7 @@ void fs_end(void)
 		if (_HFileServer) sok_stop_server(&_HFileServer);
 		_ending=FALSE;
 	}
-	else printf("stop\n");	
+	else TrPrintfL(1, "stop\n");	
 	if (_File) fclose(_File);
 	_File = NULL;
 }

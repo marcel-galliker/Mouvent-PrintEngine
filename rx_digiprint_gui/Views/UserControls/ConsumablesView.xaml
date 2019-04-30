@@ -10,32 +10,8 @@
              d:DesignWidth="300"
              Height="auto"
              MinHeight="200"
-             IsVisibleChanged="UserControl_IsVisibleChanged">
+             >
 
     <Grid x:Name="MainGrid">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="auto"/>
-        </Grid.ColumnDefinitions>
-        <!--
-        <rx_uc:RxProgress x:Name="_Unwinder" Grid.Column="0" Color="#FFF7F7F7" Text="Unwinder"/>
-        <rx_uc:RxProgress x:Name="_Rewinder" Grid.Column="1" Color="#FFF7F7F7" Text="Rewinder"/>
-        -->
     </Grid>
 </UserControl>

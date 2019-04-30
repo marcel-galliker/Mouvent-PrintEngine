@@ -29,6 +29,8 @@
 
 #define LED	 	"hps_led0"
 
+#define TRACE FALSE
+
 //--- module globals -----------------------------------------------------------------
 HANDLE			_HServer=NULL;
 SNetworkItem	_Item;
@@ -117,29 +119,24 @@ static void _enum_ports(void)
 	while (!feof(file) && ports<SIZEOF(_Item.ports))
 	{
 		ret=fgets(str, 100, file);
-//		printf("%s\n", str);
 		if (str[26]==':') 
 		{
 			_Item.ports[ports]=atoi(&str[27]);
 			if (_Item.ports[ports]>=7000) ports++;
 		}
 	}
-	if (ports)
-	{
-		printf("PORTS:\n");
-		for (ports=0; ports<SIZEOF(_Item.ports); ports++)
-			printf("Port: %d\n", _Item.ports[ports]);
-		printf("\n");
-		printf("\n");
-	}
 	pclose(file);
 }
-
 
 //--- _send_boot_info ------------------------------------
 static void _send_boot_info(UINT32 id)
 {
+	static SBootInfoMsg last={};
+	static int			lastTime=0;
+
 	SBootInfoMsg msg;
+	int			 time = rx_get_ticks();
+	
 	msg.id  	= id;
 
 	_Item.rfsPort = fs_get_port();
@@ -148,7 +145,14 @@ static void _send_boot_info(UINT32 id)
 //		TrPrintfL(1, "_send_boot_info: >>%s %s<<", msg.item.deviceTypeStr, msg.item.serialNo);
 	rx_sleep(rx_get_ticks()%50); // sleep random to avoid collusions on ethernet
 	_enum_ports();
-	_send_msg(&msg, sizeof(msg));
+
+	if (time-lastTime>1000 || memcmp(&msg, &last,sizeof(SBootInfoMsg)))
+	{
+		TrPrintfL(TRACE, "_send_boot_info");
+		_send_msg(&msg, sizeof(msg));
+		memcpy(&last, &msg, sizeof(SBootInfoMsg));
+		lastTime = time;		
+	}
 }
 
 //--- _handle_msg ---------------------------------------------------------
@@ -156,18 +160,19 @@ static int _handle_msg(RX_SOCKET socket, void *msg, int len, struct sockaddr *se
 {
 	int reply = REPLY_OK;
 	UINT32	*pcmd=(UINT32*)msg;
-
+	
 	//--- handle the message --------------
 	switch (*pcmd)
 	{
-	case CMD_BOOT_INFO_REQ:		TrPrintfL(1, "got CMD_BOOT_INFO_REQ");
+	case CMD_BOOT_INFO_REQ:		TrPrintfL(TRACE, "got CMD_BOOT_INFO_REQ");
 								_Confirmed=FALSE;
 								_send_boot_info(REP_BOOT_INFO);
 								break;
-	case CMD_BOOT_PING:			// TrPrintfL(TRUE, "got CMD_BOOT_PING");
+	case CMD_BOOT_PING:			TrPrintfL(TRACE, "got CMD_BOOT_PING");
 								_send_boot_info(REP_BOOT_PING);
 								break;
-	case CMD_BOOT_ADDR_SET:		_do_set_addr(sender, (SBootAddrSetCmd*)msg);	break;
+	case CMD_BOOT_ADDR_SET:		TrPrintfL(TRACE, "got CMD_BOOT_ADDR_SET");
+								_do_set_addr(sender, (SBootAddrSetCmd*)msg);	break;
 	case CMD_BOOT_FLASH_ON:		_do_flash_on((SBootAddrSetCmd*)msg);	break;
 
 	default:					TrPrintfL(1, "Unknown Command 0x%04x", *pcmd);

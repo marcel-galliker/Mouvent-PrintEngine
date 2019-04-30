@@ -26,7 +26,7 @@ void  fpga_init(void);
 int   fpga_is_init(void);
 void  fpga_end(void);
 
-void  fpga_main(int ticks, int menu);
+void  fpga_main(int ticks, int menu, int showCorrection);
 
 int   fpga_load(char *path_rbf);
 void* fpga_map_page(UINT64 addr, UINT32 size, UINT32 size_expected);

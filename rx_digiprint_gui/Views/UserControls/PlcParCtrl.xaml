@@ -153,6 +153,7 @@
         <!-- check boxes ____________________________________________-->
         <Grid x:Name="CheckBoxCtrl" Grid.Column="1"/>
 
+
         <ComboBox x:Name="ImgComboCtrl"  Grid.Column="1"
 			IsEditable="False"
 			SelectedIndex="{Binding ComboValue, Converter={StaticResource EnumToInt_Converter}}"
@@ -162,6 +163,9 @@
             ItemContainerStyle="{DynamicResource ComboBoxItemStyle1}" 
             FontFamily="Wingdings 3"
             />
+
+        <Image x:Name="LedCtrl" Grid.Column="1" Source="{Binding Value,   Converter={StaticResource LedImg_Converter}}" Height="20"/>
+        
         <!--
             PreviewMouseDown="ImgComboCtrl_PreviewMouseDown" 
         <rx:RxPopup x:Name="CmdPopup" 

@@ -23,12 +23,12 @@
              HorizontalAlignment="Stretch"
              IsVisibleChanged="UserControl_IsVisibleChanged"
             >
-    
+
     <UserControl.Resources>
-        <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">32</sys:Double>      
+        <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">32</sys:Double>
         <!--    <sys:Double x:Key="{x:Static SystemParameters.HorizontalScrollBarHeightKey}">50</sys:Double> -->
     </UserControl.Resources>
-    
+
     <Grid x:Name="MainGrid" HorizontalAlignment="Stretch" Background="Transparent">
         <Grid x:Name="Settings" 
               HorizontalAlignment="Stretch"
@@ -41,7 +41,7 @@
             <Grid Grid.Row="0">
                 <rx_uc:CommandButtons Margin="0,0,0,1"/>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" >
-                    
+
                     <common:RxButton x:Name="Button_Purge" Click="Purge_Clicked" ToolTip="Purge" >
                         <TextBlock Text="Purge" FontSize="22"/>
                     </common:RxButton>
@@ -66,26 +66,27 @@
 
             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" PanningMode="VerticalOnly">
                 <StackPanel>
-                    <!-- Print System ___________________________________________________________________________________________-->                    
+                    <!-- Print System ___________________________________________________________________________________________-->
                     <StackPanel x:Name="PrintSystemPanel">
                         <TextBlock Text="Print System" Background="{StaticResource Brush03}" FontWeight="Bold" Padding="5,0,0,0" />
                         <StackPanel Orientation="Horizontal">
                             <rxView:PrintSystemGrid/>
                             <rxView:OffsetsGrid x:Name="OffsetsGrid"/>
                             <rxView:StepperGrid x:Name="StepperGrid"/>
+                            <rxView:CleafStepperGrid x:Name="CleafStepperGrid"/>
                             <rx_uc:ChillerView/>
                         </StackPanel>
                     </StackPanel>
-                    
+
                     <!-- Ink Supply ________________________________________________________________________________________________________________________ -->
                     <TextBlock Text="Ink Supply" Background="{StaticResource Brush03}" FontWeight="Bold" Margin="0" Padding="5,0,0,0" />
                     <Grid>
                         <rxView:InkSupplyGrid x:Name="InkSupplyGrid" />
                         <TextBlock x:Name="ChillerError" Text="Chiller not running" Visibility="{Binding Running, Converter={StaticResource BoolToInVisible_Converter}}" Foreground="Red" FontWeight="Bold" FontSize="40" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Grid>
+                    <TextBlock Text="Print Heads" Background="{StaticResource Brush03}" FontWeight="Bold" Padding="5,0,0,0" Margin="0,5,0,0" />
 
                     <!-- Print Heads ____________________________________________________________________________________________________________-->
-                    <TextBlock Text="Print Heads" Background="{StaticResource Brush03}" FontWeight="Bold" Padding="5,0,0,0" Margin="0,5,0,0" />
                     <rxView:PrintHeadGrid x:Name="PrintHeadGrid"/>
 
                     <!-- Head Distance __________________________________________________________________________________________________________________-->

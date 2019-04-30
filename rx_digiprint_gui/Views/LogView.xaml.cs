@@ -171,7 +171,25 @@ namespace RX_DigiPrint.Views
         //--- Top_clicked ----------------------------------------------------------
         private void Top_clicked(object sender, System.Windows.RoutedEventArgs e)
         {
+            if (Scroll.Value == 0 ) Scroll.Value =1;
             Scroll.Value = 0;
+        }
+
+        //--- Top_clicked ----------------------------------------------------------
+        private void PageUp_clicked(object sender, System.Windows.RoutedEventArgs e)
+        {
+            if (Scroll.Value == 0 ) Scroll.Value =1;
+            double val = Scroll.Value-Scroll.LargeChange;
+            if (val<0) val=0;
+            Scroll.Value = val;
+        }
+
+        //--- Top_clicked ----------------------------------------------------------
+        private void PageDown_clicked(object sender, System.Windows.RoutedEventArgs e)
+        {
+            double val = Scroll.Value+Scroll.LargeChange;
+            if (val>Scroll.Maximum-Scroll.LargeChange) val=Scroll.Maximum-Scroll.LargeChange;
+            Scroll.Value = val;
         }
 
         //--- Bottom_clicked ----------------------------------------------------------

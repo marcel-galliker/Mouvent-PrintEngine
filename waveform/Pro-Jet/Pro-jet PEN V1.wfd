@@ -1,5 +1,5 @@
 <WaveForm>
-  <Ink Name="PEN V1" ColorCode="30" Description="PEN V1" ColorRGB="#FFFFFFFF" Temp="30" TempMax="45" GreyLevel="8 12 13 15 " MaxFreq="50062" />
+  <Ink Name="PEN V1" ColorCode="30" Description="PEN V1" ColorRGB="#FFFFFFFF" Temp="30" TempMax="45" GreyLevel="8 12 13 15 " MaxFreq="50062" Meniscus="0" CondPresOut="150" DropletVolume="0" FlushTime="120 300 1200" />
   <item Position="0" Voltage="0" />
   <item Position="26" Voltage="0" />
   <item Position="61" Voltage="19" />
@@ -20,5 +20,5 @@
   <item Position="1464" Voltage="9" />
   <item Position="1480" Voltage="0" />
   <item Position="1592" Voltage="0" />
-  <check>AC5C6B9995B00512535A39F6D4CDE298BF3B3EA3</check>
+  <check>47D4430E747C267DDFA00A4B0EA623EBFB1B93CC</check>
 </WaveForm>

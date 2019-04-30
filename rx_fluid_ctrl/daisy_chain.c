@@ -22,6 +22,7 @@
 #include "rx_error.h"
 #include "rx_term.h"
 #include "rx_threads.h"
+#include "rx_trace.h"
 #include "daisy_chain.h"
 #include "fpga_fluid.h"
 #include "comm.h"
@@ -34,11 +35,13 @@
 
 #define MAX_DEVICE_CNT		64
 
-#define LOADCELL_MAX_PCB	8
+#define LOADCELL_MAX_PCB	4
 
 //--- golbals -----------------------------------------------------------------
 static FILE *_daisy_chain_out;
 static FILE *_daisy_chain_in;
+
+static int				_IsActive=FALSE;
 
 static SCommandMsg		_TxFifo[FIFO_SIZE];
 static int				_FifoInIdx;
@@ -51,10 +54,15 @@ static uint8_t			_device_count = 0;
 static SAdcConfigRegs	_AdcConfigRegs[LOADCELL_MAX_PCB];
 static SDevice_Adc		_Adc[LOADCELL_MAX_PCB];
 
+static int				_Tara  [LOADCELL_MAX_PCB*LOADCELL_CNT];
+static int				_Weight[LOADCELL_MAX_PCB*LOADCELL_CNT];
+static int				_wval  [LOADCELL_MAX_PCB*LOADCELL_CNT];
+static int				_wcnt  [LOADCELL_MAX_PCB*LOADCELL_CNT];
+
 //---pprototypes --------------------------------------------------------------
 static void *_daisy_chain_thread(void *ppar);
 static void _display_status(void);
-static void _display_status_adc(void);
+static void _display_status_adc(int showAll);
 static void	*_daisy_chain_detect_devices(void *ppar);
 static int _daisy_chain_send_command(SCommandMsg *command);
 static int _daisy_chain_read(void);
@@ -62,10 +70,12 @@ static int _daisy_chain_request_dispatcher(SAnswerMsg* answer);
 static int _daisy_chain_adc_request_handler(SAnswerMsg* answer);
 static void _comm_set_baud(int comm, int baud);
 static int _devIdx(int devNo, int devId);
+static int _val_to_g(int val);
 
 //--- daisy_chain_init --------------------------------------------------------
 int daisy_chain_init(void)
 {
+	int i;
 	if (!fpga_is_init()) return REPLY_ERROR;
 	
 	// Serial Port setup
@@ -90,6 +100,13 @@ int daisy_chain_init(void)
 	memset(_device_id, 0, sizeof(_device_id));
 	memset(_device_cnt, 0, sizeof(_device_cnt));
 	memset(&_AdcConfigRegs, 0, sizeof(_AdcConfigRegs));
+	for (i=0;i<SIZEOF(_Tara); i++)
+	{
+		_Tara[i]   = 0;
+		_Weight[i] = INVALID_VALUE;
+		_wval[i]   = 0;
+		_wcnt[i]   = 0;
+	}
 	
 	comm_init(0);
 	
@@ -102,6 +119,53 @@ int daisy_chain_init(void)
 	rx_thread_start(_daisy_chain_detect_devices, NULL, 0, "DaisyChain Device detect");
 	
 	return REPLY_OK;
+}
+
+//--- daisy_chain_is_active -----------------------
+int daisy_chain_is_active(void)
+{
+	return _IsActive;
+}
+
+//--- daisy_chain_set_tara ------------------------
+void daisy_chain_set_tara(INT32 *tara, int cnt)
+{
+	int i;
+	for (i=0; i<cnt; i++)
+	{
+		if(i<SIZEOF(_Tara)) _Tara[i]=tara[i];
+	}			
+}
+
+//--- daisy_chain_get_tara ---------------------------
+void daisy_chain_get_tara(INT32 *tara, int cnt)
+{
+	int i;
+	for (i=0; i<cnt; i++)
+	{
+		if(i<SIZEOF(_Tara)) tara[i]=_Tara[i];
+		else tara[i]=0;
+	}
+}
+
+//--- daisy_chain_get_weight ---------------------------
+void daisy_chain_get_weight(INT32 *weight, int cnt)
+{
+	int i;
+	for (i=0; i<cnt; i++)
+	{
+		if(i<SIZEOF(_Tara)) weight[i]=_Weight[i]-_Tara[i];
+		else weight[i]=0;
+	}			
+}
+
+//--- daisy_chain_do_tara --------------------------------------------------------
+void daisy_chain_do_tara(int no)
+{
+	if (no>=0 && no<SIZEOF(_Tara))
+	{
+		_Tara[no] = _Weight[no];
+	}
 }
 
 //--- daisy_chain_end ---------------------------------------------------------
@@ -217,29 +281,36 @@ static int _daisy_chain_read(void)
 //--- _daisy_chain_thread -----------------------------------------------------
 int daisy_chain_main(int ticks, int menu, int displayStatus)
 {
-	if (displayStatus && menu)
+	if (menu)
 	{
-		_display_status_adc();			
+		_display_status_adc(displayStatus);			
 	}
 	return REPLY_OK;
 }
 
-//--- _display_status_adc ---------------------------------------------------------
-static void _display_status_adc()
+//--- _val_to_g ---------------------------------------------
+static int _val_to_g(int val)
 {
-#define FOR_ALL for (i = 0; i < _device_cnt[ADC_DEVICE_ID]; i++)
+	return (int) ( val / 55.0);
+}
+
+//--- _display_status_adc ---------------------------------------------------------
+static void _display_status_adc(int showAll)
+{
+#define FOR_ALL for(i=0; i<LOADCELL_CNT; i++)
 	
-	int i;
-	int j;
+	int i, n;
 	
-	// Print ADC data
-	term_printf("\n"); 
-	
-	term_printf("--- ADC  ------"); FOR_ALL {if (_device_id[i] == ADC_DEVICE_ID) {term_printf("  ---%d---", i); }}term_printf("\n"); 	
-	term_printf("Temperature:    "); FOR_ALL {term_printf("% 8d ", _Adc[i].temp);}term_printf("\n");
-	for (j = 0; j < SIZEOF(_Adc[i].weight); j++) 
-	{	
-		term_printf("Value[%d]:       ", j); FOR_ALL {term_printf("%8s ", value_str(_Adc[i].weight[j])); } term_printf("\n"); 
+	term_printf("\n"); 	
+	term_printf("--- SCALES  ---"); term_printf(" --TEMP--");FOR_ALL term_printf(" ---%02d---", i+1); term_printf("\n");
+	for (n=0; n<LOADCELL_MAX_PCB; n++)
+	{
+		if (_device_id[n] == ADC_DEVICE_ID)
+		{
+			term_printf("Board %d:     ", n+1); 
+			term_printf("% 8d   ",_Adc[n].temp); 
+			FOR_ALL term_printf("% 8s ", value_str3(_Weight[n*LOADCELL_CNT+i]-_Tara[n*LOADCELL_CNT+i])); term_printf("\n");		
+		}				
 	}
 }
 
@@ -325,7 +396,7 @@ static int _devIdx(int devNo, int devId)
 //--- _daisy_chain_handle_request ----------------------------------------------
 static int _daisy_chain_adc_request_handler(SAnswerMsg* answer)
 {
-	int no, i;
+	int no, n, i;
 	
 	no = _devIdx(answer->dev_ctr, answer->dev_id);
 	
@@ -347,8 +418,8 @@ static int _daisy_chain_adc_request_handler(SAnswerMsg* answer)
 		if (answer->length != sizeof(SDevice_Adc))
 			return Error(ERR_CONT, 0, "Loadcell data size missmatch: %d bytes recived instead of %d bytes.", answer->length, sizeof(SDevice_Adc));	
 		
-		SDevice_Adc *padc = &_Adc[no];
-		memcpy(padc, answer->data, sizeof(SDevice_Adc));
+		_IsActive = TRUE;
+		memcpy(&_Adc[no], answer->data, sizeof(SDevice_Adc));
 		
 		// Umrechnung temperatur: 
 		// U [V] = Value * 0.0000001490116119384765625
@@ -356,22 +427,24 @@ static int _daisy_chain_adc_request_handler(SAnswerMsg* answer)
 		// 0.000403V = 1°C Delta
 		// Temp [°C] = 25 + ((Value * 0.0000001490116119384765625) - 0.129) / 0.000403
 		
-		padc->temp = (INT32)(25.0 + (((0.000000149*padc->temp) - 0.129) / 0.000403));
-
-		// Umrechnung gewicht:
-		// U [V] = Value * 0.000000004656612873077392578125
-		// ±39.0625 mV = +- 40kg
-
-		for (i=0; i<SIZEOF(padc->weight); i++)
+		_Adc[no].temp = (INT32)(25.0 + (((0.000000149*_Adc[no].temp) - 0.129) / 0.000403));
+	
+		for (i=0; i<LOADCELL_CNT; i++)
 		{
-			/*
-			if(padc->weight[i]<0 || padc->weight[i]>1000000)
-				padc->weight[i] = INVALID_VALUE;
-			else
-			*/
+			int w = _val_to_g(_Adc[no].weight[i]);
+			n=no*LOADCELL_CNT+i;
+			if (n<SIZEOF(_Weight))
 			{
-				padc->weight[i] = padc->weight[i];
-			}			
+				_wval[n] += w;
+				_wcnt[n]++;
+			//	if (no==0) TrPrintfL(TRUE, "Weight[%d] w=%d, val=%d, cnt=%d, weight= %d", no, w, _wval[no], _wcnt[no], _wval[no] / _wcnt[no]);				
+				if (_wcnt[n]>50)
+				{
+					_Weight[n] = _wval[n] / _wcnt[n];
+					_wval[n] = 0;
+					_wcnt[n] = 0;
+				}				
+			}
 		}
 		return REPLY_OK;
 		

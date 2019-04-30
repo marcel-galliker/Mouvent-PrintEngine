@@ -33,11 +33,16 @@
 #endif
 #include "rx_common.h"
 
+#ifdef DEBUG
+	const int RX_Debug=TRUE;
+#else
+	const int RX_Debug=FALSE;
+#endif
 
 //--- RX_UdpBlockSize ----------------------------------
 UINT32 RX_UdpBlockSize[4] = {(45*32), (90*32), (180*32), (270*32)};
 
-char *RX_MonthStr[12]= {"JAN", "FEB", "MAR", "APR", "MAI", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"}; 
+const char *RX_MonthStr[12]= {"JAN", "FEB", "MAR", "APR", "MAI", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"}; 
 
 
 //--- rx_init --------------------------------------
@@ -85,6 +90,7 @@ void rx_get_system_time(UINT64 *pFileTime)
 		
 	*pFileTime = result;
 }
+
 void rx_get_system_time_str(char *str, char separator)
 {
 	time_t t = time(NULL);
@@ -134,6 +140,11 @@ time_t FiletimeToTimet(const LPFILETIME pft)
    ull.HighPart = pft->dwHighDateTime;
 
    return ull.QuadPart / 10000000ULL - 11644473600ULL;
+}
+#else
+time_t FiletimeToTimet(const UINT64 fileTime)
+{
+   return fileTime / 10000000ULL - 11644473600ULL;
 }
 #endif
 

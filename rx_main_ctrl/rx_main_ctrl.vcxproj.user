@@ -5,7 +5,7 @@
     <RemoteDebuggerWorkingDirectory>$(TargetDir)</RemoteDebuggerWorkingDirectory>
     <RemoteDebuggerServerName>192.168.200.1</RemoteDebuggerServerName>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>-simuplc -debug -simuchiller +simuencoder</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>-debug +simuplc +simuchiller +simuencoder</LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <RemoteDebuggerCommand>$(TargetPath)</RemoteDebuggerCommand>
@@ -30,5 +30,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerCommandArguments>+simuplc</LocalDebuggerCommandArguments>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-lx|Win32'">
+    <LocalDebuggerDebuggerType>Auto</LocalDebuggerDebuggerType>
   </PropertyGroup>
 </Project>

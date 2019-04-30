@@ -104,6 +104,37 @@ namespace RX_Common
             catch (Exception) { return 0;}
         }
 
+        //--- StrNumFormat ---------------------------------------
+        public static string StrNumFormat(string val, int nachkomma)
+        {
+         //   return val;
+            StringBuilder str = new StringBuilder(32);
+            int i;
+            int pos = val.IndexOf('.');
+            if (pos<0)   
+                pos = val.Length;
+            for (i=0; i<pos; i++)
+            {
+                str.Append(val[i]);
+                if ((i+1<pos) && ((pos-i)%3)==1) str.Append('\'');
+            }
+            if (nachkomma>0)
+            {
+                str.Append('.'); pos++;
+                while (pos<val.Length && nachkomma>0)
+                {
+                    str.Append(val[pos++]);
+                    nachkomma--;
+                }
+                while (nachkomma>0)
+                {
+                    str.Append('0');
+                    nachkomma--;
+                }
+            }
+            return str.ToString();
+        }
+
         [DllImport("user32.dll")]
         public static extern int ToUnicode(
             uint wVirtKey,

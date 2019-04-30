@@ -147,6 +147,9 @@
     <Compile Include="Views\About.xaml.cs">
       <DependentUpon>About.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\FlushTimeView.xaml.cs">
+      <DependentUpon>FlushTimeView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\GreyLevelView.xaml.cs">
       <DependentUpon>GreyLevelView.xaml</DependentUpon>
     </Compile>
@@ -184,6 +187,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\About.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\FlushTimeView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

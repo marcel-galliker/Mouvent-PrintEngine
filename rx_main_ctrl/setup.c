@@ -89,6 +89,7 @@ int setup_network(HANDLE file, SRxNetwork *pnet, EN_setup_Action  action)
 				setup_mac_addr(file, "MacAddr",		action, &pnet->item[i].macAddr,			0);
 				setup_uchar   (file, "DevType",		action, &pnet->item[i].deviceType,		dev_undef);
 				setup_uchar   (file, "DevNo",		action, &pnet->item[i].deviceNo,		0);
+				if (pnet->item[i].deviceNo==255) pnet->item[i].deviceNo=0;
 				setup_chapter (file, "..", i, action);
 			}
 		}
@@ -115,8 +116,8 @@ int setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action)
 	{
 		setup_int32(file, "type", action, (int*)&pcfg->printer.type, printer_undef);
 		setup_uint32(file, "overlap", action, &pcfg->printer.overlap, TRUE);
-		if (pcfg->printer.type!=printer_TX801 && pcfg->printer.type!=printer_TX802)	pcfg->printer.overlap = TRUE;
-		setup_uint32(file, "externalData", action, &pcfg->externalData, TRUE);
+		if (pcfg->printer.type!=printer_TX801 && pcfg->printer.type!=printer_TX802 && pcfg->printer.type!=printer_test_table)	pcfg->printer.overlap = TRUE;
+		setup_uint32(file, "externalData", action, &pcfg->externalData, FALSE);
 		setup_chapter(file, "..", -1, action);
 	}
 
@@ -125,8 +126,9 @@ int setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action)
 	{
 		setup_int32(file, "offset_angle",  action, (int*)&pcfg->printer.offset.angle, 0);
 		setup_int32(file, "offset_step", action, (int*)&pcfg->printer.offset.step, 0);
-		setup_int32(file, "offset_incPerMeter", action, (int*)&pcfg->printer.offset.incPerMeter, 0);
-		setup_uint32(file, "offsetVerso", action, &pcfg->printer.offset.verso, 0);
+		setup_int32(file, "offset_incPerMeter", action, &pcfg->printer.offset.incPerMeter[0], 0);
+		setup_int32(file, "offset_incPerMeterVerso", action, &pcfg->printer.offset.incPerMeter[1], 0);
+		setup_uint32(file, "offsetVerso", action, &pcfg->printer.offset.versoDist, 0);
 		setup_chapter(file, "..", -1, action);
 	}
 	//--- offsets ---
@@ -136,8 +138,9 @@ int setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action)
 		{
 			setup_int32(file, "offset_angle",  action, (int*)&pcfg->printer.offset.angle, 0);
 			setup_int32(file, "offset_step", action, (int*)&pcfg->printer.offset.step, 0);
-			setup_int32(file, "offset_incPerMeter", action, (int*)&pcfg->printer.offset.incPerMeter, 0);
-			setup_uint32(file, "offsetVerso", action, &pcfg->printer.offset.verso, 0);
+			setup_int32(file, "offset_incPerMeter",		 action, &pcfg->printer.offset.incPerMeter[0], 0);
+			setup_int32(file, "offset_incPerMeterVerso", action, &pcfg->printer.offset.incPerMeter[1], 0);
+			setup_uint32(file, "offsetVerso", action, &pcfg->printer.offset.versoDist, 0);
 			setup_chapter(file, "..", -1, action);			
 		}
 	}
@@ -157,11 +160,25 @@ int setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action)
 		setup_int32(file, "wipe_height",	action, &pcfg->stepper.wipe_height,		0);
 		setup_int32(file, "cap_height",		action, &pcfg->stepper.cap_height,		0);
 		setup_int32(file, "cap_pos",		action, &pcfg->stepper.cap_pos,			0);
-		if (setup_chapter(file, "..", -1, action)!=REPLY_OK) return REPLY_ERROR;
+		for (i=0; i<SIZEOF(pcfg->stepper.robot); i++)
+		{
+			if (setup_chapter(file, "robot", i, action)==REPLY_OK) 
+			{	
+				setup_int32(file, "ref_height",	  action, &pcfg->stepper.robot[i].ref_height,	0);
+				setup_int32(file, "head_align",	  action, &pcfg->stepper.robot[i].head_align,	0);
+				setup_int32(file, "robot_height", action, &pcfg->stepper.robot[i].robot_height,	0);
+				setup_int32(file, "robot_align",  action, &pcfg->stepper.robot[i].robot_align,	0);
+				
+				setup_chapter(file, "..", -1, action);
+			}				
+		}
+		setup_chapter(file, "..", -1, action);
 	}
-	
+	setup_int32_arr(file, "Tara",  action, pcfg->scalesTara, MAX_SCALES, 0);
+
 	//--- ink supply ---
-	setup_uchar(file, "InkSupplyCnt", action, &pcfg->inkSupplyCnt, 0);
+	setup_uchar(file, "InkSupplyCnt", action, &pcfg->inkSupplyCnt, 1);
+	setup_uchar(file, "HeadsPerColor", action, &pcfg->headsPerColor, 1);
 	for (i=0; i<pcfg->inkSupplyCnt; i++)
 	{
 		if (setup_chapter(file, "InkSupply", i, action)==REPLY_OK) 
@@ -170,37 +187,29 @@ int setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action)
 			sprintf(path, "%s%s.wfd", PATH_WAVE_FORM, pcfg->inkSupply[i].inkFileName);
 			setup_ink(path, &pcfg->inkSupply[i].ink, READ);
 			setup_int32(file, "RectoVerso", action, (int*)&pcfg->inkSupply[i].rectoVerso, 0);
-			setup_int32(file, "inkPressureSet", action, (int*)&pcfg->inkSupply[i].inkPressureSet, 150);
-			if (pcfg->inkSupply[i].inkPressureSet==INVALID_VALUE) pcfg->inkSupply[i].inkPressureSet=150; 
+			setup_int32(file, "inkPressureSet", action, (int*)&pcfg->inkSupply[i].cylinderPresSet, 150);
+			if (pcfg->inkSupply[i].cylinderPresSet==INVALID_VALUE) pcfg->inkSupply[i].cylinderPresSet=150; 
 		
-			setup_int32_arr(file, "headFpVoltage", action, &pcfg->headFpVoltage[i*pcfg->headsPerColor], SIZEOF(pcfg->headFpVoltage), pcfg->headsPerColor,  100);
-			setup_int32_arr(file, "HeadDist",      action, &pcfg->headDist[i*pcfg->headsPerColor],		SIZEOF(pcfg->headDist),		 pcfg->headsPerColor,	 0);
-			setup_int32_arr(file, "HeadDistBack",  action, &pcfg->headDistBack[i*pcfg->headsPerColor],	SIZEOF(pcfg->headDistBack),	 pcfg->headsPerColor,	 0);
-			setup_int32_arr(file, "ColorOffset",   action, &pcfg->colorOffset[i*pcfg->headsPerColor],	SIZEOF(pcfg->colorOffset),	 pcfg->headsPerColor,	 0);
-			
+			setup_int32_arr(file, "headFpVoltage", action, &pcfg->headFpVoltage[i*pcfg->headsPerColor], pcfg->headsPerColor,  100);
+			setup_int32_arr(file, "HeadDist",      action, &pcfg->headDist[i*pcfg->headsPerColor],		pcfg->headsPerColor,	0);
+			setup_int32_arr(file, "HeadDistBack",  action, &pcfg->headDistBack[i*pcfg->headsPerColor],	pcfg->headsPerColor,	0);
+			setup_int32(file, "ColorOffset",	   action, &pcfg->colorOffset[i], 0);
+					
 			{
 				INT32 offset[MAX_HEAD_DIST];
 				if (action==WRITE)
 				{
-					for (n=0; n<pcfg->headsPerColor; n++) offset[n] = RX_HBStatus[(i*pcfg->headsPerColor+n)/HEAD_CNT].head[(i*pcfg->headsPerColor+n)%HEAD_CNT].controller_offset;
+					for (n=0; n<pcfg->headsPerColor; n++) offset[n] = pcfg->cond[i*pcfg->headsPerColor+n].pid_offset;
 				}
-				setup_int32_arr(file, "controller_offset",  action, offset, SIZEOF(offset),	  pcfg->headsPerColor,	 1400);
+				setup_int32_arr(file, "pid_offset",  action, offset, pcfg->headsPerColor,	 1400);
 				if (action==READ)
 				{
-					for (n=0; n<pcfg->headsPerColor; n++) pcfg->cond[i*pcfg->headsPerColor+n].controller_offset = offset[n];
+					for (n=0; n<pcfg->headsPerColor; n++) pcfg->cond[i*pcfg->headsPerColor+n].pid_offset = offset[n];
 				}
 			}
 			setup_chapter(file, "..", -1, action);
 		}
 	}
-	setup_uchar(file, "HeadsPerColor", action, &pcfg->headsPerColor, 0);
-
-	/*
-	setup_int32_arr(file, "headFpVoltage", action, pcfg->headFpVoltage, SIZEOF(pcfg->headFpVoltage),  pcfg->inkSupplyCnt*pcfg->headsPerColor,  100);
-	setup_int32_arr(file, "HeadDist",      action, pcfg->headDist,		SIZEOF(pcfg->headDist),		  pcfg->inkSupplyCnt*pcfg->headsPerColor, 	 0);
-	setup_int32_arr(file, "HeadDistBack",  action, pcfg->headDistBack,	SIZEOF(pcfg->headDistBack),	  pcfg->inkSupplyCnt*pcfg->headsPerColor,    0);
-	setup_int32_arr(file, "ColorOffset",   action, pcfg->colorOffset,	SIZEOF(pcfg->colorOffset),	  pcfg->inkSupplyCnt*pcfg->headsPerColor,	 0);		
-	*/
 
 	if (action==WRITE) setup_save(file, filepath);
 	setup_destroy(file);
@@ -223,12 +232,16 @@ static void _head_pressure_out_override(SRxConfig *pcfg)
     			// conditioner
 				if (setup_chapter(file, "head", i+1, READ)==REPLY_OK) 
 				{    				
-//					setup_int32(file, "pressure",	READ, (int*)&pcfg->cond[i].pressure_out,	  300);
-//					setup_int32(file, "P",			READ, (int*)&pcfg->cond[i].controller_P,	  500);
-//					setup_int32(file, "I",			READ, (int*)&pcfg->cond[i].controller_I,	  50);
-//					setup_int32(file, "D",			READ, (int*)&pcfg->cond[i].controller_D,      0);
-//					setup_int32(file, "Offset",		READ, (int*)&pcfg->cond[i].controller_offset, 1400);
-//					setup_int32(file, "fp_voltage", READ, (int*)&pcfg->headFpVoltage[i], 100);
+					setup_int32(file, "pressure",	READ, (int*)&pcfg->cond[i].pressure_out,	300);
+					setup_int32(file, "P",			READ, (int*)&pcfg->cond[i].pid_P,			1000);
+					setup_int32(file, "I",			READ, (int*)&pcfg->cond[i].pid_I,			50);
+					setup_int32(file, "D",			READ, (int*)&pcfg->cond[i].pid_D,			0);
+					setup_int32(file, "Meniscus0",	READ, (int*)&pcfg->cond[i].menicus0,		0);
+					{
+						int offset;
+						setup_int32(file, "Offset",		READ, &offset, 1400);
+						if (pcfg->cond[i].pid_offset==0 || pcfg->cond[i].pid_offset==1400) pcfg->cond[i].pid_offset=offset;						
+					}
 					setup_chapter(file, "..", -1, READ); 
 				}	
    			}
@@ -245,34 +258,6 @@ static void _head_pressure_out_override(SRxConfig *pcfg)
 		}
 	}
 	setup_destroy(file);	
-}
-
-//--- setup_scales -----------------------------
-int setup_scales	 (const char *filepath,	SScalesCalibration  *pcalib, int cnt, EN_setup_Action  action)
-{
-	int i;
-	HANDLE file = setup_create();
-	if (setup_load(file, filepath)==REPLY_OK)
-	{
-		if (setup_chapter(file, "Scales", -1, action)==REPLY_OK)
-		{
-			//--- scale boards -----------------------
-			for (i=0; i<cnt; i++)
-			{
-				int len;
-				if (setup_chapter(file, "Module", i, action)==REPLY_OK)
-				{
-					setup_binary(file, "data", action, &pcalib[i], sizeof(pcalib[i]), &len);	
-					setup_chapter(file, "..", -1, action);
-				}
-				else memset(&pcalib[i], 0, sizeof(pcalib[i]));
-			}
-			setup_chapter(file, "..", -1, action);			
-		}
-	}
-	if (action==WRITE) setup_save(file, filepath);
-	setup_destroy(file);							
-	return REPLY_OK;
 }
 
 //--- setup_fluid_system --------------------------------------------

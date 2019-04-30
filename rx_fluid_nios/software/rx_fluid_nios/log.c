@@ -57,8 +57,8 @@ void log_tick_10ms(void)
 		for (i=0; i<NIOS_INK_SUPPLY_CNT; i++)
 		{
 			len += valstr(&str[len], pRX_Config->ink_supply[i].condPresIn);
-			len += valstr(&str[len], pRX_Status->ink_supply[i].inkPressureSet);
-			len += valstr(&str[len], pRX_Status->ink_supply[i].inkPressure);
+			len += valstr(&str[len], pRX_Status->ink_supply[i].cylinderPresSet);
+			len += valstr(&str[len], pRX_Status->ink_supply[i].cylinderPres);
 			len += valstr(&str[len], pRX_Status->ink_supply[i].inkPumpSpeed_set+110);
 //			len += valstr(&str[len], pRX_Status->ink_supply[i].inkPumpSpeed_measured);
 			len += sprintf(&str[len], "%d\t", pRX_Status->ink_supply[i].bleedValve);

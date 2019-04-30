@@ -41,6 +41,7 @@
 #define MAC_ENCODER_CTRL	mac_as_i64("00:00:00:04:00:00")
 #define MAC_FLUID_CTRL		mac_as_i64("00:00:00:05:00:00")
 #define MAC_STEPPER_CTRL	mac_as_i64("00:00:00:06:00:00")
+#define MAC_ENC32_CTRL	    mac_as_i64("00:00:00:07:00:00")
 
 #define MAC_NO_MASK			mac_as_i64("00:00:00:00:ff:ff")
 

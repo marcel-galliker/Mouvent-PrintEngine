@@ -810,6 +810,15 @@ int	 steptx_wipe_done(void)
 	return FALSE;									
 }
 
+//--- steptx_set_vent -----------------------------------------------
+void steptx_set_vent(int speed)
+{ 
+	INT32 value;
+	if(speed) value=100;
+	else      value=0;
+	sok_send_2(_step_socket[0], _step_ipaddr[0], CMD_CAP_VENT, sizeof(value), &value);
+}
+
 ////--- steptx_purge_ok --------------------------------------------
 //int	 steptx_purge_flag(int no)
 //{

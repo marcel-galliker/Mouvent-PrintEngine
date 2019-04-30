@@ -87,15 +87,14 @@ static void _main_loop()
 									else							txrob_main(ticks, menu);
 									break;
 			
-		case printer_cleaf:			if (RX_StepperCfg.boardNo == 0) cleaf_main(ticks, menu); 
-									else                            cln_main(ticks, menu);
-									break;
+		case printer_cleaf:			cleaf_main(ticks, menu); break;
 			
 		case printer_LB701: 		if (RX_StepperCfg.boardNo == 0) lb701_main(ticks, menu);
 									else							lbrob_main(ticks, menu);	
 									break;
 			
-		case printer_LB702: 		if (RX_StepperCfg.boardNo == 0) lb702_main(ticks, menu); 
+		case printer_LB702_UV: 		
+		case printer_LB702_WB:		if (RX_StepperCfg.boardNo == 0) lb702_main(ticks, menu); 
 									else							lbrob_main(ticks, menu);	
 									break;
 
@@ -116,15 +115,14 @@ static void _main_loop()
 			case printer_TX802:			if (RX_StepperCfg.boardNo == 0) _AppRunning = tx801_menu(); 
 										else							_AppRunning = txrob_menu(); 
 										break;
-			case printer_cleaf:			if (RX_StepperCfg.boardNo == 0) _AppRunning = cleaf_menu(); 
-										else							_AppRunning = cln_menu();
-										break;
+			case printer_cleaf:			_AppRunning = cleaf_menu(); break;
 
 			case printer_LB701: 		if (RX_StepperCfg.boardNo == 0) _AppRunning = lb701_menu(); 
 										else							_AppRunning = lbrob_menu(); 
 										break;
 
-			case printer_LB702: 		if (RX_StepperCfg.boardNo == 0) _AppRunning = lb702_menu(); 
+			case printer_LB702_UV:
+			case printer_LB702_WB:		if (RX_StepperCfg.boardNo == 0) _AppRunning = lb702_menu(); 
 										else							_AppRunning = lbrob_menu(); 
 										break;
 
@@ -144,20 +142,17 @@ static void _main_loop()
 ///--- main ---------------------------------------------------------------
 int main(int argc, char** argv)
 {
+	args_init(argc, argv);
+
+	rx_startup(argv[0], arg_debug);
 	Trace_init(argv[0]);
 
 	TrPrintfL(1, "RxStepperCtrl %s started", version);
-	
+
 	memset(&RX_TestTableStatus, 0, sizeof(RX_TestTableStatus));
 	memset(&RX_StepperCfg,		0, sizeof(RX_StepperCfg));
-
-	args_init(argc, argv);
-
-//	RX_StepperCfg.printerType=printer_test_table;
-
-	rx_startup(argv[0], arg_debug);
 	
-	get_version(&RX_TestTableStatus.swVersion);
+	get_version((int*)&RX_TestTableStatus.swVersion);
 	sscanf(version, "d.d.d.d", &RX_TestTableStatus.swVersion.major, &RX_TestTableStatus.swVersion.minor, &RX_TestTableStatus.swVersion.revision, &RX_TestTableStatus.swVersion.build);
 	sok_get_mac_address("eth0", &RX_TestTableStatus.macAddr);
 	RX_TestTableStatus.serialNo = swap_uint16((RX_TestTableStatus.macAddr>>32) & 0xffff);
@@ -179,15 +174,14 @@ int main(int argc, char** argv)
 								else						    txrob_init();
 								break;
 		
-	case printer_cleaf:			if (RX_StepperCfg.boardNo == 0) cleaf_init(); 
-								else                            cln_init();
-								break;
+	case printer_cleaf:			cleaf_init(); break;
 		
 	case printer_LB701: 		if (RX_StepperCfg.boardNo == 0) lb701_init(); 
 								else						    lbrob_init();
 								break;
 		
-	case printer_LB702: 		if (RX_StepperCfg.boardNo == 0) lb702_init(); 
+	case printer_LB702_UV: 		
+	case printer_LB702_WB: 		if (RX_StepperCfg.boardNo == 0) lb702_init(); 
 								else						    lbrob_init();
 								break;
 		

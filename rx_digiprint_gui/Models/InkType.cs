@@ -7,6 +7,9 @@ namespace RX_DigiPrint.Models
 {
     public class InkType : RxBindable
     {
+        static public InkType Flush = new InkType(){Name="Flush", ColorFG=Colors.Black, Color=Color.FromRgb(0xf0,0xf0,0xf0)};
+        static public InkType Waste = new InkType(){Name="Waste", ColorFG=Colors.White, Color=Color.FromRgb(0x80,0x80,0x80)};
+
         //--- constructor -------------------------------
         public InkType()
         {
@@ -20,6 +23,7 @@ namespace RX_DigiPrint.Models
             Name        = msg.name;
             ColorCode   = msg.colorCode; 
             Description = msg.description;
+            CanFlush    = msg.flushTime[0]!=0 || msg.flushTime[1]!=0 || msg.flushTime[2]!=0;
             Color=new Color(){R=msg.r, G=msg.g, B=msg.b, A=255};
         }
 
@@ -78,6 +82,14 @@ namespace RX_DigiPrint.Models
             set { _ColorFG = value;}
         }
 
+        //--- Property CanFlush ---------------------------------------
+        private bool _CanFlush = false;
+        public bool CanFlush
+        {
+            get { return _CanFlush; }
+            set { SetProperty(ref _CanFlush, value); }
+        }
+        
         //--- Property Family ---------------------------------------
         private string _Family;
         public string Family

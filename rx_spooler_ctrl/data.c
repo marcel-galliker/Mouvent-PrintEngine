@@ -16,6 +16,7 @@
 #include "rx_file.h"
 #include "rx_mem.h"
 #include "rx_threads.h"
+#include "rx_flz.h"
 #include "rx_tif.h"
 #include "rx_trace.h"
 #include "rx_rip_lib.h"
@@ -36,7 +37,6 @@
 
 static int				_Init=FALSE;
 static int				_Abort=FALSE;
-static int				_ForceFree=FALSE;
 static SPrintListItem	_PrintList[PRINT_LIST_SIZE];
 static int				_InIdx;
 static int				_SendIdx;
@@ -44,11 +44,11 @@ static int				_OutIdx;
 static int				_HeadCnt;
 static UINT64			_MaxMemory=0;
 static int				_MaxBufers=64;
-static UINT64			_BufSize=0;
 static HANDLE			_SendSem=NULL;
 static int				_Mounted=FALSE;
 static int				_IsLocal=FALSE;
 static int				_IsMain =TRUE;
+static int				_CacheInfo=FALSE;
 
 static SPageId			_LastId;
 static char				_LastFilePath[MAX_PATH];
@@ -77,24 +77,23 @@ void data_init(RX_SOCKET socket, int headCnt)
 		_SendSem=rx_sem_create();
 		rx_sem_post(_SendSem);
 		sok_get_socket_name(socket, NULL, addr, NULL);
-//		_IsMain  = !strcmp(addr, RX_CTRL_MAIN);
 		_IsMain  = !strcmp(addr, RX_CTRL_MAIN) || !strcmp(addr, "127.0.0.1");
-//		_IsLocal =                                !strcmp(addr, "127.0.0.1");
 		_IsLocal = !strcmp(addr, RX_CTRL_MAIN) || !strcmp(addr, "127.0.0.1");
 	}
 	
 	_InIdx   = 0;
 	_OutIdx  = 0;
 	_SendIdx = 0;
+	_CacheInfo = FALSE;
 	_Abort   = FALSE;
 	if (_MaxMemory==0)
 	{
 		_MaxMemory  = rx_mem_physical();
 		_MaxMemory -= 1024*1024*1024; // leave one GB for the system
+		memset(&_LastId, 0, sizeof(_LastId));
+		memset(_LastFilePath, 0, sizeof(_LastFilePath));
+		memset(&_LastBmpInfo, 0, sizeof(_LastBmpInfo));		
 	}
-	memset(&_LastId, 0, sizeof(_LastId));
-	memset(_LastFilePath, 0, sizeof(_LastFilePath));
-	memset(&_LastBmpInfo, 0, sizeof(_LastBmpInfo));
 	memset(_BlkNo, 0, sizeof(_BlkNo));
 
 	if (_HeadCnt!=headCnt)
@@ -122,8 +121,8 @@ void data_end()
 void data_abort		(void)
 {	
 	_Abort=TRUE;
-	_ForceFree=TRUE;
 	tif_abort();
+	flz_abort();
 }
 
 //--- _local_path ------------------------------------------------------------------------
@@ -228,7 +227,9 @@ static int _copy_file(SPageId *pid, char *srcDir, char *fileName, char *dstDir)
 	if (dstTime==srcTime)  return REPLY_OK;
 
 	TrPrintfL(TRUE, "copy file %s", dstPath);
-
+	if (!_CacheInfo) 
+		Error(LOG, 0, "Tansferring files");
+	_CacheInfo=TRUE;
 	{
 		FILE *src=NULL;
 		FILE *dst=NULL;
@@ -280,6 +281,15 @@ int  data_get_size	(const char *path, UINT32 page, UINT32 spacePx, UINT32 *pwidt
 {
 	int ret;
 	UINT32 memsize;
+	SFlzInfo info;
+
+	if(flz_get_info(path, page, &info)==REPLY_OK)
+	{
+		*pwidth			= info.WidthPx+spacePx;
+		*plength		= info.lengthPx;
+		*pbitsPerPixel	= info.bitsPerPixel; 
+		return REPLY_OK;
+	}
 	ret = tif_get_size(path, page, spacePx, pwidth, plength, pbitsPerPixel);
 	if (ret == REPLY_NOT_FOUND) 
 	{
@@ -291,7 +301,7 @@ int  data_get_size	(const char *path, UINT32 page, UINT32 spacePx, UINT32 *pwidt
 }
 
 //--- data_malloc -------------------------------------------------------------------------
-int  data_malloc	(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPixel, SColorSplitCfg *psplit, int splitCnt, BYTE* buffer[MAX_COLORS])
+int  data_malloc(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPixel, SColorSplitCfg *psplit, int splitCnt, UINT64 *pBufSize, BYTE* buffer[MAX_COLORS])
 {	
 	UINT64	memsize;
 	int i, found, error, lineLen;
@@ -299,7 +309,7 @@ int  data_malloc	(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPixel
 //	lineLen = (width*bitsPerPixel+7)/8;			// workes for TIFF
 //	lineLen = ((width*bitsPerPixel+15)/16)*2;	// used for BMP files!
 	lineLen = ((width*bitsPerPixel+31) & ~31)/8;	// used for BMP files!
-	
+		
 	if (FALSE && printMode==PM_SCANNING) 
 	{
 		int	cnt;
@@ -312,33 +322,19 @@ int  data_malloc	(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPixel
 	}
 	else memsize = (UINT64)lineLen*height;
 	
-	if (printMode==PM_TEST) memsize*=RX_Spooler.headsPerColor;
+	if (printMode==PM_TEST_JETS || printMode==PM_TEST_SINGLE_COLOR) 
+		memsize*=RX_Spooler.headsPerColor;
 	
 	memsize = (memsize+0xfffff) & ~0xffff; // round up to next MB
 
-	//--- allocate -------------------------
-	/*
-	TrPrintf(TRUE, "Free buffers: Force=%d", _ForceFree);
-	for (i=0; i<MAX_COLORS; i++)
-	{
-		if (psplit[i].color.name[0])
-		{
-			if (psplit[i].lastLine>psplit[i].firstLine)
-			{
-				TrPrintfL(1, "buffer[%d]: used: cnt=%d", i, rx_mem_cnt(buffer[i]));
-			}
-		}	
-	}	
-	*/
-
 	error=0;
-	if(_BufSize >= memsize && !_ForceFree)
+	if(*pBufSize >= memsize)
 	{
 		for (i=0; i<MAX_COLORS; i++)
 		{
 			if (psplit[i].color.name[0] && psplit[i].lastLine>psplit[i].firstLine)
 			{
-				TrPrintfL(1, "buffer[%d]: WAIT UNUSED %p", i, buffer[i]);
+				TrPrintfL(1, "buffer[%d]: WAIT UNUSED %p, used=%d, abort=%d", i, buffer[i], rx_mem_cnt(buffer[i]), _Abort);
 				while (!_Abort && rx_mem_cnt(buffer[i]))
 				{
 					rx_sleep(10);
@@ -346,7 +342,7 @@ int  data_malloc	(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPixel
 				TrPrintfL(1, "buffer[%d]: IS UNUSED", i);								
 			}
 		}
-		_BufSize = memsize;
+		*pBufSize = memsize;
 	}
 	else
 	{
@@ -360,12 +356,11 @@ int  data_malloc	(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPixel
 					TrPrintfL(1, "buffer[%d]: WAIT FREE %p", i, buffer[i]);
 					while (!_Abort)
 					{
-						if (_ForceFree) rx_mem_free_force(&buffer[i]);
-						else			rx_mem_free(&buffer[i]);
+						rx_mem_free(&buffer[i]);
 						if (!buffer[i]) break;
 						rx_sleep(10);
 					}
-					_BufSize = 0;
+					*pBufSize = 0;
 
 					TrPrintfL(1, "buffer[%d]: IS FREE", i);
 					if (!_Abort)
@@ -374,38 +369,36 @@ int  data_malloc	(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPixel
 						buffer[i] = rx_mem_alloc(memsize);
 						TrPrintfL(1, "data_malloc buffer[%d], %p, free=%d MB, size=%d MB", i, buffer[i], rx_mem_get_freeMB(), memsize/1024/1024);
 						if (buffer[i]==NULL) error=TRUE;
-						_BufSize = memsize;
+						*pBufSize = memsize;
 					}
 				}
 			}
 		}
-		_BufSize = memsize;
+		*pBufSize = memsize;
 	}
 	
-	_ForceFree = FALSE;
 	if (error || _Abort)
 	{
 		for (i=0; i<MAX_COLORS; i++)
 		{
 			if (buffer[i]) rx_mem_free(&buffer[i]);
 		}
-		_BufSize=0;
+		*pBufSize=0;
 		return REPLY_ERROR;
 	}
 
-	if (printMode==PM_TEST) _ForceFree = TRUE;
 	return REPLY_OK;
 }
 
 //--- data_free ----------------------------------------------
-int  data_free(BYTE* buffer[MAX_COLORS])
+int  data_free(UINT64 *pBufSize, BYTE* buffer[MAX_COLORS])
 {
 	int i;
 	for (i=0; i<MAX_COLORS; i++)
 	{
 		if (buffer[i]) rx_mem_free(&buffer[i]);
 	}
-	_BufSize=0;
+	*pBufSize=0;
 	return REPLY_OK;			
 }
 
@@ -415,6 +408,7 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, int
 	SBmpInfo		bmpInfo;
 	int ret;
 	int nextIdx;
+	int loaded=FALSE;
 	char filename[MAX_PATH];
 	char	*tiffErr;
 
@@ -426,11 +420,12 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, int
 	if (variable)	ret = sr_rip_label (buffer, &bmpInfo); 
 	else
 	{
-		if (id->id!=_LastId.id || id->page!=_LastId.page || strcmp(filepath, _LastFilePath))
+		if (/*id->id!=_LastId.id || */ id->page!=_LastId.page || strcmp(filepath, _LastFilePath))
 		{
 			ret = 1;
+			loaded = TRUE;
 			bmpInfo.printMode = printMode;
-			if (printMode==PM_TEST || printMode==PM_TEST_SINGLE_COLOR)
+			if (printMode==PM_TEST || printMode==PM_TEST_JETS || printMode==PM_TEST_SINGLE_COLOR)
 			{
 				int color;
 				for (color=0; color<MAX_COLORS; color++)
@@ -453,7 +448,18 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, int
 				}
 			}
 			split_path(filepath, NULL, filename, NULL);
-			if (ret) ret = tif_load(id, filepath, filename, printMode, gapPx, RX_Color, SIZEOF(RX_Color), buffer, &bmpInfo, ctrl_send_load_progress);
+			int time0=rx_get_ticks();
+			if (ret) 
+			{		
+				if(RX_Spooler.printerType==printer_DP803)
+				{
+					ret = flz_load(id, filepath, filename, printMode, gapPx, RX_Color, SIZEOF(RX_Color), buffer, &bmpInfo, ctrl_send_load_progress);
+					if (ret) ret = tif_load_mt(id, filepath, filename, printMode, gapPx, RX_Color, SIZEOF(RX_Color), buffer, &bmpInfo, ctrl_send_load_progress);
+				}
+				else
+					ret = tif_load(id, filepath, filename, printMode, gapPx, RX_Color, SIZEOF(RX_Color), buffer, &bmpInfo, ctrl_send_load_progress);					
+			}
+		//	Error(LOG, 0, "Tif Load Time=%d ms", rx_get_ticks()-time0);
 			if (ret==REPLY_NOT_FOUND)
 			{
 				tiffErr=tif_error();
@@ -471,13 +477,13 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, int
 	memcpy(&_LastId, id, sizeof(_LastId));
 	memcpy(&_LastBmpInfo, &bmpInfo, sizeof(bmpInfo));
 	strcpy(_LastFilePath, filepath);
-	TrPrintfL(TRUE, "data_load: File loaded");
+	TrPrintfL(TRUE, "data_load: File loaded, ret=%d", ret);
 
 //	if (ret == REPLY_NOT_FOUND) ret = bmp_load_all(filepath, RX_Color, SIZEOF(RX_Color), &bmpInfo);
 	if (ret==REPLY_OK)
 	{
 		#ifdef DEBUG
-		if (FALSE)
+		if (FALSE && loaded)
 		{
 			int i;
 			char str[MAX_PATH];
@@ -485,15 +491,19 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, int
 			{
 				if (bmpInfo.buffer[i])
 				{
-					sprintf(str, "%sSCAN_%s_%d.bmp", PATH_TEMP, RX_ColorNameShort(bmpInfo.inkSupplyNo[i]), id->copy);
+					sprintf(str, "%sSCAN_%s_%d.bmp", PATH_TEMP, RX_ColorNameShort(bmpInfo.inkSupplyNo[i]), id->page);
 					bmp_write(str, *bmpInfo.buffer[i], bmpInfo.bitsPerPixel, bmpInfo.srcWidthPx, bmpInfo.lengthPx, bmpInfo.lineLen, FALSE);
+					Error(WARN, 0, "Test: Written bitmap to >>%s<<", str);
 				}	
 			}
+			TrPrintfL(TRUE, "Testfile Written");
 		}
 		#endif
-
+	
+		_PrintList[_InIdx].lengthPx = bmpInfo.lengthPx;	
 		_data_split(id, &bmpInfo, offsetPx, lengthPx, blkNo, mirror, clearBlockUsed, same, &_PrintList[_InIdx]);
 		TrPrintfL(TRUE, "data_load DONE idx=%d, id=%d, page=%d, copy=%d, scan=%d, data_load >>%s<<, COPY=%d", _InIdx, id->id, id->page, id->copy, id->scan, filepath, _PrintList[_InIdx].id.copy);
+
 		_InIdx = nextIdx;
 		return REPLY_OK;
 	}
@@ -547,7 +557,9 @@ static int _data_split(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int length
 									else		
 										return _data_split_scan_no_overlap(id, pBmpInfo, offsetPx, lengthPx, blkNo, clearBlockUsed, same, pItem);
 		case PM_TEST:		
-		case PM_TEST_SINGLE_COLOR:	return _data_split_test(id, pBmpInfo, offsetPx, lengthPx, blkNo, clearBlockUsed, same, pItem);
+		case PM_TEST_SINGLE_COLOR:
+		case PM_TEST_JETS:
+									return _data_split_test(id, pBmpInfo, offsetPx, lengthPx, blkNo, clearBlockUsed, same, pItem);
 		case PM_SINGLE_PASS:		return _data_split_scan(id, pBmpInfo, offsetPx, min(RX_Spooler.barWidthPx, (int)pBmpInfo->srcWidthPx), blkNo, clearBlockUsed, same, pItem);
 		default:					return Error(ERR_STOP, 0, "Splitting algorithme not implemented");
 	}
@@ -563,73 +575,77 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 
 	for (color=0; color<SIZEOF(RX_Spooler.headNo); color++)
 	{
-		for (n=0; n<SIZEOF(RX_Spooler.headNo[color]); n++)
-		{	
-			head=RX_Spooler.headNo[color][n];
-			if (!head) break;
-			head--;
-			pInfo = &pItem->splitInfo[head];
-			rx_mem_use(*pBmpInfo->buffer[color]);
-			pItem->headsUsed++;
-			pInfo->pListItem	= pItem;
-			pInfo->printMode	= pBmpInfo->printMode;
-			pInfo->clearBlockUsed = clearBlockUsed;
-			pInfo->same           = same;
-			pInfo->data	= pBmpInfo->buffer[color];
+		if (RX_Color[color].spoolerNo==RX_SpoolerNo)
+		{
+			for (n=0; n<SIZEOF(RX_Spooler.headNo[color]); n++)
+			{	
+				head=RX_Spooler.headNo[color][n];
+				if (!head) break;
+				head--;
+				pInfo = &pItem->splitInfo[head];
+				rx_mem_use(*pBmpInfo->buffer[color]);
 			
-			if (id->id==3 && pInfo->data && n>0)
-			{
-				_TestBuf[color][n] = (*pBmpInfo->buffer[color])+n*pBmpInfo->dataSize;
-				pInfo->data	= &_TestBuf[color][n];
-				memset(*pInfo->data, 0, 256);
-				memcpy(*pInfo->data, *pBmpInfo->buffer[color], pBmpInfo->dataSize);
-			}
+				pItem->headsUsed++;
+				pInfo->pListItem		= pItem;
+				pInfo->printMode		= pBmpInfo->printMode;
+				pInfo->clearBlockUsed	= clearBlockUsed;
+				pInfo->same				= same;
+				pInfo->data				= pBmpInfo->buffer[color];
 			
-			pInfo->used			= TRUE;
-			pInfo->board		= head/RX_Spooler.headsPerBoard;
-			pInfo->head			= head%RX_Spooler.headsPerBoard;
-			pInfo->blk0			= _BlkNo[pInfo->board][pInfo->head]+RX_Spooler.dataBlkCntHead*(pInfo->head%RX_Spooler.headsPerBoard);
-			pInfo->bitsPerPixel	= pBmpInfo->bitsPerPixel;
-			pInfo->colorCode	= RX_Color[color].color.colorCode;
-			pInfo->inkSupplyNo  = RX_Color[color].inkSupplyNo;
-			pInfo->jetPx0		= 0;
-			pInfo->fillBt		= 0;
-			pInfo->widthPx		= pBmpInfo->srcWidthPx;
-			pInfo->startBt		= 0;
-			pInfo->widthBt		= pBmpInfo->lineLen;
-			pInfo->srcLineLen	= pBmpInfo->lineLen;
-			pInfo->srcLineCnt	= pBmpInfo->lengthPx;
-			pInfo->dstLineLen	= (pBmpInfo->lineLen+31) & ~31; // align to 256 Bits (32 Bytes)
-			pInfo->blkCnt		= (pInfo->dstLineLen*pInfo->srcLineCnt +RX_Spooler.dataBlkSize-1) / RX_Spooler.dataBlkSize;
+				if (id->id==3 && pInfo->data && n>0)
+				{
+					_TestBuf[color][n] = (*pBmpInfo->buffer[color])+n*pBmpInfo->dataSize;
+					pInfo->data	= &_TestBuf[color][n];
+					memset(*pInfo->data, 0, 256);
+					memcpy(*pInfo->data, *pBmpInfo->buffer[color], pBmpInfo->dataSize);
+				}
+			
+				pInfo->used			= TRUE;
+				pInfo->board		= head/RX_Spooler.headsPerBoard;
+				pInfo->head			= head%RX_Spooler.headsPerBoard;
+				pInfo->blk0			= _BlkNo[pInfo->board][pInfo->head]+RX_Spooler.dataBlkCntHead*(pInfo->head%RX_Spooler.headsPerBoard);
+				pInfo->bitsPerPixel	= pBmpInfo->bitsPerPixel;
+				pInfo->colorCode	= RX_Color[color].color.colorCode;
+				pInfo->inkSupplyNo  = RX_Color[color].inkSupplyNo;
+				pInfo->jetPx0		= 0;
+				pInfo->fillBt		= 0;
+				pInfo->widthPx		= pBmpInfo->srcWidthPx;
+				pInfo->startBt		= 0;
+				pInfo->widthBt		= pBmpInfo->lineLen;
+				pInfo->srcLineLen	= pBmpInfo->lineLen;
+				pInfo->srcLineCnt	= pBmpInfo->lengthPx;
+				pInfo->dstLineLen	= (pBmpInfo->lineLen+31) & ~31; // align to 256 Bits (32 Bytes)
+				pInfo->blkCnt		= (pInfo->dstLineLen*pInfo->srcLineCnt +RX_Spooler.dataBlkSize-1) / RX_Spooler.dataBlkSize;
 
-			if (pBmpInfo->printMode==PM_TEST_SINGLE_COLOR && (color+1)!=id->scan)
-			{
-				//--- empty bitmap -------
-				pInfo->data			= NULL;
-				pInfo->bitsPerPixel	= 1;
-				pInfo->widthPx		= 1;
-				pInfo->widthBt		= 1;
-				pInfo->srcLineLen	= 1;
-				pInfo->srcLineCnt	= 1;
-				pInfo->dstLineLen	= 32; // align to 256 Bits (32 Bytes)				
-				pInfo->blkCnt		= 1;
-			}
+				if (pBmpInfo->printMode==PM_TEST_SINGLE_COLOR && (color+1)!=id->scan)
+				{
+					//--- empty bitmap -------
+					pInfo->data			= NULL;
+					pInfo->bitsPerPixel	= 1;
+					pInfo->widthPx		= 1;
+					pInfo->widthBt		= 1;
+					pInfo->srcLineLen	= 1;
+					pInfo->srcLineCnt	= 1;
+					pInfo->dstLineLen	= 32; // align to 256 Bits (32 Bytes)				
+					pInfo->blkCnt		= 1;
+				}
 				
-			if (id->id==3 && pInfo->data) 
-			{
-				RX_Bitmap bmp;
-				bmp.bppx		= pInfo->bitsPerPixel;
-				bmp.width		= pInfo->widthPx;
-				bmp.height		= pInfo->srcLineCnt;
-				bmp.lineLen		= pInfo->srcLineLen;
-				bmp.sizeUsed	= 0;
-				bmp.sizeAlloc	= 0;
-				bmp.buffer		=  *pInfo->data;
-				rip_test_data(&bmp, RX_TestData[head]);
+				if (id->id==3 && pInfo->data) 
+				{
+					RX_Bitmap bmp;
+					bmp.bppx		= pInfo->bitsPerPixel;
+					bmp.width		= pInfo->widthPx;
+					bmp.height		= pInfo->srcLineCnt;
+					bmp.lineLen		= pInfo->srcLineLen;
+					bmp.sizeUsed	= 0;
+					bmp.sizeAlloc	= 0;
+					bmp.buffer		=  *pInfo->data;
+					rip_test_data(&bmp, RX_TestData[head]);
+				}
+				if (clearBlockUsed) _BlkNo[pInfo->board][pInfo->head] = (_BlkNo[pInfo->board][pInfo->head]+pInfo->blkCnt)%(RX_Spooler.dataBlkCntHead);
 			}
-			if (clearBlockUsed) _BlkNo[pInfo->board][pInfo->head] = (_BlkNo[pInfo->board][pInfo->head]+pInfo->blkCnt)%(RX_Spooler.dataBlkCntHead);
-		}
-	}	
+		}	
+	}
 	return REPLY_OK;
 }
 
@@ -670,7 +686,7 @@ static int _data_split_scan(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 	//--- do the split ------------------------------------------------
 	for (color=0; color<SIZEOF(pBmpInfo->colorCode); color++)
 	{
-		if (pBmpInfo->buffer[color])
+		if (RX_Color[color].spoolerNo==RX_SpoolerNo && pBmpInfo->buffer[color])
 		{
 //			rx_mem_use(pBmpInfo->buffer[color]);
 
@@ -742,37 +758,40 @@ static int _data_split_scan(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 		//--- fill empty heads with data ---
 		for (n=0; n<SIZEOF(RX_Spooler.headNo[color]); n++)
 		{	
-			head=RX_Spooler.headNo[color][n];
-			if (!head) break;
-			head--;
-			pInfo = &pItem->splitInfo[head];
-			if (!pInfo->used)
+			if (RX_Color[color].spoolerNo==RX_SpoolerNo)
 			{
-				pItem->headsUsed++;
-				pInfo->pListItem	= pItem;
-				pInfo->printMode	= pBmpInfo->printMode;
-				pInfo->clearBlockUsed = clearBlockUsed;
-				pInfo->same			  = same;					
-				pInfo->data			= NULL;
-				pInfo->used			= TRUE;
-				pInfo->board		= head/RX_Spooler.headsPerBoard;
-				pInfo->head			= head%RX_Spooler.headsPerBoard;
-				pInfo->blk0			= _BlkNo[pInfo->board][pInfo->head]+RX_Spooler.dataBlkCntHead*(pInfo->head%RX_Spooler.headsPerBoard);
-				pInfo->bitsPerPixel	= 1;
-				pInfo->colorCode	= pBmpInfo->colorCode[color];
-				pInfo->inkSupplyNo  = pBmpInfo->inkSupplyNo[color];
-				pInfo->jetPx0		= 0;
-				pInfo->fillBt		= 0;
-				pInfo->widthPx		= 1;
-				pInfo->startBt		= 0;
-				pInfo->widthBt		= 1;
-				pInfo->srcLineLen	= 1;
-				pInfo->srcLineCnt	= 1;
-				pInfo->dstLineLen	= 32; // align to 256 Bits (32 Bytes) 
-				pInfo->blkCnt		= 1;
-				if (clearBlockUsed)	_BlkNo[pInfo->board][pInfo->head] = (_BlkNo[pInfo->board][pInfo->head]+pInfo->blkCnt)%(RX_Spooler.dataBlkCntHead);
+				head=RX_Spooler.headNo[color][n];
+				if (!head) break;
+				head--;
+				pInfo = &pItem->splitInfo[head];
+				if (!pInfo->used)
+				{
+					pItem->headsUsed++;
+					pInfo->pListItem	= pItem;
+					pInfo->printMode	= pBmpInfo->printMode;
+					pInfo->clearBlockUsed = clearBlockUsed;
+					pInfo->same			  = same;					
+					pInfo->data			= NULL;
+					pInfo->used			= TRUE;
+					pInfo->board		= head/RX_Spooler.headsPerBoard;
+					pInfo->head			= head%RX_Spooler.headsPerBoard;
+					pInfo->blk0			= _BlkNo[pInfo->board][pInfo->head]+RX_Spooler.dataBlkCntHead*(pInfo->head%RX_Spooler.headsPerBoard);
+					pInfo->bitsPerPixel	= 1;
+					pInfo->colorCode	= pBmpInfo->colorCode[color];
+					pInfo->inkSupplyNo  = pBmpInfo->inkSupplyNo[color];
+					pInfo->jetPx0		= 0;
+					pInfo->fillBt		= 0;
+					pInfo->widthPx		= 1;
+					pInfo->startBt		= 0;
+					pInfo->widthBt		= 1;
+					pInfo->srcLineLen	= 1;
+					pInfo->srcLineCnt	= 1;
+					pInfo->dstLineLen	= 32; // align to 256 Bits (32 Bytes) 
+					pInfo->blkCnt		= 1;
+					if (clearBlockUsed)	_BlkNo[pInfo->board][pInfo->head] = (_BlkNo[pInfo->board][pInfo->head]+pInfo->blkCnt)%(RX_Spooler.dataBlkCntHead);
+				}
 			}
-		}
+		}	
 	}
 
 	//for (color=0; color<SIZEOF(pBmpInfo->colorCode); color++)
@@ -818,10 +837,9 @@ static int _data_split_scan_no_overlap(SPageId *id, SBmpInfo *pBmpInfo, int offs
 	//--- do the split ------------------------------------------------
 	for (color=0; color<SIZEOF(pBmpInfo->colorCode); color++)
 	{
-		if (pBmpInfo->buffer[color])
+		if (RX_Color[color].spoolerNo==RX_SpoolerNo && pBmpInfo->buffer[color])
 		{
 			//			rx_mem_use(pBmpInfo->buffer[color]);
-
 			colorOffset = RX_Color[color].offsetPx;
 
 			//	Error(WARN,0,"TEST"); colorOffset=color;
@@ -854,6 +872,7 @@ static int _data_split_scan_no_overlap(SPageId *id, SBmpInfo *pBmpInfo, int offs
 					pInfo->bitsPerPixel	= pBmpInfo->bitsPerPixel;
 					pInfo->colorCode	= pBmpInfo->colorCode[color];
 					pInfo->inkSupplyNo  = pBmpInfo->inkSupplyNo[color];
+
 					if (startPx<0)
 					{
 						pInfo->fillBt  = (RX_Spooler.headOverlapPx-startPx+pixelPerByte-1)/pixelPerByte;
@@ -862,7 +881,12 @@ static int _data_split_scan_no_overlap(SPageId *id, SBmpInfo *pBmpInfo, int offs
 					else
 					{
 						pInfo->startBt	= startPx/pixelPerByte;
-						pInfo->fillBt   = RX_Spooler.headOverlapPx/pixelPerByte;
+						if (n==0)	
+						{
+							pInfo->fillBt   = RX_Spooler.headOverlapPx / pixelPerByte;
+							if (startPx%pixelPerByte) pInfo->fillBt--;
+						}
+						else pInfo->fillBt	= 0;
 					}
 					
 					pInfo->widthPx		= endPx-startPx;
@@ -870,8 +894,10 @@ static int _data_split_scan_no_overlap(SPageId *id, SBmpInfo *pBmpInfo, int offs
 					if (pInfo->widthPx>headWidth)	pInfo->widthPx=headWidth;
 					pInfo->widthBt		= (pInfo->widthPx+pixelPerByte-1)/pixelPerByte;
 					if (startPx%pixelPerByte)
-					{						
-						pInfo->jetPx0  = pixelPerByte-(startPx+pixelPerByte)%pixelPerByte;
+					{					
+						if (startPx<0) 	pInfo->jetPx0  = pixelPerByte-(startPx+RX_Spooler.headWidthPx+pixelPerByte)%pixelPerByte;
+						else		    pInfo->jetPx0  = pixelPerByte-(startPx+pixelPerByte)%pixelPerByte;
+						// pInfo->fillBt--; better position here? Check on TX802!
 						pInfo->widthPx += pixelPerByte;
 						pInfo->widthBt ++;
 					}
@@ -885,7 +911,8 @@ static int _data_split_scan_no_overlap(SPageId *id, SBmpInfo *pBmpInfo, int offs
 					TrPrintfL(TRUE, "Split[%d]: startPx=%d, WidthPx=%d, buffer=0x%08x", head, startPx, pInfo->widthPx, pInfo->data);
 				}
 				//--- increment ---
-				startPx += RX_Spooler.headWidthPx;
+				if (n==0)	startPx += RX_Spooler.headWidthPx - RX_Spooler.headOverlapPx; 
+				else		startPx += RX_Spooler.headWidthPx;
 				n++;
 			}
 		}
@@ -893,36 +920,39 @@ static int _data_split_scan_no_overlap(SPageId *id, SBmpInfo *pBmpInfo, int offs
 		//--- fill empty heads with data ---
 		for (n=0; n<SIZEOF(RX_Spooler.headNo[color]); n++)
 		{	
-			head=RX_Spooler.headNo[color][n];
-			if (!head) break;
-			head--;
-			pInfo = &pItem->splitInfo[head];
-			if (!pInfo->used)
+			if(RX_Color[color].spoolerNo==RX_SpoolerNo)
 			{
-				pItem->headsUsed++;
-				pInfo->pListItem	= pItem;
-				pInfo->printMode	= pBmpInfo->printMode;
-				pInfo->clearBlockUsed = clearBlockUsed;
-				pInfo->same			  = same;
-				pInfo->data			= NULL;
-				pInfo->used			= TRUE;
-				pInfo->board		= head/RX_Spooler.headsPerBoard;
-				pInfo->head			= head%RX_Spooler.headsPerBoard;
-				pInfo->blk0			= _BlkNo[pInfo->board][pInfo->head]+RX_Spooler.dataBlkCntHead*(pInfo->head%RX_Spooler.headsPerBoard);
-				pInfo->bitsPerPixel	= 1;
-				pInfo->colorCode	= pBmpInfo->colorCode[color];
-				pInfo->inkSupplyNo  = pBmpInfo->inkSupplyNo[color];
-				pInfo->jetPx0		= 0;
-				pInfo->fillBt		= 0;
-				pInfo->widthPx		= 1;
-				pInfo->startBt		= 0;
-				pInfo->widthBt		= 1;
-				pInfo->srcLineLen	= 1;
-				pInfo->srcLineCnt	= 1;
-				pInfo->dstLineLen	= 32; // align to 256 Bits (32 Bytes) 
-				pInfo->blkCnt		= 1;
+				head=RX_Spooler.headNo[color][n];
+				if (!head) break;
+				head--;
+				pInfo = &pItem->splitInfo[head];
+				if (!pInfo->used)
+				{
+					pItem->headsUsed++;
+					pInfo->pListItem	= pItem;
+					pInfo->printMode	= pBmpInfo->printMode;
+					pInfo->clearBlockUsed = clearBlockUsed;
+					pInfo->same			  = same;
+					pInfo->data			= NULL;
+					pInfo->used			= TRUE;
+					pInfo->board		= head/RX_Spooler.headsPerBoard;
+					pInfo->head			= head%RX_Spooler.headsPerBoard;
+					pInfo->blk0			= _BlkNo[pInfo->board][pInfo->head]+RX_Spooler.dataBlkCntHead*(pInfo->head%RX_Spooler.headsPerBoard);
+					pInfo->bitsPerPixel	= 1;
+					pInfo->colorCode	= pBmpInfo->colorCode[color];
+					pInfo->inkSupplyNo  = pBmpInfo->inkSupplyNo[color];
+					pInfo->jetPx0		= 0;
+					pInfo->fillBt		= 0;
+					pInfo->widthPx		= 1;
+					pInfo->startBt		= 0;
+					pInfo->widthBt		= 1;
+					pInfo->srcLineLen	= 1;
+					pInfo->srcLineCnt	= 1;
+					pInfo->dstLineLen	= 32; // align to 256 Bits (32 Bytes) 
+					pInfo->blkCnt		= 1;
 
-				if (clearBlockUsed) _BlkNo[pInfo->board][pInfo->head] = (_BlkNo[pInfo->board][pInfo->head]+pInfo->blkCnt)%(RX_Spooler.dataBlkCntHead);
+					if (clearBlockUsed) _BlkNo[pInfo->board][pInfo->head] = (_BlkNo[pInfo->board][pInfo->head]+pInfo->blkCnt)%(RX_Spooler.dataBlkCntHead);
+				}
 			}
 		}
 	}
@@ -1124,7 +1154,9 @@ void data_fill_blk(SBmpSplitInfo *psplit, int blkNo, BYTE *dst)
 	switch(psplit->printMode)
 	{
 		case PM_TEST:		
-		case PM_TEST_SINGLE_COLOR:	_data_fill_blk_test(psplit, blkNo, dst); break;
+		case PM_TEST_SINGLE_COLOR:	
+		case PM_TEST_JETS:
+									_data_fill_blk_test(psplit, blkNo, dst); break;
 		case PM_SCANNING:			_data_fill_blk_scan(psplit, blkNo, dst); break;
 //		case PM_SINGLE_PASS:		_data_fill_blk_single_pass(psplit, blkNo, dst); break;
 		case PM_SINGLE_PASS:		_data_fill_blk_scan(psplit, blkNo, dst); break;
@@ -1166,7 +1198,19 @@ int data_sent(SBmpSplitInfo *psplit, int head)
 			evt.bufReady	= data_ready();
 			ctrl_send(&evt);
 
-			TrPrintfL(TRUE, "*** FILE SENT *** idx=%d (id=%d, page=%d, copy=%d, scan=%d) time=%d ms", _OutIdx, evt.id.id, evt.id.page, evt.id.copy, evt.id.scan, time-_time);
+			if (RX_Spooler.printerType==printer_DP803) 
+			{
+				double lengthPx = psplit->pListItem->lengthPx/(1200.0*40.0);
+				double speed=1000;
+				if (time!=_time)
+				{
+					speed= lengthPx * 60 * 1000 / (time-_time);
+				}
+				Error(LOG, 0, "FILE SENT: (id=%d, page=%d, copy=%d, scan=%d) cycletime=%d ms, speed=%d m/min", evt.id.id, evt.id.page, evt.id.copy, evt.id.scan, time-_time, (int)speed);
+
+			//	TrPrintfL(TRUE, "*** FILE SENT *** idx=%d (id=%d, page=%d, copy=%d, scan=%d) cycletime=%d ms", _OutIdx, evt.id.id, evt.id.page, evt.id.copy, evt.id.scan, time-_time);
+			}
+			TrPrintfL(TRUE, "*** FILE SENT *** idx=%d (id=%d, page=%d, copy=%d, scan=%d) cycletime=%d ms", _OutIdx, evt.id.id, evt.id.page, evt.id.copy, evt.id.scan, time-_time);
 			_time=time;
 			
 			extern int _MsgGot0, _MsgGot, _MsgSent, _MsgId;

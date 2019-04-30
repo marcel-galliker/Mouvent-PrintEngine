@@ -15,6 +15,9 @@
 #include "fpga_def_head.h"
 #include "nios_def_head.h"
 
+#define USE_HEAD_PRESOUT	// use PID of the head_presout.xml file
+// #undef USE_HEAD_PRESOUT	// use calibrated valies, ignore head_presout.xml file
+
 extern int				RX_VersionLinux;
 extern RX_SOCKET		RX_MainSocket;
 extern UINT32			RX_FpgaCmd;

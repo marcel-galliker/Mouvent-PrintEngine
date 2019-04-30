@@ -48,6 +48,7 @@ static int  _power_all_on_test(void);
 //--- power_init -----------------------------------------
 void power_init(void)
 {
+	pRX_Config->cmd.shutdown = TRUE;
 	pRX_Status->powerState = power_off;
 	_power_amplifier(FALSE);
 	_power_v3_3(FALSE);
@@ -60,20 +61,22 @@ void power_tick_10ms(void)
 {
 	volatile UINT16 val=0;
 	int				dummy;
+	int				error;
 
 	if (IORD_ALTERA_AVALON_PIO_DATA(PIO_OVERHEAT_BASE))
 		pRX_Status->error.fpga_overheated=TRUE;
 
-	if(pRX_Status->powerState < power_sd &&
-	    (  pRX_Config->cmd.shutdown
-	    || pRX_Status->error.fpga_overheated
-	//	|| pRX_Status->error.cooler_overheated
-		|| pRX_Status->error.power_all_off_timeout
-		|| pRX_Status->error.power_amp_on_timeout
-		|| pRX_Status->error.power_all_on_timeout
-		|| pRX_Status->error.u_plus_2v5
-		))
-		pRX_Status->powerState = power_sd;
+	error = pRX_Config->cmd.shutdown
+			|| pRX_Status->error.fpga_overheated
+		//	|| pRX_Status->error.cooler_overheated
+			|| pRX_Status->error.power_all_off_timeout
+			|| pRX_Status->error.power_amp_on_timeout
+			|| pRX_Status->error.power_all_on_timeout
+			|| pRX_Status->error.u_plus_2v5
+			|| pRX_Status->error.arm_timeout
+			;
+
+	if ((pRX_Status->powerState < power_sd) && (error || !pRX_Config->cmd.firepulse_on)) pRX_Status->powerState = power_sd;
 
 	IOWR_ALTERA_AVALON_PIO_DATA(PIO_ALL_ON_EN_BASE,(pRX_Status->powerState == power_all_on));
 
@@ -105,7 +108,7 @@ void power_tick_10ms(void)
 	case power_off:				_error_delay  = ERROR_DELAY;
 								break;
 
-	case power_wait_all_off:	if (!_power_all_off_test())
+	case power_wait_all_off:	if (!_power_all_off_test() && pRX_Config->cmd.firepulse_on)
 								{
 									_power_amplifier(TRUE);
 									_error_delay  = ERROR_DELAY;
@@ -152,7 +155,11 @@ void power_tick_10ms(void)
 								}
 								break;
 
-	case power_down:			break;
+	case power_down:			if (!error && pRX_Config->cmd.firepulse_on)
+								{
+									pRX_Status->powerState = power_wait_all_off;
+								}
+								break;
 	}
 }
 

@@ -266,8 +266,6 @@ static int _do_encoder_cfg 	(RX_SOCKET socket, SEncoderCfg 	*pcfg)
 	_Requests++;
 	memcpy(&RX_EncoderCfg, pcfg, sizeof(RX_EncoderCfg));
 	fpga_enc_config(0, pcfg, 0, 0);
-	tw8_config(0, pcfg->speed_mmin);
-	tw8_config(1, pcfg->speed_mmin);
 	reply.hdr.msgId  = REP_ENCODER_CFG;
 	reply.hdr.msgLen = sizeof(reply);
 	reply.reply = fpga_pg_config(socket, pcfg);

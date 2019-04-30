@@ -13,6 +13,7 @@
 
 #include "rx_common.h"
 #include "rx_sok.h"
+#include "rx_def.h"
 
 int	gui_start(void);
 int	gui_end(void);

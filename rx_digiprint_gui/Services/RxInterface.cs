@@ -148,7 +148,18 @@ namespace RX_DigiPrint.Services
                 {
                     LocalAddress = _Client.Client.LocalEndPoint.ToString();
 
-                    _Stream = _Client.GetStream();
+                    while(true)
+                    { 
+                        try
+                        {
+                            _Stream = _Client.GetStream();
+                            break;
+                        }
+                        catch(Exception e)
+                        {
+                            Console.WriteLine("Exception {0}", e.Message);
+                        }
+                    }
                     msgHandler.Restart();
 
                     SendCommand(TcpIp.CMD_GET_INK_DEF);

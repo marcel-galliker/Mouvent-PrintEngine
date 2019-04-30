@@ -181,7 +181,6 @@
   <ItemGroup>
     <ClCompile Include="args.c" />
     <ClCompile Include="cleaf.c" />
-    <ClCompile Include="cln.c" />
     <ClCompile Include="dp803.c" />
     <ClCompile Include="fpga_stepper.c" />
     <ClCompile Include="lb701.c" />
@@ -201,7 +200,6 @@
   <ItemGroup>
     <ClInclude Include="args.h" />
     <ClInclude Include="cleaf.h" />
-    <ClInclude Include="cln.h" />
     <ClInclude Include="dp803.h" />
     <ClInclude Include="fpga_def_stepper.h" />
     <ClInclude Include="fpga_stepper.h" />

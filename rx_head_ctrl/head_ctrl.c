@@ -48,6 +48,7 @@ static SFpgaMsg _MsgBuf[MSG_BUF_SIZE];
 static int		_MsgBufIn;
 static int		_MsgBufOut;
 static int		_LastMsgId;
+static int		_Printing;
 
 //--- module globals -----------------------------------------------------------------
 static HANDLE			_HServer;
@@ -58,6 +59,7 @@ static int				_StatusReqTime=0;
 
 //--- prototypes ---------------------------------------------------------------------
 static int _ctrl_connected  (RX_SOCKET socket, const char *peerName);
+static int _ctrl_deconnected(RX_SOCKET socket, const char *peerName);
 static int _save_ctrl_msg   (RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sender, void *par);
 static int _handle_ctrl_msg (RX_SOCKET socket, void *pmsg);
 
@@ -81,7 +83,9 @@ int ctrl_init()
 {
 	_MsgBufIn  = 0;
 	_MsgBufOut = 0;
-	sok_start_server(&_HServer, NULL, PORT_CTRL_HEAD, SOCK_STREAM, MAX_CONNECTIONS, _save_ctrl_msg, _ctrl_connected, NULL);
+	_Printing  = FALSE;
+	RX_MainSocket = INVALID_SOCKET;
+	sok_start_server(&_HServer, NULL, PORT_CTRL_HEAD, SOCK_STREAM, MAX_CONNECTIONS, _save_ctrl_msg, _ctrl_connected, _ctrl_deconnected);
 
 	err_set_server(_HServer);
 	
@@ -101,13 +105,37 @@ static int _ctrl_connected (RX_SOCKET socket, const char *peerName)
 	return REPLY_OK;
 }
 
+//--- _ctrl_connected ---------------------------------------------------
+static int _ctrl_deconnected (RX_SOCKET socket, const char *peerName)
+{
+	TrPrintfL(TRUE, "deconnected from >>%s<<, socket=%d", peerName, socket);
+	if (socket==RX_MainSocket)
+	{
+		TrPrintfL(TRUE, "deconnected from MAIN");
+		RX_MainSocket = INVALID_SOCKET;
+	}
+	return REPLY_OK;
+}
+
+//--- ctrl_connected --------------------------------------
+int	ctrl_connected(void)
+{
+	return RX_MainSocket!=INVALID_SOCKET;	
+}
+
+//--- ctrl_printing --------------------------------------
+int	ctrl_printing(void)
+{
+	return _Printing;	
+}
+
+
 //--- _save_ctrl_msg ---------------------------------------------------------
 static int _save_ctrl_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sender, void *par)
 {
 	SMsgHdr *phdr = (SMsgHdr*)pmsg;
-
-//	TrPrintfL(1, "_save_ctrl_msg: Received msgId=0x%08x", phdr->msgId);
-
+	static int time[MSG_BUF_SIZE];	
+	
 	// these functions mustn't use any FPGA Register !!!!
 	switch (phdr->msgId)
 	{
@@ -121,9 +149,15 @@ static int _save_ctrl_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr
 						{			
 							//ErrorFlag(ERR_CONT, (UINT32*)&RX_HBStatus[0].err, err_tcpip_overflow, 0, "TCP Message Buffer Overflow");
 							ErrorFlag(ERR_CONT, (UINT32*)&RX_HBStatus[0].err, err_tcpip_overflow, 0, "TCP Message Buffer Overflow. _MsgBufIn=%d,  _MsgBufOut=%d, id=0x%08x", _MsgBufIn, _MsgBufOut, _LastMsgId);
+							{
+								phdr = (SMsgHdr*)&_MsgBuf[idx].msg;
+								TrPrintfL(1, "msg[%d] %d: 0x%08x", idx, time[idx], phdr->msgId);
+								idx = (idx + 1) % MSG_BUF_SIZE;
+							}
 						}
 						else
 						{
+							time[_MsgBufIn] = rx_get_ticks();
 							_MsgBuf[_MsgBufIn].socket = socket;
 							if (len>sizeof(_MsgBuf[0].msg))
 								Error(ERR_ABORT, 0, "Message Buffer Overflow, msgsize=%d, bufsize=%d", len, sizeof(_MsgBuf[0].msg));
@@ -157,6 +191,7 @@ int  ctrl_main(int ticks, int menu)
 static int _handle_ctrl_msg(RX_SOCKET socket, void *pmsg)
 {
 	int reply = REPLY_ERROR;
+	int time=rx_get_ticks();
 
 	//--- handle the message --------------
 	reply = REPLY_OK;
@@ -174,7 +209,7 @@ static int _handle_ctrl_msg(RX_SOCKET socket, void *pmsg)
 	case CMD_GET_BLOCK_USED:		_do_block_used		(socket, (SBlockUsedCmd*)	pmsg);	 break;
 	case CMD_HEAD_BOARD_CFG:		_do_head_board_cfg	(socket, (SHeadBoardCfg*)  &phdr[1]);break;
 	case CMD_PRINT_ABORT:			_do_print_abort		(socket);							 break;		
-//	case CMD_HEAD_STAT:				_do_head_stat       (socket, (SFluidStateLight*) &phdr[1]); break;
+	case CMD_HEAD_STAT:				_do_head_stat       (socket, (SFluidStateLight*) &phdr[1]); break;
 	case SET_GET_INK_DEF:			_do_inkdef			(socket, (SInkDefMsg*)		pmsg);	 break;
 	case CMD_HEAD_FLUID_CTRL_MODE:	_do_set_FluidCtrlMode(socket, (SFluidCtrlCmd*)  pmsg);	 break;
 
@@ -182,7 +217,8 @@ static int _handle_ctrl_msg(RX_SOCKET socket, void *pmsg)
 					reply = REPLY_ERROR;
 					break;
 	}
-
+	time = rx_get_ticks()-time;
+	if (_Printing && time>100) Error(WARN, 0, "_handle_ctrl_msg id=0x%08x, time=%dms", phdr->msgId, time); 
 	return reply;
 };
 
@@ -225,6 +261,8 @@ static int _do_block_used	(RX_SOCKET socket, SBlockUsedCmd *msg)
 	max=min+RX_HBConfig.head[msg->headNo].blkCnt;
 	if (msg->blkNo>=min && msg->blkNo<max)
 	{
+		int time	= rx_get_ticks();
+		
 		reply.hdr.msgId		= REP_GET_BLOCK_USED;
 		reply.aliveCnt[0]   = fpga_get_aliveCnt(0);
 		reply.aliveCnt[1]   = fpga_get_aliveCnt(1);
@@ -235,6 +273,10 @@ static int _do_block_used	(RX_SOCKET socket, SBlockUsedCmd *msg)
 		reply.blkCnt		= fpga_get_block_used(reply.headNo, reply.blkNo, msg->blkCnt, reply.used);
 		reply.hdr.msgLen = sizeof(reply)-sizeof(reply.used)+reply.blkCnt/8;
 		sok_send(&socket, &reply);
+		
+		time = rx_get_ticks()-time;
+		if (time>100) Error(WARN, 0, "_do_block_used time=%d", time);
+		
 		return REPLY_OK;						
 	}
 	return Error(ERR_ABORT, 0, "Used Block %d out of range (%d..%d)!", msg->blkNo, min, max);
@@ -266,7 +308,7 @@ static int _do_write_image(RX_SOCKET socket, SFpgaWriteBmpCmd *msg)
 static int _do_head_board_cfg 	(RX_SOCKET socket, SHeadBoardCfg *cfg)
 {
 	int i;
-
+	
 	TrPrintfL(TRUE, "_do_head_board_cfg");
 
 	RX_MainSocket = socket;
@@ -283,13 +325,8 @@ static int _do_head_board_cfg 	(RX_SOCKET socket, SHeadBoardCfg *cfg)
 	fpga_set_config(RX_MainSocket);
 	nios_error_reset();
 //	memset(_PgCnt,  0, sizeof(_PgCnt));
-
-	//--- remove test bitmaps ---------
-	{
-		char path[100];
-		sprintf(path, "%s*.bmp", PATH_TEMP);
-		rx_remove_old_files(path, 0);
-	}
+	
+	_Printing = TRUE;
 	
 	_StatusReqTime = rx_get_ticks();
 	return REPLY_OK;
@@ -339,6 +376,7 @@ static int _rep_head_stat(RX_SOCKET socket)
 //--- _do_print_abort ---------------------------------------------------
 static int _do_print_abort(RX_SOCKET socket)
 {
+	_Printing=FALSE;
 	fpga_enable(FALSE);
 	return REPLY_OK;	
 }
@@ -354,8 +392,8 @@ static int _do_inkdef(RX_SOCKET socket, SInkDefMsg  *pmsg)
 static int _do_set_FluidCtrlMode(RX_SOCKET socket, SFluidCtrlCmd *pmsg)
 {
 	cond_ctrlMode(pmsg->no, pmsg->ctrlMode);
-	rx_sleep(10);
-	_rep_head_stat(socket);	// give feedback now!
+//	rx_sleep(10);
+//	_rep_head_stat(socket);	// give feedback now!
 	return REPLY_OK;
 }
 

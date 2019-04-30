@@ -72,28 +72,20 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _CanisterLevel, value); }
         }
 
-        //--- Property Humitity ---------------------------------------
-        private Int32 _Humitity;
-        public Int32 Humitity
+        //--- Property CylinderPresSet ---------------------------------------
+        private Int32 _CylinderPresSet;
+        public Int32 CylinderPresSet
         {
-            get { return _Humitity; }
-            set { SetProperty(ref _Humitity, value); }
-        }
-
-        //--- Property PresIntTankSet ---------------------------------------
-        private Int32 _PresIntTankSet;
-        public Int32 PresIntTankSet
-        {
-            get { return _PresIntTankSet; }
-            set { SetProperty(ref _PresIntTankSet, value); }
+            get { return _CylinderPresSet; }
+            set { SetProperty(ref _CylinderPresSet, value); }
         }
 
         //--- Property PresIntTank ---------------------------------------
-        private Int32 _PresIntTank;
-        public Int32 PresIntTank
+        private Int32 _CylinderPres;
+        public Int32 CylinderPres
         {
-            get { return _PresIntTank; }
-            set { SetProperty(ref _PresIntTank, value); }
+            get { return _CylinderPres; }
+            set { SetProperty(ref _CylinderPres, value); }
         }
 
         //--- Property CondPresOut ---------------------------------------
@@ -102,6 +94,14 @@ namespace RX_DigiPrint.Models
         {
             get { return _CondPresOut; }
             set { SetProperty(ref _CondPresOut, value); }
+        }
+
+        //--- Property FlushTime ---------------------------------------
+        private int _FlushTime;
+        public int FlushTime
+        {
+            get { return _FlushTime; }
+            set { SetProperty(ref _FlushTime, value); }
         }
 
         //--- Property PresLung ---------------------------------------
@@ -164,8 +164,7 @@ namespace RX_DigiPrint.Models
                     RxGlobals.PrintSystem.Changed |= (_CtrlMode==EFluidCtrlMode.ctrl_cal_start);
                 }
             }
-        }
-        
+        }        
 
         //--- Property Flushed ---------------------------------------
         private bool _Flushed = true;
@@ -221,34 +220,22 @@ namespace RX_DigiPrint.Models
             Info            = msg.info;
             Warn            = msg.warn;
             Err             = msg.err;
-//            if (no<15) CanisterLevel = canisterLevel[no+1];
-            Humitity        = msg.humidity;
-            PresIntTankSet  = msg.presIntTankSet;
-            PresIntTank     = msg.presIntTank;
+
+            CylinderPresSet  = msg.cylinderPresSet;
+            CylinderPres     = msg.cylinderPres;
             PresLung        = msg.presLung;
             CondPresOut     = msg.condPresOut;
+            FlushTime       = msg.flushTime;
             Temp            = msg.temp;
             PumpSpeedSet    = msg.pumpSpeedSet;
             PumpSpeed       = msg.pumpSpeed;
             CtrlMode        = msg.ctrlMode;
+            CanisterLevel   = msg.canisterLevel;
 
             Connected       = (msg.info & 0x00000001)!=0;
             BleedValve      = ((msg.info & 0x00000002)==0)? "--":"ON";
             AirCusionValve  = ((msg.info & 0x00000004)==0)? "--":"ON";
             Flushed         = (msg.info & 0x00000008)!=0;
-        }
-
-        //--- CreateLog -----------------------------------
-        public void CreateLog(RxWorkBook wb, int row, int col)
-        {
-            ColorCode_Str converter = new ColorCode_Str();
-            if (_InkType!=null)
-            {      
-                wb.SetFieldColor(row, col, InkType.ColorFG, InkType.Color);
-                wb.setText(row, 0, "Ink");                       wb.setText(row++, col, _InkType.Description);
-                wb.setText(row, 0, "ColorCode");                 wb.setText(row++, col, converter.Convert(_InkType.ColorCode, null, null, null) as string);
-                wb.setText(row, 0, "...");                       wb.setText(row++, col, "...");
-            }
         }
     }	
 }

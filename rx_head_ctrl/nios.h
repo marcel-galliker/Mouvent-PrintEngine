@@ -27,6 +27,8 @@ void nios_check_errors(void);
 void nios_error_reset(void);
 
 void nios_setInk(int headNo, SInkDefinition *pink, int maxDropSize, int fpVoltage);
+void nios_set_firepulse_on(int on);
+int  nios_is_firepulse_on(void);
 
 void nios_fixed_grey_levels(int fixedDropSize, int maxDropSize);
 // void nios_display_status(int nios, int status, int eeprom);

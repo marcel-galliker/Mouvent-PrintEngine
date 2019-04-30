@@ -155,6 +155,9 @@ namespace RX_DigiPrint.Views.UserControls
         //--- Off_Clicked -------------------------------------------------
         private void Off_Clicked(object sender, RoutedEventArgs e)
         {
+            FlushWindow wnd = new FlushWindow();
+            wnd.Show();
+            /*
             if (RxMessageBox.YesNo("Print System", "Shut Down the printer?",  MessageBoxImage.Question, false))
             {
 //                TcpIp.SFluidCtrlCmd msg = new TcpIp.SFluidCtrlCmd(){no=-1, ctrlMode = EFluidCtrlMode.ctrl_shutdown};
@@ -162,6 +165,7 @@ namespace RX_DigiPrint.Views.UserControls
                 RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_CTRL_MODE, ref msg);
                 RxGlobals.RxInterface.SendCommand(TcpIp.CMD_ENCODER_UV_OFF);
             }
+            */
         }
 
         //--- UV_Clicked ------------------------------------------------------------------------

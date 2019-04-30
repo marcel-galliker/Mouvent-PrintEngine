@@ -41,6 +41,7 @@ void rx_def_init();
 	#define PATH_ROOT			PATH_ROOT_WIN
 	#define PATH_TRACE			PATH_ROOT "Trace/"
 	#define PATH_TEMP			"D:/Temp/"
+	#define PATH_HOME			"D:/radex/"
 	#define PATH_SOURCE_DATA	"D:/" PATH_SOURCE_DATA_DIR
 	#define PATH_RIPPED_DATA	"D:/" PATH_RIPPED_DATA_DIR
 	#define PATH_EMBRIP_PRENV	"D:/" PATH_EMBRIP_PRENV_DIR
@@ -87,7 +88,6 @@ void rx_def_init();
 #define FILENAME_NETWORK		"network.cfg"
 #define FILENAME_PQ				"print_queue.xml"
 #define FILENAME_CFG			"config.cfg"
-#define FILENAME_SCALES			"scales.xml"
 #define FILENAME_FLUID_STATE	"fluid.xml"
 #define FILENAME_HEADS_FLUSHED	"heads_flushed.xml"
 #define FILENAME_PLC_CFG		"plc.cfg"
@@ -102,7 +102,6 @@ void rx_def_init();
 #define INK_SUPPLY_CNT		16
 #define ENC_CNT				2
 #define FLUID_BOARD_CNT		4
-#define FLUID_MAX_SCALES	8
 #define FLUID_SCALE_SENSORS 3
 #define INK_PER_BOARD		4
 #define HEAD_CNT			4	// heads per head board
@@ -112,9 +111,10 @@ void rx_def_init();
 #define MAX_GREY_LEVELS		8
 #define MAX_DROP_SIZES		4
 #define MAX_COLORS			16
+#define MAX_SCALES			(MAX_COLORS+2)
 #define MAX_HEADS_COLOR		48
 #define MAX_HEAD_DIST		128
-
+	
 #define HEAD_BOARD_CNT		(MAX_HEAD_DIST/MAX_HEADS_BOARD) // head boards per print bar
 
 #define MAX_STEPPERS		4
@@ -135,7 +135,6 @@ typedef struct SValue
 	INT32		value;
 } SValue;
 
-
 //--- device configuration --------------------
 //--- devices -----------------------------------------------------------------
 typedef enum EDevice
@@ -146,10 +145,10 @@ typedef enum EDevice
 	dev_plc,	// 03
 	dev_enc,	// 04	
 	dev_fluid,	// 05
-	dev_6,
-	dev_7,
-	dev_8,
-	dev_stepper,// 9
+	dev_6,		// 06
+	dev_enc32,	// 07
+	dev_8,		// 08
+	dev_stepper,// 09
 	dev_head,	// 10
 	dev_spooler,// 11
 	dev_end		// 13
@@ -213,7 +212,7 @@ typedef struct SNetworkItem
 	char	serialNo[32];
 	UINT64	macAddr;
 	UCHAR	deviceType;
-	UCHAR	deviceNo;
+	INT8	deviceNo;
 	char	ipAddr[32];
 	UINT8	connected;
 	UINT8	platform;	// EPlatform
@@ -229,10 +228,10 @@ typedef struct SRxNetwork
 //--- SPageId -------------------------------
 typedef struct SPageId
 {
-	UINT32 id;
-	UINT32 page;
-	UINT32 copy;
-	UINT32 scan;
+	INT32 id;
+	INT32 page;
+	INT32 copy;
+	INT32 scan;
 } SPageId;
 
 //--- SPageNumber --------------------------------
@@ -248,21 +247,22 @@ typedef struct SPageNumber
 typedef struct SPrintQueueItem
 {
 	SPageId	id;
+	SPageId	start;
 
 	char	filepath[256];
 	char	preview [256];
-	char	printEnv[128];
 	char	ripState[128];
-	UINT32	srcPages;
-	UINT32	srcWidth;	// µm
-	UINT32	srcHeight;	// µm
-	UINT32	firstPage;
-	UINT32	lastPage;
-	UINT32	startPage;	// to print
-	UINT32	copies;
-	UINT8	collate;
-	UINT8	variable;	// variable data job
-	UINT8	dropSizes;
+	char	printEnv[64];
+	char	material[64];
+	INT32	srcPages;
+	INT32	srcWidth;	// µm
+	INT32	srcHeight;	// µm
+	INT32	firstPage;
+	INT32	lastPage;
+	INT32	copies;
+	INT8	collate;
+	INT8	variable;	// variable data job
+	INT8	dropSizes;
 
 	UINT8	state;
 			#define PQ_STATE_UNDEF		0
@@ -299,26 +299,27 @@ typedef struct SPrintQueueItem
 			#define PQ_TEST_ENCODER			5
 			#define PQ_TEST_SCANNING		6
 
-	UINT32	pageWidth;	// µm
-	UINT32	pageHeight;	// µm
+	INT32	pageWidth;	// µm
+	INT32	pageHeight;	// µm
 	INT32	pageMargin;	// µm
-	UINT32  printGoMode;
+	INT32	printGoMode;
 			#define PG_MODE_MARK	1	// print mark to PG
 			#define PG_MODE_LENGTH	2	// distance between two GPs
 			#define PG_MODE_GAP		3	// gap getween images
-	UINT32  printGoDist;
-	UINT32	scanLength; // mm
+	INT32	printGoDist;
+	INT32	scanLength; // mm
 	INT32	passes;
 	INT32	curingPasses;
-	UINT32	scans;
-	UINT32  speed;
-	UINT32  copiesTotal;
-	UINT32	copiesPrinted;
-	UINT32	scansSent;
-	UINT32	scansPrinted;
-	UINT32	progress;
+	INT32	scans;
+	INT32	speed;
+	INT32	copiesTotal;
+	INT32	copiesPrinted;
+	INT32	scansSent;
+	INT32	scansPrinted;
+	INT32	scansStart;
+	INT32	progress;
 	SPageNumber pageNumber;
-	UINT32	checks;
+	INT32	checks;
 
 	char    dots[4];
 
@@ -355,7 +356,7 @@ typedef struct
 	
 //--- ColorName --------------------------------
 extern SColorName RX_ColorName[55];
-void		RX_ColorNameInit (int inkSupplyNo, ERectoVerso rectoVerso, int code);
+void RX_ColorNameInit (int inkSupplyNo, ERectoVerso	rectoVerso, char *fileName, int colorCode);
 const char* RX_ColorNameLong (int code); 
 const char* RX_ColorNameShort(int inkSupplyNo);
 
@@ -366,11 +367,13 @@ typedef struct
 	UINT16	volt;
 } SWfPoint;
 #define MAX_WF_POINTS	32
-
+	
 	// first pulse can start at this position
 #define WF_FIRST_PULSE_POS	144 // 1.80 µs@160MHz
 								// 2.06 µs@140MHz minimum 2.0 (140)
 								
+#define WF_FILLER	68			// delay of Waveform DAC OLD_OFF_OFFSET - OLD_WF_OFFSET
+
 typedef struct SInkDefinition
 {
 	char	family[64];
@@ -379,13 +382,12 @@ typedef struct SInkDefinition
 	char	description[128];
 	UINT32	colorRGB;
 	UINT32	colorCode;
-	UINT32	temp;
-	UINT32	tempMax;
-	UINT32	viscosity;
-	UINT32	density;
-	UINT32	dropletVolume;
-	UINT32	meniscus;
-	UINT32	maxFreq[MAX_DROP_SIZES];
+	INT32	temp;
+	INT32	tempMax;
+	INT32	dropletVolume;
+	INT32	condPresOut;
+	INT32	flushTime[3];
+	INT32	maxSpeed[MAX_DROP_SIZES];
 	UINT8	greyLevel[MAX_DROP_SIZES];
 	SWfPoint wf[MAX_WF_POINTS];
 } SInkDefinition;
@@ -411,7 +413,8 @@ typedef enum EPrinterType
 
 	//--- web printers ------------------------------
 	printer_LB701=1000,			// 1000: 
-	printer_LB702,				// 1001:
+	printer_LB702_UV,			// 1001:
+	printer_LB702_WB,			// 1002:
 	
 	printer_DP803=1100,			// 1100:
 	 
@@ -426,10 +429,10 @@ typedef enum EPrinterType
 	
 typedef struct SOffsetCfg
 {
-	INT32	angle;	// to adjust angle fault
-	INT32	step;		// to adjust step fault
-	INT32	incPerMeter;	// increments per meter
-	INT32	verso;
+	INT32	angle;			// to adjust angle fault
+	INT32	step;			// to adjust step fault
+	INT32	incPerMeter[2];	// increments per meter
+	INT32	versoDist;
 } SOffsetCfg;
 
 int rx_def_is_scanning(EPrinterType printerType);
@@ -477,6 +480,7 @@ typedef struct SPrinterStatus
 	UINT8			error;
 	UINT32			dataReady;
 	UINT32			sentCnt;
+	UINT32			transferredCnt;
 	UINT32			printedCnt;
 	UINT32			testMode;
 	UINT32			inkSupilesOff;
@@ -523,10 +527,11 @@ typedef struct SSpoolerCfg
 typedef struct SConditionerCfg
 {
 	INT32	pressure_out;
-	INT32	controller_P;
-	INT32	controller_I;
-	INT32	controller_D;
-	INT32   controller_offset;
+	INT32	pid_P;
+	INT32	pid_I;
+	INT32	pid_D;
+	INT32   pid_offset;
+	INT32	menicus0;
 	INT32	cylinderPressure;
 	INT32	cylinderPressureSet;
     INT32   fluidErr;
@@ -536,7 +541,7 @@ typedef struct SConditionerCfg
 typedef struct SHeadCfg
 {
 	UINT8	inkSupply;
-	UINT8	headNo;	// within color
+	UINT8	_headNo_unused;	// within color
 	UINT8	enabled;
 	UINT8	encoderNo;
 	INT32	dist;	// [µm] distance correction inside print bar 
@@ -544,8 +549,8 @@ typedef struct SHeadCfg
 	INT32	headHeight;	// [µm] height of printhead above substrate
 	UINT16	jetEnabled0;
 	UINT16  jetEnabledCnt;
-	UINT32	bmpJetOffset;
-	UINT32  bmpJetCnt;
+//	UINT32	bmpJetOffset;
+//	UINT32  bmpJetCnt;
 	
 	UINT32	blkNo0;
 	UINT32	blkCnt;
@@ -663,7 +668,7 @@ typedef enum
 	warn31			 = 0x80000000,
 } EHeadWarn;
 
-typedef enum EHeadErr
+typedef enum EHeadNiosErr
 {
 	err_nios_incompatible		= 0x00000001,
 	err_overheating				= 0x00000002,	// head is overheated
@@ -697,8 +702,9 @@ typedef enum EHeadErr
 	err_amp_all_on				= 0x20000000,
 	err_pwr_all_on				= 0x40000000,
 	err_therm_cooler			= 0x80000000,
-} EHeadErr;
+} EHeadNiosErr;
 
+	
 typedef struct
 {
 	//--- fuji eeprom ---------------------------------
@@ -717,7 +723,7 @@ typedef struct SHeadStat
 {	
 	SCondInfo		info;
 	EHeadWarn		warn;
-	EHeadErr		err;
+	UINT32			err;	// conditioner --> cond_def_head.h
 
 	//-- job info ------------------------------------
 	UINT64	dotCnt;	// printed drops since last reset
@@ -729,12 +735,13 @@ typedef struct SHeadStat
 	UINT32			tempHead;
 	UINT32			tempCond;
 	INT32			presIn;
+	INT32			presIn_max;
 	INT32			presIn_diff;
 	INT32			presOut;
 	INT32			presOut_diff;
 	INT32			meniscus;
 	INT32			meniscus_diff;
-	INT32			controller_offset;
+	INT32			pid_offset;
 	
 	UINT32			pumpSpeed;
 	UINT32			pumpFeedback;
@@ -758,9 +765,8 @@ typedef struct SHeadBoardCfg
 	INT16		dataBlkSize;
 	INT32		dataBlkCntHead;
 	SHeadCfg	head[HEAD_CNT];
-	UINT32		headsPerColor;
-	UINT16		writeTestBmp;
 	UINT16		reverseHeadOrder;
+	UINT16		spoolerNo;
 } SHeadBoardCfg;
 
 typedef struct SHeadBoardStat
@@ -779,13 +785,13 @@ typedef struct SHeadBoardStat
 	UINT64		timePower;	// [sec] time the board was powered
 	UINT64		timePrint;	// [sec] time when ink was circulating
 
-	UINT32		tempFpga;
+	INT32		tempFpga;
 	UINT32		flow;
 	
 	//--- warnings/errors ----------------
 	SHeadInfo		info;
 	EHeadWarn		warn;
-	EHeadErr		err;
+	EHeadNiosErr	err;
 
 	INT16			headCnt;
 	SHeadStat		head[HEAD_CNT];
@@ -809,6 +815,7 @@ typedef struct SEncoderCfg
 			#define CORR_ROTATIVE	0x02	// 
 			#define CORR_LINEAR		0x04	// using two encoders (scanning)
 	INT32	speed_mmin;
+	EPrinterType	printerType;
 } SEncoderCfg;
 	
 typedef struct SEncoderPgDist
@@ -936,6 +943,9 @@ typedef struct SEncoderStat
 	SEncoderWarn	warn;
 	SEncoderErr		err;
 	UINT32			PG_cnt;
+	UINT32			fifoEmpty_PG;
+	UINT32			fifoEmpty_IGN;
+	UINT32			fifoEmpty_WND;
 } SEncoderStat;
 
 //---  ink-supply Configuration ----------------------------
@@ -943,8 +953,9 @@ typedef struct SInkSupplyCfg
 {
 	char			inkFileName[64];
 	SInkDefinition	ink;
-	INT32			inkPressureSet;
+	INT32			cylinderPresSet;
 	INT32			meniscusSet;
+	INT32			flushTime;
 	ERectoVerso		rectoVerso;
     INT32           fluid_P;
 } SInkSupplyCfg;
@@ -958,11 +969,13 @@ typedef struct SFluidBoardCfgLight
 {		
 	UINT32			lung_enabled;
 	UINT32			headsPerColor;
-	INT32			inkPressureSet	[INK_PER_BOARD];
+	INT32			cylinderPresSet	[INK_PER_BOARD];
 	INT32			meniscusSet		[INK_PER_BOARD];
+	INT32			condPresOutSet	[INK_PER_BOARD];
 	UINT32			inkTemp			[INK_PER_BOARD];	
 	UINT32			inkTempMax		[INK_PER_BOARD];
     UINT32			fluid_P         [INK_PER_BOARD];
+    UINT32			flushTime       [INK_PER_BOARD][3];
 } SFluidBoardCfgLight;
 	
 typedef struct SHeadStateLight
@@ -1079,15 +1092,16 @@ typedef struct SInkSupplyStat
 	SInkSupplyWarn	warn;
 	UINT32			err;		// ENiosFluidErr
 	
-	INT32	humidity;			//  Ventilation humidity (% Luftfeuchtigkeit)
-	INT32	presIntTankSet;		//  Pressure intermediate Tank Set
-	INT32	presIntTank;		//  Pressure intermediate Tank
+	INT32	cylinderPresSet;	//  Pressure intermediate Tank Set
+	INT32	cylinderPres;		//  Pressure intermediate Tank
 	INT32	airPressureTime;
+	INT32	flushTime;
 	INT32   presLung;			//  Lung pressure
 	INT32	condPresOut;		//  
 	UINT32	temp;				//	Temperature
 	UINT32	pumpSpeedSet;		//	Consumption pump speed
 	UINT32	pumpSpeed;			//	Consumption pump speed measured
+	INT32	canisterLevel;
 	EnFluidCtrlMode	ctrlMode;	//	EnFluidCtrlMode
 } SInkSupplyStat;
 
@@ -1097,26 +1111,6 @@ typedef struct SFluidBoardStat
 	SInkSupplyStat stat[INK_PER_BOARD];
 } SFluidBoardStat;
 
-typedef struct
-{
-	INT32	weight;
-	INT8	state;
-		#define SCL_READY		0x01
-		#define SCL_CAL_ZERO	0x02
-		#define SCL_CAL_SENSOR1	0x03
-		#define SCL_CAL_SENSOR2	0x04
-		#define SCL_CAL_SENSOR3	0x05
-		#define SCL_CAL_OK		0x06
-	
-	INT8  sensorState[FLUID_SCALE_SENSORS];
-		#define SCL_SENS_READY	0x01
-		#define SCL_SENS_BUSY	0x02
-		#define SCL_SENS_OK		0x03
-		#define SCL_SENS_ERROR	0x04
-		#define SCL_SENS_OK_ERR	0x05
-	
-} SScaleStat;
-	
 //--- Chiller ---------------------------
 	
 typedef struct SChillerStat
@@ -1129,6 +1123,14 @@ typedef struct SChillerStat
 	INT32	resistivity;
 	UINT32	status;
 } SChillerStat; 
+	
+typedef struct SRobotOffsets
+{
+	INT32			ref_height;
+	INT32			head_align;
+	INT32			robot_height;
+	INT32			robot_align;
+} SRobotOffsets;
 	
 //--- Stepper Board --------------------
 typedef struct SStepperCfg
@@ -1148,6 +1150,8 @@ typedef struct SStepperCfg
 	INT32			wipe_height;	// in µm
 	INT32			cap_height;		// in µm
 	INT32			cap_pos;
+	
+	SRobotOffsets	robot[4];
 } SStepperCfg;
 	
 typedef struct SStepperMotorTest
@@ -1185,24 +1189,35 @@ typedef struct SScrewAdjustment
 	
 enum cln_state_code 
 {
-	ST_INIT,
-	ST_REF_LIFT, 
-	ST_REF_CLEAN,
-	ST_IDLE, 
-	ST_PRE_MOVE_POS, 
-	ST_CLEAN_PRE_POS, 
-	ST_CLEAN_MOVE_POS,
-	ST_LIFT_MOVE_POS, 
-	ST_LIFT_CAPPING,
-	ST_WIPE, 
-	ST_DETECT_SCREW,
-	ST_REPOS_SCREW,
-	ST_SCREW_REF,
-	ST_SCREW,
-	ST_SLIDE_MOVE,
-	ST_PURGE, 
-	ST_LIFT_UP,
-	ST_LAST_LIFT
+	ST_INIT,				// 0
+	ST_REF_LIFT,			// 1
+	ST_REF_CLEAN,			// 2
+	ST_IDLE,				// 3
+	ST_PRE_MOVE_POS,		// 4
+	ST_CLEAN_PRE_POS,		// 5
+	ST_CLEAN_MOVE_POS,		// 6	
+	ST_LIFT_MOVE_POS,		// 7
+	ST_LIFT_CAPPING,		// 8
+	ST_WIPE,				// 9
+	ST_DETECT_SCREW,		// 10
+	ST_REPOS_SCREW,			// 11
+	ST_SCREW_REF,			// 12
+	ST_SCREW,				// 13
+	ST_DETACH_SCREW,		// 14
+	ST_SLIDE_MOVE,			// 15
+	ST_PURGE,				// 16
+	ST_LIFT_UP,				// 17
+	ST_LAST_LIFT,			// 18
+	ST_CABLE_CLEAN,			// 19
+	ST_CAP_CLEAN_REF,		// 20
+	ST_CAP_CLEAN_REF_IN,	// 21
+	ST_DRAIN_WASTE_REF,		// 22
+	ST_CAP_CLEAN_START,		// 23
+	ST_CAP_CLEAN_IN,		// 24
+	ST_CAP_CLEAN_OUT,		// 25
+	ST_DRAIN_WASTE,			// 26
+	ST_CAP_FILL,			// 27
+	ST_DRAIN_WASTE_IDLE,	// 28
 };
 
 typedef struct SClnStateEnv
@@ -1220,43 +1235,52 @@ typedef struct SClnStateEnv
 	enum cln_state_code capCurrentState;
 	int lift_move_tgl;
 	int cln_move_tgl;
+	INT32 set_io_cnt;
+	int screw_0_pos;
+	int screw_1_pos;
+	int test_loop_cnt;
+	int flag_cap_empty;
+	int dry_wipe_done;
+	int flag_wet_wipe_done;
+	int cycle_sok_send;
 	//int head_safety_edge;
 } SClnStateEnv;
 
+	//--- check also GUI: RX_DigiPrint.Models.TestTableStatus.Update
 typedef struct ETestTableInfo
 {
-	UINT32 ref_done		: 1;	//	0x00000001
-	UINT32 moving		: 1;	//	0x00000002
-	UINT32 uv_on		: 1;	//	0x00000004
-	UINT32 uv_ready		: 1;	//	0x00000008
-	UINT32 z_in_ref		: 1;	//	0x00000010
-	UINT32 z_in_print	: 1;	//	0x00000020
-	UINT32 z_in_cap		: 1;	//	0x00000040
-	UINT32 info07		: 1;	//	0x00000080
-	UINT32 x_in_cap		: 1;	//	0x00000100
-	UINT32 printing		: 1;	//	0x00000200
-	UINT32 curing		: 1;	//	0x00000400
-	UINT32 cover_open	: 1;	//	0x00000800
-	UINT32 cln_in_stored : 1;	//	0x00001000
-	UINT32 cln_in_capping : 1;	//	0x00002000
-	UINT32 cln_screw_0	: 1;	//	0x00004000
-	UINT32 cln_screw_1	: 1;	//	0x00008000
-	UINT32 cln_screw_2	: 1;	//	0x00010000
-	UINT32 cln_screw_3	: 1;	//	0x00020000
-	UINT32 headUpInput_0 : 1;	//	0x00040000
-	UINT32 headUpInput_1 : 1;	//	0x00080000
-	UINT32 headUpInput_2 : 1;	//	0x00100000
-	UINT32 headUpInput_3 : 1;	//	0x00200000
-	UINT32 move_ok : 1;			//	0x00400000
-	UINT32 move_tgl : 1;		//	0x00800000
-	UINT32 screw_in_ref : 1;	//	0x01000000
-	UINT32 screw_done : 1;		//	0x02000000
-	UINT32 printhead_en : 1;    //  0x04000000
-	UINT32 head_in_safety : 1;	//  0x08000000
-	UINT32 splicing : 1;		//  0x10000000
-	UINT32 info29 : 1;
-	UINT32 info30 : 1;
-	UINT32 info31 : 1;
+	UINT32 ref_done			: 1;	//	0x00000001
+	UINT32 moving			: 1;	//	0x00000002
+	UINT32 uv_on			: 1;	//	0x00000004
+	UINT32 uv_ready			: 1;	//	0x00000008
+	UINT32 z_in_ref			: 1;	//	0x00000010
+	UINT32 z_in_print		: 1;	//	0x00000020
+	UINT32 z_in_cap			: 1;	//	0x00000040
+	UINT32 z_ref_done		: 1;	//	0x00000080
+	UINT32 x_in_cap			: 1;	//	0x00000100
+	UINT32 x_in_ref			: 1;	//	0x00000200
+	UINT32 printing			: 1;	//	0x00000400
+	UINT32 curing			: 1;	//	0x00000800
+	UINT32 cover_open		: 1;	//	0x00001000
+	UINT32 info_13_			: 1;	//	0x00002000
+	UINT32 cln_screw_0		: 1;	//	0x00004000
+	UINT32 cln_screw_1		: 1;	//	0x00008000
+	UINT32 cln_screw_2		: 1;	//	0x00010000
+	UINT32 cln_screw_3		: 1;	//	0x00020000
+	UINT32 headUpInput_0	: 1;	//	0x00040000
+	UINT32 headUpInput_1	: 1;	//	0x00080000
+	UINT32 headUpInput_2	: 1;	//	0x00100000
+	UINT32 headUpInput_3	: 1;	//	0x00200000
+	UINT32 move_ok			: 1;	//	0x00400000
+	UINT32 move_tgl			: 1;	//	0x00800000
+	UINT32 screw_in_ref		: 1;	//	0x01000000
+	UINT32 screw_done		: 1;	//	0x02000000
+	UINT32 printhead_en		: 1;    //  0x04000000
+	UINT32 splicing			: 1;	//  0x08000000
+	UINT32 info_28			: 1;	//  0x10000000
+	UINT32 info_29			: 1;	//	0x20000000
+	UINT32 info_30			: 1;	//	0x40000000
+	UINT32 info_31			: 1;	//	0x80000000
 } ETestTableInfo;
 	
 typedef struct ETestTableWarn
@@ -1341,6 +1365,7 @@ typedef struct STestTableStat
 
 	INT32			inputs;
 	SStepperMotor	motor[MAX_STEPPER_MOTORS];
+	INT32		set_io_cnt;
 } STestTableStat;
 
 	
@@ -1442,6 +1467,7 @@ typedef struct SRxConfig
 	INT32			externalData;
 	SConditionerCfg	cond[MAX_HEAD_DIST];
 	INT32			headFpVoltage[MAX_HEAD_DIST];
+	INT32			scalesTara[MAX_SCALES];
 } SRxConfig;
 
 /*
@@ -1485,10 +1511,10 @@ typedef struct
 	INT32 topFirst;		// first line is top line
 	SPoint resol;
 	INT32 printMode;
-		#define PM_UNDEF		0
-		#define PM_SCANNING		1
-		#define PM_SINGLE_PASS	2
-		#define PM_TEST			3
+		#define PM_UNDEF				0
+		#define PM_SCANNING				1
+		#define PM_SINGLE_PASS			2
+		#define PM_TEST					3
 		#define PM_TEST_SINGLE_COLOR	4
 	INT32 scanCopies;
 	INT32 planes;		// number of planes
@@ -1511,7 +1537,6 @@ extern SPrinterStatus	RX_PrinterStatus;
 extern SEncoderStat		RX_EncoderStatus;
 extern SEncoderCfg		RX_EncoderCfg;
 extern SFluidBoardStat	RX_FluidBoardStatus;
-extern SScaleStat	    RX_ScaleStatus[FLUID_MAX_SCALES];
 extern STestTableStat	RX_TestTableStatus;
 extern STestTableStat	RX_ClnStatus;
 extern SPrintQueueItem  RX_TestImage;

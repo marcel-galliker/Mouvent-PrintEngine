@@ -57,9 +57,10 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             
+            <!--
             <TextBlock Grid.Row="0" Grid.Column="0" Text="Humidity"/>
             <TextBlock Grid.Row="0" Grid.Column="1" Padding="3,0,0,0" Text="%"/>
-
+            -->
             <TextBlock Grid.Row="1" Grid.Column="0" Text="Pressure Ink Tank"/>
             <TextBlock Grid.Row="1" Grid.Column="1" Padding="3,0,0,0" Text="mbar"/>
 
@@ -71,7 +72,7 @@
 
             <TextBlock Grid.Row="4" Grid.Column="0" Text="Bleed Valve"/>
            
-            <TextBlock Grid.Row="5" Grid.Column="0" Text="Air Cussion Valve"/>
+            <TextBlock Grid.Row="5" Grid.Column="0" Text="Air Valve"/>
         </Grid>
         
         <ScrollViewer x:Name="InkSupplyScroll"

@@ -62,10 +62,12 @@ namespace RX_Common
             if (source!=null) source.AddHook(WndProc);
         }
 
-        //--- 
+        //--- _OnButton -----------------------------------------------
         private bool _OnButton(int x, int y)
         {
+            if (!this.IsVisible || !this.IsHitTestVisible) return false;
             if (!this.IsVisible) return false;
+            if (!this.IsEnabled) return false;
 
             Point min = this.PointToScreen(new Point(0,0));
             Point max = new Point(min.X+this.ActualWidth/RxScreen.Screen.Scale, min.Y+this.ActualHeight/RxScreen.Screen.Scale);
@@ -143,7 +145,7 @@ namespace RX_Common
                                 Debug.WriteLine("HitX = {1} ({2} < {3} < {4})", this.Name, pos.X<=x && xPos<=max.X, pos.X, x, max.X);
                                 Debug.WriteLine("HitY = {1} ({2} < {3} < {4})", this.Name, pos.Y<=y && yPos<=max.Y, pos.Y, y, max.Y);
                                 */
-
+                                
                                 if (_OnButton(x,y))
                                 {
                                     if (TouchEnabled)

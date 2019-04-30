@@ -70,9 +70,6 @@
     <ClCompile Include="test.c">
       <Filter>Source files</Filter>
     </ClCompile>
-    <ClCompile Include="cln.c">
-      <Filter>Source files</Filter>
-    </ClCompile>
     <ClCompile Include="cleaf.c">
       <Filter>Source files</Filter>
     </ClCompile>
@@ -154,9 +151,6 @@
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="test.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="cln.h">
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="cleaf.h">

@@ -60,17 +60,14 @@ namespace RX_DigiPrint.Views.TexView
                 if (button!=null)
                 {
                     string str = RxGlobals.Plc.GetVar(RxGlobals.Plc.UnitID, button.Name);
-                    try 
+                    bool check = false;
+                    if (str!=null && str.ToLower().Equals("true")) check=true;
+                    if (button.Name.Equals("PAR_DRYER_ON"))
                     {
-                        bool check = Convert.ToBoolean(str);
-                        if (button.Name.Equals("PAR_DRYER_ON"))
-                        {
-                            button.IsChecked = true;
-                            button.IsBusy    = check;
-                        }
-                        else button.IsChecked = check;
+                        button.IsChecked = true;
+                        button.IsBusy    = check;
                     }
-                    catch(Exception) {button.IsChecked = false;}
+                    else button.IsChecked = check;
                 }
             }
         }

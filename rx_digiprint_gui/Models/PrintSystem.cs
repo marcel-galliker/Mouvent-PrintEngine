@@ -87,7 +87,8 @@ namespace RX_DigiPrint.Models
 	            case EPrinterType.printer_test_table:	    return true;
                 case EPrinterType.printer_cleaf:            return true;
                 case EPrinterType.printer_LB701:			return true;
-	            case EPrinterType.printer_LB702:			return true;
+	            case EPrinterType.printer_LB702_UV:			return true;
+	         // case EPrinterType.printer_LB702_WB:			return true;
 	            default:                                    return false;
 	            }
             }
@@ -224,6 +225,14 @@ namespace RX_DigiPrint.Models
             set { Changed|=SetProperty(ref _OffsetIncPerMeter, value); }
         }
 
+        //--- Property OffsetIncPerMeter ---------------------------------------
+        private int _OffsetIncPerMeterVerso;
+        public int OffsetIncPerMeterVerso
+        {
+            get { return _OffsetIncPerMeterVerso; }
+            set { Changed|=SetProperty(ref _OffsetIncPerMeterVerso, value); }
+        }
+
         //--- Property Overlap ---------------------------------------
         private bool _Overlap;
         public bool Overlap
@@ -250,16 +259,19 @@ namespace RX_DigiPrint.Models
                 RxGlobals.InkSupply.List[i].InkType     = RxGlobals.InkTypes.FindByFileName(inkFileName[i]);
                 RxGlobals.InkSupply.List[i].RectoVerso  = msg.rectoVerso[i]; 
             }
-             
-            PrinterType         = msg.type;
-            Reverse             = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX801);
-            Overlap             = msg.overlap>0;
-            OffsetVerso         = msg.offset.verso;
-            OffsetAngle         = msg.offset.angle;
-            OffsetStep          = msg.offset.step;
-            OffsetIncPerMeter   = msg.offset.incPerMeter;
+            RxGlobals.InkSupply.List[TcpIp.InkSupplyCnt].InkType = InkType.Flush;
+            RxGlobals.InkSupply.List[TcpIp.InkSupplyCnt+1].InkType = InkType.Waste;
 
-            HeadCnt             = msg.headsPerColor;
+            PrinterType             = msg.type;
+            Reverse                 = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX801 || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX802);
+            Overlap                 = msg.overlap>0;
+            OffsetVerso             = msg.offset.versoDist;
+            OffsetAngle             = msg.offset.angle;
+            OffsetStep              = msg.offset.step;
+            OffsetIncPerMeter       = msg.offset.incPerMeter;
+            OffsetIncPerMeterVerso  = msg.offset.incPerMeterVerso;
+
+            HeadCnt                 = msg.headsPerColor;
 
             _HeadFpVoltage= new Int32[msg.headFpVoltage.Count()];
             for (i=0; i<_HeadFpVoltage.Count(); i++) _HeadFpVoltage[i]    = msg.headFpVoltage[i];
@@ -290,10 +302,11 @@ namespace RX_DigiPrint.Models
 
             msg.type                = _PrinterType;
             msg.overlap             = Convert.ToUInt32(_Overlap);
-            msg.offset.verso        = OffsetVerso;
+            msg.offset.versoDist    = OffsetVerso;
             msg.offset.angle        = OffsetAngle;
             msg.offset.step         = OffsetStep;
-            msg.offset.incPerMeter  = OffsetIncPerMeter; 
+            msg.offset.incPerMeter = OffsetIncPerMeter; 
+            msg.offset.incPerMeterVerso = OffsetIncPerMeterVerso; 
             msg.headsPerColor       = _HeadCnt;
             msg.externalData        = Convert.ToInt32(ExternalData);
 
@@ -338,17 +351,6 @@ namespace RX_DigiPrint.Models
             msg.inkFileNames            = str.ToString();
             
             RxGlobals.RxInterface.SendMsg(msgId, ref msg);
-        }
-
-        //--- CreateLog ---------------------------------------------------------
-        public void CreateLog(RxWorkBook wb)
-        {
-            int row=0;
-            wb.setText(row++, 0, "Print System");
-            wb.setText(row, 0, "PrinterType");          wb.setText(row++, 1, PrinterType); 
-            wb.HeaderRow(0);
-            RxGlobals.InkSupply.CreateLog(wb, row+1);
-        }
-        
+        }        
     }
 }

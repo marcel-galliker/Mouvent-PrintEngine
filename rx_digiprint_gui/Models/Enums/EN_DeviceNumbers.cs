@@ -29,7 +29,12 @@ namespace RX_DigiPrint.Models.Enums
                                                         {
                                                             try 
                                                             { 
-                                                                _List.Add(new RxEnum<int>(no+1, string.Format("{0}-{1}..{2}", InkType.ColorNameShort(RxGlobals.InkSupply.List[color].InkType.ColorCode), cluster*size+1, cluster*size+size)));
+                                                                switch(RxGlobals.InkSupply.List[color].RectoVerso)
+                                                                {
+                                                                    case ERectoVerso.rv_recto:  _List.Add(new RxEnum<int>(no+1, string.Format("R{0}-{1}..{2}", InkType.ColorNameShort(RxGlobals.InkSupply.List[color].InkType.ColorCode), cluster*size+1, cluster*size+size))); break;
+                                                                    case ERectoVerso.rv_verso:  _List.Add(new RxEnum<int>(no+1, string.Format("V{0}-{1}..{2}", InkType.ColorNameShort(RxGlobals.InkSupply.List[color].InkType.ColorCode), cluster*size+1, cluster*size+size))); break;
+                                                                    default:                    _List.Add(new RxEnum<int>(no+1, string.Format("{0}-{1}..{2}", InkType.ColorNameShort(RxGlobals.InkSupply.List[color].InkType.ColorCode), cluster*size+1, cluster*size+size))); break;
+                                                                }                                                                    
                                                             }
                                                             catch(Exception)
                                                             {
@@ -83,9 +88,10 @@ namespace RX_DigiPrint.Models.Enums
                 case EDeviceType.dev_stepper:   switch (RxGlobals.PrintSystem.PrinterType)
                                                 {
                                                     case EPrinterType.printer_LB701:        cnt=4; break;
-                                                    case EPrinterType.printer_LB702:        cnt=4; break;
+                                                    case EPrinterType.printer_LB702_UV:     cnt=4; break;
+                                                    case EPrinterType.printer_LB702_WB:     cnt=4; break;
                                                     case EPrinterType.printer_DP803:        cnt=4; break;
-                                                    case EPrinterType.printer_cleaf:        cnt=2; break;
+                                                    case EPrinterType.printer_cleaf:        cnt=4; break;
                                                     case EPrinterType.printer_test_table:   cnt=1; break;
                                                     case EPrinterType.printer_TX801:        cnt=2; break;
                                                     case EPrinterType.printer_TX802:        cnt=2; break;

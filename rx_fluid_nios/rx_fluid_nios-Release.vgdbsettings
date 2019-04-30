@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <VisualGDBProjectSettings2 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <ConfigurationName>Release</ConfigurationName>
+  <ConfigurationName>Release-soc</ConfigurationName>
   <Project xsi:type="com.visualgdb.project.windows">
     <CustomSourceDirectories>
       <Directories />
@@ -15,11 +15,12 @@
         <HostName>BuildMachine</HostName>
         <Transport>BuiltinShortcut</Transport>
       </RemoteHost>
-      <Command>F:\Tools\Bin\Altera\15.1\nios2eds\bin\eclipse-nios2.exe</Command>
-      <Arguments>-data $(SourceDir)/software</Arguments>
-      <WorkingDirectory>$(SourceDir)</WorkingDirectory>
+      <Command>cmd</Command>
+      <Arguments>/c ..\Externals\altera\build_nios_from_vs.bat $(ProjectDir)</Arguments>
+      <WorkingDirectory>$(ProjectDir)</WorkingDirectory>
       <Environment>
         <Records />
+        <EnvironmentSetupFiles />
       </Environment>
       <BackgroundMode xsi:nil="true" />
     </BuildCommand>
@@ -29,9 +30,15 @@
         <HostName>BuildMachine</HostName>
         <Transport>BuiltinShortcut</Transport>
       </RemoteHost>
+      <Command />
+      <Arguments />
+      <WorkingDirectory />
+      <Environment>
+        <Records />
+      </Environment>
       <BackgroundMode xsi:nil="true" />
     </CleanCommand>
-    <MainBuildDirectory>$(SourceDir)</MainBuildDirectory>
+    <MainBuildDirectory>$(ProjectDir)</MainBuildDirectory>
     <AbsoluteTargetPath />
     <AutoUpdateMakefiles>true</AutoUpdateMakefiles>
   </Build>
@@ -80,8 +87,32 @@
   </Debug>
   <CustomBuild>
     <PreSyncActions />
-    <PreBuildActions />
-    <PostBuildActions />
+    <PreBuildActions>
+      <CustomActionBase xsi:type="CommandLineAction">
+        <SkipWhenRunningCommandList>true</SkipWhenRunningCommandList>
+        <Command>cmd</Command>
+        <Arguments>/C "copy ..\rx_ink_lib\*.h .\software\rx_fluid_nios\"</Arguments>
+        <WorkingDirectory>$(ProjectDir)</WorkingDirectory>
+        <Environment>
+          <Records />
+          <EnvironmentSetupFiles />
+        </Environment>
+        <BackgroundMode>false</BackgroundMode>
+      </CustomActionBase>
+    </PreBuildActions>
+    <PostBuildActions>
+      <CustomActionBase xsi:type="FileTransferAction">
+        <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
+        <SourceHost>
+          <Transport>None</Transport>
+        </SourceHost>
+        <DestinationHost>
+          <Transport>None</Transport>
+        </DestinationHost>
+        <SourceFilePath>$(ProjectDir)\software\rx_fluid_nios\mem_init\fluid_board_soc_onchip_memory_nios_cpu.hex</SourceFilePath>
+        <DestinationFilePath>$(ProjectDir)\..\bin\fluid\rx_fluid_nios</DestinationFilePath>
+      </CustomActionBase>
+    </PostBuildActions>
     <PreCleanActions />
     <PostCleanActions />
   </CustomBuild>
@@ -95,7 +126,15 @@
     <Shortcuts />
     <ShowMessageAfterExecuting>true</ShowMessageAfterExecuting>
   </CustomShortcuts>
-  <UserDefinedVariables />
+  <UserDefinedVariables>
+    <BuildVariable>
+      <Label />
+      <Description />
+      <Value>F:\Tools\Bin\Altera\15.1</Value>
+      <Name>AlteraRoot</Name>
+      <PromoteToEnvironment>false</PromoteToEnvironment>
+    </BuildVariable>
+  </UserDefinedVariables>
   <ImportedPropertySheets />
   <CodeSense>
     <Enabled>Unknown</Enabled>

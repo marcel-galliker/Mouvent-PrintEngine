@@ -168,12 +168,12 @@ namespace RX_DigiPrint.Models
         }
 
         //--- Property Pages ---------------------------------------
-        public UInt32 Pages
+        public Int32 Pages
         {
             get 
             { 
-                if (_Layout.columns==0) return (UInt32)_FileDef.recordCnt;
-                else                    return (UInt32)((_FileDef.recordCnt+_Layout.columns-1)/_Layout.columns); 
+                if (_Layout.columns==0) return _FileDef.recordCnt;
+                else                    return (_FileDef.recordCnt+_Layout.columns-1)/_Layout.columns; 
             }
         }
 

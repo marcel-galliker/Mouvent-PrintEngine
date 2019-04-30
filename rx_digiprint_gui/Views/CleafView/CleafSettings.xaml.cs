@@ -58,7 +58,7 @@ namespace RX_DigiPrint.Views.CleafView
         {
             try
             {
-                int flexo = System.Convert.ToInt32(CB_Flexo.Value);
+                int flexo = Rx.StrToInt32(CB_Flexo.Value);
                 if ((flexo & 0x01)!=0) CB_Lamp1.ComboValue=1;
                 if ((flexo & 0x02)!=0) CB_Lamp2.ComboValue=1;
                 if ((flexo & 0x04)!=0) CB_Lamp4.ComboValue=1;
@@ -67,11 +67,11 @@ namespace RX_DigiPrint.Views.CleafView
             catch(Exception)
             {
             }
-            if (CB_Lamp1.ComboValue>0 && System.Convert.ToInt32(UVPower1.Value)<30) UVPower1.Value="30"; 
-            if (CB_Lamp2.ComboValue>0 && System.Convert.ToInt32(UVPower2.Value)<30) UVPower2.Value="30"; 
-            if (CB_Lamp3.ComboValue>0 && System.Convert.ToInt32(UVPower3.Value)<30) UVPower3.Value="30"; 
-            if (CB_Lamp4.ComboValue>0 && System.Convert.ToInt32(UVPower4.Value)<30) UVPower4.Value="30"; 
-            if (CB_Lamp5.ComboValue>0 && System.Convert.ToInt32(UVPower5.Value)<30) UVPower5.Value="30"; 
+            if (CB_Lamp1.ComboValue>0 && Rx.StrToInt32(UVPower1.Value)<30) UVPower1.Value="30"; 
+            if (CB_Lamp2.ComboValue>0 && Rx.StrToInt32(UVPower2.Value)<30) UVPower2.Value="30"; 
+            if (CB_Lamp3.ComboValue>0 && Rx.StrToInt32(UVPower3.Value)<30) UVPower3.Value="30"; 
+            if (CB_Lamp4.ComboValue>0 && Rx.StrToInt32(UVPower4.Value)<30) UVPower4.Value="30"; 
+            if (CB_Lamp5.ComboValue>0 && Rx.StrToInt32(UVPower5.Value)<30) UVPower5.Value="30"; 
         }
 
         //--- Save_Clicked ---------------------------------------------

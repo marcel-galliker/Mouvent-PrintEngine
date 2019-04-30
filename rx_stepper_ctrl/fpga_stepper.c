@@ -92,9 +92,9 @@ void fpga_init()
 	_MemId = open("/dev/mem", O_RDWR | O_SYNC);
 	if (_MemId == -1) Error(ERR_CONT, 0, "Could not open memory handle.");
 
-	Fpga.qsys    = (SFpgaQSys*)		rx_fpga_map_page(_MemId, ADDR_FPGA_QSYS,	sizeof(SFpgaQSys),	0x00b0);
+	Fpga.qsys    = (SFpgaQSys*)		rx_fpga_map_page(_MemId, ADDR_FPGA_QSYS,	sizeof(SFpgaQSys),	0x00c0);
 	Fpga.stat    = (SFpgaStat*)		rx_fpga_map_page(_MemId, ADDR_FPGA_STAT,	sizeof(SFpgaStat),	0x0200);
-	Fpga.par     = (SFpgaPar*)		rx_fpga_map_page(_MemId, ADDR_FPGA_PAR,		sizeof(SFpgaPar),	0x0220);
+	Fpga.par     = (SFpgaPar*)		rx_fpga_map_page(_MemId, ADDR_FPGA_PAR,		sizeof(SFpgaPar),	0x0250);
 	Fpga.move    = (SMove*)			rx_fpga_map_page(_MemId, ADDR_FPGA_MOVES,   sizeof(SMove)*MOTOR_CNT*MOVE_CNT, 12*MOTOR_CNT*MOVE_CNT);
 	Fpga.encoder = (SFpgaEncoder*)	rx_fpga_map_page(_MemId, ADDR_FPGA_ENCODER, sizeof(SFpgaEncoder)*ENCODER_CNT, 0x0030*ENCODER_CNT);		
 #endif
@@ -150,7 +150,7 @@ int	fpga_input(int no)
 void _fpga_display_status(void)
 {
 	int i, v;
-	extern int	_motor_start_cnt[MOTOR_CNT];
+	extern BYTE	_motor_start_cnt[MOTOR_CNT];
 
 	term_printf("\n");
 	term_printf("--- FPGA Status -----------------------------------\n");
@@ -163,7 +163,7 @@ void _fpga_display_status(void)
 	v = VAL_TO_MV(Fpga.stat->current_24v) * 5600.0 / 680.0;
 	term_printf("Power Supply: % 3d.%03dA\n", v / 1000, v % 1000);
 	v = ps_get_power();
-	term_printf("Power Motors: % 3d.%03dV(14)\n", v / 1000, v % 1000);
+	term_printf("Power Motors: % 3d.%03dV(24)\n", v / 1000, v % 1000);
 	
 	term_printf("Inputs:       ");
 	for (i=0; i<INPUT_CNT; i++)
@@ -200,6 +200,8 @@ if (RX_StepperCfg.printerType==printer_TX801)
 	term_printf("\n"); 
 	term_printf("stop_mux:       "); PRINTF(MOTOR_CNT)("0x%04x    ", Fpga.par->cfg[i].stop_mux);				term_printf("\n"); 
 	term_printf("Pos:            "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.stat->statMot[i].position);				term_printf("\n"); 
+	term_printf("Pos rising:     "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.stat->statMot[i].pos_rising); term_printf("\n"); 
+	term_printf("Pos falling:    "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.stat->statMot[i].pos_falling); term_printf("\n"); 
 	term_printf("Pos end:        "); PRINTF(MOTOR_CNT)("%06d    ", motor_get_end_step(i));						term_printf("\n"); 
 	term_printf("Speed [Hz]:     "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.stat->statMot[i].speed/0x10000);		term_printf("\n"); 
 //	term_printf("vEdge:          "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.stat->statMot[i].v_edge);				term_printf("\n"); 
@@ -216,10 +218,17 @@ if (RX_StepperCfg.printerType==printer_TX801)
 	term_printf("  ERR.IN3:      "); PRINTF(MOTOR_CNT)("%08x  ",   Fpga.stat->statMot[i].err_estop & ENC_ESTOP_IN03);	term_printf("\n"); 
 
 	term_printf("Encoder:        "); PRINTF(MOTOR_CNT)("---%d---   ", i);										term_printf("\n");
-	term_printf("Pos:            "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.encoder[i].pos);						term_printf("\n"); 
-	term_printf("Inc/Rev:        "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.encoder[i].incPerRev);					term_printf("\n"); 
-	term_printf("IdxCnt:         "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.encoder[i].revCnt);						term_printf("\n"); 
-
+	term_printf("Pos: inc        "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.encoder[i].pos);						term_printf("\n"); 
+//	term_printf("Inc/Rev:        "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.encoder[i].incPerRev);					term_printf("\n"); 
+//	term_printf("IdxCnt:         "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.encoder[i].revCnt);						term_printf("\n"); 
+	
+	/*
+	term_printf("pwm pulsewidth: "); PRINTF(4)("%06d    ", (UINT16)Fpga.par->pwm_output[i]); 					term_printf("\n"); 
+	
+	term_printf("analog thresh:  "); PRINTF(8)("%06d    ", (UINT16)Fpga.par->adc_thresh[i]); 					term_printf("\n"); 
+	term_printf("analog PulseCnt:"); PRINTF(8)("%06d    ", (UINT32)Fpga.stat->adc_cnt[i]); 						term_printf("\n");
+	*/
+	
 	term_printf("\n");
 	term_flush();
 }
@@ -284,15 +293,27 @@ static void  _check_errors(void)
 	if (Fpga.stat->voltage_3v3!= INVALID_VALUE)
 	{
 		if (VAL_TO_MV(Fpga.stat->voltage_3v3) < 3000)						ErrorFlag(ERR_CONT, &_ErrorFlags, ERR_0, 0, "Voltage Error: 3.3V Level is %d V", VAL_TO_MV(Fpga.stat->voltage_3v3));
-		if ((11*VAL_TO_MV(Fpga.stat->voltage_24v) < 20000))					ErrorFlag(ERR_CONT, &_ErrorFlags, ERR_1, 0, "Voltage Error: 24V Level is %d V", 11*VAL_TO_MV(Fpga.stat->voltage_24v)/1000);
 		if ((VAL_TO_MV(Fpga.stat->current_24v) * 5600.0 / 680.0) > 15000)	ErrorFlag(ERR_CONT, &_ErrorFlags, ERR_2, 0, "Current Error: Current of 24V Supply is %d A", VAL_TO_MV(Fpga.stat->current_24v) * 5600.0 / 680.0);
 		if ((VAL_TO_MV(Fpga.stat->current_24v) * 5600.0 / 680.0) > 15000)	ErrorFlag(ERR_CONT, &_ErrorFlags, ERR_3, 0, "Current Error: Current of 24V Supply is %d A", VAL_TO_MV(Fpga.stat->current_24v) * 5600.0 / 680.0);
+
+		int v24=11*VAL_TO_MV(Fpga.stat->voltage_24v) / 1000;		
+		if (v24 < 20)
+		{
+			if (!(_ErrorFlags&ERR_1)) Error(WARN, 0, "Voltage Error: 24V Level is %d V", v24);				
+			_ErrorFlags |= ERR_1;
+		}
+		else if ((_ErrorFlags&ERR_1) && (v24 > 22))
+		{
+			Error(LOG, 0, "Voltage OK: 24V Level is %d V", v24);				
+			_ErrorFlags &= ~ERR_1;				
+		}
 	}
-	int temp=Fpga.stat->temp;
-	if (temp!=0x0fff)
+	
+	int rowTemp=Fpga.stat->temp;
+	if (rowTemp!=0x0fff)
 	{
-		temp=VAL_TO_TEMP(temp);
-		if (temp > 70)				ErrorFlag(ERR_CONT, &_ErrorFlags, ERR_3, 0, "Temperature Error: Temp Level is %d C", temp);			
+		int temp=VAL_TO_TEMP(rowTemp);
+		if (temp > 70)				ErrorFlag(ERR_CONT, &_ErrorFlags, ERR_3, 0, "Temperature Error: Temp Level is %d C¨, row=%d", temp, rowTemp);			
 	}
 }
 

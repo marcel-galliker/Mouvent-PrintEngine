@@ -21,7 +21,7 @@
 #include "rx_trace.h"
 #include "tcp_ip.h"
 #include "nios_fluid.h"
-#include "balance.h"
+#include "daisy_chain.h"
 #include "fluid_ctrl.h"
 
 #ifdef linux
@@ -66,6 +66,10 @@ static int _handle_ctrl_msg (RX_SOCKET socket, void *pmsg);
 static int _do_ping				(RX_SOCKET socket);
 static int _do_fluid_stat		(RX_SOCKET socket, SHeadStateLight pressure[FLUID_BOARD_CNT]);
 static int _do_fluid_ctrlMode	(RX_SOCKET socket, SFluidCtrlCmd *pmsg);
+static void _do_scales_set_cfg	(RX_SOCKET socket, SScalesMsg* pmsg);
+static void _do_scales_get_cfg	(RX_SOCKET socket);
+static void _do_scales_tara		(RX_SOCKET socket, INT32* pmsg);
+static void _do_scales_stat		(RX_SOCKET socket);
 
 //--- ctrl_init --------------------------------------------------------------------
 int ctrl_init()
@@ -182,10 +186,10 @@ static int _handle_ctrl_msg(RX_SOCKET socket, void *msg)
 	case CMD_FLUID_STAT:		_do_fluid_stat		(socket, (SHeadStateLight*)	&phdr[1]);								break;
 	case CMD_FLUID_CTRL_MODE:	_do_fluid_ctrlMode	(socket, (SFluidCtrlCmd*)msg);										break;
 	
-	case CMD_SCALES_LOAD_CFG:	scl_cfg_set		((SScalesCalibration*)  &phdr[1], phdr->msgLen-sizeof(SMsgHdr));		break;
-	case CMD_SCALES_SAVE_CFG:	scl_cfg_save	();																		break;
-//	case CMD_SCALES_CALIBRATE:	scl_calibrate	((SScalesCalibrateCmd*)msg);											break;
-
+	case CMD_SCALES_SET_CFG:	 _do_scales_set_cfg(socket, (SScalesMsg*)msg); break;
+	case CMD_SCALES_GET_CFG:	 _do_scales_get_cfg(socket); break;
+	case CMD_SCALES_TARA:		 _do_scales_tara(socket, (INT32*)&phdr[1]);	break;	
+	case CMD_SCALES_STAT:		 _do_scales_stat(socket);	break;	
 	default:		
 					{
 						char peer[64];
@@ -231,7 +235,15 @@ static int _do_fluid_stat (RX_SOCKET socket, SHeadStateLight stat[FLUID_BOARD_CN
 	int i;
 	for (i=0;  i<FLUID_BOARD_CNT; i++) nios_set_head_state(i, &stat[i]);
 	sok_send_2(&socket, INADDR_ANY, REP_FLUID_STAT, sizeof(RX_FluidBoardStatus), &RX_FluidBoardStatus);
-	sok_send_2(&socket, INADDR_ANY, REP_SCALE_STAT, sizeof(RX_ScaleStatus),		 &RX_ScaleStatus);
+	if (daisy_chain_is_active())
+	{
+		SScalesMsg msg;
+		msg.hdr.msgId  = REP_SCALES_STAT;
+		msg.hdr.msgLen = sizeof(msg);
+		daisy_chain_get_weight(msg.val, MAX_SCALES);
+		sok_send(&socket, &msg);
+	}
+	
 	return REPLY_OK;
 }
 
@@ -240,6 +252,39 @@ static int _do_fluid_ctrlMode	(RX_SOCKET socket, SFluidCtrlCmd *pmsg)
 {
 	nios_set_ctrlmode(pmsg->no, pmsg->ctrlMode);
 	return REPLY_OK;
+}
+
+//--- _do_scales_set_cfg ---------------------------------------
+static void _do_scales_set_cfg(RX_SOCKET socket, SScalesMsg *pmsg)
+{
+	daisy_chain_set_tara(pmsg->val, MAX_SCALES);
+}
+
+//--- _do_scales_get_cfg ----------------------------------------
+static void _do_scales_get_cfg(RX_SOCKET socket)
+{
+	SScalesMsg msg;
+	msg.hdr.msgId  = REP_SCALES_GET_CFG;
+	msg.hdr.msgLen = sizeof(msg);
+	daisy_chain_get_tara(msg.val, MAX_SCALES);
+	sok_send(&socket, &msg);	
+}
+
+//--- _do_scales_tara ----------------------------------------------
+static void _do_scales_tara(RX_SOCKET socket, INT32* no)
+{
+	daisy_chain_do_tara(*no);
+	_do_scales_get_cfg(socket);		
+}
+
+//--- _do_scales_stat ----------------------------------------------
+static void _do_scales_stat		(RX_SOCKET socket)
+{
+	SScalesMsg msg;
+	msg.hdr.msgId  = REP_SCALES_STAT;
+	msg.hdr.msgLen = sizeof(msg);
+	daisy_chain_get_weight(msg.val, MAX_SCALES);
+	sok_send(&socket, &msg);				
 }
 
 //--- ctrl_socket -----------------------------------

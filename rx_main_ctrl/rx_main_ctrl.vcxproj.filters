@@ -138,6 +138,9 @@
     <ClInclude Include="pe_main.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="cleaf_orders.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="boot_svr.c">
@@ -249,6 +252,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="pe_main.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cleaf_orders.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

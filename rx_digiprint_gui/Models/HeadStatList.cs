@@ -32,7 +32,7 @@ namespace RX_DigiPrint.Models
         }
 
         //--- SetItem -----------------------------
-        public void SetItem(int no, TcpIp.SHeadStat item, UInt32 tempFpga, Int32 flow)
+        public void SetItem(int no, TcpIp.SHeadStat item, Int32 tempFpga, Int32 flow)
         {
             RxBindable.Invoke(() => 
             {            

@@ -33,6 +33,7 @@
 #include "args.h"
 #include "enc_ctrl.h"
 #include "enc_test.h"
+#include "tw8.h"
 #include "fpga_def_enc.h"
 #include "fpga_enc.h"
 
@@ -110,6 +111,8 @@ static int		_UV_Shutter = 0;
 static int		_UV_SimuCnt = 0;
 static int		_PrintGo_Locked;
 static int		_DistTelCnt = 0;
+static int		_Scanning = FALSE;
+static int		_IndexCheckDone=FALSE;
 static UINT32	_ErrFlags	= 0;
 static UINT32	_PG_WindowError = 0;
 static RX_SOCKET _Socket = INVALID_SOCKET;
@@ -117,7 +120,7 @@ static RX_SOCKET _Socket = INVALID_SOCKET;
 //--- prototypes -------------------------------------------
 static int  _fpga_running(void);
 static void _fpga_display_status_test(void);
-static void _fpga_display_status(void);
+static void _fpga_display_status(int showCorrection);
 static void _fpga_display_error(void);
 static void _fpga_corr_rotative(SEncoderCfg *pcfg);
 static void _fpga_corr_linear(SEncoderCfg *pcfg);
@@ -181,8 +184,8 @@ void fpga_init()
 		Error(ERR_ABORT, 0, "structuire mismatch");
 	}
 
-	Fpga = (SEncFpga*)rx_fpga_map_page(_MemId, 0xc0200000, sizeof(SEncFpga),	0x0e40);
-	FpgaCorr = (SEncFpgaCorr*)rx_fpga_map_page(_MemId, 0xc0203000, sizeof(SEncFpgaCorr),	0x500);
+	Fpga = (SEncFpga*)rx_fpga_map_page(_MemId, 0xc0200000, sizeof(SEncFpga), 0x0e58);
+	FpgaCorr = (SEncFpgaCorr*)rx_fpga_map_page(_MemId, 0xc0203000, sizeof(SEncFpgaCorr),	0x600);
 
 	{
 		int outNo=0;
@@ -237,7 +240,7 @@ void fpga_end()
 }
 
 //--- fpga_main ------------------------------------------
-void  fpga_main(int ticks, int menu)
+void  fpga_main(int ticks, int menu, int showCorrection)
 {	
 	static int _lastTicks=0;
 	_check_errors();
@@ -281,7 +284,7 @@ void  fpga_main(int ticks, int menu)
 	{
 		test_do(ticks);
 		if (arg_test) _fpga_display_status_test();
-		else		  _fpga_display_status();
+		else		  _fpga_display_status(showCorrection);
 		if (arg_simu_uv && RX_EncoderStatus.info.uv_on)
 		{
 			_UV_SimuCnt++;
@@ -393,6 +396,11 @@ void fpga_enc_config(int inNo, SEncoderCfg *pCfg, int outNo, int khz)
 	
 	if (!_Init) return;
 
+	_Scanning = rx_def_is_scanning(pCfg->printerType);
+
+	tw8_config(0, pCfg->speed_mmin, pCfg->printerType);
+	tw8_config(1, pCfg->speed_mmin, pCfg->printerType);
+		
 	if (khz)
 	{
 		double freq;
@@ -413,17 +421,19 @@ void fpga_enc_config(int inNo, SEncoderCfg *pCfg, int outNo, int khz)
 		for (i=0; i<SIZEOF(Fpga->cfg.pg); i++)
 		{	
 			//--- reset ------------------
-			Fpga->cfg.encIn[i].reset_pos = 0;
-			Fpga->cfg.pg[i].reset_pos	= FALSE;
-			Fpga->cfg.pg[i].reset_pos	= TRUE;
-			Fpga->cfg.pg[i].reset_pos	= FALSE;
-			Fpga->cfg.pg[i].enc_start_pos_fwd = 100;
-			Fpga->cfg.pg[i].pos_pg_fwd		  = 10;
+			Fpga->cfg.encIn[i].reset_pos		= 0;
+			Fpga->cfg.pg[i].reset_pos			= FALSE;
+			Fpga->cfg.pg[i].reset_pos			= TRUE;
+			Fpga->cfg.pg[i].reset_pos			= FALSE;
+			Fpga->cfg.pg[i].enc_start_pos_fwd	= 100;
+			Fpga->cfg.pg[i].pos_pg_fwd			= 10;
 		}
 	}
 	else
 	{	
 		_IncDist = 1000000.0/pCfg->incPerMeter; // [µm] distance of encoder increments
+		
+	//	if (tw8_present()) _IncDist *= 2;
 	
 		Fpga->cfg.encIn[inNo].enable			= FALSE;
 		
@@ -438,9 +448,11 @@ void fpga_enc_config(int inNo, SEncoderCfg *pCfg, int outNo, int khz)
 		Fpga->cfg.encOut[outNo].reset_min_max	= TRUE;
 		Fpga->cfg.encOut[outNo].dist_ratio		= (UINT32) ((double) 0x80000000 * _IncDist / _StrokeDist);
 		Fpga->cfg.encOut[outNo].synthetic_freq	= 0;
+		Fpga->cfg.general.subsample_meas		= 0;
 		if (pCfg->scanning)
 		{
-			Fpga->cfg.encOut[outNo].backlash	= FALSE;
+//			Fpga->cfg.encOut[outNo].backlash	= FALSE;
+			Fpga->cfg.encOut[outNo].backlash	= TRUE;
 			Fpga->cfg.encOut[outNo].scanning	= TRUE;
 		}
 		else
@@ -465,13 +477,22 @@ void fpga_enc_config(int inNo, SEncoderCfg *pCfg, int outNo, int khz)
 	_ErrFlags = 0;
 	_PG_WindowError = 0;
 	_DistTelCnt=0;
+	_IndexCheckDone = FALSE;
 }
 
 //--- fpga_encoder_enable -------------------------------------
 void  fpga_encoder_enable(int enable)
 {
-	if (_Init) Fpga->cfg.encIn[0].enable=enable;		
-	if (_Init) Fpga->cfg.encIn[1].enable = enable;
+	int i;
+	
+	if (_Init)
+	{
+		for(i=0; i<2; i++)
+		{
+			Fpga->cfg.encIn[i].enable	= enable;		
+			Fpga->cfg.encIn[i].index_en	= enable;				
+		}
+	}
 }		
 
 //--- _CalcSinus -------------------------------------
@@ -486,13 +507,49 @@ static void _CalcSinus(int max, int cnt, INT32 *pmem, int size)
 	}	
 }
 
+//--- _trace_sinus ---------------------------------
+static void _trace_sinus(int cnt, INT32* pmem, const char* filepath)
+{
+	FILE *file;
+	file=fopen(filepath, "w");
+	if (file)
+	{
+		int i;
+		for (i=0; i<cnt/4; i++)
+		{
+			fprintf(file, "%d\n", pmem[i]);
+		}		
+		fclose(file);			
+	}
+}
+
 //--- _fpga_corr_rotative ------------------------
 static void _fpga_corr_rotative(SEncoderCfg *pCfg)
 {
 	_CalcSinus(1024,										Fpga->cfg.encIn[0].inc_per_revolution, _CorrSin,    0x10000);
 	_CalcSinus(Fpga->cfg.encIn[0].inc_per_revolution/1000,  Fpga->cfg.encIn[0].inc_per_revolution, _CorrSinRev, 0x10000);
 
+//	_trace_sinus(Fpga->cfg.encIn[0].inc_per_revolution, _CorrSin,	 PATH_TEMP "CorrSin.csv");
+//	_trace_sinus(Fpga->cfg.encIn[0].inc_per_revolution, _CorrSinRev, PATH_TEMP "CorrSinRev.csv");
+	
 	fpga_enc_config(1, pCfg, 1, 0);
+	
+	Fpga->cfg.general.max_a0_var_high		= 1000;		// 0x0020: Threshold for the variation value, when to switch off correction
+	Fpga->cfg.general.max_a0_var_low		= 100;		// 0x0024: Threshold for the variation value, when to switch on correction
+	
+	Fpga->cfg.general.ident_rol_en			= TRUE;		// FALSE; //TRUE;			// 0x0018: enables coeff. identification logic in roller correction
+	Fpga->cfg.general.single_sin_en			= FALSE;	// 0x0040: enables use of apm and phase instead of b1 and a1
+	Fpga->cfg.general.use_internal_ident_en	= FALSE;	// 0x0044: enables use of ident values
+	Fpga->cfg.general.runnung_avg_coeff		= TRUE;		// 0x0048: enables coeff running average
+	Fpga->cfg.general.rol_2_first			= FALSE;	// 0x004C: flag
+	Fpga->cfg.general.rol_drift_mu_two		= 0x0;		// 0x0050:
+	Fpga->cfg.general.rol_ident_res_shift	= 0x07;		// f(inc_per_revolution)
+	Error(WARN, 0, "calculate rol_ident_res_shift");
+	
+	Fpga->cfg.general.rol_0_new_b1			= 0x70000;	// 0x0028: a0 sin coeff for roller 0 correction, overwrites internal coeff !
+	Fpga->cfg.general.rol_0_new_a1			= 0x30000;	// 0x002c: a1 cos coeff for roller 0 correction, overwrites internal coeff !
+	Fpga->cfg.general.rol_1_new_b1			= 0x80000;	// 0x0030: a0 sin coeff for roller 1 correction, overwrites internal coeff !
+	Fpga->cfg.general.rol_1_new_a1			= 0x20000;	// 0x0034: a1 cos coeff for roller 1 correction, overwrites internal coeff !
 }
 
 //--- _fpga_corr_linear ------------------------
@@ -589,7 +646,7 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg)
 	
 	//--- reset  position ------------------
 	int act_pos =_micron2inc(pcfg->pos_actual);
-	if ((int)Fpga->stat.encIn[0].position - act_pos > 1000 || (int)Fpga->stat.encIn[0].position - act_pos < -1000)	
+//	if ((int)Fpga->stat.encIn[0].position - act_pos > 1000 || (int)Fpga->stat.encIn[0].position - act_pos < -1000)	
 	{
 		for (pgNo=0; pgNo<SIZEOF(Fpga->cfg.pg); pgNo++)
 		{
@@ -690,7 +747,15 @@ static void  _pg_ctrl(void)
 	{
 		int pg = Fpga->stat.encOut[0].PG_cnt;
 		if (_PrintGo_Locked) pg=0;
-		if (pg!=RX_EncoderStatus.PG_cnt)
+		int  error = 	RX_EncoderStatus.fifoEmpty_PG  != Fpga->stat.pg_fifo_empty_err
+					||	RX_EncoderStatus.fifoEmpty_IGN != Fpga->stat.ignored_fifo_empty_err
+					||	RX_EncoderStatus.fifoEmpty_WND != Fpga->stat.window_fifo_empty_err;	
+
+		RX_EncoderStatus.fifoEmpty_PG  = Fpga->stat.pg_fifo_empty_err;
+		RX_EncoderStatus.fifoEmpty_IGN = Fpga->stat.ignored_fifo_empty_err;
+		RX_EncoderStatus.fifoEmpty_WND = Fpga->stat.window_fifo_empty_err;	
+
+		if (pg!=RX_EncoderStatus.PG_cnt || error)
 		{
 //			TrPrintfL(TRUE, "PrintGo %d", pg);
 			RX_EncoderStatus.PG_cnt = pg;
@@ -716,7 +781,7 @@ static const char *_level(int level)
 }
 
 //--- _fpga_display_status -----------------------------------------------
-static void _fpga_display_status(void)
+static void _fpga_display_status(int showCorrection)
 {
 	int cnt=8;
 	int i, n;
@@ -738,7 +803,7 @@ if(_ALL){term_printf("  index_on_b:    "); for (i=0; i<cnt; i++) term_printf("%0
 		{term_printf("  corr_par:      "); for (i=0; i<cnt; i++) term_printf("%09d  ", FpgaCorr->par[i].par);					term_printf("\n");}
 		{term_printf("  index_en:      "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->cfg.encIn[i].index_en);			term_printf("\n");}
 if(_ALL){term_printf("  reset_pos:     "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->cfg.encIn[i].reset_pos);			term_printf("\n");}
-
+				
 		{term_printf("\n");}
 		{term_printf("output config    "); for (i=0; i<cnt; i++) term_printf("____%d____  ", i);								term_printf("\n");}
 		{term_printf("  encoder_no:    "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->cfg.encOut[i].encoder_no);			term_printf("\n");}
@@ -775,9 +840,13 @@ if(_ALL){term_printf("  printgo_n:     "); for (i=0; i<cnt; i++)term_printf("%09
 										term_printf("\n");
 		term_printf("  i_to_a:        "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encIn[i].i_to_a);			term_printf("\n");
 		term_printf("  i_to_b:        "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encIn[i].i_to_b);			term_printf("\n");
-		term_printf("  rol_coeff:     "); for (i=0; i<4; i++)   term_printf("%09d  ", Fpga->stat.rol_coeff_at_use[i]);		term_printf("\n");
+		term_printf("  setp_time_min: "); for (i=0; i<4; i++)   term_printf("%09d  ", Fpga->stat.encIn[i].setp_time_min);	term_printf("\n");
 		
 		term_printf("  lin corr diff: "); for (i = 0; i < cnt; i++) term_printf("%09d  ", Fpga->stat.encIn[i].enc_diff); term_printf("\n");
+
+		term_printf("  rol_coeff:     "); for (i=0; i<4; i++)   term_printf("%09d  ", Fpga->stat.rol_coeff_at_use[i]);		term_printf("\n");
+		term_printf("  identified b1: "); for (i = 0; i < cnt; i++) term_printf("%09d  ", Fpga->stat.encIn[i].ident_obs_b1); term_printf("\n");
+		term_printf("  identified a1: "); for (i = 0; i < cnt; i++) term_printf("%09d  ", Fpga->stat.encIn[i].ident_obs_a1); term_printf("\n");
 		/*
 		term_printf("\n");
 		term_printf("driver status    "); for (i = 0; i < 4; i++) term_printf("____%d____  ", i); term_printf("\n");
@@ -788,21 +857,72 @@ if(_ALL){term_printf("  printgo_n:     "); for (i=0; i<cnt; i++)term_printf("%09
 		*/
 		
 		term_printf("\n");
-		term_printf("output status    "); for (i=0; i<cnt; i++) term_printf("____%d____  ", i);								term_printf("\n");
-		term_printf("  position:      "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encOut[i].position);		term_printf("\n");
-//		term_printf("  Speed:         "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encOut[i].speed);			term_printf("\n");
-//		term_printf("  Speed:         "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encOut[i].speed/50);		term_printf("\n");
-//		term_printf("  Speed Min:     "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encOut[i].speed_min);		term_printf("\n");
-//		term_printf("  Speed Min:     "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encOut[i].speed_min/50);	term_printf("\n");
-//		term_printf("  Speed Max:     "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encOut[i].speed_max);		term_printf("\n");
-//		term_printf("  Speed Max:     "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encOut[i].speed_max/50);	term_printf("\n");
-		term_printf("  PG Cnt:        "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encOut[i].PG_cnt);			term_printf("\n");
-		term_printf("  PG wnd error:  "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.dig_pg_window_err[i]);		term_printf("\n");
-//		term_printf("  mem_pointer:   "); for (i=0; i<3; i++)   term_printf("%09d  ", Fpga->stat.mem_pointer[i]);			term_printf("\n");
+		term_printf("output status    "); for (i=0; i<cnt; i++) term_printf("____%d____  ", i);									term_printf("\n");
+		term_printf("  position:      "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encOut[i].position);			term_printf("\n");
+//		term_printf("  Speed:         "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encOut[i].speed*23/100);		term_printf("\n");
+		term_printf("  Speed Min:     "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encOut[i].speed_min*23/100);	term_printf("\n");
+		term_printf("  Speed Max:     "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encOut[i].speed_max*23/100);	term_printf("\n");
+		term_printf("  PG Cnt:        "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encOut[i].PG_cnt);				term_printf("\n");
+		term_printf("  PG wnd error:  "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.dig_pg_window_err[i]);			term_printf("\n");
+//		term_printf("  mem_pointer:   "); for (i=0; i<3; i++)   term_printf("%09d  ", Fpga->stat.mem_pointer[i]);				term_printf("\n");
+
+		term_printf("  FIFO Erors:    "); term_printf("PG:%06d  ",  Fpga->stat.pg_fifo_empty_err); 
+										  term_printf("IGN:%05d  ", Fpga->stat.ignored_fifo_empty_err); 
+										  term_printf("WND:%05d",   Fpga->stat.window_fifo_empty_err); 
+										  term_printf("\n");	
+		term_printf("  TCP/IP:        "); term_printf("CON:%05d  ", ctrl_connected()); 
+										  term_printf("REQ:%05d  ", ctrl_requests()); 
+										  term_printf("REP:%05d",   ctrl_replies()); 
+										  term_printf("\n");
 		
-		if (FALSE && RX_EncoderCfg.scanning)
+		if (showCorrection)
 		{
 			term_printf("\n");
+			term_printf("--- CORR_ROTATIVE configuration -------------------------------------\n");
+			term_printf("  Rol identification en:     %09d  ", Fpga->cfg.general.ident_rol_en);				term_printf("\n");
+			term_printf("  Rol single sin en:         %09d  ", Fpga->cfg.general.single_sin_en);			term_printf("\n");
+			term_printf("  Rol use internal ident en: %09d  ", Fpga->cfg.general.use_internal_ident_en);	term_printf("\n");
+			term_printf("  Rol use new coeff en:      %09d  ", Fpga->cfg.general.runnung_avg_coeff);		term_printf("\n");	
+			term_printf("  Rol swap rols en:          %09d  ", Fpga->cfg.general.rol_2_first);				term_printf("\n");
+			term_printf("  Rol drift corr coeff:      %09d  ", Fpga->cfg.general.rol_drift_mu_two);			term_printf("\n");
+			term_printf("  Rol  coeff b1:             %09d  ", Fpga->cfg.general.rol_0_new_b1);				term_printf("\n");
+			term_printf("  Rol  coeff a1:             %09d  ", Fpga->cfg.general.rol_0_new_a1);				term_printf("\n");
+			term_printf("  Rol2 coeff b1:             %09d  ", Fpga->cfg.general.rol_1_new_b1);				term_printf("\n");
+			term_printf("  Rol2 coeff a1:             %09d  ", Fpga->cfg.general.rol_1_new_a1);				term_printf("\n");
+		}	
+
+		if (showCorrection)
+		{
+			term_printf("\n");
+			term_printf("--- CORR_ROTATIVE status -------------------------------------\n");
+			term_printf("  Rol Corr Coeff b1:      %09d  ", Fpga->stat.rol_coeff_at_use[0]);				term_printf("\n");
+			term_printf("  Rol Corr Coeff a1:      %09d  ", Fpga->stat.rol_coeff_at_use[1]);				term_printf("\n");
+			term_printf("  Rol Corr Coeff 2 b1:    %09d  ", Fpga->stat.rol_coeff_at_use[2]);				term_printf("\n");
+			term_printf("  Rol Corr Coeff 2 a1:    %09d  ", Fpga->stat.rol_coeff_at_use[3]);				term_printf("\n");
+			term_printf("  Drift w coeff:          %09d  ", Fpga->stat.drift_w_coeff);						term_printf("\n");
+			term_printf("  Rol Corr pos 0:         %09d  ", Fpga->stat.rol_corr_pos_0);						term_printf("\n");	
+			term_printf("  Rol Corr pos 1:         %09d  ", Fpga->stat.rol_corr_pos_1);						term_printf("\n");
+			term_printf("  Rol Corr flags 0:       0x%02x  ", Fpga->stat.rol_flags_0);						term_printf("\n");
+			term_printf("  Rol Corr flags 1:       0x%02x  ", Fpga->stat.rol_flags_1);						term_printf("\n");
+			term_printf("  Rol Corr rev sum long 0:%09d  ", Fpga->stat.rev_sums_long_0);					term_printf("\n");
+			term_printf("  Rol Corr rev sum long 1:%09d  ", Fpga->stat.rev_sums_long_1);					term_printf("\n");
+			term_printf("  Rol Corr ramp 0:        %09d  ", Fpga->stat.ramp_value_0);						term_printf("\n");
+			term_printf("  Rol Corr ramp 1:        %09d  ", Fpga->stat.ramp_value_1);						term_printf("\n");
+			term_printf("  Rol Corr fill lvl 0:    %09d  ", (INT16)Fpga->stat.corr_out_fill_level_0);		term_printf("\n");			
+			term_printf("  Rol Corr fill lvl 1:    %09d  ", (INT16)Fpga->stat.corr_out_fill_level_1);		term_printf("\n");
+			term_printf("  Rol Corr delays busy 0: %09d  ", Fpga->stat.corr_out_delays_busy_0);				term_printf("\n");			
+			term_printf("  Rol Corr delays busy 1: %09d  ", Fpga->stat.corr_out_delays_busy_1);				term_printf("\n");
+			term_printf("  Rol Corr delays err 0:  %09d  ", Fpga->stat.corr_out_delays_err_0);				term_printf("\n");			
+			term_printf("  Rol Corr delays err 1:  %09d  ", Fpga->stat.corr_out_delays_err_1);				term_printf("\n");
+			term_printf("  Curr ratio 0:           %09f  ", (double)Fpga->stat.curr_ratio_0 / 0x80000000);	term_printf("\n");			
+			term_printf("  Curr ratio 1:           %09f  ", (double)Fpga->stat.curr_ratio_1 / 0x80000000);	term_printf("\n");	
+			term_printf("  Clk cnt 0:              %09d  ", Fpga->stat.enc_clk_cycles_0);					term_printf("\n");			
+			term_printf("  Clk cnt 1:              %09d  ", Fpga->stat.enc_clk_cycles_1);					term_printf("\n");			
+		}
+				
+		term_printf("\n");
+		if (FALSE && RX_EncoderCfg.scanning)
+		{
 			term_printf("  scans:  %06d  pg: %06d(%06d) left:   %06d    right:   %06d \n", _scanpos_cnt, Fpga->stat.encOut[0].PG_cnt, _scanpos_pg, _scanpos_left, _scanpos_right);				
 		}
 		/*
@@ -847,10 +967,7 @@ if(_ALL){term_printf("  printgo_n:     "); for (i=0; i<cnt; i++)term_printf("%09
 		term_printf("almost full:     %03d   %03d   %03d\n",	FpgaQSys->printGo_status.almost_full     , FpgaQSys->window_status.almost_full		, FpgaQSys->ignored_status.almost_full		);
 		term_printf("almost empty:    %03d   %03d   %03d\n",	FpgaQSys->printGo_status.almost_empty	 , FpgaQSys->window_status.almost_empty		, FpgaQSys->ignored_status.almost_empty		);	
 		*/
-		
-		term_printf("\n");
-		term_printf("  TCP/IP:       connections:%03d	requests:%03d    replies:%03d\n", ctrl_connected(), ctrl_requests(), ctrl_replies());				
-		
+				
 //		test_do();
 //		if (Fpga->stat.encOut[0].PG_cnt)
 //			term_flush();
@@ -898,11 +1015,31 @@ static void _fpga_display_error(void)
 
 //--- _check_errors ---------------------------------------------------------------------
 static void  _check_errors(void)
-{
-	if (Fpga->stat.dig_pg_window_err[0]>_PG_WindowError)
+{	
+	if (_Scanning)	return;
+	
+	//--- check for index -------------------------------------------------------------
+	#define CHECK_POS	1000000
+	#define INC_PER_REV	238000
+	static int _pos[8];
+	int			i;
+//	for (int i=0; i<SIZEOF(Fpga->cfg.encIn); i++)
+	for (i=0; i<2; i++)
 	{
-		_PG_WindowError = Fpga->stat.dig_pg_window_err[0];
-		Error(ERR_CONT, 0, "PG Window Error cnt=%d", _PG_WindowError);
+		if(Fpga->cfg.encIn[i].enable && Fpga->cfg.encIn[i].index_en && !_IndexCheckDone)
+		{
+			if (_pos[i]<CHECK_POS)
+			{
+				_pos[i] = Fpga->stat.encIn[i].position;
+				if (_pos[i] >= CHECK_POS)
+				{
+					_IndexCheckDone = TRUE;
+					if (Fpga->stat.encIn[i].rev_sum==0)						Error(ERR_CONT, 0, "Encoder %d: No Index", i);
+					if (Fpga->cfg.encIn[0].inc_per_revolution!=INC_PER_REV) Error(ERR_CONT, 0, "Encoder %d: Counting %d increments per revolution (expected %d)", i, Fpga->cfg.encIn[0].inc_per_revolution, INC_PER_REV);
+				}
+			}
+		}
+		else _pos[i]=0;
 	}
 }
 

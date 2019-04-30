@@ -54,7 +54,10 @@ namespace RX_DigiPrint.Views.PrintSystemView
             }
             if (e.PropertyName.Equals("PrinterType"))
             {
-                OffsetsGrid.Visibility  = StepperGrid.Visibility = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_test_slide_only)? Visibility.Collapsed : Visibility.Visible;
+           //     OffsetsGrid.Visibility      = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_test_slide_only)? Visibility.Collapsed : Visibility.Visible;
+                CleafStepperGrid.Visibility = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf)? Visibility.Visible : Visibility.Collapsed;
+                StepperGrid.Visibility      = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_test_slide_only)? 
+                                                Visibility.Collapsed : Visibility.Visible;
                 Button_Purge.Visibility = Button_Wipe.Visibility = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX801 || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX802) ? Visibility.Visible : Visibility.Collapsed;
             }            
         }
@@ -70,8 +73,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
         //--- Save_Clicked ------------------------------------------
         private void Save_Clicked(object sender, RoutedEventArgs e)
         {
-            _PrintSystem.SendMsg(TcpIp.CMD_SET_PRINTER_CFG);
             RxGlobals.Stepper.SendStepperCfg();
+            _PrintSystem.SendMsg(TcpIp.CMD_SET_PRINTER_CFG);
         }
 
         //--- Reload_Clicked ------------------------------------------

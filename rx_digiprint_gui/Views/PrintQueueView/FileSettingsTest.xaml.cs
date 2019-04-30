@@ -23,7 +23,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
 
             InitializeComponent();
 
-            if (init) _Item = new PrintQueueItem(){TestImage=ETestImage.jets, Copies=1, LengthUnit=EPQLengthUnit.copies};
+            if (init) _Item = new PrintQueueItem(){TestImage=ETestImage.jets, Copies=1, LengthUnit=EPQLengthUnit.copies, Dots="S", DropSizes=1};
             this.DataContext = _Item;
             CB_TestImage.ItemsSource = new EN_TestImageList();
             CB_ScanMode.ItemsSource = new EN_ScanModeList();
@@ -51,7 +51,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
             }
             else if (!RxGlobals.PrintSystem.IsScanning)
             {
-                CB_Speed.ItemsSource     = RxGlobals.PrintSystem.SpeedList(3);
+                CB_Speed.ItemsSource     = RxGlobals.PrintSystem.SpeedList(1);
                 if (init)
                 {
                     MarginRow.Height     = new GridLength(0);
@@ -61,7 +61,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
             }
             else
             {
-                CB_Speed.ItemsSource     = RxGlobals.PrintSystem.SpeedList(3);
+                CB_Speed.ItemsSource     = RxGlobals.PrintSystem.SpeedList(1);
                 if (init)
                 {
                     _Item.Speed          = EN_SpeedList.DefaultValue;

@@ -27,5 +27,7 @@ int pc_print_next(void);
 
 int pc_sent(SPageId *id);
 int pc_printed(SPageId *id, int headNo);
+void pq_next_page(SPrintQueueItem *pitem, SPageId *pid);
+
 
 int pc_get_startscans(void);

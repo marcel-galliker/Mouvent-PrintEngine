@@ -42,6 +42,8 @@ int    rx_process_get_id		(const char *process, const char *arg);
 int    rx_process_kill 			(const char *process, const char *arg);
 int    rx_process_running_cnt	(const char *process, const char *arg);
 
+int	   rx_core_cnt				(void);
+
 void   rx_run_in_backgrund();
 int    rx_startup(const char* name, int debug);
 void   rx_set_process_priority(int priority);	// linux: -20=highest, 19=lowest prio

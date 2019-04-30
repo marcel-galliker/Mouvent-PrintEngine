@@ -1,0 +1,80 @@
+﻿<UserControl x:Class="RX_DigiPrint.Views.LB702WBView.LB702WB_ParMain"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:igWPF="http://schemas.infragistics.com/xaml/wpf"
+             xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+             xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
+             xmlns:local="clr-namespace:RX_DigiPrint.Views.MiniLabelView"
+             mc:Ignorable="d"
+             d:DesignHeight="700" 
+             d:DesignWidth="350"
+             >
+    <UserControl.Resources>
+        <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">32</sys:Double>
+    </UserControl.Resources>
+
+    <GroupBox Grid.Column="0" Header="Parameter" Style="{StaticResource RxGroupBox}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
+
+            <rx_uc:PlcParPanel Grid.Row="0" x:Name="ParPanelMaterial" UnitID="Application.GUI_00_001_Main" ReadOnly="False" PreviewKeyDown="ParPanel_PreviewKeyDown" LabelWidth="120" Margin="0,1,0,0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Material"/>
+                    <igWPF:XamComboEditor 
+			        x:Name="CB_Material"
+                    Grid.Column="1"
+			        HorizontalAlignment="Stretch"
+                    DisplayMemberPath="Name"
+			        DropDownResizeMode="None"
+                    IsEditable="False"
+                    DropDownClosed="CB_Material_DropDownClosed"
+                    ValueToDisplayTextConverter="{StaticResource MaterialName_Converter}"
+                    SelectedItemChanged="CB_Material_SelectedItemChanged"
+                    />
+                    <TextBox Grid.Column="1" x:Name="MaterialName" Text="NAME" Visibility="Collapsed"/>
+                </Grid>
+                <rx_uc:PlcParCtrl ID="XML_MATERIAL"  Label="" x:Name="XML_MATERIAL" Visibility="Collapsed"/>
+
+                    <!--                    <rx_uc:PlcParCtrl                      ID="PAR_MATERIAL_FLEXIBILITY"            Label="Material Flexibility" MinVal="1" MaxVal="10"/> -->
+                    <rx_uc:PlcParCtrl Grid.Row="0" ID="PAR_PRINTING_SPEED"                  Label="Print Speed"  Unit="m/min"   UnitWidth="50" Format="n"/>
+                    <rx_uc:PlcParCtrl Grid.Row="2" ID="PAR_WEB_WIDTH"                       Label="Web Width"    Unit="mm"      UnitWidth="50" Format="1"/>
+                    <rx_uc:PlcParCtrl Grid.Row="3" ID="PAR_DISTANCE_TO_STOP"                Label="Stop Dist"    Unit="m"       UnitWidth="50" Format="f"/>
+            </rx_uc:PlcParPanel>
+
+        <Grid Grid.Row="1"> <!-- Margin="0,5,0,-4"> -->
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <common:RxButton Grid.Column="0" Click="Save_Clicked" Height="40" IsChecked="{Binding ElementName=ParPanelMaterial, Path=Changed}">
+                    <Image Source="{StaticResource Yes_ico}"/>
+                </common:RxButton>
+
+                <common:RxButton Grid.Column="1" Click="Save_Default_Click" Height="40" IsChecked="{Binding ElementName=ParPanelMaterial, Path=Changed}">
+                    <Image Source="{StaticResource YesSave_ico}"/>
+                </common:RxButton>
+
+                <common:RxButton Grid.Column="2" Click="Reload_Clicked" Height="40">
+                    <Image Source="../../Resources/Bitmaps/Refresh.ico"/>
+                </common:RxButton>
+
+                <common:RxButton Grid.Column="3" Click="Delete_Clicked" Height="40">
+                    <Image Source="{StaticResource delete_ico}"/>
+                </common:RxButton>
+            </Grid>
+        </Grid>
+    </GroupBox>
+</UserControl>

@@ -6,7 +6,6 @@ using RX_DigiPrint.Models.Enums;
 using RX_DigiPrint.Services;
 using RX_DigiPrint.Views.UserControls;
 using RX_LabelComposer.External;
-using rx_rip_gui.Views;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -53,16 +52,18 @@ namespace RX_DigiPrint.Views
 
             this.Title=System.IO.Path.GetFileNameWithoutExtension(System.Windows.Forms.Application.ExecutablePath);
                         
-            PrinterName.DataContext       = RxGlobals.PrinterProperties;
+     //       PrinterName.DataContext       = RxGlobals.PrinterProperties;
 
             Status.DataContext            = RxGlobals.RxInterface;
             PrinterStatus.DataContext     = RxGlobals.RxInterface;
             TabMiniLabel.DataContext      = RxGlobals.PrintSystem;
             TabDP803.DataContext          = RxGlobals.PrintSystem;
+            TabLB702WB.DataContext        = RxGlobals.PrintSystem;
             MainNotConnected.DataContext  = RxGlobals.RxInterface;
             BlueTooth.DataContext         = RxGlobals.Bluetooth;
             BlueTooth.Visibility          = RxGlobals.Bluetooth.IsSupported ? Visibility.Visible : Visibility.Collapsed;
             User.DataContext              = RxGlobals.User;
+            CleafOrder.DataContext        = RxGlobals.CleafOrder;
             RxGlobals.License.Update();          
             _LicenseChanged();
             License.OnLicenseChanged     += _LicenseChanged;
@@ -80,6 +81,19 @@ namespace RX_DigiPrint.Views
 
             RxGlobals.RxInterface.PropertyChanged += OnRxInterfacePropertyChanged;
             RxGlobals.PrintSystem.PropertyChanged += PrintSystem_PropertyChanged;
+            RxGlobals.PrinterProperties.PropertyChanged += PrinterProperties_PropertyChanged;
+        }
+
+        void PrinterProperties_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName.Equals("Host_Name"))
+            {
+                RxBindable.Invoke(()=>
+                {
+                    PrinterName.Text= RxGlobals.PrinterProperties.Host_Name;
+                    PrinterName.InvalidateVisual();
+                });
+            }
         }
 
         //--- _LicenseChanged ---------------------------
@@ -159,8 +173,11 @@ namespace RX_DigiPrint.Views
                 switch (RxGlobals.PrintSystem.PrinterType)
                 {
                     case EPrinterType.printer_LB701:  
-                    case EPrinterType.printer_LB702:  
+                    case EPrinterType.printer_LB702_UV:  
                         _activeView (TabMiniLabel);
+                        break;
+                    case EPrinterType.printer_LB702_WB:  
+                        _activeView (TabLB702WB);
                         break;
 
                     case EPrinterType.printer_DP803:  
@@ -182,13 +199,8 @@ namespace RX_DigiPrint.Views
                         _activeView (TabCleaf);
                         break;
                 }
+                CleafOrder.Visibility = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf)? Visibility.Visible : Visibility.Collapsed;
             }
-
-            #if DEBUG
-                TabRip.Visibility = Visibility.Visible;
-            #else
-                TabRip.Visibility = Visibility.Collapsed;
-            #endif
 
             if (e.PropertyName.Equals("Changed"))
             {
@@ -218,15 +230,6 @@ namespace RX_DigiPrint.Views
 
         }
 
-        /*
-        //--- FrontPage_Clicked -----------------------------------------------------
-        private void FrontPage_Clicked(object sender, RoutedEventArgs e)
-        {
-            if (FrontPage.IsVisible) FrontPage.Visibility = Visibility.Hidden;
-            else FrontPage.Visibility=Visibility.Visible;
-        }
-        */
-
         //--- Settings_Clicked -----------------------------------------------------
         private void Settings_Clicked(object sender, RoutedEventArgs e)
         {
@@ -243,12 +246,6 @@ namespace RX_DigiPrint.Views
             BluetoothWindow wnd = new BluetoothWindow();
             wnd.ShowDialog();
             RxGlobals.License.Update();
-        }
-
-        //--- RipView_Loaded -------------------------------------
-        private void RipView_Loaded(object sender, RoutedEventArgs e)
-        {
-            (sender as RipView).ItemsSource = RxGlobals.PrintEnv.List;
         }
 
         //--- User_PreviewMouseDown -------------------------------

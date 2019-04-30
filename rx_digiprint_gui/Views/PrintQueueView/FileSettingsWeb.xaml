@@ -89,34 +89,69 @@
         </GroupBox>
         
         <!-- Pages ___________________________________________________________________ -->
-        <GroupBox x:Name="Page_Settings"
-            Grid.Row="0" Grid.Column="0" 
-            Header="Pages"
-            >
+        <GroupBox x:Name="Page_Settings" Header="Pages">
             <!-- Visibility="{Binding Variable, Converter={StaticResource BoolToVisible_Converter}}" -->
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="130" />
                     <ColumnDefinition Width="60" />
+                    <ColumnDefinition Width="10" />
+                    <ColumnDefinition Width="60" />
+                    <ColumnDefinition Width="100" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="auto"/>
                 </Grid.RowDefinitions>
                 
                 <TextBlock Grid.Column="0" Text="From"/>
                 <common:RxNumBox   Grid.Column="1" Text="{Binding FirstPage}" HorizontalContentAlignment="Right"/>
-                <StackPanel Grid.Column="2" Orientation="Horizontal">                    
-                    <TextBlock Text="To" Margin="10,0"/>
+                <TextBlock Grid.Column="3" Text="To"/>
+                <StackPanel Grid.Column="4" Orientation="Horizontal">
                     <common:RxNumBox Text="{Binding LastPage}" Width="60" HorizontalContentAlignment="Right"/>
                     <TextBlock Text=" ("/>
                     <TextBlock Text="{Binding SrcPages}"/>
                     <TextBlock Text=")"/>
                 </StackPanel>
-                <TextBlock Grid.Row="1" Grid.Column="0" Text="Start"/>
-                <common:RxNumBox Grid.Row="1"  Grid.Column="1" Text="{Binding StartPage}" HorizontalContentAlignment="Right"/>
+                
+                <TextBlock   Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Text="Copies"/>
+                <common:RxNumBox Grid.Row="1" Grid.Column="1" Text="{Binding Copies}" HorizontalContentAlignment="Right" />
 
+                <TextBlock Grid.Row="1" Grid.Column="3" Text="Collate"/>
+                <igWPF:XamComboEditor Grid.Row="1" Grid.Column="4" 
+                    HorizontalAlignment="Stretch"
+                    ItemsSource="{Binding CollateList}"
+                    Value="{Binding Collate}"
+                    DisplayMemberPath="Display"
+                    ValuePath="Value" 
+                    DropDownResizeMode="None"
+                    >
+                </igWPF:XamComboEditor>
+
+
+            </Grid>
+        </GroupBox>
+        
+        <!-- Start ___________________________________________________________________ -->
+        <GroupBox x:Name="Start_Settings" Header="Start">
+            <!-- Visibility="{Binding Variable, Converter={StaticResource BoolToVisible_Converter}}" -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="130" />
+                    <ColumnDefinition Width="60" />
+                    <ColumnDefinition Width="10" />
+                    <ColumnDefinition Width="60" />
+                    <ColumnDefinition Width="100" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="Copy"/>
+                <common:RxNumBox Grid.Column="1" Text="{Binding StartFrom}" HorizontalContentAlignment="Right"/>
+
+                <TextBlock       x:Name="StartPageTxt" Grid.Column="3" Text="Page" />
+                <common:RxNumBox x:Name="StartPageNum" Grid.Column="4" Text="{Binding StartPage}" HorizontalContentAlignment="Right"/>
             </Grid>
         </GroupBox>
 

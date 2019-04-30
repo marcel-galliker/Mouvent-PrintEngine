@@ -1,7 +1,5 @@
 ﻿using RX_Common;
 using RX_DigiPrint.Models;
-using rx_rip_gui.Models;
-using rx_rip_gui.Services;
 using RxRexrothGui.Models;
 using RxRexrothGui.Services;
 using System;
@@ -18,7 +16,6 @@ namespace RX_DigiPrint.Services
             RxGlobals.Events.Reset();
             RxGlobals.Network.Reset();
             RxGlobals.PrintQueue.Reset();
-            RxGlobals.PrintEnv.Reset();
             RxGlobals.InkTypes.Reset();
         }
 
@@ -60,7 +57,6 @@ namespace RX_DigiPrint.Services
 //                  case TcpIp.END_PLC_GET_LOG:     handle_plc_log_end(msg);     break; 
                                                        
                     case TcpIp.REP_FLUID_STAT:      handle_fluid_stat(msg);      break;
-                    case TcpIp.REP_SCALE_STAT:      handle_scale_stat(msg);      break;
 
                     case TcpIp.REP_CHILLER_STAT:    handle_chiller_stat(msg);    break;
 
@@ -84,6 +80,12 @@ namespace RX_DigiPrint.Services
                     case TcpIp.REP_REQ_LOG:         handle_event_req(msg);      break;
                     case TcpIp.EVT_GET_LOG:         handle_event(msg);          break;
 
+                    case TcpIp.REP_CO_GET_ORDER:       handle_co_order(msg);                break;
+                    case TcpIp.REP_CO_SET_OPERATOR:    handle_co_operator(msg);           break;
+                    case TcpIp.REP_CO_GET_PRODUCTION:  handle_co_production(msg);           break;
+                    case TcpIp.REP_CO_GET_ROLLS:       RxGlobals.CleafOrder.Rolls.Clear();  break;
+                    case TcpIp.REP_CO_SET_ROLL:        handle_co_roll(msg);                 break;
+                                
                     default:
                         RxGlobals.Events.AddItem(new LogItem("Received unknown MessageId=0x{0:X}", hdr.msgId)); 
                         break;
@@ -182,6 +184,7 @@ namespace RX_DigiPrint.Services
             int len=RxStructConvert.ToStruct(out msg, buf);
             if (len==msg.hdr.msgLen) 
             {
+                /*
                 switch(msg.hdr.msgId)
                 { 
                     case TcpIp.BEG_GET_PRINT_ENV: RxGlobals.PrintEnv.Reset();                break;
@@ -196,6 +199,7 @@ namespace RX_DigiPrint.Services
                         }
                         break;
                 }
+                 * */
             }
             else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length")); 
         }
@@ -220,24 +224,12 @@ namespace RX_DigiPrint.Services
         {
             TcpIp.SInkSupplyStatMsg msg;
             int len=RxStructConvert.ToStruct(out msg, buf);
+//          int size = Marshal.SizeOf(typeof(TcpIp.SInkSupplyStat));
             if (len==msg.hdr.msgLen) 
             {
                 RxGlobals.InkSupply.Update(msg);
             }
             else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length")); 
-        }
-
-        //--- handle_scale_stat -----------------------------------------
-        private void handle_scale_stat(Byte[] buf)
-        {
-            int i;
-            int offset=8;
-            
-            for (i=0; i<TcpIp.ScalesCnt; i++)
-            {
-                RxStructConvert.ToStruct(out RxGlobals.Scales[i], buf, offset);
-                offset += Marshal.SizeOf(RxGlobals.Scales[i]);
-            }
         }
 
         //--- handle_chiller_stat -----------------------------------------
@@ -394,6 +386,62 @@ namespace RX_DigiPrint.Services
             TcpIp.SMsgHdr hdr;
             int len=RxStructConvert.ToStruct(out hdr, buf);
             list.DeleteByName(System.Text.Encoding.UTF8.GetString(buf).Substring(8, hdr.msgLen-8));
+        }
+
+        //--- handle_co_order -------------------------------------
+        private void handle_co_order(Byte[] buf)
+        {
+            TcpIp.SCleafOrder order;
+            TcpIp.SMsgHdr hdr;
+            int hdrlen = RxStructConvert.ToStruct(out hdr, buf);
+            int len=RxStructConvert.ToStruct(out order, buf, hdrlen);
+            if (hdrlen+len == hdr.msgLen)
+            {
+                RxBindable.Invoke(()=>RxGlobals.CleafOrder.Update_Order(order));
+            }
+            else  RxGlobals.Events.AddItem(new LogItem("Received invalid message Length"));
+        }
+
+        //--- handle_co_production -------------------------------------
+        private void handle_co_production(Byte[] buf)
+        {
+            TcpIp.SCleafProduction prod;
+            TcpIp.SMsgHdr hdr;
+            int hdrlen = RxStructConvert.ToStruct(out hdr, buf);
+            int len=RxStructConvert.ToStruct(out prod, buf, hdrlen);
+            if (hdrlen+len == hdr.msgLen)
+            {
+                RxBindable.Invoke(()=>RxGlobals.CleafOrder.Update_Prodction(prod));
+            }
+            else  RxGlobals.Events.AddItem(new LogItem("Received invalid message Length"));
+        }
+
+        //--- handle_co_roll -------------------------------------
+        private void handle_co_roll(Byte[] buf)
+        {
+            TcpIp.SCleafRoll roll;
+            TcpIp.SMsgHdr hdr;
+            int hdrlen = RxStructConvert.ToStruct(out hdr, buf);
+            int len=RxStructConvert.ToStruct(out roll, buf, hdrlen);
+            if (hdrlen+len == hdr.msgLen)
+            {
+                RxBindable.Invoke(()=>RxGlobals.CleafOrder.Update_Roll(roll));
+            }
+            else  RxGlobals.Events.AddItem(new LogItem("Received invalid message Length"));
+        }
+
+        //--- handle_co_operator -------------------------------------
+        private void handle_co_operator(Byte[] buf)
+        {
+            TcpIp.SCleafRoll roll;
+            TcpIp.SMsgHdr hdr;
+            int hdrlen = RxStructConvert.ToStruct(out hdr, buf);
+            int len=RxStructConvert.ToStruct(out roll, buf, hdrlen);
+            if (hdrlen+len == hdr.msgLen)
+            {
+                RxBindable.Invoke(()=>RxGlobals.CleafOrder.User= roll.user);
+            }
+            else  RxGlobals.Events.AddItem(new LogItem("Received invalid message Length"));
         }
     }
 }

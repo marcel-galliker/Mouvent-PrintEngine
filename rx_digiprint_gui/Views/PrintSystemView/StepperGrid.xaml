@@ -6,10 +6,10 @@
              xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
              mc:Ignorable="d" 
-             d:DesignHeight="200" d:DesignWidth="250">
+             d:DesignHeight="200" d:DesignWidth="300">
 
     <GroupBox Header="Stepper" Style="{StaticResource RxGroupBox}">
-        <Grid>
+        <Grid x:Name="MainGrid"> 
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>

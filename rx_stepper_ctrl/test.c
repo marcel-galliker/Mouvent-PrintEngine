@@ -88,6 +88,9 @@ static void _test_motor_test(int motorNo, int steps)
 	par.accel		= 1000;
 	par.current		= 300.0;
 	par.stop_mux	= 0;
+	par.dis_mux_in	= 0;
+	par.stop_in		= ESTOP_UNUSED;
+	par.stop_level	= 0;
 	par.estop_in    = ESTOP_UNUSED;
 	par.estop_level = 0;
 	par.checkEncoder= FALSE;

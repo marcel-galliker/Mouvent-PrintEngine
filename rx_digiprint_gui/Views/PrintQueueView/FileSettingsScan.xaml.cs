@@ -33,6 +33,16 @@ namespace RX_DigiPrint.Views.PrintQueueView
         {
             PrintQueueItem item = DataContext as PrintQueueItem;
             if (item!=null) CB_Speed.ItemsSource = RxGlobals.PrintSystem.SpeedList(item.LargestDot);
+            if (item!=null && item.SrcPages>1)
+            {
+                Length_Settings.Visibility = Visibility.Collapsed;
+                Page_Settings.Visibility   = Visibility.Visible;
+            }
+            else
+            {
+                Length_Settings.Visibility = Visibility.Visible;
+                Page_Settings.Visibility   = Visibility.Collapsed;
+            }
         }
 
         //--- Property ShowSaveButton -----------------------------------------------

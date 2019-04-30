@@ -1,4 +1,5 @@
-﻿using RX_DigiPrint.Models;
+﻿using RX_Common;
+using RX_DigiPrint.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -51,11 +52,11 @@ namespace RX_DigiPrint.Views.MiniLabelView
             try
             {
                 // visible when state="PREPARE"(4)
-                i=System.Convert.ToInt32(str);
+                i=Rx.StrToInt32(str);
                 this.Visibility = (i==4) ?  Visibility.Visible:Visibility.Collapsed;                        
 
                 str = RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_PREPARE_ACTIVE");
-                i=System.Convert.ToInt32(str);
+                i=Rx.StrToInt32(str);
                 for (n=0; n<_Image.Count; n++)
                 {
                     _Image[n].Visibility = ((i & (1<<n))==0)? Visibility.Collapsed : Visibility.Visible;

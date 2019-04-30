@@ -1,5 +1,5 @@
 <WaveForm>
-  <Ink Name="Magenta 109" ColorCode="2" Description="TX130 Magenta-109" ColorRGB="#FFE40FEC" Temp="30" TempMax="45" GreyLevel="8 12 13 15 " MaxFreq="51052" />
+  <Ink Name="Magenta 109" ColorCode="2" Description="TX130 Magenta-109" ColorRGB="#FFE40FEC" Temp="30" TempMax="45" GreyLevel="8 12 13 15 " MaxFreq="51052" Meniscus="0" CondPresOut="150" DropletVolume="0" FlushTime="120 300 1200" />
   <item Position="0" Voltage="0" />
   <item Position="26" Voltage="0" />
   <item Position="67" Voltage="22" />
@@ -20,5 +20,5 @@
   <item Position="1434" Voltage="7" />
   <item Position="1449" Voltage="0" />
   <item Position="1562" Voltage="0" />
-  <check>63EC43D6D1BAAF73096E9AF392AEB940731D5F1E</check>
+  <check>B8A2F917F2374C355614A19ACA28CA0B290C44EC</check>
 </WaveForm>

@@ -2,18 +2,13 @@ stages:
   - build
   - deploy
 
-before_script:
-  #  - echo "Building git branch "${CI_COMMIT_REF_NAME}" at commit "${CI_COMMIT_SHA}""
-  #  - Remove-Item -Recurse -Force D:\radex -ErrorAction Ignore
-
 building:
   stage: build
   variables:
    GET_SOURCES_ATTEMPTS: "3"
    GIT_STRATEGY: clone
-   SHORT_SHA: ${CI_COMMIT_SHA:0:8}
   script:
-   - echo "Building git branch "${CI_COMMIT_REF_NAME}" at commit "${CI_COMMIT_SHA}" "${SHORT_SHA}""
+   - echo "Building git branch "${CI_COMMIT_REF_NAME}" at commit "${CI_COMMIT_SHA}" short ${CI_COMMIT_SHA}.Substring(0,8)"
    - automated_build/msbuild_vsprojects.bat -no-pause
   artifacts:
    when: always
@@ -43,5 +38,7 @@ deploying:
      {
        $COMMIT_TYPE='commits\' + ${DATESTR} + '_' + ${CI_COMMIT_REF_SLUG} + '_' + ${CI_COMMIT_SHA}
      }
-   - echo "deploying bin to ${TARGETPATH}\${COMMIT_TYPE}\bin"
-   - xcopy /E /Y /F bin ${TARGETPATH}\${COMMIT_TYPE}\bin\
+   - echo "deploying bin to ${TARGETPATH}\${COMMIT_TYPE}.zip"
+   - 7z.exe a ${TARGETPATH}\${COMMIT_TYPE}.zip bin
+  #  - xcopy /E /Y /F bin ${TARGETPATH}\${COMMIT_TYPE}\bin\
+  #  - Remove-Item ..\* -Recurse -Force

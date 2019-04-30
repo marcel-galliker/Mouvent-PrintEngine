@@ -124,11 +124,11 @@ int main(int argc, char* argv[])
 	//	-ipaddr <addr>
 
 	char ch;
-
+	
 	rx_process_name(argv[0]);
 	args_init(argc, argv);
-	Trace_init(argv[0]);
 	rx_startup(argv[0], arg_debug);
+	Trace_init(argv[0]);
 
 //	rx_set_process_priority(-10);
 

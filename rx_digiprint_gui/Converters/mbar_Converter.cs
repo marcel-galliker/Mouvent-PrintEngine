@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RX_Common;
+using System;
 using System.Windows.Data;
 
 namespace RX_DigiPrint.Converters
@@ -9,7 +10,7 @@ namespace RX_DigiPrint.Converters
         {
             try
             {
-                int val = System.Convert.ToInt32(value);
+                int val = Rx.StrToInt32(value as string);
                 if (val > 0) return string.Format("{0}.{1}", val / 10, val % 10);
                 else         return string.Format("{0}.{1}", val / 10, (-val) % 10);
             }

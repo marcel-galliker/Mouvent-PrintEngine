@@ -125,7 +125,9 @@ namespace RX_Common
             {
                 SetForegroundWindow(_puttyWnd);
                 Visibility  = Visibility.Visible;
-                Topmost     = true;
+                #if (!DEBUG) 
+                    Topmost     = true;
+                #endif
             }
         }
 
@@ -166,7 +168,9 @@ namespace RX_Common
                 Height          = Pad.ActualHeight;
                 Top             = _Screen.Height*_Screen.Scale-this.ActualHeight;
                 Left            = _Screen.Width*_Screen.Scale -this.ActualWidth;
-                Topmost         = true;
+                #if (!DEBUG) 
+                    Topmost     = true;
+                #endif
                 return; 
             }
             //--- place panel -----------------
@@ -181,7 +185,9 @@ namespace RX_Common
                 }
                 catch(Exception){obj =(FrameworkElement) LogicalTreeHelper.GetParent(obj);}
             }
-            this.Topmost=true;
+            #if (!DEBUG) 
+                this.Topmost=true;
+            #endif
             double left=0;
             double top=0;
             
@@ -253,6 +259,12 @@ namespace RX_Common
             else                                _handle_key(button.CommandParameter.ToString(), (char)0);
         }    
 
+        //--- close_Clicked ----------------------
+        private void close_Clicked(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
         //--- _send ---------------------
         private void _send(string str)
         {
@@ -298,7 +310,7 @@ namespace RX_Common
                 }
                 else
                 {
-                    if (_shift) Result += key;
+                    if (_shift) Result += key.ToUpper();
                     else        Result += key.ToLower();
                 }                
             }

@@ -14,7 +14,7 @@
 #include "rx_sok.h"
 
 #define WEB_OFFSET 132	// mm to add to alsolute web distance
-#define WEB_OFFSET_VERSO 6000
+#define WEB_OFFSET_VERSO 5000
 
 int	 plc_init(void);
 int  plc_end(void);
@@ -33,6 +33,7 @@ int		plc_to_wipe_pos(void);
 int		plc_in_cap_pos(void);
 int		plc_in_purge_pos(void);
 int		plc_in_wipe_pos(void);
+int		plc_is_splicing(void);
 double	plc_get_step_dist_mm(void);
 
 

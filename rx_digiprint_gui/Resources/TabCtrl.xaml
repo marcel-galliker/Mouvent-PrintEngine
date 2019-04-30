@@ -40,7 +40,7 @@
                     <Image x:Name="ChangedImg" Source="./Bitmaps/Changed.ico" Visibility="Collapsed" Width="20" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-1,-6,0"/>
                 </Grid>
             </Border>
-            <Border x:Name="Highlight" BorderBrush="{DynamicResource PrimitivesBrushKeysPrimitivesBrushKeys.TabItemHottrackHighlightLightFillKey}" BorderThickness="1,1,1,0" Margin="1,1,1,0"/>
+            <Border x:Name="Highlight" BorderBrush="{StaticResource {x:Static igWindows:PrimitivesBrushKeys.TabItemHottrackHighlightLightFillKey}}" BorderThickness="1,1,1,0" Margin="1,1,1,0"/>
         </Grid>
         <ControlTemplate.Triggers>
             <Trigger Property="IsMouseOver" Value="True"/>

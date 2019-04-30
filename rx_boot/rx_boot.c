@@ -84,6 +84,7 @@ void _info_from_mac(UINT64 macAddr, char *deviceTypeStr, int len, UINT32 *serial
 		device = macAddr & MAC_ID_MASK;
 		if		(device==MAC_HEAD_CTRL_ARM) strcpy(deviceTypeStr, "Head");
 		else if (device==MAC_ENCODER_CTRL)  strcpy(deviceTypeStr, "Encoder");
+		else if (device==MAC_ENC32_CTRL)	strcpy(deviceTypeStr, "Encoder32");
 		else if (device==MAC_FLUID_CTRL)	strcpy(deviceTypeStr, "Fluid");
 		else if (device==MAC_STEPPER_CTRL)	strcpy(deviceTypeStr, "Stepper");
 		else								sprintf(deviceTypeStr,"Device %d", device);	
@@ -112,7 +113,7 @@ int main(int argc, char** argv)
 	sok_get_ip_address_str(DEVICE_NAME, str, sizeof(str));
 	if (!strcmp(str, RX_CTRL_MAIN)) 
 	{
-		printf("PC is MAIN-CTRL\n");
+		TrPrintfL(1, "PC is MAIN-CTRL\n");
 		return 0;
 	}
 
@@ -122,34 +123,11 @@ int main(int argc, char** argv)
 	
 	if (!*deviceTypeStr) _read_info(PATH_ROOT "info", deviceTypeStr, sizeof(deviceTypeStr), &serialNo);
 
+	rx_startup(argv[0], FALSE);
+
 	TrPrintfL(1, "rx_boot >>%s %d<< starting",  deviceTypeStr, serialNo);
-
-	cnt1 = rx_process_running_cnt(argv[0], NULL);
-	TrPrintfL(1, "ProcessCnt >>%s<<=%d", argv[0], cnt1);
-
-	if (argc==2 && !strcmp(argv[1], "-debug"))
-	{
-		TrPrintfL(1, "debug version");
-		while(1)
-		{
-			cnt = rx_process_running_cnt(argv[0], NULL);
-			if (cnt<2) break;
-			TrPrintfL(1, "Kill >>%s<<", argv[0]);
-			rx_process_kill(argv[0], NULL);
-		}
-	}
-	else
-	{
-		TrPrintfL(1, "background version");
-		if (cnt1>1)
-		{
-			TrPrintfL(1, "rx_boot already running, cnt=%d", cnt1);
-			return 0;
-		}
-		rx_run_in_backgrund();
-		rx_sleep(5000);
-	}
-
+	
+//	rx_sleep(2000);
 	rx_set_process_priority(0);
 
 	err_init(0, 0);
@@ -164,7 +142,7 @@ int main(int argc, char** argv)
 
 	while (1)
 	{
-		rx_sleep(1000);
+		rx_sleep(60*1000);
 	}
 
 	return 0;

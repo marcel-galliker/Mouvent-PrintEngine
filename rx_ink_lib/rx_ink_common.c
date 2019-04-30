@@ -26,8 +26,8 @@ char *FluidCtrlModeStr(EnFluidCtrlMode mode)
 	switch (mode)
 	{		
 	case ctrl_undef:	    		return "---";		//  0x000:
-	case ctrl_shutdown:				return "SHUTDOWN";	//  0x001:
-	case ctrl_shutdown_done:		return "SD-done";	//  0x002:
+//	case ctrl_shutdown:				return "SHUTDOWN";	//  0x001:
+//	case ctrl_shutdown_done:		return "SD-done";	//  0x002:
 	case ctrl_off:					return "OFF";		//  0x003:
 	case ctrl_warmup:				return "WARM ";		//  0x004:
 	case ctrl_readyToPrint:			return "READY";		//  0x005:
@@ -38,10 +38,12 @@ char *FluidCtrlModeStr(EnFluidCtrlMode mode)
 	case ctrl_09:					return "ctrl_09";	//  0x009:
 	case ctrl_0a:					return "ctrl_0a";	//  0x00a:
 	case ctrl_0b:					return "ctrl_0b";	//  0x009:
-	case ctrl_flush:				return "FLUSH";		//  0x01b:
-	case ctrl_flush_step1:			return "FLUSH_s1";  //  0x011:
-	case ctrl_flush_step2:			return "FLUSH_s2";  //  0x012:
-	case ctrl_flush_done:			return "FLUSH_done";//  0x013:
+	case ctrl_flush_night:			return "FLUSH_N";	//  0x010:
+	case ctrl_flush_weekend:		return "FLUSH_WE";	//  0x011:
+	case ctrl_flush_week:			return "FLUSH_W";	//  0x012:
+	case ctrl_flush_step1:			return "FLUSH_s1";  //  0x013:
+	case ctrl_flush_step2:			return "FLUSH_s2";  //  0x014:
+	case ctrl_flush_done:			return "FLUSH_done";//  0x015:
 		
 	case ctrl_purge_soft:			return "PRG-S";		//  0x100:
 	case ctrl_purge:				return "PRG";		//  0x101:

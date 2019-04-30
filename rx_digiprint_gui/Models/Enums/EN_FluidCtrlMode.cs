@@ -15,15 +15,16 @@ namespace RX_DigiPrint.Models.Enums
             {
                 _List = new List<RxEnum<EFluidCtrlMode>>();
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_undef,         "undef"         ));
-                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_shutdown,      "ShutDown"      ));
-                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_shutdown_done, "SD-Done"       ));
+                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_error,         "ERROR"         ));
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_off,           "OFF"           ));
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_warmup,        "Warm Up"       ));
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_readyToPrint,  "Ready To Print"));
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_print,         "Print"         ));
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_bleed,         "Bleed"         ));
 
-                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_flush,         "Flush"         ));
+                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_flush_night,   "Flush N"       ));
+                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_flush_weekend, "Flush WE"      ));
+                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_flush_week,    "Flush W"       ));
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_flush_step1,   "Flush /1"      ));
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_flush_step2,   "Flush /2"      ));
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_flush_done,    "Flush Done"    ));

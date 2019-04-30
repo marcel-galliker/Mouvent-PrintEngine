@@ -85,6 +85,7 @@
             <Value>%PATH%;F:\Compiler\Linaro-Tools\bin</Value>
           </Record>
         </Records>
+        <EnvironmentSetupFiles />
       </Environment>
       <BackgroundMode xsi:nil="true" />
     </MakeCommandTemplate>

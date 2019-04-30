@@ -5,18 +5,29 @@ REM if started directly by double-click the script should pause at the end
 if not "%~1"=="" set NO_PAUSE=1
 
 REM vcvars batch file has to be executed first to be able to compile from CLI
-call "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat"
+set VCVARS_PATH="C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat"
+if exist %VCVARS_PATH% (
+	call %VCVARS_PATH%
+) else (
+	echo %VCVARS_PATH% could not be found!
+	echo Are you sure Visual Studio 2013 is installed?
+	goto EOF
+)
 
 REM cmd /c "bash -c 'sudo ssh-restart.sh'"
 REM call "C:\utils\start-ssh.bat"
 
-echo %DATE% %TIME%
-echo Start building projects in %CD%
 set BATCH_PATH=%~dp0
+echo %DATE% %TIME%
+echo Start building projects in %BATCH_PATH%
 
 set LOG_PATH=%BATCH_PATH%log\
 set LOG_PASS=%BATCH_PATH%log\passed\
 set LOG_FAIL=%BATCH_PATH%log\failed\
+REM set NIOS_HEAD_PATH=%BATCH_PATH%..\rx_head_nios
+REM set NIOS_FLUID_PATH=%BATCH_PATH%..\rx_fluid_nios
+set BIN_PATH=%BATCH_PATH%..\bin\
+set GUI_PATH=%BIN_PATH%gui\
 
 if not exist %LOG_PATH% (
 	md %LOG_PATH%
@@ -38,6 +49,16 @@ if not exist %LOG_FAIL% (
 	del /q %LOG_FAIL%\*
 )
 
+if not exist %BIN_PATH% (
+	REM powershell -Command "New-Item -ItemType Directory -Path %BIN_PATH% -Force | Out-Null"
+	md %BIN_PATH%
+	md %GUI_PATH%
+)
+
+if not exist %GUI_PATH% (
+	md %GUI_PATH%
+)
+
 echo.
 
 set FAILED_BUILDS=
@@ -46,26 +67,28 @@ set /A PASS_CNT=0
 set /a BIN_CNT=0
 set /A i=0
 set BINFILES[0]=
-
+set TARGETS=/t:Build
 REM build sequence
 call :LIB_X64
 call :BIN_X64
-REM call :LIB_X32
-REM call :BIN_X32
-REM call :LIB_SOC
-REM call :BIN_SOC
-REM call :LIB_LX
-REM call :BIN_LX
-REM call :NIOS
-REM call :KEIL
+call :LIB_X32
+call :BIN_X32
+call :LIB_SOC
+call :BIN_SOC
+call :LIB_LX
+call :BIN_LX
+call :NIOS
+call :KEIL
 goto :EVAL
 
 REM ----------------------------------------------------------------------------
 :NIOS
+    set TARGETS=/t:Build
 	set BUILD=32
-	set FLAGS=/m /property:Configuration=Release
+	set FLAGS=/m /property:Configuration=Release-soc
 	call :BUILD_PROJECT rx_fluid_nios, vcxproj
 	call :BUILD_PROJECT rx_head_nios, vcxproj
+    set TARGETS=/t:Clean,Build
 	goto :EOF
 REM ----------------------------------------------------------------------------
 
@@ -91,10 +114,8 @@ REM ----------------------------------------------------------------------------
 :BIN_X32
 	set BUILD=32
 	set FLAGS=/m /property:Configuration=Release
-	REM call :BUILD_PROJECT rx_digiprint_gui, sln
 	call :BUILD_PROJECT rx_main_ctrl, vcxproj
-	call :BUILD_PROJECT rx_rip_gui, csproj
-	call :BUILD_PROJECT rx_spooler_ctrl, sln
+	call :BUILD_PROJECT rx_spooler_ctrl, vcxproj
 	goto :EOF
 REM ----------------------------------------------------------------------------
 
@@ -198,7 +219,7 @@ REM Parameter [3]: optional subpath of projectfile ending with '\'
 	set PROJ_FILE=%~3%~1\%~1.%~2
 	set LOG_FILE=%LOG_PATH%%BUILD%_%~1.log
 	echo === compiling %~1 {%BUILD%} ===
-	msbuild.exe %FLAGS% %BATCH_PATH%..\%PROJ_FILE% /t:Clean,Build > %LOG_FILE%
+	msbuild.exe -nodeReuse:False -maxcpucount:1 %FLAGS% %BATCH_PATH%..\%PROJ_FILE% %TARGETS% > %LOG_FILE%
 	if errorlevel 1 (
 		REM uncomment following line to display failed log files directly
 		REM powershell -Command "&{ cat %LOGPATH% }"
@@ -215,10 +236,12 @@ REM Parameter [3]: optional subpath of projectfile ending with '\'
 	set /a BIN_CNT+=1
 
 	REM get warnings and errors from logfile
-	powershell -Command "Select-String -Path %LOG_FILE% -Pattern '(\d*) (Warning\(s\)|Warnung\(en\))$' | %% { $_.Matches.groups[1] } | %% { $_.Value }" > tmp_warn
-	powershell -Command "Select-String -Path %LOG_FILE% -Pattern '(\d*) (Error\(s\)|Fehler)$' | %% { $_.Matches.groups[1] } | %% { $_.Value }" > tmp_err
-	set /p WARN= < tmp_warn
-	set /p ERR= < tmp_err
+	set WARN_FILE=warn.tmp
+	set ERROR_FILE=error.tmp
+	powershell -Command "Select-String -Path %LOG_FILE% -Pattern '(\d*) (Warning\(s\)|Warnung\(en\))$' | %% { $_.Matches.groups[1] } | %% { $_.Value }" > %WARN_FILE%
+	powershell -Command "Select-String -Path %LOG_FILE% -Pattern '(\d*) (Error\(s\)|Fehler)$' | %% { $_.Matches.groups[1] } | %% { $_.Value }" > %ERROR_FILE%
+	set /p WARN= < %WARN_FILE%
+	set /p ERR= < %ERROR_FILE%
 	set WARN_STR=Warnings: %WARN%
 	set ERR_STR=Errors:   %ERR%
 
@@ -234,8 +257,8 @@ REM Parameter [3]: optional subpath of projectfile ending with '\'
 		echo %ERR_STR%
 	)
 
-	del tmp_warn
-	del tmp_err
+	del %WARN_FILE%
+	del %ERROR_FILE%
 
 	move %LOG_FILE% %LOGPATH_2% > nul
 	REM echo LOG: %LOGPATH_2%
@@ -260,6 +283,7 @@ REM Summarize all passed and failed builds
 
 	echo ****************************************************
 	echo %DATE% %TIME%
+	echo Finished building projects in %BATCH_PATH%
 
 	if "%FAILED_BUILDS%"=="" (
 		echo [92m

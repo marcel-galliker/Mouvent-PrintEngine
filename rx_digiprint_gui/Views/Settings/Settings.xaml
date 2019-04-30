@@ -6,6 +6,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:igWPF="http://schemas.infragistics.com/xaml/wpf"
       xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
+      xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
       xmlns:local="clr-namespace:RX_DigiPrint.Views.Settings"
       mc:Ignorable="d" 
       d:DesignHeight="700" 
@@ -24,15 +25,15 @@
                 <!-- Settings Title ___________________________________________________________________-->
                 <Grid Background="{DynamicResource Brush03}" >
                     <TextBlock Text="Settings" VerticalAlignment="Center" FontWeight="Bold" Margin="5,0,0,0"/>
-                    <StackPanel  Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button x:Name="Button_Save" Style="{DynamicResource ToolButtonStyle}" Click="Save_Clicked" >
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <common:RxButton x:Name="Button_Save" Click="Save_Clicked" >
                             <!-- IsEnabled="{Binding Changed}" -->
                             <Image Source="{StaticResource save_ico}"/>
-                        </Button>
-                        <Button x:Name="Button_Delete" Style="{DynamicResource ToolButtonStyle}" Click="Cancel_Clicked">
+                        </common:RxButton>
+                        <common:RxButton x:Name="Button_Delete" Click="Cancel_Clicked">
                             <!-- IsEnabled="{Binding Changed}" -->
                             <Image Source="{StaticResource reload_ico}"/>
-                        </Button>
+                        </common:RxButton>
                     </StackPanel>
                 </Grid>
                 <!-- Settings Content __________________________________________-->
@@ -156,14 +157,13 @@
                                 <MenuItem Height="auto" Margin="0, -1">
                                     <MenuItem.Header>
                                         <Grid>
-                                            <Button Style="{DynamicResource ToolButtonStyle}">
+                                            <common:RxButton>
                                                 <Image Source="../Resources/Bitmaps/Maintenance.ico"/>
-                                            </Button>
+                                            </common:RxButton>
                                             <Rectangle Fill="Transparent"/>
                                             // used to "disable" button
                                         </Grid>
                                     </MenuItem.Header>
-                                    <MenuItem Header="Create Log"           Command="{Binding CreateLogCmd}"/>
                                     <MenuItem Header="Check for Updates"/>
                                     <MenuItem Header="About"                Click="About_Clicked"/>
                                 </MenuItem>

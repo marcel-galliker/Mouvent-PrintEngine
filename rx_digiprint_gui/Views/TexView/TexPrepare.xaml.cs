@@ -1,4 +1,5 @@
-﻿using RX_DigiPrint.Models;
+﻿using RX_Common;
+using RX_DigiPrint.Models;
 using RX_DigiPrint.Services;
 using System;
 using System.Collections.Generic;
@@ -52,12 +53,12 @@ namespace RX_DigiPrint.Views.TexView
             try
             {
                 // visible when state="PREPARE"(4)
-            //    value=System.Convert.ToInt32(str);
+            //    value=Rx.StrToInt32(str);
             //    this.Visibility = (value==4) ?  Visibility.Visible:Visibility.Collapsed;   
                 this.Visibility = (RxGlobals.PrinterStatus.PrintState == EPrintState.ps_printing) ?  Visibility.Visible:Visibility.Collapsed;                     
 
                 str = RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_PREPARE_ACTIVE");                
-                value=System.Convert.ToInt32(str);
+                value=Rx.StrToInt32(str);
                 str=RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_HEAD_IS_UP");
                 if (str!=null && str.Equals("TRUE")) value |= 1<<7;
                 if (RxGlobals.PrinterStatus.DataReady) value |= 1<<8;

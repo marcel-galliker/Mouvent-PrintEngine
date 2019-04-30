@@ -23,6 +23,7 @@
         </Setter>
     </Style>
 
+    <!--
     <Style x:Key="ToolButtonStyle" TargetType="{x:Type Button}">
         <Setter Property="FocusVisualStyle"             Value="{StaticResource FocusVisual}"/>
         <Setter Property="Background"                   Value="{StaticResource RX.Static.Background}"/>
@@ -32,19 +33,17 @@
         <Setter Property="HorizontalContentAlignment"   Value="Center"/>
         <Setter Property="VerticalContentAlignment"     Value="Center"/>
         <Setter Property="Padding"                      Value="1"/>
-        <!--       
-        <Setter Property="Width"                        Value="50"/>
-        <Setter Property="Height"                       Value="32"/> 
-        -->
+//               
+//        <Setter Property="Width"                        Value="50"/>
+//        <Setter Property="Height"                       Value="32"/> 
+ //       
         <Setter Property="Width"                        Value="80"/>
         <Setter Property="Height"                       Value="64"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Button}">
                     <Grid>
-                        <!--
-                        <Ellipse x:Name="circle" Width="30" Height="30" Stroke="{StaticResource RX.Static.Border}" Fill="{TemplateBinding Background}"/>
-                        -->
+          //              <Ellipse x:Name="circle" Width="30" Height="30" Stroke="{StaticResource RX.Static.Border}" Fill="{TemplateBinding Background}"/>
                         <Ellipse x:Name="circle" Width="60" Height="60" Stroke="{StaticResource RX.Static.Border}" Fill="{TemplateBinding Background}"/>
                         <ContentPresenter 
                                 x:Name="contentPresenter" 
@@ -58,11 +57,9 @@
                     </Grid>
 
                     <ControlTemplate.Triggers>
-                        <!--
-    					<Trigger Property="IsDefaulted" Value="true">
-                            <Setter TargetName="circle" Property="Stroke"   Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
-                        </Trigger>
-                        -->
+    				//	<Trigger Property="IsDefaulted" Value="true">
+                    //       <Setter TargetName="circle" Property="Stroke"   Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                    //    </Trigger>
                         <Trigger Property="IsMouseOver" Value="true">
                             <Setter TargetName="circle" Property="Fill"     Value="{StaticResource RX.MouseOver.Background}"/>
                             <Setter TargetName="circle" Property="Stroke"   Value="{StaticResource RX.MouseOver.Border}"/>
@@ -72,22 +69,20 @@
                             <Setter TargetName="circle" Property="Stroke"   Value="{StaticResource RX.Pressed.Border}"/>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="false">
-                            <!--    <Setter TargetName="circle" Property="Fill"     Value="{StaticResource RX.Disabled.Background}"/> -->
+                         // <Setter TargetName="circle" Property="Fill"     Value="{StaticResource RX.Disabled.Background}"/>
                             <Setter TargetName="contentPresenter" Property="Opacity" Value="0.5"/>
                             <Setter TargetName="circle" Property="Stroke"   Value="{StaticResource RX.Disabled.Border}"/>
                             <Setter Property="TextElement.Foreground" TargetName="contentPresenter" Value="{StaticResource RX.Disabled.Foreground}"/>
                         </Trigger>
-                        <!--
-                        <Trigger Property="IsEnabled" Value="true">
-                            <Setter TargetName="contentPresenter" Property="Opacity" Value="1"/>
-                        </Trigger>
-                        -->
+                    //  <Trigger Property="IsEnabled" Value="true">
+                    //      <Setter TargetName="contentPresenter" Property="Opacity" Value="1"/>
+                    //  </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
-
+    -->
 
     <Style x:Key="{x:Type Button}" TargetType="{x:Type Button}">
         <Setter Property="FontSize" Value="{StaticResource FontSize}" />

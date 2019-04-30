@@ -59,7 +59,7 @@ namespace DigiPrint.Pages.PrintSystemView
         }
         private void Off_Clicked(object sender, EventArgs e){ _mode_clicked(EFluidCtrlMode.ctrl_off);}
         private void Print_Clicked(object sender, EventArgs e){ _mode_clicked(EFluidCtrlMode.ctrl_print);}
-        private void Flush_Clicked(object sender, EventArgs e){ _mode_clicked(EFluidCtrlMode.ctrl_flush);}
+  //      private void Flush_Clicked(object sender, EventArgs e){ _mode_clicked(EFluidCtrlMode.ctrl_flush);}
         private void PurgeS_Clicked(object sender, EventArgs e){ _mode_clicked(EFluidCtrlMode.ctrl_purge_soft);}
         private void Purge_Clicked(object sender, EventArgs e){ _mode_clicked(EFluidCtrlMode.ctrl_purge);}
         private void PurgeH_Clicked(object sender, EventArgs e){ _mode_clicked(EFluidCtrlMode.ctrl_purge_hard);}

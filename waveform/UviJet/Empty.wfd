@@ -1,5 +1,5 @@
 <WaveForm>
-  <Ink Name="Empty" ColorCode="0" Description="Empty" ColorRGB="#FFDBDBDB" Temp="0" TempMax="0" GreyLevel="8 9 13 15 " MaxFreq="56818" />
+  <Ink Name="Empty" ColorCode="0" Description="Empty" ColorRGB="#FFDBDBDB" Temp="0" TempMax="0" GreyLevel="8 9 13 15 " MaxFreq="56818" Meniscus="0" CondPresOut="0" DropletVolume="0" FlushTime="0 0 0" />
   <item Position="0" Voltage="0" />
   <item Position="36" Voltage="0" />
   <item Position="92" Voltage="30" />
@@ -17,5 +17,5 @@
   <item Position="1220" Voltage="10" />
   <item Position="1280" Voltage="10" />
   <item Position="1300" Voltage="0" />
-  <check>6E8F7E8C80D530AB07E6F068EB06E2150AE36879</check>
+  <check>1D28CEEE85FD48292E8A592B50E5AE3ADE6A4AF4</check>
 </WaveForm>

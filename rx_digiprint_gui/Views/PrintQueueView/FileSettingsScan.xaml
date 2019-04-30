@@ -33,7 +33,7 @@
         </Grid.ColumnDefinitions>
 
         <!-- Background="{DynamicResource Button.Disabled.Background}" -->
-        <!-- Page Definition _______________________________________________________________-->            
+        <!-- langth Definition _______________________________________________________________-->            
         <GroupBox x:Name="Length_Settings"
             Grid.Row="0" Grid.Column="0" 
             Header="Length"
@@ -51,11 +51,51 @@
                     <RowDefinition Height="auto" />
                 </Grid.RowDefinitions>
                 <TextBlock Grid.Row="0" Grid.Column="0" Text="Length" />
-                <common:RxNumBox   Grid.Row="0" Grid.Column="1" Text="{Binding ScanLength}" HorizontalAlignment="Right" Width="60"/>
+                <common:RxNumBox   Grid.Row="0" Grid.Column="1" Text="{Binding ScanLength}" HorizontalContentAlignment="Right" Width="60"/>
                 <StackPanel  Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" Orientation="Horizontal">
                     <common:RxRadioButton Content="m"       Background="Transparent" IsChecked="{Binding LengthUnitMM}" />
                     <common:RxRadioButton Content="copies"  Background="Transparent" IsChecked="{Binding LengthUnitCopies}" Last="True"/>
                 </StackPanel>
+            
+                <TextBlock         Grid.Row="1" Grid.Column="0" Text="Start at" />
+                <common:RxNumBox   Grid.Row="1" Grid.Column="1" Text="{Binding StartFrom}" HorizontalContentAlignment="Right" HorizontalAlignment="Right" Width="60"/>
+
+            </Grid>
+        </GroupBox>
+
+        <!-- Page Definition _______________________________________________________________-->
+        <GroupBox x:Name="Page_Settings"
+            Grid.Row="0" Grid.Column="0" 
+            Header="Pages"
+            Visibility="Collapsed"
+            >
+            <Grid HorizontalAlignment="Left">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="130" />
+                    <ColumnDefinition Width="60" />
+                    <ColumnDefinition Width="10" />
+                    <ColumnDefinition Width="60" />
+                    <ColumnDefinition Width="100" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Column="0" Text="From"/>
+                <common:RxNumBox   Grid.Column="1" Text="{Binding FirstPage}" HorizontalContentAlignment="Right"/>
+                <TextBlock Grid.Column="3" Text="To"/>
+                <StackPanel Grid.Column="4" Orientation="Horizontal">
+                    <common:RxNumBox Text="{Binding LastPage}" Width="60" HorizontalContentAlignment="Right"/>
+                    <TextBlock Text=" ("/>
+                    <TextBlock Text="{Binding SrcPages}"/>
+                    <TextBlock Text=")"/>
+                </StackPanel>
+
+                <TextBlock         Grid.Row="1" Grid.Column="0" Text="Start at" />
+                <common:RxNumBox   Grid.Row="1" Grid.Column="1" Text="{Binding StartFrom}" HorizontalContentAlignment="Right" Width="60"/>
             </Grid>
         </GroupBox>
 

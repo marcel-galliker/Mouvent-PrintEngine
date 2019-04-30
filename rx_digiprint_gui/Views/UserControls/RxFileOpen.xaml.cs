@@ -4,6 +4,7 @@ using RX_DigiPrint.Services;
 using System;
 using System.Collections.ObjectModel;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
 
@@ -218,6 +219,14 @@ namespace RX_DigiPrint.Views.UserControls
             _item_clicked(DirGrid.ActiveItem as DirItem);
         }
 
+        //--- Print_Clicked ------------------------------------
+        private void Print_Clicked(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            DirItem item = button.DataContext as DirItem;
+            _item_clicked(item);
+        }
+
         //--- SourceData_Checked -----------------------------------
         private void SourceData_Checked(object sender, RoutedEventArgs e)
         {
@@ -279,6 +288,23 @@ namespace RX_DigiPrint.Views.UserControls
                 }
             }
         }
+
+        //---- DirGrid_SelectedRowsCollectionChanged -----------------------------------
+        private void DirGrid_SelectedRowsCollectionChanged(object sender, SelectionCollectionChangedEventArgs<SelectedRowsCollection> e)
+        {
+            foreach(var row in e.PreviouslySelectedItems)
+            {
+                DirItem item=row.Data as DirItem;
+                Console.WriteLine("Selection Changed: new={0}", row.Index);
+                if (item!=null) item.PrintButtonVisibility = Visibility.Hidden;
+            }
+            foreach(var row in e.NewSelectedItems)
+            {
+                DirItem item=row.Data as DirItem;
+                if (item!=null && !item.IsDirectory) item.PrintButtonVisibility = Visibility.Visible;
+            }
+        }
+
 
         private void Window_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {

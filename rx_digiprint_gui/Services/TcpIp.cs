@@ -100,7 +100,8 @@ namespace RX_DigiPrint.Services
 
         //--- web printers ------------------------------
         printer_LB701    =1000,	    // 1000: 
-        printer_LB702,	            // 1001: 
+        printer_LB702_UV,	        // 1001: 
+        printer_LB702_WB,	        // 1002: 
 
         printer_DP803    =1100,     // 1100:
 	 
@@ -126,21 +127,25 @@ namespace RX_DigiPrint.Services
     public enum EFluidCtrlMode : int
     {
 	    ctrl_undef,				//  0x000:
-        ctrl_shutdown,          //  0x001:
-        ctrl_shutdown_done,     //  0x002:
-	    ctrl_off,				//	0x003:
+ //       ctrl_shutdown,          //  0x001:
+  //      ctrl_shutdown_done,     //  0x002:
+        ctrl_error          = 0x002,
+	    ctrl_off            = 0x003,	//	0x003:
 	    ctrl_warmup,			//  0x004:
 	    ctrl_readyToPrint,		//  0x005:
 	    ctrl_print,				//  0x006:
 	    ctrl_bleed,				//  0x007:
-        ctrl_08,             // 0x008:
-        ctrl_09,        	 // 0x009:
-        ctrl_0a,      		 //	0x00a:
-        ctrl_0b, 		     // 0x00b:
-        ctrl_flush,	         //	0x00c:
-	    ctrl_flush_step1,	 // 0x00d:
-	    ctrl_flush_step2,	 // 0x00e:
-        ctrl_flush_done,     //	0x00f:
+        ctrl_08,                //  0x008:
+        ctrl_09,        	    //  0x009:
+        ctrl_0a,      		    //	0x00a:
+        ctrl_0b, 		        //  0x00b:
+
+        ctrl_flush_night,	    //	0x010:
+        ctrl_flush_weekend,	    //	0x011:
+        ctrl_flush_week,	    //	0x012:
+	    ctrl_flush_step1,	    //  0x013:
+	    ctrl_flush_step2,	    //  0x014:
+        ctrl_flush_done,        //	0x015:
 
 	    ctrl_purge_soft =0x100,	//	0x100:
 	    ctrl_purge,				//	0x101:
@@ -197,8 +202,7 @@ namespace RX_DigiPrint.Services
         public static string RX_SOURCE_DATA_ROOT = "\\source-data";    
         public static string RX_RIPPED_DATA_ROOT = "\\ripped-data";    
 
-        public const UInt32 InkSupplyCnt = 16;
-        public const UInt32 ScalesCnt    = 16;
+        public const Int32 InkSupplyCnt = 16;
         public const UInt32 HEAD_CNT	 =	4;
 
         public const Int32 PORT_GUI = 7000;
@@ -307,13 +311,12 @@ namespace RX_DigiPrint.Services
         public const UInt32 CMD_SET_STEPPER_CFG		= 0x01000132;
         public const UInt32 REP_SET_STEPPER_CFG		= 0x02000132;
 
-        public const UInt32 CMD_SCALES_LOAD_CFG		= 0x01000141;
-        public const UInt32 REP_SCALES_LOAD_CFG		= 0x02000141;
-        public const UInt32 CMD_SCALES_SAVE_CFG		= 0x01000142;
-        public const UInt32 REP_SCALES_SAVE_CFG		= 0x02000142;
-        public const UInt32 CMD_SCALES_CALIBRATE	= 0x01000143;
-        // public const UInt32 CMD_SCALE_STAT		= 0x01000144;
-        public const UInt32 REP_SCALE_STAT			= 0x02000144;
+        public const UInt32 CMD_SCALES_SET_CFG		= 0x01000141;
+        public const UInt32 CMD_SCALES_GET_CFG		= 0x01000142;
+        public const UInt32 REP_SCALES_GET_CFG		= 0x02000142;
+        public const UInt32 CMD_SCALES_TARA		    = 0x01000143;
+        public const UInt32 CMD_SCALES_STAT		    = 0x01000144;
+        public const UInt32 REP_SCALES_STAT	        = 0x02000144;
 
         public const UInt32 REP_CHILLER_STAT		= 0x02000152;
 
@@ -403,6 +406,19 @@ namespace RX_DigiPrint.Services
         public const UInt32 CMD_CLN_ADJUST			= 0x01000710;
 
         public const UInt32 EVT_TRACE               = 0x03000100;
+
+        //--- cleaf orders -----------------------------------------
+        public const UInt32 CMD_CO_SET_ORDER		= 0x01003000;
+        public const UInt32 CMD_CO_GET_ORDER		= 0x01003001;
+        public const UInt32 REP_CO_GET_ORDER		= 0x02003001;
+        public const UInt32 CMD_CO_SET_OPERATOR		= 0x01003002;
+        public const UInt32 REP_CO_SET_OPERATOR		= 0x02003002;
+        public const UInt32 CMD_CO_GET_PRODUCTION	= 0x02003003;
+        public const UInt32 REP_CO_GET_PRODUCTION	= 0x02003003;
+        public const UInt32 CMD_CO_GET_ROLLS		= 0x01003004;
+        public const UInt32 REP_CO_GET_ROLLS		= 0x02003004;
+        public const UInt32 CMD_CO_SET_ROLL			= 0x01003005;
+        public const UInt32 REP_CO_SET_ROLL			= 0x02003005;
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct SVersion
@@ -511,10 +527,10 @@ namespace RX_DigiPrint.Services
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct SPageId
         {
-        	public UInt32 id;
-	        public UInt32 page;
-	        public UInt32 copy;
-	        public UInt32 scan;
+        	public Int32 id;
+	        public Int32 page;
+	        public Int32 copy;
+	        public Int32 scan;
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -537,52 +553,55 @@ namespace RX_DigiPrint.Services
         public struct sPrintQueueItem
         {
 	        public SPageId	id;
+	        public SPageId	start;
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
 	        public string	filepath;
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
 	        public string	preview;
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
-            public string   printEnv;
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
             public string   ripState;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 64)]
+            public string   printEnv;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 64)]
+            public string   material;
 
-	        public UInt32	srcPages;
-	        public UInt32	srcWidth;
-	        public UInt32	srcHeight;
+	        public Int32	srcPages;
+	        public Int32	srcWidth;
+	        public Int32	srcHeight;
 
-	        public UInt32	firstPage;
-	        public UInt32	lastPage;
-	        public UInt32	startPage;
-	        public UInt32   copies;
+	        public Int32	firstPage;
+	        public Int32	lastPage;
+	        public Int32    copies;
 	        public byte	    collate;
 	        public byte	    variable;
 	        public byte	    dropSizes;
 
 	        public EPQState	     state;
             public EPQLengthUnit lengthUnit;
-            public EScanMode     scanMode;
+            public EScanMode    scanMode;
 	        public byte	        orientation;
             public byte         testImage;
-	        public UInt32	    pageWidth;
-	        public UInt32	    pageHeight;
+	        public Int32	    pageWidth;
+	        public Int32	    pageHeight;
 	        public Int32	    pageMargin;
 	        public EPrintGoMode printGoMode;
-	        public UInt32       printGoDist;
-	        public UInt32	    scanLength;
+	        public Int32        printGoDist;
+	        public Int32	    scanLength;
 	        public Int32	    passes;
 	        public Int32	    curingPasses;
-	        public UInt32	    scans;
+	        public Int32	    scans;
             public Int32        speed;
 
-            public UInt32   copiesTotal;
-            public UInt32   copiesPrinted;
-            public UInt32   scansSent;
-            public UInt32   scansPrinted;
-            public UInt32   progress;
+            public Int32   copiesTotal;
+            public Int32   copiesPrinted;
+            public Int32   scansSent;
+            public Int32   scansPrinted;
+            public Int32   scansStart;
+            public Int32   progress;
 
             public sPageNumber pageNumber;
 
-            public UInt32   checks;
+            public Int32   checks;
 
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 4)]
             public string   dots;
@@ -612,14 +631,14 @@ namespace RX_DigiPrint.Services
             public byte	a;
             public UInt32 colorCode;
 
-            UInt32	temp;
-	        UInt32	tempMax;
-	        UInt32	viscosity;
-	        UInt32	density;
-	        UInt32	dropletVolume;
-	        UInt32	meniscus;
+            Int32	temp;
+	        Int32	tempMax;
+	        Int32	dropletVolume;
+	        Int32	condPresOut;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
+	        public Int32[]	flushTime;
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
-	        UInt32[]	maxFreq;
+	        Int32[]	maxFreq;
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
 	        byte[]	greyLevel;
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
@@ -657,7 +676,8 @@ namespace RX_DigiPrint.Services
 	        public Int32	angle;	// to adjust angle fault
 	        public Int32	step;	    // to adjust steph fault
 	        public Int32	incPerMeter;
-            public Int32    verso;
+	        public Int32	incPerMeterVerso;
+            public Int32    versoDist;
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -690,6 +710,7 @@ namespace RX_DigiPrint.Services
             public byte         error;
             public UInt32       dataReady;
             public UInt32       sentCnt;
+            public UInt32       transferredCnt;
             public UInt32       printedCnt;
             public UInt32       testMode;
             public UInt32		inkSupilesOff;
@@ -699,6 +720,14 @@ namespace RX_DigiPrint.Services
 	        public UInt32		externalData;	
         }
 
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct SRobotOffsets
+        {
+            public Int32       ref_height;
+            public Int32       head_align;
+            public Int32       robot_height;
+            public Int32       robot_align;
+        }
         
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct SStepperCfgMsg
@@ -711,6 +740,8 @@ namespace RX_DigiPrint.Services
 	        public Int32		wipe_height;
 	        public Int32		cap_height;
 	        public Int32		adjust_pos;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst =4)]
+            public SRobotOffsets[] robot;
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -746,15 +777,17 @@ namespace RX_DigiPrint.Services
             public UInt32	warn;
 	        public UInt32	err;
 
-	        public Int32	humidity;			//  Ventilation humidity (% Luftfeuchtigkeit)
-	        public Int32	presIntTankSet;		//  Pressure intermediate Tank
-	        public Int32	presIntTank;		//  Pressure intermediate Tank
+//	        public Int32	humidity;			//  Ventilation humidity (% Luftfeuchtigkeit)
+	        public Int32	cylinderPresSet;	//  Pressure intermediate Tank
+	        public Int32	cylinderPres;	    //  Pressure intermediate Tank
             public Int32    airPressureTime;
+            public Int32	flushTime;
 	        public Int32    presLung;			//  Lung pressure
             public Int32    condPresOut;		//  
 	        public UInt32	temp;				//	Temperature
 	        public UInt32	pumpSpeedSet;		//	Consumption pump speed
 	        public UInt32	pumpSpeed;			//	Consumption pump speed
+	        public Int32	canisterLevel;
  	        public EFluidCtrlMode	ctrlMode;	//	EnFluidCtrlMode
         }
 
@@ -762,7 +795,7 @@ namespace RX_DigiPrint.Services
         public struct SInkSupplyStatMsg
         {
             public SMsgHdr hdr;
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 18)]
             public SInkSupplyStat[] status;
         }
 
@@ -799,13 +832,12 @@ namespace RX_DigiPrint.Services
         public const Byte SCL_SENS_OK_ERR   = 0x05;
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        public struct SScaleStat
+        public struct SScalesMsg
         {
-            public Int32	weight;
-	        public Byte	    state;
-	        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
-	        public Byte[]   sensorState;
-        }
+        	public SMsgHdr			hdr;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 18)]
+	        public Int32[]			val;
+        };
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct SFluidCtrlCmd
@@ -813,14 +845,6 @@ namespace RX_DigiPrint.Services
 	        public SMsgHdr          hdr;
 	        public Int32			no;
 	        public EFluidCtrlMode   ctrlMode;
-        };
-
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        public struct SScalesCalibrateCmd
-        {
-	        public SMsgHdr          hdr;
-	        public Int32			no;
-	        public Int32            weight;
         };
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -857,6 +881,7 @@ namespace RX_DigiPrint.Services
 	        public UInt32			tempHead;
 	        public UInt32			tempCond;
 	        public Int32			presIn;
+	        public Int32			presIn_max;
 	        public Int32			presIn_diff;
 	        public Int32			presOut;
 	        public Int32			presOut_diff;
@@ -890,7 +915,7 @@ namespace RX_DigiPrint.Services
 	        public UInt64		timePower;	// [sec] time the board was powered
 	        public UInt64		timePrint;  // [sec] time when ink was circulating
 
-            public UInt32       tempFpga;
+            public Int32        tempFpga;
             public Int32        flow;
  
             //--- warnings/errors ----------------
@@ -953,6 +978,62 @@ namespace RX_DigiPrint.Services
             public Int32			inputs;
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 5)]
 	        public SStepperMotor[]	motor;
+
+            public Int32		set_io_cnt;
+        };
+
+        //--- CLEAF Orders ------------------------------------------------------
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct SCleafFlexo
+        {
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst =32)]
+	        public string       lacCode;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst =32)]
+	        public string       anilox;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst =32)]
+	        public string       rubberRoll;
+        };
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct SCleafOrder
+        {
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst =32)]
+	        public string       id;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst =32)]
+	        public string       code;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst =32)]
+	        public string       absCode;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst =32)]
+	        public string       material;
+            public Int32        speed;
+            public Int32        length;
+            public Double       printHeight;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst =32)]
+            public string       printFile;
+	        public Int32	    gloss;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst =256)]
+            public string       note;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
+	        public SCleafFlexo[]	flexo;
+        };
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct SCleafProduction
+        {
+	        public Int32        produced;
+	        public Int32        waste;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
+	        public Int32[]	inkUsed;
+        };
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct SCleafRoll	
+        {
+	        public Int32        no;
+	        public double       length;
+	        public Int32        quality;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst =64)]
+            public string       user;
         };
 
     }

@@ -29,7 +29,9 @@ void ctrl_send_all_heads_fluidCtrlMode(int fluidNo, EnFluidCtrlMode ctrlMode);	/
 int  ctrl_check_all_heads_in_fluidCtrlMode(int fluidNo, EnFluidCtrlMode ctrlMode);	// send ctrlMode to all heads connected to this fluid module
 int  ctrl_singleHead(void);
 
+void ctrl_update_hostname(void);
 int  ctrl_set_config(void);
+void ctrl_head_cal_done(int fluidNo);
 void ctrl_set_max_speed(void);
 int	 ctrl_abort_printing(void);
 void ctrl_send_firepulses(char *dots);

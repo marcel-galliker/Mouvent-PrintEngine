@@ -353,23 +353,23 @@ typedef struct SFpgaPrintData
 //--- Info Flags --------------------------------------------------
 typedef struct SFpgaHeadInfo
 {
-	UINT32	head_req_fsm_0_running:1;	// 0x0000[0]
-	UINT32  head_req_fsm_1_running:1;	// 0x0000[1]
-	UINT32	head_req_fsm_2_running:1;	// 0x0000[2]
-	UINT32  head_req_fsm_3_running:1;	// 0x0000[3]
-	UINT32	main_fsm_0_running:1;		// 0x0000[4]
-	UINT32	main_fsm_1_running:1;		// 0x0000[5]
-	UINT32	main_fsm_2_running:1;		// 0x0000[6]
-	UINT32	main_fsm_3_running:1;		// 0x0000[7]
-	UINT32	head_fsm_0_running:1;		// 0x0000[8]
-	UINT32  head_fsm_1_running:1;		// 0x0000[9]
-	UINT32	head_fsm_2_running:1;		// 0x0000[10]
-	UINT32  head_fsm_3_running:1;		// 0x0000[11]
-	UINT32	nios_reset:1;				// 0x0000[12]
-	UINT32	info13:1;
-	UINT32	info14:1;
-	UINT32	info15:1;
-	UINT32	clearing_udp_flags:1;	// 0x0000[16]
+	UINT32	head_req_fsm_0_running:1;	// 0x00000001
+	UINT32  head_req_fsm_1_running:1;	// 0x00000002
+	UINT32	head_req_fsm_2_running:1;	// 0x00000004
+	UINT32  head_req_fsm_3_running:1;	// 0x00000008
+	UINT32	main_fsm_0_running:1;		// 0x00000010
+	UINT32	main_fsm_1_running:1;		// 0x00000020
+	UINT32	main_fsm_2_running:1;		// 0x00000040
+	UINT32	main_fsm_3_running:1;		// 0x00000080
+	UINT32	head_fsm_0_running:1;		// 0x00000100
+	UINT32  head_fsm_1_running:1;		// 0x00000200
+	UINT32	head_fsm_2_running:1;		// 0x00000400
+	UINT32  head_fsm_3_running:1;		// 0x00000800
+	UINT32	nios_reset:1;				// 0x00001000
+	UINT32	info13:1;					// 0x00002000
+	UINT32	info14:1;					// 0x00004000
+	UINT32	info15:1;					// 0x00008000
+	UINT32	clearing_udp_flags:1;		// 0x00010000
 	UINT32	info17:1;
 	UINT32	info18:1;
 	UINT32	info19:1;
@@ -458,7 +458,7 @@ typedef struct SFpgaHeadStat
 	UINT16				udp_all[2];		//	0x0038: ETH udp mit korrektem header (TSE)
 	UINT32				udp_invalid_pyld_length; //	0x003:C
 
-	UINT32				temp;			//  0x0040:
+	INT32				temp;			//  0x0040:
 
 	UINT8				pg_abort_ctr[4];//	0x0044:
 	UINT8				img_line_fp[4];	//	0x0048:
@@ -618,7 +618,7 @@ typedef struct SFpgaHeadError
 	UINT16	udp_flush_fifo;		// 0x2D09C
 	UINT16	res_9E;				// 0x2D09E
 	UINT8	img_line_err[4][4]; // 0x2D0A0 .. 0x2DAE
-	
+	UINT8	clear_area_32[4];	// 0x2D0B0
 	//	"write image line error 0": erste Bildzeile nach Bildlücke nicht in img-FIFO verfügbar
 	//	"write image line error 1": erste Bildzeile nach Bildüberlappung nicht in img-FIFO verfügbar
 	//	"write image line error 2": erste Bildzeile nach Unterbruchlos-Druck (Bild an Bild ohne Lücke) nicht in img-FIFO verfügbar

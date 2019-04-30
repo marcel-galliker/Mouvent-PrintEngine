@@ -57,7 +57,7 @@
                 <StackPanel x:Name="SettingsTab" Grid.Row="0" Orientation="Horizontal" Background="Transparent">
                     <common:RxRadioButton x:Name="RB_Main"          Content="Main"          IsChecked="true"/>
                     <common:RxRadioButton x:Name="RB_Log"           Content="Log"           />
-               <!-- <common:RxRadioButton x:Name="RB_Cfg"           Content="Configuration" /> -->
+                    <common:RxRadioButton x:Name="RB_Cfg"           Content="Configuration" />
                     <common:RxRadioButton x:Name="RB_Plc"           Content="PLC Info"      Last="True"/>
                 </StackPanel>
 
@@ -93,9 +93,7 @@
                 <rx_uc:PlcStatus Grid.Row="1" Width="500" Visibility="{Binding ElementName=RB_Plc,  Path=IsChecked, Converter={StaticResource IntToVisible_Converter}}"/>
 
                 <!-- TAB: Config ____________________________________________________________-->
-                <!--
                 <local:ML_Cfg Grid.Row="1" Visibility="{Binding ElementName=RB_Cfg, Path=IsChecked, Converter={StaticResource IntToVisible_Converter}}"/>
-                -->
             </Grid>
         </Grid>
 

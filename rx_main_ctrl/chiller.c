@@ -30,7 +30,7 @@ static const char *_convert="0123456789ABCDEF";
 #define WRITE_REGISTER	0x06
 
 #define CHILLER_TEMP_SET		280	// temperature in 0.1°C
-#define CHILLER_TEMP_SET_CLEAF	320	// temperature in 0.1°C
+#define CHILLER_TEMP_SET_UV		400	// temperature in 0.1°C
 
 #define TIMEOUT 2
 
@@ -50,6 +50,7 @@ static SChillerStat _ChillerStatus;
 static INT64		_ErrorFlags;	
 static INT64		_Alarm;
 static int			_Timeout;
+static int			_TempMax=30;
 
 static int			_ChillerThreadRunning;
 static int			_Handle=0;
@@ -126,22 +127,24 @@ int	 chiller_init(void)
 	return REPLY_OK;
 }
 
-//--- chiller_enable -----------------------------------------
-void chiller_enable(int enable)
+//--- chiller_set_temp -----------------------------------------
+void chiller_set_temp(int tempMax)
 {
-	if (enable) 
-	{
-#ifndef linux
-		Error(ERR_CONT, 0, "Chiller not implemented in Windows version");
-#endif
-	}
-	if (arg_simuChiller) 
+	_TempMax = tempMax;
+	if(arg_simuChiller) 
 	{
 		_ChillerStatus.enabled = FALSE;
-		Error(WARN, 0, "Chiller in Simulation");
+		Error(WARN,0,"Chiller in Simulation");
 		return;			
 	}
-	_ChillerStatus.enabled = enable;
+	else
+	{
+		_ChillerStatus.enabled = (RX_Config.printer.type>=printer_LB701);
+		
+		#ifndef linux
+		if(_ChillerStatus.enabled) Error(ERR_CONT, 0, "Chiller not implemented in Windows version");
+		#endif
+	}
 }
 
 //--- chiller_end --------------------------------------
@@ -247,6 +250,7 @@ static void *_chiller_thread(void *lpParameter)
 {
 	char buf[256];
 	int i, ret;
+	int err=FALSE;
 	INT16 registers[8];
 	
 	while (_ChillerThreadRunning)
@@ -262,16 +266,17 @@ static void *_chiller_thread(void *lpParameter)
 					_set_baud_7e1(B19200);							
 					_Timeout = TIMEOUT;
 				}
-				else 
+				else if (!err) 
 				{
+					err=TRUE;
 					err_system_error(errno, buf, sizeof(buf));
 					TrPrintfL(TRUE, "Chiller: Error %d: %s\n", errno, buf);
 				}
 			}
 			if (_Handle>=0)
 			{
-				if (RX_Config.printer.type==printer_cleaf)	_set_temp(CHILLER_TEMP_SET_CLEAF);
-				else										_set_temp(CHILLER_TEMP_SET);
+				if (_TempMax>36)	_set_temp(CHILLER_TEMP_SET_UV);
+				else				_set_temp(CHILLER_TEMP_SET);
 				_write_register(0x0c, 1);											// Operation START				
 				ret = _read_registers(0x00, 8, registers);		
 			}

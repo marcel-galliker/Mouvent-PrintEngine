@@ -32,21 +32,28 @@
 
 //--- defines -----------------------------------------
 
-static int		_FluidThreadRunning=FALSE;
-static UINT32	_Flushed=0x00;
-
+static int				_FluidThreadRunning=FALSE;
+static UINT32			_Flushed=0x00;
+static EnFluidCtrlMode	_FlushCtrlMode = ctrl_undef;
+static int				_FlushAll = 0x00;
+static int				_FlushCtrl = FALSE;
+static int				_Scanning;
 
 //--- prototypes -----------------------
 static void* _fluid_thread(void *par);
 
-static int _handle_fluid_ctrl_msg(RX_SOCKET socket, void *msg, int len, struct sockaddr *sender, void *ppar);
-static int _connection_closed(RX_SOCKET socket, const char *peerName);
+static int _handle_fluid_ctrl_msg	(RX_SOCKET socket, void *msg, int len, struct sockaddr *sender, void *ppar);
+static int _connection_closed		(RX_SOCKET socket, const char *peerName);
+static void _send_ctrlMode			(int no, EnFluidCtrlMode ctrlMode, int sendToHeads);
+
 
 static void _do_fluid_stat(int fluidNo, SFluidBoardStat *pstat);
-static void _do_scale_stat(int scaleNo, SScaleStat *pstat);
-static void _do_save_scales_cfg(int fluidNo, SScalesCalibration *data, int len);
+static void _do_scales_stat(SScalesMsg *pstat);
+static void _do_scales_get_cfg(SScalesMsg* pmsg);
 static void _do_log_evt(int no, SLogMsg *msg);
 static void _control(int fluidNo);
+static void _control_flush();
+static void _fluid_send_flush_time(int no, INT32 time);
 
 //--- statics -----------------------------------------------------------------
 
@@ -62,14 +69,19 @@ static SFluidThreadPar _FluidThreadPar[FLUID_BOARD_CNT];
 
 static void *_fluid_thread(void *lpParameter);
 
-SInkSupplyStat   _FluidStatus[INK_SUPPLY_CNT];
+SInkSupplyStat   _FluidStatus[INK_SUPPLY_CNT+2];
+INT32			 _ScalesStatus[MAX_SCALES];
+INT32			 _FluidToScales[INK_SUPPLY_CNT+2];
 
-static SScaleStat		_ScaleStatus[INK_SUPPLY_CNT];
+
 static SHeadStateLight	_HeadState[INK_SUPPLY_CNT];
 static SHeadStateLight	_HeadStateCnt[INK_SUPPLY_CNT];
+static INT32			_HeadErr[INK_SUPPLY_CNT];
 static INT32			_HeadPumpSpeed[INK_SUPPLY_CNT][2];	// min/max
 // EnFluidCtrlMode			_FluidMode[INK_SUPPLY_CNT];
 
+
+static void _flush_next(void);
 
 //--- fluid_init ----------------------------------------------------------------
 int	fluid_init(void)
@@ -77,14 +89,16 @@ int	fluid_init(void)
 	int i;
 	
 	memset(_FluidStatus,		0, sizeof(_FluidStatus));
-	memset(_ScaleStatus,		0, sizeof(_ScaleStatus));
 	memset(_FluidThreadPar,		0, sizeof(_FluidThreadPar));
 	memset(_HeadStateCnt,		0, sizeof(_HeadStateCnt));
 	memset(_HeadState,			0, sizeof(_HeadState));
+	memset(_HeadErr,			0, sizeof(_HeadErr));
 	RX_PrinterStatus.inkSupilesOff = FALSE;
 	RX_PrinterStatus.inkSupilesOn  = FALSE;
 	
 	setup_fluid_system(PATH_USER FILENAME_FLUID_STATE, &_Flushed, READ);				
+
+	for (i=0; i<SIZEOF(_ScalesStatus); i++) _ScalesStatus[i]=INVALID_VALUE;
 	
 	for (i=0; i<SIZEOF(_FluidThreadPar); i++)
 	{
@@ -175,8 +189,44 @@ static int _connection_closed(RX_SOCKET socket, const char *peerName)
 void fluid_set_config(void)
 {
 	SFluidBoardCfgLight cfg;
-
 	int i, n;
+	
+	_Scanning = rx_def_is_scanning(RX_Config.printer.type);
+
+	//---------------------------------------------------
+	memset(_FluidToScales, 0, sizeof(_FluidToScales));
+	
+	switch (RX_Config.printer.type)
+	{
+	case printer_LB701:	_FluidToScales[0] = 5;	// Cyan 
+						_FluidToScales[1] = 4;	// Magenta
+						_FluidToScales[2] = 3;	// Yellow 
+						_FluidToScales[3] = 2;	// black		
+						_FluidToScales[INK_SUPPLY_CNT]   = 1;		// flush		
+						_FluidToScales[INK_SUPPLY_CNT+1] = 0;	// waste
+						break;
+		
+	default:			for (i=0; i<SIZEOF(_FluidToScales); i++) _FluidToScales[i]=i;	
+						break; 
+	}
+	
+	
+	//--- flush time ------------------------
+	if (_Scanning)
+	{
+		int flushTime[3];
+		memset(flushTime, 0, sizeof(flushTime)); 
+		for (i=0; i<RX_Config.inkSupplyCnt; i++)
+		{
+			for (n=0; n<SIZEOF(flushTime); n++)
+				if (RX_Config.inkSupply[i].ink.flushTime[n] > flushTime[n]) flushTime[n] = RX_Config.inkSupply[i].ink.flushTime[n];
+		}
+		for (i=0; i<RX_Config.inkSupplyCnt; i++)
+		{
+			memcpy(&RX_Config.inkSupply[i].ink.flushTime, flushTime, sizeof(flushTime)); 
+		}
+	}
+
 	for (i=0; i<FLUID_BOARD_CNT; i++)
 	{
 		if (_FluidThreadPar[i].socket!=INVALID_SOCKET)
@@ -184,38 +234,25 @@ void fluid_set_config(void)
 			cfg.lung_enabled = (i==0);
 			for (n=0; n<INK_PER_BOARD; n++) 
 			{
-				cfg.inkPressureSet[n] = RX_Config.inkSupply[i*INK_PER_BOARD+n].inkPressureSet;
-				cfg.meniscusSet[n]	  = RX_Config.inkSupply[i*INK_PER_BOARD+n].ink.meniscus;
+				cfg.cylinderPresSet[n] = RX_Config.inkSupply[i*INK_PER_BOARD+n].cylinderPresSet;
+	//			cfg.meniscusSet[n]	  = RX_Config.inkSupply[i*INK_PER_BOARD+n].ink.meniscus;
+				cfg.meniscusSet[n]	  = INVALID_VALUE;
+				cfg.condPresOutSet[n] = RX_Config.inkSupply[i*INK_PER_BOARD+n].ink.condPresOut;
 				cfg.inkTemp[n]        = RX_Config.inkSupply[i*INK_PER_BOARD+n].ink.temp;
 				cfg.inkTempMax[n]	  = RX_Config.inkSupply[i*INK_PER_BOARD+n].ink.tempMax;
+				memcpy(cfg.flushTime[n], RX_Config.inkSupply[i*INK_PER_BOARD+n].ink.flushTime, sizeof(cfg.flushTime[n]));
     			// fluid board
     			cfg.fluid_P[n] = RX_Config.inkSupply[i*INK_PER_BOARD+n].fluid_P;    
 			}
     				
 			cfg.headsPerColor = RX_Config.headsPerColor;
 
-			sok_send_2(&_FluidThreadPar[i].socket, _FluidThreadPar[i].ipaddr, CMD_FLUID_CFG, sizeof(cfg), &cfg);					
-			sok_send_2(&_FluidThreadPar[i].socket, _FluidThreadPar[i].ipaddr, CMD_SCALES_LOAD_CFG, sizeof(RX_ScalesCalibration[0])*BALANCE_CNT, &RX_ScalesCalibration[BALANCE_CNT*i]);
+			sok_send_2(&_FluidThreadPar[i].socket, _FluidThreadPar[i].ipaddr, CMD_FLUID_CFG, sizeof(cfg), &cfg);
+			
+			if (i==0) 
+				sok_send_2(&_FluidThreadPar[i].socket, _FluidThreadPar[i].ipaddr, CMD_SCALES_SET_CFG, sizeof(RX_Config.scalesTara), RX_Config.scalesTara);
 		}
 	}	
-}
-
-//--- fluid_scales_calibrate ----------------------------
-void fluid_scales_calibrate  (RX_SOCKET socket, SScalesCalibrateCmd* pmsg)
-{
-	int fluidNo;
-	SScalesCalibrateCmd msg;
-	memcpy(&msg, pmsg, sizeof(msg));
-
-	if (pmsg->no<5) { fluidNo=0; msg.no = pmsg->no;}
-	else            { fluidNo=1; msg.no = pmsg->no - FLUID_MAX_SCALES;}
-		
-	switch (pmsg->hdr.msgId)
-	{
-	case CMD_SCALES_LOAD_CFG:	sok_send_2(&_FluidThreadPar[fluidNo].socket, _FluidThreadPar[fluidNo].ipaddr, CMD_SCALES_LOAD_CFG, sizeof(RX_ScalesCalibration[0])*BALANCE_CNT, &RX_ScalesCalibration[BALANCE_CNT*fluidNo]); break;
-	case CMD_SCALES_SAVE_CFG:   sok_send(&_FluidThreadPar[fluidNo].socket, &msg); break;
-	case CMD_SCALES_CALIBRATE:  sok_send(&_FluidThreadPar[fluidNo].socket, &msg); break;
-	}
 }
 
 //--- fluid_error_reset ----------------------------------------
@@ -272,12 +309,16 @@ void fluid_tick(void)
 			state[i].condPumpFeedback = INVALID_VALUE;
 		
 		if (!chiller_is_running() &&  _FluidStatus[i].ctrlMode>ctrl_off)
-			fluid_send_ctrlMode(i, ctrl_off, TRUE);
+			_send_ctrlMode(i, ctrl_off, TRUE);
+
+		if (_HeadErr[i]) _FluidStatus[i].err |= err_printhead; 
 	}
+	
 	memset(_HeadStateCnt,  0, sizeof(_HeadStateCnt));
 	memset(_HeadState,     0, sizeof(_HeadState));
 	memset(_HeadPumpSpeed, 0, sizeof(_HeadPumpSpeed));
-	//--- send to board -----
+	memset(_HeadErr,       0, sizeof(_HeadErr));
+
 	for (i=0; i<SIZEOF(_FluidThreadPar); i++)
 	{
 		if (_FluidThreadPar[i].socket!=INVALID_SOCKET) 
@@ -311,10 +352,9 @@ static int _handle_fluid_ctrl_msg(RX_SOCKET socket, void *msg, int len, struct s
 			{
 			case REP_PING:			 TrPrintfL(TRUE, "Received REP_PING from %s", sok_get_peer_name(socket, str, NULL, NULL));	break;
 			case EVT_GET_EVT:		 _do_log_evt		(no, (SLogMsg*)		  msg);					break;																			
-			case REP_FLUID_STAT:	 _do_fluid_stat(no, (SFluidBoardStat*)&phdr[1]);				break;			
-			case REP_SCALE_STAT:	 _do_scale_stat(no, (SScaleStat*)&phdr[1]);						break;
-			case CMD_SCALES_LOAD_CFG: sok_send_2(&_FluidThreadPar[no].socket, _FluidThreadPar[no].ipaddr, CMD_SCALES_LOAD_CFG, sizeof(RX_ScalesCalibration[0])*BALANCE_CNT, &RX_ScalesCalibration[BALANCE_CNT*no]);
-			case REP_SCALES_SAVE_CFG: _do_save_scales_cfg(no, (SScalesCalibration*)&phdr[1], phdr->msgLen-sizeof(SMsgHdr)); break;
+			case REP_FLUID_STAT:	 _do_fluid_stat		(no, (SFluidBoardStat*)&phdr[1]);			break;			
+			case REP_SCALES_STAT:	 _do_scales_stat	((SScalesMsg*)msg);							break;
+			case REP_SCALES_GET_CFG: _do_scales_get_cfg	((SScalesMsg*)msg);							break;
 			default:				 Error(WARN, 0, "Got unknown messageId=0x%08x", phdr->msgId);
 			}
 			return REPLY_OK;
@@ -353,7 +393,8 @@ static void _do_fluid_stat(int fluidNo, SFluidBoardStat *pstat)
 	*/
 	
 	memcpy(&_FluidStatus[fluidNo*INK_PER_BOARD], &pstat->stat[0], INK_PER_BOARD*sizeof(_FluidStatus[0]));
-	_control(fluidNo);
+	if (_FlushCtrlMode==ctrl_undef || _FlushCtrlMode>=ctrl_flush_night && _FlushCtrlMode<=ctrl_flush_done) _control_flush();
+	else _control(fluidNo);
 
 	//--- update overall state --------------------------
 	SPrinterStatus stat;
@@ -378,17 +419,20 @@ static void _do_fluid_stat(int fluidNo, SFluidBoardStat *pstat)
 }
 
 //--- _do_scale_stat -------------------------------------------------------
-static void _do_scale_stat(int scaleNo, SScaleStat *pstat)
+static void _do_scales_stat(SScalesMsg *pstat)
 {
-	memcpy(&_ScaleStatus[scaleNo*FLUID_MAX_SCALES], pstat, FLUID_MAX_SCALES*sizeof(*pstat));
+	memcpy(_ScalesStatus, pstat->val, sizeof(_ScalesStatus));
 }
 
 
-//--- _do_save_scales_cfg ----------------------------------------
-static void _do_save_scales_cfg(int fluidNo, SScalesCalibration *data, int len)
+//--- _do_scales_get_cfg ----------------------------------------
+static void _do_scales_get_cfg(SScalesMsg *pmsg)
 {
-	memcpy(&RX_ScalesCalibration[BALANCE_CNT*fluidNo], data, len);
-	setup_scales(PATH_USER FILENAME_SCALES, RX_ScalesCalibration, SIZEOF(RX_ScalesCalibration), WRITE);
+	memcpy(RX_Config.scalesTara, pmsg->val, sizeof(RX_Config.scalesTara));
+	SRxConfig cfg;
+	setup_config(PATH_USER FILENAME_CFG, &cfg, READ);
+	memcpy(cfg.scalesTara, pmsg->val, sizeof(cfg.scalesTara));
+	setup_config(PATH_USER FILENAME_CFG, &cfg, WRITE);
 }
 
 //--- _control -------------------------------------------------
@@ -400,55 +444,98 @@ static void _control(int fluidNo)
 
 	for (i=0; i<INK_PER_BOARD; i++, _stat++, no++)
 	{
-		if (_stat->ctrlMode==ctrl_cal_done)			
-			fluid_send_ctrlMode(no, ctrl_off,	TRUE);
-		else if (_stat->ctrlMode==ctrl_shutdown_done)	
-			fluid_send_ctrlMode(no, ctrl_off,	TRUE);
-		else if (ctrl_check_all_heads_in_fluidCtrlMode(no, _stat->ctrlMode))
+//		if (_stat->ctrlMode==ctrl_shutdown_done)	
+//			_send_ctrlMode(no, ctrl_off,	TRUE);
+//		else 
+		if (ctrl_check_all_heads_in_fluidCtrlMode(no, _stat->ctrlMode))
 		{
-	//		Error(LOG, 0, "Fluid[%d] in mode >>%s<<", no, FluidCtrlModeStr(_stat->ctrlMode));
+	//		Error(LOG, 0, "Fluid[%d] in mode >>%s<<", no, FluidCtrlModeStr(_stat->ctrlMode));		
 			switch(_stat->ctrlMode)
 			{
 				case ctrl_purge:
 				case ctrl_purge_micro:	
 				case ctrl_purge_soft:
-				case ctrl_purge_hard:	fluid_send_ctrlMode(no, ctrl_purge_step1, TRUE);	break;
-				case ctrl_purge_step1:	if (step_in_purge_pos()) fluid_send_ctrlMode(no, ctrl_purge_step2, TRUE);	break;
-				case ctrl_purge_step2:	fluid_send_ctrlMode(no, ctrl_purge_step3, TRUE);	break;
-				case ctrl_purge_step3:	fluid_send_ctrlMode(no, ctrl_off,		  TRUE);	
+				case ctrl_purge_hard:	_send_ctrlMode(no, ctrl_purge_step1, TRUE);	break;
+				case ctrl_purge_step1:	if (step_in_purge_pos()) _send_ctrlMode(no, ctrl_purge_step2, TRUE);	break;
+				case ctrl_purge_step2:	_send_ctrlMode(no, ctrl_purge_step3, TRUE);	break;
+				case ctrl_purge_step3:	_send_ctrlMode(no, ctrl_off,		  TRUE);	
 										//step_wipe_start(boardNo*HEAD_CNT+i, ctrlMode);
 										Error(LOG, 0, "START WIPE");
 										break;
 
-				case ctrl_flush:		if (step_in_purge_pos()) fluid_send_ctrlMode(no, ctrl_flush_step1, TRUE); break;
-				case ctrl_flush_step1:	fluid_send_ctrlMode(no, ctrl_flush_step2, TRUE); break;
-                case ctrl_flush_step2:	fluid_send_ctrlMode(no, ctrl_flush_done, TRUE); break;
-                case ctrl_flush_done:	ErrorEx(dev_fluid, fluidNo, LOG, 0, "Flush complete");
-										fluid_send_ctrlMode(-1, ctrl_off, TRUE); break; // send to all
+				case ctrl_flush_night:		
+				case ctrl_flush_weekend:		
+				case ctrl_flush_week:	if (_Scanning) return;
+										if (step_in_purge_pos()) _send_ctrlMode(no, ctrl_flush_step1, TRUE); break;
+				case ctrl_flush_step1:	if (_Scanning) return;
+										_send_ctrlMode(no, ctrl_flush_step2, TRUE); break;
+                case ctrl_flush_step2:	if (_Scanning) return;
+										_send_ctrlMode(no, ctrl_flush_done, TRUE); break;
+                case ctrl_flush_done:	if (_Scanning) return;
+										ErrorEx(dev_fluid, fluidNo, LOG, 0, "Flush complete");
+										_send_ctrlMode(-1, ctrl_off, TRUE); 
+										_flush_next();
+										break; // send to all
 
-				case ctrl_wipe:			if (step_wipe_done()) fluid_send_ctrlMode(no, ctrl_print, TRUE); break;
+				case ctrl_wipe:			if (step_wipe_done()) _send_ctrlMode(no, ctrl_print, TRUE); break;
 
-				case ctrl_fill:			fluid_send_ctrlMode(no, ctrl_fill_step1, TRUE);		break;
+				case ctrl_fill:			_send_ctrlMode(no, ctrl_fill_step1, TRUE);		break;
 			//	case ctrl_fill_step1:	wait for user input 
-				case ctrl_fill_step2:	fluid_send_ctrlMode(no, ctrl_fill_step3, TRUE);		break;
-				case ctrl_fill_step3:	fluid_send_ctrlMode(no, ctrl_print,		 TRUE);		break;
+				case ctrl_fill_step2:	_send_ctrlMode(no, ctrl_fill_step3, TRUE);		break;
+				case ctrl_fill_step3:	_send_ctrlMode(no, ctrl_print,		 TRUE);		break;
 
-				case ctrl_empty:		fluid_send_ctrlMode(no, ctrl_empty_step1, TRUE);	break;					
+				case ctrl_empty:		_send_ctrlMode(no, ctrl_empty_step1, TRUE);	break;					
 			//	case ctrl_empty_step1:	wait for user input 
-				case ctrl_empty_step2:	fluid_send_ctrlMode(no, ctrl_off, TRUE);			break;
+				case ctrl_empty_step2:	_send_ctrlMode(no, ctrl_off, TRUE);			break;
 				
-				case ctrl_cal_start:	fluid_send_ctrlMode(no, ctrl_cal_step1,	  TRUE);	break;
-				case ctrl_cal_step1:	fluid_send_ctrlMode(no, ctrl_cal_step2,   TRUE);    break;
-				case ctrl_cal_step2:	ErrorEx(dev_fluid, fluidNo, LOG, 0, "Calibration complete: Save configuration!");
-										fluid_send_ctrlMode(no, ctrl_off,		  TRUE);    
+				case ctrl_cal_start:	_send_ctrlMode(no, ctrl_cal_step1,	  TRUE);	
 										break;
-			//	case ctrl_cal_step2:	fluid_send_ctrlMode(no, ctrl_cal_step3,   TRUE);    break;
+				
+				case ctrl_cal_step1:	_send_ctrlMode(no, ctrl_cal_step2,   TRUE);    break;
+				case ctrl_cal_step2:	ErrorEx(dev_fluid, fluidNo, LOG, 0, "Calibration complete: Save configuration!");
+										ctrl_head_cal_done(no);
+										_send_ctrlMode(no, ctrl_off,		  TRUE);    
+										break;
+			//	case ctrl_cal_step2:	_send_ctrlMode(no, ctrl_cal_step3,   TRUE);    break;
 			//	case ctrl_cal_step3:	ErrorEx(dev_fluid, fluidNo, LOG, 0, "Calibration complete: Save configuration!");
-			//							fluid_send_ctrlMode(no, ctrl_cal_done,    TRUE);    
+			//							_send_ctrlMode(no, ctrl_cal_done,    TRUE);    
 			//							break;
 			}
 		}
 	}
+}
+
+//--- _control -------------------------------------------------
+static void _control_flush(void)
+{
+	int i;
+	for (i=0; i<RX_Config.inkSupplyCnt; i++)
+	{
+		if (*RX_Config.inkSupply[i].ink.fileName)
+		{
+	//		TrPrintfL(TRUE, "Fliud[%d].mode=%d, _FlushCtrlMode=%d", i, _FluidStatus[i].ctrlMode, _FlushCtrlMode);
+			if (_FluidStatus[i].ctrlMode!=_FlushCtrlMode) return;
+		}
+	}
+//	TrPrintfL(TRUE, "All Fluids in mode %d", _FlushCtrlMode);
+	
+	switch(_FlushCtrlMode)
+	{
+	case ctrl_flush_night:		
+	case ctrl_flush_weekend:		
+	case ctrl_flush_week:		
+							if (step_in_purge_pos()) _FlushCtrlMode=ctrl_flush_step1; break;
+	case ctrl_flush_step1:	_FlushCtrlMode=ctrl_flush_step2; break;
+    case ctrl_flush_step2:	_FlushCtrlMode=ctrl_flush_done; break;
+    case ctrl_flush_done:	ErrorEx(dev_fluid, -1, LOG, 0, "Flush complete");
+							_FlushCtrlMode=ctrl_off; 
+							break; // send to all
+	default: break;		
+	}
+		
+	for (i=0; i<RX_Config.inkSupplyCnt; i++) _send_ctrlMode(i, _FlushCtrlMode, TRUE);
+
+//	TrPrintfL(TRUE, "Next mode %d", _FlushCtrlMode);
 }
 
 //--- fluid_reply_stat ------------------------------------
@@ -457,31 +544,76 @@ void fluid_reply_stat(RX_SOCKET socket)	// to GUI
 	int i;
 	for (i=0; i<SIZEOF(_FluidStatus); i++)
 	{
-		_FluidStatus[i].info.connected = (_FluidThreadPar[i/INK_PER_BOARD].socket!=INVALID_SOCKET);
-		_FluidStatus[i].info.flushed   = (_Flushed & (0x01<<i));
-//		_FluidStatus[i].info.flushed   = ctrl_check_head_flushed(i);
+		if (i<INK_SUPPLY_CNT)
+		{
+			_FluidStatus[i].info.connected = (_FluidThreadPar[i/INK_PER_BOARD].socket!=INVALID_SOCKET);
+			_FluidStatus[i].info.flushed   = (_Flushed & (0x01<<i));
+	//		_FluidStatus[i].info.flushed   = ctrl_check_head_flushed(i);			
+		}	
+		_FluidStatus[i].canisterLevel  = _ScalesStatus[_FluidToScales[i]];
 	}
-	//printf("size=%d\n", sizeof(_FluidStatus[0]));
 	sok_send_2(&socket, INADDR_ANY, REP_FLUID_STAT, sizeof(_FluidStatus), _FluidStatus);
-	sok_send_2(&socket, INADDR_ANY, REP_SCALE_STAT, sizeof(_ScaleStatus), _ScaleStatus);
 }
 
-//--- fluid_send_ctrlMode --------------------------------------
+//--- _flush_next -------------------------------------------
+static void _flush_next(void)
+{
+	if(_FlushCtrlMode >= ctrl_flush_night && _FlushCtrlMode <= ctrl_flush_week)
+	{
+		int no;
+		for (no=0; no<RX_Config.inkSupplyCnt; no++) 
+		{
+			if (_FlushAll & (1<<no))
+			{
+				_FlushAll &= ~(1<<no);
+				_send_ctrlMode(no, _FlushCtrlMode, TRUE);
+				return;									
+			}
+		}
+	}
+	_FlushCtrlMode = ctrl_undef;
+}
+
+//--- fluid_send_ctrlMode -------------------------------
 void fluid_send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
+{
+	if (_Scanning && ctrlMode==ctrl_off && _FlushCtrlMode>=ctrl_flush_step1 && _FlushCtrlMode<=ctrl_flush_done)
+	{
+		for (int i=0; i<RX_Config.inkSupplyCnt; i++) _send_ctrlMode(i, ctrlMode, sendToHeads);					
+	}
+	_FlushCtrlMode = ctrlMode;
+	_send_ctrlMode(no, ctrlMode, sendToHeads);
+}
+
+//--- _send_ctrlMode --------------------------------------
+void _send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 {
 	SFluidCtrlCmd cmd;
 	int i;
 	if (no<0)
 	{
-		for (i=0; i<RX_Config.inkSupplyCnt; i++) fluid_send_ctrlMode(i, ctrlMode, TRUE);
+		if(ctrlMode >= ctrl_flush_night && ctrlMode <= ctrl_flush_week)
+		{
+			_FlushCtrlMode = ctrlMode;
+			_FlushAll = 0x00;
+			for (i=0; i<RX_Config.inkSupplyCnt; i++) 
+			{
+				if (*RX_Config.inkSupply[i].inkFileName) _FlushAll |= (1<<i);
+			}
+			_flush_next();
+		}
+		else
+		{
+			for (i=0; i<RX_Config.inkSupplyCnt; i++) _send_ctrlMode(i, ctrlMode, TRUE);				
+		}
 		return;		
 	}
-	
+
 	for (i=0; i<INK_SUPPLY_CNT; i++)
 	{
 		if (_FluidThreadPar[i/INK_PER_BOARD].socket!=INVALID_SOCKET)
 		{
-			if (ctrlMode==ctrl_flush)
+			if (ctrlMode>=ctrl_flush_night && ctrlMode<=ctrl_flush_week )
 			{
 				step_to_purge_pos(0);
 
@@ -489,27 +621,37 @@ void fluid_send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 				cmd.hdr.msgLen	= sizeof(cmd);
 				cmd.no			= i%INK_PER_BOARD;
 				cmd.ctrlMode	= ctrlMode;
-				//if (i==0) cmd.ctrlMode = ctrlMode;
-				//else	  cmd.ctrlMode = ctrl_off;
+				if (!rx_def_is_scanning(RX_Config.printer.type))
+				{
+					if (i==no) cmd.ctrlMode = ctrlMode;
+					else	   cmd.ctrlMode = ctrl_off;		
+				}
 				_Flushed |= (0x1<<i);
 				sok_send(&_FluidThreadPar[i/INK_PER_BOARD].socket, &cmd);
 				ctrl_send_all_heads_fluidCtrlMode(i, ctrlMode);	
 				setup_fluid_system(PATH_USER FILENAME_FLUID_STATE, &_Flushed, WRITE);
 			}
-			else if (i==no || ctrlMode>=ctrl_fill)
+			else if (i==no || ctrlMode==ctrl_empty)
 			{
 				if (ctrlMode==ctrl_print && !RX_Config.inkSupply[i].ink.fileName[0]) continue;
-				if (ctrlMode==ctrl_shutdown && _FluidStatus[i].ctrlMode<=ctrl_off)   continue;
+//				if (ctrlMode==ctrl_shutdown && _FluidStatus[i].ctrlMode<=ctrl_off)   continue;
 					
+				if (ctrlMode==ctrl_cal_start)
+				{
+					switch(RX_Config.printer.type)
+					{
+					case printer_TX801:	fluid_send_pressure(no, 150); break;
+					case printer_TX802:	fluid_send_pressure(no, 150); break;
+					default: break;
+					}
+				}
+				
 				cmd.hdr.msgId	= CMD_FLUID_CTRL_MODE;
 				cmd.hdr.msgLen	= sizeof(cmd);
 				cmd.no			= i%INK_PER_BOARD;
 				if (i==no) cmd.ctrlMode = ctrlMode;
-				else if (ctrlMode>=ctrl_fill) 
-				{
-//					if (_FluidMode[i]==ctrl_undef) _FluidMode[i] = _FluidStatus[i].ctrlMode; // save moode
-					cmd.ctrlMode = ctrl_off; 		
-				}
+				else if (ctrlMode==ctrl_empty) cmd.ctrlMode = ctrl_off; 		
+
 				sok_send(&_FluidThreadPar[i/INK_PER_BOARD].socket, &cmd);
 				if (ctrlMode==ctrl_purge_hard)
 				{
@@ -532,8 +674,16 @@ void fluid_send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 //--- fluid_send_pressure -------------------------------------------
 void fluid_send_pressure(int no, INT32 pressure)
 {
-	RX_Config.inkSupply[no].inkPressureSet = pressure;
+	RX_Config.inkSupply[no].cylinderPresSet = pressure;
 	fluid_set_config();
+}
+
+//--- fluid_send_msg -------------------------------------------
+void fluid_send_tara(int no)
+{
+	int i=0;
+	no = _FluidToScales[no];
+	sok_send_2(&_FluidThreadPar[i].socket, _FluidThreadPar[i].ipaddr, CMD_SCALES_TARA, sizeof(no), &no);
 }
 
 //--- fluid_start_printing --------
@@ -542,13 +692,15 @@ void fluid_start_printing(void)
 	int i;
 	for (i=0; i<RX_Config.printer.inkSupplyCnt; i++)
 	{
-		fluid_send_ctrlMode(i, ctrl_print, TRUE);		
+		_send_ctrlMode(i, ctrl_print, TRUE);		
 	}
 }
 
 //--- fluid_get_ctrlMode -------------------------------------------
 EnFluidCtrlMode fluid_get_ctrlMode(int no)
 {
+	if (_FluidStatus[no].ctrlMode==ctrl_off)
+		TrPrintfL(TRUE, "fluid_get_ctrlMode[%d].off\n", no);
 	if (no>=0 && no<SIZEOF(_FluidStatus)) return _FluidStatus[no].ctrlMode;
 	return ctrl_undef;
 }
@@ -565,6 +717,7 @@ void fluid_set_head_state	(int no, SHeadStat *pstat)
 {
 	if (no>=0 && no<SIZEOF(_HeadState)) 
 	{	
+		if (pstat->err) _HeadErr[no] = TRUE; 
 		if (valid(pstat->presIn))
 		{
 			_HeadState[no].condPresIn += pstat->presIn;
@@ -606,22 +759,22 @@ void fluid_set_head_state	(int no, SHeadStat *pstat)
 	}
 }
 
-//--- fluid_get_inkPressureSet ------------------------------------
-INT32 fluid_get_inkPressureSet (int no)
+//--- fluid_get_cylinderPresSet ------------------------------------
+INT32 fluid_get_cylinderPresSet (int no)
 {
 	if (no>=0 && no<SIZEOF(_FluidStatus)) 
 	{
-		return _FluidStatus[no].presIntTankSet;			
+		return _FluidStatus[no].cylinderPresSet;			
 	}
 	return INVALID_VALUE;
 }
 
-//--- fluid_get_inkPressure ---------------------------------------
-INT32 fluid_get_inkPressure(int no)
+//--- fluid_get_cylinderPres ---------------------------------------
+INT32 fluid_get_cylinderPres(int no)
 {
 	if (no >= 0 && no<SIZEOF(_FluidStatus))
 	{
-		return _FluidStatus[no].presIntTank;
+		return _FluidStatus[no].cylinderPres;
 	}
 	return INVALID_VALUE;
 }

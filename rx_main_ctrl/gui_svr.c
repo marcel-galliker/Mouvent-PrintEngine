@@ -95,7 +95,7 @@ int gui_send_print_queue(UINT32 cmd, SPrintQueueItem *ppq)
 		ppq->state = ppq->state;
 	
 	if (ppq->state<SIZEOF(StateName)) 	TrPrintfL(TRUE, "id=%d, copy=%d, state=%s", ppq->id.id, ppq->id.copy, StateName[ppq->state]);
-	else Error(ERR_CONT, 0, "Programming Error");
+	else Error(ERR_CONT, 0, "Programming Error PrintQueue State=%d", ppq->state);
 	return sok_send_to_clients_2(_HGuiSvr, cmd, sizeof(*ppq), ppq);
 }
 

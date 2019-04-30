@@ -30,6 +30,10 @@ typedef struct
 	INT32	estop_in;
 			#define ESTOP_UNUSED	15	// input for uniused E-STOP
 	INT32	estop_level;
+	INT32	stop_in;
+			#define STOP_UNUSED	15	// input for uniused STOP
+	INT32	stop_level;
+	INT32	dis_mux_in;
 	INT32	checkEncoder;
 } SMovePar;
 
@@ -59,6 +63,7 @@ void	motors_reset(int motors);
 void	motors_start(UINT32 motors, UINT32 errorCheck);	// bitset of motors
 void	motors_stop (UINT32 motorsk);	// bitset of motors
 void	motors_estop(UINT32 motorsk);	// bitset of motors
+void    motor_set_hold_current(int motor);
 int		motor_move_done(int motor);
 int		motors_move_done(int motors);
 int		motor_error(int motor);

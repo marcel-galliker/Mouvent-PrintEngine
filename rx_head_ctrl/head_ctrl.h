@@ -16,6 +16,9 @@
 int ctrl_init(void);
 int ctrl_end(void);
 
+int	ctrl_connected(void);
+int ctrl_printing(void); 
+
 int ctrl_main(int ticks, int menu);
 
 void ctrl_send_file(char *filepath);

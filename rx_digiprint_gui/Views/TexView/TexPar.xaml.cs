@@ -150,13 +150,15 @@ namespace RX_DigiPrint.Views.TexView
                 if (sc)
                 {
                     RW_Flexibility.ID="PAR_SPEED_CORRECTION_RW";
-                    RW_Flexibility.Label="Speed Off";
+                    RW_Flexibility.Label="Speed Offset";
+                    RW_Flexibility.Unit="%";
                     RW_Tension.Unit = "%";
                 }
                 else
                 {
                     RW_Flexibility.ID="PAR_MATERIAL_FLEXIBILITY_RW";
                     RW_Flexibility.Label="Mat Flexibility";
+                    RW_Flexibility.Unit="";
                     RW_Tension.Unit = "N";
                 }
                 _speedcorrection = sc;

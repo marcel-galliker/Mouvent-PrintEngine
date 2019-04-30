@@ -70,9 +70,6 @@
     <ClCompile Include="..\rx_ink_lib\comm.c">
       <Filter>rx_ink_lib</Filter>
     </ClCompile>
-    <ClCompile Include="scales.c">
-      <Filter>Source files</Filter>
-    </ClCompile>
     <ClCompile Include="daisy_chain.c">
       <Filter>Source files</Filter>
     </ClCompile>
@@ -103,12 +100,6 @@
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="..\rx_ink_lib\nios_def_fluid.h">
-      <Filter>rx_ink_lib</Filter>
-    </ClInclude>
-    <ClInclude Include="balance.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\rx_ink_lib\balance_def.h">
       <Filter>rx_ink_lib</Filter>
     </ClInclude>
     <ClInclude Include="..\rx_ink_lib\comm.h">

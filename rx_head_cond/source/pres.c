@@ -28,7 +28,6 @@ static const INT32 ZERO_PRESSURE_OFFSET = 16500;
 //--- types ----------------------------------------
 
 #define BUF_SIZE	        5
-#define CALI_BUF_SIZE       50
 
 typedef void (*set_power_fct)	(int on);
 
@@ -277,6 +276,6 @@ void pres_tick_10ms(void)
     }  
 	else
     {
-        RX_Status.meniscus = (INT32)(RX_Status.pressure_in - ((RX_Status.pressure_in - RX_Status.pressure_out) / 1.81));
+        RX_Status.meniscus = (INT32)(RX_Status.pressure_in - ((RX_Status.pressure_in - RX_Status.pressure_out) / 1.81)) - RX_Config.meniscus0;
     }
 }

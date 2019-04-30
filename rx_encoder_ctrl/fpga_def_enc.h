@@ -29,8 +29,8 @@
 #define ENC_CORR_VALUES_0		0xc0201000	//	UINT32[0x1000]:	Correction Values of Encoder[0]
 #define ENC_CORR_VALUES_1		0xc0202000	//	UINT32[0x1000]:	Correction Values of Encoder[1]
 
-#define SINUS_CORRECTION		0xc0230000	//	UINT32[0x10000]:	SIN (Increments_rev/4)
-#define SINUS_IDENTIFICATION	0xc0240000	//	UINT32[0x10000]:	SIN
+#define SINUS_CORRECTION		0xc0290000	//	UINT32[0x10000]:	SIN (Increments_rev/4)
+#define SINUS_IDENTIFICATION	0xc02D0000	//	UINT32[0x10000]:	SIN
 
 //--- SDriveErr ------------------------------------
 typedef struct
@@ -44,14 +44,14 @@ typedef struct
 //--- SEncErrStatus -----------------------------------------
 typedef struct
 {
-	UINT32	enc_0;			// 0x0600:
-	UINT32	enc_1;			// 0x0604:
-	UINT32	rol_0;			// 0x0608;
-	UINT32	rol_1;			// 0x060c:
-	UINT32	input_0;		// 0x0610;
-	UINT32	input_1;		// 0x0614:
-	UINT32	r_output_0;		// 0x0618;
-	UINT32	r_output_1;		// 0x061c:
+	UINT32	enc_0;					// 0x0600:
+	UINT32	enc_1;					// 0x0604:
+	UINT32	rol_0;					// 0x0608;
+	UINT32	rol_1;					// 0x060c:
+	UINT32	input_0;				// 0x0610;
+	UINT32	input_1;				// 0x0614:
+	UINT32	r_output_0;				// 0x0618;
+	UINT32	r_output_1;				// 0x061c:
 	UINT32	r_corr_in_past_cnt_0;	// 0x0620;
 	UINT32	r_corr_in_past_cnt_1;	// 0x0624;
 } SEncErrStatus;
@@ -59,22 +59,22 @@ typedef struct
 //--- SEncInStatus ----------------------------------------
 typedef struct
 {
-	UINT32	rev_sum;		// 0x0000: Encoder Steps per revolution (inc_revolution wrap)
-	UINT32	i_to_a;			// 0x0004: Time between Index pulse and next edge in signal A
-	UINT32	i_to_b;			// 0x0008: Time between Index pulse and next edge in signal B
-	UINT32	position;		// 0x000c: Actual position of the encoder (32bit wrap)	
-	UINT32	step_time;		// 0x0010: Actual step time
-	UINT32	setp_time_min;	// 0x0014: Minimum step time (can be reset)
-	UINT32	step_time_max;	// 0x0018: Maximum step time (can be reset)
-	UINT32	ident_obs_b1;	// 0x001c
-	UINT32	ident_obs_a1;	// 0x0020
-	UINT32	enc_diff;		// 0x0024
-	UINT32	position_rev;	// 0x0028
-	UINT32	res_2c;			// 0x002c
-	UINT32	res_30;			// 0x0030
-	UINT32	res_34;			// 0x0034
-	UINT32	res_38;			// 0x0038
-	UINT32	res_3c;			// 0x003c
+	UINT32	rev_sum;			// 0x0000: Encoder Steps per revolution (inc_revolution wrap)
+	UINT32	i_to_a;				// 0x0004: Time between Index pulse and next edge in signal A
+	UINT32	i_to_b;				// 0x0008: Time between Index pulse and next edge in signal B
+	UINT32	position;			// 0x000c: Actual position of the encoder (32bit wrap)	
+	UINT32	step_time;			// 0x0010: Actual step time
+	UINT32	setp_time_min;		// 0x0014: Minimum step time (can be reset)
+	UINT32	step_time_max;		// 0x0018: Maximum step time (can be reset)
+	UINT32	ident_obs_b1;		// 0x001c
+	UINT32	ident_obs_a1;		// 0x0020
+	UINT32	enc_diff;			// 0x0024
+	UINT32	position_rev;		// 0x0028
+	UINT32	enc_diff_min;		// 0x002c
+	UINT32	enc_diff_max;		// 0x0030
+	UINT32	enc_diff_overflow;	// 0x0034
+	UINT32	res_38;				// 0x0038
+	UINT32	res_3c;				// 0x003c
  } SEncInStatus;
 
 //--- SEncOutStatus -----------------------------------------
@@ -101,50 +101,72 @@ typedef struct
 //--- SEncStatus ----------------------------------------------
 typedef struct
 {
-	SEncInStatus	encIn[8];		// 0x0000
-	SEncOutStatus	encOut[8];		// 0x0200
-	UINT32			info;			// 0x0400:
-	UINT32			error;			// 0x0404:
-	UINT32			statistics[8];	// 0x0408
-	UINT32			msg_cnt;		// 0x0428:
-	UINT32			msg_cnt_reset;	// 0x042c:
-	SVersion		version;		// 0x0430:
-    UINT32			mem_pointer[4];	// 0x0440: mem_pointer[0]
-//  UINT32			mem_pointer_1;	// 0x0444: mem_pointer[1]
-//  UINT32			mem_pointer_2;	// 0x0448: mem_pointer[2]	
-//  UINT32			mem_pointer_3;	// 0x044c: mem_pointer[3]	
-	UINT32			in_pulse_cnt;	// 0x0450: read after every scan
-	UINT32			out_pulse_cnt;	// 0x0454: read after every scan
-	UINT32			in_end_pos;		// 0x0458: read after every scan
-	UINT32			out_end_pos;	// 0x045C: read after every scan
+	SEncInStatus	encIn[8];				// 0x0000
+	SEncOutStatus	encOut[8];				// 0x0200
+	UINT32			info;					// 0x0400:
+	UINT32			error;					// 0x0404:
+	UINT32			statistics[8];			// 0x0408
+	UINT32			msg_cnt;				// 0x0428:
+	UINT32			msg_cnt_reset;			// 0x042c:
+	SVersion		version;				// 0x0430:
+    UINT32			mem_pointer[4];			// 0x0440: mem_pointer[0]
+//  UINT32			mem_pointer_1;			// 0x0444: mem_pointer[1]
+//  UINT32			mem_pointer_2;			// 0x0448: mem_pointer[2]	
+//  UINT32			mem_pointer_3;			// 0x044c: mem_pointer[3]	
+	UINT32			in_pulse_cnt;			// 0x0450: read after every scan
+	UINT32			out_pulse_cnt;			// 0x0454: read after every scan
+	UINT32			in_end_pos;				// 0x0458: read after every scan
+	UINT32			out_end_pos;			// 0x045C: read after every scan
 	UINT32			stroke_enc_pulse_cnt;	// 0x0460: read after every scan
-	UINT32			stroke_enc_end_pos;	// 0x0464: read after every scan
-	UINT32			stroke_sum_end_pos;	// 0x0468: read after every scan
-	UINT32			dir_change_cnt[2];	// 0x046C: read after every scan
-//	UINT32			dir_change_cnt_1;	// 0x0470: read after every scan
-	UINT32			ab_change_error[4];	// 0x0474: read after every scan
-//	UINT32			ab_change_error_1;	// 0x0478: read after every scan
-//	UINT32			ab_change_error_2;	// 0x047C: read after every scan
-//	UINT32			ab_change_error_3;	// 0x0480: read after every scan
-	UINT32			rol_coeff_at_use[4];// 0x0484: coeff a0 sin rol 0
-//	UINT32			rol_coeff_at_use_1;	// 0x0488: coeff a1 cos rol 0
-//	UINT32			rol_coeff_at_use_2;	// 0x048C: coeff a0 sin rol 1
-//	UINT32			rol_coeff_at_use_3;	// 0x0490: coeff a1 cos rol 1
-	SDriveErr 		drive_err[4];		// 0x0494: 
-//	SDriveErr 		drive_err_1;		// 0x04a4: 
-//	SDriveErr 		drive_err_2;		// 0x04b4: 
-//	SDriveErr 		drive_err_3;		// 0x04c4: 
-	UINT32 		    dig_pg_window_err[8];// 0x04d4
-//	UINT32 		    dig_pg_window_err_1; // 0x04d8
-//	UINT32 		    dig_pg_window_err_2; // 0x04dc
-//	UINT32 		    dig_pg_window_err_3; // 0x04e0
-//	UINT32 		    dig_pg_window_err_4; // 0x04e4
-//	UINT32 		    dig_pg_window_err_5; // 0x04e8
-//	UINT32 		    dig_pg_window_err_6; // 0x04ec
-//	UINT32 		    dig_pg_window_err_7; // 0x04f0
-	UINT32			res[(0x0600 - 0x04F4) / 4];	// 0x04f4
-	SEncErrStatus		err;			// 0x0600 - 0x0624: 
-	UINT32			res_2[(0x0800 - 0x0628) / 4];// 0x0628 .. 0x0800					
+	UINT32			stroke_enc_end_pos;		// 0x0464: read after every scan
+	UINT32			stroke_sum_end_pos;		// 0x0468: read after every scan
+	UINT32			dir_change_cnt[2];		// 0x046C: read after every scan
+//	UINT32			dir_change_cnt_1;		// 0x0470: read after every scan
+	UINT32			ab_change_error[4];		// 0x0474: read after every scan
+//	UINT32			ab_change_error_1;		// 0x0478: read after every scan
+//	UINT32			ab_change_error_2;		// 0x047C: read after every scan
+//	UINT32			ab_change_error_3;		// 0x0480: read after every scan
+	UINT32			rol_coeff_at_use[4];	// 0x0484: coeff a0 sin rol 0
+//	UINT32			rol_coeff_at_use_1;		// 0x0488: coeff a1 cos rol 0
+//	UINT32			rol_coeff_at_use_2;		// 0x048C: coeff a0 sin rol 1
+//	UINT32			rol_coeff_at_use_3;		// 0x0490: coeff a1 cos rol 1
+	SDriveErr 		drive_err[4];			// 0x0494: 
+//	SDriveErr 		drive_err_1;			// 0x04a4: 
+//	SDriveErr 		drive_err_2;			// 0x04b4: 
+//	SDriveErr 		drive_err_3;			// 0x04c4: 
+	UINT32 		    dig_pg_window_err[8];	// 0x04d4
+//	UINT32 		    dig_pg_window_err_1;	// 0x04d8
+//	UINT32 		    dig_pg_window_err_2;	// 0x04dc
+//	UINT32 		    dig_pg_window_err_3;	// 0x04e0
+//	UINT32 		    dig_pg_window_err_4;	// 0x04e4
+//	UINT32 		    dig_pg_window_err_5;	// 0x04e8
+//	UINT32 		    dig_pg_window_err_6;	// 0x04ec
+//	UINT32 		    dig_pg_window_err_7;	// 0x04f0
+	UINT32			drift_w_coeff;			// 0x04f4: 
+	UINT32			rol_corr_pos_0;			// 0x04f8: 
+	UINT32			rol_corr_pos_1; 		// 0x04fC: 
+	UINT32			rol_flags_0;			// 0x0500: 
+	UINT32			rol_flags_1;			// 0x0504: 
+	UINT32			rev_sums_long_0;		// 0x0508: 
+	UINT32			rev_sums_long_1;		// 0x050C: 
+	UINT32			ramp_value_0;			// 0x0510: 
+	UINT32			ramp_value_1;			// 0x0514:
+	UINT32			corr_out_fill_level_0;	// 0x0518: 
+	UINT32			corr_out_fill_level_1;	// 0x051C: 
+	UINT32			corr_out_delays_busy_0;	// 0x0520: 
+	UINT32			corr_out_delays_busy_1;	// 0x0524: 
+	UINT32			corr_out_delays_err_0;	// 0x0528: 
+	UINT32			corr_out_delays_err_1;	// 0x052C:
+	UINT32			curr_ratio_0;			// 0x0530: 
+	UINT32			curr_ratio_1;			// 0x0534: 
+	UINT32			enc_clk_cycles_0;		// 0x0538: 
+	UINT32			enc_clk_cycles_1;		// 0x053c: 	
+	UINT32 		    pg_fifo_empty_err;		// 0x0540
+	UINT32 		    ignored_fifo_empty_err;	// 0x0544
+	UINT32 		    window_fifo_empty_err;	// 0x0548
+	UINT32			res[(0x0600 - 0x054c) / 4];			// 0x054c .. 0x0600
+	SEncErrStatus		err;				// 0x0600 - 0x0624: 
+	UINT32			res_2[(0x0800 - 0x0628) / 4];			// 0x0604 .. 0x0800
 } SEncFpgaStatus;
 
 //--- SEncInCfg ----------------------------------------------------
@@ -203,7 +225,7 @@ typedef struct
 	UINT32	pos_pg_fwd;			// 0x0010:
 	UINT32  pos_pg_bwd;			// 0x0014:
 	UINT32	printgo_n;			// 0x0018:
-	UINT32	fifos_used;			// 0x001c:
+	UINT32	fifos_used;			// 0x001c: 2 Bit
 	UINT32	dig_in_sel;			// 0x0020: select digital input 2bit
 	UINT32	quiet_window;		// 0x0024:
 	UINT32	res_28;			    // 0x0028:
@@ -226,14 +248,23 @@ typedef struct
 	UINT32  avr_coeff_2_unused;		// 0x0014:	-- 0x8 -- 0x10 -- 0x20 -- 0x40 --  0x80 -- 0x100 -- 0x200 -- 0x400 -- 0x800 -- 0x1000 -- 0x2000
 	UINT32	ident_rol_en;			// 0x0018: enables coeff. identification logic in roller correction
 	UINT32	res_1c;					// 0x001c:
-	UINT32	max_a0_var_high;		// 0x0020: Threshold for the variation value, when to switch on correction
-	UINT32	max_a0_var_low;			// 0x0024: Threshold for the variation value, when to switch off correction
-	UINT32	rol_0_new_a0;			// 0x0028: a0 sin coeff for roller 0 correction, overwrites internal coeff !
-	UINT32	rol_0_new_a1;			// 0x002c: a1 cos coeff for roller 0 correction, overwrites internal coeff !
-	UINT32	rol_1_new_a0;			// 0x0030: a0 sin coeff for roller 1 correction, overwrites internal coeff !
-	UINT32	rol_1_new_a1;			// 0x0034: a1 cos coeff for roller 1 correction, overwrites internal coeff !
-	UINT32	space_delay_enc_0;		// 0x0038: pre-build time delay as a constant space delay at output 0
-	UINT32	space_delay_enc_1;		// 0x003c: pre-build time delay as a constant space delay at output 1
+	UINT32	max_a0_var_high;		// 0x0020: Threshold for the variation value, when to switch off correction
+	UINT32	max_a0_var_low;			// 0x0024: Threshold for the variation value, when to switch on correction
+	UINT32	rol_0_new_b1;			// 0x0028: a0 sin coeff for roller 0 correction, overwrites internal coeff ! -- s.16.15 -- if single_sin_en=1 => amp -- s.16.15
+	UINT32	rol_0_new_a1;			// 0x002c: a1 cos coeff for roller 0 correction, overwrites internal coeff ! -- s.16.15 -- if single_sin_en=1 => phase -- in steps per rev
+	UINT32	rol_1_new_b1;			// 0x0030: a0 sin coeff for roller 1 correction, overwrites internal coeff ! -- s.16.15 -- if single_sin_en=1 => amp -- s.16.15
+	UINT32	rol_1_new_a1;			// 0x0034: a1 cos coeff for roller 1 correction, overwrites internal coeff ! -- s.16.15 -- if single_sin_en=1 => phase -- sin steps per rev
+	UINT32	rol_ident_res_shift;	// 0x0038: "000" for 2'000 steps per rev, "111" for 238'000 steps per rev
+	UINT32	res_3c;					// 0x003c: 
+
+	UINT32	single_sin_en;			// 0x0040: flag
+	UINT32	use_internal_ident_en;	// 0x0044: flag
+	UINT32	runnung_avg_coeff;		// 0x0048: flag
+
+	UINT32	rol_2_first;			// 0x004C: flag
+	UINT32	rol_drift_mu_two;		// 0x0050:
+
+	UINT32	subsample_meas;			// 0x0054:
 } SGeneralCfg;
 
 typedef struct
@@ -247,7 +278,7 @@ typedef struct
 
 typedef struct	// 0x3400
 {
-	UINT32	par;	//???
+	UINT32	par;	// linear corr
 	UINT32	res_04;
 	UINT32	res_08;
 	UINT32	res_0c;
@@ -255,19 +286,27 @@ typedef struct	// 0x3400
 	UINT32	res_14;
 	UINT32	res_18;
 	UINT32	res_1c;
+	UINT32	res_20;				// 0x0020:
+	UINT32	res_24;				// 0x0024:
+	UINT32	res_28;				// 0x0028:
+	UINT32	res_2c;				// 0x002c:
+	UINT32	res_30;				// 0x0030:
+	UINT32	res_34;				// 0x0034:
+	UINT32	res_38;				// 0x0038:
+	UINT32	res_3c;				// 0x003c:
 } SEncFpgaCorrPar;
 
 typedef struct	// 0x3000
 {
 	UINT32 res[0x100];
-	SEncFpgaCorrPar par[ENCODER_OUT_CNT];	// 0x3400
+	SEncFpgaCorrPar par[ENCODER_OUT_CNT];	// 0x3400 
 } SEncFpgaCorr;
 
 //--- SEncFpga ---------------------------------------
 typedef struct
 {
-	SEncFpgaStatus	stat;
-	SEncFpgaConfig	cfg;
+	SEncFpgaStatus	stat; // 0x000
+	SEncFpgaConfig	cfg;  // 0x800
 } SEncFpga;
 
 typedef struct

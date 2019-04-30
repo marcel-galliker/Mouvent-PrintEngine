@@ -36,9 +36,9 @@
 #include "conditioner.h"
 
 //--- module globals ---------------------------------------
-static FILE			*_LogFile = NULL;
-static int			_LogTimer;
-static UINT32		_ErrFlags[MAX_HEADS_BOARD];
+static FILE					*_LogFile = NULL;
+static int					_LogTimer;
+static SConditionerCfg_mcu	_CfgBackup[MAX_HEADS_BOARD];
 
 SFpgaHeadBoardCfg	FpgaCfg;
 SVersion			_FileVersion;
@@ -58,6 +58,7 @@ static void _cond_preslog(int ticks);
 int cond_init(void)
 {	
 	int i;
+	static int _reload=FALSE;
 	
 	cond_error_reset();
 		
@@ -75,6 +76,8 @@ int cond_init(void)
 	
 	rx_sleep(1000); // give NIOS time to update versions
 
+	Error(LOG, 0, "cond_init reload=%d", _reload);
+	
 	#ifdef DEBUG
 	if (arg_offline) 
 		_cond_load(PATH_BIN_HEAD FILENAME_HEAD_COND);
@@ -82,9 +85,19 @@ int cond_init(void)
 		_cond_load(PATH_BIN_HEAD FILENAME_HEAD_COND);
 	#endif
 	
-	if (arg_offline)
+	if(arg_offline)
 	{
-		for (i=0; i<MAX_HEADS_BOARD; i++) cond_ctrlMode(i, ctrl_print);
+		for(i = 0; i < MAX_HEADS_BOARD; i++) cond_ctrlMode(i, ctrl_print);		
+	}
+	else 
+	{
+		for (i=0; i<MAX_HEADS_BOARD; i++)
+			memcpy(&_NiosMem->cfg.cond[i], &_CfgBackup[i], sizeof(_NiosMem->cfg.cond[i]));
+
+		if (!_reload) 
+		{
+			for(i = 0; i < MAX_HEADS_BOARD; i++) cond_ctrlMode(i, ctrl_undef);						
+		}
 	}
 	
 	/*
@@ -95,6 +108,21 @@ int cond_init(void)
 	}
 	*/
 	
+	_reload=TRUE;
+			
+	return REPLY_OK;
+}
+
+//--- cond_end --------------------------------
+int cond_end(void)
+{
+	if(_NiosMem!=NULL) 
+	{
+		int headNo;
+		for(headNo=0; headNo<MAX_HEADS_BOARD; headNo++)
+			memcpy(&_CfgBackup[headNo],&_NiosMem->cfg.cond[headNo],sizeof(_CfgBackup[headNo]));		
+	}
+	else memset(_CfgBackup, 0, sizeof(_CfgBackup));
 	return REPLY_OK;
 }
 
@@ -102,7 +130,7 @@ int cond_init(void)
 void cond_shutdown(void)
 {
 	int i;
-	for (i=0; i<MAX_HEADS_BOARD; i++) cond_ctrlMode(i, ctrl_shutdown);		
+	for (i=0; i<MAX_HEADS_BOARD; i++) cond_ctrlMode(i, ctrl_off);		
 }
 
 //--- cond_error_reset -----------------------------------------
@@ -110,8 +138,11 @@ void cond_error_reset(void)
 {
 	int i;
 	
-	memset(_ErrFlags, 0, sizeof(_ErrFlags));
-	_ErrLevel = LOG_TYPE_UNDEF;
+	for (i=0; i<SIZEOF(RX_HBStatus[0].head); i++) 
+	{
+		RX_HBStatus[0].head[i].err  = 0;
+		RX_HBStatus[0].head[i].warn = 0;
+	}
 		
 	_ErrorDelay = rx_get_ticks()+ERROR_DELAY;
 	if (_NiosMem!=NULL)
@@ -145,7 +176,7 @@ static void _cond_preslog(int ticks)
 {
 	int no=0;
 
-	if (!_plog_on) return;
+	if (!_plog_on || _NiosMem==NULL) return;
 	
 	//--- log while in print mode ---------------------
 	
@@ -238,6 +269,7 @@ void cond_error_check(void)
 	int head;
 	ELogItemType level=LOG_TYPE_UNDEF;
 	SVersion version;
+	SConditionerStat_mcu	*pstat;
 	
 	for (head=0; head<MAX_HEADS_BOARD; head++)
 	{		
@@ -252,46 +284,58 @@ void cond_error_check(void)
 		_ErrorDelay = 0;
     	if (RX_HBConfig.head[head].enabled == dev_on)
     	{
+	    	int abort = (_NiosMem->cfg.cond[head].mode==ctrl_off) ? LOG_TYPE_WARN : LOG_TYPE_ERROR_ABORT;
         	char *headName = RX_HBConfig.head[head].name;
+	    	pstat = &_NiosStat->cond[head];
+	
+	    	UINT32 * perr  = (UINT32*)&RX_HBStatus[0].head[head].err;
+	    	UINT32 * pwrn = (UINT32*)&RX_HBStatus[0].head[head].warn;
 			
         	if (!_NiosStat->cond[head].info.connected) {		
-            	ErrorFlag(level=ERR_ABORT, &_ErrFlags[head], 1 << 0, 0, "Conditioner %s: not connected", headName); continue;
+            	ErrorFlag(level=ERR_ABORT, perr, 1 << 0, 0, "Conditioner %s: not connected", headName); continue;
         	}
-        	if (_NiosStat->cond[head].error&COND_ERR_connection_lost)	{		ErrorFlag(level=ERR_ABORT, &_ErrFlags[head], COND_ERR_connection_lost,			0, "Conditioner %s: connection lost", headName); continue;}
-        	if (_NiosStat->cond[head].error&COND_ERR_status_struct_missmatch)	ErrorFlag(level=LOG,       &_ErrFlags[head], COND_ERR_status_struct_missmatch,	0, "Conditioner %s: status_struct_missmatch", headName);
-        	if (_NiosStat->cond[head].error&COND_ERR_version)					ErrorFlag(level=ERR_ABORT, &_ErrFlags[head], COND_ERR_version,					0, "Conditioner %s: wrong version", headName);
-        	if (_NiosStat->cond[head].error&COND_ERR_alive)						ErrorFlag(level=ERR_ABORT, &_ErrFlags[head], COND_ERR_alive,					0, "Conditioner %s: alive error %d(%d)", headName, _NiosStat->cond[head].alive, _NiosMem->cfg.cond[head].alive);
-        	if (_NiosStat->cond[head].error&COND_ERR_pres_in_hw)				ErrorFlag(level=ERR_ABORT, &_ErrFlags[head], COND_ERR_pres_in_hw,				0, "Conditioner %s: Pessure IN Sensor Error", headName);
-        	if (_NiosStat->cond[head].error&COND_ERR_pres_out_hw)				ErrorFlag(level=ERR_ABORT, &_ErrFlags[head], COND_ERR_pres_out_hw,				0, "Conditioner %s: Pessure OUT Sensor Error", headName);
-        	if (_NiosStat->cond[head].error&COND_ERR_pump_hw)					ErrorFlag(level=ERR_ABORT, &_ErrFlags[head], COND_ERR_pump_hw,					0, "Conditioner %s: Pump Error", headName);
-        	if (_NiosStat->cond[head].error&COND_ERR_temp_tank_not_changing)	ErrorFlag(level=LOG,       &_ErrFlags[head], COND_ERR_temp_tank_not_changing,	0, "Conditioner %s: temp_tank_not_changing", headName);
-        	if (_NiosStat->cond[head].error&COND_ERR_temp_head_not_changing)	ErrorFlag(level=LOG,       &_ErrFlags[head], COND_ERR_temp_head_not_changing,	0, "Conditioner %s: temp_head_not_changing", headName);
-        	if (_NiosStat->cond[head].error&COND_ERR_temp_head_overheat)		ErrorFlag(level=ERR_ABORT, &_ErrFlags[head], COND_ERR_temp_head_overheat,		0, "Conditioner %s: temp_head_overheat", headName);
-        	if (_NiosStat->cond[head].error&COND_ERR_temp_ink_overheat)			ErrorFlag(level=ERR_ABORT, &_ErrFlags[head], COND_ERR_temp_ink_overheat,		0, "Conditioner %s: temp_ink_overheat", headName);
-        	if (_NiosStat->cond[head].error&COND_ERR_temp_inlet_hw)				ErrorFlag(level=ERR_CONT,  &_ErrFlags[head], COND_ERR_temp_inlet_hw,			0, "Conditioner %s: inlet thermistor hardware", headName);
-        	if (_NiosStat->cond[head].error&COND_ERR_temp_heater_hw)			ErrorFlag(level=ERR_CONT,  &_ErrFlags[head], COND_ERR_temp_heater_hw,			0, "Conditioner %s: heater thermistor hardware", headName);
-        	if (_NiosStat->cond[head].error&COND_ERR_temp_head_hw)				ErrorFlag(level=WARN,	   &_ErrFlags[head], COND_ERR_temp_head_hw,				0, "Conditioner %s: head temp sensor hardware", headName);				
-        	if (_NiosStat->cond[head].error&COND_ERR_temp_tank_falling)			ErrorFlag(level=ERR_CONT,  &_ErrFlags[head], COND_ERR_temp_tank_falling,		0, "Conditioner %s: temp_tank_falling", headName);
-        	if (_NiosStat->cond[head].error&COND_ERR_temp_tank_too_low)		    ErrorFlag(level=ERR_CONT,  &_ErrFlags[head], COND_ERR_temp_tank_too_low,		0, "Conditioner %s: temp_tank_too_low", headName);
-        	if (_NiosStat->cond[head].error&COND_ERR_p_in_too_high)				ErrorFlag(level=WARN,      &_ErrFlags[head], COND_ERR_p_in_too_high,			0, "Conditioner %s: input pressure too high", headName);
-        	if (_NiosStat->cond[head].error&COND_ERR_p_out_too_high)			ErrorFlag(level=ERR_ABORT, &_ErrFlags[head], COND_ERR_p_out_too_high,			0, "Conditioner %s: output pressure too high", headName);
+        	if (_NiosStat->cond[head].error&COND_ERR_connection_lost)	{		ErrorFlag(level=ERR_ABORT,	perr, COND_ERR_connection_lost,			0, "Conditioner %s: connection lost", headName); continue;}
+        	if (_NiosStat->cond[head].error&COND_ERR_status_struct_missmatch)	ErrorFlag(level=LOG,		pwrn, COND_ERR_status_struct_missmatch,	0, "Conditioner %s: status_struct_missmatch", headName);
+        	if (_NiosStat->cond[head].error&COND_ERR_version)					ErrorFlag(level=ERR_ABORT,	perr, COND_ERR_version,					0, "Conditioner %s: wrong version", headName);
+        	if (_NiosStat->cond[head].error&COND_ERR_alive)						ErrorFlag(level=ERR_CONT,	perr, COND_ERR_alive,					0, "Conditioner %s: alive error %d(%d)", headName, _NiosStat->cond[head].aliveStat, _NiosStat->cond[head].aliveCfg);
+        	if (_NiosStat->cond[head].error&COND_ERR_pres_in_hw)				ErrorFlag(level=ERR_ABORT,	perr, COND_ERR_pres_in_hw,				0, "Conditioner %s: Pessure IN Sensor Error", headName);
+        	if (_NiosStat->cond[head].error&COND_ERR_pres_out_hw)				ErrorFlag(level=ERR(abort), perr, COND_ERR_pres_out_hw,				0, "Conditioner %s: Pessure OUT Sensor Error", headName);
+        	if (_NiosStat->cond[head].error&COND_ERR_pump_hw)					ErrorFlag(level=ERR_ABORT,  perr, COND_ERR_pump_hw,					0, "Conditioner %s: Pump Error", headName);
+        	if (_NiosStat->cond[head].error&COND_ERR_temp_tank_not_changing)	ErrorFlag(level=LOG,        pwrn, COND_ERR_temp_tank_not_changing,	0, "Conditioner %s: temp_tank_not_changing", headName);
+        	if (_NiosStat->cond[head].error&COND_ERR_temp_head_not_changing)	ErrorFlag(level=LOG,        pwrn, COND_ERR_temp_head_not_changing,	0, "Conditioner %s: temp_head_not_changing", headName);
+        	if (_NiosStat->cond[head].error&COND_ERR_temp_head_overheat)		ErrorFlag(level=ERR_ABORT,  perr, COND_ERR_temp_head_overheat,		0, "Conditioner %s: temp_head_overheat", headName);
+        	if (_NiosStat->cond[head].error&COND_ERR_temp_ink_overheat)			ErrorFlag(level=ERR_ABORT,  perr, COND_ERR_temp_ink_overheat,		0, "Conditioner %s: temp_ink_overheat", headName);
+        	if (_NiosStat->cond[head].error&COND_ERR_temp_inlet_hw)				ErrorFlag(level=ERR_CONT,	perr, COND_ERR_temp_inlet_hw,			0, "Conditioner %s: inlet thermistor hardware", headName);
+        	if (_NiosStat->cond[head].error&COND_ERR_temp_heater_hw)			ErrorFlag(level=ERR_CONT,	perr, COND_ERR_temp_heater_hw,			0, "Conditioner %s: heater thermistor hardware", headName);
+        	if (_NiosStat->cond[head].error&COND_ERR_temp_head_hw)				ErrorFlag(level=WARN,		pwrn, COND_ERR_temp_head_hw,			0, "Conditioner %s: head temp sensor hardware", headName);				
+        	if (_NiosStat->cond[head].error&COND_ERR_temp_tank_falling)			ErrorFlag(level=ERR_CONT,	perr, COND_ERR_temp_tank_falling,		0, "Conditioner %s: temp_tank_falling", headName);
+        	if (_NiosStat->cond[head].error&COND_ERR_temp_tank_too_low)		    ErrorFlag(level=ERR_CONT,	perr, COND_ERR_temp_tank_too_low,		0, "Conditioner %s: temp_tank_too_low", headName);
+        	if (_NiosStat->cond[head].error&COND_ERR_p_in_too_high)				ErrorFlag(level=WARN,		pwrn, COND_ERR_p_in_too_high,			0, "Conditioner %s: input pressure too high", headName);
+        	if (_NiosStat->cond[head].error&COND_ERR_p_out_too_high)			ErrorFlag(level=ERR_ABORT,	perr, COND_ERR_p_out_too_high,			0, "Conditioner %s: output pressure too high", headName);
+        	if (_NiosStat->cond[head].error&COND_ERR_pump_no_ink)				
+	        	ErrorFlag(level=WARN,      perr, COND_ERR_pump_no_ink,				0, "Conditioner %s: no ink: actVal=%d, setVal=%d, delay=%d, sum=%d", headName, pstat->pressure_out, pstat->pid_setval, pstat->pid_delay, pstat->pid_sum);
+	    	/*
 	    	if (_NiosStat->cond[head].error&COND_ERR_pump_no_ink)				
 	    	{
-		    	if (ErrorFlag(level = ERR_ABORT, &_ErrFlags[head], COND_ERR_pump_no_ink, 0, "Conditioner %s: no ink", headName)) 
-		    		_set_fluid_off(head);
+		    	if (ErrorFlag(level = WARN, perr, COND_ERR_pump_no_ink, 0, "Conditioner %s: no ink", headName)) 
+		    		cond_ctrlMode(head, ctrl_off);
 		    }
-	    	if (_NiosStat->cond[head].error&COND_ERR_pump_watchdog)				ErrorFlag(level=ERR_ABORT, &_ErrFlags[head], COND_ERR_pump_watchdog,			0, "Conditioner %s: pump watchdog", headName);
+		    */
+	    	if (_NiosStat->cond[head].error&COND_ERR_pump_watchdog)				ErrorFlag(level=ERR_ABORT, perr, COND_ERR_pump_watchdog,			0, "Conditioner %s: pump watchdog", headName);
         	if (_NiosStat->cond[head].error&COND_ERR_meniscus)					
 	        { 
-		        if (ErrorFlag(level=ERR_ABORT, &_ErrFlags[head], COND_ERR_meniscus,	 0, "Conditioner %s: meniscus error", headName))
-					_set_fluid_off(head);
+		        cond_ctrlMode(head, ctrl_error);
+//		        if (ErrorFlag(level=ERR_ABORT, perr, COND_ERR_meniscus,	 0, "Conditioner %s: meniscus error", headName))
+//					_set_fluid_off(head);
+			        
+		        ErrorFlag(level=ERR_ABORT, perr, COND_ERR_meniscus,	 0, "Conditioner %s: meniscus error", headName);
 			}
-//        	if (_NiosStat->cond[head].error&COND_ERR_sensor_offset)			    ErrorFlag(level=LOG,	   &_ErrFlags[head], COND_ERR_sensor_offset,			0, "Conditioner %s: sensors not calibrated", headName);
-	    	if (_NiosStat->cond[head].error&COND_ERR_temp_heater_overheat)		ErrorFlag(level=WARN,      &_ErrFlags[head], COND_ERR_temp_heater_overheat,		0, "Conditioner %s: heater overheated", headName);
-        	if (_NiosStat->cond[head].error&COND_ERR_download)					ErrorFlag(level=WARN,	   &_ErrFlags[head], COND_ERR_download,					0, "Conditioner %s: download", headName);				
-        	if (_NiosStat->cond[head].error&COND_ERR_power_24V)					ErrorFlag(level=ERR_CONT,  &_ErrFlags[head], COND_ERR_power_24V,				0, "Conditioner %s: 24V Power Supply Overcurrent", headName);				
-        	if (_NiosStat->cond[head].error&COND_ERR_power_heater)				ErrorFlag(level=WARN,      &_ErrFlags[head], COND_ERR_power_heater,				0, "Conditioner %s: heater Overcurrent", headName);				
-        	if (_NiosStat->cond[head].error&COND_ERR_flush_failed)				ErrorFlag(level=ERR_ABORT, &_ErrFlags[head], COND_ERR_flush_failed,				0, "Conditioner %s: flush failed", headName);
+//        	if (_NiosStat->cond[head].error&COND_ERR_sensor_offset)			    ErrorFlag(level=LOG,	   perr, COND_ERR_sensor_offset,			0, "Conditioner %s: sensors not calibrated", headName);
+	    	if (_NiosStat->cond[head].error&COND_ERR_temp_heater_overheat)		ErrorFlag(level=WARN,      pwrn, COND_ERR_temp_heater_overheat,		0, "Conditioner %s: heater overheated", headName);
+        	if (_NiosStat->cond[head].error&COND_ERR_download)					ErrorFlag(level=WARN,	   pwrn, COND_ERR_download,					0, "Conditioner %s: download", headName);				
+        	if (_NiosStat->cond[head].error&COND_ERR_power_24V)					ErrorFlag(level=ERR_CONT,  perr, COND_ERR_power_24V,				0, "Conditioner %s: 24V Power Supply Overcurrent", headName);				
+        	if (_NiosStat->cond[head].error&COND_ERR_power_heater)				ErrorFlag(level=WARN,      pwrn, COND_ERR_power_heater,				0, "Conditioner %s: heater Overcurrent", headName);				
+        	if (_NiosStat->cond[head].error&COND_ERR_flush_failed)				ErrorFlag(level=ERR_ABORT, perr, COND_ERR_flush_failed,				0, "Conditioner %s: flush failed", headName);
 	    	
 	    	if (level>_ErrLevel)
 	    		_ErrLevel = level;
@@ -481,33 +525,33 @@ void cond_set_param(int headNo, char param, int value)
 
 	for (i=0; i<MAX_HEADS_BOARD; i++)
 	{
-		_NiosMem->cfg.cond[i].controller_P		= RX_NiosStat.cond[i].controller_P;
-		_NiosMem->cfg.cond[i].controller_I		= RX_NiosStat.cond[i].controller_I;
-		_NiosMem->cfg.cond[i].controller_D		= RX_NiosStat.cond[i].controller_D;
-		_NiosMem->cfg.cond[i].controller_offset = RX_NiosStat.cond[i].controller_offset;		
+		_NiosMem->cfg.cond[i].pid_P		= RX_NiosStat.cond[i].pid_P;
+		_NiosMem->cfg.cond[i].pid_I		= RX_NiosStat.cond[i].pid_I;
+		_NiosMem->cfg.cond[i].pid_D		= RX_NiosStat.cond[i].pid_D;
+		_NiosMem->cfg.cond[i].pid_offset= RX_NiosStat.cond[i].pid_offset;		
 	}
 	
 	switch (param)
     {
     	case 'm':
             if (headNo < MAX_HEADS_BOARD)              {_NiosMem->cfg.cond[headNo].pressure_out = value; }
-            else for (i = 0; i < MAX_HEADS_BOARD; i++) {_NiosMem->cfg.cond[i].pressure_out = value; }
+            else for (i = 0; i < MAX_HEADS_BOARD; i++) {_NiosMem->cfg.cond[     i].pressure_out = value; }
             break;
         case 'P':
-            if (headNo < MAX_HEADS_BOARD)		       {_NiosMem->cfg.cond[headNo].controller_P = value; _NiosMem->cfg.cond[headNo].cmd.set_pid = TRUE;}
-            else for (i = 0; i < MAX_HEADS_BOARD; i++) {_NiosMem->cfg.cond[i].controller_P = value; _NiosMem->cfg.cond[i].cmd.set_pid = TRUE;}
+            if (headNo < MAX_HEADS_BOARD)		       {_NiosMem->cfg.cond[headNo].pid_P = value; _NiosMem->cfg.cond[headNo].cmd.set_pid = TRUE;}
+            else for (i = 0; i < MAX_HEADS_BOARD; i++) {_NiosMem->cfg.cond[     i].pid_P = value; _NiosMem->cfg.cond[     i].cmd.set_pid = TRUE;}
 			break;
         case 'I':
-            if (headNo < MAX_HEADS_BOARD)		       {_NiosMem->cfg.cond[headNo].controller_I = value; _NiosMem->cfg.cond[headNo].cmd.set_pid = TRUE;}
-            else for (i = 0; i < MAX_HEADS_BOARD; i++) {_NiosMem->cfg.cond[i].controller_I = value; _NiosMem->cfg.cond[i].cmd.set_pid = TRUE;}
+            if (headNo < MAX_HEADS_BOARD)		       {_NiosMem->cfg.cond[headNo].pid_I = value; _NiosMem->cfg.cond[headNo].cmd.set_pid = TRUE;}
+            else for (i = 0; i < MAX_HEADS_BOARD; i++) {_NiosMem->cfg.cond[     i].pid_I = value; _NiosMem->cfg.cond[     i].cmd.set_pid = TRUE;}
             break;
         case 'D':
-            if (headNo < MAX_HEADS_BOARD)		       {_NiosMem->cfg.cond[headNo].controller_D = value; _NiosMem->cfg.cond[headNo].cmd.set_pid = TRUE;}
-            else for (i = 0; i < MAX_HEADS_BOARD; i++) {_NiosMem->cfg.cond[i].controller_D = value; _NiosMem->cfg.cond[i].cmd.set_pid = TRUE;}
+            if (headNo < MAX_HEADS_BOARD)		       {_NiosMem->cfg.cond[headNo].pid_D = value; _NiosMem->cfg.cond[headNo].cmd.set_pid = TRUE;}
+            else for (i = 0; i < MAX_HEADS_BOARD; i++) {_NiosMem->cfg.cond[     i].pid_D = value; _NiosMem->cfg.cond[     i].cmd.set_pid = TRUE;}
             break;
         case 'O':
-            if (headNo < MAX_HEADS_BOARD)		       {_NiosMem->cfg.cond[headNo].controller_offset = value; _NiosMem->cfg.cond[headNo].cmd.set_pid = TRUE;}
-            else for (i = 0; i < MAX_HEADS_BOARD; i++) {_NiosMem->cfg.cond[i].controller_offset = value; _NiosMem->cfg.cond[i].cmd.set_pid = TRUE;}
+            if (headNo < MAX_HEADS_BOARD)		       {_NiosMem->cfg.cond[headNo].pid_offset = value; _NiosMem->cfg.cond[headNo].cmd.set_pid = TRUE;}
+            else for (i = 0; i < MAX_HEADS_BOARD; i++) {_NiosMem->cfg.cond[     i].pid_offset = value; _NiosMem->cfg.cond[     i].cmd.set_pid = TRUE;}
             break;
         }
 }
@@ -515,13 +559,15 @@ void cond_set_param(int headNo, char param, int value)
 //--- cond_set_config ---------------------------------------
 void cond_set_config(int headNo, SConditionerCfg *cfg)
 {	
-	if (headNo<0 || headNo>=MAX_HEADS_BOARD || _NiosMem==NULL) return;
-	_NiosMem->cfg.cond[headNo].pressure_out = cfg->pressure_out;			
-	_NiosMem->cfg.cond[headNo].controller_P = cfg->controller_P;			
-    _NiosMem->cfg.cond[headNo].controller_I = cfg->controller_I;	
-    _NiosMem->cfg.cond[headNo].controller_D = cfg->controller_D;	
-	_NiosMem->cfg.cond[headNo].controller_offset = cfg->controller_offset;
-	_NiosMem->cfg.cond[headNo].cmd.set_pid = TRUE;
+	if (headNo<0 || headNo>=MAX_HEADS_BOARD || _NiosMem==NULL) return;	
+	
+	_NiosMem->cfg.cond[headNo].pressure_out = cfg->pressure_out;		
+	_NiosMem->cfg.cond[headNo].pid_P		= cfg->pid_P;			
+    _NiosMem->cfg.cond[headNo].pid_I		= cfg->pid_I;	
+    _NiosMem->cfg.cond[headNo].pid_D		= cfg->pid_D;	
+	_NiosMem->cfg.cond[headNo].pid_offset	= cfg->pid_offset;
+	_NiosMem->cfg.cond[headNo].meniscus0	= cfg->menicus0;
+	_NiosMem->cfg.cond[headNo].cmd.set_pid	= TRUE;
 }
 
 //--- cond_volume_printed -----------------------------------
@@ -563,12 +609,11 @@ void cond_heater_set(int headNo, int temp, int tempMax)
 }
 
 //--- cond_presout_set -----------------------------------------------
-void cond_presout_set	(int headNo, int meniscus)
+void cond_presout_set	(int headNo, int pressure)
 {
-//	Error(LOG, 0, "cond_presout_set[%d]=%d",  headNo, meniscus);
 	if (_NiosMem && headNo>=0 && headNo<MAX_HEADS_BOARD)
 	{
-		_NiosMem->cfg.cond[headNo].pressure_out  = meniscus;
+		_NiosMem->cfg.cond[headNo].pressure_out  = pressure;
 	}			
 }
 
@@ -619,17 +664,17 @@ void cond_start_log(void)
 #endif // LOG_FLUID
 			
 		fprintf(_LogFile, ";+2.5V;-5V;+5V;-36V;Cooler Temp;Cooler Pressure;Enc. [kHz]");
-    	fprintf(_LogFile, ";Cond Alive 0;Cond Temp 0;Cond Temp Ht 0;Head Temp 0;Heater 0;Pres in 0;Pres in raw 0;Pres out 0;Pres out raw 0;Pump 0;Pump meas 0;Heater pg; Heater flg;24V pg; 24V flg");
-    	fprintf(_LogFile, ";Cond Alive 1;Cond Temp 1;Cond Temp Ht 1;Head Temp 1;Heater 1;Pres in 1;Pres in raw 1;Pres out 1;Pres out raw 1;Pump 1;Pump meas 1;Heater pg; Heater flg;24V pg; 24V flg");
-    	fprintf(_LogFile, ";Cond Alive 2;Cond Temp 2;Cond Temp Ht 2;Head Temp 2;Heater 2;Pres in 2;Pres in raw 2;Pres out 2;Pres out raw 2;Pump 2;Pump meas 2;Heater pg; Heater flg;24V pg; 24V flg");
-    	fprintf(_LogFile, ";Cond Alive 3;Cond Temp 3;Cond Temp Ht 3;Head Temp 3;Heater 3;Pres in 3;Pres in raw 3;Pres out 3;Pres out raw 3;Pump 3;Pump meas 3;Heater pg; Heater flg;24V pg; 24V flg"); 
+    	fprintf(_LogFile, ";Cond Alive 0;Cond Temp 0;Cond Temp Ht 0;Head Temp 0;Heater 0;Pres in 0;Pres out 0;Pump 0;Pump meas 0;Heater pg; Heater flg;24V pg; 24V flg");
+    	fprintf(_LogFile, ";Cond Alive 1;Cond Temp 1;Cond Temp Ht 1;Head Temp 1;Heater 1;Pres in 1;Pres out 1;Pump 1;Pump meas 1;Heater pg; Heater flg;24V pg; 24V flg");
+    	fprintf(_LogFile, ";Cond Alive 2;Cond Temp 2;Cond Temp Ht 2;Head Temp 2;Heater 2;Pres in 2;Pres out 2;Pump 2;Pump meas 2;Heater pg; Heater flg;24V pg; 24V flg");
+    	fprintf(_LogFile, ";Cond Alive 3;Cond Temp 3;Cond Temp Ht 3;Head Temp 3;Heater 3;Pres in 3;Pres out 3;Pump 3;Pump meas 3;Heater pg; Heater flg;24V pg; 24V flg"); 
 		fprintf(_LogFile, "\n");
 		fflush(_LogFile);
-		printf("\n--- Start log ---\n");
+		TrPrintfL(TRUE, "\n--- Start log ---\n");
 	}
 	else
 	{
-		printf("\n--- File open error! ---\n");
+		TrPrintfL(TRUE, "\n--- File open error! ---\n");
 	}
 	
 	rx_sleep(1500);
@@ -644,8 +689,7 @@ static void _write_log(void)
 		if (_LogFile != NULL)
 		{
 			fprintf(_LogFile, "%lu;", _NiosStat->alive);
-    		// todo FPGA temp in log
-			fprintf(_LogFile, "%d;%d;", _NiosStat->headcon_amc_temp, 0);
+			fprintf(_LogFile, "%d;%d;", _NiosStat->headcon_amc_temp, (RX_FpgaStat.temp - 128)*1000);
 			
 #ifdef LOG_FLUID
 			// Fluid sensors
@@ -675,8 +719,8 @@ static void _write_log(void)
 				fprintf(_LogFile, "%lu;", _NiosStat->cond[i].tempHeater);
 				fprintf(_LogFile, "%lu;", _NiosStat->head_temp[i]);
 				fprintf(_LogFile, "%lu;", _NiosStat->cond[i].heater_percent);
-				fprintf(_LogFile, "%lu;", _NiosStat->cond[i].pressure_in);
-				fprintf(_LogFile, "%lu;", _NiosStat->cond[i].pressure_out);
+				fprintf(_LogFile, "%d.%d;", _NiosStat->cond[i].pressure_in/10, abs(_NiosStat->cond[i].pressure_in)%10);
+				fprintf(_LogFile, "%d.%d;", _NiosStat->cond[i].pressure_out/10, abs(_NiosStat->cond[i].pressure_out)%10);
 				fprintf(_LogFile, "%lu;", _NiosStat->cond[i].pump);
 				fprintf(_LogFile, "%lu;", _NiosStat->cond[i].pump_measured);
 				fprintf(_LogFile, "%d;%d;", _NiosStat->cond[i].gpio_state.heater_pg, _NiosStat->cond[i].gpio_state.heater_flg);

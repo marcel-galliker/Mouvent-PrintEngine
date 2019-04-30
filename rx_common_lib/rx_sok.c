@@ -95,7 +95,6 @@ typedef struct
 	UINT32		port;
 } SRxRawSocket;
 
-
 // static HANDLE 	sok_mutex=NULL;
 
 //--- prototypes -------------------------------------------------------------------
@@ -182,6 +181,12 @@ int	sok_get_ifconfig(const char *ifname, SIfConfig *config)
 int	sok_set_ifconfig(const char *ifname, SIfConfig *config)
 {
 	return REPLY_ERROR;
+}
+
+//--- sok_get_ifcnt ----------------------------
+int	sok_get_ifcnt(const char *grep)
+{
+	return 0;							
 }
 
 //--- sok_get_mac_address ----------------------------------------------------
@@ -311,7 +316,8 @@ int sok_get_ifconfig(const char *ifname, SIfConfig *pcfg)
 				sscanf(str, "address %d.%d.%d.%d", (int*)&pcfg->addr[0], (int*)&pcfg->addr[1], (int*)&pcfg->addr[2], (int*)&pcfg->addr[3]);
 				sscanf(str, "netmask %d.%d.%d.%d", (int*)&pcfg->mask[0], (int*)&pcfg->mask[1], (int*)&pcfg->mask[2], (int*)&pcfg->mask[3]);
 			}
-			else if (strstr(str, ifname)) ret=REPLY_OK;
+			else if (strstr(str, ifname)) 
+				ret=REPLY_OK;
 		}
 		fclose(file);
 	}
@@ -325,17 +331,18 @@ static void _write_config(FILE *out, const char *ifname, SIfConfig *pcfg)
 {
 	if (pcfg->dhcp)
 	{
-	//	fprintf(out, "auto %s\n", ifname);
+		fprintf(out, "auto %s\n", ifname);
 		fprintf(out, "iface %s inet dhcp\n", ifname);						
 	}
-	else
+	else 
 	{
-	//	fprintf(out, "auto %s\n", ifname);
+		if (pcfg->addr[0] || pcfg->addr[1] || pcfg->addr[2] || pcfg->addr[3]) 
+			fprintf(out, "auto %s\n", ifname);
 		fprintf(out, "iface %s inet static\n", ifname);						
 		fprintf(out, "address %d.%d.%d.%d\n", pcfg->addr[0],  pcfg->addr[1],  pcfg->addr[2], pcfg->addr[3]);						
 		fprintf(out, "netmask %d.%d.%d.%d\n", pcfg->mask[0],  pcfg->mask[1],  pcfg->mask[2], pcfg->mask[3]);						
 	}
-	fprintf(out, "\n");
+	fprintf(out, "\n");								
 }
 
 //--- sok_set_ifconfig ---------------------------------------
@@ -343,19 +350,27 @@ int	sok_set_ifconfig(const char *ifname, SIfConfig *pcfg)
 {
 	SIfConfig act;
 	
-	if (sok_get_ifconfig(ifname, &act)!=REPLY_OK) return REPLY_ERROR;
-	if (memcmp(pcfg, &act, sizeof(act)))
+	sok_get_ifconfig(ifname, &act);
+	
+	if (strcmp(pcfg->hostname, act.hostname))
+	{
+		FILE *file;		
+		chmod("/etc/hostname", 0666);
+		file = fopen("/etc/hostname", "wt");
+		if (file!=NULL)
+		{
+			fprintf(file, "%s\n", pcfg->hostname);
+			fclose(file);
+		}
+		Error(LOG, 0, "Write Hostname=>>%s<<", pcfg->hostname);
+	}		
+	
+	if (pcfg->dhcp!=act.dhcp || memcmp(pcfg->addr, act.addr, sizeof(pcfg->addr)) || memcmp(pcfg->mask, act.mask, sizeof(pcfg->mask)))
 	{
 		FILE *file, *out;
 		int i;
 		int found=0;
 		char str[256];
-		file = fopen("/etc/hostname", "wt");
-		if (file!=NULL)
-		{
-			i=fprintf(file, "%s\n", pcfg->hostname);
-			fclose(file);
-		}
 		
 		file = fopen("/etc/network/interfaces", "rt");
 		out =  fopen("/tmp/interfaces", "wt");
@@ -363,22 +378,27 @@ int	sok_set_ifconfig(const char *ifname, SIfConfig *pcfg)
 		{
 			while(fgets(str, sizeof(str), file))
 			{
-				if (found!=1) fwrite(str, 1, strlen(str), out);
-				if (str_start(str, "#")) continue;
-				if (found==1) // found, skip
+				if (found!=1 && str_start(str, "#")) 
 				{
-					if (strlen(str)<5) found=2; 
+					fwrite(str, 1, strlen(str), out);
+					continue;
 				}
-				else if (strstr(str, ifname)) 
+				if (found==0 && strstr(str, ifname)) 
 				{
 					found = 1;
 					_write_config(out, ifname, pcfg);
 				}
+				if (found==1) // found, skip
+				{
+					if(strlen(str)<5) found=2; 
+				}
+				else fwrite(str, 1, strlen(str), out);
 			}
 			if (!found) _write_config(out, ifname, pcfg);
 
 			fclose(file);
 			fclose(out);
+			chmod("/etc/network/int5erfaces", 0666);
 			system("mv /tmp/interfaces /etc/network/interfaces");
 
 			if (pcfg->dhcp)
@@ -397,6 +417,19 @@ int	sok_set_ifconfig(const char *ifname, SIfConfig *pcfg)
 		}
 	}
 	return REPLY_OK;
+}
+
+//--- sok_get_ifcnt -----------------------------------
+int	sok_get_ifcnt(const char *grep)
+{
+	char cmd[64];
+	FILE *f;
+	sprintf(cmd, "ls -A /sys/class/net | grep %s | wc -l", grep);
+	f = popen(cmd, "r");
+	char str[32];
+	fgets(str, sizeof(str), f);
+	pclose(f);
+	return atoi(str);
 }
 
 //--- sok_get_ip_address_num -------------------------------------------------------
@@ -1231,8 +1264,11 @@ int sok_send(RX_SOCKET *socket, void *msg)
 			if(FD_ISSET(socket, &write))
 			{
 				*/
+				int time=rx_get_ticks();
 				sent=send(*socket, (char*)phdr, phdr->msgLen, MSG_NOSIGNAL);
 				if (sent==SOCKET_ERROR) return sok_error(socket);
+				time = rx_get_ticks()-time;
+				if (time>100) Error(ERR_CONT, 0, "sok_send time=%d ms, TelId=0x%08x, len=%d", time, phdr->msgId, phdr->msgLen);
 //			}
 		}
 	}
@@ -1418,7 +1454,7 @@ int sok_send_to_clients_2(HANDLE hserver, INT32 id, UINT32 len, void *data)
 	cnt = sok_send_to_clients(hserver, pmsg);
 	free(pmsg);
 	return cnt;
- }
+}
 
 //--- sok_send_to_clients_telnet ----------------------------------------
 // return:  Client Count

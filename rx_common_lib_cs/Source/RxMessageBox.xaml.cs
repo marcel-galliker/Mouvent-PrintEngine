@@ -8,12 +8,26 @@ namespace RX_Common
     public partial class RxMessageBox : Window
     {
         
+        private static bool _Cancel=false;
+
         //--- YesNo ------------------------------------------------
         static public bool YesNo(string title, string text, MessageBoxImage image, bool defaultResult)
         {     
             RxMessageBox box = new RxMessageBox(title, text, image, defaultResult);
+            box.Button_Question.Visibility = Visibility.Collapsed;
             bool ret = (bool)box.ShowDialog(); 
             return ret;
+        }
+
+        //--- YesNoCancel ------------------------------------------------
+        static public bool? YesNoCancel(string title, string text, MessageBoxImage image, bool defaultResult)
+        {    
+            _Cancel=false;
+            RxMessageBox box = new RxMessageBox(title, text, image, defaultResult);
+            box.Button_Question.Visibility = Visibility.Visible;
+            bool? ret = box.ShowDialog(); 
+            if (_Cancel) return null;
+            return ret ;
         }
 
         //--- constructor ------------------------
@@ -58,6 +72,13 @@ namespace RX_Common
         private void No_Clicked(object sender, RoutedEventArgs e)
         {
             DialogResult = false;
+        }
+
+        //--- Question_Clicked -------------------------------------------------
+        private void Question_Clicked(object sender, RoutedEventArgs e)
+        {
+            _Cancel=true;
+            Close();
         }
     }
 }

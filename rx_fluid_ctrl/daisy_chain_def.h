@@ -60,9 +60,10 @@ typedef struct
 } SAnswerMsg;
 
 //--- devices ---------------------------
+#define LOADCELL_CNT	6
 typedef struct SDevice_Adc
 {
-	INT32	weight[6];
+	INT32	weight[LOADCELL_CNT];
 	INT32	temp;
 } SDevice_Adc; 
 

@@ -113,8 +113,8 @@ int tw8_init(void)
 	{
 		_CFG[i]		 = (STW8_CFG_Regs*)   &_Registers[i][ADDR_CFG - REG_BASE];
 		_Var[i]		 = (STW8_VAR_Regs*)	  &_Registers[i][ADDR_VAR - REG_BASE];
-		_Par_Now[i]		 = (STW8_PAR_Regs*)	  &_Registers[i][ADDR_PAR_NOW - REG_BASE];
-		_Par_Bak[i]		 = (STW8_PAR_Regs*)	  &_Registers[i][ADDR_PAR_BAK - REG_BASE];
+		_Par_Now[i]	 = (STW8_PAR_Regs*)	  &_Registers[i][ADDR_PAR_NOW - REG_BASE];
+		_Par_Bak[i]  = (STW8_PAR_Regs*)	  &_Registers[i][ADDR_PAR_BAK - REG_BASE];
 		_PosSpeed[i] = (STW8_WM_PosRegs*) &_Registers[i][ADDR_POS - REG_BASE];
 	}
 	
@@ -124,8 +124,8 @@ int tw8_init(void)
 	
 	rx_sleep(500); // Wait for Analog-Encoder-Board to be ready
 	
-	tw8_config(0, 60);
-	tw8_config(1, 60);
+	tw8_config(0, 60, printer_TX801);
+	tw8_config(1, 60, printer_TX801);
 	
 	return REPLY_OK;
 }
@@ -173,10 +173,10 @@ int tw8_main(int ticks, int menu)
 int tw8_menu_print(void)
 {
 	term_printf("tw8 --------------------\n");
-	if (!_ShowStatus) term_printf("s: Show TW8 Status\n");
+	if (!_ShowStatus) term_printf("t: Show TW8 Status\n");
 	else			
 	{
-		term_printf("s:	Hide TW8 Status\n");
+		term_printf("t:	Hide TW8 Status\n");
 		term_printf("r: reset errors\n");
 		//term_printf("r<chip> <addr> <data>:	set register (addr and data in hex)\n");
 	}
@@ -189,14 +189,14 @@ int tw8_menu_cmd(char *str)
 	
 	switch (str[0])
 	{
-	case 's':	_ShowStatus = !_ShowStatus; break;
+	case 't':	_ShowStatus = !_ShowStatus; break;
 	case 'r':  tw8_reset_error(); break;
 	}
 	return REPLY_OK;			
 }
 
 //--- tw8_config ---------------------------------
-int	tw8_config(int chip, int speed_mminn)
+int	tw8_config(int chip, int speed_mminn, EPrinterType printerType)
 {
 	STW8_CFG_Regs cfg;
 	memset(&cfg, 0, sizeof(cfg));
@@ -212,7 +212,8 @@ int	tw8_config(int chip, int speed_mminn)
 	cfg.MAIN_DSM.calmp		= 0x00; // 1bit // PWM Generator Clamping
 	
 	// cfg.MAIN_INTER
-	cfg.MAIN_INTER			= 0x7D0; // 16bit // AB Output Resolution in Edges
+	if(rx_def_is_scanning(printerType))	cfg.MAIN_INTER	= 2000; // 16bit // AB Output Resolution in Edges
+	else								cfg.MAIN_INTER	= 1000; // 16bit // AB Output Resolution in Edges
 	
 	// cfg.MAIN_HYST
 	cfg.MAIN_HYST			= 0x0f; // 9bit // hyst = MAIN_HYSTx360/8192 // max 1FF // 0x00;  // Signal Path Output Hysteresis
@@ -256,8 +257,8 @@ int	tw8_config(int chip, int speed_mminn)
 	cfg.ADPT_CFG.doff		= 0x1; // 1bit // Digital Offset
 	cfg.ADPT_CFG.dgain		= 0x1; // 1bit // Digital Gain
 	cfg.ADPT_CFG.dphase		= 0x1; // 1bit // Digital Phase
-	cfg.ADPT_CFG.aoff		= 0x0; // 1bit // Analog Offset
-	cfg.ADPT_CFG.again		= 0x0; // 1bit // Analog Gain
+	cfg.ADPT_CFG.aoff		= 0x1; // 1bit // Analog Offset
+	cfg.ADPT_CFG.again		= 0x1; // 1bit // Analog Gain
 	cfg.ADPT_CFG.lut		= 0x0; // 1bit // Look-Up Table
 	cfg.ADPT_CFG.store		= 0x0; // 1bit // Auto-Storage to EEPROM
 	
@@ -327,7 +328,7 @@ int	tw8_config(int chip, int speed_mminn)
 	par.AOFFC = 0x0;
 	par.AOFFS = 0x0;
 	
-	tw8_write(chip, ADDR_PAR_NOW, sizeof(STW8_PAR_Regs), &par); // Set current Values
+	//tw8_write(chip, ADDR_PAR_NOW, sizeof(STW8_PAR_Regs), &par); // Set current Values
 	
 	UINT8	update_cmd  = 0x2;
 	tw8_write(chip, 0x80B0, sizeof(update_cmd), &update_cmd);
@@ -423,8 +424,8 @@ static void _tw8_display_var(void)
 #define ALL for(chip=0; chip<CHIP_CNT; chip++)
 	
 	term_printf("--- TW8 - VAR-BLOCK -----------------------------\n");
-	_print_addr("MAIN_CFG",		&_Var[0]->STAT_SP.reg);		ALL term_printf("0x%04X  ", _Var[chip]->STAT_SP.reg);	term_printf("\n");
-	_print_addr("STAT_EE",		&_Var[0]->STAT_EE.reg);		ALL term_printf("0x%04X  ", _Var[chip]->STAT_EE.reg);	term_printf("\n");
+	_print_addr("MAIN_CFG",		&_Var[0]->STAT_SP.reg);	ALL term_printf("0x%04X  ", _Var[chip]->STAT_SP.reg);	term_printf("\n");
+	_print_addr("STAT_EE",		&_Var[0]->STAT_EE.reg);	ALL term_printf("0x%04X  ", _Var[chip]->STAT_EE.reg);	term_printf("\n");
 	_print_addr("ADC_SIN",		&_Var[0]->ADC_SIN);		ALL term_printf("0x%04X  ", _Var[chip]->ADC_SIN);	term_printf("\n");
 	_print_addr("ADC_COS",		&_Var[0]->ADC_COS);		ALL term_printf("0x%04X  ", _Var[chip]->ADC_COS);	term_printf("\n");
 	_print_addr("ADC_AMP",		&_Var[0]->ADC_AMP);		ALL term_printf("0x%04X  ", _Var[chip]->ADC_AMP);	term_printf("\n");
@@ -443,7 +444,7 @@ static void _tw8_display_par(void)
 	_print_addr("DGAIN", &_Par_Now[0]->DGAIN); ALL term_printf("0x%04X  ", _Par_Now[chip]->DGAIN); term_printf("\n");
 	_print_addr("DOFFS", &_Par_Now[0]->DOFFS); ALL term_printf("0x%04X  ", _Par_Now[chip]->DOFFS); term_printf("\n");
 	_print_addr("DOFFC", &_Par_Now[0]->DOFFC); ALL term_printf("0x%04X  ", _Par_Now[chip]->DOFFC); term_printf("\n");
-	_print_addr("DPH", &_Par_Now[0]->DPH); ALL term_printf("0x%04X  ", _Par_Now[chip]->DPH); term_printf("\n");
+	_print_addr("DPH",   &_Par_Now[0]->DPH);   ALL term_printf("0x%04X  ", _Par_Now[chip]->DPH);   term_printf("\n");
 	_print_addr("AGAIN", &_Par_Now[0]->AGAIN); ALL term_printf("0x%04X  ", _Par_Now[chip]->AGAIN); term_printf("\n");
 	_print_addr("AOFFS", &_Par_Now[0]->AOFFS); ALL term_printf("0x%04X  ", _Par_Now[chip]->AOFFS); term_printf("\n");
 	_print_addr("AOFFC", &_Par_Now[0]->AOFFC); ALL term_printf("0x%04X  ", _Par_Now[chip]->AOFFC); term_printf("\n");
@@ -452,7 +453,7 @@ static void _tw8_display_par(void)
 	_print_addr("DGAIN", &_Par_Bak[0]->DGAIN); ALL term_printf("0x%04X  ", _Par_Bak[chip]->DGAIN); term_printf("\n");
 	_print_addr("DOFFS", &_Par_Bak[0]->DOFFS); ALL term_printf("0x%04X  ", _Par_Bak[chip]->DOFFS); term_printf("\n");
 	_print_addr("DOFFC", &_Par_Bak[0]->DOFFC); ALL term_printf("0x%04X  ", _Par_Bak[chip]->DOFFC); term_printf("\n");
-	_print_addr("DPH", &_Par_Bak[0]->DPH); ALL term_printf("0x%04X  ", _Par_Bak[chip]->DPH); term_printf("\n");
+	_print_addr("DPH",   &_Par_Bak[0]->DPH);   ALL term_printf("0x%04X  ", _Par_Bak[chip]->DPH);   term_printf("\n");
 	_print_addr("AGAIN", &_Par_Bak[0]->AGAIN); ALL term_printf("0x%04X  ", _Par_Bak[chip]->AGAIN); term_printf("\n");
 	_print_addr("AOFFS", &_Par_Bak[0]->AOFFS); ALL term_printf("0x%04X  ", _Par_Bak[chip]->AOFFS); term_printf("\n");
 	_print_addr("AOFFC", &_Par_Bak[0]->AOFFC); ALL term_printf("0x%04X  ", _Par_Bak[chip]->AOFFC); term_printf("\n");
@@ -528,7 +529,7 @@ static int _write(int chip, BYTE cmdcode, UINT16 addr, BYTE len, void *data)
 	int idx1 = (_FifoInIdx + 1) % FIFO_SIZE;
 	if (idx1 == _FifoOutIdx) 
 	{
-		printf("FIFO Overfilled\n"); 
+		TrPrintfL(TRUE, "FIFO Overfilled\n"); 
 		return REPLY_ERROR;
 	}
 		

@@ -12,10 +12,10 @@ using System.Runtime.InteropServices;
 
 namespace RX_DigiPrint.Models
 {
-    public class StepperCrg : RxBindable
+    public class StepperCfg : RxBindable
     {       
         //--- Constructor ------------------------------------------
-        public StepperCrg()
+        public StepperCfg()
         {
         }
 
@@ -67,7 +67,9 @@ namespace RX_DigiPrint.Models
         {
             get { return _AdjustPos; }
             set { Changed|=SetProperty(ref _AdjustPos, value); }
-        }      
+        }
+
+        public TcpIp.SRobotOffsets[] Robot = new TcpIp.SRobotOffsets[4];
 
         //--- SetStepperCfg ----------------------------------------
         public void SetStepperCfg(TcpIp.SStepperCfgMsg msg)
@@ -77,6 +79,8 @@ namespace RX_DigiPrint.Models
             WipeHeight  = (msg.wipe_height  /1000.0);
             CapHeight   = (msg.cap_height   /1000.0);
             AdjustPos   = (msg.adjust_pos   /1000.0);
+            Robot       = msg.robot;
+            OnPropertyChanged("Robot");
             Changed=false;
             _Init = true;
         }
@@ -92,6 +96,8 @@ namespace RX_DigiPrint.Models
             msg.cap_height   = (Int32)(CapHeight   * 1000);
             msg.adjust_pos   = (Int32)(AdjustPos   * 1000);
             
+            msg.robot        = Robot;
+
             RxGlobals.RxInterface.SendMsg(TcpIp.CMD_SET_STEPPER_CFG, ref msg);
         }        
     }

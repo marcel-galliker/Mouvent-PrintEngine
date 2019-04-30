@@ -32,7 +32,7 @@
         <string>*.mak</string>
         <string>Makefile</string>
       </FileMasks>
-      <TransferNewFilesOnly>true</TransferNewFilesOnly>
+      <TransferNewFilesOnly>false</TransferNewFilesOnly>
       <IncludeSubdirectories>true</IncludeSubdirectories>
       <SelectedDirectories />
       <DeleteDisappearedFiles>false</DeleteDisappearedFiles>
@@ -102,6 +102,7 @@
             <Value>en_US.UTF-8</Value>
           </Record>
         </Records>
+        <EnvironmentSetupFiles />
       </Environment>
       <BackgroundMode xsi:nil="true" />
     </MakeCommandTemplate>
@@ -140,7 +141,7 @@
     <LaunchGDBSettings xsi:type="GDBLaunchParametersNewInstance">
       <DebuggedProgram>$(TargetPath)</DebuggedProgram>
       <GDBServerPort>1938</GDBServerPort>
-      <ProgramArguments>-debug +simuplc +simuencoder -simuchiller</ProgramArguments>
+      <ProgramArguments>-debug -simuplc -simuencoder -simuchiller</ProgramArguments>
     </LaunchGDBSettings>
     <GenerateCtrlBreakInsteadOfCtrlC>false</GenerateCtrlBreakInsteadOfCtrlC>
     <DeploymentTargetPath />

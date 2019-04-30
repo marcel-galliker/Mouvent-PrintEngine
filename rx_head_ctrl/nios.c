@@ -32,6 +32,7 @@
 #include "crc_calc.h"
 #include "rx_threads.h"
 #include "rx_head_ctrl.h"
+#include "putty.h"
 #include "version.h"
 #include "conditioner.h"
 
@@ -58,6 +59,7 @@ static UINT32			_FPWarning;
 int						NIOS_FixedDropSize=0;
 int						NIOS_Droplets=0;
 static int				_NiosReady=FALSE;
+static int				_MaxSpeed;
 
 //--- prototypes -----------------------------------
 
@@ -141,6 +143,9 @@ int nios_init(void)
 int nios_end(void)
 {
 	// required to not damage Print Heads !
+	putty_end();
+	cond_end();
+	
 	_NiosCfg->cmd.shutdown = TRUE;
 	rx_sleep(300);
 	_NiosInit = FALSE;
@@ -225,15 +230,17 @@ int  nios_NiosLoaded(void)
 
 //--- _sample_wf ----------------------------------------
 
-#define WF_OFFSET		-20
-#define ON_OFFSET		  0 // 0.6 탎
-#define OFF_OFFSET		 48 // 0.6 탎
-// #define ALL_ON_OFFSET	 -9	// ALL-ON has to be set 9 cycles before last sub-pulse starts
-#define ALL_ON_OFFSET	 -50	// ALL-ON has to be set 50 cycles before last sub-pulse starts
-#define FP_VALUE_30		1564
+#define OLD_WF_OFFSET		-20
+#define OLD_ON_OFFSET		  0 // 0.6 탎
+#define OLD_OFF_OFFSET		 48 // 0.6 탎
+#define OLD_ALL_ON_OFFSET	 -50	// ALL-ON has to be set 50 cycles before last sub-pulse starts
+#define FP_VALUE_30			1564
 
 static void _sample_wf(int head, SInkDefinition *pink, int subPulses, int fpVoltage, SFpgaHeadCfg *cfg)
 {
+	//--- cutting droplets -------------------
+	// the droplet waveform starts with the trailing edge and ends with the trailing edge of the next droplet
+	
 #define MAX_TIME_WF 8000
 	SWfPoint pts[MAX_WF_POINTS];
 	int i, n, pos, mhz;
@@ -251,6 +258,14 @@ static void _sample_wf(int head, SInkDefinition *pink, int subPulses, int fpVolt
 	int ret;
 	int levels;
 	int value30V;
+	int lastOffPos;
+	int first;
+	int	wf_first_pulse_pos = WF_FIRST_PULSE_POS;
+	int	wf_offset	  = OLD_WF_OFFSET;
+	int on_offset	  = OLD_ON_OFFSET;
+	int off_offset	  = OLD_OFF_OFFSET;
+	int all_on_offset = OLD_ALL_ON_OFFSET;
+	
 	UINT16	voltage[VOLTAGE_SIZE];
 
 	if (!_NiosLoaded) return;
@@ -263,6 +278,15 @@ static void _sample_wf(int head, SInkDefinition *pink, int subPulses, int fpVolt
 		
 	memcpy(&_GreyLevel[head], pink->greyLevel, sizeof(_GreyLevel[head]));
 	
+	if (RX_HBStatus[0].fpgaVersion.build>=1737)
+	{
+		wf_first_pulse_pos = 0;			
+		wf_offset		   = 0;
+		on_offset		   = 0;
+		off_offset		   = 58;
+		all_on_offset	   = -9;
+	}
+	
 	mhz=fpga_fp_clock_mhz();
 	for (i=0; i<MAX_WF_POINTS; i++)
 	{
@@ -270,13 +294,13 @@ static void _sample_wf(int head, SInkDefinition *pink, int subPulses, int fpVolt
 		pts[i].volt = pink->wf[i].volt;		
 	}
 		
-	printf("\n");
-	printf("FIRST_PULSE_POS = %d\n", WF_FIRST_PULSE_POS);
-	printf("WF_OFFSET       = %d\n", WF_OFFSET);
-	printf("ON_OFFSET       = %d\n", ON_OFFSET);
-	printf("OFF_OFFSET      = %d\n", OFF_OFFSET);
-	printf("ALL_ON_OFFSET   = %d\n", ALL_ON_OFFSET);
-	printf("\n");
+	TrPrintfL(trace, "");
+	TrPrintfL(trace, "wf_first_pulse_pos = %d", wf_first_pulse_pos);
+	TrPrintfL(trace, "wf_offset       = %d", wf_offset);
+	TrPrintfL(trace, "on_offset       = %d", on_offset);
+	TrPrintfL(trace, "off_offset      = %d", off_offset);
+	TrPrintfL(trace, "all_on_offset   = %d", all_on_offset);
+	TrPrintfL(trace, "");
 
 	memset(voltage, 0, sizeof(voltage));
 	levels = pink->greyLevel[subPulses];
@@ -295,6 +319,8 @@ static void _sample_wf(int head, SInkDefinition *pink, int subPulses, int fpVolt
 	voltageCnt = 0;
 	subPulsCnt = 0;
 	dropletNo  = 0;
+	lastOffPos = 0;
+	first	   = 0;
 	
 	if (_NiosMem->cfg.cond[head].mode == ctrl_print) 
 	{
@@ -305,12 +331,11 @@ static void _sample_wf(int head, SInkDefinition *pink, int subPulses, int fpVolt
 		
 	for (i=0; i<MAX_WF_POINTS; i++)
 	{
-		p1 = pts[i].pos+shift-cut;
+		p1 = pts[i].pos-first+shift-cut;
 		v1 = pts[i].volt*10;	// calculate in 1/10V to avoid rounding problems
 
 		if (v0==0 && v1>0)
 		{
-//			if (subPulsCnt>=subPulses)
 			dropletNo++;
 			if (subPulsCnt>=allOnDroplet)
 			{
@@ -319,14 +344,14 @@ static void _sample_wf(int head, SInkDefinition *pink, int subPulses, int fpVolt
 			}
 			if (subPulsCnt==0)
 			{
-				while (pos<=WF_FIRST_PULSE_POS)
+				while (pos<wf_first_pulse_pos)
 				{
 					voltage[pos++]=0;
 					p0++;
 					p1++;
 					shift++;
 				}
-				if (trace && shift) printf("wf[%d]: p=%d, pcorr=%d, v=%d --- corrected\n", i-1, pts[i-1].pos, pts[i-1].pos+shift, pts[i-1].volt);
+				if (shift) TrPrintfL(trace, "wf[%d]: p=%d, pcorr=%d, v=%d --- corrected", i-1, pts[i-1].pos, pts[i-1].pos+shift, pts[i-1].volt);
 			}
 			if (startAllOn)
 			{				
@@ -334,42 +359,59 @@ static void _sample_wf(int head, SInkDefinition *pink, int subPulses, int fpVolt
 				p1 = startAllOn + (pts[i].pos-pts[i-1].pos);
 			}
 			cfg->fp[subPulsCnt].on = pos;
-			cfg->fp_allOn		   = pos+ALL_ON_OFFSET; // All on for the last sub-pulse!
+			cfg->fp_allOn		   = pos+all_on_offset; // All on for the last sub-pulse!
 		}
-		else if (v0!=0 && v1==0)
+		else if (v0!=0 && v1==0 && (levels & (0x01<<(dropletNo-1))))
 		{
-			cfg->fp[subPulsCnt].off = p1+OFF_OFFSET;
+			cfg->fp[subPulsCnt].off = lastOffPos = p1+off_offset;
 			if (subPulsCnt<subPulses && !startAllOn)
 				subPulsCnt++;
-			voltageCnt = p1+1+WF_OFFSET;
+			voltageCnt = p1+1+wf_offset;
 		}
-		if (trace) printf("wf[%d]: p=%d, pcorr=%d, v=%d\n", i, pts[i].pos, pts[i].pos+shift, pts[i].volt);
+		TrPrintfL(trace, "wf[%d]: p=%d, pcorr=%d, v=%d", i, pts[i].pos, pts[i].pos+shift, pts[i].volt);
 		if (p1<p0) break;
 		if (p1!=p0)
 		{
-			if (!dropletNo || (levels & (0x01<<(dropletNo-1))))
+			if(v0==0 && v1==0 && subPulsCnt==0 && !first)
 			{
-				for (n=0; pos<=p1; n++, pos++)
-				{
-					if (pos+WF_OFFSET>0) voltage[pos+WF_OFFSET] = ((v0 + (v1-v0) * (pos-p0)/(p1-p0)) * value30V) / 300;					
-				}
-			}	
+				first = p1+1;
+				p1=0;
+			}
 			else
 			{
-				cut += p1-pos;
-				p1=p0;
+				if (!dropletNo || (levels & (0x01<<(dropletNo-1))))
+				{
+					for (n=0; pos<=p1; n++, pos++)
+					{
+						if (pos+wf_offset>0) voltage[pos+wf_offset] = ((v0 + (v1-v0) * (pos-p0)/(p1-p0)) * value30V) / 300;					
+					}
+				}	
+				else
+				{
+					cut += p1-pos;
+					p1=p0;
+				}				
 			}
 		}
 		p0 = p1;
 		v0 = v1;
 	}
-	if (trace) printf("\n");
-		
+
+	TrPrintfL(trace, "");
+	//--- fill waveform ----
+	TrPrintfL(trace, "Adding %d Fillers", lastOffPos-voltageCnt);
+	while (voltageCnt<lastOffPos)
+		voltage[voltageCnt++] = 0;
+			
 	//--- set FPGA values -------------------------
 	cfg->fp_length	  = voltageCnt;
 	cfg->fp_subPulses = subPulsCnt;
-	printf("seq-length: %d\n", cfg->fp_length);
-	printf("sub-pulses: %d\n", cfg->fp_subPulses);
+	double clock=12.500*160/140;
+	double khz=1000000/(voltageCnt*clock);
+	double mmin = khz*25.4/1200.0*60.0;
+	TrPrintfL(TRUE, "Head[%d]: sub-pulses: %d, seq-length: %d, max Speed; %d m/min", head, cfg->fp_subPulses, cfg->fp_length, (int)mmin);
+	
+	if (mmin>_MaxSpeed) _MaxSpeed = mmin;
 	
 	nios_fixed_grey_levels(0, subPulses);
 	
@@ -377,22 +419,22 @@ static void _sample_wf(int head, SInkDefinition *pink, int subPulses, int fpVolt
 	{
 		for (i=0; i<4; i++)
 		{
-			printf("gl[%d]=0x%02x\n", i, cfg->gl_2_pulse[i]);
+			TrPrintfL(TRUE, "gl[%d]=0x%02x", i, cfg->gl_2_pulse[i]);
 		}
-		printf("\n");
+		TrPrintfL(TRUE, "");
 		for (i=0; i<SIZEOF(cfg->fp); i++)
 		{
-			printf("firepulse[%d]: on=%lu, off=%lu\n", i, cfg->fp[i].on, cfg->fp[i].off);
+			TrPrintfL(TRUE, "firepulse[%d]: on=%lu, off=%lu", i, cfg->fp[i].on, cfg->fp[i].off);
 		}
-		printf("AllOn: %d\n", cfg->fp_allOn);
+		TrPrintfL(TRUE, "AllOn: %d", cfg->fp_allOn);
 
 		if (FALSE)
 		{
-			printf("Waveform Sample\n");
-			for (i=0; i<voltageCnt; i++) printf("wf[%d].volt=%d\n", i, voltage[i]);
-			printf("\n");
+			TrPrintfL(TRUE, "Waveform Sample");
+			for (i=0; i<voltageCnt; i++) TrPrintfL(TRUE, "wf[%d].volt=%d", i, voltage[i]);
+			TrPrintfL(TRUE, "");
 		}
-		printf("\n");
+		TrPrintfL(TRUE, "");
 	}
 	
 	fp_set_waveform(head, voltageCnt, voltage);
@@ -437,17 +479,34 @@ void nios_fixed_grey_levels(int fixedDropSize, int maxDropSize)
 //--- nios_setInk ---------------------------------------------
 void nios_setInk(int no, SInkDefinition *pink, int maxDropSize, int fpVoltage)
 {
+	if (no==0) _MaxSpeed=0;
 	if (no>=0 && no<HEAD_CNT)
 	{
 		NIOS_Droplets = maxDropSize;
-		printf("\nSample WaveForm [%d]\n", no);
 		_sample_wf(no, pink, maxDropSize, fpVoltage, FpgaCfg.head[no]);
 		cond_heater_set(no, pink->temp, pink->tempMax);
+		#ifndef USE_HEAD_PRESOUT
 		cond_presout_set(no, pink->meniscus);
-				
+		#endif
 		RX_RGB[no] = pink->colorRGB;
 	}
+	if (no==HEAD_CNT-1) Error(LOG, 0, "MaxSpeed: %d m/min, Dotsize: %d", _MaxSpeed, maxDropSize);
 }
+
+//--- nios_set_firepulse_on ----------------------------------
+void nios_set_firepulse_on(int on)
+{
+	if (_NiosMem && _NiosMem->cfg.cmd.firepulse_on!=on) 
+		_NiosMem->cfg.cmd.firepulse_on = on;
+}
+
+//--- nios_is_firepulse_on ---------------------
+int  nios_is_firepulse_on(void)
+{
+	if (_NiosMem && _NiosMem->stat.powerState==power_all_on) return TRUE;
+	return FALSE;				
+}
+
 
 //--- nios_main --------------------------------
 int  nios_main(int ticks, int menu)
@@ -497,8 +556,8 @@ void nios_check_errors(void)
 		if (_NiosStat->info.cooler_pcb_present)
 		{
 			if (_NiosStat->error.cooler_pressure_hw)	ErrorFlag(ERR_STOP,  (UINT32*)&RX_HBStatus[0].err, err_cooler_pressure, 0, "Cooler pressure sensor hardware");
-			if (_NiosStat->error.cooler_overpressure)	ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err, err_cooler_pressure, 0, "Cooler overpressure");
-			if (_NiosStat->error.cooler_temp_hw)		ErrorFlag(ERR_CONT,  (UINT32*)&RX_HBStatus[0].err, err_therm_cooler,    0, "Cooler Thermistor hardware");
+			if (_NiosStat->error.cooler_overpressure)	ErrorFlag(WARN,		 (UINT32*)&RX_HBStatus[0].err, err_cooler_pressure, 0, "Cooler overpressure");
+			if (_NiosStat->error.cooler_temp_hw)		ErrorFlag(WARN,		 (UINT32*)&RX_HBStatus[0].err, err_therm_cooler,    0, "Cooler Thermistor hardware");
     		if (_NiosStat->error.cooler_overheated)		ErrorFlag(WARN,		 (UINT32*)&RX_HBStatus[0].err, err_therm_cooler,    0, "Cooler Thermistor too hot (%d캜)", _NiosStat->cooler_temp / 1000);
 		}
 		else

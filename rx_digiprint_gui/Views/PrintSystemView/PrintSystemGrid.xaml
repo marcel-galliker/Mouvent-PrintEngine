@@ -41,6 +41,11 @@
         <TextBlock   Grid.Row="2" Grid.Column="0" Text="Heads/Color"/>
         <common:RxNumBox Grid.Row="2" Grid.Column="1" Text="{Binding HeadCnt}"/>
 
+        <!--        
+        <TextBlock   Grid.Row="3" Grid.Column="0" Text="External Data"/>
+        <common:RxNumBox Grid.Row="3" Grid.Column="1" Text="{Binding ExternalData}"/>
+        -->
+        
         <!--
         <TextBlock    Grid.Row="3" Grid.Column="0" Text="Ergosoft Rip IP-Address"/>
         <rx:RxTextBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding EsRip_RipIpAddr}" />

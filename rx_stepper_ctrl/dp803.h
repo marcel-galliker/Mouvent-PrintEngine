@@ -1,6 +1,6 @@
 // ****************************************************************************
 //
-//	DIGITAL PRINTING - lb702.h
+//	DIGITAL PRINTING - dp803.h
 //
 //	Communication between ARM processor and FPGA
 //
@@ -15,10 +15,10 @@
 
 #include "rx_sok.h"
 
-void lb702_init(void);
-int  lb702_menu(void);
-void lb702_main(int ticks, int menu);
+void dp803_init(void);
+int  dp803_menu(void);
+void dp803_main(int ticks, int menu);
 	
-int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata);
+int  dp803_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata);
 
 

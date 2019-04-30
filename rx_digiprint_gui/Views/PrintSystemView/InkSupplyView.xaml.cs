@@ -42,7 +42,10 @@ namespace RX_DigiPrint.Views.PrintSystemView
         {
             Visibility visibility  = (RxGlobals.User.UserType >= EUserType.usr_service) ? Visibility.Visible : Visibility.Collapsed; 
             ServiceGrid.Visibility = visibility;
-            InkType.IsEnabled =  (RxGlobals.User.UserType >= EUserType.usr_service);
+            Line_Calibrate.Visibility = visibility;
+            Button_Calibrate.Visibility = visibility;
+            InkType.IsEnabled       =  (RxGlobals.User.UserType >= EUserType.usr_service);
+            CB_RectoVerso.IsEnabled =  (RxGlobals.User.UserType >= EUserType.usr_service);
         }
 
         //--- UserControl_Loaded -----------------------------------------------
@@ -134,6 +137,9 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 }
                 else MsgPopup.IsOpen=false;
             }
+
+            if (e.PropertyName.Equals("InkType")) FlushButton.DataContext = _InkSupply.InkType;
+
             if (e.PropertyName.Equals("Flushed"))
             {
                 Console.WriteLine("InkSupply[{0}]Flushed changed", _InkSupply.No);
@@ -163,6 +169,12 @@ namespace RX_DigiPrint.Views.PrintSystemView
            CmdPopup.Open(CmdButton);
         }
 
+        //--- Flush_Clicked -------------------------------------
+        private void Flush_Clicked(object sender, RoutedEventArgs e) 
+        {
+            FlushPopup.Open(FlushButton);
+        }
+
         //--- _command --------------------
         private void _command(string name, EFluidCtrlMode cmd)
         {
@@ -172,9 +184,9 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 //--- do this also for other printers? --------------
                 if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf)
                 {
-                    if (name!=null && !RxGlobals.TestTableStatus.Z_in_cap)
+                    if (name!=null) // && !RxGlobals.TestTableStatus.Z_in_cap)
                     {
-                        if (RxMessageBox.YesNo(name, "Printhead NOT in capping position. Continue?",  MessageBoxImage.Question, true)) return;
+                        if (!RxMessageBox.YesNo(name, "Insert purge tray. Continue?",  MessageBoxImage.Question, true)) return;
                     }
                 }
 
@@ -184,8 +196,9 @@ namespace RX_DigiPrint.Views.PrintSystemView
 
                 RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_CTRL_MODE, ref msg);
             }
-            CmdPopup.IsOpen = false;
-            MsgPopup.IsOpen = false;
+            CmdPopup.IsOpen     = false;
+            FlushPopup.IsOpen   = false;
+            MsgPopup.IsOpen     = false;
         }
 
         //--- OnOff_Clicked ----------------------------------------------------------
@@ -198,12 +211,14 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 _command(null, EFluidCtrlMode.ctrl_off); 
         }
 
-        private void ShutDown_Clicked   (object sender, RoutedEventArgs e) {_command(null,      EFluidCtrlMode.ctrl_shutdown);     }
+        private void ShutDown_Clicked   (object sender, RoutedEventArgs e) {_command(null,      EFluidCtrlMode.ctrl_off);          }
         private void Calibrate_Clicked  (object sender, RoutedEventArgs e) {_command(null,      EFluidCtrlMode.ctrl_cal_start);    }
         private void Print_Clicked      (object sender, RoutedEventArgs e) {_command(null,      EFluidCtrlMode.ctrl_print);        }
         private void Fill_Clicked       (object sender, RoutedEventArgs e) {_command(null,      EFluidCtrlMode.ctrl_fill);         }
         private void Empty_Clicked      (object sender, RoutedEventArgs e) {_command("Empty",   EFluidCtrlMode.ctrl_empty);        }
-        private void Flush_Clicked      (object sender, RoutedEventArgs e) {_command("Flush",   EFluidCtrlMode.ctrl_flush);        }
+        private void Flush_Clicked_0    (object sender, RoutedEventArgs e) {_command("Flush",   EFluidCtrlMode.ctrl_flush_night);  }
+        private void Flush_Clicked_1    (object sender, RoutedEventArgs e) {_command("Flush",   EFluidCtrlMode.ctrl_flush_weekend);}
+        private void Flush_Clicked_2    (object sender, RoutedEventArgs e) {_command("Flush",   EFluidCtrlMode.ctrl_flush_week);   }
         private void Purge_Clicked      (object sender, RoutedEventArgs e) {_command("Purge",   EFluidCtrlMode.ctrl_purge_hard);   }
         private void Done_Clicked       (object sender, RoutedEventArgs e) {_command(null, _InkSupply.CtrlMode+1);           }
 
@@ -211,7 +226,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
         private void Pressure_LostFocus(object sender, RoutedEventArgs e)
         {
             double pressure = (sender as RxNumBox).Value;
-            if (pressure!=_InkSupply.PresIntTankSet)
+            if (pressure!=_InkSupply.CylinderPresSet)
             {
                 TcpIp.SValue msg = new TcpIp.SValue(){no=(UInt32)_InkSupply.No-1, value=(Int32)pressure};
                 RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_PRESSURE, ref msg);

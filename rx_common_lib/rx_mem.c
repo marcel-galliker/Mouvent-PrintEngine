@@ -122,6 +122,19 @@ int  rx_mem_cnt	(BYTE *ptr)
 	return cnt;
 }
 
+//--- rx_mem_use_clear -----------------------------------
+void  rx_mem_use_clear(BYTE *ptr)
+{
+	if (ptr)
+	{
+		SBuffer *buf = ((SBuffer*)ptr) - 1;
+		rx_mutex_lock(_Mutex);
+		buf->count=0;
+		rx_mutex_unlock(_Mutex);
+	}
+}
+
+
 //--- rx_mem_free -------------------------------------------------------
 void  rx_mem_free(BYTE **ptr)
 {

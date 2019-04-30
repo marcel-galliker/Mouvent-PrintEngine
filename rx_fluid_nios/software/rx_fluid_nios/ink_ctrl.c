@@ -30,15 +30,11 @@
 #define		MAX_PRINT_PRESSURE_FLUID	300
 #define		MAX_PRESSURE_FLUID			1100
 
-#define		PRESSURE_HEAD_IN_MIN		 5	// minimal pressure -> stop bleeding
-#define		PRESSURE_HEAD_IN_MAX		40	// maximal pressure -> start bleeding
-
 #define 	PRESSURE_MICRO_PURGE		50
 #define 	PRESSURE_SOFT_PURGE			80
 #define 	PRESSURE_PURGE				160
 #define 	PRESSURE_HARD_PURGE			320
 #define 	PRESSURE_FLUSH				1000
-#define 	FLUSH_PUMP_MAX				100
 
 #define 	TIME_MICRO_PURGE			1000
 #define		TIME_SOFT_PURGE				2000
@@ -46,21 +42,14 @@
 // #define 	TIME_HARD_PURGE				5000
 #define 	TIME_HARD_PURGE				10000
 
-#define 	DEGASSING_VACCUUM			800
-#define 	DEGASSING_VACCUUM_MIN		750
-#define		AIR_PUMP_PRESSURE			500
+#define		TIME_CALIBRATE				30000
+
+#define 	DEGASSING_VACCUUM_UV		500
+#define 	DEGASSING_VACCUUM_WB		800
 
 #define 	INK_PUMP_VAL_MAX			511 // 614
 
-#define 	STABILIZE_TIME				300
-
 //--- statics -----------------------------------------------
-typedef struct
-{
-	int step;
-	int time;
-} SCalibrate;
-
 typedef struct
 {
 	SPID_par	pid;	// Reglerstruktur
@@ -70,12 +59,11 @@ typedef struct
 
 	int			inkPresSetCfg;
 	int			bleedTime;
-
-	SCalibrate	cbr;
 } SInkSupply;
 
 static SInkSupply _InkSupply[NIOS_INK_SUPPLY_CNT];
 
+static int	_LungVacc = 0;
 static int	_PurgePressure=0;
 static int	_PurgeTime=0;
 static int	_PurgeNo;
@@ -84,12 +72,12 @@ static int	_ValveOut;
 static int	_FlushPump=0;
 static int	_AirPressureTime=0;
 static int	_PrintingTime[NIOS_INK_SUPPLY_CNT] = {0};
-static int  _InkPressure_10[NIOS_INK_SUPPLY_CNT] = {0};
+static int  _cylinderPres_10[NIOS_INK_SUPPLY_CNT] = {0};
 static UINT32 _LastPumpTicks[NIOS_INK_SUPPLY_CNT] = {0};
 static UINT32 _PumpSpeed1000[NIOS_INK_SUPPLY_CNT] = {0};
 
 //--- calibration -------------------------
-static int	  _CalCnt[NIOS_INK_SUPPLY_CNT];
+static int	  _CalTime[NIOS_INK_SUPPLY_CNT];
 
 //--- prototypes ------------------------
 static int    _degass_ctrl(void);
@@ -109,10 +97,8 @@ static void _trace_pump_ctrl(int pressure);
 
 INT32 abs(INT32 val)
 {
-    if (val < 0)
-        return (-val);
-    else
-        return (val);
+    if (val < 0) return (-val);
+    else		 return (val);
 }
 
 //--- ink_init ------------------------------
@@ -144,7 +130,7 @@ void ink_init(void)
 		_InkSupply[isNo].inkPresSetCfg = INVALID_VALUE;
 		_LastPumpTicks[isNo]		   = _get_pump_ticks(isNo);
 		_PumpSpeed1000[isNo]		   = 0;
-		pRX_Status->ink_supply[isNo].inkPressureSet = INVALID_VALUE; // 150;
+		pRX_Status->ink_supply[isNo].cylinderPresSet = INVALID_VALUE; // 150;
 	}
 	_PurgePressure = 0;
 	_PurgeTime     = 0;
@@ -155,24 +141,29 @@ void ink_init(void)
 //--- ink_tick_10ms -------------------------
 void ink_tick_10ms(void)
 {
-	static const INT32 INK_LOW_PRESSURE    = 50; // mbar
+//	static const INT32 INK_LOW_PRESSURE    = 50; // mbar
 
-	static INT32 _shutdown_timeout = 0;
+//	static INT32 _shutdown_timeout = 0;
 
 	const INT32 cycleTime = 10;
 	INT32 isNo;
 	INT32 i;
 	INT32 empty_pressure = 100 * pRX_Config->headsPerColor;
 
+	_LungVacc = DEGASSING_VACCUUM_WB;
+
 	for(isNo = 0 ; isNo < NIOS_INK_SUPPLY_CNT ; isNo++)
 	{
 		pRX_Status->ink_supply[isNo].fluid_P = _InkSupply[isNo].pid.P;
 
+		//--- lung vacuum: UV when any heater is on ---
+		if (!(pRX_Status->ink_supply[isNo].error & err_heater_board)) _LungVacc = DEGASSING_VACCUUM_UV;
+
 		//---  get new value ---------
-		if (pRX_Config->ink_supply[isNo].inkPressureSet!=_InkSupply[isNo].inkPresSetCfg)
+		if (pRX_Config->ink_supply[isNo].cylinderPresSet!=_InkSupply[isNo].inkPresSetCfg)
 		{
-			pRX_Status->ink_supply[isNo].inkPressureSet = pRX_Config->ink_supply[isNo].inkPressureSet;
-			_InkSupply[isNo].inkPresSetCfg = pRX_Config->ink_supply[isNo].inkPressureSet;
+			pRX_Status->ink_supply[isNo].cylinderPresSet = pRX_Config->ink_supply[isNo].cylinderPresSet;
+			_InkSupply[isNo].inkPresSetCfg               = pRX_Config->ink_supply[isNo].cylinderPresSet;
 		}
 
 		//---  check if message received from printhead ---------------------
@@ -187,11 +178,12 @@ void ink_tick_10ms(void)
 		}
 
 		// overpressure check
-		if (pRX_Status->ink_supply[isNo].inkPressure != INVALID_VALUE
-		&&  pRX_Status->ink_supply[isNo].inkPressure > MAX_PRESSURE_FLUID
+		if (pRX_Status->ink_supply[isNo].cylinderPres != INVALID_VALUE
+		&&  pRX_Status->ink_supply[isNo].cylinderPres > MAX_PRESSURE_FLUID
 		)
 		{
 			if (pRX_Config->ink_supply[isNo].ctrl_mode != ctrl_test
+			&& 	pRX_Config->ink_supply[isNo].ctrl_mode > ctrl_off
 			&& (pRX_Config->ink_supply[isNo].ctrl_mode < ctrl_empty ||  pRX_Config->ink_supply[isNo].ctrl_mode > ctrl_empty+10))
 			{
 				_set_pump_speed(isNo, 0);
@@ -199,7 +191,7 @@ void ink_tick_10ms(void)
 				_InkSupply[isNo].degassing=FALSE;
 				_set_air_pump(FALSE);
 
-				pRX_Status->error |= err_overpressure;
+				pRX_Status->ink_supply[isNo].error |= err_overpressure;
 			}
 		}
 	}
@@ -209,25 +201,26 @@ void ink_tick_10ms(void)
 		switch(pRX_Config->ink_supply[isNo].ctrl_mode)
 		{
 			case ctrl_undef:
-			case ctrl_shutdown_done:
+//			case ctrl_shutdown_done:
 			case ctrl_off:
-					pid_reset(&_InkSupply[isNo].pid);
-					_set_air_valve(isNo, TRUE);
-					_set_bleed_valve(isNo, FALSE);
-					if (_PurgeNo<0) _set_pressure_value(FALSE);
-					if (_PurgeNo<0 || _PurgeNo==isNo)
-					{
-						_set_flush_pump(isNo, FALSE);
-						_set_pump_speed(isNo, 0);
+				pid_reset(&_InkSupply[isNo].pid);
+				_set_air_valve(isNo, TRUE);
+				_set_bleed_valve(isNo, FALSE);
+				if (_PurgeNo<0) _set_pressure_value(FALSE);
+				if (_PurgeNo<0 || _PurgeNo==isNo)
+				{
+					_set_flush_pump(isNo, FALSE);
+					_set_pump_speed(isNo, 0);
 
-						_InkSupply[isNo].degassing=FALSE;
-						if (isNo==_PurgeNo)
-						{
-							_PurgeTime=0;
-							_PurgePressure=0;
-							_PurgeNo = -1;
-						}
+					_InkSupply[isNo].degassing=FALSE;
+					if (isNo==_PurgeNo)
+					{
+						_PurgeTime=0;
+						_PurgePressure=0;
+						_PurgeNo = -1;
 					}
+				}
+				pRX_Status->ink_supply[isNo].flushTime = 0;
 				pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
 				break;
 
@@ -239,7 +232,7 @@ void ink_tick_10ms(void)
 					pRX_Config->ink_supply[isNo].test_airValve		= FALSE;
 					pRX_Config->ink_supply[isNo].test_bleedValve 	= FALSE;
 
-					_pump_ctrl(isNo, pRX_Config->ink_supply[isNo].test_inkPressure);		// ink-pump
+					_pump_ctrl(isNo, pRX_Config->ink_supply[isNo].test_cylinderPres);		// ink-pump
 					_set_pressure_value(pRX_Status->air_pressure < pRX_Config->test_airPressure);	// air-pump
 				}
 				else
@@ -247,7 +240,7 @@ void ink_tick_10ms(void)
 					// --- reset values -----------
 					pRX_Config->ink_supply[isNo].test_airValve  	= FALSE;
 					pRX_Config->ink_supply[isNo].test_bleedValve 	= FALSE;
-					pRX_Config->ink_supply[isNo].test_inkPressure 	= 0;
+					pRX_Config->ink_supply[isNo].test_cylinderPres 	= 0;
 				}
 				pRX_Status->ink_supply[isNo].ctrl_state = ctrl_test;
 				break;
@@ -256,7 +249,7 @@ void ink_tick_10ms(void)
 				_set_air_valve(isNo, FALSE);
 				_set_bleed_valve(isNo, FALSE);
 				_InkSupply[isNo].degassing=pRX_Config->cmd.lung_enabled;
-				_pump_ctrl(isNo, pRX_Status->ink_supply[isNo].inkPressureSet);
+				_pump_ctrl(isNo, pRX_Status->ink_supply[isNo].cylinderPresSet);
 				pRX_Status->ink_supply[isNo].ctrl_state = ctrl_warmup;
 				break;
 
@@ -271,33 +264,36 @@ void ink_tick_10ms(void)
 				break;
 
 			case ctrl_cal_step1:
-				pRX_Status->ink_supply[isNo].inkPressureSet = 100;
-				_pump_ctrl(isNo, pRX_Status->ink_supply[isNo].inkPressureSet);
-				_CalCnt[isNo]   = 0;
+				// pRX_Status->ink_supply[isNo].cylinderPresSet = 100;
+				_pump_ctrl(isNo, pRX_Status->ink_supply[isNo].cylinderPresSet);
+				_CalTime[isNo]   = 0;
 				pRX_Status->ink_supply[isNo].ctrl_state = ctrl_cal_step1;
 				break;
 
 			case ctrl_cal_step2:
-				_pump_ctrl(isNo, pRX_Status->ink_supply[isNo].inkPressureSet);
-				_CalCnt[isNo]++;
-				pRX_Status->ink_supply[isNo].time = _CalCnt[isNo];
-				if (_CalCnt[isNo] == 30*100)
+				_pump_ctrl(isNo, pRX_Status->ink_supply[isNo].cylinderPresSet);
+				_CalTime[isNo]+=cycleTime;
+				pRX_Status->ink_supply[isNo].time = _CalTime[isNo];
+				if (_CalTime[isNo] >= TIME_CALIBRATE)
 				{
-					int diff = -abs(pRX_Config->ink_supply[isNo].meniscusSet) - pRX_Config->ink_supply[isNo].condPresOut;
+					int diff = -abs(pRX_Config->ink_supply[isNo].condPresOutSet) - pRX_Config->ink_supply[isNo].condPresOut;
 					pRX_Status->ink_supply[isNo].diff = diff;
 					if (diff>10 || diff<-10)
 					{
-						pRX_Status->ink_supply[isNo].inkPressureSet += diff/5;
+						diff /= 5;
+						if (diff<-20) diff=-20;
+						if (diff>20) diff=20;
+						pRX_Status->ink_supply[isNo].cylinderPresSet += diff;
 					}
 					else	pRX_Status->ink_supply[isNo].ctrl_state = ctrl_cal_step2;
-					_CalCnt[isNo] = 0;
+					_CalTime[isNo]    = 0;
 				}
 				break;
 
 			case ctrl_cal_step3:
 			case ctrl_cal_step4:
 			case ctrl_cal_done:
-				_pump_ctrl(isNo, pRX_Status->ink_supply[isNo].inkPressureSet);
+				_pump_ctrl(isNo, pRX_Status->ink_supply[isNo].cylinderPresSet);
 				pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
 				break;
 
@@ -313,14 +309,17 @@ void ink_tick_10ms(void)
 				// do not start ramp-up from 0 after purge
 				if (pRX_Status->ink_supply[isNo].ctrl_state != pRX_Config->ink_supply[isNo].ctrl_mode
 				&&  pRX_Status->ink_supply[isNo].ctrl_state != ctrl_purge_step3)
-					_InkPressure_10[isNo] = 0;
+					_cylinderPres_10[isNo] = 0;
 
 				//--- rampup ink_pressure ----------
-				_InkPressure_10[isNo]++;
-				if (_InkPressure_10[isNo] > 10*pRX_Status->ink_supply[isNo].inkPressureSet)
-					_InkPressure_10[isNo] = 10*pRX_Status->ink_supply[isNo].inkPressureSet;
+				/*
+				_cylinderPres_10[isNo]++;
+				if (_cylinderPres_10[isNo] > 10*pRX_Status->ink_supply[isNo].cylinderPresSet)
+					_cylinderPres_10[isNo] = 10*pRX_Status->ink_supply[isNo].cylinderPresSet;
 
-				_pump_ctrl(isNo, _InkPressure_10[isNo]/10);
+				_pump_ctrl(isNo, _cylinderPres_10[isNo]/10);
+				*/
+				_pump_ctrl(isNo, pRX_Status->ink_supply[isNo].cylinderPresSet);
 
 				pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
 				break;
@@ -328,7 +327,7 @@ void ink_tick_10ms(void)
 			case ctrl_bleed:
 				_set_air_valve(isNo, FALSE);
 				_InkSupply[isNo].degassing=pRX_Config->cmd.lung_enabled;
-				_pump_ctrl(isNo, pRX_Status->ink_supply[isNo].inkPressureSet);
+				_pump_ctrl(isNo, pRX_Status->ink_supply[isNo].cylinderPresSet);
 				pRX_Status->ink_supply[isNo].ctrl_state = ctrl_bleed;
 				break;
 /*
@@ -340,38 +339,45 @@ void ink_tick_10ms(void)
 				break;
 */
 			// --- FLUSH --------------------------------------------------
-			case ctrl_flush:
+			case ctrl_flush_night:
+			case ctrl_flush_weekend:
+			case ctrl_flush_week:
 				_set_air_valve(isNo, FALSE);
 				_InkSupply[isNo].degassing = pRX_Config->cmd.lung_enabled;
 				_pump_ctrl(isNo, PRESSURE_FLUSH);
 				_set_flush_pump(isNo, FALSE);
+				pRX_Status->ink_supply[isNo].flushTime = 1000 * pRX_Config->ink_supply[isNo].flushTime[pRX_Config->ink_supply[isNo].ctrl_mode-ctrl_flush_night];
 
-				pRX_Status->ink_supply[isNo].ctrl_state = ctrl_flush;
+				pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
 				break;
 
 			case ctrl_flush_step1:
 				_pump_ctrl(isNo, PRESSURE_FLUSH);
-
 				// ink pressure must be applied on all cylinders so that no flush is pressed back
-				if (pRX_Status->ink_supply[isNo].inkPressure != INVALID_VALUE
-				&&  pRX_Status->ink_supply[isNo].inkPressure >= ((PRESSURE_FLUSH*9)/10))
+				if (pRX_Status->ink_supply[isNo].cylinderPres != INVALID_VALUE
+				&&  pRX_Status->ink_supply[isNo].cylinderPres >= 500)
 					pRX_Status->ink_supply[isNo].ctrl_state = ctrl_flush_step1;
 				break;
 
 			case ctrl_flush_step2:
-				_pump_ctrl(isNo, PRESSURE_FLUSH);
-
 				_InkSupply[isNo].degassing = pRX_Config->cmd.lung_enabled;
-				_set_flush_pump(isNo, TRUE);
-
-				pRX_Status->ink_supply[isNo].ctrl_state = ctrl_flush_step2;
+				if (pRX_Status->ink_supply[isNo].flushTime>0)
+				{
+					_pump_ctrl(isNo, PRESSURE_FLUSH);
+					_set_flush_pump(isNo, TRUE);
+					pRX_Status->ink_supply[isNo].flushTime -= cycleTime;
+					pRX_Status->ink_supply[isNo].ctrl_state = ctrl_flush_step1;
+				}
+				else
+				{
+					_set_pump_speed(isNo, 0);
+					_set_flush_pump(isNo, FALSE);
+					_set_air_valve(isNo, FALSE);
+					pRX_Status->ink_supply[isNo].ctrl_state = ctrl_flush_step2;
+				}
 				break;
 
 			case ctrl_flush_done:
-				_set_pump_speed(isNo, 0);
-				_set_flush_pump(isNo, FALSE);
-				_set_air_valve(isNo, FALSE);
-
 				pRX_Status->ink_supply[isNo].ctrl_state = ctrl_flush_done;
 				break;
 
@@ -382,7 +388,7 @@ void ink_tick_10ms(void)
 
 			case ctrl_purge_step1: // build up pressure
 				_pump_ctrl(isNo, _PurgePressure);
-				if (pRX_Status->ink_supply[isNo].inkPressure >= (90 * _PurgePressure / 100))
+				if (pRX_Status->ink_supply[isNo].cylinderPres >= (90 * _PurgePressure / 100))
 					pRX_Status->ink_supply[isNo].ctrl_state = ctrl_purge_step1;
 				break;
 
@@ -404,9 +410,9 @@ void ink_tick_10ms(void)
 				break;
 
 			case ctrl_purge_step3:
-			//	_pump_ctrl(isNo, pRX_Status->ink_supply[isNo].inkPressureSet);
-				_set_pump_speed(isNo, 0);
-			//	if (pRX_Status->ink_supply[isNo].inkPressure<=pRX_Status->ink_supply[isNo].inkPressureSet)
+			//	_set_pump_speed(isNo, 0);
+				_pump_ctrl(isNo, pRX_Status->ink_supply[isNo].cylinderPresSet);
+				if (pRX_Status->ink_supply[isNo].cylinderPres<=pRX_Status->ink_supply[isNo].cylinderPresSet)
 					pRX_Status->ink_supply[isNo].ctrl_state = ctrl_purge_step3;
 				break;
 
@@ -426,7 +432,7 @@ void ink_tick_10ms(void)
 				break;
 
 			case ctrl_fill_step1:
-				if (pRX_Status->ink_supply[isNo].inkPressure <= pRX_Status->ink_supply[isNo].inkPressureSet/2)
+				if (pRX_Status->ink_supply[isNo].cylinderPres <= pRX_Status->ink_supply[isNo].cylinderPresSet/2)
 					pRX_Status->ink_supply[isNo].ctrl_state = ctrl_fill_step1;
 				break;
 
@@ -434,13 +440,13 @@ void ink_tick_10ms(void)
 				_set_air_valve(isNo, TRUE);
 				_set_bleed_valve(isNo, FALSE);
 				_set_pressure_value(FALSE);
-				_pump_ctrl(isNo, pRX_Status->ink_supply[isNo].inkPressureSet);
+				_pump_ctrl(isNo, pRX_Status->ink_supply[isNo].cylinderPresSet);
 				pRX_Status->ink_supply[isNo].inkPumpSpeed_set = 100;
 				pRX_Status->ink_supply[isNo].ctrl_state = ctrl_fill_step2;
 				break;
 
 			case ctrl_fill_step3:
-				_pump_ctrl(isNo, pRX_Status->ink_supply[isNo].inkPressureSet);
+				_pump_ctrl(isNo, pRX_Status->ink_supply[isNo].cylinderPresSet);
 			//	if (pRX_Status->ink_supply[isNo].inkPumpSpeed_set<90)
 			//		pRX_Status->ink_supply[isNo].ctrl_state = ctrl_fill_step3;
 				break;
@@ -480,6 +486,7 @@ void ink_tick_10ms(void)
 				pRX_Status->ink_supply[isNo].ctrl_state = ctrl_empty_step3;
 				break;
 
+				/*
 			case ctrl_shutdown:
 				//--- stop pumps, open air valve and wait until pressure low ---
 				if (pRX_Config->ink_supply[isNo].ctrl_mode != pRX_Status->ink_supply[isNo].ctrl_state)
@@ -495,7 +502,7 @@ void ink_tick_10ms(void)
 				_PurgePressure = 0;
 				_PurgeNo = -1;
 
-				if (pRX_Status->ink_supply[isNo].inkPressure <= INK_LOW_PRESSURE &&
+				if (pRX_Status->ink_supply[isNo].cylinderPres <= INK_LOW_PRESSURE &&
 					_shutdown_timeout == 0)
 				{
 					_set_air_valve(isNo, FALSE);
@@ -507,6 +514,7 @@ void ink_tick_10ms(void)
 					pRX_Status->ink_supply[isNo].ctrl_state = ctrl_shutdown;
 				}
 				break;
+				*/
 
 			default:
 				_set_flush_pump(isNo, FALSE);
@@ -545,6 +553,7 @@ void ink_tick_1000ms(void)
 {
 	int isNo;
 
+	/*
 	if (tr_debug_on())
 	{
 		int i;
@@ -556,8 +565,8 @@ void ink_tick_1000ms(void)
 
 		trprintf("               "); PRINTF(" ---%d--- ", i); trprintf("\n");
 		trprintf("ctrl_mode:     "); PRINTF("%8s ", FluidCtrlModeStr(pRX_Config->ink_supply[i].ctrl_mode));   trprintf("\n");
-		trprintf("pressure set  :"); PRINTF("  %6s ", value_str(pRX_Status->ink_supply[i].inkPressureSet)); trprintf("\n");
-		trprintf("ink pressure  :"); PRINTF("  %6s ", value_str(pRX_Status->ink_supply[i].inkPressure)); trprintf("\n");
+		trprintf("pressure set  :"); PRINTF("  %6s ", value_str(pRX_Status->ink_supply[i].cylinderPresSet)); trprintf("\n");
+		trprintf("ink pressure  :"); PRINTF("  %6s ", value_str(pRX_Status->ink_supply[i].cylinderPres)); trprintf("\n");
 		trprintf("head in pres  :"); PRINTF("  %6s ", value_str(pRX_Config->ink_supply[i].condPresIn)); trprintf("\n");
 		trprintf("bleed valve   :"); PRINTF("       %d ", pRX_Status->ink_supply[i].bleedValve); trprintf("\n");
 		trprintf("air valve     :"); PRINTF("       %d ", pRX_Status->ink_supply[i].airValve); trprintf("\n");
@@ -576,6 +585,7 @@ void ink_tick_1000ms(void)
 
 		trprintf("purge time: %d, pressure: %d\n", _PurgeTime, _PurgePressure);
 	}
+	*/
 
 	/* pump volume calculation */
 	for (isNo = 0; isNo < NIOS_INK_SUPPLY_CNT; isNo++)
@@ -631,7 +641,7 @@ static void _init_purge(int isNo, int pressure, int time)
 		}
 
 		_PurgeNo	   = isNo;
-		_PurgePressure = pRX_Status->ink_supply[isNo].inkPressureSet + pressure;
+		_PurgePressure = pRX_Status->ink_supply[isNo].cylinderPresSet + pressure;
 
 		if (_PurgePressure > MAX_PRESSURE_FLUID)
 			_PurgePressure = MAX_PRESSURE_FLUID;
@@ -662,8 +672,8 @@ static int _degass_ctrl(void)
 	else
 	{
 		if (!degassing || pRX_Status->degass_pressure==INVALID_VALUE) 	  pRX_Status->vacuum_solenoid = FALSE;
-		else if ((-pRX_Status->degass_pressure) >= DEGASSING_VACCUUM) 	  pRX_Status->vacuum_solenoid = FALSE;
-		else if ((-pRX_Status->degass_pressure) <  DEGASSING_VACCUUM_MIN) pRX_Status->vacuum_solenoid = TRUE;
+		else if ((-pRX_Status->degass_pressure) >= _LungVacc) 	  pRX_Status->vacuum_solenoid = FALSE;
+		else if ((-pRX_Status->degass_pressure) <  _LungVacc-50)  pRX_Status->vacuum_solenoid = TRUE;
 	}
 
 	if (pRX_Status->vacuum_solenoid!=act)
@@ -724,7 +734,7 @@ static void _trace_pump_ctrl(int pressure)
 					pRX_Config->ink_supply[i].ctrl_mode,
 					pRX_Status->ink_supply[i].ctrl_state,
 					pRX_Config->ink_supply[i].condPresIn,
-					pRX_Status->ink_supply[i].inkPressure,
+					pRX_Status->ink_supply[i].cylinderPres,
 					pressure,
 					pRX_Status->ink_supply[i].inkPumpSpeed_set,
 					pRX_Status->ink_supply[i].bleedValve);
@@ -741,17 +751,17 @@ static void _pump_ctrl(INT32 isNo, INT32 pressure_target)
 	int set_valve = (pRX_Status->ink_supply[isNo].ctrl_state!=ctrl_test)
 			    && !(pRX_Status->ink_supply[isNo].ctrl_state>=ctrl_fill && pRX_Status->ink_supply[isNo].ctrl_state<ctrl_fill+10);
 
-	if (pRX_Status->ink_supply[isNo].inkPressure > (pressure_target + AIR_ON))
+	if (pRX_Status->ink_supply[isNo].cylinderPres > (pressure_target + AIR_ON))
 	{
 		if (set_valve) _set_air_valve(isNo, TRUE);
 		_set_pump_speed(isNo, 0);
 	}
-	else if (pRX_Status->ink_supply[isNo].inkPressure < (pressure_target - AIR_OFF))
+	else if (pRX_Status->ink_supply[isNo].cylinderPres < (pressure_target - AIR_OFF))
 	{
 		if (set_valve) _set_air_valve(isNo, FALSE);
 
 		if (pRX_Config->ink_supply[isNo].fluid_P) _InkSupply[isNo].pid.P = pRX_Config->ink_supply[isNo].fluid_P;
-		pid_calc(pRX_Status->ink_supply[isNo].inkPressure, pressure_target, &_InkSupply[isNo].pid);
+		pid_calc(pRX_Status->ink_supply[isNo].cylinderPres, pressure_target, &_InkSupply[isNo].pid);
 
 		if      (_InkSupply[isNo].pid.val<=0)             _set_pump_speed(isNo, 0);
 		else if (_InkSupply[isNo].pid.val<PUMP_THRESHOLD) _set_pump_speed(isNo, PUMP_THRESHOLD);

@@ -38,7 +38,7 @@ typedef struct SNiosHeadCmd
 	UINT32	shutdown:1;				// 	00:	sets the NIOS processor to a save state
 	UINT32	error_reset:1;			// 	01: 
 	UINT32	exe_valid:1;			// 	02:
-	UINT32	cmd_03:1;			// 	03:
+	UINT32	firepulse_on:1;			// 	03:
 	UINT32	cmd_04:1;			    // 	04:
 	UINT32	cmd_05:1;			    // 	05:
 	UINT32	cmd_06:1;			    // 	06:
@@ -131,7 +131,7 @@ typedef struct SNiosHeadErr
 			UINT32	fp_ac:1;				// 06
 			UINT32	fp_dc:1;				// 07
 			UINT32	head_pcb_overheated:1;	// 08
-			UINT32	err_09:1;				// 09
+			UINT32	arm_timeout:1;			// 09
 			UINT32	cooler_temp_hw:1;		// 10
 			UINT32	amc7891:1;				// 11
 			UINT32	cooler_overheated:1;	// 12

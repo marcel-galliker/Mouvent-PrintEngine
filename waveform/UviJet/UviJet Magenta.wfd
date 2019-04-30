@@ -1,5 +1,5 @@
 <WaveForm>
-  <Ink Name="Magenta" ColorCode="2" Description="Fuji UviJet SC2 Magenta 45/48&#176;C / BN:FRD-164-548B" ColorRGB="#FFE21AC4" Temp="45" TempMax="50" GreyLevel="8 9 13 15 " MaxFreq="59084" />
+  <Ink Name="Magenta" ColorCode="2" Description="Fuji UviJet SC2 Magenta 45/48&#176;C / BN:FRD-164-548B" ColorRGB="#FFE21AC4" Temp="45" TempMax="50" GreyLevel="8 9 13 15 " MaxFreq="59084" Meniscus="0" CondPresOut="0" DropletVolume="0" FlushTime="0 0 0" />
   <item Position="0" Voltage="0" />
   <item Position="15" Voltage="0" />
   <item Position="56" Voltage="23" />
@@ -17,5 +17,5 @@
   <item Position="1212" Voltage="2" />
   <item Position="1220" Voltage="2" />
   <item Position="1225" Voltage="0" />
-  <check>B457D646AA0AC996B21EA89910E359560D3D0A08</check>
+  <check>28E5F09F3A678FE2E610F2FCCA97F4BCC2995631</check>
 </WaveForm>

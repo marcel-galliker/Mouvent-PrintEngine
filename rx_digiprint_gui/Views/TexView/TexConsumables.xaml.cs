@@ -33,13 +33,6 @@ namespace RX_DigiPrint.Views.TexView
          //   Consumables.RewinderMax = 400;
         }
 
-        //--- Property CalbrationView ---------------------------------------
-        public ScaleCalibration CalibrationView
-        {
-            get { return Consumables.CalibrationView; }
-            set { Consumables.CalibrationView = value; }
-        }
-
         //--- Panel_Update ---------------------------------------
         /*
         void Panel_Update()

@@ -176,10 +176,14 @@ extern "C"{
 void 	rx_init(void);
 void 	rx_end(void);
 
+extern	const int RX_Debug;
+
 int 	rx_get_ticks(void);
 #ifdef WIN32
 void	TimetToFileTime( time_t t, LPFILETIME pft );
 time_t	FiletimeToTimet(const LPFILETIME pft);
+#else
+time_t	FiletimeToTimet(const UINT64 pft);
 #endif
 void rx_get_system_time(UINT64 *pFileTime);
 void rx_get_system_time_str(char *str, char separator);
@@ -213,6 +217,8 @@ char* char_to_lower(const char *str, char *out);
 char getchar_nolock(void);
 
 extern const char RX_Process_Name[64];
+extern const char *RX_MonthStr[12];
+	
 void rx_process_name(const char *arg0);
 
 void *rx_malloc(size_t size);

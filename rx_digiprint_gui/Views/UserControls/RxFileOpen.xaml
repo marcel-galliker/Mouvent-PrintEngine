@@ -46,6 +46,7 @@
                 TouchEnter="DirGrid_TouchEnter"
                 TouchLeave="DirGrid_TouchLeave"
                 StylusSystemGesture="DirGrid_StylusSystemGesture"
+                SelectedRowsCollectionChanged="DirGrid_SelectedRowsCollectionChanged"
                 >
             <ig:XamGrid.SelectionSettings>
                 <ig:SelectionSettings CellSelection="None" ColumnSelection="None" RowSelection="Single" CellClickAction="SelectRow"/>
@@ -62,7 +63,20 @@
         </ig:XamGrid.ExpansionIndicatorSettings>
         -->
             <ig:XamGrid.Columns>
-                <ig:ImageColumn   Key="FileType"    HeaderText=""        IsSortable="False" Width="auto"  ValueConverter="{StaticResource FileTypeImage_Converter}" ImageHeight="32"/>
+           <!--     <ig:ImageColumn   Key="FileType"    HeaderText=""        IsSortable="False" Width="auto"  ValueConverter="{StaticResource FileTypeImage_Converter}" ImageHeight="32"/> -->
+                <ig:TemplateColumn     Key="FileType"     HeaderText=" "    IsSortable="False" Width="auto" >
+                    <ig:TemplateColumn.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Image Source="{Binding FileType, Converter={StaticResource FileTypeImage_Converter}}" Height="32"/>
+                                <common:RxButton Click="Print_Clicked" Visibility="{Binding PrintButtonVisibility}" x:Name="Print">
+                                    <Image Source="../../Resources/Bitmaps/Print.ico" />
+                                </common:RxButton>
+                            </Grid>
+                        </DataTemplate>
+                    </ig:TemplateColumn.ItemTemplate>
+                </ig:TemplateColumn>
+
                 <ig:TextColumn    Key="FileName"    HeaderText="File"    IsSortable="True"  Width="auto"  ValueConverter="{StaticResource FileName_Converter}" />
                 <ig:TextColumn    Key="Time"        HeaderText="Date"    IsSortable="True"  Width="auto"  />
                 <ig:ImageColumn   Key="Preview"     HeaderText="Preview" IsSortable="False" Width="auto" HorizontalContentAlignment="Left"/>
@@ -83,7 +97,7 @@
             <common:RxRadioButton Content="Small" HorizontalAlignment="Center" MinWidth="50" Checked="Small_Checked" />
             <common:RxRadioButton x:Name="MidSize" Content="Mid"   HorizontalAlignment="Center" MinWidth="50" Checked="Mid_Checked"   />
             <common:RxRadioButton Content="Large" HorizontalAlignment="Center" MinWidth="50" Checked="Large_Checked"/>
-            <Button Content="Open"  HorizontalAlignment="Center" MinWidth="50" Click="Open_Clicked" Background="Transparent" BorderThickness="0"/>
+            <!--   <Button Content="Open"  HorizontalAlignment="Center" MinWidth="50" Click="Open_Clicked" Background="Transparent" BorderThickness="0"/> -->
         </StackPanel>
     </Grid>
 </Window>

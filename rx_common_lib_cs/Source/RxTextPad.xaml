@@ -34,8 +34,9 @@
             <Grid x:Name="Pad">
                 <StackPanel x:Name="Stack" MinWidth="400">
 
-                    <Grid x:Name="TopRow">
-                        <Button x:Name="Display"
+                    <Grid>
+                        <Grid x:Name="TopRow">
+                            <Button x:Name="Display"
                             Grid.ColumnSpan="3"
                             Background="{StaticResource RX.Green}"
                             BorderBrush="{StaticResource OptionMark.Pressed.Border}"
@@ -45,20 +46,29 @@
                             Content="{Binding Result}" 
                             />
 
-                        <Button x:Name="ClearButton"
+                            <Button x:Name="ClearButton"
                             Background="{StaticResource RX.CtrlKey}"
                             Content="Clear"
                             Click="button_Click"
                             HorizontalAlignment="Right"
                             Margin="0,0,64,0"
                             />
-
-                        <Button 
+                            
+                            <Button 
                             Background="{StaticResource RX.CtrlKey}"
                             Content="Esc"
                             Click="button_Click"
                             HorizontalAlignment="Right"
                             />
+                        </Grid>
+
+                        <Button x:Name="CloseButton"
+                            Background="{StaticResource RX.CtrlKey}"
+                            Click="close_Clicked"
+                            HorizontalAlignment="Right" FontFamily="Wingdings" FontSize="48"
+                            >
+                            <Image Source="{DynamicResource No_ico}"/>
+                        </Button>
                     </Grid>
 
                     <StackPanel Orientation="Horizontal"/>

@@ -33,6 +33,7 @@
 
 //--- Externals ---------------------------------------------------------------
 SEncoderStat	_EncoderStatus[ENC_CNT];
+SPageId			_ID;
 
 //--- Statics -----------------------------------------------------------------
 
@@ -57,6 +58,7 @@ static int		_IncPerMeter;
 static int		_PrintGo_Dist;
 static int		_Scanning=FALSE;
 static int		_DistTelCnt=0;
+static int		_TotalPgCnt;
 
 typedef struct
 {
@@ -86,6 +88,7 @@ void enc_init(void)
 {
 	int i;
 	memset(_Encoder, 0, sizeof(_Encoder));
+	memset(&_ID, 0, sizeof(_ID));
 	for (i=0; i<ENC_CNT; i++)
 	{
 		net_device_to_ipaddr(dev_enc, i, _Encoder[i].ipAddrStr, SIZEOF(_Encoder[i].ipAddrStr));
@@ -125,9 +128,10 @@ static void *_enc_thread(void *lpParameter)
 
 	while (_EncoderThreadRunning)
 	{
+		_Encoder[1].used = (RX_Config.printer.type == printer_DP803) && strcmp(RX_Hostname, "LB701-0001");
 		for (no=0; no<ENC_CNT; no++)
 		{
-			if (_Encoder[no].used && _Encoder[no].socket==INVALID_SOCKET && net_port_listening(dev_enc, no+1, PORT_CTRL_ENCODER))
+			if (_Encoder[no].used && _Encoder[no].socket==INVALID_SOCKET && (net_port_listening(dev_enc, no, PORT_CTRL_ENCODER) || (!_Encoder[1].used && net_port_listening(dev_enc, -1, PORT_CTRL_ENCODER))))
 			{			
 				errNo=sok_open_client_2(&_Encoder[no].socket, _Encoder[no].ipAddrStr, PORT_CTRL_ENCODER, SOCK_STREAM, _handle_enc_msg, _enc_closed);
 				if (errNo)
@@ -137,13 +141,7 @@ static void *_enc_thread(void *lpParameter)
 				}
 				else
 				{
-					char name[64];
-					char peer[64];
-					_TestSocket[no] = _Encoder[no].socket;
-					sok_get_socket_name(_Encoder[no].socket, name, NULL, NULL);
-					sok_get_peer_name(_Encoder[no].socket, peer, NULL, NULL);
-					sok_check_addr_32(&_Encoder[no].socket, _Encoder[no].ipAddr, __FILE__, __LINE__);
-				//	Error(LOG, 0, "Encoder connected >>%s<< to >>%s<<", name, peer);				
+					ErrorEx(dev_enc, no, LOG, 0, "Connected");
 				}
 			}				
 		}
@@ -174,13 +172,16 @@ int	 enc_set_config(void)
 {	
 	int no;
 	_Scanning = rx_def_is_scanning(RX_Config.printer.type);
+	
+	if (arg_simuEncoder) Error(WARN, 0, "Encoder in Simulation");
+
 //	_Encoder[1].used = RX_Config.printer.type==printer_DP803;
 	switch (RX_Config.printer.type)
 	{
 	case printer_TX801:			_Encoder[0].webOffset_mm=WEB_OFFSET; break;	// 20
 	case printer_TX802:			_Encoder[0].webOffset_mm=WEB_OFFSET; break;	// 20
 	case printer_DP803:			_Encoder[0].webOffset_mm=WEB_OFFSET; 
-								_Encoder[1].webOffset_mm=WEB_OFFSET+WEB_OFFSET_VERSO;
+								_Encoder[1].webOffset_mm=WEB_OFFSET+WEB_OFFSET_VERSO+RX_Config.printer.offset.versoDist;
 								break;
 	case printer_test_slide:	
 	case printer_test_slide_only:
@@ -190,12 +191,14 @@ int	 enc_set_config(void)
 //								break; 
 	case printer_test_table:	_Encoder[0].webOffset_mm=110; break;
 	case printer_LB701:
-	case printer_LB702:
+	case printer_LB702_UV:
+	case printer_LB702_WB:
 	case printer_cleaf:			_Encoder[0].webOffset_mm=10;  break;
 	default:					_Encoder[0].webOffset_mm=5;   break;
 	}
 	_PrintGo_Dist	= 10000;
 	_DistTelCnt		= 0;
+	_TotalPgCnt		= 0;
 	/*
 	memset(_PrintBuf, 0, sizeof(_PrintBuf));
 	_PrintBufIn = _PrintBufOut = 0;
@@ -227,8 +230,9 @@ int  enc_start_printing(SPrintQueueItem *pitem)
 	SEncoderCfg msg;
 	int comp;
 	memset(&msg, 0, sizeof(msg));
-		
-	msg.correction=CORR_OFF; 
+			
+	msg.printerType = RX_Config.printer.type;
+	msg.correction  = CORR_OFF; 
 
 	switch (RX_Config.printer.type)
 	{
@@ -250,7 +254,8 @@ int  enc_start_printing(SPrintQueueItem *pitem)
 //		case printer_LB701:		msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_ROTATIVE; break;	
 //		case printer_LB702:		msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_ROTATIVE; break;	
 	case printer_LB701:			msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_OFF; break;	
-	case printer_LB702:			msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_OFF; break;	
+	case printer_LB702_UV:		msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_OFF; break;	
+	case printer_LB702_WB:		msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_OFF; break;	
 	case printer_DP803:			msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_OFF; break;	
 	case printer_cleaf:			msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter= 180200; msg.pos_actual = 0;	break;
 	default:					msg.orientation = TRUE;		msg.scanning=TRUE;  msg.incPerMeter=1000000; msg.pos_actual = 0;	break;
@@ -265,16 +270,16 @@ if (RX_Config.printer.type==printer_LB701)
 #endif
 	*/
 		
-	msg.speed_mmin = pitem->speed;
-	msg.incPerMeter += RX_Config.printer.offset.incPerMeter;
+	msg.speed_mmin  = pitem->speed;
 	_IncPerMeter    = msg.incPerMeter;
 	for (no=0; no<ENC_CNT; no++)
 	{
 		if (_Encoder[no].used)
 		{
-			msg.pos_pg_fwd = _Encoder[no].webOffset_mm*1000 + pitem->pageMargin;
-			msg.pos_pg_bwd = _Encoder[no].webOffset_mm*1000 + pitem->pageMargin + pitem->srcHeight + RX_Config.headDistMax + 13350;
-		
+			msg.incPerMeter = _IncPerMeter+RX_Config.printer.offset.incPerMeter[no];
+			msg.pos_pg_fwd  = _Encoder[no].webOffset_mm*1000 + pitem->pageMargin;
+			msg.pos_pg_bwd  = _Encoder[no].webOffset_mm*1000 + pitem->pageMargin + pitem->srcHeight + RX_Config.headDistMax + 13350;
+					
 			if (_Scanning && arg_simuEncoder)
 			{
 				msg.scanning=FALSE;
@@ -286,7 +291,7 @@ if (RX_Config.printer.type==printer_LB701)
 			case PQ_SCAN_RTL:		msg.pos_pg_fwd = 	10000000; 
 									break;
 			
-			case PQ_SCAN_BIDIR:	 // comp = (int) (0.0055*RX_Config.stepper.print_height*pitem->speed);
+			case PQ_SCAN_BIDIR:	//	comp = (int) (0.0040*RX_Config.stepper.print_height*pitem->speed);	// 14.NOV.18
 									comp = (int) (0.0040*RX_Config.stepper.print_height*pitem->speed);
 									Error(LOG, 0, "Flightime Comp: height=%d speed=%d comp=%d", RX_Config.stepper.print_height, pitem->speed, comp);
 									msg.pos_pg_bwd += comp;  
@@ -304,6 +309,12 @@ if (RX_Config.printer.type==printer_LB701)
 		}
 	}
 	return REPLY_OK;
+}
+
+//--- end_sent_document ------------------------
+void end_sent_document(int pages)
+{
+	_TotalPgCnt += pages;
 }
 
 //--- enc_set_pg ----------------------------------------
@@ -328,6 +339,7 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 		memset(&dist, 0, sizeof(dist));
 		dist.cnt	= 1;
 		dist.dist	= _PrintGo_Dist;
+				
 		if (pitem->printGoMode!=PG_MODE_MARK) 
 		{
 			for(no=0; no<ENC_CNT; no++) 
@@ -339,7 +351,14 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 		switch(pitem->printGoMode)
 		{
 		case PG_MODE_LENGTH: _PrintGo_Dist = pitem->printGoDist; break;
-		case PG_MODE_GAP:	 _PrintGo_Dist = pitem->pageHeight+pitem->printGoDist; break;
+		case PG_MODE_GAP:	 _PrintGo_Dist = pitem->pageHeight+pitem->printGoDist; 
+							 /*
+ 							 {
+								Error(WARN, 0, "Test UDP FLAG");
+								_PrintGo_Dist = 1000; 										
+							 }
+							 */
+							 break;
 		case PG_MODE_MARK:	 dist.dist     = 0;
 							 //	dist.ignore   = pitem->pageHeight; 
 							 //	dist.window   = pitem->pageHeight/4; 
@@ -351,9 +370,10 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 							 }
 							 break;
 			
-		default:			 Error(WARN, 0, "PrintGo-Mode not defined");	_PrintGo_Dist = pitem->pageHeight; break;				
+		default:			if (pId->id != _ID.id) Error(WARN, 0, "PrintGo-Mode not defined");	
+							_PrintGo_Dist = pitem->pageHeight; 
+							break;				
 		}
-		return REPLY_OK;		
 	}
 	else if (_Scanning && arg_simuEncoder)
 	{ 
@@ -365,8 +385,8 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 		{
 			sok_send_2(&_Encoder[no].socket, _Encoder[no].ipAddr, CMD_ENCODER_PG_DIST, sizeof(dist), &dist);
 		}
-		return REPLY_OK;					
-	}	
+	}
+	memcpy(&_ID, pId, sizeof(_ID));
 	return REPLY_OK;					
 }
 
@@ -448,6 +468,15 @@ static int _handle_enc_msg(RX_SOCKET socket, void *msg, int len, struct sockaddr
 static void _handle_status(int no, SEncoderStat* pstat)
 {
 	SEncoderInfo info=_EncoderStatus[no].info;
+	//--- test ------------------
+	if (_DistTelCnt && pstat->PG_cnt!=_TotalPgCnt)
+	{
+		if (pstat->fifoEmpty_PG> _EncoderStatus[no].fifoEmpty_PG)  ErrorEx(dev_enc, no, ERR_STOP, 0, "PrintGo FIFO empty (PG=%d, err=%d)", pstat->PG_cnt, pstat->fifoEmpty_PG);
+		if (pstat->fifoEmpty_IGN>_EncoderStatus[no].fifoEmpty_IGN) ErrorEx(dev_enc, no, ERR_STOP, 0, "PrintGo FIFO ignore (PG=%d, err==%d)", pstat->PG_cnt, pstat->fifoEmpty_IGN);
+		if (pstat->fifoEmpty_WND>_EncoderStatus[no].fifoEmpty_WND) ErrorEx(dev_enc, no, ERR_STOP, 0, "PrintGo FIFO window (PG=%d, err==%d)", pstat->PG_cnt, pstat->fifoEmpty_WND);		
+	}
+//	if (pstat->PG_cnt>_EncoderStatus[no].PG_cnt) ErrorEx(dev_enc, no, LOG, 0, "PrintGo %d/%d", pstat->PG_cnt, _TotalPgCnt);
+	
 	memcpy(&_EncoderStatus[no], pstat, sizeof(_EncoderStatus[no]));
 	if (_Encoder[no].printGoCnt==-1 && _EncoderStatus[no].PG_cnt==0) _Encoder[no].printGoCnt=0;
 	if (_Encoder[no].printGoCnt>=0 && _EncoderStatus[no].PG_cnt != _Encoder[no].printGoCnt)
@@ -466,6 +495,7 @@ static void _handle_status(int no, SEncoderStat* pstat)
 		*/
 	}
 	if (no==0 && _EncoderStatus[no].info.analog_encoder != info.analog_encoder) ctrl_set_max_speed();
+	
 }
 		
 //--- _handle_config_reply --------------------------------

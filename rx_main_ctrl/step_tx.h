@@ -31,3 +31,5 @@ int  steptx_in_purge_pos(void);
 
 int	 steptx_wipe_start(int no);
 int	 steptx_wipe_done(void);
+
+void steptx_set_vent(int speed);

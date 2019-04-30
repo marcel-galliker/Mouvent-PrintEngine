@@ -60,6 +60,7 @@ typedef struct
 
 int		sok_get_ifconfig		(const char *ifname, SIfConfig *config);
 int		sok_set_ifconfig		(const char *ifname, SIfConfig *config);
+int		sok_get_ifcnt			(const char *grep);
 	
 void	sok_get_mac_address		(const char *deviceName, UINT64 *macAddr);
 void	sok_get_ip_address_str	(const char *deviceName, char *addr, int size);

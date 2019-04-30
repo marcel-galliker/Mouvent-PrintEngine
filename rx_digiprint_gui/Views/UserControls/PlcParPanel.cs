@@ -18,7 +18,13 @@ using System.Windows.Media;
 
 namespace RX_DigiPrint.Views.UserControls
 {
-    public class PlcParPanel : StackPanel, INotifyPropertyChanged
+    public interface IPlcParPanel
+    {
+         void Send();
+         void Reset();
+    }
+
+    public class PlcParPanel : StackPanel, INotifyPropertyChanged, IPlcParPanel
     {       
         public event PropertyChangedEventHandler PropertyChanged;
         public event Action                      Update;
@@ -96,7 +102,8 @@ namespace RX_DigiPrint.Views.UserControls
             foreach(var item in children)
             {
                 PlcParCtrl ctrl = item as PlcParCtrl;
-                if (ctrl!=null) ctrl.Send(this);
+                if (ctrl!=null) 
+                    ctrl.Send(this);
                 else
                 {
                     StackPanel panel = item as StackPanel;
@@ -251,8 +258,7 @@ namespace RX_DigiPrint.Views.UserControls
                 PlcParCtrl par = item as PlcParCtrl;
                 if (par!=null) 
                 {
-                    if (par.ComboValue!=null)   material.SaveValue(par.ID, par.ComboValue.ToString());
-                    else                        material.SaveValue(par.ID, par.Value);
+                    material.SaveValue(par.ID, par.SendValue);
                 }
                 else
                 {

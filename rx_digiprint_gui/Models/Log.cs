@@ -93,17 +93,5 @@ namespace RX_DigiPrint.Models
             for (int i=_List.Count(); --i>=0; )
                _List.RemoveAt(i);
         }
-
-        //--- CreateLog ----------------------------------------
-        public void CreateLog(RxWorkBook wb)
-        {
-            _WB = wb;
-            _WB_row = 0;
-            TcpIp.SLogReqMsg msg = new TcpIp.SLogReqMsg();
-            msg.first = 0;
-            msg.count = _WB_count;          
-            RxGlobals.RxInterface.SendMsg(TcpIp.CMD_REQ_LOG, ref msg);
-        }
-
     }
 }

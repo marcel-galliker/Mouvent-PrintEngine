@@ -93,6 +93,8 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
+            <Rectangle Grid.RowSpan="10" Fill="Red" Visibility="{Binding Err, Converter={StaticResource IntToVisible_Converter}}"/>
+
             <!-- <TextBlock Grid.Row="0" HorizontalAlignment="Center" Text="{Binding No}"/> -->
 
             <!--             DropDownOpening="ComboBox_DropDownOpening" -->
@@ -145,13 +147,32 @@
                             <Button x:Name="Button_OnOff" Content="OFF"         Click="OnOff_Clicked"     Padding="10"/>
                             <Button                       Content="Print"       Click="Print_Clicked"     Padding="10" Visibility="{Binding Flushed, Converter={StaticResource BoolToInVisible_Converter}}"/>
                             <Rectangle Fill="{StaticResource RX.Green}" HorizontalAlignment="Stretch" Height="1" Margin="-16, 8"/>
-                            <Button                       Content="Flush"       Click="Flush_Clicked"     Padding="10"/>
+                            <Button x:Name="FlushButton"  Content="Flush"       Click="Flush_Clicked"     Padding="10" Visibility="{Binding CanFlush, Converter={StaticResource BoolToVisible_Converter}}"/>
+                            
                             <Button                       Content="Purge"       Click="Purge_Clicked"     Padding="10"/>
                             <Rectangle Fill="{StaticResource RX.Green}" HorizontalAlignment="Stretch" Height="1" Margin="-16, 8"/>
-                            <Button                       Content="Fill"        Click="Fill_Clicked"      Padding="10" Visibility="{Binding Flushed, Converter={StaticResource BoolToInVisible_Converter}}"/>
+                            <Button                       Content="Fill"        Click="Fill_Clicked"      Padding="10" />
                             <Button                       Content="Empty"       Click="Empty_Clicked"     Padding="10" Visibility="{Binding Running, Converter={StaticResource BoolToInVisible_Converter}}"/>
-                            <Rectangle Fill="{StaticResource RX.Green}" HorizontalAlignment="Stretch" Height="1" Margin="-16, 8"/>
-                            <Button                       Content="Calibrate"   Click="Calibrate_Clicked" Padding="10"/>
+                            <Rectangle x:Name="Line_Calibrate"  Fill="{StaticResource RX.Green}" HorizontalAlignment="Stretch" Height="1" Margin="-16, 8"/>
+                            <Button x:Name="Button_Calibrate" Content="Calibrate"   Click="Calibrate_Clicked" Padding="10"/>
+                        </StackPanel>
+                    </GroupBox>
+                </Grid>
+            </rx:RxPopup>
+
+            <rx:RxPopup x:Name="FlushPopup" 
+                   PlacementTarget="{Binding ElementName=FlushButton}"
+                   Width="auto"
+                   MinWidth="100" 
+                   IsHitTestVisible="False"
+                   OpacityMask="White"
+                   >
+                <Grid Background="White">
+                    <GroupBox Width="150" Style="{StaticResource RxGroupBox}" Header="^">
+                        <StackPanel Margin="10,2">
+                            <Button Content="Night"      Click="Flush_Clicked_0"     Padding="10"/>
+                            <Button Content="Weekend"    Click="Flush_Clicked_1"     Padding="10"/>
+                            <Button Content="Week"       Click="Flush_Clicked_1"     Padding="10"/>
                         </StackPanel>
                     </GroupBox>
                 </Grid>
@@ -187,11 +208,11 @@
                     <RowDefinition Height="auto"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock  Grid.Row="0" HorizontalAlignment="Right" Text="{Binding Humitity,       Converter={StaticResource HeadVal_Converter}}" />
+<!--                <TextBlock  Grid.Row="0" HorizontalAlignment="Right" Text="{Binding Humitity,       Converter={StaticResource HeadVal_Converter}}" /> -->
                 
                 <StackPanel Grid.Row="1" HorizontalAlignment="Right" Orientation="Horizontal">
-                    <TextBlock  Text="{Binding PresIntTank, Converter={StaticResource HeadVal_Converter}}" VerticalAlignment="Center" Padding="3,0"/>
-                    <common:RxNumBox Text="{Binding PresIntTankSet, Converter={StaticResource HeadVal_Converter}}" MinWidth="40" LostFocus="Pressure_LostFocus" HorizontalContentAlignment="Right"/>
+                    <TextBlock  Text="{Binding CylinderPres, Converter={StaticResource HeadVal_Converter}}" VerticalAlignment="Center" Padding="3,0"/>
+                    <common:RxNumBox Text="{Binding CylinderPresSet, Converter={StaticResource HeadVal_Converter}}" MinWidth="40" LostFocus="Pressure_LostFocus" HorizontalContentAlignment="Right"/>
                 </StackPanel>
                 <TextBlock Grid.Row="2" HorizontalAlignment="Right" Text="{Binding CondPresOut, Converter={StaticResource HeadVal_Converter10}}" />
                 <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">                    

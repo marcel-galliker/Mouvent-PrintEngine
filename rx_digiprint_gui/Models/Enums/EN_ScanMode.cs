@@ -11,7 +11,7 @@ namespace RX_DigiPrint.Models.Enums
 
         public EN_ScanModeList()
         {
-            if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_test_table)
+            if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_test_table || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX801)
             {
                 _List = new List<RxEnum<EScanMode>>();
                 _List.Add(new RxEnum<EScanMode>(EScanMode.scan_std,    "--->"));

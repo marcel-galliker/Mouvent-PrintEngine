@@ -593,6 +593,7 @@
     <ClInclude Include="gcc_Debug-soc.h" />
     <ClInclude Include="gcc_Release-lx.h" />
     <ClInclude Include="gcc_Release-soc.h" />
+    <ClInclude Include="rx_mem_tif.h" />
     <ClInclude Include="rx_tif.h" />
   </ItemGroup>
   <ItemGroup>
@@ -728,6 +729,7 @@
       <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug-Remote|Win32'">4996</DisableSpecificWarnings>
       <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug-Remote|x64'">4996</DisableSpecificWarnings>
     </ClCompile>
+    <ClCompile Include="rx_mem_tif.c" />
     <ClCompile Include="rx_tif.c" />
   </ItemGroup>
   <ItemGroup>

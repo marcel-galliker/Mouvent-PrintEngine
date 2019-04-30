@@ -62,7 +62,7 @@ namespace RX_DigiPrint.Models
                     {
                         PrintQueueItem pq = new PrintQueueItem();
                         pq.read_image_properties(_FileName);
-                        Dimension = string.Format(" {0}mm x {1}mm", pq.SrcWidth, pq.SrcHeight);
+                        Dimension = string.Format(" {0}mm x {1}mm (dots {2})", pq.SrcWidth, pq.SrcHeight, pq.Dots);
                     }
                     catch(Exception)
                     { 

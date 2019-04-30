@@ -9,6 +9,7 @@ using System.Windows.Media;
 using System.Runtime.CompilerServices;
 using System.Reflection;
 using RX_GUI.Models.Enums;
+using RX_Common;
 
 namespace RxWfTool.Models 
 {
@@ -100,21 +101,53 @@ namespace RxWfTool.Models
             set { SetProperty(ref _Meniscus, value); }
         }
 
-        //--- Property Viscosity ---------------------------------------
-        private int _Viscosity;
-        public int Viscosity
+        //--- Property CondPresOut ---------------------------------------
+        private int _CondPresOut;
+        public int CondPresOut
         {
-            get { return _Viscosity; }
-            set { SetProperty(ref _Viscosity, value); }
+            get { return _CondPresOut; }
+            set { SetProperty(ref _CondPresOut, value); }
+        }
+        
+        //--- Property FlushTime0 ---------------------------------------
+        private int _FlushTime0;
+        public int FlushTime0
+        {
+            get { return _FlushTime0; }
+            set { SetProperty(ref _FlushTime0, value); }
         }
 
-        //--- Property Density ---------------------------------------
-        private int _Density;
-        public int Density
+        //--- Property FlushTime1 ---------------------------------------
+        private int _FlushTime1;
+        public int FlushTime1
         {
-            get { return _Density; }
-            set { SetProperty(ref _Density, value); }
+            get { return _FlushTime1; }
+            set { SetProperty(ref _FlushTime1, value); }
         }
+
+        //--- Property FlushTime2 ---------------------------------------
+        private int _FlushTime2;
+        public int FlushTime2
+        {
+            get { return _FlushTime2; }
+            set { SetProperty(ref _FlushTime2, value); }
+        }
+
+        //--- Property FlushTime ---------------------------------------
+        public string FlushTime
+        {
+            get 
+            { 
+                return string.Format("{0} {1} {2}", FlushTime0, FlushTime1, FlushTime2); 
+            }
+            set 
+            { 
+                string[] list = (value as string).Split(' ');
+                FlushTime0 = Rx.StrToInt32(list[0]); 
+                FlushTime1 = Rx.StrToInt32(list[1]); 
+                FlushTime2 = Rx.StrToInt32(list[2]); 
+            }
+        }   
 
         //--- Property DropletVolume ---------------------------------------
         private int _DropletVolume;
@@ -139,9 +172,9 @@ namespace RxWfTool.Models
                 RxXml.LoadProperty(xml, this, "GreyLevel");
                 RxXml.LoadProperty(xml, this, "MaxFreq");
                 RxXml.LoadProperty(xml, this, "Meniscus");
-                RxXml.LoadProperty(xml, this, "Viscosity");
-                RxXml.LoadProperty(xml, this, "Density");
+                RxXml.LoadProperty(xml, this, "CondPresOut");
                 RxXml.LoadProperty(xml, this, "DropletVolume");
+                RxXml.LoadProperty(xml, this, "FlushTime");
                 _Changed = false;
                 return true;
             }
@@ -163,9 +196,9 @@ namespace RxWfTool.Models
                 RxXml.SaveProperty(xml, this, "GreyLevel");
                 RxXml.SaveProperty(xml, this, "MaxFreq");
                 RxXml.SaveProperty(xml, this, "Meniscus");
-                RxXml.SaveProperty(xml, this, "Viscosity");
-                RxXml.SaveProperty(xml, this, "Density");
+                RxXml.SaveProperty(xml, this, "CondPresOut");
                 RxXml.SaveProperty(xml, this, "DropletVolume");
+                RxXml.SaveProperty(xml, this, "FlushTime");
             }
             xml.WriteEndElement();
             _Changed = false;

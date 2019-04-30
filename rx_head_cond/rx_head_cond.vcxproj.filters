@@ -120,4 +120,7 @@
       <Filter>Source files</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="build.log" />
+  </ItemGroup>
 </Project>

@@ -15,6 +15,7 @@
 	#include <unistd.h>
 	#include <sys/stat.h>
 	#include <sys/types.h>
+	#include <sys/time.h>
 	#include <sys/times.h>
 	#include <string.h>
 	#include <utime.h>
@@ -30,6 +31,7 @@
 #endif
 
 #include "rx_error.h"
+#include "rx_trace.h"
 #include "rx_file.h"
 
 
@@ -389,11 +391,39 @@ FILE * rx_fopen(const char * path, const char * mode, int sharemode)
 
 //--- remove_old_files --------------------------------------
 #ifdef linux
-int rx_remove_old_files(const char *searchStr, int days)
+int rx_remove_old_files(const char *searchPath, int days)
 {
-	int no=0;
+	SEARCH_Handle	search;
+	char			fileName[100];
+	char			path[MAX_PATH];
+	UINT64			fileTime;
+	UINT32			filesize;
+	UINT32			isDir;
+	int				copy;
+	struct timeval  now;
 
-	return no;
+	gettimeofday(&now, NULL);
+
+	TrPrintfL(TRUE, "rx_remove_old_files(>>%s<<, %d days)\n", searchPath, days);
+	search = rx_search_open(searchPath, "*");
+	while (rx_search_next(search, fileName, sizeof(fileName), &fileTime, &filesize, &isDir))
+	{
+		// printf("file >>%s<< diff=%d\n", fileName, now.tv_sec-fileTime);
+		sprintf(path, "%s/%s", searchPath, fileName);
+		if (isDir && fileName[0]!='.')
+		{
+			rx_remove_old_files(path, days);
+		}
+		if (!isDir && ((now.tv_sec-fileTime) > (24*60*60)*days))
+		{
+			TrPrintfL(TRUE, "remove >>%s<<\n", path);
+			remove(path);		
+		}
+		
+	}
+	rx_search_close(search);
+
+	return REPLY_OK;
 }
 #else
 int rx_remove_old_files(const char *searchStr, int days)

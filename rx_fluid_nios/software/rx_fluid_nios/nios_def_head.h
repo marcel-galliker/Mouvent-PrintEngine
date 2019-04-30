@@ -38,7 +38,7 @@ typedef struct SNiosHeadCmd
 	UINT32	shutdown:1;				// 	00:	sets the NIOS processor to a save state
 	UINT32	error_reset:1;			// 	01: 
 	UINT32	exe_valid:1;			// 	02:
-	UINT32	cmd_03:1;			// 	03:
+	UINT32	firepulse_on:1;			// 	03:
 	UINT32	cmd_04:1;			    // 	04:
 	UINT32	cmd_05:1;			    // 	05:
 	UINT32	cmd_06:1;			    // 	06:

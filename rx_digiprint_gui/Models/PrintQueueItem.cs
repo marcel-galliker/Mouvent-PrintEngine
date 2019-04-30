@@ -6,7 +6,6 @@ using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Models.Enums;
 using RX_DigiPrint.Services;
 using RX_LabelComposer.External;
-using rx_rip_gui.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -15,6 +14,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Net;
 using System.Net.NetworkInformation;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Windows.Media;
@@ -44,8 +44,8 @@ namespace RX_DigiPrint.Models
         }
 
         //--- ID -------------------------------------------
-        private UInt32 _id;
-        public UInt32 ID
+        private Int32 _id;
+        public Int32 ID
         {
             get { return _id; }
             set { Changed |= SetProperty(ref _id, value); }
@@ -116,8 +116,8 @@ namespace RX_DigiPrint.Models
         }
         
         //--- SrcPages ----------------------------------------
-        private UInt32  _SrcPages=1;
-        public UInt32 SrcPages
+        private Int32  _SrcPages=1;
+        public Int32 SrcPages
         {
             get { return _SrcPages; }
             set 
@@ -159,7 +159,11 @@ namespace RX_DigiPrint.Models
         private string _Dots;
         public string Dots
         {
-            get { return _Dots; }
+            get 
+            { 
+                if (_Dots==null || _Dots.Equals("")) return "SML"; 
+                return _Dots; 
+            }
             set { SetProperty(ref _Dots, value); }
         }
 
@@ -176,35 +180,50 @@ namespace RX_DigiPrint.Models
         }
 
         //--- FirstPage ------------------------------------
-        private UInt32 _FirstPage=1;
-        public UInt32 FirstPage
+        private Int32 _FirstPage=1;
+        public Int32 FirstPage
         {
             get { return _FirstPage; }
             set { if (SetProperty(ref _FirstPage, value)) do_checks();}
         }
 
         //--- LastPage ---------------------------------
-        private UInt32 _LastPage;
-        public UInt32 LastPage
+        private Int32 _LastPage;
+        public Int32 LastPage
         {
             get { return _LastPage; }
             set 
             { 
                 if(SetProperty(ref _LastPage, value))
                 {
-                    if (value>1) 
-                        SrcPages = LastPage-FirstPage+1;
+              //      if (value>1) 
+              //          SrcPages = LastPage-FirstPage+1;
                     do_checks(); 
                 }
             }
         }
 
         //--- StartPage ---------------------------------
-        private UInt32 _StartPage;
-        public UInt32 StartPage
+        private Int32 _StartPage;
+        public Int32 StartPage
         {
             get { return _StartPage; }
             set { if(SetProperty(ref _StartPage, value)) do_checks(); }
+        }
+
+        //--- StartFrom ---------------------------------
+        private Int32 _StartFrom;
+        public Int32 StartFrom
+        {
+            get { return _StartFrom; }
+            set 
+            {
+                if (SetProperty(ref _StartFrom, value))
+                {
+                    Changed=true;
+                    do_checks();
+                }
+            }
         }
 
         //--- do_checks -------------------------------
@@ -223,6 +242,7 @@ namespace RX_DigiPrint.Models
             {
                 if (StartPage<FirstPage) StartPage = FirstPage;
                 if (Copies<1) Copies=1;
+             //   if (StartCopy==0) StartCopy=1;
                 FirstPageRange = string.Format("({0}..{1})", 1, SrcPages);
                 LastPageRange  = string.Format("({0}..{1})", FirstPage, SrcPages);
             }
@@ -291,8 +311,8 @@ namespace RX_DigiPrint.Models
         }
 
         //--- Copies -----------------------------
-        private UInt32 _Copies;
-        public UInt32 Copies
+        private Int32 _Copies=1;
+        public Int32 Copies
         {
             get { return _Copies; }
             set { Changed |= SetProperty(ref _Copies, value); }
@@ -335,16 +355,16 @@ namespace RX_DigiPrint.Models
         }    
 
         //--- Property Scans ---------------------------------------
-        private UInt32 _Scans;
-        public UInt32 Scans
+        private Int32 _Scans;
+        public Int32 Scans
         {
             get { return _Scans; }
             set { SetProperty(ref _Scans, value); }
         }
 
         //--- Property ScansPrinted ---------------------------------------
-        private UInt32 _ScansPrinted;
-        public UInt32 ScansPrinted
+        private Int32 _ScansPrinted;
+        public Int32 ScansPrinted
         {
             get { return _ScansPrinted; }
             set { SetProperty(ref _ScansPrinted, value); }
@@ -358,25 +378,31 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _TestImage, value); }
         }
         
+        //--- CollateList -------------------------------
+        public EN_CollateList CollateList
+        {
+            get { return new EN_CollateList(); }
+        }
+
         //--- Collate ----------------------------
-        private byte _Collate;
-        public byte Collate
+        private int _Collate=1;
+        public int Collate
         {
             get { return _Collate; }
             set { Changed |= SetProperty(ref _Collate, value); }
         }
 
         //--- ActPage -----------------------------
-        private UInt32 _ActPage;
-        public UInt32 ActPage  
+        private Int32 _ActPage;
+        public Int32 ActPage  
         {
             get { return _ActPage; }
             set { Changed |= SetProperty(ref _ActPage, value); }
         }
 
         //--- ActCopy -----------------------------
-        private UInt32 _ActCopy;
-        public UInt32 ActCopy
+        private Int32 _ActCopy;
+        public Int32 ActCopy
         {
             get { return _ActCopy; }
             set { Changed |= SetProperty(ref _ActCopy, value); }
@@ -420,7 +446,6 @@ namespace RX_DigiPrint.Models
             set { if (SetProperty(ref _Orientation, value)) do_checks();}
         }
 
-
         //--- Property PreviewOrientation ---------------------------------------
         private int _PreviewOrientation=0;
         public int PreviewOrientation
@@ -438,7 +463,7 @@ namespace RX_DigiPrint.Models
         }
 
         //--- Property LengthUnit ---------------------------------------
-        private EPQLengthUnit _LengthUnit;
+        private EPQLengthUnit _LengthUnit=EPQLengthUnit.copies;
         public EPQLengthUnit LengthUnit
         {
             get { return _LengthUnit; }
@@ -447,6 +472,8 @@ namespace RX_DigiPrint.Models
                 if (value!=_LengthUnit)
                 {
                     _LengthUnit = value;
+                    if (_LengthUnit==EPQLengthUnit.mm     && StartFrom==1) StartFrom=0;
+                    if (_LengthUnit==EPQLengthUnit.copies && StartFrom==0) StartFrom=1;
                     OnPropertyChanged("LengthUnitMM");
                     OnPropertyChanged("LengthUnitCopies");
                     Changed = true;
@@ -524,27 +551,6 @@ namespace RX_DigiPrint.Models
             set { Changed |= SetProperty(ref _PrintChecks, value); }
         }
 
-        //--- PrintEnvList ----------------------------------
-        public ObservableCollection<PrEnv> PrintEnvList
-        {
-            get 
-            { 
-                return RxGlobals.PrintEnv.List; 
-            }
-        }
-
-        //--- PrintEnv ---------------------------------------
-        private static string _PrintEnv_default;
-        private string _PrintEnv=_PrintEnv_default;
-        public string PrintEnv
-        {
-            get { return _PrintEnv; }
-            set { 
-                    _PrintEnv_default = value;
-                    Changed |= SetProperty(ref _PrintEnv, value); 
-                }
-        }
-
         //--- Preview -----------------------------------
         private ImageSource _Preview;
         public ImageSource Preview
@@ -560,8 +566,16 @@ namespace RX_DigiPrint.Models
             get { return _PreviewPath; }
             set { SetProperty(ref _PreviewPath, value); }
         }
+
+        //--- Property Material ---------------------------------------
+        private string _Material;
+        public string Material
+        {
+            get { return _Material; }
+            set { SetProperty(ref _Material, value); }
+        }
         
-        
+
         //--- Ripped -------------------------------------------------
         private bool _Ripped;
         public bool Ripped
@@ -598,7 +612,7 @@ namespace RX_DigiPrint.Models
                     SrcHeight    = 25.4*_GetField(tif, TiffTag.IMAGELENGTH)/_GetField(tif, TiffTag.YRESOLUTION);
                     PageWidth    = SrcWidth;
                     PageHeight   = SrcHeight;
-                    SrcPages     = (UInt32) tif.NumberOfDirectories();
+                    SrcPages     = tif.NumberOfDirectories();
                     return true;
                 }
             }
@@ -614,6 +628,9 @@ namespace RX_DigiPrint.Models
         public void read_image_properties(string parFilePath)
         {
             string filePath = Dir.local_path(parFilePath);
+
+            if (_FilePath==null) _FilePath=filePath;
+            LoadDefaults(false);
 
             //--- label ----------------------------
             {
@@ -640,11 +657,13 @@ namespace RX_DigiPrint.Models
             //---bmp file -----------------------------
             if (_read_bmp_properties(filePath)) return;
 
+            if (_read_flz_properties(filePath)) return;
+
             //--- pdf file -------------
             try
             {
                 PdfReader pdfReader = new PdfReader(filePath);
-                SrcPages      = (uint)pdfReader.NumberOfPages;
+                SrcPages      = pdfReader.NumberOfPages;
                 SrcWidth      = (25.4*Convert.ToUInt32(pdfReader.GetPageSize(1).Width)/72.0  + 0.5);    // 72 DPI!
                 SrcHeight     = (25.4*Convert.ToUInt32(pdfReader.GetPageSize(1).Height)/72.0 + 0.5);    // 72 DPI!
                 PageWidth     = SrcWidth;
@@ -675,6 +694,45 @@ namespace RX_DigiPrint.Models
                     {
                         SrcWidth     = 25.4*bmp.Width/Convert.ToInt32(bmp.HorizontalResolution+0.5);
                         SrcHeight    = 25.4*bmp.Height/Convert.ToInt32(bmp.VerticalResolution+0.5);
+                        PageWidth    = SrcWidth;
+                        PageHeight   = SrcHeight;
+                        return true;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);                
+            }
+            return false;     
+        }
+
+        //--- _read_flz_properties ----------------------------------------------
+        private bool _read_flz_properties(string filePath)
+        {
+            try
+            {
+                string[] files = Directory.GetFiles(filePath, "*_*.flz");
+
+                SrcPages = 1;
+
+                if (files.Length==0) return false;
+
+                using(FileStream stream = new FileStream(files[0], FileMode.Open, FileAccess.Read))
+                {
+                    SFlzInfo info = new SFlzInfo();
+                    int size = Marshal.SizeOf(info);
+                    Byte[] buf = new Byte[size];
+                    stream.Read(buf, 0, size);
+                    int len=RxStructConvert.ToStruct(out info, buf);
+
+                    if (len==size)
+                    {
+                        SrcWidth  = info.WidthPx;
+                        SrcHeight = info.lengthPx;
+                        if (info.resx==0) info.resx=info.resy;
+                        if (info.resx!=0) SrcWidth  = info.WidthPx  * 25.4 / info.resx;
+                        if (info.resy!=0) SrcHeight = info.lengthPx * 25.4 / info.resy;
                         PageWidth    = SrcWidth;
                         PageHeight   = SrcHeight;
                         return true;
@@ -741,6 +799,7 @@ namespace RX_DigiPrint.Models
                     RxSettingsBase.SaveProperty(this, xml, "Passes");
                     RxSettingsBase.SaveProperty(this, xml, "CuringPasses");
                     RxSettingsBase.SaveProperty(this, xml, "Speed");
+                    RxSettingsBase.SaveProperty(this, xml, "ScanLength");
                 //  RxSettingsBase.SaveProperty(this, xml, "PageHeight");
                 //  RxSettingsBase.SaveProperty(this, xml, "PageWidth");
                     RxSettingsBase.SaveProperty(this, xml, "PageMargin");
@@ -751,6 +810,7 @@ namespace RX_DigiPrint.Models
                     RxSettingsBase.SaveProperty(this, xml, "LengthUnit");
                     RxSettingsBase.SaveProperty(this, xml, "FirstPage");
                     RxSettingsBase.SaveProperty(this, xml, "LastPage");
+                    RxSettingsBase.SaveProperty(this, xml, "SrcPages");
 
                 //  RxSettingsBase.SaveProperty(this, xml, "PrintChecks");
 
@@ -784,24 +844,23 @@ namespace RX_DigiPrint.Models
 
             FilePath        = msg.filepath;
 
-            PrintEnv        = msg.printEnv;
+            // PrintEnv        = msg.printEnv;
             RipState        = msg.ripState;
             SrcPages        = msg.srcPages;
             SrcWidth        = msg.srcWidth/1000.0;
             SrcHeight       = msg.srcHeight/1000.0;
             FirstPage       = msg.firstPage;
             LastPage        = msg.lastPage;
-            StartPage       = msg.startPage;
+            StartPage       = msg.start.page;
             Copies          = msg.copies;
             DropSizes       = msg.dropSizes;
             Dots            = msg.dots;
-            ScanMode     = (EScanMode)(msg.scanMode);
+            ScanMode        = (EScanMode)(msg.scanMode);
             Passes          = msg.passes;
             CuringPasses    = msg.curingPasses;
             Speed           = msg.speed;
             Collate         = msg.collate;
             State           = msg.state;
-            LengthUnit      = msg.lengthUnit;
             Orientation     = msg.orientation;
             PageWidth       = msg.pageWidth/1000.0;
             PageHeight      = msg.pageHeight/1000.0;
@@ -809,30 +868,49 @@ namespace RX_DigiPrint.Models
             PrintGoMode     = msg.printGoMode;
             PrintGoDist     = msg.printGoDist/1000.0;
             Scans           = msg.scans;
-            ScanLength      = msg.scanLength/1000.0;
             ScansPrinted    = msg.scansPrinted;
             TestImage       = (ETestImage)msg.testImage;
             PrintChecks     = (msg.checks!=0);
             PageNumber      = new PageNumber(msg.pageNumber);
             PageNumber.PropertyChanged += PageNumber_PropertyChanged;
             progress=0;
-            if (LastPage > FirstPage)
+            if (msg.lengthUnit == EPQLengthUnit.copies)
             {
-                if (ActPage>=FirstPage) progress = 100.0 * (ActPage-FirstPage) / (LastPage-FirstPage);
-                Progress = (int)progress;
-                ProgressStr = string.Format("{0}..{1} ({2}%)", ActPage, LastPage, Progress);
+                LengthUnit = EPQLengthUnit.copies;
+                ScanLength = msg.copies;
+                if (msg.start.copy==0) StartFrom = 1;
+                else                   StartFrom = msg.start.copy;
             }
             else
             {
-                if (msg.copiesTotal > 0) progress = 100.0 * msg.copiesPrinted / msg.copiesTotal;
-                else if (msg.scans > 0)  progress = 100.0 * msg.scansPrinted / msg.scans;
+                ScanLength = msg.scanLength/1000.0;
+                LengthUnit = EPQLengthUnit.mm;
+                StartFrom  = msg.start.scan;
+            };
+
+            if (LastPage > FirstPage)
+            {
+                int total=(LastPage-FirstPage+1) * Copies;
+                if (total!=0) progress = 100.0 * msg.copiesPrinted / total;
+                Progress = (int)progress;
+                ProgressStr = string.Format("p{0} c{1} ({2}%)", ActPage, ActCopy, Progress);
+            }
+            else
+            {
+                if (msg.scans> 0)
+                {
+                    if (msg.scansPrinted>=msg.start.scan) progress = 100.0 * (msg.scansPrinted-msg.scansStart) / (msg.scans-msg.scansStart);
+                }
+                else if (msg.copiesTotal > 0) progress = 100.0 * msg.copiesPrinted / msg.copiesTotal;
+                if (progress<0) progress=0;
                 Progress = (int)progress;
                 if (LengthUnitMM)
                 {
+//                  if (Copies!=0) StartCopy = (int)(ScanLength*StartCopy/Copies);
                     if (ScanLength < 10) ProgressStr = string.Format("{0:n3}m ({1:n1}%)", ScanLength * progress / 100.0, progress);
                     else ProgressStr = string.Format("{0:n1}m ({1}%)", ScanLength * progress / 100.0, Progress);
                 }
-                else ProgressStr = string.Format("{0}cp ({1}%)", ActCopy, Progress);
+                else ProgressStr = string.Format("{0}cp ({1}%)", msg.copiesPrinted, Progress);
             }
             Changed     = false;
         }
@@ -863,14 +941,28 @@ namespace RX_DigiPrint.Models
             msg.item.id.id      = ID;
             msg.item.filepath   = FilePath;
             msg.item.preview    = "";//_Preview.;
-            msg.item.printEnv   = PrintEnv;
+ //           msg.item.printEnv   = PrintEnv;
+            if (SrcPages>1)  LengthUnit = EPQLengthUnit.copies;
             msg.item.srcPages       = SrcPages;
-            msg.item.srcWidth       = (UInt32)(1000*SrcWidth);
-            msg.item.srcHeight      = (UInt32)(1000*SrcHeight);
+            msg.item.srcWidth       = (Int32)(1000*SrcWidth);
+            msg.item.srcHeight      = (Int32)(1000*SrcHeight);
             msg.item.firstPage      = FirstPage;
             msg.item.lastPage       = LastPage;
-            if (LengthUnit==EPQLengthUnit.copies && ScanLength>0) msg.item.copies = (UInt32)ScanLength;
-            else msg.item.copies    = Copies;
+            msg.item.start.page     = StartPage;
+            msg.item.lengthUnit     = LengthUnit;
+            msg.item.copies         = Copies;
+            if (msg.item.lengthUnit == EPQLengthUnit.copies)
+            {
+                if (SrcPages<2 && ScanLength>0) msg.item.copies = (int)ScanLength;
+                msg.item.start.copy = StartFrom;
+                msg.item.start.scan = 0;
+            }
+            else
+            {
+                msg.item.start.copy = 0;
+                msg.item.start.page = 0;
+                msg.item.start.scan = StartFrom;
+            }
             if (RxGlobals.PrintSystem.IsScanning)
             {
                 msg.item.scanMode       = ScanMode;
@@ -884,19 +976,19 @@ namespace RX_DigiPrint.Models
                 msg.item.curingPasses   = 0;
             }
             msg.item.speed          = Speed;
-            msg.item.collate        = Collate;
+            msg.item.collate        = (Byte)Collate;
             msg.item.lengthUnit     = LengthUnit;
             msg.item.variable       = Convert.ToByte(Variable);
             msg.item.dropSizes      = Convert.ToByte(DropSizes);
             msg.item.orientation    = Convert.ToByte(Orientation);
-            msg.item.pageWidth      = (UInt32)(1000*PageWidth);
-            msg.item.pageHeight     = (UInt32)(1000*PageHeight);
+            msg.item.pageWidth      = (Int32)(1000*PageWidth);
+            msg.item.pageHeight     = (Int32)(1000*PageHeight);
             msg.item.pageMargin     = (Int32)(1000*PageMargin);
             msg.item.printGoMode    = PrintGoMode;
-            msg.item.printGoDist    = (UInt32)(1000*PrintGoDist);
-            msg.item.scanLength     = (UInt32)(1000*ScanLength);
+            msg.item.printGoDist    = (Int32)(1000*PrintGoDist);
+            msg.item.scanLength     = (Int32)(1000*ScanLength);
             msg.item.testImage      = (byte)TestImage;
-            msg.item.checks         = Convert.ToUInt32(PrintChecks);
+            msg.item.checks         = Convert.ToInt32(PrintChecks);
             msg.item.dots           = Dots;
             if (PageNumber != null) PageNumber.ToMsg(ref msg.item.pageNumber);
 

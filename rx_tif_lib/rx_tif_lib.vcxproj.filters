@@ -103,6 +103,9 @@
     <ClCompile Include="rx_tif.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="rx_mem_tif.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Externals\libtiff\tif_dir.h">
@@ -131,6 +134,9 @@
     </ClInclude>
     <ClInclude Include="gcc_Debug-soc.h">
       <Filter>Make Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rx_mem_tif.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

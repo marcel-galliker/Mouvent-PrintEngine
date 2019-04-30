@@ -15,11 +15,12 @@
         <HostName>BuildMachine</HostName>
         <Transport>BuiltinShortcut</Transport>
       </RemoteHost>
-      <Command>C:\Keil_v5_spansion\UV4\UV4</Command>
-      <Arguments>-b rx_head_cond.uvprojx -t MB9BFxx4_Release -j0</Arguments>
-      <WorkingDirectory>$(SourceDir)</WorkingDirectory>
+      <Command>UV4</Command>
+      <Arguments>-b rx_head_cond.uvprojx -t MB9BFxx4_Release -j0 -o build.log</Arguments>
+      <WorkingDirectory>$(ProjectDir)</WorkingDirectory>
       <Environment>
         <Records />
+        <EnvironmentSetupFiles />
       </Environment>
       <BackgroundMode xsi:nil="true" />
     </BuildCommand>
@@ -29,9 +30,16 @@
         <HostName>BuildMachine</HostName>
         <Transport>BuiltinShortcut</Transport>
       </RemoteHost>
+      <Command>UV4</Command>
+      <Arguments>-b rx_head_cond.uvprojx -t MB9BFxx4_Release -j0 -o build.log -c</Arguments>
+      <WorkingDirectory>$(ProjectDir)</WorkingDirectory>
+      <Environment>
+        <Records />
+        <EnvironmentSetupFiles />
+      </Environment>
       <BackgroundMode xsi:nil="true" />
     </CleanCommand>
-    <MainBuildDirectory>$(SourceDir)</MainBuildDirectory>
+    <MainBuildDirectory>$(ProjectDir)</MainBuildDirectory>
     <AbsoluteTargetPath />
     <AutoUpdateMakefiles>true</AutoUpdateMakefiles>
   </Build>
@@ -80,8 +88,31 @@
   </Debug>
   <CustomBuild>
     <PreSyncActions />
-    <PreBuildActions />
-    <PostBuildActions />
+    <PreBuildActions>
+      <CustomActionBase xsi:type="CommandLineAction">
+        <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
+        <Command>cmd</Command>
+        <Arguments>/c rem See build.log in case of failure</Arguments>
+        <WorkingDirectory>$(BuildDir)</WorkingDirectory>
+        <Environment>
+          <Records />
+        </Environment>
+        <BackgroundMode>false</BackgroundMode>
+      </CustomActionBase>
+    </PreBuildActions>
+    <PostBuildActions>
+      <CustomActionBase xsi:type="CommandLineAction">
+        <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
+        <Command>cmd</Command>
+        <Arguments>/c type build.log</Arguments>
+        <WorkingDirectory>$(ProjectDir)</WorkingDirectory>
+        <Environment>
+          <Records />
+          <EnvironmentSetupFiles />
+        </Environment>
+        <BackgroundMode>false</BackgroundMode>
+      </CustomActionBase>
+    </PostBuildActions>
     <PreCleanActions />
     <PostCleanActions />
   </CustomBuild>

@@ -9,13 +9,14 @@
              mc:Ignorable="d"
              Width="250"
              d:DesignHeight="300" d:DesignWidth="200">
+    
     <GroupBox Header="Offsets" Style="{StaticResource RxGroupBox}">
         <StackPanel>
             <Grid x:Name="Encoder">
                 <TextBlock       Text="Encoder [inc/m]"/>
                 <common:RxNumBox Text="{Binding OffsetIncPerMeter}" HorizontalContentAlignment="Right" Width="70" HorizontalAlignment="Right"/>
             </Grid>
-            
+
             <Grid x:Name="Belt">
                 <TextBlock       Text="Belt Step [µm]"/>
                 <common:RxNumBox Text="{Binding OffsetStep}" HorizontalContentAlignment="Right" Width="70" HorizontalAlignment="Right"/>
@@ -38,9 +39,14 @@
 			                    HorizontalAlignment="Right"                                
                                />
             </Grid>
-            
+
+            <Grid x:Name="EncoderVerso">
+                <TextBlock       Text="Encoder Verso [inc/m]"/>
+                <common:RxNumBox Text="{Binding OffsetIncPerMeterVerso}" HorizontalContentAlignment="Right" Width="70" HorizontalAlignment="Right"/>
+            </Grid>
+
             <Grid x:Name="Verso">
-                <TextBlock       Text="Verso [mm]"/>
+                <TextBlock       Text="Dist Verso [mm]"/>
                 <common:RxNumBox Text="{Binding OffsetVerso}" HorizontalContentAlignment="Right" Width="70" HorizontalAlignment="Right"/>
             </Grid>
         </StackPanel>

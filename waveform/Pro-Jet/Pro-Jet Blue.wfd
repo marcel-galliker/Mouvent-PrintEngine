@@ -1,5 +1,5 @@
 <WaveForm>
-  <Ink Name="Blue 102" ColorCode="6" Description="Pro-Jet TX130 Blue-102" ColorRGB="#FF3C56DD" Temp="30" TempMax="45" GreyLevel="8 12 13 15 " MaxFreq="50062" />
+  <Ink Name="Blue 102" ColorCode="6" Description="Pro-Jet TX130 Blue-102" ColorRGB="#FF3C56DD" Temp="30" TempMax="45" GreyLevel="8 12 13 15 " MaxFreq="50062" Meniscus="0" CondPresOut="0" DropletVolume="0" FlushTime="120 300 1200" />
   <item Position="0" Voltage="0" />
   <item Position="26" Voltage="0" />
   <item Position="61" Voltage="19" />
@@ -20,5 +20,5 @@
   <item Position="1464" Voltage="9" />
   <item Position="1480" Voltage="0" />
   <item Position="1592" Voltage="0" />
-  <check>0CE2B7E5DB6D8948DC667BCE7DF611F6F5762506</check>
+  <check>11E74E13CF9534F3014C4B4409FE851C66F6A22C</check>
 </WaveForm>

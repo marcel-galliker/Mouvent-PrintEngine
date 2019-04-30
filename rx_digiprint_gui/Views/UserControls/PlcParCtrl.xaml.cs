@@ -20,6 +20,8 @@ namespace RX_DigiPrint.Views.UserControls
     public partial class PlcParCtrl : UserControl, INotifyPropertyChanged
     {                
         public event PropertyChangedEventHandler PropertyChanged;
+                        
+        private PropertyInfo _ComboValueProp;
 
         public enum ECtrlType : byte
         {
@@ -27,7 +29,8 @@ namespace RX_DigiPrint.Views.UserControls
             Combo,
             ComboStr,
             ImgCombo,
-            CheckBox
+            CheckBox,
+            Led
         };
 
         //--- constructor -----------------------------------------------
@@ -137,6 +140,7 @@ namespace RX_DigiPrint.Views.UserControls
                 ComboCtrl.Visibility    = _Type==ECtrlType.Combo    ? Visibility.Visible : Visibility.Hidden;
                 ImgComboCtrl.Visibility = _Type==ECtrlType.ImgCombo ? Visibility.Visible : Visibility.Hidden;
                 CheckBoxCtrl.Visibility = _Type==ECtrlType.CheckBox ? Visibility.Visible : Visibility.Hidden;
+                LedCtrl.Visibility      = _Type==ECtrlType.Led      ? Visibility.Visible : Visibility.Hidden;
                 if (_Type==ECtrlType.CheckBox && CheckBoxCtrl.Children.Count==0) _checkbox_init();
             }
         }
@@ -149,21 +153,29 @@ namespace RX_DigiPrint.Views.UserControls
                 ImgComboCtrl.ItemsSource=value;
 
                 ComboCtrl.ItemsSource=value;
-                if (value!=null)
-                {
-                    var list = value.GetEnumerator();
-                    if (list != null)
-                    {
-                        list.Reset();
-                        list.MoveNext();
-                        var first  = list.Current;
-                        PropertyInfo[] props = first.GetType().GetProperties();
-                        ComboValue = Convert.ToInt32(props[0].GetValue(first, null));
-                    }
-                }
+                              
+                var l = value.GetEnumerator();
+                l.Reset();
+                l.MoveNext();
+                _ComboValueProp = l.Current.GetType().GetProperty("Value");                
             } 
         }        
         
+        //--- GetVal --------------------------
+        private Int32 GetVal(object item)
+        {
+            if (_ComboValueProp==null || item==null) return 0;
+
+            try
+            {
+                return (Int32)_ComboValueProp.GetValue(item);
+            }
+            catch(Exception)
+            {
+                return 0;
+            }
+        }
+
         //--- Property ReadOnly ---------------------------------------
         public bool ReadOnly
         {
@@ -392,32 +404,25 @@ namespace RX_DigiPrint.Views.UserControls
                     case ECtrlType.ComboStr:
                         if (ComboCtrl.ItemsSource!=null && value!=null)
                         {
-                            var list = ComboCtrl.ItemsSource.GetEnumerator();
-                            try
+                            int val = Rx.StrToInt32(value); 
+                            foreach (var item in ComboCtrl.ItemsSource)
                             {
-                                int val = Convert.ToInt32(value); 
-                                if (list != null)
+                                if (GetVal(item)==val)
                                 {
-                                    list.Reset();
-                                    while (list.MoveNext())
+                                    try
                                     {
-                                        RxEnum<int> item = list.Current as RxEnum<int>;
-                                        if (item!=null && item.Value==val)
-                                        {
-                                            TextCtrl.Text=item.Display;
-                                            return;
-                                        }
+                                        TextCtrl.Text=(item as RxEnum<int>).Display;
                                     }
-                                }                            
+                                    catch(Exception)
+                                    {
+                                    }
+                                    break;
+                                }
                             }
-                            catch(Exception)
-                            {
-                                TextCtrl.Text = value;
-                            };
                         }
                         break;
 
-                    case ECtrlType.CheckBox: try{_checkbox_setvalue(Convert.ToInt32(value));}
+                    case ECtrlType.CheckBox: try{_checkbox_setvalue(Rx.StrToInt32(value));}
                                              catch(Exception) {_checkbox_setvalue(0);}
                                              break;
 
@@ -441,9 +446,9 @@ namespace RX_DigiPrint.Views.UserControls
                                         }
                                         break;
                                 case 'h': _Value = string.Format("{0:X}", Convert.ToInt64(value));  break;
-                                case 'f': _Value = string.Format("{0:n3}", Rx.StrToDouble(value)); break;
-                                case '1': _Value = string.Format("{0:n1}", Rx.StrToDouble(value)); break;
-                                case 'n': _Value = string.Format("{0:n0}", Rx.StrToDouble(value)); break;
+                                case 'f': _Value = Rx.StrNumFormat(value,3); break;
+                                case '1': _Value = Rx.StrNumFormat(value,1); break;
+                                case 'n': _Value = Rx.StrNumFormat(value,0); break;
                                 case 'l': _Value = value.Replace(';', '\n'); break;
                                 default : _Value = value; break;
                             }
@@ -455,6 +460,52 @@ namespace RX_DigiPrint.Views.UserControls
                     }
                     _CallPropertyChanged();
                 }
+            }
+        }
+
+        //--- SendValue ------------------------------
+        public string SendValue
+        {
+            get
+            {
+                if (_Type==ECtrlType.Combo || _Type==ECtrlType.ImgCombo)
+                {
+                    return GetVal(ComboCtrl.SelectedItem).ToString(); 
+                }
+                else
+                {
+                    if (!TextEditCtrl.Text.Equals("####"))
+                    {
+                        if (_Format=='b')
+                        {
+                            int i;
+                            UInt32 n=1, val=0;
+                            string text = TextEditCtrl.Text;
+                            for (i=text.Length-1; i>=0; i--)
+                            {
+                                if (text[i]=='1')  {val += n; n*=2;}
+                                else if (text[i]=='0') n*=2;
+                            }
+                            return val.ToString();
+                        }
+                        else 
+                        {
+                            string val=TextEditCtrl.Text;
+                            if (_Format=='n')
+                            {   // remove formatting spaces, commas (very special!)
+                                for (int i=0; i<val.Length; )
+                                {
+                                    if ((int)val[i]==160) val=val.Remove(i,1);
+                                    if ((int)val[i]==27) val=val.Remove(i,1);
+                                    if ((val[i]<'0' || val[i]>'9') && val[i]!='-' && val[i]!='.' && val[i]!=',') val=val.Remove(i,1);
+                                    else i++;
+                                }
+                            }
+                            return val.Replace(',', '.');
+                        }
+                    }
+                }
+                return null;
             }
         }
 
@@ -475,12 +526,26 @@ namespace RX_DigiPrint.Views.UserControls
                 {
                     if (_ComboValueInit==null) _ComboValueInit=value;
                     _ComboValue = (int)value;
+
+                    if (ComboCtrl.ItemsSource!=null && value!=null)
+                    {
+                        foreach(var item in ComboCtrl.ItemsSource)
+                        {
+                            if (GetVal(item)==value)
+                            {
+                                ComboCtrl.SelectedItem=item;
+                                break;
+                            }
+                        }
+                    }
+
                     _CallPropertyChanged();
                     if (!_UpdateValue) Changed = (value!=_ComboValueInit);
                 }
             }
         }
         
+
         //--- Send ------------------------------------------------------
         public void Send(PlcParPanel panel)
         {
@@ -488,7 +553,8 @@ namespace RX_DigiPrint.Views.UserControls
             string str=null;
             if (panel!=null)
             {
-                if (_Type==ECtrlType.Combo || _Type==ECtrlType.ImgCombo) str = string.Format("{0}\n{1}={2}\n", panel.UnitID, ID, _ComboValue.ToString());
+                if (_Type==ECtrlType.Combo || _Type==ECtrlType.ImgCombo) 
+                    str = string.Format("{0}\n{1}={2}\n", panel.UnitID, ID, SendValue);
                 else
                 {
                     if (!TextEditCtrl.Text.Equals("####"))
@@ -509,11 +575,12 @@ namespace RX_DigiPrint.Views.UserControls
                         {
                             string val=TextEditCtrl.Text;
                             if (_Format=='n')
-                            {   // remove formatting spaces (very spacial!)
+                            {   // remove formatting spaces, commas (very special!)
                                 for (int i=0; i<val.Length; )
                                 {
-//                                    if ((int)val[i]==160) val=val.Remove(i,1);
-                                    if ((val[i]<'0' || val[i]>'9') && val[i]!='.' && val[i]!=',') val=val.Remove(i,1);
+                                    if ((int)val[i]==160) val=val.Remove(i,1);
+                                    if ((int)val[i]==27) val=val.Remove(i,1);
+                                    if ((val[i]<'0' || val[i]>'9') && val[i]!='-' && val[i]!='.' && val[i]!=',') val=val.Remove(i,1);
                                     else i++;
                                 }
                             }
@@ -522,7 +589,11 @@ namespace RX_DigiPrint.Views.UserControls
                         }
                     }
                 }
-	            if (str!=null) RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_SET_VAR, str);         
+	            if (str!=null) 
+                {
+            //      Console.WriteLine("PlcPar.send>>{0}<<", str);
+                    RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_SET_VAR, str);         
+                }
             }
             Changed = false;
             _ValueInit      = null; // _Value;
@@ -581,7 +652,7 @@ namespace RX_DigiPrint.Views.UserControls
             FrameworkElement ctrl = sender as FrameworkElement;
             if (ctrl!=null) 
             {
-                ImgComboCtrl.SelectedIndex = Convert.ToInt32(ctrl.Tag);
+                ImgComboCtrl.SelectedIndex = Rx.StrToInt32(ctrl.Tag);
             }
             CmdPopup.IsOpen = false;
             e.Handled = true;

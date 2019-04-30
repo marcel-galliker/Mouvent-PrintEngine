@@ -6,7 +6,7 @@
       xmlns:rx="clr-namespace:RxWfTool.Helpers"
       xmlns:views="clr-namespace:RxWfTool.Views"   
       mc:Ignorable="d"
-      d:DesignHeight="300" d:DesignWidth="500"
+      d:DesignHeight="300" d:DesignWidth="700"
 	>
 
     <Grid>
@@ -20,16 +20,17 @@
             <ColumnDefinition Width="auto" MinWidth="100"/>
             <ColumnDefinition Width="auto" />
             <ColumnDefinition Width="auto" />
+            <ColumnDefinition Width="auto" />
         </Grid.ColumnDefinitions>
 
         <!-- Left Side ______________________________________________________________-->
-        <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Horizontal" Background="{DynamicResource Brush03}" Margin="0">
+        <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" Orientation="Horizontal" Background="{DynamicResource Brush03}" Margin="0">
             <TextBlock Text="Wave Form" Margin="5,0,0,0" />
         </StackPanel>
-        <views:WfGraph x:Name="Graph" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"/>
+        <views:WfGraph x:Name="Graph" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4"/>
     
         <!-- Right Side ______________________________________________________-->
-        <StackPanel Grid.Row="0" Grid.Column="3" Orientation="Horizontal" Background="{DynamicResource Brush03}">
+        <StackPanel Grid.Row="0" Grid.Column="4" Orientation="Horizontal" Background="{DynamicResource Brush03}">
             <TextBlock Text="Definition" Margin="5,0,0,0" />
             <Button x:Name="Button_Add" Style="{DynamicResource ToolButtonStyle}" ToolTip="Confirm all Events" Click="Add_clicked" >
                 <Image Source="../Resources/Bitmaps/add.ico"/>
@@ -41,7 +42,7 @@
 
         <ig:XamGrid
             x:Name="WfDefList"
-            Grid.Column="3" Grid.Row="1" Grid.RowSpan="2"
+            Grid.Column="4" Grid.Row="1" Grid.RowSpan="2"
             MinWidth="100" 
             AutoGenerateColumns="False"
             CellStyle="{DynamicResource XamGridCellStyle}"
@@ -92,13 +93,18 @@
                 <TextBlock Text="Ink" Background="{DynamicResource Brush03}" HorizontalAlignment="Stretch" Padding="5,0,0,0"/>
                 <views:InkView x:Name="InkDef" BorderBrush="{DynamicResource Brush04}" BorderThickness="1,0,0,0" Padding="2,0,0,0"/>
         </StackPanel>
-
+        
         <StackPanel Grid.Row="2" Grid.Column="1" Margin="2,0">
-            <TextBlock Grid.ColumnSpan="2" Text="Grey Levels" Background="{DynamicResource Brush03}" HorizontalAlignment="Stretch" Padding="5,0,0,0"/>
+            <TextBlock Text="Flush Time" Background="{DynamicResource Brush03}" HorizontalAlignment="Stretch" Padding="5,0,0,0"/>
+            <views:FlushTimeView x:Name="FlushTime"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Grid.Column="2" Margin="2,0">
+            <TextBlock Text="Grey Levels" Background="{DynamicResource Brush03}" HorizontalAlignment="Stretch" Padding="5,0,0,0"/>
             <views:GreyLevelView x:Name="GreyLevelDef"/>
         </StackPanel>
 
-        <StackPanel Grid.Row="2" Grid.Column="2" Margin="2,0" x:Name="Performance">
+        <StackPanel Grid.Row="2" Grid.Column="3" Margin="2,0" x:Name="Performance">
             <TextBlock Grid.ColumnSpan="2" Text="Performance" Background="{DynamicResource Brush03}" HorizontalAlignment="Stretch" Padding="5,0,0,0"/>
             <TextBlock Text="{Binding PulseLength, StringFormat='0.### µs'}"    HorizontalAlignment="Right"/>
             <TextBlock Text="{Binding PulseFreq,   StringFormat='0.### KHz'}"   HorizontalAlignment="Right"/>

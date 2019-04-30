@@ -54,7 +54,7 @@
             </Grid.RowDefinitions>
             <Button Grid.Row="0" Grid.Column="0" Text="OFF"         Clicked="Off_Clicked"/>
             <Button Grid.Row="1" Grid.Column="0" Text="Print"       Clicked="Print_Clicked"/>
-            <Button Grid.Row="2" Grid.Column="0" Text="Flush"       Clicked="Flush_Clicked"/>
+<!--            <Button Grid.Row="2" Grid.Column="0" Text="Flush"       Clicked="Flush_Clicked"/> -->
             <Button Grid.Row="0" Grid.Column="1" Text="Purge Short" Clicked="PurgeS_Clicked"/>
             <Button Grid.Row="1" Grid.Column="1" Text="Purge "      Clicked="Purge_Clicked"/>
             <Button Grid.Row="2" Grid.Column="1" Text="Purge Hard"  Clicked="PurgeH_Clicked"/>

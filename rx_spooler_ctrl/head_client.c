@@ -15,6 +15,7 @@
 #include "rx_error.h"
 #include "rx_file.h"
 #include "rx_mac_address.h"
+#include "rx_mem.h"
 #include "rx_sok.h"
 #include "rx_threads.h"
 #include "rx_trace.h"
@@ -26,10 +27,17 @@
 
 #include "head_client.h"
 
+
 //--- Defines -----------------------------------------------------------------
 // static int	_Trace=2;
 static int	_Trace=0;
-static int	_Simulation=TRUE;
+
+
+#define SIMU_OFF	0	// no simulation
+#define SIMU_WRITE	1	// write data to file
+#define SIMU_READ	2	// test reading files, no sending, no writing
+
+static int	_Simulation=SIMU_OFF;
 
 // #define RAW_SOCKET
 
@@ -59,6 +67,7 @@ typedef struct
 	int				 udpNo;
 	int				errorSent;
 	int				boardNo;
+	SPageId			lastId[HEAD_CNT];
 } SHBThreadPar;
 
 //--- static vairables --------------------------------------------------------
@@ -71,7 +80,7 @@ static SHBThreadPar*	_HBPar[HEAD_BOARD_CNT];
 static int				_SimuNo[MAX_COLORS];
 static int				_TestImgNo[HEAD_BOARD_CNT][MAX_HEADS_BOARD];
 static UINT16			_TestBlockSent[MAX_HEADS_BOARD][140000];
-static int				_TestBlockUsedReqTime[MAX_USED_ID];
+static int				_TestBlockUsedReqTime[MAX_HEADS_BOARD][MAX_USED_ID];
 static int				_TestLastBlock;
 
 //--- prototypes --------------------------------------------------------------
@@ -132,6 +141,7 @@ int hc_head_board_cfg(RX_SOCKET socket, SHeadBoardCfg* cfg)
 		system("del d:\\temp\\test\\*.* /S /Q");
 		#endif
 		memset(_SimuNo, 0, sizeof(_SimuNo));
+		if (_Simulation==SIMU_READ) rx_mem_clear_caches();
 	}
 	memset(_TestImgNo, 0, sizeof(_TestImgNo));
 	memset(_TestBlockSent, 0, sizeof(_TestBlockSent));
@@ -171,6 +181,7 @@ int hc_head_board_cfg(RX_SOCKET socket, SHeadBoardCfg* cfg)
 	}
 	_HBPar[cfg->no]->boardNo     = cfg->no;
 	_HBPar[cfg->no]->blockOutIdx = 0;
+	memset(&_HBPar[cfg->no]->lastId, 0, sizeof(_HBPar[cfg->no]->lastId));
 	memcpy(&_HBPar[cfg->no]->cfg, cfg, sizeof(_HBPar[cfg->no]->cfg));
 	size =  (cfg->dataBlkCntHead*MAX_HEADS_BOARD)/sizeof(UINT32);
 	if (size>_HBPar[cfg->no]->blockUsedSize)
@@ -182,7 +193,7 @@ int hc_head_board_cfg(RX_SOCKET socket, SHeadBoardCfg* cfg)
 	}
 	memset(_HBPar[cfg->no]->blockUsed, 0, _HBPar[cfg->no]->blockUsedSize);
 	_HBPar[cfg->no]->errorSent = FALSE;
-	_HBUsed[cfg->no]=TRUE;
+	_HBUsed[cfg->no]=(cfg->spoolerNo==RX_SpoolerNo);
 	hc_check();
 	return REPLY_OK;
 }
@@ -297,10 +308,42 @@ void hc_send_next(void)
 				{
 				case dev__undef:	break;
 				case dev_off:		break;
-				case dev_simu:		if (_Simulation) 
+				case dev_simu:		if(_Simulation==SIMU_WRITE) 
 									{
 										_save_to_file(pInfo);
-										if (data_sent(pInfo, i)) hc_send_next();	
+										if(data_sent(pInfo,i)) 
+										{
+											SPrintFileMsg evt;
+
+											evt.hdr.msgId   = EVT_PRINT_FILE;
+											evt.hdr.msgLen  = sizeof(evt);
+											memcpy(&evt.id, &pInfo->pListItem->id, sizeof(evt.id));
+											evt.evt			= DATA_PRINT_DONE;
+											evt.spoolerNo   = RX_SpoolerNo;
+											evt.bufReady	= data_ready();
+											ctrl_send(&evt);
+
+											hc_send_next();												
+										}
+									}
+									else if (_Simulation==SIMU_READ)
+									{
+										if(data_sent(pInfo,i)) 
+										{
+											static int _time=0;
+											int time = rx_get_ticks();
+											double lengthPx = pInfo->pListItem->lengthPx/(1200.0*40.0);
+											double speed=1000;
+											if (time!=_time)
+											{
+												speed= lengthPx * 60 * 1000 / (time-_time);
+											}
+											SPageId *pid = &pInfo->pListItem->id;
+											Error(LOG, 0, "SIMU_READ FILE SENT: (id=%d, page=%d, copy=%d, scan=%d) cycletime=%d ms, speed=%d m/min", pid->id, pid->page, pid->copy, pid->scan, time-_time, (int)speed);
+											_time=time;
+											
+											hc_send_next();								
+										}
 									}
 									break;
 
@@ -380,6 +423,11 @@ static int _send_image_cmd(SBmpSplitInfo *pInfo)
 	imageCmd.image.clearBlockUsed	= pInfo->clearBlockUsed;
 	
 	if (RX_Color[pInfo->inkSupplyNo].rectoVerso==rv_verso) imageCmd.image.backward = !imageCmd.image.backward;
+	if (RX_Spooler.printerType==printer_cleaf)
+	{
+		imageCmd.image.backward		  = TRUE;
+		imageCmd.image.flipHorizontal = TRUE;
+	}
 	
 	TrPrintfL(_Trace, "_send_image_cmd[%d.%d].img[%d]", pInfo->board, pInfo->head, ++_TestImgNo[pInfo->board][pInfo->head]);
 	sok_send(&_HBPar[pInfo->board]->ctrlSocket, &imageCmd);
@@ -449,7 +497,8 @@ static int _do_block_used(SHBThreadPar *par, SBlockUsedRep *msg)
 	size  = par->cfg.head[head].blkCnt;
 	end   = par->cfg.head[head].blkNo0+size;
 
-	TrPrintfL(TRUE || _Trace, "Head[%d.%d]: _do_block_used id=%d, blkNo=%d, blkCnt=%d, (Block %d .. %d), blkOutIdx=%d time=%dms", par->cfg.no, msg->headNo, msg->id, msg->blkNo, msg->blkCnt, msg->blkNo, msg->blkNo+msg->blkCnt, msg->blockOutIdx, rx_get_ticks()-_TestBlockUsedReqTime[msg->id]);
+	if (head<SIZEOF(_TestBlockUsedReqTime))
+		TrPrintfL(TRUE || _Trace, "Head[%d.%d]: _do_block_used id=%d, blkNo=%d, blkCnt=%d, (Block %d .. %d), blkOutIdx=%d blockused_time=%dms", par->cfg.no, msg->headNo, msg->id, msg->blkNo, msg->blkCnt, msg->blkNo, msg->blkNo+msg->blkCnt, msg->blockOutIdx, rx_get_ticks()-_TestBlockUsedReqTime[head][msg->id]);
 
 	if (msg->blkNo+msg->blkCnt < end)
 	{
@@ -533,7 +582,8 @@ static void _req_used_flags(SHBThreadPar *par, int head, int blkNo, int blkCnt, 
 			
 		par->reqUsedId[head][par->blockUsedId] = TRUE;
 		par->blockUsedId = (par->blockUsedId+1)%MAX_USED_ID;
-		_TestBlockUsedReqTime[par->blockUsedId] = rx_get_ticks();
+		if (head<SIZEOF(_TestBlockUsedReqTime))
+			_TestBlockUsedReqTime[head][par->blockUsedId] = rx_get_ticks();
 		TrPrintfL(TRUE || _Trace, "Head[%d.%d]: req block used: id=%d, blkNo=%d, blkCnt=%d (blk %d .. %d) line=%d", par->cfg.no, head, pcmd->id, pcmd->blkNo, pcmd->blkCnt, pcmd->blkNo, pcmd->blkNo+pcmd->blkCnt, line);
 		sok_send(&par->ctrlSocket, pcmd);
 		blkCnt -= pcmd->blkCnt;
@@ -644,12 +694,18 @@ static int _send_to_board(SHBThreadPar *par, int head, int blkNo, int blkCnt)
 		
 		if (pinfo->sendFromBlk >= pinfo->blkCnt)
 		{
-			if (pinfo->printMode!=PM_TEST && pinfo->printMode!=PM_TEST_SINGLE_COLOR) _check_image_blocks(par, pinfo, headMin, headMax);
+			SPageId *pid   = &pinfo->pListItem->id;
+			SPageId *plast = &par->lastId[head];
+			if (memcmp(plast, pid, sizeof(SPageId)))
+			{
+				if (pinfo->printMode!=PM_TEST && pinfo->printMode!=PM_TEST_SINGLE_COLOR && pinfo->printMode!=PM_TEST_JETS) _check_image_blocks(par, pinfo, headMin, headMax);
+				_send_image_cmd(pinfo);
+				static int scan=0;
+				TrPrintfL(_Trace, "All sent: blk0=%d, cnt=%d, scan=%d\n", pinfo->blk0, pinfo->blkCnt, ++scan);
+//				Error(LOG, 0, "Head[%d]: FILE SENT (id=%d, page=%d, copy=%d) last (id=%d, page=%d, copy=%d)", head, pid->id, pid->page, pid->copy, plast->id, plast->page, plast->copy);				
+				memcpy(plast, pid, sizeof(SPageId));
+			}
 
-			_send_image_cmd(pinfo);
-
-			static int scan=0;
-			TrPrintfL(_Trace, "All sent: blk0=%d, cnt=%d, scan=%d\n", pinfo->blk0, pinfo->blkCnt, ++scan);
 			if (data_sent(pinfo, head))
 			{
 				hc_send_next();
@@ -710,13 +766,12 @@ void hc_check(void)
 				{
 					len=send(_HBPar[board]->dataSocket[port], (char*)&msg, sizeof(msg.blkNo)+RX_Spooler.dataBlkSize, MSG_NOSIGNAL);
 
-					/*
+					if (FALSE)
 					{
 						char str[100];
 						sok_get_peer_name(_HBPar[board]->dataSocket[port], str, NULL, NULL);
 						TrPrintf(TRUE, "SpoolerNo=%d Alive Sent to >>%s<< len=%d", RX_SpoolerNo, str, len);
 					}
-					*/
 					sent++;
 				}
 			#endif

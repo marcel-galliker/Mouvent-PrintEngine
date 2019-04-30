@@ -7,14 +7,17 @@
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
-        <StackPanel Margin="5,0,0,0">
+        <GroupBox Header="Consumables" Style="{StaticResource RxGroupBox}">
+            <StackPanel> <!-- Margin="5,0,0,0" -->
+
             <rx_uc:PlcParPanel UnitID="Application.GUI_00_001_Main" ReadOnly="True" x:Name="Panel" Visibility="Collapsed">
                 <rx_uc:PlcParCtrl ID="STA_WINDER_DIAMETER_1"            Label="Unwinder Ø"   Unit="mm" Format="f"/>
                 <rx_uc:PlcParCtrl ID="STA_WINDER_DIAMETER_2"            Label="Rewinder Ø"   Unit="mm" Format="f"/>
             </rx_uc:PlcParPanel>
-            <TextBlock Text="Consumables" FontWeight="Bold"/>
+            <!--      <TextBlock Text="Consumables" FontWeight="Bold"/> -->
             <rx_uc:ConsumablesView x:Name="Consumables" Height="250" HorizontalAlignment="Center"/>
-        </StackPanel>
+            </StackPanel>
+        </GroupBox>
 
     </Grid>
 </UserControl>

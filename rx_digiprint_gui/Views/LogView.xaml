@@ -52,6 +52,14 @@
                 <Image Source="../Resources/Bitmaps/Top.ico"/>
             </common:RxButton>
 
+            <common:RxButton x:Name="PageUp" ToolTip="Page Up" Click="PageUp_clicked" >
+                <Image Source="../Resources/Bitmaps/PageUp.ico"/>
+            </common:RxButton>
+
+            <common:RxButton x:Name="PageDown" ToolTip="PageDown" Click="PageDown_clicked" >
+                <Image Source="../Resources/Bitmaps/PageDown.ico"/>
+            </common:RxButton>
+            
             <common:RxButton x:Name="MoveBottom" ToolTip="Go to latest Message" Click="Bottom_clicked" >
                 <Image Source="../Resources/Bitmaps/Bottom.ico"/>
             </common:RxButton>

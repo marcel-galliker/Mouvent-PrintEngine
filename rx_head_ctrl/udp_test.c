@@ -271,7 +271,7 @@ void udp_test_print(char *fname)
 				blkNo = (blkNo+1)%RX_HBConfig.head[head].blkCnt;
 				udp_test_send(&msg, dataLen+4);
 			}
-			printf("Sent UDP Blocks: %d..%d cnt=%d\n", _BlkNo[head], blkNo-1, blkNo-_BlkNo[head]);
+			TrPrintfL(TRUE, "Sent UDP Blocks: %d..%d cnt=%d\n", _BlkNo[head], blkNo-1, blkNo-_BlkNo[head]);
 			_send_image(head, &bmpInfo, RX_HBConfig.head[head].blkNo0+_BlkNo[head], _Backwards);
 			_BlkNo[head] = blkNo;
 		}
@@ -441,7 +441,7 @@ void udp_test_print_tif(char *fname)
 				memcpy(tst, msg.blkData, dataLen); tst+=dataLen;
 			}
 
-			printf("Head[%d]: size=%d, blkCnt=%d\n", head, info.lengthPx*lineLen, (info.lengthPx*lineLen+1439)/1440);
+			TrPrintfL(TRUE, "Head[%d]: size=%d, blkCnt=%d\n", head, info.lengthPx*lineLen, (info.lengthPx*lineLen+1439)/1440);
 
 			//--- send img -------------------------------------------
 			{

@@ -12,6 +12,7 @@
              xmlns:models="clr-namespace:RX_DigiPrint.Models"
              xmlns:Infragistics="clr-namespace:Infragistics;assembly=InfragisticsWPF4.Controls.Grids.XamGrid.v13.2"
              xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
+             xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
              mc:Ignorable="d" 
              x:Name="_this"
              d:DesignHeight="600" d:DesignWidth="1200"
@@ -31,18 +32,18 @@
 
         <!-- toolbar RIGHT _______________________________________________________ -->
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-           <Button x:Name="Keyboard" Style="{DynamicResource ToolButtonStyle}" Click="Keyboard_Clicked">
+            <common:RxButton x:Name="Keyboard" Click="Keyboard_Clicked">
                 <Image Source="../Resources/Bitmaps/kbd.png" Margin="8"/>
-            </Button>
-            <Button x:Name="Button_Save" Style="{DynamicResource ToolButtonStyle}" Click="Save_Clicked">
+            </common:RxButton>
+            <common:RxButton x:Name="Button_Save" Click="Save_Clicked">
                 <Image Source="{StaticResource save_ico}"/>
-            </Button>
-            <Button x:Name="Button_Reload" Style="{DynamicResource ToolButtonStyle}" Click="Reload_Clicked">
+            </common:RxButton>
+            <common:RxButton x:Name="Button_Reload" Click="Reload_Clicked">
                 <Image Source="{StaticResource reload_ico}"/>
-            </Button>
-            <Button x:Name="Button_Delete" Style="{DynamicResource ToolButtonStyle}" Click="Delete_Clicked">
+            </common:RxButton>
+            <common:RxButton x:Name="Button_Delete" Click="Delete_Clicked">
                 <Image Source="{StaticResource delete_ico}"/>
-            </Button>
+            </common:RxButton>
         </StackPanel>
         
         <ig:XamGrid 
@@ -134,7 +135,7 @@
                                 BorderBrush="{DynamicResource {x:Static SystemColors.ScrollBarBrushKey}}" 
                                 Click="Flash_Clicked" 
                                 Background="#FFF4F4F4"
-                                Visibility="{Binding DeviceType, Converter={StaticResource DeviceNoVisible_Converter}}"
+                                Visibility="{Binding DeviceType, Converter={StaticResource FlashButtonVisible_Converter}}"
                                 >
                                     <TextBlock Text="{Binding Flash, Converter={StaticResource CheckBox_Converter}}" FontFamily="Wingdings" Foreground="#FF0EE20E" FontWeight="Bold" FontSize="28"/>
                             </Button>
@@ -142,7 +143,7 @@
                     </ig:TemplateColumn.ItemTemplate>
                 </ig:TemplateColumn>
                 
-                <ig:TemplateColumn  
+                <ig:TemplateColumn
                     HeaderText="Putty"          
                     Key="PuttyDebug"         
                     VerticalContentAlignment="Stretch" 
@@ -153,6 +154,7 @@
                             <Button 
                                 BorderThickness="1" 
                                 Click="PuttyDebug_Clicked"
+                                Visibility="{Binding DeviceType, Converter={StaticResource PuttyDbgVisible_Converter}}"
                                 >
                                 <StackPanel Orientation="Horizontal" Margin="10,2">
                                     <Image Source="..\Resources\Bitmaps\PuTTY.png" Height="32"/>
@@ -173,7 +175,8 @@
                         <DataTemplate>
                             <Button 
                                 BorderThickness="1" 
-                                Click="Putty_Clicked" 
+                                Click="Putty_Clicked"
+                                Visibility="{Binding DeviceType, Converter={StaticResource PuttyVisible_Converter}}"
                                 >
                                 <StackPanel Orientation="Horizontal" Margin="10,2">
                                     <Image Source="..\Resources\Bitmaps\PuTTY.png" Height="32"/>

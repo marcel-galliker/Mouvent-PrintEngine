@@ -110,11 +110,15 @@ SColorName RX_ColorName[] =
 
 //--- RX_Color_InkSupplyPerSide -----------------------
 static char _ColorShortName[INK_SUPPLY_CNT][8];
-void RX_ColorNameInit (int inkSupplyNo, ERectoVerso	rectoVerso, int code)
+void RX_ColorNameInit (int inkSupplyNo, ERectoVerso	rectoVerso, char *fileName, int colorCode)
 {	
-	if (rectoVerso == rv_recto)			sprintf(_ColorShortName[inkSupplyNo], "R%s", RX_ColorName[code].shortName);
-	else if (rectoVerso == rv_verso)	sprintf(_ColorShortName[inkSupplyNo], "V%s", RX_ColorName[code].shortName);
-	else								sprintf(_ColorShortName[inkSupplyNo], "%s",  RX_ColorName[code].shortName);
+	if(*fileName == 0) strcpy(_ColorShortName[inkSupplyNo], "-");
+	else
+	{
+		if(rectoVerso == rv_recto)		sprintf(_ColorShortName[inkSupplyNo], "R%s", RX_ColorName[colorCode].shortName);
+		else if(rectoVerso == rv_verso)	sprintf(_ColorShortName[inkSupplyNo], "V%s", RX_ColorName[colorCode].shortName);
+		else							sprintf(_ColorShortName[inkSupplyNo], "%s", RX_ColorName[colorCode].shortName);
+	}
 }
 
 //--- RX_ColorNameLong ---------------------
@@ -149,7 +153,8 @@ int rx_def_is_web(EPrinterType printerType)
 	switch(printerType)	
 	{
 	case printer_LB701:		return TRUE;
-	case printer_LB702:		return TRUE;
+	case printer_LB702_UV:	return TRUE;
+	case printer_LB702_WB:	return TRUE;
 	case printer_DP803:		return TRUE;
 	case printer_cleaf:		return TRUE;
 	default: return FALSE;

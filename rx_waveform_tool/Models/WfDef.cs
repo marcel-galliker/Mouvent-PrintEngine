@@ -164,7 +164,7 @@ namespace RxWfTool.Models
                     if (_List[i].Voltage==0 && _List[i-1].Voltage>0) last=_List[i].Position;
                     if (len>0) _List[i-1].Delta = (_List[i].Voltage-_List[i-1].Voltage)/(len/80.0);
                 }
-                length=(last-first+WfItem.FirstPulsePos)*WfItem.Interval;
+                length=(last-first+WfItem.FirstPulsePos+WfItem.Filler)*WfItem.Interval;
             }
             if (length==0)
             {

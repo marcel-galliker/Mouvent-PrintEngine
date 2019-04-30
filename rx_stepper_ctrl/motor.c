@@ -80,17 +80,21 @@ void motor_end(void)
 //--- motor_reset -----------------------
 void motor_reset(int motor)
 {
-	Fpga.par->cmd_reset_pos   |= 0x0001<<motor;
+	if (motor <= 4)	// to prevent seg fault !
+	{
+		Fpga.par->cmd_reset_pos   |= 0x0001<<motor;
+		
+		_motor_start_cnt[motor] = 0;
 	
-	_motor_start_cnt[motor] = 0;
-
-	Fpga.encoder[motor].pos	   = 0;
-	Fpga.encoder[motor].revCnt = 0;
-	Fpga.par->cfg[motor].reset_pos_val_enc = 1;
-	Fpga.par->cfg[motor].reset_pos_val_mot = 1;
-	
-	Fpga.par->cfg[motor].stopIn		= 15;
-	Fpga.par->cfg[motor].stopLevel  = 0;
+		Fpga.encoder[motor].pos	   = 0;
+		Fpga.encoder[motor].revCnt = 0;
+		Fpga.par->cfg[motor].reset_pos_val_enc = 1;
+		Fpga.par->cfg[motor].reset_pos_val_mot = 1;
+		
+		Fpga.par->cfg[motor].stopIn		= 15;
+		Fpga.par->cfg[motor].stopLevel  = 0;
+		Fpga.par->cfg[motor].disable_mux_in  = 0;		
+	}
 }
 
 //--- motors_reset ---------------------------------------
@@ -191,8 +195,9 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
 	{
 		Fpga.par->cfg[motor].estopIn	= 15;
 		Fpga.par->cfg[motor].estopLevel = 0;
-		Fpga.par->cfg[motor].stopIn		= 15;
-		Fpga.par->cfg[motor].stopLevel  = 0;
+		Fpga.par->cfg[motor].stopIn		= par->stop_in;  // 15;
+		Fpga.par->cfg[motor].stopLevel  = 1 - par->stop_level;  //0;
+		Fpga.par->cfg[motor].disable_mux_in  = par->dis_mux_in;
 	}
 	else
 	{
@@ -200,6 +205,7 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
 		Fpga.par->cfg[motor].estopLevel = 1-par->estop_level;
 		Fpga.par->cfg[motor].stopIn		= 15;
 		Fpga.par->cfg[motor].stopLevel  = 0;
+		Fpga.par->cfg[motor].disable_mux_in  = par->dis_mux_in;
 	}
 	
 	if (par->checkEncoder)
@@ -333,6 +339,12 @@ int	motor_move_done(int motor)
 	return FALSE;
 }
 
+//--- motor_set_hold_current -------------------------------------
+void	motor_set_hold_current(int motor)
+{
+	ps_set_current(&Fpga.qsys->spi_powerstep[motor], _motor_current_hold[motor]);
+}
+
 //--- motors_move_done -----------------------------------------
 int	motors_move_done(int motors)
 {
@@ -394,6 +406,7 @@ void motor_config(int motor, int currentHold, double stepsPerMeter, double incPe
 //	Fpga.par->cfg[motor].estopLevel = 0;
 	Fpga.par->cfg[motor].stopIn		= 15;
 	Fpga.par->cfg[motor].stopLevel  = 0;	
+	Fpga.par->cfg[motor].disable_mux_in  = 0;
 }
 
 //--- motors_config -----------------------------------------

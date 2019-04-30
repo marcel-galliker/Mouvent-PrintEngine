@@ -31,6 +31,7 @@
 #include "rx_trace.h"
 #include "tcp_ip.h"
 #include "gui_msg.h"
+#include "network.h"
 #include "rfs.h"
 
 //--- Defines -----------------------------------------------------------------
@@ -62,6 +63,7 @@ typedef struct
 	char deviceType[16];
 	char dstBinPath[MAX_PATH];
 	char process[32];
+	UINT64 macAddr;
 } SUpdateThreadPar;
 
 typedef struct
@@ -113,10 +115,10 @@ int	rfs_update(const char *ipAddr, const char *srcBinPath, const char *deviceTyp
 */
 
 //--- rfs_update_start -----------------------------------------------------------
-void rfs_update_start(const char *ipAddr, int port, const char *srcBinPath, const char *deviceType, const char *dstBinPath, const char *process)
+void rfs_update_start(UINT64 macAddr, const char *ipAddr, int port, const char *srcBinPath, const char *deviceType, const char *dstBinPath, const char *process)
 {
 	int i;
-
+	
 	if (!_Init)
 	{
 		memset(_ThreadPar, 0, sizeof(_ThreadPar));
@@ -127,7 +129,12 @@ void rfs_update_start(const char *ipAddr, int port, const char *srcBinPath, cons
 	{
 		if (!strcmp(ipAddr, _ThreadPar[i].ipAddr))
 		{
-			if (_ThreadPar[i].port==port) return;
+			if (_ThreadPar[i].port==port)
+			{
+				// TrPrintfL(TRUE, "rfs_update_start(%s) port:%d already running", ipAddr, port);
+				return;
+			}
+			TrPrintfL(TRUE, "rfs_update_start(%s) port:%d ready, isBooted=%d", ipAddr, port, net_is_booted(macAddr));
 			break;
 		}
 	}
@@ -147,7 +154,12 @@ void rfs_update_start(const char *ipAddr, int port, const char *srcBinPath, cons
 	strcpy(_ThreadPar[i].deviceType,	deviceType);
 	strcpy(_ThreadPar[i].dstBinPath,	dstBinPath);
 	strcpy(_ThreadPar[i].process,		process);
+	_ThreadPar[i].macAddr = macAddr;
 	_ThreadPar[i].port	= port;
+
+	TrPrintfL(TRUE, "rfs_update_start(%s) port:%d START THREAD", ipAddr, port);
+//	Error(LOG, 0, "BOOT (%s) rfs started", ipAddr);
+	
 	rx_thread_start(_rfs_update_thread, &_ThreadPar[i], 0, "_rfs_update_thread");
 }
 
@@ -174,7 +186,8 @@ static void* _rfs_update_thread(void* lpParameter)
 	rx_sleep(100);
 //	sok_ping(par->ipAddr);
 //	rx_sleep(100);
-	TrPrintfL(TRUE, "rfs connecting to >>%s:%d<<", par->ipAddr, par->port);
+	TrPrintfL(TRUE, "RFS connecting to >>%s:%d<<", par->ipAddr, par->port);
+//	Error(LOG, 0, "BOOT (%s) rfs connected", par->ipAddr);
 	for (time=0; TRUE; time++)
 	{
 		rx_sleep(10);
@@ -235,7 +248,9 @@ start:
 		sok_send(&clientPar.socket, &cmd);
 
 		TrPrintfL(sTrace, "%s: START PROCESS >>%s<<", par->ipAddr, cmd.name);
-		rx_sleep(100);
+		net_booted(par->macAddr);
+		rx_sleep(100);	
+		Error(LOG, 0, "BOOT (%s) Started %s", par->ipAddr, cmd.name);
 	}
 	sok_close(&clientPar.socket);
 //	rx_sem_wait(clientPar.event, TIMEOUT);

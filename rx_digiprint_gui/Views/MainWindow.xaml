@@ -11,12 +11,12 @@
         xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
 		xmlns:views_ml="clr-namespace:RX_DigiPrint.Views.MiniLabelView"
 		xmlns:views_dp="clr-namespace:RX_DigiPrint.Views.DP803View"
+		xmlns:views_lb702wb="clr-namespace:RX_DigiPrint.Views.LB702WBView"
 		xmlns:views_tex="clr-namespace:RX_DigiPrint.Views.TexView"
 		xmlns:views_tt="clr-namespace:RX_DigiPrint.Views.TestTableView"
 		xmlns:views_cleaf="clr-namespace:RX_DigiPrint.Views.CleafView"
         xmlns:views_pq="clr-namespace:RX_DigiPrint.Views.PrintQueueView"
 		xmlns:views_ps="clr-namespace:RX_DigiPrint.Views.PrintSystemView"
-		xmlns:views_rip="clr-namespace:rx_rip_gui.Views;assembly=rx_rip_gui"
 		xmlns:views_settings="clr-namespace:RX_DigiPrint.Views.Settings"     
         xmlns:converters="clr-namespace:RX_DigiPrint.Converters"
         xmlns:Custom="http://infragistics.com/Windows" 
@@ -80,7 +80,11 @@
             <TextBlock x:Name="PrinterName" DataContext="{Binding ElementName=Main}" Text="{Binding Name}" HorizontalAlignment="Center" FontSize="20"/>
         </Grid>
         -->
-        <TextBlock x:Name="PrinterName" Text="{Binding Host_Name}" HorizontalAlignment="Right" Margin="0,10,100,0" FontSize="20" FontWeight="SemiBold"/>
+        <TextBlock x:Name="PrinterName" Text="{Binding Host_Name}" HorizontalAlignment="Right"  Margin="0,10,100,0" FontSize="20" FontWeight="SemiBold"/>
+        <StackPanel x:Name="CleafOrder" Orientation="Horizontal"   HorizontalAlignment="Right"  Margin="0,10,500,0" VerticalAlignment="Top">
+            <TextBlock Text="Order " VerticalAlignment="Bottom"/>
+            <TextBlock Text="{Binding Id}"         FontSize="20" FontWeight="SemiBold"/>
+        </StackPanel>
 
         <!-- ROW 0: Main Screen _______________________________________________________________________________________-->
         <Grid Grid.Row="0">
@@ -99,6 +103,10 @@
 
                 <rx:RxTabItem x:Name="TabMiniLabel" Header="Label Press" >
                     <views_ml:MiniLabelView/>
+                </rx:RxTabItem>
+                
+                <rx:RxTabItem x:Name="TabLB702WB" Header="LB 702 WB" >
+                    <views_lb702wb:LB702WBView/>
                 </rx:RxTabItem>
 
                 <rx:RxTabItem x:Name="TabDP803" Header="DP 803" >
@@ -133,10 +141,6 @@
                     <Grid>
                         <views:NetworkView x:Name="NetworkView"/>
                     </Grid>
-                </rx:RxTabItem>
-                
-                <rx:RxTabItem x:Name="TabRip" Header="Rip" Visibility="Collapsed">
-                <!--    <views_rip:RipView Loaded="RipView_Loaded"/> -->
                 </rx:RxTabItem>
                 
                 <rx:RxTabItem x:Name="TabPrintSystem" Header="Print System">

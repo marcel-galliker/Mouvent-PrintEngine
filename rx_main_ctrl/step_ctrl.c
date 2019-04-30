@@ -123,7 +123,7 @@ static int _setp_socket_closed(RX_SOCKET socket, const char *peerName)
 	{
 		if (socket==_step_Socket[i])
 		{
-			Error(LOG, 0, "Stepper %d Socket %d closed", i, socket);
+			Error(ERR_CONT, 0, "Stepper %d Socket %d closed", i, socket);
 			sok_close(&_step_Socket[i]);
 			memset(&RX_TestTableStatus, 0, sizeof(RX_TestTableStatus));
 			return REPLY_OK;				
@@ -193,6 +193,8 @@ int	 step_to_purge_pos(int no)
 	switch(_StepperType)
 	{
 	case STEPPER_TX:	return steptx_to_purge_pos(no);
+//	case STEPPER_LB:	return steplb_to_purge_pos(no);
+//	case STEPPER_TEST:  return steptest_to_purge_pos(no);
 	default:			return REPLY_ERROR;
 	}
 }
@@ -203,6 +205,8 @@ int  step_in_purge_pos(void)
 	switch(_StepperType)
 	{
 	case STEPPER_TX:	return steptx_in_purge_pos();
+//	case STEPPER_LB:	return steplb_in_purge_pos();
+//	case STEPPER_TEST:	return steptest_in_purge_pos();
 	default:			return TRUE;
 	}
 }
@@ -227,8 +231,6 @@ int  step_wipe_done(void)
 	default:			return TRUE;
 	}
 }
-
-
 
 //--- tt_cap_to_print_pos --------------------------------
 int	 tt_cap_to_print_pos(void)
@@ -255,13 +257,20 @@ int	 step_do_test(SStepperMotorTest *pmsg)
 	return REPLY_OK;
 }
 
+//--- step_set_vent -------------------------------------------------------
+void step_set_vent(int value)
+{
+				
+}
+
 //--- step_handle_gui_msg------------------------------------------------------------------
 int  step_abort_printing(void)
 {
 	switch(_StepperType)
 	{
 	case STEPPER_CLEAF:	return stepc_abort_printing();
-	case STEPPER_TX:    return REPLY_OK;
+	case STEPPER_TX:    step_set_vent(0);
+						return REPLY_OK;
 	case STEPPER_LB:    return steplb_abort_printing();
 	case STEPPER_TEST:  return REPLY_OK;
 	default:			return REPLY_OK;
@@ -277,6 +286,11 @@ static void _step_set_config(int no)
 	cfg.printerType = RX_Config.printer.type;
 	cfg.boardNo=0;
 		
+	if (RX_Config.printer.type==printer_DP803 && !strcmp(RX_Hostname, "LB701-0001"))
+	{
+		Error(WARN, 0, "TEST for LB701-0001");
+		cfg.printerType = printer_LB701;
+	}
 	switch(_StepperType)
 	{
 	case STEPPER_CLEAF:	stepc_init		(no, &_step_Socket[no], _step_IpAddr[no]); cfg.boardNo = no; break;
@@ -298,7 +312,8 @@ int step_set_config(void)
 	case printer_cleaf:			_StepperType = STEPPER_CLEAF;	break;
 //	case printer_LB701:			_StepperType = STEPPER_TEST;	break;		
 	case printer_LB701:			_StepperType = STEPPER_LB;		break;		
-	case printer_LB702:			_StepperType = STEPPER_LB;		break;		
+	case printer_LB702_UV:		_StepperType = STEPPER_LB;		break;		
+	case printer_LB702_WB:		_StepperType = STEPPER_LB;		break;		
 	case printer_DP803:			_StepperType = STEPPER_LB;		break;		
 //	case printer_TX801:			_StepperType = STEPPER_TX;		break;		
 //	case printer_TX802:			_StepperType = STEPPER_TX;		break;		
@@ -343,6 +358,7 @@ int  tt_start_printing(void)
 	par.scanCnt = _PQItem.scans;
 	par.scanMode= _PQItem.scanMode;
 	par.yStep   = 26000+1730+RX_Config.printer.offset.step;	// Overlap
+	if (!RX_Config.printer.overlap) par.yStep -= 1680;
 	if (_PQItem.passes>1) par.yStep /= _PQItem.passes;
 	par.offsetAngle  = RX_Config.printer.offset.angle;
 	par.curingPasses = _PQItem.curingPasses;

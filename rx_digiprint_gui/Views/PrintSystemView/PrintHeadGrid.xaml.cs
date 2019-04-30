@@ -67,7 +67,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
         //--- show_items --------------------------------------
         public void show_items(int cnt)
         {     
-            int i;      
+            int i, no;      
             RxGlobals.HeadStat.SetItemCount(cnt);
             for (i=PrintHeadStack.Children.Count; i<cnt; i++)
             { 
@@ -78,7 +78,9 @@ namespace RX_DigiPrint.Views.PrintSystemView
             _assign_inksupply(cnt);
             for (i=0; i<PrintHeadStack.Children.Count; i++)
             {
-                _PrintHeadView[i].Visibility = (i<cnt && (RxGlobals.PrintSystem.AllInkSupplies || (int)(i/RxGlobals.PrintSystem.HeadCnt)==RxGlobals.PrintSystem.CheckedInkSupply))? Visibility.Visible : Visibility.Collapsed;
+                no=(int)(i/RxGlobals.PrintSystem.HeadCnt);
+                if (RxGlobals.PrintSystem.Reverse) no =  RxGlobals.PrintSystem.ColorCnt-1 -no;
+                _PrintHeadView[i].Visibility = (i<cnt && (RxGlobals.PrintSystem.AllInkSupplies || no==RxGlobals.PrintSystem.CheckedInkSupply))? Visibility.Visible : Visibility.Collapsed;
             }
             Grid.RowDefinitions[1].Height = new GridLength(25/RxGlobals.Screen.Scale);
         }

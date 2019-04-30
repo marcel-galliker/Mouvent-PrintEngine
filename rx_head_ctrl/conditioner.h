@@ -38,7 +38,7 @@ void cond_display_status(int show, int status);
 void cond_ctrlMode		(int headNo, EnFluidCtrlMode ctrlMode);
 void cond_ctrlMode2		(int headNo, EnFluidCtrlMode ctrlMode);
 void cond_heater_set	(int headNo, int temp, int tempMax);
-void cond_presout_set	(int headNo, int meniscus);
+void cond_presout_set	(int headNo, int pressure);
 void cond_heater_test	(int temp);
 void cond_toggle_meniscus_check(void);
 void cond_set_config	(int headNo, SConditionerCfg *cfg);

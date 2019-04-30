@@ -17,6 +17,7 @@ namespace RxWfTool.Models
 //      public static int MaxPos  = 4096;
         public static int MaxPos  = 2000;
         public static int FirstPulsePos = 144;
+        public static int Filler = 68;
         public static double Interval = 12.5; // intervall in ns
 
         //--- Property No ------------------------------

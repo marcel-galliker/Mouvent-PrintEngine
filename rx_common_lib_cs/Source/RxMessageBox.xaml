@@ -45,6 +45,9 @@
                     <common:RxButton x:Name="Button_Yes" HorizontalAlignment="Left" Click="Yes_Clicked">
                         <Image Source="{StaticResource Yes_ico}"/>
                     </common:RxButton>
+                    <common:RxButton x:Name="Button_Question" HorizontalAlignment="Center" Click="Question_Clicked">
+                        <Image Source="{StaticResource Question_ico}"/>
+                    </common:RxButton>
                     <common:RxButton x:Name="Button_No" HorizontalAlignment="Right" Click="No_Clicked">
                         <Image Source="{StaticResource No_ico}"/>
                     </common:RxButton>

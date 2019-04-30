@@ -91,6 +91,9 @@ void tt_init(void)
 	_ParY_ref.accel			= 1000;
 	_ParY_ref.current		= 200;
 	_ParY_ref.stop_mux		= 0; // MOTOR_Y_BITS;
+	_ParY_ref.dis_mux_in	= 0;
+	_ParY_ref.stop_in		= ESTOP_UNUSED;
+	_ParY_ref.stop_level	= 0;
 	_ParY_ref.estop_in		= ESTOP_UNUSED;
 	_ParY_ref.estop_level	= 0;
 	_ParY_ref.checkEncoder  = TRUE;
@@ -99,6 +102,9 @@ void tt_init(void)
 	_ParY_print.accel		= 35000;
 	_ParY_print.current		= 500;
 	_ParY_print.stop_mux	= MOTOR_Y_BITS;
+	_ParY_print.dis_mux_in	= 0;
+	_ParY_print.stop_in		= ESTOP_UNUSED;
+	_ParY_print.stop_level	= 0;
 	_ParY_print.estop_in	= ESTOP_UNUSED;
 	_ParY_print.estop_level	= 0;
 	_ParY_print.checkEncoder= TRUE;
@@ -106,6 +112,8 @@ void tt_init(void)
 	_ParZ_down.speed		= 5000;
 	_ParZ_down.accel		= 2000;
 	_ParZ_down.current		= 100.0;
+	_ParZ_down.stop_in      = ESTOP_UNUSED;
+	_ParZ_down.stop_level   = 0;
 	_ParZ_down.estop_in     = 1;
 	_ParZ_down.estop_level  = 1;
 	_ParZ_down.checkEncoder = TRUE;
@@ -113,6 +121,8 @@ void tt_init(void)
 	_ParZ_up.speed			= 5000;
 	_ParZ_up.accel			= 2000;
 	_ParZ_up.current		= 50.0;
+	_ParZ_up.stop_in		= ESTOP_UNUSED;
+	_ParZ_up.stop_level		= 0;
 	_ParZ_up.estop_in		= ESTOP_UNUSED;
 	_ParZ_up.estop_level	= 0;
 	_ParZ_up.checkEncoder	= TRUE;
@@ -443,8 +453,11 @@ static void _start_ref1(void)
 		SMovePar parLeft;
 		parLeft.speed			= _ParY_print.speed;
 		parLeft.accel			= _ParY_print.accel;
-		parLeft.current		= _ParY_print.current;
+		parLeft.current			= _ParY_print.current;
 		parLeft.stop_mux		= 0;
+		parLeft.dis_mux_in		= 0;
+		parLeft.stop_in			= ESTOP_UNUSED;
+		parLeft.stop_level		= 1;
 		parLeft.estop_in		= 10;
 		parLeft.estop_level		= 1;
 		parLeft.checkEncoder	= TRUE;
@@ -454,6 +467,9 @@ static void _start_ref1(void)
 		parRight.accel			= _ParY_print.accel;
 		parRight.current		= _ParY_print.current;
 		parRight.stop_mux		= 0;
+		parRight.dis_mux_in		= 0;
+		parRight.stop_in		= ESTOP_UNUSED;
+		parRight.stop_level		= 0;
 		parRight.estop_in		= 11;
 		parRight.estop_level	= 1;
 		parRight.checkEncoder	= TRUE;
@@ -478,8 +494,11 @@ static void _start_ref2(void)
 		SMovePar parLeft;
 		parLeft.speed		= _ParY_ref.speed;
 		parLeft.accel		= _ParY_ref.accel;
-		parLeft.current	= _ParY_ref.current;
+		parLeft.current		= _ParY_ref.current;
 		parLeft.stop_mux	= 0;
+		parLeft.dis_mux_in	= 0;
+		parLeft.stop_in		= ESTOP_UNUSED;
+		parLeft.stop_level	= 0;
 		parLeft.estop_in	= 10;
 		parLeft.estop_level = 0;
 		parLeft.checkEncoder= TRUE;
@@ -487,8 +506,11 @@ static void _start_ref2(void)
 		SMovePar parRight;
 		parRight.speed		= _ParY_ref.speed;
 		parRight.accel		= _ParY_ref.accel;
-		parRight.current   = _ParY_ref.current;
+		parRight.current	= _ParY_ref.current;
 		parRight.stop_mux	= 0;
+		parRight.dis_mux_in = 0;
+		parRight.stop_in	= ESTOP_UNUSED;
+		parRight.stop_level = 0;
 		parRight.estop_in	= 11;
 		parRight.estop_level = 0;
 		parRight.checkEncoder = TRUE;
@@ -761,6 +783,9 @@ static void _tt_motor_y_test(int steps)
 	par.accel		 = 2000;
 	par.current		 = 318.0;
 	par.stop_mux	 = motor;
+	par.dis_mux_in	 = 0;
+	par.stop_in      = ESTOP_UNUSED;
+	par.stop_level   = 0;
 	par.estop_in     = ESTOP_UNUSED;
 	par.estop_level  = 0;
 	par.checkEncoder = TRUE;
@@ -777,6 +802,8 @@ static void _tt_motor_z_test(int steps)
 	par.speed		 = 5000;
 	par.accel		 = 2000;
 	par.current		 = 100.0;
+	par.stop_in      = ESTOP_UNUSED;
+	par.stop_level	 = 1;
 	par.estop_in     = 0;
 	par.estop_level	 = 1;
 	par.checkEncoder = TRUE;
