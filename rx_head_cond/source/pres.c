@@ -23,7 +23,7 @@
 #define ADDR_HONEY_1    		0x08
 #define ADDR_HONEY_100  		0x18
     
-// static const INT32 ZERO_PRESSURE_OFFSET_FIRST = 16500;
+static const INT32 ZERO_PRESSURE_OFFSET_FIRST = 16500;
 //static const INT32 PRES_RAW_MIN_FIRST          = 16095;
 //static const INT32 PRES_RAW_MAX_FIRST          = 16905;
 static const INT32 FULL_SCALE_SPAN_FIRST = 27;   // 27000
@@ -227,11 +227,11 @@ static void _sensor_read(SSensor *s)
 					
 					//--- convert value --------------
 					if (s->offset_factory)	
-						offset = s->offset_factory;
+						offset = ZERO_PRESSURE_OFFSET_FIRST - s->offset_factory;
 					else
 					{					
 						RX_Status.error |= COND_ERR_sensor_offset;
-						offset = 0;
+						offset = ZERO_PRESSURE_OFFSET_FIRST;
 					}
 					
 					*s->pPressure = ((pressure10 - offset) * s->valFactor * 2) / FULL_SCALE_SPAN_FIRST; // *13.5
