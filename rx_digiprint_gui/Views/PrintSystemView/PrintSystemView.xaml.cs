@@ -58,7 +58,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 CleafStepperGrid.Visibility = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf)? Visibility.Visible : Visibility.Collapsed;
                 StepperGrid.Visibility      = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_test_slide_only)? 
                                                 Visibility.Collapsed : Visibility.Visible;
-                Button_Purge.Visibility = Button_Wipe.Visibility = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX801 || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX802) ? Visibility.Visible : Visibility.Collapsed;
+            //    Button_Purge.Visibility = Button_Wipe.Visibility = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX801 || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX802) ? Visibility.Visible : Visibility.Collapsed;
             }            
         }
 
@@ -66,8 +66,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
         private void PrinterStatusChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             bool enabled = (RxGlobals.PrinterStatus.PrintState!=EPrintState.ps_printing) && (RxGlobals.PrinterStatus.PrintState!=EPrintState.ps_stopping);
-            Button_Purge.IsEnabled = enabled;
-            Button_Wipe.IsEnabled  = enabled;
+        //    Button_Purge.IsEnabled = enabled;
+        //    Button_Wipe.IsEnabled  = enabled;
         }
 
         //--- Save_Clicked ------------------------------------------
@@ -88,13 +88,13 @@ namespace RX_DigiPrint.Views.PrintSystemView
         //--- Wipe_Clicked -------------------------------------------------
         private void Wipe_Clicked(object sender, RoutedEventArgs e)
         {            
-            if (Button_Wipe.IsEnabled) RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_SET_CMD, "CMD_SLIDE_TO_WIPE");
+        //    if (Button_Wipe.IsEnabled) RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_SET_CMD, "CMD_SLIDE_TO_WIPE");
         }
 
         //--- Purge_Clicked -------------------------------------------------
         private void Purge_Clicked(object sender, RoutedEventArgs e)
         {
-            if (Button_Purge.IsEnabled) RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_SET_CMD, "CMD_SLIDE_TO_PURGE");
+        //    if (Button_Purge.IsEnabled) RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_SET_CMD, "CMD_SLIDE_TO_PURGE");
         }
 
         //--- _timer_Tick ---------------------------------------------------

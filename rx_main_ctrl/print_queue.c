@@ -270,7 +270,7 @@ int pq_abort(void)
 static int _find_item(int id, int *pidx)
 {
 	int i;
-	if (rx_def_is_singlepage(RX_Config.printer.type))
+	if (rx_def_is_test(RX_Config.printer.type))
 	{
 		*pidx=0;
 		return REPLY_OK;
@@ -297,12 +297,13 @@ SPrintQueueItem *pq_get_item_n(int i)
 //--- pq_get_next_item ---------------------------------------------------------
 SPrintQueueItem *pq_get_next_item(void)
 {
-	if (rx_def_is_singlepage(RX_Config.printer.type) && _Item>0) return NULL;
+	int slide=rx_def_is_test(RX_Config.printer.type);
+	if (slide && _Item>0) return NULL;
 	int item = _Item;
 	while(item<_Size)
 	{
 //		if (_List[item].state==PQ_STATE_QUEUED && _List[item].scanLength>0)
-		if (_List[item].state==PQ_STATE_QUEUED && (_List[item].copies>0 || _List[item].scanLength>0))
+		if ((slide || _List[item].state==PQ_STATE_QUEUED) && (_List[item].copies>0 || _List[item].scanLength>0))
 		{
 			_Item = item+1;
 			return &_List[item];
@@ -340,7 +341,7 @@ SPrintQueueItem *pq_add_item(SPrintQueueItem *pitem)
 //		if (pitem->variable) _load_variable_info(pitem);
 		if (pitem->firstPage<1) pitem->firstPage=1;
 		if (pitem->lastPage<pitem->firstPage) pitem->lastPage=pitem->firstPage;
-		if (rx_def_is_singlepage(RX_Config.printer.type) && pitem->copies<1) pitem->copies=1;
+		if (rx_def_is_test(RX_Config.printer.type) && pitem->copies<1) pitem->copies=1;
 		if (pitem->dropSizes==0) pitem->dropSizes=3;
 		pitem->id.id = ++_ID;
 		pitem->state = PQ_STATE_QUEUED;
@@ -539,28 +540,40 @@ void pq_next_page(SPrintQueueItem *pitem, SPageId *pid)
 {
 	if(rx_def_is_scanning(RX_Config.printer.type))
 	{
-		if(pitem->id.scan<pitem->scans)
+		if(pitem->srcPages>1)
 		{
-			pid->copy = pitem->id.copy;
-			if (pitem->lengthUnit==PQ_LENGTH_COPIES && pitem->scans!=pitem->scansStart && pitem->copies)
+			if( pitem->id.scan < pitem->scans)
 			{
-				double copy = (double)(pitem->id.scan-pitem->scansStart) / ((double)(pitem->scans-pitem->scansStart) / (double)pitem->copies);
-				if ((int)copy>pid->copy) pid->copy=(int)copy+1;		
-			}			
-			pid->page = pitem->id.page;
-			pid->scan = pitem->id.scan+1;	
-		}
-		else if (pitem->srcPages>1)
-		{
-			pid->copy = pitem->id.copy;
-			pid->page = pitem->id.page+1;
-			pid->scan = 0;				
+				pid->copy = 1;
+				pid->page = pitem->id.page;
+				pid->scan = pitem->id.scan+1;	
+			}
+			else
+			{
+				pid->copy = 1;
+				pid->page = pitem->id.page+1;
+				pid->scan = 0;				
+			}
 		}
 		else
-		{	
-			pid->copy = pitem->id.copy+1;
-			pid->page = pitem->id.page;
-			pid->scan = 1;								
+		{
+			if(pitem->id.scan < pitem->scans)
+			{
+				pid->copy = pitem->id.copy;
+				if(pitem->lengthUnit == PQ_LENGTH_COPIES && pitem->scans != pitem->scansStart && pitem->copies)
+				{
+					double copy = (double)(pitem->id.scan - pitem->scansStart) / ((double)(pitem->scans - pitem->scansStart) / (double)pitem->copies);
+					if((int)copy >= pid->copy) pid->copy = (int)copy + 1;		
+				}
+				pid->page = pitem->id.page;
+				pid->scan = pitem->id.scan+1;	
+			}
+			else
+			{	
+				pid->copy = pitem->id.copy+1;
+				pid->page = pitem->id.page;
+				pid->scan = 1;								
+			}			
 		}
 	}
 	else
@@ -789,17 +802,17 @@ int pq_is_ready(void)
 		if (RX_PrinterStatus.sentCnt!=sent || RX_PrinterStatus.transferredCnt!=transferred || RX_PrinterStatus.printedCnt!=printed)
 		{
 			// if (RX_PrinterStatus.sentCnt) Error(LOG, 0, "Buffered pages=%d", RX_PrinterStatus.sentCnt-RX_PrinterStatus.printedCnt);
-			TrPrintfL(TRUE, "Buffer: sent=%d, transferred=%d, printed=%d", RX_PrinterStatus.sentCnt, RX_PrinterStatus.transferredCnt, RX_PrinterStatus.printedCnt);
+			TrPrintfL(TRUE, "Buffer: sent=%d, transferred=%d, printed=%d, buffered=%d", RX_PrinterStatus.sentCnt, RX_PrinterStatus.transferredCnt, RX_PrinterStatus.printedCnt, RX_PrinterStatus.transferredCnt-RX_PrinterStatus.printedCnt);
 			sent=RX_PrinterStatus.sentCnt;
 			transferred=RX_PrinterStatus.transferredCnt;
-			printed=RX_PrinterStatus.printedCnt;			 
+			printed=RX_PrinterStatus.printedCnt;	
 		}		
 	}
 	
 	if(RX_Config.printer.type == printer_cleaf) 
 		return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printedCnt) < 16;
 	else if (rx_def_is_scanning(RX_Config.printer.type))
-		return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printedCnt) < 10;
+		return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printedCnt) < 20;
 	else
 		return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printedCnt) < 64;
 }

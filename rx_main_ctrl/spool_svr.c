@@ -17,8 +17,10 @@
 #include "rx_threads.h"
 #include "rx_trace.h"
 #include "tcp_ip.h"
+#include "args.h"
 #include "print_queue.h"
 #include "print_ctrl.h"
+#include "plc_ctrl.h"
 #include "ctrl_msg.h"
 #include "ctrl_svr.h"
 #include "enc_ctrl.h"
@@ -61,6 +63,8 @@ static int _do_spool_cfg_rep	(RX_SOCKET socket);
 static int _do_print_file_rep	(RX_SOCKET socket, SPrintFileRep	*msg);
 static int _do_print_file_evt	(RX_SOCKET socket, SPrintFileMsg	*msg);
 static int _do_log_evt			(RX_SOCKET socket, SLogMsg			*msg);
+static int _do_pause_printing	(RX_SOCKET socket);
+static int _do_start_printing	(RX_SOCKET socket);
 
 // int send_head_configs(RX_SOCKET socket);
 
@@ -113,6 +117,10 @@ static int _handle_spool_msg(RX_SOCKET socket, void *msg, int len, struct sockad
 
 	case REP_RFS_SAVE_FILE_HDR:		label_rep_file_hdr();							break;
 	case REP_RFS_SAVE_FILE_BLOCK:	label_rep_file_block();							break;
+		
+	case CMD_PAUSE_PRINTING:	_do_pause_printing(socket);							break;
+	case CMD_START_PRINTING:	_do_start_printing(socket);							break;
+		
 	default: Error(WARN, 0, "Got unknown MessageId=0x%08x", phdr->msgId);
 	}
 	return REPLY_OK;
@@ -169,6 +177,25 @@ static int _handle_spool_deconnected(RX_SOCKET socket, const char *peerName)
 //--- _do_spool_cfg_rep ---------------------------------------------------------------------
 static int _do_spool_cfg_rep(RX_SOCKET socket)
 {
+	return REPLY_OK;
+}
+
+
+//--- _do_pause_printing -------------------------------------------------------------------
+static int _do_pause_printing	(RX_SOCKET socket)
+{
+	Error(LOG, 0, "PAUSE to load file");
+	plc_pause_printing();
+	pc_print_next();
+	return REPLY_OK;
+}
+
+//--- _do_start_printing ------------------------------------------------------------------
+static int _do_start_printing	(RX_SOCKET socket)
+{
+	Error(LOG, 0, "CONTINUE after file loaded");
+	plc_start_printing();
+	pc_print_next();
 	return REPLY_OK;
 }
 
@@ -271,6 +298,12 @@ void spool_start_printing(void)
 	_SlideIsRight = FALSE;
 }
 
+//--- spool_start_sending --------------------------------
+void spool_start_sending(void)
+{
+	spool_send_msg_2(CMD_START_PRINTING, 0, NULL, TRUE);
+}
+
 //--- spool_set_layout ---------------------------------------------------------------
 int spool_set_layout(SLayoutDef *playout, char *dataPath)
 {
@@ -332,18 +365,22 @@ int spool_send_test_data(int headNo, char *str)
 }
 
 //--- spool_print_file ---------------------------------------------------------------
-int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT32 lengthPx, INT32 pgMode, INT32 pgDist, UINT8 lengthUnit, int variable, int scanMode, int clearBlockUsed)
+int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT32 lengthPx, SPrintQueueItem *pitem, int clearBlockUsed)
 {
 //	if (_Ready<=0) 
 //		 Error(WARN, 0, "Spooler not ready");
+	
+	if (arg_simuHeads) Error(LOG, 0, "Printing ID=%d, page=%d, copy=%d", pid->id, pid->page, pid->copy);
+
 	_Ready--;
 	
 	_PrintFileMsg.hdr.msgLen	= sizeof(_PrintFileMsg);
 	_PrintFileMsg.hdr.msgId		= CMD_PRINT_FILE;
 	_PrintFileMsg.blkNo			= _BlkNo;
-	_PrintFileMsg.variable		= variable;
-	_PrintFileMsg.lengthUnit	= lengthUnit;
+	_PrintFileMsg.variable		= pitem->variable;
+	_PrintFileMsg.lengthUnit	= pitem->lengthUnit;
 	_PrintFileMsg.mirror		= FALSE;
+	_PrintFileMsg.smp_flags		= 0;
 	_PrintFileMsg.clearBlockUsed= clearBlockUsed;
 	strncpy(_PrintFileMsg.filename, filename, sizeof(_PrintFileMsg.filename));
 	memcpy(&_PrintFileMsg.id, pid, sizeof(_PrintFileMsg.id));
@@ -352,7 +389,7 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 		_PrintFileMsg.printMode     = PM_TEST;
 		if (RX_Config.printer.type==printer_test_table && RX_TestImage.testImage==PQ_TEST_JETS || RX_TestImage.testImage==PQ_TEST_ENCODER)
 		{
-			 _PrintFileMsg.printMode = PM_TEST_SINGLE_COLOR;
+			_PrintFileMsg.printMode = PM_TEST_SINGLE_COLOR;
 		}
 		else if (RX_TestImage.testImage==PQ_TEST_JETS) 
 		{
@@ -365,10 +402,19 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 	}
 	else if (rx_def_is_scanning(RX_Config.printer.type))
 	{
-		_PrintFileMsg.printMode     = PM_SCANNING;
+		if(pitem->srcPages>2)
+		{
+			_PrintFileMsg.printMode=PM_SCAN_MULTI_PAGE;
+			if(pid->page==pitem->firstPage) _PrintFileMsg.smp_flags |= SMP_FIRST_PAGE;
+			if(pid->page==pitem->lastPage) 
+				_PrintFileMsg.smp_flags |= SMP_LAST_PAGE;
+			_PrintFileMsg.smp_bufSize = pitem->scansStart;
+		}
+		else _PrintFileMsg.printMode = PM_SCANNING;
+
 		_PrintFileMsg.offsetWidth	= offsetWidth;
 		_PrintFileMsg.lengthPx		= lengthPx;
-		_PrintFileMsg.gapPx			= (UINT32)(pgDist*1.200/25.4);
+		_PrintFileMsg.gapPx			= (UINT32)(pitem->printGoDist*1.200/25.4);
 	}
 	else
 	{
@@ -377,7 +423,7 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 		_PrintFileMsg.lengthPx		= 0;	// unused
 		_PrintFileMsg.gapPx			= 0;	// unused
 	}
-	switch (scanMode)
+	switch (pitem->scanMode)
 	{
 	case PQ_SCAN_BIDIR:	_PrintFileMsg.mirror = IMAGE_BIDIR | _SlideIsRight;	_SlideIsRight=!_SlideIsRight; break;
 	case PQ_SCAN_RTL:	_PrintFileMsg.mirror = TRUE;  _SlideIsRight=TRUE;	break;
@@ -389,6 +435,8 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 	cnt=spool_send_msg(&_PrintFileMsg);
 	if (cnt) RX_PrinterStatus.sentCnt++;// = _HeadBoardCnt;
 	else     Error(ERR_CONT, 0, "No Spoolers connected");
+//	Error(LOG, 0, "Load File[%d] page=%d, scan=%d", RX_PrinterStatus.sentCnt, pid->page, pid->scan);
+	
 //	spool_send_msg_2(CMD_PING, 0, NULL, TRUE);	// needed in linux to send the command without timeout!
 	_AwaitReply += cnt;
 	_MsgSent+=cnt;
@@ -549,7 +597,7 @@ int spool_send_msg_2(UINT32 cmd, int dataSize, void *data, int errmsg)
 	{
 		if(_Spooler[i].used)
 		{
-			if (_Spooler[i].socket!=INVALID_SOCKET && sok_send_2(&_Spooler[i].socket,INADDR_ANY,cmd,dataSize,data)==REPLY_OK) cnt++;
+			if (_Spooler[i].socket!=INVALID_SOCKET && sok_send_2(&_Spooler[i].socket,cmd,dataSize,data)==REPLY_OK) cnt++;
 			else if(errmsg) 
 				ErrorEx(dev_spooler, i, ERR_ABORT, 0, "not connected");
 		}

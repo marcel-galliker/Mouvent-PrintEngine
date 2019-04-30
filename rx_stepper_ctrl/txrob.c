@@ -393,7 +393,7 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 	
 	switch(msgId)
 	{
-	case CMD_TT_STATUS:				sok_send_2(&socket, INADDR_ANY, REP_TT_STATUS, sizeof(RX_TestTableStatus), &RX_TestTableStatus);	
+	case CMD_TT_STATUS:				sok_send_2(&socket, REP_TT_STATUS, sizeof(RX_TestTableStatus), &RX_TestTableStatus);	
 									break;
 
 	case CMD_CLN_STOP:				motors_stop(MOTOR_ALL_BITS);
@@ -509,5 +509,5 @@ static void _txrob_send_status(RX_SOCKET socket)
 {
 	static RX_SOCKET _socket = INVALID_SOCKET;
 	if (socket != INVALID_SOCKET) _socket = socket;
-	if (_socket != INVALID_SOCKET) sok_send_2(&_socket, INADDR_ANY, REP_TT_STATUS, sizeof(RX_TestTableStatus), &RX_TestTableStatus);
+	if (_socket != INVALID_SOCKET) sok_send_2(&_socket, REP_TT_STATUS, sizeof(RX_TestTableStatus), &RX_TestTableStatus);
 }

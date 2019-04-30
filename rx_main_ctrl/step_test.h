@@ -14,7 +14,7 @@
 #include "rx_def.h"
 #include "rx_sok.h"
 
-void steptest_init(int no, RX_SOCKET *psocket, UINT32 ipaddr);
+void steptest_init(int no, RX_SOCKET *psocket);
 
 int	 steptest_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen);
 

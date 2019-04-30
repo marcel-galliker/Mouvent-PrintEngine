@@ -19,6 +19,7 @@
 
 // return values
 #define EEPROM_SUCCESS 0
+#define EEPROM_ERROR	1
 
 /// Location to store settings in EEPROM
 const UINT32 EE_SETTINGS_PAGE = 0;
@@ -30,6 +31,35 @@ const BYTE EE_ADDR_PIN_FACTORY_OFFSET  = 0x08;
 const BYTE EE_ADDR_PIN_USER_OFFSET     = 0x0c;
 const BYTE EE_ADDR_POUT_FACTORY_OFFSET = 0x10;
 const BYTE EE_ADDR_POUT_USER_OFFSET    = 0x14;
+
+static int _Init = FALSE;
+
+//--- eeprom_init ---------------------------
+void eeprom_init(void)
+{
+			
+	i2c_bb_init();            
+	_Init = TRUE;
+	
+	#if DEBUG
+	eeprom_print_page(EE_SETTINGS_PAGE);
+	#endif
+
+	#if PERFORM_EEPROM_TEST        
+		eeprom_write_byte(1, 0xaa, 0xbb);
+		eeprom_delay();
+
+		unsigned char byte = 0;
+		eeprom_read_byte(1, 0xaa, &byte);
+
+		if (byte == 0xbb)
+			DBG_PRINTF("EEPROM Test successful\n");
+		else
+			DBG_PRINTF("EEPROM ERROR read 0x%02x\n", byte);
+		
+		eeprom_print_page(0);
+	#endif
+}
 
 /**
  * \brief Write one byte in specified page at specified address
@@ -45,6 +75,7 @@ const BYTE EE_ADDR_POUT_USER_OFFSET    = 0x14;
 int eeprom_write_byte(const UINT32 pagenum, const BYTE byteaddress,
                       const BYTE data)
 {
+	if (!_Init) return EEPROM_ERROR;
     ASSERT(pagenum <= MAX_NUM_PAGE);
 
     // calculate EEPROM address
@@ -69,6 +100,8 @@ int eeprom_write_byte(const UINT32 pagenum, const BYTE byteaddress,
 int eeprom_write_long(const UINT32 pagenum, const BYTE byteaddress,
                       const UINT32 data)
 {
+	if (!_Init) return EEPROM_ERROR;
+
     ASSERT(pagenum <= MAX_NUM_PAGE);
 
     // calculate EEPROM address
@@ -95,6 +128,8 @@ int eeprom_write_long(const UINT32 pagenum, const BYTE byteaddress,
  **/
 int eeprom_read_byte(const UINT32 pagenum, const BYTE byteaddress, BYTE *data)
 {
+	if (!_Init) return EEPROM_ERROR;
+
     ASSERT(pagenum <= MAX_NUM_PAGE);
 
     // calculate EEPROM address
@@ -120,6 +155,8 @@ int eeprom_read_byte(const UINT32 pagenum, const BYTE byteaddress, BYTE *data)
  **/
 int eeprom_read_long(const UINT32 pagenum, const BYTE byteaddress, UINT32u *data)
 {
+	if (!_Init) return EEPROM_ERROR;
+
     ASSERT(pagenum <= MAX_NUM_PAGE);
 
     // calculate EEPROM address
@@ -143,6 +180,8 @@ int eeprom_read_long(const UINT32 pagenum, const BYTE byteaddress, UINT32u *data
 #if DEBUG
 int eeprom_fill_page_dummy(const UINT32 pagenum)
 {
+	if (!_Init) return EEPROM_ERROR;
+
     ASSERT(pagenum <= MAX_NUM_PAGE);
 
     BYTE wdatas[MAX_PAGE_SIZE + 1] = {0};
@@ -168,6 +207,8 @@ int eeprom_fill_page_dummy(const UINT32 pagenum)
  **/
 int eeprom_fill_page(const UINT32 pagenum, const BYTE *page_data_256bytes)
 {
+	if (!_Init) return EEPROM_ERROR;
+
     ASSERT(pagenum <= MAX_NUM_PAGE);
 
     // calculate EEPROM address
@@ -189,6 +230,8 @@ int eeprom_fill_page(const UINT32 pagenum, const BYTE *page_data_256bytes)
  **/
 int eeprom_read_page(const UINT32 pagenum, BYTE *page_data_256bytes)
 {
+	if (!_Init) return EEPROM_ERROR;
+
     ASSERT(pagenum <= MAX_NUM_PAGE);
 
     // calculate EEPROM address
@@ -209,6 +252,8 @@ int eeprom_read_page(const UINT32 pagenum, BYTE *page_data_256bytes)
  **/
 int eeprom_clear_page(const UINT32 pagenum)
 {
+	if (!_Init) return EEPROM_ERROR;
+
     ASSERT(pagenum <= MAX_NUM_PAGE);
 
     BYTE wdatas[MAX_PAGE_SIZE + 1];
@@ -230,6 +275,8 @@ int eeprom_clear_page(const UINT32 pagenum)
  **/
 int eeprom_print_page(const UINT32 pagenum)
 {
+	if (!_Init) return EEPROM_ERROR;
+
     ASSERT(pagenum <= MAX_NUM_PAGE);
 
     BYTE rdatas[256] = {0};
@@ -255,47 +302,60 @@ int eeprom_print_page(const UINT32 pagenum)
 }
 #endif
 
-void eeprom_write_setting32(const BYTE address, const UINT32 value)
+int eeprom_write_setting32(const BYTE address, const UINT32 value)
 {
+	if (!_Init) return EEPROM_ERROR;
+
     eeprom_write_long(EE_SETTINGS_PAGE, address, value);
     eeprom_delay();
     //eeprom_ack_polling();
+	return EEPROM_SUCCESS;
 }
-
-UINT32 eeprom_read_setting32(const BYTE address)
+int eeprom_read_setting32(const BYTE address, INT32 *data)
 {
-    UINT32u ret = {0};
+	*data = 0;
+	if (!_Init) return EEPROM_ERROR;
+	
+	UINT32u ret = {0};
     eeprom_read_long(EE_SETTINGS_PAGE, address, &ret);
 
     if (ret.value != EE_EMPTY_LONG)
-        return ret.value;
-    else
-        return 0;
+	{
+        *data = ret.value;
+		return EEPROM_SUCCESS;
+	}
+    return EEPROM_ERROR;
 }
 
-void eeprom_write_setting16(const BYTE address, const UINT16 value)
+int eeprom_write_setting16(const BYTE address, const INT16 value)
 {
+	if (!_Init) return EEPROM_ERROR;
+
     UINT32 data = value;
     data |= (~value) << 16;
     
     eeprom_write_setting32(address, data);
+
+    return EEPROM_SUCCESS;
 }
 
-int eeprom_read_setting16(const BYTE address, UINT16 *value)
+int eeprom_read_setting16(const BYTE address, INT32 *value)
 {
+	*value = 0;
+	if (!_Init) return EEPROM_ERROR;
+
     #define MASK_16 0xffff    
-    UINT32 data = eeprom_read_setting32(address);
+    INT32 data;
+	if (eeprom_read_setting32(address, (INT32*)&data)) return EEPROM_ERROR;
     
     if ((data & MASK_16) == (~(data >> 16) & MASK_16))
     {
-        *value = data & MASK_16;
-        return (0);
+		INT16 d=data & MASK_16;
+        *value = d;
+        return EEPROM_SUCCESS;
     }
-    else
-    {
-        *value = 0;
-        return (-1);
-    }
+
+	return EEPROM_ERROR;
 }
 
 /*

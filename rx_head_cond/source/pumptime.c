@@ -12,7 +12,9 @@ void save_pumptime(UINT32 pumptime, int write_flash)
 // --- load_pumptime -----------------------------
 UINT32 load_pumptime(void)
 {
-    return eeprom_read_setting32(EE_ADDR_PUMPTIME);    
+	INT32 time;
+    if (eeprom_read_setting32(EE_ADDR_PUMPTIME, &time)==0) return time;
+	else return 0;
 }
 
 // --- reset_pumptime -----------------------------

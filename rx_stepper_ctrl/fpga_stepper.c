@@ -94,7 +94,7 @@ void fpga_init()
 
 	Fpga.qsys    = (SFpgaQSys*)		rx_fpga_map_page(_MemId, ADDR_FPGA_QSYS,	sizeof(SFpgaQSys),	0x00c0);
 	Fpga.stat    = (SFpgaStat*)		rx_fpga_map_page(_MemId, ADDR_FPGA_STAT,	sizeof(SFpgaStat),	0x0200);
-	Fpga.par     = (SFpgaPar*)		rx_fpga_map_page(_MemId, ADDR_FPGA_PAR,		sizeof(SFpgaPar),	0x0250);
+	Fpga.par     = (SFpgaPar*)		rx_fpga_map_page(_MemId, ADDR_FPGA_PAR,		sizeof(SFpgaPar),	0x0258);
 	Fpga.move    = (SMove*)			rx_fpga_map_page(_MemId, ADDR_FPGA_MOVES,   sizeof(SMove)*MOTOR_CNT*MOVE_CNT, 12*MOTOR_CNT*MOVE_CNT);
 	Fpga.encoder = (SFpgaEncoder*)	rx_fpga_map_page(_MemId, ADDR_FPGA_ENCODER, sizeof(SFpgaEncoder)*ENCODER_CNT, 0x0030*ENCODER_CNT);		
 #endif
@@ -111,6 +111,7 @@ void fpga_init()
 	Fpga.par->v24_enable    = TRUE;
 	Fpga.par->cmd_reset_pos|= 0xffff; //0x0001<<motor;
 	Fpga.par->adc_rst = TRUE; // restart adc
+	Fpga.par->min_in_pulse_width = 50000;	// in 20 ns!  
 
 	_Init = TRUE;
 }
@@ -150,6 +151,7 @@ int	fpga_input(int no)
 void _fpga_display_status(void)
 {
 	int i, v;
+	static UINT32 _lastPulseCnt[6];
 	extern BYTE	_motor_start_cnt[MOTOR_CNT];
 
 	term_printf("\n");
@@ -172,6 +174,11 @@ void _fpga_display_status(void)
 		else                           term_printf("_");
 		if (i%4==3)			   		   term_printf("   ");
 	}
+	term_printf("Analog [mv]:  ");
+	for (i=0; i<SIZEOF(Fpga.stat->analog_in); i++)
+	{
+		term_printf("%03d    ", VAL_TO_MV(Fpga.stat->analog_in[i]));
+	}
 	term_printf("\n");
 	term_printf("Outputs:      ");
 	for (i=0; i<OUTPUT_CNT; i++)
@@ -182,13 +189,22 @@ void _fpga_display_status(void)
 	}
 	term_printf("\n");
 
-	term_printf("Analog [mv]:  ");
-	for (i=0; i<SIZEOF(Fpga.stat->analog_in); i++)
-	{
-		term_printf("%03d    ", VAL_TO_MV(Fpga.stat->analog_in[i]));
-	}
+	term_printf("PWM [%]:   ");
+	for (i=0; i<SIZEOF(Fpga.par->pwm_output); i++)
+	term_printf("   %03d ", (100*Fpga.par->pwm_output[i]+0x8000)/0x10000);
 	term_printf("\n");
-
+	
+	term_printf("Pulse Cnt: ");
+	for (i=0; i<SIZEOF(Fpga.par->pwm_output); i++)
+	term_printf("%06d ", Fpga.stat->input_pulse_cnt[i]);
+	term_printf("\n");
+	
+	term_printf("Pulse Spd: ");
+	for (i=0; i<SIZEOF(Fpga.par->pwm_output); i++)
+	term_printf("%06d ", Fpga.stat->input_pulse_cnt[i]-_lastPulseCnt[i]);
+	term_printf("\n");
+	memcpy(&_lastPulseCnt, &Fpga.stat->input_pulse_cnt, sizeof(_lastPulseCnt));	
+	
 	term_printf("\n");
 	term_printf("Motor:           "); PRINTF(MOTOR_CNT)("---%d---   ", i); term_printf("\n");
 if (RX_StepperCfg.printerType==printer_TX801) 
@@ -216,7 +232,7 @@ if (RX_StepperCfg.printerType==printer_TX801)
 	term_printf("  ERR.IN1:      "); PRINTF(MOTOR_CNT)("%08x  ",   Fpga.stat->statMot[i].err_estop & ENC_ESTOP_IN01);	term_printf("\n"); 
 	term_printf("  ERR.IN2:      "); PRINTF(MOTOR_CNT)("%08x  ",   Fpga.stat->statMot[i].err_estop & ENC_ESTOP_IN02);	term_printf("\n"); 
 	term_printf("  ERR.IN3:      "); PRINTF(MOTOR_CNT)("%08x  ",   Fpga.stat->statMot[i].err_estop & ENC_ESTOP_IN03);	term_printf("\n"); 
-
+		
 	term_printf("Encoder:        "); PRINTF(MOTOR_CNT)("---%d---   ", i);										term_printf("\n");
 	term_printf("Pos: inc        "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.encoder[i].pos);						term_printf("\n"); 
 //	term_printf("Inc/Rev:        "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.encoder[i].incPerRev);					term_printf("\n"); 

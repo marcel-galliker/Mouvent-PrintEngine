@@ -142,6 +142,8 @@
 #define CMD_SET_PRINTER_CFG		0x0100004A
 #define REP_SET_PRINTER_CFG		0x0200004A
 
+#define CMD_DEL_FILE			0x0100004B
+
 #define CMD_RIP_START			0x0100004E
 #define REP_RIP_START			0x0200004E
 #define EVT_RIP_START			0x0300004E
@@ -172,6 +174,8 @@
 
 #define CMD_ENCODER_DISABLE		0x01000117	// temporary disable the encoder input (CLEAF Splice)
 #define CMD_ENCODER_ENABLE		0x01000118	// enable after temorary disable
+
+#define CMD_ENCODER_SAVE_PAR	0x01000119	// save correction parameters	
 
 #define CMD_FLUID_CFG			0x01000121
 #define REP_FLUID_CFG			0x02000121
@@ -334,31 +338,31 @@
 #define CMD_CLN_END				0x010007ff
 
 //--- Data Spooler -------------------------------------------------
-#define CMD_SET_SPOOL_CFG		0x01000201
-#define REP_SET_SPOOL_CFG		0x02000201
-#define CMD_REQ_SPOOL_CFG		0x04000201
+#define CMD_SET_SPOOL_CFG		0x01003001
+#define REP_SET_SPOOL_CFG		0x02003001
+#define CMD_REQ_SPOOL_CFG		0x04003001
 
-#define CMD_PRINT_FILE			0x01000202
-#define REP_PRINT_FILE			0x02000202
-#define EVT_PRINT_FILE			0x03000202
+#define CMD_PRINT_FILE			0x01003002
+#define REP_PRINT_FILE			0x02003002
+#define EVT_PRINT_FILE			0x03003002
 
-#define CMD_PRINT_ABORT			0x01000203
-#define REP_PRINT_ABORT			0x02000203
+#define CMD_PRINT_ABORT			0x01003003
+#define REP_PRINT_ABORT			0x02003003
 
-#define CMD_FONTS_UPDATED		0x01000204
+#define CMD_FONTS_UPDATED		0x01003004
 
-#define BEG_SET_FILEDEF			0x04000210
-#define ITM_SET_FILEDEF			0x05000210	// header + data
-#define END_SET_FILEDEF			0x06000210
+#define BEG_SET_FILEDEF			0x04003010
+#define ITM_SET_FILEDEF			0x05003010	// header + data
+#define END_SET_FILEDEF			0x06003010
 
-#define BEG_SET_LAYOUT			0x04000211		
-#define ITM_SET_LAYOUT			0x05000211	// header + data	
-#define END_SET_LAYOUT			0x06000211		
+#define BEG_SET_LAYOUT			0x04003011		
+#define ITM_SET_LAYOUT			0x05003011	// header + data	
+#define END_SET_LAYOUT			0x06003011		
 
-#define CMD_SET_CTRDEF			0x01000212
+#define CMD_SET_CTRDEF			0x01003012
 
-#define CMD_PRINT_DATA			0x01000230
-#define CMD_PRINT_TEST_DATA		0x01000231
+#define CMD_PRINT_DATA			0x01003030
+#define CMD_PRINT_TEST_DATA		0x01003031
 
 #define CMD_GET_BLOCK_USED		0x01001010
 #define REP_GET_BLOCK_USED		0x02001010
@@ -374,6 +378,7 @@
 
 #define EVT_TRACE				0x03000100	
 
+/*
 //--- Data Server ---------------------------------------------------------
 #define CMD_DS_OPEN				0x01002000
 #define REP_DS_OPEN				0x02002000
@@ -381,6 +386,7 @@
 #define REP_DS_READ				0x02002001
 #define CMD_DS_CLOSE			0x01002002
 #define REP_DS_CLOSE			0x02002002
+*/
 
 //--- CLEAF Orders ----------------------------------------------------
 #define CMD_CO_SET_ORDER		0x01003000
@@ -556,7 +562,8 @@ typedef struct SInkDefMsg
 	SMsgHdr			hdr;
 	SInkDefinition	ink;
 	UINT32			headNo;
-	UINT32			maxDropSize;
+//	UINT32			maxDropSize;
+	char			dots[4];
 	UINT32			fpVoltage;
 } SInkDefMsg;
 
@@ -619,9 +626,14 @@ typedef struct SPrintFileCmd
 		#define PM_TEST					3
 		#define PM_TEST_SINGLE_COLOR	4
 		#define PM_TEST_JETS			5
+		#define PM_SCAN_MULTI_PAGE		6
+	UINT16		smp_flags;			// PM_SCAN_MULTI_PAGE: flags
+		#define SMP_FIRST_PAGE	0x0001
+		#define SMP_LAST_PAGE	0x0002	
+	UINT16		smp_bufSize;		// PM_SCAN_MULTI_PAGE: buffer size
 	UINT8		variable;
 	UINT8		lengthUnit;	// see SPrintQueueItem.LengthUnit
-	UINT8		clearBlockUsed;
+	UINT8		clearBlockUsed;				
 	char		filename[256];
 } SPrintFileCmd;
 

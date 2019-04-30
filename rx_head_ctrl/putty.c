@@ -340,7 +340,7 @@ void  putty_display_fpga_error(void)
 //		term_printf("   time:        ");	PRINTF(4)("0x%04x ", RX_FpgaError.enc_fp[i].time);			term_printf("\n");
 //		term_printf("   latch_missed:   ");	PRINTF(4)("0x%04x ", RX_FpgaError.head[i].latch_missed);	term_printf("\n");
 	term_printf("   enc_crc:        ");	PRINTF(4)("0x%04x ", RX_FpgaError.encoder[i].crc);			term_printf("\n");
-	term_printf("clear_area_32:  "); PRINTF(4)("%08d   ",    RX_FpgaError.clear_area_32[i]);			term_printf("\n");
+//	term_printf("clear_area_32:  "); PRINTF(4)("%08d   ",    RX_FpgaError.clear_area_32[i]);			term_printf("\n");
 	term_printf("ETH.invalid.pyLdLen :%d UDP.PyldLenErr: %d UDP.FifoFlush: %d\n", RX_FpgaStat.udp_invalid_pyld_length, RX_FpgaError.udp_length_error, RX_FpgaError.udp_flush_fifo);
 }
 

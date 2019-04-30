@@ -161,8 +161,8 @@ int rx_def_is_web(EPrinterType printerType)
 	}
 }
 
-//--- rx_def_is_singlepage ---------------------------------------
-int rx_def_is_singlepage(EPrinterType printerType)
+//--- rx_def_is_test ---------------------------------------
+int rx_def_is_test(EPrinterType printerType)
 {
 	switch(printerType)	
 	{

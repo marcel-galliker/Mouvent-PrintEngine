@@ -179,6 +179,14 @@ namespace RX_DigiPrint.Models
             }
         }
 
+        //--- Property TestDotSize ---------------------------------------
+        private int _TestDotSize=1;
+	    public int TestDotSize
+	    {
+		    get { return _TestDotSize;}
+		    set { SetProperty(ref _TestDotSize, value);}
+	    }
+	
         //--- FirstPage ------------------------------------
         private Int32 _FirstPage=1;
         public Int32 FirstPage
@@ -574,6 +582,14 @@ namespace RX_DigiPrint.Models
             get { return _Material; }
             set { SetProperty(ref _Material, value); }
         }
+
+        //--- Property TestMessage ---------------------------------------
+        private string _TestMessage;
+        public string TestMessage
+        {
+            get { return _TestMessage; }
+            set { SetProperty(ref _TestMessage, value); }
+        }
         
 
         //--- Ripped -------------------------------------------------
@@ -630,7 +646,7 @@ namespace RX_DigiPrint.Models
             string filePath = Dir.local_path(parFilePath);
 
             if (_FilePath==null) _FilePath=filePath;
-            LoadDefaults(false);
+            LoadDefaults();
 
             //--- label ----------------------------
             {
@@ -747,17 +763,12 @@ namespace RX_DigiPrint.Models
         }
 
         //--- LoadDefaults ----------------------------------------
-        public void LoadDefaults(bool defaults)
+        public void LoadDefaults()
         {
             XmlTextReader xml;
 
             //--- defaults ---
-            if (defaults)  xml = new XmlTextReader(Dir.local_path("ripped-data:\\defaults.xml"));
-            else
-            {
-                LoadDefaults(true);
-                xml = new XmlTextReader(Dir.local_path(FilePath+string.Format("\\{0}.xml", Path.GetFileName(_FilePath))));
-            }             
+            xml = new XmlTextReader(Dir.local_path(FilePath+string.Format("\\{0}.xml", Path.GetFileName(_FilePath))));
             try
             {
                 while(xml.Read())
@@ -783,13 +794,12 @@ namespace RX_DigiPrint.Models
         }
 
         //--- SaveDefaults --------------------------------------------------------
-        public void SaveDefaults(bool defaults)
+        public void SaveDefaults()
         {
             try
             {
                 string str;
-                if (defaults)   str = Dir.local_path("ripped-data:\\defaults.xml");
-                else            str = Dir.local_path(FilePath+string.Format("\\{0}.xml", Path.GetFileName(_FilePath)));
+                str = Dir.local_path(FilePath+string.Format("\\{0}.xml", Path.GetFileName(_FilePath)));
                 XmlTextWriter xml = new XmlTextWriter(str, null);
 
                 xml.WriteStartDocument();
@@ -824,7 +834,6 @@ namespace RX_DigiPrint.Models
             { 
                 Console.WriteLine("Exception {0}", e.Message);
             }
-            if (!defaults) SaveDefaults(true);
         }
 
         #region Creator
@@ -951,6 +960,7 @@ namespace RX_DigiPrint.Models
             msg.item.start.page     = StartPage;
             msg.item.lengthUnit     = LengthUnit;
             msg.item.copies         = Copies;
+            msg.item.testMessage    = TestMessage;
             if (msg.item.lengthUnit == EPQLengthUnit.copies)
             {
                 if (SrcPages<2 && ScanLength>0) msg.item.copies = (int)ScanLength;

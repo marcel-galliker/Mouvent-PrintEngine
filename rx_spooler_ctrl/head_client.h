@@ -16,6 +16,7 @@
 int hc_start(void);
 int hc_end(void);
 
+int  hc_in_simu(void);
 int  hc_head_board_cfg(RX_SOCKET socket, SHeadBoardCfg* cfg);
 void hc_start_printing(void);
 void hc_abort_printing(void);

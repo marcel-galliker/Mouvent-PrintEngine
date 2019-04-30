@@ -22,6 +22,7 @@
 #include "print_queue.h"
 #include "print_ctrl.h"
 #include "machine_ctrl.h"
+#include "setup.h"
 #include "ctrl_msg.h"
 #include "ctrl_svr.h"
 #include "network.h"
@@ -41,7 +42,6 @@ typedef struct
 {
 	int		  used;
 	char	  ipAddrStr[32];
-	UINT32	  ipAddr;
 	RX_SOCKET socket;
 	int		  timeout;
 	int		  ready;		
@@ -92,7 +92,6 @@ void enc_init(void)
 	for (i=0; i<ENC_CNT; i++)
 	{
 		net_device_to_ipaddr(dev_enc, i, _Encoder[i].ipAddrStr, SIZEOF(_Encoder[i].ipAddrStr));
-		_Encoder[i].ipAddr = sok_addr_32(_Encoder[i].ipAddrStr);
 		_Encoder[i].socket=INVALID_SOCKET;
 		_Encoder[i].used = (i==0);
 	}
@@ -116,7 +115,7 @@ void enc_error_reset(void)
 	for (no=0; no<SIZEOF(_Encoder); no++)
 	{
 		if (_Encoder[no].used && _Encoder[no].socket!=INVALID_SOCKET)	
-			sok_send_2(&_Encoder[no].socket, _Encoder[no].ipAddr, CMD_ERROR_RESET, 0, NULL);
+			sok_send_2(&_Encoder[no].socket, CMD_ERROR_RESET, 0, NULL);
 	}	
 }
 
@@ -206,7 +205,7 @@ int	 enc_set_config(void)
 	for (no=0; no<ENC_CNT; no++) 
 	{
 		_Encoder[no].printGoCnt= -1;
-		if (_Encoder[no].used) sok_send_2(&_Encoder[no].socket, _Encoder[no].ipAddr, CMD_ENCODER_PG_INIT, 0, NULL);
+		if (_Encoder[no].used) sok_send_2(&_Encoder[no].socket, CMD_ENCODER_PG_INIT, 0, NULL);
 	}
 	return REPLY_OK;		
 }
@@ -217,7 +216,7 @@ void  enc_tick(void)
 	int no;
 	for (no=0; no<ENC_CNT; no++)
 	{
-		if (_Encoder[no].used && _Encoder[no].socket!=INVALID_SOCKET) sok_send_2(&_Encoder[no].socket, _Encoder[no].ipAddr, CMD_ENCODER_STAT, 0, NULL);
+		if (_Encoder[no].used && _Encoder[no].socket!=INVALID_SOCKET) sok_send_2(&_Encoder[no].socket, CMD_ENCODER_STAT, 0, NULL);
 		if (_Encoder[no].timeout>0 && !(--_Encoder[no].timeout)) Error(ERR_ABORT, 0, "Encoder Communication Timeout");			
 	}
 }
@@ -228,7 +227,7 @@ int  enc_start_printing(SPrintQueueItem *pitem)
 	int no;
 
 	SEncoderCfg msg;
-	int comp;
+	double comp;
 	memset(&msg, 0, sizeof(msg));
 			
 	msg.printerType = RX_Config.printer.type;
@@ -251,15 +250,20 @@ int  enc_start_printing(SPrintQueueItem *pitem)
 	case printer_TX802:			msg.orientation = FALSE;	msg.scanning=TRUE;  msg.incPerMeter=1000000; msg.pos_actual = machine_get_scanner_pos(); 
 								if (!arg_simuPLC) msg.correction=CORR_OFF; 
 								break;
-//		case printer_LB701:		msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_ROTATIVE; break;	
+	case printer_LB701:			msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; 
+								msg.correction=CORR_ROTATIVE;
+								break;	
 //		case printer_LB702:		msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_ROTATIVE; break;	
-	case printer_LB701:			msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_OFF; break;	
-	case printer_LB702_UV:		msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_OFF; break;	
-	case printer_LB702_WB:		msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_OFF; break;	
-	case printer_DP803:			msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_OFF; break;	
+//	case printer_LB701:			msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_ROTATIVE; break;	
+	case printer_LB702_UV:		msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_ROTATIVE; break;	
+	case printer_LB702_WB:		msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_ROTATIVE; break;	
+	case printer_DP803:			msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_OFF;	break;	
 	case printer_cleaf:			msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter= 180200; msg.pos_actual = 0;	break;
 	default:					msg.orientation = TRUE;		msg.scanning=TRUE;  msg.incPerMeter=1000000; msg.pos_actual = 0;	break;
 	}
+	if (msg.correction==CORR_ROTATIVE)
+		memcpy(msg.corrRotPar, RX_Config.encoder.corrRotPar, sizeof(msg.corrRotPar));
+
 	/*
 #ifdef DEBUG
 if (RX_Config.printer.type==printer_LB701)
@@ -279,7 +283,8 @@ if (RX_Config.printer.type==printer_LB701)
 			msg.incPerMeter = _IncPerMeter+RX_Config.printer.offset.incPerMeter[no];
 			msg.pos_pg_fwd  = _Encoder[no].webOffset_mm*1000 + pitem->pageMargin;
 			msg.pos_pg_bwd  = _Encoder[no].webOffset_mm*1000 + pitem->pageMargin + pitem->srcHeight + RX_Config.headDistMax + 13350;
-					
+		//	msg.pos_pg_bwd  = _Encoder[no].webOffset_mm*1000 + pitem->pageMargin + pitem->srcHeight + 13150; // not tested!
+			
 			if (_Scanning && arg_simuEncoder)
 			{
 				msg.scanning=FALSE;
@@ -291,10 +296,13 @@ if (RX_Config.printer.type==printer_LB701)
 			case PQ_SCAN_RTL:		msg.pos_pg_fwd = 	10000000; 
 									break;
 			
-			case PQ_SCAN_BIDIR:	//	comp = (int) (0.0040*RX_Config.stepper.print_height*pitem->speed);	// 14.NOV.18
-									comp = (int) (0.0040*RX_Config.stepper.print_height*pitem->speed);
-									Error(LOG, 0, "Flightime Comp: height=%d speed=%d comp=%d", RX_Config.stepper.print_height, pitem->speed, comp);
-									msg.pos_pg_bwd += comp;  
+			case PQ_SCAN_BIDIR:		if (pitem->speed)
+									{
+										comp = 0.0050 * RX_TestTableStatus.posZ * pitem->speed;
+//										test = RX_Config.headDistBackMax-comp;
+										Error(LOG, 0, "Flightime Comp: height=%d speed=%d comp=%d", RX_TestTableStatus.posZ, pitem->speed, (int)comp);
+										msg.pos_pg_bwd += (int)comp;  
+									}
 									break;
 			
 			default:				msg.pos_pg_bwd = 	10000000; break;			
@@ -304,7 +312,7 @@ if (RX_Config.printer.type==printer_LB701)
 			if (_Encoder[no].socket!=INVALID_SOCKET) // || enc_connect()==REPLY_OK)	
 			{
 				_Encoder[no].timeout = 2;
-				sok_send_2(&_Encoder[no].socket, _Encoder[no].ipAddr, CMD_ENCODER_CFG, sizeof(msg), &msg);
+				sok_send_2(&_Encoder[no].socket, CMD_ENCODER_CFG, sizeof(msg), &msg);
 			}
 		}
 	}
@@ -344,7 +352,7 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 		{
 			for(no=0; no<ENC_CNT; no++) 
 			{
-				if (_Encoder[no].used) sok_send_2(&_Encoder[no].socket, _Encoder[no].ipAddr, CMD_ENCODER_PG_DIST, sizeof(dist), &dist);
+				if (_Encoder[no].used) sok_send_2(&_Encoder[no].socket, CMD_ENCODER_PG_DIST, sizeof(dist), &dist);
 			}
 		}
 		_DistTelCnt++;
@@ -366,7 +374,7 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 							 dist.window   = pitem->printGoDist/4;
 							 for(no=0; no<ENC_CNT; no++) 
 							 {
-								sok_send_2(&_Encoder[no].socket, _Encoder[no].ipAddr, CMD_ENCODER_PG_DIST, sizeof(dist), &dist);
+								sok_send_2(&_Encoder[no].socket, CMD_ENCODER_PG_DIST, sizeof(dist), &dist);
 							 }
 							 break;
 			
@@ -383,7 +391,7 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 		dist.dist	= pitem->pageHeight+1000;
 		for(no=0; no<ENC_CNT; no++) 
 		{
-			sok_send_2(&_Encoder[no].socket, _Encoder[no].ipAddr, CMD_ENCODER_PG_DIST, sizeof(dist), &dist);
+			sok_send_2(&_Encoder[no].socket, CMD_ENCODER_PG_DIST, sizeof(dist), &dist);
 		}
 	}
 	memcpy(&_ID, pId, sizeof(_ID));
@@ -394,7 +402,7 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 int  enc_stop_printing(void)
 {
 	int no;
-	for(no=0; no<ENC_CNT; no++) sok_send_2(&_Encoder[no].socket, _Encoder[no].ipAddr, CMD_STOP_PRINTING, 0, NULL);
+	for(no=0; no<ENC_CNT; no++) sok_send_2(&_Encoder[no].socket, CMD_STOP_PRINTING, 0, NULL);
 	return REPLY_OK;
 }
 
@@ -402,7 +410,7 @@ int  enc_stop_printing(void)
 int  enc_abort_printing(void)
 {
 	int no;
-	for(no=0; no<ENC_CNT; no++) sok_send_2(&_Encoder[no].socket, _Encoder[no].ipAddr, CMD_ABORT_PRINTING, 0, NULL);
+	for(no=0; no<ENC_CNT; no++) sok_send_2(&_Encoder[no].socket, CMD_ABORT_PRINTING, 0, NULL);
 	return REPLY_OK;
 }
 
@@ -412,8 +420,8 @@ int	 enc_enable_printing(int enable)
 	int no;
 	for(no=0; no<ENC_CNT; no++)
 	{
-		if (enable) sok_send_2(&_Encoder[no].socket, _Encoder[no].ipAddr, CMD_ENCODER_ENABLE, 0, NULL);
-		else        sok_send_2(&_Encoder[no].socket, _Encoder[no].ipAddr, CMD_ENCODER_DISABLE, 0, NULL);		
+		if (enable) sok_send_2(&_Encoder[no].socket, CMD_ENCODER_ENABLE, 0, NULL);
+		else        sok_send_2(&_Encoder[no].socket, CMD_ENCODER_DISABLE, 0, NULL);		
 	}
 	return REPLY_OK;				
 }
@@ -422,7 +430,7 @@ int	 enc_enable_printing(int enable)
 int  enc_uv_on(void)
 {
 	int no;
-	for(no=0; no<ENC_CNT; no++) sok_send_2(&_Encoder[no].socket, _Encoder[no].ipAddr, CMD_ENCODER_UV_ON, 0, NULL);
+	for(no=0; no<ENC_CNT; no++) sok_send_2(&_Encoder[no].socket, CMD_ENCODER_UV_ON, 0, NULL);
 	return REPLY_OK;
 }
 
@@ -430,7 +438,7 @@ int  enc_uv_on(void)
 int  enc_uv_off(void)
 {
 	int no;
-	for(no=0; no<ENC_CNT; no++) sok_send_2(&_Encoder[no].socket, _Encoder[no].ipAddr, CMD_ENCODER_UV_OFF, 0, NULL);
+	for(no=0; no<ENC_CNT; no++) sok_send_2(&_Encoder[no].socket, CMD_ENCODER_UV_OFF, 0, NULL);
 	return REPLY_OK;
 }
 
@@ -471,9 +479,9 @@ static void _handle_status(int no, SEncoderStat* pstat)
 	//--- test ------------------
 	if (_DistTelCnt && pstat->PG_cnt!=_TotalPgCnt)
 	{
-		if (pstat->fifoEmpty_PG> _EncoderStatus[no].fifoEmpty_PG)  ErrorEx(dev_enc, no, ERR_STOP, 0, "PrintGo FIFO empty (PG=%d, err=%d)", pstat->PG_cnt, pstat->fifoEmpty_PG);
-		if (pstat->fifoEmpty_IGN>_EncoderStatus[no].fifoEmpty_IGN) ErrorEx(dev_enc, no, ERR_STOP, 0, "PrintGo FIFO ignore (PG=%d, err==%d)", pstat->PG_cnt, pstat->fifoEmpty_IGN);
-		if (pstat->fifoEmpty_WND>_EncoderStatus[no].fifoEmpty_WND) ErrorEx(dev_enc, no, ERR_STOP, 0, "PrintGo FIFO window (PG=%d, err==%d)", pstat->PG_cnt, pstat->fifoEmpty_WND);		
+		if (pstat->fifoEmpty_PG> _EncoderStatus[no].fifoEmpty_PG)  ErrorEx(dev_enc, no, ERR_CONT, 0, "PrintGo FIFO empty (PG=%d, err=%d)", pstat->PG_cnt, pstat->fifoEmpty_PG);
+		if (pstat->fifoEmpty_IGN>_EncoderStatus[no].fifoEmpty_IGN) ErrorEx(dev_enc, no, ERR_CONT, 0, "PrintGo FIFO ignore (PG=%d, err==%d)", pstat->PG_cnt, pstat->fifoEmpty_IGN);
+		if (pstat->fifoEmpty_WND>_EncoderStatus[no].fifoEmpty_WND) ErrorEx(dev_enc, no, ERR_CONT, 0, "PrintGo FIFO window (PG=%d, err==%d)", pstat->PG_cnt, pstat->fifoEmpty_WND);		
 	}
 //	if (pstat->PG_cnt>_EncoderStatus[no].PG_cnt) ErrorEx(dev_enc, no, LOG, 0, "PrintGo %d/%d", pstat->PG_cnt, _TotalPgCnt);
 	
@@ -497,7 +505,24 @@ static void _handle_status(int no, SEncoderStat* pstat)
 	if (no==0 && _EncoderStatus[no].info.analog_encoder != info.analog_encoder) ctrl_set_max_speed();
 	
 }
-		
+
+//--- enc_reply_stat ---------------------------------------------------------------
+void enc_reply_stat(RX_SOCKET socket)
+{
+	int no=0;
+	sok_send_2(&socket, REP_ENCODER_STAT, sizeof(_EncoderStatus[no]), &_EncoderStatus[no]);
+}
+
+//--- enc_save_par ---------------------------------------------------
+void enc_save_par(void)
+{
+	SRxConfig cfg;
+	setup_config(PATH_USER FILENAME_CFG, &cfg, READ);
+	memcpy(cfg.encoder.corrRotPar, _EncoderStatus[0].corrRotPar, sizeof(cfg.encoder.corrRotPar));
+	memcpy(RX_Config.encoder.corrRotPar, _EncoderStatus[0].corrRotPar, sizeof(cfg.encoder.corrRotPar));
+	setup_config(PATH_USER FILENAME_CFG, &cfg, WRITE);
+}
+
 //--- _handle_config_reply --------------------------------
 static void _handle_config_reply(int no, SReply* preply)
 {
@@ -507,6 +532,7 @@ static void _handle_config_reply(int no, SReply* preply)
 	_Encoder[no].timeout = 0;
 }
 
+//--- _handle_event -----------------------------
 static void _handle_event(int no, SLogMsg *msg)
 {
 	SlaveError(dev_enc, no, &msg->log);
@@ -526,7 +552,8 @@ int	 enc_simu_encoder(int mmin)
 {
 	int no;
 	int khz_head = (int)(mmin/60.0/25.4*1200.0);
+	if (mmin) rx_sleep(500);
 	Error(WARN, 0, "CMD_FPGA_SIMU_ENCODER %d m/min %d kHz", mmin, khz_head);
-	for(no=0; no<ENC_CNT; no++) sok_send_2(&_Encoder[no].socket, _Encoder[no].ipAddr, CMD_FPGA_SIMU_ENCODER, sizeof(khz_head), &khz_head);	
+	for(no=0; no<ENC_CNT; no++) sok_send_2(&_Encoder[no].socket, CMD_FPGA_SIMU_ENCODER, sizeof(khz_head), &khz_head);	
 	return REPLY_OK;
 }

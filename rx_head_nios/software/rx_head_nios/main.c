@@ -144,6 +144,47 @@ void main_error_reset(void) {
 	pRX_Status->error.err = _StaticErrors;
 }
 
+/*
+//--- _eeprom_test -----------------------------
+static void _eeprom_test(void)
+{
+	int temp_count=0;
+	BYTE temp_head_user_data_read[34];
+	BYTE temp_head_user_data_write[34];
+
+	memset(temp_head_user_data_read,  0, sizeof(temp_head_user_data_read));
+	memset(temp_head_user_data_write, 0, sizeof(temp_head_user_data_write));
+
+	temp_head_user_data_write[0]=0x12;//0xb7;
+	temp_head_user_data_write[1]=0x34;//0x86;
+
+	// test with head 1
+	//int head_eeprom_read_user_data(alt_u32 	head, alt_u8 * eeprom_data, alt_u32 number_of_byte_to_read, alt_u32 start_adr)
+	if(head_eeprom_read_user_data(1, &temp_head_user_data_read[0], 33, 0x00))
+	{
+		pRX_Status->error.head_eeprom_read = TRUE;
+	}
+
+	for(temp_count=0; temp_count<34;temp_count++)
+	{
+		temp_head_user_data_write[temp_count]=0xa0+temp_count;
+	}
+
+	//head_eeprom_write_user_data_seq(alt_u32 head, alt_u8 * eeprom_data, alt_u32 number_of_byte_to_write, alt_u32 start_adr)
+	if(head_eeprom_write_user_data_seq(1, &temp_head_user_data_write[0], 32, 0x00))
+	{
+		pRX_Status->error.head_eeprom_write = TRUE;
+	}
+
+	// test with head 1
+	//int head_eeprom_read_user_data(alt_u32 	head, alt_u8 * eeprom_data, alt_u32 number_of_byte_to_read, alt_u32 start_adr)
+	if(head_eeprom_read_user_data(1, &temp_head_user_data_read[0], 33, 0x00))
+	{
+		pRX_Status->error.head_eeprom_read = TRUE;
+	}
+}
+*/
+
 //--- main ----------------------------------------------------
 int main() {
 	// _DEBUG must only be enabled when downloading through hardware debugger.
@@ -172,7 +213,8 @@ int main() {
 	IOWR_ALTERA_AVALON_PIO_DATA(PIO_NIOS_LED_BASE, 0x03);// Nios all LED's off
 
 	// Analog monitor initialisation
-	if (init_AMC7891()) {
+	if (init_AMC7891())
+	{
 		pRX_Status->error.amc7891 = TRUE;
 
 		pRX_Status->u_minus_36v = INVALID_VALUE;
@@ -204,10 +246,20 @@ int main() {
 
 	trprintf("MAIN STARTED\n");
 
-	if (head_eeprom_read()) {
+	if (head_eeprom_read())
+	{
 		pRX_Status->error.head_eeprom_read = TRUE;
 		//init_I2C(I2C_MASTER_0_BASE);	// reinitialize I2C, as there is no head Connected
+	};
+
+	{
+		int head;
+		for (head = 0; head < MAX_HEADS_BOARD; head++)
+		{
+			head_eeprom_read_user_data(head, pRX_Status->user_eeprom[head], sizeof(pRX_Status->user_eeprom[head]), 0x00);
+		}
 	}
+//	_eeprom_test();
 
 	_StaticErrors = pRX_Status->error.err;
 	pRX_Status->info.nios_ready = TRUE;

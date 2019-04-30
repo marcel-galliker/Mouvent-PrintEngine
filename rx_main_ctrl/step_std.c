@@ -24,14 +24,12 @@
 #include "step_ctrl.h"
 
 static RX_SOCKET *_step_socket=NULL;
-static UINT32	  _step_ipaddr=0;	
 static int		  _Curing;
 
 //--- steps_init ---------------------------------------------------
-void steps_init(RX_SOCKET *psocket, UINT32 ipaddr)
+void steps_init(RX_SOCKET *psocket)
 {
 	_step_socket = psocket;
-	_step_ipaddr = ipaddr;
 }
 
 //--- steps_handle_gui_msg------------------------------------------------------------------
@@ -49,7 +47,7 @@ int	 steps_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen)
 	case CMD_TT_SCAN_RIGHT:
 	case CMD_TT_SCAN_LEFT:
 	case CMD_TT_VACUUM:
-				sok_send_2(_step_socket, _step_ipaddr, cmd, 0, NULL);
+				sok_send_2(_step_socket, cmd, 0, NULL);
 				break;
 
 	case CMD_TT_SCAN:
@@ -60,7 +58,7 @@ int	 steps_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen)
 					par.scanMode= PQ_SCAN_STD;
 					par.yStep   = 10000;
 
-					sok_send_2(_step_socket, _step_ipaddr, CMD_TT_SCAN, sizeof(par), &par);
+					sok_send_2(_step_socket, CMD_TT_SCAN, sizeof(par), &par);
 				}
 				break;
 
@@ -69,7 +67,7 @@ int	 steps_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen)
 	case CMD_CAP_REFERENCE:
 	case CMD_CAP_UP_POS:
 	case CMD_CAP_CAPPING_POS:
-				sok_send_2(_step_socket, _step_ipaddr, cmd, 0, NULL);
+				sok_send_2(_step_socket, cmd, 0, NULL);
 				break;
 		
 	case CMD_CAP_PRINT_POS:
@@ -105,7 +103,7 @@ int steps_handle_status(STestTableStat *pStatus)
 //--- steps_to_print_pos --------------------------------
 int	 steps_to_print_pos(void)
 {
-	if (RX_Config.printer.type==printer_test_table) sok_send_2(_step_socket, _step_ipaddr, CMD_CAP_PRINT_POS, sizeof(UINT32), &RX_Config.stepper.cap_height);
-	else											sok_send_2(_step_socket, _step_ipaddr, CMD_CAP_PRINT_POS, sizeof(UINT32), &RX_Config.stepper.print_height);
+	if (RX_Config.printer.type==printer_test_table) sok_send_2(_step_socket, CMD_CAP_PRINT_POS, sizeof(UINT32), &RX_Config.stepper.cap_height);
+	else											sok_send_2(_step_socket, CMD_CAP_PRINT_POS, sizeof(UINT32), &RX_Config.stepper.print_height);
 	return REPLY_OK;									
 }

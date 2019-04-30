@@ -37,6 +37,7 @@
                 <RowDefinition Height="auto" x:Name="ScanRow"/>
                 <RowDefinition Height="auto" x:Name="MarginRow"/>
                 <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
             </Grid.RowDefinitions>
 
             <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Text="Test Image" />
@@ -47,17 +48,15 @@
                 ValuePath="Value"
                 DropDownResizeMode="None"
             />
-            <!--
             <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Text="Drop Size"/>
             <igWPF:XamComboEditor Grid.Row="1" Grid.Column="2"
                 x:Name="CB_DropSize"
                 HorizontalAlignment="Stretch"
-                Value="{Binding DorpSize}"
+                Value="{Binding TestDotSize}"
                 DisplayMemberPath="Display"
                 ValuePath="Value" 
                 DropDownResizeMode="None"
                 />
-            -->
             <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Text="Speed" />
             <igWPF:XamComboEditor Grid.Row="2" Grid.Column="2"
             x:Name="CB_Speed"
@@ -86,6 +85,8 @@
             <TextBlock   Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Text="Copies"/>
             <common:RxNumBox Grid.Row="5" Grid.Column="2" Text="{Binding Copies}" HorizontalAlignment="Stretch" />
 
+            <TextBlock   Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Text="Message"/>
+            <rx:RxTextBox Grid.Row="6" Grid.Column="2" Grid.ColumnSpan="2" Text="{Binding TestMessage}" HorizontalAlignment="Stretch" />
         </Grid>
 
         <common:RxButton Click="Print_Clicked"  Margin="10">

@@ -69,9 +69,6 @@
     <ClInclude Include="es_rip.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="tec_it.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="plc_ctrl.h">
       <Filter>Header Files</Filter>
     </ClInclude>

@@ -100,8 +100,8 @@ int sok_ping			(const char *addr);
 int  sok_receiver	    (HANDLE hserver, RX_SOCKET *psocket, msg_handler handle_msg, void *par);
 int  sok_send			(RX_SOCKET *socket, void *msg);
 int  sok_send_wide		(RX_SOCKET *socket, void *msg);
-int  sok_send_2			(RX_SOCKET *socket, UINT32 addr, INT32 id, UINT32 dataLen, void *data);
-int  sok_send_3         (RX_SOCKET *socket, UINT32 dataLen, void *data);
+int  sok_send_2			(RX_SOCKET *socket, INT32 id, UINT32 dataLen, void *data);
+// int  sok_send_3         (RX_SOCKET *socket, UINT32 dataLen, void *data);
 int  sok_send_to_clients(HANDLE hserver, void *msg);	// return=clients count
 int  sok_send_to_clients_2(HANDLE hserver, INT32 id, UINT32 len, void *data);
 int  sok_send_to_clients_telnet(HANDLE hserver, const void *data, UINT32 lrn);

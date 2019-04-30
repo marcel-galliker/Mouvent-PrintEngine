@@ -425,11 +425,11 @@ static int error(EDevice device, int no, ELogItemType type, const char *file, in
 	}
 
 	if (type > sErrorType) sErrorType = type;
+
+	rx_mutex_unlock(sMutex);
 		
 	if (shServer) sok_send_to_clients_2(shServer, EVT_GET_EVT, sizeof(log), &log);
-	if (sClient)  sok_send_2(&sClient, INADDR_ANY, EVT_GET_EVT, sizeof(log), &log);
-	
-	rx_mutex_unlock(sMutex);
+	if (sClient)  sok_send_2(&sClient, EVT_GET_EVT, sizeof(log), &log);
 	
 	if (_OnError) _OnError(sErrorType);
 	

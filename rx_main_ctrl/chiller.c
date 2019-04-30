@@ -201,7 +201,7 @@ void chiller_error_reset(void)
 //--- fluid_reply_stat ------------------------------------
 void chiller_reply_stat(RX_SOCKET socket)	// to GUI
 {
-	sok_send_2(&socket, INADDR_ANY, REP_CHILLER_STAT, sizeof(_ChillerStatus), &_ChillerStatus);
+	sok_send_2(&socket, REP_CHILLER_STAT, sizeof(_ChillerStatus), &_ChillerStatus);
 }
 
 //--- _read_register -------------------------------------------

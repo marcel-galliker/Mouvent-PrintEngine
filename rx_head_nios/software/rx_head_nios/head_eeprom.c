@@ -13,27 +13,30 @@
 #define LAST_BYTE 1
 #define READ 1
 #define WRITE 0
+#define USER_DATA_ADR_START
 
+static int _seq_read_eeprom(alt_u8 * eeprom_data, alt_u32 number_of_byte_to_read, char chip_adr, alt_u32 addr);
+static int _seq_write_eeprom(alt_u8 * eeprom_data, alt_u32 number_of_byte_to_write, char chip_adr, alt_u32 addr);
+
+//--- head_eeprom_read --------------------------------------
+// Fuji data, read byte by byte with one single I2C read command => fast
 int head_eeprom_read(void)
 {
 	alt_u32 	head=0;
-	alt_u32		count_temp=0;
 	alt_u32		head_eeprom_ok=0;
 	// Read Data from Head eeprom
 	//0x50, 0x52, 0x54, 0x56 for head 0-4
 
 	for(head=0;head<MAX_HEADS_BOARD;head++)
 	{
-		for(count_temp=0;count_temp<EEPROM_DATA_SIZE; count_temp++)
+		//_seq_read_eeprom(alt_u8 * eeprom_data, alt_u32 number_of_byte_to_read, char chip_adr, char eeprom_adr0, char eeprom_adr1)
+		if(_seq_read_eeprom(pRX_Status->head_eeprom[head], EEPROM_DATA_SIZE, 0x50+(head*2), 0x00)==0)
 		{
-			if(read_eeprom(&pRX_Status->head_eeprom[head][count_temp], 0x50+(head*2), count_temp)==0)
-			{
-				head_eeprom_ok+=1;
-			}
-			else
-			{
-				return(-1);
-			}
+			head_eeprom_ok+=EEPROM_DATA_SIZE;
+		}
+		else
+		{
+			return(-1);
 		}
 	}
 	if(head_eeprom_ok==MAX_HEADS_BOARD*EEPROM_DATA_SIZE)
@@ -44,20 +47,34 @@ int head_eeprom_read(void)
 	return(-1);
 }
 
-int read_eeprom(alt_u8 * eeprom_data, char chip_adr, char eeprom_adr)
+//--- _seq_read_eeprom --------------------------------------
+// read byte by byte with one single I2C read command => fast
+static int _seq_read_eeprom(alt_u8 * eeprom_data, alt_u32 number_of_byte_to_read, char chip_adr, alt_u32 addr)
 {
-	int head_data=0;
+	int read_count=0;
+
+	if(addr+(number_of_byte_to_read-1)>EEPROM_MAX_ADR)
+	{
+		return (-1);	// adr. to high
+	}
+
 	if (I2C_start(I2C_MASTER_0_BASE,(chip_adr),WRITE)==I2C_ACK)					// set chip address and set to write(0)
 	{
-		if(I2C_write(I2C_MASTER_0_BASE,0x00,!LAST_BYTE)==I2C_ACK)				// set address1 to 0x00
+		if(I2C_write(I2C_MASTER_0_BASE,(addr>>8)&0xff,!LAST_BYTE)==I2C_ACK)		// set address1 to eeprom_adr0
 		{
-			if(I2C_write(I2C_MASTER_0_BASE,eeprom_adr,LAST_BYTE)==I2C_ACK)		// set address2 to 0x00
+			if(I2C_write(I2C_MASTER_0_BASE,addr&0xff,LAST_BYTE)==I2C_ACK)		// set address2 to eeprom_adr1
 			{
 				if(I2C_start(I2C_MASTER_0_BASE,(chip_adr),READ)==I2C_ACK)		// set chip address in read mode)
 				{
-					head_data=  I2C_read(I2C_MASTER_0_BASE,LAST_BYTE);  		// read
+					for(read_count=0; read_count<(number_of_byte_to_read-1);read_count++)
+					{
+						*eeprom_data = I2C_read(I2C_MASTER_0_BASE,!LAST_BYTE);  	// read
+						eeprom_data++;	//inc. adr. of pointer
+					}
+
+					*eeprom_data =  I2C_read(I2C_MASTER_0_BASE,LAST_BYTE);  		// read last Byte
 					//alt_printf("0x%x: 0x%x %c\n", eeprom_adr, head_data, head_data);
-					*eeprom_data=head_data;
+
 					return (0);
 				}
 			}
@@ -65,3 +82,107 @@ int read_eeprom(alt_u8 * eeprom_data, char chip_adr, char eeprom_adr)
 	}
 	return (-1);
 }
+
+
+//--- head_eeprom_read_user_data --------------------------------------
+// read user data
+int head_eeprom_read_user_data(alt_u32 head, alt_u8 * eeprom_data, alt_u32 number_of_byte_to_read, alt_u32 addr)
+{
+	// Read Data from Head eeprom
+	//0x50, 0x52, 0x54, 0x56 for head 0-4
+
+	if((EEPROM_USER_DATA_START+addr+number_of_byte_to_read)>EEPROM_MAX_ADR)
+	{
+		return(-1);		// number_of_byte_to_read extend EEPROM Size
+	}
+
+	if(_seq_read_eeprom(eeprom_data, number_of_byte_to_read, 0x50+(head*2), EEPROM_USER_DATA_START+addr)==0)
+	{
+		return (0);
+	}
+
+	return(-1);
+}
+
+//--- head_eeprom_write_user_data --------------------------------------
+// write only page wise (32Byte) but with a single I2C write command => fast
+int head_eeprom_write_user_data(alt_u32 head, alt_u8 * eeprom_data, alt_u32 number_of_byte_to_write, alt_u32 addr)
+{
+	// Write Data to Head eeprom
+	//0x50, 0x52, 0x54, 0x56 for head 0-4
+
+	if(EEPROM_USER_DATA_START+addr+number_of_byte_to_write>=EEPROM_MAX_ADR)
+	{
+		return(-1);		// number_of_byte_to_read extend EEPROM Size
+	}
+
+	return _seq_write_eeprom(eeprom_data, number_of_byte_to_write, 0x50+(head*2), EEPROM_USER_DATA_START+addr);
+}
+
+//--- head_eeprom_change_user_data ---------------------------------------------------------
+int head_eeprom_change_user_data(alt_u32 head, alt_u8 *act_data, alt_u8 * new_data, alt_u32 cnt, alt_u32 addr)
+{
+	int idx;
+	int len;
+
+	for (idx=0; idx<cnt; idx++)
+	{
+		if (new_data[idx] == act_data[idx]) continue;
+		for (len=0; idx+len<cnt && new_data[idx+len] != act_data[idx+len]; len++)
+		{
+		}
+//		write len bytes
+		idx+=len;
+	}
+	return REPLY_OK;
+}
+
+
+//--- _seq_write_eeprom --------------------------------------
+// writes up to 32 bytes at ones to the eeprom but those
+// 32 bytes have to be in the same (32 Byte)page as the EEPROM
+// internal Address Increment only increment Adr. Bit 0-4!
+//  waits till written into EEPROM!
+static int _seq_write_eeprom(alt_u8 * eeprom_data, alt_u32 number_of_byte_to_write, char chip_adr, alt_u32 addr)
+{
+	int timeout;
+	int write_count=0;
+	if(addr+number_of_byte_to_write>=EEPROM_MAX_ADR)
+	{
+		return (-1);	// adr. to high
+	}
+	if (addr/32 != (addr+number_of_byte_to_write-1)/32)
+	{
+		return (-1);	// writing into multiple pages is not supported in a single seq. write!
+	}
+
+	if (I2C_start(I2C_MASTER_0_BASE,(chip_adr),WRITE)==I2C_ACK)						// set chip address and set to write(0)
+	{
+		if(I2C_write(I2C_MASTER_0_BASE,(addr>>8)&0xff,!LAST_BYTE)==I2C_ACK)			// set eeprom_adr0
+		{
+			if(I2C_write(I2C_MASTER_0_BASE,addr&0xff,!LAST_BYTE)==I2C_ACK)		// set address2 to eeprom_adr
+			{
+				for(write_count=0; write_count<(number_of_byte_to_write-1);write_count++)
+				{
+					if(I2C_write(I2C_MASTER_0_BASE,*eeprom_data,!LAST_BYTE)!=I2C_ACK)	// write data to eeprom_adr
+					{
+						return (-1);
+					}
+					eeprom_data++;	//inc. adr. of pointer
+				}
+				if(I2C_write(I2C_MASTER_0_BASE,*eeprom_data,LAST_BYTE)!=I2C_ACK)	// write Last Byte to eeprom_adr
+				{
+					return (-1);
+				}
+				// wait till data is written into EEPROM (max. 5ms per Page)
+				for(timeout=50; (I2C_start(I2C_MASTER_0_BASE,(chip_adr),WRITE)==I2C_NOACK);)
+				{
+					if(!--timeout) return (-1);
+				}
+				return 0;
+			}
+		}
+	}
+	return (-1);
+}
+

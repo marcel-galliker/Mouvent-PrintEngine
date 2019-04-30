@@ -248,6 +248,7 @@ int tx801_menu(void)
 	term_printf("u: move to UP position\n");
 	term_printf("p: move to print\n");
 	term_printf("z: move by <steps>\n");
+	term_printf("v: set ventilator (%)\n");	
 	term_printf("m<n><steps>: move Motor<n> by <steps>\n");	
 	term_printf("x: exit\n");
 	term_printf(">");
@@ -257,14 +258,15 @@ int tx801_menu(void)
 	{
 		switch (str[0])
 		{
-		case 's': tx801_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_STOP,			NULL); break;
-		case 'R': tx801_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_REFERENCE,	NULL); break;
-		case 'r': motor_reset(atoi(&str[1])); break;
-		case 'c': tx801_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_CAPPING_POS,	NULL); break;
-		case 'p': tx801_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_PRINT_POS,	&pos); break;
-		case 'u': tx801_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_UP_POS,		NULL); break;
-		case 'z': _tx801_motor_z_test(atoi(&str[1]));break;
-		case 'm': _tx801_motor_test(str[1]-'0', atoi(&str[2]));break;			
+		case 's': tx801_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_STOP,			NULL);	break;
+		case 'R': tx801_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_REFERENCE,		NULL);	break;
+		case 'r': motor_reset(atoi(&str[1]));											break;
+		case 'c': tx801_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_CAPPING_POS,	NULL);	break;
+		case 'p': tx801_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_PRINT_POS,		&pos);	break;
+		case 'u': tx801_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_UP_POS,			NULL);	break;
+		case 'z': _tx801_motor_z_test(atoi(&str[1]));									break;
+		case 'm': _tx801_motor_test(str[1]-'0', atoi(&str[2]));							break;			
+		case 'v': _tx801_set_ventilators(atoi(&str[1]));								break;
 		case 'x': return FALSE;
 		}
 	}
@@ -312,20 +314,22 @@ static void _tx801_move_to_pos(int cmd, int pos)
 //--- _tx801_set_ventilators ---------------------------------------------------------
 static void _tx801_set_ventilators(int value)
 {
-	Error(LOG, 0, "Set Ventilators to %d", value);
-
+	Error(LOG, 0, "Set Ventilators to %d%%", value);
+	
+	if(value<100) value=(0x10000 * value) / 100;
+	else value=0x10000-1;
 	int i;
-	for (i=0; i<4; i++) Fpga.par->pwm_output[i] = value;
+	for (i=0; i<6; i++) Fpga.par->pwm_output[i] = value;
 }
 
 //--- tx801_handle_ctrl_msg -----------------------------------
 int  tx801_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 {	
-	INT32 pos, steps;
+	INT32 pos, steps, voltage;
 		
 	switch(msgId)
 	{
-	case CMD_TT_STATUS:				sok_send_2(&socket, INADDR_ANY, REP_TT_STATUS, sizeof(RX_TestTableStatus), &RX_TestTableStatus);	
+	case CMD_TT_STATUS:				sok_send_2(&socket, REP_TT_STATUS, sizeof(RX_TestTableStatus), &RX_TestTableStatus);	
 									break;
 		
 	case CMD_CAP_STOP:				motors_stop(MOTOR_Z_BITS);
@@ -372,8 +376,8 @@ int  tx801_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									}
 									break;
 		
-	case CMD_CAP_VENT:				pos   = (*((INT32*)pdata));
-									_tx801_set_ventilators(pos);				
+	case CMD_CAP_VENT:				voltage = (*((INT32*)pdata));
+									_tx801_set_ventilators(voltage);				
 									break;
 		
 	default:						break;

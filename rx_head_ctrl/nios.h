@@ -26,7 +26,7 @@ int  nios_main(int ticks, int menu);
 void nios_check_errors(void);
 void nios_error_reset(void);
 
-void nios_setInk(int headNo, SInkDefinition *pink, int maxDropSize, int fpVoltage);
+void nios_setInk(int headNo, SInkDefinition *pink, char *dots, int fpVoltage);
 void nios_set_firepulse_on(int on);
 int  nios_is_firepulse_on(void);
 

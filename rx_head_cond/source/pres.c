@@ -37,7 +37,7 @@ typedef struct
 	set_power_fct 	set_power;
 	INT32			*pPressure;
 	INT32			offset_factory;
-	INT32			offset_user;
+//	INT32			offset_user;
 	INT32			valFactor;
     INT32			buf[BUF_SIZE];
 	int				buf_idx;       
@@ -59,6 +59,7 @@ typedef struct
 static  SSensor	_PressureIn;
 static  SSensor	_PressureOut;
 
+UINT16 _PresInOffset=1234;
 
 //--- prototypes ------------------------
 
@@ -78,10 +79,10 @@ void pres_init(void)
    *_PressureOut.pPressure 		= INVALID_VALUE;
     _PressureOut.EE_ADDR_FACTORY = EE_ADDR_POUT_FACTORY_OFFSET;
     _PressureOut.EE_ADDR_USER    = EE_ADDR_POUT_USER_OFFSET;
-    *_PressureOut.pPressure      = INVALID_VALUE;
+   
 	_sensor_reset(&_PressureOut);
-	eeprom_read_setting16(_PressureOut.EE_ADDR_FACTORY, (UINT16*)&_PressureOut.offset_factory);
-	eeprom_read_setting16(_PressureOut.EE_ADDR_USER, 	(UINT16*)&_PressureOut.offset_user);
+	eeprom_read_setting16(_PressureOut.EE_ADDR_FACTORY, &_PressureOut.offset_factory);
+//	eeprom_read_setting16(_PressureOut.EE_ADDR_USER, 	&_PressureOut.offset_user);
 
 	memset(&_PressureIn, 0, sizeof(_PressureIn));
 	_PressureIn.pi2c 	  		= (stc_mfsn_t*)FM4_MFS3_BASE;
@@ -94,8 +95,10 @@ void pres_init(void)
     _PressureIn.EE_ADDR_USER    = EE_ADDR_PIN_USER_OFFSET;
     *_PressureIn.pPressure      = INVALID_VALUE;
 	_sensor_reset(&_PressureIn);
-	eeprom_read_setting16(_PressureOut.EE_ADDR_FACTORY, (UINT16*)&_PressureIn.offset_factory);
-	eeprom_read_setting16(_PressureOut.EE_ADDR_USER, 	(UINT16*)&_PressureIn.offset_user);
+	eeprom_read_setting16(_PressureIn.EE_ADDR_FACTORY, &_PressureIn.offset_factory);
+//	eeprom_read_setting16(_PressureIn.EE_ADDR_USER,    &_PressureIn.offset_user);
+	
+	_PresInOffset = _PressureIn.offset_factory;
 }
 
 //--- _PresIn_power ---------------------
@@ -202,16 +205,22 @@ static void _sensor_read(SSensor *s)
 						s->offset_factory = pressure; 
 						eeprom_write_setting16(s->EE_ADDR_FACTORY, s->offset_factory);
 					#else
+						/*
 						s->offset_user = pressure; 
 						eeprom_write_setting16(s->EE_ADDR_USER, s->offset_user);
+						*/
 					#endif
 					s->calibrating = FALSE;
 				}					
 
 				//--- convert value --------------
-				
-				if (s->offset_user) 		offset = s->offset_user;
-				else if (s->offset_factory)	offset = s->offset_factory;
+				/*
+				if (s->offset_user) 		
+					offset = s->offset_user;
+				else 
+				*/
+				if (s->offset_factory)	
+					offset = ZERO_PRESSURE_OFFSET-s->offset_factory;
 				else
 				{					
 					RX_Status.error |= COND_ERR_sensor_offset;
@@ -227,10 +236,12 @@ static void _sensor_read(SSensor *s)
 //--- pres_del_user_offset -----------------------
 void pres_del_user_offset(void)
 {
+	/*
 	_PressureIn.offset_user  = 0;
 	_PressureOut.offset_user = 0;
 	eeprom_write_setting32(EE_ADDR_PIN_USER_OFFSET,  _PressureIn.offset_user);
 	eeprom_write_setting32(EE_ADDR_POUT_USER_OFFSET, _PressureOut.offset_user);
+	*/
 }
 
 //--- pres_calibration_start ---------------------------

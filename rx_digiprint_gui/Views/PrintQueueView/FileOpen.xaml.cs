@@ -239,7 +239,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
                 
                     pq.FilePath = item.FileName;
                     pq.read_image_properties(item.FileName);
-                    pq.LoadDefaults(false);
+                    pq.LoadDefaults();
 
                     pq.SendMsg(TcpIp.CMD_ADD_PRINT_QUEUE);
                 }
@@ -253,6 +253,19 @@ namespace RX_DigiPrint.Views.PrintQueueView
                 Properties.Settings.Default.Save();
 
                 Visibility = Visibility.Hidden;
+            }
+        }
+
+        //--- _item_delete ------------------------------------------------------
+        private void _item_delete(DirItem item)
+        {
+            string[] name=item.FileName.Split('\\');
+            if (name.Length>1 && RxMessageBox.YesNo("Delete", String.Format("Delete {0}?", name[name.Length-1]),  MessageBoxImage.Question, false))
+            {
+                PrintQueueItem pq = new PrintQueueItem();     
+                pq.FilePath = item.FileName;
+                pq.SendMsg(TcpIp.CMD_DEL_FILE);
+                _dir.Remove(item);
             }
         }
 
@@ -323,6 +336,14 @@ namespace RX_DigiPrint.Views.PrintQueueView
             _item_clicked(item);
         }
 
+        //--- Delete_Clicked ------------------------------------
+        private void Delete_Clicked(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            DirItem item = button.DataContext as DirItem;
+            _item_delete(item);
+        }
+
         //---- DirGrid_SelectedRowsCollectionChanged -----------------------------------
         private void DirGrid_SelectedRowsCollectionChanged(object sender, SelectionCollectionChangedEventArgs<SelectedRowsCollection> e)
         {
@@ -330,12 +351,20 @@ namespace RX_DigiPrint.Views.PrintQueueView
             {
                 DirItem item=row.Data as DirItem;
                 Console.WriteLine("Selection Changed: new={0}", row.Index);
-                if (item!=null) item.PrintButtonVisibility = Visibility.Hidden;
+                if (item!=null)
+                {
+                    item.PrintButtonVisibility  = Visibility.Hidden;
+                    item.DeleteButtonVisibility = Visibility.Collapsed;
+                }
             }
             foreach(var row in e.NewSelectedItems)
             {
                 DirItem item=row.Data as DirItem;
-                if (item!=null && !item.IsDirectory) item.PrintButtonVisibility = Visibility.Visible;
+                if (item!=null && !item.IsDirectory)
+                {
+                    item.PrintButtonVisibility  = Visibility.Visible;
+                    item.DeleteButtonVisibility = (RxGlobals.User.UserType>=EUserType.usr_supervisor) ? Visibility.Visible : Visibility.Collapsed;
+                }
             }
         }
 

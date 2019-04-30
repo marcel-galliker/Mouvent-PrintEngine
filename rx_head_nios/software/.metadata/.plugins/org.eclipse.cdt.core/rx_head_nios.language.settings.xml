@@ -14,7 +14,7 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="F:/Develop/RX-Project/rx_ink_lib"/>
+						<entry kind="includePath" name="C:/Develop/RX-Project/rx_ink_lib"/>
 						<entry kind="macro" name="ALTERA_AVALON_JTAG_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALTERA_AVALON_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALT_NO_CLEAN_EXIT" value=""/>
@@ -366,7 +366,7 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="F:/Develop/RX-Project/rx_ink_lib"/>
+						<entry kind="includePath" name="C:/Develop/RX-Project/rx_ink_lib"/>
 						<entry kind="macro" name="ALTERA_AVALON_JTAG_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALTERA_AVALON_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALT_NO_CLEAN_EXIT" value=""/>
@@ -802,7 +802,7 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="F:/Develop/RX-Project/rx_ink_lib"/>
+						<entry kind="includePath" name="C:/Develop/RX-Project/rx_ink_lib"/>
 						<entry kind="macro" name="ALTERA_AVALON_JTAG_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALTERA_AVALON_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALT_NO_CLEAN_EXIT" value=""/>
@@ -906,7 +906,7 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="F:/Develop/RX-Project/rx_ink_lib"/>
+						<entry kind="includePath" name="C:/Develop/RX-Project/rx_ink_lib"/>
 						<entry kind="macro" name="ALTERA_AVALON_JTAG_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALTERA_AVALON_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALT_NO_CLEAN_EXIT" value=""/>
@@ -930,7 +930,7 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="F:/Develop/RX-Project/rx_ink_lib"/>
+						<entry kind="includePath" name="C:/Develop/RX-Project/rx_ink_lib"/>
 						<entry kind="macro" name="ALTERA_AVALON_JTAG_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALTERA_AVALON_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALT_NO_CLEAN_EXIT" value=""/>
@@ -1054,7 +1054,7 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="F:/Develop/RX-Project/rx_ink_lib"/>
+						<entry kind="includePath" name="C:/Develop/RX-Project/rx_ink_lib"/>
 						<entry kind="macro" name="ALTERA_AVALON_JTAG_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALTERA_AVALON_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALT_NO_CLEAN_EXIT" value=""/>
@@ -1178,7 +1178,7 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="F:/Develop/RX-Project/rx_ink_lib"/>
+						<entry kind="includePath" name="C:/Develop/RX-Project/rx_ink_lib"/>
 						<entry kind="macro" name="ALTERA_AVALON_JTAG_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALTERA_AVALON_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALT_NO_CLEAN_EXIT" value=""/>
@@ -1482,7 +1482,7 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="F:/Develop/RX-Project/rx_ink_lib"/>
+						<entry kind="includePath" name="C:/Develop/RX-Project/rx_ink_lib"/>
 						<entry kind="macro" name="ALTERA_AVALON_JTAG_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALTERA_AVALON_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALT_NO_CLEAN_EXIT" value=""/>
@@ -1714,7 +1714,7 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="F:/Develop/RX-Project/rx_ink_lib"/>
+						<entry kind="includePath" name="C:/Develop/RX-Project/rx_ink_lib"/>
 						<entry kind="macro" name="ALTERA_AVALON_JTAG_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALTERA_AVALON_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALT_NO_CLEAN_EXIT" value=""/>
@@ -1778,7 +1778,7 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="F:/Develop/RX-Project/rx_ink_lib"/>
+						<entry kind="includePath" name="C:/Develop/RX-Project/rx_ink_lib"/>
 						<entry kind="macro" name="ALTERA_AVALON_JTAG_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALTERA_AVALON_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALT_NO_CLEAN_EXIT" value=""/>
@@ -2114,7 +2114,7 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="F:/Develop/RX-Project/rx_ink_lib"/>
+						<entry kind="includePath" name="C:/Develop/RX-Project/rx_ink_lib"/>
 						<entry kind="macro" name="ALTERA_AVALON_JTAG_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALTERA_AVALON_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALT_NO_CLEAN_EXIT" value=""/>
@@ -2158,7 +2158,7 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="F:/Develop/RX-Project/rx_ink_lib"/>
+						<entry kind="includePath" name="C:/Develop/RX-Project/rx_ink_lib"/>
 						<entry kind="macro" name="ALTERA_AVALON_JTAG_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALTERA_AVALON_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALT_NO_CLEAN_EXIT" value=""/>

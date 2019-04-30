@@ -42,7 +42,6 @@
 
 static int				_step_ThreadRunning;
 static RX_SOCKET		_step_Socket[STEPPER_CNT];
-static UINT32			_step_IpAddr[STEPPER_CNT];
 static int				_StepperType=STEPPER_STD;
 static SPrintQueueItem	_PQItem;
 	
@@ -63,7 +62,6 @@ int	 step_init(void)
 	for (i=0; i<SIZEOF(_step_Socket); i++)
 	{
 		_step_Socket[i]=INVALID_SOCKET;
-		_step_IpAddr[i]=0;
 	}
 	rx_thread_start(_step_thread, NULL, 0, "PLC Thread");
 	return REPLY_OK;
@@ -86,7 +84,7 @@ void step_tick(void)
 		if (_step_Socket[i]!=INVALID_SOCKET) 
 		{
 			net_device_to_ipaddr(dev_stepper, i, addr, sizeof(addr));
-			sok_send_2(&_step_Socket[i], _step_IpAddr[i], CMD_TT_STATUS, 0, NULL);			
+			sok_send_2(&_step_Socket[i], CMD_TT_STATUS, 0, NULL);			
 		}
 	}	
 }
@@ -103,7 +101,6 @@ static void* _step_thread(void *par)
 			if (_step_Socket[i]==INVALID_SOCKET && net_port_listening(dev_stepper, i, PORT_CTRL_STEPPER))
 			{
 				net_device_to_ipaddr(dev_stepper, i, addr, sizeof(addr));
-				_step_IpAddr[i] = sok_addr_32(addr); 
 				if (sok_open_client_2(&_step_Socket[i], addr, PORT_CTRL_STEPPER, SOCK_STREAM, _step_handle_msg, _setp_socket_closed)== REPLY_OK)
 				{
 					_step_set_config(i);
@@ -252,15 +249,19 @@ int	 step_do_test(SStepperMotorTest *pmsg)
 	int no = pmsg->boardNo;
 	if (no>=0 && no<STEPPER_CNT && _step_Socket[no]!=INVALID_SOCKET)
 	{
-		sok_send_2(&_step_Socket[no], _step_IpAddr[no], CMD_STEPPER_TEST, sizeof(*pmsg), pmsg);
+		sok_send_2(&_step_Socket[no], CMD_STEPPER_TEST, sizeof(*pmsg), pmsg);
 	}
 	return REPLY_OK;
 }
 
 //--- step_set_vent -------------------------------------------------------
-void step_set_vent(int value)
+int step_set_vent(int speed)
 {
-				
+	INT32 value;
+	if(speed) value=60;
+	else      value=0;
+	sok_send_2(&_step_Socket[0], CMD_CAP_VENT, sizeof(value), &value);
+	return REPLY_OK;			
 }
 
 //--- step_handle_gui_msg------------------------------------------------------------------
@@ -293,14 +294,14 @@ static void _step_set_config(int no)
 	}
 	switch(_StepperType)
 	{
-	case STEPPER_CLEAF:	stepc_init		(no, &_step_Socket[no], _step_IpAddr[no]); cfg.boardNo = no; break;
-	case STEPPER_TX:	steptx_init		(no, &_step_Socket[no], _step_IpAddr[no]); cfg.boardNo = no; break;
-	case STEPPER_LB:	steplb_init		(no, &_step_Socket[no], _step_IpAddr[no]);				     break;
-	case STEPPER_TEST:	steptest_init	(no, &_step_Socket[no], _step_IpAddr[no]); cfg.boardNo = no; break;
-	default: 			steps_init		(    &_step_Socket[0],  _step_IpAddr[0]);
+	case STEPPER_CLEAF:	stepc_init		(no, &_step_Socket[no]); cfg.boardNo = no; break;
+	case STEPPER_TX:	steptx_init		(no, &_step_Socket[no]); cfg.boardNo = no; break;
+	case STEPPER_LB:	steplb_init		(no, &_step_Socket[no]);				     break;
+	case STEPPER_TEST:	steptest_init	(no, &_step_Socket[no]); cfg.boardNo = no; break;
+	default: 			steps_init		(    &_step_Socket[0]);
 	}
 
-	sok_send_2(&_step_Socket[no], _step_IpAddr[no], CMD_STEPPER_CFG, sizeof(cfg), &cfg);
+	sok_send_2(&_step_Socket[no], CMD_STEPPER_CFG, sizeof(cfg), &cfg);
 }
 
 //--- step_set_config -------------------------------------------------
@@ -369,7 +370,7 @@ int  tt_start_printing(void)
 		if (RX_TestImage.testImage==PQ_TEST_JETS || RX_TestImage.testImage==PQ_TEST_ENCODER) par.yStep  += 2500;
 	}
 	
-	sok_send_2(&_step_Socket[0], _step_IpAddr[0], CMD_TT_SCAN, sizeof(par), &par);
+	sok_send_2(&_step_Socket[0], CMD_TT_SCAN, sizeof(par), &par);
 	
 	return REPLY_OK;
 }
@@ -392,7 +393,7 @@ int  tt_stop_printing(void)
 int  tt_abort_printing(void)
 {
 	enc_stop_printing();
-	sok_send_2(&_step_Socket[0], _step_IpAddr[0], CMD_TT_ABORT, 0, NULL);
+	sok_send_2(&_step_Socket[0], CMD_TT_ABORT, 0, NULL);
 	steps_set_curing(FALSE);
 	return REPLY_OK;	
 }	
@@ -406,11 +407,11 @@ int  tt_clean(void)
 //--- step_error_reset ----------------------------------------
 void step_error_reset(void)
 {
-	sok_send_2(&_step_Socket[0], _step_IpAddr[0], CMD_ERROR_RESET, 0, NULL);
+	sok_send_2(&_step_Socket[0], CMD_ERROR_RESET, 0, NULL);
 	switch (RX_Config.printer.type)
 	{
 	case printer_cleaf: stepc_error_reset();
-						sok_send_2(&_step_Socket[1], _step_IpAddr[1], CMD_ERROR_RESET, 0, NULL); 
+						sok_send_2(&_step_Socket[1], CMD_ERROR_RESET, 0, NULL); 
 						break;
 	default:			break;
 	}

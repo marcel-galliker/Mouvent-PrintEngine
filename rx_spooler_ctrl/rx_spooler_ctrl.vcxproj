@@ -410,6 +410,7 @@ copy "$(OutDir)$(TargetName)$(TargetExt)" "d:\Radex\bin\spooler\win\"</Command>
     <ClInclude Include="data_client.h" />
     <ClInclude Include="gcc_Debug.h" />
     <ClInclude Include="gcc_Release.h" />
+    <ClInclude Include="jet_correction.h" />
     <ClInclude Include="rx_flz.h" />
     <ClInclude Include="spool_arp.h" />
     <ClInclude Include="test.h" />
@@ -423,6 +424,7 @@ copy "$(OutDir)$(TargetName)$(TargetExt)" "d:\Radex\bin\spooler\win\"</Command>
     <ClCompile Include="ctrl_client.c" />
     <ClCompile Include="data.c" />
     <ClCompile Include="head_client.c" />
+    <ClCompile Include="jet_correction.c" />
     <ClCompile Include="rx_flz.c" />
     <ClCompile Include="rx_spooler_ctrl.c" />
     <ClCompile Include="spool_rip.c" />

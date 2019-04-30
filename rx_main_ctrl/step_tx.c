@@ -28,7 +28,6 @@
 #define trace FALSE
 
 static RX_SOCKET *_step_socket[2]={NULL, NULL};
-static UINT32	  _step_ipaddr[2]={0,0};
 
 static int _lift_pos = 0;
 static int _clean_pos = 0;
@@ -150,10 +149,9 @@ static int  _do_turn_screw(SHeadAdjustment *pHeadAdjust); // or _do_adjust_head
 
 
 //--- steptx_init ---------------------------------------------------
-void steptx_init(int stepperNo, RX_SOCKET *psocket, UINT32 ipaddr)
+void steptx_init(int stepperNo, RX_SOCKET *psocket)
 {
 	_step_socket[stepperNo] = psocket;
-	_step_ipaddr[stepperNo] = ipaddr;
 	_ErrorFlags = 0;
 }
 
@@ -178,7 +176,7 @@ int	 steptx_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen
 	case CMD_TT_SCAN_RIGHT:
 	case CMD_TT_SCAN_LEFT:
 	case CMD_TT_VACUUM:
-				sok_send_2(_step_socket[0], _step_ipaddr[0], cmd, 0, NULL);
+				sok_send_2(_step_socket[0], cmd, 0, NULL);
 				break;
 
 	case CMD_TT_SCAN:
@@ -189,7 +187,7 @@ int	 steptx_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen
 					par.scanMode= PQ_SCAN_STD;
 					par.yStep   = 10000;
 
-					sok_send_2(_step_socket[0], _step_ipaddr[0], CMD_TT_SCAN, sizeof(par), &par);
+					sok_send_2(_step_socket[0], CMD_TT_SCAN, sizeof(par), &par);
 				}
 				break;
 
@@ -337,7 +335,7 @@ static void _do_tt_status(STestTableStat *pStatus)
 	// --- Stop State Machine ---
 	if (_st_cmd == CMD_CAP_STOP)
 	{
-		sok_send_2(_step_socket[0], _step_ipaddr[0], CMD_CAP_STOP, 0, NULL);
+		sok_send_2(_step_socket[0], CMD_CAP_STOP, 0, NULL);
 		_st_cmd = FALSE;
 		if (RX_TestTableStatus.info.ref_done == TRUE) // do not go to Idle if not once referenced
 		{
@@ -354,8 +352,8 @@ static void _do_tt_status(STestTableStat *pStatus)
 	// --- Reference State Machine ---
 	if (_st_cmd == CMD_CAP_REFERENCE)
 	{
-		sok_send_2(_step_socket[0], _step_ipaddr[0], CMD_CAP_STOP, 0, NULL);
-		sok_send_2(_step_socket[1], _step_ipaddr[1], CMD_CLN_STOP, 0, NULL);
+		sok_send_2(_step_socket[0], CMD_CAP_STOP, 0, NULL);
+		sok_send_2(_step_socket[1], CMD_CLN_STOP, 0, NULL);
 		_capCurrentState = ST_INIT;
 		printf("Reference State Machine \n");
 	}
@@ -381,7 +379,7 @@ static void _do_tt_status(STestTableStat *pStatus)
 		{
 			_st_cmd = FALSE;
 			}
-			sok_send_2(_step_socket[0], _step_ipaddr[0], CMD_CAP_REFERENCE, 0, NULL); // ref Lift
+			sok_send_2(_step_socket[0], CMD_CAP_REFERENCE, 0, NULL); // ref Lift
 			printf("state %d REFERENCE lift\n", _capCurrentState);
 			_capCurrentState = ST_REF_LIFT;
 		}
@@ -393,7 +391,7 @@ static void _do_tt_status(STestTableStat *pStatus)
 			_slide_enable = TRUE;
 			if (trace) Error(LOG, 0, "Flag: SLIDE enable");
 			//_lift_move_tgl = RX_TestTableStatus.info.move_tgl;
-			//sok_send_2(_step_socket[0], _step_ipaddr[0], CMD_CAP_MECH_ADJUST, 0, NULL); // Lift ref to mech
+			//sok_send_2(_step_socket[0], CMD_CAP_MECH_ADJUST, 0, NULL); // Lift ref to mech
 			_capCurrentState = ST_REF_CLEAN;
 		}
 		break;
@@ -424,7 +422,7 @@ static void _do_tt_status(STestTableStat *pStatus)
 			_clean_pos = positions.capping.pos_cln;
 			if ((abs(RX_TestTableStatus.posZ - _lift_pos) <= 10) && (abs(RX_ClnStatus.posZ - _clean_pos) <= 10)) break;  // check for Head position
 			printf("start capping \n");
-			sok_send_2(_step_socket[0], _step_ipaddr[0], CMD_CAP_PRINT_POS, sizeof(_reset_pos), &_reset_pos); // Lift up to zero position
+			sok_send_2(_step_socket[0], CMD_CAP_PRINT_POS, sizeof(_reset_pos), &_reset_pos); // Lift up to zero position
 			_capCurrentState = ST_PRE_MOVE_POS;
 		}
 		if (_st_cmd == CMD_CAP_PRINT_POS)
@@ -439,7 +437,7 @@ static void _do_tt_status(STestTableStat *pStatus)
 			
 			if (RX_TestTableStatus.info.ref_done == TRUE)
 			{
-				sok_send_2(_step_socket[0], _step_ipaddr[0], CMD_CAP_PRINT_POS, sizeof(_lift_pos), &_lift_pos); // Lift move to position
+				sok_send_2(_step_socket[0], CMD_CAP_PRINT_POS, sizeof(_lift_pos), &_lift_pos); // Lift move to position
 				_capCurrentState = ST_LIFT_MOVE_POS;
 			}
 			else
@@ -456,7 +454,7 @@ static void _do_tt_status(STestTableStat *pStatus)
 			_clean_pos = positions.reset.pos_cln;
 			if ((abs(RX_TestTableStatus.posZ - _lift_pos) <= 10) ) break;
 			printf("web up to reference \n");
-			sok_send_2(_step_socket[0], _step_ipaddr[0], CMD_CAP_UP_POS, 0, NULL); // Lift up to zero position
+			sok_send_2(_step_socket[0], CMD_CAP_UP_POS, 0, NULL); // Lift up to zero position
 			_capCurrentState = ST_LIFT_UP;
 		}
 		if (_st_cmd == CMD_CLN_WIPE)
@@ -471,7 +469,7 @@ static void _do_tt_status(STestTableStat *pStatus)
 			if (trace) Error(LOG, 0, "ctrl_start_wipe _clean_wipe_pos=%d", _clean_wipe_pos);
 			if ((_clean_wipe_pos < CLN_POS_END_WIPE) || (_clean_pos < CLN_POS_END_WIPE)) break; // printf("desired wipe wipes longer than POS_END_WIPE, cancel wiping"); 
 			printf("start wiping \n");
-			sok_send_2(_step_socket[0], _step_ipaddr[0], CMD_CAP_PRINT_POS, sizeof(_reset_pos), &_reset_pos);	// Lift up to zero position
+			sok_send_2(_step_socket[0], CMD_CAP_PRINT_POS, sizeof(_reset_pos), &_reset_pos);	// Lift up to zero position
 			//ctrl_send_head_fluidCtrlMode(_clean_wipe_head_nr, ctrl_purge_step3, TRUE); // set fluid to print
 			_capCurrentState = ST_PRE_MOVE_POS;
 		}
@@ -491,7 +489,7 @@ static void _do_tt_status(STestTableStat *pStatus)
 				}
 				else
 				{
-				sok_send_2(_step_socket[0], _step_ipaddr[0], CMD_CAP_PRINT_POS, sizeof(_reset_pos), &_reset_pos);	// Lift up to zero position
+				sok_send_2(_step_socket[0], CMD_CAP_PRINT_POS, sizeof(_reset_pos), &_reset_pos);	// Lift up to zero position
 				_capCurrentState = ST_PRE_MOVE_POS;
 			}
 		}
@@ -541,7 +539,7 @@ static void _do_tt_status(STestTableStat *pStatus)
 				_clean_wipe_head_nr = 0;
 				_flag_wipe_done = TRUE;
 				if (trace) Error(LOG, 0, "Flag: WIPE DONE enable");
-				sok_send_2(_step_socket[0], _step_ipaddr[0], CMD_CAP_PRINT_POS, sizeof(_reset_pos), &_reset_pos);
+				sok_send_2(_step_socket[0], CMD_CAP_PRINT_POS, sizeof(_reset_pos), &_reset_pos);
 				_lift_move_tgl = RX_TestTableStatus.info.move_tgl;
 				_capCurrentState = ST_LAST_LIFT;
 			}
@@ -553,7 +551,7 @@ static void _do_tt_status(STestTableStat *pStatus)
 				printf("state %d in purge position, move lift now down \n", _capCurrentState);
 				//sok_send_2(_step_socket[0], CMD_CAP_PRINT_POS, sizeof(_lift_pos), &_lift_pos); // Lift move to position
 				//sok_send_2(_step_socket[0], CMD_CAP_CAPPING_POS, 0, NULL); // Lift move to position
-				sok_send_2(_step_socket[0], _step_ipaddr[0], CMD_CAP_PRINT_POS, sizeof(_lift_pos), &_lift_pos); // Lift move to position
+				sok_send_2(_step_socket[0], CMD_CAP_PRINT_POS, sizeof(_lift_pos), &_lift_pos); // Lift move to position
 				//_capCurrentState = ST_LIFT_MOVE_POS; // no movement of cleaning station
 				_capCurrentState = ST_CLEAN_MOVE_POS; // with cleaning station movement
 				_lift_move_tgl = RX_TestTableStatus.info.move_tgl;
@@ -588,7 +586,7 @@ static void _do_tt_status(STestTableStat *pStatus)
 						printf("state %d do lift to capping now\n", _capCurrentState);
 						//sok_send_2(_step_socket[0], CMD_CAP_PRINT_POS, sizeof(_lift_pos), &_lift_pos); // Lift move to position
 					int move = _lift_pos + LIFT_CAP_SECURITY_DELTA; //  -(RX_Config.stepper.cap_height - LIFT_CAP_SECURITY_DELTA - RX_Config.stepper.ref_height); 
-						sok_send_2(_step_socket[0], _step_ipaddr[0], CMD_CAP_PRINT_POS, sizeof(move), &move);
+						sok_send_2(_step_socket[0], CMD_CAP_PRINT_POS, sizeof(move), &move);
 					//sok_send_2(_step_socket[0], CMD_CAP_PRINT_POS, sizeof(move), &move);
 					//}
 					//else
@@ -603,7 +601,7 @@ static void _do_tt_status(STestTableStat *pStatus)
 						_lift_move_tgl = RX_TestTableStatus.info.move_tgl;
 						_capCurrentState = ST_LIFT_MOVE_POS;
 						printf("state %d do lift to printing now\n", _capCurrentState);
-						sok_send_2(_step_socket[0], _step_ipaddr[0], CMD_CAP_PRINT_POS, sizeof(_lift_pos), &_lift_pos); // Lift move to position
+						sok_send_2(_step_socket[0], CMD_CAP_PRINT_POS, sizeof(_lift_pos), &_lift_pos); // Lift move to position
 					}
 					else
 					{
@@ -611,7 +609,7 @@ static void _do_tt_status(STestTableStat *pStatus)
 					_lift_move_tgl = RX_TestTableStatus.info.move_tgl;
 					_capCurrentState = ST_LIFT_MOVE_POS;
 					printf("state %d do lift move now\n", _capCurrentState);
-					sok_send_2(_step_socket[0], _step_ipaddr[0], CMD_CAP_PRINT_POS, sizeof(_lift_pos), &_lift_pos); // Lift move to position
+					sok_send_2(_step_socket[0], CMD_CAP_PRINT_POS, sizeof(_lift_pos), &_lift_pos); // Lift move to position
 				}
 		break;
 		
@@ -625,7 +623,7 @@ static void _do_tt_status(STestTableStat *pStatus)
 				{
 					printf("state %d ST_LIFT_MOVE_POS capping ok\n", _capCurrentState);
 					_lift_move_tgl = RX_TestTableStatus.info.move_tgl;
-					sok_send_2(_step_socket[0], _step_ipaddr[0], CMD_CAP_CAPPING_POS, 0, NULL); // Lift move to capping
+					sok_send_2(_step_socket[0], CMD_CAP_CAPPING_POS, 0, NULL); // Lift move to capping
 					// execute capping ?
 					// sok_send_2(_step_socket[step_lift], CMD_CAP_CAPPING_POS, 0, NULL); // Lift execute capping
 					_capCurrentState = ST_LIFT_CAPPING;
@@ -708,7 +706,7 @@ static int _do_turn_screw(SHeadAdjustment *pHeadAdjust)
 //	printf("Value cap_height	= %d \n", cfg.cap_height);
 //	printf("Value cap_pos		= %d \n", cfg.cap_pos);
 //
-//	sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_STEPPER_CFG, sizeof(cfg), &cfg);
+//	sok_send_2(_step_socket[no], CMD_STEPPER_CFG, sizeof(cfg), &cfg);
 //}
 
 // RX_Config.stepper.cap_height
@@ -813,10 +811,12 @@ int	 steptx_wipe_done(void)
 //--- steptx_set_vent -----------------------------------------------
 void steptx_set_vent(int speed)
 { 
+	Error(LOG, 0, "steptx_set_vent(%d)", speed);
+
 	INT32 value;
-	if(speed) value=100;
+	if(speed) value=60;
 	else      value=0;
-	sok_send_2(_step_socket[0], _step_ipaddr[0], CMD_CAP_VENT, sizeof(value), &value);
+	sok_send_2(_step_socket[0], CMD_CAP_VENT, sizeof(value), &value);
 }
 
 ////--- steptx_purge_ok --------------------------------------------

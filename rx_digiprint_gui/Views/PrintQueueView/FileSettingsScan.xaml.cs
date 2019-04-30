@@ -77,7 +77,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
             {
                 item.PrintGoMode = TcpIp.EPrintGoMode.PG_MODE_GAP;
                 item.SendMsg(TcpIp.CMD_SET_PRINT_QUEUE);
-                item.SaveDefaults(false);
+                item.SaveDefaults();
             }
         }
 

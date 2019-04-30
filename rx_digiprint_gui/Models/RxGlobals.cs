@@ -33,6 +33,7 @@ namespace RX_DigiPrint.Models
         public static TestTableStatus   TestTableStatus   = new TestTableStatus();
         public static Plc               Plc               = new Plc();
         public static Chiller           Chiller           = new Chiller();
+        public static Encoder           Encoder           = new Encoder();
         public static NetworkList       Network           = new NetworkList();
         public static RxScreen          Screen            = new RxScreen();
         public static PreviewCash       PreviewCash       = new PreviewCash();

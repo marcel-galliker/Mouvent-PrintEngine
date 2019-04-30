@@ -8,9 +8,12 @@
 #ifndef HEAD_EEPROM_H_
 #define HEAD_EEPROM_H_
 
-int read_eeprom(alt_u8 * eeprom_data, char chip_adr, char eeprom_adr);
 int head_eeprom_read(void);
-
+// int head_eeprom_read_seq(void);
+int head_eeprom_read_user_data(alt_u32 head, alt_u8 * eeprom_data, alt_u32 number_of_byte_to_read, alt_u32 addr);
+// int head_eeprom_write_user_data(alt_u32 head, alt_u8 * eeprom_data, alt_u32 number_of_byte_to_write, alt_u32 addr);
+int head_eeprom_write_user_data(alt_u32 head, alt_u8 * eeprom_data, alt_u32 number_of_byte_to_write, alt_u32 addr);
+int head_eeprom_change_user_data(alt_u32 head, alt_u8 *act_data, alt_u8 * new_data, alt_u32 number_of_byte_to_write, alt_u32 addr);
 
 
 #endif /* HEAD_EEPROM_H_ */

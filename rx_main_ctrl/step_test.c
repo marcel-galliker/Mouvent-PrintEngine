@@ -26,16 +26,14 @@
 #define STEPPER_CNT		4
 
 static RX_SOCKET		*_step_socket[STEPPER_CNT]={0};
-static UINT32			_step_ipaddr[STEPPER_CNT]={0};
 static STestTableStat	_status[STEPPER_CNT];
 
 //--- steptest_init ---------------------------------------------------
-void steptest_init(int no, RX_SOCKET *psocket, UINT32 ipaddr)
+void steptest_init(int no, RX_SOCKET *psocket)
 {
 	if (no>=0 && no<STEPPER_CNT)
 	{
 		_step_socket[no] = psocket;
-		_step_ipaddr[no] = ipaddr;
 	}
 	memset(_status, 0, sizeof(_status));
 }
@@ -60,7 +58,7 @@ int	 steptest_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataL
 			case CMD_TT_SCAN_RIGHT:
 			case CMD_TT_SCAN_LEFT:
 			case CMD_TT_VACUUM:
-						sok_send_2(_step_socket[no], _step_ipaddr[no], cmd, 0, NULL);
+						sok_send_2(_step_socket[no], cmd, 0, NULL);
 						break;
 
 			case CMD_TT_SCAN:
@@ -71,7 +69,7 @@ int	 steptest_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataL
 							par.scanMode= PQ_SCAN_STD;
 							par.yStep   = 10000;
 
-							sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_TT_SCAN, sizeof(par), &par);
+							sok_send_2(_step_socket[no], CMD_TT_SCAN, sizeof(par), &par);
 						}
 						break;
 
@@ -80,11 +78,11 @@ int	 steptest_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataL
 			case CMD_CAP_REFERENCE:
 			case CMD_CAP_UP_POS:
 			case CMD_CAP_CAPPING_POS:
-						sok_send_2(_step_socket[no], _step_ipaddr[no], cmd, 0, NULL);
+						sok_send_2(_step_socket[no], cmd, 0, NULL);
 						break;
 		
 			case CMD_CAP_PRINT_POS:
-						sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CAP_PRINT_POS, sizeof(RX_Config.stepper.print_height), &RX_Config.stepper.print_height);
+						sok_send_2(_step_socket[no], CMD_CAP_PRINT_POS, sizeof(RX_Config.stepper.print_height), &RX_Config.stepper.print_height);
 						break;
 			}
 		}
@@ -148,6 +146,6 @@ int steptest_handle_status(int no, STestTableStat *pStatus)
 int	 steptest_to_print_pos(void)
 {
 //	Error(LOG, 0, "Setting Printhead Height to %d", RX_Config.stepper.print_height);
-	sok_send_2(_step_socket[0], _step_ipaddr[0], CMD_CAP_PRINT_POS, sizeof(RX_Config.stepper.print_height), &RX_Config.stepper.print_height);
+	sok_send_2(_step_socket[0], CMD_CAP_PRINT_POS, sizeof(RX_Config.stepper.print_height), &RX_Config.stepper.print_height);
 	return REPLY_OK;									
 }

@@ -80,7 +80,7 @@ typedef struct
 //--- SEncOutStatus -----------------------------------------
 typedef struct
 {
-	UINT32	position;		// 0x0000:
+	UINT32	position;		// 0x0000:	// 20 Bit!
 	UINT32	speed;			// 0x0004:
 	UINT32	speed_min;		// 0x0008
 	UINT32	speed_max;		// 0x000c:
@@ -101,72 +101,92 @@ typedef struct
 //--- SEncStatus ----------------------------------------------
 typedef struct
 {
-	SEncInStatus	encIn[8];				// 0x0000
-	SEncOutStatus	encOut[8];				// 0x0200
-	UINT32			info;					// 0x0400:
-	UINT32			error;					// 0x0404:
-	UINT32			statistics[8];			// 0x0408
-	UINT32			msg_cnt;				// 0x0428:
-	UINT32			msg_cnt_reset;			// 0x042c:
-	SVersion		version;				// 0x0430:
-    UINT32			mem_pointer[4];			// 0x0440: mem_pointer[0]
-//  UINT32			mem_pointer_1;			// 0x0444: mem_pointer[1]
-//  UINT32			mem_pointer_2;			// 0x0448: mem_pointer[2]	
-//  UINT32			mem_pointer_3;			// 0x044c: mem_pointer[3]	
-	UINT32			in_pulse_cnt;			// 0x0450: read after every scan
-	UINT32			out_pulse_cnt;			// 0x0454: read after every scan
-	UINT32			in_end_pos;				// 0x0458: read after every scan
-	UINT32			out_end_pos;			// 0x045C: read after every scan
-	UINT32			stroke_enc_pulse_cnt;	// 0x0460: read after every scan
-	UINT32			stroke_enc_end_pos;		// 0x0464: read after every scan
-	UINT32			stroke_sum_end_pos;		// 0x0468: read after every scan
-	UINT32			dir_change_cnt[2];		// 0x046C: read after every scan
-//	UINT32			dir_change_cnt_1;		// 0x0470: read after every scan
-	UINT32			ab_change_error[4];		// 0x0474: read after every scan
-//	UINT32			ab_change_error_1;		// 0x0478: read after every scan
-//	UINT32			ab_change_error_2;		// 0x047C: read after every scan
-//	UINT32			ab_change_error_3;		// 0x0480: read after every scan
-	UINT32			rol_coeff_at_use[4];	// 0x0484: coeff a0 sin rol 0
-//	UINT32			rol_coeff_at_use_1;		// 0x0488: coeff a1 cos rol 0
-//	UINT32			rol_coeff_at_use_2;		// 0x048C: coeff a0 sin rol 1
-//	UINT32			rol_coeff_at_use_3;		// 0x0490: coeff a1 cos rol 1
-	SDriveErr 		drive_err[4];			// 0x0494: 
-//	SDriveErr 		drive_err_1;			// 0x04a4: 
-//	SDriveErr 		drive_err_2;			// 0x04b4: 
-//	SDriveErr 		drive_err_3;			// 0x04c4: 
-	UINT32 		    dig_pg_window_err[8];	// 0x04d4
-//	UINT32 		    dig_pg_window_err_1;	// 0x04d8
-//	UINT32 		    dig_pg_window_err_2;	// 0x04dc
-//	UINT32 		    dig_pg_window_err_3;	// 0x04e0
-//	UINT32 		    dig_pg_window_err_4;	// 0x04e4
-//	UINT32 		    dig_pg_window_err_5;	// 0x04e8
-//	UINT32 		    dig_pg_window_err_6;	// 0x04ec
-//	UINT32 		    dig_pg_window_err_7;	// 0x04f0
-	UINT32			drift_w_coeff;			// 0x04f4: 
-	UINT32			rol_corr_pos_0;			// 0x04f8: 
-	UINT32			rol_corr_pos_1; 		// 0x04fC: 
-	UINT32			rol_flags_0;			// 0x0500: 
-	UINT32			rol_flags_1;			// 0x0504: 
-	UINT32			rev_sums_long_0;		// 0x0508: 
-	UINT32			rev_sums_long_1;		// 0x050C: 
-	UINT32			ramp_value_0;			// 0x0510: 
-	UINT32			ramp_value_1;			// 0x0514:
-	UINT32			corr_out_fill_level_0;	// 0x0518: 
-	UINT32			corr_out_fill_level_1;	// 0x051C: 
-	UINT32			corr_out_delays_busy_0;	// 0x0520: 
-	UINT32			corr_out_delays_busy_1;	// 0x0524: 
-	UINT32			corr_out_delays_err_0;	// 0x0528: 
-	UINT32			corr_out_delays_err_1;	// 0x052C:
-	UINT32			curr_ratio_0;			// 0x0530: 
-	UINT32			curr_ratio_1;			// 0x0534: 
-	UINT32			enc_clk_cycles_0;		// 0x0538: 
-	UINT32			enc_clk_cycles_1;		// 0x053c: 	
-	UINT32 		    pg_fifo_empty_err;		// 0x0540
-	UINT32 		    ignored_fifo_empty_err;	// 0x0544
-	UINT32 		    window_fifo_empty_err;	// 0x0548
-	UINT32			res[(0x0600 - 0x054c) / 4];			// 0x054c .. 0x0600
-	SEncErrStatus		err;				// 0x0600 - 0x0624: 
-	UINT32			res_2[(0x0800 - 0x0628) / 4];			// 0x0604 .. 0x0800
+	SEncInStatus	encIn[8];					// 0x0000
+	SEncOutStatus	encOut[8];					// 0x0200
+	UINT32			info;						// 0x0400:
+	UINT32			error;						// 0x0404:
+	UINT32			statistics[8];				// 0x0408
+	UINT32			msg_cnt;					// 0x0428:
+	UINT32			msg_cnt_reset;				// 0x042c:
+	SVersion		version;					// 0x0430:
+    UINT32			mem_pointer[4];				// 0x0440: mem_pointer[0]
+//  UINT32			mem_pointer_1;				// 0x0444: mem_pointer[1]
+//  UINT32			mem_pointer_2;				// 0x0448: mem_pointer[2]	
+//  UINT32			mem_pointer_3;				// 0x044c: mem_pointer[3]	
+	UINT32			in_pulse_cnt;				// 0x0450: read after every scan
+	UINT32			out_pulse_cnt;				// 0x0454: read after every scan
+	UINT32			in_end_pos;					// 0x0458: read after every scan
+	UINT32			out_end_pos;				// 0x045C: read after every scan
+	UINT32			stroke_enc_pulse_cnt;		// 0x0460: read after every scan
+	UINT32			stroke_enc_end_pos;			// 0x0464: read after every scan
+	UINT32			stroke_sum_end_pos;			// 0x0468: read after every scan
+	UINT32			dir_change_cnt[2];			// 0x046C: read after every scan
+//	UINT32			dir_change_cnt_1;			// 0x0470: read after every scan
+	UINT32			ab_change_error[4];			// 0x0474: read after every scan
+//	UINT32			ab_change_error_1;			// 0x0478: read after every scan
+//	UINT32			ab_change_error_2;			// 0x047C: read after every scan
+//	UINT32			ab_change_error_3;			// 0x0480: read after every scan
+	UINT32			rol_coeff_at_use[4];		// 0x0484: coeff a0 sin rol 0
+//	UINT32			rol_coeff_at_use_1;			// 0x0488: coeff a1 cos rol 0
+//	UINT32			rol_coeff_at_use_2;			// 0x048C: coeff a0 sin rol 1
+//	UINT32			rol_coeff_at_use_3;			// 0x0490: coeff a1 cos rol 1
+	SDriveErr 		drive_err[4];				// 0x0494: 
+//	SDriveErr 		drive_err_1;				// 0x04a4: 
+//	SDriveErr 		drive_err_2;				// 0x04b4: 
+//	SDriveErr 		drive_err_3;				// 0x04c4: 
+	UINT32 		    dig_pg_window_err[8];		// 0x04d4
+//	UINT32 		    dig_pg_window_err_1;		// 0x04d8
+//	UINT32 		    dig_pg_window_err_2;		// 0x04dc
+//	UINT32 		    dig_pg_window_err_3;		// 0x04e0
+//	UINT32 		    dig_pg_window_err_4;		// 0x04e4
+//	UINT32 		    dig_pg_window_err_5;		// 0x04e8
+//	UINT32 		    dig_pg_window_err_6;		// 0x04ec
+//	UINT32 		    dig_pg_window_err_7;		// 0x04f0
+	UINT32			drift_w_coeff;				// 0x04f4: 
+	UINT32			rol_corr_pos_0;				// 0x04f8: 
+	UINT32			rol_corr_pos_1; 			// 0x04fC: 
+	UINT32			rol_flags_0;				// 0x0500: 
+	UINT32			rol_flags_1;				// 0x0504: 
+	UINT32			rev_sums_long_0;			// 0x0508: 
+	UINT32			rev_sums_long_1;			// 0x050C: 
+	UINT32			ramp_value_0;				// 0x0510: 
+	UINT32			ramp_value_1;				// 0x0514:
+	UINT32			corr_out_fill_level_0;		// 0x0518: 
+	UINT32			corr_out_fill_level_1;		// 0x051C: 
+	UINT32			corr_out_delays_busy_0;		// 0x0520: 
+	UINT32			corr_out_delays_busy_1;		// 0x0524: 
+	UINT32			corr_out_delays_err_0;		// 0x0528: 
+	UINT32			corr_out_delays_err_1;		// 0x052C:
+	UINT32			curr_ratio_0;				// 0x0530: 
+	UINT32			curr_ratio_1;				// 0x0534: 
+	UINT32			corr_out_fill_level_0_max;	// 0x0538: 
+	UINT32			corr_out_fill_level_0_min;	// 0x053c: 	
+	UINT32 		    pg_fifo_empty_err;			// 0x0540
+	UINT32 		    ignored_fifo_empty_err;		// 0x0544
+	UINT32 		    window_fifo_empty_err;		// 0x0548
+	UINT32 		    rolcor_0_err_vec;			// 0x054C // reset_min_max
+	//(0)r_corr_frame_err.r_int.r_enc_error_too_slow;
+	//(1)r_corr_frame_err.r_int.r_enc_error_too_fast;
+	//(2)r_corr_frame_err.r_int.r_enc_error_count_less;
+	//(3)r_corr_frame_err.r_int.r_enc_error_count_more;
+	//(4)r_corr_frame_err.r_int.r_enc_error_count_back;
+	//(10)r_corr_frame_err.r_rol.r_delays_busy;
+	//(11)r_corr_frame_err.r_rol.r_delay_busy_err;
+	//(12)r_corr_frame_err.r_rol.r_pos_cnt_overflow;
+	//(13)r_corr_frame_err.r_rol.r_sin_mul_overflow;
+	//(14)r_corr_frame_err.r_rol.r_prevalue_sin_corr_high_overflow;
+	//(15)r_corr_frame_err.r_rol.r_prevalue_sin_corr_low_overflow;
+	//(16)r_corr_frame_err.r_ident.r_ident_sin_sum_overflow;
+	//(17)r_corr_frame_err.r_ident.r_ident_cos_sum_overflow;
+	//(18)r_corr_frame_err.r_ident.r_int_diff_add_overflow;
+	//(19)r_corr_frame_err.r_ident.r_sin_af_mul_overflow;
+	//(20)r_corr_frame_err.r_ident.r_cos_af_mul_overflow;
+	//(21)r_corr_frame_err.r_ident.r_ident_sin_add_overflow;
+	UINT32 		    rolcor_1_err_vec;			// 0x0550 // reset_min_max
+	UINT32 		    rolcor_0_delay_busy_max;	// 0x0554 // reset_min_max
+	UINT32			res[(0x0600 - 0x0558) / 4];	// 0x054c .. 0x0600
+	SEncErrStatus		err;					// 0x0600 - 0x0624: 
+	UINT32			res2[(0x0800 - 0x0628) / 4];// 0x0628 .. 0x0800
 } SEncFpgaStatus;
 
 //--- SEncInCfg ----------------------------------------------------

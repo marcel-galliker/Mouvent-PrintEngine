@@ -353,7 +353,7 @@ int  fpga_set_config(RX_SOCKET socket)
 	int i, n, head;
 	char str[64];
 
-	fpga_enable(FALSE);
+	fpga_abort();
 
 	_ethernet_config();
 
@@ -466,8 +466,8 @@ int  fpga_set_config(RX_SOCKET socket)
 	//--- clear memory in data path ---
 	if (_ImgInIdx)
 	{				
-		SET_FLAG(FpgaCfg.cfg->cmd, CMD_MASTER_ENABLE, TRUE);
 		_fpga_enc_config(40);
+		SET_FLAG(FpgaCfg.cfg->cmd, CMD_MASTER_ENABLE, TRUE);
 		rx_sleep(20);
 		SET_FLAG(FpgaCfg.cfg->cmd, CMD_MASTER_ENABLE, FALSE);
 	}				
@@ -509,16 +509,16 @@ int  fpga_set_config(RX_SOCKET socket)
 	}
 	#endif
 		
-
 	//--- MASTER ENABLE ------------------------------------------------------
 	TrPrintfL(TRUE, "set CMD_MASTER_ENABLE=TRUE");
 	SET_FLAG(FpgaCfg.cfg->cmd, CMD_MASTER_ENABLE, TRUE);
 	_AliveChk_Timeout = 5;
-
+	
+	//--- prestart tests ------------------------------
 //	Error(LOG,  0, "fpga_set_config1: FSM State=0x%04x", Fpga.stat->info);
 //	_check_state_machines();
 	
-	SFpgaHeadInfo* pinfo = &Fpga.stat->info;
+	SFpgaHeadInfo* pinfo = (SFpgaHeadInfo*)&Fpga.stat->info;
 	if (pinfo->clearing_udp_flags) 
 	{
 //		Error(WARN, 0, "Timeout while clearing Used Block Flags");
@@ -538,7 +538,20 @@ int  fpga_set_config(RX_SOCKET socket)
 		_check_block_used_flags_clear(head, 0, RX_HBConfig.head[head].blkNo0, RX_HBConfig.head[head].blkCnt);
 	}
 
-	//	Error(LOG,  0, "fpga_set_config2: FSM State=0x%04x", Fpga.stat->info);
+	for (i=0; i<2; i++)
+	{
+		if (Fpga.error->eth_fifo_full[i]) { _Reload_FPGA=TRUE; if(ErrorFlag (ERR_ABORT, (UINT32*)&RX_HBStatus[0].err,  err_fifo_full_0<<i,  0, "ETH[%d]: FIFO Full PRESTART", i)) fpga_trace_registers("ETH-FIFO_FULL-PRESTART");}
+		if (Fpga.error->udp_fifo_full[i]) { _Reload_FPGA=TRUE; if(ErrorFlag (ERR_ABORT, (UINT32*)&RX_HBStatus[0].err,  err_fifo_full_0<<i,  0, "UDP[%d]: FIFO Full PRESTART", i)) fpga_trace_registers("UDP-FIFO_FULL-PRESTART");}			
+	}
+	
+	/*
+	//--- MASTER ENABLE ------------------------------------------------------
+	TrPrintfL(TRUE, "set CMD_MASTER_ENABLE=TRUE");
+	SET_FLAG(FpgaCfg.cfg->cmd, CMD_MASTER_ENABLE, TRUE);
+	_AliveChk_Timeout = 5;
+	*/
+	
+//	Error(LOG,  0, "fpga_set_config done");
 //	_TestFSM = 0;
 	return REPLY_OK;
 }
@@ -583,6 +596,13 @@ void fpga_enc_config(int khz)
 	_fpga_enc_config(khz);
 }
 
+//--- fpga_enc_enable --------------------------
+void fpga_enc_enable(int enable)
+{
+	if (enable) _fpga_enc_config(0);
+	else SET_FLAG(FpgaCfg.encoder->cmd, ENC_ENABLE, FALSE);				
+}
+
 static void _fpga_enc_config(int khz)
 {
 	int i;
@@ -597,15 +617,18 @@ static void _fpga_enc_config(int khz)
 	{
 		FpgaCfg.encoder->synth.value = 0;
 		FpgaCfg.encoder->synth.enable= _SynthEncoder = FALSE;
-		nios_set_firepulse_on(TRUE);
-		for (i=0; !nios_is_firepulse_on(); i+=10)
+		if (FpgaCfg.cfg->cmd & CMD_MASTER_ENABLE)
 		{
-			if (i>1000) 
+			nios_set_firepulse_on(TRUE);
+			for (i=0; !nios_is_firepulse_on(); i+=10)
 			{
-				Error(LOG, 0, "Firepulse On TimeOut");
-				return;					
-			}
-			rx_sleep(10);				
+				if (i>1000) 
+				{
+					Error(LOG, 0, "Firepulse On TimeOut");
+					return;					
+				}
+				rx_sleep(10);				
+			}				
 		}
 		FpgaCfg.encoder->synth.value = FPGA_FREQ/(khz*1000);
 		FpgaCfg.encoder->synth.enable= _SynthEncoder = TRUE;		
@@ -1023,7 +1046,7 @@ static void _fpga_check_fp_errors(void)
 	for (i=0; i<HEAD_CNT; i++) 
 	{
 		RX_FpgaData.wf_busy_warn[i] = Fpga.data->wf_busy_warn[i];
-		memcpy(&RX_FpgaError.enc_fp[i], &Fpga.error->encoder[i], sizeof(UINT32));
+		memcpy(&RX_FpgaError.enc_fp[i], &Fpga.error->enc_fp[i], sizeof(UINT32));
 		
 		{
 		//	if (Fpga.error->head[i].write_img_line)   {                    ErrorFlag (ERR_ABORT, (UINT32*)&RX_HBStatus[0].err,  err_printgo_but_no_data_0<<i,  0, "Head[%d]: Got Print Go but had no Data cnt=%d", i, Fpga.error->head[i].write_img_line);}
@@ -1313,105 +1336,99 @@ void _write_srd(const char *srcName, int subPulses, int stroke, BYTE *data, int 
 	term_printf("stroke %d done\n", stroke);
 }
 
-//--- fpga_enable -----------------------------------
-int  fpga_enable(int enable)
+//--- fpga_abort -----------------------------------
+int  fpga_abort(void)
 {
 	if(_Init)
 	{
-		if(!enable)
+		/*
+		int i;
+		for (i=0; i<SIZEOF(Fpga.stat->pg_ctr); i++)
 		{
-			/*
-			int i;
-			for (i=0; i<SIZEOF(Fpga.stat->pg_ctr); i++)
+			if (Fpga.stat->pg_ctr[i]!=Fpga.stat->print_done_ctr[i]) _Reload_FPGA=TRUE;		
+		}
+		*/
+		int i;
+		int warn=FALSE;
+		for(i=0; i<SIZEOF(Fpga.error->enc_fp); i++)
+		{
+			if(RX_FpgaData.wf_busy_warn[i] && !warn)				
 			{
-				if (Fpga.stat->pg_ctr[i]!=Fpga.stat->print_done_ctr[i]) _Reload_FPGA=TRUE;		
+				Error(WARN,
+					0,
+					"Overspeed Counters: %d  %d  %d  %d", 
+					RX_FpgaData.wf_busy_warn[0],
+					RX_FpgaData.wf_busy_warn[1],
+					RX_FpgaData.wf_busy_warn[2],
+					RX_FpgaData.wf_busy_warn[3]);
+				warn=TRUE;
 			}
-			*/
-			{
-				int i;
-				int warn=FALSE;
-				for(i=0; i<SIZEOF(Fpga.error->enc_fp); i++)
-				{
-					if(RX_FpgaData.wf_busy_warn[i] && !warn)				
-					{
-						Error(WARN,
-							0,
-							"Overspeed Counters: %d  %d  %d  %d", 
-							RX_FpgaData.wf_busy_warn[0],
-							RX_FpgaData.wf_busy_warn[1],
-							RX_FpgaData.wf_busy_warn[2],
-							RX_FpgaData.wf_busy_warn[3]);
-						warn=TRUE;
-					}
 					
-					if(RX_FpgaError.enc_fp[i].waveform_busy)				
-					{
-						Error(ERR_CONT,
-							0,
-							"Overspeed Counters: %d  %d  %d  %d", 
-							RX_FpgaError.enc_fp[i].waveform_busy,
-							RX_FpgaError.enc_fp[i].waveform_busy,
-							RX_FpgaError.enc_fp[i].waveform_busy,
-							RX_FpgaError.enc_fp[i].waveform_busy);
-						break;
-					}
-				}				
+			if(RX_FpgaError.enc_fp[i].waveform_busy)				
+			{
+				Error(ERR_CONT,
+					0,
+					"Overspeed Counters: %d  %d  %d  %d", 
+					RX_FpgaError.enc_fp[i].waveform_busy,
+					RX_FpgaError.enc_fp[i].waveform_busy,
+					RX_FpgaError.enc_fp[i].waveform_busy,
+					RX_FpgaError.enc_fp[i].waveform_busy);
+				break;
 			}
+		}
 						
-			nios_set_firepulse_on(FALSE);
-			if(FpgaCfg.encoder->synth.enable)
-			{
-				FpgaCfg.encoder->cmd = 0;
-				FpgaCfg.encoder->synth.value = 0;
-				FpgaCfg.encoder->synth.enable = _SynthEncoder = FALSE;
-				RX_FpgaEncCfg.cmd = FpgaCfg.encoder->cmd;
-	//			rx_sleep(5);
-			}
-			if(FpgaCfg.cfg->cmd & CMD_MASTER_ENABLE)
-			{	
+		nios_set_firepulse_on(FALSE);
+		if(FpgaCfg.encoder->synth.enable)
+		{
+			FpgaCfg.encoder->cmd = 0;
+			FpgaCfg.encoder->synth.value = 0;
+			FpgaCfg.encoder->synth.enable = _SynthEncoder = FALSE;
+			RX_FpgaEncCfg.cmd = FpgaCfg.encoder->cmd;
+//			rx_sleep(5);
+		}
+		if(FpgaCfg.cfg->cmd & CMD_MASTER_ENABLE)
+		{	
 //				Error(LOG,0,"fpga_disable: FSM State=0x%04x",Fpga.stat->info);
-				//--- TEST PRINT-DONE --------------
-				{
-					int i,err;
-					for(i=0,err=FALSE; i<HEAD_CNT; i++)
-					{
-						if(FpgaCfg.head[i]->cmd_enable && Fpga.stat->pg_ctr[i] > Fpga.stat->print_done_ctr[i]+1)
-						{
-							Error(WARN,0,"Head[%d]: Print-Done missing, #PrintGo=%d #Print-Done=%d",i,Fpga.stat->pg_ctr[i],Fpga.stat->print_done_ctr[i]); 
-							err=TRUE;
-						}
-					}
-					if(err) fpga_trace_registers("Print-Done-missed");	
-				//	else     fpga_trace_registers("Print-Done-OK");	
-				}
-				//---
-				TrPrintf(TRUE,"fpga_enable(false) CMD_MASTER_ENABLE=FALSE: blockCnt[0]=%d, imgInIdx[0]=%d, blockUsed=0x%08x",Fpga.data->blockCnt[0],Fpga.print->imgInIdx[0],Fpga.blockUsed[0]);
-
-				_fpga_copy_status();
-				term_save(PATH_TEMP "status.txt");
-				term_flush();
-
-				TrPrintfL(TRUE,"set CMD_MASTER_ENABLE=FALSE");				
-				SET_FLAG(FpgaCfg.cfg->cmd,CMD_MASTER_ENABLE,FALSE);
-			//	rx_sleep(5);
-			//	fpga_set_config(INVALID_SOCKET);
-			}
-
-			if(_Reload_FPGA)
+			//--- TEST PRINT-DONE --------------
 			{
-				Error(WARN,0,"RELOAD-FPGA");
-				putty_end();
-				nios_end();
-				fpga_end();
-				fpga_init();
-				nios_init();
-				cond_init();
-				putty_init();	
-				_Reload_FPGA = FALSE;
+				int i,err;
+				for(i=0,err=FALSE; i<HEAD_CNT; i++)
+				{
+					if(FpgaCfg.head[i]->cmd_enable && Fpga.stat->pg_ctr[i] > Fpga.stat->print_done_ctr[i]+1)
+					{
+						Error(WARN,0,"Head[%d]: Print-Done missing, #PrintGo=%d #Print-Done=%d",i,Fpga.stat->pg_ctr[i],Fpga.stat->print_done_ctr[i]); 
+						err=TRUE;
+					}
+				}
+				if(err) fpga_trace_registers("Print-Done-missed");	
+			//	else     fpga_trace_registers("Print-Done-OK");	
 			}
+			//---
+			TrPrintf(TRUE,"fpga_abort CMD_MASTER_ENABLE=FALSE: blockCnt[0]=%d, imgInIdx[0]=%d, blockUsed=0x%08x",Fpga.data->blockCnt[0],Fpga.print->imgInIdx[0],Fpga.blockUsed[0]);
 
-		}			
-	}
+			_fpga_copy_status();
+			term_save(PATH_TEMP "status.txt");
+			term_flush();
+
+			TrPrintfL(TRUE,"set CMD_MASTER_ENABLE=FALSE");				
+			SET_FLAG(FpgaCfg.cfg->cmd,CMD_MASTER_ENABLE,FALSE);
+		//	rx_sleep(5);
+		//	fpga_set_config(INVALID_SOCKET);
+		}
+
+		if(_Reload_FPGA)
+		{
+			Error(WARN,0,"RELOAD-FPGA");
+			putty_end();
+			nios_end();
+			fpga_end();
+			fpga_init();
+			nios_init();
+			cond_init();
+			putty_init();	
+			_Reload_FPGA = FALSE;
+		}
+	}			
 	return REPLY_OK;
 }
 
@@ -1534,7 +1551,7 @@ static int _check_print_done(void)
 			if (head==0 && RX_HBStatus[0].head[head].printGoCnt != Fpga.stat->pg_ctr[head])
 			{
 				int t=rx_get_ticks();
-				TrPrintfL(TRUE, "Head[%d].PrintGo=%d time=%d", head, Fpga.stat->pg_ctr[head], t-_TestPgTime[head]);
+				// TrPrintfL(TRUE, "Head[%d].PrintGo=%d time=%d", head, Fpga.stat->pg_ctr[head], t-_TestPgTime[head]);
 				_TestPgTime[head]=t;
 				/*
 				if (Fpga.stat->pg_ctr[head] > Fpga.stat->print_done_ctr[head]+2)
@@ -1710,7 +1727,7 @@ static void _check_errors(void)
 		}
 	}
 
-	if (FpgaCfg.encoder->cmd & ENC_ENABLE)
+	if ((FpgaCfg.encoder->cmd & ENC_ENABLE) && nios_is_firepulse_on())
 	{
 		if (_EncCheckDelay>0) _EncCheckDelay--;
 		else
@@ -1763,7 +1780,7 @@ static void _count_dots(void)
 	{		
 		droplets = Fpga.stat->head_dot_cnt[i];
 		RX_HBStatus[0].head[i].dotCnt += droplets;
-		cond_volume_printed(i, (int)(droplets*dropvolume*1000.0*1000.0/diff)); // [ul/s]
+		cond_volume_printed(i, (int)(droplets*dropvolume*1000.0*1000.0/diff)); // [µl/s]
 	}
 	_time = time;
 }

@@ -17,9 +17,12 @@
 #include "cond_def_head.h"
 
 //--- common definitions ------------------
-#define MAX_HEADS_BOARD		4
-#define EEPROM_DATA_SIZE	128
-#define EXE_BLOCK_SIZE		512
+#define MAX_HEADS_BOARD			4
+#define EEPROM_DATA_SIZE		128
+#define EEPROM_MAX_ADR			4096
+#define EEPROM_USER_DATA_START	512
+
+#define EXE_BLOCK_SIZE			512
 
 //--- Nios Configuration ---------------------------------------------
 typedef struct SExecutable
@@ -39,7 +42,7 @@ typedef struct SNiosHeadCmd
 	UINT32	error_reset:1;			// 	01: 
 	UINT32	exe_valid:1;			// 	02:
 	UINT32	firepulse_on:1;			// 	03:
-	UINT32	cmd_04:1;			    // 	04:
+	UINT32	write_user_eeprom:1;	// 	04:
 	UINT32	cmd_05:1;			    // 	05:
 	UINT32	cmd_06:1;			    // 	06:
 	UINT32	cmd_07:1;				// 	07:
@@ -73,7 +76,12 @@ typedef struct SNiosCfg
 {
 	SNiosHeadCmd	cmd;
 	SConditionerCfg_mcu	cond[MAX_HEADS_BOARD];
-	SExecutable		exe;
+
+	union
+	{
+		SExecutable		exe;
+		BYTE			user_eeprom[MAX_HEADS_BOARD][EEPROM_DATA_SIZE];
+	};
 } SNiosCfg;
 
 //*** memory written by NIOS processor ***************************************
@@ -131,7 +139,7 @@ typedef struct SNiosHeadErr
 			UINT32	fp_ac:1;				// 06
 			UINT32	fp_dc:1;				// 07
 			UINT32	head_pcb_overheated:1;	// 08
-			UINT32	err_09:1;				// 09
+			UINT32	arm_timeout:1;			// 09
 			UINT32	cooler_temp_hw:1;		// 10
 			UINT32	amc7891:1;				// 11
 			UINT32	cooler_overheated:1;	// 12
@@ -145,7 +153,7 @@ typedef struct SNiosHeadErr
 			UINT32	power_all_on_timeout;	// 20
 			UINT32	err_21:1;				// 21
 			UINT32	no_head_therm:1;    	// 22
-			UINT32	err_23:1;				// 23
+			UINT32	head_eeprom_write:1;	// 23
 			UINT32	err_24:1;				// 24
 			UINT32	err_25:1;				// 25
 			UINT32	err_26:1;				// 26
@@ -184,6 +192,7 @@ typedef struct SNiosStat
 	INT32			QSYS_id;
 	INT32			QSYS_timestamp;
 	BYTE			head_eeprom[MAX_HEADS_BOARD][EEPROM_DATA_SIZE];
+	BYTE			user_eeprom[MAX_HEADS_BOARD][EEPROM_DATA_SIZE];
 	
 	//--- other status --------------------
 	UINT32			alive;

@@ -493,11 +493,6 @@
               <FilePath>.\source\eeprom.c</FilePath>
             </File>
             <File>
-              <FileName>i2c_bitbang.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\source\i2c_bitbang.c</FilePath>
-            </File>
-            <File>
               <FileName>pumptime.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\source\pumptime.c</FilePath>
@@ -516,6 +511,11 @@
               <FileName>pid.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\source\pid.c</FilePath>
+            </File>
+            <File>
+              <FileName>i2c_bitbang.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\source\i2c_bitbang.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1156,11 +1156,6 @@
               <FilePath>.\source\eeprom.c</FilePath>
             </File>
             <File>
-              <FileName>i2c_bitbang.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\source\i2c_bitbang.c</FilePath>
-            </File>
-            <File>
               <FileName>pumptime.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\source\pumptime.c</FilePath>
@@ -1179,6 +1174,11 @@
               <FileName>pid.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\source\pid.c</FilePath>
+            </File>
+            <File>
+              <FileName>i2c_bitbang.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\source\i2c_bitbang.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1819,11 +1819,6 @@
               <FilePath>.\source\eeprom.c</FilePath>
             </File>
             <File>
-              <FileName>i2c_bitbang.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\source\i2c_bitbang.c</FilePath>
-            </File>
-            <File>
               <FileName>pumptime.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\source\pumptime.c</FilePath>
@@ -1842,6 +1837,11 @@
               <FileName>pid.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\source\pid.c</FilePath>
+            </File>
+            <File>
+              <FileName>i2c_bitbang.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\source\i2c_bitbang.c</FilePath>
             </File>
           </Files>
         </Group>

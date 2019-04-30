@@ -122,23 +122,50 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 Canvas.SetLeft(but, x);
                 Canvas.Children.Add(but);                
 
-                if (_HeadsPerColor!=0 && distNo%_HeadsPerColor==0)
+                if (_HeadsPerColor!=0)
                 {
-                    //--- offset arrow --------------
-                    y  = 10;
-                    x1 = x+width;
-                    Canvas.Children.Add(new Line(){Stroke=Brushes.Black, X1=x,     X2=x,  Y1=y-5, Y2=y+5});
-                    Canvas.Children.Add(new Line(){Stroke=Brushes.Black, X1=x,     X2=x1, Y1=y,   Y2=y});
-                    Canvas.Children.Add(new Line(){Stroke=Brushes.Black, X1=x1-3,  X2=x1, Y1=y-3, Y2=y});
-                    Canvas.Children.Add(new Line(){Stroke=Brushes.Black, X1=x1-3,  X2=x1, Y1=y+3, Y2=y});
+                    if (RxGlobals.PrintSystem.IsScanning)
+                    {
+                        if (distNo%_HeadsPerColor==0)
+                        {
+                            //--- offset arrow --------------
+                            y  = 10;
+                            x1 = x+width;
+                            Canvas.Children.Add(new Line(){Stroke=Brushes.Black, X1=x,     X2=x,  Y1=y-5, Y2=y+5});
+                            Canvas.Children.Add(new Line(){Stroke=Brushes.Black, X1=x,     X2=x1, Y1=y,   Y2=y});
+                            Canvas.Children.Add(new Line(){Stroke=Brushes.Black, X1=x1-3,  X2=x1, Y1=y-3, Y2=y});
+                            Canvas.Children.Add(new Line(){Stroke=Brushes.Black, X1=x1-3,  X2=x1, Y1=y+3, Y2=y});
 
-                    //--- offset text box -----------
-                    RxNumBox offset = new RxNumBox(){Width=width, HorizontalContentAlignment=HorizontalAlignment.Right, IsUInt32=true};
-                    offset.Tag = colorNo++;
-                    offset.LostFocus += _text_LostFocus;
-                    Canvas.SetLeft(offset, x);
-                    Canvas.SetTop(offset,  16);
-                    Canvas.Children.Add(offset);
+                            //--- offset text box -----------
+                            RxNumBox offset = new RxNumBox(){Width=width, HorizontalContentAlignment=HorizontalAlignment.Right, IsUInt32=true};
+                            offset.Tag = colorNo++;
+                            offset.LostFocus += _text_LostFocus;
+                            Canvas.SetLeft(offset, x);
+                            Canvas.SetTop(offset,  16);
+                            Canvas.Children.Add(offset);
+                        }
+                    }
+                    else
+                    {
+                        if (distNo%_HeadsPerColor==_HeadsPerColor-1)
+                        {
+                            //--- offset arrow --------------
+                            y  = 10;
+                            x1 = x+width;
+                            Canvas.Children.Add(new Line(){Stroke=Brushes.Black, X1=x1,   X2=x1,  Y1=y-5, Y2=y+5});
+                            Canvas.Children.Add(new Line(){Stroke=Brushes.Black, X1=x1,   X2=x,   Y1=y,   Y2=y});
+                            Canvas.Children.Add(new Line(){Stroke=Brushes.Black, X1=x+3,  X2=x,   Y1=y-3, Y2=y});
+                            Canvas.Children.Add(new Line(){Stroke=Brushes.Black, X1=x+3,  X2=x,   Y1=y+3, Y2=y});
+
+                            //--- offset text box -----------
+                            RxNumBox offset = new RxNumBox(){Width=width, HorizontalContentAlignment=HorizontalAlignment.Right, IsUInt32=true};
+                            offset.Tag = colorNo++;
+                            offset.LostFocus += _text_LostFocus;
+                            Canvas.SetLeft(offset, x);
+                            Canvas.SetTop(offset,  16);
+                            Canvas.Children.Add(offset);
+                        }
+                    }
                 }
 
                 //--- distance arrow -----------------

@@ -33,6 +33,7 @@
 #include "rx_sok.h"
 #include "rx_threads.h"
 #include "rx_tif.h"
+#include "rx_trace.h"
 #include "args.h"
 #include "bmp.h"
 #include "tcp_ip.h"
@@ -275,7 +276,6 @@ void udp_test_print(char *fname)
 			_send_image(head, &bmpInfo, RX_HBConfig.head[head].blkNo0+_BlkNo[head], _Backwards);
 			_BlkNo[head] = blkNo;
 		}
-		fpga_enable(TRUE);
 
 		/*
 		//--- define empty heads -------------------------------

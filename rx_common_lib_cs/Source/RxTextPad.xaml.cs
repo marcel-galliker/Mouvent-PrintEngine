@@ -49,7 +49,7 @@ namespace RX_Common
         private List<List<string>> keys = new List<List<string>>()
         {
             new List<string>{"1", "2", "3", "4", "5", "6", "7", "8", "9", "0","Back"},
-            new List<string>{"q", "w", "e", "r", "t", "z", "u", "i", "o", "p","Return"},
+            new List<string>{"q", "w", "e", "r", "t", "z", "u", "i", "o", "p","ENTER"},
             new List<string>{"a", "s", "d", "f", "g", "h", "j", "k", "l", "/"},
             new List<string>{".", "y", "x", "c", "v", "b", "n", "m", "-", "_", "\\"}
         };
@@ -282,7 +282,7 @@ namespace RX_Common
         //--- _handle_key --------------------------------------------------
         private void _handle_key(string key, char ch)
         {            
-            if (key.Equals("Return"))  
+            if (key.Equals("ENTER"))  
             {
                 if (_Target==null)  _send("\r");
                 else                this.DialogResult = true;            

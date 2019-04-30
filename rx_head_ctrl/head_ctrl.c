@@ -287,13 +287,8 @@ static int _do_fpga_image		(RX_SOCKET socket, SFpgaImageCmd *msg)
 {
 	fpga_image(msg);
 
-	{
-		SMsgHdr 		reply;
-		reply.msgLen = sizeof(reply);
-		reply.msgId  = REP_FPGA_IMAGE;
-		sok_send(&socket, &reply);
-	}
-
+	sok_send_2(&socket, REP_FPGA_IMAGE, 0, NULL);
+	
 	return REPLY_OK;
 }
 
@@ -329,6 +324,7 @@ static int _do_head_board_cfg 	(RX_SOCKET socket, SHeadBoardCfg *cfg)
 	_Printing = TRUE;
 	
 	_StatusReqTime = rx_get_ticks();
+	sok_send_2(&socket, REP_HEAD_BOARD_CFG, 0, NULL);
 	return REPLY_OK;
 }
 
@@ -369,7 +365,7 @@ static int _do_head_stat(RX_SOCKET socket, SFluidStateLight *pmsg)
 static int _rep_head_stat(RX_SOCKET socket)
 {
 	int len;
-	len = sok_send_2(&socket, INADDR_ANY, REP_HEAD_STAT, sizeof(RX_HBStatus[0]), &RX_HBStatus);
+	len = sok_send_2(&socket,  REP_HEAD_STAT, sizeof(RX_HBStatus[0]), &RX_HBStatus);
 	return REPLY_OK;
 }
 
@@ -377,14 +373,14 @@ static int _rep_head_stat(RX_SOCKET socket)
 static int _do_print_abort(RX_SOCKET socket)
 {
 	_Printing=FALSE;
-	fpga_enable(FALSE);
+	fpga_abort();
 	return REPLY_OK;	
 }
 
 //--- _do_inkdef -------------------------------
 static int _do_inkdef(RX_SOCKET socket, SInkDefMsg  *pmsg)
 {
-	nios_setInk(pmsg->headNo, &pmsg->ink, pmsg->maxDropSize, pmsg->fpVoltage);
+	nios_setInk(pmsg->headNo, &pmsg->ink, pmsg->dots, pmsg->fpVoltage);
 	return REPLY_OK;
 }
 

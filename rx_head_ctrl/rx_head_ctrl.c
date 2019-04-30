@@ -75,7 +75,7 @@ static void _do_waveform(const char *fname)
 	if (_stricmp(&path[strlen(path)-4], ".wfd")) strcat(path, ".wfd");
 	if (setup_ink(path, &inkdef, READ)==REPLY_OK)
 	{
-		for (i=0; i<4; i++) nios_setInk(i, &inkdef, 3, 100);
+		for (i=0; i<4; i++) nios_setInk(i, &inkdef, "SML", 100);
 	}
 	else Error(WARN, 0, "ERROR WaveForm >>%s<< not found or incorrect", path);
 }

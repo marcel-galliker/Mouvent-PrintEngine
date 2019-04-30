@@ -25,6 +25,7 @@ namespace RX_DigiPrint.Views.TexView
     {
         private List<Image> _Image    = new List<Image>();
         private static BitmapImage  _img_ok   = new BitmapImage(new Uri("../../Resources/Bitmaps/confirm.ico", UriKind.Relative));
+        private int _off_timer=0;
 
         public TexPrepare()
         {
@@ -48,24 +49,34 @@ namespace RX_DigiPrint.Views.TexView
         public void Update()
         {
             string str;
-            int value, n;
+            int value=0;
+            bool on=false;
             str = RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_MACHINE_STATE");
             try
             {
                 // visible when state="PREPARE"(4)
-            //    value=Rx.StrToInt32(str);
-            //    this.Visibility = (value==4) ?  Visibility.Visible:Visibility.Collapsed;   
-                this.Visibility = (RxGlobals.PrinterStatus.PrintState == EPrintState.ps_printing) ?  Visibility.Visible:Visibility.Collapsed;                     
-
-                str = RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_PREPARE_ACTIVE");                
-                value=Rx.StrToInt32(str);
-                str=RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_HEAD_IS_UP");
-                if (str!=null && str.Equals("TRUE")) value |= 1<<7;
-                if (RxGlobals.PrinterStatus.DataReady) value |= 1<<8;
-                for (n=0; n<_Image.Count; n++)
+                if (str!=null) 
                 {
-                    _Image[n].Visibility = ((value & (1<<n))==0)? Visibility.Collapsed : Visibility.Visible;
+                    value=Rx.StrToInt32(str);
+                    on = (value==4 || value==5);
                 }
+
+                if (_off_timer>0) _off_timer--;     
+                if (on || _off_timer>0)
+                {
+                    int n;
+                    this.Visibility=Visibility.Visible;
+                    str = RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_PREPARE_ACTIVE");                
+                    value=Rx.StrToInt32(str);
+                    str=RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_HEAD_IS_UP");
+                    if (str!=null && str.Equals("TRUE")) value |= 1<<7;
+                    if (RxGlobals.PrinterStatus.DataReady) value |= 1<<8;
+                    for (n=0; n<_Image.Count; n++)
+                    {
+                        _Image[n].Visibility = ((value & (1<<n))==0)? Visibility.Collapsed : Visibility.Visible;
+                    }
+                }
+                else this.Visibility=Visibility.Collapsed;
             }
             catch(Exception)
             { }

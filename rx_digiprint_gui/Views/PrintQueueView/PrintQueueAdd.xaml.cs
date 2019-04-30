@@ -79,7 +79,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
             {
                 _item.FilePath = dlg.Selected;
                 _item.read_image_properties(_item.FilePath);
-                _item.LoadDefaults(false);
+                _item.LoadDefaults();
                 
                 //--- save actual position ----------------------
                 Properties.Settings.Default.FileOpen_DataSource = dlg.RootButton;

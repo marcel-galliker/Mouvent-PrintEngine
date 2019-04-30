@@ -55,6 +55,7 @@ static int _NiosInit   = FALSE;
 static int _NiosLoaded = FALSE;
 
 static UINT8			_GreyLevel[MAX_HEADS_BOARD][MAX_DROP_SIZES];
+static int				_DotSize1;
 static UINT32			_FPWarning;
 int						NIOS_FixedDropSize=0;
 int						NIOS_Droplets=0;
@@ -95,6 +96,7 @@ int nios_init(void)
 	
 	_NiosMem = NULL;
 	_FPWarning = 0;
+	_DotSize1 = 0;
 	memset(_GreyLevel, 0, sizeof(_GreyLevel));
 
 	#ifdef soc
@@ -270,8 +272,7 @@ static void _sample_wf(int head, SInkDefinition *pink, int subPulses, int fpVolt
 
 	if (!_NiosLoaded) return;
 	
-	fpga_enable(FALSE);	
-	
+	fpga_enc_enable(FALSE);
 //	if (!strcmp(pink->fileName, _InkDef[head].fileName) && (subPulses==_MaxDropSize[head]) && (fpVoltage==_FpVoltage[head])) return
 	
 	if (fpVoltage && fpVoltage<30) ErrorFlag(WARN, &_FPWarning, 1<<head, 0, "Head[%d]: Firepulse Voltage=%d%, head not print", head, fpVoltage);
@@ -438,6 +439,7 @@ static void _sample_wf(int head, SInkDefinition *pink, int subPulses, int fpVolt
 	}
 	
 	fp_set_waveform(head, voltageCnt, voltage);
+	fpga_enc_enable(TRUE);
 }
 
 //--- nios_fixed_grey_levels ----------------------------
@@ -467,6 +469,7 @@ void nios_fixed_grey_levels(int fixedDropSize, int maxDropSize)
 				}
 				cfg->gl_2_pulse[i] = level;					
 			}
+			if (_DotSize1>1 && _DotSize1<=maxDropSize) cfg->gl_2_pulse[1] = cfg->gl_2_pulse[_DotSize1];
 		}
 		else
 		{
@@ -477,20 +480,34 @@ void nios_fixed_grey_levels(int fixedDropSize, int maxDropSize)
 }
 
 //--- nios_setInk ---------------------------------------------
-void nios_setInk(int no, SInkDefinition *pink, int maxDropSize, int fpVoltage)
+void nios_setInk(int no, SInkDefinition *pink, char *dots, int fpVoltage)
 {
 	if (no==0) _MaxSpeed=0;
 	if (no>=0 && no<HEAD_CNT)
 	{
-		NIOS_Droplets = maxDropSize;
-		_sample_wf(no, pink, maxDropSize, fpVoltage, FpgaCfg.head[no]);
+		int s, max;
+		char *ch;
+		for (ch=dots, max=0; *ch; ch++)
+		{
+			s=0;
+			if(*ch=='S')	s=1;
+			if(*ch=='M')	s=2;
+			if(*ch=='L')	s=3;
+			if (s>max) max=s;
+		}
+		if (max==0) max=3;
+
+		NIOS_Droplets = max;
+		if(dots[1] == 0) _DotSize1 = s;
+		else _DotSize1=0;
+		_sample_wf(no, pink, max, fpVoltage, FpgaCfg.head[no]);
 		cond_heater_set(no, pink->temp, pink->tempMax);
 		#ifndef USE_HEAD_PRESOUT
 		cond_presout_set(no, pink->meniscus);
 		#endif
 		RX_RGB[no] = pink->colorRGB;
 	}
-	if (no==HEAD_CNT-1) Error(LOG, 0, "MaxSpeed: %d m/min, Dotsize: %d", _MaxSpeed, maxDropSize);
+//	if (no==HEAD_CNT-1) Error(LOG, 0, "MaxSpeed: %d m/min, Dotsize: %s", _MaxSpeed, dots);
 }
 
 //--- nios_set_firepulse_on ----------------------------------
@@ -502,7 +519,7 @@ void nios_set_firepulse_on(int on)
 
 //--- nios_is_firepulse_on ---------------------
 int  nios_is_firepulse_on(void)
-{
+{	
 	if (_NiosMem && _NiosMem->stat.powerState==power_all_on) return TRUE;
 	return FALSE;				
 }
@@ -529,7 +546,7 @@ int  nios_main(int ticks, int menu)
 //--- _nios_copy_status -----------------------------------
 static void _nios_copy_status(void)
 {
-	memcpy(&RX_NiosStat, _NiosStat, sizeof(RX_NiosStat));			
+	memcpy(&RX_NiosStat, _NiosStat, sizeof(RX_NiosStat));		
 }
 
 //--- nios_check_errors ---------------------------

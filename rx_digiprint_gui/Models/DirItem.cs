@@ -252,7 +252,15 @@ namespace RX_DigiPrint.Models
         public Visibility PrintButtonVisibility
         {
             get { return _PrintButtonVisibility; }
-            set { SetProperty(ref _PrintButtonVisibility, value); }
+            set { SetProperty(ref _PrintButtonVisibility, value);}
+        }
+
+        //--- Property PrintButtonVisibility ---------------------------------------
+        private Visibility _DeleteButtonVisibility = Visibility.Collapsed;
+        public Visibility DeleteButtonVisibility
+        {
+            get { return _DeleteButtonVisibility; }
+            set { SetProperty(ref _DeleteButtonVisibility, value); }
         }
            
     }

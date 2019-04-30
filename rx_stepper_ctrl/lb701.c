@@ -228,7 +228,7 @@ int  lb701_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 	
 	switch(msgId)
 	{
-	case CMD_TT_STATUS:				sok_send_2(&socket, INADDR_ANY, REP_TT_STATUS, sizeof(RX_TestTableStatus), &RX_TestTableStatus);	
+	case CMD_TT_STATUS:				sok_send_2(&socket, REP_TT_STATUS, sizeof(RX_TestTableStatus), &RX_TestTableStatus);	
 									break;
 
 	case CMD_CAP_STOP:				strcpy(_CmdName, "CMD_CAP_STOP");
@@ -272,6 +272,8 @@ int  lb701_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 	case CMD_ERROR_RESET:			strcpy(_CmdName, "CMD_ERROR_RESET");
 									fpga_stepper_error_reset();
 									break;
+		
+	case CMD_CAP_VENT:	break;
 		
 	default:						Error(ERR_CONT, 0, "LIFT: Command 0x%08x not implemented", msgId); break;
 	}

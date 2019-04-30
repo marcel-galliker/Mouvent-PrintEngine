@@ -64,6 +64,7 @@ static void _do_get_print_queue_item	(RX_SOCKET socket, SPrintQueueEvt *pmsg);
 static void _do_del_print_queue	(RX_SOCKET socket, SPrintQueueEvt *pmsg);
 static void _do_up_print_queue	(RX_SOCKET socket, SPrintQueueEvt *pmsg);
 static void _do_dn_print_queue	(RX_SOCKET socket, SPrintQueueEvt *pmsg);
+static void _do_del_file		(RX_SOCKET socket, SPrintQueueEvt *pmsg);
 
 static void _do_get_print_env	(RX_SOCKET socket);
 static void _do_get_ink_def		(RX_SOCKET socket);
@@ -136,7 +137,8 @@ int handle_gui_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sende
 		case CMD_GET_PRINT_QUEUE_ITM:_do_get_print_queue_item(socket, (SPrintQueueEvt*) pmsg);			break;
 		case CMD_UP_PRINT_QUEUE:	_do_up_print_queue(socket, (SPrintQueueEvt*) pmsg);					break;
 		case CMD_DN_PRINT_QUEUE:	_do_dn_print_queue(socket, (SPrintQueueEvt*) pmsg);					break;
-
+		case CMD_DEL_FILE:			_do_del_file(socket, (SPrintQueueEvt*) pmsg);						break;
+			
 		case CMD_GET_PRINT_ENV:		_do_get_print_env(socket);											break;
 
 		case CMD_GET_INK_DEF:		_do_get_ink_def(socket);											break;
@@ -145,6 +147,9 @@ int handle_gui_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sende
 									chiller_reply_stat(socket);
 									break;
 		case CMD_HEAD_STAT:			ctrl_reply_stat(socket);											break;
+
+		case CMD_ENCODER_STAT:		enc_reply_stat(socket);												break;
+		case CMD_ENCODER_SAVE_PAR:	enc_save_par();														break;
 
 		case CMD_HEAD_FLUID_CTRL_MODE: _do_head_fluidCtrlMode(socket, (SFluidCtrlCmd*) pmsg);			break;
 		case CMD_FLUID_CTRL_MODE:	   _do_fluidCtrlMode(socket, (SFluidCtrlCmd*) pmsg);				break;
@@ -508,6 +513,13 @@ static void _do_dn_print_queue	(RX_SOCKET socket, SPrintQueueEvt *pmsg)
 	gui_send_print_queue(EVT_DN_PRINT_QUEUE, &pmsg->item);
 }
 
+//--- _do_del_file ------------------------------------------
+static void _do_del_file	(RX_SOCKET socket, SPrintQueueEvt *pmsg)
+{
+	_check_format("_do_del_file", pmsg, sizeof(*pmsg));
+	pc_del_file(pmsg->item.filepath);
+}
+
 //--- _do_get_print_env --------------------------------------
 static void _do_get_print_env(RX_SOCKET socket)
 {
@@ -681,7 +693,7 @@ static void _do_set_printer_cfg(RX_SOCKET socket, SPrinterCfgMsg* pmsg)
 	memcpy(&RX_Config.printer.offset,		&pmsg->offset,				sizeof(RX_Config.printer.offset));
 	setup_config(PATH_USER FILENAME_CFG, &RX_Config, WRITE);
 
-	sok_send_2(&socket, INADDR_ANY, REP_SET_PRINTER_CFG, 0, NULL);	 
+	sok_send_2(&socket, REP_SET_PRINTER_CFG, 0, NULL);	 
 
 	_do_get_printer_cfg(INVALID_SOCKET);
 }
@@ -690,7 +702,7 @@ static void _do_set_printer_cfg(RX_SOCKET socket, SPrinterCfgMsg* pmsg)
 static void _do_get_stepper_cfg	(RX_SOCKET socket)
 {
 	if (socket==INVALID_SOCKET) gui_send_msg_2(socket, REP_GET_STEPPER_CFG, sizeof(RX_Config.stepper), &RX_Config.stepper);
-	else						sok_send_2(&socket, INADDR_ANY, REP_GET_STEPPER_CFG, sizeof(RX_Config.stepper), &RX_Config.stepper);
+	else						sok_send_2(&socket, REP_GET_STEPPER_CFG, sizeof(RX_Config.stepper), &RX_Config.stepper);
 }
 
 //--- _do_set_stepper_cfg ----------------------------------------

@@ -59,7 +59,7 @@ namespace RX_DigiPrint.Services
                     case TcpIp.REP_FLUID_STAT:      handle_fluid_stat(msg);      break;
 
                     case TcpIp.REP_CHILLER_STAT:    handle_chiller_stat(msg);    break;
-
+                    case TcpIp.REP_ENCODER_STAT:    handle_encoder_stat(msg);    break;
                     case TcpIp.REP_HEAD_STAT:       handle_head_stat(msg);       break;
                     case TcpIp.REP_TT_STAT:         handle_tt_stat(msg);         break;    
 
@@ -244,6 +244,20 @@ namespace RX_DigiPrint.Services
             else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length")); 
         }
 
+        //--- handle_encoder_stat -----------------------------------------
+        private void handle_encoder_stat(Byte[] buf)
+        {
+            TcpIp.SEncoderStat status;
+            TcpIp.SMsgHdr hdr;
+            int hdrlen = RxStructConvert.ToStruct(out hdr, buf);
+            int len=RxStructConvert.ToStruct(out status, buf, hdrlen);
+            if (hdrlen+len == hdr.msgLen)
+            {
+                RxGlobals.Encoder.Update(status);
+            }
+            else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length")); 
+        }        
+        
         //--- handle_head_stat -----------------------------------------
         private void handle_head_stat(Byte[] buf)
         {

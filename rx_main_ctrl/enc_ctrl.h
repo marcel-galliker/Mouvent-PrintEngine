@@ -13,6 +13,7 @@
 
 #pragma once
 
+#include "rx_sok.h"
 #include "print_queue.h"
 
 void enc_init(void);
@@ -30,7 +31,8 @@ int	 enc_enable_printing(int enable);
 int  enc_ready(void);
 int	 enc_simu_encoder(int khz);
 void enc_error_reset(void);
-
+void enc_reply_stat(RX_SOCKET socket);
+void enc_save_par(void);
 
 int  enc_uv_on(void);
 int  enc_uv_off(void);

@@ -461,7 +461,7 @@ int  lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 	
 	switch (msgId)
 	{
-	case CMD_TT_STATUS:				sok_send_2(&socket, INADDR_ANY, REP_TT_STATUS, sizeof(RX_TestTableStatus), &RX_TestTableStatus);	
+	case CMD_TT_STATUS:				sok_send_2(&socket, REP_TT_STATUS, sizeof(RX_TestTableStatus), &RX_TestTableStatus);	
 		break;
 
 	case CMD_CLN_STOP:				motors_stop(MOTOR_ALL_BITS);
@@ -641,7 +641,9 @@ int  lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		_lbrob_ro_error_reset();
 		fpga_stepper_error_reset();
 		break;
-
+	
+	case CMD_CAP_VENT:	break;
+		
 	default:						Error(ERR_CONT, 0, "CLN: Command 0x%08x not implemented", msgId); break;
 	}
 }
@@ -701,5 +703,5 @@ static void _lbrob_ro_send_status(RX_SOCKET socket)
 {
 	static RX_SOCKET _socket = INVALID_SOCKET;
 	if (socket != INVALID_SOCKET) _socket = socket;
-	if (_socket != INVALID_SOCKET) sok_send_2(&_socket, INADDR_ANY, REP_TT_STATUS, sizeof(RX_TestTableStatus), &RX_TestTableStatus);
+	if (_socket != INVALID_SOCKET) sok_send_2(&_socket, REP_TT_STATUS, sizeof(RX_TestTableStatus), &RX_TestTableStatus);
 }

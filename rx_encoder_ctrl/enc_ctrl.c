@@ -298,6 +298,6 @@ static int _do_simu_encoder (RX_SOCKET socket, int *pkhz)
 static int _do_encoder_stat (RX_SOCKET socket)
 {
 	RX_EncoderStatus.info.analog_encoder = tw8_present();
-	sok_send_2(&socket, INADDR_ANY, REP_ENCODER_STAT, sizeof(RX_EncoderStatus), &RX_EncoderStatus);
+	sok_send_2(&socket, REP_ENCODER_STAT, sizeof(RX_EncoderStatus), &RX_EncoderStatus);
 	return REPLY_OK;
 }

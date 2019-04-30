@@ -61,6 +61,9 @@
     <ClInclude Include="rx_flz.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="jet_correction.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ctrl_client.c">
@@ -70,9 +73,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="head_client.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="data.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="spool_rip.c">
@@ -91,6 +91,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="rx_flz.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="data.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jet_correction.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

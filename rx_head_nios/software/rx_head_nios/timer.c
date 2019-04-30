@@ -171,6 +171,17 @@ static void _do_1000ms_timer(void)
 		main_error_reset();
 		pRX_Config->cmd.error_reset = FALSE;
 	}
+
+	//--- user eeprom ----------------------------------------
+	if (pRX_Config->cmd.write_user_eeprom)
+	{
+		int head;
+		for (head=0; head<SIZEOF(pRX_Config->user_eeprom); head++)
+		{
+			head_eeprom_change_user_data(head, pRX_Status->user_eeprom[head], pRX_Config->user_eeprom[head], sizeof(pRX_Config->user_eeprom[head]), 0);
+		}
+		pRX_Config->cmd.write_user_eeprom = FALSE;
+	}
 }
 
 //--- handle_timer_0_interrupt ----------------------------------------

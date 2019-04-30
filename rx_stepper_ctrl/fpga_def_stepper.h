@@ -188,9 +188,12 @@ typedef struct
 
 	//--- analog pulse counter -----------------------------
 	UINT32	adc_cnt[8];		//       130 // size 0x20
+	UINT32	input_pulse_cnt[6];		// 150 // size 0x18 // Input 6 7 8 9 10 11
+	UINT32	res_168;
+	UINT32	res_16c;
 
 	//--- reserved ------------------
-	UINT32	res_130_200[(0x200-0x150)/4];	// FF202130 - FF2021ff
+	UINT32	res_170_200[(0x200-0x170)/4];	// FF202130 - FF2021ff
 } SFpgaStat;
 
 //--- SMove -----------------------------------------
@@ -277,7 +280,7 @@ typedef struct
 	UINT32	adc_rst;		//       028: resets adc
 	UINT32	reset_err;		//       02C: 
 	UINT32	reset_cnt;		//       030: 
-	UINT32	res_114;		//       034: 
+	UINT32	min_in_pulse_width;	//   034: 16 bit entprellung, in multiples of 20ns
 	UINT32	res_118;		//       038: 
 	UINT32	res_11C;		//       03C:	
 	
@@ -286,7 +289,7 @@ typedef struct
 
 	//--- analog pulse counter -----------------------------
 	UINT32	adc_thresh[8];		//       220 // size 0x20
-	UINT32	pwm_output[4];		//       240 // size 0x20 // pwm exits the highest 4 outputs
+	UINT32	pwm_output[6];		//       240 // size 0x20 // pwm exits the highest 6 outputs  6 7 8 9 10 11
 } SFpgaPar;
 
 //--- SFpgaEncoder ---------------------------------------------

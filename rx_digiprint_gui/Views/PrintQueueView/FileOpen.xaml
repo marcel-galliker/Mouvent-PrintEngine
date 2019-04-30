@@ -79,9 +79,16 @@
                     <ig:TemplateColumn.ItemTemplate>
                         <DataTemplate>
                             <Grid>
-                                <Image Source="{Binding FileType, Converter={StaticResource FileTypeImage_Converter}}" Height="32"/>
-                                <common:RxButton Click="Print_Clicked" Visibility="{Binding PrintButtonVisibility}" x:Name="Print">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="auto"/>
+                                    <ColumnDefinition Width="auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Image Source="{Binding FileType, Converter={StaticResource FileTypeImage_Converter}}" Visibility="{Binding FileTypeVisibility}" Height="32" />
+                                <common:RxButton Grid.Column="0" Click="Print_Clicked" Visibility="{Binding PrintButtonVisibility}">
                                     <Image Source="../../Resources/Bitmaps/Print.ico" />
+                                </common:RxButton>
+                                <common:RxButton Grid.Column="1" Click="Delete_Clicked" Visibility="{Binding DeleteButtonVisibility}">
+                                    <Image Source="{StaticResource delete_ico}"/>
                                 </common:RxButton>
                             </Grid>
                         </DataTemplate>
@@ -100,11 +107,6 @@
                                     </Image.LayoutTransform>
                                 </Image>
                                 <TextBlock Text="{Binding Dimension}" Background="#99FFFFFF" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
-                                <!--
-                                <common:RxButton Click="Print_Clicked" Visibility="{Binding PrintButtonVisibility}">
-                                    <Image Source="../../Resources/Bitmaps/Print.ico" />
-                                </common:RxButton>
-                                -->
                             </Grid>
                         </DataTemplate>
                     </ig:TemplateColumn.ItemTemplate>

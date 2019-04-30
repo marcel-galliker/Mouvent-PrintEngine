@@ -20,6 +20,7 @@
 int arg_debug			= FALSE;
 int arg_simuPLC			= FALSE;
 int arg_simuEncoder		= FALSE;
+int arg_simuHeads		= FALSE;
 int arg_simuChiller		= FALSE;
 int arg_hamster			= FALSE;
 
@@ -32,6 +33,7 @@ void args_init(int argc, char** argv)
 		if		(!strcmp(argv[i],  "-debug"))	arg_debug=TRUE;
 		else if	(!stricmp(argv[i], "-simuplc"))	arg_simuPLC=TRUE;
 		else if	(!stricmp(argv[i], "-simuencoder"))	arg_simuEncoder=TRUE;
+		else if	(!stricmp(argv[i], "-simuheads"))	arg_simuHeads=TRUE;
 		else if	(!stricmp(argv[i], "-simuchiller"))	arg_simuChiller=TRUE;
 		else if	(!stricmp(argv[i], "-hamster"))		arg_hamster=arg_simuPLC=TRUE;
 		else printf("argument >>%s<< not known\n", argv[i]);	

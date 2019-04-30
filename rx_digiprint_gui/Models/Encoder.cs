@@ -1,0 +1,113 @@
+﻿using RX_Common;
+using RX_DigiPrint.Services;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace RX_DigiPrint.Models
+{
+    public class Encoder : RxBindable
+    {
+        //--- constructor ---
+        public Encoder()
+        {
+            RxGlobals.PrintSystem.PropertyChanged += PrintSystem_PropertyChanged;
+            _printertype_changed();
+        }
+
+        //--- PrintSystem_PropertyChanged ----------------------------------
+        private void PrintSystem_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName.Equals("PrinterType")) _printertype_changed();
+        }
+
+        //--- _printertype_changed --------------------
+        void _printertype_changed()
+        {
+            Enabled = (RxGlobals.PrintSystem.PrinterType!=EPrinterType.printer_undef) && !RxGlobals.PrintSystem.IsScanning;
+        }
+
+        //--- Property Enabled ---------------------------------------
+        private bool _Enabled=true;
+        public bool Enabled
+        {
+            get { return _Enabled; }
+            set { SetProperty(ref _Enabled, value); }
+        }
+
+        //--- Property Par1 ---------------------------------------
+        private int _Par1;
+        public int Par1
+        {
+            get { return _Par1; }
+            set { SetProperty(ref _Par1, value); }
+        }
+
+        //--- Property Par2 ---------------------------------------
+        private int _Par2;
+        public int Par2
+        {
+            get { return _Par2; }
+            set { SetProperty(ref _Par2, value); }
+        }
+
+        //--- Property AmplOld ---------------------------------------
+        private int _AmplOld;
+        public int AmplOld
+        {
+            get { return _AmplOld; }
+            set { SetProperty(ref _AmplOld, value); }
+        }
+
+        //--- Property AmplNew ---------------------------------------
+        private int _AmplNew;
+        public int AmplNew
+        {
+            get { return _AmplNew; }
+            set { SetProperty(ref _AmplNew, value); }
+        }
+
+        //--- Property Percentage ---------------------------------------
+        private int _Percentage;
+        public int Percentage
+        {
+            get { return _Percentage; }
+            set { SetProperty(ref _Percentage, value); }
+        }
+
+        //--- Property Meters ---------------------------------------
+        private UInt32 _Meters;
+        public UInt32 Meters
+        {
+            get { return _Meters; }
+            set { SetProperty(ref _Meters, value); }
+        }
+        
+        
+        //--- Request ---------------------------------
+        public void Request()
+        {
+            RxGlobals.RxInterface.SendCommand(TcpIp.CMD_ENCODER_STAT);
+        }
+
+        //--- Save ---------------------------------
+        public void Save()
+        {
+            RxGlobals.RxInterface.SendCommand(TcpIp.CMD_ENCODER_SAVE_PAR);
+        }
+
+        //--- Update -----------------------------------
+        public void Update(TcpIp.SEncoderStat msg)
+        {
+            Par1        = msg.corrRotPar[0];
+            Par2        = msg.corrRotPar[1];
+            AmplOld     = msg.ampl_old;
+            AmplNew     = msg.ampl_new;
+            Percentage  = msg.percentage;
+            Meters      = msg.meters;
+        }
+
+    }
+}

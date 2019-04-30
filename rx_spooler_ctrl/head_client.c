@@ -116,6 +116,12 @@ int hc_end(void)
 	return REPLY_OK;
 }
 
+//--- hc_in_simu ------------------------------------------------------------------
+int  hc_in_simu(void)
+{
+	return _Simulation;
+}
+
 //--- hc_head_board_cfg ------------------------------------------------------------------
 int hc_head_board_cfg(RX_SOCKET socket, SHeadBoardCfg* cfg)
 {

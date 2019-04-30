@@ -61,7 +61,6 @@ typedef struct
 {
 	int no;
 	RX_SOCKET	socket;
-	UINT32		ipaddr;
 	int	aliveTime;
 } SFluidThreadPar;
 
@@ -139,7 +138,6 @@ static void *_fluid_thread(void *lpParameter)
 				if (_FluidThreadPar[i].socket==INVALID_SOCKET && net_port_listening(dev_fluid, i, PORT_CTRL_FLUID))
 				{
 					net_device_to_ipaddr(dev_fluid, i, addr, sizeof(addr));
-					_FluidThreadPar[i].ipaddr = sok_addr_32(addr);
 					errNo=sok_open_client_2(&_FluidThreadPar[i].socket, addr, PORT_CTRL_FLUID, SOCK_STREAM, _handle_fluid_ctrl_msg, _connection_closed);
 					if (errNo == REPLY_OK)
 					{
@@ -247,10 +245,10 @@ void fluid_set_config(void)
     				
 			cfg.headsPerColor = RX_Config.headsPerColor;
 
-			sok_send_2(&_FluidThreadPar[i].socket, _FluidThreadPar[i].ipaddr, CMD_FLUID_CFG, sizeof(cfg), &cfg);
+			sok_send_2(&_FluidThreadPar[i].socket, CMD_FLUID_CFG, sizeof(cfg), &cfg);
 			
 			if (i==0) 
-				sok_send_2(&_FluidThreadPar[i].socket, _FluidThreadPar[i].ipaddr, CMD_SCALES_SET_CFG, sizeof(RX_Config.scalesTara), RX_Config.scalesTara);
+				sok_send_2(&_FluidThreadPar[i].socket, CMD_SCALES_SET_CFG, sizeof(RX_Config.scalesTara), RX_Config.scalesTara);
 		}
 	}	
 }
@@ -263,7 +261,7 @@ void fluid_error_reset(void)
 	{
 		if (_FluidThreadPar[i].socket!=INVALID_SOCKET) 
 		{
-			sok_send_2(&_FluidThreadPar[i].socket, _FluidThreadPar[i].ipaddr, CMD_ERROR_RESET, 0, NULL);		
+			sok_send_2(&_FluidThreadPar[i].socket, CMD_ERROR_RESET, 0, NULL);		
 		}
 	}
 }
@@ -310,14 +308,11 @@ void fluid_tick(void)
 		
 		if (!chiller_is_running() &&  _FluidStatus[i].ctrlMode>ctrl_off)
 			_send_ctrlMode(i, ctrl_off, TRUE);
-
-		if (_HeadErr[i]) _FluidStatus[i].err |= err_printhead; 
 	}
 	
 	memset(_HeadStateCnt,  0, sizeof(_HeadStateCnt));
 	memset(_HeadState,     0, sizeof(_HeadState));
 	memset(_HeadPumpSpeed, 0, sizeof(_HeadPumpSpeed));
-	memset(_HeadErr,       0, sizeof(_HeadErr));
 
 	for (i=0; i<SIZEOF(_FluidThreadPar); i++)
 	{
@@ -326,7 +321,7 @@ void fluid_tick(void)
 			if (_FluidThreadPar[i].aliveTime && _FluidThreadPar[i].aliveTime + TIMEOUT < time)
 				sok_close(&_FluidThreadPar[i].socket);
 			else
-				sok_send_2(&_FluidThreadPar[i].socket, _FluidThreadPar[i].ipaddr, CMD_FLUID_STAT, INK_PER_BOARD*sizeof(state[0]), &state[i*INK_PER_BOARD]);
+				sok_send_2(&_FluidThreadPar[i].socket, CMD_FLUID_STAT, INK_PER_BOARD*sizeof(state[0]), &state[i*INK_PER_BOARD]);
 		}
 	}
 }
@@ -551,8 +546,10 @@ void fluid_reply_stat(RX_SOCKET socket)	// to GUI
 	//		_FluidStatus[i].info.flushed   = ctrl_check_head_flushed(i);			
 		}	
 		_FluidStatus[i].canisterLevel  = _ScalesStatus[_FluidToScales[i]];
+		if (_HeadErr[i]) _FluidStatus[i].err |= err_printhead; 
+		_HeadErr[i]=0;
 	}
-	sok_send_2(&socket, INADDR_ANY, REP_FLUID_STAT, sizeof(_FluidStatus), _FluidStatus);
+	sok_send_2(&socket, REP_FLUID_STAT, sizeof(_FluidStatus), _FluidStatus);
 }
 
 //--- _flush_next -------------------------------------------
@@ -683,7 +680,7 @@ void fluid_send_tara(int no)
 {
 	int i=0;
 	no = _FluidToScales[no];
-	sok_send_2(&_FluidThreadPar[i].socket, _FluidThreadPar[i].ipaddr, CMD_SCALES_TARA, sizeof(no), &no);
+	sok_send_2(&_FluidThreadPar[i].socket, CMD_SCALES_TARA, sizeof(no), &no);
 }
 
 //--- fluid_start_printing --------
@@ -717,7 +714,7 @@ void fluid_set_head_state	(int no, SHeadStat *pstat)
 {
 	if (no>=0 && no<SIZEOF(_HeadState)) 
 	{	
-		if (pstat->err) _HeadErr[no] = TRUE; 
+		if (pstat->err) _HeadErr[no] = TRUE;
 		if (valid(pstat->presIn))
 		{
 			_HeadState[no].condPresIn += pstat->presIn;

@@ -73,7 +73,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
             {
                 if (Page_Settings.Visibility==Visibility.Visible) item.ScanLength = 0;
                 item.SendMsg(TcpIp.CMD_SET_PRINT_QUEUE);
-                item.SaveDefaults(false);
+                item.SaveDefaults();
             }
         }
     }

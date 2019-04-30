@@ -31,6 +31,7 @@ int  ctrl_singleHead(void);
 
 void ctrl_update_hostname(void);
 int  ctrl_set_config(void);
+int  ctrl_head_cfg_done(int headNo);
 void ctrl_head_cal_done(int fluidNo);
 void ctrl_set_max_speed(void);
 int	 ctrl_abort_printing(void);

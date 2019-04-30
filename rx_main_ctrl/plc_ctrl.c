@@ -24,7 +24,6 @@
 #include "rx_rexroth.h"
 #include "enc_ctrl.h"
 #include "step_ctrl.h"
-#include "step_tx.h"
 #include "ctrl_svr.h"
 #include "print_ctrl.h"
 #include "chiller.h"
@@ -128,6 +127,9 @@ static void _plc_req_material	(RX_SOCKET socket, char *filename, int cmd);
 static void _plc_save_material	(RX_SOCKET socket, char *filename, int cmd, char *varList);
 static void _plc_del_material	(RX_SOCKET socket, char *filename, int cmd, char *name);
 
+static int  _plc_error_filter(UINT32 errNo);
+static void _plc_error_filter_reset(void);
+
 static void _plc_set_command(char *mode, char *cmd);
 static void _plc_set_par_default(void);
 static void _plc_set_par(SPrintQueueItem *pItem, SPlcPar *pPlcPar);
@@ -151,10 +153,12 @@ static int				_PauseCtrl=FALSE;
 static int				_DataSent =FALSE;
 static int				_ErrorFlags;
 static int				_ErrorFilter=0;
-#define ERROR_FILTER_TIME	100
+static int				_ErrorFilterBuf[100];
+#define ERROR_FILTER_TIME	500
 static double			_StepDist;
 static int				_MpliStarting;
 static int				_UvUsed;
+static int				_Speed;
 
 static EnPlcState		_PlcState	= plc_undef;
 static int				_WasInRun   = FALSE;
@@ -181,10 +185,10 @@ int	plc_init(void)
 			
 	
 	memset(&_StartEncoderItem, 0, sizeof(_StartEncoderItem));
+	_plc_error_filter_reset();
 	_PauseCtrl = FALSE;
 	_DataSent = FALSE;
 	_ErrorFlags  = 0;
-	_ErrorFilter = 0;
 	_UvUsed = FALSE;
 	_Splicing = FALSE;
 	_CmdReleased = FALSE;
@@ -216,7 +220,7 @@ void plc_reset(void)
 void plc_error_reset(void)
 {
 	_ErrorFlags  = 0;
-	_ErrorFilter = 0;
+	_plc_error_filter_reset();
 	if (rex_is_connected())
 	{
 		_plc_set_command("", "CMD_CLEAR_ERROR");
@@ -298,7 +302,7 @@ static void _plc_set_command(char *mode, char *cmd)
 	if (!strcmp(cmd, "CMD_CLEAR_ERROR"))
 	{
 		_ErrorFlags  = 0;
-		_ErrorFilter = 0;
+		_plc_error_filter_reset();
 	    sys_reset_error();
 		rx_sleep(200);
 	}
@@ -418,6 +422,7 @@ int  plc_set_printpar(SPrintQueueItem *pItem)
 	_plc_set_par(pItem, &par);
 	_plc_send_par(&par);
 	memcpy(&_StartEncoderItem, pItem, sizeof(_StartEncoderItem));
+	_Speed = _StartEncoderItem.speed;
 	_SendPause = TRUE;
 	
 	return REPLY_OK;
@@ -431,9 +436,9 @@ int  plc_start_printing(void)
 	{
 		plc_error_reset();
 		_plc_set_command("CMD_PRODUCTION", "CMD_RUN");
-		steptx_set_vent(TRUE);
+		step_set_vent(_Speed);
 	}
-//	if (_SimuEncoder) ctrl_simu_encoder(50);
+	if (_SimuEncoder) ctrl_simu_encoder(_Speed);		
 	return REPLY_OK;
 }
 
@@ -452,8 +457,7 @@ int  plc_stop_printing(void)
 	{
 		Error(LOG, 0, "plc_stop_printing: send CMD_STOP");
 		_plc_set_command("CMD_PRODUCTION", "CMD_STOP");
-		steptx_set_vent(FALSE);
-
+		step_set_vent(FALSE);
 
 		/*
 		if (RX_Config.printer.type==printer_TX801 || RX_Config.printer.type==printer_TX802)
@@ -478,7 +482,7 @@ int  plc_clean(void)
 {
 	Error(LOG, 0, "plc_clean: send CMD_STOP");
 	_plc_set_command("CMD_PRODUCTION", "CMD_STOP");
-	steptx_set_vent(FALSE);
+	step_set_vent(FALSE);
 	return REPLY_OK;
 }
 
@@ -501,7 +505,7 @@ int	plc_to_cap_pos(void)
 {
 	Error(LOG, 0, "plc_to_cap_pos: send CMD_STOP");
 	_plc_set_command("CMD_PRODUCTION", "CMD_STOP");
-	steptx_set_vent(FALSE);
+	step_set_vent(FALSE);
 	return REPLY_OK;
 }
 
@@ -515,6 +519,7 @@ int  plc_pause_printing(void)
 	{
 		_plc_set_par_default();
 //		_plc_set_command("CMD_PRODUCTION", "CMD_PAUSE");
+		Error(LOG, 0, "send PAUSE");
 		_SendPause = TRUE;
 	}
 	return REPLY_OK;
@@ -679,10 +684,6 @@ static void _plc_get_var(RX_SOCKET socket, char *varList)
 	{
 		*end++=0; 
 		len += sprintf(&answer[len], "%s", str);
-		if (!strcmp(name, "XML_ENC_OFFSET"))
-		{
-			printf("found\n");
-		}
 		if (!name[0])
 		{
 			var = name+sprintf(name, "%s.", str);
@@ -700,7 +701,7 @@ static void _plc_get_var(RX_SOCKET socket, char *varList)
 	}
 
 //	printf("answer:len=%d\n%s\n", len, answer);
-	sok_send_2(&socket, INADDR_ANY, REP_PLC_GET_VAR, (int)strlen(answer), answer);
+	sok_send_2(&socket, REP_PLC_GET_VAR, (int)strlen(answer), answer);
 	free(answer);
 }
 
@@ -855,7 +856,7 @@ static void _plc_req_material	(RX_SOCKET socket, char *filename, int cmd)
 	HANDLE attribute =NULL;
 	sprintf(str, PATH_USER"%s", filename);
 	setup_load(file, str);
-	sok_send_2(&socket, INADDR_ANY, cmd | REP_X, 0, NULL);	// CMD_PLC_RES_MATERIAL | CMD_PLC_REQ_SPLICEPAR
+	sok_send_2(&socket, cmd | REP_X, 0, NULL);	// CMD_PLC_RES_MATERIAL | CMD_PLC_REQ_SPLICEPAR
 	while (TRUE)
 	{
 		len=0;
@@ -870,7 +871,7 @@ static void _plc_req_material	(RX_SOCKET socket, char *filename, int cmd)
 			len += sprintf(&str[len], "%s=%s\n", name, val);
 		}
 		str[len]=0;
-		sok_send_2(&socket, INADDR_ANY, cmd | EVT_X, len, str);	// CMD_PLC_ITM_MATERIAL | CMD_PLC_ITM_SPLICEPAR
+		sok_send_2(&socket, cmd | EVT_X, len, str);	// CMD_PLC_ITM_MATERIAL | CMD_PLC_ITM_SPLICEPAR
 	}
 }
 
@@ -1039,11 +1040,34 @@ static void _plc_set_time()
 	#endif
 }
 
+//--- _plc_error_filter ----------------------------------
+static int _plc_error_filter(UINT32 errNo)
+{
+	int i;
+	for (i=0; i<SIZEOF(_ErrorFilterBuf); i++)
+	{
+		if (_ErrorFilterBuf[i]==errNo) return FALSE;
+		if (_ErrorFilterBuf[i]==0)
+		{
+			_ErrorFilterBuf[i] = errNo;
+			return TRUE;
+		}
+	}
+	return TRUE;
+}
+
+//--- _plc_error_filter_reset ----------------------------
+static void _plc_error_filter_reset(void)
+{
+	_ErrorFilter = 0; 
+	memset(_ErrorFilterBuf, 0, sizeof(_ErrorFilterBuf));
+};
+
+
 //--- _plc_get_status ---------------------------------
 static void _plc_get_status()
 {
 	SPlcLogItem item;
-	int err;
 	int ticks=rx_get_ticks();
 	while(sys_get_new_log_item(&item, &_LastLogIdx) == REPLY_OK)
 	{
@@ -1065,15 +1089,18 @@ static void _plc_get_status()
 				default: err=0;						
 				}
 				*/
-				
-				err=0;
-				if(item.state == active)
+
+				if (item.state == active && _plc_error_filter(item.errNo))
 				{
-					if((item.errNo & 0xf0000000) == 0xf0000000)	{    Error(ERR_CONT,	err, "PLC (%X): %s", item.errNo, item.text); _ErrorFilter = rx_get_ticks() + ERROR_FILTER_TIME; }
-					else if((item.errNo & 0xf0000000) == 0xe0000000) Error(WARN,		err, "PLC (%X): %s", item.errNo, item.text);
-					else                                             Error(LOG,			err, "PLC (%X): %s", item.errNo, item.text);
-				}
-				else if(item.state == message) Error(LOG, err, "PLC (%X): %s", item.errNo, item.text);
+					int err=0;
+					if(item.state == active)
+					{
+						if((item.errNo & 0xf0000000) == 0xf0000000)	{    Error(ERR_CONT,	err, "PLC (%X): %s", item.errNo, item.text); _ErrorFilter = rx_get_ticks() + ERROR_FILTER_TIME; }
+						else if((item.errNo & 0xf0000000) == 0xe0000000) Error(WARN,		err, "PLC (%X): %s", item.errNo, item.text);
+						else                                             Error(LOG,			err, "PLC (%X): %s", item.errNo, item.text);
+					}
+					else if(item.state == message) Error(LOG, err, "PLC (%X): %s", item.errNo, item.text);					
+				}				
 			}
 		}
 	}
@@ -1116,8 +1143,8 @@ static void _plc_state_ctrl()
 			UINT32 released;
 			if (lc_get_value_by_name_UINT32(APP "STA_CMD_RELEASE", &released)==REPLY_OK)
 			{
-				if ( released && !_CmdReleased) Error(LOG, 0, "STA_CMD_RELEASE = TRUE");
-				if (_CmdReleased &&  !released) Error(LOG, 0, "STA_CMD_RELEASE = FALSE");
+			//	if ( released && !_CmdReleased) Error(LOG, 0, "STA_CMD_RELEASE = TRUE");
+			//	if (_CmdReleased &&  !released) Error(LOG, 0, "STA_CMD_RELEASE = FALSE");
 			
 				_CmdReleased = splicing;					
 			}
@@ -1134,7 +1161,7 @@ static void _plc_state_ctrl()
 				_SendPause = FALSE;
 				rx_sleep(200);
 				_plc_set_command("CMD_PRODUCTION", "CMD_PAUSE");
-				steptx_set_vent(FALSE);
+				step_set_vent(FALSE);
 			}
 			if (_SendWebIn)
 			{
@@ -1206,7 +1233,7 @@ static void _plc_state_ctrl()
 			_CanRun = TRUE;
 			if (!_SimuPLC)    _plc_set_command("CMD_PRODUCTION", "CMD_RUN");
 			if (_SimuEncoder) ctrl_simu_encoder(_StartEncoderItem.speed);
-			steptx_set_vent(_StartEncoderItem.speed);
+			step_set_vent(_Speed);
 			memset(&_StartEncoderItem, 0, sizeof(_StartEncoderItem));
 			TrPrintfL(TRUE, "PLC: CMD_RUN sent");
 		}
@@ -1242,7 +1269,7 @@ static void _do_plc_get_info(RX_SOCKET socket)
 		info.tempMax = (FLOAT)43.7;
 	}
 	else sys_get_info(&info);
-	sok_send_2(&socket, INADDR_ANY, REP_PLC_GET_INFO, sizeof(info), &info);
+	sok_send_2(&socket, REP_PLC_GET_INFO, sizeof(info), &info);
 }
 
 //--- _do_plc_get_log ---------------------------------------------------
@@ -1264,7 +1291,7 @@ static void _do_plc_get_log(RX_SOCKET socket)
 			sprintf(item.date, "%d.%d.%d %d:%d:%d.%d", time.wDay, time.wMonth, time.wYear, time.wHour, time.wMinute, time.wSecond, 0);
 			item.errNo = 0x1000+i;
 			sprintf(item.text, "Simu Log %03d", i+1);
-			sok_send_2(&socket, INADDR_ANY, REP_PLC_GET_LOG, sizeof(item), &item);
+			sok_send_2(&socket, REP_PLC_GET_LOG, sizeof(item), &item);
 		}
 	}
 	else
@@ -1273,11 +1300,11 @@ static void _do_plc_get_log(RX_SOCKET socket)
 		for (i=0; i<100; i++)
 		{
 			if (sys_get_log_item(i, &item, &idx)) break;
-			sok_send_2(&socket, INADDR_ANY, REP_PLC_GET_LOG, sizeof(item), &item);
+			sok_send_2(&socket, REP_PLC_GET_LOG, sizeof(item), &item);
 		}
 		if (idx>_LastLogIdx) _LastLogIdx = idx;
 	}
-//	sok_send_2(&socket, INADDR_ANY, END_PLC_GET_LOG, 0, NULL);
+//	sok_send_2(&socket, END_PLC_GET_LOG, 0, NULL);
 	TrPrintfL(1, "PlcLog: %d items sent to %d", i, socket);
 }
 
@@ -1359,9 +1386,9 @@ static void* _plc_thread(void *par)
 				_OnPlcConnected();
 				while (_NetItem.connected)
 				{
-					net_register(&_NetItem);
 					while (sys_in_run_mode())
 					{
+						net_register(&_NetItem);
 			//			TrPrintfL(TRUE, "PLC Config_timer=%d", config_timer);
 						switch(config_timer)
 						{

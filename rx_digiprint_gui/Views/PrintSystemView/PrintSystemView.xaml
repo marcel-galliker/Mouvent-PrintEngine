@@ -42,6 +42,7 @@
                 <rx_uc:CommandButtons Margin="0,0,0,1"/>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" >
 
+                    <!--                 
                     <common:RxButton x:Name="Button_Purge" Click="Purge_Clicked" ToolTip="Purge" >
                         <TextBlock Text="Purge" FontSize="22"/>
                     </common:RxButton>
@@ -49,7 +50,8 @@
                     <common:RxButton x:Name="Button_Wipe" Click="Wipe_Clicked" ToolTip="Wipe" >
                         <TextBlock Text="Wipe" FontSize="22"/>
                     </common:RxButton>
-
+                    -->
+                    
                     <common:RxButton x:Name="Button_Save" 
                                      Click="Save_Clicked" 
                                      HorizontalAlignment="Right" 
@@ -75,6 +77,7 @@
                             <rxView:StepperGrid x:Name="StepperGrid"/>
                             <rxView:CleafStepperGrid x:Name="CleafStepperGrid"/>
                             <rx_uc:ChillerView/>
+                            <rx_uc:EncoderView/>
                         </StackPanel>
                     </StackPanel>
 

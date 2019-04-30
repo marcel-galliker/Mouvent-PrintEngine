@@ -119,7 +119,6 @@ typedef struct SPosName
 //--- global  variables -----------------------------------------------------------------------------------------------------------------
 
 static RX_SOCKET		*_step_socket[STEPPER_CNT] = { 0 };
-static UINT32			_step_ipaddr[STEPPER_CNT] = { 0 };
 static STestTableStat	_status[STEPPER_CNT];
 static SClnStateEnv		_cln_state_env[STEPPER_CNT];
 static int				_reset_pos = 100000-7500; //  2000; //  27000; //  7000; // 7000; // 5000; // not negative ! // position to which he goes up after every job // slightly above robot
@@ -140,12 +139,11 @@ static void _stepc_statemachine(int no, SClnStateEnv *_state_env);
 
 
 //--- stepc_init ---------------------------------------------------
-void stepc_init(int no, RX_SOCKET *psocket, UINT32 ipaddr)
+void stepc_init(int no, RX_SOCKET *psocket)
 {
 	if (no >= 0 && no < STEPPER_CNT)
 	{
 		_step_socket[no] = psocket;
-		_step_ipaddr[no] = ipaddr;
 	}
 	memset(_status, 0, sizeof(_status));
 }
@@ -176,7 +174,7 @@ int	 stepc_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen)
 			case CMD_TT_SCAN_RIGHT:
 			case CMD_TT_SCAN_LEFT:
 			case CMD_TT_VACUUM:
-				sok_send_2(_step_socket[no], _step_ipaddr[no], cmd, 0, NULL);
+				sok_send_2(_step_socket[no], cmd, 0, NULL);
 				break;
 
 			case CMD_TT_SCAN:
@@ -186,7 +184,7 @@ int	 stepc_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen)
 								par.scanCnt = 5;
 								par.scanMode = PQ_SCAN_STD;
 								par.yStep = 10000;
-								sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_TT_SCAN, sizeof(par), &par);
+								sok_send_2(_step_socket[no], CMD_TT_SCAN, sizeof(par), &par);
 				}
 				break;
 
@@ -201,15 +199,15 @@ int	 stepc_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen)
 				break;
 
 			case CMD_CAP_UP_POS:
-				if (!arg_simuPLC) sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CAP_UP_POS, 0, NULL);
+				if (!arg_simuPLC) sok_send_2(_step_socket[no], CMD_CAP_UP_POS, 0, NULL);
 				break;
 
 			case CMD_CAP_PRINT_POS:
-				sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CAP_PRINT_POS, sizeof(RX_Config.stepper.print_height), &RX_Config.stepper.print_height);			
+				sok_send_2(_step_socket[no], CMD_CAP_PRINT_POS, sizeof(RX_Config.stepper.print_height), &RX_Config.stepper.print_height);			
 				break;
 
 			case CMD_CAP_CAPPING_POS:
-				sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CAP_CAPPING_POS, 0, NULL);			
+				sok_send_2(_step_socket[no], CMD_CAP_CAPPING_POS, 0, NULL);			
 				break;
 
 				//--- cleaning ---------------------------------------------------------
@@ -482,7 +480,7 @@ static void _stepc_statemachine(int no, SClnStateEnv *senv)
 	// --- Stop State Machine ---
 	if ((senv->st_cmd == CMD_CAP_STOP) || (senv->st_cmd == CMD_CLN_STOP))
 	{
-		sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CAP_STOP, 0, NULL);
+		sok_send_2(_step_socket[no], CMD_CAP_STOP, 0, NULL);
 		senv->st_cmd = FALSE;
 		senv->st_cmd_stored = FALSE;
 		_stepc_reset_fluid_sys(no, senv);
@@ -502,7 +500,7 @@ static void _stepc_statemachine(int no, SClnStateEnv *senv)
 	// --- Reference State Machine ---
 	if (senv->st_cmd == CMD_CAP_REFERENCE)
 	{
-		//sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CAP_STOP, 0, NULL);
+		//sok_send_2(_step_socket[no], CMD_CAP_STOP, 0, NULL);
 		senv->capCurrentState = ST_INIT;
 		printf("Reference State Machine \n");
 	}
@@ -540,19 +538,19 @@ static void _stepc_statemachine(int no, SClnStateEnv *senv)
 			if (senv->st_cmd == CMD_CAP_REFERENCE)
 			{
 				senv->st_cmd = FALSE;
-				sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CAP_REFERENCE, 0, NULL); // ref Lift
+				sok_send_2(_step_socket[no], CMD_CAP_REFERENCE, 0, NULL); // ref Lift
 				senv->capCurrentState = ST_REF_LIFT;
 			}
 			//}
 			//else
 			//			{
 			//				int set_flag = 2;
-			//				sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CLN_EMPTY_CAP, sizeof(set_flag), &set_flag); // Clean Cap valve inside
+			//				sok_send_2(_step_socket[no], CMD_CLN_EMPTY_CAP, sizeof(set_flag), &set_flag); // Clean Cap valve inside
 			//				//senv->st_cmd = CMD_CLN_WIPE;
 			//				senv->dry_wipe_done = FALSE;
 			//				set_flag = 2;
 			//				senv->lift_move_tgl = _status[no].info.move_tgl;
-			//				sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CAP_EMPTY_CAP, sizeof(set_flag), &set_flag); // Empty Cap
+			//				sok_send_2(_step_socket[no], CMD_CAP_EMPTY_CAP, sizeof(set_flag), &set_flag); // Empty Cap
 			//				senv->capCurrentState = ST_CAP_CLEAN_REF_IN;
 			//			}
 
@@ -563,10 +561,10 @@ static void _stepc_statemachine(int no, SClnStateEnv *senv)
 		//		if (senv->lift_move_tgl != _status[no].info.move_tgl)
 		//		{
 		//			int set_flag = 1;
-		//			sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CLN_EMPTY_CAP, sizeof(set_flag), &set_flag); // Clean Cap valve outside
+		//			sok_send_2(_step_socket[no], CMD_CLN_EMPTY_CAP, sizeof(set_flag), &set_flag); // Clean Cap valve outside
 		//			set_flag = 1;
 		//			senv->lift_move_tgl = _status[no].info.move_tgl;
-		//			sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CAP_EMPTY_CAP, sizeof(set_flag), &set_flag); // Empty Cap
+		//			sok_send_2(_step_socket[no], CMD_CAP_EMPTY_CAP, sizeof(set_flag), &set_flag); // Empty Cap
 		//			senv->capCurrentState = ST_CAP_CLEAN_REF;
 		//		}
 		//		break;
@@ -575,7 +573,7 @@ static void _stepc_statemachine(int no, SClnStateEnv *senv)
 		//		if (senv->lift_move_tgl != _status[no].info.move_tgl)
 		//		{
 		//			senv->cln_move_tgl = _status[no].info.move_tgl;
-		//			sok_send_2(_step_socket[0], _step_ipaddr[0], CMD_CLN_DRAIN_WASTE, 0, NULL); // Empty Waste
+		//			sok_send_2(_step_socket[0], CMD_CLN_DRAIN_WASTE, 0, NULL); // Empty Waste
 		//			senv->capCurrentState = ST_DRAIN_WASTE_REF;
 		//		}
 		//		break;
@@ -584,10 +582,10 @@ static void _stepc_statemachine(int no, SClnStateEnv *senv)
 		//		if (senv->cln_move_tgl != _status[no].info.move_tgl)
 		//		{
 		//			int set_flag = 3;
-		//			sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CLN_EMPTY_CAP, sizeof(set_flag), &set_flag); // Clean Cap valve
+		//			sok_send_2(_step_socket[no], CMD_CLN_EMPTY_CAP, sizeof(set_flag), &set_flag); // Clean Cap valve
 		//
 		//			senv->lift_move_tgl = _status[no].info.move_tgl;
-		//			sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CAP_REFERENCE, 0, NULL); // ref Lift
+		//			sok_send_2(_step_socket[no], CMD_CAP_REFERENCE, 0, NULL); // ref Lift
 		//			senv->capCurrentState = ST_REF_LIFT;
 		//		}
 		//		break;
@@ -600,10 +598,10 @@ static void _stepc_statemachine(int no, SClnStateEnv *senv)
 				//				if (senv->flag_cap_empty == FALSE)   // Enable for capping that can fill
 				//				{
 				//					int set_flag = 1;
-				//					sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CAP_SET_VAC, sizeof(set_flag), &set_flag); // Start Vacuum
+				//					sok_send_2(_step_socket[no], CMD_CAP_SET_VAC, sizeof(set_flag), &set_flag); // Start Vacuum
 				//				}
 				senv->cln_move_tgl = _status[no].info.move_tgl;
-				sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CLN_REFERENCE, 0, NULL); // ref Cleaning
+				sok_send_2(_step_socket[no], CMD_CLN_REFERENCE, 0, NULL); // ref Cleaning
 				senv->slide_enable = TRUE;
 				senv->capCurrentState = ST_REF_CLEAN;
 			}
@@ -722,7 +720,7 @@ static void _stepc_statemachine(int no, SClnStateEnv *senv)
 		//			}
 		//			else
 		//			{
-		//				sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CAP_CAPPING_POS, 0, NULL); 
+		//				sok_send_2(_step_socket[no], CMD_CAP_CAPPING_POS, 0, NULL); 
 		//				senv->capCurrentState = ST_PRE_MOVE_POS;
 		//			}
 		//		}
@@ -742,7 +740,7 @@ static void _stepc_statemachine(int no, SClnStateEnv *senv)
 			if ((abs(_status[no].posZ - senv->lift_pos) <= 10) && ((abs(_status[no].posX - senv->screw_0_pos) <= 10) || (abs(_status[no].posX - senv->screw_1_pos) <= 10)) && (_status[no].posX > (POS_SCREW_0 - CLN_SCREW_SEARCH_DELTA))) // && (plc_in_wipe_pos() == TRUE))
 			{
 				int srew_mot_nr = senv->screw_data.bar + 1;
-				sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CLN_SCREW_ATTACH, sizeof(srew_mot_nr), &srew_mot_nr); // execute ref of screws
+				sok_send_2(_step_socket[no], CMD_CLN_SCREW_ATTACH, sizeof(srew_mot_nr), &srew_mot_nr); // execute ref of screws
 				senv->capCurrentState = ST_SCREW_REF;
 			}
 			else
@@ -758,15 +756,15 @@ static void _stepc_statemachine(int no, SClnStateEnv *senv)
 		senv->flag_cap_empty = TRUE;
 		senv->lift_move_tgl = _status[no].info.move_tgl;
 		Error(LOG, 0, "send CMD_CAP_ROB_Z_POS to stepper[%d]", no);
-		sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CAP_ROB_Z_POS, sizeof(_reset_pos), &_reset_pos); // Lift up to zero position
+		sok_send_2(_step_socket[no], CMD_CAP_ROB_Z_POS, sizeof(_reset_pos), &_reset_pos); // Lift up to zero position
 		senv->capCurrentState = ST_PRE_MOVE_POS;
 		//		}
 		//		else {
 		//			int set_flag = 2; // 3
-		//			sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CLN_EMPTY_CAP, sizeof(set_flag), &set_flag); // Clean Cap valve inside
+		//			sok_send_2(_step_socket[no], CMD_CLN_EMPTY_CAP, sizeof(set_flag), &set_flag); // Clean Cap valve inside
 		//			set_flag = 2; // 1;
 		//			senv->lift_move_tgl = _status[no].info.move_tgl;
-		//			sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CAP_EMPTY_CAP, sizeof(set_flag), &set_flag); // Empty Cap
+		//			sok_send_2(_step_socket[no], CMD_CAP_EMPTY_CAP, sizeof(set_flag), &set_flag); // Empty Cap
 		//			senv->capCurrentState = ST_CAP_CLEAN_IN;
 		//			senv->dry_wipe_done = FALSE;
 		//			//senv->capCurrentState = ST_CAP_CLEAN_OUT;
@@ -777,10 +775,10 @@ static void _stepc_statemachine(int no, SClnStateEnv *senv)
 		//		if (senv->lift_move_tgl != _status[no].info.move_tgl)
 		//		{
 		//			int set_flag = 1;
-		//			sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CLN_EMPTY_CAP, sizeof(set_flag), &set_flag); // Clean Cap valve outside
+		//			sok_send_2(_step_socket[no], CMD_CLN_EMPTY_CAP, sizeof(set_flag), &set_flag); // Clean Cap valve outside
 		//			set_flag = 1;
 		//			senv->lift_move_tgl = _status[no].info.move_tgl;
-		//			sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CAP_EMPTY_CAP, sizeof(set_flag), &set_flag); // Empty Cap
+		//			sok_send_2(_step_socket[no], CMD_CAP_EMPTY_CAP, sizeof(set_flag), &set_flag); // Empty Cap
 		//			senv->capCurrentState = ST_CAP_CLEAN_OUT;
 		//		}
 		//		break;
@@ -789,9 +787,9 @@ static void _stepc_statemachine(int no, SClnStateEnv *senv)
 		//		if (senv->lift_move_tgl != _status[no].info.move_tgl)
 		//		{
 		//			int set_flag = 0;
-		//			//sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CLN_EMPTY_CAP, sizeof(set_flag), &set_flag); // Clean Cap valve off
+		//			//sok_send_2(_step_socket[no], CMD_CLN_EMPTY_CAP, sizeof(set_flag), &set_flag); // Clean Cap valve off
 		//			senv->cln_move_tgl = _status[no].info.move_tgl;
-		//			sok_send_2(_step_socket[0], _step_ipaddr[0], CMD_CLN_DRAIN_WASTE, 0, NULL); // Clear Valves Drain Cap Outside
+		//			sok_send_2(_step_socket[0], CMD_CLN_DRAIN_WASTE, 0, NULL); // Clear Valves Drain Cap Outside
 		//			senv->capCurrentState = ST_DRAIN_WASTE;
 		//		}
 		//		break;
@@ -800,9 +798,9 @@ static void _stepc_statemachine(int no, SClnStateEnv *senv)
 		//		if (senv->cln_move_tgl != _status[no].info.move_tgl)
 		//		{
 		//			int set_flag = 0;
-		//			sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CLN_EMPTY_CAP, sizeof(set_flag), &set_flag); // Clean Cap valve off
+		//			sok_send_2(_step_socket[no], CMD_CLN_EMPTY_CAP, sizeof(set_flag), &set_flag); // Clean Cap valve off
 		//			senv->lift_move_tgl = _status[no].info.move_tgl;
-		//			sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CAP_PRINT_POS, sizeof(_reset_pos), &_reset_pos); // Lift up to zero position
+		//			sok_send_2(_step_socket[no], CMD_CAP_PRINT_POS, sizeof(_reset_pos), &_reset_pos); // Lift up to zero position
 		//			senv->capCurrentState = ST_PRE_MOVE_POS;
 		//		}
 		//		break;
@@ -815,12 +813,12 @@ static void _stepc_statemachine(int no, SClnStateEnv *senv)
 				//if (senv->flag_cap_full == TRUE)
 				//{
 				//	int set_flag = 3;
-				//	sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CLN_EMPTY_CAP, sizeof(set_flag), &set_flag); // Clean Cap valve
+				//	sok_send_2(_step_socket[no], CMD_CLN_EMPTY_CAP, sizeof(set_flag), &set_flag); // Clean Cap valve
 				//	set_flag = 1;
-				//	sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CAP_SET_VAC, sizeof(set_flag), &set_flag); // Start Vacuum
+				//	sok_send_2(_step_socket[no], CMD_CAP_SET_VAC, sizeof(set_flag), &set_flag); // Start Vacuum
 				//}
 				senv->cln_move_tgl = _status[no].info.move_tgl;
-				sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CLN_MOVE_POS, sizeof(senv->clean_pos), &senv->clean_pos); // Cleaning move to position
+				sok_send_2(_step_socket[no], CMD_CLN_MOVE_POS, sizeof(senv->clean_pos), &senv->clean_pos); // Cleaning move to position
 				senv->capCurrentState = ST_CLEAN_MOVE_POS;
 			}
 			else
@@ -836,8 +834,8 @@ static void _stepc_statemachine(int no, SClnStateEnv *senv)
 		if (senv->cln_move_tgl != _status[no].info.move_tgl)
 		{
 			int set_flag = 0;
-			//sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CAP_SET_VAC, sizeof(set_flag), &set_flag); // Stop Vacuum
-			//sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CLN_EMPTY_CAP, sizeof(set_flag), &set_flag); // Clean Cap valve off
+			//sok_send_2(_step_socket[no], CMD_CAP_SET_VAC, sizeof(set_flag), &set_flag); // Stop Vacuum
+			//sok_send_2(_step_socket[no], CMD_CLN_EMPTY_CAP, sizeof(set_flag), &set_flag); // Clean Cap valve off
 			if (_status[no].info.move_ok == FALSE)
 			{
 				senv->capCurrentState = ST_INIT;
@@ -852,10 +850,10 @@ static void _stepc_statemachine(int no, SClnStateEnv *senv)
 			if (senv->st_cmd_stored == CMD_CAP_PRINT_POS)
 			{
 				Error(LOG, 0, "send CMD_CAP_PRINT_POS to stepper[%d]", no);
-				sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CAP_PRINT_POS, sizeof(senv->lift_pos), &senv->lift_pos); // Lift move to position
+				sok_send_2(_step_socket[no], CMD_CAP_PRINT_POS, sizeof(senv->lift_pos), &senv->lift_pos); // Lift move to position
 			}
 			else
-				sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CAP_ROB_Z_POS, sizeof(senv->lift_pos), &senv->lift_pos); // Lift move to position
+				sok_send_2(_step_socket[no], CMD_CAP_ROB_Z_POS, sizeof(senv->lift_pos), &senv->lift_pos); // Lift move to position
 			//}
 			senv->set_io_cnt = _status[no].set_io_cnt;
 			i = 0;
@@ -876,7 +874,7 @@ static void _stepc_statemachine(int no, SClnStateEnv *senv)
 			{
 				int set_flag = 1;
 				senv->lift_move_tgl = _status[no].info.move_tgl;
-				sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CAP_CAPPING_POS, 0, NULL); // Lift move to capping
+				sok_send_2(_step_socket[no], CMD_CAP_CAPPING_POS, 0, NULL); // Lift move to capping
 				senv->capCurrentState = ST_LIFT_CAPPING;
 			}
 			else if (senv->st_cmd_stored == CMD_CLN_WIPE)
@@ -884,28 +882,28 @@ static void _stepc_statemachine(int no, SClnStateEnv *senv)
 				int set_flag = 1;
 				//				if (senv->dry_wipe_done == FALSE)
 				//				{
-				//					sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CLN_DRY_WIPE, sizeof(set_flag), &set_flag); // start dry wipe to clean capping
-				//					sok_send_2(_step_socket[0], _step_ipaddr[0], CMD_CAP_SET_VAC, sizeof(set_flag), &set_flag); // start vacuum
-				//					//sok_send_2(_step_socket[0], _step_ipaddr[0], CMD_CLN_SET_WASTE_PUMP, sizeof(set_flag), &set_flag); // start waste pump
-				//					//sok_send_2(_step_socket[0], _step_ipaddr[0], CMD_CAP_SET_VAC, sizeof(set_flag), &set_flag); // start vacuum
+				//					sok_send_2(_step_socket[no], CMD_CLN_DRY_WIPE, sizeof(set_flag), &set_flag); // start dry wipe to clean capping
+				//					sok_send_2(_step_socket[0], CMD_CAP_SET_VAC, sizeof(set_flag), &set_flag); // start vacuum
+				//					//sok_send_2(_step_socket[0], CMD_CLN_SET_WASTE_PUMP, sizeof(set_flag), &set_flag); // start waste pump
+				//					//sok_send_2(_step_socket[0], CMD_CAP_SET_VAC, sizeof(set_flag), &set_flag); // start vacuum
 				//				}
 				//				else {
-				//sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CLN_WET_WIPE, sizeof(set_flag), &set_flag); // start wet wipe
-				//sok_send_2(_step_socket[0], _step_ipaddr[0], CMD_CAP_SET_PUMP, sizeof(set_flag), &set_flag); // start flush pump
-				//sok_send_2(_step_socket[0], _step_ipaddr[0], CMD_CLN_SET_WASTE_PUMP, sizeof(set_flag), &set_flag); // start waste pump
-				//sok_send_2(_step_socket[0], _step_ipaddr[0], CMD_CAP_SET_PUMP, sizeof(set_flag), &set_flag); // start flush pump dummy
+				//sok_send_2(_step_socket[no], CMD_CLN_WET_WIPE, sizeof(set_flag), &set_flag); // start wet wipe
+				//sok_send_2(_step_socket[0], CMD_CAP_SET_PUMP, sizeof(set_flag), &set_flag); // start flush pump
+				//sok_send_2(_step_socket[0], CMD_CLN_SET_WASTE_PUMP, sizeof(set_flag), &set_flag); // start waste pump
+				//sok_send_2(_step_socket[0], CMD_CAP_SET_PUMP, sizeof(set_flag), &set_flag); // start flush pump dummy
 				//}
 				if (_status[no].set_io_cnt == senv->set_io_cnt) 
 				{
 					switch (senv->cycle_sok_send)
 					{
-					case 0: sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CLN_WET_WIPE, sizeof(set_flag), &set_flag); // start wet wipe
+					case 0: sok_send_2(_step_socket[no], CMD_CLN_WET_WIPE, sizeof(set_flag), &set_flag); // start wet wipe
 						senv->set_io_cnt++;
 						senv->cycle_sok_send++;
 						break;
 					case 1: if (no == 0)
 							{
-										sok_send_2(_step_socket[0], _step_ipaddr[0], CMD_CAP_SET_PUMP, sizeof(set_flag), &set_flag); // start flush pump
+										sok_send_2(_step_socket[0], CMD_CAP_SET_PUMP, sizeof(set_flag), &set_flag); // start flush pump
 										senv->set_io_cnt++;
 										senv->cycle_sok_send++;
 							}
@@ -916,7 +914,7 @@ static void _stepc_statemachine(int no, SClnStateEnv *senv)
 							break;
 					case 2: if (no == 0)
 							{
-								sok_send_2(_step_socket[0], _step_ipaddr[0], CMD_CLN_SET_WASTE_PUMP, sizeof(set_flag), &set_flag); // start waste pump
+								sok_send_2(_step_socket[0], CMD_CLN_SET_WASTE_PUMP, sizeof(set_flag), &set_flag); // start waste pump
 								senv->set_io_cnt++;
 								senv->cycle_sok_send++;
 							}
@@ -928,7 +926,7 @@ static void _stepc_statemachine(int no, SClnStateEnv *senv)
 					case 3: senv->dry_wipe_done = TRUE;
 						senv->flag_cap_empty = TRUE;
 						senv->cln_move_tgl = _status[no].info.move_tgl;
-						sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CLN_WIPE, sizeof(senv->clean_wipe_pos), &senv->clean_wipe_pos); // Wipe move to position
+						sok_send_2(_step_socket[no], CMD_CLN_WIPE, sizeof(senv->clean_wipe_pos), &senv->clean_wipe_pos); // Wipe move to position
 						senv->set_io_cnt = _status[no].set_io_cnt;
 						senv->cycle_sok_send = 0;
 						senv->capCurrentState = ST_WIPE;
@@ -945,13 +943,13 @@ static void _stepc_statemachine(int no, SClnStateEnv *senv)
 					switch (senv->cycle_sok_send)
 					{
 					case 0: 				set_flag = 2;
-						sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CLN_DRY_WIPE, sizeof(set_flag), &set_flag); // start vacuum blade wipe
+						sok_send_2(_step_socket[no], CMD_CLN_DRY_WIPE, sizeof(set_flag), &set_flag); // start vacuum blade wipe
 						senv->set_io_cnt++;
 						senv->cycle_sok_send++;
 						break;
 					case 1: 				set_flag = 1;
 						if (no == 0){
-							sok_send_2(_step_socket[0], _step_ipaddr[0], CMD_CAP_SET_VAC, sizeof(set_flag), &set_flag); // start vacuum
+							sok_send_2(_step_socket[0], CMD_CAP_SET_VAC, sizeof(set_flag), &set_flag); // start vacuum
 							senv->set_io_cnt++;
 							senv->cycle_sok_send++;
 						}
@@ -960,12 +958,12 @@ static void _stepc_statemachine(int no, SClnStateEnv *senv)
 							senv->cycle_sok_send++;
 						}
 						break;
-					case 2: 				//sok_send_2(_step_socket[0], _step_ipaddr[0], CMD_CLN_SET_WASTE_PUMP, sizeof(set_flag), &set_flag); // start waste pump
-						//sok_send_2(_step_socket[0], _step_ipaddr[0], CMD_CAP_SET_VAC, sizeof(set_flag), &set_flag); // start vacuum dummy
+					case 2: 				//sok_send_2(_step_socket[0], CMD_CLN_SET_WASTE_PUMP, sizeof(set_flag), &set_flag); // start waste pump
+						//sok_send_2(_step_socket[0], CMD_CAP_SET_VAC, sizeof(set_flag), &set_flag); // start vacuum dummy
 						senv->dry_wipe_done = TRUE;
 						senv->flag_cap_empty = TRUE;
 						senv->cln_move_tgl = _status[no].info.move_tgl;
-						sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CLN_WIPE_VAC, sizeof(senv->clean_wipe_pos), &senv->clean_wipe_pos); // Wipe slow for Vacuum move to position
+						sok_send_2(_step_socket[no], CMD_CLN_WIPE_VAC, sizeof(senv->clean_wipe_pos), &senv->clean_wipe_pos); // Wipe slow for Vacuum move to position
 						senv->set_io_cnt = _status[no].set_io_cnt;
 						senv->cycle_sok_send = 0;
 						senv->capCurrentState = ST_WIPE;
@@ -977,7 +975,7 @@ static void _stepc_statemachine(int no, SClnStateEnv *senv)
 			{
 				senv->cln_move_tgl = _status[no].info.move_tgl;
 				senv->capCurrentState = ST_DETECT_SCREW;
-				sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CLN_DETECT_SCREW_0, sizeof(senv->clean_wipe_pos), &senv->clean_wipe_pos); // detect screw
+				sok_send_2(_step_socket[no], CMD_CLN_DETECT_SCREW_0, sizeof(senv->clean_wipe_pos), &senv->clean_wipe_pos); // detect screw
 			}
 			else
 			{
@@ -985,7 +983,7 @@ static void _stepc_statemachine(int no, SClnStateEnv *senv)
 				senv->st_cmd_stored = FALSE;
 			}
 			//senv->cln_move_tgl = _status[no].info.move_tgl;
-			//sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CLN_MOVE_POS, sizeof(senv->clean_pos), &senv->clean_pos); // Cleaning move to position
+			//sok_send_2(_step_socket[no], CMD_CLN_MOVE_POS, sizeof(senv->clean_pos), &senv->clean_pos); // Cleaning move to position
 			//senv->capCurrentState = ST_CLEAN_MOVE_POS;
 			//if ((_status[no].info.z_in_print == TRUE) || (_status[no].info.z_in_cap == TRUE)) // New: check also for Lift beeing in capping
 			//{
@@ -1017,17 +1015,17 @@ static void _stepc_statemachine(int no, SClnStateEnv *senv)
 				//				if (senv->st_cmd_stored == CMD_CLN_FLUSH_TEST)   // Enable for capping that can fill
 				//				{
 				//					int set_flag = 3; // empty inside and outside // 2 empty inside // 1 empty outside
-				//					sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CLN_EMPTY_CAP, sizeof(set_flag), &set_flag); // Set Valves to empty cap
+				//					sok_send_2(_step_socket[no], CMD_CLN_EMPTY_CAP, sizeof(set_flag), &set_flag); // Set Valves to empty cap
 				//					set_flag = 2;
 				//					senv->lift_move_tgl = _status[no].info.move_tgl;
-				//					sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CAP_EMPTY_CAP, sizeof(set_flag), &set_flag); // Empty Cap
+				//					sok_send_2(_step_socket[no], CMD_CAP_EMPTY_CAP, sizeof(set_flag), &set_flag); // Empty Cap
 				//				}
 				//				else // (senv->st_cmd_stored == CMD_CAP_CAPPING_POS)
 				//				{
 				//					int set_flag = 1;
-				//					sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CLN_FILL_CAP, sizeof(set_flag), &set_flag); // Set Valves to fill cap
+				//					sok_send_2(_step_socket[no], CMD_CLN_FILL_CAP, sizeof(set_flag), &set_flag); // Set Valves to fill cap
 				//					senv->lift_move_tgl = _status[no].info.move_tgl;
-				//					sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CAP_FILL_CAP, 0, NULL); // Fill Cap
+				//					sok_send_2(_step_socket[no], CMD_CAP_FILL_CAP, 0, NULL); // Fill Cap
 				//				}
 				//				senv->capCurrentState = ST_CAP_FILL;
 				senv->flag_cap_empty = FALSE;
@@ -1044,10 +1042,10 @@ static void _stepc_statemachine(int no, SClnStateEnv *senv)
 		//		if (senv->lift_move_tgl != _status[no].info.move_tgl)
 		//		{
 		//			int set_flag = 0;
-		//			sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CLN_FILL_CAP, sizeof(set_flag), &set_flag); // Clear Valves to fill cap
-		//			sok_send_2(_step_socket[0], _step_ipaddr[0], CMD_CAP_SET_PUMP, sizeof(set_flag), &set_flag); // Dummy Send
+		//			sok_send_2(_step_socket[no], CMD_CLN_FILL_CAP, sizeof(set_flag), &set_flag); // Clear Valves to fill cap
+		//			sok_send_2(_step_socket[0], CMD_CAP_SET_PUMP, sizeof(set_flag), &set_flag); // Dummy Send
 		//			senv->cln_move_tgl = _status[no].info.move_tgl;
-		//			sok_send_2(_step_socket[0], _step_ipaddr[0], CMD_CLN_DRAIN_WASTE, 0, NULL); // Clear Valves Drain Cap Outside
+		//			sok_send_2(_step_socket[0], CMD_CLN_DRAIN_WASTE, 0, NULL); // Clear Valves Drain Cap Outside
 		//			senv->capCurrentState = ST_DRAIN_WASTE_IDLE;
 		//		}
 		//		break;
@@ -1071,7 +1069,7 @@ static void _stepc_statemachine(int no, SClnStateEnv *senv)
 		if ((_status[no].posX < CLN_POS_END_WET_WIPE) && (senv->flag_wet_wipe_done == FALSE) && (no == 0)) {
 			senv->flag_wet_wipe_done = TRUE;
 			int set_flag = 0;
-			sok_send_2(_step_socket[0], _step_ipaddr[0], CMD_CAP_SET_PUMP, sizeof(set_flag), &set_flag); // stop wet wipe pump
+			sok_send_2(_step_socket[0], CMD_CAP_SET_PUMP, sizeof(set_flag), &set_flag); // stop wet wipe pump
 		}
 		if (senv->cln_move_tgl != _status[no].info.move_tgl)
 		{
@@ -1083,7 +1081,7 @@ static void _stepc_statemachine(int no, SClnStateEnv *senv)
 				{
 				case 0: if (no == 0)
 				{
-							sok_send_2(_step_socket[0], _step_ipaddr[0], CMD_CAP_SET_PUMP, sizeof(set_flag), &set_flag); // stop wet wipe pump
+							sok_send_2(_step_socket[0], CMD_CAP_SET_PUMP, sizeof(set_flag), &set_flag); // stop wet wipe pump
 							senv->set_io_cnt++;
 							senv->cycle_sok_send++;
 				}
@@ -1094,7 +1092,7 @@ static void _stepc_statemachine(int no, SClnStateEnv *senv)
 						break;
 				case 1: if (no == 0)
 				{
-							sok_send_2(_step_socket[0], _step_ipaddr[0], CMD_CAP_SET_VAC, sizeof(set_flag), &set_flag); // stop wet wipe vac
+							sok_send_2(_step_socket[0], CMD_CAP_SET_VAC, sizeof(set_flag), &set_flag); // stop wet wipe vac
 							senv->set_io_cnt++;
 							senv->cycle_sok_send++;
 				}
@@ -1105,7 +1103,7 @@ static void _stepc_statemachine(int no, SClnStateEnv *senv)
 						break;
 				case 2: if (no == 0)
 				{
-							sok_send_2(_step_socket[0], _step_ipaddr[0], CMD_CLN_SET_WASTE_PUMP, sizeof(set_flag), &set_flag); // stop waste pump
+							sok_send_2(_step_socket[0], CMD_CLN_SET_WASTE_PUMP, sizeof(set_flag), &set_flag); // stop waste pump
 							senv->set_io_cnt++;
 							senv->cycle_sok_send++;
 				}
@@ -1114,17 +1112,17 @@ static void _stepc_statemachine(int no, SClnStateEnv *senv)
 							senv->cycle_sok_send++;
 						}
 						break;
-				case 3: sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CLN_WET_WIPE, sizeof(set_flag), &set_flag); // stop wet wipe
+				case 3: sok_send_2(_step_socket[no], CMD_CLN_WET_WIPE, sizeof(set_flag), &set_flag); // stop wet wipe
 					senv->set_io_cnt++;
 					senv->cycle_sok_send++;
 					break;
-				case 4: sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CLN_DRY_WIPE, sizeof(set_flag), &set_flag); // stop dry wipe
+				case 4: sok_send_2(_step_socket[no], CMD_CLN_DRY_WIPE, sizeof(set_flag), &set_flag); // stop dry wipe
 					senv->set_io_cnt++;
 					senv->cycle_sok_send++;
 					break;
 				case 5: 			senv->lift_move_tgl = _status[no].info.move_tgl;
 					Error(LOG, 0, "send CMD_CAP_PRINT_POS to stepper[%d]", no);
-					sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CAP_PRINT_POS, sizeof(_reset_pos), &_reset_pos); // up to reset
+					sok_send_2(_step_socket[no], CMD_CAP_PRINT_POS, sizeof(_reset_pos), &_reset_pos); // up to reset
 					senv->capCurrentState = ST_LAST_LIFT;
 					// -------------------------------------------------------------------------  senv->st_cmd = CMD_CLN_SCREW_0_POS; // REMOVE FOR MACHINE // ONLY TEST // ENDLESS LOOP !!!
 					senv->test_loop_cnt++;
@@ -1150,7 +1148,7 @@ static void _stepc_statemachine(int no, SClnStateEnv *senv)
 		//	if (senv->cln_move_tgl != _status[no].info.move_tgl)
 		//	{
 		//			senv->lift_move_tgl = _status[no].info.move_tgl;
-		//			sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CAP_PRINT_POS, sizeof(_reset_pos), &_reset_pos); // up to reset
+		//			sok_send_2(_step_socket[no], CMD_CAP_PRINT_POS, sizeof(_reset_pos), &_reset_pos); // up to reset
 		//			senv->capCurrentState = ST_LAST_LIFT;
 		//	}
 		//	break;
@@ -1187,7 +1185,7 @@ static void _stepc_statemachine(int no, SClnStateEnv *senv)
 			//	{
 			//		senv->cln_move_tgl = _status[no].info.move_tgl;
 			//		int move = _status[no].posX - CLN_DET_SCREW_TO_SENSOR;
-			//		sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CLN_MOVE_POS, sizeof(move), &move); // move to screw
+			//		sok_send_2(_step_socket[no], CMD_CLN_MOVE_POS, sizeof(move), &move); // move to screw
 			//		senv->capCurrentState = ST_REPOS_SCREW;
 			//	}
 			//	else
@@ -1195,7 +1193,7 @@ static void _stepc_statemachine(int no, SClnStateEnv *senv)
 			//		ErrorFlag(ERR_CONT, &_ErrorFlags[no], ERR_6, 0, "MAIN: State_Command 0x%08x: no screw 0 found. Check Head and sensor", senv->st_cmd_stored);
 			//		senv->capCurrentState = ST_IDLE;
 			//		senv->st_cmd_stored = FALSE;
-			//		//sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CAP_STOP, 0, NULL);
+			//		//sok_send_2(_step_socket[no], CMD_CAP_STOP, 0, NULL);
 			//		// -------------------------------------------------------------------------  senv->st_cmd = CMD_CLN_WIPE; // REMOVE FOR MACHINE // ONLY TEST // ENDLESS LOOP !!!
 			//	}
 			//}
@@ -1205,7 +1203,7 @@ static void _stepc_statemachine(int no, SClnStateEnv *senv)
 			//	{
 			//		senv->cln_move_tgl = _status[no].info.move_tgl;
 			//		int move = _status[no].posX - CLN_DET_SCREW_TO_SENSOR;
-			//		sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CLN_MOVE_POS, sizeof(move), &move); // move to screw
+			//		sok_send_2(_step_socket[no], CMD_CLN_MOVE_POS, sizeof(move), &move); // move to screw
 			//		senv->capCurrentState = ST_REPOS_SCREW;
 			//	}
 			//	else
@@ -1213,7 +1211,7 @@ static void _stepc_statemachine(int no, SClnStateEnv *senv)
 			//		ErrorFlag(ERR_CONT, &_ErrorFlags[no], ERR_7, 0, "MAIN: State_Command 0x%08x: no screw 1 found. Check Head and sensor", senv->st_cmd_stored);
 			//		senv->capCurrentState = ST_IDLE;
 			//		senv->st_cmd_stored = FALSE;
-			//		//sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CAP_STOP, 0, NULL);
+			//		//sok_send_2(_step_socket[no], CMD_CAP_STOP, 0, NULL);
 			//		// -------------------------------------------------------------------------  senv->st_cmd = CMD_CLN_WIPE; // REMOVE FOR MACHINE // ONLY TEST // ENDLESS LOOP !!!
 			//	}
 			//}
@@ -1227,20 +1225,20 @@ static void _stepc_statemachine(int no, SClnStateEnv *senv)
 				senv->screw_1_pos = 0;
 			senv->cln_move_tgl = _status[no].info.move_tgl;
 			int srew_mot_nr = senv->screw_data.bar + 1;
-			sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CLN_SCREW_ATTACH, sizeof(srew_mot_nr), &srew_mot_nr); // execute ref of screws
+			sok_send_2(_step_socket[no], CMD_CLN_SCREW_ATTACH, sizeof(srew_mot_nr), &srew_mot_nr); // execute ref of screws
 			senv->capCurrentState = ST_SCREW_REF;
 		}
 
 	case ST_SCREW_REF:
 		// int mov_rel = 200;
-		//sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CLN_MOVE_POS_REL, sizeof(mov_rel), &mov_rel);
+		//sok_send_2(_step_socket[no], CMD_CLN_MOVE_POS_REL, sizeof(mov_rel), &mov_rel);
 		if (senv->cln_move_tgl != _status[no].info.move_tgl)
 		{
 			if (_status[no].info.screw_in_ref == TRUE)
 			{
 				senv->cln_move_tgl = _status[no].info.move_tgl;
 				// Define Screw to turn
-					sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CLN_SCREW_0_POS, sizeof(senv->screw_data.rot), &senv->screw_data.rot);
+					sok_send_2(_step_socket[no], CMD_CLN_SCREW_0_POS, sizeof(senv->screw_data.rot), &senv->screw_data.rot);
 					// -------------------------------------------------------------------------  senv->screw_data.rot = -(senv->screw_data.rot); // REMOVE FOR MACHINE // ONLY TEST // ENDLESS LOOP !!!
 				senv->capCurrentState = ST_SCREW;
 			}
@@ -1249,7 +1247,7 @@ static void _stepc_statemachine(int no, SClnStateEnv *senv)
 				ErrorFlag(ERR_CONT, &_ErrorFlags[no], ERR_1, 0, "MAIN: State_Command 0x%08x: screw referencing failed", senv->st_cmd_stored);
 				senv->capCurrentState = ST_DRAIN_WASTE_IDLE;
 				senv->st_cmd_stored = FALSE;
-				sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CLN_SCREW_REF, 0, NULL); // move to screw
+				sok_send_2(_step_socket[no], CMD_CLN_SCREW_REF, 0, NULL); // move to screw
 			}
 		}
 		break;
@@ -1267,7 +1265,7 @@ static void _stepc_statemachine(int no, SClnStateEnv *senv)
 			}
 			// Detach Screwer from Screw anyway
 			senv->cln_move_tgl = _status[no].info.move_tgl;
-			sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CLN_SCREW_DETACH, 0, NULL);
+			sok_send_2(_step_socket[no], CMD_CLN_SCREW_DETACH, 0, NULL);
 			senv->capCurrentState = ST_DETACH_SCREW;
 		}
 		break;
@@ -1280,7 +1278,7 @@ static void _stepc_statemachine(int no, SClnStateEnv *senv)
 				//senv->lift_move_tgl = _status[no].info.move_tgl;
 				//senv->cln_move_tgl = _status[no].info.move_tgl;
 				//senv->capCurrentState = ST_LAST_LIFT;
-				//sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CAP_PRINT_POS, sizeof(_reset_pos), &_reset_pos); // up to reset
+				//sok_send_2(_step_socket[no], CMD_CAP_PRINT_POS, sizeof(_reset_pos), &_reset_pos); // up to reset
 				// -------------------------------------------------------------------------  senv->st_cmd = CMD_CLN_WIPE; // REMOVE FOR MACHINE // ONLY TEST // ENDLESS LOOP !!!
 			}
 			else
@@ -1289,7 +1287,7 @@ static void _stepc_statemachine(int no, SClnStateEnv *senv)
 				senv->st_cmd_stored = FALSE;
 				senv->st_cmd = FALSE;
 				ErrorFlag(ERR_CONT, &_ErrorFlags[no], ERR_3, 0, "MAIN: State_Command 0x%08x: ST_DETACH_SCREW screw detach failed", senv->st_cmd_stored);
-				//sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CAP_STOP, 0, NULL);
+				//sok_send_2(_step_socket[no], CMD_CAP_STOP, 0, NULL);
 			}
 			senv->capCurrentState = ST_IDLE;
 			senv->st_cmd_stored = FALSE;
@@ -1304,13 +1302,13 @@ static void _stepc_statemachine(int no, SClnStateEnv *senv)
 static void	 _stepc_reset_fluid_sys(int no, SClnStateEnv *senv)
 {
 	int set_flag = 0;
-	if (no == 0)sok_send_2(_step_socket[0], _step_ipaddr[0], CMD_CAP_SET_PUMP, sizeof(set_flag), &set_flag); // stop wet wipe pump
-	sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CLN_WET_WIPE, sizeof(set_flag), &set_flag); // stop wet wipe
-	//sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CLN_FILL_CAP, sizeof(set_flag), &set_flag); // Clear Valves to fill cap
-	if (no == 0)sok_send_2(_step_socket[0], _step_ipaddr[0], CMD_CAP_SET_VAC, sizeof(set_flag), &set_flag); // stop vacc
-	//sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CLN_EMPTY_CAP, sizeof(set_flag), &set_flag); // Clear Cap valve inside
-	//sok_send_2(_step_socket[0], _step_ipaddr[0], CMD_CAP_SET_VAC, sizeof(set_flag), &set_flag); // stop vacc
-	//sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CLN_WET_WIPE, sizeof(set_flag), &set_flag); // stop wet wipe
+	if (no == 0)sok_send_2(_step_socket[0], CMD_CAP_SET_PUMP, sizeof(set_flag), &set_flag); // stop wet wipe pump
+	sok_send_2(_step_socket[no], CMD_CLN_WET_WIPE, sizeof(set_flag), &set_flag); // stop wet wipe
+	//sok_send_2(_step_socket[no], CMD_CLN_FILL_CAP, sizeof(set_flag), &set_flag); // Clear Valves to fill cap
+	if (no == 0)sok_send_2(_step_socket[0], CMD_CAP_SET_VAC, sizeof(set_flag), &set_flag); // stop vacc
+	//sok_send_2(_step_socket[no], CMD_CLN_EMPTY_CAP, sizeof(set_flag), &set_flag); // Clear Cap valve inside
+	//sok_send_2(_step_socket[0], CMD_CAP_SET_VAC, sizeof(set_flag), &set_flag); // stop vacc
+	//sok_send_2(_step_socket[no], CMD_CLN_WET_WIPE, sizeof(set_flag), &set_flag); // stop wet wipe
 }
 
 //--- _check_ref --------------------------------------------------
@@ -1318,12 +1316,12 @@ static void _check_ref(int no, SClnStateEnv *senv)
 {
 	if ((abs(_status[no].posZ -  _reset_pos) <= 10) && (_status[no].info.ref_done == TRUE) && (senv->flag_cap_empty == TRUE))
 	{
-		sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CLN_MOVE_POS, sizeof(senv->clean_pos), &senv->clean_pos); // Cleaning move to position
+		sok_send_2(_step_socket[no], CMD_CLN_MOVE_POS, sizeof(senv->clean_pos), &senv->clean_pos); // Cleaning move to position
 		senv->capCurrentState = ST_CLEAN_MOVE_POS;
 	}
 	else 
 	{
-		//sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CAP_PRINT_POS, sizeof(_reset_pos), &_reset_pos); // Lift up to zero position
+		//sok_send_2(_step_socket[no], CMD_CAP_PRINT_POS, sizeof(_reset_pos), &_reset_pos); // Lift up to zero position
 		//senv->capCurrentState = ST_PRE_MOVE_POS;
 		senv->capCurrentState = ST_CAP_CLEAN_START;
 	}

@@ -12,7 +12,7 @@
       xmlns:models="clr-namespace:RX_DigiPrint.Models"
       xmlns:pq_views="clr-namespace:RX_DigiPrint.Views.PrintQueueView"
       mc:Ignorable="d"
-      d:DesignHeight="600" d:DesignWidth="700"
+      d:DesignHeight="600" d:DesignWidth="900"
       x:Name="Main"
 	  >
 

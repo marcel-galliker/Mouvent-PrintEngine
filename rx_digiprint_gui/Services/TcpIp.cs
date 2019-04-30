@@ -289,11 +289,21 @@ namespace RX_DigiPrint.Services
         public const UInt32 CMD_SET_PRINTER_CFG = 0x0100004A;
         public const UInt32 REP_SET_PRINTER_CFG = 0x0200004A;
 
+        public const UInt32 CMD_DEL_FILE        = 0x0100004B;
+
         public const UInt32  CMD_HEAD_STAT			= 0x01000103;
         public const UInt32  REP_HEAD_STAT			= 0x02000103;
         
         public const UInt32  CMD_HEAD_FLUID_CTRL_MODE = 0x01000104;
         public const UInt32  REP_HEAD_FLUID_CTRL_MODE = 0x02000104;
+
+        public const UInt32 CMD_ENCODER_CFG			= 0x01000111;
+        public const UInt32 REP_ENCODER_CFG			= 0x02000111;
+
+        public const UInt32 CMD_ENCODER_STAT		= 0x01000112;
+        public const UInt32 REP_ENCODER_STAT		= 0x02000112;
+
+        public const UInt32 CMD_ENCODER_SAVE_PAR	= 0x01000119;
 
         public const UInt32  CMD_ENCODER_UV_ON		  = 0x01000113;
         public const UInt32  CMD_ENCODER_UV_OFF		  = 0x01000114;
@@ -565,6 +575,9 @@ namespace RX_DigiPrint.Services
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 64)]
             public string   material;
 
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 64)]
+            public string   testMessage;
+
 	        public Int32	srcPages;
 	        public Int32	srcWidth;
 	        public Int32	srcHeight;
@@ -575,6 +588,7 @@ namespace RX_DigiPrint.Services
 	        public byte	    collate;
 	        public byte	    variable;
 	        public byte	    dropSizes;
+	  //      public byte	    testDotSize;
 
 	        public EPQState	     state;
             public EPQLengthUnit lengthUnit;
@@ -818,6 +832,24 @@ namespace RX_DigiPrint.Services
             public SChillerStat status;
         }
 
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct SEncoderStat
+        {
+	        public Int32	info;
+	        public Int32	warn;
+	        public Int32	err;
+	        public Int32	PG_cnt;
+	        public Int32	fifoEmpty_PG;
+	        public Int32	fifoEmpty_IGN;
+	        public Int32	fifoEmpty_WND;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
+	        public Int32[]	corrRotPar;	// parameters for CORR_LINEAR
+            public Int32 ampl_old;
+            public Int32 ampl_new;
+            public Int32 percentage;
+            public UInt32 meters;
+        }
+
 		public const Byte SCL_READY         = 0x01;
 		public const Byte SCL_CAL_ZERO      = 0x02;
 		public const Byte SCL_CAL_SENSOR1   = 0x03;
@@ -865,6 +897,15 @@ namespace RX_DigiPrint.Services
         };
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct SHeadEEpromMvt
+        {
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
+	        public Int16[]			disabledJets;	
+	        public Int16	        clusterNo;
+	        public Int32	        printed_ml;
+        };
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct SHeadStat
         {
             public UInt32		    info;
@@ -896,6 +937,7 @@ namespace RX_DigiPrint.Services
 	        public EFluidCtrlMode   ctrlMode;
 
             SHeadEEpromInfo         eeprom;
+        	SHeadEEpromMvt	        eeprom_mvt;
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]

@@ -79,7 +79,6 @@
     <ClInclude Include="step_std.h" />
     <ClInclude Include="step_test.h" />
     <ClInclude Include="step_tx.h" />
-    <ClInclude Include="tec_it.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\rx_ink_lib\rx_ink_common.c" />

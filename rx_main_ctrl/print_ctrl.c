@@ -10,6 +10,7 @@
 // ****************************************************************************
 
 //--- includes ----------------------------------------------------------------
+#include "rx_def.h"
 #include "rx_error.h"
 #include "rx_file.h"
 #include "rx_threads.h"
@@ -275,6 +276,7 @@ static void _send_head_info(void)
 		{
 			pinfo = &RX_HBStatus[headNo/MAX_HEADS_BOARD].head[headNo%MAX_HEADS_BOARD].eeprom;
 			len = 0;
+			len += sprintf(&str[len], "%s\n", RX_TestImage.testMessage);
 			len += sprintf(&str[len], "%s-%d                     %s\n", RX_ColorNameShort(color), n+1, time);
 			len += sprintf(&str[len], "s# %d-%02d                 w%d/%d\n", pinfo->serialNo/100, pinfo->serialNo%100, pinfo->week, 2000+pinfo->year);
 			len += sprintf(&str[len], "volt %d / straight %d / uniform %d\n",pinfo->voltage, pinfo->straightness, pinfo->uniformity);			
@@ -312,7 +314,16 @@ static void _load_test(void)
 			RX_TestImage.printGoDist *= (RX_Config.inkSupplyCnt+1);
 		RX_TestImage.dropSizes	= 1;
 		_send_head_info();
-		spool_print_file(&RX_TestImage.id, RX_TestImage.filepath, 0, height, PG_MODE_GAP, 0, PQ_LENGTH_COPIES, 0, RX_TestImage.scanMode, TRUE);
+	//	spool_print_file(&RX_TestImage.id, RX_TestImage.filepath, 0, height, PG_MODE_GAP, 0, PQ_LENGTH_COPIES, 0, RX_TestImage.scanMode, 1, TRUE);
+		{
+			SPrintQueueItem item;
+			memset(&item, 0, sizeof(item));
+			item.printGoMode = PG_MODE_GAP;
+			item.lengthUnit  = PQ_LENGTH_COPIES;
+			item.scanMode    = RX_TestImage.scanMode;
+			item.srcPages    = 1;
+			spool_print_file(&RX_TestImage.id, RX_TestImage.filepath, 0, height, &item, TRUE);		
+		}
 	}
 }
 
@@ -351,10 +362,21 @@ static void _local_path(const char *global, char *local)
 	}
 }
 
+//--- pc_del_file -------------------------------------
+void pc_del_file(char *path)
+{
+	char localPath[MAX_PATH];
+	_local_path(path, localPath);
+	rx_remove_old_files(localPath, 0);
+	int ret=rx_rmdir(localPath);
+}
+
 //--- _print_next --------------------------------------------------------------
 static int _print_next(void)
 {
 	static int _first;
+	static int _ScansNext;
+	static int _CopiesStart;
 	TrPrintfL(TRUE, "_print_next printState=%d, spooler_ready=%d, pq_ready=%d", RX_PrinterStatus.printState, spool_is_ready(), pq_is_ready());
 	while (RX_PrinterStatus.printState==ps_printing && spool_is_ready() && pq_is_ready())
 	{	
@@ -398,6 +420,7 @@ static int _print_next(void)
 			memset(&_Item, 0, sizeof(_Item));
 			*_DataPath	  = 0;
 			_ScanLengthPx = 0;
+			_CopiesStart  = 0;
 			_first		  = TRUE;
 			SPrintQueueItem *item = pq_get_next_item();
 			if (item) 
@@ -418,30 +441,37 @@ static int _print_next(void)
 					if(!_Item.variable && _Item.lengthUnit==PQ_LENGTH_MM && _Item.pageHeight) 
 					{
 						_Item.copies  =(int)((_Item.scanLength*1000.0+_Item.pageHeight-1) / _Item.pageHeight);
+						
+						if (_Item.id.copy==0) _Item.id.copy=1;
 					}
 					else 
 					{
 						TrPrintfL(TRUE,"PRINT-NEXT: >>%s<<, copies=%d, printed=%d, pages=(%d..%d)",_Item.filepath,_Item.copies,_Item.copiesPrinted,_Item.firstPage,_Item.lastPage);
+						if (_Item.start.copy>0) _Item.copiesPrinted = _CopiesStart = _Item.start.copy-1;
 					}
+					Error(LOG, 0, "Printig1: copy=%d, copies=%d", _Item.id.copy, _Item.copies);
 					co_start_printing(_Item.pageHeight);
 				}
 
-				if (_Item.lengthUnit==PQ_LENGTH_COPIES)
+				if(_Item.lengthUnit == PQ_LENGTH_COPIES)
 				{
-					if (_Item.id.copy>_Item.copies)
+					if (_Item.id.copy<1) _Item.id.copy=1;
+					if(!rx_def_is_test(RX_Config.printer.type) && (_Item.id.copy > _Item.copies))
 					{
 						memset(&_Item, 0, sizeof(_Item));
 						continue;						
 					}
-
-					_Item.copiesTotal = _Item.copies * (_Item.lastPage-_Item.firstPage+1);
-					if (_Item.copiesTotal<1)_Item.copiesTotal=1;
 				}
-				
+				_Item.copiesTotal = _Item.copies * (_Item.lastPage - _Item.firstPage + 1);
+				if(_Item.copiesTotal < 1)_Item.copiesTotal = 1;
+
+				Error(LOG, 0, "Printig2: copies=%d, copy=%d, copiesTotal=%d", _Item.copies, _Item.id.copy, _Item.copiesTotal);
+
 				TrPrintfL(TRUE, "PRINT-NEXT: >>%s<<, copiesTotal=%d", _Item.filepath, _Item.copiesTotal);
 	//			Error(LOG, 0, "copiesTotal=%d", _Item.copiesTotal);
 				_Item.scans=0; 
 				_Item.scansSent=0;
+				_CopiesStart = _Item.copiesPrinted;
 				pq_set_item(&_Item);
 				if (_SetPrintPar)
 				{
@@ -452,23 +482,29 @@ static int _print_next(void)
 		}
 		if (*_Item.filepath) 
 		{
-			if (!_first) pq_next_page(&_Item, &_Item.id);
-			_first = FALSE;
-			if (_Item.id.copy>=_Item.copies || _Item.id.page>_Item.lastPage)// || (_Item.scans && _Item.id.scan>_Item.scans))
+			if (RX_Config.printer.type==printer_test_slide || RX_Config.printer.type==printer_test_slide_only)
 			{
-			//	Error(LOG, 0, "end_sent_document, %d", _Item.copiesTotal);
-				end_sent_document(_Item.copiesTotal);
-				TrPrintf(TRUE, "Document >>%s<< sent", _Item.filepath);
-				memset(&_Item, 0, sizeof(_Item));
-				return REPLY_OK;				
+				_Item.scansPrinted	= 0;
+				_Item.start.copy	= 0;
+				_Item.copiesPrinted	= 0;
+				_Item.id.scan		= 0;
+				_Item.id.copy++;
 			}
+			else
+			{
+				if (!_first) pq_next_page(&_Item, &_Item.id);
+				if (_Item.id.copy>_Item.copies || _Item.id.page>_Item.lastPage)
+				{
+					Error(LOG, 0, "end_sent_document, %d", _Item.copiesTotal-_CopiesStart);
+					end_sent_document(_Item.copiesTotal-_CopiesStart);
+					TrPrintf(TRUE, "Document >>%s<< sent", _Item.filepath);
+					memset(&_Item, 0, sizeof(_Item));
+					return REPLY_OK;				
+				}
+			}
+			_first = FALSE;
 
 			TrPrintfL(TRUE, "scan=%d, scans=%d, collate=%d, copies=%d", _Item.id.scan, _Item.scans, _Item.collate, _Item.copies);
-			if (RX_Config.printer.type==printer_test_slide || RX_Config.printer.type==printer_test_slide_only || RX_Config.printer.type==printer_test_table)
-			{
-				_Item.id.scan	   = 1;
-				_Item.scansPrinted = 0;
-			}
 			if (_Scanning && *_DataPath) // && _Item.id.scan<_Item.scans)
 			{				
 				if (_Item.passes)
@@ -477,16 +513,15 @@ static int _print_next(void)
 					{
 						if(RX_Config.printer.overlap) _ScanOffset = -RX_Spooler.headOverlapPx;
 						else						  _ScanOffset = 0;
+						_Item.scans	= _ScansNext;
 					}
 					else
 					{
 						if (RX_Config.printer.overlap)  _ScanOffset += (RX_Spooler.barWidthPx+RX_Spooler.headOverlapPx) / _Item.passes;
 						else                            _ScanOffset += RX_Spooler.barWidthPx / _Item.passes;							
 					}
-
-
 				}
-				spool_print_file(&_Item.id, _DataPath, _ScanOffset, _ScanLengthPx, _Item.printGoMode, _Item.printGoDist, _Item.lengthUnit, _Item.variable, _Item.scanMode, TRUE);
+				spool_print_file(&_Item.id, _DataPath, _ScanOffset, _ScanLengthPx, &_Item, TRUE);
 				return REPLY_OK;
 			}
 			{
@@ -497,65 +532,74 @@ static int _print_next(void)
 				{
 					if (_Item.scans==0)
 					{				
-						int length;
+						double length;
+						
 						// _ScanLengthPx = length to print
 						if (_Item.lengthUnit==PQ_LENGTH_COPIES)
 						{
 							int copies    = _Item.scanLength/1000;
 							if (_Item.start.copy<1) _Item.start.copy=1;
-							_Item.copiesPrinted = _Item.start.copy-1;									
+							_Item.copiesPrinted = _CopiesStart = _Item.start.copy-1;									
 							length        = _get_image_size((UINT32)(_Item.printGoDist * 1.200 / 25.4))*copies;
 							_ScanLengthPx = _get_image_size((UINT32)(_Item.printGoDist * 1.200 / 25.4))*(copies-_Item.copiesPrinted);									
 							_Item.id.copy = _Item.start.copy;
 						}
 						else 
 						{
-							int l		  = _Item.scanLength;
+							double l		  = _Item.scanLength;
 							length        = (UINT32)(l * 1200 / 25.4+0.5);
 							l			  = l - 1000*_Item.start.scan;
 							_ScanLengthPx = (UINT32)(l * 1200 / 25.4+0.5);
 						}
 
-						if (RX_Config.printer.overlap)
+						int barwidth;
+						if(RX_Config.printer.overlap) 
 						{
-							_Item.scansStart	= (RX_Spooler.maxOffsetPx+(RX_Spooler.barWidthPx+RX_Spooler.headOverlapPx)-1) / ((RX_Spooler.barWidthPx+RX_Spooler.headOverlapPx)/_Item.passes);
-							_Item.scans			= (length+RX_Spooler.maxOffsetPx+(RX_Spooler.barWidthPx+RX_Spooler.headOverlapPx)-1) / ((RX_Spooler.barWidthPx+RX_Spooler.headOverlapPx)/_Item.passes);
-							_Item.scansPrinted  = (length-_ScanLengthPx+RX_Spooler.maxOffsetPx+(RX_Spooler.barWidthPx+RX_Spooler.headOverlapPx)-1) / ((RX_Spooler.barWidthPx+RX_Spooler.headOverlapPx)/_Item.passes);
-							_ScanOffset			= -RX_Spooler.headOverlapPx;
+							barwidth	= RX_Spooler.barWidthPx + RX_Spooler.headOverlapPx;
+							_ScanOffset	= -RX_Spooler.headOverlapPx;
 						}
 						else
 						{
-							_Item.scansStart	= (RX_Spooler.maxOffsetPx+RX_Spooler.barWidthPx-1) / (RX_Spooler.barWidthPx/_Item.passes);
-							_Item.scans			= (length+RX_Spooler.maxOffsetPx+RX_Spooler.barWidthPx-1) / (RX_Spooler.barWidthPx/_Item.passes);								
-							_Item.scansPrinted	= ((length-_ScanLengthPx)+RX_Spooler.barWidthPx-1) / (RX_Spooler.barWidthPx/_Item.passes);
-							_ScanOffset = 0;
+							barwidth	= RX_Spooler.barWidthPx;
+							_ScanOffset = 0;								
 						}
-					//	if (_Item.id.page != _Item.lastPage) _Item.scans-=_Item.scansStart;
+						if (_Item.passes>1) _ScanOffset	-= barwidth*(_Item.passes-1) / _Item.passes;
+
+						_Item.scansStart	= (RX_Spooler.maxOffsetPx+barwidth-1) / (barwidth/_Item.passes);
+						_Item.scans			= (INT32)((length+RX_Spooler.maxOffsetPx+barwidth-1) / (barwidth/_Item.passes));								
+					//	_ScansNext			= (length+RX_Spooler.maxOffsetPx%barwidth+barwidth-1) / (barwidth/_Item.passes);								
+						_ScansNext			= _Item.scans-_Item.scansStart;
+						_Item.scansPrinted	= (INT32)(((length-_ScanLengthPx)+barwidth-1) / (barwidth/_Item.passes));
+
 						_Item.id.scan = _Item.scansPrinted;
 														
-						if (_Item.passes>1)
-						{	
-							if (RX_Config.printer.overlap) _ScanOffset	-= (RX_Spooler.barWidthPx+RX_Spooler.headOverlapPx)*(_Item.passes-1) / _Item.passes;
-							else                           _ScanOffset	-= RX_Spooler.barWidthPx*(_Item.passes-1) / _Item.passes;
-						}
-
 						machine_set_scans(_Item.scans);
 						pq_set_item(&_Item);
 					}
-					spool_print_file(&_Item.id, _DataPath, _ScanOffset, _ScanLengthPx, _Item.printGoMode, _Item.printGoDist, _Item.lengthUnit, _Item.variable, _Item.scanMode, TRUE);
+					spool_print_file(&_Item.id, _DataPath, _ScanOffset, _ScanLengthPx, &_Item, TRUE);
 				}
 				else
 				{
 					if (RX_Config.printer.type==printer_cleaf)
 					{
-						spool_print_file(&_Item.id, _DataPath, _Item.pageMargin, 0, _Item.printGoMode, _Item.printGoDist, PQ_LENGTH_UNDEF, _Item.variable, _Item.scanMode, FALSE);
+					//	spool_print_file(&_Item.id, _DataPath, _Item.pageMargin, 0, _Item.printGoMode, _Item.printGoDist, PQ_LENGTH_UNDEF, _Item.variable, _Item.scanMode, _Item.srcPages, FALSE);
+						SPrintQueueItem item;
+						memcpy(&item, &_Item, sizeof(item));
+						item.lengthUnit = PQ_LENGTH_UNDEF;
+						spool_print_file(&_Item.id, _DataPath, _Item.pageMargin, 0, &item, FALSE);
 					}
 					else
 					{
 						int img_offset=_Item.pageMargin + _Item.pageWidth;
 						int bar_width=RX_Spooler.barWidthPx*25400/1200;
 						if (img_offset>bar_width) img_offset = bar_width;
-						spool_print_file(&_Item.id, _DataPath, img_offset, 0, _Item.printGoMode, _Item.printGoDist, PQ_LENGTH_UNDEF, _Item.variable, _Item.scanMode, _Item.id.copy >= _Item.copies);
+					//	spool_print_file(&_Item.id, _DataPath, img_offset, 0, _Item.printGoMode, _Item.printGoDist, PQ_LENGTH_UNDEF, _Item.variable, _Item.scanMode, _Item.srcPages, _Item.id.copy >= _Item.copies);
+						{
+							SPrintQueueItem item;
+							memcpy(&item, &_Item, sizeof(item));
+							item.lengthUnit = PQ_LENGTH_UNDEF;
+							spool_print_file(&_Item.id, _DataPath, img_offset, 0, &item, _Item.id.copy >= _Item.copies);							
+						}
 					}
 				}
 				return REPLY_OK;

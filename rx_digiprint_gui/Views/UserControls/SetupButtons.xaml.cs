@@ -82,7 +82,8 @@ namespace RX_DigiPrint.Views.UserControls
         private void WebIn_Clicked(object sender, RoutedEventArgs e)
         {
             if (RxGlobals.PrintSystem.IsScanning) RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_SET_CMD, "CMD_SETUP/CMD_WEBIN");
-            else RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_SET_CMD, "CMD_SETUP");
+        //  else RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_SET_CMD, "CMD_SETUP");
+            else RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_SET_CMD, "CMD_PAUSE");
         }
 
         //--- Clean_Clicked -------------------------------------------------

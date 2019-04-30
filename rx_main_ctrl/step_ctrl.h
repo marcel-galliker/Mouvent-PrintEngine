@@ -29,6 +29,8 @@ int	 step_slide_enabled(void);
 int	 step_to_purge_pos(int no);
 int  step_in_purge_pos(void);
 
+int  step_set_vent(int speed);
+
 int  step_wipe_start(int no);
 int  step_wipe_done(void);
 

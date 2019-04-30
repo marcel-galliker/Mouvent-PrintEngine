@@ -62,11 +62,10 @@ namespace RX_Common.Source
                     return true;
 
                 process.Start();
+                if (!process.WaitForExit(200)) return false;
                 output = process.StandardOutput.ReadToEnd();
-                process.WaitForExit();
                 ret = process.ExitCode;
                 string[] lines=output.Split('\n');
-
                 if (ret==0 && lines.Count()==3) 
                     return true; // erfolgreich ausgeführt
                 if (lines.Count()>3 && lines[3].EndsWith("OK\r")) 

@@ -44,7 +44,6 @@ static SEEpromData _Data[MAX_HEADS_BOARD];
 static void _display_number(char *name, int size, BYTE *data);
 static void _display_str(char *name, int size, BYTE *data);
 
-
 //--- eeprom_init_data ------------------------------------------
 void eeprom_init_data(int headNo, BYTE *eeprom, SHeadEEpromInfo *pInfo)
 {

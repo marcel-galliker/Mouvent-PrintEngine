@@ -142,6 +142,10 @@ int32_t main(void)
 	temp_init();
 	comm_init(0);
 	uart_init(115200);
+	       
+	// PCB revision #g and later has an EEPROM
+	if (RX_Status.pcb_rev >= 'g') eeprom_init();
+
 	pres_init();
     pump_init();
 
@@ -173,29 +177,7 @@ int32_t main(void)
 	if (returnCode != 0)
     {
         HALT();
-	}
-	       
-    // PCB revision #g and later has an EEPROM
-	i2c_bb_init();            
-
-	#if DEBUG
-	eeprom_print_page(EE_SETTINGS_PAGE);
-	#endif
-	
-#if PERFORM_EEPROM_TEST        
-	eeprom_write_byte(1, 0xaa, 0xbb);
-	eeprom_delay();
-
-	unsigned char byte = 0;
-	eeprom_read_byte(1, 0xaa, &byte);
-
-	if (byte == 0xbb)
-		DBG_PRINTF("EEPROM Test successful\n");
-	else
-		DBG_PRINTF("EEPROM ERROR read 0x%02x\n", byte);
-	
-	eeprom_print_page(0);
-#endif
+	}		
 		
     // Read pumptime for Conditioner
 	RX_Status.pumptime = load_pumptime();      

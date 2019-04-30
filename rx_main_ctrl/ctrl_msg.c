@@ -63,6 +63,7 @@ int handle_headCtrl_msg(RX_SOCKET socket, void *msg, int len, struct sockaddr *s
 	switch (phdr->msgId)
 	{
 	case REP_PING:					TrPrintf			(TRUE, "got REP_PING");				 break;
+	case REP_HEAD_BOARD_CFG:		ctrl_head_cfg_done	(headNo);							break;
 	case REP_HEAD_STAT:				_do_head_stat		(socket, headNo, (SHeadBoardStat*)&phdr[1]); break;
 	case CMD_FLUID_CTRL_MODE:		_do_fluidCtrlMode	(socket, (SFluidCtrlCmd*) msg);			break;
 	case EVT_TRACE:					_do_trace_evt		(socket, (STraceMsg*)	  msg);			break;

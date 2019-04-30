@@ -65,9 +65,10 @@ namespace RX_Common
         //--- _OnButton -----------------------------------------------
         private bool _OnButton(int x, int y)
         {
-            if (!this.IsVisible || !this.IsHitTestVisible) return false;
+            if (!this.IsHitTestVisible) return false;
             if (!this.IsVisible) return false;
             if (!this.IsEnabled) return false;
+            if (!this.IsMouseDirectlyOver) return false;
 
             Point min = this.PointToScreen(new Point(0,0));
             Point max = new Point(min.X+this.ActualWidth/RxScreen.Screen.Scale, min.Y+this.ActualHeight/RxScreen.Screen.Scale);

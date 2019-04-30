@@ -145,13 +145,13 @@ int setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action)
 		}
 	}
 	
-	/*
 	//--- encoder ---
-	if (setup_chapter(file, "Encoder", -1, action)!=REPLY_OK) return REPLY_ERROR;
-	if (setup_chapter(file, "..", -1, action)!=REPLY_OK) return REPLY_ERROR;
+	if (setup_chapter(file, "Encoder", -1, action)==REPLY_OK)
+	{
+		setup_int32_arr(file, "corrRotPar",  action, pcfg->encoder.corrRotPar, SIZEOF(pcfg->encoder.corrRotPar), 0);
+		setup_chapter(file, "..", -1, action);
+	}
 
-	*/
-	
 	//--- stepper ---
 	if (setup_chapter(file, "Stepper", -1, action)==REPLY_OK) 
 	{

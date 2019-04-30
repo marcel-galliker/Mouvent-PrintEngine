@@ -35,10 +35,7 @@
             </common:RxButton>
         -->
             <common:RxButton Click="Washing_Clicked" x:Name="Button_Wash">
-                <StackPanel>
-                    <TextBlock Text="Belt"      HorizontalAlignment="Center"/>
-                    <TextBlock Text="Washing"   HorizontalAlignment="Center"/>
-                </StackPanel>
+                <Image Source="../../Resources/Bitmaps/wash.ico"/>
             </common:RxButton>
             
             <!--
@@ -50,10 +47,7 @@
             </common:RxButton>
             -->
             <common:RxButton Click="Gluing_Clicked" x:Name="Button_Glue">
-                <StackPanel>
-                    <TextBlock Text="Belt"      HorizontalAlignment="Center"/>
-                    <TextBlock Text="Gluing"    HorizontalAlignment="Center"/>
-                </StackPanel>
+                <Image Source="../../Resources/Bitmaps/glue.ico"/>
             </common:RxButton>
 
         </StackPanel>

@@ -66,8 +66,8 @@ int gui_send_msg(RX_SOCKET socket, void *msg)
 //--- gui_send_msg_2 ---------------------------------------------------------
 int gui_send_msg_2(RX_SOCKET socket, UINT32 cmd, int dataSize, void *data)
 {
-	if (socket!=0 && socket!=INVALID_SOCKET) return sok_send_2(&socket, INADDR_ANY, cmd, dataSize, data);
-	else                                        return sok_send_to_clients_2(_HGuiSvr, cmd, dataSize, data);	
+	if (socket!=0 && socket!=INVALID_SOCKET) return sok_send_2(&socket, cmd, dataSize, data);
+	else                                     return sok_send_to_clients_2(_HGuiSvr, cmd, dataSize, data);	
 }
 
 //--- gui_send_log ------------------------------------------------------------

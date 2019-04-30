@@ -49,10 +49,13 @@ static SPrintFileCmd	_PrintFile_Msg;
 
 static int				_Running;
 static int				_Abort;
+static int				_ReadyToSend;
+static int				_Paused;
 static SFSDirEntry		_DirEntry;
 static FILE				*_File=NULL;
 static char				_LastFilename[MAX_PATH];
 static int				_LastPage;
+static UINT16			_SMP_Flags;
 #define					BUFFER_CNT 2
 static int				_BufferNo;
 static UINT64			_BufferSize[BUFFER_CNT];
@@ -69,6 +72,7 @@ static int _handle_main_ctrl_msg(RX_SOCKET socket, void *msg, int len, struct so
 static int _do_spool_cfg	(RX_SOCKET socket, SSpoolerCfg	  *cfg);
 static int _do_color_cfg	(RX_SOCKET socket, SColorSplitCfg *cfg);
 static int _do_print_file	(RX_SOCKET socket, SPrintFileCmd  *msg);
+static void _do_start_sending(void);
 static int _do_print_abort	(RX_SOCKET socket);
 static int _do_print_test_data(RX_SOCKET socket, SPrintTestDataMsg *msg);
 
@@ -88,6 +92,7 @@ int ctrl_start(const char *ipAddrMain)
 	memset(_Buffer, 0, sizeof(_Buffer));
 	memset(_LastFilename, 0, sizeof(_LastFilename));
 	_LastPage=0;
+	_SMP_Flags=0;
 
 	rx_mem_init(512*1024*1024);
 	if (!_PrintFile_Sem) _PrintFile_Sem = rx_sem_create();
@@ -111,6 +116,20 @@ int ctrl_end(void)
 void ctrl_send(void *msg)
 {
 	sok_send(&_RxCtrlSocket, msg);
+}
+
+//--- ctrl_pause_printing -----------------------------------------------
+void ctrl_pause_printing(void)
+{
+	if (!_Paused) sok_send_2(&_RxCtrlSocket, CMD_PAUSE_PRINTING, 0, NULL);			
+	_Paused = TRUE;
+}
+
+//--- ctrl_start_printing -------------------------------------------------
+void ctrl_start_printing(void)
+{
+	if (_Paused) sok_send_2(&_RxCtrlSocket, CMD_START_PRINTING, 0, NULL);
+	_Paused = FALSE;
 }
 
 //--- ctrl_send_load_progress ---------------------------------------------------------
@@ -196,6 +215,7 @@ static int _handle_main_ctrl_msg(RX_SOCKET socket, void *msg, int len, struct so
 									rx_sem_post(_PrintFile_Sem);
 									break;
 
+	case CMD_START_PRINTING:		_do_start_sending	();										break;
 	case CMD_PRINT_ABORT:			_do_print_abort		(socket);								break;
 	
 	case BEG_SET_LAYOUT:			sr_set_layout_start (socket, (char*)&phdr[1]);				break;
@@ -239,16 +259,20 @@ static int _do_spool_cfg(RX_SOCKET socket, SSpoolerCfg *pmsg)
 	sr_mnt_drive(RX_Spooler.dataRoot);
 	data_init(socket, RX_Spooler.colorCnt*RX_Spooler.headsPerColor);
 	{
-		int i,n;
+		int i;
 		for (i=0; i<SIZEOF(_Buffer); i++)
-			for (n=0; n<SIZEOF(_Buffer[i]); n++)
-				rx_mem_use_clear(_Buffer[i][n]);		
+			data_clear(_Buffer[i]);		
 	}
-	_Running = FALSE;
-	_Abort   = FALSE;
+	_Running	 = FALSE;
+	_Abort		 = FALSE;
+	_ReadyToSend = FALSE;
+	_Paused		 = FALSE;
+	_SMP_Flags=0;
 	_MsgGot = _MsgSent = _MsgGot0 = 0;
-	sok_send_2(&socket, INADDR_ANY, REP_SET_SPOOL_CFG, 0, NULL);
+	sok_send_2(&socket, REP_SET_SPOOL_CFG, 0, NULL);
 	sr_reset();
+	if (rx_def_is_test(RX_Spooler.printerType) || !rx_def_is_scanning(RX_Spooler.printerType)) memset(_LastFilename, 0, sizeof(_LastFilename));
+
 	// data_free(_Buffer);
 	return REPLY_OK;
 }
@@ -295,8 +319,11 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pmsg)
 
 	TrPrintfL(TRUE, "_do_print_file >>%s<< id=%d, page=%d, copy=%d, same=%d", msg.filename, msg.id.id, msg.id.page, msg.id.copy, same);
 
+	if (pmsg->smp_flags & SMP_LAST_PAGE) Error(LOG, 0, "_do_print_file LAST PAGE >>%s<< id=%d, page=%d, copy=%d, same=%d", msg.filename, msg.id.id, msg.id.page, msg.id.copy, same); 
+	
 	if (!same)
 	{
+		Error(LOG, 0, "load file >>%s<< id=%d, page=%d, copy=%d", msg.filename, msg.id.id, msg.id.page, msg.id.copy);
 		_BufferNo = (_BufferNo+1)%BUFFER_CNT;
 
 		memset(_LastFilename, 0, sizeof(_LastFilename));
@@ -314,12 +341,16 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pmsg)
 			if (ret==REPLY_NOT_FOUND) 
 				Error(ERR_STOP, 0, "Could not load file >>%s<<", msg.filename);
 		}
-		if (ret==REPLY_OK)	    
-			ret = data_malloc (msg.printMode, reply.widthPx, reply.lengthPx, reply.bitsPerPixel, RX_Color, SIZEOF(RX_Color), &_BufferSize[_BufferNo], _Buffer[_BufferNo]);
+		if (ret==REPLY_OK)
+		{
+			if (pmsg->smp_bufSize) data_clear(_Buffer[_BufferNo]);
+			ret = data_malloc (msg.printMode, reply.widthPx, reply.lengthPx, reply.bitsPerPixel, RX_Color, SIZEOF(RX_Color), &_BufferSize[_BufferNo], _Buffer[_BufferNo]);			
+		}
 		if (_Abort) 
 			return REPLY_ERROR;
 		if (ret==REPLY_ERROR)
 			return Error(ERR_STOP, 0,     "Could not allocate memory file >>%s<<, page=%d, copy=%d, scan=%d", path, msg.id.page, msg.id.copy, msg.id.scan);
+		if (pmsg->smp_flags & SMP_LAST_PAGE) _SMP_Flags |= SMP_LAST_PAGE;
 //		is handled in main!
 //		if (msg.lengthUnit==PQ_LENGTH_COPIES)
 //			msg.lengthPx = msg.lengthPx*reply.widthPx; // scanning --> width!
@@ -341,8 +372,8 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pmsg)
 //	if (_PrintFileDone_Sem) 	rx_sem_post(_PrintFileDone_Sem);
 	 
 	if (ret==REPLY_OK || !*path)
-	{
-		if (data_load(&msg.id, path, msg.offsetWidth, msg.lengthPx, msg.gapPx, msg.blkNo, msg.printMode, msg.variable, msg.mirror, msg.clearBlockUsed, same, _Buffer[_BufferNo])!=REPLY_OK)
+	{ 
+		if (data_load(&msg.id, path, msg.offsetWidth, msg.lengthPx, msg.gapPx, msg.blkNo, msg.printMode, msg.variable, msg.mirror, msg.clearBlockUsed, same, _SMP_Flags | (pmsg->smp_flags & SMP_FIRST_PAGE), msg.smp_bufSize, _Buffer[_BufferNo])!=REPLY_OK)
 			return Error(ERR_STOP, 0, "Could not load file >>%s<<", str_start_cut(msg.filename, PATH_RIPPED_DATA));			
 		
 		//--- send spool state -------------------------------------------------------------
@@ -355,13 +386,21 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pmsg)
 		sok_send(&socket, &evt);
 		
 		TrPrintfL(TRUE, "REPLY EVT_PRINT_FILE, bufReady=%d", evt.bufReady);
-		hc_send_next();
+		if (hc_in_simu()) _ReadyToSend=TRUE;
+		if (_ReadyToSend) hc_send_next();
 		memcpy(&_LastFilename, &msg.filename, sizeof(_LastFilename));
 		_LastPage = msg.id.page;
 	}
 	return REPLY_OK;
 }
 
+//--- _do_start_sending ----------------------------
+static void _do_start_sending(void)
+{
+	_ReadyToSend = TRUE;
+	hc_send_next();
+}
+	
 //--- _do_print_abort ----------------------------------------------------------------------
 static int _do_print_abort(RX_SOCKET socket)
 {
@@ -369,7 +408,7 @@ static int _do_print_abort(RX_SOCKET socket)
 	_Abort=TRUE;
 	data_abort();
 	hc_abort_printing();
-	sok_send_2(&socket, INADDR_ANY, REP_PRINT_ABORT, 0, NULL);
+	sok_send_2(&socket, REP_PRINT_ABORT, 0, NULL);
 	return REPLY_OK;
 }
 

@@ -203,7 +203,7 @@ int _handle_ctrl_msg(RX_SOCKET socket, void *pmsg)//, int len, struct sockaddr *
 static int _do_ping(RX_SOCKET socket)
 {
 	TrPrintf(1, "got CMD_PING");
-	sok_send_2(&socket, INADDR_ANY, REP_PING, 0, NULL);
+	sok_send_2(&socket, REP_PING, 0, NULL);
 	return REPLY_OK;
 }
 

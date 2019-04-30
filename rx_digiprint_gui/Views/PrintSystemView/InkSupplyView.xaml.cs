@@ -120,8 +120,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
         {
             if (_InkSupply!=null && e.PropertyName.Equals("CtrlMode"))
             {
-                if (_InkSupply.CtrlMode==EFluidCtrlMode.ctrl_off && !_InkSupply.Flushed) Button_OnOff.Content = "ON";
-                else                                                                     Button_OnOff.Content = "OFF";
+            //  if (_InkSupply.CtrlMode==EFluidCtrlMode.ctrl_off && !_InkSupply.Flushed) Button_OnOff.Content = "ON";
+            //  else                                                                     Button_OnOff.Content = "OFF";
 
                 if (_InkSupply.CtrlMode==EFluidCtrlMode.ctrl_fill_step1)
                 {
@@ -176,7 +176,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
         }
 
         //--- _command --------------------
-        private void _command(string name, EFluidCtrlMode cmd)
+        private void _command(string name, EFluidCtrlMode cmd, bool all)
         {
             InkSupply supply = DataContext as InkSupply;
             if (supply!=null)
@@ -191,10 +191,27 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 }
 
                 TcpIp.SFluidCtrlCmd msg = new TcpIp.SFluidCtrlCmd();
-                msg.no       = supply.No-1;
-                msg.ctrlMode = cmd;
+                if (all)
+                {
+                    int i;
+                    for (i=0; i<RxGlobals.InkSupply.List.Count; i++)
+                    {
+                        if (RxGlobals.InkSupply.List[i].InkType!=null)
+                        {
+                            msg.no       = i;
+                            msg.ctrlMode = cmd;
 
-                RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_CTRL_MODE, ref msg);
+                            RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_CTRL_MODE, ref msg);
+                        }
+                    }
+                }
+                else
+                {
+                    msg.no       = supply.No-1;
+                    msg.ctrlMode = cmd;
+
+                    RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_CTRL_MODE, ref msg);
+                }
             }
             CmdPopup.IsOpen     = false;
             FlushPopup.IsOpen   = false;
@@ -206,21 +223,30 @@ namespace RX_DigiPrint.Views.PrintSystemView
         {
             if (_InkSupply.CtrlMode==EFluidCtrlMode.ctrl_off && !_InkSupply.Flushed) 
                 //_command(EFluidCtrlMode.ctrl_warmup); 
-                _command(null, EFluidCtrlMode.ctrl_print); 
+                _command(null, EFluidCtrlMode.ctrl_print, false); 
             else                                              
-                _command(null, EFluidCtrlMode.ctrl_off); 
+                _command(null, EFluidCtrlMode.ctrl_off, false); 
         }
 
-        private void ShutDown_Clicked   (object sender, RoutedEventArgs e) {_command(null,      EFluidCtrlMode.ctrl_off);          }
-        private void Calibrate_Clicked  (object sender, RoutedEventArgs e) {_command(null,      EFluidCtrlMode.ctrl_cal_start);    }
-        private void Print_Clicked      (object sender, RoutedEventArgs e) {_command(null,      EFluidCtrlMode.ctrl_print);        }
-        private void Fill_Clicked       (object sender, RoutedEventArgs e) {_command(null,      EFluidCtrlMode.ctrl_fill);         }
-        private void Empty_Clicked      (object sender, RoutedEventArgs e) {_command("Empty",   EFluidCtrlMode.ctrl_empty);        }
-        private void Flush_Clicked_0    (object sender, RoutedEventArgs e) {_command("Flush",   EFluidCtrlMode.ctrl_flush_night);  }
-        private void Flush_Clicked_1    (object sender, RoutedEventArgs e) {_command("Flush",   EFluidCtrlMode.ctrl_flush_weekend);}
-        private void Flush_Clicked_2    (object sender, RoutedEventArgs e) {_command("Flush",   EFluidCtrlMode.ctrl_flush_week);   }
-        private void Purge_Clicked      (object sender, RoutedEventArgs e) {_command("Purge",   EFluidCtrlMode.ctrl_purge_hard);   }
-        private void Done_Clicked       (object sender, RoutedEventArgs e) {_command(null, _InkSupply.CtrlMode+1);           }
+        private void ShutDown_Clicked   (object sender, RoutedEventArgs e) {_command(null,      EFluidCtrlMode.ctrl_off, false);          }
+        private void Calibrate_Clicked  (object sender, RoutedEventArgs e) {_command(null,      EFluidCtrlMode.ctrl_cal_start, false);    }
+        private void Print_Clicked      (object sender, RoutedEventArgs e) {_command(null,      EFluidCtrlMode.ctrl_print, false);        }
+        private void Fill_Clicked       (object sender, RoutedEventArgs e) {_command(null,      EFluidCtrlMode.ctrl_fill, false);         }
+        private void Empty_Clicked      (object sender, RoutedEventArgs e) {_command("Empty",   EFluidCtrlMode.ctrl_empty, false);        }
+        private void Flush_Clicked_0    (object sender, RoutedEventArgs e) {_command("Flush",   EFluidCtrlMode.ctrl_flush_night, false);  }
+        private void Flush_Clicked_1    (object sender, RoutedEventArgs e) {_command("Flush",   EFluidCtrlMode.ctrl_flush_weekend, false);}
+        private void Flush_Clicked_2    (object sender, RoutedEventArgs e) {_command("Flush",   EFluidCtrlMode.ctrl_flush_week, false);   }
+        private void Purge_Clicked      (object sender, RoutedEventArgs e) 
+        {
+            PurgeMsgBox box = new PurgeMsgBox("Purge "+_InkSupply.InkType.Name+" ?");
+            bool? ret = (bool)box.ShowDialog(); 
+            if (ret!=null && (bool)ret)
+            {
+                _command("Purge",   EFluidCtrlMode.ctrl_purge_hard, (box.Result==2)); 
+            }
+
+        }
+        private void Done_Clicked       (object sender, RoutedEventArgs e) {_command(null, _InkSupply.CtrlMode+1, false);           }
 
         //--- Pressure_LostFocus ------------------------------------------------
         private void Pressure_LostFocus(object sender, RoutedEventArgs e)

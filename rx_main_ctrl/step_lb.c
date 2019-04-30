@@ -27,18 +27,16 @@
 #define STEPPER_CNT		4
 
 static RX_SOCKET		*_step_socket[STEPPER_CNT]={0};
-static UINT32			 _step_ipaddr[STEPPER_CNT]={0};
 
 static STestTableStat	_status[STEPPER_CNT];
 static int				_AbortPrinting=FALSE;
 
 //--- steplb_init ---------------------------------------------------
-void steplb_init(int no, RX_SOCKET *psocket, UINT32 ipaddr)
+void steplb_init(int no, RX_SOCKET *psocket)
 {
 	if (no>=0 && no<STEPPER_CNT)
 	{
 		_step_socket[no] = psocket;
-		_step_ipaddr[no] = ipaddr;
 	}
 	memset(_status, 0, sizeof(_status));
 }
@@ -63,7 +61,7 @@ int	 steplb_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen
 			case CMD_TT_SCAN_RIGHT:
 			case CMD_TT_SCAN_LEFT:
 			case CMD_TT_VACUUM:
-						sok_send_2(_step_socket[no], _step_ipaddr[no], cmd, 0, NULL);
+						sok_send_2(_step_socket[no], cmd, 0, NULL);
 						break;
 
 			case CMD_TT_SCAN:
@@ -74,7 +72,7 @@ int	 steplb_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen
 							par.scanMode= PQ_SCAN_STD;
 							par.yStep   = 10000;
 
-							sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_TT_SCAN, sizeof(par), &par);
+							sok_send_2(_step_socket[no], CMD_TT_SCAN, sizeof(par), &par);
 						}
 						break;
 
@@ -82,17 +80,17 @@ int	 steplb_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen
 			case CMD_CAP_STOP:
 			case CMD_CAP_UP_POS:
 			case CMD_CAP_CAPPING_POS:
-						sok_send_2(_step_socket[no], _step_ipaddr[no], cmd, 0, NULL);
+						sok_send_2(_step_socket[no], cmd, 0, NULL);
 						break;
 
 			case CMD_CAP_REFERENCE:
 						TrPrintfL(TRUE, "Stepper[%d].CMD_CAP_REFERENCE", no);
-						sok_send_2(_step_socket[no], _step_ipaddr[no], cmd, 0, NULL);
+						sok_send_2(_step_socket[no], cmd, 0, NULL);
 						break;
 		
 			case CMD_CAP_PRINT_POS:
 						_AbortPrinting=FALSE;
-						sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CAP_PRINT_POS, sizeof(RX_Config.stepper.print_height), &RX_Config.stepper.print_height);
+						sok_send_2(_step_socket[no], CMD_CAP_PRINT_POS, sizeof(RX_Config.stepper.print_height), &RX_Config.stepper.print_height);
 						break;
 			}
 		}
@@ -163,7 +161,7 @@ int	 steplb_to_print_pos(void)
 	{
 		if (_step_socket[no] && *_step_socket[no]!=INVALID_SOCKET)
 		{
-			sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CAP_PRINT_POS, sizeof(RX_Config.stepper.print_height), &RX_Config.stepper.print_height);
+			sok_send_2(_step_socket[no], CMD_CAP_PRINT_POS, sizeof(RX_Config.stepper.print_height), &RX_Config.stepper.print_height);
 		}
 	}
 	return REPLY_OK;									
@@ -186,7 +184,7 @@ int	 steplb_to_up_pos(void)
 	{
 		if (_step_socket[no] && *_step_socket[no]!=INVALID_SOCKET)
 		{
-			sok_send_2(_step_socket[no], _step_ipaddr[no], CMD_CAP_UP_POS, 0, NULL);
+			sok_send_2(_step_socket[no], CMD_CAP_UP_POS, 0, NULL);
 		}
 	}
 	_AbortPrinting = FALSE;

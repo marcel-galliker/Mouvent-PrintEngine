@@ -64,10 +64,13 @@ namespace RX_DigiPrint.Views.PrintSystemView
         private void _ShowControls()
         {
             int i, inkSupply;
-            if (RxGlobals.PrintSystem.HeadCnt==0) return;
+            int headCnt=RxGlobals.PrintSystem.HeadCnt;
+            if (headCnt==0) return;
             for (i=0; i<Panel.Children.Count; i++)
             {
                 inkSupply = (int)((i*4)/RxGlobals.PrintSystem.HeadCnt);
+                if (RxGlobals.PrintSystem.Reverse) inkSupply = RxGlobals.PrintSystem.ColorCnt-1-inkSupply;
+            //  Panel.Children[i].Visibility = (RxGlobals.PrintSystem.AllInkSupplies || (inkSupply/headCnt)==(RxGlobals.PrintSystem.CheckedInkSupply/headCnt)) ? Visibility.Visible : Visibility.Collapsed;
                 Panel.Children[i].Visibility = (RxGlobals.PrintSystem.AllInkSupplies || inkSupply==RxGlobals.PrintSystem.CheckedInkSupply) ? Visibility.Visible : Visibility.Collapsed;
             }
         }

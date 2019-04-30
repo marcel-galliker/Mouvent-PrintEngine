@@ -142,15 +142,15 @@ static void _main_loop()
 ///--- main ---------------------------------------------------------------
 int main(int argc, char** argv)
 {
+	memset(&RX_TestTableStatus, 0, sizeof(RX_TestTableStatus));
+	memset(&RX_StepperCfg,		0, sizeof(RX_StepperCfg));
+
 	args_init(argc, argv);
 
 	rx_startup(argv[0], arg_debug);
 	Trace_init(argv[0]);
 
 	TrPrintfL(1, "RxStepperCtrl %s started", version);
-
-	memset(&RX_TestTableStatus, 0, sizeof(RX_TestTableStatus));
-	memset(&RX_StepperCfg,		0, sizeof(RX_StepperCfg));
 	
 	get_version((int*)&RX_TestTableStatus.swVersion);
 	sscanf(version, "d.d.d.d", &RX_TestTableStatus.swVersion.major, &RX_TestTableStatus.swVersion.minor, &RX_TestTableStatus.swVersion.revision, &RX_TestTableStatus.swVersion.build);

@@ -166,7 +166,7 @@ namespace RX_DigiPrint.Views.TestTableView
                 {
                     item.FilePath = dlg.Selected;
                     item.read_image_properties(item.FilePath);
-                    item.LoadDefaults(false);
+                    item.LoadDefaults();
                 
                     //--- save actual position ----------------------
                     Properties.Settings.Default.FileOpen_DataSource = dlg.RootButton;
@@ -196,7 +196,7 @@ namespace RX_DigiPrint.Views.TestTableView
             item.PageWidth  = item.SrcWidth;
             item.PageHeight = item.SrcHeight;
 
-            item.SaveDefaults(false);
+            item.SaveDefaults();
             if (RxGlobals.PrintQueue.Queue.Count>0) item.SendMsg(TcpIp.CMD_SET_PRINT_QUEUE);
             else                                    item.SendMsg(TcpIp.CMD_ADD_PRINT_QUEUE);
         }

@@ -234,7 +234,7 @@ static int _do_fluid_stat (RX_SOCKET socket, SHeadStateLight stat[FLUID_BOARD_CN
 {
 	int i;
 	for (i=0;  i<FLUID_BOARD_CNT; i++) nios_set_head_state(i, &stat[i]);
-	sok_send_2(&socket, INADDR_ANY, REP_FLUID_STAT, sizeof(RX_FluidBoardStatus), &RX_FluidBoardStatus);
+	sok_send_2(&socket, REP_FLUID_STAT, sizeof(RX_FluidBoardStatus), &RX_FluidBoardStatus);
 	if (daisy_chain_is_active())
 	{
 		SScalesMsg msg;

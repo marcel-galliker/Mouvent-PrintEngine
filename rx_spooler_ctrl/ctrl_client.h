@@ -18,4 +18,6 @@ int ctrl_start(const char *ipAddrMain);
 int ctrl_end(void);
 
 void ctrl_send(void *msg);
+void ctrl_pause_printing(void);
+void ctrl_start_printing(void);
 void ctrl_send_load_progress(SPageId *id, const char *colorSN, int progress);

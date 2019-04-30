@@ -220,6 +220,9 @@ namespace RX_DigiPrint.Models
             Info            = msg.info;
             Warn            = msg.warn;
             Err             = msg.err;
+            if (msg.err!=0)
+                Err             = msg.err;
+
 
             CylinderPresSet  = msg.cylinderPresSet;
             CylinderPres     = msg.cylinderPres;

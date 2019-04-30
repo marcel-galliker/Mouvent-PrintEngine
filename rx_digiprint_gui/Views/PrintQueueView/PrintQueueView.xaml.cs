@@ -221,13 +221,22 @@ namespace RX_DigiPrint.Views.PrintQueueView
         {
             if ((bool)e.NewValue)
             {
-                Button_Add.IsChecked = true;            
+                AllButtons(Visibility.Collapsed);
+                Button_Add.IsChecked = true;        
                 Button_Refresh.Visibility = Visibility.Visible;
             }   
             else
             {
                 Button_Add.IsChecked = false;
                 Button_Refresh.Visibility = Visibility.Collapsed;
+                foreach(Row row in PrintQueueGrid.Rows) 
+                {
+                    if (row.IsSelected)
+                    {
+                        AllButtons(Visibility.Visible);
+                        break;
+                    }
+                }
             }               
         }
 
@@ -284,7 +293,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
 
                 Button_Delete.Visibility = Visibility.Collapsed;
                 Button_Down.Visibility   = Visibility.Collapsed;
-//                Button_Up.Visibility   = (PrintedQueueGrid.ActiveItem as PrintQueueItem).Progress>=100 ? Visibility.Visible:Visibility.Collapsed;
+//              Button_Up.Visibility   = (PrintedQueueGrid.ActiveItem as PrintQueueItem).Progress>=100 ? Visibility.Visible:Visibility.Collapsed;
                 Button_Up.Visibility     = Visibility.Visible;
             }
         }

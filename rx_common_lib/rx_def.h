@@ -254,6 +254,7 @@ typedef struct SPrintQueueItem
 	char	ripState[128];
 	char	printEnv[64];
 	char	material[64];
+	char	testMessage[64];
 	INT32	srcPages;
 	INT32	srcWidth;	// µm
 	INT32	srcHeight;	// µm
@@ -437,7 +438,7 @@ typedef struct SOffsetCfg
 
 int rx_def_is_scanning(EPrinterType printerType);
 int rx_def_is_web(EPrinterType printerType);
-int rx_def_is_singlepage(EPrinterType printerType);
+int rx_def_is_test(EPrinterType printerType);
 
 typedef struct SPrinterCfg
 {
@@ -719,6 +720,13 @@ typedef struct
 	UINT16			badJets[8];
 } SHeadEEpromInfo;
 
+typedef struct
+{
+	INT16	disabledJets[16];
+	UINT16	clusterNo;
+	UINT32	printed_ml;
+} SHeadEEpromMvt;
+	
 typedef struct SHeadStat
 {	
 	SCondInfo		info;
@@ -750,6 +758,7 @@ typedef struct SHeadStat
 	EnFluidCtrlMode	ctrlMode;
 	
 	SHeadEEpromInfo	eeprom;
+	SHeadEEpromMvt	eeprom_mvt;
 } SHeadStat;
 
 typedef struct SHeadBoardCfg
@@ -815,6 +824,7 @@ typedef struct SEncoderCfg
 			#define CORR_ROTATIVE	0x02	// 
 			#define CORR_LINEAR		0x04	// using two encoders (scanning)
 	INT32	speed_mmin;
+	INT32	corrRotPar[4];					// parameters for CORR_ROTATIVE
 	EPrinterType	printerType;
 } SEncoderCfg;
 	
@@ -946,6 +956,11 @@ typedef struct SEncoderStat
 	UINT32			fifoEmpty_PG;
 	UINT32			fifoEmpty_IGN;
 	UINT32			fifoEmpty_WND;
+	INT32			corrRotPar[4];	// parameters for CORR_LINEAR
+	INT32			ampl_old;
+	INT32			ampl_new;
+	INT32			percentage;
+	UINT32			meters;
 } SEncoderStat;
 
 //---  ink-supply Configuration ----------------------------
@@ -1458,9 +1473,10 @@ typedef struct SRxConfig
 	INT32			headDist[MAX_HEAD_DIST];
 	INT32			headDistBack[MAX_HEAD_DIST];
 	INT32			headDistMax;
+	INT32			headDistBackMax;
 	INT32			colorOffset[INK_SUPPLY_CNT];
 	SPrinterCfg		printer;
-//	SEncCfg			encoder;
+	SEncoderCfg		encoder;
 	SStepperCfg		stepper;
 	SInkSupplyCfg	inkSupply[INK_SUPPLY_CNT];
 	SHeadBoardCfg	headBoard[HEAD_BOARD_CNT];	

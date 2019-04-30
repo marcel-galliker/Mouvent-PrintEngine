@@ -205,7 +205,7 @@ int tt_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 	_MainSocket = socket;
 	switch(msgId)
 	{
-	case CMD_TT_STATUS:		sok_send_2(&socket, INADDR_ANY, REP_TT_STATUS, sizeof(RX_TestTableStatus), &RX_TestTableStatus);	break;
+	case CMD_TT_STATUS:		sok_send_2(&socket, REP_TT_STATUS, sizeof(RX_TestTableStatus), &RX_TestTableStatus);	break;
 	case CMD_TT_SCAN:		tt_set_scan_par		(pdata);
 							tt_start_cmd		(msgId);
 							break;
@@ -760,7 +760,7 @@ static void _scan_state_machine(int menu)
 					RX_TestTableStatus.info.curing   = FALSE;	
 
 					RX_TestTableStatus.info.moving = FALSE;
-					if (_MainSocket!=INVALID_SOCKET) sok_send_2(&_MainSocket, INADDR_ANY, CMD_PRINT_ABORT, 0, NULL);
+					if (_MainSocket!=INVALID_SOCKET) sok_send_2(&_MainSocket, CMD_PRINT_ABORT, 0, NULL);
 					break;
 		}
 	}

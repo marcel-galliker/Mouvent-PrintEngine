@@ -369,6 +369,7 @@
     <Compile Include="Models\DeviceNumbers.cs" />
     <Compile Include="Models\Dir.cs" />
     <Compile Include="Models\DirItem.cs" />
+    <Compile Include="Models\Encoder.cs" />
     <Compile Include="Models\Enums\Alignment.cs" />
     <Compile Include="Models\Enums\BarcodeType.cs" />
     <Compile Include="Models\Enums\BoxType.cs" />
@@ -587,6 +588,9 @@
     <Compile Include="Views\PrintSystemView\PrintSystemGrid.xaml.cs">
       <DependentUpon>PrintSystemGrid.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\PrintSystemView\PurgeMsgBox.xaml.cs">
+      <DependentUpon>PurgeMsgBox.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\PrintSystemView\StepperGrid.xaml.cs">
       <DependentUpon>StepperGrid.xaml</DependentUpon>
     </Compile>
@@ -655,6 +659,9 @@
     </Compile>
     <Compile Include="Views\PrintQueueView\PageNumberView.xaml.cs">
       <DependentUpon>PageNumberView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UserControls\EncoderView.xaml.cs">
+      <DependentUpon>EncoderView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\UserControls\FlushWindow.xaml.cs">
       <DependentUpon>FlushWindow.xaml</DependentUpon>
@@ -1030,6 +1037,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\PrintSystemView\PurgeMsgBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\PrintSystemView\StepperGrid.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -1125,6 +1136,10 @@
     <Page Include="Views\UserControls\ConsumablesView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UserControls\EncoderView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\UserControls\FlushWindow.xaml">
       <SubType>Designer</SubType>
@@ -1274,6 +1289,8 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Resource Include="Resources\Bitmaps\wash.ico" />
+    <Resource Include="Resources\Bitmaps\glue.ico" />
     <Resource Include="Resources\Bitmaps\PageDown.ico" />
     <Resource Include="Resources\Bitmaps\PageUp.ico" />
     <Resource Include="Resources\Bitmaps\LB702\LB702_WB2.png" />
