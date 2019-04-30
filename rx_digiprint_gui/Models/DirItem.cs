@@ -256,7 +256,7 @@ namespace RX_DigiPrint.Models
         }
 
         //--- Property PrintButtonVisibility ---------------------------------------
-        private Visibility _PrintButtonVisibility = Visibility.Hidden;
+        private Visibility _PrintButtonVisibility = Visibility.Collapsed;
         public Visibility PrintButtonVisibility
         {
             get { return _PrintButtonVisibility; }

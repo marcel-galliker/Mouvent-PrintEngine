@@ -58,7 +58,11 @@ static void* _trace_thread(void* lpParameter);
 void Trace_init(const char *appName)
 {
 	strcpy(_sAppName_org, appName);
+#ifdef soc
 	_TraceFileOpen(PATH_TRACE, appName);
+#else
+	_TraceFileOpen(PATH_LOG, appName);
+#endif
 	if (appName)
 	{
 		split_path(appName, NULL, _sAppName, NULL);

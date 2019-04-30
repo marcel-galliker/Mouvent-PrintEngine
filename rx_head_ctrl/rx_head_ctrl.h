@@ -22,6 +22,7 @@ extern int				RX_LinuxDeployment;
 extern RX_SOCKET		RX_MainSocket;
 extern UINT32			RX_FpgaCmd;
 extern SFpgaHeadStat	RX_FpgaStat;
+extern SFpgaHeadStat	RX_FpgaStatRunning;
 extern SFpgaHeadError	RX_FpgaError;
 extern SFpgaDataStat	RX_FpgaData;
 extern SFpgaPrintList	RX_FpgaPrint;

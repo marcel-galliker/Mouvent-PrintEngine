@@ -325,6 +325,10 @@ int  data_get_size	(const char *path, UINT32 page, UINT32 spacePx, UINT32 *pwidt
 		*plength += 2*abs(_WakeupLen);
 		if (pbitsPerPixel && (RX_Spooler.printerType==printer_TX801 || RX_Spooler.printerType==printer_TX802))
 		{
+			// possible improvement:
+			//	1. read the file
+			//	2. check last byte over all rows
+			//	3. if all bytes are "0" we don't need the multiCopy option
 			int pixPByte = 8/(*pbitsPerPixel);
 			for ((*multiCopy)=1; ((*pwidth)*(*multiCopy)) % pixPByte; (*multiCopy)++)
 			{

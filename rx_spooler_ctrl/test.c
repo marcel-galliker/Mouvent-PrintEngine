@@ -78,6 +78,7 @@ static void _loadFiles(char *printEnv, char *fname)
 	int				ret, i;
 	int				time0;
 	SPrintFileRep	reply;
+	UINT8			multiCopy;
 	SBmpInfo		bmpInfo;
 
 	total = rx_mem_get_totalMB();
@@ -89,7 +90,7 @@ static void _loadFiles(char *printEnv, char *fname)
 
 	time0 = rx_get_ticks();
 
-	ret = data_get_size(filePath, 0, 0, &reply.widthPx, &reply.lengthPx, &reply.bitsPerPixel, &reply.multiCopy);
+	ret = data_get_size(filePath, 0, 0, &reply.widthPx, &reply.lengthPx, &reply.bitsPerPixel, &multiCopy);
 	if (ret==REPLY_OK) ret = data_malloc (FALSE, reply.widthPx, reply.lengthPx, reply.bitsPerPixel, RX_Color, SIZEOF(RX_Color), &_BufferSize, _Buffer);
 	if (ret==REPLY_OK) ret = tif_load(NULL, filePath, "", PM_SINGLE_PASS, 0, 0, RX_Color, SIZEOF(RX_Color), _Buffer, &bmpInfo, NULL);
 	free2 = rx_mem_get_freeMB();

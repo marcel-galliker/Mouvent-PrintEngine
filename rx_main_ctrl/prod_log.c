@@ -46,6 +46,7 @@ void pl_init(void)
 	memset(&_Start,0, sizeof(_Start));
 	memset(&_LastJob,0, sizeof(_LastJob));
 	_ProdLog = xlCreateXMLBook();
+	xlBookSetKey(_ProdLog, "Mouvent AG", "linux-e5d51b7c91a7a91d0905233d43ncj7m3"); 
 	pl_load();
 #endif
 }
@@ -159,8 +160,8 @@ static void _pl_stop_tx(SPrintQueueItem *pitem)
 	
 	pitem = pq_get_item(pitem);
 	
-	if (!*_Start.filepath) return;
-//	if (pitem->scansPrinted == _Start.scansPrinted) return;
+	if (!*_Start.filepath || !pitem) return;
+	if (pitem->scansPrinted == _Start.scansPrinted) return;
 	
 	same = !strcmp(_Start.filepath, _LastJob.filepath)
 		&& _Start.scanMode    == _LastJob.scanMode
@@ -228,7 +229,7 @@ static void _pl_stop_tx(SPrintQueueItem *pitem)
 		row++;
 		if(_Start.lengthUnit==PQ_LENGTH_COPIES)
 		{
-			xlSheetWriteStr(_ActSheet, row, 0, "printing", 0); xlSheetWriteNum(_ActSheet, row, 1, _Start.copies, 0); xlSheetWriteStr(_ActSheet, row, 2, "copies", 0);
+			xlSheetWriteStr(_ActSheet, row, 0, "Volume", 0); xlSheetWriteNum(_ActSheet, row, 1, _Start.copies, 0); xlSheetWriteStr(_ActSheet, row, 2, "copies", 0);
 			row++;
 		}
 		else
@@ -240,9 +241,10 @@ static void _pl_stop_tx(SPrintQueueItem *pitem)
 	if(_Start.lengthUnit==PQ_LENGTH_COPIES)
 	{
 		xlSheetWriteStr(_ActSheet, row, 0, "Start at", 0); xlSheetWriteNum(_ActSheet, row, 1, _Start.start.copy, 0); 
-//			xlSheetWriteNum(_ActSheet, row, 4, xlBookDatePack(_ProdLog, 2008, 4, 29, 0, 0, 0, 0), _DateFormat);
+		xlSheetWriteNum(_ActSheet, row, 3, _StartTime, _DateFormat);
 		row++;
-		xlSheetWriteStr(_ActSheet, row, 0, "Stop at", 0); xlSheetWriteNum(_ActSheet, row, 1, _Start.start.copy, 0);						
+		xlSheetWriteStr(_ActSheet, row, 0, "Last Printed", 0); xlSheetWriteNum(_ActSheet, row, 1, pitem->copiesPrinted, 0);
+		xlSheetWriteNum(_ActSheet, row, 3, time, _DateFormat);
 	}
 	else
 	{
@@ -252,11 +254,12 @@ static void _pl_stop_tx(SPrintQueueItem *pitem)
 		total = pitem->scans-pitem->scansStart;
 		if (total>0)
 		{
-			xlSheetWriteStr(_ActSheet, row, 0, "Stop at", 0); xlSheetWriteNum(_ActSheet, row, 1,_Start.scanLength/1000*(pitem->scansPrinted-pitem->scansStart)/total, 0);	xlSheetWriteStr(_ActSheet, row, 2, "m", 0);
+			xlSheetWriteStr(_ActSheet, row, 0, "Last Printed", 0); xlSheetWriteNum(_ActSheet, row, 1,_Start.scanLength/1000*(pitem->scansPrinted-pitem->scansStart)/total, 0);	xlSheetWriteStr(_ActSheet, row, 2, "m", 0);
 			xlSheetWriteNum(_ActSheet, row, 3, time, _DateFormat);
 		}
 	}			
-	xlSheetSetCol(_ActSheet, 0, 3, -1, NULL, FALSE);
+	xlSheetSetCol(_ActSheet, 0, 0, 20, NULL, FALSE);
+	xlSheetSetCol(_ActSheet, 1, 3, -1, NULL, FALSE);
 	memcpy(&_LastJob, &_Start, sizeof(_LastJob));
 	memset(&_Start, 0, sizeof(_Start));
 	pl_save();	

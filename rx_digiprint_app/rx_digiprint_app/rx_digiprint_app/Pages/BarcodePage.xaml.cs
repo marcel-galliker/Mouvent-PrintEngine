@@ -1,4 +1,5 @@
-﻿using DigiPrint.Common;
+﻿using Android.Content;
+using DigiPrint.Common;
 using DigiPrint.Models;
 using RX_DigiPrint.Services;
 using System;

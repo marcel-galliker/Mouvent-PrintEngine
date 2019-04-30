@@ -44,6 +44,11 @@ namespace RX_DigiPrint.Views.PrintQueueView
                     Length_Settings.Visibility = Visibility.Visible;
                     Page_Settings.Visibility   = StartPageTxt.Visibility = StartPageNum.Visibility = Visibility.Collapsed;
                 }
+                Settings.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                Settings.Visibility = Visibility.Hidden;
             }
         }
 

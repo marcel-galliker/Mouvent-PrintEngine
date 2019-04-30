@@ -22,10 +22,14 @@ namespace RX_DigiPrint.Views.PrintQueueView
         public  ICommand         CommandDelete       { get; private set; }
         public  ICommand         CommandInsert       { get; private set; }
 
+
         private Image _ActImage;
         double        _MaxWidth;
         double        _MaxHeight=250;
         private int   _SelectedItems=0;
+
+        private FileOpen        FileOpen;
+        private FileOpen_LB702  FileOpen_LB702;
 
         //--- constructor -----------------------------------------------
         public PrintQueueView()
@@ -42,6 +46,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
             CommandDelete = new RxCommand(DoDelete);
             CommandInsert = new RxCommand(DoInsert);
             Button_Refresh.Visibility = Visibility.Collapsed;
+            Button_Print.Visibility   = Visibility.Collapsed;
         }
 
         //--- PrintSystem_PropertyChanged --------------------------------------------
@@ -218,13 +223,67 @@ namespace RX_DigiPrint.Views.PrintQueueView
         //--- Add_Clicked -------------------------------------------------
         private void Add_Clicked(object sender, RoutedEventArgs e)
         {
-            FileOpen.Visibility = (FileOpen.Visibility==Visibility.Visible)? Visibility.Collapsed :  Visibility.Visible;
+            RxButton button = sender as RxButton;
+            UserControl ctrl;
+            UserControl act;
+
+            if (MainGrid.Children.Count==6) act = MainGrid.Children[5] as UserControl;
+            else act = null;
+            if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_UV)
+            {
+                if (FileOpen!=null)       FileOpen = null;
+                if (FileOpen_LB702==null) 
+                {
+                    FileOpen_LB702 = new FileOpen_LB702();
+                    FileOpen_LB702.SelectedChanged += FileOpen_LB702_SelectedChanged;
+                } 
+                ctrl = FileOpen_LB702;
+            }
+            else
+            {
+                if (FileOpen==null) FileOpen = new FileOpen();
+                if (FileOpen_LB702!=null) FileOpen_LB702 = null;
+                ctrl = FileOpen;
+            }
+            if (act==null || act!=ctrl)
+            {
+                Grid.SetRow(ctrl, 1);
+                Grid.SetRowSpan(ctrl, 3);
+                ctrl.Visibility = Visibility.Collapsed;
+                ctrl.IsVisibleChanged += FileOpen_IsVisibleChanged;
+            }
+            if (act==null) MainGrid.Children.Add(ctrl);
+            else if (act!=ctrl) MainGrid.Children[5]=ctrl;
+            ctrl.Visibility = (ctrl.Visibility==Visibility.Collapsed)? Visibility.Visible :  Visibility.Collapsed;
         }
         
         //--- Refresh_Clicked -----------------------------------
         private void Refresh_Clicked(object sender, RoutedEventArgs e)
         {                        
-            FileOpen.Refresh();
+            if (FileOpen_LB702!=null) FileOpen_LB702.Refresh();
+            if (FileOpen!=null) FileOpen.Refresh();
+        }
+
+        //--- Print_Clicked -----------------------------------
+        private void Print_Clicked(object sender, RoutedEventArgs e)
+        {                        
+            if (FileOpen_LB702!=null) FileOpen_LB702.Print();
+        }
+
+        //--- FileOpen_LB702_SelectedChanged ---------------------------------------
+        void FileOpen_LB702_SelectedChanged(int selected)
+        {
+            if (FileOpen_LB702!=null && selected>0) 
+            {               
+                Button_Print.Visibility   = Visibility.Visible;
+                if (RxGlobals.User.UserType>EUserType.usr_operator) Button_Delete.Visibility  = Visibility.Visible;
+                else  Button_Delete.Visibility  = Visibility.Collapsed;
+            }
+            else
+            {
+                Button_Print.Visibility   = Visibility.Collapsed;
+                Button_Delete.Visibility  = Visibility.Collapsed;
+            }
         }
 
         //--- FileOpen_IsVisibleChanged ---------------------------------
@@ -235,11 +294,14 @@ namespace RX_DigiPrint.Views.PrintQueueView
                 AllButtons(Visibility.Collapsed);
                 Button_Add.IsChecked = true;        
                 Button_Refresh.Visibility = Visibility.Visible;
+                if (FileOpen_LB702!=null && FileOpen_LB702.Selected>0) Button_Print.Visibility   = Visibility.Visible;
+                else  Button_Print.Visibility   = Visibility.Collapsed;
             }   
             else
             {
                 Button_Add.IsChecked = false;
                 Button_Refresh.Visibility = Visibility.Collapsed;
+                Button_Print.Visibility = Visibility.Collapsed;
                 foreach(Row row in PrintQueueGrid.Rows) 
                 {
                     if (row.IsSelected)
@@ -254,20 +316,27 @@ namespace RX_DigiPrint.Views.PrintQueueView
         //--- Delete_Clicked -------------------------------------------------
         private void Delete_Clicked_LB702(object sender, RoutedEventArgs e)
         {
-            if (_SelectedItems==0) return;
-            if (RxMessageBox.YesNo("Delete", "Delete the Items",  MessageBoxImage.Question, false))
+            if (Button_Add.IsChecked)
             {
-                foreach(Row row in PrintQueueGrid.Rows)
+                if (FileOpen_LB702!=null) FileOpen_LB702.Delete();
+            }
+            else
+            {
+                if (_SelectedItems==0) return;
+                if (RxMessageBox.YesNo("Delete", "Delete the Items",  MessageBoxImage.Question, false))
                 {
-                    PrintQueueItem item = row.Data as PrintQueueItem;
-                    if (item!=null && item.IsSelected)
+                    foreach(Row row in PrintQueueGrid.Rows)
                     {
-                        item.IsSelected = false;
-                        item.SendMsg(TcpIp.CMD_DEL_PRINT_QUEUE);
+                        PrintQueueItem item = row.Data as PrintQueueItem;
+                        if (item!=null && item.IsSelected)
+                        {
+                            item.IsSelected = false;
+                            item.SendMsg(TcpIp.CMD_DEL_PRINT_QUEUE);
+                        }
                     }
+                    AllButtons(Visibility.Collapsed);
+                    _update_selected_items();
                 }
-                AllButtons(Visibility.Collapsed);
-                _update_selected_items();
             }
         }
 
@@ -381,6 +450,8 @@ namespace RX_DigiPrint.Views.PrintQueueView
                 else
                     row.Control.Background = Brushes.Transparent;
             }
+            if (_SelectedItems>0) AllButtons(Visibility.Visible);
+            else                  AllButtons(Visibility.Collapsed);
         }
 
         //--- PrintedQueueGrid_SelectedRowsCollectionChanged -------------------------------------------
@@ -442,7 +513,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
         //--- PrintQueueGrid_InitializeRow ----------------------------------------------
         private void PrintQueueGrid_InitializeRow(object sender, InitializeRowEventArgs e)
         {
-            if (FileOpen.NewFile)
+            if (FileOpen!= null && FileOpen.NewFile)
             {
                 FileOpen.NewFile = false;
                 if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_UV)

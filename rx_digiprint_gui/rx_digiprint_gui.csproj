@@ -554,6 +554,9 @@
     <Compile Include="Views\PrintQueueView\FileOpen.xaml.cs">
       <DependentUpon>FileOpen.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\PrintQueueView\FileOpen_LB702.xaml.cs">
+      <DependentUpon>FileOpen_LB702.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\PrintQueueView\FileSettingsTest.xaml.cs" />
     <Compile Include="Views\PrintQueueView\PrintQueueAddTest.xaml.cs">
       <DependentUpon>PrintQueueAddTest.xaml</DependentUpon>
@@ -1018,6 +1021,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\PrintQueueView\FileOpen.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\PrintQueueView\FileOpen_LB702.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

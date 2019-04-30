@@ -121,6 +121,7 @@ namespace DigiPrint.Droid
                 Manifest.Permission.Bluetooth,
                 Manifest.Permission.BluetoothAdmin,
                 Manifest.Permission.ReadContacts,
+                Manifest.Permission.ReadUserDictionary,
                 Manifest.Permission.WriteContacts,
                 Manifest.Permission.ReadProfile,
                 Manifest.Permission.Vibrate,
@@ -147,10 +148,8 @@ namespace DigiPrint.Droid
 
         //--- _userName -----------------------------------
         private string _userName()
-        {            
-            string[] projection = {ContactsContract.Profile.InterfaceConsts.DisplayName };
-
-            Log.Debug("DigiPrint", "_userName 1");
+        {
+            string[] projection = {ContactsContract.Profile.InterfaceConsts.DisplayName};
 
             try
             {
@@ -161,10 +160,11 @@ namespace DigiPrint.Droid
                     string user = cursor.GetString(cursor.GetColumnIndex(projection[0]));
                     return user;
                 }
+                else return "Somebody";
             }
             catch
-            { }
-            Log.Debug("DigiPrint", "_userName 3");
+            {
+            }
             return null;
         }
 

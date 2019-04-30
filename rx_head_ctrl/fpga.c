@@ -1176,9 +1176,9 @@ static void _fpga_copy_status(void)
 			UINT32 *dst=(UINT32*)&RX_FpgaStat;
 			for (i=0; i<sizeof(RX_FpgaStat); i+=4) *dst++ = *src++;
 		}
-		
-		
-
+		if (FpgaCfg.cfg->cmd & CMD_MASTER_ENABLE)
+			memcpy(&RX_FpgaStatRunning, &RX_FpgaStat, sizeof(RX_FpgaStat));
+			
 		{
 			UINT32 *src=(UINT32*)Fpga.error;
 			UINT32 *dst=(UINT32*)&RX_FpgaError;
@@ -1189,6 +1189,7 @@ static void _fpga_copy_status(void)
 			}
 		}
 		
+		if (FpgaCfg.cfg->cmd & CMD_MASTER_ENABLE)
 		{
 			UINT32 *src=(UINT32*)Fpga.data;
 			UINT32 *dst=(UINT32*)&RX_FpgaData;
@@ -1196,6 +1197,7 @@ static void _fpga_copy_status(void)
 			for (i=0; i<sizeof(RX_FpgaData)-sizeof(Fpga.data->wf_busy_warn); i+=4) *dst++ = *src++;
 		}
 		
+		if (FpgaCfg.cfg->cmd & CMD_MASTER_ENABLE)
 		{
 			UINT32 *src=(UINT32*)Fpga.print;
 			UINT32 *dst=(UINT32*)&RX_FpgaPrint;
@@ -1496,11 +1498,13 @@ int  fpga_abort(void)
 			memset(_PrintDonePos, 0, sizeof(_PrintDonePos));
 
 			TrPrintf(TRUE, "fpga_abort Save status\n");
+
+			_check_encoder();
 			
 			_fpga_copy_status();
 			term_save(PATH_TEMP "status.txt");
 			term_flush();
-
+			
 			TrPrintfL(TRUE,"set CMD_MASTER_ENABLE=FALSE");
 			SET_FLAG(FpgaCfg.cfg->cmd,CMD_MASTER_ENABLE,FALSE);
 		//	rx_sleep(5);
@@ -1828,7 +1832,7 @@ static int _check_encoder(void)
 			RX_HBStatus[0].head[i].encPos = _Enc_PosBase[i] + (Fpga.stat->enc_position[i] / 8);
 		}
 	
-		if(TRUE)
+		if(FpgaCfg.cfg->cmd & CMD_MASTER_ENABLE)
 		{
 			for(i = 0; i < HEAD_CNT; i++)
 			{

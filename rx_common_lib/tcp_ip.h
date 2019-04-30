@@ -669,7 +669,6 @@ typedef struct SPrintFileRep
 	UINT32		widthPx;
 	UINT32		lengthPx;
 	UINT8		bitsPerPixel;
-	UINT8		multiCopy;		// number of copies to reach BYTE alignment
 	UINT8		bufReady;
 	UINT8		clearBlockUsed;
 } SPrintFileRep;

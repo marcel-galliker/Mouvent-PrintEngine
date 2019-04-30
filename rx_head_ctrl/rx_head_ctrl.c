@@ -46,6 +46,7 @@ SFluidStateLight		RX_FluidStat[MAX_HEADS_BOARD];
 
 UINT32					RX_FpgaCmd;
 SFpgaHeadStat			RX_FpgaStat;
+SFpgaHeadStat			RX_FpgaStatRunning;
 SFpgaHeadError			RX_FpgaError;
 SFpgaDataStat			RX_FpgaData;
 SFpgaPrintList			RX_FpgaPrint;

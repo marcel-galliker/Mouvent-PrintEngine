@@ -22,7 +22,7 @@
         <KeyBinding Key="Insert" Command="{Binding CommandInsert}"/>
     </UserControl.InputBindings>
     
-    <Grid>
+    <Grid x:Name="MainGrid">
         <Grid.RowDefinitions>
             <RowDefinition Height="auto" />
             <RowDefinition Height="80*" MinHeight="100"/>
@@ -35,6 +35,9 @@
 
         <!-- toolbar RIGHT _______________________________________________________ -->
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+            <common:RxButton x:Name="Button_Print"  Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" Click="Print_Clicked">
+                <Image Source="../../Resources/Bitmaps/Print.ico"/>
+            </common:RxButton>
             <common:RxButton x:Name="Button_Refresh"  Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" Click="Refresh_Clicked">
                 <Image Source="../../Resources/Bitmaps/Refresh.ico"/>
             </common:RxButton>
@@ -106,12 +109,13 @@
                     <ig:TemplateColumn Key="ID" HeaderText="ID">
                         <ig:TemplateColumn.ItemTemplate>
                             <DataTemplate>
-                                <Grid PreviewMouseDown="Grid_MouseDown" Height="30" Margin="-10">
+                                <Grid PreviewMouseDown="Grid_MouseDown" Height="30" Margin="-10" Background="Transparent" >
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="30"/>
                                         <ColumnDefinition Width="30"/>
                                         <ColumnDefinition Width="30"/>
                                     </Grid.ColumnDefinitions>
+                                    <!--
                                     <Image Grid.Column="0" Source="{StaticResource Yes_ico}"
                                         Visibility="{Binding IsSelected, Converter={StaticResource BoolToVisible_Converter}}"
                                         HorizontalAlignment="Center"
@@ -119,6 +123,13 @@
                                         Height="34"
                                         Margin="-5"
                                     />
+                                    -->
+                                    <CheckBox
+                                        IsChecked="{Binding IsSelected}"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center"
+                                        />
+
                                     <Image Grid.Column="2" Source="../../Resources/Bitmaps/Changed.ico"
                                         Visibility="{Binding Changed, Converter={StaticResource BoolToVisible_Converter}}"   
                                         Height="32"
@@ -301,7 +312,9 @@
         </Grid>
         
         <!-- FILE OPEN ____________________________________________________________-->
-        <pq_views:FileOpen Grid.Row="1" Grid.RowSpan="3" x:Name="FileOpen" Visibility="Hidden" IsVisibleChanged="FileOpen_IsVisibleChanged"/>
-        
+        <!--
+        <pq_views:FileOpen       Grid.Row="1" Grid.RowSpan="3" x:Name="FileOpen"       Visibility="Hidden" IsVisibleChanged="FileOpen_IsVisibleChanged" />
+        <pq_views:FileOpen_LB702 Grid.Row="1" Grid.RowSpan="3" x:Name="FileOpen_LB702" Visibility="Hidden" IsVisibleChanged="FileOpen_IsVisibleChanged" />
+        -->
     </Grid>
 </UserControl>

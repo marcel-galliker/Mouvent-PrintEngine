@@ -211,10 +211,10 @@ void putty_display_fpga_status(void)
 	term_printf("imgOutIdx:    "); PRINTF(4)("  %03d %03d   ", RX_FpgaData.imgOutIdx[no[i]][0], RX_FpgaData.imgOutIdx[no[i]][1]); term_printf("\n");
 
 	term_printf("Print GO ENC: "); PRINTF(4)("%09d   ", RX_HBStatus[0].head[no[i]].encPgCnt); term_printf("\n");
-	term_printf("Print GO:     "); PRINTF(4)("%09d   ", RX_FpgaStat.pg_ctr[no[i]]);				term_printf("\n");
+	term_printf("Print GO:     "); PRINTF(4)("%09d   ", RX_FpgaStatRunning.pg_ctr[no[i]]);				term_printf("\n");
 //	term_printf("Print GO Tel: "); PRINTF(4)("%09d   ", RX_FpgaStat.tel_pg_cnt[no[i]]);			term_printf("\n");
 //	term_printf("PG abort:     "); PRINTF(4)("%09d   ", RX_FpgaStat.pg_abort_ctr[no[i]]);		term_printf("\n");
-	term_printf("Print DONE:   "); PRINTF(4)("%09d   ", RX_FpgaStat.print_done_ctr[no[i]]);		term_printf("\n");
+	term_printf("Print DONE:   "); PRINTF(4)("%09d   ", RX_FpgaStatRunning.print_done_ctr[no[i]]);		term_printf("\n");
 	term_printf("Print GO Pos: "); PRINTF(4)("%09d   ", RX_FpgaStat.pg_in_position[no[i]]);		term_printf("\n");
 	term_printf("Print Pos:    "); PRINTF(4)("%09d   ", RX_HBStatus[0].head[no[i]].encPos-RX_FpgaStat.pg_in_position[no[i]]);		term_printf("\n");
 //	term_printf("Blk0:         "); PRINTF(4)("%09d   ", FpgaCfg.udp->block[no[i]].blkNo0);		term_printf("\n");

@@ -10,7 +10,7 @@
              xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
              xmlns:uc="clr-namespace:RX_DigiPrint.Views.UserControls"
              mc:Ignorable="d" 
-             d:DesignHeight="350" d:DesignWidth="500"
+             d:DesignHeight="500" d:DesignWidth="500"
              DataContextChanged="UserControl_DataContextChanged"
              >
 
@@ -170,9 +170,6 @@
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
                 <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Text="Print Environment" Visibility="{Binding Ripped, Converter={StaticResource IntToInVisible_Converter}}"/>
@@ -220,18 +217,20 @@
 
                 <TextBlock          Grid.Row="5" Grid.Column="0" Text="Image Distance" />
                 <common:RxNumBox    Grid.Row="5" Grid.Column="1" Text="{Binding PrintGoDist}" HorizontalAlignment="Stretch"/>
-                <TextBlock          Grid.Row="5" Grid.Column="2" Text="mm" Margin="5,0,0,0" />              
+                <TextBlock          Grid.Row="5" Grid.Column="2" Text="mm" Margin="5,0,0,0" />
 
-                <uc:PreviewWeb Grid.Row="1" Grid.Column="4" Grid.RowSpan="8" 
+            </Grid>
+        </GroupBox>
+
+        <uc:PreviewWeb Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="5" 
                     Width="250"
+                    Height="auto" MinHeight="100"
                     HorizontalAlignment="Left" 
                     Margin="40,5,0,0"
                     Source="{Binding Preview}"
                     Orientation="{Binding Orientation}"/>
-            </Grid>
-        </GroupBox>
 
-        <Grid Grid.Row="2" Grid.ColumnSpan="3" x:Name="ShowButtonGrid" Visibility="{Binding Changed, Converter={StaticResource IntToVisible_Converter}}">
+        <Grid Grid.Row="3" Grid.ColumnSpan="3" x:Name="ShowButtonGrid" Visibility="{Binding Changed, Converter={StaticResource IntToVisible_Converter}}">
             <common:RxButton x:Name="SaveButton"  Click="Save_Click" HorizontalAlignment="Left">
                 <Image Source="{StaticResource Yes_ico}"/>
             </common:RxButton>
