@@ -66,6 +66,7 @@ typedef struct SCilentThreadPar
 	open_handler	handle_open;
 	close_handler	handle_close;
 	int				sent_tick;
+	int				sendThreadRunning;
 	
 	HANDLE			hsendthread;
 	HANDLE			sendSem;
@@ -712,7 +713,7 @@ int sok_start_server(HANDLE *hserver, const char *addr, int port, int type, int 
 	struct sockaddr_in ipAddr;
 	INT32 	init;
 	int 	size;
-
+	char	name[64];
 
 //	if (sok_mutex==NULL) sok_mutex = rx_mutex_create();
 
@@ -771,14 +772,16 @@ int sok_start_server(HANDLE *hserver, const char *addr, int port, int type, int 
 	{
 		if (listen(pserver->socket, pserver->maxConnections) == SOCKET_ERROR) return _sok_server_error(pserver);
 		pserver->running = TRUE;
-		rx_thread_start(_server_thread, pserver, 0, "TCP/IP Server");
+		sprintf(name, "TCP/IP Server %s:%d", addr, port);
+		rx_thread_start(_server_thread, pserver, 0, name);
 	}
 	else
 	{
 		int thread = 0;
 		pserver->threadPar[thread].socket		= pserver->socket;
 		pserver->threadPar[thread].handle_msg	= handle_msg;
-		pserver->threadPar[thread].hthread		= rx_thread_start(_client_thread_udp, &pserver->threadPar[thread], 0, "UDP Server");
+		sprintf(name, "UDP Server %s:%d", addr, port
+		pserver->threadPar[thread].hthread		= rx_thread_start(_client_thread_udp, &pserver->threadPar[thread], 0, name);
 	}
 	*hserver = pserver;
 	return REPLY_OK;
@@ -1000,13 +1003,16 @@ int sok_open_client_2(RX_SOCKET *psocket, const char *addr, int port, int type, 
 	int ret = sok_open_client(psocket, addr, port, type);
 	if (ret==REPLY_OK)
 	{
+		char name[64];
+		sprintf(name, "TCP-Client %s:%d", addr, port);
+		
 		SCilentThreadPar *par = (SCilentThreadPar*)malloc(sizeof(SCilentThreadPar));
 		memset(par, 0, sizeof(SCilentThreadPar));
 		par->hserver		= NULL;
 		par->socket			= *psocket;
 		par->handle_msg		= handle_msg;
 		par->handle_close	= handle_close;
-		par->hthread		= rx_thread_start(_client_thread_tcp, par, 0, "ppws_client");
+		par->hthread		= rx_thread_start(_client_thread_tcp, par, 0, name);
 	}
 	return ret;
 }
@@ -1040,6 +1046,7 @@ static void* _server_thread(void* lpParameter)
 					pserver->threadPar[thread].handle_open  = pserver->handle_open;
 					pserver->threadPar[thread].handle_close = pserver->handle_close;
 					pserver->threadPar[thread].sendSem		= rx_sem_create();
+					pserver->threadPar[thread].sendThreadRunning = TRUE;
 
 					sprintf(name, "TCP Client %s", addr_clnt);
 					pserver->threadPar[thread].hthread	   = rx_thread_start(_client_thread_tcp,	  &pserver->threadPar[thread], 0, name);
@@ -1070,8 +1077,9 @@ static void* _client_thread_tcp(void* lpParameter)
 	sok_get_peer_name(par->socket, peerName, NULL, NULL);
 	if (par->handle_open) par->handle_open(par->socket, peerName);
 	sok_receiver(par->hserver, &par->socket, par->handle_msg, NULL);
+	par->sendThreadRunning=FALSE;
 	if (par->handle_close) par->handle_close(socket, peerName);
-	if (par->sendSem) rx_sem_destroy(&par->sendSem);
+	if (par->sendSem) rx_sem_post(par->sendSem);	
 	if (par->hserver) memset(par, 0, sizeof(*par));
 	else free(par);
 	return 0;
@@ -1084,9 +1092,10 @@ static void* _client_thread_tcp_send(void* lpParameter)
 	int msgOutIdx=0;
 	int sent;
 	
-	while (par->hserver!=NULL && par->sendSem)
+	while (par->hserver!=NULL && par->sendSem && par->sendThreadRunning)
 	{
 		rx_sem_wait(par->sendSem, 0);
+		if (!par->sendThreadRunning) break;
 		sent=send(par->socket, par->msgbuf[msgOutIdx], par->msglen[msgOutIdx], MSG_NOSIGNAL);
 		if (sent!=SOCKET_ERROR) par->msgTime = 0; 
 		par->msglen[msgOutIdx]=0;
@@ -1101,6 +1110,7 @@ static void* _client_thread_tcp_send(void* lpParameter)
 		}
 		*/
 	}
+	if (par->sendSem) rx_sem_destroy(&par->sendSem);
 	return 0;			
 }
 
@@ -1115,6 +1125,7 @@ int sok_receiver(HANDLE hserver, RX_SOCKET *psocket, msg_handler handle_msg, voi
 	char addr[32];
 	int len, start;
 	int reply;
+	int	socket = (int)*psocket;
 	SMsgHdr		*phdr;
 	
 	sok_get_peer_name(*psocket, addr, NULL, NULL);
@@ -1228,7 +1239,7 @@ int sok_receiver(HANDLE hserver, RX_SOCKET *psocket, msg_handler handle_msg, voi
 	free(buffer);
 
 	//--- end using the socket --------------------
-	TrPrintfL(TRUE, "ClientThread ended, socket=%d addr %s", *psocket, addr);
+	TrPrintfL(TRUE, "ClientThread ended, socket=%d addr %s", socket, addr);
 	sok_close(psocket);
 	*psocket = INVALID_SOCKET;
 	return reply;

@@ -109,7 +109,7 @@ int	fluid_init(void)
 	if (!_FluidThreadRunning)
 	{
 		_FluidThreadRunning = TRUE;
-		rx_thread_start(_fluid_thread, NULL, 0, "FluidThread");	
+		rx_thread_start(_fluid_thread, NULL, 0, "_fluid_thread");	
 	}
 	return REPLY_OK;
 }

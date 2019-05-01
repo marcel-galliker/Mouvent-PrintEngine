@@ -224,8 +224,8 @@ void pump_tick_10ms(void)
 				_pump_ticks = 0;
 				if (RX_Status.mode > ctrl_off) ctr_save();
 				_PumpPID.start_integrator = 0;
-				if(RX_Status.mode == ctrl_print) RX_Status.mode = ctrl_shutdown; 	// shutdown phase if PRINT mode before OFF
-				else RX_Status.mode = ctrl_off;
+				//if(RX_Status.mode == ctrl_print) RX_Status.mode = ctrl_shutdown; 	// shutdown phase if PRINT mode before OFF
+				/*else*/ RX_Status.mode = ctrl_off;
 				_Start_PID = START_PID_OFF;
 				_TimePIDstable = 0;
 				_TimeSwitchingOFF = 0;

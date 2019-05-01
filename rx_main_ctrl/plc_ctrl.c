@@ -200,8 +200,8 @@ int	plc_init(void)
 	if (_SimuPLC)     Error(WARN, 0, "PLC in Simulation");
 	if (_SimuEncoder) Error(WARN, 0, "Encoder in Simulation");
 	
-	if (_SimuPLC) rx_thread_start(_plc_simu_thread, NULL, 0, "PLC Thread");
-	else		  rx_thread_start(_plc_thread, NULL, 0, "PLC Thread");
+	if (_SimuPLC) rx_thread_start(_plc_simu_thread, NULL, 0, "_plc_simu_thread");
+	else		  rx_thread_start(_plc_thread, NULL, 0, "_plc_thread");
 
 //	_simu_init();
 

@@ -400,8 +400,9 @@ static HANDLE _ThreadMutex;
 //--- globals --------------------------------------------------
 typedef struct SThreadInfo
 {
+	int		idx;
 	int		tid;
-	char	name[32];
+	char	name[64];
 	void *(*thread_routine) (void *);
 	void *param;
 } SThreadInfo;
@@ -419,6 +420,7 @@ int gettid(void)
 static void *launcher(void *param)
 {
 	SThreadInfo *par = (SThreadInfo*)param;
+	int idx = par->idx;
 	void *ret;
 
 	//---  run the thread -----------------------------------
@@ -426,10 +428,21 @@ static void *launcher(void *param)
 
 	//--- clean up --------------------------
 	rx_mutex_lock(_ThreadMutex);
-	memset(par, 0, sizeof(SThreadInfo));
+//	memset(par, 0, sizeof(SThreadInfo));
+	memset(&ThreadInfo[idx], 0, sizeof(ThreadInfo[idx]));
 	rx_mutex_unlock(_ThreadMutex);
 
 	return ret;
+}
+
+//--- rx_thread_list --------------------------------------------
+void rx_thread_list(void)
+{
+	int idx;
+	for (idx=0; idx<SIZEOF(ThreadInfo); idx++)
+	{
+		if (ThreadInfo[idx].tid) TrPrintfL(TRUE, "rx_thread_start thread[%d]: tid=%d, name=>>%s<<", idx, ThreadInfo[idx].tid, ThreadInfo[idx].name);			
+	}			
 }
 
 //--- rx_thread_start(linux) ----------------------------------------------------------------
@@ -442,9 +455,9 @@ HANDLE rx_thread_start(void *(*thread_routine) (void *), void *param, UINT32 sta
 	if (!_ThreadMutex) _ThreadMutex=rx_mutex_create();
 	rx_mutex_lock(_ThreadMutex);
 
-	if (!ThreadInfo[1].tid)
+	if (!ThreadInfo[0].tid)
 	{
-		ThreadInfo[1].tid=gettid();
+		ThreadInfo[0].tid=gettid();
 		strcpy(ThreadInfo[1].name, "main");
 	}
 
@@ -461,13 +474,20 @@ HANDLE rx_thread_start(void *(*thread_routine) (void *), void *param, UINT32 sta
 		if (!ThreadInfo[idx].tid)
 		{
 			ThreadInfo[idx].tid=gettid();
-			strcpy(ThreadInfo[idx].name, name);
+			strncpy(ThreadInfo[idx].name, name, sizeof(ThreadInfo[idx].name));
 			ThreadInfo[idx].thread_routine = thread_routine;
 			ThreadInfo[idx].param          = param;
 			break;
 		}
+/*
+#ifdef linux		
+	#ifndef soc
+		TrPrintfL(TRUE, "rx_thread_start thread[%d]: tid=%d, name=>>%s<<", idx, ThreadInfo[idx].tid, ThreadInfo[idx].name);
+	#endif
+#endif
+*/
 	}
-
+	ThreadInfo[idx].idx=idx;
 	if (stacksize)
 	{
 		pthread_attr_t		attr;
@@ -479,6 +499,13 @@ HANDLE rx_thread_start(void *(*thread_routine) (void *), void *param, UINT32 sta
 	{
 		ret = pthread_create(&threadId, NULL, launcher, &ThreadInfo[idx]);
 	}		
+/*
+#ifdef linux		
+	#ifndef soc
+		TrPrintfL(TRUE, "rx_thread_start NEW thread[%d]: tid=%d, name=>>%s<<", idx, ThreadInfo[idx].tid, ThreadInfo[idx].name);
+	#endif
+#endif
+*/
 	rx_mutex_unlock(_ThreadMutex);
 	
 	if (ret==0) return (HANDLE)threadId;

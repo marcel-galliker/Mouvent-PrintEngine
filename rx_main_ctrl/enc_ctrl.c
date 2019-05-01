@@ -109,7 +109,7 @@ void enc_init(void)
 	if(!_EncoderThreadRunning)
 	{
 		_EncoderThreadRunning = TRUE;
-		rx_thread_start(_enc_thread, NULL, 0, "EncoderThread");
+		rx_thread_start(_enc_thread, NULL, 0, "_enc_thread");
 	}
 }
 

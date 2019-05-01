@@ -63,7 +63,7 @@ int	 step_init(void)
 	{
 		_step_Socket[i]=INVALID_SOCKET;
 	}
-	rx_thread_start(_step_thread, NULL, 0, "PLC Thread");
+	rx_thread_start(_step_thread, NULL, 0, "_step_thread");
 	return REPLY_OK;
 }
 

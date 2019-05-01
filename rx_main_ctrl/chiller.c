@@ -122,7 +122,7 @@ int	 chiller_init(void)
 	chiller_error_reset();
 	_ChillerThreadRunning = TRUE;
 #ifdef linux
-	rx_thread_start(_chiller_thread, NULL, 0, "ChillerThread");		
+	rx_thread_start(_chiller_thread, NULL, 0, "_chiller_thread");		
 #endif
 	return REPLY_OK;
 }

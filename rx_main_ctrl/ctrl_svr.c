@@ -310,6 +310,7 @@ static int _prepare_config()
 	
 	//--- start head client processes -------------------------------------------
 	int hb, no;
+	char name[64];
 	for (hb=0; hb < SIZEOF(RX_Config.headBoard); hb++)
 	{
 		if (RX_Config.headBoard[hb].ctrlAddr)
@@ -322,7 +323,8 @@ static int _prepare_config()
 				_HeadCtrl[no].device	= dev_head;
 				_HeadCtrl[no].no		= no;
 				_HeadCtrl[no].handle_msg= handle_headCtrl_msg;
-				_HeadCtrl[no].threadHdl	= rx_thread_start(_head_ctrl_thread, &_HeadCtrl[no], 0, "_head_ctrl_thread");
+				sprintf(name, "_head_ctrl_thread[%d]", no);
+				_HeadCtrl[no].threadHdl	= rx_thread_start(_head_ctrl_thread, &_HeadCtrl[no], 0, name);
 			}
 		}
 	}

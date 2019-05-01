@@ -75,7 +75,7 @@ int	pc_init(void)
 	if (chiller_is_running()) RX_PrinterStatus.printState = ps_ready_power;
 	_PrintThreadRunning = TRUE;
 	_PrintSem = rx_sem_create();
-	rx_thread_start(_print_thread, NULL, 0, "PrintThread");
+	rx_thread_start(_print_thread, NULL, 0, "_print_thread");
 	
 	return REPLY_OK;
 }
@@ -553,16 +553,18 @@ static int _print_next(void)
 			_first = FALSE;
 
 			//--- check all printed ------
+			/*
 			{
 				int n=_PrintGo % SIZEOF(_PrintDone);
 				if (_PrintDone[n]) 
 				{
-					Error(ERR_ABORT, 0, "PRINTGO[%d]: PrintDone[%d] still %d!", _PrintGo, _PrintGo-SIZEOF(_PrintDone), _PrintDone[n]);
+					Error(WARN, 0, "PRINTGO[%d]: PrintDone[%d] still %d missing!", _PrintGo, _PrintGo-SIZEOF(_PrintDone), _PrintDone[n]);
 					pc_abort_printing();
 					return REPLY_ERROR;
 				}
 				_PrintGo++;
 			}
+			*/
 			//----
 				
 			TrPrintfL(TRUE, "scan=%d, scans=%d, collate=%d, copies=%d", _Item.id.scan, _Item.scans, _Item.collate, _Item.copies);
@@ -726,7 +728,7 @@ int pc_print_done(int headNo, SPrintDoneMsg *pmsg)
 	int n=pmsg->pd%SIZEOF(_PrintDone);
 	_PrintDone[n]++;
 	
-	TrPrintfL(TRUE, "Head[%d] PRINT-DONE: #d: PD=%d: id=%d, page=%d, scan=%d, copy=%d **** (%d/%d)", headNo, ++_PrintDoneNo[headNo], pmsg->pd, pmsg->id.id, pmsg->id.page, pmsg->id.scan, pmsg->id.copy, _PrintDone[n], spool_head_board_cnt());	
+	TrPrintfL(TRUE, "Head[%d] PRINT-DONE: %d: PD=%d: id=%d, page=%d, scan=%d, copy=%d **** (%d/%d)", headNo, ++_PrintDoneNo[headNo], pmsg->pd, pmsg->id.id, pmsg->id.page, pmsg->id.scan, pmsg->id.copy, _PrintDone[n], spool_head_board_cnt());	
 	
 	if (RX_Config.printer.type==printer_cleaf)
 	{

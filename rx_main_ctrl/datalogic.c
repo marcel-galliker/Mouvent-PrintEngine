@@ -60,7 +60,7 @@ void dl_init(void)
 	memset(_Configured, 0, sizeof(_Configured));
 	for (i=0; i<SIZEOF(_Scanner); i++)
 		_Scanner[i].isNo = -1;
-	rx_thread_start(_dl_thread, NULL, 0, "DataLogicThread");		
+	rx_thread_start(_dl_thread, NULL, 0, "_datalogic_thread");		
 }
 
 //--- _dl_get_serialNo ----------------------------------------

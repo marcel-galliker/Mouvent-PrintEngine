@@ -94,7 +94,7 @@ int	 steptx_to_purge_pos(int no)
 int  steptx_in_purge_pos(void)
 {
 	Error(WARN, 0, "steptx_in_purge_pos NOT Implemented");
-	return FALSE;			
+	return TRUE;			
 }
 
 //--- steptx_wipe_start -------------------------------------

@@ -106,10 +106,10 @@
                     <ig:RowSelectorSettings Visibility="Collapsed"/>
                 </ig:XamGrid.RowSelectorSettings>
                 <ig:XamGrid.Columns>
-                    <ig:TemplateColumn Key="ID" HeaderText="ID">
+                    <ig:TemplateColumn Key="ID" HeaderText="ID" IsFixed="Left">
                         <ig:TemplateColumn.ItemTemplate>
                             <DataTemplate>
-                                <Grid PreviewMouseDown="Grid_MouseDown" Height="30" Margin="-10" Background="Transparent" >
+                                <Grid PreviewMouseDown="Grid_MouseDown" Height="30" Background="Transparent" >
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="30"/>
                                         <ColumnDefinition Width="30"/>
@@ -124,18 +124,20 @@
                                         Margin="-5"
                                     />
                                     -->
-                                    <CheckBox
+                                    <CheckBox Grid.Column="2"
                                         IsChecked="{Binding IsSelected}"
                                         VerticalAlignment="Center"
                                         HorizontalAlignment="Center"
                                         />
 
-                                    <Image Grid.Column="2" Source="../../Resources/Bitmaps/Changed.ico"
+                                    <Image Grid.Column="0" Source="../../Resources/Bitmaps/Changed.ico"
                                         Visibility="{Binding Changed, Converter={StaticResource BoolToVisible_Converter}}"   
-                                        Height="32"
-                                        Margin="-2, -5, 5, -5"
                                     />
-                                    <TextBlock Grid.Column="1" Text="{Binding ID, Converter={StaticResource ToString_Converter}}" VerticalAlignment="Center"/>
+                                    <!--                                       
+                                        Height="32"
+                                        Margin="-2, -5, 5, -5" 
+                                    -->
+                                    <TextBlock Grid.Column="1" Text="{Binding ID, Converter={StaticResource ToString_Converter}}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                 </Grid>                                
                             </DataTemplate>
                         </ig:TemplateColumn.ItemTemplate>
