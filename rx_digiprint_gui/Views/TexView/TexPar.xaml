@@ -95,6 +95,7 @@
                         <rx_uc:PlcParCtrl Grid.Row="5" Grid.Column="0" x:Name="CB_RotUW"     ID="PAR_WIND_DIRECTION_WINDER1"    Label="Rotation"         Unit=""  LabelWidth="100"  UnitWidth="30" Type="ImgCombo" UserEnabled="usr_supervisor"/>
 
                         <rx_uc:PlcTitle   Grid.Row="2" Grid.Column="2" x:Name="RW_Title"        Header="Rewinder" Background="{DynamicResource XamGrid_Alternate}"/>
+                        <rx_uc:PlcParCtrl Grid.Row="3" Grid.Column="2"                          ID="CFG_REWINDER_TYPE"             Label="RewinderTYpe"     Visibility="Collapsed"/>
                         <rx_uc:PlcParCtrl Grid.Row="3" Grid.Column="2" x:Name="RW_Flexibility"  ID="PAR_MATERIAL_FLEXIBILITY_RW"   Label="Mat Flexibility"  UnitWidth="30" UserEnabled="usr_supervisor" Format="n"/>
                         <rx_uc:PlcParCtrl Grid.Row="4" Grid.Column="2" x:Name="RW_Tension"      ID="PAR_TENSION_WINDER_2"          Label="Tension"          Unit="N" LabelWidth="100"  UnitWidth="30" Format="n" MinVal="1" MaxVal="200" Background="{DynamicResource XamGrid_Alternate}" UserEnabled="usr_supervisor"/>
                         <rx_uc:PlcParCtrl Grid.Row="5" Grid.Column="2" x:Name="RW_Rotation"     ID="PAR_WIND_DIRECTION_WINDER2"    Label="Rotation"         Unit=""  LabelWidth="100"  UnitWidth="30" Type="ImgCombo" UserEnabled="usr_supervisor"/>

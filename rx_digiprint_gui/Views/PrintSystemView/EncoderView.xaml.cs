@@ -33,7 +33,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
             DataContext = RxGlobals.Encoder[0];
             TX_AmplOld_1.DataContext = RxGlobals.Encoder[1];
             TX_AmplNew_1.DataContext = RxGlobals.Encoder[1];
-            TX_Percent_1.DataContext = RxGlobals.Encoder[1];
+       //   TX_Percent_1.DataContext = RxGlobals.Encoder[1];
+            BN_IsValid_1.DataContext = RxGlobals.Encoder[1];
 
             RxGlobals.PrintSystem.PropertyChanged += _PrintSystem_PropertyChanged;
         }

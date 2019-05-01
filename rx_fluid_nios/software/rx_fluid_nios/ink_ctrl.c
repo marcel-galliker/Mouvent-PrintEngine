@@ -404,7 +404,7 @@ void ink_tick_10ms(void)
 
 			case ctrl_purge_step1: // build up pressure
 				_pump_ctrl(isNo, _InkSupply[isNo].purgePressure,0);
-				if (pRX_Status->ink_supply[isNo].IS_Pressure_Actual >= (90 * _InkSupply[isNo].purgePressure / 100))
+				if (pRX_Status->ink_supply[isNo].IS_Pressure_Actual >= (60 * _InkSupply[isNo].purgePressure / 100))
 					pRX_Status->ink_supply[isNo].ctrl_state = ctrl_purge_step1;
 				break;
 

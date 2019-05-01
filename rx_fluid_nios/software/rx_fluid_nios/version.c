@@ -12,7 +12,7 @@
 #include "version.h"
 #include "string.h"
 
-const char version[32]="1.0.1.540";
+const char version[32]="1.0.1.541";
 
 void get_version(SVersion *pversion)
 {

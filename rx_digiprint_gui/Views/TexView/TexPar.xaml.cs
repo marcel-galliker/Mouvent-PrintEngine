@@ -149,7 +149,6 @@ namespace RX_DigiPrint.Views.TexView
             }
 
             int type = Rx.StrToInt32(str);
-            type = 0;
             if (type!=_rewinderType)
             {
                 _rewinderType = type;

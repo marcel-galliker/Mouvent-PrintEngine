@@ -426,6 +426,12 @@ static void *launcher(void *param)
 	//---  run the thread -----------------------------------
 	ret = par->thread_routine(par->param);
 
+#ifdef linux		
+	#ifndef soc
+		TrPrintfL(TRUE, "end thread[%d]: tid=%d, name=>>%s<<", idx, ThreadInfo[idx].tid, ThreadInfo[idx].name);
+	#endif
+#endif
+
 	//--- clean up --------------------------
 	rx_mutex_lock(_ThreadMutex);
 //	memset(par, 0, sizeof(SThreadInfo));
@@ -435,14 +441,18 @@ static void *launcher(void *param)
 	return ret;
 }
 
-//--- rx_thread_list --------------------------------------------
-void rx_thread_list(void)
+//--- _rx_thread_list --------------------------------------------
+static void _rx_thread_list(int mark)
 {
 	int idx;
 	for (idx=0; idx<SIZEOF(ThreadInfo); idx++)
 	{
-		if (ThreadInfo[idx].tid) TrPrintfL(TRUE, "rx_thread_start thread[%d]: tid=%d, name=>>%s<<", idx, ThreadInfo[idx].tid, ThreadInfo[idx].name);			
-	}			
+		if (ThreadInfo[idx].tid) 
+		{
+			if(idx == mark) TrPrintfL(TRUE, "rx_thread_start thread[%d]: tid=%d, name=>>%s<< ****", idx, ThreadInfo[idx].tid, ThreadInfo[idx].name);			
+			else			TrPrintfL(TRUE, "rx_thread_start thread[%d]: tid=%d, name=>>%s<<", idx, ThreadInfo[idx].tid, ThreadInfo[idx].name);			
+		}	
+	}
 }
 
 //--- rx_thread_start(linux) ----------------------------------------------------------------
@@ -458,7 +468,7 @@ HANDLE rx_thread_start(void *(*thread_routine) (void *), void *param, UINT32 sta
 	if (!ThreadInfo[0].tid)
 	{
 		ThreadInfo[0].tid=gettid();
-		strcpy(ThreadInfo[1].name, "main");
+		strcpy(ThreadInfo[0].name, "main");
 	}
 
 	//--- find list entry ----------------------------------
@@ -499,13 +509,12 @@ HANDLE rx_thread_start(void *(*thread_routine) (void *), void *param, UINT32 sta
 	{
 		ret = pthread_create(&threadId, NULL, launcher, &ThreadInfo[idx]);
 	}		
-/*
 #ifdef linux		
 	#ifndef soc
-		TrPrintfL(TRUE, "rx_thread_start NEW thread[%d]: tid=%d, name=>>%s<<", idx, ThreadInfo[idx].tid, ThreadInfo[idx].name);
+		_rx_thread_list(idx);
 	#endif
 #endif
-*/
+	
 	rx_mutex_unlock(_ThreadMutex);
 	
 	if (ret==0) return (HANDLE)threadId;

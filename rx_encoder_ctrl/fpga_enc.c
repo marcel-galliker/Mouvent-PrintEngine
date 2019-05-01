@@ -879,28 +879,39 @@ static void  _corr_ctrl(void)
 	static UINT32	_rest=0;
 	static INT32	_corrRotPar_new[4];
 	static int		_step=0;
-	
-	if (RX_EncoderStatus.meters<1) _step=0;
-	if(Fpga->cfg.encIn[0].enable)
-	{
-		UINT32 pos = Fpga->stat.encOut[0].position;
-		UINT32 len = (pos - _lastPos) % 0x100000;
-		UINT32 m   = _rest + len*_StrokeDist;
-		if (m > 1000000)
-		{
-			RX_EncoderStatus.meters += m/1000000;
-			_rest = m%1000000;
-			_lastPos = pos;
-		}
-	}
-	else 
-	{
-		_lastPos = 0;
-		_rest = 0;
-	}	
-	
+		
 	if (Fpga->cfg.encIn[0].correction==CORR_ROTATIVE)
 	{
+		double freq = Fpga->stat.encOut[0].speed*23/100;	// Hz
+		double mmin = 60*freq/1200*0.0254;
+		if (RX_EncoderStatus.meters<50 && mmin<40)
+		{
+			RX_EncoderStatus.meters = 0;
+			_step=0;
+			_lastPos = 0;
+			_rest = 0;
+			return;
+		}
+
+		if (RX_EncoderStatus.meters<1) _step=0;
+		if(Fpga->cfg.encIn[0].enable)
+		{
+			UINT32 pos = Fpga->stat.encOut[0].position;
+			UINT32 len = (pos - _lastPos) % 0x100000;
+			UINT32 m   = _rest + len*_StrokeDist;
+			if (m > 1000000)
+			{
+				RX_EncoderStatus.meters += m/1000000;
+				_rest = m%1000000;
+				_lastPos = pos;
+			}
+		}
+		else 
+		{
+			_lastPos = 0;
+			_rest = 0;
+		}	
+		
 		switch(_step)
 		{
 		case 0:		if (RX_EncoderStatus.meters == 40)

@@ -23,7 +23,6 @@ typedef void* (*thread_routine)	(void *par);
 
 
 HANDLE rx_thread_start(thread_routine thread, void *param, UINT32 stacksize, const char *name);
-void   rx_thread_list(void);
 
 HANDLE rx_mutex_create(void);
 int    rx_mutex_destroy(HANDLE *mutex);

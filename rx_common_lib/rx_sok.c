@@ -780,7 +780,7 @@ int sok_start_server(HANDLE *hserver, const char *addr, int port, int type, int 
 		int thread = 0;
 		pserver->threadPar[thread].socket		= pserver->socket;
 		pserver->threadPar[thread].handle_msg	= handle_msg;
-		sprintf(name, "UDP Server %s:%d", addr, port
+		sprintf(name, "UDP Server %s:%d", addr, port);
 		pserver->threadPar[thread].hthread		= rx_thread_start(_client_thread_udp, &pserver->threadPar[thread], 0, name);
 	}
 	*hserver = pserver;

@@ -40,6 +40,14 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _Enabled, value); }
         }
 
+        //--- Property IsValid ---------------------------------------
+        private bool _IsValid=false;
+        public bool IsValid
+        {
+            get { return _IsValid; }
+            set { SetProperty(ref _IsValid, value); }
+        }
+        
         //--- Property AmplOld ---------------------------------------
         private int _AmplOld = (int)TcpIp.INVALID_VALUE;
         public int AmplOld
@@ -69,7 +77,11 @@ namespace RX_DigiPrint.Models
         public UInt32 Meters
         {
             get { return _Meters; }
-            set { SetProperty(ref _Meters, value); }
+            set 
+            { 
+                if (SetProperty(ref _Meters, value))
+                    IsValid = (_Meters>=50);
+            }
         }
               
         //--- Request ---------------------------------

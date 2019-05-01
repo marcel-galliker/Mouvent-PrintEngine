@@ -123,6 +123,7 @@ void tx801_init(void)
 	_ParZ_cap.estop_level   = 0;
 	_ParZ_cap.checkEncoder  = TRUE;
 	
+	_tx801_set_ventilators(0);
 	{
 		int i;
 		for (i=0; i<SIZEOF(_LastVentValue); i++)
@@ -217,7 +218,7 @@ void tx801_main(int ticks, int menu)
 		}
 	}
 	_tx801_control();
-	_tx801_control_vents();	
+//	_tx801_control_vents();	
 }
 
 //--- _tx801_control ---------------------------------------------
@@ -423,16 +424,18 @@ static void _tx801_set_ventilators(int value)
 {
 //	Error(LOG, 0, "Set Ventilators to %d%%", value);
 	
+	/*
 	if(value && !_VentSpeed) memcpy(_VentValue, _LastVentValue, sizeof(_VentValue));
 	else					 memcpy(_LastVentValue, _VentValue, sizeof(_LastVentValue));
 	_VentSpeed = value;
 	_VentCtrlDelay = rx_get_ticks()+1000;
 	_tx801_control_vents();
-	
-//	if(value<100) value=(0x10000 * value) / 100;
-//	else value=0x10000-1;
-//	int i;
-//	for (i=0; i<6; i++) Fpga.par->pwm_output[i] = value;
+	*/
+
+	if(value<100) value=(0x10000 * value) / 100;
+	else value=0x10000-1;
+	int i;
+	for (i=0; i<6; i++) Fpga.par->pwm_output[i] = value;
 }
 
 //--- _tx801_do_ctrlMode -----------------------------------------

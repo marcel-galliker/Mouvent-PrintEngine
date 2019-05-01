@@ -256,7 +256,8 @@ int	 step_do_test(SStepperMotorTest *pmsg)
 int step_set_vent(int speed)
 {
 	INT32 value;
-	if(speed) value=25;
+//	if(speed) value=25;	// controlled PWM
+	if(speed) value=60;	// fixed PWM
 	else      value=0;
 	sok_send_2(&_step_Socket[0], CMD_CAP_VENT, sizeof(value), &value);
 	return REPLY_OK;			
