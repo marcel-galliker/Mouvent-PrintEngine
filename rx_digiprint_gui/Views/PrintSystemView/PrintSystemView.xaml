@@ -84,8 +84,18 @@
                     <!-- Ink Supply ________________________________________________________________________________________________________________________ -->
                     <TextBlock Text="Ink Supply" Background="{StaticResource Brush03}" FontWeight="Bold" Margin="0" Padding="5,0,0,0" />
                     <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="100"/>
+                        </Grid.ColumnDefinitions>
                         <rxView:InkSupplyGrid x:Name="InkSupplyGrid" />
                         <TextBlock x:Name="ChillerError" Text="Chiller not running" Visibility="{Binding Running, Converter={StaticResource BoolToInVisible_Converter}}" Foreground="Red" FontWeight="Bold" FontSize="40" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <StackPanel Grid.Column="1" x:Name="RobotButtons">
+                            <Button Content="CAP"      Click="Cap_Clicked"/>
+                            <Button Content="Wipe"     Click="Wipe_Clicked"/>
+                            <Button Content="Wet Wipe" Click="WetWipe_Clicked"/>
+                            <Button Content="Wash"     Click="Wash_Clicked"/>
+                        </StackPanel>
                     </Grid>
                     <TextBlock Text="Print Heads" Background="{StaticResource Brush03}" FontWeight="Bold" Padding="5,0,0,0" Margin="0,5,0,0" />
 

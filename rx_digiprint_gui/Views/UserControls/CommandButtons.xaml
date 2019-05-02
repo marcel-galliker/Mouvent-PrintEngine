@@ -19,7 +19,7 @@
             <common:RxButton x:Name="Button_Stop" Click="Stop_Clicked" ToolTip="Stop Printing" >
                 <Image Source="{StaticResource stop_ico}"/>
             </common:RxButton>
-            <common:RxButton x:Name="Button_Abort" Click="Abort_Clicked" ToolTip="Abort Printing" >
+            <common:RxButton x:Name="Button_Abort" Click="Abort_Clicked" ToolTip="Abort Printing" Visibility="Collapsed">
                 <Image Source="{StaticResource abort_ico}"/>
             </common:RxButton>
 

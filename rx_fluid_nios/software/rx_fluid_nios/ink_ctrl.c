@@ -383,7 +383,12 @@ void ink_tick_10ms(void)
 				if (pRX_Status->ink_supply[isNo].flushTime>0)
 				{
 					_pump_ctrl(isNo, PRESSURE_FLUSH,FALSE);
-					_set_flush_pump(isNo, TRUE);
+					if(pRX_Status->flush_pressure >= 1200) _set_flush_pump(isNo, TRUE);
+					else
+					{
+						_set_flush_pump(isNo, FALSE);
+						pRX_Status->ink_supply[isNo].ctrl_state = ctrl_error;
+					}
 					pRX_Status->ink_supply[isNo].flushTime -= cycleTime;
 					pRX_Status->ink_supply[isNo].ctrl_state = ctrl_flush_step1;
 				}
@@ -803,9 +808,9 @@ static void _pump_ctrl(INT32 isNo, INT32 pressure_target, INT32 print_mode)
 		pRX_Status->ink_supply[isNo].PIDsetpoint_Output = _InkSupply[isNo].pid_Pump.Setpoint;
 		pid_calc(pRX_Status->ink_supply[isNo].IS_Pressure_Actual, &_InkSupply[isNo].pid_Pump);
 
-		if      (_InkSupply[isNo].pid_Pump.val <=0)       	_set_pump_speed(isNo, 0);
+		if      (_InkSupply[isNo].pid_Pump.val <=0)       		_set_pump_speed(isNo, 0);
 		else if (_InkSupply[isNo].pid_Pump.val <PUMP_THRESHOLD) _set_pump_speed(isNo, PUMP_THRESHOLD);
-		else                                              _set_pump_speed(isNo, _InkSupply[isNo].pid_Pump.val);
+		else                                              		_set_pump_speed(isNo, _InkSupply[isNo].pid_Pump.val);
 
 		pRX_Status->ink_supply[isNo].PIDpump_Output		= _InkSupply[isNo].pid_Pump.val;
 		_PumpBeforeOFF = _InkSupply[isNo].pid_Pump.val;
@@ -818,7 +823,7 @@ static void _pump_ctrl(INT32 isNo, INT32 pressure_target, INT32 print_mode)
 		{
 			_set_air_valve(isNo, TRUE);
 		}
-		else if(print_mode && pRX_Status->ink_supply[isNo].IS_Pressure_Actual > pRX_Status->ink_supply[isNo].IS_Pressure_Setpoint)
+		else if(pRX_Status->ink_supply[isNo].IS_Pressure_Actual > _InkSupply[isNo].pid_Pump.Setpoint)
 		{
 			if (set_valve) _set_air_valve(isNo, TRUE);
 			else _set_air_valve(isNo, TRUE);

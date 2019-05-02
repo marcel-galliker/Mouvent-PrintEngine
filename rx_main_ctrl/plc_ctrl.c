@@ -257,16 +257,27 @@ static void _plc_set_par_default(void)
 	lc_get_value_by_name_UINT32(APP"PAR_PRINTING_SPEED",			&speed);
 	if (speed<10) lc_set_value_by_name_UINT32(APP"PAR_PRINTING_SPEED",		 30);
 
-	if (rx_def_is_scanning(RX_Config.printer.type))
+	if(rx_def_is_scanning(RX_Config.printer.type))
 	{
-		lc_get_value_by_name_FLOAT(APP"PAR_PRINTING_START_POSITION",	&start);
-		lc_get_value_by_name_FLOAT(APP"PAR_PRINTING_END_POSITION",		&end);
-		if (start==0.0 || end==0.0)
+		lc_get_value_by_name_FLOAT(APP"PAR_PRINTING_START_POSITION", &start);
+		lc_get_value_by_name_FLOAT(APP"PAR_PRINTING_END_POSITION", &end);
+		if(start == 0.0 || end == 0.0)
 		{
 			lc_set_value_by_name_FLOAT(APP"PAR_PRINTING_START_POSITION", 200.0);	
-			lc_set_value_by_name_FLOAT(APP"PAR_PRINTING_END_POSITION",	 700.0);
+			lc_set_value_by_name_FLOAT(APP"PAR_PRINTING_END_POSITION", 700.0);
 		//	_plc_set_command("", "CMD_SET_PARAMETER");
 		}
+	}
+	else if (rx_def_is_web(RX_Config.printer.type))
+	{
+		UINT32 val;
+		lc_get_value_by_name_UINT32(APP"PAR_COREDIAMETER_IN", &val);
+		if (val<80)  Error(WARN, 0, "Small Unwinder Core Diameter: %d mm", val);
+		if (val>110) Error(WARN, 0, "Large Unwinder Core Diameter: %d mm", val);
+		
+		lc_get_value_by_name_UINT32(APP"PAR_COREDIAMETER_OUT", &val);
+		if (val<80)  Error(WARN, 0, "Small Rewinder Core Diameter: %d mm", val);
+		if (val>110) Error(WARN, 0, "Large Rewinder Core Diameter: %d mm", val);
 	}
 }
 
@@ -1296,11 +1307,12 @@ static void _plc_state_ctrl()
 		if (rx_def_is_web(RX_Config.printer.type)) 
 		{
 			UINT32 length;
-			int ret;
-			lc_get_value_by_name_UINT32(APP "STA_PRINTING_SPEED", &RX_PrinterStatus.actSpeed);
-			ret = lc_get_value_by_name_UINT32(APP "STA_PAPERLENGTH_IN", &length);
-
-			if (length>0 && (int)length<_UnwinderLenMin) ErrorFlag(WARN, &_ErrorFlags, 2, 0, "Unwinder Empty, length=%d, min=%d", length, _UnwinderLenMin);
+			lc_get_value_by_name_UINT32(APP "STA_PAPERLENGTH_IN", &length);
+			if (length && (int)length<_UnwinderLenMin) 
+			{
+				if(!(_ErrorFlags & 0x04)) Error(ERR_STOP, 0, "Unwinder Empty, length=%d, min=%d", length, _UnwinderLenMin);
+				_ErrorFlags |= 0x04;				
+			}	
 		}
 	}
 	else if (_PlcState==plc_stop) 

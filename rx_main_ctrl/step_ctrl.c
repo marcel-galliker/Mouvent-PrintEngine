@@ -415,34 +415,3 @@ void step_error_reset(void)
 	default:			break;
 	}
 }
-
-//--- setp_send_ctrlMode ------------------------------------
-void setp_send_ctrlMode(EnFluidCtrlMode ctrlMode)
-{
-	if (_StepperType == STEPPER_TX)
-	{
-		int i;
-		SValue value;
-	
-		value.no	= 0;
-		value.value	= ctrlMode;
-
-		for (i=0; i<SIZEOF(_step_Socket); i++)
-		{
-			if (_step_Socket[i]!=INVALID_SOCKET) sok_send_2(&_step_Socket[i], CMD_FLUID_CTRL_MODE, sizeof(value), &value); 
-		}				
-	}
-}
-
-//--- step_all_in_ctrlMode ------------
-int  step_all_in_ctrlMode(EnFluidCtrlMode ctrlMode)
-{
-	switch(_StepperType)
-	{
-	case STEPPER_CLEAF:	return TRUE;
-	case STEPPER_TX:	return steptx_all_in_ctrlMode(ctrlMode);
-	case STEPPER_LB:	return TRUE;
-	case STEPPER_TEST:	return TRUE;
-	default: 			return TRUE;	
-	}	
-}

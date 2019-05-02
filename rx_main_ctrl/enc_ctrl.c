@@ -61,6 +61,7 @@ static int		_PrintGo_Mode;
 static int		_Scanning=FALSE;
 static int		_DistTelCnt=0;
 static int		_TotalPgCnt;
+static int		_StopPG;
 static int		_Printing=FALSE;
 static int		_Khz=0;
 static UINT32	_WarnMarkReaderPos;
@@ -329,6 +330,7 @@ int  enc_start_printing(SPrintQueueItem *pitem)
 		}
 	}
 	_Printing = TRUE;
+	_StopPG   = FALSE;
 	if (arg_simuEncoder)
 	{
 		for(no=0; no<ENC_CNT; no++) 
@@ -440,8 +442,15 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 //--- enc_stop_pg ------------------------------
 int  enc_stop_pg(void)
 {
+	_StopPG = TRUE;
 	sok_send_2(&_Encoder[0].socket, CMD_ENCODER_PG_STOP, 0, NULL);
 	return REPLY_OK;
+}
+
+//--- enc_pg_stop_cnt ----------------------------------
+int	 enc_pg_stop_cnt(void)
+{
+	return _EncoderStatus[0].PG_stop;
 }
 
 //--- enc_stop_printing ------------------------------
@@ -525,7 +534,7 @@ static void _handle_status(int no, SEncoderStat* pstat)
 {
 	SEncoderInfo info=_EncoderStatus[no].info;
 	//--- test ------------------
-	if (!_Scanning && !arg_simuEncoder)
+	if (!_Scanning && !arg_simuEncoder && !_StopPG)
 	{
 		if (_DistTelCnt && pstat->PG_cnt!=_TotalPgCnt)
 		{

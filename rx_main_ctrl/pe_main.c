@@ -253,7 +253,7 @@ static int _printstop(INT32 pageIdx)
 {
 	Error(LOG, 0, "PEM: _printstop (page=%d)", pageIdx);
 	if (pageIdx==0) pc_abort_printing();
-	else pc_stop_printing();
+	else pc_stop_printing(FALSE);
 	return REPLY_OK;
 }
 

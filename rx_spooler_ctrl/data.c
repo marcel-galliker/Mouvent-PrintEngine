@@ -336,7 +336,6 @@ int  data_get_size	(const char *path, UINT32 page, UINT32 spacePx, UINT32 *pwidt
 			*pwidth *= (*multiCopy);
 		}
 	}
-	*multiCopy = 1;
 	return ret;
 }
 
@@ -367,7 +366,7 @@ int  data_malloc(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPixel,
 	default:													   break;
 	}
 	
-	memsize = (memsize+0xfffff) & ~0xffff; // round up to next MB
+	memsize = (memsize/(1024*1024)+1) * (1024*1024); 
 
 	error=0;
 	if(*pBufSize >= memsize)
@@ -636,13 +635,14 @@ static void _data_multi_copy(SBmpInfo *pBmpInfo, UINT8 multiCopy)
 		int  x, y, m;
 		int srcLineBt  = (pBmpInfo->srcWidthPx*pBmpInfo->bitsPerPixel+7)/8;
 		int srcLinelen = pBmpInfo->lineLen;
-		int dstLineLen = ((pBmpInfo->srcWidthPx*multiCopy*pBmpInfo->bitsPerPixel+31) & ~31)/8;	
+		int dstLineLen = (((INT64)pBmpInfo->srcWidthPx*multiCopy*pBmpInfo->bitsPerPixel+31) & ~31)/8;
 		for (buf=0; buf<SIZEOF(pBmpInfo->buffer); buf++)
 		{
 			if (pBmpInfo->buffer[buf] && pBmpInfo->lengthPx>0)
 			{
-				src = (*pBmpInfo->buffer[buf]) + srcLinelen*pBmpInfo->lengthPx;
-				dst = (*pBmpInfo->buffer[buf]) + dstLineLen*pBmpInfo->lengthPx;
+				src = (*pBmpInfo->buffer[buf]) + (INT64)srcLinelen*pBmpInfo->lengthPx;
+				dst = (*pBmpInfo->buffer[buf]) + (INT64)dstLineLen*pBmpInfo->lengthPx;
+
 				for (y=pBmpInfo->lengthPx; y>0;)
 				{
 					y--;

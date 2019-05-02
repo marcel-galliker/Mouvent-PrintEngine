@@ -107,7 +107,7 @@ static void _on_error(ELogItemType type)
 			case LOG_TYPE_ERROR_STOP:	if (!arg_simuPLC) 
 										{
 											Error(LOG, 0, "STOP Printing after LOG_TYPE_ERROR_STOP");
-											pc_stop_printing(); 
+											pc_stop_printing(FALSE); 
 										}
 										break;
 			case LOG_TYPE_ERROR_ABORT:	if (!arg_simuPLC) 
@@ -184,14 +184,15 @@ int pc_start_printing(void)
 }
 
 //--- pc_stop_printing --------------------------------------------------------
-int pc_stop_printing(void)
+int pc_stop_printing(int userStop)
 {
 	TrPrintfL(TRUE, "pc_stop_printing");
-
+	
 	if (RX_PrinterStatus.printState==ps_stopping 
 	||  RX_PrinterStatus.printState==ps_pause
 	|| (RX_PrinterStatus.printState==ps_printing && RX_PrinterStatus.printedCnt >= RX_PrinterStatus.sentCnt))
 	{
+		/*
 		RX_PrinterStatus.printState=ps_stopping;
 		gui_send_printer_status(&RX_PrinterStatus);
 		if (!arg_simuPLC)
@@ -207,14 +208,17 @@ int pc_stop_printing(void)
 		pq_stop();
 		co_stop_printing();
 		if (RX_PrinterStatus.testMode) pc_off();
+		*/
+		pc_abort_printing();
 	}
 	else if (RX_PrinterStatus.printState==ps_printing)
 	{
+		if (userStop) Error(ERR_CONT, 0, "STOPPED by Operator");
 		RX_PrinterStatus.printState=ps_stopping;
 		pq_stopping(&_Item);
 		enc_stop_pg();
 		gui_send_printer_status(&RX_PrinterStatus);
-		machine_pause_printing();
+//		machine_pause_printing();
 	}
 	return REPLY_OK;
 }
@@ -785,7 +789,7 @@ int pc_print_done(int headNo, SPrintDoneMsg *pmsg)
 			{
 				Error(LOG, 0, "pc_print_done: sent=%d, printed=%d, scan=%d, scans=%d: STOP", RX_PrinterStatus.sentCnt, RX_PrinterStatus.printedCnt, _Item.id.scan, _Item.scans);
 				enc_stop_printing();
-				pc_stop_printing();
+				pc_stop_printing(FALSE);
 			}
 			*/
 			if (jobDone && pnext==NULL)
@@ -796,7 +800,7 @@ int pc_print_done(int headNo, SPrintDoneMsg *pmsg)
 				memcpy(&item.id, &pmsg->id, sizeof(item.id));
 				pl_stop(&item);
 				enc_stop_printing();
-				pc_stop_printing();
+				pc_stop_printing(FALSE);
 			}
 		}		
 	}

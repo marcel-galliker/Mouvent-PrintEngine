@@ -761,6 +761,7 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg)
 		Fpga->cfg.pg[pgNo].printgo_n	= TRUE;
 	}
 	RX_EncoderStatus.PG_cnt		   = 0;
+	RX_EncoderStatus.PG_stop	   = 0;
 	_PrintGo_Locked				   = FALSE;
 
 	test_cfg_done();
@@ -780,7 +781,8 @@ void fpga_pg_init(void)
 	TrPrintfL(TRUE, "fpga_pg_init: level=%d", FpgaQSys->printGo_status.fill_level);
 	
 	_PrintGo_Locked = TRUE;
-	RX_EncoderStatus.PG_cnt = 0;
+	RX_EncoderStatus.PG_cnt  = 0;
+	RX_EncoderStatus.PG_stop = 0;
 	for (pgNo=0; pgNo<SIZEOF(Fpga->cfg.pg); pgNo++)
 	{
 		Fpga->cfg.pg[pgNo].fifos_ready = FALSE;
@@ -801,6 +803,11 @@ void fpga_pg_init(void)
 			break;
 		}
 	}
+	
+	RX_EncoderStatus.fifoEmpty_PG  = Fpga->stat.pg_fifo_empty_err;
+	RX_EncoderStatus.fifoEmpty_IGN = Fpga->stat.ignored_fifo_empty_err;
+	RX_EncoderStatus.fifoEmpty_WND = Fpga->stat.window_fifo_empty_err;	
+
 	_DistTelCnt	= 0;
 	_PrintGo_Enabled = TRUE;
 
@@ -825,7 +832,10 @@ void  fpga_pg_stop(void)
 			fpga_init();
 			break;
 		}
-	}				
+	}
+	if(RX_EncoderStatus.PG_cnt) RX_EncoderStatus.PG_stop = RX_EncoderStatus.PG_cnt;
+	else RX_EncoderStatus.PG_stop = 1;
+	sok_send_2(&_Socket, REP_ENCODER_STAT, sizeof(RX_EncoderStatus), &RX_EncoderStatus);
 }
 
 //--- fpga_pg_set_dist -------------------------------------------
@@ -858,13 +868,17 @@ static void  _pg_ctrl(void)
 	{
 		int pg = Fpga->stat.encOut[0].PG_cnt;
 
-		if (RX_EncoderStatus.fifoEmpty_PG  != Fpga->stat.pg_fifo_empty_err)
+		if (Fpga->stat.pg_fifo_empty_err && RX_EncoderStatus.fifoEmpty_PG  != Fpga->stat.pg_fifo_empty_err)
 			Error(LOG, 0, "pg_fifo_empty_err=%d, fill_level=%d, _DistTelCnt=%d, PG_Cnt=%d", Fpga->stat.pg_fifo_empty_err, FpgaQSys->printGo_status.fill_level, _DistTelCnt, Fpga->stat.encOut[0].PG_cnt);
 		RX_EncoderStatus.fifoEmpty_PG  = Fpga->stat.pg_fifo_empty_err;
 		RX_EncoderStatus.fifoEmpty_IGN = Fpga->stat.ignored_fifo_empty_err;
 		RX_EncoderStatus.fifoEmpty_WND = Fpga->stat.window_fifo_empty_err;	
 
-		if ((Fpga->stat.encOut[0].PG_cnt & 0xff) != (RX_EncoderStatus.PG_cnt & 0xff)) RX_EncoderStatus.PG_cnt++;
+		if ((Fpga->stat.encOut[0].PG_cnt & 0xff) != (RX_EncoderStatus.PG_cnt & 0xff)) 
+		{
+			RX_EncoderStatus.PG_cnt++;
+			if (RX_EncoderStatus.PG_stop) RX_EncoderStatus.PG_stop = RX_EncoderStatus.PG_cnt;
+		}
 		
 		int  error = 	RX_EncoderStatus.fifoEmpty_PG  != Fpga->stat.pg_fifo_empty_err
 					||	RX_EncoderStatus.fifoEmpty_IGN != Fpga->stat.ignored_fifo_empty_err

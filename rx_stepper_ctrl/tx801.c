@@ -58,7 +58,6 @@ static int		_LastVentValue[6];
 static int		_VentErrorCnt[6];
 
 //--- prototypes --------------------------------------------
-static void _tx801_control(void);
 static void _tx801_control_vents(void);
 static void _tx801_motor_z_test(int steps);
 static void _tx801_motor_test  (int motor, int steps);
@@ -217,45 +216,7 @@ void tx801_main(int ticks, int menu)
 			_CmdRunning = FALSE;
 		}
 	}
-	_tx801_control();
 //	_tx801_control_vents();	
-}
-
-//--- _tx801_control ---------------------------------------------
-static void _tx801_control(void)
-{
-	switch(RX_StepperStatus.ctrlModeCfg)
-	{
-	case ctrl_purge:
-	case ctrl_purge_micro:
-	case ctrl_purge_soft:
-	case ctrl_purge_hard:	RX_StepperStatus.ctrlModeStat = RX_StepperStatus.ctrlModeCfg;
-							break;
-		
-	case ctrl_purge_step1:	RX_StepperStatus.ctrlModeStat = RX_StepperStatus.ctrlModeCfg;
-							break;
-
-	case ctrl_purge_step2:	RX_StepperStatus.ctrlModeStat = RX_StepperStatus.ctrlModeCfg;
-							break;
-
-	case ctrl_purge_step3:	RX_StepperStatus.ctrlModeStat = RX_StepperStatus.ctrlModeCfg;
-							break;
-	
-	case ctrl_flush_night:		
-	case ctrl_flush_weekend:		
-	case ctrl_flush_week:	RX_StepperStatus.ctrlModeStat = RX_StepperStatus.ctrlModeCfg;
-							break;
-	
-	case ctrl_flush_step1:	RX_StepperStatus.ctrlModeStat = RX_StepperStatus.ctrlModeCfg;
-							break;
-	case ctrl_flush_step2:	RX_StepperStatus.ctrlModeStat = RX_StepperStatus.ctrlModeCfg;
-							break;
-	case ctrl_flush_done:	RX_StepperStatus.ctrlModeStat = RX_StepperStatus.ctrlModeCfg;
-							break;
-	
-
-	default: break;
-	}
 }
 
 //--- _tx801_control_vents -------------------
@@ -441,7 +402,6 @@ static void _tx801_set_ventilators(int value)
 //--- _tx801_do_ctrlMode -----------------------------------------
 static void _tx801_do_ctrlMode(EnFluidCtrlMode ctrlMode)
 {
-	RX_StepperStatus.ctrlModeCfg = ctrlMode;
 //	sok_send_2(&socket, REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);
 }
 

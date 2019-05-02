@@ -58,7 +58,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 CleafStepperGrid.Visibility = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf)? Visibility.Visible : Visibility.Collapsed;
                 StepperGrid.Visibility      = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_test_slide_only)? 
                                                 Visibility.Collapsed : Visibility.Visible;
-            //    Button_Purge.Visibility = Button_Wipe.Visibility = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX801 || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX802) ? Visibility.Visible : Visibility.Collapsed;
+                RobotButtons.Visibility     = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX801 || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX802)? Visibility.Visible:Visibility.Collapsed;
             }            
         }
 
@@ -85,10 +85,38 @@ namespace RX_DigiPrint.Views.PrintSystemView
             _PrintSystem.SendMsg(TcpIp.CMD_GET_STEPPER_CFG);
         }
 
+        //--- _SetCtrlMode ----------------
+        private void _SetCtrlMode(EFluidCtrlMode ctrlMode)
+        {
+            TcpIp.SFluidCtrlCmd msg = new TcpIp.SFluidCtrlCmd();
+            msg.no       = -1;
+            msg.ctrlMode = EFluidCtrlMode.ctrl_cap;
+            RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_CTRL_MODE, ref msg);
+
+        }
+
+        //--- Cap_Clicked -------------------------------------------------
+        private void Cap_Clicked(object sender, RoutedEventArgs e)
+        {            
+            _SetCtrlMode(EFluidCtrlMode.ctrl_cap);
+        }
+
         //--- Wipe_Clicked -------------------------------------------------
         private void Wipe_Clicked(object sender, RoutedEventArgs e)
         {            
-        //    if (Button_Wipe.IsEnabled) RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_SET_CMD, "CMD_SLIDE_TO_WIPE");
+            _SetCtrlMode(EFluidCtrlMode.ctrl_wipe);
+        }
+
+        //--- WetWipe_Clicked -------------------------------------------------
+        private void WetWipe_Clicked(object sender, RoutedEventArgs e)
+        {            
+            _SetCtrlMode(EFluidCtrlMode.ctrl_wetwipe);
+        }
+
+        //--- Wash_Clicked -------------------------------------------------
+        private void Wash_Clicked(object sender, RoutedEventArgs e)
+        {            
+            _SetCtrlMode(EFluidCtrlMode.ctrl_wash);
         }
 
         //--- Purge_Clicked -------------------------------------------------

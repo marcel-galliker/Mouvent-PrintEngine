@@ -141,8 +141,6 @@ static void _txrob_motor_test(int motor, int steps);
 //static void _txrob_turn_screw_to_pos(int screw, int steps);
 static void _txrob_error_reset(void);
 static void _txrob_send_status(RX_SOCKET);
-static void _txrob_do_ctrlMode(EnFluidCtrlMode ctrlMode);
-static void _txrob_control(void);
 
 static int  _rot_rev_2_steps(int rev);
 static int  _rot_steps_2_rev(int steps);
@@ -574,8 +572,6 @@ void txrob_main(int ticks, int menu)
 
 	}
 	
-	_txrob_control();
-
 	//// --- Executed after each move ---
 	//if (_CmdRunning  == CMD_CLN_STOP && Fpga.stat->moving == 0)
 	//{
@@ -583,42 +579,6 @@ void txrob_main(int ticks, int menu)
 	////	_CmdRunning = FALSE;
 	//	RX_StepperStatus.info.x_in_ref = fpga_input(RO_STORED_IN); 
 	//}
-}
-
-//--- _txrob_control ---------------------------------------------
-static void _txrob_control(void)
-{
-	switch(RX_StepperStatus.ctrlModeCfg)
-	{
-	case ctrl_purge:
-	case ctrl_purge_micro:
-	case ctrl_purge_soft:
-	case ctrl_purge_hard:	RX_StepperStatus.ctrlModeStat = RX_StepperStatus.ctrlModeCfg;
-							break;
-		
-	case ctrl_purge_step1:	RX_StepperStatus.ctrlModeStat = RX_StepperStatus.ctrlModeCfg;
-							break;
-
-	case ctrl_purge_step2:	RX_StepperStatus.ctrlModeStat = RX_StepperStatus.ctrlModeCfg;
-							break;
-
-	case ctrl_purge_step3:	RX_StepperStatus.ctrlModeStat = RX_StepperStatus.ctrlModeCfg;
-							break;
-	
-	case ctrl_flush_night:		
-	case ctrl_flush_weekend:		
-	case ctrl_flush_week:	RX_StepperStatus.ctrlModeStat = RX_StepperStatus.ctrlModeCfg;
-							break;
-	
-	case ctrl_flush_step1:	RX_StepperStatus.ctrlModeStat = RX_StepperStatus.ctrlModeCfg;
-							break;
-	case ctrl_flush_step2:	RX_StepperStatus.ctrlModeStat = RX_StepperStatus.ctrlModeCfg;
-							break;
-	case ctrl_flush_done:	RX_StepperStatus.ctrlModeStat = RX_StepperStatus.ctrlModeCfg;
-							break;
-	
-	default: break;
-	}
 }
 
 //--- txrob_display_status ---------------------------------------------------------
@@ -629,16 +589,16 @@ static void _txrob_display_status(void)
 	term_printf("Inputs:       ");
 	for (i = 0; i < INPUT_CNT; i++)
 	{
-		if (Fpga.stat->input & (1 << i)) term_printf("*");
-		else                           term_printf("_");
-		if (i % 4 == 3)			   		   term_printf("   ");
+		if (Fpga.stat->input & (1 << i))	term_printf("*");
+		else								term_printf("_");
+		if (i % 4 == 3)			   			term_printf("   ");
 	}
 	term_printf("\n");
 	term_printf("Outputs:      ");
 	for (i = 0; i < OUTPUT_CNT; i++)
 	{
-		if (Fpga.par->output & (1 << i))  term_printf("*");
-		else                            term_printf("_");
+		if (Fpga.par->output & (1 << i))	term_printf("*");
+		else								term_printf("_");
 		if (i % 4 == 3)						term_printf("   ");
 	}
 	term_printf("\n");
@@ -760,13 +720,6 @@ static int  _rot_rev_2_steps(int rev)
 static int  _rot_steps_2_rev(int steps)
 {
 	return (int)(steps * (1000000.0 / ROT_STEPS_PER_REV) + 0.5);
-}
-
-//--- _txrob_do_ctrlMode -----------------------------------------
-static void _txrob_do_ctrlMode(EnFluidCtrlMode ctrlMode)
-{
-	RX_StepperStatus.ctrlModeCfg = ctrlMode;
-//	sok_send_2(&socket, REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);
 }
 
 //--- txrob_handle_ctrl_msg -----------------------------------
@@ -908,11 +861,6 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		fpga_stepper_error_reset();
 		break;
 		
-	case CMD_FLUID_CTRL_MODE:		
-		ctrlMode = (EnFluidCtrlMode) (*((INT32*)pdata));
-		_txrob_do_ctrlMode(ctrlMode);
-		break;	
-
 	default:						Error(ERR_CONT, 0, "CLN: Command 0x%08x not implemented", msgId); break;
 	}
 	

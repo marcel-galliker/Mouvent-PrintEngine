@@ -30,6 +30,7 @@ int  plc_clean(void);
 
 int		plc_to_purge_pos(void);
 int		plc_to_wipe_pos(void);
+int		plc_to_cap_pos(void);
 int		plc_in_cap_pos(void);
 int		plc_in_purge_pos(void);
 int		plc_in_wipe_pos(void);

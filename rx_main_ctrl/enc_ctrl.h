@@ -34,6 +34,7 @@ int	 enc_simu_encoder(int khz);
 void enc_error_reset(void);
 void enc_reply_stat(RX_SOCKET socket);
 void enc_save_par(int no);
+int	 enc_pg_stop_cnt(void);
 
 int  enc_uv_on(void);
 int  enc_uv_off(void);

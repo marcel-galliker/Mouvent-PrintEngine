@@ -1505,7 +1505,8 @@ int  fpga_abort(void)
 			term_save(PATH_TEMP "status.txt");
 			term_flush();
 			
-		//	fpga_trace_registers("Master-Enable-OFF", FALSE);
+			if (_FpgaErrorTrace) fpga_trace_registers("Master-Enable-OFF", FALSE);
+			_FpgaErrorTrace = FALSE;
 			TrPrintfL(TRUE,"set CMD_MASTER_ENABLE=FALSE");
 			SET_FLAG(FpgaCfg.cfg->cmd,CMD_MASTER_ENABLE,FALSE);
 		//	rx_sleep(5);
@@ -1526,14 +1527,6 @@ int  fpga_abort(void)
 			TrPrintfL(TRUE, "cond_init done");
 			_Reload_FPGA = FALSE;
 			TrPrintfL(TRUE, "putty_init done");
-		}
-		
-		if (FALSE && _FpgaErrorTrace)
-		{			
-			Trace_end();			
-			ctrl_send_file(Trace_get_path());
-			Trace_init(RX_Process_Name);
-			_FpgaErrorTrace = FALSE;
 		}
 	}			
 	return REPLY_OK;

@@ -769,7 +769,7 @@ static void _do_start_printing	(RX_SOCKET socket)
 //--- _do_stop_printing ---------------------------------------------
 static void _do_stop_printing	(RX_SOCKET socket)
 {
-	pc_stop_printing();
+	pc_stop_printing(TRUE);
 }
 
 //--- _do_abort_printing ---------------------------------------------

@@ -110,18 +110,3 @@ int	 steptx_wipe_done(void)
 	Error(WARN, 0, "steptx_wipe_done NOT Implemented");
 	return REPLY_OK;			
 }
-
-//--- steptx_all_in_ctrlMode ------------------------------
-int  steptx_all_in_ctrlMode(EnFluidCtrlMode ctrlMode)
-{
-	int i;
-	
-	for (i=0; i<SIZEOF(_step_socket); i++)
-	{
-		if (_step_socket[i]!=NULL && *_step_socket[i]!=INVALID_SOCKET) 
-		{
-			if (_Status[i].ctrlModeStat!=ctrlMode) return FALSE;
-		}
-	}
-	return TRUE;
-}

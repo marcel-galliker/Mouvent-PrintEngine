@@ -18,7 +18,7 @@ int	pc_init(void);
 int pc_end(void);
 
 int pc_start_printing(void);
-int pc_stop_printing(void);
+int pc_stop_printing(int userStop);
 int pc_off(void);
 int pc_pause_printing(void);
 int pc_abort_printing(void);

@@ -939,6 +939,7 @@ typedef struct SEncoderStat
 	SEncoderWarn	warn;
 	SEncoderErr		err;
 	UINT32			PG_cnt;
+	UINT32			PG_stop;
 	UINT32			fifoEmpty_PG;
 	UINT32			fifoEmpty_IGN;
 	UINT32			fifoEmpty_WND;
@@ -1375,9 +1376,6 @@ typedef struct SStepperStat
 	INT32			inputs;
 	SStepperMotor	motor[MAX_STEPPER_MOTORS];
 	INT32			set_io_cnt;
-	
-	EnFluidCtrlMode	ctrlModeCfg;
-	EnFluidCtrlMode	ctrlModeStat;	
 } SStepperStat;
 
 	

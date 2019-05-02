@@ -25,6 +25,7 @@
 #include "step_ctrl.h"
 #include "chiller.h"
 #include "datalogic.h"
+#include "plc_ctrl.h"
 #include "print_ctrl.h"
 #include "fluid_ctrl.h"
 
@@ -453,25 +454,93 @@ static void _control(int fluidNo)
 
 	for (i=0; i<INK_PER_BOARD; i++, _stat++, no++)
 	{
-//		if (_stat->ctrlMode==ctrl_shutdown_done)	
-//			_send_ctrlMode(no, ctrl_off,	TRUE);
-//		else 
-		if (ctrl_check_all_heads_in_fluidCtrlMode(no, _stat->ctrlMode) && (ctrl_singleHead() || step_all_in_ctrlMode(_stat->ctrlMode)))
+		if (ctrl_check_all_heads_in_fluidCtrlMode(no, _stat->ctrlMode))
 		{
 	//		Error(LOG, 0, "Fluid[%d] in mode >>%s<<", no, FluidCtrlModeStr(_stat->ctrlMode));		
 			switch(_stat->ctrlMode)
 			{
+									// PURGE
+									//	1: Köpfe auf UP
+									//	2: START SLIDE to PURGE-POS + Roboter auf WIPE
+									//	3: END 2
+									//	4: Kopf auf PURGE_POS
+									//	5: Purgen .....
+									//	6: PLC: CMD_GOTO_WIPE
+									//	7: PLC -in-wipe?
+									//	8: head to WIPE_POS
+									//	9: do wipe
+									// 10: Head to UP_Pos
 				case ctrl_purge:
 				case ctrl_purge_micro:	
 				case ctrl_purge_soft:
-				case ctrl_purge_hard:	_send_ctrlMode(no, ctrl_purge_step1, TRUE);	break;
-				case ctrl_purge_step1:	if (step_in_purge_pos()) _send_ctrlMode(no, ctrl_purge_step2, TRUE);	break;
-				case ctrl_purge_step2:	_send_ctrlMode(no, ctrl_purge_step3, TRUE);	break;
-				case ctrl_purge_step3:	_send_ctrlMode(no, ctrl_off,		  TRUE);	
-										//step_wipe_start(boardNo*HEAD_CNT+i, ctrlMode);
-										Error(LOG, 0, "START WIPE");
+				case ctrl_purge_hard:	plc_to_purge_pos();
+										// step_rob_to_wipe_pos();
+										_send_ctrlMode(no, ctrl_purge_step1, TRUE);	
 										break;
-
+				
+				case ctrl_purge_step1:	if (plc_in_purge_pos()) _send_ctrlMode(no, ctrl_purge_step2, TRUE);	
+										break;
+				
+				case ctrl_purge_step2:	_send_ctrlMode(no, ctrl_purge_step3, TRUE);	break;
+				case ctrl_purge_step3:	_send_ctrlMode(no, ctrl_wipe,		  TRUE);	
+									//	_send_ctrlMode(no, ctrl_off,		  TRUE);	
+										break;
+										//	PLC CMD_MOVE_TO_WIPE
+										//	if plc_in-Wipe -> info stepper
+										//	stepper macht wipe
+										//	
+										
+										// FLUSH
+										//	1: Köpfe auf UP
+										//	2: START SLIDE to PURGE-POS + Roboter auf CAPPING				
+				case ctrl_wipe:			
+				case ctrl_wetwipe:
+				case ctrl_wash:			plc_to_purge_pos();
+									//	step_rob_to_wipe_pos(_stat->ctrlMode);
+										_send_ctrlMode(no, ctrl_wipe_step1,	TRUE);
+										break;
+				
+				case ctrl_wipe_step1:	if (plc_in_purge_pos())// && step_rob_in_wipe_pos())
+										{
+											plc_to_wipe_pos();
+											_send_ctrlMode(no, ctrl_wipe_step2,	TRUE);										
+										}
+										break;
+				
+				case ctrl_wipe_step2:	if (plc_in_wipe_pos()) 
+										{
+										//	step_rob_wipe_start();										
+											_send_ctrlMode(no, ctrl_wipe_step3, TRUE);
+										}
+										break;
+				
+				case ctrl_cap:			plc_to_purge_pos();
+										_send_ctrlMode(no, ctrl_cap_step1, TRUE);
+										break;	
+				case ctrl_cap_step1:	if (plc_in_purge_pos()) 
+										{
+											// step_rob_to_cap_pos();
+											_send_ctrlMode(no, ctrl_cap_step2, TRUE);
+										}
+										break;				
+				case ctrl_cap_step2:	//if (step_rob_in_cap_pos()) 
+										{
+											plc_to_cap_pos();
+											_send_ctrlMode(no, ctrl_cap_step3, TRUE);
+										}
+										break;
+				case ctrl_cap_step3:	if (plc_in_cap_pos())
+										{
+										//	step_to_cap_pos();	
+											_send_ctrlMode(no, ctrl_cap_step4, TRUE);
+										}
+										break;
+				case ctrl_cap_step4:	//if (step_in_cap_pos())
+										{
+											_send_ctrlMode(no, ctrl_off, TRUE); 
+										}
+										break;				
+				
 				case ctrl_flush_night:		
 				case ctrl_flush_weekend:		
 				case ctrl_flush_week:	if (_Scanning) return;
@@ -484,9 +553,7 @@ static void _control(int fluidNo)
 										ErrorEx(dev_fluid, fluidNo, LOG, 0, "Flush complete");
 										_send_ctrlMode(-1, ctrl_off, TRUE); 
 										_flush_next();
-										break; // send to all
-
-				case ctrl_wipe:			if (step_wipe_done()) _send_ctrlMode(no, ctrl_print, TRUE); break;
+										break; 
 
 				case ctrl_fill:			_send_ctrlMode(no, ctrl_fill_step1, TRUE);		break;
 			//	case ctrl_fill_step1:	wait for user input 
@@ -676,7 +743,6 @@ void _send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 					int head = ctrl_singleHead();
 					if (head<0) ctrl_send_all_heads_fluidCtrlMode(i, cmd.ctrlMode);				
 					else ctrl_send_head_fluidCtrlMode(head, cmd.ctrlMode, FALSE, FALSE);
-					setp_send_ctrlMode(cmd.ctrlMode);
 				}
 			}
 		}			
