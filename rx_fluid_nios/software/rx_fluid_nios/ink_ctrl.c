@@ -388,12 +388,15 @@ void ink_tick_10ms(void)
 				if (pRX_Status->ink_supply[isNo].flushTime>0)
 				{
 					_pump_ctrl(isNo, PRESSURE_FLUSH,FALSE);
+					/*
 					if(pRX_Status->flush_pressure >= 1200) _set_flush_pump(isNo, TRUE);
 					else
 					{
 						_set_flush_pump(isNo, FALSE);
 						pRX_Status->ink_supply[isNo].ctrl_state = ctrl_error;
 					}
+					*/
+					_set_flush_pump(isNo, TRUE);
 					pRX_Status->ink_supply[isNo].flushTime -= cycleTime;
 					pRX_Status->ink_supply[isNo].ctrl_state = ctrl_flush_step3;
 				}

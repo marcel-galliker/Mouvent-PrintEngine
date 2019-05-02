@@ -35,7 +35,7 @@ error:
 endif
 
 SOURCEFILES := ../Externals/FreeType/src/base/ftbitmap.c ../Externals/FreeType/src/base/ftcalc.c ../Externals/FreeType/src/base/ftgloadr.c ../Externals/FreeType/src/base/ftglyph.c ../Externals/FreeType/src/base/ftinit.c ../Externals/FreeType/src/base/ftobjs.c ../Externals/FreeType/src/base/ftoutln.c ../Externals/FreeType/src/base/ftrfork.c ../Externals/FreeType/src/base/ftstream.c ../Externals/FreeType/src/base/ftsystem.c ../Externals/FreeType/src/base/fttrigon.c ../Externals/FreeType/src/base/ftutil.c ../Externals/FreeType/src/gzip/ftgzip.c ../Externals/FreeType/src/raster/ftraster.c ../Externals/FreeType/src/raster/ftrend1.c ../Externals/FreeType/src/rx_dummies.c ../Externals/FreeType/src/sfnt/pngshim.c ../Externals/FreeType/src/sfnt/sfdriver.c ../Externals/FreeType/src/sfnt/sfntpic.c ../Externals/FreeType/src/sfnt/sfobjs.c ../Externals/FreeType/src/sfnt/ttbdf.c ../Externals/FreeType/src/sfnt/ttcmap.c ../Externals/FreeType/src/sfnt/ttkern.c ../Externals/FreeType/src/sfnt/ttload.c ../Externals/FreeType/src/sfnt/ttmtx.c ../Externals/FreeType/src/sfnt/ttpost.c ../Externals/FreeType/src/sfnt/ttsbit.c ../Externals/FreeType/src/TrueType/ttdriver.c ../Externals/FreeType/src/TrueType/ttgload.c ../Externals/FreeType/src/TrueType/ttgxvar.c ../Externals/FreeType/src/TrueType/ttinterp.c ../Externals/FreeType/src/TrueType/ttobjs.c ../Externals/FreeType/src/TrueType/ttpic.c ../Externals/FreeType/src/TrueType/ttpload.c ../Externals/FreeType/src/TrueType/ttsubpix.c dllmain.cpp rip.cpp rx_embrip_lib.cpp rx_free_type.cpp rx_counter.cpp rx_data.cpp rx_rip_lib.cpp rx_barcodes.cpp SimuTecIt.c stdafx.cpp test_data.cpp
-EXTERNAL_LIBS := ../rx_common_lib/$(BINARYDIR)/rx_common_lib.a ../Externals/TinyXML/$(BINARYDIR)/TinyXML.a
+EXTERNAL_LIBS := ../rx_common_lib/$(BINARYDIR)/rx_common_lib.a ../rx_tif_lib/$(BINARYDIR)/rx_tif_lib.a ../Externals/TinyXML/$(BINARYDIR)/TinyXML.a
 EXTERNAL_LIBS_COPIED := $(foreach lib, $(EXTERNAL_LIBS),$(BINARYDIR)/$(notdir $(lib)))
 
 CFLAGS += $(COMMONFLAGS)
@@ -283,6 +283,9 @@ $(BINARYDIR)/ttsubpix.o : ../Externals/FreeType/src/TrueType/ttsubpix.c $(all_ma
 
 $(BINARYDIR)/rx_common_lib.a : ../rx_common_lib/$(BINARYDIR)/rx_common_lib.a
 	$(CP) ../rx_common_lib/$(BINARYDIR)/rx_common_lib.a $(BINARYDIR)/rx_common_lib.a
+
+$(BINARYDIR)/rx_tif_lib.a : ../rx_tif_lib/$(BINARYDIR)/rx_tif_lib.a
+	$(CP) ../rx_tif_lib/$(BINARYDIR)/rx_tif_lib.a $(BINARYDIR)/rx_tif_lib.a
 
 $(BINARYDIR)/TinyXML.a : ../Externals/TinyXML/$(BINARYDIR)/TinyXML.a
 	$(CP) ../Externals/TinyXML/$(BINARYDIR)/TinyXML.a $(BINARYDIR)/TinyXML.a

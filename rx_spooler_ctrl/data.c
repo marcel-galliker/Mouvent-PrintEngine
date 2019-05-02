@@ -320,6 +320,7 @@ int  data_get_size	(const char *path, UINT32 page, UINT32 spacePx, UINT32 *pwidt
 	}
 	
 	*multiCopy = 1;
+	/*
 	if (ret==REPLY_OK)
 	{
 		*plength += 2*abs(_WakeupLen);
@@ -336,6 +337,7 @@ int  data_get_size	(const char *path, UINT32 page, UINT32 spacePx, UINT32 *pwidt
 			*pwidth *= (*multiCopy);
 		}
 	}
+	*/
 	return ret;
 }
 

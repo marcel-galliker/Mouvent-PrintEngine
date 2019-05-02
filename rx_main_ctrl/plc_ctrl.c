@@ -1396,7 +1396,7 @@ static void _do_plc_get_log(RX_SOCKET socket)
 //--- plc_in_cap_pos ------------------------------------------
 int	 plc_in_cap_pos(void)
 {
-	if(rx_def_is_scanning(RX_Config.printer.type))
+	if(rx_def_is_tx(RX_Config.printer.type))
 	{
 		EnScanState state;
 		lc_get_value_by_name_UINT32(APP "STA_SLIDE_POSITION", (UINT32*)&state);
@@ -1408,7 +1408,7 @@ int	 plc_in_cap_pos(void)
 //--- plc_in_purge_pos ------------------------------------------
 int	 plc_in_purge_pos(void)
 {
-	if(rx_def_is_scanning(RX_Config.printer.type))
+	if(rx_def_is_tx(RX_Config.printer.type))
 	{
 		EnScanState state;
 		lc_get_value_by_name_UINT32(APP "STA_SLIDE_POSITION", (UINT32*)&state);

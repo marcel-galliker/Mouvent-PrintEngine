@@ -19,7 +19,7 @@ namespace RX_DigiPrint.Converters
             }
             catch
             {
-                return null;
+                return value.ToString();
             }
         }
 
@@ -53,7 +53,7 @@ namespace RX_DigiPrint.Converters
             }
             catch
             {
-                return null;
+                return value.ToString();
             }
         }
 
@@ -84,7 +84,7 @@ namespace RX_DigiPrint.Converters
             }
             catch
             {
-                return null;
+                return value.ToString();
             }
         }
 
