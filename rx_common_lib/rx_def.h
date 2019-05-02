@@ -421,6 +421,7 @@ typedef struct SOffsetCfg
 } SOffsetCfg;
 
 int rx_def_is_scanning(EPrinterType printerType);
+int rx_def_is_tx(EPrinterType printerType);
 int rx_def_is_web(EPrinterType printerType);
 int rx_def_is_test(EPrinterType printerType);
 

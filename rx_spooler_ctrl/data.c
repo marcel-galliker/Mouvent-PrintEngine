@@ -356,7 +356,8 @@ int  data_malloc(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPixel,
 
 //	lineLen = (width*bitsPerPixel+7)/8;			// workes for TIFF
 //	lineLen = ((width*bitsPerPixel+15)/16)*2;	// used for BMP files!
-	lineLen = ((width*bitsPerPixel+31) & ~31)/8;	// used for BMP files!
+//	lineLen = ((width*bitsPerPixel+31) & ~31)/8;	// used for BMP files!
+	lineLen = ((width*bitsPerPixel+63) & ~63)/8;	// used in case it is multicopy!
 	_PrintMode = printMode;
 	memsize = memSizeUsed = (UINT64)lineLen*height;
 	switch(printMode)
@@ -453,7 +454,7 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 	int loaded=FALSE;
 	char filename[MAX_PATH];
 	char	*tiffErr;
-
+	
 //	Error(LOG, 0, "data_load id=%d, page=%d, copy=%d, scan=%d", id->id, id->page, id->copy, id->scan);
 	TrPrintfL(TRUE, "data_load id=%d, page=%d, copy=%d, scan=%d, data_load >>%s<<", id->id, id->page, id->copy, id->scan, filepath);
  	nextIdx = (_InIdx+1) % PRINT_LIST_SIZE;
@@ -560,6 +561,7 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 				{
 					sprintf(str, "%sPAGE_%d_%s.bmp", PATH_TEMP, id->page, RX_ColorNameShort(bmpInfo.inkSupplyNo[i]));
 					bmp_write(str, *bmpInfo.buffer[i], bmpInfo.bitsPerPixel, bmpInfo.srcWidthPx, bmpInfo.lengthPx, bmpInfo.lineLen, FALSE);
+//					bmp_write(str, *bmpInfo.buffer[i], bmpInfo.bitsPerPixel, bmpInfo.srcWidthPx/multiCopy+200, 2000,             bmpInfo.lineLen, FALSE);
 					Error(WARN, 0, "Test: Written bitmap to >>%s<<", str);
 				}
 			}
@@ -631,11 +633,13 @@ static void _data_multi_copy(SBmpInfo *pBmpInfo, UINT8 multiCopy)
 	{
 		BYTE *src;
 		BYTE *dst;
+		
 		int  buf;
 		int  x, y, m;
 		int srcLineBt  = (pBmpInfo->srcWidthPx*pBmpInfo->bitsPerPixel+7)/8;
 		int srcLinelen = pBmpInfo->lineLen;
-		int dstLineLen = (((INT64)pBmpInfo->srcWidthPx*multiCopy*pBmpInfo->bitsPerPixel+31) & ~31)/8;
+		int dstLineLen = (((INT64)pBmpInfo->srcWidthPx*multiCopy*pBmpInfo->bitsPerPixel+63) & ~63)/8;
+		
 		for (buf=0; buf<SIZEOF(pBmpInfo->buffer); buf++)
 		{
 			if (pBmpInfo->buffer[buf] && pBmpInfo->lengthPx>0)
@@ -654,19 +658,20 @@ static void _data_multi_copy(SBmpInfo *pBmpInfo, UINT8 multiCopy)
 					int shl;
 					for (m=1; m<multiCopy; m++)
 					{
-						shl = 8-shr;
-						BYTE *s = dst;
-						BYTE *d = dst + m*srcLineBt-1;
-						for (x=0; x<srcLineBt; x++)
+						shl = 64-shr;
+						UINT32 *s64 = (UINT32*)dst;
+						UINT32 *d64 = (UINT32*)(dst + m*srcLineBt-1);
+						for (x=0; x<srcLineBt; x+=8)
 						{
-							*d++ |= (*s)>>shr; 
-							*d    = (*s++)<<shl;
+							*d64    = (*(s64+1))<<shl;
+							*d64++ |= (*s64++)>>shr; 
 						}
 						shr -= 2;
 					}
 				}
 			}
 		}
+
 		pBmpInfo->srcWidthPx *= multiCopy;
 		pBmpInfo->lineLen     = dstLineLen;
 		pBmpInfo->multiCopy   = multiCopy;

@@ -518,32 +518,40 @@ int  plc_abort_printing(void)
 //--- plc_clean ---------------------------------------------------------
 int  plc_clean(void)
 {
-	Error(LOG, 0, "plc_clean: send CMD_STOP");
-	_plc_set_command("CMD_PRODUCTION", "CMD_STOP");
-	step_set_vent(FALSE);
+	if(rx_def_is_tx(RX_Config.printer.type))
+	{
+		Error(LOG, 0, "plc_clean: send CMD_STOP");
+		_plc_set_command("CMD_PRODUCTION", "CMD_STOP");
+		step_set_vent(FALSE);
+	}
 	return REPLY_OK;
 }
 
 //--- plc_to_purge_pos -----------------------------------
 int	plc_to_purge_pos(void)
 {
-	_plc_set_command("CMD_PRODUCTION", "CMD_SLIDE_TO_PURGE");
+	if(rx_def_is_tx(RX_Config.printer.type))
+		_plc_set_command("CMD_PRODUCTION", "CMD_SLIDE_TO_PURGE");
 	return REPLY_OK;
 }
 
 //--- plc_to_wipe_pos ------------------------------
 int	plc_to_wipe_pos(void)
 {
-	_plc_set_command("CMD_PRODUCTION", "CMD_SLIDE_TO_WIPE");
+	if(rx_def_is_tx(RX_Config.printer.type))
+		_plc_set_command("CMD_PRODUCTION", "CMD_SLIDE_TO_WIPE");
 	return REPLY_OK;
 }
 
 //--- plc_to_cap_pos ----------------------------------
 int	plc_to_cap_pos(void)
 {
-	Error(LOG, 0, "plc_to_cap_pos: send CMD_STOP");
-	_plc_set_command("CMD_PRODUCTION", "CMD_STOP");
-	step_set_vent(FALSE);
+	if(rx_def_is_tx(RX_Config.printer.type))
+	{
+		Error(LOG, 0, "plc_to_cap_pos: send CMD_STOP");
+		_plc_set_command("CMD_PRODUCTION", "CMD_STOP");
+		step_set_vent(FALSE);			
+	}
 	return REPLY_OK;
 }
 
@@ -1400,17 +1408,25 @@ int	 plc_in_cap_pos(void)
 //--- plc_in_purge_pos ------------------------------------------
 int	 plc_in_purge_pos(void)
 {
-	EnScanState state;
-	lc_get_value_by_name_UINT32(APP "STA_SLIDE_POSITION", (UINT32*)&state);
-	return state==scan_purge;
+	if(rx_def_is_scanning(RX_Config.printer.type))
+	{
+		EnScanState state;
+		lc_get_value_by_name_UINT32(APP "STA_SLIDE_POSITION", (UINT32*)&state);
+		return state==scan_purge;
+	}
+	return TRUE;
 }
 
 //--- plc_in_wipe_pos ------------------------------------------
 int	 plc_in_wipe_pos(void)
 {
-	EnScanState state;
-	lc_get_value_by_name_UINT32(APP "STA_SLIDE_POSITION", (UINT32*)&state);
-	return state==scan_wipe;
+	if(rx_def_is_scanning(RX_Config.printer.type))
+	{
+		EnScanState state;
+		lc_get_value_by_name_UINT32(APP "STA_SLIDE_POSITION", (UINT32*)&state);
+		return state==scan_wipe;
+	}
+	return TRUE;
 }
 
 //--- plc_thread ---------------------------------------------

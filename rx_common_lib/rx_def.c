@@ -147,6 +147,17 @@ int rx_def_is_scanning(EPrinterType printerType)
 	}
 }
 
+//--- rx_def_is_tx ---------------------------------------
+int rx_def_is_tx(EPrinterType printerType)
+{
+	switch(printerType)	
+	{
+	case printer_TX801:				return TRUE;
+	case printer_TX802:				return TRUE;
+	default: return FALSE;
+	}
+}
+
 //--- rx_def_is_web ---------------------------------------
 int rx_def_is_web(EPrinterType printerType)
 {
