@@ -177,8 +177,19 @@ typedef enum EnFluidCtrlMode
     ctrl_purge_step2,         // 0x112:
     ctrl_purge_step3,         // 0x113:
 	
-	ctrl_wipe		= 0x120,  // 0x120:
-
+	ctrl_wipe			= 0x120,  // 0x120:
+	ctrl_wetwipe		= 0x121,  
+	ctrl_wash			= 0x122,  
+	ctrl_wipe_step1		= 0x131,  
+	ctrl_wipe_step2		= 0x132,  
+	ctrl_wipe_step3		= 0x133,  
+	
+	ctrl_cap			= 0x140,
+	ctrl_cap_step1		= 0x141,
+	ctrl_cap_step2		= 0x142,
+	ctrl_cap_step3		= 0x143,
+	ctrl_cap_step4		= 0x144,	
+	
     ctrl_fill = 0x200, //	0x200:
     ctrl_fill_step1,   //	0x201:
     ctrl_fill_step2,   //	0x202:
