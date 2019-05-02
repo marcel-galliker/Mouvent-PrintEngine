@@ -129,9 +129,9 @@
 0001809c G my_table
 0001827c g impure_data
 0001835c G jtag_uart
-00019394 g RETRY.3335
-00019398 g period_timer_0.3312
-0001939c g period_timer_1.3313
+00019394 g RETRY.3345
+00019398 g period_timer_0.3322
+0001939c g period_timer_1.3323
 000193a0 G _global_impure_ptr
 000193a4 G _impure_ptr
 000193a8 G alt_priority_mask
@@ -147,7 +147,7 @@
 0001a6e0 b _FlushPump
 0001a6e4 b _AirPressureTime
 0001a6e8 b _FillPressure
-0001a6ec b cnt.3098
+0001a6ec b cnt.3108
 0001a6f0 B _PumpOFFTime
 0001a6f4 B _PumpBeforeOFF
 0001a6f8 b _cnt
