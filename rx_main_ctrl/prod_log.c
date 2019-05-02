@@ -18,6 +18,7 @@
 
 #include "libxl.h"
 #include "rx_file.h"
+#include "rx_threads.h"
 #include "bmp.h"
 #include "print_queue.h"
 #include "prod_log.h"
@@ -34,6 +35,8 @@ static SheetHandle		_ActSheet;
 static FormatHandle		_TitleFormat;	// 1
 static FontHandle		_TitleFont;
 static FormatHandle		_DateFormat;	// 2
+
+static void *_prod_log_thread(void *lpParameter);
 
 //--- Prototypes --------------------------------------------------------------
 static int _add_picture(char *name, char *path);
@@ -124,6 +127,12 @@ void pl_start(SPrintQueueItem *pitem, char *localpath)
 //--- pl_stop -----------------------------------
 void pl_stop(SPrintQueueItem *pitem)
 {
+	rx_thread_start(_prod_log_thread, pitem, 0, "_prod_log_thread");
+}
+
+static void *_prod_log_thread(void *lpParameter)
+{
+	SPrintQueueItem *pitem = (SPrintQueueItem*)lpParameter;
 #ifdef linux
 	char day[32];
 
@@ -137,6 +146,7 @@ void pl_stop(SPrintQueueItem *pitem)
 	default: break;
 	}
 #endif
+	return NULL;
 }
 
 //--- _pl_stop_tx --------------------------------------------------

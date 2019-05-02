@@ -725,8 +725,10 @@ int pq_printed(int headNo, SPageId *pid, int *pageDone, int *jobDone, SPrintQueu
 				TrPrintfL(TRUE, "PQ.size=%d, idx=%d", _Size, idx);
 				if(pitem->state != PQ_STATE_PRINTED)
 				{
+					TrPrintfL(TRUE, "%s: complete", _filename(pitem->filepath));
 					Error(LOG, 0, "%s: complete", _filename(pitem->filepath));
 					*jobDone = TRUE;
+					if (rx_def_is_scanning(RX_Config.printer.type) && *pnextItem==NULL) pc_abort_printing();
 				}
 				pitem->state = PQ_STATE_PRINTED;
 			}
@@ -742,7 +744,7 @@ int pq_printed(int headNo, SPageId *pid, int *pageDone, int *jobDone, SPrintQueu
 		{
 			Error(LOG, 0, "PrintDone=%d, stop-at=%d", _PrintDoneCnt, enc_pg_stop_cnt());
 			int cnt=enc_pg_stop_cnt();
-			if (cnt && _PrintDoneCnt==cnt) pc_abort_printing();				
+			if (cnt && _PrintDoneCnt==cnt ) pc_abort_printing();				
 		}
 		
 		memcpy(&_PrintedItem, pitem, sizeof(_PrintedItem));

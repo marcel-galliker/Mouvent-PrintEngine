@@ -473,17 +473,33 @@ static void _control(int fluidNo)
 				case ctrl_purge:
 				case ctrl_purge_micro:	
 				case ctrl_purge_soft:
-				case ctrl_purge_hard:	plc_to_purge_pos();
-										// step_rob_to_wipe_pos();
+				case ctrl_purge_hard:	// step_lift_to_up();
 										_send_ctrlMode(no, ctrl_purge_step1, TRUE);	
 										break;
 				
-				case ctrl_purge_step1:	if (plc_in_purge_pos()) _send_ctrlMode(no, ctrl_purge_step2, TRUE);	
+				case ctrl_purge_step1:	// if (step_lift_is_up()) 
+										{
+											plc_to_purge_pos();
+											_send_ctrlMode(no, ctrl_purge_step2, TRUE);												
+										}
+										break;
+								
+				case ctrl_purge_step2:	if (plc_in_purge_pos())
+										{
+										//	step_lift_to_purge();										
+											_send_ctrlMode(no, ctrl_purge_step3, TRUE);	
+										}
 										break;
 				
-				case ctrl_purge_step2:	_send_ctrlMode(no, ctrl_purge_step3, TRUE);	break;
-				case ctrl_purge_step3:	_send_ctrlMode(no, ctrl_wipe,		  TRUE);	
-									//	_send_ctrlMode(no, ctrl_off,		  TRUE);	
+				case ctrl_purge_step3:	// if (step_lift_in_purge())
+										{
+											_send_ctrlMode(no, ctrl_purge_step4, TRUE);												
+										}
+										break;
+				
+				case ctrl_purge_step4:
+									//	_send_ctrlMode(no, ctrl_wipe,		  TRUE);	
+										_send_ctrlMode(no, ctrl_off,		  TRUE);	
 										break;
 										//	PLC CMD_MOVE_TO_WIPE
 										//	if plc_in-Wipe -> info stepper
@@ -598,10 +614,33 @@ static void _control_flush(void)
 	{
 	case ctrl_flush_night:		
 	case ctrl_flush_weekend:		
-	case ctrl_flush_week:		
-							if (step_in_purge_pos()) _FlushCtrlMode=ctrl_flush_step1; break;
-	case ctrl_flush_step1:	_FlushCtrlMode=ctrl_flush_step2; break;
-    case ctrl_flush_step2:	_FlushCtrlMode=ctrl_flush_done; break;
+	case ctrl_flush_week:	// step_lift_to_up();	
+							_FlushCtrlMode=ctrl_flush_step1; 
+							break;
+		
+	case ctrl_flush_step1:	// if (step_lift_is_up()) 
+							{
+								plc_to_purge_pos();
+								_FlushCtrlMode=ctrl_flush_step2;
+							}
+							break;
+		
+    case ctrl_flush_step2:	if (plc_in_purge_pos())
+							{
+								//	step_lift_to_purge();
+								_FlushCtrlMode=ctrl_flush_step3;	
+							}
+							break;
+		
+    case ctrl_flush_step3:	// if (step_lift_in_purge())
+							{
+								_FlushCtrlMode=ctrl_flush_step4;
+							}
+							break;
+
+	case ctrl_flush_step4:	_FlushCtrlMode=ctrl_flush_done;
+							break;
+		
     case ctrl_flush_done:	ErrorEx(dev_fluid, -1, LOG, 0, "Flush complete");
 							_FlushCtrlMode=ctrl_off; 
 							break; // send to all
@@ -611,7 +650,7 @@ static void _control_flush(void)
 	for (i=0; i<RX_Config.inkSupplyCnt; i++) _send_ctrlMode(i, _FlushCtrlMode, TRUE);
 
 //	TrPrintfL(TRUE, "Next mode %d", _FlushCtrlMode);
-}
+}								
 
 //--- fluid_reply_stat ------------------------------------
 void fluid_reply_stat(RX_SOCKET socket)	// to GUI

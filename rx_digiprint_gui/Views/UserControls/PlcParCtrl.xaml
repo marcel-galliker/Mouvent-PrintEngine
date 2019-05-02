@@ -124,7 +124,7 @@
         <TextBlock Grid.Column="0" Text="{Binding Label}" VerticalAlignment="Center" x:Name="LABEL"/>
 
         <TextBlock x:Name="TextCtrl" Grid.Column="1" 
-			Text="{Binding Value}"
+			Text="{Binding Value, Converter={StaticResource HeadVal_Converter}}"
 			HorizontalAlignment="Right"
 			Background="Transparent"
             Padding="2,0"
@@ -132,7 +132,7 @@
             />
 
         <common:RxNumBox x:Name="TextEditCtrl" Grid.Column="1" 
-			Text="{Binding Value}"
+			Text="{Binding Value, Converter={StaticResource HeadVal_Converter}}"
 			HorizontalContentAlignment="Right"
 			Background="Transparent"
             VerticalAlignment="Center"

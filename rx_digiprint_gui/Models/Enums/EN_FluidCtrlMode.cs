@@ -28,6 +28,8 @@ namespace RX_DigiPrint.Models.Enums
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_flush_week,    "Flush W"       ));
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_flush_step1,   "Flush /1"      ));
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_flush_step2,   "Flush /2"      ));
+                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_flush_step3,   "Flush /3"      ));
+                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_flush_step4,   "Flush /4"      ));
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_flush_done,    "Flush Done"    ));
 
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_purge_soft,    "Purge Soft"    ));
@@ -37,6 +39,7 @@ namespace RX_DigiPrint.Models.Enums
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_purge_step1,   "Purge /1"      ));
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_purge_step2,   "Purge /2"      ));
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_purge_step3,   "Purge /3"      ));
+                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_purge_step4,   "Purge /4"      ));
 
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_wipe,          "Wipe"          ));
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_wetwipe,       "Wipe Wet"      ));

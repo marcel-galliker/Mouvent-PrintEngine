@@ -796,11 +796,15 @@ int pc_print_done(int headNo, SPrintDoneMsg *pmsg)
 			{
 				TrPrintfL(TRUE, "pc_print_done: sent=%d, printed=%d, scan=%d, scans=%d: STOP", RX_PrinterStatus.sentCnt, RX_PrinterStatus.printedCnt, _Item.id.scan, _Item.scans);
 			//	Error(LOG, 0, "pc_print_done: sent=%d, printed=%d, scan=%d, scans=%d: STOP", RX_PrinterStatus.sentCnt, RX_PrinterStatus.printedCnt, _Item.id.scan, _Item.scans);
+				enc_stop_pg();
+				enc_stop_printing();
+				pc_stop_printing(FALSE);
+
+				/*
 				SPrintQueueItem item;
 				memcpy(&item.id, &pmsg->id, sizeof(item.id));
 				pl_stop(&item);
-				enc_stop_printing();
-				pc_stop_printing(FALSE);
+				*/
 			}
 		}		
 	}

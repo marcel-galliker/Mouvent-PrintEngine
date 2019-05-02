@@ -43,6 +43,8 @@ char *FluidCtrlModeStr(EnFluidCtrlMode mode)
 	case ctrl_flush_week:			return "FLUSH_W";	//  0x012:
 	case ctrl_flush_step1:			return "FLUSH_s1";  //  0x013:
 	case ctrl_flush_step2:			return "FLUSH_s2";  //  0x014:
+	case ctrl_flush_step3:			return "FLUSH_s3";  //  0x014:
+	case ctrl_flush_step4:			return "FLUSH_s4";  //  0x014:
 	case ctrl_flush_done:			return "FLUSH_done";//  0x015:
 		
 	case ctrl_purge_soft:			return "PRG-S";		//  0x100:
@@ -51,6 +53,8 @@ char *FluidCtrlModeStr(EnFluidCtrlMode mode)
 	case ctrl_purge_micro:			return "PRG-M";		//  0x103:
 	case ctrl_purge_step1:			return "PRG_s1";	//  0x111:
 	case ctrl_purge_step2:			return "PRG_s2";	//  0x112:
+	case ctrl_purge_step3:			return "PRG_s3";	//  0x113:
+	case ctrl_purge_step4:			return "PRG_s4";	//  0x114:
 		
 	case ctrl_fill:					return "FILL";		//	0x200:
 	case ctrl_fill_step1:			return "FILL_s1";	//	0x201:

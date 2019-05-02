@@ -146,7 +146,9 @@ namespace RX_DigiPrint.Services
         ctrl_flush_week,	    //	0x012:
 	    ctrl_flush_step1,	    //  0x013:
 	    ctrl_flush_step2,	    //  0x014:
-        ctrl_flush_done,        //	0x015:
+	    ctrl_flush_step3,	    //  0x015:
+	    ctrl_flush_step4,	    //  0x016:
+        ctrl_flush_done,        //	0x017:
 
 	    ctrl_purge_soft =0x100,	//	0x100:
 	    ctrl_purge,				//	0x101:
@@ -155,6 +157,7 @@ namespace RX_DigiPrint.Services
 	    ctrl_purge_step1=0x111,	//	0x111:
 	    ctrl_purge_step2,		//	0x112:
 	    ctrl_purge_step3,		//	0x113:
+	    ctrl_purge_step4,		//	0x113:
 
         ctrl_wipe           = 0x120, //  0x120   
 	    ctrl_wetwipe		= 0x121,  

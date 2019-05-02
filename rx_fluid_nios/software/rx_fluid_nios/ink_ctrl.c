@@ -329,7 +329,7 @@ void ink_tick_10ms(void)
 
 				// do not start ramp-up from 0 after purge
 				if (pRX_Status->ink_supply[isNo].ctrl_state != pRX_Config->ink_supply[isNo].ctrl_mode
-				&&  pRX_Status->ink_supply[isNo].ctrl_state != ctrl_purge_step3)
+				&&  pRX_Status->ink_supply[isNo].ctrl_state != ctrl_purge_step5)
 					_cylinderPres_10[isNo] = 0;
 
 				if(pRX_Config->ink_supply[isNo].ctrl_mode == ctrl_print)
@@ -363,22 +363,27 @@ void ink_tick_10ms(void)
 				_InkSupply[isNo].degassing = pRX_Config->cmd.lung_enabled;
 				_pump_ctrl(isNo, PRESSURE_FLUSH,FALSE);
 				_set_flush_pump(isNo, FALSE);
-				pRX_Status->ink_supply[isNo].flushTime = 1000 * pRX_Config->ink_supply[isNo].flushTime[pRX_Config->ink_supply[isNo].ctrl_mode-ctrl_flush_night];
-
+				pRX_Status->ink_supply[isNo].flushTime  = 1000 * pRX_Config->ink_supply[isNo].flushTime[pRX_Config->ink_supply[isNo].ctrl_mode-ctrl_flush_night];
 				pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
 				break;
 
 			case ctrl_flush_step1:
+			case ctrl_flush_step2:
+				_pump_ctrl(isNo, PRESSURE_FLUSH,FALSE);
+				pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
+				break;
+
+			case ctrl_flush_step3:
 				_pump_ctrl(isNo, PRESSURE_FLUSH,FALSE);
 				// ink pressure must be applied on all cylinders so that no flush is pressed back
 				if (pRX_Config->ink_supply[isNo].cylinderPresSet==0
 				|| (pRX_Status->ink_supply[isNo].IS_Pressure_Actual != INVALID_VALUE
 						&&  pRX_Status->ink_supply[isNo].IS_Pressure_Actual >= 500)
 					)
-					pRX_Status->ink_supply[isNo].ctrl_state = ctrl_flush_step1;
+					pRX_Status->ink_supply[isNo].ctrl_state = ctrl_flush_step3;
 				break;
 
-			case ctrl_flush_step2:
+			case ctrl_flush_step4:
 				_InkSupply[isNo].degassing = pRX_Config->cmd.lung_enabled;
 				if (pRX_Status->ink_supply[isNo].flushTime>0)
 				{
@@ -390,33 +395,38 @@ void ink_tick_10ms(void)
 						pRX_Status->ink_supply[isNo].ctrl_state = ctrl_error;
 					}
 					pRX_Status->ink_supply[isNo].flushTime -= cycleTime;
-					pRX_Status->ink_supply[isNo].ctrl_state = ctrl_flush_step1;
+					pRX_Status->ink_supply[isNo].ctrl_state = ctrl_flush_step3;
 				}
 				else
 				{
 					_set_pump_speed(isNo, 0);
 					_set_flush_pump(isNo, FALSE);
 					_set_air_valve(isNo, FALSE);
-					pRX_Status->ink_supply[isNo].ctrl_state = ctrl_flush_step2;
+					pRX_Status->ink_supply[isNo].ctrl_state = ctrl_flush_step4;
 				}
 				break;
 
 			case ctrl_flush_done:
 				pRX_Status->ink_supply[isNo].ctrl_state = ctrl_flush_done;
 				break;
-
 			case ctrl_purge_soft:	_init_purge(isNo, PRESSURE_SOFT_PURGE,  TIME_SOFT_PURGE ); break;
 			case ctrl_purge:		_init_purge(isNo, PRESSURE_PURGE,     	TIME_PURGE      ); break;
 			case ctrl_purge_hard:	_init_purge(isNo, PRESSURE_HARD_PURGE, 	TIME_HARD_PURGE ); break;
 			case ctrl_purge_micro:	_init_purge(isNo, PRESSURE_MICRO_PURGE, TIME_MICRO_PURGE); break;
 
 			case ctrl_purge_step1: // build up pressure
+			case ctrl_purge_step2: // build up pressure
 				_pump_ctrl(isNo, _InkSupply[isNo].purgePressure,FALSE);
-				if (pRX_Status->ink_supply[isNo].IS_Pressure_Actual >= (60 * _InkSupply[isNo].purgePressure / 100))
-					pRX_Status->ink_supply[isNo].ctrl_state = ctrl_purge_step1;
+				pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
 				break;
 
-			case ctrl_purge_step2:
+			case ctrl_purge_step3: // build up pressure
+				_pump_ctrl(isNo, _InkSupply[isNo].purgePressure,FALSE);
+				if (pRX_Status->ink_supply[isNo].IS_Pressure_Actual >= (60 * _InkSupply[isNo].purgePressure / 100))
+					pRX_Status->ink_supply[isNo].ctrl_state = ctrl_purge_step3;
+				break;
+
+			case ctrl_purge_step4:
 				if (_InkSupply[isNo].purgeTime>0)
 				{
 					_pump_ctrl(isNo, _InkSupply[isNo].purgePressure, FALSE);
@@ -429,18 +439,27 @@ void ink_tick_10ms(void)
 					_InkSupply[isNo].purgePressure = 0;
 					_set_pump_speed(isNo, 0);
 					_set_air_valve(isNo, TRUE);
-					pRX_Status->ink_supply[isNo].ctrl_state = ctrl_purge_step2;
+					pRX_Status->ink_supply[isNo].ctrl_state = ctrl_purge_step4;
 				}
 				break;
 
-			case ctrl_purge_step3:
-					pRX_Status->ink_supply[isNo].ctrl_state = ctrl_purge_step3;
+			case ctrl_purge_step5:
+					pRX_Status->ink_supply[isNo].ctrl_state = ctrl_purge_step5;
 				break;
 
+			case ctrl_cap:
+			case ctrl_cap_step1:
+			case ctrl_cap_step2:
+			case ctrl_cap_step3:
+			case ctrl_cap_step4:
 			case ctrl_wipe:
+			case ctrl_wetwipe:
+			case ctrl_wash:
+			case ctrl_wipe_step1:
+			case ctrl_wipe_step2:
 				_set_air_valve(isNo, TRUE);
 				_set_pump_speed(isNo, 0);
-				pRX_Status->ink_supply[isNo].ctrl_state = ctrl_wipe;
+				pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
 				break;
 
 			// --- FILL --------------------------------------------------

@@ -303,22 +303,7 @@ void pump_tick_10ms(void)
 						break;
 		
 		case ctrl_purge_step1:
-						temp_ctrl_on(FALSE);
-						turn_off_pump();
-						_presure_in_max();
-						max_pressure = MBAR_500;
-                        RX_Status.mode = RX_Config.mode;
-						break;
-		
 		case ctrl_purge_step2:
-						temp_ctrl_on(TRUE);
-                        _set_valve(TO_INK);
-						_set_pump_speed(0);
-						_presure_in_max();
-						max_pressure = MBAR_500;
-                        RX_Status.mode = RX_Config.mode;
-						break;
-		
 		case ctrl_purge_step3:
 						temp_ctrl_on(FALSE);
 						turn_off_pump();
@@ -326,14 +311,25 @@ void pump_tick_10ms(void)
 						max_pressure = MBAR_500;
                         RX_Status.mode = RX_Config.mode;
 						break;
-
-		case ctrl_wipe:
-						temp_ctrl_on(FALSE);
-						turn_off_pump();
+		
+		case ctrl_purge_step4:
+						temp_ctrl_on(TRUE);
+                        _set_valve(TO_INK);
+						_set_pump_speed(0);
+						_presure_in_max();
 						max_pressure = MBAR_500;
                         RX_Status.mode = RX_Config.mode;
 						break;
-
+		/*
+		case ctrl_purge_step5:
+						temp_ctrl_on(FALSE);
+						turn_off_pump();
+						_presure_in_max();
+						max_pressure = MBAR_500;
+                        RX_Status.mode = RX_Config.mode;
+						break;
+		*/
+		
 		//--- FLUSH ------------------------------------------------
 		case ctrl_flush_night:
 		case ctrl_flush_weekend:
@@ -348,6 +344,8 @@ void pump_tick_10ms(void)
         
 		case ctrl_flush_step1:        
         case ctrl_flush_step2:
+        case ctrl_flush_step3:
+        case ctrl_flush_step4:
         case ctrl_flush_done:
                         RX_Status.mode = RX_Config.mode;
 						break;
@@ -412,7 +410,27 @@ void pump_tick_10ms(void)
 						if (pres_calibration_done()) RX_Status.mode = ctrl_offset_cal_done;
 						else 						 RX_Status.mode = ctrl_offset_cal;
                         break;    
-                        
+            
+		case ctrl_cap:
+		case ctrl_cap_step1:
+		case ctrl_cap_step2:
+		case ctrl_cap_step3:
+		case ctrl_cap_step4:
+						temp_ctrl_on(FALSE);
+						turn_off_pump();
+						max_pressure = MBAR_500;
+						RX_Status.mode = RX_Config.mode;
+						break;
+		case ctrl_wipe:
+		case ctrl_wetwipe:
+		case ctrl_wash:
+		case ctrl_wipe_step1:
+		case ctrl_wipe_step2:
+						temp_ctrl_on(FALSE);
+						turn_off_pump();
+						max_pressure = MBAR_500;
+                        RX_Status.mode = RX_Config.mode;
+						break;
 		default:				
                         turn_off_pump();
                         temp_ctrl_on(FALSE);

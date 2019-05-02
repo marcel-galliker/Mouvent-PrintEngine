@@ -511,7 +511,7 @@ HANDLE rx_thread_start(void *(*thread_routine) (void *), void *param, UINT32 sta
 	}		
 #ifdef linux		
 	#ifndef soc
-		_rx_thread_list(idx);
+	//	_rx_thread_list(idx);
 	#endif
 #endif
 	
