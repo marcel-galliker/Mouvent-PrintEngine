@@ -834,7 +834,7 @@ int pq_is_ready(void)
 				case 1: // buffer full
 						if(bufsize < 10)	
 						{
-							Error(WARN, 0, "Buffer low");
+							Error(WARN, 0, "Buffer low (transferred=%d, bufsize=%d", RX_PrinterStatus.transferredCnt, bufsize);
 							_BufState = 2;
 						}
 						break;
@@ -842,12 +842,12 @@ int pq_is_ready(void)
 				case 2:	// buffer low
 						if (bufsize>15)
 						{
-							Error(LOG, 0, "Buffer recovered");
+							Error(LOG, 0, "Buffer recovered (transferred=%d, bufsize=%d)", RX_PrinterStatus.transferredCnt, bufsize);
 							_BufState = 1;							
 						}
 						else if (bufsize<3)	
 						{
-							Error(ERR_STOP, 0, "Buffer underflow");
+							Error(ERR_STOP, 0, "Buffer underflow (transferred=%d, bufsize=%d", RX_PrinterStatus.transferredCnt, bufsize);
 							_BufState=3;
 						}
 						break;
