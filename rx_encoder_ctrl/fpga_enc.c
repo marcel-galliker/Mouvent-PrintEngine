@@ -882,7 +882,7 @@ static void  _corr_ctrl(void)
 		
 	if (Fpga->cfg.encIn[0].correction==CORR_ROTATIVE)
 	{
-		double freq = Fpga->stat.encOut[0].speed*23/100;	// Hz
+		double freq = Fpga->stat.encOut[0].speed*23/1000;	// Hz
 		double mmin = 60*freq/1200*0.0254;
 		if (RX_EncoderStatus.meters<50 && mmin<40)
 		{
@@ -1086,7 +1086,7 @@ if(_ALL){term_printf("  printgo_n:     "); for (i=0; i<cnt; i++)term_printf("%09
 		term_printf("\n");
 		term_printf("output status    "); for (i=0; i<cnt; i++) term_printf("____%d____  ", i);									term_printf("\n");
 		term_printf("  position:      "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encOut[i].position);			term_printf("\n");
-//		term_printf("  Speed:         "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encOut[i].speed*23/100);		term_printf("\n");
+//		term_printf("  Speed:         "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encOut[i].speed*23/1000);		term_printf("\n");
 		term_printf("  Speed Min[Hz]: "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encOut[i].speed_min*23/1000);	term_printf("\n");
 		term_printf("  Speed Max[Hz]: "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encOut[i].speed_max*23/1000);	term_printf("\n");
 		term_printf("  PG Cnt:        "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encOut[i].PG_cnt);				term_printf("\n");

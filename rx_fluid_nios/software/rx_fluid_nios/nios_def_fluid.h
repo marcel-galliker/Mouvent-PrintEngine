@@ -66,10 +66,10 @@ typedef struct
 	INT32	condPresOutSet;
 	INT32	flushTime[3];
 
-	INT32	fluid_PIDsetpoint_P;
-	INT32	fluid_PIDsetpoint_I;
-	INT32	fluid_PIDpump_P;
-	INT32	fluid_PIDpump_I;
+//	INT32	fluid_PIDsetpoint_P;
+//	INT32	fluid_PIDsetpoint_I;
+//	INT32	fluid_PIDpump_P;
+//	INT32	fluid_PIDpump_I;
 	
 	UINT32	heaterTemp;
 	UINT32	heaterTempMax;
@@ -100,16 +100,11 @@ typedef struct SNiosFluidCfg
 	INT32			test_airPressure;	// [mbar]
 	INT32			test_flush;
 	UINT32			headsPerColor;
-	
-	/*
-	UINT32			controller_P;
-	UINT32			controller_I;
-	UINT32			controller_D;
-	UINT32			controller_offset;
-	*/
 
 	INT32			test_lungPressure;	// [mbar]
 
+	EPrinterType	printerType;
+	
 	SIsAdapterCfg ink_supply[NIOS_INK_SUPPLY_CNT];
 } SNiosFluidCfg;
 

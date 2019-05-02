@@ -411,30 +411,6 @@ typedef struct SInkLicense
 	UINT16	code_2;
 	UINT16	crc16;
 } SInkLicense;
-
-//--- printer ------------------------------------
-typedef enum EPrinterType
-{
-	printer_undef,				// 0: not defined
-	printer_test_table,			// 1:
-	printer_test_slide,			// 2:
-	printer_test_slide_only,	// 3:
-
-	//--- web printers ------------------------------
-	printer_LB701=1000,			// 1000: 
-	printer_LB702_UV,			// 1001:
-	printer_LB702_WB,			// 1002:
-	
-	printer_DP803=1100,			// 1100:
-	 
-	//--- scanning printers --------------------------
-	printer_TX801     = 2000,		// 2000: Fashionn stanrard output
-	printer_TX802,					// 2001: Fashion high outpput
-
-	//--- special projects ----------------
-	printer_cleaf = 10000,		// 10000: Cleaf machine
-} EPrinterType;
-
 	
 typedef struct SOffsetCfg
 {
@@ -1001,6 +977,7 @@ typedef struct SFluidBoardCfgLight
 	UINT32			inkTempMax		[INK_PER_BOARD];
     UINT32			fluid_P         [INK_PER_BOARD];
     UINT32			flushTime       [INK_PER_BOARD][3];
+	EPrinterType	printerType;
 } SFluidBoardCfgLight;
 	
 typedef struct SHeadStateLight

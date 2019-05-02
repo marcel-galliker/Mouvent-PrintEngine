@@ -123,6 +123,29 @@ typedef struct SVersion
 #define CALIBRATE_PUMP_SPEED    30
 #define INK_PRESSURE_MAX        1200
 
+//--- printer ------------------------------------
+typedef enum EPrinterType
+{
+	printer_undef,				// 0: not defined
+	printer_test_table,			// 1:
+	printer_test_slide,			// 2:
+	printer_test_slide_only,	// 3:
+
+	//--- web printers ------------------------------
+	printer_LB701=1000,			// 1000: 
+	printer_LB702_UV,			// 1001:
+	printer_LB702_WB,			// 1002:
+	
+	printer_DP803=1100,			// 1100:
+	 
+	//--- scanning printers --------------------------
+	printer_TX801     = 2000,		// 2000: Fashionn stanrard output
+	printer_TX802,					// 2001: Fashion high outpput
+
+	//--- special projects ----------------
+	printer_cleaf = 10000,		// 10000: Cleaf machine
+} EPrinterType;
+
 //--- EnFluidCtrlMode -----------------------------
 typedef enum EnFluidCtrlMode
 {

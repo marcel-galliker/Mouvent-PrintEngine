@@ -229,6 +229,7 @@ void fluid_set_config(void)
 	{
 		if (_FluidThreadPar[i].socket!=INVALID_SOCKET)
 		{
+			cfg.printerType = RX_Config.printer.type;
 			cfg.lung_enabled = (i==0);
 			for (n=0; n<INK_PER_BOARD; n++) 
 			{
