@@ -466,6 +466,7 @@ typedef struct SPrinterStatus
 	UINT32			dataReady;
 	UINT32			sentCnt;
 	UINT32			transferredCnt;
+	UINT32			printGoCnt;
 	UINT32			printedCnt;
 	UINT32			testMode;
 	UINT32			inkSupilesOff;

@@ -161,6 +161,7 @@ int pc_start_printing(void)
 		machine_reset();
 		RX_PrinterStatus.dataReady = FALSE;
 		RX_PrinterStatus.sentCnt=0;
+		RX_PrinterStatus.printGoCnt=0;
 		RX_PrinterStatus.printedCnt=0;
 		RX_PrinterStatus.printState=ps_printing;
 		_PrintGo = 0;

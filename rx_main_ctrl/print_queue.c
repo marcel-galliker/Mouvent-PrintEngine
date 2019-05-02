@@ -812,18 +812,19 @@ int pq_is_ready(void)
 	{
 		static UINT32 sent=0;
 		static UINT32 transferred=0;
-		static UINT32 printed=0;
+		static UINT32 printGoCnt=0;
 
-		if (RX_PrinterStatus.sentCnt!=sent || RX_PrinterStatus.transferredCnt!=transferred || RX_PrinterStatus.printedCnt!=printed)
+		if (RX_PrinterStatus.sentCnt!=sent || RX_PrinterStatus.transferredCnt!=transferred || RX_PrinterStatus.printGoCnt!=printGoCnt)
 		{
 			// if (RX_PrinterStatus.sentCnt) Error(LOG, 0, "Buffered pages=%d", RX_PrinterStatus.sentCnt-RX_PrinterStatus.printedCnt);
-			TrPrintfL(TRUE, "Buffer: sent=%d, transferred=%d, printed=%d, buffered=%d", RX_PrinterStatus.sentCnt, RX_PrinterStatus.transferredCnt, RX_PrinterStatus.printedCnt, RX_PrinterStatus.transferredCnt-RX_PrinterStatus.printedCnt);
+			TrPrintfL(TRUE, "Buffer: sent=%d, transferred=%d, printGoCnt=%d, buffered=%d", RX_PrinterStatus.sentCnt, RX_PrinterStatus.transferredCnt, RX_PrinterStatus.printGoCnt, RX_PrinterStatus.transferredCnt-RX_PrinterStatus.printGoCnt);
 			sent=RX_PrinterStatus.sentCnt;
 			transferred=RX_PrinterStatus.transferredCnt;
-			printed=RX_PrinterStatus.printedCnt;
+			printGoCnt=RX_PrinterStatus.printGoCnt;
 			
 			{
-				int bufsize = RX_PrinterStatus.transferredCnt-RX_PrinterStatus.printedCnt;
+			//	int bufsize = RX_PrinterStatus.transferredCnt-RX_PrinterStatus.printedCnt;
+				int bufsize = RX_PrinterStatus.transferredCnt-RX_PrinterStatus.printGoCnt;
 				switch(_BufState)
 				{
 				case 0: // filling

@@ -538,7 +538,7 @@ static void _handle_status(int no, SEncoderStat* pstat)
 	{
 		if (_DistTelCnt && pstat->PG_cnt!=_TotalPgCnt)
 		{
-			if (pstat->fifoEmpty_PG> _EncoderStatus[no].fifoEmpty_PG)  ErrorEx(dev_enc, no, ERR_STOP, 0, "PrintGo FIFO empty (PG=%d, err=%d) (Images: transferred=%d, printed=%d, buffer=%d)", pstat->PG_cnt, pstat->fifoEmpty_PG, RX_PrinterStatus.transferredCnt, RX_PrinterStatus.printedCnt, RX_PrinterStatus.transferredCnt-RX_PrinterStatus.printedCnt);
+			if (pstat->fifoEmpty_PG> _EncoderStatus[no].fifoEmpty_PG)  ErrorEx(dev_enc, no, ERR_STOP, 0, "PrintGo FIFO empty (PG=%d, err=%d) (Images: transferred=%d, printGo=%d, buffer=%d)", pstat->PG_cnt, pstat->fifoEmpty_PG, RX_PrinterStatus.transferredCnt, RX_PrinterStatus.printGoCnt, RX_PrinterStatus.transferredCnt-RX_PrinterStatus.printGoCnt);
 			if (pstat->fifoEmpty_IGN>_EncoderStatus[no].fifoEmpty_IGN) ErrorEx(dev_enc, no, ERR_STOP, 0, "PrintGo FIFO ignore (PG=%d, err==%d)", pstat->PG_cnt, pstat->fifoEmpty_IGN);
 			if (pstat->fifoEmpty_WND>_EncoderStatus[no].fifoEmpty_WND) ErrorEx(dev_enc, no, ERR_STOP, 0, "PrintGo FIFO window (PG=%d, err==%d)", pstat->PG_cnt, pstat->fifoEmpty_WND);		
 		}
@@ -547,7 +547,11 @@ static void _handle_status(int no, SEncoderStat* pstat)
 	
 	memcpy(&_EncoderStatus[no], pstat, sizeof(_EncoderStatus[no]));
 	if (_Encoder[no].printGoCnt==-1 && _EncoderStatus[no].PG_cnt==0)						_Encoder[no].printGoCnt = 0;
-	if (_Encoder[no].printGoCnt>=0 && _EncoderStatus[no].PG_cnt != _Encoder[no].printGoCnt)	_Encoder[no].printGoCnt = _EncoderStatus[no].PG_cnt;
+	if (_Encoder[no].printGoCnt>=0 && _EncoderStatus[no].PG_cnt != _Encoder[no].printGoCnt)	
+	{
+		_Encoder[no].printGoCnt = _EncoderStatus[no].PG_cnt;
+		if (_Encoder[no].printGoCnt > RX_PrinterStatus.printGoCnt) RX_PrinterStatus.printGoCnt = _Encoder[no].printGoCnt;
+	}
 	if (_PrintGo_Mode==PG_MODE_MARK && _Encoder[no].printGoCnt==0 && _EncoderStatus[no].meters>_WarnMarkReaderPos)
 	{
 		Error(WARN, 0, "PrintGo triggered by PrintMark but NO MARK DETECTED after %d meters", _EncoderStatus[no].meters);

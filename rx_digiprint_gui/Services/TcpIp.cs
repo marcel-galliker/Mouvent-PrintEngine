@@ -753,6 +753,7 @@ namespace RX_DigiPrint.Services
             public UInt32       dataReady;
             public UInt32       sentCnt;
             public UInt32       transferredCnt;
+            public UInt32       printGoCnt;
             public UInt32       printedCnt;
             public UInt32       testMode;
             public UInt32		inkSupilesOff;
