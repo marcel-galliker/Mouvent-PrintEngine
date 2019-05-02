@@ -466,12 +466,16 @@ int  tx801_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									break;
 
 	case CMD_CAP_PRINT_POS:			pos   = (*((INT32*)pdata));
-									if (pos<TX_PRINT_POS_MIN) pos=TX_PRINT_POS_MIN;
+									if (pos<TX_PRINT_POS_MIN) 
+									{
+										pos=TX_PRINT_POS_MIN;
+										Error(WARN, 0, "CMD_CAP_PRINT_POS set to MIN pos=%d.%03d", pos/1000, pos%1000);
+									}
 									if (!_CmdRunning && (!RX_StepperStatus.info.z_in_print || steps!=_PrintPos_Act))
 									{
 										_PrintPos_New = _micron_2_steps(TX_REF_HEIGHT - pos);
 										if (RX_StepperStatus.info.ref_done) _tx801_move_to_pos(CMD_CAP_PRINT_POS, _PrintPos_New);
-										else								  _tx801_do_reference();
+										else								_tx801_do_reference();
 									}
 									break;
 		

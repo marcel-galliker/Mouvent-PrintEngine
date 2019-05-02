@@ -693,7 +693,8 @@ namespace RX_DigiPrint.Services
             public SMsgHdr          hdr;
             public SInkDefinition   ink;
             UInt32			        headNo;
-	        UInt32			        maxDropSize;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
+	        byte[]	                dots;
 	        UInt32			        fpVoltage;
         }
 

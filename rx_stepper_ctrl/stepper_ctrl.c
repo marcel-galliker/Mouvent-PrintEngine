@@ -169,8 +169,8 @@ int _handle_ctrl_msg(RX_SOCKET socket, void *pmsg)//, int len, struct sockaddr *
 		{
 		case printer_test_table:		tt_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]); break;
 		case printer_TX801:				
-		case printer_TX802:				if (RX_StepperCfg.boardNo == step_lift)	tx801_handle_ctrl_msg(socket, phdr->msgId, pmsg); 
-										else                                    txrob_handle_ctrl_msg(socket, phdr->msgId, pmsg); 
+		case printer_TX802:				if (RX_StepperCfg.boardNo == step_lift)	tx801_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]); 
+										else                                    txrob_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]); 
 										break;
 			
 		case printer_cleaf:				cleaf_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]); break;

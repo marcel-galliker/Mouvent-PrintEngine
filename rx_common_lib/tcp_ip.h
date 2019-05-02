@@ -580,7 +580,6 @@ typedef struct SInkDefMsg
 	SMsgHdr			hdr;
 	SInkDefinition	ink;
 	UINT32			headNo;
-//	UINT32			maxDropSize;
 	char			dots[4];
 	UINT32			fpVoltage;
 } SInkDefMsg;

@@ -644,7 +644,13 @@ static void _init_purge(int isNo, int pressure, int time)
 		_set_bleed_valve(isNo, FALSE);
 
 	//	_PurgeNo	   = isNo;
-		_InkSupply[isNo].purgePressure = pRX_Config->headsPerColor * 40 + pressure;
+		switch(pRX_Config->printerType)
+		{
+			case printer_TX801 : _InkSupply[isNo].purgePressure = pressure; break;
+			case printer_TX802 : _InkSupply[isNo].purgePressure = 50 + pressure; break;
+			default : _InkSupply[isNo].purgePressure = 40 * pRX_Config->headsPerColor + pressure; break;
+		}
+		pRX_Status->ink_supply[isNo].IS_Pressure_Setpoint 	=  _InkSupply[isNo].purgePressure;
 
 		if (_InkSupply[isNo].purgePressure > MAX_PRESSURE_FLUID)
 			_InkSupply[isNo].purgePressure = MAX_PRESSURE_FLUID;

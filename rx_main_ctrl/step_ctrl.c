@@ -442,7 +442,7 @@ int  step_all_in_ctrlMode(EnFluidCtrlMode ctrlMode)
 	switch(_StepperType)
 	{
 	case STEPPER_CLEAF:	return TRUE;
-	case STEPPER_TX:	return steptx_all_in_ctrlMode(ctrlMode);
+	case STEPPER_TX:	return TRUE; // steptx_all_in_ctrlMode(ctrlMode);
 	case STEPPER_LB:	return TRUE;
 	case STEPPER_TEST:	return TRUE;
 	default: 			return TRUE;	
