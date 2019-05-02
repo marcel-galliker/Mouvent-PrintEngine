@@ -1505,7 +1505,7 @@ int  fpga_abort(void)
 			term_save(PATH_TEMP "status.txt");
 			term_flush();
 			
-			fpga_trace_registers("Master-Enable-OFF", FALSE);
+		//	fpga_trace_registers("Master-Enable-OFF", FALSE);
 			TrPrintfL(TRUE,"set CMD_MASTER_ENABLE=FALSE");
 			SET_FLAG(FpgaCfg.cfg->cmd,CMD_MASTER_ENABLE,FALSE);
 		//	rx_sleep(5);
@@ -1851,7 +1851,8 @@ static int _check_encoder(void)
 			_Enc_Pos[i] = Fpga.stat->enc_position[i];
 			RX_HBStatus[0].head[i].encPos = _Enc_PosBase[i] + (Fpga.stat->enc_position[i] / 8);
 		}
-	
+
+		/*
 		if(FpgaCfg.cfg->cmd & CMD_MASTER_ENABLE)
 		{
 			for(i = 0; i < HEAD_CNT; i++)
@@ -1866,6 +1867,7 @@ static int _check_encoder(void)
 				}			
 			}			
 		}
+		*/
 	}
 	return REPLY_OK;
 }

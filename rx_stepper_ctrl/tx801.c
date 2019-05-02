@@ -449,7 +449,7 @@ static void _tx801_do_ctrlMode(EnFluidCtrlMode ctrlMode)
 int  tx801_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 {	
 	INT32 pos, steps, voltage;
-	EnFluidCtrlMode	ctrlMode;
+	SValue	*pvalue;
 		
 	switch(msgId)
 	{
@@ -508,9 +508,8 @@ int  tx801_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									_tx801_set_ventilators(voltage);				
 									break;
 		
-	case CMD_FLUID_CTRL_MODE:		
-									ctrlMode = (EnFluidCtrlMode) (*((INT32*)pdata));
-									_tx801_do_ctrlMode(ctrlMode);
+	case CMD_FLUID_CTRL_MODE:		pvalue = (SValue*) pdata;
+									_tx801_do_ctrlMode((EnFluidCtrlMode)pvalue->value);
 									break;
 		
 	default:						break;

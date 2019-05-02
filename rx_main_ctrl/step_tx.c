@@ -118,7 +118,10 @@ int  steptx_all_in_ctrlMode(EnFluidCtrlMode ctrlMode)
 	
 	for (i=0; i<SIZEOF(_step_socket); i++)
 	{
-		if (_step_socket[i]!=NULL && *_step_socket[i]!=INVALID_SOCKET && _Status[i].ctrlModeStat!=ctrlMode) return FALSE;
+		if (_step_socket[i]!=NULL && *_step_socket[i]!=INVALID_SOCKET) 
+		{
+			if (_Status[i].ctrlModeStat!=ctrlMode) return FALSE;
+		}
 	}
 	return TRUE;
 }

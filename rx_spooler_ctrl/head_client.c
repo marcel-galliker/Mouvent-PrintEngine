@@ -36,7 +36,7 @@ static int	_Trace=0;
 #define SIMU_WRITE	1	// write data to file
 #define SIMU_READ	2	// test reading files, no sending, no writing
 
-static int	_Simulation=SIMU_WRITE;
+static int	_Simulation=SIMU_OFF;
 
 // #define RAW_SOCKET
 

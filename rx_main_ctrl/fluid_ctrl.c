@@ -456,7 +456,7 @@ static void _control(int fluidNo)
 //		if (_stat->ctrlMode==ctrl_shutdown_done)	
 //			_send_ctrlMode(no, ctrl_off,	TRUE);
 //		else 
-		if (ctrl_check_all_heads_in_fluidCtrlMode(no, _stat->ctrlMode) && step_all_in_ctrlMode(_stat->ctrlMode))
+		if (ctrl_check_all_heads_in_fluidCtrlMode(no, _stat->ctrlMode) && (ctrl_singleHead() || step_all_in_ctrlMode(_stat->ctrlMode)))
 		{
 	//		Error(LOG, 0, "Fluid[%d] in mode >>%s<<", no, FluidCtrlModeStr(_stat->ctrlMode));		
 			switch(_stat->ctrlMode)
@@ -506,7 +506,7 @@ static void _control(int fluidNo)
 			//							_send_ctrlMode(no, ctrl_off,		  TRUE);    
 			//							break;
 			//	case ctrl_cal_step2:	_send_ctrlMode(no, ctrl_cal_step3,   TRUE);    break;
-				case ctrl_cal_done:	_send_ctrlMode(no, ctrl_print, TRUE);    
+				case ctrl_cal_done:		_send_ctrlMode(no, ctrl_print, TRUE);    
 										break;
 			}
 		}

@@ -472,7 +472,8 @@ static void _display_status(void)
 		if (_Cfg->ink_supply[i].test_cylinderPres) 
 			for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("%5s(%03d)  ", value_str(_Stat->ink_supply[i].IS_Pressure_Actual), _Cfg->ink_supply[i].test_cylinderPres);
 		else 
-			for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("%5s(%03d)  ", value_str(_Stat->ink_supply[i].IS_Pressure_Actual), _Cfg->ink_supply[i].cylinderPresSet);		
+//			for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("%5s(%03d)  ", value_str(_Stat->ink_supply[i].IS_Pressure_Actual), _Cfg->ink_supply[i].cylinderPresSet);		
+			for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("%5s(%03d)  ", value_str(_Stat->ink_supply[i].IS_Pressure_Actual), _Stat->ink_supply[i].PIDsetpoint_Output);		
 		term_printf("\n");
 		term_printf("inkPump:           ");	for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("%4s(%3d%%)  ", value_str(_Stat->ink_supply[i].inkPumpSpeed_measured), _Stat->ink_supply[i].inkPumpSpeed_set); term_printf("\n");
 				

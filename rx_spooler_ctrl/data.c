@@ -336,6 +336,7 @@ int  data_get_size	(const char *path, UINT32 page, UINT32 spacePx, UINT32 *pwidt
 			*pwidth *= (*multiCopy);
 		}
 	}
+	*multiCopy = 1;
 	return ret;
 }
 
