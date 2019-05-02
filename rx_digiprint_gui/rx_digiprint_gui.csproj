@@ -337,6 +337,7 @@
     <Compile Include="Converters\Or_Converter.cs" />
     <Compile Include="Converters\PagesVisible_Converter.cs" />
     <Compile Include="Converters\PlcLogState_Converter.cs" />
+    <Compile Include="Converters\PrintQueueCheckVisible_Converter.cs" />
     <Compile Include="Converters\PuttyVisible_Converter.cs" />
     <Compile Include="Converters\RotateRect_Converter.cs" />
     <Compile Include="Converters\ScanLengt_Converter.cs" />

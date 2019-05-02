@@ -744,7 +744,7 @@ int pq_printed(int headNo, SPageId *pid, int *pageDone, int *jobDone, SPrintQueu
 		//	Error(LOG, 0, "RX_PrinterStatus.printState==ps_stopping (id=%d, page=%d, copy=%d, scan=%d)", pid->id, pid->page, pid->copy, pid->scan);
 			if (!memcmp(&_StopID, pid, sizeof(_StopID)))
 			{
-				Error(LOG, 0, "Stop after last page printed");
+				Error(LOG, 0, "Stop after stop page printed (id=%d, page=%d, copy=%d, scan=%d)", _StopID.id, _StopID.page, _StopID.copy, _StopID.scan);
 				pc_abort_printing();				
 			}			
 		}

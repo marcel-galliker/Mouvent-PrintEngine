@@ -105,6 +105,7 @@ static UINT32	_BlockOutIdx[HEAD_CNT];
 static UINT32	_ImgOutIdx[HEAD_CNT];	// use for tests
 static UINT32	_AliveCnt[UDP_PORT_CNT];
 static UINT32	_AliveChk_Timeout=0;
+static UINT32	_PrintDoneWarning;
 static UINT32	_PrintDoneError;
 static int		_TempWarn=0;
 static int		_TempErr=0;
@@ -362,7 +363,8 @@ int  fpga_set_config(RX_SOCKET socket)
 	memset(&RX_FpgaError, 0, sizeof(RX_FpgaError));
 	_TempWarn = 0;
 	_TempErr  = 0;
-	_PrintDoneError = 0;
+	_PrintDoneWarning	= 0;
+	_PrintDoneError		= 0;
 	_FpgaErrorTrace = FALSE;
 	
 	//--- head -----------------------------------------------------------------
@@ -747,7 +749,6 @@ void  fpga_get_ip_addr (int udpNo, UINT32 *addr)
 //--- fpga_trace_registers ----------------------------------------
 void fpga_trace_registers(char *fname, int error)
 {
-// #ifdef dasdasda
 	FILE *in;
 	FILE *out;
 	int  line, addr, no;
@@ -810,7 +811,6 @@ void fpga_trace_registers(char *fname, int error)
 	if (out!=NULL) fclose(out);
 	
 	ctrl_send_file(path);
-//	#endif
 }
 
 //--- fpga_get_block_used -----------------------------------------------
@@ -1505,6 +1505,7 @@ int  fpga_abort(void)
 			term_save(PATH_TEMP "status.txt");
 			term_flush();
 			
+			fpga_trace_registers("Master-Enable-OFF", FALSE);
 			TrPrintfL(TRUE,"set CMD_MASTER_ENABLE=FALSE");
 			SET_FLAG(FpgaCfg.cfg->cmd,CMD_MASTER_ENABLE,FALSE);
 		//	rx_sleep(5);
@@ -1566,7 +1567,8 @@ int   fpga_nios_reset(int reset)
 		return REPLY_ERROR; //Error(ERR_CONT, 0, "fpga_nios_reset(%d): RBF not loaded", reset);
 	SET_FLAG(FpgaCfg.cfg->cmd, CMD_NIOS_RESET, reset);
 	rx_sleep(100);
-	_PrintDoneError = 0;
+	_PrintDoneWarning	= 0;
+	_PrintDoneError		= 0;
 	/*
 	int tio;
 	tio = 100;
@@ -1704,18 +1706,36 @@ static int _check_print_done(void)
 			//--- test print-go/print-done for scanning machines 
 //			if (FpgaCfg.head[2]->encoderNo!=0) // then it a textile machine
 			{
-				if (RX_HBStatus[0].head[head].printGoCnt > RX_HBStatus[0].head[head].printDoneCnt+2 && !(_PrintDoneError&(1<<head)))
+
+				int diff = RX_HBStatus[0].head[head].printGoCnt-RX_HBStatus[0].head[head].printDoneCnt;
+				
+				if(diff > 3 && !(_PrintDoneError&(1 << head)))
 				{
-					_PrintDoneError |= (1<<head);
+					_PrintDoneError |= (1 << head);
 //					Error(ERR_ABORT, 0, "Head[%d]: Print-Done missing, #PrintGo=%d #Print-Done=%d", head, 
-					if (ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err, err_fifo_full_0, 0, "Head[%d]: Print-Done missing, #PrintGo=%d #Print-Done=%d", head, 
+					if(ErrorFlag(ERR_ABORT,
+						(UINT32*)&RX_HBStatus[0].err,
+						err_fifo_full_0,
+						0,
+						"Head[%d]: Print-Done missing, #PrintGo=%d #Print-Done=%d",
+						head, 
 						RX_HBStatus[0].head[head].printGoCnt, 
 						RX_HBStatus[0].head[head].printDoneCnt))
 					{
 					//	_Reload_FPGA = TRUE;
-						fpga_trace_registers("Print-Done-missed", TRUE);															
+						fpga_trace_registers("Print-Done-missed", TRUE);													
 					}
 				}
+				else if(diff > 2  && !(_PrintDoneWarning&(1 << head))) 
+				{
+					_PrintDoneWarning |= (1 << head);
+					Error(WARN, 0, "Head[%d]: Print-Done late, #PrintGo=%d #Print-Done=%d",
+								head, 
+								RX_HBStatus[0].head[head].printGoCnt, 
+								RX_HBStatus[0].head[head].printDoneCnt);
+					fpga_trace_registers("Print-Done-late", TRUE);													
+				}
+				else if (diff<2) _PrintDoneWarning &= ~(1 << head);
 			}
 			int time4=rx_get_ticks()-time;
 			if (time4>100) Error(WARN, 0, "_check_print_done[%d], t1=%d, t2=%d, t3=%d, t4=%d", head, time1, time2, time3, time4);

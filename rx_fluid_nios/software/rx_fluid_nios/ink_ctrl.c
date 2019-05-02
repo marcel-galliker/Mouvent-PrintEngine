@@ -83,6 +83,7 @@ INT32 _PumpOFFTime;
 
 // static int	_PrintingTime[NIOS_INK_SUPPLY_CNT] = {0};
 static int	_PressureSetpoint[NIOS_INK_SUPPLY_CNT] = {0};
+static int	_MaxPrintPressure[NIOS_INK_SUPPLY_CNT] = {0};
 static int	_CalibrationSetpoint[NIOS_INK_SUPPLY_CNT] = {0};
 static int	_CalibrationStability[NIOS_INK_SUPPLY_CNT] = {0};
 static int  _cylinderPres_10[NIOS_INK_SUPPLY_CNT] = {0};
@@ -644,11 +645,17 @@ static void _init_purge(int isNo, int pressure, int time)
 		_set_bleed_valve(isNo, FALSE);
 
 	//	_PurgeNo	   = isNo;
-		switch(pRX_Config->printerType)
+		if(_MaxPrintPressure[isNo] > 0)
 		{
-			case printer_TX801 : _InkSupply[isNo].purgePressure = pressure; break;
-			case printer_TX802 : _InkSupply[isNo].purgePressure = 50 + pressure; break;
-			default : _InkSupply[isNo].purgePressure = 40 * pRX_Config->headsPerColor + pressure; break;
+			_InkSupply[isNo].purgePressure = _MaxPrintPressure[isNo] + pressure;
+		}
+		else
+		{
+			switch(pRX_Config->printerType)
+			{
+				case printer_TX801 : _InkSupply[isNo].purgePressure = 200 + pressure; break;
+				default : _InkSupply[isNo].purgePressure = 40 * pRX_Config->headsPerColor + pressure; break;
+			}
 		}
 		pRX_Status->ink_supply[isNo].IS_Pressure_Setpoint 	=  _InkSupply[isNo].purgePressure;
 
@@ -775,6 +782,14 @@ static void _pump_ctrl(INT32 isNo, INT32 pressure_target, INT32 print_mode)
 			pid_calc(pRX_Status->ink_supply[isNo].COND_Pressure_Actual, &_InkSupply[isNo].pid_Setpoint);
 			pRX_Status->ink_supply[isNo].IS_Pressure_Setpoint 	= _InkSupply[isNo].pid_Setpoint.val;
 			pRX_Status->ink_supply[isNo].PIDsetpoint_Output		= _InkSupply[isNo].pid_Setpoint.val;
+
+			// Save max pressure for purge pressure
+			// if ink supply pressure close to setpoint
+			if(_InkSupply[isNo].pid_Setpoint.Setpoint - pRX_Status->ink_supply[isNo].COND_Pressure_Actual > 20)
+			{
+				if(_InkSupply[isNo].pid_Setpoint.val > _MaxPrintPressure[isNo])
+					_MaxPrintPressure[isNo] = _InkSupply[isNo].pid_Setpoint.val;
+			}
 		}
 
 		//-----------------------------------------------------------------------------------------

@@ -216,10 +216,24 @@ int tse_check_errors(void)
 
 			if (_ErrorDelay==0)
 			{
-				if (_Speed[0]==0) ErrorFlag (ERR_CONT, (UINT32*)&RX_HBStatus[0].err,  err_udp0_not_connected, 0, "UDP 0 not connected");
-				if (_Speed[1]==0) ErrorFlag (ERR_CONT, (UINT32*)&RX_HBStatus[0].err,  err_udp1_not_connected, 0, "UDP 1 not connected");				
+				if (_Speed[0]==0)	ErrorFlag (ERR_CONT, (UINT32*)&RX_HBStatus[0].err,  err_udp0_not_connected, 0, "UDP 0 not connected");
+				if (_Speed[1]==0)	ErrorFlag (ERR_CONT, (UINT32*)&RX_HBStatus[0].err,  err_udp1_not_connected, 0, "UDP 1 not connected");				
 				if (_Speed[0]==100) ErrorFlag (ERR_CONT, (UINT32*)&RX_HBStatus[0].err,  err_udp0_not_connected, 0, "UDP 0 only at 100 Mbit/s (needs 1 Gbit/s)");
-				if (_Speed[1]==100) ErrorFlag (ERR_CONT, (UINT32*)&RX_HBStatus[0].err,  err_udp1_not_connected, 0, "UDP 1 only at 100 Mbit/s (needs 1 Gbit/s)");				
+				if (_Speed[1]==100) ErrorFlag (ERR_CONT, (UINT32*)&RX_HBStatus[0].err,  err_udp1_not_connected, 0, "UDP 1 only at 100 Mbit/s (needs 1 Gbit/s)");
+				
+				if (RX_HBConfig.printerType==printer_DP803)
+				{
+					if (_Speed[0]==1000 && RX_HBStatus[0].err&err_udp0_not_connected)
+					{
+						Error(LOG, 0, "UDP 0 reconnected");
+						RX_HBStatus[0].err &= ~err_udp0_not_connected;					
+					}
+					if (_Speed[1]==1000 && RX_HBStatus[0].err&err_udp1_not_connected)
+					{
+						Error(LOG, 0, "UDP 1 reconnected");
+						RX_HBStatus[0].err &= ~err_udp1_not_connected;					
+					}						
+				}
 			}
 		}
 	}

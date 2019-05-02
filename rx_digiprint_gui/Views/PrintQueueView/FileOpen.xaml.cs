@@ -80,6 +80,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
                         DirTree.ActDirChangedEvent += _ActDirChanged;
                         DirTree.ActDir = Properties.Settings.Default.FileOpen_ActDir;
                         DirTreeGrid.Children.Add(DirTree);
+                        Refresh();
                     });
                 }).Start();
             }
@@ -391,7 +392,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
         {
             if ((bool)e.NewValue)
             {
-                if (DirGrid.ItemsSource==null) Refresh();
+       //         if (DirGrid.ItemsSource==null) Refresh();
 
                 int i;
                 int orientation;

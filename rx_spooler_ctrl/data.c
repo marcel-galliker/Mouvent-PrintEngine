@@ -1218,8 +1218,21 @@ static void _data_fill_blk_scan(SBmpSplitInfo *psplit, int blkNo, BYTE *dst)
 		//---------------------------------
 		if (flags & (FLAG_PASS_1OF2|FLAG_PASS_2OF2))
 		{
-			if ((flags&FLAG_PASS_1OF2) && (line&1)==1) memset(&dst[size], 0x00, dstLen);
-			if ((flags&FLAG_PASS_2OF2) && (line&1)==0) memset(&dst[size], 0x00, dstLen);
+			if (TRUE)
+			{
+				if ((flags&FLAG_PASS_1OF2) && (line&1)==1) memset(&dst[size], 0x00, dstLen);
+				if ((flags&FLAG_PASS_2OF2) && (line&1)==0) memset(&dst[size], 0x00, dstLen);
+			}
+			else
+			{
+				BYTE mask;
+				BYTE *data;
+				int len;
+				if ((flags&FLAG_PASS_1OF2) && (line&1)==1) mask =  0x33; 
+				if ((flags&FLAG_PASS_2OF2) && (line&1)==0) mask = ~0x33;
+				if (line&1) mask=~mask;
+				for (data=&dst[size], len=dstLen; len; len--) *data++ &= mask;
+			}
 		}
 		//-----------------------------------
 		

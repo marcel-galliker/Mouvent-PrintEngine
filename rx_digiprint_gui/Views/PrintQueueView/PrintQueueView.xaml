@@ -128,6 +128,7 @@
                                         IsChecked="{Binding IsSelected}"
                                         VerticalAlignment="Center"
                                         HorizontalAlignment="Center"
+                                        Visibility="{Binding IsSelected, Converter={StaticResource PrintQueueCheckVisible_Converter}}"
                                         />
 
                                     <Image Grid.Column="0" Source="../../Resources/Bitmaps/Changed.ico"

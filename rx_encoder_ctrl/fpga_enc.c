@@ -858,6 +858,8 @@ static void  _pg_ctrl(void)
 	{
 		int pg = Fpga->stat.encOut[0].PG_cnt;
 
+		if (RX_EncoderStatus.fifoEmpty_PG  != Fpga->stat.pg_fifo_empty_err)
+			Error(LOG, 0, "pg_fifo_empty_err=%d, fill_level=%d, _DistTelCnt=%d, PG_Cnt=%d", Fpga->stat.pg_fifo_empty_err, FpgaQSys->printGo_status.fill_level, _DistTelCnt, Fpga->stat.encOut[0].PG_cnt);
 		RX_EncoderStatus.fifoEmpty_PG  = Fpga->stat.pg_fifo_empty_err;
 		RX_EncoderStatus.fifoEmpty_IGN = Fpga->stat.ignored_fifo_empty_err;
 		RX_EncoderStatus.fifoEmpty_WND = Fpga->stat.window_fifo_empty_err;	
@@ -866,7 +868,7 @@ static void  _pg_ctrl(void)
 		
 		int  error = 	RX_EncoderStatus.fifoEmpty_PG  != Fpga->stat.pg_fifo_empty_err
 					||	RX_EncoderStatus.fifoEmpty_IGN != Fpga->stat.ignored_fifo_empty_err
-					||	RX_EncoderStatus.fifoEmpty_WND != Fpga->stat.window_fifo_empty_err;	
+					||	RX_EncoderStatus.fifoEmpty_WND != Fpga->stat.window_fifo_empty_err;
 
 		if (error || RX_EncoderStatus.PG_cnt!=pg) sok_send_2(&_Socket, REP_ENCODER_STAT, sizeof(RX_EncoderStatus), &RX_EncoderStatus);	
 	}
