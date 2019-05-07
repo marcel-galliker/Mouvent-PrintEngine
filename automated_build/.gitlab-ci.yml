@@ -8,7 +8,7 @@ buildnios:
   - automated_build/msbuild_vsprojects.bat nios -no-pause
   only:
   - pushes
-	
+  
 buildkeil:
   stage: build
   script:
@@ -16,7 +16,7 @@ buildkeil:
   - automated_build/msbuild_vsprojects.bat keil -no-pause
   only:
   - pushes
-	
+  
 buildother:
   stage: build
   script:
