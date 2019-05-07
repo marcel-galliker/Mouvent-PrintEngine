@@ -1,11 +1,27 @@
 stages:
   - build
   
-build:
+buildnios:
   stage: build
   script:
-  - echo "build Mouvent Printer"
-  - automated_build/msbuild_vsprojects.bat -no-pause
+  - echo "build nios Mouvent Printer"
+  - automated_build/msbuild_vsprojects.bat nios -no-pause
+  only:
+	- pushes
+	
+	buildkeil:
+  stage: build
+  script:
+  - echo "build keil Mouvent Printer"
+  - automated_build/msbuild_vsprojects.bat keil -no-pause
+  only:
+	- pushes
+	
+	buildother:
+  stage: build
+  script:
+  - echo "build other Mouvent Printer"
+  - automated_build/msbuild_vsprojects.bat other -no-pause
   only:
   - pushes
 
