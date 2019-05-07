@@ -70,7 +70,10 @@ set BINFILES[0]=
 set TARGETS=/t:Build
 REM build sequence
 
-if %1 == "other"(
+echo %1
+echo "%~1"
+
+if "%~1" == "other"(
 
   echo Build other projects
 
