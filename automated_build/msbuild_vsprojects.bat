@@ -71,6 +71,9 @@ set TARGETS=/t:Build
 REM build sequence
 
 if %1 == "other"(
+
+  echo Build other projects
+
   call :LIB_X64
   call :BIN_X64
   call :LIB_X32
