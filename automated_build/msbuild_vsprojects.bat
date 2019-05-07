@@ -70,8 +70,6 @@ set BINFILES[0]=
 set TARGETS=/t:Build
 REM build sequence
 
-echo 1
-
 if "%1"=="other" (
 
   echo "Build other projects"
@@ -86,19 +84,13 @@ if "%1"=="other" (
   call :BIN_LX
 )
 
-echo 2
-
 if "%1"=="nios" (
   call :NIOS
 )
 
-echo 3
-
 if "%1"=="keil" (
   call :KEIL
 )
-
-echo 4
 
 goto :EVAL
 
