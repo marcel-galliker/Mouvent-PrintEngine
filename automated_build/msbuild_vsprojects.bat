@@ -83,12 +83,12 @@ goto :EVAL
 
 REM ----------------------------------------------------------------------------
 :NIOS
-    set TARGETS=/t:Build
+	set TARGETS=/t:Build
 	set BUILD=32
 	set FLAGS=/m /property:Configuration=Release-soc
 	call :BUILD_PROJECT rx_fluid_nios, vcxproj
 	call :BUILD_PROJECT rx_head_nios, vcxproj
-    set TARGETS=/t:Clean,Build
+	set TARGETS=/t:Clean,Build
 	goto :EOF
 REM ----------------------------------------------------------------------------
 
