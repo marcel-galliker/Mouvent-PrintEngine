@@ -73,7 +73,7 @@ REM build sequence
 echo %1
 echo "%~1"
 
-if "%~1" == "other"(
+if %1 eq "other" (
 
   echo Build other projects
 
