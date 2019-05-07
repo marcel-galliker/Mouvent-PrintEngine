@@ -4,7 +4,7 @@ stages:
   - build3
   
 buildnios:
-  stage: build1
+  stage: build2
   script:
   - echo "build nios Mouvent Printer"
   - automated_build/msbuild_vsprojects.bat nios -no-pause
