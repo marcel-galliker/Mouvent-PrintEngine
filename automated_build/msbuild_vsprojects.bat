@@ -88,13 +88,13 @@ if %1=="other" (
 
 echo 2
 
-if %1=="nios"(
+if %1=="nios" (
   call :NIOS
 )
 
 echo 3
 
-if %1=="keil"(
+if %1=="keil" (
   call :KEIL
 )
 
