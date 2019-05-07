@@ -4,7 +4,7 @@ stages:
 build:
 	stage: build
 	script:
-	- echo build Mouvent Ptinter
+	- echo "build Mouvent Printer"
 	- automated_build/msbuild_vsprojects.bat -no-pause
 	only:
 	- pushes
