@@ -15,7 +15,7 @@ buildnios:
   - pushes
   
 buildkeil:
-  stage: build3
+  stage: build1
   variables:
     GET_SOURCES_ATTEMPTS: "3"
     GIT_STRATEGY: clone
@@ -26,7 +26,7 @@ buildkeil:
   - pushes
   
 buildother:
-  stage: build1
+  stage: build3
   variables:
     GET_SOURCES_ATTEMPTS: "3"
     GIT_STRATEGY: clone
