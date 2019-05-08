@@ -69,7 +69,7 @@ int cond_init(void)
 		Error(WARN, 0, "Conditioner in Simulation");
 		for (i = 0; i < SIZEOF(RX_HBStatus[0].head); i++)
 		{
-			RX_HBStatus[0].head[i].ctrlMode = ctrl_print;
+			RX_HBStatus[0].head[i].ctrlMode = ctrl_print_step0;
 		}
 		return REPLY_OK;
 	}
@@ -87,7 +87,7 @@ int cond_init(void)
 	
 	if(arg_offline)
 	{
-		for(i = 0; i < MAX_HEADS_BOARD; i++) cond_ctrlMode(i, ctrl_print);		
+		for(i = 0; i < MAX_HEADS_BOARD; i++) cond_ctrlMode(i, ctrl_print_step0);		
 	}
 	else 
 	{
@@ -311,7 +311,7 @@ static void _update_counters(void)
 
 	for (condNo=0; condNo<MAX_HEADS_BOARD;  condNo++)
 	{
-		if (_NiosStat->cond[condNo].mode==ctrl_print) printing = TRUE;
+		if (_NiosStat->cond[condNo].mode==ctrl_print_run) printing = TRUE;
 		if (_NiosStat->cond[condNo].clusterNo)									clusterNo = _NiosStat->cond[condNo].clusterNo;
 		if (_NiosStat->cond[condNo].clusterTime   > RX_HBStatus->clusterTime)   RX_HBStatus->clusterTime   = _NiosStat->cond[condNo].clusterTime;
 		if (_NiosStat->cond[condNo].machineMeters > machineMeters)				machineMeters = _NiosStat->cond[condNo].machineMeters;
@@ -530,7 +530,7 @@ void cond_heater_test(int temp)
 		if (temp<=65)
 		{
 			_NiosMem->cfg.cond[i].temp = temp*1000;	
-			_NiosMem->cfg.cond[i].mode = ctrl_print;
+			_NiosMem->cfg.cond[i].mode = ctrl_print_run;
 		}
 	}
 }

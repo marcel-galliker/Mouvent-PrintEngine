@@ -320,7 +320,6 @@ int  data_get_size	(const char *path, UINT32 page, UINT32 spacePx, UINT32 *pwidt
 	}
 	
 	*multiCopy = 1;
-	/*
 	if (ret==REPLY_OK)
 	{
 		*plength += 2*abs(_WakeupLen);
@@ -337,7 +336,9 @@ int  data_get_size	(const char *path, UINT32 page, UINT32 spacePx, UINT32 *pwidt
 			*pwidth *= (*multiCopy);
 		}
 	}
-	*/
+
+	*multiCopy = 1;
+	if (*multiCopy>1) Error(LOG, 0, "MultiCopy=%d", *multiCopy);
 	return ret;
 }
 
@@ -656,24 +657,27 @@ static void _data_multi_copy(SBmpInfo *pBmpInfo, UINT8 multiCopy)
 					dst -= dstLineLen;
 					memcpy(dst, src, srcLineBt);
 					if (y) memset(src, 0x00, srcLineBt);
-					int shr=pBmpInfo->bitsPerPixel*(pBmpInfo->srcWidthPx%(8/pBmpInfo->bitsPerPixel));
-					int shl;
 					for (m=1; m<multiCopy; m++)
 					{
-						shl = 64-shr;
-						UINT32 *s64 = (UINT32*)dst;
-						UINT32 *d64 = (UINT32*)(dst + m*srcLineBt-1);
-						for (x=0; x<srcLineBt; x+=8)
+						int shr = m*8/multiCopy;
+						int shl = 8-shr;
+						UINT8 *s8 = (UINT8*)dst;
+						UINT8 *d8 = (UINT8*)(dst + m*pBmpInfo->srcWidthPx*pBmpInfo->bitsPerPixel/8);
+					//	*d8  &= ~(0xff00>>shr);
+					//	if (y>1890 && y<1900)
+					//		*d8   = 0xff00>>shr;
+						for (x=0; x<srcLineBt; x+=1)
 						{
-							*d64    = (*(s64+1))<<shl;
-							*d64++ |= (*s64++)>>shr; 
+							*d8   |= (*(s8-1))<<shl;
+							*d8   |= (*s8)>>shr;
+							s8++;
+							d8++; 
 						}
-						shr -= 2;
 					}
 				}
+				Error(LOG, 0, "MultiCopy[%d] done", buf);
 			}
 		}
-
 		pBmpInfo->srcWidthPx *= multiCopy;
 		pBmpInfo->lineLen     = dstLineLen;
 		pBmpInfo->multiCopy   = multiCopy;

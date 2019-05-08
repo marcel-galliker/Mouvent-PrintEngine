@@ -742,7 +742,7 @@ int pq_printed(int headNo, SPageId *pid, int *pageDone, int *jobDone, SPrintQueu
 		_PrintDoneCnt++;
 		if (RX_PrinterStatus.printState==ps_stopping)
 		{
-			Error(LOG, 0, "PrintDone=%d, stop-at=%d", _PrintDoneCnt, enc_pg_stop_cnt());
+		//	Error(LOG, 0, "PrintDone=%d, stop-at=%d", _PrintDoneCnt, enc_pg_stop_cnt());
 			int cnt=enc_pg_stop_cnt();
 			if (cnt && _PrintDoneCnt==cnt ) pc_abort_printing();				
 		}
@@ -821,10 +821,13 @@ int pq_is_ready(void)
 			sent=RX_PrinterStatus.sentCnt;
 			transferred=RX_PrinterStatus.transferredCnt;
 			printGoCnt=RX_PrinterStatus.printGoCnt;
-			
+
 			{
 			//	int bufsize = RX_PrinterStatus.transferredCnt-RX_PrinterStatus.printedCnt;
 				int bufsize = RX_PrinterStatus.transferredCnt-RX_PrinterStatus.printGoCnt;
+				
+				if ((RX_Config.printer.type==printer_DP803) && RX_PrinterStatus.transferredCnt%100==0) Error(LOG, 0, "Buffer size (transferred=%d, bufsize=%d", RX_PrinterStatus.transferredCnt, bufsize);
+	
 				switch(_BufState)
 				{
 				case 0: // filling

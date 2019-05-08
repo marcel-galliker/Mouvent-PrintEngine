@@ -252,39 +252,58 @@ void pump_tick_10ms(void)
 						break;
 		
         //--- PRINT --------------------------------------------
+		case ctrl_print_step0:	RX_Status.mode = RX_Config.mode; break;
+		case ctrl_print_step1:	RX_Status.mode = RX_Config.mode; break;
+		case ctrl_print_step2:	RX_Status.mode = RX_Config.mode; break;
+		case ctrl_print_step3:	RX_Status.mode = RX_Config.mode; break;
+		case ctrl_print_step4:	RX_Status.mode = RX_Config.mode; break;
+		case ctrl_print_step5:	RX_Status.mode = RX_Config.mode; break;
+		case ctrl_print_step6:	RX_Status.mode = RX_Config.mode; break;
+		case ctrl_print_step7:	RX_Status.mode = RX_Config.mode; break;
+		case ctrl_print_step8:	RX_Status.mode = RX_Config.mode; break;
+		case ctrl_print_step9:	RX_Status.mode = RX_Config.mode; break;
+			
 		case ctrl_cal_start:
-		case ctrl_cal_step2:    
 		case ctrl_cal_step1:	// calculate PID.offset to pump 40 ml/min                    
-        case ctrl_cal_step3:
-		case ctrl_print:   
+		case ctrl_print_run:   
 						temp_ctrl_on(TRUE);
-						
-						if ((RX_Status.mode!=ctrl_print)&&(RX_Status.mode!=ctrl_cal_start)&&(RX_Status.mode!=ctrl_cal_step1))
-						{
-							_PumpPID.P 			= DEFAULT_P;
-							_PumpPID.I 			= DEFAULT_I;
-							
-							// Calculate the P reduced factor depending of number of heads per color
-							// NbHeads = 1 or 4 : P_start = 2 (P divide by 2)
-							// NbHeads = 8 : P_start = 3
-							// NbHeads = 12 : P_Start = 4
-							if(RX_Config.headsPerColor < 8) _PumpPID.P_start	= 2;
-							if(RX_Config.headsPerColor == 8) _PumpPID.P_start	= 3;
-							else _PumpPID.P_start	= 4;
-							_Start_PID = START_PID_P_REDUCED;
-							_PumpPID.start_integrator = 0;
-							pid_reset(&_PumpPID);
-							RX_Status.pressure_in_max=INVALID_VALUE;
-							RX_Status.error  &= ~(COND_ERR_meniscus | COND_ERR_pump_no_ink);
-							_meniscus_err_cnt=0;
-							_no_ink_err_cnt  =0;							
-						}
                         _set_valve(TO_INK);
                         max_pressure = MBAR_500;
         
 						_pump_pid();
+//                        RX_Status.mode = RX_Config.mode; 
+                        RX_Status.mode = ctrl_print_run;
+						break;
+
+		case ctrl_cal_step2:    
+        case ctrl_cal_step3:						
+						_PumpPID.P 			= DEFAULT_P;
+						_PumpPID.I 			= DEFAULT_I;
+						
+						// Calculate the P reduced factor depending of number of heads per color
+						// NbHeads = 1 or 4 : P_start = 2 (P divide by 2)
+						// NbHeads = 8 : P_start = 3
+						// NbHeads = 12 : P_Start = 4
+						if(RX_Config.headsPerColor < 8) _PumpPID.P_start	= 2;
+						if(RX_Config.headsPerColor == 8) _PumpPID.P_start	= 3;
+						else _PumpPID.P_start	= 4;
+						_Start_PID = START_PID_P_REDUCED;
+						_PumpPID.start_integrator = 0;
+						pid_reset(&_PumpPID);
+						RX_Status.pressure_in_max=INVALID_VALUE;
+						RX_Status.error  &= ~(COND_ERR_meniscus | COND_ERR_pump_no_ink);
+						_meniscus_err_cnt=0;
+						_no_ink_err_cnt  =0;							
+
+						//--- same as ctrö_print_run --------------------
+						temp_ctrl_on(TRUE);
+						_set_valve(TO_INK);
+                        max_pressure = MBAR_500;
+        
+						_pump_pid();
                         
-                        RX_Status.mode = ctrl_print;
+//                        RX_Status.mode = RX_Config.mode; 
+						RX_Status.mode = ctrl_print_run;
 						break;
         
         //--- PURGE --------------------------------------------

@@ -624,7 +624,7 @@ void ctrl_send_head_fluidCtrlMode(int headNo, EnFluidCtrlMode ctrlMode, int send
 	int mode=RX_HBStatus[headNo/HEAD_CNT].head[headNo%HEAD_CNT].ctrlMode;
 	if (mode==INVALID_VALUE || mode==ctrl_off && ctrlMode==ctrl_off) return;
 	if (fromGui) _SingleHead = headNo;
-	if (ctrlMode<=ctrl_print) _SingleHead=-1;
+	if (ctrlMode<=ctrl_print_step0) _SingleHead=-1;
 	if (_HeadCtrl[headNo/HEAD_CNT].socket!=INVALID_SOCKET)
 	{
 		SFluidCtrlCmd cmd;

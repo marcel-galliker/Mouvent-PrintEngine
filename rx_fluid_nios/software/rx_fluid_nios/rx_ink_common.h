@@ -156,20 +156,27 @@ typedef enum EnFluidCtrlMode
     ctrl_off		= 0x003,            //	0x003:
     ctrl_warmup,         // 0x004:
     ctrl_readyToPrint,   // 0x005:
-    ctrl_print,          // 0x006:
-    ctrl_bleed,          // 0x007:
-    ctrl_08,             // 0x008:
-    ctrl_09,        	 // 0x009:
-    ctrl_0a,      		 //	0x00a:
-    ctrl_0b, 		     // 0x00b:
-    ctrl_flush_night,	 //	0x00c:
-    ctrl_flush_weekend,	 //	0x00d:
-    ctrl_flush_week,	 //	0x00e:	
-	ctrl_flush_step1,	 // 0x00f:
-	ctrl_flush_step2,	 // 0x010:
-	ctrl_flush_step3,	 // 0x011:
-	ctrl_flush_step4,	 // 0x012:
-    ctrl_flush_done,     //	0x013:
+
+	ctrl_print_step0		= 0x010,    // 0x010:
+	ctrl_print_step1,			// 0x011
+	ctrl_print_step2,			// 0x012
+	ctrl_print_step3,			// 0x013	
+	ctrl_print_step4,			// 0x014
+	ctrl_print_step5,			// 0x015
+	ctrl_print_step6,			// 0x016
+	ctrl_print_step7,			// 0x017
+	ctrl_print_step8,			// 0x018
+	ctrl_print_step9,			// 0x019
+	ctrl_print_run,				// 0x01a
+	
+	ctrl_flush_night = 0x080,	// 0x080:
+    ctrl_flush_weekend,	 //	0x081:
+    ctrl_flush_week,	 //	0x082:	
+	ctrl_flush_step1,	 // 0x083:
+	ctrl_flush_step2,	 // 0x084:
+	ctrl_flush_step3,	 // 0x085:
+	ctrl_flush_step4,	 // 0x086:
+    ctrl_flush_done,     //	0x087:
 
     ctrl_purge_soft = 0x100,  // 0x100:
     ctrl_purge,               // 0x101:

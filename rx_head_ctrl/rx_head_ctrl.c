@@ -115,7 +115,7 @@ void handle_menu(char *str)
 	case 'o': cond_ctrlMode(atoi(&str[1]), ctrl_off);		break;
 	case 'w': cond_ctrlMode(atoi(&str[1]), ctrl_warmup);	break;
 	case 'R': fpga_trace_registers("registers", FALSE);		break;
-	case 'r': cond_ctrlMode(atoi(&str[1]), ctrl_print);		break;
+	case 'r': cond_ctrlMode(atoi(&str[1]), ctrl_print_run);	break;
 		
 	case 'i': cond_heater_test(atoi(&str[1]));			break;
 	case 'q': cond_start_log();							break;

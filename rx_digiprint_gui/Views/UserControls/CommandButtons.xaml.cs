@@ -158,7 +158,7 @@ namespace RX_DigiPrint.Views.UserControls
         //--- On_Clicked -------------------------------------------------
         private void On_Clicked(object sender, RoutedEventArgs e)
         {
-            TcpIp.SFluidCtrlCmd msg = new TcpIp.SFluidCtrlCmd(){no=-1, ctrlMode = EFluidCtrlMode.ctrl_print};
+            TcpIp.SFluidCtrlCmd msg = new TcpIp.SFluidCtrlCmd(){no=-1, ctrlMode = EFluidCtrlMode.ctrl_print_step0};
             RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_CTRL_MODE, ref msg);
         }
 

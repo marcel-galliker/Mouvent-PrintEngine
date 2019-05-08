@@ -88,6 +88,10 @@ typedef struct
 	int		test_airValve;
 	int		test_bleedValve;
 	int		test_cylinderPres;
+	
+	//--- test bleed line -----
+	int		test_bleed_line;
+	
 } SIsAdapterCfg;
 
 //--- SNiosFluidCfg ----------------------------------------
@@ -203,7 +207,13 @@ typedef struct
 	INT32	fluid_PIDpump_I;
 	
 	INT32	time;
-	INT32	diff;
+	INT32	diff;	
+	
+	// test bleed line sequence
+	INT32   TestBleedLine_Phase;
+	INT32	TestBleedLine_Pump_Phase1;
+	INT32	TestBleedLine_Pump_Phase2;
+	INT32	TestBleedLine_Pump_Phase3;
 } SNiosInkSupplyStat;
 
 //--- STATUS ----------------------------------------------------

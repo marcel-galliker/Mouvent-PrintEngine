@@ -35,6 +35,7 @@ void nios_error_reset		(void);
 
 void nios_test_stop			(void);
 void nios_test_air_valve	(int isNo);
+void nios_test_bleed_line	(int isNo);
 void nios_test_bleed_valve	(int isNo);
 void nios_test_ink_pump		(int isNo, int pressure);
 void nios_test_vacuum		(int pressure);

@@ -550,7 +550,7 @@ static void _handle_status(int no, SEncoderStat* pstat)
 	if (_Encoder[no].printGoCnt>=0 && _EncoderStatus[no].PG_cnt != _Encoder[no].printGoCnt)	
 	{
 		_Encoder[no].printGoCnt = _EncoderStatus[no].PG_cnt;
-		if (_Encoder[no].printGoCnt > RX_PrinterStatus.printGoCnt) RX_PrinterStatus.printGoCnt = _Encoder[no].printGoCnt;
+		if ((UINT32)_Encoder[no].printGoCnt > RX_PrinterStatus.printGoCnt) RX_PrinterStatus.printGoCnt = (UINT32)_Encoder[no].printGoCnt;
 	}
 	if (_PrintGo_Mode==PG_MODE_MARK && _Encoder[no].printGoCnt==0 && _EncoderStatus[no].meters>_WarnMarkReaderPos)
 	{

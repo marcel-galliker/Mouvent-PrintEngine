@@ -328,6 +328,12 @@ void nios_test_air_valve(int isNo)
 	if (_set_testmode()) _Cfg->ink_supply[isNo].test_airValve = TRUE;
 }
 
+//--- nios_test_bleed_line --------------------------------------------
+void nios_test_bleed_line(int isNo)
+{
+	if (_set_testmode()) _Cfg->ink_supply[isNo].test_bleed_line = TRUE;
+}
+
 //--- nios_test_bleed_valve --------------------------------------------------
 void nios_test_bleed_valve(int isNo)
 {
@@ -374,8 +380,8 @@ void _simu_fluidsystem(void)
 		{
 			switch(_Cfg->ink_supply[i].ctrl_mode)
 			{
-				case ctrl_undef:		_Stat->ink_supply[i].ctrl_state = ctrl_print;
-										_Cfg->ink_supply[i].ctrl_mode   = ctrl_print;
+				case ctrl_undef:		_Stat->ink_supply[i].ctrl_state = ctrl_print_run;
+										_Cfg->ink_supply[i].ctrl_mode   = ctrl_print_run;
 										break;
 				
 				default: _Stat->ink_supply[i].ctrl_state = _Cfg->ink_supply[i].ctrl_mode;
@@ -497,6 +503,11 @@ static void _display_status(void)
 		term_printf("Head Temp:         "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str_temp(_Cfg->ink_supply[i].headTemp)); term_printf("\n");	
 //		term_printf("PID1-Setpoint  Kp  Ti: "); for (i = 0; i < NIOS_INK_SUPPLY_CNT; i++) term_printf("  %d %d ", _Stat->ink_supply[i].fluid_PIDsetpoint_P, _Stat->ink_supply[i].fluid_PIDsetpoint_I); term_printf("\n");	
 //		term_printf("PID2-Pump  Kp  Ti:	"); for (i = 0; i < NIOS_INK_SUPPLY_CNT; i++) term_printf("  %d %d ", _Stat->ink_supply[i].fluid_PIDpump_P, _Stat->ink_supply[i].fluid_PIDpump_I); term_printf("\n");	
+		
+		term_printf("\nTest Bleed Line -------------------------\n");
+		term_printf("Pres - valves OFF"); for (i = 0; i < NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str(_Stat->ink_supply[i].TestBleedLine_Pump_Phase1)); term_printf("\n");
+		term_printf("Pump - Air ON	"); for (i = 0; i < NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str(_Stat->ink_supply[i].TestBleedLine_Pump_Phase2)); term_printf("\n");
+		term_printf("Pump - Bleed ON	 "); for (i = 0; i < NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str(_Stat->ink_supply[i].TestBleedLine_Pump_Phase3)); term_printf("\n");
 		
     	if (!nios_is_heater_connected()) 
 		{

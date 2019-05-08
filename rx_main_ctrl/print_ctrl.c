@@ -191,6 +191,7 @@ int pc_stop_printing(int userStop)
 	
 	if (RX_PrinterStatus.printState==ps_stopping 
 	||  RX_PrinterStatus.printState==ps_pause
+	||  RX_PrinterStatus.printState==ps_webin
 	|| (RX_PrinterStatus.printState==ps_printing && RX_PrinterStatus.printedCnt >= RX_PrinterStatus.sentCnt))
 	{
 		/*
@@ -522,6 +523,8 @@ static int _print_next(void)
 					else if (_Item.printGoDist < (_Item.srcWidth*95)/100) 
 						Error(WARN, 0, "Print to Print Distance (%d mm) short", _Item.printGoDist/1000);	
 				}
+
+				if (RX_Config.printer.type==printer_DP803) Error(LOG, 0, "Start Printing: >>%s<<, copiesTotal=%d, speed=%d m/min", _Item.filepath, _Item.copiesTotal, _Item.speed);
 			}
 		}
 		if (*_Item.filepath) 

@@ -598,7 +598,7 @@ static void _req_used_flags(SHBThreadPar *par, int head, int blkNo, int blkCnt, 
 		par->blockUsedId = (par->blockUsedId+1)%MAX_USED_ID;
 		if (head<SIZEOF(_TestBlockUsedReqTime))
 			_TestBlockUsedReqTime[head][par->blockUsedId] = rx_get_ticks();
-		TrPrintfL(TRUE || _Trace, "Head[%d.%d]: req block used: id=%d, blkNo=%d, blkCnt=%d (blk %d .. %d) line=%d", par->cfg.no, head, pcmd->id, pcmd->blkNo, pcmd->blkCnt, pcmd->blkNo, pcmd->blkNo+pcmd->blkCnt, line);
+		TrPrintfL(_Trace, "Head[%d.%d]: req block used: id=%d, blkNo=%d, blkCnt=%d (blk %d .. %d) line=%d", par->cfg.no, head, pcmd->id, pcmd->blkNo, pcmd->blkCnt, pcmd->blkNo, pcmd->blkNo+pcmd->blkCnt, line);
 		sok_send(&par->ctrlSocket, pcmd);
 		blkCnt -= pcmd->blkCnt;
 		blkNo  += pcmd->blkCnt;

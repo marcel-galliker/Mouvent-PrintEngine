@@ -459,6 +459,17 @@ static void _control(int fluidNo)
 	//		Error(LOG, 0, "Fluid[%d] in mode >>%s<<", no, FluidCtrlModeStr(_stat->ctrlMode));		
 			switch(_stat->ctrlMode)
 			{
+				case ctrl_print_step0:	_send_ctrlMode(no, ctrl_print_step1, TRUE);	break;
+				case ctrl_print_step1:	_send_ctrlMode(no, ctrl_print_step2, TRUE);	break;
+				case ctrl_print_step2:	_send_ctrlMode(no, ctrl_print_step3, TRUE);	break;
+				case ctrl_print_step3:	_send_ctrlMode(no, ctrl_print_step4, TRUE);	break;
+				case ctrl_print_step4:	_send_ctrlMode(no, ctrl_print_step5, TRUE);	break;
+				case ctrl_print_step5:	_send_ctrlMode(no, ctrl_print_step6, TRUE);	break;
+				case ctrl_print_step6:	_send_ctrlMode(no, ctrl_print_step7, TRUE);	break;
+				case ctrl_print_step7:	_send_ctrlMode(no, ctrl_print_step8, TRUE);	break;
+				case ctrl_print_step8:	_send_ctrlMode(no, ctrl_print_step9, TRUE);	break;
+				case ctrl_print_step9:	_send_ctrlMode(no, ctrl_print_run,   TRUE);	break;
+				
 									// PURGE
 									//	1: Köpfe auf UP
 									//	2: START SLIDE to PURGE-POS + Roboter auf WIPE
@@ -574,7 +585,7 @@ static void _control(int fluidNo)
 				case ctrl_fill:			_send_ctrlMode(no, ctrl_fill_step1, TRUE);		break;
 			//	case ctrl_fill_step1:	wait for user input 
 				case ctrl_fill_step2:	_send_ctrlMode(no, ctrl_fill_step3, TRUE);		break;
-				case ctrl_fill_step3:	_send_ctrlMode(no, ctrl_print,		 TRUE);		break;
+				case ctrl_fill_step3:	_send_ctrlMode(no, ctrl_print_step0,TRUE);		break;
 
 				case ctrl_empty:		_send_ctrlMode(no, ctrl_empty_step1, TRUE);	break;					
 			//	case ctrl_empty_step1:	wait for user input 
@@ -589,7 +600,7 @@ static void _control(int fluidNo)
 			//							_send_ctrlMode(no, ctrl_off,		  TRUE);    
 			//							break;
 			//	case ctrl_cal_step2:	_send_ctrlMode(no, ctrl_cal_step3,   TRUE);    break;
-				case ctrl_cal_done:		_send_ctrlMode(no, ctrl_print, TRUE);    
+				case ctrl_cal_done:		_send_ctrlMode(no, ctrl_print_step0, TRUE);    
 										break;
 			}
 		}
@@ -750,7 +761,7 @@ void _send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 			}
 			else if (i==no || ctrlMode==ctrl_empty)
 			{
-				if (ctrlMode==ctrl_print && !RX_Config.inkSupply[i].ink.fileName[0]) continue;
+				if (ctrlMode==ctrl_print_run && !RX_Config.inkSupply[i].ink.fileName[0]) continue;
 //				if (ctrlMode==ctrl_shutdown && _FluidStatus[i].ctrlMode<=ctrl_off)   continue;
 					
 //				if (ctrlMode==ctrl_cal_start)
@@ -809,7 +820,7 @@ void fluid_start_printing(void)
 	int i;
 	for (i=0; i<RX_Config.printer.inkSupplyCnt; i++)
 	{
-		_send_ctrlMode(i, ctrl_print, TRUE);		
+		_send_ctrlMode(i, ctrl_print_step0, TRUE);		
 	}
 }
 
@@ -832,7 +843,7 @@ int  fluid_in_ctrlMode  (int no, EnFluidCtrlMode ctrlMode)
 //--- fluid_set_head_state ----------------------------
 void fluid_set_head_state	(int no, SHeadStat *pstat)
 {
-	if (no>=0 && no<SIZEOF(_HeadState)) 
+	if (no>=0 && no<SIZEOF(_HeadState) && pstat->ctrlMode!=ctrl_off && pstat->ctrlMode!=ctrl_error) 
 	{	
 		if (pstat->err) _HeadErr[no] = TRUE;
 		if (valid(pstat->presIn))

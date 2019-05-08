@@ -37,6 +37,7 @@ SFluidBoardStat	RX_FluidBoardStatus;
 
 static int _AppRunning;
 static int _DisplayBalance=FALSE;
+static int _DisplayTestBleedLine = FALSE;
 
 //--- prototypes ---------------------------------------------------------
 static void main_menu();
@@ -58,7 +59,9 @@ static void main_menu()
 	term_printf("i<n><mbar>: Ink-Pump[n] on until ink pressure > [mbar]\n");
 	term_printf("v<mbar>:    Vacuum to [mbar] (0=test off)\n");
 	term_printf("p<mbar>:    Pressure to [mbar] (0=test off)\n");
+	term_printf("l<n>:          Test bleed line\n");			
 	term_printf("f<x>:       Flush\n");	
+	
 	if (_DisplayBalance) 
 	{
 		term_printf("T<n<:       Tara balance <n>   \n");
@@ -92,6 +95,7 @@ static void main_menu()
 		case 't':	nios_set_temp(no, atoi(&str[2]));		break;
 //		case 'q':	nios_start_temp_log();					break;
 		case 'q':	nios_start_log();						break;
+		case 'l':	nios_test_bleed_line(no); _DisplayTestBleedLine = 1; break;
 	
 /*
 		case 'c':	cmd.no		= no;
@@ -99,18 +103,7 @@ static void main_menu()
 					scl_calibrate(&cmd);					break;
 */
 		case 'x': _AppRunning=FALSE;						break;
-			
-		// Only for DEBUGGING purposes
-		// Parameters for tuning the Fluid's PID controller
-		//case 'P': if (no < 4) _Cfg->ink_supply[no].fluid_P = atoi(&str[2]); break;
-			
-		case 'T': daisy_chain_do_tara(no);
-				  break;
-		/*
-		case 'I': if (no < 4) _Cfg->controller_I		= atoi(&str[2]); break;
-		case 'D': if (no < 4) _Cfg->controller_D		= atoi(&str[2]); break;
-		case 'O': if (no < 4) _Cfg->controller_offset	= atoi(&str[2]); break;
-		*/
+		case 'T': daisy_chain_do_tara(no);					break;
 		}
 	}
 }

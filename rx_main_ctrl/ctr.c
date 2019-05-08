@@ -13,6 +13,7 @@
 #include "rx_setup_file.h"
 #include "rx_hash.h"
 #include "rx_sok.h"
+#include "gui_svr.h"
 #include "ctr.h"
 
 static int		_Time;
@@ -31,9 +32,20 @@ void ctr_init(void)
 	if (setup_chapter(file, "Counters", -1, READ)==REPLY_OK)
 	{
 		setup_double(file, "actual", READ, &RX_PrinterStatus.counterAct,   0);
-		setup_double(file, "total",  READ, &RX_PrinterStatus.counterTotal, 0);
+//		setup_double(file, "total",  READ, &RX_PrinterStatus.counterTotal, 0);
+		RX_PrinterStatus.counterTotal = RX_PrinterStatus.counterAct;
 	}
 	setup_destroy(file);
+}
+
+//--- ctr_set_total -----------------------------
+void ctr_set_total(UINT32 machineMeters)
+{
+	if (machineMeters>RX_PrinterStatus.counterTotal) 
+	{
+		RX_PrinterStatus.counterTotal=machineMeters;		
+		gui_send_printer_status(&RX_PrinterStatus);		
+	}
 }
 
 //--- ctr_tick -----------------------------
@@ -69,7 +81,7 @@ void ctr_save(void)
 	{
 		setup_str	(file, "machine", WRITE, RX_Hostname, sizeof(RX_Hostname), "");
 		setup_double(file, "actual", WRITE, &RX_PrinterStatus.counterAct, 0);
-		setup_double(file, "total",  WRITE, &RX_PrinterStatus.counterTotal, 0);
+//		setup_double(file, "total",  WRITE, &RX_PrinterStatus.counterTotal, 0);
 	}
 	setup_save(file, PATH_USER FILENAME_COUNTERS);
 	setup_destroy(file);		

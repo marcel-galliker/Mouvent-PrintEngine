@@ -31,43 +31,49 @@ char *FluidCtrlModeStr(EnFluidCtrlMode mode)
 	case ctrl_off:					return "OFF";		//  0x003:
 	case ctrl_warmup:				return "WARM ";		//  0x004:
 	case ctrl_readyToPrint:			return "READY";		//  0x005:
-	case ctrl_print:				return "PRINT";		//  0x006:
-	case ctrl_bleed:				return "BLEED";		//  0x007:
 
-	case ctrl_08:					return "ctrl_08";	//  0x008:
-	case ctrl_09:					return "ctrl_09";	//  0x009:
-	case ctrl_0a:					return "ctrl_0a";	//  0x00a:
-	case ctrl_0b:					return "ctrl_0b";	//  0x009:
-	case ctrl_flush_night:			return "FLUSH_N";	//  0x010:
-	case ctrl_flush_weekend:		return "FLUSH_WE";	//  0x011:
-	case ctrl_flush_week:			return "FLUSH_W";	//  0x012:
-	case ctrl_flush_step1:			return "FLUSH_s1";  //  0x013:
-	case ctrl_flush_step2:			return "FLUSH_s2";  //  0x014:
-	case ctrl_flush_step3:			return "FLUSH_s3";  //  0x014:
-	case ctrl_flush_step4:			return "FLUSH_s4";  //  0x014:
-	case ctrl_flush_done:			return "FLUSH_done";//  0x015:
+	case ctrl_print_step0:			return "PRINT /0";	//  0x010:
+	case ctrl_print_step1:			return "PRINT /1";	// 	0x011
+	case ctrl_print_step2:			return "PRINT /2";	// 	0x012
+	case ctrl_print_step3:			return "PRINT /3";	// 	0x013
+	case ctrl_print_step4:			return "PRINT /4";	// 	0x014
+	case ctrl_print_step5:			return "PRINT /5";	// 	0x015
+	case ctrl_print_step6:			return "PRINT /6";	// 	0x016
+	case ctrl_print_step7:			return "PRINT /7";	// 	0x017
+	case ctrl_print_step8:			return "PRINT /8";	// 	0x018
+	case ctrl_print_step9:			return "PRINT /9";	// 	0x019	
+	case ctrl_print_run:			return "PRINT";		//  0x01a:
+
+	case ctrl_flush_night:			return "FLUSH_N";	//  0x080:
+	case ctrl_flush_weekend:		return "FLUSH_WE";	//  0x081:
+	case ctrl_flush_week:			return "FLUSH_W";	//  0x082:
+	case ctrl_flush_step1:			return "FLUSH /1";  //  0x083:
+	case ctrl_flush_step2:			return "FLUSH /2";  //  0x084:
+	case ctrl_flush_step3:			return "FLUSH /3";  //  0x084:
+	case ctrl_flush_step4:			return "FLUSH /4";  //  0x084:
+	case ctrl_flush_done:			return "FLUSH_done";//  0x085:
 		
 	case ctrl_purge_soft:			return "PRG-S";		//  0x100:
 	case ctrl_purge:				return "PRG";		//  0x101:
 	case ctrl_purge_hard:			return "PRG-H";		//  0x102:
 	case ctrl_purge_micro:			return "PRG-M";		//  0x103:
-	case ctrl_purge_step1:			return "PRG_s1";	//  0x111:
-	case ctrl_purge_step2:			return "PRG_s2";	//  0x112:
-	case ctrl_purge_step3:			return "PRG_s3";	//  0x113:
-	case ctrl_purge_step4:			return "PRG_s4";	//  0x114:
+	case ctrl_purge_step1:			return "PRG /1";	//  0x111:
+	case ctrl_purge_step2:			return "PRG /2";	//  0x112:
+	case ctrl_purge_step3:			return "PRG /3";	//  0x113:
+	case ctrl_purge_step4:			return "PRG /4";	//  0x114:
 		
 	case ctrl_fill:					return "FILL";		//	0x200:
-	case ctrl_fill_step1:			return "FILL_s1";	//	0x201:
-	case ctrl_fill_step2:			return "FILL_s2";	//	0x202:
-	case ctrl_fill_step3:			return "FILL_s3";	//	0x203:
-	case ctrl_fill_step4:			return "FILL_s4";	//	0x204:	
+	case ctrl_fill_step1:			return "FILL /1";	//	0x201:
+	case ctrl_fill_step2:			return "FILL /2";	//	0x202:
+	case ctrl_fill_step3:			return "FILL /3";	//	0x203:
+	case ctrl_fill_step4:			return "FILL /4";	//	0x204:	
 
 	case ctrl_empty:				return "EMPTY";		//	0x300:
-	case ctrl_empty_step1:			return "EMPTY_s1";	//	0x301:
-	case ctrl_empty_step2:			return "EMPTY_s2";	//	0x302:
-	case ctrl_empty_step3:			return "EMPTY_s3";	//	0x303:
-	case ctrl_empty_step4:			return "EMPTY_s4";	//	0x304:
-	case ctrl_empty_step5:			return "EMPTY_s5";	//	0x305:
+	case ctrl_empty_step1:			return "EMPTY /1";	//	0x301:
+	case ctrl_empty_step2:			return "EMPTY /2";	//	0x302:
+	case ctrl_empty_step3:			return "EMPTY /3";	//	0x303:
+	case ctrl_empty_step4:			return "EMPTY /4";	//	0x304:
+	case ctrl_empty_step5:			return "EMPTY /5";	//	0x305:
 
 	case ctrl_cal_start:			return "START CAL";	//  0x00a:
 	case ctrl_cal_step1:			return "CAL /1";	//  0x00b:
