@@ -84,6 +84,8 @@ typedef struct
 	UINT32	condPumpSpeed;
 	UINT32	condPumpFeedback;
 	
+	INT32	canisterEmpty;
+	
 	//--- tests ---------------
 	int		test_airValve;
 	int		test_bleedValve;

@@ -162,33 +162,35 @@ namespace RX_DigiPrint.Views.TexView
                                 RW_Tension.Unit = "N";
                                 break;
 
-                    case 1:     // rewinder without buffer, NO Laser, OLD diameter 
-                                RW_Flexibility.ID="PAR_SPEED_CORRECTION_RW";
-                                RW_Flexibility.Label="Speed Offset";
-                                RW_Flexibility.Unit="%";
-                                RW_Tension.Unit = "%";
-                                break;
-
-                    case 2:     // rewinder without buffer, NO Laser, NEW diameter 
-                                RW_Flexibility.ID="PAR_SPEED_CORRECTION_RW";
-                                RW_Flexibility.Label="Speed Offset";
-                                RW_Flexibility.Unit="%";
-                                RW_Tension.Unit = "%";
-                                break;
-
-                    case 3:     // rewinder without buffer, WITH Laser, OLD diameter 
+                    case 1:     // rewinder without buffer, WITH Laser, OLD diameter 
                                 RW_Flexibility.ID="PAR_SPEED_CORRECTION_RW";
                                 RW_Flexibility.Label="Fabric Position";
                                 RW_Flexibility.Unit="mm";
                                 RW_Tension.Unit = "N";
                                 break;
 
-                    case 4:     // rewinder without buffer, WITH Laser, NEW diameter 
+                    case 2:     // rewinder without buffer, WITH Laser, NEW diameter 
                                 RW_Flexibility.ID="PAR_SPEED_CORRECTION_RW";
                                 RW_Flexibility.Label="Fabric Position";
                                 RW_Flexibility.Unit="mm";
                                 RW_Tension.Unit = "N";
                                 break;
+
+                    /*
+                    case 3:     // rewinder without buffer, NO Laser, NEW diameter 
+                                RW_Flexibility.ID="PAR_SPEED_CORRECTION_RW";
+                                RW_Flexibility.Label="Speed Offset";
+                                RW_Flexibility.Unit="%";
+                                RW_Tension.Unit = "%";
+                                break;
+
+                    case 4:     // rewinder without buffer, NO Laser, OLD diameter 
+                                RW_Flexibility.ID="PAR_SPEED_CORRECTION_RW";
+                                RW_Flexibility.Label="Speed Offset";
+                                RW_Flexibility.Unit="%";
+                                RW_Tension.Unit = "%";
+                                break;
+                    */
 
                     case 10:    // no rewinder 0 = no RW, 1 = yes RW
                                 visibility = Visibility.Collapsed;

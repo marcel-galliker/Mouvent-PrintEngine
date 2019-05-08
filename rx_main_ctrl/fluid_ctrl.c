@@ -309,6 +309,8 @@ void fluid_tick(void)
 		
 		if (!chiller_is_running() &&  _FluidStatus[i].ctrlMode>ctrl_off)
 			_send_ctrlMode(i, ctrl_off, TRUE);
+		
+		state[i].canisterEmpty = FALSE;
 	}
 	
 	memset(_HeadStateCnt,  0, sizeof(_HeadStateCnt));

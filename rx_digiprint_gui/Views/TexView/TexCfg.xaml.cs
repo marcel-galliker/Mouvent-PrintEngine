@@ -53,6 +53,7 @@ namespace RX_DigiPrint.Views.TexView
             catch(Exception)
             { }
             HeadRefEnable.Visibility = visible; 
+            MagneticBandEnable.Visibility = visible;
         }
 
         //--- Save_Clicked ---------------------------------------------

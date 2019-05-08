@@ -992,6 +992,7 @@ typedef struct SHeadStateLight
 	INT32			condPresOut;
 	INT32			condMeniscus;
 	INT32			condMeniscusDiff;
+	INT32			canisterEmpty;
 } SHeadStateLight;
 			
 typedef struct SFluidStateLight

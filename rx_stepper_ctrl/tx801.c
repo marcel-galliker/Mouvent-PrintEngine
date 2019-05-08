@@ -21,6 +21,9 @@
 #include "motor.h"
 #include "tx801.h"
 
+#define	VENT_CTRL		TRUE
+#define VENT_MAX_ERROR	50	// * 100 ms intervals
+
 #define TX_REF_HEIGHT		16000
 #define TX_PRINT_POS_MIN	 1200
 
@@ -216,7 +219,7 @@ void tx801_main(int ticks, int menu)
 			_CmdRunning = FALSE;
 		}
 	}
-//	_tx801_control_vents();	
+	if (VENT_CTRL) _tx801_control_vents();	
 }
 
 //--- _tx801_control_vents -------------------
@@ -234,18 +237,16 @@ static void _tx801_control_vents(void)
 			{
 				for (i=0; i<6; i++)
 				{
-					if      (fpga_pwm_speed(i) - _VentSpeed > 2)  _VentValue[i] -= 5;
-					else if (fpga_pwm_speed(i) - _VentSpeed < -2) _VentValue[i] += 5;
-					if(_VentValue[i] >= 100 && ++_VentErrorCnt[i] == 1000) 
-						Error(ERR_CONT, 0, "Drop Suction Ventilator %d blocked", i + 1);
-					else if (_VentErrorCnt[i] && _VentErrorCnt[i]<1000) _VentErrorCnt[i]--;
+					if(_VentErrorCnt[i] < VENT_MAX_ERROR)
+					{
+						if(fpga_pwm_speed(i) - _VentSpeed > 2)  _VentValue[i] -= 5;
+						else if(fpga_pwm_speed(i) - _VentSpeed < -2) _VentValue[i] += 5;
+						
+						if(_VentValue[i] >= 100 && ++_VentErrorCnt[i] == VENT_MAX_ERROR) Error(ERR_CONT, 0, "Drop Suction Ventilator %d blocked", i + 1);								
+					}
+					else _VentValue[i] = 40;
 				}					
 			}
-		}
-		else
-		{
-			memset(_VentValue, 0, sizeof(_VentValue));
-			memset(_VentErrorCnt, 0, sizeof(_VentErrorCnt));
 		}
 		for (i=0; i<6; i++) 
 		{
@@ -256,7 +257,6 @@ static void _tx801_control_vents(void)
 		_lastTime = time;
 	}
 }
-
 
 //--- _motor_name ------------------------------
 static char *_motor_name(int no)
@@ -384,19 +384,27 @@ static void _tx801_move_to_pos(int cmd, int pos)
 static void _tx801_set_ventilators(int value)
 {
 //	Error(LOG, 0, "Set Ventilators to %d%%", value);
-	
-	/*
-	if(value && !_VentSpeed) memcpy(_VentValue, _LastVentValue, sizeof(_VentValue));
-	else					 memcpy(_LastVentValue, _VentValue, sizeof(_LastVentValue));
-	_VentSpeed = value;
-	_VentCtrlDelay = rx_get_ticks()+1000;
-	_tx801_control_vents();
-	*/
 
-	if(value<100) value=(0x10000 * value) / 100;
-	else value=0x10000-1;
-	int i;
-	for (i=0; i<6; i++) Fpga.par->pwm_output[i] = value;
+	if(VENT_CTRL)
+	{	
+		if (!_VentSpeed)
+		{			
+			memset(_VentValue, 0, sizeof(_VentValue));
+			memset(_VentErrorCnt, 0, sizeof(_VentErrorCnt));		
+		}
+		if(value && !_VentSpeed) memcpy(_VentValue, _LastVentValue, sizeof(_VentValue));
+		else					 memcpy(_LastVentValue, _VentValue, sizeof(_LastVentValue));
+		_VentSpeed = value;
+		_VentCtrlDelay = rx_get_ticks() + 1000;
+		_tx801_control_vents();			
+	}
+	else
+	{
+		if(value<100) value=(0x10000 * value) / 100;
+		else value=0x10000-1;
+		int i;
+		for (i=0; i<6; i++) Fpga.par->pwm_output[i] = value;			
+	}	
 }
 
 //--- _tx801_do_ctrlMode -----------------------------------------

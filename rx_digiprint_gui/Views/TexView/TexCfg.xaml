@@ -69,6 +69,9 @@
                     <rx_uc:PlcCommand Grid.Row="10" Grid.Column="2" ID="CMD_OFFSET_SLAVE"                 Label="SET"  Padding="5,0"  User="usr_service" PreviewMouseUp="Offset_Clicked"/>
                     <TextBlock Grid.Row="11" Grid.Column="0" Text="Magnetic Band"/>
                     <rx_uc:PlcCommand Grid.Row="11" Grid.Column="2" ID="CMD_RESET_MAGNETIC_BAND"          Label="RESET"  Padding="5,0"  User="usr_service" x:Name="MagneticBand"/>
+                    <Grid Grid.Row="11" Grid.ColumnSpan="3" Background="#7FD3D3D3" Margin="150,0,0,0" x:Name="MagneticBandEnable">
+                        <TextBlock Text="ONLY AVAILABLE IN ERROR STATE" HorizontalAlignment="Center" Foreground="Red" FontWeight="Bold"/>
+                    </Grid>
                 </Grid>
             </rx_uc:PlcParPanel>
         </ScrollViewer>

@@ -312,6 +312,7 @@ void nios_set_head_state(int isNo, SHeadStateLight *pstat)
 	_Cfg->ink_supply[isNo].condPresOut				  = pstat->condPresOut;	
 	_Cfg->ink_supply[isNo].condMeniscus				  = pstat->condMeniscus;
 	_Cfg->ink_supply[isNo].condMeniscusDiff			  = pstat->condMeniscusDiff;
+	_Cfg->ink_supply[isNo].canisterEmpty			  = pstat->canisterEmpty;
 	_Cfg->ink_supply[isNo].alive++;
 }
 
