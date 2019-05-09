@@ -17,6 +17,7 @@ buildkeil:
   variables:
   script:
   - echo "build keil Mouvent Printer"
+  - whoami
   - automated_build/msbuild_vsprojects.bat keil -no-pause
   only:
   - pushes
