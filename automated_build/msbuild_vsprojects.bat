@@ -89,6 +89,10 @@ if "%1"=="nios" (
 )
 
 if "%1"=="keil" (
+
+  echo "I am"
+  whoami
+
   call :KEIL
 )
 
