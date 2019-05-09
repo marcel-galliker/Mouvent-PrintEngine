@@ -71,9 +71,6 @@ set TARGETS=/t:Build
 REM build sequence
 
 if "%1"=="other" (
-
-  echo "Build other projects"
-
   call :LIB_X64
   call :BIN_X64
   call :LIB_X32
@@ -89,10 +86,6 @@ if "%1"=="nios" (
 )
 
 if "%1"=="keil" (
-
-  echo "I am"
-  whoami
-
   call :KEIL
 )
 
