@@ -94,8 +94,8 @@ deploying:
      }
    - echo "deploying bin to ${TARGETPATH}\${COMMIT_TYPE}.zip"
    - 7z.exe a ${TARGETPATH}\${COMMIT_TYPE}.zip bin
-   - xcopy /E /Y /F bin ${TARGETPATH}\${COMMIT_TYPE}\bin\
-   - Remove-Item ..\* -Recurse -Force
+  #  - xcopy /E /Y /F bin ${TARGETPATH}\${COMMIT_TYPE}\bin\
+  #  - Remove-Item ..\* -Recurse -Force
 
 
 
