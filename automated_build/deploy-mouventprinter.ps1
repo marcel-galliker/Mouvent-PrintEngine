@@ -2,7 +2,7 @@ param(
 	[String]$targetpath,
 	[String]$committag,
 	[String]$buildname,
-	[String]$commitrefslug
+	[String]$commitrefslug,
 	[String]$commitsha
 )
 
@@ -18,7 +18,7 @@ if ($committag -and $committag[0] -eq "v")
 {
   $committype='release\' + $committag
 }
-else if ($buildname -eq "nightly")
+elseif ($buildname -eq "nightly")
 {
   $committype='nightly-builds\' + $datestr + '_' + $commitrefslug + '_' + $commitsha
 }
