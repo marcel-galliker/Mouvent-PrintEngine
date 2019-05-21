@@ -62,7 +62,7 @@ deploying:
     - echo "The current date is %DATESTR%"
  script:
    - echo %cd%
-   - powershell -noprofile -noninteractive -executionpolicy Bypass -command "& '.\automated_build\deploy-mouventprinter.ps1'" -targetpath %TARGETPATH% -committag %CI_COMMIT_TAG% -buildname %BUILDNAME% -commitrefslug %CI_COMMIT_REF_SLUG% -commitsha %CI_COMMIT_SHA%
+   - powershell -noprofile -noninteractive -executionpolicy Bypass -command "& '.\automated_build\deploy-mouventprinter.ps1'" -targetpath '%TARGETPATH%' -committag '%CI_COMMIT_TAG%' -buildname '%BUILDNAME%' -commitrefslug '%CI_COMMIT_REF_SLUG%' -commitsha '%CI_COMMIT_SHA%'
 
 
 
