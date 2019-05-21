@@ -61,25 +61,7 @@ deploying:
     - for /F "tokens=*" %%i in ('powershell Get-Date -Format yyyy.MM.dd.HHmmss') do set DATESTR=%%i
     - echo "The current date is %DATESTR%"
  script:
-   - echo %DATESTR%
-  #- $DATESTR=get-date -format "yyyyMMdd-HHmm"
-   - if %CI_COMMIT_TAG% == "" (
-       if %CI_COMMIT_TAG%[0] -eq 'v'(
-         set COMMIT_TYPE='release\' + %CI_COMMIT_TAG%
-       )
-     )
-     else (
-       if %BUILDNAME% == "nightly" (
-         set COMMIT_TYPE='nightly-builds\' + %DATESTR% + '_' + %CI_COMMIT_REF_SLUG% + '_' + %CI_COMMIT_SHA%
-       )
-       else (
-         set COMMIT_TYPE='commits\' + %DATESTR% + '_' + %CI_COMMIT_REF_SLUG% + '_' + %CI_COMMIT_SHA%
-       )
-     )
-   - echo "deploying bin to %TARGETPATH%\%COMMIT_TYPE%.zip"
-   - 7z.exe a %TARGETPATH%\%COMMIT_TYPE%.zip bin
-  #  - xcopy /E /Y /F bin ${TARGETPATH}\${COMMIT_TYPE}\bin\
-  #  - Remove-Item ..\* -Recurse -Force
+   - powershell -noprofile -noninteractive -executionpolicy Bypass -command "& 'deploy_mouventprinter.ps1'" -targetpath %TARGETPATH% -committag %CI_COMMIT_TAG% -buildname %BUILDNAME% -commitrefslug %CI_COMMIT_REF_SLUG% -commitsha %CI_COMMIT_SHA%
 
 
 
