@@ -15,7 +15,7 @@ buildnios:
   artifacts:
     when: always
     expire_in: 1 month
-    name: "%CI_COMMIT_REF_SLUG%_%CI_COMMIT_SHA%"
+    name: "%CI_COMMIT_REF_SLUG%_%CI_COMMIT_SHA%_NIOS"
     paths:
      - bin/*
      - automated_build/log/*
@@ -29,7 +29,7 @@ buildkeil:
   artifacts:
     when: always
     expire_in: 1 month
-    name: "%CI_COMMIT_REF_SLUG%_%CI_COMMIT_SHA%"
+    name: "%CI_COMMIT_REF_SLUG%_%CI_COMMIT_SHA%_KEIL"
     paths:
      - bin/*
      - automated_build/log/*
@@ -43,7 +43,7 @@ buildother:
   artifacts:
     when: always
     expire_in: 1 month
-    name: "%CI_COMMIT_REF_SLUG%_%CI_COMMIT_SHA%"
+    name: "%CI_COMMIT_REF_SLUG%_%CI_COMMIT_SHA%_OTHER"
     paths:
      - bin/*
      - automated_build/log/*
@@ -58,23 +58,24 @@ deploying:
    GIT_STRATEGY: none
    TARGETPATH: C:\Users\mouvent\RADEX AG\RX-Project - Documents
  before_script:
-    - FOR /F "tokens=*" %%i IN ('powershell Get-Date -Format yyyy.MM.dd.HHmmss') DO SET DATESTR=%%i
+    - for /F "tokens=*" %%i in ('powershell Get-Date -Format yyyy.MM.dd.HHmmss') do set DATESTR=%%i
     - echo "The current date is %DATESTR%"
  script:
    - echo %DATESTR%
   #- $DATESTR=get-date -format "yyyyMMdd-HHmm"
-   - if (%CI_COMMIT_TAG% -And %CI_COMMIT_TAG%[0] -eq 'v')
-     {
-       set COMMIT_TYPE='release\' + %CI_COMMIT_TAG%
-     }
-     elseif (%BUILDNAME% -eq "nightly")
-     {
-       set COMMIT_TYPE='nightly-builds\' + %DATESTR% + '_' + %CI_COMMIT_REF_SLUG% + '_' + %CI_COMMIT_SHA%
-     }
-     else
-     {
-       set COMMIT_TYPE='commits\' + %DATESTR% + '_' + %CI_COMMIT_REF_SLUG% + '_' + %CI_COMMIT_SHA%
-     }
+   - if %CI_COMMIT_TAG% == "" (
+       if %CI_COMMIT_TAG%[0] -eq 'v'(
+         set COMMIT_TYPE='release\' + %CI_COMMIT_TAG%
+       )
+     )
+     else (
+       if %BUILDNAME% == "nightly" (
+         set COMMIT_TYPE='nightly-builds\' + %DATESTR% + '_' + %CI_COMMIT_REF_SLUG% + '_' + %CI_COMMIT_SHA%
+       )
+       else (
+         set COMMIT_TYPE='commits\' + %DATESTR% + '_' + %CI_COMMIT_REF_SLUG% + '_' + %CI_COMMIT_SHA%
+       )
+     )
    - echo "deploying bin to %TARGETPATH%\%COMMIT_TYPE%.zip"
    - 7z.exe a %TARGETPATH%\%COMMIT_TYPE%.zip bin
   #  - xcopy /E /Y /F bin ${TARGETPATH}\${COMMIT_TYPE}\bin\
