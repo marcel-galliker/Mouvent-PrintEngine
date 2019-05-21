@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 EXIT_PROMPT_ON_CLOSE_LAST_WINDOW=false
 PROBLEMS_FILTERS_MIGRATE=true
 TASKS_FILTERS_MIGRATE=true
@@ -5,3 +6,12 @@ eclipse.preferences.version=1
 platformState=1557236573619
 quickStart=false
 tipsAndTricks=true
+=======
+EXIT_PROMPT_ON_CLOSE_LAST_WINDOW=false
+PROBLEMS_FILTERS_MIGRATE=true
+TASKS_FILTERS_MIGRATE=true
+eclipse.preferences.version=1
+platformState=1556281148336
+quickStart=false
+tipsAndTricks=true
+>>>>>>> feature-build-server

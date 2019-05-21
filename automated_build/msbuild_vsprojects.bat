@@ -2,7 +2,7 @@
 setlocal EnableDelayedExpansion
 
 REM if started directly by double-click the script should pause at the end
-if not "%~1"=="" set NO_PAUSE=1
+if not "%~2"=="" set NO_PAUSE=1
 
 REM vcvars batch file has to be executed first to be able to compile from CLI
 set VCVARS_PATH="C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat"
@@ -69,26 +69,36 @@ set /A i=0
 set BINFILES[0]=
 set TARGETS=/t:Build
 REM build sequence
-call :LIB_X64
-call :BIN_X64
-call :LIB_X32
-call :BIN_X32
-call :LIB_SOC
-call :BIN_SOC
-call :LIB_LX
-call :BIN_LX
-call :NIOS
-call :KEIL
+
+if "%1"=="other" (
+  call :LIB_X64
+  call :BIN_X64
+  call :LIB_X32
+  call :BIN_X32
+  call :LIB_SOC
+  call :BIN_SOC
+  call :LIB_LX
+  call :BIN_LX
+)
+
+if "%1"=="nios" (
+  call :NIOS
+)
+
+if "%1"=="keil" (
+  call :KEIL
+)
+
 goto :EVAL
 
 REM ----------------------------------------------------------------------------
 :NIOS
-    set TARGETS=/t:Build
+	set TARGETS=/t:Build
 	set BUILD=32
 	set FLAGS=/m /property:Configuration=Release-soc
 	call :BUILD_PROJECT rx_fluid_nios, vcxproj
 	call :BUILD_PROJECT rx_head_nios, vcxproj
-    set TARGETS=/t:Clean,Build
+	set TARGETS=/t:Clean,Build
 	goto :EOF
 REM ----------------------------------------------------------------------------
 
