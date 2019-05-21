@@ -6,6 +6,12 @@ param(
 	[String]$commitsha
 )
 
+Write-Host "targetpath = $targetpath"
+Write-Host "committag = $committag"
+Write-Host "buildname = $buildname"
+Write-Host "commitrefslug = $commitrfslug"
+Write-Host "commitsh = $commitsha"
+
 $datestr=get-date -format "yyyyMMdd-HHmm"
 
 if ($committag -and $committag[0] -eq "v")
