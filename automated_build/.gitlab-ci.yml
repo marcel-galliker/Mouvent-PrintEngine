@@ -52,24 +52,28 @@ deploying:
  stage: deploy
  when: on_success
  variables:
-  GIT_STRATEGY: none
-  TARGETPATH: C:\Users\mouvent\RADEX AG\RX-Project - Documents
+   GIT_STRATEGY: none
+   TARGETPATH: C:\Users\mouvent\RADEX AG\RX-Project - Documents
+ before_script:
+    - for /F "tokens=*" %%i IN ('powershell Get-Date -Format yyyy.MM.dd.HHmmss') DO SET DATESTR=%%i
+    - echo "The current date is %DATESTR%"
  script:
-  - $DATESTR=get-date -format "yyyyMMdd-HHmm"
-  - if (${CI_COMMIT_TAG} -And ${CI_COMMIT_TAG}[0] -eq 'v')
-    {
-      $COMMIT_TYPE='release\' + ${CI_COMMIT_TAG}
-    }
-    elseif ($BUILDNAME -eq "nightly")
-    {
-      $COMMIT_TYPE='nightly-builds\' + ${DATESTR} + '_' + ${CI_COMMIT_REF_SLUG} + '_' + ${CI_COMMIT_SHA}
-    }
-    else
-    {
-      $COMMIT_TYPE='commits\' + ${DATESTR} + '_' + ${CI_COMMIT_REF_SLUG} + '_' + ${CI_COMMIT_SHA}
-    }
-  - echo "deploying bin to ${TARGETPATH}\${COMMIT_TYPE}.zip"
-  - 7z.exe a ${TARGETPATH}\${COMMIT_TYPE}.zip bin
+   - echo %DATESTR%
+  #- $DATESTR=get-date -format "yyyyMMdd-HHmm"
+  # - if (${CI_COMMIT_TAG} -And ${CI_COMMIT_TAG}[0] -eq 'v')
+  #   {
+  #     $COMMIT_TYPE='release\' + ${CI_COMMIT_TAG}
+  #   }
+  #   elseif ($BUILDNAME -eq "nightly")
+  #   {
+  #     $COMMIT_TYPE='nightly-builds\' + ${DATESTR} + '_' + ${CI_COMMIT_REF_SLUG} + '_' + ${CI_COMMIT_SHA}
+  #   }
+  #   else
+  #   {
+  #     $COMMIT_TYPE='commits\' + ${DATESTR} + '_' + ${CI_COMMIT_REF_SLUG} + '_' + ${CI_COMMIT_SHA}
+  #   }
+  # - echo "deploying bin to ${TARGETPATH}\${COMMIT_TYPE}.zip"
+  # - 7z.exe a ${TARGETPATH}\${COMMIT_TYPE}.zip bin
  #  - xcopy /E /Y /F bin ${TARGETPATH}\${COMMIT_TYPE}\bin\
  #  - Remove-Item ..\* -Recurse -Force
 
