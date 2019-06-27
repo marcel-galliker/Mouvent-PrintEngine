@@ -29,6 +29,10 @@
 
             <Rectangle Width="100"/>
 
+            <common:RxButton x:Name="Button_PrintRelease" Click="PrintRelease_Clicked" Background="Red">
+                <TextBlock Text="!" FontSize="{StaticResource FontSizeLarge}" FontWeight="Black"/>
+            </common:RxButton>
+
             <common:RxButton x:Name="Button_UV" 
                      Click="UV_Clicked" 
                      ToolTip="UV Dryer" 

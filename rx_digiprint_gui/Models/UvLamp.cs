@@ -145,6 +145,7 @@ namespace RX_DigiPrint.Models
 //                + "STA_UV_LAMP_1_TIMER"+"\n";
 
             RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_GET_VAR, str);
+
             str = "Application.GUI_00_001_Main"+"\n"
                 + "STA_UV_POWER_ON"+"\n"
                 + "STA_UV_LAMPS_READY"+"\n"

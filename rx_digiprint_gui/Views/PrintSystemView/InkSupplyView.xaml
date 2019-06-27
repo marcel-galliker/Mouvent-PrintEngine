@@ -155,7 +155,7 @@
                             <Button                       Content="Empty"       Click="Empty_Clicked"     Padding="10" Visibility="{Binding Running, Converter={StaticResource BoolToInVisible_Converter}}"/>
                             <Rectangle x:Name="Line_Calibrate"  Fill="{StaticResource RX.Green}" HorizontalAlignment="Stretch" Height="1" Margin="-16, 8"/>
                             <Button x:Name="Button_Calibrate" Content="Calibrate"   Click="Calibrate_Clicked" Padding="10"/>
-                            <Button  Content="Chck"        Click="Check_Clicked" Padding="10"/>
+                            <Button  Content="Check"                                Click="Check_Clicked" Padding="10"/>
                         </StackPanel>
                     </GroupBox>
                 </Grid>

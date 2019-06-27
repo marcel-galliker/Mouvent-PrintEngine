@@ -17,6 +17,9 @@
                     <rx_uc:PlcParCtrl ID="STA_MACHINE_STATE"               Label="Machine State" Type="ComboStr" x:Name="CB_MainState" ReadOnly="True"/>
                     <rx_uc:PlcParCtrl ID="STA_PRINTING_SPEED"              Label="Printing Speed" Format="n"/>
                     <rx_uc:PlcParCtrl ID="STA_UV_LAMPS_READY"              Label="UV Lamps Ready" Format="b"/>
+                    <rx_uc:PlcParCtrl ID="STA_PRINT_RELEASE"               Label="Ready to Print"  Format="b"/>
+                    <rx_uc:PlcParCtrl ID="STA_CMD_RELEASE"                 Label="CMD_REALEASE"  Format="b"/>
+                    <rx_uc:PlcParCtrl ID="STA_SPLICING"                    Label="Splicing"  Format="b"/>
                     <rx_uc:PlcTitle Header="Web Length"/>
                     <rx_uc:PlcParCtrl ID="STA_WINDER_WEB_LENGHT_1"     Label="Rewinder RW-R" Unit="m" Format="f"/>
                     <rx_uc:PlcParCtrl ID="STA_WINDER_WEB_LENGHT_2"     Label="Rewinder RW-L" Unit="m" Format="f"/>

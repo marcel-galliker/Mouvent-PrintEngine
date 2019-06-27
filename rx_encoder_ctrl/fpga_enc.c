@@ -634,10 +634,9 @@ static void _fpga_corr_rotative(SEncoderCfg *pCfg)
 //--- _fpga_corr_linear ------------------------
 static void _fpga_corr_linear(SEncoderCfg *pCfg)
 {
-	double dist_encoders = 472000;
+	double dist_encoders = 476500; //  472000;
 	double dist_head	 = 48768;
 	double offset;
-	INT32 val;
 	int i;
 	
 	fpga_enc_config(1, pCfg, 1, 0);
@@ -654,14 +653,13 @@ static void _fpga_corr_linear(SEncoderCfg *pCfg)
 	{
 		Fpga->cfg.encIn[i].enable				= FALSE;
 		Fpga->cfg.encIn[i].correction			= CORR_LINEAR; 
-//		Fpga->cfg.encOut[i].encoder_no			= 0;
 		Fpga->cfg.encOut[i].encoder_no			= i;
 		Fpga->cfg.encOut[i].reset_min_max		= TRUE;
 		Fpga->cfg.encOut[i].dist_ratio			= rat;
 		Fpga->cfg.encOut[i].synthetic_freq		= 0;
 		Fpga->cfg.encOut[i].backlash			= FALSE;
 		Fpga->cfg.encOut[i].scanning			= TRUE;
-		FpgaCorr->par[i].par = val=(INT32)(0x8000*(offset+i*dist_head)/dist_encoders);
+		FpgaCorr->par[i].par = (INT32)(0x8000*(offset+i*dist_head)/dist_encoders);
 	}	
 	for (i=0; i<ENCODER_OUT_CNT; i++) Fpga->cfg.encIn[i].enable	= TRUE;
 }

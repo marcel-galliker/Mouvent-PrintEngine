@@ -28,10 +28,13 @@ namespace RX_DigiPrint.Views.UserControls
             _ButtonHeight = Button_Pause.Height;
             _SetButtonStates();
             
+            Button_PrintRelease.Visibility = Visibility.Collapsed;
+
             Button_UV.DataContext = RxGlobals.UvLamp;
 
             RxGlobals.PrinterStatus.PropertyChanged += PrinterStatusChanged;
             RxGlobals.Plc.PropertyChanged += Plc_PropertyChanged;
+            RxGlobals.Timer.TimerFct += Timer;
         }
 
         //--- SetButtonStates -------------------------------------------------
@@ -189,6 +192,26 @@ namespace RX_DigiPrint.Views.UserControls
                 }
             }
             else if (!RxGlobals.UvLamp.Busy) RxGlobals.UvLamp.SwitchOn();
+        }
+
+        //--- Timer -----------------------------------------------------------------
+        private void Timer(int no)
+        {            
+            string val="####";
+            if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf)
+            {
+                RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_GET_VAR, "Application.GUI_00_001_Main"+"\n"+ "STA_PRINT_RELEASE"+"\n");
+                val = RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_PRINT_RELEASE");
+            }
+            if (val!=null && val.Equals("FALSE")) Button_PrintRelease.Visibility = Visibility.Visible;
+            else                                  Button_PrintRelease.Visibility = Visibility.Collapsed;
+        }
+
+        //--- PrintRelease_Clicked --------------------------------------------
+        private void PrintRelease_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (RxMessageBox.YesNo("Ready to Print", "Is the machine ready to print? No Splices in the machine?",  MessageBoxImage.Question, false))
+                RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_SET_CMD, "CMD_PRINT_RELEASE");
         }
 
         /*

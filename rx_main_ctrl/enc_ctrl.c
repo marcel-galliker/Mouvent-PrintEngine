@@ -259,20 +259,23 @@ int  enc_start_printing(SPrintQueueItem *pitem)
 								msg.orientation = FALSE;	msg.scanning=TRUE;  msg.incPerMeter=1000000; msg.pos_actual = 0;
 								break;
 			
-	case printer_TX801:			msg.orientation = FALSE;	msg.scanning=TRUE;  msg.incPerMeter=1000000; msg.pos_actual = machine_get_scanner_pos(); 
+	case printer_TX801:
+	case printer_TX802:			msg.orientation = FALSE;	msg.scanning=TRUE;  msg.incPerMeter=1000000; msg.pos_actual = machine_get_scanner_pos(); 
 								if (!pitem->testImage) _WakeupLen=WAKEUP_BAR_LEN*(RX_Config.inkSupplyCnt+1);
 								if (!arg_simuPLC) 
 								{
 									if (TRUE) msg.correction=CORR_LINEAR;
 									else Error(WARN, 0, "Encoder compensation OFF");
-								}
-		
+								}		
 								break;
-			
+
+	/*			
 	case printer_TX802:			msg.orientation = FALSE;	msg.scanning=TRUE;  msg.incPerMeter=1000000; msg.pos_actual = machine_get_scanner_pos(); 
 								if (!pitem->testImage) _WakeupLen=WAKEUP_BAR_LEN*(RX_Config.inkSupplyCnt+1);
-								if (!arg_simuPLC) msg.correction=CORR_OFF; 
+								if (!arg_simuPLC) msg.correction=CORR_LINEAR; 
 								break;
+	*/
+		
 	case printer_LB701:			msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; 
 								msg.correction=CORR_ROTATIVE;
 								break;
