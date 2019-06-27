@@ -1359,6 +1359,7 @@ static void _data_fill_blk_scan(SBmpSplitInfo *psplit, int blkNo, BYTE *dst)
 	int		dstLen  = psplit->dstLineLen-start;
 	int		srcLen	= psplit->widthBt-start;
 	int		endLine = psplit->srcLineCnt;
+
 	BYTE**	ptr     = psplit->data;
 	BYTE	*src    = *ptr;
 		
@@ -1369,9 +1370,9 @@ static void _data_fill_blk_scan(SBmpSplitInfo *psplit, int blkNo, BYTE *dst)
 		endLine  = -1;
 	}
 	
-	src += (UINT64)line*psplit->srcLineLen+psplit->startBt%psplit->srcLineLen;
+	src += (UINT64)line*psplit->srcLineLen; // +psplit->startBt%psplit->srcLineLen;
 		
-	start   = start%psplit->srcLineLen;
+	start = start%psplit->srcLineLen;
 
 	while (size<RX_Spooler.dataBlkSize && line!=endLine)
 	{
@@ -1395,30 +1396,38 @@ static void _data_fill_blk_scan(SBmpSplitInfo *psplit, int blkNo, BYTE *dst)
 			if (size==0) start = (x-fillLen)%psplit->srcLineLen; // first line
 			else         start = 0;
 		}
-//		else if (size==0) start=psplit->startBt%psplit->srcLineLen;
+		start = (start+psplit->startBt) %psplit->srcLineLen;
+
+		/*
+		if (psplit->colorCode==0)
+		{
+			static int lastscan = 1234;
+			if (psplit->pListItem->id.scan==4)
+				printf("Black scan=%d, block=%d\n", psplit->pListItem->id.scan, blkNo);
+			lastscan = psplit->pListItem->id.scan;
+		}
+		*/
 
 		//--- copy the image data ----------------------------
 		{
 			if (size+srcLen>RX_Spooler.dataBlkSize) srcLen = RX_Spooler.dataBlkSize-size;
 			if (size+dstLen>RX_Spooler.dataBlkSize) dstLen = RX_Spooler.dataBlkSize-size;
-
+			int srcLineLen= psplit->srcLineLen - start;
+			
 			for(len=0; len<srcLen; len+=l)
 			{
 				l = srcLen-len;
-				if (start+l>psplit->srcLineLen) l=psplit->srcLineLen-start;
+				if(l > srcLineLen) l = srcLineLen;
 				memcpy(&dst[size+len], src+start, l);
 				start=0;
+				srcLineLen=psplit->srcLineLen;
 			}
 			if (dstLen>srcLen) memset(&dst[size+srcLen], 0x00, dstLen-srcLen);
 		}
 		
 		//---------------------------------
 		if (flags & (FLAG_PASS_1OF2|FLAG_PASS_2OF2))
-		{
-			if ((flags&FLAG_PASS_1OF2)/* && (line&1)==1*/) memset(&dst[size], 0x00, dstLen);
-			if ((flags&FLAG_PASS_2OF2) && (line&1)==0) memset(&dst[size], 0x00, dstLen);
-			
-			/*
+		{			
 			if (TRUE)
 			{
 				if ((flags&FLAG_PASS_1OF2) && (line&1)==1) memset(&dst[size], 0x00, dstLen);
@@ -1429,12 +1438,11 @@ static void _data_fill_blk_scan(SBmpSplitInfo *psplit, int blkNo, BYTE *dst)
 				BYTE mask;
 				BYTE *data;
 				int len;
-				if ((flags&FLAG_PASS_1OF2) && (line&1)==1) mask =  0x33; 
-				if ((flags&FLAG_PASS_2OF2) && (line&1)==0) mask = ~0x33;
+				if (flags&FLAG_PASS_1OF2) mask =  0x33; 
+				if (flags&FLAG_PASS_2OF2) mask = ~0x33;
 				if (line&1) mask=~mask;
 				for (data=&dst[size], len=dstLen; len; len--) *data++ &= mask;
 			}
-			*/
 		}
 		//-----------------------------------
 		
