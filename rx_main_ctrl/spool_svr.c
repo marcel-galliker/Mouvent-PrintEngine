@@ -409,14 +409,15 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 
 	_Ready--;
 	
-	msg.hdr.msgLen	= sizeof(msg);
+	memset(&msg, 0, sizeof(msg));
+	msg.hdr.msgLen		= sizeof(msg);
 	msg.hdr.msgId		= CMD_PRINT_FILE;
 	msg.blkNo			= _BlkNo;
 	msg.variable		= pitem->variable;
-	msg.lengthUnit	= pitem->lengthUnit;
+	msg.lengthUnit		= pitem->lengthUnit;
 	msg.flags			= 0;
-	msg.clearBlockUsed= clearBlockUsed;
-	msg.wakeup		= pitem->wakeup;
+	msg.clearBlockUsed	= clearBlockUsed;
+	msg.wakeup			= pitem->wakeup;
 	strncpy(msg.filename, filename, sizeof(msg.filename));
 	memcpy(&msg.id, pid, sizeof(msg.id));
 	if (RX_PrinterStatus.testMode)
@@ -440,10 +441,8 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 		if(pitem->srcPages>1)
 		{
 			msg.printMode=PM_SCAN_MULTI_PAGE;
-			if(pid->page==pitem->start.page) 
-				msg.flags |= FLAG_SMP_FIRST_PAGE;
-			if(pid->page==pitem->lastPage && pid->scan==pitem->scans) 
-				msg.flags |= FLAG_SMP_LAST_PAGE;
+			if(pid->page==pitem->start.page)						  msg.flags |= FLAG_SMP_FIRST_PAGE;
+			if(pid->page==pitem->lastPage && pid->scan==pitem->scans) msg.flags |= FLAG_SMP_LAST_PAGE;
 			msg.smp_bufSize = pitem->scansStart;
 		}
 		else msg.printMode = PM_SCANNING;

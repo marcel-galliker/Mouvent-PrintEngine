@@ -596,7 +596,8 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 			char str[MAX_PATH];
 			for (i=0; i<SIZEOF(bmpInfo.buffer); i++)
 			{
-				if (bmpInfo.buffer[i])
+			//	if (bmpInfo.buffer[i])
+				if (buffer[i])
 				{
 					sprintf(str, "%sPAGE_%d_%s.bmp", PATH_TEMP, id->page, RX_ColorNameShort(bmpInfo.inkSupplyNo[i]));
 					if (multiCopy > 1)
@@ -1433,6 +1434,7 @@ static void _data_fill_blk_scan(SBmpSplitInfo *psplit, int blkNo, BYTE *dst)
 				if ((flags&FLAG_PASS_1OF2) && (line&1)==1) memset(&dst[size], 0x00, dstLen);
 				if ((flags&FLAG_PASS_2OF2) && (line&1)==0) memset(&dst[size], 0x00, dstLen);
 			}
+			/*
 			else
 			{
 				BYTE mask;
@@ -1443,6 +1445,7 @@ static void _data_fill_blk_scan(SBmpSplitInfo *psplit, int blkNo, BYTE *dst)
 				if (line&1) mask=~mask;
 				for (data=&dst[size], len=dstLen; len; len--) *data++ &= mask;
 			}
+			*/
 		}
 		//-----------------------------------
 		

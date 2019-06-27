@@ -13,8 +13,8 @@
              d:DesignHeight="300" 
              d:DesignWidth="600"
              >
-    
-    <Grid Background="White">
+
+    <Grid Background="White" x:Name="MainGrid">
         <Grid.RowDefinitions>
             <RowDefinition Height="auto" />
             <RowDefinition Height="0" />    <!--<RowDefinition Height="auto" /> -->
@@ -22,11 +22,9 @@
             <RowDefinition Height="auto" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="auto"/>
             <ColumnDefinition Width="*"/>
-
+            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-
 
         <!-- title ____________________________________________________________-->
         <Grid Grid.Row="0" Grid.ColumnSpan="2" Background="#FFC6C6C6" Margin="0,1,0,0">
@@ -120,6 +118,10 @@
             <common:RxRadioButton x:Name="MidSize"   Content="Mid"   HorizontalAlignment="Center" MinWidth="50" Checked="Mid_Checked"   />
             <common:RxRadioButton x:Name="LargeSize" Content="Large" HorizontalAlignment="Center" MinWidth="50" Checked="Large_Checked" Last="True"/>
         </StackPanel>
+        
+        <Button Grid.Row="0" VerticalAlignment="Top" HorizontalAlignment="Right" Click="View_Clicked" FontFamily="Wingdings 3" Margin="-20,0" Height="40">
+            <Image Source="../../Resources/Bitmaps/WebIn.ico"/>
+        </Button>
 
         <TextBlock Text="Refreshing" Grid.RowSpan="4" Grid.ColumnSpan="2" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="100" x:Name="MsgRefresh" Foreground="#FFFF0909" RenderTransformOrigin="0.5,0.5">
             <TextBlock.RenderTransform> 

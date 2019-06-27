@@ -125,7 +125,7 @@
                 <Image Source="{StaticResource reload_ico}"/>
             </common:RxButton>
 
-            <common:RxButton Grid.Column="3" Click="Delete_Clicked" Height="50">
+            <common:RxButton Grid.Column="3" Click="Delete_Clicked" Height="50" x:Name="DeleteButton">
                 <Image Source="{StaticResource delete_ico}"/>
             </common:RxButton>
         </Grid>

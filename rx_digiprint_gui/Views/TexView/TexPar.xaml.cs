@@ -34,6 +34,15 @@ namespace RX_DigiPrint.Views.TexView
 
             XML_MATERIAL.PropertyChanged += XML_MATERIAL_PropertyChanged;
             RxGlobals.Timer.TimerFct += Timer;
+
+            RxGlobals.User.PropertyChanged += User_PropertyChanged;
+            User_PropertyChanged(null, null);
+        }
+
+        private void User_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            Visibility visibility  =  (RxGlobals.User.UserType >= EUserType.usr_supervisor) ? Visibility.Visible : Visibility.Collapsed; 
+            DeleteButton.Visibility = visibility;
         }
 
         //--- Save_Clicked ---------------------------------------------

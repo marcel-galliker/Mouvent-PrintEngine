@@ -459,14 +459,8 @@ int tif_load(SPageId *id, const char *filedir, const char *filename, int printMo
 			{
 				int start;
 				start = -(INT32)wakeupLen;
-				memset(_ThreadPar[i].buffer+start*lineLen, 0x00, wakeupLen * lineLen);
-
+				memset(_ThreadPar[i].buffer+start*lineLen,           0x00, wakeupLen * lineLen);
 				memset(_ThreadPar[i].buffer+pinfo->lengthPx*lineLen, 0x00, wakeupLen * lineLen);
-
-				//--- test ---
-				if (TRUE)
-					memset(_ThreadPar[i].buffer+start*lineLen, 0xff, lineLen);
-				//---
 				
 				if (wakeupOn)
 				{

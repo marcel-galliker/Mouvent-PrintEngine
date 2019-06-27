@@ -65,6 +65,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
             LargeSize.IsChecked     = (_PreviewSize==2);
             RippedData.IsChecked    = true;
             MsgRefresh.Visibility   = Visibility.Hidden;
+            View_Clicked(null, null);
         }
 
         //--- UserControl_Loaded -------------------------------------------
@@ -406,6 +407,27 @@ namespace RX_DigiPrint.Views.PrintQueueView
             }
         }
 
+        //--- View_Clicked --------------------------------------------------------------------------
+        private bool _Directories=false;
+
+        private void View_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (_Directories)
+            {
+                MainGrid.ColumnDefinitions[0].MaxWidth = 200;
+                MainGrid.ColumnDefinitions[1].MaxWidth = 10000;
+            }
+            else
+            {
+                MainGrid.ColumnDefinitions[0].MaxWidth = 10000;
+                MainGrid.ColumnDefinitions[1].MaxWidth = 200;
+            }
+            _Directories = ! _Directories;
+            if (DirGrid.ColumnLayouts.Count>0)
+            {
+                DirGrid.ColumnLayouts[0].Columns["FileType"].ColumnLayout.ColumnWidth = ColumnWidth.SizeToCells;
+            }
+        }
 
         public void Print()
         {

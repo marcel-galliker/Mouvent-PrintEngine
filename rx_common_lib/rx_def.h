@@ -418,6 +418,7 @@ typedef struct SOffsetCfg
 	INT32	step;			// to adjust step fault
 	INT32	incPerMeter[2];	// increments per meter
 	INT32	versoDist;
+	INT32	manualFlightTimeComp;
 } SOffsetCfg;
 
 int rx_def_is_scanning(EPrinterType printerType);

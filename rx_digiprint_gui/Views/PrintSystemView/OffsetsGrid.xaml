@@ -49,6 +49,12 @@
                 <TextBlock       Text="Dist Verso [mm]"/>
                 <common:RxNumBox Text="{Binding OffsetVerso}" HorizontalContentAlignment="Right" Width="70" HorizontalAlignment="Right"/>
             </Grid>
+
+            <Grid x:Name="ManualFlightTimeComp">
+                <TextBlock       Text="FlightTime [µm]"/>
+                <common:RxNumBox Text="{Binding ManualFlightTimeComp}" HorizontalContentAlignment="Right" Width="70" HorizontalAlignment="Right"/>
+            </Grid>
+
         </StackPanel>
     </GroupBox>
 </UserControl>

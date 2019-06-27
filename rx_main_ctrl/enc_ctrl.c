@@ -261,7 +261,12 @@ int  enc_start_printing(SPrintQueueItem *pitem)
 			
 	case printer_TX801:			msg.orientation = FALSE;	msg.scanning=TRUE;  msg.incPerMeter=1000000; msg.pos_actual = machine_get_scanner_pos(); 
 								if (!pitem->testImage) _WakeupLen=WAKEUP_BAR_LEN*(RX_Config.inkSupplyCnt+1);
-								if (!arg_simuPLC) msg.correction=CORR_LINEAR;
+								if (!arg_simuPLC) 
+								{
+									if (TRUE) msg.correction=CORR_LINEAR;
+									else Error(WARN, 0, "Encoder compensation OFF");
+								}
+		
 								break;
 			
 	case printer_TX802:			msg.orientation = FALSE;	msg.scanning=TRUE;  msg.incPerMeter=1000000; msg.pos_actual = machine_get_scanner_pos(); 
@@ -310,9 +315,17 @@ int  enc_start_printing(SPrintQueueItem *pitem)
 			
 			case PQ_SCAN_BIDIR:		if (pitem->speed)
 									{
-										comp = 0.0050 * RX_StepperStatus.posZ * pitem->speed;
-//										test = RX_Config.headDistBackMax-comp;
-										Error(LOG, 0, "Flightime Comp: height=%d speed=%d comp=%d", RX_StepperStatus.posZ, pitem->speed, (int)comp);
+										if(RX_Config.printer.offset.manualFlightTimeComp)
+										{
+											comp=RX_Config.printer.offset.manualFlightTimeComp;
+											Error(LOG, 0, "Manual Flightime Comp: %d µm", (int)comp);											
+										}
+										else 
+										{
+											comp = 0.0050 * RX_StepperStatus.posZ * pitem->speed;
+	//										test = RX_Config.headDistBackMax-comp;
+											Error(LOG, 0, "Flightime Comp: height=%d speed=%d comp=%d µm", RX_StepperStatus.posZ, pitem->speed, (int)comp);
+										}
 										msg.pos_pg_bwd += (int)comp;  
 									}
 									break;

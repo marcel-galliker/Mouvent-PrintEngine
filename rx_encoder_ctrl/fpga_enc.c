@@ -543,12 +543,10 @@ void  fpga_encoder_enable(int enable)
 void  fpga_encoder_reset_reg(void)
 {
 	int i;
-	
 	if (_Init)
 	{
 		for (i = 0; i < 2; i++)
-		{
-			
+		{			
 			Fpga->cfg.encOut[i].reset_min_max	= TRUE;
 			Fpga->cfg.encIn[i].reset_min_max	= TRUE;
 		}

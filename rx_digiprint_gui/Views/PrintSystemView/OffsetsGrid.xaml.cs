@@ -44,6 +44,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                                                             Overlap.Visibility      = Visibility.Visible;
                                                             EncoderVerso.Visibility = Visibility.Collapsed;
                                                             DistVerso.Visibility    = Visibility.Collapsed;
+                                                            ManualFlightTimeComp.Visibility = Visibility.Collapsed;
                                                             break;
                 case EPrinterType.printer_TX801:            
                 case EPrinterType.printer_TX802:            this.Visibility         = Visibility.Visible;
@@ -53,6 +54,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                                                             Overlap.Visibility      = Visibility.Visible;
                                                             EncoderVerso.Visibility = Visibility.Collapsed;
                                                             DistVerso.Visibility    = Visibility.Collapsed;
+                                                            ManualFlightTimeComp.Visibility = Visibility.Visible;
                                                             break;
 
                 case EPrinterType.printer_DP803:            this.Visibility         = Visibility.Visible;
@@ -62,6 +64,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                                                             Overlap.Visibility      = Visibility.Collapsed;
                                                             EncoderVerso.Visibility = Visibility.Visible;
                                                             DistVerso.Visibility    = Visibility.Visible;
+                                                            ManualFlightTimeComp.Visibility = Visibility.Collapsed;
                                                             break;
 
                 case EPrinterType.printer_LB701:
@@ -72,6 +75,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                                                             Overlap.Visibility      = Visibility.Collapsed; 
                                                             EncoderVerso.Visibility = Visibility.Collapsed;
                                                             DistVerso.Visibility    = Visibility.Collapsed;
+                                                            ManualFlightTimeComp.Visibility = Visibility.Collapsed;
                                                             break;
 
                 case EPrinterType.printer_LB702_WB:         this.Visibility         = Visibility.Visible;
@@ -81,6 +85,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                                                             Overlap.Visibility      = Visibility.Collapsed; 
                                                             EncoderVerso.Visibility = Visibility.Collapsed;
                                                             DistVerso.Visibility    = Visibility.Visible;
+                                                            ManualFlightTimeComp.Visibility = Visibility.Collapsed;
                                                             break;
 
                 default:                                    this.Visibility         = Visibility.Visible;
@@ -90,6 +95,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                                                             Overlap.Visibility      = Visibility.Collapsed; 
                                                             EncoderVerso.Visibility = Visibility.Collapsed;
                                                             DistVerso.Visibility    = Visibility.Collapsed;
+                                                            ManualFlightTimeComp.Visibility = Visibility.Collapsed;
                                                             break;
             }
         }

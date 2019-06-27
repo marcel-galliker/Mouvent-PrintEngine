@@ -243,7 +243,15 @@ namespace RX_DigiPrint.Models
             get { return _OffsetVerso; }
             set { Changed|=SetProperty(ref _OffsetVerso, value); }
         }
-                
+
+        //--- Property ManualFlightTimeComp ---------------------------------------
+        private int _ManualFlightTimeComp ;
+        public int ManualFlightTimeComp 
+        {
+            get { return _ManualFlightTimeComp ; }
+            set { Changed|=SetProperty(ref _ManualFlightTimeComp , value); }
+        }
+        
         //--- SetPrintCfg ----------------------------------------
         public void SetPrintCfg(TcpIp.SPrinterCfgMsg msg)
         {
@@ -261,6 +269,7 @@ namespace RX_DigiPrint.Models
             Reverse                 = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX801 || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX802);
             Overlap                 = msg.overlap>0;
             OffsetVerso             = msg.offset.versoDist;
+            ManualFlightTimeComp    = msg.offset.manualFlightTimeComp;
             OffsetAngle             = msg.offset.angle;
             OffsetStep              = msg.offset.step;
             OffsetIncPerMeter       = msg.offset.incPerMeter;
@@ -298,6 +307,7 @@ namespace RX_DigiPrint.Models
             msg.type                = _PrinterType;
             msg.overlap             = Convert.ToUInt32(_Overlap);
             msg.offset.versoDist    = OffsetVerso;
+            msg.offset.manualFlightTimeComp = ManualFlightTimeComp;
             msg.offset.angle        = OffsetAngle;
             msg.offset.step         = OffsetStep;
             msg.offset.incPerMeter = OffsetIncPerMeter; 

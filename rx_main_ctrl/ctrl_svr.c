@@ -266,14 +266,18 @@ static int _prepare_config()
 					else sprintf(pBoard->head[head % MAX_HEADS_BOARD].name, "%s",    RX_ColorNameShort(isNo));
 					
 					// TX801: CORR_LINEAR: Board[0].Head[0] nearest to Encoder[1]
-					if (RX_Config.printer.type==printer_TX801)
+					if(RX_Config.printer.type == printer_TX801)
 					{
-						if (!arg_simuPLC) pBoard->head[head % MAX_HEADS_BOARD].encoderNo = 7-color;
-						if (!RX_Config.printer.overlap)
+						if(TRUE)
 						{
-							pBoard->head[head % MAX_HEADS_BOARD].jetEnabled0   = overlap;
-							pBoard->head[head % MAX_HEADS_BOARD].jetEnabledCnt = jets-overlap;							
+							if(!arg_simuPLC) pBoard->head[head % MAX_HEADS_BOARD].encoderNo = 7 - color;
+							if(!RX_Config.printer.overlap)
+							{
+								pBoard->head[head % MAX_HEADS_BOARD].jetEnabled0   = overlap;
+								pBoard->head[head % MAX_HEADS_BOARD].jetEnabledCnt = jets - overlap;							
+							}								
 						}
+						else Error(WARN, 0, "Encoder compensation OFF");
 					}
 					
 					if (RX_PrinterStatus.testMode)

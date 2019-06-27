@@ -120,7 +120,8 @@ int setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action)
 		setup_chapter(file, "..", -1, action);
 	}
 
-	//--- test-table ---
+	/*
+	//--- Test-Table ---
 	if (setup_chapter(file, "Test-Table", -1, action)==REPLY_OK) 
 	{
 		setup_int32(file, "offset_angle",  action, (int*)&pcfg->printer.offset.angle, 0);
@@ -128,18 +129,21 @@ int setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action)
 		setup_int32(file, "offset_incPerMeter", action, &pcfg->printer.offset.incPerMeter[0], 0);
 		setup_int32(file, "offset_incPerMeterVerso", action, &pcfg->printer.offset.incPerMeter[1], 0);
 		setup_uint32(file, "offsetVerso", action, &pcfg->printer.offset.versoDist, 0);
+		setup_uint32(file, "manualFlightTimeComp", action, &pcfg->printer.offset.manualFlightTimeComp, 0);
 		setup_chapter(file, "..", -1, action);
 	}
+	*/
+//	if (action==WRITE)
 	//--- offsets ---
-	if (action==WRITE)
 	{
 		if (setup_chapter(file, "Offsets", -1, action)==REPLY_OK)
 		{
-			setup_int32(file, "offset_angle",  action, (int*)&pcfg->printer.offset.angle, 0);
-			setup_int32(file, "offset_step", action, (int*)&pcfg->printer.offset.step, 0);
-			setup_int32(file, "offset_incPerMeter",		 action, &pcfg->printer.offset.incPerMeter[0], 0);
-			setup_int32(file, "offset_incPerMeterVerso", action, &pcfg->printer.offset.incPerMeter[1], 0);
-			setup_uint32(file, "offsetVerso", action, &pcfg->printer.offset.versoDist, 0);
+			setup_int32(file, "offset_angle",				action, (int*)&pcfg->printer.offset.angle, 0);
+			setup_int32(file, "offset_step",				action, (int*)&pcfg->printer.offset.step, 0);
+			setup_int32(file, "offset_incPerMeter",			action, &pcfg->printer.offset.incPerMeter[0], 0);
+			setup_int32(file, "offset_incPerMeterVerso",	action, &pcfg->printer.offset.incPerMeter[1], 0);
+			setup_uint32(file, "offsetVerso",				action,	&pcfg->printer.offset.versoDist, 0);
+			setup_uint32(file, "manualFlightTimeComp",		action, &pcfg->printer.offset.manualFlightTimeComp, 0);
 			setup_chapter(file, "..", -1, action);			
 		}
 	}
@@ -179,6 +183,7 @@ int setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action)
 	//--- ink supply ---
 	setup_uchar(file, "InkSupplyCnt", action, &pcfg->inkSupplyCnt, 1);
 	setup_uchar(file, "HeadsPerColor", action, &pcfg->headsPerColor, 1);
+
 	for (i=0; i<pcfg->inkSupplyCnt; i++)
 	{
 		if (setup_chapter(file, "InkSupply", i, action)==REPLY_OK) 
