@@ -263,12 +263,9 @@ void pump_tick_10ms(void)
 		case ctrl_print_step8:	RX_Status.mode = RX_Config.mode; break;
 		case ctrl_print_step9:	RX_Status.mode = RX_Config.mode; break;
 			
-		case ctrl_cal_start:
-		case ctrl_cal_step1:                 
-		case ctrl_cal_step2:    
-        case ctrl_cal_step3:				
 		case ctrl_print_run:  
-						//--- mode changed -----------------
+		case ctrl_cal_start:
+						//--- start: reset regulation -----------------
 						if (RX_Config.mode != RX_Status.mode)
 						{
 							_PumpPID.P 			= DEFAULT_P;
@@ -289,14 +286,18 @@ void pump_tick_10ms(void)
 							_meniscus_err_cnt=0;
 							_no_ink_err_cnt  =0;							
 						}
-						RX_Status.mode = RX_Config.mode; 		
-						
+						// no break here!
+		case ctrl_cal_step1:                 
+		case ctrl_cal_step2:    
+        case ctrl_cal_step3:										
 						//--- always --------------------------
 						temp_ctrl_on(TRUE);
 						_set_valve(TO_INK);
                         max_pressure = MBAR_500;
         
 						_pump_pid();
+						
+						RX_Status.mode = RX_Config.mode; 		
                         break;
         
         //--- PURGE --------------------------------------------
