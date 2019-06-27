@@ -590,7 +590,7 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 			else if (printMode!=PM_TEST && printMode!=PM_TEST_SINGLE_COLOR) jc_correction(&bmpInfo, &_PrintList[_InIdx], 0);
 		}
 		#ifdef DEBUG
-		if (loaded)
+		if (FALSE && loaded)
 		{
 			int i;
 			char str[MAX_PATH];
@@ -1415,6 +1415,10 @@ static void _data_fill_blk_scan(SBmpSplitInfo *psplit, int blkNo, BYTE *dst)
 		//---------------------------------
 		if (flags & (FLAG_PASS_1OF2|FLAG_PASS_2OF2))
 		{
+			if ((flags&FLAG_PASS_1OF2)/* && (line&1)==1*/) memset(&dst[size], 0x00, dstLen);
+			if ((flags&FLAG_PASS_2OF2) && (line&1)==0) memset(&dst[size], 0x00, dstLen);
+			
+			/*
 			if (TRUE)
 			{
 				if ((flags&FLAG_PASS_1OF2) && (line&1)==1) memset(&dst[size], 0x00, dstLen);
@@ -1430,6 +1434,7 @@ static void _data_fill_blk_scan(SBmpSplitInfo *psplit, int blkNo, BYTE *dst)
 				if (line&1) mask=~mask;
 				for (data=&dst[size], len=dstLen; len; len--) *data++ &= mask;
 			}
+			*/
 		}
 		//-----------------------------------
 		

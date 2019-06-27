@@ -425,7 +425,7 @@ static int _send_image_cmd(SBmpSplitInfo *pInfo)
 	imageCmd.head		= pInfo->head;
 
 	memcpy(&imageCmd.id, &pInfo->pListItem->id, sizeof(imageCmd.id));
-	imageCmd.image.flags			= pInfo->pListItem->flags;
+	imageCmd.image.flags			= pInfo->pListItem->flags & (FLAG_MIRROR | FLAG_BIDIR);
 	imageCmd.image.bitPerPixel		= pInfo->bitsPerPixel;
 	imageCmd.image.blkNo			= pInfo->blk0;
 	imageCmd.image.blkCnt			= pInfo->blkCnt;

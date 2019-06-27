@@ -231,11 +231,12 @@ static void _tx801_control_vents(void)
 	
 	if (time-_lastTime>100)
 	{
+		int vent_cnt = (RX_StepperCfg.printerType==printer_TX802)? 6:4;
 		if(_VentSpeed)
 		{			
 			if (time>_VentCtrlDelay)
 			{
-				for (i=0; i<6; i++)
+				for (i=0; i<vent_cnt; i++)
 				{
 					if(_VentErrorCnt[i] < VENT_MAX_ERROR)
 					{
@@ -248,7 +249,7 @@ static void _tx801_control_vents(void)
 				}					
 			}
 		}
-		for (i=0; i<6; i++) 
+		for (i=0; i<vent_cnt; i++) 
 		{
 			if (_VentValue[i]<30)      Fpga.par->pwm_output[i] = 0;
 			else if(_VentValue[i]<100) Fpga.par->pwm_output[i] = (0x10000 * _VentValue[i]) / 100;

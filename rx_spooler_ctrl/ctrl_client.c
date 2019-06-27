@@ -314,7 +314,7 @@ static int _do_disabled_jets(RX_SOCKET socket, SDisabledJets *jets)
 }
 
 //--- _do_print_file ----------------------------------------------------------------------
-static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pmsg)
+static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 {
 	SPrintFileCmd   msg;
 	int				ret=REPLY_OK;
@@ -322,18 +322,18 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pmsg)
 	static SPrintFileRep	reply;
 	static UINT8			multiCopy;
 	static char				path[MAX_PATH];
-
+		
 	_MsgGot++;
-	memcpy(&msg, pmsg, sizeof(msg)); // local copy as original can be overwritten by the communication task!
+	memcpy(&msg, pdata, sizeof(msg)); // local copy as original can be overwritten by the communication task!
 
 	_Running = TRUE;
 	hc_start_printing();
 
-	same = (!strcmp(msg.filename, _LastFilename) && msg.id.page==_LastPage && pmsg->wakeup==_LastWakeup);
+	same = (!strcmp(msg.filename, _LastFilename) && msg.id.page==_LastPage && msg.wakeup==_LastWakeup);
 
 	TrPrintfL(TRUE, "_do_print_file[%d] >>%s<<  id=%d, page=%d, copy=%d, same=%d", _MsgGot, msg.filename, msg.id.id, msg.id.page, msg.id.copy, same);
 
-//	if(pmsg->smp_flags & SMP_LAST_PAGE) Error(LOG, 0, "_do_print_file[%d] >>%s<< id=%d, page=%d, copy=%d, scan=%d, same=%d, LAST PAGE", _MsgGot, msg.filename, msg.id.id, msg.id.page, msg.id.copy, msg.id.scan, same); 
+//	if(msg.smp_flags & SMP_LAST_PAGE) Error(LOG, 0, "_do_print_file[%d] >>%s<< id=%d, page=%d, copy=%d, scan=%d, same=%d, LAST PAGE", _MsgGot, msg.filename, msg.id.id, msg.id.page, msg.id.copy, msg.id.scan, same); 
 //	else                                Error(LOG, 0, "_do_print_file[%d] >>%s<< id=%d, page=%d, copy=%d, scan=%d, same=%d", _MsgGot, msg.filename, msg.id.id, msg.id.page, msg.id.copy, msg.id.scan, same); 
 	
 	if (!same)
@@ -341,9 +341,9 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pmsg)
 	//	Error(LOG, 0, "load file >>%s<< id=%d, page=%d, copy=%d", msg.filename, msg.id.id, msg.id.page, msg.id.copy);
 		_BufferNo = (_BufferNo+1)%BUFFER_CNT;
 
-//		if(pmsg->printMode==PM_SCANNING || pmsg->printMode==PM_SINGLE_PASS) // test
-		if(pmsg->printMode==PM_SCANNING) // correct!
-			data_set_wakeuplen(WAKEUP_BAR_LEN*(RX_Spooler.colorCnt+1), pmsg->wakeup);
+//		if(msg.printMode==PM_SCANNING || msg.printMode==PM_SINGLE_PASS) // test
+		if(msg.printMode==PM_SCANNING) // correct!
+			data_set_wakeuplen(WAKEUP_BAR_LEN*(RX_Spooler.colorCnt+1), msg.wakeup);
 		else			 
 			data_set_wakeuplen(0, FALSE);
 		memset(_LastFilename, 0, sizeof(_LastFilename));
@@ -363,7 +363,7 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pmsg)
 		}
 		if (ret==REPLY_OK)
 		{
-			if (pmsg->smp_bufSize) data_clear(_Buffer[_BufferNo]);
+			if (msg.smp_bufSize) data_clear(_Buffer[_BufferNo]);
 			ret = data_malloc (msg.printMode, reply.widthPx, reply.lengthPx, reply.bitsPerPixel, RX_Color, SIZEOF(RX_Color), &_BufferSize[_BufferNo], _Buffer[_BufferNo]);			
 		}
 		if (_Abort) 
@@ -391,8 +391,8 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pmsg)
 	{ 
 		SPrintFileMsg	evt;
 
-		if (pmsg->flags & FLAG_SMP_LAST_PAGE) _SMP_Flags |= FLAG_SMP_LAST_PAGE;
-//		if (data_load(&msg.id, path, msg.offsetWidth, msg.lengthPx, msg.gapPx, msg.blkNo, msg.printMode, msg.variable, msg.flags, msg.clearBlockUsed, same, _SMP_Flags | (pmsg->flags & FLAH_SMP_FIRST_PAGE), msg.smp_bufSize, _Buffer[_BufferNo])!=REPLY_OK && !_Abort)
+		if (msg.flags & FLAG_SMP_LAST_PAGE) _SMP_Flags |= FLAG_SMP_LAST_PAGE;
+//		if (data_load(&msg.id, path, msg.offsetWidth, msg.lengthPx, msg.gapPx, msg.blkNo, msg.printMode, msg.variable, msg.flags, msg.clearBlockUsed, same, _SMP_Flags | (msg.flags & FLAH_SMP_FIRST_PAGE), msg.smp_bufSize, _Buffer[_BufferNo])!=REPLY_OK && !_Abort)
 		if (data_load(&msg.id, path, msg.offsetWidth, msg.lengthPx, multiCopy, msg.gapPx, msg.blkNo, msg.printMode, msg.variable, msg.flags, msg.clearBlockUsed, same, msg.smp_bufSize, _Buffer[_BufferNo])!=REPLY_OK && !_Abort)
 			return Error(ERR_STOP, 0, "Could not load file >>%s<<", str_start_cut(msg.filename, PATH_RIPPED_DATA));			
 		
@@ -410,7 +410,7 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pmsg)
 		if (_ReadyToSend) hc_send_next();
 		memcpy(&_LastFilename, &msg.filename, sizeof(_LastFilename));
 		_LastPage = msg.id.page;
-		_LastWakeup = pmsg->wakeup;
+		_LastWakeup = msg.wakeup;
 	}
 	return REPLY_OK;
 }

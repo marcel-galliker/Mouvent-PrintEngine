@@ -54,7 +54,6 @@ static int		_HeadBoardCnt;
 static int		_SlideIsRight;
 static int		_Pass;
 static int		_DelayPauseTimer=0;
-static SPrintFileCmd _PrintFileMsg;
 static SSpoolerInfo	 _Spooler[MAX_SPOOLERS];
 
 
@@ -403,78 +402,80 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 {
 //	if (_Ready<=0) 
 //		 Error(WARN, 0, "Spooler not ready");
+
+	SPrintFileCmd msg;
 	
 	if (arg_simuHeads) Error(LOG, 0, "Printing ID=%d, page=%d, copy=%d", pid->id, pid->page, pid->copy);
 
 	_Ready--;
 	
-	_PrintFileMsg.hdr.msgLen	= sizeof(_PrintFileMsg);
-	_PrintFileMsg.hdr.msgId		= CMD_PRINT_FILE;
-	_PrintFileMsg.blkNo			= _BlkNo;
-	_PrintFileMsg.variable		= pitem->variable;
-	_PrintFileMsg.lengthUnit	= pitem->lengthUnit;
-	_PrintFileMsg.flags			= 0;
-	_PrintFileMsg.clearBlockUsed= clearBlockUsed;
-	_PrintFileMsg.wakeup		= pitem->wakeup;
-	strncpy(_PrintFileMsg.filename, filename, sizeof(_PrintFileMsg.filename));
-	memcpy(&_PrintFileMsg.id, pid, sizeof(_PrintFileMsg.id));
+	msg.hdr.msgLen	= sizeof(msg);
+	msg.hdr.msgId		= CMD_PRINT_FILE;
+	msg.blkNo			= _BlkNo;
+	msg.variable		= pitem->variable;
+	msg.lengthUnit	= pitem->lengthUnit;
+	msg.flags			= 0;
+	msg.clearBlockUsed= clearBlockUsed;
+	msg.wakeup		= pitem->wakeup;
+	strncpy(msg.filename, filename, sizeof(msg.filename));
+	memcpy(&msg.id, pid, sizeof(msg.id));
 	if (RX_PrinterStatus.testMode)
 	{
-		_PrintFileMsg.printMode     = PM_TEST;
+		msg.printMode     = PM_TEST;
 		if (RX_Config.printer.type==printer_test_table && (RX_TestImage.testImage==PQ_TEST_JETS || RX_TestImage.testImage==PQ_TEST_JET_NUMBERS) || RX_TestImage.testImage==PQ_TEST_ENCODER)
 		{
-			_PrintFileMsg.printMode = PM_TEST_SINGLE_COLOR;
+			msg.printMode = PM_TEST_SINGLE_COLOR;
 		}
 		else if (RX_TestImage.testImage==PQ_TEST_JETS || RX_TestImage.testImage==PQ_TEST_JET_NUMBERS) 
 		{
-			_PrintFileMsg.printMode = PM_TEST_JETS;
+			msg.printMode = PM_TEST_JETS;
 		}
 			
-		_PrintFileMsg.offsetWidth	= 0;
-		_PrintFileMsg.lengthPx		= lengthPx;
-		_PrintFileMsg.gapPx			= 0;	// unused
+		msg.offsetWidth	= 0;
+		msg.lengthPx		= lengthPx;
+		msg.gapPx			= 0;	// unused
 	}
 	else if (rx_def_is_scanning(RX_Config.printer.type))
 	{
 		if(pitem->srcPages>1)
 		{
-			_PrintFileMsg.printMode=PM_SCAN_MULTI_PAGE;
+			msg.printMode=PM_SCAN_MULTI_PAGE;
 			if(pid->page==pitem->start.page) 
-				_PrintFileMsg.flags |= FLAG_SMP_FIRST_PAGE;
+				msg.flags |= FLAG_SMP_FIRST_PAGE;
 			if(pid->page==pitem->lastPage && pid->scan==pitem->scans) 
-				_PrintFileMsg.flags |= FLAG_SMP_LAST_PAGE;
-			_PrintFileMsg.smp_bufSize = pitem->scansStart;
+				msg.flags |= FLAG_SMP_LAST_PAGE;
+			msg.smp_bufSize = pitem->scansStart;
 		}
-		else _PrintFileMsg.printMode = PM_SCANNING;
+		else msg.printMode = PM_SCANNING;
 
-		_PrintFileMsg.offsetWidth	= offsetWidth;
-		_PrintFileMsg.lengthPx		= lengthPx;
-		_PrintFileMsg.gapPx			= (UINT32)(pitem->printGoDist*1.200/25.4);
+		msg.offsetWidth	= offsetWidth;
+		msg.lengthPx		= lengthPx;
+		msg.gapPx			= (UINT32)(pitem->printGoDist*1.200/25.4);
 	}
 	else
 	{
-		_PrintFileMsg.printMode     = PM_SINGLE_PASS;
-		_PrintFileMsg.offsetWidth	= microns_to_px(offsetWidth, DPI_X);
-		_PrintFileMsg.lengthPx		= 0;	// unused
-		_PrintFileMsg.gapPx			= 0;	// unused
+		msg.printMode     = PM_SINGLE_PASS;
+		msg.offsetWidth	= microns_to_px(offsetWidth, DPI_X);
+		msg.lengthPx		= 0;	// unused
+		msg.gapPx			= 0;	// unused
 	}
 	switch (pitem->scanMode)
 	{
-	case PQ_SCAN_BIDIR:	_PrintFileMsg.flags |= (FLAG_BIDIR | _SlideIsRight); _SlideIsRight=!_SlideIsRight;	break;
-	case PQ_SCAN_RTL:	_PrintFileMsg.flags |= FLAG_MIRROR;  _SlideIsRight=TRUE;							break;
+	case PQ_SCAN_BIDIR:	msg.flags |= (FLAG_BIDIR | _SlideIsRight); _SlideIsRight=!_SlideIsRight;	break;
+	case PQ_SCAN_RTL:	msg.flags |= FLAG_MIRROR;  _SlideIsRight=TRUE;								break;
 	default:			_SlideIsRight=FALSE;	break;
 	}
-	
+
 	if (pitem->virtualDoublePass) 
 	{
-		if (_Pass==0) _PrintFileMsg.flags |= FLAG_PASS_1OF2;
-		else	      _PrintFileMsg.flags |= FLAG_PASS_2OF2;
-		_Pass = (_Pass+1) % 2;
+		if (_Pass==0) msg.flags |= FLAG_PASS_1OF2;
+		else	      msg.flags |= FLAG_PASS_2OF2;
+		_Pass = (_Pass+1) % pitem->passes;
 	}
-		
+
 	TrPrintfL(TRUE, "send spool_print_file >>%s<<", filename);
 	int cnt;
-	cnt=spool_send_msg(&_PrintFileMsg);
+	cnt=spool_send_msg(&msg);
 	if (cnt) RX_PrinterStatus.sentCnt++;// = _HeadBoardCnt;
 	else     Error(ERR_CONT, 0, "No Spoolers connected");
 //	Error(LOG, 0, "Load File[%d] page=%d, scan=%d", RX_PrinterStatus.sentCnt, pid->page, pid->scan);

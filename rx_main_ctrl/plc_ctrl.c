@@ -363,15 +363,17 @@ static void _plc_set_par(SPrintQueueItem *pItem, SPlcPar *pPlcPar)
 	{
 		_StepDist -= (128.0*25.4/1200.0);
 	}
-		
+	
+	_StepDist += ((double)(RX_Config.printer.offset.step))/1000.0;	
 	if (pItem->passes>1) _StepDist /= pItem->passes;
 	if (pItem->testImage==PQ_TEST_SCANNING) _StepDist=0;
+	pPlcPar->stepDist = _StepDist;
+
 	pPlcPar->startPos = WEB_OFFSET+(pItem->pageMargin)/1000.0-accDistmm;		
 	if (pItem->srcHeight<300)  pPlcPar->endPos = WEB_OFFSET+(pItem->pageMargin+300)/1000.0+accDistmm;
 	else                       pPlcPar->endPos = WEB_OFFSET+(pItem->pageMargin+pItem->srcHeight)/1000.0+accDistmm;
 	pPlcPar->endPos += RX_Config.headDistMax/1000.0;
 	pPlcPar->endPos += 10;
-	pPlcPar->stepDist = _StepDist + ((double)(RX_Config.printer.offset.step))/1000.0;	
 }
 
 //--- plc_get_step_dist_mm ------------------------------------------------------
