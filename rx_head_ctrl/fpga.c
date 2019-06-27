@@ -159,13 +159,13 @@ static int _check_block_used_flags_clear(int head, int imgNo, int blkNo, int blk
 static int _trace_used_flags(int head, int blkNo, int blkCnt, int blkEnd);
 static void _fpga_copy_status(void);
 static void _fpga_check_fp_errors(int printDone);
-static void _fpga_set_pg_offsets(int bwd);
+static void _fpga_set_pg_offsets(void);
 
 //*** functions ********************************************
 
 
 //--- fpga_init ----------------
-void fpga_init()
+void fpga_init(void)
 {
 	_Init = FALSE;
 	_Load_Time = rx_get_ticks()+6000;
@@ -301,7 +301,7 @@ void fpga_end()
 }
 
 //--- _ethernet_config -------------------------------
-void _ethernet_config()
+void _ethernet_config(void)
 {
 	UINT64	macAddr;
 	int		i;
@@ -573,7 +573,7 @@ int  fpga_set_config(RX_SOCKET socket)
 }
 
 //--- _fpga_set_pg_offsets ------------------------------------------------
-static void _fpga_set_pg_offsets(int bwd)
+static void _fpga_set_pg_offsets(void)
 {
 	int i;
 	
@@ -595,11 +595,10 @@ static void _fpga_set_pg_offsets(int bwd)
 	}
 	else
 	{
-		_Direction = bwd;
 		for (i=0; i<HEAD_CNT; i++)
 		{
 			FpgaCfg.head[i]->subStroke			= 0;
-			FpgaCfg.head[i]->offset_stroke		= _PgOffset[i][bwd];
+			FpgaCfg.head[i]->offset_stroke		= _PgOffset[i][_Direction];
 			FpgaCfg.head[i]->offset_substroke	= 0;
 		}					
 	}
@@ -1021,8 +1020,9 @@ int  fpga_image	(SFpgaImageCmd *msg)
 		else
 		{
 			_Bidir=FALSE;
+			_Direction = (msg->image.flags&FLAG_MIRROR) ? OFFSET_BWD:OFFSET_FWD;
 		//	TrPrintf(TRUE, "fpga_image.fpga_set_offset(%d)", msg->image.backward);
-			_fpga_set_pg_offsets(msg->image.flags);			
+			_fpga_set_pg_offsets();			
 		}
 				
 		_PageEnd[head][idx] = RX_HBConfig.head[head].blkNo0 + (msg->image.blkNo-RX_HBConfig.head[head].blkNo0+msg->image.blkCnt-1) % RX_HBConfig.head[head].blkCnt;
@@ -1621,7 +1621,7 @@ void  fpga_main(int ticks, int menu)
 	_AliveCnt[0] = Fpga.stat->udp_alive[0];
 	_AliveCnt[1] = Fpga.stat->udp_alive[1];
 
-	_fpga_set_pg_offsets(_Direction);
+	_fpga_set_pg_offsets();
 
 	int time2=rx_get_ticks()-time;
 

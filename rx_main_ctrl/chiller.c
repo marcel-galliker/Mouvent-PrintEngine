@@ -51,6 +51,7 @@ static INT64		_ErrorFlags;
 static INT64		_Alarm;
 static int			_Timeout;
 static int			_TempMax=30;
+static int			_TempChiller=30;
 
 static int			_ChillerThreadRunning;
 static int			_Handle=0;
@@ -128,9 +129,10 @@ int	 chiller_init(void)
 }
 
 //--- chiller_set_temp -----------------------------------------
-void chiller_set_temp(int tempMax)
+void chiller_set_temp(int tempChiller, int tempMax)
 {
 	_TempMax = tempMax;
+	_TempChiller = tempChiller;
 	if(arg_simuChiller) 
 	{
 		_ChillerStatus.enabled = FALSE;
@@ -275,8 +277,15 @@ static void *_chiller_thread(void *lpParameter)
 			}
 			if (_Handle>=0)
 			{
-				if (_TempMax>36)	_set_temp(CHILLER_TEMP_SET_UV);
-				else				_set_temp(CHILLER_TEMP_SET);
+				if(_TempChiller>0 && _TempChiller<100)
+				{
+					_set_temp(_TempChiller);	
+				}
+				else
+				{
+					if (_TempMax>36)	_set_temp(CHILLER_TEMP_SET_UV);
+					else				_set_temp(CHILLER_TEMP_SET);					
+				}
 				_write_register(0x0c, 1);											// Operation START				
 				ret = _read_registers(0x00, 8, registers);		
 			}

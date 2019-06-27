@@ -104,7 +104,7 @@ static int setup_item(HANDLE file, int idx, SPrintQueueItem *item, EN_setup_Acti
 		setup_uint32	(file, "printGoDist",	action, &item->printGoDist,		0);
 		setup_uint32	(file, "scanLength",	action, &item->scanLength,		100);
 		setup_uchar		(file, "passes",		action, &item->passes,			1);
-		setup_uchar		(file, "virtualDoublePass",		action, &item->virtualDoublePass,			0);
+		setup_uchar		(file, "virtualPasses",	action, &item->virtualPasses,	0);
 		setup_uchar		(file, "curingPasses",	action, &item->curingPasses,	1);
 		setup_uchar 	(file, "bidirectional",	action, &item->scanMode,		0);
 		setup_uint32	(file, "speed",			action, &item->speed,			4);

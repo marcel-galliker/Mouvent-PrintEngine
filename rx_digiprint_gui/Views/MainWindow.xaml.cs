@@ -181,7 +181,7 @@ namespace RX_DigiPrint.Views
                                         
                 Counters.Visibility      = (tx || lb) ? Visibility.Visible : Visibility.Collapsed;
 
-                if (tx) CounterUnit1.Text=" m²/h   ";
+                if (tx) CounterUnit1.Text=" m/h    ";
                 else    CounterUnit1.Text=" m/min   ";
 
                 switch (RxGlobals.PrintSystem.PrinterType)

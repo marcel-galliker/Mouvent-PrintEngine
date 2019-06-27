@@ -9,6 +9,8 @@
 //
 // ****************************************************************************
 
+#include <time.h>
+
 #include "rx_common.h"
 #include "rx_error.h"
 #include "rx_file.h"
@@ -17,6 +19,7 @@
 #include "rx_setup_ink.h"
 #include "rx_threads.h"
 #include "rx_trace.h"
+#include "libxl.h"
 #include "tcp_ip.h"
 #include "gui_svr.h"
 #include "ctr.h"
@@ -51,6 +54,7 @@ static void _do_evt_confirm		(RX_SOCKET socket);
 static void _do_restart_main	(RX_SOCKET socket);
 
 static void _do_req_log			(RX_SOCKET socket, SLogReqMsg*pmsg);
+static void _do_export_log		(RX_SOCKET socket, SLogReqMsg*pmsg);
 
 static void _do_get_network		(RX_SOCKET socket);
 static void _do_set_network		(RX_SOCKET socket, SSetNetworkCmd *pmsg);
@@ -127,7 +131,9 @@ int handle_gui_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sende
 			
 		case CMD_RESTART_MAIN:		_do_restart_main(socket);											break;
 
-		case CMD_REQ_LOG:			_do_req_log(socket, (SLogReqMsg*)pmsg);								break;
+		case CMD_REQ_LOG:			_do_req_log   (socket, (SLogReqMsg*)pmsg);							break;
+			
+		case CMD_EXPORT_LOG:		_do_export_log(socket, (SLogReqMsg*)pmsg);							break;
 		
 		case CMD_GET_NETWORK:		_do_get_network(socket);											break;
 		case CMD_SET_NETWORK:		_do_set_network(socket, (SSetNetworkCmd*)pmsg);						break;
@@ -344,6 +350,151 @@ static void _do_req_log(RX_SOCKET socket, SLogReqMsg *pmsg)
 		gui_send_msg(socket, &msg);
 	}
 	log_close(&log);
+}
+
+//--- _do_export_log ----------------------------------------------------
+static void _do_export_log(RX_SOCKET socket, SLogReqMsg *pmsg)
+{
+#ifdef linux
+	int i;
+	int last;
+	int cnt, row;
+	char filePath[MAX_PATH];
+	char message[MAX_PATH];
+	char day[32];
+	char time[64];
+	char *test;
+
+	SLogReqMsg	reply;
+	SLogItem	item;
+	log_Handle	log=NULL;
+	BookHandle  book;
+	SheetHandle	sheet;
+	FormatHandle format;
+	FormatHandle format_std;
+	FormatHandle format_log;
+	FormatHandle format_warn;
+	FormatHandle format_err;
+
+	TrPrintf(TRUE, "_do_export_log");
+	_check_format("_do_export_log", pmsg, sizeof(*pmsg));
+	
+	if (pmsg->filepath[0]) log_open(pmsg->filepath, &log, FALSE);
+	else log_open(PATH_LOG FILENAME_LOG, &log, FALSE);
+
+	reply.hdr.msgLen = sizeof(reply);
+	reply.hdr.msgId	 = REP_REQ_LOG;
+	reply.first		 = pmsg->first;
+	reply.count		 = log_get_item_cnt(log); 
+	last			 = log_get_last_item_no(log);
+
+	book = xlCreateXMLBook();
+	xlBookSetKey(book, "Mouvent AG", "linux-e5d51b7c91a7a91d0905233d43ncj7m3"); 
+
+	rx_get_system_day_str(day, '-');
+	sprintf(filePath, "%sevents_%s_%s.xlsx", PATH_TEMP, RX_Hostname, day);
+	
+	format_std  = xlBookFormat(book, 1);
+	format_log  = format_std;
+	
+	format_warn = xlBookAddFormat(book, format_std);
+	xlFormatSetFillPattern(format_warn, FILLPATTERN_SOLID);
+	xlFormatSetPatternForegroundColor(format_warn, COLOR_YELLOW);
+	xlFormatSetPatternBackgroundColor(format_warn, COLOR_YELLOW);
+
+	format_err  = xlBookAddFormat(book, format_std);	
+	xlFormatSetFillPattern(format_err, FILLPATTERN_SOLID);
+	xlFormatSetPatternForegroundColor(format_err, COLOR_RED);
+	xlFormatSetPatternBackgroundColor(format_err, COLOR_RED);
+	
+	row=0;
+	sheet = xlBookAddSheet(book, day, 0);
+	xlSheetWriteStr(sheet, row, 0, "Type",		0);
+	xlSheetWriteStr(sheet, row, 1, "Time",		0);
+	xlSheetWriteStr(sheet, row, 2, "Device",	0);
+	xlSheetWriteStr(sheet, row, 3, "No",		0);
+	xlSheetWriteStr(sheet, row, 4, "Message",	0);
+	xlSheetWriteStr(sheet, row, 5, "File",		0);
+	xlSheetWriteStr(sheet, row, 6, "Line",		0);
+	
+	for(i = last-reply.first-1, cnt = pmsg->count; cnt-- && log_get_item(log, i, &item)==REPLY_OK; i--)
+	{	
+		row++;
+		format =format_std;
+		switch (item.logType)
+        {
+        case LOG_TYPE_WARN:			format = format_warn;
+									xlSheetWriteStr(sheet, row, 0, "WARN", format); break;
+        case LOG_TYPE_ERROR_CONT:  
+        case LOG_TYPE_ERROR_STOP:  
+        case LOG_TYPE_ERROR_ABORT:  format = format_err;
+									xlSheetWriteStr(sheet, row, 0, "ERROR", format); break;
+        default:					format = format_log;
+									xlSheetWriteStr(sheet, row, 0, "LOG",   format); break;
+        }
+				
+		if (item.time)
+		{
+			time_t t=FiletimeToTimet(item.time);
+			struct tm *tm = localtime(&t);
+			sprintf(time, "%d.%s.%d  %d:%02d:%02d", tm->tm_mday, RX_MonthStr[tm->tm_mon], tm->tm_year + 1900, tm->tm_hour, tm->tm_min, tm->tm_sec);
+			xlSheetWriteStr(sheet, row, 1, time, format);
+		}
+		
+		switch(item.deviceType)
+        {
+        case dev_gui:       strcpy(message, "GUI"); break;
+		case dev_main:      strcpy(message, "Main Ctrl"); break;
+        case dev_plc:       strcpy(message, "Plc"); break;
+		case dev_enc:       if(RX_Config.printer.type == printer_DP803)
+							{ 
+								if(item.deviceNo == 0) strcpy(message, "Encoder Recto");
+								else strcpy(message, "Encoder Verso");
+							}
+							else strcpy(message, "Encoder");
+							break;
+        case dev_fluid:     sprintf(message, "Fluid%d", item.deviceNo+1); break;
+        case dev_stepper:   sprintf(message, "Stepper%d", item.deviceNo+1); break;
+	    case dev_head:      {
+								/*
+								int head0 = (_DevNo*(int)TcpIp.HEAD_CNT)%RxGlobals.PrintSystem.HeadCnt;
+                                if (RxGlobals.PrintSystem.HeadCnt==TcpIp.HEAD_CNT) 
+                                            return string.Format("CL {0}", InkType.ColorNameShort(RxGlobals.InkSupply.List[_DevNo].InkType.ColorCode), _DevNo+1, _DevNo+4);
+                                        if (RxGlobals.PrintSystem.HeadCnt > TcpIp.HEAD_CNT)
+                                        {
+                                            int isNo=(int)((_DevNo*TcpIp.HEAD_CNT)/RxGlobals.PrintSystem.HeadCnt);
+                                            string name = InkType.ColorNameShort(RxGlobals.InkSupply.List[isNo].InkType.ColorCode);
+                                            switch(RxGlobals.InkSupply.List[isNo].RectoVerso)
+                                            {
+                                                case ERectoVerso.rv_recto: name= "R"+name; break;
+                                                case ERectoVerso.rv_verso: name= "V"+name; break;
+                                                default:                   name= "CL "+name; break;
+                                            }
+                                            return string.Format("{0}-{1}..{2}", name, head0+1, head0+4);
+                                        }
+                                    }
+                                        catch(Exception){};
+								*/
+								sprintf(message,"CL%d", item.deviceNo+1);
+							}
+							break;
+	        
+        case dev_spooler:   sprintf(message, "Spooler%d0", item.deviceNo+1);
+        default:            strcpy(message, "");
+        }
+
+		xlSheetWriteStr(sheet, row, 2, message,	format);
+		xlSheetWriteNum(sheet, row, 3, item.errNo,	format);
+		compose_message(item.deviceType, item.deviceNo, item.errNo, message, sizeof(message), item.formatStr, item.arg);
+		xlSheetWriteStr(sheet, row, 4, message,		format);
+		xlSheetWriteStr(sheet, row, 5, item.file,	format);
+		xlSheetWriteNum(sheet, row, 6, item.line,	format);
+	}
+	log_close(&log);
+	xlSheetSetCol(sheet, 0, 6, -1, NULL, FALSE);
+	xlBookSave(book, filePath);
+	Error(LOG, 0, "Events exported to >>%s<<", filePath);
+#endif
 }
 
 //--- _do_get_network ----------------------------------------

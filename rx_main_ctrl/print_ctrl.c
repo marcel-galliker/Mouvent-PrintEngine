@@ -265,6 +265,7 @@ int pc_pause_printing(void)
 	if (RX_PrinterStatus.printState==ps_printing) Error(LOG, 0, "PAUSE called by user");
 	RX_PrinterStatus.printState=ps_pause;
 	gui_send_printer_status(&RX_PrinterStatus);
+	enc_stop_pg();
 	machine_pause_printing();
 	return REPLY_OK;	
 }

@@ -329,7 +329,7 @@ int pem_print_file_evt	(RX_SOCKET socket, int headNo, SPrintFileMsg	*msg)
 						break;
 
 	/*		
-	case DATA_PRINT_DONE:
+	case fv:
 						Error(LOG, 0, "Head[%d]: PrintDone (id=%d, page=%d, copy=%d)", headNo, _Item.id.id, _Item.id.page, _Item.id.copy);
 						break;	
 	*/

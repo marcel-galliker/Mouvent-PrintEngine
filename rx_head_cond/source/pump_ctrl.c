@@ -251,19 +251,20 @@ void pump_tick_10ms(void)
                         RX_Status.mode = RX_Config.mode; 		// ???
 						break;
 		
-        //--- PRINT --------------------------------------------
-		case ctrl_print_step0:	RX_Status.mode = RX_Config.mode; break;
-		case ctrl_print_step1:	RX_Status.mode = RX_Config.mode; break;
-		case ctrl_print_step2:	RX_Status.mode = RX_Config.mode; break;
-		case ctrl_print_step3:	RX_Status.mode = RX_Config.mode; break;
-		case ctrl_print_step4:	RX_Status.mode = RX_Config.mode; break;
-		case ctrl_print_step5:	RX_Status.mode = RX_Config.mode; break;
-		case ctrl_print_step6:	RX_Status.mode = RX_Config.mode; break;
-		case ctrl_print_step7:	RX_Status.mode = RX_Config.mode; break;
-		case ctrl_print_step8:	RX_Status.mode = RX_Config.mode; break;
-		case ctrl_print_step9:	RX_Status.mode = RX_Config.mode; break;
+        //--- Diangnostics --------------------------------------------
+		case ctrl_check_step0:	RX_Status.mode = RX_Config.mode; break;
+		case ctrl_check_step1:	RX_Status.mode = RX_Config.mode; break;
+		case ctrl_check_step2:	RX_Status.mode = RX_Config.mode; break;
+		case ctrl_check_step3:	RX_Status.mode = RX_Config.mode; break;
+		case ctrl_check_step4:	RX_Status.mode = RX_Config.mode; break;
+		case ctrl_check_step5:	RX_Status.mode = RX_Config.mode; break;
+		case ctrl_check_step6:	RX_Status.mode = RX_Config.mode; break;
+		case ctrl_check_step7:	RX_Status.mode = RX_Config.mode; break;
+		case ctrl_check_step8:	RX_Status.mode = RX_Config.mode; break;
+		case ctrl_check_step9:	RX_Status.mode = RX_Config.mode; break;
 			
-		case ctrl_print_run:  
+        //--- PRINT --------------------------------------------
+		case ctrl_print:  
 		case ctrl_cal_start:
 						//--- start: reset regulation -----------------
 						if (RX_Config.mode != RX_Status.mode)

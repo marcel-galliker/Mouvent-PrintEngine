@@ -378,23 +378,23 @@ void ink_tick_10ms(void)
 			case ctrl_readyToPrint:
 				break;
 
-			case ctrl_print_step0:	pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode; break;
-			case ctrl_print_step1:	pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode; break;
-			case ctrl_print_step2:	pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode; break;
-			case ctrl_print_step3:	pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode; break;
-			case ctrl_print_step4:	pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode; break;
-			case ctrl_print_step5:	pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode; break;
-			case ctrl_print_step6:	pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode; break;
-			case ctrl_print_step7:	pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode; break;
-			case ctrl_print_step8:	pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode; break;
-			case ctrl_print_step9:	pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode; break;
+			case ctrl_check_step0:	pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode; break;
+			case ctrl_check_step1:	pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode; break;
+			case ctrl_check_step2:	pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode; break;
+			case ctrl_check_step3:	pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode; break;
+			case ctrl_check_step4:	pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode; break;
+			case ctrl_check_step5:	pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode; break;
+			case ctrl_check_step6:	pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode; break;
+			case ctrl_check_step7:	pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode; break;
+			case ctrl_check_step8:	pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode; break;
+			case ctrl_check_step9:	pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode; break;
 
 			case ctrl_cal_start:
 			case ctrl_cal_step1:
 			case ctrl_cal_step2:
 			case ctrl_cal_step3:
-			case ctrl_print_run:
-				if(pRX_Config->ink_supply[isNo].ctrl_mode == ctrl_print_run) _CalibrationSetpoint[isNo] = 0;
+			case ctrl_print:
+				if(pRX_Config->ink_supply[isNo].ctrl_mode == ctrl_print) _CalibrationSetpoint[isNo] = 0;
 				else
 				{
 					_CalibrationSetpoint[isNo] = 1;
@@ -417,7 +417,7 @@ void ink_tick_10ms(void)
 				&&  pRX_Status->ink_supply[isNo].ctrl_state != ctrl_purge_step5)
 					_cylinderPres_10[isNo] = 0;
 
-				if(pRX_Config->ink_supply[isNo].ctrl_mode == ctrl_print_run)
+				if(pRX_Config->ink_supply[isNo].ctrl_mode == ctrl_print)
 				{
 					_PressureSetpoint[isNo] = pRX_Status->ink_supply[isNo].cylinderPresSet;
 					pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;

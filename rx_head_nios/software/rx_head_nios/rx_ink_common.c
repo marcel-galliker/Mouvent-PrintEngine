@@ -31,18 +31,18 @@ char *FluidCtrlModeStr(EnFluidCtrlMode mode)
 	case ctrl_off:					return "OFF";		//  0x003:
 	case ctrl_warmup:				return "WARM ";		//  0x004:
 	case ctrl_readyToPrint:			return "READY";		//  0x005:
+	case ctrl_print:				return "PRINT";		//  0x01a:
 
-	case ctrl_print_step0:			return "PRINT /0";	//  0x010:
-	case ctrl_print_step1:			return "PRINT /1";	// 	0x011
-	case ctrl_print_step2:			return "PRINT /2";	// 	0x012
-	case ctrl_print_step3:			return "PRINT /3";	// 	0x013
-	case ctrl_print_step4:			return "PRINT /4";	// 	0x014
-	case ctrl_print_step5:			return "PRINT /5";	// 	0x015
-	case ctrl_print_step6:			return "PRINT /6";	// 	0x016
-	case ctrl_print_step7:			return "PRINT /7";	// 	0x017
-	case ctrl_print_step8:			return "PRINT /8";	// 	0x018
-	case ctrl_print_step9:			return "PRINT /9";	// 	0x019	
-	case ctrl_print_run:			return "PRINT";		//  0x01a:
+	case ctrl_check_step0:			return "CHECK /0";	//  0x010:
+	case ctrl_check_step1:			return "CHECK /1";	// 	0x011
+	case ctrl_check_step2:			return "CHECK /2";	// 	0x012
+	case ctrl_check_step3:			return "CHECK /3";	// 	0x013
+	case ctrl_check_step4:			return "CHECK /4";	// 	0x014
+	case ctrl_check_step5:			return "CHECK /5";	// 	0x015
+	case ctrl_check_step6:			return "CHECK /6";	// 	0x016
+	case ctrl_check_step7:			return "CHECK /7";	// 	0x017
+	case ctrl_check_step8:			return "CHECK /8";	// 	0x018
+	case ctrl_check_step9:			return "CHECK /9";	// 	0x019	
 
 	case ctrl_flush_night:			return "FLUSH_N";	//  0x080:
 	case ctrl_flush_weekend:		return "FLUSH_WE";	//  0x081:

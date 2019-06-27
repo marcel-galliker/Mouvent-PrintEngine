@@ -207,7 +207,7 @@
         <StackPanel x:Name="Counters" Grid.Row="1" HorizontalAlignment="Center" Orientation="Horizontal" Margin="5" >
             <StackPanel Orientation="Horizontal" MinWidth="100">
                 <TextBlock Text="{Binding ActSpeed}"   FontWeight="Bold"     FontSize="{StaticResource FontSizeXL}"    VerticalAlignment="Bottom"/>
-                <TextBlock x:Name="CounterUnit1" Text=" m²/h   "                                   FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Bottom"/>
+                <TextBlock x:Name="CounterUnit1" Text=" m/h    "                                   FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Bottom"/>
             </StackPanel>
             <Grid MinWidth="150" Margin="10,0">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">

@@ -63,7 +63,7 @@ typedef struct
 	EnFluidCtrlMode	ctrl_mode;
 	INT32   cylinderPresSet;
 	INT32	meniscusSet;
-	INT32	condPresOutSet;
+//	INT32	condPresOutSet;
 	INT32	flushTime[3];
 
 //	INT32	fluid_PIDsetpoint_P;

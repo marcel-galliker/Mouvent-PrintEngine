@@ -156,6 +156,7 @@
     <Compile Include="Views\InkView.xaml.cs">
       <DependentUpon>InkView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\PrintSpeedView.xaml.cs" />
     <Compile Include="Views\WfGraph.xaml.cs">
       <DependentUpon>WfGraph.xaml</DependentUpon>
     </Compile>
@@ -216,6 +217,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Views\PrintSpeedView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Views\WfGraph.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

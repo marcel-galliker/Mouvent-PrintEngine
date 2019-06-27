@@ -77,6 +77,22 @@ namespace RxWfTool.Models
             set { _Changed |= SetProperty(ref _TempMax, value); }
         }
 
+        //--- Property Temeprature ------------------------------
+        private int _TempChiller;
+        public int TempChiller
+        {
+            get { return _TempChiller; }
+            set { _Changed |= SetProperty(ref _TempChiller, value); }
+        }
+
+        //--- Property Temeprature ------------------------------
+        private int _Viscosity;
+        public int Viscosity
+        {
+            get { return _Viscosity; }
+            set { _Changed |= SetProperty(ref _Viscosity, value); }
+        }
+
         //--- Property GreyLevel ---------------------------------------
         private int[] _GreyLevel = new int[4];
         public int[] GreyLevel
@@ -99,14 +115,6 @@ namespace RxWfTool.Models
         {
             get { return _Meniscus; }
             set { SetProperty(ref _Meniscus, value); }
-        }
-
-        //--- Property CondPresOut ---------------------------------------
-        private int _CondPresOut;
-        public int CondPresOut
-        {
-            get { return _CondPresOut; }
-            set { SetProperty(ref _CondPresOut, value); }
         }
         
         //--- Property FlushTime0 ---------------------------------------
@@ -147,6 +155,74 @@ namespace RxWfTool.Models
                 FlushTime1 = Rx.StrToInt32(list[1]); 
                 FlushTime2 = Rx.StrToInt32(list[2]); 
             }
+        }
+
+        //--- Property PrintSpeed0 ---------------------------------------
+        private int _PrintSpeed0;
+        public int PrintSpeed0
+        {
+            get { return _PrintSpeed0; }
+            set { SetProperty(ref _PrintSpeed0, value); }
+        }
+        
+        //--- Property PrintSpeed1 ---------------------------------------
+        private int _PrintSpeed1;
+        public int PrintSpeed1
+        {
+            get { return _PrintSpeed1; }
+            set { SetProperty(ref _PrintSpeed1, value); }
+        }
+
+        //--- Property PrintSpeed2 ---------------------------------------
+        private int _PrintSpeed2;
+        public int PrintSpeed2
+        {
+            get { return _PrintSpeed2; }
+            set { SetProperty(ref _PrintSpeed2, value); }
+        }
+
+        //--- Property PrintSpeed2 ---------------------------------------
+        private int _PrintSpeed3;
+        public int PrintSpeed3
+        {
+            get { return _PrintSpeed3; }
+            set { SetProperty(ref _PrintSpeed3, value); }
+        }
+
+        //--- Property PrintSpeed4 ---------------------------------------
+        private int _PrintSpeed4;
+        public int PrintSpeed4
+        {
+            get { return _PrintSpeed4; }
+            set { SetProperty(ref _PrintSpeed4, value); }
+        }
+
+        //--- Property PrintSpeed5 ---------------------------------------
+        private int _PrintSpeed5;
+        public int PrintSpeed5
+        {
+            get { return _PrintSpeed5; }
+            set { SetProperty(ref _PrintSpeed5, value); }
+        }
+
+        //--- Property PrintingSpeed ---------------------------------------
+        private string _PrintingSpeed;
+        public string PrintingSpeed
+        {
+            get 
+            { 
+                return string.Format("{0} {1} {2} {3} {4} {5}", PrintSpeed0, PrintSpeed1, PrintSpeed2, PrintSpeed3, PrintSpeed4, PrintSpeed5); 
+            }
+            set 
+            { 
+                string[] list = (value as string).Split(' ');
+                PrintSpeed0 = Rx.StrToInt32(list[0]); 
+                PrintSpeed1 = Rx.StrToInt32(list[1]); 
+                PrintSpeed2 = Rx.StrToInt32(list[2]); 
+                PrintSpeed3 = Rx.StrToInt32(list[3]); 
+                PrintSpeed4 = Rx.StrToInt32(list[4]); 
+                PrintSpeed5 = Rx.StrToInt32(list[5]); 
+            }
         }   
 
         //--- Property DropletVolume ---------------------------------------
@@ -157,6 +233,14 @@ namespace RxWfTool.Models
             set { SetProperty(ref _DropletVolume, value); }
         }
         
+        //--- Property DropSpeed ---------------------------------------
+        private int _DropSpeed;
+        public int DropSpeed
+        {
+            get { return _DropSpeed; }
+            set { SetProperty(ref _DropSpeed, value); }
+        }
+
         //--- load --------------------------------------------
         public bool load(ref XmlTextReader xml)
         {
@@ -169,12 +253,15 @@ namespace RxWfTool.Models
                 RxXml.LoadProperty(xml, this, "ColorRGB");
                 RxXml.LoadProperty(xml, this, "Temp");
                 RxXml.LoadProperty(xml, this, "TempMax");
+                RxXml.LoadProperty(xml, this, "TempChiller");
                 RxXml.LoadProperty(xml, this, "GreyLevel");
                 RxXml.LoadProperty(xml, this, "MaxFreq");
                 RxXml.LoadProperty(xml, this, "Meniscus");
-                RxXml.LoadProperty(xml, this, "CondPresOut");
+                RxXml.LoadProperty(xml, this, "Viscosity");
+                RxXml.LoadProperty(xml, this, "DropSpeed");
                 RxXml.LoadProperty(xml, this, "DropletVolume");
                 RxXml.LoadProperty(xml, this, "FlushTime");
+                RxXml.LoadProperty(xml, this, "PrintingSpeed");
                 _Changed = false;
                 return true;
             }
@@ -193,12 +280,15 @@ namespace RxWfTool.Models
                 RxXml.SaveProperty(xml, this, "ColorRGB");
                 RxXml.SaveProperty(xml, this, "Temp");
                 RxXml.SaveProperty(xml, this, "TempMax");
+                RxXml.SaveProperty(xml, this, "TempChiller");
                 RxXml.SaveProperty(xml, this, "GreyLevel");
                 RxXml.SaveProperty(xml, this, "MaxFreq");
                 RxXml.SaveProperty(xml, this, "Meniscus");
-                RxXml.SaveProperty(xml, this, "CondPresOut");
+                RxXml.SaveProperty(xml, this, "Viscosity");
+                RxXml.SaveProperty(xml, this, "DropSpeed");
                 RxXml.SaveProperty(xml, this, "DropletVolume");
                 RxXml.SaveProperty(xml, this, "FlushTime");
+                RxXml.SaveProperty(xml, this, "PrintingSpeed");
             }
             xml.WriteEndElement();
             _Changed = false;

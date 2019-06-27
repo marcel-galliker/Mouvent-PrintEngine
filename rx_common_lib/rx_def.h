@@ -314,7 +314,7 @@ typedef struct SPrintQueueItem
 	INT32	printGoDist;
 	INT32	scanLength; // mm
 	INT8	passes;
-	INT8	virtualDoublePass;
+	INT8	virtualPasses;
 	INT8	curingPasses;
 	INT32	scans;
 	INT32	speed;
@@ -392,9 +392,12 @@ typedef struct SInkDefinition
 	UINT32	colorCode;
 	INT32	temp;
 	INT32	tempMax;
+	INT32	tempChiller;
 	INT32	dropletVolume;
 	INT32	meniscus;
-	INT32	condPresOut;
+	INT32	viscosity;
+	INT32	dropSpeed;
+	INT32	printingSpeed[8];
 	INT32	flushTime[3];
 	INT32	maxSpeed[MAX_DROP_SIZES];
 	UINT8	greyLevel[MAX_DROP_SIZES];
@@ -976,7 +979,7 @@ typedef struct SFluidBoardCfgLight
 	UINT32			headsPerColor;
 	INT32			cylinderPresSet	[INK_PER_BOARD];
 	INT32			meniscusSet		[INK_PER_BOARD];
-	INT32			condPresOutSet	[INK_PER_BOARD];
+//	INT32			condPresOutSet	[INK_PER_BOARD];
 	UINT32			inkTemp			[INK_PER_BOARD];	
 	UINT32			inkTempMax		[INK_PER_BOARD];
     UINT32			fluid_P         [INK_PER_BOARD];

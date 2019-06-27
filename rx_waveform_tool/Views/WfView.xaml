@@ -21,6 +21,7 @@
             <ColumnDefinition Width="auto" />
             <ColumnDefinition Width="auto" />
             <ColumnDefinition Width="auto" />
+            <ColumnDefinition Width="auto" />
         </Grid.ColumnDefinitions>
 
         <!-- Left Side ______________________________________________________________-->
@@ -42,7 +43,7 @@
 
         <ig:XamGrid
             x:Name="WfDefList"
-            Grid.Column="4" Grid.Row="1" Grid.RowSpan="2"
+            Grid.Column="5" Grid.Row="1" Grid.RowSpan="2"
             MinWidth="100" 
             AutoGenerateColumns="False"
             CellStyle="{DynamicResource XamGridCellStyle}"
@@ -95,16 +96,21 @@
         </StackPanel>
         
         <StackPanel Grid.Row="2" Grid.Column="1" Margin="2,0">
+            <TextBlock Text="Printing Speed" Background="{DynamicResource Brush03}" HorizontalAlignment="Stretch" Padding="5,0,0,0"/>
+            <views:PrintSpeedView x:Name="PrintingSpeed"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Grid.Column="2" Margin="2,0">
             <TextBlock Text="Flush Time" Background="{DynamicResource Brush03}" HorizontalAlignment="Stretch" Padding="5,0,0,0"/>
             <views:FlushTimeView x:Name="FlushTime"/>
         </StackPanel>
 
-        <StackPanel Grid.Row="2" Grid.Column="2" Margin="2,0">
+        <StackPanel Grid.Row="2" Grid.Column="3" Margin="2,0">
             <TextBlock Text="Grey Levels" Background="{DynamicResource Brush03}" HorizontalAlignment="Stretch" Padding="5,0,0,0"/>
             <views:GreyLevelView x:Name="GreyLevelDef"/>
         </StackPanel>
 
-        <StackPanel Grid.Row="2" Grid.Column="3" Margin="2,0" x:Name="Performance">
+        <StackPanel Grid.Row="2" Grid.Column="4" Margin="2,0" x:Name="Performance">
             <TextBlock Grid.ColumnSpan="2" Text="Performance" Background="{DynamicResource Brush03}" HorizontalAlignment="Stretch" Padding="5,0,0,0"/>
             <TextBlock Text="{Binding PulseLength, StringFormat='0.### µs'}"    HorizontalAlignment="Right"/>
             <TextBlock Text="{Binding PulseFreq,   StringFormat='0.### KHz'}"   HorizontalAlignment="Right"/>

@@ -547,8 +547,7 @@ typedef struct SFpgaHeadStat
 
 	UINT32				speed_current1;	
 	UINT32				speed_min1;		
-	UINT32				speed_max1;			// 0x02e8
-	
+	UINT32				speed_max1;			// 0x02e8	
 
 	UCHAR				tel_pg_cnt[4];			// 0x02ec
 	UINT32				res_xxx[(0x300-0x2f0)/4];

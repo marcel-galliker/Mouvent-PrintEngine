@@ -465,11 +465,11 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 	default:			_SlideIsRight=FALSE;	break;
 	}
 
-	if (pitem->virtualDoublePass) 
+	if (pitem->virtualPasses) 		
 	{
-		if (_Pass==0) msg.flags |= FLAG_PASS_1OF2;
-		else	      msg.flags |= FLAG_PASS_2OF2;
-		_Pass = (_Pass+1) % pitem->passes;
+		msg.virtualPasses = pitem->passes;
+		msg.virtualPass   = _Pass;
+		_Pass			  = (_Pass+1) % pitem->passes;
 	}
 
 	TrPrintfL(TRUE, "send spool_print_file >>%s<<", filename);
@@ -563,14 +563,14 @@ static int _do_print_file_evt	(RX_SOCKET socket, SPrintFileMsg	*msg)
 						}			
 						if (_Auto)  ctrl_print_page(&msg->id);																					
 						break;
-	/*		
+	/*
 	case DATA_PRINT_DONE:	// simu_write from spooler
 						for (int i=0; i<_HeadBoardCnt; i++)
 						{
 							pc_printed(&msg->id, i);
 						}
 						break;
-	*/	
+	*/
 	default:			TrPrintf(TRUE, "Documment ID=%d  page=%d , copy=%d, scan=%d: UNKNOWN EVENT %d",	msg->spoolerNo, msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->evt); break;
 	}
 	_Ready = msg->bufReady;
@@ -581,7 +581,8 @@ static int _do_print_file_evt	(RX_SOCKET socket, SPrintFileMsg	*msg)
 //--- _do_print_done_evt ---------------------
 static void _do_print_done_evt	(RX_SOCKET socket, SPrintDoneMsg *msg)
 {
-	pc_print_done(msg->boardNo, msg);
+	for (int i=0; i<_HeadBoardCnt; i++)
+		pc_print_done(msg->boardNo, msg);
 }							
 
 //--- _do_log_evt -----------------------------------------------------

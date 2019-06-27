@@ -37,9 +37,10 @@ namespace RX_DigiPrint.Models.Enums
                 if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX801 || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX802)
                 {
                     int[] speeds={30,60,85,100};
+                    int[] speeds1 = RxGlobals.InkSupply.PrintingSpeed();
                     for (int i=0; i<speeds.Length; i++)
                     {
-                        if (speeds[i]<=maxSpeed) _List.Add(new RxEnum<int>(speeds[i],  string.Format("{0}", speeds[i])));
+                        if (speeds[i]!=0 && speeds[i]<=maxSpeed) _List.Add(new RxEnum<int>(speeds[i],  string.Format("{0}", speeds[i])));
                     }
                 }
                 else

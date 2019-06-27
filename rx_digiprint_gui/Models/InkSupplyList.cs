@@ -61,7 +61,35 @@ namespace RX_DigiPrint.Models
                 _MyList[i].SetStatus(i, msg.status[i]);
             }
         }
-                
+        
+        //--- PrintingSpeed ------------------------------
+        public int[] PrintingSpeed()
+        {
+            int i;
+            bool ok=true;
+            int[] speeds = new int[32];
+            foreach(InkSupply supply in _MyList)
+            {
+                InkType ink = supply.InkType;
+                if (ink!=null && ink.PrintingSpeed!=null)
+                {
+                    for(i=0; i<ink.PrintingSpeed.Length && ink.PrintingSpeed[i]>0; i++)
+                    {
+                        if (speeds[i]==0) speeds[i]=ink.PrintingSpeed[i];
+                        ok &= (speeds[i]==ink.PrintingSpeed[i]);
+                    }
+                }
+            }
+            if (!ok || speeds[0]==0) 
+            {
+                speeds[0]=30;
+                speeds[1]=60;
+                speeds[2]=85;
+                speeds[3]=100;
+            }
+            return speeds;
+        }
+
         //--- Reset ---------------------------------------
         public void Reset()
         {

@@ -144,6 +144,7 @@ static int				_RunTime=0;
 static SNetworkItem		_NetItem;
 static ULONG			_LastLogIdx=0;
 static int				_StartPrinting=FALSE;
+static int				_RequestPause=FALSE;
 static int				_SendPause=FALSE;
 static int				_SendRun=FALSE;
 static int				_SendWebIn=FALSE;
@@ -151,8 +152,6 @@ static int				_Splicing=FALSE;
 static int				_CmdReleased=FALSE;
 static int				_CanRun=FALSE;
 static SPrintQueueItem	_StartEncoderItem;
-static int				_PauseCtrl=FALSE;
-static int				_DataSent =FALSE;
 static int				_ErrorFlags;
 static int				_ErrorFilter=0;
 static int				_ErrorFilterBuf[100];
@@ -190,8 +189,6 @@ int	plc_init(void)
 	
 	memset(&_StartEncoderItem, 0, sizeof(_StartEncoderItem));
 	_plc_error_filter_reset();
-	_PauseCtrl = FALSE;
-	_DataSent = FALSE;
 	_ErrorFlags  = 0;
 	_UvUsed = FALSE;
 	_Splicing = FALSE;
@@ -385,9 +382,9 @@ double	 plc_get_step_dist_mm(void)
 //--- plc_get_thickness --------------------
 int	plc_get_thickness(void)
 {
-	UINT32 thickness;
-	lc_get_value_by_name_UINT32(APP"PAR_MATERIAL_THIKNESS",	&thickness);
-	return (int)thickness;
+	FLOAT thickness;
+	lc_get_value_by_name_FLOAT(APP"PAR_MATERIAL_THIKNESS",	&thickness);
+	return (int)(thickness*1000);
 }
 
 //--- _plc_send_par -------------------------------------
@@ -470,8 +467,11 @@ int  plc_set_printpar(SPrintQueueItem *pItem)
 //--- plc_start_printing -----------------------------------------------
 int  plc_start_printing(void)
 {
-	if (_PlcState!=plc_run)	_StartPrinting		= TRUE;
-
+	if (_PlcState!=plc_run)	
+	{
+		_StartPrinting		= TRUE;
+		_RequestPause		= FALSE;
+	}
 	if (_CanRun && !_SimuPLC)
 	{
 		plc_error_reset();
@@ -487,6 +487,7 @@ int  plc_stop_printing(void)
 	if (_SimuEncoder) ctrl_simu_encoder(0);
 	_StartPrinting = FALSE;
 	_SendRun       = FALSE;
+	_RequestPause  = FALSE;
 	if (_SimuPLC)
 	{
 		RX_PrinterStatus.printState = ps_off;
@@ -562,6 +563,7 @@ int  plc_pause_printing(void)
 {
 	_StartPrinting = FALSE;
 	_SendRun       = FALSE;
+	_RequestPause  = FALSE;
 	if (_SimuEncoder && rx_def_is_scanning(RX_Config.printer.type)) ctrl_simu_encoder(0);
 
 	if (!_SimuPLC)
@@ -1266,9 +1268,13 @@ static void _plc_state_ctrl()
 				if(speed == 0) RX_PrinterStatus.actSpeed = 0;
 				else
 				{
+					/*
 					double stepArea = _StartEncoderItem.srcHeight / 1000000.0 * _StepDist/1000.0;
 					if (_StartEncoderItem.scanMode!=PQ_SCAN_BIDIR) stepArea /= 2; 
 					RX_PrinterStatus.actSpeed = (UINT32)(stepArea * 3600.0 / ((double)speed/1000.0));
+					*/
+					if (_StartEncoderItem.scanMode!=PQ_SCAN_BIDIR) speed*=2;
+					RX_PrinterStatus.actSpeed = (UINT32)((_StepDist/1000.0 * 3600.0) / ((double)speed/1000.0));
 				}
 			}
 			
@@ -1337,8 +1343,8 @@ static void _plc_state_ctrl()
 	{
 		static int _time=0;
 		int ticks=rx_get_ticks();
-		if (ticks-_time>500)
-		{
+		if (ticks-_time>450)
+		{			
 			_time=ticks;
 			int speed;
 			lc_get_value_by_name_UINT32(APP "STA_PRINTING_SPEED", &speed);
@@ -1347,6 +1353,17 @@ static void _plc_state_ctrl()
 				RX_PrinterStatus.actSpeed = speed;
 				gui_send_printer_status(&RX_PrinterStatus);					
 			}
+		}
+		
+		int pause;
+		int ret = lc_get_value_by_name_UINT32(APP "STA_PAUSE_REQUEST", &pause);
+		if (RX_PrinterStatus.printState==ps_printing && !_RequestPause && pause)
+		{
+			Error(ERR_CONT, 0, "PAUSE requested by finishing");
+			RX_PrinterStatus.printState=ps_pause; // suppress pause message
+	//		gui_send_printer_status(&RX_PrinterStatus);
+			_RequestPause = TRUE;
+			pc_pause_printing();
 		}
 	}
 }

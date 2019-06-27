@@ -36,7 +36,7 @@ static int	_Trace=0;
 #define SIMU_WRITE	1	// write data to file
 #define SIMU_READ	2	// test reading files, no sending, no writing
 
-static int	_Simulation=SIMU_OFF;
+static int	_Simulation=SIMU_WRITE;
 
 // #define RAW_SOCKET
 
@@ -322,7 +322,7 @@ void hc_send_next(void)
 										{
 											SPrintDoneMsg evt;
 
-											evt.hdr.msgId   = EVT_PRINT_FILE;
+											evt.hdr.msgId   = EVT_PRINT_DONE;
 											evt.hdr.msgLen  = sizeof(evt);
 											evt.boardNo		= pInfo->board;
 											evt.pd			= _HBPar[pInfo->board]->pdCnt++;

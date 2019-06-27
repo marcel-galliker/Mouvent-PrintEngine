@@ -237,7 +237,7 @@ void fluid_set_config(void)
 				cfg.cylinderPresSet[n] = RX_Config.inkSupply[i*INK_PER_BOARD+n].cylinderPresSet;
 	//			cfg.meniscusSet[n]	  = RX_Config.inkSupply[i*INK_PER_BOARD+n].ink.meniscus;
 				cfg.meniscusSet[n]	  = INVALID_VALUE;
-				cfg.condPresOutSet[n] = RX_Config.inkSupply[i*INK_PER_BOARD+n].ink.condPresOut;
+	//			cfg.condPresOutSet[n] = RX_Config.inkSupply[i*INK_PER_BOARD+n].ink.condPresOut;
 				cfg.inkTemp[n]        = RX_Config.inkSupply[i*INK_PER_BOARD+n].ink.temp;
 				cfg.inkTempMax[n]	  = RX_Config.inkSupply[i*INK_PER_BOARD+n].ink.tempMax;
 				memcpy(cfg.flushTime[n], RX_Config.inkSupply[i*INK_PER_BOARD+n].ink.flushTime, sizeof(cfg.flushTime[n]));
@@ -461,17 +461,17 @@ static void _control(int fluidNo)
 	//		Error(LOG, 0, "Fluid[%d] in mode >>%s<<", no, FluidCtrlModeStr(_stat->ctrlMode));		
 			switch(_stat->ctrlMode)
 			{
-				case ctrl_print_step0:	_send_ctrlMode(no, ctrl_print_run, TRUE);	break;
-			//	case ctrl_print_step0:	_send_ctrlMode(no, ctrl_print_step1, TRUE);	break;
-			//	case ctrl_print_step1:	_send_ctrlMode(no, ctrl_print_step2, TRUE);	break;
-			//	case ctrl_print_step2:	_send_ctrlMode(no, ctrl_print_step3, TRUE);	break;
-			//	case ctrl_print_step3:	_send_ctrlMode(no, ctrl_print_step4, TRUE);	break;
-			//	case ctrl_print_step4:	_send_ctrlMode(no, ctrl_print_step5, TRUE);	break;
-			//	case ctrl_print_step5:	_send_ctrlMode(no, ctrl_print_step6, TRUE);	break;
-			//	case ctrl_print_step6:	_send_ctrlMode(no, ctrl_print_step7, TRUE);	break;
-			//	case ctrl_print_step7:	_send_ctrlMode(no, ctrl_print_step8, TRUE);	break;
-			//	case ctrl_print_step8:	_send_ctrlMode(no, ctrl_print_step9, TRUE);	break;
-			//	case ctrl_print_step9:	_send_ctrlMode(no, ctrl_print_run,   TRUE);	break;
+				case ctrl_check_step0:	_send_ctrlMode(no, ctrl_off, TRUE);	break;
+			//	case ctrl_check_step0:	_send_ctrlMode(no, ctrl_print_step1, TRUE);	break;
+			//	case ctrl_check_step1:	_send_ctrlMode(no, ctrl_print_step2, TRUE);	break;
+			//	case ctrl_check_step2:	_send_ctrlMode(no, ctrl_print_step3, TRUE);	break;
+			//	case ctrl_check_step3:	_send_ctrlMode(no, ctrl_print_step4, TRUE);	break;
+			//	case ctrl_check_step4:	_send_ctrlMode(no, ctrl_print_step5, TRUE);	break;
+			//	case ctrl_check_step5:	_send_ctrlMode(no, ctrl_print_step6, TRUE);	break;
+			//	case ctrl_check_step6:	_send_ctrlMode(no, ctrl_print_step7, TRUE);	break;
+			//	case ctrl_check_step7:	_send_ctrlMode(no, ctrl_print_step8, TRUE);	break;
+			//	case ctrl_check_step8:	_send_ctrlMode(no, ctrl_print_step9, TRUE);	break;
+			//	case ctrl_check_step9:	_send_ctrlMode(no, ctrl_print_run,   TRUE);	break;
 				
 									// PURGE
 									//	1: Köpfe auf UP
@@ -588,7 +588,7 @@ static void _control(int fluidNo)
 				case ctrl_fill:			_send_ctrlMode(no, ctrl_fill_step1, TRUE);		break;
 			//	case ctrl_fill_step1:	wait for user input 
 				case ctrl_fill_step2:	_send_ctrlMode(no, ctrl_fill_step3, TRUE);		break;
-				case ctrl_fill_step3:	_send_ctrlMode(no, ctrl_print_step0,TRUE);		break;
+				case ctrl_fill_step3:	_send_ctrlMode(no, ctrl_print,TRUE);		break;
 
 				case ctrl_empty:		_send_ctrlMode(no, ctrl_empty_step1, TRUE);		break;					
 			//	case ctrl_empty_step1:	wait for user input 
@@ -597,7 +597,7 @@ static void _control(int fluidNo)
 				case ctrl_cal_start:	_send_ctrlMode(no, ctrl_cal_step1,	 TRUE);	break;				
 				case ctrl_cal_step1:	_send_ctrlMode(no, ctrl_cal_step2,   TRUE);		break;
 				case ctrl_cal_step2:	_send_ctrlMode(no, ctrl_cal_step3,	 TRUE); break;
-				case ctrl_cal_step3:	_send_ctrlMode(no, ctrl_print_step0, TRUE);    
+				case ctrl_cal_step3:	_send_ctrlMode(no, ctrl_print, TRUE);    
 										break;
 			}
 		}
@@ -758,7 +758,7 @@ void _send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 			}
 			else if (i==no || ctrlMode==ctrl_empty)
 			{
-				if ((ctrlMode>=ctrl_print_step0 && ctrlMode<=ctrl_print_run) && !RX_Config.inkSupply[i].ink.fileName[0]) continue;
+				if ((ctrlMode==ctrl_print) && !RX_Config.inkSupply[i].ink.fileName[0]) continue;
 //				if (ctrlMode==ctrl_shutdown && _FluidStatus[i].ctrlMode<=ctrl_off)   continue;
 					
 //				if (ctrlMode==ctrl_cal_start)
@@ -817,7 +817,7 @@ void fluid_start_printing(void)
 	int i;
 	for (i=0; i<RX_Config.printer.inkSupplyCnt; i++)
 	{
-		_send_ctrlMode(i, ctrl_print_step0, TRUE);		
+		_send_ctrlMode(i, ctrl_print, TRUE);		
 	}
 }
 

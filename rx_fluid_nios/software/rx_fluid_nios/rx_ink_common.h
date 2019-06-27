@@ -156,18 +156,18 @@ typedef enum EnFluidCtrlMode
     ctrl_off		= 0x003,            //	0x003:
     ctrl_warmup,         // 0x004:
     ctrl_readyToPrint,   // 0x005:
-
-	ctrl_print_step0		= 0x010,    // 0x010:
-	ctrl_print_step1,			// 0x011
-	ctrl_print_step2,			// 0x012
-	ctrl_print_step3,			// 0x013	
-	ctrl_print_step4,			// 0x014
-	ctrl_print_step5,			// 0x015
-	ctrl_print_step6,			// 0x016
-	ctrl_print_step7,			// 0x017
-	ctrl_print_step8,			// 0x018
-	ctrl_print_step9,			// 0x019
-	ctrl_print_run,				// 0x01a
+	ctrl_print,          // 0x006:
+	
+	ctrl_check_step0		= 0x010,    // 0x010:
+	ctrl_check_step1,			// 0x011
+	ctrl_check_step2,			// 0x012
+	ctrl_check_step3,			// 0x013	
+	ctrl_check_step4,			// 0x014
+	ctrl_check_step5,			// 0x015
+	ctrl_check_step6,			// 0x016
+	ctrl_check_step7,			// 0x017
+	ctrl_check_step8,			// 0x018
+	ctrl_check_step9,			// 0x019
 	
 	ctrl_flush_night = 0x080,	// 0x080:
     ctrl_flush_weekend,	 //	0x081:

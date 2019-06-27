@@ -264,7 +264,7 @@ void nios_set_cfg(SFluidBoardCfgLight *pcfg)
 	{
 		if (pcfg->cylinderPresSet[i]<=INK_PRESSURE_MAX) _Cfg->ink_supply[i].cylinderPresSet = pcfg->cylinderPresSet[i];
 		_Cfg->ink_supply[i].meniscusSet		= pcfg->meniscusSet[i];
-		_Cfg->ink_supply[i].condPresOutSet	= pcfg->condPresOutSet[i];
+//		_Cfg->ink_supply[i].condPresOutSet	= pcfg->condPresOutSet[i];
 		_Cfg->ink_supply[i].heaterTemp	    = pcfg->inkTemp[i] *1000;
 		_Cfg->ink_supply[i].heaterTempMax	= pcfg->inkTempMax[i] *1000;
 		//_Cfg->ink_supply[i].fluid_P			= pcfg->fluid_P[i];
@@ -381,8 +381,8 @@ void _simu_fluidsystem(void)
 		{
 			switch(_Cfg->ink_supply[i].ctrl_mode)
 			{
-				case ctrl_undef:		_Stat->ink_supply[i].ctrl_state = ctrl_print_run;
-										_Cfg->ink_supply[i].ctrl_mode   = ctrl_print_run;
+				case ctrl_undef:		_Stat->ink_supply[i].ctrl_state = ctrl_print;
+										_Cfg->ink_supply[i].ctrl_mode   = ctrl_print;
 										break;
 				
 				default: _Stat->ink_supply[i].ctrl_state = _Cfg->ink_supply[i].ctrl_mode;
@@ -489,7 +489,7 @@ static void _display_status(void)
 		term_printf("error:             ");	for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("    0x%04x  ", _Stat->ink_supply[i].error); term_printf("\n");
 		term_printf("Cond. Pressure IN: "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str1(_Cfg->ink_supply[i].condPresIn)); term_printf("\n");	
 		term_printf("\n");
-		term_printf("Cond. Pres Out Set:"); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str1(-_Cfg->ink_supply[i].condPresOutSet)); term_printf("\n");	
+//		term_printf("Cond. Pres Out Set:"); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str1(-_Cfg->ink_supply[i].condPresOutSet)); term_printf("\n");	
 		term_printf("Cond. Pres In:     "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str1(_Cfg->ink_supply[i].condPresIn)); term_printf("\n");	
 		term_printf("Cond. Pres Out:    "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str1(_Cfg->ink_supply[i].condPresOut)); term_printf("\n");	
 		term_printf("Cond. Meniscus:    "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str1(_Cfg->ink_supply[i].condMeniscus)); term_printf("\n");	
@@ -618,9 +618,11 @@ static void _IS_cond_log(int ticks)
 	}
 
 	int time = rx_get_ticks() - _LogTimer;
+	static int _lastTime=0;
 	
-	if (!(ticks % 10))
+	if (time-_lastTime>10)
 	{
+		_lastTime = time;
 		int i, ISspeed, ISpressure, CondSpeed, Condpressure, Condpout, CondMeniscus;
 		for (i = 0; i < 4; i++)
 		{
@@ -636,24 +638,23 @@ static void _IS_cond_log(int ticks)
 			{
 			case 0 : 
 				fprintf(_plog_file_IS1, "%d;%d;%d;%d;%d;%d;%d;%d;", time, _Cfg->ink_supply[i].cylinderPresSet, Condpressure, _Stat->ink_supply[i].PIDsetpoint_Output, CondMeniscus, CondSpeed, _Stat->ink_supply[i].fluid_PIDsetpoint_P, _Stat->ink_supply[i].fluid_PIDsetpoint_I);
-				fprintf(_plog_file_IS1, "%d;%d;%d;%d;%d\n", _Stat->ink_supply[i].PIDsetpoint_Output, ISpressure, ISspeed, _Stat->ink_supply[i].fluid_PIDpump_P, _Stat->ink_supply[i].fluid_PIDpump_I); 
+				fprintf(_plog_file_IS1, "%d;%s;%d;%d;%d\n", _Stat->ink_supply[i].PIDsetpoint_Output, value_str(ISpressure), ISspeed, _Stat->ink_supply[i].fluid_PIDpump_P, _Stat->ink_supply[i].fluid_PIDpump_I); 
 				break;
 			case 1 : 
 				fprintf(_plog_file_IS2, "%d;%d;%d;%d;%d;%d;%d;%d;%d;", time, _Cfg->ink_supply[i].cylinderPresSet, Condpressure, _Stat->ink_supply[i].PIDsetpoint_Output, CondMeniscus, CondSpeed, _Stat->ink_supply[i].fluid_PIDsetpoint_P, _Stat->ink_supply[i].fluid_PIDsetpoint_I, _Stat->ink_supply[i].PIDairvalve_Output);
-				fprintf(_plog_file_IS2, "%d;%d;%d;%d;%d\n", _Stat->ink_supply[i].PIDsetpoint_Output, ISpressure, ISspeed, _Stat->ink_supply[i].fluid_PIDpump_P, _Stat->ink_supply[i].fluid_PIDpump_I); 
+				fprintf(_plog_file_IS2, "%d;%s;%d;%d;%d\n", _Stat->ink_supply[i].PIDsetpoint_Output, value_str(ISpressure), ISspeed, _Stat->ink_supply[i].fluid_PIDpump_P, _Stat->ink_supply[i].fluid_PIDpump_I); 
 				break;
 			case 2 : 
 				fprintf(_plog_file_IS3, "%d;%d;%d;%d;%d;%d;%d;%d;", time, _Cfg->ink_supply[i].cylinderPresSet, Condpressure, _Stat->ink_supply[i].PIDsetpoint_Output, CondMeniscus, CondSpeed, _Stat->ink_supply[i].fluid_PIDsetpoint_P, _Stat->ink_supply[i].fluid_PIDsetpoint_I);
-				fprintf(_plog_file_IS3, "%d;%d;%d;%d;%d\n", _Stat->ink_supply[i].PIDsetpoint_Output, ISpressure, ISspeed, _Stat->ink_supply[i].fluid_PIDpump_P, _Stat->ink_supply[i].fluid_PIDpump_I); 
+				fprintf(_plog_file_IS3, "%d;%s;%d;%d;%d\n", _Stat->ink_supply[i].PIDsetpoint_Output, value_str(ISpressure), ISspeed, _Stat->ink_supply[i].fluid_PIDpump_P, _Stat->ink_supply[i].fluid_PIDpump_I); 
 				break;
 			case 3 : 
 				fprintf(_plog_file_IS4, "%d;%d;%d;%d;%d;%d;%d;%d;", time, _Cfg->ink_supply[i].cylinderPresSet, Condpressure, _Stat->ink_supply[i].PIDsetpoint_Output, CondMeniscus, CondSpeed, _Stat->ink_supply[i].fluid_PIDsetpoint_P, _Stat->ink_supply[i].fluid_PIDsetpoint_I);
-				fprintf(_plog_file_IS4, "%d;%d;%d;%d;%d\n", _Stat->ink_supply[i].PIDsetpoint_Output, ISpressure, ISspeed, _Stat->ink_supply[i].fluid_PIDpump_P, _Stat->ink_supply[i].fluid_PIDpump_I); 
+				fprintf(_plog_file_IS4, "%d;%s;%d;%d;%d\n", _Stat->ink_supply[i].PIDsetpoint_Output, value_str(ISpressure), ISspeed, _Stat->ink_supply[i].fluid_PIDpump_P, _Stat->ink_supply[i].fluid_PIDpump_I); 
 				break;
 			} 
 		}
 	}
-	
 }
 
 // --- nios_is_heater_connected --------------------------------

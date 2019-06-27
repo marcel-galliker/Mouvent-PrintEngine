@@ -420,7 +420,7 @@ namespace RxWfTool.Models
                             item.ListChanged += item_ListChanged;
                             item.No = list.Count+1;                        
                             item.Position = Convert.ToInt32((pos-1+rtime)*time/WfItem.Interval);
-                            item.Voltage  = v * maxVolt/256;
+                            item.Voltage  = (Int32)((v * maxVolt)/256.0+0.5);
                             list.Add(item);
                         }
                         volt=v;

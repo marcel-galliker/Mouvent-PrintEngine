@@ -885,8 +885,8 @@ namespace RX_DigiPrint.Models
             Wakeup          = msg.wakeup;
             Dots            = msg.dots;
             ScanMode        = (EScanMode)(msg.scanMode);
-            if (msg.virtualDoublePass!=0) Passes = 0x12;
-            else                          Passes = msg.passes;
+            if (msg.virtualPasses!=0) Passes = 0x10 | msg.passes;
+            else                      Passes = msg.passes;
             CuringPasses    = msg.curingPasses;
             Speed           = msg.speed;
             Collate         = msg.collate;
@@ -1030,14 +1030,14 @@ namespace RX_DigiPrint.Models
             {
                 msg.item.scanMode           = ScanMode;
                 msg.item.passes             = (byte)(Passes&0x0f);
-                msg.item.virtualDoublePass  = (byte)(Passes>>4);
+                msg.item.virtualPasses      = (byte)(Passes>>4);
                 msg.item.curingPasses       = (byte)CuringPasses;
             }
             else
             {
                 msg.item.scanMode       = EScanMode.scan_std;
                 msg.item.passes         = 1;
-                msg.item.virtualDoublePass = 0;
+                msg.item.virtualPasses  = 0;
                 msg.item.curingPasses   = 0;
             }
             msg.item.speed          = Speed;

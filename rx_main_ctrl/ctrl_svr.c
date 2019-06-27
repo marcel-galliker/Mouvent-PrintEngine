@@ -119,7 +119,6 @@ void ctrl_update_hostname(void)
 					
 }
 
-
 //--- ctrl_is_connected --------------------------------------------------------------
 int  ctrl_is_connected(EDevice device, int no)
 {
@@ -138,6 +137,7 @@ static int _prepare_config()
 	int ethPortCnt;
 	int isNo;
 	int maxTemp;
+	int chillerTemp;
 	SHeadBoardCfg	*pBoard;
 	
 	if (RX_Config.simulation) Error(WARN, 0, "Config Simulation");
@@ -186,7 +186,8 @@ static int _prepare_config()
 	_headboard_config(RX_Config.inkSupplyCnt, RX_Config.headsPerColor, ethPortCnt);
 
 	memset(RX_Color, 0, sizeof(RX_Color));
-	maxTemp = 0;
+	maxTemp		= 0;
+	chillerTemp = 1000;
 	for (n=0; n<SIZEOF(RX_Config.headBoard); n++) RX_Config.headBoard[n].present=dev__undef;
 	for (color=0, head=0; color<RX_Config.inkSupplyCnt; color++)
 	{
@@ -205,6 +206,7 @@ static int _prepare_config()
 		else
 		{
 			if (RX_Config.inkSupply[color].ink.temp > maxTemp) maxTemp = RX_Config.inkSupply[color].ink.temp;
+			if (RX_Config.inkSupply[color].ink.tempChiller && RX_Config.inkSupply[color].ink.tempChiller < chillerTemp) chillerTemp = RX_Config.inkSupply[color].ink.tempChiller;
 			RX_Color[color].no = color;
 			RX_Color[color].inkSupplyNo = color;
 			memcpy(&RX_Color[color].color, &RX_Config.inkSupply[color].ink, sizeof(RX_Color[color].color));
@@ -270,7 +272,7 @@ static int _prepare_config()
 					{
 						if(TRUE)
 						{
-							if(!arg_simuPLC) pBoard->head[head % MAX_HEADS_BOARD].encoderNo = 7 - color;
+						//	if(!arg_simuPLC) pBoard->head[head % MAX_HEADS_BOARD].encoderNo = 7 - color;
 							if(!RX_Config.printer.overlap)
 							{
 								pBoard->head[head % MAX_HEADS_BOARD].jetEnabled0   = overlap;
@@ -307,8 +309,22 @@ static int _prepare_config()
 			}
 		}
 	}
+	
+	//--- Virtual encoders for textile printers ----------------------------------------------
+	if (!arg_simuPLC)
+	{
+		if(RX_Config.printer.type==printer_TX801 || RX_Config.printer.type==printer_TX802)
+		{
+			int headsPerColor = (RX_Config.printer.type==printer_TX802) ? 2:1;
+			for (head=0, color=0; color<8; head++)
+			{
+				RX_Config.headBoard[head/MAX_HEADS_BOARD].head[head%MAX_HEADS_BOARD].encoderNo = 7-color;
+				if (!(head%headsPerColor)) color++;
+			}
+		}		
+	}
 
-	chiller_set_temp(maxTemp);
+	chiller_set_temp(chillerTemp, maxTemp);
 
 	ctrl_set_max_speed();
 	
@@ -537,20 +553,6 @@ static void _send_ink_def(int headNo, char *dots)
 	int n, no;
 	int inksupply=-1;
 	SInkDefMsg	msg;
-
-	/*
-	int s, max;
-	char *ch;
-	for (ch=dots, max=0; *ch; ch++)
-	{
-		s=0;
-		if(*ch=='S')	s=1;
-		if(*ch=='M')	s=2;
-		if(*ch=='L')	s=3;
-		if (s>max) max=s;
-	}
-	if (max==0) max=3;
-	*/
 	
 	if (_HeadCtrl[headNo].running)
 	{
@@ -628,7 +630,7 @@ void ctrl_send_head_fluidCtrlMode(int headNo, EnFluidCtrlMode ctrlMode, int send
 	int mode=RX_HBStatus[headNo/HEAD_CNT].head[headNo%HEAD_CNT].ctrlMode;
 	if (mode==INVALID_VALUE || mode==ctrl_off && ctrlMode==ctrl_off) return;
 	if (fromGui) _SingleHead = headNo;
-	if (ctrlMode<=ctrl_print_step0) _SingleHead=-1;
+	if (ctrlMode<=ctrl_print) _SingleHead=-1;
 	if (_HeadCtrl[headNo/HEAD_CNT].socket!=INVALID_SOCKET)
 	{
 		SFluidCtrlCmd cmd;

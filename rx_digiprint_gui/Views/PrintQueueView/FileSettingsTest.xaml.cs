@@ -79,7 +79,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
                 {
                     TcpIp.SFluidCtrlCmd msg = new TcpIp.SFluidCtrlCmd();
                     msg.no       = -1;
-                    msg.ctrlMode = EFluidCtrlMode.ctrl_print_step0;
+                    msg.ctrlMode = EFluidCtrlMode.ctrl_print;
 
                     RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_CTRL_MODE, ref msg);
                 }

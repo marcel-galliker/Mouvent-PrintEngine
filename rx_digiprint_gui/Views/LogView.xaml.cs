@@ -168,6 +168,16 @@ namespace RX_DigiPrint.Views
             searching = true;
         }
 
+        //--- Export_clicked ----------------------------------------------------------
+        private void Export_clicked(object sender, System.Windows.RoutedEventArgs e)
+        {
+            TcpIp.SLogReqMsg msg = new TcpIp.SLogReqMsg();
+            msg.first           = 0;
+            msg.count           = 200;
+            
+            RxGlobals.RxInterface.SendMsg(TcpIp.CMD_EXPORT_LOG, ref msg);
+        }
+
         //--- Top_clicked ----------------------------------------------------------
         private void Top_clicked(object sender, System.Windows.RoutedEventArgs e)
         {

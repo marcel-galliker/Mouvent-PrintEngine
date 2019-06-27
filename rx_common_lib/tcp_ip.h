@@ -85,6 +85,7 @@
 #define REP_REQ_LOG				0x02000013
 #define EVT_GET_LOG				0x03000013
 
+#define CMD_EXPORT_LOG			0x01000014
 
 #define CMD_GET_NETWORK			0x01000031	// reqeuests all network items
 #define REP_GET_NETWORK			0x02000031	// reply
@@ -640,8 +641,9 @@ typedef struct SPrintFileCmd
 		#define FLAG_BIDIR			0x0002
 		#define FLAG_SMP_FIRST_PAGE 0x0004
 		#define FLAG_SMP_LAST_PAGE	0x0008	
-		#define FLAG_PASS_1OF2		0x0010	
-		#define FLAG_PASS_2OF2		0x0020	
+
+	UINT8		virtualPasses;
+	UINT8		virtualPass;
 	
 	UINT8		printMode;	// see rx_def.h::SBmpInfo
 		#define PM_UNDEF				0

@@ -183,7 +183,7 @@ void putty_display_fpga_status(void)
 	tse_display_status();
 	term_printf("ETH ALL Frames: %06d %06d     mac[0]: %s  ip[0]: %s\n",					RX_FpgaStat.eth_ctr[0].frames_all,	RX_FpgaStat.eth_ctr[1].frames_all,   RX_MacAddr[0], RX_IpAddr[0]);		
 	term_printf("ETH MY  Frames: %06d %06d     mac[1]: %s  ip[1]: %s\n",					RX_FpgaStat.eth_ctr[0].frames_my,	RX_FpgaStat.eth_ctr[1].frames_my,    RX_MacAddr[1], RX_IpAddr[1]);			
-	term_printf("UDP ALL:        %06d %06d     ARP REQ (BC) %06d %06d  IP ERR %06d %06d\n",	RX_FpgaStat.udp_all[0],	 RX_FpgaStat.udp_all[1],	  RX_FpgaStat.arp_req_bc_0,			RX_FpgaStat.arp_req_bc_1, RX_FpgaError.arp_error[0].arp_ip_mismatch,	RX_FpgaError.arp_error[1].arp_ip_mismatch);	
+	term_printf("UDP ALL:        %06d %06d     ARP REQ (BC) %06d %06d  IP ERR %06d %06d\n",	RX_FpgaStat.udp_all[0],	  RX_FpgaStat.udp_all[1],	RX_FpgaStat.arp_req_bc_0,			RX_FpgaStat.arp_req_bc_1, RX_FpgaError.arp_error[0].arp_ip_mismatch,	RX_FpgaError.arp_error[1].arp_ip_mismatch);	
 	term_printf("UDP ALIVE:      %06d %06d     ARP REQ (MY) %06d %06d  MISSED %06d %06d\n",	RX_FpgaStat.udp_alive[0], RX_FpgaStat.udp_alive[1], RX_FpgaStat.arp_req_my_0,			RX_FpgaStat.arp_req_my_1, RX_FpgaError.arp_error[0].arp_req_missed,	RX_FpgaError.arp_error[1].arp_req_missed);			
 	term_printf("UDP DATA:       %06d %06d     ARP REPLY    %06d %06d\n",					RX_FpgaStat.udp_data[0],				RX_FpgaStat.udp_data[1],				RX_FpgaStat.arp_rep[0],				RX_FpgaStat.arp_rep[1]);	
 //		term_printf("FIFO Level:     %06d %06d     max          %06d %06d\n",	RX_FpgaStat.dataLevel_0,				RX_FpgaStat.dataLevel_1,				RX_FpgaStat.dataMax_0,				RX_FpgaStat.dataMax_1);	
@@ -208,26 +208,26 @@ void putty_display_fpga_status(void)
 //	term_printf("blockUsed:    "); PRINTF(4)("%08x   ",	RX_BlockUsed[no[i]]);						term_printf("\n");
 	term_printf("blockCnt:     "); PRINTF(4)("%09d   ",	RX_FpgaData.blockCnt[no[i]]);			term_printf("\n");
 	term_printf("imgInIdx/buf: "); PRINTF(4)("  %03d %03d   ",  RX_FpgaPrint.imgInIdx[no[i]],    RX_HBStatus[0].head[no[i]].imgInCnt-RX_HBStatus[0].head[no[i]].printDoneCnt); term_printf("\n");
-	term_printf("imgOutIdx:    "); PRINTF(4)("  %03d %03d   ", RX_FpgaData.imgOutIdx[no[i]][0], RX_FpgaData.imgOutIdx[no[i]][1]); term_printf("\n");
+	term_printf("imgOutIdx:    "); PRINTF(4)("  %03d %03d   ", RX_FpgaData.imgOutIdx[no[i]][0], RX_FpgaData.imgOutIdx[no[i]][1]);	term_printf("\n");
 
-	term_printf("Print GO ENC: "); PRINTF(4)("%09d   ", RX_HBStatus[0].head[no[i]].encPgCnt); term_printf("\n");
-	term_printf("Print GO:     "); PRINTF(4)("%09d   ", RX_FpgaStatRunning.pg_ctr[no[i]]);				term_printf("\n");
-//	term_printf("Print GO Tel: "); PRINTF(4)("%09d   ", RX_FpgaStat.tel_pg_cnt[no[i]]);			term_printf("\n");
-//	term_printf("PG abort:     "); PRINTF(4)("%09d   ", RX_FpgaStat.pg_abort_ctr[no[i]]);		term_printf("\n");
-	term_printf("Print DONE:   "); PRINTF(4)("%09d   ", RX_FpgaStatRunning.print_done_ctr[no[i]]);		term_printf("\n");
-	term_printf("Print GO Pos: "); PRINTF(4)("%09d   ", RX_FpgaStat.pg_in_position[no[i]]);		term_printf("\n");
-	term_printf("Print Pos:    "); PRINTF(4)("%09d   ", RX_HBStatus[0].head[no[i]].encPos-RX_FpgaStat.pg_in_position[no[i]]);		term_printf("\n");
-//	term_printf("Blk0:         "); PRINTF(4)("%09d   ", FpgaCfg.udp->block[no[i]].blkNo0);		term_printf("\n");
-//	term_printf("BlkEnd:       "); PRINTF(4)("%09d   ", FpgaCfg.udp->block[no[i]].blkNoEnd);		term_printf("\n");
-//	term_printf("BlkOut:       "); PRINTF(4)("%09d   ", _BlockOutIdx[no[i]]);					term_printf("\n");
-//	term_printf("Udp ptr:      "); PRINTF(4)("%09d   ", RX_FpgaStat.blockOutNo[no[i]]);			term_printf("\n");
-//	term_printf("imgLineFP:    "); PRINTF(4)("%09d   ", RX_FpgaStat.img_line_fp[no[i]]);			term_printf("\n");
-	term_printf("Enc #:        "); PRINTF(4)("% 9d   ", RX_HBConfig.head[i].encoderNo);			term_printf("\n");
-	term_printf("Enc Position: "); PRINTF(4)(" %06d.%d   ", RX_FpgaStat.enc_position[no[i]]/8, RX_FpgaStat.enc_position[no[i]]%8); term_printf("\n");
-	term_printf("Enc Position: "); PRINTF(4)("%09d   ",    RX_HBStatus[0].head[no[i]].encPos); term_printf("\n");
-//	term_printf("enc_fp_ct:    "); PRINTF(4)("%09d   ",    RX_FpgaStat.enc_fp_cnt[no[i]]);		term_printf("\n");
-	term_printf("head_fp_ct:   "); PRINTF(4)("%09d   ",		RX_FpgaStat.head_fp_cnt[no[i]]);	term_printf("\n");
-	term_printf("head_dt_ct:   "); PRINTF(4)("%09lld   ",	RX_HBStatus[0].head[no[i]].dotCnt);	term_printf("\n");
+	term_printf("Print GO ENC: "); PRINTF(4)("%09d   ",    RX_HBStatus[0].head[no[i]].encPgCnt);									term_printf("\n");
+	term_printf("Print GO:     "); PRINTF(4)("%09d   ",    RX_FpgaStatRunning.pg_ctr[no[i]]);										term_printf("\n");
+//	term_printf("Print GO Tel: "); PRINTF(4)("%09d   ",    RX_FpgaStat.tel_pg_cnt[no[i]]);											term_printf("\n");
+//	term_printf("PG abort:     "); PRINTF(4)("%09d   ",    RX_FpgaStat.pg_abort_ctr[no[i]]);										term_printf("\n");
+	term_printf("Print DONE:   "); PRINTF(4)("%09d   ",    RX_FpgaStatRunning.print_done_ctr[no[i]]);								term_printf("\n");
+	term_printf("Print GO Pos: "); PRINTF(4)("%09d   ",	   RX_FpgaStat.pg_in_position[no[i]]);										term_printf("\n");
+	term_printf("Print Pos:    "); PRINTF(4)("%09d   ",	   RX_HBStatus[0].head[no[i]].encPos-RX_FpgaStat.pg_in_position[no[i]]);	term_printf("\n");
+//	term_printf("Blk0:         "); PRINTF(4)("%09d   ",    FpgaCfg.udp->block[no[i]].blkNo0);										term_printf("\n");
+//	term_printf("BlkEnd:       "); PRINTF(4)("%09d   ",    FpgaCfg.udp->block[no[i]].blkNoEnd);										term_printf("\n");
+//	term_printf("BlkOut:       "); PRINTF(4)("%09d   ",    _BlockOutIdx[no[i]]);													term_printf("\n");
+//	term_printf("Udp ptr:      "); PRINTF(4)("%09d   ",    RX_FpgaStat.blockOutNo[no[i]]);											term_printf("\n");
+//	term_printf("imgLineFP:    "); PRINTF(4)("%09d   ",    RX_FpgaStat.img_line_fp[no[i]]);											term_printf("\n");
+	term_printf("Enc #:        "); PRINTF(4)("% 9d   ",    RX_HBConfig.head[no[i]].encoderNo);										term_printf("\n");
+	term_printf("Enc Position: "); PRINTF(4)("%07d.%d   ", RX_FpgaStat.enc_position[no[i]]/8, RX_FpgaStat.enc_position[no[i]]%8);	term_printf("\n");
+	term_printf("Enc Position: "); PRINTF(4)("%09d   ",    RX_HBStatus[0].head[no[i]].encPos);										term_printf("\n");
+//	term_printf("enc_fp_ct:    "); PRINTF(4)("%09d   ",    RX_FpgaStat.enc_fp_cnt[no[i]]);											term_printf("\n");
+	term_printf("head_fp_ct:   "); PRINTF(4)("%09d   ",	   RX_FpgaStat.head_fp_cnt[no[i]]);											term_printf("\n");
+	term_printf("head_dt_ct:   "); PRINTF(4)("%09lld   ",  RX_HBStatus[0].head[no[i]].dotCnt);										term_printf("\n");
 
 	if (FALSE)
 	{

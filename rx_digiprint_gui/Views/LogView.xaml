@@ -48,6 +48,11 @@
                 <Image Source="../Resources/Bitmaps/SearchDown.ico"/>
             </common:RxButton>
 
+            <common:RxButton x:Name="Export" ToolTip="Go to oldest Message" Click="Export_clicked" >
+                <!--    <Image Source="../Resources/Bitmaps/Excel.ico"/> -->
+                <TextBlock Text="XLS" FontSize="{StaticResource FontSizeLarge}"/>
+            </common:RxButton>
+            
             <common:RxButton x:Name="MoveTop" ToolTip="Go to oldest Message" Click="Top_clicked" >
                 <Image Source="../Resources/Bitmaps/Top.ico"/>
             </common:RxButton>

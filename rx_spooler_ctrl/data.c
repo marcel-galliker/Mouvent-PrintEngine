@@ -480,7 +480,7 @@ int  data_free(UINT64 *pBufSize, BYTE* buffer[MAX_COLORS])
 }
 
 //--- data_load ------------------------------------------------------------------------
-int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UINT8 multiCopy, int gapPx, int blkNo, int printMode, int variable, int flags, int clearBlockUsed, int same, int smp_bufSize, BYTE* buffer[MAX_COLORS])
+int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UINT8 multiCopy, int gapPx, int blkNo, int printMode, int variable, UINT8 virtualPasses, UINT8 virtualPass, int flags, int clearBlockUsed, int same, int smp_bufSize, BYTE* buffer[MAX_COLORS])
 {
 	SBmpInfo		bmpInfo;
 	int ret;
@@ -575,7 +575,9 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 //	if (ret == REPLY_NOT_FOUND) ret = bmp_load_all(filepath, RX_Color, SIZEOF(RX_Color), &bmpInfo);
 	if (ret==REPLY_OK)
 	{	
-		_PrintList[_InIdx].lengthPx = bmpInfo.lengthPx;
+		_PrintList[_InIdx].lengthPx		 = bmpInfo.lengthPx;
+		_PrintList[_InIdx].virtualPasses = virtualPasses; 
+		_PrintList[_InIdx].virtualPass   = virtualPass;	
 		_SmpFlags   = flags;
 		_SmpBufSize = smp_bufSize;
 		int time=rx_get_ticks();
@@ -583,7 +585,6 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 		time = rx_get_ticks()-time;
 		if (time) Error(LOG, 0, "MultiCopy time=%d ms", time);
 		_data_split(id, &bmpInfo, offsetPx, lengthPx, blkNo, flags, clearBlockUsed, same, &_PrintList[_InIdx]);
-
 		if (loaded || printMode==PM_TEST || printMode==PM_TEST_JETS || printMode==PM_TEST_SINGLE_COLOR)
 		{
 			if (printMode==PM_TEST_JETS && id->id==PQ_TEST_JET_NUMBERS) jc_correction(&bmpInfo, &_PrintList[_InIdx], 4220);
@@ -1427,14 +1428,16 @@ static void _data_fill_blk_scan(SBmpSplitInfo *psplit, int blkNo, BYTE *dst)
 		}
 		
 		//---------------------------------
-		if (flags & (FLAG_PASS_1OF2|FLAG_PASS_2OF2))
-		{			
+		if (psplit->pListItem->virtualPasses)
+		{	
+			if ((line % psplit->pListItem->virtualPasses) != psplit->pListItem->virtualPass) memset(&dst[size], 0x00, dstLen);
+
+			/*
 			if (TRUE)
 			{
 				if ((flags&FLAG_PASS_1OF2) && (line&1)==1) memset(&dst[size], 0x00, dstLen);
 				if ((flags&FLAG_PASS_2OF2) && (line&1)==0) memset(&dst[size], 0x00, dstLen);
 			}
-			/*
 			else
 			{
 				BYTE mask;
