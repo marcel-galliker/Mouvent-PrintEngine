@@ -33,6 +33,14 @@
 #define PRINT_LIST_SIZE 128
 #define MNT_PATH	"/mnt/ripped-data"
 
+//--- local structures -------------------------
+typedef struct
+{
+	int			no;
+	SBmpInfo	*pBmpInfo;
+	UINT8		multiCopy;
+	HANDLE		sem_start;
+} SMultiCopyPar;
 
 //--- static variables ---------------------------------------------
 
@@ -66,6 +74,12 @@ static UINT32			_BlkNo[HEAD_BOARD_CNT][MAX_HEADS_BOARD];
 
 static BYTE*			_TestBuf[MAX_COLORS][MAX_HEADS_COLOR];	// buffered in case of same image
 
+static int				_MultiCopyThreadCnt=0;
+static SMultiCopyPar   *_MultiCopyPar=NULL;
+static HANDLE			_MultiCopyDone;	// semaphore
+static int				_ThreadRunning = TRUE;
+
+
 static int  _local_path(const char *filepath, char *localPath);
 static int	_file_used (const char *filename);
 static int  _copy_file (SPageId *pid, char *srcDir, char *filename, char *dstDir);
@@ -75,6 +89,11 @@ static int  _data_split_scan           (SPageId *id, SBmpInfo *pBmpInfo, int off
 static int  _data_split_scan_no_overlap(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int lengthPx, int blkNo, int clearBlockUsed, int same, SPrintListItem *pItem);
 static int  _data_split_test           (SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int lengthPx, int blkNo, int clearBlockUsed, int same, SPrintListItem *pItem);
 static void _data_multi_copy		   (SBmpInfo *pBmpInfo, UINT8 multiCopy);
+static void _data_multi_copy_8		   (SBmpInfo *pBmpInfo, UINT8 multiCopy);
+static void _data_multi_copy_64		   (SBmpInfo *pBmpInfo, UINT8 multiCopy);
+
+static void *_multicopy_thread(void* lpParameter);
+
 
 //--- data_init ------------------------------------------------------------------------
 void data_init(RX_SOCKET socket, int headCnt)
@@ -119,6 +138,20 @@ void data_init(RX_SOCKET socket, int headCnt)
 			memset(_PrintList[i].splitInfo, 0,  headCnt*sizeof(SBmpSplitInfo));
 		}
 	}
+
+	//--- MultiCopy Threads ---------------
+	if (_MultiCopyPar==NULL)
+	{
+		_MultiCopyThreadCnt = rx_core_cnt();
+		_MultiCopyPar = (SMultiCopyPar*)malloc(_MultiCopyThreadCnt*sizeof(SMultiCopyPar));
+		for (i=0; i<_MultiCopyThreadCnt; i++)
+		{
+			_MultiCopyPar[i].no = i;
+			_MultiCopyPar[i].sem_start = rx_sem_create();
+			rx_thread_start(_multicopy_thread, &_MultiCopyPar[i], 0, "_multicopy_thread");			
+		}			
+	}
+
 	_HeadCnt = headCnt;
 }
 
@@ -337,7 +370,7 @@ int  data_get_size	(const char *path, UINT32 page, UINT32 spacePx, UINT32 *pwidt
 		}
 	}
 
-	*multiCopy = 1;
+//	*multiCopy = 1;
 	if (*multiCopy>1) Error(LOG, 0, "MultiCopy=%d", *multiCopy);
 	return ret;
 }
@@ -545,7 +578,10 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 		_PrintList[_InIdx].lengthPx = bmpInfo.lengthPx;
 		_SmpFlags   = flags;
 		_SmpBufSize = smp_bufSize;
+		int time=rx_get_ticks();
 		_data_multi_copy(&bmpInfo, multiCopy);
+		time = rx_get_ticks()-time;
+		if (time) Error(LOG, 0, "MultiCopy time=%d ms", time);
 		_data_split(id, &bmpInfo, offsetPx, lengthPx, blkNo, flags, clearBlockUsed, same, &_PrintList[_InIdx]);
 
 		if (loaded || printMode==PM_TEST || printMode==PM_TEST_JETS || printMode==PM_TEST_SINGLE_COLOR)
@@ -554,7 +590,7 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 			else if (printMode!=PM_TEST && printMode!=PM_TEST_SINGLE_COLOR) jc_correction(&bmpInfo, &_PrintList[_InIdx], 0);
 		}
 		#ifdef DEBUG
-		if (FALSE && loaded)
+		if (loaded)
 		{
 			int i;
 			char str[MAX_PATH];
@@ -563,8 +599,10 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 				if (bmpInfo.buffer[i])
 				{
 					sprintf(str, "%sPAGE_%d_%s.bmp", PATH_TEMP, id->page, RX_ColorNameShort(bmpInfo.inkSupplyNo[i]));
-					bmp_write(str, *bmpInfo.buffer[i], bmpInfo.bitsPerPixel, bmpInfo.srcWidthPx, bmpInfo.lengthPx, bmpInfo.lineLen, FALSE);
-//					bmp_write(str, *bmpInfo.buffer[i], bmpInfo.bitsPerPixel, bmpInfo.srcWidthPx/multiCopy+200, 2000,             bmpInfo.lineLen, FALSE);
+					if (multiCopy > 1)
+						bmp_write(str, *bmpInfo.buffer[i], bmpInfo.bitsPerPixel, bmpInfo.srcWidthPx / multiCopy + 200, 2000, bmpInfo.lineLen, FALSE);
+					else					
+						bmp_write(str, *bmpInfo.buffer[i], bmpInfo.bitsPerPixel, bmpInfo.srcWidthPx, bmpInfo.lengthPx, bmpInfo.lineLen, FALSE);
 					Error(WARN, 0, "Test: Written bitmap to >>%s<<", str);
 				}
 			}
@@ -629,8 +667,8 @@ SBmpSplitInfo*  data_get_next	(int *headCnt)
 	return _PrintList[idx].splitInfo;	
 }
 
-//--- _data_multi_copy ------------------------------------------------------------------
-static void _data_multi_copy(SBmpInfo *pBmpInfo, UINT8 multiCopy)
+//--- _data_multi_copy_8 ------------------------------------------------------------------
+static void _data_multi_copy_8(SBmpInfo *pBmpInfo, UINT8 multiCopy)
 {
 	if (multiCopy>1 && !pBmpInfo->multiCopy)
 	{
@@ -682,6 +720,153 @@ static void _data_multi_copy(SBmpInfo *pBmpInfo, UINT8 multiCopy)
 		pBmpInfo->lineLen     = dstLineLen;
 		pBmpInfo->multiCopy   = multiCopy;
 	}
+}
+
+static void _data_multi_copy_64(SBmpInfo *pBmpInfo, UINT8 multiCopy)
+{
+	if (multiCopy>1 && !pBmpInfo->multiCopy)
+	{
+		BYTE *src;
+		BYTE *dst;
+		
+		int  buf;
+		int  x, y, m;
+		int srcLineBt  = (pBmpInfo->srcWidthPx*pBmpInfo->bitsPerPixel+7)/8;
+		int srcLinelen = pBmpInfo->lineLen;
+		int dstLineLen = (((INT64)pBmpInfo->srcWidthPx*multiCopy*pBmpInfo->bitsPerPixel+63) & ~63)/8;
+		
+		for (buf=0; buf<SIZEOF(pBmpInfo->buffer); buf++)
+		{
+			if (pBmpInfo->buffer[buf] && pBmpInfo->lengthPx>0)
+			{
+				src = (*pBmpInfo->buffer[buf]) + (INT64)srcLinelen*pBmpInfo->lengthPx;
+				dst = (*pBmpInfo->buffer[buf]) + (INT64)dstLineLen*pBmpInfo->lengthPx;
+
+				for (y=pBmpInfo->lengthPx; y>0;)
+				{
+					y--;
+					src -= srcLinelen;
+					dst -= dstLineLen;
+					memcpy(dst, src, srcLineBt);
+					if (y) memset(src, 0x00, srcLineBt);
+					for (m=1; m<multiCopy; m++)
+					{
+						int shr = m*8/multiCopy;
+						int shl = 64-shr;
+						UINT64 *s64 = (UINT64*)dst;
+						UINT64 *d64 = (UINT64*)(dst + m*pBmpInfo->srcWidthPx*pBmpInfo->bitsPerPixel/8);
+						UINT64 data=0;
+						UINT64 old;
+						for (x=0; x<srcLineBt; x+=8)
+						{
+							old     = data<<shl;
+							data    = swap_uint64(*s64++);
+							*d64++ |= swap_uint64(old | data>>shr);
+						}
+					}
+				}
+				Error(LOG, 0, "MultiCopy[%d] done", buf);
+			}
+		}
+		pBmpInfo->srcWidthPx *= multiCopy;
+		pBmpInfo->lineLen     = dstLineLen;
+		pBmpInfo->multiCopy   = multiCopy;
+	}
+}
+
+static void _data_multi_copy(SBmpInfo *pBmpInfo, UINT8 multiCopy)
+{
+	int i;
+	if (multiCopy>1 && !pBmpInfo->multiCopy)
+	{
+		for (i=0; i<_MultiCopyThreadCnt; i++)
+		{
+			_MultiCopyPar[i].pBmpInfo  = pBmpInfo;
+			_MultiCopyPar[i].multiCopy = multiCopy;
+			rx_sem_post(_MultiCopyPar[i].sem_start);
+		}
+		//--- wait ----
+		{
+			int running = _MultiCopyThreadCnt;
+			int done;
+			_MultiCopyDone  = rx_sem_create();
+			while (running)
+			{
+				if (rx_sem_wait(_MultiCopyDone, 500) == REPLY_OK) running--;
+				else
+				{
+					/*
+					if (progress!=NULL && height!=0) 
+					{
+						for (i=0, done=0; i<threadCnt; i++) done += _ThreadPar[i].y;
+						progress(id, "", 101*done / (height*threadCnt));
+					}
+					*/
+				}
+			}
+			// progress(id, "", 100);
+			rx_sem_destroy(&_MultiCopyDone);
+		}
+		pBmpInfo->lineLen = (((INT64)pBmpInfo->srcWidthPx*multiCopy*pBmpInfo->bitsPerPixel+63) & ~63)/8;
+		pBmpInfo->srcWidthPx *= multiCopy;
+		pBmpInfo->multiCopy   = multiCopy;		
+	}							
+}
+
+static void *_multicopy_thread(void* lpParameter)
+{
+	SMultiCopyPar *par=(SMultiCopyPar*)lpParameter;
+	while (_ThreadRunning)
+	{
+		rx_sem_wait(par->sem_start, 0);
+		{
+			SBmpInfo *pBmpInfo = par->pBmpInfo;
+			UINT8 multiCopy	   = par->multiCopy;
+
+			int  buf;
+			int  x, y, m;
+			int srcLineBt  = (pBmpInfo->srcWidthPx*pBmpInfo->bitsPerPixel+7)/8;
+			int srcLinelen = pBmpInfo->lineLen;
+			int dstLineLen = (((INT64)pBmpInfo->srcWidthPx*multiCopy*pBmpInfo->bitsPerPixel+63) & ~63)/8;
+					
+			for (buf=par->no; buf<SIZEOF(pBmpInfo->buffer); buf+=_MultiCopyThreadCnt)
+			{
+				if (pBmpInfo->buffer[buf] && pBmpInfo->lengthPx>0)
+				{
+					BYTE *src = (*pBmpInfo->buffer[buf]) + (INT64)srcLinelen*pBmpInfo->lengthPx;
+					BYTE *dst = (*pBmpInfo->buffer[buf]) + (INT64)dstLineLen*pBmpInfo->lengthPx;
+
+					for (y=pBmpInfo->lengthPx; y>0;)
+					{
+						y--;
+						src -= srcLinelen;
+						dst -= dstLineLen;
+						memcpy(dst, src, srcLineBt);
+						if (y) memset(src, 0x00, srcLineBt);
+						for (m=1; m<multiCopy; m++)
+						{
+							int shr = m*8/multiCopy;
+							int shl = 64-shr;
+							UINT64 *s64 = (UINT64*)dst;
+							UINT64 *d64 = (UINT64*)(dst + m*pBmpInfo->srcWidthPx*pBmpInfo->bitsPerPixel/8);
+							UINT64 data=0;
+							UINT64 old;
+							for (x=0; x<srcLineBt; x+=8)
+							{
+								old     = data<<shl;
+								data    = swap_uint64(*s64++);
+								*d64++ |= swap_uint64(old | data>>shr);
+							}
+						}
+					}
+					Error(LOG, 0, "MultiCopy[%d] done", buf);
+				}
+			}
+		}
+
+		rx_sem_post(_MultiCopyDone);
+	}
+	return NULL;
 }
 
 //--- _data_split -----------------------------------------------------------------------

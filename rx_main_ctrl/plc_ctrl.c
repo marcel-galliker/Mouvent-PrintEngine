@@ -1320,7 +1320,7 @@ static void _plc_state_ctrl()
 			{
 				if(!(_ErrorFlags & 0x04)) Error(ERR_STOP, 0, "Unwinder Empty, length=%d, min=%d", length, _UnwinderLenMin);
 				_ErrorFlags |= 0x04;				
-			}	
+			}
 		}
 	}
 	else if (_PlcState==plc_stop) 
@@ -1329,6 +1329,23 @@ static void _plc_state_ctrl()
 		_CanRun = FALSE;
 		_heads_to_print=FALSE;
 		_WasInRun = FALSE;
+	}
+	
+	if (rx_def_is_web(RX_Config.printer.type)) 
+	{
+		static int _time=0;
+		int ticks=rx_get_ticks();
+		if (ticks-_time>500)
+		{
+			_time=ticks;
+			int speed;
+			lc_get_value_by_name_UINT32(APP "STA_PRINTING_SPEED", &speed);
+			if (speed!=RX_PrinterStatus.actSpeed)
+			{
+				RX_PrinterStatus.actSpeed = speed;
+				gui_send_printer_status(&RX_PrinterStatus);					
+			}
+		}
 	}
 }
 

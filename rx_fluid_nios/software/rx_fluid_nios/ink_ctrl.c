@@ -402,7 +402,7 @@ void ink_tick_10ms(void)
 					{
 						pRX_Status->ink_supply[isNo].cylinderPresSet = 0;
 						_PressureSetpoint[isNo] = pRX_Status->ink_supply[isNo].cylinderPresSet;
-						pRX_Config->ink_supply[isNo].ctrl_mode = ctrl_cal_step1;
+						pRX_Status->ink_supply[isNo].ctrl_state = ctrl_cal_start;
 					}
 				}
 
@@ -968,17 +968,17 @@ static void _pump_ctrl(INT32 isNo, INT32 pressure_target, INT32 print_mode)
 				case ctrl_cal_step1 :
 					// start calibration : reset stability time count
 					_CalibrationStability[isNo] = 0;
-					pRX_Config->ink_supply[isNo].ctrl_mode = ctrl_cal_step2;
+					pRX_Status->ink_supply[isNo].ctrl_state = ctrl_cal_step1;
 					break;		// start calibration : reset stability time count
 				case ctrl_cal_step2 :
 					// wait for stability of cond pressure inlet (+/-1 mbar for 3 seconds
-					pRX_Status->ink_supply[isNo].ctrl_state = ctrl_cal_step2;
+
 					if((pressure_target - pRX_Status->ink_supply[isNo].COND_Pressure_Actual > -10)&&(pressure_target - pRX_Status->ink_supply[isNo].COND_Pressure_Actual < 10))
 						_CalibrationStability[isNo]++;
 					else _CalibrationStability[isNo] = 0;
 					if(_CalibrationStability[isNo] > 300)
 					{
-						pRX_Config->ink_supply[isNo].ctrl_mode = ctrl_cal_step3;
+						pRX_Status->ink_supply[isNo].ctrl_state = ctrl_cal_step2;
 						_CalibrationStability[isNo] = 0;
 						_InkSupply[isNo].pid_Calibration.P 					= _InkSupply[isNo].pid_Setpoint.P / 3;
 						_InkSupply[isNo].pid_Calibration.I 					= _InkSupply[isNo].pid_Setpoint.I * 2;
@@ -988,7 +988,7 @@ static void _pump_ctrl(INT32 isNo, INT32 pressure_target, INT32 print_mode)
 					break;
 				case ctrl_cal_step3 :
 					// start PID to find the best Pressure inlet setpoint for 40ml/min
-					pRX_Status->ink_supply[isNo].ctrl_state = ctrl_cal_step3;
+
 					_InkSupply[isNo].pid_Calibration.Setpoint = 400;
 					pid_calc(pRX_Config->ink_supply[isNo].condPumpFeedback, &_InkSupply[isNo].pid_Calibration);
 					_PressureSetpoint[isNo] = _InkSupply[isNo].pid_Calibration.val;
@@ -1001,8 +1001,8 @@ static void _pump_ctrl(INT32 isNo, INT32 pressure_target, INT32 print_mode)
 					if(pRX_Config->ink_supply[isNo].condPumpFeedback > _InkSupply[isNo].pid_Calibration.Setpoint - 10)
 					{
 						_CalibrationSetpoint[isNo] = 0;
-						pRX_Status->ink_supply[isNo].ctrl_state = ctrl_cal_step4;
 						pRX_Config->ink_supply[isNo].cylinderPresSet = pRX_Status->ink_supply[isNo].COND_Pressure_Actual;
+						pRX_Status->ink_supply[isNo].ctrl_state = ctrl_cal_step3;
 					}
 					break;
 				default : break;

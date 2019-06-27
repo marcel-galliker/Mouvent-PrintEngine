@@ -192,6 +192,7 @@ int pc_stop_printing(int userStop)
 	if (RX_PrinterStatus.printState==ps_stopping 
 	||  RX_PrinterStatus.printState==ps_pause
 	||  RX_PrinterStatus.printState==ps_webin
+	||  RX_PrinterStatus.printState==ps_setup
 	|| (RX_PrinterStatus.printState==ps_printing && RX_PrinterStatus.printedCnt >= RX_PrinterStatus.sentCnt))
 	{
 		/*

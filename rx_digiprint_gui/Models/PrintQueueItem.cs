@@ -1030,7 +1030,7 @@ namespace RX_DigiPrint.Models
             {
                 msg.item.scanMode           = ScanMode;
                 msg.item.passes             = (byte)(Passes&0x0f);
-                msg.item.virtualDoublePass  = (byte)(Passes>>8);
+                msg.item.virtualDoublePass  = (byte)(Passes>>4);
                 msg.item.curingPasses       = (byte)CuringPasses;
             }
             else

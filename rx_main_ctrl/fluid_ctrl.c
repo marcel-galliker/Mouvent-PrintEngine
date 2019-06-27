@@ -589,20 +589,14 @@ static void _control(int fluidNo)
 				case ctrl_fill_step2:	_send_ctrlMode(no, ctrl_fill_step3, TRUE);		break;
 				case ctrl_fill_step3:	_send_ctrlMode(no, ctrl_print_step0,TRUE);		break;
 
-				case ctrl_empty:		_send_ctrlMode(no, ctrl_empty_step1, TRUE);	break;					
+				case ctrl_empty:		_send_ctrlMode(no, ctrl_empty_step1, TRUE);		break;					
 			//	case ctrl_empty_step1:	wait for user input 
-				case ctrl_empty_step2:	_send_ctrlMode(no, ctrl_off, TRUE);			break;
+				case ctrl_empty_step2:	_send_ctrlMode(no, ctrl_off, TRUE);				break;
 				
-			//	case ctrl_cal_start:	_send_ctrlMode(no, ctrl_cal_step1,	  TRUE);	
-			//							break;
-				
-			//	case ctrl_cal_step1:	_send_ctrlMode(no, ctrl_cal_step2,   TRUE);    break;
-			//	case ctrl_cal_step2:	ErrorEx(dev_fluid, fluidNo, LOG, 0, "Calibration complete: Save configuration!");
-			//							ctrl_head_cal_done(no);
-			//							_send_ctrlMode(no, ctrl_off,		  TRUE);    
-			//							break;
-			//	case ctrl_cal_step2:	_send_ctrlMode(no, ctrl_cal_step3,   TRUE);    break;
-				case ctrl_cal_done:		_send_ctrlMode(no, ctrl_print_step0, TRUE);    
+				case ctrl_cal_start:	_send_ctrlMode(no, ctrl_cal_step1,	 TRUE);	break;				
+				case ctrl_cal_step1:	_send_ctrlMode(no, ctrl_cal_step2,   TRUE);		break;
+				case ctrl_cal_step2:	_send_ctrlMode(no, ctrl_cal_step3,	 TRUE); break;
+				case ctrl_cal_step3:	_send_ctrlMode(no, ctrl_print_step0, TRUE);    
 										break;
 			}
 		}

@@ -22,7 +22,7 @@
 #include "dp803.h"
 
 #define MOTOR_Z_0		0
-#define MOTOR_Z_BITS	0x0f
+#define MOTOR_Z_BITS	0x03
 
 #define CURRENT_HOLD	50
 

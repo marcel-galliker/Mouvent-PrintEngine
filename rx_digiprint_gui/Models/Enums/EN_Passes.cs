@@ -22,7 +22,7 @@ namespace RX_DigiPrint.Models.Enums
                 _List.Add(new RxEnum<int>(2, "2"));
                 _List.Add(new RxEnum<int>(3, "3"));
                 _List.Add(new RxEnum<int>(4, "4"));
-            //  _List.Add(new RxEnum<int>(0x12, "V 2"));
+                _List.Add(new RxEnum<int>(0x12, "V 2"));
             }
         }
 
