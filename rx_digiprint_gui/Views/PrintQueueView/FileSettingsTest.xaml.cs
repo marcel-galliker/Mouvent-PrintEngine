@@ -51,7 +51,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
             }
             else if (!RxGlobals.PrintSystem.IsScanning)
             {
-                CB_Speed.ItemsSource     = RxGlobals.PrintSystem.SpeedList(1);
+                CB_Speed.ItemsSource     = RxGlobals.PrintSystem.SpeedList(1, 2000);
                 if (init)
                 {
                     MarginRow.Height     = new GridLength(0);
@@ -61,7 +61,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
             }
             else
             {
-                CB_Speed.ItemsSource     = RxGlobals.PrintSystem.SpeedList(1);
+                CB_Speed.ItemsSource     = RxGlobals.PrintSystem.SpeedList(1, 2000);
                 if (init)
                 {
                     _Item.Speed          = EN_SpeedList.DefaultValue;

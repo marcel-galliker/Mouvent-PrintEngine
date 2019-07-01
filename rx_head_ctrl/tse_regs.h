@@ -115,3 +115,9 @@
 // PHY Control
 #define SPEED_STATUS_100					0x020
 #define SPEED_STATUS_1000					0x040
+
+// TSE Errors
+#define REMOTE_FAULT_OCCURED				0x02
+#define LINK_DOWN_OCCURED					0x04
+#define PARALLEL_DETECT_OCCURED				0x10
+#define RECEIVE_ERROR_OCCURED				0x40

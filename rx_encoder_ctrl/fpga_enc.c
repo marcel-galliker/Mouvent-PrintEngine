@@ -634,10 +634,21 @@ static void _fpga_corr_rotative(SEncoderCfg *pCfg)
 //--- _fpga_corr_linear ------------------------
 static void _fpga_corr_linear(SEncoderCfg *pCfg)
 {
-	double dist_encoders = 476500; //  472000;
-	double dist_head	 = 48768;
+	double dist_encoders;
+	double dist_head;
 	double offset;
 	int i;
+	
+	if (pCfg->printerType == printer_TX802)
+	{
+		dist_encoders	= 916100;
+		dist_head		=  97540;			
+	}
+	else // pCfg->printerType == printer_TX801
+	{
+		dist_encoders	= 476500;
+		dist_head		=  48768;			
+	}
 	
 	fpga_enc_config(1, pCfg, 1, 0);
 	

@@ -21,11 +21,21 @@
 #include "tse_regs.h"
 #include "tse.h"
 
+typedef struct
+{
+	UINT32 remote_fault;
+	UINT32 link_down_fault;
+	UINT32 parallel_detect_fault;
+	UINT32 receive_error;
+	UINT32 flags;
+} STseErrors;
+
 
 //--- module globals ---------------------------------------
 static int			_MemId=0;
 static UINT32		*_TSE[UDP_PORT_CNT];
 static INT32		_Speed[UDP_PORT_CNT];
+static STseErrors	_TseErrors[UDP_PORT_CNT];
 static UINT64		_MacAddr[UDP_PORT_CNT];
 static int			_ErrorDelay=0;
 	
@@ -35,6 +45,7 @@ int tse_init(void *addr0, void *addr1)
 	_TSE[0] = (UINT32*)addr0;
 	_TSE[1] = (UINT32*)addr1;
 	memset(_Speed, 0, sizeof(_Speed));
+	memset(_TseErrors, 0, sizeof(_TseErrors));
 	memset(_MacAddr, 0, sizeof(_MacAddr));
 	_ErrorDelay=0;
 	return REPLY_OK;
@@ -46,6 +57,14 @@ int tse_end(void)
 	close (_MemId);
 	_MemId = 0;
 	return REPLY_OK;
+}
+
+//--- tse_error_reset -----
+void tse_error_reset(void)
+{
+	int i;
+	for (i=0; i<UDP_PORT_CNT; i++)
+		_TseErrors[i].flags=0;
 }
 
 //--- tse_set_mac_addr -----------------------
@@ -90,7 +109,7 @@ int tse_set_mac_addr(int no, UINT64 macAddr)
 	// RGMII Clock Pad Skew
 	rx_clk = 0x0f;			// default (+-0ns) 5bit
 	tx_clk = 0x00;			// -0.9ns
-
+	
 	rgmii_clk = (tx_clk << 5) + rx_clk;
 
 	_TSE[no][TSE_PHY_MMD_ACCESS_CONTROL]		= 0x00000002;
@@ -189,7 +208,7 @@ void tse_display_status(void)
 }
 
 //--- tse_check_errors ----------------------------
-int tse_check_errors(void)
+int tse_check_errors(int menu)
 {
 	int i;		
 	for (i=0; i<SIZEOF(_TSE); i++)
@@ -202,41 +221,37 @@ int tse_check_errors(void)
 				else                                              _Speed[i]=100;
 			}
 			else _Speed[i]=0;
-
-			/*
-			pstatus->eth_frame_ctr[i] 		= _TSE[i][TSE_aFramesTransmittedOK];
-			pstatus->eth_frame_err[i] 		= _TSE[i][TSE_aOctetsTransmittedOK];
-			pstatus->eth_config_reg[i] 		= _TSE[i][TSE_ifOutErrors];
-			pstatus->eth_phy_status[i] 		= _TSE[i][TSE_PHY_BASIC_STATUS];
-			pstatus->eth_cable_dia[i]		= _TSE[i][TSE_PHY_LINKMD_CABLE_DIAGNOSTIC];
-			pstatus->eth_pma_status[i]		= _TSE[i][TSE_PHY_DIGITAL_PMA_PCS_STATUS];
-			pstatus->eth_rx_err_cnt[i]		= _TSE[i][TSE_PHY_RX_ER_COUNTER];
-			pstatus->eth_phy_cnt[i]			= _TSE[i][TSE_PHY_CONTROL];			
-			*/
-
-			if (_ErrorDelay==0)
-			{
-				if (_Speed[0]==0)	ErrorFlag (ERR_CONT, (UINT32*)&RX_HBStatus[0].err,  err_udp0_not_connected, 0, "UDP 0 not connected");
-				if (_Speed[1]==0)	ErrorFlag (ERR_CONT, (UINT32*)&RX_HBStatus[0].err,  err_udp1_not_connected, 0, "UDP 1 not connected");				
-				if (_Speed[0]==100) ErrorFlag (ERR_CONT, (UINT32*)&RX_HBStatus[0].err,  err_udp0_not_connected, 0, "UDP 0 only at 100 Mbit/s (needs 1 Gbit/s)");
-				if (_Speed[1]==100) ErrorFlag (ERR_CONT, (UINT32*)&RX_HBStatus[0].err,  err_udp1_not_connected, 0, "UDP 1 only at 100 Mbit/s (needs 1 Gbit/s)");
-				
-				if (RX_HBConfig.printerType==printer_DP803)
-				{
-					if (_Speed[0]==1000 && RX_HBStatus[0].err&err_udp0_not_connected)
-					{
-						Error(LOG, 0, "UDP 0 reconnected");
-						RX_HBStatus[0].err &= ~err_udp0_not_connected;					
-					}
-					if (_Speed[1]==1000 && RX_HBStatus[0].err&err_udp1_not_connected)
-					{
-						Error(LOG, 0, "UDP 1 reconnected");
-						RX_HBStatus[0].err &= ~err_udp1_not_connected;					
-					}						
-				}
-			}
+			
+			_TseErrors[i].remote_fault			= (_TSE[i][TSE_PHY_INTERRUPT_CONTROL_STATUS] & REMOTE_FAULT_OCCURED);
+			_TseErrors[i].link_down_fault		= (_TSE[i][TSE_PHY_INTERRUPT_CONTROL_STATUS] & LINK_DOWN_OCCURED);
+			_TseErrors[i].parallel_detect_fault = (_TSE[i][TSE_PHY_INTERRUPT_CONTROL_STATUS] & PARALLEL_DETECT_OCCURED);
+			_TseErrors[i].receive_error			= (_TSE[i][TSE_PHY_INTERRUPT_CONTROL_STATUS] & RECEIVE_ERROR_OCCURED);
 		}
 	}
-	if (_ErrorDelay>0) _ErrorDelay--;
+	
+	if (_ErrorDelay==0)
+	{
+		for (i=0; i<SIZEOF(_TSE); i++)
+		{
+			if (_TseErrors[i].remote_fault)				ErrorFlag(ERR_CONT, &_TseErrors[i].flags, 0x00, 0, "TSE: Remote fault occurred on UDP %d", i);
+			if (_TseErrors[i].link_down_fault)			ErrorFlag(ERR_CONT, &_TseErrors[i].flags, 0x01, 0, "TSE: Link-down occurred on UDP %d", i);
+			if (_TseErrors[i].parallel_detect_fault)	ErrorFlag(ERR_CONT, &_TseErrors[i].flags, 0x02, 0, "TSE: Parallel detect fault occurred on UDP %d", i);
+			if (_TseErrors[i].receive_error)			ErrorFlag(ERR_CONT, &_TseErrors[i].flags, 0x04,	0, "TSE: Receive error occurred on UDP %d", i);
+				
+			if (_Speed[i]==0)	ErrorFlag(ERR_CONT, &_TseErrors[i].flags, 0x08, 0, "UDP %d not connected", i);
+			if (_Speed[i]==100) ErrorFlag(ERR_CONT, &_TseErrors[i].flags, 0x10, 0, "UDP %d only at 100 Mbit/s (needs 1 Gbit/s)", i);
+				
+			if (RX_HBConfig.printerType==printer_DP803)
+			{
+				if (_Speed[i]==1000 && _TseErrors[i].flags&0x08)
+				{
+					Error(LOG, 0, "UDP %d reconnected", i);
+					_TseErrors[i].flags &= ~0x08;					
+				}
+			}				
+		}
+	}
+	
+	if(menu && _ErrorDelay>0) _ErrorDelay--;
 	return REPLY_OK;
 }

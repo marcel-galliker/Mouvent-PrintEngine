@@ -33,7 +33,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
             PrintQueueItem item = DataContext as PrintQueueItem;
             if (item!=null)
             {
-                CB_Speed.ItemsSource = RxGlobals.PrintSystem.SpeedList(item.LargestDot);
+                CB_Speed.ItemsSource = RxGlobals.PrintSystem.SpeedList(item.LargestDot, item.SrcHeight);
                 if (item.Variable || item.SrcPages>1)
                 { 
                     Length_Settings.Visibility = Visibility.Collapsed;

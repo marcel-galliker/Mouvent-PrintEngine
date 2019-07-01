@@ -267,19 +267,13 @@ static int _prepare_config()
 					}
 					else sprintf(pBoard->head[head % MAX_HEADS_BOARD].name, "%s",    RX_ColorNameShort(isNo));
 					
-					// TX801: CORR_LINEAR: Board[0].Head[0] nearest to Encoder[1]
 					if(RX_Config.printer.type == printer_TX801)
 					{
-						if(TRUE)
+						if(!RX_Config.printer.overlap)
 						{
-						//	if(!arg_simuPLC) pBoard->head[head % MAX_HEADS_BOARD].encoderNo = 7 - color;
-							if(!RX_Config.printer.overlap)
-							{
-								pBoard->head[head % MAX_HEADS_BOARD].jetEnabled0   = overlap;
-								pBoard->head[head % MAX_HEADS_BOARD].jetEnabledCnt = jets - overlap;							
-							}								
-						}
-						else Error(WARN, 0, "Encoder compensation OFF");
+							pBoard->head[head % MAX_HEADS_BOARD].jetEnabled0   = overlap;
+							pBoard->head[head % MAX_HEADS_BOARD].jetEnabledCnt = jets - overlap;							
+						}								
 					}
 					
 					if (RX_PrinterStatus.testMode)
@@ -311,6 +305,7 @@ static int _prepare_config()
 	}
 	
 	//--- Virtual encoders for textile printers ----------------------------------------------
+	// TX801: CORR_LINEAR: Board[0].Head[0] nearest to Encoder[1]
 	if (!arg_simuPLC)
 	{
 		if(RX_Config.printer.type==printer_TX801 || RX_Config.printer.type==printer_TX802)
@@ -323,7 +318,7 @@ static int _prepare_config()
 			}
 		}		
 	}
-
+	
 	chiller_set_temp(chillerTemp, maxTemp);
 
 	ctrl_set_max_speed();

@@ -659,8 +659,8 @@ typedef enum EHeadNiosErr
 {
 	err_nios_incompatible		= 0x00000001,
 	err_overheating				= 0x00000002,	// head is overheated
-	err_udp0_not_connected		= 0x00000004,
-	err_udp1_not_connected		= 0x00000008,
+	err_04						= 0x00000004,
+	err_08						= 0x00000008,
 	err_udp0_alive				= 0x00000010,
 	err_udp1_alive				= 0x00000020,
 	err_printgo_but_no_data_0	= 0x00000040,

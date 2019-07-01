@@ -19,4 +19,4 @@ int tse_end(void);
 void tse_display_status(void);
 
 int tse_set_mac_addr(int no, UINT64 macAddr);
-int tse_check_errors(void);
+int tse_check_errors(int menu);

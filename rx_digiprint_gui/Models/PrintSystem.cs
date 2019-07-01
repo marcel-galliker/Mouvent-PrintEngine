@@ -50,9 +50,9 @@ namespace RX_DigiPrint.Models
         }
         */
 
-        public EN_SpeedList SpeedList(int dropSize)
+        public EN_SpeedList SpeedList(int dropSize, double imgHeight)
         {
-            return new EN_SpeedList(RxGlobals.PrinterStatus.MaxSpeed(dropSize));
+            return new EN_SpeedList(RxGlobals.PrinterStatus.MaxSpeed(dropSize), imgHeight);
         }
 
         //--- Property IsScanning ---------------------------------------

@@ -549,9 +549,9 @@ int  nios_main(int ticks, int menu)
 	
 	cond_main(ticks);
 		
+	tse_check_errors(menu);
 	if (menu) 	
 	{
-		tse_check_errors();
 		nios_check_errors();		
 		_nios_copy_status();			
 	}
@@ -605,6 +605,7 @@ void nios_check_errors(void)
 void nios_error_reset(void)
 {
 	cond_error_reset();
+	tse_error_reset();
 	_FPWarning = 0;
 	if (_NiosLoaded) _NiosCfg->cmd.error_reset = TRUE;
 }

@@ -264,7 +264,7 @@ int  enc_start_printing(SPrintQueueItem *pitem)
 								if (!pitem->testImage) _WakeupLen=WAKEUP_BAR_LEN*(RX_Config.inkSupplyCnt+1);
 								if (!arg_simuPLC) 
 								{
-									if (TRUE) msg.correction=CORR_LINEAR;
+									if (FALSE) msg.correction=CORR_LINEAR;
 									else Error(WARN, 0, "Encoder compensation OFF");
 								}		
 								break;
