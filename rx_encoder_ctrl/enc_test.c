@@ -205,13 +205,15 @@ void test_write_csv(char *filename)
 		if (f!=NULL)
 		{
 			//fprintf(f, "%6s\t%6s\t%6s\t%6s\n", "#", "val0", "val1", "val2", "val3");
-			fprintf(f, "%6s\t%6s\t%6s\t%6s\t%6s\n", "#", "enc0_pos", "enc0_step", "enc1_pos", "enc1_step");
+			//fprintf(f, "%6s\t%6s\t%6s\t%6s\t%6s\n", "#", "enc0_pos", "enc0_step", "enc1_pos", "enc1_step");
+			fprintf(f, "%6s\t%6s\t%6s\n", "#", "substrokes", "inpos times 8");
 			for (i = 1; i < TEST_VALUE_CNT - 1; i++) // for (i=1; i<29000-1; i++)
 			{
 				enc0 = _Val[0][i];
 				enc1 = _Val[1][i];
 				//fprintf(f, "%6d\t%6d\t%6d\t%6d\t%6d\n", i, _Val[0][i], _Val[1][i], _Val[2][i],  _Val[3][i]);
-				fprintf(f, "%6d\t%6d\t%6d\t%6d\t%6d\n", i, ((enc0) & 0xffff), ((enc0) >> 16), ((enc1) & 0xffff), ((enc1) >> 16));
+				//fprintf(f, "%6d\t%6d\t%6d\t%6d\t%6d\n", i, ((enc0) & 0xffff), ((enc0) >> 16), ((enc1) & 0xffff), ((enc1) >> 16));
+				fprintf(f, "%6d\t%6d\t%6d\n", i, _Val[0][i], _Val[1][i]);
 			}
 			fclose(f);			
 		}

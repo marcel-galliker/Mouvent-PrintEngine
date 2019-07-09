@@ -79,7 +79,7 @@ int ctrl_init()
 	memset(&RX_EncoderStatus, 0, sizeof(RX_EncoderStatus));
 	RX_EncoderStatus.ampl_old	= 0;
 	RX_EncoderStatus.ampl_new   = 0;
-	RX_EncoderStatus.percentage = INVALID_VALUE;
+	RX_EncoderStatus.percentage = 0;
 	for (i=0; i<SIZEOF(RX_EncoderStatus.corrRotPar); i++)
 		RX_EncoderStatus.corrRotPar[i] = INVALID_VALUE;	
 

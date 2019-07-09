@@ -195,7 +195,11 @@ typedef struct
 	UINT32 		    max_1_b1_ident_a1;	// 0x0578 // reset_min_max
 	UINT32 		    max_1_a1_ident_b1;	// 0x057C // reset_min_max
 	UINT32 		    max_1_a1_ident_a1;	// 0x0580 // reset_min_max
-	UINT32			res[(0x0600 - 0x0584) / 4];	// 0x054c .. 0x0600
+	UINT32 		    dig_in_cnt;			// 0x0584 
+	UINT32 		    dig_cnt_stat;		// 0x0588
+	UINT32 		    res_058c;			// 0x058c
+	UINT32 		    shift_delay_cnt;	// 0x0590 not used, only of first counter for debuging
+	UINT32			res[(0x0600 - 0x0594) / 4];	// 0x054c .. 0x0600
 	SEncErrStatus		err;					// 0x0600 - 0x0624: 
 	UINT32			res2[(0x0800 - 0x0628) / 4];// 0x0628 .. 0x0800
 } SEncFpgaStatus;
@@ -296,6 +300,11 @@ typedef struct
 	UINT32	rol_drift_mu_two;		// 0x0050:
 
 	UINT32	subsample_meas;			// 0x0054:
+	
+	UINT32  shift_delay;            // 0x0058 in strokes (21um strokes)
+	
+	UINT32  sel_roller_dia_offset_0;   // 0x005c: 4 bit: 70 + sel_roller_dia_offset_0 = Roller Diameter in mm
+	UINT32  sel_roller_dia_offset_1;   // 0x0060: 4 bit: 70 + sel_roller_dia_offset_1 = Roller Diameter in mm 
 } SGeneralCfg;
 
 typedef struct

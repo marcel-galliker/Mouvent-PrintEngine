@@ -30,6 +30,7 @@ SEncoderCfg		RX_EncoderCfg;
 
 static int		_AppRunning;
 static int		_ShowCorrection=FALSE;
+static int      _ShowParam = FALSE;
 
 //--- prototypes ---------------------------------------------------------
 
@@ -50,11 +51,14 @@ void main_menu()
 	term_printf("MENU ENCODER -------------------------\n");
 	term_printf("h<xxx>: Herz Frquency in KHz\n");
 	term_printf("n<0/1>: Enable Encoder 0\n");	
+	term_printf("d<strokes>: Set Shift Delay <strokes>\n");	
+	term_printf("r<strokes>: Reset Register\n");	
 	term_printf("R: RESET encoder position\n");
-	term_printf("o<x>: Toggle Output <x> (0..n)\n");
+	term_printf("o<x>: Toggle Output <x> (0..2)\n");
 	term_printf("g<cnt> <dist>: PrintGo in x FP\n");	
 	term_printf("w: write CSV file with test data\n");
-	term_printf("c: roll Correction\n");
+	term_printf("c: show roll Correction\n");
+	term_printf("p: show parameter\n");
 	term_printf("x: exit\n");
 	tw8_menu_print();
 	term_printf(">");
@@ -65,6 +69,7 @@ void main_menu()
 		switch (str[0])
 		{
 		case 'c':   _ShowCorrection = !_ShowCorrection; break;
+		case 'p':   _ShowParam = !_ShowParam; break;
 		case 'g':	ch=strstr(str, " ");
 					if (ch) fpga_pg_set_dist(atoi(&str[1]), atoi(ch));	
 					else    fpga_pg_set_dist(1,             atoi(&str[1])); 
@@ -75,6 +80,10 @@ void main_menu()
 					fpga_enc_config(0, &cfg, 0, atoi(&str[1]));	break;
 			
 		case 'n':	fpga_encoder_enable(atoi(&str[1])); break;
+
+		case 'd':	fpga_shift_delay(atoi(&str[1])); break;
+			
+		case 'r':	fpga_encoder_reset_reg(); break;
 			
 		case 'R':	if (arg_test) fpga_enc_config_test();
 					else
@@ -144,7 +153,7 @@ static void _main_loop(void)
 		}
 
 		msg=ctrl_main(ticks, menu);
-		fpga_main(ticks, menu, _ShowCorrection);
+		fpga_main(ticks, menu, _ShowCorrection, _ShowParam);
 		tw8_main(ticks, menu);
 		if (menu) 
 		{

@@ -26,7 +26,7 @@ void  fpga_init(void);
 int   fpga_is_init(void);
 void  fpga_end(void);
 
-void  fpga_main(int ticks, int menu, int showCorrection);
+void  fpga_main(int ticks, int menu, int showCorrection, int showParam);
 
 int   fpga_load(char *path_rbf);
 void* fpga_map_page(UINT64 addr, UINT32 size, UINT32 size_expected);
@@ -34,6 +34,7 @@ void* fpga_map_page(UINT64 addr, UINT32 size, UINT32 size_expected);
 void  fpga_enc_config(int encNo, SEncoderCfg  *pCfg, int outNo, int synth);
 void  fpga_enc_config_test(void);
 void  fpga_encoder_enable(int enable);
+void  fpga_shift_delay(int strokes);
 void  fpga_encoder_reset_reg(void);
 int   fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg);
 int   fpga_pg_config_fhnw(UINT32 posActual, UINT32 posFwd, UINT32 posBwd);
