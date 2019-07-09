@@ -153,6 +153,7 @@ void data_init(RX_SOCKET socket, int headCnt)
 		}			
 	}
 
+	flz_init();
 	_HeadCnt = headCnt;
 }
 

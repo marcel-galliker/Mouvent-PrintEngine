@@ -64,30 +64,37 @@ static INT64			_FileBufSize[2]={0,0};
 static BYTE*			_FileBuf[2]={NULL, NULL};
 
 //--- prototypes --------------------------------
-static void _flz_init(void);
 static void *_flz_decompress_master_thread(void* lpParameter);
 static void *_flz_decompress_thread(void* lpParametr);
 
 //--- _tif_init -------------------------------
-static void _flz_init(void)
+void flz_init(void)
 {
-	if (_Init) return;
-	_Init = TRUE;
-	
-	int i;
-	_ThreadCnt = rx_core_cnt();
-	_ThreadPar = rx_malloc(_ThreadCnt*sizeof(SFlzThreadPar));
-	_sem_decompress_start = rx_sem_create();
-	_sem_decompress_done  = rx_sem_create();
-	rx_sem_post(_sem_decompress_done);
-	rx_thread_start(_flz_decompress_master_thread, NULL, 0, "_flz_decompress_master_thread");
-	for (i=0; i<_ThreadCnt; i++)
+	if (!_Init)
 	{
-		_ThreadPar[i].no = i;
-		_ThreadPar[i].sem_start = rx_sem_create();
-		_ThreadPar[i].sem_done  = rx_sem_create();
-		rx_thread_start(_flz_decompress_thread, &_ThreadPar[i], 0, "_flz_decompress_thread");
+		_Init = TRUE;
+	
+		int i;
+		_ThreadCnt = rx_core_cnt();
+		_ThreadPar = rx_malloc(_ThreadCnt*sizeof(SFlzThreadPar));
+		_sem_decompress_start = rx_sem_create();
+		_sem_decompress_done  = rx_sem_create();
+		rx_thread_start(_flz_decompress_master_thread, NULL, 0, "_flz_decompress_master_thread");
+		for (i=0; i<_ThreadCnt; i++)
+		{
+			_ThreadPar[i].no = i;
+			_ThreadPar[i].sem_start = rx_sem_create();
+			_ThreadPar[i].sem_done  = rx_sem_create();
+			rx_thread_start(_flz_decompress_thread, &_ThreadPar[i], 0, "_flz_decompress_thread");
+		}		
 	}
+
+	//--- start of new job ----------------------------
+	while (rx_sem_wait(_sem_decompress_done, 1)==0)
+	{};
+	rx_sem_post(_sem_decompress_done);
+	_FileBufLoadIdx=0;
+	_FileBufDecompIdx=0;
 }
 
 //--- _flz_color_path ---------------------------------
@@ -138,8 +145,6 @@ int flz_get_info(const char *path, UINT32 page, SFlzInfo *pflzinfo)
 void flz_abort(void)
 {
 	_Abort = TRUE;
-	_FileBufLoadIdx=0;
-	_FileBufDecompIdx=0;
 }
 
 //--- flz_load (multi threaded) ------------------------------------------------------------------------------------------
@@ -154,7 +159,6 @@ int flz_load(SPageId *id, const char *filedir, const char *filename, int printMo
 		
 	_Abort = FALSE;
 	memset(pinfo, 0, sizeof(SBmpInfo));
-	_flz_init();
 	for (c=0; c<MAX_COLORS && c<splitCnt; c++)
 	{
 		if (psplit[c].color.name[0] && psplit[c].lastLine)
@@ -267,11 +271,12 @@ static void *_flz_decompress_master_thread(void* lpParameter)
 	//	if (progress!=NULL) progress(id, RX_ColorNameShort(pinfo->inkSupplyNo[c]), 100);					
 
 		for (i=1; i<_ThreadCnt; i++) rx_sem_wait(_ThreadPar[i].sem_done, 0);
+
+		_FileBufDecompIdx = (_FileBufDecompIdx+1) & 1;
 		
 		TrPrintfL(TRUE, "DECOMPRESSING time=%d ms", rx_get_ticks()-time);
 		if (flz_loaded!=NULL) flz_loaded(_DecompressPar.loaded_arg);
 		rx_sem_post(_sem_decompress_done);
-		_FileBufDecompIdx = (_FileBufDecompIdx+1) & 1;
 	}
 }
 

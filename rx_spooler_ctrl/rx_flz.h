@@ -45,6 +45,8 @@ typedef void(*progress_fct) (SPageId *id, const char *colorSName, int progress);
 #ifdef __cplusplus
 extern "C"{
 #endif
+	
+void flz_init(void);
 void flz_abort(void);
 int flz_get_info(const char *path, UINT32 page, SFlzInfo *pflzinfo);
 int flz_load	(SPageId *id, const char *filedir, const char *filename, int printMode, UINT32 spacePx, SColorSplitCfg *psplit, int splitCnt, BYTE* buffer[MAX_COLORS], SBmpInfo *pinfo, progress_fct progress, void *ploaded_arg);

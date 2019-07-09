@@ -225,7 +225,12 @@ void pump_tick_10ms(void)
 				if (RX_Status.mode > ctrl_off) ctr_save();
 				_PumpPID.start_integrator = 0;
 				//if(RX_Status.mode == ctrl_print) RX_Status.mode = ctrl_shutdown; 	// shutdown phase if PRINT mode before OFF
-				/*else*/ RX_Status.mode = ctrl_off;
+				/*else*/ 
+				{
+					RX_Status.mode = ctrl_off;
+					pid_reset(&_PumpPID);
+				}
+				
 				_Start_PID = START_PID_OFF;
 				_TimePIDstable = 0;
 				_TimeSwitchingOFF = 0;
@@ -312,6 +317,7 @@ void pump_tick_10ms(void)
 							turn_off_pump();
 							RX_Status.pressure_in_max=INVALID_VALUE;
 							max_pressure = MBAR_500;
+							pid_reset(&_PumpPID);
 							RX_Status.mode = RX_Config.mode;
 						}
 						break;
@@ -366,18 +372,23 @@ void pump_tick_10ms(void)
 		
 		//--- EMPTY ------------------------------------------------
 		case ctrl_empty:
-		case ctrl_empty_step1:
 						if(RX_Status.mode == ctrl_off)
 						{
 							temp_ctrl_on(FALSE);
 							_set_valve(TO_INK);
 							// _set_pump_speed((_PumpPID.val_max + 1) / 2);
+							pid_reset(&_PumpPID);
 							_pump_pid();
-							max_pressure = MBAR_500;
-							RX_Status.mode = RX_Config.mode;
+							max_pressure = MBAR_500;	
+							RX_Status.mode = RX_Config.mode;							
 						}
+						
 						break;
-        
+        case ctrl_empty_step1:
+						_pump_pid();
+						max_pressure = MBAR_500;
+						RX_Status.mode = RX_Config.mode;
+						break;
 		case ctrl_empty_step2:
 						_pump_pid();
 						max_pressure = MBAR_500;
@@ -394,6 +405,7 @@ void pump_tick_10ms(void)
 		case ctrl_fill_step1:	
 						if(RX_Status.mode == ctrl_off)
 						{
+							pid_reset(&_PumpPID);
 							temp_ctrl_on(FALSE);
 							turn_off_pump();
 							RX_Status.error  &= ~(COND_ERR_meniscus | COND_ERR_pump_no_ink);

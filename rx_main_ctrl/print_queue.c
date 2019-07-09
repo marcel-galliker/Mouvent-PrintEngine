@@ -42,6 +42,7 @@ static int				_Item;
 static int				_TestDataSent;
 static int				_HeadBoardCnt;
 static int				_TimeCompleted;
+static int				_Speed=0;
 static int				_BufState;
 static int				_PrintDoneCnt;
 
@@ -651,6 +652,7 @@ int pq_printed(int headNo, SPageId *pid, int *pageDone, int *jobDone, SPrintQueu
 		else pitem = &_List[idx];
 		pitem->id.page = pid->page;
 		pitem->id.copy = pid->copy;
+		_Speed = pitem->speed;
 		
 		pq_next_page(pitem, &pitem->start);
 		
@@ -826,7 +828,7 @@ int pq_is_ready(void)
 			//	int bufsize = RX_PrinterStatus.transferredCnt-RX_PrinterStatus.printedCnt;
 				int bufsize = RX_PrinterStatus.transferredCnt-RX_PrinterStatus.printGoCnt;
 				
-				if ((RX_Config.printer.type==printer_DP803) && RX_PrinterStatus.transferredCnt%100==0) Error(LOG, 0, "Buffer size (transferred=%d, bufsize=%d", RX_PrinterStatus.transferredCnt, bufsize);
+				if ((RX_Config.printer.type==printer_DP803) && RX_PrinterStatus.transferredCnt%100==0) Error(LOG, 0, "Buffer size (transferred=%d, bufsize=%d, speed=%d)", RX_PrinterStatus.transferredCnt, bufsize, _Speed);
 	
 				switch(_BufState)
 				{
@@ -837,7 +839,7 @@ int pq_is_ready(void)
 				case 1: // buffer full
 						if(bufsize < 10)	
 						{
-							Error(WARN, 0, "Buffer low (transferred=%d, bufsize=%d", RX_PrinterStatus.transferredCnt, bufsize);
+							Error(WARN, 0, "Buffer low (transferred=%d, bufsize=%d, speed=%d)", RX_PrinterStatus.transferredCnt, bufsize, _Speed);
 							_BufState = 2;
 						}
 						break;
@@ -850,7 +852,7 @@ int pq_is_ready(void)
 						}
 						else if (bufsize<3)	
 						{
-							Error(ERR_STOP, 0, "Buffer underflow (transferred=%d, bufsize=%d", RX_PrinterStatus.transferredCnt, bufsize);
+							Error(ERR_STOP, 0, "Buffer underflow (transferred=%d, bufsize=%d, speed=%d)", RX_PrinterStatus.transferredCnt, bufsize, _Speed);
 							_BufState=3;
 						}
 						break;

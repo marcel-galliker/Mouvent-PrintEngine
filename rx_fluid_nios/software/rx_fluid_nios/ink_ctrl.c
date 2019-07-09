@@ -258,8 +258,8 @@ void ink_tick_10ms(void)
 
 
 					{
-						int i, on;
-						for (i=0, on=FALSE; i<NIOS_INK_SUPPLY_CNT; i++)
+						int i, on=FALSE;
+						for (i=0; i<NIOS_INK_SUPPLY_CNT; i++)
 						{
 							on |= (pRX_Config->ink_supply[i].ctrl_mode>ctrl_off);
 						}
@@ -347,7 +347,7 @@ void ink_tick_10ms(void)
 						pRX_Config->ink_supply[isNo].test_airValve		= FALSE;
 						pRX_Config->ink_supply[isNo].test_bleedValve 	= FALSE;
 
-						_pump_ctrl(isNo, pRX_Config->ink_supply[isNo].test_cylinderPres, FALSE);		// ink-pump
+						_pump_ctrl(isNo, pRX_Config->ink_supply[isNo].test_cylinderPres, 2);		// ink-pump
 						_set_pressure_value(pRX_Status->air_pressure < pRX_Config->test_airPressure);	// air-pump
 					}
 				}
@@ -588,7 +588,6 @@ void ink_tick_10ms(void)
 				break;
 
 			case ctrl_empty_step1:
-			//	_PurgeNo = isNo;
 				_set_bleed_valve(isNo, TRUE);
 				_set_air_valve(isNo, FALSE);
 				for (i=0; i<NIOS_INK_SUPPLY_CNT; i++)
@@ -596,7 +595,7 @@ void ink_tick_10ms(void)
 					_set_pump_speed(i, 0);
 					_InkSupply[i].degassing = FALSE;
 				}
-				_pump_ctrl(isNo, 0,FALSE);		// ink-pump
+				_pump_ctrl(isNo, 0,2);		// ink-pump
 
 				pRX_Status->ink_supply[isNo].ctrl_state = ctrl_empty_step1;
 				break;
@@ -604,12 +603,17 @@ void ink_tick_10ms(void)
 			case ctrl_empty_step2:
 				_set_bleed_valve(isNo, TRUE);
 				_set_air_valve(isNo, FALSE);
-				_set_pressure_value(pRX_Status->air_pressure < empty_pressure);
+				empty_pressure = 100 * pRX_Config->headsPerColor;
+				if(empty_pressure > 800) empty_pressure = 800;
+				if(pRX_Config->ink_supply[isNo].condMeniscus < -50)
+					_set_pressure_value(pRX_Status->air_pressure < empty_pressure);
+				else _set_pressure_value(FALSE);
 				pRX_Status->ink_supply[isNo].ctrl_state = ctrl_empty_step2;
 				break;
 
 			case ctrl_empty_step3:
 				_set_pressure_value(FALSE);
+				pRX_Status->ink_supply[0].TestBleedLine_Pump_Phase2++;
 				_set_bleed_valve(isNo, FALSE);
 				_set_air_valve(isNo, FALSE);
 				pRX_Status->ink_supply[isNo].ctrl_state = ctrl_empty_step3;

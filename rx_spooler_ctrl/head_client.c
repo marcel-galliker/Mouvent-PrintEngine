@@ -128,7 +128,7 @@ int hc_head_board_cfg(RX_SOCKET socket, SHeadBoardCfg* cfg)
 	int i;
 	UINT32 size;
 	char path[MAX_PATH];
-	TrPrintf(TRUE, "hc_head_board_cfg[%d]", cfg->no);
+	TrPrintfL(TRUE, "hc_head_board_cfg[%d]", cfg->no);
 
 	if (_Simulation) 
 	{
@@ -768,8 +768,10 @@ void hc_check(void)
 {
 	static SUDPDataBlockMsg msg;
 	static int sent=0;
+	static int time=0;
 	int old, len;
 	int board, port;
+	int addr=0;
 
 	if (_Simulation) return;
 	
@@ -793,18 +795,29 @@ void hc_check(void)
 				if (_HBPar[board]!=NULL && _HBPar[board]->dataSocket[port]!=INVALID_SOCKET && _HBPar[board]->dataSocket[port]!=0)
 				{
 					len=send(_HBPar[board]->dataSocket[port], (char*)&msg, sizeof(msg.blkNo)+RX_Spooler.dataBlkSize, MSG_NOSIGNAL);
-
+					
 					if (FALSE)
 					{
 						char str[100];
 						sok_get_peer_name(_HBPar[board]->dataSocket[port], str, NULL, NULL);
-						TrPrintf(TRUE, "SpoolerNo=%d Alive Sent to >>%s<< len=%d", RX_SpoolerNo, str, len);
+						TrPrintfL(TRUE, "SpoolerNo=%d Alive Sent to >>%s<< len=%d", RX_SpoolerNo, str, len);
 					}
 					sent++;
+					if (time%10==0) 
+					{
+						if (_HBPar[board]->cfg.dataAddr[port]!=addr)
+						{
+							char str[32];
+						//	TrPrintfL(TRUE, "PING %s", sok_addr_str(_HBPar[board]->cfg.dataAddr[port], str));
+							sok_ping(sok_addr_str(_HBPar[board]->cfg.dataAddr[port], str));
+							addr = _HBPar[board]->cfg.dataAddr[port];
+						}
+					}
 				}
 			#endif
 			}
 		}
+		time++;
 	}
 //	if (sent!=old) TrPrintf(TRUE, "SpoolerNo=%d Alive Sent %d", RX_SpoolerNo, sent);
 }
