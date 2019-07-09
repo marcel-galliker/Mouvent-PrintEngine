@@ -24,6 +24,7 @@ typedef struct
 	UINT8					virtualPass;
 	int						headsUsed;
 	int						lengthPx;
+	int						decompressing;
 	struct SBmpSplitInfo	*splitInfo;	// splitInfo[splitInfoCnt];
 } SPrintListItem;
 

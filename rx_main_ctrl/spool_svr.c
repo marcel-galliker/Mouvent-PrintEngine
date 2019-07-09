@@ -309,7 +309,7 @@ int spool_head_board_cnt(void)
 //--- spool_is_ready -------------------------------------------------------------------
 int spool_is_ready(void)
 {	
-	TrPrintfL(TRUE, "spool_ready: _Ready=%d, _MsgSent=%d, _MsgGot=%d", _Ready, _MsgSent, _MsgGot);
+//	TrPrintfL(TRUE, "spool_ready: _Ready=%d, _MsgSent=%d, _MsgGot=%d", _Ready, _MsgSent, _MsgGot);
 	return (_Ready!=0) && (_MsgSent==_MsgGot);
 }
 

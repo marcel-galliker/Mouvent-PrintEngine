@@ -402,7 +402,7 @@ static int _print_next(void)
 	static int _ScansNext;
 	static int _CopiesStart;
 	static int _CopiesSent;
-	TrPrintfL(TRUE, "_print_next printState=%d, spooler_ready=%d, pq_ready=%d", RX_PrinterStatus.printState, spool_is_ready(), pq_is_ready());
+//	TrPrintfL(TRUE, "_print_next printState=%d, spooler_ready=%d, pq_ready=%d", RX_PrinterStatus.printState, spool_is_ready(), pq_is_ready());
 	while (RX_PrinterStatus.printState==ps_printing && spool_is_ready() && pq_is_ready())
 	{	
 		if (RX_PrinterStatus.testMode)

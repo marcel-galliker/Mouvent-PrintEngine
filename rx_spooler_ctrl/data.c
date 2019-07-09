@@ -24,6 +24,7 @@
 #include "tcp_ip.h"
 #include "spool_rip.h"
 #include "ctrl_client.h"
+#include "head_client.h"
 #include "jet_correction.h"
 #include "data_client.h"
 
@@ -479,6 +480,14 @@ int  data_free(UINT64 *pBufSize, BYTE* buffer[MAX_COLORS])
 	return REPLY_OK;			
 }
 
+//--- _flz_data_loaded -----------------------
+static void _flz_data_loaded(void *data)
+{
+	SPrintListItem	*pitem = (SPrintListItem*)data;
+	pitem->decompressing = FALSE;
+	hc_send_next();
+}
+
 //--- data_load ------------------------------------------------------------------------
 int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UINT8 multiCopy, int gapPx, int blkNo, int printMode, int variable, UINT8 virtualPasses, UINT8 virtualPass, int flags, int clearBlockUsed, int same, int smp_bufSize, BYTE* buffer[MAX_COLORS])
 {
@@ -546,7 +555,8 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 			{		
 				if(RX_Spooler.printerType==printer_DP803)
 				{
-					ret = flz_load(id, filepath, filename, printMode, gapPx, RX_Color, SIZEOF(RX_Color), buffer, &bmpInfo, NULL);
+					flz_loaded = _flz_data_loaded;
+					ret = flz_load(id, filepath, filename, printMode, gapPx, RX_Color, SIZEOF(RX_Color), buffer, &bmpInfo, NULL, (void*)&_PrintList[_InIdx]);
 					if (ret) ret = tif_load_mt(id, filepath, filename, printMode, gapPx, RX_Color, SIZEOF(RX_Color), buffer, &bmpInfo, NULL);
 				}
 				else
@@ -587,8 +597,8 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 		_data_split(id, &bmpInfo, offsetPx, lengthPx, blkNo, flags, clearBlockUsed, same, &_PrintList[_InIdx]);
 		if (loaded || printMode==PM_TEST || printMode==PM_TEST_JETS || printMode==PM_TEST_SINGLE_COLOR)
 		{
-			if (printMode==PM_TEST_JETS && id->id==PQ_TEST_JET_NUMBERS) jc_correction(&bmpInfo, &_PrintList[_InIdx], 4220);
-			else if (printMode!=PM_TEST && printMode!=PM_TEST_SINGLE_COLOR) jc_correction(&bmpInfo, &_PrintList[_InIdx], 0);
+		//	if (printMode==PM_TEST_JETS && id->id==PQ_TEST_JET_NUMBERS) jc_correction(&bmpInfo, &_PrintList[_InIdx], 4220);
+		//	else if (printMode!=PM_TEST && printMode!=PM_TEST_SINGLE_COLOR) jc_correction(&bmpInfo, &_PrintList[_InIdx], 0);
 		}
 		#ifdef DEBUG
 		if (FALSE && loaded)
@@ -649,6 +659,9 @@ SBmpSplitInfo*  data_get_next	(int *headCnt)
 	if (_SendIdx!=_OutIdx) return NULL;
 	if (_SendIdx==_InIdx) return NULL;
 
+	if (_PrintList[_SendIdx].decompressing) 
+		return NULL;
+	
 	if (_PrintMode==PM_SCAN_MULTI_PAGE)
 	{
 		if (!(_SmpFlags & FLAG_SMP_LAST_PAGE))

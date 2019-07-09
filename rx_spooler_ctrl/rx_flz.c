@@ -24,9 +24,6 @@
 	#include "errno.h"
 #endif
 
-//--- defines -------------------------------------------------------------------------
-#define fLZ_FILE_EXT	L"flz"
-#define MAX4GB 4294967296
 
 //--- SFlzSliceThread-------------------------------------------------------------------------
 typedef struct
@@ -43,18 +40,33 @@ typedef struct
 	HANDLE		sem_done;
 } SFlzThreadPar;
 
+typedef struct
+{
+	INT32		height;
+	BYTE	   *buffer;
+	INT64		fileSize;
+	void	   *loaded_arg;
+} SDecompressPar;
+
 static int				_ThreadCnt=0;
 static SFlzThreadPar*	_ThreadPar;
 static int				_ThreadRunning=TRUE;
+
+static SDecompressPar	_DecompressPar;
+static	HANDLE			_sem_decompress_start;
+static 	HANDLE			_sem_decompress_done;
 static int				_Init=FALSE;
 static int				_Abort=FALSE;
 
-static INT64			_FileBufSize=0;
-static BYTE*			_FileBuf=NULL;
+static int				_FileBufLoadIdx=0;
+static int				_FileBufDecompIdx=0;
+static INT64			_FileBufSize[2]={0,0};
+static BYTE*			_FileBuf[2]={NULL, NULL};
 
 //--- prototypes --------------------------------
 static void _flz_init(void);
-static void *_flz_read_thread(void* lpParameter);
+static void *_flz_decompress_master_thread(void* lpParameter);
+static void *_flz_decompress_thread(void* lpParametr);
 
 //--- _tif_init -------------------------------
 static void _flz_init(void)
@@ -65,15 +77,18 @@ static void _flz_init(void)
 	int i;
 	_ThreadCnt = rx_core_cnt();
 	_ThreadPar = rx_malloc(_ThreadCnt*sizeof(SFlzThreadPar));
+	_sem_decompress_start = rx_sem_create();
+	_sem_decompress_done  = rx_sem_create();
+	rx_sem_post(_sem_decompress_done);
+	rx_thread_start(_flz_decompress_master_thread, NULL, 0, "_flz_decompress_master_thread");
 	for (i=0; i<_ThreadCnt; i++)
 	{
 		_ThreadPar[i].no = i;
 		_ThreadPar[i].sem_start = rx_sem_create();
 		_ThreadPar[i].sem_done  = rx_sem_create();
-		rx_thread_start(_flz_read_thread, &_ThreadPar[i], 0, "tif_read_thread");
+		rx_thread_start(_flz_decompress_thread, &_ThreadPar[i], 0, "_flz_decompress_thread");
 	}
 }
-
 
 //--- _flz_color_path ---------------------------------
 static void _flz_color_path(const char *path, UINT32 page, const char *nameExt, const char *colorname, char *filepath)
@@ -119,20 +134,20 @@ int flz_get_info(const char *path, UINT32 page, SFlzInfo *pflzinfo)
 	return REPLY_ERROR;
 }
 
-
 //--- flz_abort -----------------------------------------------
 void flz_abort(void)
 {
 	_Abort = TRUE;
+	_FileBufLoadIdx=0;
+	_FileBufDecompIdx=0;
 }
 
 //--- flz_load (multi threaded) ------------------------------------------------------------------------------------------
-int flz_load(SPageId *id, const char *filedir, const char *filename, int printMode, UINT32 spacePx, SColorSplitCfg *psplit, int splitCnt, BYTE* buffer[MAX_COLORS], SBmpInfo *pinfo, progress_fct progress)
+int flz_load(SPageId *id, const char *filedir, const char *filename, int printMode, UINT32 spacePx, SColorSplitCfg *psplit, int splitCnt, BYTE* buffer[MAX_COLORS], SBmpInfo *pinfo, progress_fct progress, void* loaded_arg)
 {
-	int c, i;
-	int y, h;
+	int c;
+	int time;
 	SFlzInfo *pFlzInfo;
-	INT32 height;
 	INT64 fileSize;
 	char filepath[MAX_PATH];
 	BYTE* dst;
@@ -151,36 +166,46 @@ int flz_load(SPageId *id, const char *filedir, const char *filename, int printMo
 				if (id->page>1) sprintf(filepath, "%s/%s_P%06d_%s.flz", filedir, filename, id->page, RX_ColorNameShort(pinfo->inkSupplyNo[c]));
 				else			sprintf(filepath, "%s/%s_%s.flz", filedir, filename, RX_ColorNameShort(pinfo->inkSupplyNo[c]));
 						
-				TrPrintfL(TRUE, "LOADING >>%s<<", filepath);
+				time = rx_get_ticks();
 				{
 					fileSize=rx_file_get_size(filepath);
-					if (fileSize>_FileBufSize)
+					if (fileSize>_FileBufSize[_FileBufLoadIdx])
 					{
-						if (_FileBuf!=NULL) rx_mem_free(&_FileBuf);
-						_FileBufSize = (2*fileSize+0xfffff) & ~0xffff; // round up to next MB
-						_FileBuf	 = rx_mem_alloc(_FileBufSize);
+						if (_FileBuf[_FileBufLoadIdx]!=NULL) rx_mem_free(&_FileBuf[_FileBufLoadIdx]);
+						_FileBufSize[_FileBufLoadIdx] = (2*fileSize/ 0x100000) * 0x100000; // fill to next MB, min=10
+						if (_FileBufSize[_FileBufLoadIdx]<10*0x100000) _FileBufSize[_FileBufLoadIdx] = 10*0x100000;
+						_FileBuf[_FileBufLoadIdx] = rx_mem_alloc(_FileBufSize[_FileBufLoadIdx]);
+						Error(LOG, 0, "ALLOC MEMORY [%d] %d MB", _FileBufLoadIdx, _FileBufSize[_FileBufLoadIdx]/0x100000);
 					}
 					
 					INT64 len;
 					INT64 blksize=0x10000;
 					FILE *file = fopen(filepath, "rb");			
 					if (file==NULL) return REPLY_NOT_FOUND;
-					for (dst=_FileBuf, len=fileSize; len>=blksize && !_Abort; len-=blksize)
+					for (dst=_FileBuf[_FileBufLoadIdx], len=fileSize; len>=blksize && !_Abort; len-=blksize)
 					{
 						dst += fread(dst, 1, (int)blksize, file);
 					}
 					dst+=fread(dst, (int)len, 1, file);					
 					fclose(file);
-				}
+					_FileBufLoadIdx = (_FileBufLoadIdx+1) & 1;
+				}				
+				TrPrintfL(TRUE, "LOADING >>%s<<, page %d, time=%d ms", filepath, id->page, rx_get_ticks()-time);
 			}
 			else 
 			{
-				Error(ERR_ABORT, 0, "Straeming not implemented yet");
+				Error(ERR_ABORT, 0, "Streaming not implemented yet");
 			}
 			
 			if (_Abort) return REPLY_OK;
+
+			//--- wait last decompressing finished ---------------------------------
+
+			rx_sem_wait(_sem_decompress_done, 0);
 			
-			pFlzInfo = (SFlzInfo*)_FileBuf;
+			//--- start decompressing ----------------------------------------------
+			
+			pFlzInfo = (SFlzInfo*)_FileBuf[_FileBufDecompIdx];
 			
 			pinfo->printMode     = printMode;
 			pinfo->bitsPerPixel  = pFlzInfo->bitsPerPixel;
@@ -189,41 +214,69 @@ int flz_load(SPageId *id, const char *filedir, const char *filename, int printMo
 			pinfo->lineLen		 = pFlzInfo->lineLen;
 			pinfo->dataSize		 = (INT32)pFlzInfo->dataSize;								
 			pinfo->buffer[c]	 = &buffer[c];
-			height = pinfo->lengthPx;
-			if (psplit[c].lastLine<height) height=psplit[c].lastLine;
-			
-//			y = psplit[c].firstLine;
-//			h = height/_ThreadCnt;
-			y = 0;
-			h = pFlzInfo->bands/_ThreadCnt;
-			for (i=0; i<_ThreadCnt; i++)
-			{
-				_ThreadPar[i].no	   = i;	
-				_ThreadPar[i].fileBuf  = _FileBuf;
-				_ThreadPar[i].fileSize = fileSize;
-				_ThreadPar[i].buffer   = buffer[c];
-				_ThreadPar[i].y_from   = y;
-				_ThreadPar[i].y_to	   = y+h;
-				y += h;
-			}
-			_ThreadPar[_ThreadCnt-1].y_to = pFlzInfo->bands;
 
-			for (i=0; i<_ThreadCnt; i++) rx_sem_post(_ThreadPar[i].sem_start);
-
-			while (rx_sem_wait(_ThreadPar[0].sem_done, 500)!=REPLY_OK)
-			{
-				if (progress!=NULL && h!=0) progress(id, RX_ColorNameShort(pinfo->inkSupplyNo[c]), 101*_ThreadPar[0].y / h);					
-			}
-			if (progress!=NULL) progress(id, RX_ColorNameShort(pinfo->inkSupplyNo[c]), 100);					
-
-			for (i=1; i<_ThreadCnt; i++) rx_sem_wait(_ThreadPar[i].sem_done, 0);
+			_DecompressPar.loaded_arg = loaded_arg;
+			_DecompressPar.fileSize = fileSize;
+			_DecompressPar.buffer = buffer[c];
+			_DecompressPar.height = pinfo->lengthPx;
+			if (psplit[c].lastLine<_DecompressPar.height) _DecompressPar.height=psplit[c].lastLine;			
+									
+			rx_sem_post(_sem_decompress_start);
 		}
 	}
 	return REPLY_OK;
 }
 
-//--- _flz_read_thread ------------------------------------
-static void *_flz_read_thread(void* lpParameter)
+//--- _flz_decompress_master_thread ------------------------------------
+static void *_flz_decompress_master_thread(void* lpParameter)
+{
+	int time;
+	int	i;
+	int height, y, h;
+	SFlzInfo	  *pFlzInfo;
+	
+	while (_ThreadRunning)
+	{
+		rx_sem_wait(_sem_decompress_start, 0);
+		time = rx_get_ticks();
+
+		pFlzInfo = (SFlzInfo*)_FileBuf[_FileBufDecompIdx];
+
+		height = _DecompressPar.height;
+			
+		y = 0;
+		h = pFlzInfo->bands/_ThreadCnt;
+		for (i=0; i<_ThreadCnt; i++)
+		{
+			_ThreadPar[i].no	   = i;	
+			_ThreadPar[i].fileBuf  = _FileBuf[_FileBufDecompIdx];
+			_ThreadPar[i].fileSize = _DecompressPar.fileSize;
+			_ThreadPar[i].buffer   = _DecompressPar.buffer;
+			_ThreadPar[i].y_from   = y;
+			_ThreadPar[i].y_to	   = y+h;
+			y += h;
+		}
+		_ThreadPar[_ThreadCnt-1].y_to = pFlzInfo->bands;
+
+		for (i=0; i<_ThreadCnt; i++) rx_sem_post(_ThreadPar[i].sem_start);
+
+		while (rx_sem_wait(_ThreadPar[0].sem_done, 500)!=REPLY_OK)
+		{
+		//	if (progress!=NULL && h!=0) progress(id, RX_ColorNameShort(pinfo->inkSupplyNo[c]), 101*_ThreadPar[0].y / h);					
+		}
+	//	if (progress!=NULL) progress(id, RX_ColorNameShort(pinfo->inkSupplyNo[c]), 100);					
+
+		for (i=1; i<_ThreadCnt; i++) rx_sem_wait(_ThreadPar[i].sem_done, 0);
+		
+		TrPrintfL(TRUE, "DECOMPRESSING time=%d ms", rx_get_ticks()-time);
+		if (flz_loaded!=NULL) flz_loaded(_DecompressPar.loaded_arg);
+		rx_sem_post(_sem_decompress_done);
+		_FileBufDecompIdx = (_FileBufDecompIdx+1) & 1;
+	}
+}
+
+//--- _flz_decompress_thread ------------------------------------
+static void *_flz_decompress_thread(void* lpParameter)
 {
 	SFlzThreadPar *par=(SFlzThreadPar*)lpParameter;
 	while (_ThreadRunning)
