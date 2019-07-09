@@ -277,13 +277,14 @@ int  enc_start_printing(SPrintQueueItem *pitem)
 	*/
 		
 	case printer_LB701:			msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; 
+								msg.diameter[0]=79; msg.diameter[1]=74; 
 								msg.correction=CORR_ROTATIVE;
 								break;
 		
-	case printer_LB702_UV:		msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_ROTATIVE; break;	
-	case printer_LB702_WB:		msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_ROTATIVE; break;	
-	case printer_DP803:			msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_ROTATIVE; break;	
-	case printer_cleaf:			msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter= 180200; msg.pos_actual = 0;	break;
+	case printer_LB702_UV:		msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_ROTATIVE; msg.diameter[0]=78; msg.diameter[1]=74; break;	
+	case printer_LB702_WB:		msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_ROTATIVE; msg.diameter[0]=78; msg.diameter[1]=74; break;	
+	case printer_DP803:			msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_ROTATIVE; msg.diameter[0]=74; msg.diameter[1]=76; break;	
+	case printer_cleaf:			msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter= 180200; msg.pos_actual = 0; 				               break;
 	default:					msg.orientation = TRUE;		msg.scanning=TRUE;  msg.incPerMeter=1000000; msg.pos_actual = 0;	break;
 	}
 	
@@ -304,7 +305,13 @@ int  enc_start_printing(SPrintQueueItem *pitem)
 			msg.pos_pg_fwd  = _Encoder[no].webOffset_mm*1000 + pitem->pageMargin - (_WakeupLen*25400/1200);
 			msg.pos_pg_bwd  = _Encoder[no].webOffset_mm*1000 + pitem->pageMargin + pitem->srcHeight + RX_Config.headDistMax + 13350 + (_WakeupLen*25400/1200);
 		//	msg.pos_pg_bwd  = _Encoder[no].webOffset_mm*1000 + pitem->pageMargin + pitem->srcHeight + 13150; // not tested!
-						
+			
+			if(RX_Config.printer.type == printer_DP803)
+			{
+				if(no == 0) msg.diameter[0] = 74;
+				else		msg.diameter[0] = 78;
+			}
+			
 			if (_Scanning && arg_simuEncoder)
 			{
 				msg.scanning=FALSE;
@@ -461,6 +468,13 @@ int  enc_stop_pg(void)
 	_StopPG = TRUE;
 	sok_send_2(&_Encoder[0].socket, CMD_ENCODER_PG_STOP, 0, NULL);
 	return REPLY_OK;
+}
+
+//--- enc_restart_pg ------------------------------
+int  enc_restart_pg(void)
+{
+	sok_send_2(&_Encoder[0].socket, CMD_ENCODER_PG_RESTART, 0, NULL);
+	return REPLY_OK;	
 }
 
 //--- enc_pg_stop_cnt ----------------------------------

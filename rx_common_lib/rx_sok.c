@@ -187,6 +187,7 @@ static char _TermStr[256]={0};
 int	sok_get_ifconfig(const char *ifname, SIfConfig *config)
 {
 	memset(config, 0, sizeof(SIfConfig));
+	gethostname(config->hostname, sizeof(config->hostname));
 	return REPLY_ERROR;
 }
 int	sok_set_ifconfig(const char *ifname, SIfConfig *config)

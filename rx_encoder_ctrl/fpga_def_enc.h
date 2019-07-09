@@ -73,7 +73,7 @@ typedef struct
 	UINT32	enc_diff_min;		// 0x002c
 	UINT32	enc_diff_max;		// 0x0030
 	UINT32	enc_diff_overflow;	// 0x0034
-	UINT32	res_38;				// 0x0038
+	UINT32	pg_start_pos;		// 0x0038 in encoder input steps
 	UINT32	res_3c;				// 0x003c
  } SEncInStatus;
 
@@ -303,8 +303,7 @@ typedef struct
 	
 	UINT32  shift_delay;            // 0x0058 in strokes (21um strokes)
 	
-	UINT32  sel_roller_dia_offset_0;   // 0x005c: 4 bit: 70 + sel_roller_dia_offset_0 = Roller Diameter in mm
-	UINT32  sel_roller_dia_offset_1;   // 0x0060: 4 bit: 70 + sel_roller_dia_offset_1 = Roller Diameter in mm 
+	UINT32  sel_roller_dia_offset[2]; // 0x005c: 4 bit: 70 + sel_roller_dia_offset_0 = Roller Diameter in mm
 } SGeneralCfg;
 
 typedef struct

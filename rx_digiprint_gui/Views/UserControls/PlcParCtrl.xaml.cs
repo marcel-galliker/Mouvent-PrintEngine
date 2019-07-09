@@ -448,7 +448,11 @@ namespace RX_DigiPrint.Views.UserControls
                                 case 'h': _Value = string.Format("{0:X}", Convert.ToInt64(value));  break;
                                 case 'f': _Value = Rx.StrNumFormat(value,3); break;
                                 case '1': _Value = Rx.StrNumFormat(value,1); break;
-                                case 'n': _Value = Rx.StrNumFormat(value,0); break;
+                                case 'n': if (value.Equals("1431677568.000000")) 
+                                            _Value="-----";
+                                          else
+                                            _Value = Rx.StrNumFormat(value,0); 
+                                          break;
                                 case 'l': _Value = value.Replace(';', '\n'); break;
                                 default : _Value = value; break;
                             }

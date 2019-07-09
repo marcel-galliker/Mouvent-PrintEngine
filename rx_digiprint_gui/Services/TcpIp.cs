@@ -326,11 +326,11 @@ namespace RX_DigiPrint.Services
         public const UInt32 CMD_ENCODER_STAT		= 0x01000112;
         public const UInt32 REP_ENCODER_STAT		= 0x02000112;
 
-        public const UInt32 CMD_ENCODER_SAVE_PAR	= 0x01000119;
-        public const UInt32 CMD_ENCODER_SAVE_PAR_1	= 0x0100011A;
+        public const UInt32 CMD_ENCODER_SAVE_PAR	= 0x0100011c;
+        public const UInt32 CMD_ENCODER_SAVE_PAR_1	= 0x0100011d;
 
-        public const UInt32  CMD_ENCODER_UV_ON		  = 0x01000113;
-        public const UInt32  CMD_ENCODER_UV_OFF		  = 0x01000114;
+        public const UInt32  CMD_ENCODER_UV_ON		= 0x01000113;
+        public const UInt32  CMD_ENCODER_UV_OFF		= 0x01000114;
 
         public const UInt32  CMD_FLUID_STAT			= 0x01000122;
         public const UInt32  REP_FLUID_STAT			= 0x02000122;

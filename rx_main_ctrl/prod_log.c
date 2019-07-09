@@ -82,7 +82,7 @@ void pl_load(void)
 #ifdef linux
 	FontHandle	font;
 	
-	rx_remove_old_files(PATH_LOG, 30);
+	rx_remove_old_files(PATH_LOG, 90);
 	
 	rx_get_system_day_str(_Day, '-');
 	sprintf(_FilePath, "%sprod-%s.xlsx", PATH_LOG, _Day);
@@ -275,7 +275,6 @@ static void _pl_stop_tx(SPrintQueueItem *pitem)
 	pl_save();	
 #endif
 }
-
 
 //--- pl_save --------------------------------------
 void pl_save(void)

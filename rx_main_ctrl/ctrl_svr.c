@@ -104,6 +104,7 @@ int	ctrl_start(void)
 void ctrl_update_hostname(void)
 {
 	memset(RX_Hostname, 0, sizeof(RX_Hostname));
+#ifdef linux
 	{
 		int i;
 		FILE *file;
@@ -116,7 +117,9 @@ void ctrl_update_hostname(void)
 			fclose(file);
 		}
 	}
-					
+#else
+	gethostname(RX_Hostname, sizeof(RX_Hostname));
+#endif
 }
 
 //--- ctrl_is_connected --------------------------------------------------------------

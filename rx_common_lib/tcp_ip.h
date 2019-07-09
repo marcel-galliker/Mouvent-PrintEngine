@@ -175,12 +175,13 @@
 #define CMD_ENCODER_PG_INIT		0x01000115
 #define CMD_ENCODER_PG_DIST		0x01000116
 #define CMD_ENCODER_PG_STOP		0x01000117
+#define CMD_ENCODER_PG_RESTART	0x01000118
 
-#define CMD_ENCODER_DISABLE		0x01000118	// temporary disable the encoder input (CLEAF Splice)
-#define CMD_ENCODER_ENABLE		0x01000119	// enable after temorary disable
+#define CMD_ENCODER_DISABLE		0x01000119	// temporary disable the encoder input (CLEAF Splice)
+#define CMD_ENCODER_ENABLE		0x0100011a	// enable after temorary disable
 
-#define CMD_ENCODER_SAVE_PAR	0x0100011a	// save correction parameters	
-#define CMD_ENCODER_SAVE_PAR_1	0x0100011b	// save correction parameters	
+#define CMD_ENCODER_SAVE_PAR	0x0100011c	// save correction parameters	
+#define CMD_ENCODER_SAVE_PAR_1	0x0100011d	// save correction parameters	
 
 #define CMD_FLUID_CFG			0x01000121
 #define REP_FLUID_CFG			0x02000121

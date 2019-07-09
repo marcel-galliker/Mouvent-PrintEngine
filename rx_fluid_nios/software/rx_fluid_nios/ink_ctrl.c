@@ -261,7 +261,7 @@ void ink_tick_10ms(void)
 						int i, on;
 						for (i=0, on=FALSE; i<NIOS_INK_SUPPLY_CNT; i++)
 						{
-							on |= (pRX_Config->ink_supply[isNo].ctrl_mode>ctrl_off);
+							on |= (pRX_Config->ink_supply[i].ctrl_mode>ctrl_off);
 						}
 						if (!on) _set_pressure_value(FALSE);
 					}

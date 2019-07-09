@@ -54,6 +54,8 @@ static SFpgaMsg _MsgBuf[MSG_BUF_SIZE];
 static int		_MsgBufIn;
 static int		_MsgBufOut;
 
+static SEncoderPgDist	_DistMsg[MSG_BUF_SIZE];
+
 //--- prototypes ---------------------------------------------------------------------
 static int _ctrl_connected  (RX_SOCKET socket, const char *peerName);
 static int _ctrl_deconnected(RX_SOCKET socket, const char *peerName);
@@ -64,6 +66,7 @@ static int _handle_ctrl_msg (RX_SOCKET socket, void *pmsg);
 static int _do_ping			(RX_SOCKET socket);
 static int _do_encoder_cfg 	(RX_SOCKET socket, SEncoderCfg 	*cfg);
 static int _do_encoder_pg_dist(RX_SOCKET socket, SEncoderPgDist *dist);
+static int _do_encoder_pg_restart(RX_SOCKET socket);
 static int _do_encoder_stat (RX_SOCKET socket);
 static int _do_simu_encoder (RX_SOCKET socket, int *pkhz);
 static int _do_stop_printing(RX_SOCKET socket);
@@ -121,7 +124,7 @@ void ctrl_simu(void)
 	dist.ignore = 0;
 	dist.window = 0;
 	
-	fpga_pg_init();
+	fpga_pg_init(FALSE);
 	_do_encoder_cfg(socket, &cfg);
 	for (i=0; i<10; i++) _do_encoder_pg_dist(socket, &dist);	
 	_do_simu_encoder(socket, &freq);
@@ -215,11 +218,12 @@ static int _handle_ctrl_msg(RX_SOCKET socket, void *pmsg)
 	{
 	case CMD_ENCODER_CFG:		_do_encoder_cfg	(socket, (SEncoderCfg*) &phdr[1]);		break;
 	case CMD_ENCODER_PG_INIT:	_PgNo = 0;
-								fpga_pg_init();		
+								fpga_pg_init(FALSE);		
 								break;
 	case CMD_ERROR_RESET:		tw8_reset_error(); break;
 	case CMD_ENCODER_PG_DIST:	_do_encoder_pg_dist(socket, (SEncoderPgDist*)&phdr[1]);	break;
 	case CMD_ENCODER_PG_STOP:	fpga_pg_stop();											break;
+	case CMD_ENCODER_PG_RESTART:_do_encoder_pg_restart(socket);							break;
 	case CMD_ENCODER_STAT:		_do_encoder_stat(socket);								break;
 	case CMD_FPGA_SIMU_ENCODER:	_do_simu_encoder(socket, (int*)&phdr[1]);				break;
 	case CMD_STOP_PRINTING:		fpga_stop_printing();									break;
@@ -273,10 +277,10 @@ static int _do_encoder_cfg 	(RX_SOCKET socket, SEncoderCfg 	*pcfg)
 
 	_Requests++;
 	memcpy(&RX_EncoderCfg, pcfg, sizeof(RX_EncoderCfg));
-	fpga_enc_config(0, pcfg, 0, 0);
+	fpga_enc_config(0, pcfg, 0, 0, FALSE);
 	reply.hdr.msgId  = REP_ENCODER_CFG;
 	reply.hdr.msgLen = sizeof(reply);
-	reply.reply = fpga_pg_config(socket, pcfg);
+	reply.reply = fpga_pg_config(socket, pcfg, FALSE);
 	if (reply.reply==REPLY_OK) _Replies++;
 	sok_send(&socket, &reply);
 	return REPLY_OK;
@@ -289,9 +293,36 @@ static int _do_encoder_pg_dist(RX_SOCKET socket, SEncoderPgDist *pmsg)
 	static int _time=0;
 	TrPrintfL(TRUE, "_do_encoder_pg_dist(no=%d, cnt=%d, dist=%d) time=%d", ++_PgNo, pmsg->cnt, pmsg->dist, time-_time);
 	_time=time;
+	memcpy(&_DistMsg[_PgNo%SIZEOF(_DistMsg)], pmsg, sizeof(SEncoderPgDist)); 
 	if (pmsg->dist)		fpga_pg_set_dist(pmsg->cnt, pmsg->dist);
 	if (pmsg->ignore)	Error(ERR_CONT, 0, "Not implemented yet");
 	if (pmsg->window)	Error(ERR_CONT, 0, "Not implemented yet");
+	return REPLY_OK;
+}
+
+//--- _do_encoder_pg_restart -------------------------------
+static int _do_encoder_pg_restart(RX_SOCKET socket)
+{
+	int i;
+	SEncoderPgDist *pmsg;
+	
+	TrPrintfL(TRUE, "_do_encoder_pg_restart");
+	
+	fpga_pg_init(TRUE);
+	
+	//--- refill FIFO -------------------
+	for (i=RX_EncoderStatus.PG_cnt; i<_PgNo; i++)
+	{
+		pmsg = &_DistMsg[i%SIZEOF(_DistMsg)];
+		TrPrintfL(TRUE, "_do_encoder_pg_dist(no=%d, cnt=%d, dist=%d)", i, pmsg->cnt, pmsg->dist);
+		if (pmsg->dist)		fpga_pg_set_dist(pmsg->cnt, pmsg->dist);
+		if (pmsg->ignore)	Error(ERR_CONT, 0, "Not implemented yet");
+		if (pmsg->window)	Error(ERR_CONT, 0, "Not implemented yet");									
+	}
+
+	fpga_enc_config(0, &RX_EncoderCfg, 0, 0, TRUE);
+	fpga_pg_config(INVALID_SOCKET, &RX_EncoderCfg, TRUE);
+	
 	return REPLY_OK;
 }
 
@@ -301,8 +332,8 @@ static int _do_simu_encoder (RX_SOCKET socket, int *pkhz)
 	static int _actSpeed = 0;
 	if (*pkhz != _actSpeed)
 	{
-		fpga_enc_config(0, &RX_EncoderCfg, 0, *pkhz);
-		fpga_enc_config(1, &RX_EncoderCfg, 1, *pkhz);
+		fpga_enc_config(0, &RX_EncoderCfg, 0, *pkhz, FALSE);
+		fpga_enc_config(1, &RX_EncoderCfg, 1, *pkhz, FALSE);
 		_actSpeed = *pkhz;
 	}
 	return REPLY_OK;

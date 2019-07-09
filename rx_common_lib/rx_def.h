@@ -808,6 +808,7 @@ typedef struct SEncoderCfg
 	INT32	pos_pg_fwd;
 	INT32	pos_pg_bwd;
 	INT32	incPerMeter;
+	INT32	diameter[2];
 	INT32	orientation;
 	INT32	scanning;
 	INT32	correction;

@@ -803,7 +803,6 @@ static void _data_multi_copy(SBmpInfo *pBmpInfo, UINT8 multiCopy)
 		//--- wait ----
 		{
 			int running = _MultiCopyThreadCnt;
-			int done;
 			_MultiCopyDone  = rx_sem_create();
 			while (running)
 			{

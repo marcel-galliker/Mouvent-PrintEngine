@@ -473,8 +473,9 @@ int  plc_start_printing(void)
 		_RequestPause		= FALSE;
 	}
 	if (_CanRun && !_SimuPLC)
-	{
+	{		
 		plc_error_reset();
+		if (rx_def_is_web(RX_Config.printer.type) && RX_Config.printer.type!=printer_cleaf) enc_restart_pg();
 		_SendRun = TRUE;
 	}
 	if (_SimuEncoder) ctrl_simu_encoder(_Speed);		
