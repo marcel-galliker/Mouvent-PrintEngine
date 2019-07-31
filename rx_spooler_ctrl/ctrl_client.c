@@ -364,7 +364,7 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 		if (ret==REPLY_OK)
 		{
 			if (msg.smp_bufSize) data_clear(_Buffer[_BufferNo]);
-			ret = data_malloc (msg.printMode, reply.widthPx, reply.lengthPx, reply.bitsPerPixel, RX_Color, SIZEOF(RX_Color), &_BufferSize[_BufferNo], _Buffer[_BufferNo]);			
+			ret = data_malloc (msg.printMode, reply.widthPx, reply.lengthPx, reply.bitsPerPixel, RX_Color, SIZEOF(RX_Color), multiCopy, &_BufferSize[_BufferNo], _Buffer[_BufferNo]);			
 		}
 		if (_Abort) 
 			return REPLY_ERROR;

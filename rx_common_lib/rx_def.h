@@ -1116,6 +1116,7 @@ typedef struct SInkSupplyStat
 	UINT32	pumpSpeedSet;		//	Consumption pump speed
 	UINT32	pumpSpeed;			//	Consumption pump speed measured
 	INT32	canisterLevel;
+	INT32	canisterErr;
 	char	scannerSN[16];
 	char	barcode[128];
 	EnFluidCtrlMode	ctrlMode;	//	EnFluidCtrlMode
@@ -1552,6 +1553,7 @@ typedef struct
 	PBYTE *buffer[MAX_COLORS];
 	UINT64 DropCount[MAX_COLORS][3]; //Drop count for drop size 1, 2, and 3 per plane
 	INT8 multiCopy;
+	INT8 colorCnt;
 } SBmpInfo;
 
 //--- global variables -----------------------------

@@ -304,7 +304,7 @@ static void _load_buffer(const char *filedir, const char *filename, SBmpInfo *pi
 		return;
 	}
 	
-	ret = data_malloc (scanning, pinfo->srcWidthPx, pinfo->lengthPx, pinfo->bitsPerPixel, RX_Color, SIZEOF(RX_Color), pBufSize, buffer);
+	ret = data_malloc (scanning, pinfo->srcWidthPx, pinfo->lengthPx, pinfo->bitsPerPixel, RX_Color, SIZEOF(RX_Color), multiCopy, pBufSize, buffer);
 	if (_Layout.columns>1 && width < pinfo->srcWidthPx) 
 	{
 		ret = tif_load(&id, filedir, filename, PM_SINGLE_PASS, pinfo->srcWidthPx - width+8/pinfo->bitsPerPixel, 0, RX_Color, SIZEOF(RX_Color), buffer, pinfo, ctrl_send_load_progress);

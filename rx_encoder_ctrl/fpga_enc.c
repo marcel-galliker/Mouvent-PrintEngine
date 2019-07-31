@@ -926,7 +926,10 @@ static void  _pg_ctrl(void)
 		int newpg=FALSE;
 
 		if (Fpga->stat.pg_fifo_empty_err && RX_EncoderStatus.fifoEmpty_PG  != Fpga->stat.pg_fifo_empty_err)
+		{
 			Error(LOG, 0, "pg_fifo_empty_err=%d, fill_level=%d, _DistTelCnt=%d, PG_Cnt=%d", Fpga->stat.pg_fifo_empty_err, FpgaQSys->printGo_status.fill_level, _DistTelCnt, Fpga->stat.encOut[0].PG_cnt);
+			_IndexCheckDone = TRUE;
+		}
 		RX_EncoderStatus.fifoEmpty_PG  = Fpga->stat.pg_fifo_empty_err;
 		RX_EncoderStatus.fifoEmpty_IGN = Fpga->stat.ignored_fifo_empty_err;
 		RX_EncoderStatus.fifoEmpty_WND = Fpga->stat.window_fifo_empty_err;	

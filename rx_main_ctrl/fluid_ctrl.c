@@ -70,6 +70,7 @@ static SFluidThreadPar _FluidThreadPar[FLUID_BOARD_CNT];
 static void *_fluid_thread(void *lpParameter);
 
 SInkSupplyStat   _FluidStatus[INK_SUPPLY_CNT+2];
+ELogItemType	 _ScalesErr[INK_SUPPLY_CNT+2];
 INT32			 _ScalesStatus[MAX_SCALES];
 INT32			 _FluidToScales[INK_SUPPLY_CNT+2];
 
@@ -89,6 +90,7 @@ int	fluid_init(void)
 	int i;
 	
 	memset(_FluidStatus,		0, sizeof(_FluidStatus));
+	memset(_ScalesErr,		    0, sizeof(_ScalesErr));
 	memset(_FluidThreadPar,		0, sizeof(_FluidThreadPar));
 	memset(_HeadStateCnt,		0, sizeof(_HeadStateCnt));
 	memset(_HeadState,			0, sizeof(_HeadState));
@@ -259,6 +261,9 @@ void fluid_set_config(void)
 void fluid_error_reset(void)
 {
 	int i;
+	
+	memset(_ScalesErr,		    0, sizeof(_ScalesErr));
+	
 	for (i=0; i<FLUID_BOARD_CNT; i++)
 	{
 		if (_FluidThreadPar[i].socket!=INVALID_SOCKET) 
@@ -274,9 +279,10 @@ void fluid_tick(void)
 	int i;
 	int tol=2;
 	int time=rx_get_ticks();
+	
 #define TIMEOUT 2000
 	SHeadStateLight state[INK_SUPPLY_CNT];
-
+	
 	//---  calculate average value
 	for (i=0; i<INK_SUPPLY_CNT; i++)
 	{
@@ -309,8 +315,8 @@ void fluid_tick(void)
 		
 		if (!chiller_is_running() &&  _FluidStatus[i].ctrlMode>ctrl_off)
 			_send_ctrlMode(i, ctrl_off, TRUE);
-		
-		state[i].canisterEmpty = FALSE;
+					
+		state[i].canisterEmpty = (_FluidStatus[i].canisterErr >= LOG_TYPE_ERROR_CONT);
 	}
 	
 	memset(_HeadStateCnt,  0, sizeof(_HeadStateCnt));
@@ -664,6 +670,18 @@ static void _control_flush(void)
 void fluid_reply_stat(RX_SOCKET socket)	// to GUI
 {
 	int i;
+	int	canisterLow;
+	int	canisterEmpty;
+	switch (RX_Config.printer.type)
+	{
+	case printer_TX801:
+	case printer_TX802:	canisterLow   = 1500;
+						canisterEmpty = 500;
+						break;
+	default:			canisterLow   = 1500;
+						canisterEmpty = 500;
+	}
+
 	for (i=0; i<SIZEOF(_FluidStatus); i++)
 	{
 		if (i<INK_SUPPLY_CNT)
@@ -671,8 +689,29 @@ void fluid_reply_stat(RX_SOCKET socket)	// to GUI
 			_FluidStatus[i].info.connected = (_FluidThreadPar[i/INK_PER_BOARD].socket!=INVALID_SOCKET);
 			_FluidStatus[i].info.flushed   = (_Flushed & (0x01<<i));
 	//		_FluidStatus[i].info.flushed   = ctrl_check_head_flushed(i);			
-		}	
+		}
+
 		_FluidStatus[i].canisterLevel  = _ScalesStatus[_FluidToScales[i]];
+
+		if(_ScalesErr[i] != LOG_TYPE_UNDEF)
+		{
+			if(_FluidStatus[i].canisterLevel <= canisterEmpty && _ScalesErr[i] < LOG_TYPE_ERROR_CONT)
+			{
+				Error(ERR_CONT, 0, "Ink Canister %s EMPTY!", RX_ColorNameLong(RX_Config.inkSupply[i].ink.colorCode));
+				_ScalesErr[i] = LOG_TYPE_ERROR_CONT;
+			}
+			else if(_FluidStatus[i].canisterLevel <= canisterLow && _ScalesErr[i] < LOG_TYPE_WARN)
+			{
+				Error(WARN, 0, "Ink Canister %s LOW!", RX_ColorNameLong(RX_Config.inkSupply[i].ink.colorCode));
+				_ScalesErr[i] = LOG_TYPE_WARN;
+			}
+			_FluidStatus[i].canisterErr = _ScalesErr[i];		
+		}
+		else if (_FluidStatus[i].canisterLevel>0 && _FluidStatus[i].canisterLevel<50000)
+		{
+			_ScalesErr[i] = LOG_TYPE_LOG;
+		}
+		
 		dl_get_barcode(i, _FluidStatus[i].scannerSN, _FluidStatus[i].barcode);
 		if (_HeadErr[i]) _FluidStatus[i].err |= err_printhead; 
 		_HeadErr[i]=0;

@@ -72,6 +72,14 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _CanisterLevel, value); }
         }
 
+        //--- Property CanisterErr ---------------------------------------
+        private ELogType _CanisterErr;
+        public ELogType  CanisterErr
+        {
+            get { return _CanisterErr; }
+            set { SetProperty(ref _CanisterErr, value); }
+        }
+
         //--- Property BarCode ---------------------------------------
         private string _BarCode;
         public string BarCode
@@ -267,6 +275,7 @@ namespace RX_DigiPrint.Models
             PumpSpeed       = msg.pumpSpeed;
             CtrlMode        = msg.ctrlMode;
             CanisterLevel   = msg.canisterLevel;
+            CanisterErr     = (ELogType)msg.canisterErr;
             ScannerSN       = msg.scannerSN;
             BarCode         = msg.barcode.Replace("; ", "\n");
 

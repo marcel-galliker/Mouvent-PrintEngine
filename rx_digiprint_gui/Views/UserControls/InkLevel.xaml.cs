@@ -80,8 +80,14 @@ namespace RX_DigiPrint.Views.UserControls
         //--- _update_level ------------------------------
         private void _update_level()
         {
+            double max;
             if (_InkSupply==null) return;
-
+            switch(RxGlobals.PrintSystem.PrinterType)
+            {
+                case EPrinterType.printer_TX801: max=10000; break;
+                case EPrinterType.printer_TX802: max=10000; break;
+                default: max=20000; break;
+            }
             Progress.Value = (UInt32)_InkSupply.CanisterLevel;
             if (_InkSupply.CanisterLevel==TcpIp.INVALID_VALUE)
             { 
@@ -90,10 +96,17 @@ namespace RX_DigiPrint.Views.UserControls
             }
             else
             { 
-                Progress.Value    = (uint)(100.0*_InkSupply.CanisterLevel/25000.0);
+                Progress.Value    = (uint)(100.0*_InkSupply.CanisterLevel/max);
                 Progress.ValueStr = string.Format("{0}.{1} Kg", _InkSupply.CanisterLevel/1000, Math.Abs(_InkSupply.CanisterLevel%1000)/100);
             }
+            switch(_InkSupply.CanisterErr)
+            {
+                case ELogType.eErrWarn: Progress.Background = new SolidColorBrush(Colors.Yellow);       break;
+                case ELogType.eErrCont: Progress.Background = new SolidColorBrush(Colors.Red);          break;
+                default:                Progress.Background = new SolidColorBrush(Colors.Transparent);  break;
+            }
         }
+
         //--- UserControl_PreviewMouseDown --------------------------------
         private void UserControl_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {

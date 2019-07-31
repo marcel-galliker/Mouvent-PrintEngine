@@ -128,7 +128,7 @@ static void _plc_req_material	(RX_SOCKET socket, char *filename, int cmd);
 static void _plc_save_material	(RX_SOCKET socket, char *filename, int cmd, char *varList);
 static void _plc_del_material	(RX_SOCKET socket, char *filename, int cmd, char *name);
 
-static int  _plc_error_filter(UINT32 errNo);
+static int  _plc_error_filter(SPlcLogItem *pItem, char *text);
 static void _plc_error_filter_reset(void);
 
 static void _plc_set_command(char *mode, char *cmd);
@@ -1093,18 +1093,26 @@ static void _plc_set_time()
 }
 
 //--- _plc_error_filter ----------------------------------
-static int _plc_error_filter(UINT32 errNo)
+static int _plc_error_filter(SPlcLogItem *pItem, char *text)
 {
 	int i;
+	
+	if(!strncmp(pItem->text, "RX:", 3)) 
+	{
+		strcpy(text, &pItem->text[3]);		
+		return TRUE;
+	}
+		
 	for (i=0; i<SIZEOF(_ErrorFilterBuf); i++)
 	{
-		if (_ErrorFilterBuf[i]==errNo) return FALSE;
+		if (_ErrorFilterBuf[i]==pItem->errNo) return FALSE;
 		if (_ErrorFilterBuf[i]==0)
 		{
-			_ErrorFilterBuf[i] = errNo;
+			_ErrorFilterBuf[i] = pItem->errNo;
 			return TRUE;
 		}
 	}
+	strcpy(text, pItem->text);
 	return TRUE;
 }
 
@@ -1120,6 +1128,7 @@ static void _plc_error_filter_reset(void)
 static void _plc_get_status()
 {
 	SPlcLogItem item;
+	char text[MAX_PATH];
 	int ticks=rx_get_ticks();
 	while(sys_get_new_log_item(&item, &_LastLogIdx) == REPLY_OK)
 	{
@@ -1142,14 +1151,14 @@ static void _plc_get_status()
 				}
 				*/
 
-				if (item.state == active && _plc_error_filter(item.errNo))
+				if (item.state == active && _plc_error_filter(&item, text))
 				{
 					int err=0;
 					if(item.state == active)
 					{
-						if((item.errNo & 0xf0000000) == 0xf0000000)	{    Error(ERR_CONT,	err, "PLC (%X): %s", item.errNo, item.text); _ErrorFilter = rx_get_ticks() + ERROR_FILTER_TIME; }
-						else if((item.errNo & 0xf0000000) == 0xe0000000) Error(WARN,		err, "PLC (%X): %s", item.errNo, item.text);
-						else                                             Error(LOG,			err, "PLC (%X): %s", item.errNo, item.text);
+						if((item.errNo & 0xf0000000) == 0xf0000000)	{    Error(ERR_CONT,	err, "PLC (%X): %s", item.errNo, text); _ErrorFilter = rx_get_ticks() + ERROR_FILTER_TIME; }
+						else if((item.errNo & 0xf0000000) == 0xe0000000) Error(WARN,		err, "PLC (%X): %s", item.errNo, text);
+						else                                             Error(LOG,			err, "PLC (%X): %s", item.errNo, text);
 					}
 					else if(item.state == message) Error(LOG, err, "PLC (%X): %s", item.errNo, item.text);					
 				}				

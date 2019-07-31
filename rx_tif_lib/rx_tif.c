@@ -382,6 +382,7 @@ int tif_load(SPageId *id, const char *filedir, const char *filename, int printMo
 	memset(pinfo, 0, sizeof(SBmpInfo));
 	_tif_init();
 	threadCnt = 0;
+	pinfo->colorCnt=0;
 	for (c=0; c<MAX_COLORS && c<splitCnt; c++)
 	{
 		if (psplit[c].color.name[0] && psplit[c].lastLine)
@@ -421,6 +422,7 @@ int tif_load(SPageId *id, const char *filedir, const char *filename, int printMo
 			ppar->buffer   = buffer[c]+wakeupLen*lineLen;
 			ppar->y_from   = psplit[c].firstLine;
 			ppar->y_to	   = height;
+			pinfo->colorCnt++;
 			
 			threadCnt++;
 		}

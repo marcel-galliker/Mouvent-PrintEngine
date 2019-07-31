@@ -30,6 +30,8 @@ namespace RX_DigiPrint.Views.PrintQueueView
 
         private FileOpen        FileOpen;
         private FileOpen_LB702  FileOpen_LB702;
+        
+        private bool    _UseLB702 = false;
 
         //--- constructor -----------------------------------------------
         public PrintQueueView()
@@ -47,6 +49,28 @@ namespace RX_DigiPrint.Views.PrintQueueView
             CommandInsert = new RxCommand(DoInsert);
             Button_Refresh.Visibility = Visibility.Collapsed;
             Button_Print.Visibility   = Visibility.Collapsed;
+
+            new Thread(() =>
+            {
+                RxBindable.Invoke(() =>
+                {
+                    FileOpen       = new FileOpen();
+                    FileOpen.Visibility      = Visibility.Collapsed;
+                    Grid.SetRow(FileOpen, 1);
+                    Grid.SetRowSpan(FileOpen, 3);
+                    FileOpen.IsVisibleChanged += FileOpen_IsVisibleChanged;
+                    MainGrid.Children.Add(FileOpen);
+
+                    FileOpen_LB702 = new FileOpen_LB702();
+                    FileOpen_LB702.Visibility = Visibility.Collapsed;
+                    Grid.SetRow(FileOpen_LB702, 1);
+                    Grid.SetRowSpan(FileOpen_LB702, 3);
+                    FileOpen_LB702.IsVisibleChanged += FileOpen_IsVisibleChanged;
+                    FileOpen_LB702.SelectedChanged  += FileOpen_LB702_SelectedChanged;
+
+                    MainGrid.Children.Add(FileOpen_LB702);
+                });
+            }).Start();
         }
 
         //--- PrintSystem_PropertyChanged --------------------------------------------
@@ -223,51 +247,30 @@ namespace RX_DigiPrint.Views.PrintQueueView
         //--- Add_Clicked -------------------------------------------------
         private void Add_Clicked(object sender, RoutedEventArgs e)
         {
-            RxButton button = sender as RxButton;
-            UserControl ctrl;
-            UserControl act;
-
-            if (MainGrid.Children.Count==6) act = MainGrid.Children[5] as UserControl;
-            else act = null;
-            if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_UV)
+            _UseLB702 = RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_UV;
+            if (_UseLB702)
             {
-                if (FileOpen!=null)       FileOpen = null;
-                if (FileOpen_LB702==null) 
-                {
-                    FileOpen_LB702 = new FileOpen_LB702();
-                    FileOpen_LB702.SelectedChanged += FileOpen_LB702_SelectedChanged;
-                } 
-                ctrl = FileOpen_LB702;
+                FileOpen.Visibility       = Visibility.Collapsed;
+                FileOpen_LB702.Visibility = Visibility.Visible;
             }
             else
             {
-                if (FileOpen==null) FileOpen = new FileOpen();
-                if (FileOpen_LB702!=null) FileOpen_LB702 = null;
-                ctrl = FileOpen;
+                FileOpen_LB702.Visibility = Visibility.Collapsed;
+                FileOpen.Visibility       = Visibility.Visible;
             }
-            if (act==null || act!=ctrl)
-            {
-                Grid.SetRow(ctrl, 1);
-                Grid.SetRowSpan(ctrl, 3);
-                ctrl.Visibility = Visibility.Collapsed;
-                ctrl.IsVisibleChanged += FileOpen_IsVisibleChanged;
-            }
-            if (act==null) MainGrid.Children.Add(ctrl);
-            else if (act!=ctrl) MainGrid.Children[5]=ctrl;
-            ctrl.Visibility = (ctrl.Visibility==Visibility.Collapsed)? Visibility.Visible :  Visibility.Collapsed;
         }
         
         //--- Refresh_Clicked -----------------------------------
         private void Refresh_Clicked(object sender, RoutedEventArgs e)
         {                        
-            if (FileOpen_LB702!=null) FileOpen_LB702.Refresh();
-            if (FileOpen!=null) FileOpen.Refresh();
+            FileOpen_LB702.Refresh();
+            FileOpen.Refresh();
         }
 
         //--- Print_Clicked -----------------------------------
         private void Print_Clicked(object sender, RoutedEventArgs e)
         {                        
-            if (FileOpen_LB702!=null) FileOpen_LB702.Print();
+            if (_UseLB702) FileOpen_LB702.Print();
         }
 
         //--- FileOpen_LB702_SelectedChanged ---------------------------------------
@@ -294,7 +297,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
                 AllButtons(Visibility.Collapsed);
                 Button_Add.IsChecked = true;        
                 Button_Refresh.Visibility = Visibility.Visible;
-                if (FileOpen_LB702!=null && FileOpen_LB702.Selected>0) Button_Print.Visibility   = Visibility.Visible;
+                if (_UseLB702 && FileOpen_LB702.Selected>0) Button_Print.Visibility   = Visibility.Visible;
                 else  Button_Print.Visibility   = Visibility.Collapsed;
             }   
             else
@@ -318,7 +321,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
         {
             if (Button_Add.IsChecked)
             {
-                if (FileOpen_LB702!=null) FileOpen_LB702.Delete();
+                if (_UseLB702) FileOpen_LB702.Delete();
             }
             else
             {

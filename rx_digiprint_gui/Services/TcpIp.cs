@@ -851,6 +851,7 @@ namespace RX_DigiPrint.Services
 	        public UInt32	pumpSpeedSet;		//	Consumption pump speed
 	        public UInt32	pumpSpeed;			//	Consumption pump speed
 	        public Int32	canisterLevel;
+	        public Int32	canisterErr;
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
             public string   scannerSN;
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
