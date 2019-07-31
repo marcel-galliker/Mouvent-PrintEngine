@@ -361,6 +361,7 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 			if (ret==REPLY_NOT_FOUND) 
 				Error(ERR_STOP, 0, "Could not load file >>%s<<", msg.filename);
 		}
+		if (msg.printMode==PM_SCAN_MULTI_PAGE) multiCopy=0;
 		if (ret==REPLY_OK)
 		{
 			if (msg.smp_bufSize) data_clear(_Buffer[_BufferNo]);

@@ -45,7 +45,8 @@ typedef struct SBmpSplitInfo
 	int startBt;	// bytes
 	int widthBt;	// bytes
 	int srcLineCnt;
-	int srcLineLen;	// bytes
+	int	srcWidthBt;	// bytes, no alignment
+	int srcLineLen;	// bytes, aligned to 64 Bit
 	int dstLineLen;	// bytes, aligned to 512 Bits (32 Bytes)
 	int blk0;		// number of block in printhead
 	int blkCnt;		// number of used blocks

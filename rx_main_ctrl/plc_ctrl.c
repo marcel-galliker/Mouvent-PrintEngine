@@ -1322,7 +1322,7 @@ static void _plc_state_ctrl()
 			_StartPrinting = FALSE;
 			_CanRun = TRUE;
 			if(!_SimuPLC)    _plc_set_command("CMD_PRODUCTION", "CMD_RUN");
-			if(_SimuEncoder) ctrl_simu_encoder(_StartEncoderItem.speed);
+			if(_SimuEncoder) ctrl_simu_encoder(_Speed);
 			step_set_vent(_Speed);
 			memset(&_StartEncoderItem, 0, sizeof(_StartEncoderItem));
 			TrPrintfL(TRUE, "PLC: CMD_RUN sent");

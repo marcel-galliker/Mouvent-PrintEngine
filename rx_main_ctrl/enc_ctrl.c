@@ -439,7 +439,7 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 		SEncoderPgDist dist;
 		memset(&dist, 0, sizeof(dist));
 		dist.cnt	= 1;
-		dist.dist	= pitem->pageHeight+1000+2*(_WakeupLen*25400/1200);
+		dist.dist	= pitem->pageHeight+2000+2*(_WakeupLen*25400/1200);
 		for(no=0; no<ENC_CNT; no++) 
 		{
 			sok_send_2(&_Encoder[no].socket, CMD_ENCODER_PG_DIST, sizeof(dist), &dist);

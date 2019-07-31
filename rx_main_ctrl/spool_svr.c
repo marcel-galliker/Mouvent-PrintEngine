@@ -216,7 +216,7 @@ static int _do_start_printing	(RX_SOCKET socket)
 {
 	_DelayPauseTimer = 0;
 	TrPrintfL(TRUE, "CONTINUE after file loaded");
-//	Error(LOG, 0, "CONTINUE after file loaded");
+	Error(LOG, 0, "CONTINUE after file loaded");
 	plc_start_printing();
 	pc_print_next();
 	return REPLY_OK;

@@ -825,7 +825,7 @@ void fpga_pg_init(int restart)
 	int pgNo;
 	int tio=0;
 	
-//	Error(LOG, 0, "fpga_pg_init _DistTelCnt=%d", _DistTelCnt);
+	Error(LOG, 0, "fpga_pg_init restart=%d", restart);
 
 	TrPrintfL(TRUE, "fpga_pg_init");
 
@@ -872,6 +872,9 @@ void fpga_pg_init(int restart)
 void  fpga_pg_stop(void)
 {
 	int tio=0;
+	
+	Error(LOG, 0, "fpga_pg_stop");
+	
 	_PrintGo_Enabled = FALSE;
 	Fpga->cfg.general.reset_fifos = TRUE;
 	while (FpgaQSys->printGo_status.fill_level)
@@ -1138,7 +1141,6 @@ static void _fpga_display_status(int showCorrection, int showParam)
 			 term_printf("  fifos_ready:   "); for (i=0; i<cnt; i++)term_printf("%09d  ", Fpga->cfg.pg[i].fifos_ready);			term_printf("\n");
 			 term_printf("  dig_in_sel:    "); for (i=0; i<cnt; i++)term_printf("%09d  ", Fpga->cfg.pg[i].dig_in_sel);			term_printf("\n");
 			 term_printf("  quiet_window:  "); for (i=0; i<cnt; i++)term_printf("%09d  ", Fpga->cfg.pg[i].quiet_window);			term_printf("\n");
-			 term_printf("  PG Fifo Lvl:         %03d   DistTelCnt=%06d \n", FpgaQSys->printGo_status.fill_level, _DistTelCnt); 
 		}
 
 		if (!showCorrection && !showParam)
@@ -1148,7 +1150,6 @@ static void _fpga_display_status(int showCorrection, int showParam)
 			term_printf("  position:      "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encIn[i].position);		term_printf("\n");
 			term_printf("  pg_start_pos:  "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encIn[i].pg_start_pos);	term_printf("\n");
 			term_printf("  pos_pg_fwd:	  "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->cfg.pg[i].pos_pg_fwd);			term_printf("\n");
-			term_printf("  PG Cnt:        "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encOut[i].PG_cnt);				term_printf("\n");
 	//		term_printf("  StepTime:      "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encIn[i].step_time);		term_printf("\n");
 	//		term_printf("  StepTime Min:  "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encIn[i].setp_time_min);	term_printf("\n");
 	//		term_printf("  StepTime Max:  "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encIn[i].step_time_max);	term_printf("\n");
@@ -1191,11 +1192,12 @@ static void _fpga_display_status(int showCorrection, int showParam)
 			term_printf("  Speed [m/Min]: "); for (i=0; i<cnt; i++) term_printf("%09d  ", (int)((Fpga->stat.encOut[i].speed*23/1000)*60.0/1200*0.0254) );		term_printf("\n");
 			term_printf("  Speed Min[Hz]: "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encOut[i].speed_min*23/1000);	term_printf("\n");
 			term_printf("  Speed Max[Hz]: "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encOut[i].speed_max*23/1000);	term_printf("\n");
+			term_printf("  PG FIFO:       %09d  Level=%03d \n", _DistTelCnt, FpgaQSys->printGo_status.fill_level); 
 			term_printf("  PG Cnt:        "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encOut[i].PG_cnt);				term_printf("\n");
 			term_printf("  PG wnd error:  "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.dig_pg_window_err[i]);			term_printf("\n");
 	//		term_printf("  mem_pointer:   "); for (i=0; i<3; i++)   term_printf("%09d  ", Fpga->stat.mem_pointer[i]);				term_printf("\n");
 
-			term_printf("  FIFO Erors:    "); term_printf("PG:%06d  ",  Fpga->stat.pg_fifo_empty_err); 
+			term_printf("  PG FIFO Erors: "); term_printf("PG:%06d  ",  Fpga->stat.pg_fifo_empty_err); 
 											  term_printf("IGN:%05d  ", Fpga->stat.ignored_fifo_empty_err); 
 											  term_printf("WND:%05d",   Fpga->stat.window_fifo_empty_err); 
 											  term_printf("\n");	
@@ -1203,11 +1205,12 @@ static void _fpga_display_status(int showCorrection, int showParam)
 											  term_printf("REQ:%05d  ", ctrl_requests()); 
 											  term_printf("REP:%05d",   ctrl_replies()); 
 											  term_printf("\n");
-				
+			/*	
 			term_printf("  Str meas:      %09d           ", Fpga->stat.str_corr);term_printf("\n");			
 			term_printf("  Str meas max:  %09d           ", Fpga->stat.str_corr_max);term_printf("\n")	;
 			term_printf("  Str meas min:  %09d           ", Fpga->stat.str_corr_min); term_printf("\n");
 			term_printf("  In Cnt stat:   %09d           ", Fpga->stat.dig_cnt_stat); term_printf("\n");		
+			*/
 			//term_printf("  Shift delay cnt 0: %09d           ", Fpga->cfg.general.shift_delay-(524288 - Fpga->stat.shift_delay_cnt)); term_printf("\n");
 		}
 		

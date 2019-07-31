@@ -374,7 +374,6 @@ int  data_get_size	(const char *path, UINT32 page, UINT32 spacePx, UINT32 *pwidt
 	}
 
 //	*multiCopy = 1;
-	if (*multiCopy>1) Error(LOG, 0, "MultiCopy=%d", *multiCopy);
 	return ret;
 }
 
@@ -457,6 +456,7 @@ int  data_malloc(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPixel,
 		}
 		*pBufSize = memsize;
 	}
+	/*
 	if (multicopy>1)
 	{
 		for (i=0; i<MAX_COLORS; i++)
@@ -464,6 +464,7 @@ int  data_malloc(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPixel,
 			if (buffer[i]) memset(buffer[i], 0x00, *pBufSize);
 		}
 	}
+	*/
 	if (error || _Abort)
 	{
 		for (i=0; i<MAX_COLORS; i++)
@@ -803,9 +804,11 @@ static void _data_multi_copy(SPageId *pid, SBmpInfo *pBmpInfo, UINT8 multiCopy)
 	int i;
 	if (multiCopy>1 && !pBmpInfo->multiCopy)
 	{
-		_MultiCopyDone  = rx_sem_create();
 		int running = _MultiCopyThreadCnt;
 		int done;			
+		Error(LOG, 0, "MultiCopy=%d", multiCopy);
+
+		_MultiCopyDone  = rx_sem_create();
 
 		for (i=0; i<_MultiCopyThreadCnt; i++)
 		{
@@ -991,6 +994,7 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 					pInfo->bitsPerPixel	= 1;
 					pInfo->widthPx		= 1;
 					pInfo->widthBt		= 1;
+					pInfo->srcWidthBt	= 1;
 					pInfo->srcLineLen	= 1;
 					pInfo->srcLineCnt	= 1;
 					pInfo->dstLineLen	= 32; // align to 256 Bits (32 Bytes)				
@@ -1002,7 +1006,7 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 					RX_Bitmap bmp;
 					bmp.bppx		= pInfo->bitsPerPixel;
 					bmp.width		= pInfo->widthPx;
-					bmp.height		= pInfo->srcLineCnt;
+					bmp.height		= pInfo->srcLineCnt;					
 					bmp.lineLen		= pInfo->srcLineLen;
 					bmp.sizeUsed	= 0;
 					bmp.sizeAlloc	= 0;
@@ -1130,6 +1134,7 @@ static int _data_split_scan(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 					}
 					else pInfo->jetPx0	= 0;
 
+					pInfo->srcWidthBt	= (pBmpInfo->srcWidthPx*pBmpInfo->bitsPerPixel)/8;
 					pInfo->srcLineLen	= pBmpInfo->lineLen;
 					pInfo->srcLineCnt	= pBmpInfo->lengthPx;
 					pInfo->dstLineLen	= (pInfo->widthBt+31) & ~31; // align to 256 Bits (32 Bytes)
@@ -1173,6 +1178,7 @@ static int _data_split_scan(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 					pInfo->widthPx		= 1;
 					pInfo->startBt		= 0;
 					pInfo->widthBt		= 1;
+					pInfo->srcWidthBt	= 1;
 					pInfo->srcLineLen	= 1;
 					pInfo->srcLineCnt	= 1;
 					pInfo->dstLineLen	= 32; // align to 256 Bits (32 Bytes) 
@@ -1256,7 +1262,7 @@ static int _data_split_scan_no_overlap(SPageId *id, SBmpInfo *pBmpInfo, int offs
 
 				headWidth = RX_Spooler.headWidthPx;
 				if (n+1<RX_Spooler.headsPerColor) headWidth+=RX_Spooler.headOverlapPx;
-				if(colorOffsetScans)
+				if (pBmpInfo->printMode==PM_SCAN_MULTI_PAGE && !(_SmpFlags&FLAG_SMP_FIRST_PAGE))
 				{
 				//	if (RX_Color[color].color.colorCode==0)
 				//		printf("Black\n");
@@ -1319,6 +1325,7 @@ static int _data_split_scan_no_overlap(SPageId *id, SBmpInfo *pBmpInfo, int offs
 					}
 					else pInfo->jetPx0	= 0;
 
+					pInfo->srcWidthBt	= (pBmpInfo->srcWidthPx*pBmpInfo->bitsPerPixel)/8;
 					pInfo->srcLineLen	= pBmpInfo->lineLen;
 					pInfo->srcLineCnt	= pBmpInfo->lengthPx;
 					pInfo->dstLineLen	= (pInfo->widthBt+31) & ~31; // align to 256 Bits (32 Bytes)
@@ -1434,7 +1441,8 @@ static void _data_fill_blk_scan(SBmpSplitInfo *psplit, int blkNo, BYTE *dst)
 			if (size==0) start = (x-fillLen)%psplit->srcLineLen; // first line
 			else         start = 0;
 		}
-		start = (start+psplit->startBt) %psplit->srcLineLen;
+//		start = (start+psplit->startBt) % psplit->srcLineLen;
+		start = (start+psplit->startBt) % psplit->srcWidthBt;
 
 		/*
 		if (psplit->colorCode==0)
@@ -1445,20 +1453,23 @@ static void _data_fill_blk_scan(SBmpSplitInfo *psplit, int blkNo, BYTE *dst)
 			lastscan = psplit->pListItem->id.scan;
 		}
 		*/
-
+		
 		//--- copy the image data ----------------------------
 		{
 			if (size+srcLen>RX_Spooler.dataBlkSize) srcLen = RX_Spooler.dataBlkSize-size;
 			if (size+dstLen>RX_Spooler.dataBlkSize) dstLen = RX_Spooler.dataBlkSize-size;
-			int srcLineLen= psplit->srcLineLen - start;
+			int srcWidthBt = psplit->srcWidthBt - start;
+			int srcLineLen = psplit->srcWidthBt - start;
 			
 			for(len=0; len<srcLen; len+=l)
 			{
 				l = srcLen-len;
-				if(l > srcLineLen) l = srcLineLen;
+				if (l > srcWidthBt) l = srcWidthBt;
 				memcpy(&dst[size+len], src+start, l);
+			//	dst[size+len] = 0x3C; // TEST
 				start=0;
-				srcLineLen=psplit->srcLineLen;
+				srcWidthBt = psplit->srcWidthBt;
+				srcLineLen = psplit->srcLineLen;
 			}
 			if (dstLen>srcLen) memset(&dst[size+srcLen], 0x00, dstLen-srcLen);
 		}
