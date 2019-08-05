@@ -148,8 +148,6 @@ static int				_RequestPause=FALSE;
 static int				_SendPause=FALSE;
 static int				_SendRun=FALSE;
 static int				_SendWebIn=FALSE;
-static int				_Splicing=FALSE;
-static int				_CmdReleased=FALSE;
 static int				_CanRun=FALSE;
 static SPrintQueueItem	_StartEncoderItem;
 static int				_ErrorFlags;
@@ -190,8 +188,7 @@ int	plc_init(void)
 	_plc_error_filter_reset();
 	_ErrorFlags  = 0;
 	_UvUsed = FALSE;
-	_Splicing = FALSE;
-	_CmdReleased = FALSE;
+	RX_PrinterStatus.splicing = FALSE;
 	
 	if (_SimuPLC)     Error(WARN, 0, "PLC in Simulation");
 	if (_SimuEncoder) Error(WARN, 0, "Encoder in Simulation");
@@ -1179,7 +1176,7 @@ static void _plc_heart_beat()
 //--- plc_is_splicing -------------------------------------
 int	plc_is_splicing(void)
 {
-	return 	_Splicing;					
+	return 	RX_PrinterStatus.splicing;					
 }
 
 //--- _plc_state_ctrl --------------------------------------------
@@ -1192,20 +1189,15 @@ static void _plc_state_ctrl()
 		{
 			UINT32 splicing;
 			if (lc_get_value_by_name_UINT32(APP "STA_SPLICING", &splicing)==REPLY_OK)
-			{
-				if ( splicing && !_Splicing) Error(LOG, 0, "Splicing started");
-				if (_Splicing &&  !splicing) Error(LOG, 0, "Splicing finished");
+			{				
+				if (splicing != RX_PrinterStatus.splicing)
+				{
+					if ( splicing && !RX_PrinterStatus.splicing) Error(LOG, 0, "Splicing started");
+					if (RX_PrinterStatus.splicing &&  !splicing) Error(LOG, 0, "Splicing finished");
 			
-				_Splicing = splicing;					
-			}
-			
-			UINT32 released;
-			if (lc_get_value_by_name_UINT32(APP "STA_CMD_RELEASE", &released)==REPLY_OK)
-			{
-			//	if ( released && !_CmdReleased) Error(LOG, 0, "STA_CMD_RELEASE = TRUE");
-			//	if (_CmdReleased &&  !released) Error(LOG, 0, "STA_CMD_RELEASE = FALSE");
-			
-				_CmdReleased = splicing;					
+					RX_PrinterStatus.splicing = splicing;
+					gui_send_printer_status(&RX_PrinterStatus);	
+				}
 			}
 		}
 		

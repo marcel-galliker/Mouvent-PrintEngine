@@ -33,6 +33,7 @@
 
         <!-- toolbar LEFT _______________________________________________________ -->
         <rx_uc:CommandButtons Grid.ColumnSpan="2"/>
+        <rx_uc:Splicing Grid.ColumnSpan="2"/>
 
         <StackPanel Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right">
             <common:RxButton x:Name="SearchButton" Click="Search_clicked">

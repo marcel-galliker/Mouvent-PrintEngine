@@ -474,8 +474,9 @@ typedef struct SPrinterStatus
 	UINT32			printGoCnt;
 	UINT32			printedCnt;
 	UINT32			testMode;
-	UINT32			inkSupilesOff;
-	UINT32			inkSupilesOn;	
+	UINT8			inkSupilesOff;
+	UINT8			inkSupilesOn;	
+	UINT8			splicing;
 	UINT32			maxSpeed[MAX_DROP_SIZES];	// [m/min]
 	UINT32			externalData;
 	UINT32			actSpeed;

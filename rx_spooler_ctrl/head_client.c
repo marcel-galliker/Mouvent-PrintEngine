@@ -36,7 +36,7 @@ static int	_Trace=0;
 #define SIMU_WRITE	1	// write data to file
 #define SIMU_READ	2	// test reading files, no sending, no writing
 
-static int	_Simulation=SIMU_WRITE;
+static int	_Simulation=SIMU_OFF;
 
 // #define RAW_SOCKET
 
@@ -317,6 +317,10 @@ void hc_send_next(void)
 				case dev_off:		break;
 				case dev_simu:		if(_Simulation==SIMU_WRITE) 
 									{
+										{
+											SPageId *pid = &pInfo->pListItem->id;
+											Error(LOG, 0, "File (id=%d, page=%d, copy=%d, scan=%d) headsUsed=%d", pid->id, pid->page, pid->copy, pid->scan, pInfo->pListItem->headsUsed);	
+										}
 										_save_to_file(pInfo);
 										if(data_sent(pInfo,i)) 
 										{
@@ -334,7 +338,7 @@ void hc_send_next(void)
 			
 											{
 												SPageId *pid = &pInfo->pListItem->id;
-												Error(LOG, 0, "File (id=%d, page=%d, copy=%d, scan=%d saved to >>%s/test/Scan%d<<", pid->id, pid->page, pid->copy, pid->scan, PATH_TEMP, _SimuNo[pInfo->colorCode]);																							
+												Error(LOG, 0, "File (id=%d, page=%d, copy=%d, scan=%d saved to >>%s/test/Scan%d<<", pid->id, pid->page, pid->copy, pid->scan, PATH_TEMP, _SimuNo[pInfo->colorCode]);												
 											}
 											
 											hc_send_next();												

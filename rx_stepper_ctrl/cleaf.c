@@ -94,6 +94,7 @@
 #define LASER_MM_PER_VOLT		4    // mm/V
 #define LASER_VOLT_OFFSET 		5900 // Laser Value without medium in mV
 #define LASER_VARIATION			400 // Variation +- in um
+#define LASER_TIMEOUT			2000 // ms
 #define HEAD_DOWN_EN_DELAY		10
 #define LASER_ANALOG_AVR		10.0
 //#define MAX_POS_UM		 		90000 //Resolution 20um, Working range 45...85 mm, temperature drift 18 um/K, Value range 0...10V linear rising, 1V=4mm ?
@@ -211,6 +212,10 @@ static int	_WastePumpOn = FALSE;
 static int	_TimeWastePump = 20; // in s
 static int	_TimeFillCap = 14; // in s
 static int	_TimeEmptyCap = 30; // in s
+
+static int	_LaserTimeThin;
+static int	_LaserTimeThick;
+
 
 static UINT32	_cleaf_Error[5];
 
@@ -826,7 +831,7 @@ void cleaf_main(int ticks, int menu)
 //--- _cleaf_check_laser ------------------------------------------
 static void _cleaf_check_laser(void)
 {					
-	// Read LASER value
+	//--- Read LASER value -------------------------------------------------------------------------
 	INT32 laser_value = ((LASER_VOLT_OFFSET - ((int)(VAL_TO_MV(Fpga.stat->analog_in[LASER_IN]) * 2))) * LASER_MM_PER_VOLT); // (mV -mV)*mm/V = um // medium thickness in um
 	_LaserAvr += laser_value;
 
@@ -837,28 +842,58 @@ static void _cleaf_check_laser(void)
 		_LaserCnt = 0;
 	}
 	
+	//--- checks -----------------------------------------------------------------------------------
 	if(RX_StepperStatus.info.printhead_en)
 	{
-		if(RX_StepperStatus.posY < RX_StepperCfg.material_thickness - LASER_VARIATION)
+		if(RX_StepperStatus.info.z_in_print)
 		{
-			if(RX_StepperStatus.info.z_in_print)
+			if(RX_StepperStatus.posY >= (RX_StepperCfg.material_thickness - LASER_VARIATION) && RX_StepperStatus.posY <= (RX_StepperCfg.material_thickness + LASER_VARIATION))
 			{
-				ErrorFlag(ERR_CONT, &_cleaf_Error[0], 0x01, 0, "WEB: Laser detects too thick material. Moving head up. (measured %d, expected %d)", RX_StepperStatus.posY, RX_StepperCfg.material_thickness);				
-				cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_UP_POS, NULL);				
+				_LaserTimeThin  = 0;
+				_LaserTimeThick = 0;				
 			}
-			else ErrorFlag(WARN, &_cleaf_Error[0], 0x02, 0, "WEB: Laser detects too thin material. (measured %d, expected %d)", RX_StepperStatus.posY, RX_StepperCfg.material_thickness);
+			else
+			{
+				if(RX_StepperStatus.posY < RX_StepperCfg.material_thickness - LASER_VARIATION)
+				{
+					_LaserTimeThick = 0;
+					if (!_LaserTimeThin) _LaserTimeThin  = rx_get_ticks();
+				}
+				if(RX_StepperStatus.posY > RX_StepperCfg.material_thickness + LASER_VARIATION)
+				{
+					_LaserTimeThin = 0;
+					if (!_LaserTimeThick) _LaserTimeThick  = rx_get_ticks();
+				}
+			}
+	
+			if (_LaserTimeThick && (rx_get_ticks()-_LaserTimeThick) > LASER_TIMEOUT)
+			{
+			//	if (ErrorFlag(ERR_ABORT, &_cleaf_Error[0], 0x01, 0, "WEB: Laser detects too thick material. Moving head up. (measured %d, expected %d)", RX_StepperStatus.posY, RX_StepperCfg.material_thickness))
+			//		cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_UP_POS, NULL);
+				Error(WARN, 0, "WEB: Laser detects too thick material. Moving head up. (measured %d, expected %d)", RX_StepperStatus.posY, RX_StepperCfg.material_thickness);
+				_LaserTimeThick = 0; // start next check
+			}
+			
+			if (_LaserTimeThin && (rx_get_ticks()-_LaserTimeThin) > LASER_TIMEOUT)
+			{
+			//	if (ErrorFlag(ERR_ABORT, &_cleaf_Error[0], 0x02, 0, "WEB: Laser detects too thin material. Moving head up. (measured %d, expected %d)", RX_StepperStatus.posY, RX_StepperCfg.material_thickness))
+			//		cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_UP_POS, NULL);								
+				Error(WARN, 0, "WEB: Laser detects too thin material. Moving head up. (measured %d, expected %d)", RX_StepperStatus.posY, RX_StepperCfg.material_thickness);
+				_LaserTimeThin = 0;
+			}
 		}
-		if(RX_StepperStatus.posY > RX_StepperCfg.material_thickness + LASER_VARIATION)
+		else
 		{
-			if(RX_StepperStatus.info.z_in_print)
-			{
-				ErrorFlag(ERR_CONT, &_cleaf_Error[0], 0x04, 0, "WEB: Laser detects too thick material. Moving head up. (measured %d, expected %d)", RX_StepperStatus.posY, RX_StepperCfg.material_thickness);				
-				cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_UP_POS, NULL);				
-			}
-			else ErrorFlag(WARN, &_cleaf_Error[0], 0x08, 0, "WEB: Laser detects too thick material. (measured %d, expected %d)", RX_StepperStatus.posY, RX_StepperCfg.material_thickness);				
+			_LaserTimeThin  = 0;
+			_LaserTimeThick = 0;
 		}
 	}
-	else _cleaf_Error[0] &= ~0x0f;
+	else
+	{
+		_LaserTimeThin  = 0;
+		_LaserTimeThick = 0;
+		_cleaf_Error[0] &= ~0x03;
+	}
 }
 
 //--- value_str3 ---------------------------------------------

@@ -770,8 +770,9 @@ namespace RX_DigiPrint.Services
             public UInt32       printGoCnt;
             public UInt32       printedCnt;
             public UInt32       testMode;
-            public UInt32		inkSupilesOff;
-	        public UInt32		inkSupilesOn;	
+            public byte		    inkSupilesOff;
+	        public byte		    inkSupilesOn;	
+            public byte         splicing;
             [MarshalAs(UnmanagedType.ByValArray, SizeConst =4)]
             public UInt32[]     maxSpeed;   // [m/min]
 	        public UInt32		externalData;

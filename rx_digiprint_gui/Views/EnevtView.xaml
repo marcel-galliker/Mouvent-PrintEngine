@@ -20,7 +20,7 @@
 
         <!-- toolbar LEFT _______________________________________________________ -->
         <rx_uc:CommandButtons/>
-        
+        <rx_uc:Splicing/>        
         <!-- toolbar RIGHT _______________________________________________________ -->
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
             <common:RxButton x:Name="Button_Confirm" Click="Confirm_clicked" >

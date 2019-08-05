@@ -19,6 +19,7 @@
 
         <!-- toolbar _______________________________________________________ -->
         <rx_uc:CommandButtons/>
+        <rx_uc:Splicing/>
 
         <!-- MAIN Window _________________________________________________________________________-->
         <cleaf:CleafMachine  Grid.Row="1" Grid.ColumnSpan="10"/>

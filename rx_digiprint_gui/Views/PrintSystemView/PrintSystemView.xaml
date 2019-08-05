@@ -40,6 +40,7 @@
             </Grid.RowDefinitions>
             <Grid Grid.Row="0">
                 <rx_uc:CommandButtons Margin="0,0,0,1"/>
+                <rx_uc:Splicing/>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" >
 
                     <!--                 

@@ -76,7 +76,7 @@ namespace RX_DigiPrint.Views.UserControls
                                         || RxGlobals.PrinterStatus.PrintState==EPrintState.ps_printing
                                         );
 
-            Button_Pause.IsEnabled  = RxGlobals.Plc.IsReadyForProduction;
+            Button_Pause.IsEnabled  = RxGlobals.Plc.IsReadyForProduction && !RxGlobals.PrinterStatus.Splicing;
             Button_Stop.IsEnabled   = RxGlobals.Plc.IsReadyForProduction;
             Button_Abort.IsEnabled  = RxGlobals.Plc.IsReadyForProduction;
        //   Button_JogFwd.IsEnabled = RxGlobals.Plc.IsReadyForProduction && !RxGlobals.Plc.IsRunning;
@@ -212,7 +212,7 @@ namespace RX_DigiPrint.Views.UserControls
         //--- PrintRelease_Clicked --------------------------------------------
         private void PrintRelease_Clicked(object sender, RoutedEventArgs e)
         {
-            if (RxMessageBox.YesNo("Ready to Print", "Is the machine ready to print? No Splices in the machine?",  MessageBoxImage.Question, false))
+            if (RxMessageBox.YesNo("Ready to Print", "Is the machine ready to print?\nNo Splices in the machine?",  MessageBoxImage.Question, false))
                 RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_SET_CMD, "CMD_PRINT_RELEASE");
         }
 

@@ -781,6 +781,9 @@
     <Compile Include="Views\UserControls\SetupButtons.xaml.cs">
       <DependentUpon>SetupButtons.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\UserControls\Splicing.xaml.cs">
+      <DependentUpon>Splicing.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\UserControls\StepperMotorCtrl.xaml.cs">
       <DependentUpon>StepperMotorCtrl.xaml</DependentUpon>
     </Compile>
@@ -1316,6 +1319,10 @@
     <Page Include="Views\UserControls\SetupButtons.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\UserControls\Splicing.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\UserControls\StepperMotorCtrl.xaml">
       <SubType>Designer</SubType>

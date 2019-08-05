@@ -28,6 +28,7 @@ namespace RX_DigiPrint.Models
             LogType             = (ELogType)msg.status.error;
             AllInkSupliesOff    = msg.status.inkSupilesOff!=0;
             AllInkSupliesOn     = msg.status.inkSupilesOn!=0;
+            Splicing            = msg.status.splicing!=0;
             MaxSpeeds           = msg.status.maxSpeed;
             ActSpeed            = (double)msg.status.actSpeed;
             CounterAct          = msg.status.counterAct;
@@ -80,6 +81,14 @@ namespace RX_DigiPrint.Models
         {
             get { return _AllInkSupliesOff; }
             set { SetProperty(ref _AllInkSupliesOff, value); }
+        }        
+
+        //--- Property Splicing ---------------------------------------
+        private bool _Splicing=false;
+        public bool Splicing
+        {
+            get { return _Splicing; }
+            set { SetProperty(ref _Splicing, value); }
         }        
 
         //--- Property TestMode ---------------------------------------
