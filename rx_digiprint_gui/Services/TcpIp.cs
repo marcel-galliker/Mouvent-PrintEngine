@@ -802,6 +802,7 @@ namespace RX_DigiPrint.Services
 	        public Int32		cap_pos;
 	        public Int32		adjust_pos;
 	        public Int32		use_printhead_en;
+            public Int32        material_thickness;
 
             [MarshalAs(UnmanagedType.ByValArray, SizeConst =4)]
             public SRobotOffsets[] robot;

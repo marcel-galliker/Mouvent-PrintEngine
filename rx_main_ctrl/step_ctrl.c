@@ -283,8 +283,9 @@ static void _step_set_config(int no)
 	SStepperCfg cfg;
 
 	memcpy(&cfg, &RX_Config.stepper, sizeof(cfg));
-	cfg.printerType = RX_Config.printer.type;
-	cfg.use_printhead_en = arg_simuPLC;
+	cfg.printerType		   = RX_Config.printer.type;
+	cfg.use_printhead_en   = arg_simuPLC;
+	cfg.material_thickness = plc_get_thickness();
 	cfg.boardNo=0;
 		
 	if (RX_Config.printer.type==printer_DP803 && !strcmp(RX_Hostname, "LB701-0001"))

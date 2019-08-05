@@ -107,12 +107,14 @@ namespace RX_DigiPrint.Views.UserControls
         //--- Start_Clicked ------------------------------------------------
         private void Start_Clicked(object sender, RoutedEventArgs e)
         {
-            if (StartClicked!=null && !StartClicked()) return;            
+            if (StartClicked!=null && !StartClicked()) return;
+            #if !DEBUG
             if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf && !(RxGlobals.TestTableStatus.DripPans_InfeedDOWN && RxGlobals.TestTableStatus.DripPans_OutfeedDOWN))
             {
                 RxMessageBox.YesNo("Print System", "Drip Pans below the clusters. Move it out before printing", MessageBoxImage.Question, true);
                 return;
             }
+            #endif
 
             if (!RxGlobals.PrinterStatus.AllInkSupliesOn)
             {

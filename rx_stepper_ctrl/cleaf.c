@@ -223,6 +223,7 @@ static void _cleaf_send_status(RX_SOCKET);
 static int _cleaf_retry_ref(int cmd);
 static int _cleaf_check_screw_input(int screw);
 static void _cleaf_motors_by_step(int motor_bits, int steps, SMovePar par[2]);
+static void _cleaf_check_laser(void);
 
 // Lift
 static int  _z_micron_2_steps(int micron);
@@ -252,6 +253,8 @@ void cleaf_init(void)
 
 	memset(_CmdName, 0, sizeof(_CmdName));
 
+	Error(LOG, 0, "cleaf_init: material_thickness=%d", RX_StepperCfg.material_thickness);
+	
 	//--- movment parameters Lift ----------------
 	for (i = 0; i < MOTOR_Z_CNT; i++) 
 	{
@@ -815,37 +818,54 @@ void cleaf_main(int ticks, int menu)
 				RX_StepperStatus.info.printhead_en = FALSE;  // if 0 then splice is comming and head has to go up, if not in capping
 				_cleaf_send_status(0);				
 			}
-		}
-		
-		// Read LASER value
-		INT32 laser_value = ((LASER_VOLT_OFFSET - ((int)(VAL_TO_MV(Fpga.stat->analog_in[LASER_IN]) * 2))) * LASER_MM_PER_VOLT); // (mV -mV)*mm/V = um // medium thickness in um
-		_LaserAvr += laser_value;
+		}	
+	}
+	_cleaf_check_laser();
+}
 
-		if ((++_LaserCnt) == LASER_ANALOG_AVR)
-		{
-			RX_StepperStatus.posY = _LaserAvr / LASER_ANALOG_AVR;
-			_LaserAvr = 0;
-			_LaserCnt = 0;
-		}
+//--- _cleaf_check_laser ------------------------------------------
+static void _cleaf_check_laser(void)
+{					
+	// Read LASER value
+	INT32 laser_value = ((LASER_VOLT_OFFSET - ((int)(VAL_TO_MV(Fpga.stat->analog_in[LASER_IN]) * 2))) * LASER_MM_PER_VOLT); // (mV -mV)*mm/V = um // medium thickness in um
+	_LaserAvr += laser_value;
+
+	if ((++_LaserCnt) == LASER_ANALOG_AVR)
+	{
+		RX_StepperStatus.posY = _LaserAvr / LASER_ANALOG_AVR;
+		_LaserAvr = 0;
+		_LaserCnt = 0;
+	}
 	
-		// --- LASER check thickness ---
-		if ((RX_StepperStatus.posZ < RX_StepperStatus.posY - LASER_VARIATION) 
-			&& (RX_StepperStatus.info.printhead_en == TRUE) 
-			&& LASER_EN)
+	if(RX_StepperStatus.info.printhead_en)
+	{
+		if(RX_StepperStatus.posY < RX_StepperCfg.material_thickness - LASER_VARIATION)
 		{
-			if ((_CmdRunning != CMD_CAP_UP_POS) 
-				&& (_CmdRunning != CMD_CAP_STOP)
-				&& (RX_StepperStatus.info.z_in_ref == FALSE)
-				&& (RX_StepperStatus.info.ref_done == TRUE)
-				&& (RX_StepperStatus.info.x_in_cap == FALSE)
-				&& (POS_STORED - 10  > RX_StepperStatus.posZ))
-			{				
-				Error(ERR_ABORT, 0, "WEB: LASER detecs thick medium %d um - emergency up", RX_StepperStatus.posY);	
-				cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_UP_POS, NULL);
-			}
-			
-		//	_cleaf_send_status(0);  // Push news to main
+			ErrorFlag(WARN, &_cleaf_Error[0], 0x01, 0, "WEB: Laser detects too thin material. (measured %d, expected %d)", RX_StepperStatus.posY, RX_StepperCfg.material_thickness);
 		}
+		if(RX_StepperStatus.posY > RX_StepperCfg.material_thickness + LASER_VARIATION)
+		{
+			ErrorFlag(WARN, &_cleaf_Error[0], 0x02, 0, "WEB: Laser detects too thick material. (measured %d, expected %d)", RX_StepperStatus.posY, RX_StepperCfg.material_thickness);				
+		}
+	}
+	else _cleaf_Error[0] &= ~0x03;
+	
+	// --- LASER check thickness ---
+	if ((RX_StepperStatus.posZ < RX_StepperStatus.posY - LASER_VARIATION) 
+		&& (RX_StepperStatus.info.printhead_en == TRUE) 
+		&& LASER_EN)
+	{
+		if ((_CmdRunning != CMD_CAP_UP_POS) 
+			&& (_CmdRunning != CMD_CAP_STOP)
+			&& (RX_StepperStatus.info.z_in_ref == FALSE)
+			&& (RX_StepperStatus.info.ref_done == TRUE)
+			&& (RX_StepperStatus.info.x_in_cap == FALSE)
+			&& (POS_STORED - 10  > RX_StepperStatus.posZ))
+		{				
+			Error(ERR_ABORT, 0, "WEB: LASER detecs thick medium %d um - emergency up", RX_StepperStatus.posY);	
+			cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_UP_POS, NULL);
+		}			
+	//	_cleaf_send_status(0);  // Push news to main
 	}
 }
 

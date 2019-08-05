@@ -82,13 +82,15 @@ namespace RX_DigiPrint.Models
         //---- SaveValue ---------------------------------
         public void SaveValue(string id, string val)
         {
+            if (val==null) return;
             int i;
             if (_Par==null) _Par=new List<SParVal>();
             for (i=0; i<_Par.Count; i++)
             {
                 if (_Par[i].ID.Equals(id)) 
                 {
-                    _Par[i].val.Replace(_Par[i].val.ToString(), val);
+                    _Par[i].val.Clear();
+                    _Par[i].val.Append(val);
                     return;
                 }
             }
