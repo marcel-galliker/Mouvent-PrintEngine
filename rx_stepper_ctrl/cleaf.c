@@ -842,6 +842,8 @@ static void _cleaf_check_laser(void)
 		_LaserCnt = 0;
 	}
 	
+	return;
+	
 	//--- checks -----------------------------------------------------------------------------------
 	if(RX_StepperStatus.info.printhead_en)
 	{
@@ -1208,12 +1210,14 @@ int  cleaf_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 			{
 				if(RX_StepperStatus.info.printhead_en) 
 				{
+					/*
 					if(RX_StepperStatus.posY >= (RX_StepperCfg.material_thickness - LASER_VARIATION) && RX_StepperStatus.posY <= (RX_StepperCfg.material_thickness + LASER_VARIATION))
 					{
 						_CmdRunning = CMD_CAP_PRINT_POS;
 						_Step = 0;															
 					}
 					else Error(ERR_CONT, 0, "WEB: Laser detects material out of range. (measured %d, expected %d)", RX_StepperStatus.posY, RX_StepperCfg.material_thickness);				
+					*/
 				}
 				else Error(ERR_CONT, 0, "Stepper: Command 0x%08x: printhead_en signal not set", _CmdRunning);
 			}
