@@ -49,6 +49,7 @@ static int		_MsgBufIn;
 static int		_MsgBufOut;
 static int		_LastMsgId;
 static int		_Printing;
+static RX_SOCKET	_SpoolerSocket;
 
 //--- module globals -----------------------------------------------------------------
 static HANDLE			_HServer;
@@ -85,6 +86,7 @@ int ctrl_init()
 	_MsgBufOut = 0;
 	_Printing  = FALSE;
 	RX_MainSocket = INVALID_SOCKET;
+	_SpoolerSocket = INVALID_SOCKET;
 	sok_start_server(&_HServer, NULL, PORT_CTRL_HEAD, SOCK_STREAM, MAX_CONNECTIONS, _save_ctrl_msg, _ctrl_connected, _ctrl_deconnected);
 
 	err_set_server(_HServer);
@@ -109,6 +111,7 @@ static int _ctrl_connected (RX_SOCKET socket, const char *peerName)
 static int _ctrl_deconnected (RX_SOCKET socket, const char *peerName)
 {
 	TrPrintfL(TRUE, "deconnected from >>%s<<, socket=%d", peerName, socket);
+	if (socket==_SpoolerSocket) _SpoolerSocket=INVALID_SOCKET;
 	if (socket==RX_MainSocket)
 	{
 		TrPrintfL(TRUE, "deconnected from MAIN");
@@ -129,7 +132,6 @@ int	ctrl_printing(void)
 	return _Printing;	
 }
 
-
 //--- _save_ctrl_msg ---------------------------------------------------------
 static int _save_ctrl_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sender, void *par)
 {
@@ -140,7 +142,9 @@ static int _save_ctrl_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr
 	switch (phdr->msgId)
 	{
 	case 0:				return REPLY_OK;
-	case CMD_PING:		_do_ping(socket);	break;
+	case CMD_PING:		_do_ping(socket);
+						_SpoolerSocket = socket;
+																			break;
 	case CMD_HEAD_STAT: _do_head_stat (socket, (SFluidStateLight*) &phdr[1]); break;
 	default:		{
 						// ALL messages that use FPGA Registers
@@ -186,7 +190,6 @@ int  ctrl_main(int ticks, int menu)
 	return cnt;
 }
 
-
 //--- _handle_ctrl_msg ---------------------------------------------------------
 static int _handle_ctrl_msg(RX_SOCKET socket, void *pmsg)
 {
@@ -221,6 +224,12 @@ static int _handle_ctrl_msg(RX_SOCKET socket, void *pmsg)
 	if (_Printing && time>100) Error(WARN, 0, "_handle_ctrl_msg id=0x%08x, time=%dms", phdr->msgId, time); 
 	return reply;
 };
+
+//--- ctrl_stress_test ----------------------------------
+void ctrl_stress_test(void)
+{
+	sok_send_2(&_SpoolerSocket, CMD_STRESS_TEST, 0, NULL);
+}
 
 //=== command  handlers ===========================================================================
 

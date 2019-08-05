@@ -22,3 +22,5 @@ int ctrl_printing(void);
 int ctrl_main(int ticks, int menu);
 
 void ctrl_send_file(char *filepath);
+
+void ctrl_stress_test(void);

@@ -90,6 +90,7 @@ static void _main_menu(void)
 //	term_printf("u: Display block used flags\n");
 	term_printf("l: start pressure log of head[0]\n");	
 	term_printf("R: trace registers\n");
+	term_printf("t: TCP/IP Stress Test\n");
 	term_printf("E: Reset pending errors\n");
 	term_printf("h<xxx>: Frequency in KHz\n");
 	term_printf("d<x>:   Drop size fixed 0..3\n");
@@ -163,7 +164,6 @@ void putty_display_fpga_status(void)
 	char line[90];
 	int i,l;
 	int no[MAX_HEADS_BOARD];
-
 		
 	for(i=0; i<MAX_HEADS_BOARD; i++) no[i]= RX_HBConfig.reverseHeadOrder? MAX_HEADS_BOARD-1-i:i;
 		
@@ -180,12 +180,13 @@ void putty_display_fpga_status(void)
 //		term_printf("speed min:   "); PRINTF(4)("%08d   ", _speed_160(RX_FpgaStat.enc_speed[i].min));		term_printf("\n");
 //		term_printf("speed max[Hz]:"); PRINTF(4)("%08d   ", _speed_160(RX_FpgaStat.enc_speed[i].max));		term_printf("\n");
 //		term_printf("UDP Blocks sent:%06d  BlkSize=%d  Blk/Head=%d\n",			udp_test_sent_blocks(), fpga_udp_block_size(), RX_HBConfig.head[1].blkNo0);		
-	tse_display_status();
+	tse_display_status(RX_FpgaStat.eth_ctr[0].frames_all, RX_FpgaStat.eth_ctr[1].frames_all);
 	term_printf("ETH ALL Frames: %06d %06d     mac[0]: %s  ip[0]: %s\n",					RX_FpgaStat.eth_ctr[0].frames_all,	RX_FpgaStat.eth_ctr[1].frames_all,   RX_MacAddr[0], RX_IpAddr[0]);		
 	term_printf("ETH MY  Frames: %06d %06d     mac[1]: %s  ip[1]: %s\n",					RX_FpgaStat.eth_ctr[0].frames_my,	RX_FpgaStat.eth_ctr[1].frames_my,    RX_MacAddr[1], RX_IpAddr[1]);			
 	term_printf("UDP ALL:        %06d %06d     ARP REQ (BC) %06d %06d  IP ERR %06d %06d\n",	RX_FpgaStat.udp_all[0],	  RX_FpgaStat.udp_all[1],	RX_FpgaStat.arp_req_bc_0,			RX_FpgaStat.arp_req_bc_1, RX_FpgaError.arp_error[0].arp_ip_mismatch,	RX_FpgaError.arp_error[1].arp_ip_mismatch);	
 	term_printf("UDP ALIVE:      %06d %06d     ARP REQ (MY) %06d %06d  MISSED %06d %06d\n",	RX_FpgaStat.udp_alive[0], RX_FpgaStat.udp_alive[1], RX_FpgaStat.arp_req_my_0,			RX_FpgaStat.arp_req_my_1, RX_FpgaError.arp_error[0].arp_req_missed,	RX_FpgaError.arp_error[1].arp_req_missed);			
 	term_printf("UDP DATA:       %06d %06d     ARP REPLY    %06d %06d\n",					RX_FpgaStat.udp_data[0],				RX_FpgaStat.udp_data[1],				RX_FpgaStat.arp_rep[0],				RX_FpgaStat.arp_rep[1]);	
+	
 //		term_printf("FIFO Level:     %06d %06d     max          %06d %06d\n",	RX_FpgaStat.dataLevel_0,				RX_FpgaStat.dataLevel_1,				RX_FpgaStat.dataMax_0,				RX_FpgaStat.dataMax_1);	
 		
 //		term_printf("FSM-state:      "); PRINTF(6)("%04x ", RX_FpgaStat.fsm_state[i]); term_printf("\n");

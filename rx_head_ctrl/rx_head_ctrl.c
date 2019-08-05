@@ -106,8 +106,10 @@ void handle_menu(char *str)
 				fpga_set_config(INVALID_SOCKET);			
 				break;
 	*/
-	case 't': udp_test_send_block(4, 1);				break;
-	case 'T': udp_test_send_block(4, 10000);			break;
+//	case 't': udp_test_send_block(4, 1);				break;
+//	case 'T': udp_test_send_block(4, 10000);			break;
+	case 't': ctrl_stress_test();						break;
+		
 //	case 'u': fpga_display_used_flags();				break;
 //	case 'w': _do_waveform(&str[1]);					break;
 	case 'x': _AppRunning=FALSE;						break;

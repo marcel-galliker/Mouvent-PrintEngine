@@ -22,3 +22,5 @@ void hc_start_printing(void);
 void hc_abort_printing(void);
 void hc_send_next(void);
 void hc_check(void);
+void hc_stress_test(int board);
+

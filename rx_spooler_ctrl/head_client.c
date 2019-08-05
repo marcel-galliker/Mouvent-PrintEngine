@@ -83,6 +83,8 @@ static UINT16			_TestBlockSent[MAX_HEADS_BOARD][140000];
 static int				_TestBlockUsedReqTime[MAX_HEADS_BOARD][MAX_USED_ID];
 static int				_TestLastBlock;
 
+static int				_StressTestRunning;
+
 //--- prototypes --------------------------------------------------------------
 static void *_head_board_ctrl_thread(void *par);
 static int _handle_head_ctrl_msg(RX_SOCKET socket, void *msg, int len, struct sockaddr *sender, void *par);
@@ -94,6 +96,8 @@ static int _send_image_data	(SBmpSplitInfo *pBmpSplitInfo);
 static int _send_image_cmd 	(SBmpSplitInfo *pBmpSplitInfo);
 static void _save_to_file	(SBmpSplitInfo *pInfo);
 static int _check_image_blocks (SHBThreadPar *par, SBmpSplitInfo *pBmpSplitInfo, int minBlk, int maxBlk);
+
+static void *_stress_test_thread(void *ppar);
 
 //--- hc_start ----------------------------------------------------------------
 int hc_start(void)
@@ -130,6 +134,8 @@ int hc_head_board_cfg(RX_SOCKET socket, SHeadBoardCfg* cfg)
 	char path[MAX_PATH];
 	TrPrintfL(TRUE, "hc_head_board_cfg[%d]", cfg->no);
 
+	_StressTestRunning = FALSE;
+	
 	if (_Simulation) 
 	{
 		Error(WARN, 0, "Head-Client in simulation");
@@ -229,6 +235,7 @@ static int _open_data_channel(SHBThreadPar *par)
 		{
 			TrPrintfL(TRUE, "connected, port=>>%s<<", sok_get_socket_name(par->ctrlSocket, str, NULL, NULL));
 			rx_thread_start(_head_board_ctrl_thread, par, 0, "_head_board_ctrl_thread");
+			sok_send_2(&par->ctrlSocket, CMD_PING, 0, NULL);
 		}
 	}
 	
@@ -262,7 +269,7 @@ static int _open_data_channel(SHBThreadPar *par)
 				TrPrintfL(1, "Connecting >>%s:%d<<Socket Error >>%s<<", str, par->cfg.dataPort[i], err_system_error(errno, err, sizeof(err)));
 			}
 		#ifndef RAW_SOCKET
-			else TrPrintfL(TRUE, "%s connected to HeadData[%d]", sok_get_socket_name(par->dataSocket[i], str, NULL, NULL), i);
+			else TrPrintfL(TRUE, "%s connected to HeadData[%d]", sok_get_peer_name(par->dataSocket[i], str, NULL, NULL), i);
 		#endif
 		}
 	//	arp_request(par->dataSocket[0], par->cfg.dataAddr[0]);
@@ -482,7 +489,7 @@ static void *_head_board_ctrl_thread(void *ppar)
 	TrPrintfL(TRUE, "_head_board_ctrl_thread[%d] started", par->cfg.no);
 
 	sok_receiver(NULL, &par->ctrlSocket, _handle_head_ctrl_msg, par);
-
+	
 	TrPrintfL(TRUE, "_head_board_ctrl_thread[%d] ended", par->cfg.no);
 	sok_close(&par->ctrlSocket);
 	#ifdef RAW_SOCKET
@@ -508,6 +515,7 @@ static int _handle_head_ctrl_msg(RX_SOCKET socket, void *msg, int len, struct so
 	case REP_GET_BLOCK_USED:_do_block_used	(par, (SBlockUsedRep*)msg);									break;
 	case EVT_GET_EVT:																					break;
 	case REP_FPGA_IMAGE:																				break;
+	case CMD_STRESS_TEST:	hc_stress_test(par->boardNo);												break;
 	default:				Error(WARN, 0, "Got unknown messageId=0x%08x", phdr->msgId);
 	}
 	return REPLY_OK;
@@ -828,4 +836,34 @@ void hc_check(void)
 		time++;
 	}
 //	if (sent!=old) TrPrintf(TRUE, "SpoolerNo=%d Alive Sent %d", RX_SpoolerNo, sent);
+}
+
+//--- hc_stress_test -------------------------------------
+void hc_stress_test(int board)
+{
+	_StressTestRunning = TRUE;
+	rx_thread_start(_stress_test_thread, _HBPar[board], 0, "_stress_test_thread");		
+}
+
+static void *_stress_test_thread(void *ppar)
+{
+	SHBThreadPar	*pboard = (SHBThreadPar*)ppar;
+	SUDPDataBlockMsg msg;
+	int				 msgLen;
+
+	if (pboard==NULL) return NULL;
+	
+//	rx_set_process_priority(-10);
+	
+	memset(&msg, 0x55, sizeof(msg));
+	msg.blkNo  = 0xffffffff;
+	msgLen = sizeof(msg.blkNo)+RX_Spooler.dataBlkSize;
+	
+	_open_data_channel(pboard);
+	while (_StressTestRunning && pboard->dataSocket[0] && pboard->dataSocket[0]!=INVALID_SOCKET)
+	{
+		send(pboard->dataSocket[0], (char*)&msg, msgLen, MSG_NOSIGNAL);
+		send(pboard->dataSocket[1], (char*)&msg, msgLen, MSG_NOSIGNAL);
+	}
+	return NULL;							
 }
