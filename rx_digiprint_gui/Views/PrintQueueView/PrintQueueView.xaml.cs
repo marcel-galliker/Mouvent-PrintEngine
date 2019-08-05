@@ -228,35 +228,20 @@ namespace RX_DigiPrint.Views.PrintQueueView
             Button_Up.Visibility     = visible;
             Button_Down.Visibility   = visible;
         }        
-
-        //--- Add_Clicked -------------------------------------------------
-        private void Add_Clicked1(object sender, RoutedEventArgs e)
-        {
-            PrintQueueAdd wnd = new PrintQueueAdd();
-            try 
-            { 
-                if (wnd.ShowDialog()==true)
-                    wnd.Item.SendMsg(TcpIp.CMD_ADD_PRINT_QUEUE);
-            }
-            catch(Exception ex)
-            {
-                Console.WriteLine("Exception {0}", ex.StackTrace); 
-            }
-        }
        
         //--- Add_Clicked -------------------------------------------------
         private void Add_Clicked(object sender, RoutedEventArgs e)
         {
             _UseLB702 = RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_UV;
-            if (_UseLB702)
+            if (FileOpen.Visibility==Visibility.Visible || FileOpen_LB702.Visibility==Visibility.Visible)
             {
                 FileOpen.Visibility       = Visibility.Collapsed;
-                FileOpen_LB702.Visibility = Visibility.Visible;
+                FileOpen_LB702.Visibility = Visibility.Collapsed;
             }
             else
             {
-                FileOpen_LB702.Visibility = Visibility.Collapsed;
-                FileOpen.Visibility       = Visibility.Visible;
+                if (_UseLB702)  FileOpen_LB702.Visibility = Visibility.Visible;
+                else            FileOpen.Visibility       = Visibility.Visible;
             }
         }
         

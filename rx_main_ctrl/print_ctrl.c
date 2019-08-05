@@ -650,7 +650,7 @@ static int _print_next(void)
 						if(_Item.srcPages > 1)		
 						{
 							if(_ScansNext < 0) return Error(ERR_ABORT, 0, "File too short for Multi Page printing");
-							_Item.scansTotal  = _Item.scansStart + (_Item.lastPage-_Item.start.page+1)*(_ScansNext+1);
+							_Item.scansTotal  = _Item.scansStart + (_Item.lastPage-_Item.start.page+1)*(_ScansNext+1)-1;
 						}
 						_Item.id.scan		= _Item.scansPrinted+1;								
 												

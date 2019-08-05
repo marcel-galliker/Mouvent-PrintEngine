@@ -11,6 +11,9 @@
 
 //--- Defines -----------------------------------------------------------------
 
+#define PRODLOG
+#undef  PRODLOG
+
 #ifdef linux
 	#include <time.h>
 	#include <sys/time.h>
@@ -45,7 +48,7 @@ static void _pl_stop_tx(SPrintQueueItem *pitem);
 //--- pl_init --------------------------------------
 void pl_init(void)
 {
-#ifdef linux
+#ifdef PRODLOG
 	memset(&_Start,0, sizeof(_Start));
 	memset(&_LastJob,0, sizeof(_LastJob));
 	_ProdLog = xlCreateXMLBook();
@@ -57,7 +60,7 @@ void pl_init(void)
 //--- _add_picture ------------------------------
 static int _add_picture(char *name, char *path)
 {
-#ifdef linux
+#ifdef PRODLOG
 	int rows =  xlSheetLastRow(_ActSheet);
 	int row;
 	int idx=-1;
@@ -79,7 +82,7 @@ static int _add_picture(char *name, char *path)
 //--- pl_load --------------------------------------
 void pl_load(void)
 {
-#ifdef linux
+#ifdef PRODLOG
 	FontHandle	font;
 	
 	rx_remove_old_files(PATH_LOG, 90);
@@ -113,7 +116,7 @@ void pl_load(void)
 //--- pl_start --------------------------------------------
 void pl_start(SPrintQueueItem *pitem, char *localpath)
 {
-#ifdef linux
+#ifdef PRODLOG
 	memcpy(&_Start, pitem, sizeof(_Start));
 	strcpy(_PreviewPath, localpath);
 
@@ -133,7 +136,7 @@ void pl_stop(SPrintQueueItem *pitem)
 static void *_prod_log_thread(void *lpParameter)
 {
 	SPrintQueueItem *pitem = (SPrintQueueItem*)lpParameter;
-#ifdef linux
+#ifdef PRODLOG
 	char day[32];
 
 	rx_get_system_day_str(day, '-');
@@ -152,7 +155,7 @@ static void *_prod_log_thread(void *lpParameter)
 //--- _pl_stop_tx --------------------------------------------------
 static void _pl_stop_tx(SPrintQueueItem *pitem) 
 {
-#ifdef linux
+#ifdef PRODLOG
 	int same;
 	int preview;
 	int row;
@@ -279,7 +282,7 @@ static void _pl_stop_tx(SPrintQueueItem *pitem)
 //--- pl_save --------------------------------------
 void pl_save(void)
 {
-#ifdef linux
+#ifdef PRODLOG
 	xlBookSave(_ProdLog, _FilePath);
 #endif
 }

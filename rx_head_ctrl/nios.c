@@ -567,20 +567,22 @@ static void _nios_copy_status(void)
 //--- nios_check_errors ---------------------------
 void nios_check_errors(void)
 {	
+	ELogItemType	abort = RX_HBConfig.simuPlc ? LOG_TYPE_WARN : LOG_TYPE_ERROR_ABORT;
+
 	if (fpga_is_ready())
 	{
-		if (_NiosStat->error.fpga_incompatible)	    ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err, err_nios_incompatible, 0, "Conditioner NIOS NOT compatible");
-		if (_NiosStat->error.u_plus_2v5)			ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err, err_2_5volt, 0, "2.5Volt Power Supply Error");
-		if (_NiosStat->error.u_plus_3v3)			ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err, err_3_3_volt, 0, "3.3Volt Power Supply Error");
-		if (_NiosStat->error.u_plus_5v)				ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err, err_5volt, 0, "5Volt Power Supply Error");
-		if (_NiosStat->error.u_minus_5v)			ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err, err_min_5volt, 0, "-5Volt Power Supply Error");
-		if (_NiosStat->error.u_minus_36v)			ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err, err_36volt, 0, "-36Volt Power Supply Error");
-		if (_NiosStat->error.amc7891)				ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err, err_amc7891, 0, "AMC7891 could not be initialized");
-		if (_NiosStat->error.power_all_off_timeout)	ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err, err_pwr_all_off, 0, "power_all_off_timeout");
-		if (_NiosStat->error.power_amp_on_timeout)	ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err, err_amp_all_on, 0, "power_amp_on_timeout");
-		if (_NiosStat->error.power_all_on_timeout)	ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err, err_pwr_all_on, 0, "power_all_on_timeout");
-    	if (_NiosStat->error.fpga_overheated)		ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err, err_fpga_overheated, 0, "FPGA Overheated Error");
-    	if (_NiosStat->error.head_pcb_overheated)   ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err, err_head_pcb_overheated, 0, "Head PCB overheated");
+		if (_NiosStat->error.fpga_incompatible)	    ErrorFlag(ERR(abort), (UINT32*)&RX_HBStatus[0].err, err_nios_incompatible, 0, "Conditioner NIOS NOT compatible");
+		if (_NiosStat->error.u_plus_2v5)			ErrorFlag(ERR(abort), (UINT32*)&RX_HBStatus[0].err, err_2_5volt, 0, "2.5Volt Power Supply Error");
+		if (_NiosStat->error.u_plus_3v3)			ErrorFlag(ERR(abort), (UINT32*)&RX_HBStatus[0].err, err_3_3_volt, 0, "3.3Volt Power Supply Error");
+		if (_NiosStat->error.u_plus_5v)				ErrorFlag(ERR(abort), (UINT32*)&RX_HBStatus[0].err, err_5volt, 0, "5Volt Power Supply Error");
+		if (_NiosStat->error.u_minus_5v)			ErrorFlag(ERR(abort), (UINT32*)&RX_HBStatus[0].err, err_min_5volt, 0, "-5Volt Power Supply Error");
+		if (_NiosStat->error.u_minus_36v)			ErrorFlag(ERR(abort), (UINT32*)&RX_HBStatus[0].err, err_36volt, 0, "-36Volt Power Supply Error");
+		if (_NiosStat->error.amc7891)				ErrorFlag(ERR(abort), (UINT32*)&RX_HBStatus[0].err, err_amc7891, 0, "AMC7891 could not be initialized");
+		if (_NiosStat->error.power_all_off_timeout)	ErrorFlag(ERR(abort), (UINT32*)&RX_HBStatus[0].err, err_pwr_all_off, 0, "power_all_off_timeout");
+		if (_NiosStat->error.power_amp_on_timeout)	ErrorFlag(ERR(abort), (UINT32*)&RX_HBStatus[0].err, err_amp_all_on, 0, "power_amp_on_timeout");
+		if (_NiosStat->error.power_all_on_timeout)	ErrorFlag(ERR(abort), (UINT32*)&RX_HBStatus[0].err, err_pwr_all_on, 0, "power_all_on_timeout");
+    	if (_NiosStat->error.fpga_overheated)		ErrorFlag(ERR(abort), (UINT32*)&RX_HBStatus[0].err, err_fpga_overheated, 0, "FPGA Overheated Error");
+    	if (_NiosStat->error.head_pcb_overheated)   ErrorFlag(ERR(abort), (UINT32*)&RX_HBStatus[0].err, err_head_pcb_overheated, 0, "Head PCB overheated");
 		
 		// TODO: re-enable after simu-chiller and cable problem is solved
 		//if (_NiosStat->error.chiller_overheated)    ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err, err_chiller_overheated, 0, "Chiller Overheated Error");

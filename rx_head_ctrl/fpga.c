@@ -1027,7 +1027,7 @@ int  fpga_image	(SFpgaImageCmd *msg)
 				
 		_PageEnd[head][idx] = RX_HBConfig.head[head].blkNo0 + (msg->image.blkNo-RX_HBConfig.head[head].blkNo0+msg->image.blkCnt-1) % RX_HBConfig.head[head].blkCnt;
 
-		TrPrintf(trace, "head[%d].fpga_image[%d]:(id=%d, page=%d, copy=%d. scan=%d) blocks %05d ... %05d, clearBlockUsed=%d", head, idx,  msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->image.blkNo, _PageEnd[head][idx], msg->image.clearBlockUsed);
+		TrPrintf(trace, "head[%d].fpga_image[%d]:(id=%d, page=%d, copy=%d, scan=%d) blocks %05d ... %05d, clearBlockUsed=%d", head, idx,  msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->image.blkNo, _PageEnd[head][idx], msg->image.clearBlockUsed);
 
 //		if (head==0) 
 		if (FALSE)
@@ -1774,7 +1774,7 @@ static void _handle_pd(int pd)
 		memcpy(&msg.id, &_PageId[_PdCnt%MAX_PAGES], sizeof(msg.id));
 		sok_send(&RX_MainSocket, &msg);
 		
-		TrPrintfL(TRUE, "PRINT DONE[%d]: id=%d, page=%d, copy=%d, scan=%d, pos=%d", _PdCnt%MAX_PAGES, msg.id.id, msg.id.page, msg.id.copy, msg.id.scan, RX_HBStatus[0].head[0].encPos);
+		TrPrintfL(TRUE, "PRINT DONE[%d]: id=%d, page=%d, copy=%d, scan=%d, pos=%d, lastBlock=%d %d %d %d", _PdCnt%MAX_PAGES, msg.id.id, msg.id.page, msg.id.copy, msg.id.scan, RX_HBStatus[0].head[0].encPos, _BlockOutIdx[0], _BlockOutIdx[1], _BlockOutIdx[2], _BlockOutIdx[3]);
 	//	Error(LOG, 0, "PRINT DONE[%d]:id=%d, page=%d, copy=%d, scan=%d, pos=%d (expected %d)", _PdCnt%MAX_PAGES, msg.id.id, msg.id.page, msg.id.copy, msg.id.scan, RX_HBStatus[0].head[0].encPos, _PrintDonePos[0][_PdCnt%MAX_PAGES]);
 		for (i=0; i<HEAD_CNT; i++)
 			_PrintDonePos[i][_PdCnt%MAX_PAGES] = 0;

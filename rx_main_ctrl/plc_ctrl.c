@@ -184,8 +184,7 @@ int	plc_init(void)
 {
 	_PlcThreadRunning = TRUE;
 	_SimuPLC		  = arg_simuPLC;
-	_SimuEncoder	  = arg_simuEncoder;
-			
+	_SimuEncoder	  = arg_simuEncoder;			
 	
 	memset(&_StartEncoderItem, 0, sizeof(_StartEncoderItem));
 	_plc_error_filter_reset();
@@ -383,7 +382,8 @@ double	 plc_get_step_dist_mm(void)
 int	plc_get_thickness(void)
 {
 	FLOAT thickness;
-	lc_get_value_by_name_FLOAT(APP"PAR_MATERIAL_THIKNESS",	&thickness);
+	if (_SimuPLC) thickness = 1.0;
+	else lc_get_value_by_name_FLOAT(APP"PAR_MATERIAL_THIKNESS",	&thickness);
 	return (int)(thickness*1000);
 }
 
@@ -1095,15 +1095,14 @@ static void _plc_set_time()
 //--- _plc_error_filter ----------------------------------
 static int _plc_error_filter(SPlcLogItem *pItem, char *text)
 {
-	int i;
-	
 	if(!strncmp(pItem->text, "RX:", 3)) 
 	{
 		strcpy(text, &pItem->text[3]);		
 		return TRUE;
 	}
 		
-	for (i=0; i<SIZEOF(_ErrorFilterBuf); i++)
+	strcpy(text, pItem->text);
+	for (int i=0; i<SIZEOF(_ErrorFilterBuf); i++)
 	{
 		if (_ErrorFilterBuf[i]==pItem->errNo) return FALSE;
 		if (_ErrorFilterBuf[i]==0)
@@ -1112,7 +1111,6 @@ static int _plc_error_filter(SPlcLogItem *pItem, char *text)
 			return TRUE;
 		}
 	}
-	strcpy(text, pItem->text);
 	return TRUE;
 }
 

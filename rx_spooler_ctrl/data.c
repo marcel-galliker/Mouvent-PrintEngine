@@ -64,6 +64,7 @@ static int				_CacheInfo=FALSE;
 static int				_PrintMode;
 static UINT16			_SmpFlags;
 static UINT16			_SmpBufSize;
+static int				_SmpOffset[MAX_COLORS];
 static int				_WakeupLen;
 static int				_LastWakeupLen=0; 
 
@@ -127,6 +128,7 @@ void data_init(RX_SOCKET socket, int headCnt)
 		memset(_LastColorOffset, 0, sizeof(_LastColorOffset));
 	}
 	memset(_BlkNo, 0, sizeof(_BlkNo));
+	memset(_SmpOffset, 0xff, sizeof(_SmpOffset));
 
 	if (_HeadCnt!=headCnt)
 	{
@@ -137,10 +139,19 @@ void data_init(RX_SOCKET socket, int headCnt)
 				if (i<127) free(_PrintList[i].splitInfo);
 			}
 			_PrintList[i].splitInfo = (SBmpSplitInfo*)malloc(headCnt*sizeof(SBmpSplitInfo));
-			memset(_PrintList[i].splitInfo, 0,  headCnt*sizeof(SBmpSplitInfo));
 		}
 	}
-
+	
+	for (i=0; i<SIZEOF(_PrintList); i++)
+	{
+		if (_PrintList[i].splitInfo) 
+		{
+			memset(_PrintList[i].splitInfo, 0, sizeof(_PrintList[i].splitInfo));
+			for (int n=0; n<headCnt; n++)
+				_PrintList[i].splitInfo[n].test = i;			
+		}
+	}
+	
 	//--- MultiCopy Threads ---------------
 	if (_MultiCopyPar==NULL)
 	{
@@ -156,6 +167,7 @@ void data_init(RX_SOCKET socket, int headCnt)
 
 	flz_init();
 	_HeadCnt = headCnt;
+	Error(LOG, 0, "Init: _InIdx=%d", _InIdx);
 }
 
 //--- data_end -------------------------------------------------------------------------
@@ -507,10 +519,14 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 	int nextIdx;
 	int loaded=FALSE;
 	char filename[MAX_PATH];
-	char	*tiffErr;
+	char *tiffErr;
 	
 //	Error(LOG, 0, "data_load id=%d, page=%d, copy=%d, scan=%d", id->id, id->page, id->copy, id->scan);
 	TrPrintfL(TRUE, "data_load id=%d, page=%d, copy=%d, scan=%d, data_load >>%s<<", id->id, id->page, id->copy, id->scan, filepath);
+	TrPrintfL(TRUE, "FirtPage=%d, LastPage=%d", flags & FLAG_SMP_FIRST_PAGE, flags & FLAG_SMP_LAST_PAGE);
+	
+	if (flags & FLAG_SMP_LAST_PAGE) Error(LOG, 0, "data_load id=%d, page=%d, copy=%d, scan=%d, data_load >>%s<< LAST PAGE", id->id, id->page, id->copy, id->scan, filepath);
+		
  	nextIdx = (_InIdx+1) % PRINT_LIST_SIZE;
 	if (nextIdx == _OutIdx) 
 		return Error(ERR_CONT, 0, "Print List Overflow");
@@ -631,6 +647,8 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 			TrPrintfL(TRUE, "Testfile Written");
 		}
 		#endif
+	
+		if (loaded) Error(WARN, 0, "data_load DONE idx=%d, id=%d, page=%d, copy=%d, scan=%d, data_load >>%s<<, COPY=%d", _InIdx, id->id, id->page, id->copy, id->scan, filepath, _PrintList[_InIdx].id.copy);
 	
 		TrPrintfL(TRUE, "data_load DONE idx=%d, id=%d, page=%d, copy=%d, scan=%d, data_load >>%s<<, COPY=%d", _InIdx, id->id, id->page, id->copy, id->scan, filepath, _PrintList[_InIdx].id.copy);
 		_InIdx = nextIdx;
@@ -912,8 +930,11 @@ static void *_multicopy_thread(void* lpParameter)
 
 //--- _data_split -----------------------------------------------------------------------
 static int _data_split(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int lengthPx, int blkNo, int flags, int clearBlockUsed, int same, SPrintListItem *pItem)
-{
+{	
+	int test=pItem->splitInfo->test;
 	memset(pItem->splitInfo, 0, _HeadCnt * sizeof(SBmpSplitInfo));
+	for (int i=0; i<_HeadCnt; i++)
+		pItem->splitInfo[i].test=test;
 	memcpy(&pItem->id, id, sizeof(pItem->id));
 	pItem->flags     = flags;
 	pItem->headsUsed = 0;
@@ -1096,7 +1117,7 @@ static int _data_split_scan(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 					pItem = parItem;
 					pInfo = &pItem->splitInfo[head];						
 				}
-				
+								
 				{	
 					rx_mem_use(*pBmpInfo->buffer[color]);
 					if (pItem==parItem) pItem->headsUsed++;
@@ -1216,6 +1237,7 @@ static int _data_split_scan_no_overlap(SPageId *id, SBmpInfo *pBmpInfo, int offs
 	int pixelPerByte;
 	int colorOffset;
 	int colorOffsetScans;
+	int idx;
 	SPrintListItem			*pItem;
 	struct SBmpSplitInfo	*pInfo;
 	
@@ -1242,10 +1264,10 @@ static int _data_split_scan_no_overlap(SPageId *id, SBmpInfo *pBmpInfo, int offs
 
 			if (pBmpInfo->printMode==PM_SCAN_MULTI_PAGE && !(_SmpFlags&FLAG_SMP_FIRST_PAGE))
 			{				
-			//	if (RX_Color[color].color.colorCode==0)
-			//		printf("Black\n");
+		//		if (RX_Color[color].color.colorCode==0)
+		//			printf("Black\n");
 				colorOffsetScans = colorOffset / RX_Spooler.barWidthPx;
-				colorOffset	     = colorOffset % RX_Spooler.barWidthPx;				
+				colorOffset	     = colorOffset % RX_Spooler.barWidthPx;
 			}
 			
 			startPx	= offsetPx-colorOffset;
@@ -1266,16 +1288,23 @@ static int _data_split_scan_no_overlap(SPageId *id, SBmpInfo *pBmpInfo, int offs
 				{
 				//	if (RX_Color[color].color.colorCode==0)
 				//		printf("Black\n");
-					int idx=(_InIdx+PRINT_LIST_SIZE-_SmpBufSize+colorOffsetScans)%PRINT_LIST_SIZE;										
+					idx=(_InIdx+PRINT_LIST_SIZE- _SmpBufSize+_SmpOffset[color]+1)%PRINT_LIST_SIZE;
 					pItem = &_PrintList[idx];
-					pInfo = &_PrintList[idx].splitInfo[head];						
+					pInfo = &_PrintList[idx].splitInfo[head];			
+				//	TrPrintfL(TRUE, "_PrintList[%d-%d][%d], _InIdx=%d, _SmpBufSize=%d, colorOffsetScans=%d, colorOffset=%d", head/4+1, head%4, idx, _InIdx, _SmpBufSize, colorOffsetScans, RX_Color[color].offsetPx);
+				//	Error(LOG, 0, "_PrintList[%d-%d][%d], _InIdx=%d, _SmpBufSize=%d, colorOffsetScans=%d, colorOffset=%d", head/4+1, head%4, idx, _InIdx, _SmpBufSize, colorOffsetScans, RX_Color[color].offsetPx);
 				}
 				else
 				{
+				//	TrPrintfL(TRUE, "_PrintList[%d-%d][%d], colorOffsetScans=%d, colorOffset=%d", head/4+1, head%4, _InIdx, colorOffsetScans, colorOffset);
+					idx = _InIdx;
+//					Error(LOG, 0, "_PrintList[%d-%d][%d],  _InIdx=%d, _SmpBufSize=%d", head/4+1, head%4, _InIdx, _InIdx, _SmpBufSize);
 					pItem = parItem;
 					pInfo = &pItem->splitInfo[head];						
 				}
-								
+				
+				if (_SmpOffset[color]<0) _SmpOffset[color]=_InIdx;
+				
 				{	
 					rx_mem_use(*pBmpInfo->buffer[color]);
 					int cnt=rx_mem_cnt(*pBmpInfo->buffer[color]);
@@ -1290,6 +1319,10 @@ static int _data_split_scan_no_overlap(SPageId *id, SBmpInfo *pBmpInfo, int offs
 					pInfo->used			= TRUE;
 					pInfo->board		= head/RX_Spooler.headsPerBoard;
 					pInfo->head			= head%RX_Spooler.headsPerBoard;
+
+					TrPrintfL(TRUE, "_BlkNo[%d][%d]: idx=%d, old=%d, cnt=%d, test=%d", pInfo->board, pInfo->head, idx, pInfo->blk0, pInfo->blkCnt, pInfo->test);
+					rx_sleep(1);
+					
 					pInfo->blk0			= _BlkNo[pInfo->board][pInfo->head]+RX_Spooler.dataBlkCntHead*(pInfo->head%RX_Spooler.headsPerBoard);
 					pInfo->bitsPerPixel	= pBmpInfo->bitsPerPixel;
 					pInfo->colorCode	= pBmpInfo->colorCode[color];
@@ -1330,8 +1363,14 @@ static int _data_split_scan_no_overlap(SPageId *id, SBmpInfo *pBmpInfo, int offs
 					pInfo->srcLineCnt	= pBmpInfo->lengthPx;
 					pInfo->dstLineLen	= (pInfo->widthBt+31) & ~31; // align to 256 Bits (32 Bytes)
 					pInfo->blkCnt		= (pInfo->dstLineLen * pBmpInfo->lengthPx + RX_Spooler.dataBlkSize-1) / RX_Spooler.dataBlkSize;
-					if (clearBlockUsed) _BlkNo[pInfo->board][pInfo->head] = (_BlkNo[pInfo->board][pInfo->head]+pInfo->blkCnt)%(RX_Spooler.dataBlkCntHead);
-					TrPrintfL(TRUE, "Split[%d]: startPx=%d, WidthPx=%d, buffer=0x%08x", head, startPx, pInfo->widthPx, pInfo->data);
+					if (clearBlockUsed)
+					{			
+						int blk=_BlkNo[pInfo->board][pInfo->head];
+						_BlkNo[pInfo->board][pInfo->head] = (_BlkNo[pInfo->board][pInfo->head]+pInfo->blkCnt)%(RX_Spooler.dataBlkCntHead);
+						TrPrintfL(TRUE, "_BlkNo[%d][%d]: idx=%d, act=%d, cnt=%d, next=%d, blk0=%d, test=%d", pInfo->board, pInfo->head, idx, blk, pInfo->blkCnt, _BlkNo[pInfo->board][pInfo->head], pInfo->blk0, pInfo->test);
+						rx_sleep(1);
+					}
+					TrPrintfL(TRUE, "Split[%d]: startPx=%d, WidthPx=%d, buffer=0x%08x, blk0=%d, blkCnt=%d", head, startPx, pInfo->widthPx, pInfo->data, pInfo->blk0, pInfo->blkCnt);
 				}				
 
 				//--- increment ---
@@ -1340,9 +1379,8 @@ static int _data_split_scan_no_overlap(SPageId *id, SBmpInfo *pBmpInfo, int offs
 				n++;
 			}
 		}
-			
+		
 		//--- fill empty heads with data ---
-		pItem = parItem;
 		for (n=0; n<SIZEOF(RX_Spooler.headNo[color]); n++)
 		{	
 			if(RX_Color[color].spoolerNo==RX_SpoolerNo)
@@ -1350,9 +1388,24 @@ static int _data_split_scan_no_overlap(SPageId *id, SBmpInfo *pBmpInfo, int offs
 				head=RX_Spooler.headNo[color][n];
 				if (!head) break;
 				head--;
-				pInfo = &pItem->splitInfo[head];
+				
+				if (FALSE && pBmpInfo->printMode==PM_SCAN_MULTI_PAGE && !(_SmpFlags&FLAG_SMP_FIRST_PAGE))
+				{
+					idx=(_InIdx+PRINT_LIST_SIZE-_SmpBufSize+colorOffsetScans)%PRINT_LIST_SIZE;
+					pItem = &_PrintList[idx];
+					pInfo = &_PrintList[idx].splitInfo[head];			
+				}
+				else
+				{
+					idx = _InIdx;
+					pItem = parItem;
+					pInfo = &pItem->splitInfo[head];						
+				}
+
 				if (!pInfo->used)
 				{
+				//	Error(LOG, 0, "_PrintList[%d-%d][%d] EMPTY,  _InIdx=%d, _SmpBufSize=%d", head/4+1, head%4, idx, _InIdx, _SmpBufSize);
+					
 					pItem->headsUsed++;
 					pInfo->pListItem	= pItem;
 					pInfo->printMode	= pBmpInfo->printMode;
@@ -1376,7 +1429,14 @@ static int _data_split_scan_no_overlap(SPageId *id, SBmpInfo *pBmpInfo, int offs
 					pInfo->dstLineLen	= 32; // align to 256 Bits (32 Bytes) 
 					pInfo->blkCnt		= 1;
 
-					if (clearBlockUsed) _BlkNo[pInfo->board][pInfo->head] = (_BlkNo[pInfo->board][pInfo->head]+pInfo->blkCnt)%(RX_Spooler.dataBlkCntHead);
+		//			if (clearBlockUsed) _BlkNo[pInfo->board][pInfo->head] = (_BlkNo[pInfo->board][pInfo->head]+pInfo->blkCnt)%(RX_Spooler.dataBlkCntHead);
+					if (clearBlockUsed)
+					{			
+						int blk=_BlkNo[pInfo->board][pInfo->head];
+						_BlkNo[pInfo->board][pInfo->head] = (_BlkNo[pInfo->board][pInfo->head]+pInfo->blkCnt)%(RX_Spooler.dataBlkCntHead);
+						TrPrintfL(TRUE, "_BlkNo[%d][%d]: idx=%d, act=%d, cnt=%d, next=%d, EMPTY, blk0=%d, test=%d", pInfo->board, pInfo->head, idx, blk, pInfo->blkCnt, _BlkNo[pInfo->board][pInfo->head], pInfo->blk0, pInfo->test);
+						rx_sleep(1);
+					}
 				}
 			}
 		}

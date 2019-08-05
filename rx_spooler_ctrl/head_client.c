@@ -36,7 +36,7 @@ static int	_Trace=0;
 #define SIMU_WRITE	1	// write data to file
 #define SIMU_READ	2	// test reading files, no sending, no writing
 
-static int	_Simulation=SIMU_OFF;
+static int	_Simulation=SIMU_WRITE;
 
 // #define RAW_SOCKET
 
@@ -456,9 +456,13 @@ static int _send_image_cmd(SBmpSplitInfo *pInfo)
 		imageCmd.image.flags		  = FLAG_MIRROR;
 		imageCmd.image.flipHorizontal = TRUE;
 	}
-	
+
+	TrPrintfL(TRUE, "_BlkNo[%d][%d]: idx=%d, blk=%d, cnt=%d, test=%d, SENT", pInfo->board, pInfo->head, _TestImgNo[pInfo->board][pInfo->head], pInfo->blk0, pInfo->blkCnt, pInfo->test);
+
 	TrPrintfL(_Trace, "_send_image_cmd[%d.%d].img[%d]", pInfo->board, pInfo->head, ++_TestImgNo[pInfo->board][pInfo->head]);
 	sok_send(&_HBPar[pInfo->board]->ctrlSocket, &imageCmd);
+
+	pInfo->blkCnt = -pInfo->blkCnt;
 
 	return REPLY_OK;
 }

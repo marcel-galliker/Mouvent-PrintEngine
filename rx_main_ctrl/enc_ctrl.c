@@ -619,7 +619,7 @@ static void _handle_config_reply(int no, SReply* preply)
 static void _handle_event(int no, SLogMsg *msg)
 {
 	SlaveError(dev_enc, no, &msg->log);
-	if (msg->log.logType==LOG_TYPE_ERROR_ABORT && !arg_simuPLC) pc_abort_printing();
+	if (msg->log.logType==LOG_TYPE_ERROR_ABORT) pc_abort_printing();
 }
 
 //--- enc_ready ----------------------------------------

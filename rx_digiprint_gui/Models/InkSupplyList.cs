@@ -82,10 +82,15 @@ namespace RX_DigiPrint.Models
             }
             if (!ok || speeds[0]==0) 
             {
-                speeds[0]=30;
-                speeds[1]=60;
-                speeds[2]=85;
-                speeds[3]=100;
+                int n=0;
+                speeds[n++]=1;
+                speeds[n++]=2;
+                speeds[n++]=5;
+                speeds[n++]=10;
+                speeds[n++]=30;
+                speeds[n++]=60;
+                speeds[n++]=85;
+                speeds[n++]=100;
             }
             return speeds;
         }

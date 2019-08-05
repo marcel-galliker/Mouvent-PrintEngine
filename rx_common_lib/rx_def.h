@@ -767,6 +767,7 @@ typedef struct SHeadBoardCfg
 	UINT16		reverseHeadOrder;
 	UINT16		spoolerNo;
 	UINT32		machineMeters;
+	UINT32		simuPlc;
 } SHeadBoardCfg;
 
 typedef struct SHeadBoardStat
