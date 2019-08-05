@@ -40,7 +40,8 @@
 
 #define CURRENT_Z_HOLD	50
 
-#define POS_UP			1000
+#define POS_UP				1000
+#define PRINT_HEIGHT_MIN	1000
 
 #define DIST_Z_REV		2000.0	// moving distance per revolution [µm]
 
@@ -89,7 +90,6 @@
 
 // Laser
 #define	LASER_IN				0		// Analog Input 0-3
-#define LASER_EN				FALSE
 #define LASER_VOLT_PER_MM		0.25 // V/mm
 #define LASER_MM_PER_VOLT		4    // mm/V
 #define LASER_VOLT_OFFSET 		5900 // Laser Value without medium in mV
@@ -841,32 +841,24 @@ static void _cleaf_check_laser(void)
 	{
 		if(RX_StepperStatus.posY < RX_StepperCfg.material_thickness - LASER_VARIATION)
 		{
-			ErrorFlag(WARN, &_cleaf_Error[0], 0x01, 0, "WEB: Laser detects too thin material. (measured %d, expected %d)", RX_StepperStatus.posY, RX_StepperCfg.material_thickness);
+			if(RX_StepperStatus.info.z_in_print)
+			{
+				ErrorFlag(ERR_CONT, &_cleaf_Error[0], 0x01, 0, "WEB: Laser detects too thick material. Moving head up. (measured %d, expected %d)", RX_StepperStatus.posY, RX_StepperCfg.material_thickness);				
+				cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_UP_POS, NULL);				
+			}
+			else ErrorFlag(WARN, &_cleaf_Error[0], 0x02, 0, "WEB: Laser detects too thin material. (measured %d, expected %d)", RX_StepperStatus.posY, RX_StepperCfg.material_thickness);
 		}
 		if(RX_StepperStatus.posY > RX_StepperCfg.material_thickness + LASER_VARIATION)
 		{
-			ErrorFlag(WARN, &_cleaf_Error[0], 0x02, 0, "WEB: Laser detects too thick material. (measured %d, expected %d)", RX_StepperStatus.posY, RX_StepperCfg.material_thickness);				
+			if(RX_StepperStatus.info.z_in_print)
+			{
+				ErrorFlag(ERR_CONT, &_cleaf_Error[0], 0x04, 0, "WEB: Laser detects too thick material. Moving head up. (measured %d, expected %d)", RX_StepperStatus.posY, RX_StepperCfg.material_thickness);				
+				cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_UP_POS, NULL);				
+			}
+			else ErrorFlag(WARN, &_cleaf_Error[0], 0x08, 0, "WEB: Laser detects too thick material. (measured %d, expected %d)", RX_StepperStatus.posY, RX_StepperCfg.material_thickness);				
 		}
 	}
-	else _cleaf_Error[0] &= ~0x03;
-	
-	// --- LASER check thickness ---
-	if ((RX_StepperStatus.posZ < RX_StepperStatus.posY - LASER_VARIATION) 
-		&& (RX_StepperStatus.info.printhead_en == TRUE) 
-		&& LASER_EN)
-	{
-		if ((_CmdRunning != CMD_CAP_UP_POS) 
-			&& (_CmdRunning != CMD_CAP_STOP)
-			&& (RX_StepperStatus.info.z_in_ref == FALSE)
-			&& (RX_StepperStatus.info.ref_done == TRUE)
-			&& (RX_StepperStatus.info.x_in_cap == FALSE)
-			&& (POS_STORED - 10  > RX_StepperStatus.posZ))
-		{				
-			Error(ERR_ABORT, 0, "WEB: LASER detecs thick medium %d um - emergency up", RX_StepperStatus.posY);	
-			cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_UP_POS, NULL);
-		}			
-	//	_cleaf_send_status(0);  // Push news to main
-	}
+	else _cleaf_Error[0] &= ~0x0f;
 }
 
 //--- value_str3 ---------------------------------------------
@@ -1164,24 +1156,34 @@ int  cleaf_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		break;
 
 	case CMD_CAP_PRINT_POS:			strcpy(_CmdName, "CMD_CAP_PRINT_POS");
-		_PrintPos   = (*((INT32*)pdata));
+		pos = (*((INT32*)pdata));
+		if (pos<PRINT_HEIGHT_MIN) 
+		{
+			pos = PRINT_HEIGHT_MIN;				
+			Error(WARN, 0, "PrintHeight set to minimum (%d.%03 mm)", PRINT_HEIGHT_MIN/1000, PRINT_HEIGHT_MIN%1000);
+		}
+		_PrintPos   = RX_StepperCfg.material_thickness + pos;
 //		Error(LOG, 0, "got CMD_CAP_PRINT_POS %d, _CmdRunning=0x%08x ", _PrintPos, _CmdRunning);
 		RX_StepperStatus.info.z_in_ref	= FALSE;
 		RX_StepperStatus.info.z_in_print	= FALSE;
 		RX_StepperStatus.info.z_in_cap	= FALSE;
-		if (!_CmdRunning && _AllowMoveDown)
+		if(!_CmdRunning && _AllowMoveDown)
 		{
 			if(RX_StepperStatus.info.ref_done)
 			{
-				if (RX_StepperStatus.info.printhead_en) 
+				if(RX_StepperStatus.info.printhead_en) 
 				{
-					_CmdRunning = CMD_CAP_PRINT_POS;
-					_Step = 0;								
+					if(RX_StepperStatus.posY >= (RX_StepperCfg.material_thickness - LASER_VARIATION) && RX_StepperStatus.posY <= (RX_StepperCfg.material_thickness + LASER_VARIATION))
+					{
+						_CmdRunning = CMD_CAP_PRINT_POS;
+						_Step = 0;															
+					}
+					else Error(ERR_CONT, 0, "WEB: Laser detects material out of range. (measured %d, expected %d)", RX_StepperStatus.posY, RX_StepperCfg.material_thickness);				
 				}
-				else Error(ERR_CONT, 0, "Stepper: Command 0x%08x: printhead_en signal not set", _CmdRunning); break;
+				else Error(ERR_CONT, 0, "Stepper: Command 0x%08x: printhead_en signal not set", _CmdRunning);
 			}
 			else Error(ERR_CONT, 0, "Reference not done");
-		}
+		}				
 		break;
 
 	case CMD_CAP_ROB_Z_POS:			strcpy(_CmdName, "CMD_CAP_ROB_Z_POS");
@@ -1680,7 +1682,6 @@ int  cleaf_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 	case CMD_ERROR_RESET:		//strcpy(_CmdName, "CMD_ERROR_RESET");		
 		_cleaf_error_reset();
 		fpga_stepper_error_reset();
-		if (!LASER_EN) Error(WARN, 0, "Laser Check disabled");
 		break;
 		
 	case CMD_CAP_VENT:	break;
