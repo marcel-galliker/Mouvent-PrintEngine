@@ -49,8 +49,8 @@ static void _send_ctrlMode			(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 
 
 static void _do_fluid_stat(int fluidNo, SFluidBoardStat *pstat);
-static void _do_scales_stat(SScalesMsg *pstat);
-static void _do_scales_get_cfg(SScalesMsg* pmsg);
+static void _do_scales_stat(SScalesStatMsg   *pstat);
+static void _do_scales_get_cfg(SScalesCfgMsg *pmsg);
 static void _do_log_evt(int no, SLogMsg *msg);
 static void _control(int fluidNo);
 static void _control_flush();
@@ -251,8 +251,7 @@ void fluid_set_config(void)
 
 			sok_send_2(&_FluidThreadPar[i].socket, CMD_FLUID_CFG, sizeof(cfg), &cfg);
 			
-			if (i==0) 
-				sok_send_2(&_FluidThreadPar[i].socket, CMD_SCALES_SET_CFG, sizeof(RX_Config.scalesTara), RX_Config.scalesTara);
+			if (i==0) sok_send_2(&_FluidThreadPar[i].socket, CMD_SCALES_SET_CFG, sizeof(RX_Config.scales), &RX_Config.scales);
 		}
 	}	
 }
@@ -357,8 +356,8 @@ static int _handle_fluid_ctrl_msg(RX_SOCKET socket, void *msg, int len, struct s
 			case REP_PING:			 TrPrintfL(TRUE, "Received REP_PING from %s", sok_get_peer_name(socket, str, NULL, NULL));	break;
 			case EVT_GET_EVT:		 _do_log_evt		(no, (SLogMsg*)		  msg);					break;																			
 			case REP_FLUID_STAT:	 _do_fluid_stat		(no, (SFluidBoardStat*)&phdr[1]);			break;			
-			case REP_SCALES_STAT:	 _do_scales_stat	((SScalesMsg*)msg);							break;
-			case REP_SCALES_GET_CFG: _do_scales_get_cfg	((SScalesMsg*)msg);							break;
+			case REP_SCALES_STAT:	 _do_scales_stat	((SScalesStatMsg*)msg);						break;
+			case REP_SCALES_GET_CFG: _do_scales_get_cfg	((SScalesCfgMsg*)msg);						break;
 			default:				 Error(WARN, 0, "Got unknown messageId=0x%08x", phdr->msgId);
 			}
 			return REPLY_OK;
@@ -423,7 +422,7 @@ static void _do_fluid_stat(int fluidNo, SFluidBoardStat *pstat)
 }
 
 //--- _do_scale_stat -------------------------------------------------------
-static void _do_scales_stat(SScalesMsg *pstat)
+static void _do_scales_stat(SScalesStatMsg *pstat)
 {
 	int i, isno;
 	for (i=0; i<SIZEOF(_ScalesStatus); i++)
@@ -444,12 +443,14 @@ static void _do_scales_stat(SScalesMsg *pstat)
 }
 
 //--- _do_scales_get_cfg ----------------------------------------
-static void _do_scales_get_cfg(SScalesMsg *pmsg)
+static void _do_scales_get_cfg(SScalesCfgMsg *pmsg)
 {
-	memcpy(RX_Config.scalesTara, pmsg->val, sizeof(RX_Config.scalesTara));
+	memcpy(RX_Config.scales.tara,  pmsg->tara,  sizeof(RX_Config.scales.tara));
+	memcpy(RX_Config.scales.calib, pmsg->calib, sizeof(RX_Config.scales.calib));
 	SRxConfig cfg;
 	setup_config(PATH_USER FILENAME_CFG, &cfg, READ);
-	memcpy(cfg.scalesTara, pmsg->val, sizeof(cfg.scalesTara));
+	memcpy(cfg.scales.tara,  pmsg->tara,  sizeof(cfg.scales.tara));
+	memcpy(cfg.scales.calib, pmsg->calib, sizeof(cfg.scales.calib));
 	setup_config(PATH_USER FILENAME_CFG, &cfg, WRITE);
 }
 
@@ -842,12 +843,19 @@ void fluid_send_pressure(int no, INT32 pressure)
 	fluid_set_config();
 }
 
-//--- fluid_send_msg -------------------------------------------
+//--- fluid_send_tara -------------------------------------------
 void fluid_send_tara(int no)
 {
 	int i=0;
 	no = _FluidToScales[no];
 	sok_send_2(&_FluidThreadPar[i].socket, CMD_SCALES_TARA, sizeof(no), &no);
+}
+
+//--- fluid_send_calib -------------------------------------------
+void fluid_send_calib(SValue *pmsg)
+{
+	int i=0;
+	sok_send_2(&_FluidThreadPar[i].socket, CMD_SCALES_CALIBRATE, sizeof(*pmsg), pmsg);
 }
 
 //--- fluid_start_printing --------

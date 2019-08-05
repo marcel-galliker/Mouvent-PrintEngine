@@ -433,8 +433,8 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 		}
 			
 		msg.offsetWidth	= 0;
-		msg.lengthPx		= lengthPx;
-		msg.gapPx			= 0;	// unused
+		msg.lengthPx	= lengthPx;
+		msg.gapPx		= 0;	// unused
 	}
 	else if (rx_def_is_scanning(RX_Config.printer.type))
 	{
@@ -448,15 +448,15 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 		else msg.printMode = PM_SCANNING;
 
 		msg.offsetWidth	= offsetWidth;
-		msg.lengthPx		= lengthPx;
-		msg.gapPx			= (UINT32)(pitem->printGoDist*1.200/25.4);
+		msg.lengthPx	= lengthPx;
+		msg.gapPx		= (UINT32)(pitem->printGoDist*1.200/25.4);
 	}
 	else
 	{
-		msg.printMode     = PM_SINGLE_PASS;
+		msg.printMode   = PM_SINGLE_PASS;
 		msg.offsetWidth	= microns_to_px(offsetWidth, DPI_X);
-		msg.lengthPx		= 0;	// unused
-		msg.gapPx			= 0;	// unused
+		msg.lengthPx	= 0;	// unused
+		msg.gapPx		= 0;	// unused
 	}
 	switch (pitem->scanMode)
 	{
@@ -620,8 +620,7 @@ int spool_send_msg_2(UINT32 cmd, int dataSize, void *data, int errmsg)
 		if(_Spooler[i].used)
 		{
 			if (_Spooler[i].socket!=INVALID_SOCKET && sok_send_2(&_Spooler[i].socket,cmd,dataSize,data)==REPLY_OK) cnt++;
-			else if(errmsg) 
-				ErrorEx(dev_spooler, i, ERR_ABORT, 0, "not connected");
+			else if(errmsg) ErrorEx(dev_spooler, i, ERR_ABORT, 0, "not connected");
 		}
 	}
 	return cnt;

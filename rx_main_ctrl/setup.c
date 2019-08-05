@@ -178,7 +178,8 @@ int setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action)
 		}
 		setup_chapter(file, "..", -1, action);
 	}
-	setup_int32_arr(file, "Tara",  action, pcfg->scalesTara, MAX_SCALES, 0);
+	setup_int32_arr(file, "Tara",  action, pcfg->scales.tara,  MAX_SCALES, 0);
+	setup_int32_arr(file, "Calib", action, pcfg->scales.calib, MAX_SCALES, 0);
 
 	//--- ink supply ---
 	setup_uchar(file, "InkSupplyCnt", action, &pcfg->inkSupplyCnt, 1);

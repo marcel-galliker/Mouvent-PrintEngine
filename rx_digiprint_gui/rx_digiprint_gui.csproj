@@ -673,6 +673,9 @@
     <Compile Include="Views\UserControls\InkLevel.xaml.cs">
       <DependentUpon>InkLevel.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\UserControls\InkLevelCalibrate.xaml.cs">
+      <DependentUpon>InkLevelCalibrate.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\UserControls\PlcStatus.xaml.cs">
       <DependentUpon>PlcStatus.xaml</DependentUpon>
     </Compile>
@@ -1186,6 +1189,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\UserControls\InkLevel.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UserControls\InkLevelCalibrate.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -33,14 +33,28 @@ namespace RX_DigiPrint.Views.UserControls
             MsgTitle.Text = _InkSupply.InkType.Name;
             Level.Enabled = false;
             Button_Candel.Focus();
-            if (RxGlobals.User.UserType<EUserType.usr_service)
+            if (RxGlobals.User.UserType<EUserType.usr_supervisor)
             {
                 Tara_button.Visibility = Init_Button.Visibility = Visibility.Collapsed;
+            }
+            if (RxGlobals.User.UserType<EUserType.usr_mouvent)
+            {
+                Calibrate_button.Visibility = Visibility.Collapsed;
             }
         }
 
         //---Tara_Clicked ----------------------------------------
         private void Tara_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (RxMessageBox.YesNo("Set TARA", string.Format("Set Tara for {0}?", Title),  MessageBoxImage.Question, false))
+            {
+                TcpIp.SValue msg = new TcpIp.SValue(){no=_InkSupply.No-1};
+                RxGlobals.RxInterface.SendMsg(TcpIp.CMD_SCALES_TARA, ref msg);
+            }
+        }
+
+        //---Correct_Clicked ----------------------------------------
+        private void Correct_Clicked(object sender, RoutedEventArgs e)
         {
             if (RxMessageBox.YesNo("Set TARA", string.Format("Set Tara for {0}?", Title),  MessageBoxImage.Question, false))
             {
@@ -72,6 +86,19 @@ namespace RX_DigiPrint.Views.UserControls
         {
             TcpIp.SValue msg = new TcpIp.SValue(){no=_InkSupply.No-1};
             RxGlobals.RxInterface.SendMsg(TcpIp.CMD_BCSCANNER_TRIGGER, ref msg);
+        }
+
+        //--- Calibrate_Clicked ------------------------------------
+        private void Calibrate_Clicked(object sender, RoutedEventArgs e)
+        {
+            InkLevelCalibrate wnd = new InkLevelCalibrate(_InkSupply.CanisterLevel);
+            bool res = (bool)wnd.ShowDialog();
+            if (res)
+            {
+                TcpIp.SValue msg = new TcpIp.SValue(){no=_InkSupply.No-1};
+                msg.value = wnd.RealValue;
+                RxGlobals.RxInterface.SendMsg(TcpIp.CMD_SCALES_CALIBRATE, ref msg);
+            }
         }
 
         //---Cancel_Clicked ----------------------------------------

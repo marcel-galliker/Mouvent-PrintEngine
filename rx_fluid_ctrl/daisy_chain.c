@@ -37,6 +37,8 @@
 
 #define LOADCELL_MAX_PCB	4
 
+#define CALIB_WEIGHT	10000
+
 //--- golbals -----------------------------------------------------------------
 static FILE *_daisy_chain_out;
 static FILE *_daisy_chain_in;
@@ -55,6 +57,8 @@ static SAdcConfigRegs	_AdcConfigRegs[LOADCELL_MAX_PCB];
 static SDevice_Adc		_Adc[LOADCELL_MAX_PCB];
 
 static int				_Tara  [LOADCELL_MAX_PCB*LOADCELL_CNT];
+static int				_Calib [LOADCELL_MAX_PCB*LOADCELL_CNT];	//  CALIB_WEIGHT KG
+static int				_Value [LOADCELL_MAX_PCB*LOADCELL_CNT];
 static int				_Weight[LOADCELL_MAX_PCB*LOADCELL_CNT];
 static int				_wval  [LOADCELL_MAX_PCB*LOADCELL_CNT];
 static int				_wcnt  [LOADCELL_MAX_PCB*LOADCELL_CNT];
@@ -148,13 +152,34 @@ void daisy_chain_get_tara(INT32 *tara, int cnt)
 	}
 }
 
+//--- daisy_chain_set_calib ------------------------
+void daisy_chain_set_calib(INT32 *calib, int cnt)
+{
+	int i;
+	for (i=0; i<cnt; i++)
+	{
+		if(i<SIZEOF(_Calib)) _Calib[i]=calib[i];
+	}			
+}
+
+//--- daisy_chain_get_calib ---------------------------
+void daisy_chain_get_calib(INT32 *calib, int cnt)
+{
+	int i;
+	for (i=0; i<cnt; i++)
+	{
+		if(i<SIZEOF(_Calib)) calib[i]=_Calib[i];
+		else calib[i]=0;
+	}
+}
+
 //--- daisy_chain_get_weight ---------------------------
 void daisy_chain_get_weight(INT32 *weight, int cnt)
 {
 	int i;
 	for (i=0; i<cnt; i++)
 	{
-		if(i<SIZEOF(_Tara)) weight[i]=_Weight[i]-_Tara[i];
+		if(i<SIZEOF(_Tara)) weight[i]=_Weight[i];
 		else weight[i]=0;
 	}			
 }
@@ -164,9 +189,23 @@ void daisy_chain_do_tara(int no)
 {
 	if (no>=0 && no<SIZEOF(_Tara))
 	{
-		_Tara[no] = _Weight[no];
+		_Tara[no] = _Value[no];
 	}
 }
+
+//--- -------------------------------
+void daisy_chain_do_calib(SValue *pmsg)
+{
+	int no = pmsg->no;
+	double val;
+	if (pmsg->value && no>=0 && no<SIZEOF(_Tara))
+	{
+		val = (double)(_Value[no] - _Tara[no]) / pmsg->value;
+		val *= CALIB_WEIGHT;
+		_Calib[no] = (int)val;
+	}			
+}
+
 
 //--- daisy_chain_end ---------------------------------------------------------
 int daisy_chain_end(void)
@@ -309,7 +348,7 @@ static void _display_status_adc(int showAll)
 		{
 			term_printf("Board %d:     ", n+1); 
 			term_printf("% 8d   ",_Adc[n].temp); 
-			FOR_ALL term_printf("% 8s ", value_str3(_Weight[n*LOADCELL_CNT+i]-_Tara[n*LOADCELL_CNT+i])); term_printf("\n");		
+			FOR_ALL term_printf("% 8s ", value_str3(_Weight[n*LOADCELL_CNT+i])); term_printf("\n");		
 		}				
 	}
 }
@@ -431,7 +470,9 @@ static int _daisy_chain_adc_request_handler(SAnswerMsg* answer)
 	
 		for (i=0; i<LOADCELL_CNT; i++)
 		{
-			int w = _val_to_g(_Adc[no].weight[i]);
+//			int w = _val_to_g(_Adc[no].weight[i]);
+			int w = _Adc[no].weight[i];
+			int val;
 			n=no*LOADCELL_CNT+i;
 			if (n<SIZEOF(_Weight))
 			{
@@ -440,7 +481,10 @@ static int _daisy_chain_adc_request_handler(SAnswerMsg* answer)
 			//	if (no==0) TrPrintfL(TRUE, "Weight[%d] w=%d, val=%d, cnt=%d, weight= %d", no, w, _wval[no], _wcnt[no], _wval[no] / _wcnt[no]);				
 				if (_wcnt[n]>50)
 				{
-					_Weight[n] = _wval[n] / _wcnt[n];
+					_Value[n] = _wval[n] / _wcnt[n];
+					val = _Value[n]-_Tara[n];
+					if(_Calib[n]) _Weight[n] = (int)(((double)val*CALIB_WEIGHT) / _Calib[n]);
+					else		  _Weight[n] = _val_to_g(val); 	
 					_wval[n] = 0;
 					_wcnt[n] = 0;
 				}				

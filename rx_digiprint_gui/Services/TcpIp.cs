@@ -349,12 +349,13 @@ namespace RX_DigiPrint.Services
         public const UInt32 CMD_SCALES_GET_CFG		= 0x01000142;
         public const UInt32 REP_SCALES_GET_CFG		= 0x02000142;
         public const UInt32 CMD_SCALES_TARA		    = 0x01000143;
-        public const UInt32 CMD_SCALES_STAT		    = 0x01000144;
-        public const UInt32 REP_SCALES_STAT	        = 0x02000144;
+        public const UInt32 CMD_SCALES_CALIBRATE    = 0x01000144;
+        public const UInt32 CMD_SCALES_STAT		    = 0x01000145;
+        public const UInt32 REP_SCALES_STAT	        = 0x02000145;
 
-        public const UInt32 CMD_BCSCANNER_RESET	    = 0x01000145;
-        public const UInt32 CMD_BCSCANNER_IDENTIFY	= 0x01000146;
-        public const UInt32 CMD_BCSCANNER_TRIGGER	= 0x01000147;
+        public const UInt32 CMD_BCSCANNER_RESET	    = 0x01000146;
+        public const UInt32 CMD_BCSCANNER_IDENTIFY	= 0x01000147;
+        public const UInt32 CMD_BCSCANNER_TRIGGER	= 0x01000148;
 
         public const UInt32 REP_CHILLER_STAT		= 0x02000152;
 

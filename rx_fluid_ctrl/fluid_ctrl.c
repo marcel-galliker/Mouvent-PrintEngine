@@ -67,9 +67,10 @@ static int _handle_ctrl_msg (RX_SOCKET socket, void *pmsg);
 static int _do_ping				(RX_SOCKET socket);
 static int _do_fluid_stat		(RX_SOCKET socket, SHeadStateLight pressure[FLUID_BOARD_CNT]);
 static int _do_fluid_ctrlMode	(RX_SOCKET socket, SFluidCtrlCmd *pmsg);
-static void _do_scales_set_cfg	(RX_SOCKET socket, SScalesMsg* pmsg);
+static void _do_scales_set_cfg	(RX_SOCKET socket, SScalesCfgMsg *pmsg);
 static void _do_scales_get_cfg	(RX_SOCKET socket);
-static void _do_scales_tara		(RX_SOCKET socket, INT32* pmsg);
+static void _do_scales_tara		(RX_SOCKET socket, INT32  *pmsg);
+static void _do_scales_calib	(RX_SOCKET socket, SValue *pmsg);
 static void _do_scales_stat		(RX_SOCKET socket);
 
 //--- ctrl_init --------------------------------------------------------------------
@@ -189,9 +190,10 @@ static int _handle_ctrl_msg(RX_SOCKET socket, void *msg)
 	case CMD_FLUID_STAT:		_do_fluid_stat		(socket, (SHeadStateLight*)	&phdr[1]);								break;
 	case CMD_FLUID_CTRL_MODE:	_do_fluid_ctrlMode	(socket, (SFluidCtrlCmd*)msg);										break;
 	
-	case CMD_SCALES_SET_CFG:	 _do_scales_set_cfg(socket, (SScalesMsg*)msg); break;
+	case CMD_SCALES_SET_CFG:	 _do_scales_set_cfg(socket, (SScalesCfgMsg*)msg); break;
 	case CMD_SCALES_GET_CFG:	 _do_scales_get_cfg(socket); break;
-	case CMD_SCALES_TARA:		 _do_scales_tara(socket, (INT32*)&phdr[1]);	break;	
+	case CMD_SCALES_TARA:		 _do_scales_tara(socket, (INT32*)&phdr[1]);		break;	
+	case CMD_SCALES_CALIBRATE:	 _do_scales_calib(socket, (SValue*)&phdr[1]);	break;	
 	case CMD_SCALES_STAT:		 _do_scales_stat(socket);	break;	
 	default:		
 					{
@@ -240,7 +242,7 @@ static int _do_fluid_stat (RX_SOCKET socket, SHeadStateLight stat[FLUID_BOARD_CN
 	sok_send_2(&socket, REP_FLUID_STAT, sizeof(RX_FluidBoardStatus), &RX_FluidBoardStatus);
 	if (daisy_chain_is_active())
 	{
-		SScalesMsg msg;
+		SScalesStatMsg msg;
 		msg.hdr.msgId  = REP_SCALES_STAT;
 		msg.hdr.msgLen = sizeof(msg);
 		daisy_chain_get_weight(msg.val, MAX_SCALES);
@@ -258,18 +260,20 @@ static int _do_fluid_ctrlMode	(RX_SOCKET socket, SFluidCtrlCmd *pmsg)
 }
 
 //--- _do_scales_set_cfg ---------------------------------------
-static void _do_scales_set_cfg(RX_SOCKET socket, SScalesMsg *pmsg)
+static void _do_scales_set_cfg(RX_SOCKET socket, SScalesCfgMsg *pmsg)
 {
-	daisy_chain_set_tara(pmsg->val, MAX_SCALES);
+	daisy_chain_set_tara(pmsg->tara, MAX_SCALES);
+	daisy_chain_set_calib(pmsg->calib, MAX_SCALES);
 }
 
 //--- _do_scales_get_cfg ----------------------------------------
 static void _do_scales_get_cfg(RX_SOCKET socket)
 {
-	SScalesMsg msg;
+	SScalesCfgMsg msg;
 	msg.hdr.msgId  = REP_SCALES_GET_CFG;
 	msg.hdr.msgLen = sizeof(msg);
-	daisy_chain_get_tara(msg.val, MAX_SCALES);
+	daisy_chain_get_tara(msg.tara, MAX_SCALES);
+	daisy_chain_get_calib(msg.calib, MAX_SCALES);
 	sok_send(&socket, &msg);	
 }
 
@@ -280,10 +284,17 @@ static void _do_scales_tara(RX_SOCKET socket, INT32* no)
 	_do_scales_get_cfg(socket);		
 }
 
+//--- _do_scales_calib ----------------------------------------------
+static void _do_scales_calib(RX_SOCKET socket, SValue* pmsg)
+{
+	daisy_chain_do_calib(pmsg);	
+	_do_scales_get_cfg(socket);		
+}
+
 //--- _do_scales_stat ----------------------------------------------
 static void _do_scales_stat		(RX_SOCKET socket)
 {
-	SScalesMsg msg;
+	SScalesStatMsg msg;
 	msg.hdr.msgId  = REP_SCALES_STAT;
 	msg.hdr.msgLen = sizeof(msg);
 	daisy_chain_get_weight(msg.val, MAX_SCALES);

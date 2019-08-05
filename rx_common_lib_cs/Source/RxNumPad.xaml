@@ -7,6 +7,7 @@
         AllowsTransparency="True"
         Background="Transparent"
         TouchUp="Window_TouchUp"
+        Topmost="True"
         >
         <!-- 
         Topmost="True"

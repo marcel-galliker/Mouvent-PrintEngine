@@ -19,9 +19,12 @@
 
 void daisy_chain_set_tara(INT32 *tara, int cnt);
 void daisy_chain_get_tara(INT32 *tara, int cnt);
+void daisy_chain_set_calib(INT32 *calib, int cnt);
+void daisy_chain_get_calib(INT32 *calib, int cnt);
 void daisy_chain_get_weight(INT32 *weight, int cnt);
 
 void daisy_chain_do_tara(int no);
+void daisy_chain_do_calib(SValue *pmsg);
 
 int daisy_chain_is_active(void);
 

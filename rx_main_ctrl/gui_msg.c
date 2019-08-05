@@ -79,6 +79,7 @@ static void _do_head_fluidCtrlMode(RX_SOCKET socket, SFluidCtrlCmd* pmsg);
 static void _do_fluidCtrlMode	  (RX_SOCKET socket, SFluidCtrlCmd* pmsg);
 static void _do_fluid_pressure	  (RX_SOCKET socket, SValue*		pmsg);
 static void _do_scales_tara		  (RX_SOCKET socket, SValue*        pmsg);
+static void _do_scales_calib	  (RX_SOCKET socket, SValue*        pmsg);
 
 static void _do_bcscanner_reset	  (RX_SOCKET socket, SValue*        pmsg);
 static void _do_bcscanner_identify(RX_SOCKET socket, SValue*        pmsg);
@@ -169,6 +170,7 @@ int handle_gui_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sende
 		case CMD_FLUID_PRESSURE:	   _do_fluid_pressure(socket, (SValue*)&phdr[1]);					break;
 
 		case CMD_SCALES_TARA:		_do_scales_tara(socket, (SValue*)&phdr[1]);							break;				
+		case CMD_SCALES_CALIBRATE:	_do_scales_calib(socket, (SValue*)&phdr[1]);						break;				
 
 		case CMD_BCSCANNER_RESET:	_do_bcscanner_reset(socket, (SValue*)&phdr[1]);						break;				
 		case CMD_BCSCANNER_IDENTIFY:_do_bcscanner_identify(socket, (SValue*)&phdr[1]);					break;				
@@ -774,6 +776,12 @@ static void _do_fluid_pressure(RX_SOCKET socket, SValue* pmsg)
 static void _do_scales_tara(RX_SOCKET socket, SValue* pmsg)
 {
 	fluid_send_tara(pmsg->no);
+}
+
+//--- _do_scales_calib ----------------------------------------------
+static void _do_scales_calib(RX_SOCKET socket, SValue* pmsg)
+{
+	fluid_send_calib(pmsg);
 }
 
 //--- _do_bcscanner_reset---------------------------------

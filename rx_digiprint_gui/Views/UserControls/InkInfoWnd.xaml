@@ -51,6 +51,7 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
                     <common:RxButton Grid.Column="0"  Click="Trigger_Clicked">
@@ -71,7 +72,11 @@
                         <TextBlock Text="TARA"/>
                     </common:RxButton>
                     
-                    <common:RxButton Grid.Column="3"  x:Name="Button_Candel" Click="Cancel_Clicked">
+                    <common:RxButton Grid.Column="3" Click="Calibrate_Clicked" x:Name="Calibrate_button">
+                        <TextBlock Text="Calib"/>
+                    </common:RxButton>
+
+                    <common:RxButton Grid.Column="4"  x:Name="Button_Candel" Click="Cancel_Clicked">
                         <Image Source="{StaticResource No_ico}"/>
                     </common:RxButton>
                 </Grid>

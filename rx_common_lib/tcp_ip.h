@@ -203,12 +203,13 @@
 #define CMD_SCALES_GET_CFG		0x01000142
 #define REP_SCALES_GET_CFG		0x02000142
 #define CMD_SCALES_TARA			0x01000143
-#define CMD_SCALES_STAT			0x01000144
-#define REP_SCALES_STAT			0x02000144
+#define CMD_SCALES_CALIBRATE	0x01000144
+#define CMD_SCALES_STAT			0x01000145
+#define REP_SCALES_STAT			0x02000145
 
-#define CMD_BCSCANNER_RESET		0x01000145
-#define CMD_BCSCANNER_IDENTIFY	0x01000146
-#define CMD_BCSCANNER_TRIGGER	0x01000147
+#define CMD_BCSCANNER_RESET		0x01000146
+#define CMD_BCSCANNER_IDENTIFY	0x01000147
+#define CMD_BCSCANNER_TRIGGER	0x01000148
 
 #define REP_CHILLER_STAT		0x02000152
 
@@ -759,12 +760,20 @@ typedef struct SFluidCtrlCmd
 	EnFluidCtrlMode	ctrlMode;
 } SFluidCtrlCmd;
 
-//--- SScalesMsg ----------------------
-typedef struct SScalesMsg
+//--- SScalesCfgMsg ----------------------
+typedef struct SScalesCfgMsg
+{
+	SMsgHdr			hdr;
+	INT32			tara[MAX_SCALES];
+	INT32			calib[MAX_SCALES];
+} SScalesCfgMsg;
+
+//--- SScalesStatMsg ----------------------
+typedef struct SScalesStatMsg
 {
 	SMsgHdr			hdr;
 	INT32			val[MAX_SCALES];
-} SScalesMsg;
+} SScalesStatMsg;
 
 //--- data server -------------------
 typedef struct SDsOpenCmd

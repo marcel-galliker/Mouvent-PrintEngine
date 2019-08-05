@@ -1494,7 +1494,11 @@ typedef struct SRxConfig
 	INT32			externalData;
 	SConditionerCfg	cond[MAX_HEAD_DIST];
 	INT32			headFpVoltage[MAX_HEAD_DIST];
-	INT32			scalesTara[MAX_SCALES];
+	struct
+	{
+		INT32			tara[MAX_SCALES];
+		INT32			calib[MAX_SCALES];			
+	} scales;
 	INT32			headDisabledJets[MAX_HEAD_DIST][MAX_DISABLED_JETS];
 } SRxConfig;
 
