@@ -180,7 +180,7 @@ void putty_display_fpga_status(void)
 //		term_printf("speed min:   "); PRINTF(4)("%08d   ", _speed_160(RX_FpgaStat.enc_speed[i].min));		term_printf("\n");
 //		term_printf("speed max[Hz]:"); PRINTF(4)("%08d   ", _speed_160(RX_FpgaStat.enc_speed[i].max));		term_printf("\n");
 //		term_printf("UDP Blocks sent:%06d  BlkSize=%d  Blk/Head=%d\n",			udp_test_sent_blocks(), fpga_udp_block_size(), RX_HBConfig.head[1].blkNo0);		
-	tse_display_status(RX_FpgaStat.eth_ctr[0].frames_all, RX_FpgaStat.eth_ctr[1].frames_all);
+	tse_display_status(RX_UdpSpeed);
 	term_printf("ETH ALL Frames: %06d %06d     mac[0]: %s  ip[0]: %s\n",					RX_FpgaStat.eth_ctr[0].frames_all,	RX_FpgaStat.eth_ctr[1].frames_all,   RX_MacAddr[0], RX_IpAddr[0]);		
 	term_printf("ETH MY  Frames: %06d %06d     mac[1]: %s  ip[1]: %s\n",					RX_FpgaStat.eth_ctr[0].frames_my,	RX_FpgaStat.eth_ctr[1].frames_my,    RX_MacAddr[1], RX_IpAddr[1]);			
 	term_printf("UDP ALL:        %06d %06d     ARP REQ (BC) %06d %06d  IP ERR %06d %06d\n",	RX_FpgaStat.udp_all[0],	  RX_FpgaStat.udp_all[1],	RX_FpgaStat.arp_req_bc_0,			RX_FpgaStat.arp_req_bc_1, RX_FpgaError.arp_error[0].arp_ip_mismatch,	RX_FpgaError.arp_error[1].arp_ip_mismatch);	

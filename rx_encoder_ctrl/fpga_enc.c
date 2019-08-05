@@ -667,7 +667,6 @@ static void _fpga_corr_rotative(SEncoderCfg *pCfg, int restart)
 		if(pCfg->diameter[i] < 70) Fpga->cfg.general.sel_roller_dia_offset[i] = 0;
 		else if(pCfg->diameter[i] > 70+16) Fpga->cfg.general.sel_roller_dia_offset[i] = 86 - 70;
 		else Fpga->cfg.general.sel_roller_dia_offset[i] = pCfg->diameter[i] - 70;
-		
 	}
 	
 //	Error(LOG, 0, "_fpga_corr_rotative: %d  %d  %d  %d", pCfg->corrRotPar[0], pCfg->corrRotPar[1], pCfg->corrRotPar[2], pCfg->corrRotPar[3]);

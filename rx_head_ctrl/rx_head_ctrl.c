@@ -51,6 +51,7 @@ SFpgaHeadError			RX_FpgaError;
 SFpgaDataStat			RX_FpgaData;
 SFpgaPrintList			RX_FpgaPrint;
 SFpgaEncoderCfg			RX_FpgaEncCfg;
+INT32					RX_UdpSpeed[2];
 UINT32					RX_BlockUsed[MAX_HEADS_BOARD];
 char					RX_MacAddr[2][32];
 char					RX_IpAddr[2][32];

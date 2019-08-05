@@ -202,29 +202,12 @@ int tse_set_mac_addr(int no, UINT64 macAddr)
 }
 
 //--- tse_display_status --------------------------------------
-void tse_display_status(UINT16 cnt0, UINT16 cnt1)
-{
-	static UINT16 _udp[2]={0,0};
-	static int    _udpSpeed[2];
-	static int	  _mb[2];
-	static int	  _time;
-	int			  cnt[2]={cnt0, cnt1};
-	int			  t, i;
-	
-	t=rx_get_ticks();
-	if (_time && _time!=t)
-	{
-		for (i=0; i<2; i++)
-		{
-			_udpSpeed[i] = (cnt[i] - _udp[i]) & 0xffff;		
-			_udpSpeed[i] = _udpSpeed[i]*1000/(t-_time);
-			_mb      [i] = _udpSpeed[i]*RX_HBConfig.dataBlkSize/1024;
-			_udp     [i] = cnt[i];
-		}
-	}	
-	_time=t;	
-		
-	term_printf("UDP speed:       % 4d  % 4d     msg/s %06d %06d	     MB/s %7s %7s\n", _Speed[0], _Speed[1], _udpSpeed[0], _udpSpeed[1], value_str3(_mb[0]), value_str3(_mb[1]));
+void tse_display_status(int speed[2])
+{		
+	int i, mb[2];
+	for (i=0; i<2; i++)
+		mb[i]=speed[i]*RX_HBConfig.dataBlkSize/1024;
+	term_printf("UDP speed:       % 4d  % 4d     msg/s %06d %06d	     MB/s %7s %7s\n", _Speed[0], _Speed[1], speed[0], speed[1], value_str3(mb[0]), value_str3(mb[1]));
 }
 
 //--- tse_check_errors ----------------------------
