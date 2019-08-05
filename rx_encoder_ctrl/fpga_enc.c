@@ -528,6 +528,27 @@ void fpga_enc_config(int inNo, SEncoderCfg *pCfg, int outNo, int khz, int restar
 	TrPrintfL(TRUE, "fpga_enc_config end: enable=%d, position=%d, enc_start_pos_fwd=%d, pg_start_pos=%d", Fpga->cfg.encIn[0].enable, Fpga->stat.encIn[0].position, Fpga->cfg.pg[0].enc_start_pos_fwd, Fpga->stat.encIn[0].pg_start_pos);
 }
 
+//--- fpga_enc_simu ---------------------------------------------------
+void fpga_enc_simu(int khz)
+{
+	int i, outNo;			
+	double freq;
+
+	if		(khz<1)  freq = 0;
+	else if (khz==1) freq = 0xffffffff;
+	else		 	 freq = 50000.0 * 8.0 / khz;	// 8 Subpulses!
+	
+	for (outNo=0; outNo<8; outNo++)
+	{
+		Fpga->cfg.encOut[outNo].encoder_no		= 0x08;
+		Fpga->cfg.encOut[outNo].reset_min_max	= TRUE;
+		Fpga->cfg.encOut[outNo].dist_ratio		= 0x80000000;
+		Fpga->cfg.encOut[outNo].synthetic_freq	= (UINT32)freq;
+		Fpga->cfg.encOut[outNo].backlash		= FALSE;
+		Fpga->cfg.encOut[outNo].scanning		= FALSE;				
+	}
+}
+
 //--- fpga_encoder_enable -------------------------------------
 void  fpga_encoder_enable(int enable)
 {
@@ -537,9 +558,9 @@ void  fpga_encoder_enable(int enable)
 	{
 		for(i=0; i<4; i++)
 		{
-			Fpga->cfg.encOut[i].dist_ratio		= 0x80000000;  // 101455920; // 0x80000000;
-			Fpga->cfg.encIn[i].index_on_b		= TRUE;
-			//Fpga->cfg.encIn[i].correction		= CORR_ROTATIVE;
+			// 	Problem in CLEAF!!! Fpga->cfg.encOut[i].dist_ratio		= 0x80000000;  // 101455920; // 0x80000000; 
+			//	Problem in CLEAF!!! Fpga->cfg.encIn[i].index_on_b		= TRUE;
+
 			Fpga->cfg.encOut[i].reset_min_max	= TRUE;
 			Fpga->cfg.encIn[i].reset_min_max	= TRUE;
 			Fpga->cfg.encIn[i].enable			= enable;		
