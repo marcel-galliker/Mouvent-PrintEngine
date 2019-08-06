@@ -166,8 +166,8 @@ static int _sensor_read(SSensor *s)
 	return REPLY_OK;
 }
 
-//--- pres_tick_10ms ------------------
-void pres_tick_10ms(void)
+//--- pres_tick_100ms ------------------
+void pres_tick_100ms(void)
 {
 	#define MAX_COOLER_PRES 800	// 0.8 bar
 	int _errcnt=0;

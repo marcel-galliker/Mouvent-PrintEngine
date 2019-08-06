@@ -26,7 +26,7 @@
 /*****************************************************************************/
 
 void pres_init(void);
-void pres_tick_10ms(void);
+void pres_tick_100ms(void);
 int  pres_valid(void);
 
 

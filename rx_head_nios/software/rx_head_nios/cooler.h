@@ -11,6 +11,6 @@
 #include "rx_ink_common.h"
 
 void cooler_init(void);
-void cooler_tick_10ms(void);
+void cooler_tick_100ms(void);
 
 #endif /* ANTICOOLBLOW_H_ */

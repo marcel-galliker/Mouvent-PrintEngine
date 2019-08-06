@@ -46,6 +46,7 @@ static int				_Speed=0;
 static int				_BufState;
 static int				_PrintDoneCnt;
 static int				_ActiveState;
+static char				_ActiveRipState[MAX_PATH];
 
 typedef struct 
 {
@@ -195,6 +196,7 @@ int	pq_start(void)
 	_BufState		  = 0;
 	_PrintDoneCnt	  = 0;	
 	_ActiveState	  = 0;
+	memset(_ActiveRipState, 0, sizeof(_ActiveRipState));
 	memset(&_PrintedItem, 0, sizeof(_PrintedItem));
 	_HeadBoardCnt = spool_head_board_cnt();
 	return REPLY_OK;
@@ -482,13 +484,11 @@ int pq_loading(int spoolerNo, SPageId *pid, char *txt)
 {
 	int i;
 	int n, l, len;
-	int state;
 //	if (RX_PrinterStatus.printState!=ps_printing) return REPLY_OK;
 	if (_find_item(pid->id, &i)==REPLY_OK)
 	{
 		if (_List[i].state<=PQ_STATE_LOADING || *txt)
 		{			
-			state = _List[i].state;
 //			if (_List[i].state<=PQ_STATE_LOADING)
 			if (_List[i].state!=PQ_STATE_LOADING)
 			{
@@ -505,8 +505,9 @@ int pq_loading(int spoolerNo, SPageId *pid, char *txt)
 					break;
 				len += sprintf(&_List[i].ripState[len], "%8s", _ListText[i][n]);
 			}
-			if (_ActiveState<_List[i].state)
+			if (_ActiveState<_List[i].state && strcmp(_ActiveRipState, _List[i].ripState))
 			{
+				strcpy(_ActiveRipState, _List[i].ripState); 
 				_ActiveState=_List[i].state;
 				gui_send_print_queue(EVT_GET_PRINT_QUEUE, &_List[i]);								
 			}

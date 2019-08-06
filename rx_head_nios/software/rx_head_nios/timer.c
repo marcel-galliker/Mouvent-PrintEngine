@@ -52,7 +52,7 @@ static void _do_10ms_timer(void);
 static void _do_250ms_timer(void);
 static void _do_1000ms_timer(void);
 
-static void _temp_savety(void);
+static void _temp_savety_100ms(void);
 
 int alt_irq_register (alt_u32 id, void* context, alt_isr_func handler);
 
@@ -77,8 +77,8 @@ void timer_main(void)
 	while (Timer_1000_out!=Timer_1000_in)   { _do_1000ms_timer();Timer_1000_out++;}
 }
 
-//--- _send_cond_data ----------------------
-static void _send_cond_data(void)
+//--- _send_cond_data_100ms ----------------------
+static void _send_cond_data_100ms(void)
 {
 	if (bootloader_running()) return;
 
@@ -101,12 +101,11 @@ static void _do_10ms_timer(void)
 	Timer_10ms ++;
 	if (!(Timer_10ms%10))
 	{
-		_send_cond_data();
-		pres_tick_10ms();
-		cooler_tick_10ms();
-		power_tick_10ms();
-
-		_temp_savety();
+		_send_cond_data_100ms();
+		pres_tick_100ms();
+		cooler_tick_100ms();
+		power_tick_100ms();
+		_temp_savety_100ms();
 	}
 }
 
@@ -137,10 +136,8 @@ static void _do_250ms_timer(void)
 	else            pRX_Status->headcon_amc_temp = 1000*val/8;
 }
 
-/*
- * This is called every 10 ms ?
- */
-static void _temp_savety(void)
+//--- _temp_savety_100ms ---------------
+static void _temp_savety_100ms(void)
 {
 	static const INT32 MAX_DIE = 80000;
 

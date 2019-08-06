@@ -21,7 +21,6 @@
 #include "motor.h"
 #include "tx801.h"
 
-#define	VENT_CTRL		TRUE
 #define VENT_MAX_ERROR	50	// * 100 ms intervals
 
 #define TX_REF_HEIGHT		16000
@@ -54,6 +53,8 @@ static int		_CapHight = 0;
 static int		_WetWipeHight = 0;
 static int		_WipeHight = 0;
 static int		_VacuumHight = 0;
+
+static int		_VentCtrl;
 static int		_VentCtrlDelay=0;
 static int		_VentSpeed = 0;
 static int		_VentValue[6];
@@ -124,7 +125,8 @@ void tx801_init(void)
 	_ParZ_cap.estop_in      = ESTOP_UNUSED;
 	_ParZ_cap.estop_level   = 0;
 	_ParZ_cap.checkEncoder  = TRUE;
-	
+
+	_VentCtrl				= TRUE;
 	_tx801_set_ventilators(0);
 	{
 		int i;
@@ -219,7 +221,7 @@ void tx801_main(int ticks, int menu)
 			_CmdRunning = FALSE;
 		}
 	}
-	if (VENT_CTRL) _tx801_control_vents();	
+	if (_VentCtrl) _tx801_control_vents();	
 }
 
 //--- _tx801_control_vents -------------------
@@ -329,7 +331,8 @@ int tx801_menu(void)
 		case 'u': tx801_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_UP_POS,			NULL);		break;
 		case 'z': _tx801_motor_z_test(atoi(&str[1]));										break;
 		case 'm': _tx801_motor_test(str[1]-'0', atoi(&str[2]));								break;			
-		case 'v': _tx801_set_ventilators(atoi(&str[1]));									break;
+		case 'v': _VentCtrl = (atoi(&str[1])==0);
+				  _tx801_set_ventilators(atoi(&str[1]));									break;
 		case 't': _tx801_motor_down(INVALID_SOCKET, CMD_CAP_CAPPING_POS, atoi(&str[1]));	break;
 		case 'c': _tx801_motor_down(INVALID_SOCKET, CMD_CAP_CAPPING_POS, _CapHight);		break;
 		case 'e': _tx801_motor_down(INVALID_SOCKET, CMD_CAP_CAPPING_POS, _WetWipeHight);	break;
@@ -386,8 +389,8 @@ static void _tx801_move_to_pos(int cmd, int pos)
 static void _tx801_set_ventilators(int value)
 {
 //	Error(LOG, 0, "Set Ventilators to %d%%", value);
-
-	if(VENT_CTRL)
+	
+	if(_VentCtrl)
 	{	
 		if (!_VentSpeed)
 		{			

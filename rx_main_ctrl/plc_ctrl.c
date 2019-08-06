@@ -460,7 +460,7 @@ int  plc_set_printpar(SPrintQueueItem *pItem)
 	_plc_send_par(&par);
 	memcpy(&_StartEncoderItem, pItem, sizeof(_StartEncoderItem));
 	_Speed = _StartEncoderItem.speed;
-	_SendPause = TRUE;
+	_SendPause = 1;
 	
 	return REPLY_OK;
 }
@@ -575,7 +575,7 @@ int  plc_pause_printing(void)
 		_plc_set_par_default();
 //		_plc_set_command("CMD_PRODUCTION", "CMD_PAUSE");
 		Error(LOG, 0, "send PAUSE");
-		_SendPause = TRUE;
+		_SendPause = 1;
 	}
 	return REPLY_OK;
 }
@@ -1127,20 +1127,30 @@ static ELogItemType _plc_error_filter(SPlcLogItem *pItem, char *text)
 	//--- Rexroth messages -----------------------
 	ELogItemType logType=LOG_TYPE_UNDEF;
 
-	if      ((pItem->errNo & 0xf0000000) == 0xe0000000) return LOG_TYPE_UNDEF;	// ignore warnings
+	if      ((pItem->errNo & 0xf0000000) == 0xe0000000)
+	{
+		Error(LOG, 0, "Filter: >>PLC (%X): %s<< DISCARDED warning", pItem->errNo, pItem->text);
+		return LOG_TYPE_UNDEF;	// ignore warnings
+	}
 	else if ((pItem->errNo & 0xf0000000) == 0xf0000000) logType=LOG_TYPE_ERROR_CONT;
 	else logType=LOG_TYPE_LOG;
 		
 	strcpy(text, pItem->text);
 	for (int i=0; i<SIZEOF(_ErrorFilterBuf); i++)
 	{
-		if (_ErrorFilterBuf[i]==pItem->errNo) return LOG_TYPE_UNDEF;
+		if (_ErrorFilterBuf[i]==pItem->errNo) 
+		{
+			Error(LOG, 0, "Filter: >>PLC (%X): %s<< DISCARDED already in list", pItem->errNo, pItem->text);
+			return LOG_TYPE_UNDEF;		
+		}
 		if (_ErrorFilterBuf[i]==0)
 		{
+			Error(LOG, 0, "Filter: >>PLC (%X): %s<< new message, type=%d", pItem->errNo, pItem->text, logType);
 			_ErrorFilterBuf[i] = pItem->errNo;
 			return logType;
 		}
 	}
+	Error(LOG, 0, "Filter: >>PLC (%X): %s<< else type=%d", pItem->errNo, pItem->text, logType);
 	return logType;
 }
 
@@ -1166,10 +1176,10 @@ static void _plc_get_status()
 			gui_send_msg_2(0, REP_PLC_GET_LOG, sizeof(item), &item);
 			if(!_MpliStarting)
 			{
-				logType=_plc_error_filter(&item, text);
-				if (item.state == active && logType)
+				if (item.state == active)
 				{
-					if(item.state == active)
+					logType=_plc_error_filter(&item, text);
+					if(logType)
 					{
 						if(logType==LOG_TYPE_ERROR_CONT)	{   Error(ERR_CONT,	0, "PLC (%X): %s", item.errNo, text); _ErrorFilter = rx_get_ticks() + ERROR_FILTER_TIME; }
 						else if(logType==LOG_TYPE_WARN)			Error(WARN,		0, "PLC (%X): %s", item.errNo, text);

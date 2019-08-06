@@ -11,10 +11,9 @@
 
 //--- Defines -----------------------------------------------------------------
 
-#define PRODLOG
-#undef  PRODLOG
-
 #ifdef linux
+	#define PRODLOG
+	// #undef  PRODLOG
 	#include <time.h>
 	#include <sys/time.h>
 #endif
@@ -38,6 +37,7 @@ static SheetHandle		_ActSheet;
 static FormatHandle		_TitleFormat;	// 1
 static FontHandle		_TitleFont;
 static FormatHandle		_DateFormat;	// 2
+static int				_ThreadRunning;
 
 static void *_prod_log_thread(void *lpParameter);
 
@@ -49,6 +49,7 @@ static void _pl_stop_tx(SPrintQueueItem *pitem);
 void pl_init(void)
 {
 #ifdef PRODLOG
+	_ThreadRunning = FALSE;
 	memset(&_Start,0, sizeof(_Start));
 	memset(&_LastJob,0, sizeof(_LastJob));
 	_ProdLog = xlCreateXMLBook();
@@ -94,22 +95,42 @@ void pl_load(void)
 	else								_ActSheet = xlBookAddSheet(_ProdLog, _Day, 0);
 
 	int formats= xlBookFormatSize(_ProdLog);
-	_TitleFormat = xlBookFormat(_ProdLog, 1);
-	if (_TitleFormat==0)
+	if (formats<0 || formats>=10) 
 	{
-		_TitleFormat=xlBookAddFormat(_ProdLog, NULL);
-		font = xlFormatFont(_TitleFormat);
-		_TitleFont = xlBookAddFont(_ProdLog, font);
-		xlFontSetBold(_TitleFont, TRUE);
-		xlFormatSetFont(_TitleFormat, _TitleFont);
+		// --- file corrupt! ----------------
+		char newpath[MAX_PATH];
+		int no;
+		for (no=1; ; no++)
+		{
+			sprintf(newpath, "%sprod-%s-%d.xlsx", PATH_LOG, _Day, no);
+			if (!rx_file_exists(newpath)) break;
+		}
+		rename(_FilePath, newpath);
+		if(xlBookLoad(_ProdLog, _FilePath)) _ActSheet = xlBookGetSheet(_ProdLog, 0);						
+		else								_ActSheet = xlBookAddSheet(_ProdLog, _Day, 0);
+		formats= xlBookFormatSize(_ProdLog);
 	}
-	_DateFormat = xlBookFormat(_ProdLog, 2);
-	if (_DateFormat==0)
+	
+	if (formats>0 && formats<10)
 	{
-		_DateFormat=xlBookAddFormat(_ProdLog, NULL);
-		xlFormatSetNumFormat(_DateFormat, NUMFORMAT_CUSTOM_HMMSS);
+		_TitleFormat = xlBookFormat(_ProdLog, 1);
+		if (_TitleFormat==0)
+		{
+			_TitleFormat=xlBookAddFormat(_ProdLog, NULL);
+			font = xlFormatFont(_TitleFormat);
+			_TitleFont = xlBookAddFont(_ProdLog, font);
+			xlFontSetBold(_TitleFont, TRUE);
+			xlFormatSetFont(_TitleFormat, _TitleFont);
+		}
+		_DateFormat = xlBookFormat(_ProdLog, 2);
+		if (_DateFormat==0)
+		{
+			_DateFormat=xlBookAddFormat(_ProdLog, NULL);
+			xlFormatSetNumFormat(_DateFormat, NUMFORMAT_CUSTOM_HMMSS);
+		}
+		xlSheetSetCol(_ActSheet, 0, 0, 50, NULL, FALSE);			
 	}
-	xlSheetSetCol(_ActSheet, 0, 0, 50, NULL, FALSE);
+	
 #endif
 }
 
@@ -130,7 +151,11 @@ void pl_start(SPrintQueueItem *pitem, char *localpath)
 //--- pl_stop -----------------------------------
 void pl_stop(SPrintQueueItem *pitem)
 {
-	rx_thread_start(_prod_log_thread, pitem, 0, "_prod_log_thread");
+	if (!_ThreadRunning)
+	{
+		_ThreadRunning = TRUE;
+		rx_thread_start(_prod_log_thread, pitem, 0, "_prod_log_thread");	
+	}
 }
 
 static void *_prod_log_thread(void *lpParameter)
@@ -149,6 +174,7 @@ static void *_prod_log_thread(void *lpParameter)
 	default: break;
 	}
 #endif
+	_ThreadRunning = FALSE;
 	return NULL;
 }
 
@@ -267,7 +293,7 @@ static void _pl_stop_tx(SPrintQueueItem *pitem)
 		total = pitem->scans-pitem->scansStart;
 		if (total>0)
 		{
-			xlSheetWriteStr(_ActSheet, row, 0, "Last Printed", 0); xlSheetWriteNum(_ActSheet, row, 1,_Start.scanLength/1000*(pitem->scansPrinted-pitem->scansStart)/total, 0);	xlSheetWriteStr(_ActSheet, row, 2, "m", 0);
+			xlSheetWriteStr(_ActSheet, row, 0, "Last Printed", 0); xlSheetWriteNum(_ActSheet, row, 1,(_Start.scanLength/1000)*(pitem->scansPrinted-pitem->scansStart)/total, 0);	xlSheetWriteStr(_ActSheet, row, 2, "m", 0);
 			xlSheetWriteNum(_ActSheet, row, 3, time, _DateFormat);
 		}
 	}			

@@ -38,8 +38,8 @@ void cooler_init(void)
 	pRX_Status->info.cooler_pcb_present = (ack == I2C_ACK);
 }
 
-//--- cooler_tick_10ms ----------------------------------------------
-void cooler_tick_10ms(void)
+//--- cooler_tick_100ms ----------------------------------------------
+void cooler_tick_100ms(void)
 {
 	static int _errCnt=0;	// filter for bad reads
 	static int _invalidCnt=0;

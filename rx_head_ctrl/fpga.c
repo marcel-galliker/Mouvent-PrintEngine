@@ -1554,8 +1554,6 @@ void fpga_manual_pg(void)
 	}
 }
 
-
-
 //--- fpga_nios_reset ------------------------------------
 int   fpga_nios_reset(int reset)
 {
@@ -1844,7 +1842,6 @@ static void _handle_pd(int pd)
 	}
 }
 
-
 //--- _check_encoder --------------------------------------------------------
 static int _check_encoder(void)
 {
@@ -1854,7 +1851,7 @@ static int _check_encoder(void)
 	
 	if(RX_HBConfig.present==dev_on && FpgaCfg.encoder->cmd & ENC_ENABLE)
 	{
-		if (TRUE || nios_is_firepulse_on())
+		if (nios_is_firepulse_on())
 		{
 
 			if (_EncCheckDelay>0) _EncCheckDelay--;

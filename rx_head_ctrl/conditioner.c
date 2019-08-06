@@ -291,6 +291,7 @@ void cond_error_check(void)
         	if (_NiosStat->cond[head].error&COND_ERR_power_heater)				ErrorFlag(level=WARN,      pwrn, COND_ERR_power_heater,				0, "Conditioner %s: heater Overcurrent", headName);				
         	if (_NiosStat->cond[head].error&COND_ERR_flush_failed)				ErrorFlag(level=ERR(abort),perr, COND_ERR_flush_failed,				0, "Conditioner %s: flush failed", headName);
 	    	
+	    	if (RX_HBStatus[0].head[head].imgInCnt && _NiosStat->cond[head].mode!=ctrl_print) ErrorFlag(level=WARN, pwrn, COND_ERR_not_in_printing,	0, "Conditioner %s: not in printing mode", headName);
 	    	if (level>_ErrLevel)
 	    		_ErrLevel = level;
     	}

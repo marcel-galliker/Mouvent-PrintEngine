@@ -25,6 +25,6 @@
 /*****************************************************************************/
 
 void power_init(void);
-void power_tick_10ms(void);
+void power_tick_100ms(void);
 
 #endif /* __power_h__ */

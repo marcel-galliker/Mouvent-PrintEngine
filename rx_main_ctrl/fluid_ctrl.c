@@ -732,8 +732,11 @@ void fluid_reply_stat(RX_SOCKET socket)	// to GUI
 //		for (msg.no=0; msg.no<RX_Config.inkSupplyCnt; msg.no++)
 		for (msg.no=0; msg.no<SIZEOF(_FluidStatus); msg.no++)
 		{
-			memcpy(&msg.stat, &_FluidStatus[msg.no], sizeof(msg.stat));
-			sok_send(&socket, &msg);
+			if (msg.no<RX_Config.inkSupplyCnt || msg.no>=INK_SUPPLY_CNT)
+			{
+				memcpy(&msg.stat, &_FluidStatus[msg.no], sizeof(msg.stat));
+				sok_send(&socket, &msg);					
+			}
 		}		
 	}
 }

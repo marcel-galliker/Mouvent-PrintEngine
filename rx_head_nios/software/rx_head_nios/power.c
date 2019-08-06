@@ -56,8 +56,8 @@ void power_init(void)
 	pRX_Status->powerState = power_wait_all_off;
 }
 
-//--- power_tick_10ms --------------------------------
-void power_tick_10ms(void)
+//--- power_tick_100ms --------------------------------
+void power_tick_100ms(void)
 {
 	volatile UINT16 val=0;
 	int				dummy;
