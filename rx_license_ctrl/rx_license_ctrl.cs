@@ -51,6 +51,8 @@ namespace rx_license_ctrl
             LicenseServer server = new LicenseServer();
             server.login();
 
+          //  server.test();
+
             server.send_licenses(all);
             Console.WriteLine("done");
         }
@@ -232,5 +234,40 @@ namespace rx_license_ctrl
             return null;
         }
 
+        //--- FindFolderTest ---------------------------------------
+        Folder FindFolderTest(FolderId root, string name)
+        {
+            Folder folder = null;
+            FolderView foldersview = new FolderView(1000);
+            int i;
+
+            try
+            {
+           //     SearchFilter searchFilter = new SearchFilter.Exists();
+
+                FindFoldersResults folders = _Service.FindFolders(root, foldersview);
+                for (i=0; i<folders.TotalCount; i++)
+                {
+                    folder = folders.Folders[i];
+                    if (folder.DisplayName.Equals(name)) return folder;
+                }
+            }
+            catch(Exception e) 
+            {
+                Console.WriteLine(e.Message);
+            };
+            return null;
+        }
+
+        //--- test --------------------------------------------------------------
+        public void test()
+        {
+            Folder folder = FindFolderTest(WellKnownFolderName., "");
+            if (folder == null)
+            {
+                return;
+            }
+
+        }
     }
 }
