@@ -25,7 +25,7 @@ int	 enc_set_config(void);
 int  enc_start_printing(SPrintQueueItem *pitem);
 void enc_sent_document(int pages);
 int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId);
-int  enc_stop_pg(void);
+int  enc_stop_pg(char *reason);
 int  enc_restart_pg(void);
 int  enc_stop_printing(void);
 int	 enc_abort_printing(void);

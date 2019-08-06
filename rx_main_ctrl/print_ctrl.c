@@ -220,7 +220,7 @@ int pc_stop_printing(int userStop)
 		if (userStop) Error(ERR_CONT, 0, "STOPPED by Operator");
 		RX_PrinterStatus.printState=ps_stopping;
 		pq_stopping(&_Item);
-		enc_stop_pg();
+		enc_stop_pg("pc_stop_printing");
 		gui_send_printer_status(&RX_PrinterStatus);
 //		machine_pause_printing();
 	}
@@ -266,7 +266,7 @@ int pc_pause_printing(void)
 	if (RX_PrinterStatus.printState==ps_printing) Error(LOG, 0, "PAUSE called by user");
 //	RX_PrinterStatus.printState=ps_pause;
 	gui_send_printer_status(&RX_PrinterStatus);
-	enc_stop_pg();
+	enc_stop_pg("pc_pause_printing");
 	machine_pause_printing();
 	return REPLY_OK;	
 }
@@ -806,7 +806,7 @@ int pc_print_done(int headNo, SPrintDoneMsg *pmsg)
 			{
 				TrPrintfL(TRUE, "pc_print_done: sent=%d, printed=%d, scan=%d, scans=%d: STOP", RX_PrinterStatus.sentCnt, RX_PrinterStatus.printedCnt, _Item.id.scan, _Item.scans);
 			//	Error(LOG, 0, "pc_print_done: sent=%d, printed=%d, scan=%d, scans=%d: STOP", RX_PrinterStatus.sentCnt, RX_PrinterStatus.printedCnt, _Item.id.scan, _Item.scans);
-				enc_stop_pg();
+				enc_stop_pg("pc_print_done");
 				enc_stop_printing();
 				pc_stop_printing(FALSE);
 

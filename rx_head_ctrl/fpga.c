@@ -1854,7 +1854,7 @@ static int _check_encoder(void)
 	
 	if(RX_HBConfig.present==dev_on && FpgaCfg.encoder->cmd & ENC_ENABLE)
 	{
-		if (nios_is_firepulse_on())
+		if (TRUE || nios_is_firepulse_on())
 		{
 
 			if (_EncCheckDelay>0) _EncCheckDelay--;
@@ -1869,7 +1869,7 @@ static int _check_encoder(void)
 				{
 					if (Fpga.error->encoder[i].crc != _enc_crc[i])
 					{
-						if (Fpga.error->encoder[i].crc) ErrorFlag (WARN, (UINT32*)&RX_HBStatus[0].err,  err_encoder_not_conected,  0, "Encoder CRC ");
+						if (Fpga.error->encoder[i].crc) ErrorFlag (WARN, (UINT32*)&RX_HBStatus[0].err,  err_firepulse_missed_0<<i,  0, "Encoder CRC [%d] ", i);
 						_enc_crc[i] = Fpga.error->encoder[i].crc;				
 					}
 				}
@@ -1967,7 +1967,7 @@ static void _check_errors(void)
 			_TempErr = 0;
 			if(RX_HBStatus[0].tempFpga > (MAX_FPGA_TEMP - 5)) 
 			{
-				if(++_TempWarn == 100)	ErrorFlag(WARN, (UINT32*)&RX_HBStatus[0].err,  err_firepulse_missed_0, 0, "Head FPGA is getting too hot (%d °C)", RX_HBStatus[0].tempFpga / 1000);
+				if(++_TempWarn == 100)	ErrorFlag(WARN, (UINT32*)&RX_HBStatus[0].err,  err_firepulse_missed_0, 0, "Head FPGA is getting too hot (%d °C)", RX_HBStatus[0].tempFpga);
 			}
 			else _TempWarn=0;
 		}

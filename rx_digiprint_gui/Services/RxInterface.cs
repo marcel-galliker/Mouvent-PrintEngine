@@ -181,6 +181,7 @@ namespace RX_DigiPrint.Services
 
                     //--- handling messages --------------------------------------------
                     bool first=true;
+                    TcpIp.SInkSupplyStatMsg msg=new TcpIp.SInkSupplyStatMsg();
                     while (_Running && Connected)
                     {
                         try
@@ -191,7 +192,7 @@ namespace RX_DigiPrint.Services
                             len = BitConverter.ToInt32(buffer, 0);
                             if (len>buffer.Length)
                             {
-                                RxGlobals.Events.AddItem(new LogItem(string.Format("Receive Buffer Overflow. Last good msg(id:{0:X} len:{1})", msgHandler.hdr.msgId, msgHandler.hdr.msgLen)));
+                                RxGlobals.Events.AddItem(new LogItem(string.Format("Receive Buffer Overflow. Last good msg(id:{0:X} len:{1})", msg.hdr.msgId, msg.hdr.msgLen, msg.no)));
                                 break;
                             }
                             else if (len==0)
@@ -205,16 +206,18 @@ namespace RX_DigiPrint.Services
                                 while(read>0 && size<len)
                                 {
                                     read = _Stream.Read(buffer, size, len - size);
+                                    /*
                                     {
-                                        TcpIp.SInkSupplyStatMsg msg;
                                         RxStructConvert.ToStruct(out msg, buffer);
                                         Console.WriteLine("DATA: read={0} offset={1} len={2} msg(id:{3:X} len:{4}) no={5}", read, size, len - size, msg.hdr.msgId, msg.hdr.msgLen, msg.no);
                                     }
+                                     * */
                                     size += read;
                                     if (size<len)
-                                        Console.WriteLine("SPLIT");
+                                        RxGlobals.Events.AddItem(new LogItem(string.Format("SPLIT")));
                                 }
                                 if (read <= 0) break;
+                                RxStructConvert.ToStruct(out msg, buffer);
                                 msgHandler.handle_message(buffer);  
                             }
                         }

@@ -83,9 +83,9 @@ namespace RX_DigiPrint.Models
                 if (!File.Exists(preview)) preview = Dir.local_path(_FileName + "\\" + Path.GetFileName(_FileName) + "_preview.bmp"); // wasatch rip
                 if (File.Exists(preview))
                 {
-                    Preview = new BitmapImage(new Uri(preview));                              
+                    // Preview = new BitmapImage(new Uri(preview));                              
                     
-                    /* --- the same with a local copy of the file
+                    // --- the same with a local copy of the file
                     {                        
                         FileInfo info = new FileInfo(preview);
                         Time = info.LastWriteTime.ToString();
@@ -106,7 +106,6 @@ namespace RX_DigiPrint.Models
                             Preview = new BitmapImage(new Uri("..\\..\\Resources\\Bitmaps\\MessageBox\\No.ico", UriKind.RelativeOrAbsolute));
                         }
                     }
-                     */
                 }
                 else if (File.Exists(labeldef))
                 {

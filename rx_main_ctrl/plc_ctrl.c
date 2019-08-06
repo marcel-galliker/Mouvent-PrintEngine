@@ -861,6 +861,9 @@ static void _plc_save_material	(RX_SOCKET socket, char *filename, int cmd, char 
 		printf(">>%s<< = >>%s<<\n",  var, val);
 		setup_str(file, var, WRITE,  val,	32,	"");
 
+		if (!strcmp(var, "PAR_HEAD_HEIGHT")) 
+			RX_Config.stepper.print_height = (INT32)(0.5+1000*strtod(val, NULL));
+
 		str = end;
 	}
 	setup_save(file, path);
@@ -924,6 +927,10 @@ static void _plc_req_material	(RX_SOCKET socket, char *filename, int cmd)
 			if (len==0) len = sprintf(str, "%s\n", val);
 			if (!*name) break;
 			len += sprintf(&str[len], "%s=%s\n", name, val);
+			
+			if (!strcmp(name, "PAR_HEAD_HEIGHT")) 
+				RX_Config.stepper.print_height = (INT32)(0.5+1000*strtod(val, NULL));
+
 		}
 		str[len]=0;
 		sok_send_2(&socket, cmd | EVT_X, len, str);	// CMD_PLC_ITM_MATERIAL | CMD_PLC_ITM_SPLICEPAR
@@ -1120,8 +1127,8 @@ static ELogItemType _plc_error_filter(SPlcLogItem *pItem, char *text)
 	//--- Rexroth messages -----------------------
 	ELogItemType logType=LOG_TYPE_UNDEF;
 
-	if((pItem->errNo & 0xf0000000) == 0xe0000000) return LOG_TYPE_UNDEF;	// ignore warnings
-	else if((pItem->errNo & 0xf0000000) == 0xf0000000) logType=LOG_TYPE_ERROR_CONT;
+	if      ((pItem->errNo & 0xf0000000) == 0xe0000000) return LOG_TYPE_UNDEF;	// ignore warnings
+	else if ((pItem->errNo & 0xf0000000) == 0xf0000000) logType=LOG_TYPE_ERROR_CONT;
 	else logType=LOG_TYPE_LOG;
 		
 	strcpy(text, pItem->text);
@@ -1342,10 +1349,12 @@ static void _plc_state_ctrl()
 		{
 			UINT32 length;
 			lc_get_value_by_name_UINT32(APP "STA_PAPERLENGTH_IN", &length);
-			if (length && (int)length<_UnwinderLenMin) 
+			if (length && (int)length<_UnwinderLenMin && !_RequestPause) 
 			{
-				if(!(_ErrorFlags & 0x04)) Error(ERR_STOP, 0, "Unwinder Empty, length=%d, min=%d", length, _UnwinderLenMin);
-				_ErrorFlags |= 0x04;				
+				Error(ERR_CONT, 0, "Roll Empty: PAUSE requested");
+				RX_PrinterStatus.printState=ps_pause; // suppress pause message
+				_RequestPause = TRUE;
+				pc_pause_printing();
 			}
 		}
 	}

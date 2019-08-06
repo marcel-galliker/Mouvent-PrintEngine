@@ -485,8 +485,9 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 }
 
 //--- enc_stop_pg ------------------------------
-int  enc_stop_pg(void)
+int  enc_stop_pg(char *reason)
 {
+	Error(LOG, 0, "enc_stop_pg(%s)", reason);
 	_StopPG = TRUE;
 	sok_send_2(&_Encoder[0].socket, CMD_ENCODER_PG_STOP, 0, NULL);
 	return REPLY_OK;
