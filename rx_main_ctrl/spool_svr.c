@@ -472,7 +472,7 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 		_Pass			  = (_Pass+1) % pitem->passes;
 	}
 
-	TrPrintfL(TRUE, "send spool_print_file >>%s<<", filename);
+//	TrPrintfL(TRUE, "send spool_print_file >>%s<<", filename);
 	int cnt;
 	cnt=spool_send_msg(&msg);
 	if (cnt) RX_PrinterStatus.sentCnt++;// = _HeadBoardCnt;
@@ -481,7 +481,7 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 	
 //	spool_send_msg_2(CMD_PING, 0, NULL, TRUE);	// needed in linux to send the command without timeout!
 	_MsgSent+=cnt;
-	TrPrintfL(TRUE, "****** sent spool_print_file to %d spoolers: _MsgSent=%d", _MsgSent);
+	TrPrintfL(TRUE, "****** sent spool_print_file (id=%d, page=%d, copy=%d, scan=%d) to %d spoolers: _MsgSent=%d", pid->id, pid->page, pid->copy, pid->scan, cnt);
 //	Error(LOG, 0, "spool_print_file Copy %d", pid->copy);
 	return REPLY_OK;
 }

@@ -61,6 +61,14 @@ void net_init(void)
 	_CheckTime=0;
 	setup_load(file, PATH_USER FILENAME_NETWORK);
 	setup_network(file, &RX_Network, READ);
+	if (RX_Config.printer.type!=printer_DP803)
+	{
+		int i;
+		for (i=0; i<SIZEOF(RX_Network.item); i++)
+		{
+			if (RX_Network.item[i].deviceType==dev_enc) RX_Network.item[i].deviceNo=0;
+		}			
+	}
 	memcpy(&_Network, &RX_Network, sizeof(_Network));
 	setup_destroy(file);
 	{

@@ -80,6 +80,19 @@ int tse_set_mac_addr(int no, UINT64 macAddr)
 	_ErrorDelay = 10;
 	
 	_TSE[no][TSE_PHY_BASIC_CONTROL] = 0x09140;			// Basic control	-> Software Reset
+	
+	// Config Auto-Negotiation Advertisement
+	// we do NOT support: 
+	//					T4
+	//					100Mbps half- and 100MBs full duplex
+	//					10Mbbps half- and 10MBs full duplex
+	//
+	// only 1000Mbps full duplex is supported!
+	
+	_TSE[no][TSE_PHY_AUTO_NEG_ADVERTISEMENT]	= 0x01;		
+	
+	_TSE[no][TSE_PHY_BASIC_CONTROL] = 0x0140;			// Basic control	-> disable Auto-negotiation, Full-Duplex, 1000Mbps
+	
 	_TSE[no][TSE_MDIO_ADDR_0] = PHY_ADDRESS;			// Bits[4:0] 		—> 5-bit PHY address
 
 	// RGMII Control Signal Pad Skew

@@ -616,9 +616,12 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 		_SmpFlags   = flags;
 		_SmpBufSize = smp_bufSize;
 		int time=rx_get_ticks();
-		_data_multi_copy(id, &bmpInfo, multiCopy);
-		time = rx_get_ticks()-time;
-		if (time) Error(LOG, 0, "MultiCopy time=%d ms", time);
+		if (multiCopy>1)
+		{
+			_data_multi_copy(id, &bmpInfo, multiCopy);
+			time = rx_get_ticks()-time;
+			if (time) Error(LOG, 0, "MultiCopy time=%d ms", time);				
+		}
 		_data_split(id, &bmpInfo, offsetPx, lengthPx, blkNo, flags, clearBlockUsed, same, &_PrintList[_InIdx]);
 		if (loaded || printMode==PM_TEST || printMode==PM_TEST_JETS || printMode==PM_TEST_SINGLE_COLOR)
 		{
@@ -648,7 +651,7 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 		}
 		#endif
 	
-		if (loaded) Error(WARN, 0, "data_load DONE idx=%d, id=%d, page=%d, copy=%d, scan=%d, data_load >>%s<<, COPY=%d", _InIdx, id->id, id->page, id->copy, id->scan, filepath, _PrintList[_InIdx].id.copy);
+	//	if (loaded) Error(WARN, 0, "data_load DONE idx=%d, id=%d, page=%d, copy=%d, scan=%d, data_load >>%s<<, COPY=%d", _InIdx, id->id, id->page, id->copy, id->scan, filepath, _PrintList[_InIdx].id.copy);
 	
 		TrPrintfL(TRUE, "data_load DONE idx=%d, id=%d, page=%d, copy=%d, scan=%d, data_load >>%s<<, COPY=%d", _InIdx, id->id, id->page, id->copy, id->scan, filepath, _PrintList[_InIdx].id.copy);
 		_InIdx = nextIdx;

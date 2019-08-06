@@ -60,7 +60,7 @@ static INT32			_PreloadCnt=0;
 static int				_SetPrintPar = TRUE;
 static int				_PrintGo;
 static int				_PrintDone[MAX_PAGES];
-static int				_PrintDoneNo[HEAD_BOARD_CNT];
+static int				_PrintDoneNo;
 static int				ERR_z_in_print;
 
 //--- pc_init ----------------------------------------------------------------
@@ -166,7 +166,7 @@ int pc_start_printing(void)
 		RX_PrinterStatus.printState=ps_printing;
 		_PrintGo = 0;
 		memset(_PrintDone, 0, sizeof(_PrintDone));
-		memset(_PrintDoneNo, 0, sizeof(_PrintDoneNo));
+		_PrintDoneNo = 0;
 		_SetPrintPar   = TRUE;
 //		fluid_start_printing();
 		spool_start_printing();
@@ -445,7 +445,6 @@ static int _print_next(void)
 			return REPLY_OK;
 		}
 		
-		TrPrintfL(TRUE, "_print_next");
 		//---  load next ---
 		if (*_Item.filepath==0) 
 		{
@@ -505,6 +504,9 @@ static int _print_next(void)
 				_Item.scans=0; 
 				_Item.scansSent=0;
 				_CopiesStart = _Item.copiesPrinted;
+				if (RX_Config.printer.type==printer_DP803 && _Item.lastPage!=_Item.firstPage)
+					_CopiesStart = (_Item.copiesPrinted* (_Item.lastPage - _Item.firstPage + 1) + _Item.start.page)-1;
+				
 				pq_set_item(&_Item);
 				pl_start(&_Item, _FilePathLocal);
 				if (_SetPrintPar)
@@ -542,9 +544,10 @@ static int _print_next(void)
 			else
 			{
 				if (!_first) pq_next_page(&_Item, &_Item.id);
+				TrPrintfL(TRUE, "pq_next_page id=%d, page=%d, copy=%d, scan=%d", _Item.id.id, _Item.id.page, _Item.id.copy, _Item.id.scan);
 				if (_Item.id.copy>_Item.copies || _Item.id.page>_Item.lastPage)
 				{
-				//	Error(LOG, 0, "enc_sent_document, %d", _Item.copiesTotal-_CopiesStart);
+					Error(LOG, 0, "enc_sent_document, %d, _Item.copiesTotal=%d, _CopiesStart=%d", _Item.copiesTotal-_CopiesStart, _Item.copiesTotal, _CopiesStart);
 					if (_Scanning && arg_simuEncoder)	
 					{
 						enc_sent_document(_Item.scans);
@@ -738,7 +741,7 @@ int pc_print_done(int headNo, SPrintDoneMsg *pmsg)
 	int n=pmsg->pd%SIZEOF(_PrintDone);
 	_PrintDone[n]++;
 	
-	TrPrintfL(TRUE, "Head[%d] PRINT-DONE: %d: PD=%d: id=%d, page=%d, scan=%d, copy=%d **** (%d/%d)", headNo, ++_PrintDoneNo[headNo], pmsg->pd, pmsg->id.id, pmsg->id.page, pmsg->id.scan, pmsg->id.copy, _PrintDone[n], spool_head_board_cnt());	
+//	TrPrintfL(TRUE, "Head[%d] PRINT-DONE: %d: PD=%d: id=%d, page=%d, scan=%d, copy=%d **** (%d/%d)", headNo, ++_PrintDoneNo[headNo], pmsg->pd, pmsg->id.id, pmsg->id.page, pmsg->id.scan, pmsg->id.copy, _PrintDone[n], spool_head_board_cnt());	
 	
 	if (RX_Config.printer.type==printer_cleaf)
 	{
@@ -755,7 +758,7 @@ int pc_print_done(int headNo, SPrintDoneMsg *pmsg)
 		SPrintQueueItem *pnext;
 		int pageDone, jobDone;
 
-		TrPrintf(TRUE, "*** PRINT-DONE #%d *** (id=%d, page=%d, scan=%d, copy=%d) sent=%d, printed=%d, stopping=%d", _PrintDoneNo[headNo], pmsg->id.id, pmsg->id.page, pmsg->id.scan, pmsg->id.copy, RX_PrinterStatus.sentCnt, RX_PrinterStatus.printedCnt, RX_PrinterStatus.printState==ps_stopping);
+		TrPrintf(TRUE, "*** PRINT-DONE #%d *** (id=%d, page=%d, scan=%d, copy=%d) sent=%d, printed=%d, stopping=%d", ++_PrintDoneNo, pmsg->id.id, pmsg->id.page, pmsg->id.scan, pmsg->id.copy, RX_PrinterStatus.sentCnt, RX_PrinterStatus.printedCnt, RX_PrinterStatus.printState==ps_stopping);
 
 		_PrintDone[n] = 0;
  
@@ -815,8 +818,7 @@ int pc_print_done(int headNo, SPrintDoneMsg *pmsg)
 		}		
 	}
 	
-
-	TrPrintfL(TRUE, "pc_print_done: pc_print_next");
+//	TrPrintfL(TRUE, "pc_print_done: pc_print_next");
 	pc_print_next();
 	return REPLY_OK;
 }

@@ -70,6 +70,8 @@ static void *_flz_decompress_thread(void* lpParametr);
 //--- _tif_init -------------------------------
 void flz_init(void)
 {
+	_Abort = TRUE;
+
 	if (!_Init)
 	{
 		_Init = TRUE;
@@ -78,7 +80,6 @@ void flz_init(void)
 		_ThreadCnt = rx_core_cnt();
 		_ThreadPar = rx_malloc(_ThreadCnt*sizeof(SFlzThreadPar));
 		_sem_decompress_start = rx_sem_create();
-		_sem_decompress_done  = rx_sem_create();
 		rx_thread_start(_flz_decompress_master_thread, NULL, 0, "_flz_decompress_master_thread");
 		for (i=0; i<_ThreadCnt; i++)
 		{
@@ -90,9 +91,9 @@ void flz_init(void)
 	}
 
 	//--- start of new job ----------------------------
-	while (rx_sem_wait(_sem_decompress_done, 1)==0)
-	{};
-	rx_sem_post(_sem_decompress_done);
+	if (_sem_decompress_done) rx_sem_destroy(&_sem_decompress_done);
+	_sem_decompress_done  = rx_sem_create();
+//	rx_sem_post(_sem_decompress_done);
 	_FileBufLoadIdx=0;
 	_FileBufDecompIdx=0;
 }
@@ -205,7 +206,7 @@ int flz_load(SPageId *id, const char *filedir, const char *filename, int printMo
 
 			//--- wait last decompressing finished ---------------------------------
 
-			rx_sem_wait(_sem_decompress_done, 0);
+//			rx_sem_wait(_sem_decompress_done, 0);
 			
 			//--- start decompressing ----------------------------------------------
 			
@@ -226,6 +227,7 @@ int flz_load(SPageId *id, const char *filedir, const char *filename, int printMo
 			if (psplit[c].lastLine<_DecompressPar.height) _DecompressPar.height=psplit[c].lastLine;			
 									
 			rx_sem_post(_sem_decompress_start);
+			rx_sem_wait(_sem_decompress_done, 0);
 		}
 	}
 	return REPLY_OK;

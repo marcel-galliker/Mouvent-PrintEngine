@@ -684,6 +684,8 @@ int pq_printed(int headNo, SPageId *pid, int *pageDone, int *jobDone, SPrintQueu
 		{
 			*pageDone = TRUE;
 			pitem->copiesPrinted++;
+			if (RX_Config.printer.type==printer_DP803 && (pitem->lastPage>pitem->firstPage))
+				pitem->scansPrinted = (pitem->id.copy-1) * (pitem->lastPage - pitem->firstPage + 1) + pitem->id.page;
 		}
 		
 		TrPrintfL(TRUE, "pq_printed id=%d, scan=%d, scanTotal=%d, scansprinted=%d, copiesPrinted=%d, copies=%d, copiesTotal=%d, state=%d", pid->id, pid->scan, pitem->scans, pitem->scansPrinted, pitem->copiesPrinted, pitem->copies, pitem->copiesTotal, pitem->state);
@@ -719,9 +721,18 @@ int pq_printed(int headNo, SPageId *pid, int *pageDone, int *jobDone, SPrintQueu
 		else ctr_add(pitem->srcHeight / 1000000.0);		
 
 		if(pitem->state < PQ_STATE_STOPPING)
-		{			
-			if((pitem->copiesTotal && pitem->copiesPrinted >= pitem->copiesTotal) 
-			|| (!pitem->copiesTotal && pitem->scans && pitem->scansPrinted  >= pitem->scans))
+		{		
+			if(RX_Config.printer.type==printer_DP803 && pitem->copiesTotal && pitem->scansPrinted >= pitem->copiesTotal) 
+			{
+				*jobDone = TRUE;
+			}
+			else
+			{
+				if((pitem->copiesTotal && pitem->copiesPrinted >= pitem->copiesTotal) 
+				|| (!pitem->copiesTotal && pitem->scans && pitem->scansPrinted  >= pitem->scans))
+					*jobDone = TRUE;		
+			}
+			if (*jobDone)
 			{
 				if (!RX_PrinterStatus.testMode && idx + 1 < _Size) *pnextItem = &_List[idx + 1];
 				TrPrintfL(TRUE, "PQ.size=%d, idx=%d", _Size, idx);
@@ -729,7 +740,7 @@ int pq_printed(int headNo, SPageId *pid, int *pageDone, int *jobDone, SPrintQueu
 				{
 					TrPrintfL(TRUE, "%s: complete", _filename(pitem->filepath));
 					Error(LOG, 0, "%s: complete", _filename(pitem->filepath));
-					*jobDone = TRUE;
+//					*jobDone = TRUE;
 					if (rx_def_is_scanning(RX_Config.printer.type) && *pnextItem==NULL) pc_abort_printing();
 				}
 				pitem->state = PQ_STATE_PRINTED;
