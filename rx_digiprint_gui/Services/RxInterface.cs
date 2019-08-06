@@ -180,6 +180,7 @@ namespace RX_DigiPrint.Services
                     }
 
                     //--- handling messages --------------------------------------------
+                    bool first=true;
                     while (_Running && Connected)
                     {
                         try
@@ -199,8 +200,17 @@ namespace RX_DigiPrint.Services
                                 }
                                  * */
                             }
-                            else read = _Stream.Read(buffer, size, len - size);
-                            msgHandler.handle_message(buffer);  
+                            else if (len==0)
+                            {
+                                if (first)
+                                    RxGlobals.Events.AddItem(new LogItem(string.Format("Receive Len=0. Last good msg(id:{0:X} len:{1})", msgHandler.hdr.msgId, msgHandler.hdr.msgLen)));
+                                first=false;
+                            }
+                            else
+                            {
+                                read = _Stream.Read(buffer, size, len - size);
+                                msgHandler.handle_message(buffer);  
+                            }
                         }
                         catch (Exception e)
                         {
@@ -213,6 +223,7 @@ namespace RX_DigiPrint.Services
                 if (_Running) Connected = false;
                 _Client.Close();
             };
+
          //   Marshal.FreeHGlobal(phdr);
         }
 

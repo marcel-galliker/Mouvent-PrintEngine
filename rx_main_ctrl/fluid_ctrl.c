@@ -720,7 +720,20 @@ void fluid_reply_stat(RX_SOCKET socket)	// to GUI
 		if (_HeadErr[i]) _FluidStatus[i].err |= err_printhead; 
 		_HeadErr[i]=0;
 	}
-	sok_send_2(&socket, REP_FLUID_STAT, sizeof(_FluidStatus), _FluidStatus);
+
+//	sok_send_2(&socket, REP_FLUID_STAT, 10*sizeof(SInkSupplyStat), _FluidStatus);
+	{
+		SInkSupplyStatMsg msg;
+		msg.hdr.msgId  = REP_FLUID_STAT;
+		msg.hdr.msgLen = sizeof(msg);
+		
+//		for (msg.no=0; msg.no<RX_Config.inkSupplyCnt; msg.no++)
+		for (msg.no=0; msg.no<SIZEOF(_FluidStatus); msg.no++)
+		{
+			memcpy(&msg.stat, &_FluidStatus[msg.no], sizeof(msg.stat));
+			sok_send(&socket, &msg);
+		}		
+	}
 }
 
 //--- _flush_next -------------------------------------------

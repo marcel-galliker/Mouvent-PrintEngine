@@ -116,6 +116,7 @@ static void *_client_thread_udp(void* lpParameter);
 
 static int _wsa_started=0;
 static char _TermStr[256]={0};
+static RX_SOCKET	_DebugSocket=INVALID_SOCKET;
 
 #ifdef WIN32
 
@@ -1284,15 +1285,25 @@ static void *_client_thread_udp(void *hserver)
 	return (void*)reply;
 }
 
+//--- sok_debug -----------------------------------------------------------
+int	 sok_debug(RX_SOCKET socket)
+{
+	_DebugSocket = socket;	
+}
+
+
 //--- sok_send -----------------------------------------------------
 int sok_send(RX_SOCKET *socket, void *msg)
 {
 	SMsgHdr* phdr = (SMsgHdr*)msg;
+	char	 *debug = (char*)msg;
 	int sent;
 
 	if (*socket==0) *socket=INVALID_SOCKET;
 	if (*socket!=INVALID_SOCKET)
 	{
+		if (*socket==_DebugSocket)
+			TrPrintfL(TRUE, "DebugSocket msgId=0x%08x, len=%d",  phdr->msgId, phdr->msgLen);
 		if (phdr->msgLen > MAX_MESSAGE_SIZE) Error(ERR_CONT, 0, "Message too large, id=0x%08x, len=%d, max=%d", phdr->msgId, phdr->msgLen, MAX_MESSAGE_SIZE);
 		else 
 		{
@@ -1319,6 +1330,8 @@ int sok_send(RX_SOCKET *socket, void *msg)
 				*/
 				int time=rx_get_ticks();
 				sent=send(*socket, (char*)phdr, phdr->msgLen, MSG_NOSIGNAL);
+				if (*socket==_DebugSocket)
+					TrPrintfL(TRUE, "DebugSocket msgId=0x%08x, len=%d, sent=%d",  phdr->msgId, phdr->msgLen, sent);
 				if (sent==SOCKET_ERROR) return sok_error(socket);
 				time = rx_get_ticks()-time;
 				if (time>100) Error(ERR_CONT, 0, "sok_send time=%d ms, TelId=0x%08x, len=%d", time, phdr->msgId, phdr->msgLen);

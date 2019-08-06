@@ -230,7 +230,7 @@ namespace RX_DigiPrint.Services
 //          int size = Marshal.SizeOf(typeof(TcpIp.SInkSupplyStat));
             if (len==msg.hdr.msgLen) 
             {
-                RxGlobals.InkSupply.Update(msg);
+                RxGlobals.InkSupply.Update(msg.no, msg.status);
             }
             else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length")); 
         }

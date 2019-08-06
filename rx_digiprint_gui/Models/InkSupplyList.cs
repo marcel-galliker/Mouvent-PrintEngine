@@ -53,12 +53,11 @@ namespace RX_DigiPrint.Models
         }
 
         //--- Update ------------------------------------
-        public void Update(TcpIp.SInkSupplyStatMsg msg)
+        public void Update(int no, TcpIp.SInkSupplyStat status)
         {
-            int i;
-            for (i=0; i<msg.status.Count() && i<_MyList.Count(); i++)
+            if (no>=0 && no<_MyList.Count())
             {   
-                _MyList[i].SetStatus(i, msg.status[i]);
+                _MyList[no].SetStatus(no, status);
             }
         }
         

@@ -550,6 +550,14 @@ typedef struct SPrinterStatusMsg
 	SPrinterStatus	stat;
 } SPrinterStatusEvt;
 
+//--- SInkSupplyStatMsg ------------------------
+typedef struct SInkSupplyStatMsg
+{
+	SMsgHdr			hdr;
+	INT32			no;
+	SInkSupplyStat	stat;	
+} SInkSupplyStatMsg;
+	
 //--- SPrintEnvMsg ---------------------------------
 typedef struct SPrintEnvEvt
 {

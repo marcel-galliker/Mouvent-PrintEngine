@@ -865,9 +865,9 @@ namespace RX_DigiPrint.Services
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct SInkSupplyStatMsg
         {
-            public SMsgHdr hdr;
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 18)]
-            public SInkSupplyStat[] status;
+            public SMsgHdr        hdr;
+            public Int32          no;
+            public SInkSupplyStat status;
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
