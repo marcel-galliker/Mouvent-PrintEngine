@@ -170,6 +170,8 @@ typedef struct
 	//(2)r_corr_frame_err.r_int.r_enc_error_count_less;
 	//(3)r_corr_frame_err.r_int.r_enc_error_count_more;
 	//(4)r_corr_frame_err.r_int.r_enc_error_count_back;
+	//(5)var_shift_reg_err_dig_out
+	//(6)r_pulse_delay_merge_overflow
 	//(10)r_corr_frame_err.r_rol.r_delays_busy;
 	//(11)r_corr_frame_err.r_rol.r_delay_busy_err;
 	//(12)r_corr_frame_err.r_rol.r_pos_cnt_overflow;
@@ -182,6 +184,7 @@ typedef struct
 	//(19)r_corr_frame_err.r_ident.r_sin_af_mul_overflow;
 	//(20)r_corr_frame_err.r_ident.r_cos_af_mul_overflow;
 	//(21)r_corr_frame_err.r_ident.r_ident_sin_add_overflow;
+	//(22)var_shift_reg_err_tel
 	UINT32 		    rolcor_1_err_vec;			// 0x0550 // reset_min_max
 	UINT32 		    rolcor_0_delay_busy_max;	// 0x0554 // reset_min_max
 	UINT32 		    str_corr;	// 0x0558 // reset_min_max
@@ -196,9 +199,9 @@ typedef struct
 	UINT32 		    max_1_a1_ident_b1;	// 0x057C // reset_min_max
 	UINT32 		    max_1_a1_ident_a1;	// 0x0580 // reset_min_max
 	UINT32 		    dig_in_cnt;			// 0x0584 
-	UINT32 		    dig_cnt_stat;		// 0x0588
+	UINT32 		    varshift_stat_dig_in;		// 0x0588
 	UINT32 		    res_058c;			// 0x058c
-	UINT32 		    shift_delay_cnt;	// 0x0590 not used, only of first counter for debuging
+	UINT32 		    varshift_stat_tel;	// 0x0590 not used, only of first counter for debuging
 	UINT32			res[(0x0600 - 0x0594) / 4];	// 0x054c .. 0x0600
 	SEncErrStatus		err;					// 0x0600 - 0x0624: 
 	UINT32			res2[(0x0800 - 0x0628) / 4];// 0x0628 .. 0x0800
@@ -305,9 +308,12 @@ typedef struct
 
 	UINT32	subsample_meas;			// 0x0054:
 	
-	UINT32  shift_delay;            // 0x0058 in strokes (21um strokes)
+	UINT32  shift_delay;            // 0x0058 pg delay in strokes (21um strokes)
 	
 	UINT32  sel_roller_dia_offset[2]; // 0x005c: 4 bit: 70 + sel_roller_dia_offset_0 = Roller Diameter in mm
+
+	UINT32  shift_delay_tel;        // 0x0058 pg delay in strokes (21um strokes)
+	
 } SGeneralCfg;
 
 typedef struct

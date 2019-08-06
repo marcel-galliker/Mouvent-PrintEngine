@@ -34,6 +34,7 @@ namespace RX_DigiPrint.Views.UserControls
             DataContext = this;
             CMD_JOG_FWD.TouchEnabled = true;
             CMD_JOG_BWD.TouchEnabled = true;
+            CMD_WEBIN.DataContext    = RxGlobals.Plc;
             RxGlobals.PrinterStatus.PropertyChanged += PrinterStatusChanged;
             PrinterStatusChanged(null, null);
         }
@@ -64,9 +65,10 @@ namespace RX_DigiPrint.Views.UserControls
                     CMD_JOG_FWD.Visibility = visible;
                     CMD_JOG_BWD.Visibility = visible;
                     CMD_WEBIN.Visibility   = invisible;
+                //  CMD_WEBIN.IsEnabled    = (RxGlobals.PrinterStatus.PrintState==EPrintState.ps_off || RxGlobals.PrinterStatus.PrintState==EPrintState.ps_ready_power);
+                    if (invisible==Visibility.Collapsed) CMD_WEBIN.IsChecked=false;
                 }
            }
-           
 
            Visibility v=Visibility.Collapsed;
            switch (RxGlobals.PrintSystem.PrinterType)
@@ -82,6 +84,7 @@ namespace RX_DigiPrint.Views.UserControls
         private void WebIn_Clicked(object sender, RoutedEventArgs e)
         {
             RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_SET_CMD, "CMD_CLEAR_ERROR");
+            CMD_WEBIN.IsChecked = true;
             if (RxGlobals.PrintSystem.IsScanning) RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_SET_CMD, "CMD_SETUP/CMD_WEBIN");
             else RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_SET_CMD, "CMD_PAUSE");
         }

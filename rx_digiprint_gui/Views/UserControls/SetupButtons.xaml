@@ -11,7 +11,7 @@
     <Grid>
         <StackPanel x:Name="ButtonsPanel" Orientation="Horizontal" Background="{DynamicResource Brush03}" Height="auto">
 
-            <common:RxButton x:Name="CMD_WEBIN"  Click="WebIn_Clicked" IsVisibleChanged="WebIn_IsVisibleChanged">
+            <common:RxButton x:Name="CMD_WEBIN"  Click="WebIn_Clicked" IsVisibleChanged="WebIn_IsVisibleChanged" IsEnabled="{Binding WebInEnabled}">
                 <Image Source="../../Resources/Bitmaps/WebIn.ico"/>
             </common:RxButton>
 

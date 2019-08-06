@@ -128,7 +128,7 @@ static void _plc_req_material	(RX_SOCKET socket, char *filename, int cmd);
 static void _plc_save_material	(RX_SOCKET socket, char *filename, int cmd, char *varList);
 static void _plc_del_material	(RX_SOCKET socket, char *filename, int cmd, char *name);
 
-static int  _plc_error_filter(SPlcLogItem *pItem, char *text);
+static ELogItemType  _plc_error_filter(SPlcLogItem *pItem, char *text);
 static void _plc_error_filter_reset(void);
 
 static void _plc_set_command(char *mode, char *cmd);
@@ -1091,25 +1091,40 @@ static void _plc_set_time()
 }
 
 //--- _plc_error_filter ----------------------------------
-static int _plc_error_filter(SPlcLogItem *pItem, char *text)
+static ELogItemType _plc_error_filter(SPlcLogItem *pItem, char *text)
 {
-	if(!strncmp(pItem->text, "RX:", 3)) 
+	char *t;
+	
+	//--- Mouvent messages ---------------------------------
+	if(t= strstr(pItem->text, "ERR:")) 
 	{
-		strcpy(text, &pItem->text[3]);		
-		return TRUE;
+		strcpy(text, &t[4]);		
+		return LOG_TYPE_ERROR_CONT;
 	}
+	if(t=strstr(pItem->text, "WRN:")) 
+	{
+		strcpy(text, &t[4]);		
+		return LOG_TYPE_WARN;
+	}
+	
+	//--- Rexroth messages -----------------------
+	ELogItemType logType=LOG_TYPE_UNDEF;
+
+	if((pItem->errNo & 0xf0000000) == 0xe0000000) return LOG_TYPE_UNDEF;	// ignore warnings
+	else if((pItem->errNo & 0xf0000000) == 0xf0000000) logType=LOG_TYPE_ERROR_CONT;
+	else logType=LOG_TYPE_LOG;
 		
 	strcpy(text, pItem->text);
 	for (int i=0; i<SIZEOF(_ErrorFilterBuf); i++)
 	{
-		if (_ErrorFilterBuf[i]==pItem->errNo) return FALSE;
+		if (_ErrorFilterBuf[i]==pItem->errNo) return LOG_TYPE_UNDEF;
 		if (_ErrorFilterBuf[i]==0)
 		{
 			_ErrorFilterBuf[i] = pItem->errNo;
-			return TRUE;
+			return logType;
 		}
 	}
-	return TRUE;
+	return logType;
 }
 
 //--- _plc_error_filter_reset ----------------------------
@@ -1123,6 +1138,7 @@ static void _plc_error_filter_reset(void)
 //--- _plc_get_status ---------------------------------
 static void _plc_get_status()
 {
+	ELogItemType logType;
 	SPlcLogItem item;
 	char text[MAX_PATH];
 	int ticks=rx_get_ticks();
@@ -1133,30 +1149,16 @@ static void _plc_get_status()
 			gui_send_msg_2(0, REP_PLC_GET_LOG, sizeof(item), &item);
 			if(!_MpliStarting)
 			{
-				/* --- WAIT for proper error messages from PLC ---------------
-				//--- numbers x03bxxxx are user messages ----------------
-				if((item.errNo & 0x0fff0000) == 0x003b0000) err = item.errNo & 0x0000ffff;
-				else                                        err = 0;
-				
-				switch (RX_Config.printer.type)
+				logType=_plc_error_filter(&item, text);
+				if (item.state == active && logType)
 				{
-				case printer_TX801:
-				case printer_TX802: break;
-				
-				default: err=0;						
-				}
-				*/
-
-				if (item.state == active && _plc_error_filter(&item, text))
-				{
-					int err=0;
 					if(item.state == active)
 					{
-						if((item.errNo & 0xf0000000) == 0xf0000000)	{    Error(ERR_CONT,	err, "PLC (%X): %s", item.errNo, text); _ErrorFilter = rx_get_ticks() + ERROR_FILTER_TIME; }
-						else if((item.errNo & 0xf0000000) == 0xe0000000) Error(WARN,		err, "PLC (%X): %s", item.errNo, text);
-						else                                             Error(LOG,			err, "PLC (%X): %s", item.errNo, text);
+						if(logType==LOG_TYPE_ERROR_CONT)	{   Error(ERR_CONT,	0, "PLC (%X): %s", item.errNo, text); _ErrorFilter = rx_get_ticks() + ERROR_FILTER_TIME; }
+						else if(logType==LOG_TYPE_WARN)			Error(WARN,		0, "PLC (%X): %s", item.errNo, text);
+						else                                    Error(LOG,		0, "PLC (%X): %s", item.errNo, text);
 					}
-					else if(item.state == message) Error(LOG, err, "PLC (%X): %s", item.errNo, item.text);					
+					else if(item.state == message) Error(LOG, 0, "PLC (%X): %s", item.errNo, item.text);					
 				}				
 			}
 		}

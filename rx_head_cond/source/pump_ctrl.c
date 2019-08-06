@@ -73,6 +73,7 @@ static INT32    _Start_PID;
 static INT32	_TimePIDstable;
 static INT32	_TimeSwitchingOFF;
 static INT32    _PhaseOFFMeniscusPre;
+static INT32	_Meniscus_Timeout;
 
 
 static UINT64 _flow = 0;
@@ -234,6 +235,7 @@ void pump_tick_10ms(void)
 				_Start_PID = START_PID_OFF;
 				_TimePIDstable = 0;
 				_TimeSwitchingOFF = 0;
+				_Meniscus_Timeout = MENISCUS_TIMEOUT;
 			}
 			break;	
 			
@@ -603,7 +605,7 @@ static void _pump_pid(void)
 			int flow = RX_Status.pump_measured * 60 / 1000;
 			if (RX_Config.mode==ctrl_empty_step2)	_error_cnt((flow > 95), &_no_ink_err_cnt,   COND_ERR_pump_no_ink, NO_INK_TIMEOUT);
 			else 									_error_cnt((flow > 95), &_no_ink_err_cnt,   COND_ERR_pump_no_ink, NO_INK_TIMEOUT);
-			_error_cnt((RX_Status.meniscus > MENISCUS_MAX), 	&_meniscus_err_cnt, COND_ERR_meniscus, MENISCUS_TIMEOUT);			
+			_error_cnt((RX_Status.meniscus > MENISCUS_MAX), 	&_meniscus_err_cnt, COND_ERR_meniscus, _Meniscus_Timeout);			
         }
 
 		// regulate on meniscus
@@ -633,8 +635,13 @@ static void _pump_pid(void)
 				_PumpPID.P = DEFAULT_P / _PumpPID.P_start;			
 				_TimePIDstable = 0;
 			}
+			_Meniscus_Timeout = MENISCUS_TIMEOUT * 2;
 		}
-		else _PumpPID.P = DEFAULT_P;
+		else 
+		{
+			_PumpPID.P = DEFAULT_P;
+			_Meniscus_Timeout = MENISCUS_TIMEOUT;
+		}
 		
 		pid_calc(-RX_Status.meniscus, &_PumpPID);
 		_rampup_time++;

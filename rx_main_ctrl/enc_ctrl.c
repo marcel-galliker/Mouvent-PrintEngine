@@ -248,6 +248,8 @@ int  enc_start_printing(SPrintQueueItem *pitem)
 		
 	msg.simulation  = arg_simuEncoder;
 	msg.printerType = RX_Config.printer.type;
+	msg.printGoMode = pitem->printGoMode;
+	msg.printGoDist = pitem->printGoDist;
 	msg.correction  = CORR_OFF; 
 	_WakeupLen = 0;
 	switch (RX_Config.printer.type)
@@ -423,11 +425,9 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 							 */
 							 break;
 		case PG_MODE_MARK:	 dist.dist     = 0;
-						//	 dist.ignore   = pitem->pageHeight*9/10;
-							 dist.ignore   = 0;
-							 // if (_DistTelCnt>1) // first must be 0
-							 //	 dist.window   = pitem->pageHeight/4; 
-							 for(no=0; no<ENC_CNT; no++) 
+							 if (_DistTelCnt>1) dist.ignore   = pitem->pageHeight*9/10;
+							 if (_DistTelCnt>1) dist.window   = pitem->pageHeight/4;
+							 for(no=0; no<ENC_CNT; no++)
 							 {
 								sok_send_2(&_Encoder[no].socket, CMD_ENCODER_PG_DIST, sizeof(dist), &dist);
 							 }

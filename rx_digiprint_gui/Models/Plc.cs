@@ -206,6 +206,7 @@ namespace RX_DigiPrint.Models
                         int state=Rx.StrToInt32(val[1]);
                         InReferencing = (state==13);
                         InWebIn       = (state==9);
+                        WebInEnabled  = (state!=4 && state!=6);
                     }
                     for (m=1, found=false; m<buffer[i].Count(); m++)
                     {
@@ -293,14 +294,12 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _IsReadyForProduction, value);}
         }
 
-        /*
-        //--- Property IsRunning ---------------------------------------
-        private bool _IsRunning;
-        public bool IsRunning
+        //--- Property WebInEnabled ---------------------------------------
+        private bool _WebInEnabled = false;
+        public bool WebInEnabled
         {
-            get { return _IsRunning; }
-            set { SetProperty(ref _IsRunning, value);}
+            get { return _WebInEnabled; }
+            set { SetProperty(ref _WebInEnabled, value);}
         }
-        */
     }
 }

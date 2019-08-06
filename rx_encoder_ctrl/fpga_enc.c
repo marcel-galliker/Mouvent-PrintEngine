@@ -195,7 +195,7 @@ void fpga_init()
 		Error(ERR_ABORT, 0, "structuire mismatch");
 	}
 
-	Fpga = (SEncFpga*)rx_fpga_map_page(_MemId, 0xc0200000, sizeof(SEncFpga), 0x0e64);
+	Fpga = (SEncFpga*)rx_fpga_map_page(_MemId, 0xc0200000, sizeof(SEncFpga), 0x0e68);
 	FpgaCorr = (SEncFpgaCorr*)rx_fpga_map_page(_MemId, 0xc0203000, sizeof(SEncFpgaCorr),	0x600);
 
 	{
@@ -812,7 +812,8 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg, int restart)
 		}
 		else 
 		{
-			Fpga->cfg.pg[pgNo].fifos_used   = FIFOS_DIST;
+			Fpga->cfg.pg[pgNo].fifos_used =  (pcfg->printGoMode==PG_MODE_MARK) ?  FIFOS_MARKREADER : FIFOS_DIST;
+			Fpga->cfg.general.shift_delay_tel = (int)(pcfg->printGoDist/_StrokeDist);
 		//	Fpga->cfg.pg[pgNo].dig_in_sel   = 0;
 		//	Fpga->cfg.pg[pgNo].quiet_window = 10;
 		//	if (FpgaQSys->printGo_status.fill_level) Fpga->cfg.pg[pgNo].fifos_ready	= TRUE;
@@ -928,7 +929,6 @@ void  fpga_pg_set_dist(int cnt, int dist)
 void  fpga_set_printmark(int window, int ignore)
 {
 	int pgNo;
-	Fpga->cfg.pg[0].fifos_used = FIFOS_MARKREADER;
 	FpgaQSys->window_fifo  = (int)(window/_StrokeDist);
 	FpgaQSys->ignored_fifo = (int)(ignore/_StrokeDist);
 	for (pgNo=0; pgNo<SIZEOF(Fpga->cfg.pg); pgNo++) Fpga->cfg.pg[pgNo].fifos_ready = TRUE;
@@ -1211,7 +1211,14 @@ static void _fpga_display_status(int showCorrection, int showParam)
 			term_printf("  Speed [m/Min]: "); for (i=0; i<cnt; i++) term_printf("%09d  ", (int)((Fpga->stat.encOut[i].speed*23/1000)*60.0/1200*0.0254) );		term_printf("\n");
 			term_printf("  Speed Min[Hz]: "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encOut[i].speed_min*23/1000);	term_printf("\n");
 			term_printf("  Speed Max[Hz]: "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encOut[i].speed_max*23/1000);	term_printf("\n");
-			term_printf("  PG FIFO:       %09d  Level=%03d (wnd=%03d ign=%03d), InCnt=%d\n", _DistTelCnt, FpgaQSys->printGo_status.fill_level, FpgaQSys->window_status.fill_level, FpgaQSys->ignored_status.fill_level, _InCnt); 
+			term_printf("  PG FIFO:       %09d  Used=%d     Level=%03d (wnd=%03d ign=%03d delay=%dmm), InCnt=%d\n", 
+				_DistTelCnt, 
+				Fpga->cfg.pg[0].fifos_used, 
+				FpgaQSys->printGo_status.fill_level, 
+				FpgaQSys->window_status.fill_level, 
+				FpgaQSys->ignored_status.fill_level, 
+				(int)(Fpga->cfg.general.shift_delay_tel*_StrokeDist+500)/1000, 
+				_InCnt); 
 			term_printf("  PG Cnt:        "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encOut[i].PG_cnt);				term_printf("\n");
 			term_printf("  PG wnd error:  "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.dig_pg_window_err[i]);			term_printf("\n");
 	//		term_printf("  mem_pointer:   "); for (i=0; i<3; i++)   term_printf("%09d  ", Fpga->stat.mem_pointer[i]);				term_printf("\n");
