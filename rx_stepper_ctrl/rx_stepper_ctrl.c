@@ -94,7 +94,8 @@ static void _main_loop()
 									break;
 			
 		case printer_LB702_UV: 		
-		case printer_LB702_WB:		if (RX_StepperCfg.boardNo == 0) lb702_main(ticks, menu); 
+		case printer_LB702_WB:		
+		case printer_LH702:			if (RX_StepperCfg.boardNo == 0) lb702_main(ticks, menu); 
 									else							lbrob_main(ticks, menu);	
 									break;
 
@@ -122,7 +123,8 @@ static void _main_loop()
 										break;
 
 			case printer_LB702_UV:
-			case printer_LB702_WB:		if (RX_StepperCfg.boardNo == 0) _AppRunning = lb702_menu(); 
+			case printer_LB702_WB:		
+			case printer_LH702:			if (RX_StepperCfg.boardNo == 0) _AppRunning = lb702_menu(); 
 										else							_AppRunning = lbrob_menu(); 
 										break;
 
@@ -181,7 +183,8 @@ int main(int argc, char** argv)
 								break;
 		
 	case printer_LB702_UV: 		
-	case printer_LB702_WB: 		if (RX_StepperCfg.boardNo == 0) lb702_init(); 
+	case printer_LB702_WB: 		
+	case printer_LH702:			if (RX_StepperCfg.boardNo == 0) lb702_init(); 
 								else						    lbrob_init();
 								break;
 		

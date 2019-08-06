@@ -30,6 +30,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 case EPrinterType.printer_LB701:
                 case EPrinterType.printer_LB702_UV: 
                 case EPrinterType.printer_LB702_WB: 
+                case EPrinterType.printer_LH702: 
                 case EPrinterType.printer_DP803: 
                                                     MainGrid.RowDefinitions[0].Height = GridLength.Auto;
                                                     MainGrid.RowDefinitions[1].Height = new GridLength(0);  

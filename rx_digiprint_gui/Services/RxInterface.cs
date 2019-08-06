@@ -118,7 +118,7 @@ namespace RX_DigiPrint.Services
             byte[] buffer = new Byte[4096];
 
             Int32 read, len;
-            int size = 4;
+            int size;
             RxMsgHandler msgHandler = new RxMsgHandler();
             
             while (_Running)
@@ -185,6 +185,7 @@ namespace RX_DigiPrint.Services
                     {
                         try
                         {
+                            size = 4;
                             read = _Stream.Read(buffer, 0, size);
                             if (read <= 0) break;
                             len = BitConverter.ToInt32(buffer, 0);
@@ -192,13 +193,6 @@ namespace RX_DigiPrint.Services
                             {
                                 RxGlobals.Events.AddItem(new LogItem(string.Format("Receive Buffer Overflow. Last good msg(id:{0:X} len:{1})", msgHandler.hdr.msgId, msgHandler.hdr.msgLen)));
                                 break;
-                                /*
-                                while (len>0)
-                                {
-                                    read=_Stream.Read(buffer, 0, buffer.Length);
-                                    len -= buffer.Length;
-                                }
-                                 * */
                             }
                             else if (len==0)
                             {
@@ -208,7 +202,19 @@ namespace RX_DigiPrint.Services
                             }
                             else
                             {
-                                read = _Stream.Read(buffer, size, len - size);
+                                while(read>0 && size<len)
+                                {
+                                    read = _Stream.Read(buffer, size, len - size);
+                                    {
+                                        TcpIp.SInkSupplyStatMsg msg;
+                                        RxStructConvert.ToStruct(out msg, buffer);
+                                        Console.WriteLine("DATA: read={0} offset={1} len={2} msg(id:{3:X} len:{4}) no={5}", read, size, len - size, msg.hdr.msgId, msg.hdr.msgLen, msg.no);
+                                    }
+                                    size += read;
+                                    if (size<len)
+                                        Console.WriteLine("SPLIT");
+                                }
+                                if (read <= 0) break;
                                 msgHandler.handle_message(buffer);  
                             }
                         }

@@ -30,6 +30,7 @@
 #define POS_UP			-1000
 
 #define PRINTHEAD_EN		11	// Input from SPS // '1' Allows Head to go down
+#define IS_PRINTING_OUT		11	// Input from SPS // '1' Allows Head to go down
 
 #define STEPS_REV		200*16	// steps per motor revolution * 16 times oversampling
 #define DIST_REV		2000.0	// moving distance per revolution [µm]
@@ -281,6 +282,12 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 										motors_move_to_step	(MOTOR_Z_BITS,  &_ParZ_cap, _micron_2_steps(RX_StepperCfg.cap_height));
 									}
 									break;
+		
+	case CMD_CAP_IS_PRINTING:		pos   = (*((INT32*)pdata));
+									if (pos) Fpga.par->output |=  IS_PRINTING_OUT;
+									else	 Fpga.par->output &= ~IS_PRINTING_OUT;
+									break;
+		
 		
 	case CMD_ERROR_RESET:			strcpy(_CmdName, "CMD_ERROR_RESET");
 									fpga_stepper_error_reset();

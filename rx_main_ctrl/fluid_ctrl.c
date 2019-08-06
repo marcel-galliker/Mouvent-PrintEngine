@@ -502,7 +502,8 @@ static void _control(int fluidNo)
 										_send_ctrlMode(no, ctrl_purge_step1, TRUE);	
 										break;
 				
-				case ctrl_purge_step1:	// if (step_lift_is_up()) 
+				case ctrl_purge_step1:	// if (step_lift_is_up())
+										if (RX_StepperStatus.info.z_in_ref)
 										{
 											plc_to_purge_pos();
 											_send_ctrlMode(no, ctrl_purge_step2, TRUE);												

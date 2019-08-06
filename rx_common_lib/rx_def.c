@@ -166,6 +166,7 @@ int rx_def_is_web(EPrinterType printerType)
 	case printer_LB701:		return TRUE;
 	case printer_LB702_UV:	return TRUE;
 	case printer_LB702_WB:	return TRUE;
+	case printer_LH702:		return TRUE;
 	case printer_DP803:		return TRUE;
 	case printer_cleaf:		return TRUE;
 	default: return FALSE;

@@ -13,6 +13,7 @@
 		xmlns:views_dp="clr-namespace:RX_DigiPrint.Views.DP803View"
 		xmlns:views_lb702uv="clr-namespace:RX_DigiPrint.Views.LB702UVView"
 		xmlns:views_lb702wb="clr-namespace:RX_DigiPrint.Views.LB702WBView"
+		xmlns:views_lh702="clr-namespace:RX_DigiPrint.Views.LH702View"
 		xmlns:views_tex="clr-namespace:RX_DigiPrint.Views.TexView"
 		xmlns:views_tt="clr-namespace:RX_DigiPrint.Views.TestTableView"
 		xmlns:views_cleaf="clr-namespace:RX_DigiPrint.Views.CleafView"
@@ -112,6 +113,10 @@
                 
                 <rx:RxTabItem x:Name="TabLB702WB" Header="LB 702 WB" >
                     <views_lb702wb:LB702WBView/>
+                </rx:RxTabItem>
+
+                <rx:RxTabItem x:Name="TabLH702" Header="LH 702" >
+                    <views_lh702:LH702_View/>
                 </rx:RxTabItem>
 
                 <rx:RxTabItem x:Name="TabDP803" Header="DP 803" >

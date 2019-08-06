@@ -23,3 +23,4 @@ int  steplb_handle_status(int no, SStepperStat *pStatus);
 int	 steplb_to_print_pos(void);
 int  steplb_abort_printing(void);
 int	 steplb_to_up_pos(void);
+int	 steplb_is_printing(int isprinting);

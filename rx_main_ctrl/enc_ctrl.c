@@ -205,6 +205,7 @@ int	 enc_set_config(void)
 	case printer_test_table:	_Encoder[0].webOffset_mm=110; break;
 	case printer_LB701:
 	case printer_LB702_UV:
+	case printer_LH702:
 	case printer_cleaf:			_Encoder[0].webOffset_mm=10;  break;
 	case printer_LB702_WB:		_Encoder[0].webOffset_mm=10+RX_Config.printer.offset.versoDist;
 								break;
@@ -311,6 +312,7 @@ static void _enc_start_printing(int no, SPrintQueueItem *pitem)
 		
 	case printer_LB702_UV:		msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_ROTATIVE; msg.diameter[0]=78; msg.diameter[1]=74; break;	
 	case printer_LB702_WB:		msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_ROTATIVE; msg.diameter[0]=78; msg.diameter[1]=74; break;	
+	case printer_LH702:			msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_ROTATIVE; msg.diameter[0]=78; msg.diameter[1]=74; break;	
 	case printer_DP803:			msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_ROTATIVE;
 								msg.diameter[0] = 74; 
 								msg.diameter[1] = 76;

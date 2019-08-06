@@ -38,7 +38,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
             switch (RxGlobals.PrintSystem.PrinterType)
             {
                 case EPrinterType.printer_test_table:       this.Visibility         = Visibility.Visible;
-                                                            Encoder.Visibility = Visibility.Visible;
+                                                            Encoder.Visibility      = Visibility.Visible;
                                                             Angle.Visibility        = Visibility.Visible; 
                                                             Belt.Visibility         = Visibility.Visible;
                                                             Overlap.Visibility      = Visibility.Visible;
@@ -48,7 +48,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                                                             break;
                 case EPrinterType.printer_TX801:            
                 case EPrinterType.printer_TX802:            this.Visibility         = Visibility.Visible;
-                                                            Encoder.Visibility = Visibility.Visible;
+                                                            Encoder.Visibility      = Visibility.Visible;
                                                             Angle.Visibility        = Visibility.Collapsed; 
                                                             Belt.Visibility         = Visibility.Visible; 
                                                             Overlap.Visibility      = Visibility.Visible;
@@ -68,8 +68,9 @@ namespace RX_DigiPrint.Views.PrintSystemView
                                                             break;
 
                 case EPrinterType.printer_LB701:
-                case EPrinterType.printer_LB702_UV:         this.Visibility         = Visibility.Collapsed;
-                                                            Encoder.Visibility      = Visibility.Collapsed;
+                case EPrinterType.printer_LB702_UV:         
+                case EPrinterType.printer_LH702:            this.Visibility         = Visibility.Visible;
+                                                            Encoder.Visibility      = Visibility.Visible;
                                                             Angle.Visibility        = Visibility.Collapsed;
                                                             Belt.Visibility         = Visibility.Collapsed;
                                                             Overlap.Visibility      = Visibility.Collapsed; 

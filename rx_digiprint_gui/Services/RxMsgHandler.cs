@@ -40,6 +40,7 @@ namespace RX_DigiPrint.Services
                     case TcpIp.REP_NETWORK_SETTINGS:handle_net_settings(msg);   break;
 
                     case TcpIp.REP_GET_PRINT_QUEUE: RxGlobals.PrintQueue.RemoveItem(null);    break;
+                    case TcpIp.EVT_ADD_PRINT_QUEUE: handle_print_queue(msg);    break;
                     case TcpIp.EVT_GET_PRINT_QUEUE: handle_print_queue(msg);    break;
                     case TcpIp.EVT_DEL_PRINT_QUEUE: handle_print_queue(msg);    break;
                     case TcpIp.EVT_UP_PRINT_QUEUE:  handle_print_queue(msg);    break;
@@ -171,7 +172,8 @@ namespace RX_DigiPrint.Services
                 switch(msg.hdr.msgId)
                 { 
                     case TcpIp.REP_GET_PRINT_QUEUE: RxGlobals.PrintQueue.RemoveItem(null);    break;
-                    case TcpIp.EVT_GET_PRINT_QUEUE: RxGlobals.PrintQueue.AddItem(item);       break;
+                    case TcpIp.EVT_GET_PRINT_QUEUE: RxGlobals.PrintQueue.AddItem(item, false); break;
+                    case TcpIp.EVT_ADD_PRINT_QUEUE: RxGlobals.PrintQueue.AddItem(item, true);  break;
                     case TcpIp.EVT_DEL_PRINT_QUEUE: RxGlobals.PrintQueue.RemoveItem(item);    break;
                     case TcpIp.EVT_UP_PRINT_QUEUE:  RxGlobals.PrintQueue.UpItem(item);        break;
                     case TcpIp.EVT_DN_PRINT_QUEUE:  RxGlobals.PrintQueue.DownItem(item);      break;
@@ -230,6 +232,7 @@ namespace RX_DigiPrint.Services
 //          int size = Marshal.SizeOf(typeof(TcpIp.SInkSupplyStat));
             if (len==msg.hdr.msgLen) 
             {
+//              Console.WriteLine("handle_fluid_stat[{0}]", msg.no);
                 RxGlobals.InkSupply.Update(msg.no, msg.status);
             }
             else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length")); 

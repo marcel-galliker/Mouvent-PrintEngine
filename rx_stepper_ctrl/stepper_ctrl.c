@@ -182,7 +182,8 @@ int _handle_ctrl_msg(RX_SOCKET socket, void *pmsg)//, int len, struct sockaddr *
 										else                                    lbrob_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]); 
 										break;
 		case printer_LB702_UV:
-		case printer_LB702_WB:			if (RX_StepperCfg.boardNo == step_lift)	lb702_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]); 
+		case printer_LB702_WB:			
+		case printer_LH702:				if (RX_StepperCfg.boardNo == step_lift)	lb702_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]); 
 										else                                    lbrob_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]); 
 										break;
 			
@@ -231,7 +232,8 @@ static void _do_config(SStepperCfg *pcfg)
 								break;
 		
 	case printer_LB702_UV:			
-	case printer_LB702_WB:		if (RX_StepperCfg.boardNo == step_lift) lb702_init();
+	case printer_LB702_WB:		
+	case printer_LH702:			if (RX_StepperCfg.boardNo == step_lift) lb702_init();
 								else                                    lbrob_init();
 								break;
 		

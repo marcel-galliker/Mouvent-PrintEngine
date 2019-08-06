@@ -25,6 +25,7 @@
 #include "rx_rexroth.h"
 #include "enc_ctrl.h"
 #include "step_ctrl.h"
+#include "step_lb.h"
 #include "ctrl_svr.h"
 #include "print_ctrl.h"
 #include "chiller.h"
@@ -190,6 +191,8 @@ int	plc_init(void)
 	if (_SimuPLC)     Error(WARN, 0, "PLC in Simulation");
 	if (_SimuEncoder) Error(WARN, 0, "Encoder in Simulation");
 	
+	if (RX_Config.printer.type==printer_LH702) _SimuPLC = TRUE;
+	
 	if (_SimuPLC) rx_thread_start(_plc_simu_thread, NULL, 0, "_plc_simu_thread");
 	else		  rx_thread_start(_plc_thread, NULL, 0, "_plc_thread");
 
@@ -332,6 +335,7 @@ static void _plc_set_par(SPrintQueueItem *pItem, SPlcPar *pPlcPar)
 		case printer_LB701:		_UnwinderLenMin = 10; break;	
 		case printer_LB702_UV:	_UnwinderLenMin = 10; break;	
 		case printer_LB702_WB:	_UnwinderLenMin = 20; break;	
+		case printer_LH702:		_UnwinderLenMin = 10; break;	
 		case printer_DP803:		_UnwinderLenMin = 30; break;	
 		default: _UnwinderLenMin = 0;			
 	}
@@ -475,13 +479,14 @@ int  plc_start_printing(void)
 		if (rx_def_is_web(RX_Config.printer.type) && RX_Config.printer.type!=printer_cleaf) enc_restart_pg();
 		_SendRun = TRUE;
 	}
-	if (_SimuEncoder) ctrl_simu_encoder(_Speed);		
+	if (_SimuEncoder) ctrl_simu_encoder(_Speed);
 	return REPLY_OK;
 }
 
 //--- plc_stop_printing -----------------------------------------------
 int  plc_stop_printing(void)
 {
+	if (RX_Config.printer.type==printer_LH702) steplb_is_printing(FALSE);
 	if (_SimuEncoder) ctrl_simu_encoder(0);
 	_StartPrinting = FALSE;
 	_SendRun       = FALSE;
@@ -1106,6 +1111,11 @@ static ELogItemType _plc_error_filter(SPlcLogItem *pItem, char *text)
 		strcpy(text, &t[4]);		
 		return LOG_TYPE_WARN;
 	}
+	if(t=strstr(pItem->text, "LOG:")) 
+	{
+		strcpy(text, &t[4]);		
+		return LOG_TYPE_LOG;
+	}
 	
 	//--- Rexroth messages -----------------------
 	ELogItemType logType=LOG_TYPE_UNDEF;
@@ -1294,7 +1304,7 @@ static void _plc_state_ctrl()
 		{			
 		//	TrPrintfL(TRUE, "_heads_to_print: printhead_en=%d, printState=%d (%d)", RX_StepperStatus.info.printhead_en, RX_PrinterStatus.printState, ps_printing);
 		//	if (RX_Config.printer.type!=printer_cleaf || (RX_StepperStatus.info.printhead_en && RX_PrinterStatus.printState==ps_printing))
-			if(RX_PrinterStatus.printState == ps_printing && (RX_Config.printer.type != printer_cleaf || RX_StepperStatus.info.printhead_en))
+			if(RX_PrinterStatus.printState == ps_printing && (RX_StepperStatus.info.printhead_en || (RX_Config.printer.type!=printer_cleaf &&  RX_Config.printer.type!=printer_LH702)))
 			{
 				tt_cap_to_print_pos();
 				_heads_to_print = TRUE;													
@@ -1310,7 +1320,7 @@ static void _plc_state_ctrl()
 
 		if(_StartPrinting
 			&& _StartEncoderItem.pageWidth == 0 
-			&& enc_ready() 
+			&& enc_ready()
 			&& pq_is_ready2print(&_StartEncoderItem) 
 			&& (RX_PrinterStatus.printState == ps_printing || RX_PrinterStatus.printState == ps_ready_power)
 			&& (RX_StepperStatus.info.z_in_print 
@@ -1320,6 +1330,7 @@ static void _plc_state_ctrl()
 			_CanRun = TRUE;
 			if(!_SimuPLC)    _plc_set_command("CMD_PRODUCTION", "CMD_RUN");
 			if(_SimuEncoder) ctrl_simu_encoder(_Speed);
+			if (RX_Config.printer.type==printer_LH702) steplb_is_printing(TRUE);
 			step_set_vent(_Speed);
 			memset(&_StartEncoderItem, 0, sizeof(_StartEncoderItem));
 			TrPrintfL(TRUE, "PLC: CMD_RUN sent");

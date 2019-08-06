@@ -475,7 +475,7 @@ int tif_load(SPageId *id, const char *filedir, const char *filename, int printMo
 		pinfo->lengthPx += 2*wakeupLen;
 	}
 	
-	Error(LOG, 0, "Loaded, time=%d ms", rx_get_ticks()-time);
+//	Error(LOG, 0, "Loaded, time=%d ms", rx_get_ticks()-time);
 	return REPLY_OK;
 }
 

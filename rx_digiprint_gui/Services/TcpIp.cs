@@ -102,6 +102,7 @@ namespace RX_DigiPrint.Services
         printer_LB701    =1000,	    // 1000: 
         printer_LB702_UV,	        // 1001: 
         printer_LB702_WB,	        // 1002: 
+        printer_LH702,              // 1003:
 
         printer_DP803    =1100,     // 1100:
 	 
@@ -279,6 +280,7 @@ namespace RX_DigiPrint.Services
 
         public const UInt32 CMD_ADD_PRINT_QUEUE = 0x01000042;
         public const UInt32 REP_ADD_PRINT_QUEUE = 0x02000042;
+        public const UInt32 EVT_ADD_PRINT_QUEUE = 0x03000042;
 
         public const UInt32 CMD_SET_PRINT_QUEUE = 0x01000043;
         public const UInt32 REP_SET_PRINT_QUEUE = 0x02000043;

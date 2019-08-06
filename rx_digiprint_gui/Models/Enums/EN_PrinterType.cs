@@ -21,6 +21,7 @@ namespace RX_DigiPrint.Models.Enums
                 _List.Add(new RxEnum<EPrinterType>(EPrinterType.printer_LB701,              "Mouvent LB701"   ));
                 _List.Add(new RxEnum<EPrinterType>(EPrinterType.printer_LB702_UV,           "Mouvent LB702-UV"   ));
                 _List.Add(new RxEnum<EPrinterType>(EPrinterType.printer_LB702_WB,           "Mouvent LB702-WB"   ));
+                _List.Add(new RxEnum<EPrinterType>(EPrinterType.printer_LH702,              "Mouvent LH702"     ));
 
                 _List.Add(new RxEnum<EPrinterType>(EPrinterType.printer_DP803,              "Mouvent DP803"   ));
 

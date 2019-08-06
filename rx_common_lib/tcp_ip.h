@@ -108,6 +108,7 @@
 
 #define CMD_ADD_PRINT_QUEUE		0x01000042
 #define REP_ADD_PRINT_QUEUE		0x02000042
+#define EVT_ADD_PRINT_QUEUE		0x03000042
 
 #define CMD_SET_PRINT_QUEUE		0x01000043
 #define REP_SET_PRINT_QUEUE		0x02000043
@@ -310,6 +311,7 @@
 #define CMD_CAP_EMPTY_CAP		0x0100060d
 #define CMD_CAP_ROB_Z_POS		0x0100060e
 #define CMD_CAP_VENT			0x0100060f
+#define CMD_CAP_IS_PRINTING		0x01000610
 #define CMD_CAP_END				0x010006ff
 
 //--- Cleaning Commands ---------------------------------------------------

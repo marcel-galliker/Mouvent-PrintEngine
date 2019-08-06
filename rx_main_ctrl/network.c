@@ -391,7 +391,7 @@ int net_device_to_ipaddr(EDevice dev, int no, char *ipAddr, int size)
 	case dev_plc:	sprintf(ipAddr, RX_CTRL_PLC); 
 					break;
 
-	case dev_stepper:	if (RX_Config.printer.type == printer_LB701 || RX_Config.printer.type == printer_LB702_UV || RX_Config.printer.type == printer_LB702_WB || RX_Config.printer.type == printer_DP803 || RX_Config.printer.type == printer_cleaf)
+	case dev_stepper:	if (rx_def_is_web(RX_Config.printer.type))
 						{
 							if (no<0 || no>3)
 							{

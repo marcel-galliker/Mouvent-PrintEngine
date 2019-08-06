@@ -381,6 +381,7 @@ void ctrl_set_max_speed(void)
 		case printer_LB701:		maxSpeed[0]= 100; maxSpeed[1]= 100; maxSpeed[2]= 100; maxSpeed[3]= 100; break;
 		case printer_LB702_UV:	maxSpeed[0]= 100; maxSpeed[1]= 100; maxSpeed[2]= 100; maxSpeed[3]= 100; break;
 		case printer_LB702_WB:	maxSpeed[0]= 100; maxSpeed[1]= 100; maxSpeed[2]= 100; maxSpeed[3]= 100; break;
+		case printer_LH702:		maxSpeed[0]= 100; maxSpeed[1]= 100; maxSpeed[2]= 100; maxSpeed[3]= 100; break;
 		default:				maxSpeed[0]= 100; maxSpeed[1]= 100; maxSpeed[2]= 100; maxSpeed[3]= 100; break; 	
 	}		
 
@@ -437,7 +438,6 @@ static void _headboard_config(int colorCnt, int headsPerColor, int ethPortCnt)
 			{
 				char str[32];
 				UCHAR no=(pBoard->ctrlAddr>>24)&0xff;
-				int   printbar = (no/10)-1;
 		//		if (i==0) Error(WARN, 0, "Check IP-Address assignment");
 				if (ethPortCnt) sprintf(str, "%d.%d.%d.%d", 192, 168, 201+(2*head+i)%ethPortCnt, no);
 				pBoard->dataAddr[i]  = sok_addr_32(str);

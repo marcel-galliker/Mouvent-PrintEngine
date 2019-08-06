@@ -43,19 +43,19 @@ namespace RX_DigiPrint.Models
         }
 
         //--- AddItem ---------------------------------------------
-        public void AddItem(PrintQueueItem item)
+        public void AddItem(PrintQueueItem item, bool top)
         {       
             if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_test_table 
             ||  RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_test_slide_only
             || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide)
             {
-                _addToList      (_Queue,   item);
+                _addToList      (_Queue,   item, top);
                 return;
             }     
             if (item.State==EPQState.queued)   
             {
-                if (_removeFromList (_Printed, item)) RxBindable.Invoke(() => _Queue.Insert(_Queue.Count, item));
-                else _addToList(_Queue,   item);
+                if (_removeFromList (_Printed, item)) RxBindable.Invoke(() => _Queue.Add(item));
+                else _addToList(_Queue,   item, top);
                 if (_Queue.Count()==1) item.SendBtProdState();
             }
             else
@@ -113,7 +113,7 @@ namespace RX_DigiPrint.Models
         }
 
         //--- addToList -----------------------------------------------------------------------
-        private void _addToList(ObservableCollection<PrintQueueItem> list, PrintQueueItem item)
+        private void _addToList(ObservableCollection<PrintQueueItem> list, PrintQueueItem item, bool top)
         {
             for (int i=0; i<list.Count(); i++)
             {
@@ -123,8 +123,8 @@ namespace RX_DigiPrint.Models
                     return;
                 }
             }
-
-            RxBindable.Invoke(() => list.Insert(0, item));
+            if (top) RxBindable.Invoke(() => list.Add(item));
+            else     RxBindable.Invoke(() => list.Insert(0, item));
         }
 
         //--- removeFromList -----------------------------------------------------------------------
@@ -152,7 +152,6 @@ namespace RX_DigiPrint.Models
                     return;
                 }
             }
-
             RxBindable.Invoke(() => list.Insert(0, item));
         }
     }

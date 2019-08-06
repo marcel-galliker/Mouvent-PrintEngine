@@ -35,6 +35,9 @@ namespace RX_DigiPrint.Models
                 string[] par=lines[i].Split('=');
                 if (par.Length<2) break;
                 _Par.Add(new SParVal(){ID=par[0],   val=new StringBuilder(32).Append(par[1])});
+                
+                if (par[0].Equals("PAR_HEAD_HEIGHT"))  
+                    RxGlobals.MaterialXML.PrintHeight = Rx.StrToDouble(par[1]);
             }
         }
 
@@ -57,7 +60,7 @@ namespace RX_DigiPrint.Models
             get { return _Name; }
             set { SetProperty(ref _Name, value); }
         }
-
+        
         //--- Property Value ---------------------------------------
         public string Value(string id)
         {

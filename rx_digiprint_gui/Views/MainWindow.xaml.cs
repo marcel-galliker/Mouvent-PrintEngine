@@ -60,6 +60,7 @@ namespace RX_DigiPrint.Views
             TabMiniLabel.DataContext      = RxGlobals.PrintSystem;
             TabDP803.DataContext          = RxGlobals.PrintSystem;
             TabLB702WB.DataContext        = RxGlobals.PrintSystem;
+            TabLH702.DataContext          = RxGlobals.PrintSystem;
             MainNotConnected.DataContext  = RxGlobals.RxInterface;
             BlueTooth.DataContext         = RxGlobals.Bluetooth;
             BlueTooth.Visibility          = RxGlobals.Bluetooth.IsSupported ? Visibility.Visible : Visibility.Collapsed;
@@ -172,6 +173,7 @@ namespace RX_DigiPrint.Views
                 bool lb = RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB701 
                     ||    RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB702_UV
                     ||    RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB702_WB
+                    ||    RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LH702
                     ||    RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_DP803;
 
                 TabPrintQueue.Visibility = (RxGlobals.PrintSystem.PrinterType  == EPrinterType.printer_test_table 
@@ -196,6 +198,10 @@ namespace RX_DigiPrint.Views
 
                     case EPrinterType.printer_LB702_WB:  
                         _activeView (TabLB702WB);
+                        break;
+
+                    case EPrinterType.printer_LH702:  
+                        _activeView (TabLH702);
                         break;
 
                     case EPrinterType.printer_DP803:  

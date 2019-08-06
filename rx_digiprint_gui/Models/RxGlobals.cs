@@ -39,6 +39,7 @@ namespace RX_DigiPrint.Models
         public static PreviewCash       PreviewCash       = new PreviewCash();
         public static HeadAdjustment    HeadAdjustment    = new HeadAdjustment();
         public static MaterialList      MaterialList      = new MaterialList();
+        public static MaterialXml       MaterialXML       = new MaterialXml();
         public static RxTextPad         Keyboard          = new RxTextPad(null);
         public static RxTaskSwitch      TaskSwitch        = new RxTaskSwitch();
         public static RxPopup           Popup;

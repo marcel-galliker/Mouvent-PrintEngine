@@ -191,3 +191,17 @@ int	 steplb_to_up_pos(void)
 	return REPLY_OK;									
 }
 
+//--- steplb_is_printing ----------------------------------------------
+int	 steplb_is_printing(int isprinting)
+{
+	int no;
+	for (no=0; no<SIZEOF(_step_socket); no++)
+	{
+		if (_step_socket[no] && *_step_socket[no]!=INVALID_SOCKET)
+		{
+			sok_send_2(_step_socket[no], CMD_CAP_IS_PRINTING, sizeof(isprinting), &isprinting);
+		}
+	}
+	return REPLY_OK;													
+}
+

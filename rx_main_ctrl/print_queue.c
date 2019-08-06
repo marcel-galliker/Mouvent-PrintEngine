@@ -45,6 +45,7 @@ static int				_TimeCompleted;
 static int				_Speed=0;
 static int				_BufState;
 static int				_PrintDoneCnt;
+static int				_ActiveState;
 
 typedef struct 
 {
@@ -55,6 +56,7 @@ typedef struct
 //--- prototypes -------------------------------------------------------------
 static int _find_item(int id, int *idx);
 static char* _filename(char *path);
+static void _trace_queue(void);
 
 //--- pq_init ----------------------------------------------------------------
 int	pq_init(void)
@@ -192,6 +194,7 @@ int	pq_start(void)
 	_TimeCompleted	  = 0;
 	_BufState		  = 0;
 	_PrintDoneCnt	  = 0;	
+	_ActiveState	  = 0;
 	memset(&_PrintedItem, 0, sizeof(_PrintedItem));
 	_HeadBoardCnt = spool_head_board_cnt();
 	return REPLY_OK;
@@ -226,6 +229,8 @@ int pq_stop(void)
 {
 	int i;
 
+//	TrPrintfL(TRUE, "pq_stop");
+//	_trace_queue();
 	_TimeCompleted = 0;
 	_send_PrintedItem();
 	
@@ -241,10 +246,12 @@ int pq_stop(void)
 		if (_List[i].state!=PQ_STATE_QUEUED && _List[i].state!=PQ_STATE_PRINTED)
 		{
 			_List[i].state = PQ_STATE_QUEUED;
-			gui_send_print_queue(EVT_GET_PRINT_QUEUE, &_List[i]);
+			gui_send_print_queue(EVT_ADD_PRINT_QUEUE, &_List[i]);
 		}
 	}
 
+//	TrPrintfL(TRUE, "pq_stop END");
+//	_trace_queue();
 	pq_save(PATH_USER FILENAME_PQ);
 
 	return REPLY_ERROR;	
@@ -304,6 +311,8 @@ SPrintQueueItem *pq_get_next_item(void)
 {
 	int slide=rx_def_is_test(RX_Config.printer.type);
 	if (slide && _Item>0) return NULL;
+
+
 	int item = _Item;
 	while(item<_Size)
 	{
@@ -311,10 +320,11 @@ SPrintQueueItem *pq_get_next_item(void)
 		if ((slide || _List[item].state==PQ_STATE_QUEUED) && (_List[item].copies>0 || _List[item].scanLength>0))
 		{
 			_Item = item+1;
+			_ActiveState = _List[item].state;			
 			return &_List[item];
 		}
 		item++;			
-	}
+	}		
 	return NULL;
 }
 
@@ -403,6 +413,17 @@ int pq_del_item(SPrintQueueItem *pitem)
 	return REPLY_ERROR;
 }
 
+//--- _trace_queue ----------------------------
+static void _trace_queue(void)
+{
+	int i;
+		
+	for (i=0; i<_Size; i++)
+	{
+		TrPrintfL(TRUE, "PQ[%d].id=%d", i, _List[i].id.id);			
+	}
+}
+
 //--- pq_move_item --------------------------------------------------
 int	pq_move_item(SPrintQueueItem *pitem, int d)
 {
@@ -461,11 +482,13 @@ int pq_loading(int spoolerNo, SPageId *pid, char *txt)
 {
 	int i;
 	int n, l, len;
+	int state;
 //	if (RX_PrinterStatus.printState!=ps_printing) return REPLY_OK;
 	if (_find_item(pid->id, &i)==REPLY_OK)
 	{
 		if (_List[i].state<=PQ_STATE_LOADING || *txt)
 		{			
+			state = _List[i].state;
 //			if (_List[i].state<=PQ_STATE_LOADING)
 			if (_List[i].state!=PQ_STATE_LOADING)
 			{
@@ -482,7 +505,11 @@ int pq_loading(int spoolerNo, SPageId *pid, char *txt)
 					break;
 				len += sprintf(&_List[i].ripState[len], "%8s", _ListText[i][n]);
 			}
-			gui_send_print_queue(EVT_GET_PRINT_QUEUE, &_List[i]);
+			if (_ActiveState<_List[i].state)
+			{
+				_ActiveState=_List[i].state;
+				gui_send_print_queue(EVT_GET_PRINT_QUEUE, &_List[i]);								
+			}
 		}
 		return REPLY_OK;
 	}
@@ -512,7 +539,11 @@ int pq_sending(int spoolerNo, SPageId *pid)
 				send=TRUE;
 			}
 		}
-		if (send) gui_send_print_queue(EVT_GET_PRINT_QUEUE, &_List[i]);
+		if (send && _ActiveState<_List[i].state) 
+		{
+			_ActiveState=_List[i].state;
+			gui_send_print_queue(EVT_GET_PRINT_QUEUE, &_List[i]);			
+		}
 		return REPLY_OK;
 	}
 	return REPLY_ERROR;
@@ -552,7 +583,7 @@ static char* _filename(char *path)
 		if (!strncmp(&path[pos], ripped_data, len))
 		{
 			pos+=len;
-			while(path[pos]=='\\' || path[pos]=='/') pos++;
+			while(path[pos]=='\\' || path[pos]=='/' || path[pos]==':') pos++;
 			return &path[pos];			
 		}
 	}
@@ -741,6 +772,7 @@ int pq_printed(int headNo, SPageId *pid, int *pageDone, int *jobDone, SPrintQueu
 					TrPrintfL(TRUE, "%s: complete", _filename(pitem->filepath));
 					Error(LOG, 0, "%s: complete", _filename(pitem->filepath));
 //					*jobDone = TRUE;
+					gui_send_print_queue(EVT_GET_PRINT_QUEUE, pitem);
 					if (rx_def_is_scanning(RX_Config.printer.type) && *pnextItem==NULL) pc_abort_printing();
 				}
 				pitem->state = PQ_STATE_PRINTED;

@@ -425,6 +425,7 @@
     <Compile Include="Models\Maintenance.cs" />
     <Compile Include="Models\Material.cs" />
     <Compile Include="Models\MaterialList.cs" />
+    <Compile Include="Models\MaterialXml.cs" />
     <Compile Include="Models\Network.cs" />
     <Compile Include="Models\Log.cs" />
     <Compile Include="Models\NetworkItem.cs" />
@@ -551,6 +552,12 @@
     </Compile>
     <Compile Include="Views\LB702WBView\LB702WB_Status.xaml.cs">
       <DependentUpon>LB702WB_Status.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LH702View\LH702_Par.xaml.cs">
+      <DependentUpon>LH702_Par.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LH702View\LH702_View.xaml.cs">
+      <DependentUpon>LH702_View.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\PrintQueueView\FileOpen.xaml.cs">
       <DependentUpon>FileOpen.xaml</DependentUpon>
@@ -1027,6 +1034,14 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Views\LH702View\LH702_Par.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LH702View\LH702_View.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Views\PrintQueueView\FileOpen.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -1343,6 +1358,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Resource Include="Resources\Bitmaps\LH702\LH702.jpg" />
     <Resource Include="Resources\Bitmaps\UV_Lamp_OFF.ico" />
     <Resource Include="Resources\Bitmaps\LB702\LB702_WB.png" />
     <Resource Include="Resources\Bitmaps\LB702\LB702_UV.jpg" />
