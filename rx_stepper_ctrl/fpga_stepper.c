@@ -55,7 +55,7 @@ static int		_MemId=0;
 static int		_Init=FALSE;
 static HANDLE	_FpgaThread=NULL;
 static int		_PWM_Speed[6];
-static int		_StartupTime;
+static int		_GuiTimer=0;
 
 #define WATCHDOG_CNT	0x7fffffff
 
@@ -119,7 +119,7 @@ void fpga_init()
 
 	memset(_PWM_Speed, 0, sizeof(_PWM_Speed));
 	
-	_StartupTime = rx_get_ticks()+1000;
+	_GuiTimer = rx_get_ticks()+1000;
 	Fpga.par->output |= OUT_GUI_START;
 	_Init = TRUE;
 }
@@ -312,7 +312,11 @@ void  fpga_main(int ticks, int menu)
 		_lastTicks = ticks;
 	}
 	
-	if (ticks>_StartupTime) Fpga.par->output  &= ~OUT_GUI_START;
+	if (_GuiTimer && ticks>_GuiTimer) 
+	{
+		_GuiTimer = 0;
+		Fpga.par->output  &= ~OUT_GUI_START;
+	}
 	
 	if (menu)
 	{
@@ -335,6 +339,12 @@ void  fpga_main(int ticks, int menu)
 int	  fpga_pwm_speed(int no)
 {
 	return _PWM_Speed[no];	
+}
+
+//--- fpga_output_toggle --------------------------------
+void fpga_output_toggle(int no)
+{
+	Fpga.par->output ^= (1<<no);
 }
 
 //--- _check_errors ---------------------------------------------------------------------

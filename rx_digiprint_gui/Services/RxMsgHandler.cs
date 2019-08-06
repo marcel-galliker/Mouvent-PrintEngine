@@ -20,13 +20,15 @@ namespace RX_DigiPrint.Services
         }
 
         //--- Message Dispatcher ----------------------------------------------------------
+        public TcpIp.SMsgHdr hdr;
         public void handle_message(Byte[] msg)
         {
-            TcpIp.SMsgHdr hdr;
+//            TcpIp.SMsgHdr hdr;
             RxStructConvert.ToStruct(out hdr, msg);
 
             try
             {
+                Console.WriteLine("handle_message id={0:X}, len={1}", hdr.msgId, hdr.msgLen);
                 switch (hdr.msgId)
                 {
                     case TcpIp.REP_EVT_CONFIRM:     RxGlobals.Events.Reset();   break;

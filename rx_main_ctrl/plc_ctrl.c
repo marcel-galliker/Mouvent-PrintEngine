@@ -322,7 +322,7 @@ static void _plc_set_command(char *mode, char *cmd)
 //--- _plc_set_par ----------------------------------------------------------
 static void _plc_set_par(SPrintQueueItem *pItem, SPlcPar *pPlcPar)
 {
-	int		accDistmm=0;
+	double		accDistmm=0;
 	
 	_plc_set_par_default();
 	
@@ -362,6 +362,8 @@ static void _plc_set_par(SPrintQueueItem *pItem, SPlcPar *pPlcPar)
 	if (pItem->testImage==PQ_TEST_SCANNING) _StepDist=0;
 	pPlcPar->stepDist = _StepDist;
 
+	if (pItem->speed<20) accDistmm = 100.0;
+	
 	pPlcPar->startPos = WEB_OFFSET+(pItem->pageMargin)/1000.0-accDistmm;		
 	if (pItem->srcHeight<300)  pPlcPar->endPos = WEB_OFFSET+(pItem->pageMargin+300)/1000.0+accDistmm;
 	else                       pPlcPar->endPos = WEB_OFFSET+(pItem->pageMargin+pItem->srcHeight)/1000.0+accDistmm;

@@ -115,7 +115,8 @@ namespace RX_DigiPrint.Services
 
         private void TcpIpThread()
         {
-            byte[] buffer = new Byte[4096];            
+            byte[] buffer = new Byte[4096];
+
             Int32 read, len;
             int size = 4;
             RxMsgHandler msgHandler = new RxMsgHandler();
@@ -188,21 +189,24 @@ namespace RX_DigiPrint.Services
                             len = BitConverter.ToInt32(buffer, 0);
                             if (len>buffer.Length)
                             {
-                                RxGlobals.Events.AddItem(new LogItem("Receive Buffer VAL_OVERFLOW"));
+                                RxGlobals.Events.AddItem(new LogItem(string.Format("Receive Buffer Overflow. Last good msg(id:{0:X} len:{1})", msgHandler.hdr.msgId, msgHandler.hdr.msgLen)));
+                                break;
+                                /*
                                 while (len>0)
                                 {
                                     read=_Stream.Read(buffer, 0, buffer.Length);
                                     len -= buffer.Length;
                                 }
+                                 * */
                             }
                             else read = _Stream.Read(buffer, size, len - size);
+                            msgHandler.handle_message(buffer);  
                         }
                         catch (Exception e)
                         {
                             if (_Running) _log.AddItem(new LogItem() { Error = 1010, Message = e.Message });
                             break;
                         }
-                        msgHandler.handle_message(buffer);  
                     }
                 //  Console.WriteLine("Main Disconnected");
                 }                 

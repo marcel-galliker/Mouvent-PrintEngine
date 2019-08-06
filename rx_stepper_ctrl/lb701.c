@@ -172,6 +172,7 @@ int lb701_menu(void)
 	term_printf("u: move to UP position\n");
 	term_printf("p: move to print\n");
 	term_printf("z: move by <steps>\n");
+	term_printf("o<n>: toggle output <n>\n");
 	term_printf("m<n><steps>: move Motor<n> by <steps>\n");	
 	term_printf("x: exit\n");
 	term_printf(">");
@@ -187,6 +188,7 @@ int lb701_menu(void)
 		case 'c': lb701_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_CAPPING_POS,	NULL); break;
 		case 'p': lb701_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_PRINT_POS,		&pos); break;
 		case 'u': lb701_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_UP_POS,			NULL); break;
+		case 'o': fpga_output_toggle(atoi(&str[1]));break;
 		case 'z': _lb701_motor_z_test(atoi(&str[1]));break;
 		case 'm': _lb701_motor_test(str[1]-'0', atoi(&str[2]));break;			
 		case 'x': return FALSE;

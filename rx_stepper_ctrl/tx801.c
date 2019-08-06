@@ -243,7 +243,8 @@ static void _tx801_control_vents(void)
 						if(fpga_pwm_speed(i) - _VentSpeed > 2)  _VentValue[i] -= 5;
 						else if(fpga_pwm_speed(i) - _VentSpeed < -2) _VentValue[i] += 5;
 						
-						if(_VentValue[i] >= 100 && ++_VentErrorCnt[i] == VENT_MAX_ERROR) Error(ERR_CONT, 0, "Drop Suction Ventilator %d blocked", i + 1);								
+						if(_VentValue[i] >= 100 && ++_VentErrorCnt[i] == VENT_MAX_ERROR) 
+							Error(ERR_CONT, 0, "Drop Suction Ventilator %d blocked", i + 1);								
 					}
 					else _VentValue[i] = 40;
 				}					

@@ -30,5 +30,6 @@ int   fpga_load(char *path_rbf);
 
 void  fpga_main(int ticks, int menu);
 int	  fpga_input(int no);
+void  fpga_output_toggle(int no);
 int	  fpga_pwm_speed(int no);
 void  fpga_stepper_error_reset();
