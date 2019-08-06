@@ -319,7 +319,6 @@ int  enc_start_printing(SPrintQueueItem *pitem)
 				msg.pos_actual = 0;			
 			}
 
-			if (pitem->printGoMode==PG_MODE_MARK) msg.pos_pg_fwd = 	10000000; 
 			switch(pitem->scanMode)
 			{
 			case PQ_SCAN_RTL:		msg.pos_pg_fwd = 	10000000; 

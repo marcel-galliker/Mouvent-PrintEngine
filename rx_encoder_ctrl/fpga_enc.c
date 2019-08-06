@@ -813,12 +813,11 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg, int restart)
 		else 
 		{
 			Fpga->cfg.pg[pgNo].fifos_used   = FIFOS_DIST;
-			Fpga->cfg.pg[pgNo].dig_in_sel   = 0;
-			Fpga->cfg.pg[pgNo].quiet_window = 10;
-			if (FpgaQSys->printGo_status.fill_level) Fpga->cfg.pg[pgNo].fifos_ready	= TRUE;
+		//	Fpga->cfg.pg[pgNo].dig_in_sel   = 0;
+		//	Fpga->cfg.pg[pgNo].quiet_window = 10;
+		//	if (FpgaQSys->printGo_status.fill_level) Fpga->cfg.pg[pgNo].fifos_ready	= TRUE;
 		}
 	
-	//	Fpga->cfg.pg.ext_printgo	   = FALSE;
 		Fpga->cfg.pg[pgNo].printgo_n	= TRUE;
 	}
 //	if (!restart)	RX_EncoderStatus.PG_cnt = 0;
