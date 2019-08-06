@@ -1289,7 +1289,8 @@ static int _data_split_scan_no_overlap(SPageId *id, SBmpInfo *pBmpInfo, int offs
 				
 				if (_SmpOffset[color]<0) _SmpOffset[color]=_InIdx;				
 				if(pBmpInfo->printMode == PM_SCAN_MULTI_PAGE && !(_SmpFlags&FLAG_SMP_FIRST_PAGE))
-					 idx = (_InIdx + PRINT_LIST_SIZE - _SmpBufSize + _SmpOffset[color] + 1) % PRINT_LIST_SIZE;
+//					 idx = (_InIdx + PRINT_LIST_SIZE - _SmpBufSize + _SmpOffset[color] + 1) % PRINT_LIST_SIZE;
+					 idx = (_InIdx + PRINT_LIST_SIZE - colorOffsetScans) % PRINT_LIST_SIZE;
 				else idx = _InIdx;
 
 				pItem = &_PrintList[idx];

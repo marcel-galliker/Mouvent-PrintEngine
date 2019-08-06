@@ -319,6 +319,7 @@ int  enc_start_printing(SPrintQueueItem *pitem)
 				msg.pos_actual = 0;			
 			}
 
+			if (pitem->printGoMode==PG_MODE_MARK) msg.pos_pg_fwd = 	10000000; 
 			switch(pitem->scanMode)
 			{
 			case PQ_SCAN_RTL:		msg.pos_pg_fwd = 	10000000; 
@@ -420,10 +421,10 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 							 */
 							 break;
 		case PG_MODE_MARK:	 dist.dist     = 0;
-							 //	dist.ignore   = pitem->pageHeight; 
-							 //	dist.window   = pitem->pageHeight/4; 
-							 dist.ignore   = pitem->printGoDist; 
-							 dist.window   = pitem->printGoDist/4;
+						//	 dist.ignore   = pitem->pageHeight*9/10;
+							 dist.ignore   = 0;
+							 // if (_DistTelCnt>1) // first must be 0
+							 //	 dist.window   = pitem->pageHeight/4; 
 							 for(no=0; no<ENC_CNT; no++) 
 							 {
 								sok_send_2(&_Encoder[no].socket, CMD_ENCODER_PG_DIST, sizeof(dist), &dist);

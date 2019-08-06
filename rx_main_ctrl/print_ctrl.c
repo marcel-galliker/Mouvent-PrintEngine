@@ -190,6 +190,7 @@ int pc_stop_printing(int userStop)
 	TrPrintfL(TRUE, "pc_stop_printing");
 	
 	if (RX_PrinterStatus.printState==ps_stopping 
+	||  RX_PrinterStatus.printState==ps_goto_pause
 	||  RX_PrinterStatus.printState==ps_pause
 	||  RX_PrinterStatus.printState==ps_webin
 	||  RX_PrinterStatus.printState==ps_ready_power
@@ -261,9 +262,9 @@ int pc_abort_printing(void)
 int pc_pause_printing(void)
 {
 	TrPrintfL(TRUE, "pc_pause_printing");
-//	RX_PrinterStatus.printState=ps_goto_pause;
+	RX_PrinterStatus.printState=ps_goto_pause;
 	if (RX_PrinterStatus.printState==ps_printing) Error(LOG, 0, "PAUSE called by user");
-	RX_PrinterStatus.printState=ps_pause;
+//	RX_PrinterStatus.printState=ps_pause;
 	gui_send_printer_status(&RX_PrinterStatus);
 	enc_stop_pg();
 	machine_pause_printing();

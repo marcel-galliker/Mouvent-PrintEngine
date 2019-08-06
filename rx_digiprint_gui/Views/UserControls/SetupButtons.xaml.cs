@@ -57,8 +57,8 @@ namespace RX_DigiPrint.Views.UserControls
                     }
                     else
                     {
-                        visible   = (RxGlobals.PrinterStatus.PrintState==EPrintState.ps_setup || RxGlobals.PrinterStatus.PrintState==EPrintState.ps_webin) ? Visibility.Visible   : Visibility.Collapsed; 
-                        invisible = (RxGlobals.PrinterStatus.PrintState==EPrintState.ps_setup || RxGlobals.PrinterStatus.PrintState==EPrintState.ps_webin) ? Visibility.Collapsed : Visibility.Visible; 
+                        visible   = (RxGlobals.PrinterStatus.PrintState==EPrintState.ps_pause) ? Visibility.Visible   : Visibility.Collapsed; 
+                        invisible = (RxGlobals.PrinterStatus.PrintState==EPrintState.ps_pause) ? Visibility.Collapsed : Visibility.Visible; 
                     }
 
                     CMD_JOG_FWD.Visibility = visible;
@@ -83,7 +83,6 @@ namespace RX_DigiPrint.Views.UserControls
         {
             RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_SET_CMD, "CMD_CLEAR_ERROR");
             if (RxGlobals.PrintSystem.IsScanning) RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_SET_CMD, "CMD_SETUP/CMD_WEBIN");
-        //  else RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_SET_CMD, "CMD_SETUP");
             else RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_SET_CMD, "CMD_PAUSE");
         }
 

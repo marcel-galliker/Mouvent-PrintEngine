@@ -260,7 +260,11 @@ typedef struct
 	UINT32	pos_pg_fwd;			// 0x0010:
 	UINT32  pos_pg_bwd;			// 0x0014:
 	UINT32	printgo_n;			// 0x0018:
-	UINT32	fifos_used;			// 0x001c: 2 Bit
+	UINT32	fifos_used;			// 0x001c: 2 Bit: 0=OFF, 1=Distance, 2=MarkReader
+		#define FIFOS_OFF			0
+		#define FIFOS_DIST			1
+		#define FIFOS_MARKREADER	2
+	
 	UINT32	dig_in_sel;			// 0x0020: select digital input 2bit
 	UINT32	quiet_window;		// 0x0024:
 	UINT32	res_28;			    // 0x0028:

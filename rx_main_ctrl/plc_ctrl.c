@@ -162,7 +162,6 @@ static int				_UvUsed;
 static int				_Speed;
 
 static EnPlcState		_PlcState	= plc_undef;
-static int				_WasInRun   = FALSE;
 static int				_ResetError = TRUE;
 
 static int				_TEST_UV_Lamp_Mode[5] = {0,0,0,0,0};
@@ -171,8 +170,6 @@ static int				_TEST_feeders=0;
 static int				_PAR_BELT_ON=TRUE;
 static int				_PAR_WINDER_1_ON=TRUE;
 static int				_PAR_WINDER_2_ON=TRUE;
-
-static int				_PG_DIST_TEST;
 
 static int				_heads_to_print=FALSE;
 
@@ -314,6 +311,10 @@ static void _plc_set_command(char *mode, char *cmd)
 	    sys_reset_error();
 		rx_sleep(200);
 	}
+	if (!strcmp(cmd, "CMD_PAUSE"))
+	{
+		_SendPause = 2;
+	}
 //	Error(LOG, 0, "PLC_COMMAND >>%s<<", cmd);
 	sprintf(str, APP "%s", cmd);
 	lc_set_value_by_name_UINT32(str, 1);
@@ -334,10 +335,7 @@ static void _plc_set_par(SPrintQueueItem *pItem, SPlcPar *pPlcPar)
 		case printer_DP803:		_UnwinderLenMin = 30; break;	
 		default: _UnwinderLenMin = 0;			
 	}
-	
- 	if(pItem->printGoMode == PG_MODE_MARK)	_PG_DIST_TEST = (pItem->printGoDist + 999) / 1000;
-	else _PG_DIST_TEST = 0;
-	
+		
 	pPlcPar->bidir	= (pItem->scanMode==PQ_SCAN_BIDIR);
 	pPlcPar->speed	= pItem->speed;
 	if (RX_Config.printer.type==printer_cleaf)
@@ -430,10 +428,6 @@ static void _plc_send_par(SPlcPar *pPlcPar)
 		lc_set_value_by_name_FLOAT(APP"PAR_PRINTING_END_POSITION", (float)pPlcPar->endPos);
 		lc_set_value_by_name_UINT32(APP"PAR_DRYER_BLOWER_POWER", 75);
 	}
-	else
-	{
-		if (_PG_DIST_TEST) lc_set_value_by_name_UINT32(APP"PAR_LABEL_SEQUENCE_DISTANCE", _PG_DIST_TEST);							
-	}
 
 	_plc_set_command("", "CMD_SET_PARAMETER");	
 }
@@ -487,6 +481,7 @@ int  plc_stop_printing(void)
 	if (_SimuEncoder) ctrl_simu_encoder(0);
 	_StartPrinting = FALSE;
 	_SendRun       = FALSE;
+	_SendPause	   = FALSE;
 	_RequestPause  = FALSE;
 	if (_SimuPLC)
 	{
@@ -1178,7 +1173,7 @@ static void _plc_heart_beat()
 //--- plc_is_splicing -------------------------------------
 int	plc_is_splicing(void)
 {
-	return 	RX_PrinterStatus.splicing;					
+	return 	RX_PrinterStatus.splicing;			
 }
 
 //--- _plc_state_ctrl --------------------------------------------
@@ -1198,7 +1193,6 @@ static void _plc_state_ctrl()
 					if (RX_PrinterStatus.splicing &&  !splicing) Error(LOG, 0, "Splicing finished");
 			
 					RX_PrinterStatus.splicing = splicing;
-					gui_send_printer_status(&RX_PrinterStatus);	
 				}
 			}
 		}
@@ -1209,9 +1203,9 @@ static void _plc_state_ctrl()
 			|| RX_StepperStatus.info.z_in_ref)
 		{
 			lc_set_value_by_name_UINT32(APP "STA_HEAD_IS_UP", TRUE);						
-			if (_SendPause)
+			if (_SendPause==1)
 			{
-				_SendPause = FALSE;
+				_SendPause = 2;
 				rx_sleep(200);
 				_plc_set_command("CMD_PRODUCTION", "CMD_PAUSE");
 				step_set_vent(FALSE);
@@ -1231,12 +1225,10 @@ static void _plc_state_ctrl()
 	if (_PlcState==plc_setup && RX_PrinterStatus.printState != ps_setup)
 	{
 		RX_PrinterStatus.printState = ps_setup;
-		gui_send_printer_status(&RX_PrinterStatus);
 	}
 	*/
 
 	if (RX_PrinterStatus.printState==ps_stopping && _PlcState==plc_stop) pc_off();
-	if (_PlcState==plc_run) _WasInRun=TRUE;
 	if (RX_Config.printer.type!=printer_cleaf && _PlcState==plc_error && _ResetError)
 	{		
 		_ResetError=FALSE;
@@ -1248,10 +1240,10 @@ static void _plc_state_ctrl()
 	}
 	if(_PlcState == plc_pause)
 	{		
-		if(_WasInRun)
+		if(_SendPause==2)
 		{
-			RX_PrinterStatus.printState = ps_pause;
-			_WasInRun = FALSE;
+			if (!_StartPrinting) RX_PrinterStatus.printState = ps_pause;
+			_SendPause = 0;
 		}
 		if(_SendRun)
 		{
@@ -1338,7 +1330,8 @@ static void _plc_state_ctrl()
 		RX_PrinterStatus.actSpeed = 0;
 		_CanRun = FALSE;
 		_heads_to_print=FALSE;
-		_WasInRun = FALSE;
+		if (RX_PrinterStatus.printState>plc_stop)
+			RX_PrinterStatus.printState = chiller_is_running() ? ps_ready_power : ps_off;
 	}
 	
 	if (rx_def_is_web(RX_Config.printer.type)) 
@@ -1348,13 +1341,7 @@ static void _plc_state_ctrl()
 		if (ticks-_time>450)
 		{			
 			_time=ticks;
-			int speed;
-			lc_get_value_by_name_UINT32(APP "STA_PRINTING_SPEED", &speed);
-			if (speed!=RX_PrinterStatus.actSpeed)
-			{
-				RX_PrinterStatus.actSpeed = speed;
-				gui_send_printer_status(&RX_PrinterStatus);					
-			}
+			lc_get_value_by_name_UINT32(APP "STA_PRINTING_SPEED", &RX_PrinterStatus.actSpeed);
 		}
 		
 		int pause;
@@ -1363,11 +1350,11 @@ static void _plc_state_ctrl()
 		{
 			Error(ERR_CONT, 0, "PAUSE requested by finishing");
 			RX_PrinterStatus.printState=ps_pause; // suppress pause message
-	//		gui_send_printer_status(&RX_PrinterStatus);
 			_RequestPause = TRUE;
 			pc_pause_printing();
 		}
 	}
+	gui_send_printer_status(&RX_PrinterStatus);
 }
 
 //--- _do_plc_get_info ---------------------------------------------------

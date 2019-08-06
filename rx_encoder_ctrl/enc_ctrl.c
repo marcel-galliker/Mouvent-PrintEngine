@@ -294,9 +294,8 @@ static int _do_encoder_pg_dist(RX_SOCKET socket, SEncoderPgDist *pmsg)
 	TrPrintfL(TRUE, "_do_encoder_pg_dist(no=%d, cnt=%d, dist=%d) time=%d", ++_PgNo, pmsg->cnt, pmsg->dist, time-_time);
 	_time=time;
 	memcpy(&_DistMsg[_PgNo%SIZEOF(_DistMsg)], pmsg, sizeof(SEncoderPgDist)); 
-	if (pmsg->dist)		fpga_pg_set_dist(pmsg->cnt, pmsg->dist);
-	if (pmsg->ignore)	Error(ERR_CONT, 0, "Not implemented yet");
-	if (pmsg->window)	Error(ERR_CONT, 0, "Not implemented yet");
+	if(pmsg->dist)	fpga_pg_set_dist(pmsg->cnt, pmsg->dist);
+	else			fpga_set_printmark(pmsg->window, pmsg->ignore);
 	return REPLY_OK;
 }
 

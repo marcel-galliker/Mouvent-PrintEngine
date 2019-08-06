@@ -54,7 +54,7 @@ namespace RX_DigiPrint.Views.UserControls
             Button_Pause.Height     = (RxGlobals.PrinterStatus.PrintState==EPrintState.ps_printing)? large : small;
             Button_Stop.Height      = ( RxGlobals.PrinterStatus.PrintState==EPrintState.ps_printing 
                                      || RxGlobals.PrinterStatus.PrintState==EPrintState.ps_stopping
-                                     || RxGlobals.PrinterStatus.PrintState==EPrintState.ps_goto_pause
+                                 //  || RxGlobals.PrinterStatus.PrintState==EPrintState.ps_goto_pause
                                      || RxGlobals.PrinterStatus.PrintState==EPrintState.ps_pause
                                       )? large : small;
             Button_Abort.Height     = (RxGlobals.PrinterStatus.PrintState ==EPrintState.ps_printing
