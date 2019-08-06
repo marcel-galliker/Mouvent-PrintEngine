@@ -26,6 +26,8 @@ namespace DigiPrint.Models
             email.PutExtra (Intent.ExtraSubject, mail.Subject);
 
             email.PutExtra (Intent.ExtraText, mail.Text);
+
+			/*
             {
                 string dir = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDocuments).Path;
                 System.IO.Directory.CreateDirectory(dir);
@@ -33,13 +35,17 @@ namespace DigiPrint.Models
                 string filepath = Path.Combine(Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDocuments).Path, "requestinfo.txt");
 
                 System.IO.File.WriteAllText(filepath, mail.AttachmentContent);
-                Java.IO.File file = new Java.IO.File(filepath);
+
+				Java.IO.File file = new Java.IO.File(filepath);
                 file.SetReadable (true, false);
-                email.PutExtra(Intent.ExtraStream, Android.Net.Uri.FromFile(file));
-                email.AddFlags(ActivityFlags.GrantReadUriPermission);
-            }
-  
-            email.SetType ("message/rfc822");
+				var uri = Android.Net.Uri.FromFile(file);
+				email.PutExtra(Intent.ExtraStream, uri);
+//                email.AddFlags(ActivityFlags.GrantReadUriPermission);
+				email.AddFlags(ActivityFlags.GrantReadUriPermission | ActivityFlags.GrantPrefixUriPermission);
+			}
+			*/
+
+			email.SetType ("message/rfc822");
             StartActivity(email);
         }
 

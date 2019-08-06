@@ -36,6 +36,8 @@ using System.Windows;
 using System.Windows.Input;
 using Microsoft.Exchange.WebServices.Data;
 using RX_DigiPrint.Services;
+using System.Xml;
+using System.IO;
 
 namespace rx_license_ctrl
 {
@@ -151,7 +153,7 @@ namespace rx_license_ctrl
                 email.ToRecipients.Add(to.Address);
                 email.Attachments.AddFileAttachment(filepath);
                 email.Subject = "Mouvent License";
-                email.Body = new MessageBody("This is your new license. Save this file in your DOCUMENTS folder.");
+                email.Body = new MessageBody("This is your new license. Save this file in your DOWNLOADS folder.");
 
                 email.Send();
                 System.IO.File.Delete(filepath);
@@ -186,7 +188,41 @@ namespace rx_license_ctrl
                 EmailMessage email=results.Items[i] as EmailMessage;
                 if (email!=null)
                 {
-                    email.Load(new PropertySet(EmailMessageSchema.Attachments));
+                    email.Load(new PropertySet(EmailMessageSchema.Body));
+                    string body = email.Body.ToString();
+                    int pos = body.IndexOf("Code:");
+                    if (pos>0)
+                    {
+
+                        int end =   body.IndexOf('\r', pos); 
+                        StringBuilder contentCode = new StringBuilder(body.Substring(pos+6, end-pos-6));
+                        pos=0;
+                        while (pos+2<contentCode.Length)
+                        {
+                            if (contentCode[pos]=='&' && contentCode[pos+1]=='#')
+                            {
+                                int val=0;
+                                end = pos+2;
+                                while (contentCode[end]!=';')
+                                {
+                                    val=10*val+contentCode[end++]-'0';
+                                }
+                                contentCode.Remove(pos, end-pos+1);
+                                contentCode.Insert(pos, (char)val);
+                            }
+                            pos++;
+                        }
+//                        contentCode = contentCode.Remove(pos);
+                        
+                        string content = RxEncypt.Decrypt(contentCode.ToString(), RxBtDef.InfoPwd);
+                        string license = create_license(content, level);
+                        string licCode = RxEncypt.Encrypt(license, RxBtDef.LicPwd);
+                        email.Load(new PropertySet(EmailMessageSchema.From));
+                        send_license(email.From, licCode);
+                        Console.WriteLine("    "+email.From.Address);
+                        protocol.AppendLine("    "+email.From.Address);
+                    }
+                    /*
                     if (email.Attachments.Count>0)
                     {
                         FileAttachment fileAttachment = email.Attachments[0] as FileAttachment;
@@ -203,6 +239,9 @@ namespace rx_license_ctrl
                             protocol.AppendLine("    "+email.From.Address);
                         }
                     }
+                    */
+
+
                     email.IsRead = true;
                     email.Update(ConflictResolutionMode.AlwaysOverwrite);
                     cnt++;
@@ -257,17 +296,6 @@ namespace rx_license_ctrl
                 Console.WriteLine(e.Message);
             };
             return null;
-        }
-
-        //--- test --------------------------------------------------------------
-        public void test()
-        {
-            Folder folder = FindFolderTest(WellKnownFolderName., "");
-            if (folder == null)
-            {
-                return;
-            }
-
         }
     }
 }

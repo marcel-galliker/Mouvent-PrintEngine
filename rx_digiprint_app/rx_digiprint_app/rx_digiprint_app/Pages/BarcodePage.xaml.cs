@@ -125,9 +125,12 @@ namespace DigiPrint.Pages
             {
                 To = "license@mouvent.com",
                 Subject = "License Request",
-                Text = "Licence Request for " + AppGlobals.DeviceId.UserName + "\n\n" + AppGlobals.DeviceId.ToString(),
-                AttachmentContent = AppGlobals.Crypt.Encrypt(AppGlobals.DeviceId.Info(), RxBtDef.InfoPwd)
-            };
+                Text = "Licence Request for " + AppGlobals.DeviceId.UserName + 
+						"\n\n" + AppGlobals.DeviceId.ToString()+
+						"\n\n" + "Code: " + AppGlobals.Crypt.Encrypt(AppGlobals.DeviceId.Info(), RxBtDef.InfoPwd)
+
+	//				AttachmentContent = AppGlobals.Crypt.Encrypt(AppGlobals.DeviceId.Info(), RxBtDef.InfoPwd)
+			};
             AppGlobals.MailServer.Send(mail);
         }
     }

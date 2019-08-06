@@ -1488,7 +1488,7 @@ int  fpga_abort(void)
 					}
 				}
 				if(err) fpga_trace_registers("Print-Done-missed", TRUE);	
-			//	else     fpga_trace_registers("Print-Done-OK");	
+			//	else    fpga_trace_registers("Print-Done-OK", FALSE);	
 			}
 			//---
 			TrPrintf(TRUE, "fpga_abort CMD_MASTER_ENABLE=FALSE:\n");
@@ -1713,6 +1713,13 @@ static int _check_print_done(void)
 			//	_PrintDonePos[head][i] = 0;
 				RX_HBStatus[0].head[head].printDoneCnt++;
 
+				if (FALSE)
+				{
+					char name[64];
+					sprintf(name, "Head[%d].Print-Done-%03d", head, RX_HBStatus[0].head[head].printDoneCnt);
+					fpga_trace_registers(name, FALSE);				
+				}
+				
 				TrPrintfL(TRUE, "Head[%d].PrintDone=%d, blocks %05d ... %05d", head, RX_HBStatus[0].head[head].printDoneCnt, img->blkNo, _PageEnd[head][i]);
 				if (img->clearBlockUsed) _check_block_used_flags_clear(head, RX_HBStatus[0].head[head].printDoneCnt, img->blkNo, img->blkCnt);
 				_fpga_check_fp_errors(TRUE);

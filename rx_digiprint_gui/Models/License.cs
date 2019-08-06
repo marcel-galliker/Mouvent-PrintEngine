@@ -155,7 +155,8 @@ namespace RX_DigiPrint.Models
             try
             {
                 License lic = new License();
-                string filepath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), RxBtDef.LicFileName);
+//              string filepath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), RxBtDef.LicFileName);
+                string filepath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)+"\\Downloads", RxBtDef.LicFileName);
                 lic.Code = System.IO.File.ReadAllText(filepath);
                 if (!lic.Valid) 
                 {

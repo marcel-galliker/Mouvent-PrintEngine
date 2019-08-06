@@ -13,6 +13,9 @@ using System;
 using System.IO;
 using Xamarin.Forms.Xaml;
 using ImageCircle.Forms.Plugin.Droid;
+using Android.Database;
+using Android.Accounts;
+using System.Text;
 
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 
@@ -74,8 +77,8 @@ namespace DigiPrint.Droid
             try
             {
                 //--- in downloads the files are numerated --- select the ome with the hoghest number, delete the rest ---
-                string filepath = Path.Combine(Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDocuments).Path, RxBtDef.LicFileName);
-                string[] files  = System.IO.Directory.GetFiles(Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDocuments).Path, RxBtDef.LicFileName+"*");
+                string filepath = Path.Combine(Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDownloads).Path, RxBtDef.LicFileName);
+                string[] files  = System.IO.Directory.GetFiles(Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDownloads).Path, RxBtDef.LicFileName+"*");
                 if (files.Length>1)
                 {
                     int i;
@@ -87,7 +90,7 @@ namespace DigiPrint.Droid
                 AppGlobals.License.PlainCode = AppGlobals.Crypt.Decrypt(AppGlobals.License.Code, RxBtDef.LicPwd);
                 if (AppGlobals.License.Valid && !AppGlobals.License.Expired)
                 {
-                    try{ System.IO.File.Delete(Path.Combine(Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDocuments).Path, "requestinfo.txt"));}
+                    try{ System.IO.File.Delete(Path.Combine(Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDownloads).Path, "requestinfo.txt"));}
                     catch{};
                 }
             }
@@ -113,26 +116,24 @@ namespace DigiPrint.Droid
         //--- permissions -----------------------------------------
         private void _permissions()
         {
-            string[] permissions =
+			string[] permissions =
             {
-                Manifest.Permission.Camera,
+				Manifest.Permission.Camera,
                 Manifest.Permission.ReadExternalStorage,
                 Manifest.Permission.WriteExternalStorage,
                 Manifest.Permission.Bluetooth,
                 Manifest.Permission.BluetoothAdmin,
                 Manifest.Permission.ReadContacts,
-                Manifest.Permission.ReadUserDictionary,
-                Manifest.Permission.WriteContacts,
-                Manifest.Permission.ReadProfile,
+				Manifest.Permission.ReadProfile,
+				Manifest.Permission.ReadUserDictionary,
                 Manifest.Permission.Vibrate,
-                Manifest.Permission.WriteProfile,
                 Manifest.Permission.WakeLock
             };
             ActivityCompat.RequestPermissions(this, permissions, 0);
-        }
+		}
 
-        //--- OnPause ------------------------------------
-        protected override void OnPause()
+		//--- OnPause ------------------------------------
+		protected override void OnPause()
         {
             base.OnPause();
             _wakeLock.Release();
@@ -144,12 +145,43 @@ namespace DigiPrint.Droid
             base.OnResume();
             _wakeLock.Acquire();
             _readLicense();
-        }
+		}
 
-        //--- _userName -----------------------------------
-        private string _userName()
+		private string UppercaseFirst(string s)
+		{
+			// Check for empty string.
+			if (string.IsNullOrEmpty(s))
+			{
+				return string.Empty;
+			}
+			// Return char and concat substring.
+			return char.ToUpper(s[0]) + s.Substring(1);
+		}
+
+		//--- _userName -----------------------------------
+		private string _userName()
         {
-            string[] projection = {ContactsContract.Profile.InterfaceConsts.DisplayName};
+			Account[] accounts = AccountManager.Get(this).GetAccounts();
+			foreach (Account account in  accounts)
+			{
+				int len = account.Name.Length;
+				int pos = account.Name.IndexOf("@mouvent.com");
+				int pos1 = account.Name.IndexOf('.');
+				if (pos>=0)
+				{
+					StringBuilder str = new StringBuilder(account.Name.Remove(pos));
+					str[0] = char.ToUpper(str[0]);
+					if (pos1>0)
+					{
+						str[pos1++] = ' ';
+						str[pos1]   = char.ToUpper(str[pos1]);
+					}
+					return str.ToString();
+				}
+			}
+
+			/*
+			string[] projection = {ContactsContract.Profile.InterfaceConsts.DisplayName};
 
             try
             {
@@ -162,10 +194,11 @@ namespace DigiPrint.Droid
                 }
                 else return "Somebody";
             }
-            catch
+            catch (Exception e)
             {
             }
-            return null;
+			*/
+			return null;
         }
 
         //--- OnRequestPermissionsResult --------------------------------
