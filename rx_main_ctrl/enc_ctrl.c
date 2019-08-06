@@ -88,6 +88,7 @@ static int  _handle_enc_msg		(RX_SOCKET socket, void *msg, int len, struct socka
 static void _handle_status		(int no, SEncoderStat* pstat);
 static void _handle_config_reply(int no, SReply* preply);
 static void _handle_event		(int no, SLogMsg *msg);
+static void _enc_start_printing(int no, SPrintQueueItem *pitem);
 
 //--- enc_init -------------------------------------------------
 void enc_init(void)
@@ -192,7 +193,8 @@ int	 enc_set_config(void)
 	case printer_TX801:			_Encoder[0].webOffset_mm=WEB_OFFSET; break;	// 20
 	case printer_TX802:			_Encoder[0].webOffset_mm=WEB_OFFSET; break;	// 20
 	case printer_DP803:			_Encoder[0].webOffset_mm=WEB_OFFSET; 
-								_Encoder[1].webOffset_mm=WEB_OFFSET+WEB_OFFSET_VERSO+RX_Config.printer.offset.versoDist;
+							//	_Encoder[1].webOffset_mm=WEB_OFFSET+WEB_OFFSET_VERSO+RX_Config.printer.offset.versoDist;
+								_Encoder[1].webOffset_mm=WEB_OFFSET;
 								break;
 	case printer_test_slide:	
 	case printer_test_slide_only:
@@ -241,7 +243,27 @@ void  enc_tick(void)
 int  enc_start_printing(SPrintQueueItem *pitem)
 {
 	int no;
+	for (no=0; no<ENC_CNT; no++)
+	{
+		if (_Encoder[no].used) 	_enc_start_printing(no, pitem);		
+	}
+	_Printing = TRUE;
+	_StopPG   = FALSE;
+	
+	if (arg_simuEncoder)
+	{
+		for(no=0; no<ENC_CNT; no++) 
+		{
+			sok_send_2(&_Encoder[no].socket, CMD_FPGA_SIMU_ENCODER, sizeof(_Khz), &_Khz);						
+		}
+	}
 
+	return REPLY_OK;
+}
+
+//--- _enc_start_printing ---------------------------------------------------------------
+static void _enc_start_printing(int no, SPrintQueueItem *pitem)
+{
 	SEncoderCfg msg;
 	double comp;
 	memset(&msg, 0, sizeof(msg));
@@ -289,9 +311,23 @@ int  enc_start_printing(SPrintQueueItem *pitem)
 		
 	case printer_LB702_UV:		msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_ROTATIVE; msg.diameter[0]=78; msg.diameter[1]=74; break;	
 	case printer_LB702_WB:		msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_ROTATIVE; msg.diameter[0]=78; msg.diameter[1]=74; break;	
-	case printer_DP803:			msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_ROTATIVE; msg.diameter[0]=74; msg.diameter[1]=76; break;	
-	case printer_cleaf:			msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter= 180200; msg.pos_actual = 0; 				               break;
-	default:					msg.orientation = TRUE;		msg.scanning=TRUE;  msg.incPerMeter=1000000; msg.pos_actual = 0;	break;
+	case printer_DP803:			msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_ROTATIVE;
+								msg.diameter[0] = 74; 
+								msg.diameter[1] = 76;
+								if (no == 0)
+								{
+									msg.printGoOutDist = WEB_OFFSET_VERSO + RX_Config.printer.offset.versoDist;								
+								}
+								else
+								{
+									msg.diameter[0] = 78; 
+									msg.printGoMode = PG_MODE_MARK;
+									msg.printGoDist = 0;
+								}
+								break;
+
+	case printer_cleaf:			msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter= 180200; msg.pos_actual = 0; break;
+	default:					msg.orientation = TRUE;		msg.scanning=TRUE;  msg.incPerMeter=1000000; msg.pos_actual = 0; break;
 	}
 	
 	if (arg_simuEncoder && msg.correction==CORR_ROTATIVE) msg.correction=CORR_OFF;
@@ -302,73 +338,51 @@ int  enc_start_printing(SPrintQueueItem *pitem)
 		
 	msg.speed_mmin  = pitem->speed;
 	_IncPerMeter    = msg.incPerMeter;
-	for (no=0; no<ENC_CNT; no++)
-	{
-		if (_Encoder[no].used)
-		{
-			memcpy(msg.corrRotPar, RX_Config.encoder[no].corrRotPar, sizeof(msg.corrRotPar));
-			msg.incPerMeter = _IncPerMeter+RX_Config.printer.offset.incPerMeter[no];
-			msg.pos_pg_fwd  = _Encoder[no].webOffset_mm*1000 + pitem->pageMargin - (_WakeupLen*25400/1200);
-			msg.pos_pg_bwd  = _Encoder[no].webOffset_mm*1000 + pitem->pageMargin + pitem->srcHeight + RX_Config.headDistMax + 13350 + (_WakeupLen*25400/1200);
-		//	msg.pos_pg_bwd  = _Encoder[no].webOffset_mm*1000 + pitem->pageMargin + pitem->srcHeight + 13150; // not tested!
-			
-			if(RX_Config.printer.type == printer_DP803)
-			{
-				if(no == 0) msg.diameter[0] = 74;
-				else		msg.diameter[0] = 78;
-			}
-			
-			if (_Scanning && arg_simuEncoder)
-			{
-				msg.scanning=FALSE;
-				msg.pos_actual = 0;			
-			}
 
-			switch(pitem->scanMode)
-			{
-			case PQ_SCAN_RTL:		msg.pos_pg_fwd = 	10000000; 
-									break;
+	memcpy(msg.corrRotPar, RX_Config.encoder[no].corrRotPar, sizeof(msg.corrRotPar));
+	msg.incPerMeter = _IncPerMeter+RX_Config.printer.offset.incPerMeter[no];
+	msg.pos_pg_fwd  = _Encoder[no].webOffset_mm*1000 + pitem->pageMargin - (_WakeupLen*25400/1200);
+	msg.pos_pg_bwd  = _Encoder[no].webOffset_mm*1000 + pitem->pageMargin + pitem->srcHeight + RX_Config.headDistMax + 13350 + (_WakeupLen*25400/1200);
+//	msg.pos_pg_bwd  = _Encoder[no].webOffset_mm*1000 + pitem->pageMargin + pitem->srcHeight + 13150; // not tested!
 			
-			case PQ_SCAN_BIDIR:		if (pitem->speed)
-									{
-										if(RX_Config.printer.offset.manualFlightTimeComp)
-										{
-											comp=RX_Config.printer.offset.manualFlightTimeComp;
-											Error(LOG, 0, "Manual Flightime Comp: %d µm", (int)comp);											
-										}
-										else 
-										{
-											comp = 0.0050 * RX_StepperStatus.posZ * pitem->speed;
-	//										test = RX_Config.headDistBackMax-comp;
-											Error(LOG, 0, "Flightime Comp: height=%d speed=%d comp=%d µm", RX_StepperStatus.posZ, pitem->speed, (int)comp);
-										}
-										msg.pos_pg_bwd += (int)comp;  
-									}
-									break;
 			
-			default:				msg.pos_pg_bwd = 	10000000; break;			
-			}
+	if (_Scanning && arg_simuEncoder)
+	{
+		msg.scanning=FALSE;
+		msg.pos_actual = 0;			
+	}
+
+	switch(pitem->scanMode)
+	{
+	case PQ_SCAN_RTL:		msg.pos_pg_fwd = 	10000000; 
+							break;
+			
+	case PQ_SCAN_BIDIR:		if (pitem->speed)
+							{
+								if(RX_Config.printer.offset.manualFlightTimeComp)
+								{
+									comp=RX_Config.printer.offset.manualFlightTimeComp;
+									Error(LOG, 0, "Manual Flightime Comp: %d µm", (int)comp);											
+								}
+								else 
+								{
+									comp = 0.0050 * RX_StepperStatus.posZ * pitem->speed;
+//										test = RX_Config.headDistBackMax-comp;
+									Error(LOG, 0, "Flightime Comp: height=%d speed=%d comp=%d µm", RX_StepperStatus.posZ, pitem->speed, (int)comp);
+								}
+								msg.pos_pg_bwd += (int)comp;  
+							}
+							break;
+			
+	default:				msg.pos_pg_bwd = 	10000000; break;			
+	}
 		
-			_Encoder[no].ready = FALSE;
-			if (_Encoder[no].socket!=INVALID_SOCKET) // || enc_connect()==REPLY_OK)	
-			{
-				_Encoder[no].timeout = 2;
-				sok_send_2(&_Encoder[no].socket, CMD_ENCODER_CFG, sizeof(msg), &msg);
-			}
-//			Error(LOG, 0, "CMD_ENCODER_CFG");
-		}
-	}
-	_Printing = TRUE;
-	_StopPG   = FALSE;
-	if (arg_simuEncoder)
+	_Encoder[no].ready = FALSE;
+	if (_Encoder[no].socket!=INVALID_SOCKET) // || enc_connect()==REPLY_OK)	
 	{
-		for(no=0; no<ENC_CNT; no++) 
-		{
-			sok_send_2(&_Encoder[no].socket, CMD_FPGA_SIMU_ENCODER, sizeof(_Khz), &_Khz);						
-		}
+		_Encoder[no].timeout = 2;
+		sok_send_2(&_Encoder[no].socket, CMD_ENCODER_CFG, sizeof(msg), &msg);
 	}
-
-	return REPLY_OK;
 }
 
 //--- enc_sent_document ------------------------
@@ -405,12 +419,8 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 	//	Error(LOG, 0, "enc_set_pg id=%d, page=%d, copy=%d, scan=%d, dist=%d", pId->id, pId->page, pId->copy, pId->scan, _PrintGo_Dist);						
 		
 		if (pitem->printGoMode!=PG_MODE_MARK) 
-		{
-			for(no=0; no<ENC_CNT; no++) 
-			{
-				if (_Encoder[no].used) sok_send_2(&_Encoder[no].socket, CMD_ENCODER_PG_DIST, sizeof(dist), &dist);
-			}
-		}
+			sok_send_2(&_Encoder[0].socket, CMD_ENCODER_PG_DIST, sizeof(dist), &dist);
+
 		_DistTelCnt++;
 		_PrintGo_Mode = pitem->printGoMode;
 		switch(pitem->printGoMode)
@@ -424,18 +434,24 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 							 }
 							 */
 							 break;
+			
 		case PG_MODE_MARK:	 dist.dist     = 0;
 							 if (_DistTelCnt>1) dist.ignore   = pitem->pageHeight*9/10;
 							 if (_DistTelCnt>1) dist.window   = pitem->pageHeight/4;
-							 for(no=0; no<ENC_CNT; no++)
-							 {
-								sok_send_2(&_Encoder[no].socket, CMD_ENCODER_PG_DIST, sizeof(dist), &dist);
-							 }
+							 sok_send_2(&_Encoder[0].socket, CMD_ENCODER_PG_DIST, sizeof(dist), &dist);
 							 break;
 			
 		default:			if (pId->id != _ID.id) Error(WARN, 0, "PrintGo-Mode not defined");	
 							_PrintGo_Dist = pitem->pageHeight; 
 							break;				
+		}
+		//-- DP803: encoder[1]: Always in Mark Reading Mode -----
+		if (_Encoder[1].used)
+		{
+			dist.dist     = 0;
+			if (_DistTelCnt>1) dist.ignore   = pitem->pageHeight*9/10;
+			if (_DistTelCnt>1) dist.window   = pitem->pageHeight/4;			
+			sok_send_2(&_Encoder[1].socket, CMD_ENCODER_PG_DIST, sizeof(dist), &dist);
 		}
 	}
 	else if (_Scanning && arg_simuEncoder)

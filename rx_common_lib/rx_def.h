@@ -820,7 +820,8 @@ typedef struct SEncoderCfg
 			#define CORR_ROTATIVE	0x02	// 
 			#define CORR_LINEAR		0x04	// using two encoders (scanning)
 	INT32	printGoMode;
-	INT32	printGoDist;
+	INT32	printGoDist;					// in microns
+	INT32	printGoOutDist;					// in microns
 	INT32	speed_mmin;
 	INT32	corrRotPar[4];					// parameters for CORR_ROTATIVE
 	EPrinterType	printerType;

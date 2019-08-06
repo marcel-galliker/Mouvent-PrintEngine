@@ -812,8 +812,9 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg, int restart)
 		}
 		else 
 		{
-			Fpga->cfg.pg[pgNo].fifos_used =  (pcfg->printGoMode==PG_MODE_MARK) ?  FIFOS_MARKREADER : FIFOS_DIST;
+			Fpga->cfg.pg[pgNo].fifos_used	  = (pcfg->printGoMode==PG_MODE_MARK) ?  FIFOS_MARKREADER : FIFOS_DIST;
 			Fpga->cfg.general.shift_delay_tel = (int)(pcfg->printGoDist/_StrokeDist);
+			Fpga->cfg.general.shift_delay	  = (int)(pcfg->printGoOutDist/_StrokeDist);
 		//	Fpga->cfg.pg[pgNo].dig_in_sel   = 0;
 		//	Fpga->cfg.pg[pgNo].quiet_window = 10;
 		//	if (FpgaQSys->printGo_status.fill_level) Fpga->cfg.pg[pgNo].fifos_ready	= TRUE;
@@ -1429,13 +1430,13 @@ static void  _check_errors(void)
 						n = _pos[i] / INC_PER_REV;
 						if(abs(n - (Fpga->stat.encIn[i].rev_sum-_revSumStart[i])) > 4)
 						{
-							if(_CorrRotative)	Error(ERR_ABORT, 0, "Encoder %d: Counting %d Indexes (expected %d)", i, Fpga->stat.encIn[i].rev_sum-_revSumStart[i], n);
+							if(_CorrRotative)	Error(ERR_CONT, 0, "Encoder %d: Counting %d Indexes (expected %d)", i, Fpga->stat.encIn[i].rev_sum-_revSumStart[i], n);
 							else				Error(WARN, 0, "Encoder %d: Counting %d Indexes (expected %d)", i, Fpga->stat.encIn[i].rev_sum-_revSumStart[i], n);
 						}
 					}
 					else
 					{
-						if(_CorrRotative) Error(ERR_ABORT, 0, "Encoder %d: Counting %d increments per revolution (expected %d)", i, Fpga->cfg.encIn[0].inc_per_revolution, INC_PER_REV);
+						if(_CorrRotative) Error(ERR_CONT, 0, "Encoder %d: Counting %d increments per revolution (expected %d)", i, Fpga->cfg.encIn[0].inc_per_revolution, INC_PER_REV);
 						else			  Error(WARN, 0, "Encoder %d: Counting %d increments per revolution (expected %d)", i, Fpga->cfg.encIn[0].inc_per_revolution, INC_PER_REV);
 					}
 				}
