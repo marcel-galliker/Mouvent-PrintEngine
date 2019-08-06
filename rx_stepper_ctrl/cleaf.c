@@ -99,7 +99,7 @@
 #define LASER_ANALOG_AVR		10.0
 //#define MAX_POS_UM		 		90000 //Resolution 20um, Working range 45...85 mm, temperature drift 18 um/K, Value range 0...10V linear rising, 1V=4mm ?
 
-#define VAL_TO_MV(x) ((x*5000)/0x0fff)
+#define VAL_TO_MV_AI(x) ((x*10000)/0x0fff)
 
 // Digital Inputs (max 12)
 #define HEAD_UP_IN_0		0
@@ -441,7 +441,7 @@ void cleaf_main(int ticks, int menu)
 	RX_StepperStatus.posZ = REF_HEIGHT - _z_steps_2_micron(motor_get_step(0));
 	
 	// --- read Inputs Rob ---
-	RX_StepperStatus.info.x_in_ref	= fpga_input(RO_STORED_IN_0); // Reference Sensor
+	RX_StepperStatus.info.x_in_ref	= TRUE; // fpga_input(RO_STORED_IN_0); // Reference Sensor
 	RX_StepperStatus.info.cln_screw_0 = fpga_input(RO_SCREW_DOWN_0); // Screwhead 0 is pressed down
 	RX_StepperStatus.info.cln_screw_2 = fpga_input(RO_SCREW_DETECT_0); // Screwhead 0 is detected
 	RX_StepperStatus.posX				= -_rob_steps_2_micron(motor_get_step(MOTOR_ROB_0));
@@ -618,8 +618,9 @@ void cleaf_main(int ticks, int menu)
 		// --- tasks ater reference cleaning station ---
 		if (_CmdRunning == CMD_CLN_REFERENCE)
 		{
-			rx_sleep(1000); // wait 1s on transport to stand still
-			RX_StepperStatus.info.x_in_ref = fpga_input(RO_STORED_IN_0); // Reference Sensor
+		//	rx_sleep(1000); // wait 1s on transport to stand still
+		//	RX_StepperStatus.info.x_in_ref = fpga_input(RO_STORED_IN_0); // Reference Sensor
+			RX_StepperStatus.info.x_in_ref = TRUE;
 			if (RX_StepperStatus.info.x_in_ref)
 			{
 				motors_reset(MOTOR_ROB_BITS);				// reset position after referencing
@@ -755,7 +756,8 @@ void cleaf_main(int ticks, int menu)
 		
 		// --- Set Position Flags after Commands ---
 		//RX_StepperStatus.info.move_ok = (RX_StepperStatus.info.ref_done && (abs(RX_StepperStatus.posZ - _LastRobPosCmd) <= 10));
-		RX_StepperStatus.info.x_in_ref		= (RX_StepperStatus.info.ref_done && (RX_StepperStatus.info.x_in_ref == 1));
+		// RX_StepperStatus.info.x_in_ref	= (RX_StepperStatus.info.ref_done && (RX_StepperStatus.info.x_in_ref == 1));
+		RX_StepperStatus.info.x_in_ref	= RX_StepperStatus.info.ref_done;
 		
 		// --- Toggle to mark end of move ---
 		if ((loc_new_cmd == FALSE) && (_CmdRunning != CMD_CAP_STOP) && (_CmdRunning != CMD_CLN_SET_WASTE_PUMP)) 
@@ -832,7 +834,7 @@ void cleaf_main(int ticks, int menu)
 static void _cleaf_check_laser(void)
 {					
 	//--- Read LASER value -------------------------------------------------------------------------
-	INT32 laser_value = ((LASER_VOLT_OFFSET - ((int)(VAL_TO_MV(Fpga.stat->analog_in[LASER_IN]) * 2))) * LASER_MM_PER_VOLT); // (mV -mV)*mm/V = um // medium thickness in um
+	INT32 laser_value = ((LASER_VOLT_OFFSET - (int)VAL_TO_MV_AI(Fpga.stat->analog_in[LASER_IN])) * LASER_MM_PER_VOLT); // (mV -mV)*mm/V = um // medium thickness in um
 	_LaserAvr += laser_value;
 
 	if ((++_LaserCnt) == LASER_ANALOG_AVR)

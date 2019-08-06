@@ -41,6 +41,7 @@
 #define OUT_GUI_START	0x0001
 
 #define VAL_TO_MV(x) ((x*5000)/0x0fff)
+#define VAL_TO_MV_AI(x) ((x*10000)/0x0fff)
 #define VAL_TO_TEMP(x)	 ((int)(25+(x*2-820)/2.654))
 
 //--- structures ----------------------------
@@ -187,7 +188,7 @@ void _fpga_display_status(void)
 	term_printf("Analog [mv]:  ");
 	for (i=0; i<SIZEOF(Fpga.stat->analog_in); i++)
 	{
-		term_printf("%03d    ", VAL_TO_MV(Fpga.stat->analog_in[i]));
+		term_printf("%03d    ", VAL_TO_MV_AI(Fpga.stat->analog_in[i]));
 	}
 	term_printf("\n");
 	term_printf("Outputs:      ");
