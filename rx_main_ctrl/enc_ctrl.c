@@ -245,7 +245,8 @@ int  enc_start_printing(SPrintQueueItem *pitem)
 	SEncoderCfg msg;
 	double comp;
 	memset(&msg, 0, sizeof(msg));
-				
+		
+	msg.simulation  = arg_simuEncoder;
 	msg.printerType = RX_Config.printer.type;
 	msg.correction  = CORR_OFF; 
 	_WakeupLen = 0;

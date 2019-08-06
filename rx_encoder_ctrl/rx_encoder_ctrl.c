@@ -77,7 +77,9 @@ void main_menu()
 			
 		case 'h':	memset(&cfg, 0, sizeof(cfg));
 					cfg.incPerMeter = 1000000;
-					fpga_enc_config(0, &cfg, 0, atoi(&str[1]), FALSE);	break;
+					fpga_enc_config(0, &cfg, FALSE);	
+					fpga_enc_simu(atoi(&str[1]));
+					break;
 			
 		case 'n':	fpga_encoder_enable(atoi(&str[1])); break;
 
@@ -125,7 +127,9 @@ void main_menu_test()
 	{
 		switch (str[0])
 		{
-		case 'h':	fpga_enc_config(0, &cfg, 0, atoi(&str[1]), FALSE);	break;
+		case 'h':	fpga_enc_config(0, &cfg, FALSE);	
+					fpga_enc_simu(atoi(&str[1]));
+					break;
 		case 'r':	fpga_enc_config_test();		break;
 		case 'o':	fpga_output(atoi(&str[1]));	break;
 		case 'x': _AppRunning=FALSE;	break;
@@ -193,7 +197,7 @@ int main(int argc, char** argv)
 		cfg.pos_actual  = 0;
 		cfg.correction  = 0;
 		cfg.scanning	= TRUE;
-		fpga_enc_config(0, &cfg, 0, 0, FALSE);
+		fpga_enc_config(0, &cfg, FALSE);
 		fpga_pg_config_fhnw(0, cfg.pos_pg_fwd, cfg.pos_pg_bwd);		
 	}
 	
@@ -207,7 +211,7 @@ int main(int argc, char** argv)
 		cfg.pos_actual  = 0;
 		cfg.correction  = 0;
 		cfg.scanning	= FALSE;
-		fpga_enc_config(0, &cfg, 0, 0, FALSE);
+		fpga_enc_config(0, &cfg, FALSE);
 		fpga_pg_config(INVALID_SOCKET, &cfg, FALSE);		
 	}
 	
@@ -221,7 +225,7 @@ int main(int argc, char** argv)
 		cfg.pos_actual  = 0;
 		cfg.correction  = 0;
 		cfg.scanning	= TRUE;
-		fpga_enc_config(0, &cfg, 0, 0, FALSE);
+		fpga_enc_config(0, &cfg, FALSE);
 		fpga_pg_config(INVALID_SOCKET, &cfg, FALSE);		
 	}
 

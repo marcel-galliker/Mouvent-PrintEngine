@@ -49,6 +49,7 @@
 // #define DDR3_TEST
 // #define HEAD_DATA_TEST
 #endif
+#define TEST_DEBUG	FALSE
 
 //--- defines -----------------------------------------------------------------
 #define SET_FLAG(cmd, flag, set) {if(set) cmd|=(flag); else cmd&=~(flag);}
@@ -156,7 +157,7 @@ static void  _check_state_machines(void);
 
 static int _check_block_used_flags(int head, int blkNo, int blkCnt);
 static int _check_block_used_flags_clear(int head, int imgNo, int blkNo, int blkCnt);
-static int _trace_used_flags(int head, int blkNo, int blkCnt, int blkEnd);
+static int _trace_used_flags(int head, int imgNo, int blkNo, int blkCnt, int blkEnd);
 static void _fpga_copy_status(void);
 static void _fpga_check_fp_errors(int printDone);
 static void _fpga_set_pg_offsets(void);
@@ -920,7 +921,7 @@ static int _check_block_used_flags_clear(int head, int imgNo, int blkNo, int blk
 }
 
 //--- _trace_used_flags ----------------------------------------------
-static int _trace_used_flags(int head, int blkNo, int blkCnt, int blkEnd)
+static int _trace_used_flags(int head, int imgNo, int blkNo, int blkCnt, int blkEnd)
 {
 	int blk, bit;
 	int min = FpgaCfg.udp->block[head].blkNo0;
@@ -931,7 +932,7 @@ static int _trace_used_flags(int head, int blkNo, int blkCnt, int blkEnd)
 	
 	UINT32 flags;
 	flags = Fpga.blockUsed[blkNo/32];
-	TrPrintfL(TRUE, "Blk used Flags: %d .. %d, cnt=%d", blkNo, blkEnd, blkCnt);
+	TrPrintfL(TRUE, "Img[%d].Blk used Flags: %d .. %d, cnt=%d", imgNo, blkNo, blkEnd, blkCnt);
 	len=0;
 	if (blkNo%100!=0) len=sprintf(str, "blk[% 5d]:", blkNo);
 	for (blk=blkNo; blkCnt>0; blkCnt--, blk++)
@@ -1031,11 +1032,10 @@ int  fpga_image	(SFpgaImageCmd *msg)
 		TrPrintf(trace, "head[%d].fpga_image[%d]:(id=%d, page=%d, copy=%d, scan=%d) blocks %05d ... %05d (%05d ... %05d), clearBlockUsed=%d", head, idx,  msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->image.blkNo, _PageEnd[head][idx], msg->image.blkNo-RX_HBConfig.head[head].blkNo0, _PageEnd[head][idx]-RX_HBConfig.head[head].blkNo0, msg->image.clearBlockUsed);
 
 //		if (head==0) 
-		if (FALSE)
+		if (TEST_DEBUG && head==3) // _ImgInIdx>23   )
 		{
-			TrPrintfL(TRUE, "\n");
-			TrPrintfL(TRUE, "Image[head=%d][img=%d] loaded: blocks %05d ... %05d, clearBlockUsed=%d", head, idx, msg->image.blkNo, _PageEnd[head][idx], msg->image.clearBlockUsed);
-		//	_trace_used_flags(head, msg->image.blkNo, msg->image.blkCnt, _PageEnd[head][idx]);
+		//	TrPrintfL(TRUE, "Image[head=%d][img=%d] loaded: blocks %05d ... %05d, clearBlockUsed=%d", head, idx, msg->image.blkNo, _PageEnd[head][idx], msg->image.clearBlockUsed);
+			_trace_used_flags(head, idx, msg->image.blkNo, msg->image.blkCnt, _PageEnd[head][idx]);
 		}
 		
 		idx = (idx+1) % IMAGE_LIST_SIZE;
@@ -1695,10 +1695,21 @@ static int _check_print_done(void)
 			{
 				int i   = (Fpga.stat->pg_ctr[head]-1)%MAX_PAGES;
 				_PrintDonePos[head][i] = RX_FpgaStat.pg_in_position[head] + _Img[head][i].lengthPx;
-				if (head==0)
+				if (!TEST_DEBUG && head==0)
 				{
 					SPageId *pid = &_PageId[i];
 					TrPrintfL(TRUE, "PRINT GO  [%d]: id=%d, page=%d, copy=%d, scan=%d, pos=%d, donepos=%d", i, pid->id, pid->page, pid->copy, pid->scan,  RX_FpgaStat.pg_in_position[head], _PrintDonePos[head][i]);
+				}
+				if (TEST_DEBUG)
+				{
+					SPageId *pid = &_PageId[i];
+					TrPrintfL(TRUE, "Head[%d].PRINT GO  [%d]: id=%d, page=%d, copy=%d, scan=%d, pos=%d, donepos=%d, blocks %05d ... %05d", head, i, pid->id, pid->page, pid->copy, pid->scan,  RX_FpgaStat.pg_in_position[head], _PrintDonePos[head][i], _Img[head][i].blkNo, _PageEnd[head][i]);
+					if (head==3 && i==24)
+					{
+						int idx=24;
+						SFpgaImage	*img = &_Img[head][idx];
+						_trace_used_flags(head, idx, img->blkNo, img->blkCnt, _PageEnd[head][idx]);							
+					}
 				}
 			}
 			int time2=rx_get_ticks()-time;
@@ -1713,15 +1724,23 @@ static int _check_print_done(void)
 			//	_PrintDonePos[head][i] = 0;
 				RX_HBStatus[0].head[head].printDoneCnt++;
 
-				if (FALSE)
+				if (TEST_DEBUG)
 				{
 					char name[64];
 					sprintf(name, "Head[%d].Print-Done-%03d", head, RX_HBStatus[0].head[head].printDoneCnt);
-					fpga_trace_registers(name, FALSE);				
+					fpga_trace_registers(name, FALSE);
 				}
 				
 				TrPrintfL(TRUE, "Head[%d].PrintDone=%d, blocks %05d ... %05d", head, RX_HBStatus[0].head[head].printDoneCnt, img->blkNo, _PageEnd[head][i]);
+				
 				if (img->clearBlockUsed) _check_block_used_flags_clear(head, RX_HBStatus[0].head[head].printDoneCnt, img->blkNo, img->blkCnt);
+				
+				if (TEST_DEBUG && head==3 && _ImgInIdx>24) 
+				{					
+					int idx=24;
+					SFpgaImage	*img = &_Img[head][idx];
+					_trace_used_flags(head, idx, img->blkNo, img->blkCnt, _PageEnd[head][idx]);
+				}
 				_fpga_check_fp_errors(TRUE);
 			}
 			if (RX_HBStatus[0].head[head].printDoneCnt<pd) pd=RX_HBStatus[0].head[head].printDoneCnt;

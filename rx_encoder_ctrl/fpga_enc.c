@@ -416,9 +416,10 @@ void fpga_abort_printing(void)
 }
 
 //--- fpga_enc_config ---------------------------------------------------
-void fpga_enc_config(int inNo, SEncoderCfg *pCfg, int outNo, int khz, int restart)
+void fpga_enc_config(int inNo, SEncoderCfg *pCfg, int restart)
 {
 	int i;
+	int outNo = inNo;
 	
 	if (!_Init) return;
 
@@ -445,32 +446,15 @@ void fpga_enc_config(int inNo, SEncoderCfg *pCfg, int outNo, int khz, int restar
 	tw8_config(1, pCfg->speed_mmin, pCfg->printerType);
 
 //	_SpeedCfg_hz = (int)(pCfg->speed_mmin / 60.0 * 1200 / 25.4);
-		
-	if (khz)
+	
+	if (pCfg->simulation)
 	{
-		double freq;
-
-		_IncDist = _StrokeDist; // [µm] distance of encoder increments
-		
-		for (outNo=0; outNo<8; outNo++)
-		{
-			Fpga->cfg.encOut[outNo].encoder_no		= 0x08;
-			Fpga->cfg.encOut[outNo].reset_min_max	= TRUE;
-			Fpga->cfg.encOut[outNo].dist_ratio		= 0x80000000;
-			if (khz == 1) freq = 0xffffffff;
-			else		  freq = 50000.0 * 8.0 / khz;	// 8 Subpulses!
-			Fpga->cfg.encOut[outNo].synthetic_freq	= (UINT32)freq;
-			Fpga->cfg.encOut[outNo].backlash		= FALSE;
-			Fpga->cfg.encOut[outNo].scanning		= FALSE;				
-		}
 		for (i=0; i<SIZEOF(Fpga->cfg.pg); i++)
 		{	
 			Fpga->cfg.encIn[i].reset_pos		= 0;
 			Fpga->cfg.pg[i].reset_pos			= FALSE;
 			Fpga->cfg.pg[i].reset_pos			= TRUE;
 			Fpga->cfg.pg[i].reset_pos			= FALSE;
-			Fpga->cfg.pg[i].enc_start_pos_fwd	= 100;
-			Fpga->cfg.pg[i].pos_pg_fwd			= 10;
 		}
 	}
 	else
@@ -533,14 +517,15 @@ void fpga_enc_simu(int khz)
 {
 	int i, outNo;			
 	double freq;
-
+	
 	if		(khz<1)  freq = 0;
 	else if (khz==1) freq = 0xffffffff;
 	else		 	 freq = 50000.0 * 8.0 / khz;	// 8 Subpulses!
-	
+		
 	for (outNo=0; outNo<8; outNo++)
 	{
-		Fpga->cfg.encOut[outNo].encoder_no		= 0x08;
+		if(khz) Fpga->cfg.encOut[outNo].encoder_no = 0x08;
+		else    Fpga->cfg.encOut[outNo].encoder_no = outNo;
 		Fpga->cfg.encOut[outNo].reset_min_max	= TRUE;
 		Fpga->cfg.encOut[outNo].dist_ratio		= 0x80000000;
 		Fpga->cfg.encOut[outNo].synthetic_freq	= (UINT32)freq;
@@ -647,7 +632,7 @@ static void _fpga_corr_rotative(SEncoderCfg *pCfg, int restart)
 	
 	// reset_errors
 	
-	fpga_enc_config(1, pCfg, 1, 0, restart);
+	fpga_enc_config(1, pCfg, restart);
 	
 //	Error(WARN, 0, "Warning: Testsoftware for Roller Correction enabled");
 	
@@ -707,7 +692,7 @@ static void _fpga_corr_linear(SEncoderCfg *pCfg, int restart)
 		dist_head		=  48800;			
 	}
 	
-	fpga_enc_config(1, pCfg, 1, 0, restart);
+	fpga_enc_config(1, pCfg, restart);
 	
 	_IncDist = 1000000.0/pCfg->incPerMeter; // [µm] distance of encoder increments
 

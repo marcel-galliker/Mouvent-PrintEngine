@@ -199,6 +199,7 @@ namespace rx_license_ctrl
                         pos=0;
                         while (pos+2<contentCode.Length)
                         {
+                            //--- convert special characters ---
                             if (contentCode[pos]=='&' && contentCode[pos+1]=='#')
                             {
                                 int val=0;
@@ -210,40 +211,34 @@ namespace rx_license_ctrl
                                 contentCode.Remove(pos, end-pos+1);
                                 contentCode.Insert(pos, (char)val);
                             }
+                            //--- remove tags ---
+                            if (contentCode[pos]=='<')
+                            {
+                                end=pos;
+                                while (contentCode[end]!='>') end++;
+                                contentCode.Remove(pos, end-pos+1);
+                            }
                             pos++;
                         }
-//                        contentCode = contentCode.Remove(pos);
-                        
-                        string content = RxEncypt.Decrypt(contentCode.ToString(), RxBtDef.InfoPwd);
-                        string license = create_license(content, level);
-                        string licCode = RxEncypt.Encrypt(license, RxBtDef.LicPwd);
+
                         email.Load(new PropertySet(EmailMessageSchema.From));
-                        send_license(email.From, licCode);
-                        Console.WriteLine("    "+email.From.Address);
-                        protocol.AppendLine("    "+email.From.Address);
-                    }
-                    /*
-                    if (email.Attachments.Count>0)
-                    {
-                        FileAttachment fileAttachment = email.Attachments[0] as FileAttachment;
-                        if (fileAttachment!=null)
+                        try
                         {
-                            fileAttachment.Load();
-                            string contentCode = System.Text.Encoding.Default.GetString(fileAttachment.Content);
-                            string content = RxEncypt.Decrypt(contentCode, RxBtDef.InfoPwd);
+                            string content = RxEncypt.Decrypt(contentCode.ToString(), RxBtDef.InfoPwd);
                             string license = create_license(content, level);
                             string licCode = RxEncypt.Encrypt(license, RxBtDef.LicPwd);
-                            email.Load(new PropertySet(EmailMessageSchema.From));
                             send_license(email.From, licCode);
                             Console.WriteLine("    "+email.From.Address);
                             protocol.AppendLine("    "+email.From.Address);
+                            email.IsRead = true;
+                            email.Update(ConflictResolutionMode.AlwaysOverwrite);
+                        }
+                        catch(Exception e)
+                        {
+                            Console.WriteLine("    "+email.From.Address+" Error");
+                            protocol.AppendLine("    "+email.From.Address+" Error");
                         }
                     }
-                    */
-
-
-                    email.IsRead = true;
-                    email.Update(ConflictResolutionMode.AlwaysOverwrite);
                     cnt++;
                 }
             }

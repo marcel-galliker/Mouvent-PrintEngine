@@ -277,7 +277,7 @@ static int _do_encoder_cfg 	(RX_SOCKET socket, SEncoderCfg 	*pcfg)
 
 	_Requests++;
 	memcpy(&RX_EncoderCfg, pcfg, sizeof(RX_EncoderCfg));
-	fpga_enc_config(0, pcfg, 0, 0, FALSE);
+	fpga_enc_config(0, pcfg, FALSE);
 	reply.hdr.msgId  = REP_ENCODER_CFG;
 	reply.hdr.msgLen = sizeof(reply);
 	reply.reply = fpga_pg_config(socket, pcfg, FALSE);
@@ -320,7 +320,7 @@ static int _do_encoder_pg_restart(RX_SOCKET socket)
 		if (pmsg->window)	Error(ERR_CONT, 0, "Not implemented yet");									
 	}
 
-	fpga_enc_config(0, &RX_EncoderCfg, 0, 0, TRUE);
+	fpga_enc_config(0, &RX_EncoderCfg, TRUE);
 	fpga_pg_config(INVALID_SOCKET, &RX_EncoderCfg, TRUE);
 	
 	return REPLY_OK;
