@@ -29,6 +29,7 @@ namespace RX_DigiPrint.Services
             try
             {
                 Console.WriteLine("handle_message id={0:X}, len={1}", hdr.msgId, hdr.msgLen);
+             //   RxGlobals.Events.AddItem(new LogItem(string.Format("handle_message id={0:X}, len={1}", hdr.msgId, hdr.msgLen)));
                 switch (hdr.msgId)
                 {
                     case TcpIp.REP_EVT_CONFIRM:     RxGlobals.Events.Reset();   break;

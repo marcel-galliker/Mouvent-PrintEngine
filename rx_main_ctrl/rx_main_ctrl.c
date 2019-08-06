@@ -233,7 +233,7 @@ int main(int argc, char* argv[])
 		spool_tick();
 		net_tick();
 		chiller_tick();
-		co_tick();
+	//	co_tick();	// can hang sometimes!!!
 		ctr_tick();
 		_menu();
 	}

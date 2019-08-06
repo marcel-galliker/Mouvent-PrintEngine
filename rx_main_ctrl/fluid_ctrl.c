@@ -67,7 +67,6 @@ typedef struct
 
 static SFluidThreadPar _FluidThreadPar[FLUID_BOARD_CNT];
 
-static void *_fluid_thread(void *lpParameter);
 
 SInkSupplyStat   _FluidStatus[INK_SUPPLY_CNT+2];
 ELogItemType	 _ScalesErr[INK_SUPPLY_CNT+2];
@@ -144,6 +143,7 @@ static void *_fluid_thread(void *lpParameter)
 					errNo=sok_open_client_2(&_FluidThreadPar[i].socket, addr, PORT_CTRL_FLUID, SOCK_STREAM, _handle_fluid_ctrl_msg, _connection_closed);
 					if (errNo == REPLY_OK)
 					{
+						ErrorEx(dev_fluid, i, LOG, 0, "Connected");
 						_FluidThreadPar[i].aliveTime=0;
 						fluid_set_config();
 						/*
@@ -327,7 +327,10 @@ void fluid_tick(void)
 		if (_FluidThreadPar[i].socket!=INVALID_SOCKET) 
 		{
 			if (_FluidThreadPar[i].aliveTime && _FluidThreadPar[i].aliveTime + TIMEOUT < time)
+			{
 				sok_close(&_FluidThreadPar[i].socket);
+				ErrorEx(dev_fluid, i, LOG, 0, "Connection lost");
+			}
 			else
 				sok_send_2(&_FluidThreadPar[i].socket, CMD_FLUID_STAT, INK_PER_BOARD*sizeof(state[0]), &state[i*INK_PER_BOARD]);
 		}
