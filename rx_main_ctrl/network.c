@@ -434,7 +434,7 @@ UINT32 net_head_data_addr	(int headNo, int udpNo, int portCnt)
 	net_device_to_ipaddr(dev_head, headNo, ipAddr, sizeof(ipAddr));
 	sscanf(ipAddr, "%d.%d.%d.%d", &addr[0], &addr[1], &addr[2], &addr[3]);
 	if (portCnt)	sprintf(ipAddr, "%d.%d.%d.%d", addr[0], addr[1], addr[2] + 1 + ((headNo*UDP_PORT_CNT + udpNo) % portCnt), addr[3]);
-	else			sprintf(ipAddr, "%d.%d.%d.%d", addr[0], addr[1], addr[2], 20+10*udpNo+headNo);
+	else			sprintf(ipAddr, "%d.%d.%d.%d", addr[0], addr[1], addr[2], 50+10*udpNo+headNo);
 	return sok_addr_32(ipAddr);
 }
 

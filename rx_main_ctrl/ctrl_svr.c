@@ -150,10 +150,14 @@ static int _prepare_config()
 	RX_Spooler.overlap	   = RX_Config.printer.overlap;
 	
 	//--- ethernet ports on additional interface board -------------------
+#ifdef linux
 	ethPortCnt=sok_get_ifcnt("p");
 	if (RX_Config.printer.type==printer_cleaf)		ethPortCnt=4;
 	if (RX_Config.printer.type==printer_test_table) ethPortCnt=0;	// historic
 	if (arg_hamster)								ethPortCnt=0;
+#else
+	ethPortCnt=0;
+#endif
 	
 	if(ethPortCnt) RX_Spooler.dataBlkSize = DATA_BLOCK_SIZE_JUMBO;
 	else           RX_Spooler.dataBlkSize = DATA_BLOCK_SIZE_STD;		

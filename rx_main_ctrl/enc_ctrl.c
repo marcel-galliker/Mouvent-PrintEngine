@@ -278,8 +278,11 @@ int  enc_start_printing(SPrintQueueItem *pitem)
 	*/
 		
 	case printer_LB701:			msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; 
-								msg.diameter[0]=79; msg.diameter[1]=74; 
+								msg.diameter[0]=79; msg.diameter[1]=74;
 								msg.correction=CORR_ROTATIVE;
+								#ifndef linux
+									msg.correction=CORR_OFF; // special for testmachine in Seon
+								#endif
 								break;
 		
 	case printer_LB702_UV:		msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_ROTATIVE; msg.diameter[0]=78; msg.diameter[1]=74; break;	

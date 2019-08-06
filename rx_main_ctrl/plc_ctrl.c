@@ -378,10 +378,14 @@ double	 plc_get_step_dist_mm(void)
 //--- plc_get_thickness --------------------
 int	plc_get_thickness(void)
 {
+#ifdef linux
 	FLOAT thickness;
 	if (_SimuPLC) thickness = 1.0;
 	else lc_get_value_by_name_FLOAT(APP"PAR_MATERIAL_THIKNESS",	&thickness);
 	return (int)(thickness*1000);
+#else
+	return 0;
+#endif
 }
 
 //--- _plc_send_par -------------------------------------
@@ -1295,6 +1299,13 @@ static void _plc_state_ctrl()
 			}
 		}
 		
+		/*
+		if(_StartPrinting && _StartEncoderItem.pageWidth == 0)
+		{
+			Error(LOG, 0, "enc_ready=%d, pq_is_ready2print=%d, printState=%d, z_in_print=%d", enc_ready(), pq_is_ready2print(&_StartEncoderItem), RX_PrinterStatus.printState, RX_StepperStatus.info.z_in_print);
+		}
+		*/
+
 		if(_StartPrinting
 			&& _StartEncoderItem.pageWidth == 0 
 			&& enc_ready() 
