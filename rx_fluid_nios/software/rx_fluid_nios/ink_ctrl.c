@@ -42,6 +42,9 @@
 // #define 	TIME_HARD_PURGE				5000
 #define 	TIME_HARD_PURGE				10000
 
+#define 	TIME_EMPTY					3000
+#define 	TIME_PRESSURE_FOR_FLUSH		200
+
 #define		TIME_CALIBRATE				30000
 
 #define 	DEGASSING_VACCUUM_UV		800
@@ -93,6 +96,11 @@ static int	_CalibrationStability[NIOS_INK_SUPPLY_CNT] = {0};
 static int  _cylinderPres_10[NIOS_INK_SUPPLY_CNT] = {0};
 static UINT32 _LastPumpTicks[NIOS_INK_SUPPLY_CNT] = {0};
 static UINT32 _PumpSpeed1000[NIOS_INK_SUPPLY_CNT] = {0};
+static int 	_FlushTimeISPresStable[NIOS_INK_SUPPLY_CNT] = {0};
+static int 	_FlushISPressureStable[NIOS_INK_SUPPLY_CNT] = {0};
+static int  _TimeEmpty[NIOS_INK_SUPPLY_CNT] = {0};
+static int 	_EmptyDetecTEndState[NIOS_INK_SUPPLY_CNT] = {0};
+static int 	_EmptyPressureStored[NIOS_INK_SUPPLY_CNT] = {0};
 
 //--- calibration -------------------------
 // static int	  _CalTime[NIOS_INK_SUPPLY_CNT];
@@ -457,16 +465,29 @@ void ink_tick_10ms(void)
 			case ctrl_flush_step1:
 			case ctrl_flush_step2:
 				_pump_ctrl(isNo, PRESSURE_FLUSH,FALSE);
+				_FlushISPressureStable[isNo] = pRX_Status->ink_supply[isNo].IS_Pressure_Actual;
+				_FlushTimeISPresStable[isNo] = 0;
 				pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
 				break;
 
 			case ctrl_flush_step3:
 				_pump_ctrl(isNo, PRESSURE_FLUSH,FALSE);
+				// detection of IS pressure stability to start the flush
+				if(abs(_FlushISPressureStable[isNo] -  pRX_Status->ink_supply[isNo].IS_Pressure_Actual) < 200)
+					_FlushTimeISPresStable[isNo]++;
+				else
+				{
+					_FlushISPressureStable[isNo] = pRX_Status->ink_supply[isNo].IS_Pressure_Actual;
+					_FlushTimeISPresStable[isNo] = 0;
+				}
 				// ink pressure must be applied on all cylinders so that no flush is pressed back
-				if (pRX_Config->ink_supply[isNo].cylinderPresSet==0
-				|| (pRX_Status->ink_supply[isNo].IS_Pressure_Actual != INVALID_VALUE
-						&&  pRX_Status->ink_supply[isNo].IS_Pressure_Actual >= 500)
-					)
+
+				//if (pRX_Config->ink_supply[isNo].cylinderPresSet==0
+				//||
+				if(pRX_Status->ink_supply[isNo].IS_Pressure_Actual != INVALID_VALUE
+						&&  _FlushTimeISPresStable[isNo] > TIME_PRESSURE_FOR_FLUSH
+						&& pRX_Status->ink_supply[isNo].IS_Pressure_Actual > 100)
+				//	)
 					pRX_Status->ink_supply[isNo].ctrl_state = ctrl_flush_step3;
 				break;
 
@@ -576,8 +597,8 @@ void ink_tick_10ms(void)
 
 			case ctrl_fill_step3:
 				_pump_ctrl(isNo, _FillPressure,FALSE);
-			//	if (pRX_Status->ink_supply[isNo].inkPumpSpeed_set<90)
-			//		pRX_Status->ink_supply[isNo].ctrl_state = ctrl_fill_step3;
+				if ((pRX_Status->ink_supply[isNo].PIDpump_Output < INK_PUMP_VAL_MAX / 2)&&(pRX_Status->ink_supply[isNo].IS_Pressure_Actual > 100))
+					pRX_Status->ink_supply[isNo].ctrl_state = ctrl_fill_step3;
 				break;
 
 			// --- EMPTY -------------------------------------------------
@@ -596,7 +617,8 @@ void ink_tick_10ms(void)
 					_InkSupply[i].degassing = FALSE;
 				}
 				_pump_ctrl(isNo, 0,2);		// ink-pump
-
+				_TimeEmpty[isNo] = 0;
+				_EmptyDetecTEndState[isNo] = 1;
 				pRX_Status->ink_supply[isNo].ctrl_state = ctrl_empty_step1;
 				break;
 
@@ -604,11 +626,29 @@ void ink_tick_10ms(void)
 				_set_bleed_valve(isNo, TRUE);
 				_set_air_valve(isNo, FALSE);
 				empty_pressure = 100 * pRX_Config->headsPerColor;
+				if(empty_pressure < 400) empty_pressure = 400;
 				if(empty_pressure > 800) empty_pressure = 800;
 				if(pRX_Config->ink_supply[isNo].condMeniscus < -50)
 					_set_pressure_value(pRX_Status->air_pressure < empty_pressure);
 				else _set_pressure_value(FALSE);
-				pRX_Status->ink_supply[isNo].ctrl_state = ctrl_empty_step2;
+
+				// minimum 20 secondes of running air pump for emptying the cylinder
+				_TimeEmpty[isNo]++;
+				switch(_EmptyDetecTEndState[isNo])
+				{
+					case 1 :
+						if(_TimeEmpty[isNo] > TIME_EMPTY) _EmptyDetecTEndState[isNo]++;
+						break;
+					case 2 :
+						_EmptyPressureStored[isNo] = pRX_Status->ink_supply[isNo].IS_Pressure_Actual;
+						_EmptyDetecTEndState[isNo]++;
+						break;
+					case 3 :
+						if(pRX_Status->ink_supply[isNo].IS_Pressure_Actual < _EmptyPressureStored[isNo] / 2)
+							pRX_Status->ink_supply[isNo].ctrl_state = ctrl_empty_step2;
+						break;
+				}
+
 				break;
 
 			case ctrl_empty_step3:

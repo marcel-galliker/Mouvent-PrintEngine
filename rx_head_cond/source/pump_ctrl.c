@@ -389,14 +389,19 @@ void pump_tick_10ms(void)
 						max_pressure = MBAR_500;
 						RX_Status.mode = RX_Config.mode;
 						break;
-		case ctrl_empty_step2:
-						_pump_pid();
-						max_pressure = MBAR_500;
-						if (RX_Status.error & (COND_ERR_meniscus|COND_ERR_pump_no_ink))
+		case ctrl_empty_step2:			
+						if(RX_Status.mode != RX_Config.mode)
+						{
+							max_pressure = MBAR_500;
+							if (RX_Status.error & (COND_ERR_meniscus|COND_ERR_pump_no_ink))
+								RX_Status.mode = RX_Config.mode;
+							else _pump_pid();
+						}
+						else
 						{
 							temp_ctrl_on(FALSE);
 							turn_off_pump();
-							RX_Status.mode = RX_Config.mode;
+							_set_valve(TO_FLUSH);
 						}
                         break;
 		
