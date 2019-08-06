@@ -664,6 +664,16 @@ namespace RX_DigiPrint.Models
             if (_FilePath==null) _FilePath=filePath;
             LoadDefaults();
 
+            //--- tif file ---
+            try
+            {
+                string[] fname = Directory.GetFiles(filePath, "*.tif");
+                if (fname.Length>0 && _read_tiff_properties(fname[0])) return;
+            }
+            catch (Exception)
+            {};
+        //    if (_read_tiff_properties(filePath)) return;
+
             //--- label ----------------------------
             {
                 _FilePath = filePath;
@@ -676,15 +686,6 @@ namespace RX_DigiPrint.Models
                 return;
             }
 
-            //--- tif file ---
-            try
-            {
-                string[] fname = Directory.GetFiles(filePath, "*.tif");
-                if (fname.Length>0 && _read_tiff_properties(fname[0])) return;
-            }
-            catch (Exception)
-            {};
-            if (_read_tiff_properties(filePath)) return;
 
             //---bmp file -----------------------------
             if (_read_bmp_properties(filePath)) return;
@@ -692,20 +693,23 @@ namespace RX_DigiPrint.Models
             if (_read_flz_properties(filePath)) return;
 
             //--- pdf file -------------
-            try
+            if (File.Exists(filePath+".pdf"))
             {
-                PdfReader pdfReader = new PdfReader(filePath);
-                SrcPages      = pdfReader.NumberOfPages;
-                SrcWidth      = (25.4*Convert.ToUInt32(pdfReader.GetPageSize(1).Width)/72.0  + 0.5);    // 72 DPI!
-                SrcHeight     = (25.4*Convert.ToUInt32(pdfReader.GetPageSize(1).Height)/72.0 + 0.5);    // 72 DPI!
-                PageWidth     = SrcWidth;
-                PageHeight    = SrcHeight;
-                return;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                SrcPages = 1;
+                try
+                {
+                    PdfReader pdfReader = new PdfReader(filePath);
+                    SrcPages      = pdfReader.NumberOfPages;
+                    SrcWidth      = (25.4*Convert.ToUInt32(pdfReader.GetPageSize(1).Width)/72.0  + 0.5);    // 72 DPI!
+                    SrcHeight     = (25.4*Convert.ToUInt32(pdfReader.GetPageSize(1).Height)/72.0 + 0.5);    // 72 DPI!
+                    PageWidth     = SrcWidth;
+                    PageHeight    = SrcHeight;
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    SrcPages = 1;
+                }
             }
         }
 
@@ -782,31 +786,35 @@ namespace RX_DigiPrint.Models
         public void LoadDefaults()
         {
             XmlTextReader xml;
+            string path=Dir.local_path(FilePath+string.Format("\\{0}.xml", Path.GetFileName(_FilePath)));
 
-            //--- defaults ---
-            xml = new XmlTextReader(Dir.local_path(FilePath+string.Format("\\{0}.xml", Path.GetFileName(_FilePath))));
-            try
+            if (File.Exists(path))
             {
-                while(xml.Read())
+                //--- defaults ---
+                xml = new XmlTextReader(path);
+                try
                 {
-                    if (xml.NodeType==XmlNodeType.Element && xml.Name.Equals("Defaults"))
+                    while(xml.Read())
                     {
-                        for  (int i=0; i<xml.AttributeCount; i++)
+                        if (xml.NodeType==XmlNodeType.Element && xml.Name.Equals("Defaults"))
                         {
-                            xml.MoveToAttribute(i);
-                            var prop = GetType().GetProperty(xml.Name);
-                            if (prop!=null) prop.SetValue(this, TypeDescriptor.GetConverter(prop.PropertyType).ConvertFromString(xml.Value));
+                            for  (int i=0; i<xml.AttributeCount; i++)
+                            {
+                                xml.MoveToAttribute(i);
+                                var prop = GetType().GetProperty(xml.Name);
+                                if (prop!=null) prop.SetValue(this, TypeDescriptor.GetConverter(prop.PropertyType).ConvertFromString(xml.Value));
+                            }
+                            xml.MoveToElement();
                         }
-                        xml.MoveToElement();
-                    }
-                    if (xml.NodeType==XmlNodeType.Element && xml.Name.Equals("PageNumber"))
-                        PageNumber = new PageNumber(xml);
+                        if (xml.NodeType==XmlNodeType.Element && xml.Name.Equals("PageNumber"))
+                            PageNumber = new PageNumber(xml);
+                    }            
+                }
+
+                catch(Exception)
+                {
                 }            
             }
-
-            catch(Exception)
-            {
-            }            
         }
 
         //--- SaveDefaults --------------------------------------------------------

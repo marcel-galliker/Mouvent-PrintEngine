@@ -38,6 +38,12 @@ namespace RX_DigiPrint.Views.UserControls
             string actDir = _ActDir;
             TreeWiew.Items.Clear();
             TreeWiew.Items.Add(_getDir(_ripped_data));
+            if (TreeWiew.Items.Count>0)
+            {
+                TreeViewItem item = TreeWiew.Items[0] as TreeViewItem;
+                item.IsExpanded = true;
+            }
+            
           //  TreeWiew.Items.Add(_getDir(_source_data));
             ActDir=actDir;
         }

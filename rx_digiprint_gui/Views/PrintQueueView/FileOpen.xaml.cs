@@ -60,7 +60,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
 
             DirGrid.StylusSystemGesture += RxXamGrid.RxStylusSystemGesture;
 
-        //    SmallSize.IsChecked   = (_PreviewSize==0);
+        //  SmallSize.IsChecked     = (_PreviewSize==0);
             MidSize.IsChecked       = (_PreviewSize==1);
             LargeSize.IsChecked     = (_PreviewSize==2);
             RippedData.IsChecked    = true;
@@ -81,7 +81,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
                         DirTree.ActDirChangedEvent += _ActDirChanged;
                         DirTree.ActDir = Properties.Settings.Default.FileOpen_ActDir;
                         DirTreeGrid.Children.Add(DirTree);
-                        Refresh();
+                   //     Refresh();
                     });
                 }).Start();
             }
@@ -393,7 +393,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
         {
             if ((bool)e.NewValue)
             {
-       //         if (DirGrid.ItemsSource==null) Refresh();
+                if (DirGrid.ItemsSource==null) Refresh();
 
                 int i;
                 int orientation;

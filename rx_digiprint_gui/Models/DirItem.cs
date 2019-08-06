@@ -83,14 +83,15 @@ namespace RX_DigiPrint.Models
                 if (!File.Exists(preview)) preview = Dir.local_path(_FileName + "\\" + Path.GetFileName(_FileName) + "_preview.bmp"); // wasatch rip
                 if (File.Exists(preview))
                 {
-                    FileInfo info = new FileInfo(preview);
-                    Time = info.LastWriteTime.ToString();
-                    _FileType = ENFileType.DataFile;
-                    // Preview = new System.Windows.Media.Imaging.BitmapImage(new Uri(preview));                              
-                    {
+                    Preview = new BitmapImage(new Uri(preview));                              
+                    
+                    /* --- the same with a local copy of the file
+                    {                        
+                        FileInfo info = new FileInfo(preview);
+                        Time = info.LastWriteTime.ToString();
+                        _FileType = ENFileType.DataFile;
                         string thumb_name = info.Directory +"\\"+ Path.GetFileNameWithoutExtension(info.FullName) + ".bmp";
                         thumb_name = Path.GetTempPath() + "rx_thumb_nails\\"+thumb_name.Remove(0, info.Directory.Root.ToString().Length);
-                        
                         try
                         {
                             if (!File.Exists(thumb_name) || !File.GetLastWriteTime(info.FullName).Equals(File.GetLastWriteTime(thumb_name)))
@@ -98,13 +99,14 @@ namespace RX_DigiPrint.Models
                                 Directory.CreateDirectory(Path.GetDirectoryName(thumb_name));
                                 File.Copy(preview, thumb_name, true);
                             }
-                            Preview = new System.Windows.Media.Imaging.BitmapImage(new Uri(thumb_name));
+                            Preview = new BitmapImage(new Uri(thumb_name));
                         }
                         catch(Exception)
                         {  
                             Preview = new BitmapImage(new Uri("..\\..\\Resources\\Bitmaps\\MessageBox\\No.ico", UriKind.RelativeOrAbsolute));
                         }
                     }
+                     */
                 }
                 else if (File.Exists(labeldef))
                 {

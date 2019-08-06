@@ -74,7 +74,7 @@ namespace RX_DigiPrint.Models
             {
                 if (RxPing.HostReachable(path))
                 {
-                    System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.WaitCursor;
+                //    System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.WaitCursor;
             
                     doc = RX_Rip.rip_open_xml_local(path, _TempPath);
                     Console.WriteLine("Load ({0}) {1}.{2} 1", path, DateTime.Now.Second, DateTime.Now.Millisecond);
@@ -92,7 +92,7 @@ namespace RX_DigiPrint.Models
                         return true;
                     }
                     Console.WriteLine("Load ({0}) {1}.{2} 3", path, DateTime.Now.Second, DateTime.Now.Millisecond);
-                    System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.Arrow;
+                //    System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.Arrow;
                 }
                 Console.WriteLine("Load ({0}) {1}.{2} end", path, DateTime.Now.Second, DateTime.Now.Millisecond);
             }
