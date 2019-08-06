@@ -569,6 +569,8 @@ int  fpga_set_config(RX_SOCKET socket)
 //	Error(LOG,  0, "fpga_set_config done");
 //	_TestFSM = 0;
 	
+	if (TEST_DEBUG) Error(WARN, 0, "TEST_DEBUG=%d", TEST_DEBUG);
+	
 	TrPrintfL(TRUE, "fpga_set_config done");
 
 	return REPLY_OK;

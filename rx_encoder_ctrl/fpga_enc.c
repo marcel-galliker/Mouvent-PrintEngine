@@ -394,10 +394,10 @@ void fpga_stop_printing(void)
 {
 //	_UV_Stopping = TRUE;
 //	_UV_BiDir    = TRUE;
-	if (RX_EncoderCfg.printerType!=printer_test_table) FpgaQSys->out = 0;
 	if (_Init)
 	{
 		int pgNo;
+		if (RX_EncoderCfg.printerType!=printer_test_table) FpgaQSys->out = 0;
 		for (pgNo=0; pgNo<SIZEOF(Fpga->cfg.pg); pgNo++)
 		{
 			Fpga->cfg.pg[pgNo].enc_start_pos_fwd =   10000*1000;
@@ -1150,6 +1150,10 @@ static void _fpga_display_status(int showCorrection, int showParam)
 
 		if (!showCorrection && !showParam)
 		{
+			term_printf("  Inputs: ");     for (i=0; i<4; i++) {if (FpgaQSys->in &(1<<i)) term_printf("*"); else term_printf("_");};	
+			term_printf("     Outputs: "); for (i=0; i<4; i++) {if (FpgaQSys->out&(1<<i)) term_printf("*"); else term_printf("_");};	
+			term_printf("\n");
+
 			term_printf("\n");
 			term_printf("input status     "); for (i=0; i<cnt; i++) term_printf("____%d____  ", i);								term_printf("\n");
 			term_printf("  position:      "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encIn[i].position);		term_printf("\n");
