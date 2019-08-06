@@ -180,7 +180,8 @@ namespace RX_DigiPrint.Services
                     }
 
                     //--- handling messages --------------------------------------------
-                    bool first=true;
+                    bool msg_len=false;
+                    bool msg_split=false;
                     TcpIp.SInkSupplyStatMsg msg=new TcpIp.SInkSupplyStatMsg();
                     while (_Running && Connected)
                     {
@@ -195,11 +196,11 @@ namespace RX_DigiPrint.Services
                                 RxGlobals.Events.AddItem(new LogItem(string.Format("Receive Buffer Overflow. Last good msg(id:{0:X} len:{1})", msg.hdr.msgId, msg.hdr.msgLen, msg.no)));
                                 break;
                             }
-                            else if (len==0)
+                            else if (len<8 || len>buffer.Length)
                             {
-                                if (first)
-                                    RxGlobals.Events.AddItem(new LogItem(string.Format("Receive Len=0. Last good msg(id:{0:X} len:{1})", msgHandler.hdr.msgId, msgHandler.hdr.msgLen)));
-                                first=false;
+                                if (!msg_len)
+                                    RxGlobals.Events.AddItem(new LogItem(string.Format("Receive invalid Telegram Length={0}. Last good msg(id:{1:X} len:{2})", len, msgHandler.hdr.msgId, msgHandler.hdr.msgLen)));
+                                msg_len=true;
                             }
                             else
                             {
@@ -213,8 +214,11 @@ namespace RX_DigiPrint.Services
                                     }
                                      * */
                                     size += read;
-                                    if (size<len)
-                                        RxGlobals.Events.AddItem(new LogItem(string.Format("SPLIT")));
+                                    if (size<len && !msg_split)
+                                    {
+                                        RxGlobals.Events.AddItem(new LogItem(string.Format("RxInterface: IP Message was SPLIT")));
+                                        msg_split = true;
+                                    }
                                 }
                                 if (read <= 0) break;
                                 RxStructConvert.ToStruct(out msg, buffer);
