@@ -48,6 +48,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
             }
             else
             {
+                DataContext = null;
                 Settings.Visibility = Visibility.Hidden;
             }
         }

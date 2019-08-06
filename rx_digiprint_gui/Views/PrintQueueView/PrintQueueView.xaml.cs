@@ -38,10 +38,12 @@ namespace RX_DigiPrint.Views.PrintQueueView
         {
             InitializeComponent();
             DataContext = this;
+            PrintSettings.DataContext = null;
 
             PrintQueueGrid.ItemsSource   = RxGlobals.PrintQueue.Queue;
             PrintedQueueGrid.ItemsSource = RxGlobals.PrintQueue.Printed;
 
+            RxGlobals.PrintQueue.Queue.CollectionChanged += PrintQueue_CollectionChanged;
             RxGlobals.PrintSystem.PropertyChanged   += PrintSystem_PropertyChanged;
             UpdateGridColumns();
 
@@ -71,6 +73,20 @@ namespace RX_DigiPrint.Views.PrintQueueView
                     MainGrid.Children.Add(FileOpen_LB702);
                 });
             }).Start();
+        }
+
+        //--- PrintQueue_CollectionChanged -------------------
+        void PrintQueue_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_UV)
+            {
+                if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Remove)
+                {
+                    PrintQueueItem item = e.OldItems[0] as PrintQueueItem;
+                    if (PrintQueueGrid.Rows.Count==0) 
+                        PrintSettings.DataContext=null;
+                }
+            }
         }
 
         //--- PrintSystem_PropertyChanged --------------------------------------------
@@ -390,34 +406,40 @@ namespace RX_DigiPrint.Views.PrintQueueView
         private void PrintQueueGrid_SelectedRowsCollectionChanged(object sender, SelectionCollectionChangedEventArgs<SelectedRowsCollection> e)
         {
             AllButtons(Visibility.Visible);
+            /*
 			if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_UV)
 			{
-            	if (e.NewSelectedItems.Count>0) PrintSettings.DataContext = e.NewSelectedItems[0].Data;
+            	if (e.NewSelectedItems.Count>0) 
+                {
+                    if (PrintSettings.DataContext==null)
+                    {
+    //                  PrintSettings.DataContext = e.NewSelectedItems[0].Data;
+                        PrintQueueGrid.ActiveItem = PrintQueueGrid.Rows[0].Data;
+                        PrintQueueGrid.Rows[0].IsSelected = true;
+                    }
+                }
+            //    else PrintSettings.DataContext = null;   
 			}
-			
+            */
+            /*
             if (e.NewSelectedItems.Count>0)
             {
                 foreach(Row row in PrintedQueueGrid.Rows) row.IsSelected = false;
                 PrintQueueGrid.ActiveItem = e.NewSelectedItems[0].Data;
+                PrintQueueGrid.Rows[e.NewSelectedItems[0].Index].IsSelected = true;
 			}
+             * */
         }
 
         //--- Grid_MouseDown ------------------------------------------------
         private void Grid_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            PrintQueueItem selected = ((sender as Grid).DataContext) as PrintQueueItem;
+            Grid grid = sender as Grid;
             foreach(Row row in PrintQueueGrid.Rows)
             {
                 PrintQueueItem item = row.Data as PrintQueueItem;
-                if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_UV)
-                {
-                    if (item.Equals(selected))
-                    {
-                        PrintSettings.DataContext = item;
-                        item.IsSelected = !item.IsSelected;
-                    }
-                } 
-                else if (item!=null) item.IsSelected = false;
+                if (item!=null && grid.DataContext.Equals(item)) 
+                    item.IsSelected = !item.IsSelected;
             }
             _update_selected_items();
             e.Handled = true;
@@ -512,6 +534,15 @@ namespace RX_DigiPrint.Views.PrintQueueView
             }
             PrintQueueItem item = e.Row.Data as PrintQueueItem;
             if (item!=null && RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf) item.PreviewOrientation = 270;
+
+            if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_UV)
+            {
+                if (PrintSettings.DataContext==null)
+                {
+                    e.Row.IsSelected = true;
+                    PrintSettings.DataContext = e.Row.Data;
+                }
+            }
         }
 
         //--- Rotate_Clicked ------------------------------------
@@ -587,6 +618,17 @@ namespace RX_DigiPrint.Views.PrintQueueView
             {
              // Debug.WriteLine(string.Format("{0}:Cancel", Environment.TickCount));
                 e.Cancel=true;
+            }
+        }
+
+        private void PrintQueueGrid_ActiveCellChanged(object sender, EventArgs e)
+        {
+            if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_UV)
+            {
+                XamGrid         grid = sender as XamGrid;
+                Cell            cell = grid.ActiveCell as Cell;
+                if (cell==null) PrintSettings.DataContext = null;
+                else            PrintSettings.DataContext = cell.Row.Data as PrintQueueItem;
             }
         }
     }

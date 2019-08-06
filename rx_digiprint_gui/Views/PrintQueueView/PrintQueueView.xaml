@@ -81,6 +81,7 @@
 			    x:Name="PrintQueueGrid"
                 Grid.Row="2"
                 AutoGenerateColumns="False"
+                ActiveCellChanged="PrintQueueGrid_ActiveCellChanged"
                 HeaderStyle="{DynamicResource XamGridHeaderStyle}"
                 CellStyle="{DynamicResource XamGridCellControlStyle}"
                 Style="{DynamicResource XamGrid-WideScroll-Style}"
