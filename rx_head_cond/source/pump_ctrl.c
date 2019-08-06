@@ -313,15 +313,12 @@ void pump_tick_10ms(void)
 		case ctrl_purge:
 		case ctrl_purge_hard:
 		case ctrl_purge_micro:
-						if(RX_Status.mode == ctrl_off)
-						{
-							temp_ctrl_on(FALSE);
-							turn_off_pump();
-							RX_Status.pressure_in_max=INVALID_VALUE;
-							max_pressure = MBAR_500;
-							pid_reset(&_PumpPID);
-							RX_Status.mode = RX_Config.mode;
-						}
+						temp_ctrl_on(FALSE);
+						turn_off_pump();
+						RX_Status.pressure_in_max=INVALID_VALUE;
+						max_pressure = MBAR_500;
+						pid_reset(&_PumpPID);
+						RX_Status.mode = RX_Config.mode;
 						break;
 		
 		case ctrl_purge_step1:
@@ -356,12 +353,9 @@ void pump_tick_10ms(void)
 		case ctrl_flush_night:
 		case ctrl_flush_weekend:
 		case ctrl_flush_week:
-                        if(RX_Status.mode == ctrl_off)
-						{
-							turn_off_pump(); // opens FLUSH valve
-							max_pressure 	= MBAR_500;
-							RX_Status.mode 	= RX_Config.mode;
-						}
+						turn_off_pump(); // opens FLUSH valve
+						max_pressure 	= MBAR_500;
+						RX_Status.mode 	= RX_Config.mode;
                         break;
         
 		case ctrl_flush_step1:        
@@ -374,18 +368,15 @@ void pump_tick_10ms(void)
 		
 		//--- EMPTY ------------------------------------------------
 		case ctrl_empty:
-						if(RX_Status.mode == ctrl_off)
-						{
-							temp_ctrl_on(FALSE);
-							_set_valve(TO_INK);
-							// _set_pump_speed((_PumpPID.val_max + 1) / 2);
-							pid_reset(&_PumpPID);
-							_pump_pid();
-							max_pressure = MBAR_500;	
-							RX_Status.mode = RX_Config.mode;							
-						}
-						
+						temp_ctrl_on(FALSE);
+						_set_valve(TO_INK);
+						// _set_pump_speed((_PumpPID.val_max + 1) / 2);
+						pid_reset(&_PumpPID);
+						_pump_pid();
+						max_pressure = MBAR_500;	
+						RX_Status.mode = RX_Config.mode;						
 						break;
+		
         case ctrl_empty_step1:
 						_pump_pid();
 						max_pressure = MBAR_500;
@@ -410,15 +401,12 @@ void pump_tick_10ms(void)
 		//--- FILL -------------------------------------------------------
 		case ctrl_fill:	
 		case ctrl_fill_step1:	
-						if(RX_Status.mode == ctrl_off)
-						{
-							pid_reset(&_PumpPID);
-							temp_ctrl_on(FALSE);
-							turn_off_pump();
-							RX_Status.error  &= ~(COND_ERR_meniscus | COND_ERR_pump_no_ink);
-							max_pressure = MBAR_100;
-							RX_Status.mode = RX_Config.mode;
-						}
+						pid_reset(&_PumpPID);
+						temp_ctrl_on(FALSE);
+						turn_off_pump();
+						RX_Status.error  &= ~(COND_ERR_meniscus | COND_ERR_pump_no_ink);
+						max_pressure = MBAR_100;
+						RX_Status.mode = RX_Config.mode;
 						break;
 		
 		case ctrl_fill_step2:
