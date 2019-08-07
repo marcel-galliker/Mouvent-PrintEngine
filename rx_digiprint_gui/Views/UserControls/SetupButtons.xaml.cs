@@ -86,7 +86,7 @@ namespace RX_DigiPrint.Views.UserControls
             RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_SET_CMD, "CMD_CLEAR_ERROR");
             CMD_WEBIN.IsChecked = true;
             if (RxGlobals.PrintSystem.IsScanning) RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_SET_CMD, "CMD_SETUP/CMD_WEBIN");
-            else RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_SET_CMD, "CMD_PAUSE");
+            else RxGlobals.RxInterface.SendCommand(TcpIp.CMD_PAUSE_PRINTING);
         }
 
         //--- Clean_Clicked -------------------------------------------------

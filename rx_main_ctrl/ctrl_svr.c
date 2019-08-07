@@ -413,10 +413,12 @@ static void _headboard_config(int colorCnt, int headsPerColor, int ethPortCnt)
 	// ethcnt = number of ethernet connestions on spooler
 	//--- scanning: All Heads on one PrintBar ----------------------
 	int i;
-	int board, head;
+	int board, head, port;
 	char ipAddr[32];
 	SHeadBoardCfg	*pBoard;
 
+	if (headsPerColor==0) headsPerColor=1;
+	
 	//--- config the boards TCP/IP Interfaces ------------
 	pBoard=RX_Config.headBoard;
 	RX_Config.headDistMax=0;
@@ -431,15 +433,17 @@ static void _headboard_config(int colorCnt, int headsPerColor, int ethPortCnt)
 	//	TrPrintfL(TRUE, "ctrl interface >>%s<<", ipAddr);
 		pBoard->ctrlAddr	 = sok_addr_32(ipAddr);
 		pBoard->ctrlPort     = PORT_CTRL_HEAD;			
+		if (head%headsPerColor==0) port=200;
 		for (i=0; i<SIZEOF(pBoard->dataAddr); i++)
 		{
+			port++;
 			pBoard->dataPort[i]  = PORT_UDP_DATA;
 			if(RX_Config.printer.type == printer_DP803)
 			{
 				char str[32];
 				UCHAR no=(pBoard->ctrlAddr>>24)&0xff;
 		//		if (i==0) Error(WARN, 0, "Check IP-Address assignment");
-				if (ethPortCnt) sprintf(str, "%d.%d.%d.%d", 192, 168, 201+(2*head+i)%ethPortCnt, no);
+				if (ethPortCnt) sprintf(str, "%d.%d.%d.%d", 192, 168, port, no);
 				pBoard->dataAddr[i]  = sok_addr_32(str);
 			}
 			else 

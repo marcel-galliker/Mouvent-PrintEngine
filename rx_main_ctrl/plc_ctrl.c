@@ -316,9 +316,7 @@ static void _plc_set_command(char *mode, char *cmd)
 	}
 	if (!strcmp(cmd, "CMD_PAUSE"))
 	{
-		Error(LOG, 0, "CMD_PAUSE _SendPause=%d", _SendPause);
-		if (_SendPause == 1) _SendPause = 2; 
-		else _SendPause = 0;
+		if (!_StartPrinting) _SendPause = 2; 
 	}
 //	Error(LOG, 0, "PLC_COMMAND >>%s<<", cmd);
 	sprintf(str, APP "%s", cmd);
@@ -472,7 +470,6 @@ int  plc_start_printing(void)
 {
 	if (_PlcState!=plc_run)	
 	{
-		Error(LOG, 0, "_StartPrinting=TRUE");
 		_StartPrinting		= TRUE;
 		_RequestPause		= FALSE;
 	}
@@ -491,7 +488,6 @@ int  plc_stop_printing(void)
 {
 	if (RX_Config.printer.type==printer_LH702) steplb_is_printing(FALSE);
 	if (_SimuEncoder) ctrl_simu_encoder(0);
-		Error(LOG,0, "_StartPrinting=FALSE");
 	_StartPrinting = FALSE;
 	_SendRun       = FALSE;
 	_SendPause	   = FALSE;
@@ -603,7 +599,8 @@ int plc_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen)
 		case CMD_PLC_GET_VAR:		_plc_get_var (socket, (char*)data);				break;
 		case CMD_PLC_SET_VAR:		_plc_set_var (socket, (char*)data);				break;
 		case CMD_PLC_SET_CMD:		_plc_set_cmd (socket, (char*)data);				break;
-
+		case CMD_PAUSE_PRINTING:	_SendPause=1; break;
+		
 		//--- material database --------------------------------------------------------
 		case CMD_PLC_REQ_MATERIAL:	_plc_req_material  (socket, FILENAME_MATERIAL, cmd); break;
 		case CMD_PLC_SAVE_MATERIAL:	_plc_save_material (socket, FILENAME_MATERIAL, CMD_PLC_ITM_MATERIAL, (char*)data);		break;
@@ -1270,7 +1267,6 @@ static void _plc_state_ctrl()
 	{		
 		if(_SendPause==2)
 		{
-			Error(LOG, 0, "_SendPause=%d _StartPrinting=%d", _SendPause, _StartPrinting);
 			if (!_StartPrinting) RX_PrinterStatus.printState = ps_pause;
 			_SendPause = 0;
 		}
@@ -1324,11 +1320,13 @@ static void _plc_state_ctrl()
 			}
 		}
 		
+		/*
 		if(_StartPrinting && _StartEncoderItem.pageWidth == 0)
 		{
 			Error(LOG, 0, "enc_ready=%d, pq_is_ready2print=%d, printState=%d, z_in_print=%d", enc_ready(), pq_is_ready2print(&_StartEncoderItem), RX_PrinterStatus.printState, RX_StepperStatus.info.z_in_print);
 		}
-
+		*/
+		
 		if(_StartPrinting
 			&& _StartEncoderItem.pageWidth == 0 
 			&& enc_ready()
@@ -1337,7 +1335,6 @@ static void _plc_state_ctrl()
 			&& (RX_StepperStatus.info.z_in_print 
 			|| _SimuPLC))
 		{
-			Error(LOG,0, "_StartPrinting=FALSE");
 			_StartPrinting = FALSE;
 			_CanRun = TRUE;
 			if(!_SimuPLC)    _plc_set_command("CMD_PRODUCTION", "CMD_RUN");

@@ -872,7 +872,7 @@ int pq_is_ready(void)
 			//	int bufsize = RX_PrinterStatus.transferredCnt-RX_PrinterStatus.printedCnt;
 				int bufsize = RX_PrinterStatus.transferredCnt-RX_PrinterStatus.printGoCnt;
 				
-				if ((RX_Config.printer.type==printer_DP803) && RX_PrinterStatus.transferredCnt%100==0) Error(LOG, 0, "Buffer size (transferred=%d, bufsize=%d, speed=%d)", RX_PrinterStatus.transferredCnt, bufsize, _Speed);
+				if ((RX_Config.printer.type==printer_DP803) && RX_PrinterStatus.transferredCnt && RX_PrinterStatus.transferredCnt%100==0) Error(LOG, 0, "Buffer size (transferred=%d, bufsize=%d, speed=%d)", RX_PrinterStatus.transferredCnt, bufsize, _Speed);
 	
 				switch(_BufState)
 				{
