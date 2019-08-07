@@ -33,6 +33,26 @@
 #define STEPS_REV		200*16	// steps per motor revolution * 16 times oversampling
 #define DIST_REV		2000.0	// moving distance per revolution [µm]
 
+//---- CAPPING ----
+// Digital Inputs 
+
+#define CAPPING_HEIGHT		-18500
+#define REF_SAFE_HEIGHT		-2000
+
+#define IN_CAP_PISTON1_OUT		5
+#define IN_CAP_PISTON1_IN		6
+#define IN_CAP_PISTON2_OUT		7
+#define IN_CAP_PISTON2_IN		8
+
+// Digital outputs
+#define OUT_CAP_VALVE_IN		0x100
+#define OUT_CAP_VALVE_OUT		0x200
+#define OUT_CAP_VALVE_OFF		0x300
+#define OUT_CAP_FLUSH_FILL		0x400
+#define OUT_CAP_FLUSH_EMPTY		0x800
+#define OUT_CAP_FLUSH_OFF		0xC00
+//---- END OF CAPPING ----
+
 static SMovePar	_ParRef;
 static SMovePar	_ParZ_down;
 static SMovePar	_ParZ_cap;
@@ -41,7 +61,9 @@ static char		_CmdName[32];
 static int		_PrintPos_New=0;
 static int		_PrintPos_Act=0;
 static int		_PrintHeight=0;
-
+//---- CAPPING ----
+static int	_TimeCntPumpsCAP = 0;
+//---- END OF CAPPING ----
 
 //--- prototypes --------------------------------------------
 static void _dp803_motor_z_test(int steps);
@@ -80,11 +102,11 @@ void dp803_init(void)
 	_ParZ_down.estop_in     = ESTOP_UNUSED;
 	_ParZ_down.estop_level  = 0;
 	_ParZ_down.checkEncoder = TRUE;
-
-	_ParZ_cap.speed			= 1000;
-	_ParZ_cap.accel			= 1000;
-	_ParZ_cap.current		= 100.0;
-	_ParZ_cap.stop_mux		= FALSE;
+	
+	_ParZ_cap.speed			= 5000;
+	_ParZ_cap.accel			= 2000;
+	_ParZ_cap.current		= 300.0;
+	_ParZ_cap.stop_mux		= MOTOR_Z_BITS;
 	_ParZ_cap.dis_mux_in	= 0;
 	_ParZ_cap.stop_in		= ESTOP_UNUSED;
 	_ParZ_cap.stop_level	= 0;
@@ -102,6 +124,12 @@ void dp803_main(int ticks, int menu)
 	RX_StepperStatus.info.headUpInput_0 = fpga_input(HEAD_UP_IN_0);
 	RX_StepperStatus.info.headUpInput_1 = fpga_input(HEAD_UP_IN_1);
 	RX_StepperStatus.posZ				  = motor_get_step(MOTOR_Z_0);
+	
+	//---- CAPPING ----
+	RX_StepperStatus.info.x_in_cap =  fpga_input(IN_CAP_PISTON1_IN) && fpga_input(IN_CAP_PISTON2_IN);
+	RX_StepperStatus.info.x_in_ref =  fpga_input(IN_CAP_PISTON1_OUT) && fpga_input(IN_CAP_PISTON2_OUT);
+	if (_TimeCntPumpsCAP != 0) _TimeCntPumpsCAP--; // waiting time
+	//---- END OF CAPPING ----
 
 	if (RX_StepperStatus.info.moving)
 	{
@@ -110,7 +138,7 @@ void dp803_main(int ticks, int menu)
 		RX_StepperStatus.info.z_in_cap   = FALSE;			
 	}
 	if (_CmdRunning==0) RX_StepperStatus.info.moving = FALSE;
-	if (_CmdRunning && motors_move_done(MOTOR_Z_BITS)) 
+	if (_CmdRunning && motors_move_done(MOTOR_Z_BITS))// && _CmdRunning != CMD_CAP_FILL)
 	{
 		RX_StepperStatus.info.moving = FALSE;
 		if (_CmdRunning == CMD_CAP_REFERENCE) 
@@ -119,25 +147,41 @@ void dp803_main(int ticks, int menu)
 			if (!RX_StepperStatus.info.headUpInput_1) Error(ERR_CONT, 0, "dp803: Command REFERENCE: End Sensor 2 NOT HIGH");
 			RX_StepperStatus.info.ref_done =  RX_StepperStatus.info.headUpInput_0 && RX_StepperStatus.info.headUpInput_1;
 			motors_reset(MOTOR_Z_BITS);				
+			if (RX_StepperStatus.info.ref_done)
+			{
+				_CmdRunning = CMD_CAP_REF_SAFE;
+				RX_StepperStatus.info.moving = TRUE;
+				motors_move_to_step(MOTOR_Z_BITS, &_ParZ_cap, REF_SAFE_HEIGHT);
+			}			
 		}
 		else if (motors_error(MOTOR_Z_BITS, &motor))
 		{
-			Error(ERR_CONT, 0, "LIFT: Command %s: Motor[%d] blocked", _CmdName, motor+1);
+			Error(ERR_CONT, 0, "LIFT: Command %s: Motor[%d] blocked", _CmdName, motor + 1);
 			RX_StepperStatus.info.ref_done = FALSE;							
 		}
-		RX_StepperStatus.info.z_in_ref    = ((_CmdRunning==CMD_CAP_REFERENCE || _CmdRunning==CMD_CAP_UP_POS) && RX_StepperStatus.info.ref_done);
-		RX_StepperStatus.info.z_in_print  = (_CmdRunning==CMD_CAP_PRINT_POS && RX_StepperStatus.info.ref_done);
-		RX_StepperStatus.info.z_in_cap    = (_CmdRunning==CMD_CAP_CAPPING_POS);
+		RX_StepperStatus.info.z_in_ref    = ((_CmdRunning == CMD_CAP_REFERENCE || _CmdRunning == CMD_CAP_UP_POS || _CmdRunning == CMD_CAP_REF_SAFE) && RX_StepperStatus.info.ref_done);
+		RX_StepperStatus.info.z_in_print  = (_CmdRunning == CMD_CAP_PRINT_POS && RX_StepperStatus.info.ref_done);
+		RX_StepperStatus.info.z_in_cap    = (_CmdRunning == CMD_CAP_CAPPING_POS);
 		if (_CmdRunning == CMD_CAP_REFERENCE && _PrintPos_New) 
 		{
 			_dp803_move_to_pos(CMD_CAP_PRINT_POS, _PrintPos_New);
 			_PrintPos_Act = _PrintPos_New;
 			_PrintPos_New = 0;
 		}
-		else {
+		else
+		{
 			RX_StepperStatus.info.move_tgl = !RX_StepperStatus.info.move_tgl;
 			_CmdRunning = FALSE;
 		}
+	}
+	else
+	{
+		//---- CAPPING ----
+		if (_TimeCntPumpsCAP == 0) 
+		{
+			Fpga.par->output &= ~OUT_CAP_FLUSH_OFF;
+		}
+		//---- END OF CAPPING ----
 	}	
 }
 
@@ -153,6 +197,13 @@ static void _dp803_display_status(void)
 	term_printf("z in reference: %d\n",	RX_StepperStatus.info.z_in_ref);
 	term_printf("z in print:     %d\n",	RX_StepperStatus.info.z_in_print);
 	term_printf("z in capping:   %d\n",	RX_StepperStatus.info.z_in_cap);
+	term_printf("CAPPING -------------------------\n");
+	term_printf("x Sensors (ref): %d %d\n", fpga_input(IN_CAP_PISTON1_OUT), fpga_input(IN_CAP_PISTON2_OUT));	
+	term_printf("x Sensors (cap): %d %d\n", fpga_input(IN_CAP_PISTON1_IN), fpga_input(IN_CAP_PISTON2_IN));	
+	term_printf("x in ref:   %d\n", RX_StepperStatus.info.x_in_ref);
+	term_printf("x in cap:   %d\n", RX_StepperStatus.info.x_in_cap);
+	term_printf("CAP time:   %d\n", _TimeCntPumpsCAP);
+	term_printf("END CAPPING -------------------------\n");
 	term_printf("\n");
 }
 
@@ -175,6 +226,9 @@ int dp803_menu(void)
 	term_printf("p: move to print\n");
 	term_printf("z: move by <steps>\n");
 	term_printf("m<n><steps>: move Motor<n> by <steps>\n");	
+	term_printf("D: move drip pans\n");
+	term_printf("F: Fill 5 seconds\n");
+	term_printf("E: Empty 2 minutes\n");
 	term_printf("x: exit\n");
 	term_printf(">");
 	term_flush();
@@ -193,6 +247,13 @@ int dp803_menu(void)
 		case 'm': _dp803_motor_test(str[1]-'0', atoi(&str[2]));break;
 		case 'o': Fpga.par->adc_rst = FALSE; break;
 		case 'i': Fpga.par->adc_rst = TRUE; break;
+			
+		//---- CAPPING ----
+		case 'D': dp803_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_DRIP_PANS, NULL); break;
+		case 'F': dp803_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_FILL, NULL); break;
+		case 'E': dp803_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_EMPTY, NULL); break;
+		//---- END OF CAPPING ----
+			
 		case 'x': return FALSE;
 		}
 	}
@@ -246,15 +307,25 @@ int  dp803_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 	case CMD_CAP_STOP:				strcpy(_CmdName, "CMD_CAP_STOP");
 									motors_stop(MOTOR_Z_BITS);
 									_CmdRunning = 0;
+									_TimeCntPumpsCAP = 0;
+									Fpga.par->output &= ~OUT_CAP_FLUSH_OFF;
 									break;	
 
 	case CMD_CAP_REFERENCE:			_PrintPos_New=0;
+									Error(LOG, 0, "CMD_CAP_REFERENCE");
 									strcpy(_CmdName, "CMD_CAP_REFERENCE");
-									_dp803_do_reference();	
+									if (RX_StepperStatus.info.ref_done) 
+									{
+										_CmdRunning = CMD_CAP_REF_SAFE;
+										RX_StepperStatus.info.moving = TRUE;
+										motors_move_to_step(MOTOR_Z_BITS, &_ParZ_cap, REF_SAFE_HEIGHT);
+									}
+									else _dp803_do_reference();	
 									break;
 
 	case CMD_CAP_PRINT_POS:			strcpy(_CmdName, "CMD_CAP_PRINT_POS");
 									pos   = (*((INT32*)pdata));
+									Error(LOG, 0, "CMD_CAP_PRINT_POS pos=%d", pos);
 									_PrintHeight = pos;
 									steps = _micron_2_steps(RX_StepperCfg.ref_height - pos);
 									if (!_CmdRunning && (!RX_StepperStatus.info.z_in_print || steps!=_PrintPos_Act))
@@ -263,6 +334,7 @@ int  dp803_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 										if (RX_StepperStatus.info.ref_done) _dp803_move_to_pos(CMD_CAP_PRINT_POS, _PrintPos_New);
 										else								  _dp803_do_reference();
 									}
+									Error(LOG, 0, "CMD_CAP_PRINT_POS _PrintHeight=%d, _PrintPos_New=%d", _PrintHeight, _PrintPos_New);
 									break;
 		
 	case CMD_CAP_UP_POS:			strcpy(_CmdName, "CMD_CAP_UP_POS");
@@ -274,13 +346,71 @@ int  dp803_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									break;
 
 	case CMD_CAP_CAPPING_POS:		strcpy(_CmdName, "CMD_CAP_CAPPING_POS");
-									if (!_CmdRunning)
+									if ((!_CmdRunning)&&(RX_StepperStatus.info.x_in_cap))
 									{
 										_CmdRunning  = msgId;
 										RX_StepperStatus.info.moving = TRUE;
-										motors_move_to_step	(MOTOR_Z_BITS,  &_ParZ_cap, _micron_2_steps(RX_StepperCfg.cap_height));
+										motors_move_to_step(MOTOR_Z_BITS, &_ParZ_cap, CAPPING_HEIGHT);
 									}
 									break;
+		
+	//---- CAPPING ----
+	case CMD_CLN_DRIP_PANS :
+		if ((RX_StepperStatus.info.z_in_ref))
+		{
+			if (Fpga.par->output & OUT_CAP_VALVE_IN == OUT_CAP_VALVE_IN)
+			{
+				Fpga.par->output &= ~OUT_CAP_VALVE_OFF;
+				Fpga.par->output |= OUT_CAP_VALVE_OUT;	
+			}	
+			else
+			{
+				Fpga.par->output &= ~OUT_CAP_VALVE_OFF;
+				Fpga.par->output |= OUT_CAP_VALVE_IN;
+			}
+		}
+		break;
+		
+	case CMD_CLN_DRIP_PANS_CAP:
+		if ((!_CmdRunning) && (RX_StepperStatus.info.z_in_ref))
+		{			
+			Fpga.par->output &= ~OUT_CAP_VALVE_OFF;
+			Fpga.par->output |= OUT_CAP_VALVE_IN;
+			_TimeCntPumpsCAP = 0;
+			Fpga.par->output &= ~OUT_CAP_FLUSH_OFF;
+		}
+		break;
+		
+	case CMD_CLN_DRIP_PANS_REF:	
+		if ((!_CmdRunning) && (RX_StepperStatus.info.z_in_ref))
+		{
+			// all stepper motors in reference
+			Fpga.par->output &= ~OUT_CAP_VALVE_OFF;
+			Fpga.par->output |= OUT_CAP_VALVE_OUT;	
+			_TimeCntPumpsCAP = 0;
+			Fpga.par->output &= ~OUT_CAP_FLUSH_OFF;
+		}
+		break;
+		
+	case CMD_CAP_FILL:		strcpy(_CmdName, "CMD_CLN_FILL_CAP");
+		if (!_CmdRunning)//&&(RX_StepperStatus.info.x_in_cap))
+		{
+			Fpga.par->output &= ~OUT_CAP_FLUSH_OFF;
+			Fpga.par->output |= OUT_CAP_FLUSH_FILL;	
+			//_CmdRunning = CMD_CAP_FILL;
+			_TimeCntPumpsCAP = 5000;
+		}		
+		break;
+	case CMD_CAP_EMPTY:		strcpy(_CmdName, "CMD_CLN_EMPTY_CAP");
+		if (!_CmdRunning)//&&(RX_StepperStatus.info.x_in_cap))
+		{
+			Fpga.par->output &= ~OUT_CAP_FLUSH_OFF;
+			Fpga.par->output |= OUT_CAP_FLUSH_EMPTY;	
+			//_CmdRunning = CMD_CAP_FILL;
+			_TimeCntPumpsCAP = 120000;
+		}	
+		break;		
+//---- END OF CAPPING ----
 		
 	case CMD_ERROR_RESET:			strcpy(_CmdName, "CMD_ERROR_RESET");
 									fpga_stepper_error_reset();

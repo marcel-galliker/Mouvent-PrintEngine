@@ -312,6 +312,12 @@
 #define CMD_CAP_ROB_Z_POS		0x0100060e
 #define CMD_CAP_VENT			0x0100060f
 #define CMD_CAP_IS_PRINTING		0x01000610
+//---- CAPPING ----
+#define CMD_CAP_FILL			0x01000611
+#define CMD_CAP_EMPTY			0x01000612
+#define CMD_CAP_REF_SAFE		0x01000613
+//---- END OF CAPPING ----
+
 #define CMD_CAP_END				0x010006ff
 
 //--- Cleaning Commands ---------------------------------------------------
@@ -353,6 +359,8 @@
 #define CMD_CLN_DRIP_PANS_EN		0x01000722		// Main ask board 0 for positions of drip pans
 #define CMD_CAP_ALLOW_MOVE_DOWN		0x01000723
 #define CMD_CAP_NOT_ALLOW_MOVE_DOWN	0x01000724
+#define CMD_CLN_DRIP_PANS_CAP		0x01000725
+#define CMD_CLN_DRIP_PANS_REF		0x01000726
 
 #define CMD_CLN_ROT_REF			0x01000730
 #define CMD_CLN_SHIFT_REF		0x01000731

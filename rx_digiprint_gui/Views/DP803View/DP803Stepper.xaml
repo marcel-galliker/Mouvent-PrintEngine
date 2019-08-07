@@ -11,7 +11,7 @@
             <ColumnDefinition Width="auto"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <rx_uc:CleaningView HorizontalAlignment="Right" Width="200"/>
+        <rx_uc:CleaningView HorizontalAlignment="Right" Width="300"/>
 
         <StackPanel Grid.Column="1" Orientation="Horizontal">
             <rx_uc:StepperMotorCtrl DataContext="{Binding Motors[0]}" Header="1" Width="270"/>

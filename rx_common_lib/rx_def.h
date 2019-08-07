@@ -709,9 +709,10 @@ typedef struct
 
 typedef struct
 {
-	INT16	disabledJets[MAX_DISABLED_JETS];
-	UINT16	clusterNo;
+	UINT16	meniscus_factor;
+	UINT16	clusterNo;	
 	UINT32	printed_ml;
+	INT16	disabledJets[MAX_DISABLED_JETS];
 } SHeadEEpromMvt;
 	
 typedef struct SHeadStat

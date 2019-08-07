@@ -6,7 +6,7 @@
              xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
              mc:Ignorable="d"
-             d:DesignHeight="300" d:DesignWidth="300">
+             d:DesignHeight="361" d:DesignWidth="300">
 
     <Grid VerticalAlignment="Top">
         <GroupBox x:Name="CapGroup" Header="Cleaning" Style="{StaticResource RxGroupBox}">
@@ -51,7 +51,11 @@
                 <CheckBox x:Name="Button_Up"    Grid.Row="3" Content="Up"    Style="{DynamicResource RxCommandButton}" Margin="10" Click="CapUp_clicked"          IsEnabled="{Binding cmd_enabled}"/>
                 <CheckBox x:Name="Button_Print" Grid.Row="4" Content="Print" Style="{DynamicResource RxCommandButton}" Margin="10" Click="CapPrint_clicked"       IsEnabled="{Binding cmd_enabled}"/>
                 <CheckBox x:Name="Button_Cap"   Grid.Row="5" Content="Cap"   Style="{DynamicResource RxCommandButton}" Margin="10,10,0,10" Click="CapCapping_clicked"     IsEnabled="{Binding cap_enabled}" HorizontalAlignment="Left" Width="80"/>
-                <CheckBox x:Name="Button_DripPans"  Grid.Row="6" Content="DRIP PANS"  Style="{DynamicResource RxCommandButton}" Margin="10" Click="CapDripPans_clicked"        IsEnabled="{Binding drip_pans_enabled}"/>
+                <CheckBox x:Name="Button_DripPans" Grid.Row="6" Content="DRIP PANS"  Style="{DynamicResource RxCommandButton}" Margin="10" Click="CapDripPans_clicked"        IsEnabled="{Binding capDP803_enabled}"/>
+                <CheckBox x:Name="Button_DripPansCAP" Grid.Row="6" Content="Carriage CAP"  Style="{DynamicResource RxCommandButton}" Margin="10" Click="CapDripPansCAP_clicked"        IsEnabled="{Binding capDP803_enabled}"/>
+                <CheckBox x:Name="Button_DripPansREF" Grid.Row="6" Grid.Column="1" Content="Carriage REF"  Style="{DynamicResource RxCommandButton}" Margin="10" Click="CapDripPansREF_clicked"        IsEnabled="{Binding capDP803_enabled}"/>
+                <CheckBox x:Name="Button_Fill" Grid.Row="7" Content="Fill 5sec"  Style="{DynamicResource RxCommandButton}" Margin="10" Click="CapFill_clicked"        IsEnabled="{Binding capDP803_enabled}"/>
+                <CheckBox x:Name="Button_Empty" Grid.Row="7" Grid.Column="1" Content="Empty 2min"  Style="{DynamicResource RxCommandButton}" Margin="10" Click="CapEmpty_clicked"        IsEnabled="{Binding capDP803_enabled}"/>
 
                 <Grid x:Name="Leds_DripPans" Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2">
                     <StackPanel Orientation="Horizontal">
@@ -68,8 +72,8 @@
                         <Image  Source="../../Resources/Bitmaps/LED_GREY.ico"  Visibility="{Binding DripPans_OutfeedDOWN,   Converter={StaticResource BoolToInVisible_Converter}}" HorizontalAlignment="Left"/>
                     </StackPanel>
                 </Grid>
-                <TextBlock Grid.Row="7" Grid.Column="0" Text="Laser" VerticalAlignment="Center" FontSize="{StaticResource FontSizeStd}" Margin="5,0" x:Name="LaserTX"/>
-                <StackPanel Grid.Row="7" Grid.Column="1" Grid.ColumnSpan="3" Orientation="Horizontal" x:Name="LaserVal">
+                <TextBlock Grid.Row="8" Grid.Column="0" Text="Laser" VerticalAlignment="Center" FontSize="{StaticResource FontSizeStd}" Margin="5,0" x:Name="LaserTX"/>
+                <StackPanel Grid.Row="8" Grid.Column="1" Grid.ColumnSpan="3" Orientation="Horizontal" x:Name="LaserVal">
                     <TextBlock Text="{Binding PosY, Converter={StaticResource HeadVal_ConverterTemp}}" VerticalAlignment="Center" FontSize="{StaticResource FontSizeStd}"/>
                     <TextBlock Text="mm" Margin="5,0"/>
                 </StackPanel>

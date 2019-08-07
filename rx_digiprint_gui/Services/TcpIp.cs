@@ -436,6 +436,11 @@ namespace RX_DigiPrint.Services
         public const UInt32 CMD_CAP_CAPPING_POS		= 0x01000604;
         public const UInt32 CMD_CAP_UP_POS  		= 0x01000605;
 
+        //---- CAPPING ----
+        public const UInt32 CMD_CAP_FILL 			= 0x01000611;
+        public const UInt32 CMD_CAP_EMPTY 			= 0x01000612;
+        //---- END OF CAPPING ----
+
         public const UInt32 CMD_CLN_STOP			= 0x01000701;
         public const UInt32 CMD_CLN_REFERENCE		= 0x01000702;
         public const UInt32 CMD_CLN_MOVE_POS		= 0x01000703;
@@ -449,6 +454,8 @@ namespace RX_DigiPrint.Services
         public const UInt32 CMD_CLN_ADJUST			= 0x01000710;
 
         public const UInt32 CMD_CLN_DRIP_PANS       = 0x01000721;
+        public const UInt32 CMD_CLN_DRIP_PANS_CAP   = 0x01000725;
+        public const UInt32 CMD_CLN_DRIP_PANS_REF   = 0x01000726;
 
         public const UInt32 EVT_TRACE               = 0x03000100;
 
@@ -959,10 +966,11 @@ namespace RX_DigiPrint.Services
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct SHeadEEpromMvt
         {
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
-	        public Int16[]			disabledJets;	
+            public UInt16	        meniscus_factor;
 	        public Int16	        clusterNo;
 	        public Int32	        printed_ml;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
+	        public Int16[]			disabledJets;	
         };
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]

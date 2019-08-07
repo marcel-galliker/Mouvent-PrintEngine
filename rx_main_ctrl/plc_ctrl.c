@@ -445,7 +445,7 @@ int  plc_set_printpar(SPrintQueueItem *pItem)
 {		
 	SPlcPar par;
 	if ((RX_Config.stepper.ref_height || RX_Config.stepper.print_height) 
-	&&  (RX_Config.printer.type==printer_TX801 ||RX_Config.printer.type==printer_TX802))
+	&&  (RX_Config.printer.type==printer_TX801 || RX_Config.printer.type==printer_TX802))
 	{
 		// else wait webtension is ok
 		_heads_to_print=TRUE;
@@ -477,7 +477,8 @@ int  plc_start_printing(void)
 	{		
 		plc_error_reset();
 		if (rx_def_is_web(RX_Config.printer.type) && RX_Config.printer.type!=printer_cleaf) enc_restart_pg();
-		_SendRun = TRUE;
+		_SendRun		= TRUE;
+		_heads_to_print	= FALSE;
 	}
 	if (_SimuEncoder) ctrl_simu_encoder(_Speed);
 	return REPLY_OK;
@@ -495,6 +496,7 @@ int  plc_stop_printing(void)
 	if (_SimuPLC)
 	{
 		RX_PrinterStatus.printState = ps_off;
+		_heads_to_print				= FALSE;
 		if (chiller_is_running()) RX_PrinterStatus.printState = ps_ready_power;
 		gui_send_printer_status(&RX_PrinterStatus);
 	}
@@ -1332,8 +1334,8 @@ static void _plc_state_ctrl()
 			&& enc_ready()
 			&& pq_is_ready2print(&_StartEncoderItem) 
 			&& (RX_PrinterStatus.printState == ps_printing || RX_PrinterStatus.printState == ps_ready_power)
-			&& (RX_StepperStatus.info.z_in_print 
-			|| _SimuPLC))
+			&& (RX_StepperStatus.info.z_in_print || (_SimuPLC && RX_Config.printer.type!=printer_LH702))
+			)
 		{
 			_StartPrinting = FALSE;
 			_CanRun = TRUE;

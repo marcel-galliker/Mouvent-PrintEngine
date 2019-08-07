@@ -30,7 +30,9 @@ namespace RX_DigiPrint.Views.UserControls
             Button_Up.IsChecked     = (button==Button_Up);
             Button_Print.IsChecked  = (button==Button_Print);
             Button_Cap.IsChecked    = (button==Button_Cap);
-            //Button_Wipe.IsChecked   = (button==Button_Wipe);
+            Button_DripPans.IsChecked = (button == Button_DripPans);
+            Button_Fill.IsChecked = (button == Button_Fill);
+            Button_Empty.IsChecked = (button == Button_Empty);
         }
 
         //--- PrintSystem_PropertyChanged -----------------------------------
@@ -38,19 +40,19 @@ namespace RX_DigiPrint.Views.UserControls
         {
             if (e.PropertyName.Equals("PrinterType"))
             {
-                /*
-                Button_Wipe.Visibility = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf 
-                                       || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702)? 
-                                        Visibility.Visible:Visibility.Collapsed;
+                Visibility visibility;
                 
-                Button_Wipe.Visibility = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_UV || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_WB)? 
-                                        Visibility.Visible:Visibility.Collapsed;
-                */
-                Visibility visibility = LaserVal.Visibility = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf) ? Visibility.Visible : Visibility.Collapsed;
-                Button_DripPans.Visibility = visibility;
-                Leds_DripPans.Visibility   = visibility;
-                LaserTX.Visibility         = visibility; 
-                LaserVal.Visibility        = visibility;
+                visibility = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf) ? Visibility.Visible : Visibility.Collapsed;
+                Leds_DripPans.Visibility      = visibility;
+                LaserTX.Visibility            = visibility; 
+                LaserVal.Visibility           = visibility;
+
+                visibility = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_DP803) ? Visibility.Visible : Visibility.Collapsed;
+                Button_DripPans.Visibility    = visibility;
+                Button_DripPansCAP.Visibility = visibility;
+                Button_DripPansREF.Visibility = visibility;
+                Button_Fill.Visibility        = visibility;
+                Button_Empty.Visibility       = visibility;
             }   
         }
 
@@ -93,6 +95,20 @@ namespace RX_DigiPrint.Views.UserControls
             }
         }
 
+        //--- CapFill_clicked -------------------------------------------
+        private void CapFill_clicked(object sender, RoutedEventArgs e)
+        {
+            _button_active(sender as CheckBox);
+            RxGlobals.RxInterface.SendCommand(TcpIp.CMD_CAP_FILL);
+        }
+
+        //--- CapEmpty_clicked -------------------------------------------
+        private void CapEmpty_clicked(object sender, RoutedEventArgs e)
+        {
+            _button_active(sender as CheckBox);
+            RxGlobals.RxInterface.SendCommand(TcpIp.CMD_CAP_EMPTY);
+        }
+
         //--- CapWiping_clicked -------------------------------------------
         private void CapWiping_clicked(object sender, RoutedEventArgs e)
         {
@@ -105,6 +121,20 @@ namespace RX_DigiPrint.Views.UserControls
         {
             _button_active(sender as CheckBox);
             RxGlobals.RxInterface.SendCommand(TcpIp.CMD_CLN_DRIP_PANS);
+        }
+
+        //--- CapDripPans_clicked -------------------------------------------
+        private void CapDripPansCAP_clicked(object sender, RoutedEventArgs e)
+        {
+            _button_active(sender as CheckBox);
+            RxGlobals.RxInterface.SendCommand(TcpIp.CMD_CLN_DRIP_PANS_CAP);
+        }
+
+        //--- CapDripPans_clicked -------------------------------------------
+        private void CapDripPansREF_clicked(object sender, RoutedEventArgs e)
+        {
+            _button_active(sender as CheckBox);
+            RxGlobals.RxInterface.SendCommand(TcpIp.CMD_CLN_DRIP_PANS_REF);
         }
     }
 }

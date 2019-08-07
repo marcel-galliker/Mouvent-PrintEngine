@@ -26,6 +26,7 @@
 #include "step_std.h"
 #include "step_tx.h"
 #include "step_lb.h"
+#include "step_dp.h"
 #include "step_cleaf.h"
 #include "step_test.h"
 #include "step_ctrl.h"
@@ -37,7 +38,8 @@
 #define STEPPER_CLEAF	1
 #define STEPPER_TX		2
 #define STEPPER_LB		3
-#define STEPPER_TEST	4
+#define STEPPER_DP		4
+#define STEPPER_TEST	5
 
 
 static int				_step_ThreadRunning;
@@ -146,6 +148,7 @@ static int _step_handle_msg(RX_SOCKET socket, void *msg, int len, struct sockadd
 									case STEPPER_CLEAF: return stepc_handle_status		(no, (SStepperStat*)&phdr[1]);
 									case STEPPER_TX:	return steptx_handle_status		(no, (SStepperStat*)&phdr[1]);
 									case STEPPER_LB:	return steplb_handle_status		(no, (SStepperStat*)&phdr[1]);
+									case STEPPER_DP:	return stepdp_handle_status		(no, (SStepperStat*)&phdr[1]);
 									case STEPPER_TEST:	return steptest_handle_status	(no, (SStepperStat*)&phdr[1]);
 									default:			return steps_handle_status		(	 (SStepperStat*)&phdr[1]);
 									}
@@ -165,6 +168,7 @@ int	 step_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen)
 	case STEPPER_CLEAF:	return stepc_handle_gui_msg   (socket, cmd, data, dataLen);
 	case STEPPER_TX:	return steptx_handle_gui_msg  (socket, cmd, data, dataLen);
 	case STEPPER_LB:	return steplb_handle_gui_msg  (socket, cmd, data, dataLen);
+	case STEPPER_DP:	return stepdp_handle_gui_msg  (socket, cmd, data, dataLen);
 	case STEPPER_TEST:	return steptest_handle_gui_msg(socket, cmd, data, dataLen);
 	default:			return steps_handle_gui_msg   (socket, cmd, data, dataLen);
 	}
@@ -235,6 +239,7 @@ int	 tt_cap_to_print_pos(void)
 	case STEPPER_CLEAF: stepc_to_print_pos();		break;
 	case STEPPER_TX:    steptx_to_print_pos();		break;
 	case STEPPER_LB:    steplb_to_print_pos();		break;
+	case STEPPER_DP:    stepdp_to_print_pos();		break;
 	case STEPPER_TEST:  steptest_to_print_pos();	break;
 	default:			steps_to_print_pos();		break;
 	}
@@ -256,8 +261,7 @@ int	 step_do_test(SStepperMotorTest *pmsg)
 int step_set_vent(int speed)
 {
 	INT32 value;
-	if(speed) value=20;	// controlled PWM
-//	if(speed) value=60;	// fixed PWM
+	if(speed) value=20;
 	else      value=0;
 	sok_send_2(&_step_Socket[0], CMD_CAP_VENT, sizeof(value), &value);
 	return REPLY_OK;			
@@ -272,6 +276,7 @@ int  step_abort_printing(void)
 	case STEPPER_TX:    step_set_vent(0);
 						return REPLY_OK;
 	case STEPPER_LB:    return steplb_abort_printing();
+	case STEPPER_DP:    return stepdp_abort_printing();
 	case STEPPER_TEST:  return REPLY_OK;
 	default:			return REPLY_OK;
 	}					
@@ -298,6 +303,7 @@ static void _step_set_config(int no)
 	case STEPPER_CLEAF:	stepc_init		(no, &_step_Socket[no]); cfg.boardNo = no; break;
 	case STEPPER_TX:	steptx_init		(no, &_step_Socket[no]); cfg.boardNo = no; break;
 	case STEPPER_LB:	steplb_init		(no, &_step_Socket[no]); break;
+	case STEPPER_DP:	stepdp_init(no, &_step_Socket[no]); break;
 	case STEPPER_TEST:	steptest_init	(no, &_step_Socket[no]); cfg.boardNo = no; break;
 	default: 			steps_init		(    &_step_Socket[0]);
 	}
@@ -316,7 +322,7 @@ int step_set_config(void)
 	case printer_LB702_UV:		_StepperType = STEPPER_LB;		break;		
 	case printer_LB702_WB:		_StepperType = STEPPER_LB;		break;		
 	case printer_LH702:			_StepperType = STEPPER_LB;		break;		
-	case printer_DP803:			_StepperType = STEPPER_LB;		break;		
+	case printer_DP803:			_StepperType = STEPPER_DP;		break;		
 	case printer_TX801:			_StepperType = STEPPER_TX;		break;		
 	case printer_TX802:			_StepperType = STEPPER_TX;		break;		
 	default:					_StepperType = STEPPER_STD;		break;
