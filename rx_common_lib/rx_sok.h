@@ -97,7 +97,7 @@ int sok_send_arp		(RX_RAW_SOCKET *psocket, UINT64 dstMacAddr, void *data, int da
 int sok_close_raw		(RX_RAW_SOCKET *psocket);
 int sok_ping			(const char *addr);
 
-int	 sok_debug			(RX_SOCKET socket);
+void sok_debug			(RX_SOCKET socket);
 int  sok_receiver	    (HANDLE hserver, RX_SOCKET *psocket, msg_handler handle_msg, void *par);
 int  sok_send			(RX_SOCKET *socket, void *msg);
 int  sok_send_wide		(RX_SOCKET *socket, void *msg);

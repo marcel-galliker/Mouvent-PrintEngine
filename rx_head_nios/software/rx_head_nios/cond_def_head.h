@@ -52,7 +52,7 @@
 	#define COND_ERR_power_24V					(1<<26)
 	#define COND_ERR_power_heater				(1<<27)	
 	#define COND_ERR_flush_failed				(1<<28)
-	#define COND_ERR_29							(1<<29)			
+	#define COND_ERR_not_in_printing			(1<<29)			
 	#define COND_ERR_30							(1<<30)			
 	#define COND_ERR_31							(1<<31)			
 

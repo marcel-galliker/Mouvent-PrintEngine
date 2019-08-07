@@ -36,7 +36,7 @@ error:
 endif
 
 SOURCEFILES := ../Externals/libtiff/tif_aux.c ../Externals/libtiff/tif_close.c ../Externals/libtiff/tif_codec.c ../Externals/libtiff/tif_color.c ../Externals/libtiff/tif_compress.c ../Externals/libtiff/tif_dir.c ../Externals/libtiff/tif_dirinfo.c ../Externals/libtiff/tif_dirread.c ../Externals/libtiff/tif_dirwrite.c ../Externals/libtiff/tif_dumpmode.c ../Externals/libtiff/tif_error.c ../Externals/libtiff/tif_extension.c ../Externals/libtiff/tif_fax3.c ../Externals/libtiff/tif_fax3sm.c ../Externals/libtiff/tif_flush.c ../Externals/libtiff/tif_getimage.c ../Externals/libtiff/tif_luv.c ../Externals/libtiff/tif_lzw.c ../Externals/libtiff/tif_next.c ../Externals/libtiff/tif_open.c ../Externals/libtiff/tif_packbits.c ../Externals/libtiff/tif_predict.c ../Externals/libtiff/tif_print.c ../Externals/libtiff/tif_read.c ../Externals/libtiff/tif_strip.c ../Externals/libtiff/tif_swab.c ../Externals/libtiff/tif_thunder.c ../Externals/libtiff/tif_tile.c ../Externals/libtiff/tif_unix.c ../Externals/libtiff/tif_version.c ../Externals/libtiff/tif_warning.c ../Externals/libtiff/tif_win32.c ../Externals/libtiff/tif_write.c rx_mem_tif.c rx_tif.c
-EXTERNAL_LIBS := ../rx_common_lib/$(BINARYDIR)/rx_common_lib.a
+EXTERNAL_LIBS := 
 EXTERNAL_LIBS_COPIED := $(foreach lib, $(EXTERNAL_LIBS),$(BINARYDIR)/$(notdir $(lib)))
 
 CFLAGS += $(COMMONFLAGS)
@@ -273,7 +273,4 @@ $(BINARYDIR)/tif_win32.o : ../Externals/libtiff/tif_win32.c $(all_make_files) |$
 
 $(BINARYDIR)/tif_write.o : ../Externals/libtiff/tif_write.c $(all_make_files) |$(BINARYDIR)
 	$(CC) $(CFLAGS) -c $< -o $@ -MD -MF $(@:.o=.dep)
-
-$(BINARYDIR)/rx_common_lib.a : ../rx_common_lib/$(BINARYDIR)/rx_common_lib.a
-	$(CP) ../rx_common_lib/$(BINARYDIR)/rx_common_lib.a $(BINARYDIR)/rx_common_lib.a
 

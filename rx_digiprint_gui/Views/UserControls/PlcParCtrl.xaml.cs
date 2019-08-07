@@ -578,7 +578,7 @@ namespace RX_DigiPrint.Views.UserControls
                         else 
                         {
                             string val=TextEditCtrl.Text;
-                            if (_Format=='n')
+                            if (_Format=='n' || _Format=='1')
                             {   // remove formatting spaces, commas (very special!)
                                 for (int i=0; i<val.Length; )
                                 {

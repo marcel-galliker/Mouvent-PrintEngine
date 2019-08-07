@@ -498,7 +498,8 @@ static void _control(int fluidNo)
 				case ctrl_purge_micro:	
 				case ctrl_purge_soft:
 				case ctrl_purge_hard:	// step_lift_to_up();
-										step_handle_gui_msg(INVALID_SOCKET, CMD_CAP_UP_POS, NULL, 0);
+										// step_handle_gui_msg(INVALID_SOCKET, CMD_CAP_UP_POS, NULL, 0);
+										step_handle_gui_msg(INVALID_SOCKET, CMD_CAP_REFERENCE, NULL, 0);
 										_send_ctrlMode(no, ctrl_purge_step1, TRUE);	
 										break;
 				

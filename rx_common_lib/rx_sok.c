@@ -1286,9 +1286,9 @@ static void *_client_thread_udp(void *hserver)
 }
 
 //--- sok_debug -----------------------------------------------------------
-int	 sok_debug(RX_SOCKET socket)
+void	 sok_debug(RX_SOCKET socket)
 {
-	_DebugSocket = socket;	
+	_DebugSocket = socket;
 }
 
 
