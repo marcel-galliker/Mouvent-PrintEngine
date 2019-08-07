@@ -55,7 +55,6 @@ void cooler_tick_100ms(void)
 	else
 	{
 		pRX_Status->cooler_temp = INVALID_VALUE;
-//		pRX_Status->error.cooler_overheated = TRUE;
 	}
 
 	if (pRX_Status->cooler_temp == INVALID_VALUE)

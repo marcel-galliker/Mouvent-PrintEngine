@@ -88,11 +88,11 @@ void power_tick_100ms(void)
 
 	// result=36V / start converting -5V
 	val = IORD_16DIRECT(AMC7891_0_BASE,AMC7891_ADC1_DATA) & 0x3ff;
-	pRX_Status->u_minus_36v = -1*(1000 *(5120000 - 5235 * val)/48128);
+	pRX_Status->u_minus_36v = 109*(val-978);
 
 	// result=-5V / start converting +5V
 	val = IORD_16DIRECT(AMC7891_0_BASE,AMC7891_ADC2_DATA) & 0x3ff;
-	pRX_Status->u_minus_5v		= -1*(1000* (10240 - 15*val)/1024);
+	pRX_Status->u_minus_5v		= (146*val-100000)/10;
 
 	// result=+5V / start converting -2.5V
 	val = IORD_16DIRECT(AMC7891_0_BASE,AMC7891_ADC3_DATA) & 0x3ff;

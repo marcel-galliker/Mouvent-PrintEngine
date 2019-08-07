@@ -383,13 +383,17 @@ void ctrl_set_max_speed(void)
 		case printer_LB702_WB:	maxSpeed[0]= 100; maxSpeed[1]= 100; maxSpeed[2]= 100; maxSpeed[3]= 100; break;
 		case printer_LH702:		maxSpeed[0]= 100; maxSpeed[1]= 100; maxSpeed[2]= 100; maxSpeed[3]= 100; break;
 		default:				maxSpeed[0]= 100; maxSpeed[1]= 100; maxSpeed[2]= 100; maxSpeed[3]= 100; break; 	
-	}		
-
+	}
 //	if (enc_is_analog() || !strcmp(RX_Hostname, "TX801-0001") || !strcmp(RX_Hostname, "TX801-0009"))
 	{
 		maxSpeed[0]= 100; maxSpeed[1]= 100; maxSpeed[2]= 100; maxSpeed[3]= 100;				
 	}			
 
+	if (!strcmp(RX_Hostname, "DropWatcher"))
+	{
+		maxSpeed[0]= 120; maxSpeed[1]= 120; maxSpeed[2]= 120; maxSpeed[3]= 120;		
+	}
+	
 	for (n=0; n<MAX_DROP_SIZES; n++)
 	{
 		if(inkSpeed[n]) RX_PrinterStatus.maxSpeed[n] = (int) (0.95*inkSpeed[n]); // for safety
