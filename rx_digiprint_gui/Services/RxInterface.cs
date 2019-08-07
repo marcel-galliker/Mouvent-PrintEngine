@@ -62,15 +62,41 @@ namespace RX_DigiPrint.Services
             get { return _Running; }
             set { SetProperty(ref _Running, value); }
         }
+
+        //---Property Connected ---------------------------------
+        private Boolean _GuiConnected = false;
+        public Boolean GuiConnected
+        {
+            get { return _GuiConnected; }
+            private set
+            {
+                if (_Running) SetProperty(ref _GuiConnected, value);
+            }
+        }
         
         //---Property Connected ---------------------------------
         private Boolean _Connected = false;
         public Boolean Connected
         {
             get { return _Connected; }
-            private set
+            set
             {
-                if (_Running) SetProperty(ref _Connected, value);
+                if (_Running)
+                {
+                    if (SetProperty(ref _Connected, value))
+                    {
+                        if (_Connected) _GuiConnected=true;
+                        else
+                        {
+                            Thread t=new Thread(()=>
+                            {
+                                Thread.Sleep(1000);
+                                if (!_Connected) _GuiConnected=false;
+                            });
+                            t.Start();
+                        }
+                    }
+                }
             }
         }
 

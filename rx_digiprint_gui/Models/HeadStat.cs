@@ -277,8 +277,10 @@ namespace RX_DigiPrint.Models
         //--- SetItem ----------------------------------------------
         public void SetItem(int no, TcpIp.SHeadStat item, Int32 tempFpga, Int32 flow)
         {   
-            List<RxEnum<int>> list = new EN_ColorCodeList().List;
             HeadNo  = no;
+
+            if (no==0)
+                no=0;
 
             try
             {

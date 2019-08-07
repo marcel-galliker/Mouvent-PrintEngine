@@ -368,11 +368,14 @@ static void _enc_start_printing(int no, SPrintQueueItem *pitem)
 								}
 								else 
 								{
-									comp = 0.0050 * RX_StepperStatus.posZ * pitem->speed;
+								//	comp = 0.0050 * RX_StepperStatus.posZ * pitem->speed;
+									comp = 0;
 //										test = RX_Config.headDistBackMax-comp;
 									Error(LOG, 0, "Flightime Comp: height=%d speed=%d comp=%d µm", RX_StepperStatus.posZ, pitem->speed, (int)comp);
 								}
+								Error(LOG, 0, "Encoder.pos_pg_bwd: %d µm org", msg.pos_pg_bwd);
 								msg.pos_pg_bwd += (int)comp;  
+								Error(LOG, 0, "Encoder.pos_pg_bwd: %d µm comp", msg.pos_pg_bwd);
 							}
 							break;
 			

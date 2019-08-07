@@ -205,6 +205,7 @@ static void *_print_file_thread(void *par)
 static int _handle_main_ctrl_msg(RX_SOCKET socket, void *msg, int len, struct sockaddr	*sender, void *par)
 {
 	SMsgHdr *phdr = (SMsgHdr*)msg;
+	static UINT32 _UnknownMsgId=0;
 
 	_MsgId = phdr->msgId;
 	switch(phdr->msgId)
@@ -243,7 +244,12 @@ static int _handle_main_ctrl_msg(RX_SOCKET socket, void *msg, int len, struct so
 //	case CMD_FONTS_UPDATED:			rip_add_fonts(PATH_FONTS);									break;
 	case CMD_FONTS_UPDATED:			rip_add_fonts((char*)&phdr[1]);								break;
 
-	default:					Error(WARN, 0, "Got unknown messageId=0x%08x", phdr->msgId);
+	default:					
+		if (phdr->msgId != _UnknownMsgId)
+		{
+			Error(WARN, 0, "Got unknown messageId=0x%08x", phdr->msgId);
+			_UnknownMsgId = phdr->msgId;
+		}
 	}
 	_MsgId=0;
 	return REPLY_OK;

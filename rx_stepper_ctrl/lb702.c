@@ -128,7 +128,7 @@ void lb702_main(int ticks, int menu)
 		{
 			if (!RX_StepperStatus.info.headUpInput_0) Error(ERR_CONT, 0, "LB702: Command REFERENCE: End Sensor 1 NOT HIGH");
 			if (!RX_StepperStatus.info.headUpInput_1) Error(ERR_CONT, 0, "LB702: Command REFERENCE: End Sensor 2 NOT HIGH");
-			RX_StepperStatus.info.ref_done =  RX_StepperStatus.info.headUpInput_0 && RX_StepperStatus.info.headUpInput_1;
+			RX_StepperStatus.info.ref_done = RX_StepperStatus.info.headUpInput_0 && RX_StepperStatus.info.headUpInput_1;
 			motors_reset(MOTOR_Z_BITS);				
 		}
 		else if (motors_error(MOTOR_Z_BITS, &motor))
@@ -237,8 +237,8 @@ static void _lb702_move_to_pos(int cmd, int pos)
 
 //--- lb702_handle_ctrl_msg -----------------------------------
 int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
-{	
-	INT32 pos;
+{		
+	int val;
 	
 	switch(msgId)
 	{
@@ -256,10 +256,9 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									break;
 
 	case CMD_CAP_PRINT_POS:			strcpy(_CmdName, "CMD_CAP_PRINT_POS");
-									pos   = (*((INT32*)pdata));
-									_PrintHeight = pos;
+									_PrintHeight   = (*((INT32*)pdata));
 								//	Error(LOG, 0, "CMD_CAP_PRINT_POS _CmdRunning=0x%08x, ref_done=%d, z_in_print=%d, =%d, _PrintPos_Act=%d", _CmdRunning, RX_StepperStatus.info.ref_done, RX_StepperStatus.info.z_in_print, steps, _PrintPos_Act);
-									_PrintPos_New = -1*_micron_2_steps(RX_StepperCfg.ref_height - pos);
+									_PrintPos_New = -1*_micron_2_steps(RX_StepperCfg.ref_height - _PrintHeight);
 								//	Error(LOG, 0, "CMD_CAP_PRINT_POS _PrintPos_New=%d", _PrintPos_New);											
 									if(!RX_StepperStatus.info.printhead_en) Error(ERR_ABORT, 0, "Allow Head Down signal not set!");
 									else if (!_CmdRunning && (!RX_StepperStatus.info.ref_done || !RX_StepperStatus.info.z_in_print || _PrintPos_New!=_PrintPos_Act))
@@ -270,9 +269,10 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									break;
 		
 	case CMD_CAP_UP_POS:			strcpy(_CmdName, "CMD_CAP_UP_POS");
+									_PrintPos_New = -1*_micron_2_steps(RX_StepperCfg.ref_height - 20000);
 									if (!_CmdRunning)
 									{
-										if (RX_StepperStatus.info.ref_done) _lb702_move_to_pos(CMD_CAP_UP_POS, -1*_micron_2_steps(RX_StepperCfg.ref_height - 20000));
+										if (RX_StepperStatus.info.ref_done) _lb702_move_to_pos(CMD_CAP_UP_POS, _PrintPos_New);
 										else								_lb702_do_reference();
 									}
 									break;
@@ -286,8 +286,8 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									}
 									break;
 		
-	case CMD_CAP_IS_PRINTING:		pos   = (*((INT32*)pdata));
-									if (pos) Fpga.par->output |=  (1<<IS_PRINTING_OUT);
+	case CMD_CAP_IS_PRINTING:		val   = (*((INT32*)pdata));
+									if (val) Fpga.par->output |=  (1<<IS_PRINTING_OUT);
 									else	 Fpga.par->output &= ~(1<<IS_PRINTING_OUT);
 									break;
 		
