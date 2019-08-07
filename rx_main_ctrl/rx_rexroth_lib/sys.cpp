@@ -95,10 +95,14 @@ int sys_in_run_mode(void)
 
 	MlpiSystemMode mode = MLPI_SYSTEMMODE_SWITCHING;
 	MLPIRESULT result = mlpiSystemGetCurrentMode(_Connection, &mode);
+	if (rex_check_result(result)==REPLY_OK)
+		return TRUE;
+	/*
 	if (rex_check_result(result)==REPLY_OK && mode==MLPI_SYSTEMMODE_BB) return TRUE;
 //#ifdef DEBUG
 	if (rex_check_result(result)==REPLY_OK && mode==MLPI_SYSTEMMODE_P2) return TRUE; 
 //#endif
+	*/
 	return FALSE;
 }
 

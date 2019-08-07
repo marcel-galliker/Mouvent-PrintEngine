@@ -316,7 +316,9 @@ static void _plc_set_command(char *mode, char *cmd)
 	}
 	if (!strcmp(cmd, "CMD_PAUSE"))
 	{
-		_SendPause = 2;
+		Error(LOG, 0, "CMD_PAUSE _SendPause=%d", _SendPause);
+		if (_SendPause == 1) _SendPause = 2; 
+		else _SendPause = 0;
 	}
 //	Error(LOG, 0, "PLC_COMMAND >>%s<<", cmd);
 	sprintf(str, APP "%s", cmd);
@@ -470,6 +472,7 @@ int  plc_start_printing(void)
 {
 	if (_PlcState!=plc_run)	
 	{
+		Error(LOG, 0, "_StartPrinting=TRUE");
 		_StartPrinting		= TRUE;
 		_RequestPause		= FALSE;
 	}
@@ -488,6 +491,7 @@ int  plc_stop_printing(void)
 {
 	if (RX_Config.printer.type==printer_LH702) steplb_is_printing(FALSE);
 	if (_SimuEncoder) ctrl_simu_encoder(0);
+		Error(LOG,0, "_StartPrinting=FALSE");
 	_StartPrinting = FALSE;
 	_SendRun       = FALSE;
 	_SendPause	   = FALSE;
@@ -565,6 +569,7 @@ int	plc_to_cap_pos(void)
 //--- plc_pause_printing ---------------------------------------
 int  plc_pause_printing(void)
 {
+	Error(LOG,0, "_StartPrinting=FALSE");
 	_StartPrinting = FALSE;
 	_SendRun       = FALSE;
 	_RequestPause  = FALSE;
@@ -1127,30 +1132,20 @@ static ELogItemType _plc_error_filter(SPlcLogItem *pItem, char *text)
 	//--- Rexroth messages -----------------------
 	ELogItemType logType=LOG_TYPE_UNDEF;
 
-	if      ((pItem->errNo & 0xf0000000) == 0xe0000000)
-	{
-		Error(LOG, 0, "Filter: >>PLC (%X): %s<< DISCARDED warning", pItem->errNo, pItem->text);
-		return LOG_TYPE_UNDEF;	// ignore warnings
-	}
+	if      ((pItem->errNo & 0xf0000000) == 0xe0000000) return LOG_TYPE_UNDEF;	// ignore warnings
 	else if ((pItem->errNo & 0xf0000000) == 0xf0000000) logType=LOG_TYPE_ERROR_CONT;
 	else logType=LOG_TYPE_LOG;
 		
 	strcpy(text, pItem->text);
 	for (int i=0; i<SIZEOF(_ErrorFilterBuf); i++)
 	{
-		if (_ErrorFilterBuf[i]==pItem->errNo) 
-		{
-			Error(LOG, 0, "Filter: >>PLC (%X): %s<< DISCARDED already in list", pItem->errNo, pItem->text);
-			return LOG_TYPE_UNDEF;		
-		}
+		if (_ErrorFilterBuf[i]==pItem->errNo) return LOG_TYPE_UNDEF;		
 		if (_ErrorFilterBuf[i]==0)
 		{
-			Error(LOG, 0, "Filter: >>PLC (%X): %s<< new message, type=%d", pItem->errNo, pItem->text, logType);
 			_ErrorFilterBuf[i] = pItem->errNo;
 			return logType;
 		}
 	}
-	Error(LOG, 0, "Filter: >>PLC (%X): %s<< else type=%d", pItem->errNo, pItem->text, logType);
 	return logType;
 }
 
@@ -1275,6 +1270,7 @@ static void _plc_state_ctrl()
 	{		
 		if(_SendPause==2)
 		{
+			Error(LOG, 0, "_SendPause=%d _StartPrinting=%d", _SendPause, _StartPrinting);
 			if (!_StartPrinting) RX_PrinterStatus.printState = ps_pause;
 			_SendPause = 0;
 		}
@@ -1328,12 +1324,10 @@ static void _plc_state_ctrl()
 			}
 		}
 		
-		/*
 		if(_StartPrinting && _StartEncoderItem.pageWidth == 0)
 		{
 			Error(LOG, 0, "enc_ready=%d, pq_is_ready2print=%d, printState=%d, z_in_print=%d", enc_ready(), pq_is_ready2print(&_StartEncoderItem), RX_PrinterStatus.printState, RX_StepperStatus.info.z_in_print);
 		}
-		*/
 
 		if(_StartPrinting
 			&& _StartEncoderItem.pageWidth == 0 
@@ -1343,6 +1337,7 @@ static void _plc_state_ctrl()
 			&& (RX_StepperStatus.info.z_in_print 
 			|| _SimuPLC))
 		{
+			Error(LOG,0, "_StartPrinting=FALSE");
 			_StartPrinting = FALSE;
 			_CanRun = TRUE;
 			if(!_SimuPLC)    _plc_set_command("CMD_PRODUCTION", "CMD_RUN");

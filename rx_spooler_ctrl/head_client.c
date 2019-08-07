@@ -819,16 +819,18 @@ void hc_check(void)
 						TrPrintfL(TRUE, "SpoolerNo=%d Alive Sent to >>%s<< len=%d", RX_SpoolerNo, str, len);
 					}
 					sent++;
+					/*
 					if (time%10==0) 
 					{
 						if (_HBPar[board]->cfg.dataAddr[port]!=addr)
 						{
 							char str[32];
-						//	TrPrintfL(TRUE, "PING %s", sok_addr_str(_HBPar[board]->cfg.dataAddr[port], str));
+							TrPrintfL(TRUE, "PING %s", sok_addr_str(_HBPar[board]->cfg.dataAddr[port], str));
 							sok_ping(sok_addr_str(_HBPar[board]->cfg.dataAddr[port], str));
 							addr = _HBPar[board]->cfg.dataAddr[port];
 						}
 					}
+					*/
 				}
 			#endif
 			}

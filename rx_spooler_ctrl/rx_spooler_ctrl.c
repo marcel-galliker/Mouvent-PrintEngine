@@ -12,6 +12,7 @@
 #include "tcp_ip.h"
 #include "rx_common.h"
 #include "rx_error.h"
+#include "rx_file.h"
 #include "rx_threads.h"
 #include "rx_trace.h"
 #include "args.h"
@@ -128,11 +129,16 @@ int main(int argc, char* argv[])
 	rx_process_name(argv[0]);
 	args_init(argc, argv);
 	rx_startup(argv[0], arg_debug);
+
 	Trace_init(argv[0]);
 
 //	rx_set_process_priority(-10);
 
 	RX_SpoolerNo = _spoolerNo();
+
+	rx_mkdir(PATH_HOME);
+	rx_mkdir(PATH_USER);
+	rx_mkdir(PATH_LOG);
 
 //	Trace_to_screen(FALSE);
 //	Trace_to_file(FALSE);

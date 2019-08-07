@@ -318,7 +318,7 @@ static void _enc_start_printing(int no, SPrintQueueItem *pitem)
 								msg.diameter[1] = 76;
 								if (no == 0)
 								{
-									msg.printGoOutDist = WEB_OFFSET_VERSO + RX_Config.printer.offset.versoDist;								
+									msg.printGoOutDist = 1000*(WEB_OFFSET_VERSO + RX_Config.printer.offset.versoDist);
 								}
 								else
 								{

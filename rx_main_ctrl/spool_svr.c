@@ -37,6 +37,7 @@
 typedef struct
 {
 	int			used;
+	int			err;
 	RX_SOCKET	socket;
 	int			loadNo;
 	int			sendNo;
@@ -63,7 +64,7 @@ static int _handle_spool_connected	(RX_SOCKET socket, const char *peerName);
 static int _handle_spool_deconnected(RX_SOCKET socket, const char *peerName);
 
 static int _do_spool_cfg_rep	(RX_SOCKET socket);
-static int _do_print_file_rep	(RX_SOCKET socket, SPrintFileRep	*msg);
+static int _do_print_file_rep	(RX_SOCKET socket, int spoolerNo, SPrintFileRep	*msg);
 static int _do_print_file_evt	(RX_SOCKET socket, SPrintFileMsg	*msg);
 static void _do_print_done_evt	(RX_SOCKET socket, SPrintDoneMsg	*msg);
 static int _do_log_evt			(RX_SOCKET socket, SLogMsg			*msg);
@@ -120,12 +121,15 @@ void spool_auto(int enable)
 static int _handle_spool_msg(RX_SOCKET socket, void *msg, int len, struct sockaddr *sender, void *par)
 {
 	SMsgHdr	*phdr = (SMsgHdr*)msg;
-
+	int spoolerNo;
+	
+	for (spoolerNo=0; _Spooler[spoolerNo].socket!=socket; spoolerNo++);
+	
 	switch(phdr->msgId)
 	{
 	case CMD_REQ_SPOOL_CFG:	spool_set_config	(socket);							break;
 	case REP_SET_SPOOL_CFG:	_do_spool_cfg_rep	(socket);							break;
-	case REP_PRINT_FILE:	_do_print_file_rep	(socket, (SPrintFileRep*)	msg);	break;
+	case REP_PRINT_FILE:	_do_print_file_rep	(socket, spoolerNo, (SPrintFileRep*)	msg);	break;
 	case REP_PRINT_ABORT:															break;
 	case EVT_PRINT_FILE:	_do_print_file_evt	(socket, (SPrintFileMsg*)	msg);	break;
 	case EVT_PRINT_DONE:	_do_print_done_evt	(socket, (SPrintDoneMsg*)	msg);	break;
@@ -163,7 +167,11 @@ static int _handle_spool_connected(RX_SOCKET socket, const char *peerName)
 	EDevice device;
 	int no;
 	net_ipaddr_to_device(peerName, &device, &no);
-	if (no<SIZEOF(_Spooler)) _Spooler[no].socket = socket;
+	if (no<SIZEOF(_Spooler))
+	{
+		_Spooler[no].err	= FALSE;
+		_Spooler[no].socket = socket;
+	}
 	spool_set_config(socket);
 	return REPLY_OK;
 }
@@ -494,14 +502,14 @@ int spool_abort_printing(void)
 }
 
 //--- _do_print_file_rep ------------------------------------------------------
-static int _do_print_file_rep(RX_SOCKET socket, SPrintFileRep *msg)
+static int _do_print_file_rep(RX_SOCKET socket, int spoolerNo, SPrintFileRep *msg)
 {
 	int size;
 
 	_MsgGot++;
 //	if (msg->bufReady)
 	{
-		TrPrintfL(TRUE, "****** rep_print_file id=%d, page=%d, copy=%d, scan=%d, width=%d, length=%d, bufReady=%d, _MsgSent=%d, _MsgGot=%d", msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->widthPx, msg->lengthPx, msg->bufReady, _MsgSent, _MsgGot);
+		TrPrintfL(TRUE, "****** Spooler[%d]:rep_print_file id=%d, page=%d, copy=%d, scan=%d, width=%d, length=%d, bufReady=%d, _MsgSent=%d, _MsgGot=%d", spoolerNo, msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->widthPx, msg->lengthPx, msg->bufReady, _MsgSent, _MsgGot);
 		size = ((RX_Spooler.headWidthPx+RX_Spooler.headOverlapPx)*msg->bitsPerPixel+7)/8;
 		size *= msg->lengthPx;
 		size = (size+RX_Spooler.dataBlkSize-1) / RX_Spooler.dataBlkSize;
@@ -620,7 +628,11 @@ int spool_send_msg_2(UINT32 cmd, int dataSize, void *data, int errmsg)
 		if(_Spooler[i].used)
 		{
 			if (_Spooler[i].socket!=INVALID_SOCKET && sok_send_2(&_Spooler[i].socket,cmd,dataSize,data)==REPLY_OK) cnt++;
-			else if(errmsg) ErrorEx(dev_spooler, i, ERR_ABORT, 0, "not connected");
+			else if(errmsg) 
+			{
+				if (!_Spooler[i].err) ErrorEx(dev_spooler, i, ERR_ABORT, 0, "not connected");
+				_Spooler[i].err = TRUE;
+			}
 		}
 	}
 	return cnt;

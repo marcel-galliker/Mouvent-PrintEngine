@@ -814,8 +814,8 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg, int restart)
 		else 
 		{
 			Fpga->cfg.pg[pgNo].fifos_used	  = (pcfg->printGoMode==PG_MODE_MARK) ?  FIFOS_MARKREADER : FIFOS_DIST;
-			Fpga->cfg.general.shift_delay_tel = (int)(pcfg->printGoDist/_StrokeDist);
 			Fpga->cfg.general.shift_delay	  = (int)(pcfg->printGoOutDist/_StrokeDist);
+			Fpga->cfg.general.shift_delay_tel = (int)(pcfg->printGoDist/_StrokeDist);
 		//	Fpga->cfg.pg[pgNo].dig_in_sel   = 0;
 		//	Fpga->cfg.pg[pgNo].quiet_window = 10;
 		//	if (FpgaQSys->printGo_status.fill_level) Fpga->cfg.pg[pgNo].fifos_ready	= TRUE;
@@ -1138,7 +1138,8 @@ static void _fpga_display_status(int showCorrection, int showParam)
 			{term_printf("  enable enc/idx:"); for (i=0; i<cnt; i++) term_printf("%03d   %03d  ", Fpga->cfg.encIn[i].enable, Fpga->cfg.encIn[i].index_en);			term_printf("\n");}
 	if(_ALL){term_printf("  reset_pos:     "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->cfg.encIn[i].reset_pos);			term_printf("\n");}
 			term_printf("  RollerDiameter:%09d  %09d  ", 70 + Fpga->cfg.general.sel_roller_dia_offset[0], 70 + Fpga->cfg.general.sel_roller_dia_offset[1]); term_printf("\n");
-
+			term_printf("  shift_delay:   %09d  shift_delay_tel:  %09d", Fpga->cfg.general.shift_delay, Fpga->cfg.general.shift_delay_tel); term_printf("\n");
+			
 			{term_printf("\n");}
 			{term_printf("output config    "); for (i=0; i<cnt; i++) term_printf("____%d____  ", i);								term_printf("\n");}
 			{term_printf("  encoder_no:    "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->cfg.encOut[i].encoder_no);			term_printf("\n");}
