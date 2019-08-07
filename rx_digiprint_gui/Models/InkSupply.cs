@@ -210,12 +210,12 @@ namespace RX_DigiPrint.Models
         private bool _Flushed = true;
         public bool Flushed
         {
-            get { return _Flushed; }
-            set 
+            get { return _Flushed; }set 
             { 
-                if (value!=Flushed)
-                    Console.WriteLine("Flushed changed");
-                SetProperty(ref _Flushed, value); 
+               if (SetProperty(ref _Flushed, value))
+               {
+                    Console.WriteLine("InkSupply[{0}].Flushed={1}", No, value);
+               }
             }
         }
         

@@ -69,9 +69,12 @@ namespace RX_DigiPrint.Models
         //--- RemoveItem ------------------------------------------------------------------------
         public void RemoveItem(PrintQueueItem item)
         {
-            if (item==null) _Queue.Clear();
-            else _removeFromList(_Queue, item);
-            if (_Queue.Count()==0) new PrintQueueItem().SendBtProdState(); 
+            RxBindable.Invoke(() => 
+            {
+                if (item==null) _Queue.Clear();
+                else _removeFromList(_Queue, item);
+                if (_Queue.Count()==0) new PrintQueueItem().SendBtProdState(); 
+            });
         }
 
         //--- UpItem ------------------------------------------------------------------------

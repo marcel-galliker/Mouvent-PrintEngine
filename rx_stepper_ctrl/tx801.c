@@ -173,8 +173,9 @@ void tx801_main(int ticks, int menu)
 	if (_CmdRunning && motors_move_done(MOTOR_Z_BITS)) 
 	{
 		RX_StepperStatus.info.moving = FALSE;
-		if (_CmdRunning == CMD_CAP_REFERENCE) 
+		if (_CmdRunning == CMD_CAP_REFERENCE)
 		{
+			_tx801_set_ventilators(0);
 			if (motor_error(MOTOR_Z_BITS))
 			{	
 				Error(ERR_CONT, 0, "LIFT: %s: motor %s blocked", ctrl_cmd_name(_CmdRunning), _motor_name(motor));
@@ -357,6 +358,7 @@ static void _tx801_do_reference(void)
 	_CmdRunning  = CMD_CAP_REFERENCE;
 	RX_StepperStatus.info.moving = TRUE;
 	motors_move_by_step	(MOTOR_Z_BITS,  &_ParRef, -500000, TRUE);
+	// _tx801_set_ventilators(20);
 }
 
 //---_micron_2_steps --------------------------------------------------------------
@@ -435,7 +437,7 @@ int  tx801_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 
 	case CMD_CAP_REFERENCE:			_PrintPos_New=0;
 									motors_reset(MOTOR_Z_BITS);
-									_tx801_do_reference();	
+									_tx801_do_reference();
 									break;
 
 	case CMD_CAP_PRINT_POS:			pos   = (*((INT32*)pdata));

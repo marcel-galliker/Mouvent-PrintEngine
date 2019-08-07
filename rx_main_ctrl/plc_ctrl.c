@@ -42,8 +42,6 @@ static int _SimuEncoder;
 
 #define APP				"Application.GUI_00_001_Main."
 
-#define PAUSE_TIMEOUT	(2*30)
-
 #define UPDATE_ALL		FALSE
 
 typedef struct
@@ -149,7 +147,6 @@ static ULONG			_LastLogIdx=0;
 static int				_StartPrinting=FALSE;
 static int				_RequestPause=FALSE;
 static int				_SendPause=FALSE;
-static int				_PauseTimeout=0;
 static int				_SendRun=FALSE;
 static int				_SendWebIn=FALSE;
 static int				_CanRun=FALSE;
@@ -463,11 +460,8 @@ int  plc_set_printpar(SPrintQueueItem *pItem)
 	_plc_send_par(&par);
 	memcpy(&_StartEncoderItem, pItem, sizeof(_StartEncoderItem));
 	_Speed = _StartEncoderItem.speed;
-	Error(LOG, 0, "CMD_PAUSE refDone=%d, z_in_ref=%d, z_in_print=%d", RX_StepperStatus.info.ref_done, RX_StepperStatus.info.z_in_ref, RX_StepperStatus.info.z_in_print);
-	if (!RX_StepperStatus.info.z_in_ref && !RX_StepperStatus.info.z_in_print && !RX_StepperStatus.info.moving)
-		step_handle_gui_msg(INVALID_SOCKET, CMD_CAP_UP_POS, NULL, 0);		
+	step_set_vent(_Speed);
 	_SendPause = 1;
-	_PauseTimeout = PAUSE_TIMEOUT;
 	
 	return REPLY_OK;
 }
@@ -487,6 +481,7 @@ int  plc_start_printing(void)
 		_SendRun		= TRUE;
 		_heads_to_print	= FALSE;
 	}
+	step_set_vent(_Speed);
 	if (_SimuEncoder) ctrl_simu_encoder(_Speed);
 	return REPLY_OK;
 }
@@ -500,6 +495,7 @@ int  plc_stop_printing(void)
 	_SendRun       = FALSE;
 	_SendPause	   = FALSE;
 	_RequestPause  = FALSE;
+	step_set_vent(FALSE);
 	if (_SimuPLC)
 	{
 		RX_PrinterStatus.printState = ps_off;
@@ -511,7 +507,6 @@ int  plc_stop_printing(void)
 	{
 		Error(LOG, 0, "plc_stop_printing: send CMD_STOP");
 		_plc_set_command("CMD_PRODUCTION", "CMD_STOP");
-		step_set_vent(FALSE);
 
 		/*
 		if (RX_Config.printer.type==printer_TX801 || RX_Config.printer.type==printer_TX802)
@@ -584,12 +579,8 @@ int  plc_pause_printing(void)
 	{
 		_plc_set_par_default();
 //		_plc_set_command("CMD_PRODUCTION", "CMD_PAUSE");
-		Error(LOG, 0, "send PAUSE");
-		Error(LOG, 0, "CMD_PAUSE refDone=%d, z_in_ref=%d, z_in_print=%d", RX_StepperStatus.info.ref_done, RX_StepperStatus.info.z_in_ref, RX_StepperStatus.info.z_in_print);
-		if (!RX_StepperStatus.info.z_in_ref && !RX_StepperStatus.info.z_in_print && !RX_StepperStatus.info.moving)
-			step_handle_gui_msg(INVALID_SOCKET, CMD_CAP_UP_POS, NULL, 0);		
+//		Error(LOG, 0, "send PAUSE");
 		_SendPause = 1;
-		_PauseTimeout = PAUSE_TIMEOUT;
 	}
 	return REPLY_OK;
 }
@@ -612,12 +603,7 @@ int plc_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen)
 		case CMD_PLC_GET_VAR:		_plc_get_var (socket, (char*)data);				break;
 		case CMD_PLC_SET_VAR:		_plc_set_var (socket, (char*)data);				break;
 		case CMD_PLC_SET_CMD:		_plc_set_cmd (socket, (char*)data);				break;
-		case CMD_PAUSE_PRINTING:	Error(LOG, 0, "CMD_PAUSE refDone=%d, z_in_ref=%d, z_in_print=%d", RX_StepperStatus.info.ref_done, RX_StepperStatus.info.z_in_ref, RX_StepperStatus.info.z_in_print);
-									if (!RX_StepperStatus.info.z_in_ref && !RX_StepperStatus.info.z_in_print && !RX_StepperStatus.info.moving)
-										step_handle_gui_msg(INVALID_SOCKET, CMD_CAP_UP_POS, NULL, 0);		
-									_SendPause=1;
-									_PauseTimeout = PAUSE_TIMEOUT;
-									break;
+		case CMD_PAUSE_PRINTING:	_SendPause=1;									break;
 		
 		//--- material database --------------------------------------------------------
 		case CMD_PLC_REQ_MATERIAL:	_plc_req_material  (socket, FILENAME_MATERIAL, cmd); break;
@@ -1241,38 +1227,33 @@ static void _plc_state_ctrl()
 			}
 		}
 		
-	//	if (_PlcState==plc_setup && RX_PrinterStatus.printState==ps_webin && RX_Config.printer.type!=printer_cleaf) _plc_set_command("CMD_SETUP", "CMD_WEBIN");
 		if (RX_Config.stepper.ref_height!=0 || RX_Config.stepper.print_height!=0)
 		{
 			headIsUp = (RX_StepperStatus.info.z_in_print || RX_StepperStatus.info.z_in_ref);
 
-		//	if (_SendPause) Error(LOG, 0, "_SendPause=%d, z_in_ref=%d, z_in_print=%d, moving=%d", _SendPause, RX_StepperStatus.info.z_in_ref, RX_StepperStatus.info.z_in_print, RX_StepperStatus.info.moving);
-
-			if (headIsUp)
+			if(headIsUp)
 			{
-				if (_SendPause==1)
+				if(_SendPause == 1)
 				{
 					_SendPause = 2;
-					_PauseTimeout=0;
 					rx_sleep(200);
 					_plc_set_command("CMD_PRODUCTION", "CMD_PAUSE");
-					step_set_vent(FALSE);
 				}
-				if (_SendWebIn)
+				if(_SendWebIn)
 				{
 					_SendWebIn = FALSE;
 					rx_sleep(200);
 					_plc_set_command("CMD_SETUP", "CMD_WEBIN");
 					return;
 				}									
-			}
-			else 
-			{				
-				if (_PauseTimeout>0 && --_PauseTimeout==0) Error(ERR_CONT, 0, "Timeout waiting for Steppers in reference"); 
+			} 
+			else if (_SendPause==1 && !RX_StepperStatus.info.moving)
+			{
+				step_handle_gui_msg(INVALID_SOCKET, CMD_CAP_UP_POS, NULL, 0);				
 			}
 		}
+		lc_set_value_by_name_UINT32(APP "STA_HEAD_IS_UP", headIsUp);	
 	}
-	lc_set_value_by_name_UINT32(APP "STA_HEAD_IS_UP", headIsUp);	
 
 	/*	Label
 	if (_PlcState==plc_setup && RX_PrinterStatus.printState != ps_setup)
@@ -1296,13 +1277,14 @@ static void _plc_state_ctrl()
 		if(_SendPause==2)
 		{
 			if (!_StartPrinting) RX_PrinterStatus.printState = ps_pause;
+			if (!_StartPrinting) step_set_vent(0);
 			_SendPause = 0;
 		}
 		if(_SendRun)
 		{
 			_SendRun = FALSE;
 			_plc_set_command("CMD_PRODUCTION", "CMD_RUN");
-			step_set_vent(_Speed);
+		//	step_set_vent(_Speed);
 			RX_PrinterStatus.printState = ps_printing;
 		}
 		if(_StartEncoderItem.pageWidth)	// send position to encoder
@@ -1368,7 +1350,7 @@ static void _plc_state_ctrl()
 			if(!_SimuPLC)    _plc_set_command("CMD_PRODUCTION", "CMD_RUN");
 			if(_SimuEncoder) ctrl_simu_encoder(_Speed);
 			if (RX_Config.printer.type==printer_LH702) steplb_is_printing(TRUE);
-			step_set_vent(_Speed);
+//			step_set_vent(_Speed);
 			memset(&_StartEncoderItem, 0, sizeof(_StartEncoderItem));
 //			TrPrintfL(TRUE, "PLC: CMD_RUN sent");
 			Error(LOG, 0, "PLC: CMD_RUN sent");

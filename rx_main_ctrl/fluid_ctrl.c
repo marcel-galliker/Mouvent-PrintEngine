@@ -694,7 +694,7 @@ void fluid_reply_stat(RX_SOCKET socket)	// to GUI
 		if (i<INK_SUPPLY_CNT)
 		{
 			_FluidStatus[i].info.connected = (_FluidThreadPar[i/INK_PER_BOARD].socket!=INVALID_SOCKET);
-			_FluidStatus[i].info.flushed   = (_Flushed & (0x01<<i));
+			_FluidStatus[i].info.flushed   = ((_Flushed & (0x01<<i))!=0);
 	//		_FluidStatus[i].info.flushed   = ctrl_check_head_flushed(i);			
 		}
 

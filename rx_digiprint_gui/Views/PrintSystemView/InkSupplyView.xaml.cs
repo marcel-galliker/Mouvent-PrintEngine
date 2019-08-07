@@ -138,12 +138,14 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 else MsgPopup.IsOpen=false;
             }
 
-            if (e.PropertyName.Equals("InkType")) FlushButton.DataContext = _InkSupply.InkType;
-
+            if (e.PropertyName.Equals("InkType")) 
+                FlushButton.DataContext = _InkSupply.InkType;
+            /*
             if (e.PropertyName.Equals("Flushed"))
             {
                 Console.WriteLine("InkSupply[{0}]Flushed changed", _InkSupply.No);
             }
+            */
         }
 
         //--- to adjust when styla changes ---------------------------

@@ -41,8 +41,12 @@ int	 steptx_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen
 	switch(cmd)
 	{
 	//--- cappping ---------------------------------------------------------
-	case CMD_CAP_STOP:
 	case CMD_CAP_REFERENCE:
+				sok_send_2(_step_socket[0], cmd, 0, NULL);
+				step_set_vent(TRUE);
+				break;
+
+	case CMD_CAP_STOP:
 	case CMD_CAP_UP_POS:
 	case CMD_CAP_CAPPING_POS:
 				sok_send_2(_step_socket[0], cmd, 0, NULL);

@@ -85,13 +85,13 @@ namespace RX_DigiPrint.Services
                 {
                     if (SetProperty(ref _Connected, value))
                     {
-                        if (_Connected) _GuiConnected=true;
+                        if (_Connected) GuiConnected=true;
                         else
                         {
                             Thread t=new Thread(()=>
                             {
                                 Thread.Sleep(1000);
-                                if (!_Connected) _GuiConnected=false;
+                                if (!_Connected) GuiConnected=false;
                             });
                             t.Start();
                         }

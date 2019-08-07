@@ -154,6 +154,14 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _X_in_cap, value); }
         }
 
+        //--- Property X_in_ref ---------------------------------------
+        private bool _X_in_ref;
+        public bool X_in_ref
+        {
+            get { return _X_in_ref; }
+            set { SetProperty(ref _X_in_ref, value); }
+        }
+
         //--- Property _HeadUpInput_0 ---------------------------------------
         private bool _HeadUpInput_0;
         public bool HeadUpInput_0
@@ -200,6 +208,14 @@ namespace RX_DigiPrint.Models
         {
             get { return _cap_enabled; }
             set { SetProperty(ref _cap_enabled, value); }
+        }
+
+        //--- Property capDP803_enabled ---------------------------------------
+        private bool _capDP803_enabled;
+        public bool capDP803_enabled
+        {
+            get { return _capDP803_enabled; }
+            set { SetProperty(ref _capDP803_enabled, value); }
         }
 
         //--- Property drip_pans_enabled ---------------------------------------
@@ -260,8 +276,22 @@ namespace RX_DigiPrint.Models
             Z_in_print= (msg.info & 0x00000020)!=0;
             Z_in_cap  = (msg.info & 0x00000040)!=0;
             X_in_cap  = (msg.info & 0x00000100)!=0 || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB701;
+            X_in_ref = (msg.info & 0x00000200) != 0;
+           
             CoverOpen = (msg.info & 0x00001000)!=0;
-            cap_enabled = RefDone && DripPans_InfeedUP && DripPans_OutfeedUP && (X_in_cap || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB701 || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_cleaf);
+            //cap_enabled = RefDone && DripPans_InfeedUP && DripPans_OutfeedUP && (X_in_cap || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB701 || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_cleaf);
+            //---- CAPPING ----
+            if (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_DP803)
+            {
+                cap_enabled = RefDone && X_in_cap;
+                capDP803_enabled = RefDone && Z_in_ref;
+            }
+            //---- END OF CAPPING ----
+            else
+            {
+                cap_enabled = RefDone && DripPans_InfeedUP && DripPans_OutfeedUP && (X_in_cap || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB701 || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_cleaf);
+                capDP803_enabled = false;
+            }
             HeadUpInput_0 = (msg.info & 0x00040000)!=0;
             HeadUpInput_1 = (msg.info & 0x00080000)!=0;
             HeadUpInput_2 = (msg.info & 0x00100000)!=0;
@@ -274,6 +304,9 @@ namespace RX_DigiPrint.Models
             DripPans_OutfeedDOWN    = (msg.info & 0x80000000) != 0;
 
             if (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_cleaf) cmd_enabled = RefDone && DripPans_InfeedDOWN && DripPans_OutfeedDOWN && !DripPans_InfeedUP && !DripPans_OutfeedUP;
+            //---- CAPPING ----
+            else if (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_DP803) cmd_enabled = RefDone && X_in_ref;
+            //---- END OF CAPPING ----
             else cmd_enabled = RefDone;
 
             PosX    = msg.posX;

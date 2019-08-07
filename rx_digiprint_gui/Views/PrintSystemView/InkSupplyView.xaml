@@ -144,6 +144,10 @@
                     <GroupBox Width="150" Style="{StaticResource RxGroupBox}" Header="^">
                         <StackPanel Margin="10,2">
                       <!--  <Button                       Content="Shut Down"   Click="ShutDown_Clicked"  Padding="10" Visibility="{Binding Flushed, Converter={StaticResource BoolToInVisible_Converter}}"/> -->
+                            <!--
+                            <Button Content="{Binding No}" Height="40"/>
+                            <Button Content="{Binding Flushed}" Height="40"/>
+                            -->
                             <Button x:Name="Button_OnOff" Content="OFF"         Click="OnOff_Clicked"     Padding="10"/>
                             <Button                       Content="Print"       Click="Print_Clicked"     Padding="10" Visibility="{Binding Flushed, Converter={StaticResource BoolToInVisible_Converter}}"/>
                             <Rectangle Fill="{StaticResource RX.Green}" HorizontalAlignment="Stretch" Height="1" Margin="-16, 8"/>
@@ -241,6 +245,21 @@
                     Foreground="Red" 
                     FontWeight="Bold"
                     Visibility="{Binding Connected, Converter={StaticResource BoolToInVisible_Converter}}"
+                    RenderTransformOrigin="0.5,0.5" >
+                <TextBlock.LayoutTransform>
+                    <RotateTransform Angle="-70"/>
+                </TextBlock.LayoutTransform>
+            </TextBlock>
+
+            <TextBlock x:Name="Flushed"
+                    Grid.RowSpan="100"
+                    Text="FLUSHED" 
+                    FontSize="15" 
+                    HorizontalAlignment="Center" 
+                    VerticalAlignment="Center" 
+                    Foreground="Orange" 
+                    FontWeight="Bold"
+                    Visibility="{Binding Flushed, Converter={StaticResource BoolToVisible_Converter}}"
                     RenderTransformOrigin="0.5,0.5" >
                 <TextBlock.LayoutTransform>
                     <RotateTransform Angle="-70"/>
