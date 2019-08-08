@@ -363,17 +363,18 @@ void pres_tick_10ms(void)
 	if (_PressureIn.error)  RX_Status.error |= COND_ERR_pres_in_hw;
 	if (_PressureOut.error) RX_Status.error |= COND_ERR_pres_out_hw;
 	
+	if (RX_Config.flowResistance<100 || RX_Config.flowResistance>500)
+	{
+		RX_Config.flowResistance = 181;
+		RX_Status.flowResistance = RX_Config.flowResistance;
+	}
+
 	if (!valid(RX_Status.pressure_in) || !valid(RX_Status.pressure_out) || RX_Status.error&COND_ERR_p_in_too_high)
     {
         RX_Status.meniscus = INVALID_VALUE;
     }  
 	else
     {
-		if (RX_Config.flowResistance==0)
-		{
-			RX_Config.flowResistance = 181;
-			RX_Status.flowResistance = RX_Config.flowResistance;
-		}
         RX_Status.meniscus = (INT32)(RX_Status.pressure_in - ((RX_Status.pressure_in - RX_Status.pressure_out) / (0.01 * RX_Config.flowResistance)));
     }
 }

@@ -174,7 +174,7 @@ int pc_start_printing(void)
 		pc_print_next();
 		gui_send_printer_status(&RX_PrinterStatus);
 	}
-	else if (RX_PrinterStatus.printState==ps_pause || RX_PrinterStatus.printState==ps_printing)
+	else if (RX_PrinterStatus.printState==ps_pause/* || RX_PrinterStatus.printState==ps_printing*/)
 	{
 		RX_PrinterStatus.dataReady=TRUE;
 		machine_start_printing();
@@ -301,7 +301,7 @@ static void _send_head_info(void)
 			len = 0;
 			len += sprintf(&str[len], "%s\n", RX_TestImage.testMessage);
 			len += sprintf(&str[len], "%s-%d                     %s\n", RX_ColorNameShort(color), n+1, time);
-			len += sprintf(&str[len], "cl# %06d  s# %d-%02d     w%d/%d\n", RX_HBStatus[headNo/MAX_HEADS_BOARD].clusterNo, pinfo->serialNo/100, pinfo->serialNo%100, pinfo->week, 2000+pinfo->year);
+			len += sprintf(&str[len], "cl# %06d  s# %d-%02d  w%d/%d\n", RX_HBStatus[headNo/MAX_HEADS_BOARD].clusterNo, pinfo->serialNo/100, pinfo->serialNo%100, pinfo->week, 2000+pinfo->year);
 			len += sprintf(&str[len], "volt %d / straight %d / uniform %d\n",pinfo->voltage, pinfo->straightness, pinfo->uniformity);
 			len += sprintf(&str[len], "bad");
 			for (bad=0; bad<SIZEOF(pinfo->badJets) && pinfo->badJets[bad]; bad++)

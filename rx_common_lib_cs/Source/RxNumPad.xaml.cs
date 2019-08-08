@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Globalization;
 
 namespace RX_Common
 {
@@ -136,26 +137,26 @@ namespace RX_Common
             {          
                 double val=_OrgValue+Rx.StrToDouble(Result);
                 if (val<0 && _IsUint32) val=_OrgValue;
-                Result = val.ToString();     
+                Result = val.ToString(CultureInfo.InvariantCulture);     
                 this.DialogResult = true;
             }
             else if (key.Equals("-="))      
             {
                 double val=_OrgValue-Rx.StrToDouble(Result);
                 if (val<0 && _IsUint32) val=_OrgValue;
-                Result = val.ToString();     
+                Result = val.ToString(CultureInfo.InvariantCulture);     
                 this.DialogResult = true;
             }
             else if (key.Equals("PAP"))
             {
                 double val=Rx.StrToDouble(Result);
-                Result = (val*550).ToString();    // 550 m per roll     
+                Result = (val * 550).ToString(CultureInfo.InvariantCulture);    // 550 m per roll     
                 this.DialogResult = true;
             }
             else if (key.Equals("ABS"))
             {
                 double val=Rx.StrToDouble(Result);
-                Result = (val*420).ToString();    // 420 m per roll     
+                Result = (val * 420).ToString(CultureInfo.InvariantCulture);    // 420 m per roll     
                 this.DialogResult = true;
             }
             else if (key.Equals("Back"))

@@ -173,6 +173,7 @@ static int				_PAR_WINDER_1_ON=TRUE;
 static int				_PAR_WINDER_2_ON=TRUE;
 
 static int				_heads_to_print=FALSE;
+static int				_head_was_up=FALSE;
 
 	
 //--- plc_init ----------------------------------------------------------------
@@ -448,8 +449,13 @@ int  plc_set_printpar(SPrintQueueItem *pItem)
 	&&  (RX_Config.printer.type==printer_TX801 || RX_Config.printer.type==printer_TX802))
 	{
 		// else wait webtension is ok
-		_heads_to_print=TRUE;
-		tt_cap_to_print_pos();
+		_head_was_up   = (RX_StepperStatus.info.z_in_print || RX_StepperStatus.info.z_in_ref);
+		if (_head_was_up)
+		{
+			_heads_to_print= TRUE;
+			tt_cap_to_print_pos();
+		}
+		else _heads_to_print= FALSE;
 	}
 	
 	_UvUsed = (RX_Config.printer.type==printer_cleaf || RX_Config.printer.type==printer_LB701 || RX_Config.printer.type==printer_LB702_UV);
@@ -495,6 +501,7 @@ int  plc_stop_printing(void)
 	_SendRun       = FALSE;
 	_SendPause	   = FALSE;
 	_RequestPause  = FALSE;
+	_head_was_up   = FALSE; 
 	step_set_vent(FALSE);
 	if (_SimuPLC)
 	{
@@ -571,6 +578,7 @@ int  plc_pause_printing(void)
 {
 	Error(LOG,0, "_StartPrinting=FALSE");
 	_StartPrinting = FALSE;
+	_head_was_up   = FALSE;
 	_SendRun       = FALSE;
 	_RequestPause  = FALSE;
 	if (_SimuEncoder && rx_def_is_scanning(RX_Config.printer.type)) ctrl_simu_encoder(0);
@@ -1229,7 +1237,7 @@ static void _plc_state_ctrl()
 		
 		if (RX_Config.stepper.ref_height!=0 || RX_Config.stepper.print_height!=0)
 		{
-			headIsUp = (RX_StepperStatus.info.z_in_print || RX_StepperStatus.info.z_in_ref);
+			headIsUp = (RX_StepperStatus.info.z_in_print || RX_StepperStatus.info.z_in_ref || _head_was_up);
 
 			if(headIsUp)
 			{
@@ -1320,7 +1328,7 @@ static void _plc_state_ctrl()
 		}
 
 		if(!_heads_to_print)
-		{			
+		{
 		//	TrPrintfL(TRUE, "_heads_to_print: printhead_en=%d, printState=%d (%d)", RX_StepperStatus.info.printhead_en, RX_PrinterStatus.printState, ps_printing);
 		//	if (RX_Config.printer.type!=printer_cleaf || (RX_StepperStatus.info.printhead_en && RX_PrinterStatus.printState==ps_printing))
 			if(RX_PrinterStatus.printState == ps_printing && (RX_StepperStatus.info.printhead_en || (RX_Config.printer.type!=printer_cleaf &&  RX_Config.printer.type!=printer_LH702)))
@@ -1346,6 +1354,7 @@ static void _plc_state_ctrl()
 			)
 		{
 			_StartPrinting = FALSE;
+			_head_was_up   = FALSE;
 			_CanRun = TRUE;
 			if(!_SimuPLC)    _plc_set_command("CMD_PRODUCTION", "CMD_RUN");
 			if(_SimuEncoder) ctrl_simu_encoder(_Speed);

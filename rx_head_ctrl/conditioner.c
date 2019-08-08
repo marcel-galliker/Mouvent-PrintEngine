@@ -569,7 +569,7 @@ void cond_set_flowResistance(int headNo, int value)
 	memcpy(&mem, _NiosStat->user_eeprom[headNo], sizeof(mem));
 	mem.flowResistance = value;
 	mem.flowResistanceCheck = ~mem.flowResistance;
-	nios_set_user_eeprom(headNo, (char*) &mem);
+	nios_set_user_eeprom(headNo, &mem);
 
 	_NiosMem->cfg.cond[headNo].flowResistance = value;
 }
@@ -590,7 +590,7 @@ void cond_set_clusterNo(INT32 clusterNo)
 		if (mem.clusterNo!=clusterNo)
 		{
 			mem.clusterNo = clusterNo;
-			nios_set_user_eeprom(headNo, (char*) &mem);
+			nios_set_user_eeprom(headNo, &mem);
 		}
 	}
 	RX_HBStatus->clusterNo = clusterNo;

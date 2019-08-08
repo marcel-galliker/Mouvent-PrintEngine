@@ -366,6 +366,7 @@ namespace RxWfTool.Models
             {
                 int     time=64;
                 int     maxVolt=32;
+                int     largestDroplet=0;
                 int     volt=0;
                 int     pos=0;
                 bool    waveFormSamples=false;
@@ -397,11 +398,38 @@ namespace RxWfTool.Models
 
                     if (line.StartsWith("Start Section-to-Multibit Mapping Table"))
                     {
+                        for (int i=0; i<Ink.GreyLevel.Count(); i++) Ink.GreyLevel[i]=0;
                         sectionNumbers = true;
                     }
                     else if (line.StartsWith("End Section-to-Multibit Mapping Table"))
                     {
                         sectionNumbers = false;
+                        // remove unused voltages at end
+                        int idx=list.Count();
+                        while (idx>2 && list[idx-1].Voltage==0 && list[idx-2].Voltage==0)
+                        {
+                            list.RemoveAt(idx-1);
+                            idx--;
+                        }
+                        // add AllOn Droplet if needed
+                        if (Ink.GreyLevel[0]==0)
+                        {
+                            for(int i=0; i<Ink.GreyLevel.Count(); i++) 
+                                Ink.GreyLevel[i] |= (largestDroplet<<1);
+
+                            WfItem item1 = new WfItem();
+                            item1.ListChanged += item_ListChanged;
+                            item1.No = list.Count+1;                        
+                            item1.Position = list.Last().Position+2;
+                            item1.Voltage  = 1;
+                            list.Add(item1);
+                            WfItem item2 = new WfItem();
+                            item2.ListChanged += item_ListChanged;
+                            item2.No = list.Count+1;                        
+                            item2.Position = list.Last().Position+2;
+                            item2.Voltage  = 0;
+                            list.Add(item2);
+                        }
                     }
                     else if (line.Contains("Start Waveform Samples"))
                     {
@@ -420,14 +448,15 @@ namespace RxWfTool.Models
                         string[] value = line.Split(separator);
                         try
                         {
-                            int dotszie=Convert.ToInt32(value[0]);
-                            int greyLevel=0;
-                            int i;
-                            for (i=0; i<8; i++)
+                            int droplet=0x01<<(Convert.ToInt32(value[0])-1);
+                            for (int i=0; i<Ink.GreyLevel.Count(); i++)
                             {
-                                if (value[2+i].Equals("1")) greyLevel |= (1<<i);
+                                if (value[i+1].Equals("1")) 
+                                {
+                                    Ink.GreyLevel[i] |= droplet;
+                                    if (droplet>largestDroplet) largestDroplet=droplet;
+                                }
                             }
-                            Ink.GreyLevel[dotszie] = greyLevel;
                         }
                         catch(Exception)
                         { };

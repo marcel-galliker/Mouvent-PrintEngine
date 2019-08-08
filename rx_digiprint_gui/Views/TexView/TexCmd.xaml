@@ -18,7 +18,7 @@
             <rx_uc:PlcCommand ID="CMD_SLIDE_TO_PURGE"    Label="PURGE POS" User="usr_service"/>
             <rx_uc:PlcCommand ID="CMD_SLIDE_TO_WIPE"     Label="WIPE POS"  User="usr_service"/> 
             
-            <rx_uc:PlcCommand ID="CMD_RUN"              Label="RUN"                 IsEnabled="{Binding Z_in_print}" User="usr_mouvent"/>
+            <!-- <rx_uc:PlcCommand ID="CMD_RUN"              Label="RUN"                 IsEnabled="{Binding Z_in_print}" User="usr_mouvent"/> -->
             <!-- <rx_uc:PlcCommand ID="CMD_PAUSE"            Label="PAUSE"               IsEnabled="{Binding Z_in_print}" x:Name="Button_Pause"/>  -->
             <!-- <rx_uc:PlcCommand ID="CMD_STOP"             Label="STOP"/> -->
 

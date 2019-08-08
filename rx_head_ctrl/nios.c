@@ -531,12 +531,17 @@ int  nios_is_firepulse_on(void)
 }
 
 //--- nios_set_user_eeprom ------------------------------------
-void nios_set_user_eeprom(int no, char *data)
+void nios_set_user_eeprom(int no, SHeadEEpromMvt *data)
 {
 	if (_NiosMem)
 	{
-		memcpy(_NiosMem->cfg.user_eeprom[no], data, sizeof(_NiosMem->cfg.user_eeprom[no]));
-		_NiosMem->cfg.cmd.cmd |= (WRITE_USER_EEPROM<<no);
+		if (sizeof(SHeadEEpromMvt)<=sizeof(_NiosMem->cfg.user_eeprom[no])) 
+		{
+			Error(LOG, 0, "nios_set_user_eeprom head=%d, flowResistance=%d, check=%d", no, data->flowResistance, ~(data->flowResistanceCheck));
+			memcpy(_NiosMem->cfg.user_eeprom[no], data, sizeof(_NiosMem->cfg.user_eeprom[no]));
+			_NiosMem->cfg.cmd.cmd |= (WRITE_USER_EEPROM<<no);	
+		}
+		else Error(ERR_CONT, 0, "Head User EEPROM overflow");
 	}
 }
 
