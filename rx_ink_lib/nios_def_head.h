@@ -36,40 +36,45 @@ typedef struct SExecutable
 //*** memory written by ARM processor ****************************************
 
 //--- cmd_ Flags --------------------------------------------------
-typedef struct SNiosHeadCmd
+typedef union SNiosHeadCmd
 {
-	UINT32	shutdown:1;				// 	00:	sets the NIOS processor to a save state
-	UINT32	error_reset:1;			// 	01: 
-	UINT32	exe_valid:1;			// 	02:
-	UINT32	firepulse_on:1;			// 	03:
-	UINT32	write_user_eeprom:1;	// 	04:
-	UINT32	cmd_05:1;			    // 	05:
-	UINT32	cmd_06:1;			    // 	06:
-	UINT32	cmd_07:1;				// 	07:
-	UINT32	cmd_08:1;				// 	08:
-	UINT32	cmd_09:1;				// 	09:
-	UINT32	cmd_10:1;				// 	10:
-	UINT32	cmd_11:1;				// 	11:
-	UINT32	cmd_12:1;				// 	12:
-	UINT32	cmd_13:1;				// 	13:
-	UINT32	cmd_14:1;				// 	14:
-	UINT32	cmd_15:1;				// 	15:
-	UINT32	cmd_16:1;				// 	16:
-	UINT32	cmd_17:1;				// 	17:
-	UINT32	cmd_18:1;				// 	18:
-	UINT32	cmd_19:1;				// 	19:
-	UINT32	cmd_20:1;				// 	20:
-	UINT32	cmd_21:1;				// 	21:
-	UINT32	cmd_22:1;				// 	22:
-	UINT32	cmd_23:1;				// 	23:
-	UINT32	cmd_24:1;				// 	24:
-	UINT32	cmd_25:1;				// 	25:
-	UINT32	cmd_26:1;				// 	26:
-	UINT32	cmd_27:1;				// 	27:
-	UINT32	cmd_28:1;				// 	28:
-	UINT32	cmd_29:1;				// 	29:
-	UINT32	cmd_30:1;				// 	30:
-	UINT32	cmd_31:1;				// 	31:
+	UINT32 cmd;
+	struct
+	{		
+		UINT32	shutdown:1;				// 	00:	sets the NIOS processor to a save state
+		UINT32	error_reset:1;			// 	01: 
+		UINT32	exe_valid:1;			// 	02:
+		UINT32	firepulse_on:1;			// 	03:
+#define WRITE_USER_EEPROM	(1<<4)
+		UINT32	write_user_eeprom0:1;	// 	04:
+		UINT32	write_user_eeprom1:1;	// 	05:
+		UINT32	write_user_eeprom2:1;	// 	06:
+		UINT32	write_user_eeprom3:1;	// 	07:
+		UINT32	cmd_08:1;				// 	08:
+		UINT32	cmd_09:1;				// 	09:
+		UINT32	cmd_10:1;				// 	10:
+		UINT32	cmd_11:1;				// 	11:
+		UINT32	cmd_12:1;				// 	12:
+		UINT32	cmd_13:1;				// 	13:
+		UINT32	cmd_14:1;				// 	14:
+		UINT32	cmd_15:1;				// 	15:
+		UINT32	cmd_16:1;				// 	16:
+		UINT32	cmd_17:1;				// 	17:
+		UINT32	cmd_18:1;				// 	18:
+		UINT32	cmd_19:1;				// 	19:
+		UINT32	cmd_20:1;				// 	20:
+		UINT32	cmd_21:1;				// 	21:
+		UINT32	cmd_22:1;				// 	22:
+		UINT32	cmd_23:1;				// 	23:
+		UINT32	cmd_24:1;				// 	24:
+		UINT32	cmd_25:1;				// 	25:
+		UINT32	cmd_26:1;				// 	26:
+		UINT32	cmd_27:1;				// 	27:
+		UINT32	cmd_28:1;				// 	28:
+		UINT32	cmd_29:1;				// 	29:
+		UINT32	cmd_30:1;				// 	30:
+		UINT32	cmd_31:1;				// 	31:			
+	};
 } SNiosHeadCmd;
 
 typedef struct SNiosCfg

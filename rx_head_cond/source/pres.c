@@ -369,6 +369,11 @@ void pres_tick_10ms(void)
     }  
 	else
     {
-        RX_Status.meniscus = (INT32)(RX_Status.pressure_in - ((RX_Status.pressure_in - RX_Status.pressure_out) / 1.81));
+		if (RX_Config.flowResistance==0)
+		{
+			RX_Config.flowResistance = 181;
+			RX_Status.flowResistance = RX_Config.flowResistance;
+		}
+        RX_Status.meniscus = (INT32)(RX_Status.pressure_in - ((RX_Status.pressure_in - RX_Status.pressure_out) / (0.01 * RX_Config.flowResistance)));
     }
 }

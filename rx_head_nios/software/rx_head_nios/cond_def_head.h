@@ -155,9 +155,9 @@ typedef union SCondCmd
 			UINT32 user_calibration:1;		    //02 toggle between factory and user calibration values
 			UINT32 resetPumpTime:1;				//03
 			UINT32 reset_errors:1;				//04
-			UINT32 del_offset:1;		//05
-			UINT32 set_pid:1;	    //06
-			UINT32 cmd_07:1;		//07
+			UINT32 del_offset:1;				//05
+			UINT32 set_pid:1;					//06
+			UINT32 save_eeprom:1;				//07
 			UINT32 cmd_08:1;		//08
 			UINT32 cmd_09:1;		//09
 			UINT32 cmd_10:1;		//10
@@ -200,6 +200,7 @@ typedef struct SConditionerCfg_mcu
 	UINT32	tempHead;				// measured head temperature
 	UINT32	mode;					// EnFluidCtrlMode
 	UINT32	volume_printed;			// [ml/min]
+	UINT16	flowResistance;
 		
 	//--- status of fluid system -------------------
     INT32   cylinderPressure;
@@ -239,6 +240,7 @@ typedef struct SConditionerStat_mcu
 	INT32			meniscus;
 	INT32			meniscus_setpoint;
 	INT32			meniscus_diff;
+	UINT16			flowResistance;
 	
 	UINT32			pump;				// rpm (calculated based on actual/desired output pressure)
 	UINT32			pump_measured;		// measured rpm
@@ -263,7 +265,7 @@ typedef struct SConditionerStat_mcu
 
 	//Saved values on Flash
 	UINT32 			pumptime;		// count seconds
-	UINT32			clusterNo;
+	INT32			clusterNo;		// stored in head EEPROM!
 	UINT32			clusterTime;
 	UINT32			machineMeters;
 	

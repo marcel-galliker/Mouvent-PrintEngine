@@ -710,7 +710,7 @@ typedef struct
 
 typedef struct
 {
-	UINT16	meniscus_factor;
+	UINT16	flowResistance;
 	UINT16	clusterNo;	
 	UINT32	printed_ml;
 	INT16	disabledJets[MAX_DISABLED_JETS];

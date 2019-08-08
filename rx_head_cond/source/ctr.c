@@ -7,15 +7,16 @@ static UINT32 _PumpTime=0;
 // --- ctr_save -----------------------------
 void ctr_save(void)
 {
-	if (RX_Status.pumptime!=_PumpTime)
-	{
-		eeprom_write_setting32(EE_ADDR_PUMPTIME, RX_Status.pumptime);
-		_PumpTime = RX_Status.pumptime;
-	}
 	if (RX_Config.clusterNo && RX_Config.clusterNo != RX_Status.clusterNo) 
 	{
 		eeprom_write_setting32(EE_ADDR_CLUSTER_NO, RX_Config.clusterNo);
 		RX_Status.clusterNo = RX_Config.clusterNo;
+	}
+
+	if (RX_Status.pumptime!=_PumpTime)
+	{
+		eeprom_write_setting32(EE_ADDR_PUMPTIME, RX_Status.pumptime);
+		_PumpTime = RX_Status.pumptime;
 	}
 	if (RX_Config.clusterTime && RX_Config.clusterTime != RX_Status.clusterTime) 
 	{

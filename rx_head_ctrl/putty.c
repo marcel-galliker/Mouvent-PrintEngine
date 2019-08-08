@@ -515,7 +515,7 @@ void putty_display_cond_status(int show, int status)
 			}
 		}
 		
-		term_printf("Cluster:  No: %06d", RX_NiosStat.cond[0].clusterNo);
+		term_printf("Cluster:  No: %06d", RX_HBStatus->clusterNo);
 		{
 			int h, m, s;
 			s = RX_NiosStat.cond[0].clusterTime%60;
@@ -613,6 +613,7 @@ void putty_display_cond_status(int show, int status)
 			term_printf("\n");
     	}
 		
+		term_printf("meniscus flowRes: "); PRINTF(MAX_HEADS_BOARD)("     %d.%02d (%d.%02d)", _NiosMem->stat.cond[no[i]].flowResistance/100, _NiosMem->stat.cond[no[i]].flowResistance%100, _NiosMem->cfg.cond[no[i]].flowResistance/100, _NiosMem->cfg.cond[no[i]].flowResistance%100); term_printf("\n");
 		term_printf("meniscus setpoint:"); PRINTF(MAX_HEADS_BOARD)(" %14s ", value_str1(RX_NiosStat.cond[no[i]].meniscus_setpoint)); term_printf("\n");
 		
     	term_printf("Pressure out:    ");

@@ -91,56 +91,64 @@ void handle_menu(char *str)
 	int i;
 	int no;
 	
-	no = str[1] - '0';
-	switch (str[0])
+	if(no=str_start(str, "cluster"))
 	{
-	case '0': cond_resetPumpTime(atoi(&str[1])); break;
+		cond_set_clusterNo(atoi(&str[no]));
+	}
+	else
+	{
+		no = str[1] - '0';
+		switch (str[0])
+		{
+		case '0': cond_resetPumpTime(atoi(&str[1])); break;
 			
-	case 'd': nios_fixed_grey_levels(atoi(&str[1]), 3);	break;
-	case 'g': fpga_manual_pg();							break;
-	case 'h': fpga_enc_config(atoi(&str[1]));			break;
-	case 'p': udp_test_print(&str[1]);					break;
-	//case 'P': udp_test_print_tif(&str[1]);				break;
-	/*
-	case 'r': fpga_load(PATH_BIN_HEAD FIELNAME_HEAD_RBF);	
-				nios_load(PATH_BIN_HEAD FIELNAME_HEAD_NIOS);
-				fpga_set_config(INVALID_SOCKET);			
-				break;
-	*/
-//	case 't': udp_test_send_block(4, 1);				break;
-//	case 'T': udp_test_send_block(4, 10000);			break;
-	case 't': ctrl_stress_test();						break;
+		case 'd': nios_fixed_grey_levels(atoi(&str[1]), 3);	break;
+		case 'g': fpga_manual_pg();							break;
+		case 'h': fpga_enc_config(atoi(&str[1]));			break;
+		case 'p': udp_test_print(&str[1]);					break;
+		//case 'P': udp_test_print_tif(&str[1]);				break;
+		/*
+		case 'r': fpga_load(PATH_BIN_HEAD FIELNAME_HEAD_RBF);	
+					nios_load(PATH_BIN_HEAD FIELNAME_HEAD_NIOS);
+					fpga_set_config(INVALID_SOCKET);			
+					break;
+		*/
+	//	case 't': udp_test_send_block(4, 1);				break;
+	//	case 'T': udp_test_send_block(4, 10000);			break;
+		case 't': ctrl_stress_test();						break;
 		
-//	case 'u': fpga_display_used_flags();				break;
-//	case 'w': _do_waveform(&str[1]);					break;
-	case 'x': _AppRunning=FALSE;						break;
+	//	case 'u': fpga_display_used_flags();				break;
+	//	case 'w': _do_waveform(&str[1]);					break;
+		case 'x': _AppRunning=FALSE;						break;
 			
-	case 'o': cond_ctrlMode(atoi(&str[1]), ctrl_off);		break;
-	case 'w': cond_ctrlMode(atoi(&str[1]), ctrl_warmup);	break;
-	case 'R': fpga_trace_registers("registers", FALSE);		break;
-	case 'r': cond_ctrlMode(atoi(&str[1]), ctrl_print);		break;
+		case 'o': cond_ctrlMode(atoi(&str[1]), ctrl_off);		break;
+		case 'w': cond_ctrlMode(atoi(&str[1]), ctrl_warmup);	break;
+		case 'R': fpga_trace_registers("registers", FALSE);		break;
+		case 'r': cond_ctrlMode(atoi(&str[1]), ctrl_print);		break;
 		
-	case 'i': cond_heater_test(atoi(&str[1]));			break;
-	case 'q': cond_start_log();							break;
+		case 'i': cond_heater_test(atoi(&str[1]));			break;
+		case 'q': cond_start_log();							break;
 			
-	case 'E': cond_error_reset();						break;
-	case 'l': cond_start_preslog();						break;
+		case 'E': cond_error_reset();						break;
+		case 'l': cond_start_preslog();						break;
 		
-	// todo remove from final software -> toggle meniscus error check	
-	case 'M': cond_toggle_meniscus_check();				break;
+		case 'f': cond_set_flowResistance(str[1]-'0', atoi(&str[2]));		break;
+		// todo remove from final software -> toggle meniscus error check	
+		case 'M': cond_toggle_meniscus_check();				break;
 							
-	// Only for DEBUGGING purposes
-	// Parameters for tuning the Conditioner's PID controller
+		// Only for DEBUGGING purposes
+		// Parameters for tuning the Conditioner's PID controller
 
-	case 'u': if (no<=4) cond_offset_del(no);					break;
-	case 'z': if (no<=4) cond_ctrlMode2(no, ctrl_offset_cal);	break;	
+		case 'u': if (no<=4) cond_offset_del(no);					break;
+		case 'z': if (no<=4) cond_ctrlMode2(no, ctrl_offset_cal);	break;	
 
-	/*
-	case 'z': if (no<=4) cond_ctrlMode2(no, ctrl_offset_cal);			break; // 4 for all connected heads
-	case 'B': if (no<4) cond_toggle_psensor_cali(no);					break;
-	case 'b': if (no<4) cond_toggle_psensor_cali_user(no);				break;
-	*/
-	default: putty_handle_menu(str);
+		/*
+		case 'z': if (no<=4) cond_ctrlMode2(no, ctrl_offset_cal);			break; // 4 for all connected heads
+		case 'B': if (no<4) cond_toggle_psensor_cali(no);					break;
+		case 'b': if (no<4) cond_toggle_psensor_cali_user(no);				break;
+		*/
+		default: putty_handle_menu(str);
+		}		
 	}
 }
 

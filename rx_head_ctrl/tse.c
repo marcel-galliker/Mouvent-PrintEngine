@@ -215,7 +215,7 @@ int tse_set_mac_addr(int no, UINT64 macAddr)
 }
 
 //--- tse_display_status --------------------------------------
-void tse_display_status(int speed[2])
+void tse_display_status(INT32 speed[2])
 {		
 	int i, mb[2];
 	for (i=0; i<2; i++)

@@ -16,7 +16,7 @@
 int tse_init(void *addr0, void *addr1);
 int tse_end(void);
 
-void tse_display_status(int speed[2]);
+void tse_display_status(INT32 speed[2]);
 
 int tse_set_mac_addr(int no, UINT64 macAddr);
 int tse_check_errors(int menu);

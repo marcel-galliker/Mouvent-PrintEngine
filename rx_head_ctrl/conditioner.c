@@ -51,6 +51,8 @@ static ELogItemType	_ErrLevel = LOG_TYPE_UNDEF;
 
 static void _write_log(void);
 static void _cond_preslog(int ticks);
+static void	_update_clusterNo(void);
+
 
 //#define LOG_FLUID
 
@@ -99,6 +101,9 @@ int cond_init(void)
 			for(i = 0; i < MAX_HEADS_BOARD; i++) cond_ctrlMode(i, ctrl_undef);						
 		}
 	}
+	
+	_update_clusterNo();
+
 	
 	/*
 	{
@@ -232,6 +237,7 @@ void cond_error_check(void)
 		if (_NiosStat->cond[head].cmdConfirm.resetPumpTime) _NiosMem->cfg.cond[head].cmd.resetPumpTime= FALSE;
 		if (_NiosStat->cond[head].cmdConfirm.del_offset)	_NiosMem->cfg.cond[head].cmd.del_offset   = FALSE;
 		if (_NiosStat->cond[head].cmdConfirm.set_pid)		_NiosMem->cfg.cond[head].cmd.set_pid	  = FALSE;
+		if (_NiosStat->cond[head].cmdConfirm.save_eeprom)   _NiosMem->cfg.cond[head].cmd.save_eeprom  = FALSE;
 		
 		_NiosMem->cfg.cond[head].alive =  _NiosStat->cond[head].alive;
 		if (_ErrorDelay && rx_get_ticks()<_ErrorDelay) return;
@@ -304,29 +310,77 @@ ELogItemType cond_err_level(void)
 	return _ErrLevel;	
 }
 
-//--- _update_counters -------------------------------------
-static void _update_counters(void)
+//--- _count -------------
+static struct {int no; int cnt;} _cntr[8];
+static void _count(INT32 no)
+{
+	int i;
+//	printf("no=%d\n", no);
+	if (no<=0) return;
+	for (i=0; i<SIZEOF(_cntr); i++)
+	{
+		if (_cntr[i].no==no)
+		{
+			_cntr[i].cnt++;
+			return;
+		}
+		if (_cntr[i].no==0)
+		{
+			_cntr[i].no=no;
+			_cntr[i].cnt=1;
+			return;
+		}
+	}
+}
+
+//--- _update_clusterNo ------------------------------------
+static void _update_clusterNo(void)
 {
 	int condNo, n;
 	int clusterNo=-1;
+	SHeadEEpromMvt mem;
+
+	memset(_cntr, 0, sizeof(_cntr));
+	for (condNo=0; condNo<MAX_HEADS_BOARD;  condNo++)
+	{
+		memcpy(&mem, _NiosStat->user_eeprom[condNo], sizeof(mem));
+		_count(mem.clusterNo);
+		_count(_NiosStat->cond[condNo].clusterNo);
+	}
+
+	int cnt=0, idx=0;
+	for (n=0; n<SIZEOF(_cntr); n++)
+	{
+		if(_cntr[n].cnt>cnt)
+		{
+			idx=n;
+			cnt=_cntr[n].cnt;
+		}
+	}
+	clusterNo = _cntr[idx].no;
+	cond_set_clusterNo(clusterNo);
+	RX_HBStatus->clusterNo     = clusterNo;				
+}
+
+//--- _update_counters -------------------------------------
+static void _update_counters(void)
+{
+	int condNo;
 	int machineMeters=0;
 	int printing=FALSE;
-
+		
 	for (condNo=0; condNo<MAX_HEADS_BOARD;  condNo++)
 	{
 		if (_NiosStat->cond[condNo].mode==ctrl_print) printing = TRUE;
-		if (_NiosStat->cond[condNo].clusterNo)									clusterNo = _NiosStat->cond[condNo].clusterNo;
 		if (_NiosStat->cond[condNo].clusterTime   > RX_HBStatus->clusterTime)   RX_HBStatus->clusterTime   = _NiosStat->cond[condNo].clusterTime;
 		if (_NiosStat->cond[condNo].machineMeters > machineMeters)				machineMeters = _NiosStat->cond[condNo].machineMeters;
 	}
 	if (printing) RX_HBStatus->clusterTime++;
 
-	RX_HBStatus->clusterNo     = clusterNo;
 	RX_HBStatus->machineMeters = machineMeters;
-
+	
 	for (condNo=0; condNo<MAX_HEADS_BOARD;  condNo++)
 	{
-		_NiosCfg->cond[0].clusterNo			 = clusterNo;
 		_NiosCfg->cond[condNo].clusterTime   = RX_HBStatus->clusterTime;
 		if (RX_FluidStat[0].machineMeters!=INVALID_VALUE)// && RX_FluidStat[0].machineMeters>_NiosCfg->cond[condNo].machineMeters)
 			_NiosCfg->cond[condNo].machineMeters = RX_FluidStat[0].machineMeters;
@@ -469,6 +523,9 @@ void cond_ctrlMode(int headNo, EnFluidCtrlMode ctrlMode)
 {
 	if (headNo<0 || headNo>=MAX_HEADS_BOARD) return;
 
+	SHeadEEpromMvt *mem = (SHeadEEpromMvt*)_NiosStat->user_eeprom[headNo];
+	_NiosMem->cfg.cond[headNo].flowResistance = mem->flowResistance;
+
 	if (arg_simu_conditioner) RX_HBStatus[0].head[headNo].ctrlMode = ctrlMode;
 	else if (_NiosMem!=NULL) _NiosMem->cfg.cond[headNo].mode = ctrlMode;		
 }
@@ -498,6 +555,38 @@ void cond_set_config(int headNo, SConditionerCfg *cfg)
 //	_NiosMem->cfg.cond[headNo].meniscus_setpoint = cfg->meniscus_setpoint;		
 	_NiosMem->cfg.cond[headNo].headsPerColor= cfg->headsPerColor;
 	_NiosMem->cfg.cond[headNo].cmd.set_pid	= TRUE;
+}
+
+//--- cond_set_flowResistance --------------------------------
+void cond_set_flowResistance(int headNo, int value)
+{
+	if (headNo<0 || headNo>=MAX_HEADS_BOARD || _NiosMem==NULL) return;	
+
+	SHeadEEpromMvt mem;
+	memcpy(&mem, _NiosStat->user_eeprom[headNo], sizeof(mem));
+	mem.flowResistance = value;
+	nios_set_user_eeprom(headNo, (char*) &mem);
+
+	_NiosMem->cfg.cond[headNo].flowResistance = value;
+}
+
+//--- cond_set_clusterNo --------------------------------
+void cond_set_clusterNo(INT32 no)
+{
+	int headNo;
+	SHeadEEpromMvt mem;
+	for (headNo=0; headNo<MAX_HEADS_BOARD; headNo++)
+	{
+		memcpy(&mem, _NiosStat->user_eeprom[headNo], sizeof(mem));
+		if (mem.clusterNo!=no)
+		{
+			_NiosCfg->cond[headNo].clusterNo = no;
+			_NiosCfg->cond[headNo].cmd.save_eeprom = TRUE;
+			mem.clusterNo = no;
+			nios_set_user_eeprom(headNo, (char*) &mem);
+			_NiosMem->cfg.cond[headNo].clusterNo = no;				
+		}
+	}
 }
 
 //--- cond_setInk ---------------------------------------

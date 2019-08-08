@@ -31,7 +31,7 @@ extern UINT32			RX_BlockUsed[MAX_HEADS_BOARD];
 extern int				RX_RGB[MAX_HEADS_BOARD];
 extern char				RX_MacAddr[2][32];
 extern char				RX_IpAddr[2][32];
-INT32					RX_UdpSpeed[2];
+extern INT32			RX_UdpSpeed[2];
 
 extern SNiosStat		RX_NiosStat;
 extern SFluidStateLight	RX_FluidStat[MAX_HEADS_BOARD];

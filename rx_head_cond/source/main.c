@@ -278,6 +278,12 @@ void RxMessage_Handler(void)
 	}
 	RX_Status.cmdConfirm.reset_errors = RX_Config.cmd.reset_errors;
     
+	if (RX_Config.cmd.save_eeprom && !RX_Status.cmdConfirm.save_eeprom)
+	{
+		ctr_save();
+	}
+	RX_Status.cmdConfirm.save_eeprom = RX_Config.cmd.save_eeprom;
+		
     if (RX_Config.cmd.del_offset && !RX_Status.cmdConfirm.del_offset) pres_del_user_offset();
 	RX_Status.cmdConfirm.del_offset = RX_Config.cmd.del_offset;
 	
