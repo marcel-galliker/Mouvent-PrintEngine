@@ -54,10 +54,24 @@ namespace RX_DigiPrint.Views.PrintSystemView
             }
             if (e.PropertyName.Equals("PrinterType"))
             {
-           //     OffsetsGrid.Visibility      = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_test_slide_only)? Visibility.Collapsed : Visibility.Visible;
-                CleafStepperGrid.Visibility = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf)? Visibility.Visible : Visibility.Collapsed;
-                StepperGrid.Visibility      = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_test_slide_only)? 
-                                                Visibility.Collapsed : Visibility.Visible;
+           //     OffsetsGrid.Visibility    = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_test_slide_only)? Visibility.Collapsed : Visibility.Visible;
+                switch(RxGlobals.PrintSystem.PrinterType)
+                {
+                case EPrinterType.printer_cleaf:    StepperGridCleaf.Visibility=Visibility.Visible;
+                                                    StepperGridDP803.Visibility = Visibility.Collapsed;
+                                                    StepperGrid.Visibility=Visibility.Collapsed;
+                                                    break; 
+
+                case EPrinterType.printer_DP803:    StepperGridDP803.Visibility = Visibility.Visible;
+                                                    StepperGridCleaf.Visibility=Visibility.Collapsed;
+                                                    StepperGrid.Visibility=Visibility.Collapsed;
+                                                    break;
+
+                default:                            StepperGridDP803.Visibility = Visibility.Collapsed;
+                                                    StepperGridCleaf.Visibility=Visibility.Collapsed;
+                                                    StepperGrid.Visibility=Visibility.Visible;
+                                                    break;                               
+                }
                 RobotButtons.Visibility     = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX801 || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX802)? Visibility.Visible:Visibility.Collapsed;
             }            
         }

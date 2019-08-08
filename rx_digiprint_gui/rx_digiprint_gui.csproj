@@ -572,8 +572,8 @@
     <Compile Include="Views\PrintSystemView\AdjustmentHelp.xaml.cs">
       <DependentUpon>AdjustmentHelp.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\PrintSystemView\CleafStepperGrid.xaml.cs">
-      <DependentUpon>CleafStepperGrid.xaml</DependentUpon>
+    <Compile Include="Views\PrintSystemView\StepperGridCleaf.xaml.cs">
+      <DependentUpon>StepperGridCleaf.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\PrintSystemView\HeadAdjustment.xaml.cs">
       <DependentUpon>HeadAdjustment.xaml</DependentUpon>
@@ -604,6 +604,9 @@
     </Compile>
     <Compile Include="Views\PrintSystemView\OffsetsGrid.xaml.cs">
       <DependentUpon>OffsetsGrid.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PrintSystemView\StepperGridDP803.xaml.cs">
+      <DependentUpon>StepperGridDP803.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Settings\NetworkItem.xaml.cs">
       <DependentUpon>NetworkItem.xaml</DependentUpon>
@@ -1062,7 +1065,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\PrintSystemView\CleafStepperGrid.xaml">
+    <Page Include="Views\PrintSystemView\StepperGridCleaf.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -1105,6 +1108,10 @@
     <Page Include="Views\PrintSystemView\OffsetsGrid.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\PrintSystemView\StepperGridDP803.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\Settings\NetworkItem.xaml">
       <SubType>Designer</SubType>

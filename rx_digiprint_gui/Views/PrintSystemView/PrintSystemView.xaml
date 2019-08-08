@@ -76,7 +76,8 @@
                             <rxView:PrintSystemGrid/>
                             <rxView:OffsetsGrid x:Name="OffsetsGrid"/>
                             <rxView:StepperGrid x:Name="StepperGrid"/>
-                            <rxView:CleafStepperGrid x:Name="CleafStepperGrid"/>
+                            <rxView:StepperGridCleaf x:Name="StepperGridCleaf"/>
+                            <rxView:StepperGridDP803 x:Name="StepperGridDP803"/>
                             <rxView:ChillerView/>
                             <rxView:EncoderView/>
                         </StackPanel>

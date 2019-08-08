@@ -22,6 +22,7 @@
 #include "dp803.h"
 
 #define MOTOR_Z_0		0
+#define MOTOR_Z_1		1
 #define MOTOR_Z_BITS	0x03
 
 #define CURRENT_HOLD	50
@@ -199,7 +200,7 @@ static void _dp803_display_status(void)
 	term_printf("DP 803 ---------------------------------\n");
 	term_printf("moving:         %d		cmd: %08x\n",	RX_StepperStatus.info.moving, _CmdRunning);
 	term_printf("actpos:         %06d  newpos: %06d\n",	_PrintPos_Act, _PrintPos_New);		
-	term_printf("refheight:      %06d  ph:     %06d\n", 	_micron_2_steps(RX_StepperCfg.ref_height), _micron_2_steps(_PrintHeight));
+	term_printf("refheight:      %06d  ph:     %06d\n", 	_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height), _micron_2_steps(_PrintHeight));
 	term_printf("Head UP Sensor: %d  %d\n",	fpga_input(HEAD_UP_IN_0), fpga_input(HEAD_UP_IN_1));	
 	term_printf("reference done: %d\n",	RX_StepperStatus.info.ref_done);
 	term_printf("z in reference: %d\n",	RX_StepperStatus.info.z_in_ref);
@@ -299,7 +300,16 @@ static void _dp803_move_to_pos(int cmd, int pos)
 {
 	_CmdRunning  = cmd;
 	RX_StepperStatus.info.moving = TRUE;
-	motors_move_to_step(MOTOR_Z_BITS, &_ParZ_down, pos);
+	if(cmd == CMD_CAP_PRINT_POS)
+	{
+		motor_move_to_step(MOTOR_Z_0, &_ParZ_down, pos);
+		motor_move_to_step(MOTOR_Z_1, &_ParZ_down, pos + _micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].head_align));
+		motors_start(MOTOR_Z_BITS, TRUE);			
+	} 
+	else 
+	{
+		motors_move_to_step(MOTOR_Z_BITS, &_ParZ_down, pos);
+	}
 }
 
 //--- dp803_handle_ctrl_msg -----------------------------------
@@ -333,7 +343,7 @@ int  dp803_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 	case CMD_CAP_PRINT_POS:			strcpy(_CmdName, "CMD_CAP_PRINT_POS");
 									_PrintHeight   = (*((INT32*)pdata));									
 									Error(LOG, 0, "CMD_CAP_PRINT_POS pos=%d", _PrintHeight);
-									_PrintPos_New = -1*_micron_2_steps(RX_StepperCfg.ref_height - _PrintHeight);
+									_PrintPos_New = -1*_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height - _PrintHeight);
 									_Cmd_New = msgId;
 									if (!_CmdRunning && (!RX_StepperStatus.info.ref_done || !RX_StepperStatus.info.z_in_print || _PrintPos_New!=_PrintPos_Act))
 									{
@@ -343,7 +353,7 @@ int  dp803_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									break;
 		
 	case CMD_CAP_UP_POS:			strcpy(_CmdName, "CMD_CAP_UP_POS");
-									_PrintPos_New = -1*_micron_2_steps(RX_StepperCfg.ref_height - 20000);
+									_PrintPos_New = -1*_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height - 20000);
 									_Cmd_New = msgId;
 									if (!_CmdRunning)
 									{
