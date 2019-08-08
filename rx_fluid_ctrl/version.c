@@ -11,4 +11,4 @@
 
 #include "../rx_common_lib/version.h"
 
-const char version[32]="1.0.1.515";
+const char version[32]="1.0.1.569";
