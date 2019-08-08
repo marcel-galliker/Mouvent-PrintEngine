@@ -2,8 +2,8 @@
 <sch:Settings xmlns:sch="http://www.altera.com/embeddedsw/bsp/schema">
         <BspType>hal</BspType>
         <BspVersion>default</BspVersion>
-        <BspGeneratedTimeStamp>24.05.2019 10:01:03</BspGeneratedTimeStamp>
-        <BspGeneratedUnixTimeStamp>1558684863698</BspGeneratedUnixTimeStamp>
+        <BspGeneratedTimeStamp>07.08.2019 19:23:46</BspGeneratedTimeStamp>
+        <BspGeneratedUnixTimeStamp>1565198626749</BspGeneratedUnixTimeStamp>
         <BspGeneratedLocation>C:\Develop\RX-Project\rx_head_nios\software\rx_head_nios_bsp</BspGeneratedLocation>
         <BspSettingsFile>C:\Develop\RX-Project\rx_head_nios\software\rx_head_nios_bsp\settings.bsp</BspSettingsFile>
         <SopcDesignFile>..\..\soc_system.sopcinfo</SopcDesignFile>
@@ -1087,6 +1087,12 @@
         <MemoryMap>
                 <slaveDescriptor>pio_overheat</slaveDescriptor>
                 <addressRange>0x00010380 - 0x0001038F</addressRange>
+                <addressSpan>16</addressSpan>
+                <attributes/>
+        </MemoryMap>
+        <MemoryMap>
+                <slaveDescriptor>pio_fpga_shutdown</slaveDescriptor>
+                <addressRange>0x00010390 - 0x0001039F</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>

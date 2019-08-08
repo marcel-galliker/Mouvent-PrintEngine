@@ -2,20 +2,20 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="exe_valid" key="selection"/>
+		<item value="_send_cond_data" key="selection"/>
 		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
+			<item value="_send_cond_data"/>
+			<item value="_temp_savety"/>
+			<item value="10ms"/>
 			<item value="head_eeprom_write_user_data"/>
 			<item value="exe_valid"/>
 			<item value="_seq_read_eeprom"/>
 			<item value="_write_eeprom"/>
 			<item value="u16"/>
-			<item value="_read_eeprom"/>
-			<item value="read_eeprom"/>
-			<item value="pRX_Status-&gt;error"/>
 		</list>
 		<list key="replacehistory">
 		</list>

@@ -4,7 +4,7 @@
  * Machine generated for CPU 'nios_cpu' in SOPC Builder design 'soc_system'
  * SOPC Builder design path: ../../soc_system.sopcinfo
  *
- * Generated: Thu Jun 07 09:57:43 CEST 2018
+ * Generated: Mon Jun 17 17:45:16 CEST 2019
  */
 
 /*
@@ -882,6 +882,33 @@
 
 
 /*
+ * pio_fpga_shutdown configuration
+ *
+ */
+
+#define ALT_MODULE_CLASS_pio_fpga_shutdown altera_avalon_pio
+#define PIO_FPGA_SHUTDOWN_BASE 0x10390
+#define PIO_FPGA_SHUTDOWN_BIT_CLEARING_EDGE_REGISTER 0
+#define PIO_FPGA_SHUTDOWN_BIT_MODIFYING_OUTPUT_REGISTER 0
+#define PIO_FPGA_SHUTDOWN_CAPTURE 0
+#define PIO_FPGA_SHUTDOWN_DATA_WIDTH 1
+#define PIO_FPGA_SHUTDOWN_DO_TEST_BENCH_WIRING 0
+#define PIO_FPGA_SHUTDOWN_DRIVEN_SIM_VALUE 0
+#define PIO_FPGA_SHUTDOWN_EDGE_TYPE "NONE"
+#define PIO_FPGA_SHUTDOWN_FREQ 50000000
+#define PIO_FPGA_SHUTDOWN_HAS_IN 0
+#define PIO_FPGA_SHUTDOWN_HAS_OUT 1
+#define PIO_FPGA_SHUTDOWN_HAS_TRI 0
+#define PIO_FPGA_SHUTDOWN_IRQ -1
+#define PIO_FPGA_SHUTDOWN_IRQ_INTERRUPT_CONTROLLER_ID -1
+#define PIO_FPGA_SHUTDOWN_IRQ_TYPE "NONE"
+#define PIO_FPGA_SHUTDOWN_NAME "/dev/pio_fpga_shutdown"
+#define PIO_FPGA_SHUTDOWN_RESET_VALUE 0
+#define PIO_FPGA_SHUTDOWN_SPAN 16
+#define PIO_FPGA_SHUTDOWN_TYPE "altera_avalon_pio"
+
+
+/*
  * pio_nios_led configuration
  *
  */
@@ -969,12 +996,12 @@
 
 #define ALT_MODULE_CLASS_sysid_qsys altera_avalon_sysid_qsys
 #define SYSID_QSYS_BASE 0x10000
-#define SYSID_QSYS_ID -1395322109
+#define SYSID_QSYS_ID -1395322108
 #define SYSID_QSYS_IRQ -1
 #define SYSID_QSYS_IRQ_INTERRUPT_CONTROLLER_ID -1
 #define SYSID_QSYS_NAME "/dev/sysid_qsys"
 #define SYSID_QSYS_SPAN 8
-#define SYSID_QSYS_TIMESTAMP 1527587035
+#define SYSID_QSYS_TIMESTAMP 1560758923
 #define SYSID_QSYS_TYPE "altera_avalon_sysid_qsys"
 
 
