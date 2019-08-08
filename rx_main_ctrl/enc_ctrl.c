@@ -312,7 +312,8 @@ static void _enc_start_printing(int no, SPrintQueueItem *pitem)
 		
 	case printer_LB702_UV:		msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_ROTATIVE; msg.diameter[0]=78; msg.diameter[1]=74; break;	
 	case printer_LB702_WB:		msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_ROTATIVE; msg.diameter[0]=78; msg.diameter[1]=74; break;	
-	case printer_LH702:			msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_ROTATIVE; msg.diameter[0]=78; msg.diameter[1]=74; break;	
+	case printer_LH702:			msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_ROTATIVE; msg.diameter[0]=78; msg.diameter[1]=74; 
+								break;
 	case printer_DP803:			msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_ROTATIVE;
 								msg.diameter[0] = 74; 
 								msg.diameter[1] = 76;
@@ -441,8 +442,20 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 							 break;
 			
 		case PG_MODE_MARK:	 dist.dist     = 0;
-							 if (_DistTelCnt>1) dist.ignore   = pitem->pageHeight*9/10;
-							 if (_DistTelCnt>1) dist.window   = pitem->pageHeight/4;
+							 if (_DistTelCnt>1)
+							 {
+								if(RX_Config.printer.type == printer_LH702 || RX_Config.printer.type == printer_LB701)
+								{
+									int markdist = 1000*RX_Config.printer.offset.printMarkDist; // 406000;					
+									dist.window  = 50000;
+									dist.ignore  = markdist-dist.window/2;									
+								} 
+								else
+								{
+									dist.ignore   = pitem->pageHeight*9/10;
+									dist.window   = pitem->pageHeight/4;										 
+								}
+							 }
 							 sok_send_2(&_Encoder[0].socket, CMD_ENCODER_PG_DIST, sizeof(dist), &dist);
 							 break;
 			

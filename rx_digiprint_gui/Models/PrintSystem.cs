@@ -221,6 +221,14 @@ namespace RX_DigiPrint.Models
             set { Changed|=SetProperty(ref _OffsetIncPerMeter, value); }
         }
 
+        //--- Property PrintMarkDist ---------------------------------------
+        private int _PrintMarkDist;
+        public int PrintMarkDist
+        {
+            get { return _PrintMarkDist; }
+            set { Changed|=SetProperty(ref _PrintMarkDist, value); }
+        }     
+
         //--- Property OffsetIncPerMeter ---------------------------------------
         private int _OffsetIncPerMeterVerso;
         public int OffsetIncPerMeterVerso
@@ -275,7 +283,7 @@ namespace RX_DigiPrint.Models
             OffsetStep              = msg.offset.step;
             OffsetIncPerMeter       = msg.offset.incPerMeter;
             OffsetIncPerMeterVerso  = msg.offset.incPerMeterVerso;
-
+            PrintMarkDist           = msg.offset.printMarkDist;
             HeadCnt                 = msg.headsPerColor;
 
             _HeadFpVoltage= new Int32[msg.headFpVoltage.Count()];
@@ -305,16 +313,17 @@ namespace RX_DigiPrint.Models
             StringBuilder str  = new StringBuilder(1024);
             msg.rectoVerso     = new ERectoVerso[16];
 
-            msg.type                = _PrinterType;
-            msg.overlap             = Convert.ToUInt32(_Overlap);
-            msg.offset.versoDist    = OffsetVerso;
+            msg.type                    = _PrinterType;
+            msg.overlap                 = Convert.ToUInt32(_Overlap);
+            msg.offset.versoDist        = OffsetVerso;
             msg.offset.manualFlightTimeComp = ManualFlightTimeComp;
-            msg.offset.angle        = OffsetAngle;
-            msg.offset.step         = OffsetStep;
-            msg.offset.incPerMeter = OffsetIncPerMeter; 
+            msg.offset.angle            = OffsetAngle;
+            msg.offset.step             = OffsetStep;
+            msg.offset.incPerMeter      = OffsetIncPerMeter; 
             msg.offset.incPerMeterVerso = OffsetIncPerMeterVerso; 
-            msg.headsPerColor       = _HeadCnt;
-            msg.externalData        = Convert.ToInt32(ExternalData);
+            msg.offset.printMarkDist    = PrintMarkDist;
+            msg.headsPerColor           = _HeadCnt;
+            msg.externalData            = Convert.ToInt32(ExternalData);
 
             if (_HeadFpVoltage!=null)
             {

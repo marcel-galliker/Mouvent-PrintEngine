@@ -59,9 +59,9 @@ typedef struct
 //--- SEncInStatus ----------------------------------------
 typedef struct
 {
-	UINT32	rev_sum;			// 0x0000: Encoder Steps per revolution (inc_revolution wrap)
-	UINT32	i_to_a;				// 0x0004: Time between Index pulse and next edge in signal A
-	UINT32	i_to_b;				// 0x0008: Time between Index pulse and next edge in signal B
+	UINT32	rev_sum;			// 0x0000: 4x Encoder Steps per revolution (inc_revolution wrap)
+	UINT32	i_to_a;				// 0x0004: 4x Time between Index pulse and next edge in signal A
+	UINT32	i_to_b;				// 0x0008: 4x Time between Index pulse and next edge in signal B
 	UINT32	position;			// 0x000c: Actual position of the encoder (32bit wrap)	
 	UINT32	step_time;			// 0x0010: Actual step time
 	UINT32	setp_time_min;		// 0x0014: Minimum step time (can be reset)
@@ -69,12 +69,12 @@ typedef struct
 	UINT32	ident_obs_b1;		// 0x001c
 	UINT32	ident_obs_a1;		// 0x0020
 	UINT32	enc_diff;			// 0x0024
-	UINT32	position_rev;		// 0x0028
+	UINT32	position_rev;		// 0x0028 4x 
 	UINT32	enc_diff_min;		// 0x002c
 	UINT32	enc_diff_max;		// 0x0030
 	UINT32	enc_diff_overflow;	// 0x0034
 	UINT32	pg_start_pos;		// 0x0038 in encoder input steps
-	UINT32	res_3c;				// 0x003c
+	UINT32	digin_edge_dist;	// 0x003c 4x distance between digin rising edges (in encoder input steps)
  } SEncInStatus;
 
 //--- SEncOutStatus -----------------------------------------
@@ -85,7 +85,7 @@ typedef struct
 	UINT32	speed_min;		// 0x0008:	// * 50000000/2^31    OR *23/1000	
 	UINT32	speed_max;		// 0x000c:
 	UINT32	PG_cnt;			// 0x0010	// 10 bit!
-	UINT32	res_14;			// 0x0014
+	UINT32	mark_edge_warn;	// 0x0014 mark edge detected during ignore window
 	UINT32	res_18;			// 0x0018
 	UINT32	res_1c;			// 0x001c
 	UINT32	res_20;			// 0x0020
@@ -170,7 +170,7 @@ typedef struct
 	//(2)r_corr_frame_err.r_int.r_enc_error_count_less;
 	//(3)r_corr_frame_err.r_int.r_enc_error_count_more;
 	//(4)r_corr_frame_err.r_int.r_enc_error_count_back;
-	//(5)var_shift_reg_err_dig_out
+	//(5)var_shift_reg_err_dig_out -- more than 200 counters of shift_delay are used = print-gos lost !
 	//(6)r_pulse_delay_merge_overflow
 	//(10)r_corr_frame_err.r_rol.r_delays_busy;
 	//(11)r_corr_frame_err.r_rol.r_delay_busy_err;
@@ -198,7 +198,7 @@ typedef struct
 	UINT32 		    max_1_b1_ident_a1;	// 0x0578 // reset_min_max
 	UINT32 		    max_1_a1_ident_b1;	// 0x057C // reset_min_max
 	UINT32 		    max_1_a1_ident_a1;	// 0x0580 // reset_min_max
-	UINT32 		    dig_in_cnt;			// 0x0584 
+	UINT32 		    dig_in_cnt;			// 0x0584 counts digin rising edges
 	UINT32 		    varshift_stat_dig_in;		// 0x0588
 	UINT32 		    res_058c;			// 0x058c
 	UINT32 		    varshift_stat_tel;	// 0x0590 not used, only of first counter for debuging
@@ -263,13 +263,15 @@ typedef struct
 	UINT32	pos_pg_fwd;			// 0x0010:
 	UINT32  pos_pg_bwd;			// 0x0014:
 	UINT32	printgo_n;			// 0x0018:
-	UINT32	fifos_used;			// 0x001c: 2 Bit: 0=OFF, 1=Distance, 2=MarkReader
-		#define FIFOS_OFF			0
-		#define FIFOS_DIST			1
-		#define FIFOS_MARKREADER	2
+	UINT32	fifos_used;			// 0x001c: 3 Bit: 0=OFF, 1=Distance, 2=MarkReader, 4=MarkReaderAll, 6=MarkRepairReader
+		#define FIFOS_OFF				0
+		#define FIFOS_DIST				1
+		#define FIFOS_MARKREADER		2 // <quiet_window> -<ignored_fifo><window_fifo>-<ignored_fifo><window_fifo>-<ignored_fifo><window_fifo>-...
+		#define FIFOS_MARKREADERALL		4
+		#define FIFOS_MARKREPAIRREADER	6 // creates PG at the end of window_fifo, if no DigIn was detected
 	
 	UINT32	dig_in_sel;			// 0x0020: select digital input 2bit
-	UINT32	quiet_window;		// 0x0024:
+	UINT32	quiet_window;		// 0x0024: First Window in MARKREADER to ignore DigIn. Restarts quiet_window when DigIn = '1' while in quiet_window
 	UINT32	res_28;			    // 0x0028:
 	UINT32	res_2c;			    // 0x002c:
 	UINT32	res_30;				// 0x0030: select digital input 2bit
@@ -312,7 +314,12 @@ typedef struct
 	
 	UINT32  sel_roller_dia_offset[2]; // 0x005c: 4 bit: 70 + sel_roller_dia_offset_0 = Roller Diameter in mm
 
-	UINT32  shift_delay_tel;        // 0x0058 pg delay in strokes (21um strokes)
+	UINT32  shift_delay_tel;        // 0x0058 pg delay in strokes for telegram pg (21um strokes) (only encoder 0)
+
+	UINT32  shift_delay_rep;        // 0x0058 pg delay in strokes for repair pg (21um strokes) (only encoder 0)
+									// calculate shift_delay_rep:
+									// repair_pulse_delayed_distance = window_fifo.value + ignored_fifo.value - MarkDistance
+									// shift_delay_rep = shift_delay_tel - repair_pulse_delayed_distance
 	
 } SGeneralCfg;
 

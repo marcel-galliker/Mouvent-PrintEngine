@@ -195,7 +195,7 @@ void fpga_init()
 		Error(ERR_ABORT, 0, "structuire mismatch");
 	}
 
-	Fpga = (SEncFpga*)rx_fpga_map_page(_MemId, 0xc0200000, sizeof(SEncFpga), 0x0e68);
+	Fpga = (SEncFpga*)rx_fpga_map_page(_MemId, 0xc0200000, sizeof(SEncFpga), 0x0e6c);
 	FpgaCorr = (SEncFpgaCorr*)rx_fpga_map_page(_MemId, 0xc0203000, sizeof(SEncFpgaCorr),	0x600);
 
 	{
@@ -813,7 +813,7 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg, int restart)
 		}
 		else 
 		{
-			Fpga->cfg.pg[pgNo].fifos_used	  = (pcfg->printGoMode==PG_MODE_MARK) ?  FIFOS_MARKREADER : FIFOS_DIST;
+			Fpga->cfg.pg[pgNo].fifos_used	  = (pcfg->printGoMode == PG_MODE_MARK) ?  FIFOS_MARKREPAIRREADER : FIFOS_DIST; // FIFOS_MARKREPAIRREADER OR FIFOS_MARKREADER
 			Fpga->cfg.general.shift_delay	  = (int)(pcfg->printGoOutDist/_StrokeDist);
 			Fpga->cfg.general.shift_delay_tel = (int)(pcfg->printGoDist/_StrokeDist);
 		//	Fpga->cfg.pg[pgNo].dig_in_sel   = 0;
@@ -1121,7 +1121,8 @@ static void _fpga_display_status(int showCorrection, int showParam)
 	if (_Init)
 	{
 		term_printf("\n");
-
+		if (((INT16)Fpga->stat.rolcor_0_err_vec & 0x20) > 0) Error(ERR_ABORT, 0, "PG Shift Register: more than 200 PG detected, lost PG");
+		
 		term_printf("--- FPGA Status ----------------------------------------\n");
 		term_printf("Version: %d.%d.%d.%d           Linux=%d\n",	Fpga->stat.version.major, Fpga->stat.version.minor, Fpga->stat.version.revision, Fpga->stat.version.build, _LinuxDeployment);
 
@@ -1138,7 +1139,7 @@ static void _fpga_display_status(int showCorrection, int showParam)
 			{term_printf("  enable enc/idx:"); for (i=0; i<cnt; i++) term_printf("%03d   %03d  ", Fpga->cfg.encIn[i].enable, Fpga->cfg.encIn[i].index_en);			term_printf("\n");}
 	if(_ALL){term_printf("  reset_pos:     "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->cfg.encIn[i].reset_pos);			term_printf("\n");}
 			term_printf("  RollerDiameter:%09d  %09d  ", 70 + Fpga->cfg.general.sel_roller_dia_offset[0], 70 + Fpga->cfg.general.sel_roller_dia_offset[1]); term_printf("\n");
-			term_printf("  shift_delay:   %09d  shift_delay_tel:  %09d", Fpga->cfg.general.shift_delay, Fpga->cfg.general.shift_delay_tel); term_printf("\n");
+			term_printf("  shift_delay:   %09d  shift_delay_tel:  %09d  shift_delay_rep:  %09d", Fpga->cfg.general.shift_delay, Fpga->cfg.general.shift_delay_tel, Fpga->cfg.general.shift_delay_rep); term_printf("\n");
 			
 			{term_printf("\n");}
 			{term_printf("output config    "); for (i=0; i<cnt; i++) term_printf("____%d____  ", i);								term_printf("\n");}
@@ -1171,6 +1172,7 @@ static void _fpga_display_status(int showCorrection, int showParam)
 			term_printf("input status     "); for (i=0; i<cnt; i++) term_printf("____%d____  ", i);								term_printf("\n");
 			term_printf("  position:      "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encIn[i].position);		term_printf("\n");
 			term_printf("  pg_start_pos:  "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encIn[i].pg_start_pos);	term_printf("\n");
+			
 			term_printf("  pos_pg_fwd:	  "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->cfg.pg[i].pos_pg_fwd);			term_printf("\n");
 	//		term_printf("  StepTime:      "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encIn[i].step_time);		term_printf("\n");
 	//		term_printf("  StepTime Min:  "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encIn[i].setp_time_min);	term_printf("\n");
@@ -1190,10 +1192,10 @@ static void _fpga_display_status(int showCorrection, int showParam)
 			term_printf("  setp_time_min: "); for (i=0; i<4; i++)   term_printf("%09d  ", Fpga->stat.encIn[i].setp_time_min);	term_printf("\n");
 			term_printf("  ab_change_err: "); for (i = 0; i < 4; i++) term_printf("%09d  ", Fpga->stat.ab_change_error[i]); term_printf("\n");
 		
-			term_printf("  lin corr diff: "); for (i = 0; i < cnt; i++) term_printf("%09d  ", (INT16)Fpga->stat.encIn[i].enc_diff); term_printf("\n");
-			term_printf("  lin diff min:  "); for (i = 0; i < cnt; i++) term_printf("%09d  ", (INT16)Fpga->stat.encIn[i].enc_diff_min); term_printf("\n");
-			term_printf("  lin diff max:  "); for (i = 0; i < cnt; i++) term_printf("%09d  ", (INT16)Fpga->stat.encIn[i].enc_diff_max); term_printf("\n");
-			term_printf("  lin diff err:  "); for (i = 0; i < cnt; i++) term_printf("%09d  ", (INT16)Fpga->stat.encIn[i].enc_diff_overflow); term_printf("\n");
+			term_printf("  lin corr diff: "); for (i = 0; i < 1; i++) term_printf("%09d  ", (INT16)Fpga->stat.encIn[i].enc_diff); term_printf("\n");
+			term_printf("  lin diff min:  "); for (i = 0; i < 1; i++) term_printf("%09d  ", (INT16)Fpga->stat.encIn[i].enc_diff_min); term_printf("\n");
+			term_printf("  lin diff max:  "); for (i = 0; i < 1; i++) term_printf("%09d  ", (INT16)Fpga->stat.encIn[i].enc_diff_max); term_printf("\n");
+			term_printf("  lin diff err:  "); for (i = 0; i < 1; i++) term_printf("%09d  ", (INT16)Fpga->stat.encIn[i].enc_diff_overflow); term_printf("\n");
 	
 			term_printf("  rol_coeff:     "); for (i=0; i<4; i++)   term_printf("%09d  ", Fpga->stat.rol_coeff_at_use[i]);		term_printf("\n");
 			term_printf("  identified b1: "); for (i = 0; i < cnt; i++) term_printf("%09d  ", Fpga->stat.encIn[i].ident_obs_b1); term_printf("\n");
@@ -1214,17 +1216,20 @@ static void _fpga_display_status(int showCorrection, int showParam)
 			term_printf("  Speed [m/Min]: "); for (i=0; i<cnt; i++) term_printf("%09d  ", (int)((Fpga->stat.encOut[i].speed*23/1000)*60.0/1200*0.0254) );		term_printf("\n");
 			term_printf("  Speed Min[Hz]: "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encOut[i].speed_min*23/1000);	term_printf("\n");
 			term_printf("  Speed Max[Hz]: "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encOut[i].speed_max*23/1000);	term_printf("\n");
-			term_printf("  PG FIFO:       %09d  Used=%d     Level=%03d (wnd=%03d ign=%03d delay=%dmm), InCnt=%d\n", 
+			term_printf("  PG FIFO:       %09d  Used=%d     Level=%03d (wnd=%03d ign=%03d delay=%dmm), InCnt=%d (fpga=%d)\n", 
 				_DistTelCnt, 
 				Fpga->cfg.pg[0].fifos_used, 
 				FpgaQSys->printGo_status.fill_level, 
 				FpgaQSys->window_status.fill_level, 
 				FpgaQSys->ignored_status.fill_level, 
 				(int)(Fpga->cfg.general.shift_delay_tel*_StrokeDist+500)/1000, 
-				_InCnt); 
+				_InCnt, Fpga->stat.dig_in_cnt); 
 			term_printf("  PG Cnt:        "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encOut[i].PG_cnt);				term_printf("\n");
 			term_printf("  PG wnd error:  "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.dig_pg_window_err[i]);			term_printf("\n");
 	//		term_printf("  mem_pointer:   "); for (i=0; i<3; i++)   term_printf("%09d  ", Fpga->stat.mem_pointer[i]);				term_printf("\n");
+			term_printf("  Mark edge warn:"); for (i = 0; i < 4; i++) term_printf("%09d  ", Fpga->stat.encOut[i].mark_edge_warn); term_printf("\n");
+			term_printf("  Digin EdgeDist:"); for (i = 0; i < 4; i++) term_printf("%09d  ", Fpga->stat.encIn[i].digin_edge_dist); term_printf("\n");
+			term_printf("  DigInput Cnt:  "); term_printf("%09d  ", Fpga->stat.dig_in_cnt); term_printf("\n");
 
 			term_printf("  PG FIFO Erors: "); term_printf("PG:%06d  ",  Fpga->stat.pg_fifo_empty_err); 
 											  term_printf("IGN:%05d  ", Fpga->stat.ignored_fifo_empty_err); 
