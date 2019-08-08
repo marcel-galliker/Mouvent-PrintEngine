@@ -1371,6 +1371,7 @@ static void _plc_state_ctrl()
 				pc_pause_printing();
 			}
 
+			/*
 			lc_get_value_by_name_UINT32(APP "PAR_MAXDIAMETER_OUT", &max);			
 			lc_get_value_by_name_UINT32(APP "STA_PAPERLENGTH_OUT", &length);
 			if (max && length && (int)length>max && !_RequestPause) 
@@ -1380,6 +1381,7 @@ static void _plc_state_ctrl()
 				_RequestPause = TRUE;
 				pc_pause_printing();
 			}
+			*/
 		}
 	}
 	else if (_PlcState==plc_stop) 
