@@ -821,6 +821,11 @@ void _send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 			else if (i==no || ctrlMode==ctrl_empty)
 			{
 				if ((ctrlMode==ctrl_print) && !RX_Config.inkSupply[i].ink.fileName[0]) continue;
+				if ((ctrlMode==ctrl_print) && _FluidStatus[i].info.flushed) 
+				{
+					ErrorEx(dev_fluid, i, WARN, 0, "Is FLUSHED. It mist be purged before it can go to print mode.");
+					continue;						
+				}
 //				if (ctrlMode==ctrl_shutdown && _FluidStatus[i].ctrlMode<=ctrl_off)   continue;
 					
 //				if (ctrlMode==ctrl_cal_start)

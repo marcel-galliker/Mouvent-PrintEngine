@@ -967,7 +967,8 @@ namespace RX_DigiPrint.Services
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct SHeadEEpromMvt
         {
-            public UInt16	        meniscus_factor;
+            public UInt16	        flowResistance;
+            public UInt16	        flowResistanceCheck;
 	        public Int16	        clusterNo;
 	        public Int32	        printed_ml;
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]

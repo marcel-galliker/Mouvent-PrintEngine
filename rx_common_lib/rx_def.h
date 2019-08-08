@@ -711,6 +711,7 @@ typedef struct
 typedef struct
 {
 	UINT16	flowResistance;
+	UINT16	flowResistanceCheck;
 	UINT16	clusterNo;	
 	UINT32	printed_ml;
 	INT16	disabledJets[MAX_DISABLED_JETS];

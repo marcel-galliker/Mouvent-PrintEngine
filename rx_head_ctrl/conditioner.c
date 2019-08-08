@@ -337,7 +337,7 @@ static void _count(INT32 no)
 static void _update_clusterNo(void)
 {
 	int condNo, n;
-	int clusterNo=-1;
+	int clusterNo;
 	SHeadEEpromMvt mem;
 
 	memset(_cntr, 0, sizeof(_cntr));
@@ -359,7 +359,7 @@ static void _update_clusterNo(void)
 	}
 	clusterNo = _cntr[idx].no;
 	cond_set_clusterNo(clusterNo);
-	RX_HBStatus->clusterNo     = clusterNo;				
+	RX_HBStatus->clusterNo     = clusterNo;
 }
 
 //--- _update_counters -------------------------------------
@@ -524,7 +524,10 @@ void cond_ctrlMode(int headNo, EnFluidCtrlMode ctrlMode)
 	if (headNo<0 || headNo>=MAX_HEADS_BOARD) return;
 
 	SHeadEEpromMvt *mem = (SHeadEEpromMvt*)_NiosStat->user_eeprom[headNo];
-	_NiosMem->cfg.cond[headNo].flowResistance = mem->flowResistance;
+	if (mem->flowResistance == ~mem->flowResistanceCheck)
+		_NiosMem->cfg.cond[headNo].flowResistance = mem->flowResistance;
+	else	
+		_NiosMem->cfg.cond[headNo].flowResistance = 0;
 
 	if (arg_simu_conditioner) RX_HBStatus[0].head[headNo].ctrlMode = ctrlMode;
 	else if (_NiosMem!=NULL) _NiosMem->cfg.cond[headNo].mode = ctrlMode;		
@@ -565,28 +568,32 @@ void cond_set_flowResistance(int headNo, int value)
 	SHeadEEpromMvt mem;
 	memcpy(&mem, _NiosStat->user_eeprom[headNo], sizeof(mem));
 	mem.flowResistance = value;
+	mem.flowResistanceCheck = ~mem.flowResistance;
 	nios_set_user_eeprom(headNo, (char*) &mem);
 
 	_NiosMem->cfg.cond[headNo].flowResistance = value;
 }
 
 //--- cond_set_clusterNo --------------------------------
-void cond_set_clusterNo(INT32 no)
+void cond_set_clusterNo(INT32 clusterNo)
 {
 	int headNo;
 	SHeadEEpromMvt mem;
 	for (headNo=0; headNo<MAX_HEADS_BOARD; headNo++)
 	{
-		memcpy(&mem, _NiosStat->user_eeprom[headNo], sizeof(mem));
-		if (mem.clusterNo!=no)
+		if (_NiosStat->cond[headNo].clusterNo!=clusterNo)
 		{
-			_NiosCfg->cond[headNo].clusterNo = no;
-			_NiosCfg->cond[headNo].cmd.save_eeprom = TRUE;
-			mem.clusterNo = no;
+			_NiosCfg->cond[headNo].clusterNo = clusterNo;				
+			_NiosCfg->cond[headNo].cmd.save_eeprom = TRUE;				
+		}
+		memcpy(&mem, _NiosStat->user_eeprom[headNo], sizeof(mem));
+		if (mem.clusterNo!=clusterNo)
+		{
+			mem.clusterNo = clusterNo;
 			nios_set_user_eeprom(headNo, (char*) &mem);
-			_NiosMem->cfg.cond[headNo].clusterNo = no;				
 		}
 	}
+	RX_HBStatus->clusterNo = clusterNo;
 }
 
 //--- cond_setInk ---------------------------------------

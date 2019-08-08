@@ -505,7 +505,7 @@ int pq_loading(int spoolerNo, SPageId *pid, char *txt)
 					break;
 				len += sprintf(&_List[i].ripState[len], "%8s", _ListText[i][n]);
 			}
-			if (_ActiveState<_List[i].state && strcmp(_ActiveRipState, _List[i].ripState))
+			if (_ActiveState<=_List[i].state && strcmp(_ActiveRipState, _List[i].ripState))
 			{
 				strcpy(_ActiveRipState, _List[i].ripState); 
 				_ActiveState=_List[i].state;
