@@ -368,6 +368,8 @@ namespace RxWfTool.Models
                 int     maxVolt=32;
                 int     volt=0;
                 int     pos=0;
+                bool    waveFormSamples=false;
+                bool    sectionNumbers=false;
                 char    separator=(char)0;
 
                 ObservableCollection<WfItem> list=new ObservableCollection<WfItem>();
@@ -393,7 +395,44 @@ namespace RxWfTool.Models
                         else if (line.Contains(',')) separator=',';                         
                     }
 
-                    if (line.StartsWith("Sample Clock Period [in ns]"))
+                    if (line.StartsWith("Start Section-to-Multibit Mapping Table"))
+                    {
+                        sectionNumbers = true;
+                    }
+                    else if (line.StartsWith("End Section-to-Multibit Mapping Table"))
+                    {
+                        sectionNumbers = false;
+                    }
+                    else if (line.Contains("Start Waveform Samples"))
+                    {
+                        waveFormSamples = true;
+                    }
+                    else if (line.Contains("End Waveform Samples"))
+                    {
+                        waveFormSamples = false;
+                    }
+
+                    if (waveFormSamples)
+                    { 
+                    }                        
+                    else if (sectionNumbers)
+                    {
+                        string[] value = line.Split(separator);
+                        try
+                        {
+                            int dotszie=Convert.ToInt32(value[0]);
+                            int greyLevel=0;
+                            int i;
+                            for (i=0; i<8; i++)
+                            {
+                                if (value[2+i].Equals("1")) greyLevel |= (1<<i);
+                            }
+                            Ink.GreyLevel[dotszie] = greyLevel;
+                        }
+                        catch(Exception)
+                        { };
+                    }
+                    else if (line.StartsWith("Sample Clock Period [in ns]"))
                     {
                         string[] value = line.Split(separator);
                         time = Convert.ToInt32(value[1]);
@@ -430,7 +469,7 @@ namespace RxWfTool.Models
                             item.ListChanged += item_ListChanged;
                             item.No = list.Count+1;
                             item.Position = Convert.ToInt32((pos-1)*time/WfItem.Interval);
-                            item.Voltage  = v * maxVolt/256;
+                            item.Voltage  = (Int32)((v * maxVolt)/256.0+0.5);
                             list.Add(item);
                         }
                     }
