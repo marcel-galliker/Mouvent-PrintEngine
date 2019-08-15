@@ -237,6 +237,8 @@ int  nios_NiosLoaded(void)
 #define OLD_OFF_OFFSET		 48 // 0.6 µs
 #define OLD_ALL_ON_OFFSET	 -50	// ALL-ON has to be set 50 cycles before last sub-pulse starts
 #define FP_VALUE_30			1564
+#define FP_VALUE_36			1820	//for test only
+#define FP_VALUE_44			1920	//for test only, R6 = 430 Ohm
 
 static void _sample_wf(int head, SInkDefinition *pink, char *dots, int fpVoltage, SFpgaHeadCfg *cfg)
 {
@@ -259,7 +261,8 @@ static void _sample_wf(int head, SInkDefinition *pink, char *dots, int fpVoltage
 	int load;
 	int ret;
 	int levels;
-	int value30V;
+	int voltageRef;
+	int valueRef;
 	int lastOffPos;
 	int first;
 	int subPulses=1;
@@ -341,12 +344,34 @@ static void _sample_wf(int head, SInkDefinition *pink, char *dots, int fpVoltage
 	lastOffPos = 0;
 	first	   = 0;
 	
+	//default values ----
+	{
+		voltageRef = 300; // 30 Volt
+		valueRef   = FP_VALUE_30;			
+	}
+		
+	/*
+	if (48V)
+	{
+		// 48V puwer supply: Reference at 44V, 
+		voltageRef = 440;
+		valueRef   = FP_VALUE_44;			
+	}
+
+	if (36V)
+	{
+		// 36V puwer supply: Reference at 44V, 
+		voltageRef = 360;
+		valueRef   = FP_VALUE_36;			
+	}
+	*/
+	
 	if (_NiosMem->cfg.cond[head].mode==ctrl_print) 
 	{
-		if (fpVoltage) 	value30V = (FP_VALUE_30*fpVoltage)/100;
-		else			value30V = FP_VALUE_30;
+		if (fpVoltage) 	valueRef = (valueRef*fpVoltage)/100;
+		else			valueRef = valueRef;
 	}
-	else value30V = 0;
+	else valueRef = 0;
 		
 	for (i=0; i<MAX_WF_POINTS; i++)
 	{
@@ -402,7 +427,7 @@ static void _sample_wf(int head, SInkDefinition *pink, char *dots, int fpVoltage
 				{
 					for (n=0; pos<=p1; n++, pos++)
 					{
-						if (pos+wf_offset>0) voltage[pos+wf_offset] = ((v0 + (v1-v0) * (pos-p0)/(p1-p0)) * value30V) / 300;					
+						if (pos+wf_offset>0) voltage[pos+wf_offset] = ((v0 + (v1-v0) * (pos-p0)/(p1-p0)) * valueRef) / voltageRef;					
 					}
 				}	
 				else
@@ -537,7 +562,6 @@ void nios_set_user_eeprom(int no, SHeadEEpromMvt *data)
 	{
 		if (sizeof(SHeadEEpromMvt)<=sizeof(_NiosMem->cfg.user_eeprom[no])) 
 		{
-			Error(LOG, 0, "nios_set_user_eeprom head=%d, flowResistance=%d, check=%d", no, data->flowResistance, ~(data->flowResistanceCheck));
 			memcpy(_NiosMem->cfg.user_eeprom[no], data, sizeof(_NiosMem->cfg.user_eeprom[no]));
 			_NiosMem->cfg.cmd.cmd |= (WRITE_USER_EEPROM<<no);	
 		}
@@ -552,7 +576,7 @@ int  nios_main(int ticks, int menu)
 	_nios_fastlog();
 #endif
 	
-	cond_main(ticks);
+	if (_NiosMem) cond_main(ticks);
 		
 	tse_check_errors(menu);
 	if (menu) 	
@@ -581,7 +605,13 @@ void nios_check_errors(void)
 		if (_NiosStat->error.u_plus_3v3)			ErrorFlag(ERR(abort), (UINT32*)&RX_HBStatus[0].err, err_3_3_volt, 0, "3.3Volt Power Supply Error");
 		if (_NiosStat->error.u_plus_5v)				ErrorFlag(ERR(abort), (UINT32*)&RX_HBStatus[0].err, err_5volt, 0, "5Volt Power Supply Error");
 		if (_NiosStat->error.u_minus_5v)			ErrorFlag(ERR(abort), (UINT32*)&RX_HBStatus[0].err, err_min_5volt, 0, "-5Volt Power Supply Error");
-		if (_NiosStat->error.u_minus_36v)			ErrorFlag(ERR(abort), (UINT32*)&RX_HBStatus[0].err, err_36volt, 0, "-36Volt Power Supply Error");
+		if (_NiosStat->error.u_firepulse)			
+		{
+			if(_NiosStat->info.u_firepulse_48V)
+				ErrorFlag(ERR(abort), (UINT32*)&RX_HBStatus[0].err, err_36volt, 0, "-48Volt Power Supply Error");				
+			else
+				ErrorFlag(ERR(abort), (UINT32*)&RX_HBStatus[0].err, err_36volt, 0, "-36Volt Power Supply Error");				
+		}
 		if (_NiosStat->error.amc7891)				ErrorFlag(ERR(abort), (UINT32*)&RX_HBStatus[0].err, err_amc7891, 0, "AMC7891 could not be initialized");
 		if (_NiosStat->error.power_all_off_timeout)	ErrorFlag(ERR(abort), (UINT32*)&RX_HBStatus[0].err, err_pwr_all_off, 0, "power_all_off_timeout");
 		if (_NiosStat->error.power_amp_on_timeout)	ErrorFlag(ERR(abort), (UINT32*)&RX_HBStatus[0].err, err_amp_all_on, 0, "power_amp_on_timeout");

@@ -31,7 +31,10 @@ namespace RX_DigiPrint.Models.Enums
                         _List.Add(new RxEnum<int>(speed,  string.Format("{0}", speed)));
                     }
                 }
-                else if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX801 || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX802)
+                else if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX801 
+                    ||   RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX802
+                    ||   RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_DP803
+                    )
                 {
                     if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX801 && imgHeight<TX801_MIN_HEIGHT) maxSpeed = 85;
                     int[] speeds = RxGlobals.InkSupply.PrintingSpeed();

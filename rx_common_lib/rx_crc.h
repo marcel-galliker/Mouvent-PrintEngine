@@ -13,6 +13,7 @@
 
 #include "rx_common.h"
 
+UINT8  rx_crc8(const void *pdata, UINT32 length);
 UINT16 rx_crc16(const void *buf, UINT32 size);
 UINT32 rx_crc32(const void *buf, UINT32 size);
 UINT32 rx_hash32(const char *str);

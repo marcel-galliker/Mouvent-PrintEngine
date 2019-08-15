@@ -58,7 +58,7 @@
                 </StackPanel>
             
                 <TextBlock         Grid.Row="1" Grid.Column="0" Text="Start at" />
-                <common:RxNumBox   Grid.Row="1" Grid.Column="1" Text="{Binding StartFrom}" HorizontalContentAlignment="Right" HorizontalAlignment="Right" Width="60"/>
+                <common:RxNumBox   Grid.Row="1" Grid.Column="1" Text="{Binding StartFrom}" HorizontalContentAlignment="Right" Height="24" VerticalAlignment="Top" />
 
             </Grid>
         </GroupBox>

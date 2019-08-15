@@ -100,6 +100,31 @@ static UINT32 _crc32_tab[] = {
 	0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d
 };
 
+//--- rx_crc8 --------------------------------------
+UINT8 rx_crc8(const void *pdata, UINT32 length) 
+{
+	const UINT8* data_p = (UINT8*) pdata;
+    unsigned long crc;
+    int bit;
+
+    crc = 0xFF;
+    while (length--)
+    {
+        crc ^= *data_p++;
+        for ( bit=0 ; bit<8 ; bit++ ) 
+        {
+            if ( (crc & 0x80)!=0 ) 
+            {
+                crc <<= 1;
+                crc ^= 0x1D;
+            }
+            else crc <<= 1;
+        }
+    }
+
+    return (~crc)&0xFF;
+}
+
 //--- rx_crc16 ---------------------------------------------
 UINT16 rx_crc16(const void* pdata, UINT32 length)
 {
@@ -107,7 +132,8 @@ UINT16 rx_crc16(const void* pdata, UINT32 length)
     unsigned char x;
     unsigned short crc = 0xFFFF;
 
-    while (length--){
+    while (length--)
+    {
         x = crc >> 8 ^ *data_p++;
         x ^= x>>4;
         crc = (crc << 8) ^ ((unsigned short)(x << 12)) ^ ((unsigned short)(x <<5)) ^ ((unsigned short)x);

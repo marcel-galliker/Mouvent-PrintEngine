@@ -532,7 +532,7 @@ namespace RX_DigiPrint.Models
         public Double PageMargin
         {
             get { return _PageMargin; }
-            set { Changed |= SetProperty(ref _PageMargin, Math.Round(value, 3));}
+            set { Changed |= SetProperty(ref _PageMargin, Rx.DoubleRange(value, 0, 2000));}
         }
 
         //--- Property PrintGoMode ---------------------------------------
@@ -548,7 +548,7 @@ namespace RX_DigiPrint.Models
         public Double PrintGoDist
         {
             get { return _PrintGoDist; }
-            set { if (SetProperty(ref _PrintGoDist, round(value))) do_checks(); }
+            set { if (SetProperty(ref _PrintGoDist, Rx.DoubleRange(value, 0, 10000))) do_checks(); }
         }
 
         //--- Property PageNumber ---------------------------------------

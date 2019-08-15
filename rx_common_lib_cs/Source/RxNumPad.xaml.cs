@@ -48,7 +48,9 @@ namespace RX_Common
             if (screen.Surface) Back.BorderThickness = new Thickness(_Position.X*screen.Scale, _Position.Y*screen.Scale, (screen.Width-_Position.X)*screen.Scale-obj.ActualWidth*screen.FactX, (screen.Height-_Position.Y)*screen.Scale-obj.ActualHeight*screen.FactY-1);
             else                Back.BorderThickness = new Thickness(_Position.X, _Position.Y, screen.Width-_Position.X-obj.ActualWidth, screen.Height-_Position.Y-obj.ActualHeight-1);
 
-            #if (!DEBUG)
+            #if (DEBUG)
+                this.Topmost = false;
+            #else
                 this.Topmost = true;
             #endif
 

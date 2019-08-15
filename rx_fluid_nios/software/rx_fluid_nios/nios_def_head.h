@@ -100,7 +100,7 @@ typedef struct SNiosHeadInfo
 	UINT32	watchdog_dbg_mode:1;// 	03:
 	UINT32	watchdog_catch_fp_err:1;		// 	04: if the correct AMC IS is read out
 	UINT32	cooler_pcb_present:1;		// 	05: 
-	UINT32	info_06:1;		// 	06:
+	UINT32	u_firepulse_48V:1;		// 	06:
 	UINT32	info_07:1;		// 	07:
 	UINT32	info_08:1;		// 	08:
 	UINT32	info_09:1;		// 	09:
@@ -140,7 +140,7 @@ typedef struct SNiosHeadErr
 			UINT32	u_plus_3v3:1;			// 02
 			UINT32	u_plus_5v:1;			// 03
 			UINT32	u_minus_5v:1;			// 04
-			UINT32	u_minus_36v:1;			// 05
+			UINT32	u_firepulse:1;			// 05
 			UINT32	fp_ac:1;				// 06
 			UINT32	fp_dc:1;				// 07
 			UINT32	head_pcb_overheated:1;	// 08
@@ -201,7 +201,7 @@ typedef struct SNiosStat
 	
 	//--- other status --------------------
 	UINT32			alive;
-	INT32			u_minus_36v;
+	INT32			u_firepulse;
 	INT32			u_minus_5v;
 	INT32			u_plus_5v;
 	INT32			u_plus_2v5;

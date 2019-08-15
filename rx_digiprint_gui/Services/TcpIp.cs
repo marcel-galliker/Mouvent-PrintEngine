@@ -970,7 +970,7 @@ namespace RX_DigiPrint.Services
             public UInt16	        flowResistance;
             public UInt16	        flowResistanceCheck;
 	        public Int16	        clusterNo;
-	        public Int32	        printed_ml;
+	        public UInt32	        dropletsPrinted;
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
 	        public Int16[]			disabledJets;	
         };
@@ -1003,9 +1003,11 @@ namespace RX_DigiPrint.Services
             public Int32			meniscus_diff;
             public Int32			controller_offset;
 
+            public float			dropVolume;	// in pl
 	        public UInt32			pumpSpeed;
 	        public UInt32			pumpFeedback;
 	        public UInt32			printingSeconds;
+	        public UInt32			printedDroplets;
             public Int32			presIn_0out;
 	        public EFluidCtrlMode   ctrlMode;
 

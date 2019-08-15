@@ -21,6 +21,7 @@
 	#include <fcntl.h>
 #endif
 #include "rx_def.h"
+#include "rx_crc.h"
 #include "rx_error.h"
 #include "rx_file.h"
 #include "rx_threads.h"
@@ -260,11 +261,11 @@ void cond_error_check(void)
         	if (_NiosStat->cond[head].error&COND_ERR_alive)						ErrorFlag(level=ERR(cont),	perr, COND_ERR_alive,					0, "Conditioner %s: alive error %d(%d)", headName, _NiosStat->cond[head].aliveStat, _NiosStat->cond[head].aliveCfg);
         	if (_NiosStat->cond[head].error&COND_ERR_pres_in_hw)				ErrorFlag(level=ERR(abort),	perr, COND_ERR_pres_in_hw,				0, "Conditioner %s: Pessure IN Sensor Error", headName);
 	       	if (_NiosStat->cond[head].error&COND_ERR_pres_out_hw)				ErrorFlag(level=ERR(abort), perr, COND_ERR_pres_out_hw,				0, "Conditioner %s: Pessure OUT Sensor Error", headName);
-        	if (_NiosStat->cond[head].error&COND_ERR_pump_hw)					ErrorFlag(level=ERR(abort),  perr, COND_ERR_pump_hw,					0, "Conditioner %s: Pump Error", headName);
+        	if (_NiosStat->cond[head].error&COND_ERR_pump_hw)					ErrorFlag(level=ERR(abort), perr, COND_ERR_pump_hw,					0, "Conditioner %s: Pump Error", headName);
         	if (_NiosStat->cond[head].error&COND_ERR_temp_tank_not_changing)	ErrorFlag(level=LOG,        pwrn, COND_ERR_temp_tank_not_changing,	0, "Conditioner %s: temp_tank_not_changing", headName);
         	if (_NiosStat->cond[head].error&COND_ERR_temp_head_not_changing)	ErrorFlag(level=LOG,        pwrn, COND_ERR_temp_head_not_changing,	0, "Conditioner %s: temp_head_not_changing", headName);
-        	if (_NiosStat->cond[head].error&COND_ERR_temp_head_overheat)		ErrorFlag(level=ERR(abort),  perr, COND_ERR_temp_head_overheat,		0, "Conditioner %s: temp_head_overheat", headName);
-        	if (_NiosStat->cond[head].error&COND_ERR_temp_ink_overheat)			ErrorFlag(level=ERR(abort),  perr, COND_ERR_temp_ink_overheat,		0, "Conditioner %s: temp_ink_overheat", headName);
+        	if (_NiosStat->cond[head].error&COND_ERR_temp_head_overheat)		ErrorFlag(level=ERR(abort), perr, COND_ERR_temp_head_overheat,		0, "Conditioner %s: temp_head_overheat", headName);
+        	if (_NiosStat->cond[head].error&COND_ERR_temp_ink_overheat)			ErrorFlag(level=ERR(abort), perr, COND_ERR_temp_ink_overheat,		0, "Conditioner %s: temp_ink_overheat", headName);
         	if (_NiosStat->cond[head].error&COND_ERR_temp_inlet_hw)				ErrorFlag(level=ERR(cont),	perr, COND_ERR_temp_inlet_hw,			0, "Conditioner %s: inlet thermistor hardware", headName);
         	if (_NiosStat->cond[head].error&COND_ERR_temp_heater_hw)			ErrorFlag(level=ERR(cont),	perr, COND_ERR_temp_heater_hw,			0, "Conditioner %s: heater thermistor hardware", headName);
         	if (_NiosStat->cond[head].error&COND_ERR_temp_head_hw)				ErrorFlag(level=WARN,		pwrn, COND_ERR_temp_head_hw,			0, "Conditioner %s: head temp sensor hardware", headName);				
@@ -272,8 +273,7 @@ void cond_error_check(void)
         	if (_NiosStat->cond[head].error&COND_ERR_temp_tank_too_low)		    ErrorFlag(level=ERR(cont),	perr, COND_ERR_temp_tank_too_low,		0, "Conditioner %s: temp_tank_too_low", headName);
         	if (_NiosStat->cond[head].error&COND_ERR_p_in_too_high)				ErrorFlag(level=WARN,		pwrn, COND_ERR_p_in_too_high,			0, "Conditioner %s: input pressure too high", headName);
         	if (_NiosStat->cond[head].error&COND_ERR_p_out_too_high)			ErrorFlag(level=ERR(abort),	perr, COND_ERR_p_out_too_high,			0, "Conditioner %s: output pressure too high", headName);
-        	if (_NiosStat->cond[head].error&COND_ERR_pump_no_ink)				
-	        	ErrorFlag(level=WARN,      perr, COND_ERR_pump_no_ink,				0, "Conditioner %s: no ink: actVal=%d, setVal=%d, sum=%d", headName, pstat->pressure_out, pstat->pid_setval, pstat->pid_sum);
+        	if (_NiosStat->cond[head].error&COND_ERR_pump_no_ink)				ErrorFlag(level=WARN,       perr, COND_ERR_pump_no_ink,				0, "Conditioner %s: no ink: actVal=%d, setVal=%d, sum=%d", headName, pstat->pressure_out, pstat->pid_setval, pstat->pid_sum);
 	    	/*
 	    	if (_NiosStat->cond[head].error&COND_ERR_pump_no_ink)				
 	    	{
@@ -346,6 +346,12 @@ static void _update_clusterNo(void)
 		memcpy(&mem, _NiosStat->user_eeprom[condNo], sizeof(mem));
 		_count(mem.clusterNo);
 		_count(_NiosStat->cond[condNo].clusterNo);
+				
+		if(mem.dropletsPrintedCRC==rx_crc8(&mem.dropletsPrinted, sizeof(mem.dropletsPrinted)))
+			RX_HBStatus->head[condNo].printedDroplets = mem.dropletsPrinted; 
+		else
+			RX_HBStatus->head[condNo].printedDroplets = 0; 
+		RX_HBStatus[0].head[condNo].dropVolume = 0.0000000000024;
 	}
 
 	int cnt=0, idx=0;
@@ -368,7 +374,7 @@ static void _update_counters(void)
 	int condNo;
 	int machineMeters=0;
 	int printing=FALSE;
-		
+				
 	for (condNo=0; condNo<MAX_HEADS_BOARD;  condNo++)
 	{
 		if (_NiosStat->cond[condNo].mode==ctrl_print) printing = TRUE;
@@ -379,12 +385,14 @@ static void _update_counters(void)
 
 	RX_HBStatus->machineMeters = machineMeters;
 	
+	TrPrintfL(TRUE, "_update_counters");
 	for (condNo=0; condNo<MAX_HEADS_BOARD;  condNo++)
 	{
 		_NiosCfg->cond[condNo].clusterTime   = RX_HBStatus->clusterTime;
 		if (RX_FluidStat[0].machineMeters!=INVALID_VALUE)// && RX_FluidStat[0].machineMeters>_NiosCfg->cond[condNo].machineMeters)
 			_NiosCfg->cond[condNo].machineMeters = RX_FluidStat[0].machineMeters;
 	}
+	TrPrintfL(TRUE, "_update_counters ok");
 }
 
 //--- cond_main ---------------------------------------------
@@ -523,9 +531,10 @@ void cond_ctrlMode(int headNo, EnFluidCtrlMode ctrlMode)
 {
 	if (headNo<0 || headNo>=MAX_HEADS_BOARD) return;
 
-	SHeadEEpromMvt *mem = (SHeadEEpromMvt*)_NiosStat->user_eeprom[headNo];
-	if (mem->flowResistance == ~mem->flowResistanceCheck)
-		_NiosMem->cfg.cond[headNo].flowResistance = mem->flowResistance;
+	SHeadEEpromMvt mem;
+	memcpy(&mem, _NiosStat->user_eeprom[headNo], sizeof(mem));
+	if (mem.flowResistanceCRC==rx_crc8(&mem.flowResistance, sizeof(mem.flowResistance)))
+		_NiosMem->cfg.cond[headNo].flowResistance = mem.flowResistance;
 	else	
 		_NiosMem->cfg.cond[headNo].flowResistance = 0;
 
@@ -568,10 +577,32 @@ void cond_set_flowResistance(int headNo, int value)
 	SHeadEEpromMvt mem;
 	memcpy(&mem, _NiosStat->user_eeprom[headNo], sizeof(mem));
 	mem.flowResistance = value;
-	mem.flowResistanceCheck = ~mem.flowResistance;
+	mem.flowResistanceCRC = rx_crc8(&mem.flowResistance, sizeof(mem.flowResistance));
 	nios_set_user_eeprom(headNo, &mem);
 
 	_NiosMem->cfg.cond[headNo].flowResistance = value;
+}
+
+//--- cond_add_droplets_printed ---------------------------------------
+void cond_add_droplets_printed(int headNo, UINT64 droplets64)
+{
+	if (headNo<0 || headNo>=MAX_HEADS_BOARD || _NiosMem==NULL) return;	
+
+	SHeadEEpromMvt mem;
+	UINT32 droplets = (UINT32)(droplets64/1000000000);
+	memcpy(&mem, _NiosStat->user_eeprom[headNo], sizeof(mem));
+	if (droplets>0)
+	{
+		if(mem.dropletsPrinted==rx_crc8(&mem.dropletsPrinted, sizeof(mem.dropletsPrinted)))	
+			mem.dropletsPrinted += droplets;
+		else
+			mem.dropletsPrinted  = droplets;
+		mem.dropletsPrintedCRC = rx_crc8(&mem.dropletsPrinted, sizeof(mem.dropletsPrinted));
+		RX_HBStatus->head[headNo].printedDroplets = mem.dropletsPrinted; 
+		nios_set_user_eeprom(headNo, &mem);			
+	}
+
+//	_NiosMem->cfg.cond[headNo].flowResistance = value;
 }
 
 //--- cond_set_clusterNo --------------------------------
@@ -722,7 +753,7 @@ static void _write_log(void)
 			fprintf(_LogFile, "%s; ", value_str_u(_NiosStat->u_plus_2v5));
 			fprintf(_LogFile, "%s; ", value_str_u(_NiosStat->u_minus_5v));
 			fprintf(_LogFile, "%s; ", value_str_u(_NiosStat->u_plus_5v));
-			fprintf(_LogFile, "%s; ", value_str_u(_NiosStat->u_minus_36v));
+			fprintf(_LogFile, "%s; ", value_str_u(_NiosStat->u_firepulse));
 			fprintf(_LogFile, "%lu;", _NiosStat->cooler_temp);
 			fprintf(_LogFile, "%ld;", _NiosStat->cooler_pressure);
 			

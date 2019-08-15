@@ -28,16 +28,17 @@
 static int _amplifier_on = TRUE;
 static int _v3_3_on		 = TRUE;
 static int _error_delay	 = 0;
-static int power_on_err_counter;
+static int _power_on_timer;
 
-#define ERROR_DELAY			20 		// 200 ms
-#define POWER_ON_DELAY		10
+#define ERROR_DELAY			20 		// *100 ms
+#define POWER_ON_TIMEOUT	10		// *100 ms
+#define POWER_OFF_TIMEOUT	100		// *100 ms
 
 /*****************************************************************************/
 /* Function prototype                                                        */
 /*****************************************************************************/
 
-static int _power_test_v3_3(void);
+static int  _power_test_v3_3(void);
 static void _power_amplifier(int on);
 static void _power_v3_3(int on);
 
@@ -52,7 +53,7 @@ void power_init(void)
 	pRX_Status->powerState = power_off;
 	_power_amplifier(FALSE);
 	_power_v3_3(FALSE);
-	_error_delay  = ERROR_DELAY;
+	_error_delay  = POWER_OFF_TIMEOUT;
 	pRX_Status->powerState = power_wait_all_off;
 }
 
@@ -88,7 +89,7 @@ void power_tick_100ms(void)
 
 	// result=36V / start converting -5V
 	val = IORD_16DIRECT(AMC7891_0_BASE,AMC7891_ADC1_DATA) & 0x3ff;
-	pRX_Status->u_minus_36v = 109*(val-978);
+	pRX_Status->u_firepulse = 109*(val-978);
 
 	// result=-5V / start converting +5V
 	val = IORD_16DIRECT(AMC7891_0_BASE,AMC7891_ADC2_DATA) & 0x3ff;
@@ -121,13 +122,12 @@ void power_tick_100ms(void)
 								{
 									_power_v3_3(TRUE);
 									_error_delay  = ERROR_DELAY;
+									_power_on_timer = POWER_ON_TIMEOUT;
 									pRX_Status->powerState = power_wait_all_on;
 								}
 								break;
 
 	case power_wait_all_on:		watchdog_toggle(WATCHDOG_TIME_MS, WATCHDOG_CHECK_FP);
-								_error_delay = ERROR_DELAY;
-								power_on_err_counter = POWER_ON_DELAY;
 								if(_power_all_on_test()) pRX_Status->powerState = power_all_on;
 								break;
 
@@ -203,7 +203,7 @@ static int _power_all_off_test(void)
 	int on = FALSE;
 
 	if(_power_test_v3_3() != 0x00)      {on=TRUE; if (!_error_delay) pRX_Status->error.u_plus_3v3  = TRUE;}
-	if(pRX_Status->u_minus_36v <-30000) {on=TRUE; if (!_error_delay) pRX_Status->error.u_minus_36v = TRUE;}
+	if(pRX_Status->u_firepulse < -5000) {on=TRUE; if (!_error_delay) pRX_Status->error.u_firepulse = TRUE;}
 	if(pRX_Status->u_minus_5v  < -4000) {on=TRUE; if (!_error_delay) pRX_Status->error.u_minus_5v  = TRUE;}
 	if(pRX_Status->u_plus_5v   >  4000) {on=TRUE; if (!_error_delay) pRX_Status->error.u_plus_5v   = TRUE;}
 
@@ -218,7 +218,12 @@ static int _power_amp_on_test(void)
 	int on = TRUE;
 
 	if(_power_test_v3_3() != 0x00)                                         {on=FALSE; if (!_error_delay)pRX_Status->error.u_plus_3v3  = TRUE;}
-	if(pRX_Status->u_minus_36v>=-30000 || pRX_Status->u_minus_36v<=-40000) {on=FALSE; if (!_error_delay)pRX_Status->error.u_minus_36v = TRUE;}
+	if(pRX_Status->u_firepulse>=(-36000+5000) || pRX_Status->u_firepulse<=(-48000-5000))
+	{
+		on=FALSE;
+		pRX_Status->info.u_firepulse_48V = (pRX_Status->u_firepulse<(-48000+8000));
+		if (!_error_delay)pRX_Status->error.u_firepulse = TRUE;
+	}
 	if(pRX_Status->u_minus_5v >= -4000 || pRX_Status->u_minus_5v <= -6000) {on=FALSE; if (!_error_delay)pRX_Status->error.u_minus_5v  = TRUE;}
 	if(pRX_Status->u_plus_5v  <=  4000 || pRX_Status->u_plus_5v  >=  6000) {on=FALSE; if (!_error_delay)pRX_Status->error.u_plus_5v   = TRUE;}
 
@@ -231,16 +236,16 @@ static int _power_amp_on_test(void)
 static int _power_all_on_test(void)
 {
 	int on = TRUE;
-	--power_on_err_counter;
+	if (_power_on_timer) --_power_on_timer;
 
-	if(_power_test_v3_3() != 0x0f)                                         {on=FALSE; if (!power_on_err_counter) pRX_Status->error.u_plus_3v3  = TRUE;}
-	if(pRX_Status->u_minus_36v>=-30000 || pRX_Status->u_minus_36v<=-40000) {on=FALSE; if (!power_on_err_counter) pRX_Status->error.u_minus_36v = TRUE;}
-	if(pRX_Status->u_minus_5v >= -4000 || pRX_Status->u_minus_5v <= -6000) {on=FALSE; if (!power_on_err_counter) pRX_Status->error.u_minus_5v  = TRUE;}
-	if(pRX_Status->u_plus_5v  <=  4000 || pRX_Status->u_plus_5v  >=  6000) {on=FALSE; if (!power_on_err_counter) pRX_Status->error.u_plus_5v   = TRUE;}
+	if(_power_test_v3_3() != 0x0f)                                         {on=FALSE; if (!_power_on_timer) pRX_Status->error.u_plus_3v3  = TRUE;}
+	if(pRX_Status->u_firepulse>=-30000 || pRX_Status->u_firepulse<=-54000) {on=FALSE; if (!_power_on_timer) pRX_Status->error.u_firepulse = TRUE;}
+	if(pRX_Status->u_minus_5v >= -4000 || pRX_Status->u_minus_5v <= -6000) {on=FALSE; if (!_power_on_timer) pRX_Status->error.u_minus_5v  = TRUE;}
+	if(pRX_Status->u_plus_5v  <=  4000 || pRX_Status->u_plus_5v  >=  6000) {on=FALSE; if (!_power_on_timer) pRX_Status->error.u_plus_5v   = TRUE;}
 
-	if (on) power_on_err_counter = POWER_ON_DELAY;
+	if (on) _power_on_timer = POWER_ON_TIMEOUT;
 
-	if(!power_on_err_counter && on == FALSE) pRX_Status->error.power_all_on_timeout=TRUE;
+	if(!_power_on_timer && on == FALSE) pRX_Status->error.power_all_on_timeout=TRUE;
 
 	return on;
 }

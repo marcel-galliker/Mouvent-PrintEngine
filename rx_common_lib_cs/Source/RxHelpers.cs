@@ -104,6 +104,15 @@ namespace RX_Common
             catch (Exception) { return 0;}
         }
 
+        //--- DoubleRange ------------------------------
+        public static double DoubleRange(double value, double min, double max)
+        {
+            double val = Math.Round(value, 3);
+            if (val<=min) return min;
+            if (val>=max) return max;
+            return val;
+        }
+
         //--- StrNumFormat ---------------------------------------
         public static string StrNumFormat(string val, int nachkomma)
         {

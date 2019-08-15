@@ -176,7 +176,7 @@ int main() {
 	{
 		pRX_Status->error.amc7891 = TRUE;
 
-		pRX_Status->u_minus_36v = INVALID_VALUE;
+		pRX_Status->u_firepulse = INVALID_VALUE;
 		pRX_Status->u_minus_5v = INVALID_VALUE;
 		pRX_Status->u_plus_5v = INVALID_VALUE;
 		pRX_Status->u_plus_2v5 = INVALID_VALUE;

@@ -710,10 +710,11 @@ typedef struct
 
 typedef struct
 {
-	UINT16	flowResistance;
-	UINT16	flowResistanceCheck;
 	UINT16	clusterNo;	
-	UINT32	printed_ml;
+	UINT16	flowResistance;
+	UINT8	flowResistanceCRC;
+	UINT32	dropletsPrinted;	// multiply with 1'000'000'000 to get droplets
+	UINT8	dropletsPrintedCRC;
 	INT16	disabledJets[MAX_DISABLED_JETS];
 } SHeadEEpromMvt;
 	
@@ -744,9 +745,11 @@ typedef struct SHeadStat
 	INT32			meniscus_diff;
 	INT32			pid_offset;
 	
+	FLOAT			dropVolume;	// in pl
 	UINT32			pumpSpeed;
 	UINT32			pumpFeedback;
 	UINT32			printingSeconds;
+	UINT32			printedDroplets;
 	INT32			presIn_0out;
 	EnFluidCtrlMode	ctrlMode;
 	

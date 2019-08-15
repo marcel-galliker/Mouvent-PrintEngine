@@ -376,18 +376,23 @@ void ctrl_set_max_speed(void)
 
 	switch(RX_Config.printer.type)
 	{
-		case printer_TX801:		maxSpeed[0]=  60; maxSpeed[1]=  60; maxSpeed[2]=  60; maxSpeed[3]=  40; break;
-		case printer_TX802:		maxSpeed[0]=  60; maxSpeed[1]=  60; maxSpeed[2]=  60; maxSpeed[3]=  40; break;
+		case printer_TX801:		
+		case printer_TX802:		if (enc_is_analog())
+								{
+									maxSpeed[0]= 100; maxSpeed[1]= 100; maxSpeed[2]= 100; maxSpeed[3]= 100;				
+								}
+								else 
+								{
+									maxSpeed[0]=  60; maxSpeed[1]=  60; maxSpeed[2]=  60; maxSpeed[3]=  40;
+								}
+								break;
 		case printer_LB701:		maxSpeed[0]= 100; maxSpeed[1]= 100; maxSpeed[2]= 100; maxSpeed[3]= 100; break;
 		case printer_LB702_UV:	maxSpeed[0]= 100; maxSpeed[1]= 100; maxSpeed[2]= 100; maxSpeed[3]= 100; break;
 		case printer_LB702_WB:	maxSpeed[0]= 100; maxSpeed[1]= 100; maxSpeed[2]= 100; maxSpeed[3]= 100; break;
 		case printer_LH702:		maxSpeed[0]= 100; maxSpeed[1]= 100; maxSpeed[2]= 100; maxSpeed[3]= 100; break;
+		case printer_DP803:		maxSpeed[0]= 120; maxSpeed[1]= 120; maxSpeed[2]= 120; maxSpeed[3]= 120; break;
 		default:				maxSpeed[0]= 100; maxSpeed[1]= 100; maxSpeed[2]= 100; maxSpeed[3]= 100; break; 	
 	}
-//	if (enc_is_analog() || !strcmp(RX_Hostname, "TX801-0001") || !strcmp(RX_Hostname, "TX801-0009"))
-	{
-		maxSpeed[0]= 100; maxSpeed[1]= 100; maxSpeed[2]= 100; maxSpeed[3]= 100;				
-	}			
 
 	if (!strcmp(RX_Hostname, "DropWatcher"))
 	{

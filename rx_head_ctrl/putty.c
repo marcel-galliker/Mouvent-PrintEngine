@@ -389,6 +389,7 @@ void putty_display_nios_status(int nios, int status, int eeprom)
 			term_printf("Cooler:        PCB missing\n");
 		}
 
+		term_printf("printed: [l]    "); for (i=0; i<MAX_HEADS_BOARD; i++) term_printf("  %14s", value_str((int)(RX_HBStatus->head[no[i]].printedDroplets*(1000000000*RX_HBStatus[0].head[no[i]].dropVolume)))); term_printf("\n");
 		term_printf("Temp Head:      "); for (i=0; i<MAX_HEADS_BOARD; i++) term_printf("  %14s", value_str_temp(RX_NiosStat.head_temp[no[i]])); term_printf("\n");
 
 		if (eeprom) 
@@ -442,10 +443,11 @@ void putty_display_cond_status(int show, int status)
 	int alternate = 0;
 	char str[64];
 	char line[90] = {0};
+	SHeadEEpromMvt mem;
 	static const char ERR[2] = { '.', 'X' };
 	static const char VALVE_NAME[2][6] = { "FLUSH", "  INK" };
 	static const char STATUS_STRING[2][9] = { " enabled", "disabled" };
-	
+
 	int no[MAX_HEADS_BOARD];
 
 	for(i=0; i<MAX_HEADS_BOARD; i++) no[i]= RX_HBConfig.reverseHeadOrder? MAX_HEADS_BOARD-1-i:i;
@@ -509,6 +511,7 @@ void putty_display_cond_status(int show, int status)
 				RX_HBStatus->head[i].pumpSpeed		= INVALID_VALUE;
 				RX_HBStatus->head[i].pumpFeedback	= INVALID_VALUE;
 				RX_HBStatus->head[i].printingSeconds= INVALID_VALUE;
+				RX_HBStatus->head[i].printedDroplets= INVALID_VALUE;
 				RX_HBStatus->head[i].ctrlMode		= INVALID_VALUE;	
 				RX_HBStatus->head[i].presIn_0out    = INVALID_VALUE;
 				RX_NiosStat.cond[i].pcb_rev		    = '-';	
@@ -722,8 +725,11 @@ void putty_display_cond_status(int show, int status)
 			term_printf("+2.5V: %6s err:%d\n", value_str_u(RX_NiosStat.u_plus_2v5),  RX_NiosStat.error.u_plus_2v5);
 			term_printf("+3.3V:        err:%d\n",                                    RX_NiosStat.error.u_plus_3v3);		
 			term_printf("+5V:   %6s err:%d\n", value_str_u(RX_NiosStat.u_plus_5v),   RX_NiosStat.error.u_plus_5v);	
-			term_printf("-5V:   %6s err:%d\n", value_str_u(RX_NiosStat.u_minus_5v),  RX_NiosStat.error.u_minus_5v);		
-			term_printf("-36V:  %6s err:%d\n", value_str_u(RX_NiosStat.u_minus_36v), RX_NiosStat.error.u_minus_36v);
+			term_printf("-5V:   %6s err:%d\n", value_str_u(RX_NiosStat.u_minus_5v),  RX_NiosStat.error.u_minus_5v);
+			if(_NiosStat->info.u_firepulse_48V)
+				term_printf("-48V:  %6s err:%d\n", value_str_u(RX_NiosStat.u_firepulse), RX_NiosStat.error.u_firepulse); 
+			else
+				term_printf("-36V:  %6s err:%d\n", value_str_u(RX_NiosStat.u_firepulse), RX_NiosStat.error.u_firepulse);
 			term_printf("\n");
 		}
 		

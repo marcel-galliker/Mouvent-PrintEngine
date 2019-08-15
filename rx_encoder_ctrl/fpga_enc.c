@@ -1216,7 +1216,7 @@ static void _fpga_display_status(int showCorrection, int showParam)
 			term_printf("  Speed [m/Min]: "); for (i=0; i<cnt; i++) term_printf("%09d  ", (int)((Fpga->stat.encOut[i].speed*23/1000)*60.0/1200*0.0254) );		term_printf("\n");
 			term_printf("  Speed Min[Hz]: "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encOut[i].speed_min*23/1000);	term_printf("\n");
 			term_printf("  Speed Max[Hz]: "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encOut[i].speed_max*23/1000);	term_printf("\n");
-			term_printf("  PG FIFO:       %09d  Used=%d     Level=%03d (wnd=%03d ign=%03d delay=%dmm), InCnt=%d (fpga=%d)\n", 
+			term_printf("  PG FIFO:       %09d  Used=%d     (dist=%03d wnd=%03d ign=%03d delay=%dmm), InCnt=%d (fpga=%d)\n", 
 				_DistTelCnt, 
 				Fpga->cfg.pg[0].fifos_used, 
 				FpgaQSys->printGo_status.fill_level, 

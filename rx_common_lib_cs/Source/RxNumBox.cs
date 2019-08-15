@@ -69,6 +69,7 @@ namespace RX_Common
         //--- RxNumBox_TouchUp -----------------------------------
         void RxNumBox_TouchUp(object sender, TouchEventArgs e)
         {
+            RxNumBox test=sender as RxNumBox;
             IsPadActive = true;
             RxNumPad pad = new RxNumPad(this, IsUInt32);
             if (ShowRolls) pad.ShowRolls=true;

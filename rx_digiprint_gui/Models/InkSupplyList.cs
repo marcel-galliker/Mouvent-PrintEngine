@@ -90,6 +90,7 @@ namespace RX_DigiPrint.Models
                 speeds[n++]=60;
                 speeds[n++]=85;
                 speeds[n++]=100;
+                speeds[n++]=120;    // DP803
             }
             return speeds;
         }
