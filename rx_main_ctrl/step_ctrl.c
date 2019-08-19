@@ -215,8 +215,8 @@ int  step_lift_is_up(void)
 {
 	switch(_StepperType)
 	{
-	case STEPPER_TX:	return RX_StepperStatus.info.z_in_ref;
-	case STEPPER_LB:	return RX_StepperStatus.info.z_in_ref;
+	case STEPPER_TX:	return steptx_lift_is_up();
+	case STEPPER_LB:	return steplb_lift_is_up();
 	default:			return TRUE;
 	}
 }

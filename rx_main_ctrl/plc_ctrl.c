@@ -468,6 +468,7 @@ int  plc_set_printpar(SPrintQueueItem *pItem)
 	_Speed = _StartEncoderItem.speed;
 	step_set_vent(_Speed);
 	_SendPause = 1;
+	if (RX_PrinterStatus.printState==ps_printing) _StartPrinting=TRUE;
 	
 	return REPLY_OK;
 }
@@ -576,7 +577,7 @@ int	plc_to_cap_pos(void)
 //--- plc_pause_printing ---------------------------------------
 int  plc_pause_printing(void)
 {
-	Error(LOG,0, "_StartPrinting=FALSE");
+//	Error(LOG,0, "plc_pause_printing: _StartPrinting=FALSE");
 	_StartPrinting = FALSE;
 	_head_was_up   = FALSE;
 	_SendRun       = FALSE;
@@ -1284,7 +1285,8 @@ static void _plc_state_ctrl()
 	{		
 		if(_SendPause==2)
 		{
-			if (!_StartPrinting) RX_PrinterStatus.printState = ps_pause;
+//			if (!_StartPrinting) RX_PrinterStatus.printState = ps_pause;
+			if (_StartEncoderItem.pageWidth==0) RX_PrinterStatus.printState = ps_pause;
 			if (!_StartPrinting) step_set_vent(0);
 			_SendPause = 0;
 		}
@@ -1341,7 +1343,7 @@ static void _plc_state_ctrl()
 		/*
 		if(_StartPrinting && _StartEncoderItem.pageWidth == 0)
 		{
-			Error(LOG, 0, "enc_ready=%d, pq_is_ready2print=%d, printState=%d, z_in_print=%d", enc_ready(), pq_is_ready2print(&_StartEncoderItem), RX_PrinterStatus.printState, RX_StepperStatus.info.z_in_print);
+			Error(LOG, 0, "_StartPrinting=%d, enc_ready=%d, pq_is_ready2print=%d, printState=%d, z_in_print=%d, pageWidth=%d", _StartPrinting, enc_ready(), pq_is_ready2print(&_StartEncoderItem), RX_PrinterStatus.printState, RX_StepperStatus.info.z_in_print, _StartEncoderItem.pageWidth);
 		}
 		*/
 		

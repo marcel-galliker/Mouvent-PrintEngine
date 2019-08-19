@@ -23,6 +23,7 @@ int  steptx_handle_status(int stepperNo, SStepperStat *pStatus);
 
 int	 steptx_to_print_pos(void);
 int	 steptx_to_up_pos(void);
+int	 steptx_lift_is_up(void);
 
 int	 steptx_to_purge_pos(int no);
 int  steptx_in_purge_pos(void);

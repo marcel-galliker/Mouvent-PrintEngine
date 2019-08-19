@@ -199,6 +199,12 @@ int	 steplb_to_up_pos(void)
 	return REPLY_OK;									
 }
 
+//--- steplb_lift_is_up --------------
+int	 steplb_lift_is_up(void)
+{
+	return RX_StepperStatus.info.z_in_ref;
+}
+
 //--- steplb_is_printing ----------------------------------------------
 int	 steplb_is_printing(int isprinting)
 {

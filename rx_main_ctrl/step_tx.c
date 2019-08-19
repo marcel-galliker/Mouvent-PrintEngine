@@ -101,6 +101,12 @@ int  steptx_in_purge_pos(void)
 	return TRUE;			
 }
 
+//--- steptx_lift_is_up --------------
+int	 steptx_lift_is_up(void)
+{
+	return RX_StepperStatus.info.z_in_ref;
+}
+
 //--- steptx_wipe_start -------------------------------------
 int	 steptx_wipe_start(int no)
 {
