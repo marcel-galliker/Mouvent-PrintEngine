@@ -55,7 +55,7 @@
 
 //--- module globals ----------------------------------------------------------------
 
-#define FIFO_SIZE	10
+#define FIFO_SIZE	32
 
 typedef struct SCilentThreadPar
 {
@@ -74,6 +74,7 @@ typedef struct SCilentThreadPar
 	int				msglen[FIFO_SIZE];
 	BYTE			msgbuf[FIFO_SIZE][MAX_MESSAGE_SIZE];
 	int				msgInIdx;
+	int				msgOutIdx;
 } SCilentThreadPar;
 
 typedef struct SServer
@@ -1091,26 +1092,29 @@ static void* _client_thread_tcp(void* lpParameter)
 static void* _client_thread_tcp_send(void* lpParameter)
 {
 	SCilentThreadPar *par = (SCilentThreadPar*)lpParameter;
-	int msgOutIdx=0;
 	int sent;
 	
 	while (par->hserver!=NULL && par->sendSem && par->sendThreadRunning)
 	{
 		rx_sem_wait(par->sendSem, 0);
-		if (!par->sendThreadRunning) break;
-		sent=send(par->socket, par->msgbuf[msgOutIdx], par->msglen[msgOutIdx], MSG_NOSIGNAL);
-		if (sent!=SOCKET_ERROR) par->msgTime = 0; 
-		par->msglen[msgOutIdx]=0;
-		msgOutIdx = (msgOutIdx+1) % FIFO_SIZE;
-		/*
-		if (sent==SOCKET_ERROR) 
+		while(par->msgOutIdx!=par->msgInIdx)
 		{
-			char err[200];
-			err_system_error(errno, err, sizeof(err));
-			sok_error(&par->socket);
-			break;
+			if (!par->sendThreadRunning) break;
+			sent=send(par->socket, par->msgbuf[par->msgOutIdx], par->msglen[par->msgOutIdx], MSG_NOSIGNAL);
+			if (sent==SOCKET_ERROR)
+			{
+				char peerName[64];
+				char errStr[200];
+				int err;
+				err = sok_error(&par->socket);
+				err_system_error(err, errStr, sizeof(errStr));
+				sok_get_peer_name(par->socket, peerName, NULL, NULL);
+				Error(LOG, 0, "_client_thread_tcp_send >>%s<<, error=>>%s<<", peerName, errStr);
+			}
+			par->msgTime = 0; 
+			par->msglen[par->msgOutIdx]=0;
+			par->msgOutIdx = (par->msgOutIdx+1) % FIFO_SIZE;
 		}
-		*/
 	}
 	if (par->sendSem) rx_sem_destroy(&par->sendSem);
 	return 0;			
@@ -1170,8 +1174,17 @@ int sok_receiver(HANDLE hserver, RX_SOCKET *psocket, msg_handler handle_msg, voi
 			len = recv(*psocket, &buffer[start], bufferLen - start, 0);
 				
 			// TrPrintf(TRUE, "received %d bytes", len);
-			if (len == 0) 
+			if (len == 0)
+			{
+				#ifdef linux
+					if (errno==EWOULDBLOCK) continue;
+				#else
+					if (WSAGetLastError()==WSAEWOULDBLOCK) continue;
+				#endif // linux			
+				reply = sok_error(psocket);
+				TrPrintf(TRUE, ">>%s<< received %d bytes, err=%d", addr, len, reply);
 				break;
+			}
 			else if (len<0)
 			{
 				#ifdef linux
@@ -1180,6 +1193,7 @@ int sok_receiver(HANDLE hserver, RX_SOCKET *psocket, msg_handler handle_msg, voi
 					if (WSAGetLastError()==WSAEWOULDBLOCK) continue;
 				#endif // linux			
 				reply = sok_error(psocket);
+				TrPrintf(TRUE, ">>%s<< received %d bytes, err=%d", addr, len, reply);
 			//	{
 			//		char str[256];
 			//		Error(ERR_CONT, 0, "Socket %s Error: %d >>%s<<", addr, reply, err_system_error(reply, str, sizeof(str)));
@@ -1461,7 +1475,7 @@ int sok_send_to_clients(HANDLE hserver, void *pmsg)
 	SCilentThreadPar	*par;
 	
 	int thread;
-	int cnt=0;
+	int idx;
 	char peerName[100];
 
 	if (phdr->msgLen > MAX_MESSAGE_SIZE) Error(ERR_CONT, 0, "Message too large, id=0x%08x, len=%d, max=%d", phdr->msgId, phdr->msgLen, MAX_MESSAGE_SIZE);
@@ -1470,27 +1484,29 @@ int sok_send_to_clients(HANDLE hserver, void *pmsg)
 		for (thread = 0; thread < pserver->maxConnections; thread++)
 		{
 			par = &pserver->threadPar[thread];
-			if (par->hthread && par->socket && par->socket!=INVALID_SOCKET)
+			if (par->hthread && par->socket && par->socket!=INVALID_SOCKET && par->sendSem)
 			{
-				if(par->msglen[par->msgInIdx]==0)
-				{
-					if(par->msgTime == 0) par->msgTime = rx_get_ticks();
-					par->msglen[par->msgInIdx] = phdr->msgLen;
-					memcpy(par->msgbuf[par->msgInIdx], pmsg, par->msglen[par->msgInIdx]);
-					par->msgInIdx = (par->msgInIdx+1) % FIFO_SIZE;
-					if(par->sendSem) rx_sem_post(par->sendSem);					
-				}
-				else
+				idx = (par->msgInIdx+1) % FIFO_SIZE;
+				if(idx==par->msgOutIdx)
 				{
 					int time = rx_get_ticks()-par->sent_tick;
 					sok_get_peer_name(par->socket, peerName, NULL, NULL);
+					Error(LOG, 0, "sok_send_to_clients[%d] >>%s<<, message buffer overflow, time since fill=%d, msgcnt=%d, socket closed", thread, peerName, time, (par->msgInIdx+FIFO_SIZE-par->msgOutIdx) % FIFO_SIZE);
+					TrPrintfL(TRUE, "sok_close %s:%d", __FILE__, __LINE__);
 					sok_close(&par->socket);
-				//	Error(LOG, 0, "sok_send_to_clients[%d] >>%s<<, message buffer overflow, time since sending=%d, socket closed", thread, peerName, time);						
+				}
+				else
+				{
+					par->msgTime = rx_get_ticks();
+					par->msglen[par->msgInIdx] = phdr->msgLen;
+					memcpy(par->msgbuf[par->msgInIdx], pmsg, par->msglen[par->msgInIdx]);
+					par->msgInIdx = idx;
+					rx_sem_post(par->sendSem);					
 				}
 			}
 		}
 	}
-	return cnt;
+	return 1;
 }
 
 //--- sok_send_to_clients_2 -----------------------------------------------------

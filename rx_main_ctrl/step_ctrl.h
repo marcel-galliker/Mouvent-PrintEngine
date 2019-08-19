@@ -28,6 +28,7 @@ int  step_abort_printing(void);
 
 int	 step_to_purge_pos(int no);
 int  step_in_purge_pos(void);
+int  step_lift_is_up(void);
 
 int  step_set_vent(int speed);
 

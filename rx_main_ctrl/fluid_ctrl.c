@@ -36,7 +36,7 @@
 static int				_FluidThreadRunning=FALSE;
 static UINT32			_Flushed=0x00;
 static EnFluidCtrlMode	_FlushCtrlMode = ctrl_undef;
-static int				_FlushAll = 0x00;
+static EnFluidCtrlMode  _purgeCtrlMode = ctrl_undef;
 static int				_FlushCtrl = FALSE;
 static int				_Scanning;
 
@@ -81,7 +81,6 @@ static INT32			_HeadPumpSpeed[INK_SUPPLY_CNT][2];	// min/max
 // EnFluidCtrlMode			_FluidMode[INK_SUPPLY_CNT];
 
 
-static void _flush_next(void);
 
 //--- fluid_init ----------------------------------------------------------------
 int	fluid_init(void)
@@ -499,12 +498,14 @@ static void _control(int fluidNo)
 				case ctrl_purge_soft:
 				case ctrl_purge_hard:	// step_lift_to_up();
 										// step_handle_gui_msg(INVALID_SOCKET, CMD_CAP_UP_POS, NULL, 0);
+										_purgeCtrlMode = _stat->ctrlMode;
 										step_handle_gui_msg(INVALID_SOCKET, CMD_CAP_REFERENCE, NULL, 0);
 										_send_ctrlMode(no, ctrl_purge_step1, TRUE);	
 										break;
 				
 				case ctrl_purge_step1:	// if (step_lift_is_up())
-										if (RX_StepperStatus.info.z_in_ref)
+										// if (RX_StepperStatus.info.z_in_ref)
+										if (step_lift_is_up())
 										{
 											plc_to_purge_pos();
 											_send_ctrlMode(no, ctrl_purge_step2, TRUE);												
@@ -526,7 +527,12 @@ static void _control(int fluidNo)
 				
 				case ctrl_purge_step4:
 									//	_send_ctrlMode(no, ctrl_wipe,		  TRUE);	
-										_send_ctrlMode(no, ctrl_off,		  TRUE);	
+										_send_ctrlMode(no, ctrl_off,		  TRUE);
+										if (_purgeCtrlMode==ctrl_purge_hard)
+										{
+											_Flushed &= (~0x01<<i);
+											setup_fluid_system(PATH_USER FILENAME_FLUID_STATE, &_Flushed, WRITE);				
+										}
 										break;
 										//	PLC CMD_MOVE_TO_WIPE
 										//	if plc_in-Wipe -> info stepper
@@ -595,7 +601,6 @@ static void _control(int fluidNo)
                 case ctrl_flush_done:	if (_Scanning) return;
 										ErrorEx(dev_fluid, fluidNo, LOG, 0, "Flush complete");
 										_send_ctrlMode(-1, ctrl_off, TRUE); 
-										_flush_next();
 										break; 
 
 				case ctrl_fill:			_send_ctrlMode(no, ctrl_fill_step1, TRUE);		break;
@@ -625,7 +630,6 @@ static void _control_flush(void)
 	{
 		if (*RX_Config.inkSupply[i].ink.fileName)
 		{
-	//		TrPrintfL(TRUE, "Fliud[%d].mode=%d, _FlushCtrlMode=%d", i, _FluidStatus[i].ctrlMode, _FlushCtrlMode);
 			if (_FluidStatus[i].ctrlMode!=_FlushCtrlMode) return;
 		}
 	}
@@ -742,25 +746,6 @@ void fluid_reply_stat(RX_SOCKET socket)	// to GUI
 	}
 }
 
-//--- _flush_next -------------------------------------------
-static void _flush_next(void)
-{
-	if(_FlushCtrlMode >= ctrl_flush_night && _FlushCtrlMode <= ctrl_flush_week)
-	{
-		int no;
-		for (no=0; no<RX_Config.inkSupplyCnt; no++) 
-		{
-			if (_FlushAll & (1<<no))
-			{
-				_FlushAll &= ~(1<<no);
-				_send_ctrlMode(no, _FlushCtrlMode, TRUE);
-				return;									
-			}
-		}
-	}
-	_FlushCtrlMode = ctrl_undef;
-}
-
 //--- fluid_send_ctrlMode -------------------------------
 void fluid_send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 {
@@ -779,20 +764,7 @@ void _send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 	int i;
 	if (no<0)
 	{
-		if(ctrlMode >= ctrl_flush_night && ctrlMode <= ctrl_flush_week)
-		{
-			_FlushCtrlMode = ctrlMode;
-			_FlushAll = 0x00;
-			for (i=0; i<RX_Config.inkSupplyCnt; i++) 
-			{
-				if (*RX_Config.inkSupply[i].inkFileName) _FlushAll |= (1<<i);
-			}
-			_flush_next();
-		}
-		else
-		{
-			for (i=0; i<RX_Config.inkSupplyCnt; i++) _send_ctrlMode(i, ctrlMode, TRUE);				
-		}
+		for (i=0; i<RX_Config.inkSupplyCnt; i++) _send_ctrlMode(i, ctrlMode, TRUE);				
 		return;		
 	}
 
@@ -821,7 +793,7 @@ void _send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 			else if (i==no || ctrlMode==ctrl_empty)
 			{
 				if ((ctrlMode==ctrl_print) && !RX_Config.inkSupply[i].ink.fileName[0]) continue;
-				if ((ctrlMode==ctrl_print) && _FluidStatus[i].info.flushed) 
+				if ((ctrlMode==ctrl_print) && (_Flushed & (0x01<<i))) 
 				{
 					ErrorEx(dev_fluid, i, WARN, 0, "Is FLUSHED. It mist be purged before it can go to print mode.");
 					continue;						
@@ -898,8 +870,8 @@ void fluid_start_printing(void)
 //--- fluid_get_ctrlMode -------------------------------------------
 EnFluidCtrlMode fluid_get_ctrlMode(int no)
 {
-	if (_FluidStatus[no].ctrlMode==ctrl_off)
-		TrPrintfL(TRUE, "fluid_get_ctrlMode[%d].off\n", no);
+//	if (_FluidStatus[no].ctrlMode==ctrl_off)
+//		TrPrintfL(TRUE, "fluid_get_ctrlMode[%d].off", no);
 	if (no>=0 && no<SIZEOF(_FluidStatus)) return _FluidStatus[no].ctrlMode;
 	return ctrl_undef;
 }

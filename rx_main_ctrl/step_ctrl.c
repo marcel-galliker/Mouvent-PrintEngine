@@ -210,6 +210,16 @@ int  step_in_purge_pos(void)
 	}
 }
 
+//--- step_lift_is_up ----------------------------------------------
+int  step_lift_is_up(void)
+{
+	switch(_StepperType)
+	{
+	case STEPPER_TX:	return RX_StepperStatus.info.z_in_ref;
+	case STEPPER_LB:	return RX_StepperStatus.info.z_in_ref;
+	default:			return TRUE;
+	}
+}
 
 //--- step_wipe_start ------------------------------------------------
 int  step_wipe_start(int no)
