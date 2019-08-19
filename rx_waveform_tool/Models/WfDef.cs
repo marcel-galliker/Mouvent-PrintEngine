@@ -404,6 +404,7 @@ namespace RxWfTool.Models
                     else if (line.StartsWith("End Section-to-Multibit Mapping Table"))
                     {
                         sectionNumbers = false;
+                        /*
                         // remove unused voltages at end
                         int idx=list.Count();
                         while (idx>2 && list[idx-1].Voltage==0 && list[idx-2].Voltage==0)
@@ -430,6 +431,7 @@ namespace RxWfTool.Models
                             item2.Voltage  = 0;
                             list.Add(item2);
                         }
+                        */
                     }
                     else if (line.Contains("Start Waveform Samples"))
                     {
