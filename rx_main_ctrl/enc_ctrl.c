@@ -88,7 +88,7 @@ static int  _handle_enc_msg		(RX_SOCKET socket, void *msg, int len, struct socka
 static void _handle_status		(int no, SEncoderStat* pstat);
 static void _handle_config_reply(int no, SReply* preply);
 static void _handle_event		(int no, SLogMsg *msg);
-static void _enc_start_printing(int no, SPrintQueueItem *pitem);
+static void _enc_start_printing (int no, SPrintQueueItem *pitem, int restart);
 
 //--- enc_init -------------------------------------------------
 void enc_init(void)
@@ -183,6 +183,9 @@ static int   _enc_closed(RX_SOCKET socket, const char *peerName)
 int	 enc_set_config(void)
 {	
 	int no;
+	
+//	Error(LOG, 0, "enc_set_config");
+	
 	_Scanning = rx_def_is_scanning(RX_Config.printer.type);
 		
 	if (arg_simuEncoder) Error(WARN, 0, "Encoder in Simulation");
@@ -241,12 +244,13 @@ void  enc_tick(void)
 }
 
 //--- enc_start_printing ---------------------------------------------------------------
-int  enc_start_printing(SPrintQueueItem *pitem)
+int  enc_start_printing(SPrintQueueItem *pitem, int restart)
 {
 	int no;
+//	Error(LOG, 0, "enc_start_printing");
 	for (no=0; no<ENC_CNT; no++)
 	{
-		if (_Encoder[no].used) 	_enc_start_printing(no, pitem);		
+		if (_Encoder[no].used) 	_enc_start_printing(no, pitem, restart);		
 	}
 	_Printing = TRUE;
 	_StopPG   = FALSE;
@@ -263,12 +267,15 @@ int  enc_start_printing(SPrintQueueItem *pitem)
 }
 
 //--- _enc_start_printing ---------------------------------------------------------------
-static void _enc_start_printing(int no, SPrintQueueItem *pitem)
+static void _enc_start_printing(int no, SPrintQueueItem *pitem, int restart)
 {
 	SEncoderCfg msg;
 	double comp;
 	memset(&msg, 0, sizeof(msg));
+
+//	Error(LOG, 0, "_enc_start_printing");
 		
+	msg.restart		= restart;
 	msg.simulation  = arg_simuEncoder;
 	msg.printerType = RX_Config.printer.type;
 	msg.printGoMode = pitem->printGoMode;
@@ -404,6 +411,8 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 	int no;
 	
 	if (pId->scan==0xffffffff) return REPLY_OK; // flush
+
+//	Error(LOG, 0, "enc_set_pg");
 	
 	/*
 	//--- put to fifo
@@ -512,6 +521,7 @@ int  enc_stop_pg(char *reason)
 //--- enc_restart_pg ------------------------------
 int  enc_restart_pg(void)
 {
+//	Error(LOG, 0, "enc_restart_pg");
 	sok_send_2(&_Encoder[0].socket, CMD_ENCODER_PG_RESTART, 0, NULL);
 	return REPLY_OK;	
 }
@@ -543,6 +553,8 @@ int  enc_abort_printing(void)
 //--- enc_enable_printing ----------------------------
 int	 enc_enable_printing(int enable)
 {
+//	Error(LOG, 0, "enc_enable_printing(%d)", enable);
+
 	int no;
 	for(no=0; no<ENC_CNT; no++)
 	{
@@ -620,7 +632,12 @@ static void _handle_status(int no, SEncoderStat* pstat)
 	if (_Encoder[no].printGoCnt>=0 && _EncoderStatus[no].PG_cnt != _Encoder[no].printGoCnt)	
 	{
 		_Encoder[no].printGoCnt = _EncoderStatus[no].PG_cnt;
-		if ((UINT32)_Encoder[no].printGoCnt > RX_PrinterStatus.printGoCnt) RX_PrinterStatus.printGoCnt = (UINT32)_Encoder[no].printGoCnt;
+
+		while ((UINT32)_Encoder[no].printGoCnt > RX_PrinterStatus.printGoCnt)
+		{
+			pc_print_go();
+			RX_PrinterStatus.printGoCnt++;
+		}
 	}
 	if (_PrintGo_Mode==PG_MODE_MARK && _Encoder[no].printGoCnt==0 && _EncoderStatus[no].meters>_WarnMarkReaderPos)
 	{

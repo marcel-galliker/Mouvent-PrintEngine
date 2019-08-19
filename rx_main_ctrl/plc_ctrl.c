@@ -590,6 +590,7 @@ int  plc_pause_printing(void)
 //		_plc_set_command("CMD_PRODUCTION", "CMD_PAUSE");
 //		Error(LOG, 0, "send PAUSE");
 		_SendPause = 1;
+		_plc_state_ctrl();
 	}
 	return REPLY_OK;
 }
@@ -1323,7 +1324,7 @@ static void _plc_state_ctrl()
 			else lc_get_value_by_name_UINT32(APP "STA_SLIDE_POSITION", (UINT32*)&scan_state);
 			if(scan_state != scan_moving)
 			{
-				enc_start_printing(&_StartEncoderItem);
+				enc_start_printing(&_StartEncoderItem, RX_PrinterStatus.printGoCnt);
 				_StartEncoderItem.pageWidth = 0;
 				return;
 			}

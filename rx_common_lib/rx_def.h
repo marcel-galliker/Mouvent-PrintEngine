@@ -813,6 +813,7 @@ typedef struct SHeadBoardStat
 typedef struct SEncoderCfg
 {
 	INT32	simulation;
+	INT32	restart;
 	INT32	pos_actual;
 	INT32	pos_pg_fwd;
 	INT32	pos_pg_bwd;

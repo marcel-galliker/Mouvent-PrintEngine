@@ -71,7 +71,12 @@ namespace RX_DigiPrint.Models
                     FileName = Dir.filename(value);
                     Changed = true;
                     Ripped = Dir.isRipped(FilePath);
-                    if (Ripped) PreviewPath = Dir.local_path(_FilePath + Path.DirectorySeparatorChar + Path.GetFileName(_FilePath) + ".bmp"); 
+                    if (Ripped) 
+                    {
+                        string path=Dir.local_path(_FilePath + Path.DirectorySeparatorChar + Path.GetFileName(_FilePath) + ".bmp");
+                        if (File.Exists(path)) PreviewPath = path;
+                        else                   PreviewPath = Dir.local_path(_FilePath + Path.DirectorySeparatorChar + Path.GetFileName(_FilePath) + "_preview.bmp"); 
+                    }
                     else
                     {
                         FileInfo info = new FileInfo(Dir.local_path(_FilePath));

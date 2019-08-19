@@ -22,7 +22,7 @@ void enc_end(void);
 void enc_tick(void);
 
 int	 enc_set_config(void);
-int  enc_start_printing(SPrintQueueItem *pitem);
+int  enc_start_printing(SPrintQueueItem *pitem, int restart);
 void enc_sent_document(int pages);
 int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId);
 int  enc_stop_pg(char *reason);

@@ -35,6 +35,7 @@ int spool_send_msg(void *msg);
 int spool_send_msg_2(UINT32 cmd, int dataSize, void *data, int errmsg);
 int spool_send_test_data(int headNo, char *str);
 int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT32 lengthPx, SPrintQueueItem *pitem, int clearBlockUsed);
+SPageId* spool_get_id(int no);
 // int spool_print_empty(void);
 int spool_abort_printing(void);
 int spool_head_board_cnt(void);

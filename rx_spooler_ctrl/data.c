@@ -921,7 +921,6 @@ static void *_multicopy_thread(void* lpParameter)
 							}
 						}
 					}
-					Error(LOG, 0, "MultiCopy[%d] done", buf);
 				}
 			}
 		}

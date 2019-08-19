@@ -404,7 +404,6 @@ static int _print_next(void)
 	static int _first;
 	static int _ScansNext;
 	static int _CopiesStart;
-	static int _CopiesSent;
 //	TrPrintfL(TRUE, "_print_next printState=%d, spooler_ready=%d, pq_ready=%d", RX_PrinterStatus.printState, spool_is_ready(), pq_is_ready());
 	while ((RX_PrinterStatus.printState==ps_printing ||RX_PrinterStatus.printState==ps_pause) && spool_is_ready() && pq_is_ready())
 	{	
@@ -455,7 +454,6 @@ static int _print_next(void)
 			*_DataPath	  = 0;
 			_ScanLengthPx = 0;
 			_CopiesStart  = 0;
-			_CopiesSent   = 0;
 			_first		  = TRUE;
 			SPrintQueueItem *item = pq_get_next_item();
 			if (item) 
@@ -629,6 +627,7 @@ static int _print_next(void)
 							length        = (UINT32)(l * 1200 / 25.4+0.5);
 							l			  = l - 1000*_Item.start.scan;
 							_ScanLengthPx = (UINT32)(l * 1200 / 25.4+0.5);
+							_Item.id.copy = 1;
 						}
 
 						int barwidth;
@@ -726,7 +725,7 @@ static void *_print_thread(void *lpParameter)
 //--- pc_sent --------------------------------------------
 int pc_sent(SPageId *id)
 {
-	// Error(LOG, 0, "Data Sent Copy=%d, SpoolerReady=%d", id->copy, spool_is_ready());
+//	Error(LOG, 0, "Data Sent id=%d, page=%d, scan=%d, copy=%d", id->id, id->page, id->scan, id->copy);
 	TrPrintfL(TRUE, "**** SENT id=%d, page=%d, scan=%d, copy=%d ****", id->id, id->page, id->scan, id->copy);
 	
 	if  (_PreloadCnt && !(--_PreloadCnt))
@@ -824,4 +823,18 @@ int pc_print_done(int headNo, SPrintDoneMsg *pmsg)
 //	TrPrintfL(TRUE, "pc_print_done: pc_print_next");
 	pc_print_next();
 	return REPLY_OK;
+}
+
+//--- pc_print_go -----------------------------------
+int pc_print_go(void)
+{
+	if (_Scanning) 
+	{
+		SPageId *pid  = spool_get_id(RX_PrinterStatus.printGoCnt);
+		SPageId *next = spool_get_id(RX_PrinterStatus.printGoCnt+1);
+		
+	//	Error(LOG, 0, "PrintGo[%d] (id=%d, page=%d, scan=%d, copy=%d)", RX_PrinterStatus.printGoCnt, pid->id, pid->page, pid->scan, pid->copy);
+	//	Error(LOG, 0, "NEXT   [%d] (id=%d, page=%d, scan=%d, copy=%d)", RX_PrinterStatus.printGoCnt, next->id, next->page, next->scan, next->copy);
+		if (next->id != pid->id) machine_pause_printing();			
+	}
 }

@@ -96,7 +96,7 @@ int		machine_set_printpar(SPrintQueueItem *pItem)
 
 	switch(_MInterface) 
 	{
-	case mi_none:	return enc_start_printing (pItem);
+	case mi_none:	return enc_start_printing (pItem, FALSE);
 	case mi_tt:		return tt_set_printpar(pItem);
 	case mi_plc:	return plc_set_printpar(pItem);
 	}

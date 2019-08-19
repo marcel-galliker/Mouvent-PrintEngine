@@ -31,6 +31,7 @@
 //--- Defines -----------------------------------------------------------------
 
 #define MAX_SPOOLERS	8	
+#define MAX_PAGES		128
 
 //--- Externals ---------------------------------------------------------------
 
@@ -56,7 +57,7 @@ static int		_SlideIsRight;
 static int		_Pass;
 static int		_DelayPauseTimer=0;
 static SSpoolerInfo	 _Spooler[MAX_SPOOLERS];
-
+static SPageId		_Id[MAX_PAGES];
 
 //--- Prototypes --------------------------------------------------------------
 static int _handle_spool_msg	(RX_SOCKET socket, void *msg, int len, struct sockaddr *sender, void *par);
@@ -83,6 +84,7 @@ int	spool_start(void)
 	_Auto = FALSE;
 	TrPrintfL(TRUE, "Spool started");
 	memset(_Spooler, 0, sizeof(_Spooler));
+	memset(_Id, 0, sizeof(_Id));
 	for(i=0; i<SIZEOF(_Spooler); i++) 
 	{	
 		net_device_to_ipaddr(dev_spooler, i, addr, sizeof(addr));
@@ -428,6 +430,7 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 	msg.wakeup			= pitem->wakeup;
 	strncpy(msg.filename, filename, sizeof(msg.filename));
 	memcpy(&msg.id, pid, sizeof(msg.id));
+	memcpy(&_Id[RX_PrinterStatus.sentCnt], pid, sizeof(msg.id));
 	if (RX_PrinterStatus.testMode)
 	{
 		msg.printMode     = PM_TEST;
@@ -492,6 +495,12 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 	TrPrintfL(TRUE, "****** sent spool_print_file (id=%d, page=%d, copy=%d, scan=%d) to %d spoolers: _MsgSent=%d", pid->id, pid->page, pid->copy, pid->scan, cnt);
 //	Error(LOG, 0, "spool_print_file Copy %d", pid->copy);
 	return REPLY_OK;
+}
+
+//--- spool_get_id ---------------------------------
+SPageId *spool_get_id(int no)
+{
+	return &_Id[no%MAX_PAGES];
 }
 
 //--- spool_abort_printing --------------------------------------

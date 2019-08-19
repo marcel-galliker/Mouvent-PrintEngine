@@ -505,7 +505,13 @@ void fpga_enc_config(int inNo, SEncoderCfg *pCfg, int restart)
 		default:	break;
 		}
 		RX_EncoderStatus.meters = 0;
-		_corr_ctrl();		
+		_corr_ctrl();
+		if (inNo==0 && pCfg->restart)
+		{
+			_PrintGo_Start = RX_EncoderStatus.PG_cnt;			
+			TrPrintfL(TRUE, "_PrintGo_Start=%d", _PrintGo_Start);
+			RX_EncoderStatus.PG_cnt = 0;
+		}
 		Fpga->cfg.encIn[inNo].enable			= TRUE;
 	}
 	if(RX_EncoderCfg.printerType == printer_test_table) _uv_init();
@@ -956,8 +962,8 @@ static void  _pg_ctrl(void)
 
 		if ((Fpga->stat.encOut[0].PG_cnt & 0xff) != ((RX_EncoderStatus.PG_cnt-_PrintGo_Start) & 0xff)) 
 		{
-			TrPrintfL(TRUE, "Fpga.PG_cnt=%d, PG_cnt=%d", Fpga->stat.encOut[0].PG_cnt & 0xff, (RX_EncoderStatus.PG_cnt-_PrintGo_Start)& 0xff);
 			RX_EncoderStatus.PG_cnt++;
+			TrPrintfL(TRUE, "Fpga.PG_cnt=%d, PG_cnt=%d, PG=%d", Fpga->stat.encOut[0].PG_cnt & 0xff, (RX_EncoderStatus.PG_cnt-_PrintGo_Start)& 0xff, RX_EncoderStatus.PG_cnt);
 			newpg=TRUE;
 			if (RX_EncoderStatus.PG_stop) RX_EncoderStatus.PG_stop = RX_EncoderStatus.PG_cnt;
 		}

@@ -367,7 +367,7 @@ int  tt_set_scans	   (int scans)
 //--- tt_start_printing ---------------------------------------------
 int  tt_start_printing(void)
 {
-	enc_start_printing(&_PQItem);
+	enc_start_printing(&_PQItem, FALSE);
 	
 	STestTableScanPar par;
 	steps_set_curing(FALSE);

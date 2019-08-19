@@ -26,6 +26,7 @@ int pc_auto(int enable);
 int pc_print_next(void);
 
 int pc_sent(SPageId *id);
+int pc_print_go(void);
 int pc_print_done(int headNo, SPrintDoneMsg *pmsg);
 void pq_next_page(SPrintQueueItem *pitem, SPageId *pid);
 

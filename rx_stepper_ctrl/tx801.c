@@ -444,7 +444,7 @@ int  tx801_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									if (pos<TX_PRINT_POS_MIN) 
 									{
 										pos=TX_PRINT_POS_MIN;
-										Error(WARN, 0, "CMD_CAP_PRINT_POS set to MIN pos=%d.%03d", pos/1000, pos%1000);
+										Error(WARN, 0, "CMD_CAP_PRINT_POS set to MIN pos=%d.%03d mm", pos/1000, pos%1000);
 									}
 									if (!_CmdRunning && (!RX_StepperStatus.info.z_in_print || steps!=_PrintPos_Act))
 									{
