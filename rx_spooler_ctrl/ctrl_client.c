@@ -377,8 +377,8 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 			return REPLY_ERROR;
 		if (ret==REPLY_ERROR)
 		{
-			if (multiCopy)	return Error(ERR_STOP, 0,     "Could not allocate memory file >>%s<<, page=%d, copy=%d, scan=%d (Make Image width a multilpe of 4)", path, msg.id.page, msg.id.copy, msg.id.scan);
-			else			return Error(ERR_STOP, 0,     "Could not allocate memory file >>%s<<, page=%d, copy=%d, scan=%d", path, msg.id.page, msg.id.copy, msg.id.scan);
+			if (multiCopy>1) return Error(ERR_STOP, 0,     "Could not allocate memory file >>%s<<, page=%d, copy=%d, scan=%d (Make Image width a multilpe of 4)", path, msg.id.page, msg.id.copy, msg.id.scan);
+			else			 return Error(ERR_STOP, 0,     "Could not allocate memory file >>%s<<, page=%d, copy=%d, scan=%d", path, msg.id.page, msg.id.copy, msg.id.scan);
 		}
 	}
 

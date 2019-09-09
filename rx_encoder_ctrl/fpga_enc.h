@@ -43,7 +43,7 @@ int   fpga_pg_config_fhnw(UINT32 posActual, UINT32 posFwd, UINT32 posBwd);
 void  fpga_pg_init(int restart);
 void  fpga_pg_stop(void);
 void  fpga_pg_set_dist(int cnt, int dist);
-void  fpga_set_printmark(int window, int ignore);
+void  fpga_set_printmark(SEncoderPgDist *pmsg);
 
 void  fpga_stop_printing();
 void  fpga_abort_printing();

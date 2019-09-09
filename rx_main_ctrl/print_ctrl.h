@@ -24,6 +24,7 @@ int pc_pause_printing(void);
 int pc_abort_printing(void);
 int pc_auto(int enable);
 int pc_print_next(void);
+int pc_set_pageMargin(INT32 pageMargin);
 
 int pc_sent(SPageId *id);
 int pc_print_go(void);

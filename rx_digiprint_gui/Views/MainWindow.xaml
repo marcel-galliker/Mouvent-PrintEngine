@@ -103,7 +103,7 @@
                     <views_pq:PrintQueueView x:Name="PrintQueueView" Loaded="PrintQueueView_Loaded"/>
                 </rx:RxTabItem>
 
-                <rx:RxTabItem x:Name="TabMiniLabel" Header="Label Press" >
+                <rx:RxTabItem x:Name="TabLB701" Header="LB 701" >
                     <views_ml:LB701UVView/>
                 </rx:RxTabItem>
                 

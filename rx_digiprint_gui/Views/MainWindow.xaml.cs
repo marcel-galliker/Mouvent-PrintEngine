@@ -57,7 +57,7 @@ namespace RX_DigiPrint.Views
             Status.DataContext            = RxGlobals.RxInterface;
             PrinterStatus.DataContext     = RxGlobals.RxInterface;
             Counters.DataContext          = RxGlobals.PrinterStatus;
-            TabMiniLabel.DataContext      = RxGlobals.PrintSystem;
+            TabLB701.DataContext          = RxGlobals.PrintSystem;
             TabDP803.DataContext          = RxGlobals.PrintSystem;
             TabLB702WB.DataContext        = RxGlobals.PrintSystem;
             TabLH702.DataContext          = RxGlobals.PrintSystem;
@@ -189,7 +189,7 @@ namespace RX_DigiPrint.Views
                 switch (RxGlobals.PrintSystem.PrinterType)
                 {
                     case EPrinterType.printer_LB701:  
-                        _activeView (TabMiniLabel);
+                        _activeView (TabLB701);
                         break;
 
                     case EPrinterType.printer_LB702_UV:  
@@ -239,7 +239,8 @@ namespace RX_DigiPrint.Views
             {                
                 TabItemEx item = TabCtrl.Items[i] as TabItemEx;
                 if (item.Name.Equals("TabEvents")) break;
-                if (item.Equals(activeItem))
+                if (item.Equals(activeItem) 
+                || (activeItem.Equals(TabLH702) && item.Equals(TabLB701)))
                 {
                     item.Visibility=Visibility.Visible;
   //                TabCtrl.SelectedIndex = i;

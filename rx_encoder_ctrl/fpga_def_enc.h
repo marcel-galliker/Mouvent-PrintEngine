@@ -73,21 +73,21 @@ typedef struct
 	UINT32	enc_diff_min;		// 0x002c
 	UINT32	enc_diff_max;		// 0x0030
 	UINT32	enc_diff_overflow;	// 0x0034
-	UINT32	pg_start_pos;		// 0x0038 in encoder input steps
+	UINT32	digin_mark_len_cnt;	// 0x0038
 	UINT32	digin_edge_dist;	// 0x003c 4x distance between digin rising edges (in encoder input steps)
  } SEncInStatus;
 
 //--- SEncOutStatus -----------------------------------------
 typedef struct
 {
-	UINT32	position;		// 0x0000:	// 20 Bit!
+	UINT32	position;		// 0x0000[Bit 0..19]: 20 Bit counter!
 	UINT32	speed;			// 0x0004:
 	UINT32	speed_min;		// 0x0008:	// * 50000000/2^31    OR *23/1000	
 	UINT32	speed_max;		// 0x000c:
-	UINT32	PG_cnt;			// 0x0010	// 10 bit!
+	UINT32	PG_cnt;			// 0x0010[Bit 0..9]: 10 bit counter!
 	UINT32	mark_edge_warn;	// 0x0014 mark edge detected during ignore window
-	UINT32	res_18;			// 0x0018
-	UINT32	res_1c;			// 0x001c
+	UINT32	window_mark_pos;	// 0x0018
+	UINT32	pg_start_pos;	// 0x001c in encoder input steps
 	UINT32	res_20;			// 0x0020
 	UINT32	res_24;			// 0x0024
 	UINT32	res_28;			// 0x0028
@@ -267,8 +267,8 @@ typedef struct
 		#define FIFOS_OFF				0
 		#define FIFOS_DIST				1
 		#define FIFOS_MARKREADER		2 // <quiet_window> -<ignored_fifo><window_fifo>-<ignored_fifo><window_fifo>-<ignored_fifo><window_fifo>-...
-		#define FIFOS_MARKREADERALL		4
-		#define FIFOS_MARKREPAIRREADER	6 // creates PG at the end of window_fifo, if no DigIn was detected
+		#define FIFOS_MARKREADER_ALL	4
+		#define FIFOS_MARKREADER_REPAIR	6 // creates PG at the end of window_fifo, if no DigIn was detected
 	
 	UINT32	dig_in_sel;			// 0x0020: select digital input 2bit
 	UINT32	quiet_window;		// 0x0024: First Window in MARKREADER to ignore DigIn. Restarts quiet_window when DigIn = '1' while in quiet_window
@@ -310,16 +310,13 @@ typedef struct
 
 	UINT32	subsample_meas;			// 0x0054:
 	
-	UINT32  shift_delay;            // 0x0058 pg delay in strokes (21um strokes)
+	UINT32  shift_delay;            // 0x0058[Bit 0..18]: pg delay in strokes (21um strokes)
 	
-	UINT32  sel_roller_dia_offset[2]; // 0x005c: 4 bit: 70 + sel_roller_dia_offset_0 = Roller Diameter in mm
+	UINT32  sel_roller_dia_offset[2]; // 0x005c[Bit 0..3]: 70 + sel_roller_dia_offset_0 = Roller Diameter in mm
 
-	UINT32  shift_delay_tel;        // 0x0058 pg delay in strokes for telegram pg (21um strokes) (only encoder 0)
+	UINT32  shift_delay_tel;          // 0x0058 // 19 bit // pg delay in strokes for telegram pg (21um strokes) (only encoder 0)
 
-	UINT32  shift_delay_rep;        // 0x0058 pg delay in strokes for repair pg (21um strokes) (only encoder 0)
-									// calculate shift_delay_rep:
-									// repair_pulse_delayed_distance = window_fifo.value + ignored_fifo.value - MarkDistance
-									// shift_delay_rep = shift_delay_tel - repair_pulse_delayed_distance
+	UINT32  min_mark_len;            // 0x0058 // 19 bit // minimal mark length in encoder steps 
 	
 } SGeneralCfg;
 

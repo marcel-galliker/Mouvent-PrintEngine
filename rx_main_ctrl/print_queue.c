@@ -284,7 +284,7 @@ int pq_abort(void)
 static int _find_item(int id, int *pidx)
 {
 	int i;
-	if (rx_def_is_test(RX_Config.printer.type))
+	if (!rx_def_use_pq(RX_Config.printer.type))
 	{
 		*pidx=0;
 		return REPLY_OK;
@@ -311,7 +311,7 @@ SPrintQueueItem *pq_get_item_n(int i)
 //--- pq_get_next_item ---------------------------------------------------------
 SPrintQueueItem *pq_get_next_item(void)
 {
-	int slide=rx_def_is_test(RX_Config.printer.type);
+	int slide=!rx_def_use_pq(RX_Config.printer.type);
 	if (slide && _Item>0) return NULL;
 
 
@@ -358,7 +358,7 @@ SPrintQueueItem *pq_add_item(SPrintQueueItem *pitem)
 //		if (pitem->variable) _load_variable_info(pitem);
 		if (pitem->firstPage<1) pitem->firstPage=1;
 		if (pitem->lastPage<pitem->firstPage) pitem->lastPage=pitem->firstPage;
-		if (rx_def_is_test(RX_Config.printer.type) && pitem->copies<1) pitem->copies=1;
+		if (!rx_def_use_pq(RX_Config.printer.type) && pitem->copies<1) pitem->copies=1;
 		if (pitem->dropSizes==0) pitem->dropSizes=3;
 		pitem->id.id = ++_ID;
 		pitem->state = PQ_STATE_QUEUED;
@@ -912,7 +912,9 @@ int pq_is_ready(void)
 		}		
 	}
 	
-	if(RX_Config.printer.type == printer_cleaf) 
+	if(RX_Config.printer.type == printer_LH702) 
+		return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printedCnt) < 8;
+	else if(RX_Config.printer.type == printer_cleaf) 
 		return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printedCnt) < 16;
 	else if (rx_def_is_scanning(RX_Config.printer.type))
 		return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printedCnt) < 20;

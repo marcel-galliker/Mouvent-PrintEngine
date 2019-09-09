@@ -284,6 +284,7 @@ namespace RX_DigiPrint.Services
 
         public const UInt32 CMD_SET_PRINT_QUEUE = 0x01000043;
         public const UInt32 REP_SET_PRINT_QUEUE = 0x02000043;
+        public const UInt32 EVT_SET_PRINT_QUEUE = 0x03000043;
 
         public const UInt32 CMD_DEL_PRINT_QUEUE = 0x01000044;
         public const UInt32 REP_DEL_PRINT_QUEUE = 0x02000044;

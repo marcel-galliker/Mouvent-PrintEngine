@@ -1394,6 +1394,23 @@ static void _plc_state_ctrl()
 				pc_pause_printing();
 			}
 			*/
+		} 
+		else if(rx_def_is_tx(RX_Config.printer.type))
+		{ // calculate speed
+			UINT32 speed;
+			// speed = time for one scanner movement!
+			lc_get_value_by_name_UINT32(APP "STA_PRINTING_CYCLE_TIME", &speed);
+			if(speed == 0) RX_PrinterStatus.actSpeed = 0;
+			else
+			{
+				/*
+				double stepArea = _StartEncoderItem.srcHeight / 1000000.0 * _StepDist/1000.0;
+				if (_StartEncoderItem.scanMode!=PQ_SCAN_BIDIR) stepArea /= 2; 
+				RX_PrinterStatus.actSpeed = (UINT32)(stepArea * 3600.0 / ((double)speed/1000.0));
+				*/
+				if (_StartEncoderItem.scanMode!=PQ_SCAN_BIDIR) speed*=2;
+				RX_PrinterStatus.actSpeed = (UINT32)((_StepDist/1000.0 * 3600.0) / ((double)speed/1000.0));
+			}
 		}
 	}
 	else if (_PlcState==plc_stop) 
@@ -1573,6 +1590,7 @@ static void* _plc_thread(void *par)
 				_MpliStarting=TRUE;
 				config_timer = 10;
 				_OnPlcConnected();
+			//	_SimuPLC = FALSE;
 				while (_NetItem.connected)
 				{
 					while (sys_in_run_mode())

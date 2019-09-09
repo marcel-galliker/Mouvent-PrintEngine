@@ -429,6 +429,7 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 		memset(&dist, 0, sizeof(dist));
 		dist.cnt	= 1;
 		dist.dist	= _PrintGo_Dist;
+		dist.printGoMode = pitem->printGoMode;
 		
 		TrPrintfL(TRUE, "enc_set_pg id=%d, page=%d, copy=%d, scan=%d", pId->id, pId->page, pId->copy, pId->scan);						
 	//	Error(LOG, 0, "enc_set_pg id=%d, page=%d, copy=%d, scan=%d, dist=%d", pId->id, pId->page, pId->copy, pId->scan, _PrintGo_Dist);						
@@ -455,14 +456,16 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 							 {
 								if(RX_Config.printer.type == printer_LH702 || RX_Config.printer.type == printer_LB701)
 								{
-									int markdist = 1000*RX_Config.printer.offset.printMarkDist; // 406000;					
+									int markdist = 1000*RX_Config.printer.offset.printMarkDist;				
 									dist.window  = 50000;
-									dist.ignore  = markdist-dist.window/2;									
+									dist.ignore  = markdist-dist.window/2;
+									dist.dist	 = pitem->printGoDist;
+								//	Error(LOG, 0, "SEND CMD_ENCODER_PG_DIST dist=%d", dist.dist);
 								} 
 								else
 								{
 									dist.ignore   = pitem->pageHeight*9/10;
-									dist.window   = pitem->pageHeight/4;										 
+									dist.window   = pitem->pageHeight/4;
 								}
 							 }
 							 sok_send_2(&_Encoder[0].socket, CMD_ENCODER_PG_DIST, sizeof(dist), &dist);
@@ -507,6 +510,14 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 	}
 	memcpy(&_ID, pId, sizeof(_ID));
 	return REPLY_OK;					
+}
+
+//--- enc_change_printGoDist --------------------------------------
+int	enc_change_printGoDist(int printGoDist)
+{
+	Error(LOG, 0, "enc_change_printGoDist(%d)", printGoDist);
+	sok_send_2(&_Encoder[0].socket, CMD_ENCODER_PG_STOP, 0, NULL);
+	return REPLY_OK;
 }
 
 //--- enc_stop_pg ------------------------------

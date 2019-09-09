@@ -62,6 +62,11 @@ namespace RX_DigiPrint.Models
             { 
                 _removeFromList (_Queue,   item);
                 _updateList     (_Printed, item);
+                if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LH702)
+                {
+                    RxGlobals.PrintingItem = _Printed[0];
+                    if (RxGlobals.PrintQueueChanged!=null) RxBindable.Invoke(()=>RxGlobals.PrintQueueChanged());
+                }
                 item.SendBtProdState();
             }
         }

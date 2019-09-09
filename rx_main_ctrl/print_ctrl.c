@@ -51,6 +51,7 @@ static HANDLE _PrintSem;
 #define MAX_PAGES	128
 
 static SPrintQueueItem	_Item;
+static INT32			_PageMargin_Next;
 static char				_FilePathLocal[MAX_PATH];
 static int				_Scanning;
 static char				_DataPath[MAX_PATH];
@@ -174,7 +175,7 @@ int pc_start_printing(void)
 		pc_print_next();
 		gui_send_printer_status(&RX_PrinterStatus);
 	}
-	else if (RX_PrinterStatus.printState==ps_pause/* || RX_PrinterStatus.printState==ps_printing*/)
+	else if (RX_PrinterStatus.printState==ps_pause || RX_PrinterStatus.printState==ps_printing)
 	{
 		RX_PrinterStatus.dataReady=TRUE;
 		machine_start_printing();
@@ -301,8 +302,6 @@ static void _send_head_info(void)
 			len = 0;
 			len += sprintf(&str[len], "%s\n", RX_TestImage.testMessage);
 			len += sprintf(&str[len], "%s-%d                     %s\n", RX_ColorNameShort(color), n+1, time);
-			
-			len += sprintf(&str[len], "cl# %06d  printed %12s l\n", RX_HBStatus[headNo/MAX_HEADS_BOARD].clusterNo, value_str3((int)(1000.0*RX_HBStatus[headNo/MAX_HEADS_BOARD].head[headNo%MAX_HEADS_BOARD].printedDroplets*(1000000000*RX_HBStatus[headNo/MAX_HEADS_BOARD].head[headNo%MAX_HEADS_BOARD].dropVolume))));
 			len += sprintf(&str[len], "s# %d-%02d                 w%d/%d\n", pinfo->serialNo/100, pinfo->serialNo%100, pinfo->week, 2000+pinfo->year);
 			len += sprintf(&str[len], "volt %d / straight %d / uniform %d\n",pinfo->voltage, pinfo->straightness, pinfo->uniformity);
 			len += sprintf(&str[len], "bad");
@@ -398,6 +397,12 @@ void pc_del_file(char *path)
 	int ret=rx_rmdir(localPath);
 }
 
+//--- pc_set_pageMargin ------------------------------------
+int pc_set_pageMargin(INT32 pageMargin)
+{
+	_PageMargin_Next = 	pageMargin;		
+}
+
 //--- _print_next --------------------------------------------------------------
 static int _print_next(void)
 {
@@ -489,7 +494,7 @@ static int _print_next(void)
 				if(_Item.lengthUnit == PQ_LENGTH_COPIES)
 				{
 					if (_Item.id.copy<1) _Item.id.copy=1;
-					if(!rx_def_is_test(RX_Config.printer.type) && (_Item.id.copy > _Item.copies))
+					if(rx_def_use_pq(RX_Config.printer.type) && (_Item.id.copy > _Item.copies))
 					{
 						memset(&_Item, 0, sizeof(_Item));
 						return Error(ERR_ABORT, 0, "Invalid copy settings");
@@ -504,6 +509,7 @@ static int _print_next(void)
 	//			Error(LOG, 0, "copiesTotal=%d", _Item.copiesTotal);
 				_Item.scans=0; 
 				_Item.scansSent=0;
+				_PageMargin_Next = _Item.pageMargin;
 				_CopiesStart = _Item.copiesPrinted;
 				if (RX_Config.printer.type==printer_DP803 && _Item.lastPage!=_Item.firstPage)
 					_CopiesStart = (_Item.copiesPrinted* (_Item.lastPage - _Item.firstPage + 1) + _Item.start.page)-1;
@@ -684,9 +690,11 @@ static int _print_next(void)
 						{
 							SPrintQueueItem item;
 							int clearBlockUsed=(_Item.id.copy >= _Item.copies) || (_Item.firstPage!=_Item.lastPage);
+							if (_Item.pageMargin!=_PageMargin_Next) clearBlockUsed = TRUE;
 							memcpy(&item, &_Item, sizeof(item));
 							item.lengthUnit = PQ_LENGTH_UNDEF;
-							spool_print_file(&_Item.id, _DataPath, img_offset, 0, &item, clearBlockUsed);							
+							spool_print_file(&_Item.id, _DataPath, img_offset, 0, &item, clearBlockUsed);
+							_Item.pageMargin=_PageMargin_Next;
 						}
 					}
 				}

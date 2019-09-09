@@ -200,6 +200,8 @@ int main(int argc, char* argv[])
 	//--- main procedure ---------------------------
 	setup_config(PATH_USER FILENAME_CFG, &RX_Config, READ);
 	
+	ctrl_update_hostname();
+	
 	net_init();
 	pq_init();
 	pq_load(PATH_USER FILENAME_PQ);

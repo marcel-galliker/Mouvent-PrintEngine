@@ -553,8 +553,14 @@
     <Compile Include="Views\LB702WBView\LB702WB_Status.xaml.cs">
       <DependentUpon>LB702WB_Status.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\LH702View\LH702_ImgSettings.xaml.cs">
+      <DependentUpon>LH702_ImgSettings.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\LH702View\LH702_Par.xaml.cs">
       <DependentUpon>LH702_Par.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LH702View\LH702_Preview.xaml.cs">
+      <DependentUpon>LH702_Preview.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\LH702View\LH702_View.xaml.cs">
       <DependentUpon>LH702_View.xaml</DependentUpon>
@@ -1037,7 +1043,15 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Views\LH702View\LH702_ImgSettings.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Views\LH702View\LH702_Par.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LH702View\LH702_Preview.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

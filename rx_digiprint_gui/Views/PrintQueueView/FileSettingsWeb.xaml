@@ -195,7 +195,7 @@
                     >
                 </igWPF:XamComboEditor>
 
-                <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Text="Speed" Margin="-1,0,1,0" />
+                <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Text="Speed"/>
                 <rx:RxComboBox x:Name="CB_Speed"
                     Grid.Row="2" Grid.Column="1"
                     SelectedValue="{Binding Speed}"

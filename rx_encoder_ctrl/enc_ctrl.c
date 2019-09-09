@@ -291,11 +291,19 @@ static int _do_encoder_pg_dist(RX_SOCKET socket, SEncoderPgDist *pmsg)
 {
 	int time=rx_get_ticks();
 	static int _time=0;
-	TrPrintfL(TRUE, "_do_encoder_pg_dist(no=%d, cnt=%d, dist=%d) time=%d", ++_PgNo, pmsg->cnt, pmsg->dist, time-_time);
+	// TrPrintfL(TRUE, "_do_encoder_pg_dist(no=%d, cnt=%d, dist=%d) time=%d", ++_PgNo, pmsg->cnt, pmsg->dist, time-_time);
 	_time=time;
-	memcpy(&_DistMsg[_PgNo%SIZEOF(_DistMsg)], pmsg, sizeof(SEncoderPgDist)); 
-	if(pmsg->dist)	fpga_pg_set_dist(pmsg->cnt, pmsg->dist);
-	else			fpga_set_printmark(pmsg->window, pmsg->ignore);
+	memcpy(&_DistMsg[_PgNo%SIZEOF(_DistMsg)], pmsg, sizeof(SEncoderPgDist));
+	if (pmsg->printGoMode==PG_MODE_MARK) 
+	{
+		TrPrintfL(TRUE, "fpga_set_printmark(no=%d, cnt=%d, dist=%d, ignore=%d, window=%d) time=%d", ++_PgNo, pmsg->cnt, pmsg->dist, pmsg->ignore, pmsg->window, time-_time);
+		fpga_set_printmark(pmsg);
+	}
+	else
+	{
+		TrPrintfL(TRUE, "fpga_pg_set_dist(no=%d, cnt=%d, dist=%d) time=%d", ++_PgNo, pmsg->cnt, pmsg->dist, time-_time);
+		fpga_pg_set_dist(pmsg->cnt, pmsg->dist);
+	}
 	return REPLY_OK;
 }
 

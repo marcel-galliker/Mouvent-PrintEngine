@@ -76,6 +76,7 @@ void rx_def_init();
 #define PATH_FONTS			PATH_TEMP "/Fonts/"
 
 #define FIELNAME_HEAD_RBF		"rx_head_rbf"
+#define FIELNAME_HEADTEMP_RBF	"rx_headtemp_rbf"
 #define FIELNAME_HEAD_NIOS		"rx_head_nios"
 #define FILENAME_HEAD_COND		"rx_head_cond"
 #define FIELNAME_FLUID_RBF		"rx_fluid_rbf"
@@ -429,6 +430,8 @@ int rx_def_is_scanning(EPrinterType printerType);
 int rx_def_is_tx(EPrinterType printerType);
 int rx_def_is_web(EPrinterType printerType);
 int rx_def_is_test(EPrinterType printerType);
+int rx_def_use_pq(EPrinterType printerType);
+
 
 typedef struct SPrinterCfg
 {
@@ -838,6 +841,7 @@ typedef struct SEncoderPgDist
 {
 	// all distances in microns
 	// allvalues relative to last Print-Go
+	INT32	printGoMode;
 	INT32	cnt;		// number of print-Gos
 	INT32	ignore;	// length from PG until the sensor window is opened  (0=unused)
 	INT32	window;	// length of the sensor window (0=unused)
