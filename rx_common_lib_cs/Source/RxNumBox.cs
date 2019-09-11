@@ -8,6 +8,9 @@ namespace RX_Common
 {
     public class RxNumBox : TextBox
     {
+
+        static CultureInfo _CultureInfo = new CultureInfo("en-US");
+
         //--- Constructor ----------------------------
         public RxNumBox()
         {
@@ -27,8 +30,8 @@ namespace RX_Common
             double val = Rx.StrToDouble(Text);
             if (min!=double.NaN && val<min) val = min;
             else if (max!=double.NaN && val>max) val = max;
-            if (IsInt) Text=((int)val).ToString();
-            else       Text=val.ToString();
+            if (IsInt) Text=((int)val).ToString(_CultureInfo);
+            else       Text=val.ToString(_CultureInfo);
         //    e.Handled = true;
         }
 

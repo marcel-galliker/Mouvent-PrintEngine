@@ -53,7 +53,6 @@ static int   _step_handle_msg	(RX_SOCKET socket, void *msg, int len, struct sock
 static int   _setp_socket_closed(RX_SOCKET socket, const char *peerName);
 static void  _step_set_config	(int no);
 
-
 //--- step_init --------------------------------------------------
 int	 step_init(void)
 {	
@@ -83,7 +82,7 @@ void step_tick(void)
 	for (i=0; i<SIZEOF(_step_Socket); i++)
 	{
 		if (_step_Socket[i]!=INVALID_SOCKET) 
-			sok_send_2(&_step_Socket[i], CMD_TT_STATUS, 0, NULL);			
+			sok_send_2(&_step_Socket[i], CMD_TT_STATUS, 0, NULL);
 	}	
 }
 
@@ -101,6 +100,7 @@ static void* _step_thread(void *par)
 				net_device_to_ipaddr(dev_stepper, i, addr, sizeof(addr));
 				if (sok_open_client_2(&_step_Socket[i], addr, PORT_CTRL_STEPPER, SOCK_STREAM, _step_handle_msg, _setp_socket_closed)== REPLY_OK)
 				{
+					Error(LOG, 0, "Socket[%d] Connected, _StepperType=%d", i, _StepperType);
 					_step_set_config(i);
 				}			
 			}
@@ -120,6 +120,15 @@ static int _setp_socket_closed(RX_SOCKET socket, const char *peerName)
 		{
 			Error(ERR_CONT, 0, "Stepper %d Socket %d closed", i, socket);
 			sok_close(&_step_Socket[i]);
+			switch(_StepperType)
+			{
+			case STEPPER_CLEAF:	stepc_init		(i, INVALID_SOCKET); break;
+			case STEPPER_TX:	steptx_init		(i, INVALID_SOCKET); break;
+			case STEPPER_LB:	steplb_init		(i, INVALID_SOCKET); break;
+			case STEPPER_DP:	stepdp_init		(i, INVALID_SOCKET); break;
+			case STEPPER_TEST:	steptest_init	(i, INVALID_SOCKET); break;
+			default: 			steps_init		(    INVALID_SOCKET);
+			}
 			memset(&RX_StepperStatus, 0, sizeof(RX_StepperStatus));
 			return REPLY_OK;				
 		}
@@ -141,8 +150,12 @@ static int _step_handle_msg(RX_SOCKET socket, void *msg, int len, struct sockadd
 
 			switch (phdr->msgId)
 			{
-				case EVT_GET_EVT:	if (!arg_simuPLC) SlaveError(dev_stepper, no, &((SLogMsg*)msg)->log);	break;
-				case CMD_PRINT_ABORT:pc_abort_printing(); break;
+				case EVT_GET_EVT:	if (!arg_simuPLC) SlaveError(dev_stepper, no, &((SLogMsg*)msg)->log);	
+									return REPLY_OK;
+				
+				case CMD_PRINT_ABORT:pc_abort_printing(); 
+									return REPLY_OK;
+				
 				case REP_TT_STATUS:	switch(_StepperType)
 									{
 									case STEPPER_CLEAF: return stepc_handle_status		(no, (SStepperStat*)&phdr[1]);
@@ -310,19 +323,19 @@ static void _step_set_config(int no)
 	}
 	switch(_StepperType)
 	{
-	case STEPPER_CLEAF:	stepc_init		(no, &_step_Socket[no]); cfg.boardNo = no; break;
-	case STEPPER_TX:	steptx_init		(no, &_step_Socket[no]); cfg.boardNo = no; break;
-	case STEPPER_LB:	steplb_init		(no, &_step_Socket[no]); break;
-	case STEPPER_DP:	stepdp_init(no, &_step_Socket[no]); break;
-	case STEPPER_TEST:	steptest_init	(no, &_step_Socket[no]); cfg.boardNo = no; break;
-	default: 			steps_init		(    &_step_Socket[0]);
+	case STEPPER_CLEAF:	stepc_init		(no, _step_Socket[no]); cfg.boardNo = no; break;
+	case STEPPER_TX:	steptx_init		(no, _step_Socket[no]); cfg.boardNo = no; break;
+	case STEPPER_LB:	steplb_init		(no, _step_Socket[no]); break;
+	case STEPPER_DP:	stepdp_init		(no, _step_Socket[no]); break;
+	case STEPPER_TEST:	steptest_init	(no, _step_Socket[no]); cfg.boardNo = no; break;
+	default: 			steps_init		(    _step_Socket[0]);
 	}
 
 	sok_send_2(&_step_Socket[no], CMD_STEPPER_CFG, sizeof(cfg), &cfg);
 }
 
 //--- step_set_config -------------------------------------------------
-int step_set_config(void)				
+int step_set_config(void)
 {
 	int i;
 	switch(RX_Config.printer.type)

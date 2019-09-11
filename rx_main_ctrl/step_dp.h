@@ -14,7 +14,7 @@
 #include "rx_def.h"
 #include "rx_sok.h"
 
-void stepdp_init(int no, RX_SOCKET *psocket);
+void stepdp_init(int no, RX_SOCKET psocket);
 
 int	 stepdp_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen);
 

@@ -61,6 +61,7 @@ static RX_SOCKET		_MainSocket;
 
 //--- prototypes ---------------------------------------------------------------------
 static int _ctrl_connected  (RX_SOCKET socket, const char *peerName);
+static int _ctrl_deconnected(RX_SOCKET socket, const char *peerName);
 static int _handle_ctrl_msg (RX_SOCKET socket, void *pmsg);
 static int _save_ctrl_msg   (RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sender, void *par);
 
@@ -73,7 +74,7 @@ int ctrl_init()
 {
 	_MsgBufIn  = 0;
 	_MsgBufOut = 0;
-	sok_start_server(&_HServer, NULL, PORT_CTRL_STEPPER, SOCK_STREAM, MAX_CONNECTIONS, _save_ctrl_msg, _ctrl_connected, NULL);
+	sok_start_server(&_HServer, NULL, PORT_CTRL_STEPPER, SOCK_STREAM, MAX_CONNECTIONS, _save_ctrl_msg, _ctrl_connected, _ctrl_deconnected);
 
 	err_set_server(_HServer);
 	
@@ -90,6 +91,13 @@ int ctrl_end()
 static int _ctrl_connected (RX_SOCKET socket, const char *peerName)
 {
 	TrPrintfL(TRUE, "connected from >>%s<<, socket=%d", peerName, socket);
+	return REPLY_OK;
+}
+
+//--- _ctrl_deconnected ---------------------------------------------------
+static int _ctrl_deconnected (RX_SOCKET socket, const char *peerName)
+{
+	TrPrintfL(TRUE, "connection from >>%s<<, socket=%d closed", peerName, socket);
 	return REPLY_OK;
 }
 

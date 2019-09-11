@@ -25,11 +25,11 @@
 
 #define STEPPER_CNT		4
 
-static RX_SOCKET		*_step_socket[STEPPER_CNT]={0};
+static RX_SOCKET	_step_socket[STEPPER_CNT]={0};
 static SStepperStat	_status[STEPPER_CNT];
 
 //--- steptest_init ---------------------------------------------------
-void steptest_init(int no, RX_SOCKET *psocket)
+void steptest_init(int no, RX_SOCKET psocket)
 {
 	if (no>=0 && no<STEPPER_CNT)
 	{
@@ -44,7 +44,7 @@ int	 steptest_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataL
 	int no;
 	for (no=0; no<SIZEOF(_step_socket); no++)
 	{
-		if (_step_socket[no] && *_step_socket[no]!=INVALID_SOCKET)
+		if (_step_socket[no]!=INVALID_SOCKET)
 		{
 			switch(cmd)
 			{
@@ -58,7 +58,7 @@ int	 steptest_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataL
 			case CMD_TT_SCAN_RIGHT:
 			case CMD_TT_SCAN_LEFT:
 			case CMD_TT_VACUUM:
-						sok_send_2(_step_socket[no], cmd, 0, NULL);
+						sok_send_2(&_step_socket[no], cmd, 0, NULL);
 						break;
 
 			case CMD_TT_SCAN:
@@ -69,7 +69,7 @@ int	 steptest_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataL
 							par.scanMode= PQ_SCAN_STD;
 							par.yStep   = 10000;
 
-							sok_send_2(_step_socket[no], CMD_TT_SCAN, sizeof(par), &par);
+							sok_send_2(&_step_socket[no], CMD_TT_SCAN, sizeof(par), &par);
 						}
 						break;
 
@@ -78,11 +78,11 @@ int	 steptest_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataL
 			case CMD_CAP_REFERENCE:
 			case CMD_CAP_UP_POS:
 			case CMD_CAP_CAPPING_POS:
-						sok_send_2(_step_socket[no], cmd, 0, NULL);
+						sok_send_2(&_step_socket[no], cmd, 0, NULL);
 						break;
 		
 			case CMD_CAP_PRINT_POS:
-						sok_send_2(_step_socket[no], CMD_CAP_PRINT_POS, sizeof(RX_Config.stepper.print_height), &RX_Config.stepper.print_height);
+						sok_send_2(&_step_socket[no], CMD_CAP_PRINT_POS, sizeof(RX_Config.stepper.print_height), &RX_Config.stepper.print_height);
 						break;
 			}
 		}
@@ -108,7 +108,7 @@ int steptest_handle_status(int no, SStepperStat *pStatus)
 	
 	for (i=0; i<STEPPER_CNT; i++)
 	{
-		if (_step_socket[i] && *_step_socket[i]!=INVALID_SOCKET)
+		if (_step_socket[i]!=INVALID_SOCKET)
 		{
 //			TrPrintf(TRUE, "Stepper[%d]: ref_done=%d moving=%d  in_print=%d  up=%d", i, _status[i].info.ref_done, _status[i].info.moving, _status[i].info.z_in_print, _status[i].info.z_in_ref);
 			info.ref_done		&= _status[i].info.ref_done;
@@ -146,6 +146,6 @@ int steptest_handle_status(int no, SStepperStat *pStatus)
 int	 steptest_to_print_pos(void)
 {
 //	Error(LOG, 0, "Setting Printhead Height to %d", RX_Config.stepper.print_height);
-	sok_send_2(_step_socket[0], CMD_CAP_PRINT_POS, sizeof(RX_Config.stepper.print_height), &RX_Config.stepper.print_height);
+	sok_send_2(&_step_socket[0], CMD_CAP_PRINT_POS, sizeof(RX_Config.stepper.print_height), &RX_Config.stepper.print_height);
 	return REPLY_OK;									
 }

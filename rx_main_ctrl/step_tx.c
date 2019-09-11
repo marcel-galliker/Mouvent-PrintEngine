@@ -25,12 +25,12 @@
 
 #define STEPPER_CNT		2
 
-static RX_SOCKET	*_step_socket[STEPPER_CNT]={0};
+static RX_SOCKET	_step_socket[STEPPER_CNT]={0};
 static SStepperStat	_Status[STEPPER_CNT];
 
 
 //--- steptx_init ---------------------------------------------------
-void steptx_init(int stepperNo, RX_SOCKET *psocket)
+void steptx_init(int stepperNo, RX_SOCKET psocket)
 {
 	_step_socket[stepperNo] = psocket;
 }
@@ -42,14 +42,14 @@ int	 steptx_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen
 	{
 	//--- cappping ---------------------------------------------------------
 	case CMD_CAP_REFERENCE:
-				sok_send_2(_step_socket[0], cmd, 0, NULL);
+				sok_send_2(&_step_socket[0], cmd, 0, NULL);
 				step_set_vent(TRUE);
 				break;
 
 	case CMD_CAP_STOP:
 	case CMD_CAP_UP_POS:
 	case CMD_CAP_CAPPING_POS:
-				sok_send_2(_step_socket[0], cmd, 0, NULL);
+				sok_send_2(&_step_socket[0], cmd, 0, NULL);
 				break;
 		
 	case CMD_CAP_PRINT_POS:
@@ -78,11 +78,11 @@ int steptx_handle_status(int no, SStepperStat *pStatus)
 //--- steptx_to_print_pos --------------------------------
 int	 steptx_to_print_pos(void)
 {
-	if (RX_Config.printer.type==printer_test_table) sok_send_2(_step_socket[0], CMD_CAP_PRINT_POS, sizeof(UINT32), &RX_Config.stepper.cap_height);
+	if (RX_Config.printer.type==printer_test_table) sok_send_2(&_step_socket[0], CMD_CAP_PRINT_POS, sizeof(UINT32), &RX_Config.stepper.cap_height);
 	else // TX801/TX802
 	{
 		INT32 height = RX_Config.stepper.print_height + plc_get_thickness();
-		sok_send_2(_step_socket[0], CMD_CAP_PRINT_POS, sizeof(height), &height);		
+		sok_send_2(&_step_socket[0], CMD_CAP_PRINT_POS, sizeof(height), &height);		
 	}
 	return REPLY_OK;									
 }

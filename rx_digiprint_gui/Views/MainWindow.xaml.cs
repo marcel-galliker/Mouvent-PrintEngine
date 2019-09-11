@@ -240,7 +240,8 @@ namespace RX_DigiPrint.Views
                 TabItemEx item = TabCtrl.Items[i] as TabItemEx;
                 if (item.Name.Equals("TabEvents")) break;
                 if (item.Equals(activeItem) 
-                || (activeItem.Equals(TabLH702) && item.Equals(TabLB701)))
+//                || (activeItem.Equals(TabLH702) && item.Equals(TabLB701))
+                    )
                 {
                     item.Visibility=Visibility.Visible;
   //                TabCtrl.SelectedIndex = i;

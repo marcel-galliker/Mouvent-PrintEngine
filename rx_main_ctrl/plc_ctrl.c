@@ -159,7 +159,6 @@ static double			_StepDist;
 static int				_UnwinderLenMin;
 
 static int				_MpliStarting;
-static int				_UvUsed;
 static int				_Speed;
 
 static EnPlcState		_PlcState	= plc_undef;
@@ -186,7 +185,6 @@ int	plc_init(void)
 	memset(&_StartEncoderItem, 0, sizeof(_StartEncoderItem));
 	_plc_error_filter_reset();
 	_ErrorFlags  = 0;
-	_UvUsed = FALSE;
 	RX_PrinterStatus.splicing = FALSE;
 	
 	if (_SimuPLC)     Error(WARN, 0, "PLC in Simulation");
@@ -458,8 +456,6 @@ int  plc_set_printpar(SPrintQueueItem *pItem)
 		else _heads_to_print= FALSE;
 	}
 	
-	_UvUsed = (RX_Config.printer.type==printer_cleaf || RX_Config.printer.type==printer_LB701 || RX_Config.printer.type==printer_LB702_UV);
-
 //	Error(LOG, 0, "PrintPar: PageMargin=%d.%03d", pItem->pageMargin/1000, pItem->pageMargin%1000);
 
 	_plc_set_par(pItem, &par);

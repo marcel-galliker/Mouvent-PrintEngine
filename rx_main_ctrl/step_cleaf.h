@@ -14,7 +14,7 @@
 #include "rx_def.h"
 #include "rx_sok.h"
 
-void stepc_init(int stepperNo, RX_SOCKET *psocket);
+void stepc_init(int stepperNo, RX_SOCKET psocket);
 void stepc_error_reset();
 
 int	 stepc_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen);

@@ -430,7 +430,7 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 	msg.wakeup			= pitem->wakeup;
 	strncpy(msg.filename, filename, sizeof(msg.filename));
 	memcpy(&msg.id, pid, sizeof(msg.id));
-	memcpy(&_Id[RX_PrinterStatus.sentCnt], pid, sizeof(msg.id));
+	memcpy(&_Id[RX_PrinterStatus.sentCnt%MAX_PAGES], pid, sizeof(msg.id));
 	if (RX_PrinterStatus.testMode)
 	{
 		msg.printMode     = PM_TEST;
