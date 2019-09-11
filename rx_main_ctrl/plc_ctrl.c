@@ -1321,6 +1321,7 @@ static void _plc_state_ctrl()
 			if(scan_state != scan_moving)
 			{
 				enc_start_printing(&_StartEncoderItem, RX_PrinterStatus.printGoCnt);
+				if (rx_def_is_web(RX_Config.printer.type)) 	enc_enable_printing(FALSE);
 				_StartEncoderItem.pageWidth = 0;
 				return;
 			}
@@ -1355,6 +1356,7 @@ static void _plc_state_ctrl()
 			_StartPrinting = FALSE;
 			_head_was_up   = FALSE;
 			_CanRun = TRUE;
+			enc_enable_printing(TRUE);
 			if(!_SimuPLC)    _plc_set_command("CMD_PRODUCTION", "CMD_RUN");
 			if(_SimuEncoder) ctrl_simu_encoder(_Speed);
 			if (RX_Config.printer.type==printer_LH702) steplb_is_printing(TRUE);

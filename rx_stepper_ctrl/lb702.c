@@ -110,7 +110,7 @@ void lb702_main(int ticks, int menu)
 	{
 		int enabled=fpga_input(PRINTHEAD_EN);
 		if (RX_StepperStatus.info.printhead_en && !enabled) Error(ERR_ABORT, 0, "Allow Head Down signal removed!");
-		RX_StepperStatus.info.printhead_en = enabled;			
+		RX_StepperStatus.info.printhead_en = enabled;	
 	}
 	else RX_StepperStatus.info.printhead_en = TRUE;
 	
