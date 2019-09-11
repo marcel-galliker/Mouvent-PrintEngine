@@ -45,14 +45,8 @@
 
             <TextBlock       Grid.Row="0" Grid.Column="3" Text="Ref Height"/>
             <TextBlock       Grid.Row="1" Grid.Column="3"><Run Language="de-ch" Text="Head Align"/></TextBlock>
-            <!--
-            <TextBlock       Grid.Row="2" Grid.Column="3"><Run Language="de-ch" Text="Robot "/><Run Text="Height"/></TextBlock>
-            <TextBlock       Grid.Row="3" Grid.Column="3"><Run Language="de-ch" Text="Robot "/><Run Text="Align"/></TextBlock>
-            -->
             <TextBlock       Grid.Row="0" Grid.Column="8" Text=" mm" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center"/>
             <TextBlock       Grid.Row="1" Grid.Column="8" Text=" mm" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center"/>
-            <TextBlock       Grid.Row="2" Grid.Column="8" Text=" mm" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center"/>
-            <TextBlock       Grid.Row="3" Grid.Column="8" Text=" mm" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center"/>
 
         </Grid>
     </GroupBox>

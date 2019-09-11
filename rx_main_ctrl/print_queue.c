@@ -48,14 +48,6 @@ static int				_PrintDoneCnt;
 static int				_ActiveState;
 static char				_ActiveRipState[MAX_PATH];
 
-/*
-typedef struct 
-{
-	SPageId	id;
-	int		pd;	
-} SPdListItem;
-*/
-
 //--- prototypes -------------------------------------------------------------
 static int _find_item(int id, int *idx);
 static char* _filename(char *path);
@@ -915,7 +907,8 @@ int pq_is_ready(void)
 	}
 	
 	if(RX_Config.printer.type == printer_LH702) 
-		return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printedCnt) < 8;
+//		return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printedCnt) < 8;
+		return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printedCnt) < 32;
 	else if(RX_Config.printer.type == printer_cleaf) 
 		return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printedCnt) < 16;
 	else if (rx_def_is_scanning(RX_Config.printer.type))

@@ -562,22 +562,19 @@ static int _do_print_file_evt	(RX_SOCKET socket, SPrintFileMsg	*msg)
 
 	case DATA_SENT:		TrPrintf(TRUE, "SPOOLER %d: SENT #%d: (id=%d, page=%d, scan=%d, copy=%d), bufReady=%d,  _MsgSent=%d, _MsgGot=%d",	msg->spoolerNo, ++_Spooler[msg->spoolerNo].sentNo, msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->bufReady, _MsgSent, _MsgGot);
 						pitem = pq_sent(&msg->id);							
-						if(RX_PrinterStatus.testMode)
+						if(RX_PrinterStatus.testMode || pitem==NULL)
 						{
 							RX_PrinterStatus.transferredCnt++;
 							pc_sent(&msg->id);
 							enc_set_pg(&RX_TestImage, &msg->id);
 						}
-						else
+						else if (_SpoolerCnt==0 || (pitem->scansSent%_SpoolerCnt)==0)
 						{
-							if (_SpoolerCnt==0 || (pitem->scansSent%_SpoolerCnt)==0)
-							{
-								TrPrintf(TRUE, "*** SENT #%d *** (id=%d, page=%d, scan=%d, copy=%d)", _Spooler[msg->spoolerNo].sentNo, msg->id.id, msg->id.page, msg->id.copy, msg->id.scan);							
-								RX_PrinterStatus.transferredCnt++;
-								pc_sent(&msg->id);
-								enc_set_pg(pitem, &msg->id);
-							}							
-						}			
+							TrPrintf(TRUE, "*** SENT #%d *** (id=%d, page=%d, scan=%d, copy=%d)", _Spooler[msg->spoolerNo].sentNo, msg->id.id, msg->id.page, msg->id.copy, msg->id.scan);							
+							RX_PrinterStatus.transferredCnt++;
+							pc_sent(&msg->id);
+							enc_set_pg(pitem, &msg->id);
+						}							
 						if (_Auto)  ctrl_print_page(&msg->id);																					
 						break;
 	/*

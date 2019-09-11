@@ -46,6 +46,7 @@ namespace RX_DigiPrint.Views.UserControls
                 Leds_DripPans.Visibility      = visibility;
                 LaserTX.Visibility            = visibility; 
                 LaserVal.Visibility           = visibility;
+                Button_Cap.Visibility         = (RxGlobals.PrintSystem.PrinterType!=EPrinterType.printer_cleaf) ? Visibility.Visible : Visibility.Collapsed;
 
                 visibility = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_DP803) ? Visibility.Visible : Visibility.Collapsed;
                 Button_DripPans.Visibility    = visibility;

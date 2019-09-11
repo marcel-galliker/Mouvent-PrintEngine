@@ -30,13 +30,13 @@
 
 // Lift Z Axis
 #define MOTOR_Z_CNT		2
-#define MOTOR_Z_FRONT		0
-#define MOTOR_Z_BACK		1
+#define MOTOR_Z_FRONT	0
+#define MOTOR_Z_BACK	1
 #define MOTOR_Z_BITS	((0x01<<MOTOR_Z_FRONT) | (0x01<<MOTOR_Z_BACK))
 
 #define CURRENT_Z_HOLD	50
 
-#define POS_UP				1000
+#define POS_UP			    10000
 #define PRINT_HEIGHT_MIN	1000
 
 #define DIST_Z_REV		2000.0	// moving distance per revolution [µm]
@@ -94,14 +94,12 @@ static int	_CmdRunning = 0;
 static char	_CmdName[32];
 static int  _LastRobPosCmd = 0;
 static int	_PrintPos;
-static int	_DripPans_Connected = FALSE;
 static int  _AllowMoveDown = 0;
-static int  _DripPansPosition = 2;	// 2 = position unknown after start
 
 // Lift
 static SMovePar	_Par_Z_ref[MOTOR_Z_CNT];
 static SMovePar	_ParZ_down;
-static SMovePar	_ParZ_cap;
+// static SMovePar	_ParZ_cap;
 
 // Laser
 static int	_PrintHeadEn_On  = 0;
@@ -139,8 +137,7 @@ void cleaf_init(void)
 		_Par_Z_ref[i].speed			= 16000; // 10000; // 2mm/U // 10mm/s => 5U/s*200steps/U*16=16000  //  20mm/s => 10U/s*200steps/U*16=32000
 		_Par_Z_ref[i].accel			=  8000; // 5000;
 		_Par_Z_ref[i].current		= 300; // 250.0;
-//		_Par_Z_ref[i].stop_mux		= MOTOR_Z_BITS;
-		_Par_Z_ref[i].stop_mux		= 0;
+		_Par_Z_ref[i].stop_mux		= MOTOR_Z_BITS;
 		_Par_Z_ref[i].dis_mux_in	= TRUE;
 		_Par_Z_ref[i].stop_in		= ESTOP_UNUSED;
 		_Par_Z_ref[i].stop_level	= 0;
@@ -156,26 +153,26 @@ void cleaf_init(void)
 //	_ParZ_down.current		= 300.0; 	
 	_ParZ_down.current		= 350.0; 	
 	_ParZ_down.stop_mux		= MOTOR_Z_BITS;
-	_ParZ_down.dis_mux_in	= 0;
+	_ParZ_down.dis_mux_in	= FALSE;
 	_ParZ_down.estop_in     = ESTOP_UNUSED;
 	_ParZ_down.estop_level  = 0;
 	_ParZ_down.checkEncoder = TRUE;
 	_ParZ_down.stop_in		= ESTOP_UNUSED;
 	_ParZ_down.stop_level	= 0;
-	_ParZ_down.dis_mux_in	= FALSE;
 
+	/*
 	_ParZ_cap.speed			= 10000; // 1000;
 	_ParZ_cap.accel			=  5000; //1000;
 	_ParZ_cap.current		= 150.0;
 	_ParZ_cap.stop_mux		= FALSE;
-	_ParZ_cap.dis_mux_in	= 0;
+	_ParZ_down.dis_mux_in	= FALSE;
 	_ParZ_cap.stop_in		= ESTOP_UNUSED;
 	_ParZ_cap.stop_level	= 0;
 	_ParZ_cap.estop_in      = ESTOP_UNUSED;
 	_ParZ_cap.estop_level   = 0;
 	_ParZ_cap.checkEncoder  = TRUE;
-	_ParZ_cap.dis_mux_in	= FALSE;
-				
+	*/
+		
 	//--- Outputs ----------------
 	Fpga.par->output &= ~RO_ALL_OUTPUTS; // ALL OUTPUTS
 }
@@ -201,10 +198,10 @@ void cleaf_main(int ticks, int menu)
 	RX_StepperStatus.posZ = REF_HEIGHT - _z_steps_2_micron(motor_get_step(0));
 		
 	// Drip Pans : enabled when the main send a command CMD_CLN_DRIP_PANS
-	RX_StepperStatus.info.DripPans_InfeedDOWN	= _DripPans_Connected && fpga_input(DRIP_PANS_INFEED_DOWN);
-	RX_StepperStatus.info.DripPans_InfeedUP		= _DripPans_Connected && fpga_input(DRIP_PANS_INFEED_UP);
-	RX_StepperStatus.info.DripPans_OutfeedDOWN	= _DripPans_Connected && fpga_input(DRIP_PANS_OUTFEED_DOWN);
-	RX_StepperStatus.info.DripPans_OutfeedUP	= _DripPans_Connected && fpga_input(DRIP_PANS_OUTFEED_UP);
+	RX_StepperStatus.info.DripPans_InfeedDOWN	= (RX_StepperCfg.boardNo==0) && fpga_input(DRIP_PANS_INFEED_DOWN);
+	RX_StepperStatus.info.DripPans_InfeedUP		= (RX_StepperCfg.boardNo==0) && fpga_input(DRIP_PANS_INFEED_UP);
+	RX_StepperStatus.info.DripPans_OutfeedDOWN	= (RX_StepperCfg.boardNo==0) && fpga_input(DRIP_PANS_OUTFEED_DOWN);
+	RX_StepperStatus.info.DripPans_OutfeedUP	= (RX_StepperCfg.boardNo==0) && fpga_input(DRIP_PANS_OUTFEED_UP);
 
 	// --- set positions False while moving ---
 	RX_StepperStatus.info.moving = (_CmdRunning!=0);
@@ -242,7 +239,7 @@ void cleaf_main(int ticks, int menu)
 			if (!fpga_input(HEAD_UP_IN_FRONT)) Error(LOG, 0, "Stepper: Command REFERENCE: End Sensor Front NOT HIGH");
 			if (!fpga_input(HEAD_UP_IN_BACK))  Error(LOG, 0, "Stepper: Command REFERENCE: End Sensor Back NOT HIGH");
 			RX_StepperStatus.info.ref_done = (RX_StepperStatus.info.headUpInput_0 && RX_StepperStatus.info.headUpInput_1);
-			motors_move_to_step(MOTOR_Z_BITS, &_ParZ_down, POS_UP);			
+			motors_move_to_step(MOTOR_Z_BITS, &_ParZ_down, 100);			
 		}
 
 		RX_StepperStatus.info.z_in_ref   = (_CmdRunning==CMD_CAP_REFERENCE || _CmdRunning==CMD_CAP_UP_POS);
@@ -377,14 +374,15 @@ void cleaf_display_status(void)
 		term_printf("pos in um:      %06d  \n", RX_StepperStatus.posZ);
 		term_printf("LASER in um:      %06d  row=%06d \n", RX_StepperStatus.posY, Fpga.stat->analog_in[LASER_IN]);	
 		term_printf("Head UP Sensor: front: %d  back: %d\n",	fpga_input(HEAD_UP_IN_FRONT), fpga_input(HEAD_UP_IN_BACK));	
-		term_printf("reference done: %d\n", RX_StepperStatus.info.ref_done);
-		term_printf("z in ref:%d print:%d cap:%d\n", RX_StepperStatus.info.z_in_ref, RX_StepperStatus.info.z_in_print, RX_StepperStatus.info.z_in_cap);
-//		term_printf("move tgl bit: %d \n", RX_StepperStatus.info.move_tgl);
+		term_printf("reference done:  %d\n", RX_StepperStatus.info.ref_done);
 		term_printf("allow move down: %d \n", _AllowMoveDown);
-		term_printf("drips pans connected: %d \n", _DripPans_Connected);
-		term_printf("drips pans valve: %d \n", _DripPansPosition);
-		term_printf("drips pans UP:   Infeed: %d Outfeed: %d\n", RX_StepperStatus.info.DripPans_InfeedUP,   RX_StepperStatus.info.DripPans_OutfeedUP);
-		term_printf("drips pans DOWN: Infeed: %d Outfeed: %d\n", RX_StepperStatus.info.DripPans_InfeedDOWN, RX_StepperStatus.info.DripPans_OutfeedDOWN);
+		term_printf("z in ref:%d print:%d cap:%d\n", RX_StepperStatus.info.z_in_ref, RX_StepperStatus.info.z_in_print, RX_StepperStatus.info.z_in_cap);
+		if (RX_StepperCfg.boardNo==0)
+		{
+			term_printf("drips pans valve: up=%d down=%d\n", (Fpga.par->output&DRIP_PANS_VALVE_UP)!=0, (Fpga.par->output&DRIP_PANS_VALVE_DOWN)!=0);
+			term_printf("drips pans UP:   Infeed: %d Outfeed: %d\n", RX_StepperStatus.info.DripPans_InfeedUP,   RX_StepperStatus.info.DripPans_OutfeedUP);
+			term_printf("drips pans DOWN: Infeed: %d Outfeed: %d\n", RX_StepperStatus.info.DripPans_InfeedDOWN, RX_StepperStatus.info.DripPans_OutfeedDOWN);			
+		}
 		term_printf("\n");
 	}
 }
@@ -395,7 +393,7 @@ int cleaf_menu(void)
 	char str[MAX_PATH];
 	int synth = FALSE;
 	static int cnt = 0;
-	int i;
+	int i, old;
 	int pos;
 
 	if (RX_StepperCfg.printerType != printer_cleaf) return TRUE;
@@ -431,7 +429,12 @@ int cleaf_menu(void)
 		
 		case 'R': cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_REFERENCE, NULL); break;
 		case 'c': cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_CAPPING_POS, NULL); break;
-		case 'p': cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_PRINT_POS, &pos); break;
+		case 'p': pos=2000;
+				  old =  _AllowMoveDown;
+				  _AllowMoveDown=TRUE;
+				  cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_PRINT_POS, &pos); 
+				  _AllowMoveDown = old;	
+				  break;
 		case 'u': cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_UP_POS, NULL); break;
 		case 'z': _cleaf_motor_z_test(atoi(&str[1])); break;
 		case 'x': return FALSE;
@@ -508,6 +511,7 @@ int  cleaf_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		//		||   RX_StepperStatus.posY > (RX_StepperCfg.material_thickness + LASER_VARIATION)) Error(ERR_CONT, 0, "WEB: Laser detects material out of range. (measured %d, expected %d)", RX_StepperStatus.posY, RX_StepperCfg.material_thickness);
 			else
 			{
+				if (REF_HEIGHT<90000) Error(WARN, 0, "Reference Height is only %d.02d mm", REF_HEIGHT/100, REF_HEIGHT%100);
 				_CmdRunning = CMD_CAP_PRINT_POS;
 				motor_move_to_step(MOTOR_Z_FRONT, &_ParZ_down, _z_micron_2_steps(REF_HEIGHT - _PrintPos));
 				motor_move_to_step(MOTOR_Z_BACK,  &_ParZ_down, _z_micron_2_steps(REF_HEIGHT - _PrintPos + HEAD_ALIGN));
@@ -516,6 +520,7 @@ int  cleaf_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		}				
 		break;
 		
+	/*
 	case CMD_CAP_CAPPING_POS:		strcpy(_CmdName, "CMD_CAP_CAPPING_POS");
 		if (!_CmdRunning && RX_StepperStatus.info.ref_done)
 		{
@@ -525,7 +530,8 @@ int  cleaf_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 			motors_start(MOTOR_Z_BITS, FALSE);
 		}
 		break;
-
+	*/
+		
 	case CMD_CAP_UP_POS:			
 		strcpy(_CmdName, "CMD_CAP_UP_POS");
 //		Error(LOG, 0, "got CMD_CAP_UP_POS _CmdRunning=0x%08x", _CmdRunning);
@@ -537,32 +543,23 @@ int  cleaf_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		break;
 		
 	case CMD_CLN_DRIP_PANS:
-		_DripPans_Connected = TRUE;
 		if (RX_StepperStatus.info.z_in_ref) 
 		{			
-			if (!_DripPansPosition)
+			if (fpga_input(DRIP_PANS_INFEED_UP) || fpga_input(DRIP_PANS_OUTFEED_UP))
 			{
 				// all stepper motors in reference
 				Fpga.par->output &= ~DRIP_PANS_VALVE_ALL;
 				Fpga.par->output |= DRIP_PANS_VALVE_UP;	
-				_DripPansPosition = 1;
 			}
-			else
+			else 
 			{
 				// all stepper motors in reference
 				Fpga.par->output &= ~DRIP_PANS_VALVE_ALL;
 				Fpga.par->output |= DRIP_PANS_VALVE_DOWN;	
-				_DripPansPosition = 0;
 			}
 		}
 		break;
-		
-	case CMD_CLN_DRIP_PANS_EN:
-		_DripPans_Connected = TRUE;
-		if (fpga_input(DRIP_PANS_INFEED_UP) && fpga_input(DRIP_PANS_OUTFEED_UP)) _DripPansPosition = 1;
-		else _DripPansPosition = 0;
-		break;
-		
+				
 	case CMD_CAP_ALLOW_MOVE_DOWN:
 		_AllowMoveDown = 1;
 		break;
@@ -594,18 +591,10 @@ static void _cleaf_motor_test(int motorNo, int steps)
 	int i;
 	int mot_steps = steps;
 
-	if ((motorNo == MOTOR_Z_FRONT) || (motorNo == MOTOR_Z_BACK)) {
-		par.speed	= 5000;
-		par.accel	= 2500;
-		par.current	= 320.0;
-		mot_steps	= -steps;
-	}		
-	else
-	{
-		par.speed	= 0;					
-		par.accel	= 0;			
-		par.current = 0.0;
-	}
+	par.speed	= 5000;
+	par.accel	= 2500;
+	par.current	= 320.0;
+	mot_steps	= -steps;
 	
 	par.stop_mux		= 0;
 	par.dis_mux_in		= 0;

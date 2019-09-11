@@ -438,6 +438,8 @@ static int _print_next(void)
 											 RX_TestImage.id.id++;
 											 RX_TestImage.copies=8;
 											 break;
+				case PQ_TEST_FULL_ALIGNMENT: strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "FullAlignement.bmp");	break;
+											 break;
 //				case PQ_TEST_DIVIDER:		 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "divider.tif"); break;
 				default:					 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "fuji.bmp");	break;
 			}

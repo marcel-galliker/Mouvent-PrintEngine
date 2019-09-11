@@ -280,7 +280,7 @@ void fluid_tick(void)
 	int tol=2;
 	int time=rx_get_ticks();
 	
-#define TIMEOUT 2000
+#define TIMEOUT 5000
 	SHeadStateLight state[INK_SUPPLY_CNT];
 	
 	//---  calculate average value

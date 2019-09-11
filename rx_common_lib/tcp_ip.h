@@ -361,7 +361,7 @@
 #define CMD_CLN_PURGE_TEST		0x01000720
 
 #define CMD_CLN_DRIP_PANS			0x01000721
-#define CMD_CLN_DRIP_PANS_EN		0x01000722		// Main ask board 0 for positions of drip pans
+// #define CMD_CLN_DRIP_PANS_EN		0x01000722		// Main ask board 0 for positions of drip pans
 #define CMD_CAP_ALLOW_MOVE_DOWN		0x01000723
 #define CMD_CAP_NOT_ALLOW_MOVE_DOWN	0x01000724
 #define CMD_CLN_DRIP_PANS_CAP		0x01000725

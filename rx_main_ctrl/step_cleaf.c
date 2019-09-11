@@ -76,7 +76,6 @@ int	 stepc_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen)
 
 			case CMD_CAP_REFERENCE:
 				sok_send_2(&_step_socket[no], CMD_CAP_REFERENCE, 0, NULL); // ref Lift
-				if (no == 0) sok_send_2(&_step_socket[0], CMD_CLN_DRIP_PANS_EN, 0, NULL);
 				break;
 
 			case CMD_CAP_UP_POS:
@@ -167,10 +166,11 @@ int stepc_handle_status(int no, SStepperStat *pStatus)
 			}
 		}
 	}
-	info.headUpInput_0 = _status[0].info.headUpInput_0 && _status[0].info.headUpInput_1;
-	info.headUpInput_1 = _status[1].info.headUpInput_0 && _status[1].info.headUpInput_1;
-	info.headUpInput_2 = _status[2].info.headUpInput_0 && _status[2].info.headUpInput_1;
-	info.headUpInput_3 = _status[3].info.headUpInput_0 && _status[3].info.headUpInput_1;
+	//--- right->left on GUI!
+	info.headUpInput_3 = _status[0].info.headUpInput_0 && _status[0].info.headUpInput_1;
+	info.headUpInput_2 = _status[1].info.headUpInput_0 && _status[1].info.headUpInput_1;
+	info.headUpInput_1 = _status[2].info.headUpInput_0 && _status[2].info.headUpInput_1;
+	info.headUpInput_0 = _status[3].info.headUpInput_0 && _status[3].info.headUpInput_1;
 	
 	_allow_stepper_move_down = allowed;
 
