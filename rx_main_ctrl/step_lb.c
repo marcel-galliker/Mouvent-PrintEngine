@@ -164,14 +164,10 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
 //--- steplb_to_print_pos --------------------------------
 int	 steplb_to_print_pos(void)
 {
-	int no;
 	_AbortPrinting = FALSE;
-	for (no=0; no<SIZEOF(_step_socket); no++)
+	for (int no=0; no<SIZEOF(_step_socket); no++)
 	{
-		if (_step_socket[no]!=INVALID_SOCKET)
-		{
-			sok_send_2(&_step_socket[no], CMD_CAP_PRINT_POS, sizeof(RX_Config.stepper.print_height), &RX_Config.stepper.print_height);
-		}
+		sok_send_2(&_step_socket[no], CMD_CAP_PRINT_POS, sizeof(RX_Config.stepper.print_height), &RX_Config.stepper.print_height);
 	}
 	return REPLY_OK;									
 }
@@ -179,7 +175,6 @@ int	 steplb_to_print_pos(void)
 //--- steplb_abort_printing -----------------------------------------
 int  steplb_abort_printing(void)
 {
-	
 	if(RX_StepperStatus.info.z_in_print) return steplb_to_up_pos();
 	else _AbortPrinting = TRUE;
 	return REPLY_OK;
@@ -188,13 +183,9 @@ int  steplb_abort_printing(void)
 //--- steplb_to_up_pos ---------------------------
 int	 steplb_to_up_pos(void)
 {
-	int no;
-	for (no=0; no<SIZEOF(_step_socket); no++)
+	for (int no=0; no<SIZEOF(_step_socket); no++)
 	{
-		if (_step_socket[no]!=INVALID_SOCKET)
-		{
-			sok_send_2(&_step_socket[no], CMD_CAP_UP_POS, 0, NULL);
-		}
+		sok_send_2(&_step_socket[no], CMD_CAP_UP_POS, 0, NULL);
 	}
 	_AbortPrinting = FALSE;
 	return REPLY_OK;									

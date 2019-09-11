@@ -78,11 +78,9 @@ int  step_end(void)
 //--- step_tick ------------------------------------------
 void step_tick(void)
 {
-	int i;
-	for (i=0; i<SIZEOF(_step_Socket); i++)
+	for (int i=0; i<SIZEOF(_step_Socket); i++)
 	{
-		if (_step_Socket[i]!=INVALID_SOCKET) 
-			sok_send_2(&_step_Socket[i], CMD_TT_STATUS, 0, NULL);
+		sok_send_2(&_step_Socket[i], CMD_TT_STATUS, 0, NULL);
 	}	
 }
 
@@ -127,7 +125,7 @@ static int _setp_socket_closed(RX_SOCKET socket, const char *peerName)
 			case STEPPER_LB:	steplb_init		(i, INVALID_SOCKET); break;
 			case STEPPER_DP:	stepdp_init		(i, INVALID_SOCKET); break;
 			case STEPPER_TEST:	steptest_init	(i, INVALID_SOCKET); break;
-			default: 			steps_init		(    INVALID_SOCKET);
+			default: 			steps_init		(   INVALID_SOCKET);
 			}
 			memset(&RX_StepperStatus, 0, sizeof(RX_StepperStatus));
 			return REPLY_OK;				
@@ -337,7 +335,6 @@ static void _step_set_config(int no)
 //--- step_set_config -------------------------------------------------
 int step_set_config(void)
 {
-	int i;
 	switch(RX_Config.printer.type)
 	{
 	case printer_cleaf:			_StepperType = STEPPER_CLEAF;	break;
@@ -351,7 +348,7 @@ int step_set_config(void)
 	default:					_StepperType = STEPPER_STD;		break;
 	}
 
-	for(i=0; i<SIZEOF(_step_Socket); i++)
+	for(int i=0; i<SIZEOF(_step_Socket); i++)
 		if (_step_Socket[i]!=INVALID_SOCKET) _step_set_config(i);
 	return REPLY_OK;
 }

@@ -18,7 +18,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Rectangle Grid.RowSpan="10" Fill="Red" Visibility="{Binding Err, Converter={StaticResource IntToVisible_Converter}}"/>
+        <Rectangle Grid.RowSpan="10" Visibility="{Binding Err, Converter={StaticResource IntToVisible_Converter}}"/>
         <TextBox  Text="{Binding Name}"
                     Background="{Binding Color}" 
                     Foreground="{Binding ColorFG}"
@@ -87,7 +87,7 @@
             </Grid.RowDefinitions>
 
             <TextBlock Grid.Row="0" HorizontalAlignment="Right"  Text="{Binding TempCond,  Converter={StaticResource HeadVal_ConverterTemp}}"  />
-            <common:RxNumBox Grid.Row="1" HorizontalContentAlignment="Right" x:Name="FpVoltage" TextChanged="FpVoltage_TextChanged"/>
+            <common:RxNumBox Grid.Row="1" HorizontalContentAlignment="Right" x:Name="FpVoltage" TextChanged="FpVoltage_TextChanged" IsInt="True" Min="0" Max="120"/>
 
             <StackPanel  Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
                 <TextBlock Text="{Binding PresIn,  Converter={StaticResource HeadVal_Converter10}}"   />
