@@ -1243,7 +1243,7 @@ static void _plc_state_ctrl()
 			{
 				static int _scannerpos;
 				UINT32 pos = plc_get_scanner_pos();
-				if (_scannerpos>(pos+100))
+				if (_scannerpos>(int)(pos+100))
 				{
 					_GUIPause =FALSE;
 					_SendPause=1;
@@ -1394,7 +1394,7 @@ static void _plc_state_ctrl()
 		if (rx_def_is_web(RX_Config.printer.type)) 
 		{
 			UINT32 length;
-			UINT32	max;
+//			UINT32	max;
 			lc_get_value_by_name_UINT32(APP "STA_PAPERLENGTH_IN", &length);
 			if (length && (int)length<_UnwinderLenMin && !_RequestPause) 
 			{

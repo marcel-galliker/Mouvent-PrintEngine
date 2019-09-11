@@ -41,6 +41,7 @@ static int _power_on_timer;
 static int  _power_test_v3_3(void);
 static void _power_amplifier(int on);
 static void _power_v3_3(int on);
+static void _stop_fpga(void);
 
 static int  _power_all_off_test(void);
 static int  _power_amp_on_test(void);
@@ -57,12 +58,19 @@ void power_init(void)
 	pRX_Status->powerState = power_wait_all_off;
 }
 
+//--- _stop_fpga -------------------------------------
+static void _stop_fpga(void)
+{
+	IOWR_ALTERA_AVALON_PIO_DATA(PIO_FPGA_SHUTDOWN_BASE,1);
+}
+
 //--- power_tick_100ms --------------------------------
 void power_tick_100ms(void)
 {
 	volatile UINT16 val=0;
 	int				dummy;
 	int				error;
+	int				critical_error;
 
 	if (IORD_ALTERA_AVALON_PIO_DATA(PIO_OVERHEAT_BASE))
 		pRX_Status->error.fpga_overheated=TRUE;
@@ -77,11 +85,28 @@ void power_tick_100ms(void)
 			|| pRX_Status->error.arm_timeout
 			;
 
-	if ((pRX_Status->powerState < power_sd) && (error || !pRX_Config->cmd.firepulse_on)) pRX_Status->powerState = power_sd;
+	// shutdown request which is NOT from ARM
+	critical_error =  pRX_Status->error.fpga_overheated
+			|| pRX_Status->error.cooler_overheated
+			|| pRX_Status->error.power_all_off_timeout
+			|| pRX_Status->error.power_amp_on_timeout
+			|| pRX_Status->error.power_all_on_timeout
+			|| pRX_Status->error.u_plus_2v5
+			|| pRX_Status->error.arm_timeout
+			;
 
-	IOWR_ALTERA_AVALON_PIO_DATA(PIO_ALL_ON_EN_BASE,(pRX_Status->powerState == power_all_on));
+	if ((pRX_Status->powerState < power_sd) && (error || !pRX_Config->cmd.firepulse_on))
+	{
+		if (critical_error) _error_delay = 2;
+		else			    _error_delay = 0;
+		pRX_Status->powerState = power_sd;
+	}
 
 	if (_error_delay > 0) _error_delay--;
+
+	IOWR_ALTERA_AVALON_PIO_DATA(PIO_ALL_ON_EN_BASE,(pRX_Status->powerState == power_all_on
+							 	 	 	 	 	 || pRX_Status->powerState == power_pre_all_on
+												 || (pRX_Status->powerState == power_sd && _error_delay)));
 
 	// start converting -36v
 	dummy = IORD_16DIRECT(AMC7891_0_BASE,AMC7891_ADC0_DATA) & 0x3ff;
@@ -128,7 +153,21 @@ void power_tick_100ms(void)
 								break;
 
 	case power_wait_all_on:		watchdog_toggle(WATCHDOG_TIME_MS, WATCHDOG_CHECK_FP);
-								if(_power_all_on_test()) pRX_Status->powerState = power_all_on;
+								if(_power_all_on_test())
+								{
+									_error_delay  = 2;	//200ms 11.02.19 Stefan
+									pRX_Status->powerState = power_pre_all_on;
+								}
+								break;
+
+	case power_pre_all_on:		watchdog_toggle(WATCHDOG_TIME_MS, WATCHDOG_CHECK_FP);		//new state for power up, 11.02.19 Stefan
+								if(_error_delay==0)
+								{
+									if(_power_all_on_test())
+									{
+										pRX_Status->powerState = power_all_on;
+									}
+								}
 								break;
 
 	case power_all_on:			_power_all_on_test();
@@ -136,13 +175,17 @@ void power_tick_100ms(void)
 								break;
 
     // --- SHUT-DOWN ------------------------------------------------------
-	case power_sd:				pRX_Status->powerState = power_sd_3v3;
-								pRX_Config->cmd.shutdown = 0;
-								watchdog_toggle(WATCHDOG_TIME_MS, WATCHDOG_CHECK_FP);
+	case power_sd:				if (_error_delay) _stop_fpga();
+								else
+								{
+									pRX_Status->powerState = power_sd_3v3;
+									pRX_Config->cmd.shutdown = 0;
+									watchdog_toggle(WATCHDOG_TIME_MS, WATCHDOG_CHECK_FP);
+								}
 								break;
 
 	case power_sd_3v3:			_power_v3_3(FALSE);
-								_error_delay  = ERROR_DELAY;
+								_error_delay  = 2;	//200ms 11.02.19 Stefan
 								watchdog_toggle(WATCHDOG_TIME_MS, WATCHDOG_CHECK_FP);
 								pRX_Status->powerState = power_sd_amp;
 								break;

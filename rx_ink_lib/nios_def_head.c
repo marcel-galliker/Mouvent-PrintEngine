@@ -21,6 +21,7 @@ char *PowerStateStr(EnPowerState state)
 	case power_off:				return "off";
 	case power_wait_all_off:	return "wait_all_off";
 	case power_wait_amp_on:		return "wait_amp_on";
+	case power_pre_all_on:		return "pre_all_on";
 	case power_wait_all_on:		return "wait_all_on";
 	case power_all_on:			return "all_on";
 	case power_sd:				return "sd";

@@ -99,7 +99,7 @@ static int _do_head_stat(RX_SOCKET socket, int headNo, SHeadBoardStat	*pstat)
 		memcpy(&RX_HBStatus[headNo], pstat, sizeof(RX_HBStatus[0]));
 		if (RX_HBStatus[headNo].err & 
 			( err_fpga_overheated
-			| err_head_pcb_overheated
+		//	| err_head_pcb_overheated
 			| err_amc7891
 			| err_pwr_all_off
 			| err_amp_all_on

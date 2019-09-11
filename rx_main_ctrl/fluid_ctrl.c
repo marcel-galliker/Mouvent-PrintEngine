@@ -474,7 +474,7 @@ static int _all_fluids_in_fluidCtrlMode(EnFluidCtrlMode ctrlMode)
 //--- _control -------------------------------------------------
 static void _control(int fluidNo)
 {
-	int i, j;
+	int i;
 	int no = fluidNo*INK_PER_BOARD;
 	static EnFluidCtrlMode _wipemode;
 	static EnFluidCtrlMode _actmode;

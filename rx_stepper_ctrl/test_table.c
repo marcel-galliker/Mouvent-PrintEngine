@@ -339,8 +339,6 @@ void tt_main(int ticks, int menu)
 	case CMD_TT_SCAN_RIGHT:	
 	case CMD_TT_SCAN_LEFT:	if (slide_move_done()) _CmdRunning = 0; 
 							break;
-
-
 	}
 }
 

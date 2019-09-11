@@ -143,7 +143,6 @@ static int	_TimeCnt = 0;
 static int  _first_move = 0;
 //static int  _stop_reached = 0;
 static int _CapTilt = 0;
-static int _RefDoneMessage = FALSE;
 static int _MoveLeftPos = 0;
 
 static int _WipeWaiting = FALSE;
@@ -167,6 +166,9 @@ static int	_TimeFillCap = 14; // in s
 static int	_SpeedShift = 20000; // in steps/s
 static int	_RotRefOffset = 11; // in steps
 static int	_TiltSteps = 90; // in steps
+
+static INT32	_AfterRefCmd=0;
+static INT32	_AfterRefPar;
 
 //--- prototypes --------------------------------------------
 static void _txrob_motor_test(int motor, int steps);
@@ -516,13 +518,19 @@ void txrob_main(int ticks, int menu)
 		
 		if (_CmdRunning == CMD_CLN_ROT_REF2)
 		{
-
 			motors_reset(MOTOR_ROT_BITS);
 			RX_StepperStatus.posZ = _rot_steps_2_rev(motor_get_step(MOTOR_ROT));
-			loc_new_cmd = CMD_CLN_SHIFT_MOV; 
 			RX_StepperStatus.robinfo.ref_done = TRUE;
-			_RefDoneMessage = FALSE;
-			
+			if (_AfterRefCmd)
+			{
+				txrob_handle_ctrl_msg(INVALID_SOCKET, _AfterRefCmd, &_AfterRefPar);
+				loc_new_cmd  = FALSE;
+				_AfterRefCmd = 0;
+			}
+			else
+			{
+				loc_new_cmd = CMD_CLN_SHIFT_MOV; 				
+			}
 		}
 		
 		// --- tasks after motor stop ---
@@ -894,6 +902,7 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		break;
 
 	case CMD_CLN_REFERENCE:			strcpy(_CmdName, "CMD_CLN_REFERENCE");
+		if (socket!=INVALID_SOCKET) _AfterRefCmd=0;
 		if (_CmdRunning && _CmdRunning != CMD_FLUID_CTRL_MODE){ txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_STOP, NULL); _NewCmd = CMD_CLN_REFERENCE; break; }
 		motor_reset(MOTOR_ROT); // to recover from move count missalignment
 		motor_reset(MOTOR_SHIFT); // to recover from move count missalignment
@@ -947,13 +956,14 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 	case CMD_CLN_MOVE_POS:		strcpy(_CmdName, "CMD_CLN_MOVE_POS");
 		if (!_CmdRunning || _CmdRunning == CMD_CLN_SHIFT_LEFT)
 		{
-			if (!RX_StepperStatus.robinfo.ref_done && _RefDoneMessage == FALSE)
+			pos = *((INT32*)pdata);
+			if (!RX_StepperStatus.robinfo.ref_done)
 			{ 
-				Error(LOG, 0, "CLN: Command %s: missing ref_done", _CmdName);
-				_RefDoneMessage = TRUE;
+				_AfterRefCmd = CMD_CLN_MOVE_POS;
+				_AfterRefPar = pos;
+				txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_REFERENCE, NULL);
 				break;
 			}
-			pos = *((INT32*)pdata);
 			if (pos < 0) {Error(LOG, 0, "CLN: Command %s: negative position not allowed", _CmdName); break;}
 			if (pos >= POS_ROT_CNT) {Error(LOG, 0, "CLN: Command %s: too high pos", _CmdName); break;}
 			if (POS_SHIFT[1] < motor_get_step(MOTOR_SHIFT) && RX_StepperStatus.robinfo.moving == FALSE)
@@ -974,22 +984,21 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 				sok_send_2(&socket, REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);
 				motors_move_to_step(MOTOR_ROT_BITS, &_ParRotDrive, pos);
 				
-			}
-
-			
+			}		
 		}
 		break;
 		
 	case CMD_CLN_SHIFT_MOV:		strcpy(_CmdName, "CMD_CLN_SHIFT_MOV");
 		if (!_CmdRunning || _CmdRunning == CMD_FLUID_CTRL_MODE)
 		{
+			pos = *((INT32*)pdata);
 			if (!RX_StepperStatus.robinfo.ref_done)
 			{ 
-				Error(LOG, 0, "CLN: Command %s: missing ref_done", _CmdName);
+				_AfterRefCmd = CMD_CLN_MOVE_POS;
+				_AfterRefPar = pos;
 				txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_REFERENCE, NULL); break;
 				break;
 			}
-			pos = *((INT32*)pdata);
 			if (pos < 0) {Error(LOG, 0, "CLN: Command %s: negative position not allowed", _CmdName); break;}
 			if (pos >= POS_SHIFT_CNT) {Error(LOG, 0, "CLN: Command %s: too high pos", _CmdName); break;}
 			if (_RobFunction==ROB_FUNCTION_CAP && pos != 1) {Error(LOG, 0, "CLN: Command %s: cancle shift, robot in capping", _CmdName); break;}

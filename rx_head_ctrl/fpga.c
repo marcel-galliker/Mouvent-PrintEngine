@@ -285,6 +285,12 @@ void fpga_init(char *rbfFileName)
 #endif
 }
 
+// --- fpga_master_disable -------------------
+void fpga_master_disable()
+{
+	SET_FLAG(FpgaCfg.cfg->cmd, CMD_MASTER_ENABLE, FALSE);
+}
+
 // --- fpga_end -------------------
 void fpga_end()
 {
@@ -301,6 +307,14 @@ void fpga_end()
 	close (_MemId);
 	_MemId = 0;
 #endif
+}
+
+//--- fpga_overheated ---------------------------------
+void  fpga_overheated(void)
+{	
+	_Reload_FPGA=TRUE;
+	nios_shutdown();
+	fpga_abort();			
 }
 
 //--- _ethernet_config -------------------------------
@@ -630,6 +644,7 @@ void fpga_enc_enable(int enable)
 static void _fpga_enc_config(int khz)
 {
 	int i;
+	int enable;
 	
 	SET_FLAG(FpgaCfg.encoder->cmd, ENC_ENABLE, FALSE);
 	
@@ -641,26 +656,31 @@ static void _fpga_enc_config(int khz)
 	{
 		FpgaCfg.encoder->synth.value = 0;
 		FpgaCfg.encoder->synth.enable= _SynthEncoder = FALSE;
-		if (FpgaCfg.cfg->cmd & CMD_MASTER_ENABLE)
+
+		// first disable FPGA, then start power up, and finally enable fpga
+		enable = (FpgaCfg.cfg->cmd & CMD_MASTER_ENABLE)!=0;
+
+		SET_FLAG(FpgaCfg.cfg->cmd, CMD_MASTER_ENABLE, FALSE);
+		nios_set_firepulse_on(TRUE);
+		
+		for (i=0; !nios_is_firepulse_on(); i += 10)
 		{
-			nios_set_firepulse_on(TRUE);
-			for (i=0; !nios_is_firepulse_on(); i+=10)
+			if (i > 1000) 
 			{
-				if (i>1000) 
-				{
-					Error(LOG, 0, "Firepulse On TimeOut");
-					return;					
-				}
-				rx_sleep(10);				
-			}				
+				Error(LOG, 0, "Firepulse On TimeOut");
+				return;					
+			}
+			rx_sleep(10);				
 		}
+		SET_FLAG(FpgaCfg.cfg->cmd, CMD_MASTER_ENABLE, enable);
 		FpgaCfg.encoder->synth.value = FPGA_FREQ/(khz*1000);
 		FpgaCfg.encoder->synth.enable= _SynthEncoder = TRUE;		
 	}
-	else		
+	else if (_SynthEncoder)	
 	{
 		FpgaCfg.encoder->synth.value = 0;
 		FpgaCfg.encoder->synth.enable= _SynthEncoder = FALSE;
+		SET_FLAG(FpgaCfg.cfg->cmd, CMD_MASTER_ENABLE, FALSE);
 		nios_set_firepulse_on(FALSE);
 	}
 
@@ -986,6 +1006,13 @@ static char* _get_ip_addr(SFpgaEthCfg *ethcfg, char *str)
 	memcpy(addr, &ethcfg->ipAddr, 4);
 	sprintf(str, "%d.%d.%d.%d", addr[3], addr[2], addr[1], addr[0]);
 	return str;
+}
+
+//--- fpga_get_nios_shutdown ----------------------------------
+int fpga_get_nios_shutdown(void)
+{
+	SFpgaHeadInfo* pinfo = (SFpgaHeadInfo*)&Fpga.stat->info;
+	return pinfo->fpga_shutdown_from_nios;
 }
 
 //--- fpga_image ------------------------------------------------
@@ -1533,9 +1560,10 @@ int  fpga_abort(void)
 			Error(WARN,0,"RELOAD-FPGA");
 			nios_end();
 			fpga_end();
-			if (RX_HBStatus[0].tempFpga>MAX_FPGA_TEMP) 
+			if (RX_HBStatus[0].err & (err_fpga_overheated | err_cooler_overheated))
 				 fpga_init(FIELNAME_HEADTEMP_RBF);
-			else fpga_init(FIELNAME_HEAD_RBF);
+			else 
+				fpga_init(FIELNAME_HEAD_RBF);
 			TrPrintfL(TRUE, "fpga_init done");
 			nios_init();
 			TrPrintfL(TRUE, "nios_init done");
@@ -1968,12 +1996,7 @@ static void _check_errors(void)
 			if (++_TempErr==100)
 			{
 				TrPrintfL(TRUE, "Head FPGA overheated temp=%d row=%d", RX_HBStatus[0].tempFpga, Fpga.stat->temp);
-				if (ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err,  err_firepulse_missed_0, 0, "Head FPGA overheated (%d °C)", RX_HBStatus[0].tempFpga))
-				{
-					_Reload_FPGA=TRUE;
-					nios_shutdown();
-					fpga_abort();
-				}
+				if (ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err,  err_fpga_overheated, 0, "Head FPGA overheated (%d °C)", RX_HBStatus[0].tempFpga)) fpga_overheated();
 			}
 		}
 		else 
@@ -2000,7 +2023,7 @@ static void _check_state_machines(void)
 {
 	if ((Fpga.stat->info & 0x0fff) != 0x0fff) 
 	{
-		ErrorFlag (ERR_CONT,  (UINT32*)&RX_HBStatus[0].err,  err_udp1_alive,  0, "FPGA not all State Mashines running");
+		ErrorFlag (ERR_CONT,  (UINT32*)&RX_HBStatus[0].err,  err_fpga_state_machines,  0, "FPGA not all State Mashines running");
 		_Reload_FPGA = TRUE;
 	}
 }

@@ -57,6 +57,7 @@ static int _NiosLoaded = FALSE;
 static UINT8			_GreyLevel[MAX_HEADS_BOARD][MAX_DROP_SIZES];
 static int				_DotSize1;
 static UINT32			_FPWarning;
+static int				_CoolerErr;
 int						NIOS_FixedDropSize=0;
 int						NIOS_Droplets=0;
 static int				_NiosReady=FALSE;
@@ -81,6 +82,7 @@ void nios_shutdown(void)
 		int fd = open("/dev/mem", O_RDWR); 
 		_NiosMem  = (SNiosMemory*)mmap(NULL, NIOS_MEM_SIZE, PROT_READ|PROT_WRITE, MAP_SHARED, fd, NIOS_MEM_ADDR);
 		_NiosCfg  = &_NiosMem->cfg;
+//		cond_ctrlMode2(-1, ctrl_off);
 		close(fd);		
 		nios_end();		
 	}
@@ -96,6 +98,7 @@ int nios_init(void)
 	
 	_NiosMem = NULL;
 	_FPWarning = 0;
+	_CoolerErr = 0;
 	_DotSize1 = 0;
 	memset(_GreyLevel, 0, sizeof(_GreyLevel));
 
@@ -144,19 +147,24 @@ int nios_init(void)
 //--- nios_end -------------------------------------
 int nios_end(void)
 {
-	// required to not damage Print Heads !
-//	putty_end();
-	cond_end();
-	
-	_NiosCfg->cmd.shutdown = TRUE;
-	rx_sleep(300);
-	_NiosInit = FALSE;
+	if (_NiosLoaded) 
+	{
+		// required to not damage Print Heads !
+		//	putty_end();
+		cond_end();
+		fpga_master_disable();
+		rx_sleep(200);
+		nios_set_firepulse_on(FALSE);
+		_NiosCfg->cmd.shutdown = TRUE;
+		rx_sleep(1000);
+		_NiosInit = FALSE;
 
-	#ifdef soc
-		munmap(_NiosMem, NIOS_MEM_SIZE); 
-	#endif
-	_NiosMem = NULL;
-	_NiosLoaded = FALSE;
+		#ifdef soc
+			munmap(_NiosMem, NIOS_MEM_SIZE); 
+		#endif
+		_NiosMem = NULL;
+		_NiosLoaded = FALSE;			
+	}
 	return REPLY_OK;
 }
 
@@ -576,13 +584,16 @@ int  nios_main(int ticks, int menu)
 	_nios_fastlog();
 #endif
 	
-	if (_NiosMem) cond_main(ticks);
-		
-	tse_check_errors(menu);
-	if (menu) 	
+	if (_NiosLoaded)
 	{
-		nios_check_errors();		
-		_nios_copy_status();			
+		if (_NiosMem) cond_main(ticks);
+		
+		tse_check_errors(menu);
+		if (menu) 	
+		{
+			nios_check_errors();		
+			_nios_copy_status();			
+		}		
 	}
 	return REPLY_OK;
 }
@@ -616,18 +627,28 @@ void nios_check_errors(void)
 		if (_NiosStat->error.power_all_off_timeout)	ErrorFlag(ERR(abort), (UINT32*)&RX_HBStatus[0].err, err_pwr_all_off, 0, "power_all_off_timeout");
 		if (_NiosStat->error.power_amp_on_timeout)	ErrorFlag(ERR(abort), (UINT32*)&RX_HBStatus[0].err, err_amp_all_on, 0, "power_amp_on_timeout");
 		if (_NiosStat->error.power_all_on_timeout)	ErrorFlag(ERR(abort), (UINT32*)&RX_HBStatus[0].err, err_pwr_all_on, 0, "power_all_on_timeout");
-    	if (_NiosStat->error.fpga_overheated)		ErrorFlag(ERR(abort), (UINT32*)&RX_HBStatus[0].err, err_fpga_overheated, 0, "FPGA Overheated Error");
-    	if (_NiosStat->error.head_pcb_overheated)   ErrorFlag(ERR(abort), (UINT32*)&RX_HBStatus[0].err, err_head_pcb_overheated, 0, "Head PCB overheated");
 		
 		// TODO: re-enable after simu-chiller and cable problem is solved
 		//if (_NiosStat->error.chiller_overheated)    ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err, err_chiller_overheated, 0, "Chiller Overheated Error");
 				
 		if (_NiosStat->info.cooler_pcb_present)
 		{
-			if (_NiosStat->error.cooler_pressure_hw)	ErrorFlag(ERR_STOP,  (UINT32*)&RX_HBStatus[0].err, err_cooler_pressure, 0, "Cooler pressure sensor hardware");
-			if (_NiosStat->error.cooler_overpressure)	ErrorFlag(WARN,		 (UINT32*)&RX_HBStatus[0].err, err_cooler_pressure, 0, "Cooler overpressure");
-			if (_NiosStat->error.cooler_temp_hw)		ErrorFlag(WARN,		 (UINT32*)&RX_HBStatus[0].err, err_therm_cooler,    0, "Cooler Thermistor hardware");
-    		if (_NiosStat->error.cooler_overheated)		ErrorFlag(WARN,		 (UINT32*)&RX_HBStatus[0].err, err_therm_cooler,    0, "Cooler Thermistor too hot (%d°C)", _NiosStat->cooler_temp / 1000);
+			if (_NiosStat->error.cooler_temp_hw)		ErrorFlag(WARN,		 (UINT32*)&RX_HBStatus[0].err, err_therm_cooler,      0, "Cooler Thermistor hardware");
+    		if (_NiosStat->error.cooler_overheated)	
+	    	{
+	    		if (ErrorFlag(WARN,		 (UINT32*)&RX_HBStatus[0].err, err_cooler_overheated, 0, "Cooler too hot (%d°C)", _NiosStat->cooler_temp / 1000))
+		    		fpga_overheated();						    	
+	    	}
+			if (_NiosStat->cooler_pressure > 1200)	
+			{				
+				if (_CoolerErr<10 && ++_CoolerErr>=10)
+				{
+	    			Error(WARN,	0, "Cooler Overpressure (%d mBar)", _NiosStat->cooler_pressure);
+					RX_HBStatus[0].err |= err_cooler_overpressure;
+		    		fpga_overheated();						    										
+				}
+			}
+			else _CoolerErr=0;
 		}
 		else
 		{
@@ -644,6 +665,8 @@ void nios_error_reset(void)
 	cond_error_reset();
 	tse_error_reset();
 	_FPWarning = 0;
+	_CoolerErr = 0;
+	
 	if (_NiosLoaded) _NiosCfg->cmd.error_reset = TRUE;
 }
 

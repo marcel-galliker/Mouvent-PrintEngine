@@ -24,7 +24,9 @@ extern SFpgaHeadBoardCfg	FpgaCfg;
 void  fpga_init(char *rbfFileName);
 int   fpga_is_init(void);
 int	  fpga_is_ready(void);
+void  fpga_master_disable();
 void  fpga_end(void);
+void  fpga_overheated(void);
 
 void  fpga_main(int ticks, int menu);
 
@@ -58,3 +60,5 @@ int fpga_temp(void);
 int fpga_qsys_id(void);
 int fpga_qsys_timestamp(void);
 int fpga_fp_clock_mhz(void);
+
+int fpga_get_nios_shutdown(void);

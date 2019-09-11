@@ -95,6 +95,10 @@ void handle_menu(char *str)
 	{
 		cond_set_clusterNo(atoi(&str[no]));
 	}
+	else if (no=str_start(str, "resetinkctr"))
+	{
+		cond_volume_printed(atoi(&str[no]), 0);			
+	}
 	else
 	{
 		no = str[1] - '0';
@@ -115,6 +119,7 @@ void handle_menu(char *str)
 		*/
 	//	case 't': udp_test_send_block(4, 1);				break;
 	//	case 'T': udp_test_send_block(4, 10000);			break;
+//		case 's': fpga_overheated();						break;
 		case 't': ctrl_stress_test();						break;
 		
 	//	case 'u': fpga_display_used_flags();				break;
@@ -291,7 +296,7 @@ int main(int argc, char** argv)
 
 	rx_init();
 	err_init(0, 100);
-	nios_shutdown();
+//	nios_shutdown();
 	fpga_init(FIELNAME_HEAD_RBF);
 	nios_init();
 	cond_init();

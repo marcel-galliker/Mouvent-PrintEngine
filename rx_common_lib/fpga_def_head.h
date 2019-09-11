@@ -366,7 +366,7 @@ typedef struct SFpgaHeadInfo
 	UINT32	head_fsm_2_running:1;		// 0x00000400
 	UINT32  head_fsm_3_running:1;		// 0x00000800
 	UINT32	nios_reset:1;				// 0x00001000
-	UINT32	info13:1;					// 0x00002000
+	UINT32	fpga_shutdown_from_nios:1;	// 0x00002000
 	UINT32	info14:1;					// 0x00004000
 	UINT32	info15:1;					// 0x00008000
 	UINT32	clearing_udp_flags:1;		// 0x00010000

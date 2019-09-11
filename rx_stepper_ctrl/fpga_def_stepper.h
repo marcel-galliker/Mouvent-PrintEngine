@@ -71,9 +71,9 @@ typedef struct
 	UINT32	res_5c;
 
 	UINT32	spi_powerstep[MOTOR_CNT];	//	0060: 
-	UINT32	res_64;
-	UINT32	res_68;
-	UINT32	res_6c;
+//	UINT32	spi_powerstep[1];			// 0x0064
+//	UINT32	spi_powerstep[2];			// 0x0068
+//	UINT32	spi_powerstep[3];			// 0x006c
 	
 	UINT32	res_70;	//	0070: 
 	UINT32	res_74;
