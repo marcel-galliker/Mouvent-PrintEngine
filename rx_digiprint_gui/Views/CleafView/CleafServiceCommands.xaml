@@ -15,8 +15,8 @@
                 
                 <rx_uc:PlcCommand ID="CMD_CALIBRATE_DIAMETER_SENSOR_WINDER_1"    Label="Diameter UW-R"/>
                 <rx_uc:PlcCommand ID="CMD_CALIBRATE_DIAMETER_SENSOR_WINDER_2"    Label="Diameter UW-L"/>
-                <rx_uc:PlcCommand ID="CMD_CALIBRATE_DIAMETER_SENSOR_WINDER_3"    Label="Diameter RW_R"/>
-                <rx_uc:PlcCommand ID="CMD_CALIBRATE_DIAMETER_SENSOR_WINDER_4"    Label="Diameter RW_L"/>
+                <rx_uc:PlcCommand ID="CMD_CALIBRATE_DIAMETER_SENSOR_WINDER_3"    Label="Diameter RW-R"/>
+                <rx_uc:PlcCommand ID="CMD_CALIBRATE_DIAMETER_SENSOR_WINDER_4"    Label="Diameter RW-L"/>
 
                 <rx_uc:PlcTitle Header="Calibrate Tension"/>
                 

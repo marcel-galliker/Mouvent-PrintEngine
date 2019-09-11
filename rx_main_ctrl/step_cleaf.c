@@ -37,7 +37,7 @@
 
 //--- global  variables -----------------------------------------------------------------------------------------------------------------
 
-static RX_SOCKET		_step_socket[STEPPER_CNT] = { 0 };
+static RX_SOCKET		_step_socket[STEPPER_CNT];
 static SStepperStat		_status[STEPPER_CNT];
 static int				_splicing=FALSE;
 static int				_enc_disabled=FALSE;
@@ -70,32 +70,6 @@ int	 stepc_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen)
 		{
 			switch (cmd)
 			{
-			case CMD_TT_STOP:
-			case CMD_TT_START_REF:
-			case CMD_TT_MOVE_TABLE:
-			case CMD_TT_MOVE_LOAD:
-			case CMD_TT_MOVE_CAP:
-			case CMD_TT_MOVE_PURGE:
-			case CMD_TT_MOVE_ADJUST:
-			case CMD_TT_SCAN_RIGHT:
-			case CMD_TT_SCAN_LEFT:
-			case CMD_TT_VACUUM:
-				sok_send_2(&_step_socket[no], cmd, 0, NULL);
-				break;
-
-			case CMD_TT_SCAN:
-				{
-								STestTableScanPar par;
-								par.speed = 5;
-								par.scanCnt = 5;
-								par.scanMode = PQ_SCAN_STD;
-								par.yStep = 10000;
-								sok_send_2(&_step_socket[no], CMD_TT_SCAN, sizeof(par), &par);
-				}
-				break;
-
-				//--- cappping ---------------------------------------------------------	
-
 			case CMD_CAP_STOP:
 				sok_send_2(&_step_socket[no], CMD_CAP_STOP, 0, NULL);
 				break;

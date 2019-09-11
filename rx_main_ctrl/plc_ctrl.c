@@ -586,7 +586,7 @@ int  plc_pause_printing(void)
 		_plc_set_par_default();
 //		_plc_set_command("CMD_PRODUCTION", "CMD_PAUSE");
 //		Error(LOG, 0, "send PAUSE");
-		_GUIPause = TRUE;
+		_SendPause = 1;
 		_plc_state_ctrl();
 	}
 	return REPLY_OK;
@@ -1258,7 +1258,7 @@ static void _plc_state_ctrl()
 		}
 		if (RX_Config.stepper.ref_height!=0 || RX_Config.stepper.print_height!=0)
 		{
-			if(RX_StepperStatus.info.scannerEnable)
+			if(rx_def_is_web(RX_Config.printer.type) || RX_StepperStatus.info.scannerEnable)
 			{
 				if(_SendPause == 1)
 				{
