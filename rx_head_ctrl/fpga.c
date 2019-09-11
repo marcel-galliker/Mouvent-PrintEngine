@@ -169,9 +169,12 @@ static void _check_udp_speed(int ticks);
 //--- fpga_init ----------------
 void fpga_init(void)
 {
+	char rbfpath[MAX_PATH];
 	_Init = FALSE;
 	_Load_Time = rx_get_ticks()+6000;
-	if (rx_fpga_load (PATH_BIN_HEAD FIELNAME_HEAD_RBF)!=REPLY_OK) 
+	sprintf(rbfpath, "%s%s", PATH_BIN_HEAD, FIELNAME_HEAD_RBF);
+//	sprintf(rbfpath, "%s%s", PATH_BIN_HEAD, "rx_headtemp_rbf");
+	if (rx_fpga_load (rbfpath)!=REPLY_OK) 
 	{
 		int i;
 
