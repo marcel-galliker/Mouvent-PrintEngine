@@ -35,7 +35,7 @@
 #define STEPS_REV		200*16	// steps per motor revolution * 16 times oversampling
 #define DIST_REV		2000.0	// moving distance per revolution [µm]
 
-
+static RX_SOCKET	_MainSocket=INVALID_SOCKET;
 static SMovePar	_ParRef;
 static SMovePar	_ParZ_down;
 static SMovePar	_ParZ_cap;
@@ -99,6 +99,8 @@ void lb702_init(void)
 void lb702_main(int ticks, int menu)
 {
 	int motor;
+	SStepperStat oldSatus;
+	memcpy(&oldSatus, &RX_StepperStatus, sizeof(RX_StepperStatus));
 	
 	motor_main(ticks, menu);
 	
@@ -114,13 +116,13 @@ void lb702_main(int ticks, int menu)
 	}
 	else RX_StepperStatus.info.printhead_en = TRUE;
 	
+	RX_StepperStatus.info.moving = (_CmdRunning!=0);
 	if (RX_StepperStatus.info.moving)
 	{
 		RX_StepperStatus.info.z_in_ref   = FALSE;
 		RX_StepperStatus.info.z_in_print = FALSE;
 		RX_StepperStatus.info.z_in_cap   = FALSE;			
 	}
-	if (_CmdRunning==0) RX_StepperStatus.info.moving = FALSE;
 	if (_CmdRunning && motors_move_done(MOTOR_Z_BITS)) 
 	{
 		RX_StepperStatus.info.moving = FALSE;
@@ -139,18 +141,22 @@ void lb702_main(int ticks, int menu)
 		RX_StepperStatus.info.z_in_ref    = ((_CmdRunning==CMD_CAP_REFERENCE || _CmdRunning==CMD_CAP_UP_POS) && RX_StepperStatus.info.ref_done);
 		RX_StepperStatus.info.z_in_print  = (_CmdRunning==CMD_CAP_PRINT_POS && RX_StepperStatus.info.ref_done);
 		RX_StepperStatus.info.z_in_cap    = (_CmdRunning==CMD_CAP_CAPPING_POS);
-//		if (_CmdRunning == CMD_CAP_REFERENCE && _PrintPos_New) 
 		if (_PrintPos_New) 
 		{
 			_lb702_move_to_pos(CMD_CAP_PRINT_POS, _PrintPos_New);
 			_PrintPos_Act = _PrintPos_New;
 			_PrintPos_New = 0;
 		}
-		else {
-		//	RX_StepperStatus.info.move_tgl = !RX_StepperStatus.info.move_tgl;
+		else 
+		{
 			_CmdRunning = FALSE;
 		}
-	}	
+	}
+	
+	if (memcpy(&oldSatus, &RX_StepperStatus, sizeof(RX_StepperStatus)))
+	{
+		sok_send_2(&_MainSocket, REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);		
+	}
 }
 
 //--- _lb702_display_status ---------------------------------------------------------
@@ -240,6 +246,7 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 {		
 	int val;
 	
+	_MainSocket = socket;
 	switch(msgId)
 	{
 	case CMD_TT_STATUS:				sok_send_2(&socket, REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);	
@@ -251,7 +258,7 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									break;	
 
 	case CMD_CAP_REFERENCE:			strcpy(_CmdName, "CMD_CAP_REFERENCE");
-									_PrintPos_New=0;
+									_PrintPos_New = -1*_micron_2_steps(RX_StepperCfg.ref_height - 20000);
 									_lb702_do_reference();	
 									break;
 

@@ -130,7 +130,8 @@ void lb701_main(int ticks, int menu)
 		RX_StepperStatus.info.z_in_cap    = (_CmdRunning==CMD_CAP_CAPPING_POS);
 		if (_CmdRunning == CMD_CAP_REFERENCE && _PrintPos_New) 
 		{
-			_lb701_move_to_pos(CMD_CAP_PRINT_POS, _PrintPos_New);
+			if (_PrintPos_New==POS_UP) _lb701_move_to_pos(CMD_CAP_UP_POS,    _PrintPos_New);
+			else                       _lb701_move_to_pos(CMD_CAP_PRINT_POS, _PrintPos_New);
 			_PrintPos_Act = _PrintPos_New;
 			_PrintPos_New = 0;
 		}
@@ -239,7 +240,7 @@ int  lb701_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									break;	
 
 	case CMD_CAP_REFERENCE:			strcpy(_CmdName, "CMD_CAP_REFERENCE");
-									_PrintPos_New=0;
+									_PrintPos_New=POS_UP;
 									_lb701_do_reference();	
 									break;
 
@@ -250,7 +251,7 @@ int  lb701_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									{
 										_PrintPos_New = _micron_2_steps(RX_StepperCfg.ref_height - pos);
 										if (RX_StepperStatus.info.ref_done) _lb701_move_to_pos(CMD_CAP_PRINT_POS, _PrintPos_New);
-										else								  _lb701_do_reference();
+										else								_lb701_do_reference();
 									}
 									break;
 		
@@ -258,7 +259,7 @@ int  lb701_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									if (!_CmdRunning)
 									{
 										if (RX_StepperStatus.info.ref_done) _lb701_move_to_pos(CMD_CAP_UP_POS, POS_UP);
-										else								  _lb701_do_reference();
+										else								_lb701_do_reference();
 									}
 									break;
 

@@ -7,6 +7,7 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace RX_DigiPrint.Views.UserControls
 {
@@ -200,7 +201,8 @@ namespace RX_DigiPrint.Views.UserControls
         //--- Timer -----------------------------------------------------------------
         private void Timer(int no)
         {            
-            string val="####";
+            string val="####";                
+            
             if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf)
             {
                 RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_GET_VAR, "Application.GUI_00_001_Main"+"\n"+ "STA_PRINT_RELEASE"+"\n");
@@ -208,6 +210,18 @@ namespace RX_DigiPrint.Views.UserControls
             }
             if (val!=null && val.Equals("FALSE")) Button_PrintRelease.Visibility = Visibility.Visible;
             else                                  Button_PrintRelease.Visibility = Visibility.Collapsed;
+            
+            /*
+            if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf)
+            {
+                Button_PrintRelease.Visibility = Visibility.Visible;
+                RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_GET_VAR, "Application.GUI_00_001_Main"+"\n"+ "STA_PRINT_RELEASE"+"\n");
+                val = RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_PRINT_RELEASE");
+                if (val!=null && val.Equals("FALSE")) Button_PrintRelease.Background = Brushes.Red;
+                else                                  Button_PrintRelease.Background = Brushes.LightGreen;
+            }
+            else Button_PrintRelease.Visibility = Visibility.Collapsed;
+            */
         }
 
         //--- PrintRelease_Clicked --------------------------------------------

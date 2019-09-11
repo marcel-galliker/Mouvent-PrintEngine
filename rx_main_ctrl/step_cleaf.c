@@ -118,6 +118,8 @@ int stepc_handle_status(int no, SStepperStat *pStatus)
 	info.z_in_ref		= TRUE;
 	info.headUpInput_0	= TRUE;
 	info.headUpInput_1	= TRUE;
+	info.headUpInput_2	= TRUE;
+	info.headUpInput_3	= TRUE;
 	info.DripPans_InfeedDOWN	= TRUE;
 	info.DripPans_InfeedUP		= TRUE;
 	info.DripPans_OutfeedDOWN	= TRUE;
@@ -145,8 +147,6 @@ int stepc_handle_status(int no, SStepperStat *pStatus)
 			//			TrPrintf(TRUE, "Stepper[%d]: ref_done=%d moving=%d  in_print=%d  up=%d", i, _status[i].info.ref_done, _status[i].info.moving, _status[i].info.z_in_print, _status[i].info.z_in_ref);
 			cnt++;
 			info.ref_done		&= _status[i].info.ref_done;
-			info.headUpInput_0	&= _status[i].info.headUpInput_0;
-			info.headUpInput_1	&= _status[i].info.headUpInput_1;
 			info.moving			|= _status[i].info.moving;
 			info.z_in_ref		&= _status[i].info.z_in_ref;
 			info.z_in_print		&= _status[i].info.z_in_print;
@@ -167,6 +167,11 @@ int stepc_handle_status(int no, SStepperStat *pStatus)
 			}
 		}
 	}
+	info.headUpInput_0 = _status[0].info.headUpInput_0 && _status[0].info.headUpInput_1;
+	info.headUpInput_1 = _status[1].info.headUpInput_0 && _status[1].info.headUpInput_1;
+	info.headUpInput_2 = _status[2].info.headUpInput_0 && _status[2].info.headUpInput_1;
+	info.headUpInput_3 = _status[3].info.headUpInput_0 && _status[3].info.headUpInput_1;
+	
 	_allow_stepper_move_down = allowed;
 
 	if (cnt)

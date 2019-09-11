@@ -17,7 +17,7 @@
                 <rx_uc:PlcCommand ID="CMD_RUN"                      Label="Run"/>
                 <rx_uc:PlcCommand ID="CMD_PAUSE"                    Label="Pause"/>
                 <rx_uc:PlcCommand ID="CMD_STOP"                     Label="STOP"/>
-                <rx_uc:PlcCommand ID="CMD_BUFFER_REFERENCE"         Label="Reference Buf" IsEnabled="{Binding ReferenceEnabled}"/>
+                <rx_uc:PlcCommand ID="CMD_BUFFER_REFERENCE"         Label="Ref Buffer" IsEnabled="{Binding ReferenceEnabled}"/>
 
                 <Rectangle Fill="LightGray" StrokeThickness="2" Height="5"/>
                 

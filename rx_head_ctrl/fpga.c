@@ -1558,8 +1558,9 @@ int  fpga_abort(void)
 			Error(WARN,0,"RELOAD-FPGA");
 			nios_end();
 			fpga_end();
-			if (RX_HBStatus[0].err & (err_fpga_overheated | err_cooler_overheated))
-				 fpga_init(FIELNAME_HEADTEMP_RBF);
+//			if (RX_HBStatus[0].err & (err_fpga_overheated | err_cooler_overheated))
+			if (RX_HBStatus[0].err & (err_fpga_overheated))
+				fpga_init(FIELNAME_HEADTEMP_RBF);
 			else 
 				fpga_init(FIELNAME_HEAD_RBF);
 			TrPrintfL(TRUE, "fpga_init done");

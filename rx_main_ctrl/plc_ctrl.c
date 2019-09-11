@@ -1353,6 +1353,7 @@ static void _plc_state_ctrl()
 		if(!_heads_to_print)
 		{
 		//	TrPrintfL(TRUE, "_heads_to_print: printhead_en=%d, printState=%d (%d)", RX_StepperStatus.info.printhead_en, RX_PrinterStatus.printState, ps_printing);
+		//	Error(LOG, 0, "_heads_to_print: printhead_en=%d, printState=%d (%d)", RX_StepperStatus.info.printhead_en, RX_PrinterStatus.printState, ps_printing);
 		//	if (RX_Config.printer.type!=printer_cleaf || (RX_StepperStatus.info.printhead_en && RX_PrinterStatus.printState==ps_printing))
 			if(RX_PrinterStatus.printState == ps_printing && (RX_StepperStatus.info.printhead_en || (RX_Config.printer.type!=printer_cleaf &&  RX_Config.printer.type!=printer_LH702)))
 			{

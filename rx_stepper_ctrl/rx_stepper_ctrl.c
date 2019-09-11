@@ -194,7 +194,10 @@ int main(int argc, char** argv)
 	default:					test_init();
 	}			
 	
+	Trace_to_screen(FALSE);
 	_main_loop();
+	Trace_to_screen(TRUE);
+
 	tt_end();
 
 //	nios_end();

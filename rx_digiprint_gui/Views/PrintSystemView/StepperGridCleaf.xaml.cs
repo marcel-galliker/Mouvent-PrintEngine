@@ -8,7 +8,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
 {
     public partial class StepperGridCleaf : UserControl
     {
-        private RxNumBox[,] _numbox= new  RxNumBox[4,4];
+//      private RxNumBox[,] _numbox= new  RxNumBox[4,4];
+        private RxNumBox[,] _numbox= new  RxNumBox[4,2];
 
         public StepperGridCleaf()
         {
@@ -55,8 +56,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
             {
                 case 0: RxGlobals.Stepper.Robot[no].ref_height  = (System.Int32)(box.Value*1000); break;
                 case 1: RxGlobals.Stepper.Robot[no].head_align  = (System.Int32)(box.Value*1000); break;
-                case 2: RxGlobals.Stepper.Robot[no].robot_height = (System.Int32)(box.Value*1000); break;
-                case 3: RxGlobals.Stepper.Robot[no].robot_align  = (System.Int32)(box.Value*1000); break;
+           //     case 2: RxGlobals.Stepper.Robot[no].robot_height = (System.Int32)(box.Value*1000); break;
+           //     case 3: RxGlobals.Stepper.Robot[no].robot_align  = (System.Int32)(box.Value*1000); break;
                 default: break;
             }
             RxGlobals.Stepper.Changed=true;
@@ -70,8 +71,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
             {
                 _numbox[no,0].Text = (RxGlobals.Stepper.Robot[no].ref_height /1000.0).ToString();
                 _numbox[no,1].Text = (RxGlobals.Stepper.Robot[no].head_align /1000.0).ToString();
-                _numbox[no,2].Text = (RxGlobals.Stepper.Robot[no].robot_height/1000.0).ToString();
-                _numbox[no,3].Text = (RxGlobals.Stepper.Robot[no].robot_align /1000.0).ToString();
+            //    _numbox[no,2].Text = (RxGlobals.Stepper.Robot[no].robot_height/1000.0).ToString();
+            //    _numbox[no,3].Text = (RxGlobals.Stepper.Robot[no].robot_align /1000.0).ToString();
             }
         }
     }

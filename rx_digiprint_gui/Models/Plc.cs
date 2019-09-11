@@ -289,7 +289,7 @@ namespace RX_DigiPrint.Models
         }
 
         //--- Property CLEAF_CanRefBuf ---------------------------------------
-        private bool _ReferenceEnabled;
+        private bool _ReferenceEnabled=false;
         public bool ReferenceEnabled
         {
             get { return _ReferenceEnabled; }

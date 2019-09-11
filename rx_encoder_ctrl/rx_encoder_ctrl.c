@@ -232,7 +232,10 @@ int main(int argc, char** argv)
 
 	if (arg_test) fpga_enc_config_test();
 			
+	Trace_to_screen(FALSE);
 	_main_loop();
+	Trace_to_screen(TRUE);
+
 	TrPrintfL(1, "Closing rx_encoder_ctrl");
 	fpga_end();
 	rx_end();

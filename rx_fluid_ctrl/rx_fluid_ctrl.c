@@ -159,8 +159,10 @@ int main(int argc, char** argv)
 	ctrl_init();
 	daisy_chain_init(); 
 
+	Trace_to_screen(FALSE);
 	_main_loop();
-	
+	Trace_to_screen(TRUE);
+
 	daisy_chain_end(); 
 	nios_end();
 	rx_end();

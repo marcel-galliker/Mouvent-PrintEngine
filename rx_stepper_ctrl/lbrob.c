@@ -123,13 +123,9 @@ void lbrob_main(int ticks, int menu)
 	RX_StepperStatus.posZ = motor_get_step(MOTOR_CAP) * 1000000.0 / CAP_STEPS_PER_METER;
 	
 	// --- Set Position Flags ---
-	RX_StepperStatus.info.z_in_ref = ((RX_StepperStatus.info.ref_done == 1)
-		&& (abs(RX_StepperStatus.posZ - POS_STORED_UM) <= 10)
-		&& (RX_StepperStatus.info.x_in_ref == 1));
+	RX_StepperStatus.info.z_in_ref   = ((RX_StepperStatus.info.ref_done == 1) && (abs(RX_StepperStatus.posZ - POS_STORED_UM)     <= 10) && (RX_StepperStatus.info.x_in_ref == 1));
 	RX_StepperStatus.info.z_in_print = RX_StepperStatus.info.z_in_ref;
-	RX_StepperStatus.info.z_in_cap = ((RX_StepperStatus.info.ref_done == 1)
-		&& (abs(RX_StepperStatus.posZ - POS_PRINTHEADS_UM) <= 10)
-		&& (RX_StepperStatus.info.x_in_ref == 0));
+	RX_StepperStatus.info.z_in_cap   = ((RX_StepperStatus.info.ref_done == 1) && (abs(RX_StepperStatus.posZ - POS_PRINTHEADS_UM) <= 10) && (RX_StepperStatus.info.x_in_ref == 0));
 
 	// --- set positions False while moving ---
 	if (RX_StepperStatus.info.moving) //  && (Fpga.stat->moving != 0))

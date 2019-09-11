@@ -637,6 +637,7 @@ void nios_check_errors(void)
 		if (_NiosStat->info.cooler_pcb_present)
 		{
 			if (_NiosStat->error.cooler_temp_hw)		ErrorFlag(WARN,		 (UINT32*)&RX_HBStatus[0].err, err_therm_cooler,      0, "Cooler Thermistor hardware");
+			/*
     		if (_NiosStat->error.cooler_overheated)	
 	    	{
 	    		if (ErrorFlag(WARN,		 (UINT32*)&RX_HBStatus[0].err, err_cooler_overheated, 0, "Cooler too hot (%d°C)", _NiosStat->cooler_temp / 1000))
@@ -652,6 +653,7 @@ void nios_check_errors(void)
 				}
 			}
 			else _CoolerErr=0;
+			*/
 		}
 		else
 		{

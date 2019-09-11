@@ -249,7 +249,7 @@ int tse_check_errors(int menu)
 	{
 		for (i=0; i<SIZEOF(_TSE); i++)
 		{
-			if (_TseErrors[i].remote_fault)				ErrorFlag(ERR_CONT, &_TseErrors[i].flags, 0x00, 0, "TSE: Remote fault occurred on UDP %d", i);
+//			if (_TseErrors[i].remote_fault)				ErrorFlag(ERR_CONT, &_TseErrors[i].flags, 0x00, 0, "TSE: Remote fault occurred on UDP %d", i);
 			if (_TseErrors[i].link_down_fault)			ErrorFlag(ERR_CONT, &_TseErrors[i].flags, 0x01, 0, "TSE: Link-down occurred on UDP %d", i);
 			if (_TseErrors[i].parallel_detect_fault)	ErrorFlag(ERR_CONT, &_TseErrors[i].flags, 0x02, 0, "TSE: Parallel detect fault occurred on UDP %d", i);
 			if (_TseErrors[i].receive_error)			ErrorFlag(ERR_CONT, &_TseErrors[i].flags, 0x04,	0, "TSE: Receive error occurred on UDP %d", i);
