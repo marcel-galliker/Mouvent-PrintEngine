@@ -29,12 +29,6 @@ namespace RX_DigiPrint.Models
 
         private Label _Label;
         
-        //--- round --------------------------
-        private double round(double val)
-        {
-            return (int)(val*100+0.5)/100.0;
-        }
-
         //--- Property IsSelected ---------------------------------------
         private bool _IsSelected = false;
         public bool IsSelected
@@ -149,7 +143,7 @@ namespace RX_DigiPrint.Models
         public Double SrcWidth
         {
             get { return _SrcWidth; }
-            set { SetProperty(ref _SrcWidth, round(value)); }
+            set { SetProperty(ref _SrcWidth, Math.Round(value,3)); }
         }
 
         //--- Property SrcHeight ---------------------------------------
@@ -157,7 +151,7 @@ namespace RX_DigiPrint.Models
         public Double SrcHeight
         {
             get { return _SrcHeight; }
-            set { SetProperty(ref _SrcHeight, round(value)); }
+            set { SetProperty(ref _SrcHeight, Math.Round(value,3)); }
         }
 
         //--- Property DropSizes ---------------------------------------
@@ -521,7 +515,7 @@ namespace RX_DigiPrint.Models
         public Double PageWidth
         {
             get { return _PageWidth; }
-            set { if (SetProperty(ref _PageWidth, round(value))) do_checks(); }
+            set { if (SetProperty(ref _PageWidth, Math.Round(value, 3))) do_checks(); }
         }
         
         //--- PageHeight -----------------------------
@@ -529,7 +523,7 @@ namespace RX_DigiPrint.Models
         public Double PageHeight
         {
             get { return _PageHeight; }
-            set { if (SetProperty(ref _PageHeight, round(value))) do_checks(); }
+            set { if (SetProperty(ref _PageHeight, Math.Round(value, 3))) do_checks(); }
         }
 
         //--- PageMargin -----------------------------
@@ -537,7 +531,7 @@ namespace RX_DigiPrint.Models
         public Double PageMargin
         {
             get { return _PageMargin; }
-            set { Changed |= SetProperty(ref _PageMargin, round(value));}
+            set { Changed |= SetProperty(ref _PageMargin, Math.Round(value, 3));}
         }
 
         //--- Property PrintGoMode ---------------------------------------

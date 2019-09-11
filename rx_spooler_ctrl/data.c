@@ -521,7 +521,7 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 	char *tiffErr;
 	
 //	Error(LOG, 0, "data_load id=%d, page=%d, copy=%d, scan=%d", id->id, id->page, id->copy, id->scan);
-	TrPrintfL(TRUE, "data_load id=%d, page=%d, copy=%d, scan=%d, data_load >>%s<<", id->id, id->page, id->copy, id->scan, filepath);
+	TrPrintfL(TRUE, "data_load id=%d, page=%d, copy=%d, scan=%d, offsetPx=%d, data_load >>%s<<", id->id, id->page, id->copy, id->scan, offsetPx, filepath);
 	TrPrintfL(TRUE, "FirtPage=%d, LastPage=%d", flags & FLAG_SMP_FIRST_PAGE, flags & FLAG_SMP_LAST_PAGE);
 	
 	if (flags & FLAG_SMP_LAST_PAGE) 
@@ -542,7 +542,6 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 				if (RX_Color[color].offsetPx!=_LastColorOffset[color]) newOffsets =TRUE;
 				_LastColorOffset[color] = RX_Color[color].offsetPx;
 			}
-			 
 			if (offsetPx != _LastOffset)
 			{
 				_LastOffset = offsetPx;

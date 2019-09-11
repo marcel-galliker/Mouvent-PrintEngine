@@ -1,13 +1,8 @@
-﻿using Infragistics.Windows.Editors;
-using RX_Common;
-using RX_DigiPrint.Models;
+﻿using RX_DigiPrint.Models;
 using RX_DigiPrint.Models.Enums;
 using RX_DigiPrint.Services;
-using System;
-using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
 
 
 namespace RX_DigiPrint.Views.PrintQueueView

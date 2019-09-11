@@ -61,7 +61,7 @@ int handle_headCtrl_msg(RX_SOCKET socket, void *msg, int len, struct sockaddr *s
 	reply = REPLY_OK;
 	SMsgHdr *phdr = (SMsgHdr*)msg;
 
-	TrPrintfL(TRUE, "received Head[%d].MsgId=0x%08x", headNo, phdr->msgId);
+//	TrPrintfL(TRUE, "received Head[%d].MsgId=0x%08x", headNo, phdr->msgId);
 	
 	switch (phdr->msgId)
 	{

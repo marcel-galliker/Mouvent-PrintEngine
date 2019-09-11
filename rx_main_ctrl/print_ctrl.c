@@ -197,23 +197,6 @@ int pc_stop_printing(int userStop)
 	||  RX_PrinterStatus.printState==ps_ready_power
 	|| (RX_PrinterStatus.printState==ps_printing && RX_PrinterStatus.printedCnt >= RX_PrinterStatus.sentCnt))
 	{
-		/*
-		RX_PrinterStatus.printState=ps_stopping;
-		gui_send_printer_status(&RX_PrinterStatus);
-		if (!arg_simuPLC)
-		{
-//			if (RX_Config.printer.type==printer_cleaf) step_handle_gui_msg(INVALID_SOCKET, CMD_CAP_CAPPING_POS, NULL, 0);
-			if (RX_Config.printer.type==printer_cleaf) step_handle_gui_msg(INVALID_SOCKET, CMD_CAP_UP_POS, NULL, 0);
-			else if (!_Scanning) step_handle_gui_msg(INVALID_SOCKET, CMD_CAP_UP_POS, NULL, 0);
-		}		
-//		Error(LOG, 0, "pc_stop_printing");
-		machine_stop_printing();	
-		ctrl_abort_printing();
-		pl_stop(&_Item);
-		pq_stop();
-		co_stop_printing();
-		if (RX_PrinterStatus.testMode) pc_off();
-		*/
 		pc_abort_printing();
 	}
 	else if (RX_PrinterStatus.printState==ps_printing)
@@ -223,7 +206,6 @@ int pc_stop_printing(int userStop)
 		pq_stopping(&_Item);
 		enc_stop_pg("pc_stop_printing");
 		gui_send_printer_status(&RX_PrinterStatus);
-//		machine_pause_printing();
 	}
 	return REPLY_OK;
 }
@@ -689,12 +671,12 @@ static int _print_next(void)
 					{
 						int img_offset=_Item.pageMargin + _Item.pageWidth;
 						int bar_width=RX_Spooler.barWidthPx*25400/1200;
-						if (img_offset>bar_width) img_offset = bar_width;
-					//	spool_print_file(&_Item.id, _DataPath, img_offset, 0, _Item.printGoMode, _Item.printGoDist, PQ_LENGTH_UNDEF, _Item.variable, _Item.scanMode, _Item.srcPages, _Item.id.copy >= _Item.copies);
+						if (img_offset>bar_width && RX_Config.printer.type!=printer_LH702) img_offset = bar_width;
 						{
 							SPrintQueueItem item;
 							int clearBlockUsed=(_Item.id.copy >= _Item.copies) || (_Item.firstPage!=_Item.lastPage);
-							if (_Item.pageMargin!=_PageMargin_Next) clearBlockUsed = TRUE;
+							if (_Item.pageMargin!=_PageMargin_Next) 
+								clearBlockUsed = TRUE;
 							memcpy(&item, &_Item, sizeof(item));
 							item.lengthUnit = PQ_LENGTH_UNDEF;
 							spool_print_file(&_Item.id, _DataPath, img_offset, 0, &item, clearBlockUsed);

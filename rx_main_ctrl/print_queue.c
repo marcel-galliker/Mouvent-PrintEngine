@@ -907,8 +907,13 @@ int pq_is_ready(void)
 	}
 	
 	if(RX_Config.printer.type == printer_LH702) 
-//		return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printedCnt) < 8;
-		return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printedCnt) < 32;
+	{
+		#ifdef DEBUG
+			return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printedCnt) < 8;
+		#else
+			return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printedCnt) < 32;
+		#endif
+	}
 	else if(RX_Config.printer.type == printer_cleaf) 
 		return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printedCnt) < 16;
 	else if (rx_def_is_scanning(RX_Config.printer.type))

@@ -127,7 +127,7 @@ static int _handle_spool_msg(RX_SOCKET socket, void *msg, int len, struct sockad
 	
 	for (spoolerNo=0; _Spooler[spoolerNo].socket!=socket; spoolerNo++);
 	
-	TrPrintfL(TRUE, "received Spooler[%d].MsgId=0x%08x", spoolerNo, phdr->msgId);
+//	TrPrintfL(TRUE, "received Spooler[%d].MsgId=0x%08x", spoolerNo, phdr->msgId);
 	
 	switch(phdr->msgId)
 	{

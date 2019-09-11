@@ -354,10 +354,18 @@ static void _enc_start_printing(int no, SPrintQueueItem *pitem, int restart)
 
 	memcpy(msg.corrRotPar, RX_Config.encoder[no].corrRotPar, sizeof(msg.corrRotPar));
 	msg.incPerMeter = _IncPerMeter+RX_Config.printer.offset.incPerMeter[no];
-	msg.pos_pg_fwd  = _Encoder[no].webOffset_mm*1000 + pitem->pageMargin - (_WakeupLen*25400/1200);
-	msg.pos_pg_bwd  = _Encoder[no].webOffset_mm*1000 + pitem->pageMargin + pitem->srcHeight + RX_Config.headDistMax + 13350 + (_WakeupLen*25400/1200);
-//	msg.pos_pg_bwd  = _Encoder[no].webOffset_mm*1000 + pitem->pageMargin + pitem->srcHeight + 13150; // not tested!
-			
+
+	if (_Scanning)
+	{
+		msg.pos_pg_fwd  = _Encoder[no].webOffset_mm*1000 + pitem->pageMargin - (_WakeupLen*25400/1200);
+		msg.pos_pg_bwd  = _Encoder[no].webOffset_mm*1000 + pitem->pageMargin + pitem->srcHeight + RX_Config.headDistMax + 13350 + (_WakeupLen*25400/1200);
+	//	msg.pos_pg_bwd  = _Encoder[no].webOffset_mm*1000 + pitem->pageMargin + pitem->srcHeight + 13150; // not tested!		
+	}
+	else
+	{
+		msg.pos_pg_fwd  = _Encoder[no].webOffset_mm*1000;
+		msg.pos_pg_bwd  = 10000000;			
+	}
 			
 	if (_Scanning && arg_simuEncoder)
 	{
@@ -616,7 +624,7 @@ static int _handle_enc_msg(RX_SOCKET socket, void *msg, int len, struct sockaddr
 			{
 				net_register_by_device(dev_enc, no);
 
-				TrPrintfL(TRUE, "received Encoder[%d].MsgId=0x%08x", no, phdr->msgId);
+			//	TrPrintfL(TRUE, "received Encoder[%d].MsgId=0x%08x", no, phdr->msgId);
 
 				switch(phdr->msgId)
 				{

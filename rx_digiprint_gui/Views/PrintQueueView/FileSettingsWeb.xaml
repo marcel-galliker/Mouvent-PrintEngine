@@ -204,7 +204,7 @@
                 <TextBlock  Grid.Row="2" Grid.Column="3" Text="m/min" Margin="5,0,0,0"/>
 
                 <TextBlock          Grid.Row="3" Grid.Column="0" Text="Image Margin" />
-                <common:RxNumBox    Grid.Row="3" Grid.Column="1" Text="{Binding PageMargin}" HorizontalAlignment="Stretch" Min="0"/>
+                <common:RxNumBox    Grid.Row="3" Grid.Column="1" Text="{Binding PageMargin}" HorizontalAlignment="Stretch"/>
                 <TextBlock          Grid.Row="3" Grid.Column="2" Text="mm" Margin="5,0,0,0" />
 
                 <TextBlock Grid.Row="4" Grid.Column="0" Text="PrintGo Mode" VerticalAlignment="Center"/>

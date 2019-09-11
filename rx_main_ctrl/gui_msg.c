@@ -109,9 +109,7 @@ int handle_gui_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sende
 {
 	SMsgHdr* phdr = (SMsgHdr*)pmsg;
 
-//	TrPrintfL(TRUE, "GUI Received id=0x%04x", phdr->msgId);
-	
-	TrPrintfL(TRUE, "received GUI.MsgId=0x%08x", phdr->msgId);
+//	TrPrintfL(TRUE, "received GUI.MsgId=0x%08x", phdr->msgId);
 		
 	if (FALSE)
 	{
