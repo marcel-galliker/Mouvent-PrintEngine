@@ -18,6 +18,8 @@
 	#include <sys/time.h>
 #endif
 
+#undef  PRODLOG	// bug in library!!!
+
 #include "libxl.h"
 #include "rx_file.h"
 #include "rx_threads.h"
