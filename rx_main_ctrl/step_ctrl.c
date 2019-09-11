@@ -98,8 +98,13 @@ static void* _step_thread(void *par)
 				net_device_to_ipaddr(dev_stepper, i, addr, sizeof(addr));
 				if (sok_open_client_2(&_step_Socket[i], addr, PORT_CTRL_STEPPER, SOCK_STREAM, _step_handle_msg, _setp_socket_closed)== REPLY_OK)
 				{
-					Error(LOG, 0, "Socket[%d] Connected, _StepperType=%d", i, _StepperType);
+					ErrorEx(dev_stepper, i, LOG, 0, "connected");
 					_step_set_config(i);
+					if (i==1 && (RX_Config.printer.type==printer_TX801 || RX_Config.printer.type==printer_TX802)) 
+					{
+						RX_PrinterStatus.txRobot = TRUE;
+						Error(LOG, 0, "Robot connected");
+					}
 				}			
 			}
 		}
@@ -128,10 +133,18 @@ static int _setp_socket_closed(RX_SOCKET socket, const char *peerName)
 			default: 			steps_init		(   INVALID_SOCKET);
 			}
 			memset(&RX_StepperStatus, 0, sizeof(RX_StepperStatus));
+			if (i==1) RX_PrinterStatus.txRobot = FALSE;
 			return REPLY_OK;				
 		}
 	}
 	return REPLY_OK;
+}
+
+//--- step_active -------------------
+int	 step_active(int no)
+{
+	if (no>=0 && no<SIZEOF(_step_Socket)) return (_step_Socket[no]!=INVALID_SOCKET);
+	return FALSE;
 }
 
 //--- _step_handle_msg -------------------------------------------------------
@@ -197,58 +210,157 @@ int	 step_slide_enabled(void)
 }
 */
 
-//--- step_to_purge_pos ----------------------------------
-int	 step_to_purge_pos(int no)
+//--- step_lift_to_wipe_pos ----------------------------------
+void step_lift_to_wipe_pos(EnFluidCtrlMode mode)
 {
-	switch(_StepperType)
+	switch (_StepperType)
 	{
-	case STEPPER_TX:	return steptx_to_purge_pos(no);
-//	case STEPPER_LB:	return steplb_to_purge_pos(no);
-//	case STEPPER_TEST:  return steptest_to_purge_pos(no);
-	default:			return REPLY_ERROR;
+	case STEPPER_TX:	steptx_lift_to_wipe_pos(mode); break;
+	default:			break;
 	}
-}
-														
-//--- step_in_purge_pos -------------------------------------
-int  step_in_purge_pos(void)
+}														
+
+//--- step_lift_in_wipe_pos -------------------------------------
+int  step_lift_in_wipe_pos(EnFluidCtrlMode mode)
 {
-	switch(_StepperType)
+	switch (_StepperType)
 	{
-	case STEPPER_TX:	return steptx_in_purge_pos();
-//	case STEPPER_LB:	return steplb_in_purge_pos();
-//	case STEPPER_TEST:	return steptest_in_purge_pos();
+	case STEPPER_TX:	return steptx_lift_in_wipe_pos(mode);
 	default:			return TRUE;
 	}
 }
 
-//--- step_lift_is_up ----------------------------------------------
-int  step_lift_is_up(void)
+//--- step_lift_to_print_pos ----------------------------------
+void step_lift_to_print_pos(void)
 {
 	switch(_StepperType)
 	{
-	case STEPPER_TX:	return steptx_lift_is_up();
-	case STEPPER_LB:	return steplb_lift_is_up();
+	case STEPPER_TX:	steptx_lift_to_print_pos();	break;
+	default:			break;
+	}
+}														
+
+//--- step_lift_in_print_pos -------------------------------------
+int  step_lift_in_print_pos(void)
+{
+	switch(_StepperType)
+	{
+	case STEPPER_TX:	return steptx_lift_in_print_pos();
 	default:			return TRUE;
 	}
 }
 
-//--- step_wipe_start ------------------------------------------------
-int  step_wipe_start(int no)
+//--- step_lift_to_up_pos ----------------------------------------------
+void  step_lift_to_up_pos(void)
 {
 	switch(_StepperType)
 	{
-	case STEPPER_TX:	return steptx_wipe_start(no);
-	default:			return REPLY_ERROR;
+	case STEPPER_TX:	steptx_lift_to_up_pos(); break;
+	case STEPPER_LB:	steplb_lift_to_up_pos(); break;
+	default:			break;
 	}
 }
 
-//--- step_wipe_done ------------------------------------------------
-int  step_wipe_done(void)
+//--- step_lift_in_up_pos ----------------------------------------------
+int  step_lift_in_up_pos(void)
 {
 	switch(_StepperType)
 	{
-	case STEPPER_TX:	return steptx_wipe_done();
+	case STEPPER_TX:	return steptx_lift_in_up_pos();
+	case STEPPER_LB:	return steplb_lift_in_up_pos();
 	default:			return TRUE;
+	}
+}
+
+//--- step_lift_stop -----------------------------------------------------
+void step_lift_stop(void)
+{
+	switch (_StepperType)
+	{
+	case STEPPER_TX:	steptx_lift_stop(); break;
+	default: break;
+	}
+}
+
+//--- step_rob_reference_done -------------------------------
+int step_rob_reference_done(void)
+{
+	switch (_StepperType)
+	{
+	case STEPPER_TX:	return steptx_rob_reference_done(); break;
+	default:			break;
+	}
+	return REPLY_OK;
+}
+
+//--- step_rob_to_center_position ---------------------------
+void step_rob_to_center_pos(void)
+{
+	switch (_StepperType)
+	{
+	case STEPPER_TX: steptx_rob_to_center_pos(); break;
+	default: break;
+	}
+
+}
+
+//--- step_rob_do_reference ---------------------------------
+void step_rob_do_reference(void)
+{
+	switch (_StepperType)
+	{
+	case STEPPER_TX:	 steptx_rob_do_reference(); break;
+	default:			break;
+	}
+}
+
+//--- step_rob_to_wipe_pos ----------------------------------
+void step_rob_to_wipe_pos(EnFluidCtrlMode mode)
+{
+	switch(_StepperType)
+	{
+	case STEPPER_TX:	steptx_rob_to_wipe_pos(mode); break;
+	default:			break;
+	}	
+}
+
+//--- step_rob_in_wipe_pos ----------------------------------
+int step_rob_in_wipe_pos(EnFluidCtrlMode mode)
+{
+	switch(_StepperType)
+	{
+	case STEPPER_TX:	return steptx_rob_in_wipe_pos(mode);
+	default:			break;
+	}
+	return FALSE;
+}
+
+//--- step_rob_wipe_start ------------------------------------------------
+void step_rob_wipe_start(EnFluidCtrlMode mode)
+{
+	switch(_StepperType)
+	{
+	case STEPPER_TX:	steptx_rob_wipe_start(mode); break;
+	default:			break;
+	}
+}
+
+//--- step_rob_wipe_done ------------------------------------------------
+int  step_rob_wipe_done(EnFluidCtrlMode mode)
+{
+	switch(_StepperType)
+	{
+	case STEPPER_TX:	return steptx_rob_wipe_done();
+	default:			return TRUE;
+	}
+}
+//--- step_rob_stop -----------------------------------------------------
+void step_rob_stop(void)
+{
+	switch (_StepperType)
+	{
+	case STEPPER_TX:	steptx_rob_stop(); break;
+	default: break;
 	}
 }
 
@@ -258,7 +370,7 @@ int	 tt_cap_to_print_pos(void)
 	switch(_StepperType)
 	{
 	case STEPPER_CLEAF: stepc_to_print_pos();		break;
-	case STEPPER_TX:    steptx_to_print_pos();		break;
+	case STEPPER_TX:    steptx_lift_to_print_pos();	break;
 	case STEPPER_LB:    steplb_to_print_pos();		break;
 	case STEPPER_DP:    stepdp_to_print_pos();		break;
 	case STEPPER_TEST:  steptest_to_print_pos();	break;
@@ -279,27 +391,25 @@ int	 step_do_test(SStepperMotorTest *pmsg)
 }
 
 //--- step_set_vent -------------------------------------------------------
-int step_set_vent(int speed)
+void step_set_vent(int speed)
 {
 	INT32 value;
 	if(speed) value=20;
 	else      value=0;
 	sok_send_2(&_step_Socket[0], CMD_CAP_VENT, sizeof(value), &value);
-	return REPLY_OK;			
 }
 
 //--- step_handle_gui_msg------------------------------------------------------------------
-int  step_abort_printing(void)
+void  step_abort_printing(void)
 {
 	switch(_StepperType)
 	{
-	case STEPPER_CLEAF:	return stepc_abort_printing();
-	case STEPPER_TX:    step_set_vent(0);
-						return REPLY_OK;
-	case STEPPER_LB:    return steplb_abort_printing();
-	case STEPPER_DP:    return stepdp_abort_printing();
-	case STEPPER_TEST:  return REPLY_OK;
-	default:			return REPLY_OK;
+	case STEPPER_CLEAF:	stepc_abort_printing();		break;
+	case STEPPER_TX:    step_set_vent(0);			break;
+	case STEPPER_LB:    steplb_abort_printing();	break;
+	case STEPPER_DP:    stepdp_abort_printing();	break;
+	case STEPPER_TEST:  break;
+	default:			break;
 	}					
 }
 
@@ -333,7 +443,7 @@ static void _step_set_config(int no)
 }
 
 //--- step_set_config -------------------------------------------------
-int step_set_config(void)
+int step_set_config(void)				
 {
 	switch(RX_Config.printer.type)
 	{

@@ -44,8 +44,7 @@ void stepdp_init(int no, RX_SOCKET psocket)
 //--- steplb_handle_gui_msg------------------------------------------------------------------
 int	 stepdp_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen)
 {	
-	int no;
-	for (no=0; no<SIZEOF(_step_socket); no++)
+	for (int no=0; no<SIZEOF(_step_socket); no++)
 	{
 		if (_step_socket[no]!=INVALID_SOCKET)
 		{
@@ -110,7 +109,6 @@ int	 stepdp_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen
 //--- steplb_handle_Status ----------------------------------------------------------------------
 int stepdp_handle_status(int no, SStepperStat *pStatus)
 {
-	int i;
 	ETestTableInfo info;
 
 	/*
@@ -131,7 +129,7 @@ int stepdp_handle_status(int no, SStepperStat *pStatus)
 			
 //	TrPrintf(TRUE, "steplb_handle_Status(%d)", no);
 	
-	for (i=0; i<STEPPER_CNT; i++)
+	for (int i=0; i<STEPPER_CNT; i++)
 	{
 		if (_step_socket[i]!=INVALID_SOCKET)
 		{
@@ -177,7 +175,10 @@ int	 stepdp_to_print_pos(void)
 	_AbortPrinting = FALSE;
 	for (int no=0; no<SIZEOF(_step_socket); no++)
 	{
-		sok_send_2(&_step_socket[no], CMD_CAP_PRINT_POS, sizeof(RX_Config.stepper.print_height), &RX_Config.stepper.print_height);
+		if (_step_socket[no]!=INVALID_SOCKET)
+		{
+			sok_send_2(&_step_socket[no], CMD_CAP_PRINT_POS, sizeof(RX_Config.stepper.print_height), &RX_Config.stepper.print_height);
+		}
 	}
 	return REPLY_OK;									
 }
@@ -196,8 +197,12 @@ int	 stepdp_to_up_pos(void)
 {
 	for (int no=0; no<SIZEOF(_step_socket); no++)
 	{
-		sok_send_2(&_step_socket[no], CMD_CAP_UP_POS, 0, NULL);
+		if (_step_socket[no]!=INVALID_SOCKET)
+		{
+			sok_send_2(&_step_socket[no], CMD_CAP_UP_POS, 0, NULL);
+		}
 	}
 	_AbortPrinting = FALSE;
 	return REPLY_OK;									
 }
+

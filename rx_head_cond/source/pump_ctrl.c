@@ -432,30 +432,20 @@ void pump_tick_10ms(void)
 						else 						 RX_Status.mode = ctrl_offset_cal;
                         break;    
             
-		case ctrl_cap:
-		case ctrl_cap_step1:
-		case ctrl_cap_step2:
-		case ctrl_cap_step3:
-		case ctrl_cap_step4:
-						temp_ctrl_on(FALSE);
-						turn_off_pump();
-						max_pressure = MBAR_500;
-						RX_Status.mode = RX_Config.mode;
-						break;
-		case ctrl_wipe:
-		case ctrl_wetwipe:
-		case ctrl_wash:
-		case ctrl_wipe_step1:
-		case ctrl_wipe_step2:
-						temp_ctrl_on(FALSE);
-						turn_off_pump();
-						max_pressure = MBAR_500;
-                        RX_Status.mode = RX_Config.mode;
-						break;
-		default:				
-                        turn_off_pump();
-                        temp_ctrl_on(FALSE);
-						RX_Status.mode = ctrl_undef;
+		
+		default:		if (RX_Config.mode>=ctrl_wipe && RX_Config.mode<ctrl_fill)
+						{						
+							temp_ctrl_on(FALSE);
+							turn_off_pump();
+							max_pressure = MBAR_500;
+							RX_Status.mode = RX_Config.mode;
+						}
+						else
+						{
+							turn_off_pump();
+							temp_ctrl_on(FALSE);
+							RX_Status.mode = ctrl_undef;
+						}
 						break; 
 	}
 	    

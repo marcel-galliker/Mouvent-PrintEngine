@@ -26,10 +26,6 @@
                     <ColumnDefinition Width="auto"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <StackPanel Grid.Row="0" Grid.ColumnSpan="3" Orientation="Horizontal">
-                    <TextBlock Text="State: "/>
-                    <TextBlock Text="{Binding State, Converter={StaticResource CleaningState_Converter}}"/>
-                </StackPanel>
                 <CheckBox x:Name="Button_Stop" Grid.Row="1" Content="STOP"  Style="{DynamicResource RxCommandButton}" Margin="10" Click="CapStop_clicked" FontWeight="Bold"/>
                 <Grid Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2">
                     <StackPanel Orientation="Horizontal">

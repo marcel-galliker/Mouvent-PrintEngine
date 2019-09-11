@@ -21,12 +21,26 @@ int	 steptx_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen
 
 int  steptx_handle_status(int stepperNo, SStepperStat *pStatus);
 
-int	 steptx_to_print_pos(void);
-int	 steptx_to_up_pos(void);
-int	 steptx_lift_is_up(void);
+void steptx_lift_to_wipe_pos(EnFluidCtrlMode mode);
+int  steptx_lift_in_wipe_pos(EnFluidCtrlMode mode);
 
-int	 steptx_to_purge_pos(int no);
-int  steptx_in_purge_pos(void);
+int	 steptx_lift_to_print_pos(void);
+int	 steptx_lift_in_print_pos(void);
 
-int	 steptx_wipe_start(int no);
-int	 steptx_wipe_done(void);
+int	 steptx_lift_to_up_pos(void);
+int	 steptx_lift_in_up_pos(void);
+
+void steptx_lift_stop(void);
+
+void steptx_rob_do_reference(void);
+int  steptx_rob_reference_done(void);
+
+void steptx_rob_to_center_pos(void);
+
+void steptx_rob_to_wipe_pos(EnFluidCtrlMode mode);
+int  steptx_rob_in_wipe_pos(EnFluidCtrlMode mode);
+
+int	 steptx_rob_wipe_start(EnFluidCtrlMode mode);
+int	 steptx_rob_wipe_done(void);
+
+void steptx_rob_stop(void);

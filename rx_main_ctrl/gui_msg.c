@@ -772,7 +772,7 @@ static void _do_get_ink_def(RX_SOCKET socket)
 //--- _do_head_fluidCtrlMode ---
 static void _do_head_fluidCtrlMode(RX_SOCKET socket, SFluidCtrlCmd* pmsg)
 {
-	if(pmsg->ctrlMode == ctrl_wipe) step_wipe_start(pmsg->no);
+	if(pmsg->ctrlMode == ctrl_wipe) step_rob_wipe_start(ctrl_wipe);
 	else if (pmsg->ctrlMode == ctrl_off) ctrl_send_head_fluidCtrlMode(pmsg->no, pmsg->ctrlMode, FALSE, TRUE);
 	else ctrl_send_head_fluidCtrlMode(pmsg->no, pmsg->ctrlMode, TRUE, TRUE);
 }

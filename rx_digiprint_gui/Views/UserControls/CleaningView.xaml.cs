@@ -47,8 +47,10 @@ namespace RX_DigiPrint.Views.UserControls
                 LaserTX.Visibility            = visibility; 
                 LaserVal.Visibility           = visibility;
 
-                visibility = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_DP803) ? Visibility.Visible : Visibility.Collapsed;
+                visibility = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_DP803) ? Visibility.Visible : Visibility.Collapsed;
                 Button_DripPans.Visibility    = visibility;
+
+                visibility = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_DP803) ? Visibility.Visible : Visibility.Collapsed;
                 Button_DripPansCAP.Visibility = visibility;
                 Button_DripPansREF.Visibility = visibility;
                 Button_Fill.Visibility        = visibility;
@@ -123,14 +125,14 @@ namespace RX_DigiPrint.Views.UserControls
             RxGlobals.RxInterface.SendCommand(TcpIp.CMD_CLN_DRIP_PANS);
         }
 
-        //--- CapDripPans_clicked -------------------------------------------
+        //--- CapDripPansCAP_clicked -------------------------------------------
         private void CapDripPansCAP_clicked(object sender, RoutedEventArgs e)
         {
             _button_active(sender as CheckBox);
             RxGlobals.RxInterface.SendCommand(TcpIp.CMD_CLN_DRIP_PANS_CAP);
         }
 
-        //--- CapDripPans_clicked -------------------------------------------
+        //--- CapDripPansREF_clicked -------------------------------------------
         private void CapDripPansREF_clicked(object sender, RoutedEventArgs e)
         {
             _button_active(sender as CheckBox);

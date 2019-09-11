@@ -49,10 +49,10 @@ static SMovePar	_ParZ_cap;
 static int		_CmdRunning=0;
 static int		_PrintPos_New=0;
 static int		_PrintPos_Act=0;
-static int		_CapHight = 0;
-static int		_WetWipeHight = 0;
-static int		_WipeHight = 0;
-static int		_VacuumHight = 0;
+static int		_CapHight = -8700;
+static int		_WetWipeHight = -7200;
+static int		_WipeHight = -7700;
+static int		_VacuumHight = -8700;
 
 static int		_VentCtrl;
 static int		_VentCtrlDelay=0;
@@ -95,7 +95,7 @@ void tx801_init(void)
 	*/
 	_ParRef.speed		= 10000;
 	_ParRef.accel		= 5000;
-	_ParRef.current		= 150.0;
+	_ParRef.current		= 153.0;
 	_ParRef.stop_mux	= 0;
 	_ParRef.dis_mux_in	= 0;
 	_ParRef.stop_in		= ESTOP_UNUSED;
@@ -115,9 +115,9 @@ void tx801_init(void)
 	_ParZ_down.estop_level  = 0;
 	_ParZ_down.checkEncoder = TRUE;
 
-	_ParZ_cap.speed			= 2000;
-	_ParZ_cap.accel			= 2000;
-	_ParZ_cap.current		= 100.0;
+	_ParZ_cap.speed			= 5000;
+	_ParZ_cap.accel			= 1500;
+	_ParZ_cap.current		= 200.0;
 	_ParZ_cap.stop_mux		= FALSE;
 	_ParZ_cap.dis_mux_in	= 0;
 	_ParZ_cap.stop_in       = ESTOP_UNUSED;
@@ -146,7 +146,7 @@ void tx801_main(int ticks, int menu)
 	RX_StepperStatus.info.headUpInput_2 = fpga_input(HEAD_UP_IN_2);
 	RX_StepperStatus.info.headUpInput_3 = fpga_input(HEAD_UP_IN_3);
 	RX_StepperStatus.posZ				  = TX_REF_HEIGHT - _steps_2_micron(motor_get_step(MOTOR_Z_0));
-
+	RX_StepperStatus.info.scannerEnable	= RX_StepperStatus.info.ref_done && RX_StepperStatus.posZ>=TX_PRINT_POS_MIN;
 	{
 		int i;
 		RX_StepperStatus.inputs = Fpga.stat->input;
@@ -168,7 +168,10 @@ void tx801_main(int ticks, int menu)
 	{
 		RX_StepperStatus.info.z_in_ref   = FALSE;
 		RX_StepperStatus.info.z_in_print = FALSE;
-		RX_StepperStatus.info.z_in_cap   = FALSE;			
+		RX_StepperStatus.info.z_in_cap   = FALSE;
+		RX_StepperStatus.robinfo.z_in_wipe = FALSE;
+		RX_StepperStatus.robinfo.z_in_vacuum = FALSE;
+		RX_StepperStatus.robinfo.z_in_wetwipe = FALSE;
 	}
 	if (_CmdRunning && motors_move_done(MOTOR_Z_BITS)) 
 	{
@@ -211,6 +214,9 @@ void tx801_main(int ticks, int menu)
 		RX_StepperStatus.info.z_in_ref    = ((_CmdRunning==CMD_CAP_REFERENCE || _CmdRunning==CMD_CAP_UP_POS) && RX_StepperStatus.info.ref_done);
 		RX_StepperStatus.info.z_in_print  = (_CmdRunning==CMD_CAP_PRINT_POS && RX_StepperStatus.info.ref_done);
 		RX_StepperStatus.info.z_in_cap    = (_CmdRunning==CMD_CAP_CAPPING_POS);
+		RX_StepperStatus.robinfo.z_in_wipe = (_CmdRunning == CMD_CAP_WIPE_POS);
+		RX_StepperStatus.robinfo.z_in_vacuum = (_CmdRunning == CMD_CAP_VACUUM_POS);
+		RX_StepperStatus.robinfo.z_in_wetwipe = (_CmdRunning == CMD_CAP_WETWIPE_POS);
 		if (_CmdRunning==CMD_CAP_REFERENCE && _PrintPos_New) 
 		{
 			_tx801_move_to_pos(CMD_CAP_PRINT_POS, _PrintPos_New);
@@ -465,8 +471,35 @@ int  tx801_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									{
 										_CmdRunning  = msgId;
 										RX_StepperStatus.info.moving = TRUE;
-										steps = _micron_2_steps(TX_REF_HEIGHT - RX_StepperCfg.cap_height);
+										steps = _micron_2_steps(TX_REF_HEIGHT - _CapHight);
 										motors_move_to_step	(MOTOR_Z_BITS,  &_ParZ_cap, steps);
+									}
+									break;
+		
+	case CMD_CAP_WETWIPE_POS:		if (!_CmdRunning)
+									{
+										_CmdRunning  = msgId;
+										RX_StepperStatus.info.moving = TRUE;
+										steps = _micron_2_steps(TX_REF_HEIGHT - _WetWipeHight);
+										motors_move_to_step(MOTOR_Z_BITS, &_ParZ_cap, steps);
+									}
+									break;
+		
+	case CMD_CAP_WIPE_POS:			if (!_CmdRunning)
+									{
+										_CmdRunning = msgId;
+										RX_StepperStatus.info.moving = TRUE;
+										steps = _micron_2_steps(TX_REF_HEIGHT - _WipeHight);
+										motors_move_to_step(MOTOR_Z_BITS, &_ParZ_cap, steps);
+									}
+									break;
+		
+	case CMD_CAP_VACUUM_POS:		if (!_CmdRunning)
+									{
+										_CmdRunning = msgId;
+										RX_StepperStatus.info.moving = TRUE;
+										steps = _micron_2_steps(TX_REF_HEIGHT - _VacuumHight);
+										motors_move_to_step(MOTOR_Z_BITS, &_ParZ_cap, steps);
 									}
 									break;
 	

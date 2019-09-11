@@ -39,6 +39,7 @@ static EnFluidCtrlMode	_FlushCtrlMode = ctrl_undef;
 static EnFluidCtrlMode  _purgeCtrlMode = ctrl_undef;
 static int				_FlushCtrl = FALSE;
 static int				_Scanning;
+static int				_Checking_Reference = FALSE;
 
 //--- prototypes -----------------------
 static void* _fluid_thread(void *par);
@@ -459,15 +460,18 @@ static void _do_scales_get_cfg(SScalesCfgMsg *pmsg)
 //--- _control -------------------------------------------------
 static void _control(int fluidNo)
 {
-	int i;
+	int i, j;
 	int no = fluidNo*INK_PER_BOARD;
+	static EnFluidCtrlMode _wipemode;
+	static EnFluidCtrlMode _actmode;
+	static int printing;
 	SInkSupplyStat *_stat = &_FluidStatus[no];
 
 	for (i=0; i<INK_PER_BOARD; i++, _stat++, no++)
 	{
 		if (ctrl_check_all_heads_in_fluidCtrlMode(no, _stat->ctrlMode))
 		{
-	//		Error(LOG, 0, "Fluid[%d] in mode >>%s<<", no, FluidCtrlModeStr(_stat->ctrlMode));		
+	//		Error(LOG, 0, "Fluid[%d] in mode >>%s<<", no, FluidCtrlModeStr(_stat->ctrlMode));
 			switch(_stat->ctrlMode)
 			{
 				case ctrl_check_step0:	_send_ctrlMode(no, ctrl_off, TRUE);	break;
@@ -496,127 +500,401 @@ static void _control(int fluidNo)
 				case ctrl_purge:
 				case ctrl_purge_micro:	
 				case ctrl_purge_soft:
-				case ctrl_purge_hard:	// step_lift_to_up();
-										// step_handle_gui_msg(INVALID_SOCKET, CMD_CAP_UP_POS, NULL, 0);
-										_purgeCtrlMode = _stat->ctrlMode;
-										step_handle_gui_msg(INVALID_SOCKET, CMD_CAP_REFERENCE, NULL, 0);
-										_send_ctrlMode(no, ctrl_purge_step1, TRUE);	
-										break;
+				case ctrl_purge_hard:		step_lift_to_up_pos();
+											// step_handle_gui_msg(INVALID_SOCKET, CMD_CAP_UP_POS, NULL, 0);
+											_purgeCtrlMode = _stat->ctrlMode;
+											step_handle_gui_msg(INVALID_SOCKET, CMD_CAP_REFERENCE, NULL, 0);
+											_send_ctrlMode(no, ctrl_purge_step1, TRUE);	
+											break;
 				
-				case ctrl_purge_step1:	// if (step_lift_is_up())
-										// if (RX_StepperStatus.info.z_in_ref)
-										if (step_lift_is_up())
-										{
-											plc_to_purge_pos();
-											_send_ctrlMode(no, ctrl_purge_step2, TRUE);												
-										}
-										break;
+				case ctrl_purge_step1:		if (step_lift_in_up_pos())
+											{
+												if (_actmode!=_stat->ctrlMode)
+												{
+													_actmode=_stat->ctrlMode;
+													plc_to_purge_pos();
+													_send_ctrlMode(no, ctrl_purge_step2, TRUE);																										
+												}
+											}
+											break;
 								
-				case ctrl_purge_step2:	if (plc_in_purge_pos())
-										{
-										//	step_lift_to_purge();										
-											_send_ctrlMode(no, ctrl_purge_step3, TRUE);	
-										}
-										break;
-				
-				case ctrl_purge_step3:	// if (step_lift_in_purge())
-										{
-											_send_ctrlMode(no, ctrl_purge_step4, TRUE);												
-										}
-										break;
-				
-				case ctrl_purge_step4:
-									//	_send_ctrlMode(no, ctrl_wipe,		  TRUE);	
-										_send_ctrlMode(no, ctrl_off,		  TRUE);
-										if (_purgeCtrlMode==ctrl_purge_hard)
-										{
-											_Flushed &= (~0x01<<i);
-											setup_fluid_system(PATH_USER FILENAME_FLUID_STATE, &_Flushed, WRITE);				
-										}
-										break;
-										//	PLC CMD_MOVE_TO_WIPE
-										//	if plc_in-Wipe -> info stepper
-										//	stepper macht wipe
-										//	
+				case ctrl_purge_step2:		if (plc_in_purge_pos())
+											{
+												if (_actmode!=_stat->ctrlMode)
+												{
+													_actmode=_stat->ctrlMode;
+													_send_ctrlMode(no, ctrl_purge_step3, TRUE);												
+												}
+											}
+											break;
+				case ctrl_purge_step3:		if (_actmode!=_stat->ctrlMode)
+											{
+												_actmode=_stat->ctrlMode;
+												_send_ctrlMode(no, ctrl_purge_step4, TRUE);
+											}
+											break;
+				case ctrl_purge_step4:		if (_actmode!=_stat->ctrlMode)
+											{
+												_actmode=_stat->ctrlMode;
 										
-										// FLUSH
-										//	1: Köpfe auf UP
-										//	2: START SLIDE to PURGE-POS + Roboter auf CAPPING				
-				case ctrl_wipe:			
-				case ctrl_wetwipe:
-				case ctrl_wash:			plc_to_purge_pos();
-									//	step_rob_to_wipe_pos(_stat->ctrlMode);
-										_send_ctrlMode(no, ctrl_wipe_step1,	TRUE);
-										break;
-				
-				case ctrl_wipe_step1:	if (plc_in_purge_pos())// && step_rob_in_wipe_pos())
-										{
-											plc_to_wipe_pos();
-											_send_ctrlMode(no, ctrl_wipe_step2,	TRUE);										
-										}
-										break;
-				
-				case ctrl_wipe_step2:	if (plc_in_wipe_pos()) 
-										{
-										//	step_rob_wipe_start();										
-											_send_ctrlMode(no, ctrl_wipe_step3, TRUE);
-										}
-										break;
-				
-				case ctrl_cap:			plc_to_purge_pos();
-										_send_ctrlMode(no, ctrl_cap_step1, TRUE);
-										break;	
-				case ctrl_cap_step1:	if (plc_in_purge_pos()) 
-										{
-											// step_rob_to_cap_pos();
-											_send_ctrlMode(no, ctrl_cap_step2, TRUE);
-										}
-										break;				
-				case ctrl_cap_step2:	//if (step_rob_in_cap_pos()) 
-										{
-											plc_to_cap_pos();
-											_send_ctrlMode(no, ctrl_cap_step3, TRUE);
-										}
-										break;
-				case ctrl_cap_step3:	if (plc_in_cap_pos())
-										{
-										//	step_to_cap_pos();	
-											_send_ctrlMode(no, ctrl_cap_step4, TRUE);
-										}
-										break;
-				case ctrl_cap_step4:	//if (step_in_cap_pos())
-										{
-											_send_ctrlMode(no, ctrl_off, TRUE); 
-										}
-										break;				
-				
-				case ctrl_flush_night:		
-				case ctrl_flush_weekend:		
-				case ctrl_flush_week:	if (_Scanning) return;
-										if (step_in_purge_pos()) _send_ctrlMode(no, ctrl_flush_step1, TRUE); break;
-				case ctrl_flush_step1:	if (_Scanning) return;
-										_send_ctrlMode(no, ctrl_flush_step2, TRUE); break;
-                case ctrl_flush_step2:	if (_Scanning) return;
-										_send_ctrlMode(no, ctrl_flush_done, TRUE); break;
-                case ctrl_flush_done:	if (_Scanning) return;
-										ErrorEx(dev_fluid, fluidNo, LOG, 0, "Flush complete");
-										_send_ctrlMode(-1, ctrl_off, TRUE); 
-										break; 
+												if (_purgeCtrlMode==ctrl_purge_hard)
+												{
+													_Flushed &= ~(0x01<<no);
+													setup_fluid_system(PATH_USER FILENAME_FLUID_STATE, &_Flushed, WRITE);				
+												}
 
-				case ctrl_fill:			_send_ctrlMode(no, ctrl_fill_step1, TRUE);		break;
-			//	case ctrl_fill_step1:	wait for user input 
-				case ctrl_fill_step2:	_send_ctrlMode(no, ctrl_fill_step3, TRUE);		break;
-				case ctrl_fill_step3:	_send_ctrlMode(no, ctrl_print,TRUE);		break;
-
-				case ctrl_empty:		_send_ctrlMode(no, ctrl_empty_step1, TRUE);		break;					
-			//	case ctrl_empty_step1:	wait for user input 
-				case ctrl_empty_step2:	_send_ctrlMode(no, ctrl_off, TRUE);				break;
+												if (step_active(1)) _send_ctrlMode(no, ctrl_wipe, TRUE);														
+ 												else if (RX_PrinterStatus.printState==ps_pause) _send_ctrlMode(no, ctrl_print, TRUE);
+												else _send_ctrlMode(no, ctrl_off, TRUE);		
+											}
+											break;
+											//	PLC CMD_MOVE_TO_WIPE
+											//	if plc_in-Wipe -> info stepper
+											//	stepper macht wipe
+											//	
+											
+											// FLUSH
+											//	1: Köpfe auf UP
+											//	2: START SLIDE to PURGE-POS + Roboter auf CAPPING	
+				case ctrl_wetwipe:			step_lift_to_up_pos();
+											_send_ctrlMode(-1, ctrl_wetwipe_step1, TRUE);
+											_wipemode = _stat->ctrlMode;
+											break;
 				
-				case ctrl_cal_start:	_send_ctrlMode(no, ctrl_cal_step1,	 TRUE);	break;				
-				case ctrl_cal_step1:	_send_ctrlMode(no, ctrl_cal_step2,   TRUE);		break;
-				case ctrl_cal_step2:	_send_ctrlMode(no, ctrl_cal_step3,	 TRUE); break;
-				case ctrl_cal_step3:	_send_ctrlMode(no, ctrl_print, TRUE);    
-										break;
+				case ctrl_wetwipe_step1:	if (step_lift_in_up_pos() && step_rob_reference_done())
+											{
+												plc_to_wipe_pos();
+												step_rob_to_wipe_pos(_wipemode);
+												_send_ctrlMode(-1, ctrl_wetwipe_step2, TRUE);
+												_Checking_Reference = FALSE;
+											}
+											else if (step_lift_in_up_pos() && _Checking_Reference == FALSE)
+											{
+												_actmode=_stat->ctrlMode;
+												step_rob_do_reference();
+												_Checking_Reference = TRUE;
+											}
+											break;	
+				
+				case ctrl_wetwipe_step2:	if (plc_in_wipe_pos() && step_rob_in_wipe_pos(_wipemode))
+											{
+												if (_actmode!=_stat->ctrlMode)
+												{
+													_actmode=_stat->ctrlMode;
+													step_lift_to_wipe_pos(_wipemode);
+													_send_ctrlMode(-1, ctrl_wetwipe_step3, TRUE);
+												}
+											}
+											break;
+				
+				case ctrl_wetwipe_step3:	if (step_lift_in_wipe_pos(_wipemode))
+											{
+												if (_actmode!=_stat->ctrlMode)
+												{
+													_actmode=_stat->ctrlMode;
+													step_rob_wipe_start(_wipemode);
+													_send_ctrlMode(-1, ctrl_wetwipe_step4, TRUE);
+												}
+											}
+											break;
+				
+				case ctrl_wetwipe_step4:	if (step_rob_wipe_done(_wipemode))
+											{
+												if (_actmode!=_stat->ctrlMode)
+												{
+													_actmode=_stat->ctrlMode;
+													step_lift_to_up_pos();
+													//step_rob_to_center_pos();
+													_send_ctrlMode(-1, ctrl_wetwipe_step5, TRUE);
+												}
+											}
+											break;
+				
+				case ctrl_wetwipe_step5:	if (step_lift_in_up_pos())
+											{
+												_send_ctrlMode(-1, ctrl_wipe, TRUE);
+											}
+											break;
+				
+				case ctrl_wipe:						
+				case ctrl_wash:				
+										
+											step_lift_to_up_pos();
+											_send_ctrlMode(-1, ctrl_wipe_step1,	TRUE);
+											_wipemode = _stat->ctrlMode;
+											
+				
+											break;
+				
+				case ctrl_wipe_step1:		if (step_lift_in_up_pos() && step_rob_reference_done())
+											{
+												plc_to_wipe_pos();
+												step_rob_to_wipe_pos(_wipemode);
+												_send_ctrlMode(-1, ctrl_wipe_step2, TRUE);
+												_Checking_Reference = FALSE;
+											}
+											else if (step_lift_in_up_pos()&& _Checking_Reference == FALSE)
+											{
+												step_rob_do_reference();
+												_Checking_Reference = TRUE;
+											}
+											break;
+				
+				case ctrl_wipe_step2:		if (plc_in_wipe_pos() && step_rob_in_wipe_pos(_wipemode))
+											{
+												if (_actmode!=_stat->ctrlMode)
+												{
+													_actmode=_stat->ctrlMode;
+													step_lift_to_wipe_pos(_wipemode);
+													_send_ctrlMode(-1, ctrl_wipe_step3,	TRUE);
+												}
+											}
+											break;
+				
+				case ctrl_wipe_step3:		if (step_lift_in_wipe_pos(_wipemode))
+											{
+												if (_actmode!=_stat->ctrlMode)
+												{
+													_actmode=_stat->ctrlMode;
+													step_rob_wipe_start(_wipemode);
+													_send_ctrlMode(-1, ctrl_wipe_step4, TRUE);
+												}
+											}
+											break;
+
+				case ctrl_wipe_step4:		if (step_rob_wipe_done(_wipemode))
+											{
+												if (_actmode!=_stat->ctrlMode)
+												{
+													_actmode=_stat->ctrlMode;
+													step_lift_to_up_pos();
+													_send_ctrlMode(-1, ctrl_wipe_step5, TRUE);
+												}
+											}
+											break;
+
+				case ctrl_wipe_step5:		if (step_lift_in_up_pos())
+											{
+												if (_actmode!=_stat->ctrlMode)
+												{
+													_actmode=_stat->ctrlMode;
+													_send_ctrlMode(-1, ctrl_vacuum, TRUE);
+												}
+											}
+											break;
+				
+				case ctrl_vacuum:			step_lift_to_up_pos();
+											_send_ctrlMode(-1, ctrl_vacuum_step1, TRUE);
+											_wipemode = _stat->ctrlMode;
+											break;
+				
+				case ctrl_vacuum_step1:		if (step_lift_in_up_pos() && step_rob_reference_done())
+											{
+												plc_to_wipe_pos();
+												step_rob_to_wipe_pos(_wipemode);
+												_send_ctrlMode(-1, ctrl_vacuum_step2, TRUE);
+												_Checking_Reference = FALSE;
+											}
+											else if (step_lift_in_up_pos() && _Checking_Reference == FALSE)
+											{
+												step_rob_do_reference();
+												_Checking_Reference = TRUE;
+											}
+											break;
+				
+				case ctrl_vacuum_step2:		if (plc_in_wipe_pos() && step_rob_in_wipe_pos(_wipemode))
+											{
+												if (_actmode!=_stat->ctrlMode)
+												{
+													_actmode=_stat->ctrlMode;
+													step_lift_to_wipe_pos(_wipemode);
+													_send_ctrlMode(-1, ctrl_vacuum_step3, TRUE);
+												}
+											}
+											break;
+				
+				case ctrl_vacuum_step3:		if (step_lift_in_wipe_pos(_wipemode))
+											{
+												if (_actmode!=_stat->ctrlMode)
+												{
+													_actmode=_stat->ctrlMode;
+													step_rob_wipe_start(_wipemode);
+													_send_ctrlMode(-1, ctrl_vacuum_step4, TRUE);
+												}
+											}
+											break;
+				
+				case ctrl_vacuum_step4:		if (step_rob_wipe_done(_wipemode))
+											{
+												if (_actmode!=_stat->ctrlMode)
+												{
+													_actmode=_stat->ctrlMode;
+													step_lift_to_up_pos();
+													_send_ctrlMode(-1, ctrl_vacuum_step5, TRUE);
+												}
+											}
+											break;
+				
+				case ctrl_vacuum_step5:		if (step_lift_in_up_pos())
+											{
+												if (_actmode!=_stat->ctrlMode)
+												{
+													_actmode=_stat->ctrlMode;
+													step_rob_to_wipe_pos(ctrl_vacuum_step6);
+													_send_ctrlMode(-1, ctrl_vacuum_step6, TRUE);
+												}
+											}
+											break;
+				
+				case ctrl_vacuum_step6:		if (step_rob_in_wipe_pos(ctrl_vacuum_step6))
+											{
+												if (_actmode!=_stat->ctrlMode)
+												{
+													_actmode=_stat->ctrlMode;
+													step_rob_to_wipe_pos(_wipemode);
+													_send_ctrlMode(-1, ctrl_vacuum_step7, TRUE);
+												}
+											}
+											break;
+				
+				case ctrl_vacuum_step7:		if (step_rob_in_wipe_pos(_wipemode))
+											{
+												if (_actmode!=_stat->ctrlMode)
+												{
+													_actmode=_stat->ctrlMode;												
+													step_lift_to_wipe_pos(_wipemode);
+													_send_ctrlMode(-1, ctrl_vacuum_step8, TRUE);
+												}
+											}
+											break;
+				
+				case ctrl_vacuum_step8:		if (step_lift_in_wipe_pos(_wipemode))
+											{
+												if (_actmode!=_stat->ctrlMode)
+												{
+													_actmode=_stat->ctrlMode;
+													step_rob_wipe_start(_wipemode);
+													_send_ctrlMode(-1, ctrl_vacuum_step9, TRUE);
+												}
+											}
+											break;
+				
+				case ctrl_vacuum_step9:		if (step_rob_wipe_done(_wipemode))
+											{
+												if (_actmode!=_stat->ctrlMode)
+												{
+													_actmode=_stat->ctrlMode;
+													printing = (RX_PrinterStatus.printState==ps_pause);
+													if (printing) step_lift_to_print_pos();
+													else		  step_lift_to_up_pos();
+													_send_ctrlMode(-1, ctrl_vacuum_step10, TRUE);
+												}
+											}
+											break;
+				
+				case ctrl_vacuum_step10:	if ((printing && step_lift_in_print_pos()) ||  (!printing && step_lift_in_up_pos()))
+											{
+												if (_actmode!=_stat->ctrlMode)
+												{
+													_actmode=_stat->ctrlMode;
+													Error(LOG, 0, "ctrl_vacuum_step10 printState=%d", RX_PrinterStatus.printState);
+													if (printing) _send_ctrlMode(-1, ctrl_print, TRUE);																	
+													else		  _send_ctrlMode(-1, ctrl_off, TRUE);
+												}
+											}
+											break;
+				
+				case ctrl_cap:				step_lift_to_up_pos();
+											_send_ctrlMode(-1, ctrl_cap_step1, TRUE);
+											_wipemode = _stat->ctrlMode;
+											break;
+				
+				case ctrl_cap_step1:		if (step_lift_in_up_pos() && step_rob_reference_done())
+											{
+												plc_to_purge_pos();
+												_send_ctrlMode(-1, ctrl_cap_step2, TRUE);	
+												_Checking_Reference = FALSE;
+											}
+											else if (step_lift_in_up_pos() && _Checking_Reference == FALSE)
+											{
+												step_rob_do_reference();
+												_Checking_Reference = TRUE;
+											}
+											break;	 
+				
+				case ctrl_cap_step2:		if (plc_in_purge_pos()) 
+											{
+												if (_actmode!=_stat->ctrlMode)
+												{
+													_actmode=_stat->ctrlMode;												
+													step_rob_to_wipe_pos(_wipemode);
+													_send_ctrlMode(-1, ctrl_cap_step3, TRUE);
+												}
+											}
+											break;
+				case ctrl_cap_step3:		if (step_rob_in_wipe_pos(_wipemode))
+											{
+												if (_actmode!=_stat->ctrlMode)
+												{
+													_actmode=_stat->ctrlMode;												
+													plc_to_wipe_pos();
+													_send_ctrlMode(-1, ctrl_cap_step4, TRUE);
+												}
+											}
+											break;				
+				case ctrl_cap_step4:		if (plc_in_wipe_pos())
+											{
+												if (_actmode!=_stat->ctrlMode)
+												{
+													_actmode=_stat->ctrlMode;																								
+													step_lift_to_wipe_pos(_wipemode);
+													_send_ctrlMode(-1, ctrl_cap_step5, TRUE);
+												}
+											}
+											break;
+				case ctrl_cap_step5:		if (step_lift_in_wipe_pos(_wipemode))
+											{
+												if (_actmode!=_stat->ctrlMode)
+												{
+													_actmode=_stat->ctrlMode;												
+													_send_ctrlMode(-1, ctrl_off, TRUE); 
+												}
+											}
+											break;				
+				
+				case ctrl_flush_night:			
+				case ctrl_flush_weekend:			
+				case ctrl_flush_week:		if (_Scanning) return;
+											_send_ctrlMode(no, ctrl_flush_step1, TRUE); break;
+				case ctrl_flush_step1:		if (_Scanning) return;
+											_send_ctrlMode(no, ctrl_flush_step2, TRUE); break;
+                case ctrl_flush_step2:		if (_Scanning) return;
+											_send_ctrlMode(no, ctrl_flush_done, TRUE); break;
+                case ctrl_flush_done:		if (_Scanning) return;
+											ErrorEx(dev_fluid, fluidNo, LOG, 0, "Flush complete");
+											_send_ctrlMode(-1, ctrl_off, TRUE); 
+											break; 
+
+				case ctrl_fill:				_send_ctrlMode(no, ctrl_fill_step1, TRUE);		break;
+			//	case ctrl_fill_step1:		wait for user input 
+				case ctrl_fill_step2:		_send_ctrlMode(no, ctrl_fill_step3, TRUE);		break;
+				case ctrl_fill_step3:		_send_ctrlMode(no, ctrl_print,TRUE);		break;
+
+				case ctrl_empty:			_send_ctrlMode(no, ctrl_empty_step1, TRUE);		break;					
+			//	case ctrl_empty_step1:		wait for user input 
+				case ctrl_empty_step2:		_send_ctrlMode(no, ctrl_off, TRUE);				break;
+				
+				case ctrl_cal_start:		_send_ctrlMode(no, ctrl_cal_step1,	 TRUE);	break;				
+				case ctrl_cal_step1:		_send_ctrlMode(no, ctrl_cal_step2,   TRUE);		break;
+				case ctrl_cal_step2:		_send_ctrlMode(no, ctrl_cal_step3,	 TRUE); break;
+				case ctrl_cal_step3:		_send_ctrlMode(no, ctrl_print, TRUE);    
+											break;
+				
+				case ctrl_off:				_Checking_Reference = FALSE;
+											//step_rob_stop();
+											//step_lift_stop();
+					break;
+				
 			}
 		}
 	}
@@ -639,11 +917,11 @@ static void _control_flush(void)
 	{
 	case ctrl_flush_night:		
 	case ctrl_flush_weekend:		
-	case ctrl_flush_week:	// step_lift_to_up();	
+	case ctrl_flush_week:	step_lift_to_up_pos();	
 							_FlushCtrlMode=ctrl_flush_step1; 
 							break;
 		
-	case ctrl_flush_step1:	// if (step_lift_is_up()) 
+	case ctrl_flush_step1:	if (step_lift_in_up_pos()) 
 							{
 								plc_to_purge_pos();
 								_FlushCtrlMode=ctrl_flush_step2;
@@ -651,13 +929,6 @@ static void _control_flush(void)
 							break;
 		
     case ctrl_flush_step2:	if (plc_in_purge_pos())
-							{
-								//	step_lift_to_purge();
-								_FlushCtrlMode=ctrl_flush_step3;	
-							}
-							break;
-		
-    case ctrl_flush_step3:	// if (step_lift_in_purge())
 							{
 								_FlushCtrlMode=ctrl_flush_step4;
 							}
@@ -774,8 +1045,6 @@ void _send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 		{
 			if (ctrlMode>=ctrl_flush_night && ctrlMode<=ctrl_flush_week )
 			{
-				step_to_purge_pos(0);
-
 				cmd.hdr.msgId	= CMD_FLUID_CTRL_MODE;
 				cmd.hdr.msgLen	= sizeof(cmd);
 				cmd.no			= i%INK_PER_BOARD;
@@ -798,6 +1067,9 @@ void _send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 					ErrorEx(dev_fluid, i, WARN, 0, "Is FLUSHED. It must be purged before it can go to print mode.");
 					continue;						
 				}
+				
+				RX_PrinterStatus.cleaning = (ctrlMode>ctrl_purge_soft) && (ctrlMode<ctrl_fill);
+
 //				if (ctrlMode==ctrl_shutdown && _FluidStatus[i].ctrlMode<=ctrl_off)   continue;
 					
 //				if (ctrlMode==ctrl_cal_start)
@@ -817,12 +1089,14 @@ void _send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 				else if (ctrlMode==ctrl_empty) cmd.ctrlMode = ctrl_off; 		
 
 				sok_send(&_FluidThreadPar[i/INK_PER_BOARD].socket, &cmd);
+				/*
 				if (ctrlMode==ctrl_purge_hard)
 				{
 					_Flushed &= (~0x01<<i);
 					setup_fluid_system(PATH_USER FILENAME_FLUID_STATE, &_Flushed, WRITE);				
 				}
-
+				*/
+				
 				//--- send mode to heads ---
 				if (sendToHeads)
 				{

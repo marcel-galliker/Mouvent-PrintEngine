@@ -41,14 +41,6 @@ namespace RX_DigiPrint.Models
             get { return _Moving; }
             set { SetProperty(ref _Moving, value); }
         }
-
-        //--- Property Status ---------------------------------------
-        private int _State;
-        public int State
-        {
-            get { return _State; }
-            set { SetProperty(ref _State, value); }
-        }
         
         //--- Property PosX ---------------------------------------
         private Int32 _PosX;
@@ -207,7 +199,7 @@ namespace RX_DigiPrint.Models
         public bool cap_enabled
         {
             get { return _cap_enabled; }
-            set { SetProperty(ref _cap_enabled, value); }
+            set { SetProperty(ref _cap_enabled, value); }   
         }
 
         //--- Property capDP803_enabled ---------------------------------------
@@ -276,9 +268,26 @@ namespace RX_DigiPrint.Models
             Z_in_print= (msg.info & 0x00000020)!=0;
             Z_in_cap  = (msg.info & 0x00000040)!=0;
             X_in_cap  = (msg.info & 0x00000100)!=0 || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB701;
-            X_in_ref = (msg.info & 0x00000200) != 0;
-           
+            X_in_ref  = (msg.info & 0x00000200) != 0;
             CoverOpen = (msg.info & 0x00001000)!=0;
+            
+            HeadUpInput_0 = (msg.info & 0x00040000)!=0;
+            HeadUpInput_1 = (msg.info & 0x00080000)!=0;
+            HeadUpInput_2 = (msg.info & 0x00100000)!=0;
+            HeadUpInput_3 = (msg.info & 0x00200000)!=0;
+
+            DripPans_InfeedUP       = (msg.info & 0x10000000) != 0;
+            DripPans_InfeedDOWN     = (msg.info & 0x20000000) != 0;
+            DripPans_OutfeedUP      = (msg.info & 0x40000000) != 0;
+            DripPans_OutfeedDOWN    = (msg.info & 0x80000000) != 0;
+
+            drip_pans_enabled = Z_in_ref;
+
+            PosX    = msg.posX;
+            PosY    = msg.posY;
+            PosZ    = msg.posZ;
+            Error   = msg.err;
+
             //cap_enabled = RefDone && DripPans_InfeedUP && DripPans_OutfeedUP && (X_in_cap || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB701 || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_cleaf);
             //---- CAPPING ----
             if (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_DP803)
@@ -290,31 +299,14 @@ namespace RX_DigiPrint.Models
             else
             {
                 cap_enabled = RefDone && DripPans_InfeedUP && DripPans_OutfeedUP && (X_in_cap || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB701 || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_cleaf);
-                capDP803_enabled = false;
+                capDP803_enabled = false || (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_cleaf);
             }
-            HeadUpInput_0 = (msg.info & 0x00040000)!=0;
-            HeadUpInput_1 = (msg.info & 0x00080000)!=0;
-            HeadUpInput_2 = (msg.info & 0x00100000)!=0;
-            HeadUpInput_3 = (msg.info & 0x00200000)!=0;
-
-            drip_pans_enabled = Z_in_ref;
-            DripPans_InfeedUP       = (msg.info & 0x10000000) != 0;
-            DripPans_InfeedDOWN     = (msg.info & 0x20000000) != 0;
-            DripPans_OutfeedUP      = (msg.info & 0x40000000) != 0;
-            DripPans_OutfeedDOWN    = (msg.info & 0x80000000) != 0;
 
             if (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_cleaf) cmd_enabled = RefDone && DripPans_InfeedDOWN && DripPans_OutfeedDOWN && !DripPans_InfeedUP && !DripPans_OutfeedUP;
             //---- CAPPING ----
             else if (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_DP803) cmd_enabled = RefDone && X_in_ref;
             //---- END OF CAPPING ----
             else cmd_enabled = RefDone;
-
-            PosX    = msg.posX;
-            PosY    = msg.posY;
-            PosZ    = msg.posZ;
-            Error   = msg.err;
-
-            State   = msg.state;
 
             {
                 int i;

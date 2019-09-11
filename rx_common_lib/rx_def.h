@@ -1181,6 +1181,14 @@ typedef struct SRobotOffsets
 	INT32			robot_align;
 } SRobotOffsets;
 	
+typedef enum ERobotFunctions
+{
+	rob_fct0,	// 00
+	rob_fct1,	// 01
+	rob_fct2,	// 02
+	rob_fct3,	// 03
+} ERobotFunctions;
+	
 //--- Stepper Board --------------------
 typedef struct SStepperCfg
 {
@@ -1239,64 +1247,6 @@ typedef struct SScrewAdjustment
 	INT32   bar;
 } SScrewAdjustment;
 	
-enum cln_state_code 
-{
-	ST_INIT,				// 0
-	ST_REF_LIFT,			// 1
-	ST_REF_CLEAN,			// 2
-	ST_IDLE,				// 3
-	ST_PRE_MOVE_POS,		// 4
-	ST_CLEAN_PRE_POS,		// 5
-	ST_CLEAN_MOVE_POS,		// 6	
-	ST_LIFT_MOVE_POS,		// 7
-	ST_LIFT_CAPPING,		// 8
-	ST_WIPE,				// 9
-	ST_DETECT_SCREW,		// 10
-	ST_REPOS_SCREW,			// 11
-	ST_SCREW_REF,			// 12
-	ST_SCREW,				// 13
-	ST_DETACH_SCREW,		// 14
-	ST_SLIDE_MOVE,			// 15
-	ST_PURGE,				// 16
-	ST_LIFT_UP,				// 17
-	ST_LAST_LIFT,			// 18
-	ST_CABLE_CLEAN,			// 19
-	ST_CAP_CLEAN_REF,		// 20
-	ST_CAP_CLEAN_REF_IN,	// 21
-	ST_DRAIN_WASTE_REF,		// 22
-	ST_CAP_CLEAN_START,		// 23
-	ST_CAP_CLEAN_IN,		// 24
-	ST_CAP_CLEAN_OUT,		// 25
-	ST_DRAIN_WASTE,			// 26
-	ST_CAP_FILL,			// 27
-	ST_DRAIN_WASTE_IDLE,	// 28
-};
-
-typedef struct SClnStateEnv
-{
-	SScrewAdjustment screw_data;
-	int lift_pos;
-	int clean_pos;
-	int clean_wipe_pos;
-	int clean_wipe_head_nr;
-	int slide_enable;
-	int flag_wipe_done;
-	int flag_purge_done;
-	UINT32 st_cmd;
-	UINT32 st_cmd_stored;
-	enum cln_state_code capCurrentState;
-	int lift_move_tgl;
-	int cln_move_tgl;
-	INT32 set_io_cnt;
-	int screw_0_pos;
-	int screw_1_pos;
-	int test_loop_cnt;
-	int flag_cap_empty;
-	int dry_wipe_done;
-	int flag_wet_wipe_done;
-	int cycle_sok_send;
-	//int head_safety_edge;
-} SClnStateEnv;
 
 	//--- check also GUI: RX_DigiPrint.Models.TestTableStatus.Update
 typedef struct ETestTableInfo
@@ -1314,19 +1264,19 @@ typedef struct ETestTableInfo
 	UINT32 printing			: 1;	//	0x00000400
 	UINT32 curing			: 1;	//	0x00000800
 	UINT32 cover_open		: 1;	//	0x00001000
-	UINT32 info_13_			: 1;	//	0x00002000
-	UINT32 cln_screw_0		: 1;	//	0x00004000
-	UINT32 cln_screw_1		: 1;	//	0x00008000
-	UINT32 cln_screw_2		: 1;	//	0x00010000
-	UINT32 cln_screw_3		: 1;	//	0x00020000
+	UINT32 info_13			: 1;	//	0x00002000
+	UINT32 info_14			: 1;	//	0x00004000
+	UINT32 info_15			: 1;	//	0x00008000
+	UINT32 info_16			: 1;	//	0x00010000
+	UINT32 info_17			: 1;	//	0x00020000
 	UINT32 headUpInput_0	: 1;	//	0x00040000
 	UINT32 headUpInput_1	: 1;	//	0x00080000
 	UINT32 headUpInput_2	: 1;	//	0x00100000
 	UINT32 headUpInput_3	: 1;	//	0x00200000
 	UINT32 move_ok			: 1;	//	0x00400000
 	UINT32 move_tgl			: 1;	//	0x00800000
-	UINT32 screw_in_ref		: 1;	//	0x01000000
-	UINT32 screw_done		: 1;	//	0x02000000
+	UINT32 scannerEnable	: 1;	//	0x01000000
+	UINT32 info_25			: 1;	//	0x02000000
 	UINT32 printhead_en		: 1;    //  0x04000000
 	UINT32 splicing			: 1;	//  0x08000000
 	UINT32 DripPans_InfeedUP			: 1;	//  0x10000000
@@ -1335,6 +1285,42 @@ typedef struct ETestTableInfo
 	UINT32 DripPans_OutfeedDOWN			: 1;	//	0x80000000
 } ETestTableInfo;
 	
+typedef struct ERobotInfo
+{
+	UINT32 ref_done			: 1;	//	0x00000001
+	UINT32 moving			: 1;	//	0x00000002
+	UINT32 x_in_ref			: 1;	//	0x00000004
+	UINT32 z_in_ref			: 1;	//	0x00000008
+	UINT32 z_in_print		: 1;	//	0x00000010
+	UINT32 z_in_cap			: 1;	//	0x00000020
+	UINT32 z_in_wipe		: 1;	//	0x00000040
+	UINT32 z_in_vacuum		: 1;	//	0x00000080
+	UINT32 z_in_wetwipe		: 1;	//	0x00000100
+	UINT32 move_ok			: 1;	//	0x00000200
+	UINT32 cap_ready		: 1;	//	0x00000400
+	UINT32 wipe_ready		: 1;	//	0x00000800
+	UINT32 vacuum_ready		: 1;	//	0x00001000
+	UINT32 wetwipe_ready	: 1;	//	0x00002000
+	UINT32 wipe_done		: 1;	//	0x00004000
+	UINT32 vacuum_done		: 1;	//	0x00008000
+	UINT32 wetwipe_done		: 1;	//	0x00010000
+	UINT32 vacuum_in_change	: 1;	//	0x00020000
+	UINT32 r_info_18		: 1;	//	0x00040000
+	UINT32 r_info_19		: 1;	//	0x00080000
+	UINT32 r_info_20		: 1;	//	0x00100000
+	UINT32 r_info_21		: 1;	//	0x00200000
+	UINT32 r_info_22		: 1;	//	0x00400000
+	UINT32 r_info_23		: 1;	//	0x00800000
+	UINT32 r_info_24		: 1;	//	0x01000000
+	UINT32 r_info_25		: 1;	//	0x02000000
+	UINT32 r_info_26		: 1;    //  0x04000000
+	UINT32 r_info_27		: 1;	//  0x08000000
+	UINT32 r_info_28		: 1;	//  0x10000000
+	UINT32 r_info_29		: 1;	//	0x20000000
+	UINT32 r_info_30		: 1;	//	0x40000000
+	UINT32 r_info_31		: 1;	//	0x80000000
+} ERobotInfo;
+
 typedef struct ETestTableWarn
 {
 	UINT32 warn_0 : 1;
@@ -1394,8 +1380,9 @@ typedef struct SStepperStat
 	SVersion	fpgaVersion;
 
 	//--- warnings/errors ----------------
-	ETestTableInfo	info;	// UINT32
-			
+	ETestTableInfo	info;		// UINT32
+	ERobotInfo		robinfo;	// UINT32
+
 	UINT32		warn;
 	
 	UINT32		err;
@@ -1412,7 +1399,6 @@ typedef struct SStepperStat
 	INT32		posZ;
 	
 	INT32		adjustmentProgress;
-	INT32		state;
 	UINT32		alive[2];
 
 	INT32			inputs;

@@ -555,21 +555,6 @@ void ink_tick_10ms(void)
 					pRX_Status->ink_supply[isNo].ctrl_state = ctrl_purge_step5;
 				break;
 
-			case ctrl_cap:
-			case ctrl_cap_step1:
-			case ctrl_cap_step2:
-			case ctrl_cap_step3:
-			case ctrl_cap_step4:
-			case ctrl_wipe:
-			case ctrl_wetwipe:
-			case ctrl_wash:
-			case ctrl_wipe_step1:
-			case ctrl_wipe_step2:
-				_set_air_valve(isNo, TRUE);
-				_set_pump_speed(isNo, 0);
-				pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
-				break;
-
 			// --- FILL --------------------------------------------------
 			case ctrl_fill:
 				_InkSupply[isNo].degassing = FALSE;
@@ -690,10 +675,19 @@ void ink_tick_10ms(void)
 				*/
 
 			default:
-				_set_flush_pump(isNo, FALSE);
-				_set_air_valve(isNo, FALSE);
-				_set_pump_speed(isNo, 0);
-				_InkSupply[isNo].degassing=FALSE;
+				if (pRX_Config->ink_supply[isNo].ctrl_mode>=ctrl_wipe && pRX_Config->ink_supply[isNo].ctrl_mode<ctrl_fill)
+				{
+					_set_air_valve(isNo, TRUE);
+					_set_pump_speed(isNo, 0);
+					pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
+				}
+				else
+				{
+					_set_flush_pump(isNo, FALSE);
+					_set_air_valve(isNo, FALSE);
+					_set_pump_speed(isNo, 0);
+					_InkSupply[isNo].degassing=FALSE;
+				}
 				break;
 		} // end switch
 	} // end for

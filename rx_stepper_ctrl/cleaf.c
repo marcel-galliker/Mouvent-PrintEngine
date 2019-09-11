@@ -56,24 +56,6 @@
 #define ROB_STEPS_PER_METER		909456.8
 #define ROB_INC_PER_METER		1136821.0	// 909456.8 / 0.8
 
-// Screw
-#define MOTOR_SCREW_CNT			1
-#define MOTOR_SCREW_0			3
-#define MOTOR_SCREW_0_BITS		(0x01<<MOTOR_SCREW_0)	// #define MOTOR_SCREW_0_BITS
-#define MOTOR_SCREW_ALL_BITS	MOTOR_SCREW_0_BITS		// #define MOTOR_SCREW_ALL_BITS
-
-#define CURRENT_SCREW_HOLD	7.0
-
-#define SCREW_STEPS_PER_REV		 80000.0 // 200 * 16 * 25
-#define SCREW_INC_PER_REV		100000.0 // 80000.0 / 0.8
-
-#define SCREW_MIN_UNIT			2.0 // 360/2.0 = 180° // 360/6.0 = 60° minimal turn
-#define SCREW_PLAY_REV			(1) // (3*SCREW_MIN_UNIT) // 2 // 1 // 0.500 // 1=1rev // no negative value allowed!
-#define SCREW_DETACH_REV		0.02 // 0.002 // 0.002 // less than 1 deg
-//#define SCREW_REF_SEARCH		(1/SCREW_MIN_UNIT) // 60° // Delta for screw search turns
-//#define SCREW_REF_ANGLE			0.10 // 0.09 // (SCREW_REF_SEARCH/2.0) // 0.0833333 // 30° // Delta from Ref to Screw Pos
-//#define SCREW_POS_SEARCH		(-200.0) // in um // Delta for pos search steps
-
 // Pump
 #define MOTOR_WASTE_PUMP	4
 #define WASTE_PUMP_STEPS		500000 // steps per trigger period
@@ -105,8 +87,6 @@
 #define HEAD_UP_IN_0		0
 #define HEAD_UP_IN_1		1
 #define RO_STORED_IN_0		2
-#define RO_SCREW_DOWN_0		3
-#define RO_SCREW_DETECT_0	4
 
 // DRIP PAN FUNCTION
 #define DRIP_PANS_INFEED_DOWN		5
@@ -118,8 +98,6 @@
 
 // Digital Outputs (max 12)
 #define RO_FLUSH_CAR_0			0x001 //  0 // Y1 Flush Servicecar 0
-#define RO_SCREW_UP_0			0x002 //  1 // SY11 Bit Kopf 0 left
-#define RO_SCREW_UP_ALL			0x002 
 #define RO_BLADE_UP_0			0x008 //  3 // SY13 Wipe-Blade 0
 #define RO_VACUUM_BLADE			0x020 //  5 // Y8 Vakuum Blade
 #define RO_VACUUM				0x040 //  6 // SY10 Vakuum
@@ -143,14 +121,6 @@ static int	RO_STORED_IN[MOTOR_ROB_CNT] = {
 	RO_STORED_IN_0
 };
 
-static int	RO_SCREW_DETECT[MOTOR_SCREW_CNT] = {
-	RO_SCREW_DETECT_0
-};
-
-static int	RO_SCREW_DOWN[MOTOR_SCREW_CNT] = {
-	RO_SCREW_DOWN_0
-};
-
 #define REF_HEIGHT			RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height
 #define HEAD_ALIGN			RX_StepperCfg.robot[RX_StepperCfg.boardNo].head_align
 #define ROBOT_HEIGHT		RX_StepperCfg.robot[RX_StepperCfg.boardNo].robot_height
@@ -163,7 +133,6 @@ static int	RO_SCREW_DOWN[MOTOR_SCREW_CNT] = {
 #define LIFT_RESET				1000 // Reset height
 #define POS_STORED				REF_HEIGHT-LIFT_RESET // ROBOT_HEIGHT
 
-#define CLN_SCREW_TO_SENSOR		(12000+1000) // physical distancec screw center to detector center
 
 //--- global  variables -----------------------------------------------------------------------------------------------------------------
 static int	_CmdRunning = 0;
@@ -176,7 +145,7 @@ static int	_NewCmdPos = 0;
 static int	_TimeCnt = 0;
 static int	_Step;
 static int	_PrintPos;
-static int	_DripPans_Connected = 0;
+static int	_DripPans_Connected = FALSE;
 static int  _AllowMoveDown = 0;
 static int  _DripPansPosition = 2;	// 2 = position unknown after start
 
@@ -190,19 +159,12 @@ static SMovePar	_ParRob_ref[MOTOR_ROB_CNT];
 static SMovePar	_ParRob_drive;
 static SMovePar	_ParRob_wipe;
 static SMovePar	_ParRob_wipe_vac;
-static SMovePar	_ParRob_detect[MOTOR_SCREW_CNT];
 
 // Laser
 static int	_PrintHeadEn_On  = 0;
 static int	_PrintHeadEn_Off = 0;
 static int	_LaserAvr = 0;
 static int	_LaserCnt = 0;
-
-// Screw
-static SMovePar	_ParScrew_ref[MOTOR_SCREW_CNT];
-static SMovePar	_ParScrew_ref_back[MOTOR_SCREW_CNT];
-static SMovePar	_ParScrew_turn;
-static int	_ScrewRefRetried = 0;
 
 // Pump
 static SMovePar	_ParPump_waste;
@@ -226,7 +188,6 @@ static void _cleaf_motor_test(int motor, int steps);
 static void _cleaf_error_reset(void);
 static void _cleaf_send_status(RX_SOCKET);
 static int _cleaf_retry_ref(int cmd);
-static int _cleaf_check_screw_input(int screw);
 static void _cleaf_motors_by_step(int motor_bits, int steps, SMovePar par[2]);
 static void _cleaf_check_laser(void);
 
@@ -238,15 +199,10 @@ static void _lift_do_reference(void);
 // Robot
 static int  _rob_micron_2_steps(int micron);
 static int  _rob_steps_2_micron(int steps);
-static void _rob_detect_screw(int motor, int pos);
 
 // Pump
 static void _rob_set_threshold(int analog_in_nr, int threshold);
 static void _rob_waste_pump(int steps);
-
-// Screw
-static int  _screw_rev_2_steps(int rev);
-static int  _screw_steps_2_rev(int steps);
 
 // PWM
 static void _rob_set_pwm(int pwm_nr, int pulse_width);
@@ -300,34 +256,6 @@ void cleaf_init(void)
 	_ParZ_cap.estop_level   = 0;
 	_ParZ_cap.checkEncoder  = TRUE;
 	_ParZ_cap.dis_mux_in	= FALSE;
-
-	//--- movement parameters screws ---------------- 0.1 Nm with 400 U/min -- 400*200*16/60=21'333
-	for (i = 0; i < MOTOR_SCREW_CNT; i++) 
-	{	
-		_ParScrew_ref[i].speed			= 21000; // 4000; // speed with max tork: 21'333
-		_ParScrew_ref[i].accel			= 10000; //  1000;
-		_ParScrew_ref[i].current		= 67.0; // max 67 = 0.67 A
-		_ParScrew_ref[i].stop_mux		= 0;
-		_ParScrew_ref[i].dis_mux_in		= 0;
-		_ParScrew_ref[i].estop_in		= RO_SCREW_DOWN[i];
-		_ParScrew_ref[i].estop_level	= 0; // stopp when sensor off
-		_ParScrew_ref[i].checkEncoder	= TRUE;
-		_ParScrew_ref[i].stop_in		= ESTOP_UNUSED;
-		_ParScrew_ref[i].stop_level		= 0;
-		_ParScrew_ref[i].dis_mux_in		= TRUE; // FALSE;
-	}
-	
-	_ParScrew_turn.speed		= 8000; // 21000; // speed with max tork: 21'333
-	_ParScrew_turn.accel		= 4000; // 10000;
-	_ParScrew_turn.current		= 40.0; // 80.0; // 67.0; // 80.0;  // max 95 = 0.95 A // Amps/Phase Parallel: 0.67 A // approx 0.9N; max 1.4 N
-	_ParScrew_turn.stop_mux		= 0;
-	_ParScrew_turn.dis_mux_in	= 0;
-	_ParScrew_turn.estop_in		= ESTOP_UNUSED;
-	_ParScrew_turn.estop_level	= 0;
-	_ParScrew_turn.checkEncoder = TRUE;
-	_ParScrew_turn.stop_in		= ESTOP_UNUSED;
-	_ParScrew_turn.stop_level	= 0;
-	_ParScrew_turn.dis_mux_in	= FALSE;
 	
 	//--- movement parameters Roboter ---------------- 0.9 Nm with 100 U/min --- 0.8 Nm with 300 U/min -- 300*200*16/60
 	for (i = 0; i < MOTOR_ROB_CNT; i++) 
@@ -380,21 +308,6 @@ void cleaf_init(void)
 	_ParRob_wipe_vac.stop_in		= ESTOP_UNUSED;
 	_ParRob_wipe_vac.stop_level		= 0;
 	_ParRob_wipe_vac.dis_mux_in		= FALSE;
-
-	for (i = 0; i < MOTOR_SCREW_CNT; i++) 
-	{
-		_ParRob_detect[i].speed			= 10000; // speed with max tork: 21'333 // 16000; // 32000; // speed with max tork: 16'000
-		_ParRob_detect[i].accel			= 5000; // 8000; // 16000;
-		_ParRob_detect[i].current		= 60.0; // max 67 = 0.67 A // 400.0; // max 424 = 4.24 A
-		_ParRob_detect[i].stop_mux		= MOTOR_ROB_BITS;
-		_ParRob_detect[i].dis_mux_in	= 0;
-		_ParRob_detect[i].estop_level	= 1;
-		_ParRob_detect[i].checkEncoder	= TRUE;
-		_ParRob_detect[i].stop_in		= ESTOP_UNUSED;
-		_ParRob_detect[i].stop_level	= 0;
-		_ParRob_detect[i].dis_mux_in	= TRUE; // FALSE;
-		_ParRob_detect[i].estop_in		= RO_SCREW_DETECT[i];
-	}
 	
 	//--- movment parameters Pump stepper motor ----------------
 	_ParPump_waste.speed			= 20000; // 32000; // speed with max tork: 2k pulses per sec * 16 // 500u/min * 200 * 16 /60 = 26000
@@ -426,7 +339,6 @@ void cleaf_main(int ticks, int menu)
 	{
 		motors_config(MOTOR_Z_BITS, CURRENT_Z_HOLD, 0.0, 0.0);
 		motors_config(MOTOR_ROB_BITS, CURRENT_X_HOLD, ROB_STEPS_PER_METER, ROB_INC_PER_METER);
-		motors_config(MOTOR_SCREW_ALL_BITS, CURRENT_SCREW_HOLD, SCREW_STEPS_PER_REV, SCREW_INC_PER_REV);
 		motor_config(MOTOR_WASTE_PUMP, CURRENT_PUMP_HOLD, ROB_STEPS_PER_METER, ROB_INC_PER_METER);
 	}
 	
@@ -442,17 +354,15 @@ void cleaf_main(int ticks, int menu)
 	
 	// --- read Inputs Rob ---
 	RX_StepperStatus.info.x_in_ref	= TRUE; // fpga_input(RO_STORED_IN_0); // Reference Sensor
-	RX_StepperStatus.info.cln_screw_0 = fpga_input(RO_SCREW_DOWN_0); // Screwhead 0 is pressed down
-	RX_StepperStatus.info.cln_screw_2 = fpga_input(RO_SCREW_DETECT_0); // Screwhead 0 is detected
-	RX_StepperStatus.posX				= -_rob_steps_2_micron(motor_get_step(MOTOR_ROB_0));
+	RX_StepperStatus.posX			= -_rob_steps_2_micron(motor_get_step(MOTOR_ROB_0));
 	
 	// Drip Pans : enabled when the main send a command CMD_CLN_DRIP_PANS
 	if (_DripPans_Connected)
 	{
-		RX_StepperStatus.info.DripPans_InfeedDOWN		= fpga_input(DRIP_PANS_INFEED_DOWN);
+		RX_StepperStatus.info.DripPans_InfeedDOWN	= fpga_input(DRIP_PANS_INFEED_DOWN);
 		RX_StepperStatus.info.DripPans_InfeedUP		= fpga_input(DRIP_PANS_INFEED_UP);
 		RX_StepperStatus.info.DripPans_OutfeedDOWN	= fpga_input(DRIP_PANS_OUTFEED_DOWN);
-		RX_StepperStatus.info.DripPans_OutfeedUP		= fpga_input(DRIP_PANS_OUTFEED_UP);
+		RX_StepperStatus.info.DripPans_OutfeedUP	= fpga_input(DRIP_PANS_OUTFEED_UP);
 	}
 
 	// --- set positions False while moving ---
@@ -461,10 +371,6 @@ void cleaf_main(int ticks, int menu)
 		// RX_StepperStatus.info.z_in_ref		= (RX_StepperStatus.info.ref_done && (abs(RX_StepperStatus.posZ - REF_HEIGHT) <= 10 + LIFT_RESET));
 		// RX_StepperStatus.info.x_in_ref		= (RX_StepperStatus.info.ref_done && (RX_StepperStatus.info.x_in_ref == 1));
 		RX_StepperStatus.info.move_ok = FALSE;
-		//RX_StepperStatus.info.screw_in_ref = FALSE;
-		RX_StepperStatus.info.screw_done = FALSE;
-		if (_CmdRunning == CMD_CLN_SCREW_0_POS)			RX_StepperStatus.adjustmentProgress = (int)(motor_get_step(MOTOR_SCREW_0) * 100.0 / (motor_get_end_step(0)));
-		//else											RX_StepperStatus.adjustmentProgress = 0;
 	}
 	if (_CmdRunning == 0) RX_StepperStatus.info.moving = FALSE;
 	if (_TimeCnt != 0) _TimeCnt--; // waiting time
@@ -483,7 +389,6 @@ void cleaf_main(int ticks, int menu)
 				loc_new_cmd = FALSE;
 				RX_StepperStatus.info.ref_done = FALSE;
 				RX_StepperStatus.info.z_ref_done = FALSE;
-				RX_StepperStatus.info.screw_in_ref = FALSE;
 				Error(ERR_CONT, 0, "Stepper: Command %s: Motor[%d] blocked", _CmdName, motor + 1);
 				_CmdRunning = FALSE;
 				_ResetRetried = 0;
@@ -498,9 +403,7 @@ void cleaf_main(int ticks, int menu)
 		if (_CmdRunning == CMD_CAP_STOP)
 		{
 			_ResetRetried = 0;
-			_ScrewRefRetried = 0;
 			RX_StepperStatus.set_io_cnt = 0;
-			RX_StepperStatus.info.screw_done = TRUE;
 			RX_StepperStatus.adjustmentProgress = (int)100;
 		}
 		
@@ -518,7 +421,7 @@ void cleaf_main(int ticks, int menu)
 			}
 			else
 			{
-				loc_new_cmd = FALSE;
+				loc_new_cmd = CMD_CLN_REFERENCE;
 				_ResetRetried = 0;
 			}
 		}
@@ -627,8 +530,6 @@ void cleaf_main(int ticks, int menu)
 				RX_StepperStatus.info.ref_done = TRUE;
 				_ResetRetried = 0;
 				RX_StepperStatus.posX = -_rob_steps_2_micron(motor_get_step(MOTOR_ROB_0));
-			//	Fpga.par->output |= RO_FLUSH_VOLT; // Enable Flush Pump
-			//	loc_new_cmd = CMD_CLN_SCREW_REF; // ref all screws
 				loc_move_pos = FALSE;
 			}
 			else
@@ -653,94 +554,7 @@ void cleaf_main(int ticks, int menu)
 		{
 			Fpga.par->output &= ~RO_BLADE_UP_0;
 		}
-		
-		// --- tasks after detect ---
-		if ((_CmdRunning == CMD_CLN_DETECT_SCREW_0)
-			|| (_CmdRunning == CMD_CLN_DETECT_SCREW_1))
-		{
-			int pos_start = abs(Fpga.stat->statMot[MOTOR_ROB_0].pos_rising);
-			int pos_end = abs(Fpga.stat->statMot[MOTOR_ROB_0].pos_falling);
-			int pos_min  = min(pos_start, pos_end);
-			if (pos_start == 0 && pos_end == 0)
-			{
-				loc_new_cmd = FALSE;
-				RX_StepperStatus.info.move_ok = FALSE;
-				_LastRobPosCmd = FALSE;
-			}
-			else
-			{
-				int screw_pos = _rob_steps_2_micron((abs(pos_start - pos_end) / 2.0) + pos_min) - CLN_SCREW_TO_SENSOR;
-				loc_new_cmd = CMD_CLN_MOVE_POS;
-				loc_move_pos = screw_pos;
-			}
-		}
-
-		//========================================== screws ==========================================
-		// --- tasks ater detatch from screws ---
-		if (_CmdRunning == CMD_CLN_SCREW_DETACH)
-		{
-			rx_sleep(200);
-			RX_StepperStatus.info.cln_screw_0 = fpga_input(RO_SCREW_DOWN_0); // Screwhead 0 is pressed down
-			if (RX_StepperStatus.info.cln_screw_0 == 1)
-			{
-				// Success
-				loc_new_cmd = CMD_CLN_SCREW_TO_REF;
-				loc_move_pos = 0;
-			}
-			else
-			{
-				Error(LOG, 0, "Stepper: Command %s: Detach from screws failed", _CmdName);
-				loc_new_cmd = FALSE;
-				RX_StepperStatus.info.screw_in_ref = FALSE;
-				RX_StepperStatus.info.ref_done = FALSE;
-				RX_StepperStatus.info.z_ref_done = FALSE;
-			}
-		}
-		
-		// --- tasks ater reference screws ---
-		if (_CmdRunning == CMD_CLN_SCREW_REF)
-		{
-			loc_new_cmd = CMD_CLN_SCREW_TO_REF;
-			loc_move_pos = 0;
-		}
-		
-		// --- tasks ater reference screws ---
-		if (_CmdRunning == CMD_CLN_SCREW_TO_REF)
-		{
-			motors_reset(MOTOR_SCREW_ALL_BITS);				// reset position after referencing
-			RX_StepperStatus.info.screw_in_ref = TRUE;
-		}
-		
-		// --- tasks ater attach screws ---
-		if (_CmdRunning == CMD_CLN_SCREW_ATTACH)
-		{
-			rx_sleep(600); // rx_sleep(1000);
-			RX_StepperStatus.info.cln_screw_0 = fpga_input(RO_SCREW_DOWN_0); // Screwhead 0 is pressed down
-			if (RX_StepperStatus.info.cln_screw_0 == 1)
-			{
-				if (_ScrewRefRetried < 2)
-				{
-					loc_new_cmd = CMD_CLN_SCREW_ATTACH;
-					loc_move_pos = 1;
-					_ScrewRefRetried++;
-				}
-				else
-				{
-					RX_StepperStatus.info.screw_in_ref = FALSE;
-					_ScrewRefRetried = 0;
-					Error(LOG, 0, "Stepper: Command %s: Attaching to screw failed", _CmdName);
-				}
-			}
-		}
-		
-		// --- tasks after turning screws ---
-		if ((_CmdRunning == CMD_CLN_SCREW_0_POS)
-			|| (_CmdRunning == CMD_CLN_SCREW_1_POS))
-		{
-			RX_StepperStatus.info.screw_done = TRUE;
-			RX_StepperStatus.adjustmentProgress = (int)100;
-			Fpga.par->output &= ~RO_ALL_OUT_MECH; // set all output to off
-		}
+				
 
 		//========================================== waste pump ==========================================
 		// --- tasks after drain waste ---
@@ -776,15 +590,8 @@ void cleaf_main(int ticks, int menu)
 		switch (loc_new_cmd)
 		{
 		case CMD_CAP_REFERENCE: 	cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_REFERENCE, NULL); break;
-		case CMD_CLN_SCREW_0_POS:	cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_SCREW_0_POS, &loc_move_pos); break;
-		case CMD_CLN_SCREW_1_POS:	cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_SCREW_1_POS, &loc_move_pos); break;
-		case CMD_CLN_SCREW_REF:		cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_SCREW_REF, &loc_move_pos); break;
 		case CMD_CLN_MOVE_POS:		cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_MOVE_POS, &loc_move_pos); break;
-		case CMD_CLN_SCREW_TO_REF:	cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_SCREW_TO_REF, NULL); break;	
-		case CMD_CLN_SCREW_ATTACH:	cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_SCREW_ATTACH, &loc_move_pos); break;
 		case CMD_CLN_REFERENCE:		cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_REFERENCE, NULL); break;
-		case CMD_CLN_DETECT_SCREW_0: cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_DETECT_SCREW_0, &loc_move_pos); break;
-		case CMD_CLN_DETECT_SCREW_1: cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_DETECT_SCREW_1, &loc_move_pos); break;
 		case CMD_CAP_UP_POS:  		_CmdRunning = loc_new_cmd;	break;
 		case CMD_CAP_PRINT_POS:		_CmdRunning = loc_new_cmd;	break;
 		case CMD_CAP_CAPPING_POS:	_CmdRunning = loc_new_cmd;	break;
@@ -946,8 +753,6 @@ void cleaf_display_status(void)
 	if (_ShowStatus == SHOW_ROB)
 	{
 		int enc0_mm = Fpga.encoder[MOTOR_ROB_0].pos * 1000000.0 / ROB_INC_PER_METER;
-		int screwpos0_mm = _screw_steps_2_rev(motor_get_step(MOTOR_SCREW_0)); 
-		int screwenc0_mm = _screw_steps_2_rev(Fpga.encoder[MOTOR_SCREW_0].pos);
 		term_printf("Cleaf Stepper ROB ---------------------------------\n");
 		term_printf("moving:         %d		cmd: %08x\n", RX_StepperStatus.info.moving, _CmdRunning);
 		term_printf("Pos0 in steps:   %d  ", motor_get_step(MOTOR_ROB_0));
@@ -956,16 +761,9 @@ void cleaf_display_status(void)
 		//term_printf("Pos0 in steps SOLL:   %d\n", POS_PRINTHEADS_UM);
 		term_printf("Enc0 in steps:   %d  ", Fpga.encoder[MOTOR_ROB_0].pos);
 		term_printf("Enc0 in um:   %d\n", enc0_mm);
-		term_printf("ScrewPos0 in steps:   %d  ", motor_get_step(MOTOR_SCREW_0));
-		term_printf("ScrewPos0 in mU:   %d\n", screwpos0_mm);
-		term_printf("ScrewEnc0 in steps:   %d  ", Fpga.encoder[MOTOR_SCREW_0].pos);
-		term_printf("ScrewEnc0 in mU:   %d\n", screwenc0_mm);
 		term_printf("reference done: %d \n", RX_StepperStatus.info.ref_done);
 		term_printf("x in reference: %d \n", RX_StepperStatus.info.x_in_ref);
 		//term_printf("x in capping:   %d \n", RX_StepperStatus.info.x_in_cap);
-		term_printf("Screw adjust Progress:   %d  ", RX_StepperStatus.adjustmentProgress);
-		term_printf("Screw in ref:   %d  ", RX_StepperStatus.info.screw_in_ref);
-		term_printf("Screw done:   %d\n", RX_StepperStatus.info.screw_done);
 		// term_printf("Flag move OK: %d ", RX_StepperStatus.info.move_ok);
 		term_printf("move tgl bit: %d \n", RX_StepperStatus.info.move_tgl);	
 		term_printf("\n");
@@ -1021,11 +819,7 @@ int cleaf_menu(void)
 		term_printf("R: Reference Roboter\n");
 		term_printf("p: move cap to <um>\n");
 		term_printf("w: wipe to <um>\n");
-		term_printf("d<scr><um>: detect screw <scr> move to <um>\n");
 		term_printf("z<steps>: move cap Motor0/1 by <steps>\n");
-		term_printf("i: reference all screws\n");
-		term_printf("c: detach all screws\n");
-		term_printf("t<x>: turn screw 0 for x times 180 deg\n");
 	}
 	
 	if (_ShowStatus == SHOW_PUMP)
@@ -1076,11 +870,7 @@ int cleaf_menu(void)
 			case 'R': cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_REFERENCE, NULL); break;
 			case 'p': pos = atoi(&str[1]); cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_MOVE_POS, &pos); break;
 			case 'n': pos = atoi(&str[1]); cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_WIPE, &pos); break;
-			case 'd': _rob_detect_screw(str[1] - '0', atoi(&str[2])); break;
 			case 'z': _cleaf_motor_x_test(atoi(&str[1])); break;
-			case 'i': pos = atoi(&str[1]); cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_SCREW_REF, &pos); break;
-			case 'c': cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_SCREW_DETACH, NULL); break;
-			case 't': pos = 1000000 / SCREW_MIN_UNIT* atoi(&str[1]); cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_SCREW_0_POS, &pos); break;
 			}
 		}
 		if (_ShowStatus == SHOW_PUMP)
@@ -1125,19 +915,6 @@ static int  _rob_micron_2_steps(int micron)
 static int  _rob_steps_2_micron(int steps)
 {
 	return (int)(steps * (1000000.0 / ROB_STEPS_PER_METER) + 0.5);
-}
-
-//---_screw_micron_2_steps --------------------------------------------------------------
-static int  _screw_rev_2_steps(int rev)
-{
-	INT32 round = rev*SCREW_MIN_UNIT / 1000000.0;
-	return (int)(0.5 + round / SCREW_MIN_UNIT * SCREW_STEPS_PER_REV);
-}
-
-//---_screw_steps_2_rev --------------------------------------------------------------
-static int  _screw_steps_2_rev(int steps)
-{
-	return (int)(steps * (1000000.0 / SCREW_STEPS_PER_REV) + 0.5);
 }
 
 //--- _lift_do_reference ----------------------------------------------------------------
@@ -1185,7 +962,6 @@ int  cleaf_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		RX_StepperStatus.set_io_cnt = 0;
 		RX_StepperStatus.info.ref_done = FALSE;
 		RX_StepperStatus.info.z_ref_done = FALSE;
-		RX_StepperStatus.info.screw_in_ref = FALSE;
 		RX_StepperStatus.info.z_in_ref	= FALSE;
 		RX_StepperStatus.info.z_in_print	= FALSE;
 		RX_StepperStatus.info.z_in_cap	= FALSE;
@@ -1263,7 +1039,7 @@ int  cleaf_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		break;
 		
 	case CMD_CLN_DRIP_PANS:
-		_DripPans_Connected = 1;
+		_DripPans_Connected = TRUE;
 		if (RX_StepperStatus.info.z_in_ref) 
 		{			
 			if (!_DripPansPosition)
@@ -1284,7 +1060,7 @@ int  cleaf_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		break;
 		
 	case CMD_CLN_DRIP_PANS_EN:
-		_DripPans_Connected = 1;
+		_DripPans_Connected = TRUE;
 		if (fpga_input(DRIP_PANS_INFEED_UP) && fpga_input(DRIP_PANS_OUTFEED_UP)) _DripPansPosition = 1;
 		else _DripPansPosition = 0;
 		
@@ -1310,14 +1086,6 @@ int  cleaf_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 			Fpga.par->output &= ~RO_ALL_OUT_MECH; // set all output to off
 			rx_sleep(1000); // wait ms
 		}
-		if (fpga_input(RO_SCREW_DOWN_0) == 0) 
-		{
-			Error(LOG, 0, "Stepper: Command %s: reference screw motor first", _CmdName);
-			_CmdRunning = 1;
-//			_NewCmd = CMD_CLN_SCREW_REF;
-			_NewCmd = FALSE;
-			break;
-		}
 		if (RX_StepperStatus.info.z_ref_done != TRUE) Error(ERR_CONT, 0, "CLN: Command %s: canceled reference ROBOT, reference HUB first", _CmdName);
 		if (RX_StepperStatus.info.z_ref_done != TRUE) break;
 		RX_StepperStatus.set_io_cnt = 0;
@@ -1338,7 +1106,6 @@ int  cleaf_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 				Fpga.par->output &= ~RO_ALL_OUT_MECH; // set all output to off
 				rx_sleep(1000); // wait ms
 			}
-			if (_cleaf_check_screw_input(RO_SCREW_DOWN_0)) break;
 			if (RX_StepperStatus.info.z_ref_done != TRUE) break;
 			RX_StepperStatus.info.moving = TRUE;
 			pos = *((INT32*)pdata);
@@ -1353,299 +1120,7 @@ int  cleaf_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		pos = *((INT32*)pdata);
 		if (RX_StepperStatus.info.ref_done) motors_move_to_step(MOTOR_ROB_BITS, &_ParRob_drive, -_rob_micron_2_steps(pos));
 		break;
-
-		// ============================================================== Screw ==============================================================
-	case CMD_CLN_SCREW_REF:			strcpy(_CmdName, "CMD_CLN_SCREW_REF");
-		if (_CmdRunning){ cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_STOP, NULL); break; }
-		_CmdRunning = msgId;
-		Fpga.par->output &= ~RO_SCREW_UP_0; // set bit output off
-		RX_StepperStatus.info.moving = TRUE;
-		motors_reset(MOTOR_SCREW_ALL_BITS);
-		_cleaf_motors_by_step(MOTOR_SCREW_ALL_BITS, -SCREW_STEPS_PER_REV, _ParScrew_ref);
-//		rx_sleep(600);  // rx_sleep(1000);
-//		RX_StepperStatus.info.cln_screw_0 = fpga_input(RO_SCREW_DOWN_0); // Read Screwhead 0 Sensor
-//		if (RX_StepperStatus.info.cln_screw_0 == 1)
-//		{
-//			_cleaf_motors_by_step(MOTOR_SCREW_ALL_BITS, -SCREW_REF_SEARCH*SCREW_STEPS_PER_REV * 5, _ParScrew_ref);
-//			if (_ScrewRefRetried < 2)
-//			{
-//				_NewCmd = CMD_CLN_SCREW_REF;
-//			}
-//			_ScrewRefRetried++;
-//		}
-//		else
-//		{
-//			_cleaf_motors_by_step(MOTOR_SCREW_ALL_BITS, SCREW_REF_SEARCH*SCREW_STEPS_PER_REV * 3, _ParScrew_ref_back);
-//		}
-		break;
-		
-	case CMD_CLN_SCREW_TO_REF:			//strcpy(_CmdName, "CMD_CLN_SCREW_TO_REF");
-		if (!_CmdRunning)
-		{
-			
-			int pos_start_0 = abs(Fpga.stat->statMot[MOTOR_SCREW_0].pos_rising);
-			int pos_end_0   = abs(Fpga.stat->statMot[MOTOR_SCREW_0].pos_falling);
-			int pos_min_0   = min(pos_start_0, pos_end_0);
-			int screw_pos_0 = abs(pos_start_0 - pos_end_0) / 2.0 + pos_min_0 + SCREW_STEPS_PER_REV / 4.0;
-			
-			if (RX_StepperStatus.info.cln_screw_0 == 1)
-			{
-				screw_pos_0 = screw_pos_0 + SCREW_STEPS_PER_REV / 2.0;
-			}
-			if (pos_start_0 == 0 && pos_end_0 == 0)
-			{
-				Error(ERR_CONT, 0, "Stepper: Command 0x%08x: Referencing Screw 0 failed, no bit-sensor detected", _CmdRunning);
-				break;
-			}
-			_CmdRunning = msgId;
-			RX_StepperStatus.info.moving = TRUE;
-			motor_move_by_step(MOTOR_SCREW_0, &_ParScrew_turn, SCREW_STEPS_PER_REV - screw_pos_0);	
-			motors_start(MOTOR_SCREW_ALL_BITS, TRUE);
-		}
-		break;
-		
-	case CMD_CLN_SCREW_ATTACH:			strcpy(_CmdName, "CMD_CLN_SCREW_ATTACH");
-		if (_CmdRunning){ cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_STOP, NULL); break; }
-		pos = *((INT32*)pdata);
-		
-		if (pos == 1)
-		{
-			_CmdRunning = msgId;
-			Fpga.par->output |= RO_SCREW_UP_0; // set bit up
-			RX_StepperStatus.info.moving = TRUE;
-			//rx_sleep(600); // rx_sleep(1000);
-			//RX_StepperStatus.info.cln_screw_0 = fpga_input(RO_SCREW_DOWN_0); // Screwhead 0 is pressed down
-			//if (RX_StepperStatus.info.cln_screw_0 == 1)
-			{
-			//	motors_move_by_step(MOTOR_SCREW_ALL_BITS, &_ParScrew_turn, SCREW_DETACH_REV*SCREW_STEPS_PER_REV, FALSE);
-			}
-		}
-		break;
-		
-	case CMD_CLN_SCREW_0_POS:		strcpy(_CmdName, "CMD_CLN_SCREW_0_POS");
-		if (!_CmdRunning)
-		{
-			_CmdRunning = msgId;
-			//Fpga.par->output |= RO_SCREW_UP_0; // Do not enable
-			RX_StepperStatus.info.moving = TRUE;
-			pos = *((INT32*)pdata);
-			if (pos < 0)
-			{
-				pos = pos - SCREW_PLAY_REV * 1000000;    // turn more than the play down in addition to the turn change
-				_NewCmdPos = SCREW_PLAY_REV * 1000000; // turn later more than the play up
-				_NewCmd = msgId;
-			}
-			motors_move_by_step(MOTOR_SCREW_0_BITS, &_ParScrew_turn, _screw_rev_2_steps(pos), FALSE);
-		}
-		break;
-		
-//	case CMD_CLN_SCREW_TO_POS:		strcpy(_CmdName, "CMD_CLN_SCREW_TO_POS");
-//		if (!_CmdRunning)
-//		{
-//			_CmdRunning = msgId;
-//			//Fpga.par->output |= RO_SCREW_UP_0; // Do not enable
-//			RX_StepperStatus.info.moving = TRUE;
-//			pos = *((INT32*)pdata);
-//			motors_move_to_step(MOTOR_SCREW_ALL_BITS, &_ParScrew_ref[0], _screw_rev_2_steps(pos));
-//		}
-//		break;
-									
-	case CMD_CLN_DETECT_SCREW_0:		strcpy(_CmdName, "CMD_CLN_DETECT_SCREW_0");
-		if (!_CmdRunning)
-		{
-			_CmdRunning = msgId;
-			if ((Fpga.par->output & RO_ALL_OUT_MECH))
-			{
-				Fpga.par->output &= ~RO_ALL_OUT_MECH; // set all output to off
-				rx_sleep(1000); // wait ms
-			}
-			if (_cleaf_check_screw_input(RO_SCREW_DOWN_0)) break;
-			RX_StepperStatus.info.moving = TRUE;
-			pos = *((INT32*)pdata);
-			_LastRobPosCmd = pos;
-			if (!RX_StepperStatus.info.ref_done) Error(LOG, 0, "CLN: Command %s: missing ref_done: triggers Referencing", _CmdName);
-			if (RX_StepperStatus.info.ref_done) motors_move_to_step(MOTOR_ROB_BITS, &_ParRob_detect[0], -_rob_micron_2_steps(pos));
-		}
-		break;
-								
-	case CMD_CLN_SCREW_DETACH:		strcpy(_CmdName, "CMD_CLN_SCREW_DETACH");
-		if (!_CmdRunning)
-		{
-			_CmdRunning = msgId;
-			Fpga.par->output &= ~RO_SCREW_UP_ALL; // turn off screws
-			RX_StepperStatus.info.moving = TRUE;
-			motors_move_by_step(MOTOR_SCREW_ALL_BITS, &_ParScrew_turn, -SCREW_DETACH_REV*SCREW_STEPS_PER_REV, FALSE);
-		}
-		break;
-		
-		// ============================================================== Wipe ==============================================================
-
-	case CMD_CLN_WIPE:		strcpy(_CmdName, "CMD_CLN_WIPE");
-		if (!_CmdRunning)
-		{
-			_CmdRunning = msgId;
-			if ((Fpga.par->output & RO_SCREW_UP_ALL))
-			{
-				Fpga.par->output &= ~RO_SCREW_UP_ALL; // set all screw up to off
-				rx_sleep(1000); // wait ms !!! Please no BUSY Waiting !!!
-			}
-			if (_cleaf_check_screw_input(RO_SCREW_DOWN_0)) break;
-			RX_StepperStatus.info.moving = TRUE;
-			pos = *((INT32*)pdata);
-			_LastRobPosCmd = pos;
-			i = 1;
-			//cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_WET_WIPE, &i); // set always wet wipe
-			if (!RX_StepperStatus.info.ref_done) Error(LOG, 0, "CLN: Command %s: missing ref_done: triggers Referencing", _CmdName);
-			if (RX_StepperStatus.info.ref_done) motors_move_to_step(MOTOR_ROB_BITS, &_ParRob_wipe, -_rob_micron_2_steps(pos));
-		}
-		break;
-		
-	case CMD_CLN_WIPE_VAC:		strcpy(_CmdName, "CMD_CLN_WIPE_VAC");
-		if (!_CmdRunning)
-		{
-			_CmdRunning = msgId;
-			if ((Fpga.par->output & RO_SCREW_UP_ALL))
-			{
-				Fpga.par->output &= ~RO_SCREW_UP_ALL; // set all screw up to off
-				rx_sleep(1000); // wait ms
-			}
-			if (_cleaf_check_screw_input(RO_SCREW_DOWN_0)) break;
-			RX_StepperStatus.info.moving = TRUE;
-			pos = *((INT32*)pdata);
-			_LastRobPosCmd = pos;
-			if (!RX_StepperStatus.info.ref_done) Error(LOG, 0, "CLN: Command %s: missing ref_done: triggers Referencing", _CmdName);
-			if (RX_StepperStatus.info.ref_done) motors_move_to_step(MOTOR_ROB_BITS, &_ParRob_wipe_vac, -_rob_micron_2_steps(pos));
-		}
-		break;
-		
-		// ============================================================== Wipe Valves ==============================================================
-		
-	case CMD_CLN_WET_WIPE:		//strcpy(_CmdName, "CMD_CLN_WET_WIPE");
-		//if (!_CmdRunning)
-		{
-			pos = *((INT32*)pdata);
-		
-			if (pos == 0)
-			{
-				Fpga.par->output &= ~RO_BLADE_UP_0;
-				Fpga.par->output &= ~RO_FLUSH_CAR_0; // o5
-			}
-			if (pos == 1)
-			{
-				Fpga.par->output |= RO_BLADE_UP_0;
-				Fpga.par->output |= RO_FLUSH_CAR_0; // o5
-				Fpga.par->output &= ~RO_DRAIN_WASTE; // 11 und 10 // 0 enables drain chain
-			}				
-			RX_StepperStatus.set_io_cnt++;
-			//Error(LOG, 0, "Stepper: Command 0x%08x: CMD_CLN_WET_WIPE cnt set_io", _CmdRunning);
-		}
-		break;
-		
-	case CMD_CLN_DRY_WIPE:		//strcpy(_CmdName, "CMD_CLN_DRY_WIPE");
-		//if (!_CmdRunning)
-		{
-			pos = *((INT32*)pdata);
-		
-			if (pos == 0)
-			{
-				Fpga.par->output &= ~RO_BLADE_UP_0;
-				Fpga.par->output &= ~RO_VACUUM_BLADE; // o0
-				//Fpga.par->output &= ~RO_DRAIN_CAP_OUTSIDE; // o8
-				//Fpga.par->output &= ~RO_DRAIN_CAP_INSIDE; // o9
-			}
-			if (pos == 1) // clean capping while dry wipe
-			{
-				Fpga.par->output |= RO_BLADE_UP_0;
-				Fpga.par->output &= ~RO_DRAIN_WASTE; // 11 und 10 // 0 enables drain chain
-				//Fpga.par->output |= RO_DRAIN_CAP_OUTSIDE; // o8
-				//Fpga.par->output |= RO_DRAIN_CAP_INSIDE; // o9
-			}	
-			if (pos == 2) // vacuum blade while wipe
-			{
-				Fpga.par->output &= ~RO_DRAIN_WASTE; // 11 und 10 // 0 enables drain chain
-				Fpga.par->output |= RO_VACUUM_BLADE; // o0
-			}
-			RX_StepperStatus.set_io_cnt++;
-			//Error(LOG, 0, "Stepper: Command 0x%08x: CMD_CLN_DRY_WIPE cnt set_io", _CmdRunning);
-		}
-		break;
-		
-		// ============================================================== Capping ==============================================================
-		
-//	case CMD_CAP_EMPTY_CAP:			//strcpy(_CmdName, "CMD_CAP_EMPTY_CAP");
-//		pos = *((INT32*)pdata);
-//		_CmdRunning = msgId;
-//		RX_StepperStatus.info.moving = TRUE;
-//		Fpga.par->output |= RO_VACUUM;
-//		//_rob_set_pwm(PUMP_1, PUMP_1_WASTE);
-//		_TimeCnt = pos * _TimeEmptyCap * MAIN_PER_SEC;
-//		break;
-//		
-//	case CMD_CAP_FILL_CAP:			//strcpy(_CmdName, "CMD_CAP_FILL_CAP");
-//		_CmdRunning = msgId;
-//		RX_StepperStatus.info.moving = TRUE;
-//		//Fpga.par->output |= LB_FLUSH_CAP;
-//		//rx_sleep(500);
-//		Fpga.par->output |= RO_VACUUM;
-//		//_rob_set_pwm(PUMP_1, PUMP_1_WASTE);
-//		//Fpga.par->output |= LB_PUMP_FLUSH;
-//		_rob_set_pwm(PUMP_0, PUMP_0_FILL_CAP);
-//		_TimeCnt = _TimeFillCap * MAIN_PER_SEC;
-//		break;
-		
-//								
-//	case CMD_CLN_FILL_CAP:		//strcpy(_CmdName, "CMD_CLN_FILL_CAP");
-//		//if (!_CmdRunning)
-//		{
-//			pos = *((INT32*)pdata);
-//		
-//			if (pos == 0)
-//			{
-//				Fpga.par->output &= ~RO_DRAIN_CAP_OUTSIDE; // o8
-//				Fpga.par->output &= ~RO_DRAIN_CAP_INSIDE; // o9
-//				Fpga.par->output &= ~RO_FLUSH_CAP; // o7
-//			}
-//			if (pos == 1)
-//			{
-//				Fpga.par->output |= RO_DRAIN_CAP_OUTSIDE; // o8
-//				Fpga.par->output |= RO_FLUSH_CAP; // o7
-//			}
-//												  
-//		}
-//		break;
-//		
-//	case CMD_CLN_EMPTY_CAP:		//strcpy(_CmdName, "CMD_CLN_EMPTY_CAP");
-//		//if (!_CmdRunning)
-//		{
-//			pos = *((INT32*)pdata);
-//		
-//			if (pos == 0)
-//			{
-//				Fpga.par->output &= ~RO_DRAIN_CAP_OUTSIDE; // o8
-//				Fpga.par->output &= ~RO_DRAIN_CAP_INSIDE; // o9
-//				Fpga.par->output &= ~RO_FLUSH_CAP; // o7
-//			}
-//			if (pos == 1) // emtpy outside
-//			{
-//				Fpga.par->output |= RO_DRAIN_CAP_OUTSIDE; // o8
-//				Fpga.par->output &= ~RO_DRAIN_CAP_INSIDE; // o9
-//			}
-//			if (pos == 2) // empty inside
-//			{
-//				Fpga.par->output &= ~RO_DRAIN_CAP_OUTSIDE; // o8
-//				Fpga.par->output |= RO_DRAIN_CAP_INSIDE; // o9
-//			}
-//			if (pos == 3) // empty both
-//			{
-//				Fpga.par->output |= RO_DRAIN_CAP_OUTSIDE; // o8
-//				Fpga.par->output |= RO_DRAIN_CAP_INSIDE; // o9
-//			}
-//												  
-//		}
-//		break;
-
-		// ============================================================== Flush Pump ==============================================================
-		
+						
 	case CMD_CAP_SET_PUMP:			//strcpy(_CmdName, "CMD_SET_PUMP");
 		pos = *((INT32*)pdata);
 		if (pos == 0)
@@ -1731,18 +1206,6 @@ int  cleaf_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 	return TRUE;
 }
 
-//--- _cleaf_check_screw_input ----------------------------------------------------------------------
-int _cleaf_check_screw_input(int screw)
-{
-	if (fpga_input(screw) == 0)
-	{
-		Error(ERR_CONT, 0, "Stepper: Command %s: cancel move, screw bit is not down", _CmdName);
-		_CmdRunning = FALSE;
-		return TRUE;
-	}
-	return FALSE;
-}
-
 //--- _cleaf_retry_ref ----------------------------------------------------------------------
 int _cleaf_retry_ref(int cmd)
 {
@@ -1777,15 +1240,6 @@ static void _cleaf_send_status(RX_SOCKET socket)
 	if (_socket != INVALID_SOCKET) sok_send_2(&_socket, REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);	
 }
 	
-	//--- _rob_detect_screw ---------------------------------
-static void _rob_detect_screw(int motorNo, int pos)
-{
-	switch (motorNo)	
-	{
-	case 0:	cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_DETECT_SCREW_0, &pos); break;
-	case 1:	cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_DETECT_SCREW_1, &pos); break;
-	}
-}
 
 //--- _cleaf_motor_test ---------------------------------
 static void _cleaf_motor_test(int motorNo, int steps)
@@ -1807,11 +1261,6 @@ static void _cleaf_motor_test(int motorNo, int steps)
 		par.accel	= 2500;
 		par.current	= 320.0;
 		mot_steps	= -steps;
-	}
-	else if (motorNo == MOTOR_SCREW_0) {
-		par.speed	= 21000;		//21000;					//21000;				//21000;			//21000;			//21000;					
-		par.accel	= 10000;		//10000;					//10000;				//10000;			//10000;			//10000;				
-		par.current = 80.0;//134.0;	//40.0;	minimum for 0.3 Nm	// 60.0; for 0.4 Nm		// 80.0 for 0.5 Nm	// 100.0 for 0.6 Nm	// 120.0 for 0.7 Nm	// 134.0 for 0.8 Nm	
 	}
 		
 	else if (motorNo == MOTOR_WASTE_PUMP) {

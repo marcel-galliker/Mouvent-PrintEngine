@@ -152,7 +152,7 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
 		RX_StepperStatus.posZ = _Status[no].posZ;
 	}
 	
-	if (_AbortPrinting && RX_StepperStatus.info.z_in_print) steplb_to_up_pos();
+	if (_AbortPrinting && RX_StepperStatus.info.z_in_print) steplb_lift_to_up_pos();
 		
 	memcpy(&RX_StepperStatus.info, &info, sizeof(RX_StepperStatus.info));
 	RX_StepperStatus.info.x_in_cap = plc_in_cap_pos();
@@ -173,26 +173,24 @@ int	 steplb_to_print_pos(void)
 }
 
 //--- steplb_abort_printing -----------------------------------------
-int  steplb_abort_printing(void)
+void  steplb_abort_printing(void)
 {
-	if(RX_StepperStatus.info.z_in_print) return steplb_to_up_pos();
+	if(RX_StepperStatus.info.z_in_print) steplb_lift_to_up_pos();
 	else _AbortPrinting = TRUE;
-	return REPLY_OK;
 }
 
-//--- steplb_to_up_pos ---------------------------
-int	 steplb_to_up_pos(void)
+//--- steplb_lift_to_up_pos ---------------------------
+void steplb_lift_to_up_pos(void)
 {
 	for (int no=0; no<SIZEOF(_step_socket); no++)
 	{
 		sok_send_2(&_step_socket[no], CMD_CAP_UP_POS, 0, NULL);
 	}
 	_AbortPrinting = FALSE;
-	return REPLY_OK;									
 }
 
 //--- steplb_lift_is_up --------------
-int	 steplb_lift_is_up(void)
+int	 steplb_lift_in_up_pos(void)
 {
 	return RX_StepperStatus.info.z_in_ref;
 }

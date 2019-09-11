@@ -147,6 +147,7 @@ static ULONG			_LastLogIdx=0;
 static int				_StartPrinting=FALSE;
 static int				_RequestPause=FALSE;
 static int				_SendPause=FALSE;
+static int				_GUIPause=FALSE;
 static int				_SendRun=FALSE;
 static int				_SendWebIn=FALSE;
 static int				_CanRun=FALSE;
@@ -497,6 +498,7 @@ int  plc_stop_printing(void)
 	_StartPrinting = FALSE;
 	_SendRun       = FALSE;
 	_SendPause	   = FALSE;
+	_GUIPause	   = FALSE;
 	_RequestPause  = FALSE;
 	_head_was_up   = FALSE; 
 	step_set_vent(FALSE);
@@ -563,8 +565,7 @@ int	plc_to_cap_pos(void)
 {
 	if(rx_def_is_tx(RX_Config.printer.type))
 	{
-		Error(LOG, 0, "plc_to_cap_pos: send CMD_STOP");
-		_plc_set_command("CMD_PRODUCTION", "CMD_STOP");
+		_plc_set_command("CMD_PRODUCTION", "CMD_SLIDE_TO_WIPE");
 		step_set_vent(FALSE);			
 	}
 	return REPLY_OK;
@@ -585,7 +586,7 @@ int  plc_pause_printing(void)
 		_plc_set_par_default();
 //		_plc_set_command("CMD_PRODUCTION", "CMD_PAUSE");
 //		Error(LOG, 0, "send PAUSE");
-		_SendPause = 1;
+		_GUIPause = TRUE;
 		_plc_state_ctrl();
 	}
 	return REPLY_OK;
@@ -609,7 +610,7 @@ int plc_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen)
 		case CMD_PLC_GET_VAR:		_plc_get_var (socket, (char*)data);				break;
 		case CMD_PLC_SET_VAR:		_plc_set_var (socket, (char*)data);				break;
 		case CMD_PLC_SET_CMD:		_plc_set_cmd (socket, (char*)data);				break;
-		case CMD_PAUSE_PRINTING:	_SendPause=1;									break;
+		case CMD_PAUSE_PRINTING:	_GUIPause=TRUE;									break;
 		
 		//--- material database --------------------------------------------------------
 		case CMD_PLC_REQ_MATERIAL:	_plc_req_material  (socket, FILENAME_MATERIAL, cmd); break;
@@ -659,12 +660,15 @@ static void _plc_load_par(void)
 	if (lc_get_value_by_name(APP "XML_ENC_OFFSET", value)==REPLY_OK)
 		RX_Config.printer.offset.incPerMeter[0] = atoi(value);
 
+	/*
 	if (rx_def_is_scanning(RX_Config.printer.type))
 	{
 		lc_set_value_by_name_UINT32(APP"CFG_POSITION_PURGE",	90);				
-		lc_set_value_by_name_UINT32(APP"CFG_POSITION_CAPPING",	55);				
+		lc_set_value_by_name_UINT32(APP"CFG_POSITION_CAPPING",	45);				
 		lc_set_value_by_name_UINT32(APP"CFG_POSITION_WIPE",		 0);
 	}
+	*/
+	
 	switch(RX_Config.printer.type)
 	{
 	case printer_TX801:	lc_set_value_by_name_UINT32(APP"CFG_MACHINE_TYPE",	0);	break;
@@ -1233,15 +1237,33 @@ static void _plc_state_ctrl()
 			}
 		}
 		
+		if (_GUIPause)
+		{
+			if (rx_def_is_scanning(RX_Config.printer.type))
+			{
+				static int _scannerpos;
+				UINT32 pos = plc_get_scanner_pos();
+				if (_scannerpos>(pos+100))
+				{
+					_GUIPause =FALSE;
+					_SendPause=1;
+				}
+				_scannerpos = pos;			
+			}
+			else 
+			{
+				_GUIPause =FALSE;
+				_SendPause=1;					
+			}
+		}
 		if (RX_Config.stepper.ref_height!=0 || RX_Config.stepper.print_height!=0)
 		{
-			headIsUp = (RX_StepperStatus.info.z_in_print || RX_StepperStatus.info.z_in_ref || _head_was_up);
-
-			if(headIsUp)
+			if(RX_StepperStatus.info.scannerEnable)
 			{
 				if(_SendPause == 1)
 				{
 					_SendPause = 2;
+					_GUIPause  = FALSE;
 					rx_sleep(200);
 					_plc_set_command("CMD_PRODUCTION", "CMD_PAUSE");
 				}
@@ -1258,7 +1280,7 @@ static void _plc_state_ctrl()
 				step_handle_gui_msg(INVALID_SOCKET, CMD_CAP_UP_POS, NULL, 0);				
 			}
 		}
-		lc_set_value_by_name_UINT32(APP "STA_HEAD_IS_UP", headIsUp);	
+		lc_set_value_by_name_UINT32(APP "STA_HEAD_IS_UP", RX_StepperStatus.info.scannerEnable);	
 	}
 
 	/*	Label
@@ -1286,6 +1308,7 @@ static void _plc_state_ctrl()
 			if (_StartEncoderItem.pageWidth==0) RX_PrinterStatus.printState = ps_pause;
 			if (!_StartPrinting) step_set_vent(0);
 			_SendPause = 0;
+			_GUIPause = FALSE;
 		}
 		if(_SendRun)
 		{
@@ -1535,7 +1558,7 @@ int	 plc_in_wipe_pos(void)
 	{
 		EnScanState state;
 		lc_get_value_by_name_UINT32(APP "STA_SLIDE_POSITION", (UINT32*)&state);
-		return state==scan_wipe;
+		return (state==scan_wipe || state==scan_capping);
 	}
 	return TRUE;
 }

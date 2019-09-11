@@ -400,9 +400,9 @@ void pc_del_file(char *path)
 }
 
 //--- pc_set_pageMargin ------------------------------------
-int pc_set_pageMargin(INT32 pageMargin)
+void pc_set_pageMargin(INT32 pageMargin)
 {
-	_PageMargin_Next = 	pageMargin;		
+	_PageMargin_Next = 	pageMargin;
 }
 
 //--- _print_next --------------------------------------------------------------
@@ -836,7 +836,7 @@ int pc_print_done(int headNo, SPrintDoneMsg *pmsg)
 }
 
 //--- pc_print_go -----------------------------------
-int pc_print_go(void)
+void pc_print_go(void)
 {
 	if (_Scanning) 
 	{

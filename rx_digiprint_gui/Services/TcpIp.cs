@@ -1100,6 +1100,7 @@ namespace RX_DigiPrint.Services
 	        SVersion	        fpgaVersion;
 
             public UInt32		info;
+            public UInt32		robinfo;
 	        public UInt32		warn;
 	        public UInt32		err;
 
@@ -1108,7 +1109,6 @@ namespace RX_DigiPrint.Services
 	        public Int32		posZ;
 
             public Int32        adjustmentProgress;
-            public Int32        state;
 
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
             public Int32[]       alive;
