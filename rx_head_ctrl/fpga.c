@@ -356,6 +356,8 @@ int  fpga_set_config(RX_SOCKET socket)
 	TrPrintfL(TRUE, "fpga_set_config start");
 	fpga_abort();
 
+	if (RX_HBStatus[0].fpgaVersion.major==0) Error(ERR_CONT, 0, "Head electronics overheated. It is disabled until the next power on of the printer.");
+	
 	_ethernet_config();
 
 	if (!RX_LinuxDeployment) Error(WARN, 0, "Head unreliable startup of operating system from SD-Card. CHANGE TO FLASH booting!");
@@ -1526,7 +1528,9 @@ int  fpga_abort(void)
 			Error(WARN,0,"RELOAD-FPGA");
 			nios_end();
 			fpga_end();
-			fpga_init(FIELNAME_HEAD_RBF);
+			if (RX_HBStatus[0].tempFpga>MAX_FPGA_TEMP) 
+				 fpga_init(FIELNAME_HEADTEMP_RBF);
+			else fpga_init(FIELNAME_HEAD_RBF);
 			TrPrintfL(TRUE, "fpga_init done");
 			nios_init();
 			TrPrintfL(TRUE, "nios_init done");
@@ -1960,7 +1964,11 @@ static void _check_errors(void)
 			{
 				TrPrintfL(TRUE, "Head FPGA overheated temp=%d row=%d", RX_HBStatus[0].tempFpga, Fpga.stat->temp);
 				if (ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err,  err_firepulse_missed_0, 0, "Head FPGA overheated (%d °C)", RX_HBStatus[0].tempFpga))
-					nios_shutdown();				
+				{
+					_Reload_FPGA=TRUE;
+					nios_shutdown();
+					fpga_abort();
+				}
 			}
 		}
 		else 
