@@ -552,13 +552,12 @@ int  fpga_set_config(RX_SOCKET socket)
 //	Error(LOG,  0, "fpga_set_config1: FSM State=0x%04x", Fpga.stat->info);
 //	_check_state_machines();
 	
-	SFpgaHeadInfo* pinfo = (SFpgaHeadInfo*)&Fpga.stat->info;
-	if (pinfo->clearing_udp_flags) 
+	if (Fpga.stat->info.clearing_udp_flags) 
 	{
 //		Error(WARN, 0, "Timeout while clearing Used Block Flags");
 		rx_sleep(10);
 	}
-	if (pinfo->clearing_udp_flags) 
+	if (Fpga.stat->info.clearing_udp_flags) 
 	{
 		_Reload_FPGA=TRUE;
 		return Error(ERR_ABORT, 0, "Timeout while clearing Used Block Flags");
@@ -1011,8 +1010,7 @@ static char* _get_ip_addr(SFpgaEthCfg *ethcfg, char *str)
 //--- fpga_get_nios_shutdown ----------------------------------
 int fpga_get_nios_shutdown(void)
 {
-	SFpgaHeadInfo* pinfo = (SFpgaHeadInfo*)&Fpga.stat->info;
-	return pinfo->fpga_shutdown_from_nios;
+	return Fpga.stat->info.fpga_shutdown_from_nios;
 }
 
 //--- fpga_image ------------------------------------------------
@@ -2021,7 +2019,7 @@ static void _check_errors(void)
 //--- _check_state_machines --------------------
 static void _check_state_machines(void)
 {
-	if ((Fpga.stat->info & 0x0fff) != 0x0fff) 
+	if ((Fpga.stat->info.flags & 0x0fff) != 0x0fff) 
 	{
 		ErrorFlag (ERR_CONT,  (UINT32*)&RX_HBStatus[0].err,  err_fpga_state_machines,  0, "FPGA not all State Mashines running");
 		_Reload_FPGA = TRUE;

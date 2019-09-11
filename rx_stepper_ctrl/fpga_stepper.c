@@ -97,7 +97,7 @@ void fpga_init()
 	_MemId = open("/dev/mem", O_RDWR | O_SYNC);
 	if (_MemId == -1) Error(ERR_CONT, 0, "Could not open memory handle.");
 
-	Fpga.qsys    = (SFpgaQSys*)		rx_fpga_map_page(_MemId, ADDR_FPGA_QSYS,	sizeof(SFpgaQSys),	0x00c0);
+	Fpga.qsys    = (SFpgaQSys*)		rx_fpga_map_page(_MemId, ADDR_FPGA_QSYS,	sizeof(SFpgaQSys),	0x00b4);
 	Fpga.stat    = (SFpgaStat*)		rx_fpga_map_page(_MemId, ADDR_FPGA_STAT,	sizeof(SFpgaStat),	0x0200);
 	Fpga.par     = (SFpgaPar*)		rx_fpga_map_page(_MemId, ADDR_FPGA_PAR,		sizeof(SFpgaPar),	0x0258);
 	Fpga.move    = (SMove*)			rx_fpga_map_page(_MemId, ADDR_FPGA_MOVES,   sizeof(SMove)*MOTOR_CNT*MOVE_CNT, 12*MOTOR_CNT*MOVE_CNT);

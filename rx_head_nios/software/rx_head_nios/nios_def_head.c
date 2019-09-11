@@ -24,6 +24,7 @@ char *PowerStateStr(EnPowerState state)
 	case power_pre_all_on:		return "pre_all_on";
 	case power_wait_all_on:		return "wait_all_on";
 	case power_all_on:			return "all_on";
+	case power_sd_fpga:			return "sd_fpga";
 	case power_sd:				return "sd";
 	case power_sd_3v3:			return "sd_3v3";
 	case power_sd_amp:			return "sd_amp";

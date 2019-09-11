@@ -82,7 +82,7 @@ void nios_shutdown(void)
 		int fd = open("/dev/mem", O_RDWR); 
 		_NiosMem  = (SNiosMemory*)mmap(NULL, NIOS_MEM_SIZE, PROT_READ|PROT_WRITE, MAP_SHARED, fd, NIOS_MEM_ADDR);
 		_NiosCfg  = &_NiosMem->cfg;
-//		cond_ctrlMode2(-1, ctrl_off);
+		cond_ctrlMode2(-1, ctrl_off);
 		close(fd);		
 		nios_end();		
 	}

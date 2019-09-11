@@ -351,40 +351,44 @@ typedef struct SFpgaPrintData
 //=== HEAD STATUS =====================================================
 
 //--- Info Flags --------------------------------------------------
-typedef struct SFpgaHeadInfo
+typedef union SFpgaHeadInfo
 {
-	UINT32	head_req_fsm_0_running:1;	// 0x00000001
-	UINT32  head_req_fsm_1_running:1;	// 0x00000002
-	UINT32	head_req_fsm_2_running:1;	// 0x00000004
-	UINT32  head_req_fsm_3_running:1;	// 0x00000008
-	UINT32	main_fsm_0_running:1;		// 0x00000010
-	UINT32	main_fsm_1_running:1;		// 0x00000020
-	UINT32	main_fsm_2_running:1;		// 0x00000040
-	UINT32	main_fsm_3_running:1;		// 0x00000080
-	UINT32	head_fsm_0_running:1;		// 0x00000100
-	UINT32  head_fsm_1_running:1;		// 0x00000200
-	UINT32	head_fsm_2_running:1;		// 0x00000400
-	UINT32  head_fsm_3_running:1;		// 0x00000800
-	UINT32	nios_reset:1;				// 0x00001000
-	UINT32	fpga_shutdown_from_nios:1;	// 0x00002000
-	UINT32	info14:1;					// 0x00004000
-	UINT32	info15:1;					// 0x00008000
-	UINT32	clearing_udp_flags:1;		// 0x00010000
-	UINT32	info17:1;
-	UINT32	info18:1;
-	UINT32	info19:1;
-	UINT32	info20:1;
-	UINT32	info21:1;
-	UINT32	info22:1;
-	UINT32	info23:1;
-	UINT32	info24:1;
-	UINT32	info25:1;
-	UINT32	info26:1;
-	UINT32	info27:1;
-	UINT32	info28:1;
-	UINT32	info29:1;
-	UINT32	info30:1;
-	UINT32	info31:1;
+	struct
+	{
+		UINT32	head_req_fsm_0_running:1;	// 0x00000001
+		UINT32  head_req_fsm_1_running:1;	// 0x00000002
+		UINT32	head_req_fsm_2_running:1;	// 0x00000004
+		UINT32  head_req_fsm_3_running:1;	// 0x00000008
+		UINT32	main_fsm_0_running:1;		// 0x00000010
+		UINT32	main_fsm_1_running:1;		// 0x00000020
+		UINT32	main_fsm_2_running:1;		// 0x00000040
+		UINT32	main_fsm_3_running:1;		// 0x00000080
+		UINT32	head_fsm_0_running:1;		// 0x00000100
+		UINT32  head_fsm_1_running:1;		// 0x00000200
+		UINT32	head_fsm_2_running:1;		// 0x00000400
+		UINT32  head_fsm_3_running:1;		// 0x00000800
+		UINT32	nios_reset:1;				// 0x00001000
+		UINT32	fpga_shutdown_from_nios:1;	// 0x00002000
+		UINT32	info14:1;					// 0x00004000
+		UINT32	info15:1;					// 0x00008000
+		UINT32	clearing_udp_flags:1;		// 0x00010000
+		UINT32	info17:1;
+		UINT32	info18:1;
+		UINT32	info19:1;
+		UINT32	info20:1;
+		UINT32	info21:1;
+		UINT32	info22:1;
+		UINT32	info23:1;
+		UINT32	info24:1;
+		UINT32	info25:1;
+		UINT32	info26:1;
+		UINT32	info27:1;
+		UINT32	info28:1;
+		UINT32	info29:1;
+		UINT32	info30:1;
+		UINT32	info31:1;		
+	};
+	UINT32 flags;
 } SFpgaHeadInfo;
 
 //--- Error Flags --------------------------------------------------------
@@ -431,8 +435,8 @@ typedef struct SFpgaHeadErr
 typedef struct SFpgaHeadStat
 {
 	// clock frequency 160 MHz
-//	SFpgaHeadInfo		info;			//  0x0000
-	UINT32				info;
+//	UINT32				info;			//  0x0000
+	SFpgaHeadInfo		info;
 	UINT32				eth;			//	0x0004: ethernet status
 	BYTE				dataLevel_0;	//	0x0008:
 	BYTE				dataLevel_1;	//	0x0009:
