@@ -2,6 +2,7 @@
 using RX_DigiPrint.Models;
 using RX_DigiPrint.Models.Enums;
 using RX_DigiPrint.Services;
+using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -34,7 +35,7 @@ namespace RX_DigiPrint.Views.LH702View
         //--- Save_Clicked ---------------------------------------------
         private void Save_Clicked(object sender, RoutedEventArgs e)
         {
-            RxGlobals.MaterialList.List[0].SaveValue("PAR_HEAD_HEIGHT", RxGlobals.MaterialXML.PrintHeight.ToString());
+            RxGlobals.MaterialList.List[0].SaveValue("PAR_HEAD_HEIGHT", RxGlobals.MaterialXML.PrintHeight.ToString(new CultureInfo("en-US")));
             RxGlobals.MaterialList.List[0].Send(TcpIp.CMD_PLC_SAVE_MATERIAL);
         }
 
