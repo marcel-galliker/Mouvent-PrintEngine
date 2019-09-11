@@ -43,6 +43,7 @@ static SConditionerCfg_mcu	_CfgBackup[MAX_HEADS_BOARD];
 
 SFpgaHeadBoardCfg	FpgaCfg;
 SVersion			_FileVersion;
+static int			_UpdateClusterTimer;
 static int			_ErrorDelay=0;
 static ELogItemType	_ErrLevel = LOG_TYPE_UNDEF;
 
@@ -103,7 +104,8 @@ int cond_init(void)
 		}
 	}
 	
-	_update_clusterNo();
+	_UpdateClusterTimer = 5;
+//	_update_clusterNo();
 
 	
 	/*
@@ -345,7 +347,7 @@ static void _update_clusterNo(void)
 	{
 		memcpy(&mem, _NiosStat->user_eeprom[condNo], sizeof(mem));
 		_count(mem.clusterNo);
-		_count(_NiosStat->cond[condNo].clusterNo);
+	//	_count(_NiosStat->cond[condNo].clusterNo);
 				
 		if(mem.dropletsPrintedCRC==rx_crc8(&mem.dropletsPrinted, sizeof(mem.dropletsPrinted)))
 			RX_HBStatus->head[condNo].printedDroplets = mem.dropletsPrinted; 
@@ -363,9 +365,7 @@ static void _update_clusterNo(void)
 			cnt=_cntr[n].cnt;
 		}
 	}
-	clusterNo = _cntr[idx].no;
-	cond_set_clusterNo(clusterNo);
-	RX_HBStatus->clusterNo     = clusterNo;
+	cond_set_clusterNo(_cntr[idx].no);
 }
 
 //--- _update_counters -------------------------------------
@@ -401,6 +401,10 @@ void cond_main(int ticks)
 	static int _ticks=0;
 	if (ticks-_ticks>1000)
 	{
+		if (_UpdateClusterTimer>0 && --_UpdateClusterTimer<=0)
+		{
+			_update_clusterNo();			
+		}
 		_update_counters();
 		_ticks=ticks;
 	}	

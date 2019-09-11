@@ -29,7 +29,7 @@ namespace RX_Common
             else if (max!=double.NaN && val>max) val = max;
             if (IsInt) Text=((int)val).ToString();
             else       Text=val.ToString();
-            e.Handled = true;
+        //    e.Handled = true;
         }
 
         //--- RxNumBox_PreviewMouseDown --------------------------------------------

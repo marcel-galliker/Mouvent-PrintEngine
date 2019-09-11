@@ -267,8 +267,6 @@ typedef struct
 		#define FIFOS_OFF				0
 		#define FIFOS_DIST				1
 		#define FIFOS_MARKREADER		2 // <quiet_window> -<ignored_fifo><window_fifo>-<ignored_fifo><window_fifo>-<ignored_fifo><window_fifo>-...
-		#define FIFOS_MARKREADER_ALL	4
-		#define FIFOS_MARKREADER_REPAIR	6 // creates PG at the end of window_fifo, if no DigIn was detected
 	
 	UINT32	dig_in_sel;			// 0x0020: select digital input 2bit
 	UINT32	quiet_window;		// 0x0024: First Window in MARKREADER to ignore DigIn. Restarts quiet_window when DigIn = '1' while in quiet_window

@@ -906,6 +906,7 @@ namespace RX_DigiPrint.Services
 	        public Int32	info;
 	        public Int32	warn;
 	        public Int32	err;
+	        public Int32	distTelCnt;
 	        public Int32	PG_cnt;
 	        public Int32	PG_stop;
 	        public Int32	fifoEmpty_PG;

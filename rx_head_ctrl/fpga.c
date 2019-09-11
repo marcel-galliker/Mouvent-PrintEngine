@@ -1443,8 +1443,9 @@ int  fpga_abort(void)
 		}
 		*/
 		
-		int i;
+		int i, len;
 		int warn=FALSE;
+		char str[MAX_PATH];
 		for(i=0; i<SIZEOF(Fpga.error->enc_fp); i++)
 		{
 			if(RX_FpgaData.wf_busy_warn[i] && !warn)				
@@ -1484,20 +1485,24 @@ int  fpga_abort(void)
 		if(FpgaCfg.cfg->cmd & CMD_MASTER_ENABLE)
 		{	
 //				Error(LOG,0,"fpga_disable: FSM State=0x%04x",Fpga.stat->info);
+
+			len = sprintf(str, "PG-Counters: Tel=%d, (PG/PD): ", _Enc_PgCnt[0]);
 			//--- TEST PRINT-DONE --------------
 			{
 				int i,err;
 				for(i=0,err=FALSE; i<HEAD_CNT; i++)
 				{
-					if(FpgaCfg.head[i]->cmd_enable && Fpga.stat->pg_ctr[i] > Fpga.stat->print_done_ctr[i]+1)
+					len += sprintf(&str[len], "%d:(%d/%d)  ", i, Fpga.stat->pg_ctr[i],Fpga.stat->print_done_ctr[i]);
+					if(FpgaCfg.head[i]->cmd_enable && ((Fpga.stat->pg_ctr[i] > Fpga.stat->print_done_ctr[i]+1) || (_Enc_PgCnt[0]>Fpga.stat->pg_ctr[i])))
 					{
-						Error(WARN,0,"Head[%d]: Print-Done missing, #PrintGo=%d #Print-Done=%d",i,Fpga.stat->pg_ctr[i],Fpga.stat->print_done_ctr[i]); 
+						Error(WARN,0,"Head[%d]: Print-Done missing, #Encoder=%d, #PrintGo=%d #PrintDone=%d", i, _Enc_PgCnt[0], Fpga.stat->pg_ctr[i],Fpga.stat->print_done_ctr[i]); 
 						err=TRUE;
 					}
 				}
 				if(err) fpga_trace_registers("Print-Done-missed", TRUE);	
 			//	else    fpga_trace_registers("Print-Done-OK", FALSE);	
 			}
+			Error(LOG, 0, str);
 			//---
 			TrPrintf(TRUE, "fpga_abort CMD_MASTER_ENABLE=FALSE:\n");
 			TrPrintf(TRUE, "fpga_abort CMD_MASTER_ENABLE=FALSE: blockCnt[0]=%d", Fpga.data->blockCnt[0]);

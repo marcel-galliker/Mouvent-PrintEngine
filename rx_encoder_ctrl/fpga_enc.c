@@ -119,7 +119,6 @@ static int		_CorrRotative = FALSE;
 static int		_PrintGo_Locked;
 static int		_PrintGo_Start;
 static int		_PrintGo_Enabled=FALSE;
-static int		_DistTelCnt = 0;
 static int		_Scanning = FALSE;
 static int		_IndexCheckDone=FALSE;
 static UINT32	_ErrFlags	= 0;
@@ -445,6 +444,8 @@ void fpga_enc_config(int inNo, SEncoderCfg *pCfg, int restart)
 	int outNo = inNo;
 	
 	if (!_Init) return;
+	
+	Error(LOG, 0, "fpga_enc_config Version %d.%d.%d.%d", Fpga->stat.version.major, Fpga->stat.version.minor, Fpga->stat.version.revision, Fpga->stat.version.build);
 
 	TrPrintfL(TRUE, "fpga_enc_config(inNo=%d, retsart=%d)", inNo, restart);
 
@@ -816,7 +817,7 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg, int restart)
 
 	TrPrintfL(TRUE, "fpga_pg_config start: enable=%d, position=%d, enc_start_pos_fwd=%d, pg_start_pos=%d, restart=%d", Fpga->cfg.encIn[0].enable, Fpga->stat.encIn[0].position, Fpga->cfg.pg[0].enc_start_pos_fwd, Fpga->stat.encOut[0].pg_start_pos, restart);
 	
-//	Error(LOG, 0, "fpga_pg_config _DistTelCnt=%d", _DistTelCnt);
+//	Error(LOG, 0, "fpga_pg_config RX_EncoderStatus.distTelCnt=%d", RX_EncoderStatus.distTelCnt);
 	//--- reset  position ------------------
 	int act_pos;
 	
@@ -847,7 +848,7 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg, int restart)
 		}
 		else 
 		{
-			Fpga->cfg.pg[pgNo].fifos_used	  = (pcfg->printGoMode == PG_MODE_MARK) ?  FIFOS_MARKREADER_REPAIR : FIFOS_DIST;
+			Fpga->cfg.pg[pgNo].fifos_used	  = (pcfg->printGoMode == PG_MODE_MARK) ?  FIFOS_MARKREADER : FIFOS_DIST;
 		//	Fpga->cfg.general.min_mark_len	  = 1000;
 			Fpga->cfg.general.shift_delay	  = (int)((pcfg->printGoOutDist-Fpga->cfg.general.min_mark_len)/_StrokeDist);
 			Fpga->cfg.general.shift_delay_tel = (int)((pcfg->printGoDist   -Fpga->cfg.general.min_mark_len)/_StrokeDist);
@@ -917,7 +918,7 @@ void fpga_pg_init(int restart)
 	RX_EncoderStatus.fifoEmpty_IGN = Fpga->stat.ignored_fifo_empty_err;
 	RX_EncoderStatus.fifoEmpty_WND = Fpga->stat.window_fifo_empty_err;	
 
-	if (!restart) _DistTelCnt	= 0;
+	if (!restart) RX_EncoderStatus.distTelCnt	= 0;
 	_PrintGo_Enabled = TRUE;
 
 	TrPrintfL(TRUE, "fpga_pg_init: enable=%d, position=%d, enc_start_pos_fwd=%d", Fpga->cfg.encIn[0].enable, Fpga->stat.encIn[0].position, Fpga->cfg.pg[0].enc_start_pos_fwd);
@@ -963,7 +964,7 @@ void  fpga_pg_set_dist(int cnt, int dist)
 		int incs = (int)(dist/_StrokeDist);
 		while (cnt-->0) FpgaQSys->printGo_fifo = incs;
 		for (pgNo=0; pgNo<SIZEOF(Fpga->cfg.pg); pgNo++) Fpga->cfg.pg[pgNo].fifos_ready = TRUE;
-		_DistTelCnt++;
+		RX_EncoderStatus.distTelCnt++;
 	//	Error(LOG, 0, "fpga_pg_set_dist dist=%d, incs=%d", dist, incs);		
 	}
 }
@@ -977,7 +978,7 @@ void  fpga_set_printmark(SEncoderPgDist *pmsg)
 	FpgaQSys->window_fifo  = _Window = (int)(pmsg->window/_StrokeDist);
 	FpgaQSys->ignored_fifo = _Ignore = (int)(pmsg->ignore/_StrokeDist);
 	for (pgNo=0; pgNo<SIZEOF(Fpga->cfg.pg); pgNo++) Fpga->cfg.pg[pgNo].fifos_ready = TRUE;
-	_DistTelCnt++;
+	RX_EncoderStatus.distTelCnt++;
 }
 
 //--- _pg_ctrl ------------------------------------------------------
@@ -1003,7 +1004,17 @@ static void  _pg_ctrl(void)
 		//--- FIFO-Errors ---------------------------------------------------------------------------------
 		if (Fpga->stat.pg_fifo_empty_err && RX_EncoderStatus.fifoEmpty_PG != Fpga->stat.pg_fifo_empty_err)
 		{
-			Error(LOG, 0, "pg_fifo_empty_err=%d, fill_level=%d, _DistTelCnt=%d, PG_Cnt=%d", Fpga->stat.pg_fifo_empty_err, FpgaQSys->printGo_status.fill_level, _DistTelCnt, Fpga->stat.encOut[0].PG_cnt);
+			Error(LOG, 0, "pg_fifo_empty_err=%d (distTelCnt=%d, fill_level=%d, PG_Cnt=%d)", Fpga->stat.pg_fifo_empty_err, RX_EncoderStatus.distTelCnt, FpgaQSys->printGo_status.fill_level, RX_EncoderStatus.PG_cnt);
+			_IndexCheckDone = TRUE;
+		}
+		if (Fpga->stat.ignored_fifo_empty_err && RX_EncoderStatus.fifoEmpty_IGN != Fpga->stat.ignored_fifo_empty_err)
+		{
+			Error(LOG, 0, "ignored_fifo_empty_err=%d, (distTelCnt=%d, fill_level=%d, PG_Cnt=%d)", Fpga->stat.ignored_fifo_empty_err, RX_EncoderStatus.distTelCnt, FpgaQSys->ignored_status.fill_level, RX_EncoderStatus.PG_cnt);
+			_IndexCheckDone = TRUE;
+		}
+		if (Fpga->stat.window_fifo_empty_err && RX_EncoderStatus.fifoEmpty_WND != Fpga->stat.window_fifo_empty_err)
+		{
+			Error(LOG, 0, "window_fifo_empty_err=%d, (distTelCnt=%d, fill_level=%d, PG_Cnt=%d)", Fpga->stat.window_fifo_empty_err, RX_EncoderStatus.distTelCnt, FpgaQSys->window_status.fill_level, RX_EncoderStatus.PG_cnt);
 			_IndexCheckDone = TRUE;
 		}
 		
@@ -1326,7 +1337,7 @@ static void _fpga_display_status(int showCorrection, int showParam)
 			term_printf("  Wind mark pos: "); for (i = 0; i < cnt; i++) term_printf("%09d  ", Fpga->stat.encOut[i].window_mark_pos); term_printf("\n");
 
 			term_printf("  PG FIFO:       %09d  Used=%d     dist=%03d wnd=%03d ign=%03d\n", 
-				_DistTelCnt, 
+				RX_EncoderStatus.distTelCnt, 
 				Fpga->cfg.pg[0].fifos_used, 
 				FpgaQSys->printGo_status.fill_level, 
 				FpgaQSys->window_status.fill_level, 

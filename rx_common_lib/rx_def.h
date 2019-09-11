@@ -962,6 +962,7 @@ typedef struct SEncoderStat
 	SEncoderInfo	info;
 	SEncoderWarn	warn;
 	SEncoderErr		err;
+	UINT32			distTelCnt;
 	UINT32			PG_cnt;
 	UINT32			PG_stop;
 	UINT32			fifoEmpty_PG;
