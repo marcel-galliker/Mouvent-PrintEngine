@@ -36,6 +36,7 @@
 #define ADDR_FPGA_PAR		(ADDR_FPGA_BASE+0x1000)
 #define ADDR_FPGA_MOVES		(ADDR_FPGA_BASE+0x2000)
 #define ADDR_FPGA_ENCODER	(ADDR_FPGA_BASE+0x3000)
+#define ADDR_FPGA_ENCODER_540	(ADDR_FPGA_BASE+0x4000)
 
 typedef struct
 {
@@ -160,7 +161,7 @@ typedef struct
 	BYTE	res_63;
 	INT32	pos_rising;			//      0064:
 	INT32	pos_falling;		//      0068:
-	UINT32	res_6c;				//      006c 				
+	UINT32	pos_ctrl_out;		//      006c 				
 } SMotStat;
 
 //--- SFpgaStatus -------------------------------------
@@ -193,7 +194,7 @@ typedef struct
 	UINT32	res_16c;
 
 	//--- reserved ------------------
-	UINT32	res_170_200[(0x200-0x170)/4];	// FF202130 - FF2021ff
+	UINT32	res_170_200[(0x200 - 0x170) / 4];	// FF202130 - FF2021ff
 } SFpgaStat;
 
 //--- SMove -----------------------------------------
@@ -233,13 +234,16 @@ typedef struct
 	//--- E-Stop ----------------------------------
 	UINT32	estopIn;			//       0130: [4 Bit] if (input[estopIn]==estopLevel) -> E-Stop
 	UINT32	estopLevel;			//       0134: [1 Bit] // !!! INVERTED !!!
-	INT32	minPos;				//       0138: [unused] (SIGNED) whenever the motor gets down to this position -> E-Stop
-	INT32	maxPos;				//       013c: [unused] whenever the motor gets up   to this position -> E-Stop
+	UINT32	amp_idle;				//       0138: [8 Bit] [ampere reg value]
+	UINT32	amp_stop;				//       013c: [8 Bit] [ampere reg value]
 
 	//---  encoder -------------------------------
 	UINT32	enc_bwd;			//       0140: [1 Bit]
 	UINT32	enc_stall_en;		//       0142: [unused]
 	UINT32	enc_stall_var;		//       0148: [unused]
+//	UINT32	v_min_speed;        //       0142: [32 Bit]
+//	UINT32	res_148;		    //       0148: [32 Bit]
+
 	UINT32	enc_stop_index;		//       014c: [1 Bit] aborts motor on next index
 
 	UINT32  enc_mot_ratio;		//	     0150: [unused] ratio = motor per rev. / encoder per rev.
@@ -281,7 +285,7 @@ typedef struct
 	UINT32	reset_err;		//       02C: 
 	UINT32	reset_cnt;		//       030: 
 	UINT32	min_in_pulse_width;	//   034: 16 bit entprellung, in multiples of 20ns
-	UINT32	res_118;		//       038: 
+	UINT32	cmd_start_encmot;		//       038:  [ 5 Bit] to start 5 motors based on the encoder
 	UINT32	res_11C;		//       03C:	
 	
 	//--- motor -----------------------------

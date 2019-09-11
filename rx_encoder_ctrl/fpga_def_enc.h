@@ -37,25 +37,25 @@
 //--- SDriveErr ------------------------------------
 typedef struct
 {
-	UINT32	chanel_a;			// 0x0000:
-	UINT32	chanel_b;			// 0x0004:
-	UINT32  chanel_i;			// 0x0008:
-	UINT32  chanel_d;			// 0x000c:
+	UINT32	unused_chanel_a;			// 0x0000:
+	UINT32	unused_chanel_b;			// 0x0004:
+	UINT32  unused_chanel_i;			// 0x0008:
+	UINT32  unused_chanel_d;			// 0x000c:
 } SDriveErr;
 
 //--- SEncErrStatus -----------------------------------------
 typedef struct
 {
-	UINT32	enc_0;					// 0x0600:
-	UINT32	enc_1;					// 0x0604:
-	UINT32	rol_0;					// 0x0608;
-	UINT32	rol_1;					// 0x060c:
-	UINT32	input_0;				// 0x0610;
-	UINT32	input_1;				// 0x0614:
-	UINT32	r_output_0;				// 0x0618;
-	UINT32	r_output_1;				// 0x061c:
-	UINT32	r_corr_in_past_cnt_0;	// 0x0620;
-	UINT32	r_corr_in_past_cnt_1;	// 0x0624;
+	UINT32	unused_enc_0;					// 0x0600:
+	UINT32	unused_enc_1;					// 0x0604:
+	UINT32	unused_rol_0;					// 0x0608;
+	UINT32	unused_rol_1;					// 0x060c:
+	UINT32	unused_input_0;				// 0x0610;
+	UINT32	unused_input_1;				// 0x0614:
+	UINT32	unused_r_output_0;				// 0x0618;
+	UINT32	unused_r_output_1;				// 0x061c:
+	UINT32	unused_r_corr_in_past_cnt_0;	// 0x0620;
+	UINT32	unused_r_corr_in_past_cnt_1;	// 0x0624;
 } SEncErrStatus;
 
 //--- SEncInStatus ----------------------------------------
@@ -84,8 +84,8 @@ typedef struct
 {
 	UINT32	position;		// 0x0000[Bit 0..19]: 20 Bit counter!
 	UINT32	speed;			// 0x0004:
-	UINT32	speed_min;		// 0x0008:	// * 50000000/2^31    OR *23/1000	
-	UINT32	speed_max;		// 0x000c:
+	UINT32	unused_speed_min;		// 0x0008:	// * 50000000/2^31    OR *23/1000	
+	UINT32	unused_speed_max;		// 0x000c:
 	UINT32	PG_cnt;			// 0x0010[Bit 0..9]: 10 bit counter!
 	UINT32	mark_edge_warn;	// 0x0014 mark edge detected during ignore window
 	UINT32	window_mark_pos;	// 0x0018
@@ -107,22 +107,22 @@ typedef struct
 	SEncOutStatus	encOut[8];					// 0x0200
 	UINT32			info;						// 0x0400:
 	UINT32			error;						// 0x0404:
-	UINT32			statistics[8];				// 0x0408
-	UINT32			msg_cnt;					// 0x0428:
-	UINT32			msg_cnt_reset;				// 0x042c:
+	UINT32			unused_statistics[8];				// 0x0408
+	UINT32			unused_msg_cnt;					// 0x0428:
+	UINT32			unused_msg_cnt_reset;				// 0x042c:
 	SVersion		version;					// 0x0430:
     UINT32			mem_pointer[4];				// 0x0440: mem_pointer[0]
 //  UINT32			mem_pointer_1;				// 0x0444: mem_pointer[1]
 //  UINT32			mem_pointer_2;				// 0x0448: mem_pointer[2]	
 //  UINT32			mem_pointer_3;				// 0x044c: mem_pointer[3]	
-	UINT32			in_pulse_cnt;				// 0x0450: read after every scan
-	UINT32			out_pulse_cnt;				// 0x0454: read after every scan
-	UINT32			in_end_pos;					// 0x0458: read after every scan
-	UINT32			out_end_pos;				// 0x045C: read after every scan
-	UINT32			stroke_enc_pulse_cnt;		// 0x0460: read after every scan
-	UINT32			stroke_enc_end_pos;			// 0x0464: read after every scan
-	UINT32			stroke_sum_end_pos;			// 0x0468: read after every scan
-	UINT32			dir_change_cnt[2];			// 0x046C: read after every scan
+	UINT32			unused_in_pulse_cnt;				// 0x0450: read after every scan
+	UINT32			unused_out_pulse_cnt;				// 0x0454: read after every scan
+	UINT32			unused_in_end_pos;					// 0x0458: read after every scan
+	UINT32			unused_out_end_pos;				// 0x045C: read after every scan
+	UINT32			unused_stroke_enc_pulse_cnt;		// 0x0460: read after every scan
+	UINT32			unused_stroke_enc_end_pos;			// 0x0464: read after every scan
+	UINT32			unused_stroke_sum_end_pos;			// 0x0468: read after every scan
+	UINT32			unused_dir_change_cnt[2];			// 0x046C: read after every scan
 //	UINT32			dir_change_cnt_1;			// 0x0470: read after every scan
 	UINT32			ab_change_error[4];			// 0x0474: read after every scan
 //	UINT32			ab_change_error_1;			// 0x0478: read after every scan
@@ -132,7 +132,7 @@ typedef struct
 //	UINT32			rol_coeff_at_use_1;			// 0x0488: coeff a1 cos rol 0
 //	UINT32			rol_coeff_at_use_2;			// 0x048C: coeff a0 sin rol 1
 //	UINT32			rol_coeff_at_use_3;			// 0x0490: coeff a1 cos rol 1
-	SDriveErr 		drive_err[4];				// 0x0494: 
+	SDriveErr 		unused_drive_err[4];				// 0x0494: 
 //	SDriveErr 		drive_err_1;				// 0x04a4: 
 //	SDriveErr 		drive_err_2;				// 0x04b4: 
 //	SDriveErr 		drive_err_3;				// 0x04c4: 
@@ -205,7 +205,7 @@ typedef struct
 	UINT32 		    ftc_shift_delay_strokes_tel;// 0x058c
 	UINT32 		    varshift_stat_tel;	// 0x0590 not used, only of first counter for debuging
 	UINT32			res[(0x0600 - 0x0594) / 4];	// 0x054c .. 0x0600
-	SEncErrStatus		err;					// 0x0600 - 0x0624: 
+	SEncErrStatus	unused_err;					// 0x0600 - 0x0624: 
 	UINT32			res2[(0x0800 - 0x0628) / 4];// 0x0628 .. 0x0800
 } SEncFpgaStatus;
 

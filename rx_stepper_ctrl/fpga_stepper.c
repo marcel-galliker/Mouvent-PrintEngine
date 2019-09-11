@@ -101,14 +101,17 @@ void fpga_init()
 	Fpga.stat    = (SFpgaStat*)		rx_fpga_map_page(_MemId, ADDR_FPGA_STAT,	sizeof(SFpgaStat),	0x0200);
 	Fpga.par     = (SFpgaPar*)		rx_fpga_map_page(_MemId, ADDR_FPGA_PAR,		sizeof(SFpgaPar),	0x0258);
 	Fpga.move    = (SMove*)			rx_fpga_map_page(_MemId, ADDR_FPGA_MOVES,   sizeof(SMove)*MOTOR_CNT*MOVE_CNT, 12*MOTOR_CNT*MOVE_CNT);
-	Fpga.encoder = (SFpgaEncoder*)	rx_fpga_map_page(_MemId, ADDR_FPGA_ENCODER, sizeof(SFpgaEncoder)*ENCODER_CNT, 0x0030*ENCODER_CNT);		
+	if (Fpga.stat->version.build>=540)
+		Fpga.encoder = (SFpgaEncoder*)	rx_fpga_map_page(_MemId, ADDR_FPGA_ENCODER_540, sizeof(SFpgaEncoder)*ENCODER_CNT, 0x0030*ENCODER_CNT);		
+	else
+		Fpga.encoder = (SFpgaEncoder*)	rx_fpga_map_page(_MemId, ADDR_FPGA_ENCODER, sizeof(SFpgaEncoder)*ENCODER_CNT, 0x0030*ENCODER_CNT);		
 #endif
 
 	printf("Version: %lu.%lu.%lu.%lu\n", Fpga.stat->version.major, Fpga.stat->version.minor, Fpga.stat->version.revision, Fpga.stat->version.build);
 
 	RX_StepperStatus.fpgaVersion.major	   = Fpga.stat->version.major;
 	RX_StepperStatus.fpgaVersion.minor	   = Fpga.stat->version.minor;
-	RX_StepperStatus.fpgaVersion.revision	   = Fpga.stat->version.revision;
+	RX_StepperStatus.fpgaVersion.revision  = Fpga.stat->version.revision;
 	RX_StepperStatus.fpgaVersion.build	   = Fpga.stat->version.build;
 
 	Fpga.par->watchdog_freq = 250000;
