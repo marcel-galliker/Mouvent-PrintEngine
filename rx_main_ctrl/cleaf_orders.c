@@ -106,7 +106,6 @@ static void _save_status(const char *time)
 	setup_destroy(file);
 }
 
-
 //--- _init_roll ----------------------------------------------
 static void _init_roll(int no)
 {

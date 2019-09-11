@@ -55,7 +55,7 @@
 
 //--- module globals ----------------------------------------------------------------
 
-#define FIFO_SIZE	64
+#define FIFO_SIZE	128
 
 typedef struct SCilentThreadPar
 {
@@ -115,9 +115,8 @@ static void *_client_thread_tcp(void* lpParameter);
 static void *_client_thread_tcp_send(void* lpParameter);
 static void *_client_thread_udp(void* lpParameter);
 
-static int _wsa_started=0;
-static char _TermStr[256]={0};
-static int _Clinent_overflowError=FALSE;
+static int			_wsa_started=0;
+static char			_TermStr[256]={0};
 static RX_SOCKET	_DebugSocket=INVALID_SOCKET;
 
 #ifdef WIN32
@@ -1490,15 +1489,11 @@ int sok_send_to_clients(HANDLE hserver, void *pmsg)
 				idx = (par->msgInIdx+1) % FIFO_SIZE;
 				if(idx==par->msgOutIdx)
 				{
-					if (!_Clinent_overflowError)
-					{
-						int time = rx_get_ticks()-par->msgTime;
-						sok_get_peer_name(par->socket, peerName, NULL, NULL);
-						Error(LOG, 0, "sok_send_to_clients[%d] >>%s<<, message buffer overflow, msgId=0x%08x, time since fill=%d, msgcnt=%d, socket closed", thread, peerName, phdr->msgId, time, (par->msgInIdx+FIFO_SIZE-par->msgOutIdx) % FIFO_SIZE);
-						_Clinent_overflowError = TRUE;
-					}
-					TrPrintfL(TRUE, "sok_close %s:%d", __FILE__, __LINE__);						
+					int time = rx_get_ticks()-par->msgTime;
+					sok_get_peer_name(par->socket, peerName, NULL, NULL);
 					sok_close(&par->socket);
+						
+					Error(LOG, 0, "sok_send_to_clients[%d] >>%s<<, message buffer overflow, msgId=0x%08x, time since fill=%d, msgcnt=%d, socket closed", thread, peerName, phdr->msgId, time, (par->msgInIdx+FIFO_SIZE-par->msgOutIdx) % FIFO_SIZE);
 				}
 				else
 				{

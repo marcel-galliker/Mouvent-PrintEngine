@@ -136,8 +136,8 @@ int main(int argc, char* argv[])
 	Trace_init(argv[0]);
 
 	rx_set_process_priority(1);
-		
-	TrPrintfL(TRUE, "rx_main_ctrl V %s", version);
+
+	TrPrintfL(TRUE, "rx_main_ctrl V %s (%s / %s)", version, __DATE__, __TIME__);
 	
 	//--- initialize libraries ---------------------
 	rx_mkdir(PATH_ROOT);

@@ -101,6 +101,7 @@ namespace RX_DigiPrint.Views.UserControls
            //     Console.WriteLine("Task[{0}]: {1}.{2} handle={4} used={3}", i, b.Process.ProcessName, b.Process.MainWindowTitle, b.used, b.Process.MainWindowHandle.ToString());
                 if (b.used==0) TaskList.Children.RemoveAt(i);
             }
+            if (TaskList.Children.Count<2) Visibility = Visibility.Collapsed;
         }
 
         //--- Button_Clicked --------------------------------------------------------------------------------

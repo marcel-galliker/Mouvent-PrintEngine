@@ -4,6 +4,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+             xmlns:tex="clr-namespace:RX_DigiPrint.Views.TexView"
              xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
              xmlns:igWPF="http://schemas.infragistics.com/xaml/wpf"
              xmlns:cleaf="clr-namespace:RX_DigiPrint.Views.CleafView"
@@ -43,7 +44,12 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <cleaf:CleafSettings Grid.Column="0" Width="450"/>
-            <cleaf:CleafStatus   Grid.Column="1"/>
+            <StackPanel  Grid.Column="1">
+                <cleaf:CleafStatus/>
+                <GroupBox Header="Consumables" Style="{StaticResource RxGroupBox}">
+                        <rx_uc:ConsumablesView Height="250" HorizontalAlignment="Center"/>
+                </GroupBox>
+            </StackPanel>
             <cleaf:CleafCommands Grid.Column="2" MinWidth="150"/>
             <cleaf:CleafServiceCommands Grid.Row="2" Grid.Column="3" x:Name="ServiveCmmands"/>
             <rx_uc:CleaningView Grid.Column="4" Width="300"/>

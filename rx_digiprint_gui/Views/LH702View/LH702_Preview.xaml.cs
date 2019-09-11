@@ -147,31 +147,37 @@ namespace RX_DigiPrint.Views.LH702View
         //--- MoveLeft_Clicked --------------------------------------
         private void MoveLeft_Clicked(object sender, RoutedEventArgs e)
         {
-            RxButton button = sender as RxButton;
-            button.IsChecked = true;
-            MoveLeft.Text="";
-            RxNumPad pad = new RxNumPad(MoveLeft);
-            if((bool)pad.ShowDialog())
+            if (RxGlobals.PrintingItem!=null)
             {
-                RxGlobals.PrintingItem.PrintGoDist += Rx.StrToDouble(pad.Result);
-                RxGlobals.PrintingItem.SendMsg(TcpIp.EVT_SET_PRINT_QUEUE);
+                RxButton button = sender as RxButton;
+                button.IsChecked = true;
+                MoveLeft.Text="";
+                RxNumPad pad = new RxNumPad(MoveLeft);
+                if((bool)pad.ShowDialog())
+                {
+                    RxGlobals.PrintingItem.PrintGoDist += Rx.StrToDouble(pad.Result);
+                    RxGlobals.PrintingItem.SendMsg(TcpIp.EVT_SET_PRINT_QUEUE);
+                }
+                button.IsChecked = false;
             }
-            button.IsChecked = false;
         }
 
         //--- MoveRight_Clicked ---------------------------------------
         private void MoveRight_Clicked(object sender, RoutedEventArgs e)
         {
-            RxButton button = sender as RxButton;
-            button.IsChecked = true;
-            MoveRight.Text="";
-            RxNumPad pad = new RxNumPad(MoveRight);
-            if((bool)pad.ShowDialog())
+            if (RxGlobals.PrintingItem!=null)
             {
-                RxGlobals.PrintingItem.PrintGoDist -= Rx.StrToDouble(pad.Result);
-                RxGlobals.PrintingItem.SendMsg(TcpIp.EVT_SET_PRINT_QUEUE);
+                RxButton button = sender as RxButton;
+                button.IsChecked = true;
+                MoveRight.Text="";
+                RxNumPad pad = new RxNumPad(MoveRight);
+                if((bool)pad.ShowDialog())
+                {
+                    RxGlobals.PrintingItem.PrintGoDist -= Rx.StrToDouble(pad.Result);
+                    RxGlobals.PrintingItem.SendMsg(TcpIp.EVT_SET_PRINT_QUEUE);
+                }
+                button.IsChecked = false;
             }
-            button.IsChecked = false;
         }
 
     }

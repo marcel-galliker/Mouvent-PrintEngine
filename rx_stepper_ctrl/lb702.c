@@ -258,8 +258,8 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									break;	
 
 	case CMD_CAP_REFERENCE:			strcpy(_CmdName, "CMD_CAP_REFERENCE");
-									_PrintPos_New = -1*_micron_2_steps(RX_StepperCfg.ref_height - 20000);
-									_lb702_do_reference();	
+									_PrintPos_New = 0;
+									_lb702_do_reference();
 									break;
 
 	case CMD_CAP_PRINT_POS:			strcpy(_CmdName, "CMD_CAP_PRINT_POS");
@@ -296,8 +296,7 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 	case CMD_CAP_IS_PRINTING:		val   = (*((INT32*)pdata));
 									if (val) Fpga.par->output |=  (1<<IS_PRINTING_OUT);
 									else	 Fpga.par->output &= ~(1<<IS_PRINTING_OUT);
-									break;
-		
+									break;		
 		
 	case CMD_ERROR_RESET:			strcpy(_CmdName, "CMD_ERROR_RESET");
 									fpga_stepper_error_reset();

@@ -505,8 +505,6 @@ int  cleaf_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		{
 			if      (!RX_StepperStatus.info.ref_done)				Error(ERR_CONT, 0, "Reference not done");
 			else if (!_AllowMoveDown)								Error(ERR_CONT, 0, "Stepper: Command 0x%08x: printhead_en signal not set", msgId);
-		//	else if (!RX_StepperStatus.info.DripPans_InfeedDOWN)	Error(ERR_CONT, 0, "Stepper: Command 0x%08x: Drip pan Infeed is not DOWN", msgId);
-		//	else if (!RX_StepperStatus.info.DripPans_OutfeedDOWN)	Error(ERR_CONT, 0, "Stepper: Command 0x%08x: Drip pan Outfeed is not DOWN", msgId);
 		//	else if (RX_StepperStatus.posY < (RX_StepperCfg.material_thickness - LASER_VARIATION) 
 		//		||   RX_StepperStatus.posY > (RX_StepperCfg.material_thickness + LASER_VARIATION)) Error(ERR_CONT, 0, "WEB: Laser detects material out of range. (measured %d, expected %d)", RX_StepperStatus.posY, RX_StepperCfg.material_thickness);
 			else
