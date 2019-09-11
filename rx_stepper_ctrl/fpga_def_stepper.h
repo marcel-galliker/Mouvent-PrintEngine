@@ -239,10 +239,8 @@ typedef struct
 
 	//---  encoder -------------------------------
 	UINT32	enc_bwd;			//       0140: [1 Bit]
-	UINT32	enc_stall_en;		//       0142: [unused]
-	UINT32	enc_stall_var;		//       0148: [unused]
-//	UINT32	v_min_speed;        //       0142: [32 Bit]
-//	UINT32	res_148;		    //       0148: [32 Bit]
+	UINT32	v_min_speed;        //       0144: [32 Bit]
+	UINT32	res_148;		    //       0148: [32 Bit]
 
 	UINT32	enc_stop_index;		//       014c: [1 Bit] aborts motor on next index
 

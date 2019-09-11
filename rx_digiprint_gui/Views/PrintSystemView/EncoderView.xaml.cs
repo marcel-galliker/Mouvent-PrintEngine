@@ -36,6 +36,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
        //   TX_Percent_1.DataContext = RxGlobals.Encoder[1];
             BN_IsValid_1.DataContext = RxGlobals.Encoder[1];
 
+
             RxGlobals.PrintSystem.PropertyChanged += _PrintSystem_PropertyChanged;
         }
 
@@ -52,15 +53,12 @@ namespace RX_DigiPrint.Views.PrintSystemView
         //--- GroupBox_IsVisibleChanged ----------------------------
         private void GroupBox_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            if ((bool)e.NewValue)
+            if ((bool)e.NewValue) 
             {
-                if ((bool)e.NewValue) 
-                {
-                    RxGlobals.Encoder[0].Request();
-                    RxGlobals.Timer.TimerFct += _Tick;
-                }
-                else  RxGlobals.Timer.TimerFct -= _Tick;
+                RxGlobals.Encoder[0].Request();
+                RxGlobals.Timer.TimerFct += _Tick;
             }
+            else  RxGlobals.Timer.TimerFct -= _Tick;
         }
 
         //--- _Tick --------------------------------------------

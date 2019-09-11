@@ -278,7 +278,8 @@ static void _enc_start_printing(int no, SPrintQueueItem *pitem, int restart)
 	msg.restart		= restart;
 	msg.simulation  = arg_simuEncoder;
 	msg.printerType = RX_Config.printer.type;
-	msg.printGoMode = pitem->printGoMode;
+	if (pitem->printGoMode==PG_MODE_MARK) msg.printGoMode = PG_MODE_MARK_FILTER;
+	else                                  msg.printGoMode = pitem->printGoMode;
 	msg.printGoDist = pitem->printGoDist;
 	msg.correction  = CORR_OFF; 
 	msg.ftc			= RX_Config.printer.offset.manualFlightTimeComp;
@@ -444,11 +445,11 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 		switch(pitem->printGoMode)
 		{
 		case PG_MODE_LENGTH: _PrintGo_Dist = pitem->printGoDist; break;
-		case PG_MODE_GAP:	 _PrintGo_Dist = pitem->pageHeight+pitem->printGoDist; 
+		case PG_MODE_GAP:	 _PrintGo_Dist = pitem->pageHeight+pitem->printGoDist;
 							 /*
  							 {
-								Error(WARN, 0, "Test UDP FLAG");
-								_PrintGo_Dist = 1000; 										
+								if (_DistTelCnt%100==1) Error(WARN, 0, "TEST: Cut image");
+								_PrintGo_Dist -= (_DistTelCnt%10)*5; 										
 							 }
 							 */
 							 break;

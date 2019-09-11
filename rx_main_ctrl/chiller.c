@@ -279,7 +279,7 @@ static void *_chiller_thread(void *lpParameter)
 			{
 				if(_TempChiller>0 && _TempChiller<100)
 				{
-					_set_temp(_TempChiller);	
+					_set_temp(_TempChiller*10);	
 				}
 				else
 				{

@@ -85,11 +85,12 @@ namespace RX_DigiPrint.Models
         }
               
         //--- Request ---------------------------------
+        
         public void Request()
         {
             RxGlobals.RxInterface.SendCommand(TcpIp.CMD_ENCODER_STAT);
         }
-
+        
         //--- Save ---------------------------------
         public void Save()
         {
