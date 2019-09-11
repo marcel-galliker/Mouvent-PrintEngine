@@ -141,17 +141,14 @@ namespace RX_DigiPrint.Models
                 + "PAR_UV_LAMP_2_MODE"+"\n"
                 + "PAR_UV_LAMP_3_MODE"+"\n"
                 + "PAR_UV_LAMP_4_MODE"+"\n"
-                + "PAR_UV_LAMP_5_MODE"+"\n";
+                + "PAR_UV_LAMP_5_MODE"+"\n"
 //                + "STA_UV_LAMP_1_TIMER"+"\n";
-
-            RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_GET_VAR, str);
-
-            str = "Application.GUI_00_001_Main"+"\n"
                 + "STA_UV_POWER_ON"+"\n"
                 + "STA_UV_LAMPS_READY"+"\n"
                 + "STA_UV_LAMP_1_TIMER"+"\n";
 
-            RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_GET_VAR, str);
+        //    RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_GET_VAR, str);
+            RxGlobals.Plc.RequestVar(str);
         }
 
         //--- Plc_PropertyChanged ----------------------------

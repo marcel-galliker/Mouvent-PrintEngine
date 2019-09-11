@@ -205,7 +205,8 @@ namespace RX_DigiPrint.Views.UserControls
             
             if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf)
             {
-                RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_GET_VAR, "Application.GUI_00_001_Main"+"\n"+ "STA_PRINT_RELEASE"+"\n");
+            //  RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_GET_VAR, "Application.GUI_00_001_Main"+"\n"+ "STA_PRINT_RELEASE"+"\n");
+                RxGlobals.Plc.RequestVar("Application.GUI_00_001_Main"+"\n"+ "STA_PRINT_RELEASE"+"\n");
                 val = RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_PRINT_RELEASE");
             }
             if (val!=null && val.Equals("FALSE")) Button_PrintRelease.Visibility = Visibility.Visible;

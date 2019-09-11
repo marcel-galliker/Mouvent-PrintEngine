@@ -153,7 +153,7 @@ void lb702_main(int ticks, int menu)
 		}
 	}
 	
-	if (memcpy(&oldSatus, &RX_StepperStatus, sizeof(RX_StepperStatus)))
+	if (memcmp(&oldSatus.info, &RX_StepperStatus.info, sizeof(RX_StepperStatus.info)))
 	{
 		sok_send_2(&_MainSocket, REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);		
 	}

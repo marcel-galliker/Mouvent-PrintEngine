@@ -513,7 +513,7 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 {
 	SBmpInfo		bmpInfo;
 	int ret;
-	int newOffsets;
+	int newOffsets;		// image must be reloaded for jet correction!
 	int color;
 	int nextIdx;
 	int loaded=FALSE;
@@ -542,9 +542,12 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 				if (RX_Color[color].offsetPx!=_LastColorOffset[color]) newOffsets =TRUE;
 				_LastColorOffset[color] = RX_Color[color].offsetPx;
 			}
-			if (rx_def_is_web(RX_Spooler.printerType)) newOffsets =TRUE;
-				if (offsetPx != _LastOffset) 
-			_LastOffset = offsetPx;
+			 
+			if (offsetPx != _LastOffset)
+			{
+				_LastOffset = offsetPx;
+				if (rx_def_is_web(RX_Spooler.printerType)) newOffsets =TRUE;
+			}
 		}
 		if (/*id->id!=_LastId.id || */ id->page!=_LastId.page || strcmp(filepath, _LastFilePath) || _WakeupLen!=_LastWakeupLen || newOffsets)
 		{

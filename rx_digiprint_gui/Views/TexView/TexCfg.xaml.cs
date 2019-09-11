@@ -46,7 +46,8 @@ namespace RX_DigiPrint.Views.TexView
             try
             {
                 string str = string.Format("{0}\n{1}\n", CfgPanel.UnitID, "STA_MACHINE_STATE");
-                RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_GET_VAR, str.ToString());
+                // RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_GET_VAR, str.ToString());
+                RxGlobals.Plc.RequestVar(str.ToString());
                 string state=_states.GetDisplay(Convert.ToInt32(RxGlobals.Plc.GetVar(CfgPanel.UnitID, "STA_MACHINE_STATE")));
                 if (state.Equals("ERROR")) visible = Visibility.Collapsed;
             }

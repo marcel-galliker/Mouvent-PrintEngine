@@ -46,7 +46,8 @@ namespace RX_DigiPrint.Views.TexView
                     if (button!=null) str.AppendFormat("{0}\n", button.Name);
                 }
 
-                RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_GET_VAR, str.ToString());
+                // RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_GET_VAR, str.ToString());
+                RxGlobals.Plc.RequestVar(str.ToString());
             }
         }
 

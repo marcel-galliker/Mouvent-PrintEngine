@@ -614,7 +614,8 @@ void nios_check_errors(void)
 
 	if (fpga_is_ready())
 	{
-		if (_NiosStat->error.fpga_incompatible)		ErrorFlag(ERR(abort), (UINT32*)&RX_HBStatus[0].err, err_nios_incompatible, 0, "Conditioner NIOS NOT compatible");
+//		if (_NiosStat->error.fpga_incompatible)		ErrorFlag(ERR(abort), (UINT32*)&RX_HBStatus[0].err, err_nios_incompatible, 0, "Conditioner NIOS NOT compatible");
+		if (_NiosStat->error.fpga_incompatible)		ErrorFlag(WARN, (UINT32*)&RX_HBStatus[0].err, err_nios_incompatible, 0, "Conditioner NIOS NOT compatible");
 		if (_NiosStat->error.u_plus_2v5)			ErrorFlag(ERR(abort), (UINT32*)&RX_HBStatus[0].err, err_2_5volt, 0, "2.5Volt Power Supply Error");
 		if (_NiosStat->error.u_plus_3v3)			ErrorFlag(ERR(abort), (UINT32*)&RX_HBStatus[0].err, err_3_3_volt, 0, "3.3Volt Power Supply Error");
 		if (_NiosStat->error.u_plus_5v)				ErrorFlag(ERR(abort), (UINT32*)&RX_HBStatus[0].err, err_5volt, 0, "5Volt Power Supply Error");

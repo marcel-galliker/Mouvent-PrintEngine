@@ -226,18 +226,31 @@ int main(int argc, char* argv[])
 	while (running)
 	{
 		rx_sleep(1000);
+		int t0=rx_get_ticks();
 		ctrl_tick();
+		int t1=rx_get_ticks()-t0;
 		enc_tick();
+		int t2=rx_get_ticks()-t1;
 		pq_tick();
+		int t3=rx_get_ticks()-t2;
 		fluid_tick();
+		int t4=rx_get_ticks()-t3;
 		step_tick();
+		int t5=rx_get_ticks()-t4;
 		machine_tick();
+		int t6=rx_get_ticks()-t5;
 		spool_tick();
+		int t7=rx_get_ticks()-t6;
 		net_tick();
+		int t8=rx_get_ticks()-t7;
 		chiller_tick();
 	//	co_tick();	// can hang sometimes!!!
+		int t9=rx_get_ticks()-t8;
 		ctr_tick();
+		int t10=rx_get_ticks()-t9;
 		_menu();
+		int t11=rx_get_ticks()-t10;
+		if (rx_get_ticks()-t0>1000) Error(WARN, 0, "MAIN LOOP, t1=%d t2=%d t3=%d t4=%d t5=%d t6=%d t7=%d t8=%d t9=%d t10=%d t11=%d", t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11);
 	}
 
 	//--- end libraries ----------------------------

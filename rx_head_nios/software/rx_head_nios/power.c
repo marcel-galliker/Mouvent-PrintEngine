@@ -59,10 +59,12 @@ void power_init(void)
 }
 
 //--- _stop_fpga -------------------------------------
+/* Das macht nur Probleme!
 static void _stop_fpga(void)
 {
 	IOWR_ALTERA_AVALON_PIO_DATA(PIO_FPGA_SHUTDOWN_BASE,1);
 }
+*/
 
 //--- power_tick_100ms --------------------------------
 void power_tick_100ms(void)
@@ -70,7 +72,7 @@ void power_tick_100ms(void)
 	volatile UINT16 val=0;
 	int				dummy;
 	int				error;
-	int				critical_error;
+//	int				critical_error;
 
 	if (IORD_ALTERA_AVALON_PIO_DATA(PIO_OVERHEAT_BASE))
 		pRX_Status->error.fpga_overheated=TRUE;
@@ -85,6 +87,7 @@ void power_tick_100ms(void)
 			|| pRX_Status->error.arm_timeout
 			;
 
+	/*
 	// shutdown request which is NOT from ARM
 	critical_error =  pRX_Status->error.fpga_overheated
 			|| pRX_Status->error.cooler_overheated
@@ -94,12 +97,15 @@ void power_tick_100ms(void)
 			|| pRX_Status->error.u_plus_2v5
 			|| pRX_Status->error.arm_timeout
 			;
+	*/
 
 	if ((pRX_Status->powerState < power_sd) && (error || !pRX_Config->cmd.firepulse_on))
 	{
+		/*
 		if (critical_error && !pRX_Config->cmd.debug)
 			pRX_Status->powerState = power_sd_fpga;
 		else
+		*/
 			pRX_Status->powerState = power_sd;
 	}
 
@@ -176,7 +182,7 @@ void power_tick_100ms(void)
 								break;
 
     // --- SHUT-DOWN ------------------------------------------------------
-	case power_sd_fpga:			_stop_fpga();	// does not allow debugging with breakpoints!!!
+	case power_sd_fpga:			// _stop_fpga();	// does not allow debugging with breakpoints!!!
 								pRX_Status->powerState = power_sd;
 								break;
 

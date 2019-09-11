@@ -91,6 +91,7 @@ static BYTE		*_QSYS_mem=NULL;
 static BYTE		*_AXI_mem=NULL;
 #define AXI_MEM_SIZE 0x1000
 
+static int		_CfgCnt=0;
 static int		_Init=FALSE;
 static int		_Reload_FPGA = FALSE;
 static int		_FpgaErrorTrace=FALSE;
@@ -361,12 +362,19 @@ void _ethernet_config(void)
 	TrPrintfL(TRUE, "Data Block Size  =%d\n", RX_HBConfig.dataBlkSize);
 }
 
+//--- fpga_cfg_cnt ----------------------------------
+int	  fpga_cfg_cnt(void)
+{
+	return _CfgCnt;
+}
+
 //--- fpga_set_config ----------------------------------------------
 int  fpga_set_config(RX_SOCKET socket)
 {
 	int i, n, head;
 	char str[64];
 
+	_CfgCnt++;
 	TrPrintfL(TRUE, "fpga_set_config start");
 	fpga_abort();
 
@@ -384,7 +392,8 @@ int  fpga_set_config(RX_SOCKET socket)
 	_TempErr  = 0;
 	_PrintDoneWarning	= 0;
 	_PrintDoneError		= 0;
-	_FpgaErrorTrace = FALSE;
+	_FpgaErrorTrace		= FALSE;
+	
 	
 	//--- head -----------------------------------------------------------------
 	nios_set_firepulse_on(FALSE);

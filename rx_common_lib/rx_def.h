@@ -310,9 +310,11 @@ typedef struct SPrintQueueItem
 	INT32	pageHeight;	// µm
 	INT32	pageMargin;	// µm
 	INT32	printGoMode;
-			#define PG_MODE_MARK	1	// print mark to PG
-			#define PG_MODE_LENGTH	2	// distance between two GPs
-			#define PG_MODE_GAP		3	// gap getween images
+			#define PG_MODE_MARK		1	// print mark to PG
+			#define PG_MODE_LENGTH		2	// distance between two GPs
+			#define PG_MODE_GAP			3	// gap getween images
+			#define PG_MODE_MARK_FILTER	4	// print mark to PG
+	
 	INT32	printGoDist;
 	INT32	scanLength; // mm
 	INT8	passes;

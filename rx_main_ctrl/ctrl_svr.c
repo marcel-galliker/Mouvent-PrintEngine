@@ -220,9 +220,14 @@ static int _prepare_config()
 			RX_Color[color].firstLine = 0;
 			RX_Color[color].lastLine  = 1000000;
 			if (RX_Config.printer.type == printer_DP803)
-				RX_Color[color].spoolerNo = color;	// one pc per color	
+				if (!strcmp(RX_Hostname, "TEST-0001"))
+				{
+					Error(WARN, 0, "TEST: all on first spooler");
+					RX_Color[color].spoolerNo = 0;						
+				}
+				else RX_Color[color].spoolerNo = color;	// one pc per color	
 			else
-				RX_Color[color].spoolerNo = 0;//i;	
+				RX_Color[color].spoolerNo = 0;	
 			{
 				//--- split one bitmap over 4 heads ----
 

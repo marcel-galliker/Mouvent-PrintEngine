@@ -216,8 +216,8 @@ namespace RX_DigiPrint.Views.TexView
         private void _old_Timer(int no)
         {
             string str = "Application.GUI_00_001_Main"+"\n"+ "PAR_SPEED_CORRECTION_RW"+"\n";
-            RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_GET_VAR, str);
-
+            // RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_GET_VAR, str);
+            RxGlobals.Plc.RequestVar(str);
             str = RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "PAR_SPEED_CORRECTION_RW");
             bool sc = str!=null && !str.Equals("ERROR");
             if (str!=null && sc!=_speedcorrection)

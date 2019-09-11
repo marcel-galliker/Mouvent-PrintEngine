@@ -350,6 +350,8 @@ static int _handle_fluid_ctrl_msg(RX_SOCKET socket, void *msg, int len, struct s
 	ctrl_get_device(socket, &device, &no);
 	net_register_by_device(dev_fluid, no);
 	
+	TrPrintfL(TRUE, "received Fluid[%d].MsgId=0x%08x", no, phdr->msgId);
+
 	for (no=0; no<SIZEOF(_FluidThreadPar); no++)
 	{
 		if (socket==_FluidThreadPar[no].socket)

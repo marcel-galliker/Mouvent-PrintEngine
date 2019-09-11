@@ -454,6 +454,7 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 							 break;
 			
 		case PG_MODE_MARK:	 dist.dist     = 0;
+							 dist.printGoMode = PG_MODE_MARK_FILTER;
 							 if (_DistTelCnt>1)
 							 {
 								if(RX_Config.printer.type == printer_LH702 || RX_Config.printer.type == printer_LB701)
@@ -480,7 +481,8 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 		//-- DP803: encoder[1]: Always in Mark Reading Mode -----
 		if (_Encoder[1].used)
 		{
-			dist.dist     = 0;
+			dist.printGoMode = PG_MODE_MARK;
+			dist.dist		 = 0;
 			if (_DistTelCnt>1) dist.ignore   = pitem->pageHeight*9/10;
 			if (_DistTelCnt>1) dist.window   = pitem->pageHeight/4;			
 			sok_send_2(&_Encoder[1].socket, CMD_ENCODER_PG_DIST, sizeof(dist), &dist);
@@ -612,6 +614,9 @@ static int _handle_enc_msg(RX_SOCKET socket, void *msg, int len, struct sockaddr
 			if (socket==_Encoder[no].socket)
 			{
 				net_register_by_device(dev_enc, no);
+
+				TrPrintfL(TRUE, "received Encoder[%d].MsgId=0x%08x", no, phdr->msgId);
+
 				switch(phdr->msgId)
 				{
 				case REP_ENCODER_CFG:	_handle_config_reply(no, (SReply*)msg);				break;	

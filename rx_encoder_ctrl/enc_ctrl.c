@@ -294,7 +294,7 @@ static int _do_encoder_pg_dist(RX_SOCKET socket, SEncoderPgDist *pmsg)
 	// TrPrintfL(TRUE, "_do_encoder_pg_dist(no=%d, cnt=%d, dist=%d) time=%d", ++_PgNo, pmsg->cnt, pmsg->dist, time-_time);
 	_time=time;
 	memcpy(&_DistMsg[_PgNo%SIZEOF(_DistMsg)], pmsg, sizeof(SEncoderPgDist));
-	if (pmsg->printGoMode==PG_MODE_MARK) 
+	if (pmsg->printGoMode==PG_MODE_MARK || pmsg->printGoMode==PG_MODE_MARK_FILTER) 
 	{
 		TrPrintfL(TRUE, "fpga_set_printmark(no=%d, cnt=%d, dist=%d, ignore=%d, window=%d) time=%d", ++_PgNo, pmsg->cnt, pmsg->dist, pmsg->ignore, pmsg->window, time-_time);
 		fpga_set_printmark(pmsg);

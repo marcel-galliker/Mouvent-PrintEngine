@@ -247,7 +247,8 @@ namespace RX_DigiPrint.Views.UserControls
 
             str.AppendFormat("{0}\n", UnitID);
             send = _refresh_children(Children, ref str);
-            if (send) RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_GET_VAR, str.ToString());
+//            if (send) RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_GET_VAR, str.ToString());
+            if (send) RxGlobals.Plc.RequestVar(str.ToString());
         }
 
         //--- SaveValues ----------------------------------------------

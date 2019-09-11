@@ -6,6 +6,7 @@ using RxRexrothGui.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading;
 
 namespace RX_DigiPrint.Models
@@ -145,7 +146,38 @@ namespace RX_DigiPrint.Models
                 }
             }
         }
-        
+
+        //--- RequestVar ------------------------------------------------------
+        private string[] _varList = new string[128];
+        private int      _varListLen=0;
+        private DateTime _lastTime = DateTime.Now;
+        public void RequestVar(string var)
+        {
+            int i;
+            string[] list = var.Split('\n');
+            for (i=0; i<list.Length; i++)
+            {
+                if (!_varList.Contains(list[i]))
+                {
+                    _varList[_varListLen++] = list[i];
+                }
+            }
+            TimeSpan diff=DateTime.Now-_lastTime;
+            _lastTime=DateTime.Now;
+            if (diff.Milliseconds>100)
+            {
+                new Thread(()=>
+                {
+                    Thread.Sleep(10);
+                    StringBuilder str = new StringBuilder(2048);
+                    for (int n=0; n<_varListLen; n++)
+                        str.Append(_varList[n]+'\n');
+                    RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_GET_VAR, str.ToString());
+                    _varListLen=0;
+                }).Start();
+            }
+        }
+
         //--- RequestAllPar ---------------------------------------------------
         public void RequestAllPar()
         {

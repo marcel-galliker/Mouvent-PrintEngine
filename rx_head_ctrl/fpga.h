@@ -27,6 +27,7 @@ int	  fpga_is_ready(void);
 void  fpga_master_disable();
 void  fpga_end(void);
 void  fpga_overheated(void);
+int	  fpga_cfg_cnt(void);
 
 void  fpga_main(int ticks, int menu);
 

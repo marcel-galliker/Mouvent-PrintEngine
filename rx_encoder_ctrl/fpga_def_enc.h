@@ -269,6 +269,7 @@ typedef struct
 		#define FIFOS_OFF				0
 		#define FIFOS_DIST				1
 		#define FIFOS_MARKREADER		2 // <quiet_window> -<ignored_fifo><window_fifo>-<ignored_fifo><window_fifo>-<ignored_fifo><window_fifo>-...
+		#define FIFOS_MARKFILTER        6 // <quiet_window> -<ignored_fifo><window_fifo>-<ignored_fifo><window_fifo>-<ignored_fifo><window_fifo>-...
 	
 	UINT32	dig_in_sel;			// 0x0020: select digital input 2bit
 	UINT32	quiet_window;		// 0x0024: First Window in MARKREADER to ignore DigIn. Restarts quiet_window when DigIn = '1' while in quiet_window
@@ -286,10 +287,10 @@ typedef struct
 	UINT32	watchdog_freq;			// 0x0000:
 	UINT32	watchdog_cnt;			// 0x0004:
 	UINT32	reset_fifos;			// 0x0008:
-									// 			--   8 --   16 --   32 --   64 --   128 --   256 --   512 --  1024 --  2048 --   4096 --   8192
-	UINT32	avr_coeff_0_unused;		// 0x000c:	-- 0x8 -- 0x10 -- 0x20 -- 0x40 --  0x80 -- 0x100 -- 0x200 -- 0x400 -- 0x800 -- 0x1000 -- 0x2000
-	UINT32	avr_coeff_1_unused;		// 0x0010:	-- 0x6 -- 0x08 -- 0x0A -- 0x0C --  0x0E -- 0x010 -- 0x012 -- 0x014 -- 0x016 -- 0x0018 -- 0x001A
-	UINT32  avr_coeff_2_unused;		// 0x0014:	-- 0x8 -- 0x10 -- 0x20 -- 0x40 --  0x80 -- 0x100 -- 0x200 -- 0x400 -- 0x800 -- 0x1000 -- 0x2000
+									// 			
+	UINT32	shift_delay_pulse_len ; // 0x000c:	
+	UINT32	cfg_0010;				// 0x0010:	
+	UINT32  cfg_0014;				// 0x0014:	
 	UINT32	ident_rol_en;			// 0x0018: enables coeff. identification logic in roller correction
 	UINT32	reset_errors;					// 0x001c:
 	UINT32	max_a0_var_high;		// 0x0020: Threshold for the variation value, when to switch off correction

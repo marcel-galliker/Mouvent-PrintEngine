@@ -221,7 +221,7 @@ static int _handle_ctrl_msg(RX_SOCKET socket, void *pmsg)
 					break;
 	}
 	time = rx_get_ticks()-time;
-	if (_Printing && time>100) Error(WARN, 0, "_handle_ctrl_msg id=0x%08x, time=%dms", phdr->msgId, time); 
+	if (_Printing && phdr->msgId!=CMD_HEAD_BOARD_CFG && time>100) Error(WARN, 0, "_handle_ctrl_msg id=0x%08x, time=%dms", phdr->msgId, time); 
 	return reply;
 };
 

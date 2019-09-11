@@ -111,11 +111,13 @@ int handle_gui_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sende
 
 //	TrPrintfL(TRUE, "GUI Received id=0x%04x", phdr->msgId);
 	
+	TrPrintfL(TRUE, "received GUI.MsgId=0x%08x", phdr->msgId);
+		
 	if (FALSE)
 	{
 		char str[64];
 		sok_get_peer_name(socket, str, NULL, NULL);
-		TrPrintfL(TRUE, "handle_gui_msg: sender=>>%s<<", str);
+		TrPrintfL(TRUE, "handle_gui_msg: sender=>>%s<< msgId=0x%08x", str, phdr->msgId);
 	}
 		
 	if (phdr->msgId >= CMD_PLC_0 && phdr->msgId < CMD_PLC_END)		plc_handle_gui_msg(socket, phdr->msgId, &phdr[1], phdr->msgLen - sizeof(SMsgHdr));

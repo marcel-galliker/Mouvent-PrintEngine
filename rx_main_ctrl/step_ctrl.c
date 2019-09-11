@@ -160,6 +160,8 @@ static int _step_handle_msg(RX_SOCKET socket, void *msg, int len, struct sockadd
 		if (socket==_step_Socket[no])			
 		{
 			net_register_by_device(dev_stepper, no);
+			
+			TrPrintfL(TRUE, "received Stepper[%d].MsgId=0x%08x", no, phdr->msgId);
 
 			switch (phdr->msgId)
 			{

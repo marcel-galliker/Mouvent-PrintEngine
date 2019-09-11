@@ -88,7 +88,6 @@ static UINT32 _AVR_COEFF [][4]=
 
 #define AVR_COEFF_IDX	4
 
-static INT32 *_CorrVal[2];
 static INT32 *_CorrSin;
 static INT32 *_CorrSinRev;
 static double _AmplNew;
@@ -183,9 +182,6 @@ void fpga_init()
 	UINT32 *pid;
 	UINT32 test;
 	
-	_CorrVal[0] = (INT32*)rx_fpga_map_page(_MemId, ENC_CORR_VALUES_0, 0x1000*sizeof(INT32), 0x1000*sizeof(INT32));
-	_CorrVal[1] = (INT32*)rx_fpga_map_page(_MemId, ENC_CORR_VALUES_1, 0x1000*sizeof(INT32), 0x1000*sizeof(INT32));
-
 	_CorrSin	= (INT32*)rx_fpga_map_page(_MemId, SINUS_CORRECTION,     0x10000*sizeof(INT32), 0x10000*sizeof(INT32));
 	_CorrSinRev = (INT32*)rx_fpga_map_page(_MemId, SINUS_IDENTIFICATION, 0x10000*sizeof(INT32), 0x10000*sizeof(INT32));
 
@@ -274,7 +270,7 @@ void  fpga_main(int ticks, int menu, int showCorrection, int showParam)
 		_uv_ctrl();
 		_pg_ctrl();
 		_corr_ctrl();
-		_simu_markreader();
+	//	_simu_markreader();
 		/*
 		{
 			static int _in=0;
@@ -857,10 +853,17 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg, int restart)
 		}
 		else 
 		{
-			Fpga->cfg.pg[pgNo].fifos_used	  = (pcfg->printGoMode == PG_MODE_MARK) ?  FIFOS_MARKREADER : FIFOS_DIST;
+			switch(pcfg->printGoMode)
+			{
+			case PG_MODE_MARK:			Fpga->cfg.pg[pgNo].fifos_used = FIFOS_MARKREADER; break;
+			case PG_MODE_MARK_FILTER:	Fpga->cfg.pg[pgNo].fifos_used = FIFOS_MARKFILTER; break;
+			default:					Fpga->cfg.pg[pgNo].fifos_used = FIFOS_DIST; 
+			}
+			
 		//	Fpga->cfg.general.min_mark_len	  = 1000;
 			Fpga->cfg.general.shift_delay	  = (int)((pcfg->printGoOutDist-Fpga->cfg.general.min_mark_len)/_StrokeDist);
 			Fpga->cfg.general.shift_delay_tel = (int)((pcfg->printGoDist   -Fpga->cfg.general.min_mark_len)/_StrokeDist);
+			Fpga->cfg.general.shift_delay_pulse_len = (Fpga->cfg.general.min_mark_len*11)/10;
 		//	Fpga->cfg.pg[pgNo].dig_in_sel   = 0;
 		//	Fpga->cfg.pg[pgNo].quiet_window = 10;
 		//	if (FpgaQSys->printGo_status.fill_level) Fpga->cfg.pg[pgNo].fifos_ready	= TRUE;
@@ -1031,6 +1034,7 @@ static void  _pg_ctrl(void)
 							break;
 			
 		case FIFOS_MARKREADER:	
+		case FIFOS_MARKFILTER:	
 							if (Fpga->stat.ignored_fifo_empty_err && RX_EncoderStatus.fifoEmpty_IGN != Fpga->stat.ignored_fifo_empty_err)
 							{
 								Error(LOG, 0, "ignored_fifo_empty_err=%d, (distTelCnt=%d, fill_level=%d, PG_Cnt=%d)", Fpga->stat.ignored_fifo_empty_err, RX_EncoderStatus.distTelCnt, FpgaQSys->ignored_status.fill_level, RX_EncoderStatus.PG_cnt);
@@ -1204,7 +1208,7 @@ static void _simu_markreader(void)
 	static UINT32 _PM_LastPos=0;
 	static UINT32 _digin_edge_dist;
 	
-	if(RX_EncoderCfg.printGoMode == PG_MODE_MARK)
+	if(RX_EncoderCfg.printGoMode==PG_MODE_MARK || RX_EncoderCfg.printGoMode==PG_MODE_MARK_FILTER)
 	{
 		FpgaQSys->out &= ~MARKREADER_SIMU_OUT;
 		if (Fpga->cfg.encOut[0].synthetic_freq)

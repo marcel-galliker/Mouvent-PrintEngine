@@ -127,6 +127,8 @@ static int _handle_spool_msg(RX_SOCKET socket, void *msg, int len, struct sockad
 	
 	for (spoolerNo=0; _Spooler[spoolerNo].socket!=socket; spoolerNo++);
 	
+	TrPrintfL(TRUE, "received Spooler[%d].MsgId=0x%08x", spoolerNo, phdr->msgId);
+	
 	switch(phdr->msgId)
 	{
 	case CMD_REQ_SPOOL_CFG:	spool_set_config	(socket);							break;
