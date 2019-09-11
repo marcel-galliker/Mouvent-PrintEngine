@@ -16,10 +16,9 @@ namespace RX_Common
         private Point   _Position;
         private double  _ObjWidth=0;
         private double  _ObjHeight=0;
-        private bool    _IsUint32=false;
 
         //--- creator -----------------------------------
-        public RxNumPad(TextBox obj, bool isUInt32)
+        public RxNumPad(TextBox obj)
         {
             InitializeComponent();
             this.DataContext = this;
@@ -35,9 +34,6 @@ namespace RX_Common
             _Position  = obj.PointToScreen(new Point(0, 0));
             _ObjWidth  = obj.ActualWidth;
             _ObjHeight = obj.ActualHeight;
-            _IsUint32  = isUInt32;
-
-            if (_IsUint32) SIGN.IsEnabled=false;
 
             RxScreen screen =new RxScreen();
             screen.PlaceWindow(this);
@@ -138,14 +134,12 @@ namespace RX_Common
             else if (key.Equals("+="))      
             {          
                 double val=_OrgValue+Rx.StrToDouble(Result);
-                if (val<0 && _IsUint32) val=_OrgValue;
                 Result = val.ToString(CultureInfo.InvariantCulture);     
                 this.DialogResult = true;
             }
             else if (key.Equals("-="))      
             {
                 double val=_OrgValue-Rx.StrToDouble(Result);
-                if (val<0 && _IsUint32) val=_OrgValue;
                 Result = val.ToString(CultureInfo.InvariantCulture);     
                 this.DialogResult = true;
             }

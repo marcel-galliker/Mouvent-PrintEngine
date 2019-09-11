@@ -16,7 +16,20 @@ namespace RX_Common
             PreviewMouseDown +=RxNumBox_PreviewMouseDown;
             TouchUp += RxNumBox_TouchUp;
             KeyDown   += OnKeyDown;
+            LostFocus += RxNumBox_LostFocus;
          //   PreviewMouseUp += RxNumBox_MouseUp;
+        }
+
+        void RxNumBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            double min=Min;
+            double max=Max;
+            double val = Rx.StrToDouble(Text);
+            if (min!=double.NaN && val<min) val = min;
+            else if (max!=double.NaN && val>max) val = max;
+            if (IsInt) Text=((int)val).ToString();
+            else       Text=val.ToString();
+            e.Handled = true;
         }
 
         //--- RxNumBox_PreviewMouseDown --------------------------------------------
@@ -44,16 +57,38 @@ namespace RX_Common
         public static readonly DependencyProperty IsPadActiveProperty =
             DependencyProperty.Register("IsPadActive", typeof(bool), typeof(RxNumBox), new PropertyMetadata(false));
         
-        //--- Property IsUINT32 ------------------------------------------------
-        public bool IsUInt32
+        //--- Property IsInt ------------------------------------------------
+        public bool IsInt
         {
-            get { return (bool)GetValue(IsUInt32Property); }
-            set { SetValue(IsUInt32Property, value); }
+            get { return (bool)GetValue(IsIntProperty); }
+            set { SetValue(IsIntProperty, value); }
         }        
 
         // Using a DependencyProperty as the backing store for IsPadActive.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty IsUInt32Property =
-            DependencyProperty.Register("IsUInt32", typeof(bool), typeof(RxNumBox), new PropertyMetadata(false));
+        public static readonly DependencyProperty IsIntProperty =
+            DependencyProperty.Register("IsInt", typeof(bool), typeof(RxNumBox), new PropertyMetadata(false));
+
+        //--- Property Min ------------------------------------------------
+        public double Min
+        {
+            get { return (double)GetValue(MinProperty); }
+            set { SetValue(MinProperty, value); }
+        }        
+
+        // Using a DependencyProperty as the backing store for IsPadActive.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty MinProperty =
+            DependencyProperty.Register("Min", typeof(double), typeof(RxNumBox), new PropertyMetadata(double.NaN));
+
+        //--- Property Max ------------------------------------------------
+        public double Max
+        {
+            get { return (double)GetValue(MaxProperty); }
+            set { SetValue(MaxProperty, value); }
+        }        
+
+        // Using a DependencyProperty as the backing store for IsPadActive.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty MaxProperty =
+            DependencyProperty.Register("Max", typeof(double), typeof(RxNumBox), new PropertyMetadata(double.NaN));
 
         //--- Property ShowRolls ------------------------------------------------
         public bool ShowRolls
@@ -71,7 +106,7 @@ namespace RX_Common
         {
             RxNumBox test=sender as RxNumBox;
             IsPadActive = true;
-            RxNumPad pad = new RxNumPad(this, IsUInt32);
+            RxNumPad pad = new RxNumPad(this);
             if (ShowRolls) pad.ShowRolls=true;
             bool? result=pad.ShowDialog();
             IsPadActive = false;

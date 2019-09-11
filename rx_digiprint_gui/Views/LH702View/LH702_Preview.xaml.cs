@@ -120,7 +120,7 @@ namespace RX_DigiPrint.Views.LH702View
             RxButton button = sender as RxButton;
             button.IsChecked = true;
             MoveUp.Text="";
-            RxNumPad pad = new RxNumPad(MoveUp, false);
+            RxNumPad pad = new RxNumPad(MoveUp);
             if((bool)pad.ShowDialog())
             {
                 RxGlobals.PrintingItem.PageMargin += Rx.StrToDouble(pad.Result);
@@ -135,7 +135,7 @@ namespace RX_DigiPrint.Views.LH702View
             RxButton button = sender as RxButton;
             button.IsChecked = true;
             MoveDown.Text="";
-            RxNumPad pad = new RxNumPad(MoveDown, false);
+            RxNumPad pad = new RxNumPad(MoveDown);
             if((bool)pad.ShowDialog())
             {
                 RxGlobals.PrintingItem.PageMargin -= Rx.StrToDouble(pad.Result);
@@ -150,7 +150,7 @@ namespace RX_DigiPrint.Views.LH702View
             RxButton button = sender as RxButton;
             button.IsChecked = true;
             MoveLeft.Text="";
-            RxNumPad pad = new RxNumPad(MoveLeft, false);
+            RxNumPad pad = new RxNumPad(MoveLeft);
             if((bool)pad.ShowDialog())
             {
                 RxGlobals.PrintingItem.PrintGoDist += Rx.StrToDouble(pad.Result);
@@ -165,7 +165,7 @@ namespace RX_DigiPrint.Views.LH702View
             RxButton button = sender as RxButton;
             button.IsChecked = true;
             MoveRight.Text="";
-            RxNumPad pad = new RxNumPad(MoveRight, false);
+            RxNumPad pad = new RxNumPad(MoveRight);
             if((bool)pad.ShowDialog())
             {
                 RxGlobals.PrintingItem.PrintGoDist -= Rx.StrToDouble(pad.Result);

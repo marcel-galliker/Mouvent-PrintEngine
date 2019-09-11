@@ -138,7 +138,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                             Canvas.Children.Add(new Line(){Stroke=Brushes.Black, X1=x1-3,  X2=x1, Y1=y+3, Y2=y});
 
                             //--- offset text box -----------
-                            RxNumBox offset = new RxNumBox(){Width=width, HorizontalContentAlignment=HorizontalAlignment.Right, IsUInt32=true};
+                            RxNumBox offset = new RxNumBox(){Width=width, HorizontalContentAlignment=HorizontalAlignment.Right, IsInt=true};
                             offset.Tag = colorNo++;
                             offset.LostFocus += _text_LostFocus;
                             Canvas.SetLeft(offset, x);
@@ -159,7 +159,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                             Canvas.Children.Add(new Line(){Stroke=Brushes.Black, X1=x+3,  X2=x,   Y1=y+3, Y2=y});
 
                             //--- offset text box -----------
-                            RxNumBox offset = new RxNumBox(){Width=width, HorizontalContentAlignment=HorizontalAlignment.Right, IsUInt32=true};
+                            RxNumBox offset = new RxNumBox(){Width=width, HorizontalContentAlignment=HorizontalAlignment.Right, IsInt=true};
                             offset.Tag = colorNo++;
                             offset.LostFocus += _text_LostFocus;
                             Canvas.SetLeft(offset, x);
@@ -177,7 +177,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 Canvas.Children.Add(new Line(){Stroke=Brushes.Black, X1=x1+5, X2=x1, Y1=y+5, Y2=y});
 
                 //--- distance text box fore ------------------
-                RxNumBox dist = new RxNumBox(){Width=width, HorizontalContentAlignment=HorizontalAlignment.Right, IsUInt32=true};
+                RxNumBox dist = new RxNumBox(){Width=width, HorizontalContentAlignment=HorizontalAlignment.Right, IsInt=true};
                 dist.Tag = 100+distNo;
                 dist.LostFocus += _text_LostFocus;
                 Canvas.SetLeft(dist, x);
@@ -187,7 +187,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 //--- distance text box back ------------------
                 if (true)
                 {
-                    RxNumBox distback = new RxNumBox(){Width=width, HorizontalContentAlignment=HorizontalAlignment.Right, IsUInt32=true};
+                    RxNumBox distback = new RxNumBox(){Width=width, HorizontalContentAlignment=HorizontalAlignment.Right, IsInt=true};
                     distback.Tag = 200+distNo;
                     distback.LostFocus += _text_LostFocus;
                     Canvas.SetLeft(distback, x);
