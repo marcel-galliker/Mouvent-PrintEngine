@@ -22,4 +22,12 @@
 	</section>
 	<section name="completion_proposal_size">
 	</section>
+	<section name="org.eclipse.cdt.internal.ui.typehierarchy.QuickHierarchy">
+		<item value="400" key="org.eclipse.cdt.internal.ui.typehierarchy.THInformationControlDIALOG_WIDTH"/>
+		<item value="true" key="org.eclipse.cdt.internal.ui.typehierarchy.THInformationControlDIALOG_USE_PERSISTED_SIZE"/>
+		<item value="true" key="org.eclipse.cdt.internal.ui.typehierarchy.THInformationControlDIALOG_USE_PERSISTED_LOCATION"/>
+		<item value="320" key="org.eclipse.cdt.internal.ui.typehierarchy.THInformationControlDIALOG_HEIGHT"/>
+		<item value="919" key="org.eclipse.cdt.internal.ui.typehierarchy.THInformationControlDIALOG_X_ORIGIN"/>
+		<item value="423" key="org.eclipse.cdt.internal.ui.typehierarchy.THInformationControlDIALOG_Y_ORIGIN"/>
+	</section>
 </section>

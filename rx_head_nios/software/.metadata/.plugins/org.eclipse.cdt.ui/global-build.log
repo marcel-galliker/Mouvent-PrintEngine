@@ -1,9 +1,4 @@
-Info: (rx_head_nios.elf) 46 KBytes program size (code + initialized data).
-Info:                    14 KBytes free for stack + heap.
-Info: Creating rx_head_nios.objdump
-nios2-elf-objdump --disassemble --syms --all-header rx_head_nios.elf >rx_head_nios.objdump
-[rx_head_nios build complete]
-13:20:26 **** Build of configuration Nios II for project rx_head_nios ****
+13:48:00 **** Build of configuration Nios II for project rx_head_nios ****
 make mem_init_generate 
 Info: Building ../rx_head_nios_bsp
 F:/Tools/Bin/Altera/15.1/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../rx_head_nios_bsp
