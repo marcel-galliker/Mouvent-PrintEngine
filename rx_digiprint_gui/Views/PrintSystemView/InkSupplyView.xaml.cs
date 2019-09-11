@@ -138,8 +138,11 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 else MsgPopup.IsOpen=false;
             }
 
+            /*
             if (e.PropertyName.Equals("InkType")) 
                 FlushButton.DataContext = _InkSupply.InkType;
+            */
+
             /*
             if (e.PropertyName.Equals("Flushed"))
             {
@@ -172,10 +175,12 @@ namespace RX_DigiPrint.Views.PrintSystemView
         }
 
         //--- Flush_Clicked -------------------------------------
+        /*
         private void Flush_Clicked(object sender, RoutedEventArgs e) 
         {
             FlushPopup.Open(FlushButton);
         }
+        */
 
         //--- _command --------------------
         private void _command(string name, EFluidCtrlMode cmd, bool all)
