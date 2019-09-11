@@ -292,7 +292,7 @@ int main(int argc, char** argv)
 	rx_init();
 	err_init(0, 100);
 	nios_shutdown();
-	fpga_init();
+	fpga_init(FIELNAME_HEAD_RBF);
 	nios_init();
 	cond_init();
 	putty_init();

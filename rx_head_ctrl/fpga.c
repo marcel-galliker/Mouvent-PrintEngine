@@ -167,18 +167,16 @@ static void _check_udp_speed(int ticks);
 
 
 //--- fpga_init ----------------
-void fpga_init(void)
+void fpga_init(char *rbfFileName)
 {
 	char rbfpath[MAX_PATH];
 	_Init = FALSE;
 	_Load_Time = rx_get_ticks()+6000;
-	sprintf(rbfpath, "%s%s", PATH_BIN_HEAD, FIELNAME_HEAD_RBF);
-//	sprintf(rbfpath, "%s%s", PATH_BIN_HEAD, "rx_headtemp_rbf");
-	if (rx_fpga_load (rbfpath)!=REPLY_OK) 
+//	sprintf(rbfpath, "%s%s", PATH_BIN_HEAD, FIELNAME_HEAD_RBF);
+	sprintf(rbfpath, "%s%s", PATH_BIN_HEAD, rbfFileName);
+	if (rx_fpga_load(rbfpath)!=REPLY_OK) 
 	{
 		int i;
-
-		Error(WARN, 0, "TEST");
 		
 		FpgaCfg.cfg		= (SFpgaMainCfg*)	rx_malloc(sizeof(SFpgaMainCfg));
 		for (i=0; i<SIZEOF(FpgaCfg.head); i++) FpgaCfg.head[i] = (SFpgaHeadCfg*)rx_malloc(sizeof(SFpgaHeadCfg));
@@ -1528,7 +1526,7 @@ int  fpga_abort(void)
 			Error(WARN,0,"RELOAD-FPGA");
 			nios_end();
 			fpga_end();
-			fpga_init();
+			fpga_init(FIELNAME_HEAD_RBF);
 			TrPrintfL(TRUE, "fpga_init done");
 			nios_init();
 			TrPrintfL(TRUE, "nios_init done");

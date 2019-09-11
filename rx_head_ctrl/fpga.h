@@ -21,7 +21,7 @@ extern SFpgaHeadBoardCfg	FpgaCfg;
 
 
 //--- functions -----------------------------
-void  fpga_init(void);
+void  fpga_init(char *rbfFileName);
 int   fpga_is_init(void);
 int	  fpga_is_ready(void);
 void  fpga_end(void);

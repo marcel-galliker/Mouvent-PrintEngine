@@ -84,10 +84,19 @@ int rx_fpga_load(char *path_rbf)
 		}
 
 		char command[MAX_PATH];
+		if (_LinuxVersion.major==4)
+		{
+			sprintf(command, "rm %s", "/lib/firmware/rx_board_rbf");
+			system(command);										
+			
+			sprintf(command, "ln -s \"%s\" \"%s\"", path_rbf, "/lib/firmware/rx_board_rbf");
+			system(command);										
+		}	
+
 		if (_LinuxVersion.major==3)	sprintf(command, "su -c '/opt/radex/load-fpga %s'", path_rbf);
 		else						sprintf(command, "su -c '/etc/init.d/S50devicetree_overlay restart'");
 		system(command);				
-		if (rx_fpga_running())	
+		if (rx_fpga_running())
 		{
 			TrPrintf(TRUE, "FPGA loaded");
 			return REPLY_OK;
