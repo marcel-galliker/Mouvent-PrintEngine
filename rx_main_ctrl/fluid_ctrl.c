@@ -531,7 +531,7 @@ static void _control(int fluidNo)
 												setup_fluid_system(PATH_USER FILENAME_FLUID_STATE, &_Flushed, WRITE);				
 											}
 
-											if (step_active(1) && _PurgeFluidNo<0) 
+											if (rx_def_is_tx(RX_Config.printer.type) && step_active(1) && _PurgeFluidNo<0) 
 											{
 												if(_all_fluids_in_fluidCtrlMode(ctrl_purge_step4)) _send_ctrlMode(no, ctrl_wipe, TRUE);														
 											}
