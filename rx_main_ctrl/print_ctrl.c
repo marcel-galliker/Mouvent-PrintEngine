@@ -845,6 +845,9 @@ void pc_print_go(void)
 		
 	//	Error(LOG, 0, "PrintGo[%d] (id=%d, page=%d, scan=%d, copy=%d)", RX_PrinterStatus.printGoCnt, pid->id, pid->page, pid->scan, pid->copy);
 	//	Error(LOG, 0, "NEXT   [%d] (id=%d, page=%d, scan=%d, copy=%d)", RX_PrinterStatus.printGoCnt, next->id, next->page, next->scan, next->copy);
-		if (next->id != pid->id) machine_pause_printing();			
+		if (!RX_PrinterStatus.testMode && next->id != pid->id) 
+		{
+			machine_pause_printing();			
+		}
 	}
 }

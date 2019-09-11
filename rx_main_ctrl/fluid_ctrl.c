@@ -923,7 +923,7 @@ void fluid_send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 	if (ctrlMode==ctrl_purge_hard) _PurgeFluidNo=no;
 		
 	_FluidCtrlMode = ctrlMode;
-	Error(LOG, 0, "fluid_send_ctrlMode 0X%04x", ctrlMode);
+//	Error(LOG, 0, "fluid_send_ctrlMode 0X%04x", ctrlMode);
 	_RobotCtrlMode = ctrlMode;
 	_send_ctrlMode(no, ctrlMode, sendToHeads);
 }

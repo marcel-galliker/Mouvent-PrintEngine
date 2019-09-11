@@ -99,7 +99,7 @@ static void* _step_thread(void *par)
 				net_device_to_ipaddr(dev_stepper, i, addr, sizeof(addr));
 				if (sok_open_client_2(&_step_Socket[i], addr, PORT_CTRL_STEPPER, SOCK_STREAM, _step_handle_msg, _setp_socket_closed)== REPLY_OK)
 				{
-					ErrorEx(dev_stepper, i, LOG, 0, "connected");
+					ErrorEx(dev_stepper, i, LOG, 0, "Connected");
 					_step_set_config(i);
 					if (i==1 && (RX_Config.printer.type==printer_TX801 || RX_Config.printer.type==printer_TX802)) 
 					{
