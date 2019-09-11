@@ -178,11 +178,12 @@ typedef enum
 	power_wait_all_off,	// 1
 	power_wait_amp_on,	// 2
 	power_wait_all_on,	// 3
-	power_all_on,		// 4	
-	power_sd,			// 5
-	power_sd_3v3,		// 6
-	power_sd_amp,		// 7
-	power_down			// 8	
+	power_pre_all_on,	// 4	
+	power_all_on,		// 5	
+	power_sd,			// 6
+	power_sd_3v3,		// 7
+	power_sd_amp,		// 8
+	power_down			// 9	
 } EnPowerState;
 
 char *PowerStateStr(EnPowerState state);
