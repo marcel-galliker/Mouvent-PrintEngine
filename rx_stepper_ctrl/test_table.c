@@ -239,7 +239,7 @@ void tt_main(int ticks, int menu)
 	RX_StepperStatus.posY = motor_get_step(MOTOR_Y_LEFT);
 	RX_StepperStatus.posZ = motor_get_step(MOTOR_Z);
 
-	RX_StepperStatus.info.cover_open = FALSE; // !(Fpga.stat->input & TT_COVER_CLOSED_IN);
+//	RX_StepperStatus.info.cover_open = FALSE; // !(Fpga.stat->input & TT_COVER_CLOSED_IN);
 
 	if (!arg_simu)
 	{
@@ -332,7 +332,7 @@ void tt_main(int ticks, int menu)
 							}
 							break;
 
-	case CMD_TT_SCAN:		if (RX_StepperStatus.info.cover_open ) ErrorFlag(ERR_ABORT, &RX_StepperStatus.err, TT_ERR_COVER_OPEN, 0, "Cover open.");	
+	case CMD_TT_SCAN:	//	if (RX_StepperStatus.info.cover_open ) ErrorFlag(ERR_ABORT, &RX_StepperStatus.err, TT_ERR_COVER_OPEN, 0, "Cover open.");	
 							if (menu) _scan_state_machine(menu); 
 							break;
 		

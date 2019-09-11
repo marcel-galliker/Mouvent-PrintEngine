@@ -137,7 +137,7 @@ void lbrob_main(int ticks, int menu)
 		RX_StepperStatus.info.z_in_ref = FALSE;
 		RX_StepperStatus.info.z_in_print = FALSE;
 		RX_StepperStatus.info.z_in_cap = FALSE;
-		RX_StepperStatus.info.move_ok = FALSE;
+	//	RX_StepperStatus.info.move_ok = FALSE;
 	}
 
 	if (_CmdRunning && motors_move_done(MOTOR_ALL_BITS))
@@ -197,32 +197,7 @@ void lbrob_main(int ticks, int menu)
 				Error(LOG, 0, "FLO_RO: Command 0x%08x: triggers Referencing", _CmdRunning); //problem mit toggel move : do not toggle twice!
 			}
 		}
-		
-		// --- tasks after wipe ---
-		if ((_CmdRunning == CMD_CLN_WIPE))  //  && (RX_StepperStatus.posZ == 0)
-		{
-			Fpga.par->output &= ~RO_BLADE_UP_0;
-			Fpga.par->output &= ~RO_VACUUM_0;
-			Fpga.par->output &= ~RO_BLADE_UP_1;
-			Fpga.par->output &= ~RO_VACUUM_1;
-			if (motor_error(MOTOR_CAP))
-			{
-				RX_StepperStatus.info.ref_done = FALSE;
-				Error(ERR_CONT, 0, "FLO_RO: Command 0x%08x: triggers motor_error", _CmdRunning);
-			}
-		}
-
-
-		// --- Set Position Flags after Commands ---
-		RX_StepperStatus.info.move_ok = ((_CmdRunning == CMD_CLN_REFERENCE || _CmdRunning == CMD_CLN_MOVE_POS || _CmdRunning == CMD_CLN_WIPE)
-			&& RX_StepperStatus.info.ref_done
-			&& abs(RX_StepperStatus.posZ - _lastPosCmd) <= 10);
-
-		if (_new_cmd == FALSE)
-		{
-			RX_StepperStatus.info.move_tgl = !RX_StepperStatus.info.move_tgl;
-		}
-
+				
 		// --- Reset Commands ---
 		_CmdRunning = FALSE;
 
@@ -261,7 +236,7 @@ static void _lbrob_display_status(void)
 	term_printf("z in print:     %d  ", RX_StepperStatus.info.z_in_print);
 	term_printf("z in capping:   %d\n", RX_StepperStatus.info.z_in_cap);
 	term_printf("Flag reference done: %d  ", RX_StepperStatus.info.ref_done);
-	term_printf("Flag move OK: %d", RX_StepperStatus.info.move_ok);
+//	term_printf("Flag move OK: %d", RX_StepperStatus.info.move_ok);
 	term_printf("Last pos cmd in um:   %d\n", _lastPosCmd);
 	term_printf("Pos0 in steps:   %d  ", motor_get_step(MOTOR_CAP));
 	//term_printf("Pos0 in steps SOLL:   %d\n", printhead_soll);
@@ -306,7 +281,6 @@ int lbrob_menu(void)
 		case 'R': lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_REFERENCE, NULL); break;
 		case 'p': pos = atoi(&str[1]); lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_MOVE_POS, &pos); break;
 		case 'm': _lbrob_ro_motor_test(str[1] - '0', atoi(&str[2])); break;
-		case 'w' : pos = atoi(&str[1]); lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_WIPE, &pos); break;
 		case 'x': return FALSE;
 		}
 	}
@@ -360,22 +334,6 @@ int  lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 			if (!RX_StepperStatus.info.ref_done) Error(LOG, 0, "CLN: Command 0x%08x: missing ref_done: triggers Referencing", _CmdRunning);
 			if (RX_StepperStatus.info.ref_done) motors_move_to_step(MOTOR_CAP_BITS, &_ParCap_drive, -pos*CAP_STEPS_PER_METER / 1000000);
 			else								  lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_REFERENCE, NULL);
-		}
-		break;
-
-	case CMD_CLN_WIPE:		if (!_CmdRunning)
-		{
-			Fpga.par->output |= RO_BLADE_UP_0;
-			Fpga.par->output |= RO_VACUUM_0;
-			Fpga.par->output |= RO_BLADE_UP_1;
-			Fpga.par->output |= RO_VACUUM_1;
-			_CmdRunning = msgId;
-			RX_StepperStatus.info.moving = TRUE;
-			pos = *((INT32*)pdata);
-			_lastPosCmd = pos;
-			if (!RX_StepperStatus.info.ref_done) Error(LOG, 0, "CLN: Command 0x%08x: missing ref_done: triggers Referencing", _CmdRunning);
-			if (RX_StepperStatus.info.ref_done) motors_move_to_step(MOTOR_CAP_BITS, &_ParCap_wipe, -pos*CAP_STEPS_PER_METER / 1000000);
-			else							    lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_REFERENCE, NULL);
 		}
 		break;
 								

@@ -224,7 +224,6 @@ void tx801_main(int ticks, int menu)
 			_PrintPos_New=0;
 		}
 		else {
-			RX_StepperStatus.info.move_tgl = !RX_StepperStatus.info.move_tgl;
 			_CmdRunning = FALSE;
 		}
 	}
@@ -297,7 +296,6 @@ static void _tx801_display_status(void)
 				RX_StepperStatus.robinfo.z_in_wetwipe, 
 				RX_StepperStatus.robinfo.z_in_vacuum);
 	term_printf("z position in micron:   %d\n", RX_StepperStatus.posZ);	
-	term_printf("move toggle:    %d\n", RX_StepperStatus.info.move_tgl);
 	term_printf("\n");
 }
 

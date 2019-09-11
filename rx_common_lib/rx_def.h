@@ -1265,12 +1265,12 @@ typedef struct ETestTableInfo
 	UINT32 z_in_ref			: 1;	//	0x00000010
 	UINT32 z_in_print		: 1;	//	0x00000020
 	UINT32 z_in_cap			: 1;	//	0x00000040
-	UINT32 z_ref_done		: 1;	//	0x00000080
+	UINT32 info_07			: 1;	//	0x00000080
 	UINT32 x_in_cap			: 1;	//	0x00000100
 	UINT32 x_in_ref			: 1;	//	0x00000200
 	UINT32 printing			: 1;	//	0x00000400
 	UINT32 curing			: 1;	//	0x00000800
-	UINT32 cover_open		: 1;	//	0x00001000
+	UINT32 info_12			: 1;	//	0x00001000
 	UINT32 info_13			: 1;	//	0x00002000
 	UINT32 info_14			: 1;	//	0x00004000
 	UINT32 info_15			: 1;	//	0x00008000
@@ -1280,8 +1280,8 @@ typedef struct ETestTableInfo
 	UINT32 headUpInput_1	: 1;	//	0x00080000
 	UINT32 headUpInput_2	: 1;	//	0x00100000
 	UINT32 headUpInput_3	: 1;	//	0x00200000
-	UINT32 move_ok			: 1;	//	0x00400000
-	UINT32 move_tgl			: 1;	//	0x00800000
+	UINT32 info_22			: 1;	//	0x00400000
+	UINT32 info_23			: 1;	//	0x00800000
 	UINT32 scannerEnable	: 1;	//	0x01000000
 	UINT32 info_25			: 1;	//	0x02000000
 	UINT32 printhead_en		: 1;    //  0x04000000
@@ -1410,7 +1410,7 @@ typedef struct SStepperStat
 
 	INT32			inputs;
 	SStepperMotor	motor[MAX_STEPPER_MOTORS];
-	INT32			set_io_cnt;
+	INT32			unused_set_io_cnt;
 } SStepperStat;
 
 	

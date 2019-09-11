@@ -135,7 +135,7 @@ void lb701_main(int ticks, int menu)
 			_PrintPos_New = 0;
 		}
 		else {
-			RX_StepperStatus.info.move_tgl = !RX_StepperStatus.info.move_tgl;
+		//	RX_StepperStatus.info.move_tgl = !RX_StepperStatus.info.move_tgl;
 			_CmdRunning = FALSE;
 		}
 	}	

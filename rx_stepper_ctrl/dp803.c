@@ -177,7 +177,7 @@ void dp803_main(int ticks, int menu)
 		}
 		else
 		{
-			RX_StepperStatus.info.move_tgl = !RX_StepperStatus.info.move_tgl;
+//			RX_StepperStatus.info.move_tgl = !RX_StepperStatus.info.move_tgl;
 			_CmdRunning = FALSE;
 		}
 		_PrintPos_New = 0;

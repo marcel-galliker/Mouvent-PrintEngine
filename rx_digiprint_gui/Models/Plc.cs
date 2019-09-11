@@ -208,6 +208,8 @@ namespace RX_DigiPrint.Models
                         InWebIn       = (state==9);
                         WebInEnabled  = (state!=4 && state!=6);
                     }
+                    if (val[0].Equals("STA_REFERENCE_ENABLE")) ReferenceEnabled = (val[1].Equals("TRUE"));
+
                     for (m=1, found=false; m<buffer[i].Count(); m++)
                     {
                         if (buffer[i][m].StartsWith(val[0]))
@@ -284,6 +286,14 @@ namespace RX_DigiPrint.Models
         {
             get { return _InRefencing; }
             set { SetProperty(ref _InRefencing, value); }
+        }
+
+        //--- Property CLEAF_CanRefBuf ---------------------------------------
+        private bool _ReferenceEnabled;
+        public bool ReferenceEnabled
+        {
+            get { return _ReferenceEnabled; }
+            set { SetProperty(ref _ReferenceEnabled, value); }
         }
 
         //--- Property IsReadyForProduction ---------------------------------------
