@@ -56,7 +56,7 @@
             </Grid>
 
             <Grid x:Name="ManualFlightTimeComp">
-                <TextBlock       Text="FlightTime [µm]"/>
+                <TextBlock       Text="FlightTime [mm]"/>
                 <common:RxNumBox Text="{Binding ManualFlightTimeComp}" HorizontalContentAlignment="Right" Width="70" HorizontalAlignment="Right"/>
             </Grid>
 

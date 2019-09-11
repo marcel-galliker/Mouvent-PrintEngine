@@ -281,6 +281,8 @@ static void _enc_start_printing(int no, SPrintQueueItem *pitem, int restart)
 	msg.printGoMode = pitem->printGoMode;
 	msg.printGoDist = pitem->printGoDist;
 	msg.correction  = CORR_OFF; 
+	msg.ftc			= RX_Config.printer.offset.manualFlightTimeComp;
+	
 	_WakeupLen = 0;
 	switch (RX_Config.printer.type)
 	{

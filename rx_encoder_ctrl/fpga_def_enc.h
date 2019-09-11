@@ -19,6 +19,8 @@
 #define ENCODER_IN_CNT	8
 #define ENCODER_OUT_CNT	8
 
+#define FPGA_FREQ	50000000
+
 //--- TEST Value Arrays ---------------------------------------
 #define TEST_VALUE_CNT			8192		// UINT32
 #define TEST_VALUE_ADDR_0		0xc0210000
@@ -200,7 +202,7 @@ typedef struct
 	UINT32 		    max_1_a1_ident_a1;	// 0x0580 // reset_min_max
 	UINT32 		    dig_in_cnt;			// 0x0584 counts digin rising edges
 	UINT32 		    varshift_stat_dig_in;		// 0x0588
-	UINT32 		    res_058c;			// 0x058c
+	UINT32 		    ftc_shift_delay_strokes_tel;// 0x058c
 	UINT32 		    varshift_stat_tel;	// 0x0590 not used, only of first counter for debuging
 	UINT32			res[(0x0600 - 0x0594) / 4];	// 0x054c .. 0x0600
 	SEncErrStatus		err;					// 0x0600 - 0x0624: 
@@ -312,9 +314,12 @@ typedef struct
 	
 	UINT32  sel_roller_dia_offset[2]; // 0x005c[Bit 0..3]: 70 + sel_roller_dia_offset_0 = Roller Diameter in mm
 
-	UINT32  shift_delay_tel;          // 0x0058 // 19 bit // pg delay in strokes for telegram pg (21um strokes) (only encoder 0)
+	UINT32  shift_delay_tel;          // 0x0060 // 19 bit // pg delay in strokes for telegram pg (21um strokes) (only encoder 0)
 
-	UINT32  min_mark_len;            // 0x0058 // 19 bit // minimal mark length in encoder steps 
+	UINT32  min_mark_len;            // 0x0064 // 19 bit // minimal mark length in encoder steps 
+	
+	UINT32  ftc_ratio;            // 0x0068 // 27 bit // clk // 0 bits after binary point
+	UINT32  ftc_speed;            // 0x006c // 24 bit // strokes/clk // 31 bits after binary point
 	
 } SGeneralCfg;
 

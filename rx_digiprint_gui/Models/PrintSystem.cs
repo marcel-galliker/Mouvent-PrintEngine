@@ -254,8 +254,8 @@ namespace RX_DigiPrint.Models
         }
 
         //--- Property ManualFlightTimeComp ---------------------------------------
-        private int _ManualFlightTimeComp ;
-        public int ManualFlightTimeComp 
+        private double _ManualFlightTimeComp ;
+        public double ManualFlightTimeComp 
         {
             get { return _ManualFlightTimeComp ; }
             set { Changed|=SetProperty(ref _ManualFlightTimeComp , value); }
@@ -278,7 +278,7 @@ namespace RX_DigiPrint.Models
             Reverse                 = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX801 || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX802);
             Overlap                 = msg.overlap>0;
             OffsetVerso             = msg.offset.versoDist;
-            ManualFlightTimeComp    = msg.offset.manualFlightTimeComp;
+            ManualFlightTimeComp    = (msg.offset.manualFlightTimeComp/1000.0);
             OffsetAngle             = msg.offset.angle;
             OffsetStep              = msg.offset.step;
             OffsetIncPerMeter       = msg.offset.incPerMeter;
@@ -316,7 +316,7 @@ namespace RX_DigiPrint.Models
             msg.type                    = _PrinterType;
             msg.overlap                 = Convert.ToUInt32(_Overlap);
             msg.offset.versoDist        = OffsetVerso;
-            msg.offset.manualFlightTimeComp = ManualFlightTimeComp;
+            msg.offset.manualFlightTimeComp = Convert.ToInt32(ManualFlightTimeComp*1000);
             msg.offset.angle            = OffsetAngle;
             msg.offset.step             = OffsetStep;
             msg.offset.incPerMeter      = OffsetIncPerMeter; 

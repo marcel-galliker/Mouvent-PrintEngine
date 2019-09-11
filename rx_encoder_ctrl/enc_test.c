@@ -282,7 +282,7 @@ void test_speed(int ticks)
 {
 	extern SEncFpga		*Fpga;
 	static int running=FALSE;
-	double fact = 50000000.0 / 101455920.0 / 1000000.0 * 60;
+	double fact = FPGA_FREQ / 101455920.0 / 1000000.0 * 60;
 	
 //	int min = Fpga->stat.encOut[0].speed_min;
 	if (Fpga->cfg.encIn[0].enable)
@@ -314,7 +314,7 @@ void test_step_time(int ticks)
 	extern SEncFpga		*Fpga;
 	static int running=FALSE;
 	static int pg=0;
-	double fact = 50000000.0 / 101455920.0 / 1000000.0 * 60;
+	double fact = FPGA_FREQ / 101455920.0 / 1000000.0 * 60;
 	
 	if (Fpga!=NULL && Fpga->cfg.encIn[0].enable)
 	{

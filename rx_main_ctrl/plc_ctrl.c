@@ -338,7 +338,7 @@ static void _plc_set_par(SPrintQueueItem *pItem, SPlcPar *pPlcPar)
 		case printer_DP803:		_UnwinderLenMin = 30; break;	
 		default: _UnwinderLenMin = 0;			
 	}
-		
+			
 	pPlcPar->bidir	= (pItem->scanMode==PQ_SCAN_BIDIR);
 	pPlcPar->speed	= pItem->speed;
 	if (RX_Config.printer.type==printer_cleaf)

@@ -199,10 +199,10 @@ void fpga_init()
 		term_printf("pg-cfg				@ 0x%04x (0x0c00)\n", (BYTE*)&test.cfg.pg		 -(BYTE*)&test);
 		term_printf("general			@ 0x%04x (0x0d00)\n", (BYTE*)&test.cfg.general	 -(BYTE*)&test);
 		term_flush();
-		Error(ERR_ABORT, 0, "structuire mismatch");
+		Error(ERR_ABORT, 0, "structure mismatch");
 	}
 
-	Fpga = (SEncFpga*)rx_fpga_map_page(_MemId, 0xc0200000, sizeof(SEncFpga), 0x0e6c);
+	Fpga = (SEncFpga*)rx_fpga_map_page(_MemId, 0xc0200000, sizeof(SEncFpga), 0x0e74);
 	FpgaCorr = (SEncFpgaCorr*)rx_fpga_map_page(_MemId, 0xc0203000, sizeof(SEncFpgaCorr),	0x600);
 
 	{
@@ -855,6 +855,17 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg, int restart)
 		//	Fpga->cfg.pg[pgNo].dig_in_sel   = 0;
 		//	Fpga->cfg.pg[pgNo].quiet_window = 10;
 		//	if (FpgaQSys->printGo_status.fill_level) Fpga->cfg.pg[pgNo].fifos_ready	= TRUE;
+			
+			{
+				//--- flight time compensation of Mark Reader ----------------------------
+				double ftc_strokes = pcfg->ftc/_StrokeDist;
+				double hz		   = 100.0/60.0*1000000.0/_StrokeDist;// fix 100 m/min
+				double speed	   = (hz/FPGA_FREQ)*0x80000000;
+				double ratio       = ftc_strokes / (hz / FPGA_FREQ);
+
+				Fpga->cfg.general.ftc_speed = (int)speed;
+				Fpga->cfg.general.ftc_ratio = (int)ratio;
+			}
 		}
 	
 		Fpga->cfg.pg[pgNo].printgo_n	= FALSE;
@@ -1002,20 +1013,24 @@ static void  _pg_ctrl(void)
 		}				
 
 		//--- FIFO-Errors ---------------------------------------------------------------------------------
-		if (Fpga->stat.pg_fifo_empty_err && RX_EncoderStatus.fifoEmpty_PG != Fpga->stat.pg_fifo_empty_err)
+		switch(Fpga->cfg.pg[0].fifos_used)
 		{
-			Error(LOG, 0, "pg_fifo_empty_err=%d (distTelCnt=%d, fill_level=%d, PG_Cnt=%d)", Fpga->stat.pg_fifo_empty_err, RX_EncoderStatus.distTelCnt, FpgaQSys->printGo_status.fill_level, RX_EncoderStatus.PG_cnt);
-			_IndexCheckDone = TRUE;
-		}
-		if (Fpga->stat.ignored_fifo_empty_err && RX_EncoderStatus.fifoEmpty_IGN != Fpga->stat.ignored_fifo_empty_err)
-		{
-			Error(LOG, 0, "ignored_fifo_empty_err=%d, (distTelCnt=%d, fill_level=%d, PG_Cnt=%d)", Fpga->stat.ignored_fifo_empty_err, RX_EncoderStatus.distTelCnt, FpgaQSys->ignored_status.fill_level, RX_EncoderStatus.PG_cnt);
-			_IndexCheckDone = TRUE;
-		}
-		if (Fpga->stat.window_fifo_empty_err && RX_EncoderStatus.fifoEmpty_WND != Fpga->stat.window_fifo_empty_err)
-		{
-			Error(LOG, 0, "window_fifo_empty_err=%d, (distTelCnt=%d, fill_level=%d, PG_Cnt=%d)", Fpga->stat.window_fifo_empty_err, RX_EncoderStatus.distTelCnt, FpgaQSys->window_status.fill_level, RX_EncoderStatus.PG_cnt);
-			_IndexCheckDone = TRUE;
+		case FIFOS_DIST:	if (Fpga->stat.pg_fifo_empty_err && RX_EncoderStatus.fifoEmpty_PG != Fpga->stat.pg_fifo_empty_err)
+							{
+								Error(LOG, 0, "pg_fifo_empty_err=%d (distTelCnt=%d, fill_level=%d, PG_Cnt=%d)", Fpga->stat.pg_fifo_empty_err, RX_EncoderStatus.distTelCnt, FpgaQSys->printGo_status.fill_level, RX_EncoderStatus.PG_cnt);
+							}
+							break;
+			
+		case FIFOS_MARKREADER:	
+							if (Fpga->stat.ignored_fifo_empty_err && RX_EncoderStatus.fifoEmpty_IGN != Fpga->stat.ignored_fifo_empty_err)
+							{
+								Error(LOG, 0, "ignored_fifo_empty_err=%d, (distTelCnt=%d, fill_level=%d, PG_Cnt=%d)", Fpga->stat.ignored_fifo_empty_err, RX_EncoderStatus.distTelCnt, FpgaQSys->ignored_status.fill_level, RX_EncoderStatus.PG_cnt);
+							}
+							if (Fpga->stat.window_fifo_empty_err && RX_EncoderStatus.fifoEmpty_WND != Fpga->stat.window_fifo_empty_err)
+							{
+								Error(LOG, 0, "window_fifo_empty_err=%d, (distTelCnt=%d, fill_level=%d, PG_Cnt=%d)", Fpga->stat.window_fifo_empty_err, RX_EncoderStatus.distTelCnt, FpgaQSys->window_status.fill_level, RX_EncoderStatus.PG_cnt);
+							}
+							break;
 		}
 		
 		int  error = 	RX_EncoderStatus.fifoEmpty_PG  != Fpga->stat.pg_fifo_empty_err
@@ -1334,6 +1349,7 @@ static void _fpga_display_status(int showCorrection, int showParam)
 			term_printf("  Speed [m/Min]: "); for (i=0; i<cnt; i++) term_printf("%09d  ", (int)((Fpga->stat.encOut[i].speed*23/1000)*60.0/1200*0.0254) );		term_printf("\n");
 //			term_printf("  Speed Min[Hz]: "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encOut[i].speed_min*23/1000);	term_printf("\n");
 //			term_printf("  Speed Max[Hz]: "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encOut[i].speed_max*23/1000);	term_printf("\n");
+			term_printf("  FlighTimeComp: "); term_printf("%09d  ", Fpga->stat.ftc_shift_delay_strokes_tel );		term_printf("\n");
 			term_printf("  Wind mark pos: "); for (i = 0; i < cnt; i++) term_printf("%09d  ", Fpga->stat.encOut[i].window_mark_pos); term_printf("\n");
 
 			term_printf("  PG FIFO:       %09d  Used=%d     dist=%03d wnd=%03d ign=%03d\n", 

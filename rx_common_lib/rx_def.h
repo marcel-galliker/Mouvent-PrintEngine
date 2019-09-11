@@ -847,6 +847,7 @@ typedef struct SEncoderCfg
 	INT32	printGoOutDist;					// in microns
 	INT32	speed_mmin;
 	INT32	corrRotPar[4];					// parameters for CORR_ROTATIVE
+	INT32	ftc;							// Flight Time Compensation
 	EPrinterType	printerType;
 } SEncoderCfg;
 	
