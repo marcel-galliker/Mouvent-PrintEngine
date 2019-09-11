@@ -120,6 +120,8 @@ int nios_init(void)
 	
 	_NiosCfg  = &_NiosMem->cfg;
 	_NiosStat = &_NiosMem->stat;
+	
+	_NiosMem->cfg.cmd.debug = arg_debug;
 
 	//--- wait until nios ready ----------------------
 	for (tio=0; !_NiosMem->stat.info.nios_ready && tio<10; tio++) 
@@ -553,6 +555,7 @@ void nios_set_firepulse_on(int on)
 	{
 		TrPrintfL(TRUE, "nios_set_firepulse_on(%d)", on);	
 		_NiosMem->cfg.cmd.firepulse_on = on;
+		_NiosMem->cfg.cmd.debug = arg_debug;
 	}
 }
 

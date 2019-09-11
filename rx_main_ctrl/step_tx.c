@@ -157,41 +157,25 @@ void steptx_rob_to_center_pos(void)
 }
 
 //--- steptx_rob_to_wipe_pos ------------------------
-void steptx_rob_to_wipe_pos(EnFluidCtrlMode mode)
+void steptx_rob_to_wipe_pos(ERobotFunctions rob_function)
 {
 	if (_step_socket[1]==INVALID_SOCKET) return;
 	
-	int function=0;
-	// 0=CAP
-	// 1=Wet Whipe
-	// 2=Vacuum
-	// 3=Wipe
-	// 4=Vacuum change
-	switch(mode)
-	{
-	case ctrl_cap:			function=0; break;
-	case ctrl_wetwipe:		function = 1; break;
-	case ctrl_vacuum:		function = 2; break;
-	case ctrl_wipe:			function = 3; break;
-	case ctrl_vacuum_step6: function = 4; break;
-	default: break;
-	}
-	
-	sok_send_2(&_step_socket[1], CMD_CLN_MOVE_POS, sizeof(function), &function);		
+	sok_send_2(&_step_socket[1], CMD_CLN_MOVE_POS, sizeof(rob_function), &rob_function);		
 }
 	
 //--- steptx_rob_in_wipe_pos ------------------------
-int  steptx_rob_in_wipe_pos(EnFluidCtrlMode mode)
+int  steptx_rob_in_wipe_pos(ERobotFunctions rob_function)
 {
 	if (_step_socket[1]==INVALID_SOCKET) return TRUE;
 	
-	switch (mode)
+	switch (rob_function)
 	{
-	case ctrl_cap:			return _Status[1].robinfo.cap_ready			&& _Status[1].robinfo.moving == FALSE; break;
-	case ctrl_wetwipe:		return _Status[1].robinfo.wetwipe_ready		&& _Status[1].robinfo.moving == FALSE; break;
-	case ctrl_vacuum:		return _Status[1].robinfo.vacuum_ready		&& _Status[1].robinfo.moving == FALSE; break;
-	case ctrl_wipe:			return _Status[1].robinfo.wipe_ready		&& _Status[1].robinfo.moving == FALSE; break;
-	case ctrl_vacuum_step6: return _Status[1].robinfo.vacuum_in_change	&& _Status[1].robinfo.moving == FALSE; break;
+	case rob_fct_cap: 			return _Status[1].robinfo.cap_ready			&& _Status[1].robinfo.moving == FALSE; break;
+	case rob_fct_wetwipe: 		return _Status[1].robinfo.wetwipe_ready		&& _Status[1].robinfo.moving == FALSE; break;
+	case rob_fct_vacuum: 		return _Status[1].robinfo.vacuum_ready		&& _Status[1].robinfo.moving == FALSE; break;
+	case rob_fct_wipe: 			return _Status[1].robinfo.wipe_ready		&& _Status[1].robinfo.moving == FALSE; break;
+	case rob_fct_vacuum_change: return _Status[1].robinfo.vacuum_in_change	&& _Status[1].robinfo.moving == FALSE; break;
 	default: return FALSE; break;
 	}
 }

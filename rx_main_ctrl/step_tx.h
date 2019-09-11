@@ -37,8 +37,8 @@ int  steptx_rob_reference_done(void);
 
 void steptx_rob_to_center_pos(void);
 
-void steptx_rob_to_wipe_pos(EnFluidCtrlMode mode);
-int  steptx_rob_in_wipe_pos(EnFluidCtrlMode mode);
+void steptx_rob_to_wipe_pos(ERobotFunctions rob_function);
+int  steptx_rob_in_wipe_pos(ERobotFunctions rob_function);
 
 int	 steptx_rob_wipe_start(EnFluidCtrlMode mode);
 int	 steptx_rob_wipe_done(void);

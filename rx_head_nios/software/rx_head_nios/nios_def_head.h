@@ -50,7 +50,7 @@ typedef union SNiosHeadCmd
 		UINT32	write_user_eeprom1:1;	// 	05:
 		UINT32	write_user_eeprom2:1;	// 	06:
 		UINT32	write_user_eeprom3:1;	// 	07:
-		UINT32	cmd_08:1;				// 	08:
+		UINT32	debug:1;				// 	08:
 		UINT32	cmd_09:1;				// 	09:
 		UINT32	cmd_10:1;				// 	10:
 		UINT32	cmd_11:1;				// 	11:

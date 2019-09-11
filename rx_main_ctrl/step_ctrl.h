@@ -46,8 +46,8 @@ void step_rob_do_reference(void);
 
 void step_rob_to_center_pos(void);
 
-void step_rob_to_wipe_pos(EnFluidCtrlMode mode);
-int  step_rob_in_wipe_pos(EnFluidCtrlMode mode);
+void step_rob_to_wipe_pos(ERobotFunctions rob_function);
+int  step_rob_in_wipe_pos(ERobotFunctions rob_function);
 
 void step_rob_wipe_start(EnFluidCtrlMode mode);
 int  step_rob_wipe_done(EnFluidCtrlMode mode);

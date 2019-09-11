@@ -52,39 +52,44 @@
 
 #define SPEED_SLOW_SHIFT	3200 // in steps/s
 
-#define ROB_FUNCTION_CAP	0
-#define ROB_FUNCTION_WASH	1
-#define ROB_FUNCTION_VACUUM	2
-#define ROB_FUNCTION_WIPE	3
-#define ROB_FUNCTION_TILT	4
+//#define ROB_FUNCTION_CAP	0
+//#define ROB_FUNCTION_WASH	1
+//#define ROB_FUNCTION_VACUUM	2
+//#define ROB_FUNCTION_WIPE	3
+//#define ROB_FUNCTION_TILT	4
+#define ROB_FUNCTION_VACUUM_CHANGE	5
 
 #define ROB_SIDE_MOVINGS	3
 
 // MOTOR_ROT Positions
 #define POS_ROT_CNT			6
-#define POS_ROT_WIPE		(ROT_STEPS_PER_REV/4.0*2)
+#define POS_ROT_WIPE		(ROT_STEPS_PER_REV/4.0*0)
 #define POS_ROT_VAC			(ROT_STEPS_PER_REV/4.0*1)
-#define POS_ROT_WASH		(ROT_STEPS_PER_REV/4.0*0)
+#define POS_ROT_WASH		(ROT_STEPS_PER_REV/4.0*2)
 #define POS_ROT_CAP			(ROT_STEPS_PER_REV/4.0*3)
 #define POS_ROT_VAC_CHANGE	(ROT_STEPS_PER_REV/4.0*3)
 #define POS_ROT_TILT		(POS_ROT_CAP-_TiltSteps)
 
 // ENCODER_ROT Positions
-#define POS_ENC_WIPE		(ROT_INC_PER_REV/4.0*2)
+#define POS_ENC_WIPE		(ROT_INC_PER_REV/4.0*0)
 #define POS_ENC_VAC			(ROT_INC_PER_REV/4.0*1)
-#define POS_ENC_WET			(ROT_INC_PER_REV/4.0*0)
+#define POS_ENC_WET			(ROT_INC_PER_REV/4.0*2)
 #define POS_ENC_CAP			(ROT_INC_PER_REV/4.0*3)
 #define POS_ENC_VAC_CHANGE	(ROT_INC_PER_REV/4.0*3)
 #define POS_ENC_TILT		(POS_ROT_TILT*ROT_INC_PER_REV/ROT_STEPS_PER_REV)
 
 // MOTOR_SHIFT Positions
-#define POS_CENTER_OFFSET	(0.001+0.002) // 0.001 // in m
-#define POS_SHIFT_CNT		6
-#define POS_SHIFT_REF		(SHIFT_STEPS_PER_METER*(0/*-POS_CENTER_OFFSET*/))
-#define POS_SHIFT_CENTER	(SHIFT_STEPS_PER_METER*(0.024+0))
-#define POS_SHIFT_START		(SHIFT_STEPS_PER_METER*(0.024-0.024)) // (SHIFT_STEPS_PER_METER*(0.024+0.024))
-#define POS_SHIFT_END		(SHIFT_STEPS_PER_METER*(0.024+0.023))	//(SHIFT_STEPS_PER_METER*(0.024+0.025)) // (SHIFT_STEPS_PER_METER*(0.024-0.024))
+#define POS_CENTER_OFFSET		(0.001+0.002) // 0.001 // in m
+#define POS_SHIFT_CNT			6
+#define POS_SHIFT_REF			(SHIFT_STEPS_PER_METER*(0/*-POS_CENTER_OFFSET*/))
+#define POS_SHIFT_CENTER_801	(SHIFT_STEPS_PER_METER*(0.024+0))
+#define POS_SHIFT_START			(SHIFT_STEPS_PER_METER*(0.024-0.024)) // (SHIFT_STEPS_PER_METER*(0.024+0.024))
+#define POS_SHIFT_END_801		(SHIFT_STEPS_PER_METER*(0.024+0.023))	//(SHIFT_STEPS_PER_METER*(0.024+0.025)) // (SHIFT_STEPS_PER_METER*(0.024-0.024))
+#define POS_SHIFT_CENTER_802	(SHIFT_STEPS_PER_METER*(0.024+0.012))
+#define POS_SHIFT_END_802		(SHIFT_STEPS_PER_METER*(0.024+0.05))
 //#define POS_SHIFT_START		(SHIFT_STEPS_PER_METER*(0.024-0.024)) // (SHIFT_STEPS_PER_METER*(0.024+0.024))
+
+#define POS_SHIFT_CENTER	 POS_SHIFT_CENTER_801
 
 // Inputs
 #define ROT_STORED_IN		0
@@ -123,9 +128,9 @@ static int	POS_ENC_ROT[POS_ROT_CNT] = {
 
 static int	POS_SHIFT[POS_SHIFT_CNT] = {
 	POS_SHIFT_REF,	
-	POS_SHIFT_CENTER,
+	POS_SHIFT_CENTER_801,
 	POS_SHIFT_START,
-	POS_SHIFT_END,
+	POS_SHIFT_END_801,
 	POS_SHIFT_START,
 	POS_SHIFT_START
 };
@@ -135,6 +140,7 @@ static int	_CmdRunning = 0;
 static char	_CmdName[32];
 static int	_ResetRetried = 0;
 static int  _LastRobPosCmd = 0;
+static int  _ref_done_1;
 static int  _RobFunction = 0;
 static int  _ShowStatus = 0;
 static int	_NewCmd = 0;
@@ -147,6 +153,9 @@ static int _MoveLeftPos = 0;
 
 static int _WipeWaiting = FALSE;
 static int _VacuumWaiting = FALSE;
+
+static int _PosShiftCenter = 0;
+static int _PosShiftEnd = 0;
 
 static SMovePar	_ParRotRef;
 static SMovePar	_ParRotSensRef;
@@ -163,12 +172,11 @@ static UINT32	_txrob_Error[5];
 // Times and Parameters
 static int	_TimeWastePump = 5; //20; // in s
 static int	_TimeFillCap = 14; // in s
+static int	_TimeFillCap801 = 14;	// in s
+static int	_TimeFillCap802 = 25;	// in s
 static int	_SpeedShift = 20000; // in steps/s
 static int	_RotRefOffset = 11; // in steps
 static int	_TiltSteps = 90; // in steps
-
-static INT32	_AfterRefCmd=0;
-static INT32	_AfterRefPar;
 
 //--- prototypes --------------------------------------------
 static void _txrob_motor_test(int motor, int steps);
@@ -301,6 +309,29 @@ void txrob_init(void)
 	
 	//--- Outputs ----------------
 	Fpga.par->output &= ~RO_ALL_OUTPUTS; // ALL OUTPUTS OFF
+	
+	// Initalize the differences between TX801 and TX802
+	if (RX_StepperCfg.printerType == printer_TX801)
+	{
+		int temp;
+		POS_SHIFT[1] = POS_SHIFT_CENTER_801;
+		POS_SHIFT[3] = POS_SHIFT_END_801;
+		_TimeFillCap = 14;		// seconds
+		
+		// Roboter positions have to be changed just for the R&D Robot.
+		temp = POS_ROT[rob_fct_wetwipe];
+		POS_ROT[rob_fct_wetwipe] = POS_ROT[rob_fct_wipe];
+		POS_ROT[rob_fct_wipe] = temp;
+		temp = POS_ENC_ROT[rob_fct_wetwipe];
+		POS_ENC_ROT[rob_fct_wetwipe] = POS_ENC_ROT[rob_fct_wipe];
+		POS_ENC_ROT[rob_fct_wipe] = temp;
+	}
+	else if (RX_StepperCfg.printerType == printer_TX802)
+	{
+		POS_SHIFT[1] = POS_SHIFT_CENTER_802;
+		POS_SHIFT[3] = POS_SHIFT_END_802;
+		_TimeFillCap = 25;		// seconds
+	}
 }
 
 //---_rot_pos_check --------------------------------------------------------------
@@ -487,7 +518,7 @@ void txrob_main(int ticks, int menu)
 				loc_move_pos = 0; // Ref Pos
 				motors_reset(MOTOR_SHIFT_BITS);
 				RX_StepperStatus.posX = _shift_steps_2_micron(motor_get_step(MOTOR_SHIFT));
-				_RobFunction = ROB_FUNCTION_TILT;	//4; // not 0, otherwise shift is canceled
+				_RobFunction = rob_fct_tilt;	//5; // not 0, otherwise shift is canceled
 			}
 			else
 			{
@@ -520,17 +551,9 @@ void txrob_main(int ticks, int menu)
 		{
 			motors_reset(MOTOR_ROT_BITS);
 			RX_StepperStatus.posZ = _rot_steps_2_rev(motor_get_step(MOTOR_ROT));
-			RX_StepperStatus.robinfo.ref_done = TRUE;
-			if (_AfterRefCmd)
-			{
-				txrob_handle_ctrl_msg(INVALID_SOCKET, _AfterRefCmd, &_AfterRefPar);
-				loc_new_cmd  = FALSE;
-				_AfterRefCmd = 0;
-			}
-			else
-			{
-				loc_new_cmd = CMD_CLN_SHIFT_MOV; 				
-			}
+			loc_new_cmd = CMD_CLN_SHIFT_MOV;
+			_ref_done_1 = TRUE;
+		//	RX_StepperStatus.robinfo.ref_done = TRUE;
 		}
 		
 		// --- tasks after motor stop ---
@@ -544,19 +567,19 @@ void txrob_main(int ticks, int menu)
 		{
 			switch (_RobFunction)
 			{
-			case ROB_FUNCTION_CAP:	// Cap
+			case rob_fct_cap:	// Cap
 				TrPrintfL(TRUE, "ROB_FUNCTION_CAP done");
 				loc_new_cmd = CMD_CLN_SHIFT_MOV; 
 				loc_move_pos = 1; // center
 				break;
 
-			case ROB_FUNCTION_WASH:	// Wet wipe
+			case rob_fct_wetwipe:	// Wet wipe
 				TrPrintfL(TRUE, "ROB_FUNCTION_WASH done");
 				loc_new_cmd = CMD_CLN_SHIFT_MOV; 
 				loc_move_pos = 2; // start
 				break;
 	
-			case ROB_FUNCTION_VACUUM:	// Vacuum
+			case rob_fct_vacuum:	// Vacuum
 				TrPrintfL(TRUE, "ROB_FUNCTION_VACUUM done");
 				loc_new_cmd = CMD_CLN_SHIFT_MOV; 
 				loc_move_pos = 2; // start
@@ -564,16 +587,16 @@ void txrob_main(int ticks, int menu)
 				Fpga.par->output |= VAC_ON; // VACUUM ON
 				break;
 				
-			case ROB_FUNCTION_WIPE: // Wipe
+			case rob_fct_wipe: // Wipe
 				TrPrintfL(TRUE, "ROB_FUNCTION_WIPE done");
 				loc_new_cmd = CMD_CLN_SHIFT_MOV;
 				loc_move_pos = 2; // start
 				_WipeWaiting = TRUE;
 				break;
 				
-			case ROB_FUNCTION_TILT: // Tilt
+			case rob_fct_tilt: // Tilt
 				TrPrintfL(TRUE, "ROB_FUNCTION_TILT done");
-				_RobFunction = ROB_FUNCTION_CAP;	//0; // Robot in cap
+				_RobFunction = rob_fct_cap;	//0; // Robot in cap
 				RX_StepperStatus.robinfo.cap_ready = TRUE;
 				break;
 			}
@@ -590,7 +613,7 @@ void txrob_main(int ticks, int menu)
 		{
 			TrPrintfL(TRUE, "CMD_CLN_WAIT done");
 			loc_new_cmd = CMD_CLN_MOVE_POS; 
-			loc_move_pos = 4; // Tilt end, move to Cap
+			loc_move_pos = rob_fct_tilt; // Tilt end, move to Cap
 		}
 		
 		//========================================== shift ==========================================
@@ -605,6 +628,7 @@ void txrob_main(int ticks, int menu)
 			case 0:	// Ref
 				motors_reset(MOTOR_SHIFT_BITS);
 				RX_StepperStatus.posX = _shift_steps_2_micron(motor_get_step(MOTOR_SHIFT));
+				RX_StepperStatus.robinfo.ref_done = TRUE;
 				break;
 
 			case 1:	// Center
@@ -614,21 +638,21 @@ void txrob_main(int ticks, int menu)
 			case 2:	// Start
 				switch (_RobFunction)
 				{
-				case ROB_FUNCTION_CAP:	// Cap
+				case rob_fct_cap:	// Cap
 					break;
 
-				case ROB_FUNCTION_WASH:	// Wet wipe
+				case rob_fct_wetwipe:	// Wet wipe
 					Fpga.par->output |= PUMP_FLUSH_WET; // Flush Wet ON
 					break;
 	
-				case ROB_FUNCTION_VACUUM:	// Vacuum
+				case rob_fct_vacuum:	// Vacuum
 					Fpga.par->output |= PUMP_WASTE_VAC; // Waste ON
 					break;
 				
-				case ROB_FUNCTION_WIPE: // Wipe
+				case rob_fct_wipe: // Wipe
 					break;
 					
-				case ROB_FUNCTION_TILT: // Tilt
+				case rob_fct_tilt: // Tilt
 					break;
 				}
 				break;
@@ -636,23 +660,23 @@ void txrob_main(int ticks, int menu)
 			case 3: // End
 				switch (_RobFunction)
 				{
-				case ROB_FUNCTION_CAP:	// Cap
+				case rob_fct_cap:	// Cap
 					break;
 
-				case ROB_FUNCTION_WASH:	// Wet wipe
+				case rob_fct_wetwipe:	// Wet wipe
 					//loc_new_cmd = CMD_CLN_EMPTY_WASTE; 
 					break;
 	
-				case ROB_FUNCTION_VACUUM:	// Vacuum -> drive back
+				case rob_fct_vacuum:	// Vacuum -> drive back
 					Fpga.par->output |= PUMP_WASTE_VAC; // Waste ON
 					loc_new_cmd = CMD_CLN_SHIFT_MOV; 
 					loc_move_pos = 4; // final end at start pos
 					break;
 				
-				case ROB_FUNCTION_WIPE: // Wipe
+				case rob_fct_wipe: // Wipe
 					break;
 					
-				case ROB_FUNCTION_TILT: // Tilt
+				case rob_fct_tilt: // Tilt
 					break;
 				}
 				break;
@@ -747,7 +771,7 @@ static void _txrob_display_status(void)
 	term_printf("\n");
 	term_printf("\n");
 	
-	term_printf("FLO Robot Advanced mechref ---------------------------------\n");
+	term_printf("TX80x Robot Advanced mechref ---------------------------------\n");
 	term_printf("moving:              %d		cmd: %08x\n", RX_StepperStatus.robinfo.moving, _CmdRunning);
 	term_printf("move ok:             %d\n", RX_StepperStatus.robinfo.move_ok);
 	term_printf("Sensor Ref Rotation: %d\n", RX_StepperStatus.robinfo.z_in_ref);
@@ -893,7 +917,7 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		_CmdRunning = msgId;
 		// reset var
 		_LastRobPosCmd = 0;
-		_RobFunction = ROB_FUNCTION_CAP;
+		_RobFunction = rob_fct_cap;
 		_TimeCnt = 0;
 		_NewCmdPos = 0;
 		_NewCmd = FALSE;
@@ -902,7 +926,6 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		break;
 
 	case CMD_CLN_REFERENCE:			strcpy(_CmdName, "CMD_CLN_REFERENCE");
-		if (socket!=INVALID_SOCKET) _AfterRefCmd=0;
 		if (_CmdRunning && _CmdRunning != CMD_FLUID_CTRL_MODE){ txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_STOP, NULL); _NewCmd = CMD_CLN_REFERENCE; break; }
 		motor_reset(MOTOR_ROT); // to recover from move count missalignment
 		motor_reset(MOTOR_SHIFT); // to recover from move count missalignment
@@ -911,7 +934,8 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		_CmdRunning = msgId;
 		// reset var
 		_LastRobPosCmd = 0;
-		_RobFunction = ROB_FUNCTION_CAP;
+		_ref_done_1 = FALSE;
+		_RobFunction = rob_fct_cap;
 		_TimeCnt = 0;
 		_NewCmdPos = 0;
 		_NewCmd = FALSE;
@@ -956,16 +980,15 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 	case CMD_CLN_MOVE_POS:		strcpy(_CmdName, "CMD_CLN_MOVE_POS");
 		if (!_CmdRunning || _CmdRunning == CMD_CLN_SHIFT_LEFT)
 		{
-			pos = *((INT32*)pdata);
 			if (!RX_StepperStatus.robinfo.ref_done)
 			{ 
-				_AfterRefCmd = CMD_CLN_MOVE_POS;
-				_AfterRefPar = pos;
-				txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_REFERENCE, NULL);
+				Error(ERR_CONT,0, "Robot not refenenced, cmd=0x%08x", msgId);
 				break;
 			}
-			if (pos < 0) {Error(LOG, 0, "CLN: Command %s: negative position not allowed", _CmdName); break;}
-			if (pos >= POS_ROT_CNT) {Error(LOG, 0, "CLN: Command %s: too high pos", _CmdName); break;}
+			pos = *((INT32*)pdata);
+			if (pos < rob_fct_cap) {Error(LOG, 0, "CLN: Command %s: negative position not allowed", _CmdName); break;}
+			if (pos > rob_fct_tilt) {Error(LOG, 0, "CLN: Command %s: too high pos", _CmdName); break;}
+
 			if (POS_SHIFT[1] < motor_get_step(MOTOR_SHIFT) && RX_StepperStatus.robinfo.moving == FALSE)
 			{
 				int left_pos = 1;
@@ -983,7 +1006,6 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 				
 				sok_send_2(&socket, REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);
 				motors_move_to_step(MOTOR_ROT_BITS, &_ParRotDrive, pos);
-				
 			}		
 		}
 		break;
@@ -991,22 +1013,21 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 	case CMD_CLN_SHIFT_MOV:		strcpy(_CmdName, "CMD_CLN_SHIFT_MOV");
 		if (!_CmdRunning || _CmdRunning == CMD_FLUID_CTRL_MODE)
 		{
-			pos = *((INT32*)pdata);
-			if (!RX_StepperStatus.robinfo.ref_done)
+			if (!RX_StepperStatus.robinfo.ref_done && !_ref_done_1)
 			{ 
-				_AfterRefCmd = CMD_CLN_MOVE_POS;
-				_AfterRefPar = pos;
-				txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_REFERENCE, NULL); break;
+				Error(ERR_CONT,0, "Robot not refenenced, cmd=0x%08x", msgId);
 				break;
 			}
+			_ref_done_1 = FALSE;
+			pos = *((INT32*)pdata);
 			if (pos < 0) {Error(LOG, 0, "CLN: Command %s: negative position not allowed", _CmdName); break;}
 			if (pos >= POS_SHIFT_CNT) {Error(LOG, 0, "CLN: Command %s: too high pos", _CmdName); break;}
-			if (_RobFunction==ROB_FUNCTION_CAP && pos != 1) {Error(LOG, 0, "CLN: Command %s: cancle shift, robot in capping", _CmdName); break;}
+			if (_RobFunction == rob_fct_cap && pos != 1) {Error(LOG, 0, "CLN: Command %s: cancle shift, robot in capping", _CmdName); break;}
 			_CmdRunning = msgId;
 			RX_StepperStatus.robinfo.moving = TRUE;
 			_LastRobPosCmd = pos;
 			
-			if (pos == 3 && _RobFunction == ROB_FUNCTION_WASH)
+			if (pos == 3 && _RobFunction == rob_fct_wetwipe)
 			{
 				pos = POS_SHIFT[pos];
 				_ParShiftWet.speed = _SpeedShift;
@@ -1031,11 +1052,15 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 	case CMD_CLN_SHIFT_LEFT:	strcpy(_CmdName, "CMD_CLN_SHIFT_LEFT");
 		if (!_CmdRunning || _CmdRunning == CMD_FLUID_CTRL_MODE)
 		{
-			if (!RX_StepperStatus.robinfo.ref_done){ Error(LOG, 0, "CLN: Command %s: missing ref_done", _CmdName); break;}
+			if (!RX_StepperStatus.robinfo.ref_done)
+			{ 
+				Error(ERR_CONT,0, "Robot not refenenced, cmd=0x%08x", msgId);
+				break;
+			}
 			pos = *((INT32*)pdata);
 			if (pos < 0) {Error(LOG, 0, "CLN: Command %s: negative position not allowed", _CmdName); break;}
 			if (pos >= POS_SHIFT_CNT) {Error(LOG, 0, "CLN: Command %s: too high pos", _CmdName); break;}
-			if (_RobFunction == ROB_FUNCTION_CAP && pos != 1) {Error(LOG, 0, "CLN: Command %s: cancle shift, robot in capping", _CmdName); break;}
+			if (_RobFunction == rob_fct_cap && pos != 1) {Error(LOG, 0, "CLN: Command %s: cancle shift, robot in capping", _CmdName); break;}
 			_CmdRunning = msgId;
 			RX_StepperStatus.robinfo.moving = TRUE;
 			pos = POS_SHIFT[pos];
@@ -1066,7 +1091,11 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 	case CMD_CLN_TILT_CAP :		strcpy(_CmdName, "CMD_CLN_TILT_CAP");
 		if (!_CmdRunning || _CmdRunning == CMD_FLUID_CTRL_MODE)
 		{
-			if (!RX_StepperStatus.robinfo.ref_done){ Error(LOG, 0, "CLN: Command %s: missing ref_done", _CmdName); break;}
+			if (!RX_StepperStatus.robinfo.ref_done)
+			{ 
+				Error(ERR_CONT,0, "Robot not refenenced, cmd=0x%08x", msgId);
+				break;
+			}
 			_CmdRunning = msgId;
 			RX_StepperStatus.robinfo.moving = TRUE;
 			motors_move_to_step(MOTOR_ROT_BITS, &_ParRotDrive, POS_ROT_TILT);

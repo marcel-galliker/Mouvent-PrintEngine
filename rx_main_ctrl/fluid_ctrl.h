@@ -28,6 +28,7 @@ void fluid_send_pressure    (int no, INT32 pressure);
 void fluid_send_tara        (int no);
 void fluid_send_calib		(SValue *pmsg);
 
+
 EnFluidCtrlMode fluid_get_ctrlMode(int no);
 int  fluid_in_ctrlMode		(int no, EnFluidCtrlMode ctrlMode);
 void fluid_set_head_state	(int no, SHeadStat *pstat);
@@ -37,3 +38,5 @@ INT32 fluid_get_pumpSpeed	   (int no);
 INT32 fluid_get_pumpFeedback   (int no);
 INT32 fluid_get_amcTemp        (int no);
 INT32 fluid_get_error          (int no);
+
+void fluid_control_robot(void);

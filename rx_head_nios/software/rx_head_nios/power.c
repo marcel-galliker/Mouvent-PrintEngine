@@ -95,13 +95,13 @@ void power_tick_100ms(void)
 			|| pRX_Status->error.arm_timeout
 			;
 
-	/*
 	if ((pRX_Status->powerState < power_sd) && (error || !pRX_Config->cmd.firepulse_on))
 	{
-		if (critical_error) pRX_Status->powerState = power_sd_fpga
-		else			    pRX_Status->powerState = power_sd;
+		if (critical_error && !pRX_Config->cmd.debug)
+			pRX_Status->powerState = power_sd_fpga;
+		else
+			pRX_Status->powerState = power_sd;
 	}
-	*/
 
 	IOWR_ALTERA_AVALON_PIO_DATA(PIO_ALL_ON_EN_BASE,pRX_Status->powerState  == power_all_on
 							 	 	 	 	 	 || pRX_Status->powerState == power_pre_all_on
@@ -176,7 +176,7 @@ void power_tick_100ms(void)
 								break;
 
     // --- SHUT-DOWN ------------------------------------------------------
-	case power_sd_fpga:		//	_stop_fpga();	// does not allow debugging with breakpoints!!!
+	case power_sd_fpga:			_stop_fpga();	// does not allow debugging with breakpoints!!!
 								pRX_Status->powerState = power_sd;
 								break;
 

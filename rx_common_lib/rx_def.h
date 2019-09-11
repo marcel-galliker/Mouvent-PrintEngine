@@ -1183,10 +1183,12 @@ typedef struct SRobotOffsets
 	
 typedef enum ERobotFunctions
 {
-	rob_fct0,	// 00
-	rob_fct1,	// 01
-	rob_fct2,	// 02
-	rob_fct3,	// 03
+	rob_fct_cap,			// Capping
+	rob_fct_wetwipe,		// Wetwipe
+	rob_fct_vacuum,			// Vacuum
+	rob_fct_wipe,			// Wiping
+	rob_fct_vacuum_change,	// Vaccum change		
+	rob_fct_tilt,			// Tilt for Capping
 } ERobotFunctions;
 	
 //--- Stepper Board --------------------
@@ -1202,16 +1204,20 @@ typedef struct SStepperCfg
 	INT32			boardNo;
 			#define		step_lift	0
 			#define		step_clean	1
-	INT32			ref_height;		// distance "Belt" to reference position in µm: "0" is at "Belt" Level
-	INT32			print_height;	// in µm
-	INT32			wipe_height;	// in µm
-	INT32			cap_height;		// in µm
+	INT32			ref_height;			// distance "Belt" to reference position in µm: "0" is at "Belt" Level
+	INT32			ref_height_down;	// height of reference tool , to adjust the motors
+	INT32			print_height;		// in µm
+	INT32			wipe_height;		// in µm
+	INT32			cap_height;			// in µm
 	INT32			cap_pos;
 	INT32			adjust_pos;
 	INT32			use_printhead_en;	// if true use PRINTHEAD_EN to allow head going down
 	INT32			material_thickness;
 	
 	SRobotOffsets	robot[4];
+	
+	INT32			motor_correct0[4];		// reference correction value for the motor 0 -> used to bring the steppermotors completly in level
+	INT32			motor_correct1[4];		// reference correction value for the motor 1 -> used to bring the steppermotors completly in level
 } SStepperCfg;
 	
 typedef struct SStepperMotorTest

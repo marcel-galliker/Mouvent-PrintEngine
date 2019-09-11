@@ -237,10 +237,10 @@ start:
 		cmd.hdr.msgLen	= sizeof(cmd);
 		sprintf(cmd.name, "%s%s", dstPath, par->process);
 
-		#ifndef DEBUG
+	//	#ifndef DEBUG
 			cmd.hdr.msgId	= CMD_RFS_KILL_PROCESS;
 			sok_send(&clientPar.socket, &cmd);
-		#endif
+	//	#endif
 
 		rx_sleep(100);
 

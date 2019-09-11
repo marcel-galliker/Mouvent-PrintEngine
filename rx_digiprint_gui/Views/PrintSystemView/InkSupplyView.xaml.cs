@@ -194,27 +194,11 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 }
 
                 TcpIp.SFluidCtrlCmd msg = new TcpIp.SFluidCtrlCmd();
-                if (all)
-                {
-                    int i;
-                    for (i=0; i<RxGlobals.InkSupply.List.Count; i++)
-                    {
-                        if (RxGlobals.InkSupply.List[i].InkType!=null)
-                        {
-                            msg.no       = i;
-                            msg.ctrlMode = cmd;
+                if (all) msg.no = -1;
+                else     msg.no = supply.No-1;
+                msg.ctrlMode = cmd;
 
-                            RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_CTRL_MODE, ref msg);
-                        }
-                    }
-                }
-                else
-                {
-                    msg.no       = supply.No-1;
-                    msg.ctrlMode = cmd;
-
-                    RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_CTRL_MODE, ref msg);
-                }
+                RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_CTRL_MODE, ref msg);
             }
             CmdPopup.IsOpen     = false;
             FlushPopup.IsOpen   = false;

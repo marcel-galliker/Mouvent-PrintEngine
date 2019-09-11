@@ -173,6 +173,7 @@ namespace RX_DigiPrint.Services
 	    ctrl_wipe_step3		= 0x133,  
 	    ctrl_wipe_step4		= 0x134,  
 	    ctrl_wipe_step5		= 0x135,  
+	    ctrl_wipe_step6		= 0x136,  
 
         ctrl_cap			= 0x140,
     	ctrl_cap_step1		= 0x141,
@@ -180,6 +181,7 @@ namespace RX_DigiPrint.Services
     	ctrl_cap_step3		= 0x143,
     	ctrl_cap_step4		= 0x144,	
     	ctrl_cap_step5		= 0x145,	
+    	ctrl_cap_step6		= 0x146,	
 
         ctrl_vacuum			= 0x150,
 	    ctrl_vacuum_step1	= 0x151,
@@ -192,6 +194,7 @@ namespace RX_DigiPrint.Services
 	    ctrl_vacuum_step8	= 0x158,
 	    ctrl_vacuum_step9	= 0x159,
 	    ctrl_vacuum_step10	= 0x15a,
+	    ctrl_vacuum_step11	= 0x15b,
 
         ctrl_wetwipe		= 0x160,  
         ctrl_wetwipe_step1	= 0x161,  
@@ -199,6 +202,7 @@ namespace RX_DigiPrint.Services
         ctrl_wetwipe_step3	= 0x163,  
         ctrl_wetwipe_step4	= 0x164,  
         ctrl_wetwipe_step5	= 0x165,  
+        ctrl_wetwipe_step6	= 0x166,  
 
 	    ctrl_fill	    =0x200,	//	0x200:
 	    ctrl_fill_step1,		//	0x201:
@@ -826,6 +830,7 @@ namespace RX_DigiPrint.Services
         	public EPrinterType	printerType;    // used in background only
 	        public Int32		boardNo;        // used in background only
 	        public Int32		ref_height;
+	        public Int32		ref_height_down;
 	        public Int32		print_height;
 	        public Int32		wipe_height;
 	        public Int32		cap_height;
@@ -836,6 +841,12 @@ namespace RX_DigiPrint.Services
 
             [MarshalAs(UnmanagedType.ByValArray, SizeConst =4)]
             public SRobotOffsets[] robot;
+
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst =4)]
+            public Int32[]		motor_correct0;		// reference correction value for the motor 0 -> used to bring the steppermotors completly in level
+
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst =4)]
+	        public Int32[]		motor_correct1;		// reference correction value for the motor 1 -> used to bring the steppermotors completly in level
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]

@@ -22,6 +22,7 @@
 #include "args.h"
 #include "plc_ctrl.h"
 #include "enc_ctrl.h"
+#include "fluid_ctrl.h"
 #include "gui_svr.h"
 #include "step_std.h"
 #include "step_tx.h"
@@ -152,6 +153,7 @@ static int _step_handle_msg(RX_SOCKET socket, void *msg, int len, struct sockadd
 {
 	SMsgHdr			*phdr = (SMsgHdr*)msg;
 	int no;
+	int ret;
 	
 	for(no=0; no<SIZEOF(_step_Socket); no++)
 	{
@@ -169,14 +171,15 @@ static int _step_handle_msg(RX_SOCKET socket, void *msg, int len, struct sockadd
 				
 				case REP_TT_STATUS:	switch(_StepperType)
 									{
-									case STEPPER_CLEAF: return stepc_handle_status		(no, (SStepperStat*)&phdr[1]);
-									case STEPPER_TX:	return steptx_handle_status		(no, (SStepperStat*)&phdr[1]);
-									case STEPPER_LB:	return steplb_handle_status		(no, (SStepperStat*)&phdr[1]);
-									case STEPPER_DP:	return stepdp_handle_status		(no, (SStepperStat*)&phdr[1]);
-									case STEPPER_TEST:	return steptest_handle_status	(no, (SStepperStat*)&phdr[1]);
-									default:			return steps_handle_status		(	 (SStepperStat*)&phdr[1]);
+									case STEPPER_CLEAF: ret = stepc_handle_status		(no, (SStepperStat*)&phdr[1]); break;
+									case STEPPER_TX:	ret = steptx_handle_status		(no, (SStepperStat*)&phdr[1]); break;
+									case STEPPER_LB:	ret = steplb_handle_status		(no, (SStepperStat*)&phdr[1]); break;
+									case STEPPER_DP:	ret = stepdp_handle_status		(no, (SStepperStat*)&phdr[1]); break;
+									case STEPPER_TEST:	ret = steptest_handle_status	(no, (SStepperStat*)&phdr[1]); break;
+									default:			ret = steps_handle_status		(	 (SStepperStat*)&phdr[1]); break;
 									}
-									break;
+									fluid_control_robot();
+									return ret;
 			}
 		}
 	}
@@ -315,21 +318,21 @@ void step_rob_do_reference(void)
 }
 
 //--- step_rob_to_wipe_pos ----------------------------------
-void step_rob_to_wipe_pos(EnFluidCtrlMode mode)
+void step_rob_to_wipe_pos(ERobotFunctions rob_function)
 {
 	switch(_StepperType)
 	{
-	case STEPPER_TX:	steptx_rob_to_wipe_pos(mode); break;
+	case STEPPER_TX:	steptx_rob_to_wipe_pos(rob_function); break;
 	default:			break;
 	}	
 }
 
 //--- step_rob_in_wipe_pos ----------------------------------
-int step_rob_in_wipe_pos(EnFluidCtrlMode mode)
+int step_rob_in_wipe_pos(ERobotFunctions rob_function)
 {
 	switch(_StepperType)
 	{
-	case STEPPER_TX:	return steptx_rob_in_wipe_pos(mode);
+	case STEPPER_TX:	return steptx_rob_in_wipe_pos(rob_function);
 	default:			break;
 	}
 	return FALSE;

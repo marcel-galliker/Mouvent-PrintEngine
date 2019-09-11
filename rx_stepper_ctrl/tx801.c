@@ -95,7 +95,7 @@ void tx801_init(void)
 	*/
 	_ParRef.speed		= 10000;
 	_ParRef.accel		= 5000;
-	_ParRef.current		= 153.0;
+	_ParRef.current		= 154.0;
 	_ParRef.stop_mux	= 0;
 	_ParRef.dis_mux_in	= 0;
 	_ParRef.stop_in		= ESTOP_UNUSED;
@@ -166,11 +166,11 @@ void tx801_main(int ticks, int menu)
 
 	if (RX_StepperStatus.info.moving)
 	{
-		RX_StepperStatus.info.z_in_ref   = FALSE;
-		RX_StepperStatus.info.z_in_print = FALSE;
-		RX_StepperStatus.info.z_in_cap   = FALSE;
-		RX_StepperStatus.robinfo.z_in_wipe = FALSE;
-		RX_StepperStatus.robinfo.z_in_vacuum = FALSE;
+		RX_StepperStatus.info.z_in_ref		  = FALSE;
+		RX_StepperStatus.info.z_in_print	  = FALSE;
+		RX_StepperStatus.info.z_in_cap		  = FALSE;
+		RX_StepperStatus.robinfo.z_in_wipe	  = FALSE;
+		RX_StepperStatus.robinfo.z_in_vacuum  = FALSE;
 		RX_StepperStatus.robinfo.z_in_wetwipe = FALSE;
 	}
 	if (_CmdRunning && motors_move_done(MOTOR_Z_BITS)) 
@@ -289,10 +289,14 @@ static void _tx801_display_status(void)
 	term_printf("moving:         %d		cmd: %08x\n",	RX_StepperStatus.info.moving, _CmdRunning);	
 	term_printf("Head UP Sensor: %d%d%d%d\n",	fpga_input(HEAD_UP_IN_0), fpga_input(HEAD_UP_IN_1), fpga_input(HEAD_UP_IN_2), fpga_input(HEAD_UP_IN_3));	
 	term_printf("reference done: %d\n",	RX_StepperStatus.info.ref_done);
-	term_printf("z in reference: %d\n",	RX_StepperStatus.info.z_in_ref);
-	term_printf("z in print:     %d\n",	RX_StepperStatus.info.z_in_print);
-	term_printf("z in capping:   %d\n",	RX_StepperStatus.info.z_in_cap);
-	term_printf("z position in micro:   %d\n", RX_StepperStatus.posZ);	
+	term_printf("z in reference: %d print:%d cap:%d wipe:%d wetwipe:%d vacc:%d\n",	
+				RX_StepperStatus.info.z_in_ref, 
+				RX_StepperStatus.info.z_in_print,
+				RX_StepperStatus.info.z_in_cap,
+				RX_StepperStatus.robinfo.z_in_wipe,
+				RX_StepperStatus.robinfo.z_in_wetwipe, 
+				RX_StepperStatus.robinfo.z_in_vacuum);
+	term_printf("z position in micron:   %d\n", RX_StepperStatus.posZ);	
 	term_printf("move toggle:    %d\n", RX_StepperStatus.info.move_tgl);
 	term_printf("\n");
 }
@@ -481,7 +485,7 @@ int  tx801_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 										_CmdRunning  = msgId;
 										RX_StepperStatus.info.moving = TRUE;
 										steps = _micron_2_steps(TX_REF_HEIGHT - _WetWipeHight);
-										motors_move_to_step(MOTOR_Z_BITS, &_ParZ_cap, steps);
+										motors_move_to_step(MOTOR_Z_BITS, &_ParZ_down, steps);
 									}
 									break;
 		
@@ -490,7 +494,7 @@ int  tx801_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 										_CmdRunning = msgId;
 										RX_StepperStatus.info.moving = TRUE;
 										steps = _micron_2_steps(TX_REF_HEIGHT - _WipeHight);
-										motors_move_to_step(MOTOR_Z_BITS, &_ParZ_cap, steps);
+										motors_move_to_step(MOTOR_Z_BITS, &_ParZ_down, steps);
 									}
 									break;
 		
@@ -499,7 +503,7 @@ int  tx801_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 										_CmdRunning = msgId;
 										RX_StepperStatus.info.moving = TRUE;
 										steps = _micron_2_steps(TX_REF_HEIGHT - _VacuumHight);
-										motors_move_to_step(MOTOR_Z_BITS, &_ParZ_cap, steps);
+										motors_move_to_step(MOTOR_Z_BITS, &_ParZ_down, steps);
 									}
 									break;
 	
