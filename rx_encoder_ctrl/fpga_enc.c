@@ -132,6 +132,8 @@ static UINT32	_PM_Cnt;
 static INT32	_Window;
 static INT32	_Ignore;
 	
+static FILE	*_LogFile = NULL;
+
 //--- prototypes -------------------------------------------
 static int  _fpga_running(void);
 static void _fpga_display_status_test(void);
@@ -559,6 +561,12 @@ void fpga_enc_simu(int khz)
 		
 	TrPrintfL(TRUE, "fpga_enc_simu start: marks:%06d ok:%06d filtred=%06d missed=%06d dist=%06d pos=%06d\n", Fpga->stat.dig_in_cnt, Fpga->stat.encOut[0].PG_cnt, _PM_Filtered_Cnt, _PM_Missed_Cnt, Fpga->stat.encIn[0].digin_edge_dist, Fpga->stat.encOut[0].position);
 
+	if (RX_EncoderCfg.printerType==printer_undef)
+	{
+		Fpga->cfg.pg[0].enc_start_pos_fwd  =   10*1000;
+		Fpga->cfg.pg[0].pos_pg_fwd		   =   10*1000;	 
+	}
+		
 	if		(khz<1)  freq = 0;
 	else if (khz==1) freq = 0xffffffff;
 	else		 	 freq = 50000.0 * 8.0 / khz;	// 8 Subpulses!
@@ -573,6 +581,7 @@ void fpga_enc_simu(int khz)
 		Fpga->cfg.encOut[outNo].backlash		= TRUE;
 		Fpga->cfg.encOut[outNo].scanning		= FALSE;				
 	}
+	
 	TrPrintfL(TRUE, "fpga_enc_simu end: marks:%06d ok:%06d filtred=%06d missed=%06d dist=%06d pos=%06d\n", Fpga->stat.dig_in_cnt, Fpga->stat.encOut[0].PG_cnt, _PM_Filtered_Cnt, _PM_Missed_Cnt, Fpga->stat.encIn[0].digin_edge_dist, Fpga->stat.encOut[0].position);
 }
 
@@ -1044,6 +1053,16 @@ static void  _pg_ctrl(void)
 		//--- trace PrintMark ----------------------------
 		if((Fpga->stat.dig_in_cnt&0xff) != (_PM_Cnt&0xff))
 		{
+			{ //---  LOG -----------------------------------------
+				if (_PM_Cnt==0)
+				{
+					if (_LogFile) fclose(_LogFile);
+					_LogFile  = fopen(PATH_TEMP "markreader.csv", "w");
+					fprintf(_LogFile, "pos;dist;freq\n");
+				}
+				fprintf(_LogFile, "%d;%d;%d\n", Fpga->stat.encOut[0].position, Fpga->stat.encIn[0].digin_edge_dist, (int)(Fpga->stat.encOut[0].speed*23/1000));
+				fflush(_LogFile);				
+			}
 			TrPrintfL(TRUE, "PrintMark[%d] ok:%06d filtred=%06d missed=%06d dist=%06d pos=%06d\n", _PM_Cnt, RX_EncoderStatus.PG_cnt, _PM_Filtered_Cnt, _PM_Missed_Cnt, Fpga->stat.encIn[0].digin_edge_dist, Fpga->stat.encOut[0].position);
 			_PM_Cnt++;
 		}

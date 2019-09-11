@@ -77,7 +77,7 @@ void main_menu()
 			
 		case 'h':	memset(&cfg, 0, sizeof(cfg));
 					cfg.incPerMeter = 1000000;
-					fpga_enc_config(0, &cfg, FALSE);	
+					fpga_enc_config(0, &cfg, FALSE);
 					fpga_enc_simu(atoi(&str[1]));
 					break;
 			
@@ -127,7 +127,8 @@ void main_menu_test()
 	{
 		switch (str[0])
 		{
-		case 'h':	fpga_enc_config(0, &cfg, FALSE);	
+		case 'h':	fpga_enc_config(0, &cfg, FALSE);
+					
 					fpga_enc_simu(atoi(&str[1]));
 					break;
 		case 'r':	fpga_enc_config_test();		break;

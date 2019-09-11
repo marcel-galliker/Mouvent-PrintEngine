@@ -197,6 +197,7 @@ typedef enum EnFluidCtrlMode
 	ctrl_wipe_step3		= 0x133,  
 	ctrl_wipe_step4		= 0x134,  
 	ctrl_wipe_step5		= 0x135,  
+	ctrl_wipe_step6		= 0x136,  
 	
 	ctrl_cap			= 0x140,
 	ctrl_cap_step1		= 0x141,
@@ -216,6 +217,7 @@ typedef enum EnFluidCtrlMode
 	ctrl_vacuum_step8	= 0x158,
 	ctrl_vacuum_step9	= 0x159,
 	ctrl_vacuum_step10	= 0x15a,
+	ctrl_vacuum_step11	= 0x15b,
 	
 	ctrl_wetwipe		= 0x160,  
 	ctrl_wetwipe_step1	= 0x161,  
@@ -223,6 +225,7 @@ typedef enum EnFluidCtrlMode
 	ctrl_wetwipe_step3	= 0x163,  
 	ctrl_wetwipe_step4	= 0x164,  
 	ctrl_wetwipe_step5	= 0x165,  
+	ctrl_wetwipe_step6	= 0x166,  
 
     ctrl_fill = 0x200, //	0x200:
     ctrl_fill_step1,   //	0x201:

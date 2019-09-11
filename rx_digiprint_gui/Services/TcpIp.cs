@@ -124,6 +124,7 @@ namespace RX_DigiPrint.Services
         grid,                   // 05
         encoder,                // 06
         scanning,               // 07
+        fullAlignment,          // 08
     };
 
     public enum EFluidCtrlMode : int

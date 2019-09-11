@@ -106,7 +106,10 @@ void main_tick_1000ms(void) {
 					pRX_Status->cond[condNo].info.connected = FALSE;
 					pRX_Status->cond[condNo].error |= COND_ERR_connection_lost;
 				}
-				pRX_Status->error.arm_timeout = (_Cond[condNo].arm_alive == pRX_Config->cond[condNo].alive);
+				if (pRX_Config->cmd.debug)
+					pRX_Status->error.arm_timeout = FALSE;
+				else
+					pRX_Status->error.arm_timeout = (!pRX_Config->cmd.debug) && (_Cond[condNo].arm_alive == pRX_Config->cond[condNo].alive);
 				_Cond[condNo].arm_alive = pRX_Config->cond[condNo].alive;
 			}
 		}

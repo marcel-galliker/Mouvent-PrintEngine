@@ -17,7 +17,7 @@ namespace RX_DigiPrint.Models.Enums
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_undef,         "undef"         ));
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_error,         "ERROR"         ));
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_off,           "OFF"           ));
-                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_shutdown,      "Shutdown"));
+                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_shutdown,      "Shutdown"      ));
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_warmup,        "Warm Up"       ));
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_readyToPrint,  "Ready To Print"));
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_print,         "Print"         ));
@@ -60,13 +60,13 @@ namespace RX_DigiPrint.Models.Enums
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_wipe_step5,    "Wipe /5"       ));
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_wipe_step6,    "Wipe /6"       ));
 
-                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_wetwipe,       "Clean"      ));
-                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_wetwipe_step1, "Clean /1"   ));
-                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_wetwipe_step2, "Clean /2"   ));
-                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_wetwipe_step3, "Clean /3"   ));
-                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_wetwipe_step4, "Clean /4"   ));
-                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_wetwipe_step5, "Clean /5"   ));
-                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_wetwipe_step6, "Clean /6"   ));
+                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_wetwipe,       "Clean"         ));
+                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_wetwipe_step1, "Clean /1"      ));
+                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_wetwipe_step2, "Clean /2"      ));
+                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_wetwipe_step3, "Clean /3"      ));
+                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_wetwipe_step4, "Clean /4"      ));
+                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_wetwipe_step5, "Clean /5"      ));
+                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_wetwipe_step6, "Clean /6"      ));
 
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_cap,          "Cap"            ));
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_cap_step1,    "Cap /1"         ));
@@ -76,18 +76,18 @@ namespace RX_DigiPrint.Models.Enums
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_cap_step5,    "Cap /5"         ));
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_cap_step6,    "Cap /6"         ));
 
-                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_vacuum,       "Vac"         ));
-                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_vacuum_step1, "Vac /1"      ));
-                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_vacuum_step2, "Vac /2"      ));
-                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_vacuum_step3, "Vac /3"      ));
-                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_vacuum_step4, "Vac /4"      ));
-                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_vacuum_step5, "Vac /5"      ));
-                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_vacuum_step6, "Vac /6"      ));
-                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_vacuum_step7, "Vac /7"      ));
-                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_vacuum_step8, "Vac /8"      ));
-                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_vacuum_step9, "Vac /9"      ));
-                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_vacuum_step10,"Vac /10"    ));
-                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_vacuum_step11,"Vac /11"    ));
+                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_vacuum,       "Vac"            ));
+                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_vacuum_step1, "Vac /1"         ));
+                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_vacuum_step2, "Vac /2"         ));
+                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_vacuum_step3, "Vac /3"         ));
+                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_vacuum_step4, "Vac /4"         ));
+                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_vacuum_step5, "Vac /5"         ));
+                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_vacuum_step6, "Vac /6"         ));
+                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_vacuum_step7, "Vac /7"         ));
+                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_vacuum_step8, "Vac /8"         ));
+                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_vacuum_step9, "Vac /9"         ));
+                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_vacuum_step10,"Vac /10"        ));
+                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_vacuum_step11,"Vac /11"        ));
 
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_fill,          "Fill"          ));
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_fill_step1,    "Fill /1"       ));
@@ -112,8 +112,8 @@ namespace RX_DigiPrint.Models.Enums
 
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_test_watchdog, "Test WDG"      ));
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_test,          "Test"          ));
-                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_offset_cal,      "Cal Offset"));
-                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_offset_cal_done, "Cal Done"));
+                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_offset_cal,      "Cal Offset"  ));
+                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_offset_cal_done, "Cal Done"    ));
             }
         }
 

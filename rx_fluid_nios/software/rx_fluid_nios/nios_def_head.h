@@ -50,7 +50,7 @@ typedef union SNiosHeadCmd
 		UINT32	write_user_eeprom1:1;	// 	05:
 		UINT32	write_user_eeprom2:1;	// 	06:
 		UINT32	write_user_eeprom3:1;	// 	07:
-		UINT32	cmd_08:1;				// 	08:
+		UINT32	debug:1;				// 	08:
 		UINT32	cmd_09:1;				// 	09:
 		UINT32	cmd_10:1;				// 	10:
 		UINT32	cmd_11:1;				// 	11:
@@ -180,10 +180,11 @@ typedef enum
 	power_wait_all_on,	// 3
 	power_pre_all_on,	// 4	
 	power_all_on,		// 5	
-	power_sd,			// 6
-	power_sd_3v3,		// 7
-	power_sd_amp,		// 8
-	power_down			// 9	
+	power_sd_fpga,		// 6
+	power_sd,			// 7
+	power_sd_3v3,		// 8
+	power_sd_amp,		// 9
+	power_down			// 10	
 } EnPowerState;
 
 char *PowerStateStr(EnPowerState state);

@@ -289,7 +289,7 @@ static void _sample_wf(int head, SInkDefinition *pink, char *dots, int fpVoltage
 	fpga_enc_enable(FALSE);
 //	if (!strcmp(pink->fileName, _InkDef[head].fileName) && (subPulses==_MaxDropSize[head]) && (fpVoltage==_FpVoltage[head])) return
 	
-	if (fpVoltage && fpVoltage<30) ErrorFlag(WARN, &_FPWarning, 1<<head, 0, "Head[%d]: Firepulse Voltage=%d%, head not print", head, fpVoltage);
+	if (fpVoltage && fpVoltage<30) ErrorFlag(WARN, &_FPWarning, 1<<head, 0, "Head[%d]: Firepulse Voltage=%d%, head may not print", head, fpVoltage);
 		
 	memcpy(&_GreyLevel[head], pink->greyLevel, sizeof(_GreyLevel[head]));
 
