@@ -48,11 +48,13 @@ static int				_PrintDoneCnt;
 static int				_ActiveState;
 static char				_ActiveRipState[MAX_PATH];
 
+/*
 typedef struct 
 {
 	SPageId	id;
 	int		pd;	
 } SPdListItem;
+*/
 
 //--- prototypes -------------------------------------------------------------
 static int _find_item(int id, int *idx);

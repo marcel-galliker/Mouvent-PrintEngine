@@ -649,7 +649,7 @@ void fluid_control_robot(void)
 		case ctrl_wetwipe_step4:	if (step_lift_in_wipe_pos(ctrl_wetwipe))
 									{
 										step_rob_wipe_start(ctrl_wetwipe);
-										_RobotCtrlMod=ctrl_wetwipe_step5;
+										_RobotCtrlMode=ctrl_wetwipe_step5;
 									}
 									break;
 				
