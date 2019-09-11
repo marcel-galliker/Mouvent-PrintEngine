@@ -54,6 +54,7 @@ volatile uint32_t timer_second=0;
 
 int		_test_received_char =0;
 int		_test_received_msg  =0;
+int		_overcurrent		=0;
 
 /*****************************************************************************/
 /* Function prototype                                                        */
@@ -191,7 +192,7 @@ int32_t main(void)
 		RX_Status.gpio_state.heater_pg		= Gpio1pin_Get(GPIO1PIN_P11);
 		RX_Status.gpio_state.heater_flg		= Gpio1pin_Get(GPIO1PIN_P61);
                 		
-		if(RX_Status.gpio_state.u_24v_pg) 	RX_Status.error |= COND_ERR_power_24V;			
+//		if(RX_Status.gpio_state.u_24v_pg) 	RX_Status.error |= COND_ERR_power_24V;
 	}
 }
 
@@ -342,4 +343,9 @@ static void _tick__100ms(void)
 static void _tick_1000ms(void)
 {
 	pump_tick_1000ms();
+	
+	//--- check overcurrent ------------------
+	if(RX_Status.gpio_state.u_24v_pg) _overcurrent++;
+	else _overcurrent = 0;
+	if (_overcurrent>3) RX_Status.error |= COND_ERR_power_24V;
 }
