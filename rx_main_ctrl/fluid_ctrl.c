@@ -37,6 +37,7 @@ static int				_FluidThreadRunning=FALSE;
 static UINT32			_Flushed=0x00;
 static EnFluidCtrlMode	_FlushCtrlMode = ctrl_undef;
 static EnFluidCtrlMode  _PurgeCtrlMode = ctrl_undef;
+static int				_PurgeFluidNo=0;
 static int				_Scanning;
 static int				_Checking_Reference = FALSE;
 
@@ -530,7 +531,7 @@ static void _control(int fluidNo)
 												setup_fluid_system(PATH_USER FILENAME_FLUID_STATE, &_Flushed, WRITE);				
 											}
 
-											if (step_active(1)) 
+											if (step_active(1) && _PurgeFluidNo<0) 
 											{
 												if(_all_fluids_in_fluidCtrlMode(ctrl_purge_step4)) _send_ctrlMode(no, ctrl_wipe, TRUE);														
 											}
@@ -1008,6 +1009,8 @@ void fluid_send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 	{
 		for (int i=0; i<RX_Config.inkSupplyCnt; i++) _send_ctrlMode(i, ctrlMode, sendToHeads);					
 	}
+	if (ctrlMode==ctrl_purge_hard) _PurgeFluidNo=no;
+		
 	_FlushCtrlMode = ctrlMode;
 	_send_ctrlMode(no, ctrlMode, sendToHeads);
 }
@@ -1073,13 +1076,6 @@ void _send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 				else if (ctrlMode==ctrl_empty) cmd.ctrlMode = ctrl_off; 		
 
 				sok_send(&_FluidThreadPar[i/INK_PER_BOARD].socket, &cmd);
-				/*
-				if (ctrlMode==ctrl_purge_hard)
-				{
-					_Flushed &= (~0x01<<i);
-					setup_fluid_system(PATH_USER FILENAME_FLUID_STATE, &_Flushed, WRITE);				
-				}
-				*/
 				
 				//--- send mode to heads ---
 				if (sendToHeads)

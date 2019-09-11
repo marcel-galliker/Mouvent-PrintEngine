@@ -28,6 +28,7 @@ namespace RX_DigiPrint.Views.UserControls
         {
             TcpIp.SFluidCtrlCmd msg = new TcpIp.SFluidCtrlCmd(){no=-1, ctrlMode = EFluidCtrlMode.ctrl_flush_night};
             RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_CTRL_MODE, ref msg);
+            RxGlobals.RxInterface.SendCommand(TcpIp.CMD_ENCODER_UV_OFF);
             Close();
         }
  
@@ -36,6 +37,7 @@ namespace RX_DigiPrint.Views.UserControls
         {
             TcpIp.SFluidCtrlCmd msg = new TcpIp.SFluidCtrlCmd(){no=-1, ctrlMode = EFluidCtrlMode.ctrl_flush_weekend};
             RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_CTRL_MODE, ref msg);
+            RxGlobals.RxInterface.SendCommand(TcpIp.CMD_ENCODER_UV_OFF);
             Close();
         }
 
@@ -44,6 +46,7 @@ namespace RX_DigiPrint.Views.UserControls
         {
             TcpIp.SFluidCtrlCmd msg = new TcpIp.SFluidCtrlCmd(){no=-1, ctrlMode = EFluidCtrlMode.ctrl_flush_week};
             RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_CTRL_MODE, ref msg);
+            RxGlobals.RxInterface.SendCommand(TcpIp.CMD_ENCODER_UV_OFF);
             Close();
         }
 

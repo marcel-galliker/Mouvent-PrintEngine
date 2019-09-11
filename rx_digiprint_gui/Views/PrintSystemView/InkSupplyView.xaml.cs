@@ -138,10 +138,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 else MsgPopup.IsOpen=false;
             }
 
-            /*
             if (e.PropertyName.Equals("InkType")) 
                 FlushButton.DataContext = _InkSupply.InkType;
-            */
 
             /*
             if (e.PropertyName.Equals("Flushed"))
@@ -175,12 +173,10 @@ namespace RX_DigiPrint.Views.PrintSystemView
         }
 
         //--- Flush_Clicked -------------------------------------
-        /*
         private void Flush_Clicked(object sender, RoutedEventArgs e) 
         {
             FlushPopup.Open(FlushButton);
         }
-        */
 
         //--- _command --------------------
         private void _command(string name, EFluidCtrlMode cmd, bool all)
@@ -235,15 +231,16 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 _command(null, EFluidCtrlMode.ctrl_off, false); 
         }
 
-        private void ShutDown_Clicked   (object sender, RoutedEventArgs e) {_command(null,      EFluidCtrlMode.ctrl_off, false);          }
-        private void Check_Clicked      (object sender, RoutedEventArgs e) {_command(null,      EFluidCtrlMode.ctrl_check_step0, false);    }
-        private void Calibrate_Clicked  (object sender, RoutedEventArgs e) {_command(null,      EFluidCtrlMode.ctrl_cal_start, false);    }
-        private void Print_Clicked      (object sender, RoutedEventArgs e) {_command(null,      EFluidCtrlMode.ctrl_print, false);  }
-        private void Fill_Clicked       (object sender, RoutedEventArgs e) {_command(null,      EFluidCtrlMode.ctrl_fill, false);         }
-        private void Empty_Clicked      (object sender, RoutedEventArgs e) {_command("Empty",   EFluidCtrlMode.ctrl_empty, false);        }
-        private void Flush_Clicked_0    (object sender, RoutedEventArgs e) {_command("Flush",   EFluidCtrlMode.ctrl_flush_night, false);  }
-        private void Flush_Clicked_1    (object sender, RoutedEventArgs e) {_command("Flush",   EFluidCtrlMode.ctrl_flush_weekend, false);}
-        private void Flush_Clicked_2    (object sender, RoutedEventArgs e) {_command("Flush",   EFluidCtrlMode.ctrl_flush_week, false);   }
+        private void ShutDown_Clicked   (object sender, RoutedEventArgs e) {_command(null,      EFluidCtrlMode.ctrl_off,            false);}
+        private void Check_Clicked      (object sender, RoutedEventArgs e) {_command(null,      EFluidCtrlMode.ctrl_check_step0,    false);}
+        private void Calibrate_Clicked  (object sender, RoutedEventArgs e) {_command(null,      EFluidCtrlMode.ctrl_cal_start,      false);}
+        private void Print_Clicked      (object sender, RoutedEventArgs e) {_command(null,      EFluidCtrlMode.ctrl_print,          false);}
+        private void Fill_Clicked       (object sender, RoutedEventArgs e) {_command(null,      EFluidCtrlMode.ctrl_fill,           false);}
+        private void Empty_Clicked      (object sender, RoutedEventArgs e) {_command("Empty",   EFluidCtrlMode.ctrl_empty,          false);}
+        private void Flush_Clicked_0    (object sender, RoutedEventArgs e) {_command("Flush",   EFluidCtrlMode.ctrl_flush_night,    false);}
+        private void Flush_Clicked_1    (object sender, RoutedEventArgs e) {_command("Flush",   EFluidCtrlMode.ctrl_flush_weekend,  false);}
+        private void Flush_Clicked_2    (object sender, RoutedEventArgs e) {_command("Flush",   EFluidCtrlMode.ctrl_flush_week,     false);}
+
         private void Purge_Clicked      (object sender, RoutedEventArgs e) 
         {
             PurgeMsgBox box = new PurgeMsgBox("Purge "+_InkSupply.InkType.Name+" ?");
