@@ -24,17 +24,22 @@ namespace RX_DigiPrint.Models
         public void Upadte(TcpIp.SPrinterStatusMsg msg)
         {
             PrintState          = msg.status.printState;
-            TestMode            = msg.status.testMode;
             LogType             = (ELogType)msg.status.error;
-            AllInkSupliesOff    = msg.status.inkSupilesOff!=0;
-            AllInkSupliesOn     = msg.status.inkSupilesOn!=0;
-            Splicing            = msg.status.splicing!=0;
+
+			//--- flags ---
+            Cleaning            = (msg.status.flags & 0x0001)!=0;
+            DataReady           = (msg.status.flags & 0x0002)!=0;
+            Splicing            = (msg.status.flags & 0x0004)!=0;
+            AllInkSupliesOff    = (msg.status.flags & 0x0008)!=0;
+            AllInkSupliesOn     = (msg.status.flags & 0x0010)!=0;
+            TestMode            = (msg.status.flags & 0x0020)!=0;
+            ExternalData        = (msg.status.flags & 0x0040)!=0;
+            TxRobot             = (msg.status.flags & 0x0080)!=0;
+ 
             MaxSpeeds           = msg.status.maxSpeed;
             ActSpeed            = (double)msg.status.actSpeed;
             CounterAct          = msg.status.counterAct;
             CounterTotal        = msg.status.counterTotal;
-            DataReady           = (msg.status.dataReady!=0);
-            ExternalData        = (msg.status.externalData!=0);
         }
         
         //--- Printing ------------------------------------
@@ -58,7 +63,14 @@ namespace RX_DigiPrint.Models
                 }
             }
         }
-
+        //--- Property Cleaning ---------------------------------------
+        private bool _Cleaning;
+        public bool Cleaning
+        {
+            get { return _Cleaning; }
+            set { SetProperty(ref _Cleaning, value); }
+        }
+        
         //--- Property IsOff ---------------------------------------
         private bool _IsOff=true;
         public bool IsOff
@@ -92,8 +104,8 @@ namespace RX_DigiPrint.Models
         }        
 
         //--- Property TestMode ---------------------------------------
-        private UInt32 _TestMode;
-        public UInt32 TestMode
+        private bool _TestMode;
+        public bool TestMode
         {
             get { return _TestMode; }
             set { SetProperty(ref _TestMode, value); }
@@ -105,6 +117,14 @@ namespace RX_DigiPrint.Models
         {
             get { return _ExternalData; }
             set { SetProperty(ref _ExternalData, value); }
+        }
+
+        //--- Property TxRobot ---------------------------------------
+        private bool _TxRobot;
+        public bool TxRobot
+        {
+            get { return _TxRobot; }
+            set { SetProperty(ref _TxRobot, value); }
         }
         
         //--- Property MaxSpeed ---------------------------------------

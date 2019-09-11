@@ -280,7 +280,6 @@ int pc_print_next()
 }
 
 //--- _send_head_info -----------------------------------------------------------
-//--- _send_head_info -----------------------------------------------------------
 static void _send_head_info(void)
 {
 	int color, n, headNo, len, bad;
@@ -321,46 +320,6 @@ static void _send_head_info(void)
 	}
 	if (file) fclose(file);
 }
-/*
-static void _send_head_info(void)
-{
-	int color, n, headNo, len, bad;
-	char str[MAX_TEST_DATA_SIZE];
-	char time[64];
-	SHeadEEpromInfo *pinfo;
-	SHeadStat		*pstat;
-	FILE		*file=NULL;
-
-	if (_SetPrintPar) file = rx_fopen(PATH_TEMP "printheads.txt", "wb", _SH_DENYNO);
-	
-	rx_get_system_time_str(time, '-');
-
-	for (color=0, headNo=0; color<RX_Config.inkSupplyCnt; color++)
-	{
-		for (n=0; n<RX_Config.headsPerColor; n++, headNo++)
-		{
-			pstat = &RX_HBStatus[headNo/MAX_HEADS_BOARD].head[headNo%MAX_HEADS_BOARD];
-			pinfo = &pstat->eeprom;
-			len = 0;
-			len += sprintf(&str[len], "%s\n", RX_TestImage.testMessage);
-			len += sprintf(&str[len], "%s-%d                     %s\n", RX_ColorNameShort(color), n+1, time);
-			len += sprintf(&str[len], "s# %d-%02d                 w%d/%d\n", pinfo->serialNo/100, pinfo->serialNo%100, pinfo->week, 2000+pinfo->year);
-			len += sprintf(&str[len], "volt %d / straight %d / uniform %d\n",pinfo->voltage, pinfo->straightness, pinfo->uniformity);
-			len += sprintf(&str[len], "bad");
-			for (bad=0; bad<SIZEOF(pinfo->badJets) && pinfo->badJets[bad]; bad++)
-			{
-				len += sprintf(&str[len], "  %d", pinfo->badJets[bad]); 
-			}
-			len += sprintf(&str[len], "\n");
-			len += sprintf(&str[len], "Dots=%s / Men=%d.%d / Pump=%d.%d\n", RX_TestImage.dots, pstat->meniscus/10, abs(pstat->meniscus)%10, pstat->pumpFeedback/10, pstat->pumpFeedback%10);
-			len += sprintf(&str[len], "\n");
-			spool_send_test_data(headNo, str);
-			if (file) fprintf(file, "%s\n", str);
-		}
-	}
-	if (file) fclose(file);
-}
-*/
 
 //--- _load_test -----------------------------------------------------------------
 static void _load_test(void)

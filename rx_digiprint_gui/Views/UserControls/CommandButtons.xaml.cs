@@ -66,7 +66,7 @@ namespace RX_DigiPrint.Views.UserControls
             //--- checks ---------------------------------------------------------
             Button_Start.IsChecked  = RxGlobals.PrinterStatus.PrintState==EPrintState.ps_printing;
             Button_Stop.IsChecked   = RxGlobals.PrinterStatus.PrintState==EPrintState.ps_stopping;
-            Button_Test.IsChecked   = RxGlobals.PrinterStatus.TestMode != 0;
+            Button_Test.IsChecked   = RxGlobals.PrinterStatus.TestMode;
             
             //--- enable ------------------------------------------------------
             Button_Start.IsEnabled  = RxGlobals.Plc.IsReadyForProduction 

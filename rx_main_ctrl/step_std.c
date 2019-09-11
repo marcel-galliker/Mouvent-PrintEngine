@@ -23,7 +23,7 @@
 #include "gui_svr.h"
 #include "step_ctrl.h"
 
-static RX_SOCKET _step_socket=NULL;
+static RX_SOCKET _step_socket=INVALID_VALUE;
 static int		  _Curing;
 
 //--- steps_init ---------------------------------------------------

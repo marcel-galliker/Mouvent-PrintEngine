@@ -472,17 +472,30 @@ typedef struct SPrinterStatus
 {
 	EPrintState		printState;
 	UINT8			error;
-	UINT32			dataReady;
+
+	//--- flags --------------------------
+	union
+	{
+		struct
+		{
+		UINT32			cleaning:1;			// 0x0001
+		UINT32			dataReady:1;		// 0x0002
+		UINT32			splicing:1;			// 0x0004
+		UINT32			inkSupilesOff:1;	// 0x0008
+		UINT32			inkSupilesOn:1;		// 0x0010
+		UINT32			testMode:1;			// 0x0020
+		UINT32			externalData:1;		// 0x0040
+		UINT32			txRobot:1;			// 0x0080
+		};
+		UINT32 flags;		
+	};
+	//--- flags end -------------------------
+	
 	UINT32			sentCnt;
 	UINT32			transferredCnt;
 	UINT32			printGoCnt;
 	UINT32			printedCnt;
-	UINT32			testMode;
-	UINT8			inkSupilesOff;
-	UINT8			inkSupilesOn;	
-	UINT8			splicing;
 	UINT32			maxSpeed[MAX_DROP_SIZES];	// [m/min]
-	UINT32			externalData;
 	UINT32			actSpeed;
 	double			counterAct;
     double			counterTotal;

@@ -1,12 +1,7 @@
-﻿using Android.Content;
-using DigiPrint.Common;
+﻿using DigiPrint.Common;
 using DigiPrint.Models;
 using RX_DigiPrint.Services;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
 using Xamarin.Forms;
@@ -18,7 +13,7 @@ using static RX_DigiPrint.Services.RxBtDef;
 
 namespace DigiPrint.Pages
 {
-    [XamlCompilation(XamlCompilationOptions.Compile)]
+	[XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class BarcodePage : ContentPage
     {
         private bool                _Demo = false;

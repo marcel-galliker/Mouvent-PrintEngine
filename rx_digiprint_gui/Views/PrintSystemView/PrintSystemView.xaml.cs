@@ -19,6 +19,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
             InitializeComponent();
           //  DataContext = this;
             DataContext = _PrintSystem;
+            RobotButtons.DataContext = RxGlobals.PrinterStatus;
             ChillerError.DataContext = RxGlobals.Chiller;
             _PrintSystem.PropertyChanged += _PrintSystem_PropertyChanged;
             RxGlobals.PrinterStatus.PropertyChanged += PrinterStatusChanged;
@@ -67,12 +68,18 @@ namespace RX_DigiPrint.Views.PrintSystemView
                                                     StepperGrid.Visibility=Visibility.Collapsed;
                                                     break;
 
+                case EPrinterType.printer_TX801:
+                case EPrinterType.printer_TX802:
+                                                    StepperGridDP803.Visibility = Visibility.Collapsed;
+                                                    StepperGridCleaf.Visibility=Visibility.Collapsed;
+                                                    StepperGrid.Visibility=Visibility.Collapsed;
+                                                    break;            
+
                 default:                            StepperGridDP803.Visibility = Visibility.Collapsed;
                                                     StepperGridCleaf.Visibility=Visibility.Collapsed;
                                                     StepperGrid.Visibility=Visibility.Visible;
                                                     break;                               
                 }
-                RobotButtons.Visibility     = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX801 || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX802)? Visibility.Visible:Visibility.Collapsed;
             }            
         }
 
@@ -104,7 +111,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
         {
             TcpIp.SFluidCtrlCmd msg = new TcpIp.SFluidCtrlCmd();
             msg.no       = -1;
-            msg.ctrlMode = EFluidCtrlMode.ctrl_cap;
+            //msg.ctrlMode = EFluidCtrlMode.ctrl_cap;
+            msg.ctrlMode = ctrlMode;
             RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_CTRL_MODE, ref msg);
 
         }
@@ -122,15 +130,15 @@ namespace RX_DigiPrint.Views.PrintSystemView
         }
 
         //--- WetWipe_Clicked -------------------------------------------------
-        private void WetWipe_Clicked(object sender, RoutedEventArgs e)
+        private void Vacuum_Clicked(object sender, RoutedEventArgs e)
         {            
-            _SetCtrlMode(EFluidCtrlMode.ctrl_wetwipe);
+            _SetCtrlMode(EFluidCtrlMode.ctrl_vacuum);
         }
 
         //--- Wash_Clicked -------------------------------------------------
         private void Wash_Clicked(object sender, RoutedEventArgs e)
         {            
-            _SetCtrlMode(EFluidCtrlMode.ctrl_wash);
+            _SetCtrlMode(EFluidCtrlMode.ctrl_wetwipe);
         }
 
         //--- Purge_Clicked -------------------------------------------------

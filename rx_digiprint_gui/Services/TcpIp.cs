@@ -167,17 +167,38 @@ namespace RX_DigiPrint.Services
 	    ctrl_purge_step4,		//	0x113:
 
         ctrl_wipe           = 0x120, //  0x120   
-	    ctrl_wetwipe		= 0x121,  
 	    ctrl_wash			= 0x122,  
 	    ctrl_wipe_step1		= 0x131,  
 	    ctrl_wipe_step2		= 0x132,  
 	    ctrl_wipe_step3		= 0x133,  
+	    ctrl_wipe_step4		= 0x134,  
+	    ctrl_wipe_step5		= 0x135,  
 
         ctrl_cap			= 0x140,
     	ctrl_cap_step1		= 0x141,
     	ctrl_cap_step2		= 0x142,
     	ctrl_cap_step3		= 0x143,
     	ctrl_cap_step4		= 0x144,	
+    	ctrl_cap_step5		= 0x145,	
+
+        ctrl_vacuum			= 0x150,
+	    ctrl_vacuum_step1	= 0x151,
+	    ctrl_vacuum_step2	= 0x152,
+	    ctrl_vacuum_step3	= 0x153,
+	    ctrl_vacuum_step4	= 0x154,
+	    ctrl_vacuum_step5	= 0x155,
+	    ctrl_vacuum_step6	= 0x156,
+	    ctrl_vacuum_step7	= 0x157,
+	    ctrl_vacuum_step8	= 0x158,
+	    ctrl_vacuum_step9	= 0x159,
+	    ctrl_vacuum_step10	= 0x15a,
+
+        ctrl_wetwipe		= 0x160,  
+        ctrl_wetwipe_step1	= 0x161,  
+        ctrl_wetwipe_step2	= 0x162,  
+        ctrl_wetwipe_step3	= 0x163,  
+        ctrl_wetwipe_step4	= 0x164,  
+        ctrl_wetwipe_step5	= 0x165,  
 
 	    ctrl_fill	    =0x200,	//	0x200:
 	    ctrl_fill_step1,		//	0x201:
@@ -775,18 +796,15 @@ namespace RX_DigiPrint.Services
         {
             public EPrintState  printState;
             public byte         error;
-            public UInt32       dataReady;
+
+            public UInt32       flags;
+
             public UInt32       sentCnt;
             public UInt32       transferredCnt;
             public UInt32       printGoCnt;
             public UInt32       printedCnt;
-            public UInt32       testMode;
-            public byte		    inkSupilesOff;
-	        public byte		    inkSupilesOn;	
-            public byte         splicing;
             [MarshalAs(UnmanagedType.ByValArray, SizeConst =4)]
             public UInt32[]     maxSpeed;   // [m/min]
-	        public UInt32		externalData;
             public UInt32		actSpeed;
             public double       counterAct;
             public double       counterTotal;
