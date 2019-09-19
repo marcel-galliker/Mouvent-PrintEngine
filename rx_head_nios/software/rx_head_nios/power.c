@@ -41,7 +41,7 @@ static int _power_on_timer;
 static int  _power_test_v3_3(void);
 static void _power_amplifier(int on);
 static void _power_v3_3(int on);
-static void _stop_fpga(void);
+// static void _stop_fpga(void);
 
 static int  _power_all_off_test(void);
 static int  _power_amp_on_test(void);

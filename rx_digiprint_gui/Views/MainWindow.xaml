@@ -56,19 +56,25 @@
 
   <!--  <Grid DataContext="{StaticResource Windows1ViewModel}"> -->
     <Grid>
-            <Grid.Background>
+        <Grid.Background>
             <ImageBrush ImageSource="/RX_DigiPrint;component/Resources/Bitmaps/radex_bg.jpg" Stretch="Uniform" AlignmentX="Right"/>
         </Grid.Background>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="50"/>
         </Grid.RowDefinitions>
-        
+
+        <!--
         <Grid Grid.RowSpan="3" Margin="0,0,100,8" Height="30" HorizontalAlignment="Right" VerticalAlignment="Bottom">
             <Image Source="..\Resources\Bitmaps\Mouvent_Logo.png" />
-        <!--  <TextBlock Text="A Bobst Group company  " VerticalAlignment="Bottom" HorizontalAlignment="Right" FontSize="16"/> -->
+        //  <TextBlock Text="A Bobst Group company  " VerticalAlignment="Bottom" HorizontalAlignment="Right" FontSize="16"/> 
         </Grid>
-        
+        -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,100,8" HorizontalAlignment="Right">
+            <TextBlock x:Name="Version" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Bottom" Margin="4,0"/>
+            <Image Source="..\Resources\Bitmaps\Mouvent_Logo.png" />
+        </StackPanel>
+
         <!-- ROW 0: Status line _______________________________________________________________________________________-->
         <!--
         <Grid>

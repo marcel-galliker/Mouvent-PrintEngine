@@ -9,6 +9,7 @@ using RX_LabelComposer.External;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 // using System.Net.NetworkInformation;
@@ -81,6 +82,12 @@ namespace RX_DigiPrint.Views
                 if (tab.Name.Equals("TabEvents")) 
                     break;
                 tab.Visibility = Visibility.Collapsed;
+            }
+
+            {
+                FileVersionInfo info = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location);
+                // DateTime date=File.GetLastWriteTime(Assembly.GetExecutingAssembly().Location);
+                Version.Text = "V "+info.FileVersion;
             }
 
             RxGlobals.RxInterface.PropertyChanged += OnRxInterfacePropertyChanged;

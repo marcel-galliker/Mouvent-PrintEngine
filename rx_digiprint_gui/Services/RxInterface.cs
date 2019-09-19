@@ -207,7 +207,7 @@ namespace RX_DigiPrint.Services
 
                     //--- handling messages --------------------------------------------
                     bool msg_len=false;
-                    bool msg_split=false;
+                   // bool msg_split=false;
                     TcpIp.SInkSupplyStatMsg msg=new TcpIp.SInkSupplyStatMsg();
                     while (_Running && Connected)
                     {
@@ -240,11 +240,13 @@ namespace RX_DigiPrint.Services
                                     }
                                      * */
                                     size += read;
+                                    /*
                                     if (size<len && !msg_split)
                                     {
                                         RxGlobals.Events.AddItem(new LogItem(string.Format("RxInterface: IP Message was SPLIT")));
                                         msg_split = true;
                                     }
+                                    */
                                 }
                                 if (read <= 0) break;
                                 RxStructConvert.ToStruct(out msg, buffer);
