@@ -13,6 +13,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
+using System.Linq;
 
 namespace RX_DigiPrint.Views.Settings
 {
@@ -99,7 +100,7 @@ namespace RX_DigiPrint.Views.Settings
             DataContext = _Settings;
 
             FileVersionInfo info = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location);
-            DateTime date=File.GetLastWriteTime(Assembly.GetExecutingAssembly().Location);
+            DateTime date = GetBuildTime();
             Version.Text = info.FileVersion;
             Date.Text    = string.Format("{0} {1} {2}", date.Day, Rx.MonthName[date.Month], date.Year);
             LocalIpAddr.Text = RxGlobals.RxInterface.LocalAddress;
@@ -281,6 +282,30 @@ namespace RX_DigiPrint.Views.Settings
         {
             AboutDlg dlg = new AboutDlg(typeof(MainWindow).Assembly.GetName());
             dlg.ShowDialog();
+        }
+
+
+        private DateTime GetBuildTime()
+        {
+            AssemblyInformationalVersionAttribute infoVerAttr = GetAssemblyAttribute<AssemblyInformationalVersionAttribute>();
+            if (null != infoVerAttr)
+            {
+                string str = infoVerAttr.InformationalVersion.ToString().Replace("BuiltOn=", string.Empty);
+                string[] aStr = str.Split('.');
+                if (3 == aStr.Length)
+                {
+                    return new DateTime(Int32.Parse(aStr[2]), Int32.Parse(aStr[1]), Int32.Parse(aStr[0]));
+                }
+            }
+
+            return File.GetLastWriteTime(Assembly.GetExecutingAssembly().Location);
+
+        }
+
+        private T GetAssemblyAttribute<T>() where T : Attribute
+        {
+            Assembly ass = Assembly.GetExecutingAssembly();
+            return (T)ass.GetCustomAttributes(typeof(T), false).FirstOrDefault();
         }
    }
 }

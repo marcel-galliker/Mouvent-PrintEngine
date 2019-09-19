@@ -10,7 +10,7 @@ using System.Windows;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Mouvent AG")]
 [assembly: AssemblyProduct("RX-DigiPrint")]
-[assembly: AssemblyCopyright("Copyright © Mouvent 2017")]
+[assembly: AssemblyCopyright("Copyright © Mouvent 2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -48,7 +48,7 @@ using System.Windows;
 //
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
-// [assembly: AssemblyVersion("1.0.1.5755")]
+// [assembly: AssemblyVersion("1.0.1.5778")]
 
 //--- SVN enable keyword substitution ----------------
 // http://svnbook.red-bean.com/en/1.4/svn.advanced.props.special.keywords.html
@@ -57,8 +57,10 @@ using System.Windows;
 
 // "$Revision: 4007 $"
 
-[assembly: AssemblyVersion("1.0.1.5755")]
-[assembly: AssemblyFileVersion("1.0.1.5755")]
+[assembly: AssemblyVersion("1.0.1.5778")]
+[assembly: AssemblyFileVersion("1.0.1.5778")]
 
 //  http://www.radex-net.com/Downloads/RX-Gui/publish.htm
 //  G1EhZ$ETMf
+
+[assembly: AssemblyInformationalVersion("BuiltOn=19.9.2019")]

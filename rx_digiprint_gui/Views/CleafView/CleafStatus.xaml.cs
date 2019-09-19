@@ -1,4 +1,5 @@
-﻿using RX_DigiPrint.Models.Enums;
+﻿using RX_DigiPrint.Models;
+using RX_DigiPrint.Models.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,8 +26,8 @@ namespace RX_DigiPrint.Views.CleafView
         {
             InitializeComponent();
 
-             CB_MainState.ItemsSource = new EN_MachineStateList();
-             Panel.Update += CleafPrepare.Update;
+            CB_MainState.ItemsSource = new EN_MachineStateList();
+            Panel.Update += CleafPrepare.Update;
         }
     }
 }

@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ctime>
 
 static int  _ver_major=0;
 static int  _ver_minor=0;
@@ -109,6 +110,12 @@ int update(char *path, char *versionPath)
 				if (revision==_ver_revision) build++;
 				else						 build=1;
 				sprintf(ch, "AssemblyVersion(\"%d.%d.%d.%d\")]\n", _ver_major, _ver_minor, _ver_revision, build);
+			}
+			else if (ch = strstr(line, "AssemblyInformationalVersion"))
+			{
+				time_t t = time(0);
+				struct tm * timeStruct = localtime(&t);
+				sprintf(ch, "AssemblyInformationalVersion(\"BuiltOn=%d.%d.%d\")]\n", timeStruct->tm_mday, timeStruct->tm_mon+1, timeStruct->tm_year+1900);
 			}
 			fputs(line, dst);
 		}
