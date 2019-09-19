@@ -51,5 +51,6 @@ void  fpga_output(int no);
 void  fpga_uv_on(void);
 void  fpga_uv_off(void);
 
+void fpga_start_poslog(void);
 
 // void  fpga_reset_pos(void);

@@ -396,7 +396,9 @@ static void _do_export_log(RX_SOCKET socket, SLogReqMsg *pmsg)
 	xlBookSetKey(book, "Mouvent AG", "linux-e5d51b7c91a7a91d0905233d43ncj7m3"); 
 
 	rx_get_system_day_str(day, '-');
-	sprintf(filePath, "%sevents_%s_%s.xlsx", PATH_TEMP, RX_Hostname, day);
+	rx_remove_old_files(PATH_LOG, 7);
+//	sprintf(filePath, "%sevents_%s_%s.xlsx", PATH_TEMP, RX_Hostname, day);
+	sprintf(filePath, "%sevents_%s_%s.xlsx", PATH_LOG, RX_Hostname, day);
 	
 	format_std  = xlBookFormat(book, 1);
 	format_log  = format_std;

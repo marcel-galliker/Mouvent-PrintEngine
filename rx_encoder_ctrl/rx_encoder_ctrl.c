@@ -56,7 +56,8 @@ void main_menu()
 	term_printf("R: RESET encoder position\n");
 	term_printf("o<x>: Toggle Output <x> (0..2)\n");
 	term_printf("g<cnt> <dist>: PrintGo in x FP\n");	
-	term_printf("w: write CSV file with test data\n");
+	//term_printf("w: write CSV file with test data\n");
+	term_printf("l: start/stop log of positions for CSV file\n");
 	term_printf("c: show roll Correction\n");
 	term_printf("p: show parameter\n");
 	term_printf("x: exit\n");
@@ -98,6 +99,7 @@ void main_menu()
 			
 		case 'o':	fpga_output(atoi(&str[1]));	break;
 		case 'w':	test_write_csv("encoder_test.csv");	break;
+		case 'l':	fpga_start_poslog(); break;
 		case 'x': _AppRunning=FALSE;	break;
 		default:	tw8_menu_cmd(str);
 		}

@@ -401,7 +401,7 @@ int rx_remove_old_files(const char *searchPath, int days)
 	UINT32			isDir;
 	int				copy;
 	struct timeval  now;
-
+	
 	gettimeofday(&now, NULL);
 
 	TrPrintfL(TRUE, "rx_remove_old_files(>>%s<<, %d days)\n", searchPath, days);
@@ -414,7 +414,7 @@ int rx_remove_old_files(const char *searchPath, int days)
 		{
 			rx_remove_old_files(path, days);
 		}
-		if (!isDir && ((now.tv_sec-fileTime) > (24*60*60)*days))
+		if (!isDir && (now.tv_sec>fileTime) &&  ((now.tv_sec-fileTime) > (24*60*60)*days))
 		{
 			TrPrintfL(TRUE, "remove >>%s<<\n", path);
 			remove(path);		

@@ -62,13 +62,14 @@ static int		_LastVentValue[6];
 static int		_VentErrorCnt[6];
 
 //--- prototypes --------------------------------------------
-static void _tx801_control_vents(void);
+static void re(void);
 static void _tx801_motor_z_test(int steps);
 static void _tx801_motor_test  (int motor, int steps);
 static void _tx801_do_reference(void);
 static void _tx801_do_ctrlMode(EnFluidCtrlMode ctrlMode);
 static void _tx801_move_to_pos(int cmd, int pos);
 static void _tx801_set_ventilators(int value);
+static void _tx801_control_vents(void);
 static int  _micron_2_steps(int micron);// microns to motor steps
 static int  _steps_2_micron(int steps); // motor steps to microns
 static int  _incs_2_micron(int steps);  // encoder_incs to microns
@@ -211,12 +212,12 @@ void tx801_main(int ticks, int menu)
 			}
 			if (!ok) RX_StepperStatus.info.ref_done = FALSE;							
 		}
-		RX_StepperStatus.info.z_in_ref    = ((_CmdRunning==CMD_CAP_REFERENCE || _CmdRunning==CMD_CAP_UP_POS) && RX_StepperStatus.info.ref_done);
-		RX_StepperStatus.info.z_in_print  = (_CmdRunning==CMD_CAP_PRINT_POS && RX_StepperStatus.info.ref_done);
-		RX_StepperStatus.info.z_in_cap    = (_CmdRunning==CMD_CAP_CAPPING_POS);
-		RX_StepperStatus.robinfo.z_in_wipe = (_CmdRunning == CMD_CAP_WIPE_POS);
-		RX_StepperStatus.robinfo.z_in_vacuum = (_CmdRunning == CMD_CAP_VACUUM_POS);
-		RX_StepperStatus.robinfo.z_in_wetwipe = (_CmdRunning == CMD_CAP_WETWIPE_POS);
+		RX_StepperStatus.info.z_in_ref			= ((_CmdRunning==CMD_CAP_REFERENCE || _CmdRunning==CMD_CAP_UP_POS) && RX_StepperStatus.info.ref_done);
+		RX_StepperStatus.info.z_in_print		= (_CmdRunning==CMD_CAP_PRINT_POS && RX_StepperStatus.info.ref_done);
+		RX_StepperStatus.info.z_in_cap			= (_CmdRunning==CMD_CAP_CAPPING_POS);
+		RX_StepperStatus.robinfo.z_in_wipe		= (_CmdRunning == CMD_CAP_WIPE_POS);
+		RX_StepperStatus.robinfo.z_in_vacuum	= (_CmdRunning == CMD_CAP_VACUUM_POS);
+		RX_StepperStatus.robinfo.z_in_wetwipe	= (_CmdRunning == CMD_CAP_WETWIPE_POS);
 		if (_CmdRunning==CMD_CAP_REFERENCE && _PrintPos_New) 
 		{
 			_tx801_move_to_pos(CMD_CAP_PRINT_POS, _PrintPos_New);

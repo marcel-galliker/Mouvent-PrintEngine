@@ -130,7 +130,7 @@ static UINT32	_PM_SimuCnt;
 static UINT32	_PM_Cnt;
 static INT32	_Window;
 static INT32	_Ignore;
-	
+
 static FILE	*_LogFile = NULL;
 
 //--- prototypes -------------------------------------------
@@ -149,6 +149,7 @@ static void  _simu_markreader(void);
 
 static void  _check_errors(void);
 
+static void _fpga_poslog(void);
 
 //--- scan check -----------------------------------------------------------
 static UINT32 _scanpos_last;
@@ -164,6 +165,13 @@ static void	 _scan_check(void);
 
 // static void _LoadSinus(char *filepath, INT32 *pmem, int size);
 static void _CalcSinus(int max, int cnt, INT32 *pmem, int size);
+
+//--- _poslog -----------------------------------------
+static int	 _poslog_on   = FALSE;
+static FILE	*_poslog_file = NULL;
+static int   _poslog_cnt  = 0;
+static int	 _poslog_timer;
+#define POSLOG_MAX		1048575
 
 //*** functions ********************************************
 
@@ -311,6 +319,7 @@ void  fpga_main(int ticks, int menu, int showCorrection, int showParam)
 //		test_speed(ticks);
 //		test_step_time(ticks);
 		test_do(ticks);
+		if (_Init) _fpga_poslog();
 	}
 		
 	if (_Init) Fpga->cfg.general.watchdog_cnt  = WATCHDOG_CNT;
@@ -324,6 +333,56 @@ void  fpga_main(int ticks, int menu, int showCorrection, int showParam)
 			_UV_SimuCnt++;
 		}
 	}
+}
+	
+//--- fpga_start_poslog -----------------------------------------
+void fpga_start_poslog(void)
+{
+	_poslog_on = !_poslog_on;
+}
+
+//--- _fpga_poslog -----------------------------------------
+static void _fpga_poslog(void)
+{	
+	if (!_poslog_on) 
+	{
+		if (_poslog_file)
+		{
+			Error(WARN, 0, "Logging Encoder Position done");
+			fclose(_poslog_file);
+			_poslog_file = NULL;
+		}
+		return;
+	}
+	else
+	{
+		if (_poslog_cnt > POSLOG_MAX)
+		{
+			Error(WARN, 0, "Logging Encoder Position reached excel maximum");
+			fclose(_poslog_file);
+			_poslog_file = NULL;
+			return;
+		}
+	}
+	int i;
+	if (_poslog_file == NULL)
+	{
+		char name[100];
+		sprintf(name, PATH_TEMP "Encoder_Positions.csv");
+		_poslog_file = fopen(name, "w");
+		fprintf(_poslog_file, "time(ms)");
+		for (i = 0; i < 4; i++) fprintf(_poslog_file, ";position enc %d", i);
+		fprintf(_poslog_file, "\n");
+		_poslog_timer = rx_get_ticks();
+		_poslog_cnt++;
+	}
+
+	int time = rx_get_ticks() - _poslog_timer;
+	_poslog_cnt++;
+	
+	fprintf(_poslog_file, "%d", time);
+	for (i = 0; i < 4; i++) fprintf(_poslog_file, ";%d", (int)Fpga->stat.encIn[i].position);
+	fprintf(_poslog_file, "\n");
 }
 
 //--- fpga_output --------------------------------
@@ -1400,6 +1459,9 @@ static void _fpga_display_status(int showCorrection, int showParam)
 											  term_printf("REQ:%05d  ", ctrl_requests()); 
 											  term_printf("REP:%05d",   ctrl_replies()); 
 											  term_printf("\n");
+			
+			term_printf("  Log running:   "); term_printf("%09d  ", _poslog_on); term_printf("\n");
+			
 			/*	
 			term_printf("  Str meas:      %09d           ", Fpga->stat.str_corr);term_printf("\n");			
 			term_printf("  Str meas max:  %09d           ", Fpga->stat.str_corr_max);term_printf("\n")	;

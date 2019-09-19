@@ -42,18 +42,26 @@
 #define DIST_Z_REV		2000.0	// moving distance per revolution [µm]
 
 // Laser
-#define	LASER_IN				0		// Analog Input 0-3
-#define LASER_VOLT_PER_MM		0.25 // V/mm
-#define LASER_MM_PER_VOLT		4    // mm/V
-#define LASER_VOLT_OFFSET 		5900 // Laser Value without medium in mV
-#define LASER_VARIATION			400 // Variation +- in um
-#define LASER_TIMEOUT			2000 // ms
+#define	LASER_IN				0		// Analog Input 0-3 -> 0 is used for distance sensor before Printheads
+//#define LASER_IN_CURRENT		1		// Analog Input 1 is used for distance sensor with current input -> just for tests
+#define LASER_VOLT_PER_MM		0.45	// V/mm -> 9V/20mm
+//#define LASER_AMPER_PER_MM		1.6		// A/mm -> 16mA/10mm
+#define LASER_MM_PER_VOLT		2.22	// mm/V -> 20mm/9V
+//#define LASER_MM_PER_AMPER		0.625	// mm/V -> 10mm/16mA
+#define LASER_VOLT_OFFSET 		1000	// Laser Value with 20mm material in it (Laser goes from 1-10V for 25-45mm) -> makes an offset of 1000mV
+//#define LASER_CURRENT_OFFSET	4000	// Laser Value with 10mm material in it (Laser goes from 4-20mA for 20-30mm) -> makes an offset of 4000uA
+#define LASER_VOLT_RANGE		9000	// Laser works from 1-10V which makes a range of 9000mV
+//#define LASER_CURRENT_RANGE		16000	// Laser works from 4-20mA mich makes a range of 16000uA
+#define LASER_VARIATION			400		// Variation +- in um
+#define LASER_TIMEOUT			2000	// ms
+#define HEAD_DOWN_EN_DELAY		10
 #define LASER_ANALOG_AVR		10.0
 
 #define HEAD_DOWN_EN_DELAY		10
 //#define MAX_POS_UM		 		90000 //Resolution 20um, Working range 45...85 mm, temperature drift 18 um/K, Value range 0...10V linear rising, 1V=4mm ?
 
 #define VAL_TO_MV_AI(x) ((x*10000)/0x0fff)
+//#define VAL_TO_MA_AI(x) ((x*20500)/0x0fff)
 
 // Digital Inputs (max 12)
 #define HEAD_UP_IN_FRONT	0
@@ -150,7 +158,6 @@ void cleaf_init(void)
 	
 	_ParZ_down.speed		= 30000; 
 	_ParZ_down.accel		= 15000; 
-//	_ParZ_down.current		= 300.0; 	
 	_ParZ_down.current		= 350.0; 	
 	_ParZ_down.stop_mux		= MOTOR_Z_BITS;
 	_ParZ_down.dis_mux_in	= FALSE;
@@ -288,7 +295,8 @@ void cleaf_main(int ticks, int menu)
 static void _cleaf_check_laser(void)
 {					
 	//--- Read LASER value -------------------------------------------------------------------------
-	INT32 laser_value = ((LASER_VOLT_OFFSET - (int)VAL_TO_MV_AI(Fpga.stat->analog_in[LASER_IN])) * LASER_MM_PER_VOLT); // (mV -mV)*mm/V = um // medium thickness in um
+	INT32 laser_value = ((LASER_VOLT_RANGE - ((int)VAL_TO_MV_AI(Fpga.stat->analog_in[LASER_IN]) - LASER_VOLT_OFFSET)) * LASER_MM_PER_VOLT); // (mV -mV)*mm/V = um // medium thickness in um
+	//INT32 laser_value = ((LASER_CURRENT_RANGE - ((int)VAL_TO_MA_AI(Fpga.stat->analog_in[LASER_IN_CURRENT]) - LASER_CURRENT_OFFSET)) * LASER_MM_PER_AMPER); // (uA -uA)*mm/mA = um // medium thickness in um
 	_LaserAvr += laser_value;
 
 	if ((++_LaserCnt) == LASER_ANALOG_AVR)
