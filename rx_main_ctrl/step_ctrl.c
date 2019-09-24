@@ -240,8 +240,12 @@ void step_lift_to_print_pos(void)
 {
 	switch(_StepperType)
 	{
-	case STEPPER_TX:	steptx_lift_to_print_pos();	break;
-	default:			break;
+	case STEPPER_CLEAF: stepc_to_print_pos();		break;
+	case STEPPER_TX:    steptx_lift_to_print_pos();	break;
+	case STEPPER_LB:    steplb_to_print_pos();		break;
+	case STEPPER_DP:    stepdp_to_print_pos();		break;
+	case STEPPER_TEST:  steptest_to_print_pos();	break;
+	default:			steps_to_print_pos();		break;
 	}
 }														
 
@@ -367,21 +371,6 @@ void step_rob_stop(void)
 	case STEPPER_TX:	steptx_rob_stop(); break;
 	default: break;
 	}
-}
-
-//--- tt_cap_to_print_pos --------------------------------
-int	 tt_cap_to_print_pos(void)
-{
-	switch(_StepperType)
-	{
-	case STEPPER_CLEAF: stepc_to_print_pos();		break;
-	case STEPPER_TX:    steptx_lift_to_print_pos();	break;
-	case STEPPER_LB:    steplb_to_print_pos();		break;
-	case STEPPER_DP:    stepdp_to_print_pos();		break;
-	case STEPPER_TEST:  steptest_to_print_pos();	break;
-	default:			steps_to_print_pos();		break;
-	}
-	return REPLY_OK;									
 }
 
 //--- step_do_test -------------------------------

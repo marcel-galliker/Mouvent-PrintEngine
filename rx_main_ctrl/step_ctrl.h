@@ -63,6 +63,4 @@ int  tt_stop_printing  (void);
 int  tt_abort_printing (void);
 int  tt_clean		   (void);
 
-int	 tt_cap_to_print_pos(void);
-
 

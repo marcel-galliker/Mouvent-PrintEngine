@@ -452,7 +452,7 @@ int  plc_set_printpar(SPrintQueueItem *pItem)
 		if (_head_was_up)
 		{
 			_heads_to_print= TRUE;
-			tt_cap_to_print_pos();
+			step_lift_to_print_pos();
 		}
 		else _heads_to_print= FALSE;
 	}
@@ -485,6 +485,7 @@ int  plc_start_printing(void)
 		_SendRun		= TRUE;
 		_heads_to_print	= FALSE;
 	}
+	Error(LOG, 0, "plc_start_printing: heads_to_print=%d, z_in_print=%d",_heads_to_print, RX_StepperStatus.info.z_in_print);
 	step_set_vent(_Speed);
 	if (_SimuEncoder) ctrl_simu_encoder(_Speed);
 	return REPLY_OK;
@@ -1357,7 +1358,7 @@ static void _plc_state_ctrl()
 		//	if (RX_Config.printer.type!=printer_cleaf || (RX_StepperStatus.info.printhead_en && RX_PrinterStatus.printState==ps_printing))
 			if(RX_PrinterStatus.printState == ps_printing && (RX_StepperStatus.info.printhead_en || (RX_Config.printer.type!=printer_cleaf &&  RX_Config.printer.type!=printer_LH702)))
 			{
-				tt_cap_to_print_pos();
+				step_lift_to_print_pos();
 				_heads_to_print = TRUE;													
 			}
 		}

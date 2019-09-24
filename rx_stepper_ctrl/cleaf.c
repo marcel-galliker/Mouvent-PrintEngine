@@ -341,6 +341,7 @@ static void _cleaf_check_laser(void)
 			if (_LaserTimeThin && (rx_get_ticks()-_LaserTimeThin) > LASER_TIMEOUT)
 			{
 				Error(WARN, 0, "WEB: Laser detects too thin material. Moving head up. (measured %d, expected %d)", RX_StepperStatus.posY, RX_StepperCfg.material_thickness);
+				cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_UP_POS, NULL);			
 				_LaserTimeThin = 0;
 			}
 		}
@@ -513,8 +514,8 @@ int  cleaf_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		{
 			if      (!RX_StepperStatus.info.ref_done)				Error(ERR_CONT, 0, "Reference not done");
 			else if (!_AllowMoveDown)								Error(ERR_CONT, 0, "Stepper: Command 0x%08x: printhead_en signal not set", msgId);
-		//	else if (RX_StepperStatus.posY < (RX_StepperCfg.material_thickness - LASER_VARIATION) 
-		//		||   RX_StepperStatus.posY > (RX_StepperCfg.material_thickness + LASER_VARIATION)) Error(ERR_CONT, 0, "WEB: Laser detects material out of range. (measured %d, expected %d)", RX_StepperStatus.posY, RX_StepperCfg.material_thickness);
+			else if (RX_StepperStatus.posY < (RX_StepperCfg.material_thickness - LASER_VARIATION) 
+				||   RX_StepperStatus.posY > (RX_StepperCfg.material_thickness + LASER_VARIATION)) Error(ERR_CONT, 0, "WEB: Laser detects material out of range. (measured %d, expected %d)", RX_StepperStatus.posY, RX_StepperCfg.material_thickness);
 			else
 			{
 				if (REF_HEIGHT<90000) Error(WARN, 0, "Reference Height is only %d.02d mm", REF_HEIGHT/100, REF_HEIGHT%100);

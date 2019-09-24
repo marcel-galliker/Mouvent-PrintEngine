@@ -53,7 +53,7 @@ int	 steptx_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen
 				break;
 		
 	case CMD_CAP_PRINT_POS:
-				tt_cap_to_print_pos();	
+				step_lift_to_print_pos();	
 				break;
 	}
 	return REPLY_OK;
@@ -108,6 +108,7 @@ void steptx_lift_to_print_pos(void)
 	if (RX_Config.printer.type==printer_test_table) sok_send_2(&_step_socket[0], CMD_CAP_PRINT_POS, sizeof(UINT32), &RX_Config.stepper.cap_height);
 	else // TX801/TX802
 	{
+		Error(LOG, 0, "steptx_lift_to_print_pos, z_in_print=%d", RX_StepperStatus.info.z_in_print);
 		INT32 height = RX_Config.stepper.print_height + plc_get_thickness();
 		sok_send_2(&_step_socket[0], CMD_CAP_PRINT_POS, sizeof(height), &height);		
 	}

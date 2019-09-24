@@ -71,7 +71,7 @@ int	 steps_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen)
 				break;
 		
 	case CMD_CAP_PRINT_POS:
-				tt_cap_to_print_pos();	
+				step_lift_to_print_pos();	
 				break;
 	}
 	return REPLY_OK;

@@ -205,10 +205,11 @@ int stepc_handle_status(int no, SStepperStat *pStatus)
 		}
 	}
 	_splicing = info.splicing;
-	
 
 	//	TrPrintf(TRUE, "STEPPER: ref_done=%d moving=%d  in_print=%d  up=%d", info.ref_done, info.moving, info.z_in_print, info.z_in_ref);
 
+	if (info.z_in_print != RX_StepperStatus.info.z_in_print) Error(LOG, 0, "z_in_print changed to %d", info.z_in_print);
+	
 	memcpy(&RX_StepperStatus.info, &info, sizeof(RX_StepperStatus.info));
 
 	gui_send_msg_2(0, REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);
