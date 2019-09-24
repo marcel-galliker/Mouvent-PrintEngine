@@ -306,7 +306,7 @@ static void _cleaf_check_laser(void)
 		_LaserCnt = 0;
 	}
 	
-	return;
+//	return;
 	
 	//--- checks -----------------------------------------------------------------------------------
 	if(RX_StepperStatus.info.printhead_en)
