@@ -160,7 +160,7 @@ int main(int argc, char* argv[])
 	rx_mkdir(PATH_LOG);
 
 	rx_remove_old_files(PATH_FPGA_REGS, 7);
-
+	
 	err_init(TRUE, 100);
 	err_set_device(dev_main, 0);
 
@@ -202,6 +202,14 @@ int main(int argc, char* argv[])
 	
 	ctrl_update_hostname();
 	
+	if (!strcmp(RX_Hostname, "TEST-0001"))
+	{
+		arg_simuPLC			= TRUE;
+		arg_simuEncoder		= TRUE;
+		arg_simuHeads		= TRUE;
+		arg_simuChiller		= TRUE;	
+	}
+
 	net_init();
 	pq_init();
 	pq_load(PATH_USER FILENAME_PQ);

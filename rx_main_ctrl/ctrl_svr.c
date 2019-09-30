@@ -494,33 +494,34 @@ static void _headboard_config(int colorCnt, int headsPerColor, int ethPortCnt)
 		{
 			pBoard->head[i].blkNo0    = i*RX_Spooler.dataBlkCntHead;
 			pBoard->head[i].blkCnt    = RX_Spooler.dataBlkCntHead;
-			pBoard->head[i].dist	  = RX_Config.headDist[board*MAX_HEADS_BOARD+i];
-			pBoard->head[i].distBack  = RX_Config.headDistBack[board*MAX_HEADS_BOARD+i];
-				
-			if (!rx_def_is_scanning(RX_Config.printer.type)) pBoard->head[i].distBack = pBoard->head[i].dist;
+			pBoard->head[i].dist	  = RX_Config.headDist[board*MAX_HEADS_BOARD+i];				
+			if (rx_def_is_web(RX_Config.printer.type))	pBoard->head[i].distBack = pBoard->head[i].dist;
+			else										pBoard->head[i].distBack = RX_Config.headDistBack[board*MAX_HEADS_BOARD+i];
+			
 			pBoard->head[i].headHeight= RX_Config.stepper.print_height;
 			memcpy(&pBoard->head[i].cond, &RX_Config.cond[board*MAX_HEADS_BOARD+i], sizeof(SConditionerCfg));
 			pBoard->head[i].cond.headsPerColor = RX_Config.headsPerColor;
 			if (RX_PrinterStatus.testMode)
 			{
-				int inkSupply = pBoard->head[i].inkSupply;
 				int offset;
+				int inkSupply = pBoard->head[i].inkSupply;
 				if (RX_Config.printer.type==printer_DP803) inkSupply=inkSupply%(RX_Config.inkSupplyCnt/2);	// recto/verso
-				if (RX_TestImage.testImage==PQ_TEST_ANGLE_SEPARATED)
+				if (rx_def_is_web(RX_Config.printer.type))
+				{
+					if (RX_TestImage.testImage==PQ_TEST_JETS)				offset = 210000*inkSupply;
+					if (RX_TestImage.testImage==PQ_TEST_FULL_ALIGNMENT)		offset = 350000*inkSupply;
+					if (RX_TestImage.testImage==PQ_TEST_JET_NUMBERS)		offset = 150000*inkSupply;
+					if (RX_TestImage.testImage==PQ_TEST_ENCODER)			offset = 265000*inkSupply;
+					if (RX_TestImage.testImage==PQ_TEST_ANGLE_SEPARATED)	offset =  50000*inkSupply;
+					pBoard->head[i].dist	 += offset;	// recto
+					pBoard->head[i].distBack += offset;	// verso				
+				}
+				else if (RX_TestImage.testImage==PQ_TEST_ANGLE_SEPARATED)
 				{
 					pBoard->head[i].dist	 += 50000*inkSupply;
 					pBoard->head[i].distBack =  25000*inkSupply;
 				}
-				if (!rx_def_is_scanning(RX_Config.printer.type))
-				{
-					if (RX_TestImage.testImage==PQ_TEST_JETS)		offset = 210000*inkSupply;
-					if (RX_TestImage.testImage==PQ_TEST_JET_NUMBERS)offset = 210000*inkSupply;
-					if (RX_TestImage.testImage==PQ_TEST_ENCODER)	offset = 265000*inkSupply;
-					pBoard->head[i].dist	 += offset;	// recto
-					pBoard->head[i].distBack += offset;	// verso				
-				}				
 			}
-			if (RX_Config.printer.type==printer_cleaf)				pBoard->head[i].distBack = pBoard->head[i].dist;
 			if (pBoard->head[i].dist>RX_Config.headDistMax)			RX_Config.headDistMax = pBoard->head[i].dist;
 			if (pBoard->head[i].distBack>RX_Config.headDistBackMax) RX_Config.headDistBackMax = pBoard->head[i].distBack;
 		}
