@@ -138,10 +138,11 @@ void lb702_main(int ticks, int menu)
 			Error(ERR_CONT, 0, "LIFT: Command %s: Motor[%d] blocked", _CmdName, motor+1);			
 			RX_StepperStatus.info.ref_done = FALSE;							
 		}
+		
 		RX_StepperStatus.info.z_in_ref    = ((_CmdRunning==CMD_CAP_REFERENCE || _CmdRunning==CMD_CAP_UP_POS) && RX_StepperStatus.info.ref_done);
 		RX_StepperStatus.info.z_in_print  = (_CmdRunning==CMD_CAP_PRINT_POS && RX_StepperStatus.info.ref_done);
 		RX_StepperStatus.info.z_in_cap    = (_CmdRunning==CMD_CAP_CAPPING_POS);
-		if (RX_StepperStatus.info.ref_done && _PrintPos_New) 
+		if (RX_StepperStatus.info.ref_done && _CmdRunning==CMD_CAP_REFERENCE && _PrintPos_New) 
 		{
 			_lb702_move_to_pos(CMD_CAP_PRINT_POS, _PrintPos_New);
 			_PrintPos_Act = _PrintPos_New;

@@ -1086,7 +1086,7 @@ static void  _pg_ctrl(void)
 {		
 	if (_Socket!=INVALID_SOCKET && !_PrintGo_Locked)
 	{
-		int newpg=FALSE;
+		int send=FALSE;
 
 		//--- new Print-Go -------------------------------------------------------------------------------
 		if ((Fpga->stat.encOut[0].PG_cnt & 0xff) != ((RX_EncoderStatus.PG_cnt-_PrintGo_Start) & 0xff)) 
@@ -1097,7 +1097,7 @@ static void  _pg_ctrl(void)
 			if (RX_EncoderStatus.PG_cnt==0) TrPrintfL(TRUE, "PrintGo[%d]: pos_1200=%d", RX_EncoderStatus.PG_cnt, pos);
 			else							TrPrintfL(TRUE, "PrintGo[%d]: pos_1200=%d, dist=%d, pos_in=%d, pg_start_pos=%d", RX_EncoderStatus.PG_cnt, pos, pos-_lastPos, Fpga->stat.encIn[0].position, _pg_start_pos());
 			_lastPos = pos;
-			newpg=TRUE;
+			send=TRUE;
 			RX_EncoderStatus.PG_cnt++;
 			if (RX_EncoderStatus.PG_stop) RX_EncoderStatus.PG_stop = RX_EncoderStatus.PG_cnt;
 		}				
@@ -1132,6 +1132,14 @@ static void  _pg_ctrl(void)
 		RX_EncoderStatus.fifoEmpty_IGN = Fpga->stat.ignored_fifo_empty_err;
 		RX_EncoderStatus.fifoEmpty_WND = Fpga->stat.window_fifo_empty_err;
 		
+		INT32 diff = _pg_start_pos()-Fpga->stat.encIn[0].position;
+		int can_start = ((_pg_start_pos() | Fpga->stat.encIn[0].position)==0) || (diff>0);
+		if (can_start != RX_EncoderStatus.info.can_start)
+		{
+			RX_EncoderStatus.info.can_start = can_start;
+			send=TRUE;
+		}
+			
 		if (Fpga->cfg.pg[0].fifos_used==FIFOS_MARKREADER || Fpga->cfg.pg[0].fifos_used==FIFOS_MARKFILTER)
 		{
 			//--- trace PrintMark ----------------------------
@@ -1165,7 +1173,7 @@ static void  _pg_ctrl(void)
 			}			
 		}
 		
-		if (error || newpg) sok_send_2(&_Socket, REP_ENCODER_STAT, sizeof(RX_EncoderStatus), &RX_EncoderStatus);
+		if (error || send) sok_send_2(&_Socket, REP_ENCODER_STAT, sizeof(RX_EncoderStatus), &RX_EncoderStatus);
 	}
 }
 

@@ -83,9 +83,16 @@ namespace RX_DigiPrint.Models
                     IsValid = (_Meters>=50);
             }
         }
+
+        //--- Property CanRestart ---------------------------------------
+        private bool _CanStart = false;
+        public bool CanStart
+        {
+            get { return _CanStart; }
+            private set { SetProperty(ref _CanStart, value); }
+        }
               
-        //--- Request ---------------------------------
-        
+        //--- Request --------------------------------- 
         public void Request()
         {
             RxGlobals.RxInterface.SendCommand(TcpIp.CMD_ENCODER_STAT);
@@ -104,6 +111,7 @@ namespace RX_DigiPrint.Models
             AmplNew     = msg.ampl_new;
             Percentage  = msg.percentage;
             Meters      = msg.meters;
+            CanStart    = (msg.info & 0x00000010)!=0;
         }
     }
 }

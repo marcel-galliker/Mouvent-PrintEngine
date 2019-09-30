@@ -867,14 +867,14 @@ typedef struct SEncoderPgDist
 	
 typedef struct SEncoderInfo
 {
-	UINT32 connected : 1;
-	UINT32 uv_on	 : 1;
-	UINT32 uv_ready  : 1;
-	UINT32 analog_encoder : 1;
-	UINT32 info_4 : 1;
-	UINT32 info_5 : 1;
-	UINT32 info_6 : 1;
-	UINT32 info_7 : 1;
+	UINT32 connected :		1;	// 0x00000001
+	UINT32 uv_on	 :		1;	// 0x00000002
+	UINT32 uv_ready  :		1;	// 0x00000004
+	UINT32 analog_encoder : 1;	// 0x00000008
+	UINT32 can_start :		1;	// 0x00000010
+	UINT32 info_5 : 1;			// 0x00000020
+	UINT32 info_6 : 1;			// 0x00000040
+	UINT32 info_7 : 1;			// 0x00000080
 	UINT32 info_8 : 1;
 	UINT32 info_9 : 1;
 	UINT32 info10 : 1;
