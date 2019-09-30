@@ -548,7 +548,7 @@ int  enc_stop_pg(char *reason)
 //--- enc_restart_pg ------------------------------
 int  enc_restart_pg(void)
 {
-//	Error(LOG, 0, "enc_restart_pg");
+	TrPrintfL(TRUE, "enc_restart_pg");
 	sok_send_2(&_Encoder[0].socket, CMD_ENCODER_PG_RESTART, 0, NULL);
 	return REPLY_OK;	
 }

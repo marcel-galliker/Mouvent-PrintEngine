@@ -1,6 +1,6 @@
 // ****************************************************************************
 //
-//	machine_ctrl.h	
+//	machine_ctrl.c
 //
 // ****************************************************************************
 //
@@ -10,6 +10,7 @@
 // ****************************************************************************
 
 #include "rx_def.h"
+#include "rx_trace.h"
 #include "tcp_ip.h"
 #include "enc_ctrl.h"
 #include "plc_ctrl.h"
@@ -131,6 +132,7 @@ UINT32	machine_get_scanner_pos(void)
 //--- machine_start_printing ----------------------
 int		machine_start_printing(void)
 {
+	TrPrintfL(TRUE, "machine_start_printing");
 	switch(_MInterface) 
 	{
 	case mi_none:	return REPLY_OK;

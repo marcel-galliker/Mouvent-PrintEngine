@@ -319,6 +319,7 @@ static void _plc_set_command(char *mode, char *cmd)
 		if (!_StartPrinting) _SendPause = 2;
 	}
 //	Error(LOG, 0, "PLC_COMMAND >>%s<<", cmd);
+	TrPrintfL(TRUE, "PLC_COMMAND >>%s<<", cmd);
 	sprintf(str, APP "%s", cmd);
 	lc_set_value_by_name_UINT32(str, 1);
 }
@@ -473,6 +474,7 @@ int  plc_set_printpar(SPrintQueueItem *pItem)
 //--- plc_start_printing -----------------------------------------------
 int  plc_start_printing(void)
 {
+	TrPrintfL(TRUE, "plc_start_printing");
 	if (_PlcState!=plc_run)	
 	{
 		_StartPrinting		= TRUE;
@@ -611,7 +613,8 @@ int plc_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen)
 		case CMD_PLC_GET_VAR:		_plc_get_var (socket, (char*)data);				break;
 		case CMD_PLC_SET_VAR:		_plc_set_var (socket, (char*)data);				break;
 		case CMD_PLC_SET_CMD:		_plc_set_cmd (socket, (char*)data);				break;
-		case CMD_PAUSE_PRINTING:	_GUIPause=TRUE;									break;
+		case CMD_PAUSE_PRINTING:	TrPrintfL(TRUE, "PAUSE by user");
+									_GUIPause=TRUE;									break;
 		
 		//--- material database --------------------------------------------------------
 		case CMD_PLC_REQ_MATERIAL:	_plc_req_material  (socket, FILENAME_MATERIAL, cmd); break;

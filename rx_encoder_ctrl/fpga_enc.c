@@ -614,7 +614,7 @@ void fpga_enc_simu(int khz)
 		
 	TrPrintfL(TRUE, "fpga_enc_simu(%d)", khz);
 		
-	TrPrintfL(TRUE, "fpga_enc_simu start: marks:%06d ok:%06d filtred=%06d missed=%06d dist=%06d pos=%06d\n", Fpga->stat.dig_in_cnt, Fpga->stat.encOut[0].PG_cnt, _PM_Filtered_Cnt, _PM_Missed_Cnt, Fpga->stat.encIn[0].digin_edge_dist, Fpga->stat.encOut[0].position);
+	TrPrintfL(TRUE, "fpga_enc_simu start: marks:%06d ok:%06d filtered=%06d missed=%06d dist=%06d pos=%06d\n", Fpga->stat.dig_in_cnt, Fpga->stat.encOut[0].PG_cnt, _PM_Filtered_Cnt, _PM_Missed_Cnt, Fpga->stat.encIn[0].digin_edge_dist, Fpga->stat.encOut[0].position);
 
 	if (RX_EncoderCfg.printerType==printer_undef)
 	{

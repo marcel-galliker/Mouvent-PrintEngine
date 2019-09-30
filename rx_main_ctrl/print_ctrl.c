@@ -712,6 +712,7 @@ static int _print_next(void)
 			if (_PreloadCnt && RX_PrinterStatus.sentCnt)
 			{
 				RX_PrinterStatus.dataReady = TRUE;
+				TrPrintfL(TRUE, "_print_next");
 				machine_start_printing();
 				gui_send_printer_status(&RX_PrinterStatus);
 				_PreloadCnt = 0;
@@ -745,6 +746,7 @@ int pc_sent(SPageId *id)
 	if  (_PreloadCnt && !(--_PreloadCnt))
 	{
 		RX_PrinterStatus.dataReady = TRUE;
+		TrPrintfL(TRUE, "pc_sent start machine");
 		machine_start_printing();
 		gui_send_printer_status(&RX_PrinterStatus);
 	}
