@@ -1943,7 +1943,6 @@ static int _check_encoder(void)
 			RX_HBStatus[0].head[i].encPos = _Enc_PosBase[i] + (Fpga.stat->enc_position[i] / 8);
 		}
 
-		/*
 		if(FpgaCfg.cfg->cmd & CMD_MASTER_ENABLE)
 		{
 			for(i = 0; i < HEAD_CNT; i++)
@@ -1951,14 +1950,13 @@ static int _check_encoder(void)
 				int enc = RX_HBConfig.head[i].encoderNo;
 				RX_HBStatus[0].head[i].encPgCnt = _Enc_PgCnt[enc];
 
-				if(RX_HBConfig.head[i].enabled==dev_on && _Enc_PgCnt[enc] > Fpga.stat->pg_ctr[i] + 5 && !(RX_HBStatus[0].err&(err_printgo_but_no_data_0<<i)))
+				if(RX_HBConfig.head[i].enabled==dev_on && _Enc_PgCnt[enc] > Fpga.stat->pg_ctr[i] + 5 && !(RX_HBStatus[0].err&(err_06<<i)))
 				{
-					RX_HBStatus[0].err |= (err_printgo_but_no_data_0<<i);
+					RX_HBStatus[0].err |= (err_06<<i);
 					Error(ERR_CONT, 0, "Head[%d]: Encoder PrintGO=%d > Head PrintGO=%d", i, _Enc_PgCnt[enc], Fpga.stat->pg_ctr[i]); 
-				}			
+				}
 			}			
 		}
-		*/
 	}
 	return REPLY_OK;
 }

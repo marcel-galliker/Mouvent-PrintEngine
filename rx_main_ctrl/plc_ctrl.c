@@ -485,7 +485,7 @@ int  plc_start_printing(void)
 		_SendRun		= TRUE;
 		_heads_to_print	= FALSE;
 	}
-	Error(LOG, 0, "plc_start_printing: heads_to_print=%d, z_in_print=%d",_heads_to_print, RX_StepperStatus.info.z_in_print);
+//	Error(LOG, 0, "plc_start_printing: heads_to_print=%d, z_in_print=%d",_heads_to_print, RX_StepperStatus.info.z_in_print);
 	step_set_vent(_Speed);
 	if (_SimuEncoder) ctrl_simu_encoder(_Speed);
 	return REPLY_OK;
@@ -1388,7 +1388,7 @@ static void _plc_state_ctrl()
 //			step_set_vent(_Speed);
 			memset(&_StartEncoderItem, 0, sizeof(_StartEncoderItem));
 //			TrPrintfL(TRUE, "PLC: CMD_RUN sent");
-			Error(LOG, 0, "PLC: CMD_RUN sent");
+		//	Error(LOG, 0, "PLC: CMD_RUN sent");
 		}		
 	}
 	else if (_PlcState==plc_run)

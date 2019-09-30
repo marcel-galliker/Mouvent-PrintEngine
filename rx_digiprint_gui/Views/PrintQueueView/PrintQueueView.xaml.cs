@@ -1,11 +1,8 @@
 ﻿using Infragistics.Controls.Grids;
 using RX_Common;
-using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Models;
 using RX_DigiPrint.Services;
-using RX_DigiPrint.Views.UserControls;
 using System;
-using System.Diagnostics;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -373,7 +370,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
 			}
 			else if (PrintQueueGrid.ActiveItem!=null) (PrintQueueGrid.ActiveItem as PrintQueueItem).SendMsg(TcpIp.CMD_UP_PRINT_QUEUE);
 
-            if (PrintedQueueGrid.ActiveItem!=null) 
+            if (PrintedQueueGrid.ActiveItem!=null)
             {
                 PrintQueueItem item = PrintedQueueGrid.ActiveItem as PrintQueueItem;
                 item.StartFrom=0;
@@ -406,6 +403,11 @@ namespace RX_DigiPrint.Views.PrintQueueView
         private void PrintQueueGrid_SelectedRowsCollectionChanged(object sender, SelectionCollectionChangedEventArgs<SelectedRowsCollection> e)
         {
             AllButtons(Visibility.Visible);
+            if (sender.Equals(PrintQueueGrid))
+            {
+                PrintedQueueGrid.ActiveItem=null;
+            }
+
             /*
 			if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_UV)
 			{
@@ -441,6 +443,13 @@ namespace RX_DigiPrint.Views.PrintQueueView
                 if (item!=null && grid.DataContext.Equals(item)) 
                     item.IsSelected = !item.IsSelected;
             }
+
+            //--- remove selection in printed list ----
+            PrintedQueueGrid.ActiveItem=null;
+            foreach(Row row in PrintedQueueGrid.Rows)
+                row.IsSelected=false;
+            //--------------------------
+
             _update_selected_items();
             e.Handled = true;
         }
@@ -457,7 +466,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
                     _SelectedItems++;
                     row.Control.Background =  Brushes.Transparent; // Application.Current.Resources["XamGrid_Selected"] as Brush;
                 }
-                else
+                else if (row.Control!=null)
                     row.Control.Background = Brushes.Transparent;
             }
             if (_SelectedItems>0) AllButtons(Visibility.Visible);

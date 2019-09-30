@@ -10,8 +10,9 @@ namespace RX_DigiPrint.Converters
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            if(RxGlobals.PrintSystem.IsScanning) return Visibility.Collapsed;
-            return Visibility.Visible;
+            if(RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_UV) 
+                return Visibility.Visible;
+            return Visibility.Collapsed;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)

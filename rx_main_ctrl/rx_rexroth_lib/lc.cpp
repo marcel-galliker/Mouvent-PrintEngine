@@ -244,7 +244,8 @@ int lc_get_value_by_name_FLOAT (char *name, FLOAT *pvalue)
 
 	result = mlpiLogicReadVariableBySymbolFloat(_Connection, wname, pvalue);
 	if ( MLPI_FAILED(result)) 
-			Error(ERR_CONT, 0, "Error accessing >>%s<<\n", name);		
+//			Error(ERR_CONT, 0, "Error accessing >>%s<<\n", name);		
+			Error(LOG, 0, "Error accessing >>%s<<\n", name);		
 	return rex_check_result(result);
 }
 

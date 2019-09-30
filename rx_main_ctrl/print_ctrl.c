@@ -387,6 +387,26 @@ void pc_set_pageMargin(INT32 pageMargin)
 	_PageMargin_Next = 	pageMargin;
 }
 
+//--- _filename ------------------------------------
+static char* _filename(char *path)
+{
+	char ripped_data[32];
+	int pos, len;
+	strcpy(ripped_data, PATH_RIPPED_DATA_DIR);
+	len = strlen(ripped_data);
+	ripped_data[--len]=0;
+	for (pos=0; path[pos]; pos++)
+	{
+		if (!strncmp(&path[pos], ripped_data, len))
+		{
+			pos+=len;
+			while(path[pos]=='\\' || path[pos]=='/' || path[pos]==':') pos++;
+			return &path[pos];			
+		}
+	}
+	return path;
+}
+
 //--- _print_next --------------------------------------------------------------
 static int _print_next(void)
 {
@@ -470,7 +490,7 @@ static int _print_next(void)
 					}
 					else 
 					{
-						TrPrintfL(TRUE,"PRINT-NEXT: >>%s<<, copies=%d, printed=%d, pages=(%d..%d)",_Item.filepath,_Item.copies,_Item.copiesPrinted,_Item.firstPage,_Item.lastPage);
+						TrPrintfL(TRUE,"PRINT-NEXT: ID=%d >>%s<<, copies=%d, printed=%d, pages=(%d..%d)", _Item.id.id, _Item.filepath,_Item.copies,_Item.copiesPrinted,_Item.firstPage,_Item.lastPage);
 						if (_Item.start.copy>0) _Item.copiesPrinted = _CopiesStart = _Item.start.copy-1;
 					}
 				//	Error(LOG, 0, "Printig1: copy=%d, copies=%d", _Item.id.copy, _Item.copies);
@@ -490,7 +510,7 @@ static int _print_next(void)
 				if(_Item.copiesTotal < 1)_Item.copiesTotal = 1;
 
 //				Error(LOG, 0, "Printig2: copies=%d, copy=%d, copiesTotal=%d", _Item.copies, _Item.id.copy, _Item.copiesTotal);
-
+				if (rx_def_is_web(RX_Config.printer.type)) Error(LOG, 0, "%d: %s: Started, %d copies", _Item.id.id, _filename(_Item.filepath), _Item.copies);
 				TrPrintfL(TRUE, "PRINT-NEXT: >>%s<<, copiesTotal=%d", _Item.filepath, _Item.copiesTotal);
 	//			Error(LOG, 0, "copiesTotal=%d", _Item.copiesTotal);
 				_Item.scans=0; 
@@ -540,7 +560,7 @@ static int _print_next(void)
 				TrPrintfL(TRUE, "pq_next_page id=%d, page=%d, copy=%d, scan=%d", _Item.id.id, _Item.id.page, _Item.id.copy, _Item.id.scan);
 				if (_Item.id.copy>_Item.copies || _Item.id.page>_Item.lastPage)
 				{
-					Error(LOG, 0, "enc_sent_document, _Item.copiesTotal=%d, _CopiesStart=%d, _TotalPgCnt=%d", _Item.copiesTotal, _CopiesStart, _Item.copiesTotal-_CopiesStart);
+				//	Error(LOG, 0, "enc_sent_document, _Item.copiesTotal=%d, _CopiesStart=%d, _TotalPgCnt=%d", _Item.copiesTotal, _CopiesStart, _Item.copiesTotal-_CopiesStart);
 					if (_Scanning && arg_simuEncoder)	
 					{
 						enc_sent_document(_Item.scans);

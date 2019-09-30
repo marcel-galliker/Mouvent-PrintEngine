@@ -59,6 +59,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
             {
                 item.PrintGoMode = TcpIp.EPrintGoMode.PG_MODE_GAP;
                 item.SendMsg(TcpIp.CMD_SET_PRINT_QUEUE);
+                item.SaveDefaults();
             }
         }
 
@@ -69,18 +70,6 @@ namespace RX_DigiPrint.Views.PrintQueueView
             if (item!=null) item.SendMsg(TcpIp.CMD_GET_PRINT_QUEUE_ITM);
         }
         
-        //--- Save_Default_Clicked --------------------------------------------------------------------
-        private void Save_Default_Clicked(object sender, RoutedEventArgs e)
-        {
-            PrintQueueItem item = DataContext as PrintQueueItem;
-            if (item!=null)
-            {
-                item.PrintGoMode = TcpIp.EPrintGoMode.PG_MODE_GAP;
-                item.SendMsg(TcpIp.CMD_SET_PRINT_QUEUE);
-                item.SaveDefaults();
-            }
-        }
-
         //--- Numbers_Clicked -------------------------------------------------
         private void Numbers_Clicked(object sender, RoutedEventArgs e)
         {

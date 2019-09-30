@@ -308,18 +308,15 @@ SPrintQueueItem *pq_get_next_item(void)
 	int slide=!rx_def_use_pq(RX_Config.printer.type);
 	if (slide && _Item>0) return NULL;
 
-
-	int item = _Item;
-	while(item<_Size)
+	for(int item=0; item<_Size; item++)
 	{
 //		if (_List[item].state==PQ_STATE_QUEUED && _List[item].scanLength>0)
 		if ((slide || _List[item].state==PQ_STATE_QUEUED) && (_List[item].copies>0 || _List[item].scanLength>0))
 		{
 			_Item = item+1;
-			_ActiveState = _List[item].state;			
+			_ActiveState = _List[item].state;
 			return &_List[item];
 		}
-		item++;			
 	}		
 	return NULL;
 }
@@ -764,8 +761,8 @@ int pq_printed(int headNo, SPageId *pid, int *pageDone, int *jobDone, SPrintQueu
 				TrPrintfL(TRUE, "PQ.size=%d, idx=%d", _Size, idx);
 				if(pitem->state != PQ_STATE_PRINTED)
 				{
-					TrPrintfL(TRUE, "%s: complete", _filename(pitem->filepath));
-					Error(LOG, 0, "%s: complete", _filename(pitem->filepath));
+	//				TrPrintfL(TRUE, "%s: complete", _filename(pitem->filepath));
+					Error(LOG, 0, "%d: %s: complete", pitem->id .id, _filename(pitem->filepath));
 //					*jobDone = TRUE;
 					gui_send_print_queue(EVT_GET_PRINT_QUEUE, pitem);
 					if (rx_def_is_scanning(RX_Config.printer.type) && *pnextItem==NULL) pc_abort_printing();

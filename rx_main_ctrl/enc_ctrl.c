@@ -466,7 +466,7 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 							 dist.printGoMode = PG_MODE_MARK_FILTER;
 							 if (_DistTelCnt>1)
 							 {
-								if(RX_Config.printer.type == printer_LH702 || RX_Config.printer.type == printer_LB701)
+								if(RX_Config.printer.type == printer_LH702) // || RX_Config.printer.type == printer_LB701)
 								{
 									int markdist = 1000*RX_Config.printer.offset.printMarkDist;				
 									dist.window  = 50000;

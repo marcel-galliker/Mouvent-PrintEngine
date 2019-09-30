@@ -240,7 +240,7 @@ int  lb701_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									break;	
 
 	case CMD_CAP_REFERENCE:			strcpy(_CmdName, "CMD_CAP_REFERENCE");
-									_PrintPos_New=POS_UP;
+									_PrintPos_New=0;
 									_lb701_do_reference();	
 									break;
 

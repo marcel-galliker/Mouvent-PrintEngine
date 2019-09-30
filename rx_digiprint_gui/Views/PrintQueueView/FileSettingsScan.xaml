@@ -240,11 +240,7 @@
                 <Image Source="{StaticResource Yes_ico}"/>
             </common:RxButton>
 
-            <common:RxButton x:Name="SaveDefault" Click="Save_Default_Clicked" HorizontalAlignment="Center">
-                <Image Source="{StaticResource YesSave_ico}"/>
-            </common:RxButton>
-
-            <common:RxButton x:Name="CancelButton" Click="Cancel_Clicked" HorizontalAlignment="Right">
+           <common:RxButton x:Name="CancelButton" Click="Cancel_Clicked" HorizontalAlignment="Right">
                 <Image Source="{StaticResource No_ico}"/>
             </common:RxButton>
         </Grid>
