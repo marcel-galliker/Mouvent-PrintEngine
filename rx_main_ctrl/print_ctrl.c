@@ -741,7 +741,7 @@ static void *_print_thread(void *lpParameter)
 int pc_sent(SPageId *id)
 {
 //	Error(LOG, 0, "Data Sent id=%d, page=%d, scan=%d, copy=%d", id->id, id->page, id->scan, id->copy);
-	TrPrintfL(TRUE, "**** SENT id=%d, page=%d, scan=%d, copy=%d ****", id->id, id->page, id->scan, id->copy);
+	TrPrintfL(TRUE, "**** SENT id=%d, page=%d, scan=%d, copy=%d ****  _PreloadCnt=%d", id->id, id->page, id->scan, id->copy, _PreloadCnt);
 	
 	if  (_PreloadCnt && !(--_PreloadCnt))
 	{
@@ -805,8 +805,13 @@ int pc_print_done(int headNo, SPrintDoneMsg *pmsg)
 					if (!arg_simuEncoder && _Scanning) machine_set_printpar(pnext);
 					if(pnext->state < PQ_STATE_TRANSFER)
 					{
-						machine_pause_printing();
-						_PreloadCnt = 5;				
+						if (rx_def_is_tx(RX_Config.printer.type))
+						{
+							Error(LOG, 0, "file >>%s<< not loaded completely: PAUSE printing", _filename(pnext->filepath));
+							machine_pause_printing();
+							_PreloadCnt = 5;								
+						}
+						else Error(WARN, 0, "file >>%s<< not loaded completely: HERE WAS THE BUG", _filename(pnext->filepath));
 					}
 				}
 			}

@@ -128,7 +128,7 @@ void lb701_main(int ticks, int menu)
 		RX_StepperStatus.info.z_in_ref    = ((_CmdRunning==CMD_CAP_REFERENCE || _CmdRunning==CMD_CAP_UP_POS) && RX_StepperStatus.info.ref_done);
 		RX_StepperStatus.info.z_in_print  = (_CmdRunning==CMD_CAP_PRINT_POS && RX_StepperStatus.info.ref_done);
 		RX_StepperStatus.info.z_in_cap    = (_CmdRunning==CMD_CAP_CAPPING_POS);
-		if (_CmdRunning == CMD_CAP_REFERENCE && _PrintPos_New) 
+		if (RX_StepperStatus.info.ref_done && _CmdRunning == CMD_CAP_REFERENCE && _PrintPos_New) 
 		{
 			if (_PrintPos_New==POS_UP) _lb701_move_to_pos(CMD_CAP_UP_POS,    _PrintPos_New);
 			else                       _lb701_move_to_pos(CMD_CAP_PRINT_POS, _PrintPos_New);

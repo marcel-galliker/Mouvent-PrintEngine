@@ -907,6 +907,7 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg, int restart)
 			Error(ERR_ABORT, 0, "ERROR Position");
 		if(restart && pgNo==0)
 		{
+			Error(LOG, 0, "Restart: pos_in=%d, pg_start_pos=%d", Fpga->stat.encIn[0].position, _pg_start_pos());
 			if (Fpga->stat.encIn[0].position>_pg_start_pos() && Fpga->stat.encIn[0].position>500000)
 				Error(ERR_ABORT, 0, "PAUSE: Moving back is too short! pos_in=%d, pg_start_pos=%d", Fpga->stat.encIn[0].position, _pg_start_pos());
 			Fpga->cfg.pg[pgNo].enc_start_pos_fwd = _pg_start_pos();									
@@ -1130,36 +1131,39 @@ static void  _pg_ctrl(void)
 		RX_EncoderStatus.fifoEmpty_PG  = Fpga->stat.pg_fifo_empty_err;
 		RX_EncoderStatus.fifoEmpty_IGN = Fpga->stat.ignored_fifo_empty_err;
 		RX_EncoderStatus.fifoEmpty_WND = Fpga->stat.window_fifo_empty_err;
-
-		//--- trace PrintMark ----------------------------
-		if(Fpga->stat.dig_in_cnt[0] != (_PM_Cnt&0xff))
+		
+		if (Fpga->cfg.pg[0].fifos_used==FIFOS_MARKREADER || Fpga->cfg.pg[0].fifos_used==FIFOS_MARKFILTER)
 		{
-			{ //---  LOG -----------------------------------------
-				if (_PM_Cnt==0)
-				{
-					if (_LogFile) fclose(_LogFile);
-					_LogFile  = fopen(PATH_TEMP "markreader.csv", "w");
-					fprintf(_LogFile, "pos;dist;freq\n");
+			//--- trace PrintMark ----------------------------
+			if(Fpga->stat.dig_in_cnt[0] != (_PM_Cnt&0xff))
+			{
+				{ //---  LOG -----------------------------------------
+					if (_PM_Cnt==0)
+					{
+						if (_LogFile) fclose(_LogFile);
+						_LogFile  = fopen(PATH_TEMP "markreader.csv", "w");
+						fprintf(_LogFile, "pos;dist;freq\n");
+					}
+					fprintf(_LogFile, "%d;%d;%d\n", Fpga->stat.encOut[0].position, Fpga->stat.encIn[0].digin_edge_dist, (int)(Fpga->stat.encOut[0].speed*23/1000));
+					fflush(_LogFile);				
 				}
-				fprintf(_LogFile, "%d;%d;%d\n", Fpga->stat.encOut[0].position, Fpga->stat.encIn[0].digin_edge_dist, (int)(Fpga->stat.encOut[0].speed*23/1000));
-				fflush(_LogFile);				
+				TrPrintfL(TRUE, "PrintMark[%d] ok:%06d filtred=%06d missed=%06d dist=%06d pos=%06d\n", _PM_Cnt, RX_EncoderStatus.PG_cnt, _PM_Filtered_Cnt, _PM_Missed_Cnt, Fpga->stat.encIn[0].digin_edge_dist, Fpga->stat.encOut[0].position);
+				_PM_Cnt++;
 			}
-			TrPrintfL(TRUE, "PrintMark[%d] ok:%06d filtred=%06d missed=%06d dist=%06d pos=%06d\n", _PM_Cnt, RX_EncoderStatus.PG_cnt, _PM_Filtered_Cnt, _PM_Missed_Cnt, Fpga->stat.encIn[0].digin_edge_dist, Fpga->stat.encOut[0].position);
-			_PM_Cnt++;
-		}
 
-		//--- check PrintMark Missed --------------------------------------------------------------------------
-		if (Fpga->stat.dig_pg_window_err!=_PM_Missed_Cnt)
-		{
-			Error(WARN, 0, "PrintMark %d Missed", RX_EncoderStatus.PG_cnt);
-			_PM_Missed_Cnt = Fpga->stat.dig_pg_window_err;
+			//--- check PrintMark Missed --------------------------------------------------------------------------
+			if (Fpga->stat.dig_pg_window_err!=_PM_Missed_Cnt)
+			{
+				Error(WARN, 0, "PrintMark %d Missed", RX_EncoderStatus.PG_cnt);
+				_PM_Missed_Cnt = Fpga->stat.dig_pg_window_err;
+			}
+			if (Fpga->stat.encOut[0].mark_edge_warn!=_PM_Filtered_Cnt)
+			{
+				Error(WARN, 0, "PrintMark %d Filtered", RX_EncoderStatus.PG_cnt);
+				TrPrintfL(TRUE, "PrintMark %d Filtered, pos=%d", RX_EncoderStatus.PG_cnt, Fpga->stat.encOut[0].position);
+				_PM_Filtered_Cnt = Fpga->stat.encOut[0].mark_edge_warn;
+			}			
 		}
-		if (Fpga->stat.encOut[0].mark_edge_warn!=_PM_Filtered_Cnt)
-		{
-			Error(WARN, 0, "PrintMark %d Filtered", RX_EncoderStatus.PG_cnt);
-			TrPrintfL(TRUE, "PrintMark %d Filtered, pos=%d", RX_EncoderStatus.PG_cnt, Fpga->stat.encOut[0].position);
-			_PM_Filtered_Cnt = Fpga->stat.encOut[0].mark_edge_warn;
-		}			
 		
 		if (error || newpg) sok_send_2(&_Socket, REP_ENCODER_STAT, sizeof(RX_EncoderStatus), &RX_EncoderStatus);
 	}

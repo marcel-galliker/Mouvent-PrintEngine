@@ -10,6 +10,7 @@
 // ****************************************************************************
 
 #include "rx_def.h"
+#include "rx_error.h"
 #include "rx_trace.h"
 #include "tcp_ip.h"
 #include "enc_ctrl.h"
@@ -91,6 +92,7 @@ void	machine_error_reset(void)
 //--- machine_set_printpar -----------------------
 int		machine_set_printpar(SPrintQueueItem *pItem)
 {
+	TrPrintfL(TRUE, "machine_set_printpar");
 	set_interface();
 	
 	ctrl_send_firepulses(pItem->dots);
@@ -132,7 +134,8 @@ UINT32	machine_get_scanner_pos(void)
 //--- machine_start_printing ----------------------
 int		machine_start_printing(void)
 {
-	TrPrintfL(TRUE, "machine_start_printing");
+	TrPrintfL(TRUE, "machine_start_printing printState=%d", RX_PrinterStatus.printState);
+	Error(LOG, 0, "machine_start_printing printState=%d", RX_PrinterStatus.printState);
 	switch(_MInterface) 
 	{
 	case mi_none:	return REPLY_OK;
