@@ -1,4 +1,4 @@
-13:48:00 **** Build of configuration Nios II for project rx_head_nios ****
+20:04:27 **** Build of configuration Nios II for project rx_head_nios ****
 make mem_init_generate 
 Info: Building ../rx_head_nios_bsp
 F:/Tools/Bin/Altera/15.1/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../rx_head_nios_bsp
