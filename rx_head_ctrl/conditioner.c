@@ -389,14 +389,14 @@ static void _update_counters(void)
 
 	RX_HBStatus->machineMeters = machineMeters;
 	
-	TrPrintfL(TRUE, "_update_counters");
+//	TrPrintfL(TRUE, "_update_counters");
 	for (condNo=0; condNo<MAX_HEADS_BOARD;  condNo++)
 	{
 		_NiosCfg->cond[condNo].clusterTime   = RX_HBStatus->clusterTime;
 		if (RX_FluidStat[0].machineMeters!=INVALID_VALUE)// && RX_FluidStat[0].machineMeters>_NiosCfg->cond[condNo].machineMeters)
 			_NiosCfg->cond[condNo].machineMeters = RX_FluidStat[0].machineMeters;
 	}
-	TrPrintfL(TRUE, "_update_counters ok");
+//	TrPrintfL(TRUE, "_update_counters ok");
 }
 
 //--- cond_main ---------------------------------------------

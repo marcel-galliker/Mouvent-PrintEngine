@@ -255,7 +255,7 @@ typedef struct
 	UINT32	pos_pg_fwd;			// 0x0010:
 	UINT32  pos_pg_bwd;			// 0x0014:
 	UINT32	printgo_n;			// 0x0018:
-	UINT32	fifos_used;			// 0x001c: 3 Bit: 0=OFF, 1=Distance, 2=MarkReader, 4=MarkReaderAll, 6=MarkRepairReader
+	UINT32	fifos_used;			// 0x001c: 3 Bit: 0=OFF, 1=Distance, 2=MarkReader, 6=MarkRepairReader
 		#define FIFOS_OFF				0
 		#define FIFOS_DIST				1
 		#define FIFOS_MARKREADER		2 // <quiet_window> -<ignored_fifo><window_fifo>-<ignored_fifo><window_fifo>-<ignored_fifo><window_fifo>-...

@@ -472,11 +472,7 @@ int  cleaf_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 	
 	_MainSocket = socket;
 	switch (msgId)
-	{
-	case CMD_TT_STATUS:			
-		sok_send_2(&socket, REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);				
-		break;
-		
+	{	
 		// ============================================================== Hub ==============================================================
 
 	case CMD_CAP_STOP:				strcpy(_CmdName, "CMD_CAP_STOP");

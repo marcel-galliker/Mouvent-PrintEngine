@@ -292,9 +292,6 @@ int  lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 	
 	switch (msgId)
 	{
-	case CMD_TT_STATUS:				sok_send_2(&socket, REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);	
-		break;
-
 	case CMD_CLN_STOP:				motors_stop(MOTOR_ALL_BITS);
 		_CmdRunning = msgId;
 		Fpga.par->output &= ~RO_ALL_OUT; // set all output to off

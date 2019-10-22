@@ -745,6 +745,7 @@ int pq_printed(int headNo, SPageId *pid, int *pageDone, int *jobDone, SPrintQueu
 
 		if(pitem->state < PQ_STATE_STOPPING)
 		{		
+			if (pid->copy==pitem->copies) spool_file_printed(pid);
 			if(RX_Config.printer.type==printer_DP803 && pitem->copiesTotal && pitem->scansPrinted >= pitem->copiesTotal) 
 			{
 				*jobDone = TRUE;

@@ -135,7 +135,6 @@ UINT32	machine_get_scanner_pos(void)
 int		machine_start_printing(void)
 {
 	TrPrintfL(TRUE, "machine_start_printing printState=%d", RX_PrinterStatus.printState);
-	Error(LOG, 0, "machine_start_printing printState=%d", RX_PrinterStatus.printState);
 	switch(_MInterface) 
 	{
 	case mi_none:	return REPLY_OK;

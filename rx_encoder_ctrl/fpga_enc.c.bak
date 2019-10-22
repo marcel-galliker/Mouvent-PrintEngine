@@ -120,6 +120,7 @@ static int		_PrintGo_Locked;
 static int		_PrintGo_Start;
 static int		_PrintGo_Enabled=FALSE;
 static int		_Scanning = FALSE;
+static int		_IndexCheckDone=FALSE;
 static UINT32	_ErrFlags	= 0;
 static RX_SOCKET _Socket = INVALID_SOCKET;
 static int		_InCnt;
@@ -131,8 +132,6 @@ static UINT32	_PM_Cnt;
 static INT32	_Window;
 static INT32	_Ignore;
 static int		_PG_START_POS;
-static int		_RevSumStart[8];
-static int		_Restarted = FALSE;
 
 static FILE	*_LogFile = NULL;
 
@@ -285,7 +284,7 @@ void  fpga_main(int ticks, int menu, int showCorrection, int showParam)
 		_uv_ctrl();
 		_pg_ctrl();
 		_corr_ctrl();
-	//	_simu_markreader();
+		_simu_markreader();
 		/*
 		{
 			static int _in=0;
@@ -594,7 +593,6 @@ void fpga_enc_config(int inNo, SEncoderCfg *pCfg, int restart)
 			TrPrintfL(TRUE, "_PrintGo_Start=%d", _PrintGo_Start);
 			RX_EncoderStatus.PG_cnt = 0;
 		}
-		_RevSumStart[inNo] = Fpga->stat.encIn[inNo].rev_sum;
 		Fpga->cfg.encIn[inNo].enable			= TRUE;
 	}
 	if(RX_EncoderCfg.printerType == printer_test_table) _uv_init();
@@ -602,13 +600,12 @@ void fpga_enc_config(int inNo, SEncoderCfg *pCfg, int restart)
 	
 //	_scan_check_init();
 	Fpga->cfg.general.reset_errors = TRUE;
-//	if (!restart) _IndexCheckDone = FALSE;
+	if (!restart) _IndexCheckDone = FALSE;
 
 	_ErrFlags		 = 0;
 	_PM_Missed_Cnt   = Fpga->stat.dig_pg_window_err;
 	_PM_Filtered_Cnt = Fpga->stat.encOut[0].mark_edge_warn;
 	_PM_SimuCnt		 = 0;
-	_Restarted		 = restart;
 	
 	TrPrintfL(TRUE, "fpga_enc_config end: marks:%06d ok:%06d filtred=%06d missed=%06d dist=%06d pos=%06d\n", _PM_Cnt, Fpga->stat.encOut[0].PG_cnt, _PM_Filtered_Cnt, _PM_Missed_Cnt, Fpga->stat.encIn[0].digin_edge_dist, Fpga->stat.encOut[0].position);
 
@@ -914,7 +911,7 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg, int restart)
 	
 	if (restart) act_pos = Fpga->stat.encIn[0].position;
 	else		 act_pos =_micron2inc(pcfg->pos_actual);
-		
+	
 	for (pgNo=0; pgNo<SIZEOF(Fpga->cfg.pg); pgNo++)
 	{
 		Fpga->cfg.pg[pgNo].reset_pos	= FALSE;			
@@ -928,7 +925,7 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg, int restart)
 			Error(LOG, 0, "Restart: pos_in=%d, pg_start_pos=%d", Fpga->stat.encIn[0].position, _pg_start_pos());
 			if (Fpga->stat.encIn[0].position>_pg_start_pos() && Fpga->stat.encIn[0].position>500000)
 				Error(ERR_ABORT, 0, "PAUSE: Moving back is too short! pos_in=%d, pg_start_pos=%d", Fpga->stat.encIn[0].position, _pg_start_pos());
-			Fpga->cfg.pg[pgNo].enc_start_pos_fwd = _pg_start_pos();								
+			Fpga->cfg.pg[pgNo].enc_start_pos_fwd = _pg_start_pos();									
 		}
 		else
 		{
@@ -1166,27 +1163,20 @@ static void  _pg_ctrl(void)
 			//--- trace PrintMark ----------------------------
 			if (Fpga->stat.encOut[0].PG_cnt != (_PM_Cnt & 0xff)) // Fpga->stat.dig_in_cnt[0]
 			{
-				if (Fpga->stat.encOut[0].position==0)
-				{
-					_PM_Cnt=Fpga->stat.encOut[0].PG_cnt;
-				}
-				else
-				{
-					{ //---  LOG -----------------------------------------
-						if (_PM_Cnt==0)
-						{
-							if (_LogFile) fclose(_LogFile);
-							_LogFile  = fopen(PATH_TEMP "markreader.csv", "w");
-							fprintf(_LogFile, "time;pos0[strokes];mark_dist[strokes];freq[strokes/s];digin_pulse_dist[steps];mark_dist_avr[strokes];ftc[strokes];ftc_ideal[strokes]\n");
-							_statlog_timer = rx_get_ticks();
-						}
-						fprintf(_LogFile, "%d;%d;%d;%d;%d;%d;%d;%d\n", rx_get_ticks() - _statlog_timer, Fpga->stat.encOut[0].position, (int)(_Ignore + _Window - Fpga->stat.encOut[0].window_mark_pos), (int)(Fpga->stat.encOut[0].speed * 23 / 1000), Fpga->stat.encIn[0].digin_edge_dist, (int)(_Ignore + _Window  - Fpga->stat.avr_med_pos), Fpga->stat.ftc_shift_delay_strokes_tel, (int)((Fpga->cfg.general.ftc_speed - Fpga->stat.encOut[0].speed) * Fpga->cfg.general.ftc_ratio / 0x80000000));
-						fflush(_LogFile);
+				{ //---  LOG -----------------------------------------
+					if (_PM_Cnt==0)
+					{
+						if (_LogFile) fclose(_LogFile);
+						_LogFile  = fopen(PATH_TEMP "markreader.csv", "w");
+						fprintf(_LogFile, "time;pos0[strokes];mark_dist[strokes];freq[strokes/s];digin_pulse_dist[steps];mark_dist_avr[strokes];ftc[strokes];ftc_ideal[strokes]\n");
 						_statlog_timer = rx_get_ticks();
 					}
-					TrPrintfL(TRUE, "PrintMark[%d] ok:%06d filtred=%06d missed=%06d dist=%06d InPos=%06d OutPos=%06d\n", _PM_Cnt, RX_EncoderStatus.PG_cnt, _PM_Filtered_Cnt, _PM_Missed_Cnt, Fpga->stat.encIn[0].digin_edge_dist, Fpga->stat.encIn[0].position, Fpga->stat.encOut[0].position);
-					_PM_Cnt++;					
+					fprintf(_LogFile, "%d;%d;%d;%d;%d;%d;%d;%d\n", rx_get_ticks() - _statlog_timer, Fpga->stat.encOut[0].position, (int)(_Ignore + _Window - Fpga->stat.encOut[0].window_mark_pos), (int)(Fpga->stat.encOut[0].speed * 23 / 1000), Fpga->stat.encIn[0].digin_edge_dist, (int)(_Ignore + _Window  - Fpga->stat.avr_med_pos), Fpga->stat.ftc_shift_delay_strokes_tel, (int)((Fpga->cfg.general.ftc_speed - Fpga->stat.encOut[0].speed) * Fpga->cfg.general.ftc_ratio / 0x80000000));
+					fflush(_LogFile);
+					_statlog_timer = rx_get_ticks();
 				}
+				TrPrintfL(TRUE, "PrintMark[%d] ok:%06d filtred=%06d missed=%06d dist=%06d pos=%06d\n", _PM_Cnt, RX_EncoderStatus.PG_cnt, _PM_Filtered_Cnt, _PM_Missed_Cnt, Fpga->stat.encIn[0].digin_edge_dist, Fpga->stat.encOut[0].position);
+				_PM_Cnt++;
 			}
 
 			//--- check PrintMark Missed --------------------------------------------------------------------------
@@ -1197,10 +1187,8 @@ static void  _pg_ctrl(void)
 			}
 			if (Fpga->stat.encOut[0].mark_edge_warn!=_PM_Filtered_Cnt)
 			{
-				int speed=(int)((Fpga->stat.encOut[0].speed*23/1000)*60.0/1200*0.0254);
-				if (FpgaQSys->window_status.fill_level) Error(WARN, 0, "Mark near PrintMark %d Filtered", RX_EncoderStatus.PG_cnt);
-				else                                    Error(LOG,  0, "Mark near PrintMark %d Filtered, speed=%dm/min", RX_EncoderStatus.PG_cnt, speed);
-				TrPrintfL(TRUE, "Mark near PrintMark %d Filtered, InPos=%06d, OutPos=%06d", RX_EncoderStatus.PG_cnt, Fpga->stat.encIn[0].position, Fpga->stat.encOut[0].position);
+				Error(WARN, 0, "Mark near PrintMark %d Filtered", RX_EncoderStatus.PG_cnt);
+				TrPrintfL(TRUE, "Mark near PrintMark %d Filtered, pos=%d", RX_EncoderStatus.PG_cnt, Fpga->stat.encOut[0].position);
 				_PM_Filtered_Cnt = Fpga->stat.encOut[0].mark_edge_warn;
 			}			
 		}
@@ -1502,7 +1490,8 @@ static void _fpga_display_status(int showCorrection, int showParam)
 			term_printf("  Speed [m/Min]: "); for (i=0; i<cnt; i++) term_printf("%09d  ", (int)((Fpga->stat.encOut[i].speed*23/1000)*60.0/1200*0.0254) );		term_printf("\n");
 //			term_printf("  Speed Min[Hz]: "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encOut[i].speed_min*23/1000);	term_printf("\n");
 //			term_printf("  Speed Max[Hz]: "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encOut[i].speed_max*23/1000);	term_printf("\n");
-			term_printf("  FlighTimeComp: "); term_printf("%09d  ", Fpga->stat.ftc_shift_delay_strokes_tel );		term_printf("\n");
+			//term_printf("  FlighTimeComp: "); term_printf("%09d  ", Fpga->stat.ftc_shift_delay_strokes_tel );		term_printf("\n");
+			term_printf("  FTC shift [um]:"); term_printf("%09d  ", (int)(Fpga->stat.ftc_shift_delay_strokes_tel * _StrokeDist)); term_printf("\n");
 			term_printf("  Wind mark pos: "); for (i = 0; i < cnt; i++) term_printf("%09d  ", Fpga->stat.encOut[i].window_mark_pos); term_printf("\n");
 			term_printf("  Avr Med Pos:   "); term_printf("%09d  ", Fpga->stat.avr_med_pos); term_printf("\n");
 
@@ -1708,47 +1697,42 @@ static void  _check_errors(void)
 	#define INC_PER_REV	238000
 	static int _pos[8];
 	static int _posStart[8];
-	int			i, n, p;
-
+	static int _revSumStart[8];
+	int			i, n;
+//	for (int i=0; i<SIZEOF(Fpga->cfg.encIn); i++)
 	for (i=0; i<2; i++)
 	{
-		if(Fpga->cfg.encIn[i].enable && Fpga->cfg.encIn[i].index_en)
+		if(Fpga->cfg.encIn[i].correction == CORR_ROTATIVE && Fpga->cfg.encIn[i].enable && Fpga->cfg.encIn[i].index_en && !_IndexCheckDone)
 		{
-			//--- check first index -------------------------------
-			p = _pos[i];
-			_pos[i] = Fpga->stat.encIn[i].position-_posStart[i];
-			if(p < CHECK_POS && (_pos[i] >= CHECK_POS))
+			if(_pos[i] < CHECK_POS)
 			{
-				if(Fpga->stat.encIn[i].rev_sum == 0)						ErrorFlag(ERR_CONT,  &_ErrFlags, 1<<0, 0, "Encoder %d: No Index", i);
-			}
-			
-			//---  check if all indexes detected (if not in rollback) ------------------------
-			if (_pos[i]-1000>p && !_Restarted)
-			{
-				if(Fpga->cfg.encIn[0].inc_per_revolution == INC_PER_REV) 
+				_pos[i] = Fpga->stat.encIn[i].position-_posStart[i];
+				if(_pos[i] >= CHECK_POS)
 				{
-					n = _pos[i] / INC_PER_REV;
-					if(abs(n - (Fpga->stat.encIn[i].rev_sum-_RevSumStart[i])) > 4)
+					_IndexCheckDone = TRUE;
+					if(Fpga->stat.encIn[i].rev_sum == 0)						Error(ERR_CONT, 0, "Encoder %d: No Index", i);
+					if(Fpga->cfg.encIn[0].inc_per_revolution == INC_PER_REV) 
 					{
-						if(_CorrRotative) ErrorFlag(ERR_CONT, &_ErrFlags, 1<<1, 0, "Encoder %d: Counting %d Indexes (expected %d)", i, Fpga->stat.encIn[i].rev_sum-_RevSumStart[i], n);
-						else			  ErrorFlag(WARN,	  &_ErrFlags, 1<<1, 0, "Encoder %d: Counting %d Indexes (expected %d)", i, Fpga->stat.encIn[i].rev_sum-_RevSumStart[i], n);
+						n = _pos[i] / INC_PER_REV;
+						if(abs(n - (Fpga->stat.encIn[i].rev_sum-_revSumStart[i])) > 4)
+						{
+							if(_CorrRotative)	Error(ERR_CONT, 0, "Encoder %d: Counting %d Indexes (expected %d)", i, Fpga->stat.encIn[i].rev_sum-_revSumStart[i], n);
+							else				Error(WARN, 0, "Encoder %d: Counting %d Indexes (expected %d)", i, Fpga->stat.encIn[i].rev_sum-_revSumStart[i], n);
+						}
+					}
+					else
+					{
+						if(_CorrRotative) Error(ERR_CONT, 0, "Encoder %d: Counting %d increments per revolution (expected %d)", i, Fpga->cfg.encIn[0].inc_per_revolution, INC_PER_REV);
+						else			  Error(WARN, 0, "Encoder %d: Counting %d increments per revolution (expected %d)", i, Fpga->cfg.encIn[0].inc_per_revolution, INC_PER_REV);
 					}
 				}
-				else
-				{
-					if(_CorrRotative) ErrorFlag(ERR_CONT, &_ErrFlags, 1<<2, 0, "Encoder %d: Counting %d increments per revolution (expected %d)", i, Fpga->cfg.encIn[0].inc_per_revolution, INC_PER_REV);
-					else			  ErrorFlag(WARN,	  &_ErrFlags, 1<<2, 0, "Encoder %d: Counting %d increments per revolution (expected %d)", i, Fpga->cfg.encIn[0].inc_per_revolution, INC_PER_REV);
-				}				
-			}
-			if (_Restarted)
-			{
 			}
 		}
 		else 
 		{
 			_pos[i]			= 0;
 			_posStart[i]	= Fpga->stat.encIn[i].position;
-			_RevSumStart[i] = Fpga->stat.encIn[i].rev_sum;
+			_revSumStart[i] = Fpga->stat.encIn[i].rev_sum;
 		}
 	}
 }

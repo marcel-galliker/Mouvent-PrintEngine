@@ -66,7 +66,7 @@ namespace rx_license_ctrl
         ExchangeService _Service= new ExchangeService(ExchangeVersion.Exchange2013);
 
         readonly string   _UserName = "license@mouvent.com";
-        readonly string   _Password = "Dun74739";
+        readonly string   _Password = "SD9F8Zsda";
 
         readonly int  _Level_Supervisor =2;
         readonly int  _Level_Service    =3;

@@ -45,6 +45,13 @@ typedef struct
 	int			sentNo;
 } SSpoolerInfo;
 
+typedef struct
+{
+	SPageId id;
+	int		blkNo;
+	int		blkCnt;
+} SLoadedFiles;
+
 //--- Statics -----------------------------------------------------------------
 static HANDLE	_HSpoolServer;
 static int		_Ready;
@@ -56,8 +63,9 @@ static int		_HeadBoardCnt;
 static int		_SlideIsRight;
 static int		_Pass;
 static int		_DelayPauseTimer=0;
-static SSpoolerInfo	 _Spooler[MAX_SPOOLERS];
-static SPageId		_Id[MAX_PAGES];
+static SSpoolerInfo		_Spooler[MAX_SPOOLERS];
+static SPageId			_Id[MAX_PAGES];
+static SLoadedFiles		_LoadedFiles[MAX_PAGES];
 
 //--- Prototypes --------------------------------------------------------------
 static int _handle_spool_msg	(RX_SOCKET socket, void *msg, int len, struct sockaddr *sender, void *par);
@@ -85,6 +93,7 @@ int	spool_start(void)
 	TrPrintfL(TRUE, "Spool started");
 	memset(_Spooler, 0, sizeof(_Spooler));
 	memset(_Id, 0, sizeof(_Id));
+	memset(_LoadedFiles, 0, sizeof(_LoadedFiles));
 	for(i=0; i<SIZEOF(_Spooler); i++) 
 	{	
 		net_device_to_ipaddr(dev_spooler, i, addr, sizeof(addr));
@@ -338,6 +347,7 @@ void spool_start_printing(void)
 		rx_sleep(500);
 		Error(WARN, 0, "rx_spooler_ctrl restarted");
 	}
+	memset(_LoadedFiles, 0, sizeof(_LoadedFiles));
 
 	_SlideIsRight = FALSE;
 	_Pass		  = 0;
@@ -417,8 +427,8 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 
 	SPrintFileCmd msg;
 	
-	if (arg_simuHeads) Error(LOG, 0, "Printing ID=%d, page=%d, copy=%d", pid->id, pid->page, pid->copy);
-
+	if (arg_simuHeads) Error(LOG, 0, "Printing ID=%d, page=%d, copy=%d, scan=%d", pid->id, pid->page, pid->copy, pid->scan);
+	
 	_Ready--;
 	
 	memset(&msg, 0, sizeof(msg));
@@ -433,6 +443,25 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 	strncpy(msg.filename, filename, sizeof(msg.filename));
 	memcpy(&msg.id, pid, sizeof(msg.id));
 	memcpy(&_Id[RX_PrinterStatus.sentCnt%MAX_PAGES], pid, sizeof(msg.id));
+
+	if (RX_Config.printer.type==printer_LB702_UV)
+	{
+		int i;
+		SPageId *p; 
+		for (i=0; i<SIZEOF(_LoadedFiles); i++)
+		{
+			p=&_LoadedFiles[i].id;
+			if ((p->id==pid->id) && (p->page==pid->page) && (p->scan==pid->scan)) // copy changes! 
+			{
+				msg.flags |= FLAG_SAME;
+				msg.blkNo = _LoadedFiles[i].blkNo;
+				break;				
+			}	
+		}
+		if(pitem->srcPages>1 && pid->copy<pitem->copies) msg.clearBlockUsed=FALSE;
+	//	if (arg_simuHeads) Error(LOG, 0, "same=%d, clearBlockUsed=%d", msg.flags&FLAG_SAME, msg.clearBlockUsed);
+	}
+	
 	if (RX_PrinterStatus.testMode)
 	{
 		msg.printMode     = PM_TEST;
@@ -499,6 +528,22 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 	return REPLY_OK;
 }
 
+//--- spool_file_printed -----------------------------------
+void spool_file_printed(SPageId *pid)
+{
+	int i;
+	SPageId *p;
+	for (i=0; i<SIZEOF(_LoadedFiles); i++)
+	{
+		p=&_LoadedFiles[i].id;
+		if ((p->id==pid->id) && (p->page==pid->page) && (p->scan==pid->scan))
+		{
+			memset(&_LoadedFiles[i], 0, sizeof(_LoadedFiles[i]));
+			break;				
+		}	
+	}		
+}
+
 //--- spool_get_id ---------------------------------
 SPageId *spool_get_id(int no)
 {
@@ -515,18 +560,26 @@ int spool_abort_printing(void)
 //--- _do_print_file_rep ------------------------------------------------------
 static int _do_print_file_rep(RX_SOCKET socket, int spoolerNo, SPrintFileRep *msg)
 {
-	int size;
-
 	_MsgGot++;
 //	if (msg->bufReady)
 	{
-		TrPrintfL(TRUE, "****** Spooler[%d]:rep_print_file id=%d, page=%d, copy=%d, scan=%d, width=%d, length=%d, bufReady=%d, _MsgSent=%d, _MsgGot=%d", spoolerNo, msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->widthPx, msg->lengthPx, msg->bufReady, _MsgSent, _MsgGot);
-		size = ((RX_Spooler.headWidthPx+RX_Spooler.headOverlapPx)*msg->bitsPerPixel+7)/8;
-		size *= msg->lengthPx;
-		size = (size+RX_Spooler.dataBlkSize-1) / RX_Spooler.dataBlkSize;
+		TrPrintfL(TRUE, "****** Spooler[%d]:rep_print_file id=%d, page=%d, copy=%d, scan=%d, bufReady=%d, same=%d, _MsgSent=%d, _MsgGot=%d", spoolerNo, msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->bufReady, msg->same, _MsgSent, _MsgGot);
 	
-		if (msg->clearBlockUsed)
-			_BlkNo = (_BlkNo+size) % RX_Spooler.dataBlkCntHead;
+		if (!msg->same)
+		{
+			int i;
+			for (i=0; i<SIZEOF(_LoadedFiles); i++)
+			{
+				if (_LoadedFiles[i].blkCnt==0)
+				{
+					memcpy(&_LoadedFiles[i].id, &msg->id, sizeof(_LoadedFiles[i].id));
+					_LoadedFiles[i].blkNo  = _BlkNo;
+					_LoadedFiles[i].blkCnt = msg->blkCnt;
+					break;
+				}
+			}
+			_BlkNo = (_BlkNo+msg->blkCnt) % RX_Spooler.dataBlkCntHead;				
+		}
 		
 		_Ready = msg->bufReady;
 		pc_print_next();

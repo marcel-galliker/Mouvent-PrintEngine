@@ -46,6 +46,7 @@
 #define PORT_CTRL_ENCODER		7013
 #define PORT_CTRL_FLUID			7014
 #define PORT_CTRL_STEPPER		7015
+#define PORT_CTRL_PLC			7016
 
 #define PORT_UDP_BOOT_SVR		7004
 #define PORT_UDP_BOOT_CLNT		7005
@@ -675,7 +676,8 @@ typedef struct SPrintFileCmd
 		#define FLAG_MIRROR			0x0001
 		#define FLAG_BIDIR			0x0002
 		#define FLAG_SMP_FIRST_PAGE 0x0004
-		#define FLAG_SMP_LAST_PAGE	0x0008	
+		#define FLAG_SMP_LAST_PAGE	0x0008
+		#define FLAG_SAME			0x0010
 
 	UINT8		virtualPasses;
 	UINT8		virtualPass;
@@ -702,11 +704,9 @@ typedef struct SPrintFileRep
 	SMsgHdr		hdr;
 	SPageId		id;
 	UINT32		msgNo;
-	UINT32		widthPx;
-	UINT32		lengthPx;
-	UINT8		bitsPerPixel;
+	UINT32		blkCnt;
 	UINT8		bufReady;
-	UINT8		clearBlockUsed;
+	UINT8		same;
 } SPrintFileRep;
 
 typedef struct SPrintFileMsg

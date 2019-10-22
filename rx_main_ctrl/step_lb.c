@@ -118,7 +118,7 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
 	
 	for (i=0; i<STEPPER_CNT; i++)
 	{
-		if (_step_socket[i]!=INVALID_SOCKET)
+		if (_step_socket[i] && _step_socket[i]!=INVALID_SOCKET)
 		{
 //			TrPrintf(TRUE, "Stepper[%d]: ref_done=%d moving=%d  z_in_print=%d  z_in_ref=%d", i, _Status[i].info.ref_done, _Status[i].info.moving, _Status[i].info.z_in_print, _Status[i].info.z_in_ref);
 			info.ref_done		&= _Status[i].info.ref_done;

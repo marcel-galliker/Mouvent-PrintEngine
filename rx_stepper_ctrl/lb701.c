@@ -109,16 +109,14 @@ void lb701_main(int ticks, int menu)
 		RX_StepperStatus.info.moving = FALSE;
 		if (_CmdRunning == CMD_CAP_REFERENCE) 
 		{
-			if (motor_error(MOTOR_Z_BITS))
-			{	
-				Error(ERR_CONT, 0, "LB701: Command CMD_CAP_REFERENCE: triggers motor_error", _CmdRunning);
-				RX_StepperStatus.info.ref_done = FALSE;
-			}
-			else
-			{
-				motors_reset(MOTOR_Z_BITS);				
-				RX_StepperStatus.info.ref_done = TRUE;
-			}
+			if (!RX_StepperStatus.info.headUpInput_0) Error(ERR_CONT, 0, "LB702: Command REFERENCE: End Sensor 1 NOT HIGH");
+			RX_StepperStatus.info.ref_done = RX_StepperStatus.info.headUpInput_0;
+			motors_reset(MOTOR_Z_BITS);				
+		}
+		else if (motors_error(MOTOR_Z_BITS, &motor))
+		{
+			Error(ERR_CONT, 0, "LIFT: Command %s: Motor[%d] blocked", _CmdName, motor+1);			
+			RX_StepperStatus.info.ref_done = FALSE;							
 		}
 		else if (motors_error(MOTOR_Z_BITS, &motor))
 		{
@@ -231,9 +229,6 @@ int  lb701_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 	
 	switch(msgId)
 	{
-	case CMD_TT_STATUS:				sok_send_2(&socket, REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);	
-									break;
-
 	case CMD_CAP_STOP:				strcpy(_CmdName, "CMD_CAP_STOP");
 									motors_stop(MOTOR_Z_BITS);
 									_CmdRunning = 0;

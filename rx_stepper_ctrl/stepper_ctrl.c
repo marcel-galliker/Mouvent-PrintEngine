@@ -171,6 +171,9 @@ int _handle_ctrl_msg(RX_SOCKET socket, void *pmsg)//, int len, struct sockaddr *
 	switch (phdr->msgId)
 	{
 	case CMD_STEPPER_CFG:			_do_config((SStepperCfg*)&phdr[1]);	break;
+	case CMD_TT_STATUS:				sok_send_2(&socket, REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);	
+									break;
+
 //	case CMD_PING:					_do_ping			(socket);							 break;
 	default:
 		switch (RX_StepperCfg.printerType)
@@ -199,7 +202,7 @@ int _handle_ctrl_msg(RX_SOCKET socket, void *pmsg)//, int len, struct sockaddr *
 										else Error(ERR_CONT, 0, "RX_StepperCfg.boardNo=%d, not implemented!", RX_StepperCfg.boardNo);
 										break;
 			
-		default:	Error(ERR_CONT, 0, "PrinterType %d not implemented", RX_StepperCfg.printerType);
+		default:	Error(ERR_CONT, 0, "PrinterType %d not implemented, msgId=0x%08x", RX_StepperCfg.printerType, phdr->msgId);
 		}			
 	}
 	

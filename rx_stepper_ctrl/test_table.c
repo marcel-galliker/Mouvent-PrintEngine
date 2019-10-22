@@ -199,13 +199,9 @@ int tt_menu(void)
 //--- tt_handle_ctrl_msg -----------------------------------------
 int tt_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 {
-//	if (msgId!=CMD_TT_STATUS) 
-//		RX_StepperStatus.err=0;
-
 	_MainSocket = socket;
 	switch(msgId)
 	{
-	case CMD_TT_STATUS:		sok_send_2(&socket, REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);	break;
 	case CMD_TT_SCAN:		tt_set_scan_par		(pdata);
 							tt_start_cmd		(msgId);
 							break;

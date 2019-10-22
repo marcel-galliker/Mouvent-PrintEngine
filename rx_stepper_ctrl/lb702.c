@@ -123,7 +123,7 @@ void lb702_main(int ticks, int menu)
 		RX_StepperStatus.info.z_in_print = FALSE;
 		RX_StepperStatus.info.z_in_cap   = FALSE;			
 	}
-	if (_CmdRunning && motors_move_done(MOTOR_Z_BITS)) 
+	if (_CmdRunning && motors_move_done(MOTOR_Z_BITS))
 	{
 		RX_StepperStatus.info.moving = FALSE;
 		if (_CmdRunning == CMD_CAP_REFERENCE) 
@@ -250,9 +250,6 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 	_MainSocket = socket;
 	switch(msgId)
 	{
-	case CMD_TT_STATUS:				sok_send_2(&socket, REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);	
-									break;
-
 	case CMD_CAP_STOP:				strcpy(_CmdName, "CMD_CAP_STOP");
 									motors_stop(MOTOR_Z_BITS);
 									_CmdRunning = 0;

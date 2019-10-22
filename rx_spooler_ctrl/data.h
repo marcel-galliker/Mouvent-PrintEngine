@@ -23,6 +23,7 @@ typedef struct
 	UINT8					virtualPasses;
 	UINT8					virtualPass;
 	int						headsUsed;
+	int						headsInUse;
 	int						lengthPx;
 	int						decompressing;
 	struct SBmpSplitInfo	*splitInfo;	// splitInfo[splitInfoCnt];
@@ -72,9 +73,11 @@ int  data_get_size	(const char *path, UINT32 page, UINT32 spacePx, UINT32 *width
 void data_clear		(BYTE* buffer[MAX_COLORS]);
 int  data_malloc	(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPixel, SColorSplitCfg *psplit, int splitCnt, int multicopy, UINT64 *pBufSize, BYTE* buffer[MAX_COLORS]);
 int  data_free		(UINT64 *pBufSize, BYTE* buffer[MAX_COLORS]);
-int  data_load		(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UINT8 multiCopy, int gapPx, int blkNo, int printMode, int variable, UINT8 virtualPasses, UINT8 virtualPass, int flags, int clearBlockUsed, int same, int smp_bufsize, BYTE* buffer[MAX_COLORS]);
+int  data_load		(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UINT8 multiCopy, int gapPx, int blkNo, int blkCnt, int printMode, int variable, UINT8 virtualPasses, UINT8 virtualPass, int flags, int clearBlockUsed, int same, int smp_bufsize, BYTE* buffer[MAX_COLORS]);
+int  data_same		(SPageId *id);
 // int  data_reload	(SPageId *id);
 SBmpSplitInfo*		data_get_next	(int *headCnt);
 void data_fill_blk	(SBmpSplitInfo *psplit, int blkNo, BYTE *dst);
 int  data_sent		(SBmpSplitInfo *psplit, int head); // return TRUE=all data sent
 int  data_ready		(void);
+int	 data_printList_idx(SPrintListItem *pitem);

@@ -36,7 +36,7 @@ static int	_Trace=0;
 #define SIMU_WRITE	1	// write data to file
 #define SIMU_READ	2	// test reading files, no sending, no writing
 
-static int	_Simulation=SIMU_WRITE;
+static int	_Simulation=SIMU_OFF;
 
 // #define RAW_SOCKET
 
@@ -430,7 +430,9 @@ static int _send_image_data(SBmpSplitInfo *pInfo)
 	else
 	{
 		static int test=0;
-		TrPrintfL(_Trace, "Head[%d.%d]: _send_image_data blocks[%d .. %d]", pInfo->board, pInfo->head, pInfo->blk0, pInfo->blk0+pInfo->blkCnt);
+		SPageId *pid=&pInfo->pListItem->id;
+		int idx=data_printList_idx(pInfo->pListItem);
+		TrPrintfL(_Trace, "Head[%d.%d]: _send_image_data pl[%d](id=%d, p=%d, c=%d, s=%d) blocks[%d .. %d] ", pInfo->board, pInfo->head, idx, pid->id, pid->page, pid->copy, pid->scan, pInfo->blk0, pInfo->blk0+pInfo->blkCnt);
 		pInfo->sendFromBlk	= 0;
 
 		_HBPar[pInfo->board]->pBmpSplitPar[pInfo->head] = pInfo;
@@ -470,10 +472,11 @@ static int _send_image_cmd(SBmpSplitInfo *pInfo)
 
 	TrPrintfL(TRUE, "_BlkNo[%d][%d]: idx=%d, blk=%d, cnt=%d, test=%d, SENT", pInfo->board, pInfo->head, _TestImgNo[pInfo->board][pInfo->head], pInfo->blk0, pInfo->blkCnt, pInfo->test);
 
-	TrPrintfL(_Trace, "_send_image_cmd[%d.%d].img[%d]", pInfo->board, pInfo->head, ++_TestImgNo[pInfo->board][pInfo->head]);
+	SPageId *pid = &pInfo->pListItem->id;
+	TrPrintfL(_Trace, "_send_image_cmd[%d.%d].img[%d] (id=%d, page=%d, copy=%d, scan=%d)", pInfo->board, pInfo->head, ++_TestImgNo[pInfo->board][pInfo->head], pid->id, pid->page, pid->copy, pid->scan);
 	sok_send(&_HBPar[pInfo->board]->ctrlSocket, &imageCmd);
 
-	pInfo->blkCnt = -pInfo->blkCnt;
+//	pInfo->blkCnt = -pInfo->blkCnt;
 
 	return REPLY_OK;
 }
@@ -603,7 +606,7 @@ static void _req_used_flags(SHBThreadPar *par, int head, int blkNo, int blkCnt, 
 	SHeadCfg		*pHead;
 
 	if (_Abort) return;
-
+	
 	pcmd->hdr.msgLen	= sizeof(SBlockUsedCmd);
 	pcmd->hdr.msgId	= CMD_GET_BLOCK_USED;
 	
@@ -629,6 +632,10 @@ static void _req_used_flags(SHBThreadPar *par, int head, int blkNo, int blkCnt, 
 		if (head<SIZEOF(_TestBlockUsedReqTime))
 			_TestBlockUsedReqTime[head][par->blockUsedId] = rx_get_ticks();
 		TrPrintfL(_Trace, "Head[%d.%d]: req block used: id=%d, blkNo=%d, blkCnt=%d (blk %d .. %d) line=%d", par->cfg.no, head, pcmd->id, pcmd->blkNo, pcmd->blkCnt, pcmd->blkNo, pcmd->blkNo+pcmd->blkCnt, line);
+
+		if (pcmd->blkCnt>1000)
+			printf("Error");
+
 		sok_send(&par->ctrlSocket, pcmd);
 		blkCnt -= pcmd->blkCnt;
 		blkNo  += pcmd->blkCnt;
@@ -736,7 +743,7 @@ static int _send_to_board(SHBThreadPar *par, int head, int blkNo, int blkCnt)
 
 		if (_Abort) return REPLY_OK;
 		
-		if (pinfo->sendFromBlk >= pinfo->blkCnt)
+		if (pinfo->sendFromBlk >= pinfo->blkCnt || dstBlk == par->blockOutIdx)
 		{
 			SPageId *pid   = &pinfo->pListItem->id;
 			SPageId *plast = &par->lastId[head];

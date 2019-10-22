@@ -322,9 +322,23 @@ static int _do_encoder_pg_restart(RX_SOCKET socket)
 	{
 		pmsg = &_DistMsg[i%SIZEOF(_DistMsg)];
 		TrPrintfL(TRUE, "_do_encoder_pg_dist(no=%d, cnt=%d, dist=%d)", i, pmsg->cnt, pmsg->dist);
-		if (pmsg->dist)		fpga_pg_set_dist(pmsg->cnt, pmsg->dist);
-		if (pmsg->ignore)	Error(ERR_CONT, 0, "Not implemented yet");
-		if (pmsg->window)	Error(ERR_CONT, 0, "Not implemented yet");									
+		if (pmsg->printGoMode==PG_MODE_MARK || pmsg->printGoMode==PG_MODE_MARK_FILTER) 
+		{
+			if (i==0) Error(ERR_CONT, 0, "Not implemented yet");
+			if (i==0)
+			{
+				SEncoderPgDist msg;
+				memcpy(&msg , pmsg, sizeof(msg));
+				msg.ignore=0;
+				msg.window=0;
+				fpga_set_printmark(&msg);			
+			}
+			else fpga_set_printmark(pmsg);
+		}
+		else
+		{
+			fpga_pg_set_dist(pmsg->cnt, pmsg->dist);
+		}
 	}
 
 	fpga_enc_config(0, &RX_EncoderCfg, TRUE);

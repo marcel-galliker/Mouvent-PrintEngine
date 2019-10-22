@@ -905,11 +905,7 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 	int firsttime = 0;
 	
 	switch (msgId)
-	{
-	case CMD_TT_STATUS:				sok_send_2(&socket, REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);
-									//_txrob_control(socket, ctrlMode);
-									break;
-	
+	{	
 	case CMD_CLN_STOP:				strcpy(_CmdName, "CMD_CLN_STOP");
 		motors_stop(MOTOR_ALL_BITS); // Stops Hub and Robot
 		Fpga.par->output &= ~RO_ALL_OUTPUTS; // set all output to off
