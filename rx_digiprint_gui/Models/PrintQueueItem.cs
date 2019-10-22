@@ -639,6 +639,10 @@ namespace RX_DigiPrint.Models
             {
                 using (Tiff  tif = Tiff.Open(filePath, "r"))
                 {
+
+                    int width = _GetField(tif, TiffTag.IMAGEWIDTH);
+                    int res   = _GetField(tif, TiffTag.XRESOLUTION);
+
                     SrcWidth     = 25.4*_GetField(tif, TiffTag.IMAGEWIDTH) /_GetField(tif, TiffTag.XRESOLUTION);
                     SrcHeight    = 25.4*_GetField(tif, TiffTag.IMAGELENGTH)/_GetField(tif, TiffTag.YRESOLUTION);
                     PageWidth    = SrcWidth;

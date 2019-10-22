@@ -531,14 +531,28 @@ static int _print_next(void)
 				//--- check print-go Mode ----
 				if (_Item.printGoMode==PG_MODE_LENGTH)
 				{
-					if (_Item.printGoDist < (_Item.srcWidth*90)/100)
+					if (_Scanning)
 					{
-						Error(ERR_ABORT, 0, "Print to Print Distance (%d mm) too short (min=%d mm)", _Item.printGoDist/1000, (_Item.srcWidth*90)/100000);						
-						memset(&_Item, 0, sizeof(_Item));
-						pc_abort_printing();
+						if (_Item.printGoDist < (_Item.srcWidth*90)/100)
+						{
+							Error(ERR_ABORT, 0, "Print to Print Distance (%d mm) too short (min=%d mm)", _Item.printGoDist/1000, (_Item.srcWidth*90)/100000);						
+							memset(&_Item, 0, sizeof(_Item));
+							pc_abort_printing();
+						}
+						else if (_Item.printGoDist < (_Item.srcWidth*95)/100) 
+							Error(WARN, 0, "Print to Print Distance (%d mm) short", _Item.printGoDist/1000);							
 					}
-					else if (_Item.printGoDist < (_Item.srcWidth*95)/100) 
-						Error(WARN, 0, "Print to Print Distance (%d mm) short", _Item.printGoDist/1000);	
+					else
+					{							
+						if (_Item.printGoDist < (_Item.srcHeight*90)/100)
+						{
+							Error(ERR_ABORT, 0, "Print to Print Distance (%d mm) too short (min=%d mm)", _Item.printGoDist/1000, (_Item.srcHeight*90)/100000);						
+							memset(&_Item, 0, sizeof(_Item));
+							pc_abort_printing();
+						}
+						else if (_Item.printGoDist < (_Item.srcHeight*95)/100) 
+							Error(WARN, 0, "Print to Print Distance (%d mm) short", _Item.printGoDist/1000);	
+					}
 				}
 
 				if (RX_Config.printer.type==printer_DP803) Error(LOG, 0, "Start Printing: >>%s<<, copiesTotal=%d, speed=%d m/min", _Item.filepath, _Item.copiesTotal, _Item.speed);

@@ -131,6 +131,7 @@ static UINT32	_PM_Cnt;
 static INT32	_Window;
 static INT32	_Ignore;
 static int		_PG_START_POS;
+static int		_FirstMarkPos;
 static int		_RevSumStart[8];
 static int		_Restarted = FALSE;
 
@@ -645,7 +646,7 @@ void fpga_enc_simu(int khz)
 		Fpga->cfg.encOut[outNo].scanning		= FALSE;				
 	}
 	
-	TrPrintfL(TRUE, "fpga_enc_simu end: marks:%06d ok:%06d filtred=%06d missed=%06d dist=%06d pos=%06d\n", Fpga->stat.dig_in_cnt, Fpga->stat.encOut[0].PG_cnt, _PM_Filtered_Cnt, _PM_Missed_Cnt, Fpga->stat.encIn[0].digin_edge_dist, Fpga->stat.encOut[0].position);
+	TrPrintfL(TRUE, "fpga_enc_simu end: marks:%06d ok:%06d filtred=%06d missed=%06d dist=%06d pos=%06d\n", _PM_Cnt, Fpga->stat.encOut[0].PG_cnt, _PM_Filtered_Cnt, _PM_Missed_Cnt, Fpga->stat.encIn[0].digin_edge_dist, Fpga->stat.encOut[0].position);
 }
 
 //--- fpga_encoder_enable -------------------------------------
@@ -911,7 +912,11 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg, int restart)
 	int act_pos;
 	
 	if (restart) act_pos = Fpga->stat.encIn[0].position;
-	else		 act_pos =_micron2inc(pcfg->pos_actual);
+	else		 
+	{
+		act_pos =_micron2inc(pcfg->pos_actual);
+		_FirstMarkPos=0;		
+	}
 		
 	for (pgNo=0; pgNo<SIZEOF(Fpga->cfg.pg); pgNo++)
 	{
@@ -926,7 +931,13 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg, int restart)
 			Error(LOG, 0, "Restart: pos_in=%d, pg_start_pos=%d", Fpga->stat.encIn[0].position, _pg_start_pos());
 			if (Fpga->stat.encIn[0].position>_pg_start_pos() && Fpga->stat.encIn[0].position>500000)
 				Error(ERR_ABORT, 0, "PAUSE: Moving back is too short! pos_in=%d, pg_start_pos=%d", Fpga->stat.encIn[0].position, _pg_start_pos());
-			Fpga->cfg.pg[pgNo].enc_start_pos_fwd = _pg_start_pos();								
+			if (Fpga->cfg.pg[pgNo].fifos_used==FIFOS_DIST) Fpga->cfg.pg[pgNo].enc_start_pos_fwd = _pg_start_pos();
+			else 
+			{
+				_PG_START_POS = 0;
+				Fpga->cfg.encIn[pgNo].reset_pos = 0;
+				Fpga->cfg.pg[pgNo].enc_start_pos_fwd = _micron2inc(pcfg->pos_pg_fwd-100);	
+			}
 		}
 		else
 		{
@@ -958,32 +969,33 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg, int restart)
 			Fpga->cfg.general.shift_delay_tel		= (int)((pcfg->printGoDist   -Fpga->cfg.general.min_mark_len)/_StrokeDist);
 		//	Fpga->cfg.pg[pgNo].dig_in_sel   = 0;
 		//	Fpga->cfg.pg[pgNo].quiet_window = 10;
-		//	if (FpgaQSys->printGo_status.fill_level) Fpga->cfg.pg[pgNo].fifos_ready	= TRUE;
-			
-			//{
-				//--- flight time compensation of Mark Reader ----------------------------	
-
-			double ftc_strokes = pcfg->ftc/_StrokeDist;
-			double hz		   = 100.0/60.0*1000000.0/_StrokeDist;// fix 100 m/min
-			double speed	   = (hz/FPGA_FREQ)*0x80000000;
-			double ratio       = ftc_strokes / (hz / FPGA_FREQ);
-
-			Fpga->cfg.general.ftc_speed = (int)speed;
-			Fpga->cfg.general.ftc_ratio = (int)ratio;
-			TrPrintfL(TRUE, "fpga_pg_config start: set ftc_speed=%d", (int)speed);
-			TrPrintfL(TRUE, "fpga_pg_config start: set ftc_ratio=%d", (int)ratio);
-			//}
+		//	if (FpgaQSys->printGo_status.fill_level) Fpga->cfg.pg[pgNo].fifos_ready	= TRUE;	
 		}
-	
+			
 		Fpga->cfg.pg[pgNo].printgo_n	= FALSE;
 	}
+	
+	{
+		//--- flight time compensation of Mark Reader ----------------------------	
+
+		double ftc_strokes = pcfg->ftc/_StrokeDist;
+		double hz		   = 100.0/60.0*1000000.0/_StrokeDist;// fix 100 m/min
+		double speed	   = (hz/FPGA_FREQ)*0x80000000;
+		double ratio       = ftc_strokes / (hz / FPGA_FREQ);
+
+		Fpga->cfg.general.ftc_speed = (int)speed;
+		Fpga->cfg.general.ftc_ratio = (int)ratio;
+		TrPrintfL(TRUE, "fpga_pg_config start: set ftc_speed=%d", (int)speed);
+		TrPrintfL(TRUE, "fpga_pg_config start: set ftc_ratio=%d", (int)ratio);
+	}
+
 //	if (!restart)	RX_EncoderStatus.PG_cnt = 0;
 //	RX_EncoderStatus.PG_stop	   = 0;
 	_PrintGo_Locked				   = FALSE;
 
 	test_cfg_done();
 	
-	TrPrintfL(TRUE, "fpga_pg_config end: marks:%06d ok:%06d filtred=%06d missed=%06d dist=%06d pos=%06d", Fpga->stat.dig_in_cnt, Fpga->stat.encOut[0].PG_cnt, _PM_Filtered_Cnt, _PM_Missed_Cnt, Fpga->stat.encIn[0].digin_edge_dist, Fpga->stat.encOut[0].position);
+	TrPrintfL(TRUE, "fpga_pg_config end: marks:%06d ok:%06d filtred=%06d missed=%06d dist=%06d pos=%06d", _PM_Cnt, Fpga->stat.encOut[0].PG_cnt, _PM_Filtered_Cnt, _PM_Missed_Cnt, Fpga->stat.encIn[0].digin_edge_dist, Fpga->stat.encOut[0].position);
 	TrPrintfL(TRUE, "fpga_pg_config end: enable=%d, pos_in=%d, enc_start_pos_fwd=%d, pg_start_pos=%d, restart=%d", Fpga->cfg.encIn[0].enable, Fpga->stat.encIn[0].position, Fpga->cfg.pg[0].enc_start_pos_fwd, _pg_start_pos(), restart);
 
 	return REPLY_OK;
@@ -1051,6 +1063,8 @@ void  fpga_pg_stop(void)
 	
 	Error(LOG, 0, "fpga_pg_stop");
 	
+	RX_EncoderStatus.distTelCnt -=  FpgaQSys->window_status.fill_level;
+	
 	_PrintGo_Enabled = FALSE;
 	Fpga->cfg.general.reset_fifos = TRUE;
 	while (FpgaQSys->printGo_status.fill_level)
@@ -1082,21 +1096,36 @@ void  fpga_pg_set_dist(int cnt, int dist)
 		int incs = (int)(dist/_StrokeDist);
 		while (cnt-->0) FpgaQSys->printGo_fifo = incs;
 		for (pgNo=0; pgNo<SIZEOF(Fpga->cfg.pg); pgNo++) Fpga->cfg.pg[pgNo].fifos_ready = TRUE;
+
 		RX_EncoderStatus.distTelCnt++;
+		TrPrintfL(TRUE, "fpga_pg_set_dist(no=%d, cnt=%d, dist=%d)", RX_EncoderStatus.distTelCnt, cnt, dist);
+
 	//	Error(LOG, 0, "fpga_pg_set_dist dist=%d, incs=%d", dist, incs);		
 	}
+}
+
+//--- fpga_get_restart_ignore -------------------------
+int	  fpga_get_restart_ignore(void)
+{
+	int ignore = (int)(_IncDist * (Fpga->stat.encOut[0].pg_start_pos - Fpga->stat.encIn[0].position));
+	_FirstMarkPos = Fpga->stat.encOut[0].pg_start_pos;
+	TrPrintfL(TRUE, "fpga_get_restart_ignore (pg_start_pos=%d, InPos=%d), diff=%d, ignore=%d, _IncDist=%f.5", Fpga->stat.encOut[0].pg_start_pos, Fpga->stat.encIn[0].position, (Fpga->stat.encOut[0].pg_start_pos-Fpga->stat.encIn[0].position),ignore , _StrokeDist);
+	return ignore;
 }
 
 //--- fpga_set_printmark -------------------------------------------
 void  fpga_set_printmark(SEncoderPgDist *pmsg)
 {
 	int pgNo;
-	
+
 	//Fpga->cfg.general.shift_delay_tel =  (int)((pmsg->dist-Fpga->cfg.general.min_mark_len)/_StrokeDist);
 	FpgaQSys->window_fifo  = _Window = (int)(pmsg->window/_StrokeDist);
-	FpgaQSys->ignored_fifo = _Ignore = (int)(pmsg->ignore/_StrokeDist);
+	if (pmsg->ignore>10000) FpgaQSys->ignored_fifo = _Ignore = (int)(pmsg->ignore/_StrokeDist);
+	else FpgaQSys->ignored_fifo = _Ignore = (int)(10000/_StrokeDist);
 	for (pgNo=0; pgNo<SIZEOF(Fpga->cfg.pg); pgNo++) Fpga->cfg.pg[pgNo].fifos_ready = TRUE;
+
 	RX_EncoderStatus.distTelCnt++;
+	TrPrintfL(TRUE, "fpga_set_printmark(no=%d, cnt=%d, dist=%d, ignore=%d, window=%d)", RX_EncoderStatus.distTelCnt, pmsg->cnt, pmsg->dist, pmsg->ignore, pmsg->window);
 }
 
 //--- _pg_ctrl ------------------------------------------------------
@@ -1193,12 +1222,13 @@ static void  _pg_ctrl(void)
 				Error(WARN, 0, "PrintMark %d Missed", RX_EncoderStatus.PG_cnt);
 				_PM_Missed_Cnt = Fpga->stat.dig_pg_window_err;
 			}
-			if (Fpga->stat.encOut[0].mark_edge_warn!=_PM_Filtered_Cnt)
-			{
-				int speed=(int)((Fpga->stat.encOut[0].speed*23/1000)*60.0/1200*0.0254);
-				if (FpgaQSys->window_status.fill_level) Error(WARN, 0, "Mark near PrintMark %d Filtered", RX_EncoderStatus.PG_cnt);
-				else                                    Error(LOG,  0, "Mark near PrintMark %d Filtered, speed=%dm/min", RX_EncoderStatus.PG_cnt, speed);
+			if (_PM_Cnt<RX_EncoderStatus.distTelCnt && Fpga->stat.encOut[0].mark_edge_warn!=_PM_Filtered_Cnt)
+			{				 
 				TrPrintfL(TRUE, "Mark near PrintMark %d Filtered, InPos=%06d, OutPos=%06d", RX_EncoderStatus.PG_cnt, Fpga->stat.encIn[0].position, Fpga->stat.encOut[0].position);
+				TrPrintfL(TRUE, "Fpga->stat.encOut[0].mark_edge_warn=%d _PM_Filtered_Cnt=%d, _PM_Cnt=%d, distTelCnt=%d", Fpga->stat.encOut[0].mark_edge_warn, _PM_Filtered_Cnt, _PM_Cnt, RX_EncoderStatus.distTelCnt);
+								
+				if (FpgaQSys->window_status.fill_level && (Fpga->stat.encIn[0].position > _FirstMarkPos)) Error(WARN, 0, "Mark near PrintMark %d Filtered", RX_EncoderStatus.PG_cnt);
+			//	else                                    Error(LOG,  0, "Mark near PrintMark %d Filtered", RX_EncoderStatus.PG_cnt);
 				_PM_Filtered_Cnt = Fpga->stat.encOut[0].mark_edge_warn;
 			}			
 		}

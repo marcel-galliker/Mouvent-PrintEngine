@@ -742,7 +742,7 @@ static int _send_to_board(SHBThreadPar *par, int head, int blkNo, int blkCnt)
 
 		if (_Abort) return REPLY_OK;
 		
-		if (pinfo->sendFromBlk >= pinfo->blkCnt || (RX_Spooler.printerType==printer_LB702_UV && endReached && (pinfo->pListItem->flags&FLAG_SAME)))
+		if (pinfo->sendFromBlk >= pinfo->blkCnt || (RX_Spooler.printerType==printer_LB702_UV && (endReached && (cnt==0 || (pinfo->pListItem->flags&FLAG_SAME)))))
 		{
 			SPageId *pid   = &pinfo->pListItem->id;
 			SPageId *plast = &par->lastId[head];

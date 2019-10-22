@@ -737,6 +737,7 @@ SBmpSplitInfo*  data_get_next	(int *headCnt)
 {
 	int idx;
 		
+	TrPrintfL(TRUE, "data_get_next _InIdx=%d, _SendIdx=%d, _OutIdx=%d", _InIdx, _SendIdx, _OutIdx);
 	if (_SendIdx!=_OutIdx) return NULL;
 	if (_SendIdx==_InIdx) return NULL;
 
@@ -761,6 +762,7 @@ SBmpSplitInfo*  data_get_next	(int *headCnt)
 	_SendIdx = (_SendIdx+1) % PRINT_LIST_SIZE;
 	*headCnt = _HeadCnt;
 	_PrintList[idx].headsInUse = _PrintList[idx].headsUsed;
+	TrPrintfL(TRUE, "data_get_next idx=%d, headsUsed=%d", idx, _PrintList[idx].headsUsed);
 	
 	/*
 	{
@@ -1775,6 +1777,13 @@ int data_sent(SBmpSplitInfo *psplit, int head)
 //				Error(LOG, 0, "rx_mem_unuse[0]=%d\n", cnt1);
 		}
 		psplit->data = NULL;
+
+		{
+			SPrintFileMsg evt;
+					
+			memcpy(&evt.id, &psplit->pListItem->id, sizeof(evt.id));
+			TrPrintfL(TRUE, "data_sent idx=%d (id=%d, page=%d, copy=%d, scan=%d) headsInUse=%d", _OutIdx, evt.id.id, evt.id.page, evt.id.copy, evt.id.scan, psplit->pListItem->headsInUse);
+		}
 
 		//--- send data to rx_main_ctrl ---
 		if  (psplit->pListItem->headsInUse==0)

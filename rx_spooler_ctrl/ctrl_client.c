@@ -431,7 +431,7 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 		evt.bufReady    = reply.bufReady;
 		sok_send(&socket, &evt);
 		
-		TrPrintfL(TRUE, "REPLY EVT_PRINT_FILE, bufReady=%d", evt.bufReady);
+		TrPrintfL(TRUE, "REPLY EVT_PRINT_FILE, bufReady=%d, _ReadyToSend=%d", evt.bufReady, _ReadyToSend);
 		if (hc_in_simu()) _ReadyToSend=TRUE;
 		if (_ReadyToSend) hc_send_next();
 		memcpy(&_LastFilename, &msg.filename, sizeof(_LastFilename));
