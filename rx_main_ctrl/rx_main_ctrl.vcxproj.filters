@@ -147,6 +147,9 @@
     <ClInclude Include="step_dp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="siemens_ctrl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="boot_svr.c">
@@ -267,6 +270,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="step_dp.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="siemens_ctrl.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

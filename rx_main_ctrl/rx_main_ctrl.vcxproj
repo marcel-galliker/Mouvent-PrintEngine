@@ -49,6 +49,7 @@
     <ClInclude Include="ctr.h" />
     <ClInclude Include="pe_main.h" />
     <ClInclude Include="prod_log.h" />
+    <ClInclude Include="siemens_ctrl.h" />
     <ClInclude Include="step_dp.h" />
     <ClInclude Include="step_lb.h" />
     <ClInclude Include="args.h" />
@@ -90,6 +91,7 @@
     <ClCompile Include="ctr.c" />
     <ClCompile Include="pe_main.c" />
     <ClCompile Include="prod_log.c" />
+    <ClCompile Include="siemens_ctrl.c" />
     <ClCompile Include="step_dp.c" />
     <ClCompile Include="step_lb.c" />
     <ClCompile Include="args.c" />

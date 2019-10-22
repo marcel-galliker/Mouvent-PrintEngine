@@ -26,7 +26,7 @@
 #define CURRENT_HOLD	50
 
 #define HEAD_UP_IN		0
-#define POS_UP			1000
+#define POS_UP			5000
 
 #define STEPS_REV		200*16	// steps per motor revolution * 16 times oversampling
 #define DIST_REV		2000.0	// moving distance per revolution [µm]

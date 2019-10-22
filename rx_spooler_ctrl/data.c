@@ -1197,8 +1197,10 @@ static int _data_split_scan(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 					pInfo->used			= TRUE;
 					pInfo->board		= head/RX_Spooler.headsPerBoard;
 					pInfo->head			= head%RX_Spooler.headsPerBoard;
-				//	pInfo->blk0			= _BlkNo[pInfo->board][pInfo->head]+RX_Spooler.dataBlkCntHead*(pInfo->head%RX_Spooler.headsPerBoard);
-					pInfo->blk0			= blkNo+RX_Spooler.dataBlkCntHead*(pInfo->head%RX_Spooler.headsPerBoard);
+					if (RX_Spooler.printerType==printer_LB702_UV)
+						pInfo->blk0			= blkNo+RX_Spooler.dataBlkCntHead*(pInfo->head%RX_Spooler.headsPerBoard);
+					else
+						pInfo->blk0			= _BlkNo[pInfo->board][pInfo->head]+RX_Spooler.dataBlkCntHead*(pInfo->head%RX_Spooler.headsPerBoard);
 					pInfo->bitsPerPixel	= pBmpInfo->bitsPerPixel;
 					pInfo->colorCode	= pBmpInfo->colorCode[color];
 					pInfo->inkSupplyNo  = pBmpInfo->inkSupplyNo[color];
@@ -1260,8 +1262,10 @@ static int _data_split_scan(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 					pInfo->used			= TRUE;
 					pInfo->board		= head/RX_Spooler.headsPerBoard;
 					pInfo->head			= head%RX_Spooler.headsPerBoard;
-				//	pInfo->blk0			= _BlkNo[pInfo->board][pInfo->head]+RX_Spooler.dataBlkCntHead*(pInfo->head%RX_Spooler.headsPerBoard);
-					pInfo->blk0			= blkNo+RX_Spooler.dataBlkCntHead*(pInfo->head%RX_Spooler.headsPerBoard);
+					if (RX_Spooler.printerType==printer_LB702_UV)
+						pInfo->blk0			= blkNo+RX_Spooler.dataBlkCntHead*(pInfo->head%RX_Spooler.headsPerBoard);
+					else
+						pInfo->blk0			= _BlkNo[pInfo->board][pInfo->head]+RX_Spooler.dataBlkCntHead*(pInfo->head%RX_Spooler.headsPerBoard);
 					pInfo->bitsPerPixel	= 1;
 					pInfo->colorCode	= pBmpInfo->colorCode[color];
 					pInfo->inkSupplyNo  = pBmpInfo->inkSupplyNo[color];
@@ -1275,7 +1279,7 @@ static int _data_split_scan(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 					pInfo->srcLineCnt	= 1;
 					pInfo->dstLineLen	= 32; // align to 256 Bits (32 Bytes) 
 					pInfo->blkCnt		= 1;
-				//	if (clearBlockUsed)	_BlkNo[pInfo->board][pInfo->head] = (_BlkNo[pInfo->board][pInfo->head]+pInfo->blkCnt)%(RX_Spooler.dataBlkCntHead);
+					if (clearBlockUsed)	_BlkNo[pInfo->board][pInfo->head] = (_BlkNo[pInfo->board][pInfo->head]+pInfo->blkCnt)%(RX_Spooler.dataBlkCntHead);
 				}
 			}
 		}	

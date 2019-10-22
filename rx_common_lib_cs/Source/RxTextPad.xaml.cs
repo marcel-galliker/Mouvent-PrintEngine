@@ -189,7 +189,7 @@ namespace RX_Common
             double left = _Position.X*screen.Scale;
             double top  = _Position.Y*screen.Scale;
             double border=2;
-            if (screen.Surface)
+            if (screen.Surface || screen.Elo)
             {
                 top  += _ObjHeight;
                 left -= 32;

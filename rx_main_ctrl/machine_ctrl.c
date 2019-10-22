@@ -15,6 +15,7 @@
 #include "tcp_ip.h"
 #include "enc_ctrl.h"
 #include "plc_ctrl.h"
+#include "siemens_ctrl.h"
 #include "chiller.h"
 #include "step_ctrl.h"
 #include "ctrl_svr.h"
@@ -54,6 +55,7 @@ static void set_interface(void)
 int		machine_init(void)
 {
 	plc_init();
+	siemens_init();
 	set_interface();
 	return REPLY_OK;
 }
@@ -62,12 +64,14 @@ int		machine_init(void)
 int		machine_end(void)
 {
 	plc_end();
+	siemens_end();
 	return REPLY_OK;
 }
 
 //--- machine_tick -------------------------------
 int		machine_tick(void)
 {
+	siemens_tick();
 	return REPLY_OK;
 }
 
@@ -83,6 +87,7 @@ void	machine_error_reset(void)
 {
 	chiller_error_reset();
 	plc_error_reset();
+	siemens_error_reset();
 	fluid_error_reset();
 	ctrl_head_error_reset();
 	step_error_reset();

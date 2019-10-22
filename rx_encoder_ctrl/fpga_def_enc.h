@@ -37,32 +37,32 @@ typedef struct
 	UINT32	rev_sum;			// 0x0000: 4x Encoder Steps per revolution (inc_revolution wrap)
 	UINT32	i_to_a;				// 0x0004: 4x Time between Index pulse and next edge in signal A
 	UINT32	i_to_b;				// 0x0008: 4x Time between Index pulse and next edge in signal B
-	UINT32	position;			// 0x000c: Actual position of the encoder (32bit wrap)	
+	UINT32	position;			// 0x000c: // steps //  Actual position of the encoder (32bit wrap)	
 	UINT32	step_time;			// 0x0010: Actual step time
 	UINT32	setp_time_min;		// 0x0014: Minimum step time (can be reset)
 	UINT32	step_time_max;		// 0x0018: Maximum step time (can be reset)
-	UINT32	inc_per_revolution;	// 0x001c: measured steps per index
+	UINT32	inc_per_revolution;	// 0x001c: // steps // measured steps per index
 	UINT32	res_20;				// 0x0020
-	UINT32	enc_diff;			// 0x0024
-	UINT32	position_rev;		// 0x0028 4x 
-	UINT32	enc_diff_min;		// 0x002c
-	UINT32	enc_diff_max;		// 0x0030
+	UINT32	enc_diff;			// 0x0024 // steps // 
+	UINT32	position_rev;		// 0x0028 // steps // 4x 
+	UINT32	enc_diff_min;		// 0x002c // steps // 
+	UINT32	enc_diff_max;		// 0x0030 // steps // 
 	UINT32	enc_diff_overflow;	// 0x0034
-	UINT32	digin_mark_len_cnt;	// 0x0038
-	UINT32	digin_edge_dist;	// 0x003c 4x distance between digin rising edges (in encoder input steps)
+	UINT32	digin_mark_len_cnt;	// 0x0038 // steps // 
+	UINT32	digin_edge_dist;	// 0x003c // steps // 4x distance between digin rising edges (in encoder input steps)
  } SEncInStatus;
 
 //--- SEncOutStatus -----------------------------------------
 typedef struct
 {
-	UINT32	position;		// 0x0000[Bit 0..19]: 20 Bit counter! in strokes
-	UINT32	speed;			// 0x0004: speed* 50000000/2^31 // speed*23/1000 = stokes per sec
+	UINT32	position;		// 0x0000[Bit 0..19]: // strokes // 20 Bit counter! in strokes
+	UINT32	speed;			// 0x0004: // strokes/s // speed* 50000000/2^31 // speed*23/1000 = stokes per sec
 	UINT32	res_8;			// 0x0008:
 	UINT32	res_c;			// 0x000c:
 	UINT32	PG_cnt;			// 0x0010[Bit 0..9]: 10 bit counter!
 	UINT32	mark_edge_warn;	// 0x0014 mark edge detected during ignore window
-	UINT32	window_mark_pos;// 0x0018 distance from Mark pos until end of window in strokes
-	UINT32	pg_start_pos;	// 0x001c in encoder input steps
+	UINT32	window_mark_pos;// 0x0018 // strokes // distance from Mark pos until end of window in strokes
+	UINT32	pg_start_pos;	// 0x001c // steps // in encoder input steps
 	UINT32	res_20;			// 0x0020
 	UINT32	res_24;			// 0x0024
 	UINT32	res_28;			// 0x0028
@@ -205,8 +205,8 @@ typedef struct
 	UINT32	enable;				// 0x0000:
 	UINT32	reset_min_max;		// 0x0004:
 	UINT32	orientation;		// 0x0008:
-	UINT32	index_on_b;			// 0x000c:
-	UINT32	inc_per_revolution;	// 0x0010:
+	UINT32	res_0c;				// 0x000c:
+	UINT32	inc_per_revolution;	// 0x0010: // steps per index //
 	UINT32	correction;			// 0x0014: 0x04: Linear correction (Textile Slide)
 			#define CORR_OFF		0x00
 			#define CORR_ENCODER	0x01	// 32 values
@@ -231,7 +231,7 @@ typedef struct
 	UINT32	reset_min_max;		// 0x0004:
 	UINT32	dist_ratio;			// 0x0008: Ratio of: (stroke step size)/(encoder step size); 31 digits after the binary point
 	UINT32	synthetic_freq;		// 0x000c: Defines the frequency of the synthetic encoder.; Min: 1 Hz; Max: 200 KHz
-	UINT32	backlash;			// 0x0010:
+	UINT32	backlash;			// 0x0010: if enabled, keeps out-pos while driving backwards, until driving forwards and reaching higher out-pos
 	UINT32	scanning;			// 0x0014:
 	UINT32	res_18;	            // 0x0018:
 	UINT32	res_1c;				// 0x001c:
@@ -249,20 +249,20 @@ typedef struct
 typedef struct
 {
 	UINT32	reset_pos;			// 0x0000:
-	UINT32	enc_start_pos_fwd;	// 0x0004:
-	UINT32  enc_start_pos_bwd;	// 0x0008:
+	UINT32	enc_start_pos_fwd;	// 0x0004: // steps //
+	UINT32  enc_start_pos_bwd;	// 0x0008: // steps //
 	UINT32	fifos_ready;		// 0x000c:
-	UINT32	pos_pg_fwd;			// 0x0010:
-	UINT32  pos_pg_bwd;			// 0x0014:
+	UINT32	pos_pg_fwd;			// 0x0010: // strokes //
+	UINT32  pos_pg_bwd;			// 0x0014: // strokes //
 	UINT32	printgo_n;			// 0x0018:
-	UINT32	fifos_used;			// 0x001c: 3 Bit: 0=OFF, 1=Distance, 2=MarkReader, 6=MarkRepairReader
+	UINT32	fifos_used;			// 0x001c: 3 Bit: 0=OFF, 1=Distance, 2=MarkReader, 4=MarkReaderAll, 6=MarkRepairReader
 		#define FIFOS_OFF				0
 		#define FIFOS_DIST				1
 		#define FIFOS_MARKREADER		2 // <quiet_window> -<ignored_fifo><window_fifo>-<ignored_fifo><window_fifo>-<ignored_fifo><window_fifo>-...
 		#define FIFOS_MARKFILTER        6 // <quiet_window> -<ignored_fifo><window_fifo>-<ignored_fifo><window_fifo>-<ignored_fifo><window_fifo>-...
 	
 	UINT32	dig_in_sel;			// 0x0020: select digital input 2bit
-	UINT32	quiet_window;		// 0x0024: First Window in MARKREADER to ignore DigIn. Restarts quiet_window when DigIn = '1' while in quiet_window
+	UINT32	quiet_window;		// 0x0024: // strokes // First Window in MARKREADER to ignore DigIn. Restarts quiet_window when DigIn = '1' while in quiet_window
 	UINT32	res_28;			    // 0x0028:
 	UINT32	res_2c;			    // 0x002c:
 	UINT32	res_30;				// 0x0030: select digital input 2bit
@@ -300,13 +300,13 @@ typedef struct
 
 	UINT32	subsample_meas;			// 0x0054: measurements to jump over, only for fpga measurements
 
-	UINT32  shift_delay;            // 0x0058[Bit 0..18]: pg delay in strokes (21um strokes)
+	UINT32  shift_delay;            // 0x0058[Bit 0..18]: // strokes // pg delay in strokes (21um strokes)
 	
 	UINT32  sel_roller_dia_offset[2]; // 0x005c[Bit 0..3]: 70 + sel_roller_dia_offset_0 = Roller Diameter in mm
 
-	UINT32  shift_delay_tel;          // 0x0060 // 19 bit // pg delay in strokes for telegram pg (21um strokes) (only encoder 0)
+	UINT32  shift_delay_tel;          // 0x0060 // 19 bit // strokes // pg delay in strokes for telegram pg (21um strokes) (only encoder 0)
 
-	UINT32  min_mark_len;            // 0x0064 // 19 bit // minimal mark length in encoder steps 
+	UINT32  min_mark_len;            // 0x0064 // 19 bit // steps // minimal mark length in encoder steps 
 	
 	UINT32  ftc_ratio;            	 // 0x0068 // 27 bit // clk // 0 bits after binary point
 	UINT32  ftc_speed;            	 // 0x006c // 24 bit // strokes/clk // 31 bits after binary point
@@ -376,8 +376,8 @@ typedef struct
 	// base:				0xff20 0000
 	UINT32	sysid_qsys;		//	 0x0000
 	UINT32	res_04;			//	 0x0004
-	UINT32	window_fifo;	//	 0x0008
-	UINT32	ignored_fifo;	//	 0x000c
+	UINT32	window_fifo;	//	 0x0008: // strokes //
+	UINT32	ignored_fifo;	//	 0x000c: // strokes //
 	UINT32	in;				//	 0x0010
 	UINT32	res_14;			//	 0x0014
 	UINT32	res_18;			//	 0x0018

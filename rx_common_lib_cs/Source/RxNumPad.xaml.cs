@@ -41,8 +41,9 @@ namespace RX_Common
             Left=0;
             Width=screen.Width;
             Height=screen.Height;
-            if (screen.Surface) Back.BorderThickness = new Thickness(_Position.X*screen.Scale, _Position.Y*screen.Scale, (screen.Width-_Position.X)*screen.Scale-obj.ActualWidth*screen.FactX, (screen.Height-_Position.Y)*screen.Scale-obj.ActualHeight*screen.FactY-1);
-            else                Back.BorderThickness = new Thickness(_Position.X, _Position.Y, screen.Width-_Position.X-obj.ActualWidth, screen.Height-_Position.Y-obj.ActualHeight-1);
+            if (screen.Surface)  Back.BorderThickness = new Thickness(_Position.X*screen.Scale, _Position.Y*screen.Scale, (screen.Width-_Position.X)*screen.Scale-obj.ActualWidth*screen.FactX, (screen.Height-_Position.Y)*screen.Scale-obj.ActualHeight*screen.FactY-1);
+            else if (screen.Elo) Back.BorderThickness = new Thickness(_Position.X*screen.Scale, _Position.Y*screen.Scale, (screen.Width-_Position.X)*screen.Scale-obj.ActualWidth*screen.FactX, (screen.Height-_Position.Y)*screen.Scale-obj.ActualHeight*screen.FactY-1);
+            else                 Back.BorderThickness = new Thickness(_Position.X, _Position.Y, screen.Width-_Position.X-obj.ActualWidth, screen.Height-_Position.Y-obj.ActualHeight-1);
 
             #if (DEBUG)
                 this.Topmost = false;
@@ -66,7 +67,7 @@ namespace RX_Common
             double left = _Position.X*screen.Scale;
             double top  = _Position.Y*screen.Scale;
             double border=2;
-            if (screen.Surface)
+            if (screen.Surface || screen.Elo)
             {
                 top  += _ObjHeight;
                 left -= 32;

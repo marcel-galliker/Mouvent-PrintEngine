@@ -44,6 +44,7 @@ namespace RX_Common
         public double Height;
         public double Scale;
         public bool   Surface;
+        public bool   Elo;
         public double FactX;
         public double FactY;
 
@@ -59,12 +60,18 @@ namespace RX_Common
             if (Width!=0) Scale = System.Windows.SystemParameters.PrimaryScreenWidth / Width;
             else          Scale = 1;
             Surface = (Scale==0.5);
+            Elo     = (Scale==0.8);
             if (Surface)
             {   
                 FactX=0.975;
                 FactY=0.90;
             }
-            else FactX=FactY=Scale=1;
+            else if (Elo)
+            {
+                FactX=0.8;
+                FactY=0.2;
+            }
+            else FactX=FactY=Scale=1.0;
         }
 
         //--- PlaceWindow -----------------------------------------------------------

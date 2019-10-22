@@ -33,6 +33,7 @@
 #include "gui_svr.h"
 #include "ctrl_svr.h"
 #include "plc_ctrl.h"
+#include "siemens_ctrl.h"
 #include "pe_main.h"
 #include "machine_ctrl.h"
 #include "spool_svr.h"

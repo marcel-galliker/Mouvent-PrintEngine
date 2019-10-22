@@ -557,7 +557,6 @@ void fpga_enc_config(int inNo, SEncoderCfg *pCfg, int restart)
 		Fpga->cfg.encIn[inNo].reset_min_max		= TRUE;
 		Fpga->cfg.encIn[inNo].orientation		= pCfg->orientation;
 		Fpga->cfg.encIn[inNo].index_en			= FALSE;			
-		Fpga->cfg.encIn[inNo].index_on_b		= FALSE;
 		Fpga->cfg.encIn[inNo].inc_per_revolution= 0xffffffff;
 		Fpga->cfg.encIn[inNo].correction		= pCfg->correction;
 		
@@ -856,7 +855,6 @@ void  fpga_enc_config_test(void)
 		Fpga->cfg.pg[0].pos_pg_fwd				= 10;
 		Fpga->cfg.encIn[i].reset_min_max		= TRUE;
 		Fpga->cfg.encIn[i].orientation			= FALSE;
-		Fpga->cfg.encIn[i].index_on_b			= TRUE;
 		Fpga->cfg.encIn[i].inc_per_revolution	= 0xffffffff;
 		Fpga->cfg.encIn[i].correction			= 0;
 		Fpga->cfg.encIn[i].enable				= TRUE;
@@ -1413,7 +1411,6 @@ static void _fpga_display_status(int showCorrection, int showParam)
 			{term_printf("input config     "); for (i=0; i<cnt; i++) term_printf("____%d____  ", i);								term_printf("\n");}
 			{term_printf("  enable:        "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->cfg.encIn[i].enable);				term_printf("\n");}
 			{term_printf("  orientation:   "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->cfg.encIn[i].orientation);			term_printf("\n");}
-			{term_printf("  index_on_b:    "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->cfg.encIn[i].index_on_b);			term_printf("\n");}
 			{term_printf("  inc_per_rev:   "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->cfg.encIn[i].inc_per_revolution);	term_printf("\n");}
 			{term_printf("  correction:    "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->cfg.encIn[i].correction);			term_printf("\n");}
 			{term_printf("  corr_par:      "); for (i=0; i<cnt; i++) term_printf("%09d  ", FpgaCorr->par[i].par);					term_printf("\n");}

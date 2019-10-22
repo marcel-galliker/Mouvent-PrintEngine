@@ -624,7 +624,7 @@ static void _req_used_flags(SHBThreadPar *par, int head, int blkNo, int blkCnt, 
 		pcmd->blkNo = blkNo;
 		if (blkCnt>MAX_USED_SIZE*8) pcmd->blkCnt = MAX_USED_SIZE*8;
 		else						pcmd->blkCnt = blkCnt;
-		pcmd->id		= par->blockUsedId; 
+		pcmd->id		= par->blockUsedId;
 		pcmd->headNo	= head;
 			
 		par->reqUsedId[head][par->blockUsedId] = TRUE;
@@ -632,9 +632,6 @@ static void _req_used_flags(SHBThreadPar *par, int head, int blkNo, int blkCnt, 
 		if (head<SIZEOF(_TestBlockUsedReqTime))
 			_TestBlockUsedReqTime[head][par->blockUsedId] = rx_get_ticks();
 		TrPrintfL(_Trace, "Head[%d.%d]: req block used: id=%d, blkNo=%d, blkCnt=%d (blk %d .. %d) line=%d", par->cfg.no, head, pcmd->id, pcmd->blkNo, pcmd->blkCnt, pcmd->blkNo, pcmd->blkNo+pcmd->blkCnt, line);
-
-		if (pcmd->blkCnt>1000)
-			printf("Error");
 
 		sok_send(&par->ctrlSocket, pcmd);
 		blkCnt -= pcmd->blkCnt;
@@ -649,6 +646,7 @@ static int _send_to_board(SHBThreadPar *par, int head, int blkNo, int blkCnt)
 	int dstBlk; 
 	int headMin, headMax;
 	int cnt, sent;
+	int endReached=FALSE;
 	SBmpSplitInfo		*pinfo;
 	SHeadCfg			*phead;
 
@@ -679,6 +677,7 @@ static int _send_to_board(SHBThreadPar *par, int head, int blkNo, int blkCnt)
 			if (dstBlk == par->blockOutIdx) 
 			{
 				TrPrintfL(_Trace, "BlockOutIdx reached %d: blk0=%d, blkCnt=%d, cnt=%d\n", par->blockOutIdx, pinfo->blk0, pinfo->blkCnt, cnt);
+				endReached = TRUE;
 				break;
 			}
 
@@ -743,7 +742,7 @@ static int _send_to_board(SHBThreadPar *par, int head, int blkNo, int blkCnt)
 
 		if (_Abort) return REPLY_OK;
 		
-		if (pinfo->sendFromBlk >= pinfo->blkCnt || dstBlk == par->blockOutIdx)
+		if (pinfo->sendFromBlk >= pinfo->blkCnt || (RX_Spooler.printerType==printer_LB702_UV && endReached && (pinfo->pListItem->flags&FLAG_SAME)))
 		{
 			SPageId *pid   = &pinfo->pListItem->id;
 			SPageId *plast = &par->lastId[head];

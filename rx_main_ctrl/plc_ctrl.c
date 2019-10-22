@@ -614,7 +614,11 @@ int plc_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen)
 		case CMD_PLC_SET_VAR:		_plc_set_var (socket, (char*)data);				break;
 		case CMD_PLC_SET_CMD:		_plc_set_cmd (socket, (char*)data);				break;
 		case CMD_PAUSE_PRINTING:	TrPrintfL(TRUE, "PAUSE by user");
-									_GUIPause=TRUE;									break;
+									if (rx_def_is_tx(RX_Config.printer.type))
+										_GUIPause=TRUE;
+									else
+										_SendPause=1;
+									break;
 		
 		//--- material database --------------------------------------------------------
 		case CMD_PLC_REQ_MATERIAL:	_plc_req_material  (socket, FILENAME_MATERIAL, cmd); break;
@@ -1240,26 +1244,19 @@ static void _plc_state_ctrl()
 				}
 			}
 		}
-		
-		if (_GUIPause)
+
+		if (rx_def_is_tx(RX_Config.printer.type))
 		{
-			if (rx_def_is_scanning(RX_Config.printer.type))
-			{
-				static int _scannerpos;
-				UINT32 pos = plc_get_scanner_pos();
-				if (_scannerpos>(int)(pos+100))
-				{
-					_GUIPause =FALSE;
-					_SendPause=1;
-				}
-				_scannerpos = pos;			
-			}
-			else 
+			static UINT32 _scannerpos;
+			UINT32 old=_scannerpos;
+			_scannerpos = plc_get_scanner_pos();
+			if (_GUIPause && _scannerpos < (int)(old+2000))
 			{
 				_GUIPause =FALSE;
-				_SendPause=1;					
+				_SendPause=1;
 			}
 		}
+		
 		if (RX_Config.stepper.ref_height!=0 || RX_Config.stepper.print_height!=0)
 		{
 			if(rx_def_is_web(RX_Config.printer.type) || RX_StepperStatus.info.scannerEnable)

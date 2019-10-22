@@ -268,6 +268,17 @@
 #define CMD_PLC_SAVE_MATERIAL   0x01000366
 #define CMD_PLC_DEL_MATERIAL    0x01000367
 
+//--- Siemens messages -------------------------
+#define CMD_PLC_CFG				0x010003a1
+
+#define CMD_PLC_STAT			0x010003a2
+#define REP_PLC_STAT			0x020003a2
+
+#define CMD_PLC_PAR				0x010003a3
+#define REP_PLC_PAR				0x020003a3
+#define EVT_PLC_PAR				0x030003a3
+
+
 #define CMD_PLC_END				0x010003FF
 
 //--- Steppper Board ---------------------------------------------
@@ -381,6 +392,7 @@
 #define CMD_CLN_PURGE			0x01000738
 
 #define CMD_CLN_END				0x010007ff
+
 
 //--- Data Spooler -------------------------------------------------
 #define CMD_SET_SPOOL_CFG		0x01003001
