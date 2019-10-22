@@ -91,6 +91,7 @@ static UINT32 _AVR_COEFF [][4]=
 static INT32 *_CorrSin;
 static INT32 *_CorrSinRev;
 static double _AmplNew;
+static INT32 _ftc_send=0;
 
 //--- globals -----------------------------------------------------------------
 
@@ -175,6 +176,8 @@ static FILE	*_poslog_file = NULL;
 static int   _poslog_cnt  = 0;
 static int	 _poslog_timer;
 #define POSLOG_MAX		1048575
+
+static int	 _statlog_timer;
 
 //*** functions ********************************************
 
@@ -683,18 +686,28 @@ void  fpga_shift_delay(int strokes)
 //--- fpga_encoder_reset_reg -------------------------------------
 void  fpga_encoder_reset_reg(void)
 {
-	int i;
+	double ftc_strokes = _ftc_send / _StrokeDist;
+	double hz		   = 100.0 / 60.0 * 1000000.0 / _StrokeDist;// fix 100 m/min
+	double speed	   = (hz / FPGA_FREQ) * 0x80000000;
+	double ratio       = ftc_strokes / (hz / FPGA_FREQ);
+
+	Fpga->cfg.general.ftc_speed = (int)speed;
+	Fpga->cfg.general.ftc_ratio = (int)ratio;
+	TrPrintfL(TRUE, "fpga_pg_config start: set ftc_speed=%d", (int)speed);
+	TrPrintfL(TRUE, "fpga_pg_config start: set ftc_ratio=%d", (int)ratio);
 	
-	if (_Init)
-	{
-		for (i = 0; i < 2; i++)
-		{
-			
-			Fpga->cfg.encOut[i].reset_min_max	= TRUE;
-			Fpga->cfg.encIn[i].reset_min_max	= TRUE;
-		}
-	}
-	Fpga->cfg.general.reset_errors	= TRUE;
+//	int i;
+//	
+//	if (_Init)
+//	{
+//		for (i = 0; i < 2; i++)
+//		{
+//			
+//			Fpga->cfg.encOut[i].reset_min_max	= TRUE;
+//			Fpga->cfg.encIn[i].reset_min_max	= TRUE;
+//		}
+//	}
+//	Fpga->cfg.general.reset_errors	= TRUE;
 }
 
 //--- _CalcSinus -------------------------------------
@@ -885,6 +898,8 @@ static int _pg_start_pos(void)
 int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg, int restart)
 {
 	if (socket!=INVALID_SOCKET) _Socket = socket;
+	
+	_ftc_send = pcfg->ftc;
 
 	int pgNo;
 
@@ -944,16 +959,19 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg, int restart)
 		//	Fpga->cfg.pg[pgNo].quiet_window = 10;
 		//	if (FpgaQSys->printGo_status.fill_level) Fpga->cfg.pg[pgNo].fifos_ready	= TRUE;
 			
-			{
-				//--- flight time compensation of Mark Reader ----------------------------
-				double ftc_strokes = pcfg->ftc/_StrokeDist;
-				double hz		   = 100.0/60.0*1000000.0/_StrokeDist;// fix 100 m/min
-				double speed	   = (hz/FPGA_FREQ)*0x80000000;
-				double ratio       = ftc_strokes / (hz / FPGA_FREQ);
+			//{
+				//--- flight time compensation of Mark Reader ----------------------------	
 
-				Fpga->cfg.general.ftc_speed = (int)speed;
-				Fpga->cfg.general.ftc_ratio = (int)ratio;
-			}
+			double ftc_strokes = pcfg->ftc/_StrokeDist;
+			double hz		   = 100.0/60.0*1000000.0/_StrokeDist;// fix 100 m/min
+			double speed	   = (hz/FPGA_FREQ)*0x80000000;
+			double ratio       = ftc_strokes / (hz / FPGA_FREQ);
+
+			Fpga->cfg.general.ftc_speed = (int)speed;
+			Fpga->cfg.general.ftc_ratio = (int)ratio;
+			TrPrintfL(TRUE, "fpga_pg_config start: set ftc_speed=%d", (int)speed);
+			TrPrintfL(TRUE, "fpga_pg_config start: set ftc_ratio=%d", (int)ratio);
+			//}
 		}
 	
 		Fpga->cfg.pg[pgNo].printgo_n	= FALSE;
@@ -1073,7 +1091,7 @@ void  fpga_set_printmark(SEncoderPgDist *pmsg)
 {
 	int pgNo;
 	
-	Fpga->cfg.general.shift_delay_tel =  (int)((pmsg->dist-Fpga->cfg.general.min_mark_len)/_StrokeDist);
+	//Fpga->cfg.general.shift_delay_tel =  (int)((pmsg->dist-Fpga->cfg.general.min_mark_len)/_StrokeDist);
 	FpgaQSys->window_fifo  = _Window = (int)(pmsg->window/_StrokeDist);
 	FpgaQSys->ignored_fifo = _Ignore = (int)(pmsg->ignore/_StrokeDist);
 	for (pgNo=0; pgNo<SIZEOF(Fpga->cfg.pg); pgNo++) Fpga->cfg.pg[pgNo].fifos_ready = TRUE;
@@ -1143,17 +1161,19 @@ static void  _pg_ctrl(void)
 		if (Fpga->cfg.pg[0].fifos_used==FIFOS_MARKREADER || Fpga->cfg.pg[0].fifos_used==FIFOS_MARKFILTER)
 		{
 			//--- trace PrintMark ----------------------------
-			if(Fpga->stat.dig_in_cnt[0] != (_PM_Cnt&0xff))
+			if (Fpga->stat.encOut[0].PG_cnt != (_PM_Cnt & 0xff)) // Fpga->stat.dig_in_cnt[0]
 			{
 				{ //---  LOG -----------------------------------------
 					if (_PM_Cnt==0)
 					{
 						if (_LogFile) fclose(_LogFile);
 						_LogFile  = fopen(PATH_TEMP "markreader.csv", "w");
-						fprintf(_LogFile, "pos;dist;freq\n");
+						fprintf(_LogFile, "time;pos0[strokes];mark_dist[strokes];freq[strokes/s];digin_pulse_dist[steps];mark_dist_avr[strokes];ftc[strokes];ftc_ideal[strokes]\n");
+						_statlog_timer = rx_get_ticks();
 					}
-					fprintf(_LogFile, "%d;%d;%d\n", Fpga->stat.encOut[0].position, Fpga->stat.encIn[0].digin_edge_dist, (int)(Fpga->stat.encOut[0].speed*23/1000));
-					fflush(_LogFile);				
+					fprintf(_LogFile, "%d;%d;%d;%d;%d;%d;%d;%d\n", rx_get_ticks() - _statlog_timer, Fpga->stat.encOut[0].position, (int)(_Ignore + _Window - Fpga->stat.encOut[0].window_mark_pos), (int)(Fpga->stat.encOut[0].speed * 23 / 1000), Fpga->stat.encIn[0].digin_edge_dist, (int)(_Ignore + _Window  - Fpga->stat.avr_med_pos), Fpga->stat.ftc_shift_delay_strokes_tel, (int)((Fpga->cfg.general.ftc_speed - Fpga->stat.encOut[0].speed) * Fpga->cfg.general.ftc_ratio / 0x80000000));
+					fflush(_LogFile);
+					_statlog_timer = rx_get_ticks();
 				}
 				TrPrintfL(TRUE, "PrintMark[%d] ok:%06d filtred=%06d missed=%06d dist=%06d pos=%06d\n", _PM_Cnt, RX_EncoderStatus.PG_cnt, _PM_Filtered_Cnt, _PM_Missed_Cnt, Fpga->stat.encIn[0].digin_edge_dist, Fpga->stat.encOut[0].position);
 				_PM_Cnt++;
@@ -1167,8 +1187,8 @@ static void  _pg_ctrl(void)
 			}
 			if (Fpga->stat.encOut[0].mark_edge_warn!=_PM_Filtered_Cnt)
 			{
-				Error(WARN, 0, "PrintMark %d Filtered", RX_EncoderStatus.PG_cnt);
-				TrPrintfL(TRUE, "PrintMark %d Filtered, pos=%d", RX_EncoderStatus.PG_cnt, Fpga->stat.encOut[0].position);
+				Error(WARN, 0, "Mark near PrintMark %d Filtered", RX_EncoderStatus.PG_cnt);
+				TrPrintfL(TRUE, "Mark near PrintMark %d Filtered, pos=%d", RX_EncoderStatus.PG_cnt, Fpga->stat.encOut[0].position);
 				_PM_Filtered_Cnt = Fpga->stat.encOut[0].mark_edge_warn;
 			}			
 		}
@@ -1409,6 +1429,8 @@ static void _fpga_display_status(int showCorrection, int showParam)
 			 term_printf("  fifos_ready:   "); for (i=0; i<cnt; i++)term_printf("%09d  ", Fpga->cfg.pg[i].fifos_ready);			term_printf("\n");
 			 term_printf("  dig_in_sel:    "); for (i=0; i<cnt; i++)term_printf("%09d  ", Fpga->cfg.pg[i].dig_in_sel);			term_printf("\n");
 			 term_printf("  quiet_window:  "); for (i=0; i<cnt; i++)term_printf("%09d  ", Fpga->cfg.pg[i].quiet_window);			term_printf("\n");
+			 term_printf("  ftc_max_freq:  "); term_printf("%09d  ", (int)(Fpga->cfg.general.ftc_speed*FPGA_FREQ / 0x80000000)); term_printf("\n");
+			 term_printf("  ftc_strokes:   "); term_printf("%09d  ", (int)(Fpga->cfg.general.ftc_ratio * Fpga->cfg.general.ftc_speed / 0x80000000)); term_printf("\n"); // strokes
 		}
 
 		if (!showCorrection && !showParam)
@@ -1430,6 +1452,7 @@ static void _fpga_display_status(int showCorrection, int showParam)
 	//		term_printf("  rev_sum:       "); for (i = 0; i < cnt; i++) term_printf("%09d  ", Fpga->stat.encIn[i].rev_sum); term_printf("\n");
 			term_printf("  position_rev:  "); for (i = 0; i < cnt; i++) term_printf("%09d  ", Fpga->stat.encIn[i].position_rev); term_printf("\n");
 			term_printf("  inc_per_rev:   "); for (i = 0; i < cnt; i++) term_printf("%09d  ", Fpga->cfg.encIn[i].inc_per_revolution); term_printf("\n");
+			term_printf("  inc_per_rev:   "); for (i = 0; i < cnt; i++) term_printf("%09d  ", Fpga->stat.encIn[i].inc_per_revolution); term_printf("\n");
 			term_printf("  index_cnt:     "); for (i = 0; i < cnt; i++) 
 			{
 				n=Fpga->cfg.encIn[i].inc_per_revolution;
@@ -1449,8 +1472,8 @@ static void _fpga_display_status(int showCorrection, int showParam)
 			term_printf("  lin diff err:  "); for (i = 0; i < 1; i++) term_printf("%09d  ", (INT16)Fpga->stat.encIn[i].enc_diff_overflow); term_printf("\n");
 	
 			term_printf("  rol_coeff:     "); for (i=0; i<4; i++)   term_printf("%09d  ", Fpga->stat.rol_coeff_at_use[i]);		term_printf("\n");
-			term_printf("  identified b1: "); for (i = 0; i < cnt; i++) term_printf("%09d  ", Fpga->stat.encIn[i].ident_obs_b1); term_printf("\n");
-			term_printf("  identified a1: "); for (i = 0; i < cnt; i++) term_printf("%09d  ", Fpga->stat.encIn[i].ident_obs_a1); term_printf("\n");
+			//term_printf("  identified b1: "); for (i = 0; i < cnt; i++) term_printf("%09d  ", Fpga->stat.encIn[i].ident_obs_b1); term_printf("\n");
+			//term_printf("  identified a1: "); for (i = 0; i < cnt; i++) term_printf("%09d  ", Fpga->stat.encIn[i].ident_obs_a1); term_printf("\n");
 			/*
 			term_printf("\n");
 			term_printf("driver status    "); for (i = 0; i < 4; i++) term_printf("____%d____  ", i); term_printf("\n");
@@ -1467,10 +1490,12 @@ static void _fpga_display_status(int showCorrection, int showParam)
 			term_printf("  Speed [m/Min]: "); for (i=0; i<cnt; i++) term_printf("%09d  ", (int)((Fpga->stat.encOut[i].speed*23/1000)*60.0/1200*0.0254) );		term_printf("\n");
 //			term_printf("  Speed Min[Hz]: "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encOut[i].speed_min*23/1000);	term_printf("\n");
 //			term_printf("  Speed Max[Hz]: "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encOut[i].speed_max*23/1000);	term_printf("\n");
-			term_printf("  FlighTimeComp: "); term_printf("%09d  ", Fpga->stat.ftc_shift_delay_strokes_tel );		term_printf("\n");
+			//term_printf("  FlighTimeComp: "); term_printf("%09d  ", Fpga->stat.ftc_shift_delay_strokes_tel );		term_printf("\n");
+			term_printf("  FTC shift [um]:"); term_printf("%09d  ", (int)(Fpga->stat.ftc_shift_delay_strokes_tel * _StrokeDist)); term_printf("\n");
 			term_printf("  Wind mark pos: "); for (i = 0; i < cnt; i++) term_printf("%09d  ", Fpga->stat.encOut[i].window_mark_pos); term_printf("\n");
+			term_printf("  Avr Med Pos:   "); term_printf("%09d  ", Fpga->stat.avr_med_pos); term_printf("\n");
 
-			term_printf("  PG FIFO:       %09d  Used=%d     dist=%03d   wnd=%03d    ign=%03d\n", 
+			term_printf("  PG FIFO:       %09d  Used=%d     dist_fill=%03d   wnd_fill=%03d    ign_fill=%03d\n", 
 				RX_EncoderStatus.distTelCnt, 
 				Fpga->cfg.pg[0].fifos_used, 
 				FpgaQSys->printGo_status.fill_level, 
@@ -1480,7 +1505,7 @@ static void _fpga_display_status(int showCorrection, int showParam)
 				_InCnt, _PM_Cnt); 
 			term_printf("  PG Cnt:        "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encOut[i].PG_cnt);				term_printf("\n");
 			term_printf("  PM Par:        window____ %09d  ignore____ %09d\n", _Window, _Ignore); 
-			term_printf("  PM:            marks:%06d (simu:%06d)  ok:%06d  filtred=%06d  missed=%06d  dist=%06d\n", _PM_Cnt, _PM_SimuCnt, Fpga->stat.encOut[0].PG_cnt, _PM_Filtered_Cnt, _PM_Missed_Cnt, Fpga->stat.encIn[0].digin_edge_dist);
+			term_printf("  PM:            marks:%06d (simu:%06d)  ok:%06d  ignored=%06d  repaired=%06d  dist_strokes=%06d\n", _PM_Cnt, _PM_SimuCnt, Fpga->stat.encOut[0].PG_cnt, _PM_Filtered_Cnt, _PM_Missed_Cnt, (_Ignore + _Window - Fpga->stat.encOut[0].window_mark_pos)); // Fpga->stat.encIn[0].digin_edge_dist);
 
 			term_printf("  PG FIFO Erors: "); term_printf("PG:%06d  ",  Fpga->stat.pg_fifo_empty_err); 
 											  term_printf("IGN:%05d  ", Fpga->stat.ignored_fifo_empty_err); 
@@ -1555,8 +1580,8 @@ static void _fpga_display_status(int showCorrection, int showParam)
 			term_printf("  Err Vec:                %09x  ", (INT16)Fpga->stat.rolcor_0_err_vec);;			
 			term_printf("%09x  ", (INT16)Fpga->stat.rolcor_1_err_vec); term_printf("\n");
 			term_printf("  Delays busy 0 max:      %09d  ", Fpga->stat.rolcor_0_delay_busy_max); term_printf("\n");
-			term_printf("  identified b1:          "); for (i = 0; i < 2; i++) term_printf("%09d  ", Fpga->stat.encIn[i].ident_obs_b1); term_printf("\n");
-			term_printf("  identified a1:          "); for (i = 0; i < 2; i++) term_printf("%09d  ", Fpga->stat.encIn[i].ident_obs_a1); term_printf("\n");			
+			//term_printf("  identified b1:          "); for (i = 0; i < 2; i++) term_printf("%09d  ", Fpga->stat.encIn[i].ident_obs_b1); term_printf("\n");
+			//term_printf("  identified a1:          "); for (i = 0; i < 2; i++) term_printf("%09d  ", Fpga->stat.encIn[i].ident_obs_a1); term_printf("\n");			
 			term_printf("  Rol Corr max b1 b1:     %09d  ", Fpga->stat.max_0_b1_ident_b1);				
 			term_printf("%09d  ", Fpga->stat.max_1_b1_ident_b1); term_printf("\n");	
 			term_printf("  Rol Corr max b1 a1:     %09d  ", Fpga->stat.max_0_b1_ident_a1);

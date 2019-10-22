@@ -41,8 +41,8 @@ typedef struct
 	UINT32	step_time;			// 0x0010: Actual step time
 	UINT32	setp_time_min;		// 0x0014: Minimum step time (can be reset)
 	UINT32	step_time_max;		// 0x0018: Maximum step time (can be reset)
-	UINT32	ident_obs_b1;		// 0x001c
-	UINT32	ident_obs_a1;		// 0x0020
+	UINT32	inc_per_revolution;	// 0x001c: measured steps per index
+	UINT32	res_20;				// 0x0020
 	UINT32	enc_diff;			// 0x0024
 	UINT32	position_rev;		// 0x0028 4x 
 	UINT32	enc_diff_min;		// 0x002c
@@ -55,13 +55,13 @@ typedef struct
 //--- SEncOutStatus -----------------------------------------
 typedef struct
 {
-	UINT32	position;		// 0x0000[Bit 0..19]: 20 Bit counter!
-	UINT32	speed;			// 0x0004:
-	UINT32	res_8;			// 0x0008:	// * 50000000/2^31    OR *23/1000	
+	UINT32	position;		// 0x0000[Bit 0..19]: 20 Bit counter! in strokes
+	UINT32	speed;			// 0x0004: speed* 50000000/2^31 // speed*23/1000 = stokes per sec
+	UINT32	res_8;			// 0x0008:
 	UINT32	res_c;			// 0x000c:
 	UINT32	PG_cnt;			// 0x0010[Bit 0..9]: 10 bit counter!
 	UINT32	mark_edge_warn;	// 0x0014 mark edge detected during ignore window
-	UINT32	window_mark_pos;	// 0x0018
+	UINT32	window_mark_pos;// 0x0018 distance from Mark pos until end of window in strokes
 	UINT32	pg_start_pos;	// 0x001c in encoder input steps
 	UINT32	res_20;			// 0x0020
 	UINT32	res_24;			// 0x0024
@@ -78,8 +78,8 @@ typedef struct
 {
 	SEncInStatus	encIn[8];					// 0x0000
 	SEncOutStatus	encOut[8];					// 0x0200
-	UINT32			info;						// 0x0400:
-	UINT32			error;						// 0x0404:
+	UINT32			info;						// 0x0400: Tel Info
+	UINT32			error;						// 0x0404: Tel Error
 	UINT32			res_408;					// 0x0408
 	UINT32			res_40c;					// 0x040c
 	UINT32			res_410;					// 0x0410
@@ -90,7 +90,7 @@ typedef struct
 	UINT32			res_424;					// 0x0424
 	UINT32			res_428;					// 0x0428:
 	UINT32			res_42c;					// 0x042c:
-	SVersion		version;					// 0x0430:
+	SVersion		version;					// 0x0430: FPGA Version
     UINT32			mem_pointer[4];				// 0x0440: mem_pointer[0]
 //  UINT32			mem_pointer_1;				// 0x0444: mem_pointer[1]
 //  UINT32			mem_pointer_2;				// 0x0448: mem_pointer[2]	
@@ -193,9 +193,9 @@ typedef struct
 	UINT32 		    max_1_a1_ident_b1;			// 0x057C // reset_min_max
 	UINT32 		    max_1_a1_ident_a1;			// 0x0580 // reset_min_max
 	UINT8 		    dig_in_cnt[4];				// 0x0584 counts digin rising edges for the 4 input pins
-	UINT32 		    varshift_stat_dig_in;		// 0x0588
-	UINT32 		    ftc_shift_delay_strokes_tel;// 0x058c
-	UINT32 		    varshift_stat_tel;			// 0x0590 not used, only of first counter for debuging
+	UINT32 		    varshift_stat_dig_in;		// 0x0588 for debug shift reg // first 32 counter en signals
+	UINT32 		    ftc_shift_delay_strokes_tel;// 0x058c result of ftc ramp in strokes
+	UINT32 		    avr_med_pos;				// 0x0590 result of avrage-median filter in strokes
 	UINT32			res[(0x0800 - 0x0594) / 4];	// 0x0594 .. 0x0800
 } SEncFpgaStatus;
 
@@ -298,7 +298,7 @@ typedef struct
 	UINT32	rol_2_first;			// 0x004C: flag
 	UINT32	rol_drift_mu_two;		// 0x0050:
 
-	UINT32	subsample_meas;			// 0x0054:
+	UINT32	subsample_meas;			// 0x0054: measurements to jump over, only for fpga measurements
 
 	UINT32  shift_delay;            // 0x0058[Bit 0..18]: pg delay in strokes (21um strokes)
 	

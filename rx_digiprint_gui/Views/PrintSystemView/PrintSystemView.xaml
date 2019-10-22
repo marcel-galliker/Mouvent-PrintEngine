@@ -52,7 +52,7 @@
                         <TextBlock Text="Wipe" FontSize="22"/>
                     </common:RxButton>
                     -->
-                    
+
                     <common:RxButton x:Name="Button_Save" 
                                      Click="Save_Clicked" 
                                      HorizontalAlignment="Right" 
@@ -78,13 +78,13 @@
                             <rxView:StepperGrid x:Name="StepperGrid"/>
                             <rxView:StepperGridCleaf x:Name="StepperGridCleaf"/>
                             <rxView:StepperGridDP803 x:Name="StepperGridDP803"/>
-                            <rxView:ChillerView/>
                             <rxView:EncoderView/>
+                            <rxView:ChillerView/>
                         </StackPanel>
                     </StackPanel>
+                    <TextBlock Text="Ink Supply" Background="{StaticResource Brush03}" FontWeight="Bold" Margin="0" Padding="5,0,0,0" />
 
                     <!-- Ink Supply ________________________________________________________________________________________________________________________ -->
-                    <TextBlock Text="Ink Supply" Background="{StaticResource Brush03}" FontWeight="Bold" Margin="0" Padding="5,0,0,0" />
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="auto"/>

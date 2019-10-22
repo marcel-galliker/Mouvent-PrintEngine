@@ -1136,17 +1136,40 @@ static void _fpga_check_fp_errors(int printDone)
 		if (Fpga.error->head[head].fifo_img_line && !RX_FpgaError.head[head].fifo_img_line)
 		{ 
 			fpga_trace_registers("fifo_img_line", TRUE);
-			Error(ERR_ABORT, 0, "Head[%d]: fifo_img_line: cnt=%d", head, Fpga.error->head[head].fifo_img_line);	
+			Error(ERR_ABORT, 0, "Head[%d]: img-line FIFO over- or underflow (fifo_img_line) cnt=%d", head, Fpga.error->head[head].fifo_img_line);	
 		}
 		RX_FpgaError.head[head].fifo_img_line = Fpga.error->head[head].fifo_img_line;
 
 		if (Fpga.error->head[head].write_img_line && !RX_FpgaError.head[head].write_img_line)
 		{ 
 			fpga_trace_registers("write_img_line", TRUE);
-			Error(ERR_ABORT, 0, "Head[%d]: write_img_line: cnt=%d", head, Fpga.error->head[head].write_img_line);	
+			Error(ERR_ABORT, 0, "Head[%d]: NoImgInfo PG and Skip: (write_img_line) cnt=%d", head, Fpga.error->head[head].write_img_line);	
 		}
 		RX_FpgaError.head[head].write_img_line = Fpga.error->head[head].write_img_line;
 		
+		/*
+		if (Fpga.error->head[head].read_img_line && !RX_FpgaError.head[head].read_img_line)
+		{ 
+			fpga_trace_registers("read_img_line", TRUE);
+			Error(ERR_ABORT, 0, "Head[%d]: LineReq but HeadMem busy (read_img_line): cnt=%d", head, Fpga.error->head[head].read_img_line);	
+		}
+		RX_FpgaError.head[head].read_img_line = Fpga.error->head[head].read_img_line;
+		*/
+		
+		if (Fpga.error->head[head].prepare_img_line && !RX_FpgaError.head[head].prepare_img_line)
+		{ 
+			fpga_trace_registers("prepare_img_line", TRUE);
+			Error(ERR_ABORT, 0, "Head[%d]: LineReq but HeadMem busy (prepare_img_line): cnt=%d", head, Fpga.error->head[head].prepare_img_line);	
+		}
+		RX_FpgaError.head[head].prepare_img_line = Fpga.error->head[head].prepare_img_line;
+		
+		if (Fpga.error->head[head].latch_missed && !RX_FpgaError.head[head].latch_missed)
+		{ 
+			fpga_trace_registers("latch_missed", TRUE);
+			Error(ERR_ABORT, 0, "Head[%d]: EncFP missed err, img line skipped (latch_missed): cnt=%d", head, Fpga.error->head[head].latch_missed);	
+		}
+		RX_FpgaError.head[head].latch_missed = Fpga.error->head[head].latch_missed;
+
 		for (n=0; n<SIZEOF(Fpga.error->img_line_err[0]); n++)
 		{
 			if (Fpga.error->img_line_err[n][head]) 
@@ -1156,20 +1179,20 @@ static void _fpga_check_fp_errors(int printDone)
 					int err=FALSE;
 					switch(n)
 					{
-					case 0: 	fpga_trace_registers("miss_line_after_gap_err", TRUE);
-								Error(ERR_ABORT, 0, "Head[%d]: 1st line after gap missing: cnt=%d, imgIn=%d, PG=%d", head, Fpga.error->img_line_err[n][head], RX_HBStatus[0].head[head].imgInCnt, RX_HBStatus[0].head[head].printGoCnt);
+					case 0: 	fpga_trace_registers("img_line_err_0", TRUE);
+								Error(ERR_ABORT, 0, "Head[%d]: 1st img-line missing in FIFO: cnt=%d, imgIn=%d, PG=%d", head, Fpga.error->img_line_err[n][head], RX_HBStatus[0].head[head].imgInCnt, RX_HBStatus[0].head[head].printGoCnt);
 								err=TRUE;
 								break;
-					case 1: 	fpga_trace_registers("miss_line_after_overlap_err", TRUE);
-								Error(ERR_ABORT, 0, "Head[%d]: 1st line after overlap missing: cnt=%d, imgIn=%d, PG=%d", head, Fpga.error->img_line_err[n][head], RX_HBStatus[0].head[head].imgInCnt, RX_HBStatus[0].head[head].printGoCnt);
+					case 1: 	fpga_trace_registers("img_line_err_1", TRUE);
+								Error(ERR_ABORT, 0, "Head[%d]: 1st img-line missing due to no img-info: cnt=%d, imgIn=%d, PG=%d", head, Fpga.error->img_line_err[n][head], RX_HBStatus[0].head[head].imgInCnt, RX_HBStatus[0].head[head].printGoCnt);
 								err=TRUE;
 								break;
-					case 2: 	fpga_trace_registers("miss_line_after_seamlessp_err", TRUE);
-								Error(ERR_ABORT, 0, "Head[%d]: 1st line after seamless missing: cnt=%d, imgIn=%d, PG=%d", head, Fpga.error->img_line_err[n][head], RX_HBStatus[0].head[head].imgInCnt, RX_HBStatus[0].head[head].printGoCnt);
+					case 2: 	fpga_trace_registers("img_line_err_2", TRUE);
+								Error(ERR_ABORT, 0, "Head[%d]: not used: cnt=%d, imgIn=%d, PG=%d", head, Fpga.error->img_line_err[n][head], RX_HBStatus[0].head[head].imgInCnt, RX_HBStatus[0].head[head].printGoCnt);
 								err=TRUE;
 								break;
-					case 3: 	fpga_trace_registers("miss_inner_line_err", TRUE);
-								Error(ERR_ABORT, 0, "Head[%d]: inner line missing: cnt=%d, imgIn=%d, PG=%d", head, Fpga.error->img_line_err[n][head], RX_HBStatus[0].head[head].imgInCnt, RX_HBStatus[0].head[head].printGoCnt);
+					case 3: 	fpga_trace_registers("img_line_err_3", TRUE);
+								Error(ERR_ABORT, 0, "Head[%d]: missing a img-line in FIFO (not 1st img-line): cnt=%d, imgIn=%d, PG=%d", head, Fpga.error->img_line_err[n][head], RX_HBStatus[0].head[head].imgInCnt, RX_HBStatus[0].head[head].printGoCnt);
 								err=TRUE;
 								break;	
 					}
