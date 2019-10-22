@@ -20,6 +20,7 @@
 #include "pio.h"
 #include "heater.h"
 #include "adc_thermistor.h"
+#include "pid.h"
 
 //--- defines --------------------------------------------
 #define HEATER_0_ON 	0x0001
@@ -31,6 +32,11 @@
 #define HEATER_ANALOG_COUNT		8
 
 //--- statics -----------------------------------------------
+SPID_par	_pid_Temp[NIOS_INK_SUPPLY_CNT];			// PID temperature heater
+static int 	_DutyTemp_Count[NIOS_INK_SUPPLY_CNT];
+static int 	_Temp_Tab[NIOS_INK_SUPPLY_CNT][100];
+static int 	_Temp_Average[NIOS_INK_SUPPLY_CNT];
+static int 	_Temp_Inc[NIOS_INK_SUPPLY_CNT];
 
 //--- prototypes ----------------------------------
 static void _set_heater_out(int i, int newState);
@@ -66,7 +72,7 @@ void heater_init(void)
 //--- heater_tick_10ms ---------------------------------------------------------------
 void heater_tick_10ms(void)
 {
-	int 		i;
+	int 		i,j;
 	alt_u16		temp;
 	alt_u16 	heater_gpio_in;
 
@@ -99,21 +105,52 @@ void heater_tick_10ms(void)
 			//temp = IORD_16DIRECT(AXI_LW_SLAVE_REGISTER_0_BASE, AMC7891_ADC7_DATA -(2*i)) & 0x3ff;
 
 			// Convert to Temperature
-			pRX_Status->ink_supply[i].heaterTemp = Main_adc_polling(temp);
+			// pRX_Status->ink_supply[i].heaterTemp = Main_adc_polling(temp);
+
+			_Temp_Tab[i][_Temp_Inc[i]] = Main_adc_polling(temp) / 100;
+			_Temp_Inc[i]++;
+			if(_Temp_Inc[i] > 99) _Temp_Inc[i] = 0;
+
+			_Temp_Average[i] = 0;
+			for(j=0;j<100;j++) _Temp_Average[i] += _Temp_Tab[i][j];
+			pRX_Status->ink_supply[i].heaterTemp = _Temp_Average[i];
 		}
 
 		if(pRX_Status->ink_supply[i].heaterTemp != INVALID_VALUE && pRX_Config->ink_supply[i].ctrl_mode > ctrl_off)
 		{
-			if (pRX_Status->ink_supply[i].heaterTemp >= pRX_Config->ink_supply[i].heaterTempMax)
+			/*if (pRX_Status->ink_supply[i].heaterTemp >= pRX_Config->ink_supply[i].heaterTempMax)
 				_set_heater_out(i, FALSE);
 			else if (pRX_Config->ink_supply[i].headTemp >= pRX_Config->ink_supply[i].heaterTemp)
 				_set_heater_out(i, FALSE);
 			else if (pRX_Config->ink_supply[i].condPumpFeedback)
 				_set_heater_out(i, TRUE);
 			else
-				_set_heater_out(i, FALSE);
+				_set_heater_out(i, FALSE);*/
+
+			// PID parameters
+			_pid_Temp[i].P 					= 20;
+			_pid_Temp[i].I 					= 30000;
+			_pid_Temp[i].Start_Integrator	= 1;
+			_pid_Temp[i].val_max    		= 1000;	// Duty time on 1000 ms
+			_pid_Temp[i].val_min			= 0;
+			_pid_Temp[i].Setpoint			= pRX_Config->ink_supply[i].heaterTempMax;
+
+			if (pRX_Config->ink_supply[i].condPumpFeedback)
+			{
+				pid_calc(pRX_Status->ink_supply[i].heaterTemp, &_pid_Temp[i]);
+				_DutyTemp_Count[i] += 10;
+				if(_DutyTemp_Count[i] > 1000) _DutyTemp_Count[i] = 0;
+				// duty on 1 second
+				if(_pid_Temp[i].val > _DutyTemp_Count[i]) _set_heater_out(i, TRUE);
+				else _set_heater_out(i, FALSE);
+			}
+			else _set_heater_out(i, FALSE);
 		}
-		else _set_heater_out(i, FALSE);
+		else
+		{
+			_set_heater_out(i, FALSE);
+			pid_reset(&_pid_Temp[i]);
+		}
 	}
 }
 

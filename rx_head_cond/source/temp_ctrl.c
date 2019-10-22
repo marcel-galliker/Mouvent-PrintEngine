@@ -30,8 +30,9 @@
 // Production test software for Walter which heats up without a connected head
 
 //#define LOG_TEMP    TRUE
-#define TEMP_MAX		 50000			// maximal valid conditioner temperature
-#define TEMP_ERROR       TEMP_MAX+5000  // in 1/1000 °C = 90 °C -> compare to thermistor value directly
+#define TEMP_MAX_LOW_PUMP		50000						// maximal valid conditioner temperature for pump speed < 10%
+#define TEMP_MAX_HIGH_PUMP		70000						// maximal valid conditioner temperature for pump speed > 10%
+#define TEMP_ERROR       		TEMP_MAX_HIGH_PUMP + 5000  	// in 1/1000 °C = 90 °C -> compare to thermistor value directly
 
 #define VALUE_BUF_SIZE		10
 
@@ -56,8 +57,6 @@
 
 #define GRAD_MAX_INDEX 10
 // measured if thermistor is unconnected
-
-#define _TEMP_RAMPUMP				60000	//in 10mS, 10 minutes
 
 //@}
 
@@ -205,19 +204,25 @@ static int		_head_temp_timeout   = HEAD_TEMP_TIMEOUT;
 static int		_head_target_timeout = RANGE_TIMEOUT;
 static BOOL		_heater_running      = FALSE;
 //static int		_heater_delay		 = 0;
-static INT32	_DutyPercent		 = 0;    // duty cycle in [%]
-static INT32	_DeltaTempSumming_mK = 0;
-static INT32	_DiffTemp_mK		 = 0;
-static INT32	_DiffRampUp			 = 0;
-//@}
+
 
 //@{
 /** private functions *********************************************************/
 static void _heater_ctrl (UINT32 percent);
 static int  _safety_net  (void);
-static UINT32 _calc_heater_dutycycle(const INT32 t_jettingplate, const INT32 t_jettingplate_target);
 
 //@}
+
+SPID_par _HeatPID = 
+{
+	.Setpoint			= 300,
+	.P					= 20,
+	.I					= 30000,
+	.start_integrator 	= 0,
+	.val_min			= 0,   // 91, => 0.22V start of linear pump function 
+	.val_max			= 70, // 0xfff, 	//max value for pump DAC voltage
+							// Value for DAC, 0x0fff = 9.7V => max, 0x0000 => 32mV => min
+};
 
 /**
  * \brief Initialize ADC for measuring temperature in tank
@@ -296,12 +301,6 @@ void temp_ctrl_on(int turn_on)
 		if (!_heater_running) {
 			_heater_ctrl(OFF);
 		}
-		else {
-			_DutyPercent = 0;
-			_DeltaTempSumming_mK = 0;
-			_DiffTemp_mK = 0;
-			_DiffRampUp = _TEMP_RAMPUMP;
-		}
 //      if (_heater_running) _heater_delay = HEATER_DELAY;
 //		else 				 _heater_ctrl(OFF);
     }
@@ -337,7 +336,7 @@ static void _heater_ctrl(UINT32 percent)
 	else		
     {            
         // HW Revision >= 'h' has a second thermistor
-		if (RX_Status.tempHeater == INVALID_VALUE || RX_Status.tempHeater > TEMP_MAX) 
+		if (RX_Status.tempHeater == INVALID_VALUE || RX_Status.tempHeater > TEMP_MAX_HIGH_PUMP) 
 			RX_Status.heater_percent = 0;
 		else
 			RX_Status.heater_percent = percent;
@@ -561,22 +560,45 @@ static int _safety_net(void)
  **/
 void temp_tick_10ms (void)
 {	
-	if (RX_Config.temp > TEMP_MAX)
-		RX_Config.temp = TEMP_MAX;
-
+	if (RX_Config.temp > TEMP_MAX_HIGH_PUMP)
+		RX_Config.temp = TEMP_MAX_HIGH_PUMP;
+	
+	// NEW REGULATION : setpoint/100 + tempMAX = setpoint + 2°C
+	RX_Status.tempSetpoint	= RX_Config.temp;
+	_HeatPID.Setpoint 		= RX_Config.temp / 100;	
+	// for a good regulation, we need a max at setpoint + 2°C
+	int TempMAX = RX_Config.tempMax;
+	if (TempMAX < _HeatPID.Setpoint + 200) TempMAX = _HeatPID.Setpoint + 200;
+	
+	// OLD REGULATION
+	//if (_heater_running 
+    //     && !RX_Status.error 	// not for any error
+    //     && (RX_Status.tempIn < RX_Config.tempMax))
+	
+	// NEW REGULATION
+	int tempHeaterOK = 1;
+	if((RX_Status.tempHeater > TEMP_MAX_HIGH_PUMP) && (RX_Status.pump_measured * 60 / 1000 > 10)) tempHeaterOK = 0;
+	if((RX_Status.tempHeater > TEMP_MAX_LOW_PUMP) && (RX_Status.pump_measured * 60 / 1000 <= 10)) tempHeaterOK = 0;
+	
 	if (_heater_running 
-   //     && !RX_Status.error 	// not for any error
-        && (RX_Status.tempIn < RX_Config.tempMax))
-    {        
+        && (RX_Status.tempIn < TempMAX)
+		&& (tempHeaterOK)
+		&& (RX_Status.pump_measured * 60 / 1000 < 80) )
+    {
 		if (RX_Config.tempHead==INVALID_VALUE)
 		{
 			RX_Status.error |= COND_ERR_temp_head_hw;
-			_heater_ctrl(_calc_heater_dutycycle(RX_Status.tempIn, RX_Config.temp));
+			
+			pid_calc(RX_Status.tempIn/100, &_HeatPID);
+			_heater_ctrl(_HeatPID.val);
 		}
 		else
 		{
-			_heater_ctrl(_calc_heater_dutycycle(RX_Config.tempHead, RX_Config.temp));
-		}		
+			pid_calc(RX_Config.tempHead/100, &_HeatPID);
+			_heater_ctrl(_HeatPID.val);
+			// Start integrator only if temperature < setpoint, otherwise the integrator accumulate wrong error
+			if(RX_Config.tempHead/100 < _HeatPID.Setpoint) _HeatPID.start_integrator = 1;
+		}			
         
         #if defined (LOG_TEMP)        
         static UINT32 counter = 0;
@@ -587,58 +609,22 @@ void temp_tick_10ms (void)
     else
     {
         _heater_ctrl(OFF);
+		// NEW REGULATION : reset PID
+		pid_reset(&_HeatPID);
+		_HeatPID.start_integrator = 0;		
     }
-}
-
-UINT32 _calc_heater_dutycycle(const INT32 t_jettingplate, const INT32 t_jettingplate_target)
-{
-    static const UINT32 c = 4184;   // temperature coefficient of water in [mWs/(ml*K)]
-    static const UINT32 MAX_HEATER_POWER = 35000;
-	static const UINT32 MAX_DUTY_CYCLE = 70;
-    
-    UINT32 deltatheta_mK = 0;       // temperature difference in [mK]
-    UINT32 q_mW = 0;                // power in [mW]
-    UINT32 m_ul = 0;                // mass in [ul] = [mg] with density of ink = 1 g/ml
-
-    // calculate temperature difference in [mK]
-	if (t_jettingplate_target > t_jettingplate)
-        deltatheta_mK = t_jettingplate_target - t_jettingplate;
-    else
-        deltatheta_mK = 0;
-
-	// eror correction
-	if (_DiffRampUp)
+	
+	// Message temeprature ready = setpoint +/- 1°C
+	if (RX_Config.tempHead==INVALID_VALUE)
 	{
-		_DiffRampUp--;
-		_DeltaTempSumming_mK = 0;
+		if(RX_Status.tempIn > RX_Config.temp) RX_Status.tempReady = (RX_Status.tempIn - RX_Config.temp) / 1000;
+		else RX_Status.tempReady = (RX_Config.temp - RX_Status.tempIn) / 1000;
 	}
-	else
+	else 
 	{
-		if ((_DutyPercent > 0) && (_DutyPercent < MAX_DUTY_CYCLE))
-			_DeltaTempSumming_mK += (t_jettingplate_target - t_jettingplate);
+		if(RX_Config.tempHead > RX_Config.temp) RX_Status.tempReady = (RX_Config.tempHead - RX_Config.temp) / 1000;	
+		else RX_Status.tempReady = (RX_Config.temp - RX_Config.tempHead) / 1000;	
 	}
-	_DiffTemp_mK = _DeltaTempSumming_mK / 50000; // it takes 10000*0.01 sec = 100 secs to correct the value
-
-    /* calculate mass/volume depending on pump speed and printed drops in [ul/s]
-     * RX_Status.pump_measured in [ul/s]
-     * RX_Config.volume_printed in [ul/s]
-     * 
-     * q [Ws] = [kg] * [Ws/(kg*K)] * [K]    SI-Units
-     * q [1000mWs] = [1000000ul] * [1000mWs/(1000000ul*K)] * [K]     
-     */
-    m_ul = RX_Status.pump_measured + RX_Config.volume_printed;	
-	q_mW = m_ul * c / 1000 * (deltatheta_mK + _DiffTemp_mK ) / 1000; // mK->K, ul->ml
-
-    // calculate duty cycle in [%]
-	_DutyPercent = 100 * q_mW / MAX_HEATER_POWER;
-	if (_DutyPercent > MAX_DUTY_CYCLE)
-		_DutyPercent = MAX_DUTY_CYCLE;
-	if (_DutyPercent <0)
-		_DutyPercent = 0;
-    
-    //DBG_PRINTF("m = %d ul/s %d ml/min printed = %d -> q = %d [temp %d - %d = %d] pump = %d duty = %d\n", m_ul, RX_Status.pump_measured * 60 / 1000, RX_Config.volume_printed, q_mW, t_jettingplate_target, t_inlet, deltatheta_mK, RX_Status.pump_measured, duty_percent);
-    
-	return _DutyPercent;
 }
 
 /**

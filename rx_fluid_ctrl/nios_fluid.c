@@ -313,6 +313,7 @@ void nios_set_head_state(int isNo, SHeadStateLight *pstat)
 	_Cfg->ink_supply[isNo].condMeniscus				  = pstat->condMeniscus;
 	_Cfg->ink_supply[isNo].condMeniscusDiff			  = pstat->condMeniscusDiff;
 	_Cfg->ink_supply[isNo].canisterEmpty			  = pstat->canisterEmpty;
+	_Cfg->ink_supply[isNo].condTempReady			  = pstat->condTempReady;
 	_Cfg->ink_supply[isNo].alive++;
 }
 
@@ -414,6 +415,7 @@ void _update_status(void)
 		else						pstat->presLung = INVALID_VALUE;
 		pstat->condPresOut		= _Cfg->ink_supply[i].condPresOut;
 		pstat->condPresIn		= _Cfg->ink_supply[i].condPresIn;
+		pstat->condTempReady	= _Cfg->ink_supply[i].condTempReady;
 //		pstat->meniscus			= _Cfg->ink_supply[i].condMeniscus; //_Stat->ink_supply[i].meniscus;
 		pstat->ctrlMode			= _Stat->ink_supply[i].ctrl_state;
 		pstat->cylinderPresSet	= _Stat->ink_supply[i].cylinderPresSet;		
@@ -567,6 +569,7 @@ static FILE	*_plog_file_IS1 = NULL;
 static FILE	*_plog_file_IS2 = NULL;
 static FILE	*_plog_file_IS3 = NULL;
 static FILE	*_plog_file_IS4 = NULL;
+static FILE	*_plog_file_Temp = NULL;
 static int					_LogTimer;
 
 //--- nios_start_log --------------------------------------
@@ -616,6 +619,14 @@ static void _IS_cond_log(int ticks)
 		fprintf(_plog_file_IS4, "PID2_SP-PID1_Output;PID2_Feedback-ISpres (mbar);PID2_Output-PumpSpeed (%);PID2-P;PID2-I\n");
 		fflush(_plog_file_IS4);
 	}
+	if (_plog_file_Temp == NULL)
+	{
+		char name[100];
+		sprintf(name, PATH_TEMP "Temperatures.csv");
+		_plog_file_Temp = fopen(name, "w");
+		fprintf(_plog_file_Temp, "pump_ticks(ms);TempINK1;setpoint;Heads;TempINK2;setpoint;Heads;TempINK3;setpoint;Heads;TempINK4;setpoint;Heads\n ");
+		fflush(_plog_file_Temp);
+	}
 
 	int time = rx_get_ticks() - _LogTimer;
 	static int _lastTime=0;
@@ -654,6 +665,11 @@ static void _IS_cond_log(int ticks)
 				break;
 			} 
 		}
+		fprintf(_plog_file_Temp, "%d", time);
+			
+		for (i = 0; i < 4; i++)
+			fprintf(_plog_file_Temp, ";%d;%d;%d", _Stat->ink_supply[i].heaterTemp, _Cfg->ink_supply[i].heaterTemp, _Cfg->ink_supply[i].headTemp);
+		fprintf(_plog_file_Temp, "\n");	
 	}
 }
 

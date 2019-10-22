@@ -18,7 +18,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Rectangle Grid.RowSpan="10" Visibility="{Binding Err, Converter={StaticResource IntToVisible_Converter}}"/>
+        <Rectangle Grid.RowSpan="10" Fill="Red" Visibility="{Binding Err, Converter={StaticResource IntToVisible_Converter}}"/>
         <TextBox  Text="{Binding Name}"
                     Background="{Binding Color}" 
                     Foreground="{Binding ColorFG}"
@@ -69,7 +69,14 @@
             </Grid>
         </rx:RxPopup>
 
-        <TextBlock Grid.Row="2" HorizontalAlignment="Right"  Text="{Binding TempHead,  Converter={StaticResource HeadVal_ConverterTemp}}"  />
+        <Rectangle Grid.Row="2" Fill="Yellow" Visibility="{Binding TempReady, Converter={StaticResource IntToVisible_Converter}}"/>
+
+        <StackPanel  Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+            <TextBlock Text="{Binding TempHead,  Converter={StaticResource HeadVal_ConverterTemp}}"/>
+            <TextBlock Text=" (" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
+            <TextBlock Text="{Binding TempSetpoint, Converter={StaticResource HeadVal_ConverterTemp}}" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
+            <TextBlock Text=")" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
+        </StackPanel>
 
         <Grid Grid.Row="3" x:Name="ServiceGrid" IsVisibleChanged="ServiceGrid_IsVisibleChanged">
             <Grid.RowDefinitions>

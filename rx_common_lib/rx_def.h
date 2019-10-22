@@ -489,6 +489,7 @@ typedef struct SPrinterStatus
 		UINT32			testMode:1;			// 0x0020
 		UINT32			externalData:1;		// 0x0040
 		UINT32			txRobot:1;			// 0x0080
+		UINT32			tempReady:1;		// 0x0100
 		};
 		UINT32 flags;		
 	};
@@ -755,6 +756,8 @@ typedef struct SHeadStat
 	//--- ink system ---------------------------------
 	UINT32			tempHead;
 	UINT32			tempCond;
+	UINT32			tempSetpoint;
+	INT32			tempReady;
 	INT32			presIn;
 	INT32			presIn_max;
 	INT32			presIn_diff;
@@ -1032,6 +1035,7 @@ typedef struct SHeadStateLight
 	INT32			condPresOut;
 	INT32			condMeniscus;
 	INT32			condMeniscusDiff;
+	INT32			condTempReady;
 	INT32			canisterEmpty;
 } SHeadStateLight;
 			
@@ -1147,6 +1151,7 @@ typedef struct SInkSupplyStat
 	INT32   presLung;			//  Lung pressure
 	INT32	condPresOut;	
 	INT32	condPresIn;  
+	UINT32  condTempReady;
 	UINT32	temp;				//	Temperature
 	UINT32	pumpSpeedSet;		//	Consumption pump speed
 	UINT32	pumpSpeed;			//	Consumption pump speed measured

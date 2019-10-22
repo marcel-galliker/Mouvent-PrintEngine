@@ -199,7 +199,11 @@ static void _cond_preslog(int ticks)
 		sprintf(name, PATH_TEMP "Conditioners_Regulation.csv");
 		_plog_file = fopen(name, "w");
 		fprintf(_plog_file, "pump_ticks(ms)");
-		for (i = 0; i < 4; i++) fprintf(_plog_file, ";Pin %d; Meniscus %d;pump %d;P %d;I %d", i, i, i, i, i);
+		for (i = 0; i < 4; i++) 
+		{
+			fprintf(_plog_file, ";Pin %d; Meniscus %d;pump %d", i, i, i);
+			fprintf(_plog_file, ";TempHEAD %d;tempSTP %d; Heater %d", i, i, i);
+		}
 		fprintf(_plog_file, "\n");
 		_LogTimer = rx_get_ticks();
 	}
@@ -207,7 +211,7 @@ static void _cond_preslog(int ticks)
 	int time = rx_get_ticks() - _LogTimer;
 	
 	fprintf(_plog_file, "%d", time);
-	for (i = 0; i < 4; i++) fprintf(_plog_file, ";%d;%d;%d;%d;%d", _NiosStat->cond[i].pressure_in, _NiosStat->cond[i].meniscus, _NiosStat->cond[i].pump_measured, _NiosStat->cond[i].pid_P, _NiosStat->cond[i].pid_I);
+	for (i = 0; i < 4; i++) fprintf(_plog_file, ";%d;%d;%d;%d;%d;%d", _NiosStat->cond[i].pressure_in, _NiosStat->cond[i].meniscus, _NiosStat->cond[i].pump_measured, _NiosMem->cfg.cond[i].tempHead / 100, _NiosMem->cfg.cond[i].temp / 100, _NiosStat->cond[i].heater_percent);
 	fprintf(_plog_file, "\n");
 }
 

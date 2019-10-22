@@ -78,6 +78,7 @@ INT32			 _FluidToScales[INK_SUPPLY_CNT+2];
 
 static SHeadStateLight	_HeadState[INK_SUPPLY_CNT];
 static SHeadStateLight	_HeadStateCnt[INK_SUPPLY_CNT];
+static INT32			_HeadStateTempReady[INK_SUPPLY_CNT];
 static INT32			_HeadErr[INK_SUPPLY_CNT];
 static INT32			_HeadPumpSpeed[INK_SUPPLY_CNT][2];	// min/max
 // EnFluidCtrlMode			_FluidMode[INK_SUPPLY_CNT];
@@ -279,6 +280,7 @@ void fluid_tick(void)
 {
 	int i;
 	int tol=2;
+	int maxTempReady = 0;
 	int time=rx_get_ticks();
 	
 #define TIMEOUT 5000
@@ -318,8 +320,14 @@ void fluid_tick(void)
 			_send_ctrlMode(i, ctrl_off, TRUE);
 					
 		state[i].canisterEmpty = (_FluidStatus[i].canisterErr >= LOG_TYPE_ERROR_CONT);
+
+		state[i].condTempReady = _HeadStateTempReady[i];
+		if (state[i].condTempReady > maxTempReady) maxTempReady = state[i].condTempReady;
+		_HeadStateTempReady[i] = 0;		
 	}
 	
+	RX_PrinterStatus.tempReady = maxTempReady;
+
 	memset(_HeadStateCnt,  0, sizeof(_HeadStateCnt));
 	memset(_HeadState,     0, sizeof(_HeadState));
 	memset(_HeadPumpSpeed, 0, sizeof(_HeadPumpSpeed));
@@ -413,12 +421,14 @@ static void _do_fluid_stat(int fluidNo, SFluidBoardStat *pstat)
 	memcpy(&stat, &RX_PrinterStatus, sizeof(stat));
 	stat.inkSupilesOff = TRUE;
 	stat.inkSupilesOn  = TRUE;
+	stat.tempReady = 0;
 	for (i=0; i<RX_Config.inkSupplyCnt; i++)
 	{
 		if (RX_Config.inkSupply[i].inkFileName[0]) 
 		{
 			if (_FluidStatus[i].ctrlMode<=ctrl_off) stat.inkSupilesOn =FALSE;
 			if (_FluidStatus[i].ctrlMode>ctrl_off)  stat.inkSupilesOff=FALSE;
+			if (_FluidStatus[i].condTempReady > stat.tempReady) stat.tempReady = _FluidStatus[i].condTempReady;
 		}
 	}
 	if (stat.printState==ps_off) stat.printState = ps_ready_power;
@@ -1060,6 +1070,8 @@ void fluid_set_head_state	(int no, SHeadStat *pstat)
 	if (no>=0 && no<SIZEOF(_HeadState) && pstat->ctrlMode!=ctrl_off && pstat->ctrlMode!=ctrl_error) 
 	{	
 		if (pstat->err) _HeadErr[no] = TRUE;
+		if (pstat->tempReady > _HeadStateTempReady[no]) _HeadStateTempReady[no] = pstat->tempReady;
+
 		if (valid(pstat->presIn))
 		{
 			_HeadState[no].condPresIn += pstat->presIn;

@@ -248,6 +248,8 @@ typedef struct SConditionerStat_mcu
 	UINT32			tempIn;				// actual Temp (1/1000 °C)
     UINT32			tempHeater;		    // Temperature measured directly on heater cartridge (>= Revision #h) (1/1000 °C)
 	UINT32			heater_percent;		// heater on time (between 0% and 80%)
+	INT32			tempReady;			// temp ink = setpoint +/- 1°C
+	UINT32			tempSetpoint;		// Setpoint temperature
 	UINT32			mode;				// EnFluidCtrlMode
 	SCondStatus		gpio_state;			// state of GPIO Inputs
 	UINT32			error;

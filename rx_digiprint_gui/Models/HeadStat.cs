@@ -150,6 +150,22 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _TempCond, value); }
         }
 
+        //--- Property TempSetpoint ---------------------------------------
+        private UInt32 _TempSetpoint;
+        public UInt32 TempSetpoint
+        {
+            get { return _TempSetpoint; }
+            set { SetProperty(ref _TempSetpoint, value); }
+        }
+
+        //--- Property TempReady ---------------------------------------
+        private Int32 _TempReady;
+        public Int32 TempReady
+        {
+            get { return _TempReady; }
+            set { SetProperty(ref _TempReady, value); }
+        }
+
         //--- Property Property -------------------------------------------
         /*
         private UInt32 _TempFpga;
@@ -316,6 +332,8 @@ namespace RX_DigiPrint.Models
             // Conditioner
             TempHead    = item.tempHead;
             TempCond    = item.tempCond;
+            TempSetpoint = item.tempSetpoint;
+            TempReady    = item.tempReady;
             PresIn      = item.presIn;
             PresIn_max  = item.presIn_max;
             PresIn_diff = item.presIn_diff;

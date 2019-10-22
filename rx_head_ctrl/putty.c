@@ -479,6 +479,8 @@ void putty_display_cond_status(int show, int status)
 				RX_HBStatus->head[i].info				= RX_NiosStat.cond[i].info;
 				RX_HBStatus->head[i].tempHead			= RX_NiosStat.head_temp[i];
 				RX_HBStatus->head[i].tempCond			= RX_NiosStat.cond[i].tempIn;
+				RX_HBStatus->head[i].tempSetpoint		= RX_NiosStat.cond[i].tempSetpoint;
+				RX_HBStatus->head[i].tempReady			= RX_NiosStat.cond[i].tempReady;
 				RX_HBStatus->head[i].presIn				= RX_NiosStat.cond[i].pressure_in;
 				RX_HBStatus->head[i].presIn_max			= RX_NiosStat.cond[i].pressure_in_max;
 				RX_HBStatus->head[i].presIn_diff	    = RX_NiosStat.cond[i].pressure_in_diff;
@@ -506,6 +508,8 @@ void putty_display_cond_status(int show, int status)
 				RX_HBStatus->head[i].info.flags		= 0;
 				RX_HBStatus->head[i].tempHead		= INVALID_VALUE;
 				RX_HBStatus->head[i].tempCond		= INVALID_VALUE;
+				RX_HBStatus->head[i].tempSetpoint	= INVALID_VALUE;
+				RX_HBStatus->head[i].tempReady		= INVALID_VALUE;
 				RX_HBStatus->head[i].presIn			= INVALID_VALUE;
 				RX_HBStatus->head[i].presOut		= INVALID_VALUE;
 				RX_HBStatus->head[i].pumpSpeed		= INVALID_VALUE;
@@ -678,6 +682,7 @@ void putty_display_cond_status(int show, int status)
 
 		for (i = 0; i < MAX_HEADS_BOARD; i++) if (RX_NiosStat.cond[no[i]].error&COND_ERR_temp_head_overheat) str[i]='E'; else str[i]=' ';
 		term_printf("Temp Head [C]:    "); PRINTF(MAX_HEADS_BOARD)("   %s(%02d<%02d)%c ", value_str_temp(_NiosCfg->cond[no[i]].tempHead), _NiosCfg->cond[no[i]].temp / 1000, _NiosCfg->cond[no[i]].tempMax / 1000, str[no[i]]); term_printf("\n"); 
+		term_printf("Temp Ready :      "); PRINTF(MAX_HEADS_BOARD)("           %4s ", value_str(RX_HBStatus->head[no[i]].tempReady)); term_printf("\n"); 		
 		term_printf("Temp Inlet [C]:   "); PRINTF(MAX_HEADS_BOARD)("%14s  ",  value_str_temp(RX_NiosStat.cond[no[i]].tempIn)); term_printf("\n");
 		term_printf("Temp Heater [C]:  "); PRINTF(MAX_HEADS_BOARD)("%14s  ", value_str_temp(RX_NiosStat.cond[no[i]].tempHeater)); term_printf("\n");
 		term_printf("Heater:           "); PRINTF(MAX_HEADS_BOARD)("          %3d%%  ", RX_NiosStat.cond[no[i]].heater_percent); term_printf("\n");

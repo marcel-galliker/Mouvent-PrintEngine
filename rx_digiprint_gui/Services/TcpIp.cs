@@ -891,6 +891,7 @@ namespace RX_DigiPrint.Services
 	        public Int32    presLung;			//  Lung pressure
             public Int32    condPresOut;  
             public Int32    condPresIn;
+            public UInt32   condTempReady;
 	        public UInt32	temp;				//	Temperature
 	        public UInt32	pumpSpeedSet;		//	Consumption pump speed
 	        public UInt32	pumpSpeed;			//	Consumption pump speed
@@ -1026,6 +1027,8 @@ namespace RX_DigiPrint.Services
 	        //--- ink system ---------------------------------
 	        public UInt32			tempHead;
 	        public UInt32			tempCond;
+            public UInt32           tempSetpoint;
+            public Int32            tempReady;
 	        public Int32			presIn;
 	        public Int32			presIn_max;
 	        public Int32			presIn_diff;
@@ -1033,7 +1036,7 @@ namespace RX_DigiPrint.Services
 	        public Int32			presOut_diff;
             public Int32			meniscus;
             public Int32			meniscus_diff;
-            public Int32			controller_offset;
+            public Int32			pid_offset;
 
             public float			dropVolume;	// in pl
 	        public UInt32			pumpSpeed;
