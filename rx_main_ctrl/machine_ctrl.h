@@ -23,7 +23,7 @@ int		machine_set_printpar(SPrintQueueItem *pItem);
 int		machine_set_scans(int scans);
 UINT32	machine_get_scanner_pos(void);
 int		machine_start_printing(void);
-int		machine_pause_printing(void);
+int		machine_pause_printing(int fromGui);
 int		machine_stop_printing(void);
 int		machine_abort_printing(void);
 int		machine_clean(void);

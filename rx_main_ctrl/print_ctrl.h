@@ -20,7 +20,7 @@ int pc_end(void);
 int  pc_start_printing(void);
 int  pc_stop_printing(int userStop);
 int  pc_off(void);
-int  pc_pause_printing(void);
+int  pc_pause_printing(int fromGui);
 int  pc_abort_printing(void);
 int  pc_auto(int enable);
 int  pc_print_next(void);

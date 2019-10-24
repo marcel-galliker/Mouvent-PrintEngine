@@ -285,7 +285,7 @@ static int _printcmd(Smvt_prt_cmd *cmd)
 									break;
 		
 	case	PRINTCMD_PAPERSTOP:		Error(LOG, 0, "PEM: CMD PAPER-STOP");
-									machine_pause_printing();
+									machine_pause_printing(TRUE);
 									break;
 		
 	case	PRINTCMD_PAPERFEED:		Error(LOG, 0, "PEM: CMD PAPER-FEED");  break;

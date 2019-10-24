@@ -242,7 +242,7 @@ int pc_abort_printing(void)
 }
 
 //--- pc_pause_printing -----------------------------------------------------------
-int pc_pause_printing(void)
+int pc_pause_printing(int fromGui)
 {
 	TrPrintfL(TRUE, "pc_pause_printing");
 	RX_PrinterStatus.printState=ps_goto_pause;
@@ -250,7 +250,7 @@ int pc_pause_printing(void)
 //	RX_PrinterStatus.printState=ps_pause;
 	gui_send_printer_status(&RX_PrinterStatus);
 	enc_stop_pg("pc_pause_printing");
-	machine_pause_printing();
+	machine_pause_printing(fromGui);
 	return REPLY_OK;	
 }
 
@@ -822,7 +822,7 @@ int pc_print_done(int headNo, SPrintDoneMsg *pmsg)
 						if (rx_def_is_tx(RX_Config.printer.type))
 						{
 							Error(LOG, 0, "file >>%s<< not loaded completely: PAUSE printing", _filename(pnext->filepath));
-							machine_pause_printing();
+							machine_pause_printing(FALSE);
 							_PreloadCnt = 5;								
 						}
 						else Error(WARN, 0, "file >>%s<< not loaded completely: HERE WAS THE BUG", _filename(pnext->filepath));
@@ -872,7 +872,7 @@ void pc_print_go(void)
 	//	Error(LOG, 0, "NEXT   [%d] (id=%d, page=%d, scan=%d, copy=%d)", RX_PrinterStatus.printGoCnt, next->id, next->page, next->scan, next->copy);
 		if (!RX_PrinterStatus.testMode && next->id != pid->id) 
 		{
-			machine_pause_printing();			
+			machine_pause_printing(FALSE);			
 		}
 	}
 }

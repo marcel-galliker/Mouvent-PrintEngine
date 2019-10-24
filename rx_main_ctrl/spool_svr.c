@@ -117,8 +117,8 @@ void spool_tick(void)
 	{
 		_DelayPauseTimer = 0;
 		Error(LOG, 0, "PAUSE to load file");
-		plc_pause_printing();
-		pc_print_next();			
+		plc_pause_printing(FALSE);
+		pc_print_next();
 	}
 }
 
@@ -225,7 +225,7 @@ static int _do_pause_printing	(RX_SOCKET socket)
 	if (arg_simuPLC)
 	{
 		Error(LOG, 0, "PAUSE to load file");
-		plc_pause_printing();
+		plc_pause_printing(FALSE);
 		pc_print_next();			
 	}
 	else _DelayPauseTimer = rx_get_ticks()+1000;

@@ -150,13 +150,13 @@ int		machine_start_printing(void)
 }
 
 //--- machine_pause_printing ----------------------
-int		machine_pause_printing(void)
+int		machine_pause_printing(int fromGui)
 {
 	switch(_MInterface) 
 	{
 	case mi_none:	return REPLY_OK;
 	case mi_tt:		return tt_pause_printing();
-	case mi_plc:	return plc_pause_printing();
+	case mi_plc:	return plc_pause_printing(fromGui);
 	}
 	return REPLY_OK;
 }

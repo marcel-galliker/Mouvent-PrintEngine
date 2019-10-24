@@ -23,7 +23,7 @@ void plc_error_reset(void);
 int  plc_set_printpar(SPrintQueueItem *pItem);
 UINT32 plc_get_scanner_pos(void);
 int  plc_start_printing(void);
-int  plc_pause_printing(void);
+int  plc_pause_printing(int fromGui);
 int  plc_stop_printing(void);
 int  plc_abort_printing(void);
 int  plc_clean(void);

@@ -575,22 +575,29 @@ int	plc_to_cap_pos(void)
 }
 
 //--- plc_pause_printing ---------------------------------------
-int  plc_pause_printing(void)
+int  plc_pause_printing(int fromGui)
 {
-//	Error(LOG,0, "plc_pause_printing: _StartPrinting=FALSE");
-	_StartPrinting = FALSE;
-	_head_was_up   = FALSE;
-	_SendRun       = FALSE;
-	_RequestPause  = FALSE;
-	if (_SimuEncoder && rx_def_is_scanning(RX_Config.printer.type)) ctrl_simu_encoder(0);
-
-	if (!_SimuPLC)
+	if (fromGui && rx_def_is_tx(RX_Config.printer.type))
 	{
-		_plc_set_par_default();
-//		_plc_set_command("CMD_PRODUCTION", "CMD_PAUSE");
-//		Error(LOG, 0, "send PAUSE");
-		_SendPause = 1;
-		_plc_state_ctrl();
+		_GUIPause=TRUE;
+	}
+	else
+	{
+	//	Error(LOG,0, "plc_pause_printing: _StartPrinting=FALSE");
+		_StartPrinting = FALSE;
+		_head_was_up   = FALSE;
+		_SendRun       = FALSE;
+		_RequestPause  = FALSE;
+		if (_SimuEncoder && rx_def_is_scanning(RX_Config.printer.type)) ctrl_simu_encoder(0);
+
+		if (!_SimuPLC)
+		{
+			_plc_set_par_default();
+	//		_plc_set_command("CMD_PRODUCTION", "CMD_PAUSE");
+	//		Error(LOG, 0, "send PAUSE");
+			_SendPause = 1;
+			_plc_state_ctrl();
+		}		
 	}
 	return REPLY_OK;
 }
@@ -613,12 +620,6 @@ int plc_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen)
 		case CMD_PLC_GET_VAR:		_plc_get_var (socket, (char*)data);				break;
 		case CMD_PLC_SET_VAR:		_plc_set_var (socket, (char*)data);				break;
 		case CMD_PLC_SET_CMD:		_plc_set_cmd (socket, (char*)data);				break;
-		case CMD_PAUSE_PRINTING:	TrPrintfL(TRUE, "PAUSE by user");
-									if (rx_def_is_tx(RX_Config.printer.type))
-										_GUIPause=TRUE;
-									else
-										_SendPause=1;
-									break;
 		
 		//--- material database --------------------------------------------------------
 		case CMD_PLC_REQ_MATERIAL:	_plc_req_material  (socket, FILENAME_MATERIAL, cmd); break;
@@ -1403,7 +1404,7 @@ static void _plc_state_ctrl()
 				Error(ERR_CONT, 0, "Roll Empty: PAUSE requested");
 				RX_PrinterStatus.printState=ps_pause; // suppress pause message
 				_RequestPause = TRUE;
-				pc_pause_printing();
+				pc_pause_printing(FALSE);
 			}
 
 			/*
@@ -1462,7 +1463,7 @@ static void _plc_state_ctrl()
 			Error(ERR_CONT, 0, "PAUSE requested by finishing");
 			RX_PrinterStatus.printState=ps_pause; // suppress pause message
 			_RequestPause = TRUE;
-			pc_pause_printing();
+			pc_pause_printing(FALSE);
 		}
 	}
 	gui_send_printer_status(&RX_PrinterStatus);

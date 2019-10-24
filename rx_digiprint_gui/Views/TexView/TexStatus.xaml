@@ -15,7 +15,7 @@
 
             <rx_uc:PlcParCtrl ID="STA_SLIDE_POSITION"               Label="Slide State"         x:Name="CB_ScannerStatus" Type="ComboStr"/>
             <rx_uc:PlcParCtrl ID="STA_SLIDE_POSITION_ABSOLUTE"      Label="Slide Pos"           Unit="mm" Format="f" UserVisible="usr_service"/>
-            <rx_uc:PlcParCtrl ID="STA_HEAD_IS_UP"                   Label="Head is UP"                               UserVisible="usr_service"/>
+            <rx_uc:PlcParCtrl ID="STA_HEAD_IS_UP"                   Label="Scanner Enabled"                          UserVisible="usr_service"/>
 
             <!--            
             <rx_uc:PlcParCtrl ID="STA_WINDER_DIAMETER_1"            Label="Unwinder Ø"   Unit="mm" Format="f"/>

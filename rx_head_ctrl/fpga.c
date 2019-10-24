@@ -114,13 +114,12 @@ static int		_TempErr=0;
 static UINT32	_ImgInIdx;
 static UINT32	_FirstImage;
 static UINT32	_PdCnt;
-static UINT32	_Enc_Flag[4];
-static UINT32	_Enc_PgCnt[4];
+static UINT32	_Enc_Flag[8];
+static UINT32	_Enc_PgCnt[8];
 static UINT32	_Enc_Pos[4];
 static UINT32	_Enc_PosBase[4];
 static UINT32	_PgSimuIn, _PgSimuOut;
 static int		_UdpIsLocal;
-static int		_SynthEncoder=FALSE;
 static BYTE		*_FpgaBase;
 static int		_EncCheckDelay=0;
 static UINT32*  _Buffer[HEAD_CNT]={NULL,NULL,NULL,NULL};	// for DDR3-Tests
@@ -663,7 +662,7 @@ static void _fpga_enc_config(int khz)
 	if (khz>1)
 	{
 		FpgaCfg.encoder->synth.value = 0;
-		FpgaCfg.encoder->synth.enable= _SynthEncoder = FALSE;
+		FpgaCfg.encoder->synth.enable= FALSE;
 
 		// first disable FPGA, then start power up, and finally enable fpga
 		enable = (FpgaCfg.cfg->cmd & CMD_MASTER_ENABLE)!=0;
@@ -682,14 +681,14 @@ static void _fpga_enc_config(int khz)
 		}
 		SET_FLAG(FpgaCfg.cfg->cmd, CMD_MASTER_ENABLE, enable);
 		FpgaCfg.encoder->synth.value = FPGA_FREQ/(khz*1000);
-		FpgaCfg.encoder->synth.enable= _SynthEncoder = TRUE;		
+		FpgaCfg.encoder->synth.enable= TRUE;		
 	}
-	else if (_SynthEncoder)	
+	else 	
 	{
 		FpgaCfg.encoder->synth.value = 0;
-		FpgaCfg.encoder->synth.enable= _SynthEncoder = FALSE;
-		SET_FLAG(FpgaCfg.cfg->cmd, CMD_MASTER_ENABLE, FALSE);
-		nios_set_firepulse_on(FALSE);
+		FpgaCfg.encoder->synth.enable= FALSE;
+	//	SET_FLAG(FpgaCfg.cfg->cmd, CMD_MASTER_ENABLE, FALSE);
+	//	nios_set_firepulse_on(FALSE);
 	}
 
 	SET_FLAG(FpgaCfg.encoder->cmd, ENC_SIGNAL_MODE, 0);  // 0: Telegram, 1:no telegram
@@ -1535,7 +1534,7 @@ int  fpga_abort(void)
 		{
 			FpgaCfg.encoder->cmd = 0;
 			FpgaCfg.encoder->synth.value = 0;
-			FpgaCfg.encoder->synth.enable = _SynthEncoder = FALSE;
+			FpgaCfg.encoder->synth.enable = FALSE;
 			RX_FpgaEncCfg.cmd = FpgaCfg.encoder->cmd;
 //			rx_sleep(5);
 		}
@@ -1901,7 +1900,7 @@ static void _handle_pd(int pd)
 		for (i=0; i<HEAD_CNT; i++)
 			_PrintDonePos[i][_PdCnt%MAX_PAGES] = 0;
 				
-		if (_SynthEncoder)
+		if (FpgaCfg.encoder->synth.enable)
 		{
 			if (_ImgInIdx > RX_HBStatus[0].head[0].printDoneCnt)
 			{
@@ -1960,6 +1959,9 @@ static int _check_encoder(void)
 				_Enc_Flag[i] = flag;
 				_Enc_PgCnt[i]++;
 			}
+		}
+		for(i = 0; i < HEAD_CNT; i++)
+		{
 			if(Fpga.stat->enc_position[i] && Fpga.stat->enc_position[i] < _Enc_Pos[i])
 				_Enc_PosBase[i] += 0x100000;
 			_Enc_Pos[i] = Fpga.stat->enc_position[i];

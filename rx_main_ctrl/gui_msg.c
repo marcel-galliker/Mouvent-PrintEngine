@@ -960,7 +960,7 @@ static void _do_abort_printing	(RX_SOCKET socket)
 //--- _do_pause_printing ---------------------------------------------
 static void _do_pause_printing	(RX_SOCKET socket)
 {
-	pc_pause_printing();
+	pc_pause_printing(TRUE);
 }
 
 //--- _do_external_data --------------------------------------------
