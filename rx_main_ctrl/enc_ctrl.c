@@ -470,6 +470,7 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 							 dist.printGoMode = PG_MODE_MARK_FILTER;
 							 if (_DistTelCnt>1)
 							 {
+								/*
 								if(RX_Config.printer.type == printer_LH702) // || RX_Config.printer.type == printer_LB701)
 								{
 									int markdist = 1000*RX_Config.printer.offset.printMarkDist;				
@@ -479,6 +480,7 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 								//	Error(LOG, 0, "SEND CMD_ENCODER_PG_DIST dist=%d", dist.dist);
 								} 
 								else
+								*/
 								{
 									dist.ignore   = pitem->pageHeight*9/10;
 									dist.window   = pitem->pageHeight/4;

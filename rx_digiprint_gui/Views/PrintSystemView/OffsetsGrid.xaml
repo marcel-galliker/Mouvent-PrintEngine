@@ -17,11 +17,6 @@
                 <common:RxNumBox Text="{Binding OffsetIncPerMeter}" HorizontalContentAlignment="Right" Width="70" HorizontalAlignment="Right"/>
             </Grid>
 
-            <Grid x:Name="PrintMarkDist">
-                <TextBlock       Text="PrintMark Dist [mm]"/>
-                <common:RxNumBox Text="{Binding PrintMarkDist}" HorizontalContentAlignment="Right" Width="70" HorizontalAlignment="Right"/>
-            </Grid>
-
             <Grid x:Name="Belt">
                 <TextBlock       Text="Belt Step [µm]"/>
                 <common:RxNumBox Text="{Binding OffsetStep}" HorizontalContentAlignment="Right" Width="70" HorizontalAlignment="Right"/>

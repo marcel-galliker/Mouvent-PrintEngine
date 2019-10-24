@@ -144,7 +144,6 @@ int setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action)
 			setup_int32(file, "offset_incPerMeterVerso",	action, &pcfg->printer.offset.incPerMeter[1], 0);
 			setup_uint32(file, "offsetVerso",				action,	&pcfg->printer.offset.versoDist, 0);
 			setup_uint32(file, "manualFlightTimeComp",		action, &pcfg->printer.offset.manualFlightTimeComp, 0);
-			setup_int32(file, "offset_printMarkDist",		action, &pcfg->printer.offset.printMarkDist, 406);
 			setup_chapter(file, "..", -1, action);			
 		}
 	}

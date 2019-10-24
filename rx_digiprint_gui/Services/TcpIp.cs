@@ -770,7 +770,6 @@ namespace RX_DigiPrint.Services
 	        public Int32	incPerMeterVerso;
             public Int32    versoDist;
             public Int32    manualFlightTimeComp;
-            public Int32    printMarkDist;
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]

@@ -32,6 +32,8 @@
 
 //--- Defines -----------------------------------------------------------------
 	
+// Siemsns:		192.168.20.192:2000
+// Server:		192.168.20.118
 
 //--- Externals ---------------------------------------------------------------
 
@@ -91,7 +93,7 @@ static void *_siemens_thread(void *lpParameter)
 	{
 		if (_Socket==INVALID_SOCKET)
 		{			
-			errNo=sok_open_client_2(&_Socket, RX_CTRL_PLC, PORT_CTRL_PLC, SOCK_STREAM, _handle_siemens_msg, _siemens_closed);
+			errNo=sok_open_client_2(&_Socket, "192.168.20.192", 2000, SOCK_STREAM, _handle_siemens_msg, _siemens_closed);
 			if (errNo)
 			{
 			//	char str[256];
@@ -99,6 +101,7 @@ static void *_siemens_thread(void *lpParameter)
 			}
 			else
 			{
+				TrPrintfL(TRUE, "Connected");
 				ErrorEx(dev_plc, -1, LOG, 0, "Connected");
 			}
 		}				
@@ -111,6 +114,7 @@ static void *_siemens_thread(void *lpParameter)
 static int _siemens_closed(RX_SOCKET socket, const char *peerName)
 {
 	sok_close(&_Socket);
+	TrPrintfL(TRUE, "TCP/IP connection closed");
 	Error(LOG, 0, "TCP/IP connection closed");
 	return REPLY_OK;
 }
@@ -118,7 +122,7 @@ static int _siemens_closed(RX_SOCKET socket, const char *peerName)
 //--- siemens_tick --------------------------------------------
 void  siemens_tick(void)
 {
-	sok_send_2(&_Socket, CMD_PLC_STAT, 0, NULL);
+	if (sok_send_2(&_Socket, CMD_PLC_STAT, 0, NULL)==REPLY_OK) TrPrintfL(TRUE, "Siemend: Sent Message");
 }
 
 //--- _handle_siemens_msg ------------------------------------------------------------------

@@ -39,7 +39,6 @@ namespace RX_DigiPrint.Views.PrintSystemView
             {
                 case EPrinterType.printer_test_table:       this.Visibility         = Visibility.Visible;
                                                             Encoder.Visibility      = Visibility.Visible;
-                                                            PrintMarkDist.Visibility = Visibility.Collapsed;
                                                             Angle.Visibility        = Visibility.Visible; 
                                                             Belt.Visibility         = Visibility.Visible;
                                                             Overlap.Visibility      = Visibility.Visible;
@@ -50,7 +49,6 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 case EPrinterType.printer_TX801:            
                 case EPrinterType.printer_TX802:            this.Visibility         = Visibility.Visible;
                                                             Encoder.Visibility      = Visibility.Visible;
-                                                            PrintMarkDist.Visibility = Visibility.Collapsed;
                                                             Angle.Visibility        = Visibility.Collapsed; 
                                                             Belt.Visibility         = Visibility.Visible; 
                                                             Overlap.Visibility      = Visibility.Visible;
@@ -61,7 +59,6 @@ namespace RX_DigiPrint.Views.PrintSystemView
 
                 case EPrinterType.printer_DP803:            this.Visibility         = Visibility.Visible;
                                                             Encoder.Visibility      = Visibility.Visible;
-                                                            PrintMarkDist.Visibility = Visibility.Collapsed;
                                                             Angle.Visibility        = Visibility.Collapsed; 
                                                             Belt.Visibility         = Visibility.Collapsed;
                                                             Overlap.Visibility      = Visibility.Collapsed;
@@ -73,8 +70,6 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 case EPrinterType.printer_LB701:
                 case EPrinterType.printer_LB702_UV:         this.Visibility         = Visibility.Visible;
                                                             Encoder.Visibility      = Visibility.Visible;
-                                                            PrintMarkDist.Visibility = Visibility.Collapsed;
-                                                         // PrintMarkDist.Visibility = Visibility.Visible;
                                                             Angle.Visibility        = Visibility.Collapsed;
                                                             Belt.Visibility         = Visibility.Collapsed;
                                                             Overlap.Visibility      = Visibility.Collapsed; 
@@ -85,7 +80,6 @@ namespace RX_DigiPrint.Views.PrintSystemView
 
                 case EPrinterType.printer_LH702:            this.Visibility         = Visibility.Visible;
                                                             Encoder.Visibility      = Visibility.Visible;
-                                                            PrintMarkDist.Visibility = Visibility.Visible;
                                                             Angle.Visibility        = Visibility.Collapsed;
                                                             Belt.Visibility         = Visibility.Collapsed;
                                                             Overlap.Visibility      = Visibility.Collapsed; 
@@ -96,7 +90,6 @@ namespace RX_DigiPrint.Views.PrintSystemView
 
                 case EPrinterType.printer_LB702_WB:         this.Visibility         = Visibility.Visible;
                                                             Encoder.Visibility      = Visibility.Visible;
-                                                            PrintMarkDist.Visibility = Visibility.Collapsed;
                                                             Angle.Visibility        = Visibility.Collapsed;
                                                             Belt.Visibility         = Visibility.Collapsed;
                                                             Overlap.Visibility      = Visibility.Collapsed; 
@@ -107,7 +100,6 @@ namespace RX_DigiPrint.Views.PrintSystemView
 
                 default:                                    this.Visibility         = Visibility.Visible;
                                                             Encoder.Visibility      = Visibility.Visible;
-                                                            PrintMarkDist.Visibility = Visibility.Collapsed;
                                                             Angle.Visibility        = Visibility.Collapsed;
                                                             Belt.Visibility         = Visibility.Collapsed;
                                                             Overlap.Visibility      = Visibility.Collapsed; 

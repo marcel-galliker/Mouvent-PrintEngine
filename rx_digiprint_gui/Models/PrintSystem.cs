@@ -221,14 +221,6 @@ namespace RX_DigiPrint.Models
             set { Changed|=SetProperty(ref _OffsetIncPerMeter, value); }
         }
 
-        //--- Property PrintMarkDist ---------------------------------------
-        private int _PrintMarkDist;
-        public int PrintMarkDist
-        {
-            get { return _PrintMarkDist; }
-            set { Changed|=SetProperty(ref _PrintMarkDist, value); }
-        }     
-
         //--- Property OffsetIncPerMeter ---------------------------------------
         private int _OffsetIncPerMeterVerso;
         public int OffsetIncPerMeterVerso
@@ -283,7 +275,6 @@ namespace RX_DigiPrint.Models
             OffsetStep              = msg.offset.step;
             OffsetIncPerMeter       = msg.offset.incPerMeter;
             OffsetIncPerMeterVerso  = msg.offset.incPerMeterVerso;
-            PrintMarkDist           = msg.offset.printMarkDist;
             HeadCnt                 = msg.headsPerColor;
 
             _HeadFpVoltage= new Int32[msg.headFpVoltage.Count()];
@@ -321,7 +312,6 @@ namespace RX_DigiPrint.Models
             msg.offset.step             = OffsetStep;
             msg.offset.incPerMeter      = OffsetIncPerMeter; 
             msg.offset.incPerMeterVerso = OffsetIncPerMeterVerso; 
-            msg.offset.printMarkDist    = PrintMarkDist;
             msg.headsPerColor           = _HeadCnt;
             msg.externalData            = Convert.ToInt32(ExternalData);
 
