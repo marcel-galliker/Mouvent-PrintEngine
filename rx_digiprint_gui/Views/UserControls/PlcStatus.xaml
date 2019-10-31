@@ -13,23 +13,67 @@
         <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">32</sys:Double>
     </UserControl.Resources>
 
-    <GroupBox Header="PLC Info" MinWidth="300" Style="{StaticResource RxGroupBox}">
+    <GroupBox Header="PLC Info" MinWidth="350" Style="{StaticResource RxGroupBox}" IsVisibleChanged="PLC_INFO_IsVisibleChanged">
         <ScrollViewer ScrollViewer.VerticalScrollBarVisibility="Auto">
-            <rx_uc:PlcParPanel UnitID="PLC" ReadOnly="True" LabelWidth="200">
-                <rx_uc:PlcParCtrl ID="display"          Label="Display"             HCA="Left" ContentBack="LightGreen"/>
-                <rx_uc:PlcParCtrl ID="serialNo"         Label="Serial No"           HCA="Left"/>
-                <rx_uc:PlcParCtrl ID="tempAct [°C]"     Label="Temparature"         HCA="Left" Format='n'/>
-                <rx_uc:PlcParCtrl ID="tempMax [°C]"     Label="Temparature Max"     HCA="Left" Format='n'/>
-                <rx_uc:PlcParCtrl ID="versionHardware"  Label="Version HW"          HCA="Left"/>
-                <rx_uc:PlcParCtrl ID="versionFirmware"  Label="Version FW"          HCA="Left"/>
-                <rx_uc:PlcParCtrl ID="versionLogic"     Label="Version Logic"       HCA="Left"/>
-                <rx_uc:PlcParCtrl ID="versionBsp"       Label="Version BSP"         HCA="Left"/>
-                <rx_uc:PlcParCtrl ID="versionMlpi"      Label="Version MLPI"        HCA="Left"/>
-                <rx_uc:PlcParCtrl ID="hardwareDetails"  Label="Hardware Details"    HCA="Left"/>
-                <rx_uc:PlcParCtrl ID="localBusConfig"   Label="Local Bus Config"    HCA="Left" Format='l'/>
-                <rx_uc:PlcParCtrl ID="modulBusConfig"   Label="Modul Bus Config"    HCA="Left"/>
-                <rx_uc:PlcParCtrl ID="modulHwDetails"   Label="Modul HW Details"    HCA="Left"/>
-            </rx_uc:PlcParPanel>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="180"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Display"/>
+
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Serial No"/>
+                <TextBlock Grid.Row="1" Grid.Column="1" x:Name="SerielNo"/>
+                
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="Temparature"/>
+                <TextBlock Grid.Row="2" Grid.Column="1" x:Name="Temparature"/>
+
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="Temparature Max"/>
+                <TextBlock Grid.Row="3" Grid.Column="1" x:Name="TemparatureMax"/>
+
+                <TextBlock Grid.Row="4" Grid.Column="0" Text="Version HW"/>
+                <TextBlock Grid.Row="4" Grid.Column="1" x:Name="VersionHW"/>
+
+                <TextBlock Grid.Row="5" Grid.Column="0" Text="Version FW"/>
+                <TextBlock Grid.Row="5" Grid.Column="1" x:Name="VersionFW"/>
+
+                <TextBlock Grid.Row="6" Grid.Column="0" Text="Version Logic"/>
+                <TextBlock Grid.Row="6" Grid.Column="1" x:Name="VersionLogic"/>
+
+                <TextBlock Grid.Row="7" Grid.Column="0" Text="Version BSP"/>
+                <TextBlock Grid.Row="7" Grid.Column="1" x:Name="VersionBSP"/>
+
+                <TextBlock Grid.Row="8" Grid.Column="0" Text="Version MLPI"/>
+                <TextBlock Grid.Row="8" Grid.Column="1" x:Name="VersionMPLI"/>
+
+                <TextBlock Grid.Row="9" Grid.Column="0" Text="Hardware Details"/>
+                <TextBlock Grid.Row="9" Grid.Column="1" x:Name="HardwareDetail"/>
+
+                <TextBlock Grid.Row="10" Grid.Column="0" Text="Local Bus Config"/>
+                <TextBlock Grid.Row="10" Grid.Column="1" x:Name="LocalBusConfig"/>
+
+                <TextBlock Grid.Row="11" Grid.Column="0" Text="Modul Bus Config"/>
+                <TextBlock Grid.Row="11" Grid.Column="1" x:Name="ModulBusConfig"/>
+
+                <TextBlock Grid.Row="12" Grid.Column="0" Text="Modul HW Details"/>
+                <TextBlock Grid.Row="12" Grid.Column="1" x:Name="ModulHwDetails"/>
+
+            </Grid>
         </ScrollViewer>
     </GroupBox>
 </UserControl>

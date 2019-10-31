@@ -49,7 +49,6 @@ namespace RxRexrothGui.Services
             //--- LOG tests --------------------------------
             public UInt32 indexOldest;
             public UInt32 indexNewest;
-            public UInt32 indexRx;
         };
 
         public struct SSystemTime

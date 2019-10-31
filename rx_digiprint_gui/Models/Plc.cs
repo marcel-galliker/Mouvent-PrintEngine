@@ -41,7 +41,8 @@ namespace RX_DigiPrint.Models
                     LogInfo(_WB, _WB_row);
                     _WB_row = 0;
                }               
-               else OnPropertyChanged();
+               else 
+                   OnPropertyChanged();
             }
         }
 
