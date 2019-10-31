@@ -121,7 +121,7 @@ namespace RX_DigiPrint.Models
             else if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LH702)
             {
                 str.Append(string.Format("{0}\n", "LH702"));
-                str.Append(string.Format("{0}={1}\n", "XML_MATERIAL", "LH702"));                
+                str.Append(string.Format("{0}={1}\n", "XML_MATERIAL", "LH702"));
             }
             else str.Append(string.Format("{0}\n", Name));
 

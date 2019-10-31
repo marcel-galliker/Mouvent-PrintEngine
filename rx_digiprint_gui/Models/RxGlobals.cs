@@ -18,6 +18,7 @@ namespace RX_DigiPrint.Models
         public static EventList         Events            = new EventList();
         public static PrinterStatus     PrinterStatus     = new PrinterStatus();
         public static PrintQueue        PrintQueue        = new PrintQueue();
+        public static PrintQueueItem    NextItem          = null;
         public static PrintQueueItem    PrintingItem      = null;
         public static Action            PrintQueueChanged = null;
         public static RxLanguage        Language          = new RxLanguage();

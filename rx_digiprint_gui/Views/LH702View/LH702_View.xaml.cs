@@ -52,7 +52,7 @@ namespace RX_DigiPrint.Views.LH702View
         //--- _PrintQueueChanged ---------------------------
         private void _PrintQueueChanged()
         {
-            Preview.DataContext = RxGlobals.PrintingItem;
+            Preview.DataContext = RxGlobals.NextItem;
         }
 
         //--- Preview_Loaded ------------------------------

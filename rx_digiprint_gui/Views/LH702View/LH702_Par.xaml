@@ -16,39 +16,40 @@
         <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">32</sys:Double>
     </UserControl.Resources>
 
-    <GroupBox Grid.Column="0" Header="Parameter" Style="{StaticResource RxGroupBox}">
+    <GroupBox Grid.Column="0" Header="Settings" Style="{StaticResource RxGroupBox}">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="auto"/>
             </Grid.RowDefinitions>
 
-            <Grid x:Name="ParamsGrid">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="120"/>
-                    <ColumnDefinition Width="70"/>
-                    <ColumnDefinition Width="50"/>
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                </Grid.RowDefinitions>
-                
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="Print Height"/>
-                <common:RxNumBox Grid.Row="0" Grid.Column="1" 
-			        Text="{Binding PrintHeight}"
-			        HorizontalContentAlignment="Right"
-			        Background="Transparent"
-                    VerticalAlignment="Center"
-                    />
-                <TextBlock Grid.Row="0" Grid.Column="2" Text="mm" FontSize="{StaticResource FontSizeStd}" Padding="3,0,0,0" VerticalAlignment="Center"/>
+            <rx_uc:PlcParPanel Grid.Row="0" x:Name="ParPanelMaterial" UnitID="Application.GUI_00_001_Main" ReadOnly="False" LabelWidth="120">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Material"/>
+                    <igWPF:XamComboEditor 
+			            x:Name="CB_Material"
+                        Grid.Column="1"
+			            HorizontalAlignment="Stretch"
+                        DisplayMemberPath="Name"
+			            DropDownResizeMode="None"
+                        IsEditable="False"
+                        DropDownClosed="CB_Material_DropDownClosed"
+                        ValueToDisplayTextConverter="{StaticResource MaterialName_Converter}"
+                        SelectedItemChanged="CB_Material_SelectedItemChanged"
+                        />
+                    <TextBox Grid.Column="1" x:Name="MaterialName" Text="Name" Visibility="Collapsed"/>
+                </Grid>
+                <rx_uc:PlcParCtrl ID="XML_MATERIAL"  Label="" x:Name="XML_MATERIAL" Visibility="Collapsed"/>
 
-            </Grid>
-
+                <rx_uc:PlcParCtrl ID="XML_MATERIAL_THICKNESS" Label="Thickness"    Unit="µm" UnitWidth="50" Format="n"/>
+                <rx_uc:PlcParCtrl ID="XML_HEAD_HEIGHT"        Label="Print Height" Unit="mm" UnitWidth="50" Format="1"/>
+                <rx_uc:PlcParCtrl ID="XML_ENC_OFFSET"         Label="Encoder Adj"  Unit="inc" UnitWidth="50" Format="n"/>
+            </rx_uc:PlcParPanel>
+            
             <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>

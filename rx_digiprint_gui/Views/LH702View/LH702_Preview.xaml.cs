@@ -26,7 +26,6 @@ namespace RX_DigiPrint.Views.LH702View
         public LH702_Preview()
         {
             InitializeComponent();
-            DataContext = RxGlobals.PrintingItem;
         }
 
         //--- Property Source ------------------------------------------
@@ -58,15 +57,13 @@ namespace RX_DigiPrint.Views.LH702View
 
             MainGrid.Clip = geometry;
 
-            Image.Height = ActualHeight-50;
+//          Image.Height = ActualHeight-50;
+            Image.Width  = ActualHeight-50;
 
             //--- direction --------------------------------------------------------
             Canvas.SetLeft(Direction,  (ActualWidth-Direction.ActualWidth)/2);
             Canvas.SetLeft(Direction2, (ActualWidth-Direction.ActualWidth)/2);
             Canvas.SetTop (Direction2, ActualHeight-Direction.ActualHeight);
-
-            Canvas.SetLeft(PrintMark, w-100);
-            Canvas.SetTop (PrintMark, 20);
         }
 
         //--- addLineH -----------------------------------------------------------------------------------
@@ -107,9 +104,14 @@ namespace RX_DigiPrint.Views.LH702View
             FirstMesurementChild = MainGrid.Children.Count;
 
             Border border = sender as Border;
-            double left=Canvas.GetLeft(PrintMark);
+
             double x = Canvas.GetLeft(border)+e.NewSize.Width;
             double b = Canvas.GetTop(border)+border.ActualHeight;
+
+            Canvas.SetLeft(PrintMark, x+100);
+            Canvas.SetTop (PrintMark, 20);
+
+            double left=Canvas.GetLeft(PrintMark);
             addLineV(x, b, MainGrid.ActualHeight, 1);
             addLineH(x, left-2, 30, 10, 2);
         }
@@ -117,31 +119,19 @@ namespace RX_DigiPrint.Views.LH702View
         //--- MoveUp_Clicked --------------------------------------
         private void MoveUp_Clicked(object sender, RoutedEventArgs e)
         {
-            RxButton button = sender as RxButton;
-            button.IsChecked = true;
-            MoveUp.Text="";
-            RxNumPad pad = new RxNumPad(MoveUp);
-            if((bool)pad.ShowDialog())
+            if (RxGlobals.PrintingItem!=null)
             {
-                RxGlobals.PrintingItem.PageMargin += Rx.StrToDouble(pad.Result);
-                RxGlobals.PrintingItem.SendMsg(TcpIp.EVT_SET_PRINT_QUEUE);
+                RxButton button = sender as RxButton;
+                button.IsChecked = true;
+                MoveUp.Text="";
+                RxNumPad pad = new RxNumPad(MoveUp);
+                if((bool)pad.ShowDialog())
+                {
+                    RxGlobals.PrintingItem.PageMargin += Rx.StrToDouble(pad.Result);
+                    RxGlobals.PrintingItem.SendMsg(TcpIp.EVT_SET_PRINT_QUEUE);
+                }
+                button.IsChecked = false;
             }
-            button.IsChecked = false;
-        }
-
-        //--- MoveDown_Clicked --------------------------------------
-        private void MoveDown_Clicked(object sender, RoutedEventArgs e)
-        {
-            RxButton button = sender as RxButton;
-            button.IsChecked = true;
-            MoveDown.Text="";
-            RxNumPad pad = new RxNumPad(MoveDown);
-            if((bool)pad.ShowDialog())
-            {
-                RxGlobals.PrintingItem.PageMargin -= Rx.StrToDouble(pad.Result);
-                RxGlobals.PrintingItem.SendMsg(TcpIp.EVT_SET_PRINT_QUEUE);
-            }
-            button.IsChecked = false;
         }
 
         //--- MoveLeft_Clicked --------------------------------------
@@ -156,24 +146,6 @@ namespace RX_DigiPrint.Views.LH702View
                 if((bool)pad.ShowDialog())
                 {
                     RxGlobals.PrintingItem.PrintGoDist += Rx.StrToDouble(pad.Result);
-                    RxGlobals.PrintingItem.SendMsg(TcpIp.EVT_SET_PRINT_QUEUE);
-                }
-                button.IsChecked = false;
-            }
-        }
-
-        //--- MoveRight_Clicked ---------------------------------------
-        private void MoveRight_Clicked(object sender, RoutedEventArgs e)
-        {
-            if (RxGlobals.PrintingItem!=null)
-            {
-                RxButton button = sender as RxButton;
-                button.IsChecked = true;
-                MoveRight.Text="";
-                RxNumPad pad = new RxNumPad(MoveRight);
-                if((bool)pad.ShowDialog())
-                {
-                    RxGlobals.PrintingItem.PrintGoDist -= Rx.StrToDouble(pad.Result);
                     RxGlobals.PrintingItem.SendMsg(TcpIp.EVT_SET_PRINT_QUEUE);
                 }
                 button.IsChecked = false;

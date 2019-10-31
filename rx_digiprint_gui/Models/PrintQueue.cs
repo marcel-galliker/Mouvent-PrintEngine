@@ -57,6 +57,8 @@ namespace RX_DigiPrint.Models
                 if (_removeFromList (_Printed, item)) RxBindable.Invoke(() => _Queue.Add(item));
                 else _addToList(_Queue,   item, top);
                 if (_Queue.Count()==1) item.SendBtProdState();
+                RxGlobals.NextItem = item;
+                if (RxGlobals.PrintQueueChanged!=null) RxBindable.Invoke(()=>RxGlobals.PrintQueueChanged());
             }
             else
             { 

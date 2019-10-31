@@ -19,7 +19,7 @@
             <TextBlock x:Name="Direction2" Text="ð ð ð ð ð ð ð ð ð ð ð ð" FontFamily="Wingdings" FontSize="40" Background="Transparent" Foreground="White"/>
 
             <Border x:Name="Border"
-                Canvas.Left="70"
+                Canvas.Left="120"
                 Canvas.Top="25"
                 BorderBrush="{StaticResource RX.Green}"
                 BorderThickness="3"
@@ -32,11 +32,9 @@
                     Source="{Binding Preview}"
                     RenderTransformOrigin="0.5,0.5"
                     >
-                    <!--
                     <Image.LayoutTransform>
                         <RotateTransform Angle="90"/>
                     </Image.LayoutTransform>
-                    -->
                 </Image>
 
             </Border>
@@ -45,46 +43,23 @@
         </Canvas>
         
         <!-- move buttons ______________________________________________________________________________________-->
-        <Grid Width="250" Height="250" HorizontalAlignment="Left" Margin="100,10,0,0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="auto"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-
-            <Grid Grid.Row="0"  Grid.Column="1" >
-                <TextBox x:Name="MoveUp" Visibility="Hidden"/>
-                <common:RxButton Click="MoveUp_Clicked">
-                    <TextBlock Text="é" FontFamily="Wingdings" FontSize="{StaticResource FontSizeXL}"/>
-                </common:RxButton>
-            </Grid>
-
-            <Grid Grid.Row="2"  Grid.Column="1" >
-                <TextBox x:Name="MoveDown" Visibility="Hidden"/>
-                <common:RxButton Click="MoveDown_Clicked">
-                    <TextBlock Text="ê" FontFamily="Wingdings" FontSize="{StaticResource FontSizeXL}"/>
-                </common:RxButton>
-            </Grid>
-
-            <Grid Grid.Row="1" Grid.Column="0">
+        <StackPanel Width="auto" Height="auto" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="100,10,0,0" Orientation="Horizontal">
+            <Grid HorizontalAlignment="Left">
                 <TextBox x:Name="MoveLeft" Visibility="Hidden"/>
                 <common:RxButton  Click="MoveLeft_Clicked">
-                    <TextBlock Text="ç" FontFamily="Wingdings" FontSize="{StaticResource FontSizeXL}"/>
+                    <TextBlock Text="çè" FontFamily="Wingdings" FontSize="{StaticResource FontSizeXL}"/>
                 </common:RxButton>
             </Grid>
 
-            <Grid Grid.Row="1"  Grid.Column="2">
-                <TextBox x:Name="MoveRight" Visibility="Hidden"/>
-                <common:RxButton Click="MoveRight_Clicked">
-                    <TextBlock Text="è" FontFamily="Wingdings" FontSize="{StaticResource FontSizeXL}"/>
+            <Grid HorizontalAlignment="Right">
+                <TextBox x:Name="MoveUp" Visibility="Hidden"/>
+                <common:RxButton Click="MoveUp_Clicked">
+                    <StackPanel>
+                        <TextBlock Text="é" FontFamily="Wingdings" FontSize="{StaticResource FontSizeXL}"/>
+                        <TextBlock Text="ê" FontFamily="Wingdings" FontSize="{StaticResource FontSizeXL}"/>
+                    </StackPanel>
                 </common:RxButton>
             </Grid>
-
-        </Grid>
+        </StackPanel>
     </Grid>
 </UserControl>
