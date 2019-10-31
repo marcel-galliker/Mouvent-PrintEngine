@@ -510,9 +510,8 @@ void fpga_enc_config(int inNo, SEncoderCfg *pCfg, int restart)
 	Error(LOG, 0, "fpga_enc_config Version %d.%d.%d.%d", Fpga->stat.version.major, Fpga->stat.version.minor, Fpga->stat.version.revision, Fpga->stat.version.build);
 
 	TrPrintfL(TRUE, "fpga_enc_config(inNo=%d, retsart=%d)", inNo, restart);
-
 	TrPrintfL(TRUE, "fpga_enc_config start: enable=%d, position=%d, enc_start_pos_fwd=%d, pg_start_pos=%d", Fpga->cfg.encIn[0].enable, Fpga->stat.encIn[0].position, Fpga->cfg.pg[0].enc_start_pos_fwd, Fpga->stat.encOut[0].pg_start_pos);
-	
+
 	_Scanning = rx_def_is_scanning(pCfg->printerType);
 
 	if (pCfg->printerType >= printer_LB701 &&  pCfg->printerType<printer_cleaf)
@@ -608,7 +607,6 @@ void fpga_enc_config(int inNo, SEncoderCfg *pCfg, int restart)
 	_Restarted		 = restart;
 	
 	TrPrintfL(TRUE, "fpga_enc_config end: marks:%06d ok:%06d filtred=%06d missed=%06d dist=%06d pos=%06d\n", _PM_Cnt, Fpga->stat.encOut[0].PG_cnt, _PM_Filtered_Cnt, _PM_Missed_Cnt, Fpga->stat.encIn[0].digin_edge_dist, Fpga->stat.encOut[0].position);
-
 	TrPrintfL(TRUE, "fpga_enc_config end: enable=%d, position=%d, enc_start_pos_fwd=%d, pg_start_pos=%d", Fpga->cfg.encIn[0].enable, Fpga->stat.encIn[0].position, Fpga->cfg.pg[0].enc_start_pos_fwd, Fpga->stat.encOut[0].pg_start_pos);
 }
 
@@ -896,7 +894,7 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg, int restart)
 	int pgNo;
 
 	TrPrintfL(TRUE, "fpga_pg_config start: enable=%d, pos_in=%d, enc_start_pos_fwd=%d, pg_start_pos=%d, restart=%d", Fpga->cfg.encIn[0].enable, Fpga->stat.encIn[0].position, Fpga->cfg.pg[0].enc_start_pos_fwd, Fpga->stat.encOut[0].pg_start_pos, restart);
-	
+
 //	Error(LOG, 0, "fpga_pg_config RX_EncoderStatus.distTelCnt=%d", RX_EncoderStatus.distTelCnt);
 	//--- reset  position ------------------
 	int act_pos;
@@ -908,65 +906,12 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg, int restart)
 		act_pos =_micron2inc(pcfg->pos_actual);
 		_FirstMarkPos=0;		
 	}
-		
-	for (pgNo=0; pgNo<SIZEOF(Fpga->cfg.pg); pgNo++)
-	{
-		//--- FIFO mode ---------------------------
-		if (pcfg->scanning)
-		{
-			Fpga->cfg.pg[pgNo].fifos_used   = FIFOS_OFF;		
-		}
-		else 
-		{
-			switch(pcfg->printGoMode)
-			{
-			case PG_MODE_MARK:			Fpga->cfg.pg[pgNo].fifos_used = FIFOS_MARKREADER; break;
-			case PG_MODE_MARK_FILTER:	Fpga->cfg.pg[pgNo].fifos_used = FIFOS_MARKFILTER; break;
-			default:					Fpga->cfg.pg[pgNo].fifos_used = FIFOS_DIST; 
-			}			
-		}
-
-		//--- encoder position ----------------------
-		Fpga->cfg.pg[pgNo].reset_pos	= FALSE;			
-		Fpga->cfg.encIn[pgNo].reset_pos = act_pos;
-
-		//--- set positions ---------------
-		if (pcfg->pos_pg_fwd<100) 
-			Error(ERR_ABORT, 0, "ERROR Position");
-		if(restart && pgNo==0)
-		{
-			Error(LOG, 0, "Restart: pos_in=%d, pg_start_pos=%d, Fifo_used=%d, PGMode=%d", Fpga->stat.encIn[0].position, Fpga->stat.encOut[0].pg_start_pos, Fpga->cfg.pg[pgNo].fifos_used, pcfg->printGoMode);
-			if (Fpga->stat.encIn[0].position>Fpga->stat.encOut[0].pg_start_pos && Fpga->stat.encIn[0].position>500000)
-				Error(ERR_ABORT, 0, "PAUSE: Moving back is too short! pos_in=%d, pg_start_pos=%d", Fpga->stat.encIn[0].position, Fpga->stat.encOut[0].pg_start_pos);
-			if (Fpga->cfg.pg[pgNo].fifos_used==FIFOS_DIST) 
-				Fpga->cfg.pg[pgNo].enc_start_pos_fwd = Fpga->stat.encOut[0].pg_start_pos;
-			else 
-			{
-				Fpga->cfg.encIn[pgNo].reset_pos = 0;
-				Fpga->cfg.pg[pgNo].enc_start_pos_fwd = _micron2inc(pcfg->pos_pg_fwd-100);	
-			}
-		}
-		else
-		{
-			Fpga->cfg.pg[pgNo].enc_start_pos_fwd = _micron2inc(pcfg->pos_pg_fwd-100);
-		}
-		Fpga->cfg.pg[pgNo].pos_pg_fwd		 = 10;
-		Fpga->cfg.pg[pgNo].enc_start_pos_bwd = _micron2inc(pcfg->pos_pg_bwd+100);
-		Fpga->cfg.pg[pgNo].pos_pg_bwd		 = 10;
-		Fpga->cfg.pg[pgNo].reset_pos		 = TRUE;
-		Fpga->cfg.pg[pgNo].reset_pos		 = FALSE;			
-			
-		Fpga->cfg.pg[pgNo].printgo_n	= FALSE;
-	}
 	
 	{
 		//	Fpga->cfg.general.min_mark_len	  = 1000;
 			Fpga->cfg.general.shift_delay_pulse_len = (Fpga->cfg.general.min_mark_len*11)/10;
 			Fpga->cfg.general.shift_delay			= (int)((pcfg->printGoOutDist-Fpga->cfg.general.min_mark_len)/_StrokeDist);
 			Fpga->cfg.general.shift_delay_tel		= (int)((pcfg->printGoDist   -Fpga->cfg.general.min_mark_len)/_StrokeDist);
-		//	Fpga->cfg.pg[pgNo].dig_in_sel   = 0;
-		//	Fpga->cfg.pg[pgNo].quiet_window = 10;
-		//	if (FpgaQSys->printGo_status.fill_level) Fpga->cfg.pg[pgNo].fifos_ready	= TRUE;	
 
 		//--- flight time compensation of Mark Reader ----------------------------	
 
@@ -981,6 +926,56 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg, int restart)
 		TrPrintfL(TRUE, "fpga_pg_config start: set ftc_ratio=%d", (int)ratio);
 	}
 
+	for (pgNo=0; pgNo<SIZEOF(Fpga->cfg.pg); pgNo++)
+	{
+		//--- encoder position ----------------------
+		Fpga->cfg.pg[pgNo].reset_pos	= FALSE;			
+		Fpga->cfg.encIn[pgNo].reset_pos = act_pos;
+
+		//--- set positions ---------------
+		if (pcfg->pos_pg_fwd<100) 
+			Error(ERR_ABORT, 0, "ERROR Position");
+		if(restart && pgNo==0)
+		{
+			Error(LOG, 0, "Restart: pos_in=%d, pg_start_pos=%d, Fifo_used=%d, PGMode=%d", Fpga->stat.encIn[0].position, Fpga->stat.encOut[0].pg_start_pos, Fpga->cfg.pg[pgNo].fifos_used, pcfg->printGoMode);
+			if (Fpga->stat.encIn[0].position>Fpga->stat.encOut[0].pg_start_pos && Fpga->stat.encIn[0].position>500000)
+				Error(ERR_ABORT, 0, "PAUSE: Moving back is too short! pos_in=%d, pg_start_pos=%d", Fpga->stat.encIn[0].position, Fpga->stat.encOut[0].pg_start_pos);
+			if (pcfg->printGoMode==PG_MODE_MARK || pcfg->printGoMode==PG_MODE_MARK_FILTER)
+			{
+				Fpga->cfg.encIn[pgNo].reset_pos = 0;
+				Fpga->cfg.pg[pgNo].enc_start_pos_fwd = _micron2inc(pcfg->pos_pg_fwd-100);	
+			}
+			else Fpga->cfg.pg[pgNo].enc_start_pos_fwd = Fpga->stat.encOut[0].pg_start_pos;
+		}
+		else
+		{
+			Fpga->cfg.pg[pgNo].enc_start_pos_fwd = _micron2inc(pcfg->pos_pg_fwd-100);
+		}
+
+		Fpga->cfg.pg[pgNo].pos_pg_fwd		 = 10;
+		Fpga->cfg.pg[pgNo].enc_start_pos_bwd = _micron2inc(pcfg->pos_pg_bwd+100);
+		Fpga->cfg.pg[pgNo].pos_pg_bwd		 = 10;
+		Fpga->cfg.pg[pgNo].reset_pos		 = TRUE;
+		Fpga->cfg.pg[pgNo].reset_pos		 = FALSE;			
+
+		Fpga->cfg.pg[pgNo].printgo_n	= FALSE;
+
+		//--- FIFO mode ---------------------------
+		if (pcfg->scanning)
+		{
+			Fpga->cfg.pg[pgNo].fifos_used   = FIFOS_OFF;		
+		}
+		else 
+		{
+			switch(pcfg->printGoMode)
+			{
+			case PG_MODE_MARK:			Fpga->cfg.pg[pgNo].fifos_used = FIFOS_MARKREADER; break;
+			case PG_MODE_MARK_FILTER:	Fpga->cfg.pg[pgNo].fifos_used = FIFOS_MARKFILTER; break;
+			default:					Fpga->cfg.pg[pgNo].fifos_used = FIFOS_DIST; 
+			}			
+		}
+	}
+	
 //	if (!restart)	RX_EncoderStatus.PG_cnt = 0;
 //	RX_EncoderStatus.PG_stop	   = 0;
 	_PrintGo_Locked				   = FALSE;
