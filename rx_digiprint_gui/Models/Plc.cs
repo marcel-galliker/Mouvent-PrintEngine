@@ -14,9 +14,6 @@ namespace RX_DigiPrint.Models
     public class Plc :RxBindable
     {
         public Action   LogComplete;
-        RxWorkBook      _WB;
-        int             _WB_sheet;
-        int             _WB_row=0;
         int             _MaxLogItems=50;
 
         List<List<string>>    _Variables=new List<List<string>>();    // buffer of "STA_*" variables
@@ -33,17 +30,7 @@ namespace RX_DigiPrint.Models
         public RxRexroth.SSystemInfo Info
         {
             get { return _Info; }
-            set 
-            { 
-               _Info = value;
-               if (_WB_row>0)
-               {
-                    LogInfo(_WB, _WB_row);
-                    _WB_row = 0;
-               }               
-               else 
-                   OnPropertyChanged();
-            }
+            set { SetProperty(ref _Info, value);}
         }
 
         //--- Property Log ---------------------------------------
@@ -61,71 +48,6 @@ namespace RX_DigiPrint.Models
             while (Log.Count>=_MaxLogItems) Log.RemoveAt(Log.Count-1);
             if (item.No<=0) Log.Insert(0, item);
             else            Log.Add(item);
-        }
-
-        //--- LogInfo ---------------------------------------
-        private void LogInfo(RxWorkBook wb, int row)
-        {
-            row+=2;
-            wb.setText(row, 0, "Rexroth System Info");
-            wb.HeaderRow(row);
-            row++;
-            wb.setText(row, 0, "versionHardware");          wb.setText(row++, 1, Info.versionHardware); 
-            wb.setText(row, 0, "versionFirmware");          wb.setText(row++, 1, Info.versionFirmware); 
-            wb.setText(row, 0, "versionLogic");             wb.setText(row++, 1, Info.versionLogic); 
-            wb.setText(row, 0, "versionBsp");               wb.setText(row++, 1, Info.versionBsp); 
-            wb.setText(row, 0, "versionMlpi");              wb.setText(row++, 1, Info.versionMlpi); 
-            wb.setText(row, 0, "serialNo");                 wb.setText(row++, 1, Info.serialNo); 
-            wb.setText(row, 0, "hardwareDetails");          wb.setText(row++, 1, Info.hardwareDetails); 
-            wb.setText(row, 0, "localBusConfig");           wb.setText(row++, 1, Info.localBusConfig); 
-            wb.setText(row, 0, "modulBusConfig");           wb.setText(row++, 1, Info.modulBusConfig); 
-            wb.setText(row, 0, "modulHwDetails");           wb.setText(row++, 1, Info.modulHwDetails); 
-            wb.setText(row, 0, "tempAct");                  wb.setText(row++, 1, Info.tempAct); 
-            wb.setText(row, 0, "tempMax");                  wb.setText(row++, 1, Info.tempMax);
-        }
-
-        //--- WriteLog -----------------------------------------------------
-        private void WriteLog()
-        {
-            int row = 0;
-            _WB.Sheet = _WB_sheet;
-            _WB.setText(row, 0, "No");
-            _WB.setText(row, 1, "Time");
-            _WB.setText(row, 2, "Err");
-            _WB.setText(row, 3, "Message");
-            _WB.HeaderRow(row);
-
-            foreach(CPlcLogItem item  in RxGlobals.Plc.Log)
-            {
-                row++;
-                _WB.setText(row, 0, item.No);
-                _WB.setText(row, 1, item.Time);
-                _WB.setText(row, 2, string.Format("{0:X}", item.ErrNo));
-                _WB.setText(row, 3, item.Text);
-            }
-            LogComplete -= WriteLog;
-            _WB.SizeColumns();
-            _WB.write(_WB.FileName);
-        }                
-
-        //--- LogInfo ------------------------------------------
-        public void LogInfo(RxWorkBook wb)
-        {            
-            _WB = wb;
-            _WB_row = wb.LastRow;
-            RxGlobals.RxInterface.SendCommand(TcpIp.CMD_PLC_GET_INFO);
-            for (int i=0; i<20 &&_WB_row>0;  i++) Thread.Sleep(100);
-            _WB_row = 0;
-        }
-
-        //--- LogErrors ------------------------------------------------------
-        public void LogErrors(RxWorkBook wb)
-        {
-            _WB = wb;
-            _WB_sheet = wb.Sheet;
-            LogComplete += WriteLog;
-            RxGlobals.Plc.Log = new CPlcLogCollection();
-            RxGlobals.RxInterface.SendCommand(TcpIp.CMD_PLC_GET_LOG);
         }
 
         //--- Property Connected ---------------------------------------

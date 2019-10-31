@@ -12,9 +12,6 @@ namespace RX_DigiPrint.Models
     public class LogList : ObservableCollection<LogItem>
     {
         private static ObservableCollection<LogItem> _List = new ObservableCollection<LogItem>();
-        private RxWorkBook  _WB;
-        private int         _WB_count=100;
-        private int         _WB_row;
         private bool        _alternate=false;
         
         //--- Property List ----------------------------------------------
@@ -41,43 +38,16 @@ namespace RX_DigiPrint.Models
         {
             get { return _Pos; }
 //            set { SetProperty(ref _Pos, value); }
-            set 
-            { 
-                _Pos = value;
-            }
+            set { _Pos = value;}
         }
         
         //--- AddItem ------------------------------------------------------
         public void AddItem(LogItem item)
         {
-            if (_WB!=null)
-            {
-                int col=0;
-                _WB.setText(0, col, "Time");     _WB.setText(_WB_row, col++, item.TimeStr);
-                _WB.setText(0, col, "Type");     _WB.setText(_WB_row, col++, item.LogTypeStr);
-                _WB.setText(0, col, "No");       _WB.setText(_WB_row, col++, item.Error);
-                _WB.setText(0, col, "Message");  _WB.setText(_WB_row, col++, item.Message);
-                switch (item.LogType)
-                {
-                    case ELogType.eErrLog:   break;
-                    case ELogType.eErrWarn:  _WB.SetRowColor(_WB_row, Colors.Black, Colors.Orange); break;
-                    default:                 _WB.SetRowColor(_WB_row, Colors.Black, Colors.Red); break;
-                }
-               
-                if (_WB_row==0) _WB.HeaderRow(0);
-                _WB_row++;            
-                if (_WB_row==_WB_count) 
-                {
-                    _WB.SizeColumns();
-                    _WB.write(_WB.FileName);
-                    _WB=null;      
-                }
-            }
-            else RxBindable.Invoke(() => 
+            RxBindable.Invoke(() => 
             {
                 item.Alternate = _alternate;
                 _alternate = !_alternate;
-            //    _List.Insert(0, item);
                 _List.Add(item);
             });
         }
@@ -85,7 +55,7 @@ namespace RX_DigiPrint.Models
         //--- Reset --------------------------------------------------------
         public void Reset()
         {
-            if(_WB==null) RxBindable.Invoke(()=>reset());
+            RxBindable.Invoke(()=>reset());
         }
 
         private void reset()

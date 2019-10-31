@@ -263,10 +263,6 @@
       <HintPath>packages\QRCoder.1.3.2\lib\net40\QRCoder.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="SX, Version=2.5.1.5, Culture=neutral, PublicKeyToken=882b9c044052e7f6, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Externals\SmartXLS\SX.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
@@ -363,7 +359,6 @@
     <Compile Include="Helpers\RxPopup.cs" />
     <Compile Include="Helpers\RxTabItem.cs" />
     <Compile Include="Helpers\RxTextBox.cs" />
-    <Compile Include="Helpers\RxWorkBook.cs" />
     <Compile Include="Helpers\RxXamGrid.cs" />
     <Compile Include="Models\Chiller.cs" />
     <Compile Include="Models\CleafFlexo.cs" />
