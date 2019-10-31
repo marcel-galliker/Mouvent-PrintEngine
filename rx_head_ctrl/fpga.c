@@ -1109,6 +1109,11 @@ int  fpga_image	(SFpgaImageCmd *msg)
 //				if (++_FirstImage==4) fpga_trace_registers("IMAGE-loaded");
 			}
 		}
+		for (head=0; head<HEAD_CNT; head++)
+		{
+			if (RX_HBConfig.head[head].enabled == dev_on && RX_HBStatus->head[head].ctrlMode!=ctrl_print) ErrorFlag(WARN, (UINT32*)&RX_HBStatus[0].err, err_not_in_print, 0, "Conditioner %s: not in printing mode", RX_HBConfig.head[head].name);			
+		}
+
 //		_check_state_machines();
 	}	
 	nios_set_firepulse_on(TRUE);
@@ -1558,7 +1563,7 @@ int  fpga_abort(void)
 				if(err) fpga_trace_registers("Print-Done-missed", TRUE);	
 			//	else    fpga_trace_registers("Print-Done-OK", FALSE);	
 			}
-			Error(LOG, 0, str);
+		//	Error(LOG, 0, str);
 			//---
 			TrPrintf(TRUE, "fpga_abort CMD_MASTER_ENABLE=FALSE:\n");
 			TrPrintf(TRUE, "fpga_abort CMD_MASTER_ENABLE=FALSE: blockCnt[0]=%d", Fpga.data->blockCnt[0]);
@@ -1975,9 +1980,9 @@ static int _check_encoder(void)
 				int enc = RX_HBConfig.head[i].encoderNo;
 				RX_HBStatus[0].head[i].encPgCnt = _Enc_PgCnt[enc];
 
-				if(RX_HBConfig.head[i].enabled==dev_on && _Enc_PgCnt[enc] > Fpga.stat->pg_ctr[i] + 5 && !(RX_HBStatus[0].err&(err_06<<i)))
+				if(RX_HBConfig.head[i].enabled==dev_on && _Enc_PgCnt[enc] > Fpga.stat->pg_ctr[i] + 5 && !(RX_HBStatus[0].err&(err_PG_0<<i)))
 				{
-					RX_HBStatus[0].err |= (err_06<<i);
+					RX_HBStatus[0].err |= (err_PG_0<<i);
 					Error(ERR_CONT, 0, "Head[%d]: Encoder PrintGO=%d > Head PrintGO=%d", i, _Enc_PgCnt[enc], Fpga.stat->pg_ctr[i]); 
 				}
 			}			

@@ -496,7 +496,6 @@ int  plc_start_printing(void)
 //--- plc_stop_printing -----------------------------------------------
 int  plc_stop_printing(void)
 {
-	if (RX_Config.printer.type==printer_LH702) steplb_is_printing(FALSE);
 	if (_SimuEncoder) ctrl_simu_encoder(0);
 	_StartPrinting = FALSE;
 	_SendRun       = FALSE;
@@ -1385,7 +1384,6 @@ static void _plc_state_ctrl()
 			enc_enable_printing(TRUE);
 			if(!_SimuPLC)    _plc_set_command("CMD_PRODUCTION", "CMD_RUN");
 			if(_SimuEncoder) ctrl_simu_encoder(_Speed);
-			if (RX_Config.printer.type==printer_LH702) steplb_is_printing(TRUE);
 //			step_set_vent(_Speed);
 			memset(&_StartEncoderItem, 0, sizeof(_StartEncoderItem));
 //			TrPrintfL(TRUE, "PLC: CMD_RUN sent");

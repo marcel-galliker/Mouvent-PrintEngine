@@ -466,25 +466,12 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 							 */
 							 break;
 			
-		case PG_MODE_MARK:	 dist.dist     = 0;
+		case PG_MODE_MARK:	 dist.dist	  = pitem->printGoDist;
 							 dist.printGoMode = PG_MODE_MARK_FILTER;
 							 if (_DistTelCnt>1)
 							 {
-								/*
-								if(RX_Config.printer.type == printer_LH702) // || RX_Config.printer.type == printer_LB701)
-								{
-									int markdist = 1000*RX_Config.printer.offset.printMarkDist;				
-									dist.window  = 50000;
-									dist.ignore  = markdist-dist.window/2;
-									dist.dist	 = pitem->printGoDist;
-								//	Error(LOG, 0, "SEND CMD_ENCODER_PG_DIST dist=%d", dist.dist);
-								} 
-								else
-								*/
-								{
-									dist.ignore   = pitem->pageHeight*9/10;
-									dist.window   = pitem->pageHeight/4;
-								}
+								dist.ignore   = pitem->pageHeight*8/10;
+								dist.window   = pitem->pageHeight/4;
 							 }
 							 sok_send_2(&_Encoder[0].socket, CMD_ENCODER_PG_DIST, sizeof(dist), &dist);
 							 break;

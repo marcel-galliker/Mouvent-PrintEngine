@@ -114,7 +114,7 @@ static void *_siemens_thread(void *lpParameter)
 static int _siemens_closed(RX_SOCKET socket, const char *peerName)
 {
 	sok_close(&_Socket);
-	TrPrintfL(TRUE, "TCP/IP connection closed");
+//	TrPrintfL(TRUE, "TCP/IP connection closed");
 	Error(LOG, 0, "TCP/IP connection closed");
 	return REPLY_OK;
 }
@@ -122,7 +122,10 @@ static int _siemens_closed(RX_SOCKET socket, const char *peerName)
 //--- siemens_tick --------------------------------------------
 void  siemens_tick(void)
 {
-	if (sok_send_2(&_Socket, CMD_PLC_STAT, 0, NULL)==REPLY_OK) TrPrintfL(TRUE, "Siemend: Sent Message");
+	if (sok_send_2(&_Socket, CMD_PLC_STAT, 0, NULL)==REPLY_OK) 
+	{
+	//	TrPrintfL(TRUE, "Siemend: Sent Message");
+	}
 }
 
 //--- _handle_siemens_msg ------------------------------------------------------------------

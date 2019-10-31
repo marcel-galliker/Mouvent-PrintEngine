@@ -1118,7 +1118,8 @@ void  fpga_set_printmark(SEncoderPgDist *pmsg)
 {
 	int pgNo;
 
-	//Fpga->cfg.general.shift_delay_tel =  (int)((pmsg->dist-Fpga->cfg.general.min_mark_len)/_StrokeDist);
+	Fpga->cfg.general.shift_delay_tel =  (int)((pmsg->dist-Fpga->cfg.general.min_mark_len)/_StrokeDist);
+//	Error(LOG, 0, "fpga_set_printmark dist=%d, shift=%d", pmsg->dist, Fpga->cfg.general.shift_delay_tel);
 	FpgaQSys->window_fifo  = _Window = (int)(pmsg->window/_StrokeDist);
 	if (pmsg->ignore>10000) FpgaQSys->ignored_fifo = _Ignore = (int)(pmsg->ignore/_StrokeDist);
 	else FpgaQSys->ignored_fifo = _Ignore = (int)(10000/_StrokeDist);

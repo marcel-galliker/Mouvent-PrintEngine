@@ -25,4 +25,3 @@ void steplb_abort_printing(void);
 
 void steplb_lift_to_up_pos(void);
 int	 steplb_lift_in_up_pos(void);
-int	 steplb_is_printing(int isprinting);

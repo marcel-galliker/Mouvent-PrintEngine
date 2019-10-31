@@ -706,11 +706,15 @@ static int _print_next(void)
 						int img_offset=_Item.pageMargin + _Item.pageWidth;
 						int bar_width=RX_Spooler.barWidthPx*25400/1200;
 						if (img_offset>bar_width && RX_Config.printer.type!=printer_LH702) img_offset = bar_width;
+						
 						{
 							SPrintQueueItem item;
 							int clearBlockUsed=(_Item.id.copy >= _Item.copies) || (_Item.firstPage!=_Item.lastPage);
-							if (_Item.pageMargin!=_PageMargin_Next) 
+							if (_Item.pageMargin!=_PageMargin_Next)
+							{	
+							//	Error(LOG, 0, "PrintCtrl: PageMargin old=%d, new=%d", _Item.pageMargin, _PageMargin_Next);
 								clearBlockUsed = TRUE;
+							}
 							memcpy(&item, &_Item, sizeof(item));
 							item.lengthUnit = PQ_LENGTH_UNDEF;
 							spool_print_file(&_Item.id, _DataPath, img_offset, 0, &item, clearBlockUsed);

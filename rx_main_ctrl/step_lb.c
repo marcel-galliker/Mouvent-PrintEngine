@@ -194,14 +194,3 @@ int	 steplb_lift_in_up_pos(void)
 {
 	return RX_StepperStatus.info.z_in_ref;
 }
-
-//--- steplb_is_printing ----------------------------------------------
-int	 steplb_is_printing(int isprinting)
-{
-	for (int no=0; no<SIZEOF(_step_socket); no++)
-	{
-		sok_send_2(&_step_socket[no], CMD_CAP_IS_PRINTING, sizeof(isprinting), &isprinting);
-	}
-	return REPLY_OK;													
-}
-

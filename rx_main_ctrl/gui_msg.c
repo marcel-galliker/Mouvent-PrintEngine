@@ -661,6 +661,7 @@ static void _do_set_print_queue_evt	(RX_SOCKET socket, SPrintQueueEvt *pmsg)
 	_chmod(pmsg->item.filepath, S_IRWXU | S_IRWXG | S_IRWXO);
 	#endif
 	item=pq_set_item(&pmsg->item);
+//	Error(LOG, 0, "GUI: New PageMargin=%d", pmsg->item.pageMargin);
 	pc_set_pageMargin(pmsg->item.pageMargin);
 	if (item!=NULL) gui_send_print_queue(EVT_GET_PRINT_QUEUE, item);
 	pq_save(PATH_USER FILENAME_PQ);
