@@ -354,6 +354,7 @@ static void _enc_start_printing(int no, SPrintQueueItem *pitem, int restart)
 
 	memcpy(msg.corrRotPar, RX_Config.encoder[no].corrRotPar, sizeof(msg.corrRotPar));
 	msg.incPerMeter = _IncPerMeter+RX_Config.printer.offset.incPerMeter[no];
+//	Error(LOG, 0, "EncoderOffset=%d", RX_Config.printer.offset.incPerMeter[0]);
 
 	if (_Scanning)
 	{

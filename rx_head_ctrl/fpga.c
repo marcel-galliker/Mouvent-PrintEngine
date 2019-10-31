@@ -82,7 +82,7 @@ SFpgaHeadBoardCfg	FpgaCfg;
 #define OFFSET_FWD	0
 #define OFFSET_BWD	1
 
-#define MAX_FPGA_TEMP	60
+#define MAX_FPGA_TEMP	65
 
 //--- module globals ---------------------------------------
 static int		_MemId=0;
