@@ -987,8 +987,8 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg, int restart)
 
 	test_cfg_done();
 	
-	TrPrintfL(TRUE, "fpga_pg_config end: marks:%06d ok:%06d filtred=%06d missed=%06d dist=%06d pos=%06d", _PM_Cnt, Fpga->stat.encOut[0].PG_cnt, _PM_Filtered_Cnt, _PM_Missed_Cnt, Fpga->stat.encIn[0].digin_edge_dist, Fpga->stat.encOut[0].position);
-	TrPrintfL(TRUE, "fpga_pg_config end: enable=%d, pos_in=%d, enc_start_pos_fwd=%d, pg_start_pos=%d, restart=%d", Fpga->cfg.encIn[0].enable, Fpga->stat.encIn[0].position, Fpga->cfg.pg[0].enc_start_pos_fwd, Fpga->stat.encOut[0].pg_start_pos, restart);
+	TrPrintfL(TRUE, "fpga_pg_config end1: marks:%06d ok:%06d filtred=%06d missed=%06d dist=%06d pos=%06d", _PM_Cnt, Fpga->stat.encOut[0].PG_cnt, _PM_Filtered_Cnt, _PM_Missed_Cnt, Fpga->stat.encIn[0].digin_edge_dist, Fpga->stat.encOut[0].position);
+	TrPrintfL(TRUE, "fpga_pg_config end2: enable=%d, pos_in=%d, pos_out=%d, enc_start_pos_fwd=%d, pos_pg_fwd=%d, pg_start_pos=%d, restart=%d", Fpga->cfg.encIn[0].enable, Fpga->stat.encIn[0].position, Fpga->stat.encOut [0].position, Fpga->cfg.pg[0].enc_start_pos_fwd, Fpga->cfg.pg[0].pos_pg_fwd,  Fpga->stat.encOut[0].pg_start_pos, restart);
 
 	return REPLY_OK;
 }

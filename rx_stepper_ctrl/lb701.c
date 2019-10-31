@@ -56,7 +56,8 @@ void lb701_init(void)
 	//--- movment parameters ----------------
 	_ParRef.speed		= 10000;
 	_ParRef.accel		= 5000;
-	_ParRef.current		= 150.0;
+//	_ParRef.current		= 150.0;
+	_ParRef.current		= 200.0;
 	_ParRef.stop_mux	= 0;
 	_ParRef.dis_mux_in	= 0;
 	_ParRef.stop_in		= ESTOP_UNUSED;
