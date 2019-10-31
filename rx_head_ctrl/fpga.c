@@ -862,7 +862,11 @@ void fpga_trace_registers(char *fname, int error)
 	if (in!=NULL) fclose(in);
 	if (out!=NULL) fclose(out);
 	
+	TrPrintfL(TRUE, "fpga_trace_registers >>%s<< CLOSED", str);
+	
 	ctrl_send_file(path);
+
+	TrPrintfL(TRUE, "fpga_trace_registers >>%s<< DONE", str);
 }
 
 //--- fpga_get_block_used -----------------------------------------------
@@ -1207,6 +1211,8 @@ static void _fpga_check_fp_errors(int printDone)
 								err=TRUE;
 								break;
 					case 1: 	fpga_trace_registers("img_line_err_1", TRUE);
+								Error(ERR_ABORT, 0, "Head[%d]: 1st img-line missing due to no img-info: imgIn=%d, PG=%d", head, RX_HBStatus[0].head[head].imgInCnt, RX_HBStatus[0].head[head].printGoCnt);
+								rx_sleep(100);
 								Error(ERR_ABORT, 0, "Head[%d]: 1st img-line missing due to no img-info: cnt=%d, imgIn=%d, PG=%d", head, Fpga.error->img_line_err[n][head], RX_HBStatus[0].head[head].imgInCnt, RX_HBStatus[0].head[head].printGoCnt);
 								err=TRUE;
 								break;
