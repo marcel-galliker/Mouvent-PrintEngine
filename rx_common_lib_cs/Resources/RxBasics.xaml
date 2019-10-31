@@ -12,6 +12,7 @@
     <System:Double x:Key="FontSizeLarge">20</System:Double>
     <System:Double x:Key="FontSizeXL">32</System:Double>
     <System:Double x:Key="FontSizeSmall">12</System:Double>
+    <System:Double x:Key="FontSizeXS">10</System:Double>
 
     <System:Double x:Key="RxScrollBarWidth">32</System:Double>
 

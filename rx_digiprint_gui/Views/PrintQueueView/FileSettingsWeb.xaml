@@ -71,6 +71,8 @@
         <GroupBox x:Name="Length_Settings"
             Grid.Row="0" Grid.Column="0" 
             Header="Length"
+            FontSize="{StaticResource FontSizeXS}"
+            Padding="0,-4,0,-4"
             >
             <!-- Visibility ="{Binding Variable, Converter={StaticResource BoolToInVisible_Converter}}" -->
             <Grid HorizontalAlignment="Left">
@@ -89,7 +91,7 @@
         </GroupBox>
         
         <!-- Pages ___________________________________________________________________ -->
-        <GroupBox x:Name="Page_Settings" Header="Pages">
+        <GroupBox x:Name="Page_Settings" Header="Pages" FontSize="{StaticResource FontSizeXS}" Padding="0,-4,0,-4">
             <!-- Visibility="{Binding Variable, Converter={StaticResource BoolToVisible_Converter}}" -->
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -135,7 +137,7 @@
         </GroupBox>
         
         <!-- Start ___________________________________________________________________ -->
-        <GroupBox x:Name="Start_Settings" Header="Start">
+        <GroupBox x:Name="Start_Settings" Header="Start" FontSize="{StaticResource FontSizeXS}" Padding="0,-4,0,-4">
             <!-- Visibility="{Binding Variable, Converter={StaticResource BoolToVisible_Converter}}" -->
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -156,7 +158,7 @@
         </GroupBox>
 
         <!-- RIP Settings _____________________________________________________________________________-->
-        <GroupBox Header="Rip Settings" HorizontalAlignment="Left">
+        <GroupBox Header="Settings" FontSize="{StaticResource FontSizeXS}" Padding="0,-4" HorizontalAlignment="Left">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="140" />
@@ -229,7 +231,6 @@
                     Margin="40,5,0,0"
                     Source="{Binding Preview}"
                     Orientation="{Binding Orientation}"/>
-
         <Grid Grid.Row="3" Grid.ColumnSpan="3" x:Name="ShowButtonGrid" Visibility="{Binding Changed, Converter={StaticResource IntToVisible_Converter}}">
             <common:RxButton x:Name="SaveButton"  Click="Save_Click" HorizontalAlignment="Left">
                 <Image Source="{StaticResource Yes_ico}"/>
