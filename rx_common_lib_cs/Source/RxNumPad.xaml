@@ -25,7 +25,27 @@
         </ResourceDictionary>
     </Window.Resources>
     <Grid Background="Transparent">
-        <Border x:Name="Back" BorderBrush="#66808080" BorderThickness="100"/>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100" x:Name="_Left"/>
+                <ColumnDefinition Width="100" x:Name="_Width"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="100" x:Name="_Top"/>
+                <RowDefinition Height="10" x:Name="_Height"/>
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Rectangle Grid.Row="0" Grid.Column="0" Fill="#66808080"/>
+            <Rectangle Grid.Row="0" Grid.Column="1" Fill="#66808080"/>
+            <Rectangle Grid.Row="0" Grid.Column="2" Fill="#66808080"/>
+            <Rectangle Grid.Row="1" Grid.Column="0" Fill="#66808080"/>
+            <Rectangle Grid.Row="1" Grid.Column="2" Fill="#66808080"/>
+            <Rectangle Grid.Row="2" Grid.Column="0" Fill="#66808080"/>
+            <Rectangle Grid.Row="2" Grid.Column="1" Fill="#66808080"/>
+            <Rectangle Grid.Row="2" Grid.Column="2" Fill="#66808080"/>
+        </Grid>
         <Canvas>
 
             <Grid x:Name="Pad" SizeChanged="Pad_SizeChanged">

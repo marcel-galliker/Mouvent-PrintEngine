@@ -187,11 +187,10 @@ namespace RX_Common
         {            
             RxScreen screen =new RxScreen();
             double left = _Position.X*screen.Scale;
-            double top  = _Position.Y*screen.Scale;
+            double top  = _Position.Y*screen.Scale+_ObjHeight;
             double border=2;
             if (screen.Surface || screen.Elo)
             {
-                top  += _ObjHeight;
                 left -= 32;
                 border=10;
             }
@@ -241,10 +240,11 @@ namespace RX_Common
                 this.Topmost=true;
             #endif
             
-            double width=(_Screen.Width-pt.X)*_Screen.Scale-_Target.ActualWidth*_Screen.FactX;
-            double height=(_Screen.Height-pt.Y)*_Screen.Scale-_Target.ActualHeight*_Screen.FactY;
+            _Left.Width    = new GridLength(_Position.X*_Screen.Scale);
+            _Width.Width   = new GridLength(obj.ActualWidth);
+            _Top.Height    = new GridLength(_Position.Y*_Screen.Scale);
+            _Height.Height = new GridLength(obj.ActualHeight);
 
-            Back.BorderThickness = new Thickness(pt.X*_Screen.Scale, pt.Y*_Screen.Scale, width, height);
             Pad.Visibility = Visibility.Visible;
         }
 

@@ -31,6 +31,7 @@ namespace RX_Common
 
             _OrgValue = Rx.StrToDouble(obj.Text);
 
+        //    _Position  = obj.PointToScreen(new Point(0, 0));
             _Position  = obj.PointToScreen(new Point(0, 0));
             _ObjWidth  = obj.ActualWidth;
             _ObjHeight = obj.ActualHeight;
@@ -41,16 +42,16 @@ namespace RX_Common
             Left=0;
             Width=screen.Width;
             Height=screen.Height;
-            if (screen.Surface)  Back.BorderThickness = new Thickness(_Position.X*screen.Scale, _Position.Y*screen.Scale, (screen.Width-_Position.X)*screen.Scale-obj.ActualWidth*screen.FactX, (screen.Height-_Position.Y)*screen.Scale-obj.ActualHeight*screen.FactY-1);
-            else if (screen.Elo) Back.BorderThickness = new Thickness(_Position.X*screen.Scale, _Position.Y*screen.Scale, (screen.Width-_Position.X)*screen.Scale-obj.ActualWidth*screen.FactX, (screen.Height-_Position.Y)*screen.Scale-obj.ActualHeight*screen.FactY-1);
-            else                 Back.BorderThickness = new Thickness(_Position.X, _Position.Y, screen.Width-_Position.X-obj.ActualWidth, screen.Height-_Position.Y-obj.ActualHeight-1);
 
             #if (DEBUG)
                 this.Topmost = false;
             #else
                 this.Topmost = true;
             #endif
-
+            _Left.Width = new GridLength(_Position.X*screen.Scale);
+            _Width.Width = new GridLength(_ObjWidth);
+            _Top.Height  = new GridLength(_Position.Y*screen.Scale);
+            _Height.Height = new GridLength(_ObjHeight);
             _Position.X += obj.ActualWidth;
         }
 
@@ -181,6 +182,11 @@ namespace RX_Common
         {
             _TouchedButton = e.Source as Button;
             _Timer.Start();
+        }
+
+        private void Rectangle_GiveFeedback(object sender, GiveFeedbackEventArgs e)
+        {
+
         }
 
     }
