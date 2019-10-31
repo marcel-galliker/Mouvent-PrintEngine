@@ -373,13 +373,16 @@ int  fpga_set_config(RX_SOCKET socket)
 	int i, n, head;
 	char str[64];
 
+	Error(LOG, 0, "fpga_set_config 1");
 	_CfgCnt++;
 	TrPrintfL(TRUE, "fpga_set_config start");
 	fpga_abort();
 
 	if (RX_HBStatus[0].fpgaVersion.major==0) Error(ERR_CONT, 0, "Head electronics overheated. It is disabled until the next power on of the printer.");
 	
+	Error(LOG, 0, "fpga_set_config 2");
 	_ethernet_config();
+	Error(LOG, 0, "fpga_set_config 3");
 
 	if (!RX_LinuxDeployment) Error(WARN, 0, "Head unreliable startup of operating system from SD-Card. CHANGE TO FLASH booting!");
 
@@ -393,9 +396,11 @@ int  fpga_set_config(RX_SOCKET socket)
 	_PrintDoneError		= 0;
 	_FpgaErrorTrace		= FALSE;
 	
-	
+	Error(LOG, 0, "fpga_set_config 4");
+
 	//--- head -----------------------------------------------------------------
 	nios_set_firepulse_on(FALSE);
+	Error(LOG, 0, "fpga_set_config 5");
 	_Bidir     = FALSE;
 	for (i=0; i<SIZEOF(FpgaCfg.head); i++)
 	{
@@ -440,6 +445,7 @@ int  fpga_set_config(RX_SOCKET socket)
 			}
 		}
 	}
+	Error(LOG, 0, "fpga_set_config 6");
 
 	//--- UDP Interface --------------------------------------------------------
 	if (Fpga.blockUsed==NULL) Fpga.blockUsed  =(UINT32*) malloc((RX_HBConfig.dataBlkCntHead+7)/8*HEAD_CNT);
@@ -500,6 +506,8 @@ int  fpga_set_config(RX_SOCKET socket)
 		RX_HBStatus[0].head[i].dotCnt       = 0;
 	}
 	
+	Error(LOG, 0, "fpga_set_config 7");
+
 	//--- clear memory in data path ---
 	if (_ImgInIdx)
 	{				
@@ -523,6 +531,7 @@ int  fpga_set_config(RX_SOCKET socket)
 	_FirstImage = 0;
 	
 	//---  set encoder ---------------------------------------------------
+	Error(LOG, 0, "fpga_set_config 8");
 	_fpga_enc_config(arg_simu_machine);
 
 	//--- general settings --------------------
@@ -559,7 +568,9 @@ int  fpga_set_config(RX_SOCKET socket)
 	//--- prestart tests ------------------------------
 //	Error(LOG,  0, "fpga_set_config1: FSM State=0x%04x", Fpga.stat->info);
 //	_check_state_machines();
-	
+
+	Error(LOG, 0, "fpga_set_config 9");
+
 	if (Fpga.stat->info.clearing_udp_flags) 
 	{
 //		Error(WARN, 0, "Timeout while clearing Used Block Flags");
@@ -570,7 +581,9 @@ int  fpga_set_config(RX_SOCKET socket)
 		_Reload_FPGA=TRUE;
 		return Error(ERR_ABORT, 0, "Timeout while clearing Used Block Flags");
 	}
-	
+
+	Error(LOG, 0, "fpga_set_config 10");
+
 	for (head=0; head<SIZEOF(RX_HBStatus[0].head); head++) 
 	{
 #ifdef USE_HEAD_PRESOUT
@@ -578,6 +591,8 @@ int  fpga_set_config(RX_SOCKET socket)
 #endif
 		_check_block_used_flags_clear(head, 0, RX_HBConfig.head[head].blkNo0, RX_HBConfig.head[head].blkCnt);
 	}
+
+	Error(LOG, 0, "fpga_set_config 11");
 
 	for (i=0; i<2; i++)
 	{
@@ -598,6 +613,8 @@ int  fpga_set_config(RX_SOCKET socket)
 	if (TEST_DEBUG) Error(WARN, 0, "TEST_DEBUG=%d", TEST_DEBUG);
 	
 	TrPrintfL(TRUE, "fpga_set_config done");
+
+	Error(LOG, 0, "fpga_set_config END");
 
 	return REPLY_OK;
 }
@@ -1058,6 +1075,7 @@ int  fpga_image	(SFpgaImageCmd *msg)
 		memcpy(&_PageId[idx], &msg->id, sizeof(SPageId));
 		memcpy(&_Img[head][idx], &msg->image, sizeof(SFpgaImage));
 		
+		/*
 		if (msg->image.flags & FLAG_BIDIR) _Bidir = TRUE;				
 		else
 		{
@@ -1066,7 +1084,8 @@ int  fpga_image	(SFpgaImageCmd *msg)
 		//	TrPrintf(TRUE, "fpga_image.fpga_set_offset(%d)", msg->image.backward);
 			_fpga_set_pg_offsets();			
 		}
-				
+		*/
+		
 		_PageEnd[head][idx] = RX_HBConfig.head[head].blkNo0 + (msg->image.blkNo-RX_HBConfig.head[head].blkNo0+msg->image.blkCnt-1) % RX_HBConfig.head[head].blkCnt;
 
 		TrPrintf(trace, "head[%d].fpga_image[%d]:(id=%d, page=%d, copy=%d, scan=%d) blocks %05d ... %05d (%05d ... %05d), clearBlockUsed=%d", head, idx,  msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->image.blkNo, _PageEnd[head][idx], msg->image.blkNo-RX_HBConfig.head[head].blkNo0, _PageEnd[head][idx]-RX_HBConfig.head[head].blkNo0, msg->image.clearBlockUsed);
@@ -1786,6 +1805,19 @@ static int _check_print_done(void)
 						SFpgaImage	*img = &_Img[head][idx];
 						_trace_used_flags(head, idx, img->blkNo, img->blkCnt, _PageEnd[head][idx]);							
 					}
+				}
+				
+				{
+					SFpgaImage	*img = &_Img[head][i];
+
+					if (img->flags & FLAG_BIDIR) _Bidir = TRUE;				
+					else
+					{
+						_Bidir=FALSE;
+						_Direction = (img->flags&FLAG_MIRROR) ? OFFSET_BWD:OFFSET_FWD;
+					//	TrPrintf(TRUE, "fpga_image.fpga_set_offset(%d)", msg->image.backward);
+						_fpga_set_pg_offsets();			
+					}					
 				}
 			}
 			int time2=rx_get_ticks()-time;

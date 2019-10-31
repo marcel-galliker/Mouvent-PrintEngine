@@ -46,11 +46,12 @@ static int _SimuEncoder;
 
 typedef struct
 {
+	char    dots[4];
 	INT32	bidir;
 	INT32	speed;
 	double	stepDist;
 	double	startPos;
-	double	endPos;	
+	double	endPos;
 } SPlcPar;
 
 typedef enum
@@ -158,6 +159,7 @@ static int				_ErrorFilterBuf[100];
 #define ERROR_FILTER_TIME	500
 static double			_StepDist;
 static int				_UnwinderLenMin;
+static UINT32			_ActSpeed;
 
 static int				_MpliStarting;
 static int				_Speed;
@@ -340,7 +342,8 @@ static void _plc_set_par(SPrintQueueItem *pItem, SPlcPar *pPlcPar)
 		case printer_DP803:		_UnwinderLenMin = 30; break;	
 		default: _UnwinderLenMin = 0;			
 	}
-			
+		
+	memcpy(&pPlcPar->dots, pItem->dots, sizeof(pPlcPar->dots));
 	pPlcPar->bidir	= (pItem->scanMode==PQ_SCAN_BIDIR);
 	pPlcPar->speed	= pItem->speed;
 	if (RX_Config.printer.type==printer_cleaf)
@@ -438,7 +441,8 @@ static void _plc_send_par(SPlcPar *pPlcPar)
 		lc_set_value_by_name_UINT32(APP"PAR_DRYER_BLOWER_POWER", 75);
 	}
 
-	_plc_set_command("", "CMD_SET_PARAMETER");	
+	_plc_set_command("", "CMD_SET_PARAMETER");
+	ctrl_send_firepulses(pPlcPar->dots);
 }
 
 //--- plc_set_printpar -----------------------------------------------
@@ -1334,7 +1338,7 @@ static void _plc_state_ctrl()
 					RX_PrinterStatus.actSpeed = (UINT32)(stepArea * 3600.0 / ((double)speed/1000.0));
 					*/
 					if (_StartEncoderItem.scanMode!=PQ_SCAN_BIDIR) speed*=2;
-					RX_PrinterStatus.actSpeed = (UINT32)((_StepDist/1000.0 * 3600.0) / ((double)speed/1000.0));
+					RX_PrinterStatus.actSpeed = _ActSpeed = (UINT32)((_StepDist/1000.0 * 3600.0) / ((double)speed/1000.0));
 				}
 			}
 			
@@ -1423,16 +1427,7 @@ static void _plc_state_ctrl()
 			// speed = time for one scanner movement!
 			lc_get_value_by_name_UINT32(APP "STA_PRINTING_CYCLE_TIME", &speed);
 			if(speed == 0) RX_PrinterStatus.actSpeed = 0;
-			else
-			{
-				/*
-				double stepArea = _StartEncoderItem.srcHeight / 1000000.0 * _StepDist/1000.0;
-				if (_StartEncoderItem.scanMode!=PQ_SCAN_BIDIR) stepArea /= 2; 
-				RX_PrinterStatus.actSpeed = (UINT32)(stepArea * 3600.0 / ((double)speed/1000.0));
-				*/
-				if (_StartEncoderItem.scanMode!=PQ_SCAN_BIDIR) speed*=2;
-				RX_PrinterStatus.actSpeed = (UINT32)((_StepDist/1000.0 * 3600.0) / ((double)speed/1000.0));
-			}
+			else		   RX_PrinterStatus.actSpeed = _ActSpeed;
 		}
 	}
 	else if (_PlcState==plc_stop) 

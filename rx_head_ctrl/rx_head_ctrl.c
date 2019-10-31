@@ -168,11 +168,14 @@ static void _main_loop(void)
 	int printing;
 	int connected;
 	char str[64];
+	int ctrlInit=FALSE;
 	int time0=0, time1=0, time2=0, time3=0, time4=0, time5=0, time6=0;
 
 //	rx_set_tread_priority(50);
 	_AppRunning = TRUE;
 	connected=0;
+	if (arg_offline) ctrlInit=TRUE;
+	else			 ctrlInit=FALSE;
 	while (_AppRunning)
 	{
 		printing = ctrl_printing();
@@ -199,14 +202,22 @@ static void _main_loop(void)
 		//	_check_rx_boot();
 		}
 		time5 = rx_get_ticks();
+		if (!ctrlInit && nios_NiosLoaded()) 
+		{
+			ctrlInit=TRUE;
+			ctrl_init();
+		}
+
+		if (ctrlInit)
 		{
 			int c=ctrl_connected();
-			if (connected && !c) _AppRunning=FALSE;
+			if (connected && !c) _AppRunning=FALSE;				
 			connected=c;			
 		}
 		if (!connected) rx_sleep(500);
 		if (!msg) rx_sleep(10);
 		time6= rx_get_ticks();
+		
 	}
 }
 
@@ -314,7 +325,7 @@ int main(int argc, char** argv)
 		fpga_set_config(INVALID_SOCKET);
 	}
 	
-	if (!arg_offline) ctrl_init();
+//	if (!arg_offline) ctrl_init();
 	
 //	DataSrv_init();
 	Trace_to_screen(FALSE);

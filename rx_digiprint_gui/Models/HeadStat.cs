@@ -293,6 +293,7 @@ namespace RX_DigiPrint.Models
         //--- SetItem ----------------------------------------------
         public void SetItem(int no, TcpIp.SHeadStat item, Int32 tempFpga, Int32 flow)
         {   
+            bool used=false;
             HeadNo  = no;
 
             if (no==0)
@@ -307,6 +308,7 @@ namespace RX_DigiPrint.Models
                 string str = new ColorCode_Str().Convert(RxGlobals.InkSupply.List[ink].InkType.ColorCode, null, ink, null).ToString();
 
                 Name    = str+"-"+(1+no%(int)RxGlobals.PrintSystem.HeadCnt).ToString();
+                used = true;
             }
             catch(Exception)
             {
@@ -332,8 +334,9 @@ namespace RX_DigiPrint.Models
             // Conditioner
             TempHead    = item.tempHead;
             TempCond    = item.tempCond;
-            TempSetpoint = item.tempSetpoint;
-            TempReady    = item.tempReady;
+            TempSetpoint= item.tempSetpoint;
+            if (used) TempReady   = item.tempReady;
+            else TempReady=0;
             PresIn      = item.presIn;
             PresIn_max  = item.presIn_max;
             PresIn_diff = item.presIn_diff;

@@ -183,8 +183,8 @@ void putty_display_fpga_status(void)
 	tse_display_status(RX_UdpSpeed);
 	term_printf("ETH ALL Frames: %06d %06d     mac[0]: %s  ip[0]: %s\n",					RX_FpgaStat.eth_ctr[0].frames_all,	RX_FpgaStat.eth_ctr[1].frames_all,   RX_MacAddr[0], RX_IpAddr[0]);		
 	term_printf("ETH MY  Frames: %06d %06d     mac[1]: %s  ip[1]: %s\n",					RX_FpgaStat.eth_ctr[0].frames_my,	RX_FpgaStat.eth_ctr[1].frames_my,    RX_MacAddr[1], RX_IpAddr[1]);			
-	term_printf("UDP ALL:        %06d %06d     ARP REQ (BC) %06d %06d  IP ERR %06d %06d\n",	RX_FpgaStat.udp_all[0],	  RX_FpgaStat.udp_all[1],	RX_FpgaStat.arp_req_bc_0,			RX_FpgaStat.arp_req_bc_1, RX_FpgaError.arp_error[0].arp_ip_mismatch,	RX_FpgaError.arp_error[1].arp_ip_mismatch);	
-	term_printf("UDP ALIVE:      %06d %06d     ARP REQ (MY) %06d %06d  MISSED %06d %06d\n",	RX_FpgaStat.udp_alive[0], RX_FpgaStat.udp_alive[1], RX_FpgaStat.arp_req_my_0,			RX_FpgaStat.arp_req_my_1, RX_FpgaError.arp_error[0].arp_req_missed,	RX_FpgaError.arp_error[1].arp_req_missed);			
+	term_printf("UDP ALL:        %06d %06d     ARP REQ (BC) %06d %06d  IP ERR %06d %06d\n",	RX_FpgaStat.udp_all[0],	  RX_FpgaStat.udp_all[1],	RX_FpgaStat.arp_req_bc_0,			RX_FpgaStat.arp_req_bc_1, RX_FpgaError.arp_error[0].arp_ip_mismatch, RX_FpgaError.arp_error[1].arp_ip_mismatch);	
+	term_printf("UDP ALIVE:      %06d %06d     ARP REQ (MY) %06d %06d  MISSED %06d %06d\n",	RX_FpgaStat.udp_alive[0], RX_FpgaStat.udp_alive[1], RX_FpgaStat.arp_req_my_0,			RX_FpgaStat.arp_req_my_1, RX_FpgaError.arp_error[0].arp_req_missed,	 RX_FpgaError.arp_error[1].arp_req_missed);			
 	term_printf("UDP DATA:       %06d %06d     ARP REPLY    %06d %06d\n",					RX_FpgaStat.udp_data[0],				RX_FpgaStat.udp_data[1],				RX_FpgaStat.arp_rep[0],				RX_FpgaStat.arp_rep[1]);	
 	
 //		term_printf("FIFO Level:     %06d %06d     max          %06d %06d\n",	RX_FpgaStat.dataLevel_0,				RX_FpgaStat.dataLevel_1,				RX_FpgaStat.dataMax_0,				RX_FpgaStat.dataMax_1);	
@@ -558,7 +558,7 @@ void putty_display_cond_status(int show, int status)
 			memcpy(&line[16*i+(14-l)], str, l);
 		}
 		term_printf("%s\n", line);		
-		term_printf("alive:           "); PRINTF(MAX_HEADS_BOARD)(" %06d(%06d) ", RX_NiosStat.cond[no[i]].alive, _NiosMem->cfg.cond[no[i]].alive); term_printf("\n");
+		term_printf("alive:           "); PRINTF(MAX_HEADS_BOARD)(" %06d ", RX_NiosStat.cond[no[i]].alive); term_printf("\n");
 
 		term_printf("error:            ");
 		for (i=0; i<MAX_HEADS_BOARD; i++)
@@ -599,8 +599,8 @@ void putty_display_cond_status(int show, int status)
 		term_printf("Mode:             ");
 		for (i = 0; i < MAX_HEADS_BOARD; i++)
 		{
-			if (RX_NiosStat.cond[no[i]].info.connected) sprintf(str, "%s(%s)", FluidCtrlModeStr(RX_NiosStat.cond[no[i]].mode), FluidCtrlModeStr(_NiosMem->cfg.cond[no[i]].mode));
-			else                              sprintf(str, " x(%s)", FluidCtrlModeStr(_NiosMem->cfg.cond[no[i]].mode));
+			if (RX_NiosStat.cond[no[i]].info.connected) sprintf(str, "%s(%s)", FluidCtrlModeStr(RX_NiosStat.cond[no[i]].mode), FluidCtrlModeStr(cond_getCtrlMode(no[i])));
+			else                              sprintf(str, " x(%s)", FluidCtrlModeStr(cond_getCtrlMode(no[i])));
 			term_printf("%14s  ", str);		
 		}
 		term_printf("\n");

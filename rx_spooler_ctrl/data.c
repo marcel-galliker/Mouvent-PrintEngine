@@ -643,7 +643,8 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 			//	if (bmpInfo.buffer[i])
 				if (buffer[i])
 				{
-					sprintf(str, "%sPAGE_%d_%s.bmp", PATH_TEMP, id->page, RX_ColorNameShort(bmpInfo.inkSupplyNo[i]));
+				//	sprintf(str, "%sPAGE_%d_%s.bmp", PATH_TEMP, id->page, RX_ColorNameShort(bmpInfo.inkSupplyNo[i]));
+					sprintf(str, "%sID_%d_%s.bmp", PATH_TEMP, id->id, RX_ColorNameShort(bmpInfo.inkSupplyNo[i]));
 					if (multiCopy > 2)
 						bmp_write(str, *bmpInfo.buffer[i], bmpInfo.bitsPerPixel, bmpInfo.srcWidthPx / multiCopy + 200, 2000, bmpInfo.lineLen, FALSE);
 					else					

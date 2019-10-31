@@ -40,6 +40,8 @@
 static FILE					*_LogFile = NULL;
 static int					_LogTimer;
 static SConditionerCfg_mcu	_CfgBackup[MAX_HEADS_BOARD];
+static EnFluidCtrlMode		_CtrlMode[MAX_HEADS_BOARD];
+
 
 SFpgaHeadBoardCfg	FpgaCfg;
 SVersion			_FileVersion;
@@ -544,9 +546,11 @@ void cond_ctrlMode(int headNo, EnFluidCtrlMode ctrlMode)
 		_NiosMem->cfg.cond[headNo].flowResistance = mem.flowResistance;
 	else	
 		_NiosMem->cfg.cond[headNo].flowResistance = 0;
-
+	
 	if (arg_simu_conditioner) RX_HBStatus[0].head[headNo].ctrlMode = ctrlMode;
 	else if (_NiosMem!=NULL) _NiosMem->cfg.cond[headNo].mode = ctrlMode;		
+
+	_CtrlMode[headNo] = ctrlMode;
 }
 
 //--- cond_ctrlMode2 --------------------------------------------------------------------
@@ -557,6 +561,13 @@ void cond_ctrlMode2(int headNo, EnFluidCtrlMode ctrlMode)
 	else for(i=0; i<MAX_HEADS_BOARD; i++) cond_ctrlMode(i, ctrlMode);
 }
 
+
+//--- cond_getCtrlMode --------------------------------------------
+EnFluidCtrlMode cond_getCtrlMode(int headNo)
+{
+	return _CtrlMode[headNo];		
+}
+
 //--- cond_offset_del --------------------------
 void cond_offset_del(int headNo)
 {
@@ -564,7 +575,6 @@ void cond_offset_del(int headNo)
 	if(headNo < MAX_HEADS_BOARD)		  _NiosMem->cfg.cond[headNo].cmd.del_offset = TRUE;
 	else for(i=0; i<MAX_HEADS_BOARD; i++) _NiosMem->cfg.cond[i].cmd.del_offset      = TRUE;
 }
-
 
 //--- cond_set_config ---------------------------------------
 void cond_set_config(int headNo, SConditionerCfg *cfg)
