@@ -358,12 +358,7 @@ static void _enc_start_printing(int no, SPrintQueueItem *pitem, int restart)
 	if (_Scanning)
 	{
 		msg.pos_pg_fwd  = _Encoder[no].webOffset_mm*1000 + pitem->pageMargin - (_WakeupLen*25400/1200);
-		if (RX_Config.printer.type==printer_TX802)
-			msg.pos_pg_bwd  = _Encoder[no].webOffset_mm*1000 + pitem->pageMargin + pitem->srcHeight + 13350 + (_WakeupLen*25400/1200);
-		else
-			msg.pos_pg_bwd  = _Encoder[no].webOffset_mm*1000 + pitem->pageMargin + pitem->srcHeight + RX_Config.headDistMax + 13350 + (_WakeupLen*25400/1200);
-	//	msg.pos_pg_bwd  = _Encoder[no].webOffset_mm*1000 + pitem->pageMargin + pitem->srcHeight + 13150; // not tested!		
-	//	if (RX_Config.printer.type==printer_TX802) msg.pos_pg_bwd += 2000;
+		msg.pos_pg_bwd  = _Encoder[no].webOffset_mm*1000 + pitem->pageMargin + pitem->srcHeight + 13350 + 5000 + (_WakeupLen*25400/1200);	// add extra 5000 for nagative distance
 	}
 	else
 	{

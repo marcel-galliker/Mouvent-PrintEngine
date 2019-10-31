@@ -496,7 +496,7 @@ static void _headboard_config(int colorCnt, int headsPerColor, int ethPortCnt)
 			pBoard->head[i].blkCnt    = RX_Spooler.dataBlkCntHead;
 			pBoard->head[i].dist	  = RX_Config.headDist[board*MAX_HEADS_BOARD+i];				
 			if (rx_def_is_web(RX_Config.printer.type))	pBoard->head[i].distBack = pBoard->head[i].dist;
-			else										pBoard->head[i].distBack = RX_Config.headDistBack[board*MAX_HEADS_BOARD+i];
+			else										pBoard->head[i].distBack = 5000+RX_Config.headDistBack[board*MAX_HEADS_BOARD+i]-pBoard->head[i].dist;
 			
 			pBoard->head[i].headHeight= RX_Config.stepper.print_height;
 			memcpy(&pBoard->head[i].cond, &RX_Config.cond[board*MAX_HEADS_BOARD+i], sizeof(SConditionerCfg));
