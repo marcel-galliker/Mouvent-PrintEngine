@@ -37,6 +37,7 @@ namespace RX_DigiPrint.Views.UserControls
             CMD_WEBIN.DataContext    = RxGlobals.Plc;
             RxGlobals.PrinterStatus.PropertyChanged += PrinterStatusChanged;
             PrinterStatusChanged(null, null);
+            RxGlobals.Timer.TimerFct += _Timer;
         }
 
         EPrintState _printerState = EPrintState.ps_undef;
@@ -66,7 +67,8 @@ namespace RX_DigiPrint.Views.UserControls
                     CMD_JOG_BWD.Visibility = visible;
                     CMD_WEBIN.Visibility   = invisible;
                 //  CMD_WEBIN.IsEnabled    = (RxGlobals.PrinterStatus.PrintState==EPrintState.ps_off || RxGlobals.PrinterStatus.PrintState==EPrintState.ps_ready_power);
-                    if (invisible==Visibility.Collapsed) CMD_WEBIN.IsChecked=false;
+                    if (invisible==Visibility.Collapsed) 
+                        CMD_WEBIN.IsChecked=false;
                 }
            }
 
@@ -87,6 +89,20 @@ namespace RX_DigiPrint.Views.UserControls
             CMD_WEBIN.IsChecked = true;
             if (RxGlobals.PrintSystem.IsScanning) RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_SET_CMD, "CMD_SETUP/CMD_WEBIN");
             else RxGlobals.RxInterface.SendCommand(TcpIp.CMD_PAUSE_PRINTING);
+        }
+
+        //--- _Timer ------------------------------------------------------------------
+        private void _Timer(int no)
+        {
+            if (CMD_JOG_FWD.Visibility==Visibility.Visible )
+            {
+                string val;
+                RxGlobals.Plc.RequestVar("Application.GUI_00_001_Main"+"\n"+ "STA_WEBIN_PREP_FWD"+"\n"+"STA_WEBIN_PREP_BWD"+"\n");
+                val = RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_WEBIN_PREP_FWD");
+                CMD_JOG_FWD.IsBusy = (val!=null) && val.Equals("TRUE");
+                val = RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_WEBIN_PREP_BWD");
+                CMD_JOG_BWD.IsBusy = (val!=null) && val.Equals("TRUE");
+            }
         }
 
         //--- Clean_Clicked -------------------------------------------------
