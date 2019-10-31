@@ -49,11 +49,11 @@
                     <rx_uc:PlcParCtrl Grid.Row="0" ID="PAR_PRINTING_SPEED"                  Label="Print Speed"  Unit="m/min"   UnitWidth="50" Format="n"/>
                     <rx_uc:PlcParCtrl Grid.Row="2" ID="PAR_WEB_WIDTH"                       Label="Web Width"    Unit="mm"      UnitWidth="50" Format="1"/>
                     <rx_uc:PlcParCtrl Grid.Row="3" ID="PAR_DISTANCE_TO_STOP"                Label="Stop Dist"    Unit="m"       UnitWidth="50" Format="f"/>
+                    <rx_uc:PlcParCtrl Grid.Row="4" ID="XML_ENC_OFFSET"                      Label="Encoder Adj"  Unit="inc" UnitWidth="50" Format="n"/>
             </rx_uc:PlcParPanel>
 
         <Grid Grid.Row="1"> <!-- Margin="0,5,0,-4"> -->
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
@@ -63,15 +63,11 @@
                     <Image Source="{StaticResource Yes_ico}"/>
                 </common:RxButton>
 
-                <common:RxButton Grid.Column="1" Click="Save_Default_Click" Height="40" IsChecked="{Binding ElementName=ParPanelMaterial, Path=Changed}">
-                    <Image Source="{StaticResource YesSave_ico}"/>
-                </common:RxButton>
-
-                <common:RxButton Grid.Column="2" Click="Reload_Clicked" Height="40">
+                <common:RxButton Grid.Column="1" Click="Reload_Clicked" Height="40">
                     <Image Source="../../Resources/Bitmaps/Refresh.ico"/>
                 </common:RxButton>
 
-                <common:RxButton Grid.Column="3" Click="Delete_Clicked" Height="40">
+                <common:RxButton Grid.Column="2" Click="Delete_Clicked" Height="40">
                     <Image Source="{StaticResource delete_ico}"/>
                 </common:RxButton>
             </Grid>

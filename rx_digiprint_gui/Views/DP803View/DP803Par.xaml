@@ -130,22 +130,17 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             
             <common:RxButton Grid.Column="0" Click="Save_Clicked" IsChecked="{Binding ElementName=ParPanelMaterial, Path=Changed}" Height="50">
                 <Image Source="{StaticResource Yes_ico}"/>
             </common:RxButton>
 
-            <common:RxButton Grid.Column="1" Click="Save_Default_Click" IsChecked="{Binding ElementName=ParPanelMaterial, Path=Changed}" Height="50">
-                <Image Source="{StaticResource YesSave_ico}"/>
-            </common:RxButton>
-
-            <common:RxButton Grid.Column="2" Click="Reload_Clicked" Height="50">
+            <common:RxButton Grid.Column="1" Click="Reload_Clicked" Height="50">
                 <Image Source="{StaticResource reload_ico}"/>
             </common:RxButton>
 
-            <common:RxButton Grid.Column="3" Click="Delete_Clicked" Height="50">
+            <common:RxButton Grid.Column="2" Click="Delete_Clicked" Height="50">
                 <Image Source="{StaticResource delete_ico}"/>
             </common:RxButton>
         </Grid>

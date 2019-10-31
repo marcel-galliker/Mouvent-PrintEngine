@@ -136,22 +136,17 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <common:RxButton Grid.Column="0" Click="Save_Clicked" Height="40" IsChecked="{Binding ElementName=ParPanelMaterial, Path=Changed}">
+                <common:RxButton Grid.Column="0" Click="Save_Clicked" Height="40" IsChecked="{Binding ElementName=ParPanelMaterial, Path=Changed}" x:Name="ButtonSave">
                     <Image Source="{StaticResource Yes_ico}"/>
                 </common:RxButton>
 
-                <common:RxButton Grid.Column="1" Click="Save_Default_Click" Height="40" IsChecked="{Binding ElementName=ParPanelMaterial, Path=Changed}">
-                    <Image Source="{StaticResource YesSave_ico}"/>
-                </common:RxButton>
-
-                <common:RxButton Grid.Column="2" Click="Reload_Clicked" Height="40">
+                <common:RxButton Grid.Column="1" Click="Reload_Clicked" Height="40">
                     <Image Source="../../Resources/Bitmaps/Refresh.ico"/>
                 </common:RxButton>
 
-                <common:RxButton Grid.Column="3" Click="Delete_Clicked" Height="40">
+                <common:RxButton Grid.Column="2" Click="Delete_Clicked" Height="40">
                     <Image Source="{StaticResource delete_ico}"/>
                 </common:RxButton>
             </Grid>

@@ -48,13 +48,7 @@ namespace RX_DigiPrint.Views.TexView
         //--- Save_Clicked ---------------------------------------------
         private void Save_Clicked(object sender, RoutedEventArgs e)
         {
-            ParPanelMaterial.Send();
-            RxGlobals.RxInterface.SendCommand(TcpIp.CMD_PLC_SAVE_PAR);
-        }
-
-        //--- Save_Default_Click ---------------------------------------------
-        private void Save_Default_Click(object sender, RoutedEventArgs e)
-        {
+            CB_Material.EndEditMode(true, true);
             Save_Clicked(sender, e);
             Material material = RxGlobals.MaterialList.FindByName(XML_MATERIAL.Value);
             if (material!=null)

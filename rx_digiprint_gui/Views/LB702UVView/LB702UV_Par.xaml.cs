@@ -41,13 +41,7 @@ namespace RX_DigiPrint.Views.LB702UVView
         //--- Save_Clicked ---------------------------------------------
         private void Save_Clicked(object sender, RoutedEventArgs e)
         {
-            ParPanelMaterial.Send();
-            RxGlobals.RxInterface.SendCommand(TcpIp.CMD_PLC_SAVE_PAR);
-        }
-
-        //--- Save_Default_Click ---------------------------------------------
-        private void Save_Default_Click(object sender, RoutedEventArgs e)
-        {
+            CB_Material.EndEditMode(true, true);
             ParPanelMaterial.Send();
             RxGlobals.RxInterface.SendCommand(TcpIp.CMD_PLC_SAVE_PAR);
             Material material = CB_Material.SelectedItem as Material;

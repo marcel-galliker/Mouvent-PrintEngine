@@ -22,19 +22,13 @@ namespace RX_DigiPrint.Views.LB702WBView
             InitializeComponent();
 
             CB_Material.ItemsSource   = RxGlobals.MaterialList.List;
+            XML_MATERIAL.PropertyChanged          += XML_MATERIAL_PropertyChanged;
         }
 
         //--- Save_Clicked ---------------------------------------------
         private void Save_Clicked(object sender, RoutedEventArgs e)
         {
-            ParPanelMaterial.Send();
-            if (SendParameters!=null) SendParameters();
-            RxGlobals.RxInterface.SendCommand(TcpIp.CMD_PLC_SAVE_PAR);
-        }
-
-        //--- Save_Default_Click ---------------------------------------------
-        private void Save_Default_Click(object sender, RoutedEventArgs e)
-        {
+            CB_Material.EndEditMode(true, true);
             ParPanelMaterial.Send();
             RxGlobals.RxInterface.SendCommand(TcpIp.CMD_PLC_SAVE_PAR);
             Material material = CB_Material.SelectedItem as Material;
@@ -103,21 +97,11 @@ namespace RX_DigiPrint.Views.LB702WBView
             }
         }
 
-        private int recursive=0;
+        //--- CB_Material_SelectedItemChanged --------------------------------------------------
         private void CB_Material_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            if (recursive>0)
-            {
-                recursive--;
-                return;
-            }
-            Material material = e.NewValue as Material;
-            if (material==null) 
-            {
-                recursive = 2;
-                CB_Material.SelectedItem = RxGlobals.MaterialList.List.First();
-                CB_Material.SelectedItem = null;
-            }
+            if (e.NewValue==null) CB_Material.SelectedItem = e.OldValue as Material;
+            else                  CB_Material.SelectedItem = e.NewValue as Material;
         }
       
         //--- XML_MATERIAL_PropertyChanged --------------------------------------------

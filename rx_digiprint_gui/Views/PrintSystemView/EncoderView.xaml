@@ -12,7 +12,7 @@
               IsVisibleChanged="GroupBox_IsVisibleChanged">
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="135"/>
                 <ColumnDefinition Width="70"/>
                 <ColumnDefinition Width="70" x:Name="ColEncoder2"/>
                 <ColumnDefinition Width="*"/>
@@ -40,7 +40,7 @@
             <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding Percentage, Converter={StaticResource HeadVal_Converter10}}" HorizontalAlignment="Right" x:Name="TX_Percent_1"/>
             -->
             <TextBlock Grid.Row="3" Grid.Column="0" Text="Distance [m]"/>
-            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Meters}"/>
+            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Meters}" HorizontalAlignment="Right"/>
 
             <common:RxButton Grid.Row="4" Grid.Column="1" Click="Save_Clicked" Height="30" HorizontalAlignment="Center" IsEnabled="{Binding IsValid}">
                 <Image Source="{StaticResource Yes_ico}"/>

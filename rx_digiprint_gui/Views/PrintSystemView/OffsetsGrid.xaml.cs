@@ -68,8 +68,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
                                                             break;
 
                 case EPrinterType.printer_LB701:
-                case EPrinterType.printer_LB702_UV:         this.Visibility         = Visibility.Visible;
-                                                            Encoder.Visibility      = Visibility.Visible;
+                case EPrinterType.printer_LB702_UV:         this.Visibility         = Visibility.Collapsed;
+                                                            Encoder.Visibility      = Visibility.Collapsed;
                                                             Angle.Visibility        = Visibility.Collapsed;
                                                             Belt.Visibility         = Visibility.Collapsed;
                                                             Overlap.Visibility      = Visibility.Collapsed; 
@@ -89,7 +89,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                                                             break;
 
                 case EPrinterType.printer_LB702_WB:         this.Visibility         = Visibility.Visible;
-                                                            Encoder.Visibility      = Visibility.Visible;
+                                                            Encoder.Visibility      = Visibility.Collapsed;
                                                             Angle.Visibility        = Visibility.Collapsed;
                                                             Belt.Visibility         = Visibility.Collapsed;
                                                             Overlap.Visibility      = Visibility.Collapsed; 

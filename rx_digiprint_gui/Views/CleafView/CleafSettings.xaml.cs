@@ -77,6 +77,7 @@ namespace RX_DigiPrint.Views.CleafView
         //--- Save_Clicked ---------------------------------------------
         private void Save_Clicked(object sender, RoutedEventArgs e)
         {
+            CB_ProcessPar.EndEditMode(true, true);
             _check_settings();
             RxGlobals.RxInterface.SendCommand(TcpIp.CMD_PLC_SAVE_PAR);
             RxGlobals.Plc.SetVar("PAR_WINDER_WEB_LENGHT_RESET", _LengthReset);

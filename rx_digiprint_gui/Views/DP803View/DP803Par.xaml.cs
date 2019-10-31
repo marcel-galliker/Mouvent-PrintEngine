@@ -41,14 +41,9 @@ namespace RX_DigiPrint.Views.DP803View
         //--- Save_Clicked ---------------------------------------------
         private void Save_Clicked(object sender, RoutedEventArgs e)
         {
+            CB_Material.EndEditMode(true, true);
             ParPanelMaterial.Send();
             RxGlobals.RxInterface.SendCommand(TcpIp.CMD_PLC_SAVE_PAR);
-        }
-
-        //--- Save_Default_Click ---------------------------------------------
-        private void Save_Default_Click(object sender, RoutedEventArgs e)
-        {
-            Save_Clicked(sender, e);
             Material material = RxGlobals.MaterialList.FindByName(XML_MATERIAL.Value);
             if (material!=null)
             {
@@ -113,23 +108,13 @@ namespace RX_DigiPrint.Views.DP803View
             }
         }
 
-        private int recursive=0;
+        //--- CB_Material_SelectedItemChanged --------------------------------------------------
         private void CB_Material_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            if (recursive>0)
-            {
-                recursive--;
-                return;
-            }
-            Material material = e.NewValue as Material;
-            if (material==null) 
-            {
-                recursive = 2;
-                CB_Material.SelectedItem = RxGlobals.MaterialList.List.First();
-                CB_Material.SelectedItem = null;
-            }
+            if (e.NewValue==null) CB_Material.SelectedItem = e.OldValue as Material;
+            else                  CB_Material.SelectedItem = e.NewValue as Material;
         }
-      
+
         //--- XML_MATERIAL_PropertyChanged --------------------------------------------
         private void XML_MATERIAL_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {

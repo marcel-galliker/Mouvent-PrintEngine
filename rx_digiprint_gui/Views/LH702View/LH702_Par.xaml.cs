@@ -35,6 +35,7 @@ namespace RX_DigiPrint.Views.LH702View
         //--- Save_Clicked ---------------------------------------------
         private void Save_Clicked(object sender, RoutedEventArgs e)
         {
+        //    CB_Material.EndEditMode(true, true);
             RxGlobals.MaterialList.List[0].SaveValue("PAR_HEAD_HEIGHT", RxGlobals.MaterialXML.PrintHeight.ToString(new CultureInfo("en-US")));
             RxGlobals.MaterialList.List[0].Send(TcpIp.CMD_PLC_SAVE_MATERIAL);
         }
