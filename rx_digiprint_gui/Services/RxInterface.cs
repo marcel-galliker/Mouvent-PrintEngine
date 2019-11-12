@@ -147,6 +147,9 @@ namespace RX_DigiPrint.Services
             int size;
             RxMsgHandler msgHandler = new RxMsgHandler();
             
+            while (RxBindable.Dispatcher==null)
+                Thread.Sleep(100);
+
             while (_Running)
             {
                 //--- connecting -------------------------------------------
