@@ -36,8 +36,11 @@
 
 #define CURRENT_Z_HOLD	50
 
-#define POS_UP			    10000
-#define PRINT_HEIGHT_MIN	1000
+#define POS_UP			    10000		// um
+#define PRINT_HEIGHT_MIN	1000		// um
+
+#define HEIGHT_INCREASE_AFTER_MATERIAL_DETECTION	1000	//um
+#define HEIGHT_INCREASE_TIMEOUT						2000	//ms
 
 #define DIST_Z_REV		2000.0	// moving distance per revolution [µm]
 
@@ -67,6 +70,9 @@
 #define HEAD_UP_IN_FRONT	0
 #define HEAD_UP_IN_BACK		1
 
+// Head supervision with Stepperboard
+#define LASER_BEFORE_HEAD_IN		2
+
 // DRIP PAN FUNCTION
 #define DRIP_PANS_INFEED_DOWN		5
 #define DRIP_PANS_INFEED_UP			6
@@ -76,6 +82,7 @@
 #define PRINTHEAD_EN		11	// Input from SPS // '1' Allows Head to go down
 
 // Digital Outputs (max 12)
+#define LASER_BEFORE_HEAD_OUT	0x001
 // #define RO_FLUSH_CAR_0		0x001 //  0 // Y1 Flush Servicecar 0
 // #define RO_BLADE_UP_0		0x008 //  3 // SY13 Wipe-Blade 0
 // #define RO_VACUUM_BLADE		0x020 //  5 // Y8 Vakuum Blade
@@ -83,7 +90,7 @@
 // #define RO_DRAIN_WASTE		0x080 // 7 // Y6 & Y7 // 1 == Waste Beh. Absaugen // 0 == Cable Chain absaugen 
 // #define RO_FLUSH_VOLT		0x100
 // #define RO_ALL_OUT_MECH			0x00E // ALL robot (blades and screws)
-#define RO_ALL_OUTPUTS			0x2FF //  ALL Outputs
+#define RO_ALL_OUTPUTS			0x2FE //  ALL Outputs instead of Output 0, 10 and 11
 
 // DRIP PAN FUNCTION
 #define DRIP_PANS_VALVE_ALL		0x300
@@ -118,13 +125,21 @@ static int	_LaserCnt = 0;
 // Timers
 static int	_LaserTimeThin;
 static int	_LaserTimeThick;
+static int	_PrintHeight_Time;
 
 static UINT32	_cleaf_Error=0;
+
+// Head supervision
+static int  _PrintHeightTemp;
+static int  _MaterialDetected;
+static int  _MaterialDetectedInput;
+
 
 //--- prototypes --------------------------------------------
 static void _cleaf_motor_z_test(int steps);
 static void _cleaf_motor_test(int motor, int steps);
 static void _cleaf_check_laser(void);
+static void _check_material_supervision(void);
 
 // Lift
 static int  _z_micron_2_steps(int micron);
@@ -198,10 +213,13 @@ void cleaf_main(int ticks, int menu)
 	
 	if (RX_StepperCfg.printerType != printer_cleaf) return; // printer_cleaf
 	motor_main(ticks, menu);
+	
+	
 		
 	// --- read Inputs Cap ---
 	RX_StepperStatus.info.headUpInput_0 = fpga_input(HEAD_UP_IN_FRONT);
 	RX_StepperStatus.info.headUpInput_1 = fpga_input(HEAD_UP_IN_BACK);
+	
 	RX_StepperStatus.posZ = REF_HEIGHT - _z_steps_2_micron(motor_get_step(0));
 		
 	// Drip Pans : enabled when the main send a command CMD_CLN_DRIP_PANS
@@ -219,6 +237,11 @@ void cleaf_main(int ticks, int menu)
 		RX_StepperStatus.info.z_in_print = FALSE;
 		RX_StepperStatus.info.z_in_cap   = FALSE;
 	}
+	
+	// Enable supervision for printheads
+	if (RX_StepperStatus.info.z_in_print || _MaterialDetected)	_MaterialDetectedInput = fpga_input(LASER_BEFORE_HEAD_IN);
+	else														_MaterialDetectedInput = FALSE;
+
 
 	// --- Executed after each move ---
 	if (_CmdRunning && motors_move_done(MOTOR_ALL_BITS))
@@ -253,7 +276,14 @@ void cleaf_main(int ticks, int menu)
 		RX_StepperStatus.info.z_in_print = (_CmdRunning==CMD_CAP_PRINT_POS);
 		RX_StepperStatus.info.z_in_cap   = (_CmdRunning==CMD_CAP_CAPPING_POS);
 		
+		if (_CmdRunning == CMD_CAP_UP_POS)
+		{
+			Fpga.par->output |= LASER_BEFORE_HEAD_OUT;			// Laser for supervision OFF
+		}
+		
 		_CmdRunning = 0;
+		
+		
 	}	
 	
 	//--- HEAD DOWN ENABLE --------------------
@@ -276,7 +306,7 @@ void cleaf_main(int ticks, int menu)
 			if (((++_PrintHeadEn_Off) == HEAD_DOWN_EN_DELAY) && (RX_StepperStatus.info.printhead_en == TRUE)) // (_PrintHeadEn_Off < HEAD_DOWN_EN_DELAY) && 
 			{
 			//	Error(LOG, 0, "LIFT: printhead_en disabled", _CmdRunning);
-				if (RX_StepperStatus.info.z_in_print)					
+				if (RX_StepperStatus.info.z_in_print)
 				{	
 					Error(LOG, 0, "LIFT: printhead_en disabled, go up for splice");
 					RX_StepperStatus.info.splicing = TRUE;
@@ -287,8 +317,9 @@ void cleaf_main(int ticks, int menu)
 			}
 		}	
 	}
-
+	
 	_cleaf_check_laser();
+	_check_material_supervision();
 }
 
 //--- _cleaf_check_laser ------------------------------------------
@@ -358,6 +389,38 @@ static void _cleaf_check_laser(void)
 	}
 }
 
+// --- _check_material_supervision --------------------------
+static void _check_material_supervision(void)
+{
+	// Supervision for printhead
+	// -> If sensor detects material -> Head moves up a bit, if the sensor still detects material, it sends an Error and moves up otherwise it moves down again after a short waiting time
+	if (_MaterialDetectedInput && !_MaterialDetected)
+	{
+		int pos;
+		if (!_PrintHeightTemp) _PrintHeightTemp = RX_StepperStatus.posZ;
+		pos = RX_StepperStatus.posZ + HEIGHT_INCREASE_AFTER_MATERIAL_DETECTION;
+		_MaterialDetected = TRUE;
+		cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_PRINT_POS, &pos);
+	}
+	else if (_MaterialDetected && _MaterialDetectedInput && RX_StepperStatus.info.z_in_print)
+	{
+		Error(ERR_CONT, 0, "Laser detects material in front of Printhead.");
+		cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_UP_POS, NULL);
+	}
+	else if (_MaterialDetected && !_MaterialDetectedInput)
+	{
+		if (!_PrintHeight_Time) _PrintHeight_Time = rx_get_ticks();
+		if (rx_get_ticks() > _PrintHeight_Time + HEIGHT_INCREASE_TIMEOUT && !_MaterialDetectedInput)
+		{
+			cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_PRINT_POS, &_PrintHeightTemp);
+			_MaterialDetected = FALSE;
+			_PrintHeight_Time = 0;
+			_PrintHeightTemp = 0;
+		}
+		else if (rx_get_ticks() >= _PrintHeight_Time + HEIGHT_INCREASE_TIMEOUT && _MaterialDetectedInput) _PrintHeight_Time = rx_get_ticks();
+	}
+}
+
 //--- value_str3 ---------------------------------------------
 static char *_value_str3(int val)
 {
@@ -378,14 +441,15 @@ void cleaf_display_status(void)
 	
 	{
 	//	term_printf("Cleaf Stepper LIFT ---------------------------------\n");
-		term_printf("moving:         %d		cmd: %08x\n", RX_StepperStatus.info.moving, _CmdRunning);	
-		term_printf("refheight:      %06d  ", RX_StepperCfg.ref_height);
-		term_printf("pos in um:      %06d  \n", RX_StepperStatus.posZ);
-		term_printf("LASER in um:      %06d  row=%06d \n", RX_StepperStatus.posY, Fpga.stat->analog_in[LASER_IN]);	
-		term_printf("Head UP Sensor: front: %d  back: %d\n",	fpga_input(HEAD_UP_IN_FRONT), fpga_input(HEAD_UP_IN_BACK));	
-		term_printf("reference done:  %d\n", RX_StepperStatus.info.ref_done);
-		term_printf("allow move down: %d \n", _AllowMoveDown);
-		term_printf("z in ref:%d print:%d cap:%d\n", RX_StepperStatus.info.z_in_ref, RX_StepperStatus.info.z_in_print, RX_StepperStatus.info.z_in_cap);
+		term_printf("moving:            %d		cmd: %08x\n", RX_StepperStatus.info.moving, _CmdRunning);	
+		term_printf("refheight:         %06d  ", RX_StepperCfg.ref_height);
+		term_printf("pos in um:         %06d  \n", RX_StepperStatus.posZ);
+		term_printf("LASER in um:       %06d  row=%06d \n", RX_StepperStatus.posY, Fpga.stat->analog_in[LASER_IN]);	
+		term_printf("Head UP Sensor:    front: %d  back: %d\n",	fpga_input(HEAD_UP_IN_FRONT), fpga_input(HEAD_UP_IN_BACK));	
+		term_printf("reference done:    %d\n", RX_StepperStatus.info.ref_done);
+		term_printf("allow move down:   %d \n", _AllowMoveDown);
+		term_printf("Material detected: %d \n", _MaterialDetectedInput);
+		term_printf("z in ref:%d print: %d cap:%d\n", RX_StepperStatus.info.z_in_ref, RX_StepperStatus.info.z_in_print, RX_StepperStatus.info.z_in_cap);
 		if (RX_StepperCfg.boardNo==0)
 		{
 			term_printf("drips pans valve: up=%d down=%d\n", (Fpga.par->output&DRIP_PANS_VALVE_UP)!=0, (Fpga.par->output&DRIP_PANS_VALVE_DOWN)!=0);
@@ -480,6 +544,7 @@ int  cleaf_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		Fpga.par->output &= ~RO_ALL_OUTPUTS; // set all output to off
 		RX_StepperStatus.info.moving = TRUE;
 		_CmdRunning = msgId;
+		_MaterialDetected = FALSE;
 		break;
 
 	case CMD_CAP_REFERENCE:			strcpy(_CmdName, "CMD_CAP_REFERENCE");
@@ -489,11 +554,13 @@ int  cleaf_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 			motors_reset(MOTOR_ALL_BITS); // to recover from move count missalignment
 			RX_StepperStatus.info.ref_done		= FALSE;
 			Fpga.par->output &= ~RO_ALL_OUTPUTS;
+			Fpga.par->output |= LASER_BEFORE_HEAD_OUT;			// Laser for supervision OFF
 			_CmdRunning  = CMD_CAP_REFERENCE;
 			RX_StepperStatus.info.moving = TRUE;
 			motor_move_by_step(MOTOR_Z_FRONT, &_Par_Z_ref[0], -500000);
 			motor_move_by_step(MOTOR_Z_BACK,  &_Par_Z_ref[1], -500000);
 			motors_start(MOTOR_Z_BITS, TRUE);
+			_MaterialDetected = FALSE;
 		}
 		break;
 
@@ -504,6 +571,7 @@ int  cleaf_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 			pos = PRINT_HEIGHT_MIN;				
 			Error(WARN, 0, "PrintHeight set to minimum (%d.%03 mm)", PRINT_HEIGHT_MIN/1000, PRINT_HEIGHT_MIN%1000);
 		}
+		if (pos >= REF_HEIGHT - 1000) pos = REF_HEIGHT - 1000;
 		_PrintPos   = RX_StepperCfg.material_thickness + pos;
 //		Error(LOG, 0, "got CMD_CAP_PRINT_POS %d, _CmdRunning=0x%08x ", _PrintPos, _CmdRunning);
 		if(!_CmdRunning && _AllowMoveDown)
@@ -514,11 +582,13 @@ int  cleaf_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 				||   RX_StepperStatus.posY > (RX_StepperCfg.material_thickness + LASER_VARIATION)) Error(ERR_CONT, 0, "WEB: Laser detects material out of range. (measured %d, expected %d)", RX_StepperStatus.posY, RX_StepperCfg.material_thickness);
 			else
 			{
-				if (REF_HEIGHT<90000) Error(WARN, 0, "Reference Height is only %d.02d mm", REF_HEIGHT/100, REF_HEIGHT%100);
+				if (REF_HEIGHT<87000) Error(WARN, 0, "Reference Height is only %d.02d mm", REF_HEIGHT/100, REF_HEIGHT%100);
 				_CmdRunning = CMD_CAP_PRINT_POS;
 				motor_move_to_step(MOTOR_Z_FRONT, &_ParZ_down, _z_micron_2_steps(REF_HEIGHT - _PrintPos));
 				motor_move_to_step(MOTOR_Z_BACK,  &_ParZ_down, _z_micron_2_steps(REF_HEIGHT - _PrintPos + HEAD_ALIGN));
 				motors_start(MOTOR_Z_BITS, TRUE);
+				Fpga.par->output &= ~LASER_BEFORE_HEAD_OUT;		// Laser for supervision on
+				
 			}
 		}				
 		break;
@@ -542,6 +612,8 @@ int  cleaf_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		{
 			_CmdRunning = msgId;
 			motors_move_to_step(MOTOR_Z_BITS, &_ParZ_down, POS_UP);
+			_MaterialDetected = FALSE;
+			//Fpga.par->output |= LASER_BEFORE_HEAD_OUT;			// Laser for supervision OFF
 		}
 		break;
 		
