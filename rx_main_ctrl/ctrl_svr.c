@@ -223,7 +223,7 @@ static int _prepare_config()
 				if (!strcmp(RX_Hostname, "TEST-0001"))
 				{
 					Error(WARN, 0, "TEST: all on first spooler");
-					RX_Color[color].spoolerNo = 0;						
+					RX_Color[color].spoolerNo = 0;			
 				}
 				else RX_Color[color].spoolerNo = color;	// one pc per color	
 			else
@@ -322,11 +322,15 @@ static int _prepare_config()
 	{
 		if(RX_Config.printer.type==printer_TX801 || RX_Config.printer.type==printer_TX802)
 		{
-			int headsPerColor = (RX_Config.printer.type==printer_TX802) ? 2:1;
-			for (head=0, color=0; color<8; head++)
+			int h=0;
+			for (head=0, color=0, h=0; color<8; head++)
 			{
 				RX_Config.headBoard[head/MAX_HEADS_BOARD].head[head%MAX_HEADS_BOARD].encoderNo = 7-color;
-				if (!(head%headsPerColor)) color++;
+				if (++h==RX_Config.headsPerColor)
+				{
+					color++;
+					h=0;
+				}
 			}
 		}		
 	}
@@ -494,7 +498,7 @@ static void _headboard_config(int colorCnt, int headsPerColor, int ethPortCnt)
 		{
 			pBoard->head[i].blkNo0    = i*RX_Spooler.dataBlkCntHead;
 			pBoard->head[i].blkCnt    = RX_Spooler.dataBlkCntHead;
-			pBoard->head[i].dist	  = RX_Config.headDist[board*MAX_HEADS_BOARD+i];				
+			pBoard->head[i].dist	  = RX_Config.headDist[board*MAX_HEADS_BOARD+i];			
 			if (rx_def_is_web(RX_Config.printer.type))	pBoard->head[i].distBack = pBoard->head[i].dist;
 			else										pBoard->head[i].distBack = 5000+RX_Config.headDistBack[board*MAX_HEADS_BOARD+i]-pBoard->head[i].dist;
 			
