@@ -228,7 +228,7 @@
             <hadIRAM2>1</hadIRAM2>
             <hadIROM2>1</hadIROM2>
             <StupSel>8</StupSel>
-            <useUlib>0</useUlib>
+            <useUlib>1</useUlib>
             <EndSel>0</EndSel>
             <uLtcg>0</uLtcg>
             <nSecure>0</nSecure>
@@ -458,11 +458,6 @@
               <FilePath>.\source\version.c</FilePath>
             </File>
             <File>
-              <FileName>work_flash_operation.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\source\work_flash_operation.c</FilePath>
-            </File>
-            <File>
               <FileName>watchdog.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\source\watchdog.c</FilePath>
@@ -561,11 +556,6 @@
               <FileName>temp_ctrl.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\source\temp_ctrl.h</FilePath>
-            </File>
-            <File>
-              <FileName>work_flash_operation.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\source\work_flash_operation.h</FilePath>
             </File>
             <File>
               <FileName>watchdog.h</FileName>
@@ -1121,11 +1111,6 @@
               <FilePath>.\source\version.c</FilePath>
             </File>
             <File>
-              <FileName>work_flash_operation.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\source\work_flash_operation.c</FilePath>
-            </File>
-            <File>
               <FileName>watchdog.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\source\watchdog.c</FilePath>
@@ -1224,11 +1209,6 @@
               <FileName>temp_ctrl.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\source\temp_ctrl.h</FilePath>
-            </File>
-            <File>
-              <FileName>work_flash_operation.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\source\work_flash_operation.h</FilePath>
             </File>
             <File>
               <FileName>watchdog.h</FileName>
@@ -1784,11 +1764,6 @@
               <FilePath>.\source\version.c</FilePath>
             </File>
             <File>
-              <FileName>work_flash_operation.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\source\work_flash_operation.c</FilePath>
-            </File>
-            <File>
               <FileName>watchdog.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\source\watchdog.c</FilePath>
@@ -1887,11 +1862,6 @@
               <FileName>temp_ctrl.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\source\temp_ctrl.h</FilePath>
-            </File>
-            <File>
-              <FileName>work_flash_operation.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\source\work_flash_operation.h</FilePath>
             </File>
             <File>
               <FileName>watchdog.h</FileName>
