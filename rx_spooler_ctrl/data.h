@@ -76,6 +76,7 @@ int  data_free		(UINT64 *pBufSize, BYTE* buffer[MAX_COLORS]);
 int  data_load		(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UINT8 multiCopy, int gapPx, int blkNo, int blkCnt, int printMode, int variable, UINT8 virtualPasses, UINT8 virtualPass, int flags, int clearBlockUsed, int same, int smp_bufsize, BYTE* buffer[MAX_COLORS]);
 int  data_same		(SPageId *id);
 // int  data_reload	(SPageId *id);
+void data_send_id	(SPageId *id);
 SBmpSplitInfo*		data_get_next	(int *headCnt);
 void data_fill_blk	(SBmpSplitInfo *psplit, int blkNo, BYTE *dst);
 int  data_sent		(SBmpSplitInfo *psplit, int head); // return TRUE=all data sent

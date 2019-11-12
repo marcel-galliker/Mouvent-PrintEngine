@@ -21,3 +21,5 @@ void ctrl_send(void *msg);
 void ctrl_pause_printing(void);
 void ctrl_start_printing(void);
 void ctrl_send_load_progress(SPageId *id, const char *colorSN, int progress);
+
+int ctrl_get_bufferNo(BYTE *ptr);

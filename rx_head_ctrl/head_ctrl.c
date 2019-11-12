@@ -181,15 +181,17 @@ static int _save_ctrl_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr
 int  ctrl_main(int ticks, int menu)
 {
 	int cnt=0;
+	
+	if (_StatusReqTime && rx_get_ticks()>(_StatusReqTime+1500)) 
+	{
+		Error(LOG, 0, "Status Request Late: time=%d", rx_get_ticks()-_StatusReqTime);
+		_StatusReqTime = 0;
+	}
+
 	while (_MsgBufOut!=_MsgBufIn)
 	{
 		cnt++;
 		
-		if (_StatusReqTime && rx_get_ticks()>(_StatusReqTime+1500)) 
-		{
-			Error(LOG, 0, "Status Request Late: time=%d", rx_get_ticks()-_StatusReqTime);
-		}
-
 		_handle_ctrl_msg(_MsgBuf[_MsgBufOut].socket, _MsgBuf[_MsgBufOut].msg);
 		_MsgBufOut = (_MsgBufOut+1) % MSG_BUF_SIZE;
 		break; // only one per call

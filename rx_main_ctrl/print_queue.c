@@ -17,9 +17,11 @@
 #include "rx_trace.h"
 #include "gui_svr.h"
 #include "rx_setup_file.h"
+#include "args.h"
 #include "print_ctrl.h"
 #include "machine_ctrl.h"
 #include "plc_ctrl.h"
+#include "ctrl_svr.h"
 #include "es_rip.h"
 #include "enc_ctrl.h"
 #include "ctr.h"
@@ -473,14 +475,15 @@ int	pq_move_item(SPrintQueueItem *pitem, int d)
 }
 
 //--- pq_preflight --------------------------------------------------------------
-int pq_preflight(SPrintQueueItem *pitem)
+int pq_preflight(SPageId *pid)
 {
 	int i;
-	if (_find_item(pitem->id.id, &i)==REPLY_OK)
+	if (_find_item(pid->id, &i)==REPLY_OK)
 	{
 		if (_List[i].state<PQ_STATE_PREFLIGHT)
 		{
 			_List[i].state=PQ_STATE_PREFLIGHT;
+			memset(_List[i].ripState, 0, sizeof(_List[i].ripState));
 			gui_send_print_queue(EVT_GET_PRINT_QUEUE, &_List[i]);
 		}
 		return REPLY_OK;
@@ -809,7 +812,11 @@ int pq_printed(int headNo, SPageId *pid, int *pageDone, int *jobDone, SPrintQueu
 					Error(LOG, 0, "%d: %s: complete", pitem->id .id, _filename(pitem->filepath));
 //					*jobDone = TRUE;
 					gui_send_print_queue(EVT_GET_PRINT_QUEUE, pitem);
-					if (rx_def_is_scanning(RX_Config.printer.type) && *pnextItem==NULL) pc_abort_printing();
+					if (rx_def_is_scanning(RX_Config.printer.type))
+					{
+						enc_enable_printing(FALSE);
+						if(*pnextItem==NULL) pc_abort_printing();
+					}
 				}
 				pitem->state = PQ_STATE_PRINTED;
 			}

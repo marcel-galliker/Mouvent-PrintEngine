@@ -128,12 +128,13 @@ static void _send_image(int head, SBmpInfo *bmpInfo, int blkNo, int backwards)
 	img.id.id	= 1;
 	img.id.page = 1;
 	img.id.scan = 1;
+	img.id.copy	= 1;
 
 	img.head	= head;
 
 	img.image.bitPerPixel	= bmpInfo->bitsPerPixel;		
 	img.image.blkNo			= blkNo;			
-	img.image.widthPx		= bmpInfo->srcWidthPx;			
+	img.image.widthPx		= bmpInfo->srcWidthPx;
 	img.image.widthBytes	= bmpInfo->lineLen;
 	img.image.lengthPx		= bmpInfo->lengthPx;			
 	img.image.jetPx0		= 0;		
@@ -256,7 +257,7 @@ void udp_test_print(char *fname)
 					if (blkLen==dataLen)
 					{
 						msg.blkNo = RX_HBConfig.head[head].blkNo0+blkNo;
-						blkNo = (blkNo+1)%RX_HBConfig.head[head].blkCnt;
+						blkNo = (blkNo+1)%RX_HBConfig.head[head].blkCnt;						
 						udp_test_send(&msg, dataLen+4);
 						memset(&msg, 0, sizeof(msg));
 						dst = msg.blkData;
@@ -272,7 +273,7 @@ void udp_test_print(char *fname)
 				blkNo = (blkNo+1)%RX_HBConfig.head[head].blkCnt;
 				udp_test_send(&msg, dataLen+4);
 			}
-			TrPrintfL(TRUE, "Sent UDP Blocks: %d..%d cnt=%d\n", _BlkNo[head], blkNo-1, blkNo-_BlkNo[head]);
+			TrPrintfL(TRUE, "Sent UDP Blocks: %d..%d cnt=%d", _BlkNo[head], blkNo-1, blkNo-_BlkNo[head]);
 			_send_image(head, &bmpInfo, RX_HBConfig.head[head].blkNo0+_BlkNo[head], _Backwards);
 			_BlkNo[head] = blkNo;
 		}
@@ -319,6 +320,8 @@ void udp_test_print_tif(char *fname)
 	SUDPDataBlockMsg msg;
 	int				 dataLen = fpga_udp_block_size();
 
+	RX_Color[0].lastLine = 1;
+	
 	if (FALSE)
 	{	// activate TCP/IP
 		memset(&msg, 0, sizeof(msg));
@@ -494,6 +497,8 @@ int udp_test_send(void *data, int dataLen)
 	char str[100];
 	SUDPDataBlockMsg *pmsg = (SUDPDataBlockMsg*)data;	
 
+//	TrPrintfL(TRUE, "udp_test_send(%d.%d)", pmsg->blkNo/RX_HBConfig.head[0].blkCnt, pmsg->blkNo%RX_HBConfig.head[0].blkCnt);
+	
 	if (FALSE)
 	{
 		int i;

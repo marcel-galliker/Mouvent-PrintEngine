@@ -509,7 +509,7 @@ void fpga_enc_config(int inNo, SEncoderCfg *pCfg, int restart)
 	
 	if (!_Init) return;
 	
-	Error(LOG, 0, "fpga_enc_config Version %d.%d.%d.%d", Fpga->stat.version.major, Fpga->stat.version.minor, Fpga->stat.version.revision, Fpga->stat.version.build);
+//	if (inNo==0) Error(LOG, 0, "fpga_enc_config Version %d.%d.%d.%d", Fpga->stat.version.major, Fpga->stat.version.minor, Fpga->stat.version.revision, Fpga->stat.version.build);
 
 	TrPrintfL(TRUE, "fpga_enc_config(inNo=%d, retsart=%d)", inNo, restart);
 	TrPrintfL(TRUE, "fpga_enc_config start: enable=%d, position=%d, enc_start_pos_fwd=%d, pg_start_pos=%d", Fpga->cfg.encIn[0].enable, Fpga->stat.encIn[0].position, Fpga->cfg.pg[0].enc_start_pos_fwd, Fpga->stat.encOut[0].pg_start_pos);
@@ -642,6 +642,7 @@ void fpga_enc_simu(int khz)
 		Fpga->cfg.encOut[outNo].backlash		= TRUE;
 		Fpga->cfg.encOut[outNo].scanning		= FALSE;				
 	}
+	_PrintGo_Start = RX_EncoderStatus.PG_cnt;
 	
 	TrPrintfL(TRUE, "fpga_enc_simu end: marks:%06d ok:%06d filtred=%06d missed=%06d dist=%06d pos=%06d\n", _PM_Cnt, Fpga->stat.encOut[0].PG_cnt, _PM_Filtered_Cnt, _PM_Missed_Cnt, Fpga->stat.encIn[0].digin_edge_dist, Fpga->stat.encOut[0].position);
 }

@@ -43,6 +43,7 @@ SHeadBoardCfg			RX_HBConfig;
 int						RX_RGB[MAX_HEADS_BOARD];
 SHeadBoardStat			RX_HBStatus[1];
 SFluidStateLight		RX_FluidStat[MAX_HEADS_BOARD];
+SColorSplitCfg			RX_Color[MAX_COLORS];
 
 UINT32					RX_FpgaCmd;
 SFpgaHeadStat			RX_FpgaStat;
@@ -51,6 +52,8 @@ SFpgaHeadError			RX_FpgaError;
 SFpgaDataStat			RX_FpgaData;
 SFpgaPrintList			RX_FpgaPrint;
 SFpgaEncoderCfg			RX_FpgaEncCfg;
+UINT8					RX_GreyLevel[MAX_HEADS_BOARD][MAX_DROP_SIZES];
+
 INT32					RX_UdpSpeed[2];
 UINT32					RX_BlockUsed[MAX_HEADS_BOARD];
 char					RX_MacAddr[2][32];
@@ -109,8 +112,8 @@ void handle_menu(char *str)
 		case 'd': nios_fixed_grey_levels(atoi(&str[1]), 3);	break;
 		case 'g': fpga_manual_pg();							break;
 		case 'h': fpga_enc_config(atoi(&str[1]));			break;
-		case 'p': udp_test_print(&str[1]);					break;
-		//case 'P': udp_test_print_tif(&str[1]);				break;
+	    case 'p': udp_test_print(&str[1]);					break;
+	//  case 'p': udp_test_print_tif(&str[1]);				break;
 		/*
 		case 'r': fpga_load(PATH_BIN_HEAD FIELNAME_HEAD_RBF);	
 					nios_load(PATH_BIN_HEAD FIELNAME_HEAD_NIOS);
@@ -175,8 +178,6 @@ static void _main_loop(void)
 //	rx_set_tread_priority(50);
 	_AppRunning = TRUE;
 	connected=0;
-	if (arg_offline) ctrlInit=TRUE;
-	else			 ctrlInit=FALSE;
 	while (_AppRunning)
 	{
 		printing = ctrl_printing();
@@ -203,7 +204,7 @@ static void _main_loop(void)
 		//	_check_rx_boot();
 		}
 		time5 = rx_get_ticks();
-		if (!ctrlInit && nios_NiosLoaded()) 
+		if (!ctrlInit && nios_NiosLoaded() && !arg_offline) 
 		{
 			ctrlInit=TRUE;
 			ctrl_init();

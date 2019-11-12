@@ -768,6 +768,13 @@ void ctrl_send_firepulses(char *dots)
 	for (i=0; i<SIZEOF(_HeadCtrl); i++) _send_ink_def(i, dots);
 }
 
+//--- ctrl_send_head_cfg -------------------------
+void ctrl_send_head_cfg(void)
+{
+	int i;
+	for (i=0; i<SIZEOF(_HeadCtrl); i++) _send_head_cfg(i);				
+}
+
 //--- ctrl_send_scan_direction -------------------------------------
 void ctrl_send_scan_direction(INT32 backwards)
 {

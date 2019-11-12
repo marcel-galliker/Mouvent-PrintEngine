@@ -400,8 +400,16 @@ int	plc_get_thickness(void)
 static void _plc_send_par(SPlcPar *pPlcPar)
 {
 //	Error(LOG, 0, "SET PLC Parameter: PAR_PRINTING_START_POSITION=%d, PAR_PRINTING_END_POSITION=%d", (int)pPlcPar->startPos, (int)pPlcPar->endPos);
+	TrPrintfL(TRUE, "_plc_send_par scanning=%d", rx_def_is_scanning(RX_Config.printer.type));
+	
+	if(rx_def_is_scanning(RX_Config.printer.type))
+	{
+		Error(LOG, 0, "ctrl_send_head_cfg");
+		ctrl_send_head_cfg();			
+	}
+	
 	if (_SimuPLC) return;
-
+	
 	if (_PlcState==plc_webin)
 	{
 		Error(LOG, 0, "_plc_send_par in webin: send CMD_STOP");
@@ -441,6 +449,7 @@ static void _plc_send_par(SPlcPar *pPlcPar)
 		lc_set_value_by_name_UINT32(APP"PAR_DRYER_BLOWER_POWER", 75);
 	//	ctrl_send_firepulses(pPlcPar->dots);
 	//	ctrl_send_firepulses("SML");
+	//	ctrl_send_head_cfg();
 	}
 	_plc_set_command("", "CMD_SET_PARAMETER");
 }
@@ -449,6 +458,9 @@ static void _plc_send_par(SPlcPar *pPlcPar)
 int  plc_set_printpar(SPrintQueueItem *pItem)
 {		
 	SPlcPar par;
+	
+	TrPrintfL(TRUE, "plc_set_printpar");
+	
 	if ((RX_Config.stepper.ref_height || RX_Config.stepper.print_height) 
 	&&  (RX_Config.printer.type==printer_TX801 || RX_Config.printer.type==printer_TX802))
 	{
@@ -464,7 +476,9 @@ int  plc_set_printpar(SPrintQueueItem *pItem)
 	
 //	Error(LOG, 0, "PrintPar: PageMargin=%d.%03d", pItem->pageMargin/1000, pItem->pageMargin%1000);
 
+	TrPrintfL(TRUE, "_plc_set_par");
 	_plc_set_par(pItem, &par);
+	TrPrintfL(TRUE, "_plc_send_par");
 	_plc_send_par(&par);
 	memcpy(&_StartEncoderItem, pItem, sizeof(_StartEncoderItem));
 	_Speed = _StartEncoderItem.speed;
@@ -493,7 +507,7 @@ int  plc_start_printing(void)
 	}
 //	Error(LOG, 0, "plc_start_printing: heads_to_print=%d, z_in_print=%d",_heads_to_print, RX_StepperStatus.info.z_in_print);
 	step_set_vent(_Speed);
-	if (_SimuEncoder) ctrl_simu_encoder(_Speed);
+//	if (_SimuEncoder) ctrl_simu_encoder(_Speed);
 	return REPLY_OK;
 }
 

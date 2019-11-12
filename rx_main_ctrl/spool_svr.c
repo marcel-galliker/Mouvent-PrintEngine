@@ -279,7 +279,7 @@ int	spool_set_config(RX_SOCKET socket)
 	// data is always on MAIN
 	if (strcmp(str, "127.0.0.1")) sprintf(RX_Spooler.dataRoot, "\\\\%s\\%s", str, PATH_RIPPED_DATA_DIR);
 	else strcpy(RX_Spooler.dataRoot, PATH_RIPPED_DATA_DIR);
-	cnt=spool_send_msg_2(CMD_SET_SPOOL_CFG, sizeof(RX_Spooler), &RX_Spooler, FALSE);
+	cnt=spool_send_msg_2(CMD_SET_SPOOL_CFG, sizeof(RX_Spooler), &RX_Spooler, FALSE);		
 
 	//--- send bitmap split config (all info) --------------------------
 	if (RX_Config.printer.type==printer_DP803) Error(LOG, 0, "Send CMD_COLOR_CFG only to used spooler");
@@ -430,7 +430,7 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 	if (arg_simuHeads) Error(LOG, 0, "Printing ID=%d, page=%d, copy=%d, scan=%d", pid->id, pid->page, pid->copy, pid->scan);
 	
 	_Ready--;
-	
+		
 	memset(&msg, 0, sizeof(msg));
 	msg.hdr.msgLen		= sizeof(msg);
 	msg.hdr.msgId		= CMD_PRINT_FILE;
@@ -488,7 +488,20 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 			msg.smp_bufSize = pitem->scansStart;
 		}
 		else msg.printMode = PM_SCANNING;
-
+		/*
+		else 
+		{
+			static int _lastid=0;
+			if (_lastid!=pid->id) 
+			{ // plc_ctrl::ctrl_send_head_cfg()
+				_lastid		= pid->id;
+				_BlkNo		= 0;
+				msg.blkNo	= _BlkNo;				
+			}
+			msg.printMode = PM_SCANNING;
+		}
+		*/
+		
 		msg.offsetWidth	= offsetWidth;
 		msg.lengthPx	= lengthPx;
 		msg.gapPx		= (UINT32)(pitem->printGoDist*1.200/25.4);
@@ -513,11 +526,15 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 		msg.virtualPass   = _Pass;
 		_Pass			  = (_Pass+1) % pitem->passes;
 	}
-
+	
 //	TrPrintfL(TRUE, "send spool_print_file >>%s<<", filename);
 	int cnt;
 	cnt=spool_send_msg(&msg);
-	if (cnt) RX_PrinterStatus.sentCnt++;// = _HeadBoardCnt;
+	if (cnt)
+	{
+		pq_preflight(&msg.id);
+		RX_PrinterStatus.sentCnt++;// = _HeadBoardCnt;
+	}
 	else     Error(ERR_CONT, 0, "No Spoolers connected");
 //	Error(LOG, 0, "Load File[%d] page=%d, scan=%d", RX_PrinterStatus.sentCnt, pid->page, pid->scan);
 	
@@ -564,7 +581,7 @@ static int _do_print_file_rep(RX_SOCKET socket, int spoolerNo, SPrintFileRep *ms
 //	if (msg->bufReady)
 	{
 		TrPrintfL(TRUE, "****** Spooler[%d]:rep_print_file id=%d, page=%d, copy=%d, scan=%d, bufReady=%d, same=%d, _MsgSent=%d, _MsgGot=%d", spoolerNo, msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->bufReady, msg->same, _MsgSent, _MsgGot);
-	
+			
 		if (!msg->same)
 		{
 			int i;

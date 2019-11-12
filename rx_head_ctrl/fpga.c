@@ -369,16 +369,16 @@ int  fpga_set_config(RX_SOCKET socket)
 	int i, n, head;
 	char str[64];
 
-	Error(LOG, 0, "fpga_set_config 1");
+//	Error(LOG, 0, "fpga_set_config 1");
 	_CfgCnt++;
 	TrPrintfL(TRUE, "fpga_set_config start");
 	fpga_abort();
 
 	if (RX_HBStatus[0].fpgaVersion.major==0) Error(ERR_CONT, 0, "Head electronics overheated. It is disabled until the next power on of the printer.");
 	
-	Error(LOG, 0, "fpga_set_config 2");
+//	Error(LOG, 0, "fpga_set_config 2");
 	_ethernet_config();
-	Error(LOG, 0, "fpga_set_config 3");
+//	Error(LOG, 0, "fpga_set_config 3");
 
 	if (!RX_LinuxDeployment) Error(WARN, 0, "Head unreliable startup of operating system from SD-Card. CHANGE TO FLASH booting!");
 
@@ -392,11 +392,11 @@ int  fpga_set_config(RX_SOCKET socket)
 	_PrintDoneError		= 0;
 	_FpgaErrorTrace		= FALSE;
 	
-	Error(LOG, 0, "fpga_set_config 4");
+//	Error(LOG, 0, "fpga_set_config 4");
 
 	//--- head -----------------------------------------------------------------
-	nios_set_firepulse_on(FALSE);
-	Error(LOG, 0, "fpga_set_config 5");
+//	nios_set_firepulse_on(FALSE);
+//	Error(LOG, 0, "fpga_set_config 5");
 	for (i=0; i<SIZEOF(FpgaCfg.head); i++)
 	{
 		FpgaCfg.head[i]->cmd_enable			= FALSE; // need toggle to reset!
@@ -439,7 +439,7 @@ int  fpga_set_config(RX_SOCKET socket)
 			}
 		}
 	}
-	Error(LOG, 0, "fpga_set_config 6");
+//	Error(LOG, 0, "fpga_set_config 6");
 
 	//--- UDP Interface --------------------------------------------------------
 	if (Fpga.blockUsed==NULL) Fpga.blockUsed  =(UINT32*) malloc((RX_HBConfig.dataBlkCntHead+7)/8*HEAD_CNT);
@@ -497,21 +497,25 @@ int  fpga_set_config(RX_SOCKET socket)
 		RX_HBStatus[0].head[i].printGoCnt   = 0;
 		RX_HBStatus[0].head[i].printDoneCnt = 0;
 		cond_add_droplets_printed(i, RX_HBStatus[0].head[i].dotCnt);
-		RX_HBStatus[0].head[i].dotCnt       = 0;
 	}
 	
-	Error(LOG, 0, "fpga_set_config 7");
+//	Error(LOG, 0, "fpga_set_config 7");
 
 	//--- clear memory in data path ---
 	if (_ImgInCnt)
-	{				
-		_fpga_enc_config(40);
+	{		
 		SET_FLAG(FpgaCfg.cfg->cmd, CMD_MASTER_ENABLE, TRUE);
+		_fpga_enc_config(40);
 		rx_sleep(20);
+		_fpga_enc_config(0);
 		SET_FLAG(FpgaCfg.cfg->cmd, CMD_MASTER_ENABLE, FALSE);
 	}				
 
-	for (i=0; i<HEAD_CNT; i++) Fpga.stat->head_dot_cnt[i];
+	for (i=0; i<HEAD_CNT; i++) 
+	{
+		Fpga.stat->head_dot_cnt[i];
+		RX_HBStatus[0].head[i].dotCnt = 0;
+	}
 	
 	_PdCnt=0;
 	for (i=0; i<SIZEOF(_Enc_Flag); i++)
@@ -527,7 +531,7 @@ int  fpga_set_config(RX_SOCKET socket)
 	_FirstImage = 0;
 	
 	//---  set encoder ---------------------------------------------------
-	Error(LOG, 0, "fpga_set_config 8");
+//	Error(LOG, 0, "fpga_set_config 8");
 	_fpga_enc_config(arg_simu_machine);
 
 	//--- general settings --------------------
@@ -565,7 +569,7 @@ int  fpga_set_config(RX_SOCKET socket)
 //	Error(LOG,  0, "fpga_set_config1: FSM State=0x%04x", Fpga.stat->info);
 //	_check_state_machines();
 
-	Error(LOG, 0, "fpga_set_config 9");
+//	Error(LOG, 0, "fpga_set_config 9");
 
 	if (Fpga.stat->info.clearing_udp_flags) 
 	{
@@ -578,7 +582,7 @@ int  fpga_set_config(RX_SOCKET socket)
 		return Error(ERR_ABORT, 0, "Timeout while clearing Used Block Flags");
 	}
 
-	Error(LOG, 0, "fpga_set_config 10");
+//	Error(LOG, 0, "fpga_set_config 10");
 
 	for (head=0; head<SIZEOF(RX_HBStatus[0].head); head++) 
 	{
@@ -588,7 +592,7 @@ int  fpga_set_config(RX_SOCKET socket)
 		_check_block_used_flags_clear(head, 0, RX_HBConfig.head[head].blkNo0, RX_HBConfig.head[head].blkCnt);
 	}
 
-	Error(LOG, 0, "fpga_set_config 11");
+//	Error(LOG, 0, "fpga_set_config 11");
 
 	for (i=0; i<2; i++)
 	{
@@ -610,7 +614,7 @@ int  fpga_set_config(RX_SOCKET socket)
 	
 	TrPrintfL(TRUE, "fpga_set_config done");
 
-	Error(LOG, 0, "fpga_set_config END");
+//	Error(LOG, 0, "fpga_set_config END");
 
 	return REPLY_OK;
 }
@@ -656,22 +660,25 @@ static void _fpga_enc_config(int khz)
 		FpgaCfg.encoder->synth.value = 0;
 		FpgaCfg.encoder->synth.enable= FALSE;
 
+		/*
 		// first disable FPGA, then start power up, and finally enable fpga
 		enable = (FpgaCfg.cfg->cmd & CMD_MASTER_ENABLE)!=0;
-
+		
 		SET_FLAG(FpgaCfg.cfg->cmd, CMD_MASTER_ENABLE, FALSE);
 		nios_set_firepulse_on(TRUE);
 		
 		for (i=0; !nios_is_firepulse_on(); i += 10)
 		{
-			if (i > 1000) 
+			if (i > 50) 
 			{
 				Error(LOG, 0, "Firepulse On TimeOut");
-				return;					
+				break;					
 			}
 			rx_sleep(10);				
 		}
 		SET_FLAG(FpgaCfg.cfg->cmd, CMD_MASTER_ENABLE, enable);
+		*/
+		
 		FpgaCfg.encoder->synth.value = FPGA_FREQ/(khz*1000);
 		FpgaCfg.encoder->synth.enable= TRUE;		
 	}
@@ -1052,8 +1059,8 @@ int  fpga_image	(SFpgaImageCmd *msg)
 		
 		_PageEnd[head][idx] = RX_HBConfig.head[head].blkNo0 + (msg->image.blkNo-RX_HBConfig.head[head].blkNo0+msg->image.blkCnt-1) % RX_HBConfig.head[head].blkCnt;
 
-		TrPrintf(trace, "head[%d].fpga_image[%d]:(id=%d, page=%d, copy=%d, scan=%d) blocks %05d ... %05d (%05d ... %05d), clearBlockUsed=%d", head, idx,  msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->image.blkNo, _PageEnd[head][idx], msg->image.blkNo-RX_HBConfig.head[head].blkNo0, _PageEnd[head][idx]-RX_HBConfig.head[head].blkNo0, msg->image.clearBlockUsed);
-		TrPrintf(trace, "head[%d].fpga_image[%d]: width=%d, height=%d, bits=%d", head, idx, msg->image.widthBytes, msg->image.lengthPx,  msg->image.bitPerPixel);
+		TrPrintfL(trace, "head[%d].fpga_image[%d]:(id=%d, page=%d, copy=%d, scan=%d) blocks %05d ... %05d (%05d ... %05d), clearBlockUsed=%d", head, idx,  msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->image.blkNo, _PageEnd[head][idx], msg->image.blkNo-RX_HBConfig.head[head].blkNo0, _PageEnd[head][idx]-RX_HBConfig.head[head].blkNo0, msg->image.clearBlockUsed);
+		TrPrintfL(trace, "head[%d].fpga_image[%d]: width=%d, height=%d, bits=%d", head, idx, msg->image.widthBytes, msg->image.lengthPx,  msg->image.bitPerPixel);
 
 //		if (head==0) 
 		if (TEST_DEBUG && head==3) // _ImgInCnt>23   )
@@ -1086,7 +1093,7 @@ int  fpga_image	(SFpgaImageCmd *msg)
 			Fpga.print->imgInIdx[head] = idx;
 			RX_HBStatus[0].head[head].imgInCnt++;
 			RX_HBStatus[0].head[head].imgBuf = RX_HBStatus[0].head[head].imgInCnt - RX_HBStatus[0].head[head].printGoCnt;
-			if (head==0) _ImgInCnt++;
+			if (RX_HBStatus[0].head[head].imgInCnt>_ImgInCnt) _ImgInCnt=RX_HBStatus[0].head[head].imgInCnt;
 
 			if (RX_HBStatus[0].head[head].imgInCnt==1) 
 			{
@@ -1219,25 +1226,41 @@ static void _fpga_copy_status(void)
 		//--- simulation -------------
 		static UINT32 data[4];
 		static UINT32 cnt[4]={0,0,0,0};
-					
+				
 		int head, change=FALSE;
 		int blkCnt;
 		char str[32], str1[32];
 		char line[90];
 		int i,l;
 		int no[MAX_HEADS_BOARD];
+
+		{
+			for (head=0; head<HEAD_CNT; head++)
+			{
+				for (i=0; i<HEAD_CNT; i++)
+				{
+					RX_GreyLevel[head][i] = FpgaCfg.head[head]->gl_2_pulse[i];
+				}
+			}			
+		}
+		
 		{
 			UINT32 *src=(UINT32*)Fpga.stat;
 			UINT32 *dst=(UINT32*)&RX_FpgaStat;
-			for (i=0; i<sizeof(RX_FpgaStat); i+=4) *dst++ = *src++;
+			for (i=0; i<sizeof(RX_FpgaStat); i+=sizeof(UINT32), src++, dst++) 
+			{
+				if (src<&Fpga.stat->head_dot_cnt[0] || src>&Fpga.stat->head_dot_cnt[3])  
+					*dst = *src;					
+			}
 		}
+		
 		if (FpgaCfg.cfg->cmd & CMD_MASTER_ENABLE)
-			memcpy(&RX_FpgaStatRunning, &RX_FpgaStat, sizeof(RX_FpgaStat));
-			
+			memcpy(&RX_FpgaStatRunning, &RX_FpgaStat, sizeof(RX_FpgaStatRunning));		
+	
 		{
 			UINT32 *src=(UINT32*)Fpga.error;
 			UINT32 *dst=(UINT32*)&RX_FpgaError;
-			for (i=0; i<sizeof(RX_FpgaError); i+=4) 
+			for (i=0; i<sizeof(RX_FpgaError); i+=sizeof(UINT32)) 
 			{
 				if (src<(UINT32*)&Fpga.error->enc_fp[0] || src>=(UINT32*)&Fpga.error->enc_fp[4])
 					*dst++ = *src++;
@@ -1249,14 +1272,14 @@ static void _fpga_copy_status(void)
 			UINT32 *src=(UINT32*)Fpga.data;
 			UINT32 *dst=(UINT32*)&RX_FpgaData;
 //			for (i=0; i<sizeof(RX_FpgaData); i+=4) *dst++ = *src++;
-			for (i=0; i<sizeof(RX_FpgaData)-sizeof(Fpga.data->wf_busy_warn); i+=4) *dst++ = *src++;
+			for (i=0; i<sizeof(RX_FpgaData)-sizeof(Fpga.data->wf_busy_warn); i+=sizeof(UINT32)) *dst++ = *src++;
 		}
 		
 		if (FpgaCfg.cfg->cmd & CMD_MASTER_ENABLE)
 		{
 			UINT32 *src=(UINT32*)Fpga.print;
 			UINT32 *dst=(UINT32*)&RX_FpgaPrint;
-			for (i=0; i<sizeof(RX_FpgaPrint); i+=4) *dst++ = *src++;
+			for (i=0; i<sizeof(RX_FpgaPrint); i+=sizeof(UINT32)) *dst++ = *src++;
 		}
 		
 		RX_FpgaCmd = FpgaCfg.cfg->cmd;

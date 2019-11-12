@@ -207,7 +207,7 @@ int main(int argc, char* argv[])
 	{
 		arg_simuPLC			= TRUE;
 		arg_simuEncoder		= TRUE;
-		arg_simuHeads		= TRUE;
+//		arg_simuHeads		= TRUE;
 		arg_simuChiller		= TRUE;	
 	}
 

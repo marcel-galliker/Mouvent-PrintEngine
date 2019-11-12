@@ -27,6 +27,7 @@ extern SFpgaHeadError	RX_FpgaError;
 extern SFpgaDataStat	RX_FpgaData;
 extern SFpgaPrintList	RX_FpgaPrint;
 extern SFpgaEncoderCfg	RX_FpgaEncCfg;
+extern UINT8			RX_GreyLevel[MAX_HEADS_BOARD][MAX_DROP_SIZES];
 extern UINT32			RX_BlockUsed[MAX_HEADS_BOARD];
 extern int				RX_RGB[MAX_HEADS_BOARD];
 extern char				RX_MacAddr[2][32];

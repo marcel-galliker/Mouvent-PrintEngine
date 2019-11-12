@@ -413,7 +413,7 @@ static int _print_next(void)
 	static int _first;
 	static int _ScansNext;
 	static int _CopiesStart;
-//	TrPrintfL(TRUE, "_print_next printState=%d, spooler_ready=%d, pq_ready=%d", RX_PrinterStatus.printState, spool_is_ready(), pq_is_ready());
+	TrPrintfL(TRUE, "_print_next printState=%d, spooler_ready=%d, pq_ready=%d", RX_PrinterStatus.printState, spool_is_ready(), pq_is_ready());
 	while ((RX_PrinterStatus.printState==ps_printing ||RX_PrinterStatus.printState==ps_pause) && spool_is_ready() && pq_is_ready())
 	{	
 		if (RX_PrinterStatus.testMode)
@@ -825,7 +825,8 @@ int pc_print_done(int headNo, SPrintDoneMsg *pmsg)
 			{
 				if (pnext) 
 				{
-					if (!arg_simuEncoder && _Scanning) machine_set_printpar(pnext);
+//					if (!arg_simuEncoder && _Scanning) machine_set_printpar(pnext);
+					if (_Scanning) machine_set_printpar(pnext);
 					if(pnext->state < PQ_STATE_TRANSFER)
 					{
 						if (rx_def_is_tx(RX_Config.printer.type))

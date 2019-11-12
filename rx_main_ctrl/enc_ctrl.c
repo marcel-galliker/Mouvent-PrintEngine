@@ -434,6 +434,8 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 	
 	if (_Encoder[0].socket==INVALID_SOCKET) return REPLY_OK;
 	
+	TrPrintfL(TRUE, "enc_set_pg id=%d, page=%d, copy=%d, scan=%d", pId->id, pId->page, pId->copy, pId->scan);						
+	
 	if (!_Scanning)
 	{
 		SEncoderPgDist dist;
@@ -442,7 +444,6 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 		dist.dist	= _PrintGo_Dist;
 		dist.printGoMode = pitem->printGoMode;
 		
-		TrPrintfL(TRUE, "enc_set_pg id=%d, page=%d, copy=%d, scan=%d", pId->id, pId->page, pId->copy, pId->scan);						
 	//	Error(LOG, 0, "enc_set_pg id=%d, page=%d, copy=%d, scan=%d, dist=%d", pId->id, pId->page, pId->copy, pId->scan, _PrintGo_Dist);						
 		
 		if (pitem->printGoMode!=PG_MODE_MARK) 
@@ -713,12 +714,13 @@ int  enc_ready(void)
 int	 enc_simu_encoder(int mmin)
 {
 	int no;
-	int khz_head = (int)(mmin/60.0/25.4*1200.0);	
-	_Khz = khz_head;
-	Error(WARN, 0, "CMD_FPGA_SIMU_ENCODER %d m/min %d kHz", mmin, khz_head);
-	if (_Printing || !_Khz)
+	int khz_head = (int)(mmin/60.0/25.4*1200.0);
+//	if (_Printing || !_Khz)
+	if (_Khz != khz_head)
 	{
+		Error(WARN, 0, "CMD_FPGA_SIMU_ENCODER %d m/min %d kHz", mmin, khz_head);
 		for(no=0; no<ENC_CNT; no++) sok_send_2(&_Encoder[no].socket, CMD_FPGA_SIMU_ENCODER, sizeof(khz_head), &khz_head);						
 	}
+	_Khz = khz_head;
 	return REPLY_OK;
 }

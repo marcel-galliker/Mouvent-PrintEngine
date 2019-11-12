@@ -375,6 +375,7 @@ int tif_load(SPageId *id, const char *filedir, const char *filename, int printMo
 	else			  wakeupLen = -wakeupLen;
 	
 	_Abort = FALSE;
+	
 	*_ErrorStr=0;
 	*_WarnStr=0;
 	_TIFFerrorHandler   = _tif_ErrorHandler;
@@ -450,7 +451,7 @@ int tif_load(SPageId *id, const char *filedir, const char *filename, int printMo
 					}
 				}
 			}
-			progress(id, "", 100);
+			if (!_Abort) progress(id, "", 100);
 		}
 		rx_sem_destroy(&_SemDone);
 		
@@ -504,8 +505,13 @@ static void *_tif_read_thread(void* lpParameter)
 				spaceLen			= par->pinfo->lineLen - srcLen;
 				dst					= par->buffer + (par->y_from*par->pinfo->lineLen);				
 								
-				for(par->y = par->y_from; par->y <= par->y_to && !_Abort; par->y++)
+				for(par->y = par->y_from; par->y <= par->y_to; par->y++)
 				{										
+					if (_Abort)
+					{
+						Error(LOG, 0, "Abort Thread %d", par->no);
+						break;							
+					}
 					ret = TIFFReadScanline(file, dst, par->y, 1);
 					dst += srcLen;
 					if(spaceLen)
