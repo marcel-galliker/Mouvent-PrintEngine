@@ -527,6 +527,7 @@ typedef struct SSpoolerCfg
 	INT32	colorCnt;
 	INT32	headsPerColor;
 	INT32	headsPerBoard;
+	UINT32	resetCnt;
 
 	//--- network -----------------------------
 	char	dataRoot[MAX_PATH];	// network path
@@ -796,6 +797,7 @@ typedef struct SHeadBoardCfg
 	UINT16		spoolerNo;
 	UINT32		machineMeters;
 	UINT32		simuPlc;
+	UINT32		resetCnt;
 } SHeadBoardCfg;
 
 typedef struct SHeadBoardStat

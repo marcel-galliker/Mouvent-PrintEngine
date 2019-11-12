@@ -7,15 +7,7 @@
         AllowsTransparency="True"
         Background="Transparent"
         TouchUp="Window_TouchUp"
-        Topmost="True"
         >
-        <!-- 
-        Topmost="True"
-        Width="260"
-        Height="326"
-        Background="#33FFFFFF"
-        WindowStartupLocation="CenterScreen"
-    -->
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>

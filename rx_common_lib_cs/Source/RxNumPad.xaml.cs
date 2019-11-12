@@ -43,7 +43,7 @@ namespace RX_Common
             Width=screen.Width;
             Height=screen.Height;
 
-            #if (DEBUG)
+            #if DEBUG
                 this.Topmost = false;
             #else
                 this.Topmost = true;

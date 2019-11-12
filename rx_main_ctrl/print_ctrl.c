@@ -420,28 +420,37 @@ static int _print_next(void)
 		{
 			switch (RX_TestImage.testImage)
 			{
-				case PQ_TEST_ANGLE_OVERLAP:  strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "angle.bmp");	break;
-				case PQ_TEST_ANGLE_SEPARATED:strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "angle.bmp");	break;
+				case PQ_TEST_ANGLE_OVERLAP:  strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "angle.bmp");
+											 RX_TestImage.scansTotal = RX_TestImage.copies;
+											 break;
+				case PQ_TEST_ANGLE_SEPARATED:strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "angle.bmp");	
+											 RX_TestImage.scansTotal = RX_TestImage.copies;
+											 break;
 				case PQ_TEST_JETS:			 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "fuji.bmp");
 											 if (RX_Config.printer.type==printer_TX801 
 											 ||  RX_Config.printer.type==printer_TX802 
 											 ||  RX_Config.printer.type==printer_test_table) 
-												 RX_TestImage.copies=1;		
+												 RX_TestImage.copies = RX_TestImage.scansTotal = 1;
 											 break;
 				case PQ_TEST_JET_NUMBERS:	 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "jet_numbers.bmp");
 											 if (RX_Config.printer.type==printer_TX801 
 											 ||  RX_Config.printer.type==printer_TX802 
 											 ||  RX_Config.printer.type==printer_test_table) 
-												 RX_TestImage.copies=1;		
+												 RX_TestImage.copies = RX_TestImage.scansTotal = 1;		
 											 break;
-				case PQ_TEST_GRID:			 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "grid.bmp");	break;
-				case PQ_TEST_ENCODER:		 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "encoder.bmp"); break;
+				case PQ_TEST_GRID:			 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "grid.bmp");	
+											 RX_TestImage.scansTotal = RX_TestImage.copies;
+											 break;
+				case PQ_TEST_ENCODER:		 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "encoder.bmp"); 
+											 RX_TestImage.scansTotal = RX_TestImage.copies;
+											 break;
 				case PQ_TEST_SCANNING:		 sprintf(RX_TestImage.filepath, PATH_BIN_SPOOLER "scanning_%d.bmp", RX_TestImage.id.scan+1);
 											 RX_TestImage.id.id++;
 											 RX_TestImage.copies=1;	
 											 RX_TestImage.scans=RX_TestImage.scansTotal=8;
 											 break;
-				case PQ_TEST_FULL_ALIGNMENT: strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "FullAlignement.bmp");	break;
+				case PQ_TEST_FULL_ALIGNMENT: strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "FullAlignement.bmp");
+											 RX_TestImage.copies = RX_TestImage.scansTotal = 1;	
 											 break;
 //				case PQ_TEST_DIVIDER:		 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "divider.tif"); break;
 				default:					 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "fuji.bmp");	break;
@@ -887,3 +896,4 @@ void pc_print_go(void)
 		}
 	}
 }
+ 

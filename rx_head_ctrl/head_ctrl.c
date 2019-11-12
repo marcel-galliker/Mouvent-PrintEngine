@@ -323,7 +323,7 @@ static int _do_head_board_cfg 	(RX_SOCKET socket, SHeadBoardCfg *cfg)
 {
 	int i;
 	
-	TrPrintfL(TRUE, "_do_head_board_cfg");
+	TrPrintfL(TRUE, "_do_head_board_cfg (%d)", cfg->resetCnt);
 
 	RX_MainSocket = socket;
 	memcpy(&RX_HBConfig, cfg, sizeof(RX_HBConfig));
@@ -342,7 +342,7 @@ static int _do_head_board_cfg 	(RX_SOCKET socket, SHeadBoardCfg *cfg)
 	
 	_Printing = TRUE;
 	
-	sok_send_2(&socket, REP_HEAD_BOARD_CFG, 0, NULL);
+	sok_send_2(&socket, REP_HEAD_BOARD_CFG, sizeof(cfg->resetCnt), &cfg->resetCnt);
 	return REPLY_OK;
 }
 

@@ -60,6 +60,7 @@ typedef struct
 HANDLE	_HeadCtrlSvr;
 
 SHeadCtrlPar _HeadCtrl[HEAD_BOARD_CNT];
+static int	_HeadResetCnt;
 static int	 _SingleHead;
 static int	 _AwaitHeadCfg;
 
@@ -82,6 +83,7 @@ int	ctrl_start(void)
 {
 	int i;
 	_AwaitHeadCfg = 0;
+	_HeadResetCnt = 0;
 	memset(_HeadCtrl, 0, sizeof(_HeadCtrl));
 	for (i=0; i<SIZEOF(_HeadCtrl); i++) _HeadCtrl[i].socket = INVALID_SOCKET;
 	
@@ -608,10 +610,11 @@ static void _send_head_cfg(int headNo)
 	int n;
 	int inksupply=-1;
 	
-	if (arg_simuHeads) spool_start_sending();
+//	if (arg_simuHeads) spool_start_sending(_HeadResetCnt);
 
 	if (_HeadCtrl[headNo].running && _HeadCtrl[headNo].socket!=INVALID_SOCKET)
 	{			
+		_HeadCtrl[headNo].cfg->resetCnt = _HeadResetCnt;
 		sok_send_2(&_HeadCtrl[headNo].socket, CMD_HEAD_BOARD_CFG, sizeof(SHeadBoardCfg), _HeadCtrl[headNo].cfg);
 		_AwaitHeadCfg |= (1<<headNo);
 
@@ -631,15 +634,22 @@ static void _send_head_cfg(int headNo)
 }
 
 //--- ctrl_head_cfg_done ------------------------------------
-int ctrl_head_cfg_done(int headNo)
+int ctrl_head_cfg_done(int headNo, UINT32 resetCnt)
 {
-	if (_AwaitHeadCfg)
+	if (_AwaitHeadCfg && resetCnt==_HeadResetCnt)
 	{
 		_AwaitHeadCfg &= ~(1<<headNo);
-		if (!_AwaitHeadCfg) spool_start_sending();
+		if (!_AwaitHeadCfg) spool_start_sending(_HeadResetCnt);
 	}
 	return REPLY_OK;
 }
+
+//--- ctrl_headResetCnt --------------------------------
+UINT32 ctrl_headResetCnt(void)
+{
+	return _HeadResetCnt;				
+}
+
 
 //--- ctrl_singleHead -------------------------------
 int  ctrl_singleHead(void)
@@ -731,9 +741,9 @@ int ctrl_set_config(void)
 
 	TrPrintf(TRUE, "Send config to Heads");
 //	Error(LOG, 0, "Send config to Heads");
-	for (i=0; i<SIZEOF(_HeadCtrl); i++) _send_head_cfg(i);	
-
-	cnt=spool_set_config(INVALID_SOCKET);
+	
+	ctrl_send_head_cfg();
+	cnt=spool_set_config(INVALID_SOCKET, _HeadResetCnt);
 	TrPrintfL(TRUE, "Send Config to %d Spoolers",  cnt);
 	if (cnt==0) 
 	{
@@ -777,7 +787,8 @@ void ctrl_send_firepulses(char *dots)
 void ctrl_send_head_cfg(void)
 {
 	int i;
-	for (i=0; i<SIZEOF(_HeadCtrl); i++) _send_head_cfg(i);				
+	_HeadResetCnt++;
+	for (i=0; i<SIZEOF(_HeadCtrl); i++) _send_head_cfg(i);
 }
 
 //--- ctrl_send_scan_direction -------------------------------------

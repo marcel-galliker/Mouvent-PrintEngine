@@ -24,9 +24,9 @@ void spool_tick(void);
 
 void spool_auto(int enable);
 
-int	spool_set_config(RX_SOCKET socket);
+int	spool_set_config(RX_SOCKET socket, UINT32 resetCnt);
 void spool_start_printing(void);
-void spool_start_sending(void);
+void spool_start_sending(UINT32 resetCnt);
 int spool_is_ready(void);
 int spool_set_layout(SLayoutDef *playout, char *dataPath);
 int spool_set_filedef(SFileDef  *pfileDef);

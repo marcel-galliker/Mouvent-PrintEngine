@@ -802,7 +802,7 @@ int pq_printed(int headNo, SPageId *pid, int *pageDone, int *jobDone, SPrintQueu
 				|| (!pitem->copiesTotal && pitem->scans && pitem->scansPrinted  >= pitem->scans))
 					*jobDone = TRUE;
 				else if (pitem->scansTotal && pitem->scansPrinted >= pitem->scansTotal) 
-					*jobDone = TRUE;	
+					*jobDone = TRUE;
 			}
 			if (*jobDone)
 			{

@@ -140,7 +140,7 @@ static int _handle_spool_msg(RX_SOCKET socket, void *msg, int len, struct sockad
 	
 	switch(phdr->msgId)
 	{
-	case CMD_REQ_SPOOL_CFG:	spool_set_config	(socket);							break;
+	case CMD_REQ_SPOOL_CFG:	spool_set_config	(socket, ctrl_headResetCnt());				break;
 	case REP_SET_SPOOL_CFG:	_do_spool_cfg_rep	(socket);							break;
 	case REP_PRINT_FILE:	_do_print_file_rep	(socket, spoolerNo, (SPrintFileRep*)	msg);	break;
 	case REP_PRINT_ABORT:															break;
@@ -185,7 +185,7 @@ static int _handle_spool_connected(RX_SOCKET socket, const char *peerName)
 		_Spooler[no].err	= FALSE;
 		_Spooler[no].socket = socket;
 	}
-	spool_set_config(socket);
+	spool_set_config(socket, ctrl_headResetCnt());
 	return REPLY_OK;
 }
 
@@ -245,7 +245,7 @@ static int _do_start_printing	(RX_SOCKET socket)
 
 //--- spool_set_config ---------------------------------------------------------------
 // return: count of clients
-int	spool_set_config(RX_SOCKET socket)
+int	spool_set_config(RX_SOCKET socket, UINT32 resetCnt)
 {
 	int hb, cnt, no;
 	char str[100];
@@ -279,6 +279,7 @@ int	spool_set_config(RX_SOCKET socket)
 	// data is always on MAIN
 	if (strcmp(str, "127.0.0.1")) sprintf(RX_Spooler.dataRoot, "\\\\%s\\%s", str, PATH_RIPPED_DATA_DIR);
 	else strcpy(RX_Spooler.dataRoot, PATH_RIPPED_DATA_DIR);
+	RX_Spooler.resetCnt = resetCnt;
 	cnt=spool_send_msg_2(CMD_SET_SPOOL_CFG, sizeof(RX_Spooler), &RX_Spooler, FALSE);		
 
 	//--- send bitmap split config (all info) --------------------------
@@ -354,9 +355,9 @@ void spool_start_printing(void)
 }
 
 //--- spool_start_sending --------------------------------
-void spool_start_sending(void)
+void spool_start_sending(UINT32 resetCnt)
 {
-	spool_send_msg_2(CMD_START_PRINTING, 0, NULL, TRUE);
+	spool_send_msg_2(CMD_START_PRINTING, sizeof(resetCnt), &resetCnt, TRUE);
 }
 
 //--- spool_set_layout ---------------------------------------------------------------

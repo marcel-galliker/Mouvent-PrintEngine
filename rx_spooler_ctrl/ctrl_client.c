@@ -50,8 +50,7 @@ static SPrintFileCmd	_PrintFile_Msg;
 
 static int				_Running;
 static int				_Abort;
-static int				_ReadyToSend;
-static int				_StartToSend;
+static int				_ResetCnt;
 static int				_FirstFile;
 static int				_Paused;
 static SFSDirEntry		_DirEntry;
@@ -79,7 +78,7 @@ static int _do_spool_cfg	(RX_SOCKET socket, SSpoolerCfg	  *cfg);
 static int _do_color_cfg	(RX_SOCKET socket, SColorSplitCfg *cfg);
 static int _do_disabled_jets(RX_SOCKET socket, SDisabledJets  *jets);
 static int _do_print_file	(RX_SOCKET socket, SPrintFileCmd  *msg);
-static void _do_start_sending(void);
+static void _do_start_sending(UINT32 resetCnt);
 static int _do_print_abort	(RX_SOCKET socket);
 static int _do_print_test_data(RX_SOCKET socket, SPrintTestDataMsg *msg);
 
@@ -245,7 +244,7 @@ static int _handle_main_ctrl_msg(RX_SOCKET socket, void *msg, int len, struct so
 									rx_sem_post(_PrintFile_Sem);
 									break;
 
-	case CMD_START_PRINTING:		_do_start_sending	();										break;
+	case CMD_START_PRINTING:		_do_start_sending	(*(UINT32*)&phdr[1]);					break;
 	case CMD_PRINT_ABORT:			_do_print_abort		(socket);								break;
 	
 	case BEG_SET_LAYOUT:			sr_set_layout_start (socket, (char*)&phdr[1]);				break;
@@ -302,8 +301,7 @@ static int _do_spool_cfg(RX_SOCKET socket, SSpoolerCfg *pmsg)
 	memset(&_LoadedId, 0, sizeof(_LoadedId));
 	_Running	 = FALSE;
 	_Abort		 = FALSE;
-	_ReadyToSend = FALSE;
-	_StartToSend = FALSE;
+	_ResetCnt = FALSE;
 	_FirstFile	 = TRUE;
 	_Paused		 = FALSE;
 	_SMP_Flags	 = 0;
@@ -471,30 +469,25 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 		evt.bufReady    = reply.bufReady;
 		sok_send(&socket, &evt);
 		
-		TrPrintfL(TRUE, "REPLY EVT_PRINT_FILE, bufReady=%d, _ReadyToSend=%d", evt.bufReady, _ReadyToSend);
+		TrPrintfL(TRUE, "REPLY EVT_PRINT_FILE, bufReady=%d, _ResetCnt=%d, ResetCnt=%d", evt.bufReady, _ResetCnt, RX_Spooler.resetCnt);
 		if (_FirstFile || !same)
 		{
 			_FirstFile = FALSE;
-			if (msg.printMode==PM_SCANNING)
+			Error(LOG, 0, "File Loaded: _ResetCnt=%d, resetCnt=%d", _ResetCnt, RX_Spooler.resetCnt);
+			if (_ResetCnt==RX_Spooler.resetCnt) 
 			{
-				if (_StartToSend) 
-				{
-					_StartToSend = FALSE;
-					Error(LOG, 0, "_do_start_sending(id=%d)", msg.id.id);
-					data_send_id(&msg.id);
-					memset(&_LoadedId, 0, sizeof(_LoadedId));	
-				}
-				else
-				{
-					Error(LOG, 0, "Data Loaded:_LoadedId=%d", msg.id.id);				
-					memcpy(&_LoadedId, &msg.id, sizeof(_LoadedId));					
-				}
+				Error(LOG, 0, "_do_start_sending(id=%d)", msg.id.id);
+				data_send_id(&msg.id);
+				memset(&_LoadedId, 0, sizeof(_LoadedId));	
 			}
-			else data_send_id(NULL);	
+			else
+			{
+				Error(LOG, 0, "Data Loaded:_LoadedId=%d", msg.id.id);				
+				memcpy(&_LoadedId, &msg.id, sizeof(_LoadedId));					
+			}
 		}
 
-		if (hc_in_simu()) _ReadyToSend=TRUE;
-		if (_ReadyToSend) hc_send_next();
+		if (_ResetCnt==RX_Spooler.resetCnt || hc_in_simu()) hc_send_next();
 		memcpy(&_LastFilename, &msg.filename, sizeof(_LastFilename));
 		_LastPage   = msg.id.page;
 		_LastWakeup = msg.wakeup;
@@ -504,20 +497,21 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 }
 
 //--- _do_start_sending ----------------------------
-static void _do_start_sending(void)
+static void _do_start_sending(UINT32 resetCnt)
 {
-	Error(LOG, 0, "_do_start_sending, _ReadyToSend=%d", _ReadyToSend);
-	if (!_ReadyToSend) Error(LOG, 0, "_ReadyToSend=TRUE");
-	_StartToSend = TRUE;
-	_ReadyToSend = TRUE;
-	if (_LoadedId.id)
+	Error(LOG, 0, "_do_start_sending(%d), resetCnt=%d", resetCnt, RX_Spooler.resetCnt);
+	if (resetCnt==RX_Spooler.resetCnt) 
 	{
-		Error(LOG, 0, "_do_start_sending(LoadedId=%d)", _LoadedId.id);
-		_StartToSend = FALSE;
-		data_send_id(&_LoadedId);
-		memset(&_LoadedId, 0, sizeof(_LoadedId));			
+		Error(LOG, 0, "_ResetCnt=TRUE");
+		_ResetCnt = resetCnt;
+		if (_LoadedId.id)
+		{
+			Error(LOG, 0, "_do_start_sending(LoadedId=%d)", _LoadedId.id);
+			data_send_id(&_LoadedId);
+			memset(&_LoadedId, 0, sizeof(_LoadedId));			
+		}
+		hc_send_next();
 	}
-	hc_send_next();
 }
 	
 //--- _do_print_abort ----------------------------------------------------------------------
