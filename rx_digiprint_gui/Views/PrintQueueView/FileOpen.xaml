@@ -93,9 +93,19 @@
                     </ig:TemplateColumn.ItemTemplate>
                 </ig:TemplateColumn>
                 <ig:TextColumn     Key="FileName"    HeaderText="File"    IsSortable="True"  Width="auto"  ValueConverter="{StaticResource FileName_Converter}" SortComparer="{StaticResource FileName_Comparer}"/>
-                <ig:TextColumn     Key="Time"        HeaderText="Date"    IsSortable="True"  Width="auto"  SortComparer="{StaticResource Date_Comparer}"/>
+            <!--    <ig:TextColumn     Key="Time"        HeaderText="Date"    IsSortable="True"  Width="auto"  SortComparer="{StaticResource Date_Comparer}"/> -->
+                <ig:TemplateColumn Key="Time"        HeaderText="Date"    IsSortable="True"  Width="auto"  SortComparer="{StaticResource Date_Comparer}">
+                    <ig:TemplateColumn.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel>
+                                <TextBlock Text="{Binding Date}"/>
+                                <TextBlock Text="{Binding Time}"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ig:TemplateColumn.ItemTemplate>
+                </ig:TemplateColumn>
 
-                <ig:TemplateColumn Key="Preview"     HeaderText="Preview" IsSortable="False" Width="auto" VerticalContentAlignment="Stretch" >
+                <ig:TemplateColumn Key="Preview"     HeaderText="Preview" IsSortable="False" Width="auto" VerticalContentAlignment="Stretch" MaximumWidth="500">
                     <ig:TemplateColumn.ItemTemplate>
                         <DataTemplate>
                             <Grid>

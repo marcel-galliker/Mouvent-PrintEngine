@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -88,7 +89,8 @@ namespace RX_DigiPrint.Models
                     // --- the same with a local copy of the file
                     {                        
                         FileInfo info = new FileInfo(preview);
-                        Time = info.LastWriteTime.ToString();
+                        Date = info.LastWriteTime.ToString("d");//, CultureInfo.CreateSpecificCulture("en-US"));
+                        Time = info.LastWriteTime.ToString("H:mm");
                         _FileType = ENFileType.DataFile;
                         string thumb_name = info.Directory +"\\"+ Path.GetFileNameWithoutExtension(info.FullName) + ".bmp";
                         thumb_name = Path.GetTempPath() + "rx_thumb_nails\\"+thumb_name.Remove(0, info.Directory.Root.ToString().Length);
@@ -136,7 +138,8 @@ namespace RX_DigiPrint.Models
                 else
                 {
                     FileType = ENFileType.SourceFile;
-                    Time = info.LastWriteTime.ToString();
+                    Date = info.LastWriteTime.ToString("d");//, CultureInfo.CreateSpecificCulture("en-US"));
+                    Time = info.LastWriteTime.ToString("H:mm");
                     Thread thread = new Thread(()=>_create_preview(info, this));
                     thread.Start();
                 }
@@ -230,6 +233,14 @@ namespace RX_DigiPrint.Models
         {
             get { return _Time; }
             set { _Time = value; }
+        }
+
+        //--- Property Date ---------------------------------------
+        private string _Date;
+        public string Date
+        {
+            get { return _Date; }
+            set { _Date = value; }
         }
 
         //--- Property DirVisible ----------------------

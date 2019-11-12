@@ -94,6 +94,7 @@
                 StylusSystemGesture="PrintQueueGrid_StylusSystemGesture"
                 RowExpansionChanging="PrintQueueGrid_RowExpansionChanging"
                 RowHover="Row"
+                RowExpansionChanged="PrintQueueGrid_RowExpansionChanged"
                 >
                 <ig:XamGrid.SelectionSettings>
                     <ig:SelectionSettings CellSelection="None" ColumnSelection="None" RowSelection="Single" CellClickAction="SelectRow"/>

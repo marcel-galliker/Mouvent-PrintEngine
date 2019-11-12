@@ -630,6 +630,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
             }
         }
 
+        //--- PrintQueueGrid_ActiveCellChanged ------------------------------------------------
         private void PrintQueueGrid_ActiveCellChanged(object sender, EventArgs e)
         {
             if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_UV)
@@ -638,6 +639,15 @@ namespace RX_DigiPrint.Views.PrintQueueView
                 Cell            cell = grid.ActiveCell as Cell;
                 if (cell==null) PrintSettings.DataContext = null;
                 else            PrintSettings.DataContext = cell.Row.Data as PrintQueueItem;
+            }
+        }
+
+        //--- PrintQueueGrid_RowExpansionChanged -----------------------------------------------
+        private void PrintQueueGrid_RowExpansionChanged(object sender, RowExpansionChangedEventArgs e)
+        {
+            if (e.Row.IsExpanded)
+            {
+                PrintQueueGrid.BringIntoView();
             }
         }
     }

@@ -366,6 +366,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
                 {
                     item.PrintButtonVisibility  = Visibility.Visible;
                     item.DeleteButtonVisibility = (RxGlobals.User.UserType>=EUserType.usr_supervisor) ? Visibility.Visible : Visibility.Collapsed;
+                    DirGrid.ScrollCellIntoView(row.Cells[0]);
                 }
             }
         }
