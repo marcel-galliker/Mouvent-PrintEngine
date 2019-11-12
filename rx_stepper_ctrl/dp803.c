@@ -160,15 +160,13 @@ void dp803_main(int ticks, int menu)
 
 //		Error(LOG, 0, "Command Done 0x%08x, ref_done=%d, z_in_ref=%d, z_in_print=%d", _CmdRunning,RX_StepperStatus.info.ref_done, RX_StepperStatus.info.z_in_ref, RX_StepperStatus.info.z_in_print);
 
-//		if (_CmdRunning == CMD_CAP_REFERENCE && _PrintPos_New) 
-		if (_PrintPos_New) 
+		if (_CmdRunning == CMD_CAP_REFERENCE && _PrintPos_New) 
 		{
 			if (_PrintPos_New!=_PrintPos_Act) _dp803_move_to_pos(_Cmd_New, _PrintPos_New);
 			_PrintPos_Act = _PrintPos_New;
 		}
 		else
 		{
-//			RX_StepperStatus.info.move_tgl = !RX_StepperStatus.info.move_tgl;
 			_CmdRunning = FALSE;
 		}
 		_PrintPos_New = 0;
