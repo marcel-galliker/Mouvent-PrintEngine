@@ -167,6 +167,7 @@ static void _main_loop(void)
 	int cfgCnt=0, cnt;
 	int printing;
 	int connected;
+	int shutdown_time=0;
 	char str[64];
 	int ctrlInit=FALSE;
 	int time0=0, time1=0, time2=0, time3=0, time4=0, time5=0, time6=0;
@@ -210,14 +211,26 @@ static void _main_loop(void)
 
 		if (ctrlInit)
 		{
-			int c=ctrl_connected();
-			if (connected && !c) _AppRunning=FALSE;				
-			connected=c;			
+			if (ctrl_connected())
+			{
+				connected = TRUE;
+				shutdown_time = 0;
+			}
+			else if (connected)
+			{
+				shutdown_time = rx_get_ticks()+2000;
+				TrPrintfL(TRUE, "shutdown_time=%d", shutdown_time);
+				connected = FALSE;
+			}
+			else if (shutdown_time && rx_get_ticks()>shutdown_time)
+			{
+				Error(ERR_ABORT, 0, "Connection to rx_main_ctrl lost");
+				TrPrintfL(TRUE, "shutdown_time=%d: _AppRunning=FALSE", shutdown_time);
+				_AppRunning=FALSE;										
+			}
 		}
-		if (!connected) rx_sleep(500);
 		if (!msg) rx_sleep(10);
 		time6= rx_get_ticks();
-		
 	}
 }
 

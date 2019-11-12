@@ -511,6 +511,8 @@ int  fpga_set_config(RX_SOCKET socket)
 		SET_FLAG(FpgaCfg.cfg->cmd, CMD_MASTER_ENABLE, FALSE);
 	}				
 
+	for (i=0; i<HEAD_CNT; i++) Fpga.stat->head_dot_cnt[i];
+	
 	_PdCnt=0;
 	for (i=0; i<SIZEOF(_Enc_Flag); i++)
 	{

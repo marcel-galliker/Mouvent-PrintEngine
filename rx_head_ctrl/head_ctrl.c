@@ -184,6 +184,12 @@ int  ctrl_main(int ticks, int menu)
 	while (_MsgBufOut!=_MsgBufIn)
 	{
 		cnt++;
+		
+		if (_StatusReqTime && rx_get_ticks()>(_StatusReqTime+1500)) 
+		{
+			Error(LOG, 0, "Status Request Late: time=%d", rx_get_ticks()-_StatusReqTime);
+		}
+
 		_handle_ctrl_msg(_MsgBuf[_MsgBufOut].socket, _MsgBuf[_MsgBufOut].msg);
 		_MsgBufOut = (_MsgBufOut+1) % MSG_BUF_SIZE;
 		break; // only one per call
@@ -334,7 +340,6 @@ static int _do_head_board_cfg 	(RX_SOCKET socket, SHeadBoardCfg *cfg)
 	
 	_Printing = TRUE;
 	
-	_StatusReqTime = rx_get_ticks();
 	sok_send_2(&socket, REP_HEAD_BOARD_CFG, 0, NULL);
 	return REPLY_OK;
 }
@@ -352,10 +357,8 @@ static int _do_error_reset(void)
 //--- _do_head_stat --------------------------------------------------
 static int _do_head_stat(RX_SOCKET socket, SFluidStateLight *pmsg)
 {	
-	int t=rx_get_ticks();
-	//TrPrintfL(TRUE, "*** _do_head_stat time0%d ***", t-_StatusReqTime);
-	if (_StatusReqTime && t-_StatusReqTime>1500) Error(LOG, 0, "Status Request Late: time=%d", t-_StatusReqTime);
-	_StatusReqTime = t;
+//	TrPrintfL(TRUE, "*** _do_head_stat(socket=%d) time=%d ***", socket, rx_get_ticks()-_StatusReqTime);
+	_StatusReqTime = rx_get_ticks();
 	
 	memcpy(RX_FluidStat, pmsg, sizeof(RX_FluidStat));
 

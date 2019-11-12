@@ -312,10 +312,10 @@ void  putty_display_fpga_error(void)
 //	term_printf("ETH.invalid.pyLdLen :%d UDP.PyldLenErr: %d UDP.FifoFlush: %d\n", RX_FpgaStat.udp_invalid_pyld_length, RX_FpgaError.udp_length_error, RX_FpgaError.udp_flush_fifo);
 
 	term_printf("\n");
-	term_printf("img_line_err[0]: "); PRINTF(4)("%08d   ",    RX_FpgaError.img_line_err[0][i]);			term_printf(" 1st line after gap\n");
-	term_printf("img_line_err[1]: "); PRINTF(4)("%08d   ",    RX_FpgaError.img_line_err[1][i]);			term_printf(" 1st line after overlap\n");
-	term_printf("img_line_err[2]: "); PRINTF(4)("%08d   ",    RX_FpgaError.img_line_err[2][i]);			term_printf(" 1st line after seamless\n");
-	term_printf("img_line_err[3]: "); PRINTF(4)("%08d   ",    RX_FpgaError.img_line_err[3][i]);			term_printf(" internal line missing\n");		
+	term_printf("img_line_err[0]: "); PRINTF(4)("%08d   ",    RX_FpgaError.img_line_err[0][i]);			term_printf(" 1st data line missing\n");
+	term_printf("img_line_err[1]: "); PRINTF(4)("%08d   ",    RX_FpgaError.img_line_err[1][i]);			term_printf(" PG: img-info missing\n");
+	term_printf("img_line_err[2]: "); PRINTF(4)("%08d   ",    RX_FpgaError.img_line_err[2][i]);			term_printf(" not used\n");
+	term_printf("img_line_err[3]: "); PRINTF(4)("%08d   ",    RX_FpgaError.img_line_err[3][i]);			term_printf(" data line missing\n");		
 	
 	term_printf("fifo_img_line:   "); PRINTF(4)("%08d   ",    RX_FpgaError.head[i].fifo_img_line);		term_printf("\n");
 	term_printf("write_img_line:  "); PRINTF(4)("%08d   ",    RX_FpgaError.head[i].write_img_line);		term_printf("\n");
