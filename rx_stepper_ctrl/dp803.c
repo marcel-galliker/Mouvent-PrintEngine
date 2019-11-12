@@ -38,7 +38,6 @@
 // Digital Inputs 
 
 #define CAPPING_HEIGHT		-18500
-#define REF_SAFE_HEIGHT		-2000
 
 #define IN_CAP_PISTON1_OUT		5
 #define IN_CAP_PISTON1_IN		6
@@ -149,21 +148,13 @@ void dp803_main(int ticks, int menu)
 			if (!RX_StepperStatus.info.headUpInput_1) Error(ERR_CONT, 0, "dp803: Command REFERENCE: End Sensor 2 NOT HIGH");
 			RX_StepperStatus.info.ref_done =  RX_StepperStatus.info.headUpInput_0 && RX_StepperStatus.info.headUpInput_1;
 			motors_reset(MOTOR_Z_BITS);
-			/*
-			if (RX_StepperStatus.info.ref_done)
-			{
-				_CmdRunning = CMD_CAP_REF_SAFE;
-				RX_StepperStatus.info.moving = TRUE;
-				motors_move_to_step(MOTOR_Z_BITS, &_ParZ_cap, REF_SAFE_HEIGHT);
-			}
-			*/
 		}
 		else if (motors_error(MOTOR_Z_BITS, &motor))
 		{
 			Error(ERR_CONT, 0, "LIFT: Command %s: Motor[%d] blocked", _CmdName, motor + 1);
 			RX_StepperStatus.info.ref_done = FALSE;							
 		}
-		RX_StepperStatus.info.z_in_ref    = ((_CmdRunning == CMD_CAP_REFERENCE || _CmdRunning == CMD_CAP_UP_POS || _CmdRunning == CMD_CAP_REF_SAFE) && RX_StepperStatus.info.ref_done);
+		RX_StepperStatus.info.z_in_ref    = ((_CmdRunning == CMD_CAP_REFERENCE || _CmdRunning == CMD_CAP_UP_POS) && RX_StepperStatus.info.ref_done);
 		RX_StepperStatus.info.z_in_print  = (_CmdRunning == CMD_CAP_PRINT_POS && RX_StepperStatus.info.ref_done);
 		RX_StepperStatus.info.z_in_cap    = (_CmdRunning == CMD_CAP_CAPPING_POS);
 
@@ -328,13 +319,7 @@ int  dp803_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									_Cmd_New=0;
 									Error(LOG, 0, "CMD_CAP_REFERENCE");
 									strcpy(_CmdName, "CMD_CAP_REFERENCE");
-									if (RX_StepperStatus.info.ref_done) 
-									{
-										_CmdRunning = CMD_CAP_REF_SAFE;
-										RX_StepperStatus.info.moving = TRUE;
-										motors_move_to_step(MOTOR_Z_BITS, &_ParZ_cap, REF_SAFE_HEIGHT);
-									}
-									else _dp803_do_reference();	
+									_dp803_do_reference();	
 									break;
 
 	case CMD_CAP_PRINT_POS:			strcpy(_CmdName, "CMD_CAP_PRINT_POS");
