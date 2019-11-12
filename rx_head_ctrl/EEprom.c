@@ -93,10 +93,14 @@ void eeprom_init_data(int headNo, BYTE *eeprom, SHeadEEpromInfo *pInfo)
 			case 'r':	memcpy(pdata->jetStraightness,  src,  2); src+= 2; break;
 			case 'b':	memset(str, 0, sizeof(str));
 						memcpy(str, src,  3); src+= 3; 
-						sscanf(str, "%x", &pdata->badNozzleM[badM++]);	   break;
+						sscanf(str, "%x", &val);
+						pdata->badNozzleM[badM++] = 2048-val;
+						break;
 			case 'e':	memset(str, 0, sizeof(str));
 						memcpy(str, src,  3); src+= 3; 
-						sscanf(str, "%x", &pdata->badNozzleE[badE++]);	   break;
+						sscanf(str, "%x", &val);
+						pdata->badNozzleE[badE++] = val;
+						break;
 			case 'u':	memcpy(pdata->volumeUniformity, src,  4); src+= 4; break;
 			case 'c':	done=TRUE; break;
 			default:
