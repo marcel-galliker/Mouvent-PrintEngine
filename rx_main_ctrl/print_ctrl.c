@@ -438,7 +438,8 @@ static int _print_next(void)
 				case PQ_TEST_ENCODER:		 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "encoder.bmp"); break;
 				case PQ_TEST_SCANNING:		 sprintf(RX_TestImage.filepath, PATH_BIN_SPOOLER "scanning_%d.bmp", RX_TestImage.id.scan+1);
 											 RX_TestImage.id.id++;
-											 RX_TestImage.copies=8;
+											 RX_TestImage.copies=1;	
+											 RX_TestImage.scans=RX_TestImage.scansTotal=8;
 											 break;
 				case PQ_TEST_FULL_ALIGNMENT: strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "FullAlignement.bmp");	break;
 											 break;

@@ -966,7 +966,7 @@ void _send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 				if (!rx_def_is_scanning(RX_Config.printer.type))
 				{
 					if (i==no) cmd.ctrlMode = ctrlMode;
-					else	   cmd.ctrlMode = ctrl_off;		
+					else	   cmd.ctrlMode = ctrl_off;
 				}
 				_Flushed |= (0x1<<i);
 				sok_send(&_FluidThreadPar[i/INK_PER_BOARD].socket, &cmd);

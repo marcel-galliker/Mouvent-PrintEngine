@@ -788,7 +788,7 @@ int pq_printed(int headNo, SPageId *pid, int *pageDone, int *jobDone, SPrintQueu
 			}
 		}
 		else ctr_add(pitem->srcHeight / 1000000.0);		
-
+	
 		if(pitem->state < PQ_STATE_STOPPING)
 		{		
 			if (pid->copy==pitem->copies) spool_file_printed(pid);
@@ -800,7 +800,9 @@ int pq_printed(int headNo, SPageId *pid, int *pageDone, int *jobDone, SPrintQueu
 			{
 				if((pitem->copiesTotal && pitem->copiesPrinted >= pitem->copiesTotal) 
 				|| (!pitem->copiesTotal && pitem->scans && pitem->scansPrinted  >= pitem->scans))
-					*jobDone = TRUE;		
+					*jobDone = TRUE;
+				else if (pitem->scansTotal && pitem->scansPrinted >= pitem->scansTotal) 
+					*jobDone = TRUE;	
 			}
 			if (*jobDone)
 			{
