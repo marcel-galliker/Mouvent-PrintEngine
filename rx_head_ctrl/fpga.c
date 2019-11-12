@@ -116,11 +116,11 @@ static UINT32	_FirstImage;
 static UINT32	_PdCnt;
 static UINT32	_Enc_Flag[8];
 static UINT32	_Enc_PgCnt[8];
-static UINT32	_Enc_Pos[4];
-static UINT32	_Enc_PosBase[4];
+static UINT32	_Enc_Pos[8];
+static UINT32	_Enc_PosBase[8];
 static UINT32	_PgSimuIn, _PgSimuOut;
 static int		_UdpIsLocal;
-static BYTE		*_FpgaBase;
+static BYTE		*_FpgaBase=NULL;
 static int		_EncCheckDelay=0;
 static UINT32*  _Buffer[HEAD_CNT]={NULL,NULL,NULL,NULL};	// for DDR3-Tests
 static UINT32*	_ImgBuf[HEAD_CNT];
@@ -862,11 +862,7 @@ void fpga_trace_registers(char *fname, int error)
 	if (in!=NULL) fclose(in);
 	if (out!=NULL) fclose(out);
 	
-	TrPrintfL(TRUE, "fpga_trace_registers >>%s<< CLOSED", str);
-	
 	ctrl_send_file(path);
-
-	TrPrintfL(TRUE, "fpga_trace_registers >>%s<< DONE", str);
 }
 
 //--- fpga_get_block_used -----------------------------------------------
