@@ -621,7 +621,7 @@ static int _handle_enc_msg(RX_SOCKET socket, void *msg, int len, struct sockaddr
 				case REP_ENCODER_STAT:  _handle_status		(no, (SEncoderStat*)&phdr[1]);	break;
 				case EVT_GET_EVT:		_handle_event		(no, (SLogMsg*)	 msg);			break;
 				default: Error(WARN, 0, "Encoder[%d]:Got unknown MessageId=0x%08x", no, phdr->msgId);
-				}		
+				}
 				break;				
 			}
 		}
@@ -645,10 +645,13 @@ static void _handle_status(int no, SEncoderStat* pstat)
 		}
 	//	if (pstat->PG_cnt>_EncoderStatus[no].PG_cnt) ErrorEx(dev_enc, no, LOG, 0, "PrintGo %d/%d", pstat->PG_cnt, _TotalPgCnt);			
 	}
+
+	if (no==0 && pstat->info.backwards!=_EncoderStatus[no].info.backwards) 
+		ctrl_send_scan_direction(pstat->info.backwards);
 	
 	memcpy(&_EncoderStatus[no], pstat, sizeof(_EncoderStatus[no]));
-	if (_Encoder[no].printGoCnt==-1 && _EncoderStatus[no].PG_cnt==0)						_Encoder[no].printGoCnt = 0;
-	if (_Encoder[no].printGoCnt>=0 && _EncoderStatus[no].PG_cnt != _Encoder[no].printGoCnt)	
+	if (_Encoder[no].printGoCnt==-1 && _EncoderStatus[no].PG_cnt==0) _Encoder[no].printGoCnt = 0;
+	if (_Encoder[no].printGoCnt>=0  && _EncoderStatus[no].PG_cnt != _Encoder[no].printGoCnt)	
 	{
 		_Encoder[no].printGoCnt = _EncoderStatus[no].PG_cnt;
 
@@ -663,7 +666,7 @@ static void _handle_status(int no, SEncoderStat* pstat)
 		Error(WARN, 0, "PrintGo triggered by PrintMark but NO MARK DETECTED after %d meters", _EncoderStatus[no].meters);
 		_WarnMarkReaderPos = _EncoderStatus[no].meters;
 	}
-	if (no==0 && _EncoderStatus[no].info.analog_encoder != info.analog_encoder) ctrl_set_max_speed();	
+	if (no==0 && _EncoderStatus[no].info.analog_encoder != info.analog_encoder) ctrl_set_max_speed();
 }
 
 //--- enc_reply_stat ---------------------------------------------------------------

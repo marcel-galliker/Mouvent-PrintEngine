@@ -120,6 +120,7 @@ static int		_PrintGo_Locked;
 static int		_PrintGo_Start;
 static int		_PrintGo_Enabled=FALSE;
 static int		_Scanning = FALSE;
+static int		_DirectionLastPos;
 static UINT32	_ErrFlags	= 0;
 static RX_SOCKET _Socket = INVALID_SOCKET;
 static int		_InCnt;
@@ -147,6 +148,7 @@ static void _fpga_corr_linear(SEncoderCfg *pcfg, int restart);
 static void  _uv_init(void);
 static void  _uv_ctrl(void);
 static void  _pg_ctrl(void);
+static int	 _direction_ctrl(void);
 static void  _corr_ctrl(void);
 static void  _simu_markreader(void);
 
@@ -198,17 +200,17 @@ void fpga_init()
 	_CorrSin	= (INT32*)rx_fpga_map_page(_MemId, SINUS_CORRECTION,     0x10000*sizeof(INT32), 0x10000*sizeof(INT32));
 	_CorrSinRev = (INT32*)rx_fpga_map_page(_MemId, SINUS_IDENTIFICATION, 0x10000*sizeof(INT32), 0x10000*sizeof(INT32));
 
-	if (sizeof(SEncFpga)!=0x0e40)
+	if (sizeof(SEncFpga)!=0x0e74)
 	{
 		SEncFpga test;
 		term_printf("TEST Structures -------\n");
-		term_printf("info				@ 0x%04x (0x0400)\n", (BYTE*)&test.stat.info    -(BYTE*)&test);
-	//	term_printf("drive_err			@ 0x%04x (0x0494)\n", (BYTE*)&test.stat.drive_err -(BYTE*)&test);
+		term_printf("info               @ 0x%04x (0x0400)\n", (BYTE*)&test.stat.info    -(BYTE*)&test);
+	//	term_printf("drive_err          @ 0x%04x (0x0494)\n", (BYTE*)&test.stat.drive_err -(BYTE*)&test);
 		term_printf("dig_pg_window_err  @ 0x%04x (0x04d4)\n", (BYTE*)&test.stat.dig_pg_window_err -(BYTE*)&test);
-		term_printf("in-cfg				@ 0x%04x (0x0800)\n", (BYTE*)&test.cfg.encIn[0] -(BYTE*)&test);
-		term_printf("out-cfg			@ 0x%04x (0x0a00)\n", (BYTE*)&test.cfg.encOut[0]-(BYTE*)&test);
-		term_printf("pg-cfg				@ 0x%04x (0x0c00)\n", (BYTE*)&test.cfg.pg		 -(BYTE*)&test);
-		term_printf("general			@ 0x%04x (0x0d00)\n", (BYTE*)&test.cfg.general	 -(BYTE*)&test);
+		term_printf("in-cfg             @ 0x%04x (0x0800)\n", (BYTE*)&test.cfg.encIn[0] -(BYTE*)&test);
+		term_printf("out-cfg            @ 0x%04x (0x0a00)\n", (BYTE*)&test.cfg.encOut[0]-(BYTE*)&test);
+		term_printf("pg-cfg             @ 0x%04x (0x0c00)\n", (BYTE*)&test.cfg.pg		 -(BYTE*)&test);
+		term_printf("general            @ 0x%04x (0x0e00)\n", (BYTE*)&test.cfg.general	 -(BYTE*)&test);
 		term_flush();
 		Error(ERR_ABORT, 0, "structure mismatch");
 	}
@@ -904,26 +906,37 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg, int restart)
 	else		 
 	{
 		act_pos =_micron2inc(pcfg->pos_actual);
+		TrPrintfL(TRUE, "pos_actual=%d microns, =%d incs", pcfg->pos_actual, act_pos);
 		_FirstMarkPos=0;		
 	}
+	_DirectionLastPos = act_pos;
 	
+	if (pcfg->printGoMode==PG_MODE_MARK || pcfg->printGoMode==PG_MODE_MARK_FILTER)
 	{
 		//	Fpga->cfg.general.min_mark_len	  = 1000;
-			Fpga->cfg.general.shift_delay_pulse_len = (Fpga->cfg.general.min_mark_len*11)/10;
-			Fpga->cfg.general.shift_delay			= (int)((pcfg->printGoOutDist-Fpga->cfg.general.min_mark_len)/_StrokeDist);
-			Fpga->cfg.general.shift_delay_tel		= (int)((pcfg->printGoDist   -Fpga->cfg.general.min_mark_len)/_StrokeDist);
-
+		Fpga->cfg.general.shift_delay_pulse_len = (Fpga->cfg.general.min_mark_len*11)/10;
+		Fpga->cfg.general.shift_delay			= (int)((pcfg->printGoOutDist-Fpga->cfg.general.min_mark_len)/_StrokeDist);
+		Fpga->cfg.general.shift_delay_tel		= (int)((pcfg->printGoDist   -Fpga->cfg.general.min_mark_len)/_StrokeDist);				
+		
 		//--- flight time compensation of Mark Reader ----------------------------	
-
 		double ftc_strokes = pcfg->ftc/_StrokeDist;
 		double hz		   = 100.0/60.0*1000000.0/_StrokeDist;// fix 100 m/min
 		double speed	   = (hz/FPGA_FREQ)*0x80000000;
 		double ratio       = ftc_strokes / (hz / FPGA_FREQ);
 
+		
 		Fpga->cfg.general.ftc_speed = (int)speed;
 		Fpga->cfg.general.ftc_ratio = (int)ratio;
 		TrPrintfL(TRUE, "fpga_pg_config start: set ftc_speed=%d", (int)speed);
 		TrPrintfL(TRUE, "fpga_pg_config start: set ftc_ratio=%d", (int)ratio);
+	}
+	else
+	{
+		Fpga->cfg.general.shift_delay_pulse_len = 0;
+		Fpga->cfg.general.shift_delay			= 0;
+		Fpga->cfg.general.shift_delay_tel		= 0;							
+		Fpga->cfg.general.ftc_speed = 0;
+		Fpga->cfg.general.ftc_ratio = 0;
 	}
 
 	for (pgNo=0; pgNo<SIZEOF(Fpga->cfg.pg); pgNo++)
@@ -1116,13 +1129,43 @@ void  fpga_set_printmark(SEncoderPgDist *pmsg)
 	TrPrintfL(TRUE, "fpga_set_printmark(no=%d, cnt=%d, dist=%d, ignore=%d, window=%d)", RX_EncoderStatus.distTelCnt, pmsg->cnt, pmsg->dist, pmsg->ignore, pmsg->window);
 }
 
+//--- _direction_ctrl -----------------------------------------------------
+static int _direction_ctrl(void)
+{
+	int backwards=2;
+	int pos = Fpga->stat.encIn[0].position;
+	
+	if (_Scanning)
+	{
+		if (pos > (_DirectionLastPos+1000)) 
+		{
+			_DirectionLastPos = pos;
+			backwards = FALSE;
+		}
+		else if (pos < (_DirectionLastPos-1000))
+		{
+			_DirectionLastPos = pos;
+			backwards = TRUE;
+		}
+	//	TrPrintfL(TRUE, "_direction_ctrl pos=%d, lastpos=%d, backwards=%d, (%d)", pos, _DirectionLastPos, backwards, RX_EncoderStatus.info.backwards);
+		if (backwards<=1 && RX_EncoderStatus.info.backwards != backwards)
+		{
+			RX_EncoderStatus.info.backwards = backwards;
+	//		Error(LOG, 0, "Encoder pos=%d backwards=%d", pos, RX_EncoderStatus.info.backwards);
+			return TRUE;		
+		}		
+	}
+	
+	return FALSE;
+}
+
 //--- _pg_ctrl ------------------------------------------------------
 static void  _pg_ctrl(void)
 {		
 	if (_Socket!=INVALID_SOCKET && !_PrintGo_Locked)
 	{
-		int send=FALSE;
-
+		int send=_direction_ctrl();
+		
 		//--- new Print-Go -------------------------------------------------------------------------------
 		if ((Fpga->stat.encOut[0].PG_cnt & 0xff) != ((RX_EncoderStatus.PG_cnt-_PrintGo_Start) & 0xff)) 
 		{

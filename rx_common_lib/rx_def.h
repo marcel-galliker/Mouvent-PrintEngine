@@ -874,7 +874,7 @@ typedef struct SEncoderInfo
 	UINT32 uv_ready  :		1;	// 0x00000004
 	UINT32 analog_encoder : 1;	// 0x00000008
 	UINT32 can_start :		1;	// 0x00000010
-	UINT32 info_5 : 1;			// 0x00000020
+	UINT32 backwards : 1;		// 0x00000020
 	UINT32 info_6 : 1;			// 0x00000040
 	UINT32 info_7 : 1;			// 0x00000080
 	UINT32 info_8 : 1;

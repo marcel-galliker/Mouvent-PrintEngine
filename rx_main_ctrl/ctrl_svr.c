@@ -768,6 +768,17 @@ void ctrl_send_firepulses(char *dots)
 	for (i=0; i<SIZEOF(_HeadCtrl); i++) _send_ink_def(i, dots);
 }
 
+//--- ctrl_send_scan_direction -------------------------------------
+void ctrl_send_scan_direction(INT32 backwards)
+{
+	int i;
+//	Error(LOG, 0, "ctrl_send_scan_direction(%d)", backwards);
+	for (i=0; i<SIZEOF(_HeadCtrl); i++)
+	{
+		if (_HeadCtrl[i].running) sok_send_2(&_HeadCtrl[i].socket, CMD_SET_SCAN_DIRECTION, sizeof(backwards), &backwards);		
+	}
+}
+
 //--- ctrl_abort_printing ------------------------------------------------------
 int	 ctrl_abort_printing(void)
 {

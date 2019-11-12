@@ -439,10 +439,10 @@ static void _plc_send_par(SPlcPar *pPlcPar)
 		lc_set_value_by_name_FLOAT(APP"PAR_PRINTING_START_POSITION", (float)pPlcPar->startPos);	
 		lc_set_value_by_name_FLOAT(APP"PAR_PRINTING_END_POSITION", (float)pPlcPar->endPos);
 		lc_set_value_by_name_UINT32(APP"PAR_DRYER_BLOWER_POWER", 75);
+	//	ctrl_send_firepulses(pPlcPar->dots);
+	//	ctrl_send_firepulses("SML");
 	}
-
 	_plc_set_command("", "CMD_SET_PARAMETER");
-	ctrl_send_firepulses(pPlcPar->dots);
 }
 
 //--- plc_set_printpar -----------------------------------------------

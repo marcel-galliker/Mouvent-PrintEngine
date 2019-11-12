@@ -134,9 +134,6 @@ static SFpgaImage _Img[HEAD_CNT][MAX_PAGES];	// for debugging
 
 
 //--- bidirectional: Changing offsets ----------------------- 
-static int		_Bidir;
-static int		_Direction;
-static BYTE		_BidirCnt[HEAD_CNT];
 static UINT32	_PgOffset[HEAD_CNT][2];		// foreward/backward
 
 //--- prototypes -------------------------------------------
@@ -160,7 +157,6 @@ static int _check_block_used_flags_clear(int head, int imgNo, int blkNo, int blk
 static int _trace_used_flags(int head, int imgNo, int blkNo, int blkCnt, int blkEnd);
 static void _fpga_copy_status(void);
 static void _fpga_check_fp_errors(int printDone);
-static void _fpga_set_pg_offsets(void);
 static void _check_udp_speed(int ticks);
 
 //*** functions ********************************************
@@ -401,7 +397,6 @@ int  fpga_set_config(RX_SOCKET socket)
 	//--- head -----------------------------------------------------------------
 	nios_set_firepulse_on(FALSE);
 	Error(LOG, 0, "fpga_set_config 5");
-	_Bidir     = FALSE;
 	for (i=0; i<SIZEOF(FpgaCfg.head); i++)
 	{
 		FpgaCfg.head[i]->cmd_enable			= FALSE; // need toggle to reset!
@@ -411,8 +406,6 @@ int  fpga_set_config(RX_SOCKET socket)
 		_PgOffset[i][OFFSET_FWD] = (UINT32)((1.0*RX_HBConfig.head[i].dist)/21.166667);
 		_PgOffset[i][OFFSET_BWD] = (UINT32)((1.0*RX_HBConfig.head[i].distBack)/21.166667);
 				
-		_BidirCnt[i]=0;
-		_Direction = OFFSET_FWD;
 		FpgaCfg.head[i]->subStroke			= 0;
 		FpgaCfg.head[i]->offset_stroke		= _PgOffset[i][OFFSET_FWD];
 		FpgaCfg.head[i]->offset_substroke	= 0;
@@ -621,45 +614,16 @@ int  fpga_set_config(RX_SOCKET socket)
 }
 
 //--- _fpga_set_pg_offsets ------------------------------------------------
-static void _fpga_set_pg_offsets(void)
+void fpga_set_pg_offsets(INT32 backwards)
 {
 	int i;
-	static int _direction[4]={-1, -1, -1, -1};
-	
-	if (_Bidir)
+//	Error(LOG, 0, "fpga_set_pg_offsets(backwards=%d)", backwards);
+	for (i=0; i<HEAD_CNT; i++)
 	{
-		for (i=0; i<HEAD_CNT; i++)
-		{
-//			TrPrintfL(TRUE, "Head[%d]: ImgOut[0]=%d, ImgOut[1]=%d, pg=%d, pd=%d", i, Fpga.data->imgOutIdx[i][0], Fpga.data->imgOutIdx[i][1], Fpga.stat->pg_ctr[i], Fpga.stat->print_done_ctr[i]);
-			
-			if (((Fpga.stat->pg_ctr[i] & 0xff) != _BidirCnt[i]) || (_ImgInCnt==RX_HBStatus[0].head[i].printDoneCnt))
-			{
-				_BidirCnt[i]++;
-			//	TrPrintfL(TRUE, "_fpga_set_pg_offsets(_Direction=%d, dir=%d))", _BidirCnt[i]&0x01);	
-				FpgaCfg.head[i]->subStroke			= 0;
-				FpgaCfg.head[i]->offset_stroke		= _PgOffset[i][_BidirCnt[i]&0x01];
-			//	TrPrintfL(TRUE, "Head[%d].offset_stroke=%06d, pg=%d, _BidirCnt=%d", i, FpgaCfg.head[i]->offset_stroke, Fpga.stat->pg_ctr[i], _BidirCnt[i]);
-				FpgaCfg.head[i]->offset_substroke	= 0;
-				_direction[i]=_Direction;
-			}
-		}		
-	}
-	else
-	{
-		for (i=0; i<HEAD_CNT; i++)
-		{
-			if (_direction[i]!=_Direction)
-			{
-				FpgaCfg.head[i]->subStroke			= 0;
-				FpgaCfg.head[i]->offset_stroke		= _PgOffset[i][_Direction];
-				FpgaCfg.head[i]->offset_substroke	= 0;
-				TrPrintfL(TRUE, "Head[%d]: direction=%d, offset_stroke=%06d, ", i, _Direction, FpgaCfg.head[i]->offset_stroke);
-				_direction[i]=_Direction;
-			}
-		}
-	}
+		FpgaCfg.head[i]->subStroke			= 0;
+		FpgaCfg.head[i]->offset_stroke		= _PgOffset[i][backwards];
+	}		
 }
-
 
 //--- fpga_enc_config ---------------------------------------------------
 void fpga_enc_config(int khz)
@@ -1084,20 +1048,10 @@ int  fpga_image	(SFpgaImageCmd *msg)
 		memcpy(&_PageId[idx], &msg->id, sizeof(SPageId));
 		memcpy(&_Img[head][idx], &msg->image, sizeof(SFpgaImage));
 		
-		if (_ImgInCnt==RX_HBStatus[0].head[head].printDoneCnt)
-		{
-			if (msg->image.flags & FLAG_BIDIR) _Bidir = TRUE;				
-			else
-			{
-				_Bidir=FALSE;
-				_Direction = (msg->image.flags&FLAG_MIRROR) ? OFFSET_BWD:OFFSET_FWD;
-			}			
-			_fpga_set_pg_offsets();			
-		}	
-				
 		_PageEnd[head][idx] = RX_HBConfig.head[head].blkNo0 + (msg->image.blkNo-RX_HBConfig.head[head].blkNo0+msg->image.blkCnt-1) % RX_HBConfig.head[head].blkCnt;
 
 		TrPrintf(trace, "head[%d].fpga_image[%d]:(id=%d, page=%d, copy=%d, scan=%d) blocks %05d ... %05d (%05d ... %05d), clearBlockUsed=%d", head, idx,  msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->image.blkNo, _PageEnd[head][idx], msg->image.blkNo-RX_HBConfig.head[head].blkNo0, _PageEnd[head][idx]-RX_HBConfig.head[head].blkNo0, msg->image.clearBlockUsed);
+		TrPrintf(trace, "head[%d].fpga_image[%d]: width=%d, height=%d, bits=%d", head, idx, msg->image.widthBytes, msg->image.lengthPx,  msg->image.bitPerPixel);
 
 //		if (head==0) 
 		if (TEST_DEBUG && head==3) // _ImgInCnt>23   )
@@ -1731,8 +1685,6 @@ void  fpga_main(int ticks, int menu)
 	_AliveCnt[0] = Fpga.stat->udp_alive[0];
 	_AliveCnt[1] = Fpga.stat->udp_alive[1];
 
-//	_fpga_set_pg_offsets();
-
 	int time2=rx_get_ticks()-time;
 
 	pd = _check_print_done();
@@ -1832,19 +1784,6 @@ static int _check_print_done(void)
 				_BlockOutIdx[head]     = _PageEnd[head][i];
 			//	_PrintDonePos[head][i] = 0;
 				RX_HBStatus[0].head[head].printDoneCnt++;
-
-				if (RX_HBStatus[0].head[head].printDoneCnt<_ImgInCnt)
-				{
-					SFpgaImage	*img = &_Img[head][(i+1)%MAX_PAGES];
-
-					if (img->flags & FLAG_BIDIR) _Bidir = TRUE;				
-					else
-					{
-						_Bidir=FALSE;
-						_Direction = (img->flags&FLAG_MIRROR) ? OFFSET_BWD:OFFSET_FWD;
-					}					
-					_fpga_set_pg_offsets();			
-				}
 
 				if (TEST_DEBUG)
 				{

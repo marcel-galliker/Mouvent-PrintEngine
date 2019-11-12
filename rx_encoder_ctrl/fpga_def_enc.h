@@ -319,7 +319,7 @@ typedef struct
 	SEncInCfg	encIn[ENCODER_IN_CNT];		// 0x0000
 	SEncOutCfg	encOut[ENCODER_OUT_CNT];	// 0x0200
 	SPrintGoCfg	pg[ENCODER_OUT_CNT];		// 0x0400
-	SGeneralCfg	general;					// 0x0600	0x0d00
+	SGeneralCfg	general;					// 0x0e00
 } SEncFpgaConfig;
 
 //--- SEncFpgaCorrPar ---------------------------------------
