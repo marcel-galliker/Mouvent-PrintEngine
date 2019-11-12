@@ -99,7 +99,7 @@ void eeprom_init_data(int headNo, BYTE *eeprom, SHeadEEpromInfo *pInfo)
 			case 'e':	memset(str, 0, sizeof(str));
 						memcpy(str, src,  3); src+= 3; 
 						sscanf(str, "%x", &val);
-						pdata->badNozzleE[badE++] = val;
+						pdata->badNozzleE[badE++] = 2048-val;
 						break;
 			case 'u':	memcpy(pdata->volumeUniformity, src,  4); src+= 4; break;
 			case 'c':	done=TRUE; break;
