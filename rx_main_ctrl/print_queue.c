@@ -648,14 +648,19 @@ void pq_next_page(SPrintQueueItem *pitem, SPageId *pid)
 				if(pitem->lengthUnit == PQ_LENGTH_COPIES && pitem->scans != pitem->scansStart && pitem->copies)
 				{
 					double copy = (double)(pitem->id.scan - pitem->scansStart) / ((double)(pitem->scans - pitem->scansStart) / (double)pitem->copies);
-					if((int)copy >= pid->copy) pid->copy = (int)copy + 1;		
+					if((int)copy >= pid->copy) pid->copy = (int)copy + 1;
 				}
 				pid->page = pitem->id.page;
 				pid->scan = pitem->id.scan+1;	
 			}
 			else
 			{	
-				pid->copy = pitem->id.copy+1;
+				if(pitem->lengthUnit == PQ_LENGTH_COPIES && pitem->scans != pitem->scansStart && pitem->copies)
+				{
+					double copy = (double)(pitem->id.scan - pitem->scansStart) / ((double)(pitem->scans - pitem->scansStart) / (double)pitem->copies);
+					if((int)copy >= pid->copy) pid->copy = (int)copy + 1;
+				}
+				else pid->copy = pitem->id.copy+1;
 				pid->page = pitem->id.page;
 				pid->scan = 1;								
 			}			
@@ -719,7 +724,7 @@ int pq_printed(int headNo, SPageId *pid, int *pageDone, int *jobDone, SPrintQueu
 		printed = pitem->copiesPrinted;
 		if(pitem->scans > 0)
 		{
-			pitem->scansPrinted++;// = pid->scan;
+			pitem->scansPrinted++;
 			*pageDone = TRUE;
 			if (pitem->srcPages>1 && (pid->scan==pitem->scans || (pitem->copiesPrinted && pid->scan==pitem->scans-pitem->scansStart)))
 			{	
@@ -736,7 +741,8 @@ int pq_printed(int headNo, SPageId *pid, int *pageDone, int *jobDone, SPrintQueu
 				if((int)p>printed)
 				{
 					*pageDone = TRUE;
-					pitem->copiesPrinted++;
+					if (pitem->scansPrinted==pitem->scansTotal)	pitem->copiesPrinted = pitem->copies;
+					else										pitem->copiesPrinted = pitem->id.copy;
 				}
 			}
 		}

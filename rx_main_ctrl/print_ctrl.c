@@ -505,8 +505,10 @@ static int _print_next(void)
 						memset(&_Item, 0, sizeof(_Item));
 						return Error(ERR_ABORT, 0, "Invalid copy settings");
 					}
+					_Item.copiesTotal = _Item.copies * (_Item.lastPage - _Item.firstPage + 1);
 				}
-				_Item.copiesTotal = _Item.copies * (_Item.lastPage - _Item.firstPage + 1);
+				else _Item.copiesTotal = _Item.copies = 1;
+				
 				if(_Item.copiesTotal < 1)_Item.copiesTotal = 1;
 
 //				Error(LOG, 0, "Printig2: copies=%d, copy=%d, copiesTotal=%d", _Item.copies, _Item.id.copy, _Item.copiesTotal);
@@ -677,7 +679,10 @@ static int _print_next(void)
 					//	_ScansNext			= (length+RX_Spooler.maxOffsetPx%barwidth+barwidth-1) / (barwidth/_Item.passes);								
 						_ScansNext			= _Item.scans-_Item.scansStart;
 						_Item.scansPrinted	= (INT32)(((length-_ScanLengthPx)+barwidth-1) / (barwidth/_Item.passes));
-						_Item.scansTotal    = _Item.scansStart + _Item.copiesTotal*(_ScansNext+1);
+						if (_Item.lengthUnit==PQ_LENGTH_COPIES)
+							_Item.scansTotal    = _Item.scans;
+						else
+							_Item.scansTotal    = _Item.scansStart + _Item.copiesTotal*(_ScansNext+1);
 						if(_Item.srcPages > 1)		
 						{
 							if(_ScansNext < 0) return Error(ERR_ABORT, 0, "File too short for Multi Page printing");
@@ -876,7 +881,7 @@ void pc_print_go(void)
 	//	Error(LOG, 0, "NEXT   [%d] (id=%d, page=%d, scan=%d, copy=%d)", RX_PrinterStatus.printGoCnt, next->id, next->page, next->scan, next->copy);
 		if (!RX_PrinterStatus.testMode && next->id != pid->id) 
 		{
-			machine_pause_printing(FALSE);			
+			if (!arg_simuEncoder) machine_pause_printing(FALSE);			
 		}
 	}
 }

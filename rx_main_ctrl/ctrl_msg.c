@@ -95,6 +95,8 @@ static int _do_head_stat(RX_SOCKET socket, int headNo, SHeadBoardStat	*pstat)
 {
 	int i;
 	
+//	TrPrintfL(TRUE, "_do_head_stat(%d)", headNo);
+	
 	if (headNo<HEAD_BOARD_CNT)
 	{
 		ctrl_head_alive(headNo);
