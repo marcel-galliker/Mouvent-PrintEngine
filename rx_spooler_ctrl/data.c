@@ -651,8 +651,8 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 		
 		if (loaded || printMode==PM_TEST || printMode==PM_TEST_JETS || printMode==PM_TEST_SINGLE_COLOR)
 		{
-		//	if (printMode==PM_TEST_JETS && id->id==PQ_TEST_JET_NUMBERS) jc_correction(&bmpInfo, &_PrintList[_InIdx], 4220);
-		//	else if (printMode!=PM_TEST && printMode!=PM_TEST_SINGLE_COLOR) jc_correction(&bmpInfo, &_PrintList[_InIdx], 0);
+			if (printMode==PM_TEST_JETS && id->id==PQ_TEST_JET_NUMBERS) jc_correction(&bmpInfo, &_PrintList[_InIdx], 4220);
+			else if (printMode!=PM_TEST && printMode!=PM_TEST_SINGLE_COLOR) jc_correction(&bmpInfo, &_PrintList[_InIdx], 0);
 		}
 		#ifdef DEBUG
 //		if (FALSE && loaded)
