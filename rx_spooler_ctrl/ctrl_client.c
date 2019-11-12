@@ -59,6 +59,7 @@ static FILE				*_File=NULL;
 static char				_LastFilename[MAX_PATH];
 static int				_LastPage;
 static int				_LastWakeup;
+static int				_LastGap;
 static SPageId			_LoadedId;
 static UINT16			_SMP_Flags;
 #define					BUFFER_CNT 2
@@ -100,6 +101,7 @@ int ctrl_start(const char *ipAddrMain)
 	memset(&_LoadedId, 0, sizeof(_LoadedId));
 	_LastPage=0;
 	_LastWakeup = 0;
+	_LastGap = 0;
 	_SMP_Flags=0;
 
 	rx_mem_init(512*1024*1024);
@@ -367,7 +369,7 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 	_Running = TRUE;
 	hc_start_printing();
 		
-	same = (!strcmp(msg.filename, _LastFilename) && msg.id.page==_LastPage && msg.wakeup==_LastWakeup);
+	same = (!strcmp(msg.filename, _LastFilename) && msg.id.page==_LastPage && msg.wakeup==_LastWakeup && msg.gapPx==_LastGap);
 	if (RX_Spooler.printerType==printer_LB702_UV && msg.printMode==PM_SINGLE_PASS) same = ((msg.flags&FLAG_SAME)!=0);
 
 	TrPrintfL(TRUE, "_do_print_file[%d] >>%s<<  id=%d, page=%d, copy=%d, scan=%d, same=%d, blkNo=%d", _MsgGot, msg.filename, msg.id.id, msg.id.page, msg.id.copy, msg.id.scan ,same, msg.blkNo);
@@ -494,8 +496,9 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 		if (hc_in_simu()) _ReadyToSend=TRUE;
 		if (_ReadyToSend) hc_send_next();
 		memcpy(&_LastFilename, &msg.filename, sizeof(_LastFilename));
-		_LastPage = msg.id.page;
+		_LastPage   = msg.id.page;
 		_LastWakeup = msg.wakeup;
+		_LastGap	= msg.gapPx;
 	}
 	return REPLY_OK;
 }

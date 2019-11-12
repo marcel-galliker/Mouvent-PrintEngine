@@ -140,12 +140,13 @@ int hc_head_board_cfg(RX_SOCKET socket, SHeadBoardCfg* cfg)
 	{
 		Error(WARN, 0, "Head-Client in simulation");
 		cfg->present=dev_simu;
-		rx_mkdir(PATH_TEMP "test");
+	//	rx_mkdir(PATH_TEMP "test");
+		rx_mkdir(PATH_HOME PATH_RIPPED_DATA_DIR "trace/");
 		for (i=0; i<SIZEOF(RX_Color); i++)
 		{
 			if (RX_Color[i].lastLine>0)
 			{
-				sprintf(path, PATH_TEMP "test//%s", RX_ColorNameShort(i));
+				sprintf(path, PATH_HOME PATH_RIPPED_DATA_DIR "trace/%s", RX_ColorNameShort(i));
 				rx_mkdir(path);
 			}
 		}
@@ -413,7 +414,9 @@ static void _save_to_file(SBmpSplitInfo *pInfo)
 	{
 		data_fill_blk(pInfo, i, &buffer[i*RX_Spooler.dataBlkSize]);
 	}
-	sprintf(fname, "%stest/%s/Scan%02d-img%d-hd%d_%s.bmp", PATH_TEMP, RX_ColorNameShort(pInfo->inkSupplyNo), ++_SimuNo[pInfo->colorCode], pInfo->pListItem->id.id, pInfo->head, RX_ColorNameShort(pInfo->inkSupplyNo));
+
+//	sprintf(fname, "%stest/%s/Scan%02d-img%d-hd%d_%s.bmp", PATH_TEMP, RX_ColorNameShort(pInfo->inkSupplyNo), ++_SimuNo[pInfo->colorCode], pInfo->pListItem->id.id, pInfo->head, RX_ColorNameShort(pInfo->inkSupplyNo));
+	sprintf(fname, "%strace/%s/Scan%02d-img%d-hd%d_%s.bmp", PATH_HOME PATH_RIPPED_DATA_DIR, RX_ColorNameShort(pInfo->inkSupplyNo), ++_SimuNo[pInfo->colorCode], pInfo->pListItem->id.id, pInfo->head, RX_ColorNameShort(pInfo->inkSupplyNo));
 	bmp_write(fname, buffer, pInfo->bitsPerPixel, pInfo->widthPx, pInfo->srcLineCnt, pInfo->dstLineLen, FALSE);
 	free(buffer);
 //	Error(LOG, 0, "File saved to >>%s<<", fname);

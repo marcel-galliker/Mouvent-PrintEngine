@@ -486,13 +486,13 @@ int  data_malloc(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPixel,
 		*pBufSize=0;
 		return REPLY_ERROR;
 	}
-	
+
 	/*
 	//--- clear buffer ----------------------------------------
 	{
 		for (i=0; i<MAX_COLORS; i++)
 		{
-			if (buffer[i]) memset(buffer[i], 0x00, *pBufSize);
+			if (buffer[i]) memset(buffer[i], 0x55, *pBufSize);
 		}
 	}
 	*/
@@ -655,8 +655,8 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 			else if (printMode!=PM_TEST && printMode!=PM_TEST_SINGLE_COLOR) jc_correction(&bmpInfo, &_PrintList[_InIdx], 0);
 		}
 		#ifdef DEBUG
-//		if (FALSE && loaded)
-		if (loaded)
+		if (FALSE && loaded)
+//		if (loaded)
 		{
 			int i;
 			char str[MAX_PATH];
@@ -666,7 +666,7 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 				if (buffer[i] && RX_ColorNameShort(bmpInfo.inkSupplyNo[i])[0]=='K')
 				{
 				//	sprintf(str, "%sPAGE_%d_%s.bmp", PATH_TEMP, id->page, RX_ColorNameShort(bmpInfo.inkSupplyNo[i]));
-					sprintf(str, "%sID_%d_%s.bmp", PATH_TEMP, id->id, RX_ColorNameShort(bmpInfo.inkSupplyNo[i]));
+					sprintf(str, "%sID_%d_%s.bmp", PATH_HOME PATH_RIPPED_DATA_DIR "trace/", id->id, RX_ColorNameShort(bmpInfo.inkSupplyNo[i]));
 				//	if (multiCopy > 2)
 				//		bmp_write(str, *bmpInfo.buffer[i], bmpInfo.bitsPerPixel, bmpInfo.srcWidthPx / multiCopy + 200, 2000, bmpInfo.lineLen, FALSE);
 				//	else					
@@ -977,13 +977,14 @@ static void *_multicopy_thread(void* lpParameter)
 			{
 				if (pBmpInfo->buffer[buf] && pBmpInfo->lengthPx>0)
 				{
-				//	(*pBmpInfo->buffer[buf])[32*srcLinelen] = 0xcc;
-				//	(*pBmpInfo->buffer[buf])[33*srcLinelen+srcLinelen-1] = 0xcc;
-				//	(*pBmpInfo->buffer[buf])[130*srcLinelen] = 0xcc;
-				//	(*pBmpInfo->buffer[buf])[131*srcLinelen+srcLinelen-1] = 0xcc;
+				//	(*pBmpInfo->buffer[buf])[(_WakeupLen-1)*srcLinelen] = 0xc0;
+				//	(*pBmpInfo->buffer[buf])[(_WakeupLen-2)*srcLinelen+pBmpInfo->srcWidthPx/4] = 0x03<<(2*(4-pBmpInfo->srcWidthPx%4));
+				//	(*pBmpInfo->buffer[buf])[(_WakeupLen-3)*srcLinelen+pBmpInfo->srcWidthPx/4] = 0x03<<6;
+				//	(*pBmpInfo->buffer[buf])[(_WakeupLen-4)*srcLinelen+pBmpInfo->srcWidthPx/4] = 0x03<<4;
+				//	(*pBmpInfo->buffer[buf])[(_WakeupLen-5)*srcLinelen+pBmpInfo->srcWidthPx/4] = 0x03<<2;
+				//	(*pBmpInfo->buffer[buf])[(_WakeupLen-6)*srcLinelen+pBmpInfo->srcWidthPx/4] = 0x03<<0;
 					BYTE *src = (*pBmpInfo->buffer[buf]) + (INT64)srcLinelen*pBmpInfo->lengthPx;
 					BYTE *dst = (*pBmpInfo->buffer[buf]) + (INT64)dstLineLen*pBmpInfo->lengthPx;
-
 					for (y=pBmpInfo->lengthPx; y>0; par->progress++)
 					{
 						y--;
@@ -1012,8 +1013,8 @@ static void *_multicopy_thread(void* lpParameter)
 						//--- 8 bit ---------------------
 						for (m=1; m<multiCopy; m++)
 						{
-							int shl = (m*8)/multiCopy;
-							int shr = 8-shl;
+							int shr = (m*pBmpInfo->srcWidthPx*pBmpInfo->bitsPerPixel)%8;
+							int shl = 8-shr;
 							UINT8 *s8 = (UINT8*)dst;
 							UINT8 *d8 = (UINT8*)(dst + (m*pBmpInfo->srcWidthPx*pBmpInfo->bitsPerPixel)/8);
 							UINT8 data=0;
@@ -1581,6 +1582,8 @@ static void _data_fill_blk_scan(SBmpSplitInfo *psplit, int blkNo, BYTE *dst)
 		
 	start = start%psplit->srcLineLen;
 
+
+//	printf("head=%d, blkNo=%d, dstLen=%d\n", psplit->head, blkNo, dstLen);
 	while (size<RX_Spooler.dataBlkSize && line!=endLine)
 	{
 		//--- each line ---------------------
@@ -1592,12 +1595,15 @@ static void _data_fill_blk_scan(SBmpSplitInfo *psplit, int blkNo, BYTE *dst)
 				else l=0;
 			}
 			else l=fillLen;
+			if (l>dstLen) 
+				l=dstLen;
 			if (size+l>=RX_Spooler.dataBlkSize) 
 			{
 				memset(&dst[size], 0x00, RX_Spooler.dataBlkSize-size);
 				return;
 			}
 			memset(&dst[size], 0x00, l);
+	//		printf("head=%d, blkNo=%d, fill(%d, %d), dstLen=%d\n", psplit->head, blkNo, size, l, dstLen-l);
 			size   += l;
 			dstLen -= l;
 			if (size==0) start = (x-fillLen)%psplit->srcLineLen; // first line
@@ -1628,6 +1634,7 @@ static void _data_fill_blk_scan(SBmpSplitInfo *psplit, int blkNo, BYTE *dst)
 				l = srcLen-len;
 				if (l > srcWidthBt) l = srcWidthBt;
 				memcpy(&dst[size+len], src+start, l);
+			//	printf("head=%d, blkNo=%d, memcpy(%d, %d), size=%d\n", psplit->head, blkNo, size+len, l, size+len+l);
 			//	dst[size+len] = 0x3C; // TEST
 				start=0;
 				srcWidthBt = psplit->srcWidthBt;
