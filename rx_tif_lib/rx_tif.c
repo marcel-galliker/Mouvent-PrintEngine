@@ -43,6 +43,7 @@ typedef struct
 	BYTE	   *buffer;
 	int			y_from;
 	int			y_to;
+	int			gap;
 	int			y;
 	HANDLE		sem_start;
 } STifThreadPar;
@@ -328,6 +329,7 @@ int tif_load_mt(SPageId *id, const char *filedir, const char *filename, int prin
 				_ThreadPar[i].buffer   = buffer[c];
 				_ThreadPar[i].y_from   = y;
 				_ThreadPar[i].y_to	   = y+h;
+				_ThreadPar[i].gap	   = spacePx;
 				y += h;
 			}
 			_ThreadPar[threadCnt-1].y_to =height;				
@@ -423,6 +425,7 @@ int tif_load(SPageId *id, const char *filedir, const char *filename, int printMo
 			ppar->buffer   = buffer[c]+wakeupLen*lineLen;
 			ppar->y_from   = psplit[c].firstLine;
 			ppar->y_to	   = height;
+			ppar->gap	   = spacePx;	
 			pinfo->colorCnt++;
 			
 			threadCnt++;
@@ -501,7 +504,7 @@ static void *_tif_read_thread(void* lpParameter)
 			
 			if(file)
 			{				
-				srcLen				= (par->pinfo->srcWidthPx*par->pinfo->bitsPerPixel + 7) / 8; 			
+				srcLen				= ((par->pinfo->srcWidthPx-par->gap)*par->pinfo->bitsPerPixel + 7) / 8; 			
 				spaceLen			= par->pinfo->lineLen - srcLen;
 				dst					= par->buffer + (par->y_from*par->pinfo->lineLen);				
 								
