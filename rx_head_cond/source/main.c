@@ -25,7 +25,6 @@
 #include "uart.h"
 #include <stdio.h>
 #include "pid.h"
-#include "work_flash_operation.h"
 #include "gpio/gpio.h"
 #include "watchdog.h"
 #include "temp_ctrl.h"
