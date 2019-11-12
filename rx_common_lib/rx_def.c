@@ -193,7 +193,6 @@ int rx_def_use_pq(EPrinterType printerType)
 	case printer_test_table:		return FALSE;
 	case printer_test_slide:		return FALSE;
 	case printer_test_slide_only:	return FALSE;
-//	case printer_LH702:				return FALSE;
 	default: return TRUE;
 	}
 }

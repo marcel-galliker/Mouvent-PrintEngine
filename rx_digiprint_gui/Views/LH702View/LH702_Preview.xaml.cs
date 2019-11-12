@@ -22,12 +22,47 @@ namespace RX_DigiPrint.Views.LH702View
     /// Interaction logic for LH702_preview.xaml
     /// </summary>
     public partial class LH702_Preview : UserControl
-    {
+    {   
+        private int _selected;
+
         public LH702_Preview()
         {
             InitializeComponent();
         }
+        //--- Property ImgSettings ---------------------------------------
+        private LH702_ImgSettings _ImgSettings;
+        public LH702_ImgSettings  ImgSettings
+        {
+            set { _ImgSettings = value; }
+        }
 
+        public void UpdateSettings()
+        {
+            switch(_selected)
+            {
+            case 1: _ImgSettings.DataContext = DataContext; break;
+            case 2: _ImgSettings.DataContext = _Next;       break;
+            }
+            _ImgSettings.CanDelete = (_selected==2);
+        }
+     
+        //--- Property Next ---------------------------------------
+        private PrintQueueItem _Next;
+        public PrintQueueItem Next
+        {
+            set 
+            {
+                NextImage.DataContext = _Next = value;
+                if (_Next==null)
+                {
+                    NextBorder.Visibility = NextImage.Visibility = Visibility.Collapsed;
+                    if (_selected==2) Image_Clicked(null, null);
+                }
+                else 
+                    NextBorder.Visibility = NextImage.Visibility = Visibility.Visible;
+            }
+        }
+        
         //--- Property Source ------------------------------------------
         public ImageSource Source
         {
@@ -58,7 +93,8 @@ namespace RX_DigiPrint.Views.LH702View
             MainGrid.Clip = geometry;
 
 //          Image.Height = ActualHeight-50;
-            Image.Width  = ActualHeight-50;
+            Image.Width     = ActualHeight-50;
+            NextImage.Width = ActualHeight-50;
 
             //--- direction --------------------------------------------------------
             Canvas.SetLeft(Direction,  (ActualWidth-Direction.ActualWidth)/2);
@@ -72,11 +108,11 @@ namespace RX_DigiPrint.Views.LH702View
             MainGrid.Children.Add(new Line(){X1=x1, Y1=y, X2=x1,   Y2=y-h, Stroke=Brushes.Black});
             MainGrid.Children.Add(new Line(){X1=x2, Y1=y, X2=x2,   Y2=y-h, Stroke=Brushes.Black});
             MainGrid.Children.Add(new Line(){X1=x1, Y1=y-h/2, X2=x2, Y2=y-h/2,  Stroke=Brushes.Black});
-            TextBlock text=new TextBlock(){Text=((char)(0x80+number)).ToString(), FontFamily=new FontFamily("Wingdings") };
-            Canvas.SetLeft(text, (x1+x2)/2-5);
-            if (h>0) Canvas.SetTop(text, y-21);
-            else     Canvas.SetTop(text, y+5);
-            MainGrid.Children.Add(text);
+        //  TextBlock text=new TextBlock(){Text=((char)(0x80+number)).ToString(), FontFamily=new FontFamily("Wingdings") };
+        //  Canvas.SetLeft(text, (x1+x2)/2-5);
+        //  if (h>0) Canvas.SetTop(text, y-21);
+        //  else     Canvas.SetTop(text, y+5);
+        //  MainGrid.Children.Add(text);
         }
 
         //--- addLineV ----------------------------------------------------------------------------------
@@ -85,10 +121,10 @@ namespace RX_DigiPrint.Views.LH702View
             MainGrid.Children.Add(new Line(){X1=x, Y1=y1, X2=x+10,   Y2=y1, Stroke=Brushes.Black});
             MainGrid.Children.Add(new Line(){X1=x, Y1=y2, X2=x+10,   Y2=y2, Stroke=Brushes.Black});
             MainGrid.Children.Add(new Line(){X1=x+5, Y1=y1, X2=x+5,  Y2=y2,  Stroke=Brushes.Black});
-            TextBlock text=new TextBlock(){Text=((char)(0x80+number)).ToString(), FontFamily=new FontFamily("Wingdings") };
-            Canvas.SetLeft(text, x+7);
-            Canvas.SetTop(text, (y1+y2)/2-10);
-            MainGrid.Children.Add(text);
+        //  TextBlock text=new TextBlock(){Text=((char)(0x80+number)).ToString(), FontFamily=new FontFamily("Wingdings") };
+        //  Canvas.SetLeft(text, x+7);
+        //  Canvas.SetTop(text, (y1+y2)/2-10);
+        //  MainGrid.Children.Add(text);
         }
 
         private int FirstMesurementChild=0;
@@ -103,10 +139,8 @@ namespace RX_DigiPrint.Views.LH702View
             }
             FirstMesurementChild = MainGrid.Children.Count;
 
-            Border border = sender as Border;
-
-            double x = Canvas.GetLeft(border)+e.NewSize.Width;
-            double b = Canvas.GetTop(border)+border.ActualHeight;
+            double x = Canvas.GetLeft(Border)+e.NewSize.Width;
+            double b = Canvas.GetTop(Border)+Border.ActualHeight;
 
             Canvas.SetLeft(PrintMark, x+100);
             Canvas.SetTop (PrintMark, 20);
@@ -114,12 +148,16 @@ namespace RX_DigiPrint.Views.LH702View
             double left=Canvas.GetLeft(PrintMark);
             addLineV(x, b, MainGrid.ActualHeight, 1);
             addLineH(x, left-2, 30, 10, 2);
+
+            //--- Next --------------------------------------
+            Canvas.SetLeft(NextBorder, left+20);
         }
 
         //--- MoveUp_Clicked --------------------------------------
         private void MoveUp_Clicked(object sender, RoutedEventArgs e)
         {
-            if (RxGlobals.PrintingItem!=null)
+            PrintQueueItem item = DataContext as PrintQueueItem;
+            if (item!=null)
             {
                 RxButton button = sender as RxButton;
                 button.IsChecked = true;
@@ -127,8 +165,8 @@ namespace RX_DigiPrint.Views.LH702View
                 RxNumPad pad = new RxNumPad(MoveUp);
                 if((bool)pad.ShowDialog())
                 {
-                    RxGlobals.PrintingItem.PageMargin += Rx.StrToDouble(pad.Result);
-                    RxGlobals.PrintingItem.SendMsg(TcpIp.EVT_SET_PRINT_QUEUE);
+                    item.PageMargin += Rx.StrToDouble(pad.Result);
+                    item.SendMsg(TcpIp.EVT_SET_PRINT_QUEUE);
                 }
                 button.IsChecked = false;
             }
@@ -137,7 +175,8 @@ namespace RX_DigiPrint.Views.LH702View
         //--- MoveLeft_Clicked --------------------------------------
         private void MoveLeft_Clicked(object sender, RoutedEventArgs e)
         {
-            if (RxGlobals.PrintingItem!=null)
+            PrintQueueItem item = DataContext as PrintQueueItem;
+            if (item!=null)
             {
                 RxButton button = sender as RxButton;
                 button.IsChecked = true;
@@ -145,11 +184,29 @@ namespace RX_DigiPrint.Views.LH702View
                 RxNumPad pad = new RxNumPad(MoveLeft);
                 if((bool)pad.ShowDialog())
                 {
-                    RxGlobals.PrintingItem.PrintGoDist += Rx.StrToDouble(pad.Result);
-                    RxGlobals.PrintingItem.SendMsg(TcpIp.EVT_SET_PRINT_QUEUE);
+                    item.PrintGoDist += Rx.StrToDouble(pad.Result);
+                    item.SendMsg(TcpIp.EVT_SET_PRINT_QUEUE);
                 }
                 button.IsChecked = false;
             }
+        }
+
+        //--- Image_Clicked --------------------------------------
+        private void Image_Clicked(object sender, MouseButtonEventArgs e)
+        {
+            NextBorder.BorderBrush = Application.Current.Resources["RX.Green"] as Brush;
+            Border.BorderBrush     = Brushes.Blue;
+            _selected = 1;
+            UpdateSettings();
+        }
+
+        //--- NextImage_Clicked ------------------------------------
+        private void NextImage_Clicked(object sender, MouseButtonEventArgs e)
+        {
+            Border.BorderBrush     = Application.Current.Resources["RX.Green"] as Brush;
+            NextBorder.BorderBrush = Brushes.Blue;
+            _selected = 2;
+            UpdateSettings();
         }
 
     }

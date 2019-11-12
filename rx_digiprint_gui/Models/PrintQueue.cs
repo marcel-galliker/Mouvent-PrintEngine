@@ -55,21 +55,21 @@ namespace RX_DigiPrint.Models
             if (item.State==EPQState.queued)   
             {
                 if (_removeFromList (_Printed, item)) RxBindable.Invoke(() => _Queue.Add(item));
+                else if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LH702)
+                {
+                    if (_Queue.Count>0) RxBindable.Invoke(()=> _Queue[0] = item);
+                    else _addToList(_Queue,   item, top);
+                } 
                 else _addToList(_Queue,   item, top);
                 if (_Queue.Count()==1) item.SendBtProdState();
-                RxGlobals.NextItem = item;
                 if (RxGlobals.PrintQueueChanged!=null) RxBindable.Invoke(()=>RxGlobals.PrintQueueChanged());
             }
             else
             { 
                 _removeFromList (_Queue,   item);
                 _updateList     (_Printed, item);
-                if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LH702)
-                {
-                    RxGlobals.PrintingItem = _Printed[0];
-                    if (RxGlobals.PrintQueueChanged!=null) RxBindable.Invoke(()=>RxGlobals.PrintQueueChanged());
-                }
                 item.SendBtProdState();
+                if (RxGlobals.PrintQueueChanged!=null) RxBindable.Invoke(()=>RxGlobals.PrintQueueChanged());
             }
         }
 
@@ -80,7 +80,8 @@ namespace RX_DigiPrint.Models
             {
                 if (item==null) _Queue.Clear();
                 else _removeFromList(_Queue, item);
-                if (_Queue.Count()==0) new PrintQueueItem().SendBtProdState(); 
+                if (_Queue.Count()==0) new PrintQueueItem().SendBtProdState();
+                if (RxGlobals.PrintQueueChanged!=null) RxGlobals.PrintQueueChanged();
             });
         }
 

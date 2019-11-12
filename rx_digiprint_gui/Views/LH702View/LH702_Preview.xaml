@@ -27,18 +27,45 @@
                 MinHeight="100"
                 SizeChanged="Border_SizeChanged"
                 >
+                <Grid MouseUp="Image_Clicked">
                     <Image 
                     x:Name="Image"
                     Source="{Binding Preview}"
                     RenderTransformOrigin="0.5,0.5"
+                    MouseUp="Image_Clicked"
                     >
-                    <Image.LayoutTransform>
-                        <RotateTransform Angle="90"/>
-                    </Image.LayoutTransform>
-                </Image>
+                        <Image.LayoutTransform>
+                            <RotateTransform Angle="90"/>
+                        </Image.LayoutTransform>
+                    </Image>
+                    <TextBlock Text="Printing" HorizontalAlignment="Center" Margin="19,-32,19,0" FontSize="{StaticResource FontSizeLarge}"/>
+                </Grid>
 
             </Border>
             <Rectangle x:Name="PrintMark" Fill="Black" Width="5" Height="20"/>
+
+            <Border x:Name="NextBorder"                
+                Canvas.Left="250"
+                Canvas.Top="25"
+                BorderBrush="{StaticResource RX.Green}"
+                BorderThickness="3"
+                MinWidth="100"
+                MinHeight="100"
+                >
+                <Grid>
+                    <Image 
+                    x:Name="NextImage"
+                    Source="{Binding Preview}"
+                    RenderTransformOrigin="0.5,0.5"
+                    MouseUp="NextImage_Clicked"
+                    >
+                        <Image.LayoutTransform>
+                            <RotateTransform Angle="90"/>
+                        </Image.LayoutTransform>
+                    </Image>
+                    <TextBlock Text="Next" HorizontalAlignment="Center" Margin="0,-32,0,0" FontSize="{StaticResource FontSizeLarge}"/>
+                </Grid>
+            </Border>
 
         </Canvas>
         
@@ -47,17 +74,14 @@
             <Grid HorizontalAlignment="Left">
                 <TextBox x:Name="MoveLeft" Visibility="Hidden"/>
                 <common:RxButton  Click="MoveLeft_Clicked">
-                    <TextBlock Text="çè" FontFamily="Wingdings" FontSize="{StaticResource FontSizeXL}"/>
+                    <TextBlock Text="ó" FontFamily="Wingdings" FontSize="{StaticResource FontSizeXL}"/>
                 </common:RxButton>
             </Grid>
 
             <Grid HorizontalAlignment="Right">
                 <TextBox x:Name="MoveUp" Visibility="Hidden"/>
                 <common:RxButton Click="MoveUp_Clicked">
-                    <StackPanel>
-                        <TextBlock Text="é" FontFamily="Wingdings" FontSize="{StaticResource FontSizeXL}"/>
-                        <TextBlock Text="ê" FontFamily="Wingdings" FontSize="{StaticResource FontSizeXL}"/>
-                    </StackPanel>
+                    <TextBlock Text="ô" FontFamily="Wingdings" FontSize="{StaticResource FontSizeXL}"/>
                 </common:RxButton>
             </Grid>
         </StackPanel>

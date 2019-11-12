@@ -145,7 +145,7 @@
                             </DataTemplate>
                         </ig:TemplateColumn.ItemTemplate>
                     </ig:TemplateColumn>
-                    <ig:TextColumn Key="FileName"       HeaderText="File"    Width="auto" />
+                    <ig:TextColumn Key="FileName"       HeaderText="File"    Width="auto" ValueConverter="{StaticResource FileName_Converter}"/>
                     <ig:TextColumn Key="PageStr"        HeaderText="Pages"   Width="auto" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
                     <ig:TemplateColumn Key="Copies" HeaderText="Copies">
                         <ig:TemplateColumn.ItemTemplate>
@@ -257,7 +257,7 @@
                 </ig:XamGrid.RowSelectorSettings>
                 <ig:XamGrid.Columns>
                     <ig:TextColumn Key="ID"         HeaderText="ID"             Width="auto"/>
-                    <ig:TextColumn Key="FileName"   HeaderText="File"           Width="auto"/>
+                    <ig:TextColumn Key="FileName"   HeaderText="File"           Width="auto" ValueConverter="{StaticResource FileName_Converter}"/>
                     <ig:TextColumn Key="PageStr"    HeaderText="Pages"          Width="auto" HorizontalContentAlignment="Right"/>
                     <ig:TemplateColumn Key="Copies" HeaderText="Copies">
                         <ig:TemplateColumn.ItemTemplate>

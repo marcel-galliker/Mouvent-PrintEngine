@@ -31,6 +31,7 @@ namespace RX_DigiPrint.Views.LH702View
                     Grid.SetRowSpan(FileOpen, 3);
                     FileOpen.IsVisibleChanged += FileOpen_IsVisibleChanged;
                     MainGrid.Children.Add(FileOpen);
+                    Preview.ImgSettings = ImgSettings;
                 });
             }).Start();
 
@@ -51,8 +52,16 @@ namespace RX_DigiPrint.Views.LH702View
 
         //--- _PrintQueueChanged ---------------------------
         private void _PrintQueueChanged()
-        {
-            Preview.DataContext = RxGlobals.NextItem;
+        {           
+            Preview.DataContext = (RxGlobals.PrintQueue.Printed.Count>0) ? RxGlobals.PrintQueue.Printed[0] : null;
+            
+            if (RxGlobals.PrintQueue.Queue.Count>0 && (RxGlobals.PrintQueue.Printed.Count==0 || RxGlobals.PrintQueue.Queue[0].ID != RxGlobals.PrintQueue.Printed[0].ID))
+            {
+                Preview.Next =  RxGlobals.PrintQueue.Queue[0];        
+            }
+            else Preview.Next = null;
+
+            Preview.UpdateSettings();
         }
 
         //--- Preview_Loaded ------------------------------

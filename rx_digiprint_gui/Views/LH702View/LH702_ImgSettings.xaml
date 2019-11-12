@@ -10,9 +10,9 @@
              xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
              xmlns:local="clr-namespace:RX_DigiPrint.Views.LH702View"
              mc:Ignorable="d"
-             Width="500"
              d:DesignHeight="700" 
              d:DesignWidth="600"
+             DataContextChanged="_DataContextChanged"
              >
     <UserControl.Resources>
         <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">32</sys:Double>
@@ -34,7 +34,7 @@
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="0"/>
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="auto"/>
@@ -42,57 +42,43 @@
                 </Grid.RowDefinitions>
                 
                 <TextBlock Grid.Row="0" Grid.Column="0" Text="Image"/>
-                <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="10"
-			        Text="{Binding FilePath}"
+                <TextBlock Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="10"
+			        Text="{Binding FilePath, Converter={StaticResource FileName_Converter}}"
 			        Background="Transparent"
                     VerticalAlignment="Center"
                     />
-
-                <StackPanel  Grid.Row="2" Grid.Column="0" Orientation="Horizontal">
-                    <TextBlock Text="Margin"/>
-                    <TextBlock Text=" " FontFamily="Wingdings"/>
-                </StackPanel>
-                <common:RxNumBox Grid.Row="2" Grid.Column="1"
-			        Text="{Binding PageMargin}"
-			        HorizontalContentAlignment="Right"
-			        Background="Transparent"
-                    VerticalAlignment="Center"
-                    LostFocus="PageMargin_LostFocus"
-                    />
-                <TextBlock Grid.Row="2" Grid.Column="2" Text="mm" FontSize="{StaticResource FontSizeStd}" Padding="3,0,0,0" VerticalAlignment="Center"/>
-
-                <TextBlock Grid.Row="3" Grid.Column="0" Text="PrintGo"/>
+                
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="PrintGo"/>
                 <rx:RxComboBox x:Name="CB_PrintGoMode"
-                    Grid.Row="3" Grid.Column="1"
+                    Grid.Row="2" Grid.Column="1"
                     SelectedValue="{Binding PrintGoMode}"
                     ImageBox="true"
                     >
                 </rx:RxComboBox>
-                
-                <StackPanel  Grid.Row="4" Grid.Column="0" Orientation="Horizontal">
-                    <TextBlock Text="Distance"/>
-                    <TextBlock Text=" " FontFamily="Wingdings"/>
-                </StackPanel>
-                <common:RxNumBox Grid.Row="4" Grid.Column="1" 
+
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="Distance"/>
+                <common:RxNumBox Grid.Row="3" Grid.Column="1" 
 			        Text="{Binding PrintGoDist}"
 			        HorizontalContentAlignment="Right"
 			        Background="Transparent"
                     VerticalAlignment="Center"
                     />
+                <TextBlock Grid.Row="3" Grid.Column="2" Text="mm" FontSize="{StaticResource FontSizeStd}" Padding="3,0,0,0" VerticalAlignment="Center"/>
+
+                <TextBlock Grid.Row="4" Grid.Column="0" Text="Lateral"/>
+                <common:RxNumBox Grid.Row="4" Grid.Column="1"
+			        Text="{Binding PageMargin}"
+			        HorizontalContentAlignment="Right"
+			        Background="Transparent"                    VerticalAlignment="Center"
+                    LostFocus="PageMargin_LostFocus"
+                    />
                 <TextBlock Grid.Row="4" Grid.Column="2" Text="mm" FontSize="{StaticResource FontSizeStd}" Padding="3,0,0,0" VerticalAlignment="Center"/>
                 
-                <TextBlock Grid.Row="5" Grid.Column="0" Text="Speed"/>
-                <rx:RxComboBox x:Name="CB_Speed"
-                    Grid.Row="5" Grid.Column="1"
-                    SelectedValue="{Binding Speed}"
-                    HorizontalContentAlignment="Right"
-                    />
-                <TextBlock Grid.Row="5" Grid.Column="2" Text="m/Min" FontSize="{StaticResource FontSizeStd}" Padding="3,0,0,0" VerticalAlignment="Center"/>
+                
             </Grid>
 
-            <Grid Grid.Row="3">
+            <Grid Grid.Row="3" Width="250" HorizontalAlignment="Left">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
@@ -102,8 +88,12 @@
                     <Image Source="{StaticResource Yes_ico}"/>
                 </common:RxButton>
 
-                <common:RxButton Grid.Column="2" Click="Reload_Clicked" Height="40">
+                <common:RxButton Grid.Column="1" Click="Reload_Clicked" Height="40">
                     <Image Source="../../Resources/Bitmaps/Refresh.ico"/>
+                </common:RxButton>
+
+                <common:RxButton Grid.Column="2" Click="Delete_Clicked" Height="40" x:Name="ButtonDelete">
+                    <Image Source="{StaticResource delete_ico}"/>
                 </common:RxButton>
             </Grid>
         </Grid>

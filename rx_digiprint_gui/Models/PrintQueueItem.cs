@@ -1070,6 +1070,8 @@ namespace RX_DigiPrint.Models
             if (PageNumber != null) PageNumber.ToMsg(ref msg.item.pageNumber);
 
             RxGlobals.RxInterface.SendMsg(msgId, ref msg);
+
+            if (msgId==TcpIp.CMD_SET_PRINT_QUEUE) Changed=false;
         }
 
         //--- SendBtProdState ---------------------------------------

@@ -2,6 +2,7 @@
 using RX_DigiPrint.Models;
 using RX_DigiPrint.Models.Enums;
 using RX_DigiPrint.Services;
+using System;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -15,30 +16,53 @@ namespace RX_DigiPrint.Views.LH702View
     /// </summary>
     public partial class LH702_ImgSettings : UserControl
     {
+        private PrintQueueItem _Item;
+
         public LH702_ImgSettings()
         {
             InitializeComponent();
 
             CB_PrintGoMode.ItemsSource  = new EN_PgModeList();
-            RxGlobals.PrintQueueChanged += _PrintQueueChanged;
         }
 
-        private void _PrintQueueChanged()
+        //--- Property CanDelete ---------------------------------------
+        public bool CanDelete
         {
-            CB_Speed.ItemsSource = RxGlobals.PrintSystem.SpeedList(RxGlobals.PrintingItem.LargestDot, RxGlobals.PrintingItem.SrcHeight);
-            this.DataContext = RxGlobals.PrintingItem;
+            set 
+            { 
+                if (value) ButtonDelete.Visibility = Visibility.Visible;
+                else       ButtonDelete.Visibility = Visibility.Collapsed;
+            }
+        }
+        
+        //--- _DataContextChanged -
+        private void _DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            _Item = DataContext as PrintQueueItem;
         }
 
         //--- Save_Clicked ---------------------------------------------
         private void Save_Clicked(object sender, RoutedEventArgs e)
         {
-            RxGlobals.PrintingItem.SendMsg(TcpIp.CMD_SET_PRINT_QUEUE);
+            if (_Item!=null) _Item.SendMsg(TcpIp.CMD_SET_PRINT_QUEUE);
         }
 
         //--- Reload_Clicked ---------------------------------------------
         private void Reload_Clicked(object sender, RoutedEventArgs e)
         {
-            if (RxGlobals.PrintingItem!=null) RxGlobals.PrintingItem.SendMsg(TcpIp.CMD_GET_PRINT_QUEUE_ITM);
+            if (_Item!=null) _Item.SendMsg(TcpIp.CMD_GET_PRINT_QUEUE_ITM);
+        }
+
+        //--- Delete_Clicked ---------------------------------------------
+        private void Delete_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (_Item!=null)
+            {
+                if (RxMessageBox.YesNo("Delete", "Delete the Items",  MessageBoxImage.Question, false))
+                {
+                    _Item.SendMsg(TcpIp.CMD_DEL_PRINT_QUEUE);
+                }
+            }
         }
 
         //--- Grid_Loaded -------------------------
@@ -59,11 +83,11 @@ namespace RX_DigiPrint.Views.LH702View
         //--- PageMargin_LostFocus -----------------------------------------------------------
         private void PageMargin_LostFocus(object sender, RoutedEventArgs e)
         {
-            if (RxGlobals.PrinterStatus.PrintState==EPrintState.ps_printing && RxGlobals.PrintingItem!=null)
+            if (RxGlobals.PrinterStatus.PrintState==EPrintState.ps_printing && _Item!=null)
             {
                 RxNumBox ctrl = e.Source as RxNumBox;
-                RxGlobals.PrintingItem.PageMargin = ctrl.Value;
-                RxGlobals.PrintingItem.SendMsg(TcpIp.EVT_SET_PRINT_QUEUE);       
+                _Item.PageMargin = ctrl.Value;
+                _Item.SendMsg(TcpIp.EVT_SET_PRINT_QUEUE);       
             }
         }
 

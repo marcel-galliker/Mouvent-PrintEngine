@@ -320,19 +320,13 @@ static int _prepare_config()
 	// TX801: CORR_LINEAR: Board[0].Head[0] nearest to Encoder[1]
 	if (!arg_simuPLC)
 	{
-		if(RX_Config.printer.type==printer_TX801 || RX_Config.printer.type==printer_TX802)
+		if(rx_def_is_tx(RX_Config.printer.type) && RX_Config.headsPerColor)
 		{
-			int h=0;
-			for (head=0, color=0, h=0; color<8; head++)
+			for (head=0; color<8; head++)
 			{
-				RX_Config.headBoard[head/MAX_HEADS_BOARD].head[head%MAX_HEADS_BOARD].encoderNo = 7-color;
-				if (++h==RX_Config.headsPerColor)
-				{
-					color++;
-					h=0;
-				}
+				RX_Config.headBoard[head/MAX_HEADS_BOARD].head[head%MAX_HEADS_BOARD].encoderNo = 7-(head/RX_Config.headsPerColor);
 			}
-		}		
+		}
 	}
 	
 	chiller_set_temp(chillerTemp, maxTemp);
@@ -501,6 +495,8 @@ static void _headboard_config(int colorCnt, int headsPerColor, int ethPortCnt)
 			pBoard->head[i].dist	  = RX_Config.headDist[board*MAX_HEADS_BOARD+i];			
 			if (rx_def_is_web(RX_Config.printer.type))	pBoard->head[i].distBack = pBoard->head[i].dist;
 			else										pBoard->head[i].distBack = 5000+RX_Config.headDistBack[board*MAX_HEADS_BOARD+i]-pBoard->head[i].dist;
+			
+			TrPrintfL(TRUE, "Head[%d]: dist=%06d  distback=%06d", board*MAX_HEADS_BOARD+i, pBoard->head[i].dist, pBoard->head[i].distBack);
 			
 			pBoard->head[i].headHeight= RX_Config.stepper.print_height;
 			memcpy(&pBoard->head[i].cond, &RX_Config.cond[board*MAX_HEADS_BOARD+i], sizeof(SConditionerCfg));

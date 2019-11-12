@@ -23,6 +23,7 @@ namespace RX_Common
         public static Dispatcher Dispatcher
         {
             set { _Dispatcher= value; }
+            get { return _Dispatcher; }
         }
 
         //--- Invoke -------------------------

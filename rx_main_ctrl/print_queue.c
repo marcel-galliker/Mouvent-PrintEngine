@@ -232,6 +232,12 @@ int pq_stop(void)
 	
 	ctr_save();
 	
+	if (RX_Config.printer.type==printer_LH702)
+	{
+		for (i=0; i<_Size; i++)
+			if (_List[i].state == PQ_STATE_QUEUED) return REPLY_OK;
+	}
+	
 	for (i=_Size-1; i>=0;  i--)
 	{
 		if (_List[i].state==PQ_STATE_STOPPING) 
@@ -302,9 +308,28 @@ SPrintQueueItem *pq_get_item_n(int i)
 	return NULL;
 }
 
+//--- pq_get_next_item_LH702 ------------------------------------
+SPrintQueueItem *pq_get_next_item_LH702(void)
+{
+	for(int item=0; item<_Size; item++)
+	{
+		if (_List[item].state==PQ_STATE_QUEUED && _List[item].scanLength>0)
+		{
+			_List[item].lengthUnit = PQ_LENGTH_COPIES;
+			_List[item].copies = 1000000;
+			_ActiveState = _List[item].state;
+			Error(LOG, 0, "Next Image >>%s<<", _List[item].filepath);
+			return &_List[item];
+		}
+	}
+	return NULL;
+}
+
 //--- pq_get_next_item ---------------------------------------------------------
 SPrintQueueItem *pq_get_next_item(void)
 {
+	if (RX_Config.printer.type==printer_LH702) return pq_get_next_item_LH702();
+	
 	int slide=!rx_def_use_pq(RX_Config.printer.type);
 	if (slide && _Item>0) return NULL;
 
@@ -331,9 +356,9 @@ static void _load_variable_info(SPrintQueueItem *pitem)
 
 //--- pq_add_item --------------------------------------------------------------
 SPrintQueueItem *pq_add_item(SPrintQueueItem *pitem)
-{
+{	
 	SPrintQueueItem *ret;
-
+	
 	//--- remove latest printed item ---
 	if (_Size>=SIZEOF(_List))
 	{
@@ -354,11 +379,23 @@ SPrintQueueItem *pq_add_item(SPrintQueueItem *pitem)
 		pitem->id.id = ++_ID;
 		pitem->state = PQ_STATE_QUEUED;
 		TrPrintf(TRUE, "pq_add_item id=%d, >>%s<< pages: %d..%d copies=%d", pitem->id, pitem->filepath, pitem->firstPage, pitem->lastPage, pitem->copies);
+		if (RX_Config.printer.type==printer_LH702)
+		{
+			int idx;
+			for (idx=0; idx<_Size; idx++)
+			{
+				if (_List[idx].state==PQ_STATE_QUEUED)
+				{
+					memcpy(&_List[idx], pitem, sizeof(_List[idx]));
+					return &_List[idx];						
+				}
+			};
+		}
 		ret = &_List[_Size];
-		memcpy(&_List[_Size], pitem, sizeof(_List[0]));
+		memcpy(&_List[_Size], pitem, sizeof(_List[_Size]));
+		_Size++;
 //		char datapath[MAX_PATH];
 //		esrip_file_ripped(ret, datapath, sizeof(datapath));
-		_Size++;
 		pc_print_next();
 		return ret;
 	}

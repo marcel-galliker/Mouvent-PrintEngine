@@ -205,7 +205,7 @@ int main(int argc, char* argv[])
 	
 	if (!strcmp(RX_Hostname, "TEST-0001"))
 	{
-		arg_simuPLC			= FALSE;
+		arg_simuPLC			= TRUE;
 		arg_simuEncoder		= TRUE;
 		arg_simuHeads		= TRUE;
 		arg_simuChiller		= TRUE;	

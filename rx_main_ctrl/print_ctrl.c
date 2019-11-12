@@ -588,7 +588,7 @@ static int _print_next(void)
 					TrPrintf(TRUE, "Document sent >>%s<<, copiesTotal=%d, _CopiesStart=%d", _Item.filepath, _Item.copiesTotal, _CopiesStart);
 					memset(&_Item, 0, sizeof(_Item));
 					return REPLY_OK;				
-				}
+				}					
 			}
 			_first = FALSE;
 

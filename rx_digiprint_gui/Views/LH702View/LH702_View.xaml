@@ -62,12 +62,12 @@
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="auto"/>
-                        <ColumnDefinition Width="auto"/>
                         <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="auto"/>
                     </Grid.ColumnDefinitions>
 
-                   <!-- <local:LH702_ImgSettings Grid.Column="0"/> -->
-                    <local:LH702_Par Grid.Column="1"/>
+                    <local:LH702_Par Grid.Column="0"  Width="300"/>
+                    <local:LH702_ImgSettings Grid.Column="1" x:Name="ImgSettings" HorizontalAlignment="Stretch"/>
                     <rx_uc:CleaningView Grid.Column="2" Width="250" HorizontalAlignment="Right"/>
                 </Grid>
                 
