@@ -285,7 +285,7 @@ void  fpga_main(int ticks, int menu, int showCorrection, int showParam)
 		_uv_ctrl();
 		_pg_ctrl();
 		_corr_ctrl();
-	//	_simu_markreader();
+		_simu_markreader();
 		/*
 		{
 			static int _in=0;
@@ -1152,7 +1152,7 @@ static int _direction_ctrl(void)
 		if (backwards<=1 && RX_EncoderStatus.info.backwards != backwards)
 		{
 			RX_EncoderStatus.info.backwards = backwards;
-	//		Error(LOG, 0, "Encoder pos=%d backwards=%d", pos, RX_EncoderStatus.info.backwards);
+		//	Error(LOG, 0, "Encoder pos=%d backwards=%d", pos, RX_EncoderStatus.info.backwards);
 			return TRUE;		
 		}		
 	}
@@ -1513,7 +1513,8 @@ static void _fpga_display_status(int showCorrection, int showParam)
 			term_printf("input status     "); for (i=0; i<cnt; i++) term_printf("____%d____  ", i);								term_printf("\n");
 			term_printf("  position:      "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encIn[i].position);		term_printf("\n");
 			term_printf("  pg_start_pos:  "); for (i=0; i<1; i++)   term_printf("%09d  ", Fpga->stat.encOut[0].pg_start_pos);	term_printf("\n");
-			term_printf("  diff:          "); for (i=0; i<1; i++)   term_printf("%09d  ", Fpga->stat.encOut[0].pg_start_pos-Fpga->stat.encIn[i].position);	term_printf("\n");
+			term_printf("  diff:          "); for (i=0; i<1; i++)   term_printf("%09d  ", Fpga->stat.encOut[0].pg_start_pos-Fpga->stat.encIn[i].position);	
+			term_printf("Backwards: %d\n", RX_EncoderStatus.info.backwards);
 			
 			term_printf("  pos_pg_fwd:    "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->cfg.pg[i].pos_pg_fwd);			term_printf("\n");
 	//		term_printf("  StepTime:      "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encIn[i].step_time);		term_printf("\n");
