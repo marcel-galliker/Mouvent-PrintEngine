@@ -78,6 +78,7 @@ int  data_load		(SPageId *id, const char *filepath, int offsetPx, int lengthPx, 
 int  data_same		(SPageId *id);
 // int  data_reload	(SPageId *id);
 void data_send_id	(SPageId *id);
+int	 data_next_id	(void);
 SBmpSplitInfo*		data_get_next	(int *headCnt);
 void data_fill_blk	(SBmpSplitInfo *psplit, int blkNo, BYTE *dst);
 int  data_sent		(SBmpSplitInfo *psplit, int head); // return TRUE=all data sent

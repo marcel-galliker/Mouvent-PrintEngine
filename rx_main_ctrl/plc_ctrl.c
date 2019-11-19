@@ -401,7 +401,7 @@ int	plc_get_thickness(void)
 static void _plc_send_par(SPlcPar *pPlcPar)
 {
 //	Error(LOG, 0, "SET PLC Parameter: PAR_PRINTING_START_POSITION=%d, PAR_PRINTING_END_POSITION=%d", (int)pPlcPar->startPos, (int)pPlcPar->endPos);
-	TrPrintfL(TRUE, "_plc_send_par scanning=%d", rx_def_is_scanning(RX_Config.printer.type));
+	TrPrintfL(TRUE, "_plc_send_par scanning=%d, _FirstParameters=%d", rx_def_is_scanning(RX_Config.printer.type), _FirstParameters);
 	
 	if(rx_def_is_scanning(RX_Config.printer.type) && !_FirstParameters)
 	{
@@ -448,9 +448,6 @@ static void _plc_send_par(SPlcPar *pPlcPar)
 		lc_set_value_by_name_FLOAT(APP"PAR_PRINTING_START_POSITION", (float)pPlcPar->startPos);	
 		lc_set_value_by_name_FLOAT(APP"PAR_PRINTING_END_POSITION", (float)pPlcPar->endPos);
 		lc_set_value_by_name_UINT32(APP"PAR_DRYER_BLOWER_POWER", 75);
-	//	ctrl_send_firepulses(pPlcPar->dots);
-	//	ctrl_send_firepulses("SML");
-	//	ctrl_send_head_cfg();
 	}
 	_plc_set_command("", "CMD_SET_PARAMETER");
 }
@@ -533,7 +530,7 @@ int  plc_stop_printing(void)
 	}
 	else
 	{
-		Error(LOG, 0, "plc_stop_printing: send CMD_STOP");
+		// Error(LOG, 0, "plc_stop_printing: send CMD_STOP");
 		_plc_set_command("CMD_PRODUCTION", "CMD_STOP");
 
 		/*
@@ -1331,11 +1328,10 @@ static void _plc_state_ctrl()
 			_SendPause = 0;
 			_GUIPause = FALSE;
 		}
-		if(_SendRun)
+		if(_SendRun && (RX_StepperStatus.info.z_in_print || _SimuPLC))
 		{
 			_SendRun = FALSE;
 			_plc_set_command("CMD_PRODUCTION", "CMD_RUN");
-		//	step_set_vent(_Speed);
 			RX_PrinterStatus.printState = ps_printing;
 		}
 		if(_StartEncoderItem.pageWidth)	// send position to encoder
@@ -1450,7 +1446,6 @@ static void _plc_state_ctrl()
 	else if (_PlcState==plc_stop) 
 	{
 		RX_PrinterStatus.actSpeed = 0;
-		_FirstParameters = TRUE;
 		_CanRun = FALSE;
 		_heads_to_print=FALSE;
 		if (RX_PrinterStatus.printState>plc_stop)

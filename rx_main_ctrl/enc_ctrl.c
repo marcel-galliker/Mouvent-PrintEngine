@@ -492,7 +492,7 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 		SEncoderPgDist dist;
 		memset(&dist, 0, sizeof(dist));
 		dist.cnt	= 1;
-		dist.dist	= pitem->pageHeight+2000+2*(_WakeupLen*25400/1200);
+		dist.dist	= pitem->pageHeight+10000+2*(_WakeupLen*25400/1200);
 		for(no=0; no<ENC_CNT; no++) 
 		{
 			sok_send_2(&_Encoder[no].socket, CMD_ENCODER_PG_DIST, sizeof(dist), &dist);
@@ -646,9 +646,6 @@ static void _handle_status(int no, SEncoderStat* pstat)
 		}
 	//	if (pstat->PG_cnt>_EncoderStatus[no].PG_cnt) ErrorEx(dev_enc, no, LOG, 0, "PrintGo %d/%d", pstat->PG_cnt, _TotalPgCnt);			
 	}
-
-	if (no==0 && pstat->info.backwards!=_EncoderStatus[no].info.backwards)
-		ctrl_send_scan_direction(pstat->info.backwards);
 	
 	memcpy(&_EncoderStatus[no], pstat, sizeof(_EncoderStatus[no]));
 	if (_Encoder[no].printGoCnt==-1 && _EncoderStatus[no].PG_cnt==0) _Encoder[no].printGoCnt = 0;

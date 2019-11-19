@@ -51,6 +51,7 @@ static SPrintFileCmd	_PrintFile_Msg;
 static int				_Running;
 static int				_Abort;
 static int				_ResetCnt;
+static int				_StartCnt;
 static int				_FirstFile;
 static int				_Paused;
 static SFSDirEntry		_DirEntry;
@@ -301,9 +302,10 @@ static int _do_spool_cfg(RX_SOCKET socket, SSpoolerCfg *pmsg)
 	memset(&_LoadedId, 0, sizeof(_LoadedId));
 	_Running	 = FALSE;
 	_Abort		 = FALSE;
-	_ResetCnt = FALSE;
+	_ResetCnt	 = 0;
 	_FirstFile	 = TRUE;
 	_Paused		 = FALSE;
+	_StartCnt	 = RX_Spooler.resetCnt;
 	_SMP_Flags	 = 0;
 	_MsgGot = _MsgSent = _MsgGot0 = 0;
 	sok_send_2(&socket, REP_SET_SPOOL_CFG, 0, NULL);
@@ -369,7 +371,10 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 		
 	same = (!strcmp(msg.filename, _LastFilename) && msg.id.page==_LastPage && msg.wakeup==_LastWakeup && msg.gapPx==_LastGap);
 	if (RX_Spooler.printerType==printer_LB702_UV && msg.printMode==PM_SINGLE_PASS) same = ((msg.flags&FLAG_SAME)!=0);
-
+	_LastGap	= msg.gapPx;
+	_LastPage   = msg.id.page;
+	_LastWakeup = msg.wakeup;
+	
 	TrPrintfL(TRUE, "_do_print_file[%d] >>%s<<  id=%d, page=%d, copy=%d, scan=%d, same=%d, blkNo=%d", _MsgGot, msg.filename, msg.id.id, msg.id.page, msg.id.copy, msg.id.scan ,same, msg.blkNo);
 	if (msg.id.scan==1) Error(LOG, 0, "_do_print_file[%d] >>%s<<  id=%d, page=%d, copy=%d, scan=%d, same=%d, blkNo=%d", _MsgGot, msg.filename, msg.id.id, msg.id.page, msg.id.copy, msg.id.scan ,same, msg.blkNo);
 	
@@ -476,28 +481,20 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 		{
 			if(rx_def_is_tx(RX_Spooler.printerType))
 			{
-				if (_ResetCnt==RX_Spooler.resetCnt) 
+				Error(LOG, 0, "Data Loaded: id=%d _ResetCnt=%d, _StartCnt=%d, RX_Spooler.resetCnt=%d", msg.id.id, _ResetCnt, _StartCnt, RX_Spooler.resetCnt);				
+				if (_ResetCnt==_StartCnt)
 				{
-					Error(LOG, 0, "Data Loaded: id=%d Start Sending", msg.id.id);				
-					data_send_id(&msg.id);
-					memset(&_LoadedId, 0, sizeof(_LoadedId));	
+					if (data_next_id()) _StartCnt++;
 				}
-				else
-				{
-					Error(LOG, 0, "Data Loaded:_LoadedId=%d", msg.id.id);				
-					memcpy(&_LoadedId, &msg.id, sizeof(_LoadedId));					
-				}							
 			}
 			else data_send_id(NULL);
 			_FirstFile = FALSE;
 		}
 
 		if (_ResetCnt==RX_Spooler.resetCnt || hc_in_simu()) 
-			hc_send_next();
+			hc_send_next();			
+			
 		memcpy(&_LastFilename, &msg.filename, sizeof(_LastFilename));
-		_LastPage   = msg.id.page;
-		_LastWakeup = msg.wakeup;
-		_LastGap	= msg.gapPx;
 	}
 	return REPLY_OK;
 }
@@ -505,16 +502,12 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 //--- _do_start_sending ----------------------------
 static void _do_start_sending(UINT32 resetCnt)
 {
-	Error(LOG, 0, "_do_start_sending(%d), resetCnt=%d", resetCnt, RX_Spooler.resetCnt);
+	Error(LOG, 0, "_do_start_sending(%d), RX_Spooler.resetCnt=%d", resetCnt, RX_Spooler.resetCnt);
+	if (RX_Spooler.resetCnt && resetCnt>RX_Spooler.resetCnt) RX_Spooler.resetCnt=resetCnt;
 	if (resetCnt==RX_Spooler.resetCnt) 
 	{
-		_ResetCnt = resetCnt;
-		if (_LoadedId.id)
-		{
-			Error(LOG, 0, "_do_start_sending(LoadedId=%d)", _LoadedId.id);
-			data_send_id(&_LoadedId);
-			memset(&_LoadedId, 0, sizeof(_LoadedId));			
-		}
+		_ResetCnt = _StartCnt = resetCnt;
+		if(rx_def_is_tx(RX_Spooler.printerType) && data_next_id()) _StartCnt++;
 		hc_send_next();
 	}
 }

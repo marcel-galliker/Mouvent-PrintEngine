@@ -573,6 +573,7 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 		{
 			ret = 1;
 			loaded = TRUE;
+			memset(_LastFilePath, 0, sizeof(_LastFilePath));
 			if (_PrintMode==PM_SCAN_MULTI_PAGE && !(flags & FLAG_SMP_FIRST_PAGE))
 				ctrl_pause_printing();
 			bmpInfo.printMode = printMode;
@@ -770,6 +771,7 @@ void data_send_id(SPageId *id)
 {
 	if (id) memcpy(&_SendingId, id, sizeof(_SendingId));
 	else    memset(&_SendingId, 0, sizeof(_SendingId));
+	Error(LOG, 0, "data_send_id _SendingId=%d", _SendingId.id);
 }
 
 //--- data_get_next ----------------------------------------------------------------
@@ -781,8 +783,11 @@ SBmpSplitInfo*  data_get_next	(int *headCnt)
 	if (_SendIdx!=_OutIdx) return NULL;
 	if (_SendIdx==_InIdx) return NULL;
 
-	if (_PrintList[_SendIdx].decompressing) 
-		return NULL;
+	if (_PrintList[_SendIdx].decompressing)
+	{
+		TrPrintfL(TRUE, "data_get_next _PrintList[_SendIdx].decompressing", _SendIdx);
+		return NULL;		
+	}
 	
 	if (_PrintMode==PM_SCAN_MULTI_PAGE)
 	{
@@ -799,7 +804,10 @@ SBmpSplitInfo*  data_get_next	(int *headCnt)
 	}
 	
 	if (_SendingId.id && _PrintList[_SendIdx].id.id!=_SendingId.id) 
-		return NULL;
+	{
+		TrPrintfL(TRUE, "data_get_next _PrintList[%d].id=%d _SendingId=%d", _SendIdx, _PrintList[_SendIdx].id.id, _SendingId.id);	
+		return NULL;		
+	}
 		
 	idx = _SendIdx;
 	_SendIdx = (_SendIdx+1) % PRINT_LIST_SIZE;
@@ -823,6 +831,22 @@ SBmpSplitInfo*  data_get_next	(int *headCnt)
 	
 	return _PrintList[idx].splitInfo;	
 }
+
+//--- data_next_id -------------------------
+int	 data_next_id(void)
+{
+	int lastidx=(_OutIdx+PRINT_LIST_SIZE-1)%PRINT_LIST_SIZE;
+	Error(LOG, 0, "data_next_id _SendingId=%d, lastidx=%d, outIdx=%d, sendIdx=%d, last.id=%d, out.id=%d, send.id=%d", _SendingId.id, lastidx, _OutIdx, _SendIdx, _PrintList[lastidx].id.id, _PrintList[_OutIdx].id.id, _PrintList[_SendIdx].id.id);
+	if (_PrintList[lastidx].id.id==_SendingId.id && _PrintList[_OutIdx].id.id!=_SendingId.id)
+	{
+		data_send_id(&_PrintList[_OutIdx].id);
+		memset(&_PrintList[lastidx].id, 0, sizeof(_PrintList[lastidx].id.id));
+		return TRUE;
+	}
+	else Error(LOG, 0, "data_next_id KEEP");
+	return FALSE;
+}
+
 
 //--- _data_multi_copy_8 ------------------------------------------------------------------
 static void _data_multi_copy_8(SPageId *id, SBmpInfo *pBmpInfo, UINT8 multiCopy)

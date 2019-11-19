@@ -788,18 +788,8 @@ void ctrl_send_head_cfg(void)
 {
 	int i;
 	_HeadResetCnt++;
+	Error(LOG, 0, "ctrl_send_head_cfg(%d)", _HeadResetCnt);
 	for (i=0; i<SIZEOF(_HeadCtrl); i++) _send_head_cfg(i);
-}
-
-//--- ctrl_send_scan_direction -------------------------------------
-void ctrl_send_scan_direction(INT32 backwards)
-{
-	int i;
-//	Error(LOG, 0, "ctrl_send_scan_direction(%d)", backwards);
-	for (i=0; i<SIZEOF(_HeadCtrl); i++)
-	{
-		if (_HeadCtrl[i].running) sok_send_2(&_HeadCtrl[i].socket, CMD_SET_SCAN_DIRECTION, sizeof(backwards), &backwards);		
-	}
 }
 
 //--- ctrl_abort_printing ------------------------------------------------------
