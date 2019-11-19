@@ -337,7 +337,14 @@ int spool_is_ready(void)
 
 //--- spool_start_printing --------------------------------
 void spool_start_printing(void)
-{
+{	
+	//--- DP803: Check that all spoolers are running  -----
+	if (RX_Config.printer.type==printer_DP803)
+	{
+		Error(LOG, 0, "Check or restart spoolers");
+	}
+
+	//--- check local spooler is running ------------------
 	if (rx_process_running_cnt(FILENAME_SPOOLER_CTRL, NULL)==0)
 	{
 		#ifdef WIN32

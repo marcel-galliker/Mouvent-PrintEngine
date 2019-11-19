@@ -769,9 +769,12 @@ int data_same(SPageId *id)
 //--- data_send_id ------------------------------------------------------
 void data_send_id(SPageId *id)
 {
-	if (id) memcpy(&_SendingId, id, sizeof(_SendingId));
+	if (id)
+	{
+		memcpy(&_SendingId, id, sizeof(_SendingId));
+		Error(LOG, 0, "data_send_id _SendingId=%d", _SendingId.id);
+	}
 	else    memset(&_SendingId, 0, sizeof(_SendingId));
-	Error(LOG, 0, "data_send_id _SendingId=%d", _SendingId.id);
 }
 
 //--- data_get_next ----------------------------------------------------------------

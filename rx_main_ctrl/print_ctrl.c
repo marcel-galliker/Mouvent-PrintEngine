@@ -62,6 +62,7 @@ static INT32			_PreloadCnt=0;
 static int				_SetPrintPar = TRUE;
 static int				_PrintGo;
 static int				_PrintDone[MAX_PAGES];
+static int				_PrintDoneFlags;
 static int				_PrintDoneNo;
 static int				ERR_z_in_print;
 
@@ -125,6 +126,8 @@ static void _on_error(ELogItemType type)
 //--- pc_start_printing -------------------------------------------------------
 int pc_start_printing(void)
 {	
+	int i;
+	
 	TrPrintfL(TRUE, "pc_start_printing printState=%d, (%d)", RX_PrinterStatus.printState, ps_ready_power);
 	ERR_z_in_print = FALSE;
 	if (RX_PrinterStatus.printState==ps_ready_power || RX_PrinterStatus.printState==ps_webin)
@@ -170,6 +173,9 @@ int pc_start_printing(void)
 		_ChangeJob = FALSE;
 		memset(_PrintDone, 0, sizeof(_PrintDone));
 		_PrintDoneNo = 0;
+		_PrintDoneFlags = 0;
+		if (spool_head_board_cnt() > 8*sizeof(_PrintDoneFlags)) Error(ERR_ABORT, 0, "PROGRAMMING ERROR! _PrintDoneFlags");
+		for (i=0; i<spool_head_board_cnt(); i++) _PrintDoneFlags |= (1<<i);
 		_SetPrintPar   = TRUE;
 //		fluid_start_printing();
 		spool_start_printing();
@@ -799,9 +805,9 @@ int pc_sent(SPageId *id)
 int pc_print_done(int headNo, SPrintDoneMsg *pmsg)
 {	
 	int n=pmsg->pd%SIZEOF(_PrintDone);
-	_PrintDone[n]++;
+	_PrintDone[n] |= (1<<headNo);
 	
-//	TrPrintfL(TRUE, "Head[%d] PRINT-DONE: %d: PD=%d: id=%d, page=%d, scan=%d, copy=%d **** (%d/%d)", headNo, ++_PrintDoneNo[headNo], pmsg->pd, pmsg->id.id, pmsg->id.page, pmsg->id.scan, pmsg->id.copy, _PrintDone[n], spool_head_board_cnt());	
+//	TrPrintfL(TRUE, "Head[%d] PRINT-DONE: PD=%d: id=%d, page=%d, scan=%d, copy=%d **** (0x%08x/0x%08x)", headNo, pmsg->pd, pmsg->id.id, pmsg->id.page, pmsg->id.scan, pmsg->id.copy, _PrintDone[n], _PrintDoneFlags);	
 	
 	if (RX_Config.printer.type==printer_cleaf)
 	{
@@ -813,7 +819,7 @@ int pc_print_done(int headNo, SPrintDoneMsg *pmsg)
 		}
 	}
 	
-	if (_PrintDone[n] == spool_head_board_cnt())
+	if (_PrintDone[n] == _PrintDoneFlags)
 	{
 		SPrintQueueItem *pnext;
 		int pageDone, jobDone;
