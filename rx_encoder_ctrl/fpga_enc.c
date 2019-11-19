@@ -120,7 +120,6 @@ static int		_PrintGo_Locked;
 static int		_PrintGo_Start;
 static int		_PrintGo_Enabled=FALSE;
 static int		_Scanning = FALSE;
-static int		_DirectionLastPos;
 static UINT32	_ErrFlags	= 0;
 static RX_SOCKET _Socket = INVALID_SOCKET;
 static int		_InCnt;
@@ -148,7 +147,6 @@ static void _fpga_corr_linear(SEncoderCfg *pcfg, int restart);
 static void  _uv_init(void);
 static void  _uv_ctrl(void);
 static void  _pg_ctrl(void);
-static int	 _direction_ctrl(void);
 static void  _corr_ctrl(void);
 static void  _simu_markreader(void);
 
@@ -910,7 +908,6 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg, int restart)
 		TrPrintfL(TRUE, "pos_actual=%d microns, =%d incs", pcfg->pos_actual, act_pos);
 		_FirstMarkPos=0;		
 	}
-	_DirectionLastPos = act_pos;
 	
 	if (pcfg->printGoMode==PG_MODE_MARK || pcfg->printGoMode==PG_MODE_MARK_FILTER)
 	{
@@ -1094,13 +1091,22 @@ void  fpga_pg_set_dist(int cnt, int dist)
 	if (_PrintGo_Enabled)
 	{
 		int pgNo;
+		int c=cnt;
 		int incs = (int)(dist/_StrokeDist);
-		while (cnt-->0) FpgaQSys->printGo_fifo = incs;
+		while (cnt-->0)
+		{
+			FpgaQSys->printGo_fifo = incs;
+			while (RX_EncoderCfg.simulation && FpgaQSys->printGo_status.fill_level==0)
+			{
+				FpgaQSys->printGo_fifo = incs;				
+			}			
+		}
+					
 		for (pgNo=0; pgNo<SIZEOF(Fpga->cfg.pg); pgNo++) Fpga->cfg.pg[pgNo].fifos_ready = TRUE;
 
 		RX_EncoderStatus.distTelCnt++;
-		TrPrintfL(TRUE, "fpga_pg_set_dist(no=%d, cnt=%d, dist=%d)", RX_EncoderStatus.distTelCnt, cnt, dist);
-
+		TrPrintfL(TRUE, "fpga_pg_set_dist(no=%d, cnt=%d, dist=%d) distTelCnt=%d, FIFO=%d", RX_EncoderStatus.distTelCnt, c, dist, RX_EncoderStatus.distTelCnt, FpgaQSys->printGo_status.fill_level);
+		
 	//	Error(LOG, 0, "fpga_pg_set_dist dist=%d, incs=%d", dist, incs);		
 	}
 }
@@ -1130,50 +1136,20 @@ void  fpga_set_printmark(SEncoderPgDist *pmsg)
 	TrPrintfL(TRUE, "fpga_set_printmark(no=%d, cnt=%d, dist=%d, ignore=%d, window=%d)", RX_EncoderStatus.distTelCnt, pmsg->cnt, pmsg->dist, pmsg->ignore, pmsg->window);
 }
 
-//--- _direction_ctrl -----------------------------------------------------
-static int _direction_ctrl(void)
-{
-	int backwards=2;
-	int pos = Fpga->stat.encIn[0].position;
-	
-	if (_Scanning)
-	{
-		if (pos > (_DirectionLastPos+1000)) 
-		{
-			_DirectionLastPos = pos;
-			backwards = FALSE;
-		}
-		else if (pos < (_DirectionLastPos-1000))
-		{
-			_DirectionLastPos = pos;
-			backwards = TRUE;
-		}
-	//	TrPrintfL(TRUE, "_direction_ctrl pos=%d, lastpos=%d, backwards=%d, (%d)", pos, _DirectionLastPos, backwards, RX_EncoderStatus.info.backwards);
-		if (backwards<=1 && RX_EncoderStatus.info.backwards != backwards)
-		{
-			RX_EncoderStatus.info.backwards = backwards;
-		//	Error(LOG, 0, "Encoder pos=%d backwards=%d", pos, RX_EncoderStatus.info.backwards);
-			return TRUE;		
-		}		
-	}
-	
-	return FALSE;
-}
-
 //--- _pg_ctrl ------------------------------------------------------
 static void  _pg_ctrl(void)
 {		
 	if (_Socket!=INVALID_SOCKET && !_PrintGo_Locked)
 	{
-		int send=_direction_ctrl();
+		int send=FALSE;
 		
 		//--- new Print-Go -------------------------------------------------------------------------------
 		if ((Fpga->stat.encOut[0].PG_cnt & 0xff) != ((RX_EncoderStatus.PG_cnt-_PrintGo_Start) & 0xff)) 
 		{
 			static int _lastPos=0;
 			int pos = Fpga->stat.encOut[0].position;
-			if (RX_EncoderStatus.PG_cnt==0) TrPrintfL(TRUE, "PrintGo[%d]: pos_1200=%d", RX_EncoderStatus.PG_cnt, pos);
-			else							TrPrintfL(TRUE, "PrintGo[%d]: pos_1200=%d, dist=%d, pos_in=%d, pg_start_pos=%d", RX_EncoderStatus.PG_cnt, pos, pos-_lastPos, Fpga->stat.encIn[0].position, Fpga->stat.encOut[0].pg_start_pos);
+			if (RX_EncoderStatus.PG_cnt==0) TrPrintfL(TRUE, "PrintGo[%d]: pos_1200=%d, FIFO=%d", RX_EncoderStatus.PG_cnt, pos, FpgaQSys->printGo_status.fill_level);
+			else							TrPrintfL(TRUE, "PrintGo[%d]: pos_1200=%d, dist=%d, pos_in=%d, pg_start_pos=%d, FIFO=%d", RX_EncoderStatus.PG_cnt, pos, pos-_lastPos, Fpga->stat.encIn[0].position, Fpga->stat.encOut[0].pg_start_pos, FpgaQSys->printGo_status.fill_level);
 			_lastPos = pos;
 			send=TRUE;
 			RX_EncoderStatus.PG_cnt++;
