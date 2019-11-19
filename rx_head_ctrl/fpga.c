@@ -135,6 +135,7 @@ static SFpgaImage _Img[HEAD_CNT][MAX_PAGES];	// for debugging
 
 //--- bidirectional: Changing offsets ----------------------- 
 static UINT32	_PgOffset[HEAD_CNT][2];		// foreward/backward
+static int		_ScanBackwards;
 
 //--- prototypes -------------------------------------------
 static void  _ethernet_config(void);
@@ -391,6 +392,7 @@ int  fpga_set_config(RX_SOCKET socket)
 	_PrintDoneWarning	= 0;
 	_PrintDoneError		= 0;
 	_FpgaErrorTrace		= FALSE;
+	_ScanBackwards		= RX_HBConfig.backwards;
 	
 //	Error(LOG, 0, "fpga_set_config 4");
 
@@ -407,7 +409,7 @@ int  fpga_set_config(RX_SOCKET socket)
 		_PgOffset[i][OFFSET_BWD] = (UINT32)((1.0*RX_HBConfig.head[i].distBack)/21.166667);
 				
 		FpgaCfg.head[i]->subStroke			= 0;
-		FpgaCfg.head[i]->offset_stroke		= _PgOffset[i][OFFSET_FWD];
+		FpgaCfg.head[i]->offset_stroke		= _PgOffset[i][_ScanBackwards];
 		FpgaCfg.head[i]->offset_substroke	= 0;
 		if (FALSE && RX_HBConfig.head[i].headHeight>0)
 		{
@@ -619,16 +621,25 @@ int  fpga_set_config(RX_SOCKET socket)
 	return REPLY_OK;
 }
 
+//--- fpga_set_scan_dir -----------------------
+void fpga_set_scan_dir(int backwards)
+{
+	_ScanBackwards = backwards;
+}
+
 //--- _fpga_set_pg_offsets ------------------------------------------------
 void fpga_set_pg_offsets(INT32 backwards)
 {
 	int i;
-//	Error(LOG, 0, "fpga_set_pg_offsets(backwards=%d)", backwards);
+	char str[100];
+	int len=0;
 	for (i=0; i<HEAD_CNT; i++)
 	{
 		FpgaCfg.head[i]->subStroke			= 0;
 		FpgaCfg.head[i]->offset_stroke		= _PgOffset[i][backwards];
+		len += sprintf(&str[len], "%06d  ", FpgaCfg.head[i]->offset_stroke);
 	}		
+	Error(LOG, 0, "fpga_set_pg_offsets(backwards=%d) %s", backwards, str);
 }
 
 //--- fpga_enc_config ---------------------------------------------------
@@ -1815,6 +1826,11 @@ static int _check_print_done(void)
 					char name[64];
 					sprintf(name, "Head[%d].Print-Done-%03d", head, RX_HBStatus[0].head[head].printDoneCnt);
 					fpga_trace_registers(name, FALSE);
+				}
+				
+				if (img->flags&FLAG_BIDIR)
+				{
+					fpga_set_pg_offsets(1-_ScanBackwards);	// for next printgo			
 				}
 				
 				TrPrintfL(TRUE, "Head[%d].PrintDone=%d, blocks %05d ... %05d", head, RX_HBStatus[0].head[head].printDoneCnt, img->blkNo, _PageEnd[head][i]);

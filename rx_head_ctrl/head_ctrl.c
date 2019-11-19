@@ -73,7 +73,6 @@ static int _do_simu_print		(RX_SOCKET socket);
 static int _do_simu_encoder		(RX_SOCKET socket, UINT32			*khz);
 static int _do_write_image	 	(RX_SOCKET socket, SFpgaWriteBmpCmd *pmsg);
 static int _do_head_board_cfg 	(RX_SOCKET socket, SHeadBoardCfg 	*pcfg);
-static int _do_set_scan_dir		(RX_SOCKET socket, INT32			*backwards);
 static int _do_head_stat		(RX_SOCKET socket, SFluidStateLight *pmsg);
 static int _rep_head_stat		(RX_SOCKET socket);
 static int _do_inkdef			(RX_SOCKET socket, SInkDefMsg	    *pmsg);
@@ -146,7 +145,9 @@ static int _save_ctrl_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr
 	case CMD_PING:		_do_ping(socket);
 						_SpoolerSocket = socket;
 																			break;
-	case CMD_HEAD_STAT: _do_head_stat (socket, (SFluidStateLight*) &phdr[1]); break;
+	case CMD_HEAD_STAT:				_do_head_stat	(socket, (SFluidStateLight*) &phdr[1]); break;
+	case CMD_SET_SCAN_DIRECTION:	fpga_set_scan_dir(*(INT32*)&phdr[1]);	break;
+
 	default:		{
 						// ALL messages that use FPGA Registers
 						int idx = (_MsgBufIn + 1) % MSG_BUF_SIZE;
@@ -222,7 +223,6 @@ static int _handle_ctrl_msg(RX_SOCKET socket, void *pmsg)
 	case CMD_HEAD_BOARD_CFG:		_do_head_board_cfg	(socket, (SHeadBoardCfg*)  &phdr[1]);break;
 	case CMD_PRINT_ABORT:			_do_print_abort		(socket);							 break;		
 	case CMD_HEAD_STAT:				_do_head_stat       (socket, (SFluidStateLight*) &phdr[1]); break;
-	case CMD_SET_SCAN_DIRECTION:	_do_set_scan_dir	(socket, (INT32*)		     &phdr[1]);break;
 	case SET_GET_INK_DEF:			_do_inkdef			(socket, (SInkDefMsg*)		pmsg);	 break;
 	case CMD_HEAD_FLUID_CTRL_MODE:	_do_set_FluidCtrlMode(socket, (SFluidCtrlCmd*)  pmsg);	 break;
 
@@ -431,12 +431,6 @@ static int _do_simu_encoder		(RX_SOCKET socket, UINT32 *khz)
 		}
 	}
 	return REPLY_OK;
-}
-
-//--- _do_set_scan_dir -----------------------------------
-static int _do_set_scan_dir(RX_SOCKET socket, INT32 *backwards)
-{
-	fpga_set_pg_offsets(*backwards);			
 }
 
 //--- ctrl_send_file -----------------------------------------
