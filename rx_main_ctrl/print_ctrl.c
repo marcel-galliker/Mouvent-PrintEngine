@@ -52,6 +52,7 @@ static HANDLE _PrintSem;
 
 static SPrintQueueItem	_Item;
 static INT32			_PageMargin_Next;
+static int				_ChangeJob;
 static char				_FilePathLocal[MAX_PATH];
 static int				_Scanning;
 static char				_DataPath[MAX_PATH];
@@ -166,6 +167,7 @@ int pc_start_printing(void)
 		RX_PrinterStatus.printedCnt=0;
 		RX_PrinterStatus.printState=ps_printing;
 		_PrintGo = 0;
+		_ChangeJob = FALSE;
 		memset(_PrintDone, 0, sizeof(_PrintDone));
 		_PrintDoneNo = 0;
 		_SetPrintPar   = TRUE;
@@ -213,7 +215,7 @@ int pc_stop_printing(int userStop)
 //--- pc_change_job ---------------------------------------------
 int  pc_change_job(void)
 {
-	return Error(ERR_CONT, 0, "Not implemented yet");				
+	_ChangeJob = TRUE;				
 }
 
 //--- pc_off ------------------------------------------------------------
@@ -481,6 +483,7 @@ static int _print_next(void)
 			*_DataPath	  = 0;
 			_ScanLengthPx = 0;
 			_CopiesStart  = 0;
+			_ChangeJob	  = FALSE;
 			_first		  = TRUE;
 			SPrintQueueItem *item = pq_get_next_item();
 			if (item) 
@@ -590,7 +593,7 @@ static int _print_next(void)
 			{
 				if (!_first) pq_next_page(&_Item, &_Item.id);
 				TrPrintfL(TRUE, "pq_next_page id=%d, page=%d, copy=%d, scan=%d", _Item.id.id, _Item.id.page, _Item.id.copy, _Item.id.scan);
-				if (_Item.id.copy>_Item.copies || _Item.id.page>_Item.lastPage)
+				if (_Item.id.copy>_Item.copies || _Item.id.page>_Item.lastPage || _ChangeJob)
 				{
 				//	Error(LOG, 0, "enc_sent_document, _Item.copiesTotal=%d, _CopiesStart=%d, _TotalPgCnt=%d", _Item.copiesTotal, _CopiesStart, _Item.copiesTotal-_CopiesStart);
 					if (_Scanning && arg_simuEncoder)	

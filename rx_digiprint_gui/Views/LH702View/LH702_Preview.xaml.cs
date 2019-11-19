@@ -191,6 +191,12 @@ namespace RX_DigiPrint.Views.LH702View
             }
         }
 
+        //--- Change_Clicked --------------------------------------
+        private void Change_Clicked(object sender, RoutedEventArgs e)
+        {
+            RxGlobals.RxInterface.SendCommand(TcpIp.CMD_CHG_PRINT_QUEUE);
+        }
+
         //--- Image_Clicked --------------------------------------
         private void Image_Clicked(object sender, MouseButtonEventArgs e)
         {

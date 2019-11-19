@@ -1395,7 +1395,8 @@ static void _plc_state_ctrl()
 			&& enc_ready()
 			&& pq_is_ready2print(&_StartEncoderItem) 
 			&& (RX_PrinterStatus.printState == ps_printing || RX_PrinterStatus.printState == ps_ready_power)
-			&& (RX_StepperStatus.info.z_in_print || (_SimuPLC && RX_Config.printer.type!=printer_LH702))
+//			&& (RX_StepperStatus.info.z_in_print || (_SimuPLC && RX_Config.printer.type!=printer_LH702))
+			&& (RX_StepperStatus.info.z_in_print || (_SimuPLC))
 			)
 		{
 			_StartPrinting = FALSE;

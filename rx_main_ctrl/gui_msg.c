@@ -67,6 +67,7 @@ static void _do_get_print_queue	(RX_SOCKET socket);
 static void _do_add_print_queue	(RX_SOCKET socket, SPrintQueueEvt *pmsg);
 static void _do_set_print_queue	(RX_SOCKET socket, SPrintQueueEvt *pmsg);
 static void _do_set_print_queue_evt	(RX_SOCKET socket, SPrintQueueEvt *pmsg);
+static void _do_chg_print_queue	(RX_SOCKET socket);
 static void _do_get_print_queue_item	(RX_SOCKET socket, SPrintQueueEvt *pmsg);
 static void _do_del_print_queue	(RX_SOCKET socket, SPrintQueueEvt *pmsg);
 static void _do_up_print_queue	(RX_SOCKET socket, SPrintQueueEvt *pmsg);
@@ -148,6 +149,7 @@ int handle_gui_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sende
 		case CMD_ADD_PRINT_QUEUE:	_do_add_print_queue(socket, (SPrintQueueEvt*) pmsg);				break;
 		case CMD_SET_PRINT_QUEUE:	_do_set_print_queue(socket, (SPrintQueueEvt*) pmsg);				break;
 		case EVT_SET_PRINT_QUEUE:	_do_set_print_queue_evt(socket, (SPrintQueueEvt*) pmsg);			break;
+		case CMD_CHG_PRINT_QUEUE:	_do_chg_print_queue(socket);										break;
 		case CMD_DEL_PRINT_QUEUE:	_do_del_print_queue(socket, (SPrintQueueEvt*) pmsg);				break;
 		case CMD_GET_PRINT_QUEUE_ITM:_do_get_print_queue_item(socket, (SPrintQueueEvt*) pmsg);			break;
 		case CMD_UP_PRINT_QUEUE:	_do_up_print_queue(socket, (SPrintQueueEvt*) pmsg);					break;
@@ -665,6 +667,12 @@ static void _do_set_print_queue_evt	(RX_SOCKET socket, SPrintQueueEvt *pmsg)
 	pc_set_pageMargin(pmsg->item.pageMargin);
 	if (item!=NULL) gui_send_print_queue(EVT_GET_PRINT_QUEUE, item);
 	pq_save(PATH_USER FILENAME_PQ);
+}
+
+//--- _do_chg_print_queue ------------------------------------------
+static void _do_chg_print_queue	(RX_SOCKET socket)
+{
+	pc_change_job();
 }
 
 //--- _do_get_print_queue_item ------------------------------------------

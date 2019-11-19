@@ -18,6 +18,8 @@
 
 #pragma pack(1)
 
+#define TCP_IP_H
+
 //--- Globals ---------------------------------------------------
 #define MAX_MESSAGE_SIZE	9000 // (8*1024) // jumbo blocks
 #define TCPIP_HEADER_SIZE	  66
@@ -114,6 +116,7 @@
 #define CMD_SET_PRINT_QUEUE		0x01000043
 #define REP_SET_PRINT_QUEUE		0x02000043
 #define EVT_SET_PRINT_QUEUE		0x03000043
+#define CMD_CHG_PRINT_QUEUE		0x04000043
 
 #define CMD_DEL_PRINT_QUEUE		0x01000044
 #define REP_DEL_PRINT_QUEUE		0x02000044
