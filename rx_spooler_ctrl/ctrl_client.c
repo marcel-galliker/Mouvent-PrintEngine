@@ -398,7 +398,7 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 		}
 		else
 		{
-			ret = data_get_size(path, msg.id.page, msg.gapPx, &widthPx, &lengthPx, &bitsPerPixel, &multiCopy);
+			ret = data_get_size(path, msg.id.page, &msg.gapPx, &widthPx, &lengthPx, &bitsPerPixel, &multiCopy);
 			TrPrintfL(TRUE, "data_get_size >>%s<<: gapPx=%d, widthPx=%d, lengthPx=%d, bitsPerPixel=%d, multiCopy=%d", path, msg.gapPx, widthPx, lengthPx, bitsPerPixel, multiCopy);
 			if (ret==REPLY_NOT_FOUND) 
 				Error(ERR_STOP, 0, "Could not load file >>%s<<", msg.filename);
@@ -412,14 +412,16 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 				Error(LOG, 0, "data_clear");				
 				data_clear(_Buffer[_BufferNo]);
 			}
-			ret = data_malloc (msg.printMode, widthPx, lengthPx, bitsPerPixel, RX_Color, SIZEOF(RX_Color), multiCopy, &_BufferSize[_BufferNo], _Buffer[_BufferNo]);			
+			ret = data_malloc (msg.printMode, widthPx, lengthPx, bitsPerPixel, RX_Color, SIZEOF(RX_Color), &_BufferSize[_BufferNo], _Buffer[_BufferNo]);			
 		}
-		if (_Abort) 
+		if (_Abort)
 			return REPLY_ERROR;
 		if (ret==REPLY_ERROR)
 		{
-			if (multiCopy>1) return Error(ERR_STOP, 0,     "Could not allocate memory file >>%s<<, page=%d, copy=%d, scan=%d (Make Image width a multilpe of 4)", path, msg.id.page, msg.id.copy, msg.id.scan);
-			else			 return Error(ERR_STOP, 0,     "Could not allocate memory file >>%s<<, page=%d, copy=%d, scan=%d", path, msg.id.page, msg.id.copy, msg.id.scan);
+			Error(ERR_STOP, 0,  "Could not allocate memory file >>%s<<, page=%d", path, msg.id.page);
+			Error(LOG, 0,		"Memory expected=%dMB, free=%d MB", (int)(data_memsize(msg.printMode, widthPx, lengthPx, bitsPerPixel)/1024/1024), rx_mem_get_freeMB());
+			if (multiCopy>1)	Error(LOG, 0,   "Make Image width a multilpe of 4 (multicopy=%d)", multiCopy);
+			return REPLY_ERROR;				
 		}
 	}
 
@@ -472,22 +474,26 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 		TrPrintfL(TRUE, "REPLY EVT_PRINT_FILE, bufReady=%d, _ResetCnt=%d, ResetCnt=%d", evt.bufReady, _ResetCnt, RX_Spooler.resetCnt);
 		if (_FirstFile || !same)
 		{
+			if(rx_def_is_tx(RX_Spooler.printerType))
+			{
+				if (_ResetCnt==RX_Spooler.resetCnt) 
+				{
+					Error(LOG, 0, "Data Loaded: id=%d Start Sending", msg.id.id);				
+					data_send_id(&msg.id);
+					memset(&_LoadedId, 0, sizeof(_LoadedId));	
+				}
+				else
+				{
+					Error(LOG, 0, "Data Loaded:_LoadedId=%d", msg.id.id);				
+					memcpy(&_LoadedId, &msg.id, sizeof(_LoadedId));					
+				}							
+			}
+			else data_send_id(NULL);
 			_FirstFile = FALSE;
-			Error(LOG, 0, "File Loaded: _ResetCnt=%d, resetCnt=%d", _ResetCnt, RX_Spooler.resetCnt);
-			if (_ResetCnt==RX_Spooler.resetCnt) 
-			{
-				Error(LOG, 0, "_do_start_sending(id=%d)", msg.id.id);
-				data_send_id(&msg.id);
-				memset(&_LoadedId, 0, sizeof(_LoadedId));	
-			}
-			else
-			{
-				Error(LOG, 0, "Data Loaded:_LoadedId=%d", msg.id.id);				
-				memcpy(&_LoadedId, &msg.id, sizeof(_LoadedId));					
-			}
 		}
 
-		if (_ResetCnt==RX_Spooler.resetCnt || hc_in_simu()) hc_send_next();
+		if (_ResetCnt==RX_Spooler.resetCnt || hc_in_simu()) 
+			hc_send_next();
 		memcpy(&_LastFilename, &msg.filename, sizeof(_LastFilename));
 		_LastPage   = msg.id.page;
 		_LastWakeup = msg.wakeup;
@@ -502,7 +508,6 @@ static void _do_start_sending(UINT32 resetCnt)
 	Error(LOG, 0, "_do_start_sending(%d), resetCnt=%d", resetCnt, RX_Spooler.resetCnt);
 	if (resetCnt==RX_Spooler.resetCnt) 
 	{
-		Error(LOG, 0, "_ResetCnt=TRUE");
 		_ResetCnt = resetCnt;
 		if (_LoadedId.id)
 		{

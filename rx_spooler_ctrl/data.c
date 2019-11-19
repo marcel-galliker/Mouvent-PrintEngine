@@ -345,7 +345,7 @@ static int _copy_file(SPageId *pid, char *srcDir, char *fileName, char *dstDir)
 }
 
 //--- data_get_size ---------------------------------------------------------------
-int  data_get_size	(const char *path, UINT32 page, UINT32 spacePx, UINT32 *pwidth, UINT32 *plength, UINT8 *pbitsPerPixel, UINT8 *multiCopy)
+int  data_get_size	(const char *path, UINT32 page, UINT32 *pspacePx, UINT32 *pwidth, UINT32 *plength, UINT8 *pbitsPerPixel, UINT8 *multiCopy)
 {
 	int ret;
 	UINT32 memsize;
@@ -353,14 +353,14 @@ int  data_get_size	(const char *path, UINT32 page, UINT32 spacePx, UINT32 *pwidt
 			
 	if(flz_get_info(path, page, &info)==REPLY_OK)
 	{
-		*pwidth			= info.WidthPx+spacePx;
+		*pwidth			= info.WidthPx+*pspacePx;
 		*plength		= info.lengthPx+2*abs(_WakeupLen);
 		*pbitsPerPixel	= info.bitsPerPixel;
 		ret = REPLY_OK;
 	}
 	else
 	{
-		ret = tif_get_size(path, page, spacePx, pwidth, plength, pbitsPerPixel);
+		ret = tif_get_size(path, page, *pspacePx, pwidth, plength, pbitsPerPixel);
 		if (ret == REPLY_NOT_FOUND) 
 		{
 			char filepath[MAX_PATH];
@@ -370,10 +370,18 @@ int  data_get_size	(const char *path, UINT32 page, UINT32 spacePx, UINT32 *pwidt
 	}
 	
 	*multiCopy = 1;
-	if (ret==REPLY_OK)
+	if (ret==REPLY_OK && (RX_Spooler.printerType==printer_TX801 || RX_Spooler.printerType==printer_TX802))
 	{
 		*plength += 2*abs(_WakeupLen);
-		if (pbitsPerPixel && (RX_Spooler.printerType==printer_TX801 || RX_Spooler.printerType==printer_TX802))
+
+		//--- allign width to full byte ---
+		if (*pspacePx)
+		{
+			UINT32 width=*pwidth;
+			*pwidth    = ((width*(*pbitsPerPixel)+7)&~7) / (*pbitsPerPixel);
+			*pspacePx += (*pwidth)-width;
+		}
+		else
 		{
 			// possible improvement:
 			//	1. read the file
@@ -382,12 +390,10 @@ int  data_get_size	(const char *path, UINT32 page, UINT32 spacePx, UINT32 *pwidt
 			int pixPByte = 8/(*pbitsPerPixel);
 			for ((*multiCopy)=1; ((*pwidth)*(*multiCopy)) % pixPByte; (*multiCopy)++)
 			{
-			};
+			};				
 			*pwidth *= (*multiCopy);
 		}
 	}
-
-//	*multiCopy = 1;
 	return ret;
 }
 
@@ -399,24 +405,17 @@ void data_clear(BYTE* buffer[MAX_COLORS])
 		rx_mem_use_clear(buffer[n]);		
 }
 
-//--- data_malloc -------------------------------------------------------------------------
-int  data_malloc(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPixel, SColorSplitCfg *psplit, int splitCnt, int multicopy, UINT64 *pBufSize, BYTE* buffer[MAX_COLORS])
-{	
+//--- data_memsize --------------------------------------------
+UINT64 data_memsize(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPixel)
+{
 	UINT64	memsize;
-	UINT64	memSizeUsed;
 	int i, found, error, lineLen;
 
 //	lineLen = (width*bitsPerPixel+7)/8;			// workes for TIFF
 //	lineLen = ((width*bitsPerPixel+15)/16)*2;	// used for BMP files!
 //	lineLen = ((width*bitsPerPixel+31) & ~31)/8;	// used for BMP files!
 	lineLen = ((width*bitsPerPixel+63) & ~63)/8;	// used in case it is multicopy!
-	_PrintMode = printMode;
-	if (multicopy==0) 
-	{
-		Error(ERR_CONT, 0, "multicopy=0");
-		multicopy=1;
-	}
-	memsize = memSizeUsed = (UINT64)lineLen*height*multicopy;
+	memsize = (UINT64)lineLen*height;			
 	switch(printMode)
 	{
 	case PM_TEST_JETS:			memsize*=RX_Spooler.headsPerColor; break;
@@ -424,7 +423,18 @@ int  data_malloc(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPixel,
 	default:													   break;
 	}
 	
-	memsize = (memsize/(1024*1024)+1) * (1024*1024); 
+	return (memsize/(1024*1024)+1) * (1024*1024); 
+}
+
+//--- data_malloc -------------------------------------------------------------------------
+int  data_malloc(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPixel, SColorSplitCfg *psplit, int splitCnt, UINT64 *pBufSize, BYTE* buffer[MAX_COLORS])
+{	
+	UINT64	memsize;
+	int i, found, error, lineLen;
+
+	memsize = data_memsize(printMode, width, height, bitsPerPixel);
+
+	_PrintMode = printMode;
 
 	error=0;
 	if(memsize <= *pBufSize)
@@ -788,7 +798,8 @@ SBmpSplitInfo*  data_get_next	(int *headCnt)
 		}
 	}
 	
-	if (_SendingId.id && _PrintList[_SendIdx].id.id!=_SendingId.id) return NULL;
+	if (_SendingId.id && _PrintList[_SendIdx].id.id!=_SendingId.id) 
+		return NULL;
 		
 	idx = _SendIdx;
 	_SendIdx = (_SendIdx+1) % PRINT_LIST_SIZE;

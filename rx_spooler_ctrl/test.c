@@ -92,7 +92,7 @@ static void _loadFiles(char *printEnv, char *fname)
 	time0 = rx_get_ticks();
 
 	ret = data_get_size(filePath, 0, 0, &widthPx, &lengthPx, &bitsPerPixel, &multiCopy);
-	if (ret==REPLY_OK) ret = data_malloc (FALSE, widthPx, lengthPx, bitsPerPixel, RX_Color, SIZEOF(RX_Color), multiCopy, &_BufferSize, _Buffer);
+	if (ret==REPLY_OK) ret = data_malloc (FALSE, widthPx, lengthPx, bitsPerPixel, RX_Color, SIZEOF(RX_Color), &_BufferSize, _Buffer);
 	if (ret==REPLY_OK) ret = tif_load(NULL, filePath, "", PM_SINGLE_PASS, 0, 0, RX_Color, SIZEOF(RX_Color), _Buffer, &bmpInfo, NULL);
 	free2 = rx_mem_get_freeMB();
 	for (i=0; i<SIZEOF(_Buffer); i++) rx_mem_unuse(&_Buffer[i]);
