@@ -30,6 +30,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
         private int            _HeadsPerColor=1;
         private bool           _Reverse=false;
         private bool           _AdjustmentSupported=false;
+        private const double   _StrokeDist = 25.4 / 1200;
+            
         static ControlTemplate _ButtonTemplate;
 
         //--- Constructor -----------------------------------
@@ -140,6 +142,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                             //--- offset text box -----------
                             RxNumBox offset = new RxNumBox(){Width=width, HorizontalContentAlignment=HorizontalAlignment.Right};
                             offset.Tag = colorNo++;
+                            offset.FontSize = (double)Application.Current.Resources["FontSizeSmall"];
                             offset.LostFocus += _text_LostFocus;
                             Canvas.SetLeft(offset, x);
                             Canvas.SetTop(offset,  16);
@@ -158,9 +161,39 @@ namespace RX_DigiPrint.Views.PrintSystemView
                             Canvas.Children.Add(new Line(){Stroke=Brushes.Black, X1=x+3,  X2=x,   Y1=y-3, Y2=y});
                             Canvas.Children.Add(new Line(){Stroke=Brushes.Black, X1=x+3,  X2=x,   Y1=y+3, Y2=y});
 
+                            TextBlock text = new TextBlock(){Text="mm", FontSize=(double)Application.Current.Resources["FontSizeSmall"], Background=Brushes.White};
+                            Canvas.SetLeft(text, x+width/2);
+                            Canvas.SetTop (text, y-8);
+                            Canvas.Children.Add(text);
+
                             //--- offset text box -----------
                             RxNumBox offset = new RxNumBox(){Width=width, HorizontalContentAlignment=HorizontalAlignment.Right};
                             offset.Tag = colorNo++;
+                            offset.FontSize = (double)Application.Current.Resources["FontSizeSmall"];
+                            offset.LostFocus += _text_LostFocus;
+                            Canvas.SetLeft(offset, x);
+                            Canvas.SetTop(offset,  16);
+                            Canvas.Children.Add(offset);
+                        }
+                        if (distNo%_HeadsPerColor==_HeadsPerColor-2)
+                        {
+                            //--- offset arrow --------------
+                            y  = 10;
+                            x1 = x+width;
+                            Canvas.Children.Add(new Line(){Stroke=Brushes.Black, X1=x1,   X2=x1,  Y1=y-5, Y2=y+5});
+                            Canvas.Children.Add(new Line(){Stroke=Brushes.Black, X1=x1,   X2=x,   Y1=y,   Y2=y});
+                            Canvas.Children.Add(new Line(){Stroke=Brushes.Black, X1=x+3,  X2=x,   Y1=y-3, Y2=y});
+                            Canvas.Children.Add(new Line(){Stroke=Brushes.Black, X1=x+3,  X2=x,   Y1=y+3, Y2=y});
+
+                            TextBlock text = new TextBlock(){Text="dt", FontSize=(double)Application.Current.Resources["FontSizeSmall"], Background=Brushes.White};
+                            Canvas.SetLeft(text, x+width/2);
+                            Canvas.SetTop (text, y-8);
+                            Canvas.Children.Add(text);
+
+                            //--- offset text box -----------
+                            RxNumBox offset = new RxNumBox(){Width=width, HorizontalContentAlignment=HorizontalAlignment.Right};
+                            offset.Tag = 100+colorNo;
+                            offset.FontSize = (double)Application.Current.Resources["FontSizeSmall"];
                             offset.LostFocus += _text_LostFocus;
                             Canvas.SetLeft(offset, x);
                             Canvas.SetTop(offset,  16);
@@ -178,7 +211,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
 
                 //--- distance text box fore ------------------
                 RxNumBox dist = new RxNumBox(){Width=width, HorizontalContentAlignment=HorizontalAlignment.Right};
-                dist.Tag = 100+distNo;
+                dist.Tag = 200+distNo;
+                dist.FontSize = (double)Application.Current.Resources["FontSizeSmall"];
                 dist.LostFocus += _text_LostFocus;
                 Canvas.SetLeft(dist, x);
                 Canvas.SetTop(dist, y+12);
@@ -188,7 +222,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 if (true)
                 {
                     RxNumBox distback = new RxNumBox(){Width=width, HorizontalContentAlignment=HorizontalAlignment.Right};
-                    distback.Tag = 200+distNo;
+                    distback.Tag = 300+distNo;
+                    distback.FontSize = (double)Application.Current.Resources["FontSizeSmall"];
                     distback.LostFocus += _text_LostFocus;
                     Canvas.SetLeft(distback, x);
                     Canvas.SetTop(distback, y+35);
@@ -225,17 +260,39 @@ namespace RX_DigiPrint.Views.PrintSystemView
                                     {
                                         RxGlobals.PrintSystem.ColorOffset[inkSupply] = text.Value;
                                         RxGlobals.PrintSystem.Changed = true;
+                                        _update();
                                     }
                                     break;
 
-                        case 1:     if (RxGlobals.PrintSystem.HeadDist[headNo] != text.Value)
+                        case 1:     if (RxGlobals.PrintSystem.ColorOffset[inkSupply]!=text.Value)
                                     {
-                                        RxGlobals.PrintSystem.HeadDist[headNo] = text.Value;
+                                        RxGlobals.PrintSystem.ColorOffset[inkSupply] = Math.Round(text.Value*_StrokeDist, 3);
+                                        RxGlobals.PrintSystem.Changed = true;
+                                        _update();
+                                    }
+                                    break;
+
+                        case 2:     if (RxGlobals.PrintSystem.HeadDist[headNo] != text.Value)
+                                    {
+                                        if (RxGlobals.PrintSystem.IsScanning)
+                                        { 
+                                            RxGlobals.PrintSystem.HeadDist[headNo] = text.Value;
+                                        }
+                                        else
+                                        { 
+                                            double diff=text.Value-RxGlobals.PrintSystem.HeadDist[headNo];
+                                            do
+                                            {
+                                                RxGlobals.PrintSystem.HeadDist[headNo++] += diff;
+                                            }
+                                            while ((headNo%RxGlobals.PrintSystem.HeadCnt)!=0);
+                                            RxGlobals.PrintSystem.OnPropertyChanged();  // call _update() for all heads
+                                        }
                                         RxGlobals.PrintSystem.Changed = true;
                                     }
                                     break;
                         
-                        case 2:     if (RxGlobals.PrintSystem.HeadDistBack[headNo] != text.Value)
+                        case 3:     if (RxGlobals.PrintSystem.HeadDistBack[headNo] != text.Value)
                                     {
                                         RxGlobals.PrintSystem.HeadDistBack[headNo] = text.Value;
                                         RxGlobals.PrintSystem.Changed = true;
@@ -309,8 +366,9 @@ namespace RX_DigiPrint.Views.PrintSystemView
                             switch(tag/100)
                             {
                                 case 0: text.Text = RxGlobals.PrintSystem.ColorOffset[inkSupply].ToString();break;
-                                case 1: text.Text = RxGlobals.PrintSystem.HeadDist[headNo].ToString(); break;
-                                case 2: text.Visibility = visible;                          
+                                case 1: text.Text = Math.Round(RxGlobals.PrintSystem.ColorOffset[inkSupply]/_StrokeDist).ToString();break;
+                                case 2: text.Text = RxGlobals.PrintSystem.HeadDist[headNo].ToString(); break;
+                                case 3: text.Visibility = visible;                          
                                         text.Text = RxGlobals.PrintSystem.HeadDistBack[headNo].ToString(); break;
                             }
                         }
