@@ -308,6 +308,7 @@ static int _do_spool_cfg(RX_SOCKET socket, SSpoolerCfg *pmsg)
 	_StartCnt	 = RX_Spooler.resetCnt;
 	_SMP_Flags	 = 0;
 	_MsgGot = _MsgSent = _MsgGot0 = 0;
+	if (!rx_def_is_tx(RX_Spooler.printerType)) data_send_id(NULL);
 	sok_send_2(&socket, REP_SET_SPOOL_CFG, 0, NULL);
 	sr_reset();
 	if (rx_def_is_test(RX_Spooler.printerType) || !rx_def_is_scanning(RX_Spooler.printerType)) memset(_LastFilename, 0, sizeof(_LastFilename));
@@ -477,17 +478,14 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 		sok_send(&socket, &evt);
 		
 		TrPrintfL(TRUE, "REPLY EVT_PRINT_FILE, bufReady=%d, _ResetCnt=%d, ResetCnt=%d", evt.bufReady, _ResetCnt, RX_Spooler.resetCnt);
-		if (_FirstFile || !same)
+		if(rx_def_is_tx(RX_Spooler.printerType) && (_FirstFile || !same))
 		{
-			if(rx_def_is_tx(RX_Spooler.printerType))
+			if (_FirstFile) data_send_id(NULL);
+			Error(LOG, 0, "Data Loaded: id=%d _ResetCnt=%d, _StartCnt=%d, RX_Spooler.resetCnt=%d", msg.id.id, _ResetCnt, _StartCnt, RX_Spooler.resetCnt);				
+			if (_ResetCnt==_StartCnt)
 			{
-				Error(LOG, 0, "Data Loaded: id=%d _ResetCnt=%d, _StartCnt=%d, RX_Spooler.resetCnt=%d", msg.id.id, _ResetCnt, _StartCnt, RX_Spooler.resetCnt);				
-				if (_ResetCnt==_StartCnt)
-				{
-					if (data_next_id()) _StartCnt++;
-				}
+				if (data_next_id()) _StartCnt++;
 			}
-			else data_send_id(NULL);
 			_FirstFile = FALSE;
 		}
 

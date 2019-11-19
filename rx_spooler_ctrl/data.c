@@ -843,7 +843,6 @@ int	 data_next_id(void)
 	if (_PrintList[lastidx].id.id==_SendingId.id && _PrintList[_OutIdx].id.id!=_SendingId.id)
 	{
 		data_send_id(&_PrintList[_OutIdx].id);
-		memset(&_PrintList[lastidx].id, 0, sizeof(_PrintList[lastidx].id.id));
 		return TRUE;
 	}
 	else Error(LOG, 0, "data_next_id KEEP");
@@ -1902,7 +1901,10 @@ int data_sent(SBmpSplitInfo *psplit, int head)
 			
 			extern int _MsgGot0, _MsgGot, _MsgSent, _MsgId;
 			// TrPrintfL(TRUE, "EVT_PRINT_FILE: DATA_SENT _InIdx=%d, _OutIdx=%d, bufReady=%d, _MsgGot0=%d, _MsgGot=%d, _MsgSent=%d, _MsgId=0x%08x", _InIdx, _OutIdx, evt.bufReady, _MsgGot0, _MsgGot, _MsgSent, _MsgId);
-
+			{ //--- used for printqueue handling of TX machines ------------------------------
+				int lastidx=(_OutIdx+PRINT_LIST_SIZE-1)%PRINT_LIST_SIZE;
+				memset(&_PrintList[lastidx].id, 0, sizeof(_PrintList[lastidx].id));
+			}
 			_OutIdx = (_OutIdx+1) % PRINT_LIST_SIZE;
 			rx_sem_post(_SendSem);
 			return TRUE;
