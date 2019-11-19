@@ -407,12 +407,12 @@ int  fpga_set_config(RX_SOCKET socket)
 		FpgaCfg.head[i]->cmd_enable         = (RX_HBConfig.head[i].enabled == dev_on);
 		FpgaCfg.head[i]->encoderNo			= RX_HBConfig.head[i].encoderNo;
 
-		_PgOffset[i][OFFSET_FWD] = (UINT32)((1.0*RX_HBConfig.head[i].dist)/21.166667);
-		_PgOffset[i][OFFSET_BWD] = (UINT32)((1.0*RX_HBConfig.head[i].distBack)/21.166667);
+		_PgOffset[i][OFFSET_FWD] = (UINT32)((8.0*RX_HBConfig.head[i].dist)/21.166667);
+		_PgOffset[i][OFFSET_BWD] = (UINT32)((8.0*RX_HBConfig.head[i].distBack)/21.166667);
 				
 		FpgaCfg.head[i]->subStroke			= 0;
-		FpgaCfg.head[i]->offset_stroke		= _PgOffset[i][0];
-		FpgaCfg.head[i]->offset_substroke	= 0;
+		FpgaCfg.head[i]->offset_stroke		= _PgOffset[i][0]/8;
+		FpgaCfg.head[i]->offset_substroke	= _PgOffset[i][0]%8;
 		if (FALSE && RX_HBConfig.head[i].headHeight>0)
 		{
 			double time = RX_HBConfig.head[i].headHeight/1000000.0/DROP_SPEED;
@@ -633,9 +633,9 @@ void fpga_set_pg_offsets(INT32 backwards)
 	_DonePD = 0;
 	for (head=0; head<HEAD_CNT; head++)
 	{
-		FpgaCfg.head[head]->offset_stroke		= _PgOffset[head][backwards];
-		FpgaCfg.head[head]->subStroke			= 0;
-		len += sprintf(&str[len], "%06d  ",		FpgaCfg.head[head]->offset_stroke);
+		FpgaCfg.head[head]->offset_stroke		= _PgOffset[head][backwards]/8;
+		FpgaCfg.head[head]->subStroke			= _PgOffset[head][backwards]%8;
+		len += sprintf(&str[len], "%06d.%d  ",	FpgaCfg.head[head]->offset_stroke, FpgaCfg.head[head]->subStroke);
 	}		
 //	Error(LOG, 0, "fpga_set_pg_offsets(backwards=%d) %s", backwards, str);
 }
