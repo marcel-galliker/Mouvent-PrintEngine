@@ -226,6 +226,7 @@ void pq_tick(void)
 int pq_stop(void)
 {
 	int i;
+	int done=FALSE;
 
 //	TrPrintfL(TRUE, "pq_stop");
 //	_trace_queue();
@@ -235,9 +236,21 @@ int pq_stop(void)
 	ctr_save();
 	
 	if (RX_Config.printer.type==printer_LH702)
-	{
-		for (i=0; i<_Size; i++)
-			if (_List[i].state == PQ_STATE_QUEUED) return REPLY_OK;
+	{			
+		int idx=-1;
+		for (i=0; i<_Size && idx<0; i++)
+			if (_List[i].state == PQ_STATE_QUEUED) idx=i;
+		for (i=0; i<_Size && idx<0; i++)
+			if (_List[i].state != PQ_STATE_QUEUED) idx=i;
+
+		if (_Size>0)
+		{
+			if (idx!=0) memcpy(&_List[0], &_List[idx], sizeof(_List[0]));
+			_Size=1;
+			_List[0].state = PQ_STATE_QUEUED;
+			gui_send_print_queue(EVT_ADD_PRINT_QUEUE, &_List[0]);			
+		}
+		return REPLY_OK;	
 	}
 	
 	for (i=_Size-1; i>=0;  i--)
@@ -484,6 +497,13 @@ int pq_preflight(SPageId *pid)
 		{
 			_List[i].state=PQ_STATE_PREFLIGHT;
 			memset(_List[i].ripState, 0, sizeof(_List[i].ripState));
+			if (RX_Config.printer.type==printer_LH702)
+			{
+				if (i) memcpy(&_List[0], &_List[i], sizeof(_List[0]));
+				_Size=1;
+				i=0;
+			}
+			Error(LOG, 0, "pq_preflight _Size=%d", _Size);
 			gui_send_print_queue(EVT_GET_PRINT_QUEUE, &_List[i]);
 		}
 		return REPLY_OK;

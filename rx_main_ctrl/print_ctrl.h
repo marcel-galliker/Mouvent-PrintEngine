@@ -13,12 +13,14 @@
 
 #include "rx_common.h"
 #include "rx_def.h"
+#include "tcp_ip.h"
 
 int	pc_init(void);
 int pc_end(void);
 
 int  pc_start_printing(void);
 int  pc_stop_printing(int userStop);
+int  pc_change_job(void);
 int  pc_off(void);
 int  pc_pause_printing(int fromGui);
 int  pc_abort_printing(void);

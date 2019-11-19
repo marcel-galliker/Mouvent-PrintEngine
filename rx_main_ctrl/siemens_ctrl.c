@@ -17,7 +17,7 @@
 #include "rx_threads.h"
 #include "rx_trace.h"
 #include "args.h"
-#include "tcp_ip.h"
+#include "tcp_ip_bobst.h"
 #include "plc_ctrl.h"
 #include "print_queue.h"
 #include "print_ctrl.h"
@@ -42,6 +42,8 @@ static RX_SOCKET _Socket=INVALID_SOCKET;
 
 static int		 _SiemensThreadRunning=FALSE;
 
+static SBobstState _Status;
+
 static int		_IncPerMeter;
 static int		_WakeupLen;
 static int		_PrintGo_Dist;
@@ -64,6 +66,10 @@ static int  _handle_siemens_msg		(RX_SOCKET socket, void *msg, int len, struct s
 //--- siemens_init -------------------------------------------------
 void siemens_init(void)
 {
+	memset(&_Status, 0, sizeof(_Status));
+	_Status.hdr.msgLen = sizeof(_Status);
+	_Status.hdr.msgId  = EVT_STATE;
+	
 	_Socket=INVALID_SOCKET;
 	if(!_SiemensThreadRunning)
 	{
@@ -81,7 +87,7 @@ void siemens_end(void)
 //--- siemens_error_reset -----------------------
 void siemens_error_reset(void)
 {
-	sok_send_2(&_Socket, CMD_ERROR_RESET, 0, NULL);
+//	sok_send_2(&_Socket, CMD_ERROR_RESET, 0, NULL);
 }
 
 //--- _siemens_thread ------------------------------------------------------------
@@ -122,10 +128,10 @@ static int _siemens_closed(RX_SOCKET socket, const char *peerName)
 //--- siemens_tick --------------------------------------------
 void  siemens_tick(void)
 {
-	if (sok_send_2(&_Socket, CMD_PLC_STAT, 0, NULL)==REPLY_OK) 
-	{
-	//	TrPrintfL(TRUE, "Siemend: Sent Message");
-	}
+	/*
+	UINT32	printState;		#define BS_OFF		0		#define BS_STARTING	1		#define BS_PRINTING	2		INT32	thickness;	INT32	encoder_adj;	INT32	dist_long;	INT32	dist_lat;	INT32	id;	INT32	copies_printed;	*/
+	
+	sok_send(&_Socket, &_Status); 
 }
 
 //--- _handle_siemens_msg ------------------------------------------------------------------
@@ -141,8 +147,18 @@ static int _handle_siemens_msg(RX_SOCKET socket, void *msg, int len, struct sock
 
 		switch(phdr->msgId)
 		{
-		case REP_ENCODER_STAT:  	Error(LOG, 0, "received REP_ENCODER_STAT"); break;
-		case EVT_GET_EVT:			Error(LOG, 0, "received EVT_GET_EVT");		break;
+		case CMD_START_PRINTING:  	Error(LOG, 0, "received CMD_START_PRINTING");	
+									pc_start_printing();
+									break;
+			
+		case CMD_STOP_PRINTING:		Error(LOG, 0, "received CMD_STOP_PRINTING");	
+									pc_stop_printing(TRUE);
+									break;
+			
+		case CMD_CHANGE_JOB:		Error(LOG, 0, "received CMD_CHANGE_JOB");		
+									pc_change_job();
+									break;
+			
 		default: Error(WARN, 0, "Siemens:Got unknown MessageId=0x%08x", phdr->msgId);
 		}		
 	}

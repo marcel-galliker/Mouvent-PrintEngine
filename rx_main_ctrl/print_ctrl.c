@@ -210,6 +210,12 @@ int pc_stop_printing(int userStop)
 	return REPLY_OK;
 }
 
+//--- pc_change_job ---------------------------------------------
+int  pc_change_job(void)
+{
+	return Error(ERR_CONT, 0, "Not implemented yet");				
+}
+
 //--- pc_off ------------------------------------------------------------
 int pc_off(void)
 {

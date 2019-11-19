@@ -150,6 +150,9 @@
     <ClInclude Include="siemens_ctrl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="tcp_ip_bobst.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="boot_svr.c">
