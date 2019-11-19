@@ -283,14 +283,12 @@ void  fpga_main(int ticks, int menu, int showCorrection, int showParam)
 		_uv_ctrl();
 		_pg_ctrl();
 		_corr_ctrl();
-		_simu_markreader();
-		/*
+	//	if (RX_EncoderCfg.simulation) _simu_markreader();
 		{
 			static int _in=0;
 			if (FpgaQSys->in&1 && !_in&1) _InCnt++;
 			_in=FpgaQSys->in;
 		}
-		*/
 	}
 
 //	_scan_check();
@@ -912,8 +910,6 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg, int restart)
 	if (pcfg->printGoMode==PG_MODE_MARK || pcfg->printGoMode==PG_MODE_MARK_FILTER)
 	{
 		//	Fpga->cfg.general.min_mark_len	  = 1000;
-		Fpga->cfg.general.shift_delay_pulse_len = (Fpga->cfg.general.min_mark_len*11)/10;
-		Fpga->cfg.general.shift_delay			= (int)((pcfg->printGoOutDist-Fpga->cfg.general.min_mark_len)/_StrokeDist);
 		Fpga->cfg.general.shift_delay_tel		= (int)((pcfg->printGoDist   -Fpga->cfg.general.min_mark_len)/_StrokeDist);				
 		
 		//--- flight time compensation of Mark Reader ----------------------------	
@@ -921,7 +917,6 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg, int restart)
 		double hz		   = 100.0/60.0*1000000.0/_StrokeDist;// fix 100 m/min
 		double speed	   = (hz/FPGA_FREQ)*0x80000000;
 		double ratio       = ftc_strokes / (hz / FPGA_FREQ);
-
 		
 		Fpga->cfg.general.ftc_speed = (int)speed;
 		Fpga->cfg.general.ftc_ratio = (int)ratio;
@@ -930,11 +925,14 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg, int restart)
 	}
 	else
 	{
-		Fpga->cfg.general.shift_delay_pulse_len = 0;
-		Fpga->cfg.general.shift_delay			= 0;
-		Fpga->cfg.general.shift_delay_tel		= 0;							
-		Fpga->cfg.general.ftc_speed = 0;
-		Fpga->cfg.general.ftc_ratio = 0;
+		Fpga->cfg.general.shift_delay_tel	= 0;							
+		Fpga->cfg.general.ftc_speed			= 0;
+		Fpga->cfg.general.ftc_ratio			= 0;
+	}
+	
+	{	//--- used for DP803 ---
+		Fpga->cfg.general.shift_delay_pulse_len = (Fpga->cfg.general.min_mark_len*11)/10;
+		Fpga->cfg.general.shift_delay			= (int)((pcfg->printGoOutDist-Fpga->cfg.general.min_mark_len)/_StrokeDist);		
 	}
 
 	for (pgNo=0; pgNo<SIZEOF(Fpga->cfg.pg); pgNo++)
@@ -1265,7 +1263,8 @@ static void  _corr_ctrl(void)
 			return;
 		}
 
-		if (RX_EncoderStatus.meters<1) _step=0;
+		if (RX_EncoderStatus.meters<1)
+			_step=0;
 		if(Fpga->cfg.encIn[0].enable)
 		{
 			UINT32 pos = Fpga->stat.encOut[0].position;
@@ -1541,7 +1540,7 @@ static void _fpga_display_status(int showCorrection, int showParam)
 			term_printf("  Wind mark pos: "); for (i = 0; i < cnt; i++) term_printf("%09d  ", Fpga->stat.encOut[i].window_mark_pos); term_printf("\n");
 			term_printf("  Avr Med Pos:   "); term_printf("%09d  ", Fpga->stat.avr_med_pos); term_printf("\n");
 
-			term_printf("  PG FIFO:       %09d  Used=%d     dist_fill=%03d   wnd_fill=%03d    ign_fill=%03d\n", 
+			term_printf("  PG FIFO:       %09d  Used=%d     dist_fill=%03d   wnd_fill=%03d    ign_fill=%03d  delay=%d InCnt=%d\n", 
 				RX_EncoderStatus.distTelCnt, 
 				Fpga->cfg.pg[0].fifos_used, 
 				FpgaQSys->printGo_status.fill_level, 

@@ -277,7 +277,7 @@ typedef struct
 	UINT32	watchdog_freq;			// 0x0000:
 	UINT32	watchdog_cnt;			// 0x0004:
 	UINT32	reset_fifos;			// 0x0008:
-	UINT32	shift_delay_pulse_len ; // 0x000c:	
+	UINT32	shift_delay_pulse_len;  // 0x000c:	
 	UINT32	cfg_0010;				// 0x0010:	
 	UINT32  cfg_0014;				// 0x0014:	
 	UINT32	ident_rol_en;			// 0x0018: enables coeff. identification logic in roller correction
