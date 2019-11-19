@@ -647,7 +647,7 @@ static void _handle_status(int no, SEncoderStat* pstat)
 	//	if (pstat->PG_cnt>_EncoderStatus[no].PG_cnt) ErrorEx(dev_enc, no, LOG, 0, "PrintGo %d/%d", pstat->PG_cnt, _TotalPgCnt);			
 	}
 
-	if (no==0 && pstat->info.backwards!=_EncoderStatus[no].info.backwards) 
+	if (no==0 && pstat->info.backwards!=_EncoderStatus[no].info.backwards)
 		ctrl_send_scan_direction(pstat->info.backwards);
 	
 	memcpy(&_EncoderStatus[no], pstat, sizeof(_EncoderStatus[no]));
