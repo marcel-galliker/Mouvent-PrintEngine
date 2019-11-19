@@ -146,7 +146,6 @@ static int _save_ctrl_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr
 						_SpoolerSocket = socket;
 																			break;
 	case CMD_HEAD_STAT:				_do_head_stat	(socket, (SFluidStateLight*) &phdr[1]); break;
-	case CMD_SET_SCAN_DIRECTION:	fpga_set_scan_dir(*(INT32*)&phdr[1]);	break;
 
 	default:		{
 						// ALL messages that use FPGA Registers

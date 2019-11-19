@@ -44,7 +44,6 @@ UINT32 fpga_get_aliveCnt(int udpNo);
 int  fpga_set_config(RX_SOCKET socket);
 void fpga_enc_config(int synth);
 void fpga_enc_enable(int enable);
-void fpga_set_scan_dir(int backwards);
 int  fpga_abort(void);
 int  fpga_image	(SFpgaImageCmd *msg);
 
