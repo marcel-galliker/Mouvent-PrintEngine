@@ -36,4 +36,46 @@ typedef struct SMsgHdr
 	INT32  msgLen;
 	UINT32 msgId;
 } SMsgHdr;
-#endif//--- SBobstPar --------------------------------------typedef struct SBobstPar{	SMsgHdr	hdr;	// msgId: CMD_ADD_DIST	// msgId: CMD_ADD_LATERAL	// msgId: PAR_THICKNESS	// msgId: PAR_ENCODER_ADJ	INT32	value;} SBobstPar;//--- SBobstState -----------------------------typedef struct SBobstState{	SMsgHdr	hdr;	// msgId: EVT_STATE		UINT32	printState;		#define BS_OFF		0		#define BS_STARTING	1		#define BS_PRINTING	2		INT32	thickness;	INT32	encoder_adj;	INT32	dist;	INT32	lateral;	INT32	id;	INT32	copies_printed;} SBobstState;//--- SBobstMessage --------------------------typedef struct SBobstMessage{	SMsgHdr	hdr;	// msgId: EVT_WARN	// msgId: EVT_ERROR		INT32 no;	char msg[256];} SBobstMessage;
+#endif
+
+//--- SBobstPar --------------------------------------
+typedef struct SBobstPar
+{
+	SMsgHdr	hdr;
+	// msgId: CMD_ADD_DIST
+	// msgId: CMD_ADD_LATERAL
+	// msgId: PAR_THICKNESS
+	// msgId: PAR_ENCODER_ADJ
+	INT32	value;
+} SBobstPar;
+
+//--- SBobstState -----------------------------
+typedef struct SBobstState
+{
+	SMsgHdr	hdr;
+	// msgId: EVT_STATE
+	
+	UINT32	printState;
+		#define BS_OFF		0
+		#define BS_STARTING	1
+		#define BS_PRINTING	2
+	
+	INT32	thickness;
+	INT32	encoder_adj;
+	INT32	dist;
+	INT32	lateral;
+	INT32	id;
+	INT32	copies_printed;
+} SBobstState;
+
+//--- SBobstMessage --------------------------
+typedef struct SBobstMessage
+{
+	SMsgHdr	hdr;
+	// msgId: EVT_WARN
+	// msgId: EVT_ERROR
+	
+	INT32 no;
+	char msg[256];
+} SBobstMessage;
+
