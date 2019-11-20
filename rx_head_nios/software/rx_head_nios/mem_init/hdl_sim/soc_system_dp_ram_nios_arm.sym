@@ -186,7 +186,7 @@
 00009d80 G ram_kernel_prepare
 00009d8a G ram_kernel
 0000a5ab G jump_to_ram
-0000a5b8 g _pio_base.3727
+0000a5b8 g _pio_base.3729
 0000a5c8 g impure_data
 0000a6a8 g uart_3
 0000a6d4 g uart_2
@@ -200,13 +200,13 @@
 0000a935 G chip_erase
 0000a93a G blank_check_0
 0000a93f G blank_check_1
-0000a944 g RETRY.2006
+0000a944 g RETRY.2008
 0000a948 g _amplifier_on
 0000a94c g _v3_3_on
-0000a950 g MAX_DIE.3670
-0000a954 g period_timer_0.3693
-0000a958 g period_timer_1.3694
-0000a95c g period_timer_2.3695
+0000a950 g MAX_DIE.3672
+0000a954 g period_timer_0.3695
+0000a958 g period_timer_1.3696
+0000a95c g period_timer_2.3697
 0000a960 G _global_impure_ptr
 0000a964 G _impure_ptr
 0000a968 G alt_priority_mask
@@ -222,8 +222,8 @@
 0000b598 B cr_trimming_mirror_data
 0000b5a0 b _Running
 0000b5a4 B heat
-0000b5a8 b _invalidCnt.2017
-0000b5ac b _errCnt.2016
+0000b5a8 b _invalidCnt.2019
+0000b5ac b _errCnt.2018
 0000b5b0 b crc_tabccitt_init
 0000b5b4 b _StaticErrors
 0000b5b8 B arm_ptr
@@ -243,7 +243,7 @@
 0000b5f0 b Timer_1000_out
 0000b5f4 b _DEBUG
 0000b5f8 B _Uart
-0000b5fc b toggle.3169
+0000b5fc b toggle.3171
 0000b600 B errno
 0000b604 B alt_irq_active
 0000b608 B alt_envp
