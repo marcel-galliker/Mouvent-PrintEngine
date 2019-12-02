@@ -44,7 +44,11 @@ namespace RX_DigiPrint.Views.LH702View
         //--- Save_Clicked ---------------------------------------------
         private void Save_Clicked(object sender, RoutedEventArgs e)
         {
-            if (_Item!=null) _Item.SendMsg(TcpIp.CMD_SET_PRINT_QUEUE);
+            if (_Item!=null)
+            {
+                _Item.SendMsg(TcpIp.CMD_SET_PRINT_QUEUE);
+                _Item.SaveDefaults();
+            }
         }
 
         //--- Reload_Clicked ---------------------------------------------

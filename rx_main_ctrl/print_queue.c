@@ -497,12 +497,14 @@ int pq_preflight(SPageId *pid)
 		{
 			_List[i].state=PQ_STATE_PREFLIGHT;
 			memset(_List[i].ripState, 0, sizeof(_List[i].ripState));
+			/*
 			if (RX_Config.printer.type==printer_LH702)
 			{
 				if (i) memcpy(&_List[0], &_List[i], sizeof(_List[0]));
 				_Size=1;
 				i=0;
 			}
+			*/
 			gui_send_print_queue(EVT_GET_PRINT_QUEUE, &_List[i]);
 		}
 		return REPLY_OK;
@@ -859,6 +861,8 @@ int pq_printed(int headNo, SPageId *pid, int *pageDone, int *jobDone, SPrintQueu
 		memcpy(&_PrintedItem, pitem, sizeof(_PrintedItem));
 		return *pageDone || *jobDone;
 	}
+
+	_find_item(pid->id, &idx);
 	return FALSE;
 }
 
@@ -975,8 +979,7 @@ int pq_is_ready(void)
 		}		
 	}
 	
-//	if(RX_Config.printer.type == printer_LH702)				return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printedCnt) < 8;
-	if(RX_Config.printer.type == printer_LH702)				return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printedCnt) < 16;
+	if(RX_Config.printer.type == printer_LH702)				return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printedCnt) < 8;
 	else if(RX_Config.printer.type == printer_cleaf)		return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printedCnt) < 16;
 	else if (rx_def_is_scanning(RX_Config.printer.type))	return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printedCnt) < 20;
 	else													return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printedCnt) < 64;

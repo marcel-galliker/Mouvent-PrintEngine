@@ -413,7 +413,7 @@ static void _enc_start_printing(int no, SPrintQueueItem *pitem, int restart)
 void enc_sent_document(int pages)
 {
 	_TotalPgCnt += pages;
-	TrPrintf(TRUE, "&&&&&&&&& enc_sent_document(%d) _TotalPgCnt=%d", pages, _TotalPgCnt);
+	TrPrintf(TRUE, "enc_sent_document(%d) _TotalPgCnt=%d", pages, _TotalPgCnt);
 }
 
 //--- enc_set_pg ----------------------------------------

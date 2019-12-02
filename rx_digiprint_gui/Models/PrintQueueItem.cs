@@ -385,6 +385,14 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _ScansPrinted, value); }
         }
 
+        //--- Property CopiesPrinted ---------------------------------------
+        private Int32 _CopiesPrinted;
+        public Int32 CopiesPrinted
+        {
+            get { return _CopiesPrinted; }
+            set { SetProperty(ref _CopiesPrinted, value); }
+        }
+
         //--- Property TestImage ---------------------------------------
         private ETestImage _TestImage;
         public ETestImage TestImage
@@ -910,6 +918,7 @@ namespace RX_DigiPrint.Models
             PrintGoDist     = msg.printGoDist/1000.0;
             Scans           = msg.scans;
             ScansPrinted    = msg.scansPrinted;
+            CopiesPrinted   = msg.copiesPrinted;
             TestImage       = (ETestImage)msg.testImage;
             PrintChecks     = (msg.checks!=0);
             PageNumber      = new PageNumber(msg.pageNumber);
@@ -979,6 +988,7 @@ namespace RX_DigiPrint.Models
             ActCopy         = item.ActCopy;
             Scans           = item.Scans;
             ScansPrinted    = item.ScansPrinted;
+            CopiesPrinted   = item.CopiesPrinted;
             RipState        = item.RipState;
             Progress        = item.Progress;
             ProgressStr     = item.ProgressStr;

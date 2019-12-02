@@ -1275,6 +1275,7 @@ static int _data_split_scan(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 					pInfo->used			= TRUE;
 					pInfo->board		= head/RX_Spooler.headsPerBoard;
 					pInfo->head			= head%RX_Spooler.headsPerBoard;
+				//	if (rx_def_is_web(RX_Spooler.printerType))
 					if (RX_Spooler.printerType==printer_LB702_UV)
 						pInfo->blk0			= blkNo+RX_Spooler.dataBlkCntHead*(pInfo->head%RX_Spooler.headsPerBoard);
 					else
@@ -1340,6 +1341,7 @@ static int _data_split_scan(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 					pInfo->used			= TRUE;
 					pInfo->board		= head/RX_Spooler.headsPerBoard;
 					pInfo->head			= head%RX_Spooler.headsPerBoard;
+				//	if (rx_def_is_web(RX_Spooler.printerType))
 					if (RX_Spooler.printerType==printer_LB702_UV)
 						pInfo->blk0			= blkNo+RX_Spooler.dataBlkCntHead*(pInfo->head%RX_Spooler.headsPerBoard);
 					else

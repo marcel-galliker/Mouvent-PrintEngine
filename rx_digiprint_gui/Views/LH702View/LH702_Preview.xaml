@@ -6,7 +6,7 @@
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
              mc:Ignorable="d"
              SizeChanged="UserControl_SizeChanged"
-             d:DesignHeight="300" d:DesignWidth="400">
+             d:DesignHeight="300" d:DesignWidth="500">
     <Grid>
         <Canvas x:Name="MainGrid" OpacityMask="Black">
             <Canvas.Background>
@@ -23,11 +23,15 @@
                 Canvas.Top="25"
                 BorderBrush="{StaticResource RX.Green}"
                 BorderThickness="3"
-                MinWidth="100"
+                MinWidth="200"
                 MinHeight="100"
                 SizeChanged="Border_SizeChanged"
                 >
                 <Grid MouseUp="Image_Clicked">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="19,-32,19,0">
+                        <TextBlock Text="Printing " FontSize="{StaticResource FontSizeLarge}"/>
+                        <TextBlock Text="{Binding CopiesPrinted}" FontSize="{StaticResource FontSizeLarge}"/>
+                    </StackPanel>
                     <Image 
                     x:Name="Image"
                     Source="{Binding Preview}"
@@ -38,14 +42,13 @@
                             <RotateTransform Angle="90"/>
                         </Image.LayoutTransform>
                     </Image>
-                    <TextBlock Text="Printing" HorizontalAlignment="Center" Margin="19,-32,19,0" FontSize="{StaticResource FontSizeLarge}"/>
                 </Grid>
 
             </Border>
             <Rectangle x:Name="PrintMark" Fill="Black" Width="5" Height="20"/>
 
             <Border x:Name="NextBorder"                
-                Canvas.Left="250"
+                Canvas.Left="350"
                 Canvas.Top="25"
                 BorderBrush="{StaticResource RX.Green}"
                 BorderThickness="3"

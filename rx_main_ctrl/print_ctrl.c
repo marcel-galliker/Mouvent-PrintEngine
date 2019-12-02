@@ -221,7 +221,7 @@ int pc_stop_printing(int userStop)
 //--- pc_change_job ---------------------------------------------
 int  pc_change_job(void)
 {
-	_ChangeJob = TRUE;				
+	_ChangeJob = 1;				
 }
 
 //--- pc_off ------------------------------------------------------------
@@ -599,13 +599,18 @@ static int _print_next(void)
 			{
 				if (!_first) pq_next_page(&_Item, &_Item.id);
 				TrPrintfL(TRUE, "pq_next_page id=%d, page=%d, copy=%d, scan=%d", _Item.id.id, _Item.id.page, _Item.id.copy, _Item.id.scan);
-				if (_Item.id.copy>_Item.copies || _Item.id.page>_Item.lastPage || _ChangeJob)
+				if (_Item.id.copy>_Item.copies || _Item.id.page>_Item.lastPage || _ChangeJob==2)
 				{
 				//	Error(LOG, 0, "enc_sent_document, _Item.copiesTotal=%d, _CopiesStart=%d, _TotalPgCnt=%d", _Item.copiesTotal, _CopiesStart, _Item.copiesTotal-_CopiesStart);
 					if (_Scanning && arg_simuEncoder)	
 					{
 						enc_sent_document(_Item.scans);
 						pq_sent_document(_Item.scans);
+					}
+					else if (RX_Config.printer.type==printer_LH702)
+					{
+						enc_sent_document(_Item.id.copy-_CopiesStart);
+						pq_sent_document(_Item.id.copy-_CopiesStart);							
 					}
 					else
 					{
@@ -740,10 +745,11 @@ static int _print_next(void)
 						{
 							SPrintQueueItem item;
 							int clearBlockUsed=(_Item.id.copy >= _Item.copies) || (_Item.firstPage!=_Item.lastPage);
-							if (_Item.pageMargin!=_PageMargin_Next)
+							if (_Item.pageMargin!=_PageMargin_Next || _ChangeJob==1)
 							{	
 							//	Error(LOG, 0, "PrintCtrl: PageMargin old=%d, new=%d", _Item.pageMargin, _PageMargin_Next);
 								clearBlockUsed = TRUE;
+								_ChangeJob = 2;
 							}
 							memcpy(&item, &_Item, sizeof(item));
 							item.lengthUnit = PQ_LENGTH_UNDEF;

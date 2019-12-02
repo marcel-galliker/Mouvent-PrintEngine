@@ -30,7 +30,7 @@
 
 //--- Defines -----------------------------------------------------------------
 // static int	_Trace=2;
-static int	_Trace=0;
+static int	_Trace=2;
 
 #define SIMU_OFF	0	// no simulation
 #define SIMU_WRITE	1	// write data to file

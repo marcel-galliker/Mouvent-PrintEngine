@@ -29,6 +29,7 @@ namespace RX_DigiPrint.Views.LH702View
         {
             InitializeComponent();
         }
+
         //--- Property ImgSettings ---------------------------------------
         private LH702_ImgSettings _ImgSettings;
         public LH702_ImgSettings  ImgSettings
