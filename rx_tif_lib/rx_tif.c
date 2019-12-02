@@ -623,7 +623,6 @@ int tif_load_simple	(const char *path, BYTE **buffer, int bufsize, SBmpInfo *pin
 	*_WarnStr=0;
 	_TIFFerrorHandler   = _tif_ErrorHandler;
 	_TIFFwarningHandler = _tif_WarningHandler;
-	memset(pinfo, 0, sizeof(SBmpInfo));
 	
 	if (file=TIFFOpen (path, "r"))
 	{

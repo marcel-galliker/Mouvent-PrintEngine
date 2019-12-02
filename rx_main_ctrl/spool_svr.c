@@ -528,11 +528,19 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 	default:			_SlideIsRight=TRUE;	break;
 	}
 
-	if (pitem->virtualPasses) 		
+	if (pitem->virtualPasses)
 	{
+		static int _lastId=0;
+		if (pid->id!=_lastId) _Pass=0;
+		_lastId = pid->id;
 		msg.virtualPasses = pitem->passes;
 		msg.virtualPass   = _Pass;
 		_Pass			  = (_Pass+1) % pitem->passes;
+	}
+	else 
+	{
+		_Pass=0;
+		msg.virtualPass=0;
 	}
 	
 //	TrPrintfL(TRUE, "send spool_print_file >>%s<<", filename);
@@ -548,7 +556,7 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 	
 //	spool_send_msg_2(CMD_PING, 0, NULL, TRUE);	// needed in linux to send the command without timeout!
 	_MsgSent+=cnt;
-	TrPrintfL(TRUE, "****** sent spool_print_file (id=%d, page=%d, copy=%d, scan=%d) to %d spoolers: _MsgSent=%d", pid->id, pid->page, pid->copy, pid->scan, cnt);
+	TrPrintfL(TRUE, "****** sent spool_print_file (id=%d, page=%d, copy=%d, scan=%d) to %d spoolers: _MsgSent=%d", pid->id, pid->page, pid->copy, pid->scan, cnt, _MsgSent);
 //	Error(LOG, 0, "spool_print_file Copy %d", pid->copy);
 	return REPLY_OK;
 }
@@ -670,7 +678,7 @@ static void _do_print_done_evt	(RX_SOCKET socket, SPrintDoneMsg *msg)
 {
 	for (int i=0; i<8*sizeof(_HeadBoardUsedFlags); i++)
 		if (_HeadBoardUsedFlags & (1<<i))
-			pc_print_done(msg->boardNo, msg);
+			pc_print_done(i, msg);
 }							
 
 //--- _do_log_evt -----------------------------------------------------

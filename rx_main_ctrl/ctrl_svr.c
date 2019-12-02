@@ -324,7 +324,7 @@ static int _prepare_config()
 	{
 		if(rx_def_is_tx(RX_Config.printer.type) && RX_Config.headsPerColor)
 		{
-			for (head=0; color<8; head++)
+			for (head=0; head<RX_Config.inkSupplyCnt * RX_Config.headsPerColor; head++)
 			{
 				RX_Config.headBoard[head/MAX_HEADS_BOARD].head[head%MAX_HEADS_BOARD].encoderNo = 7-(head/RX_Config.headsPerColor);
 			}

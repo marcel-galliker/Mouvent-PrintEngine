@@ -70,6 +70,7 @@ static int				_WakeupLen;
 static int				_LastWakeupLen=0; 
 
 static SPageId			_LastId;
+static int				_LastSplitId;
 static SPageId			_SendingId;
 static char				_LastFilePath[MAX_PATH];
 static SBmpInfo			_LastBmpInfo;
@@ -117,6 +118,7 @@ void data_init(RX_SOCKET socket, int headCnt)
 	_InIdx   = 0;
 	_OutIdx  = 0;
 	_SendIdx = 0;
+	_LastSplitId = 0;
 	_CacheInfo = FALSE;
 	_Abort   = FALSE;
 	if (_MaxMemory==0)
@@ -1019,7 +1021,13 @@ static void *_multicopy_thread(void* lpParameter)
 
 //--- _data_split -----------------------------------------------------------------------
 static int _data_split(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int lengthPx, int blkNo, int blkCnt, int flags, int clearBlockUsed, int same, SPrintListItem *pItem)
-{	
+{		
+	if (rx_def_is_scanning(RX_Spooler.printerType) && id->id!=_LastSplitId)
+	{
+		_LastSplitId = id->id;
+		memset(_BlkNo, 0, sizeof(_BlkNo));
+	}
+	
 	int test=pItem->splitInfo->test;
 	memset(pItem->splitInfo, 0, _HeadCnt * sizeof(SBmpSplitInfo));
 	for (int i=0; i<_HeadCnt; i++)
@@ -1027,7 +1035,7 @@ static int _data_split(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int length
 	memcpy(&pItem->id, id, sizeof(pItem->id));
 	pItem->flags     = flags;
 	pItem->headsUsed = 0;
-	
+		
 	switch(pBmpInfo->printMode)
 	{
 		case PM_SCANNING:
@@ -1458,7 +1466,7 @@ static int _data_split_scan_no_overlap(SPageId *id, SBmpInfo *pBmpInfo, int offs
 						TrPrintfL(TRUE, "SPLIT _BlkNo[%d][%d]: idx=%d, act=%d, cnt=%d, next=%d, blk0=%d, buffer=%03d, test=%d", pInfo->board, pInfo->head, idx, blk, pInfo->blkCnt, _BlkNo[pInfo->board][pInfo->head], pInfo->blk0, ctrl_get_bufferNo(*pInfo->data), pInfo->test);
 						rx_sleep(1);
 					}
-					TrPrintfL(TRUE, "Split[head=%d]: startPx=%d, WidthPx=%d, buffer=%03d, blk0=%d, blkCnt=%d", head, startPx, pInfo->widthPx, ctrl_get_bufferNo(*pInfo->data), pInfo->blk0, pInfo->blkCnt);
+					TrPrintfL(TRUE, "Split[head=%d]: startPx=%d, WidthPx=%d, FillBt=%d, buffer=%03d, blk0=%d, blkCnt=%d", head, startPx, pInfo->widthPx, pInfo->fillBt, ctrl_get_bufferNo(*pInfo->data), pInfo->blk0, pInfo->blkCnt);
 				}				
 
 				//--- increment ---
@@ -1636,8 +1644,6 @@ static void _data_fill_blk_scan(SBmpSplitInfo *psplit, int blkNo, BYTE *dst)
 					Error(ERR_ABORT, 0, "_data_fill_blk_scan lower border");
 				if (*test1!=0x66) 
 					Error(ERR_ABORT, 0, "_data_fill_blk_scan upper border");
-			//	printf("head=%d, blkNo=%d, memcpy(%d, %d), size=%d\n", psplit->head, blkNo, size+len, l, size+len+l);
-			//	dst[size+len] = 0x3C; // TEST
 				start=0;
 				srcWidthBt = psplit->srcWidthBt;
 				srcLineLen = psplit->srcLineLen;

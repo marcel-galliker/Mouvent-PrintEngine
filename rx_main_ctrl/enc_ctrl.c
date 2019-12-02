@@ -70,15 +70,14 @@ static UINT32	_WarnMarkReaderPos;
 typedef struct
 {
 	SPageId			id;
-	int				scans;
+	int				pages;
 } SBufItem;
 
-/*
+
 #define PRINT_BUF_SIZE	128
 static SBufItem	_PrintBuf[PRINT_BUF_SIZE];
 static int		_PrintBufIn;
 static int		_PrintBufOut;
-*/
 
 //--- Prototypes --------------------------------------------------------------
 
@@ -221,10 +220,10 @@ int	 enc_set_config(void)
 	_FirstPG		= TRUE;
 	_TotalPgCnt		= 0;
 	_WarnMarkReaderPos = 9;
-	/*
+	
 	memset(_PrintBuf, 0, sizeof(_PrintBuf));
 	_PrintBufIn = _PrintBufOut = 0;
-	*/
+	
 	for (no=0; no<ENC_CNT; no++) 
 	{
 		_Encoder[no].printGoCnt= -1;
@@ -412,11 +411,16 @@ static void _enc_start_printing(int no, SPrintQueueItem *pitem, int restart)
 }
 
 //--- enc_sent_document ------------------------
-void enc_sent_document(int pages)
+void enc_sent_document(int pages, SPageId *pId)
 {
+	//--- put to fifo
+	memcpy(&_PrintBuf[_PrintBufIn].id, pId, sizeof(SPageId));
+	_PrintBuf[_PrintBufIn].pages = pages;
+	_PrintBufIn = (_PrintBufIn+1)%PRINT_BUF_SIZE;
+	/*
 	_TotalPgCnt += pages;
 	_FirstPG = TRUE;
-	TrPrintf(TRUE, "enc_sent_document(%d) _TotalPgCnt=%d", pages, _TotalPgCnt);
+	*/
 }
 
 //--- enc_set_pg ----------------------------------------
@@ -424,6 +428,14 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 {
 	int no;
 	
+	if (!memcmp(pId, &_PrintBuf[_PrintBufOut].id, sizeof(SPageId)))
+	{
+		_TotalPgCnt += _PrintBuf[_PrintBufOut].pages;
+		_FirstPG = TRUE;
+		_PrintBufOut = (_PrintBufOut+1)%PRINT_BUF_SIZE;
+		TrPrintf(TRUE, "enc_sent_document(%d) _TotalPgCnt=%d", _PrintBuf[_PrintBufOut].pages, _TotalPgCnt);
+	}
+		
 	if (pId->scan==0xffffffff) return REPLY_OK; // flush
 
 //	Error(LOG, 0, "enc_set_pg");

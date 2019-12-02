@@ -1187,13 +1187,13 @@ static void _fpga_check_fp_errors(int printDone)
 					switch(n)
 					{
 					case 0: 	fpga_trace_registers("img_line_err_0", TRUE);
-								Error(ERR_ABORT, 0, "Head[%d]: 1st img-line missing in FIFO: cnt=%d, imgIn=%d, PG=%d", head, Fpga.error->img_line_err[n][head], RX_HBStatus[0].head[head].imgInCnt, RX_HBStatus[0].head[head].printGoCnt);
+								Error(ERR_ABORT, 0, "Head[%d]: 1st Data Block missing: cnt=%d, imgIn=%d, PG=%d", head, Fpga.error->img_line_err[n][head], RX_HBStatus[0].head[head].imgInCnt, RX_HBStatus[0].head[head].printGoCnt);
 								err=TRUE;
 								break;
 					case 1: 	fpga_trace_registers("img_line_err_1", TRUE);
-								Error(ERR_ABORT, 0, "Head[%d]: 1st img-line missing due to no img-info: imgIn=%d, PG=%d", head, RX_HBStatus[0].head[head].imgInCnt, RX_HBStatus[0].head[head].printGoCnt);
-								rx_sleep(100);
-								Error(ERR_ABORT, 0, "Head[%d]: 1st img-line missing due to no img-info: cnt=%d, imgIn=%d, PG=%d", head, Fpga.error->img_line_err[n][head], RX_HBStatus[0].head[head].imgInCnt, RX_HBStatus[0].head[head].printGoCnt);
+								Error(ERR_ABORT, 0, "Head[%d]: img-info missing: imgIn=%d, PG=%d", head, RX_HBStatus[0].head[head].imgInCnt+1, RX_HBStatus[0].head[head].printGoCnt+1);
+							//	rx_sleep(100);
+							//	Error(ERR_ABORT, 0, "Head[%d]: 1st img-line missing due to no img-info: cnt=%d, imgIn=%d, PG=%d", head, Fpga.error->img_line_err[n][head], RX_HBStatus[0].head[head].imgInCnt, RX_HBStatus[0].head[head].printGoCnt);
 								err=TRUE;
 								break;
 					case 2: 	fpga_trace_registers("img_line_err_2", TRUE);
@@ -1201,7 +1201,7 @@ static void _fpga_check_fp_errors(int printDone)
 								err=TRUE;
 								break;
 					case 3: 	fpga_trace_registers("img_line_err_3", TRUE);
-								Error(ERR_ABORT, 0, "Head[%d]: missing a img-line in FIFO (not 1st img-line): cnt=%d, imgIn=%d, PG=%d", head, Fpga.error->img_line_err[n][head], RX_HBStatus[0].head[head].imgInCnt, RX_HBStatus[0].head[head].printGoCnt);
+								Error(ERR_ABORT, 0, "Head[%d]: Data Block missing: cnt=%d, imgIn=%d, PG=%d", head, Fpga.error->img_line_err[n][head], RX_HBStatus[0].head[head].imgInCnt, RX_HBStatus[0].head[head].printGoCnt);
 								err=TRUE;
 								break;	
 					}

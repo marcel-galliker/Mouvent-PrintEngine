@@ -119,6 +119,7 @@ static void _on_error(ELogItemType type, char *deviceStr, int no, char *msg)
 											Error(LOG, 0, "STOP Printing after LOG_TYPE_ERROR_ABORT");
 											pc_abort_printing(); 
 										} break;
+		default: break;
 		}
 		lh702_on_error(type, deviceStr, no, msg);
 		gui_send_printer_status(&RX_PrinterStatus);
@@ -128,8 +129,6 @@ static void _on_error(ELogItemType type, char *deviceStr, int no, char *msg)
 //--- pc_start_printing -------------------------------------------------------
 int pc_start_printing(void)
 {	
-	int i;
-	
 	TrPrintfL(TRUE, "pc_start_printing printState=%d, (%d)", RX_PrinterStatus.printState, ps_ready_power);
 	ERR_z_in_print = FALSE;
 	if (RX_PrinterStatus.printState==ps_ready_power || RX_PrinterStatus.printState==ps_webin)
@@ -355,7 +354,7 @@ static void _load_test(void)
 //--- _get_image_size --------------------------------------------------------
 static int _get_image_size(UINT32 gap)
 {
-	int length;
+	UINT32 length;
 
 	if (tif_get_size(_DataPath, 0, gap, &length, NULL, NULL)==REPLY_OK) return length;
 
@@ -374,13 +373,13 @@ static void _local_path(const char *global, char *local)
 	char *ch;
 	char sharename[MAX_PATH], str[MAX_PATH];
 	
-	if (pos=str_start(global, PATH_RIPPED_DATA_DRIVE))
+	if ((pos=str_start(global, PATH_RIPPED_DATA_DRIVE)))
 		sprintf(local, "//%s/%s%s", RX_CTRL_MAIN, PATH_RIPPED_DATA_DIR,  &global[pos]);
 	else strcpy(local, global);
 	for (ch=local; *ch; ch++) if(*ch=='\\') *ch='/';
 	
 	sprintf(sharename, "//%s/%s", RX_CTRL_MAIN, PATH_RIPPED_DATA_DIR);
-	if (pos=str_start(local, sharename))
+	if ((pos=str_start(local, sharename)))
 	{	
 		strcpy(str, &local[pos]);
 		sprintf(local, "%s%s", PATH_RIPPED_DATA, str);
@@ -475,7 +474,7 @@ static int _print_next(void)
 			{
 				if (_PreloadCnt>RX_TestImage.scans) _PreloadCnt = RX_TestImage.scans;
 				machine_set_printpar(&RX_TestImage);
-				enc_sent_document(RX_TestImage.copiesTotal);
+				enc_sent_document(RX_TestImage.copiesTotal, &RX_TestImage.id);
 				pq_sent_document(RX_TestImage.copiesTotal);
 			}
 			return REPLY_OK;
@@ -489,11 +488,11 @@ static int _print_next(void)
 			_ScanLengthPx = 0;
 			_CopiesStart  = 0;
 			_ChangeJob	  = FALSE;
-			_first		  = TRUE;
 			SPrintQueueItem *item = pq_get_next_item();
 			if (item) 
 			{
 				memcpy(&_Item, item, sizeof(_Item));
+				_first		  = TRUE;
 						
 				_local_path(_Item.filepath, _FilePathLocal);
 				
@@ -596,6 +595,7 @@ static int _print_next(void)
 			}
 			else
 			{
+				if (_first) TrPrintfL(TRUE, "NEW FILE id=%d, page=%d, copy=%d, scan=%d", _Item.id.id, _Item.id.page, _Item.id.copy, _Item.id.scan);
 				if (!_first) pq_next_page(&_Item, &_Item.id);
 				TrPrintfL(TRUE, "pq_next_page id=%d, page=%d, copy=%d, scan=%d", _Item.id.id, _Item.id.page, _Item.id.copy, _Item.id.scan);
 				if (_Item.id.copy>_Item.copies || _Item.id.page>_Item.lastPage || _ChangeJob==2)
@@ -603,17 +603,17 @@ static int _print_next(void)
 				//	Error(LOG, 0, "enc_sent_document, _Item.copiesTotal=%d, _CopiesStart=%d, _TotalPgCnt=%d", _Item.copiesTotal, _CopiesStart, _Item.copiesTotal-_CopiesStart);
 					if (_Scanning && arg_simuEncoder)	
 					{
-						enc_sent_document(_Item.scans);
+						enc_sent_document(_Item.scans, &_Item.id);
 						pq_sent_document(_Item.scans);
 					}
 					else if (RX_Config.printer.type==printer_LH702)
 					{
-						enc_sent_document(_Item.id.copy-_CopiesStart);
+						enc_sent_document(_Item.id.copy-_CopiesStart, &_Item.id);
 						pq_sent_document(_Item.id.copy-_CopiesStart);							
 					}
 					else
 					{
-						enc_sent_document(_Item.copiesTotal-_CopiesStart);
+						enc_sent_document(_Item.copiesTotal-_CopiesStart, &_Item.id);
 						pq_sent_document(_Item.copiesTotal-_CopiesStart);
 					}
 					TrPrintf(TRUE, "Document sent >>%s<<, copiesTotal=%d, _CopiesStart=%d", _Item.filepath, _Item.copiesTotal, _CopiesStart);
@@ -707,7 +707,7 @@ static int _print_next(void)
 						_Item.scans			= (INT32)((length+RX_Spooler.maxOffsetPx+barwidth-1) / (barwidth/_Item.passes));								
 					//	_ScansNext			= (length+RX_Spooler.maxOffsetPx%barwidth+barwidth-1) / (barwidth/_Item.passes);								
 						_ScansNext			= _Item.scans-_Item.scansStart;
-						_Item.scansPrinted	= (INT32)(((length-_ScanLengthPx)+barwidth-1) / (barwidth/_Item.passes));
+						_Item.scansPrinted	= (INT32)(((length-_ScanLengthPx)+(barwidth/_Item.passes)-1) / (barwidth/_Item.passes));
 						if (_Item.lengthUnit==PQ_LENGTH_COPIES)
 							_Item.scansTotal    = _Item.scans;
 						else

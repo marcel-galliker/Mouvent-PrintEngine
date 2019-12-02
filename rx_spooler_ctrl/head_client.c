@@ -137,10 +137,7 @@ int hc_head_board_cfg(RX_SOCKET socket, SHeadBoardCfg* cfg)
 	_StressTestRunning = FALSE;
 	
 	if (_Simulation) 
-	{
-		Error(WARN, 0, "Head-Client in simulation");
-		cfg->present=dev_simu;
-	//	rx_mkdir(PATH_TEMP "test");
+	{ //--- prepare simulation directory ------------------------------		
 		rx_mkdir(PATH_HOME PATH_RIPPED_DATA_DIR "trace/");
 		for (i=0; i<SIZEOF(RX_Color); i++)
 		{
@@ -151,11 +148,18 @@ int hc_head_board_cfg(RX_SOCKET socket, SHeadBoardCfg* cfg)
 			}
 		}
 		#ifndef linux
-		system("del d:\\temp\\test\\*.* /S /Q");
+		system("del "  PATH_HOME PATH_RIPPED_DATA_DIR "trace\\*.* /S /Q");
 		#endif
 		memset(_SimuNo, 0, sizeof(_SimuNo));
+	}
+
+	if (_Simulation) 
+	{
+		Error(WARN, 0, "Head-Client in simulation");
+		if (_Simulation) cfg->present=dev_simu;
 		if (_Simulation==SIMU_READ) rx_mem_clear_caches();
 	}
+	
 	memset(_TestImgNo, 0, sizeof(_TestImgNo));
 	memset(_TestBlockSent, 0, sizeof(_TestBlockSent));
 	memset(_TestBlockUsedReqTime, 0, sizeof(_TestBlockUsedReqTime));
@@ -392,7 +396,13 @@ void hc_send_next()
 									}
 									break;
 
-				case dev_on:		_send_image_data(pInfo);
+				case dev_on:		//if (pInfo->pListItem->id.scan<2 && pInfo->colorCode==0) 
+									if (FALSE)
+									{										
+										_save_to_file(pInfo);
+										Error(LOG, 0, "File (id=%d, page=%d, copy=%d, scan=%d) buffer=%03d, blk0=%d, blkCnt=%d saved to File", pInfo->pListItem->id.id, pInfo->pListItem->id.page, pInfo->pListItem->id.copy, pInfo->pListItem->id.scan, ctrl_get_bufferNo(*pInfo->data), pInfo->blk0, pInfo->blkCnt);
+									}
+									_send_image_data(pInfo);
 									break;
 
 				default:			Error(ERR_ABORT, 0, "Headboard[%d].Present=%d, undefined", pInfo->board, _HBPar[pInfo->board]->cfg.present);

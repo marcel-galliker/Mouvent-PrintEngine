@@ -166,7 +166,7 @@ typedef enum ENiosFluidErr
 //	err_overpressure		= 0x00000040,
 //	err_inkpres_not_reached = 0x00000080,
 	err_watchdog	        = 0x00000100,	
-//	err_printhead	        = 0x00000200,	
+	err_printhead	        = 0x00000200,	
 } ENiosFluidErr;
 
 typedef enum ENiosInkSupplyErr
