@@ -95,12 +95,18 @@ static void _main_loop()
 			
 		case printer_LB702_UV: 		
 		case printer_LB702_WB:		
-		case printer_LH702:			if (RX_StepperCfg.boardNo == 0) lb702_main(ticks, menu); 
+		case printer_LH702:			/*
+									if (RX_StepperCfg.boardNo == 0) lb702_main(ticks, menu); 
 									else							lbrob_main(ticks, menu);	
+									*/
+									lb702_main(ticks, menu); 
 									break;
 
-		case printer_DP803: 		/*if (RX_StepperCfg.boardNo == 0)*/ dp803_main(ticks, menu); 
-									//else							lbrob_main(ticks, menu);	
+		case printer_DP803: 		/*
+									if (RX_StepperCfg.boardNo == 0) dp803_main(ticks, menu); 
+									else							lbrob_main(ticks, menu);	
+									*/
+									dp803_main(ticks, menu);
 									break;
 			
 		default:					test_main(ticks, menu); break;			
@@ -124,12 +130,18 @@ static void _main_loop()
 
 			case printer_LB702_UV:
 			case printer_LB702_WB:		
-			case printer_LH702:			if (RX_StepperCfg.boardNo == 0) _AppRunning = lb702_menu(); 
+			case printer_LH702:			/*
+										if (RX_StepperCfg.boardNo == 0) _AppRunning = lb702_menu(); 
 										else							_AppRunning = lbrob_menu(); 
+										*/
+										_AppRunning = lb702_menu();
 										break;
 
-			case printer_DP803: 		/*if (RX_StepperCfg.boardNo == 0)*/ _AppRunning = dp803_menu(); 
-										//else							_AppRunning = lbrob_menu(); 
+			case printer_DP803: 		/*
+										if (RX_StepperCfg.boardNo == 0) _AppRunning = dp803_menu(); 
+										else							_AppRunning = lbrob_menu(); 
+										*/
+										_AppRunning = dp803_menu();
 										break;
 			
 			default:					_AppRunning = test_menu(); break;				
@@ -184,12 +196,18 @@ int main(int argc, char** argv)
 		
 	case printer_LB702_UV: 		
 	case printer_LB702_WB: 		
-	case printer_LH702:			if (RX_StepperCfg.boardNo == 0) lb702_init(); 
+	case printer_LH702:			/*
+								if (RX_StepperCfg.boardNo == 0) lb702_init(); 
 								else						    lbrob_init();
+								*/
+								lb702_init();
 								break;
 		
-	case printer_DP803: 		if (RX_StepperCfg.boardNo == 0) dp803_init(); 
+	case printer_DP803: 		/*	
+								if (RX_StepperCfg.boardNo == 0) dp803_init(); 
 								else						    lbrob_init();
+								*/
+								dp803_init();
 								break;
 	default:					test_init();
 	}			

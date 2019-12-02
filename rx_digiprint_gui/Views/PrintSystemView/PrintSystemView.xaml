@@ -75,9 +75,13 @@
                         <StackPanel Orientation="Horizontal">
                             <rxView:PrintSystemGrid/>
                             <rxView:OffsetsGrid x:Name="OffsetsGrid"/>
+                            <Grid x:Name="StepperGrid"/>
+                            <!--
                             <rxView:StepperGrid x:Name="StepperGrid"/>
                             <rxView:StepperGridCleaf x:Name="StepperGridCleaf"/>
                             <rxView:StepperGridDP803 x:Name="StepperGridDP803"/>
+                            <rxView:StepperGridLB702 x:Name="StepperGridLB702"/>
+                            -->
                             <rxView:EncoderView/>
                             <rxView:ChillerView/>
                         </StackPanel>

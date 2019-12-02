@@ -216,7 +216,7 @@ static void _lbrob_display_status(void)
 	enc0_mm = Fpga.encoder[MOTOR_CAP].pos * 1000000.0 / CAP_INC_PER_METER;
 	int printhead_soll = POS_PRINTHEADS_UM;
 
-	term_printf("TX Robot ---------------------------------\n");
+	term_printf("LB Robot ---------------------------------\n");
 	term_printf("moving:         %d		cmd: %08x\n", RX_StepperStatus.info.moving, _CmdRunning);
 	term_printf("Sensor Reference Motor: %d\n", RX_StepperStatus.info.x_in_ref);
 	term_printf("z in reference: %d  ", RX_StepperStatus.info.z_in_ref);

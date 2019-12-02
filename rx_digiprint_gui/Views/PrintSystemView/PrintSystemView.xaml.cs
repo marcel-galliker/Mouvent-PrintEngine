@@ -58,26 +58,26 @@ namespace RX_DigiPrint.Views.PrintSystemView
            //     OffsetsGrid.Visibility    = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_test_slide_only)? Visibility.Collapsed : Visibility.Visible;
                 switch(RxGlobals.PrintSystem.PrinterType)
                 {
-                case EPrinterType.printer_cleaf:    StepperGridCleaf.Visibility=Visibility.Visible;
-                                                    StepperGridDP803.Visibility = Visibility.Collapsed;
-                                                    StepperGrid.Visibility=Visibility.Collapsed;
+                case EPrinterType.printer_cleaf:    StepperGrid.Children.Clear();
+                                                    StepperGrid.Children.Add(new StepperGridCleaf());
                                                     break; 
 
-                case EPrinterType.printer_DP803:    StepperGridDP803.Visibility = Visibility.Visible;
-                                                    StepperGridCleaf.Visibility=Visibility.Collapsed;
-                                                    StepperGrid.Visibility=Visibility.Collapsed;
+                case EPrinterType.printer_DP803:    StepperGrid.Children.Clear();
+                                                    StepperGrid.Children.Add(new StepperGridDP803());
+                                                    break;
+
+                case EPrinterType.printer_LB702_UV:
+                case EPrinterType.printer_LB702_WB: 
+                case EPrinterType.printer_LH702:    StepperGrid.Children.Clear();
+                                                    StepperGrid.Children.Add(new StepperGridLB702());
                                                     break;
 
                 case EPrinterType.printer_TX801:
-                case EPrinterType.printer_TX802:
-                                                    StepperGridDP803.Visibility = Visibility.Collapsed;
-                                                    StepperGridCleaf.Visibility=Visibility.Collapsed;
-                                                    StepperGrid.Visibility=Visibility.Collapsed;
+                case EPrinterType.printer_TX802:    StepperGrid.Children.Clear();
                                                     break;            
 
-                default:                            StepperGridDP803.Visibility = Visibility.Collapsed;
-                                                    StepperGridCleaf.Visibility=Visibility.Collapsed;
-                                                    StepperGrid.Visibility=Visibility.Visible;
+                default:                            StepperGrid.Children.Clear();
+                                                    StepperGrid.Children.Add(new StepperGrid());
                                                     break;                               
                 }
             }            

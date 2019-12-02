@@ -416,7 +416,7 @@ static void _step_set_config(int no)
 	cfg.printerType		   = RX_Config.printer.type;
 	cfg.use_printhead_en   = RX_Config.printer.type==printer_LH702;
 	cfg.material_thickness = plc_get_thickness();
-	cfg.boardNo=0;
+	cfg.boardNo=no;
 		
 	if (RX_Config.printer.type==printer_DP803 && !strcmp(RX_Hostname, "LB701-0001"))
 	{
@@ -425,11 +425,11 @@ static void _step_set_config(int no)
 	}
 	switch(_StepperType)
 	{
-	case STEPPER_CLEAF:	stepc_init		(no, _step_Socket[no]); cfg.boardNo = no; break;
-	case STEPPER_TX:	steptx_init		(no, _step_Socket[no]); cfg.boardNo = no; break;
+	case STEPPER_CLEAF:	stepc_init		(no, _step_Socket[no]); break;
+	case STEPPER_TX:	steptx_init		(no, _step_Socket[no]); break;
 	case STEPPER_LB:	steplb_init		(no, _step_Socket[no]); break;
-	case STEPPER_DP:	stepdp_init		(no, _step_Socket[no]); cfg.boardNo = no; break;
-	case STEPPER_TEST:	steptest_init	(no, _step_Socket[no]); cfg.boardNo = no; break;
+	case STEPPER_DP:	stepdp_init		(no, _step_Socket[no]); break;
+	case STEPPER_TEST:	steptest_init	(no, _step_Socket[no]); break;
 	default: 			steps_init		(    _step_Socket[0]);
 	}
 

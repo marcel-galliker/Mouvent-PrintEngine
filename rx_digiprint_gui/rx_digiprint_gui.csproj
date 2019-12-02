@@ -611,6 +611,9 @@
     <Compile Include="Views\PrintSystemView\StepperGridDP803.xaml.cs">
       <DependentUpon>StepperGridDP803.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\PrintSystemView\StepperGridLB702.xaml.cs">
+      <DependentUpon>StepperGridLB702.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Settings\NetworkItem.xaml.cs">
       <DependentUpon>NetworkItem.xaml</DependentUpon>
     </Compile>
@@ -1121,6 +1124,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\PrintSystemView\StepperGridDP803.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\PrintSystemView\StepperGridLB702.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
