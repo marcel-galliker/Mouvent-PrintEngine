@@ -114,6 +114,7 @@ namespace RX_DigiPrint.Models
                     foreach (string file in files)
                     {
                         if (file.ToLower().EndsWith(".bmp")) _List.Add(new DirItem(){FileName=global_path(file)});
+                        else if (file.ToLower().EndsWith(".rlj")) _List.Add(new DirItem(){FileName=global_path(file)});
                         else if (!IsRipped)
                         {
                             if (file.ToLower().EndsWith(".gif") || file.ToLower().EndsWith(".tif") || file.ToLower().EndsWith(".jpeg") || file.ToLower().EndsWith(".png")

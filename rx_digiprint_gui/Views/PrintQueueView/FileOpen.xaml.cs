@@ -6,12 +6,12 @@ using RX_DigiPrint.Services;
 using RX_DigiPrint.Views.UserControls;
 using System;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
+using System.IO;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Threading;
+using System.Xml;
 
 namespace RX_DigiPrint.Views.PrintQueueView
 {
@@ -230,6 +230,10 @@ namespace RX_DigiPrint.Views.PrintQueueView
                 else dir = item.FileName;
                 DirTree.ActDir = dir;
             }
+            else if (item.FileType==DirItem.ENFileType.RunList)
+            {
+                _load_runList(item);
+            }
             else
             {
                 _ActPath = DirTree.ActDir;
@@ -255,6 +259,61 @@ namespace RX_DigiPrint.Views.PrintQueueView
                 Properties.Settings.Default.Save();
 
                 Visibility = Visibility.Hidden;
+            }
+        }
+        //--- _load_runList -----------------------------------------------------
+        private void _load_runList(DirItem item)
+        {
+            XmlTextReader xml;
+            string path=Dir.local_path(item.FileName);
+            string dir =Path.GetDirectoryName(path) + "\\";
+            if (File.Exists(path))
+            {
+                //--- defaults ---
+                xml = new XmlTextReader(path);
+                try
+                {
+                    while(xml.Read())
+                    {
+                        if (xml.NodeType==XmlNodeType.Element && xml.Name.Equals("RunListsJob"))
+                        {
+                            for  (int i=0; i<xml.AttributeCount; i++)
+                            {
+                                xml.MoveToAttribute(i);
+                                var prop = GetType().GetProperty(xml.Name);
+                            }
+                            xml.MoveToElement();
+                        }
+                        if (xml.NodeType==XmlNodeType.Element && xml.Name.Equals("RunList"))
+                        {
+                            PrintQueueItem pq = new PrintQueueItem();
+
+                            for  (int i=0; i<xml.AttributeCount; i++)
+                            {
+                                xml.MoveToAttribute(i);
+                                if (xml.Name.Equals("Filename"))
+                                {
+                                    pq.FilePath = dir +xml.Value;
+                                    pq.read_image_properties(pq.FilePath);
+                                    pq.LoadDefaults();
+                                }
+                                if (xml.Name.Equals("CopiesCount"))
+                                {
+                                    pq.LengthUnit = EPQLengthUnit.copies;
+                                    pq.Copies     = Rx.StrToInt32(xml.Value); 
+                                }
+                                if (xml.Name.Equals("PageStart")) pq.FirstPage = Rx.StrToInt32(xml.Value); 
+                                if (xml.Name.Equals("PageEnd"))   pq.LastPage  = Rx.StrToInt32(xml.Value); 
+                            }
+                            xml.MoveToElement();
+                            pq.SendMsg(TcpIp.CMD_ADD_PRINT_QUEUE);
+                        }
+                    }            
+                }
+
+                catch(Exception)
+                {
+                }            
             }
         }
 

@@ -29,7 +29,8 @@ namespace RX_DigiPrint.Models
             Undef,
             Directory,
             SourceFile,
-            DataFile
+            DataFile,
+            RunList
         };
 
         private int _MaxHeight=500;
@@ -148,7 +149,8 @@ namespace RX_DigiPrint.Models
                 if (IsDirectory) FileType = ENFileType.Directory;
                 else
                 {
-                    FileType = ENFileType.SourceFile;
+                    if (_FileName.ToLower().EndsWith(".rlj")) FileType = ENFileType.RunList;
+                    else                                      FileType = ENFileType.SourceFile;
                     Date = info.LastWriteTime.ToString("d");//, CultureInfo.CreateSpecificCulture("en-US"));
                     Time = info.LastWriteTime.ToString("H:mm");
                     Thread thread = new Thread(()=>_create_preview(info, this));
@@ -184,15 +186,15 @@ namespace RX_DigiPrint.Models
             string thumb_name = info.Directory +"\\"+ Path.GetFileNameWithoutExtension(info.FullName) + ".png";
             thumb_name = Path.GetTempPath() + "rx_thumb_nails\\"+thumb_name.Remove(0, info.Directory.Root.ToString().Length);
             Console.WriteLine("thumb_name-mag >>{0}<<", thumb_name);
-
         
             if (OnPreviewStarted!=null) OnPreviewStarted();
             
             Directory.CreateDirectory(Path.GetDirectoryName(thumb_name));
 
+
             FileInfo thumb_info = new FileInfo(thumb_name);
             double width, height;
-            if (thumb_info.LastWriteTime < info.LastWriteTime)
+            if (FileType==ENFileType.RunList || thumb_info.LastWriteTime < info.LastWriteTime)
             {
                 string path = Dir.local_path(_FileName);
                 if (_FileName.EndsWith(".rxd"))
@@ -204,16 +206,25 @@ namespace RX_DigiPrint.Models
 
                 Console.WriteLine("File >>{0}<< Read", path);
                 Image image;
-                try
+                if (FileType==ENFileType.RunList) 
                 {
-                    image = Image.FromFile(path);
-                }
-                catch (Exception)
-                {
-                    BitmapImage img  = new BitmapImage(new Uri("pack://application:,,,/Resources/Bitmaps/file.png", UriKind.RelativeOrAbsolute));
+                    BitmapImage img  = new BitmapImage(new Uri("pack://application:,,,/Resources/Bitmaps/runlist.png", UriKind.RelativeOrAbsolute));
                     Bitmap bmp = RxImaging.BitmapImage2Bitmap(img);
                     image = Image.FromHbitmap(bmp.GetHbitmap());
                 }
+                else
+                {
+                    try
+                    {
+                        image = Image.FromFile(path);
+                    }
+                    catch (Exception)
+                    {
+                        BitmapImage img  = new BitmapImage(new Uri("pack://application:,,,/Resources/Bitmaps/file.png", UriKind.RelativeOrAbsolute));
+                        Bitmap bmp = RxImaging.BitmapImage2Bitmap(img);
+                        image = Image.FromHbitmap(bmp.GetHbitmap());
+                    }
+                };
                 width = image.Width;
                 height= image.Height;
                 Console.WriteLine("File >>{0}<< w={1}, h={2}", _FileName, image.Width, image.Height);
