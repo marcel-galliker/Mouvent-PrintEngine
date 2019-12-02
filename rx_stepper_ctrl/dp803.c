@@ -138,6 +138,7 @@ void dp803_main(int ticks, int menu)
 			if (!RX_StepperStatus.info.headUpInput_0) Error(ERR_CONT, 0, "dp803: Command REFERENCE: End Sensor 1 NOT HIGH");
 			if (!RX_StepperStatus.info.headUpInput_1) Error(ERR_CONT, 0, "dp803: Command REFERENCE: End Sensor 2 NOT HIGH");
 			RX_StepperStatus.info.ref_done =  RX_StepperStatus.info.headUpInput_0 && RX_StepperStatus.info.headUpInput_1;
+			Error(LOG, 0, "Reference done: IN0=%d, IN1=%d, done=%d", RX_StepperStatus.info.headUpInput_0, RX_StepperStatus.info.headUpInput_1, RX_StepperStatus.info.ref_done);
 			motors_reset(MOTOR_Z_BITS);
 		}
 		else if (motors_error(MOTOR_Z_BITS, &motor))
@@ -149,7 +150,7 @@ void dp803_main(int ticks, int menu)
 		RX_StepperStatus.info.z_in_print  = (_CmdRunning == CMD_CAP_PRINT_POS && RX_StepperStatus.info.ref_done);
 		RX_StepperStatus.info.z_in_cap    = (_CmdRunning == CMD_CAP_CAPPING_POS);
 
-//		Error(LOG, 0, "Command Done 0x%08x, ref_done=%d, z_in_ref=%d, z_in_print=%d", _CmdRunning,RX_StepperStatus.info.ref_done, RX_StepperStatus.info.z_in_ref, RX_StepperStatus.info.z_in_print);
+//		Error(LOG, 0, "Command Done 0x%08x, ref_done=%d, z_in_ref=%d, z_in_print=%d", _CmdRunning,7, RX_StepperStatus.info.z_in_ref, RX_StepperStatus.info.z_in_print);
 
 		if (_CmdRunning == CMD_CAP_REFERENCE && _PrintPos_New) 
 		{
