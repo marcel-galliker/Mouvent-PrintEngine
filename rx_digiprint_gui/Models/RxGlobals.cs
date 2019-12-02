@@ -13,6 +13,7 @@ namespace RX_DigiPrint.Models
     public class RxGlobals
     {
         public static RxTimer           Timer             = new RxTimer(500);
+        public static Settings          Settings          = new Settings();
         public static PrinterProperties PrinterProperties = new PrinterProperties(){init=true};
         public static LogList           Log               = new LogList();
         public static EventList         Events            = new EventList();

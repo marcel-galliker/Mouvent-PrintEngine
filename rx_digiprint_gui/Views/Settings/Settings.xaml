@@ -47,12 +47,18 @@
                             <RowDefinition Height="auto"/>
                             <RowDefinition Height="auto"/>
                         </Grid.RowDefinitions>
-                        <!--
-                        <TextBlock      Grid.Row="0" Grid.Column="0" Text="Name"/>
-                        <rx:RxTextBox   Grid.Row="0" Grid.Column="1" Margin="2" Text="{Binding Name}"/>
-                        -->
-                        <TextBlock      Grid.Row="1" Grid.Column="0" Text="IP Address"/>                        
-                        <rx:RxTextBox   Grid.Row="1" Grid.Column="1" Margin="2" Text="{Binding IP_Address}"/>
+                        <TextBlock      Grid.Row="0" Grid.Column="0" Text="IP Address"/>                        
+                        <rx:RxTextBox   Grid.Row="0" Grid.Column="1" Margin="2" Text="{Binding IP_Address}"/>
+                        <TextBlock      Grid.Row="1" Grid.Column="0" Text="Units"/>
+                        <igWPF:XamComboEditor Grid.Row="1" Grid.Column="1"
+                            x:Name="CB_Units"
+                            HorizontalAlignment="Stretch"
+                            Value="{Binding Units}"
+                            DisplayMemberPath="Display"
+                            ValuePath="Value" 
+                            DropDownResizeMode="None"
+                            />
+
                         <!--
                          <igWPF:XamComboEditor Grid.Row="1" Grid.Column="1"
                             HorizontalAlignment="Stretch"

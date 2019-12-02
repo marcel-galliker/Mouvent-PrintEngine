@@ -1,11 +1,11 @@
 ﻿using RX_Common;
+using RX_DigiPrint.Models.Enums;
 using RX_DigiPrint.Services;
 using RX_DigiPrint.Views.UserControls;
 using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
-using System.Runtime.InteropServices;
 
 namespace RX_DigiPrint.Models
 {
@@ -20,7 +20,7 @@ namespace RX_DigiPrint.Models
             {
                 _Path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Radex";
             }
-            Settings.The_Settings.Load(_Path);
+            RxGlobals.Settings.Load(_Path);
         }
 
         public object Clone()
@@ -86,8 +86,9 @@ namespace RX_DigiPrint.Models
         {
             set 
             { 
-                Name        = Settings.The_Settings.Name;
-                IP_Address  = Settings.The_Settings.IP_Addr;
+                Name        = RxGlobals.Settings.Name;
+                IP_Address  = RxGlobals.Settings.IP_Addr;
+                Units       = RxGlobals.Settings.Units;
                 use();
             }
         }
@@ -103,9 +104,10 @@ namespace RX_DigiPrint.Models
         //--- Save --------------------------------------------
         public void Save()
         {
-            Settings.The_Settings.Name     = Name;
-            Settings.The_Settings.IP_Addr  = IP_Address;
-            Settings.The_Settings.Save(_Path);
+            RxGlobals.Settings.Name     = Name;
+            RxGlobals.Settings.IP_Addr  = IP_Address;
+            RxGlobals.Settings.Units    = Units;
+            RxGlobals.Settings.Save(_Path);
             use();
         }
 
@@ -133,6 +135,14 @@ namespace RX_DigiPrint.Models
             set { if(SetProperty(ref _IP_Address, value)) Changed=true; }
         }
 
+        //--- Property Units ---------------------------------------
+        private EUnits _Units;
+        public EUnits Units
+        {
+            get { return _Units; }
+            set { if(SetProperty(ref _Units, value)) Changed=true; }
+        }
+
         //--- Property IP_AddressList ---------------------------------------
         private ObservableCollection<string> _IP_AddressList;
         public ObservableCollection<string> IP_AddressList
@@ -153,7 +163,7 @@ namespace RX_DigiPrint.Models
         //--- RippedDataPath -----------------------------------
         public string RippedDataPath
         {
-            get { return Settings.The_Settings.RippedDataPath;}
+            get { return RxGlobals.Settings.RippedDataPath;}
             set { string path=value;}
         }
 

@@ -403,6 +403,7 @@
     <Compile Include="Models\Enums\EN_SpreadRoller.cs" />
     <Compile Include="Models\Enums\EN_SweepDirection.cs" />
     <Compile Include="Models\Enums\EN_TestBmp.cs" />
+    <Compile Include="Models\Enums\EN_Units.cs" />
     <Compile Include="Models\Enums\EN_UserTypes.cs" />
     <Compile Include="Models\Enums\FieldSeparator.cs" />
     <Compile Include="Models\Enums\FileFormat.cs" />

@@ -114,9 +114,17 @@ namespace RX_Common
         }
 
         //--- StrNumFormat ---------------------------------------
-        public static string StrNumFormat(string val, int nachkomma)
+        public static string StrNumFormat(string val, int decimals, double factor)
         {
          //   return val;
+
+            if (factor!=1.0)
+            {
+                double value=StrToDouble(val);
+                value *= factor;
+                return Math.Round(value, decimals).ToString();
+            }
+
             StringBuilder str = new StringBuilder(32);
             int i;
             int pos = val.IndexOf('.');
@@ -127,18 +135,18 @@ namespace RX_Common
                 str.Append(val[i]);
                 if ((i+1<pos) && ((pos-i)%3)==1) str.Append('\'');
             }
-            if (nachkomma>0)
+            if (decimals>0)
             {
                 str.Append('.'); pos++;
-                while (pos<val.Length && nachkomma>0)
+                while (pos<val.Length && decimals>0)
                 {
                     str.Append(val[pos++]);
-                    nachkomma--;
+                    decimals--;
                 }
-                while (nachkomma>0)
+                while (decimals>0)
                 {
                     str.Append('0');
-                    nachkomma--;
+                    decimals--;
                 }
             }
             return str.ToString();

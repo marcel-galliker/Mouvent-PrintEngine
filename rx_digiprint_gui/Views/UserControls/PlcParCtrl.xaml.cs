@@ -1,11 +1,10 @@
 ﻿using RX_Common;
-using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Models;
+using RX_DigiPrint.Models.Enums;
 using RX_DigiPrint.Services;
 using System;
 using System.Collections;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Windows;
@@ -22,6 +21,7 @@ namespace RX_DigiPrint.Views.UserControls
         public event PropertyChangedEventHandler PropertyChanged;
                         
         private PropertyInfo _ComboValueProp;
+        private CUnit        _Unit;
 
         public enum ECtrlType : byte
         {
@@ -260,7 +260,19 @@ namespace RX_DigiPrint.Views.UserControls
         {
             set 
             { 
-                TB_Unit.Text=value; 
+                _Unit = new CUnit(value);
+                string text=value;
+                /*
+                if (RxGlobals.Settings.Units==EUnits.imperial)
+                {
+                    if (value.Equals("mm"))         {text="inch";   _Factor=1.0/25.4;}
+                    else if (value.Equals("N/mm"))  {text="N/inch"; _Factor=1.0/25.4;}
+                    else if (value.Equals("m"))     {text="ft";     _Factor=3.28084/1.0;}
+                    else if (value.Equals("m/min")) {text="ft/min"; _Factor=3.28084/1.0;}
+                }
+                TB_Unit.Text=text; 
+                */
+                TB_Unit.Text = _Unit.Name;
                 TB_Unit.Visibility=Visibility.Visible;
             }
         }
@@ -429,6 +441,8 @@ namespace RX_DigiPrint.Views.UserControls
                     default:
                         try
                         {
+                            double factor = 1.0;
+                            if (_UpdateValue && _Unit!=null) factor=_Unit.Factor;
                             switch(_Format)
                             {
                                 case 'b':
@@ -446,13 +460,9 @@ namespace RX_DigiPrint.Views.UserControls
                                         }
                                         break;
                                 case 'h': _Value = string.Format("{0:X}", Convert.ToInt64(value));  break;
-                                case 'f': _Value = Rx.StrNumFormat(value,3); break;
-                                case '1': _Value = Rx.StrNumFormat(value,1); break;
-                                case 'n': if (value.Equals("1431677568.000000")) 
-                                            _Value="-----";
-                                          else
-                                            _Value = Rx.StrNumFormat(value,0); 
-                                          break;
+                                case 'f': _Value = Rx.StrNumFormat(value,3,factor);  break;
+                                case '1': _Value = Rx.StrNumFormat(value,1,factor);  break;
+                                case 'n': _Value = Rx.StrNumFormat(value,0, factor); break;
                                 case 'l': _Value = value.Replace(';', '\n'); break;
                                 default : _Value = value; break;
                             }
@@ -505,6 +515,7 @@ namespace RX_DigiPrint.Views.UserControls
                                     else i++;
                                 }
                             }
+                            if (_Unit==null || _Unit.Factor==1.0) return val.Replace(',', '.');
                             return val.Replace(',', '.');
                         }
                     }
@@ -577,19 +588,21 @@ namespace RX_DigiPrint.Views.UserControls
                         }
                         else 
                         {
-                            string val=TextEditCtrl.Text;
-                            if (_Format=='n' || _Format=='1')
-                            {   // remove formatting spaces, commas (very special!)
-                                for (int i=0; i<val.Length; )
-                                {
-                                    if ((int)val[i]==160) val=val.Remove(i,1);
-                                    if ((int)val[i]==27) val=val.Remove(i,1);
-                                    if ((val[i]<'0' || val[i]>'9') && val[i]!='-' && val[i]!='.' && val[i]!=',') val=val.Remove(i,1);
-                                    else i++;
+                            if (_Unit==null || _Unit.Factor==1.0)
+                            { 
+                                if (_Format=='n' || _Format=='1')
+                                {   
+                                    double val=Rx.StrToDouble(TextEditCtrl.Text);
+                                    str = string.Format("{0}\n{1}={2}\n", panel.UnitID, ID, val.ToString());
                                 }
+                                else str = string.Format("{0}\n{1}={2}\n", panel.UnitID, ID, TextEditCtrl.Text);
                             }
-
-                            str = string.Format("{0}\n{1}={2}\n", panel.UnitID, ID, val.Replace(',', '.'));
+                            else
+                            {
+                                double val=Rx.StrToDouble(TextEditCtrl.Text);
+                                val /= _Unit.Factor; 
+                                str = string.Format("{0}\n{1}={2}\n", panel.UnitID, ID, val.ToString());
+                            }
                         }
                     }
                 }

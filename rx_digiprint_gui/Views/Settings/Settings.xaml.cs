@@ -14,6 +14,7 @@ using System.Windows.Input;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Linq;
+using RX_DigiPrint.Models.Enums;
 
 namespace RX_DigiPrint.Views.Settings
 {
@@ -45,6 +46,7 @@ namespace RX_DigiPrint.Views.Settings
                     
             _Settings = RxGlobals.PrinterProperties.RxClone();    
             DataContext = _Settings;
+            CB_Units.ItemsSource  = new EN_UnitsList();
 
             _sb.Duration        = _duration;
             Resources.Add("unique_id", _sb);

@@ -1,12 +1,11 @@
 ﻿using RX_Common;
 using RX_Common.Source;
+using RX_DigiPrint.Models.Enums;
 
 namespace RX_DigiPrint.Models
 {
     public class Settings : RxSettingsBase
     {
-        public static Settings The_Settings = new Settings();
-        
         //--- Constructor --------------------------------------------------
         public Settings()
         {
@@ -41,6 +40,15 @@ namespace RX_DigiPrint.Models
         {
             get { return _Name; }
             set { _Name = value; }
-        }        
+        }
+
+        //--- Property Units ---------------------------------------
+        private EUnits _Units=EUnits.metric;
+        public EUnits Units
+        {
+            get { return _Units; }
+            set { SetProperty(ref _Units, value); }
+        }
+        
     }
 }
