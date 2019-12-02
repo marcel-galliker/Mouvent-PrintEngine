@@ -202,12 +202,23 @@ void fluid_set_config(void)
 	switch (RX_Config.printer.type)
 	{
 	case printer_LB701:	
+						/*
 						_FluidToScales[0] = 5;	// Cyan 
 						_FluidToScales[1] = 4;	// Magenta
 						_FluidToScales[2] = 3;	// Yellow 
 						_FluidToScales[3] = 2;	// black		
 						_FluidToScales[INK_SUPPLY_CNT]   = 1;	// flush		
 						_FluidToScales[INK_SUPPLY_CNT+1] = 0;	// waste
+						*/
+						_FluidToScales[0] = 0;	// Cyan 
+						_FluidToScales[1] = 1;	// Magenta
+						_FluidToScales[2] = 2;	// Yellow 
+						_FluidToScales[3] = 3;	// Black
+						_FluidToScales[4] = 6;	// White
+						_FluidToScales[5] = 7;	// Orange
+						_FluidToScales[6] = 8;	// Violet
+						_FluidToScales[INK_SUPPLY_CNT]   = 4;	// flush		
+						_FluidToScales[INK_SUPPLY_CNT+1] = 9;	// waste
 						break;
 		
 	default:			for (i=0; i<SIZEOF(_FluidToScales); i++) _FluidToScales[i]=i;	
@@ -888,7 +899,7 @@ void fluid_reply_stat(RX_SOCKET socket)	// to GUI
 		{
 			if(_FluidStatus[i].canisterLevel <= canisterEmpty && _ScalesErr[i] < LOG_TYPE_ERROR_CONT)
 			{
-				Error(ERR_CONT, 0, "Ink Canister %s EMPTY!", RX_ColorNameLong(RX_Config.inkSupply[i].ink.colorCode));
+				Error(ERR_STOP, 0, "Ink Canister %s EMPTY!", RX_ColorNameLong(RX_Config.inkSupply[i].ink.colorCode));
 				Error(LOG, 0, "_FluidStatus[%d].canisterLevel=%d < %d", i, _FluidStatus[i].canisterLevel, canisterEmpty);
 				_ScalesErr[i] = LOG_TYPE_ERROR_CONT;
 			}

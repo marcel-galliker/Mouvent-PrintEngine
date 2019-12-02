@@ -120,8 +120,6 @@ void lh702_error_reset(void)
 void lh702_save_material	(char *varList)
 {
 	HANDLE attribute =NULL;
-	char attrname[64];
-	char path[MAX_PATH];
 	char *str=varList;
 	char *end;
 	char *val;
