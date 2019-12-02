@@ -130,7 +130,7 @@
                        FontSize="{StaticResource FontSizeLarge}"
                        Content="{Binding CtrlMode, Converter={StaticResource CtrlMode_Str}}"
                        Margin="0"
-                       Click="Cmd_Clicked" HorizontalAlignment="Left" Width="86"
+                       Click="Cmd_Clicked" HorizontalAlignment="Left" Width="86"                       IsEnabled="False"
                        />
             <Button x:Name="CmdButton2"  Grid.Row="2" Content="..." HorizontalAlignment="Right" Margin="0" Click="Cmd_Clicked"/>
             <rx:RxPopup x:Name="CmdPopup" 

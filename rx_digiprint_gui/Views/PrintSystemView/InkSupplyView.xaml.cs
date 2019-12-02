@@ -34,7 +34,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
         //--- Chiller_PropertyChanged ----------------------------------
         private void Chiller_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            CmdButton.IsEnabled = CmdButton2.IsEnabled = RxGlobals.Chiller.Running;
+            CmdButton.IsEnabled = CmdButton2.IsEnabled = RxGlobals.Chiller.Running && _InkSupply!=null && _InkSupply.InkType!=null;
         }
 
         //--- User_PropertyChanged --------------------------------------
@@ -138,8 +138,11 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 else MsgPopup.IsOpen=false;
             }
 
-            if (e.PropertyName.Equals("InkType")) 
+            if (e.PropertyName.Equals("InkType"))
+            {
                 FlushButton.DataContext = _InkSupply.InkType;
+                Chiller_PropertyChanged(this, null);
+            }
 
             /*
             if (e.PropertyName.Equals("Flushed"))

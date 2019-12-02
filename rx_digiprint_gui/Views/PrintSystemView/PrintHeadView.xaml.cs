@@ -39,6 +39,19 @@ namespace RX_DigiPrint.Views.PrintSystemView
    //         catch (Exception) { FpVoltage.Text = "";};
         }
 
+        //--- UserControl_DataContextChanged -----------------------------------
+        private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            HeadStat stat = DataContext as HeadStat;
+            if (stat!= null) stat.PropertyChanged += stat_PropertyChanged;
+        }
+
+        //--- stat_PropertyChanged ----------------------------------------------
+        void stat_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName.Equals("Name")) Chiller_PropertyChanged(this, null);
+        }
+
         //--- Property No ---------------------------------------
         private int _No;
         public int No
@@ -50,7 +63,10 @@ namespace RX_DigiPrint.Views.PrintSystemView
         //--- Chiller_PropertyChanged ----------------------------------
         private void Chiller_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            CmdButton.IsEnabled = CmdButton2.IsEnabled = RxGlobals.Chiller.Running;
+            HeadStat stat = DataContext as HeadStat;
+            if (stat==null || stat.Name==null || stat.Name.StartsWith("?"))
+                CmdButton.IsEnabled = CmdButton2.IsEnabled = false;
+            else CmdButton.IsEnabled = CmdButton2.IsEnabled = RxGlobals.Chiller.Running;
         }
 
         //--- User_PropertyChanged --------------------------------------
