@@ -38,7 +38,7 @@ static UINT32			_Flushed=0x00;
 static EnFluidCtrlMode	_FluidCtrlMode = ctrl_undef;
 static EnFluidCtrlMode	_RobotCtrlMode = ctrl_undef;
 static EnFluidCtrlMode  _PurgeCtrlMode = ctrl_undef;
-static int				_PurgeFluidNo=0;
+static int				_PurgeAll=FALSE;
 static int				_Scanning;
 
 //--- prototypes -----------------------
@@ -552,12 +552,19 @@ static void _control(int fluidNo)
 												setup_fluid_system(PATH_USER FILENAME_FLUID_STATE, &_Flushed, WRITE);				
 											}
 
-											if (rx_def_is_tx(RX_Config.printer.type) && step_active(1) && _PurgeFluidNo<0) 
+											if (rx_def_is_tx(RX_Config.printer.type) && step_active(1) && _PurgeAll)
 											{
-												if(_all_fluids_in_fluidCtrlMode(ctrl_purge_step4)) _send_ctrlMode(no, ctrl_wipe, TRUE);														
+												if(_all_fluids_in_fluidCtrlMode(ctrl_purge_step4))
+												{
+													_PurgeAll = FALSE;
+													_send_ctrlMode(no, ctrl_wipe, TRUE);													
+												}
 											}
- 											else if (RX_PrinterStatus.printState==ps_pause) _send_ctrlMode(no, ctrl_print, TRUE);
-											else _send_ctrlMode(no, ctrl_off, TRUE);		
+ 											else
+	 										{
+ 												if (RX_PrinterStatus.printState==ps_pause) _send_ctrlMode(no, ctrl_print, TRUE);		 										
+												else									   _send_ctrlMode(no, ctrl_off,   TRUE);		
+	 										}
 											break;
 
 				
@@ -577,8 +584,13 @@ static void _control(int fluidNo)
 				case ctrl_cal_step3:		_send_ctrlMode(no, ctrl_print, TRUE);    
 											break;
 				
+				//--- ctrl_print -------------------------------------------------------------------
+				case ctrl_print:			_PurgeAll=FALSE;
+											break;
+				
 				//--- ctrl_off ---------------------------------------------------------------------
-				case ctrl_off:				//step_rob_stop();
+				case ctrl_off:				_PurgeAll=FALSE;
+											//step_rob_stop();
 											//step_lift_stop();
 					break;				
 			}
@@ -945,7 +957,7 @@ void fluid_send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 	{
 		for (int i=0; i<RX_Config.inkSupplyCnt; i++) _send_ctrlMode(i, ctrlMode, sendToHeads);					
 	}
-	if (ctrlMode==ctrl_purge_hard) _PurgeFluidNo=no;
+	if (ctrlMode==ctrl_purge_hard) _PurgeAll=(no==-1);
 		
 	_FluidCtrlMode = ctrlMode;
 //	Error(LOG, 0, "fluid_send_ctrlMode 0X%04x", ctrlMode);
