@@ -4,3 +4,6 @@ rx_head_rbf binary
 rx_fluid_rbf binary
 rx_encoder_rbf binary
 *.suo binary
+*.sln -merge -text
+*.csproj -merge -text
+*.vcxproj -merge -text
