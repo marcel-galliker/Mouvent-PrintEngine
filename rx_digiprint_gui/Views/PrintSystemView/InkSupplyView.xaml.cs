@@ -28,7 +28,6 @@ namespace RX_DigiPrint.Views.PrintSystemView
             RxGlobals.User.PropertyChanged += User_PropertyChanged;
             RxGlobals.Chiller.PropertyChanged += Chiller_PropertyChanged;
             User_PropertyChanged(null, null);
-            Chiller_PropertyChanged(null, null);
         }
 
         //--- Chiller_PropertyChanged ----------------------------------
@@ -57,6 +56,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
             _InkSupply.PropertyChanged += OnInkSupplyPropertyChanged;
             RxGlobals.PrintSystem.PropertyChanged += PrintSystem_PropertyChanged;
             _set_checkbox_style();
+            Chiller_PropertyChanged(this, null);
         }
 
         //--- UserControl_Unloaded ------------------------------------------------------
@@ -266,5 +266,6 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 }
             }
         }
+
     }
 }
