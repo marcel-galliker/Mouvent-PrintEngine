@@ -39,4 +39,4 @@ void spool_file_printed(SPageId *pid);
 SPageId* spool_get_id(int no);
 // int spool_print_empty(void);
 int spool_abort_printing(void);
-int spool_head_board_cnt(void);
+UINT32 spool_head_board_used_flags(void);

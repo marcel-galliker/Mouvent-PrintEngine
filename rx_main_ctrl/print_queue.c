@@ -42,7 +42,6 @@ static int				_Size=0;
 static INT32			_ID=0;
 static int				_Item;
 static int				_TestDataSent;
-static int				_HeadBoardCnt;
 static int				_TimeCompleted;
 static int				_Speed=0;
 static int				_BufState;
@@ -194,7 +193,6 @@ int	pq_start(void)
 	_ActiveState	  = 0;
 	memset(_ActiveRipState, 0, sizeof(_ActiveRipState));
 	memset(&_PrintedItem, 0, sizeof(_PrintedItem));
-	_HeadBoardCnt = spool_head_board_cnt();
 
 	return REPLY_OK;
 }
@@ -951,8 +949,6 @@ void pq_sent_document(int pages)
 //--- pq_is_ready ----------------------------------
 int pq_is_ready(void)
 {
-//	if (_HeadBoardCnt<1) return FALSE;
-
 	if (TRUE)
 	{
 		static UINT32 sent=0;

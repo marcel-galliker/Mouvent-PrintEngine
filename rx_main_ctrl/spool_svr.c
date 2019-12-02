@@ -59,7 +59,7 @@ static int		_Auto;
 static int		_BlkNo;
 static int		_SpoolerCnt;
 static int		_MsgSent, _MsgGot;
-static int		_HeadBoardCnt;
+static UINT32	_HeadBoardUsedFlags;
 static int		_SlideIsRight;
 static int		_Pass;
 static int		_DelayPauseTimer=0;
@@ -292,13 +292,13 @@ int	spool_set_config(RX_SOCKET socket, UINT32 resetCnt)
 	}
 
 	//--- send head board configurations ------------------------
-	_HeadBoardCnt=0;
+	_HeadBoardUsedFlags=0;
 	if (RX_Config.printer.type==printer_DP803) Error(LOG, 0, "Send CMD_HEAD_BOARD_CFG only to used spooler"); // RX_Config.headBoard[hb].spoolerNo
 	for (hb=0; hb<SIZEOF(RX_Config.headBoard); hb++)
 	{
 		if (RX_Config.headBoard[hb].present>=dev_on)
 		{
-			_HeadBoardCnt++;
+			_HeadBoardUsedFlags|=(1<<hb);
 			cnt=spool_send_msg_2(CMD_HEAD_BOARD_CFG, sizeof(SHeadBoardCfg), &RX_Config.headBoard[hb], FALSE);
 		}
 	}
@@ -322,10 +322,10 @@ int	spool_set_config(RX_SOCKET socket, UINT32 resetCnt)
 	return cnt;
 }
 
-//--- spool_head_board_cnt --------------------------
-int spool_head_board_cnt(void)
+//--- spool_head_board_used_flags --------------------------
+UINT32 spool_head_board_used_flags(void)
 {
-	return _HeadBoardCnt;
+	return _HeadBoardUsedFlags;
 }
 
 //--- spool_is_ready -------------------------------------------------------------------
@@ -541,7 +541,7 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 	if (cnt)
 	{
 		pq_preflight(&msg.id);
-		RX_PrinterStatus.sentCnt++;// = _HeadBoardCnt;
+		RX_PrinterStatus.sentCnt++;
 	}
 	else     Error(ERR_CONT, 0, "No Spoolers connected");
 //	Error(LOG, 0, "Load File[%d] page=%d, scan=%d", RX_PrinterStatus.sentCnt, pid->page, pid->scan);
@@ -657,15 +657,8 @@ static int _do_print_file_evt	(RX_SOCKET socket, SPrintFileMsg	*msg)
 						}							
 						if (_Auto)  ctrl_print_page(&msg->id);																					
 						break;
-	/*
-	case DATA_PRINT_DONE:	// simu_write from spooler
-						for (int i=0; i<_HeadBoardCnt; i++)
-						{
-							pc_printed(&msg->id, i);
-						}
-						break;
-	*/
-	default:			TrPrintf(TRUE, "Documment ID=%d  page=%d , copy=%d, scan=%d: UNKNOWN EVENT %d",	msg->spoolerNo, msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->evt); break;
+
+		default:			TrPrintf(TRUE, "Documment ID=%d  page=%d , copy=%d, scan=%d: UNKNOWN EVENT %d",	msg->spoolerNo, msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->evt); break;
 	}
 	_Ready = msg->bufReady;
 	pc_print_next();
@@ -675,8 +668,9 @@ static int _do_print_file_evt	(RX_SOCKET socket, SPrintFileMsg	*msg)
 //--- _do_print_done_evt ---------------------
 static void _do_print_done_evt	(RX_SOCKET socket, SPrintDoneMsg *msg)
 {
-	for (int i=0; i<_HeadBoardCnt; i++)
-		pc_print_done(msg->boardNo, msg);
+	for (int i=0; i<8*sizeof(_HeadBoardUsedFlags); i++)
+		if (_HeadBoardUsedFlags & (1<<i))
+			pc_print_done(msg->boardNo, msg);
 }							
 
 //--- _do_log_evt -----------------------------------------------------

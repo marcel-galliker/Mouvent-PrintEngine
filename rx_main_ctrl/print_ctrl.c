@@ -175,9 +175,7 @@ int pc_start_printing(void)
 		_ChangeJob = FALSE;
 		memset(_PrintDone, 0, sizeof(_PrintDone));
 		_PrintDoneNo = 0;
-		_PrintDoneFlags = 0;
-		if (spool_head_board_cnt() > 8*sizeof(_PrintDoneFlags)) Error(ERR_ABORT, 0, "PROGRAMMING ERROR! _PrintDoneFlags");
-		for (i=0; i<spool_head_board_cnt(); i++) _PrintDoneFlags |= (1<<i);
+		_PrintDoneFlags = spool_head_board_used_flags();
 		_SetPrintPar   = TRUE;
 //		fluid_start_printing();
 		spool_start_printing();
@@ -822,7 +820,7 @@ int pc_print_done(int headNo, SPrintDoneMsg *pmsg)
 	int n=pmsg->pd%SIZEOF(_PrintDone);
 	_PrintDone[n] |= (1<<headNo);
 	
-//	TrPrintfL(TRUE, "Head[%d] PRINT-DONE: PD=%d: id=%d, page=%d, scan=%d, copy=%d **** (0x%08x/0x%08x)", headNo, pmsg->pd, pmsg->id.id, pmsg->id.page, pmsg->id.scan, pmsg->id.copy, _PrintDone[n], _PrintDoneFlags);	
+	TrPrintfL(TRUE, "Head[%d] PRINT-DONE: PD=%d: id=%d, page=%d, scan=%d, copy=%d **** (0x%08x/0x%08x)", headNo, pmsg->pd, pmsg->id.id, pmsg->id.page, pmsg->id.scan, pmsg->id.copy, _PrintDone[n], _PrintDoneFlags);	
 	
 	if (RX_Config.printer.type==printer_cleaf)
 	{
