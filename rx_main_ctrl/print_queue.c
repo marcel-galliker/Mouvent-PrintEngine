@@ -195,6 +195,7 @@ int	pq_start(void)
 	memset(_ActiveRipState, 0, sizeof(_ActiveRipState));
 	memset(&_PrintedItem, 0, sizeof(_PrintedItem));
 	_HeadBoardCnt = spool_head_board_cnt();
+
 	return REPLY_OK;
 }
 
@@ -236,20 +237,40 @@ int pq_stop(void)
 	ctr_save();
 	
 	if (RX_Config.printer.type==printer_LH702)
-	{			
-		int idx=-1;
-		for (i=0; i<_Size && idx<0; i++)
-			if (_List[i].state == PQ_STATE_QUEUED) idx=i;
-		for (i=0; i<_Size && idx<0; i++)
-			if (_List[i].state != PQ_STATE_QUEUED) idx=i;
-
-		if (_Size>0)
+	{	
+		/*
+		Error(LOG, 0, "pq_stop: PrintQueue.Size=%d", _Size);
+		for (i=0; i<_Size; i++)
+			Error(LOG, 0, "PrintQueue[%d].file=>>%s<<, State=%d", i, _List[i].filepath, _List[i].state);
+		*/
+		gui_send_cmd(REP_GET_PRINT_QUEUE);
+		for (i=0; i<_Size; i++)
 		{
-			if (idx!=0) memcpy(&_List[0], &_List[idx], sizeof(_List[0]));
-			_Size=1;
-			_List[0].state = PQ_STATE_QUEUED;
-			gui_send_print_queue(EVT_ADD_PRINT_QUEUE, &_List[0]);			
+			if (_List[i].state == PQ_STATE_QUEUED)
+			{
+				if (i) memcpy(&_List[0], &_List[i], sizeof(_List[0]));
+				_Size=1;
+				gui_send_print_queue(EVT_ADD_PRINT_QUEUE, &_List[0]);
+				return REPLY_OK;
+			}
 		}
+		
+		for (i=0; i<_Size; i++)
+		{
+			if (_List[i].state != PQ_STATE_QUEUED && _List[i].state<PQ_STATE_PRINTED)
+			{
+				if (i) memcpy(&_List[0], &_List[i], sizeof(_List[0]));
+				_List[0].state=PQ_STATE_QUEUED;
+				_Size=1;					
+				gui_send_print_queue(EVT_ADD_PRINT_QUEUE, &_List[0]);
+				return REPLY_OK;
+			}
+		}
+		if (_Size>1) memcpy(&_List[0], &_List[_Size-1], sizeof(_List[0]));
+		_List[0].state=PQ_STATE_QUEUED;		
+		_Size=1;
+		gui_send_print_queue(EVT_ADD_PRINT_QUEUE, &_List[0]);
+		
 		return REPLY_OK;	
 	}
 	
@@ -497,14 +518,6 @@ int pq_preflight(SPageId *pid)
 		{
 			_List[i].state=PQ_STATE_PREFLIGHT;
 			memset(_List[i].ripState, 0, sizeof(_List[i].ripState));
-			/*
-			if (RX_Config.printer.type==printer_LH702)
-			{
-				if (i) memcpy(&_List[0], &_List[i], sizeof(_List[0]));
-				_Size=1;
-				i=0;
-			}
-			*/
 			gui_send_print_queue(EVT_GET_PRINT_QUEUE, &_List[i]);
 		}
 		return REPLY_OK;
@@ -608,6 +621,25 @@ int pq_stopping(SPrintQueueItem *pitem)
 	int i;
 	SPrintQueueItem item;
 //	Error(LOG, 0, "pq_stopping 1 (id=%d, page=%d, copy=%d, scan=%d)", pitem->id.id, pitem->id.page, pitem->id.copy, pitem->id.scan);
+	if (RX_Config.printer.type==printer_LH702)
+	{
+		/*
+		Error(LOG, 0, "pq_stopping: PrintQueue.Size=%d", _Size);
+		for (int i=0; i<_Size; i++)
+			Error(LOG, 0, "PrintQueue[%d].file=>>%s<<, State=%d", i, _List[i].filepath, _List[i].state);
+		*/
+		for (int i=0; i<_Size; i++)
+		{
+			if (_List[i].state>PQ_STATE_PREFLIGHT)
+			{
+				_List[i].state=PQ_STATE_STOPPING;
+		//		Error(LOG, 0, "STOPPING PrintQueue[%d].file=>>%s<<, State=%d", i, _List[i].filepath, _List[i].state);
+				gui_send_print_queue(EVT_GET_PRINT_QUEUE, &_List[i]);
+			}
+		}
+		return REPLY_OK;
+	}
+		
 	if (_find_item(pitem->id.id, &i)==REPLY_OK)
 	{
 		if (_List[i].state<PQ_STATE_STOPPING)

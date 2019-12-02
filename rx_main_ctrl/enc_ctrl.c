@@ -60,6 +60,7 @@ static int		_PrintGo_Dist;
 static int		_PrintGo_Mode;
 static int		_Scanning=FALSE;
 static int		_DistTelCnt=0;
+static int		_FirstPG;
 static int		_TotalPgCnt;
 static int		_StopPG;
 static int		_Printing=FALSE;
@@ -217,6 +218,7 @@ int	 enc_set_config(void)
 	_PrintGo_Dist	= 10000;
 	_PrintGo_Mode	= 0;
 	_DistTelCnt		= 0;
+	_FirstPG		= TRUE;
 	_TotalPgCnt		= 0;
 	_WarnMarkReaderPos = 9;
 	/*
@@ -413,6 +415,7 @@ static void _enc_start_printing(int no, SPrintQueueItem *pitem, int restart)
 void enc_sent_document(int pages)
 {
 	_TotalPgCnt += pages;
+	_FirstPG = TRUE;
 	TrPrintf(TRUE, "enc_sent_document(%d) _TotalPgCnt=%d", pages, _TotalPgCnt);
 }
 
@@ -465,18 +468,20 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 			
 		case PG_MODE_MARK:	 dist.dist	  = pitem->printGoDist;
 							 dist.printGoMode = PG_MODE_MARK_FILTER;
-							 if (_DistTelCnt>1)
+							 if (!_FirstPG)
 							 {
 								dist.ignore   = pitem->pageHeight*8/10;
 								dist.window   = pitem->pageHeight/4;
 							 }
 							 sok_send_2(&_Encoder[0].socket, CMD_ENCODER_PG_DIST, sizeof(dist), &dist);
+							 _FirstPG = FALSE;
 							 break;
 			
 		default:			if (pId->id != _ID.id) Error(WARN, 0, "PrintGo-Mode not defined");	
 							_PrintGo_Dist = pitem->pageHeight; 
 							break;				
 		}
+		TrPrintfL(TRUE, "enc_set_pg (no=%d, dist=%d, ignore=%d, window=%d)", _DistTelCnt, dist.dist, dist.ignore, dist.window);						
 		//-- DP803: encoder[1]: Always in Mark Reading Mode -----
 		if (_Encoder[1].used)
 		{

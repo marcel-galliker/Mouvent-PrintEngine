@@ -91,7 +91,7 @@
             <Grid HorizontalAlignment="Right">
                 <TextBox x:Name="Change" Visibility="Hidden"/>
                 <common:RxButton Click="Change_Clicked">
-                    <TextBlock Text="a" FontFamily="Wingdings" FontSize="{StaticResource FontSizeXL}"/>
+                    <TextBlock Text="CHG" FontSize="{StaticResource FontSizeXL}"/>
                 </common:RxButton>
             </Grid>
         </StackPanel>

@@ -745,11 +745,19 @@ static int _print_next(void)
 						{
 							SPrintQueueItem item;
 							int clearBlockUsed=(_Item.id.copy >= _Item.copies) || (_Item.firstPage!=_Item.lastPage);
-							if (_Item.pageMargin!=_PageMargin_Next || _ChangeJob==1)
+							if (_ChangeJob==1)
+							{	
+								Error(LOG, 0, "PrintCtrl: New Job: copy=%d, scansSent=%d", _Item.id.copy, _Item.scansSent);
+								clearBlockUsed = TRUE;
+								_ChangeJob = 2;
+								SPrintQueueItem *pitem =pq_get_item(&_Item);
+								pitem->copiesTotal = _Item.id.copy;
+								pq_set_item(pitem);									
+							}
+							else if (_Item.pageMargin!=_PageMargin_Next)
 							{	
 							//	Error(LOG, 0, "PrintCtrl: PageMargin old=%d, new=%d", _Item.pageMargin, _PageMargin_Next);
 								clearBlockUsed = TRUE;
-								_ChangeJob = 2;
 							}
 							memcpy(&item, &_Item, sizeof(item));
 							item.lengthUnit = PQ_LENGTH_UNDEF;

@@ -314,22 +314,33 @@ int  dp803_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 	case CMD_CAP_PRINT_POS:			strcpy(_CmdName, "CMD_CAP_PRINT_POS");
 									_PrintHeight   = (*((INT32*)pdata));									
 									Error(LOG, 0, "CMD_CAP_PRINT_POS pos=%d", _PrintHeight);
-									_PrintPos_New = -1*_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height - _PrintHeight);
-									_Cmd_New = msgId;
-									if (!_CmdRunning && (!RX_StepperStatus.info.ref_done || !RX_StepperStatus.info.z_in_print || _PrintPos_New!=_PrintPos_Act))
+									if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height < 10000) Error(ERR_ABORT, 0, "Reference Height not defined");
+									else
 									{
-										if (RX_StepperStatus.info.ref_done) _dp803_move_to_pos(CMD_CAP_PRINT_POS, _PrintPos_New);
-										else								_dp803_do_reference();
+										if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height < 90000) Error(WARN, 0, "Reference Height small");
+ 
+										_PrintPos_New = -1*_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height - _PrintHeight);
+										_Cmd_New = msgId;
+										if (!_CmdRunning && (!RX_StepperStatus.info.ref_done || !RX_StepperStatus.info.z_in_print || _PrintPos_New!=_PrintPos_Act))
+										{
+											if (RX_StepperStatus.info.ref_done) _dp803_move_to_pos(CMD_CAP_PRINT_POS, _PrintPos_New);
+											else								_dp803_do_reference();
+										}										
 									}
 									break;
 		
 	case CMD_CAP_UP_POS:			strcpy(_CmdName, "CMD_CAP_UP_POS");
-									_PrintPos_New = -1*_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height - 20000);
-									_Cmd_New = msgId;
-									if (!_CmdRunning)
+									if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height < 10000) Error(ERR_ABORT, 0, "Reference Height not defined");
+									else
 									{
-										if (RX_StepperStatus.info.ref_done) _dp803_move_to_pos(CMD_CAP_UP_POS, _PrintPos_New);
-										else								_dp803_do_reference();
+										if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height < 90000) Error(WARN, 0, "Reference Height small");
+										_PrintPos_New = -1*_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height - 20000);
+										_Cmd_New = msgId;
+										if (!_CmdRunning)
+										{
+											if (RX_StepperStatus.info.ref_done) _dp803_move_to_pos(CMD_CAP_UP_POS, _PrintPos_New);
+											else								_dp803_do_reference();
+										}
 									}
 									break;
 

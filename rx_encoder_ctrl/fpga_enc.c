@@ -283,7 +283,7 @@ void  fpga_main(int ticks, int menu, int showCorrection, int showParam)
 		_uv_ctrl();
 		_pg_ctrl();
 		_corr_ctrl();
-	//	if (RX_EncoderCfg.simulation) _simu_markreader();
+		if (RX_EncoderCfg.simulation) _simu_markreader();
 		{
 			static int _in=0;
 			if (FpgaQSys->in&1 && !_in&1) _InCnt++;
@@ -1127,11 +1127,11 @@ void  fpga_set_printmark(SEncoderPgDist *pmsg)
 //	Error(LOG, 0, "fpga_set_printmark dist=%d, shift=%d", pmsg->dist, Fpga->cfg.general.shift_delay_tel);
 	FpgaQSys->window_fifo  = _Window = (int)(pmsg->window/_StrokeDist);
 	if (pmsg->ignore>10000) FpgaQSys->ignored_fifo = _Ignore = (int)(pmsg->ignore/_StrokeDist);
-	else FpgaQSys->ignored_fifo = _Ignore = (int)(10000/_StrokeDist);
+	else                    FpgaQSys->ignored_fifo = _Ignore = (int)(10000/_StrokeDist);
 	for (pgNo=0; pgNo<SIZEOF(Fpga->cfg.pg); pgNo++) Fpga->cfg.pg[pgNo].fifos_ready = TRUE;
 
 	RX_EncoderStatus.distTelCnt++;
-	TrPrintfL(TRUE, "fpga_set_printmark(no=%d, cnt=%d, dist=%d, ignore=%d, window=%d)", RX_EncoderStatus.distTelCnt, pmsg->cnt, pmsg->dist, pmsg->ignore, pmsg->window);
+	TrPrintfL(TRUE, "fpga_set_printmark(no=%d, cnt=%d, dist=%d, ignore=%d, window=%d) FIFO=%d", RX_EncoderStatus.distTelCnt, pmsg->cnt, pmsg->dist, pmsg->ignore, pmsg->window, FpgaQSys->window_status.fill_level);
 }
 
 //--- _pg_ctrl ------------------------------------------------------
@@ -1146,8 +1146,16 @@ static void  _pg_ctrl(void)
 		{
 			static int _lastPos=0;
 			int pos = Fpga->stat.encOut[0].position;
-			if (RX_EncoderStatus.PG_cnt==0) TrPrintfL(TRUE, "PrintGo[%d]: pos_1200=%d, FIFO=%d", RX_EncoderStatus.PG_cnt, pos, FpgaQSys->printGo_status.fill_level);
-			else							TrPrintfL(TRUE, "PrintGo[%d]: pos_1200=%d, dist=%d, pos_in=%d, pg_start_pos=%d, FIFO=%d", RX_EncoderStatus.PG_cnt, pos, pos-_lastPos, Fpga->stat.encIn[0].position, Fpga->stat.encOut[0].pg_start_pos, FpgaQSys->printGo_status.fill_level);
+			if (Fpga->cfg.pg[0].fifos_used==FIFOS_DIST)
+			{
+				if (RX_EncoderStatus.PG_cnt==0) TrPrintfL(TRUE, "PrintGo[%d]: pos_1200=%d, FIFO=%d", RX_EncoderStatus.PG_cnt, pos, FpgaQSys->printGo_status.fill_level);
+				else							TrPrintfL(TRUE, "PrintGo[%d]: pos_1200=%d, dist=%d, pos_in=%d, pg_start_pos=%d, FIFO=%d", RX_EncoderStatus.PG_cnt, pos, pos-_lastPos, Fpga->stat.encIn[0].position, Fpga->stat.encOut[0].pg_start_pos, FpgaQSys->printGo_status.fill_level);				
+			}
+			else				
+			{
+				if (RX_EncoderStatus.PG_cnt==0) TrPrintfL(TRUE, "PrintGo[%d]: pos_1200=%d, FIFO=%d", RX_EncoderStatus.PG_cnt, pos, FpgaQSys->window_status.fill_level);
+				else							TrPrintfL(TRUE, "PrintGo[%d]: pos_1200=%d, dist=%d, pos_in=%d, pg_start_pos=%d, FIFO=%d", RX_EncoderStatus.PG_cnt, pos, pos-_lastPos, Fpga->stat.encIn[0].position, Fpga->stat.encOut[0].pg_start_pos, FpgaQSys->window_status.fill_level);				
+			}
 			_lastPos = pos;
 			send=TRUE;
 			RX_EncoderStatus.PG_cnt++;
@@ -1392,7 +1400,7 @@ static void _simu_markreader(void)
 				UINT32 dist = ((Fpga->stat.encOut[0].position - _PM_LastPos) & 0x1ffff); 
 				if(_Ignore && dist > (_Ignore + _Window / 2))
 				{
-					TrPrintfL(TRUE, "PM[%d]: Set Output (Pos=%d, dist=%d, shift_delay_tel=%d)", _PM_Cnt+1, Fpga->stat.encOut[0].position, dist, Fpga->cfg.general.shift_delay_tel);
+					TrPrintfL(TRUE, "PM[%d]: Set Output (Pos=%d, dist=%d, shift_delay_tel=%d) FIFO=%d", _PM_Cnt+1, Fpga->stat.encOut[0].position, dist, Fpga->cfg.general.shift_delay_tel, FpgaQSys->window_status.fill_level);
 					FpgaQSys->out |= MARKREADER_SIMU_OUT;
 					_PM_SimuCnt++;
 					_PM_LastPos = Fpga->stat.encOut[0].position;		
