@@ -409,7 +409,7 @@ void data_clear(BYTE* buffer[MAX_COLORS])
 UINT64 data_memsize(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPixel)
 {
 	UINT64	memsize;
-	int i, found, error, lineLen;
+	int lineLen;
 
 //	lineLen = (width*bitsPerPixel+7)/8;			// workes for TIFF
 //	lineLen = ((width*bitsPerPixel+15)/16)*2;	// used for BMP files!
@@ -430,7 +430,7 @@ UINT64 data_memsize(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPix
 int  data_malloc(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPixel, SColorSplitCfg *psplit, int splitCnt, UINT64 *pBufSize, BYTE* buffer[MAX_COLORS])
 {	
 	UINT64	memsize;
-	int i, found, error, lineLen;
+	int i, found, error;
 
 	memsize = data_memsize(printMode, width, height, bitsPerPixel);
 

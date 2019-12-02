@@ -198,8 +198,8 @@ int _handle_ctrl_msg(RX_SOCKET socket, void *pmsg)//, int len, struct sockaddr *
 										else                                    lbrob_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]); 
 										break;
 			
-		case printer_DP803:				if(RX_StepperCfg.boardNo == step_lift)	dp803_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);
-										else Error(ERR_CONT, 0, "RX_StepperCfg.boardNo=%d, not implemented!", RX_StepperCfg.boardNo);
+		case printer_DP803:				/*if(RX_StepperCfg.boardNo == step_lift)*/	dp803_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);
+										//else Error(ERR_CONT, 0, "RX_StepperCfg.boardNo=%d, not implemented!", RX_StepperCfg.boardNo);
 										break;
 			
 		default:	Error(ERR_CONT, 0, "PrinterType %d not implemented, msgId=0x%08x", RX_StepperCfg.printerType, phdr->msgId);
@@ -248,8 +248,8 @@ static void _do_config(SStepperCfg *pcfg)
 								else                                    lbrob_init();
 								break;
 		
-	case printer_DP803:			if (RX_StepperCfg.boardNo == step_lift) dp803_init();
-								else                                    lbrob_init();
+	case printer_DP803:			/*if (RX_StepperCfg.boardNo == step_lift)*/ dp803_init();
+								//else                                    lbrob_init();
 								break;
 		
 	default:	Error(ERR_CONT, 0, "PrinterType %d not implemented", RX_StepperCfg.printerType);

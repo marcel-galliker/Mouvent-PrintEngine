@@ -99,8 +99,8 @@ static void _main_loop()
 									else							lbrob_main(ticks, menu);	
 									break;
 
-		case printer_DP803: 		if (RX_StepperCfg.boardNo == 0) dp803_main(ticks, menu); 
-									else							lbrob_main(ticks, menu);	
+		case printer_DP803: 		/*if (RX_StepperCfg.boardNo == 0)*/ dp803_main(ticks, menu); 
+									//else							lbrob_main(ticks, menu);	
 									break;
 			
 		default:					test_main(ticks, menu); break;			
@@ -128,8 +128,8 @@ static void _main_loop()
 										else							_AppRunning = lbrob_menu(); 
 										break;
 
-			case printer_DP803: 		if (RX_StepperCfg.boardNo == 0) _AppRunning = dp803_menu(); 
-										else							_AppRunning = lbrob_menu(); 
+			case printer_DP803: 		/*if (RX_StepperCfg.boardNo == 0)*/ _AppRunning = dp803_menu(); 
+										//else							_AppRunning = lbrob_menu(); 
 										break;
 			
 			default:					_AppRunning = test_menu(); break;				

@@ -71,8 +71,8 @@
             <TextBlock       Grid.Row="1" Grid.Column="9" Text=" mm" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center"/>
             <TextBlock       Grid.Row="2" Grid.Column="9" Text=" mm" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center"/>
 
-            <TextBlock Grid.Column="4" Grid.ColumnSpan="2" Text="RECTO" HorizontalAlignment="Center"/>
-            <TextBlock Grid.Column="7" Grid.ColumnSpan="2" Text="VERSO" HorizontalAlignment="Center"/>
+            <TextBlock Grid.Column="4" Grid.ColumnSpan="2" Text="VERSO" HorizontalAlignment="Center"/>
+            <TextBlock Grid.Column="7" Grid.ColumnSpan="2" Text="RECTO" HorizontalAlignment="Center"/>
 
         </Grid>
     </GroupBox>

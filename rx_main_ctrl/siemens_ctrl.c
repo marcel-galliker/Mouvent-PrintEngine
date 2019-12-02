@@ -32,7 +32,7 @@
 
 //--- Defines -----------------------------------------------------------------
 	
-// Siemsns:		192.168.20.192:2000
+// Siemens:		192.168.20.192:2000
 // Server:		192.168.20.118
 
 //--- Externals ---------------------------------------------------------------
@@ -129,7 +129,18 @@ static int _siemens_closed(RX_SOCKET socket, const char *peerName)
 void  siemens_tick(void)
 {
 	/*
-	UINT32	printState;		#define BS_OFF		0		#define BS_STARTING	1		#define BS_PRINTING	2		INT32	thickness;	INT32	encoder_adj;	INT32	dist_long;	INT32	dist_lat;	INT32	id;	INT32	copies_printed;	*/
+	UINT32	printState;
+		#define BS_OFF		0
+		#define BS_STARTING	1
+		#define BS_PRINTING	2
+	
+	INT32	thickness;
+	INT32	encoder_adj;
+	INT32	dist_long;
+	INT32	dist_lat;
+	INT32	id;
+	INT32	copies_printed;
+	*/
 	
 	sok_send(&_Socket, &_Status); 
 }

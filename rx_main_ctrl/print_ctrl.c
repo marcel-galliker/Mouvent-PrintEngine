@@ -221,7 +221,8 @@ int pc_stop_printing(int userStop)
 //--- pc_change_job ---------------------------------------------
 int  pc_change_job(void)
 {
-	_ChangeJob = 1;				
+	_ChangeJob = 1;
+	return REPLY_OK;
 }
 
 //--- pc_off ------------------------------------------------------------

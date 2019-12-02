@@ -15,14 +15,14 @@ namespace RX_DigiPrint.Views.PrintSystemView
             InitializeComponent();
             DataContext = RxGlobals.Stepper;
             RxGlobals.Stepper.PropertyChanged += Stepper_PropertyChanged;
-            Col0.DataContext = RxGlobals.InkSupply.List[0];
-            Col1.DataContext = RxGlobals.InkSupply.List[1];
-            Col2.DataContext = RxGlobals.InkSupply.List[2];
-            Col3.DataContext = RxGlobals.InkSupply.List[3];
-            Col4.DataContext = RxGlobals.InkSupply.List[4];
-            Col5.DataContext = RxGlobals.InkSupply.List[5];
-            Col6.DataContext = RxGlobals.InkSupply.List[6];
-            Col7.DataContext = RxGlobals.InkSupply.List[7];
+            Col0.DataContext = RxGlobals.InkSupply.List[7];
+            Col1.DataContext = RxGlobals.InkSupply.List[6];
+            Col2.DataContext = RxGlobals.InkSupply.List[5];
+            Col3.DataContext = RxGlobals.InkSupply.List[4];
+            Col4.DataContext = RxGlobals.InkSupply.List[0];
+            Col5.DataContext = RxGlobals.InkSupply.List[1];
+            Col6.DataContext = RxGlobals.InkSupply.List[2];
+            Col7.DataContext = RxGlobals.InkSupply.List[3];
 
             //--- allocate boxes ---------------------------
             int x, y;

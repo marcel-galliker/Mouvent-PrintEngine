@@ -661,7 +661,7 @@ int  ctrl_singleHead(void)
 void ctrl_send_head_fluidCtrlMode(int headNo, EnFluidCtrlMode ctrlMode, int sendToFluid, int fromGui)
 {
 	int mode=RX_HBStatus[headNo/HEAD_CNT].head[headNo%HEAD_CNT].ctrlMode;
-	if (mode==INVALID_VALUE || mode==ctrl_off && ctrlMode==ctrl_off) return;
+	if (mode==INVALID_VALUE || (mode==ctrl_off && ctrlMode==ctrl_off)) return;
 	if (fromGui) 
 	{
 		if (ctrlMode>=ctrl_purge_soft && ctrlMode<ctrl_purge_step1)
@@ -733,7 +733,7 @@ int  ctrl_check_head_flushed(int fluidNo)
 //--- ctrl_set_config -------------------------------------------------------------------
 int ctrl_set_config(void)
 {
-	int i, cnt;
+	int cnt;
 
 	TrPrintf(TRUE, "ctrl_set_config");
 

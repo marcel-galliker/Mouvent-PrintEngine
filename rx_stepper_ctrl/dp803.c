@@ -181,6 +181,7 @@ static void _dp803_display_status(void)
 	term_printf("DP 803 ---------------------------------\n");
 	term_printf("moving:         %d		cmd: %08x\n",	RX_StepperStatus.info.moving, _CmdRunning);
 	term_printf("actpos:         %06d  newpos: %06d\n",	_PrintPos_Act, _PrintPos_New);		
+	term_printf("Board No:      %06d\n", RX_StepperCfg.boardNo);
 	term_printf("refheight:      %06d  ph:     %06d\n", 	_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height), _micron_2_steps(_PrintHeight));
 	term_printf("Head UP Sensor: %d  %d\n",	fpga_input(HEAD_UP_IN_0), fpga_input(HEAD_UP_IN_1));	
 	term_printf("reference done: %d\n",	RX_StepperStatus.info.ref_done);
@@ -204,6 +205,9 @@ int dp803_menu(void)
 	int synth=FALSE;
 	static int cnt=0;
 	int pos=10000;
+	
+	if (_PrintHeight > 0) pos = _PrintHeight;
+
 
 	_dp803_display_status();
 	
