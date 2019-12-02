@@ -823,6 +823,7 @@ static void _plc_set_var(RX_SOCKET socket, char *varList)
 			val= strchr(str, '=');
 			*val++=0;
 			strcpy(var, str);
+			for(char *ch=val; *ch; ch++) if (*ch==',') *ch='.';
 			if (!_plc_set_cpu_cmd(name, val))
 			{
 				if (!strcmp(var, "CMD_SET_PARAMETER") && RX_PrinterStatus.printState==ps_webin && RX_Config.printer.type!=printer_cleaf)
@@ -838,7 +839,7 @@ static void _plc_set_var(RX_SOCKET socket, char *varList)
 			//	Error(LOG, 0, "SET %s=%s", name, val);
 			//	TrPrintfL(TRUE, 0, "SET %s=%s", name, val);
 			//	TrPrintfL(!strcmp(name, "Application.GUI_00_001_Main.PAR_FLEXO_CONFIGURATION"), "_plc_set_var socket=%d >>%s=%s<< ret=%d", socket, name, val, ret);
-				if (ret)  ErrorFlag(ERR_CONT, &_ErrorFlags, 1, 0, "Writing >>%s<<: Error %s", name, mlpi_get_errmsg());
+				if (ret)  ErrorFlag(ERR_CONT, &_ErrorFlags, 1, 0, "Writing >>%s=%s<<: Error %s", name, val, mlpi_get_errmsg());
 				if (toWebin)
 				{
 					rx_sleep(200);
