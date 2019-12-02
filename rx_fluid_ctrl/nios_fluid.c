@@ -172,7 +172,7 @@ static void _nios_check_errors(void)
 	if (_Stat->error&err_fpga_incompatible)  ErrorFlag(ERR_ABORT, &RX_FluidBoardStatus.err, err_fpga_incompatible,   0, "Fluid NIOS NOT compatible");
 	if (_Stat->error&err_amc_fluid)			 ErrorFlag(ERR_ABORT, &RX_FluidBoardStatus.err, err_amc_fluid,           0, "AMC Fluid Temperature Error");
 	if (_Stat->error&err_watchdog)			 ErrorFlag(ERR_ABORT, &RX_FluidBoardStatus.err, err_watchdog,            0, "Watchdog");
-	if (_Stat->error&err_inkpres_not_reached)ErrorFlag(ERR_CONT,  &RX_FluidBoardStatus.err, err_inkpres_not_reached, 0, "Ink Tank pressure not reached");
+//	if (_Stat->error&err_inkpres_not_reached)ErrorFlag(ERR_CONT,  &RX_FluidBoardStatus.err, err_inkpres_not_reached, 0, "Ink Tank pressure not reached");
     if (_TempMax>40000 && _Stat->error&err_amc_heater) ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_amc_heater, 0, "No Heater Board connected to Fluid");
     
 	int isNo;
@@ -180,16 +180,16 @@ static void _nios_check_errors(void)
 	{
 		if (_Stat->ink_supply[isNo].error&err_overpressure)		 
 			ErrorFlag(ERR_CONT,  &RX_FluidBoardStatus.err, err_overpressure,      0, "InkSupply[%d] Ink Tank overpressure", isNo+1);
-		if (_Stat->ink_supply[isNo].error & err_ink_tank_pressure)
-			ErrorFlag (ERR_CONT, (UINT32*)&_Error[isNo],  err_ink_tank_pressure,  0, "InkSupply[%d] Ink Tank Sensor Error", isNo+1);							
+//		if (_Stat->ink_supply[isNo].error & err_ink_tank_pressure)
+//			ErrorFlag (ERR_CONT, (UINT32*)&_Error[isNo],  err_ink_tank_pressure,  0, "InkSupply[%d] Ink Tank Sensor Error", isNo+1);							
 		if (nios_is_heater_connected())
 		{
-			if (_Stat->ink_supply[isNo].error & err_heater_board) ErrorFlag(ERR_CONT, (UINT32*)&_Error[isNo], err_heater_board, 0, "InkSupply[%d] Heater Board Error or Openload", isNo + 1);	
-			if (_Stat->ink_supply[isNo].error & err_watchdog) ErrorFlag(ERR_CONT, (UINT32*)&_Error[isNo], err_heater_board, 0, "InkSupply[%d] Heater Board Watchdog Error", isNo + 1);	
-			if (_Stat->HeaterBoard_Vsupply_3V < 3000) ErrorFlag(ERR_CONT, (UINT32*)&_Error[isNo], err_heater_board, 0, "InkSupply[%d] Heater Board 3.3V error", isNo + 1);
-			if (_Stat->HeaterBoard_Vsupply_5V < 4800) ErrorFlag(ERR_CONT, (UINT32*)&_Error[isNo], err_heater_board, 0, "InkSupply[%d] Heater Board 5V error", isNo + 1);
-			if (_Stat->HeaterBoard_Vsupply_24V < 12000) ErrorFlag(ERR_CONT, (UINT32*)&_Error[isNo], err_heater_board, 0, "InkSupply[%d] Heater Board 24V error", isNo + 1);
-			if (_Stat->HeaterBoard_Vsupply_24VP < 12000) ErrorFlag(ERR_CONT, (UINT32*)&_Error[isNo], err_heater_board, 0, "InkSupply[%d] Heater Board 24VP error", isNo + 1);
+			if (_Stat->ink_supply[isNo].error & err_heater_board)	ErrorFlag(ERR_CONT, (UINT32*)&_Error[isNo], err_heater_board, 0, "InkSupply[%d] Heater Board Error or Openload", isNo + 1);	
+			if (_Stat->ink_supply[isNo].error & err_watchdog)		ErrorFlag(ERR_CONT, (UINT32*)&_Error[isNo], err_heater_board, 0, "InkSupply[%d] Heater Board Watchdog Error", isNo + 1);	
+			if (_Stat->HeaterBoard_Vsupply_3V < 3000)				ErrorFlag(ERR_CONT, (UINT32*)&_Error[isNo], err_heater_board, 0, "InkSupply[%d] Heater Board 3.3V error", isNo + 1);
+			if (_Stat->HeaterBoard_Vsupply_5V < 4800)				ErrorFlag(ERR_CONT, (UINT32*)&_Error[isNo], err_heater_board, 0, "InkSupply[%d] Heater Board 5V error", isNo + 1);
+			if (_Stat->HeaterBoard_Vsupply_24V < 12000)				ErrorFlag(ERR_CONT, (UINT32*)&_Error[isNo], err_heater_board, 0, "InkSupply[%d] Heater Board 24V error", isNo + 1);
+			if (_Stat->HeaterBoard_Vsupply_24VP < 12000)			ErrorFlag(ERR_CONT, (UINT32*)&_Error[isNo], err_heater_board, 0, "InkSupply[%d] Heater Board 24VP error", isNo + 1);
 		}  	
 	}
 }
