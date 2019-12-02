@@ -39,6 +39,7 @@ int tif_load_mt		(SPageId *id, const char *filedir, const char *filename, int pr
 int tif_load		(SPageId *id, const char *filedir, const char *filename, int printMode, UINT32 spacePx, INT32 wakeupLen, SColorSplitCfg *psplit, int splitCnt, BYTE* buffer[MAX_COLORS], SBmpInfo *pinfo, progress_fct progress);
 int tif_load_simple	(const char *path, BYTE **buffer, int bufsize, SBmpInfo *info);
 int tif_load_8bppx	(const char *path, int printMode, SColorSplitCfg *psplit, int splitCnt, BYTE* buffer[MAX_COLORS], SBmpInfo *pinfo);
+char* tif_last_filepath(void);
 // int tif_write(const char *filedir, const char *filename, const char *ext, SBmpInfo *pinfo, int uncompress);
 int tif_write		(const char *filedir, const char *filename, SBmpInfo *pinfo);
 int tif_write_plane(const char *filepath, SPlaneInfo *pinfo, int uncompress);

@@ -412,7 +412,23 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 			if (ret==REPLY_NOT_FOUND) 
 				Error(ERR_STOP, 0, "Could not load file >>%s<<", msg.filename);
 		}
-		
+	}
+	//--- send feedback ---------------------------------------------------------------------
+	{
+		int linelenBt;
+		reply.hdr.msgId  = REP_PRINT_FILE;
+		reply.hdr.msgLen = sizeof(reply);
+		reply.same   = same;
+		linelenBt = ((HEAD_WIDTH_SAMBA+HEAD_OVERLAP_SAMBA)*bitsPerPixel+8)/8;	// 7=max pixel shifting
+		linelenBt = (linelenBt+31) & ~31;// align to 256 Bits (32 Bytes)
+		reply.blkCnt = (linelenBt *lengthPx +RX_Spooler.dataBlkSize-1) / RX_Spooler.dataBlkSize;
+		memcpy(&reply.id, &msg.id, sizeof(reply.id));
+		reply.bufReady   = data_ready();
+		if (sok_send(&socket, &reply)==REPLY_OK) _MsgSent++;
+	}
+	
+	if (!same)
+	{
 		if (msg.printMode==PM_SCAN_MULTI_PAGE) multiCopy=1;
 		if (ret==REPLY_OK)
 		{
@@ -434,23 +450,6 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 			return REPLY_ERROR;				
 		}
 	}
-
-	//--- send feedback ---------------------------------------------------------------------
-	{
-		int linelenBt;
-		reply.hdr.msgId  = REP_PRINT_FILE;
-		reply.hdr.msgLen = sizeof(reply);
-		reply.same   = same;
-		linelenBt = ((HEAD_WIDTH_SAMBA+HEAD_OVERLAP_SAMBA)*bitsPerPixel+8)/8;	// 7=max pixel shifting
-		linelenBt = (linelenBt+31) & ~31;// align to 256 Bits (32 Bytes)
-		reply.blkCnt = (linelenBt *lengthPx +RX_Spooler.dataBlkSize-1) / RX_Spooler.dataBlkSize;
-		memcpy(&reply.id, &msg.id, sizeof(reply.id));
-		reply.bufReady   = data_ready();
-		ret=sok_send(&socket, &reply);
-	}
-	if (ret==0) _MsgSent++;
-	else
-		TrPrintfL(TRUE, "sok_send PRINT-REPLY=%d", ret);
 
 	TrPrintfL(TRUE, "REP_PRINT_FILE _MsgGot0=%d, _MsgGot=%d, _MsgSent=%d, widthPx=%d, lengthPx=%d, same=%d", _MsgGot0, _MsgGot, _MsgSent, widthPx, lengthPx, same);
 //	if (_PrintFileDone_Sem) 	rx_sem_post(_PrintFileDone_Sem);

@@ -22,6 +22,7 @@ typedef struct
 	int						flags;
 	UINT8					virtualPasses;
 	UINT8					virtualPass;
+	UINT8					penetrationPasses;
 	int						headsUsed;
 	int						headsInUse;
 	int						lengthPx;

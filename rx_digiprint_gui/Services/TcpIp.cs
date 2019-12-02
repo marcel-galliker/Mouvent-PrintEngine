@@ -673,6 +673,7 @@ namespace RX_DigiPrint.Services
 	        public Int32	    scanLength;
 	        public byte	        passes;
             public byte         virtualPasses;
+            public byte         penetrationPasses;
 	        public byte	        curingPasses;
 	        public Int32	    scans;
             public Int32        speed;

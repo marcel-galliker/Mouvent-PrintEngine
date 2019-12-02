@@ -28,7 +28,37 @@ namespace RX_DigiPrint.Models
         #region Properties
 
         private Label _Label;
-        
+        private static string _TempPath=Path.GetTempPath() + "rx_thumb_nails\\";
+        private static bool _First=true;
+
+        //--- clearFolder ----------------------------------------------
+        private void clearFolder(string FolderName)
+        {
+            DirectoryInfo dir = new DirectoryInfo(FolderName);
+
+            foreach(FileInfo fi in dir.GetFiles())
+            {
+                fi.Delete();
+            }
+
+            foreach (DirectoryInfo di in dir.GetDirectories())
+            {
+                clearFolder(di.FullName);
+                di.Delete();
+            }
+        }
+
+        //--- constructor ---------------------------------------------
+        public PrintQueueItem()
+        {
+            if (_First)
+            {
+                Directory.CreateDirectory(_TempPath);
+                clearFolder(_TempPath);
+                _First=false;
+            }
+        }
+
         //--- Property IsSelected ---------------------------------------
         private bool _IsSelected = false;
         public bool IsSelected
@@ -67,15 +97,20 @@ namespace RX_DigiPrint.Models
                     Ripped = Dir.isRipped(FilePath);
                     if (Ripped) 
                     {
+                        string tempPath=_TempPath+Path.GetFileName(_FilePath)+ ".bmp";
                         string path=Dir.local_path(_FilePath + Path.DirectorySeparatorChar + Path.GetFileName(_FilePath) + ".bmp");
-                        if (File.Exists(path)) PreviewPath = path;
-                        else                   PreviewPath = Dir.local_path(_FilePath + Path.DirectorySeparatorChar + Path.GetFileName(_FilePath) + "_preview.bmp"); 
+                        if (!File.Exists(path)) path = Dir.local_path(_FilePath + Path.DirectorySeparatorChar + Path.GetFileName(_FilePath) + "_preview.bmp");
+                        if (File.Exists(path))
+                        {
+                            if (!File.Exists(tempPath)) File.Copy(path, tempPath);
+                            PreviewPath = tempPath;
+                        }
                     }
                     else
                     {
                         FileInfo info = new FileInfo(Dir.local_path(_FilePath));
                         string preview = info.Directory +"\\"+ Path.GetFileNameWithoutExtension(info.FullName) + ".png";
-                        PreviewPath = Path.GetTempPath() + "rx_thumb_nails\\"+preview.Remove(0, info.Directory.Root.ToString().Length);
+                        PreviewPath = _TempPath+preview.Remove(0, info.Directory.Root.ToString().Length);
                     }
                     RxBindable.Invoke(()=>{Preview = RxGlobals.PreviewCash.GetPreview(PreviewPath) as ImageSource;});
                 }
@@ -349,6 +384,20 @@ namespace RX_DigiPrint.Models
             set { Changed |= SetProperty(ref _CuringPasses, value); }
         }
 
+        //--- Property PenetrationPasses ---------------------------------------
+        private int _PenetrationPasses;
+        public int PenetrationPasses
+        {
+            get { return _PenetrationPasses; }
+            set 
+            { 
+                if (SetProperty(ref _PenetrationPasses, value) && _PenetrationPasses>1)
+                {
+                    Passes= 0x10 | _PenetrationPasses;
+                }
+            }
+        }
+        
         //--- Property Speed ---------------------------------------
         private int _Speed;
         public int Speed
@@ -842,6 +891,7 @@ namespace RX_DigiPrint.Models
 
                     RxSettingsBase.SaveProperty(this, xml, "ScanMode");
                     RxSettingsBase.SaveProperty(this, xml, "Passes");
+                    RxSettingsBase.SaveProperty(this, xml, "PenetrationPasses");
                     RxSettingsBase.SaveProperty(this, xml, "CuringPasses");
                     RxSettingsBase.SaveProperty(this, xml, "Speed");
                     RxSettingsBase.SaveProperty(this, xml, "ScanLength");
@@ -870,11 +920,6 @@ namespace RX_DigiPrint.Models
             { 
                 Console.WriteLine("Exception {0}", e.Message);
             }
-        }
-
-        #region Creator
-        public PrintQueueItem()
-        {
         }
 
         private int _PageOffset=0;
@@ -906,6 +951,7 @@ namespace RX_DigiPrint.Models
             ScanMode        = (EScanMode)(msg.scanMode);
             if (msg.virtualPasses!=0) Passes = 0x10 | msg.passes;
             else                      Passes = msg.passes;
+            PenetrationPasses = msg.penetrationPasses;
             CuringPasses    = msg.curingPasses;
             Speed           = msg.speed;
             Collate         = msg.collate;
@@ -1053,6 +1099,7 @@ namespace RX_DigiPrint.Models
                 msg.item.scanMode           = ScanMode;
                 msg.item.passes             = (byte)(Passes&0x0f);
                 msg.item.virtualPasses      = (byte)(Passes>>4);
+                msg.item.penetrationPasses  = (byte)PenetrationPasses;
                 msg.item.curingPasses       = (byte)CuringPasses;
             }
             else
@@ -1061,6 +1108,7 @@ namespace RX_DigiPrint.Models
                 msg.item.passes         = 1;
                 msg.item.virtualPasses  = 0;
                 msg.item.curingPasses   = 0;
+                msg.item.penetrationPasses = 0;
             }
             msg.item.speed          = Speed;
             msg.item.collate        = (Byte)Collate;
@@ -1102,6 +1150,5 @@ namespace RX_DigiPrint.Models
 
             RxGlobals.BtProdState.send(true);
         }
-        #endregion
     }
 }

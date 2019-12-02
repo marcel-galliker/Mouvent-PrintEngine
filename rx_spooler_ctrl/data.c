@@ -73,6 +73,9 @@ static SPageId			_LastId;
 static int				_LastSplitId;
 static SPageId			_SendingId;
 static char				_LastFilePath[MAX_PATH];
+static char				_FileTimePath[MAX_PATH];
+static time_t			_LastFileTime;
+
 static SBmpInfo			_LastBmpInfo;
 static int				_LastColorOffset[MAX_COLORS];
 static int				_LastOffset;
@@ -127,6 +130,7 @@ void data_init(RX_SOCKET socket, int headCnt)
 		_MaxMemory -= 1024*1024*1024; // leave one GB for the system
 		memset(&_LastId, 0, sizeof(_LastId));
 		memset(_LastFilePath, 0, sizeof(_LastFilePath));
+		memset(_FileTimePath, 0, sizeof(_FileTimePath));
 		memset(&_LastBmpInfo, 0, sizeof(_LastBmpInfo));
 		memset(_LastColorOffset, 0, sizeof(_LastColorOffset));
 	}
@@ -569,8 +573,9 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 				_LastOffset = offsetPx;
 				if (rx_def_is_web(RX_Spooler.printerType)) newOffsets =TRUE;
 			}
-		}
-		if (/*id->id!=_LastId.id || */ id->page!=_LastId.page || strcmp(filepath, _LastFilePath) || _WakeupLen!=_LastWakeupLen || newOffsets)
+		}		
+			
+		if (/*id->id!=_LastId.id || */ id->page!=_LastId.page || strcmp(filepath, _LastFilePath) || _WakeupLen!=_LastWakeupLen || newOffsets || rx_file_get_mtime (_FileTimePath)!=_LastFileTime)
 		{
 			ret = 1;
 			loaded = TRUE;
@@ -585,6 +590,7 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 					if (buffer[color])
 					{
 						ret=bmp_load(filepath, &buffer[color], 100000, &bmpInfo);
+						if (ret==REPLY_OK) strcpy(_FileTimePath, filepath);
 //						ret=tif_load_simple(filepath, &buffer[color], 100000, &bmpInfo);
 						if (FALSE)
 						{
@@ -607,10 +613,18 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 				{
 					flz_loaded = _flz_data_loaded;
 					ret = flz_load(id, filepath, filename, printMode, gapPx, RX_Color, SIZEOF(RX_Color), buffer, &bmpInfo, NULL, (void*)&_PrintList[_InIdx]);
-					if (ret) ret = tif_load_mt(id, filepath, filename, printMode, gapPx, RX_Color, SIZEOF(RX_Color), buffer, &bmpInfo, NULL);
+					if (ret==REPLY_OK) strcpy(_FileTimePath, flz_last_filepath());
+					else					
+					{
+						ret = tif_load_mt(id, filepath, filename, printMode, gapPx, RX_Color, SIZEOF(RX_Color), buffer, &bmpInfo, NULL);
+						strcpy(_FileTimePath, tif_last_filepath());
+					}
 				}
 				else
+				{
 					ret = tif_load(id, filepath, filename, printMode, gapPx, _WakeupLen, RX_Color, SIZEOF(RX_Color), buffer, &bmpInfo, ctrl_send_load_progress);
+					strcpy(_FileTimePath, tif_last_filepath());				
+				}
 				
 				{ // test ------------
 					int i;
@@ -627,11 +641,14 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 				
 			if (ret) ret = bmp_load_all(filepath, printMode, RX_Color, SIZEOF(RX_Color), buffer, &bmpInfo);
 
+			/* is done in split !
 			if (printMode==PM_SCANNING)
 			{
 //				Error(LOG, 0, "Reset _BlkNo, blkNo=%d", blkNo);
 				memset(_BlkNo, 0, sizeof(_BlkNo));			
 			}
+			*/
+			if (*_FileTimePath) _LastFileTime=rx_file_get_mtime (_FileTimePath);
 		}
 		else
 		{
@@ -1022,7 +1039,7 @@ static void *_multicopy_thread(void* lpParameter)
 //--- _data_split -----------------------------------------------------------------------
 static int _data_split(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int lengthPx, int blkNo, int blkCnt, int flags, int clearBlockUsed, int same, SPrintListItem *pItem)
 {		
-	if (rx_def_is_scanning(RX_Spooler.printerType) && id->id!=_LastSplitId)
+	if (pBmpInfo->printMode==PM_SCANNING && id->id!=_LastSplitId)
 	{
 		_LastSplitId = id->id;
 		memset(_BlkNo, 0, sizeof(_BlkNo));
@@ -1656,7 +1673,8 @@ static void _data_fill_blk_scan(SBmpSplitInfo *psplit, int blkNo, BYTE *dst)
 		}
 		
 		//---------------------------------
-		if (psplit->pListItem->virtualPasses)
+		if (psplit->pListItem->virtualPasses 
+		&& (psplit->pListItem->penetrationPasses<2 || psplit->colorCode!=30)) // penetration is colorode 30
 		{	
 			if ((line % psplit->pListItem->virtualPasses) != psplit->pListItem->virtualPass) memset(&dst[size], 0x00, dstLen);
 			if (*test0!=0x33) 

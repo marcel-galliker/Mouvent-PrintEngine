@@ -319,6 +319,7 @@ typedef struct SPrintQueueItem
 	INT32	scanLength; // mm
 	INT8	passes;
 	INT8	virtualPasses;
+	INT8	penetrationPasses;
 	INT8	curingPasses;
 	INT32	scans;
 	INT32	speed;

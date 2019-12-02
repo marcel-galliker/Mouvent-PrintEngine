@@ -693,6 +693,7 @@ typedef struct SPrintFileCmd
 
 	UINT8		virtualPasses;
 	UINT8		virtualPass;
+	UINT8		penetrationPasses;
 	
 	UINT8		printMode;	// see rx_def.h::SBmpInfo
 		#define PM_UNDEF				0

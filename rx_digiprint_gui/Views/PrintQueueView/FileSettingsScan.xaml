@@ -158,7 +158,7 @@
                 <rx:RxComboBox x:Name="CB_ScanMode"
                     Grid.Row="1" Grid.Column="2" 
                     SelectedValue="{Binding ScanMode}"
-                    HorizontalContentAlignment="Center"
+                    HorizontalContentAlignment="Center" Height="26" VerticalAlignment="Top"
                     />
 
                 <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Text="Passes" />

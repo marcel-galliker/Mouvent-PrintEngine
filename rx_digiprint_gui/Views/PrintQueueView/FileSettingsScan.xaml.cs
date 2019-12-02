@@ -40,6 +40,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
                 MarginUnit.Text    = DistUnit.Text = new CUnit("mm").Name;
 
                 CB_Speed.ItemsSource = RxGlobals.PrintSystem.SpeedList(item.LargestDot, item.SrcHeight);
+                CB_Passes.IsEnabled  = item.PenetrationPasses<2;
                 if(item.SrcPages>1)
                 {
                     Length_Settings.Visibility = Visibility.Collapsed;
@@ -148,5 +149,5 @@ namespace RX_DigiPrint.Views.PrintQueueView
         {
         //  Checks_Settings.Visibility= Visibility.Collapsed; 
         }
-    }
+   }
 }

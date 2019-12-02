@@ -95,9 +95,7 @@ namespace RX_DigiPrint.Models
                 string labeldef = Dir.local_path(_FileName + "\\" + Path.GetFileName(_FileName) + ".rxd");
                 if (!File.Exists(preview)) preview = Dir.local_path(_FileName + "\\" + Path.GetFileName(_FileName) + "_preview.bmp"); // wasatch rip
                 if (File.Exists(preview))
-                {
-                    // Preview = new BitmapImage(new Uri(preview));                              
-                    
+                {                    
                     // --- the same with a local copy of the file
                     {                        
                         FileInfo info = new FileInfo(preview);

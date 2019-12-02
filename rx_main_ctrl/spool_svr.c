@@ -447,7 +447,9 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 	msg.lengthUnit		= pitem->lengthUnit;
 	msg.flags			= 0;
 	msg.clearBlockUsed	= clearBlockUsed;
-	msg.wakeup			= pitem->wakeup;
+	msg.wakeup			  = pitem->wakeup;
+	msg.penetrationPasses = pitem->penetrationPasses; 
+	
 	strncpy(msg.filename, filename, sizeof(msg.filename));
 	memcpy(&msg.id, pid, sizeof(msg.id));
 	memcpy(&_Id[RX_PrinterStatus.sentCnt%MAX_PAGES], pid, sizeof(msg.id));

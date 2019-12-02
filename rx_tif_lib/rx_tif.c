@@ -56,6 +56,8 @@ static int				_Init=FALSE;
 static INT64			_FileBufSize=0;
 static BYTE*			_FileBuf=NULL;
 
+static char				_LastFilePath[MAX_PATH]="";
+
 static int _Abort;
 static char _ErrorStr[256]={0};
 static char _WarnStr[256] ={0};
@@ -290,6 +292,7 @@ int tif_load_mt(SPageId *id, const char *filedir, const char *filename, int prin
 					{
 						dst += fread(dst, 1, (int)blksize, file);
 					}
+					strcpy(_LastFilePath, filepath);
 					fread(dst, (int)len, 1, file);					
 					fclose(file);
 				}
@@ -398,7 +401,9 @@ int tif_load(SPageId *id, const char *filedir, const char *filename, int printMo
 				if (id->page>1) sprintf(filepath, "%s/%s_P%06d_%s.tif", filedir, filename, id->page, RX_ColorNameShort(pinfo->inkSupplyNo[c]));
 				else			sprintf(filepath, "%s/%s_%s.tif", filedir, filename, RX_ColorNameShort(pinfo->inkSupplyNo[c]));							
 				ppar->file = TIFFOpen (filepath, "r");
-				if (!ppar->file)
+				if (ppar->file)
+					strcpy(_LastFilePath, filepath);
+				else
 					Error(ERR_CONT, 0, "Could not open file >>%s<<", filepath);
 			}
 			else 
@@ -481,6 +486,12 @@ int tif_load(SPageId *id, const char *filedir, const char *filename, int printMo
 	
 //	Error(LOG, 0, "Loaded, time=%d ms", rx_get_ticks()-time);
 	return REPLY_OK;
+}
+
+//--- tif_last_filepath --------------------------------------
+char* tif_last_filepath(void)
+{
+	return _LastFilePath;
 }
 
 //--- _tif_read_thread ------------------------------------

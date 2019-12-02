@@ -62,6 +62,7 @@ static int				_FileBufLoadIdx=0;
 static int				_FileBufDecompIdx=0;
 static INT64			_FileBufSize[2]={0,0};
 static BYTE*			_FileBuf[2]={NULL, NULL};
+static char				_LastFilePath[MAX_PATH]="";
 
 //--- prototypes --------------------------------
 static void *_flz_decompress_master_thread(void* lpParameter);
@@ -193,6 +194,8 @@ int flz_load(SPageId *id, const char *filedir, const char *filename, int printMo
 					}
 					dst+=fread(dst, (int)len, 1, file);					
 					fclose(file);
+					strcpy(_LastFilePath, filepath); 
+
 					_FileBufLoadIdx = (_FileBufLoadIdx+1) & 1;
 				}				
 				TrPrintfL(TRUE, "LOADING >>%s<<, page %d, time=%d ms", filepath, id->page, rx_get_ticks()-time);
@@ -231,6 +234,12 @@ int flz_load(SPageId *id, const char *filedir, const char *filename, int printMo
 		}
 	}
 	return REPLY_OK;
+}
+
+//--- flz_last_filepath --------------------------------------
+char* flz_last_filepath(void)
+{
+	return _LastFilePath;
 }
 
 //--- _flz_decompress_master_thread ------------------------------------
