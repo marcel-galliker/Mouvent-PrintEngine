@@ -84,7 +84,7 @@ void tx801_init(void)
 	//--- movment parameters ----------------	
 	_ParRef.speed		= 10000;
 	_ParRef.accel		= 5000;
-	_ParRef.current_acc	= 154;
+	_ParRef.current_acc	= 150;
 	_ParRef.current_run	= 100;
 	_ParRef.estop_in_bit[0] = (1<<HEAD_UP_IN_0);
 	_ParRef.estop_in_bit[1] = (1<<HEAD_UP_IN_1);
@@ -164,25 +164,19 @@ void tx801_main(int ticks, int menu)
 		if (_CmdRunning == CMD_CAP_REFERENCE)
 		{
 			_tx801_set_ventilators(0);
-			if (motor_error(MOTOR_Z_BITS))
-			{	
-				Error(ERR_CONT, 0, "LIFT: %s: motor %s blocked", ctrl_cmd_name(_CmdRunning), _motor_name(motor));
-				RX_StepperStatus.info.ref_done = FALSE;
-			}
-			else
+			for (motor=0, ok=TRUE; motor<MOTOR_Z_CNT; motor++)
 			{
-				motors_reset(MOTOR_Z_BITS);				
-				for (motor=0, ok=TRUE; motor<MOTOR_Z_CNT; motor++)
+				if ((Fpga.stat->statMot[motor].err_estop & ENC_ESTOP_ENC))
 				{
-					if (!fpga_input(motor))	
+					if (!fpga_input(motor)) 
 					{
-						Error(ERR_CONT, 0, "Referencing motor %s: Sensor not covered", _motor_name(motor));
-						ok = FALSE;	
+						Error(ERR_CONT, 0, "LIFT: %s: motor %s blocked", ctrl_cmd_name(_CmdRunning), _motor_name(motor));
+						ok=FALSE;
 					}
 				}
-					
-				RX_StepperStatus.info.ref_done = ok;
 			}
+			motors_reset(MOTOR_Z_BITS);						
+			RX_StepperStatus.info.ref_done = ok;
 		}
 		else
 		{
@@ -350,7 +344,7 @@ static void _tx801_do_reference(void)
 
 	_CmdRunning  = CMD_CAP_REFERENCE;
 	RX_StepperStatus.info.moving = TRUE;
-	motors_move_by_step	(MOTOR_Z_BITS,  &_ParRef, -500000, TRUE);
+	motors_move_by_step	(MOTOR_Z_BITS,  &_ParRef, -100000, TRUE);
 	// _tx801_set_ventilators(20);
 }
 
