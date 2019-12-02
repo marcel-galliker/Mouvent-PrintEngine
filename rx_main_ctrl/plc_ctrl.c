@@ -160,6 +160,7 @@ static int				_ErrorFilterBuf[100];
 static double			_StepDist;
 static int				_UnwinderLenMin;
 static UINT32			_ActSpeed;
+static double			_StartPos;
 
 static int				_MpliStarting;
 static int				_Speed;
@@ -444,6 +445,7 @@ static void _plc_send_par(SPlcPar *pPlcPar)
 			lc_set_value_by_name_UINT32(UnitID ".PAR_WINDER_1_ON", 0);
 			lc_set_value_by_name_UINT32(UnitID ".PAR_WINDER_2_ON", 0);
 		}
+		_StartPos = pPlcPar->startPos;
 		lc_set_value_by_name_FLOAT(UnitID ".PAR_PRINTING_START_POSITION", (float)pPlcPar->startPos);	
 		lc_set_value_by_name_FLOAT(UnitID ".PAR_PRINTING_END_POSITION", (float)pPlcPar->endPos);
 		lc_set_value_by_name_UINT32(UnitID ".PAR_DRYER_BLOWER_POWER", 75);
@@ -1303,7 +1305,7 @@ static void _plc_state_ctrl()
 			static UINT32 _scannerpos;
 			UINT32 old=_scannerpos;
 			_scannerpos = plc_get_scanner_pos();
-			if (_GUIPause && _scannerpos < (int)(old+2000))
+			if (_GUIPause && _scannerpos>_StartPos*1000 && _scannerpos < (int)(old+2000))
 			{
 				_GUIPause =FALSE;
 				_SendPause=1;
