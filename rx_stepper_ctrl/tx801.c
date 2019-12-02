@@ -503,7 +503,8 @@ int  tx801_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 	case CMD_FLUID_CTRL_MODE:		pvalue = (SValue*) pdata;
 									_tx801_do_ctrlMode((EnFluidCtrlMode)pvalue->value);
 									break;
-		
+	
+	case CMD_ERROR_RESET:			fpga_stepper_error_reset();
 	default:						break;
 	}
 	return REPLY_OK;

@@ -638,9 +638,9 @@ int  cleaf_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 										
 	// ============================================================== Reset ==============================================================
 
-	case CMD_ERROR_RESET:		//strcpy(_CmdName, "CMD_ERROR_RESET");		
-		_cleaf_Error = 0;
+	case CMD_ERROR_RESET:		//strcpy(_CmdName, "CMD_ERROR_RESET");
 		fpga_stepper_error_reset();
+		_cleaf_Error = 0;
 		break;
 		
 	case CMD_CAP_VENT:	break;

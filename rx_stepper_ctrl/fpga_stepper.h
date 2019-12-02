@@ -28,6 +28,9 @@ void  fpga_end(void);
 
 int   fpga_load(char *path_rbf);
 
+void  fpga_connected(void);
+void  fpga_deconnected(void);
+
 void  fpga_main(int ticks, int menu);
 int	  fpga_input(int no);
 void  fpga_output_toggle(int no);

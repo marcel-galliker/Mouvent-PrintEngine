@@ -57,16 +57,14 @@ static int		_Init=FALSE;
 static HANDLE	_FpgaThread=NULL;
 static int		_PWM_Speed[6];
 static int		_GuiTimer=0;
-
+static int		_ErrorCheckTime=0;
+	
 #define WATCHDOG_CNT	0x7fffffff
 
 //--- Errors ----------------------------------------
-#define ERR_0	0x00000001
-#define ERR_1	0x00000002
-#define ERR_2	0x00000004
-#define ERR_3	0x00000008
 
 static INT32 _ErrorFlags;
+static int	 _ErrorCnt[32];
 
 //--- prototypes -------------------------------------------
 static void  _check_errors(void);
@@ -78,6 +76,7 @@ void fpga_init()
 {
 	_Init = FALSE;
 	_ErrorFlags = 0;
+	memset(_ErrorCnt, 0, sizeof(_ErrorCnt));
 	if (rx_fpga_load (PATH_BIN_STEPPER FIELNAME_STEPPER_RBF)!=REPLY_OK) 
 	{
 		//--- simulation in windows ----------------
@@ -143,6 +142,18 @@ void fpga_end()
 	close (_MemId);
 	_MemId = 0;
 #endif
+}
+
+//--- fpga_connected -------------------------
+void  fpga_connected(void)
+{
+	_ErrorCheckTime	= RX_StepperStatus.alive[0]+2;	
+}
+
+//--- fpga_deconnected --------------------------
+void  fpga_deconnected(void)
+{
+	_ErrorCheckTime=0;		
 }
 
 //--- fpga_is_init -----------------------------
@@ -328,7 +339,7 @@ void  fpga_main(int ticks, int menu)
 		led = !led;
 		RX_StepperStatus.alive[0]++;
 		
-		if (RX_StepperStatus.alive[0]>5) 
+		if (_ErrorCheckTime && RX_StepperStatus.alive[0]>_ErrorCheckTime)
 			_check_errors();
 
 		//--- user interface ------------------------------				
@@ -354,35 +365,37 @@ void fpga_output_toggle(int no)
 //--- _check_errors ---------------------------------------------------------------------
 static void  _check_errors(void)
 {
-	if (Fpga.stat->voltage_3v3!= INVALID_VALUE)
+	if (Fpga.stat->voltage_3v3!= INVALID_VALUE && _ErrorFlags==0)
 	{
-		if (VAL_TO_MV(Fpga.stat->voltage_3v3) < 3000)						ErrorFlag(ERR_CONT, &_ErrorFlags, ERR_0, 0, "Voltage Error: 3.3V Level is %d V", VAL_TO_MV(Fpga.stat->voltage_3v3));
-		if ((VAL_TO_MV(Fpga.stat->current_24v) * 5600.0 / 680.0) > 15000)	ErrorFlag(ERR_CONT, &_ErrorFlags, ERR_2, 0, "Current Error: Current of 24V Supply is %d A", VAL_TO_MV(Fpga.stat->current_24v) * 5600.0 / 680.0);
-		if ((VAL_TO_MV(Fpga.stat->current_24v) * 5600.0 / 680.0) > 15000)	ErrorFlag(ERR_CONT, &_ErrorFlags, ERR_3, 0, "Current Error: Current of 24V Supply is %d A", VAL_TO_MV(Fpga.stat->current_24v) * 5600.0 / 680.0);
+		if (VAL_TO_MV(Fpga.stat->voltage_3v3) < 3000)						_ErrorCnt[0]++;
+		if ((VAL_TO_MV(Fpga.stat->current_24v) * 5600.0 / 680.0) > 15000)	_ErrorCnt[1]++;
+		if ((VAL_TO_MV(Fpga.stat->current_24v) * 5600.0 / 680.0) > 15000)	_ErrorCnt[2]++;
 
 		int v24=11*VAL_TO_MV(Fpga.stat->voltage_24v) / 1000;		
-		if (v24 < 20)
-		{
-			if (!(_ErrorFlags&ERR_1)) Error(WARN, 0, "Voltage Error: 24V Level is %d V", v24);				
-			_ErrorFlags |= ERR_1;
-		}
-		else if ((_ErrorFlags&ERR_1) && (v24 > 22))
-		{
-			Error(LOG, 0, "Voltage OK: 24V Level is %d V", v24);				
-			_ErrorFlags &= ~ERR_1;				
-		}
-	}
-	
-	int rowTemp=Fpga.stat->temp;
-	if (rowTemp!=0x0fff)
-	{
+		if (v24 < 20) _ErrorCnt[3]++;
+		else if (v24 > 22) _ErrorCnt[4]++;
+		int rowTemp=Fpga.stat->temp;
 		int temp=VAL_TO_TEMP(rowTemp);
-		if (temp > 70)				ErrorFlag(ERR_CONT, &_ErrorFlags, ERR_3, 0, "Temperature Error: Temp Level is %d °C, row=%d", temp, rowTemp);			
-	}
+		if (rowTemp!=0x0fff && temp > 70) _ErrorCnt[5]++;
+	
+		if (_ErrorCnt[0]==5) _ErrorFlags=Error(ERR_CONT, 0, "Voltage Error: 3.3V Level is %d V", VAL_TO_MV(Fpga.stat->voltage_3v3));
+		if (_ErrorCnt[1]==5) _ErrorFlags=Error(ERR_CONT, 0, "Current Error: Current of 24V Supply is %d A", VAL_TO_MV(Fpga.stat->current_24v) * 5600.0 / 680.0);
+		if (_ErrorCnt[2]==5) _ErrorFlags=Error(ERR_CONT, 0, "Current Error: Current of 24V Supply is %d A", VAL_TO_MV(Fpga.stat->current_24v) * 5600.0 / 680.0);
+		if (_ErrorCnt[3]==5) _ErrorFlags=Error(WARN,     0, "Voltage Error: 24V Level is %d V", v24);
+		if (_ErrorCnt[4]==5) _ErrorFlags=Error(LOG,      0, "Voltage OK: 24V Level is %d V", v24);
+		if (_ErrorCnt[5]==5) _ErrorFlags=Error(ERR_CONT, 0, "Temperature Error: Temp Level is %d °C, row=%d", temp, rowTemp);	
+	}	
 }
 
 //--- fpga_stepper_error_reset ----------------------------------------------------
 void fpga_stepper_error_reset(void)
 {
-	_ErrorFlags = 0;
+	if (_ErrorFlags)
+	{
+		Fpga.par->adc_rst = TRUE;
+		_ErrorCheckTime	= RX_StepperStatus.alive[0]+2;		
+	}
+
+	memset(_ErrorCnt, 0, sizeof(_ErrorCnt));
+	_ErrorFlags = 0;	
 }

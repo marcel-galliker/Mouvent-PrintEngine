@@ -538,12 +538,5 @@ int  tt_clean(void)
 //--- step_error_reset ----------------------------------------
 void step_error_reset(void)
 {
-	sok_send_2(&_step_Socket[0], CMD_ERROR_RESET, 0, NULL);
-	switch (RX_Config.printer.type)
-	{
-	case printer_cleaf: stepc_error_reset();
-						sok_send_2(&_step_Socket[1], CMD_ERROR_RESET, 0, NULL); 
-						break;
-	default:			break;
-	}
+	for (int i=0; i<SIZEOF(_step_Socket); i++) sok_send_2(&_step_Socket[i], CMD_ERROR_RESET, 0, NULL);
 }

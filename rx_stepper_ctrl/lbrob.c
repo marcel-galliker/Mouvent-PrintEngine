@@ -340,9 +340,9 @@ int  lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		}
 		break;
 
-	case CMD_ERROR_RESET:		
-		_lbrob_ro_error_reset();
+	case CMD_ERROR_RESET:
 		fpga_stepper_error_reset();
+		_lbrob_ro_error_reset();
 		break;
 	
 	case CMD_CAP_VENT:	break;

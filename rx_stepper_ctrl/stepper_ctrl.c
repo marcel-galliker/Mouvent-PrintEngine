@@ -21,6 +21,7 @@
 #include "rx_trace.h"
 #include "args.h"
 #include "cln.h"
+#include "fpga_stepper.h"
 #include "lb701.h"
 #include "lb702.h"
 #include "lbrob.h"
@@ -55,8 +56,8 @@ static int		_MsgBufOut;
 
 //--- module globals -----------------------------------------------------------------
 static HANDLE			_HServer;
+static int				_Connections=0;
 
-static RX_SOCKET		_MainSocket;
 // static UINT32			_PgCnt[MAX_HEADS_BOARD];
 
 //--- prototypes ---------------------------------------------------------------------
@@ -91,6 +92,8 @@ int ctrl_end()
 static int _ctrl_connected (RX_SOCKET socket, const char *peerName)
 {
 	TrPrintfL(TRUE, "connected from >>%s<<, socket=%d", peerName, socket);
+	if (_Connections==0) fpga_connected();
+	_Connections++;
 	return REPLY_OK;
 }
 
@@ -98,6 +101,8 @@ static int _ctrl_connected (RX_SOCKET socket, const char *peerName)
 static int _ctrl_deconnected (RX_SOCKET socket, const char *peerName)
 {
 	TrPrintfL(TRUE, "connection from >>%s<<, socket=%d closed", peerName, socket);
+	_Connections--;
+	if (_Connections==0) fpga_deconnected();
 	return REPLY_OK;
 }
 

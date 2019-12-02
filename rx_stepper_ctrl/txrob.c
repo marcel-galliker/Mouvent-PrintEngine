@@ -1100,8 +1100,9 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		}
 		break;
 
-	case CMD_ERROR_RESET:		_txrob_error_reset();
+	case CMD_ERROR_RESET:		
 		fpga_stepper_error_reset();
+		_txrob_error_reset();
 		break;
 
 	default:						Error(ERR_CONT, 0, "CLN: Command 0x%08x not implemented", msgId); break;

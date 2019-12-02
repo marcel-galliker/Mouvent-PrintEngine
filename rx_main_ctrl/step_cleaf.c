@@ -56,11 +56,6 @@ void stepc_init(int no, RX_SOCKET psocket)
 	memset(_status, 0, sizeof(_status));
 }
 
-//--- stepc_error_reset ----------------------------------------------------
-void stepc_error_reset(void)
-{
-}
-
 //--- stepc_handle_gui_msg------------------------------------------------------------------
 int	 stepc_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen)
 {
