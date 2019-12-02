@@ -5,6 +5,7 @@ using RX_DigiPrint.Services;
 using System;
 using System.Collections;
 using System.ComponentModel;
+using System.Globalization;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Windows;
@@ -503,7 +504,7 @@ namespace RX_DigiPrint.Views.UserControls
                                 if (text[i]=='1')  {val += n; n*=2;}
                                 else if (text[i]=='0') n*=2;
                             }
-                            return val.ToString();
+                            return val.ToString(new CultureInfo("en-US"));
                         }
                         else 
                         {
@@ -561,8 +562,7 @@ namespace RX_DigiPrint.Views.UserControls
                     if (!_UpdateValue) Changed = (value!=_ComboValueInit);
                 }
             }
-        }
-        
+        }        
 
         //--- Send ------------------------------------------------------
         public void Send(PlcParPanel panel)
@@ -596,7 +596,7 @@ namespace RX_DigiPrint.Views.UserControls
                                 if (_Format=='n' || _Format=='1')
                                 {   
                                     double val=Rx.StrToDouble(TextEditCtrl.Text);
-                                    str = string.Format("{0}\n{1}={2}\n", panel.UnitID, ID, val.ToString());
+                                    str = string.Format("{0}\n{1}={2}\n", panel.UnitID, ID, val.ToString(new CultureInfo("en-US")));
                                 }
                                 else str = string.Format("{0}\n{1}={2}\n", panel.UnitID, ID, TextEditCtrl.Text);
                             }
@@ -604,7 +604,7 @@ namespace RX_DigiPrint.Views.UserControls
                             {
                                 double val=Rx.StrToDouble(TextEditCtrl.Text);
                                 val /= _Unit.Factor; 
-                                str = string.Format("{0}\n{1}={2}\n", panel.UnitID, ID, val.ToString());
+                                str = string.Format("{0}\n{1}={2}\n", panel.UnitID, ID, val.ToString(new CultureInfo("en-US")));
                             }
                         }
                     }
