@@ -217,20 +217,21 @@
         <!-- Counters -->
         <StackPanel x:Name="Counters" Grid.Row="1" HorizontalAlignment="Center" Orientation="Horizontal" Margin="5" >
             <StackPanel Orientation="Horizontal" MinWidth="100">
-                <TextBlock Text="{Binding ActSpeed}"   FontWeight="Bold"     FontSize="{StaticResource FontSizeXL}"    VerticalAlignment="Bottom"/>
-                <TextBlock x:Name="CounterUnit1" Text=" m/h    "                                   FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Bottom"/>
+                <TextBlock Text="{Binding ActSpeed, Converter={StaticResource Len_Unit_Converter}, ConverterParameter=m0}"   FontWeight="Bold"     FontSize="{StaticResource FontSizeXL}"    VerticalAlignment="Bottom"/>
+                <TextBlock x:Name="CounterUnit1" Padding="2,0,0,0" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Bottom"/>
             </StackPanel>
             <Grid MinWidth="150" Margin="10,0">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <TextBlock Text="{Binding CounterAct, Converter={StaticResource Counter_Converter}}"   FontWeight="Bold"   FontSize="{StaticResource FontSizeLarge}" VerticalAlignment="Bottom"/>
-                    <TextBlock x:Name="CounterUnit2" Text=" m   "                                     FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Bottom"/>
+                    <TextBlock x:Name="CounterUnit2"  Padding="2,0,10,0"                                 FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Bottom"/>
                 </StackPanel>
                 <Rectangle Fill="Transparent" MouseDown="Counter_MouseDown" Stroke="LightGray" StrokeThickness="1"/>
             </Grid>
             <Grid MinWidth="150">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <TextBlock Text="{Binding CounterTotal, Converter={StaticResource Counter_Converter}}"   FontWeight="Bold" FontSize="{StaticResource FontSizeLarge}" VerticalAlignment="Bottom"/>
-                    <TextBlock x:Name="CounterUnit3" Text=" m tot" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Bottom"/>
+                    <TextBlock Text="{Binding CounterTotal, Converter={StaticResource Counter_Converter}}"  FontWeight="Bold" FontSize="{StaticResource FontSizeLarge}" VerticalAlignment="Bottom"/>
+                    <TextBlock x:Name="CounterUnit3" Padding="2,0,0,0" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Bottom"/>
+                    <TextBlock Text=" tot" Padding="0,0,20,0" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Bottom"/>
                 </StackPanel>
             </Grid>
         </StackPanel>

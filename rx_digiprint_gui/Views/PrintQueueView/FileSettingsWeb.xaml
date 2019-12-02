@@ -84,7 +84,7 @@
                 <TextBlock Grid.Row="0" Grid.Column="0" Text="Length" />
                 <common:RxNumBox   Grid.Row="0" Grid.Column="1" Text="{Binding ScanLength}" HorizontalAlignment="Right" Width="60" x:Name="LengthBox" Min="0"/>
                 <StackPanel  Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" Orientation="Horizontal">
-                    <common:RxRadioButton Content="m"       Background="Transparent" IsChecked="{Binding LengthUnitMM}"/>
+                    <common:RxRadioButton Content="m"       Background="Transparent" IsChecked="{Binding LengthUnitMM}" x:Name="LengthUnit"/>
                     <common:RxRadioButton Content="copies"  Background="Transparent" IsChecked="{Binding LengthUnitCopies}" Last="True"/>
                 </StackPanel>
             </Grid>
@@ -150,7 +150,7 @@
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Grid.Column="0" Text="Copy"/>
-                <common:RxNumBox Grid.Column="1" Text="{Binding StartFrom}" HorizontalContentAlignment="Right" Min="0" IsInt="True"/>
+                <common:RxNumBox Grid.Column="1" Text="{Binding StartFrom}" HorizontalContentAlignment="Right" Min="0" IsInt="True" x:Name="NumBox_StartFrom"/>
 
                 <TextBlock       x:Name="StartPageTxt" Grid.Column="3" Text="Page" />
                 <common:RxNumBox x:Name="StartPageNum" Grid.Column="4" Text="{Binding StartPage}" HorizontalContentAlignment="Right"/>
@@ -203,11 +203,11 @@
                     SelectedValue="{Binding Speed}"
                     HorizontalContentAlignment="Right"
                     />            
-                <TextBlock  Grid.Row="2" Grid.Column="3" Text="m/min" Margin="5,0,0,0"/>
+                <TextBlock  Grid.Row="2" Grid.Column="3" Text="m/min" Margin="5,0,0,0" x:Name="SpeedUnit"/>
 
                 <TextBlock          Grid.Row="3" Grid.Column="0" Text="Image Margin" />
-                <common:RxNumBox    Grid.Row="3" Grid.Column="1" Text="{Binding PageMargin}" HorizontalAlignment="Stretch"/>
-                <TextBlock          Grid.Row="3" Grid.Column="2" Text="mm" Margin="5,0,0,0" />
+                <common:RxNumBox    Grid.Row="3" Grid.Column="1" Text="{Binding PageMargin, Converter={StaticResource Len_Unit_Converter}, ConverterParameter=mm}" HorizontalAlignment="Stretch"/>
+                <TextBlock          Grid.Row="3" Grid.Column="2" Text="mm" Margin="5,0,0,0" x:Name="MarginUnit"/>
 
                 <TextBlock Grid.Row="4" Grid.Column="0" Text="PrintGo Mode" VerticalAlignment="Center"/>
                 <rx:RxComboBox x:Name="CB_PrintGoMode"
@@ -218,8 +218,8 @@
                 </rx:RxComboBox>
 
                 <TextBlock          Grid.Row="5" Grid.Column="0" Text="Image Distance" />
-                <common:RxNumBox    Grid.Row="5" Grid.Column="1" Text="{Binding PrintGoDist}" HorizontalAlignment="Stretch" Min="0"/>
-                <TextBlock          Grid.Row="5" Grid.Column="2" Text="mm" Margin="5,0,0,0" />
+                <common:RxNumBox    Grid.Row="5" Grid.Column="1" Text="{Binding PrintGoDist, Converter={StaticResource Len_Unit_Converter}, ConverterParameter=mm}" HorizontalAlignment="Stretch" Min="0"/>
+                <TextBlock          Grid.Row="5" Grid.Column="2" Text="mm" Margin="5,0,0,0" x:Name="DistUnit"/>
 
             </Grid>
         </GroupBox>

@@ -36,6 +36,7 @@
     <converters:IntToInVisible_Converter    x:Key="IntToInVisible_Converter" />
     <converters:IsBiggerThanConverter       x:Key="IsBiggerThanConverter" />
     <converters:LedImg_Converter            x:Key="LedImg_Converter"/>
+    <converters:Len_Unit_Converter          x:Key="Len_Unit_Converter"/>
     <converters:LogTypeColor_Converter      x:Key="LogTypeColor_Converter" />
     <converters:MacAddr_Converter           x:Key="MacAddr_Converter" />
     <converters:MaterialName_Converter      x:Key="MaterialName_Converter" />

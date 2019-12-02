@@ -324,6 +324,7 @@
     <Compile Include="Converters\IntToInVisible_Converter.cs" />
     <Compile Include="Converters\IntToVisible_Converter.cs" />
     <Compile Include="Converters\LedImg_Converter.cs" />
+    <Compile Include="Converters\Len_Unit_Converter.cs" />
     <Compile Include="Converters\LogTypeColor_Converter.cs" />
     <Compile Include="Converters\MacAddr_Converter.cs" />
     <Compile Include="Converters\DeviceType_Converter.cs" />

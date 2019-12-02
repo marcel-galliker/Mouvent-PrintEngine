@@ -39,6 +39,17 @@ namespace RX_DigiPrint.Views.UserControls
             InitializeComponent();
             DataContext = this;
             Type = ECtrlType.Text;
+                       
+            RxGlobals.Settings.PropertyChanged += _Settings_PropertyChanged;
+        }
+
+        //--- _Settings_PropertyChanged -----------------------------------------
+        private void _Settings_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName.Equals("Units"))
+            {
+                if (_Unit!=null) TB_Unit.Text = _Unit.Name;
+            }
         }
 
         //--- UserControl_Loaded ----------------------------------
@@ -262,16 +273,6 @@ namespace RX_DigiPrint.Views.UserControls
             { 
                 _Unit = new CUnit(value);
                 string text=value;
-                /*
-                if (RxGlobals.Settings.Units==EUnits.imperial)
-                {
-                    if (value.Equals("mm"))         {text="inch";   _Factor=1.0/25.4;}
-                    else if (value.Equals("N/mm"))  {text="N/inch"; _Factor=1.0/25.4;}
-                    else if (value.Equals("m"))     {text="ft";     _Factor=3.28084/1.0;}
-                    else if (value.Equals("m/min")) {text="ft/min"; _Factor=3.28084/1.0;}
-                }
-                TB_Unit.Text=text; 
-                */
                 TB_Unit.Text = _Unit.Name;
                 TB_Unit.Visibility=Visibility.Visible;
             }
@@ -461,7 +462,9 @@ namespace RX_DigiPrint.Views.UserControls
                                         break;
                                 case 'h': _Value = string.Format("{0:X}", Convert.ToInt64(value));  break;
                                 case 'f': _Value = Rx.StrNumFormat(value,3,factor);  break;
-                                case '1': _Value = Rx.StrNumFormat(value,1,factor);  break;
+                                case '1': if (factor!=1.0) _Value = Rx.StrNumFormat(value,3, factor);
+                                          else             _Value = Rx.StrNumFormat(value,1, factor);  
+                                          break;
                                 case 'n': _Value = Rx.StrNumFormat(value,0, factor); break;
                                 case 'l': _Value = value.Replace(';', '\n'); break;
                                 default : _Value = value; break;

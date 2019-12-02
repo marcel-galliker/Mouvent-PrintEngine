@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RX_DigiPrint.Models.Enums;
+using System;
 using System.Windows;
 using System.Windows.Data;
 
@@ -11,14 +12,15 @@ namespace RX_DigiPrint.Converters
             try
             {
                 string str;
-                double m=System.Convert.ToDouble(value);
+                CUnit unit = new CUnit("m");
+                double m=System.Convert.ToDouble(value)*unit.Factor;
                 if (m<100)      str= String.Format("{0:0.0}", m);           
                 else            str = String.Format("{0:0,0}", m);
                 return str;
             }
             catch
             {
-                return Visibility.Collapsed;
+                return null;
             }
         }
 

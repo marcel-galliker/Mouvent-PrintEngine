@@ -23,6 +23,7 @@ namespace RX_DigiPrint.Models.Enums
                 int speed;
                 _List.Clear();
                 _MaxSpeed = (int)maxSpeed;
+                CUnit unit=new CUnit("m/min");
 
                 if (RxGlobals.PrinterProperties.Host_Name.Equals("DropWatcher")) 
                 {
@@ -40,7 +41,7 @@ namespace RX_DigiPrint.Models.Enums
                     int[] speeds = RxGlobals.InkSupply.PrintingSpeed();
                     for (int i=0; i<speeds.Length; i++)
                     {
-                        if (speeds[i]!=0 && speeds[i]<=maxSpeed) _List.Add(new RxEnum<int>(speeds[i],  string.Format("{0}", speeds[i])));
+                        if (speeds[i]!=0 && speeds[i]<=maxSpeed) _List.Add(new RxEnum<int>(speeds[i],  string.Format("{0}", Math.Round(speeds[i]*unit.Factor))));
                     }
                 }
                 else
@@ -49,10 +50,10 @@ namespace RX_DigiPrint.Models.Enums
                     {
                         if (speed>=_MaxSpeed)
                         {
-                            _List.Add(new RxEnum<int>(_MaxSpeed,  string.Format("{0}", _MaxSpeed)));
+                            _List.Add(new RxEnum<int>(_MaxSpeed,  string.Format("{0}", Math.Round(_MaxSpeed*unit.Factor))));
                             break;
                         }
-                        _List.Add(new RxEnum<int>(speed,  string.Format("{0}", speed)));
+                        _List.Add(new RxEnum<int>(speed,  string.Format("{0}", Math.Round(speed*unit.Factor))));
                     }
                 }
             }

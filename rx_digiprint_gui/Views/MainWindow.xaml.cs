@@ -93,6 +93,7 @@ namespace RX_DigiPrint.Views
             RxGlobals.RxInterface.PropertyChanged += OnRxInterfacePropertyChanged;
             RxGlobals.PrintSystem.PropertyChanged += PrintSystem_PropertyChanged;
             RxGlobals.PrinterProperties.PropertyChanged += PrinterProperties_PropertyChanged;
+            RxGlobals.Settings.PropertyChanged += Settings_PropertyChanged;
         }
 
         void PrinterProperties_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -111,6 +112,12 @@ namespace RX_DigiPrint.Views
         void _LicenseChanged()
         {
             User.ItemsSource = new EN_UserTypeList();
+        }
+
+        //--- Settings_PropertyChanged -----------------------------------------------
+        void Settings_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName.Equals("Units")) _PrinterTypeChanged();
         }
 
         //--- Window_Loaded ------------------------------------------------------
@@ -174,69 +181,78 @@ namespace RX_DigiPrint.Views
         //--- PrintSystem_PropertyChanged --------------------------
         void PrintSystem_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (e.PropertyName.Equals("PrinterType"))
-            {
-                bool tx = RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_TX801 || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX802;
-                bool lb = RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB701 
-                    ||    RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB702_UV
-                    ||    RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB702_WB
-                    ||    RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LH702
-                    ||    RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_DP803;
+            if (e.PropertyName.Equals("PrinterType")) _PrinterTypeChanged();
 
-                TabPrintQueue.Visibility = (RxGlobals.PrintSystem.PrinterType  == EPrinterType.printer_test_table 
-                                          || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide
-                                          || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide_only
-                                          ) ? Visibility.Collapsed : Visibility.Visible;
+            if (e.PropertyName.Equals("Changed"))   TabPrintSystem.Changed = RxGlobals.PrintSystem.Changed;
+        }
+
+        //--- _PrinterTypeChanged ----------------------------------------------------------------
+        private void _PrinterTypeChanged()
+        {
+            bool tx = RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_TX801 || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX802;
+            bool lb = RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB701 
+                ||    RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB702_UV
+                ||    RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB702_WB
+                ||    RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LH702
+                ||    RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_DP803;
+
+            TabPrintQueue.Visibility = (RxGlobals.PrintSystem.PrinterType  == EPrinterType.printer_test_table 
+                                        || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide
+                                        || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide_only
+                                        ) ? Visibility.Collapsed : Visibility.Visible;
                                         
-                Counters.Visibility      = (tx || lb) ? Visibility.Visible : Visibility.Collapsed;
+            Counters.Visibility      = (tx || lb) ? Visibility.Visible : Visibility.Collapsed;
 
-                if (tx) CounterUnit1.Text=" m/h    ";
-                else    CounterUnit1.Text=" m/min   ";
+            { //--- update the counters ------------------------
+                CUnit unit = new CUnit("m");
+                if (tx) CounterUnit1.Text= unit.Name+"/h";
+                else    CounterUnit1.Text= unit.Name+"/min";
 
-                switch (RxGlobals.PrintSystem.PrinterType)
-                {
-                    case EPrinterType.printer_LB701:  
-                        _activeView (TabLB701);
-                        break;
+                CounterUnit2.Text=unit.Name;
+                CounterUnit3.Text=unit.Name;
 
-                    case EPrinterType.printer_LB702_UV:  
-                        _activeView (TabLB702UV);
-                        break;
-
-                    case EPrinterType.printer_LB702_WB:  
-                        _activeView (TabLB702WB);
-                        break;
-
-                    case EPrinterType.printer_LH702:  
-                        _activeView (TabLH702);
-                        break;
-
-                    case EPrinterType.printer_DP803:  
-                        _activeView (TabDP803);
-                        break;
-
-                    case EPrinterType.printer_TX801:
-                    case EPrinterType.printer_TX802:
-                        _activeView (TabTex);
-                        break;
-
-                    case EPrinterType.printer_test_slide:
-                    case EPrinterType.printer_test_slide_only:
-                    case EPrinterType.printer_test_table:
-                        _activeView(TabTestTable);
-                        break;
-
-                    case EPrinterType.printer_cleaf:
-                        _activeView (TabCleaf);
-                        break;
-                }
-                CleafOrder.Visibility = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf)? Visibility.Visible : Visibility.Collapsed;
+                Counters.DataContext = null;
+                Counters.DataContext = RxGlobals.PrinterStatus;
             }
 
-            if (e.PropertyName.Equals("Changed"))
+            switch (RxGlobals.PrintSystem.PrinterType)
             {
-                TabPrintSystem.Changed = RxGlobals.PrintSystem.Changed;
+                case EPrinterType.printer_LB701:  
+                    _activeView (TabLB701);
+                    break;
+
+                case EPrinterType.printer_LB702_UV:  
+                    _activeView (TabLB702UV);
+                    break;
+
+                case EPrinterType.printer_LB702_WB:  
+                    _activeView (TabLB702WB);
+                    break;
+
+                case EPrinterType.printer_LH702:  
+                    _activeView (TabLH702);
+                    break;
+
+                case EPrinterType.printer_DP803:  
+                    _activeView (TabDP803);
+                    break;
+
+                case EPrinterType.printer_TX801:
+                case EPrinterType.printer_TX802:
+                    _activeView (TabTex);
+                    break;
+
+                case EPrinterType.printer_test_slide:
+                case EPrinterType.printer_test_slide_only:
+                case EPrinterType.printer_test_table:
+                    _activeView(TabTestTable);
+                    break;
+
+                case EPrinterType.printer_cleaf:
+                    _activeView (TabCleaf);
+                    break;
             }
+            CleafOrder.Visibility = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf)? Visibility.Visible : Visibility.Collapsed;
         }
 
         //--- _activeView -------------------------------

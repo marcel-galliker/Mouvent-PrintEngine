@@ -28,7 +28,10 @@ namespace RX_DigiPrint.Views.PrintQueueView
             CB_TestImage.ItemsSource = new EN_TestImageList();
             CB_ScanMode.ItemsSource  = new EN_ScanModeList();
             CB_DropSize.ItemsSource  = new EN_DropSize();
-            
+
+            SpeedUnit.Text  = new CUnit("m/min").Name;
+            MarginUnit.Text = new CUnit("mm").Name;
+
             CB_ScanMode.Visibility = CT_ScanMode.Visibility = RxGlobals.PrintSystem.IsScanning? Visibility.Visible:Visibility.Collapsed;
 
             if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_test_slide

@@ -1,6 +1,7 @@
 ﻿using RX_DigiPrint.Models;
 using RX_DigiPrint.Models.Enums;
 using RX_DigiPrint.Services;
+using System;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -19,7 +20,20 @@ namespace RX_DigiPrint.Views.PrintQueueView
             Visibility = RxGlobals.PrintSystem.IsScanning ? Visibility.Collapsed : Visibility.Visible;
             PrintQueueItem item = DataContext as PrintQueueItem;
             CB_PrintGoMode.ItemsSource  = new EN_PgModeList();
+            RxGlobals.Settings.PropertyChanged += Settings_PropertyChanged;
             LengthBox.ShowRolls = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf);
+
+            NumBox_StartFrom.DataContext = this;
+        }
+
+        void Settings_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName.Equals("Units"))
+            {
+                var datacontext = DataContext;
+                DataContext = null;
+                DataContext = datacontext;
+            }
         }
        
         //--- UserControl_DataContextChanged ----------------------------------
@@ -28,6 +42,10 @@ namespace RX_DigiPrint.Views.PrintQueueView
             PrintQueueItem item = DataContext as PrintQueueItem;
             if (item!=null)
             {
+                LengthUnit.Content = new CUnit("m").Name;
+                SpeedUnit.Text     = new CUnit("m/min").Name;
+                MarginUnit.Text = DistUnit.Text = new CUnit("mm").Name;
+
                 CB_Speed.ItemsSource = RxGlobals.PrintSystem.SpeedList(item.LargestDot, item.SrcHeight);
                 if (item.Variable || item.SrcPages>1)
                 { 
@@ -45,6 +63,38 @@ namespace RX_DigiPrint.Views.PrintQueueView
             {
                 DataContext = null;
                 Settings.Visibility = Visibility.Hidden;
+            }
+        }
+
+        //--- Property StartFrom ---------------------------------------
+        public double StartFrom
+        {
+            get 
+            { 
+                PrintQueueItem item = DataContext as PrintQueueItem;
+                if (item!=null)
+                {
+                    if (item.LengthUnitMM)
+                    {
+                        CUnit unit = new CUnit("m");
+                        return Math.Round(item.StartFrom*unit.Factor);
+                    }
+                    return item.StartFrom;
+                }
+                return 0; 
+            }
+            set 
+            {
+                PrintQueueItem item = DataContext as PrintQueueItem;
+                if (item!=null)
+                {
+                     if (item.LengthUnitMM)
+                     {
+                        CUnit unit = new CUnit("m");
+                        item.StartFrom = (int)Math.Round(value/unit.Factor);
+                     }
+                     else item.StartFrom=(int)value;
+                }
             }
         }
 

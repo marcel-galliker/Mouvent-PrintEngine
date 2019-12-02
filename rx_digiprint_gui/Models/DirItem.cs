@@ -1,5 +1,6 @@
 ﻿using RX_Common;
 using RX_DigiPrint.Helpers;
+using RX_DigiPrint.Models.Enums;
 using RX_DigiPrint.Properties;
 using System;
 using System.Collections.Generic;
@@ -39,6 +40,13 @@ namespace RX_DigiPrint.Models
         //--- creator ------------------------------------------------
         public DirItem()
         {
+            RxGlobals.Settings.PropertyChanged += Settings_PropertyChanged;
+        }
+
+        //--- Settings_PropertyChanged -----------------------------------
+        void Settings_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName.Equals("Units")) _SetDimension();
         }
 
         //--- Property IsSelected ---------------------------------------
@@ -71,7 +79,10 @@ namespace RX_DigiPrint.Models
                     {
                         PrintQueueItem pq = new PrintQueueItem();
                         pq.read_image_properties(_FileName);
-                        Dimension = string.Format(" {0}mm x {1}mm (dots {2})", pq.SrcWidth, pq.SrcHeight, pq.Dots);
+                        _SrcWidth  = pq.SrcWidth;
+                        _SrcHeight = pq.SrcHeight;
+                        _Dots      = pq.Dots;
+                        _SetDimension();
                     }
                     catch(Exception)
                     { 
@@ -148,12 +159,24 @@ namespace RX_DigiPrint.Models
 
         //--- Property Dimension ---------------------------------------
         private string _Dimension = null;
+        private double _SrcWidth;
+        private double _SrcHeight;
+        private string _Dots;          
         public string Dimension
         {
             get { return _Dimension; }
             set { SetProperty(ref _Dimension, value); }
         }
         
+        //--- _SetDimension -----------------------
+        private void _SetDimension()
+        {
+            CUnit unit=new CUnit("mm");
+            if (RxGlobals.Settings.Units==EUnits.imperial)
+                Dimension = string.Format(" {0}\" x {1}\" (dots {2})", Math.Round(_SrcWidth*unit.Factor, 3), Math.Round(_SrcHeight*unit.Factor, 3), _Dots);
+            else
+                Dimension = string.Format(" {0}mm x {1}mm (dots {2})", Math.Round(_SrcWidth, 1), Math.Round(_SrcHeight, 1), _Dots);
+        }
         //--- _create_preview ---------------------------------------------
         private void _create_preview(FileInfo info, DirItem obj)
         {
