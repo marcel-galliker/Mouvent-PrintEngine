@@ -444,7 +444,17 @@ namespace RX_DigiPrint.Views.UserControls
                         try
                         {
                             double factor = 1.0;
-                            if (_UpdateValue && _Unit!=null) factor=_Unit.Factor;
+                            int digits =1;
+                            if (_Unit!=null)
+                            {
+                                if (TextEditCtrl.Tag!=null && TextEditCtrl.Tag.Equals("RxNumPad"))
+                                {
+                                    TextEditCtrl.Tag=null;
+                                    digits=3;
+                                }
+                                else if (_UpdateValue) factor=_Unit.Factor;
+                                if (factor!=1.0) digits=3;
+                            }
                             switch(_Format)
                             {
                                 case 'b':
@@ -462,11 +472,9 @@ namespace RX_DigiPrint.Views.UserControls
                                         }
                                         break;
                                 case 'h': _Value = string.Format("{0:X}", Convert.ToInt64(value));  break;
-                                case 'f': _Value = Rx.StrNumFormat(value,3,factor);  break;
-                                case '1': if (factor!=1.0) _Value = Rx.StrNumFormat(value,3, factor);
-                                          else             _Value = Rx.StrNumFormat(value,1, factor);  
-                                          break;
-                                case 'n': _Value = Rx.StrNumFormat(value,0, factor); break;
+                                case 'f': _Value = Rx.StrNumFormat(value, 3,      factor); break;
+                                case '1': _Value = Rx.StrNumFormat(value, digits, factor); break;
+                                case 'n': _Value = Rx.StrNumFormat(value, 0,      factor); break;
                                 case 'l': _Value = value.Replace(';', '\n'); break;
                                 default : _Value = value; break;
                             }
@@ -591,21 +599,13 @@ namespace RX_DigiPrint.Views.UserControls
                         }
                         else 
                         {
-                            if (_Unit==null || _Unit.Factor==1.0)
-                            { 
-                                if (_Format=='n' || _Format=='1')
-                                {   
-                                    double val=Rx.StrToDouble(TextEditCtrl.Text);
-                                    str = string.Format("{0}\n{1}={2}\n", panel.UnitID, ID, val.ToString(new CultureInfo("en-US")));
-                                }
-                                else str = string.Format("{0}\n{1}={2}\n", panel.UnitID, ID, TextEditCtrl.Text);
-                            }
-                            else
-                            {
+                            if (_Format=='n' || _Format=='1' || _Format=='f')
+                            {   
                                 double val=Rx.StrToDouble(TextEditCtrl.Text);
-                                val /= _Unit.Factor; 
+                                if (_Unit!=null) val /= _Unit.Factor;
                                 str = string.Format("{0}\n{1}={2}\n", panel.UnitID, ID, val.ToString(new CultureInfo("en-US")));
                             }
+                            else str = string.Format("{0}\n{1}={2}\n", panel.UnitID, ID, TextEditCtrl.Text);
                         }
                     }
                 }

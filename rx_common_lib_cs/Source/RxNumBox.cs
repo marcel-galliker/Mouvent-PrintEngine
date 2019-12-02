@@ -30,6 +30,9 @@ namespace RX_Common
             double val = Rx.StrToDouble(Text);
             if (min!=double.NaN && val<min) val = min;
             else if (max!=double.NaN && val>max) val = max;
+            
+            if (this.Tag==null) this.Tag="RxNumPad";
+
             if (IsInt) Text=((int)val).ToString(_CultureInfo);
             else       Text=val.ToString(_CultureInfo);
         //    e.Handled = true;

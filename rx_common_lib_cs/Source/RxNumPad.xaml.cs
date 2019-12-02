@@ -132,7 +132,8 @@ namespace RX_Common
         private void _handle_key(string key)
         {
             if (key.Equals("Escape"))       this.DialogResult = false;
-            else if (key.Equals("Return"))  this.DialogResult = true;
+            else if (key.Equals("Return"))  
+                this.DialogResult = true;
             else if (key.Equals("+="))      
             {          
                 double val=_OrgValue+Rx.StrToDouble(Result);
