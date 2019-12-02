@@ -239,7 +239,6 @@ int dp803_menu(void)
 		case 'u': dp803_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_UP_POS,		NULL); break;
 		case 'z': _dp803_motor_z_test(atoi(&str[1]));break;
 		case 'm': _dp803_motor_test(str[1]-'0', atoi(&str[2]));break;
-		case 'o': Fpga.par->adc_rst = FALSE; break;
 		case 'i': Fpga.par->adc_rst = TRUE; break;
 			
 		//---- CAPPING ----

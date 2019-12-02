@@ -279,7 +279,7 @@ typedef struct
 	UINT32	v24_enable;		//       01C: [ 1 Bit]
 	UINT32	v24_standby;	//       020: [ 1 Bit]
 	UINT32	mot_bwd;		//       024: [ 5 Bit] Direction of Motor movement, 5 bit for 5 motors
-	UINT32	adc_rst;		//       028: resets adc
+	UINT32	adc_rst;		//       028: resets adc (auto reset)
 	UINT32	reset_err;		//       02C: 
 	UINT32	reset_cnt;		//       030: 
 	UINT32	min_in_pulse_width;	//   034: 16 bit entprellung, in multiples of 20ns

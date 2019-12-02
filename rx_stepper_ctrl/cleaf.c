@@ -478,6 +478,7 @@ int cleaf_menu(void)
 		term_printf("p: move lift to print\n");
 		term_printf("c: move lift to cap\n");
 		term_printf("u: move lift to UP position\n");
+		term_printf("i: reset ADC\n");
 		term_printf("z: move lift by <steps>\n");
 	}
 	term_printf("x: exit\n");
@@ -502,6 +503,7 @@ int cleaf_menu(void)
 				  _AllowMoveDown = old;	
 				  break;
 		case 'u': cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_UP_POS, NULL); break;
+		case 'i': Fpga.par->adc_rst = TRUE; break;
 		case 'z': _cleaf_motor_z_test(atoi(&str[1])); break;
 		case 'x': return FALSE;
 		}
