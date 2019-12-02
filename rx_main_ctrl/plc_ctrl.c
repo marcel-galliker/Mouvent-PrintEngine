@@ -1421,18 +1421,6 @@ static void _plc_state_ctrl()
 				_RequestPause = TRUE;
 				pc_pause_printing(FALSE);
 			}
-
-			/*
-			lc_get_value_by_name_UINT32(APP "PAR_MAXDIAMETER_OUT", &max);			
-			lc_get_value_by_name_UINT32(APP "STA_PAPERLENGTH_OUT", &length);
-			if (max && length && (int)length>max && !_RequestPause) 
-			{
-				Error(ERR_CONT, 0, "Rewinder Roll Full: PAUSE requested");
-				RX_PrinterStatus.printState=ps_pause; // suppress pause message
-				_RequestPause = TRUE;
-				pc_pause_printing();
-			}
-			*/
 		} 
 		else if(rx_def_is_tx(RX_Config.printer.type))
 		{ // calculate speed

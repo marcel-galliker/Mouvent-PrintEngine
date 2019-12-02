@@ -377,7 +377,7 @@ static void  _check_errors(void)
 	if (rowTemp!=0x0fff)
 	{
 		int temp=VAL_TO_TEMP(rowTemp);
-		if (temp > 70)				ErrorFlag(ERR_CONT, &_ErrorFlags, ERR_3, 0, "Temperature Error: Temp Level is %d C¨, row=%d", temp, rowTemp);			
+		if (temp > 70)				ErrorFlag(ERR_CONT, &_ErrorFlags, ERR_3, 0, "Temperature Error: Temp Level is %d °C, row=%d", temp, rowTemp);			
 	}
 }
 

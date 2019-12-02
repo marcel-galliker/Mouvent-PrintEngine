@@ -510,7 +510,7 @@ static int _print_next(void)
 				{
 					if(!_Item.variable && _Item.lengthUnit==PQ_LENGTH_MM && _Item.pageHeight) 
 					{
-						_Item.copies  = (int)((_Item.scanLength*1000.0+_Item.pageHeight-1) / _Item.pageHeight);
+						_Item.copies  = _Item.copiesTotal = (int)((_Item.scanLength*1000.0+_Item.pageHeight-1) / _Item.pageHeight);
 						_Item.id.copy = _Item.copiesPrinted+1;						
 						if (_Item.id.copy==0) _Item.id.copy=1;
 					}
@@ -518,6 +518,7 @@ static int _print_next(void)
 					{
 						TrPrintfL(TRUE,"PRINT-NEXT: ID=%d >>%s<<, copies=%d, printed=%d, pages=(%d..%d)", _Item.id.id, _Item.filepath,_Item.copies,_Item.copiesPrinted,_Item.firstPage,_Item.lastPage);
 						if (_Item.start.copy>0) _Item.copiesPrinted = _CopiesStart = _Item.start.copy-1;
+						_Item.copiesTotal = _Item.copies * (_Item.lastPage - _Item.firstPage + 1);
 					}
 				//	Error(LOG, 0, "Printig1: copy=%d, copies=%d", _Item.id.copy, _Item.copies);
 					co_start_printing(_Item.pageHeight);
@@ -533,8 +534,7 @@ static int _print_next(void)
 					}
 					_Item.copiesTotal = _Item.copies * (_Item.lastPage - _Item.firstPage + 1);
 				}
-				else _Item.copiesTotal = _Item.copies = 1;
-				
+							
 				if(_Item.copiesTotal < 1)_Item.copiesTotal = 1;
 
 //				Error(LOG, 0, "Printig2: copies=%d, copy=%d, copiesTotal=%d", _Item.copies, _Item.id.copy, _Item.copiesTotal);

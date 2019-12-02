@@ -1609,7 +1609,15 @@ static void _data_fill_blk_scan(SBmpSplitInfo *psplit, int blkNo, BYTE *dst)
 
 	BYTE**	ptr     = psplit->data;
 	BYTE	*src    = *ptr;
-		
+	
+	//--- test lower and upper border -------------------
+	BYTE	*test0  = &dst[-1];
+	BYTE	*test1  = &dst[RX_Spooler.dataBlkSize];
+	BYTE    t0=*test0;
+	BYTE	t1=*test1;
+	*test0 = 0x33;
+	*test1 = 0x66;
+	
 	if (RX_Color[psplit->inkSupplyNo].rectoVerso==rv_verso) mirror = !mirror;
 	if (mirror)
 	{
@@ -1639,9 +1647,19 @@ static void _data_fill_blk_scan(SBmpSplitInfo *psplit, int blkNo, BYTE *dst)
 			if (size+l>=RX_Spooler.dataBlkSize) 
 			{
 				memset(&dst[size], 0x00, RX_Spooler.dataBlkSize-size);
+				if (*test0!=0x33) 
+					Error(ERR_ABORT, 0, "_data_fill_blk_scan lower border");
+				if (*test1!=0x66) 
+					Error(ERR_ABORT, 0, "_data_fill_blk_scan upper border");
+				*test0=t0;
+				*test1=t1;
 				return;
 			}
 			memset(&dst[size], 0x00, l);
+			if (*test0!=0x33) 
+				Error(ERR_ABORT, 0, "_data_fill_blk_scan lower border");
+			if (*test1!=0x66) 
+				Error(ERR_ABORT, 0, "_data_fill_blk_scan upper border");
 	//		printf("head=%d, blkNo=%d, fill(%d, %d), dstLen=%d\n", psplit->head, blkNo, size, l, dstLen-l);
 			size   += l;
 			dstLen -= l;
@@ -1667,25 +1685,37 @@ static void _data_fill_blk_scan(SBmpSplitInfo *psplit, int blkNo, BYTE *dst)
 			if (size+dstLen>RX_Spooler.dataBlkSize) dstLen = RX_Spooler.dataBlkSize-size;
 			int srcWidthBt = psplit->srcWidthBt - start;
 			int srcLineLen = psplit->srcWidthBt - start;
-			
+
 			for(len=0; len<srcLen; len+=l)
 			{
 				l = srcLen-len;
 				if (l > srcWidthBt) l = srcWidthBt;
 				memcpy(&dst[size+len], src+start, l);
+				if (*test0!=0x33) 
+					Error(ERR_ABORT, 0, "_data_fill_blk_scan lower border");
+				if (*test1!=0x66) 
+					Error(ERR_ABORT, 0, "_data_fill_blk_scan upper border");
 			//	printf("head=%d, blkNo=%d, memcpy(%d, %d), size=%d\n", psplit->head, blkNo, size+len, l, size+len+l);
 			//	dst[size+len] = 0x3C; // TEST
 				start=0;
 				srcWidthBt = psplit->srcWidthBt;
 				srcLineLen = psplit->srcLineLen;
 			}
-			if (dstLen>srcLen) memset(&dst[size+srcLen], 0x00, dstLen-srcLen);
+			if (dstLen>srcLen && srcLen>0) memset(&dst[size+srcLen], 0x00, dstLen-srcLen);
+			if (*test0!=0x33) 
+				Error(ERR_ABORT, 0, "_data_fill_blk_scan lower border");
+			if (*test1!=0x66) 
+				Error(ERR_ABORT, 0, "_data_fill_blk_scan upper border");
 		}
 		
 		//---------------------------------
 		if (psplit->pListItem->virtualPasses)
 		{	
 			if ((line % psplit->pListItem->virtualPasses) != psplit->pListItem->virtualPass) memset(&dst[size], 0x00, dstLen);
+			if (*test0!=0x33) 
+				Error(ERR_ABORT, 0, "_data_fill_blk_scan lower border");
+			if (*test1!=0x66) 
+				Error(ERR_ABORT, 0, "_data_fill_blk_scan upper border");
 
 			/*
 			if (TRUE)
@@ -1723,6 +1753,12 @@ static void _data_fill_blk_scan(SBmpSplitInfo *psplit, int blkNo, BYTE *dst)
 		}
 	}
 	if (size<RX_Spooler.dataBlkSize) memset(&dst[size], 0x00, RX_Spooler.dataBlkSize-size);
+	if (*test0!=0x33) 
+		Error(ERR_ABORT, 0, "_data_fill_blk_scan lower border");
+	if (*test1!=0x66) 
+		Error(ERR_ABORT, 0, "_data_fill_blk_scan upper border");
+	*test0=t0;
+	*test1=t1;
 }
 
 //--- _data_fill_blk_test --------------------------------------------

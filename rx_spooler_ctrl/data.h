@@ -69,7 +69,7 @@ void data_end(void);
 void data_abort		(void);
 int	 data_cache		(SPageId *id, const char *path, char *localpath, SColorSplitCfg *psplit, int splitCnt);
 void data_set_wakeuplen	(int len, int on);
-int  data_get_size	(const char *path, UINT32 page, UINT32 *pspacePx, UINT32 *width, UINT32 *height, UINT8 *bitsPerPixel, UINT8 *multiCopy);
+int  data_get_size	(const char *path, UINT32 page, UINT32 *pspacePx, UINT32 *pwidth, UINT32 *plength, UINT8 *bitsPerPixel, UINT8 *multiCopy);
 void data_clear		(BYTE* buffer[MAX_COLORS]);
 UINT64 data_memsize(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPixel);
 int  data_malloc	(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPixel, SColorSplitCfg *psplit, int splitCnt, UINT64 *pBufSize, BYTE* buffer[MAX_COLORS]);

@@ -30,7 +30,7 @@
 
 //--- Defines -----------------------------------------------------------------
 // static int	_Trace=2;
-static int	_Trace=2;
+static int	_Trace=0;
 
 #define SIMU_OFF	0	// no simulation
 #define SIMU_WRITE	1	// write data to file
@@ -325,10 +325,12 @@ void hc_send_next()
 				case dev_off:		break;
 				case dev_simu:		if(_Simulation==SIMU_WRITE) 
 									{
+										/*
 										{
 											SPageId *pid = &pInfo->pListItem->id;
 											Error(LOG, 0, "File (id=%d, page=%d, copy=%d, scan=%d) headsUsed=%d", pid->id, pid->page, pid->copy, pid->scan, pInfo->pListItem->headsUsed);	
 										}
+										*/
 										_save_to_file(pInfo);
 										if(data_sent(pInfo,i)) 
 										{
@@ -346,7 +348,10 @@ void hc_send_next()
 			
 											{
 												SPageId *pid = &pInfo->pListItem->id;
-												Error(LOG, 0, "File (id=%d, page=%d, copy=%d, scan=%d saved to >>%s/test/Scan%d<<", pid->id, pid->page, pid->copy, pid->scan, PATH_TEMP, _SimuNo[pInfo->colorCode]);												
+												if (rx_def_is_scanning(RX_Spooler.printerType))
+													Error(LOG, 0, "File (id=%d, page=%d, copy=%d, scan=%d) saved to File", pid->id, pid->page, pid->copy, pid->scan);												
+												else
+													Error(LOG, 0, "File (id=%d, page=%d, copy=%d) saved to File", pid->id, pid->page, pid->copy);												
 											}
 											
 											hc_send_next();												
@@ -402,21 +407,25 @@ void hc_send_next()
 static void _save_to_file(SBmpSplitInfo *pInfo)
 {
 	int		size=pInfo->blkCnt * RX_Spooler.dataBlkSize;
-	int		i;
+	int		head, blk;
 	char	fname[100];
 	BYTE   *buffer;
 
 	buffer = (BYTE*)malloc(size);
 	if (buffer==NULL)
 		return;
-
-	for (i=0; i<pInfo->blkCnt; i++)
+	
+	head = ((pInfo->board*MAX_HEADS_BOARD)+pInfo->head) % RX_Spooler.headsPerColor;
+	
+	for (blk=0; blk<pInfo->blkCnt; blk++)
 	{
-		data_fill_blk(pInfo, i, &buffer[i*RX_Spooler.dataBlkSize]);
+		data_fill_blk(pInfo, blk, &buffer[blk*RX_Spooler.dataBlkSize]);
 	}
-
-//	sprintf(fname, "%stest/%s/Scan%02d-img%d-hd%d_%s.bmp", PATH_TEMP, RX_ColorNameShort(pInfo->inkSupplyNo), ++_SimuNo[pInfo->colorCode], pInfo->pListItem->id.id, pInfo->head, RX_ColorNameShort(pInfo->inkSupplyNo));
-	sprintf(fname, "%strace/%s/Scan%02d-img%d-hd%d_%s.bmp", PATH_HOME PATH_RIPPED_DATA_DIR, RX_ColorNameShort(pInfo->inkSupplyNo), ++_SimuNo[pInfo->colorCode], pInfo->pListItem->id.id, pInfo->head, RX_ColorNameShort(pInfo->inkSupplyNo));
+	
+	if (rx_def_is_scanning(RX_Spooler.printerType))
+		sprintf(fname, "%strace/%s/Scan%02d-img%d-hd%d_%s.bmp", PATH_HOME PATH_RIPPED_DATA_DIR, RX_ColorNameShort(pInfo->inkSupplyNo), ++_SimuNo[pInfo->colorCode], pInfo->pListItem->id.id, pInfo->head, RX_ColorNameShort(pInfo->inkSupplyNo));
+	else
+		sprintf(fname, "%strace/%s/(id=%d, p=%d, c=%d)-%s%d.bmp", PATH_HOME PATH_RIPPED_DATA_DIR, RX_ColorNameShort(pInfo->inkSupplyNo), pInfo->pListItem->id.id, pInfo->pListItem->id.page, pInfo->pListItem->id.copy, RX_ColorNameShort(pInfo->inkSupplyNo), head);
 	bmp_write(fname, buffer, pInfo->bitsPerPixel, pInfo->widthPx, pInfo->srcLineCnt, pInfo->dstLineLen, FALSE);
 	free(buffer);
 //	Error(LOG, 0, "File saved to >>%s<<", fname);
