@@ -644,7 +644,7 @@ static void _handle_status(int no, SEncoderStat* pstat)
 	{
 		if (_DistTelCnt && _TotalPgCnt && pstat->PG_cnt!=_TotalPgCnt)
 		{
-			if (RX_Config.printer.type == printer_DP803) Error(LOG, 0, "_DistTelCnt=%d, PG_cnt=%d, _TotalPgCnt=%d", _DistTelCnt, pstat->PG_cnt, _TotalPgCnt);
+		//	if (RX_Config.printer.type == printer_DP803) Error(LOG, 0, "_DistTelCnt=%d, PG_cnt=%d, _TotalPgCnt=%d", _DistTelCnt, pstat->PG_cnt, _TotalPgCnt);
 			if (pstat->fifoEmpty_PG >_EncoderStatus[no].fifoEmpty_PG)  ErrorEx(dev_enc, no, ERR_STOP, 0, "PrintGo.dist FIFO empty (PG=%d, err=%d) (Images: transferred=%d, printGo=%d, buffer=%d)", pstat->PG_cnt, pstat->fifoEmpty_PG, RX_PrinterStatus.transferredCnt, RX_PrinterStatus.printGoCnt, RX_PrinterStatus.transferredCnt-RX_PrinterStatus.printGoCnt);
 			if (pstat->fifoEmpty_IGN>_EncoderStatus[no].fifoEmpty_IGN) ErrorEx(dev_enc, no, ERR_STOP, 0, "PrintGo.ignore FIFO empty (PG=%d, err==%d)", pstat->PG_cnt, pstat->fifoEmpty_IGN);
 			if (pstat->fifoEmpty_WND>_EncoderStatus[no].fifoEmpty_WND) ErrorEx(dev_enc, no, ERR_STOP, 0, "PrintGo.window FIFO empty (PG=%d, err==%d)", pstat->PG_cnt, pstat->fifoEmpty_WND);		
