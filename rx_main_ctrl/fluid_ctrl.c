@@ -899,7 +899,7 @@ void fluid_reply_stat(RX_SOCKET socket)	// to GUI
 		{
 			if(_FluidStatus[i].canisterLevel <= canisterEmpty && _ScalesErr[i] < LOG_TYPE_ERROR_CONT)
 			{
-				Error(ERR_STOP, 0, "Ink Canister %s EMPTY!", RX_ColorNameLong(RX_Config.inkSupply[i].ink.colorCode));
+				Error(ERR_CONT, 0, "Ink Canister %s EMPTY!", RX_ColorNameLong(RX_Config.inkSupply[i].ink.colorCode));
 				Error(LOG, 0, "_FluidStatus[%d].canisterLevel=%d < %d", i, _FluidStatus[i].canisterLevel, canisterEmpty);
 				_ScalesErr[i] = LOG_TYPE_ERROR_CONT;
 			}
