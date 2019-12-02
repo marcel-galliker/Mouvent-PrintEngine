@@ -973,8 +973,9 @@ namespace RX_DigiPrint.Models
                 if (LengthUnitMM)
                 {
 //                  if (Copies!=0) StartCopy = (int)(ScanLength*StartCopy/Copies);
-                    if (ScanLength < 10) ProgressStr = string.Format("{0:n3}m ({1:n1}%)", ScanLength * progress / 100.0, progress);
-                    else ProgressStr = string.Format("{0:n1}m ({1}%)", ScanLength * progress / 100.0, Progress);
+                    CUnit unit = new CUnit("m");
+                    if (ScanLength < 10) ProgressStr = string.Format("{0:n3}{2} ({1:n1}%)", ScanLength * progress * unit.Factor / 100.0, progress, unit.Name);
+                    else ProgressStr = string.Format("{0:n1}{2} ({1}%)", ScanLength * progress * unit.Factor / 100.0, Progress, unit.Name);
                 }
                 else ProgressStr = string.Format("{0}cp ({1}%)", msg.copiesPrinted, Progress);
             }
