@@ -18,8 +18,6 @@
 
 #pragma pack(1)
 
-#define TCP_IP_H
-
 //--- Globals ---------------------------------------------------
 #define MAX_MESSAGE_SIZE	9000 // (8*1024) // jumbo blocks
 #define TCPIP_HEADER_SIZE	  66

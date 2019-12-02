@@ -127,7 +127,7 @@ namespace RX_DigiPrint.Views.UserControls
         //--- Gluing_Clicked -------------------------------------------------
         private void Gluing_Clicked(object sender, RoutedEventArgs e)
         {            
-            if (RxMessageBox.YesNo("Gluing", "Start Gluig?",  MessageBoxImage.Question, false))
+            if (RxMessageBox.YesNo("Gluing", "Start Gluing?",  MessageBoxImage.Question, false))
                 RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_SET_CMD, "CMD_SETUP/CMD_GLUE");
         }
 

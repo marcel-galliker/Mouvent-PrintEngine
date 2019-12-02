@@ -49,7 +49,7 @@
     <ClInclude Include="ctr.h" />
     <ClInclude Include="pe_main.h" />
     <ClInclude Include="prod_log.h" />
-    <ClInclude Include="siemens_ctrl.h" />
+    <ClInclude Include="lh702_ctrl.h" />
     <ClInclude Include="step_dp.h" />
     <ClInclude Include="step_lb.h" />
     <ClInclude Include="args.h" />
@@ -83,7 +83,7 @@
     <ClInclude Include="step_std.h" />
     <ClInclude Include="step_test.h" />
     <ClInclude Include="step_tx.h" />
-    <ClInclude Include="tcp_ip_bobst.h" />
+    <ClInclude Include="lh702_tcp_ip.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\rx_ink_lib\rx_ink_common.c" />
@@ -92,7 +92,7 @@
     <ClCompile Include="ctr.c" />
     <ClCompile Include="pe_main.c" />
     <ClCompile Include="prod_log.c" />
-    <ClCompile Include="siemens_ctrl.c" />
+    <ClCompile Include="lh702_ctrl.c" />
     <ClCompile Include="step_dp.c" />
     <ClCompile Include="step_lb.c" />
     <ClCompile Include="args.c" />

@@ -118,11 +118,6 @@ namespace RX_DigiPrint.Models
             int i;
             StringBuilder str = new StringBuilder(2048);
             if (cmd==TcpIp.CMD_PLC_SET_VAR)     str.Append(string.Format("{0}\n", _UnitID));
-            else if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LH702)
-            {
-                str.Append(string.Format("{0}\n", "LH702"));
-                str.Append(string.Format("{0}={1}\n", "XML_MATERIAL", "LH702"));
-            }
             else str.Append(string.Format("{0}\n", Name));
 
             for(i=0; i<_Par.Count; i++)

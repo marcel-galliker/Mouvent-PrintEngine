@@ -16,6 +16,8 @@
 #define WEB_OFFSET 132	// mm to add to alsolute web distance
 #define WEB_OFFSET_VERSO 5000
 
+#define UnitID		"Application.GUI_00_001_Main"
+
 int	 plc_init(void);
 int  plc_end(void);
 void plc_reset(void);
@@ -27,6 +29,8 @@ int  plc_pause_printing(int fromGui);
 int  plc_stop_printing(void);
 int  plc_abort_printing(void);
 int  plc_clean(void);
+
+void	plc_load_material(char *name);
 
 int		plc_to_purge_pos(void);
 int		plc_to_wipe_pos(void);

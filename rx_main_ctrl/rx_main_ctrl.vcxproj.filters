@@ -147,10 +147,10 @@
     <ClInclude Include="step_dp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="siemens_ctrl.h">
+    <ClInclude Include="lh702_tcp_ip.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="tcp_ip_bobst.h">
+    <ClInclude Include="lh702_ctrl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -275,7 +275,7 @@
     <ClCompile Include="step_dp.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="siemens_ctrl.c">
+    <ClCompile Include="lh702_ctrl.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

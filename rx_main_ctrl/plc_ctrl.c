@@ -29,6 +29,7 @@
 #include "ctrl_svr.h"
 #include "print_ctrl.h"
 #include "chiller.h"
+#include "lh702_ctrl.h"
 #include "plc_ctrl.h"
 
 //--- SIMULATION ----------------------------------------------
@@ -39,8 +40,6 @@ static int _SimuEncoder;
 //--- defines -----------------------------------------
 #define NAME_APP		"Application.app"
 #define NAME_ACCOUNTS	"accounts.xml"
-
-#define APP				"Application.GUI_00_001_Main."
 
 #define UPDATE_ALL		FALSE
 
@@ -233,7 +232,7 @@ UINT32 plc_get_scanner_pos(void)
 {
 	FLOAT pos;
 	if (_SimuPLC)	pos=(FLOAT)70.12;
-	else			lc_get_value_by_name_FLOAT(APP "STA_SLIDE_POSITION_ABSOLUTE", &pos);
+	else			lc_get_value_by_name_FLOAT(UnitID "STA_SLIDE_POSITION_ABSOLUTE", &pos);
 	return (UINT32)(1000*pos);
 }
 
@@ -245,33 +244,33 @@ static void _plc_set_par_default(void)
 
 	if (_SimuPLC) return;	
 		
-	lc_get_value_by_name_UINT32(APP"CFG_TENSION_SENSOR_OFFSET_1", &tension);
+	lc_get_value_by_name_UINT32(UnitID "CFG_TENSION_SENSOR_OFFSET_1", &tension);
 	TrPrintf(TRUE, "_plc_set_par_default: tension=%d", tension);
 	if (tension==0) 
 		rex_load(PATH_USER FILENAME_PLC_CFG);
 
-	lc_get_value_by_name_UINT32(APP"PAR_PRINTING_SPEED",			&speed);
-	if (speed<10) lc_set_value_by_name_UINT32(APP"PAR_PRINTING_SPEED",		 30);
+	lc_get_value_by_name_UINT32(UnitID "PAR_PRINTING_SPEED",			&speed);
+	if (speed<10) lc_set_value_by_name_UINT32(UnitID "PAR_PRINTING_SPEED",		 30);
 
 	if(rx_def_is_scanning(RX_Config.printer.type))
 	{
-		lc_get_value_by_name_FLOAT(APP"PAR_PRINTING_START_POSITION", &start);
-		lc_get_value_by_name_FLOAT(APP"PAR_PRINTING_END_POSITION", &end);
+		lc_get_value_by_name_FLOAT(UnitID "PAR_PRINTING_START_POSITION", &start);
+		lc_get_value_by_name_FLOAT(UnitID "PAR_PRINTING_END_POSITION", &end);
 		if(start == 0.0 || end == 0.0)
 		{
-			lc_set_value_by_name_FLOAT(APP"PAR_PRINTING_START_POSITION", 200.0);	
-			lc_set_value_by_name_FLOAT(APP"PAR_PRINTING_END_POSITION", 700.0);
+			lc_set_value_by_name_FLOAT(UnitID "PAR_PRINTING_START_POSITION", 200.0);	
+			lc_set_value_by_name_FLOAT(UnitID "PAR_PRINTING_END_POSITION", 700.0);
 		//	_plc_set_command("", "CMD_SET_PARAMETER");
 		}
 	}
 	else if (rx_def_is_web(RX_Config.printer.type))
 	{
 		UINT32 val;
-		lc_get_value_by_name_UINT32(APP"PAR_COREDIAMETER_IN", &val);
+		lc_get_value_by_name_UINT32(UnitID "PAR_COREDIAMETER_IN", &val);
 		if (val<80)  Error(WARN, 0, "Small Unwinder Core Diameter: %d mm", val);
 		if (val>110) Error(WARN, 0, "Large Unwinder Core Diameter: %d mm", val);
 		
-		lc_get_value_by_name_UINT32(APP"PAR_COREDIAMETER_OUT", &val);
+		lc_get_value_by_name_UINT32(UnitID "PAR_COREDIAMETER_OUT", &val);
 		if (val<80)  Error(WARN, 0, "Small Rewinder Core Diameter: %d mm", val);
 		if (val>110) Error(WARN, 0, "Large Rewinder Core Diameter: %d mm", val);
 	}
@@ -289,11 +288,11 @@ static void _plc_set_command(char *mode, char *cmd)
 // Label	if (!strcmp(_PlcModeOfState[_PlcState], "CMD_SETUP") && _PlcState!=plc_setup)  // SUB-Menu of SETUP?
 			if (!strcmp(_PlcModeOfState[_PlcState], "CMD_SETUP"))  // SUB-Menu of SETUP?
 			{
-				strcpy(str, APP "CMD_SETUP");
+				strcpy(str, UnitID "CMD_SETUP");
 				lc_set_value_by_name_UINT32(str, 1);
 				rx_sleep(250);
 			}	
-			sprintf(str, APP "%s", mode);
+			sprintf(str, UnitID "%s", mode);
 			lc_set_value_by_name_UINT32(str, 1);
 			rx_sleep(250);
 		}
@@ -323,7 +322,7 @@ static void _plc_set_command(char *mode, char *cmd)
 	}
 //	Error(LOG, 0, "PLC_COMMAND >>%s<<", cmd);
 	TrPrintfL(TRUE, "PLC_COMMAND >>%s<<", cmd);
-	sprintf(str, APP "%s", cmd);
+	sprintf(str, UnitID "%s", cmd);
 	lc_set_value_by_name_UINT32(str, 1);
 }
 
@@ -349,7 +348,7 @@ static void _plc_set_par(SPrintQueueItem *pItem, SPlcPar *pPlcPar)
 	pPlcPar->speed	= pItem->speed;
 	if (RX_Config.printer.type==printer_cleaf)
 	{
-		int flexo = lc_get_value_by_name_UINT32(APP"PAR_FLEXO_CONFIGURATION", &flexo);
+		int flexo = lc_get_value_by_name_UINT32(UnitID "PAR_FLEXO_CONFIGURATION", &flexo);
 		if (flexo && (pPlcPar->speed<15))
 		{			
 			pPlcPar->speed = 15;
@@ -390,7 +389,7 @@ int	plc_get_thickness(void)
 #ifdef linux
 	FLOAT thickness;
 	if (_SimuPLC) thickness = 1.0;
-	else lc_get_value_by_name_FLOAT(APP"PAR_MATERIAL_THIKNESS",	&thickness);
+	else lc_get_value_by_name_FLOAT(UnitID "PAR_MATERIAL_THIKNESS",	&thickness);
 	return (int)(thickness*1000);
 #else
 	return 0;
@@ -421,33 +420,33 @@ static void _plc_send_par(SPlcPar *pPlcPar)
 	/*
 	if (RX_Config.printer.type==printer_TX801 || RX_Config.printer.type==printer_TX802)
 	{
-		lc_get_value_by_name_UINT32(APP"PAR_BELT_ON", &_PAR_BELT_ON);
-		lc_get_value_by_name_UINT32(APP"PAR_WINDER_1_ON", &_PAR_WINDER_1_ON);
-		lc_get_value_by_name_UINT32(APP"PAR_WINDER_2_ON", &_PAR_WINDER_2_ON);		
+		lc_get_value_by_name_UINT32(UnitID "PAR_BELT_ON", &_PAR_BELT_ON);
+		lc_get_value_by_name_UINT32(UnitID "PAR_WINDER_1_ON", &_PAR_WINDER_1_ON);
+		lc_get_value_by_name_UINT32(UnitID "PAR_WINDER_2_ON", &_PAR_WINDER_2_ON);		
 	}
 	*/
 	
 	switch(RX_Config.printer.type)
 	{
-	case printer_TX801:	lc_set_value_by_name_UINT32(APP"CFG_MACHINE_TYPE",	0);	break;
-	case printer_TX802:	lc_set_value_by_name_UINT32(APP"CFG_MACHINE_TYPE",	1);	break;
+	case printer_TX801:	lc_set_value_by_name_UINT32(UnitID "CFG_MACHINE_TYPE",	0);	break;
+	case printer_TX802:	lc_set_value_by_name_UINT32(UnitID "CFG_MACHINE_TYPE",	1);	break;
 	default:			break;
 	}
 
-	lc_set_value_by_name_UINT32(APP"PAR_PRINTING_SPEED",		pPlcPar->speed);
+	lc_set_value_by_name_UINT32(UnitID "PAR_PRINTING_SPEED",		pPlcPar->speed);
 	if(rx_def_is_scanning(RX_Config.printer.type))
 	{
-		lc_set_value_by_name_UINT32(APP"PAR_BIDIRECTIONAL", pPlcPar->bidir);
-		if(pPlcPar->stepDist > 0) lc_set_value_by_name_FLOAT(APP"PAR_STEP_DISTANCE", (float)pPlcPar->stepDist);
+		lc_set_value_by_name_UINT32(UnitID "PAR_BIDIRECTIONAL", pPlcPar->bidir);
+		if(pPlcPar->stepDist > 0) lc_set_value_by_name_FLOAT(UnitID "PAR_STEP_DISTANCE", (float)pPlcPar->stepDist);
 		else 
 		{
-			lc_set_value_by_name_UINT32(APP"PAR_BELT_ON", 0);
-			lc_set_value_by_name_UINT32(APP"PAR_WINDER_1_ON", 0);
-			lc_set_value_by_name_UINT32(APP"PAR_WINDER_2_ON", 0);
+			lc_set_value_by_name_UINT32(UnitID "PAR_BELT_ON", 0);
+			lc_set_value_by_name_UINT32(UnitID "PAR_WINDER_1_ON", 0);
+			lc_set_value_by_name_UINT32(UnitID "PAR_WINDER_2_ON", 0);
 		}
-		lc_set_value_by_name_FLOAT(APP"PAR_PRINTING_START_POSITION", (float)pPlcPar->startPos);	
-		lc_set_value_by_name_FLOAT(APP"PAR_PRINTING_END_POSITION", (float)pPlcPar->endPos);
-		lc_set_value_by_name_UINT32(APP"PAR_DRYER_BLOWER_POWER", 75);
+		lc_set_value_by_name_FLOAT(UnitID "PAR_PRINTING_START_POSITION", (float)pPlcPar->startPos);	
+		lc_set_value_by_name_FLOAT(UnitID "PAR_PRINTING_END_POSITION", (float)pPlcPar->endPos);
+		lc_set_value_by_name_UINT32(UnitID "PAR_DRYER_BLOWER_POWER", 75);
 	}
 	_plc_set_command("", "CMD_SET_PARAMETER");
 }
@@ -536,9 +535,9 @@ int  plc_stop_printing(void)
 		/*
 		if (RX_Config.printer.type==printer_TX801 || RX_Config.printer.type==printer_TX802)
 		{
-			lc_set_value_by_name_UINT32(APP"PAR_WINDER_1_ON", _PAR_WINDER_1_ON);
-			lc_set_value_by_name_UINT32(APP"PAR_WINDER_2_ON", _PAR_WINDER_2_ON);
-			lc_set_value_by_name_UINT32(APP"PAR_BELT_ON", _PAR_BELT_ON);	
+			lc_set_value_by_name_UINT32(UnitID "PAR_WINDER_1_ON", _PAR_WINDER_1_ON);
+			lc_set_value_by_name_UINT32(UnitID "PAR_WINDER_2_ON", _PAR_WINDER_2_ON);
+			lc_set_value_by_name_UINT32(UnitID "PAR_BELT_ON", _PAR_BELT_ON);	
 		}
 		*/
 	}
@@ -639,7 +638,9 @@ int plc_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen)
 		
 		//--- material database --------------------------------------------------------
 		case CMD_PLC_REQ_MATERIAL:	_plc_req_material  (socket, FILENAME_MATERIAL, cmd); break;
-		case CMD_PLC_SAVE_MATERIAL:	_plc_save_material (socket, FILENAME_MATERIAL, CMD_PLC_ITM_MATERIAL, (char*)data);		break;
+		case CMD_PLC_SAVE_MATERIAL:	_plc_save_material (socket, FILENAME_MATERIAL, CMD_PLC_ITM_MATERIAL, (char*)data);
+									lh702_save_material((char*)data);
+									break;
 		case CMD_PLC_DEL_MATERIAL:	_plc_del_material  (socket, FILENAME_MATERIAL, cmd, (char*)data);		break;
 	}
 	return REPLY_OK;
@@ -679,25 +680,25 @@ static void _plc_load_par(void)
 	rex_load(PATH_USER FILENAME_PLC_CFG);
 	rex_load(PATH_USER FILENAME_PLC_PAR);
 
-	if (lc_get_value_by_name(APP "PAR_HEAD_HEIGHT", value)==REPLY_OK)
+	if (lc_get_value_by_name(UnitID "PAR_HEAD_HEIGHT", value)==REPLY_OK)
 		RX_Config.stepper.print_height=(UINT32)(1000*atof(value));
 
-	if (lc_get_value_by_name(APP "XML_ENC_OFFSET", value)==REPLY_OK)
+	if (lc_get_value_by_name(UnitID "XML_ENC_OFFSET", value)==REPLY_OK)
 		RX_Config.printer.offset.incPerMeter[0] = atoi(value);
 
 	/*
 	if (rx_def_is_scanning(RX_Config.printer.type))
 	{
-		lc_set_value_by_name_UINT32(APP"CFG_POSITION_PURGE",	90);				
-		lc_set_value_by_name_UINT32(APP"CFG_POSITION_CAPPING",	45);				
-		lc_set_value_by_name_UINT32(APP"CFG_POSITION_WIPE",		 0);
+		lc_set_value_by_name_UINT32(UnitID "CFG_POSITION_PURGE",	90);				
+		lc_set_value_by_name_UINT32(UnitID "CFG_POSITION_CAPPING",	45);				
+		lc_set_value_by_name_UINT32(UnitID "CFG_POSITION_WIPE",		 0);
 	}
 	*/
 	
 	switch(RX_Config.printer.type)
 	{
-	case printer_TX801:	lc_set_value_by_name_UINT32(APP"CFG_MACHINE_TYPE",	0);	break;
-	case printer_TX802:	lc_set_value_by_name_UINT32(APP"CFG_MACHINE_TYPE",	1);	break;
+	case printer_TX801:	lc_set_value_by_name_UINT32(UnitID "CFG_MACHINE_TYPE",	0);	break;
+	case printer_TX802:	lc_set_value_by_name_UINT32(UnitID"CFG_MACHINE_TYPE",	1);	break;
 	default:			break;
 	}
 
@@ -869,7 +870,7 @@ static void _plc_save_material	(RX_SOCKET socket, char *filename, int cmd, char 
 	char *end;
 	char *val;
 	char var[128];
-	
+		
 	gui_send_msg_2(0, cmd, strlen(varList), varList);
 
 	sprintf(path, PATH_USER"%s", filename);
@@ -879,7 +880,7 @@ static void _plc_save_material	(RX_SOCKET socket, char *filename, int cmd, char 
 	//--- find material ---
 	if ((end=strchr(str, '\n')))
 	{
-		*end++=0;
+		*end=0;
 		while (TRUE)
 		{
 			setup_chapter_next(file, READ, attrname, sizeof(attrname));
@@ -891,21 +892,23 @@ static void _plc_save_material	(RX_SOCKET socket, char *filename, int cmd, char 
 			setup_str(file, "XML_MATERIAL", READ, attrname, sizeof(attrname), "");
 			if (!stricmp(attrname, str)) break;	// found
 		}
+		*end++='\n';
 	}
 	str = end;
 
 	while ((end=strchr(str, '\n')))
 	{
-		*end++=0;
+		*end=0;
 		val= strchr(str, '=');
-		*val++=0;
+		*val=0;
 		strcpy(var, str);
+		*val++='=';
 		printf(">>%s<< = >>%s<<\n",  var, val);
 		setup_str(file, var, WRITE,  val,	32,	"");
-
 		if (!strcmp(var, "PAR_HEAD_HEIGHT")) 
-			RX_Config.stepper.print_height = (INT32)(0.5+1000*strtod(val, NULL));
+			RX_Config.stepper.print_height = (INT32)(0.5+1000*strtod(val+1, NULL));
 
+		*end++='\n';
 		str = end;
 	}
 	setup_save(file, path);
@@ -977,6 +980,38 @@ static void _plc_req_material	(RX_SOCKET socket, char *filename, int cmd)
 		str[len]=0;
 		sok_send_2(&socket, cmd | EVT_X, len, str);	// CMD_PLC_ITM_MATERIAL | CMD_PLC_ITM_SPLICEPAR
 	}
+}
+
+//--- plc_load_material -----------------
+void plc_load_material(char *material)
+{
+	char name[64];
+	char val[64];
+	char str[64];
+	int load=FALSE;
+	
+	HANDLE file = setup_create();
+	HANDLE attribute =NULL;
+	sprintf(str, PATH_USER"%s", FILENAME_MATERIAL);
+	setup_load(file, str);
+	while (TRUE)
+	{
+		setup_chapter_next(file, READ, name, sizeof(name));
+		if (!*name) return;
+		while (TRUE)
+		{
+			setup_str_next(file, &attribute, name, sizeof(name), val, sizeof(val));
+			if (!*name) break;
+			if (!strcmp(name, "XML_MATERIAL")) 
+				load=!stricmp(val, material);
+			if (load) 
+			{
+				printf("LOAD %s=%s\n", name, val);
+				sprintf(str, UnitID "%s", name);
+				lc_set_value_by_name(str, val);
+			}
+		}
+	}				
 }
 
 //--- _plc_set_cmd --------------------------------------------------------------
@@ -1231,8 +1266,8 @@ static void _plc_heart_beat()
 	int ret;
 	UINT32 val;
 
-	ret=lc_get_value_by_name_UINT32(APP "STA_HEARTBEAT_OUT", &val);
-	ret=lc_set_value_by_name_UINT32(APP "USR_HEARTBEAT_IN", val);
+	ret=lc_get_value_by_name_UINT32(UnitID "STA_HEARTBEAT_OUT", &val);
+	ret=lc_set_value_by_name_UINT32(UnitID "USR_HEARTBEAT_IN", val);
 }
 
 //--- plc_is_splicing -------------------------------------
@@ -1248,10 +1283,10 @@ static void _plc_state_ctrl()
 	if (_SimuPLC) _PlcState = plc_pause;
 	else
 	{
-		lc_get_value_by_name_UINT32(APP "STA_MACHINE_STATE", (UINT32*)&_PlcState);
+		lc_get_value_by_name_UINT32(UnitID "STA_MACHINE_STATE", (UINT32*)&_PlcState);
 		{
 			UINT32 splicing;
-			if (lc_get_value_by_name_UINT32(APP "STA_SPLICING", &splicing)==REPLY_OK)
+			if (lc_get_value_by_name_UINT32(UnitID "STA_SPLICING", &splicing)==REPLY_OK)
 			{				
 				if (splicing != RX_PrinterStatus.splicing)
 				{
@@ -1299,7 +1334,7 @@ static void _plc_state_ctrl()
 				step_handle_gui_msg(INVALID_SOCKET, CMD_CAP_UP_POS, NULL, 0);				
 			}
 		}
-		lc_set_value_by_name_UINT32(APP "STA_HEAD_IS_UP", RX_StepperStatus.info.scannerEnable);	
+		lc_set_value_by_name_UINT32(UnitID "STA_HEAD_IS_UP", RX_StepperStatus.info.scannerEnable);	
 	}
 
 	/*	Label
@@ -1341,7 +1376,7 @@ static void _plc_state_ctrl()
 			{ // calculate speed
 				UINT32 speed;
 				// speed = time for one scanner movement!
-				lc_get_value_by_name_UINT32(APP "STA_PRINTING_CYCLE_TIME", &speed);
+				lc_get_value_by_name_UINT32(UnitID "STA_PRINTING_CYCLE_TIME", &speed);
 				if(speed == 0) RX_PrinterStatus.actSpeed = 0;
 				else
 				{
@@ -1358,7 +1393,7 @@ static void _plc_state_ctrl()
 			EnScanState scan_state;
 			if(_SimuPLC || !rx_def_is_scanning(RX_Config.printer.type)) 
 				scan_state = scan_start;
-			else lc_get_value_by_name_UINT32(APP "STA_SLIDE_POSITION", (UINT32*)&scan_state);
+			else lc_get_value_by_name_UINT32(UnitID "STA_SLIDE_POSITION", (UINT32*)&scan_state);
 			if(scan_state != scan_moving)
 			{
 				enc_start_printing(&_StartEncoderItem, RX_PrinterStatus.printGoCnt);
@@ -1414,7 +1449,7 @@ static void _plc_state_ctrl()
 		{
 			UINT32 length;
 //			UINT32	max;
-			lc_get_value_by_name_UINT32(APP "STA_PAPERLENGTH_IN", &length);
+			lc_get_value_by_name_UINT32(UnitID "STA_PAPERLENGTH_IN", &length);
 			if (length && (int)length<_UnwinderLenMin && RX_PrinterStatus.printState==ps_printing && !_RequestPause) 
 			{
 				Error(ERR_CONT, 0, "Roll Empty: PAUSE requested");
@@ -1427,7 +1462,7 @@ static void _plc_state_ctrl()
 		{ // calculate speed
 			UINT32 speed;
 			// speed = time for one scanner movement!
-			lc_get_value_by_name_UINT32(APP "STA_PRINTING_CYCLE_TIME", &speed);
+			lc_get_value_by_name_UINT32(UnitID "STA_PRINTING_CYCLE_TIME", &speed);
 			if(speed == 0) RX_PrinterStatus.actSpeed = 0;
 			else		   RX_PrinterStatus.actSpeed = _ActSpeed;
 		}
@@ -1448,11 +1483,11 @@ static void _plc_state_ctrl()
 		if (ticks-_time>450)
 		{			
 			_time=ticks;
-			lc_get_value_by_name_UINT32(APP "STA_PRINTING_SPEED", &RX_PrinterStatus.actSpeed);
+			lc_get_value_by_name_UINT32(UnitID "STA_PRINTING_SPEED", &RX_PrinterStatus.actSpeed);
 		}
 		
 		int pause;
-		int ret = lc_get_value_by_name_UINT32(APP "STA_PAUSE_REQUEST", &pause);
+		int ret = lc_get_value_by_name_UINT32(UnitID "STA_PAUSE_REQUEST", &pause);
 		if (RX_PrinterStatus.printState==ps_printing && !_RequestPause && pause)
 		{
 			Error(ERR_CONT, 0, "PAUSE requested by finishing");
@@ -1531,7 +1566,7 @@ int	 plc_in_cap_pos(void)
 	if(rx_def_is_tx(RX_Config.printer.type))
 	{
 		EnScanState state;
-		lc_get_value_by_name_UINT32(APP "STA_SLIDE_POSITION", (UINT32*)&state);
+		lc_get_value_by_name_UINT32(UnitID "STA_SLIDE_POSITION", (UINT32*)&state);
 		return state == scan_capping;	
 	}
 	return TRUE;
@@ -1543,7 +1578,7 @@ int	 plc_in_purge_pos(void)
 	if(rx_def_is_tx(RX_Config.printer.type))
 	{
 		EnScanState state;
-		lc_get_value_by_name_UINT32(APP "STA_SLIDE_POSITION", (UINT32*)&state);
+		lc_get_value_by_name_UINT32(UnitID "STA_SLIDE_POSITION", (UINT32*)&state);
 		return state==scan_purge;
 	}
 	return TRUE;
@@ -1555,7 +1590,7 @@ int	 plc_in_wipe_pos(void)
 	if(rx_def_is_scanning(RX_Config.printer.type))
 	{
 		EnScanState state;
-		lc_get_value_by_name_UINT32(APP "STA_SLIDE_POSITION", (UINT32*)&state);
+		lc_get_value_by_name_UINT32(UnitID "STA_SLIDE_POSITION", (UINT32*)&state);
 		return (state==scan_wipe || state==scan_capping);
 	}
 	return TRUE;

@@ -377,7 +377,7 @@ int	sok_set_ifconfig(const char *ifname, SIfConfig *pcfg)
 			fclose(file);
 		}
 		Error(LOG, 0, "Write Hostname=>>%s<<", pcfg->hostname);
-	}		
+	}
 	
 	if (pcfg->dhcp!=act.dhcp || memcmp(pcfg->addr, act.addr, sizeof(pcfg->addr)) || memcmp(pcfg->mask, act.mask, sizeof(pcfg->mask)))
 	{

@@ -273,6 +273,7 @@ namespace RX_DigiPrint.Views.UserControls
         public void SaveValues(Material material)
         {
             _saveValuesChildren(material, Children);
+            Changed=false;
         }
 
         //--- SetValues ----------------------------------------------

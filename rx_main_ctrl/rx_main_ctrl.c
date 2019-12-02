@@ -33,7 +33,7 @@
 #include "gui_svr.h"
 #include "ctrl_svr.h"
 #include "plc_ctrl.h"
-#include "siemens_ctrl.h"
+#include "lh702_ctrl.h"
 #include "pe_main.h"
 #include "machine_ctrl.h"
 #include "spool_svr.h"
@@ -116,6 +116,7 @@ static void _menu(void)
 		case 't':	dl_trigger (atoi(&str[1]));	break;
 		default:	break;
 		}
+		lh702_menu(str);
 	}
 }
 

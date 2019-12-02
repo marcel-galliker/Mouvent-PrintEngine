@@ -127,7 +127,7 @@ void err_clear_all(void)
 
 	rx_mutex_unlock(sMutex);
 
-	if (_OnError) _OnError(LOG_TYPE_UNDEF);
+	if (_OnError) _OnError(LOG_TYPE_UNDEF, "", 0, "");
 }
 
 //--- add_to_list -------------------------
@@ -326,6 +326,7 @@ static int error(EDevice device, int no, ELogItemType type, const char *file, in
 	const char	*ch;
 	char	*f, *start;
 	char	*str;
+	char	deviceStr[32];
 
 	if (!sInit)
 	{
@@ -415,6 +416,8 @@ static int error(EDevice device, int no, ELogItemType type, const char *file, in
 		char timestr[64];
 		rx_get_system_time_str(timestr, '.');
 		compose_message((EDevice)log.deviceType, log.deviceNo, errNo, sErrorStrTemp, SIZEOF(sErrorStrTemp), (const char*)format, log.arg);
+		if (device==dev_undef) *deviceStr=0;
+		else sprintf(deviceStr, "%s %d", DeviceStr[device], no);
 		if (device==dev_undef)	TrPrintfL(1, "{%s} %s:%s [%s:%d]", 							   timestr, LogItemTypeStr[type], sErrorStrTemp, log.file, log.line);
 		else					TrPrintfL(1, "%s %d: {%s} %s: %s [%s:%d]", DeviceStr[device], no, timestr, LogItemTypeStr[type], sErrorStrTemp, log.file, log.line);
 	}
@@ -431,7 +434,7 @@ static int error(EDevice device, int no, ELogItemType type, const char *file, in
 	if (shServer) sok_send_to_clients_2(shServer, EVT_GET_EVT, sizeof(log), &log);
 	if (sClient)  sok_send_2(&sClient, EVT_GET_EVT, sizeof(log), &log);
 	
-	if (_OnError) _OnError(sErrorType);
+	if (_OnError) _OnError(sErrorType, deviceStr, no, sErrorStrTemp);
 	
 	if (errNo) return errNo;
 	else return REPLY_ERROR; 

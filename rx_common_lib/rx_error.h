@@ -29,7 +29,7 @@ typedef HANDLE err_Handle;
 #define ERR_ABORT	LOG_TYPE_ERROR_ABORT,	__FILE__,__LINE__
 #define ERR(TYPE)	TYPE,	                __FILE__,__LINE__ 
 	
-typedef void (*ErrorHandler)(ELogItemType errType);
+typedef void (*ErrorHandler)(ELogItemType errType, char *deviceStr, int no, char *msg);
 
 void err_SetHandler(ErrorHandler OnError);
 

@@ -28,6 +28,7 @@
 #include "print_ctrl.h"
 #include "machine_ctrl.h"
 #include "fluid_ctrl.h"
+#include "lh702_ctrl.h"
 #include "step_ctrl.h"
 #include "step_cleaf.h"
 #include "step_std.h"
@@ -38,7 +39,7 @@
 #include "label.h"
 
 //--- prototypes -----------------------
-static void _on_error(ELogItemType type);
+static void _on_error(ELogItemType type, char *deviceStr, int no, char *msg);
 static int _print_next(void);
 
 //--- processes ----------------------
@@ -91,7 +92,7 @@ int pc_end(void)
 }
 
 //--- _on_error -----------------------------------------------------------------
-static void _on_error(ELogItemType type)
+static void _on_error(ELogItemType type, char *deviceStr, int no, char *msg)
 {
 	if (type==LOG_TYPE_UNDEF)
 	{
@@ -119,6 +120,7 @@ static void _on_error(ELogItemType type)
 											pc_abort_printing(); 
 										} break;
 		}
+		lh702_on_error(type, deviceStr, no, msg);
 		gui_send_printer_status(&RX_PrinterStatus);
 	}
 }
