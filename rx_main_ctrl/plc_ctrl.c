@@ -1414,7 +1414,7 @@ static void _plc_state_ctrl()
 			UINT32 length;
 //			UINT32	max;
 			lc_get_value_by_name_UINT32(APP "STA_PAPERLENGTH_IN", &length);
-			if (length && (int)length<_UnwinderLenMin && !_RequestPause) 
+			if (length && (int)length<_UnwinderLenMin && RX_PrinterStatus.printState==ps_printing && !_RequestPause) 
 			{
 				Error(ERR_CONT, 0, "Roll Empty: PAUSE requested");
 				RX_PrinterStatus.printState=ps_pause; // suppress pause message
