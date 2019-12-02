@@ -219,6 +219,7 @@ typedef struct SNiosStat
 
 	//--- cooler ----------------
 	UINT32 			cooler_temp;
+	UINT32			cooler_pressure_ID;
 	INT32			cooler_pressure;
 	UINT32			cooler_pressure_reset_cnt;
 	

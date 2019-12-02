@@ -26,7 +26,7 @@
 /* Function prototype                                                        */
 /*****************************************************************************/
 
-#define FIFO_SIZE	1024
+#define FIFO_SIZE	1024	// this variable depending on COMM_BUF_SIZE
 
 typedef struct
 {

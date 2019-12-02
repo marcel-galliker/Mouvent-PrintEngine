@@ -96,7 +96,8 @@ void main_rebooting_cond(void) {
 }
 
 //--- main_tick_1000ms ------------------------------
-void main_tick_1000ms(void) {
+void main_tick_1000ms(void)
+{
 	int condNo;
 
 	if (!bootloader_running()) {
@@ -191,7 +192,7 @@ int main() {
 	// I2C initialisation
 	IOWR_16DIRECT(AMC7891_0_BASE, AMC7891_DAC0_DATA, _3V3);// Power for Levelshifter I2C and Flow Check Sensor
 	init_I2C(I2C_MASTER_0_BASE);// Head EEPROM (I2C Adr. 0x52/0x54/0x56/0x58)
-	init_I2C(I2C_MASTER_1_BASE);// 8 x MOSFET Temperatures, Flow Check Pressure (I2C Adr. 0x78), Thermistor (0x90) Cooler PCB
+	init_I2C(I2C_MASTER_1_BASE);// (8 x MOSFET Temperatures), Flow Check Pressure (I2C Adr. 0x78), Thermistor (0x90) Cooler PCB
 
 	cooler_init();
 	power_init();
@@ -212,8 +213,8 @@ int main() {
 	{
 		pRX_Status->error.head_eeprom_read = TRUE;
 		//init_I2C(I2C_MASTER_0_BASE);	// reinitialize I2C, as there is no head Connected
-	};
-
+	}
+	else
 	{
 		int head;
 		for (head = 0; head < MAX_HEADS_BOARD; head++)
@@ -235,7 +236,8 @@ int main() {
 	pRX_Status->memSize = mem_available();
 
 	// Event loop never exits
-	while (1) {
+	while (1)
+	{
 		int condNo;
 
 		timer_main();

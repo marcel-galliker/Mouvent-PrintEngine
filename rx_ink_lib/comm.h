@@ -13,8 +13,7 @@
 
 #include "rx_ink_common.h"
 
-#define COMM_BUF_SIZE	512
-//#define COMM_BUF_SIZE	1024
+#define COMM_BUF_SIZE	768 //depending on size of bigest Structure transfered (SConditionerStat_mcu)
 
 //--- defines -----------------------------------------------------------------
 

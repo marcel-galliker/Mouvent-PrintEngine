@@ -759,9 +759,11 @@ typedef struct SHeadStat
 	UINT32			tempCond;
 	UINT32			tempSetpoint;
 	INT32			tempReady;
+	UINT32			presIn_ID;
 	INT32			presIn;
 	INT32			presIn_max;
 	INT32			presIn_diff;
+	UINT32			presOut_ID;
 	INT32			presOut;
 	INT32			presOut_diff;
 	INT32			meniscus;

@@ -32,6 +32,7 @@ typedef struct
 {
 	int				i2c;
 	UINT32			*resetCnt;
+	UINT32			*pSensorId;
 	INT32			*pPressure;
 	INT32			buf[BUF_SIZE];
 	int				buf_idx;
@@ -54,7 +55,8 @@ SSensor _Sensor;
 static void _Pres_power(int on);
 static void _sensor_reset(SSensor *s);
 static int  _sensor_read(SSensor *s);
-
+static UINT32 _read_Sensor_ID(SSensor *s);
+static void _i2c_wait_time(void);
 
 //--- pres_init -----------------------
 void pres_init(void)
@@ -64,22 +66,20 @@ void pres_init(void)
 	_Sensor.i2c 		= I2C_MASTER_1_BASE;
 	_Sensor.pPressure 	= &pRX_Status->cooler_pressure;
 	_Sensor.resetCnt	= &pRX_Status->cooler_pressure_reset_cnt;
+	_Sensor.pSensorId   = &pRX_Status->cooler_pressure_ID;
 	*_Sensor.pPressure	= INVALID_VALUE;
 	_sensor_reset(&_Sensor);
 }
 
+
+//--- _Pres_power -----------------------------------
 static void _Pres_power(int on)
 {
 	//AMC DAC output on/off
-	if(on)
-	{
-	//	IOWR_16DIRECT(AMC7891_0_BASE, AMC7891_DAC0_DATA, _3V3);
-	}
-	else
-	{
-	//	IOWR_16DIRECT(AMC7891_0_BASE, AMC7891_DAC0_DATA, _0V);
-	}
+	if(on) IOWR_16DIRECT(AMC7891_0_BASE, AMC7891_DAC0_DATA, _3V3);
+	else   IOWR_16DIRECT(AMC7891_0_BASE, AMC7891_DAC0_DATA, _0V);
 }
+
 //--- _sensor_reset -------------
 static void _sensor_reset(SSensor *s)
 {
@@ -103,6 +103,7 @@ static int _sensor_read(SSensor *s)
 			_Pres_power(TRUE);
 			s->poweron++;
 			s->power=TRUE;
+		   *s->pSensorId = _read_Sensor_ID(s);
 		}
 		return REPLY_OK;
 	}
@@ -180,4 +181,51 @@ void pres_tick_100ms(void)
 
 	if (*_Sensor.pPressure != INVALID_VALUE && *_Sensor.pPressure > MAX_COOLER_PRES)
 		pRX_Status->error.cooler_overpressure = TRUE;
+}
+
+//--- _read_Sensor_ID ------------------
+static UINT32 _read_Sensor_ID(SSensor *s)
+{
+	UINT32  id=0;
+	UCHAR	*pid = (UCHAR*)&id;
+	int ret=0;
+
+	if(s->power)
+	{
+		_i2c_wait_time();
+
+		// Read Sensor ID Back
+		ret = I2C_start(s->i2c, ADDR_SENSOR, WRITE);
+		if (!ret) ret = I2C_write(s->i2c, 0x4e, LAST_BYTE);						// ask for first two Sensor ID values
+
+		_i2c_wait_time();
+
+		ret = I2C_start(s->i2c, ADDR_SENSOR, READ);
+		if (!ret) pid[0] = I2C_read(s->i2c, !LAST_BYTE);				// read first two Sensor ID values
+		if (!ret) pid[1] = I2C_read(s->i2c, LAST_BYTE);				// read first two Sensor ID values
+
+		_i2c_wait_time();
+
+		ret = I2C_start(s->i2c, ADDR_SENSOR, WRITE);
+		if (!ret) ret = I2C_write(s->i2c, 0x4f, LAST_BYTE);						// ask for second two Sensor ID values
+
+		_i2c_wait_time();
+
+		ret = I2C_start(s->i2c, ADDR_SENSOR, READ);
+		if (!ret) pid[2] = I2C_read(s->i2c, !LAST_BYTE);				// read first two Sensor ID values
+		if (!ret) pid[3] = I2C_read(s->i2c, LAST_BYTE);				// read first two Sensor ID values
+
+		if(ret) return 0;// fail read out!!
+		return id;
+	}
+	return 0;	// could not check as power is off!
+}
+
+//--- _i2c_wait_time ------------------
+void _i2c_wait_time(void)
+{
+	int i;
+	// dummy wait for about 110us
+	for (i = 0; i < 250; i++)
+		;
 }

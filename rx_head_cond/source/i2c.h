@@ -24,6 +24,8 @@ int		I2cReceiveByteSeq	(volatile stc_mfsn_t* pstcI2C, uint8_t* pdata, uint8_t u8
 void 	I2cStopRead			(volatile stc_mfsn_t* pstcI2C);
 void 	I2cStopWrite		(volatile stc_mfsn_t* pstcI2C);
 // int		I2cReceiveByte(volatile stc_mfsn_t* pstcI2C);
+int I2cSendByte(uint8_t u8Data, volatile stc_mfsn_t* pstcI2C);
+int I2cStartWrite(volatile stc_mfsn_t* pstcI2C, uint8_t addr);
 
 // void 	I2cWait(void);
 

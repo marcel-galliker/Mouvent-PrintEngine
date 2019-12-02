@@ -383,6 +383,7 @@ void putty_display_nios_status(int nios, int status, int eeprom)
 
 		if (RX_NiosStat.info.cooler_pcb_present)
 		{
+			UCHAR *id=(UCHAR*)&RX_NiosStat.cooler_pressure_ID;
 			term_printf("Cooler:        ");
 			if (RX_NiosStat.error.cooler_overpressure) term_color(RED);
 			term_printf("pres=%s mbar", value_str(RX_NiosStat.cooler_pressure));
@@ -393,7 +394,9 @@ void putty_display_nios_status(int nios, int status, int eeprom)
 			term_color(BLACK);
 			term_printf("  overheated=%d ", RX_NiosStat.error.cooler_overheated);
 			term_printf("  overpressure=%d ", RX_NiosStat.error.cooler_overpressure);
-			term_printf("  HW-Error=%d\n", RX_NiosStat.error.cooler_pressure_hw);
+			term_printf("  HW-Error=%d", RX_NiosStat.error.cooler_pressure_hw);
+			term_printf("  ID=%d.%d.%d.%d", id[0], id[1], id[2], id[3]);
+			term_printf("\n");			
 		}
 		else
 		{
@@ -492,9 +495,11 @@ void putty_display_cond_status(int show, int status)
 				RX_HBStatus->head[i].tempCond			= RX_NiosStat.cond[i].tempIn;
 				RX_HBStatus->head[i].tempSetpoint		= RX_NiosStat.cond[i].tempSetpoint;
 				RX_HBStatus->head[i].tempReady			= RX_NiosStat.cond[i].tempReady;
+				RX_HBStatus->head[i].presIn_ID			= RX_NiosStat.cond[i].pressure_in_ID;
 				RX_HBStatus->head[i].presIn				= RX_NiosStat.cond[i].pressure_in;
 				RX_HBStatus->head[i].presIn_max			= RX_NiosStat.cond[i].pressure_in_max;
 				RX_HBStatus->head[i].presIn_diff	    = RX_NiosStat.cond[i].pressure_in_diff;
+				RX_HBStatus->head[i].presOut_ID			= RX_NiosStat.cond[i].pressure_out_ID;
 				RX_HBStatus->head[i].presOut			= RX_NiosStat.cond[i].pressure_out;
 				RX_HBStatus->head[i].presOut_diff		= RX_NiosStat.cond[i].pressure_out_diff;
 				RX_HBStatus->head[i].meniscus			= RX_NiosStat.cond[i].meniscus;
@@ -616,6 +621,29 @@ void putty_display_cond_status(int show, int status)
 		}
 		term_printf("\n");
 
+		if (status)
+		{
+			term_printf("Pressure in ID:  "); 
+			for (i=0; i<MAX_HEADS_BOARD; i++)
+			{
+				UCHAR *id=(UCHAR*)&RX_HBStatus->head[no[i]].presIn_ID;
+			
+				sprintf(str, "%d.%d.%d.%d", id[0], id[1], id[2], id[3]);
+				term_printf(" %14s ", str);
+			}
+			term_printf("\n");
+
+			term_printf("Pressure out ID: "); 
+			for (i=0; i<MAX_HEADS_BOARD; i++)
+			{
+				UCHAR *id=(UCHAR*)&RX_HBStatus->head[no[i]].presOut_ID;
+			
+				sprintf(str, "%d.%d.%d.%d", id[0], id[1], id[2], id[3]);
+				term_printf(" %14s ", str);
+			}
+			term_printf("\n");
+		}	
+		
 		term_printf("Pressure in:     "); 
     	{
 			int i, l;
@@ -626,7 +654,7 @@ void putty_display_cond_status(int show, int status)
 					l  += sprintf(&str[l], "~%4s", value_str1(RX_HBStatus->head[no[i]].presIn_diff));
 				else
 					l  += sprintf(&str[l], "^%4s", value_str1(RX_HBStatus->head[no[i]].presIn_max));
-				term_printf(" %14s ", str);
+				term_printf("%15s ", str);
 			}
 			term_printf("\n");
     	}
