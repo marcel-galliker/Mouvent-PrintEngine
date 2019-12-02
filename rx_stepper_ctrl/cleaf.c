@@ -60,6 +60,8 @@
 #define HEAD_DOWN_EN_DELAY		10
 #define LASER_ANALOG_AVR		10.0
 
+#define DRIPPAN_TIMEOUT			500		// ms -> Time to change side on valve. This is needed especially for the first time starting.
+
 #define HEAD_DOWN_EN_DELAY		10
 //#define MAX_POS_UM		 		90000 //Resolution 20um, Working range 45...85 mm, temperature drift 18 um/K, Value range 0...10V linear rising, 1V=4mm ?
 
@@ -83,19 +85,15 @@
 
 // Digital Outputs (max 12)
 #define LASER_BEFORE_HEAD_OUT	0x001
-// #define RO_FLUSH_CAR_0		0x001 //  0 // Y1 Flush Servicecar 0
-// #define RO_BLADE_UP_0		0x008 //  3 // SY13 Wipe-Blade 0
-// #define RO_VACUUM_BLADE		0x020 //  5 // Y8 Vakuum Blade
-// #define RO_VACUUM			0x040 //  6 // SY10 Vakuum
-// #define RO_DRAIN_WASTE		0x080 // 7 // Y6 & Y7 // 1 == Waste Beh. Absaugen // 0 == Cable Chain absaugen 
-// #define RO_FLUSH_VOLT		0x100
-// #define RO_ALL_OUT_MECH			0x00E // ALL robot (blades and screws)
-#define RO_ALL_OUTPUTS			0x2FE //  ALL Outputs instead of Output 0, 10 and 11
 
 // DRIP PAN FUNCTION
 #define DRIP_PANS_VALVE_ALL		0x300
-#define DRIP_PANS_VALVE_UP		0x100
-#define DRIP_PANS_VALVE_DOWN	0x200
+#define DRIP_PANS_VALVE_DOWN	0x100
+#define DRIP_PANS_VALVE_UP		0x200
+
+#define RO_ALL_OUTPUTS			0x0FE //  ALL Outputs instead of Output 0, 8, 9, 10 and 11
+
+
 
 #define REF_HEIGHT			RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height
 #define HEAD_ALIGN			RX_StepperCfg.robot[RX_StepperCfg.boardNo].head_align
@@ -126,6 +124,7 @@ static int	_LaserCnt = 0;
 static int	_LaserTimeThin;
 static int	_LaserTimeThick;
 static int	_PrintHeight_Time;
+static int  _DripPanTime;
 
 static UINT32	_cleaf_Error=0;
 
@@ -224,7 +223,7 @@ void cleaf_main(int ticks, int menu)
 	// --- set positions False while moving ---
 	RX_StepperStatus.info.moving = (_CmdRunning!=0);
 
-	if (_CmdRunning)
+	if (_CmdRunning && _CmdRunning != CMD_CLN_DRIP_PANS)
 	{
 		RX_StepperStatus.info.z_in_ref   = FALSE;
 		RX_StepperStatus.info.z_in_print = FALSE;
@@ -264,18 +263,44 @@ void cleaf_main(int ticks, int menu)
 			RX_StepperStatus.info.ref_done = (RX_StepperStatus.info.headUpInput_0 && RX_StepperStatus.info.headUpInput_1);
 			motors_move_to_step(MOTOR_Z_BITS, &_ParZ_down, 100);			
 		}
-
-		RX_StepperStatus.info.z_in_ref   = (_CmdRunning==CMD_CAP_REFERENCE || _CmdRunning==CMD_CAP_UP_POS);
-		RX_StepperStatus.info.z_in_print = (_CmdRunning==CMD_CAP_PRINT_POS);
-		RX_StepperStatus.info.z_in_cap   = (_CmdRunning==CMD_CAP_CAPPING_POS);
 		
 		if (_CmdRunning == CMD_CAP_UP_POS)
 		{
 			Fpga.par->output |= LASER_BEFORE_HEAD_OUT;			// Laser for supervision OFF
 		}
-		
-		_CmdRunning = 0;
-		
+
+		if (_CmdRunning == CMD_CLN_DRIP_PANS)
+		{
+			if (rx_get_ticks() > _DripPanTime + DRIPPAN_TIMEOUT /*&& RX_StepperStatus.info.z_in_ref*/)
+			{
+				/*
+				First it should move for 0.5 seconds to the position it is already and only then it should move the other way, 
+				this is to fill the tubes and so it shouldn't move too fast down. The other part is in the cleaf_handle_ctrl_msg().
+				Here it moves to the final position 
+				*/
+				if (fpga_input(DRIP_PANS_INFEED_UP) || fpga_input(DRIP_PANS_OUTFEED_UP))
+				{
+					// all stepper motors in reference
+					Fpga.par->output &= ~DRIP_PANS_VALVE_ALL;
+					Fpga.par->output |= DRIP_PANS_VALVE_DOWN;
+				}
+				else 
+				{
+					// all stepper motors in reference
+					Fpga.par->output &= ~DRIP_PANS_VALVE_ALL;
+					Fpga.par->output |= DRIP_PANS_VALVE_UP;
+				}
+				_DripPanTime = 0;
+				_CmdRunning = 0;
+			}
+		}
+		else
+		{
+			RX_StepperStatus.info.z_in_ref   = (_CmdRunning == CMD_CAP_REFERENCE || _CmdRunning == CMD_CAP_UP_POS);
+			RX_StepperStatus.info.z_in_print = (_CmdRunning == CMD_CAP_PRINT_POS);
+			RX_StepperStatus.info.z_in_cap   = (_CmdRunning == CMD_CAP_CAPPING_POS);
+			_CmdRunning = 0;
+		}
 		
 	}	
 	
@@ -479,6 +504,7 @@ int cleaf_menu(void)
 		term_printf("c: move lift to cap\n");
 		term_printf("u: move lift to UP position\n");
 		term_printf("i: reset ADC\n");
+		term_printf("d: move Drip Pans");
 		term_printf("z: move lift by <steps>\n");
 	}
 	term_printf("x: exit\n");
@@ -504,6 +530,7 @@ int cleaf_menu(void)
 				  break;
 		case 'u': cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_UP_POS, NULL); break;
 		case 'i': Fpga.par->adc_rst = TRUE; break;
+		case 'd': cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_DRIP_PANS, NULL); break;
 		case 'z': _cleaf_motor_z_test(atoi(&str[1])); break;
 		case 'x': return FALSE;
 		}
@@ -612,18 +639,23 @@ int  cleaf_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		
 	case CMD_CLN_DRIP_PANS:
 		if (RX_StepperStatus.info.z_in_ref) 
-		{			
+		{
+			/*
+			First it should move for 0.5 seconds to the position it is already and only then it should move the other way, 
+			this is to fill the tubes and so it shouldn't move too fast down. The other part is in the cleaf_main().
+			Here it moves first to the position, it is already.
+			*/
+			_CmdRunning = msgId;
+			_DripPanTime = rx_get_ticks();
 			if (fpga_input(DRIP_PANS_INFEED_UP) || fpga_input(DRIP_PANS_OUTFEED_UP))
 			{
-				// all stepper motors in reference
 				Fpga.par->output &= ~DRIP_PANS_VALVE_ALL;
-				Fpga.par->output |= DRIP_PANS_VALVE_UP;	
+				Fpga.par->output |= DRIP_PANS_VALVE_UP;
 			}
 			else 
 			{
-				// all stepper motors in reference
 				Fpga.par->output &= ~DRIP_PANS_VALVE_ALL;
-				Fpga.par->output |= DRIP_PANS_VALVE_DOWN;	
+				Fpga.par->output |= DRIP_PANS_VALVE_DOWN;
 			}
 		}
 		break;
