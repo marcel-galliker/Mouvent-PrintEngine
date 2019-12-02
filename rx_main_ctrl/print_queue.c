@@ -810,7 +810,7 @@ int pq_printed(int headNo, SPageId *pid, int *pageDone, int *jobDone, SPrintQueu
 				pitem->scansPrinted = (pitem->id.copy-1) * (pitem->lastPage - pitem->firstPage + 1) + pitem->id.page;
 		}
 		
-		TrPrintfL(TRUE, "pq_printed id=%d, scan=%d, scanTotal=%d, scansprinted=%d, copiesPrinted=%d, copies=%d, copiesTotal=%d, state=%d", pid->id, pid->scan, pitem->scans, pitem->scansPrinted, pitem->copiesPrinted, pitem->copies, pitem->copiesTotal, pitem->state);
+		TrPrintfL(TRUE, "pq_printed id=%d, scan=%d, scanTotal=%d, scansprinted=%d, copiesPrinted=%d, copies=%d, copiesTotal=%d, state=%d, counterAct=%.3f", pid->id, pid->scan, pitem->scans, pitem->scansPrinted, pitem->copiesPrinted, pitem->copies, pitem->copiesTotal, pitem->state, RX_PrinterStatus.counterAct);
 				
 		//--- log ----------------------------------------
 		if(rx_def_is_scanning(RX_Config.printer.type))
