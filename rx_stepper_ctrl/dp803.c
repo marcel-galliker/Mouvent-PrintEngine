@@ -84,36 +84,27 @@ void dp803_init(void)
 	_ParRef.speed			= 10000;
 	_ParRef.accel			= 5000;
 //	_ParRef.current			= 150.0;
-	_ParRef.current			= 250.0;
+	_ParRef.current_acc		= 250.0;
+	_ParRef.current_run		= 250.0;
 	_ParRef.stop_mux		= 0;
 	_ParRef.dis_mux_in		= 0;
-	_ParRef.stop_in			= ESTOP_UNUSED;
-	_ParRef.stop_level		= 0;
-	_ParRef.estop_in		= ESTOP_UNUSED;
-	_ParRef.estop_level		= 0;
-	_ParRef.checkEncoder	=TRUE;
+	_ParRef.encCheck		= chk_std;
 	
 	_ParZ_down.speed		= 10000;
 	_ParZ_down.accel		= 5000;
-	_ParZ_down.current		= 400.0;
+	_ParZ_down.current_acc	= 400.0;
+	_ParZ_down.current_run	= 400.0;
 	_ParZ_down.stop_mux		= MOTOR_Z_BITS;
 	_ParZ_down.dis_mux_in	= 0;
-	_ParZ_down.stop_in      = ESTOP_UNUSED;
-	_ParZ_down.stop_level   = 0;
-	_ParZ_down.estop_in     = ESTOP_UNUSED;
-	_ParZ_down.estop_level  = 0;
-	_ParZ_down.checkEncoder = TRUE;
+	_ParZ_down.encCheck		= chk_std;
 	
 	_ParZ_cap.speed			= 5000;
 	_ParZ_cap.accel			= 2000;
-	_ParZ_cap.current		= 300.0;
+	_ParZ_cap.current_acc	= 300.0;
+	_ParZ_cap.current_run	= 300.0;
 	_ParZ_cap.stop_mux		= MOTOR_Z_BITS;
 	_ParZ_cap.dis_mux_in	= 0;
-	_ParZ_cap.stop_in		= ESTOP_UNUSED;
-	_ParZ_cap.stop_level	= 0;
-	_ParZ_cap.estop_in      = ESTOP_UNUSED;
-	_ParZ_cap.estop_level   = 0;
-	_ParZ_cap.checkEncoder  = TRUE;
+	_ParZ_cap.encCheck		= chk_std;
 }
 
 //--- dp803_main ------------------------------------------------------------------
@@ -124,7 +115,7 @@ void dp803_main(int ticks, int menu)
 	
 	RX_StepperStatus.info.headUpInput_0 = fpga_input(HEAD_UP_IN_0);
 	RX_StepperStatus.info.headUpInput_1 = fpga_input(HEAD_UP_IN_1);
-	RX_StepperStatus.posZ				  = motor_get_step(MOTOR_Z_0);
+	RX_StepperStatus.posZ				= motor_get_step(MOTOR_Z_0);
 	
 	//---- CAPPING ----
 	RX_StepperStatus.info.x_in_cap =  fpga_input(IN_CAP_PISTON1_IN) && fpga_input(IN_CAP_PISTON2_IN);
@@ -443,16 +434,14 @@ static void _dp803_motor_test(int motorNo, int steps)
 	SMovePar par;
 	int i;
 
+	memset(&par, 0, sizeof(par));
 	par.speed		= 5000;
 	par.accel		= 2500;
-	par.current		= 400.0;
+	par.current_acc	= 400.0;
+	par.current_run	= 400.0;
 	par.stop_mux	= 0;
 	par.dis_mux_in	= 0;
-	par.stop_in		= ESTOP_UNUSED;
-	par.stop_level	= 0;
-	par.estop_in    = ESTOP_UNUSED;
-	par.estop_level = 0;
-	par.checkEncoder= FALSE;
+	par.encCheck	= chk_off;
 	
 	_CmdRunning = 1; // TEST
 	RX_StepperStatus.info.moving = TRUE;

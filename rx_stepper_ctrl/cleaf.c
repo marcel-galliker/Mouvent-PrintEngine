@@ -112,7 +112,7 @@ static int	_PrintPos;
 static int  _AllowMoveDown = 0;
 
 // Lift
-static SMovePar	_Par_Z_ref[MOTOR_Z_CNT];
+static SMovePar	_Par_Z_ref;
 static SMovePar	_ParZ_down;
 // static SMovePar	_ParZ_cap;
 
@@ -155,32 +155,25 @@ void cleaf_init(void)
 	Error(LOG, 0, "cleaf_init: material_thickness=%d", RX_StepperCfg.material_thickness);
 	
 	//--- movment parameters Lift ----------------
-	for (i = 0; i < MOTOR_Z_CNT; i++) 
-	{
-		_Par_Z_ref[i].speed			= 16000; // 10000; // 2mm/U // 10mm/s => 5U/s*200steps/U*16=16000  //  20mm/s => 10U/s*200steps/U*16=32000
-		_Par_Z_ref[i].accel			=  8000; // 5000;
-		_Par_Z_ref[i].current		= 300; // 250.0;
-		_Par_Z_ref[i].stop_mux		= MOTOR_Z_BITS;
-		_Par_Z_ref[i].dis_mux_in	= TRUE;
-		_Par_Z_ref[i].stop_in		= ESTOP_UNUSED;
-		_Par_Z_ref[i].stop_level	= 0;
-		_Par_Z_ref[i].estop_level	= 1;
-		_Par_Z_ref[i].checkEncoder	= TRUE;
-	}
+	_Par_Z_ref.speed			= 16000; // 10000; // 2mm/U // 10mm/s => 5U/s*200steps/U*16=16000  //  20mm/s => 10U/s*200steps/U*16=32000
+	_Par_Z_ref.accel			=  8000; // 5000;
+	_Par_Z_ref.current_acc		= 300; // 250.0;
+	_Par_Z_ref.current_run		= 300; // 250.0;
+	_Par_Z_ref.stop_mux			= MOTOR_Z_BITS;
+	_Par_Z_ref.dis_mux_in		= TRUE;
+	_Par_Z_ref.estop_level		= 1;
+	_Par_Z_ref.encCheck			= chk_std;
 
-	_Par_Z_ref[MOTOR_Z_FRONT].estop_in	= HEAD_UP_IN_FRONT; 
-	_Par_Z_ref[MOTOR_Z_BACK].estop_in	= HEAD_UP_IN_BACK; 
+	_Par_Z_ref.estop_in_bit[MOTOR_Z_FRONT]	= (1<<HEAD_UP_IN_FRONT);
+	_Par_Z_ref.estop_in_bit[MOTOR_Z_BACK]	= (1<<HEAD_UP_IN_BACK); 
 	
 	_ParZ_down.speed		= 30000; 
 	_ParZ_down.accel		= 15000; 
-	_ParZ_down.current		= 350.0; 	
+	_ParZ_down.current_acc	= 350.0; 	
+	_ParZ_down.current_run	= 350.0; 	
 	_ParZ_down.stop_mux		= MOTOR_Z_BITS;
 	_ParZ_down.dis_mux_in	= FALSE;
-	_ParZ_down.estop_in     = ESTOP_UNUSED;
-	_ParZ_down.estop_level  = 0;
-	_ParZ_down.checkEncoder = TRUE;
-	_ParZ_down.stop_in		= ESTOP_UNUSED;
-	_ParZ_down.stop_level	= 0;
+	_ParZ_down.encCheck		= chk_std;
 
 	/*
 	_ParZ_cap.speed			= 10000; // 1000;
@@ -188,7 +181,7 @@ void cleaf_init(void)
 	_ParZ_cap.current		= 150.0;
 	_ParZ_cap.stop_mux		= FALSE;
 	_ParZ_down.dis_mux_in	= FALSE;
-	_ParZ_cap.stop_in		= ESTOP_UNUSED;
+	_ParZ_cap.stop_in_bits	= 0;
 	_ParZ_cap.stop_level	= 0;
 	_ParZ_cap.estop_in      = ESTOP_UNUSED;
 	_ParZ_cap.estop_level   = 0;
@@ -557,9 +550,7 @@ int  cleaf_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 			Fpga.par->output |= LASER_BEFORE_HEAD_OUT;			// Laser for supervision OFF
 			_CmdRunning  = CMD_CAP_REFERENCE;
 			RX_StepperStatus.info.moving = TRUE;
-			motor_move_by_step(MOTOR_Z_FRONT, &_Par_Z_ref[0], -500000);
-			motor_move_by_step(MOTOR_Z_BACK,  &_Par_Z_ref[1], -500000);
-			motors_start(MOTOR_Z_BITS, TRUE);
+			motors_move_by_step(MOTOR_Z_BITS, &_Par_Z_ref, -500000, TRUE);
 			_MaterialDetected = FALSE;
 		}
 		break;
@@ -666,18 +657,17 @@ static void _cleaf_motor_test(int motorNo, int steps)
 	int i;
 	int mot_steps = steps;
 
+	memset(&par, 0, sizeof(par));
+
 	par.speed	= 5000;
 	par.accel	= 2500;
-	par.current	= 320.0;
+	par.current_acc	= 320.0;
+	par.current_run	= 320.0;
 	mot_steps	= -steps;
 	
 	par.stop_mux		= 0;
 	par.dis_mux_in		= 0;
-	par.estop_in		= ESTOP_UNUSED;
-	par.estop_level		= 0;
-	par.checkEncoder	= FALSE;
-	par.stop_in			= ESTOP_UNUSED;
-	par.stop_level		= 0;
+	par.encCheck		= chk_off;
 	par.dis_mux_in		= FALSE;
 	RX_StepperStatus.info.moving = TRUE;
 	_CmdRunning = 1; // TEST

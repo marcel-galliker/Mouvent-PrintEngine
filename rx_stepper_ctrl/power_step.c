@@ -18,10 +18,6 @@
 #include "ps_common.h"
 #include "power_step.h"
 
-
-static int	   _voltage_mv;
-
-
 //--- prototypes ---------------------------------
 
 static UINT16 _ps_get_status(UINT32 *pspi);
@@ -29,6 +25,8 @@ static void   _ps_set_byte	(UINT32 *pspi, int par, int val);
 static UINT8  _ps_get_byte  (UINT32 *pspi, int par);
 static void	  _ps_set_int16	(UINT32 *pspi, int par, int val);
 static UINT16 _ps_get_uint16(UINT32 *pspi, int par);
+
+static int _count_missing_voltage = 0;
 
 static SPS_MotorCfg cfg_motor = 
 {
@@ -96,13 +94,13 @@ static SPS_MotorCfg cfg_motor =
 
 //--- ps_main ---------------------------
 int	 ps_main(void)
-{
-#define MIN_VOLTAGE 10000
-	UINT8 adc_out = _ps_get_byte(&Fpga.qsys->spi_powerstep[0], POWERSTEP01_ADC_OUT);	
-	int old=_voltage_mv;
-	_voltage_mv = (adc_out*3300)*(56+2)/2.0/32.0;
-	if (old>=MIN_VOLTAGE && _voltage_mv<MIN_VOLTAGE) return REPLY_ERROR;
+{	
+	if (ps_get_power() < 20000 && _count_missing_voltage == 1)	return REPLY_ERROR;
+	else if (ps_get_power() < 20000)							_count_missing_voltage++;
+	else														_count_missing_voltage = 0;
+	
 	return REPLY_OK;
+	//return (ps_get_power() < 20000);
 }
 
 //--- ps_init ----------------------------------------------
@@ -187,16 +185,6 @@ int ps_init(UINT32 *pspi, SPS_MotorCfg *pcfg)
 	return REPLY_OK;
 }
 
-//--- ps_set_current --------------------------------------
-int	 ps_set_current	 (UINT32 *pspi, double current)
-{
-	_ps_set_byte (pspi, POWERSTEP01_TVAL_HOLD,	Tval_Current_to_Par(current));
-	_ps_set_byte (pspi, POWERSTEP01_TVAL_RUN,	Tval_Current_to_Par(current));
-	_ps_set_byte (pspi, POWERSTEP01_TVAL_ACC,	Tval_Current_to_Par(current));
-	_ps_set_byte (pspi, POWERSTEP01_TVAL_DEC,	Tval_Current_to_Par(current));			
-	return REPLY_OK;
-}
-
 //--- ps_set_backwards -------------------------------
 int ps_set_backwards(UINT32 *pspi, int backwards)
 {
@@ -243,7 +231,8 @@ static UINT16 _ps_get_uint16(UINT32 *pspi, int par)
 //--- ps_get_power -----------------------------------
 int ps_get_power(void)
 {
-	return _voltage_mv;
+	UINT8 adc_out = _ps_get_byte(&Fpga.qsys->spi_powerstep[0], POWERSTEP01_ADC_OUT);
+	return (adc_out * 3300)*(56 + 2) / 2.0 / 32.0;
 }
 	
 //--- _ps_get_status ----------------------

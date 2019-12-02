@@ -14,28 +14,31 @@
 
 #include "rx_def.h"
 #include "power_step.h"
+#include "fpga_def_stepper.h"
 
-//--- 
-typedef struct
+
+typedef enum
 {
-	UINT32	stepsPerM;	// steps per meter
-} SMotorCfg;
-
+	chk_off,		// 00
+	chk_std,		// 01
+	chk_txrob_ref,	// 02
+	chk_txrob,		// 03
+	chk_lbrob		// 04
+} EEncCheck;
+	
 typedef struct
 {
 	INT32	speed;	// Hz
 	UINT32	accel;	// Hz/Sec
-	double  current;
+	double  current_acc;
+	double  current_run;
 	UINT32	stop_mux;
-	INT32	estop_in;
-			#define ESTOP_UNUSED	15	// input for uniused E-STOP
+	INT32	estop_in_bit[MOTOR_CNT];
 	INT32	estop_level;
-	INT32	stop_in;
-			#define STOP_UNUSED	15	// input for uniused STOP
-	INT32	stop_level;
 	INT32	dis_mux_in;
-	INT32	checkEncoder;
-	INT32	sensRef;
+	EEncCheck encCheck;
+	INT32	enc_mode;
+	UINT32	enc_bwd;
 } SMovePar;
 
 void	motor_init(void);
@@ -47,14 +50,13 @@ int		motors_init_done(void);
 
 void	motor_trace_move(int motor);
 
-void	motor_config(int motor, int currentHold, double stepsPerMeter, double incPerMeter);
+void	motor_config (int motor, int currentHold, double stepsPerMeter, double incPerMeter);
 void	motors_config(int motors, int currentHold, double stepsPerMeter, double incPerMeter);
 
 INT32	motor_get_step(int motor);
 INT32	motor_get_end_step(int motor);
 int     motor_move_to_step(int motor, SMovePar *par, INT32 steps);
 int     motors_move_to_step(int motor, SMovePar *par, INT32 steps);
-int 	motors_dual_move_to_step(int motor, SMovePar *par_pos, SMovePar *par_neg, INT32 steps);
 int		motor_move_by_step(int motor, SMovePar *par, INT32 steps);
 int		motors_move_by_step(int motors, SMovePar *par, INT32 steps, UINT32 errorCheck);
 int		motors_quad_move_by_step(int motor, SMovePar *par[4], INT32 steps, UINT32 errorCheck);
@@ -62,8 +64,9 @@ int		motors_quad_move_by_step(int motor, SMovePar *par[4], INT32 steps, UINT32 e
 void	motor_reset(int motor);
 void	motors_reset(int motors);
 void	motors_start(UINT32 motors, UINT32 errorCheck);	// bitset of motors
-void	motors_stop (UINT32 motorsk);	// bitset of motors
-void	motors_estop(UINT32 motorsk);	// bitset of motors
+void	motors_start_enc_reg(UINT32 motors, UINT32 errorCheck);
+void	motors_stop(UINT32 motors);	// bitset of motors
+void	motors_estop(UINT32 motors);	// bitset of motors
 void    motor_set_hold_current(int motor);
 int		motor_move_done(int motor);
 int		motors_move_done(int motors);

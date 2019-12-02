@@ -84,17 +84,14 @@ static void _test_motor_test(int motorNo, int steps)
 	SMovePar par;
 	int i;
 
+	memset(&par, 0, sizeof(par));
 	par.speed		= 1000;
 	par.accel		= 1000;
-//	par.current		= 300.0;
-	par.current		= 50.0;
+	par.current_acc	= 50.0;
+	par.current_run	= 50.0;
 	par.stop_mux	= 0;
 	par.dis_mux_in	= 0;
-	par.stop_in		= ESTOP_UNUSED;
-	par.stop_level	= 0;
-	par.estop_in    = ESTOP_UNUSED;
-	par.estop_level = 0;
-	par.checkEncoder= FALSE;
+	par.encCheck	= chk_off;
 	RX_StepperStatus.info.moving = TRUE;
 	
 //	motors_config(motors,  CURRENT_HOLD, 0.0, 0.0);

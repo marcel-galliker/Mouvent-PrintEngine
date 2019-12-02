@@ -81,51 +81,35 @@ void tx801_init(void)
 {
 	motors_config(MOTOR_Z_BITS, CURRENT_HOLD, 0.0, 0.0);
 	
-	//--- movment parameters ----------------
-	/*
-	_ParRef.speed		= 2000;
-	_ParRef.accel		= 1000;
-	_ParRef.current		= 100.0;
-	_ParRef.stop_mux	= 0;
-	_ParRef.dis_mux_in	= 0;
-	_ParRef.stop_in		= ESTOP_UNUSED;
-	_ParRef.stop_level	= 0;
-	_ParRef.estop_in    = ESTOP_UNUSED;
-	_ParRef.estop_level = 0;
-	_ParRef.checkEncoder=TRUE;
-	*/
+	//--- movment parameters ----------------	
 	_ParRef.speed		= 10000;
 	_ParRef.accel		= 5000;
-	_ParRef.current		= 154.0;
-	_ParRef.stop_mux	= 0;
-	_ParRef.dis_mux_in	= 0;
-	_ParRef.stop_in		= ESTOP_UNUSED;
-	_ParRef.stop_level	= 0;
-	_ParRef.estop_in    = ESTOP_UNUSED;
-	_ParRef.estop_level = 0;
-	_ParRef.checkEncoder=TRUE;
+	_ParRef.current_acc	= 154;
+	_ParRef.current_run	= 100;
+	_ParRef.estop_in_bit[0] = (1<<HEAD_UP_IN_0);
+	_ParRef.estop_in_bit[1] = (1<<HEAD_UP_IN_1);
+	_ParRef.estop_in_bit[2] = (1<<HEAD_UP_IN_2);
+	_ParRef.estop_in_bit[3] = (1<<HEAD_UP_IN_3);
+	_ParRef.estop_level	= 1;
+	_ParRef.stop_mux	= MOTOR_Z_BITS;
+	_ParRef.dis_mux_in	= TRUE;
+	_ParRef.encCheck	= chk_std;
 	
 	_ParZ_down.speed		= 10000;
 	_ParZ_down.accel		= 5000;
-	_ParZ_down.current		= 200.0; // 150.0;
+	_ParZ_down.current_acc	= 200.0;
+	_ParZ_down.current_run	= 100.0;
 	_ParZ_down.stop_mux		= MOTOR_Z_BITS;
-	_ParZ_down.dis_mux_in	= 0;
-	_ParZ_down.stop_in		= ESTOP_UNUSED;
-	_ParZ_down.stop_level	= 0;
-	_ParZ_down.estop_in     = ESTOP_UNUSED;
-	_ParZ_down.estop_level  = 0;
-	_ParZ_down.checkEncoder = TRUE;
+	_ParZ_down.dis_mux_in	= FALSE;
+	_ParZ_down.encCheck		= chk_std;
 
 	_ParZ_cap.speed			= 5000;
 	_ParZ_cap.accel			= 1500;
-	_ParZ_cap.current		= 200.0;
+	_ParZ_cap.current_acc	= 150.0;
+	_ParZ_cap.current_run	= 100.0;
 	_ParZ_cap.stop_mux		= FALSE;
-	_ParZ_cap.dis_mux_in	= 0;
-	_ParZ_cap.stop_in       = ESTOP_UNUSED;
-	_ParZ_cap.stop_level    = 0;
-	_ParZ_cap.estop_in      = ESTOP_UNUSED;
-	_ParZ_cap.estop_level   = 0;
-	_ParZ_cap.checkEncoder  = TRUE;
+	_ParZ_cap.dis_mux_in	= FALSE;
+	_ParZ_cap.encCheck		= chk_std;
 
 	_VentCtrl				= TRUE;
 	_tx801_set_ventilators(0);
@@ -540,16 +524,15 @@ static void _tx801_motor_test(int motorNo, int steps)
 	SMovePar par;
 	int i;
 
+	memset(&par, 0, sizeof(par));
+
 	par.speed		= 1000;
 	par.accel		= 1000;
-	par.current		= 250.0;
+	par.current_acc	= 250.0;
+	par.current_run	= 250.0;
 	par.stop_mux	= 0;
 	par.dis_mux_in	= 0;
-	par.stop_in		= ESTOP_UNUSED;
-	par.stop_level	= 0;
-	par.estop_in    = ESTOP_UNUSED;
-	par.estop_level = 0;
-	par.checkEncoder= FALSE;
+	par.encCheck	= chk_off;
 	
 	_CmdRunning = 1; // TEST
 	RX_StepperStatus.info.moving = TRUE;

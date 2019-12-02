@@ -35,8 +35,7 @@
 #define ADDR_FPGA_STAT		(ADDR_FPGA_BASE+0x0000)
 #define ADDR_FPGA_PAR		(ADDR_FPGA_BASE+0x1000)
 #define ADDR_FPGA_MOVES		(ADDR_FPGA_BASE+0x2000)
-#define ADDR_FPGA_ENCODER	(ADDR_FPGA_BASE+0x3000)
-#define ADDR_FPGA_ENCODER_540	(ADDR_FPGA_BASE+0x4000)
+#define ADDR_FPGA_ENCODER	(ADDR_FPGA_BASE+0x4000)
 
 typedef struct
 {
@@ -204,6 +203,7 @@ typedef struct
 	UINT32	cc0_256;		//      01C0: [32 Bit] [steps/s mit 16bit after binarypoint] Clock Counter 0: number of system clocks between two steps at start of move (*256)
 	UINT32	a_256;			//      01C4: [32 Bit] [steps/s/5us mit 16bit after binarypoint] Acceleration per system clock (*256)
 	UINT32	steps;			//      01C8: [32 Bit] [steps per move] number of steps withthis speed
+	UINT32  amp;            //      01CC: [8 Bit] [ampere reg value]
 	
 	//------------- pseudo code ----------------------
 	//	cc_256 = cc0_256;
@@ -226,8 +226,8 @@ typedef struct
 {
 	//--- stop ------------------------------------
 								// FF21
-	UINT32	stopIn;				//       0120: [4 Bit] if (input[stopIn]==stopLevel) the motor stops with stopAcc_256 untill cc_256>stopCC_256
-	UINT32	stopLevel;			//       0124: [1 Bit]
+	UINT32	unused_stopIn;				//       0120: [4 Bit] if (input[stopIn]==stopLevel) the motor stops with stopAcc_256 untill cc_256>stopCC_256
+	UINT32	unused_stopLevel;			//       0124: [1 Bit]
 	UINT32	stopAcc_256;		//       0128: [unused]	??
 	UINT32	stopCC_256;			//       012c: [unused] ??
 

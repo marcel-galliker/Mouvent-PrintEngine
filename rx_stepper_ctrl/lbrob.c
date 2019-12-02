@@ -80,36 +80,27 @@ void lbrob_init(void)
 	
 	_ParCap_ref.speed = 8000; // 16000; // speed with max tork: 16'000
 	_ParCap_ref.accel =  4000; //8000;
-	_ParCap_ref.current = 400.0; // max 424 = 4.24 A
+	_ParCap_ref.current_acc = 400.0; // max 424 = 4.24 A
+	_ParCap_ref.current_run = 400.0; // max 424 = 4.24 A
 	_ParCap_ref.stop_mux = 0;
 	_ParCap_ref.dis_mux_in = 0;
-	_ParCap_ref.stop_in		= ESTOP_UNUSED; // Check Input 0
-	_ParCap_ref.stop_level = 0; // stopp when sensor on
-	_ParCap_ref.estop_in = RO_STORED_IN; // Check Input 0
-	_ParCap_ref.estop_level = 1; // stopp when sensor on
-	_ParCap_ref.checkEncoder = FALSE; // TRUE;
-
+	_ParCap_ref.encCheck = chk_off;
+		
 	_ParCap_drive.speed = 16000; // 32000; // speed with max tork: 16'000
 	_ParCap_drive.accel = 8000; // 16000;
-	_ParCap_drive.current = 400.0; // max 424 = 4.24 A
-	_ParCap_drive.stop_mux = 0;
-	_ParCap_drive.dis_mux_in = 0;
-	_ParCap_drive.stop_in	= ESTOP_UNUSED;
-	_ParCap_drive.stop_level = 0;
-	_ParCap_drive.estop_in = ESTOP_UNUSED;
-	_ParCap_drive.estop_level = 1;
-	_ParCap_drive.checkEncoder = FALSE; // TRUE;
+	_ParCap_drive.current_acc = 400.0; // max 424 = 4.24 A
+	_ParCap_drive.current_run = 400.0; // max 424 = 4.24 A
+	_ParCap_ref.stop_mux = 0;
+	_ParCap_ref.dis_mux_in = 0;
+	_ParCap_drive.encCheck = chk_off; // TRUE;
 
 	_ParCap_wipe.speed = 8000; // 25000; // speed with max tork: 16'000
 	_ParCap_wipe.accel = 4000;// 12500;
-	_ParCap_wipe.current = 300.0; // max 424 = 4.24 A
+	_ParCap_wipe.current_acc = 300.0; // max 424 = 4.24 A
+	_ParCap_wipe.current_run = 300.0; // max 424 = 4.24 A
 	_ParCap_wipe.stop_mux = 0;
 	_ParCap_wipe.dis_mux_in = 0;
-	_ParCap_wipe.stop_in = ESTOP_UNUSED;
-	_ParCap_wipe.stop_level = 0;
-	_ParCap_wipe.estop_in = ESTOP_UNUSED;
-	_ParCap_wipe.estop_level = 1;
-	_ParCap_wipe.checkEncoder = FALSE; // TRUE;	
+	_ParCap_wipe.encCheck = chk_off; // TRUE;	
 }
 
 //--- lbrob_main ------------------------------------------------------------------
@@ -367,25 +358,24 @@ static void _lbrob_ro_motor_test(int motorNo, int steps)
 	SMovePar par;
 	int i;
 
+	memset(&par, 0, sizeof(par));
 	if (motorNo == MOTOR_CAP)
 	{
 		par.speed = 8000; // 16000; // 32000;//25000; // 8000;// 4000; // 2000;
 		par.accel = 4000; // 8000; //16000;//12500;// 4000;//2000; // 1000;
-		par.current = 400.0; // 60.0;  // for Tests: 50
+		par.current_acc = 400.0; // 60.0;  // for Tests: 50
+		par.current_run = 400.0; // 60.0;  // for Tests: 50
 	}
 	else
 	{
 		par.speed	= 21000;		//21000;					//21000;				//21000;			//21000;			//21000;					
 		par.accel	= 10000;		//10000;					//10000;				//10000;			//10000;			//10000;				
-		par.current = 80.0;//134.0;	//40.0;	minimum for 0.3 Nm	// 60.0; for 0.4 Nm		// 80.0 for 0.5 Nm	// 100.0 for 0.6 Nm	// 120.0 for 0.7 Nm	// 134.0 for 0.8 Nm	
+		par.current_acc = 80.0;//134.0;	//40.0;	minimum for 0.3 Nm	// 60.0; for 0.4 Nm		// 80.0 for 0.5 Nm	// 100.0 for 0.6 Nm	// 120.0 for 0.7 Nm	// 134.0 for 0.8 Nm	
+		par.current_run = 80.0;//134.0;	//40.0;	minimum for 0.3 Nm	// 60.0; for 0.4 Nm		// 80.0 for 0.5 Nm	// 100.0 for 0.6 Nm	// 120.0 for 0.7 Nm	// 134.0 for 0.8 Nm	
 	}
 	par.stop_mux = 0;
 	par.dis_mux_in = 0;
-	par.stop_in		= ESTOP_UNUSED;
-	par.stop_level	= 0;
-	par.estop_in = ESTOP_UNUSED;
-	par.estop_level = 0;
-	par.checkEncoder = FALSE;
+	par.encCheck = chk_off;
 	RX_StepperStatus.info.moving = TRUE;
 	_CmdRunning = 1; // TEST
 
