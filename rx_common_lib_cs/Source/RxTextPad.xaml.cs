@@ -55,7 +55,7 @@ namespace RX_Common
             new List<List<string>>
             {
                 new List<string>{"1", "2", "3", "4", "5", "6", "7", "8", "9", "0","Back"},
-                new List<string>{"q", "w", "e", "r", "t", "z", "u", "i", "o", "p","ENTER"},
+                new List<string>{"q", "w", "e", "r", "t", "z", "u", "i", "o", "p","Return"},
                 new List<string>{"a", "s", "d", "f", "g", "h", "j", "k", "l", "/"},
                 new List<string>{".", "y", "x", "c", "v", "b", "n", "m", "-", "_", "\\"}
             },
@@ -63,7 +63,7 @@ namespace RX_Common
             new List<List<string>>
             {
                 new List<string>{"1", "2", "3", "4", "5", "6", "7", "8", "9", "0","Back"},
-                new List<string>{"Q", "W", "E", "R", "T", "Z", "U", "I", "O", "P","ENTER"},
+                new List<string>{"Q", "W", "E", "R", "T", "Z", "U", "I", "O", "P","Return"},
                 new List<string>{"A", "S", "D", "F", "G", "H", "J", "K", "L", "/"},
                 new List<string>{".", "Y", "X", "C", "V", "B", "N", "M", "-", "_", "\\"}
             },
@@ -71,7 +71,7 @@ namespace RX_Common
             new List<List<string>>
             {
                 new List<string>{"1", "2", "3", "4", "5", "6", "7", "8", "9", "0","Back"},
-                new List<string>{"@", "#", "°", "$", "€", "+", "-", "?", "&", "%","ENTER"},
+                new List<string>{"@", "#", "°", "$", "€", "+", "-", "?", "&", "%","Return"},
                 new List<string>{"ä", "ö", "ü", "é", "è", "à", "â", "", "", "/"},
                 new List<string>{".", ",", ":", ";", "", "", "", "", "", "_", "\\"}
             }
@@ -321,7 +321,7 @@ namespace RX_Common
         //--- _handle_key --------------------------------------------------
         private void _handle_key(string key, char ch)
         {            
-            if (key.Equals("ENTER"))  
+            if (key.Equals("Return"))  
             {
                 if (_Target==null)  _send("\r");
                 else                this.DialogResult = true;            

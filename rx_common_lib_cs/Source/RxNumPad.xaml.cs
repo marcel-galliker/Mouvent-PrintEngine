@@ -102,11 +102,11 @@ namespace RX_Common
         //--- RxNumPad_KeyDown ----------------------------------------------
         void RxNumPad_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
-            if (e.Key==Key.Decimal)     _handle_key(".");
+            if (e.Key==Key.Decimal || e.Key==Key.OemPeriod)     _handle_key(".");
             else if (e.Key==Key.Return || e.Key==Key.Back || e.Key==Key.Escape) _handle_key(e.Key.ToString());
             else 
             {
-                int code=System.Windows.Input.KeyInterop.VirtualKeyFromKey(e.Key);             
+                int code=System.Windows.Input.KeyInterop.VirtualKeyFromKey(e.Key);         
                 if (e.Key>=Key.NumPad0 && e.Key<=Key.NumPad9) code = '0'+e.Key-Key.NumPad0;
                 _handle_key(new string(Convert.ToChar(code),1));
             } 
