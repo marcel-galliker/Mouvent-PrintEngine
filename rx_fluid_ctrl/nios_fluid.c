@@ -182,8 +182,15 @@ static void _nios_check_errors(void)
 			ErrorFlag(ERR_CONT,  &RX_FluidBoardStatus.err, err_overpressure,      0, "InkSupply[%d] Ink Tank overpressure", isNo+1);
 		if (_Stat->ink_supply[isNo].error & err_ink_tank_pressure)
 			ErrorFlag (ERR_CONT, (UINT32*)&_Error[isNo],  err_ink_tank_pressure,  0, "InkSupply[%d] Ink Tank Sensor Error", isNo+1);							
-    	if (nios_is_heater_connected() && (_Stat->ink_supply[isNo].error & err_heater_board))
-        	ErrorFlag(ERR_CONT, (UINT32*)&_Error[isNo], err_heater_board, 0, "InkSupply[%d] Heater Board Error or Openload", isNo + 1);	
+		if (nios_is_heater_connected())
+		{
+			if (_Stat->ink_supply[isNo].error & err_heater_board) ErrorFlag(ERR_CONT, (UINT32*)&_Error[isNo], err_heater_board, 0, "InkSupply[%d] Heater Board Error or Openload", isNo + 1);	
+			if (_Stat->ink_supply[isNo].error & err_watchdog) ErrorFlag(ERR_CONT, (UINT32*)&_Error[isNo], err_heater_board, 0, "InkSupply[%d] Heater Board Watchdog Error", isNo + 1);	
+			if (_Stat->HeaterBoard_Vsupply_3V < 3000) ErrorFlag(ERR_CONT, (UINT32*)&_Error[isNo], err_heater_board, 0, "InkSupply[%d] Heater Board 3.3V error", isNo + 1);
+			if (_Stat->HeaterBoard_Vsupply_5V < 4800) ErrorFlag(ERR_CONT, (UINT32*)&_Error[isNo], err_heater_board, 0, "InkSupply[%d] Heater Board 5V error", isNo + 1);
+			if (_Stat->HeaterBoard_Vsupply_24V < 12000) ErrorFlag(ERR_CONT, (UINT32*)&_Error[isNo], err_heater_board, 0, "InkSupply[%d] Heater Board 24V error", isNo + 1);
+			if (_Stat->HeaterBoard_Vsupply_24VP < 12000) ErrorFlag(ERR_CONT, (UINT32*)&_Error[isNo], err_heater_board, 0, "InkSupply[%d] Heater Board 24VP error", isNo + 1);
+		}  	
 	}
 }
 
@@ -516,6 +523,7 @@ static void _display_status(void)
 		{
 			term_printf("\n");
 			term_printf("--- HEATER ------------------------------------------------------\n");
+			term_printf("Heater AMC Volt:         %d.%d  %d.%d  %d.%d  %d.%d\n", _Stat->HeaterBoard_Vsupply_3V / 1000, _Stat->HeaterBoard_Vsupply_3V % 1000, _Stat->HeaterBoard_Vsupply_5V / 1000, _Stat->HeaterBoard_Vsupply_5V % 1000, _Stat->HeaterBoard_Vsupply_24V / 1000, _Stat->HeaterBoard_Vsupply_24V % 1000, _Stat->HeaterBoard_Vsupply_24VP / 1000, _Stat->HeaterBoard_Vsupply_24VP % 1000);
 			term_printf("Heater AMC Temp:         %d.%d\n", _Stat->heater_amc_temp / 8, _Stat->heater_amc_temp % 8); 
 			term_printf("Temp:              ");  
 			for (i = 0; i < NIOS_INK_SUPPLY_CNT; i++) 

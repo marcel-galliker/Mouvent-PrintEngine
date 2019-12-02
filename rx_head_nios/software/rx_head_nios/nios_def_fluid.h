@@ -260,6 +260,12 @@ typedef struct SNiosFluidStat
 	UINT32	logInIdx;
 	UINT32	logOutIdx;
 	char	logStr[LOG_STR_CNT][LOG_STR_LEN];
+	
+	// Vsupply check Heater board
+	INT32	HeaterBoard_Vsupply_3V;
+	INT32	HeaterBoard_Vsupply_5V;
+	INT32	HeaterBoard_Vsupply_24V;
+	INT32	HeaterBoard_Vsupply_24VP;
 
 } SNiosFluidStat;
 

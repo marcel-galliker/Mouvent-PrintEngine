@@ -88,6 +88,23 @@ void heater_tick_10ms(void)
 		return;
 	}
 
+	// Vsupply HeaterBoard
+	temp = IORD_16DIRECT(AVALON_SPI_AMC7891_1_BASE, AMC7891_ADC0_DATA) & 0x3ff;
+	temp = IORD_16DIRECT(AVALON_SPI_AMC7891_1_BASE, AMC7891_ADC0_DATA) & 0x3ff;
+	pRX_Status->HeaterBoard_Vsupply_3V = temp * 5000 / 1024;
+
+	temp = IORD_16DIRECT(AVALON_SPI_AMC7891_1_BASE, AMC7891_ADC0_DATA + 2) & 0x3ff;
+	temp = IORD_16DIRECT(AVALON_SPI_AMC7891_1_BASE, AMC7891_ADC0_DATA + 2) & 0x3ff;
+	pRX_Status->HeaterBoard_Vsupply_5V = temp * 5000 / 1024;
+
+	temp = IORD_16DIRECT(AVALON_SPI_AMC7891_1_BASE, AMC7891_ADC0_DATA + 4) & 0x3ff;
+	temp = IORD_16DIRECT(AVALON_SPI_AMC7891_1_BASE, AMC7891_ADC0_DATA + 4) & 0x3ff;
+	pRX_Status->HeaterBoard_Vsupply_24V = temp * 5000 / 1024 * 115 / 15;
+
+	temp = IORD_16DIRECT(AVALON_SPI_AMC7891_1_BASE, AMC7891_ADC0_DATA + 6) & 0x3ff;
+	temp = IORD_16DIRECT(AVALON_SPI_AMC7891_1_BASE, AMC7891_ADC0_DATA + 6) & 0x3ff;
+	pRX_Status->HeaterBoard_Vsupply_24VP = temp * 5000 / 1024 * 115 / 15;
+
 	// Thermistor Heaterboard
 	for(i=0; i<NIOS_INK_SUPPLY_CNT; i++)
 	{
