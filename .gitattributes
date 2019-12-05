@@ -7,3 +7,4 @@ rx_encoder_rbf binary
 *.sln -merge -text
 *.csproj -merge -text
 *.vcxproj -merge -text
+
