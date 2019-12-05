@@ -194,24 +194,13 @@ int _handle_ctrl_msg(RX_SOCKET socket, void *pmsg)//, int len, struct sockaddr *
 		case printer_test_slide:		break;
 		case printer_test_slide_only:	break;
 			
-		case printer_LB701:				if (RX_StepperCfg.boardNo == step_lift)	lb701_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);
-										else                                    lbrob_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]); 
-										break;
+		case printer_LB701:				lb701_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);	break;
 		case printer_LB702_UV:
 		case printer_LB702_WB:			
-		case printer_LH702:				/*
-										if (RX_StepperCfg.boardNo == step_lift)	lb702_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]); 
-										else                                    lbrob_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]); 
-										*/
-										lb702_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);
-										break;
+		case printer_LH702:				lb702_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);	break;
+		case printer_LBROB:				lbrob_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);	break;
 			
-		case printer_DP803:				/*
-										if(RX_StepperCfg.boardNo == step_lift) dp803_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);
-										else Error(ERR_CONT, 0, "RX_StepperCfg.boardNo=%d, not implemented!", RX_StepperCfg.boardNo);
-										*/
-										dp803_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);
-										break;
+		case printer_DP803:				dp803_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);	break;
 			
 		default:	Error(ERR_CONT, 0, "PrinterType %d not implemented, msgId=0x%08x", RX_StepperCfg.printerType, phdr->msgId);
 		}			
@@ -247,27 +236,16 @@ static void _do_config(SStepperCfg *pcfg)
 								else                                    txrob_init();
 								break;
 		
-	case printer_cleaf:			cleaf_init(); break;
+	case printer_cleaf:			cleaf_init();	break;
 		
-	case printer_LB701:			if (RX_StepperCfg.boardNo == step_lift) lb701_init();	
-								else                                    lbrob_init();
-								break;
+	case printer_LB701:			lb701_init();	break;
 		
 	case printer_LB702_UV:			
 	case printer_LB702_WB:		
-	case printer_LH702:			/*
-								if (RX_StepperCfg.boardNo == step_lift) lb702_init();
-								else                                    lbrob_init();
-								*/
-								lb702_init();
-								break;
+	case printer_LH702:			lb702_init();	break;
+	case printer_LBROB:			lbrob_init();	break;
 		
-	case printer_DP803:			/*
-								if (RX_StepperCfg.boardNo == step_lift) dp803_init();
-								else                                    lbrob_init();
-								*/
-								dp803_init();
-								break;
+	case printer_DP803:			dp803_init();	break;
 		
 	default:	Error(ERR_CONT, 0, "PrinterType %d not implemented", RX_StepperCfg.printerType);
 	}						

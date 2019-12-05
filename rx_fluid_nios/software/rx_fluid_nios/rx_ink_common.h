@@ -138,13 +138,17 @@ typedef enum EPrinterType
 	printer_LH702,				// 1003:
 	
 	printer_DP803=1100,			// 1100:
-	 
+
+	printer_LBROB=1900,			// 1900: For stepper only; Use LB Roboter
+	
+	
 	//--- scanning printers --------------------------
 	printer_TX801     = 2000,		// 2000: Fashionn stanrard output
 	printer_TX802,					// 2001: Fashion high outpput
 
 	//--- special projects ----------------
 	printer_cleaf = 10000,		// 10000: Cleaf machine
+
 } EPrinterType;
 
 //--- EnFluidCtrlMode -----------------------------

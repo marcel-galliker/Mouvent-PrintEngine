@@ -87,27 +87,13 @@ static void _main_loop()
 									else							txrob_main(ticks, menu);
 									break;
 			
-		case printer_cleaf:			cleaf_main(ticks, menu); break;
-			
-		case printer_LB701: 		if (RX_StepperCfg.boardNo == 0) lb701_main(ticks, menu);
-									else							lbrob_main(ticks, menu);	
-									break;
-			
+		case printer_cleaf:			cleaf_main(ticks, menu);	break;			
+		case printer_LB701: 		lb701_main(ticks, menu);	break;			
 		case printer_LB702_UV: 		
 		case printer_LB702_WB:		
-		case printer_LH702:			/*
-									if (RX_StepperCfg.boardNo == 0) lb702_main(ticks, menu); 
-									else							lbrob_main(ticks, menu);	
-									*/
-									lb702_main(ticks, menu); 
-									break;
-
-		case printer_DP803: 		/*
-									if (RX_StepperCfg.boardNo == 0) dp803_main(ticks, menu); 
-									else							lbrob_main(ticks, menu);	
-									*/
-									dp803_main(ticks, menu);
-									break;
+		case printer_LH702:			lb702_main(ticks, menu); break;
+		case printer_LBROB:			lbrob_main(ticks, menu); break;
+		case printer_DP803: 		dp803_main(ticks, menu); break;
 			
 		default:					test_main(ticks, menu); break;			
 		}				
@@ -124,25 +110,14 @@ static void _main_loop()
 										break;
 			case printer_cleaf:			_AppRunning = cleaf_menu(); break;
 
-			case printer_LB701: 		if (RX_StepperCfg.boardNo == 0) _AppRunning = lb701_menu(); 
-										else							_AppRunning = lbrob_menu(); 
-										break;
+			case printer_LB701: 		_AppRunning = lb701_menu();	break;
 
 			case printer_LB702_UV:
 			case printer_LB702_WB:		
-			case printer_LH702:			/*
-										if (RX_StepperCfg.boardNo == 0) _AppRunning = lb702_menu(); 
-										else							_AppRunning = lbrob_menu(); 
-										*/
-										_AppRunning = lb702_menu();
-										break;
+			case printer_LH702:			_AppRunning = lb702_menu(); break;
+			case printer_LBROB:			_AppRunning = lbrob_menu(); break;
 
-			case printer_DP803: 		/*
-										if (RX_StepperCfg.boardNo == 0) _AppRunning = dp803_menu(); 
-										else							_AppRunning = lbrob_menu(); 
-										*/
-										_AppRunning = dp803_menu();
-										break;
+			case printer_DP803: 		_AppRunning = dp803_menu();	break;
 			
 			default:					_AppRunning = test_menu(); break;				
 			}					
@@ -190,25 +165,16 @@ int main(int argc, char** argv)
 		
 	case printer_cleaf:			cleaf_init(); break;
 		
-	case printer_LB701: 		if (RX_StepperCfg.boardNo == 0) lb701_init(); 
-								else						    lbrob_init();
-								break;
+	case printer_LB701: 		lb701_init(); break;
 		
 	case printer_LB702_UV: 		
 	case printer_LB702_WB: 		
-	case printer_LH702:			/*
-								if (RX_StepperCfg.boardNo == 0) lb702_init(); 
-								else						    lbrob_init();
-								*/
-								lb702_init();
-								break;
+	case printer_LH702:			lb702_init();	break;
+	case printer_LBROB:			lbrob_init();	break;
 		
-	case printer_DP803: 		/*	
-								if (RX_StepperCfg.boardNo == 0) dp803_init(); 
-								else						    lbrob_init();
-								*/
-								dp803_init();
-								break;
+	case printer_DP803: 		dp803_init();	break;
+
+	
 	default:					test_init();
 	}			
 	
