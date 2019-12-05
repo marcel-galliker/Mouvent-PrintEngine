@@ -113,7 +113,7 @@ namespace RX_DigiPrint.Services
                 RxGlobals.Log.ItemCount = req.count;
                 RxGlobals.Log.Pos       = req.first;
             }
-            else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length")); 
+            else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length SLogReqMsg")); 
         }
 
         //--- handle_event ----------------------------------------------------------------
@@ -133,7 +133,7 @@ namespace RX_DigiPrint.Services
                 default: RxGlobals.Events.AddItem(new LogItem("Received unknown MessageId=0x{0:X}", err.hdr.msgId)); break;
                 }
             }
-            else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length")); 
+            else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length SErrorMsg")); 
         }
 
         //--- handle_net_item --------------------------------------------
@@ -145,7 +145,7 @@ namespace RX_DigiPrint.Services
             {
                 RxGlobals.Network.AddItem(new NetworkItem(ref msg.item, msg.flash));
             }
-            else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length")); 
+            else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length sNetworkMsg")); 
         }
 
         //--- handle_net_settings -----------------------------------------
@@ -157,7 +157,7 @@ namespace RX_DigiPrint.Services
             { 
                 RxBindable.Invoke(()=>RxGlobals.PrinterProperties.NetworkSettings(settings));
             }
-            else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length")); 
+            else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length SIfConfig")); 
         }
 
         //--- handle_print_queue -----------------------------------------
@@ -179,7 +179,7 @@ namespace RX_DigiPrint.Services
                     case TcpIp.EVT_DN_PRINT_QUEUE:  RxGlobals.PrintQueue.DownItem(item);      break;
                 }
             }
-            else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length"));
+            else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length sPrintQueueMsg"));
         }
 
         //--- handle_print_env -----------------------------------------
@@ -206,7 +206,7 @@ namespace RX_DigiPrint.Services
                 }
                  * */
             }
-            else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length")); 
+            else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length sPrintEnvMsg")); 
         }
 
         //--- handle_ink_def -----------------------------------------
@@ -219,7 +219,7 @@ namespace RX_DigiPrint.Services
             { 
                 case TcpIp.BEG_GET_INK_DEF: RxGlobals.InkTypes.Reset();                          break;
                 case TcpIp.ITM_GET_INK_DEF: if (len== msg.hdr.msgLen) RxGlobals.InkTypes.AddItem(new InkType(msg.ink));    
-                                            else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length")); 
+                                            else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length SInkDefMsg")); 
                                             break;
             }
         }
@@ -235,7 +235,7 @@ namespace RX_DigiPrint.Services
 //              Console.WriteLine("handle_fluid_stat[{0}]", msg.no);
                 RxGlobals.InkSupply.Update(msg.no, msg.status);
             }
-            else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length")); 
+            else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length SInkSupplyStatMsg")); 
         }
 
         //--- handle_chiller_stat -----------------------------------------
@@ -247,7 +247,7 @@ namespace RX_DigiPrint.Services
             {
                 RxGlobals.Chiller.Update(msg.status);
             }
-            else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length")); 
+            else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length SChillerStatMsg")); 
         }
 
         //--- handle_encoder_stat -----------------------------------------
@@ -264,7 +264,7 @@ namespace RX_DigiPrint.Services
                 hdrlen += len;
             }
             if (hdrlen!=hdr.msgLen)
-                RxGlobals.Events.AddItem(new LogItem("Received invalid message Length"));
+                RxGlobals.Events.AddItem(new LogItem("Received invalid message Length SEncoderStat"));
         }        
         
         //--- handle_head_stat -----------------------------------------
@@ -285,7 +285,7 @@ namespace RX_DigiPrint.Services
                     RxGlobals.HeadStat.List[no].SendBt();
                 }
             }
-            else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length"));
+            else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length SHeadBoardStatMsg"));
         }
 
         //--- handle_tt_stat -----------------------------------------
@@ -297,7 +297,7 @@ namespace RX_DigiPrint.Services
             {
                 RxGlobals.TestTableStatus.Update(msg);
             }
-            else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length")); 
+            else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length SStepperStat")); 
         }
 
         //--- handle_printer_cfg -----------------------------------------
@@ -312,7 +312,7 @@ namespace RX_DigiPrint.Services
                     case TcpIp.REP_GET_PRINTER_CFG: RxGlobals.PrintSystem.SetPrintCfg(msg); break;
                 }
             }
-            else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length")); 
+            else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length SPrinterCfgMsg")); 
         }
         
         //--- handle_printer_stat -----------------------------------------
@@ -324,7 +324,7 @@ namespace RX_DigiPrint.Services
             {
                 RxGlobals.PrinterStatus.Upadte(msg);
             }
-            else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length")); 
+            else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length SPrinterStatusMsg")); 
         }
 
         //--- handle_stepper_cfg -----------------------------------------
@@ -336,7 +336,7 @@ namespace RX_DigiPrint.Services
             {
                 RxGlobals.Stepper.SetStepperCfg(msg);
             }
-            else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length")); 
+            else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length SStepperCfgMsg")); 
         }
 
         //--- handle_plc_info -----------------------------------------
@@ -350,7 +350,7 @@ namespace RX_DigiPrint.Services
             {
                 RxGlobals.Plc.Info = info;
             }
-            else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length")); 
+            else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length SSystemInfo")); 
         }
 
         //--- handle_plc_log -----------------------------------------
@@ -363,7 +363,7 @@ namespace RX_DigiPrint.Services
                 if (msg.item.no%10==0) Console.WriteLine("{0}: Get Log.no={1}", Environment.TickCount, msg.item.no);
                 RxBindable.Invoke(()=>RxGlobals.Plc.AddLogItem(new CPlcLogItem(msg.item)));
             }
-            else  RxGlobals.Events.AddItem(new LogItem("Received invalid message Length"));
+            else  RxGlobals.Events.AddItem(new LogItem("Received invalid message Length SPlcLogItemMsg"));
         }
 
         /*
@@ -422,7 +422,7 @@ namespace RX_DigiPrint.Services
             {
                 RxBindable.Invoke(()=>RxGlobals.CleafOrder.Update_Order(order));
             }
-            else  RxGlobals.Events.AddItem(new LogItem("Received invalid message Length"));
+            else  RxGlobals.Events.AddItem(new LogItem("Received invalid message Length SCleafOrder"));
         }
 
         //--- handle_co_production -------------------------------------
@@ -436,7 +436,7 @@ namespace RX_DigiPrint.Services
             {
                 RxBindable.Invoke(()=>RxGlobals.CleafOrder.Update_Prodction(prod));
             }
-            else  RxGlobals.Events.AddItem(new LogItem("Received invalid message Length"));
+            else  RxGlobals.Events.AddItem(new LogItem("Received invalid message Length SCleafProduction"));
         }
 
         //--- handle_co_roll -------------------------------------
@@ -450,7 +450,7 @@ namespace RX_DigiPrint.Services
             {
                 RxBindable.Invoke(()=>RxGlobals.CleafOrder.Update_Roll(roll));
             }
-            else  RxGlobals.Events.AddItem(new LogItem("Received invalid message Length"));
+            else  RxGlobals.Events.AddItem(new LogItem("Received invalid message Length SCleafRoll"));
         }
 
         //--- handle_co_operator -------------------------------------
@@ -464,7 +464,7 @@ namespace RX_DigiPrint.Services
             {
                 RxBindable.Invoke(()=>RxGlobals.CleafOrder.User= roll.user);
             }
-            else  RxGlobals.Events.AddItem(new LogItem("Received invalid message Length"));
+            else  RxGlobals.Events.AddItem(new LogItem("Received invalid message Length SCleafRoll"));
         }
     }
 }
