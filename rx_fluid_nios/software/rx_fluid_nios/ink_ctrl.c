@@ -720,6 +720,12 @@ void ink_tick_1000ms(void)
 {
 	int isNo;
 
+	if (tr_debug_on())
+	{
+		int i;
+		trprintf("\n-------------------------------------------------------------------------------------\n");
+		trprintf("ink pressure  :"); PRINTF("  %6d ", pRX_Status->ink_supply[i].IS_Pressure_Actual); trprintf("\n");
+	}
 	/*
 	if (tr_debug_on())
 	{

@@ -394,7 +394,6 @@ void putty_display_nios_status(int nios, int status, int eeprom)
 			term_color(BLACK);
 			term_printf("  overheated=%d ", RX_NiosStat.error.cooler_overheated);
 			term_printf("  overpressure=%d ", RX_NiosStat.error.cooler_overpressure);
-			term_printf("  HW-Error=%d", RX_NiosStat.error.cooler_pressure_hw);
 			term_printf("  ID=%d.%d.%d.%d", id[0], id[1], id[2], id[3]);
 			term_printf("\n");			
 		}

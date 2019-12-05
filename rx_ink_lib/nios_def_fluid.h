@@ -184,6 +184,8 @@ typedef struct
 
 	EnFluidCtrlMode	ctrl_state;
 
+	UINT32	sensorID;
+	
 	UINT32	inkPumpSpeed_set;
 	UINT32	inkPumpSpeed_measured;
 	INT32   cylinderPresSet;
@@ -241,6 +243,10 @@ typedef struct SNiosFluidStat
 	UINT32	air_pump:1;			// 0=? 1=?
 	UINT32	airPressureTime;
 
+	UINT32	flush_sensorID;
+	UINT32	degas_sensorID;
+	UINT32	air_sensorID;
+	
 	INT32	degass_pressure;
 	INT32	flush_pressure;
 	INT32	flush_pump_val;

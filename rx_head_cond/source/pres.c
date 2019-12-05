@@ -43,10 +43,8 @@ typedef struct
 	int				buf_valid;
 	int				power;
 	int				power_timer;
-	int				power_cnt;
 	int				low_cnt;
 	int				high_cnt;
-	int				error;
 	int				calibrating;
     INT32           EE_ADDR_FACTORY;
     INT32           EE_ADDR_USER;
@@ -132,7 +130,7 @@ static void _sensor_read(SSensor *s)
     INT32   pressure = 0;   
 	INT32   pressure10 = 0;   
 	UCHAR	*ppressure = (UCHAR*)&pressure;
-
+	
 	//--- repower sensor ---
 	if (!s->power)
 	{
@@ -142,7 +140,6 @@ static void _sensor_read(SSensor *s)
 		if ((--s->power_timer)<=0)
 		{
 			_sensor_reset(s);
-			s->set_power(TRUE);
 			s->power = TRUE;
 		   *s->pSensorID = _read_Sensor_ID(s);
 		}
@@ -163,13 +160,7 @@ static void _sensor_read(SSensor *s)
 			s->set_power(FALSE); // DS1_3V3 OFF
 			s->power = FALSE;
 			s->power_timer = 4;
-			s->power_cnt++;
-			if (s->power_cnt>3)
-			{
-				s->power_cnt = 0;
-				*s->pPressure = INVALID_VALUE;
-				//s->error = TRUE;
-			}
+			*s->pPressure = INVALID_VALUE;
 		}
 		else if (pressure==0)
 		{
@@ -183,9 +174,7 @@ static void _sensor_read(SSensor *s)
 		{	
 			if (s->low_cnt)  s->low_cnt--;
 			if (s->high_cnt) s->high_cnt--;
-			
-			s->power_cnt = 0;
-			
+						
 			//--- save to buffer -----
 			s->buf10[s->buf_idx10++] = pressure;
 			if (s->buf_idx10 >= BUF_SIZE_10) s->buf_idx10   = 0;
@@ -272,8 +261,8 @@ void pres_tick_10ms(void)
 		_sensor_reset(&_PressureOut);
 	}
     
-	if (_PressureIn.error)  RX_Status.error |= COND_ERR_pres_in_hw;
-	if (_PressureOut.error) RX_Status.error |= COND_ERR_pres_out_hw;
+//	if (_PressureIn.error)  RX_Status.error |= COND_ERR_pres_in_hw;
+//	if (_PressureOut.error) RX_Status.error |= COND_ERR_pres_out_hw;
 	
 	if (RX_Config.flowResistance<100 || RX_Config.flowResistance>500)
 	{
@@ -296,43 +285,31 @@ static UINT32 _read_Sensor_ID(SSensor *s)
 {
 	UINT32  id;
 	UCHAR	*pid = (UCHAR*)&id;
-	int ret=0;
 
-	/*
-	int read_ack=INVALID_VALUE;
-	read_ack=working_ack_polling(s->pi2c, ADDR_SENSOR);
-	if (!ret) ret = I2cReceiveByteSeq(s->pi2c, &psensor_id_0[1], TRUE);		
-	I2cStopWrite(s->pi2c);						// must be this!	
-	_i2c_wait_time();
-	*/
-
-	// old
 	// Read Sensor ID Back
-	ret = I2cStartWrite(s->pi2c, ADDR_SENSOR);
-	if (!ret) ret = I2cSendByte(0x4e, s->pi2c);															// ask for first two Sensor ID values
+	if (I2cStartWrite(s->pi2c, ADDR_SENSOR)) return 1;
+	if (I2cSendByte(0x4e, s->pi2c)) return 2;															// ask for first two Sensor ID values
 	I2cStopWrite(s->pi2c);						// must be this!	
 	
 	_i2c_wait_time();
 
-	ret = I2cStartRead(s->pi2c, ADDR_SENSOR);
-	if (!ret) ret = I2cReceiveByteSeq(s->pi2c, &pid[0], FALSE);		// read first two Sensor ID values
-	if (!ret) ret = I2cReceiveByteSeq(s->pi2c, &pid[1], TRUE);		
+	if (I2cStartRead(s->pi2c, ADDR_SENSOR)) return 3;
+	I2cReceiveByteSeq(s->pi2c, &pid[0], FALSE);		// read first two Sensor ID values
+	I2cReceiveByteSeq(s->pi2c, &pid[1], TRUE);		
 	I2cStopWrite(s->pi2c);						// must be this!	
 
 	_i2c_wait_time();
 
-	ret = I2cStartWrite(s->pi2c, ADDR_SENSOR);
-	if (!ret) ret = I2cSendByte(0x4f, s->pi2c);															// ask for second two Sensor ID values
+	if (I2cStartWrite(s->pi2c, ADDR_SENSOR)) return 4;
+	I2cSendByte(0x4f, s->pi2c);															// ask for second two Sensor ID values
 	I2cStopWrite(s->pi2c);						// must be this!	
 	
 	_i2c_wait_time();
 
-	ret = I2cStartRead(s->pi2c, ADDR_SENSOR);
-	if (!ret) ret = I2cReceiveByteSeq(s->pi2c, &pid[2], FALSE);		// read first two Sensor ID values
-	if (!ret) ret = I2cReceiveByteSeq(s->pi2c, &pid[3], TRUE);		
+	if (I2cStartRead(s->pi2c, ADDR_SENSOR)) return 5;
+	I2cReceiveByteSeq(s->pi2c, &pid[2], FALSE);		// read first two Sensor ID values
+	I2cReceiveByteSeq(s->pi2c, &pid[3], TRUE);		
 	I2cStopWrite(s->pi2c);						// must be this!		
-
-	if (ret) id=0;
 
 	return id;
 }

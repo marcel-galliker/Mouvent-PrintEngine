@@ -406,7 +406,7 @@ void _update_status(void)
 {
 	int i;
 	SInkSupplyStat *pstat;
-	
+		
 	for (i=0; i<SIZEOF(RX_FluidBoardStatus.stat); i++)
 	{
 		pstat = &RX_FluidBoardStatus.stat[i];
@@ -439,8 +439,9 @@ void _update_status(void)
 //--- _display_status ----------------------------
 static void _display_status(void)
 {
-	int i, val;
-	char str[32];
+	int i, val, len;
+	char str[128];
+	UCHAR *id;
 
 	if (_Loaded)
 	{			
@@ -465,9 +466,22 @@ static void _display_status(void)
 			(_Stat->error&err_watchdog)!=0);
 		term_printf("\n");
 		
-		term_printf("degass pressure: %s\n", value_str(_Stat->degass_pressure));
-		term_printf("air pressure:    %s", value_str(_Stat->air_pressure));	if(_Cfg->test_airPressure) term_printf("(Test %d)", _Cfg->test_airPressure); term_printf("\n");
-		term_printf("flush pressure:  %s\n", value_str(_Stat->flush_pressure));
+		term_printf("degass pressure: %6s    ", value_str(_Stat->degass_pressure));
+		id = (UCHAR*)&_Stat->degas_sensorID;
+		term_printf("ID: %d.%d.%d.%d", id[0], id[1], id[2], id[3]);		
+		term_printf("\n");
+		
+		term_printf("air pressure:    %6s    ", value_str(_Stat->air_pressure));	
+		id = (UCHAR*)&_Stat->air_sensorID;
+		term_printf("ID: %d.%d.%d.%d", id[0], id[1], id[2], id[3]);		
+		if(_Cfg->test_airPressure) term_printf("(Test %d)", _Cfg->test_airPressure); 
+		term_printf("\n");
+		
+		term_printf("flush pressure:  %6s    ", value_str(_Stat->flush_pressure));
+		id = (UCHAR*)&_Stat->flush_sensorID;
+		term_printf("ID: %d.%d.%d.%d", id[0], id[1], id[2], id[3]);		
+		term_printf("\n");
+		
 		term_printf("vacc solenoid:   %d", _Stat->vacuum_solenoid); if (_Cfg->test_lungPressure) term_printf("(Test)"); term_printf("\n");
 		term_printf("pressure sol:    %d, time=%dms\n", _Stat->air_pressure_solenoid, _Stat->airPressureTime);
 		term_printf("flush pump:      %d,  %d%%,   %d\n", _Stat->flush_pump, _Stat->flush_pump_val, _Stat->flush_pres_head);
@@ -477,6 +491,16 @@ static void _display_status(void)
 		term_printf("p_sensor_error:  "); for (i=0; i<8; i++) term_printf("%5s ", value_str(_Stat->p_sensor_error[i]));	term_printf("\n");
 		term_printf("pt100temp:       "); for (i=0; i<8; i++) term_printf("%05d ", _Stat->pt100[i]);			term_printf("\n");
 		term_printf("\n");
+		
+		term_printf("ID:               ");
+			for (i=0; i<NIOS_INK_SUPPLY_CNT; i++)
+			{
+				id = (UCHAR*)&_Stat->ink_supply[i].sensorID;
+				sprintf(str, "%d.%d.%d.%d", id[0], id[1], id[2], id[3]);		
+				term_printf("%11s ", str);
+			}
+		term_printf("\n");
+		
 		term_printf("ctrl mode:        ");
 			for (i=0; i<NIOS_INK_SUPPLY_CNT; i++)
 			{
