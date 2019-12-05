@@ -189,11 +189,11 @@ static void _disable_jet(UCHAR *pBuffer, int bitsPerPixel, int length, int bytes
 				_SetPixel(pBuffer, bytesPerLine, jet+y+1, fromLine-y-1, 0);
 
 				//--- arrow at bottom -------------------------------------
-				_SetPixel(pBuffer, bytesPerLine, jet-y-1, length-10+y, 3);
-				_SetPixel(pBuffer, bytesPerLine, jet-y,   length-10+y, 3);
-				_SetPixel(pBuffer, bytesPerLine, jet,     length-10+y, 3);
-				_SetPixel(pBuffer, bytesPerLine, jet+y,   length-10+y, 3);
-				_SetPixel(pBuffer, bytesPerLine, jet+y+1, length-10+y, 3);
+				_SetPixel(pBuffer, bytesPerLine, jet-y-1, length-25+y, 3);
+				_SetPixel(pBuffer, bytesPerLine, jet-y,   length-25+y, 3);
+				_SetPixel(pBuffer, bytesPerLine, jet,     length-25+y, 3);
+				_SetPixel(pBuffer, bytesPerLine, jet+y,   length-25+y, 3);
+				_SetPixel(pBuffer, bytesPerLine, jet+y+1, length-25+y, 3);
 			}
 		}
 

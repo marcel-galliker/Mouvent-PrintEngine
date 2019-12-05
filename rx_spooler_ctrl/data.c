@@ -575,7 +575,7 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 			}
 		}		
 			
-		if (/*id->id!=_LastId.id || */ id->page!=_LastId.page || strcmp(filepath, _LastFilePath) || _WakeupLen!=_LastWakeupLen || newOffsets || rx_file_get_mtime (_FileTimePath)!=_LastFileTime)
+		if (/*id->id!=_LastId.id || */ id->page!=_LastId.page || strcmp(filepath, _LastFilePath) || _WakeupLen!=_LastWakeupLen || newOffsets || rx_file_get_mtime (_FileTimePath)!=_LastFileTime || printMode==PM_TEST_JETS)
 		{
 			ret = 1;
 			loaded = TRUE;
@@ -680,8 +680,8 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 		
 		if (loaded || printMode==PM_TEST || printMode==PM_TEST_JETS || printMode==PM_TEST_SINGLE_COLOR)
 		{
-			if (printMode==PM_TEST_JETS && id->id==PQ_TEST_JET_NUMBERS) jc_correction(&bmpInfo, &_PrintList[_InIdx], 4220);
-			else if (printMode!=PM_TEST && printMode!=PM_TEST_SINGLE_COLOR) jc_correction(&bmpInfo, &_PrintList[_InIdx], 0);
+			if      (printMode==PM_TEST_JETS && id->id==PQ_TEST_JET_NUMBERS) jc_correction(&bmpInfo, &_PrintList[_InIdx], 4385);
+			else if (printMode!=PM_TEST && printMode!=PM_TEST_SINGLE_COLOR)  jc_correction(&bmpInfo, &_PrintList[_InIdx], 0);
 		}
 		#ifdef DEBUG
 		if (FALSE && loaded)
@@ -1102,7 +1102,7 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 					_TestBuf[color][n] = (*pBmpInfo->buffer[color])+n*pBmpInfo->dataSize;
 					pInfo->data	= &_TestBuf[color][n];
 					memset(*pInfo->data, 0, 256);
-					memcpy(*pInfo->data, *pBmpInfo->buffer[color], pBmpInfo->dataSize);
+					memcpy(*pInfo->data, *pBmpInfo->buffer[color], pBmpInfo->dataSize);					
 				}
 			
 				pInfo->used			= TRUE;
