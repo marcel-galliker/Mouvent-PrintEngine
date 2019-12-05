@@ -48,7 +48,7 @@ using System.Windows;
 //
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
-// [assembly: AssemblyVersion("1.0.1.6921")]
+// [assembly: AssemblyVersion("1.0.1.6931")]
 
 //--- SVN enable keyword substitution ----------------
 // http://svnbook.red-bean.com/en/1.4/svn.advanced.props.special.keywords.html
@@ -57,10 +57,10 @@ using System.Windows;
 
 // "$Revision: 4007 $"
 
-[assembly: AssemblyVersion("1.0.1.6921")]
-[assembly: AssemblyFileVersion("1.0.1.6921")]
+[assembly: AssemblyVersion("1.0.1.6931")]
+[assembly: AssemblyFileVersion("1.0.1.6931")]
 
 //  http://www.radex-net.com/Downloads/RX-Gui/publish.htm
 //  G1EhZ$ETMf
 
-[assembly: AssemblyInformationalVersion("BuiltOn=28.11.2019")]
+[assembly: AssemblyInformationalVersion("BuiltOn=4.12.2019")]
