@@ -1478,16 +1478,7 @@ static void _plc_state_ctrl()
 			RX_PrinterStatus.printState = chiller_is_running() ? ps_ready_power : ps_off;
 	}
 	
-	if (rx_def_is_web(RX_Config.printer.type)) 
 	{
-		static int _time=0;
-		int ticks=rx_get_ticks();
-		if (ticks-_time>450)
-		{			
-			_time=ticks;
-			lc_get_value_by_name_UINT32(UnitID ".STA_PRINTING_SPEED", &RX_PrinterStatus.actSpeed);
-		}
-		
 		int pause;
 		int ret = lc_get_value_by_name_UINT32(UnitID ".STA_PAUSE_REQUEST", &pause);
 		if (RX_PrinterStatus.printState==ps_printing && !_RequestPause && pause)
@@ -1496,6 +1487,17 @@ static void _plc_state_ctrl()
 			RX_PrinterStatus.printState=ps_pause; // suppress pause message
 			_RequestPause = TRUE;
 			pc_pause_printing(FALSE);
+		}		
+	}
+	
+	if (rx_def_is_web(RX_Config.printer.type)) 
+	{
+		static int _time=0;
+		int ticks=rx_get_ticks();
+		if (ticks-_time>450)
+		{			
+			_time=ticks;
+			lc_get_value_by_name_UINT32(UnitID ".STA_PRINTING_SPEED", &RX_PrinterStatus.actSpeed);
 		}
 	}
 	gui_send_printer_status(&RX_PrinterStatus);
