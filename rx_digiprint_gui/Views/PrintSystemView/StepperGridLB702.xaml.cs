@@ -14,6 +14,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
         {
             InitializeComponent();
             DataContext = RxGlobals.Stepper;
+            ManualFlightTimeComp.DataContext = RxGlobals.PrintSystem;
             RxGlobals.Stepper.PropertyChanged += Stepper_PropertyChanged;
             Col0.DataContext = RxGlobals.InkSupply.List[0];
             Col1.DataContext = RxGlobals.InkSupply.List[1];

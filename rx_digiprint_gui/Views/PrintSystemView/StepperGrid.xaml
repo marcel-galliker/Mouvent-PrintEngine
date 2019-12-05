@@ -15,6 +15,7 @@
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="150"/>
@@ -43,6 +44,9 @@
             <common:RxNumBox Grid.Row="3" Grid.Column="1" Text="{Binding AdjustPos}" HorizontalContentAlignment="Right"/>
             <TextBlock       Grid.Row="3" Grid.Column="2" Text=" mm" FontSize="{StaticResource FontSizeStd}"/>
 
+            <TextBlock       Grid.Row="4" Grid.Column="0" Text="FlightTime"/>
+            <common:RxNumBox Grid.Row="4" Grid.Column="1" Text="{Binding ManualFlightTimeComp}" HorizontalContentAlignment="Right" x:Name="ManualFlightTimeComp"/>
+            <TextBlock       Grid.Row="4" Grid.Column="2" Text=" mm" FontSize="{StaticResource FontSizeStd}"/>
         </Grid>
     </GroupBox>
 </UserControl>

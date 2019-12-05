@@ -16,6 +16,7 @@
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>           
                 <ColumnDefinition Width="160"/>
@@ -32,7 +33,7 @@
             <TextBlock       Grid.Row="1" Grid.Column="5" Text=" mm" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center"/>
             <TextBlock       Grid.Row="2" Grid.Column="5" Text=" mm" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center"/>
 
-            <Grid Grid.Column="1" Grid.RowSpan="5" >
+            <Grid Grid.Column="1" Grid.RowSpan="3" >
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
@@ -40,7 +41,7 @@
                 <Rectangle Grid.Column="0" x:Name="Col0" Fill="{Binding InkType, Converter={StaticResource InkType_ColorBG}}"/>
                 <Rectangle Grid.Column="1" x:Name="Col1" Fill="{Binding InkType, Converter={StaticResource InkType_ColorBG}}"/>
             </Grid>
-            <Grid Grid.Column="2" Grid.RowSpan="5" >
+            <Grid Grid.Column="2" Grid.RowSpan="3" >
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
@@ -48,7 +49,7 @@
                 <Rectangle Grid.Column="0" x:Name="Col2" Fill="{Binding InkType, Converter={StaticResource InkType_ColorBG}}"/>
                 <Rectangle Grid.Column="1" x:Name="Col3" Fill="{Binding InkType, Converter={StaticResource InkType_ColorBG}}"/>
             </Grid>
-            <Grid Grid.Column="3" Grid.RowSpan="5" >
+            <Grid Grid.Column="3" Grid.RowSpan="3" >
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
@@ -56,7 +57,7 @@
                 <Rectangle Grid.Column="0" x:Name="Col4" Fill="{Binding InkType, Converter={StaticResource InkType_ColorBG}}"/>
                 <Rectangle Grid.Column="1" x:Name="Col5" Fill="{Binding InkType, Converter={StaticResource InkType_ColorBG}}"/>
             </Grid>
-            <Grid Grid.Column="4" Grid.RowSpan="5" >
+            <Grid Grid.Column="4" Grid.RowSpan="3" >
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
@@ -64,6 +65,11 @@
                 <Rectangle Grid.Column="0" x:Name="Col6" Fill="{Binding InkType, Converter={StaticResource InkType_ColorBG}}"/>
                 <Rectangle Grid.Column="1" x:Name="Col7" Fill="{Binding InkType, Converter={StaticResource InkType_ColorBG}}"/>
             </Grid>
+ 
+            <TextBlock Grid.Row="3"      Text="FlightTime"/>
+            <common:RxNumBox Grid.Row="3" Grid.Column="1" Text="{Binding ManualFlightTimeComp}" HorizontalContentAlignment="Right" HorizontalAlignment="Stretch" x:Name="ManualFlightTimeComp" />
+            <TextBlock       Grid.Row="3" Grid.Column="5" Text=" mm" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center"/>
+
         </Grid>
     </GroupBox>
 </UserControl>

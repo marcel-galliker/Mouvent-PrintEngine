@@ -85,7 +85,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                                                             Overlap.Visibility      = Visibility.Collapsed; 
                                                             EncoderVerso.Visibility = Visibility.Collapsed;
                                                             DistVerso.Visibility    = Visibility.Collapsed;
-                                                            ManualFlightTimeComp.Visibility = Visibility.Visible;
+                                                            ManualFlightTimeComp.Visibility = Visibility.Collapsed;
                                                             break;
 
                 case EPrinterType.printer_LB702_WB:         this.Visibility         = Visibility.Visible;
