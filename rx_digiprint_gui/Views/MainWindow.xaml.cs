@@ -199,6 +199,7 @@ namespace RX_DigiPrint.Views
             TabPrintQueue.Visibility = (RxGlobals.PrintSystem.PrinterType  == EPrinterType.printer_test_table 
                                         || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide
                                         || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide_only
+                                        || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LH702
                                         ) ? Visibility.Collapsed : Visibility.Visible;
                                         
             Counters.Visibility      = (tx || lb) ? Visibility.Visible : Visibility.Collapsed;

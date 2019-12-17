@@ -79,6 +79,7 @@
 			CellStyle="{DynamicResource XamGridLogCellControlStyle}" 
             SizeChanged="LogGrid_SizeChanged" 
 			BorderThickness="1"
+            VerticalAlignment="Stretch"
             >
             <!--
             Style="{DynamicResource XamGrid-NoVScroll-Style}"
@@ -97,7 +98,7 @@
                 <ig:TextColumn Key="Line"       HeaderText="Line"    Width="auto" HorizontalContentAlignment="Right"/>
             </ig:XamGrid.Columns>
         </ig:XamGrid>
-        <ScrollBar x:Name="Scroll" 
+        <ScrollBar x:Name="Scroll"
 			Grid.Row="1" 
 			Grid.Column="1" 
 			Width="20" 

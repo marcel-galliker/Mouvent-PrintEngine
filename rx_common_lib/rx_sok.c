@@ -1173,7 +1173,7 @@ int sok_receiver(HANDLE hserver, RX_SOCKET *psocket, msg_handler handle_msg, voi
 		{
 			len = recv(*psocket, &buffer[start], bufferLen - start, 0);
 				
-			// TrPrintf(TRUE, "received %d bytes", len);
+			if (*psocket==_DebugSocket) TrPrintfL(TRUE, "received %d bytes", len);
 			if (len == 0)
 			{
 				#ifdef linux
@@ -1220,6 +1220,8 @@ int sok_receiver(HANDLE hserver, RX_SOCKET *psocket, msg_handler handle_msg, voi
 				while (len >= sizeof(SMsgHdr))
 				{
 					phdr = (SMsgHdr*)&buffer[start];
+								
+					if (*psocket==_DebugSocket) TrPrintfL(TRUE, "received hdr(len=%d, id=0x%08x)", phdr->msgLen, phdr->msgId);
 
 					if (phdr->msgLen > bufferLen) 
 					{
@@ -1233,7 +1235,7 @@ int sok_receiver(HANDLE hserver, RX_SOCKET *psocket, msg_handler handle_msg, voi
 						start = 0;
 						phdr = (SMsgHdr*)buffer;
 					}
-
+					
 					if (phdr->msgLen > len) break;
 
 					if (pserver) rx_mutex_lock(pserver->mutex);

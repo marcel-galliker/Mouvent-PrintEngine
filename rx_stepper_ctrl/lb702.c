@@ -281,7 +281,7 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 	case CMD_CAP_PRINT_POS:			if(!RX_StepperStatus.info.printhead_en) return Error(ERR_ABORT, 0, "Allow Head Down signal not set!");
 									strcpy(_CmdName, "CMD_CAP_PRINT_POS");
 									_PrintHeight   = (*((INT32*)pdata));
-									Error(LOG, 0, "Goto Print: ref=%d, align=%d, printheight=%d", RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height, RX_StepperCfg.robot[RX_StepperCfg.boardNo].head_align, _PrintHeight);
+								//	Error(LOG, 0, "Goto Print: ref=%d, align=%d, printheight=%d", RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height, RX_StepperCfg.robot[RX_StepperCfg.boardNo].head_align, _PrintHeight);
 									if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height < 10000) Error(ERR_ABORT, 0, "Reference Height not defined");
 									else
 									{

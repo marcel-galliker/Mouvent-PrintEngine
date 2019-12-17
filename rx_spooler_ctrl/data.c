@@ -1583,6 +1583,7 @@ static void _data_fill_blk_scan(SBmpSplitInfo *psplit, int blkNo, BYTE *dst, int
 	BYTE	*test1  = &dst[RX_Spooler.dataBlkSize];
 	BYTE    t0=*test0;
 	BYTE	t1=*test1;
+	
 	if (test)
 	{
 		*test0 = 0x33;

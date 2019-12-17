@@ -290,8 +290,7 @@ static int _lh702_handle_msg(RX_SOCKET socket, void *pmsg, int len, struct socka
 		net_register_by_device(dev_plc, -1);
 
 //		TrPrintfL(TRUE, "received Siemens.MsgId=0x%08x", phdr->msgId);
-		Error(LOG, 0, "received msg (len=%d, id=5x%08x)", phdr->msgLen, phdr->msgId);
-
+		Error(LOG, 0, "received msg (len=%d, id=0x%08x)", phdr->msgLen, phdr->msgId);
 		switch(phdr->msgId)
 		{
 		case CMD_START_PRINTING:  	Error(LOG, 0, "received CMD_START_PRINTING");	
