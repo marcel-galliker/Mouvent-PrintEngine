@@ -127,6 +127,7 @@ static void _plc_set_var	(RX_SOCKET socket, char *varList);
 static void _plc_set_cmd	(RX_SOCKET socket, char *cmd);
 static void _plc_req_material	(RX_SOCKET socket, char *filename, int cmd);
 static void _plc_save_material	(RX_SOCKET socket, char *filename, int cmd, char *varList);
+static void _plc_update_material_list	(char *srcFilename, char* dstFilename);
 static void _plc_del_material	(RX_SOCKET socket, char *filename, int cmd, char *name);
 
 static ELogItemType  _plc_error_filter(SPlcLogItem *pItem, char *text);
@@ -200,7 +201,7 @@ int	plc_init(void)
 	else		  rx_thread_start(_plc_thread, NULL, 0, "_plc_thread");
 
 //	_simu_init();
-
+	_plc_update_material_list(FILENAME_MATERIAL, FILENAME_MATERIAL_LIST);
 	return REPLY_OK;
 }
 
@@ -642,6 +643,7 @@ int plc_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen)
 		case CMD_PLC_REQ_MATERIAL:	_plc_req_material  (socket, FILENAME_MATERIAL, cmd); break;
 		case CMD_PLC_SAVE_MATERIAL:	_plc_save_material (socket, FILENAME_MATERIAL, CMD_PLC_ITM_MATERIAL, (char*)data);
 									lh702_save_material((char*)data);
+									_plc_update_material_list(FILENAME_MATERIAL, FILENAME_MATERIAL_LIST);
 									break;
 		case CMD_PLC_DEL_MATERIAL:	_plc_del_material  (socket, FILENAME_MATERIAL, cmd, (char*)data);		break;
 	}
@@ -915,6 +917,38 @@ static void _plc_save_material	(RX_SOCKET socket, char *filename, int cmd, char 
 	}
 	setup_save(file, path);
 	setup_destroy(file);
+}
+
+//--- _plc_material_list -------------------------------------
+static void _plc_update_material_list(char *srcFilename, char *dstFilename)
+{
+	HANDLE attribute =NULL;
+	char attrname[64];
+	char path[MAX_PATH];
+	int no=0;
+
+	HANDLE src = setup_create();
+	HANDLE dst = setup_create();
+	
+	sprintf(path, PATH_USER"%s", srcFilename);
+	setup_load(src, path);
+	setup_chapter(dst, "Material List", -1, WRITE);
+	while (TRUE)
+	{
+		setup_chapter_next(src, READ, attrname, sizeof(attrname));
+		if (!*attrname) break;					
+		setup_str(src, "XML_MATERIAL", READ, attrname, sizeof(attrname), "");
+		setup_chapter_add(dst, "Material");
+		setup_str(dst, "name", WRITE, attrname, sizeof(attrname), "");
+		setup_chapter(dst, "..", -1, WRITE);
+	}
+	setup_chapter(dst, "..", -1, WRITE);
+	
+	sprintf(path, PATH_RIPPED_DATA"%s", dstFilename);
+
+	setup_save(dst, path);
+	setup_destroy(src);
+	setup_destroy(dst);	
 }
 
 //--- _plc_del_material ----------------------------------------------

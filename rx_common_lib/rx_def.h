@@ -94,6 +94,7 @@ void rx_def_init();
 #define FILENAME_PLC_CFG		"plc.cfg"
 #define FILENAME_PLC_PAR		"plc.par"
 #define FILENAME_MATERIAL		"material.xml"
+#define FILENAME_MATERIAL_LIST	"materialList.xml"
 #define FILENAME_SPLICE_PAR		"splicepar.xml"
 #define FILENAME_HEAD_PRESOUT	"head_presout.xml"
 #define FILENAME_COUNTERS		"counters.xml"
