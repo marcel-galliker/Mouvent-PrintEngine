@@ -635,8 +635,8 @@ void fpga_set_pg_offsets(INT32 backwards)
 	for (head=0; head<HEAD_CNT; head++)
 	{
 		FpgaCfg.head[head]->offset_stroke		= _PgOffset[head][backwards]/8;
-		FpgaCfg.head[head]->offset_stroke		= _PgOffset[head][backwards]%8;
-		len += sprintf(&str[len], "%06d.%d  ",	FpgaCfg.head[head]->offset_stroke, FpgaCfg.head[head]->offset_stroke);
+		FpgaCfg.head[head]->offset_substroke	= _PgOffset[head][backwards]%8;
+		len += sprintf(&str[len], "%06d.%d  ",	FpgaCfg.head[head]->offset_stroke, FpgaCfg.head[head]->offset_substroke);
 	}		
 //	Error(LOG, 0, "fpga_set_pg_offsets(backwards=%d) %s", backwards, str);
 }
