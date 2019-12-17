@@ -30,6 +30,9 @@
 #define HEAD_UP_IN_1	0
 #define POS_UP			-1000
 
+#define MAX_ALIGN		5000
+
+
 #define PRINTHEAD_EN		11	// Input from SPS // '1' Allows Head to go down
 
 #define STEPS_REV		200*16	// steps per motor revolution * 16 times oversampling
@@ -234,7 +237,17 @@ static void _lb702_move_to_pos(int cmd, int pos)
 	if(cmd == CMD_CAP_PRINT_POS)
 	{
 		motor_move_to_step(MOTOR_Z_0, &_ParZ_down, pos);
-		motor_move_to_step(MOTOR_Z_1, &_ParZ_down, pos + _micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].head_align));
+		if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].head_align>MAX_ALIGN || RX_StepperCfg.robot[RX_StepperCfg.boardNo].head_align<-MAX_ALIGN)
+		{
+			Error(ERR_CONT, 0, "Head Alignment too large (max=%d mm)", MAX_ALIGN/1000);
+			motor_move_to_step(MOTOR_Z_1, &_ParZ_down, pos);				
+		}
+		else
+		{
+			if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].head_align>MAX_ALIGN/2 || RX_StepperCfg.robot[RX_StepperCfg.boardNo].head_align<-MAX_ALIGN/2)
+				Error(ERR_CONT, 0, "Head Alignment large");
+			motor_move_to_step(MOTOR_Z_1, &_ParZ_down, pos + _micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].head_align));
+		}
 		motors_start(MOTOR_Z_BITS, TRUE);			
 	} 
 	else 
@@ -264,6 +277,7 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 	case CMD_CAP_PRINT_POS:			if(!RX_StepperStatus.info.printhead_en) return Error(ERR_ABORT, 0, "Allow Head Down signal not set!");
 									strcpy(_CmdName, "CMD_CAP_PRINT_POS");
 									_PrintHeight   = (*((INT32*)pdata));
+									Error(LOG, 0, "Goto Print: ref=%d, align=%d, printheight=%d", RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height, RX_StepperCfg.robot[RX_StepperCfg.boardNo].head_align, _PrintHeight);
 									if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height < 10000) Error(ERR_ABORT, 0, "Reference Height not defined");
 									else
 									{
