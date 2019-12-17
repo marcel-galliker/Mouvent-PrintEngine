@@ -91,6 +91,7 @@ int	 steplb_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen
 		
 			case CMD_CAP_PRINT_POS:
 						_AbortPrinting=FALSE;
+						Error(LOG, 0, "steplb_to_print_pos(%d)", RX_Config.stepper.print_height);
 						sok_send_2(&_step_socket[no], CMD_CAP_PRINT_POS, sizeof(RX_Config.stepper.print_height), &RX_Config.stepper.print_height);
 						break;
 			}
@@ -165,9 +166,11 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
 int	 steplb_to_print_pos(void)
 {
 	_AbortPrinting = FALSE;
+	Error(LOG, 0, "steplb_to_print_pos(height=%d, thickness=%d)", RX_Config.stepper.print_height, RX_Config.stepper.material_thickness);
+	int pos = RX_Config.stepper.material_thickness+RX_Config.stepper.print_height;
 	for (int no=0; no<SIZEOF(_step_socket); no++)
 	{
-		sok_send_2(&_step_socket[no], CMD_CAP_PRINT_POS, sizeof(RX_Config.stepper.print_height), &RX_Config.stepper.print_height);
+		sok_send_2(&_step_socket[no], CMD_CAP_PRINT_POS, sizeof(pos), &pos);
 	}
 	return REPLY_OK;									
 }

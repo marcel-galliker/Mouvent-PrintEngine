@@ -378,7 +378,7 @@ static void  _check_errors(void)
 
 		int v24=11*VAL_TO_MV(Fpga.stat->voltage_24v) / 1000;		
 		if (v24 < 20) _ErrorCnt[3]++;
-		else if (v24 > 22) _ErrorCnt[4]++;
+		else if (v24 > 25) _ErrorCnt[4]++;
 		int rowTemp=Fpga.stat->temp;
 		int temp=VAL_TO_TEMP(rowTemp);
 		if (rowTemp!=0x0fff && temp > 70) _ErrorCnt[5]++;

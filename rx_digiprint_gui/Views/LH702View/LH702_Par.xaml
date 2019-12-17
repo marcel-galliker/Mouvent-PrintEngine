@@ -46,7 +46,7 @@
                 <rx_uc:PlcParCtrl ID="XML_MATERIAL"  Label="" x:Name="XML_MATERIAL" Visibility="Collapsed"/>
 
                 <rx_uc:PlcParCtrl ID="XML_HEAD_HEIGHT"        Label="Print Height" Unit="mm" UnitWidth="50" Format="1"/>
-                <rx_uc:PlcParCtrl ID="XML_MATERIAL_THICKNESS" Label="Thickness"    Unit="µm" UnitWidth="50" Format="n"/>
+                <rx_uc:PlcParCtrl ID="XML_MATERIAL_THICKNESS" Label="Thickness"    Unit="mm" UnitWidth="50" Format="f"/>
                 <rx_uc:PlcParCtrl ID="XML_ENC_OFFSET"         Label="Encoder Adj"  Unit="inc" UnitWidth="50" Format="n"/>
             </rx_uc:PlcParPanel>
             

@@ -855,10 +855,13 @@ static void _plc_set_var(RX_SOCKET socket, char *varList)
 			//--- XML_STEPPER_PRINT_HEIGHT special -----------------------------------------------
 			if (!strcmp(var, "PAR_HEAD_HEIGHT")) 
 				RX_Config.stepper.print_height = (INT32)(0.5+1000*strtod(val, NULL));
+			if (!strcmp(var, "XML_MATERIAL_THICKNESS")) 
+				RX_Config.stepper.material_thickness = (INT32)(0.5+1000*strtod(val, NULL));
 			
 			//--- XML_ special -----------------------------------------------
 			if (!strcmp(var, "XML_ENC_OFFSET")) 
 				RX_Config.printer.offset.incPerMeter[0] = atoi(val);
+
 		}
 		str = end;
 	}
@@ -894,7 +897,8 @@ static void _plc_save_material	(RX_SOCKET socket, char *filename, int cmd, char 
 				break;					
 			}
 			setup_str(file, "XML_MATERIAL", READ, attrname, sizeof(attrname), "");
-			if (!stricmp(attrname, str)) break;	// found
+			if (!stricmp(attrname, str)) 
+				break;	// found
 		}
 		*end++='\n';
 	}
@@ -909,9 +913,20 @@ static void _plc_save_material	(RX_SOCKET socket, char *filename, int cmd, char 
 		*val++='=';
 		printf(">>%s<< = >>%s<<\n",  var, val);
 		setup_str(file, var, WRITE,  val,	32,	"");
-		if (!strcmp(var, "PAR_HEAD_HEIGHT")) 
-			RX_Config.stepper.print_height = (INT32)(0.5+1000*strtod(val+1, NULL));
-
+		if (RX_Config.printer.type==printer_LH702)
+		{
+			if (!strcmp(var, "XML_HEAD_HEIGHT"))
+				RX_Config.stepper.print_height			= (INT32)(0.5+1000*strtod(val, NULL));
+			if (!strcmp(var, "XML_MATERIAL_THICKNESS")) 
+				RX_Config.stepper.material_thickness	= (INT32)(0.5+1000*strtod(val, NULL));
+			if (!strcmp(var, "XML_ENC_OFFSET"))			RX_Config.printer.offset.incPerMeter[0] = atoi(val);
+		}
+		else
+		{
+			if (!strcmp(var, "PAR_HEAD_HEIGHT")) 
+				RX_Config.stepper.print_height = (INT32)(0.5+1000*strtod(val, NULL));				
+		}
+	
 		*end++='\n';
 		str = end;
 	}
@@ -1009,9 +1024,8 @@ static void _plc_req_material	(RX_SOCKET socket, char *filename, int cmd)
 			if (!*name) break;
 			len += sprintf(&str[len], "%s=%s\n", name, val);
 			
-			if (!strcmp(name, "PAR_HEAD_HEIGHT")) 
-				RX_Config.stepper.print_height = (INT32)(0.5+1000*strtod(val, NULL));
-
+//			if (!strcmp(name, "PAR_HEAD_HEIGHT")) 
+//				RX_Config.stepper.print_height = (INT32)(0.5+1000*strtod(val, NULL));
 		}
 		str[len]=0;
 		sok_send_2(&socket, cmd | EVT_X, len, str);	// CMD_PLC_ITM_MATERIAL | CMD_PLC_ITM_SPLICEPAR
@@ -1451,20 +1465,17 @@ static void _plc_state_ctrl()
 			}
 		}
 		
-		/*
 		if(_StartPrinting && _StartEncoderItem.pageWidth == 0)
 		{
 			Error(LOG, 0, "_StartPrinting=%d, enc_ready=%d, pq_is_ready2print=%d, printState=%d, z_in_print=%d, pageWidth=%d", _StartPrinting, enc_ready(), pq_is_ready2print(&_StartEncoderItem), RX_PrinterStatus.printState, RX_StepperStatus.info.z_in_print, _StartEncoderItem.pageWidth);
 		}
-		*/
 		
 		if(_StartPrinting
 			&& _StartEncoderItem.pageWidth == 0 
 			&& enc_ready()
 			&& pq_is_ready2print(&_StartEncoderItem) 
 			&& (RX_PrinterStatus.printState == ps_printing || RX_PrinterStatus.printState == ps_ready_power)
-//			&& (RX_StepperStatus.info.z_in_print || (_SimuPLC && RX_Config.printer.type!=printer_LH702))
-			&& (RX_StepperStatus.info.z_in_print || (_SimuPLC))
+			&& (RX_StepperStatus.info.z_in_print || (_SimuPLC && RX_Config.printer.type!=printer_LH702))
 			)
 		{
 			_StartPrinting = FALSE;

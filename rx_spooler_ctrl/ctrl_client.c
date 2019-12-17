@@ -451,7 +451,7 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 		}
 	}
 
-	TrPrintfL(TRUE, "REP_PRINT_FILE _MsgGot0=%d, _MsgGot=%d, _MsgSent=%d, widthPx=%d, lengthPx=%d, same=%d", _MsgGot0, _MsgGot, _MsgSent, widthPx, lengthPx, same);
+	TrPrintfL(TRUE, "REP_PRINT_FILE _MsgGot0=%d, _MsgGot=%d, _MsgSent=%d, widthPx=%d, lengthPx=%d, offset=%d, same=%d", _MsgGot0, _MsgGot, _MsgSent, widthPx, lengthPx, msg.offsetWidth, same);
 //	if (_PrintFileDone_Sem) 	rx_sem_post(_PrintFileDone_Sem);
 	 
 	if (ret==REPLY_OK || !*path)

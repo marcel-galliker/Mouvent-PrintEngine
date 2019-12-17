@@ -110,8 +110,8 @@ namespace RX_DigiPrint.Views.LH702View
         {
             Material material = RxGlobals.MaterialList.FindByName(XML_MATERIAL.Value);
             CB_Material.SelectedItem = material;
+            Save_Clicked(this, null);
         }
-
 
      }
 }

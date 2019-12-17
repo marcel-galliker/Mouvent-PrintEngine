@@ -36,7 +36,7 @@ static int	_Trace=0;
 #define SIMU_WRITE	1	// write data to file
 #define SIMU_READ	2	// test reading files, no sending, no writing
 
-static int	_Simulation=SIMU_WRITE;
+static int	_Simulation=SIMU_OFF;
 
 // #define RAW_SOCKET
 
@@ -429,7 +429,7 @@ static void _save_to_file(SBmpSplitInfo *pInfo)
 	
 	for (blk=0; blk<pInfo->blkCnt; blk++)
 	{
-		data_fill_blk(pInfo, blk, &buffer[blk*RX_Spooler.dataBlkSize]);
+		data_fill_blk(pInfo, blk, &buffer[blk*RX_Spooler.dataBlkSize], TRUE);
 	}
 	
 	if (rx_def_is_scanning(RX_Spooler.printerType))
@@ -493,9 +493,9 @@ static int _send_image_cmd(SBmpSplitInfo *pInfo)
 	}
 
 	if (pInfo->data==NULL)
-		TrPrintfL(TRUE, "SENT _BlkNo[%d][%d]: idx=%d, blk=%d, cnt=%d, buffer=NULL, test=%d, SENT", pInfo->board, pInfo->head, _TestImgNo[pInfo->board][pInfo->head], pInfo->blk0, pInfo->blkCnt, pInfo->test);
+		TrPrintfL(_Trace, "SENT _BlkNo[%d][%d]: idx=%d, blk=%d, cnt=%d, buffer=NULL, test=%d, SENT", pInfo->board, pInfo->head, _TestImgNo[pInfo->board][pInfo->head], pInfo->blk0, pInfo->blkCnt, pInfo->test);
 	else
-		TrPrintfL(TRUE, "SENT _BlkNo[%d][%d]: idx=%d, blk=%d, cnt=%d, buffer=%03d, test=%d, SENT", pInfo->board, pInfo->head, _TestImgNo[pInfo->board][pInfo->head], pInfo->blk0, pInfo->blkCnt, ctrl_get_bufferNo(*pInfo->data), pInfo->test);
+		TrPrintfL(_Trace, "SENT _BlkNo[%d][%d]: idx=%d, blk=%d, cnt=%d, buffer=%03d, test=%d, SENT", pInfo->board, pInfo->head, _TestImgNo[pInfo->board][pInfo->head], pInfo->blk0, pInfo->blkCnt, ctrl_get_bufferNo(*pInfo->data), pInfo->test);
 
 	SPageId *pid = &pInfo->pListItem->id;
 	TrPrintfL(_Trace, "_send_image_cmd[%d.%d].img[%d] (id=%d, page=%d, copy=%d, scan=%d)", pInfo->board, pInfo->head, ++_TestImgNo[pInfo->board][pInfo->head], pid->id, pid->page, pid->copy, pid->scan);
@@ -714,7 +714,7 @@ static int _send_to_board(SHBThreadPar *par, int head, int blkNo, int blkCnt)
 			{
 			//	if (i==0) pinfo->wasFree=TRUE;
 				par->msg.blkNo = dstBlk;
-				data_fill_blk(pinfo, i, par->msg.blkData);
+				data_fill_blk(pinfo, i, par->msg.blkData, FALSE);
 				/*
 				if (TRUE)
 				{

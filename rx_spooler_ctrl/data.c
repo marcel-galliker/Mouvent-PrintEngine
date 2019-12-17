@@ -1561,7 +1561,7 @@ static int _data_split_scan_no_overlap(SPageId *id, SBmpInfo *pBmpInfo, int offs
 }
 
 //--- _data_fill_blk_scan -------------------------------------------------------
-static void _data_fill_blk_scan(SBmpSplitInfo *psplit, int blkNo, BYTE *dst)
+static void _data_fill_blk_scan(SBmpSplitInfo *psplit, int blkNo, BYTE *dst, int test)
 {
 	int		mirror=psplit->pListItem->flags&FLAG_MIRROR;
 	int		flags = psplit->pListItem->flags;
@@ -1579,13 +1579,15 @@ static void _data_fill_blk_scan(SBmpSplitInfo *psplit, int blkNo, BYTE *dst)
 	BYTE**	ptr     = psplit->data;
 	BYTE	*src    = *ptr;
 	
-	//--- test lower and upper border -------------------
-	BYTE	*test0  = &dst[-1];
+	BYTE	*test0  = &dst[-1];	// overwrites BlockNo!
 	BYTE	*test1  = &dst[RX_Spooler.dataBlkSize];
 	BYTE    t0=*test0;
 	BYTE	t1=*test1;
-	*test0 = 0x33;
-	*test1 = 0x66;
+	if (test)
+	{
+		*test0 = 0x33;
+		*test1 = 0x66;			
+	}
 	
 	if (RX_Color[psplit->inkSupplyNo].rectoVerso==rv_verso) mirror = !mirror;
 	if (mirror)
@@ -1613,19 +1615,21 @@ static void _data_fill_blk_scan(SBmpSplitInfo *psplit, int blkNo, BYTE *dst)
 			if (size+l>=RX_Spooler.dataBlkSize) 
 			{
 				memset(&dst[size], 0x00, RX_Spooler.dataBlkSize-size);
-				if (*test0!=0x33) 
-					Error(ERR_ABORT, 0, "_data_fill_blk_scan lower border");
-				if (*test1!=0x66) 
-					Error(ERR_ABORT, 0, "_data_fill_blk_scan upper border");
-				*test0=t0;
-				*test1=t1;
+				if (test)
+				{
+				 	if (*test0!=0x33) Error(ERR_ABORT, 0, "_data_fill_blk_scan lower border");
+				 	if (*test1!=0x66) Error(ERR_ABORT, 0, "_data_fill_blk_scan upper border");
+				 	*test0=t0;
+				 	*test1=t1;
+				}
 				return;
 			}
 			memset(&dst[size], 0x00, l);
-			if (*test0!=0x33) 
-				Error(ERR_ABORT, 0, "_data_fill_blk_scan lower border");
-			if (*test1!=0x66) 
-				Error(ERR_ABORT, 0, "_data_fill_blk_scan upper border");
+			if (test)
+			{
+			 	if (*test0!=0x33) Error(ERR_ABORT, 0, "_data_fill_blk_scan lower border");
+			 	if (*test1!=0x66) Error(ERR_ABORT, 0, "_data_fill_blk_scan upper border");
+			}
 	//		printf("head=%d, blkNo=%d, fill(%d, %d), dstLen=%d\n", psplit->head, blkNo, size, l, dstLen-l);
 			size   += l;
 			dstLen -= l;
@@ -1657,19 +1661,21 @@ static void _data_fill_blk_scan(SBmpSplitInfo *psplit, int blkNo, BYTE *dst)
 				l = srcLen-len;
 				if (l > srcWidthBt) l = srcWidthBt;
 				memcpy(&dst[size+len], src+start, l);
-				if (*test0!=0x33) 
-					Error(ERR_ABORT, 0, "_data_fill_blk_scan lower border");
-				if (*test1!=0x66) 
-					Error(ERR_ABORT, 0, "_data_fill_blk_scan upper border");
+				if (test)
+				{
+					if (*test0!=0x33) Error(ERR_ABORT, 0, "_data_fill_blk_scan lower border size=%d, len=%d, l=%d, max=%d, data=%d", size, len, l, RX_Spooler.dataBlkSize, dst[RX_Spooler.dataBlkSize]);
+					if (*test1!=0x66) Error(ERR_ABORT, 0, "_data_fill_blk_scan upper border size=%d, len=%d, l=%d, max=%d, data=%d", size, len, l, RX_Spooler.dataBlkSize, dst[RX_Spooler.dataBlkSize]);	
+				}
 				start=0;
 				srcWidthBt = psplit->srcWidthBt;
 				srcLineLen = psplit->srcLineLen;
 			}
 			if (dstLen>srcLen && srcLen>0) memset(&dst[size+srcLen], 0x00, dstLen-srcLen);
-			if (*test0!=0x33) 
-				Error(ERR_ABORT, 0, "_data_fill_blk_scan lower border");
-			if (*test1!=0x66) 
-				Error(ERR_ABORT, 0, "_data_fill_blk_scan upper border");
+			if (test)
+			{
+			 	if (*test0!=0x33) Error(ERR_ABORT, 0, "_data_fill_blk_scan lower border");
+			 	if (*test1!=0x66) Error(ERR_ABORT, 0, "_data_fill_blk_scan upper border");					
+			}
 		}
 		
 		//---------------------------------
@@ -1677,11 +1683,6 @@ static void _data_fill_blk_scan(SBmpSplitInfo *psplit, int blkNo, BYTE *dst)
 		&& (psplit->pListItem->penetrationPasses<2 || psplit->colorCode!=30)) // penetration is colorode 30
 		{	
 			if ((line % psplit->pListItem->virtualPasses) != psplit->pListItem->virtualPass) memset(&dst[size], 0x00, dstLen);
-			if (*test0!=0x33) 
-				Error(ERR_ABORT, 0, "_data_fill_blk_scan lower border");
-			if (*test1!=0x66) 
-				Error(ERR_ABORT, 0, "_data_fill_blk_scan upper border");
-
 			/*
 			if (TRUE)
 			{
@@ -1718,12 +1719,13 @@ static void _data_fill_blk_scan(SBmpSplitInfo *psplit, int blkNo, BYTE *dst)
 		}
 	}
 	if (size<RX_Spooler.dataBlkSize) memset(&dst[size], 0x00, RX_Spooler.dataBlkSize-size);
-	if (*test0!=0x33) 
-		Error(ERR_ABORT, 0, "_data_fill_blk_scan lower border");
-	if (*test1!=0x66) 
-		Error(ERR_ABORT, 0, "_data_fill_blk_scan upper border");
-	*test0=t0;
-	*test1=t1;
+	if (test)
+	{
+	 	if (*test0!=0x33) Error(ERR_ABORT, 0, "_data_fill_blk_scan lower border");
+	 	if (*test1!=0x66) Error(ERR_ABORT, 0, "_data_fill_blk_scan upper border");
+	 	*test0=t0;
+	 	*test1=t1;		
+	}
 }
 
 //--- _data_fill_blk_test --------------------------------------------
@@ -1822,7 +1824,7 @@ static void _data_fill_blk_single_pass(SBmpSplitInfo *psplit, int blkNo, BYTE *d
 */
 
 //--- data_fill_blk -------------------------------------------------------
-void data_fill_blk(SBmpSplitInfo *psplit, int blkNo, BYTE *dst)
+void data_fill_blk(SBmpSplitInfo *psplit, int blkNo, BYTE *dst, int test)
 {
 	if (psplit->data==NULL)
 	{
@@ -1838,9 +1840,9 @@ void data_fill_blk(SBmpSplitInfo *psplit, int blkNo, BYTE *dst)
 		case PM_TEST_JETS:
 									_data_fill_blk_test(psplit, blkNo, dst); break;
 		case PM_SCANNING:			
-		case PM_SCAN_MULTI_PAGE:	_data_fill_blk_scan(psplit, blkNo, dst); break;
+		case PM_SCAN_MULTI_PAGE:	_data_fill_blk_scan(psplit, blkNo, dst, test); break;
 //		case PM_SINGLE_PASS:		_data_fill_blk_single_pass(psplit, blkNo, dst); break;
-		case PM_SINGLE_PASS:		_data_fill_blk_scan(psplit, blkNo, dst); break;
+		case PM_SINGLE_PASS:		_data_fill_blk_scan(psplit, blkNo, dst, test); break;
 	}	
 }
 
@@ -1865,13 +1867,14 @@ int data_sent(SBmpSplitInfo *psplit, int head)
 		}
 		psplit->data = NULL;
 
+		if (FALSE)
 		{
 			SPrintFileMsg evt;
 					
 			memcpy(&evt.id, &psplit->pListItem->id, sizeof(evt.id));
 			TrPrintfL(TRUE, "data_sent idx=%d (id=%d, page=%d, copy=%d, scan=%d) headsInUse=%d", _OutIdx, evt.id.id, evt.id.page, evt.id.copy, evt.id.scan, psplit->pListItem->headsInUse);
 		}
-
+		
 		//--- send data to rx_main_ctrl ---
 		if  (psplit->pListItem->headsInUse==0)
 		{
