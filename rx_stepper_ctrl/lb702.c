@@ -67,9 +67,12 @@ void lb702_init(void)
 	_ParRef.accel			= 32000;
 	_ParRef.current_acc		= 250.0;
 	_ParRef.current_run		= 250.0;
-	_ParRef.stop_mux		= 0;
-	_ParRef.dis_mux_in		= 0;
 	_ParRef.encCheck		= chk_std;
+	_ParRef.stop_mux		= MOTOR_Z_BITS;
+	_ParRef.dis_mux_in		= TRUE;
+	_ParRef.estop_in_bit[MOTOR_Z_0] = (1<<HEAD_UP_IN_0);
+	_ParRef.estop_in_bit[MOTOR_Z_1] = (1<<HEAD_UP_IN_1);
+	_ParRef.estop_level		= 1;
 	
 	_ParZ_down.speed		= 13000;
 	_ParZ_down.accel		= 32000;
