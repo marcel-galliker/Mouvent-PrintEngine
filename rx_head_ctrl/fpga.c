@@ -117,8 +117,9 @@ static UINT32	_PdCnt;
 static UINT32	_UsedHeads;
 static UINT32	_PrintGo_flags;
 static UINT32	_PrintDone_flags;
+static int		_Bidir;
 static UINT32	_DirchangeTimer;
-static UINT32   _Direction;
+static int	    _Direction;
 static UINT32	_Enc_Flag[8];
 static UINT32	_Enc_PgCnt[8];
 static UINT32	_Enc_Pos[8];
@@ -1104,6 +1105,7 @@ int  fpga_image	(SFpgaImageCmd *msg)
 			RX_HBStatus[0].head[head].imgInCnt++;
 			RX_HBStatus[0].head[head].imgBuf = RX_HBStatus[0].head[head].imgInCnt - RX_HBStatus[0].head[head].printGoCnt;
 			_UsedHeads |= (1<<head);
+			_Bidir = msg->image.flags & FLAG_BIDIR;
 			if (_ImgInCnt==0) fpga_set_pg_offsets(msg->image.flags & FLAG_MIRROR);
 			if (RX_HBStatus[0].head[head].imgInCnt>_ImgInCnt) _ImgInCnt=RX_HBStatus[0].head[head].imgInCnt;
 			/*
@@ -1797,17 +1799,22 @@ static int _check_print_done(void)
 			{
 				int i   = (Fpga.stat->pg_ctr[head]-1)%MAX_PAGES;
 				_PrintDonePos[head][i] = RX_FpgaStat.pg_in_position[head] + _Img[head][i].lengthPx;
-				
-				_PrintGo_flags |= (1<<head);
+
 				TrPrintfL(TRUE, "Head[%d].PrintGo=%d, pos=%d", head, RX_HBStatus[0].head[head].printGoCnt, RX_FpgaStat.pg_in_position[head]);
 				
-				if (_PrintGo_flags==_UsedHeads)
+				if (_Bidir)
 				{
-					SPageId *pid = &_PageId[i];
-					TrPrintfL(TRUE, "PRINT GO  [%d]: id=%d, page=%d, copy=%d, scan=%d, pos=%d, donepos=%d", i, pid->id, pid->page, pid->copy, pid->scan,  RX_FpgaStat.pg_in_position[head], _PrintDonePos[head][i]);
-					_Direction=_Img[head][(i+1)%MAX_PAGES].flags & FLAG_MIRROR;
-					_DirchangeTimer = rx_get_ticks()+500;
-				//	fpga_set_pg_offsets(_Img[head][(i+1)%MAX_PAGES].flags & FLAG_MIRROR);				
+					if (_PrintGo_flags & (1<<head)) Error(ERR_ABORT, 0, "Head[%d]: Direction change not detected", head);
+					_PrintGo_flags |= (1<<head);
+				
+					if (_PrintGo_flags==_UsedHeads)
+					{
+						SPageId *pid = &_PageId[i];
+						TrPrintfL(TRUE, "PRINT GO  [%d]: id=%d, page=%d, copy=%d, scan=%d, pos=%d, donepos=%d", i, pid->id, pid->page, pid->copy, pid->scan,  RX_FpgaStat.pg_in_position[head], _PrintDonePos[head][i]);
+						_Direction =_Img[head][(i+1)%MAX_PAGES].flags & FLAG_MIRROR;
+						_DirchangeTimer = rx_get_ticks()+500;
+					//	fpga_set_pg_offsets(_Img[head][(i+1)%MAX_PAGES].flags & FLAG_MIRROR);				
+					}					
 				}
 				
 				if (TEST_DEBUG)
