@@ -40,6 +40,7 @@ static EnFluidCtrlMode	_RobotCtrlMode = ctrl_undef;
 static EnFluidCtrlMode  _PurgeCtrlMode = ctrl_undef;
 static int				_PurgeAll=FALSE;
 static int				_Scanning;
+static int				_ScalesFluidNo=-1;
 
 //--- prototypes -----------------------
 static void* _fluid_thread(void *par);
@@ -50,7 +51,7 @@ static void _send_ctrlMode			(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 
 
 static void _do_fluid_stat(int fluidNo, SFluidBoardStat *pstat);
-static void _do_scales_stat(SScalesStatMsg   *pstat);
+static void _do_scales_stat(int fluidNo, SScalesStatMsg   *pstat);
 static void _do_scales_get_cfg(SScalesCfgMsg *pmsg);
 static void _do_log_evt(int no, SLogMsg *msg);
 static void _control(int fluidNo);
@@ -180,6 +181,7 @@ static int _connection_closed(RX_SOCKET socket, const char *peerName)
 	{
 		if (socket==_FluidThreadPar[i].socket)	
 		{
+			if (i==_ScalesFluidNo) _ScalesFluidNo=-1;
 			sok_close(&_FluidThreadPar[i].socket);
 			TrPrintf(TRUE, "Fluid[%d]", i);
 		}
@@ -187,8 +189,8 @@ static int _connection_closed(RX_SOCKET socket, const char *peerName)
 	return REPLY_OK;
 }
 
-
 //--- fluid_set_config ----------------------------------------------------------
+#define SCALE(board, scale) (((board)-1)*6+(scale)-1)
 void fluid_set_config(void)
 {
 	SFluidBoardCfgLight cfg;
@@ -201,15 +203,15 @@ void fluid_set_config(void)
 	
 	switch (RX_Config.printer.type)
 	{
-	case printer_LB701:		_FluidToScales[0] = 0;	// Cyan 
-							_FluidToScales[1] = 1;	// Magenta
-							_FluidToScales[2] = 2;	// Yellow 
-							_FluidToScales[3] = 3;	// Black
-							_FluidToScales[4] = 6;	// White
-							_FluidToScales[5] = 7;	// Orange
-							_FluidToScales[6] = 8;	// Violet
-							_FluidToScales[INK_SUPPLY_CNT]   = 4;	// flush		
-							_FluidToScales[INK_SUPPLY_CNT+1] = 9;	// waste
+	case printer_LB701:		_FluidToScales[0] = SCALE(1,1);// 0;	// Cyan 
+							_FluidToScales[1] = SCALE(1,2);// 1;	// Magenta
+							_FluidToScales[2] = SCALE(1,3);// 2;	// Yellow 
+							_FluidToScales[3] = SCALE(1,4);// 3;	// Black
+							_FluidToScales[4] = SCALE(2,1);// 6;	// White
+							_FluidToScales[5] = SCALE(2,2);// 7;	// Orange
+							_FluidToScales[6] = SCALE(2,3);// 8;	// Violet
+							_FluidToScales[INK_SUPPLY_CNT]   = SCALE(1,5);// 4;	// flush		
+							_FluidToScales[INK_SUPPLY_CNT+1] = SCALE(2,4);// 9;	// waste
 							break;
 
 	case printer_LB702_UV:	
@@ -221,6 +223,17 @@ void fluid_set_config(void)
 							_FluidToScales[5] = 7;	// Orange
 							_FluidToScales[6] = 8;	// Violet
 							_FluidToScales[INK_SUPPLY_CNT]   = 9;	// flush		
+							break;
+		
+	case printer_LH702:		_FluidToScales[0] = SCALE(2,5); // unused 
+							_FluidToScales[1] = SCALE(2,2); // white
+							_FluidToScales[2] = SCALE(2,3); // orange 
+							_FluidToScales[3] = SCALE(2,4); // violet
+							_FluidToScales[4] = SCALE(1,1); // cyan
+							_FluidToScales[5] = SCALE(1,2); // magenta
+							_FluidToScales[6] = SCALE(1,3); // yellow
+							_FluidToScales[7] = SCALE(1,4); // black
+							_FluidToScales[INK_SUPPLY_CNT]   = SCALE(2, 1); //9;	// flush		
 							break;
 		
 	default:			for (i=0; i<SIZEOF(_FluidToScales); i++) _FluidToScales[i]=i;	
@@ -266,8 +279,7 @@ void fluid_set_config(void)
 			cfg.headsPerColor = RX_Config.headsPerColor;
 
 			sok_send_2(&_FluidThreadPar[i].socket, CMD_FLUID_CFG, sizeof(cfg), &cfg);
-			
-			if (i==0) sok_send_2(&_FluidThreadPar[i].socket, CMD_SCALES_SET_CFG, sizeof(RX_Config.scales), &RX_Config.scales);
+	//		sok_send_2(&_FluidThreadPar[i].socket, CMD_SCALES_SET_CFG, sizeof(RX_Config.scales), &RX_Config.scales);
 		}
 	}	
 }
@@ -384,7 +396,7 @@ static int _handle_fluid_ctrl_msg(RX_SOCKET socket, void *msg, int len, struct s
 			case REP_PING:			 TrPrintfL(TRUE, "Received REP_PING from %s", sok_get_peer_name(socket, str, NULL, NULL));	break;
 			case EVT_GET_EVT:		 _do_log_evt		(no, (SLogMsg*)		  msg);					break;																			
 			case REP_FLUID_STAT:	 _do_fluid_stat		(no, (SFluidBoardStat*)&phdr[1]);			break;			
-			case REP_SCALES_STAT:	 _do_scales_stat	((SScalesStatMsg*)msg);						break;
+			case REP_SCALES_STAT:	 _do_scales_stat	(no, (SScalesStatMsg*)msg);						break;
 			case REP_SCALES_GET_CFG: _do_scales_get_cfg	((SScalesCfgMsg*)msg);						break;
 			default:				 Error(WARN, 0, "Got unknown messageId=0x%08x", phdr->msgId);
 			}
@@ -453,9 +465,12 @@ static void _do_fluid_stat(int fluidNo, SFluidBoardStat *pstat)
 }
 
 //--- _do_scale_stat -------------------------------------------------------
-static void _do_scales_stat(SScalesStatMsg *pstat)
+static void _do_scales_stat(int fluidNo, SScalesStatMsg *pstat)
 {
 	int i, isno;
+	if (_ScalesFluidNo>=0 && fluidNo!=_ScalesFluidNo) Error(WARN, 0, "SCALES on several Fluids");
+	if (_ScalesFluidNo<0) sok_send_2(&_FluidThreadPar[fluidNo].socket, CMD_SCALES_SET_CFG, sizeof(RX_Config.scales), &RX_Config.scales);
+ 	_ScalesFluidNo = fluidNo;
 	for (i=0; i<SIZEOF(_ScalesStatus); i++)
 	{
 		if (_ScalesStatus[i]<100 && pstat->val[i]>5000)
@@ -899,7 +914,7 @@ void fluid_reply_stat(RX_SOCKET socket)	// to GUI
 						canisterEmpty = 500;
 	}
 
-	for (i=0; i<SIZEOF(_FluidStatus); i++)
+	for (i=0; i<SIZEOF(_FluidStatus)-1; i++) // not for waste!
 	{
 		if (i<INK_SUPPLY_CNT)
 		{
@@ -913,13 +928,15 @@ void fluid_reply_stat(RX_SOCKET socket)	// to GUI
 		{
 			if(_FluidStatus[i].canisterLevel <= canisterEmpty && _ScalesErr[i] < LOG_TYPE_ERROR_CONT)
 			{
-				Error(ERR_CONT, 0, "Ink Canister %s EMPTY!", RX_ColorNameLong(RX_Config.inkSupply[i].ink.colorCode));
-				Error(LOG, 0, "_FluidStatus[%d].canisterLevel=%d < %d", i, _FluidStatus[i].canisterLevel, canisterEmpty);
+				if (i==INK_SUPPLY_CNT) Error(ERR_CONT, 0, "Flush Canister EMPTY!");
+				else Error(ERR_CONT, 0, "Ink Canister %s EMPTY!", RX_ColorNameLong(RX_Config.inkSupply[i].ink.colorCode));
+				Error(LOG, 0, "_FluidStatus[%d].canisterLevel=%d < %d", i, _FluidStatus[i].canisterLevel, canisterEmpty);						
 				_ScalesErr[i] = LOG_TYPE_ERROR_CONT;
 			}
 			else if(_FluidStatus[i].canisterLevel <= canisterLow && _ScalesErr[i] < LOG_TYPE_WARN)
 			{
-				Error(WARN, 0, "Ink Canister %s LOW!", RX_ColorNameLong(RX_Config.inkSupply[i].ink.colorCode));
+				if (i==INK_SUPPLY_CNT) Error(WARN, 0, "Flush Canister LOW!");
+				else Error(WARN, 0, "Ink Canister %s LOW!", RX_ColorNameLong(RX_Config.inkSupply[i].ink.colorCode));
 				_ScalesErr[i] = LOG_TYPE_WARN;
 			}
 			_FluidStatus[i].canisterErr = _ScalesErr[i];		
@@ -1052,16 +1069,23 @@ void fluid_send_pressure(int no, INT32 pressure)
 //--- fluid_send_tara -------------------------------------------
 void fluid_send_tara(int no)
 {
-	int i=0;
-	no = _FluidToScales[no];
-	sok_send_2(&_FluidThreadPar[i].socket, CMD_SCALES_TARA, sizeof(no), &no);
+	if (_ScalesFluidNo>=0)
+	{
+		no = _FluidToScales[no];
+		sok_send_2(&_FluidThreadPar[_ScalesFluidNo].socket, CMD_SCALES_TARA, sizeof(no), &no);			
+	}
 }
 
 //--- fluid_send_calib -------------------------------------------
 void fluid_send_calib(SValue *pmsg)
 {
-	int i=0;
-	sok_send_2(&_FluidThreadPar[i].socket, CMD_SCALES_CALIBRATE, sizeof(*pmsg), pmsg);
+	if (_ScalesFluidNo>=0)
+	{
+		SValue msg;
+		memcpy(&msg, pmsg, sizeof(msg));
+		msg.no = _FluidToScales[pmsg->no];
+		sok_send_2(&_FluidThreadPar[_ScalesFluidNo].socket, CMD_SCALES_CALIBRATE, sizeof(msg), &msg);			
+	}
 }
 
 //--- fluid_start_printing --------
