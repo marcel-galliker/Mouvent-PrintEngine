@@ -156,7 +156,7 @@ void tx801_main(int ticks, int menu)
 		RX_StepperStatus.info.z_in_cap		  = FALSE;
 		RX_StepperStatus.robinfo.z_in_wipe	  = FALSE;
 		RX_StepperStatus.robinfo.z_in_vacuum  = FALSE;
-		RX_StepperStatus.robinfo.z_in_wetwipe = FALSE;
+		RX_StepperStatus.robinfo.z_in_wash 	  = FALSE;
 	}
 	if (_CmdRunning && motors_move_done(MOTOR_Z_BITS)) 
 	{
@@ -195,7 +195,7 @@ void tx801_main(int ticks, int menu)
 		RX_StepperStatus.info.z_in_cap			= (_CmdRunning==CMD_CAP_CAPPING_POS);
 		RX_StepperStatus.robinfo.z_in_wipe		= (_CmdRunning == CMD_CAP_WIPE_POS);
 		RX_StepperStatus.robinfo.z_in_vacuum	= (_CmdRunning == CMD_CAP_VACUUM_POS);
-		RX_StepperStatus.robinfo.z_in_wetwipe	= (_CmdRunning == CMD_CAP_WETWIPE_POS);
+		RX_StepperStatus.robinfo.z_in_wash		= (_CmdRunning == CMD_CAP_WASH_POS);
 		if (_CmdRunning==CMD_CAP_REFERENCE && _PrintPos_New) 
 		{
 			_tx801_move_to_pos(CMD_CAP_PRINT_POS, _PrintPos_New);
@@ -272,7 +272,7 @@ static void _tx801_display_status(void)
 				RX_StepperStatus.info.z_in_print,
 				RX_StepperStatus.info.z_in_cap,
 				RX_StepperStatus.robinfo.z_in_wipe,
-				RX_StepperStatus.robinfo.z_in_wetwipe, 
+				RX_StepperStatus.robinfo.z_in_wash, 
 				RX_StepperStatus.robinfo.z_in_vacuum);
 	term_printf("z position in micron:   %d\n", RX_StepperStatus.posZ);	
 	term_printf("\n");
@@ -456,7 +456,7 @@ int  tx801_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									}
 									break;
 		
-	case CMD_CAP_WETWIPE_POS:		if (!_CmdRunning)
+	case CMD_CAP_WASH_POS:			if (!_CmdRunning)
 									{
 										_CmdRunning  = msgId;
 										RX_StepperStatus.info.moving = TRUE;

@@ -285,7 +285,7 @@ typedef struct
 	UINT32	reset_err;		//       02C: 
 	UINT32	reset_cnt;		//       030: 
 	UINT32	ad5592_spi_from_arm_en;	//   034:
-	UINT32	cmd_start_encmot;		//       038:  [ 5 Bit] to start 5 motors based on the encoder
+	UINT32	unused_cmd_start_encmot;		//       038:  [ 5 Bit] to start 5 motors based on the encoder
 	UINT32	res_11C;		//       03C:	
 	
 	//--- motor -----------------------------

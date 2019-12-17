@@ -263,7 +263,7 @@ if (RX_StepperCfg.printerType==printer_TX801)
 		
 	term_printf("Encoder:        "); PRINTF(MOTOR_CNT)("---%d---   ", i);										term_printf("\n");
 	term_printf("Pos: inc        "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.encoder[i].pos);						term_printf("\n"); 
-	term_printf("microsteps:     "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.par->cfg[i].microsteps);				term_printf("\n"); 
+//	term_printf("microsteps:     "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.par->cfg[i].microsteps);				term_printf("\n"); 
 //	term_printf("Inc/Rev:        "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.encoder[i].incPerRev);					term_printf("\n"); 
 //	term_printf("IdxCnt:         "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.encoder[i].revCnt);						term_printf("\n"); 
 	/*

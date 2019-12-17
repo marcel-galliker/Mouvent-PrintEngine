@@ -82,11 +82,10 @@ void steptx_lift_to_wipe_pos(EnFluidCtrlMode mode)
 	{
 	case ctrl_wipe:		sok_send_2(&_step_socket[0], CMD_CAP_WIPE_POS,	  0, NULL); break;
 	case ctrl_cap:		sok_send_2(&_step_socket[0], CMD_CAP_CAPPING_POS, 0, NULL); break;
-	case ctrl_wetwipe:	sok_send_2(&_step_socket[0], CMD_CAP_WETWIPE_POS, 0, NULL); break;
+	case ctrl_wetwipe:	sok_send_2(&_step_socket[0], CMD_CAP_WASH_POS,    0, NULL); break;
 	case ctrl_vacuum:	sok_send_2(&_step_socket[0], CMD_CAP_VACUUM_POS,  0, NULL); break;
 	default: break;
-	}
-		
+	}	
 }
 
 //--- steptx_lift_in_wipe_pos----------------------------------
@@ -96,7 +95,7 @@ int steptx_lift_in_wipe_pos(EnFluidCtrlMode mode)
 	{
 	case ctrl_wipe:		return _Status[0].robinfo.z_in_wipe; 
 	case ctrl_cap:		return _Status[0].info.z_in_cap; 
-	case ctrl_wetwipe:	return _Status[0].robinfo.z_in_wetwipe;
+	case ctrl_wetwipe:	return _Status[0].robinfo.z_in_wash;
 	case ctrl_vacuum:	return _Status[0].robinfo.z_in_vacuum; 
 	default: return TRUE;
 	}

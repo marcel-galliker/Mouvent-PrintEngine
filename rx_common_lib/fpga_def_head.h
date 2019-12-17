@@ -173,7 +173,7 @@ typedef struct SFpgaHeadCfg
 
 	UINT32			gl_2_pulse[8];			// 0x10C0 .. 0x10DC:  c_cfg_hx_gl_to_subplsx_addr
 	UINT32			encoderNo;				// 0x10E0: c_cfg_h0_encoder_no_addr
-	UINT32			subStroke;				// 0x10E4: c_cfg_h0_substrokes_addr
+	UINT32			res_E4;					// 0x10E4: c_cfg_h0_substrokes_addr
 	UINT32			offset_substroke;		// 0x10E8: c_cfg_h0_fp_offset_fss_addr offset fire-sub-stroke
 	UINT32			offset_stroke;			// 0x10EC: c_cfg_h0_fp_offset_fs_addr
 	UINT32			res_F0;					// 0x10F0:

@@ -1227,6 +1227,7 @@ typedef struct SStepperCfg
 	INT32			use_printhead_en;	// if true use PRINTHEAD_EN to allow head going down
 	INT32			material_thickness;
 	
+	INT32			robot_used;
 	SRobotOffsets	robot[4];
 	
 	INT32			motor_correct0[4];		// reference correction value for the motor 0 -> used to bring the steppermotors completly in level
@@ -1314,7 +1315,7 @@ typedef struct ERobotInfo
 	UINT32 z_in_cap			: 1;	//	0x00000020
 	UINT32 z_in_wipe		: 1;	//	0x00000040
 	UINT32 z_in_vacuum		: 1;	//	0x00000080
-	UINT32 z_in_wetwipe		: 1;	//	0x00000100
+	UINT32 z_in_wash		: 1;	//	0x00000100
 	UINT32 move_ok			: 1;	//	0x00000200
 	UINT32 cap_ready		: 1;	//	0x00000400
 	UINT32 wipe_ready		: 1;	//	0x00000800

@@ -198,7 +198,7 @@ int _handle_ctrl_msg(RX_SOCKET socket, void *pmsg)//, int len, struct sockaddr *
 		case printer_LB702_UV:
 		case printer_LB702_WB:			
 		case printer_LH702:				lb702_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);	break;
-		case printer_LBROB:				lbrob_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);	break;
+//		case printer_LBROB:				lbrob_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);	break;
 			
 		case printer_DP803:				dp803_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);	break;
 			
@@ -221,9 +221,7 @@ static int _do_ping(RX_SOCKET socket)
 
 //--- _do_config -----------------------------------------------------------------------------
 static void _do_config(SStepperCfg *pcfg)
-{
-	int printerType = RX_StepperCfg.printerType;
-	
+{	
 	memcpy(&RX_StepperCfg, pcfg, sizeof(RX_StepperCfg));
 	
 	switch (RX_StepperCfg.printerType)
@@ -243,7 +241,7 @@ static void _do_config(SStepperCfg *pcfg)
 	case printer_LB702_UV:			
 	case printer_LB702_WB:		
 	case printer_LH702:			lb702_init();	break;
-	case printer_LBROB:			lbrob_init();	break;
+//	case printer_LBROB:			lbrob_init();	break;
 		
 	case printer_DP803:			dp803_init();	break;
 		

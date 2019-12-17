@@ -166,6 +166,8 @@ namespace RX_DigiPrint.Services
 	    ctrl_purge_step2,		//	0x112:
 	    ctrl_purge_step3,		//	0x113:
 	    ctrl_purge_step4,		//	0x113:
+        ctrl_purge_step5,       //  0x114:
+        ctrl_purge_step6,       //  0x115:
 
         ctrl_wipe           = 0x120, //  0x120   
 	    ctrl_wash			= 0x122,  
@@ -841,6 +843,7 @@ namespace RX_DigiPrint.Services
 	        public Int32		adjust_pos;
 	        public Int32		use_printhead_en;
             public Int32        material_thickness;
+            public Int32		robot_used;
 
             [MarshalAs(UnmanagedType.ByValArray, SizeConst =4)]
             public SRobotOffsets[] robot;

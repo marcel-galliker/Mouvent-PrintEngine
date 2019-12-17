@@ -68,6 +68,7 @@ void lb702_init(void)
 	_ParRef.current_acc		= 250.0;
 	_ParRef.current_run		= 250.0;
 	_ParRef.encCheck		= chk_std;
+	_ParRef.enc_bwd			= TRUE;
 	_ParRef.stop_mux		= MOTOR_Z_BITS;
 	_ParRef.dis_mux_in		= TRUE;
 	_ParRef.estop_in_bit[MOTOR_Z_0] = (1<<HEAD_UP_IN_0);
@@ -81,14 +82,16 @@ void lb702_init(void)
 	_ParZ_down.stop_mux		= MOTOR_Z_BITS;
 	_ParZ_down.dis_mux_in	= 0;
 	_ParZ_down.encCheck		= chk_std;
+	_ParZ_down.enc_bwd		= TRUE;
 
-	_ParZ_cap.speed			= 4000;
+	_ParZ_cap.speed			= 5000;
 	_ParZ_cap.accel			= 32000;
 	_ParZ_cap.current_acc	= 200.0;
 	_ParZ_cap.current_run	= 200.0;
 	_ParZ_cap.stop_mux		= FALSE;
 	_ParZ_cap.dis_mux_in	= 0;
 	_ParZ_cap.encCheck		= chk_std;
+	_ParZ_cap.enc_bwd		= TRUE;
 }
 
 //--- lb702_main ------------------------------------------------------------------
@@ -98,11 +101,13 @@ void lb702_main(int ticks, int menu)
 	SStepperStat oldSatus;
 	memcpy(&oldSatus, &RX_StepperStatus, sizeof(RX_StepperStatus));
 	
+	if (RX_StepperCfg.robot_used) lbrob_main(ticks, menu);
 	motor_main(ticks, menu);
 	
 	RX_StepperStatus.info.headUpInput_0 = fpga_input(HEAD_UP_IN_0);
 	RX_StepperStatus.info.headUpInput_1 = fpga_input(HEAD_UP_IN_1);
 	RX_StepperStatus.posZ			    = motor_get_step(MOTOR_Z_0);
+	RX_StepperStatus.posY				= motor_get_step(MOTOR_Z_1);
 	
 	if(RX_StepperCfg.use_printhead_en)
 	{

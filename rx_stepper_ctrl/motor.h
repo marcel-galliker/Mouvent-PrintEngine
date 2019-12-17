@@ -37,7 +37,9 @@ typedef enum
 	chk_std,		// 01
 	chk_txrob_ref,	// 02
 	chk_txrob,		// 03
-	chk_lbrob		// 04
+	chk_lbrob,		// 04
+	chk_lb_ref1,	// 05
+	chk_lb_ref2		// 06
 } EEncCheck;
 	
 typedef struct
@@ -51,7 +53,6 @@ typedef struct
 	INT32	estop_level;
 	INT32	dis_mux_in;
 	EEncCheck encCheck;
-	INT32	enc_mode;
 	UINT32	enc_bwd;
 } SMovePar;
 
@@ -78,7 +79,6 @@ int		motors_quad_move_by_step(int motor, SMovePar *par[4], INT32 steps, UINT32 e
 void	motor_reset(int motor);
 void	motors_reset(int motors);
 void	motors_start(UINT32 motors, UINT32 errorCheck);	// bitset of motors
-void	motors_start_enc_reg(UINT32 motors, UINT32 errorCheck);
 void	motors_stop(UINT32 motors);	// bitset of motors
 void	motors_estop(UINT32 motors);	// bitset of motors
 void    motor_set_hold_current(int motor);

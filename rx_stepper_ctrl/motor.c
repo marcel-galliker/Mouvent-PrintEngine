@@ -84,9 +84,7 @@ void motor_end(void)
 void motor_reset(int motor)
 {
 	if (motor <= 4)	// to prevent seg fault !
-	{
-		Fpga.par->cmd_reset_pos   |= 0x0001 << motor;
-		
+	{		
 		_motor_start_cnt[motor] = 0;
 	
 		Fpga.encoder[motor].pos	   = 0;
@@ -97,6 +95,8 @@ void motor_reset(int motor)
 //		Fpga.par->cfg[motor].stopIn		= 15;
 //		Fpga.par->cfg[motor].stopLevel  = 0;
 		Fpga.par->cfg[motor].disable_mux_in  = 0;		
+	
+		Fpga.par->cmd_reset_pos   |= 0x0001 << motor;	// must be at end to reset errors
 	}
 }
 
@@ -105,7 +105,7 @@ void motors_reset(int motors)
 {
 	int motor;
 	rx_sleep(20); // todo peb
-	FOR_ALL_MOTORS(motor, motors) motor_reset(motor);	
+	FOR_ALL_MOTORS(motor, motors) motor_reset(motor);
 }
 
 //--- motor_main ------------------------------------------
@@ -188,8 +188,6 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
 	
 	_motor_end_pos[motor] = Fpga.stat->statMot[motor].position*microsteps + steps;
 	
-	_motor_end_pos[motor] = Fpga.stat->statMot[motor].position*microsteps + steps;
-	
 	if (steps < 0) 
 	{
 		speed = -par->speed;
@@ -208,7 +206,7 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
 		ps_set_backwards(&Fpga.qsys->spi_powerstep[motor], TRUE);
 	}
 	
-	if (speed<MIN_SPEED_HZ+100) speed=MIN_SPEED_HZ+100;
+	if (speed<MIN_SPEED_HZ+1000) speed=MIN_SPEED_HZ+1000;
 	
 	switch(par->encCheck)
 	{	
@@ -228,8 +226,18 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
 		break;
 
 	case chk_lbrob:
-		Fpga.par->cfg[motor].enc_max_diff		= 1000;
+		Fpga.par->cfg[motor].enc_max_diff		= 200;
 		Fpga.par->cfg[motor].enc_max_diff_stop	= 20;	
+		break;
+		
+	case chk_lb_ref1:
+		Fpga.par->cfg[motor].enc_max_diff		= 50;
+		Fpga.par->cfg[motor].enc_max_diff_stop	= 50;	
+		break;	
+		
+	case chk_lb_ref2:
+		Fpga.par->cfg[motor].enc_max_diff		= 50;
+		Fpga.par->cfg[motor].enc_max_diff_stop	= 50;	
 		break;
 
 	case chk_off:
@@ -254,10 +262,7 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
 	// Rising ramp is always the same
 	dist_rising_ramp = (speed*speed - MIN_SPEED_HZ*MIN_SPEED_HZ) / par->accel / 2;
 	
-	if (par->enc_mode)
-		dist_falling_ramp = (speed*speed - ENC_STOP_MIN_SPEED_HZ*ENC_STOP_MIN_SPEED_HZ) / par->accel / 2;
-	else
-		dist_falling_ramp = dist_rising_ramp;
+	dist_falling_ramp = dist_rising_ramp;
 	
 	dist_ramp_total = dist_rising_ramp + dist_falling_ramp;
 	
@@ -279,17 +284,7 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
 		falling_steps = (int)dist_falling_ramp;
 		
 		// Dividing by encoder step to morot step ratio if we drive to a target position based on the encoder
-		if(par->enc_mode)
-		{
-			rising_steps  /= _enc_mot_ratio[motor];
-			linear_steps  /= _enc_mot_ratio[motor];
-			falling_steps /= _enc_mot_ratio[motor];
-			min_speed = ENC_STOP_MIN_SPEED_HZ * FIX_POINT_SPEED;
-		}
-		else
-		{
-			min_speed = MIN_SPEED_HZ * FIX_POINT_SPEED;
-		}
+		min_speed = MIN_SPEED_HZ * FIX_POINT_SPEED;
 		
 		cnt=0;
 		// Set rising ramp parameters
@@ -349,18 +344,9 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
 		int min_speed;
 
 		// If we drive by encoder steps, we need to 
-		if (par->enc_mode)
-		{
-			rising_steps  = ((steps*dist_rising_ramp) / (dist_rising_ramp + dist_falling_ramp)) / _enc_mot_ratio[motor];
-			falling_steps = ((steps*dist_falling_ramp) / (dist_rising_ramp + dist_falling_ramp)) / _enc_mot_ratio[motor];
-			min_speed = ENC_STOP_MIN_SPEED_HZ*FIX_POINT_SPEED;
-		}
-		else
-		{
-			rising_steps  = (int)(steps / 2);
-			falling_steps = (int)(steps - (steps / 2));
-			min_speed = MIN_SPEED_HZ*FIX_POINT_SPEED;
-		}
+		rising_steps  = (int)(steps / 2);
+		falling_steps = (int)(steps - (steps / 2));
+		min_speed = MIN_SPEED_HZ*FIX_POINT_SPEED;
 		
 		// Set rising ramp parameters
 		move[0].cc0_256 = (UINT32)(v_max * FIX_POINT_SPEED);
@@ -390,15 +376,6 @@ void motors_start(UINT32 motors, UINT32 errorCheck)
 {	
 	Fpga.par->cmd_estop |= motors;
 	Fpga.par->cmd_start  = motors;
-	if (errorCheck) _ErrorCheck |= motors;
-	else			_ErrorCheck &= ~motors;
-}
-
-//--- motors_start ---------------------------------------
-void motors_start_enc_reg(UINT32 motors, UINT32 errorCheck)
-{	
-	Fpga.par->cmd_estop |= motors;
-	Fpga.par->cmd_start_encmot  = motors;
 	if (errorCheck) _ErrorCheck |= motors;
 	else			_ErrorCheck &= ~motors;
 }
