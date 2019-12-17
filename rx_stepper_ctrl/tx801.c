@@ -79,11 +79,11 @@ static int _tx801_motor_down(RX_SOCKET socket, int msgId, int length);
 //--- tx801_init --------------------------------------
 void tx801_init(void)
 {
-	motors_config(MOTOR_Z_BITS, CURRENT_HOLD, 0.0, 0.0);
+	motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L3518_STEPS_PER_METER, L3518_INC_PER_METER);
 	
 	//--- movment parameters ----------------	
 	_ParRef.speed		= 10000;
-	_ParRef.accel		= 5000;
+	_ParRef.accel		= 32000;
 	_ParRef.current_acc	= 150;
 	_ParRef.current_run	= 100;
 	_ParRef.estop_in_bit[0] = (1<<HEAD_UP_IN_0);
@@ -96,7 +96,7 @@ void tx801_init(void)
 	_ParRef.encCheck	= chk_std;
 	
 	_ParZ_down.speed		= 10000;
-	_ParZ_down.accel		= 5000;
+	_ParZ_down.accel		= 32000;
 	_ParZ_down.current_acc	= 200.0;
 	_ParZ_down.current_run	= 100.0;
 	_ParZ_down.stop_mux		= MOTOR_Z_BITS;
@@ -104,7 +104,7 @@ void tx801_init(void)
 	_ParZ_down.encCheck		= chk_std;
 
 	_ParZ_cap.speed			= 5000;
-	_ParZ_cap.accel			= 1500;
+	_ParZ_cap.accel			= 32000;
 	_ParZ_cap.current_acc	= 150.0;
 	_ParZ_cap.current_run	= 100.0;
 	_ParZ_cap.stop_mux		= FALSE;
@@ -340,7 +340,7 @@ int tx801_menu(void)
 static void _tx801_do_reference(void)
 {
 	motors_stop	(MOTOR_Z_BITS);
-	motors_config(MOTOR_Z_BITS, CURRENT_HOLD, 0.0, 0.0);
+	motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L3518_STEPS_PER_METER, L3518_INC_PER_METER);
 
 	_CmdRunning  = CMD_CAP_REFERENCE;
 	RX_StepperStatus.info.moving = TRUE;
@@ -419,12 +419,14 @@ int  tx801_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									_CmdRunning = 0;
 									break;	
 
-	case CMD_CAP_REFERENCE:			_PrintPos_New=0;
+	case CMD_CAP_REFERENCE:			Error(WARN, 0, "Stepper software not trealeased for this machine");
+									_PrintPos_New=0;
 									motors_reset(MOTOR_Z_BITS);
 									_tx801_do_reference();
 									break;
 
-	case CMD_CAP_PRINT_POS:			pos   = (*((INT32*)pdata));
+	case CMD_CAP_PRINT_POS:			Error(WARN, 0, "Stepper software not trealeased for this machine");
+									pos   = (*((INT32*)pdata));
 									if (pos<TX_PRINT_POS_MIN) 
 									{
 										pos=TX_PRINT_POS_MIN;
@@ -532,7 +534,7 @@ static void _tx801_motor_test(int motorNo, int steps)
 	_CmdRunning = 1; // TEST
 	RX_StepperStatus.info.moving = TRUE;
 	
-	motors_config(motors, CURRENT_HOLD, 0.0, 0.0);
+	motors_config(motors, CURRENT_HOLD, L3518_STEPS_PER_METER, L3518_INC_PER_METER);
 	motors_move_by_step(motors, &par, steps, FALSE);			
 }
 

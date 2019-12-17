@@ -50,12 +50,12 @@ static int  _micron_2_steps(int micron);
 //--- lb701_init --------------------------------------
 void lb701_init(void)
 {
-	motors_config(MOTOR_Z_BITS, CURRENT_HOLD, 0.0, 0.0);
+	motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER);
 	memset(_CmdName, 0, sizeof(_CmdName));
 
 	//--- movment parameters ----------------
-	_ParRef.speed			= 10000;
-	_ParRef.accel			= 5000;
+	_ParRef.speed			= 13000;
+	_ParRef.accel			= 32000;
 	_ParRef.current_acc		= 150.0;
 	_ParRef.current_run		= 100.0;
 	_ParRef.stop_mux		= 0;
@@ -63,16 +63,16 @@ void lb701_init(void)
 	_ParRef.estop_level		= 1;
 	_ParRef.encCheck		= chk_std;
 	
-	_ParZ_down.speed		= 40000;
-	_ParZ_down.accel		= 10000;
+	_ParZ_down.speed		= 16000;
+	_ParZ_down.accel		= 32000;
 	_ParZ_down.current_acc	= 300.0;
 	_ParZ_down.current_run	= 100.0;
 	_ParZ_down.stop_mux		= MOTOR_Z_BITS;
 	_ParZ_down.dis_mux_in	= 0;
 	_ParZ_down.encCheck		= chk_std;
 
-	_ParZ_cap.speed			= 1000;
-	_ParZ_cap.accel			= 1000;
+	_ParZ_cap.speed			= 4000;
+	_ParZ_cap.accel			= 32000;
 	_ParZ_cap.current_acc	= 300.0;
 	_ParZ_cap.current_run	= 100.0;
 	_ParZ_cap.stop_mux		= FALSE;
@@ -193,7 +193,7 @@ int lb701_menu(void)
 static void _lb701_do_reference(void)
 {
 	motors_stop	(MOTOR_Z_BITS);
-	motors_config(MOTOR_Z_BITS, CURRENT_HOLD, 0.0, 0.0);
+	motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER);
 	
 	_CmdRunning  = CMD_CAP_REFERENCE;
 	RX_StepperStatus.info.moving = TRUE;
@@ -226,12 +226,14 @@ int  lb701_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									_CmdRunning = 0;
 									break;	
 
-	case CMD_CAP_REFERENCE:			strcpy(_CmdName, "CMD_CAP_REFERENCE");
+	case CMD_CAP_REFERENCE:			Error(WARN, 0, "Stepper software not trealeased for this machine");
+									strcpy(_CmdName, "CMD_CAP_REFERENCE");
 									_PrintPos_New=0;
 									_lb701_do_reference();	
 									break;
 
-	case CMD_CAP_PRINT_POS:			strcpy(_CmdName, "CMD_CAP_PRINT_POS");
+	case CMD_CAP_PRINT_POS:			Error(WARN, 0, "Stepper software not trealeased for this machine");
+									strcpy(_CmdName, "CMD_CAP_PRINT_POS");
 									pos   = (*((INT32*)pdata));
 									steps = _micron_2_steps(RX_StepperCfg.ref_height - pos);
 									if (!_CmdRunning && (!RX_StepperStatus.info.z_in_print || steps!=_PrintPos_Act))
@@ -285,7 +287,7 @@ static void _lb701_motor_test(int motorNo, int steps)
 
 	memset(&par, 0, sizeof(par));
 	par.speed		= 10000;
-	par.accel		= 5000;
+	par.accel		= 32000;
 	par.current_acc	= 250.0;
 	par.current_run	= 250.0;
 	par.stop_mux	= 0;
@@ -295,7 +297,7 @@ static void _lb701_motor_test(int motorNo, int steps)
 	_CmdRunning = 1; // TEST
 	RX_StepperStatus.info.moving = TRUE;
 	
-	motors_config(motors, CURRENT_HOLD, 0.0, 0.0);
+	motors_config(motors, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER);
 	motors_move_by_step(motors, &par, steps, FALSE);			
 }
 

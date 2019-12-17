@@ -245,23 +245,25 @@ typedef struct
 	UINT32	enc_stop_index;		//       014c: [1 Bit] aborts motor on next index
 
 	UINT32  enc_mot_ratio;		//	     0150: [unused] ratio = motor per rev. / encoder per rev.
-	UINT32  enc_rel_steps0;		//	     0154: [12 Bit] 
+	UINT32  _unused_enc_rel_steps0;		//	     0154: [12 Bit] 
 
 	//--- relative stall detection -------------------------
-	UINT32  enc_rel_steps;		//	     0158: [12 Bit] Motor steps			(0=funciton OFF)
-	UINT32  enc_rel_incs;		//	     015c: [12 Bit] Encoder-Increments	(0=function OFF)
-								//						function: check every enc_rel_steps that encoder-inrements >= enc_rel_incs
+	UINT32  enc_max_diff;		//	     0158: [16 Bit] max difference motor to encoder while running
+	UINT32  enc_max_diff_stop;	//	     015c: [16 Bit] max difference motor to encoder while NOT running
 	UINT32  reset_pos_val_mot;	//	     0160: [32 Bit] Motor Pos
 	UINT32  reset_pos_val_enc;	//	     0164: [32 Bit] Encoder Pos
-	UINT32  res_168;			//	     0168:
-	UINT32  res_16c;			//	     016c:
+
+	//--- motor timings -------------------------
+	UINT32  dec_off_delay;			//	     0168:
+	UINT32  acc_on_delay;			//	     016c:
 
 	//--- moves ---------------------------------------
 	UINT32	moveCnt;			//	     0170: [8 Bit]
 	UINT32  stop_mux;			//	     0174: [5 Bit] choose other motors to stop also
 	//--- Disable mux for sensor = 1
 	UINT32  disable_mux_in;		//	     0178: [1 Bit]
-	UINT32  res_17c;			//	     017c:
+	//--- Microsteps 
+	UINT32  microsteps;			//	     017c: microsteps-1
 } SMotCfg;
 
 //--- SFpgaPar ---------------------------------------
@@ -282,7 +284,7 @@ typedef struct
 	UINT32	adc_rst;		//       028: resets adc (auto reset)
 	UINT32	reset_err;		//       02C: 
 	UINT32	reset_cnt;		//       030: 
-	UINT32	min_in_pulse_width;	//   034: 16 bit entprellung, in multiples of 20ns
+	UINT32	ad5592_spi_from_arm_en;	//   034:
 	UINT32	cmd_start_encmot;		//       038:  [ 5 Bit] to start 5 motors based on the encoder
 	UINT32	res_11C;		//       03C:	
 	
@@ -302,8 +304,9 @@ typedef struct
 	UINT32	incPerRev;			//       004: [16 Bit] increments  per revolution
 	UINT32  revCnt;				//       008: [ 8 Bit] (R/W)	number of revolutions
 	UINT32	_pos_motor;			//       00c: [32 Bit]
-	UINT32	res_10; 			//       010:		
-	UINT32	res_14; 			//       014:		
+	INT16	pos_diff; 			//       010: [16 Bit] difference in motor steps (motor-encoder)
+	INT16   res_12;				//		 012: [16 Bit]
+	UINT32	ab_err; 			//       014:		
 	UINT32	res_18; 			//       018:		
 	UINT32	res_1c; 			//       01c:		
 	UINT32	res_20; 			//       020:		

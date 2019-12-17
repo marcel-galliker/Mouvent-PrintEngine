@@ -106,7 +106,7 @@ void fpga_init()
 	Fpga.encoder = (SFpgaEncoder*)	rx_fpga_map_page(_MemId, ADDR_FPGA_ENCODER, sizeof(SFpgaEncoder)*ENCODER_CNT, 0x0030*ENCODER_CNT);		
 #endif
 
-	printf("Version: %lu.%lu.%lu.%lu\n", Fpga.stat->version.major, Fpga.stat->version.minor, Fpga.stat->version.revision, Fpga.stat->version.build);
+	TrPrintfL(TRUE, "Version: %lu.%lu.%lu.%lu\n", Fpga.stat->version.major, Fpga.stat->version.minor, Fpga.stat->version.revision, Fpga.stat->version.build);
 
 	RX_StepperStatus.fpgaVersion.major	   = Fpga.stat->version.major;
 	RX_StepperStatus.fpgaVersion.minor	   = Fpga.stat->version.minor;
@@ -117,8 +117,8 @@ void fpga_init()
 	Fpga.par->watchdog_cnt  = WATCHDOG_CNT;
 	Fpga.par->v24_enable    = TRUE;
 	Fpga.par->cmd_reset_pos|= 0xffff; //0x0001<<motor;
+	Fpga.par->ad5592_spi_from_arm_en = FALSE;
 	Fpga.par->adc_rst = TRUE; // restart adc
-	Fpga.par->min_in_pulse_width = 50000;	// in 20 ns!  
 
 	memset(_PWM_Speed, 0, sizeof(_PWM_Speed));
 	
@@ -192,7 +192,7 @@ void _fpga_display_status(void)
 	v = ps_get_power();
 	term_printf("Power Motors: % 3d.%03dV(24)\n", v / 1000, v % 1000);
 	
-	term_printf("Inputs:       ");
+	term_printf("Inputs:      ");
 	for (i=0; i<INPUT_CNT; i++)
 	{
 		if (Fpga.stat->input & (1<<i)) term_printf("*");
@@ -205,7 +205,7 @@ void _fpga_display_status(void)
 		term_printf("%03d    ", VAL_TO_MV_AI(Fpga.stat->analog_in[i]));
 	}
 	term_printf("\n");
-	term_printf("Outputs:      ");
+	term_printf("Outputs:     ");
 	for (i=0; i<OUTPUT_CNT; i++)
 	{
 		if (Fpga.par->output & (1<<i))  term_printf("*");
@@ -241,11 +241,13 @@ if (RX_StepperCfg.printerType==printer_TX801)
 	term_printf("motor_start_cnt: "); PRINTF(MOTOR_CNT)("%06d    ", _motor_start_cnt[i]); 
 	term_printf("\n"); 
 	term_printf("stop_mux:       "); PRINTF(MOTOR_CNT)("0x%04x    ", Fpga.par->cfg[i].stop_mux);				term_printf("\n"); 
-	term_printf("Pos:            "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.stat->statMot[i].position);				term_printf("\n"); 
-	term_printf("Pos rising:     "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.stat->statMot[i].pos_rising); term_printf("\n"); 
-	term_printf("Pos falling:    "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.stat->statMot[i].pos_falling); term_printf("\n"); 
+	term_printf("Pos[steps]:     "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.stat->statMot[i].position);				term_printf("\n"); 
+    term_printf("EncPos[steps]:  "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.encoder[i]._pos_motor);					term_printf("\n");
+    term_printf("Diff[steps]:    "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.encoder[i].pos_diff);					term_printf("\n");
+	term_printf("Pos rising:     "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.stat->statMot[i].pos_rising);			term_printf("\n"); 
+	term_printf("Pos falling:    "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.stat->statMot[i].pos_falling);			term_printf("\n"); 
 	term_printf("Pos end:        "); PRINTF(MOTOR_CNT)("%06d    ", motor_get_end_step(i));						term_printf("\n"); 
-	term_printf("Speed [Hz]:     "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.stat->statMot[i].speed/0x10000);		term_printf("\n"); 
+	term_printf("Speed [Hz]:     "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.stat->statMot[i].speed);				term_printf("\n"); 
 //	term_printf("vEdge:          "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.stat->statMot[i].v_edge);				term_printf("\n"); 
 	term_printf("stopIn_Pos:     "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.stat->statMot[i].stopIn_Pos);			term_printf("\n"); 
 	term_printf("too_fast:       "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.stat->statMot[i].err_too_fast);			term_printf("\n"); 
@@ -254,23 +256,26 @@ if (RX_StepperCfg.printerType==printer_TX801)
 	term_printf("  ERR.ENC:      "); PRINTF(MOTOR_CNT)("%08x  ",   Fpga.stat->statMot[i].err_estop & ENC_ESTOP_ENC);	term_printf("\n"); 
 	term_printf("  ERR.EMUX:     "); PRINTF(MOTOR_CNT)("%08x  ",   Fpga.stat->statMot[i].err_estop & ENC_ESTOP_EMUX);	term_printf("\n"); 
 	term_printf("  ERR.MUX:      "); PRINTF(MOTOR_CNT)("%08x  ",   Fpga.stat->statMot[i].err_estop & ENC_ESTOP_MUX);	term_printf("\n"); 
-	term_printf("  ERR.IN0:      "); PRINTF(MOTOR_CNT)("%08x  ",   Fpga.stat->statMot[i].err_estop & ENC_ESTOP_IN00);	term_printf("\n"); 
-	term_printf("  ERR.IN1:      "); PRINTF(MOTOR_CNT)("%08x  ",   Fpga.stat->statMot[i].err_estop & ENC_ESTOP_IN01);	term_printf("\n"); 
-	term_printf("  ERR.IN2:      "); PRINTF(MOTOR_CNT)("%08x  ",   Fpga.stat->statMot[i].err_estop & ENC_ESTOP_IN02);	term_printf("\n"); 
-	term_printf("  ERR.IN3:      "); PRINTF(MOTOR_CNT)("%08x  ",   Fpga.stat->statMot[i].err_estop & ENC_ESTOP_IN03);	term_printf("\n"); 
+//	term_printf("  ERR.IN0:      "); PRINTF(MOTOR_CNT)("%08x  ",   Fpga.stat->statMot[i].err_estop & ENC_ESTOP_IN00);	term_printf("\n"); 
+//	term_printf("  ERR.IN1:      "); PRINTF(MOTOR_CNT)("%08x  ",   Fpga.stat->statMot[i].err_estop & ENC_ESTOP_IN01);	term_printf("\n"); 
+//	term_printf("  ERR.IN2:      "); PRINTF(MOTOR_CNT)("%08x  ",   Fpga.stat->statMot[i].err_estop & ENC_ESTOP_IN02);	term_printf("\n"); 
+//	term_printf("  ERR.IN3:      "); PRINTF(MOTOR_CNT)("%08x  ",   Fpga.stat->statMot[i].err_estop & ENC_ESTOP_IN03);	term_printf("\n"); 
 		
 	term_printf("Encoder:        "); PRINTF(MOTOR_CNT)("---%d---   ", i);										term_printf("\n");
 	term_printf("Pos: inc        "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.encoder[i].pos);						term_printf("\n"); 
+	term_printf("microsteps:     "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.par->cfg[i].microsteps);				term_printf("\n"); 
 //	term_printf("Inc/Rev:        "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.encoder[i].incPerRev);					term_printf("\n"); 
 //	term_printf("IdxCnt:         "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.encoder[i].revCnt);						term_printf("\n"); 
-	
 	/*
 	term_printf("pwm pulsewidth: "); PRINTF(4)("%06d    ", (UINT16)Fpga.par->pwm_output[i]); 					term_printf("\n"); 
 	
 	term_printf("analog thresh:  "); PRINTF(8)("%06d    ", (UINT16)Fpga.par->adc_thresh[i]); 					term_printf("\n"); 
 	term_printf("analog PulseCnt:"); PRINTF(8)("%06d    ", (UINT32)Fpga.stat->adc_cnt[i]); 						term_printf("\n");
 	*/
-	
+//	 term_printf("Ratio:          "); PRINTF(MOTOR_CNT)("%06f    ", (Fpga.par->cfg[i].enc_mot_ratio / 16777216.0)); term_printf("\n");
+//   term_printf("Schlepp Err     "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.par->cfg[i].enc_max_diff); term_printf("\n");
+//   term_printf("Endpos  Err     "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.par->cfg[i].enc_max_diff_stop); term_printf("\n"); //    term_printf("Inc/Rev:        "); PRINTF(MOTOR_CNT)("%06d ", Fpga.encoder[i].incPerRev); term_printf("\n"); //    term_printf("IdxCnt:         "); PRINTF(MOTOR_CNT)("%06d ", Fpga.encoder[i].revCnt); term_printf("\n");
+
 	term_printf("\n");
 	term_flush();
 }
@@ -392,6 +397,7 @@ void fpga_stepper_error_reset(void)
 {
 	if (_ErrorFlags)
 	{
+		Fpga.par->ad5592_spi_from_arm_en = FALSE;
 		Fpga.par->adc_rst = TRUE;
 		_ErrorCheckTime	= RX_StepperStatus.alive[0]+2;		
 	}

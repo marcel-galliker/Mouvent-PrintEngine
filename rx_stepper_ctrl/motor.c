@@ -25,11 +25,12 @@
 //--- defines ----------------------------------------------------------------
 #define FOR_ALL_MOTORS(motor, motors) for (motor=0; motor<MOTOR_CNT; motor++) if (motors & (1<<motor))
 
-#define MIN_SPEED_HZ				100		// minimal speed in Hz
-#define ENC_STOP_MIN_SPEED_HZ		2500
+#define MIN_SPEED_HZ				4000		// minimal speed in Hz
+#define ENC_STOP_MIN_SPEED_HZ		4000
 #define MAX_SPEED_HZ				17000		// maximal speed in Hz
 
-#define FIX_POINT		0x10000
+#define FIX_POINT			0x10000
+#define FIX_POINT_SPEED		0x1 // 0x10000 // 0x10
 
 //--- globals ------------------------------------
 
@@ -47,7 +48,8 @@ static int		_message_written = FALSE;
 //--- motor_get_step ------------------------
 INT32	motor_get_step(int motor)
 {
-	return Fpga.stat->statMot[motor].position;
+	int microsteps = Fpga.par->cfg[motor].microsteps+1;
+	return Fpga.stat->statMot[motor].position*microsteps;
 }
 
 //--- motor_get_end_step ------------------------
@@ -102,6 +104,7 @@ void motor_reset(int motor)
 void motors_reset(int motors)
 {
 	int motor;
+	rx_sleep(20); // todo peb
 	FOR_ALL_MOTORS(motor, motors) motor_reset(motor);	
 }
 
@@ -161,7 +164,8 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
 	double		v_max;
 	int			bwd;
 	SMove		*move;
-
+	int			microsteps;
+	
 	// 	t = v/a
 	//	d = (a*t^2)/2 = (v^2/a)/2
 	//  v = sqrt(2*a/d)
@@ -178,9 +182,13 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
 	Fpga.par->cfg[motor].stop_mux			= par->stop_mux;
 	Fpga.par->cfg[motor].disable_mux_in		= par->dis_mux_in;
 	speed = par->speed;
-	
+		
 	// Set target pos
-	_motor_end_pos[motor] = Fpga.stat->statMot[motor].position + steps;
+	microsteps = Fpga.par->cfg[motor].microsteps+1;
+	
+	_motor_end_pos[motor] = Fpga.stat->statMot[motor].position*microsteps + steps;
+	
+	_motor_end_pos[motor] = Fpga.stat->statMot[motor].position*microsteps + steps;
 	
 	if (steps < 0) 
 	{
@@ -199,38 +207,35 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
 		Fpga.par->mot_bwd &= ~(0x01 << motor);
 		ps_set_backwards(&Fpga.qsys->spi_powerstep[motor], TRUE);
 	}
-		
+	
+	if (speed<MIN_SPEED_HZ+100) speed=MIN_SPEED_HZ+100;
+	
 	switch(par->encCheck)
 	{	
 	case chk_std:
-		Fpga.par->cfg[motor].enc_rel_steps0 = 200;
-		Fpga.par->cfg[motor].enc_rel_steps  = 100;
-		Fpga.par->cfg[motor].enc_rel_incs	= 20;	
+		Fpga.par->cfg[motor].enc_max_diff		= 50;
+		Fpga.par->cfg[motor].enc_max_diff_stop	= 50;	
 		break;
 		
 	case chk_txrob_ref:
-		Fpga.par->cfg[motor].enc_rel_steps0 = 10;
-		Fpga.par->cfg[motor].enc_rel_steps  = 1;
-		Fpga.par->cfg[motor].enc_rel_incs	= 1;
+		Fpga.par->cfg[motor].enc_max_diff		= 50;
+		Fpga.par->cfg[motor].enc_max_diff_stop	= 50;	
 		break;
 
 	case chk_txrob:
-		Fpga.par->cfg[motor].enc_rel_steps0 = 10;
-		Fpga.par->cfg[motor].enc_rel_steps  = 2;
-		Fpga.par->cfg[motor].enc_rel_incs	= 1;	
+		Fpga.par->cfg[motor].enc_max_diff		= 50;
+		Fpga.par->cfg[motor].enc_max_diff_stop	= 50;	
 		break;
 
 	case chk_lbrob:
-		Fpga.par->cfg[motor].enc_rel_steps0 = 2000;
-		Fpga.par->cfg[motor].enc_rel_steps  = 1000;
-		Fpga.par->cfg[motor].enc_rel_incs	= 20;	
+		Fpga.par->cfg[motor].enc_max_diff		= 1000;
+		Fpga.par->cfg[motor].enc_max_diff_stop	= 20;	
 		break;
 
 	case chk_off:
 	default:
-		Fpga.par->cfg[motor].enc_rel_steps0 = 0;
-		Fpga.par->cfg[motor].enc_rel_steps  = 0;
-		Fpga.par->cfg[motor].enc_rel_incs	= 0;								
+		Fpga.par->cfg[motor].enc_max_diff		= 0xffff;
+		Fpga.par->cfg[motor].enc_max_diff_stop	= 0xffff;								
 		break;
 	}
 	
@@ -243,7 +248,7 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
 		return 0;
 	
 	Fpga.par->cfg[motor].amp_stop	 = Tval_Current_to_Par(par->current_acc);
-	Fpga.par->cfg[motor].v_min_speed = MIN_SPEED_HZ*FIX_POINT;
+	Fpga.par->cfg[motor].v_min_speed = MIN_SPEED_HZ*FIX_POINT_SPEED;
 	
 	// Calculate ramps	
 	// Rising ramp is always the same
@@ -256,10 +261,10 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
 	
 	dist_ramp_total = dist_rising_ramp + dist_falling_ramp;
 	
-	accel = par->accel*FIX_POINT / 200000; // [steps/s/5us]
+	accel = (int)(par->accel*FIX_POINT / 200000.0 + 0.5); // [steps/s/5us]
 	v_max = sqrt(steps*par->accel + MIN_SPEED_HZ*MIN_SPEED_HZ);
 	Fpga.par->cfg[motor].stopAcc_256 = -accel;
-	Fpga.par->cfg[motor].stopCC_256  = MIN_SPEED_HZ*FIX_POINT;
+	Fpga.par->cfg[motor].stopCC_256  = MIN_SPEED_HZ*FIX_POINT_SPEED;
 	
 	// If the total distance is longer than the length of both ramps
 	if (steps > dist_ramp_total)
@@ -279,41 +284,41 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
 			rising_steps  /= _enc_mot_ratio[motor];
 			linear_steps  /= _enc_mot_ratio[motor];
 			falling_steps /= _enc_mot_ratio[motor];
-			min_speed = ENC_STOP_MIN_SPEED_HZ*FIX_POINT;
+			min_speed = ENC_STOP_MIN_SPEED_HZ * FIX_POINT_SPEED;
 		}
 		else
 		{
-			min_speed = MIN_SPEED_HZ*FIX_POINT;
+			min_speed = MIN_SPEED_HZ * FIX_POINT_SPEED;
 		}
 		
 		cnt=0;
 		// Set rising ramp parameters
-		move[cnt].cc0_256 = (UINT32) speed*FIX_POINT;
+		move[cnt].cc0_256 = (UINT32) speed*FIX_POINT_SPEED;
 		move[cnt].a_256   = accel;
-		move[cnt].steps   = rising_steps;
+		move[cnt].steps   = rising_steps/microsteps;
 		move[cnt].amp	  = Tval_Current_to_Par(par->current_acc);
 		cnt++;
 		
 		// Set linear movement parameters 
 		if (linear_steps>CURRENT_OFFSET)
 		{
-			move[cnt].cc0_256 = (UINT32) speed*FIX_POINT;
+			move[cnt].cc0_256 = (UINT32) speed*FIX_POINT_SPEED;
 			move[cnt].a_256   = 0;
-			move[cnt].steps   = linear_steps-CURRENT_OFFSET;
+			move[cnt].steps   = (linear_steps-CURRENT_OFFSET)/microsteps;
 			move[cnt].amp	  = Tval_Current_to_Par(par->current_run);			
 			cnt++;
 			
-			move[cnt].cc0_256 = (UINT32) speed*FIX_POINT;
+			move[cnt].cc0_256 = (UINT32) speed*FIX_POINT_SPEED;
 			move[cnt].a_256   = 0;
-			move[cnt].steps   = CURRENT_OFFSET;
+			move[cnt].steps   = CURRENT_OFFSET/microsteps;
 			move[cnt].amp	  = Tval_Current_to_Par(par->current_acc);
 			cnt++;
 		}
 		else
 		{
-			move[cnt].cc0_256 = (UINT32) speed*FIX_POINT;
+			move[cnt].cc0_256 = (UINT32) speed * FIX_POINT_SPEED;
 			move[cnt].a_256   = 0;
-			move[cnt].steps   = linear_steps;
+			move[cnt].steps   = linear_steps/microsteps;
 			move[cnt].amp	  = Tval_Current_to_Par(par->current_acc);
 			cnt++;
 		}
@@ -321,15 +326,15 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
 		// Set falling ramp parameters
 		move[cnt].cc0_256 = min_speed;
 		move[cnt].a_256   = -accel;
-		move[cnt].steps   = falling_steps;
+		move[cnt].steps   = falling_steps/microsteps;
 		move[cnt].amp	  = Tval_Current_to_Par(par->current_acc);
 		cnt++;
 
-		// Set holding current after move done
+		// Set acc current after move done
 		move[cnt].cc0_256 = 1;
 		move[cnt].a_256   = 1;
 		move[cnt].steps	  = 0;
-		move[cnt].amp	  = Tval_Current_to_Par(_current_hold[motor]);
+		move[cnt].amp	  = Tval_Current_to_Par(par->current_acc);
 		cnt++;
 		
 	//	int steps_total = move[0].steps + move[1].steps + move[2].steps;
@@ -348,32 +353,32 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
 		{
 			rising_steps  = ((steps*dist_rising_ramp) / (dist_rising_ramp + dist_falling_ramp)) / _enc_mot_ratio[motor];
 			falling_steps = ((steps*dist_falling_ramp) / (dist_rising_ramp + dist_falling_ramp)) / _enc_mot_ratio[motor];
-			min_speed = ENC_STOP_MIN_SPEED_HZ*FIX_POINT;
+			min_speed = ENC_STOP_MIN_SPEED_HZ*FIX_POINT_SPEED;
 		}
 		else
 		{
 			rising_steps  = (int)(steps / 2);
 			falling_steps = (int)(steps - (steps / 2));
-			min_speed = MIN_SPEED_HZ*FIX_POINT;
+			min_speed = MIN_SPEED_HZ*FIX_POINT_SPEED;
 		}
 		
 		// Set rising ramp parameters
-		move[0].cc0_256 = (UINT32)(v_max*FIX_POINT);
+		move[0].cc0_256 = (UINT32)(v_max * FIX_POINT_SPEED);
 		move[0].a_256   = accel;
-		move[0].steps   = rising_steps;
+		move[0].steps   = rising_steps/microsteps;
 		move[0].amp		= Tval_Current_to_Par(par->current_acc);
 
 		// Set falling ramp parameters
 		move[1].cc0_256 = min_speed;
 		move[1].a_256   = -accel;
-		move[1].steps   = falling_steps;
+		move[1].steps   = falling_steps/microsteps;
 		move[1].amp		= Tval_Current_to_Par(par->current_acc);
 
-		// Set holding current after move done
+		// Set acc current after move done
 		move[2].cc0_256 = 1;
 		move[2].a_256   = 1;
 		move[2].steps	= 0;
-		move[2].amp		= Tval_Current_to_Par(_current_hold[motor]);
+		move[2].amp		= Tval_Current_to_Par(par->current_acc);
 			
 		Fpga.par->cfg[motor].moveCnt = 3;		
 	}
@@ -485,6 +490,8 @@ int	motors_error(int motors, int *err)
 //--- motor_config ---------------------
 void motor_config(int motor, int currentHold, double stepsPerMeter, double incPerMeter)
 {
+	int microsteps=16;
+	
 	if (ps_get_power() < 20000) return;
 	if (_init_done & (0x01 << motor)) return;
 	_init_done |= (0x01 << motor);
@@ -500,12 +507,17 @@ void motor_config(int motor, int currentHold, double stepsPerMeter, double incPe
 	
 	_enc_mot_ratio[motor] = (double)((double)stepsPerMeter / (double)incPerMeter); // mot/enc=ratio
 	
-	Fpga.par->cfg[motor].enc_rel_steps0 = 200;
-	Fpga.par->cfg[motor].enc_rel_steps  = 100;
-	Fpga.par->cfg[motor].enc_rel_incs	= 20;
+	Fpga.par->cfg[motor].enc_max_diff		= 50;
+	Fpga.par->cfg[motor].enc_max_diff_stop	= 50;
 	Fpga.par->cfg[motor].stop_mux = 0x00; // stop motors together
 	
 	Fpga.par->cfg[motor].disable_mux_in  = 0;
+	
+	Fpga.par->cfg[motor].enc_mot_ratio	= (int)((double)stepsPerMeter / microsteps/  (double)incPerMeter * 16777216); // todo peb
+	Fpga.par->cfg[motor].dec_off_delay	= 10;	// todo peb
+	Fpga.par->cfg[motor].acc_on_delay	= 10;	// todo peb
+
+	Fpga.par->cfg[motor].microsteps		= microsteps-1;
 }
 
 //--- motors_config -----------------------------------------

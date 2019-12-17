@@ -78,8 +78,8 @@ void lbrob_init(void)
 	
 	//--- movement parameters capping ---------------- 0.9 Nm with 100 U/min --- 0.8 Nm with 300 U/min -- 300*200*16/60
 	
-	_ParCap_ref.speed = 8000; // 16000; // speed with max tork: 16'000
-	_ParCap_ref.accel =  4000; //8000;
+	_ParCap_ref.speed =  8000; // 16000; // speed with max tork: 16'000
+	_ParCap_ref.accel =  32000; //8000;
 	_ParCap_ref.current_acc = 400.0; // max 424 = 4.24 A
 	_ParCap_ref.current_run = 400.0; // max 424 = 4.24 A
 	_ParCap_ref.stop_mux = 0;
@@ -87,7 +87,7 @@ void lbrob_init(void)
 	_ParCap_ref.encCheck = chk_off;
 		
 	_ParCap_drive.speed = 16000; // 32000; // speed with max tork: 16'000
-	_ParCap_drive.accel = 8000; // 16000;
+	_ParCap_drive.accel = 32000; // 16000;
 	_ParCap_drive.current_acc = 400.0; // max 424 = 4.24 A
 	_ParCap_drive.current_run = 400.0; // max 424 = 4.24 A
 	_ParCap_ref.stop_mux = 0;
@@ -95,7 +95,7 @@ void lbrob_init(void)
 	_ParCap_drive.encCheck = chk_off; // TRUE;
 
 	_ParCap_wipe.speed = 8000; // 25000; // speed with max tork: 16'000
-	_ParCap_wipe.accel = 4000;// 12500;
+	_ParCap_wipe.accel = 32000;// 12500;
 	_ParCap_wipe.current_acc = 300.0; // max 424 = 4.24 A
 	_ParCap_wipe.current_run = 300.0; // max 424 = 4.24 A
 	_ParCap_wipe.stop_mux = 0;
@@ -290,6 +290,7 @@ int  lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		break;
 
 	case CMD_CLN_REFERENCE:
+		Error(WARN, 0, "Stepper software not trealeased for this machine");
 		if (_CmdRunning){ lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_STOP, NULL); _new_cmd = CMD_CLN_REFERENCE; break; }
 		motor_reset(MOTOR_CAP); // to recover from move count missalignment
 		_CmdRunning = msgId;
@@ -306,6 +307,7 @@ int  lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 
 	case CMD_CLN_MOVE_POS:		if (!_CmdRunning)
 		{
+			Error(WARN, 0, "Stepper software not trealeased for this machine");
 			if ((Fpga.par->output & RO_ALL_OUT))
 			{
 				Fpga.par->output &= ~RO_ALL_OUT; // set all output to off
@@ -323,6 +325,7 @@ int  lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 								
 	case CMD_CLN_CAP:		if (!_CmdRunning)
 		{
+			Error(WARN, 0, "Stepper software not trealeased for this machine");
 			if (!RX_StepperStatus.info.ref_done)
 			{
 				Error(LOG, 0, "CLN: Command 0x%08x: missing ref_done: triggers Referencing", _CmdRunning); 
@@ -362,14 +365,14 @@ static void _lbrob_ro_motor_test(int motorNo, int steps)
 	if (motorNo == MOTOR_CAP)
 	{
 		par.speed = 8000; // 16000; // 32000;//25000; // 8000;// 4000; // 2000;
-		par.accel = 4000; // 8000; //16000;//12500;// 4000;//2000; // 1000;
+		par.accel = 320000; // 8000; //16000;//12500;// 4000;//2000; // 1000;
 		par.current_acc = 400.0; // 60.0;  // for Tests: 50
 		par.current_run = 400.0; // 60.0;  // for Tests: 50
 	}
 	else
 	{
 		par.speed	= 21000;		//21000;					//21000;				//21000;			//21000;			//21000;					
-		par.accel	= 10000;		//10000;					//10000;				//10000;			//10000;			//10000;				
+		par.accel	= 32000;		//10000;					//10000;				//10000;			//10000;			//10000;				
 		par.current_acc = 80.0;//134.0;	//40.0;	minimum for 0.3 Nm	// 60.0; for 0.4 Nm		// 80.0 for 0.5 Nm	// 100.0 for 0.6 Nm	// 120.0 for 0.7 Nm	// 134.0 for 0.8 Nm	
 		par.current_run = 80.0;//134.0;	//40.0;	minimum for 0.3 Nm	// 60.0; for 0.4 Nm		// 80.0 for 0.5 Nm	// 100.0 for 0.6 Nm	// 120.0 for 0.7 Nm	// 134.0 for 0.8 Nm	
 	}

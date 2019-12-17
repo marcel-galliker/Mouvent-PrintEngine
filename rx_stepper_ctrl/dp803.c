@@ -77,21 +77,20 @@ static void reinit(void);
 //--- dp803_init --------------------------------------
 void dp803_init(void)
 {
-	motors_config(MOTOR_Z_BITS, CURRENT_HOLD, 0.0, 0.0);
+	motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER);
 	memset(_CmdName, 0, sizeof(_CmdName));
 
 	//--- movment parameters ----------------
-	_ParRef.speed			= 10000;
-	_ParRef.accel			= 5000;
-//	_ParRef.current			= 150.0;
-	_ParRef.current_acc		= 250.0;
-	_ParRef.current_run		= 250.0;
+	_ParRef.speed			= 13000;
+	_ParRef.accel			= 32000;
+	_ParRef.current_acc		= 320.0;
+	_ParRef.current_run		= 320.0;
 	_ParRef.stop_mux		= 0;
 	_ParRef.dis_mux_in		= 0;
 	_ParRef.encCheck		= chk_std;
 	
-	_ParZ_down.speed		= 10000;
-	_ParZ_down.accel		= 5000;
+	_ParZ_down.speed		= 13000;
+	_ParZ_down.accel		= 32000;
 	_ParZ_down.current_acc	= 400.0;
 	_ParZ_down.current_run	= 400.0;
 	_ParZ_down.stop_mux		= MOTOR_Z_BITS;
@@ -99,7 +98,7 @@ void dp803_init(void)
 	_ParZ_down.encCheck		= chk_std;
 	
 	_ParZ_cap.speed			= 5000;
-	_ParZ_cap.accel			= 2000;
+	_ParZ_cap.accel			= 32000;
 	_ParZ_cap.current_acc	= 300.0;
 	_ParZ_cap.current_run	= 300.0;
 	_ParZ_cap.stop_mux		= MOTOR_Z_BITS;
@@ -267,7 +266,7 @@ static void _dp803_do_reference(void)
 	TrPrintfL(TRUE, "_dp803_do_reference");
 	Error(LOG, 0, "_dp803_do_reference");
 	motors_stop	(MOTOR_Z_BITS);
-	motors_config(MOTOR_Z_BITS, CURRENT_HOLD, 0.0, 0.0);
+	motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER);
 	_CmdRunning  = CMD_CAP_REFERENCE;
 	RX_StepperStatus.info.moving = TRUE;
 	motors_move_by_step	(MOTOR_Z_BITS,  &_ParRef, 500000, TRUE);
@@ -308,14 +307,16 @@ int  dp803_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									Fpga.par->output &= ~OUT_CAP_FLUSH_OFF;
 									break;	
 
-	case CMD_CAP_REFERENCE:			_PrintPos_New=0;
+	case CMD_CAP_REFERENCE:			Error(WARN, 0, "Stepper software not trealeased for this machine");
+									_PrintPos_New=0;
 									_Cmd_New=0;
 									Error(LOG, 0, "CMD_CAP_REFERENCE");
 									strcpy(_CmdName, "CMD_CAP_REFERENCE");
 									_dp803_do_reference();	
 									break;
 
-	case CMD_CAP_PRINT_POS:			strcpy(_CmdName, "CMD_CAP_PRINT_POS");
+	case CMD_CAP_PRINT_POS:			Error(WARN, 0, "Stepper software not trealeased for this machine");
+									strcpy(_CmdName, "CMD_CAP_PRINT_POS");
 									_PrintHeight   = (*((INT32*)pdata));									
 									Error(LOG, 0, "CMD_CAP_PRINT_POS pos=%d", _PrintHeight);
 									if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height < 10000) Error(ERR_ABORT, 0, "Reference Height not defined");
@@ -451,7 +452,7 @@ static void _dp803_motor_test(int motorNo, int steps)
 
 	memset(&par, 0, sizeof(par));
 	par.speed		= 5000;
-	par.accel		= 2500;
+	par.accel		= 32000;
 	par.current_acc	= 400.0;
 	par.current_run	= 400.0;
 	par.stop_mux	= 0;
@@ -461,6 +462,6 @@ static void _dp803_motor_test(int motorNo, int steps)
 	_CmdRunning = 1; // TEST
 	RX_StepperStatus.info.moving = TRUE;
 	
-	motors_config(motors, CURRENT_HOLD, 0.0, 0.0);
+	motors_config(motors, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER);
 	motors_move_by_step(motors, &par, steps, FALSE);			
 }

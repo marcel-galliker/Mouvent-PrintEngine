@@ -209,7 +209,7 @@ static int _robot_left(void);
 void txrob_init(void)
 {
 	// Init Motors
-	motor_config(MOTOR_ROT, CURRENT_HOLD_ROT, ROT_STEPS_PER_REV, ROT_INC_PER_REV);
+	motor_config(MOTOR_ROT,   CURRENT_HOLD_ROT,   ROT_STEPS_PER_REV, ROT_INC_PER_REV);
 	motor_config(MOTOR_SHIFT, CURRENT_HOLD_SHIFT, SHIFT_STEPS_PER_METER, SHIFT_INC_PER_METER);
 
 	//--- movement parameters capping ----------------
@@ -901,6 +901,7 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		break;
 
 	case CMD_CLN_REFERENCE:			strcpy(_CmdName, "CMD_CLN_REFERENCE");
+		Error(WARN, 0, "Stepper software not trealeased for this machine");
 		if (_CmdRunning && _CmdRunning != CMD_FLUID_CTRL_MODE){ txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_STOP, NULL); _NewCmd = CMD_CLN_REFERENCE; break; }
 		motor_reset(MOTOR_ROT); // to recover from move count missalignment
 		motor_reset(MOTOR_SHIFT); // to recover from move count missalignment
@@ -1125,7 +1126,7 @@ static void _txrob_motor_test(int motorNo, int steps)
 		par.accel		= 1000;
 		par.current_acc	= 300.0;
 		par.current_run	= 300.0;
-		motors_config(motors, CURRENT_HOLD_ROT, 0.0, 0.0);
+		motors_config(motors, CURRENT_HOLD_ROT,  L3518_STEPS_PER_METER, L3518_INC_PER_METER);
 	}
 	else
 	{

@@ -16,6 +16,20 @@
 #include "power_step.h"
 #include "fpga_def_stepper.h"
 
+#define L5918_STEPS_PER_METER	3200	// LBxxx: Motor steps/meter
+#define L5918_INC_PER_METER		16000	// LBxxx: Encoder incs/meter
+
+// max speeds LBxx
+// current=200	max_speed=20'000
+// current=300	max_speed=16'000
+// current=420	max_speed=13'000
+
+
+#define L3518_STEPS_PER_METER	3200	// TXxxx: Motor steps/meter
+#define L3518_INC_PER_METER		4000	// TXxxx: Encoder incs/meter
+
+// max speeds TXxx
+// current=???	max_speed=???
 
 typedef enum
 {

@@ -15,6 +15,7 @@
 #include "rx_term.h"
 #include "rx_threads.h"
 #include "tcp_ip.h"
+#include "args.h"
 #include "fpga_stepper.h"
 #include "power_step.h"
 #include "motor_cfg.h"
@@ -155,8 +156,8 @@ void cleaf_init(void)
 	
 	//--- movment parameters Lift ----------------
 	_Par_Z_ref.speed			= 16000; // 10000; // 2mm/U // 10mm/s => 5U/s*200steps/U*16=16000  //  20mm/s => 10U/s*200steps/U*16=32000
-	_Par_Z_ref.accel			=  8000; // 5000;
-	_Par_Z_ref.current_acc		= 300; // 250.0;
+	_Par_Z_ref.accel			= 32000; // 8000; // 5000;
+	_Par_Z_ref.current_acc		= 320; // 250.0;
 	_Par_Z_ref.current_run		= 300; // 250.0;
 	_Par_Z_ref.stop_mux			= MOTOR_Z_BITS;
 	_Par_Z_ref.dis_mux_in		= TRUE;
@@ -166,10 +167,10 @@ void cleaf_init(void)
 	_Par_Z_ref.estop_in_bit[MOTOR_Z_FRONT]	= (1<<HEAD_UP_IN_FRONT);
 	_Par_Z_ref.estop_in_bit[MOTOR_Z_BACK]	= (1<<HEAD_UP_IN_BACK); 
 	
-	_ParZ_down.speed		= 30000; 
-	_ParZ_down.accel		= 15000; 
-	_ParZ_down.current_acc	= 350.0; 	
-	_ParZ_down.current_run	= 350.0; 	
+	_ParZ_down.speed		= 16000; 
+	_ParZ_down.accel		= 32000; 
+	_ParZ_down.current_acc	= 320.0; 	
+	_ParZ_down.current_run	= 300.0; 	
 	_ParZ_down.stop_mux		= MOTOR_Z_BITS;
 	_ParZ_down.dis_mux_in	= FALSE;
 	_ParZ_down.encCheck		= chk_std;
@@ -200,7 +201,7 @@ void cleaf_main(int ticks, int menu)
 		
 	if (!motors_init_done())
 	{
-		motors_config(MOTOR_Z_BITS, CURRENT_Z_HOLD, 0.0, 0.0);
+		motors_config(MOTOR_Z_BITS, CURRENT_Z_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER);
 	}
 	
 	if (RX_StepperCfg.printerType != printer_cleaf) return; // printer_cleaf
@@ -484,6 +485,7 @@ int cleaf_menu(void)
 	char str[MAX_PATH];
 	int synth = FALSE;
 	static int cnt = 0;
+	static int _showMenu=FALSE;
 	int i, old;
 	int pos;
 
@@ -492,22 +494,26 @@ int cleaf_menu(void)
 	cleaf_display_status();
 	
 	term_printf("MENU CLEAF ------------------------\n");
-	term_printf("s: STOP\n");
-	term_printf("r<n>: reset motor<n>\n");	
-	term_printf("m<n><steps>: move Motor<n> by <steps>\n");
-	term_printf("o: toggle output <no>\n");
 	
+	if (_showMenu)
 	{
-//		term_printf("MENU LIFT ----------------\n");
-		term_printf("R: Reference lift\n");
-		term_printf("p: move lift to print\n");
-		term_printf("c: move lift to cap\n");
-		term_printf("u: move lift to UP position\n");
-		term_printf("i: reset ADC\n");
-		term_printf("d: move Drip Pans");
-		term_printf("z: move lift by <steps>\n");
+		term_printf("s: STOP\n");
+		term_printf("r<n>: reset motor<n>\n");	
+		term_printf("m<n><steps>: move Motor<n> by <steps>\n");
+		term_printf("o: toggle output <no>\n");	
+		{
+	//		term_printf("MENU LIFT ----------------\n");
+			term_printf("R: Reference lift\n");
+			term_printf("p<pos>: move lift to print <pos>\n");
+			term_printf("c: move lift to cap\n");
+			term_printf("u: move lift to UP position\n");
+			term_printf("i: reset ADC\n");
+			term_printf("d: move Drip Pans");
+			term_printf("z: move lift by <steps>\n");
+		}
+		term_printf("x: exit\n");			
 	}
-	term_printf("x: exit\n");
+	else term_printf("?: HELP for commands\n");			
 	term_printf(">");
 	term_flush();
 	
@@ -522,7 +528,8 @@ int cleaf_menu(void)
 		
 		case 'R': cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_REFERENCE, NULL); break;
 		case 'c': cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_CAPPING_POS, NULL); break;
-		case 'p': pos=2000;
+		case 'p': pos=atoi(&str[1]);
+				   if (arg_debug && REF_HEIGHT==0) REF_HEIGHT=90000;
 				  old =  _AllowMoveDown;
 				  _AllowMoveDown=TRUE;
 				  cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_PRINT_POS, &pos); 
@@ -533,7 +540,9 @@ int cleaf_menu(void)
 		case 'd': cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_DRIP_PANS, NULL); break;
 		case 'z': _cleaf_motor_z_test(atoi(&str[1])); break;
 		case 'x': return FALSE;
+		case '?': _showMenu=!_showMenu; return TRUE;
 		}
+		_showMenu = FALSE;
 	}
 	return TRUE;
 }
@@ -598,8 +607,10 @@ int  cleaf_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		{
 			if      (!RX_StepperStatus.info.ref_done)				Error(ERR_CONT, 0, "Reference not done");
 			else if (!_AllowMoveDown)								Error(ERR_CONT, 0, "Stepper: Command 0x%08x: printhead_en signal not set", msgId);
+#ifdef debug
 			else if (RX_StepperStatus.posY < (RX_StepperCfg.material_thickness - LASER_VARIATION) 
 				||   RX_StepperStatus.posY > (RX_StepperCfg.material_thickness + LASER_VARIATION)) Error(ERR_CONT, 0, "WEB: Laser detects material out of range. (measured %d, expected %d)", RX_StepperStatus.posY, RX_StepperCfg.material_thickness);
+#endif
 			else
 			{
 				if (REF_HEIGHT<87000) Error(WARN, 0, "Reference Height is only %d.02d mm", REF_HEIGHT/100, REF_HEIGHT%100);
@@ -694,9 +705,9 @@ static void _cleaf_motor_test(int motorNo, int steps)
 	memset(&par, 0, sizeof(par));
 
 	par.speed	= 5000;
-	par.accel	= 2500;
-	par.current_acc	= 320.0;
-	par.current_run	= 320.0;
+	par.accel	= 32000;
+	par.current_acc	= 400.0;
+	par.current_run	= 400.0;
 	mot_steps	= -steps;
 	
 	par.stop_mux		= 0;

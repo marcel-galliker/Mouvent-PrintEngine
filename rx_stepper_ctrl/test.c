@@ -85,16 +85,16 @@ static void _test_motor_test(int motorNo, int steps)
 	int i;
 
 	memset(&par, 0, sizeof(par));
-	par.speed		= 1000;
-	par.accel		= 1000;
-	par.current_acc	= 50.0;
-	par.current_run	= 50.0;
+	par.speed		= 5000;
+	par.accel		= 32000;
+	par.current_acc	= 100.0;
+	par.current_run	= 100.0;
 	par.stop_mux	= 0;
 	par.dis_mux_in	= 0;
-	par.encCheck	= chk_off;
+	par.encCheck	= chk_std;
 	RX_StepperStatus.info.moving = TRUE;
 	
 //	motors_config(motors,  CURRENT_HOLD, 0.0, 0.0);
-	motors_config(motors,  0, 0.0, 0.0);
+	motors_config(motors,  0, L3518_STEPS_PER_METER, L3518_INC_PER_METER);
 	motors_move_by_step(motors, &par, steps, FALSE);			
 }
