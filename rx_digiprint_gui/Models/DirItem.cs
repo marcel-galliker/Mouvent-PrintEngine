@@ -2,6 +2,7 @@
 using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Models.Enums;
 using RX_DigiPrint.Properties;
+using RX_DigiPrint.Services;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -111,6 +112,7 @@ namespace RX_DigiPrint.Models
                                 Directory.CreateDirectory(Path.GetDirectoryName(thumb_name));
                                 File.Copy(preview, thumb_name, true);
                             }
+                            if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LH702) PreviewOrientation=90;
                             Preview = new BitmapImage(new Uri(thumb_name));
                         }
                         catch(Exception)

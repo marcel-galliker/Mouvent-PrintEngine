@@ -47,6 +47,7 @@ static int				_step_ThreadRunning;
 static RX_SOCKET		_step_Socket[STEPPER_CNT];
 static int				_StepperType=STEPPER_STD;
 static SPrintQueueItem	_PQItem;
+static int				_LB_Rob;
 	
 //--- prototypes -----------------------
 static void* _step_thread		(void *par);
@@ -59,6 +60,7 @@ int	 step_init(void)
 {	
 	int i;
 	_step_ThreadRunning = TRUE;
+	_LB_Rob = FALSE;
 	memset(&RX_StepperStatus, 0, sizeof(RX_StepperStatus));
 	//memset(&RX_ClnStatus, 0, sizeof(RX_ClnStatus));
 	for (i=0; i<SIZEOF(_step_Socket); i++)
@@ -152,6 +154,7 @@ int	 step_active(int no)
 static int _step_handle_msg(RX_SOCKET socket, void *msg, int len, struct sockaddr *sender, void *par)
 {
 	SMsgHdr			*phdr = (SMsgHdr*)msg;
+	SStepperStat	*pStat = (SStepperStat*)&phdr[1];
 	int no;
 	int ret;
 	
@@ -173,14 +176,17 @@ static int _step_handle_msg(RX_SOCKET socket, void *msg, int len, struct sockadd
 				
 				case REP_TT_STATUS:	switch(_StepperType)
 									{
-									case STEPPER_CLEAF: ret = stepc_handle_status		(no, (SStepperStat*)&phdr[1]); break;
-									case STEPPER_TX:	ret = steptx_handle_status		(no, (SStepperStat*)&phdr[1]); break;
-									case STEPPER_LB:	ret = steplb_handle_status		(no, (SStepperStat*)&phdr[1]); break;
-									case STEPPER_DP:	ret = stepdp_handle_status		(no, (SStepperStat*)&phdr[1]); break;
-									case STEPPER_TEST:	ret = steptest_handle_status	(no, (SStepperStat*)&phdr[1]); break;
-									default:			ret = steps_handle_status		(	 (SStepperStat*)&phdr[1]); break;
+									case STEPPER_CLEAF: ret = stepc_handle_status		(no, pStat); break;
+									case STEPPER_TX:	ret = steptx_handle_status		(no, pStat); break;
+									case STEPPER_LB:	_LB_Rob |= pStat->robot_used;
+														if (_LB_Rob && !pStat->robot_used) ErrorEx(dev_stepper, no, ERR_CONT, 0, "ROBOT_USED bridge not set");
+														ret = steplb_handle_status		(no, pStat); break;
+									case STEPPER_DP:	ret = stepdp_handle_status		(no, pStat); break;
+									case STEPPER_TEST:	ret = steptest_handle_status	(no, pStat); break;
+									default:			ret = steps_handle_status		(	 pStat); break;
 									}
-									fluid_control_robot();
+									
+									fluid_control_robot(_LB_Rob);
 									return ret;
 			}
 		}

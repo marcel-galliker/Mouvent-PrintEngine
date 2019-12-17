@@ -132,7 +132,8 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <UseVSHostingProcess>false</UseVSHostingProcess>
-    <DocumentationFile>RX_DigiPrint.XML</DocumentationFile>
+    <DocumentationFile>
+    </DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
@@ -1383,6 +1384,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Resource Include="Resources\Bitmaps\PG_Mark_Virtual.ico" />
     <Resource Include="Resources\Bitmaps\RunList.png" />
     <Resource Include="Resources\Bitmaps\LH702\LH702.jpg" />
     <Resource Include="Resources\Bitmaps\UV_Lamp_OFF.ico" />

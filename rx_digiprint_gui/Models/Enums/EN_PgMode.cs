@@ -16,9 +16,9 @@ namespace RX_DigiPrint.Models.Enums
             if (_List==null)
             {
                 _List = new List<RxEnum<TcpIp.EPrintGoMode>>();
-                _List.Add(new RxEnum<TcpIp.EPrintGoMode>(TcpIp.EPrintGoMode.PG_MODE_MARK,    "Mark",   new BitmapImage(new Uri("../../Resources/Bitmaps/PG_Mark.ico", UriKind.Relative))));
-                _List.Add(new RxEnum<TcpIp.EPrintGoMode>(TcpIp.EPrintGoMode.PG_MODE_LENGTH, "Length",  new BitmapImage(new Uri("../../Resources/Bitmaps/PG_Length.ico", UriKind.Relative)) ));
-                _List.Add(new RxEnum<TcpIp.EPrintGoMode>(TcpIp.EPrintGoMode.PG_MODE_GAP,    "Gap",     new BitmapImage(new Uri("../../Resources/Bitmaps/PG_Gap.ico", UriKind.Relative))));
+                _List.Add(new RxEnum<TcpIp.EPrintGoMode>(TcpIp.EPrintGoMode.PG_MODE_MARK,   "Mark",   new BitmapImage(new Uri("../../Resources/Bitmaps/PG_Mark.ico", UriKind.Relative))));
+                _List.Add(new RxEnum<TcpIp.EPrintGoMode>(TcpIp.EPrintGoMode.PG_MODE_LENGTH, "Length", new BitmapImage(new Uri("../../Resources/Bitmaps/PG_Length.ico", UriKind.Relative)) ));
+                _List.Add(new RxEnum<TcpIp.EPrintGoMode>(TcpIp.EPrintGoMode.PG_MODE_GAP,    "Gap",    new BitmapImage(new Uri("../../Resources/Bitmaps/PG_Gap.ico", UriKind.Relative))));
             }
         }
 
@@ -26,6 +26,27 @@ namespace RX_DigiPrint.Models.Enums
         {
             return (IEnumerator)new RxListEnumerator<RxEnum<TcpIp.EPrintGoMode>>(_List);
         }
+    }
 
+    public class EN_PgModeList_LH702: IEnumerable
+    {
+        private static List<RxEnum<TcpIp.EPrintGoMode>> _List;
+
+        public EN_PgModeList_LH702()
+        {
+            if (_List==null)
+            {
+                _List = new List<RxEnum<TcpIp.EPrintGoMode>>();
+                _List.Add(new RxEnum<TcpIp.EPrintGoMode>(TcpIp.EPrintGoMode.PG_MODE_MARK,       "Mark",   new BitmapImage(new Uri("../../Resources/Bitmaps/PG_Mark.ico", UriKind.Relative))));
+                _List.Add(new RxEnum<TcpIp.EPrintGoMode>(TcpIp.EPrintGoMode.PG_MODE_MARK_VRT,   "MarkV",  new BitmapImage(new Uri("../../Resources/Bitmaps/PG_Mark_Virtual.ico", UriKind.Relative))));
+                _List.Add(new RxEnum<TcpIp.EPrintGoMode>(TcpIp.EPrintGoMode.PG_MODE_LENGTH,     "Length", new BitmapImage(new Uri("../../Resources/Bitmaps/PG_Length.ico", UriKind.Relative)) ));
+                _List.Add(new RxEnum<TcpIp.EPrintGoMode>(TcpIp.EPrintGoMode.PG_MODE_GAP,        "Gap",    new BitmapImage(new Uri("../../Resources/Bitmaps/PG_Gap.ico", UriKind.Relative))));
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return (IEnumerator)new RxListEnumerator<RxEnum<TcpIp.EPrintGoMode>>(_List);
+        }
     }
 }

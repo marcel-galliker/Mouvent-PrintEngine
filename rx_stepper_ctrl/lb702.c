@@ -31,7 +31,7 @@
 
 #define MAX_ALIGN		10000	// microns
 
-
+#define ROBOT_USED_IN		10
 #define PRINTHEAD_EN		11	// Input from SPS // '1' Allows Head to go down
 
 #define STEPS_REV		200*16	// steps per motor revolution * 16 times oversampling
@@ -59,6 +59,8 @@ static int  _micron_2_steps(int micron);
 //--- lb702_init --------------------------------------
 void lb702_init(void)
 {
+	RX_StepperStatus.robot_used = fpga_input(ROBOT_USED_IN);
+		
 	motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER);
 	memset(_CmdName, 0, sizeof(_CmdName));
 
@@ -107,7 +109,6 @@ void lb702_main(int ticks, int menu)
 	RX_StepperStatus.info.headUpInput_0 = fpga_input(HEAD_UP_IN_0);
 	RX_StepperStatus.info.headUpInput_1 = fpga_input(HEAD_UP_IN_1);
 	RX_StepperStatus.posZ			    = motor_get_step(MOTOR_Z_0);
-	RX_StepperStatus.posY				= motor_get_step(MOTOR_Z_1);
 	
 	if(RX_StepperCfg.use_printhead_en)
 	{
@@ -180,28 +181,36 @@ static void _lb702_display_status(void)
 //--- lb702_menu --------------------------------------------------
 int lb702_menu(void)
 {
+	static int _help=FALSE;
 	char str[MAX_PATH];
 	int synth=FALSE;
-	static int cnt=0;
 	int pos=10000;
 
 	_lb702_display_status();
 	
 	term_printf("LB 702 MENU -------------------------\n");
-	term_printf("s: STOP\n");
-	term_printf("r<n>: reset motor<n>\n");	
-	term_printf("R: Reference\n");
-	term_printf("c: move to cap\n");
-	term_printf("u: move to UP position\n");
-	term_printf("p: move to print\n");
-	term_printf("z: move by <steps>\n");
-	term_printf("m<n><steps>: move Motor<n> by <steps>\n");	
-	term_printf("x: exit\n");
+	if (_help)
+	{
+		term_printf("s: STOP\n");
+		term_printf("r<n>: reset motor<n>\n");	
+		term_printf("R: Reference\n");
+		term_printf("c: move to cap\n");
+		term_printf("u: move to UP position\n");
+		term_printf("p: move to print\n");
+		term_printf("z: move by <steps>\n");
+		term_printf("m<n><steps>: move Motor<n> by <steps>\n");	
+		term_printf("x: exit\n");		
+	}
+	else
+	{
+		term_printf("?: help\n");
+	}
 	term_printf(">");
 	term_flush();
 
 	if (term_get_str(str, sizeof(str)))
 	{
+		_help = FALSE;
 		switch (str[0])
 		{
 		case 's': lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_STOP,		NULL); break;
@@ -211,7 +220,8 @@ int lb702_menu(void)
 		case 'p': lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_PRINT_POS,	&pos); break;
 		case 'u': lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_UP_POS,		NULL); break;
 		case 'z': _lb702_motor_z_test(atoi(&str[1]));break;
-		case 'm': _lb702_motor_test(str[1]-'0', atoi(&str[2]));break;			
+		case 'm': _lb702_motor_test(str[1]-'0', atoi(&str[2]));break;
+		case '?': _help=TRUE; break;
 		case 'x': return FALSE;
 		}
 	}

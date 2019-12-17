@@ -41,7 +41,7 @@ static EnFluidCtrlMode  _PurgeCtrlMode = ctrl_undef;
 static int				_PurgeAll=FALSE;
 static int				_Scanning;
 static int				_ScalesFluidNo=-1;
-
+	
 //--- prototypes -----------------------
 static void* _fluid_thread(void *par);
 
@@ -433,6 +433,7 @@ static void _do_fluid_stat(int fluidNo, SFluidBoardStat *pstat)
 	*/
 	
 	memcpy(&_FluidStatus[fluidNo*INK_PER_BOARD], &pstat->stat[0], INK_PER_BOARD*sizeof(_FluidStatus[0]));
+		
 	if      (_FluidCtrlMode>=ctrl_flush_night && _FluidCtrlMode<=ctrl_flush_done) _control_flush();
 //	else if (_RobotCtrlMode>=ctrl_wipe        && _RobotCtrlMode<ctrl_fill       && fluidNo==0) _control_robot();
 	else _control(fluidNo);
@@ -659,7 +660,7 @@ static void _control_flush(void)
 }								
 
 //--- fluid_control_robot -------------------------------------------------
-void fluid_control_robot(void)
+void fluid_control_robot(int lbrob)
 {
 	static int	_printing;		
 

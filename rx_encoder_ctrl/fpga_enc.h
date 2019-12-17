@@ -42,7 +42,7 @@ int   fpga_pg_config_fhnw(UINT32 posActual, UINT32 posFwd, UINT32 posBwd);
 
 void  fpga_pg_init(int restart);
 void  fpga_pg_stop(void);
-void  fpga_pg_set_dist(int cnt, int dist);
+void  fpga_pg_set_dist(SPageId *pid, int cnt, int dist);
 int	  fpga_get_restart_ignore(void);
 void  fpga_set_printmark(SEncoderPgDist *pmsg);
 

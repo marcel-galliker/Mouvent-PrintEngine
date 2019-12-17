@@ -105,7 +105,7 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
 	int i;
 	ETestTableInfo info;
 	memcpy(&_Status[no], pStatus, sizeof(_Status[no]));
-
+	
 	memset(&info, 0, sizeof(info));
 	info.printhead_en	= TRUE;
 	info.ref_done		= TRUE;

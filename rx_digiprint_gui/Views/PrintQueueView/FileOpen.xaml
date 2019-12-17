@@ -52,7 +52,7 @@
                 SelectedRowsCollectionChanged="DirGrid_SelectedRowsCollectionChanged"
                 ScrollViewer.PanningMode="VerticalOnly"
                 RowHover="Row"
-                IsVisibleChanged="DirGrid_IsVisibleChanged"
+                IsVisibleChanged="DirGrid_IsVisibleChanged" Margin="5,2,-5,-2"
                 >
             <!-- 
                 StylusSystemGesture="DirGrid_StylusSystemGesture"

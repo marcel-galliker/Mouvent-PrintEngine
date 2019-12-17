@@ -627,9 +627,11 @@ namespace RX_DigiPrint.Services
 
         public enum EPrintGoMode : int
         {
-            PG_MODE_MARK	=1,	// print mark to PG
+            PG_MODE_MARK	=1,	// print mark to PG (IN[0])
 			PG_MODE_LENGTH,		// distance between two GPs
-			PG_MODE_GAP,        // gap getween images        
+			PG_MODE_GAP,        // gap getween images
+            PG_MODE_MARK_FILTER,
+            PG_MODE_MARK_VRT,   // rint mark to PG (IN[1])
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -1120,6 +1122,8 @@ namespace RX_DigiPrint.Services
 
 	        SVersion	        swVersion;
 	        SVersion	        fpgaVersion;
+
+            public Int32		robot_used;
 
             public UInt32		info;
             public UInt32		robinfo;

@@ -39,4 +39,4 @@ INT32 fluid_get_pumpFeedback   (int no);
 INT32 fluid_get_amcTemp        (int no);
 INT32 fluid_get_error          (int no);
 
-void fluid_control_robot(void);
+void fluid_control_robot(int lbrob);

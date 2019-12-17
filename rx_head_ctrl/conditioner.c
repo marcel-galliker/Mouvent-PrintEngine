@@ -281,7 +281,7 @@ void cond_error_check(void)
         	if (_NiosStat->cond[head].error&COND_ERR_temp_tank_too_low)		    ErrorFlag(level=ERR(cont),	perr, COND_ERR_temp_tank_too_low,		0, "Conditioner %s: temp_tank_too_low", headName);
         	if (_NiosStat->cond[head].error&COND_ERR_p_in_too_high)				ErrorFlag(level=WARN,		pwrn, COND_ERR_p_in_too_high,			0, "Conditioner %s: input pressure too high", headName);
         	if (_NiosStat->cond[head].error&COND_ERR_p_out_too_high)			ErrorFlag(level=ERR(abort),	perr, COND_ERR_p_out_too_high,			0, "Conditioner %s: output pressure too high", headName);
-        	if (_NiosStat->cond[head].error&COND_ERR_pump_no_ink)				ErrorFlag(level=WARN,       perr, COND_ERR_pump_no_ink,				0, "Conditioner %s: no ink: actVal=%d, setVal=%d, sum=%d", headName, pstat->pressure_out, pstat->pid_setval, pstat->pid_sum);
+        	if (_NiosStat->cond[head].error&COND_ERR_pump_no_ink)				ErrorFlag(level=WARN,       perr, COND_ERR_pump_no_ink,				0, "Conditioner %s: no ink: actVal=%d, sum=%d", headName, pstat->pressure_out, pstat->pid_sum);
 	    	/*
 	    	if (_NiosStat->cond[head].error&COND_ERR_pump_no_ink)				
 	    	{
@@ -648,7 +648,7 @@ void cond_set_clusterNo(INT32 clusterNo)
 void cond_setInk(int headNo, SInkDefinition *pink)
 {
 	if (headNo<0 || headNo>=MAX_HEADS_BOARD || _NiosMem==NULL) return;	
-	
+	RX_HBStatus->head[headNo].tempSetpoint		 = pink->temp    *1000;
 	_NiosMem->cfg.cond[headNo].temp				 = pink->temp    *1000;
 	_NiosMem->cfg.cond[headNo].tempMax			 = pink->tempMax *1000;		
 	_NiosMem->cfg.cond[headNo].meniscus_setpoint = pink->meniscus;

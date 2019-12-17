@@ -36,7 +36,7 @@ static int	_Trace=0;
 #define SIMU_WRITE	1	// write data to file
 #define SIMU_READ	2	// test reading files, no sending, no writing
 
-static int	_Simulation=SIMU_OFF;
+static int	_Simulation=SIMU_WRITE;
 
 // #define RAW_SOCKET
 
@@ -68,6 +68,7 @@ typedef struct
 	int				errorSent;
 	int				boardNo;
 	SPageId			lastId[HEAD_CNT];
+	UINT8			blkData[DATA_BLOCK_SIZE_JUMBO+2];
 } SHBThreadPar;
 
 //--- static vairables --------------------------------------------------------
@@ -714,7 +715,12 @@ static int _send_to_board(SHBThreadPar *par, int head, int blkNo, int blkCnt)
 			{
 			//	if (i==0) pinfo->wasFree=TRUE;
 				par->msg.blkNo = dstBlk;
-				data_fill_blk(pinfo, i, par->msg.blkData, FALSE);
+				if (RX_Spooler.printerType==printer_LH702)
+				{
+					data_fill_blk(pinfo, i, &par->msg.blkData[1], TRUE);
+					memcpy(par->msg.blkData, &par->blkData[1], sizeof(par->msg.blkData));
+				}
+				else data_fill_blk(pinfo, i, par->msg.blkData, FALSE);
 				/*
 				if (TRUE)
 				{

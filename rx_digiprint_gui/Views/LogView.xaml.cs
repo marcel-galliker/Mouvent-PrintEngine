@@ -1,4 +1,5 @@
-﻿using RX_DigiPrint.Models;
+﻿using RX_Common;
+using RX_DigiPrint.Models;
 using RX_DigiPrint.Services;
 using System;
 using System.Diagnostics;
@@ -103,7 +104,10 @@ namespace RX_DigiPrint.Views
             if (LogGrid.MinimumRowHeight!=0)
             {
                 UInt32 rows;
-                rows = ((UInt32)(LogGrid.ActualHeight/LogGrid.MinimumRowHeight))-1;
+                rows = (UInt32)(LogGrid.ActualHeight/LogGrid.MinimumRowHeight);
+                if (RxScreen.Screen.Surface) rows-=2;
+                else rows-=1;
+
                 Scroll.ViewportSize = rows;
                 if (rows>2) Scroll.LargeChange  = rows-2;
                 else        Scroll.LargeChange  = 1;

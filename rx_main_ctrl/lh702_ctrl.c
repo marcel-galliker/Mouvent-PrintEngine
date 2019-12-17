@@ -53,7 +53,7 @@ static SPrintQueueItem	*_pItem;
 static int		_IncPerMeter;
 static int		_WakeupLen;
 static int		_PrintGo_Dist;
-static int		_PrintGo_Mode;
+static int		_PrintMark_Mode;
 static int		_Scanning=FALSE;
 static int		_DistTelCnt=0;
 static int		_TotalPgCnt;

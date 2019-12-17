@@ -41,6 +41,7 @@
 
 static int _ALL=FALSE;	// show all registers
 
+#define ID_CNT 128
 //--- defines -----------------------------------------------------------------
 //--- sub zero power levels ----------------- 
 //	0x00:	 0%	Do not use
@@ -133,6 +134,7 @@ static INT32	_Ignore;
 static int		_FirstMarkPos;
 static int		_RevSumStart[8];
 static int		_Restarted = FALSE;
+static SPageId	_ID[ID_CNT];
 
 static FILE	*_LogFile = NULL;
 
@@ -907,7 +909,7 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg, int restart)
 		_FirstMarkPos=0;		
 	}
 	
-	if (pcfg->printGoMode==PG_MODE_MARK || pcfg->printGoMode==PG_MODE_MARK_FILTER)
+	if (pcfg->printGoMode==PG_MODE_MARK || pcfg->printGoMode==PG_MODE_MARK_FILTER || RX_EncoderCfg.printGoMode==PG_MODE_MARK_VRT)
 	{
 		//	Fpga->cfg.general.min_mark_len	  = 1000;
 		Fpga->cfg.general.shift_delay_tel		= (int)((pcfg->printGoDist   -Fpga->cfg.general.min_mark_len)/_StrokeDist);				
@@ -949,7 +951,7 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg, int restart)
 			Error(LOG, 0, "Restart: pos_in=%d, pg_start_pos=%d, Fifo_used=%d, PGMode=%d", Fpga->stat.encIn[0].position, Fpga->stat.encOut[0].pg_start_pos, Fpga->cfg.pg[pgNo].fifos_used, pcfg->printGoMode);
 			if (Fpga->stat.encIn[0].position>Fpga->stat.encOut[0].pg_start_pos && Fpga->stat.encIn[0].position>500000)
 				Error(ERR_ABORT, 0, "PAUSE: Moving back is too short! pos_in=%d, pg_start_pos=%d", Fpga->stat.encIn[0].position, Fpga->stat.encOut[0].pg_start_pos);
-			if (pcfg->printGoMode==PG_MODE_MARK || pcfg->printGoMode==PG_MODE_MARK_FILTER)
+			if (pcfg->printGoMode==PG_MODE_MARK || pcfg->printGoMode==PG_MODE_MARK_FILTER || pcfg->printGoMode==PG_MODE_MARK_VRT)
 			{
 				Fpga->cfg.encIn[pgNo].reset_pos = 0;
 				Fpga->cfg.pg[pgNo].enc_start_pos_fwd = _micron2inc(pcfg->pos_pg_fwd-100);	
@@ -978,8 +980,9 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg, int restart)
 		{
 			switch(pcfg->printGoMode)
 			{
-			case PG_MODE_MARK:			Fpga->cfg.pg[pgNo].fifos_used = FIFOS_MARKREADER; break;
-			case PG_MODE_MARK_FILTER:	Fpga->cfg.pg[pgNo].fifos_used = FIFOS_MARKFILTER; break;
+			case PG_MODE_MARK:			Fpga->cfg.pg[pgNo].fifos_used = FIFOS_MARKREADER; Fpga->cfg.pg[pgNo].dig_in_sel=0; break;
+			case PG_MODE_MARK_FILTER:	Fpga->cfg.pg[pgNo].fifos_used = FIFOS_MARKFILTER; Fpga->cfg.pg[pgNo].dig_in_sel=0; break;
+			case PG_MODE_MARK_VRT:		Fpga->cfg.pg[pgNo].fifos_used = FIFOS_MARKFILTER; Fpga->cfg.pg[pgNo].dig_in_sel=1; break;
 			default:					Fpga->cfg.pg[pgNo].fifos_used = FIFOS_DIST; 
 			}			
 		}
@@ -1009,6 +1012,7 @@ void fpga_pg_init(int restart)
 
 	TrPrintfL(TRUE, "fpga_pg_init: level=%d", FpgaQSys->printGo_status.fill_level);
 	
+	memset(_ID, 0, sizeof(_ID));
 	if (!restart) _PrintGo_Locked = TRUE;
 	if (!restart) 
 	{
@@ -1084,7 +1088,7 @@ void  fpga_pg_stop(void)
 }
 
 //--- fpga_pg_set_dist -------------------------------------------
-void  fpga_pg_set_dist(int cnt, int dist)
+void  fpga_pg_set_dist(SPageId *pid, int cnt, int dist)
 {
 	if (_PrintGo_Enabled)
 	{
@@ -1101,9 +1105,10 @@ void  fpga_pg_set_dist(int cnt, int dist)
 		}
 					
 		for (pgNo=0; pgNo<SIZEOF(Fpga->cfg.pg); pgNo++) Fpga->cfg.pg[pgNo].fifos_ready = TRUE;
-
+		
+		memcpy(&_ID[RX_EncoderStatus.distTelCnt%ID_CNT], pid, sizeof(SPageId));
+		TrPrintfL(TRUE, "fpga_pg_set_dist[%d] (id=%d, page=%d, copy=%d, scan=%d) dist=%d, distTelCnt=%d, FIFO=%d", RX_EncoderStatus.distTelCnt, pid->id, pid->page, pid->copy, pid->scan, dist, RX_EncoderStatus.distTelCnt, FpgaQSys->printGo_status.fill_level);
 		RX_EncoderStatus.distTelCnt++;
-		TrPrintfL(TRUE, "fpga_pg_set_dist(no=%d, cnt=%d, dist=%d) distTelCnt=%d, FIFO=%d", RX_EncoderStatus.distTelCnt, c, dist, RX_EncoderStatus.distTelCnt, FpgaQSys->printGo_status.fill_level);
 		
 	//	Error(LOG, 0, "fpga_pg_set_dist dist=%d, incs=%d", dist, incs);		
 	}
@@ -1131,7 +1136,7 @@ void  fpga_set_printmark(SEncoderPgDist *pmsg)
 	for (pgNo=0; pgNo<SIZEOF(Fpga->cfg.pg); pgNo++) Fpga->cfg.pg[pgNo].fifos_ready = TRUE;
 
 	RX_EncoderStatus.distTelCnt++;
-	TrPrintfL(TRUE, "fpga_set_printmark(no=%d, cnt=%d, dist=%d, ignore=%d, window=%d) FIFO=%d", RX_EncoderStatus.distTelCnt, pmsg->cnt, pmsg->dist, pmsg->ignore, pmsg->window, FpgaQSys->window_status.fill_level);
+	TrPrintfL(TRUE, "fpga_set_printmark(no=%d, (id=%d, page=%d, copy=%d, scan=%d) cnt=%d, dist=%d, ignore=%d, window=%d) FIFO=%d", RX_EncoderStatus.distTelCnt, pmsg->id.id, pmsg->id.page, pmsg->id.copy, pmsg->id.scan, pmsg->cnt, pmsg->dist, pmsg->ignore, pmsg->window, FpgaQSys->window_status.fill_level);
 }
 
 //--- _pg_ctrl ------------------------------------------------------
@@ -1146,15 +1151,16 @@ static void  _pg_ctrl(void)
 		{
 			static int _lastPos=0;
 			int pos = Fpga->stat.encOut[0].position;
+			SPageId *pid = &_ID[RX_EncoderStatus.PG_cnt%ID_CNT];
 			if (Fpga->cfg.pg[0].fifos_used==FIFOS_DIST)
 			{
-				if (RX_EncoderStatus.PG_cnt==0) TrPrintfL(TRUE, "PrintGo[%d]: pos_1200=%d, FIFO=%d", RX_EncoderStatus.PG_cnt, pos, FpgaQSys->printGo_status.fill_level);
-				else							TrPrintfL(TRUE, "PrintGo[%d]: pos_1200=%d, dist=%d, pos_in=%d, pg_start_pos=%d, FIFO=%d", RX_EncoderStatus.PG_cnt, pos, pos-_lastPos, Fpga->stat.encIn[0].position, Fpga->stat.encOut[0].pg_start_pos, FpgaQSys->printGo_status.fill_level);				
+				if (RX_EncoderStatus.PG_cnt==0) TrPrintfL(TRUE, "PrintGo[%d]: (id=%d, page=%d, copy=%d, scan=%d) pos_1200=%d, FIFO=%d", RX_EncoderStatus.PG_cnt, pid->id, pid->page, pid->copy, pid->scan, pos, FpgaQSys->printGo_status.fill_level);
+				else							TrPrintfL(TRUE, "PrintGo[%d]: (id=%d, page=%d, copy=%d, scan=%d) pos_1200=%d, dist=%d, pos_in=%d, pg_start_pos=%d, FIFO=%d", RX_EncoderStatus.PG_cnt, pid->id, pid->page, pid->copy, pid->scan, pos, pos-_lastPos, Fpga->stat.encIn[0].position, Fpga->stat.encOut[0].pg_start_pos, FpgaQSys->printGo_status.fill_level);				
 			}
 			else				
 			{
-				if (RX_EncoderStatus.PG_cnt==0) TrPrintfL(TRUE, "PrintGo[%d]: pos_1200=%d, FIFO=%d", RX_EncoderStatus.PG_cnt, pos, FpgaQSys->window_status.fill_level);
-				else							TrPrintfL(TRUE, "PrintGo[%d]: pos_1200=%d, dist=%d, pos_in=%d, pg_start_pos=%d, FIFO=%d", RX_EncoderStatus.PG_cnt, pos, pos-_lastPos, Fpga->stat.encIn[0].position, Fpga->stat.encOut[0].pg_start_pos, FpgaQSys->window_status.fill_level);				
+				if (RX_EncoderStatus.PG_cnt==0) TrPrintfL(TRUE, "PrintGo[%d]: (id=%d, page=%d, copy=%d, scan=%d) pos_1200=%d, FIFO=%d", RX_EncoderStatus.PG_cnt, pid->id, pid->page, pid->copy, pid->scan, pos, FpgaQSys->window_status.fill_level);
+				else							TrPrintfL(TRUE, "PrintGo[%d]: (id=%d, page=%d, copy=%d, scan=%d) pos_1200=%d, dist=%d, pos_in=%d, pg_start_pos=%d, FIFO=%d", RX_EncoderStatus.PG_cnt, pid->id, pid->page, pid->copy, pid->scan, pos, pos-_lastPos, Fpga->stat.encIn[0].position, Fpga->stat.encOut[0].pg_start_pos, FpgaQSys->window_status.fill_level);				
 			}
 			_lastPos = pos;
 			send=TRUE;
@@ -1371,7 +1377,7 @@ static void _simu_markreader(void)
 	static UINT32 _PM_LastPos=0;
 	static UINT32 _digin_edge_dist;
 	
-	if(RX_EncoderCfg.printGoMode==PG_MODE_MARK || RX_EncoderCfg.printGoMode==PG_MODE_MARK_FILTER)
+	if(RX_EncoderCfg.printGoMode==PG_MODE_MARK || RX_EncoderCfg.printGoMode==PG_MODE_MARK_FILTER || RX_EncoderCfg.printGoMode==PG_MODE_MARK_VRT)
 	{
 //		FpgaQSys->out &= ~MARKREADER_SIMU_OUT;
 		if (Fpga->cfg.encOut[0].synthetic_freq)

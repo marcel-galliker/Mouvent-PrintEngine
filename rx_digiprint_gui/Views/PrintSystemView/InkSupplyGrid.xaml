@@ -32,7 +32,7 @@
         <TextBlock Grid.Row="0" Grid.Column="1" Text="Ink"  VerticalAlignment="Center"/>
         <TextBlock Grid.Row="1" Grid.Column="0" Text="Side" VerticalAlignment="Center" x:Name="TX_Side"/>
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Text="Control Mode"/>
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="Control Mode" VerticalAlignment="Center"/>
 
         <TextBlock Grid.Row="3" Grid.Column="0" Text="Canister Level"/>
         <TextBlock Grid.Row="3" Grid.Column="1" Padding="3,0,0,0" Text="Kg"/>
@@ -61,7 +61,7 @@
             <TextBlock Grid.Row="0" Grid.Column="0" Text="Humidity"/>
             <TextBlock Grid.Row="0" Grid.Column="1" Padding="3,0,0,0" Text="%"/>
             -->
-            <TextBlock Grid.Row="1" Grid.Column="0" Text="Pressure Inlet Cond." Height="20" VerticalAlignment="Top"/>
+            <TextBlock Grid.Row="1" Grid.Column="0" Text="Pressure Inlet Cond." VerticalAlignment="Top"/>
             <TextBlock Grid.Row="1" Grid.Column="1" Padding="3,0,0,0" Text="mbar"/>
 
             <TextBlock Grid.Row="2" Grid.Column="0" Text="Pressure Ink Tank"/>

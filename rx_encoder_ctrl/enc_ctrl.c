@@ -294,10 +294,10 @@ static int _do_encoder_pg_dist(RX_SOCKET socket, SEncoderPgDist *pmsg)
 	// TrPrintfL(TRUE, "_do_encoder_pg_dist(no=%d, cnt=%d, dist=%d) time=%d", ++_PgNo, pmsg->cnt, pmsg->dist, time-_time);
 	_time=time;
 	memcpy(&_DistMsg[_PgNo%SIZEOF(_DistMsg)], pmsg, sizeof(SEncoderPgDist));
-	if (pmsg->printGoMode==PG_MODE_MARK || pmsg->printGoMode==PG_MODE_MARK_FILTER) 
+	if (pmsg->printGoMode==PG_MODE_MARK || pmsg->printGoMode==PG_MODE_MARK_FILTER || pmsg->printGoMode==PG_MODE_MARK_VRT) 
 		fpga_set_printmark(pmsg);
 	else
-		fpga_pg_set_dist(pmsg->cnt, pmsg->dist);
+		fpga_pg_set_dist(&pmsg->id, pmsg->cnt, pmsg->dist);
 	_PgNo++;
 	return REPLY_OK;
 }
@@ -317,7 +317,7 @@ static int _do_encoder_pg_restart(RX_SOCKET socket)
 	{
 		pmsg = &_DistMsg[i%SIZEOF(_DistMsg)];
 		TrPrintfL(TRUE, "_do_encoder_pg_dist(no=%d, printGoMode=%d, cnt=%d, dist=%d)", i, pmsg->printGoMode, pmsg->cnt, pmsg->dist);
-		if (pmsg->printGoMode==PG_MODE_MARK || pmsg->printGoMode==PG_MODE_MARK_FILTER) 
+		if (pmsg->printGoMode==PG_MODE_MARK || pmsg->printGoMode==PG_MODE_MARK_FILTER || pmsg->printGoMode==PG_MODE_MARK_VRT) 
 		{
 			if (i==RX_EncoderStatus.PG_cnt)
 			{
@@ -330,7 +330,7 @@ static int _do_encoder_pg_restart(RX_SOCKET socket)
 			else 	
 				fpga_set_printmark(pmsg);
 		}
-		else fpga_pg_set_dist(pmsg->cnt, pmsg->dist);
+		else fpga_pg_set_dist(&pmsg->id , pmsg->cnt, pmsg->dist);
 	}
 
 	fpga_enc_config(0, &RX_EncoderCfg, TRUE);

@@ -231,9 +231,11 @@ typedef struct SConditionerStat_mcu
 	SCondCmd		cmdConfirm;
 		
 	//actual values
+	UINT32			pressure_in_ID;
 	INT32			pressure_in;
 	INT32			pressure_in_max;
 	INT32			pressure_in_diff;
+	UINT32			pressure_out_ID;
 	INT32			pressure_out;		
 	INT32			pressure_out_diff;
 	
@@ -244,12 +246,10 @@ typedef struct SConditionerStat_mcu
 	
 	UINT32			pump;				// rpm (calculated based on actual/desired output pressure)
 	UINT32			pump_measured;		// measured rpm
-    //INT32           pump_pid;         // actual PID value
 	UINT32			tempIn;				// actual Temp (1/1000 °C)
     UINT32			tempHeater;		    // Temperature measured directly on heater cartridge (>= Revision #h) (1/1000 °C)
 	UINT32			heater_percent;		// heater on time (between 0% and 80%)
 	INT32			tempReady;			// temp ink = setpoint +/- 1°C
-	UINT32			tempSetpoint;		// Setpoint temperature
 	UINT32			mode;				// EnFluidCtrlMode
 	SCondStatus		gpio_state;			// state of GPIO Inputs
 	UINT32			error;
@@ -261,8 +261,6 @@ typedef struct SConditionerStat_mcu
 
 	UINT32			pid_P;
 	UINT32			pid_I;
-    
-	INT32			pid_setval;
 	INT32			pid_sum;
 
 	//Saved values on Flash

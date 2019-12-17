@@ -22,7 +22,7 @@ namespace RX_DigiPrint.Views.LH702View
         {
             InitializeComponent();
 
-            CB_PrintGoMode.ItemsSource  = new EN_PgModeList();
+            CB_PrintGoMode.ItemsSource  = new EN_PgModeList_LH702();
         }
 
         //--- Property CanDelete ---------------------------------------

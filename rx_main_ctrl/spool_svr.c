@@ -678,6 +678,7 @@ static int _do_print_file_evt	(RX_SOCKET socket, SPrintFileMsg	*msg)
 //--- _do_print_done_evt ---------------------
 static void _do_print_done_evt	(RX_SOCKET socket, SPrintDoneMsg *msg)
 {
+	RX_PrinterStatus.printGoCnt++;
 	for (int i=0; i<8*sizeof(_HeadBoardUsedFlags); i++)
 		if (_HeadBoardUsedFlags & (1<<i))
 			pc_print_done(i, msg);

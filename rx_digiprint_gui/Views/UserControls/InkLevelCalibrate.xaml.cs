@@ -21,11 +21,14 @@ namespace RX_DigiPrint.Views.UserControls
     /// </summary>
     public partial class InkLevelCalibrate : Window
     {
+        static private double _RealValue=0;
+
         public InkLevelCalibrate(int value)
         {
             InitializeComponent();
             if (value==TcpIp.INVALID_VALUE) Value.Text = "----";
             else                            Value.Text = (value/1000.0).ToString();
+            NBRealValue.Text = _RealValue.ToString();
         }
 
         //---Ok_Clicked ----------------------------------------
@@ -45,8 +48,8 @@ namespace RX_DigiPrint.Views.UserControls
         {
             get 
             { 
-                double val=NBRealValue.Value;
-                return Convert.ToInt32(val*1000); 
+                _RealValue=NBRealValue.Value;
+                return Convert.ToInt32(_RealValue*1000); 
             }
         }        
 

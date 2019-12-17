@@ -132,7 +132,7 @@ static void _main_loop()
 int main(int argc, char** argv)
 {
 	memset(&RX_StepperStatus, 0, sizeof(RX_StepperStatus));
-	memset(&RX_StepperCfg,		0, sizeof(RX_StepperCfg));
+	memset(&RX_StepperCfg,	  0, sizeof(RX_StepperCfg));
 
 	args_init(argc, argv);
 

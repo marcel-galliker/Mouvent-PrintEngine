@@ -311,10 +311,11 @@ typedef struct SPrintQueueItem
 	INT32	pageHeight;	// µm
 	INT32	pageMargin;	// µm
 	INT32	printGoMode;
-			#define PG_MODE_MARK		1	// print mark to PG
+			#define PG_MODE_MARK		1	// print mark to PG (IN[0])
 			#define PG_MODE_LENGTH		2	// distance between two GPs
 			#define PG_MODE_GAP			3	// gap getween images
-			#define PG_MODE_MARK_FILTER	4	// print mark to PG
+			#define PG_MODE_MARK_FILTER	4	// print mark to PG (IN[0])
+			#define PG_MODE_MARK_VRT	5	// print mark to PG (IN[1])
 	
 	INT32	printGoDist;
 	INT32	scanLength; // mm
@@ -864,8 +865,10 @@ typedef struct SEncoderCfg
 	
 typedef struct SEncoderPgDist
 {
+	SPageId	id;
+	
 	// all distances in microns
-	// allvalues relative to last Print-Go
+	// all values relative to last Print-Go
 	INT32	printGoMode;
 	INT32	cnt;		// number of print-Gos
 	INT32	ignore;	// length from PG until the sensor window is opened  (0=unused)
@@ -1399,6 +1402,8 @@ typedef struct SStepperStat
 	SVersion	swVersion;
 	SVersion	fpgaVersion;
 
+	INT32		robot_used;
+	
 	//--- warnings/errors ----------------
 	ETestTableInfo	info;		// UINT32
 	ERobotInfo		robinfo;	// UINT32

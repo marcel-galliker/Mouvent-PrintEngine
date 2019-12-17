@@ -564,7 +564,7 @@ void temp_tick_10ms (void)
 		RX_Config.temp = TEMP_MAX_HIGH_PUMP;
 	
 	// NEW REGULATION : setpoint/100 + tempMAX = setpoint + 2°C
-	RX_Status.tempSetpoint	= RX_Config.temp;
+//	RX_Status.tempSetpoint	= RX_Config.temp;
 	_HeatPID.Setpoint 		= RX_Config.temp / 100;	
 	// for a good regulation, we need a max at setpoint + 2°C
 	int TempMAX = RX_Config.tempMax;

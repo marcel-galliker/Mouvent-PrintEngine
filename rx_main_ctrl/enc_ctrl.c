@@ -57,7 +57,7 @@ static int		 _EncoderThreadRunning=FALSE;
 static int		_IncPerMeter;
 static int		_WakeupLen;
 static int		_PrintGo_Dist;
-static int		_PrintGo_Mode;
+static int		_PrintMark_Mode;
 static int		_Scanning=FALSE;
 static int		_DistTelCnt=0;
 static int		_FirstPG;
@@ -215,7 +215,7 @@ int	 enc_set_config(void)
 	default:					_Encoder[0].webOffset_mm=5;   break;
 	}
 	_PrintGo_Dist	= 10000;
-	_PrintGo_Mode	= 0;
+	_PrintMark_Mode		= FALSE;
 	_DistTelCnt		= 0;
 	_FirstPG		= TRUE;
 	_TotalPgCnt		= 0;
@@ -401,13 +401,15 @@ static void _enc_start_printing(int no, SPrintQueueItem *pitem, int restart)
 			
 	default:				msg.pos_pg_bwd = 	10000000; break;			
 	}
-		
+	
+	if (arg_simuEncoder)  msg.correction=CORR_OFF;
 	_Encoder[no].ready = FALSE;
 	if (_Encoder[no].socket!=INVALID_SOCKET) // || enc_connect()==REPLY_OK)	
 	{
 		_Encoder[no].timeout = 2;
 		sok_send_2(&_Encoder[no].socket, CMD_ENCODER_CFG, sizeof(msg), &msg);
 	}
+	Error(LOG, 0, "CMD_ENCODER_CFG");
 }
 
 //--- enc_sent_document ------------------------
@@ -427,6 +429,7 @@ void enc_sent_document(int pages, SPageId *pId)
 int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 {
 	int no;
+	static UINT32 _LastId; 
 	
 	if (!memcmp(pId, &_PrintBuf[_PrintBufOut].id, sizeof(SPageId)))
 	{
@@ -434,6 +437,12 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 		_FirstPG = TRUE;
 		_PrintBufOut = (_PrintBufOut+1)%PRINT_BUF_SIZE;
 		TrPrintf(TRUE, "enc_sent_document(%d) _TotalPgCnt=%d", _PrintBuf[_PrintBufOut].pages, _TotalPgCnt);
+	}
+	
+	if (RX_Config.printer.type==printer_LH702 && pId->id!=_LastId)
+	{
+		_LastId  = pId->id;
+		_FirstPG = TRUE;			
 	}
 		
 	if (pId->scan==0xffffffff) return REPLY_OK; // flush
@@ -455,17 +464,18 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 	{
 		SEncoderPgDist dist;
 		memset(&dist, 0, sizeof(dist));
+		if (pId!=NULL) memcpy(&dist.id, pId, sizeof(dist.id));
 		dist.cnt	= 1;
 		dist.dist	= _PrintGo_Dist;
 		dist.printGoMode = pitem->printGoMode;
 		
 	//	Error(LOG, 0, "enc_set_pg id=%d, page=%d, copy=%d, scan=%d, dist=%d", pId->id, pId->page, pId->copy, pId->scan, _PrintGo_Dist);						
+
+		_PrintMark_Mode = (pitem->printGoMode==PG_MODE_MARK) || (pitem->printGoMode==PG_MODE_MARK_VRT);
 		
-		if (pitem->printGoMode!=PG_MODE_MARK) 
-			sok_send_2(&_Encoder[0].socket, CMD_ENCODER_PG_DIST, sizeof(dist), &dist);
+		if (!_PrintMark_Mode) sok_send_2(&_Encoder[0].socket, CMD_ENCODER_PG_DIST, sizeof(dist), &dist);
 
 		_DistTelCnt++;
-		_PrintGo_Mode = pitem->printGoMode;
 		switch(pitem->printGoMode)
 		{
 		case PG_MODE_LENGTH: _PrintGo_Dist = pitem->printGoDist; break;
@@ -478,8 +488,10 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 							 */
 							 break;
 			
-		case PG_MODE_MARK:	 dist.dist	  = pitem->printGoDist;
-							 dist.printGoMode = PG_MODE_MARK_FILTER;
+		case PG_MODE_MARK:	 
+		case PG_MODE_MARK_VRT:
+							 dist.dist		   = pitem->printGoDist;
+							 dist.printGoMode  = PG_MODE_MARK_FILTER;
 							 if (!_FirstPG)
 							 {
 								dist.ignore   = pitem->pageHeight*8/10;
@@ -676,7 +688,7 @@ static void _handle_status(int no, SEncoderStat* pstat)
 			RX_PrinterStatus.printGoCnt++;
 		}
 	}
-	if (_PrintGo_Mode==PG_MODE_MARK && _Encoder[no].printGoCnt==0 && _EncoderStatus[no].meters>_WarnMarkReaderPos)
+	if (_PrintMark_Mode && _Encoder[no].printGoCnt==0 && _EncoderStatus[no].meters>_WarnMarkReaderPos)
 	{
 		Error(WARN, 0, "PrintGo triggered by PrintMark but NO MARK DETECTED after %d meters", _EncoderStatus[no].meters);
 		_WarnMarkReaderPos = _EncoderStatus[no].meters;
@@ -725,10 +737,16 @@ int  enc_ready(void)
 }
 
 //--- enc_simu_encoder ----------------------
+#define LH702_SPEED 20	
+
 int	 enc_simu_encoder(int mmin)
-{
+{	
 	int no;
-	int khz_head = (int)(mmin/60.0/25.4*1200.0);
+	int khz_head;
+	
+	if (mmin && RX_Config.printer.type==printer_LH702) mmin=LH702_SPEED;
+	
+	khz_head = (int)(mmin/60.0/25.4*1200.0);
 //	if (_Printing || !_Khz)
 	if (_Khz != khz_head)
 	{

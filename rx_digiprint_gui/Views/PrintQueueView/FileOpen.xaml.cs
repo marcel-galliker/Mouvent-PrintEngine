@@ -458,6 +458,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
                 int i;
                 int orientation;
                 if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf) orientation=270;
+                else if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LH702) orientation=90;
                 else orientation=0;
                 for (i=0; i<DirGrid.Rows.Count; i++)
                 {

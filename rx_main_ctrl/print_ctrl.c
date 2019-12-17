@@ -487,7 +487,6 @@ static int _print_next(void)
 			*_DataPath	  = 0;
 			_ScanLengthPx = 0;
 			_CopiesStart  = 0;
-			_ChangeJob	  = FALSE;
 			SPrintQueueItem *item = pq_get_next_item();
 			if (item) 
 			{
@@ -600,6 +599,8 @@ static int _print_next(void)
 				TrPrintfL(TRUE, "pq_next_page id=%d, page=%d, copy=%d, scan=%d", _Item.id.id, _Item.id.page, _Item.id.copy, _Item.id.scan);
 				if (_Item.id.copy>_Item.copies || _Item.id.page>_Item.lastPage || _ChangeJob==2)
 				{
+					Error(LOG, 0, "Document sent >>%s<<, copiesTotal=%d, _CopiesStart=%d, _ChangeJob=%d", _Item.filepath, _Item.copiesTotal, _CopiesStart, _ChangeJob);
+					_ChangeJob = 0;
 				//	Error(LOG, 0, "enc_sent_document, _Item.copiesTotal=%d, _CopiesStart=%d, _TotalPgCnt=%d", _Item.copiesTotal, _CopiesStart, _Item.copiesTotal-_CopiesStart);
 					if (_Scanning && arg_simuEncoder)	
 					{

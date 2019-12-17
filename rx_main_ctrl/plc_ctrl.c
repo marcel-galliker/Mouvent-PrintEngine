@@ -260,7 +260,7 @@ static void _plc_set_par_default(void)
 		lc_get_value_by_name_FLOAT(UnitID ".PAR_PRINTING_END_POSITION", &end);
 		if(start == 0.0 || end == 0.0)
 		{
-			lc_set_value_by_name_FLOAT(UnitID ".PAR_PRINTING_START_POSITION", 200.0);	
+			lc_set_value_by_name_FLOAT(UnitID ".PAR_PRINTING_START_POSITION", 300.0);	
 			lc_set_value_by_name_FLOAT(UnitID ".PAR_PRINTING_END_POSITION", 700.0);
 		//	_plc_set_command("", "CMD_SET_PARAMETER");
 		}
@@ -1329,7 +1329,7 @@ int	plc_is_splicing(void)
 //--- _plc_state_ctrl --------------------------------------------
 static void _plc_state_ctrl()
 {		
-	int headIsUp=FALSE;
+	int z_in_print;
 	if (_SimuPLC) _PlcState = plc_pause;
 	else
 	{
@@ -1464,10 +1464,19 @@ static void _plc_state_ctrl()
 				_heads_to_print = TRUE;													
 			}
 		}
-		
+				
+		{
+			z_in_print = RX_StepperStatus.info.z_in_print;
+			if (RX_Config.printer.type==printer_LH702)
+			{
+				if (_SimuEncoder) z_in_print = TRUE;
+			}
+			else if (_SimuPLC) z_in_print = TRUE;			
+		}
+
 		if(_StartPrinting && _StartEncoderItem.pageWidth == 0)
 		{
-	//		Error(LOG, 0, "_StartPrinting=%d, enc_ready=%d, pq_is_ready2print=%d, printState=%d, z_in_print=%d, pageWidth=%d", _StartPrinting, enc_ready(), pq_is_ready2print(&_StartEncoderItem), RX_PrinterStatus.printState, RX_StepperStatus.info.z_in_print, _StartEncoderItem.pageWidth);
+	//		Error(LOG, 0, "_StartPrinting=%d, enc_ready=%d, pq_is_ready2print=%d, printState=%d, z_in_print=%d, pageWidth=%d", _StartPrinting, enc_ready(), pq_is_ready2print(&_StartEncoderItem), RX_PrinterStatus.printState, z_in_print, _StartEncoderItem.pageWidth);
 		}
 		
 		if(_StartPrinting
@@ -1475,8 +1484,7 @@ static void _plc_state_ctrl()
 			&& enc_ready()
 			&& pq_is_ready2print(&_StartEncoderItem) 
 			&& (RX_PrinterStatus.printState == ps_printing || RX_PrinterStatus.printState == ps_ready_power)
-			&& (RX_StepperStatus.info.z_in_print || (_SimuPLC && RX_Config.printer.type!=printer_LH702))
-			)
+			&& z_in_print)
 		{
 			_StartPrinting = FALSE;
 			_head_was_up   = FALSE;

@@ -44,6 +44,7 @@ void main_menu()
 	int cnt;
 	int menu=TRUE;
 	int synth=FALSE;
+	SPageId id;
 	SEncoderCfg cfg;
 
 	cfg.incPerMeter = 1000000;
@@ -72,8 +73,9 @@ void main_menu()
 		case 'c':   _ShowCorrection = !_ShowCorrection; break;
 		case 'p':   _ShowParam = !_ShowParam; break;
 		case 'g':	ch=strstr(str, " ");
-					if (ch) fpga_pg_set_dist(atoi(&str[1]), atoi(ch));	
-					else    fpga_pg_set_dist(1,             atoi(&str[1])); 
+					memset(&id, 0, sizeof(id));
+					if (ch) fpga_pg_set_dist(&id, atoi(&str[1]), atoi(ch));	
+					else    fpga_pg_set_dist(&id, 1,             atoi(&str[1])); 
 					break;
 			
 		case 'h':	memset(&cfg, 0, sizeof(cfg));
