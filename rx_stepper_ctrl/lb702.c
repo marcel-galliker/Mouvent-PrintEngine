@@ -28,9 +28,8 @@
 
 #define HEAD_UP_IN_0	1
 #define HEAD_UP_IN_1	0
-#define POS_UP			-1000
 
-#define MAX_ALIGN		5000
+#define MAX_ALIGN		10000	// microns
 
 
 #define PRINTHEAD_EN		11	// Input from SPS // '1' Allows Head to go down
