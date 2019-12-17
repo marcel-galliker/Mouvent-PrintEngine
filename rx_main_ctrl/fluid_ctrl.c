@@ -220,7 +220,7 @@ void fluid_set_config(void)
 							_FluidToScales[4] = 6;	// White
 							_FluidToScales[5] = 7;	// Orange
 							_FluidToScales[6] = 8;	// Violet
-							_FluidToScales[INK_SUPPLY_CNT]   = 94;	// flush		
+							_FluidToScales[INK_SUPPLY_CNT]   = 9;	// flush		
 							break;
 		
 	default:			for (i=0; i<SIZEOF(_FluidToScales); i++) _FluidToScales[i]=i;	
