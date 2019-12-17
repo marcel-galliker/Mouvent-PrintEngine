@@ -201,7 +201,7 @@ int	plc_init(void)
 	else		  rx_thread_start(_plc_thread, NULL, 0, "_plc_thread");
 
 //	_simu_init();
-	_plc_update_material_list(FILENAME_MATERIAL, FILENAME_MATERIAL_LIST);
+
 	return REPLY_OK;
 }
 

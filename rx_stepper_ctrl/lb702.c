@@ -244,7 +244,7 @@ static void _lb702_move_to_pos(int cmd, int pos)
 		else
 		{
 			if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].head_align>MAX_ALIGN/2 || RX_StepperCfg.robot[RX_StepperCfg.boardNo].head_align<-MAX_ALIGN/2)
-				Error(ERR_CONT, 0, "Head Alignment large");
+				Error(WARN, 0, "Head Alignment large");
 			motor_move_to_step(MOTOR_Z_1, &_ParZ_down, pos + _micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].head_align));
 		}
 		motors_start(MOTOR_Z_BITS, TRUE);			
