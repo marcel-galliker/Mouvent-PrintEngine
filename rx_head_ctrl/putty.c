@@ -378,12 +378,11 @@ void putty_display_nios_status(int nios, int status, int eeprom)
 		if (RX_NiosStat.error.fpga_incompatible) term_printf("ERROR\n");
 		else                                    term_printf("OK\n");
 
-		term_printf("alive:           %d  Power: %s Temp:%s FixedDropSize:%d Droplets:%d\n", RX_NiosStat.alive, PowerStateStr(RX_NiosStat.powerState), value_str_temp(RX_NiosStat.headcon_amc_temp), NIOS_FixedDropSize, NIOS_Droplets);
+		term_printf("alive:           %03d.%03d  Power: %s Temp:%s FixedDropSize:%d Droplets:%d\n", RX_NiosStat.alive/1000, RX_NiosStat.alive%1000, PowerStateStr(RX_NiosStat.powerState), value_str_temp(RX_NiosStat.headcon_amc_temp), NIOS_FixedDropSize, NIOS_Droplets);
 //		term_printf("arm_timeout:     %d  \n", RX_NiosStat.error.arm_timeout);
 
 		if (RX_NiosStat.info.cooler_pcb_present)
 		{
-			UCHAR *id=(UCHAR*)&RX_NiosStat.cooler_pressure_ID;
 			term_printf("Cooler:        ");
 			if (RX_NiosStat.error.cooler_overpressure) term_color(RED);
 			term_printf("pres=%s mbar", value_str(RX_NiosStat.cooler_pressure));
@@ -394,7 +393,12 @@ void putty_display_nios_status(int nios, int status, int eeprom)
 			term_color(BLACK);
 			term_printf("  overheated=%d ", RX_NiosStat.error.cooler_overheated);
 			term_printf("  overpressure=%d ", RX_NiosStat.error.cooler_overpressure);
-			term_printf("  ID=%d.%d.%d.%d", id[0], id[1], id[2], id[3]);
+			/*
+			{
+				UCHAR *id=(UCHAR*)&RX_NiosStat.cooler_pressure_ID;
+				term_printf("  ID=%d.%d.%d.%d", id[0], id[1], id[2], id[3]);				
+			}
+			*/
 			term_printf("\n");			
 		}
 		else
@@ -494,11 +498,11 @@ void putty_display_cond_status(int show, int status)
 				RX_HBStatus->head[i].tempCond			= RX_NiosStat.cond[i].tempIn;
 				RX_HBStatus->head[i].tempSetpoint		= RX_NiosStat.cond[i].tempSetpoint;
 				RX_HBStatus->head[i].tempReady			= RX_NiosStat.cond[i].tempReady;
-				RX_HBStatus->head[i].presIn_ID			= RX_NiosStat.cond[i].pressure_in_ID;
+				RX_HBStatus->head[i].presIn_ID			= 0; //RX_NiosStat.cond[i].pressure_in_ID;
 				RX_HBStatus->head[i].presIn				= RX_NiosStat.cond[i].pressure_in;
 				RX_HBStatus->head[i].presIn_max			= RX_NiosStat.cond[i].pressure_in_max;
 				RX_HBStatus->head[i].presIn_diff	    = RX_NiosStat.cond[i].pressure_in_diff;
-				RX_HBStatus->head[i].presOut_ID			= RX_NiosStat.cond[i].pressure_out_ID;
+				RX_HBStatus->head[i].presOut_ID			= 0; //RX_NiosStat.cond[i].pressure_out_ID;
 				RX_HBStatus->head[i].presOut			= RX_NiosStat.cond[i].pressure_out;
 				RX_HBStatus->head[i].presOut_diff		= RX_NiosStat.cond[i].pressure_out_diff;
 				RX_HBStatus->head[i].meniscus			= RX_NiosStat.cond[i].meniscus;

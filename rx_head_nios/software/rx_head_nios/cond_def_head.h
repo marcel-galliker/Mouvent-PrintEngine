@@ -231,11 +231,9 @@ typedef struct SConditionerStat_mcu
 	SCondCmd		cmdConfirm;
 		
 	//actual values
-	UINT32			pressure_in_ID;
 	INT32			pressure_in;
 	INT32			pressure_in_max;
 	INT32			pressure_in_diff;
-	UINT32			pressure_out_ID;
 	INT32			pressure_out;		
 	INT32			pressure_out_diff;
 	

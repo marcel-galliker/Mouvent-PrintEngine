@@ -114,12 +114,6 @@ int I2cStartRead(volatile stc_mfsn_t* pstcI2C, uint8_t addr)
 	return _i2c_start(pstcI2C, addr, I2C_READ);
 }
 
-//--- I2cStartWrite ---------------------------------
-int I2cStartWrite(volatile stc_mfsn_t* pstcI2C, uint8_t addr)
-{
-	return _i2c_start(pstcI2C, addr, I2C_WRITE);
-}
-
 /**
  ******************************************************************************
  **  \brief    Stop I2C Write Communication
@@ -276,40 +270,3 @@ static void _i2c_sleep(void)
 	for(i=0; i<40; i++); // 30=error!
 }
 
-/**
- ******************************************************************************
- **  \brief        Send I2C Byte
- **
- **  \param [in]   u8Data   Byte Data
- **
- **  \retval      0    0k
- **  \retval      -1   Time-out Error
- **  \retval      -2   Bus Error
- **  \retval      -3   Ack Error
- **  \retval      -4   Rack Error
- **  \retval      -5   Trx Error
- ******************************************************************************/
-int I2cSendByte(uint8_t u8Data, volatile stc_mfsn_t* pstcI2C)
-{
-	uint16_t u16Timeout;
-
-	pstcI2C->TDR = u8Data;  // Send data to EEPROM
-	pstcI2C->IBCR = 0xB0;   // WSEL = 1, ACKE = 1, Clear INT flag
-
-	u16Timeout = TIME_OUT_INT;
-
-	while(!(pstcI2C->IBCR & 0x01)) // Wait for transmission complete via INT flag
-	{
-		if (!u16Timeout--) return -1;	// timeout
-	}
-
-	if (pstcI2C->IBCR & 0x02)     return -2; // BER == 1? ->  error
-	if (!(pstcI2C->IBCR & 0x40))  return -3; // ACT == 0? ->  error
-
-	// MSS is set, no reserved address
-
-	if (pstcI2C->IBSR & 0x40)  	  return -4; // RACK == 1? ->  error
-	if (!(pstcI2C->IBSR & 0x10))  return -5; // TRX == 0? ->  error
-
-	return 0;
-}

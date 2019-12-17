@@ -52,7 +52,7 @@
 	#define COND_ERR_power_24V					(1<<26)
 	#define COND_ERR_power_heater				(1<<27)	
 	#define COND_ERR_flush_failed				(1<<28)
-	#define COND_ERR_not_in_printing			(1<<29)			
+	#define COND_ERR_29							(1<<29)			
 	#define COND_ERR_30							(1<<30)			
 	#define COND_ERR_31							(1<<31)			
 
@@ -231,9 +231,11 @@ typedef struct SConditionerStat_mcu
 	SCondCmd		cmdConfirm;
 		
 	//actual values
+	UINT32			pressure_in_ID;
 	INT32			pressure_in;
 	INT32			pressure_in_max;
 	INT32			pressure_in_diff;
+	UINT32			pressure_out_ID;
 	INT32			pressure_out;		
 	INT32			pressure_out_diff;
 	
@@ -248,6 +250,8 @@ typedef struct SConditionerStat_mcu
 	UINT32			tempIn;				// actual Temp (1/1000 °C)
     UINT32			tempHeater;		    // Temperature measured directly on heater cartridge (>= Revision #h) (1/1000 °C)
 	UINT32			heater_percent;		// heater on time (between 0% and 80%)
+	INT32			tempReady;			// temp ink = setpoint +/- 1°C
+	UINT32			tempSetpoint;		// Setpoint temperature
 	UINT32			mode;				// EnFluidCtrlMode
 	SCondStatus		gpio_state;			// state of GPIO Inputs
 	UINT32			error;

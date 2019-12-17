@@ -148,7 +148,7 @@ typedef struct SNiosHeadErr
 			UINT32	cooler_temp_hw:1;		// 10
 			UINT32	amc7891:1;				// 11
 			UINT32	cooler_overheated:1;	// 12
-			UINT32	err_13:1;				// 13
+			UINT32	cooler_pressure_hw:1;	// 13
 			UINT32	cooler_overpressure:1;	// 14
 			UINT32	head_eeprom_read:1;		// 15
 			UINT32	watchdog:1;				// 16
@@ -219,7 +219,6 @@ typedef struct SNiosStat
 
 	//--- cooler ----------------
 	UINT32 			cooler_temp;
-	UINT32			cooler_pressure_ID;
 	INT32			cooler_pressure;
 	UINT32			cooler_pressure_reset_cnt;
 	

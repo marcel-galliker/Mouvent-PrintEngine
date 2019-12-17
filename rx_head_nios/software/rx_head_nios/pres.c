@@ -26,21 +26,24 @@
 
 #define BUF_SIZE		10
 
-#define MAX_COOLER_PRES 800	// 0.8 bar
-
 //--- types ----------------------------------------
 
 typedef struct
 {
 	int				i2c;
 	UINT32			*resetCnt;
-	UINT32			*pSensorID;
 	INT32			*pPressure;
 	INT32			buf[BUF_SIZE];
 	int				buf_idx;
 	int				buf_valid;
 	int				power;
 	int				power_timer;
+	int				power_cnt;
+
+	//--- for development only ---------
+	int				ok;
+	int				nok;
+	int				poweron;
 } SSensor;
 
 //--- statics -----------------------------------
@@ -48,11 +51,10 @@ SSensor _Sensor;
 
 //--- prototypes ------------------------
 
-static void _set_power(int on);
+static void _Pres_power(int on);
 static void _sensor_reset(SSensor *s);
 static int  _sensor_read(SSensor *s);
-static UINT32 _read_Sensor_ID(SSensor *s);
-static void _i2c_wait_time(void);
+
 
 //--- pres_init -----------------------
 void pres_init(void)
@@ -62,34 +64,22 @@ void pres_init(void)
 	_Sensor.i2c 		= I2C_MASTER_1_BASE;
 	_Sensor.pPressure 	= &pRX_Status->cooler_pressure;
 	_Sensor.resetCnt	= &pRX_Status->cooler_pressure_reset_cnt;
-	_Sensor.pSensorID   = &pRX_Status->cooler_pressure_ID;
 	*_Sensor.pPressure	= INVALID_VALUE;
 	_sensor_reset(&_Sensor);
 }
 
-//--- _set_power -----------------------------------
-static void _set_power(int on)
+static void _Pres_power(int on)
 {
-	static int _on=FALSE;
-	if (on!=_on)
+	//AMC DAC output on/off
+	if(on)
 	{
-		if(on)
-		{
-			IOWR_16DIRECT(AMC7891_0_BASE, AMC7891_DAC0_DATA, _3V3);
-			if (_Sensor.power_timer<=0) _Sensor.power_timer=1;
-		}
-		else
-		{
-			IOWR_16DIRECT(AMC7891_0_BASE, AMC7891_DAC0_DATA, _0V);
-			*_Sensor.pPressure = INVALID_VALUE;
-			_Sensor.power=FALSE;
-			_Sensor.power_timer = 10;
-			_Sensor.resetCnt++;
-		}
-		_on=on;
+	//	IOWR_16DIRECT(AMC7891_0_BASE, AMC7891_DAC0_DATA, _3V3);
+	}
+	else
+	{
+	//	IOWR_16DIRECT(AMC7891_0_BASE, AMC7891_DAC0_DATA, _0V);
 	}
 }
-
 //--- _sensor_reset -------------
 static void _sensor_reset(SSensor *s)
 {
@@ -106,11 +96,12 @@ static int _sensor_read(SSensor *s)
 	//--- repower sensor ---
 	if (!s->power)
 	{
-		if (s->power_timer==2) _set_power(TRUE);
+		if (s->power_timer==2) _Pres_power(TRUE);
 		if ((--s->power_timer)<=0)
 		{
 			_sensor_reset(s);
-			_set_power(TRUE);
+			_Pres_power(TRUE);
+			s->poweron++;
 			s->power=TRUE;
 		}
 		return REPLY_OK;
@@ -118,17 +109,33 @@ static int _sensor_read(SSensor *s)
 		
 	if(s->power)											//if there is no read error at the moment
 	{
-		I2C_start(s->i2c, ADDR_SENSOR, READ);
+		if (I2C_start(s->i2c, ADDR_SENSOR, READ)!=I2C_ACK)
+		{
+			*s->pPressure=INVALID_VALUE;
+			return REPLY_ERROR;	// stop here if sensor is not answering
+		}
 		pressure = (I2C_read(s->i2c, !LAST_BYTE) << 8) | I2C_read(s->i2c, LAST_BYTE);
 		if(pressure == 0xffff || pressure == 0)				// pressure sensor error, reset
 		{	
-			_set_power(FALSE);						// DS1_3V3 OFF
-			return REPLY_ERROR;
+			_Pres_power(FALSE);						// DS1_3V3 OFF
+			s->power=FALSE;
+			s->power_timer = 10;
+			s->power_cnt++;
+			(s->resetCnt)++;
+			if (s->power_cnt>3)
+			{
+				*s->pPressure=INVALID_VALUE;
+				return REPLY_ERROR;
+			}
 		}
 		else
 		{	
+			s->power_cnt=0;
+			s->ok++;
+			
 			//--- convert value --------------
-			pressure = (2*(pressure- 16500)) / 27;	// div 13.5
+			if(pressure >= 16500)	pressure = ((pressure- 16500) / 13.5);
+			else					pressure = -((16500 - pressure) / 13.5);
 			
 			//--- save to buffer -----
 			s->buf[s->buf_idx++] = pressure;
@@ -151,10 +158,8 @@ static int _sensor_read(SSensor *s)
 					if (s->buf[i]<min) min=s->buf[i];
 					if (s->buf[i]>max) max=s->buf[i];
 				}
+				s->resetCnt  = 0;
 				*s->pPressure = (sum-min-max) / (BUF_SIZE-2);
-
-				if (*s->pPressure > MAX_COOLER_PRES)
-					pRX_Status->error.cooler_overpressure = TRUE;
 			}
 		}
 	}
@@ -164,65 +169,15 @@ static int _sensor_read(SSensor *s)
 //--- pres_tick_100ms ------------------
 void pres_tick_100ms(void)
 {
-	static int init=1;
+	#define MAX_COOLER_PRES 800	// 0.8 bar
+	int _errcnt=0;
 
-	if (init)
+	if (_sensor_read(&_Sensor))
 	{
-		switch(init++)
-		{
-		case 1: _set_power(TRUE);
-				break;
-
-		case 2: *_Sensor.pSensorID =_read_Sensor_ID(&_Sensor);
-				_set_power(FALSE);
-				break;
-
-		case 3:  _set_power(TRUE);
-				 init=0;
-				 break;
-		}
+		if (++_errcnt>10) pRX_Status->error.cooler_pressure_hw = TRUE;
 	}
-	else if (*_Sensor.pSensorID>256 )
-	{
-		_sensor_read(&_Sensor);
-	}
-}
+	else _errcnt=0;
 
-//--- _read_Sensor_ID ------------------
-static UINT32 _read_Sensor_ID(SSensor *s)
-{
-	UINT32  id=0;
-	UCHAR	*pid = (UCHAR*)&id;
-
-	// Read Sensor ID Back
-	if (I2C_start(s->i2c, ADDR_SENSOR, WRITE)) return 1;
-	if (I2C_write(s->i2c, 0x4e, LAST_BYTE))    return 2;						// ask for first two Sensor ID values
-
-	_i2c_wait_time();
-
-	if (I2C_start(s->i2c, ADDR_SENSOR, READ)) return 3;
-	pid[0] = I2C_read(s->i2c, !LAST_BYTE);				// read first two Sensor ID values
-	pid[1] = I2C_read(s->i2c, LAST_BYTE);				// read first two Sensor ID values
-
-	_i2c_wait_time();
-
-	if (I2C_start(s->i2c, ADDR_SENSOR, WRITE)) return 4;
-	if (I2C_write(s->i2c, 0x4f, LAST_BYTE))    return 5;						// ask for second two Sensor ID values
-
-	_i2c_wait_time();
-
-	if (I2C_start(s->i2c, ADDR_SENSOR, READ)) return 6;
-	pid[2] = I2C_read(s->i2c, !LAST_BYTE);				// read first two Sensor ID values
-	pid[3] = I2C_read(s->i2c, LAST_BYTE);				// read first two Sensor ID values
-
-	return id;
-}
-
-//--- _i2c_wait_time ------------------
-void _i2c_wait_time(void)
-{
-	int i;
-	// dummy wait for about 110us
-	for (i = 0; i < 250; i++)
-		;
+	if (*_Sensor.pPressure != INVALID_VALUE && *_Sensor.pPressure > MAX_COOLER_PRES)
+		pRX_Status->error.cooler_overpressure = TRUE;
 }

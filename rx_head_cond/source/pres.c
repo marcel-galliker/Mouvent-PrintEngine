@@ -33,7 +33,6 @@ typedef struct
 {
 	stc_mfsn_t		*pi2c;
 	set_power_fct 	set_power;
-	UINT32			*pSensorID;
 	INT32			*pPressure;
 	INT32			offset_factory;
 //	INT32			offset_user;
@@ -43,8 +42,10 @@ typedef struct
 	int				buf_valid;
 	int				power;
 	int				power_timer;
+	int				power_cnt;
 	int				low_cnt;
 	int				high_cnt;
+	int				error;
 	int				calibrating;
     INT32           EE_ADDR_FACTORY;
     INT32           EE_ADDR_USER;
@@ -63,8 +64,6 @@ static void _PresIn_power(int on);
 static void _PresOut_power(int on);
 static void _sensor_reset(SSensor *s);
 static void _sensor_read (SSensor *s);
-static void _i2c_wait_time(void);
-static UINT32 _read_Sensor_ID(SSensor *s);
 
 //--- pres_init -----------------------
 void pres_init(void)
@@ -73,7 +72,6 @@ void pres_init(void)
 	_PressureOut.pi2c 	   			= (stc_mfsn_t*)FM4_MFS2_BASE;
 	_PressureOut.set_power 			= _PresOut_power;
 	_PressureOut.valFactor 			= 1;
-	_PressureOut.pSensorID			= &RX_Status.pressure_out_ID;
 	_PressureOut.pPressure 			= &RX_Status.pressure_out;
    *_PressureOut.pPressure 			= INVALID_VALUE;
     _PressureOut.EE_ADDR_FACTORY 	= EE_ADDR_POUT_FACTORY_OFFSET;
@@ -87,14 +85,13 @@ void pres_init(void)
 	_PressureIn.pi2c 	  		= (stc_mfsn_t*)FM4_MFS3_BASE;
 	_PressureIn.set_power 		= _PresIn_power;
 	_PressureIn.valFactor 		= 10;
-	_PressureIn.pSensorID 		= &RX_Status.pressure_in_ID;
 	_PressureIn.pPressure 		= &RX_Status.pressure_in;
    *_PressureIn.pPressure 		= INVALID_VALUE;
         
     _PressureIn.EE_ADDR_FACTORY = EE_ADDR_PIN_FACTORY_OFFSET;
     _PressureIn.EE_ADDR_USER    = EE_ADDR_PIN_USER_OFFSET;
+    *_PressureIn.pPressure      = INVALID_VALUE;
 	_sensor_reset(&_PressureIn);
-
 	eeprom_read_setting16(_PressureIn.EE_ADDR_FACTORY, &_PressureIn.offset_factory);
 //	eeprom_read_setting16(_PressureIn.EE_ADDR_USER,    &_PressureIn.offset_user);
 	
@@ -130,7 +127,7 @@ static void _sensor_read(SSensor *s)
     INT32   pressure = 0;   
 	INT32   pressure10 = 0;   
 	UCHAR	*ppressure = (UCHAR*)&pressure;
-	
+
 	//--- repower sensor ---
 	if (!s->power)
 	{
@@ -140,8 +137,8 @@ static void _sensor_read(SSensor *s)
 		if ((--s->power_timer)<=0)
 		{
 			_sensor_reset(s);
+			s->set_power(TRUE);
 			s->power = TRUE;
-		   *s->pSensorID = _read_Sensor_ID(s);
 		}
 		return;
 	}
@@ -160,7 +157,13 @@ static void _sensor_read(SSensor *s)
 			s->set_power(FALSE); // DS1_3V3 OFF
 			s->power = FALSE;
 			s->power_timer = 4;
-			*s->pPressure = INVALID_VALUE;
+			s->power_cnt++;
+			if (s->power_cnt>3)
+			{
+				s->power_cnt = 0;
+				*s->pPressure = INVALID_VALUE;
+				//s->error = TRUE;
+			}
 		}
 		else if (pressure==0)
 		{
@@ -174,7 +177,9 @@ static void _sensor_read(SSensor *s)
 		{	
 			if (s->low_cnt)  s->low_cnt--;
 			if (s->high_cnt) s->high_cnt--;
-						
+			
+			s->power_cnt = 0;
+			
 			//--- save to buffer -----
 			s->buf10[s->buf_idx10++] = pressure;
 			if (s->buf_idx10 >= BUF_SIZE_10) s->buf_idx10   = 0;
@@ -261,8 +266,8 @@ void pres_tick_10ms(void)
 		_sensor_reset(&_PressureOut);
 	}
     
-//	if (_PressureIn.error)  RX_Status.error |= COND_ERR_pres_in_hw;
-//	if (_PressureOut.error) RX_Status.error |= COND_ERR_pres_out_hw;
+	if (_PressureIn.error)  RX_Status.error |= COND_ERR_pres_in_hw;
+	if (_PressureOut.error) RX_Status.error |= COND_ERR_pres_out_hw;
 	
 	if (RX_Config.flowResistance<100 || RX_Config.flowResistance>500)
 	{
@@ -279,47 +284,3 @@ void pres_tick_10ms(void)
         RX_Status.meniscus = (INT32)(RX_Status.pressure_in - ((RX_Status.pressure_in - RX_Status.pressure_out) / (0.01 * RX_Config.flowResistance)));
     }
 }
-
-//--- _read_Sensor_ID ------------------
-static UINT32 _read_Sensor_ID(SSensor *s)
-{
-	UINT32  id;
-	UCHAR	*pid = (UCHAR*)&id;
-
-	// Read Sensor ID Back
-	if (I2cStartWrite(s->pi2c, ADDR_SENSOR)) return 1;
-	if (I2cSendByte(0x4e, s->pi2c)) return 2;															// ask for first two Sensor ID values
-	I2cStopWrite(s->pi2c);						// must be this!	
-	
-	_i2c_wait_time();
-
-	if (I2cStartRead(s->pi2c, ADDR_SENSOR)) return 3;
-	I2cReceiveByteSeq(s->pi2c, &pid[0], FALSE);		// read first two Sensor ID values
-	I2cReceiveByteSeq(s->pi2c, &pid[1], TRUE);		
-	I2cStopWrite(s->pi2c);						// must be this!	
-
-	_i2c_wait_time();
-
-	if (I2cStartWrite(s->pi2c, ADDR_SENSOR)) return 4;
-	I2cSendByte(0x4f, s->pi2c);															// ask for second two Sensor ID values
-	I2cStopWrite(s->pi2c);						// must be this!	
-	
-	_i2c_wait_time();
-
-	if (I2cStartRead(s->pi2c, ADDR_SENSOR)) return 5;
-	I2cReceiveByteSeq(s->pi2c, &pid[2], FALSE);		// read first two Sensor ID values
-	I2cReceiveByteSeq(s->pi2c, &pid[3], TRUE);		
-	I2cStopWrite(s->pi2c);						// must be this!		
-
-	return id;
-}
-
-//--- _i2c_wait_time ------------------
-static void _i2c_wait_time(void)
-{
-	int i;
-	// dummy wait for about 400us
-	for (i = 0; i < 4096; i++)
-		;
-}
-
