@@ -348,7 +348,7 @@ SPrintQueueItem *pq_get_next_item_LH702(void)
 {
 	for(int item=0; item<_Size; item++)
 	{
-		if (_List[item].state==PQ_STATE_QUEUED && _List[item].scanLength>0)
+		if (_List[item].state==PQ_STATE_QUEUED)
 		{
 			_List[item].lengthUnit = PQ_LENGTH_COPIES;
 			_List[item].copies = 1000000;
@@ -1008,7 +1008,7 @@ int pq_is_ready(void)
 		}		
 	}
 	
-	if(RX_Config.printer.type == printer_LH702)				return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printedCnt) < 5;
+	if(RX_Config.printer.type == printer_LH702)				return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printGoCnt) < 5;	// minimize buffer, independent on format!
 	else if(RX_Config.printer.type == printer_cleaf)		return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printedCnt) < 16;
 	else if (rx_def_is_scanning(RX_Config.printer.type))	return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printedCnt) < 20;
 	else													return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printedCnt) < 64;

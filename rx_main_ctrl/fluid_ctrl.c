@@ -366,8 +366,7 @@ void fluid_tick(void)
 				sok_close(&_FluidThreadPar[i].socket);
 				ErrorEx(dev_fluid, i, LOG, 0, "Connection lost");
 			}
-			else
-				sok_send_2(&_FluidThreadPar[i].socket, CMD_FLUID_STAT, INK_PER_BOARD*sizeof(state[0]), &state[i*INK_PER_BOARD]);
+			else sok_send_2(&_FluidThreadPar[i].socket, CMD_FLUID_STAT, INK_PER_BOARD*sizeof(state[0]), &state[i*INK_PER_BOARD]);
 		}
 	}
 }
@@ -403,10 +402,8 @@ static int _handle_fluid_ctrl_msg(RX_SOCKET socket, void *msg, int len, struct s
 			return REPLY_OK;
 		}
 	}
-
 	return REPLY_OK;
 }
-
 
 //--- _do_log_evt -----------------------------------------------------
 static void _do_log_evt(int no, SLogMsg *msg)

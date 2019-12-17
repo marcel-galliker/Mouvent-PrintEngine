@@ -298,7 +298,7 @@ static int _lh702_handle_msg(RX_SOCKET socket, void *pmsg, int len, struct socka
 									break;
 			
 		case CMD_STOP_PRINTING:		Error(LOG, 0, "received CMD_STOP_PRINTING");	
-									pc_stop_printing(TRUE);
+									pc_abort_printing();
 									break;
 			
 		case CMD_CHANGE_JOB:		Error(LOG, 0, "received CMD_CHANGE_JOB");		
