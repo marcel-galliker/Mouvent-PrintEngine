@@ -167,7 +167,7 @@ static void _lb702_display_status(void)
 	term_printf("LB 702 ---------------------------------\n");
 	term_printf("moving:         %d		cmd: %08x\n",	RX_StepperStatus.info.moving, _CmdRunning);
 	term_printf("actpos:         %06d  newpos: %06d\n",	_PrintPos_Act, _PrintPos_New);		
-	term_printf("refheight:      %06d  ph:     %06d\n", 	_micron_2_steps(RX_StepperCfg.ref_height), _micron_2_steps(_PrintHeight));
+	term_printf("refheight:      %06d  ph:     %06d\n", 	_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height), _micron_2_steps(_PrintHeight));
 	term_printf("Head UP Sensor: %d  %d\n",	fpga_input(HEAD_UP_IN_0), fpga_input(HEAD_UP_IN_1));
 	term_printf("reference done: %d\n",	RX_StepperStatus.info.ref_done);
 	term_printf("printhead_en:   %d\n",	RX_StepperStatus.info.printhead_en);
@@ -286,7 +286,7 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									else
 									{
 										if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height < 90000) Error(WARN, 0, "Reference Height small");
-										val = -1*_micron_2_steps(RX_StepperCfg.ref_height - _PrintHeight);
+										val = -1*_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height - _PrintHeight);
 										if ((!_CmdRunning || _CmdRunning==CMD_CAP_REFERENCE) && (!RX_StepperStatus.info.ref_done || !RX_StepperStatus.info.z_in_print || val!=_PrintPos_Act))
 										{
 											_Cmd_New      = msgId;
@@ -298,7 +298,7 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									break;
 		
 	case CMD_CAP_UP_POS:			strcpy(_CmdName, "CMD_CAP_UP_POS");
-									val = -1*_micron_2_steps(RX_StepperCfg.ref_height - 20000);
+									val = -1*_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height - 20000);
 									if (!_CmdRunning)
 									{
 										_PrintPos_New = val;
