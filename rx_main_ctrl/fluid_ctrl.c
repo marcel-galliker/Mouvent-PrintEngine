@@ -574,10 +574,8 @@ static void _control(int fluidNo)
 				case ctrl_purge_hard_wipe:	
 				case ctrl_purge_soft:
 				case ctrl_purge_hard:		if (lbrob) steplb_rob_to_wipe_pos(no/2, HeadNo + rob_fct_purge_head0);
-											else		step_lift_to_up_pos();
+											step_lift_to_top_pos();
 				
-											// step_handle_gui_msg(INVALID_SOCKET, CMD_CAP_UP_POS, NULL, 0);
-											if (!lbrob) step_handle_gui_msg(INVALID_SOCKET, CMD_CAP_REFERENCE, NULL, 0);
 											_PurgeCtrlMode = _stat->ctrlMode;
 											switch(_stat->ctrlMode)
 											{
@@ -599,7 +597,7 @@ static void _control(int fluidNo)
 												
 											break;
 											
-				case ctrl_purge_step1:		if (step_lift_in_up_pos() || lbrob && steplb_lift_in_up_pos_individually(no/2))
+				case ctrl_purge_step1:		if (step_lift_in_top_pos() || lbrob && steplb_lift_in_up_pos_individually(no/2))
 											{
 												if (txrob && _PurgeFluidNo < 0 && !steptx_rob_wash_done()) break;
 												if (lbrob && !steplb_rob_in_wipe_pos(no/2, HeadNo + rob_fct_purge_head0))
@@ -619,9 +617,11 @@ static void _control(int fluidNo)
 												_send_ctrlMode(no, ctrl_purge_step3, TRUE);												
 											}
 											break;
+
 				case ctrl_purge_step3:		_send_ctrlMode(no, ctrl_purge_step4, TRUE);
 											if (lbrob) steplb_rob_wipe_start(no/2, HeadNo + rob_fct_purge_head0);
 											break;
+
 				case ctrl_purge_step4:		if (_PurgeCtrlMode==ctrl_purge_hard || _PurgeCtrlMode==ctrl_purge_hard_wipe)
 											{
 												_Flushed &= ~(0x01<<no);
@@ -691,11 +691,11 @@ static void _control_flush(void)
 		{
 		case ctrl_flush_night:		
 		case ctrl_flush_weekend:		
-		case ctrl_flush_week:	step_lift_to_up_pos();	
+		case ctrl_flush_week:	step_lift_to_top_pos();	
 								_FluidCtrlMode=ctrl_flush_step1; 
 								break;
 		
-		case ctrl_flush_step1:	if (step_lift_in_up_pos()) 
+		case ctrl_flush_step1:	if (step_lift_in_top_pos()) 
 								{
 									plc_to_purge_pos();
 									_FluidCtrlMode=ctrl_flush_step2;
@@ -739,11 +739,11 @@ void fluid_control_robot(int lbrob)
 		{
 		/*
 		//--- ctrl_wetwipe --------------------------------------------------------------------------------------
-		case ctrl_wetwipe:			step_lift_to_up_pos();
+		case ctrl_wetwipe:			step_lift_to_top_pos();
 									_RobotCtrlMode = ctrl_wetwipe_step1;
 									break;
 				
-		case ctrl_wetwipe_step1:	if (step_lift_in_up_pos())
+		case ctrl_wetwipe_step1:	if (step_lift_in_top_pos())
 									{
 										if (!step_rob_reference_done()) step_rob_do_reference();
 										plc_to_wipe_pos();
@@ -774,13 +774,13 @@ void fluid_control_robot(int lbrob)
 				
 		case ctrl_wetwipe_step5:	if (step_rob_wipe_done(ctrl_wetwipe))
 									{
-										step_lift_to_up_pos();
+										step_lift_to_top_pos();
 										//step_rob_to_center_pos();
 										_RobotCtrlMode=ctrl_wetwipe_step6;
 									}
 									break;
 				
-		case ctrl_wetwipe_step6:	if (step_lift_in_up_pos())
+		case ctrl_wetwipe_step6:	if (step_lift_in_top_pos())
 									{
 										_RobotCtrlMode = ctrl_wipe;
 									}
@@ -789,11 +789,11 @@ void fluid_control_robot(int lbrob)
 			
 		//--- ctrl_wipe -------------------------------------------------------------------------------------
 		case ctrl_wipe:						
-		case ctrl_wash:				step_lift_to_up_pos();
+		case ctrl_wash:				step_lift_to_top_pos();
 									_RobotCtrlMode = ctrl_wipe_step1;
 									break;
 				
-		case ctrl_wipe_step1:		if (step_lift_in_up_pos())
+		case ctrl_wipe_step1:		if (step_lift_in_top_pos())
 									{
 										if (!step_rob_reference_done()) step_rob_do_reference();
 										plc_to_wipe_pos();
@@ -824,23 +824,23 @@ void fluid_control_robot(int lbrob)
 
 		case ctrl_wipe_step5:		if (step_rob_wipe_done(ctrl_wipe))
 									{
-										step_lift_to_up_pos();
+										step_lift_to_top_pos();
 										_RobotCtrlMode=ctrl_wipe_step6;
 									}
 									break;
 
-		case ctrl_wipe_step6:		if (step_lift_in_up_pos())
+		case ctrl_wipe_step6:		if (step_lift_in_top_pos())
 									{
 										_RobotCtrlMode = ctrl_vacuum;
 									}
 									break;
 				
 		//--- ctrl_vacuum ----------------------------------------------------
-		case ctrl_vacuum:			step_lift_to_up_pos();
+		case ctrl_vacuum:			step_lift_to_top_pos();
 									_RobotCtrlMode = ctrl_vacuum_step1;
 									break;
 				
-		case ctrl_vacuum_step1:		if (step_lift_in_up_pos())
+		case ctrl_vacuum_step1:		if (step_lift_in_top_pos())
 									{
 										if (!step_rob_reference_done()) step_rob_do_reference();
 										plc_to_wipe_pos();
@@ -869,12 +869,12 @@ void fluid_control_robot(int lbrob)
 				
 		case ctrl_vacuum_step5:		if (step_rob_wipe_done(ctrl_vacuum))
 									{
-										step_lift_to_up_pos();
+										step_lift_to_top_pos();
 										_RobotCtrlMode=ctrl_vacuum_step6;
 									}
 									break;
 				
-		case ctrl_vacuum_step6:		if (step_lift_in_up_pos())
+		case ctrl_vacuum_step6:		if (step_lift_in_top_pos())
 									{
 										step_rob_to_wipe_pos(rob_fct_vacuum_change);
 										_RobotCtrlMode=ctrl_vacuum_step7;
@@ -906,12 +906,12 @@ void fluid_control_robot(int lbrob)
 									{
 										_printing = (RX_PrinterStatus.printState==ps_pause);
 										if (_printing) step_lift_to_print_pos();
-										else		  step_lift_to_up_pos();
+										else		   step_lift_to_up_pos();
 										_RobotCtrlMode=ctrl_vacuum_step11;
 									}
 									break;
 				
-		case ctrl_vacuum_step11:	if ((_printing && step_lift_in_print_pos()) || (!_printing && step_lift_in_up_pos()))
+		case ctrl_vacuum_step11:	if ((_printing && step_lift_in_print_pos()) || (!_printing && step_lift_in_top_pos()))
 									{
 										Error(LOG, 0, "ctrl_vacuum_step10 printState=%d", RX_PrinterStatus.printState);
 										if (_printing) _RobotCtrlMode = ctrl_print;
@@ -920,11 +920,11 @@ void fluid_control_robot(int lbrob)
 									break;
 
 		//--- ctrl_cap -----------------------------------------------------------------------------
-		case ctrl_cap:				step_lift_to_up_pos();
+		case ctrl_cap:				step_lift_to_top_pos();
 									_RobotCtrlMode=ctrl_cap_step1;
 									break;
 				
-		case ctrl_cap_step1:		if (step_lift_in_up_pos())
+		case ctrl_cap_step1:		if (step_lift_in_top_pos())
 									{
 										if (!step_rob_reference_done()) step_rob_do_reference();
 										plc_to_purge_pos();

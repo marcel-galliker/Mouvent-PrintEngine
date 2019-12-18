@@ -266,13 +266,35 @@ int  step_lift_in_print_pos(void)
 	}
 }
 
-//--- step_lift_to_up_pos ----------------------------------------------
-void  step_lift_to_up_pos(void)
+//--- step_lift_to_top_pos ----------------------------------------------
+void  step_lift_to_top_pos(int top)
 {
 	switch(_StepperType)
 	{
 	case STEPPER_TX:	steptx_lift_to_up_pos(); break;
-	case STEPPER_LB:	steplb_lift_to_up_pos(); break;
+	case STEPPER_LB:	steplb_lift_to_top_pos(top); break;
+	default:			break;
+	}
+}
+
+//--- step_lift_in_top_pos ----------------------------------------------
+int  step_lift_in_top_pos(void)
+{
+	switch(_StepperType)
+	{
+	case STEPPER_TX:	return steptx_lift_in_up_pos();
+	case STEPPER_LB:	return steplb_lift_in_top_pos();
+	default:			return TRUE;
+	}
+}
+
+//--- step_lift_to_up_pos ----------------------------------------------
+void  step_lift_to_up_pos(int top)
+{
+	switch(_StepperType)
+	{
+	case STEPPER_TX:	steptx_lift_to_up_pos(); break;
+	case STEPPER_LB:	steplb_lift_to_up_pos(top); break;
 	default:			break;
 	}
 }

@@ -70,6 +70,7 @@ void motor_init(void)
 	for (motor = 0; motor < MOTOR_CNT; motor++)
 	{
 		Fpga.qsys->pio_sm_out = (Fpga.qsys->pio_sm_out & ~(0x0f << (4*motor))) | (0x0e << (4*motor));
+		motor_reset(motor);
 	}
 	rx_sleep(500);
 }
@@ -83,25 +84,24 @@ void motor_end(void)
 //--- motor_reset -----------------------
 void motor_reset(int motor)
 {
-	int i;
-	if (motor <= 4)	// to prevent seg fault !
+	if (motor>=0 && motor <= 4)
 	{		
-		for (i=0; i<2; i++)
-		{
-			_motor_start_cnt[motor] = 0;
+		_motor_start_cnt[motor] = 0;
 	
-			Fpga.encoder[motor].pos	   = 0;
-			Fpga.encoder[motor].revCnt = 0;
-			Fpga.par->cfg[motor].reset_pos_val_enc = 1;
-			Fpga.par->cfg[motor].reset_pos_val_mot = 1;
+		Fpga.encoder[motor].pos	   = 0;
+		Fpga.encoder[motor].revCnt = 0;
+		Fpga.par->cfg[motor].reset_pos_val_enc = TRUE;
+		Fpga.par->cfg[motor].reset_pos_val_mot = TRUE;
 		
-	//		Fpga.par->cfg[motor].stopIn		= 15;
-	//		Fpga.par->cfg[motor].stopLevel  = 0;
-			Fpga.par->cfg[motor].disable_mux_in  = 0;		
-		
-			Fpga.par->cmd_reset_pos   |= 0x0001 << motor;	// must be at end to reset errors
-	//		Fpga.par->reset_err	= TRUE;			
-		}
+//		Fpga.par->cfg[motor].stopIn		= 15;
+//		Fpga.par->cfg[motor].stopLevel  = 0;
+		Fpga.par->cfg[motor].disable_mux_in		= 0;
+		Fpga.par->cfg[motor].estopIn			= ESTOP_UNUSED;
+		Fpga.par->cfg[motor].enc_max_diff		= 0xffff;
+		Fpga.par->cfg[motor].enc_max_diff_stop	= 0xffff;								
+
+		Fpga.par->cmd_reset_pos   |= 0x0001 << motor;	// must be at end to reset errors
+//		Fpga.par->reset_err	= TRUE;			
 	}
 }
 
@@ -486,6 +486,7 @@ void motor_config(int motor, int currentHold, double stepsPerMeter, double incPe
 	Fpga.par->cmd_estop |= (0x01 << motor);
 	Fpga.par->cfg[motor].enc_bwd = FALSE;
 	Fpga.par->cfg[motor].enc_stop_index = FALSE;
+	Fpga.par->cfg[motor].estopIn  = ESTOP_UNUSED;
 	
 	_enc_mot_ratio[motor] = (double)((double)stepsPerMeter / (double)incPerMeter); // mot/enc=ratio
 	
@@ -500,6 +501,7 @@ void motor_config(int motor, int currentHold, double stepsPerMeter, double incPe
 	Fpga.par->cfg[motor].acc_on_delay	= 10;	// todo peb
 
 	Fpga.par->cfg[motor].microsteps		= microsteps-1;
+	motor_reset(motor);
 }
 
 //--- motors_config -----------------------------------------

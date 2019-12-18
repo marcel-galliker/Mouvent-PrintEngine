@@ -804,6 +804,7 @@ typedef struct SHeadBoardCfg
 	UINT32		machineMeters;
 	UINT32		simuPlc;
 	UINT32		resetCnt;
+	UINT32		debug;
 } SHeadBoardCfg;
 
 typedef struct SHeadBoardStat

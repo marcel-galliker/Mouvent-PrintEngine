@@ -184,7 +184,7 @@ int  ctrl_main(int ticks, int menu)
 	
 	if (_StatusReqTime && rx_get_ticks()>(_StatusReqTime+1500)) 
 	{
-		Error(LOG, 0, "Status Request Late: time=%d", rx_get_ticks()-_StatusReqTime);
+		if (!RX_HBConfig.debug) Error(LOG, 0, "Status Request Late: time=%d", rx_get_ticks()-_StatusReqTime);
 		_StatusReqTime = 0;
 	}
 

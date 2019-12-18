@@ -442,7 +442,12 @@ static void _headboard_config(int colorCnt, int headsPerColor, int ethPortCnt)
 		if (head>=SIZEOF(RX_Config.headBoard)*MAX_HEADS_BOARD) Error(ERR_ABORT, 0, "Memory Overflow");
 //		pBoard->present		= dev_on; // only if one of the heads is active 
 		pBoard->no			= board;
-		pBoard->simuPlc		= arg_simuPLC;
+#ifdef DEBUG
+		pBoard->debug		= TRUE;
+#else
+		pBoard->debug		= FALSE;
+#endif
+			pBoard->simuPlc		= arg_simuPLC;
 		net_device_to_ipaddr(dev_head, pBoard->no, ipAddr, sizeof(ipAddr));
 	//	TrPrintfL(TRUE, "ctrl interface >>%s<<", ipAddr);
 		pBoard->ctrlAddr	 = sok_addr_32(ipAddr);

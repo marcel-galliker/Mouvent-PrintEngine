@@ -28,6 +28,8 @@
 #define L3518_STEPS_PER_METER	3200	// TXxxx: Motor steps/meter
 #define L3518_INC_PER_METER		4000	// TXxxx: Encoder incs/meter
 
+#define ESTOP_UNUSED	15	// input for uniused E-STOP
+
 // max speeds TXxx
 // current=???	max_speed=???
 

@@ -226,14 +226,12 @@ int  lb701_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									_CmdRunning = 0;
 									break;	
 
-	case CMD_CAP_REFERENCE:			Error(WARN, 0, "Stepper software not trealeased for this machine");
-									strcpy(_CmdName, "CMD_CAP_REFERENCE");
+	case CMD_CAP_REFERENCE:			strcpy(_CmdName, "CMD_CAP_REFERENCE");
 									_PrintPos_New=0;
 									_lb701_do_reference();	
 									break;
 
-	case CMD_CAP_PRINT_POS:			Error(WARN, 0, "Stepper software not trealeased for this machine");
-									strcpy(_CmdName, "CMD_CAP_PRINT_POS");
+	case CMD_CAP_PRINT_POS:			strcpy(_CmdName, "CMD_CAP_PRINT_POS");
 									pos   = (*((INT32*)pdata));
 									steps = _micron_2_steps(RX_StepperCfg.ref_height - pos);
 									if (!_CmdRunning && (!RX_StepperStatus.info.z_in_print || steps!=_PrintPos_Act))
@@ -265,7 +263,7 @@ int  lb701_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									break;
 		
 	case CMD_CAP_VENT:	break;
-		
+	case CMD_CLN_STOP:	break;
 	default:						Error(ERR_CONT, 0, "LIFT: Command 0x%08x not implemented", msgId); break;
 	}
 }

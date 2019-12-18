@@ -210,6 +210,13 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
 			}
 		}
 	};
+	if (RX_Config.printer.type==printer_LB701) 
+	{
+		info.headUpInput_0 =  _Status[0].info.headUpInput_0;
+		info.headUpInput_1 =  _Status[1].info.headUpInput_0;
+		info.headUpInput_2 =  _Status[2].info.headUpInput_0;
+		info.headUpInput_3 =  _Status[3].info.headUpInput_0;
+	}
 	RX_StepperStatus.robot_used = robot_used;
 	
 //	TrPrintf(TRUE, "STEPPER: ref_done=%d moving=%d  z_in_print=%d  z_in_ref=%d", info.ref_done, info.moving, info.z_in_print, info.z_in_ref);
@@ -266,6 +273,22 @@ void  steplb_abort_printing(void)
 {
 	if(RX_StepperStatus.info.z_in_print) steplb_lift_to_up_pos();
 	else _AbortPrinting = TRUE;
+}
+
+//--- steplb_lift_to_top_pos ---------------------------
+void steplb_lift_to_top_pos(void)
+{
+	for (int no=0; no<SIZEOF(_step_socket); no++)
+	{
+		sok_send_2(&_step_socket[no], CMD_CAP_REFERENCE, 0, NULL);
+	}
+	_AbortPrinting = FALSE;
+}
+
+//--- steplb_lift_in_top_pos --------------
+int	 steplb_lift_in_top_pos(void)
+{
+	return RX_StepperStatus.info.z_in_ref;
 }
 
 //--- steplb_lift_to_up_pos ---------------------------

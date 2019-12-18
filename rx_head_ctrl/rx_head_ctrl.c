@@ -210,7 +210,7 @@ static void _main_loop(void)
 			ctrl_init();
 		}
 
-		if (ctrlInit)
+		if (ctrlInit && !RX_HBConfig.debug)
 		{
 			if (ctrl_connected())
 			{

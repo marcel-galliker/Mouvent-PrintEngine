@@ -34,6 +34,9 @@ int  step_lift_in_wipe_pos(EnFluidCtrlMode mode);
 void step_lift_to_print_pos(void);
 int  step_lift_in_print_pos(void);
 
+void step_lift_to_top_pos(void);
+int  step_lift_in_top_pos(void);
+
 void step_lift_to_up_pos(void);
 int  step_lift_in_up_pos(void);
 
