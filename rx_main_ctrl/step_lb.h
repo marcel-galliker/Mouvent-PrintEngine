@@ -25,3 +25,29 @@ void steplb_abort_printing(void);
 
 void steplb_lift_to_up_pos(void);
 int	 steplb_lift_in_up_pos(void);
+
+void steplb_lift_to_up_pos_individually(int no);
+int	 steplb_lift_in_up_pos_individually(int fluidNo);
+
+void steplb_lift_to_wipe_pos(int no, ERobotFunctions rob_function); 
+int  steplb_lift_in_wipe_pos(int no, ERobotFunctions rob_function);
+
+void steplb_rob_to_wipe_pos(int no, ERobotFunctions rob_function);
+int	 steplb_rob_in_wipe_pos(int no, ERobotFunctions rob_function);
+int	 steplb_rob_in_wipe_pos_all(ERobotFunctions rob_function);
+
+void steplb_rob_wipe_start(int no, ERobotFunctions rob_function);
+int	 steplb_rob_wipe_done (int no, ERobotFunctions rob_function);
+
+int	 steplb_is_printing(int isprinting);
+
+void steplb_rob_do_reference_if_necessary(void);
+void steplb_rob_do_reference(void);
+int  steplb_rob_reference_done(void);
+
+void steplb_rob_stop(void);
+
+void steplb_rob_control_all(EnFluidCtrlMode ctrlMode);
+void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no);
+
+//void _check_pump(void);

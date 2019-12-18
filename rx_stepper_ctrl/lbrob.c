@@ -1,6 +1,6 @@
 // ****************************************************************************
 //
-//	DIGITAL PRINTING - lbrob_rob.c
+//	DIGITAL PRINTING - lbrob.c
 //
 //	Communication between ARM processor and FPGA
 //
@@ -19,384 +19,724 @@
 #include "motor_cfg.h"
 #include "motor.h"
 #include "lbrob.h"
+#include "robi_interface.h"
+#include "lb702.h"
 
-//--- defines ------------------------------------------------
-#define CURRENT_HOLD	   10.0 // 200 steps/rev // 2 mm/rev
+//#define MOTOR_Z_0		0
+//#define MOTOR_Z_1		1
+#define MOTOR_X_0		4
 
-#define MOTOR_CAP			0
+//#define MOTOR_Z_BITS	0x03
+#define MOTOR_X_BITS	0x10
+#define MOTOR_ALL_BITS	0x13
 
-#define MOTOR_CAP_BITS			0x01
-#define MOTOR_ALL_BITS			0x01
+#define X_STEPS_PER_METER	636619.0	//100000	//636619.0
+#define X_INC_PER_METER		316507.0	//49717.0
 
-#define CAP_STEPS_PER_METER		385852.0 // 200 steps *16 * 40 / U // 1:40
-#define CAP_INC_PER_METER		482315.0 // 385852.0 / 0.8
-//#define CAP_ENC_RATIO			0.8 //
+#define CABLE_CAP_POS			-540000	// PROTOTYPE TEST 
+//#define CABLE_CAP_POS			-436000	// LB702-WB
+#define CABLE_END_POS			1000
+#define CABLE_WIPE_POS_FRONT	-410000	//-460000
+#define CABLE_WIPE_POS_BACK		-180000
 
-// Digital Inputs (max 12)
-#define RO_STORED_IN		0
-//#define RO_CAPPING_IN		1
+#define CURRENT_HOLD			200
 
-// Digital Outputs (max 12)
-#define RO_CAPP_INFLATE		0x001
-#define RO_BLADE_UP_0		0x008
-#define RO_BLADE_UP_1		0x010
-#define RO_VACUUM_0			0x020
-#define RO_VACUUM_1			0x040
-#define RO_ALL_OUT			0x07F
-// Flush?
-//	Fpga.par->output |= Output; // Set Fpga.par->output |= RO_CAPP_INFLATE;
-//	Fpga.par->output &= ~Output; // Release
+#define CAP_FILL_TIME			8000		// ms
+#define MAX_PUMP_TIME			30000		// milliseconds
+#define WASTE_PUMP_TIME			6000		// ms
 
-// Analog Inputs (max 4)
+// Digital Inputs
+#define CABLE_PULL_REF	2
+#define CAPPING_ENDSTOP	3
 
-#define POS_STORED_UM			0 // Ref
-#define POS_PRINTHEADS_UM	RX_StepperCfg.cap_pos // capping position max distance 285'000 steps
+#define CABLE_PULL_REF_BIT	0x04
+#define CAPPING_ENDSTOP_BIT	0x08
 
-static SMovePar	_ParCap_ref;
-static SMovePar	_ParCap_drive;
-static SMovePar	_ParCap_wipe;
+// Digital Outputs
+#define RO_ALL_OUTPUTS			0x0BF		// All outputs except of outputs 8, 9, 10 and 11
+#define RO_FLUSH_TO_CAP			0x001		// o0
+#define RO_FLUSH_LEFT			0x002		// o1
+#define RO_FLUSH_RIGHT			0x004		// o2
+#define RO_SCREW_AIR_VALVE		0x008		// o3
+#define RO_VACUUM_VALVE			0x010		// o4
+#define RO_FLUSH_PUMP			0x020		// o5
+#define RO_WASTE_PUMP			0x040		// o6
+#define RO_EN_VACUUM			0x080		// o7
+#define RO_CAP_WASTE_LEFT		0x100		// o8
+#define RO_CAP_WASTE_RIGHT		0x200		// o9
+#define RO_CAP_WASTE_SUMP		0x400		// o10
+//#define RO_VACUUM_WASTE_SUMP	0x800		// o11
+#define RO_CAP_WASTE_TUB		0x800		// o11
+
+#define RO_CAP_WASTE_ALL		0x700		// o8, o9, o10
+
+#define MAX_POS_DIFFERENT		3000		// steps
+
+#define REF_SPEED				16000		
+
+// globals
+
+int _CmdRunning_Lift = 0;
+
+// static
+static RX_SOCKET	_MainSocket = INVALID_SOCKET;
+
+static SMovePar	_ParCable_ref;
+static SMovePar	_ParCable_drive;
+static SMovePar _ParCable_drive_purge;
+
 
 static int		_CmdRunning = 0;
-static int		_lastPosCmd = 0;
-static int		_reset_retried = 0;
-static int		_new_cmd = FALSE;
+static char		_CmdName[32];
+static int		_PrintPos_New = 0;
+static int		_PrintPos_Act = 0;
+static int		_PrintHeight = 0;
 
-static UINT32	_lbrob_Error[5];
+static int		_NewCmd = 0;
+
+static BOOL		_TimeReached = TRUE;
+static int		_TimeNow = 0;
+static int		_TimeEnd = 0;
+
+static BOOL		_WasteDrained = TRUE;
+static int		_WasteValves[] = { RO_CAP_WASTE_LEFT, RO_CAP_WASTE_RIGHT, RO_CAP_WASTE_SUMP };
+static int		_WasteValveSelect = 0;
+static int		_PrevWasteValveSelect = 0;
+static int		_WasteValveSwitched = 0;
+
+static int		_Rob_In_Cap = FALSE;
+static int		_Rob_In_Purge_Start = FALSE;
+static int		_Rob_In_Purge_End = FALSE;
+
+static int		_PumpStartTime = 0;
+static int		_CapFillTime = 0;
+static int		_PumpWasteBackOutTime = 0;
+
+static int		_FrontPumpUsed = FALSE;
+static int		_WastePumpOldState = FALSE;
+
+static ERobotFunctions _RobFunction = 0;
 
 //--- prototypes --------------------------------------------
-static void _lbrob_ro_motor_test(int motor, int steps);
-static void _lbrob_ro_error_reset(void);
-static void _lbrob_ro_send_status(RX_SOCKET);
+static void _lbrob_motor_z_test(int steps);
+static void _lbrob_motor_test(int motor, int steps);
+static void _lbrob_do_reference(void);
+static void _lbrob_move_to_pos(int cmd, int pos);
+static void _lbrob_motor_enc_reg_test(int steps);
+static int  _micron_2_steps(int micron);
+static void _set_waste_pump(int on);
+static void _cln_move_to(int msgId, ERobotFunctions fct);
+
+
+static int _CmdRunning_old = 0;
 
 //--- lbrob_init --------------------------------------
 void lbrob_init(void)
 {
-	int i;
-
-	motor_config(MOTOR_CAP, CURRENT_HOLD, CAP_STEPS_PER_METER, CAP_INC_PER_METER);
-
+	memset(_CmdName, 0, sizeof(_CmdName));
+	memset(&_ParCable_ref, 0, sizeof(SMovePar));
+	memset(&_ParCable_drive, 0, sizeof(SMovePar));
+	memset(&_ParCable_drive_purge, 0, sizeof(SMovePar));
 	
-	//--- movement parameters capping ---------------- 0.9 Nm with 100 U/min --- 0.8 Nm with 300 U/min -- 300*200*16/60
+	// config for referencing cable pull motor (motor 4)
+	_ParCable_ref.speed		= REF_SPEED;
+	_ParCable_ref.accel		= 32000;
+	_ParCable_ref.current_acc = 400.0;
+	_ParCable_ref.current_run = 400.0;
+	_ParCable_ref.stop_mux = 0;
+	_ParCable_ref.dis_mux_in = 0;
+	_ParCable_ref.estop_level = 0;
+	_ParCable_ref.enc_bwd = TRUE;
+	_ParCable_ref.encCheck = chk_lbrob;
 	
-	_ParCap_ref.speed =  8000; // 16000; // speed with max tork: 16'000
-	_ParCap_ref.accel =  32000; //8000;
-	_ParCap_ref.current_acc = 400.0; // max 424 = 4.24 A
-	_ParCap_ref.current_run = 400.0; // max 424 = 4.24 A
-	_ParCap_ref.stop_mux = 0;
-	_ParCap_ref.dis_mux_in = 0;
-	_ParCap_ref.encCheck = chk_off;
-		
-	_ParCap_drive.speed = 16000; // 32000; // speed with max tork: 16'000
-	_ParCap_drive.accel = 32000; // 16000;
-	_ParCap_drive.current_acc = 400.0; // max 424 = 4.24 A
-	_ParCap_drive.current_run = 400.0; // max 424 = 4.24 A
-	_ParCap_ref.stop_mux = 0;
-	_ParCap_ref.dis_mux_in = 0;
-	_ParCap_drive.encCheck = chk_off; // TRUE;
+	// config for moving normal with cable pull motor (motor 4)
+	// This commands that use this config need to start the motor with the special encoder mode
+	_ParCable_drive.speed = 32000;
+	_ParCable_drive.accel = 32000;
+	_ParCable_drive.current_acc = 400.0;
+	_ParCable_drive.current_run = 400.0;
+	_ParCable_drive.stop_mux = 0;
+	_ParCable_drive.dis_mux_in = 0;
+	_ParCable_drive.estop_level = 0;
+	_ParCable_drive.enc_bwd  = TRUE;
+//	_ParCable_drive.encCheck = chk_lbrob;
+	_ParCable_drive.encCheck = chk_off;
+	
+	_ParCable_drive_purge.speed = RX_StepperCfg.wipe_speed * X_STEPS_PER_METER / 1000;				// divided by 1000 to get from steps/m to steps/mm
+	_ParCable_drive_purge.accel = 8000;
+	_ParCable_drive_purge.current_acc = 400.0;
+	_ParCable_drive_purge.current_run = 400.0;
+	_ParCable_drive_purge.stop_mux = 0;
+	_ParCable_drive_purge.dis_mux_in = 0;
+	_ParCable_drive_purge.estop_level = 0;
+	_ParCable_drive_purge.enc_bwd = TRUE;
+	_ParCable_drive_purge.encCheck = chk_lbrob;
+	
+	motor_config(MOTOR_X_0, CURRENT_HOLD, X_STEPS_PER_METER, X_INC_PER_METER);
+}
 
-	_ParCap_wipe.speed = 8000; // 25000; // speed with max tork: 16'000
-	_ParCap_wipe.accel = 32000;// 12500;
-	_ParCap_wipe.current_acc = 300.0; // max 424 = 4.24 A
-	_ParCap_wipe.current_run = 300.0; // max 424 = 4.24 A
-	_ParCap_wipe.stop_mux = 0;
-	_ParCap_wipe.dis_mux_in = 0;
-	_ParCap_wipe.encCheck = chk_off; // TRUE;	
+//--- _set_waste_pump ------------------------------------------------
+static void _set_waste_pump(int on)
+{
+	int tmp = Fpga.par->output & RO_WASTE_PUMP;
+	if (RX_StepperCfg.boardNo==0)
+	{
+		if (on) 
+		{
+			Fpga.par->output |=  RO_WASTE_PUMP;
+			_PumpWasteBackOutTime = 0;
+		}
+		else if (Fpga.par->output & RO_WASTE_PUMP && !_PumpWasteBackOutTime)
+			_PumpWasteBackOutTime = rx_get_ticks();
+		else if ((rx_get_ticks() >= _PumpWasteBackOutTime + WASTE_PUMP_TIME) && _PumpWasteBackOutTime) 
+		{
+			Fpga.par->output &= ~RO_WASTE_PUMP;
+			Fpga.par->output &= ~RO_CAP_WASTE_TUB;
+			_PumpWasteBackOutTime = 0;
+		}
+	}	
 }
 
 //--- lbrob_main ------------------------------------------------------------------
 void lbrob_main(int ticks, int menu)
 {
+	int motor;
+	int cappingEndstop;
+	RX_StepperStatus.posX				= motor_get_step(MOTOR_X_0);
+	
+	if (RX_StepperCfg.boardNo == 0)
+	{
+		if ((rx_get_ticks() >= _PumpWasteBackOutTime + WASTE_PUMP_TIME) && _PumpWasteBackOutTime)
+		{
+			_set_waste_pump(FALSE);
+		}
+		if (_PumpWasteBackOutTime)	
+		{
+			Fpga.par->output |= RO_CAP_WASTE_TUB;
+			Fpga.par->output &= ~RO_CAP_WASTE_ALL;
+		}
+		else						Fpga.par->output &= ~RO_CAP_WASTE_TUB;
+	}
+	
+	_WasteValveSelect = RX_StepperStatus.waste_valve;
+	if (_PrevWasteValveSelect != _WasteValveSelect && RX_StepperStatus.waste_valve >= RX_StepperCfg.boardNo * SIZEOF(_WasteValves) && RX_StepperStatus.waste_valve < (RX_StepperCfg.boardNo + 1) * (SIZEOF(_WasteValves)))
+	{
+		if (RX_StepperStatus.robinfo.use_waste_pump)
+		{
+			Fpga.par->output &= ~RO_CAP_WASTE_ALL;
+			if (_FrontPumpUsed)	Fpga.par->output |= _WasteValves[2];
+			else																	Fpga.par->output |= _WasteValves[_WasteValveSelect % 3];
+			
+		}
+		else Fpga.par->output &= ~RO_CAP_WASTE_ALL;
+		
+		_PrevWasteValveSelect = _WasteValveSelect;
+	}
+	else if(_PrevWasteValveSelect != _WasteValveSelect) Fpga.par->output &= ~RO_CAP_WASTE_ALL;
+	
+	if (RX_StepperStatus.waste_valve <= RX_StepperCfg.boardNo * 3 && RX_StepperStatus.waste_valve > RX_StepperCfg.boardNo * 3)
+	{
+		Fpga.par->output |= _WasteValves[RX_StepperStatus.waste_valve % 3];
+	}
+	
+	if ((_CmdRunning && _CmdRunning != CMD_CLN_FILL_CAP) || 
+		(!_CmdRunning && _RobFunction == rob_fct_cap && !RX_StepperStatus.robinfo.use_waste_pump)) 
+		_FrontPumpUsed = FALSE;
+	
+	if (rx_get_ticks() >= _PumpStartTime + MAX_PUMP_TIME) _PumpStartTime = 0;
+	
+	RX_StepperStatus.robinfo.rob_in_cap  = _Rob_In_Cap && !RX_StepperStatus.robinfo.moving;
+	RX_StepperStatus.robinfo.purge_ready = _Rob_In_Purge_Start && !RX_StepperStatus.robinfo.moving;
+	RX_StepperStatus.robinfo.purge_done  = _Rob_In_Purge_End && !RX_StepperStatus.robinfo.moving;
+	
+	SStepperStat oldSatus;
+	memcpy(&oldSatus, &RX_StepperStatus, sizeof(RX_StepperStatus));
+	
 	motor_main(ticks, menu);
 	
-	// --- read Inputs ---
-	RX_StepperStatus.info.x_in_ref = fpga_input(RO_STORED_IN); // Reference Sensor
-	//RX_StepperStatus.info.cln_in_capping = fpga_input(RO_CAPPING_IN); // Sensor for cleaning station beeing in capping pos
-	RX_StepperStatus.posZ = motor_get_step(MOTOR_CAP) * 1000000.0 / CAP_STEPS_PER_METER;
-	
-	// --- Set Position Flags ---
-	RX_StepperStatus.info.z_in_ref   = ((RX_StepperStatus.info.ref_done == 1) && (abs(RX_StepperStatus.posZ - POS_STORED_UM)     <= 10) && (RX_StepperStatus.info.x_in_ref == 1));
-	RX_StepperStatus.info.z_in_print = RX_StepperStatus.info.z_in_ref;
-	RX_StepperStatus.info.z_in_cap   = ((RX_StepperStatus.info.ref_done == 1) && (abs(RX_StepperStatus.posZ - POS_PRINTHEADS_UM) <= 10) && (RX_StepperStatus.info.x_in_ref == 0));
-
-	// --- set positions False while moving ---
-	if (RX_StepperStatus.info.moving) //  && (Fpga.stat->moving != 0))
+	cappingEndstop = fpga_input(CAPPING_ENDSTOP);
+		
+	RX_StepperStatus.robinfo.moving = (_CmdRunning != 0);
+	if (RX_StepperStatus.robinfo.moving)
 	{
-		RX_StepperStatus.info.z_in_ref = FALSE;
-		RX_StepperStatus.info.z_in_print = FALSE;
-		RX_StepperStatus.info.z_in_cap = FALSE;
-	//	RX_StepperStatus.info.move_ok = FALSE;
+		RX_StepperStatus.info.x_in_ref = FALSE;
+		RX_StepperStatus.info.x_in_cap = FALSE;
+		RX_StepperStatus.robinfo.cap_ready = FALSE;
+		_Rob_In_Cap = FALSE;
+		_Rob_In_Purge_Start = FALSE;
+		_Rob_In_Purge_End = FALSE;
 	}
+	RX_StepperStatus.robinfo.use_waste_pump = _CmdRunning || _PumpStartTime || _CmdRunning_Lift || _Rob_In_Purge_Start;
 
-	if (_CmdRunning && motors_move_done(MOTOR_ALL_BITS))
+	if (_CmdRunning && motors_move_done(MOTOR_X_BITS)) 
 	{
-		RX_StepperStatus.info.moving = FALSE;
-
-		// --- tasks ater the deceleration period of the Stopp Command ---
-		if (_CmdRunning == CMD_CLN_STOP)
+		RX_StepperStatus.robinfo.moving = FALSE;
+		
+		
+		RX_StepperStatus.info.x_in_ref = fpga_input(CABLE_PULL_REF);
+		RX_StepperStatus.info.x_in_cap = fpga_input(CAPPING_ENDSTOP);
+		
+		if (_CmdRunning == CMD_CLN_REFERENCE) 
 		{
-			if (motor_error(MOTOR_CAP))
+			if (motors_error(MOTOR_X_BITS, &motor))
 			{
-				RX_StepperStatus.info.ref_done = FALSE;
-				Error(ERR_CONT, 0, "FLO_RO: Command 0x%08x: triggers motor_error", _CmdRunning);
-			}
-		}
-
-		// --- tasks ater reference cleaning station ---
-		if (_CmdRunning == CMD_CLN_REFERENCE)
-		{
-			rx_sleep(1000); // wait 1s on transport to stand still
-			RX_StepperStatus.info.x_in_ref = fpga_input(RO_STORED_IN); // Reference Sensor
-
-			if (motor_error(MOTOR_CAP))
-			{
-				RX_StepperStatus.info.ref_done = FALSE;
-				Error(ERR_CONT, 0, "FLO_RO: Command 0x%08x: triggers motor_error", _CmdRunning);
-			}
-			else if (RX_StepperStatus.info.x_in_ref)
-			{
-				motor_reset(MOTOR_CAP);				// reset position after referencing
-				RX_StepperStatus.info.ref_done = TRUE;
-				_reset_retried = 0;
-				RX_StepperStatus.posZ = motor_get_step(MOTOR_CAP) * 1000000.0 / CAP_STEPS_PER_METER;
-			}
-			else
-			{
-				if (_reset_retried < 3)
+				if (RX_StepperStatus.info.x_in_ref)
 				{
-					_reset_retried++;
-					_new_cmd = CMD_CLN_REFERENCE;
-					Error(LOG, 0, "FLO_RO: Command 0x%08x: Retry Reference CLN", _CmdRunning);
+					motors_reset(MOTOR_X_BITS);
+					RX_StepperStatus.robinfo.ref_done = TRUE;
 				}
 				else
 				{
-					Error(ERR_CONT, 0, "FLO_RO: Command 0x%08x: Referencing CLN failed", _CmdRunning);
-					_reset_retried = 0;
+					Error(ERR_CONT, 0, "LBROB: Command %s: End Sensor REF NOT HIGH", _CmdName);
+					RX_StepperStatus.robinfo.ref_done = FALSE;
+					_CmdRunning_old = FALSE;
 				}
 			}
 		}
-
-		// --- tasks after move to pos 0 stored position, check ref sensor ---
-		if ((_CmdRunning == CMD_CLN_MOVE_POS) && (_lastPosCmd == 0))  //  && (RX_StepperStatus.posZ == 0)
+		
+		if (_CmdRunning != CMD_CLN_REFERENCE)
 		{
-			if (!RX_StepperStatus.info.x_in_ref)
+			if (motors_error(MOTOR_X_BITS, &motor))
 			{
-				_new_cmd = CMD_CLN_REFERENCE;
-				Error(LOG, 0, "FLO_RO: Command 0x%08x: triggers Referencing", _CmdRunning); //problem mit toggel move : do not toggle twice!
+				RX_StepperStatus.robinfo.ref_done = FALSE;
+				Error(ERR_CONT, 0, "Stepper: Command %s: Motor[%d] blocked", _CmdName, motor + 1);
+				_CmdRunning = FALSE;
+				_CmdRunning_Lift = 0;
+				_NewCmd=0;
+				Fpga.par->output &= ~RO_ALL_OUTPUTS;
+			}			
+		}
+		
+		if (_CmdRunning == CMD_CLN_FILL_CAP)
+		{
+			switch (_RobFunction)
+			{
+			case rob_fct_cap:			if (rx_get_ticks() >= _CapFillTime + CAP_FILL_TIME)
+										{
+											_CmdRunning = FALSE;
+											Fpga.par->output &= ~RO_ALL_OUTPUTS;
+											RX_StepperStatus.robinfo.cap_ready = RX_StepperStatus.info.x_in_cap && !RX_StepperStatus.robinfo.moving;
+											_CapFillTime = 0;
+										}
+										break;
+				
+			case rob_fct_purge_all:		_CmdRunning = FALSE;
+										_Rob_In_Purge_End = TRUE;
+										break;
+			case rob_fct_purge_head0:	
+			case rob_fct_purge_head1:
+			case rob_fct_purge_head2:
+			case rob_fct_purge_head3:
+			case rob_fct_purge_head4:
+			case rob_fct_purge_head5:
+			case rob_fct_purge_head6:
+			case rob_fct_purge_head7:	_CmdRunning = FALSE;
+										_PumpStartTime = rx_get_ticks();
+				break;	
+				
+			default:					Error(ERR_CONT, 0, "Command %s: Robi-Function %d not implemented", _CmdName, _RobFunction); break;
+			}
+			
+		}
+		else if (_CmdRunning == CMD_CLN_MOVE_POS)
+		{
+			switch (_RobFunction)
+			{
+			case rob_fct_cap:			_Rob_In_Cap = fpga_input(CAPPING_ENDSTOP);
+										if (!_Rob_In_Cap && _NewCmd != CMD_CLN_MOVE_POS)
+										{
+											Error(ERR_CONT, 0, "LBROB: Command %s: End Sensor Capping NOT HIGH", _CmdName);
+											RX_StepperStatus.robinfo.ref_done = FALSE;
+										}
+										_CmdRunning = FALSE;
+										break;
+				
+			case rob_fct_purge_all:		_Rob_In_Purge_Start = (abs(motor_get_step(MOTOR_X_0) - CABLE_WIPE_POS_BACK) <= MAX_POS_DIFFERENT);
+										if (!_Rob_In_Purge_Start && _NewCmd != CMD_CLN_MOVE_POS)
+										{
+											Error(ERR_CONT, 0, "LBROB: Command %s: Robot not in correct position", _CmdName);
+											RX_StepperStatus.robinfo.ref_done = FALSE;
+										}
+										_CmdRunning = FALSE;
+										break;
+				
+				break;
+			case rob_fct_purge_head0:	_Rob_In_Purge_Start = (abs(motor_get_step(MOTOR_X_0) - motor_get_end_step(MOTOR_X_0)) <= MAX_POS_DIFFERENT);
+										if (!_Rob_In_Purge_Start && _NewCmd != CMD_CLN_MOVE_POS)
+										{
+											Error(ERR_CONT, 0, "LBROB: Command %s: Robot not in correct position", _CmdName);
+											RX_StepperStatus.robinfo.ref_done = FALSE;
+										}
+										_CmdRunning = FALSE;
+										break;
+			case rob_fct_purge_head1:
+			case rob_fct_purge_head2:
+			case rob_fct_purge_head3:
+			case rob_fct_purge_head4:
+			case rob_fct_purge_head5:
+			case rob_fct_purge_head6:
+			case rob_fct_purge_head7:	_Rob_In_Purge_Start = TRUE;
+										_CmdRunning = FALSE;
+										break;
+			default: break;
+			}
+			
+		}
+		else if (_CmdRunning == CMD_CLN_REFERENCE && _CmdRunning_old)
+		{
+			int loc_new_cmd = 0;
+			if (!RX_StepperStatus.robinfo.moving && !RX_StepperStatus.info.moving)
+			{
+				loc_new_cmd = _CmdRunning_old;
+				_CmdRunning_old = FALSE;
+				_CmdRunning = FALSE;
+			}
+			
+			switch (loc_new_cmd)
+			{
+			case CMD_CLN_MOVE_POS: lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_MOVE_POS, &_RobFunction); break;
+			default: Error(ERR_CONT, 0, "LBROB_MAIN: Command 0x%08x not implemented", _CmdRunning_old); break;
+			}
+			loc_new_cmd = FALSE;
+		}
+		else	
+		{
+			_CmdRunning = FALSE;
+			_CmdRunning_old = FALSE;
+		}	
+	}
+	
+	if (memcpy(&oldSatus.robinfo, &RX_StepperStatus.robinfo, sizeof(RX_StepperStatus.robinfo)))
+	{
+		sok_send_2(&_MainSocket, REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);		
+	}
+	
+	if (_CmdRunning_Lift)
+	{
+		int loc_new_cmd = 0;
+		if (!RX_StepperStatus.robinfo.moving && !RX_StepperStatus.info.moving) 
+		{
+			loc_new_cmd = _NewCmd;
+			_NewCmd = FALSE;
+			_CmdRunning_Lift = FALSE;
+		}
+		if (loc_new_cmd)
+		{
+			switch (loc_new_cmd)
+			{
+			case CMD_CLN_REFERENCE: lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_REFERENCE, NULL); break;
+			case CMD_CLN_MOVE_POS: lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_MOVE_POS, &_RobFunction); break;
+			default: Error(ERR_CONT, 0, "LBROB_MAIN: Command 0x%08x not implemented", loc_new_cmd); break;
 			}
 		}
-				
-		// --- Reset Commands ---
-		_CmdRunning = FALSE;
-
-		// --- Execute next Commands ---
-		switch (_new_cmd)
-		{
-		case CMD_CLN_REFERENCE:	  lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_REFERENCE, NULL);			 break;
-		case 0: break;
-		default:				Error(ERR_CONT, 0, "FLO_RO_MAIN: Command 0x%08x not implemented", _new_cmd); break;
-		}
-		_new_cmd = FALSE;
-
-		// _cln_send_status(0); // Push news of move end to main
-
+		loc_new_cmd = FALSE;
 	}
-	//// --- Executed after each move ---
-	//if (_CmdRunning  == CMD_CLN_STOP && Fpga.stat->moving == 0)
-	//{
-	////	RX_StepperStatus.info.moving = FALSE;
-	////	_CmdRunning = FALSE;
-	//	RX_StepperStatus.info.x_in_ref = fpga_input(RO_STORED_IN); 
-	//}
 }
 
-//--- lbrob_display_status ---------------------------------------------------------
-static void _lbrob_display_status(void)
+//---_micron_2_steps --------------------------------------------------------------
+static int  _micron_2_steps(int micron)
 {
-	int enc0_mm;
-	enc0_mm = Fpga.encoder[MOTOR_CAP].pos * 1000000.0 / CAP_INC_PER_METER;
-	int printhead_soll = POS_PRINTHEADS_UM;
+	//return (int)(0.5 + STEPS_REV / DIST_REV*micron);
+	return (int)(0.5 + micron * X_STEPS_PER_METER) / 1000000;
+}
 
-	term_printf("LB Robot ---------------------------------\n");
-	term_printf("moving:         %d		cmd: %08x\n", RX_StepperStatus.info.moving, _CmdRunning);
-	term_printf("Sensor Reference Motor: %d\n", RX_StepperStatus.info.x_in_ref);
-	term_printf("z in reference: %d  ", RX_StepperStatus.info.z_in_ref);
-	term_printf("z in print:     %d  ", RX_StepperStatus.info.z_in_print);
-	term_printf("z in capping:   %d\n", RX_StepperStatus.info.z_in_cap);
-	term_printf("Flag reference done: %d  ", RX_StepperStatus.info.ref_done);
-//	term_printf("Flag move OK: %d", RX_StepperStatus.info.move_ok);
-	term_printf("Last pos cmd in um:   %d\n", _lastPosCmd);
-	term_printf("Pos0 in steps:   %d  ", motor_get_step(MOTOR_CAP));
-	//term_printf("Pos0 in steps SOLL:   %d\n", printhead_soll);
-	term_printf("Pos0 in um:   %d \n", RX_StepperStatus.posZ);
-	term_printf("Enc0 in steps:   %d  ", Fpga.encoder[MOTOR_CAP].pos);
-	term_printf("Enc0 in um:   %d\n", enc0_mm);
+//--- _lbrob_display_status --------------------------------------------------------
+void lbrob_display_status(void)
+{
+	term_printf("LB ROB ---------------------------------\n");
+	term_printf("moving:         %d		cmd: %08x\n", RX_StepperStatus.robinfo.moving, _CmdRunning);
+	term_printf("Ref sensor:     %d\n", fpga_input(CABLE_PULL_REF));
+	term_printf("Cap sensor:     %d\n", fpga_input(CAPPING_ENDSTOP));
+	term_printf("reference done: %d\n", RX_StepperStatus.robinfo.ref_done);
+	term_printf("x in reference: %d\n", RX_StepperStatus.info.x_in_ref);
+	term_printf("Cap ready       %d\n", RX_StepperStatus.robinfo.cap_ready);
+	term_printf("actPos Robi:    %d\n", RX_StepperStatus.posX);
+	term_printf("Waste pump:     %d\n", RX_StepperStatus.waste_valve);
+	term_printf("Wipe-Speed:     %d\n", RX_StepperCfg.wipe_speed);
+	if (_PumpStartTime)
+		term_printf("Pump-Time:      %d\n", ((MAX_PUMP_TIME - (rx_get_ticks() - _PumpStartTime)) / 1000));
+	else
+		term_printf("Pump-Time:      %d\n", _PumpStartTime);
+	if (_CapFillTime)
+		term_printf("Cap-Fill-Time:  %d\n", ((CAP_FILL_TIME - (rx_get_ticks() - _CapFillTime)) / 1000));
+	else
+		term_printf("Cap-Fill-Time:  %d\n", _CapFillTime);
+	if (_PumpWasteBackOutTime)
+		term_printf("Pump-Back-Time: %d\n", ((WASTE_PUMP_TIME - (rx_get_ticks() - _PumpWasteBackOutTime)) / 1000));
+	else
+		term_printf("Pump-Back-Time: %d\n", _PumpWasteBackOutTime);
 	term_printf("\n");
 }
 
-//--- lbrob_menu --------------------------------------------------
-int lbrob_menu(void)
+//--- lbrob_menu --------------------------------------------------------------------
+void lbrob_menu(int help)
 {
-	char str[MAX_PATH];
-	int synth = FALSE;
-	static int cnt = 0;
-	int i;
-	int pos = 0;
-
-	_lbrob_display_status();
-	
-	term_printf("MENU TX-PROTOTYPE-ROBOT -------------------------\n");
-	term_printf("o: toggle output <no>\n");
-	term_printf("s: STOP\n");
-	term_printf("r<n>: reset motor<n>\n");
-	term_printf("R: Reference\n");
-	term_printf("p: move to <um>\n");
-	term_printf("m<n><steps>: move Motor<n> by <steps>\n");
-	term_printf("w: wipe to <um>\n");
-	term_printf("x: exit\n");
-	term_printf(">");
-	term_flush();
-
-	if (term_get_str(str, sizeof(str)))
+	if (help)
 	{
-		switch (str[0])
-		{
-		case 'o': Fpga.par->output ^= (1 << atoi(&str[1])); break;
-		case 's': lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_STOP, NULL); break;
-		case 'r': if (str[1] == 0) for (i = 0; i < MOTOR_CNT; i++) motor_reset(i);
-			else           motor_reset(atoi(&str[1]));
-			break;
-		case 'R': lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_REFERENCE, NULL); break;
-		case 'p': pos = atoi(&str[1]); lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_MOVE_POS, &pos); break;
-		case 'm': _lbrob_ro_motor_test(str[1] - '0', atoi(&str[2])); break;
-		case 'x': return FALSE;
-		}
-	}
-	return TRUE;
-}
-
-
-//--- lbrob_handle_ctrl_msg -----------------------------------
-int  lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
-{	
-	int i;
-	INT32 pos, steps;
-	
-	switch (msgId)
-	{
-	case CMD_CLN_STOP:				motors_stop(MOTOR_ALL_BITS);
-		_CmdRunning = msgId;
-		Fpga.par->output &= ~RO_ALL_OUT; // set all output to off
-		RX_StepperStatus.info.moving = TRUE;
-		break;
-
-	case CMD_CLN_REFERENCE:
-		Error(WARN, 0, "Stepper software not trealeased for this machine");
-		if (_CmdRunning){ lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_STOP, NULL); _new_cmd = CMD_CLN_REFERENCE; break; }
-		motor_reset(MOTOR_CAP); // to recover from move count missalignment
-		_CmdRunning = msgId;
-		if ((Fpga.par->output & RO_ALL_OUT))
-		{
-			Fpga.par->output &= ~RO_ALL_OUT; // set all output to off
-			rx_sleep(1000); // wait ms
-		}
-		RX_StepperStatus.info.ref_done = FALSE;
-		RX_StepperStatus.info.moving = TRUE;
-		_lastPosCmd = 0;
-		motors_move_by_step(MOTOR_CAP_BITS, &_ParCap_ref, 1000000, TRUE);
-		break;
-
-	case CMD_CLN_MOVE_POS:		if (!_CmdRunning)
-		{
-			Error(WARN, 0, "Stepper software not trealeased for this machine");
-			if ((Fpga.par->output & RO_ALL_OUT))
-			{
-				Fpga.par->output &= ~RO_ALL_OUT; // set all output to off
-				rx_sleep(1000); // wait ms
-			}
-			_CmdRunning = msgId;
-			RX_StepperStatus.info.moving = TRUE;
-			pos = *((INT32*)pdata);
-			_lastPosCmd = pos;
-			if (!RX_StepperStatus.info.ref_done) Error(LOG, 0, "CLN: Command 0x%08x: missing ref_done: triggers Referencing", _CmdRunning);
-			if (RX_StepperStatus.info.ref_done) motors_move_to_step(MOTOR_CAP_BITS, &_ParCap_drive, -pos*CAP_STEPS_PER_METER / 1000000);
-			else								  lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_REFERENCE, NULL);
-		}
-		break;
-								
-	case CMD_CLN_CAP:		if (!_CmdRunning)
-		{
-			Error(WARN, 0, "Stepper software not trealeased for this machine");
-			if (!RX_StepperStatus.info.ref_done)
-			{
-				Error(LOG, 0, "CLN: Command 0x%08x: missing ref_done: triggers Referencing", _CmdRunning); 
-				lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_REFERENCE, NULL);
-			}
-			else if (RX_StepperStatus.info.z_in_cap)
-			{
-				Fpga.par->output |= RO_CAPP_INFLATE;
-			}
-			else 
-			{
-				Error(ERR_CONT, 0, "FLO_RO: Command 0x%08x: not in capping position", _CmdRunning);
-			}										
-												  
-		}
-		break;
-
-	case CMD_ERROR_RESET:
-		fpga_stepper_error_reset();
-		_lbrob_ro_error_reset();
-		break;
-	
-	case CMD_CAP_VENT:	break;
-		
-	default:						Error(ERR_CONT, 0, "CLN: Command 0x%08x not implemented", msgId); break;
-	}
-}
-
-//--- _lbrob_ro_motor_test ---------------------------------
-static void _lbrob_ro_motor_test(int motorNo, int steps)
-{
-	int motor = 1 << motorNo;
-	SMovePar par;
-	int i;
-
-	memset(&par, 0, sizeof(par));
-	if (motorNo == MOTOR_CAP)
-	{
-		par.speed = 8000; // 16000; // 32000;//25000; // 8000;// 4000; // 2000;
-		par.accel = 320000; // 8000; //16000;//12500;// 4000;//2000; // 1000;
-		par.current_acc = 400.0; // 60.0;  // for Tests: 50
-		par.current_run = 400.0; // 60.0;  // for Tests: 50
+		term_printf("LB rob MENU ------------------------- (2)\n");
+		term_printf("s: STOP\n");
+		term_printf("o: toggle output <no>\n");
+		term_printf("R: Reference\n");
+		term_printf("r<n>: reset motor<n>\n");	
+		term_printf("c: move to cap Robi\n");
+		term_printf("m<n><steps>: move Motor<n> by <steps>\n");	
+		term_printf("e<steps>: move Cablepull with encoder regulator by <steps>\n");
+		term_printf("p: Start pump for %d seconds\n", MAX_PUMP_TIME/1000);
+		term_printf("w: Move to Purge Front Position\n");
+		term_flush();
 	}
 	else
 	{
-		par.speed	= 21000;		//21000;					//21000;				//21000;			//21000;			//21000;					
-		par.accel	= 32000;		//10000;					//10000;				//10000;			//10000;			//10000;				
-		par.current_acc = 80.0;//134.0;	//40.0;	minimum for 0.3 Nm	// 60.0; for 0.4 Nm		// 80.0 for 0.5 Nm	// 100.0 for 0.6 Nm	// 120.0 for 0.7 Nm	// 134.0 for 0.8 Nm	
-		par.current_run = 80.0;//134.0;	//40.0;	minimum for 0.3 Nm	// 60.0; for 0.4 Nm		// 80.0 for 0.5 Nm	// 100.0 for 0.6 Nm	// 120.0 for 0.7 Nm	// 134.0 for 0.8 Nm	
+		term_printf("?: help\n");
+		term_printf("1: LB702 menu\n");
 	}
-	par.stop_mux = 0;
-	par.dis_mux_in = 0;
-	par.encCheck = chk_off;
-	RX_StepperStatus.info.moving = TRUE;
+}
+
+//--- lbrob_handle_menu -----------------------------------------------
+void lbrob_handle_menu(char *str)
+{
+	int pos = 10000;
+	switch (str[0])
+	{
+	case 's': lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_STOP, NULL); break;
+	case 'o': Fpga.par->output ^= (1 << atoi(&str[1])); break;
+	case 'R': lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_REFERENCE, NULL); break;
+	case 'r': motor_reset(atoi(&str[1])); break;
+	case 'c': pos = rob_fct_cap;
+		lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_MOVE_POS, &pos); break;
+	case 'w': pos = rob_fct_purge_all;
+		lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_FILL_CAP, &pos); break;
+	case 'm': _lbrob_motor_test(str[1] - '0', atoi(&str[2])); break;			
+	case 'e': _lbrob_motor_enc_reg_test(atoi(&str[1])); break;
+	case 'p': _PumpStartTime = rx_get_ticks(); break;
+	}
+}
+
+//--- _lbrob_move_to_pos ---------------------------------------------------------------
+static void _lbrob_move_to_pos(int cmd, int pos)
+{
+	_CmdRunning  = cmd;
+	RX_StepperStatus.robinfo.moving = TRUE;
+	motors_move_to_step(MOTOR_X_0, &_ParCable_drive, pos);
+}
+
+static void _lbrob_do_reference()
+{
+	_PumpStartTime = rx_get_ticks();
+	motor_reset(MOTOR_X_0);
+	Fpga.par->output &= ~RO_ALL_OUTPUTS;
+	RX_StepperStatus.robinfo.ref_done = FALSE;
+	_CmdRunning = CMD_CLN_REFERENCE;
+	_NewCmd = 0;
+	RX_StepperStatus.robinfo.moving = TRUE;
+	_WasteDrained = FALSE;
+	motors_move_by_step(1 << MOTOR_X_0, &_ParCable_ref, 1000000, TRUE);
+}
+
+//--- lbrob_handle_ctrl_msg -----------------------------------
+int  lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
+{		
+	int val, pos;
+	
+	_MainSocket = socket;
+	switch (msgId)
+	{
+	case CMD_CLN_STOP:				strcpy(_CmdName, "CMD_CLN_STOP");
+		motors_stop(MOTOR_ALL_BITS);
+		Fpga.par->output &= ~RO_ALL_OUTPUTS;
+		//_PumpStartTime = 0;
+		_CmdRunning_Lift = 0;
+	//	robi_stop_all();
+		_CmdRunning = 0;
+		_WasteDrained = TRUE;
+		break;
+
+	case CMD_CLN_REFERENCE:	
+		strcpy(_CmdName, "CMD_CLN_REFERENCE");
+		if (_CmdRunning){lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_STOP, NULL); _NewCmd = CMD_CLN_REFERENCE; break;}
+		if (!RX_StepperStatus.info.z_in_ref)
+		{
+			if (!RX_StepperStatus.info.moving)	
+			{
+				_CmdRunning_Lift = CMD_CAP_REFERENCE;
+				lb702_handle_ctrl_msg(INVALID_SOCKET, _CmdRunning_Lift, NULL);
+				_NewCmd = msgId;
+			}
+			//Error(ERR_CONT, 0, "Command %s: Basket is too low", _CmdName);
+			break;
+		}
+		_CmdRunning = msgId;
+		_lbrob_do_reference();
+		break;
+		
+	case CMD_CLN_MOVE_POS:			strcpy(_CmdName, "CMD_CLN_MOVE_POS");
+		_cln_move_to(msgId, *(ERobotFunctions*)pdata);
+		break;
+		
+	case CMD_CLN_FILL_CAP:			strcpy(_CmdName, "CMD_CLN_FILL_CAP");
+		if (!_CmdRunning)
+		{
+			
+			if (!RX_StepperStatus.robinfo.ref_done)
+			{
+				Error(ERR_CONT, 0, "LBROB: Robot not refenenced, cmd=0x%08x", msgId);
+				break;
+			}
+			_CmdRunning = msgId;
+			pos = *((INT32*)pdata);
+			_RobFunction = pos;
+			switch (_RobFunction)
+			{
+			case rob_fct_cap:			_WasteDrained = TRUE;
+										_WasteValveSwitched = 0;
+										_PrevWasteValveSelect = 0;
+										RX_StepperStatus.robinfo.moving = TRUE;
+										Fpga.par->output &= ~RO_ALL_OUTPUTS;
+										Fpga.par->output |= RO_FLUSH_TO_CAP;
+										Fpga.par->output |= RO_FLUSH_PUMP;
+										_CapFillTime = rx_get_ticks();
+										_FrontPumpUsed = TRUE;
+										_PumpStartTime = rx_get_ticks();
+										break;
+				
+			case rob_fct_purge_all:		_WasteDrained = TRUE;
+										if (!RX_StepperStatus.info.z_in_ref)								// Here this is for purging and not for vacuum
+										{
+											if (!RX_StepperStatus.info.moving)
+											{
+												_CmdRunning_Lift = CMD_CAP_UP_POS;
+												lb702_handle_ctrl_msg(INVALID_SOCKET, _CmdRunning_Lift, NULL);
+												_NewCmd = msgId;
+												break;
+											}
+										}
+										RX_StepperStatus.robinfo.moving = TRUE;
+										_CmdRunning = msgId;
+										_ParCable_drive_purge.speed = RX_StepperCfg.wipe_speed * X_STEPS_PER_METER / 1000;			// divided by 1000 to get from steps/m to steps/mm
+										motors_move_to_step(MOTOR_X_BITS, &_ParCable_drive_purge, CABLE_WIPE_POS_FRONT);
+										_PumpStartTime = rx_get_ticks();
+										_FrontPumpUsed = TRUE;
+										break;
+
+			case rob_fct_purge_head0:
+			case rob_fct_purge_head1:
+			case rob_fct_purge_head2:
+			case rob_fct_purge_head3:
+			case rob_fct_purge_head4:
+			case rob_fct_purge_head5:
+			case rob_fct_purge_head6:
+			case rob_fct_purge_head7:
+										break;
+				
+			default: break;
+			}
+		}
+		
+	case CMD_ERROR_RESET:			strcpy(_CmdName, "CMD_ERROR_RESET");
+		fpga_stepper_error_reset();
+		break;
+	
+	case CMD_CLN_WASTE_PUMP:
+		val   = (*((INT32*)pdata));
+		_set_waste_pump(val);
+		break;
+		
+	case CMD_CLN_SET_VALVE:
+		val = (*((INT32*)pdata));
+		RX_StepperStatus.waste_valve = val;
+		break;
+
+	/*
+	case CMD_CAP_CAPPING_POS:
+		_cln_move_to(CMD_CAP_CAPPING_POS, rob_fct_cap);
+		break;
+	*/
+		
+	default:					
+		lb702_handle_ctrl_msg(socket, msgId, pdata); 
+		break;
+	}
+}
+
+//--- _cln_move_to ---------------------------------------
+static void _cln_move_to(int msgId, ERobotFunctions fct)
+{
+	int pos;
+	if (!_CmdRunning)
+	{
+		int old_RobFunction = _RobFunction;
+		_RobFunction = fct;
+		if (!RX_StepperStatus.info.z_in_ref || !RX_StepperStatus.info.headUpInput_0 || !RX_StepperStatus.info.headUpInput_1)								// Here this is for purging and not for vacuum
+		{
+			if (!RX_StepperStatus.info.moving)
+			{
+				_CmdRunning_Lift = CMD_CAP_REFERENCE;
+				lb702_handle_ctrl_msg(INVALID_SOCKET, _CmdRunning_Lift, NULL);
+				_NewCmd = msgId;
+			}
+			return;
+		}
+		else if (!RX_StepperStatus.robinfo.ref_done || ((_FrontPumpUsed && old_RobFunction != rob_fct_cap)/* && _RobFunction == rob_fct_cap*/))
+		{
+			_lbrob_do_reference();
+			//Error(ERR_CONT, 0, "LBROB: Robot not refenenced, cmd=0x%08x", msgId);
+			_CmdRunning_old = msgId;
+			return;
+		}
+		RX_StepperStatus.robinfo.moving = TRUE;
+		_CmdRunning  = msgId;
+		switch (_RobFunction)
+		{
+		case rob_fct_cap:			motors_move_to_step(MOTOR_X_BITS, &_ParCable_drive, CABLE_CAP_POS);
+									break;
+				
+		case rob_fct_purge_all:		motors_move_to_step(MOTOR_X_BITS, &_ParCable_drive, CABLE_WIPE_POS_BACK);
+									break;
+				
+		case rob_fct_purge_head0:					
+		case rob_fct_purge_head1:	
+		case rob_fct_purge_head2:					
+		case rob_fct_purge_head3:	
+		case rob_fct_purge_head4:					
+		case rob_fct_purge_head5:	
+		case rob_fct_purge_head6:					
+		case rob_fct_purge_head7:	pos = (CABLE_WIPE_POS_BACK + (((int)_RobFunction - (int)rob_fct_purge_head0) * (CABLE_WIPE_POS_FRONT - CABLE_WIPE_POS_BACK)) / 7);
+									motors_move_to_step(MOTOR_X_BITS, &_ParCable_drive, pos);
+									break;
+				
+		default:					Error(ERR_CONT, 0, "Command %s: Rob-Function %d not implemented", _CmdName, _RobFunction);
+		}
+	}	
+}
+
+//--- _lbrob_motor_test ---------------------------------
+static void _lbrob_motor_test(int motorNo, int steps)
+{
+	motorNo = 4;
+	int motors = 1 << motorNo;
+	SMovePar par;
+	int i;
+
+	memset(&par, 0, sizeof(SMovePar));
+	
+	par.speed		= REF_SPEED;
+	par.accel		= 32000;
+	par.current_acc	= 400.0;
+	par.current_run	= 400.0;
+	par.enc_bwd     = TRUE;
+	
 	_CmdRunning = 1; // TEST
-
-	for (i = 0; i < MOTOR_CNT; i++) if (motor & (1 << i)) motor_config(i, CURRENT_HOLD, CAP_STEPS_PER_METER, CAP_INC_PER_METER);
-	motors_move_by_step(motor, &par, -steps, FALSE);
+	RX_StepperStatus.info.moving = TRUE;
+	
+	motors_config(motors, CURRENT_HOLD, X_STEPS_PER_METER, X_INC_PER_METER);
+	motors_move_by_step(motors, &par, steps, FALSE);			
 }
 
-//--- _lbrob_ro_error_reset ------------------------------------
-void	_lbrob_ro_error_reset(void)
+//--- _lbrob_motor_enc_reg_test -----------------------------------------------
+static void _lbrob_motor_enc_reg_test(int steps)
 {
-	memset(_lbrob_Error, 0, sizeof(_lbrob_Error));
-	// use: ErrorFlag (ERR_CONT, (UINT32*)&_Error[isNo],  1,  0, "InkSupply[%d] Ink Tank Sensor Error", isNo+1);
-}
-
-//--- _lbrob_ro_send_status --------------------------------------------------
-static void _lbrob_ro_send_status(RX_SOCKET socket)
-{
-	static RX_SOCKET _socket = INVALID_SOCKET;
-	if (socket != INVALID_SOCKET) _socket = socket;
-	if (_socket != INVALID_SOCKET) sok_send_2(&_socket, REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);
+	RX_StepperStatus.robinfo.moving = TRUE;
+	_CmdRunning = 1;
+	
+	motors_move_by_step(MOTOR_X_0, &_ParCable_drive, -steps, FALSE);
 }

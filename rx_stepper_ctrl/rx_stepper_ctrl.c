@@ -115,7 +115,6 @@ static void _main_loop()
 			case printer_LB702_UV:
 			case printer_LB702_WB:		
 			case printer_LH702:			_AppRunning = lb702_menu(); break;
-//			case printer_LBROB:			_AppRunning = lbrob_menu(); break;
 
 			case printer_DP803: 		_AppRunning = dp803_menu();	break;
 			

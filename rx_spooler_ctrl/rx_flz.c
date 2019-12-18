@@ -289,6 +289,7 @@ static void *_flz_decompress_master_thread(void* lpParameter)
 		if (flz_loaded!=NULL) flz_loaded(_DecompressPar.loaded_arg);
 		rx_sem_post(_sem_decompress_done);
 	}
+	return NULL;
 }
 
 //--- _flz_decompress_thread ------------------------------------

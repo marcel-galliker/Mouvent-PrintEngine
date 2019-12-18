@@ -114,7 +114,6 @@ namespace RX_DigiPrint.Views.PrintSystemView
             //msg.ctrlMode = EFluidCtrlMode.ctrl_cap;
             msg.ctrlMode = ctrlMode;
             RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_CTRL_MODE, ref msg);
-
         }
 
         //--- Cap_Clicked -------------------------------------------------
@@ -138,7 +137,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
         //--- Wash_Clicked -------------------------------------------------
         private void Wash_Clicked(object sender, RoutedEventArgs e)
         {            
-            _SetCtrlMode(EFluidCtrlMode.ctrl_wetwipe);
+            _SetCtrlMode(EFluidCtrlMode.ctrl_wash);
         }
 
         //--- Purge_Clicked -------------------------------------------------

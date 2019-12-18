@@ -154,6 +154,14 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _X_in_ref, value); }
         }
 
+        //--- Property RobotUsed ---------------------------------------
+        private bool _RobotUsed;
+        public bool RobotUsed
+        {
+            get { return _RobotUsed; }
+            set { SetProperty(ref _RobotUsed, value); }
+        }
+
         //--- Property _HeadUpInput_0 ---------------------------------------
         private bool _HeadUpInput_0;
         public bool HeadUpInput_0
@@ -280,6 +288,7 @@ namespace RX_DigiPrint.Models
             DripPans_InfeedDOWN     = (msg.info & 0x20000000) != 0;
             DripPans_OutfeedUP      = (msg.info & 0x40000000) != 0;
             DripPans_OutfeedDOWN    = (msg.info & 0x80000000) != 0;
+            RobotUsed               = (msg.robot_used!=0);
 
             drip_pans_enabled = Z_in_ref;
 
@@ -295,18 +304,24 @@ namespace RX_DigiPrint.Models
                 cap_enabled = RefDone && X_in_cap;
                 capDP803_enabled = RefDone && Z_in_ref;
             }
+            else if (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_cleaf)
+            {
+                cap_enabled = RefDone && DripPans_InfeedUP && DripPans_OutfeedUP;
+                capDP803_enabled = true;
+            }
             //---- END OF CAPPING ----
             else
             {
-                cap_enabled = RefDone && DripPans_InfeedUP && DripPans_OutfeedUP && (X_in_cap || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB701 || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_cleaf);
-                capDP803_enabled = false || (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_cleaf);
+                cap_enabled = RefDone ;
+                capDP803_enabled = false;
             }
+
 
             if (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_cleaf) cmd_enabled = RefDone && DripPans_InfeedDOWN && DripPans_OutfeedDOWN && !DripPans_InfeedUP && !DripPans_OutfeedUP;
             //---- CAPPING ----
             else if (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_DP803) cmd_enabled = RefDone && X_in_ref;
             //---- END OF CAPPING ----
-            else cmd_enabled = RefDone;
+            else cmd_enabled = RefDone && !;
 
             {
                 int i;

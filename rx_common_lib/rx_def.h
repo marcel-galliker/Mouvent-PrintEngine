@@ -492,6 +492,7 @@ typedef struct SPrinterStatus
 		UINT32			externalData:1;		// 0x0040
 		UINT32			txRobot:1;			// 0x0080
 		UINT32			tempReady:1;		// 0x0100
+		UINT32			lbRobot : 1;		// 0x0200
 		};
 		UINT32 flags;		
 	};
@@ -1193,19 +1194,35 @@ typedef struct SRobotOffsets
 {
 	INT32			ref_height;
 	INT32			head_align;
-	INT32			robot_height;
-	INT32			robot_align;
 } SRobotOffsets;
 	
 typedef enum ERobotFunctions
 {
 	rob_fct_cap,			// Capping
-	rob_fct_wetwipe,		// Wetwipe
+	rob_fct_wash,			// Wash
 	rob_fct_vacuum,			// Vacuum
 	rob_fct_wipe,			// Wiping
-	rob_fct_vacuum_change,	// Vaccum change		
+	rob_fct_vacuum_change,	// Vaccum change
 	rob_fct_tilt,			// Tilt for Capping
+	rob_fct_vacuum_all,		// Vacuum all heads
+	rob_fct_purge_all,		// Purge all heads
+	rob_fct_purge_head0,	// Purge head 0
+	rob_fct_purge_head1,	// Purge head 1
+	rob_fct_purge_head2,	// Purge head 2
+	rob_fct_purge_head3,	// Purge head 3
+	rob_fct_purge_head4,	// Purge head 4
+	rob_fct_purge_head5,	// Purge head 5
+	rob_fct_purge_head6,	// Purge head 6
+	rob_fct_purge_head7,	// Purge head 7
+
 } ERobotFunctions;
+	
+typedef enum ERobotVaccumState
+{
+	rob_vacuum_1_to_4,
+	rob_vacuum_5_to_8,
+	rob_vacuum_all,
+} ERobotVacuumState;
 	
 //--- Stepper Board --------------------
 typedef struct SStepperCfg
@@ -1224,17 +1241,15 @@ typedef struct SStepperCfg
 	INT32			ref_height_down;	// height of reference tool , to adjust the motors
 	INT32			print_height;		// in µm
 	INT32			wipe_height;		// in µm
+	INT32			wipe_delay;			// in ms
+	INT32			wipe_speed;			// in mm/s
 	INT32			cap_height;			// in µm
 	INT32			cap_pos;
 	INT32			adjust_pos;
 	INT32			use_printhead_en;	// if true use PRINTHEAD_EN to allow head going down
 	INT32			material_thickness;
 	
-	INT32			robot_used;
 	SRobotOffsets	robot[4];
-	
-	INT32			motor_correct0[4];		// reference correction value for the motor 0 -> used to bring the steppermotors completly in level
-	INT32			motor_correct1[4];		// reference correction value for the motor 1 -> used to bring the steppermotors completly in level
 } SStepperCfg;
 	
 typedef struct SStepperMotorTest
@@ -1323,18 +1338,18 @@ typedef struct ERobotInfo
 	UINT32 cap_ready		: 1;	//	0x00000400
 	UINT32 wipe_ready		: 1;	//	0x00000800
 	UINT32 vacuum_ready		: 1;	//	0x00001000
-	UINT32 wetwipe_ready	: 1;	//	0x00002000
-	UINT32 wipe_done		: 1;	//	0x00004000
-	UINT32 vacuum_done		: 1;	//	0x00008000
-	UINT32 wetwipe_done		: 1;	//	0x00010000
-	UINT32 vacuum_in_change	: 1;	//	0x00020000
-	UINT32 r_info_18		: 1;	//	0x00040000
-	UINT32 r_info_19		: 1;	//	0x00080000
-	UINT32 r_info_20		: 1;	//	0x00100000
-	UINT32 r_info_21		: 1;	//	0x00200000
-	UINT32 r_info_22		: 1;	//	0x00400000
-	UINT32 r_info_23		: 1;	//	0x00800000
-	UINT32 r_info_24		: 1;	//	0x01000000
+	UINT32 wash_ready		: 1;	//	0x00002000
+	UINT32 purge_ready		: 1;	//	0x00004000	
+	UINT32 wipe_done		: 1;	//	0x00008000
+	UINT32 vacuum_done		: 1;	//	0x00010000
+	UINT32 wash_done		: 1;	//	0x00020000
+	UINT32 purge_done		: 1;	//	0x00040000
+	UINT32 vacuum_in_change	: 1;	//	0x00080000
+	UINT32 use_waste_pump	: 1;	//	0x00100000
+	UINT32 rob_in_wipe		: 1;	//	0x00200000
+	UINT32 rob_in_vac		: 1;	//	0x00400000
+	UINT32 rob_in_wash		: 1;	//	0x00800000
+	UINT32 rob_in_cap		: 1;	//	0x01000000
 	UINT32 r_info_25		: 1;	//	0x02000000
 	UINT32 r_info_26		: 1;    //  0x04000000
 	UINT32 r_info_27		: 1;	//  0x08000000
@@ -1422,6 +1437,8 @@ typedef struct SStepperStat
 	INT32		posX;
 	INT32		posY;
 	INT32		posZ;
+
+	INT32		waste_valve;
 	
 	INT32		adjustmentProgress;
 	UINT32		alive[2];

@@ -171,7 +171,7 @@ int	fpga_input(int no)
 //--- fpga_display_status -----------------------------------------------
 #define PRINTF(n)  for(i=0; i<n; i++) term_printf
 
-void _fpga_display_status(void)
+void fpga_display_status(void)
 {
 	int i, v;
 	static UINT32 _lastPulseCnt[6];
@@ -235,6 +235,8 @@ void _fpga_display_status(void)
 	term_printf("Motor:           "); PRINTF(MOTOR_CNT)("---%d---   ", i); term_printf("\n");
 if (RX_StepperCfg.printerType==printer_TX801) 
 	term_printf("Place:           --LF---   --LB---   --RB---   --RF---   -------\n");
+if (RX_StepperCfg.printerType==printer_LB702_UV || RX_StepperCfg.printerType==printer_LB702_WB || RX_StepperCfg.printerType==printer_LH702 || RX_StepperCfg.printerType==printer_DP803) 
+	term_printf("Place:           -BACK--   -FRONT-   -------   -------   -ROBOT-\n");
 	term_printf("Moving:          "); PRINTF(MOTOR_CNT)("   %d      ", ((Fpga.stat->moving & (0x01<<i))!=0));	term_printf("\n"); 
 	term_printf("moveIdx:         "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.stat->statMot[i].moveIdx);				term_printf("\n"); 
 	term_printf("moving_cnt:      "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.stat->statMot[i].moving_cnt);			term_printf("\n"); 
@@ -350,7 +352,7 @@ void  fpga_main(int ticks, int menu)
 		//--- user interface ------------------------------				
 		{
 //			_fpga_display_error();
-			_fpga_display_status();
+			fpga_display_status();
 		}
 	}
 }

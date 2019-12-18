@@ -18,7 +18,7 @@
 void cleaf_init(void);
 int  cleaf_menu(void);
 void cleaf_main(int ticks, int menu);
-	
+
 int  cleaf_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata);
 
 

@@ -67,6 +67,7 @@ static int _handle_ctrl_msg (RX_SOCKET socket, void *pmsg);
 static int _do_ping				(RX_SOCKET socket);
 static int _do_fluid_stat		(RX_SOCKET socket, SHeadStateLight pressure[FLUID_BOARD_CNT]);
 static int _do_fluid_ctrlMode	(RX_SOCKET socket, SFluidCtrlCmd *pmsg);
+static int _do_set_purge_par	(RX_SOCKET socket, SPurgePar *ppar);
 static void _do_scales_set_cfg	(RX_SOCKET socket, SScalesCfgMsg *pmsg);
 static void _do_scales_get_cfg	(RX_SOCKET socket);
 static void _do_scales_tara		(RX_SOCKET socket, INT32  *pmsg);
@@ -187,14 +188,15 @@ static int _handle_ctrl_msg(RX_SOCKET socket, void *msg)
 	case CMD_FLUID_CFG:			nios_set_cfg		((SFluidBoardCfgLight*) &phdr[1]);									
 								fpga_cfg			();
 								break;
-	case CMD_FLUID_STAT:		_do_fluid_stat		(socket, (SHeadStateLight*)	&phdr[1]);								break;
-	case CMD_FLUID_CTRL_MODE:	_do_fluid_ctrlMode	(socket, (SFluidCtrlCmd*)msg);										break;
-	
-	case CMD_SCALES_SET_CFG:	 _do_scales_set_cfg(socket, (SScalesCfgMsg*)msg); break;
-	case CMD_SCALES_GET_CFG:	 _do_scales_get_cfg(socket); break;
-	case CMD_SCALES_TARA:		 _do_scales_tara(socket, (INT32*)&phdr[1]);		break;	
-	case CMD_SCALES_CALIBRATE:	 _do_scales_calib(socket, (SValue*)&phdr[1]);	break;	
-	case CMD_SCALES_STAT:		 _do_scales_stat(socket);	break;	
+	case CMD_FLUID_STAT:		_do_fluid_stat		(socket, (SHeadStateLight*)	&phdr[1]);	break;
+	case CMD_FLUID_CTRL_MODE:	_do_fluid_ctrlMode	(socket, (SFluidCtrlCmd*)msg);			break;
+	case CMD_SET_PURGE_PAR:		_do_set_purge_par	(socket, (SPurgePar*)	&phdr[1]);		break;
+
+	case CMD_SCALES_SET_CFG:	 _do_scales_set_cfg(socket, (SScalesCfgMsg*)msg);			break;
+	case CMD_SCALES_GET_CFG:	 _do_scales_get_cfg(socket);								break;
+	case CMD_SCALES_TARA:		 _do_scales_tara(socket, (INT32*)&phdr[1]);					break;	
+	case CMD_SCALES_CALIBRATE:	 _do_scales_calib(socket, (SValue*)&phdr[1]);				break;	
+	case CMD_SCALES_STAT:		 _do_scales_stat(socket);									break;	
 	default:		
 					{
 						char peer[64];
@@ -256,6 +258,13 @@ static int _do_fluid_stat (RX_SOCKET socket, SHeadStateLight stat[FLUID_BOARD_CN
 static int _do_fluid_ctrlMode	(RX_SOCKET socket, SFluidCtrlCmd *pmsg)
 {
 	nios_set_ctrlmode(pmsg->no, pmsg->ctrlMode);
+	return REPLY_OK;
+}
+
+//--- _do_set_purge_par ---------------------------------------------
+static int _do_set_purge_par(RX_SOCKET socket, SPurgePar *ppar)
+{
+	nios_set_purge_par(ppar->no, ppar->delay, ppar->time);
 	return REPLY_OK;
 }
 

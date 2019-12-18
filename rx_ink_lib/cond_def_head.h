@@ -201,6 +201,8 @@ typedef struct SConditionerCfg_mcu
 	UINT32	mode;					// EnFluidCtrlMode
 	UINT32	volume_printed;			// [ml/min]
 	UINT16	flowResistance;
+	UINT32	purgeDelay;				// ms wait before opening the valve
+	UINT32	purgeTime;				// ms the valve is open
 		
 	//--- status of fluid system -------------------
     INT32   cylinderPressure;

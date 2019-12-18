@@ -78,6 +78,7 @@ static int _rep_head_stat		(RX_SOCKET socket);
 static int _do_inkdef			(RX_SOCKET socket, SInkDefMsg	    *pmsg);
 static int _do_print_abort		(RX_SOCKET socket);
 static int _do_set_FluidCtrlMode(RX_SOCKET socket, SFluidCtrlCmd	*pmsg);
+static int _do_set_purge_par	(RX_SOCKET socket, SPurgePar		*ppar);
 
 //--- ctrl_init --------------------------------------------------------------------
 int ctrl_init()
@@ -145,8 +146,7 @@ static int _save_ctrl_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr
 	case CMD_PING:		_do_ping(socket);
 						_SpoolerSocket = socket;
 																			break;
-	case CMD_HEAD_STAT:				_do_head_stat	(socket, (SFluidStateLight*) &phdr[1]); break;
-
+	case CMD_HEAD_STAT: _do_head_stat (socket, (SFluidStateLight*) &phdr[1]); break;
 	default:		{
 						// ALL messages that use FPGA Registers
 						int idx = (_MsgBufIn + 1) % MSG_BUF_SIZE;
@@ -224,6 +224,7 @@ static int _handle_ctrl_msg(RX_SOCKET socket, void *pmsg)
 	case CMD_HEAD_STAT:				_do_head_stat       (socket, (SFluidStateLight*) &phdr[1]); break;
 	case SET_GET_INK_DEF:			_do_inkdef			(socket, (SInkDefMsg*)		pmsg);	 break;
 	case CMD_HEAD_FLUID_CTRL_MODE:	_do_set_FluidCtrlMode(socket, (SFluidCtrlCmd*)  pmsg);	 break;
+	case CMD_SET_PURGE_PAR:			_do_set_purge_par	(socket, (SPurgePar*)	&phdr[1]);	 break;
 
 	default:		Error(LOG, 0, "Unknown Command 0x%04x", phdr->msgId);
 					reply = REPLY_ERROR;
@@ -406,6 +407,13 @@ static int _do_set_FluidCtrlMode(RX_SOCKET socket, SFluidCtrlCmd *pmsg)
 	cond_ctrlMode(pmsg->no, pmsg->ctrlMode);
 //	rx_sleep(10);
 //	_rep_head_stat(socket);	// give feedback now!
+	return REPLY_OK;
+}
+
+//--- _do_set_purge_par -------------------------------------
+static int _do_set_purge_par(RX_SOCKET socket, SPurgePar *ppar)
+{
+	cond_set_purge_par(ppar->no, ppar->delay, ppar->time);
 	return REPLY_OK;
 }
 

@@ -292,6 +292,13 @@ void nios_set_ctrlmode(int isNo, EnFluidCtrlMode mode)
 	_Cfg->ink_supply[isNo].ctrl_mode = mode;
 }
 
+//--- nios_set_purge_par --------------------------------------
+void nios_set_purge_par(int isNo, int delay, int time)
+{
+	if (isNo<0 || isNo>NIOS_INK_SUPPLY_CNT) return;
+	_Cfg->ink_supply[isNo].purgeTime = time;
+}
+
 //--- _set_testmode -----------------------------
 static int _set_testmode(void)
 {

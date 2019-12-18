@@ -135,6 +135,7 @@ static int		_FirstMarkPos;
 static int		_RevSumStart[8];
 static int		_Restarted = FALSE;
 static SPageId	_ID[ID_CNT];
+static int		_Enabled[ENCODER_IN_CNT];
 
 static FILE	*_LogFile = NULL;
 
@@ -496,7 +497,8 @@ void fpga_abort_printing(void)
 	int i;
 	if (RX_EncoderCfg.printerType==printer_test_table) _UV_Stopping = TRUE;
 	else FpgaQSys->out = 0;
-	for (i=0; i<SIZEOF(Fpga->cfg.encIn); i++) Fpga->cfg.encIn[i].enable = FALSE;
+	for (i=0; i<SIZEOF(Fpga->cfg.encIn); i++) 
+		Fpga->cfg.encIn[i].enable = _Enabled[i] = FALSE;
 }
 
 //--- fpga_enc_config ---------------------------------------------------
@@ -591,7 +593,7 @@ void fpga_enc_config(int inNo, SEncoderCfg *pCfg, int restart)
 			RX_EncoderStatus.PG_cnt = 0;
 		}
 		_RevSumStart[inNo] = Fpga->stat.encIn[inNo].rev_sum;
-		Fpga->cfg.encIn[inNo].enable			= TRUE;
+		Fpga->cfg.encIn[inNo].enable			= _Enabled[inNo] =TRUE;
 	}
 	if(RX_EncoderCfg.printerType == printer_test_table) _uv_init();
 	else FpgaQSys->out = ENC_READY_OUT;
@@ -648,7 +650,7 @@ void fpga_enc_simu(int khz)
 //--- fpga_encoder_enable -------------------------------------
 void  fpga_encoder_enable(int enable)
 {
-	int i;
+	int i;	
 	
 	if (_Init)
 	{
@@ -659,8 +661,8 @@ void  fpga_encoder_enable(int enable)
 
 			Fpga->cfg.encOut[i].reset_min_max	= TRUE;
 			Fpga->cfg.encIn[i].reset_min_max	= TRUE;
-			Fpga->cfg.encIn[i].enable			= enable;		
-			Fpga->cfg.encIn[i].index_en			= enable;	
+			Fpga->cfg.encIn[i].enable			= enable && _Enabled[i];		
+			Fpga->cfg.encIn[i].index_en			= enable && _Enabled[i];	
 			
 // for Debuging
 //			Fpga->cfg.encOut[i].scanning		= FALSE;
@@ -1025,7 +1027,8 @@ void fpga_pg_init(int restart)
 	for (pgNo=0; pgNo<SIZEOF(Fpga->cfg.pg); pgNo++)
 	{
 		Fpga->cfg.pg[pgNo].fifos_ready = FALSE;
-		Fpga->cfg.pg[pgNo].fifos_used  = FIFOS_OFF;				
+		Fpga->cfg.pg[pgNo].fifos_used  = FIFOS_OFF;
+		Fpga->cfg.encOut[pgNo].scanning = FALSE;
 	}
 	
 	Fpga->cfg.general.reset_fifos = TRUE;

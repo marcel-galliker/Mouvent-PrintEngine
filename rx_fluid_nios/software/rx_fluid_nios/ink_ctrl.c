@@ -30,16 +30,13 @@
 #define		MAX_PRINT_PRESSURE_FLUID	300
 #define		MAX_PRESSURE_FLUID			1100
 
-#define 	PRESSURE_MICRO_PURGE		50
 #define 	PRESSURE_SOFT_PURGE			80
 #define 	PRESSURE_PURGE				160
 #define 	PRESSURE_HARD_PURGE			320
 #define 	PRESSURE_FLUSH				1000
 
-#define 	TIME_MICRO_PURGE			1000
 #define		TIME_SOFT_PURGE				2000
 #define 	TIME_PURGE					3000
-// #define 	TIME_HARD_PURGE				5000
 #define 	TIME_HARD_PURGE				10000
 
 #define 	TIME_EMPTY					3000
@@ -107,7 +104,7 @@ static int 	_EmptyPressureStored[NIOS_INK_SUPPLY_CNT] = {0};
 
 //--- prototypes ------------------------
 static int    _degass_ctrl(void);
-static void   _init_purge(int isNo, int presure, int time);
+static void   _init_purge(int isNo, int presure);
 static void   _set_pump_speed(int isNo, int speed);
 static UINT32 _get_pump_ticks(int isNo);
 static void   _set_air_valve(int isNo, int newState);
@@ -517,10 +514,10 @@ void ink_tick_10ms(void)
 			case ctrl_flush_done:
 				pRX_Status->ink_supply[isNo].ctrl_state = ctrl_flush_done;
 				break;
-			case ctrl_purge_soft:	_init_purge(isNo, PRESSURE_SOFT_PURGE,  TIME_SOFT_PURGE ); break;
-			case ctrl_purge:		_init_purge(isNo, PRESSURE_PURGE,     	TIME_PURGE      ); break;
-			case ctrl_purge_hard:	_init_purge(isNo, PRESSURE_HARD_PURGE, 	TIME_HARD_PURGE ); break;
-			case ctrl_purge_micro:	_init_purge(isNo, PRESSURE_MICRO_PURGE, TIME_MICRO_PURGE); break;
+			case ctrl_purge_soft:		_init_purge(isNo, PRESSURE_SOFT_PURGE); break;
+			case ctrl_purge:			_init_purge(isNo, PRESSURE_PURGE); 		break;
+			case ctrl_purge_hard:		_init_purge(isNo, PRESSURE_HARD_PURGE); break;
+			case ctrl_purge_hard_wipe:	_init_purge(isNo, PRESSURE_HARD_PURGE); break;
 
 			case ctrl_purge_step1: // build up pressure
 			case ctrl_purge_step2: // build up pressure
@@ -530,20 +527,20 @@ void ink_tick_10ms(void)
 
 			case ctrl_purge_step3: // build up pressure
 				_pump_ctrl(isNo, _InkSupply[isNo].purgePressure,FALSE);
+				_InkSupply[isNo].purgeTime = 0;
 				if (pRX_Status->ink_supply[isNo].IS_Pressure_Actual >= (60 * _InkSupply[isNo].purgePressure / 100))
 					pRX_Status->ink_supply[isNo].ctrl_state = ctrl_purge_step3;
 				break;
 
 			case ctrl_purge_step4:
-				if (_InkSupply[isNo].purgeTime>0)
+				if (_InkSupply[isNo].purgeTime<pRX_Config->ink_supply[isNo].purgeTime)
 				{
 					_pump_ctrl(isNo, _InkSupply[isNo].purgePressure, FALSE);
 					_set_bleed_valve(isNo, FALSE);
-					_InkSupply[isNo].purgeTime-=cycleTime;
+					_InkSupply[isNo].purgeTime+=cycleTime;
 				}
 				else
 				{
-					_InkSupply[isNo].purgeTime 	   = 0;
 					_InkSupply[isNo].purgePressure = 0;
 					_set_pump_speed(isNo, 0);
 					_set_air_valve(isNo, TRUE);
@@ -793,7 +790,7 @@ void ink_tick_1000ms(void)
 }
 
 //--- _init_purge ---------------------------------------------
-static void _init_purge(int isNo, int pressure, int time)
+static void _init_purge(int isNo, int pressure)
 {
 	if (_InkSupply[isNo].purgePressure==0)
 	{
@@ -820,8 +817,6 @@ static void _init_purge(int isNo, int pressure, int time)
 			_InkSupply[isNo].purgePressure = MAX_PRESSURE_FLUID;
 
 		pRX_Status->ink_supply[isNo].IS_Pressure_Setpoint 	=  _InkSupply[isNo].purgePressure;
-
-		_InkSupply[isNo].purgeTime     = time;
 	}
 	pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
 }
@@ -933,7 +928,7 @@ static void _pump_ctrl(INT32 isNo, INT32 pressure_target, INT32 print_mode)
 
 		pRX_Status->ink_supply[isNo].COND_Pressure_Actual 	= pRX_Config->ink_supply[isNo].condPresIn;
 		if(pRX_Config->headsPerColor == 1) _InkSupply[isNo].pid_Setpoint.P = 100;
-		else _InkSupply[isNo].pid_Setpoint.P 				= 200;
+		else _InkSupply[isNo].pid_Setpoint.P 				= 50;
 
 		if(print_mode == 1)
 		{

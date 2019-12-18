@@ -105,6 +105,7 @@ typedef enum
 	scan_wipe,		// 05
 	scan_manual,	// 06
 	scan_stopped,	// 07
+	scan_fill_cap,	// 08
 } EnScanState;
 
 //--- prototypes -----------------------
@@ -562,6 +563,14 @@ int  plc_clean(void)
 		_plc_set_command("CMD_PRODUCTION", "CMD_STOP");
 		step_set_vent(FALSE);
 	}
+	return REPLY_OK;
+}
+
+//--- plc_to_fill_cap_pos ----------------------------------
+int plc_to_fill_cap_pos(void)
+{
+	if (rx_def_is_tx(RX_Config.printer.type))
+		_plc_set_command("CMD_PRODUCTION", "CMD_SLIDE_TO_FILL_CAP");
 	return REPLY_OK;
 }
 
@@ -1625,6 +1634,18 @@ int	 plc_in_cap_pos(void)
 		EnScanState state;
 		lc_get_value_by_name_UINT32(UnitID ".STA_SLIDE_POSITION", (UINT32*)&state);
 		return state == scan_capping;	
+	}
+	return TRUE;
+}
+
+//---- plc_in_fill_cap_pos --------------------------------------
+int plc_in_fill_cap_pos(void)
+{
+	if (rx_def_is_tx(RX_Config.printer.type))
+	{
+		EnScanState state;
+		lc_get_value_by_name_UINT32(UnitID ".STA_SLIDE_POSITION", (UINT32*)&state);
+		return state == scan_fill_cap;
 	}
 	return TRUE;
 }

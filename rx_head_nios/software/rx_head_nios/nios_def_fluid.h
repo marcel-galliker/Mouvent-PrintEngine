@@ -65,7 +65,8 @@ typedef struct
 	INT32	meniscusSet;
 //	INT32	condPresOutSet;
 	INT32	flushTime[3];
-
+	INT32	purgeTime;
+	
 //	INT32	fluid_PIDsetpoint_P;
 //	INT32	fluid_PIDsetpoint_I;
 //	INT32	fluid_PIDpump_P;

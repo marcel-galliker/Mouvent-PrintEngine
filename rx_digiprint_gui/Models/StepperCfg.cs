@@ -61,6 +61,23 @@ namespace RX_DigiPrint.Models
             set { Changed|=SetProperty(ref _AdjustPos, value); }
         }
 
+        //--- Property WipeDelay ---------------------------------------
+        private int _WipeDelay;
+        public int WipeDelay
+        {
+            get { return _WipeDelay; }
+            set { Changed|=SetProperty(ref _WipeDelay, value); }
+        }
+
+        //--- Property WipeSpeed ---------------------------------------
+        private int _WipeSpeed;
+        public int WipeSpeed
+        {
+            get { return _WipeSpeed; }
+            set { Changed|=SetProperty(ref _WipeSpeed, value); }
+        }
+
+        
         public TcpIp.SRobotOffsets[] Robot = new TcpIp.SRobotOffsets[4];
 
         //--- SetStepperCfg ----------------------------------------
@@ -71,6 +88,8 @@ namespace RX_DigiPrint.Models
             WipeHeight  = (msg.wipe_height  /1000.0);
             CapHeight   = (msg.cap_height   /1000.0);
             AdjustPos   = (msg.adjust_pos   /1000.0);
+            WipeDelay   = msg.wipe_delay;
+            WipeSpeed   = msg.wipe_speed;
             Robot       = msg.robot;
             OnPropertyChanged("Robot");
             Changed=false;
@@ -87,6 +106,8 @@ namespace RX_DigiPrint.Models
             msg.wipe_height  = (Int32)(WipeHeight  * 1000);
             msg.cap_height   = (Int32)(CapHeight   * 1000);
             msg.adjust_pos   = (Int32)(AdjustPos   * 1000);
+            msg.wipe_delay   = WipeDelay;
+            msg.wipe_speed   = WipeSpeed;
             
             msg.robot        = Robot;
 

@@ -31,6 +31,7 @@ void fluid_send_calib		(SValue *pmsg);
 
 EnFluidCtrlMode fluid_get_ctrlMode(int no);
 int  fluid_in_ctrlMode		(int no, EnFluidCtrlMode ctrlMode);
+int	 fluid_purge_fluidNo	(void);
 void fluid_set_head_state	(int no, SHeadStat *pstat);
 INT32 fluid_get_cylinderPresSet(int no);
 INT32 fluid_get_cylinderPres   (int no);

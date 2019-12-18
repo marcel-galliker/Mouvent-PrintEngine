@@ -197,7 +197,9 @@ int _handle_ctrl_msg(RX_SOCKET socket, void *pmsg)//, int len, struct sockaddr *
 		case printer_LB701:				lb701_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);	break;
 		case printer_LB702_UV:
 		case printer_LB702_WB:			
-		case printer_LH702:				lb702_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);	break;
+		case printer_LH702:				if (RX_StepperStatus.robot_used) lbrob_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);
+										else							 lb702_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);	
+										break;
 //		case printer_LBROB:				lbrob_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);	break;
 			
 		case printer_DP803:				dp803_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);	break;
@@ -223,7 +225,7 @@ static int _do_ping(RX_SOCKET socket)
 static void _do_config(SStepperCfg *pcfg)
 {	
 	memcpy(&RX_StepperCfg, pcfg, sizeof(RX_StepperCfg));
-	
+		
 	switch (RX_StepperCfg.printerType)
 	{
 	case printer_test_slide:		break;

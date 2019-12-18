@@ -16,7 +16,9 @@
 #include "rx_sok.h"
 
 void lbrob_init(void);
-int  lbrob_menu(void);
+void lbrob_display_status(void);	
+void lbrob_menu(int help);
+void lbrob_handle_menu(char *str);
 void lbrob_main(int ticks, int menu);
 	
 int  lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata);

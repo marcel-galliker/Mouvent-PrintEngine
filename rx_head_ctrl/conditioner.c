@@ -600,6 +600,15 @@ void cond_set_flowResistance(int headNo, int value)
 	_NiosMem->cfg.cond[headNo].flowResistance = value;
 }
 
+//--- cond_set_purge_par -----------------------------------------
+void cond_set_purge_par (int headNo, int delay, int time)
+{
+	if (headNo<0 || headNo>=MAX_HEADS_BOARD || _NiosMem==NULL) return;	
+	
+	_NiosMem->cfg.cond[headNo].purgeDelay = delay;
+	_NiosMem->cfg.cond[headNo].purgeTime  = time;		
+}
+
 //--- cond_add_droplets_printed ---------------------------------------
 void cond_add_droplets_printed(int headNo, UINT64 droplets64)
 {

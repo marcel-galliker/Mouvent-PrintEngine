@@ -17,6 +17,7 @@
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>           
                 <ColumnDefinition Width="160"/>
@@ -69,6 +70,14 @@
             <TextBlock Grid.Row="3"      Text="FlightTime"/>
             <common:RxNumBox Grid.Row="3" Grid.Column="1" Text="{Binding ManualFlightTimeComp}" HorizontalContentAlignment="Right" HorizontalAlignment="Stretch" x:Name="ManualFlightTimeComp" />
             <TextBlock       Grid.Row="3" Grid.Column="5" Text=" mm" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center"/>
+
+            <TextBlock       Grid.Row="4" Grid.Column="0" Text="Wiping Delay"/>
+            <common:RxNumBox Grid.Row="4" Grid.Column="1" Text="{Binding WipeDelay}" HorizontalContentAlignment="Right"/>
+            <TextBlock       Grid.Row="4" Grid.Column="2" Text=" ms" FontSize="{StaticResource FontSizeStd}"/>
+
+            <TextBlock       Grid.Row="5" Grid.Column="0" Text="Wiping Speed"/>
+            <common:RxNumBox Grid.Row="5" Grid.Column="1" Text="{Binding WipeSpeed}" HorizontalContentAlignment="Right"/>
+            <TextBlock       Grid.Row="5" Grid.Column="2" Text=" mm/s" FontSize="{StaticResource FontSizeStd}"/>
 
         </Grid>
     </GroupBox>

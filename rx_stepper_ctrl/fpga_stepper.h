@@ -32,6 +32,7 @@ void  fpga_connected(void);
 void  fpga_deconnected(void);
 
 void  fpga_main(int ticks, int menu);
+void  fpga_display_status(void);
 int	  fpga_input(int no);
 void  fpga_output_toggle(int no);
 int	  fpga_pwm_speed(int no);

@@ -18,6 +18,7 @@
 #include "power_step.h"
 #include "motor_cfg.h"
 #include "motor.h"
+#include "lbrob.h"
 #include "lb702.h"
 
 #define MOTOR_Z_0				0
@@ -26,27 +27,36 @@
 
 #define CURRENT_HOLD	50
 
-#define HEAD_UP_IN_0	1
-#define HEAD_UP_IN_1	0
+#define HEAD_UP_IN_0	0
+#define HEAD_UP_IN_1	1
 
 #define MAX_ALIGN		10000	// microns
 
 #define ROBOT_USED_IN		10
 #define PRINTHEAD_EN		11	// Input from SPS // '1' Allows Head to go down
 
-#define STEPS_REV		200*16	// steps per motor revolution * 16 times oversampling
+#define STEPS_REV		(200*16)	// steps per motor revolution * 16 times oversampling
 #define DIST_REV		2000.0	// moving distance per revolution [µm]
 
 static RX_SOCKET	_MainSocket=INVALID_SOCKET;
 static SMovePar	_ParRef;
 static SMovePar	_ParZ_down;
 static SMovePar	_ParZ_cap;
+static SMovePar	_ParAlone;
+
 static int		_CmdRunning=0;
+static int		_NewCmd = 0;
+
 static char		_CmdName[32];
 static int		_Cmd_New=0;
 static int		_PrintPos_New=0;
 static int		_PrintPos_Act=0;
 static int		_PrintHeight=0;
+
+static int		_Step;
+static int		_CmdRunningRobi = 0;
+static int		_Help=FALSE;
+static int		_Menu=1;
 
 
 //--- prototypes --------------------------------------------
@@ -67,7 +77,7 @@ void lb702_init(void)
 	//--- movment parameters ----------------
 	_ParRef.speed			= 13000;
 	_ParRef.accel			= 32000;
-	_ParRef.current_acc		= 250.0;
+	_ParRef.current_acc		= 400.0;
 	_ParRef.current_run		= 250.0;
 	_ParRef.encCheck		= chk_std;
 	_ParRef.enc_bwd			= TRUE;
@@ -94,6 +104,17 @@ void lb702_init(void)
 	_ParZ_cap.dis_mux_in	= 0;
 	_ParZ_cap.encCheck		= chk_std;
 	_ParZ_cap.enc_bwd		= TRUE;
+	
+	_ParAlone.speed			= 5000;
+	_ParAlone.accel			= 3200;
+	_ParAlone.current_acc	= 400.0;
+	_ParAlone.current_run	= 400.0;
+	_ParAlone.stop_mux		= 0;
+	_ParAlone.dis_mux_in	= 0;
+	_ParAlone.encCheck		= chk_off;
+	_ParAlone.enc_bwd		= TRUE;
+	
+	if (RX_StepperStatus.robot_used) lbrob_init();
 }
 
 //--- lb702_main ------------------------------------------------------------------
@@ -103,12 +124,13 @@ void lb702_main(int ticks, int menu)
 	SStepperStat oldSatus;
 	memcpy(&oldSatus, &RX_StepperStatus, sizeof(RX_StepperStatus));
 	
-	if (RX_StepperCfg.robot_used) lbrob_main(ticks, menu);
+	if (RX_StepperStatus.robot_used) lbrob_main(ticks, menu);
 	motor_main(ticks, menu);
 	
 	RX_StepperStatus.info.headUpInput_0 = fpga_input(HEAD_UP_IN_0);
 	RX_StepperStatus.info.headUpInput_1 = fpga_input(HEAD_UP_IN_1);
 	RX_StepperStatus.posZ			    = motor_get_step(MOTOR_Z_0);
+	RX_StepperStatus.posY				= motor_get_step(MOTOR_Z_1);
 	
 	if(RX_StepperCfg.use_printhead_en)
 	{
@@ -144,21 +166,46 @@ void lb702_main(int ticks, int menu)
 		RX_StepperStatus.info.z_in_ref    = ((_CmdRunning==CMD_CAP_REFERENCE || _CmdRunning==CMD_CAP_UP_POS) && RX_StepperStatus.info.ref_done);
 		RX_StepperStatus.info.z_in_print  = (_CmdRunning==CMD_CAP_PRINT_POS && RX_StepperStatus.info.ref_done);
 		RX_StepperStatus.info.z_in_cap    = (_CmdRunning==CMD_CAP_CAPPING_POS);
-		if (RX_StepperStatus.info.ref_done && _CmdRunning==CMD_CAP_REFERENCE && _PrintPos_New!=_PrintPos_Act) 
+						
+		if (RX_StepperStatus.info.ref_done && _CmdRunning==CMD_CAP_REFERENCE && _Cmd_New) // _PrintPos_New!=_PrintPos_Act)
 		{
 			_lb702_move_to_pos(_Cmd_New, _PrintPos_New);
-			_PrintPos_Act = _PrintPos_New;
+			_PrintPos_Act = _PrintPos_New;		
 		}
 		else 
 		{
 			_CmdRunning = FALSE;
 		}
+				
 		_Cmd_New      = 0;
 	}
 	
 	if (memcmp(&oldSatus.info, &RX_StepperStatus.info, sizeof(RX_StepperStatus.info)))
 	{
 		sok_send_2(&_MainSocket, REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);		
+	}
+	
+	if (RX_StepperStatus.robot_used && _CmdRunningRobi)
+	{
+		int loc_new_cmd = 0;
+		if (!RX_StepperStatus.robinfo.moving && !RX_StepperStatus.info.moving) 
+		{
+			//
+			loc_new_cmd = _NewCmd;
+			_NewCmd = FALSE;
+			_CmdRunningRobi = FALSE;
+		}
+		if (RX_StepperStatus.robinfo.ref_done && loc_new_cmd)
+		{
+			switch (loc_new_cmd)
+			{
+			case CMD_CAP_PRINT_POS: lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_PRINT_POS, &RX_StepperCfg.print_height); break;
+			case CMD_CAP_UP_POS:    lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_UP_POS, NULL); break;
+			case CMD_CAP_REFERENCE: break;
+			default: Error(ERR_CONT, 0, "LB702_MAIN: Command 0x%08x not implemented", loc_new_cmd); break;
+			}
+		}
+		loc_new_cmd = FALSE;	
 	}
 }
 
@@ -169,7 +216,7 @@ static void _lb702_display_status(void)
 	term_printf("moving:         %d		cmd: %08x\n",	RX_StepperStatus.info.moving, _CmdRunning);
 	term_printf("actpos:         %06d  newpos: %06d\n",	_PrintPos_Act, _PrintPos_New);		
 	term_printf("refheight:      %06d  ph:     %06d\n", 	_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height), _micron_2_steps(_PrintHeight));
-	term_printf("Head UP Sensor: %d  %d\n",	fpga_input(HEAD_UP_IN_0), fpga_input(HEAD_UP_IN_1));
+	term_printf("Head UP Sensor: BACK=%d  FRONT=%d\n",	fpga_input(HEAD_UP_IN_0), fpga_input(HEAD_UP_IN_1));
 	term_printf("reference done: %d\n",	RX_StepperStatus.info.ref_done);
 	term_printf("printhead_en:   %d\n",	RX_StepperStatus.info.printhead_en);
 	term_printf("z in reference: %d\n",	RX_StepperStatus.info.z_in_ref);
@@ -178,52 +225,78 @@ static void _lb702_display_status(void)
 	term_printf("\n");
 }
 
-//--- lb702_menu --------------------------------------------------
-int lb702_menu(void)
+//--- _lb702_handle_menu -----------------------------------------------------
+static void _lb702_handle_menu(char *str)
 {
-	static int _help=FALSE;
-	char str[MAX_PATH];
-	int synth=FALSE;
 	int pos=10000;
-
-	_lb702_display_status();
-	
-	term_printf("LB 702 MENU -------------------------\n");
-	if (_help)
+	if (str)
 	{
-		term_printf("s: STOP\n");
-		term_printf("r<n>: reset motor<n>\n");	
-		term_printf("R: Reference\n");
-		term_printf("c: move to cap\n");
-		term_printf("u: move to UP position\n");
-		term_printf("p: move to print\n");
-		term_printf("z: move by <steps>\n");
-		term_printf("m<n><steps>: move Motor<n> by <steps>\n");	
-		term_printf("x: exit\n");		
-	}
-	else
-	{
-		term_printf("?: help\n");
-	}
-	term_printf(">");
-	term_flush();
-
-	if (term_get_str(str, sizeof(str)))
-	{
-		_help = FALSE;
 		switch (str[0])
 		{
 		case 's': lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_STOP,		NULL); break;
 		case 'R': lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_REFERENCE,	NULL); break;
-		case 'r': motor_reset(atoi(&str[1])); break;
+		case 'r': motors_reset(1<<atoi(&str[1])); break;
 		case 'c': lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_CAPPING_POS,NULL); break;
 		case 'p': lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_PRINT_POS,	&pos); break;
 		case 'u': lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_UP_POS,		NULL); break;
 		case 'z': _lb702_motor_z_test(atoi(&str[1]));break;
 		case 'm': _lb702_motor_test(str[1]-'0', atoi(&str[2]));break;
-		case '?': _help=TRUE; break;
-		case 'x': return FALSE;
 		}
+	}			
+}
+
+//--- lb702_menu --------------------------------------------------
+int lb702_menu(void)
+{
+	char str[MAX_PATH];
+	int synth=FALSE;
+	int pos=10000;
+
+	_lb702_display_status();
+	if (RX_StepperStatus.robot_used) lbrob_display_status();
+	
+	if (_Menu==1) term_printf("LB 702 MENU -------------------------\n");
+	else          term_printf("ROBOT MENU --------------------------\n");
+	if (_Menu==1)
+	{
+		if (_Help)
+		{
+			term_printf("s: STOP\n");
+			term_printf("o: toggle output <no>\n");
+			term_printf("r<n>: reset motor<n>\n");	
+			term_printf("R: Reference\n");
+			term_printf("c: move to cap\n");
+			term_printf("u: move to UP position\n");
+			term_printf("p: move to print\n");
+			term_printf("z: move by <steps>\n");
+			term_printf("m<n><steps>: move Motor<n> by <steps>\n");	
+			term_printf("x: exit\n");						
+		}
+		else
+		{
+			term_printf("?: help\n");
+			term_printf("2: ROBOT menu\n"); 
+		}
+	}
+	else lbrob_menu(_Help);
+
+	term_printf(">");
+	term_flush();
+
+	if (term_get_str(str, sizeof(str)))
+	{
+		_Help = FALSE;
+		switch (str[0])
+		{
+		case '?': _Help=TRUE; break;
+		case '1': _Menu = 1; break;
+		case '2': _Menu = 2; break;
+		case 'x': return FALSE;
+		default:
+			if (_Menu==1) _lb702_handle_menu(str);
+			else           lbrob_handle_menu(str);
+			break;
+		}		
 	}
 	return TRUE;
 }
@@ -231,11 +304,18 @@ int lb702_menu(void)
 //--- _lb702_do_reference ----------------------------------------------------------------
 static void _lb702_do_reference(void)
 {
-	motors_stop	(MOTOR_Z_BITS);
-	motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER);
+	if (RX_StepperStatus.info.ref_done)
+	{
+		_lb702_move_to_pos(CMD_CAP_REFERENCE, 2000);
+	}
+	else
+	{
+		motors_stop	(MOTOR_Z_BITS);
+		motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER);
+		motors_move_by_step	(MOTOR_Z_BITS,  &_ParRef, 500000, TRUE);		
+	}
 	_CmdRunning  = CMD_CAP_REFERENCE;
 	RX_StepperStatus.info.moving = TRUE;
-	motors_move_by_step	(MOTOR_Z_BITS,  &_ParRef, 500000, TRUE);
 }
 
 //---_micron_2_steps --------------------------------------------------------------
@@ -248,9 +328,16 @@ static int  _micron_2_steps(int micron)
 static void _lb702_move_to_pos(int cmd, int pos)
 {
 	_CmdRunning  = cmd;
-	RX_StepperStatus.info.moving = TRUE;
-	if(cmd == CMD_CAP_PRINT_POS)
+	
+	if (RX_StepperStatus.robot_used && !_CmdRunningRobi && (!RX_StepperStatus.robinfo.ref_done || !RX_StepperStatus.info.x_in_ref))
 	{
+		_CmdRunningRobi = CMD_CLN_REFERENCE;
+		lbrob_handle_ctrl_msg(INVALID_SOCKET, _CmdRunningRobi, NULL);
+		_NewCmd = cmd;
+	}
+	else if(cmd == CMD_CAP_PRINT_POS)
+	{
+		RX_StepperStatus.info.moving = TRUE;
 		motor_move_to_step(MOTOR_Z_0, &_ParZ_down, pos);
 		if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].head_align>MAX_ALIGN || RX_StepperCfg.robot[RX_StepperCfg.boardNo].head_align<-MAX_ALIGN)
 		{
@@ -263,7 +350,7 @@ static void _lb702_move_to_pos(int cmd, int pos)
 				Error(WARN, 0, "Head Alignment large");
 			motor_move_to_step(MOTOR_Z_1, &_ParZ_down, pos + _micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].head_align));
 		}
-		motors_start(MOTOR_Z_BITS, TRUE);			
+		motors_start(MOTOR_Z_BITS, TRUE);	
 	} 
 	else 
 	{
@@ -277,6 +364,7 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 	int val;
 	
 	_MainSocket = socket;
+	
 	switch(msgId)
 	{
 	case CMD_CAP_STOP:				strcpy(_CmdName, "CMD_CAP_STOP");
@@ -291,6 +379,7 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 	case CMD_CAP_PRINT_POS:			if(!RX_StepperStatus.info.printhead_en) return Error(ERR_ABORT, 0, "Allow Head Down signal not set!");
 									strcpy(_CmdName, "CMD_CAP_PRINT_POS");
 									_PrintHeight   = (*((INT32*)pdata));
+									_Step=0;
 								//	Error(LOG, 0, "Goto Print: ref=%d, align=%d, printheight=%d", RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height, RX_StepperCfg.robot[RX_StepperCfg.boardNo].head_align, _PrintHeight);
 									if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height < 10000) Error(ERR_ABORT, 0, "Reference Height not defined");
 									else
@@ -322,7 +411,9 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									{
 										_CmdRunning  = msgId;
 										RX_StepperStatus.info.moving = TRUE;
-										motors_move_to_step	(MOTOR_Z_BITS,  &_ParZ_cap, _micron_2_steps(RX_StepperCfg.cap_height));
+										if (RX_StepperStatus.robot_used)
+											motors_move_to_step	(MOTOR_Z_BITS,  &_ParZ_down, -1*_micron_2_steps(20000));
+										else motors_move_to_step (MOTOR_Z_BITS,  &_ParZ_down, -1*_micron_2_steps(RX_StepperCfg.cap_height));
 									}
 									break;
 				
@@ -356,7 +447,8 @@ static void _lb702_motor_test(int motorNo, int steps)
 	par.current_run	= 400.0;
 	par.stop_mux	= 0;
 	par.dis_mux_in	= 0;
-	par.encCheck		= chk_off;
+	par.enc_bwd		= TRUE;
+	par.encCheck	= chk_std;
 	
 	_CmdRunning = 1; // TEST
 	RX_StepperStatus.info.moving = TRUE;

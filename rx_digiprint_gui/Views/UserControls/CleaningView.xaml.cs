@@ -94,7 +94,15 @@ namespace RX_DigiPrint.Views.UserControls
             _button_active(sender as CheckBox);
             if (RxMessageBox.YesNo("Capping", "Goto Capping position?",  MessageBoxImage.Question, false))
             {   
-                RxGlobals.RxInterface.SendCommand(TcpIp.CMD_CAP_CAPPING_POS);
+                if (RxGlobals.TestTableStatus.RobotUsed)
+                {
+                    TcpIp.SFluidCtrlCmd msg = new TcpIp.SFluidCtrlCmd();
+                    msg.no       = -1;
+                    msg.ctrlMode = EFluidCtrlMode.ctrl_cap;
+                    RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_CTRL_MODE, ref msg);
+                }
+                else
+                    RxGlobals.RxInterface.SendCommand(TcpIp.CMD_CAP_CAPPING_POS);
             }
         }
 

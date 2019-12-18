@@ -83,20 +83,25 @@ void motor_end(void)
 //--- motor_reset -----------------------
 void motor_reset(int motor)
 {
+	int i;
 	if (motor <= 4)	// to prevent seg fault !
 	{		
-		_motor_start_cnt[motor] = 0;
+		for (i=0; i<2; i++)
+		{
+			_motor_start_cnt[motor] = 0;
 	
-		Fpga.encoder[motor].pos	   = 0;
-		Fpga.encoder[motor].revCnt = 0;
-		Fpga.par->cfg[motor].reset_pos_val_enc = 1;
-		Fpga.par->cfg[motor].reset_pos_val_mot = 1;
+			Fpga.encoder[motor].pos	   = 0;
+			Fpga.encoder[motor].revCnt = 0;
+			Fpga.par->cfg[motor].reset_pos_val_enc = 1;
+			Fpga.par->cfg[motor].reset_pos_val_mot = 1;
 		
-//		Fpga.par->cfg[motor].stopIn		= 15;
-//		Fpga.par->cfg[motor].stopLevel  = 0;
-		Fpga.par->cfg[motor].disable_mux_in  = 0;		
-	
-		Fpga.par->cmd_reset_pos   |= 0x0001 << motor;	// must be at end to reset errors
+	//		Fpga.par->cfg[motor].stopIn		= 15;
+	//		Fpga.par->cfg[motor].stopLevel  = 0;
+			Fpga.par->cfg[motor].disable_mux_in  = 0;		
+		
+			Fpga.par->cmd_reset_pos   |= 0x0001 << motor;	// must be at end to reset errors
+	//		Fpga.par->reset_err	= TRUE;			
+		}
 	}
 }
 
@@ -105,7 +110,7 @@ void motors_reset(int motors)
 {
 	int motor;
 	rx_sleep(20); // todo peb
-	FOR_ALL_MOTORS(motor, motors) motor_reset(motor);
+	FOR_ALL_MOTORS(motor, motors) motor_reset(motor);		
 }
 
 //--- motor_main ------------------------------------------
@@ -227,9 +232,9 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
 
 	case chk_lbrob:
 		Fpga.par->cfg[motor].enc_max_diff		= 200;
-		Fpga.par->cfg[motor].enc_max_diff_stop	= 20;	
+		Fpga.par->cfg[motor].enc_max_diff_stop	= 200;	
 		break;
-		
+
 	case chk_lb_ref1:
 		Fpga.par->cfg[motor].enc_max_diff		= 50;
 		Fpga.par->cfg[motor].enc_max_diff_stop	= 50;	

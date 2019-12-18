@@ -169,10 +169,7 @@ int setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action)
 			if (setup_chapter(file, "robot", i, action)==REPLY_OK) 
 			{	
 				setup_int32(file, "ref_height",	  action, &pcfg->stepper.robot[i].ref_height,	0);
-				setup_int32(file, "head_align",	  action, &pcfg->stepper.robot[i].head_align,	0);
-				setup_int32(file, "robot_height", action, &pcfg->stepper.robot[i].robot_height,	0);
-				setup_int32(file, "robot_align",  action, &pcfg->stepper.robot[i].robot_align,	0);
-				
+				setup_int32(file, "head_align",	  action, &pcfg->stepper.robot[i].head_align,	0);				
 				setup_chapter(file, "..", -1, action);
 			}				
 		}

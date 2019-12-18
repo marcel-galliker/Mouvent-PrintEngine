@@ -697,6 +697,36 @@ void ctrl_send_all_heads_fluidCtrlMode(int fluidNo, EnFluidCtrlMode ctrlMode)
 	}
 }
 
+//--- ctrl_send_purge_par ----------------------------------------------
+int ctrl_send_purge_par(int fluidNo, int time)
+{
+#define HEAD_WIDTH	43000
+	int head;
+	int delay;
+	int timeTotal;
+	SPurgePar par;
+	SHeadCfg *pcfg;
+	
+	if (RX_Config.stepper.wipe_speed) delay =  HEAD_WIDTH / RX_Config.stepper.wipe_speed;
+	else delay=0;
+
+	timeTotal = 0;
+	par.delay = 0;
+	par.time  = time;
+	for (head=0; head<SIZEOF(RX_Config.headBoard)*MAX_HEADS_BOARD; head++)
+	{
+		pcfg = &RX_Config.headBoard[head/MAX_HEADS_BOARD].head[head%MAX_HEADS_BOARD];
+		if (pcfg->enabled && pcfg->inkSupply==fluidNo)
+		{
+			par.no = head%HEAD_CNT;
+			sok_send_2(&_HeadCtrl[head/HEAD_CNT].socket, CMD_SET_PURGE_PAR, sizeof(par), &par);
+			if (par.delay+par.time>timeTotal) timeTotal = par.delay+par.time;
+			par.delay+=delay;
+		}
+	}
+	return timeTotal;
+}
+
 //--- ctrl_check_all_heads_in_fluidCtrlMode ------------
 int  ctrl_check_all_heads_in_fluidCtrlMode(int fluidNo, EnFluidCtrlMode ctrlMode)
 {
@@ -714,21 +744,6 @@ int  ctrl_check_all_heads_in_fluidCtrlMode(int fluidNo, EnFluidCtrlMode ctrlMode
 	}
 	return TRUE;
 }
-
-/*
-//--- ctrl_check_head_flushed ------------------------------------
-int  ctrl_check_head_flushed(int fluidNo)
-{
-	int head;
-	SHeadCfg *pcfg;
-	for (head=0; head<SIZEOF(RX_Config.headBoard)*MAX_HEADS_BOARD; head++)
-	{
-		pcfg = &RX_Config.headBoard[head/MAX_HEADS_BOARD].head[head%MAX_HEADS_BOARD];
-		if (pcfg->enabled && pcfg->inkSupply==fluidNo && _HeadsFlushed&(0x01LL<<head)) return TRUE;
-	}
-	return FALSE;
-}
-*/
 
 //--- ctrl_set_config -------------------------------------------------------------------
 int ctrl_set_config(void)

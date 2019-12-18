@@ -260,7 +260,12 @@ int main(int argc, char* argv[])
 		int t10=rx_get_ticks()-t9;
 		_menu();
 		int t11=rx_get_ticks()-t10;
-		if (rx_get_ticks()-t0>1000) Error(WARN, 0, "MAIN LOOP, t1=%d t2=%d t3=%d t4=%d t5=%d t6=%d t7=%d t8=%d t9=%d t10=%d t11=%d", t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11);
+		if (rx_get_ticks()-t0>1000) 
+		{
+			char str[100];
+			sprintf(str, "MAIN LOOP: t1=%d t2=%d t3=%d t4=%d t5=%d t6=%d t7=%d t8=%d t9=%d t10=%d t11=%d", t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11);
+			Error(WARN, 0, str);
+		}
 	}
 
 	//--- end libraries ----------------------------

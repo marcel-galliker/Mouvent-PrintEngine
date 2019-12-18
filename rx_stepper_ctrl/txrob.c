@@ -298,11 +298,11 @@ void txrob_init(void)
 		_TimeFillCap = 14;		// seconds
 		
 		// Roboter positions have to be changed just for the R&D Robot.
-		temp = POS_ROT[rob_fct_wetwipe];
-		POS_ROT[rob_fct_wetwipe] = POS_ROT[rob_fct_wipe];
+		temp = POS_ROT[rob_fct_wash];
+		POS_ROT[rob_fct_wash] = POS_ROT[rob_fct_wipe];
 		POS_ROT[rob_fct_wipe] = temp;
-		temp = POS_ENC_ROT[rob_fct_wetwipe];
-		POS_ENC_ROT[rob_fct_wetwipe] = POS_ENC_ROT[rob_fct_wipe];
+		temp = POS_ENC_ROT[rob_fct_wash];
+		POS_ENC_ROT[rob_fct_wash] = POS_ENC_ROT[rob_fct_wipe];
 		POS_ENC_ROT[rob_fct_wipe] = temp;
 	}
 	else if (RX_StepperCfg.printerType == printer_TX802)
@@ -436,8 +436,8 @@ void txrob_main(int ticks, int menu)
 		RX_StepperStatus.robinfo.vacuum_done = FALSE;
 		RX_StepperStatus.robinfo.vacuum_in_change = FALSE;
 		RX_StepperStatus.robinfo.vacuum_in_change = FALSE;
-		RX_StepperStatus.robinfo.wetwipe_ready = FALSE;
-		RX_StepperStatus.robinfo.wetwipe_done = FALSE;
+		RX_StepperStatus.robinfo.wash_ready = FALSE;
+		RX_StepperStatus.robinfo.wash_done = FALSE;
 	}
 	else
 	{
@@ -446,8 +446,8 @@ void txrob_main(int ticks, int menu)
 		RX_StepperStatus.robinfo.vacuum_ready = _step_rob_in_vacuum();
 		RX_StepperStatus.robinfo.vacuum_done = _vacuum_done();
 		RX_StepperStatus.robinfo.vacuum_in_change = _vacuum_in_change();
-		RX_StepperStatus.robinfo.wetwipe_ready = _step_rob_in_wetwipe();
-		RX_StepperStatus.robinfo.wetwipe_done = _wetwipe_done();
+		RX_StepperStatus.robinfo.wash_ready = _step_rob_in_wetwipe();
+		RX_StepperStatus.robinfo.wash_done = _wetwipe_done();
 	}
 	
 
@@ -552,7 +552,7 @@ void txrob_main(int ticks, int menu)
 				loc_move_pos = 1; // center
 				break;
 
-			case rob_fct_wetwipe:	// Wet wipe
+			case rob_fct_wash:	// Wet wipe
 				TrPrintfL(TRUE, "ROB_FUNCTION_WASH done");
 				loc_new_cmd = CMD_CLN_SHIFT_MOV; 
 				loc_move_pos = 2; // start
@@ -620,7 +620,7 @@ void txrob_main(int ticks, int menu)
 				case rob_fct_cap:	// Cap
 					break;
 
-				case rob_fct_wetwipe:	// Wet wipe
+				case rob_fct_wash:	// Wet wipe
 					Fpga.par->output |= PUMP_FLUSH_WET; // Flush Wet ON
 					break;
 	
@@ -642,7 +642,7 @@ void txrob_main(int ticks, int menu)
 				case rob_fct_cap:	// Cap
 					break;
 
-				case rob_fct_wetwipe:	// Wet wipe
+				case rob_fct_wash:	// Wet wipe
 					//loc_new_cmd = CMD_CLN_EMPTY_WASTE; 
 					break;
 	
@@ -1003,7 +1003,7 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 			RX_StepperStatus.robinfo.moving = TRUE;
 			_LastRobPosCmd = pos;
 			
-			if (pos == 3 && _RobFunction == rob_fct_wetwipe)
+			if (pos == 3 && _RobFunction == rob_fct_wash)
 			{
 				pos = POS_SHIFT[pos];
 				_ParShiftWet.speed = _SpeedShift;

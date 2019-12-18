@@ -34,8 +34,9 @@ namespace RX_DigiPrint.Models
             AllInkSupliesOn     = (msg.status.flags & 0x0010)!=0;
             TestMode            = (msg.status.flags & 0x0020)!=0;
             ExternalData        = (msg.status.flags & 0x0040)!=0;
-            TxRobot             = (msg.status.flags & 0x0080)!=0;
- 
+            TxRobot             = (msg.status.flags & 0x0080) != 0;
+ 			TempReady           = (msg.status.flags & 0x0100)!=0;
+            LbRobot             = (msg.status.flags & 0x0200) != 0;
             MaxSpeeds           = msg.status.maxSpeed;
             ActSpeed            = (double)msg.status.actSpeed;
             CounterAct          = msg.status.counterAct;
@@ -93,7 +94,15 @@ namespace RX_DigiPrint.Models
         {
             get { return _AllInkSupliesOff; }
             set { SetProperty(ref _AllInkSupliesOff, value); }
-        }        
+        }
+
+        //--- Property TempReady ---------------------------------------
+        private bool _TempReady;
+        public bool TempReady
+        {
+            get { return _TempReady; }
+            set { SetProperty(ref _TempReady, value); }
+        }   
 
         //--- Property Splicing ---------------------------------------
         private bool _Splicing=false;
@@ -125,6 +134,14 @@ namespace RX_DigiPrint.Models
         {
             get { return _TxRobot; }
             set { SetProperty(ref _TxRobot, value); }
+        }
+
+        //--- Probperty LbRobot ---------------------------------------
+        private bool _LbRobot;
+        public bool LbRobot
+        {
+            get { return _LbRobot; }
+            set { SetProperty(ref _LbRobot, value); }
         }
         
         //--- Property MaxSpeed ---------------------------------------

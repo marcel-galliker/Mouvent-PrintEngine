@@ -183,7 +183,7 @@ typedef enum EnFluidCtrlMode
     ctrl_purge_soft = 0x100,  // 0x100:
     ctrl_purge,               // 0x101:
 	ctrl_purge_hard,          // 0x102:
-	ctrl_purge_micro,		  // 0x103:
+	ctrl_purge_hard_wipe,	  // 0x103:
     ctrl_purge_step1 = 0x111, // 0x111:
     ctrl_purge_step2,         // 0x112:
     ctrl_purge_step3,         // 0x113:
@@ -192,48 +192,54 @@ typedef enum EnFluidCtrlMode
     ctrl_purge_step6,         // 0x116:
 	
 	ctrl_wipe			= 0x120,  // 0x120:
-	ctrl_wash			= 0x122,  
-	ctrl_wipe_step1		= 0x131,  
-	ctrl_wipe_step2		= 0x132,  
-	ctrl_wipe_step3		= 0x133,  
-	ctrl_wipe_step4		= 0x134,  
-	ctrl_wipe_step5		= 0x135,  
-	ctrl_wipe_step6		= 0x136,  
+	ctrl_wipe_step1		= 0x131,  // 0x131:
+	ctrl_wipe_step2		= 0x132,  // 0x132:
+	ctrl_wipe_step3		= 0x133,  // 0x133:
+	ctrl_wipe_step4		= 0x134,  // 0x134:
+	ctrl_wipe_step5		= 0x135,  // 0x135:
+	ctrl_wipe_step6		= 0x136,  // 0x136:
 	
-	ctrl_cap			= 0x140,
-	ctrl_cap_step1		= 0x141,
-	ctrl_cap_step2		= 0x142,
-	ctrl_cap_step3		= 0x143,
-	ctrl_cap_step4		= 0x144,	
-	ctrl_cap_step5		= 0x145,	
+	ctrl_cap			= 0x140,	// 0x140:
+	ctrl_cap_step1		= 0x141,	// 0x141:
+	ctrl_cap_step2		= 0x142,	// 0x142:
+	ctrl_cap_step3		= 0x143,	// 0x143:
+	ctrl_cap_step4		= 0x144,	// 0x144:
+	ctrl_cap_step5		= 0x145,	// 0x145:
 	
-	ctrl_vacuum			= 0x150,
-	ctrl_vacuum_step1	= 0x151,
-	ctrl_vacuum_step2	= 0x152,
-	ctrl_vacuum_step3	= 0x153,
-	ctrl_vacuum_step4	= 0x154,
-	ctrl_vacuum_step5	= 0x155,
-	ctrl_vacuum_step6	= 0x156,
-	ctrl_vacuum_step7	= 0x157,
-	ctrl_vacuum_step8	= 0x158,
-	ctrl_vacuum_step9	= 0x159,
-	ctrl_vacuum_step10	= 0x15a,
-	ctrl_vacuum_step11	= 0x15b,
+	ctrl_vacuum			= 0x150,	// 0x150:
+	ctrl_vacuum_step1	= 0x151,	// 0x151:
+	ctrl_vacuum_step2	= 0x152,	// 0x152:
+	ctrl_vacuum_step3	= 0x153,	// 0x153:
+	ctrl_vacuum_step4	= 0x154,	// 0x154:
+	ctrl_vacuum_step5	= 0x155,	// 0x155:
+	ctrl_vacuum_step6	= 0x156,	// 0x156:
+	ctrl_vacuum_step7	= 0x157,	// 0x157:
+	ctrl_vacuum_step8	= 0x158,	// 0x158:
+	ctrl_vacuum_step9	= 0x159,	// 0x159:
+	ctrl_vacuum_step10	= 0x15a,	// 0x15a:
+	ctrl_vacuum_step11	= 0x15b,	// 0x15b:
+	ctrl_vacuum_step12	= 0x15c,	// 0x15c:
+	ctrl_vacuum_step13	= 0x15d,	// 0x15d:
+	ctrl_vacuum_step14	= 0x15e,	// 0x15e:
+	ctrl_vacuum_high	= 0x15f,	// 0x15f:
 	
-	ctrl_wetwipe		= 0x160,  
-	ctrl_wetwipe_step1	= 0x161,  
-	ctrl_wetwipe_step2	= 0x162,  
-	ctrl_wetwipe_step3	= 0x163,  
-	ctrl_wetwipe_step4	= 0x164,  
-	ctrl_wetwipe_step5	= 0x165,  
-	ctrl_wetwipe_step6	= 0x166,  
+	ctrl_wash			= 0x160,	// 0x160:
+	ctrl_wash_step1		= 0x161,  	// 0x161:
+	ctrl_wash_step2		= 0x162,  	// 0x162:
+	ctrl_wash_step3		= 0x163,  	// 0x163:
+	ctrl_wash_step4		= 0x164,  	// 0x164:
+	ctrl_wash_step5		= 0x165,  	// 0x165:
+	ctrl_wash_step6		= 0x166,  	// 0x166:
+									   
+	ctrl_robi_out		= 0x170,	// 0x170:
+	ctrl_robi_out_step1	= 0x171,	// 0x171:
 
-    ctrl_fill = 0x200, //	0x200:
-    ctrl_fill_step1,   //	0x201:
-    ctrl_fill_step2,   //	0x202:
-    ctrl_fill_step3,   //	0x203:
-    ctrl_fill_step4,   //	0x204:
-    ctrl_fill_step5,   //	0x205:
+    ctrl_fill = 0x200,	//	0x200:
+    ctrl_fill_step1,	//	0x201:
+    ctrl_fill_step2,	//	0x202:
+    ctrl_fill_step3,	//	0x203:
+    ctrl_fill_step4,	//	0x204:
+    ctrl_fill_step5,	//	0x205:
 
     ctrl_empty = 0x300, //	0x300:
     ctrl_empty_step1,   //	0x301:
@@ -275,6 +281,13 @@ typedef enum EnDownloadState
 } EnDownloadState;
 
 char *DownloadStateStr(EnDownloadState mode);
+
+typedef struct SPurgePar
+{
+	INT32 no;
+	INT32 delay;
+	INT32 time;
+} SPurgePar;
 
 int valid(int val);
 

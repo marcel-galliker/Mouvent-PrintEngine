@@ -23,6 +23,8 @@
 #include "ctrl_msg.h"
 #include "gui_svr.h"
 #include "step_ctrl.h"
+#include "step_tx.h"
+#include "step_lb.h"
 #include "chiller.h"
 #include "datalogic.h"
 #include "plc_ctrl.h"
@@ -32,6 +34,11 @@
 //--- SIMULATION ----------------------------------------------
 
 //--- defines -----------------------------------------
+#define		TIME_SOFT_PURGE				2000	// [ms]
+#define 	TIME_PURGE					3000	// [ms]
+#define 	TIME_HARD_PURGE				10000	// [ms]
+
+//--- statics ----------------------------------------
 
 static int				_FluidThreadRunning=FALSE;
 static UINT32			_Flushed=0x00;
@@ -39,6 +46,7 @@ static EnFluidCtrlMode	_FluidCtrlMode = ctrl_undef;
 static EnFluidCtrlMode	_RobotCtrlMode = ctrl_undef;
 static EnFluidCtrlMode  _PurgeCtrlMode = ctrl_undef;
 static int				_PurgeAll=FALSE;
+static int				_PurgeFluidNo;
 static int				_Scanning;
 static int				_ScalesFluidNo=-1;
 	
@@ -48,7 +56,7 @@ static void* _fluid_thread(void *par);
 static int _handle_fluid_ctrl_msg	(RX_SOCKET socket, void *msg, int len, struct sockaddr *sender, void *ppar);
 static int _connection_closed		(RX_SOCKET socket, const char *peerName);
 static void _send_ctrlMode			(int no, EnFluidCtrlMode ctrlMode, int sendToHeads);
-
+static void _send_purge_par			(int fluidNo, int time);
 
 static void _do_fluid_stat(int fluidNo, SFluidBoardStat *pstat);
 static void _do_scales_stat(int fluidNo, SScalesStatMsg   *pstat);
@@ -58,6 +66,7 @@ static void _control(int fluidNo);
 static void _control_flush();
 static void _fluid_send_flush_time(int no, INT32 time);
 static int  _all_fluids_in_fluidCtrlMode(EnFluidCtrlMode ctrlMode);
+static int  _all_fluids_in_3fluidCtrlModes(EnFluidCtrlMode ctrlMode1, EnFluidCtrlMode ctrlMode2, EnFluidCtrlMode ctrlMode3);
 
 //--- statics -----------------------------------------------------------------
 
@@ -279,7 +288,7 @@ void fluid_set_config(void)
 			cfg.headsPerColor = RX_Config.headsPerColor;
 
 			sok_send_2(&_FluidThreadPar[i].socket, CMD_FLUID_CFG, sizeof(cfg), &cfg);
-	//		sok_send_2(&_FluidThreadPar[i].socket, CMD_SCALES_SET_CFG, sizeof(RX_Config.scales), &RX_Config.scales);
+			sok_send_2(&_FluidThreadPar[i].socket, CMD_SCALES_SET_CFG, sizeof(RX_Config.scales), &RX_Config.scales);
 		}
 	}	
 }
@@ -511,12 +520,36 @@ static int _all_fluids_in_fluidCtrlMode(EnFluidCtrlMode ctrlMode)
 	return TRUE;
 }
 
+//--- static int _all_fluids_in_fluidCtrlModes ---------------------------
+static int _all_fluids_in_3fluidCtrlModes(EnFluidCtrlMode ctrlMode1, EnFluidCtrlMode ctrlMode2, EnFluidCtrlMode ctrlMode3)
+{
+	for (int i = 0; i < RX_Config.inkSupplyCnt; i++)
+	{
+		if (*RX_Config.inkSupply[i].ink.fileName)
+		{
+			if (_FluidStatus[i].ctrlMode != ctrlMode1 && _FluidStatus[i].ctrlMode != ctrlMode2 && _FluidStatus[i].ctrlMode != ctrlMode3) return FALSE;
+		}
+	}
+	return TRUE;
+}
+
+//--- fluid_purge_fluidNo --------------------------------------------------
+int	 fluid_purge_fluidNo(void)
+{
+	return _PurgeFluidNo;				
+}
+
 //--- _control -------------------------------------------------
 static void _control(int fluidNo)
 {
 	int i;
 	int no = fluidNo*INK_PER_BOARD;
 	SInkSupplyStat *_stat = &_FluidStatus[no];
+	int	txrob = rx_def_is_tx(RX_Config.printer.type) && step_active(1);
+	int	lbrob = (RX_Config.printer.type==printer_LB702_UV || RX_Config.printer.type == printer_LB702_WB);
+	int HeadNo = ctrl_singleHead();
+	if (HeadNo != -1) HeadNo %= 8;
+
 
 	for (i=0; i<INK_PER_BOARD; i++, _stat++, no++)
 	{
@@ -538,20 +571,47 @@ static void _control(int fluidNo)
 			//	case ctrl_check_step9:	_send_ctrlMode(no, ctrl_print_run,   TRUE);	break;
 				
 				case ctrl_purge:
-				case ctrl_purge_micro:	
+				case ctrl_purge_hard_wipe:	
 				case ctrl_purge_soft:
-				case ctrl_purge_hard:		step_lift_to_up_pos();
+				case ctrl_purge_hard:		if (lbrob) steplb_rob_to_wipe_pos(no/2, HeadNo + rob_fct_purge_head0);
+											else		step_lift_to_up_pos();
+				
 											// step_handle_gui_msg(INVALID_SOCKET, CMD_CAP_UP_POS, NULL, 0);
+											if (!lbrob) step_handle_gui_msg(INVALID_SOCKET, CMD_CAP_REFERENCE, NULL, 0);
 											_PurgeCtrlMode = _stat->ctrlMode;
-											step_handle_gui_msg(INVALID_SOCKET, CMD_CAP_REFERENCE, NULL, 0);
-											_send_ctrlMode(no, ctrl_purge_step1, TRUE);	
+											switch(_stat->ctrlMode)
+											{
+											case ctrl_purge_soft:		_send_purge_par(no, TIME_SOFT_PURGE); break;
+											case ctrl_purge:			_send_purge_par(no, TIME_PURGE);	  break;
+											case ctrl_purge_hard_wipe:	_send_purge_par(no, TIME_HARD_PURGE); break;
+											case ctrl_purge_hard:		_send_purge_par(no, TIME_HARD_PURGE); break;
+											}
+											if (txrob && _PurgeFluidNo<0) steptx_rob_wash_start();
+											_send_ctrlMode(_PurgeFluidNo, ctrl_purge_step1, TRUE);
 											break;
 				
-				case ctrl_purge_step1:		if (step_lift_in_up_pos())
+				case ctrl_wash_step6:	if (steptx_rob_wash_done())
+											{	
+												if (_PurgeCtrlMode == ctrl_undef)	fluid_send_ctrlMode(-1, ctrl_vacuum, TRUE);
+												else								_send_ctrlMode(_PurgeFluidNo, ctrl_purge_step1, TRUE);
+												break;
+											}	
+												
+											break;
+											
+				case ctrl_purge_step1:		if (step_lift_in_up_pos() || lbrob && steplb_lift_in_up_pos_individually(no/2))
 											{
+												if (txrob && _PurgeFluidNo < 0 && !steptx_rob_wash_done()) break;
+												if (lbrob && !steplb_rob_in_wipe_pos(no/2, HeadNo + rob_fct_purge_head0))
+												{
+													if (!RX_StepperStatus.robinfo.moving && !RX_StepperStatus.info.moving)	steplb_rob_to_wipe_pos(no/2, HeadNo + rob_fct_purge_head0);
+													break;
+												}
+												
 												plc_to_purge_pos();
 												_send_ctrlMode(no, ctrl_purge_step2, TRUE);																										
 											}
+											else if (lbrob && !RX_StepperStatus.info.moving && RX_StepperStatus.robinfo.moving) steplb_rob_to_wipe_pos(no/2, HeadNo + rob_fct_purge_head0);
 											break;
 								
 				case ctrl_purge_step2:		if (plc_in_purge_pos())
@@ -560,26 +620,33 @@ static void _control(int fluidNo)
 											}
 											break;
 				case ctrl_purge_step3:		_send_ctrlMode(no, ctrl_purge_step4, TRUE);
+											if (lbrob) steplb_rob_wipe_start(no/2, HeadNo + rob_fct_purge_head0);
 											break;
-				case ctrl_purge_step4:		if (_PurgeCtrlMode==ctrl_purge_hard)
+				case ctrl_purge_step4:		if (_PurgeCtrlMode==ctrl_purge_hard || _PurgeCtrlMode==ctrl_purge_hard_wipe)
 											{
 												_Flushed &= ~(0x01<<no);
 												setup_fluid_system(PATH_USER FILENAME_FLUID_STATE, &_Flushed, WRITE);				
 											}
 
-											if (rx_def_is_tx(RX_Config.printer.type) && step_active(1) && _PurgeAll)
+											if (txrob && _PurgeFluidNo < 0) 
 											{
-												if(_all_fluids_in_fluidCtrlMode(ctrl_purge_step4))
+												if (_all_fluids_in_fluidCtrlMode(ctrl_purge_step4)) 
 												{
-													_PurgeAll = FALSE;
-													_send_ctrlMode(no, ctrl_wipe, TRUE);													
+													if (_PurgeCtrlMode==ctrl_purge_hard_wipe)
+														fluid_send_ctrlMode(-1, ctrl_wipe, TRUE);
+													else
+														fluid_send_ctrlMode(-1, ctrl_vacuum, TRUE);
 												}
 											}
- 											else
-	 										{
- 												if (RX_PrinterStatus.printState==ps_pause) _send_ctrlMode(no, ctrl_print, TRUE);		 										
-												else									   _send_ctrlMode(no, ctrl_off,   TRUE);		
-	 										}
+											else if (txrob)
+											{
+												if (_all_fluids_in_3fluidCtrlModes(ctrl_purge_step4, ctrl_off, ctrl_print))
+												{
+													fluid_send_ctrlMode(-1, ctrl_vacuum, TRUE);
+												}
+											}
+ 											else if (RX_PrinterStatus.printState==ps_pause) _send_ctrlMode(no, ctrl_print, TRUE);
+											else _send_ctrlMode(no, ctrl_off, TRUE);		
 											break;
 
 				
@@ -670,6 +737,7 @@ void fluid_control_robot(int lbrob)
 		
 		switch(_RobotCtrlMode)
 		{
+		/*
 		//--- ctrl_wetwipe --------------------------------------------------------------------------------------
 		case ctrl_wetwipe:			step_lift_to_up_pos();
 									_RobotCtrlMode = ctrl_wetwipe_step1;
@@ -717,7 +785,8 @@ void fluid_control_robot(int lbrob)
 										_RobotCtrlMode = ctrl_wipe;
 									}
 									break;
-				
+		*/
+			
 		//--- ctrl_wipe -------------------------------------------------------------------------------------
 		case ctrl_wipe:						
 		case ctrl_wash:				step_lift_to_up_pos();
@@ -849,7 +918,7 @@ void fluid_control_robot(int lbrob)
 										else		   _RobotCtrlMode = ctrl_off;
 									}
 									break;
-				
+
 		//--- ctrl_cap -----------------------------------------------------------------------------
 		case ctrl_cap:				step_lift_to_up_pos();
 									_RobotCtrlMode=ctrl_cap_step1;
@@ -972,14 +1041,26 @@ void fluid_send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 {
 	if (ctrlMode==ctrl_off && _FluidCtrlMode>=ctrl_flush_step1 && _FluidCtrlMode<=ctrl_flush_done)
 	{
-		for (int i=0; i<RX_Config.inkSupplyCnt; i++) _send_ctrlMode(i, ctrlMode, sendToHeads);					
+		for (int i=0; i<RX_Config.inkSupplyCnt; i++) _send_ctrlMode(i, ctrlMode, sendToHeads);	
 	}
-	if (ctrlMode==ctrl_purge_hard) _PurgeAll=(no==-1);
-		
+	if (ctrlMode==ctrl_off) step_rob_stop();	
+	if (ctrlMode==ctrl_purge_hard || ctrlMode == ctrl_purge_hard_wipe || ctrlMode == ctrl_purge || ctrlMode == ctrl_purge_soft) _PurgeFluidNo=no;
+	
 	_FluidCtrlMode = ctrlMode;
-//	Error(LOG, 0, "fluid_send_ctrlMode 0X%04x", ctrlMode);
 	_RobotCtrlMode = ctrlMode;
 	_send_ctrlMode(no, ctrlMode, sendToHeads);
+//	Error(LOG, 0, "fluid_send_ctrlMode 0X%04x", ctrlMode);
+	switch (RX_Config.printer.type)
+	{
+	case printer_TX801:
+	case printer_TX802:		steptx_rob_control(ctrlMode);
+							break;
+	case printer_LB701:
+	case printer_LB702_UV:
+	case printer_LB702_WB:	steplb_rob_control_all(ctrlMode);
+							break;
+	default:				break;
+	}
 }
 
 //--- _send_ctrlMode --------------------------------------
@@ -1055,6 +1136,16 @@ void _send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 			}
 		}			
 	}
+}
+
+//--- _send_purge_par -------------------------------------------------
+static void _send_purge_par(int fluidNo, int time)
+{
+	SPurgePar par;
+	par.no    =  fluidNo%INK_PER_BOARD;
+	par.delay = 0;
+	par.time  = ctrl_send_purge_par(fluidNo, time);
+	sok_send_2(&_FluidThreadPar[fluidNo/INK_PER_BOARD].socket, CMD_SET_PURGE_PAR, sizeof(par), &par);
 }
 
 //--- fluid_send_pressure -------------------------------------------
