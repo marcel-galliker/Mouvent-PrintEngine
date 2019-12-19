@@ -68,6 +68,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
         }
 
         //--- _update ----------------------------------
+        static readonly GridLength _hidden = new GridLength(0);
         private void _update()
         {
             int no;
@@ -75,6 +76,16 @@ namespace RX_DigiPrint.Views.PrintSystemView
             {
                 _numbox[no,0].Text = (RxGlobals.Stepper.Robot[no].ref_height /1000.0).ToString();
                 _numbox[no,1].Text = (RxGlobals.Stepper.Robot[no].head_align /1000.0).ToString();
+            }
+            if (RxGlobals.TestTableStatus.RobotUsed)
+            {
+                WipingDelay_Height.Height = GridLength.Auto;
+                WipingSpeed_Height.Height = GridLength.Auto;
+            }
+            else
+            {
+                WipingDelay_Height.Height = _hidden;
+                WipingSpeed_Height.Height = _hidden;
             }
         }
     }

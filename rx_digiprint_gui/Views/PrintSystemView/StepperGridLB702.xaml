@@ -16,8 +16,8 @@
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto" x:Name="WipingDelay_Height"/>
+                <RowDefinition Height="auto" x:Name="WipingSpeed_Height"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>           
                 <ColumnDefinition Width="160"/>
