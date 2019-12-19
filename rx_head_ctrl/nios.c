@@ -380,6 +380,7 @@ static void _sample_wf(int head, SInkDefinition *pink, char *dots, int fpVoltage
 	{
 		if (fpVoltage) 	valueRef = (valueRef*fpVoltage)/100;
 		else			valueRef = valueRef;
+		Error(LOG, 0, "Firepulse[%s].Voltage = %d%%", RX_HBConfig.head[head].name, fpVoltage);
 	}
 	else valueRef = 0;
 		

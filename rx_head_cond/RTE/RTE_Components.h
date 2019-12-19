@@ -4,7 +4,7 @@
  *      *** Do not modify ! ***
  *
  * Project: 'rx_head_cond' 
- * Target:  'MB9BFxx4_Debug' 
+ * Target:  'MB9BFxx4_Release' 
  */
 
 #ifndef RTE_COMPONENTS_H

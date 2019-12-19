@@ -321,7 +321,7 @@ namespace RX_DigiPrint.Models
             //---- CAPPING ----
             else if (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_DP803) cmd_enabled = RefDone && X_in_ref;
             //---- END OF CAPPING ----
-            else cmd_enabled = RefDone && !;
+            else cmd_enabled = RefDone && !Z_in_cap;
 
             {
                 int i;
