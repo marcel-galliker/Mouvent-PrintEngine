@@ -1026,6 +1026,7 @@ typedef struct SFluidBoardCfgLight
 {		
 	UINT32			lung_enabled;
 	UINT32			headsPerColor;
+	INT32			present			[INK_PER_BOARD];
 	INT32			cylinderPresSet	[INK_PER_BOARD];
 	INT32			meniscusSet		[INK_PER_BOARD];
 //	INT32			condPresOutSet	[INK_PER_BOARD];

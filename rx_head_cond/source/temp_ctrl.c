@@ -301,8 +301,6 @@ void temp_ctrl_on(int turn_on)
 		if (!_heater_running) {
 			_heater_ctrl(OFF);
 		}
-//      if (_heater_running) _heater_delay = HEATER_DELAY;
-//		else 				 _heater_ctrl(OFF);
     }
 }
 
@@ -562,20 +560,12 @@ void temp_tick_10ms (void)
 {	
 	if (RX_Config.temp > TEMP_MAX_HIGH_PUMP)
 		RX_Config.temp = TEMP_MAX_HIGH_PUMP;
-	
-	// NEW REGULATION : setpoint/100 + tempMAX = setpoint + 2°C
-//	RX_Status.tempSetpoint	= RX_Config.temp;
+
 	_HeatPID.Setpoint 		= RX_Config.temp / 100;	
 	// for a good regulation, we need a max at setpoint + 2°C
 	int TempMAX = RX_Config.tempMax;
 	if (TempMAX < _HeatPID.Setpoint + 200) TempMAX = _HeatPID.Setpoint + 200;
 	
-	// OLD REGULATION
-	//if (_heater_running 
-    //     && !RX_Status.error 	// not for any error
-    //     && (RX_Status.tempIn < RX_Config.tempMax))
-	
-	// NEW REGULATION
 	int tempHeaterOK = 1;
 	if((RX_Status.tempHeater > TEMP_MAX_HIGH_PUMP) && (RX_Status.pump_measured * 60 / 1000 > 10)) tempHeaterOK = 0;
 	if((RX_Status.tempHeater > TEMP_MAX_LOW_PUMP) && (RX_Status.pump_measured * 60 / 1000 <= 10)) tempHeaterOK = 0;
@@ -598,7 +588,7 @@ void temp_tick_10ms (void)
 			_heater_ctrl(_HeatPID.val);
 			// Start integrator only if temperature < setpoint, otherwise the integrator accumulate wrong error
 			if(RX_Config.tempHead/100 < _HeatPID.Setpoint) _HeatPID.start_integrator = 1;
-		}			
+		}		
         
         #if defined (LOG_TEMP)        
         static UINT32 counter = 0;
@@ -609,9 +599,8 @@ void temp_tick_10ms (void)
     else
     {
         _heater_ctrl(OFF);
-		// NEW REGULATION : reset PID
 		pid_reset(&_HeatPID);
-		_HeatPID.start_integrator = 0;		
+		_HeatPID.start_integrator = 0;
     }
 	
 	// Message temeprature ready = setpoint +/- 1°C
@@ -626,6 +615,7 @@ void temp_tick_10ms (void)
 		else RX_Status.tempReady = (RX_Config.temp - RX_Config.tempHead) / 1000;	
 	}
 }
+
 
 /**
  * \brief Timed IRQ to trigger a temperature measurement

@@ -269,6 +269,7 @@ void nios_set_cfg(SFluidBoardCfgLight *pcfg)
 	_TempMax = 0;
 	for (i=0; i<INK_PER_BOARD; i++) 
 	{
+		_Cfg->ink_supply[i].present         = pcfg->present;
 		if (pcfg->cylinderPresSet[i]<=INK_PRESSURE_MAX) _Cfg->ink_supply[i].cylinderPresSet = pcfg->cylinderPresSet[i];
 		_Cfg->ink_supply[i].meniscusSet		= pcfg->meniscusSet[i];
 //		_Cfg->ink_supply[i].condPresOutSet	= pcfg->condPresOutSet[i];

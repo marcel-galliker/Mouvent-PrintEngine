@@ -247,7 +247,7 @@ void pres_tick_10ms(void)
 	{
 		for (i=0; i<SENSOR_CNT; i++)
 		{
-			if (*_Sensor[i].pSensorID>256) _sensor_read(&_Sensor[i], i);
+			if (pRX_Config->ink_supply[i].present) _sensor_read(&_Sensor[i], i);
 		}
 	}
 }

@@ -274,6 +274,7 @@ void fluid_set_config(void)
 			cfg.lung_enabled = (i==0);
 			for (n=0; n<INK_PER_BOARD; n++) 
 			{
+				cfg.present[n]		   = (RX_Config.inkSupply[i*INK_PER_BOARD+n].inkFileName[0]!=0);
 				cfg.cylinderPresSet[n] = RX_Config.inkSupply[i*INK_PER_BOARD+n].cylinderPresSet;
 	//			cfg.meniscusSet[n]	  = RX_Config.inkSupply[i*INK_PER_BOARD+n].ink.meniscus;
 				cfg.meniscusSet[n]	  = INVALID_VALUE;

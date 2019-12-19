@@ -60,6 +60,7 @@ typedef struct SNiosFluidCmd
 //--- SIsAdapterCfg -------------------------
 typedef struct
 {
+	INT32	present;
 	EnFluidCtrlMode	ctrl_mode;
 	INT32   cylinderPresSet;
 	INT32	meniscusSet;
