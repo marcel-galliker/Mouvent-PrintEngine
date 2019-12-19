@@ -1346,7 +1346,7 @@ typedef struct ERobotInfo
 	UINT32 wash_done		: 1;	//	0x00020000
 	UINT32 purge_done		: 1;	//	0x00040000
 	UINT32 vacuum_in_change	: 1;	//	0x00080000
-	UINT32 use_waste_pump	: 1;	//	0x00100000
+	UINT32 r_info_20		: 1;	//	0x00100000
 	UINT32 rob_in_wipe		: 1;	//	0x00200000
 	UINT32 rob_in_vac		: 1;	//	0x00400000
 	UINT32 rob_in_wash		: 1;	//	0x00800000
@@ -1438,8 +1438,6 @@ typedef struct SStepperStat
 	INT32		posX;
 	INT32		posY;
 	INT32		posZ;
-
-	INT32		waste_valve;
 	
 	INT32		adjustmentProgress;
 	UINT32		alive[2];

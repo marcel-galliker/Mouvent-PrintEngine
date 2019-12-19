@@ -28,22 +28,12 @@
 
 #define STEPPER_CNT		4
 
-#define WASTE_VALVE_INTERVAL	1000
-
-static void _check_pump(void);
-
 static RX_SOCKET		_step_socket[STEPPER_CNT]={0};
 
 static SStepperStat		_Status[STEPPER_CNT];
 static int				_AbortPrinting=FALSE;
 
 static EnFluidCtrlMode	_RobotCtrlMode[STEPPER_CNT] = {ctrl_undef};
-
-static int _PumpState = FALSE;
-static int _PumpState_old = FALSE;
-static int _TimeStart = 0;
-static int _TimeNow = 0;
-static int _WasteValveSwitched = 0;
 
 //--- steplb_init ---------------------------------------------------
 void steplb_init(int no, RX_SOCKET psocket)
@@ -54,53 +44,6 @@ void steplb_init(int no, RX_SOCKET psocket)
 		memset(&_Status[no], 0, sizeof(_Status[no]));
 	}
 	memset(_Status, 0, sizeof(_Status));
-}
-
-//--- _check_pump --------------------------------------------
-static void _check_pump(void)
-{
-	_PumpState = RX_StepperStatus.robinfo.use_waste_pump;
-	if (_PumpState != _PumpState_old)
-	{
-		sok_send_2(&_step_socket[0], CMD_CLN_WASTE_PUMP, sizeof(_PumpState), &_PumpState);
-		_PumpState_old = _PumpState;
-	}
-
-	if (_PumpState)
-	{
-		_TimeNow = rx_get_ticks();
-	
-		if (RX_StepperStatus.robinfo.use_waste_pump)
-		{
-			int t = (_TimeNow) / WASTE_VALVE_INTERVAL;
-	
-			if (t > _WasteValveSwitched)
-			{
-				_WasteValveSwitched = t;
-				RX_StepperStatus.waste_valve++;
-				
-				
-				for (int no = 0; no < SIZEOF(_step_socket); no++)
-				{
-					if (RX_StepperStatus.waste_valve == no * 3 && !_Status[no].robinfo.use_waste_pump) RX_StepperStatus.waste_valve = 3 * (no + 1);
-				}
-				if (RX_StepperStatus.waste_valve >= SIZEOF(_step_socket) * 3)		RX_StepperStatus.waste_valve = 0;
-				for (int no = 0; no < SIZEOF(_step_socket); no++)
-				{
-					if (RX_StepperStatus.waste_valve == no * 3 && !_Status[no].robinfo.use_waste_pump) RX_StepperStatus.waste_valve = 3 * (no + 1);
-				}
-				
-				for (int no = 0; no < SIZEOF(_step_socket); no++)
-				{
-					if (_step_socket[no] && _step_socket[no] != INVALID_SOCKET)
-					{
-						sok_send_2(&_step_socket[no], CMD_CLN_SET_VALVE, sizeof(RX_StepperStatus.waste_valve), &RX_StepperStatus.waste_valve);
-					}
-				}
-			}
-		}
-	}
-	else RX_StepperStatus.waste_valve = 0;
 }
 
 //--- steplb_handle_gui_msg------------------------------------------------------------------
@@ -178,7 +121,6 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
 	info.z_in_cap		= TRUE;
 	info.x_in_cap		= TRUE;
 	info.x_in_ref		= TRUE;
-	robinfo.use_waste_pump = FALSE;
 	robinfo.rob_in_cap = TRUE;
 	robinfo.ref_done = TRUE;
 				
@@ -198,7 +140,6 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
 			info.x_in_cap		&= _Status[i].info.x_in_cap;
 			info.x_in_ref		&= _Status[i].info.x_in_ref;
 			robot_used			|= _Status[i].robot_used;
-			robinfo.use_waste_pump |= _Status[i].robinfo.use_waste_pump;
 			robinfo.rob_in_cap &= _Status[i].robinfo.rob_in_cap;
 			robinfo.ref_done &= _Status[i].robinfo.ref_done;
 			robinfo.moving |= _Status[i].robinfo.moving;
@@ -217,6 +158,14 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
 		info.headUpInput_2 =  _Status[2].info.headUpInput_0;
 		info.headUpInput_3 =  _Status[3].info.headUpInput_0;
 	}
+	else if (RX_Config.printer.type==printer_LB702_WB || RX_Config.printer.type==printer_LB702_UV) 
+	{
+		info.headUpInput_0 = _Status[0].info.headUpInput_0 && _Status[0].info.headUpInput_1;
+		info.headUpInput_1 = _Status[1].info.headUpInput_0 && _Status[1].info.headUpInput_1;
+		info.headUpInput_2 = _Status[2].info.headUpInput_0 && _Status[2].info.headUpInput_1;
+		info.headUpInput_3 = _Status[3].info.headUpInput_0 && _Status[3].info.headUpInput_1;
+	
+	}
 	RX_StepperStatus.robot_used = robot_used;
 	
 //	TrPrintf(TRUE, "STEPPER: ref_done=%d moving=%d  z_in_print=%d  z_in_ref=%d", info.ref_done, info.moving, info.z_in_print, info.z_in_ref);
@@ -233,12 +182,6 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
 		RX_StepperStatus.posY = _Status[no].posY;
 		RX_StepperStatus.posZ = _Status[no].posZ;
 	}
-	if (robinfo.use_waste_pump != RX_StepperStatus.robinfo.use_waste_pump)
-	{
-		int on = robinfo.use_waste_pump;
-		sok_send_2(&_step_socket[0], CMD_CLN_WASTE_PUMP, sizeof(on), &on);
-		RX_StepperStatus.robinfo.use_waste_pump = robinfo.use_waste_pump;
-	}
 	
 	if (_AbortPrinting && RX_StepperStatus.info.z_in_print) steplb_lift_to_up_pos();
 		
@@ -253,7 +196,6 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
 	}
 	
 	gui_send_msg_2(0, REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);
-	_check_pump();
 	return REPLY_OK;
 }
 

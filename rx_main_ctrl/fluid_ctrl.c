@@ -695,7 +695,7 @@ static void _control_flush(void)
 								_FluidCtrlMode=ctrl_flush_step1; 
 								break;
 		
-		case ctrl_flush_step1:	if (step_lift_in_top_pos()) 
+		case ctrl_flush_step1:	if (step_lift_in_up_pos()) 
 								{
 									plc_to_purge_pos();
 									_FluidCtrlMode=ctrl_flush_step2;

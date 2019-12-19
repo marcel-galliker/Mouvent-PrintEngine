@@ -1138,8 +1138,6 @@ namespace RX_DigiPrint.Services
 	        public Int32		posY;
 	        public Int32		posZ;
 
-            public Int32        waste_valve;
-
             public Int32        adjustmentProgress;
 
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
