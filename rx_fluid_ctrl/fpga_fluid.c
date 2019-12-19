@@ -103,7 +103,7 @@ int	  fpga_qsys_timestamp(void)
 //--- fpga_cfg -----------------
 void fpga_cfg(void)
 {
-	if (_LinuxDeployment<26) Error(WARN, 0, "LinuxDeloyment V%d, must be 26 or higher", _LinuxDeployment);		
+	if (_LinuxDeployment<26) Error(WARN, 0, "LinuxDeployment V%d, must be 26 or higher", _LinuxDeployment);		
 }
 
 //--- _fpga_display_status -----------------------------------------------
