@@ -267,12 +267,12 @@ int  step_lift_in_print_pos(void)
 }
 
 //--- step_lift_to_top_pos ----------------------------------------------
-void  step_lift_to_top_pos(int top)
+void  step_lift_to_top_pos(void)
 {
 	switch(_StepperType)
 	{
 	case STEPPER_TX:	steptx_lift_to_up_pos(); break;
-	case STEPPER_LB:	steplb_lift_to_top_pos(top); break;
+	case STEPPER_LB:	steplb_lift_to_top_pos(); break;
 	default:			break;
 	}
 }
@@ -289,12 +289,12 @@ int  step_lift_in_top_pos(void)
 }
 
 //--- step_lift_to_up_pos ----------------------------------------------
-void  step_lift_to_up_pos(int top)
+void  step_lift_to_up_pos(void)
 {
 	switch(_StepperType)
 	{
 	case STEPPER_TX:	steptx_lift_to_up_pos(); break;
-	case STEPPER_LB:	steplb_lift_to_up_pos(top); break;
+	case STEPPER_LB:	steplb_lift_to_up_pos(); break;
 	default:			break;
 	}
 }
