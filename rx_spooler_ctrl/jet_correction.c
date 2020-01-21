@@ -163,7 +163,7 @@ static void _set_pixel2(UCHAR *pBuffer, int bytesPerLine, int x, int y, int val)
 }
 
 //--- _disable_jet -----------------------------------------------------
-static void _disable_jet(UCHAR *pBuffer, int bitsPerPixel, int length, int bytesPerLine, int jet, int fromLine)
+static void _disable_jet_old(UCHAR *pBuffer, int bitsPerPixel, int length, int bytesPerLine, int jet, int fromLine)
 {
 	int y, size, s;
 	int offset;
@@ -218,6 +218,79 @@ static void _disable_jet(UCHAR *pBuffer, int bitsPerPixel, int length, int bytes
 				_SetPixel(pBuffer, bytesPerLine, jet, y, 0);
 			}
 		}
+	}
+	Error(LOG, 0, "_disable_jet %d", jet);
+}
+
+//--- _disable_jet ----------------------------------------------
+static void _disable_jet(UCHAR *pBuffer, int bitsPerPixel, int length, int bytesPerLine, int jet, int fromLine)
+{
+    int jetMax=bytesPerLine*8/bitsPerPixel;
+	
+	if (jet>0 && jet<jetMax)
+	{
+		//--- special for "Jet Numbers" Image
+		if (fromLine)
+		{
+            int y, s;
+            for (y=0; y<50; y++)
+			{
+				for (s=-15; s<=15; s++)
+					_SetPixel(pBuffer, bytesPerLine, jet+s, fromLine-y, 3);
+			}
+			for (y=0; y<20; y++)
+			{
+				//--- arrow on top ----------------------------------------
+				_SetPixel(pBuffer, bytesPerLine, jet-y-1, fromLine-y-1, 0);
+				_SetPixel(pBuffer, bytesPerLine, jet-y,   fromLine-y-1, 0);
+				_SetPixel(pBuffer, bytesPerLine, jet,     fromLine-y-1, 0);
+				_SetPixel(pBuffer, bytesPerLine, jet+y,   fromLine-y-1, 0);
+				_SetPixel(pBuffer, bytesPerLine, jet+y+1, fromLine-y-1, 0);
+
+				//--- arrow at bottom -------------------------------------
+				_SetPixel(pBuffer, bytesPerLine, jet-y-1, length-25+y, 3);
+				_SetPixel(pBuffer, bytesPerLine, jet-y,   length-25+y, 3);
+				_SetPixel(pBuffer, bytesPerLine, jet,     length-25+y, 3);
+				_SetPixel(pBuffer, bytesPerLine, jet+y,   length-25+y, 3);
+				_SetPixel(pBuffer, bytesPerLine, jet+y+1, length-25+y, 3);
+			}
+		}
+
+        {
+			int y;
+            int d;			// droplets to compensate in this line
+            int droplets=0;	// droplets to compensate total
+			int max;		// maximum droplets that can be compensated in this line
+			int side=0;		// side: to change left/right
+            int org[2];		// original dot size 
+            int comp[2];	// compensated dot size
+			for (y=fromLine; y<length; y++)
+			{
+				if ((d = _GetPixel(pBuffer, bytesPerLine, jet, y)))
+				{
+					droplets += d;
+					_SetPixel(pBuffer, bytesPerLine, jet, y, 0);
+				}
+				if (droplets)
+				{
+					org[0] = comp[0] = _GetPixel(pBuffer, bytesPerLine, jet-1, y);
+					org[1] = comp[1] = _GetPixel(pBuffer, bytesPerLine, jet+1, y);
+					max = 2*_MaxDropSize-org[0]-org[1];
+					while (droplets && max)
+					{
+						if (comp[side] < _MaxDropSize)
+						{
+							comp[side]++;
+							droplets--;
+							max--;
+						}
+						side = 1 - side;
+					}
+					if (comp[0]!=org[0]) _SetPixel(pBuffer, bytesPerLine, jet-1, y, comp[0]);
+					if (comp[1]!=org[1]) _SetPixel(pBuffer, bytesPerLine, jet+1, y, comp[1]);
+				}
+			}            
+        }
 	}
 	Error(LOG, 0, "_disable_jet %d", jet);
 }
