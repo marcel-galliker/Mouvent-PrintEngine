@@ -164,7 +164,6 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
 		info.headUpInput_1 = _Status[1].info.headUpInput_0 && _Status[1].info.headUpInput_1;
 		info.headUpInput_2 = _Status[2].info.headUpInput_0 && _Status[2].info.headUpInput_1;
 		info.headUpInput_3 = _Status[3].info.headUpInput_0 && _Status[3].info.headUpInput_1;
-	
 	}
 	RX_StepperStatus.robot_used = robot_used;
 	

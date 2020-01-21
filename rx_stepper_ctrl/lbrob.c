@@ -81,7 +81,7 @@
 int _CmdRunning_Lift = 0;
 
 // static
-static RX_SOCKET	_MainSocket = INVALID_SOCKET;
+static RX_SOCKET RX_MainSocket = INVALID_SOCKET;
 
 static SMovePar	_ParCable_ref;
 static SMovePar	_ParCable_drive;
@@ -456,7 +456,7 @@ void lbrob_main(int ticks, int menu)
 	
 	if (memcpy(&oldSatus.robinfo, &RX_StepperStatus.robinfo, sizeof(RX_StepperStatus.robinfo)))
 	{
-		sok_send_2(&_MainSocket, REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);		
+		sok_send_2(ctrl_main_socket(), REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);		
 	}
 }
 
@@ -581,7 +581,6 @@ int  lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 {		
 	int val, pos;
 	
-	_MainSocket = socket;
 	switch (msgId)
 	{
 	case CMD_CLN_STOP:				strcpy(_CmdName, "CMD_CLN_STOP");

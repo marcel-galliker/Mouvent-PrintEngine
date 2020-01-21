@@ -36,7 +36,6 @@
 #define CURRENT_HOLD	100
 
 //--- static variables ---------------------------------------
-static RX_SOCKET _MainSocket = INVALID_SOCKET;
 static SMovePar	_ParY_ref;
 static SMovePar	_ParY_print;
 static SMovePar	_ParZ_up;
@@ -189,7 +188,6 @@ int tt_menu(void)
 //--- tt_handle_ctrl_msg -----------------------------------------
 int tt_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 {
-	_MainSocket = socket;
 	switch(msgId)
 	{
 	case CMD_TT_SCAN:		tt_set_scan_par		(pdata);
@@ -722,7 +720,7 @@ static void _scan_state_machine(int menu)
 					RX_StepperStatus.info.curing   = FALSE;	
 
 					RX_StepperStatus.info.moving = FALSE;
-					if (_MainSocket!=INVALID_SOCKET) sok_send_2(&_MainSocket, CMD_PRINT_ABORT, 0, NULL);
+					sok_send_2(ctrl_main_socket(), CMD_PRINT_ABORT, 0, NULL);
 					break;
 		}
 	}

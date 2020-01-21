@@ -19,6 +19,7 @@
 #include "network.h"
 #include "ctrl_msg.h"
 #include "print_ctrl.h"
+#include "gui_msg.h"
 #include "args.h"
 #include "plc_ctrl.h"
 #include "enc_ctrl.h"
@@ -189,6 +190,12 @@ static int _step_handle_msg(RX_SOCKET socket, void *msg, int len, struct sockadd
 									
 									fluid_control_robot(_LB_Rob);
 									return ret;
+                                   
+                case REP_CAP_CALIBRATE:
+									gui_set_stepper_offsets(no, (SRobotOffsets*)pStat);
+									return REPLY_OK;
+			default:				
+                Error(WARN, 0, "Got unknown messageId=0x%08x", phdr->msgId);
 			}
 		}
 	}

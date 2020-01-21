@@ -43,6 +43,8 @@
 #define MSG_BUF_SIZE	256
 #define MSG_MSG_SIZE	256
 
+static RX_SOCKET	_MainSocket=INVALID_SOCKET;
+
 //--- buffer ---------------------------------------------------------
 typedef struct
 {
@@ -97,6 +99,11 @@ static int _ctrl_connected (RX_SOCKET socket, const char *peerName)
 	return REPLY_OK;
 }
 
+//--- ctrl_main_socket --------------------
+RX_SOCKET *ctrl_main_socket()
+{
+    return &_MainSocket;
+}
 //--- _ctrl_deconnected ---------------------------------------------------
 static int _ctrl_deconnected (RX_SOCKET socket, const char *peerName)
 {
@@ -172,8 +179,10 @@ int _handle_ctrl_msg(RX_SOCKET socket, void *pmsg)//, int len, struct sockaddr *
 	//--- handle the message --------------
 	reply = REPLY_OK;
 	SMsgHdr *phdr = (SMsgHdr*)pmsg;
-			
-	switch (phdr->msgId)
+
+    if (socket != INVALID_SOCKET) _MainSocket = socket;
+
+    switch (phdr->msgId)
 	{
 	case CMD_STEPPER_CFG:			_do_config((SStepperCfg*)&phdr[1]);	break;
 	case CMD_TT_STATUS:				sok_send_2(&socket, REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);	

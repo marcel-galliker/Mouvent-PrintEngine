@@ -13,6 +13,7 @@
 
 #include "rx_error.h"
 #include "rx_term.h"
+#include "rx_trace.h"
 #include "tcp_ip.h"
 #include "fpga_stepper.h"
 #include "power_step.h"
@@ -42,7 +43,6 @@
 #define CAL_POS_1		70000
 #define CAL_TOOL_HEIGHT	25000
 
-static RX_SOCKET	_MainSocket=INVALID_SOCKET;
 static SMovePar	_ParRef;
 static SMovePar	_ParZ_down;
 static SMovePar	_ParZ_calibrate;
@@ -193,24 +193,12 @@ void lb702_main(int ticks, int menu)
                     break;
                     
             case 2:	//--- motors blocked at tool -------------------------------------------------
-					{
-                        int steps, incs;
-                        steps=motor_get_step(MOTOR_Z_0);
-                        incs=fpga_encoder_pos(MOTOR_Z_0);
-						if (motor_error(MOTOR_Z_0)) Error(LOG, 0, "Motor[0] stopped at step=%d, %dµm, enc=%d, %dµm", steps, -_steps_2_micron(steps)+CAL_TOOL_HEIGHT, incs, -_incs_2_micron(incs)+CAL_TOOL_HEIGHT);
-                        steps=motor_get_step(MOTOR_Z_1);
-                        incs=fpga_encoder_pos(MOTOR_Z_1);
-						if (motor_error(MOTOR_Z_1)) Error(LOG, 0, "Motor[1] stopped at step=%d, %dµm, enc=%d, %dµm", steps, -_steps_2_micron(steps)+CAL_TOOL_HEIGHT, incs, -_incs_2_micron(incs)+CAL_TOOL_HEIGHT);
-						Error(LOG, 0, "Calibation done");
-						_CmdRunning = FALSE;
-                    }
-					break;
-			/*                
-            case 4: //--- done -------------------------------------------------------------------
-					Error(LOG, 0, "Calibation done");
+                    RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height = -_incs_2_micron(fpga_encoder_pos(MOTOR_Z_0))+CAL_TOOL_HEIGHT;
+                    RX_StepperCfg.robot[RX_StepperCfg.boardNo].head_align = -_incs_2_micron(fpga_encoder_pos(MOTOR_Z_1))+CAL_TOOL_HEIGHT - RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height;
+                    Error(LOG, 0, "Calibration done: ref_height=% 6d, head_align=% 3d", RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height, RX_StepperCfg.robot[RX_StepperCfg.boardNo].head_align);
+                    sok_send_2(ctrl_main_socket(), REP_CAP_CALIBRATE, sizeof(RX_StepperCfg.robot[RX_StepperCfg.boardNo]), &RX_StepperCfg.robot[RX_StepperCfg.boardNo]);
 					_CmdRunning = FALSE;
 					break;
-            */        
             }
         }
         else
@@ -270,7 +258,7 @@ void lb702_main(int ticks, int menu)
 	
 	if (memcmp(&oldSatus.info, &RX_StepperStatus.info, sizeof(RX_StepperStatus.info)))
 	{
-		sok_send_2(&_MainSocket, REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);		
+		sok_send_2(ctrl_main_socket(), REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);		
 	}
 }
 
@@ -442,9 +430,7 @@ static void _lb702_move_to_pos(int cmd, int pos)
 int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 {		
 	int val;
-	
-	_MainSocket = socket;
-	
+
 	switch(msgId)
 	{
 	case CMD_CAP_STOP:				strcpy(_CmdName, "CMD_CAP_STOP");
@@ -459,12 +445,24 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									break;
 
     case CMD_CAP_CALIBRATE:			strcpy(_CmdName, "CMD_CAP_CALIBRATE");
-									_CmdRunning = msgId;
-                                    _CmdStep=0;
-									motors_stop	(MOTOR_Z_BITS);
-                                    motors_reset(MOTOR_Z_BITS);
-									motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER);
-									motors_move_by_step	(MOTOR_Z_BITS,  &_ParRef, 500000, TRUE);		
+        							if (TRUE) // simulation
+                                    {
+                                        int ret;
+										RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height = 100000;
+										RX_StepperCfg.robot[RX_StepperCfg.boardNo].head_align = 1;
+										Error(LOG, 0, "Calibration done SIMULATION: ref_height=%06d, head_align=%03d", RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height, RX_StepperCfg.robot[RX_StepperCfg.boardNo].head_align);
+										ret=sok_send_2(ctrl_main_socket(), REP_CAP_CALIBRATE, sizeof(RX_StepperCfg.robot[RX_StepperCfg.boardNo]), &RX_StepperCfg.robot[RX_StepperCfg.boardNo]);
+										_CmdRunning = FALSE;
+									}
+									else
+                                    {
+										_CmdRunning = msgId;
+										_CmdStep=0;
+										motors_stop	(MOTOR_Z_BITS);
+										motors_reset(MOTOR_Z_BITS);
+										motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER);
+										motors_move_by_step	(MOTOR_Z_BITS,  &_ParRef, 500000, TRUE);		
+                                    }
 									break;
                                        
     case CMD_CAP_PRINT_POS:			if(!RX_StepperStatus.info.printhead_en) return Error(ERR_ABORT, 0, "Allow Head Down signal not set!");

@@ -850,7 +850,6 @@ namespace RX_DigiPrint.Services
         	public EPrinterType	printerType;    // used in background only
 	        public Int32		boardNo;        // used in background only
 	        public Int32		ref_height;
-	        public Int32		ref_height_down;
 	        public Int32		print_height;
 	        public Int32		wipe_height;
             public Int32        wipe_delay;

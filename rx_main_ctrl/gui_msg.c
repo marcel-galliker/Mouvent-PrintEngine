@@ -924,6 +924,17 @@ static void _do_set_printer_cfg(RX_SOCKET socket, SPrinterCfgMsg* pmsg)
 	_do_get_printer_cfg(INVALID_SOCKET);
 }
 
+//--- gui_set_stepper_offset --------------------------------------
+void gui_set_stepper_offsets(int no, SRobotOffsets *poffsets)
+{
+    if (no >= 0 && no < SIZEOF(RX_Config.stepper.robot))
+    {
+		memcpy(&RX_Config.stepper.robot[no], poffsets, sizeof(RX_Config.stepper.robot[no]));
+		setup_config(PATH_USER FILENAME_CFG, &RX_Config, WRITE);
+		gui_send_msg_2(INVALID_SOCKET, REP_GET_STEPPER_CFG, sizeof(RX_Config.stepper), &RX_Config.stepper);        
+    }
+}
+
 //--- _do_get_stepper_cfg --------------------------------------
 static void _do_get_stepper_cfg	(RX_SOCKET socket)
 {

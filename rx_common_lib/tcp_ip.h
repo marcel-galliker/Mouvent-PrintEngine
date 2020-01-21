@@ -321,6 +321,7 @@
 #define CMD_CAP_CAPPING_POS		0x01000604
 #define CMD_CAP_UP_POS			0x01000605
 #define CMD_CAP_CALIBRATE		0x01000606
+#define REP_CAP_CALIBRATE		0x02000606
 #define CMD_CAP_VENT			0x0100060f
 
 //---- CAPPING ----
@@ -562,7 +563,7 @@ typedef struct SInkSupplyStatMsg
 	INT32			no;
 	SInkSupplyStat	stat;	
 } SInkSupplyStatMsg;
-	
+
 //--- SPrintEnvMsg ---------------------------------
 typedef struct SPrintEnvEvt
 {

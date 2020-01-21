@@ -19,3 +19,5 @@ int ctrl_end(void);
 int ctrl_main(int ticks, int menu);
 
 char *ctrl_cmd_name(int cmd);
+
+RX_SOCKET *ctrl_main_socket();

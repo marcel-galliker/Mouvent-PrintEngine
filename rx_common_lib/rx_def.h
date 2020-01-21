@@ -1227,7 +1227,6 @@ typedef struct SStepperCfg
 			#define		step_lift	0
 			#define		step_clean	1
 	INT32			ref_height;			// distance "Belt" to reference position in µm: "0" is at "Belt" Level
-	INT32			ref_height_down;	// height of reference tool , to adjust the motors
 	INT32			print_height;		// in µm
 	INT32			wipe_height;		// in µm
 	INT32			wipe_delay;			// in ms
