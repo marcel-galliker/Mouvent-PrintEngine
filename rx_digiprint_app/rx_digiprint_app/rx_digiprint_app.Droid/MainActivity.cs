@@ -78,23 +78,25 @@ namespace DigiPrint.Droid
             {
                 //--- in downloads the files are numerated --- select the ome with the hoghest number, delete the rest ---
                 string filepath = Path.Combine(Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDownloads).Path, RxBtDef.LicFileName);
-                string[] files  = System.IO.Directory.GetFiles(Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDownloads).Path, RxBtDef.LicFileName+"*");
-                if (files.Length>1)
-                {
-                    int i;
-                    for (i=0; i<files.Length-1; i++)
-                        System.IO.File.Delete(files[i]);
-                    System.IO.File.Move(files[i], filepath);
-                }
-                AppGlobals.License.Code = System.IO.File.ReadAllText(filepath);
-                AppGlobals.License.PlainCode = AppGlobals.Crypt.Decrypt(AppGlobals.License.Code, RxBtDef.LicPwd);
-                if (AppGlobals.License.Valid && !AppGlobals.License.Expired)
-                {
-                    try{ System.IO.File.Delete(Path.Combine(Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDownloads).Path, "requestinfo.txt"));}
-                    catch{};
-                }
+				string[] files = System.IO.Directory.GetFiles(Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDownloads).Path, "mouvent*.lic");
+				foreach(string file in files)
+				{
+					AppGlobals.License.Code = System.IO.File.ReadAllText(file);
+					AppGlobals.License.PlainCode = AppGlobals.Crypt.Decrypt(AppGlobals.License.Code, RxBtDef.LicPwd);
+					if (AppGlobals.License.Valid && !AppGlobals.License.Expired)
+					{
+						try { System.IO.File.Delete(Path.Combine(Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDownloads).Path, "requestinfo.txt")); }
+						catch { };
+						if (!file.Equals(filepath))
+						{
+							System.IO.File.Delete(filepath);
+							System.IO.File.Move(file, filepath);
+						}
+					}
+					else System.IO.File.Delete(file);
+				}
             }
-            catch
+            catch (Exception ex)
             {
                 AppGlobals.License.Code = null;
             }
