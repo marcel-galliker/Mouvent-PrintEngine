@@ -217,7 +217,7 @@ int  pres_valid(int i)
 void pres_tick_10ms(void)
 {
 	int i;
-	static int init=1;
+	static int init=4;
 
 	if (init)
 	{
@@ -247,7 +247,7 @@ void pres_tick_10ms(void)
 	{
 		for (i=0; i<SENSOR_CNT; i++)
 		{
-			if (pRX_Config->ink_supply[i].present) _sensor_read(&_Sensor[i], i);
+			if (i>=NIOS_INK_SUPPLY_CNT || pRX_Config->ink_supply[i].present) _sensor_read(&_Sensor[i], i);
 		}
 	}
 }
