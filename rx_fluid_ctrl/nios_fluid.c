@@ -180,20 +180,31 @@ static void _nios_check_errors(void)
 	{
 		if (_Stat->ink_supply[isNo].error&err_overpressure)		 
 			ErrorFlag(ERR_CONT,  &RX_FluidBoardStatus.err, err_overpressure,      0, "InkSupply[%d] Ink Tank overpressure", isNo+1);
-//		if (_Stat->ink_supply[isNo].error & err_ink_tank_pressure)
-//			ErrorFlag (ERR_CONT, (UINT32*)&_Error[isNo],  err_ink_tank_pressure,  0, "InkSupply[%d] Ink Tank Sensor Error", isNo+1);							
-		if (nios_is_heater_connected())
-		{
-			if (_Stat->ink_supply[isNo].error & err_heater_temp_frozen)
-				ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_heater_temp_frozen, 0, "Heater Box temperatures frozen : auto-reset done");
-		
-			if (_Stat->ink_supply[isNo].error & err_heater_board)	ErrorFlag(ERR_CONT, (UINT32*)&_Error[isNo], err_heater_board, 0, "InkSupply[%d] Heater Board Error or Openload", isNo + 1);	
-			if (_Stat->ink_supply[isNo].error & err_watchdog)		ErrorFlag(ERR_CONT, (UINT32*)&_Error[isNo], err_heater_board, 0, "InkSupply[%d] Heater Board Watchdog Error", isNo + 1);	
-		}  	
-		if (_Stat->HeaterBoard_Vsupply_3V < 3000)				ErrorFlag(ERR_CONT, (UINT32*)&_Error[0], err_heater_board, 0, "Heater Board %d.%dV (3.3V)", _Stat->HeaterBoard_Vsupply_3V/1000, _Stat->HeaterBoard_Vsupply_3V%1000);
-		if (_Stat->HeaterBoard_Vsupply_5V < 4800)				ErrorFlag(ERR_CONT, (UINT32*)&_Error[1], err_heater_board, 0, "Heater Board %d.%dV (5.0V)", _Stat->HeaterBoard_Vsupply_5V/1000, _Stat->HeaterBoard_Vsupply_5V%1000);
-		if (_Stat->HeaterBoard_Vsupply_24V < 12000)				ErrorFlag(ERR_CONT, (UINT32*)&_Error[2], err_heater_board, 0, "Heater Board %d.%dV (24V)", _Stat->HeaterBoard_Vsupply_24V/1000, _Stat->HeaterBoard_Vsupply_24V%1000);
-		if (_Stat->HeaterBoard_Vsupply_24VP < 12000)			ErrorFlag(ERR_CONT, (UINT32*)&_Error[3], err_heater_board, 0, "Heater Board %d.%dV (24V)P", _Stat->HeaterBoard_Vsupply_24VP/1000, _Stat->HeaterBoard_Vsupply_24VP%1000);
+        //		if (_Stat->ink_supply[isNo].error & err_ink_tank_pressure)
+        //			ErrorFlag (ERR_CONT, (UINT32*)&_Error[isNo],
+        //err_ink_tank_pressure,  0, "InkSupply[%d] Ink Tank Sensor Error",
+        //isNo+1);
+        if (nios_is_heater_connected())
+        {
+            if (_Stat->ink_supply[isNo].error & err_heater_temp_frozen)
+                ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err,
+                          err_heater_temp_frozen, 0,
+                          "Heater Box temperatures frozen : auto-reset done");
+
+            if (_Stat->ink_supply[isNo].error & err_heater_board)
+                ErrorFlag(ERR_CONT, (UINT32 *)&_Error[isNo], err_heater_board,
+                          0, "InkSupply[%d] Heater Board Error or Openload",
+                          isNo + 1);
+            if (_Stat->ink_supply[isNo].error & err_watchdog)
+                ErrorFlag(ERR_CONT, (UINT32 *)&_Error[isNo], err_heater_board,
+                          0, "InkSupply[%d] Heater Board Watchdog Error",
+                          isNo + 1);
+
+            if (_Stat->HeaterBoard_Vsupply_3V < 3000)				ErrorFlag(ERR_CONT, (UINT32*)&_Error[0], err_heater_board, 0, "Heater Board %d.%dV (3.3V)", _Stat->HeaterBoard_Vsupply_3V/1000, _Stat->HeaterBoard_Vsupply_3V%1000);
+			if (_Stat->HeaterBoard_Vsupply_5V < 4800)				ErrorFlag(ERR_CONT, (UINT32*)&_Error[1], err_heater_board, 0, "Heater Board %d.%dV (5.0V)", _Stat->HeaterBoard_Vsupply_5V/1000, _Stat->HeaterBoard_Vsupply_5V%1000);
+			if (_Stat->HeaterBoard_Vsupply_24V < 12000)				ErrorFlag(ERR_CONT, (UINT32*)&_Error[2], err_heater_board, 0, "Heater Board %d.%dV (24V)", _Stat->HeaterBoard_Vsupply_24V/1000, _Stat->HeaterBoard_Vsupply_24V%1000);
+			if (_Stat->HeaterBoard_Vsupply_24VP < 12000)			ErrorFlag(ERR_CONT, (UINT32*)&_Error[3], err_heater_board, 0, "Heater Board %d.%dV (24V)P", _Stat->HeaterBoard_Vsupply_24VP/1000, _Stat->HeaterBoard_Vsupply_24VP%1000);
+        }        
 	}
 }
 
