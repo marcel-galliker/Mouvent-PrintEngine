@@ -33,6 +33,7 @@
 #define TEMP_MAX_LOW_PUMP		50000						// maximal valid conditioner temperature for pump speed < 10%
 #define TEMP_MAX_HIGH_PUMP		70000						// maximal valid conditioner temperature for pump speed > 10%
 #define TEMP_ERROR       		TEMP_MAX_HIGH_PUMP + 5000  	// in 1/1000 °C = 90 °C -> compare to thermistor value directly
+#define TEMP_TOLERANCE			1000
 
 #define VALUE_BUF_SIZE		10
 
@@ -605,15 +606,9 @@ void temp_tick_10ms (void)
 	
 	// Message temeprature ready = setpoint +/- 1°C
 	if (RX_Config.tempHead==INVALID_VALUE)
-	{
-		if(RX_Status.tempIn > RX_Config.temp) RX_Status.tempReady = (RX_Status.tempIn - RX_Config.temp) / 1000;
-		else RX_Status.tempReady = (RX_Config.temp - RX_Status.tempIn) / 1000;
-	}
+		RX_Status.tempReady = RX_Status.tempIn   > (RX_Config.temp-TEMP_TOLERANCE);
 	else 
-	{
-		if(RX_Config.tempHead > RX_Config.temp) RX_Status.tempReady = (RX_Config.tempHead - RX_Config.temp) / 1000;	
-		else RX_Status.tempReady = (RX_Config.temp - RX_Config.tempHead) / 1000;	
-	}
+		RX_Status.tempReady = RX_Config.tempHead > (RX_Config.temp-TEMP_TOLERANCE);
 }
 
 

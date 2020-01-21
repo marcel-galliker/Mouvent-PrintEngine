@@ -85,7 +85,7 @@ typedef struct
 	INT32	condMeniscusDiff;
 	UINT32	condPumpSpeed;
 	UINT32	condPumpFeedback;
-	UINT32  condTempReady;
+//	UINT32  condTempReady;
 	
 	INT32	canisterEmpty;
 	
@@ -229,13 +229,14 @@ typedef struct
 	INT32	PIDairvalve_Output;
 	
 	INT32	condPresOut;
-	UINT32	heaterTemp;
+	INT32	heaterTemp;
 	INT32	flushTime;
 	
 	UINT32	bleedValve:1;
 	UINT32  airValve:1;
 	UINT32  heaterOn:1;
-
+	UINT32	heaterTempReady:1;
+	
 	INT32	fluid_PIDsetpoint_P;
 	INT32	fluid_PIDsetpoint_I;
 	INT32	fluid_PIDpump_P;

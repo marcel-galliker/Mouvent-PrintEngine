@@ -31,6 +31,8 @@
 
 #define HEATER_ANALOG_COUNT		8
 
+#define HEATER_TEMP_TOLERANCE	1000
+
 //--- statics -----------------------------------------------
 SPID_par	_pid_Temp[NIOS_INK_SUPPLY_CNT];			// PID temperature heater
 static int 	_DutyTemp_Count[NIOS_INK_SUPPLY_CNT];
@@ -136,6 +138,7 @@ void heater_tick_10ms(void)
 			_Temp_Average[i] = 0;
 			for(j=0;j<100;j++) _Temp_Average[i] += _Temp_Tab[i][j];
 			pRX_Status->ink_supply[i].heaterTemp = _Temp_Average[i];
+			pRX_Status->ink_supply[i].heaterTempReady = pRX_Status->ink_supply[i].heaterTemp > (pRX_Config->ink_supply[i].heaterTemp-HEATER_TEMP_TOLERANCE);
 
 			//--- CEDRIC --- Error Temperature frozen : Auto-reset + EVENT message
 			if(pRX_Config->ink_supply[i].ctrl_mode > ctrl_off)

@@ -32,10 +32,10 @@
 //--- defines ------------------------------------------------------
 
 #define	NIOS_EXE_ADDR	0xc0000000
-#define NIOS_EXE_SIZE	0x00010000
+#define NIOS_EXE_SIZE	0x00010000 // 0x00018000 // 0x00010000
 
 #define NIOS_MEM_ADDR	0xc0060000
-#define NIOS_MEM_SIZE	0x00010000	// 0x00001000
+#define NIOS_MEM_SIZE	0x00010000	
 
 #define NIOS_SYSID_ADDR	0xFF200000
 
@@ -217,9 +217,9 @@ void nios_load(const char *exepath)
 	INT32	size, read, tio;
 	UINT32	*exeMem;
 	UINT32  data;
-	BYTE	buffer[0x10000];
+	BYTE	buffer[NIOS_EXE_SIZE];
 
-	hex2bin(exepath, buffer, sizeof(buffer), &size);
+	hex2bin(exepath, buffer, NIOS_EXE_SIZE, &size);
 	if (size)
 	{
 		if (_NiosMem)
@@ -332,6 +332,7 @@ static int _set_testmode(void)
 void nios_set_head_state(int isNo, SHeadStateLight *pstat)
 {
 	if (!_Init || isNo<0 || isNo>NIOS_INK_SUPPLY_CNT) return;
+	RX_FluidBoardStatus.stat[isNo].info.condTempReady = pstat->condTempReady;
 	_Cfg->ink_supply[isNo].headTemp                   = pstat->temp;
 	_Cfg->ink_supply[isNo].condPumpSpeed			  = pstat->condPumpSpeed;
 	_Cfg->ink_supply[isNo].condPumpFeedback			  = pstat->condPumpFeedback;
@@ -340,7 +341,6 @@ void nios_set_head_state(int isNo, SHeadStateLight *pstat)
 	_Cfg->ink_supply[isNo].condMeniscus				  = pstat->condMeniscus;
 	_Cfg->ink_supply[isNo].condMeniscusDiff			  = pstat->condMeniscusDiff;
 	_Cfg->ink_supply[isNo].canisterEmpty			  = pstat->canisterEmpty;
-	_Cfg->ink_supply[isNo].condTempReady			  = pstat->condTempReady;
 	_Cfg->ink_supply[isNo].alive++;
 }
 
@@ -425,24 +425,28 @@ void _simu_fluidsystem(void)
 void _update_status(void)
 {
 	int i;
+	int condTempReady;
 	SInkSupplyStat *pstat;
 		
 	for (i=0; i<SIZEOF(RX_FluidBoardStatus.stat); i++)
 	{
 		pstat = &RX_FluidBoardStatus.stat[i];
 		
+		condTempReady = pstat->info.condTempReady;
 		pstat->info.val = 0x00;
 		pstat->warn.val = 0x00;
 		pstat->err		= _Stat->ink_supply[i].error;  // 0x00;
 
-		pstat->info.connected	= TRUE;
-		pstat->info.bleedValve  = _Stat->ink_supply[i].bleedValve;
-		pstat->info.cusionValve = _Stat->ink_supply[i].airValve;
+		pstat->info.connected		= TRUE;
+		pstat->info.bleedValve		= _Stat->ink_supply[i].bleedValve;
+		pstat->info.cusionValve		= _Stat->ink_supply[i].airValve;
+		pstat->info.condTempReady	= condTempReady;
+		pstat->info.heaterTempReady = _Stat->ink_supply[i].heaterTempReady;
 		if (_Cfg->cmd.lung_enabled) pstat->presLung = _Stat->degass_pressure;
 		else						pstat->presLung = INVALID_VALUE;
 		pstat->condPresOut		= _Cfg->ink_supply[i].condPresOut;
 		pstat->condPresIn		= _Cfg->ink_supply[i].condPresIn;
-		pstat->condTempReady	= _Cfg->ink_supply[i].condTempReady;
+		pstat->condTemp			= _Cfg->ink_supply[i].headTemp;
 //		pstat->meniscus			= _Cfg->ink_supply[i].condMeniscus; //_Stat->ink_supply[i].meniscus;
 		pstat->ctrlMode			= _Stat->ink_supply[i].ctrl_state;
 		pstat->cylinderPresSet	= _Stat->ink_supply[i].cylinderPresSet;		

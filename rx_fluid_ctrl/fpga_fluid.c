@@ -97,7 +97,7 @@ int	  fpga_qsys_id(void)
 //--- fpga_qsys_timestamp ---------------------
 int	  fpga_qsys_timestamp(void)
 {
-	return _Qsys->qsys_timestamp;			
+	return _Qsys->qsys_timestamp;
 }
 
 //--- fpga_cfg -----------------

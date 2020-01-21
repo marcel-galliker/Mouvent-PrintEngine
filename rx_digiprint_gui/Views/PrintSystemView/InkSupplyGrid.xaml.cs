@@ -76,9 +76,9 @@ namespace RX_DigiPrint.Views.PrintSystemView
                     for (i = 3; i < InkSuplyGrid.RowDefinitions.Count; i++) InkSuplyGrid.RowDefinitions[i].Height = new GridLength(1, GridUnitType.Auto);
                     break;
             }
-            InkSuplyGrid.RowDefinitions[3].Height = new GridLength(0); // Canister Level
-            if (RxGlobals.PrintSystem.HasHeater)  InkSuplyGrid.RowDefinitions[4].Height =  new GridLength(1, GridUnitType.Auto);
-            else                                  InkSuplyGrid.RowDefinitions[4].Height =  new GridLength(0);
+         // InkSuplyGrid.RowDefinitions[3].Height = new GridLength(0); // Canister Level
+            if (RxGlobals.PrintSystem.HasHeater)  InkSuplyGrid.RowDefinitions[3].Height =  new GridLength(1, GridUnitType.Auto);
+            else                                  InkSuplyGrid.RowDefinitions[3].Height =  new GridLength(0);
             _assign_inksupply(RxGlobals.PrintSystem.ColorCnt);
         }
 

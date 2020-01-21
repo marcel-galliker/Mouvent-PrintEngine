@@ -14,7 +14,6 @@
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -34,11 +33,10 @@
 
         <TextBlock Grid.Row="2" Grid.Column="0" Text="Control Mode" VerticalAlignment="Center"/>
 
-        <TextBlock Grid.Row="3" Grid.Column="0" Text="Canister Level"/>
-        <TextBlock Grid.Row="3" Grid.Column="1" Padding="3,0,0,0" Text="Kg"/>
-        <!-- <TextBlock Grid.Row="3" Grid.Column="2" HorizontalAlignment="Right" Text="{Binding InkLevel}"/> -->
+        <TextBlock Grid.Row="3" Grid.Column="0" Text="Temperature Inksupply"/>
+        <TextBlock Grid.Row="3" Grid.Column="1" Padding="3,0,0,0" Text="°C"/>
 
-        <TextBlock Grid.Row="4" Grid.Column="0" Text="Temperature"/>
+        <TextBlock Grid.Row="4" Grid.Column="0" Text="Temperature Head"/>
         <TextBlock Grid.Row="4" Grid.Column="1" Padding="3,0,0,0" Text="°C"/>
 
         <Grid Grid.Row="5" Grid.ColumnSpan="3" x:Name="ServiceGrid">

@@ -80,15 +80,14 @@ typedef struct
 static SFluidThreadPar _FluidThreadPar[FLUID_BOARD_CNT];
 
 
-SInkSupplyStat   _FluidStatus[INK_SUPPLY_CNT+2];
-ELogItemType	 _ScalesErr[INK_SUPPLY_CNT+2];
-INT32			 _ScalesStatus[MAX_SCALES];
-INT32			 _FluidToScales[INK_SUPPLY_CNT+2];
+static SInkSupplyStat   _FluidStatus[INK_SUPPLY_CNT+2];
+static ELogItemType		_ScalesErr[INK_SUPPLY_CNT+2];
+static INT32			_ScalesStatus[MAX_SCALES];
+static INT32			_FluidToScales[INK_SUPPLY_CNT+2];
 
 
 static SHeadStateLight	_HeadState[INK_SUPPLY_CNT];
 static SHeadStateLight	_HeadStateCnt[INK_SUPPLY_CNT];
-static INT32			_HeadStateTempReady[INK_SUPPLY_CNT];
 static INT32			_HeadErr[INK_SUPPLY_CNT];
 static INT32			_HeadPumpSpeed[INK_SUPPLY_CNT][2];	// min/max
 // EnFluidCtrlMode			_FluidMode[INK_SUPPLY_CNT];
@@ -324,8 +323,16 @@ void fluid_tick(void)
 		if  (_HeadStateCnt[i].condMeniscusDiff>0)	state[i].condMeniscusDiff = 12;
 		else										state[i].condMeniscusDiff = INVALID_VALUE;
 
-		if  (_HeadStateCnt[i].temp>0)			state[i].temp = _HeadState[i].temp/_HeadStateCnt[i].temp;
-		else									state[i].temp = INVALID_VALUE; 
+		if  (_HeadStateCnt[i].temp>0)
+		{
+			state[i].temp		   = _HeadState[i].temp/_HeadStateCnt[i].temp;
+			state[i].condTempReady = _HeadState[i].condTempReady/_HeadStateCnt[i].temp;
+		}
+		else
+		{
+			state[i].temp = INVALID_VALUE; 
+			state[i].condTempReady = TRUE;
+		}
 		if  (_HeadStateCnt[i].condPumpSpeed>0 || _HeadPumpSpeed[i][0]>=CALIBRATE_PUMP_SPEED-tol)
 		{
 			//state[i].condPumpSpeed = _HeadState[i].condPumpSpeed/_HeadStateCnt[i].condPumpSpeed;
@@ -346,10 +353,6 @@ void fluid_tick(void)
 			_send_ctrlMode(i, ctrl_off, TRUE);
 					
 		state[i].canisterEmpty = (_FluidStatus[i].canisterErr >= LOG_TYPE_ERROR_CONT);
-
-		state[i].condTempReady = _HeadStateTempReady[i];
-		if (state[i].condTempReady > maxTempReady) maxTempReady = state[i].condTempReady;
-		_HeadStateTempReady[i] = 0;		
 	}
 	
 	RX_PrinterStatus.tempReady = maxTempReady;
@@ -445,14 +448,14 @@ static void _do_fluid_stat(int fluidNo, SFluidBoardStat *pstat)
 	memcpy(&stat, &RX_PrinterStatus, sizeof(stat));
 	stat.inkSupilesOff = TRUE;
 	stat.inkSupilesOn  = TRUE;
-	stat.tempReady = 0;
+	stat.tempReady	   = TRUE;
 	for (i=0; i<RX_Config.inkSupplyCnt; i++)
 	{
 		if (RX_Config.inkSupply[i].inkFileName[0]) 
 		{
 			if (_FluidStatus[i].ctrlMode<=ctrl_off) stat.inkSupilesOn =FALSE;
 			if (_FluidStatus[i].ctrlMode>ctrl_off)  stat.inkSupilesOff=FALSE;
-			if (_FluidStatus[i].condTempReady > stat.tempReady) stat.tempReady = _FluidStatus[i].condTempReady;
+			if (!_FluidStatus[i].info.condTempReady) stat.tempReady = FALSE;
 		}
 	}
 	if (stat.printState==ps_off) stat.printState = ps_ready_power;
@@ -1205,7 +1208,6 @@ void fluid_set_head_state	(int no, SHeadStat *pstat)
 	if (no>=0 && no<SIZEOF(_HeadState) && pstat->ctrlMode!=ctrl_off && pstat->ctrlMode!=ctrl_error) 
 	{	
 		if (pstat->err) _HeadErr[no] = TRUE;
-		if (pstat->tempReady > _HeadStateTempReady[no]) _HeadStateTempReady[no] = pstat->tempReady;
 
 		if (valid(pstat->presIn))
 		{
@@ -1225,6 +1227,7 @@ void fluid_set_head_state	(int no, SHeadStat *pstat)
 
 		if (valid(pstat->tempHead))
 		{
+			if (pstat->tempReady) _HeadState[no].condTempReady++;
 			_HeadState[no].temp += pstat->tempHead;
 			_HeadStateCnt[no].temp++; 
 		}		
@@ -1299,6 +1302,7 @@ INT32 fluid_get_pumpFeedback(int no)
 }
 
 //--- fluid_get_amcTemp ---------------------------------------
+/*
 INT32 fluid_get_amcTemp(int no)
 {
 	if (no >= 0 && no < SIZEOF(_FluidStatus))
@@ -1307,7 +1311,7 @@ INT32 fluid_get_amcTemp(int no)
 	}
 	return INVALID_VALUE;
 }
-
+*/
 //--- fluid_get_error ---------------------------------------
 INT32 fluid_get_error(int no)
 {

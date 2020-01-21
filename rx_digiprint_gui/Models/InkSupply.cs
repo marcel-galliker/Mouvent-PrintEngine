@@ -152,25 +152,57 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _PresLung, value); }
         }
 
+        //--- Property TempSetpoint ---------------------------------------
+        private double _TempSetpoint;
+        public double TempSetpoint
+        {
+            get { return _TempSetpoint; }
+            set { SetProperty(ref _TempSetpoint, value); }
+        }       
+
         //--- Property Temp ---------------------------------------
-        private UInt32 _Temp;
-        public UInt32 Temp
+        private Int32 _Temp;
+        public Int32 Temp
         {
             get { return _Temp; }
             set { SetProperty(ref _Temp, value); }
         }
 
+        //--- Property TempReady ---------------------------------------
+        private bool _TempReady;
+        public bool TempReady
+        {
+            get { return _TempReady; }
+            set { SetProperty(ref _TempReady, value); }
+        }
+        
+        //--- Property CondTemp ---------------------------------------
+        private Int32 _CondTemp;
+        public Int32 CondTemp
+        {
+            get { return _CondTemp; }
+            set { SetProperty(ref _CondTemp, value); }
+        }
+
+        //--- Property CondTempReady ---------------------------------------
+        private bool _CondTempReady;
+        public bool CondTempReady
+        {
+            get { return _CondTempReady; }
+            set { SetProperty(ref _CondTempReady, value); }
+        }
+        
         //--- Property PumpSpeedSet ---------------------------------------
-        private UInt32 _PumpSpeedSet;
-        public UInt32 PumpSpeedSet
+        private Int32 _PumpSpeedSet;
+        public Int32 PumpSpeedSet
         {
             get { return _PumpSpeedSet; }
             set { SetProperty(ref _PumpSpeedSet, value); }
         }
 
         //--- Property PumpSpeed ---------------------------------------
-        private UInt32 _PumpSpeed;
-        public UInt32 PumpSpeed
+        private Int32 _PumpSpeed;
+        public Int32 PumpSpeed
         {
             get { return _PumpSpeed; }
             set { SetProperty(ref _PumpSpeed, value); }
@@ -231,7 +263,11 @@ namespace RX_DigiPrint.Models
         public InkType InkType
         {
             get { return _InkType; }
-            set { SetProperty(ref _InkType, value);}
+            set 
+            { 
+                if (SetProperty(ref _InkType, value))
+                    TempSetpoint = _InkType.Temp;
+            }
         }
 
         //--- Property RectoVerso ---------------------------------------
@@ -269,6 +305,7 @@ namespace RX_DigiPrint.Models
             PresLung        = msg.presLung;
             CondPresOut     = msg.condPresOut;
             CondPresIn      = msg.condPresIn;
+            CondTemp        = msg.condTemp;
             FlushTime       = msg.flushTime;
             Temp            = msg.temp;
             PumpSpeedSet    = msg.pumpSpeedSet;
@@ -283,6 +320,8 @@ namespace RX_DigiPrint.Models
             BleedValve      = ((msg.info & 0x00000002)==0)? "--":"ON";
             AirCusionValve  = ((msg.info & 0x00000004)==0)? "--":"ON";
             Flushed         = (msg.info & 0x00000008)!=0;
+            CondTempReady   = (msg.info & 0x00000010)!=0;
+            TempReady       = (msg.info & 0x00000020)!=0;
         }
     }	
 }

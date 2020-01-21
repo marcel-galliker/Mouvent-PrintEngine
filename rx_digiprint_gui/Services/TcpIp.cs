@@ -734,7 +734,7 @@ namespace RX_DigiPrint.Services
             public byte	a;
             public UInt32 colorCode;
 
-            Int32	temp;
+            public Int32	temp;
 	        Int32	tempMax;
 	        Int32	tempChiller;
 	        Int32	dropletVolume;
@@ -902,10 +902,10 @@ namespace RX_DigiPrint.Services
 	        public Int32    presLung;			//  Lung pressure
             public Int32    condPresOut;  
             public Int32    condPresIn;
-            public UInt32   condTempReady;
-	        public UInt32	temp;				//	Temperature
-	        public UInt32	pumpSpeedSet;		//	Consumption pump speed
-	        public UInt32	pumpSpeed;			//	Consumption pump speed
+	        public Int32	condTemp;
+	        public Int32	temp;				//	Temperature
+	        public Int32	pumpSpeedSet;		//	Consumption pump speed
+	        public Int32	pumpSpeed;			//	Consumption pump speed
 	        public Int32	canisterLevel;
 	        public Int32	canisterErr;
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]

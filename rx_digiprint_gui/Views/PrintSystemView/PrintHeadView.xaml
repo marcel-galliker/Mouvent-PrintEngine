@@ -70,7 +70,7 @@
             </Grid>
         </rx:RxPopup>
 
-        <Rectangle Grid.Row="2" Fill="Yellow" Visibility="{Binding TempReady, Converter={StaticResource IntToVisible_Converter}}"/>
+        <Rectangle Grid.Row="2" Fill="Yellow" Visibility="{Binding TempReady, Converter={StaticResource BoolToInVisible_Converter}}"/>
 
         <StackPanel  Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
             <TextBlock Text="{Binding TempHead,  Converter={StaticResource HeadVal_ConverterTemp}}"/>

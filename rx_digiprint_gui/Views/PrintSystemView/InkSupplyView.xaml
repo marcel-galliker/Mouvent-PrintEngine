@@ -82,7 +82,7 @@
 
     <!--    <CheckBox x:Name="CheckBox" Checked="CheckBox_Checked" IsChecked="{Binding IsChecked}" Style="{StaticResource CheckBoxStyle_OFF}"> -->
     <CheckBox x:Name="CheckBox" Click="CheckBox_Clicked" IsChecked="{Binding IsChecked}" Style="{StaticResource CheckBoxStyle_OFF}">
-        <Grid x:Name="SettingsGrid" Width="100"  Margin="1,0">
+        <Grid x:Name="SettingsGrid" Width="100">
             <Grid.RowDefinitions>
                 <RowDefinition Height="26"/>
                 <RowDefinition Height="auto"/>
@@ -199,8 +199,22 @@
                 </Grid>
             </rx:RxPopup>
 
-            <TextBlock Grid.Row="3" HorizontalAlignment="Right" Text="{Binding CanisterLevel,  Converter={StaticResource HeadVal_ConverterTemp}}" />
-            <TextBlock Grid.Row="4" HorizontalAlignment="Right" Text="{Binding Temp,           Converter={StaticResource HeadVal_ConverterTemp}}" x:Name="Temp"/>
+<!--            <TextBlock Grid.Row="3" HorizontalAlignment="Right" Text="{Binding CanisterLevel,  Converter={StaticResource HeadVal_ConverterTemp}}" /> -->
+            <Rectangle Grid.Row="3" Fill="Yellow"         Visibility="{Binding TempReady,     Converter={StaticResource BoolToInVisible_Converter}}"/>
+            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
+                <TextBlock Text="{Binding Temp,  Converter={StaticResource HeadVal_ConverterTemp}}"/>
+                <TextBlock Text=" (" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding TempSetpoint, Converter={StaticResource HeadVal_ConverterTemp}}" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
+                <TextBlock Text=")" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
+            </StackPanel>
+            <Rectangle Grid.Row="4" Fill="Yellow"         Visibility="{Binding CondTempReady, Converter={StaticResource BoolToInVisible_Converter}}"/>
+            <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
+                <TextBlock Text="{Binding CondTemp,      Converter={StaticResource HeadVal_ConverterTemp}}" />
+                <TextBlock Text=" (" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding TempSetpoint, Converter={StaticResource HeadVal_ConverterTemp}}" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
+                <TextBlock Text=")" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
+            </StackPanel>
+            
             <Grid x:Name="ServiceGrid" Grid.Row="5">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="0"/>

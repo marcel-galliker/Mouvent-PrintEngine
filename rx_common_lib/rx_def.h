@@ -1055,38 +1055,38 @@ typedef struct SInkSupplyInfo
 		UINT32 val;
 		struct
 		{
-			UINT32 connected : 1;	// 0x00000001
-			UINT32 bleedValve : 1;	// 0x00000002
-			UINT32 cusionValve : 1;	// 0x00000004
-			UINT32 flushed : 1;		// 0x00000008
-			UINT32 info_4 : 1;		// 0x00000010
-			UINT32 info_5 : 1;		// 0x00000020
-			UINT32 info_6 : 1;		// 0x00000040
-			UINT32 info_7 : 1;		// 0x00000080
-			UINT32 info_8 : 1;		// 0x00000100
-			UINT32 info_9 : 1;		// 0x00000200
-			UINT32 info10 : 1;		// 0x00000400
-			UINT32 info11 : 1;		// 0x00000800
-			UINT32 info12 : 1;		// 0x00001000
-			UINT32 info13 : 1;		// 0x00002000
-			UINT32 info14 : 1;		// 0x00004000
-			UINT32 info15 : 1;		// 0x00008000
-			UINT32 info16 : 1;		// 0x00010000
-			UINT32 info17 : 1;		// 0x00020000
-			UINT32 info18 : 1;		// 0x00040000
-			UINT32 info19 : 1;		// 0x00080000
-			UINT32 info20 : 1;		// 0x00100000
-			UINT32 info21 : 1;		// 0x00200000
-			UINT32 info22 : 1;		// 0x00400000
-			UINT32 info23 : 1;		// 0x00800000
-			UINT32 info24 : 1;		// 0x01000000
-			UINT32 info25 : 1;		// 0x02000000
-			UINT32 info26 : 1;		// 0x04000000
-			UINT32 info27 : 1;		// 0x08000000
-			UINT32 info28 : 1;		// 0x10000000
-			UINT32 info29 : 1;		// 0x20000000
-			UINT32 info30 : 1;		// 0x40000000
-			UINT32 info31 : 1;		// 0x80000000
+			UINT32 connected : 1;		// 0x00000001
+			UINT32 bleedValve : 1;		// 0x00000002
+			UINT32 cusionValve : 1;		// 0x00000004
+			UINT32 flushed : 1;			// 0x00000008
+			UINT32 condTempReady : 1;	// 0x00000010
+			UINT32 heaterTempReady : 1;	// 0x00000020
+			UINT32 info_6 : 1;			// 0x00000040
+			UINT32 info_7 : 1;			// 0x00000080
+			UINT32 info_8 : 1;			// 0x00000100
+			UINT32 info_9 : 1;			// 0x00000200
+			UINT32 info10 : 1;			// 0x00000400
+			UINT32 info11 : 1;			// 0x00000800
+			UINT32 info12 : 1;			// 0x00001000
+			UINT32 info13 : 1;			// 0x00002000
+			UINT32 info14 : 1;			// 0x00004000
+			UINT32 info15 : 1;			// 0x00008000
+			UINT32 info16 : 1;			// 0x00010000
+			UINT32 info17 : 1;			// 0x00020000
+			UINT32 info18 : 1;			// 0x00040000
+			UINT32 info19 : 1;			// 0x00080000
+			UINT32 info20 : 1;			// 0x00100000
+			UINT32 info21 : 1;			// 0x00200000
+			UINT32 info22 : 1;			// 0x00400000
+			UINT32 info23 : 1;			// 0x00800000
+			UINT32 info24 : 1;			// 0x01000000
+			UINT32 info25 : 1;			// 0x02000000
+			UINT32 info26 : 1;			// 0x04000000
+			UINT32 info27 : 1;			// 0x08000000
+			UINT32 info28 : 1;			// 0x10000000
+			UINT32 info29 : 1;			// 0x20000000
+			UINT32 info30 : 1;			// 0x40000000
+			UINT32 info31 : 1;			// 0x80000000
 		};
 	};
 } SInkSupplyInfo;
@@ -1149,10 +1149,10 @@ typedef struct SInkSupplyStat
 	INT32   presLung;			//  Lung pressure
 	INT32	condPresOut;	
 	INT32	condPresIn;  
-	UINT32  condTempReady;
-	UINT32	temp;				//	Temperature
-	UINT32	pumpSpeedSet;		//	Consumption pump speed
-	UINT32	pumpSpeed;			//	Consumption pump speed measured
+	INT32	condTemp;
+	INT32	temp;				//	Temperature
+	INT32	pumpSpeedSet;		//	Consumption pump speed
+	INT32	pumpSpeed;			//	Consumption pump speed measured
 	INT32	canisterLevel;
 	INT32	canisterErr;
 	char	scannerSN[16];

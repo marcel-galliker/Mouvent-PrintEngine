@@ -142,7 +142,6 @@ namespace RX_DigiPrint.Models
                 + "PAR_UV_LAMP_3_MODE"+"\n"
                 + "PAR_UV_LAMP_4_MODE"+"\n"
                 + "PAR_UV_LAMP_5_MODE"+"\n"
-//                + "STA_UV_LAMP_1_TIMER"+"\n";
                 + "STA_UV_POWER_ON"+"\n"
                 + "STA_UV_LAMPS_READY"+"\n"
                 + "STA_UV_LAMP_1_TIMER"+"\n";
