@@ -734,7 +734,7 @@ static void _IS_cond_log(int ticks)
 // --- nios_is_heater_connected --------------------------------
 int nios_is_heater_connected(void)
 {
-	return _Init && !_Stat->error&err_amc_heater;
+	return _Init && !(_Stat->error&err_amc_heater);
 }
 
 // --- nios_set_temp ----------------------------------

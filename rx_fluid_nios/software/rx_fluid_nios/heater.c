@@ -143,8 +143,7 @@ void heater_tick_10ms(void)
 			//--- CEDRIC --- Error Temperature frozen : Auto-reset + EVENT message
 			if(pRX_Config->ink_supply[i].ctrl_mode > ctrl_off)
 			{
-				if((pRX_Status->ink_supply[i].heaterTemp == _Temp_Pre[i]) // temperature frozen
-					&&(_pid_Temp[i].val - _Heater_Pre[i] > 50)) // Heater increasing for more than 5%
+				if(pRX_Status->ink_supply[i].heaterTemp == _Temp_Pre[i]) // temperature frozen
 				{
 					_TimeTempFrozen[i]++;
 					if(_TimeTempFrozen[i] > 6000)	// during 20 seconds

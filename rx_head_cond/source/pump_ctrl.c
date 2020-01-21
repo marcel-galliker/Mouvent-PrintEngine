@@ -30,6 +30,8 @@
 #define TO_FLUSH	FALSE
 #define TO_INK		TRUE
 
+#define CALIBRATION_NB_VAL		30
+
 static const INT32 MENISCUS_TIMEOUT 	= 500; //2000;
 static const INT32 NO_INK_TIMEOUT 		= 1000; //2000;
 static const INT32 MENISCUS_CHECK_TIME 	= 60*100;
@@ -50,7 +52,7 @@ void ICU0_IRQHandler(void);
 
 static void _set_valve(int state);
 static void _set_pump_speed(UINT32 speed);
-static void _pump_pid(void);
+static void _pump_pid(int Meniscus_Error_Enable);
 static void _watchdog_check(void);
 static void _menicus_minmax_reset(void);
 static void _menicus_minmax(void);
@@ -70,13 +72,66 @@ static INT32	_pout_min;
 static INT32	_pout_max;
 static INT32    _Start_PID;
 static INT32	_TimePIDstable;
-static INT32	_TimeSwitchingOFF;
-static INT32    _PhaseOFFMeniscusPre;
+// static INT32	_TimeSwitchingOFF;
+// static INT32 _PhaseOFFMeniscusPre;
 static INT32	_Meniscus_Timeout;
 static INT32	_PurgeDelay;
 static INT32	_PurgeTime;
 
-static UINT64 _flow = 0;
+// ---- NEW : flow resistance  -----
+// static INT32	_TimeFlowResistancestablePRINT;
+// static int	_NbAverageFlowResistancePRINT;
+// static int	_SumFlowResistancePRINT;
+// static UINT32	_PumpMeasuredStablePRINT;
+// static INT32	_TabFlowResistance[100];
+
+// ---- NEW : pump measured  -----
+// static UINT32 	_PumpMeasuredFlowCnt = 0;
+// static UINT32 	_PumpMeasuredFlow = 0;
+// static UINT32 	_NbPulsesCnt = 0;
+// static UINT32 	_SumTimePulses = 0;
+// static INT32	_TabAvgSpeedPump[50];
+// static INT32    _NbAvgPumpSpeed;
+// static INT32    _SumPumpSpeed;
+
+// --- shutdown phase ---
+static INT32	_ShutdownPrint;
+static INT32	_TimeMeniscusStability;
+static INT32	_NbPresShutdown;
+
+// --- Calibration ---
+/*static INT32 	_MaxDerivPoutCalibration;						
+static INT32 	_Nb100msCalibration;
+static INT32 	_NbAvgCalibration;
+static INT32 	_NbPresCalibration;
+static INT32 	_AvgPoutCalibration;
+static INT32 	_TimeSatbilityCalibration;
+static INT32 	_ThresholdDetectOKCalibration;
+static INT32 	_TimeOutCalibration;
+static INT32 	_TabAvgPoutCalibration[CALIBRATION_NB_VAL];
+static INT32 	_TabDerivPoutCalibration[CALIBRATION_NB_VAL];
+static INT32 	_PoutSTEP1Calibration;
+static INT32 	_PoutMaxSTEP2Calibration;
+static INT32	_PinSTEP2Calibration;
+static INT32	_DelatPSTEP2Calibration;
+static INT32 	_PinAvgCalibration;
+static INT32 	_PoutAvgCalibration;
+static INT32 	_SumAvgPoutCalibration;
+static INT32 	_ThresholdDetectOKCalibration;
+static INT32 	_PinCalibration;
+static INT32 	_PoutCalibration;
+
+// --- Check ---
+static INT32 	_TimeStabilityCheck;
+static INT32	_CheckSequence;
+static INT32	_CheckStep4_Pin;
+static INT32	_CheckStep4_Pout;
+static INT32	_CheckStep4_Meniscus;
+static INT32	_CheckStep4_Pump;
+static INT32	_CheckStep4_PumpMeasured;*/
+
+static UINT32 _flow = 0;
+// --- END NEW ---
 static UINT32 _flow_cnt = 0;
 static UINT32 _pump_ticks = 0;
 
@@ -181,8 +236,8 @@ void pump_tick_10ms(void)
 	
 	//--- PID Values --------------------------------
 	
-	if(RX_Config.meniscus_setpoint > 50) _PumpPID.Setpoint = RX_Config.meniscus_setpoint;
-	else _PumpPID.Setpoint	= DEFAULT_SETPOINT;
+	//if(RX_Config.meniscus_setpoint > 50) _PumpPID.Setpoint = RX_Config.meniscus_setpoint;
+	//else _PumpPID.Setpoint	= DEFAULT_SETPOINT;
 	
 	RX_Status.pid_P 			= _PumpPID.P;	
 	RX_Status.pid_I 			= _PumpPID.I;
@@ -192,53 +247,71 @@ void pump_tick_10ms(void)
 	
 	switch(RX_Config.mode)
 	{
+		case ctrl_shutdown:	
+
+				if(_ShutdownPrint > 0)					
+				{
+					
+					_TimeMeniscusStability = 0;
+					_NbPresShutdown = 0;
+					_PumpPID.Setpoint = -RX_Status.meniscus;
+				}
+				RX_Status.mode = RX_Config.mode;
+				break;
+		
+		case ctrl_shutdown_done:	
+		
+				// Bring Meniscus to Setpoint (WF) + 15mbars
+				if(_ShutdownPrint > 0)
+				{
+					_ShutdownPrint++;
+					_NbPresShutdown++;
+					if(_NbPresShutdown > 10)
+					{
+						if(_PumpPID.Setpoint > RX_Config.meniscus_setpoint - 150) _PumpPID.Setpoint --;
+						else _PumpPID.Setpoint = RX_Config.meniscus_setpoint - 150;
+						_NbPresShutdown = 0;
+					}
+					_pump_pid(FALSE);	// disable meniscus error
+					if(abs(RX_Status.meniscus) < 20)
+					{
+						_TimeMeniscusStability++;
+						if(_TimeMeniscusStability > 300) RX_Status.mode = RX_Config.mode; 
+					}
+					else if(_PumpPID.val == _PumpPID.val_min)
+					{
+						_TimeMeniscusStability++;
+						if(_TimeMeniscusStability > 2000) RX_Status.mode = RX_Config.mode;
+						pid_reset(&_PumpPID);						
+					}
+					else _TimeMeniscusStability = 0;
+					// Timeout
+					if(_ShutdownPrint > 4500) RX_Status.mode = RX_Config.mode;
+				}
+				else RX_Status.mode = RX_Config.mode;
+				break;
+		
 		case ctrl_off:
+		case ctrl_undef:
 		case ctrl_error:
-		case ctrl_shutdown:               
-			if(RX_Status.mode == ctrl_shutdown)		// switching OFF phase : keep the meniscus between -10 and -13
-			{
-				_TimeSwitchingOFF++;
-				if(RX_Status.meniscus > -10) 
-				{
-					_set_valve(TO_FLUSH);
-					if(_PhaseOFFMeniscusPre == TO_INK) _TimeSwitchingOFF = 0;
-					_PhaseOFFMeniscusPre = TO_FLUSH;
-				}
-				else if(RX_Status.meniscus < -50) 
-				{
-					_set_valve(TO_INK);
-					if(_PhaseOFFMeniscusPre == TO_FLUSH) _TimeSwitchingOFF = 0;
-					_PhaseOFFMeniscusPre = TO_INK;
-				}
-				// when valve didn't change for than 5 seconds, mean that meniscus is stable : go to mode OFF
-				if(_TimeSwitchingOFF > 1000)
-				{
-					RX_Status.mode = ctrl_off;
-					_set_valve(TO_FLUSH);
-				}				
-			}
-			else 
-			{
-				temp_ctrl_on(FALSE);
-				turn_off_pump();
-				RX_Status.logCnt = 0;
-				_pump_ticks = 0;
-				if (RX_Status.mode > ctrl_off) ctr_save();
-				_PumpPID.start_integrator = 0;
-				//if(RX_Status.mode == ctrl_print) RX_Status.mode = ctrl_shutdown; 	// shutdown phase if PRINT mode before OFF
-				/*else*/ 
-				{
-					RX_Status.mode = ctrl_off;
-					pid_reset(&_PumpPID);
-				}
-				
-				_Start_PID = START_PID_OFF;
-				_TimePIDstable = 0;
-				_TimeSwitchingOFF = 0;
-				_Meniscus_Timeout = MENISCUS_TIMEOUT;
-			}
-			break;	
-			
+						temp_ctrl_on(FALSE);
+						turn_off_pump();		
+						RX_Status.logCnt = 0;
+						_pump_ticks = 0;
+						if (RX_Status.mode > ctrl_off) ctr_save();
+									
+						pid_reset(&_PumpPID);			
+						_PumpPID.start_integrator = 0;
+						_Start_PID = START_PID_OFF;
+						_TimePIDstable = 0;
+//						_TimeSwitchingOFF = 0;
+						_Meniscus_Timeout = MENISCUS_TIMEOUT;
+						_ShutdownPrint = 0;
+					
+						RX_Status.mode = RX_Config.mode;
+											
+						break;
+		
 		case ctrl_warmup:
 						temp_ctrl_on(TRUE);
 						if (RX_Status.mode==ctrl_readyToPrint) break;
@@ -251,28 +324,15 @@ void pump_tick_10ms(void)
 						if (_timer<5000)
                             _set_pump_speed(_PumpPID.val_max*75/100+1);
 						else if (_timer<20000) 
-                            _pump_pid();
+                            _pump_pid(TRUE);
 						else 
                             RX_Status.mode=ctrl_readyToPrint;	// ???
                         		
                         RX_Status.mode = RX_Config.mode; 		// ???
-						break;
-		
-        //--- Diangnostics --------------------------------------------
-		case ctrl_check_step0:	RX_Status.mode = RX_Config.mode; break;
-		case ctrl_check_step1:	RX_Status.mode = RX_Config.mode; break;
-		case ctrl_check_step2:	RX_Status.mode = RX_Config.mode; break;
-		case ctrl_check_step3:	RX_Status.mode = RX_Config.mode; break;
-		case ctrl_check_step4:	RX_Status.mode = RX_Config.mode; break;
-		case ctrl_check_step5:	RX_Status.mode = RX_Config.mode; break;
-		case ctrl_check_step6:	RX_Status.mode = RX_Config.mode; break;
-		case ctrl_check_step7:	RX_Status.mode = RX_Config.mode; break;
-		case ctrl_check_step8:	RX_Status.mode = RX_Config.mode; break;
-		case ctrl_check_step9:	RX_Status.mode = RX_Config.mode; break;
+						break;        
 			
         //--- PRINT --------------------------------------------
-		case ctrl_print:  
-		case ctrl_cal_start:
+		case ctrl_print:  		
 						//--- start: reset regulation -----------------
 						if (RX_Config.mode != RX_Status.mode)
 						{
@@ -288,26 +348,324 @@ void pump_tick_10ms(void)
 							else _PumpPID.P_start	= 4;
 							_Start_PID = START_PID_P_REDUCED;
 							_PumpPID.start_integrator = 0;
+							// Meniscus setpoint in WF (if 0, setpoint=default)
+							_PumpPID.Setpoint = RX_Config.meniscus_setpoint;
+							if(_PumpPID.Setpoint < 50) _PumpPID.Setpoint = DEFAULT_SETPOINT;
 							pid_reset(&_PumpPID);
 							RX_Status.pressure_in_max=INVALID_VALUE;
 							RX_Status.error  &= ~(COND_ERR_meniscus | COND_ERR_pump_no_ink);
 							_meniscus_err_cnt=0;
-							_no_ink_err_cnt  =0;							
+							_no_ink_err_cnt  =0;		
+						//	_TimeFlowResistancestablePRINT = 0;							
 						}
-						// no break here!
-		case ctrl_cal_step1:                 
-		case ctrl_cal_step2:    
-        case ctrl_cal_step3:										
-						//--- always --------------------------
+						
 						temp_ctrl_on(TRUE);
 						_set_valve(TO_INK);
                         max_pressure = MBAR_500;
+						_ShutdownPrint = 1;
         
-						_pump_pid();
+						_pump_pid(TRUE);
 						
 						RX_Status.mode = RX_Config.mode; 		
                         break;
-        
+        //--- CALIBRATION --------------------------------------------
+	/*	case ctrl_cal_start:	// Initialize variables
+						
+						RX_Status.mode = RX_Config.mode; 						
+						temp_ctrl_on(TRUE);
+						_set_valve(TO_INK);
+						_PumpPID.start_integrator = 0;
+						pid_reset(&_PumpPID);
+						_ShutdownPrint = 1;
+						
+						_MaxDerivPoutCalibration = -1000;						
+						_Nb100msCalibration = 0;
+						_NbAvgCalibration = 0;
+						_NbPresCalibration = 0;
+						_AvgPoutCalibration = 0;
+						_TimeSatbilityCalibration = 0;
+						_ThresholdDetectOKCalibration = 100;
+						_TimeOutCalibration = 0;
+						for(int i=0;i<CALIBRATION_NB_VAL;i++) 
+						{
+							_TabAvgPoutCalibration[i] = 0;
+							_TabDerivPoutCalibration[i] = 0;
+						}
+						_PumpPID.Setpoint = RX_Config.meniscus_setpoint - 50;
+						
+						break;
+		
+		case ctrl_cal_step1:	// Regulate meniscus at setpoint +5mbars, until meniscus and temperature stable			
+						
+						_pump_pid(FALSE);
+						if((abs(RX_Status.meniscus + _PumpPID.Setpoint) < 10)&&(abs(RX_Config.temp - RX_Config.tempHead) < 1000))
+						{
+							_TimeSatbilityCalibration++;
+							if(_TimeSatbilityCalibration > 3000) RX_Status.mode = RX_Config.mode;		
+						}
+						if(RX_Status.mode == RX_Config.mode) _TimeSatbilityCalibration = 0;
+						break;						
+			
+		case ctrl_cal_step2:  // Fix pump speed 40% and wait for 30 seconds
+			
+						_TimeSatbilityCalibration++;
+						if(_TimeSatbilityCalibration > 3000) RX_Status.mode = RX_Config.mode;							 
+						_PoutSTEP1Calibration = RX_Status.pressure_out;
+							
+						// For the calculation of Pinlet setpoint
+						_PinSTEP2Calibration = RX_Status.pressure_in;
+						_DelatPSTEP2Calibration = RX_Status.pressure_in - RX_Status.pressure_out;
+		
+						pid_reset(&_PumpPID);
+						
+		case ctrl_cal_step3: // IS decrease Pinlet, look for derivate peak and calculate new  flow resistance factor
+						
+						// Remain pump stable at 40%
+						//----------------------------
+						if(RX_Status.mode != ctrl_cal_step3) _set_pump_speed(_PumpPID.val_max * 41 / 100);
+						else _pump_pid(FALSE);						
+		
+						// Find time when air is sucked
+						// Sliding Average of (Pin - Pout) during 3 seconds
+						// Derivative during 1 second
+						_Nb100msCalibration++;
+						_PinAvgCalibration 	+= RX_Status.pressure_in;
+						_PoutAvgCalibration += RX_Status.pressure_out;
+						if(_Nb100msCalibration > 9) 	// every 100ms enough
+						{							
+							_PinAvgCalibration /= _Nb100msCalibration;
+							_PoutAvgCalibration /= _Nb100msCalibration;
+							_Nb100msCalibration = 0;
+							
+							// Average 3 seconds
+							_NbAvgCalibration++;
+							if(_NbAvgCalibration > CALIBRATION_NB_VAL - 1) _NbAvgCalibration = 0;
+							_TabAvgPoutCalibration[_NbAvgCalibration] = - _PoutAvgCalibration;
+							
+							_SumAvgPoutCalibration = 0;
+							for(int i=0;i<CALIBRATION_NB_VAL;i++) _SumAvgPoutCalibration += _TabAvgPoutCalibration[i];
+							_AvgPoutCalibration = _SumAvgPoutCalibration / 10;
+							
+							// Derivative 1 second
+							if(RX_Config.mode == ctrl_cal_step3) RX_Status.deriv_calibration = _AvgPoutCalibration - _TabDerivPoutCalibration[_NbAvgCalibration];
+							else RX_Status.deriv_calibration = 0;
+							_TabDerivPoutCalibration[_NbAvgCalibration] = _AvgPoutCalibration;	
+														
+							// Look for Max Deriv, wait 1 second after to validate the MAX
+							if(RX_Config.mode == ctrl_cal_step3)
+							{
+								// In case of deriv not enough high, ask for PURGE and restart
+								_TimeOutCalibration++;
+								if((_TimeOutCalibration > 500)&&(_NbPresCalibration < 3))
+								{
+									RX_Status.flowResistance = RX_Config.flowResistance;
+									RX_Status.pout_air_ignition = 1200;									
+									RX_Status.mode = RX_Config.mode;
+								}
+								switch(_NbPresCalibration)
+								{
+									case 0 : 	if(RX_Status.deriv_calibration > 100) 
+												{
+													_NbPresCalibration++; 
+													_MaxDerivPoutCalibration = RX_Status.deriv_calibration;
+												}
+												_TimeSatbilityCalibration = 0;
+												_PoutMaxSTEP2Calibration = _PoutSTEP1Calibration;
+												break;
+									case 1 :	// Detect end of deriv detection : 7.5 seconds after last peak > 200
+												_ThresholdDetectOKCalibration = _MaxDerivPoutCalibration * 0.3;
+												if(_ThresholdDetectOKCalibration < 50) _ThresholdDetectOKCalibration = 50;
+										
+												if(RX_Status.deriv_calibration < _ThresholdDetectOKCalibration) _TimeSatbilityCalibration++;
+												else 
+												{
+													_TimeSatbilityCalibration = 0;
+													if(RX_Status.deriv_calibration > 100)
+													{
+														if(RX_Status.deriv_calibration > _MaxDerivPoutCalibration) 									
+														{
+															_MaxDerivPoutCalibration = RX_Status.deriv_calibration;
+															_PinCalibration = _PinAvgCalibration;
+															_PoutCalibration = _PoutAvgCalibration;															
+														}																													
+													}													
+												}
+												
+												if(_TimeSatbilityCalibration > 50)
+												{
+													_NbPresCalibration++;
+													//RX_Status.FlowResist_Pin = _PinFlowResistance;
+													RX_Status.pout_air_ignition = _PoutCalibration;
+													RX_Status.flowResistance = (100 * (_PinCalibration - _PoutCalibration)) / (_PinCalibration + (RX_Config.meniscus_setpoint + 150));													
+													RX_Status.pinlet_spt_calibration = _PinSTEP2Calibration - (_DelatPSTEP2Calibration / RX_Config.flowResistance) + (_DelatPSTEP2Calibration / RX_Status.flowResistance);
+												}
+													
+												if(RX_Status.pressure_out < _PoutMaxSTEP2Calibration)
+													_PoutMaxSTEP2Calibration = RX_Status.pressure_out;
+												
+												break;
+									default : 	_NbPresCalibration++;
+												// Deriv should never go below 0, so a problem appear and I restart the sequence												
+												if(_NbPresCalibration> 10) RX_Status.mode = RX_Config.mode; 
+												_PumpPID.start_integrator = 0;
+												pid_reset(&_PumpPID);
+												_TimeSatbilityCalibration = 0;
+												// if diff between Pout STEP1 and Pout MAX is too low, the derivate is not good : meniscus setpoint too close to air sucks point
+												if(_NbPresCalibration == 3)
+												{
+													if(abs(_PoutSTEP1Calibration - _PoutMaxSTEP2Calibration) < 100)
+													{
+														RX_Status.flowResistance = RX_Config.flowResistance;
+														RX_Status.pout_air_ignition = 1000;
+													}
+													else if((RX_Status.flowResistance < 130)||(RX_Status.flowResistance > 500))
+													{
+														RX_Status.flowResistance = RX_Config.flowResistance;
+														RX_Status.pout_air_ignition = 1100;
+													}
+												}
+												break;
+								}
+							}
+							else _NbPresCalibration = 0;
+							_PinAvgCalibration = 0;
+							_PoutAvgCalibration = 0;
+						}
+					
+						break; 	
+		case ctrl_cal_step4: 	// regulate meniscus to remove air in the circuit
+						
+						_AvgPoutCalibration = 0;						
+						_NbPresCalibration++;
+						if(_NbPresCalibration > 3)
+						{
+							if(_PumpPID.Setpoint > RX_Config.meniscus_setpoint) _PumpPID.Setpoint--;
+							else if(_PumpPID.Setpoint < RX_Config.meniscus_setpoint) _PumpPID.Setpoint++;
+							_NbPresCalibration = 0;
+						}
+						
+						_pump_pid(FALSE);
+						
+						if((abs(RX_Status.meniscus + _PumpPID.Setpoint) < 10)&&(_PumpPID.Setpoint == RX_Config.meniscus_setpoint))
+						{
+							_TimeSatbilityCalibration++;
+							if(_TimeSatbilityCalibration > 100) RX_Status.mode = RX_Config.mode; 
+							_NbAvgCalibration = 0;
+							//RX_Status.pinlet_spt_calibration = RX_Status.pressure_in;
+						}
+						else _TimeSatbilityCalibration = 0; 
+						break;
+						
+		case ctrl_cal_done: 
+						RX_Status.mode = RX_Config.mode;				
+						break;
+        */
+		
+		//--- Diangnostics --------------------------------------------
+		case ctrl_check_step0:	RX_Status.mode = RX_Config.mode; break;
+		case ctrl_check_step1:	RX_Status.mode = RX_Config.mode; break;
+		case ctrl_check_step2:	RX_Status.mode = RX_Config.mode; break;
+		case ctrl_check_step3:	RX_Status.mode = RX_Config.mode; break;
+		case ctrl_check_step4:	RX_Status.mode = RX_Config.mode; break;
+		case ctrl_check_step5:	RX_Status.mode = RX_Config.mode; break;
+		case ctrl_check_step6:	RX_Status.mode = RX_Config.mode; break;
+		case ctrl_check_step7:	RX_Status.mode = RX_Config.mode; break;
+		case ctrl_check_step8:	RX_Status.mode = RX_Config.mode; break;
+		case ctrl_check_step9:	RX_Status.mode = RX_Config.mode; break;
+	/*	case ctrl_check_step3:	
+						RX_Status.mode = RX_Config.mode; 						
+											
+						_PumpPID.start_integrator = 0;
+						pid_reset(&_PumpPID);						
+						_PumpPID.Setpoint = RX_Config.meniscus_setpoint;
+						_TimeStabilityCheck = 0;
+						RX_Status.mode = RX_Config.mode; 
+						_CheckSequence = 1;
+						_PumpPID.val_max = 3000;	// max 75% to avoid high pressure in case of return tube is clogged
+						break;
+		
+		case ctrl_check_step4:	
+						_set_valve(TO_INK);
+						RX_Status.mode = RX_Config.mode;						
+						if((_CheckSequence == 0)||(RX_Config.fluidErr))
+						{
+							_set_valve(TO_FLUSH);
+							turn_off_pump();							 
+						}
+						else _pump_pid(FALSE);
+						
+						_TimeStabilityCheck++;
+						switch(_CheckSequence)
+						{
+							case 1 : // Save pressures and pump after 2 seconds
+								if(_TimeStabilityCheck > 200)
+								{
+									_CheckStep4_Pin 			= RX_Status.pressure_in;
+									_CheckStep4_Pout 			= RX_Status.pressure_out;
+									_CheckStep4_Meniscus 		= RX_Status.meniscus;
+									_CheckStep4_Pump 			= RX_Status.pump;
+									_CheckStep4_PumpMeasured 	= RX_Status.pump_measured;
+									_CheckSequence++;
+								}
+								break;
+								
+							case 2 : // detect pump > 75% for 5 seconds and Pout increase and No fluid board error
+								if((_PumpPID.val == _PumpPID.val_max)&&(RX_Status.pressure_out > _CheckStep4_Pout)&&(RX_Config.fluidErr == 0))
+								{
+									// RETURN tube clogged
+									_TimeStabilityCheck++;
+									
+									if(_TimeStabilityCheck > 500)
+									{
+										RX_Status.error |= COND_ERR_return_pipe;
+										_CheckSequence = 0;
+									}
+								}
+								else _TimeStabilityCheck = 0;
+						}
+						
+						break;
+						
+		case ctrl_check_step5:
+						if((_CheckSequence != 0)&&(RX_Config.fluidErr == 0)&&(RX_Status.error == 0))
+						{
+							_pump_pid(FALSE);
+		
+							// Valve not on INK
+							if((RX_Status.meniscus < _CheckStep4_Meniscus)&&(RX_Status.pressure_in < _CheckStep4_Pin))
+								RX_Status.error |= COND_ERR_valve;
+							// Pump problem if command - measure > 25%
+							else if(abs(RX_Status.pump_measured - RX_Status.pump * 10) > 250)
+								RX_Status.error |= COND_ERR_pump_hw;
+							// Pinlet sensor defected
+							else if(abs(RX_Status.pressure_in - _CheckStep4_Pin) < 50)
+								RX_Status.error |= COND_ERR_pres_in_hw;
+							// Pinlet sensor defected
+							else if(abs(RX_Status.pressure_out - _CheckStep4_Pout) < 50)
+								RX_Status.error |= COND_ERR_pres_out_hw;
+						}			
+						RX_Status.mode = RX_Config.mode; 
+						break;
+		
+		case ctrl_check_step6:	
+		case ctrl_check_step7:	
+		case ctrl_check_step8:	
+		case ctrl_check_step9:	 
+						if((RX_Status.error == 0)&&(RX_Config.fluidErr == 0)) 
+						{
+							_pump_pid(FALSE);
+							_ShutdownPrint = 1;
+						}
+						else
+						{
+							temp_ctrl_on(FALSE);
+							turn_off_pump();
+							_ShutdownPrint = 0;
+						}
+						_PumpPID.val_max = 4095;
+						RX_Status.mode = RX_Config.mode; 
+						break;*/
+						
         //--- PURGE --------------------------------------------
 		case ctrl_purge_soft:
 		case ctrl_purge:
@@ -384,13 +742,13 @@ void pump_tick_10ms(void)
 						_set_valve(TO_INK);
 						// _set_pump_speed((_PumpPID.val_max + 1) / 2);
 						pid_reset(&_PumpPID);
-						_pump_pid();
+						_pump_pid(TRUE);
 						max_pressure = MBAR_500;	
 						RX_Status.mode = RX_Config.mode;						
 						break;
 		
         case ctrl_empty_step1:
-						_pump_pid();
+						_pump_pid(TRUE);
 						max_pressure = MBAR_500;
 						RX_Status.mode = RX_Config.mode;
 						break;
@@ -400,7 +758,7 @@ void pump_tick_10ms(void)
 							max_pressure = MBAR_500;
 							if (RX_Status.error & (COND_ERR_meniscus|COND_ERR_pump_no_ink))
 								RX_Status.mode = RX_Config.mode;
-							else _pump_pid();
+							else _pump_pid(TRUE);
 						}
 						else
 						{
@@ -425,7 +783,7 @@ void pump_tick_10ms(void)
         case ctrl_fill_step3:  
 						temp_ctrl_on(FALSE);
 						_set_valve(TO_INK);
-						_pump_pid();
+						_pump_pid(TRUE);
 						max_pressure = MBAR_500;
 						if (RX_Config.mode==ctrl_fill_step2 
 						||  (RX_Config.mode==ctrl_fill_step3 && RX_Status.pressure_in!=INVALID_VALUE && RX_Status.pressure_in>0)) 
@@ -572,7 +930,7 @@ static void _error_cnt(int err, int *errcnt, int errflag, int timeout)
 }
 
 //--- _pump_pid --------------------------------------
-static void _pump_pid(void)
+static void _pump_pid(int Meniscus_Error_Enable)
 {       
     static const INT32 MENISCUS_MAX = 1;    // [0.1mbar]
  		
@@ -582,21 +940,24 @@ static void _pump_pid(void)
 		turn_off_pump();
     }
 	else
-	{   					
-		_menicus_minmax();
-		
-        // meniscus shall never be positive while in PRINT mode		
-        if (!RX_Config.cmd.disable_meniscus_check 
-		&&  !(RX_Config.mode>=ctrl_fill && RX_Config.mode<ctrl_fill+10)
-		&&  !(RX_Config.mode>=ctrl_cal_step1 && RX_Config.mode<ctrl_cal_done)
-		&&  (_rampup_time>=RAMP_UP_TIME)
-		)
-        {        
-			int flow = RX_Status.pump_measured * 60 / 1000;
-			if (RX_Config.mode==ctrl_empty_step2)	_error_cnt((flow > 95), &_no_ink_err_cnt,   COND_ERR_pump_no_ink, NO_INK_TIMEOUT);
-			else 									_error_cnt((flow > 95), &_no_ink_err_cnt,   COND_ERR_pump_no_ink, NO_INK_TIMEOUT);
-			_error_cnt((RX_Status.meniscus > MENISCUS_MAX), 	&_meniscus_err_cnt, COND_ERR_meniscus, _Meniscus_Timeout);			
-        }
+	{   
+		if(Meniscus_Error_Enable)
+		{
+			_menicus_minmax();
+			
+			// meniscus shall never be positive while in PRINT mode		
+			if (!RX_Config.cmd.disable_meniscus_check 
+			&&  !(RX_Config.mode>=ctrl_fill && RX_Config.mode<ctrl_fill+10)
+			&&  !(RX_Config.mode>=ctrl_cal_step1 && RX_Config.mode<ctrl_cal_done)
+			&&  (_rampup_time>=RAMP_UP_TIME)
+			)
+			{        
+				int flow = RX_Status.pump_measured * 60 / 1000;
+				if (RX_Config.mode==ctrl_empty_step2)	_error_cnt((flow > 95), &_no_ink_err_cnt,   COND_ERR_pump_no_ink, NO_INK_TIMEOUT);
+				else 									_error_cnt((flow > 95), &_no_ink_err_cnt,   COND_ERR_pump_no_ink, NO_INK_TIMEOUT);
+				_error_cnt((RX_Status.meniscus > MENISCUS_MAX), 	&_meniscus_err_cnt, COND_ERR_meniscus, _Meniscus_Timeout);			
+			}
+		}
 
 		// regulate on meniscus
 		// detection for the start of the integrator : when Meniscus pass over the setpoint

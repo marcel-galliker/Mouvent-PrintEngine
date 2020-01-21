@@ -85,7 +85,6 @@ typedef struct
 	INT32	condMeniscusDiff;
 	UINT32	condPumpSpeed;
 	UINT32	condPumpFeedback;
-//	UINT32  condTempReady;
 	
 	INT32	canisterEmpty;
 	
