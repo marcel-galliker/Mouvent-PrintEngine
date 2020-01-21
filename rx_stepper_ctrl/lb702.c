@@ -38,6 +38,8 @@
 #define STEPS_REV		(200*16)	// steps per motor revolution * 16 times oversampling
 #define DIST_REV		2000.0	// moving distance per revolution [µm]
 
+#define POS_CAP					RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height + 8000
+
 static RX_SOCKET	_MainSocket=INVALID_SOCKET;
 static SMovePar	_ParRef;
 static SMovePar	_ParZ_down;
@@ -164,10 +166,10 @@ void lb702_main(int ticks, int menu)
 		}
 		
 		RX_StepperStatus.info.z_in_ref    = ((_CmdRunning==CMD_CAP_REFERENCE || _CmdRunning==CMD_CAP_UP_POS) && RX_StepperStatus.info.ref_done);
-		RX_StepperStatus.info.z_in_print  = (_CmdRunning==CMD_CAP_PRINT_POS && RX_StepperStatus.info.ref_done);
+		RX_StepperStatus.info.z_in_print  = (_CmdRunning==CMD_CAP_PRINT_POS && RX_StepperStatus.info.ref_done && !_CmdRunningRobi);
 		RX_StepperStatus.info.z_in_cap    = (_CmdRunning==CMD_CAP_CAPPING_POS);
 						
-		if (RX_StepperStatus.info.ref_done && _CmdRunning==CMD_CAP_REFERENCE && _Cmd_New) // _PrintPos_New!=_PrintPos_Act)
+		if (RX_StepperStatus.info.ref_done && _CmdRunning==CMD_CAP_REFERENCE && _Cmd_New && !_CmdRunningRobi)
 		{
 			_lb702_move_to_pos(_Cmd_New, _PrintPos_New);
 			_PrintPos_Act = _PrintPos_New;		
@@ -178,11 +180,6 @@ void lb702_main(int ticks, int menu)
 		}
 				
 		_Cmd_New      = 0;
-	}
-	
-	if (memcmp(&oldSatus.info, &RX_StepperStatus.info, sizeof(RX_StepperStatus.info)))
-	{
-		sok_send_2(&_MainSocket, REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);		
 	}
 	
 	if (RX_StepperStatus.robot_used && _CmdRunningRobi)
@@ -206,6 +203,11 @@ void lb702_main(int ticks, int menu)
 			}
 		}
 		loc_new_cmd = FALSE;	
+	}
+	
+	if (memcmp(&oldSatus.info, &RX_StepperStatus.info, sizeof(RX_StepperStatus.info)))
+	{
+		sok_send_2(&_MainSocket, REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);		
 	}
 }
 
@@ -270,7 +272,7 @@ int lb702_menu(void)
 			term_printf("p: move to print\n");
 			term_printf("z: move by <steps>\n");
 			term_printf("m<n><steps>: move Motor<n> by <steps>\n");	
-			term_printf("x: exit\n");						
+			term_printf("x: exit\n");	
 		}
 		else
 		{
@@ -306,7 +308,7 @@ static void _lb702_do_reference(void)
 {
 	if (RX_StepperStatus.info.ref_done)
 	{
-		_lb702_move_to_pos(CMD_CAP_REFERENCE, 2000);
+		_lb702_move_to_pos(CMD_CAP_REFERENCE, -500);
 	}
 	else
 	{
@@ -329,7 +331,7 @@ static void _lb702_move_to_pos(int cmd, int pos)
 {
 	_CmdRunning  = cmd;
 	
-	if (RX_StepperStatus.robot_used && !_CmdRunningRobi && (!RX_StepperStatus.robinfo.ref_done || !RX_StepperStatus.info.x_in_ref))
+	if (RX_StepperStatus.robot_used && !_CmdRunningRobi && (!RX_StepperStatus.robinfo.ref_done || !RX_StepperStatus.info.x_in_ref) && _CmdRunning != CMD_CAP_REFERENCE) 
 	{
 		_CmdRunningRobi = CMD_CLN_REFERENCE;
 		lbrob_handle_ctrl_msg(INVALID_SOCKET, _CmdRunningRobi, NULL);
@@ -352,10 +354,11 @@ static void _lb702_move_to_pos(int cmd, int pos)
 		}
 		motors_start(MOTOR_Z_BITS, TRUE);	
 	} 
-	else 
+	else if (abs(pos - motor_get_step(MOTOR_Z_0)) >= 100 && abs(pos - motor_get_step(MOTOR_Z_1)) >= 100)
 	{
 		motors_move_to_step(MOTOR_Z_BITS, &_ParZ_down, pos);
 	}
+	else _CmdRunning = 0;
 }
 
 //--- lb702_handle_ctrl_msg -----------------------------------
@@ -370,6 +373,8 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 	case CMD_CAP_STOP:				strcpy(_CmdName, "CMD_CAP_STOP");
 									motors_stop(MOTOR_Z_BITS);
 									_CmdRunning = 0;
+									_Cmd_New = FALSE;
+									if (RX_StepperStatus.robot_used) lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_STOP, NULL);
 									break;	
 
 	case CMD_CAP_REFERENCE:			strcpy(_CmdName, "CMD_CAP_REFERENCE");
@@ -384,14 +389,32 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height < 10000) Error(ERR_ABORT, 0, "Reference Height not defined");
 									else
 									{
-										if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height < 90000) Error(WARN, 0, "Reference Height small");
 										val = -1*_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height - _PrintHeight);
-										if ((!_CmdRunning || _CmdRunning==CMD_CAP_REFERENCE) && (!RX_StepperStatus.info.ref_done || !RX_StepperStatus.info.z_in_print || val!=_PrintPos_Act))
+										if (!RX_StepperStatus.info.x_in_ref && RX_StepperStatus.robot_used)
 										{
-											_Cmd_New      = msgId;
-											_PrintPos_New = val;
-											if (RX_StepperStatus.info.ref_done) _lb702_move_to_pos(CMD_CAP_PRINT_POS, _PrintPos_New);
-											else if (_CmdRunning!=CMD_CAP_REFERENCE) _lb702_do_reference();
+											if (!RX_StepperStatus.info.z_in_ref)
+											{
+												_Cmd_New = msgId;
+												_PrintPos_New = val;
+												_lb702_do_reference();
+											}
+											else
+											{
+												_CmdRunningRobi = CMD_CLN_REFERENCE;
+												lbrob_handle_ctrl_msg(INVALID_SOCKET, _CmdRunningRobi, NULL);
+												_NewCmd = msgId;
+											}
+										}
+										else
+										{
+											if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height < 90000) Error(WARN, 0, "Reference Height small");
+											if ((!_CmdRunning || _CmdRunning == CMD_CAP_REFERENCE) && (!RX_StepperStatus.info.ref_done || !RX_StepperStatus.info.z_in_print || val != _PrintPos_Act))
+											{
+												_Cmd_New      = msgId;
+												_PrintPos_New = val;
+												if (RX_StepperStatus.info.ref_done) _lb702_move_to_pos(CMD_CAP_PRINT_POS, _PrintPos_New);
+												else if (_CmdRunning != CMD_CAP_REFERENCE) _lb702_do_reference();
+											}
 										}
 									}
 									break;
@@ -412,8 +435,8 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 										_CmdRunning  = msgId;
 										RX_StepperStatus.info.moving = TRUE;
 										if (RX_StepperStatus.robot_used)
-											motors_move_to_step	(MOTOR_Z_BITS,  &_ParZ_down, -1*_micron_2_steps(20000));
-										else motors_move_to_step (MOTOR_Z_BITS,  &_ParZ_down, -1*_micron_2_steps(RX_StepperCfg.cap_height));
+											motors_move_to_step	(MOTOR_Z_BITS,  &_ParZ_down,  -1 * _micron_2_steps(RX_StepperCfg.robot[0].ref_height - POS_CAP));
+										else motors_move_to_step (MOTOR_Z_BITS,  &_ParZ_down, -1 * _micron_2_steps(RX_StepperCfg.robot[0].ref_height + RX_StepperCfg.robot[0].head_align - POS_CAP));
 									}
 									break;
 				

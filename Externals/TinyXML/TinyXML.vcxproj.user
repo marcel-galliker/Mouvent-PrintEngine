@@ -4,6 +4,10 @@
     <RemoteDebuggerServerName>$(RemoteComputer)</RemoteDebuggerServerName>
     <DebuggerFlavor>WindowsRemoteDebugger</DebuggerFlavor>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-Remote|VisualGDB'">
+    <RemoteDebuggerServerName>$(RemoteComputer)</RemoteDebuggerServerName>
+    <DebuggerFlavor>WindowsRemoteDebugger</DebuggerFlavor>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-Remote|x64'">
     <RemoteDebuggerServerName>$(RemoteComputer)</RemoteDebuggerServerName>
     <DebuggerFlavor>WindowsRemoteDebugger</DebuggerFlavor>

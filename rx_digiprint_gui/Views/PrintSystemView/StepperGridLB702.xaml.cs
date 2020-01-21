@@ -77,7 +77,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 _numbox[no,0].Text = (RxGlobals.Stepper.Robot[no].ref_height /1000.0).ToString();
                 _numbox[no,1].Text = (RxGlobals.Stepper.Robot[no].head_align /1000.0).ToString();
             }
-            if (RxGlobals.TestTableStatus.RobotUsed)
+            if (RxGlobals.TestTableStatus.RobotUsed || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_WB)
             {
                 WipingDelay_Height.Height = GridLength.Auto;
                 WipingSpeed_Height.Height = GridLength.Auto;

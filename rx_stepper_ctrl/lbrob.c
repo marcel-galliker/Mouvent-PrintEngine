@@ -35,16 +35,18 @@
 //#define CABLE_WIPE_POS_FRONT	-410000	//-460000				steps LB702
 //#define CABLE_WIPE_POS_BACK	-180000 //						steps LB702
 
-#define CABLE_CAP_POS			-848231	// PROTOTYP TEST		um PROTOYPE
-//#define CABLE_CAP_POS			-684868	//						um LB702
+//#define CABLE_CAP_POS			-848231	// PROTOTYP TEST		um PROTOYPE
+#define CABLE_CAP_POS			-684868	//						um LB702
+//#define CABLE_WIPE_POS_FRONT	-800000	//						um PROTOYPE
 #define CABLE_WIPE_POS_FRONT	-644027	//						um LB702
-#define CABLE_WIPE_POS_BACK		-282743	//						um LB702
+//#define CABLE_WIPE_POS_BACK		-282000	//						um PROTOYPE
+#define CABLE_WIPE_POS_BACK		-290000	//-282743	//						um LB702
 
 #define CURRENT_HOLD			200
 
-#define CAP_FILL_TIME			8000		// ms
-#define MAX_PUMP_TIME			30000		// ms
-#define WASTE_PUMP_TIME			6000		// ms
+#define CAP_FILL_TIME			180000		// ms
+#define MAX_PUMP_TIME			300000		// ms
+#define WASTE_PUMP_TIME			60000		// ms
 #define WASTE_VALVE_INTERVAL	1000		// ms
 
 // Digital Inputs
@@ -108,6 +110,7 @@ static int		_PumpWasteBackOutTime = 0;
 static int		_FrontPumpUsed = FALSE;
 
 static ERobotFunctions _RobFunction = 0;
+static ERobotFunctions _Old_RobFunction = 0;
 
 //--- prototypes --------------------------------------------
 static void _lbrob_motor_z_test(int steps);
@@ -355,6 +358,7 @@ void lbrob_main(int ticks, int menu)
 				
 			default:					Error(ERR_CONT, 0, "Command %s: Robi-Function %d not implemented", _CmdName, _RobFunction); break;
 			}
+			_Old_RobFunction = _RobFunction;
 			
 		}
 		else if (_CmdRunning == CMD_CLN_MOVE_POS)
@@ -370,7 +374,7 @@ void lbrob_main(int ticks, int menu)
 										_CmdRunning = FALSE;
 										break;
 				
-			case rob_fct_purge_all:		RX_StepperStatus.robinfo.purge_ready = (abs(motor_get_step(MOTOR_X_0) - CABLE_WIPE_POS_BACK) <= MAX_POS_DIFFERENT);
+			case rob_fct_purge_all:		RX_StepperStatus.robinfo.purge_ready = (abs(motor_get_step(MOTOR_X_0) - _micron_2_steps(CABLE_WIPE_POS_BACK)) <= MAX_POS_DIFFERENT);
 										if (!RX_StepperStatus.robinfo.purge_ready && _NewCmd != CMD_CLN_MOVE_POS)
 										{
 											Error(ERR_CONT, 0, "LBROB: Command %s: Robot not in correct position", _CmdName);
@@ -397,8 +401,12 @@ void lbrob_main(int ticks, int menu)
 			case rob_fct_purge_head7:	RX_StepperStatus.robinfo.purge_ready = TRUE;
 										_CmdRunning = FALSE;
 										break;
-			default: break;
+			default:					Error(ERR_CONT, 0, "LBROB_MAIN: Rob-Function %d not implemented", _RobFunction);
+										_CmdRunning = FALSE; 
+										RX_StepperStatus.robinfo.ref_done = FALSE;
+										break;
 			}
+			_Old_RobFunction = _RobFunction;
 			
 		}
 		else if (_CmdRunning == CMD_CLN_REFERENCE && _CmdRunning_old)
@@ -425,11 +433,6 @@ void lbrob_main(int ticks, int menu)
 		}	
 	}
 	
-	if (memcpy(&oldSatus.robinfo, &RX_StepperStatus.robinfo, sizeof(RX_StepperStatus.robinfo)))
-	{
-		sok_send_2(&_MainSocket, REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);		
-	}
-	
 	if (_CmdRunning_Lift)
 	{
 		int loc_new_cmd = 0;
@@ -449,6 +452,11 @@ void lbrob_main(int ticks, int menu)
 			}
 		}
 		loc_new_cmd = FALSE;
+	}
+	
+	if (memcpy(&oldSatus.robinfo, &RX_StepperStatus.robinfo, sizeof(RX_StepperStatus.robinfo)))
+	{
+		sok_send_2(&_MainSocket, REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);		
 	}
 }
 
@@ -497,6 +505,9 @@ void lbrob_menu(int help)
 		term_printf("R: Reference\n");
 		term_printf("r<n>: reset motor<n>\n");	
 		term_printf("c: move to cap Robi\n");
+		term_printf("g<n>: Go to purge position of head 1 -8 or for all (0)\n");
+		term_printf("f: Fill Cap\n");
+		term_printf("w: Wipe Heads\n");
 		term_printf("m<n><steps>: move Motor<n> by <steps>\n");	
 		term_printf("e<steps>: move Cablepull with encoder regulator by <steps>\n");
 		term_printf("p: Start pump for %d seconds\n", MAX_PUMP_TIME/1000);
@@ -521,7 +532,22 @@ void lbrob_handle_menu(char *str)
 	case 'R': lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_REFERENCE, NULL); break;
 	case 'r': motor_reset(atoi(&str[1])); break;
 	case 'c': pos = rob_fct_cap;
+			  lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_MOVE_POS, &pos); break;
+	case 'g': switch (str[1])
+			{
+			case '0': pos = rob_fct_purge_all;   break;
+			case '1':  pos = rob_fct_purge_head0; break;
+			case '2':  pos = rob_fct_purge_head1; break;
+			case '3':  pos = rob_fct_purge_head2; break;
+			case '4':  pos = rob_fct_purge_head3; break;
+			case '5':  pos = rob_fct_purge_head4; break;
+			case '6':  pos = rob_fct_purge_head5; break;
+			case '7':  pos = rob_fct_purge_head6; break;
+			case '8':  pos = rob_fct_purge_head7; break;
+			}
 		lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_MOVE_POS, &pos); break;
+	case 'f': pos = rob_fct_cap;
+		lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_FILL_CAP, &pos); break;
 	case 'w': pos = rob_fct_purge_all;
 		lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_FILL_CAP, &pos); break;
 	case 'm': _lbrob_motor_test(str[1] - '0', atoi(&str[2])); break;			
@@ -568,7 +594,7 @@ int  lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 	case CMD_CLN_REFERENCE:	
 		strcpy(_CmdName, "CMD_CLN_REFERENCE");
 		if (_CmdRunning){lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_STOP, NULL); _NewCmd = CMD_CLN_REFERENCE; break;}
-		if (!RX_StepperStatus.info.z_in_ref)
+		if (!RX_StepperStatus.info.z_in_ref || !RX_StepperStatus.info.headUpInput_0 || !RX_StepperStatus.info.headUpInput_1)
 		{
 			if (!RX_StepperStatus.info.moving)	
 			{
@@ -612,11 +638,13 @@ int  lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 										_PumpStartTime = rx_get_ticks();
 										break;
 				
-			case rob_fct_purge_all:		if (!RX_StepperStatus.info.z_in_ref)								
+			case rob_fct_purge_all:		if (RX_StepperCfg.wipe_speed == 0) Error(ERR_CONT, 0, "Wipe-Speed is set 0, please chose another value");
+										
+										if (!RX_StepperStatus.info.z_in_ref  || !RX_StepperStatus.info.headUpInput_0 || !RX_StepperStatus.info.headUpInput_1)								
 										{
 											if (!RX_StepperStatus.info.moving)
 											{
-												_CmdRunning_Lift = CMD_CAP_UP_POS;
+												_CmdRunning_Lift = CMD_CAP_REFERENCE;
 												lb702_handle_ctrl_msg(INVALID_SOCKET, _CmdRunning_Lift, NULL);
 												_NewCmd = msgId;
 												break;
@@ -624,11 +652,14 @@ int  lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 										}
 										RX_StepperStatus.robinfo.moving = TRUE;
 										_CmdRunning = msgId;
-										_ParCable_drive_purge.speed = RX_StepperCfg.wipe_speed * X_STEPS_PER_METER / 1000;			// divided by 1000 to get from steps/m to steps/mm
+										if (RX_StepperCfg.wipe_speed)	_ParCable_drive_purge.speed = RX_StepperCfg.wipe_speed * X_STEPS_PER_METER / 1000;			// divided by 1000 to get from steps/m to steps/mm
+										else							_ParCable_drive_purge.speed = 10 * X_STEPS_PER_METER / 1000;								// divided by 1000 to get from steps/m to steps/mm
 										motors_move_to_step(MOTOR_X_BITS, &_ParCable_drive_purge, _micron_2_steps(CABLE_WIPE_POS_FRONT));
 										_PumpStartTime = rx_get_ticks();
 										_FrontPumpUsed = TRUE;
 										break;
+										
+										
 
 			case rob_fct_purge_head0:
 			case rob_fct_purge_head1:
@@ -660,7 +691,6 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
 	int pos;
 	if (!_CmdRunning)
 	{
-		int old_RobFunction = _RobFunction;
 		_RobFunction = fct;
 		if (!RX_StepperStatus.info.z_in_ref || !RX_StepperStatus.info.headUpInput_0 || !RX_StepperStatus.info.headUpInput_1)								// Here this is for purging and not for vacuum
 		{
@@ -672,7 +702,7 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
 			}
 			return;
 		}
-		else if (!RX_StepperStatus.robinfo.ref_done || ((_FrontPumpUsed && old_RobFunction != rob_fct_cap)/* && _RobFunction == rob_fct_cap*/))
+		else if (!RX_StepperStatus.robinfo.ref_done || (_FrontPumpUsed && _Old_RobFunction != rob_fct_cap))
 		{
 			_lbrob_do_reference();
 			//Error(ERR_CONT, 0, "LBROB: Robot not refenenced, cmd=0x%08x", msgId);

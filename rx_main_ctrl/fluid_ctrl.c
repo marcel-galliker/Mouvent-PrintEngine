@@ -541,6 +541,8 @@ static void _control(int fluidNo)
 	int	lbrob = (RX_Config.printer.type==printer_LB702_UV || RX_Config.printer.type == printer_LB702_WB);
 	int HeadNo = ctrl_singleHead();
 	if (HeadNo != -1) HeadNo %= 8;
+	
+	if (lbrob && RX_Config.stepper.wipe_speed == 0) RX_Config.stepper.wipe_speed = 10;
 
 
 	for (i=0; i<INK_PER_BOARD; i++, _stat++, no++)
@@ -568,7 +570,7 @@ static void _control(int fluidNo)
 				case ctrl_purge_hard_wipe:	
 				case ctrl_purge_soft:
 				case ctrl_purge_hard:		if (lbrob) steplb_rob_to_wipe_pos(no/2, HeadNo + rob_fct_purge_head0);
-											step_lift_to_top_pos();
+											else	   step_lift_to_top_pos();
 				
 											_PurgeCtrlMode = _stat->ctrlMode;
 											switch(_stat->ctrlMode)

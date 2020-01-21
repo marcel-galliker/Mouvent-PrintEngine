@@ -162,6 +162,8 @@ int setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action)
 		setup_int32(file, "ref_height",		action, &pcfg->stepper.ref_height,		0);
 		setup_int32(file, "print_height",	action, &pcfg->stepper.print_height,	0);
 		setup_int32(file, "wipe_height",	action, &pcfg->stepper.wipe_height,		0);
+		setup_int32(file, "wipe_delay",		action, &pcfg->stepper.wipe_delay,		0);
+		setup_int32(file, "wipe_speed",		action, &pcfg->stepper.wipe_speed,		0);
 		setup_int32(file, "cap_height",		action, &pcfg->stepper.cap_height,		0);
 		setup_int32(file, "cap_pos",		action, &pcfg->stepper.cap_pos,			0);
 		for (i=0; i<SIZEOF(pcfg->stepper.robot); i++)
