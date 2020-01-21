@@ -174,7 +174,7 @@ static void _nios_check_errors(void)
 	if (_Stat->error&err_watchdog)			 ErrorFlag(ERR_ABORT, &RX_FluidBoardStatus.err, err_watchdog,            0, "Watchdog");
 //	if (_Stat->error&err_inkpres_not_reached)ErrorFlag(ERR_CONT,  &RX_FluidBoardStatus.err, err_inkpres_not_reached, 0, "Ink Tank pressure not reached");
     if (_HeaterUsed && _Stat->error&err_amc_heater) ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_amc_heater, 0, "No Heater Board connected to Fluid");
-    
+		
 	int isNo;
 	for (isNo=0; isNo<SIZEOF(_Stat->ink_supply); isNo++)
 	{
@@ -580,7 +580,6 @@ static void _display_status(void)
 			{
 				if (_Stat->ink_supply[i].heaterOn)	term_printf("*"); 
 				else								term_printf(" ");
-
 				term_printf(" %s", value_str_temp(_Stat->ink_supply[i].heaterTemp));
 				term_printf("(%02d/%02d) ", _Cfg->ink_supply[i].heaterTemp / 1000, _Cfg->ink_supply[i].heaterTempMax / 1000);
 			}
