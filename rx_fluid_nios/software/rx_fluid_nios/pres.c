@@ -219,7 +219,7 @@ void pres_tick_10ms(void)
 	int i;
 	static int init=1;
 
-	if (FALSE && init)
+	if (init)
 	{
 		switch(init++)
 		{

@@ -1320,7 +1320,8 @@ int sok_send(RX_SOCKET *socket, void *msg)
 	{
 		if (*socket==_DebugSocket)
 			TrPrintfL(TRUE, "DebugSocket msgId=0x%08x, len=%d",  phdr->msgId, phdr->msgLen);
-		if (phdr->msgLen > MAX_MESSAGE_SIZE) Error(ERR_CONT, 0, "Message too large, id=0x%08x, len=%d, max=%d", phdr->msgId, phdr->msgLen, MAX_MESSAGE_SIZE);
+		if (phdr->msgLen > MAX_MESSAGE_SIZE) 
+            Error(ERR_CONT, 0, "Message too large, id=0x%08x, len=%d, max=%d", phdr->msgId, phdr->msgLen, MAX_MESSAGE_SIZE);
 		else 
 		{
 			/*

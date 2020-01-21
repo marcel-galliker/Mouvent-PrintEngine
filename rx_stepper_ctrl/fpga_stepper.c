@@ -168,6 +168,12 @@ int	fpga_input(int no)
 	return (Fpga.stat->input & (1<<no)) != 0;		
 }
 
+//--- fpga_encoder_pos ----------------------
+int fpga_encoder_pos(int no)
+{
+    return Fpga.encoder[no].pos;
+}
+
 //--- fpga_display_status -----------------------------------------------
 #define PRINTF(n)  for(i=0; i<n; i++) term_printf
 

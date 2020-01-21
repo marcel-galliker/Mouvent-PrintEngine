@@ -209,8 +209,6 @@ static void _disable_jet(UCHAR *pBuffer, int bitsPerPixel, int length, int bytes
 			{
 				if (size=_GetPixel(pBuffer, bytesPerLine, jet, y))
 				{
-				//	if (y&1) _SetPixel(pBuffer, bytesPerLine, jet-1,   y, 3);
-				//	else     _SetPixel(pBuffer, bytesPerLine, jet+1,   y, 3);
 					if (y&1) offset=1;
 					else	 offset=-1;
 					s=_GetPixel(pBuffer, bytesPerLine, jet-offset, y);

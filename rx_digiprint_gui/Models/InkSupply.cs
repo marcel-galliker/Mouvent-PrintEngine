@@ -266,7 +266,10 @@ namespace RX_DigiPrint.Models
             set 
             { 
                 if (SetProperty(ref _InkType, value))
-                    TempSetpoint = _InkType.Temp;
+                {
+                    if (_InkType==null) TempSetpoint = 0;
+                    else                TempSetpoint = _InkType.Temp;
+                }
             }
         }
 

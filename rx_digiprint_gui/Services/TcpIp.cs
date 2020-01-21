@@ -374,10 +374,13 @@ namespace RX_DigiPrint.Services
         public const UInt32  CMD_FLUID_STAT			= 0x01000123;
         public const UInt32  REP_FLUID_STAT			= 0x02000123;
 
-        public const UInt32  CMD_FLUID_CTRL_MODE    = 0x01000124;
-        public const UInt32  REP_FLUID_CTRL_MODE	= 0x02000124;
+        public const UInt32 CMD_SET_PURGE_PAR       = 0x01000124;
+        public const UInt32 REP_SET_PURGE_PAR       = 0x02000124;
 
-        public const UInt32  CMD_FLUID_PRESSURE     = 0x01000125;
+        public const UInt32  CMD_FLUID_CTRL_MODE    = 0x01000125;
+        public const UInt32  REP_FLUID_CTRL_MODE	= 0x02000125;
+
+        public const UInt32  CMD_FLUID_PRESSURE     = 0x01000126;
 
         public const UInt32 CMD_GET_STEPPER_CFG		= 0x01000131;
         public const UInt32 REP_GET_STEPPER_CFG		= 0x02000131;

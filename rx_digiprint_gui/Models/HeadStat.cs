@@ -159,11 +159,11 @@ namespace RX_DigiPrint.Models
         }
 
         //--- Property TempReady ---------------------------------------
-        private Int32 _TempReady;
-        public Int32 TempReady
+        private bool _TempReady;
+        public bool TempReady
         {
             get { return _TempReady; }
-            set { SetProperty(ref _TempReady, value); }
+            set {   SetProperty(ref _TempReady, value);}
         }
 
         //--- Property Property -------------------------------------------
@@ -335,8 +335,8 @@ namespace RX_DigiPrint.Models
             TempHead    = item.tempHead;
             TempCond    = item.tempCond;
             TempSetpoint= item.tempSetpoint;
-            if (used) TempReady   = item.tempReady;
-            else TempReady=0;
+            if (used) TempReady   = item.tempReady!=0;
+            else TempReady=false;
             PresIn      = item.presIn;
             PresIn_max  = item.presIn_max;
             PresIn_diff = item.presIn_diff;
