@@ -1137,7 +1137,7 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 					pInfo->blkCnt		= 1;
 				}
 				
-				if ((id->id==PQ_TEST_JETS || id->id==PQ_TEST_JET_NUMBERS)&& pInfo->data && id->copy==1) 
+				if ((id->id==PQ_TEST_JETS || id->id==PQ_TEST_JET_NUMBERS)&& pInfo->data)// && id->copy==1) 
 				{
 					RX_Bitmap bmp;
 					bmp.bppx		= pInfo->bitsPerPixel;
