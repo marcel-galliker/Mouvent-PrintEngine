@@ -25,7 +25,8 @@ namespace RX_DigiPrint.Views.LB702WBView
         private Rectangle[] BackRect  = new Rectangle[9];
         private Rectangle[] FrontRect = new Rectangle[9];
         private Brush[]     Fill      = new Brush[3];
-   
+        private Image[]     ChangedCtrl   = new Image[9];
+
         public  Action<int>      DeviceSelected;
 
         public LB702WB_Machine()
@@ -58,9 +59,29 @@ namespace RX_DigiPrint.Views.LB702WBView
                     Grid.SetColumn(FrontRect[i], i);
                     Grid.SetRowSpan(FrontRect[i], 10);
                     FrontGrid.Children.Add(FrontRect[i]);
+
+                    ChangedCtrl[i] = new Image()
+                    {
+                        HorizontalAlignment=HorizontalAlignment.Center,  
+                        VerticalAlignment=VerticalAlignment.Top, 
+                        Height=20,
+                        Visibility=Visibility.Collapsed
+                    };
+                    Grid.SetColumn(ChangedCtrl[i], i);
+
+                    ChangedCtrl[i].Source=new BitmapImage(new Uri("../../Resources/Bitmaps/Changed.ico", UriKind.Relative));
+
+                    FrontGrid.Children.Add(ChangedCtrl[i]);
                 }
                 ParPanel.Update += ParPanel_Update;
+                RxGlobals.LB702WB_Machine = this;
             }
+        }
+
+        //--- Changed -----------------------------------
+        public void Changed(int col, bool changed)
+        {
+            ChangedCtrl[col].Visibility = changed? Visibility.Visible:Visibility.Collapsed;
         }
 
         //--- ParPanel_Update ----------------------

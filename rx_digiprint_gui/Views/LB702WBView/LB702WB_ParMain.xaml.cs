@@ -21,8 +21,8 @@ namespace RX_DigiPrint.Views.LB702WBView
         {
             InitializeComponent();
 
-            CB_Material.ItemsSource   = RxGlobals.MaterialList.List;
-            XML_MATERIAL.PropertyChanged          += XML_MATERIAL_PropertyChanged;
+            CB_Material.ItemsSource         = RxGlobals.MaterialList.List;
+            XML_MATERIAL.PropertyChanged   += XML_MATERIAL_PropertyChanged;
         }
 
         //--- Save_Clicked ---------------------------------------------

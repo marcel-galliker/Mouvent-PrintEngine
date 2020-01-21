@@ -14,13 +14,27 @@
              >
     
     <GroupBox Header="Unwinder" Style="{StaticResource RxGroupBox}">
-        <rx_uc:PlcParPanel x:Name="ParPanel" UnitID="Application.GUI_00_001_Main" ReadOnly="False" LabelWidth="120" Margin="0,1,0,0">
-            <rx_uc:PlcParCtrl x:Name="CB_RotUW"    ID="PAR_WIND_DIRECTION_WINDER1" Label="Rotation"     Unit=""     UnitWidth="50" Type="ImgCombo"/>
-            <rx_uc:PlcParCtrl                      ID="PAR_WINDER_TENSION_1"       Label="Tension"      Unit="N/mm" UnitWidth="50" Format="1" />
+        <Grid>
+            <rx_uc:PlcParPanel x:Name="ParPanel" UnitID="Application.GUI_00_001_Main" ReadOnly="False" LabelWidth="120" Margin="0,1,0,0">
+                <rx_uc:PlcParCtrl x:Name="CB_RotUW"    ID="PAR_WIND_DIRECTION_WINDER1" Label="Rotation"     Unit=""     UnitWidth="50" Type="ImgCombo"/>
+                <rx_uc:PlcParCtrl                      ID="PAR_WINDER_TENSION_1"       Label="Tension"      Unit="N/mm" UnitWidth="50" Format="1" />
 
-            <rx_uc:PlcTitle Grid.Row="0" Grid.Column="2" Header="Corona"/>
-            <rx_uc:PlcParCtrl ID="PAR_CORONA_MODE"           Label="Mode"   Unit=""  UnitWidth="50" Type="Combo" x:Name="CB_Corona" />
-            <rx_uc:PlcParCtrl ID="PAR_CORONA_POWER_MAX"      Label="Power"  Unit="%" UnitWidth="50" Format="n" />
-        </rx_uc:PlcParPanel>
+                <rx_uc:PlcTitle Grid.Row="0" Grid.Column="2" Header="Corona"/>
+                <rx_uc:PlcParCtrl ID="PAR_CORONA_MODE"           Label="Mode"   Unit=""  UnitWidth="50" Type="Combo" x:Name="CB_Corona" />
+                <rx_uc:PlcParCtrl ID="PAR_CORONA_POWER_MAX"      Label="Power"  Unit="%" UnitWidth="50" Format="n" />
+            </rx_uc:PlcParPanel>
+            <Grid VerticalAlignment="Bottom">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <common:RxButton Grid.Column="0" Click="Save_Clicked" Height="40" IsChecked="{Binding ElementName=ParPanel, Path=Changed}" >
+                    <Image Source="{StaticResource Yes_ico}"/>
+                </common:RxButton>
+                <common:RxButton Grid.Column="1" Click="Reload_Clicked" Height="40" >
+                    <Image Source="../../Resources/Bitmaps/Refresh.ico"/>
+                </common:RxButton>
+            </Grid>
+        </Grid>
     </GroupBox>
 </UserControl>

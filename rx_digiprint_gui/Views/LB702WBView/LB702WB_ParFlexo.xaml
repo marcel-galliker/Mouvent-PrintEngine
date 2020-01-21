@@ -14,11 +14,23 @@
              >
 
     <GroupBox x:Name="GroupBox" Header="Flexo" Style="{StaticResource RxGroupBox}">
-        <rx_uc:PlcParPanel x:Name="ParPanel" UnitID="Application.GUI_00_001_Main" ReadOnly="False" LabelWidth="120">
-            <rx_uc:PlcParCtrl ID="PAR_FLEXO_1_CLICHE_DIAM"      Label="Diameter"     Unit="mm"   UnitWidth="50" Format="1" />
-            <rx_uc:PlcParCtrl ID="PAR_FLEXO_1_TENSION"          Label="Tension"      Unit="N/mm" UnitWidth="50" Format="1" />
-                        
-        </rx_uc:PlcParPanel>
-        
+        <Grid>
+            <rx_uc:PlcParPanel x:Name="ParPanel" UnitID="Application.GUI_00_001_Main" ReadOnly="False" LabelWidth="120">
+                <rx_uc:PlcParCtrl ID="PAR_FLEXO_1_CLICHE_DIAM"      Label="Diameter"     Unit="mm"   UnitWidth="50" Format="1" />
+                <rx_uc:PlcParCtrl ID="PAR_FLEXO_1_TENSION"          Label="Tension"      Unit="N/mm" UnitWidth="50" Format="1" />
+            </rx_uc:PlcParPanel>
+            <Grid VerticalAlignment="Bottom">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <common:RxButton Grid.Column="0" Click="Save_Clicked" Height="40" IsChecked="{Binding ElementName=ParPanel, Path=Changed}" >
+                    <Image Source="{StaticResource Yes_ico}"/>
+                </common:RxButton>
+                <common:RxButton Grid.Column="1" Click="Reload_Clicked" Height="40" >
+                    <Image Source="../../Resources/Bitmaps/Refresh.ico"/>
+                </common:RxButton>
+            </Grid>
+        </Grid>
     </GroupBox>
 </UserControl>

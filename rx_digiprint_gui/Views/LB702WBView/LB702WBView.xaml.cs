@@ -21,7 +21,6 @@ namespace RX_DigiPrint.Views.LB702WBView
             Device_selected(0);
             Machine.DeviceSelected +=  Device_selected;
 
-
             foreach(var ctrl in DeviceGrid.Children)
             {
                 IPlcParPanel panel = ctrl as IPlcParPanel;

@@ -16,9 +16,25 @@ namespace RX_DigiPrint.Views.LB702WBView
     /// </summary>
     public partial class LB702WB_ParFlexo : UserControl, IPlcParPanel
     {
+        private int _no;
+
         public LB702WB_ParFlexo()
         {
             InitializeComponent();
+            ParPanel.PropertyChanged +=ParPanel_PropertyChanged;
+        }
+
+        //--- ParPanel_PropertyChanged ----------------------------------
+        void ParPanel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+ 	        if (e.PropertyName.Equals("Changed"))
+            {
+                switch(_no)
+                {
+                    case 1: RxGlobals.LB702WB_Machine.Changed(1, ParPanel.Changed); break;
+                    case 2: RxGlobals.LB702WB_Machine.Changed(6, ParPanel.Changed); break;
+                }
+            }
         }
 
         //--- FlexoName ----------------------
@@ -26,6 +42,7 @@ namespace RX_DigiPrint.Views.LB702WBView
         { 
             set 
             {
+                _no = Rx.StrToInt32(value);
                 GroupBox.Header = "Flexo "+value;
                 string name = value.ToUpper();
                 for (int i=0; i<ParPanel.Children.Count; i++)
@@ -41,5 +58,17 @@ namespace RX_DigiPrint.Views.LB702WBView
 
         //--- Reset -------------------------
         public void Reset() {ParPanel.Reset();}
+
+        //--- Save_Clicked ---------------------------------------------
+        private void Save_Clicked(object sender, RoutedEventArgs e)
+        {
+            Send();
+        }
+
+        //--- Reload_Clicked ---------------------------------------------
+        private void Reload_Clicked(object sender, RoutedEventArgs e)
+        {
+            Reset();
+        }
      }
 }
