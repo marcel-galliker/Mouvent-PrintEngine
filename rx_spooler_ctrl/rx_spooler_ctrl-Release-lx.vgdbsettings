@@ -34,6 +34,7 @@
       <IncludeSubdirectories>true</IncludeSubdirectories>
       <SelectedDirectories />
       <DeleteDisappearedFiles>false</DeleteDisappearedFiles>
+      <ApplyGlobalExclusionList>true</ApplyGlobalExclusionList>
     </MainSourceTransferCommand>
     <AllowChangingHostForMainCommands>false</AllowChangingHostForMainCommands>
     <SkipBuildIfNoSourceFilesChanged>false</SkipBuildIfNoSourceFilesChanged>
@@ -43,20 +44,16 @@
     <MainSourceDirectoryForLocalBuilds>$(ProjectDir)</MainSourceDirectoryForLocalBuilds>
   </Project>
   <Build xsi:type="com.visualgdb.build.make">
-    <MakeFilePathRelativeToSourceDir>Makefile</MakeFilePathRelativeToSourceDir>
-    <MakeConfigurationName>Release-lx</MakeConfigurationName>
-    <AdditionalMakeArguments />
+    <ToolchainID>
+      <ID>com.sysprogs.toolchain.default-gcc</ID>
+      <Version>
+        <Revision>0</Revision>
+      </Version>
+    </ToolchainID>
     <Toolchain>
-      <Name>Default GCC toolchain on 192.168.125.8</Name>
       <UnixSystem>true</UnixSystem>
-      <GCC>gcc</GCC>
-      <GXX>g++</GXX>
-      <GDB>gdb</GDB>
-      <AR>ar</AR>
-      <OBJCOPY>objcopy</OBJCOPY>
-      <Make>make</Make>
-      <RequireCmdExe>false</RequireCmdExe>
       <RequireCtrlBreak>false</RequireCtrlBreak>
+      <ArgumentEscapingMode>Normal</ArgumentEscapingMode>
       <RequiredLinuxPackages>
         <TestableLinuxPackage>
           <UserFriendlyName>GCC</UserFriendlyName>
@@ -75,7 +72,18 @@
           <BinaryToCheck>make</BinaryToCheck>
         </TestableLinuxPackage>
       </RequiredLinuxPackages>
+      <Name>Default GCC toolchain on 192.168.125.8</Name>
+      <GCC>gcc</GCC>
+      <GXX>g++</GXX>
+      <GDB>gdb</GDB>
+      <AR>ar</AR>
+      <OBJCOPY>objcopy</OBJCOPY>
+      <Make>make</Make>
+      <ShellMode>Direct</ShellMode>
     </Toolchain>
+    <MakeFilePathRelativeToSourceDir>Makefile</MakeFilePathRelativeToSourceDir>
+    <MakeConfigurationName>Release-lx</MakeConfigurationName>
+    <AdditionalMakeArguments />
     <MakeCommandTemplate>
       <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
       <RemoteHost>
@@ -96,52 +104,6 @@
       <BackgroundMode xsi:nil="true" />
     </MakeCommandTemplate>
   </Build>
-  <Debug xsi:type="com.visualgdb.debug.remote">
-    <AdditionalStartupCommands />
-    <AdditionalGDBSettings>
-      <Features>
-        <DisableAutoDetection>false</DisableAutoDetection>
-        <UseFrameParameter>false</UseFrameParameter>
-        <SimpleValuesFlagSupported>false</SimpleValuesFlagSupported>
-        <ListLocalsSupported>false</ListLocalsSupported>
-        <ByteLevelMemoryCommandsAvailable>false</ByteLevelMemoryCommandsAvailable>
-        <ThreadInfoSupported>false</ThreadInfoSupported>
-        <PendingBreakpointsSupported>false</PendingBreakpointsSupported>
-        <SupportTargetCommand>false</SupportTargetCommand>
-        <ReliableBreakpointNotifications>false</ReliableBreakpointNotifications>
-      </Features>
-      <EnableSmartStepping>false</EnableSmartStepping>
-      <FilterSpuriousStoppedNotifications>false</FilterSpuriousStoppedNotifications>
-      <ForceSingleThreadedMode>false</ForceSingleThreadedMode>
-      <UseAppleExtensions>false</UseAppleExtensions>
-      <CanAcceptCommandsWhileRunning>false</CanAcceptCommandsWhileRunning>
-      <MakeLogFile>false</MakeLogFile>
-      <IgnoreModuleEventsWhileStepping>true</IgnoreModuleEventsWhileStepping>
-      <UseRelativePathsOnly>false</UseRelativePathsOnly>
-      <ExitAction>None</ExitAction>
-      <DisableDisassembly>false</DisableDisassembly>
-      <ExamineMemoryWithXCommand>false</ExamineMemoryWithXCommand>
-      <StepIntoNewInstanceEntry>main</StepIntoNewInstanceEntry>
-      <ExamineRegistersInRawFormat>true</ExamineRegistersInRawFormat>
-      <DisableSignals>false</DisableSignals>
-      <EnableAsyncExecutionMode>false</EnableAsyncExecutionMode>
-      <EnableNonStopMode>false</EnableNonStopMode>
-    </AdditionalGDBSettings>
-    <LaunchGDBSettings xsi:type="GDBLaunchParametersNewInstance">
-      <DebuggedProgram>$(TargetPath)</DebuggedProgram>
-      <GDBServerPort>2000</GDBServerPort>
-      <ProgramArguments />
-    </LaunchGDBSettings>
-    <GenerateCtrlBreakInsteadOfCtrlC>false</GenerateCtrlBreakInsteadOfCtrlC>
-    <DeploymentTargetPath />
-    <X11WindowMode>Local</X11WindowMode>
-    <KeepConsoleAfterExit>false</KeepConsoleAfterExit>
-    <RunGDBUnderSudo>false</RunGDBUnderSudo>
-    <DeploymentMode>Auto</DeploymentMode>
-    <LdLibraryPath />
-    <DeployWhenLaunchedWithoutDebugging>true</DeployWhenLaunchedWithoutDebugging>
-    <SuppressTTYCreation>false</SuppressTTYCreation>
-  </Debug>
   <CustomBuild>
     <PreSyncActions>
       <CustomActionBase xsi:type="CommandLineAction">
@@ -180,6 +142,7 @@
         </DestinationHost>
         <SourceFilePath>$(ProjectDir)\..\Externals\Tec-it\Linux\Tec-it-11\lib\libtbarcode11.so.0</SourceFilePath>
         <DestinationFilePath>$(ProjectDir)\..\bin\spooler\libtbarcode11.so.0</DestinationFilePath>
+        <OverwriteTrigger>Always</OverwriteTrigger>
       </CustomActionBase>
       <CustomActionBase xsi:type="FileTransferAction">
         <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
@@ -193,6 +156,7 @@
         </DestinationHost>
         <SourceFilePath>$(TargetPath)</SourceFilePath>
         <DestinationFilePath>$(ProjectDir)\..\bin\spooler\$(TargetFileName)</DestinationFilePath>
+        <OverwriteTrigger>Always</OverwriteTrigger>
       </CustomActionBase>
     </PostBuildActions>
     <PreCleanActions />
@@ -214,6 +178,61 @@
     <Enabled>Unknown</Enabled>
     <ExtraSettings>
       <HideErrorsInSystemHeaders>true</HideErrorsInSystemHeaders>
+      <SupportLightweightReferenceAnalysis>false</SupportLightweightReferenceAnalysis>
+      <CheckForClangFormatFiles xsi:nil="true" />
+      <FormattingEngine xsi:nil="true" />
     </ExtraSettings>
+    <CodeAnalyzerSettings>
+      <Enabled>false</Enabled>
+    </CodeAnalyzerSettings>
   </CodeSense>
+  <Configurations />
+  <ProgramArgumentsSuggestions />
+  <Debug xsi:type="com.visualgdb.debug.remote">
+    <AdditionalStartupCommands />
+    <AdditionalGDBSettings>
+      <Features>
+        <DisableAutoDetection>false</DisableAutoDetection>
+        <UseFrameParameter>false</UseFrameParameter>
+        <SimpleValuesFlagSupported>false</SimpleValuesFlagSupported>
+        <ListLocalsSupported>false</ListLocalsSupported>
+        <ByteLevelMemoryCommandsAvailable>false</ByteLevelMemoryCommandsAvailable>
+        <ThreadInfoSupported>false</ThreadInfoSupported>
+        <PendingBreakpointsSupported>false</PendingBreakpointsSupported>
+        <SupportTargetCommand>false</SupportTargetCommand>
+        <ReliableBreakpointNotifications>false</ReliableBreakpointNotifications>
+      </Features>
+      <EnableSmartStepping>false</EnableSmartStepping>
+      <FilterSpuriousStoppedNotifications>false</FilterSpuriousStoppedNotifications>
+      <ForceSingleThreadedMode>false</ForceSingleThreadedMode>
+      <UseAppleExtensions>false</UseAppleExtensions>
+      <CanAcceptCommandsWhileRunning>false</CanAcceptCommandsWhileRunning>
+      <MakeLogFile>false</MakeLogFile>
+      <IgnoreModuleEventsWhileStepping>true</IgnoreModuleEventsWhileStepping>
+      <UseRelativePathsOnly>false</UseRelativePathsOnly>
+      <ExitAction>None</ExitAction>
+      <DisableDisassembly>false</DisableDisassembly>
+      <ExamineMemoryWithXCommand>false</ExamineMemoryWithXCommand>
+      <StepIntoNewInstanceEntry>main</StepIntoNewInstanceEntry>
+      <ExamineRegistersInRawFormat>true</ExamineRegistersInRawFormat>
+      <DisableSignals>false</DisableSignals>
+      <EnableAsyncExecutionMode>false</EnableAsyncExecutionMode>
+      <EnableNonStopMode>false</EnableNonStopMode>
+      <MaxBreakpointLimit>0</MaxBreakpointLimit>
+    </AdditionalGDBSettings>
+    <LaunchGDBSettings xsi:type="GDBLaunchParametersNewInstance">
+      <DebuggedProgram>$(TargetPath)</DebuggedProgram>
+      <GDBServerPort>2000</GDBServerPort>
+      <ProgramArguments />
+    </LaunchGDBSettings>
+    <GenerateCtrlBreakInsteadOfCtrlC>false</GenerateCtrlBreakInsteadOfCtrlC>
+    <DeploymentTargetPath />
+    <X11WindowMode>Local</X11WindowMode>
+    <KeepConsoleAfterExit>false</KeepConsoleAfterExit>
+    <RunGDBUnderSudo>false</RunGDBUnderSudo>
+    <DeploymentMode>Auto</DeploymentMode>
+    <LdLibraryPath />
+    <DeployWhenLaunchedWithoutDebugging>true</DeployWhenLaunchedWithoutDebugging>
+    <SuppressTTYCreation>false</SuppressTTYCreation>
+  </Debug>
 </VisualGDBProjectSettings2>

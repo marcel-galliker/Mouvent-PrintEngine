@@ -32,6 +32,7 @@
       <IncludeSubdirectories>true</IncludeSubdirectories>
       <SelectedDirectories />
       <DeleteDisappearedFiles>false</DeleteDisappearedFiles>
+      <ApplyGlobalExclusionList>true</ApplyGlobalExclusionList>
     </MainSourceTransferCommand>
     <AllowChangingHostForMainCommands>false</AllowChangingHostForMainCommands>
     <SkipBuildIfNoSourceFilesChanged>false</SkipBuildIfNoSourceFilesChanged>
@@ -41,29 +42,38 @@
     <MainSourceDirectoryForLocalBuilds>$(ProjectDir)</MainSourceDirectoryForLocalBuilds>
   </Project>
   <Build xsi:type="com.visualgdb.build.make">
-    <MakeFilePathRelativeToSourceDir>Makefile</MakeFilePathRelativeToSourceDir>
-    <MakeConfigurationName>Debug-soc</MakeConfigurationName>
-    <AdditionalMakeArguments />
+    <ToolchainID>
+      <ID>com.sysprogs.imported.arm-linux-gnueabi</ID>
+      <Version>
+        <GCC>4.7.1</GCC>
+        <GDB>(crosstool-NG</GDB>
+        <Revision>0</Revision>
+      </Version>
+    </ToolchainID>
     <Toolchain>
+      <UnixSystem>false</UnixSystem>
+      <AdditionalPathDirectories>
+        <string>F:\Compiler\Linaro-Tools\bin</string>
+      </AdditionalPathDirectories>
+      <RequireCtrlBreak>false</RequireCtrlBreak>
+      <ArgumentEscapingMode>Normal</ArgumentEscapingMode>
+      <SourceDirMapping>
+        <Directories />
+        <PathStyle>RemoteUnix</PathStyle>
+      </SourceDirMapping>
       <Name>arm-linux-gnueabi</Name>
       <Location>F:\Compiler\Linaro-Tools\bin</Location>
-      <UnixSystem>false</UnixSystem>
       <GCC>F:\Compiler\Linaro-Tools\bin\arm-linux-gnueabi-gcc.exe</GCC>
       <GXX>F:\Compiler\Linaro-Tools\bin\arm-linux-gnueabi-g++.exe</GXX>
       <GDB>F:\Compiler\Linaro-Tools\bin\arm-linux-gnueabi-gdb.exe</GDB>
       <AR>F:\Compiler\Linaro-Tools\bin\arm-linux-gnueabi-ar.exe</AR>
       <OBJCOPY>F:\Compiler\Linaro-Tools\bin\arm-linux-gnueabi-objcopy.exe</OBJCOPY>
       <Make>$(VISUALGDB_DIR)\make.exe</Make>
-      <AdditionalPathDirectories>
-        <string>F:\Compiler\Linaro-Tools\bin</string>
-      </AdditionalPathDirectories>
-      <RequireCmdExe>true</RequireCmdExe>
-      <RequireCtrlBreak>false</RequireCtrlBreak>
-      <SourceDirMapping>
-        <Directories />
-        <PathStyle>RemoteUnix</PathStyle>
-      </SourceDirMapping>
+      <ShellMode>Direct</ShellMode>
     </Toolchain>
+    <MakeFilePathRelativeToSourceDir>Makefile</MakeFilePathRelativeToSourceDir>
+    <MakeConfigurationName>Debug-soc</MakeConfigurationName>
+    <AdditionalMakeArguments />
     <MakeCommandTemplate>
       <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
       <RemoteHost>
@@ -84,10 +94,47 @@
             <Value>%PATH%;F:\Compiler\Linaro-Tools\bin</Value>
           </Record>
         </Records>
+        <EnvironmentSetupFiles />
       </Environment>
       <BackgroundMode xsi:nil="true" />
     </MakeCommandTemplate>
   </Build>
+  <CustomBuild>
+    <PreSyncActions />
+    <PreBuildActions />
+    <PostBuildActions />
+    <PreCleanActions />
+    <PostCleanActions />
+  </CustomBuild>
+  <CustomDebug>
+    <PreDebugActions />
+    <PostDebugActions />
+    <DebugStopActions />
+    <BreakMode>Default</BreakMode>
+  </CustomDebug>
+  <CustomShortcuts>
+    <Shortcuts />
+    <ShowMessageAfterExecuting>true</ShowMessageAfterExecuting>
+  </CustomShortcuts>
+  <UserDefinedVariables />
+  <ImportedPropertySheets />
+  <CodeSense>
+    <Enabled>Unknown</Enabled>
+    <CFLAGS />
+    <CXXFLAGS />
+    <ExternalSourceFileList />
+    <ExtraSettings>
+      <HideErrorsInSystemHeaders>true</HideErrorsInSystemHeaders>
+      <SupportLightweightReferenceAnalysis>false</SupportLightweightReferenceAnalysis>
+      <CheckForClangFormatFiles xsi:nil="true" />
+      <FormattingEngine xsi:nil="true" />
+    </ExtraSettings>
+    <CodeAnalyzerSettings>
+      <Enabled>false</Enabled>
+    </CodeAnalyzerSettings>
+  </CodeSense>
+  <Configurations />
+  <ProgramArgumentsSuggestions />
   <Debug xsi:type="com.visualgdb.debug.remote">
     <AdditionalStartupCommands />
     <AdditionalGDBSettings>
@@ -118,6 +165,7 @@
       <DisableSignals>false</DisableSignals>
       <EnableAsyncExecutionMode>false</EnableAsyncExecutionMode>
       <EnableNonStopMode>false</EnableNonStopMode>
+      <MaxBreakpointLimit>0</MaxBreakpointLimit>
     </AdditionalGDBSettings>
     <LaunchGDBSettings xsi:type="GDBLaunchParametersNewInstance">
       <GDBExe>F:\Compiler\Linaro-Tools\bin\arm-linux-gnueabi-gdb.exe</GDBExe>
@@ -132,6 +180,7 @@
             <Value>%PATH%;F:\Compiler\DS-5\bin;F:\Compiler\Linaro-Tools\bin</Value>
           </Record>
         </Records>
+        <EnvironmentSetupFiles />
       </GDBEnvironment>
       <DebuggedProgram>$(TargetPath)</DebuggedProgram>
       <GDBServerPort>2000</GDBServerPort>
@@ -147,32 +196,4 @@
     <DeployWhenLaunchedWithoutDebugging>true</DeployWhenLaunchedWithoutDebugging>
     <SuppressTTYCreation>false</SuppressTTYCreation>
   </Debug>
-  <CustomBuild>
-    <PreSyncActions />
-    <PreBuildActions />
-    <PostBuildActions />
-    <PreCleanActions />
-    <PostCleanActions />
-  </CustomBuild>
-  <CustomDebug>
-    <PreDebugActions />
-    <PostDebugActions />
-    <DebugStopActions />
-    <BreakMode>Default</BreakMode>
-  </CustomDebug>
-  <CustomShortcuts>
-    <Shortcuts />
-    <ShowMessageAfterExecuting>true</ShowMessageAfterExecuting>
-  </CustomShortcuts>
-  <UserDefinedVariables />
-  <ImportedPropertySheets />
-  <CodeSense>
-    <Enabled>Unknown</Enabled>
-    <CFLAGS />
-    <CXXFLAGS />
-    <ExternalSourceFileList />
-    <ExtraSettings>
-      <HideErrorsInSystemHeaders>true</HideErrorsInSystemHeaders>
-    </ExtraSettings>
-  </CodeSense>
 </VisualGDBProjectSettings2>

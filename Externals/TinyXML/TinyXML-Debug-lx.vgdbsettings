@@ -34,7 +34,9 @@
       </FileMasks>
       <TransferNewFilesOnly>true</TransferNewFilesOnly>
       <IncludeSubdirectories>true</IncludeSubdirectories>
+      <SelectedDirectories />
       <DeleteDisappearedFiles>false</DeleteDisappearedFiles>
+      <ApplyGlobalExclusionList>true</ApplyGlobalExclusionList>
     </MainSourceTransferCommand>
     <AllowChangingHostForMainCommands>false</AllowChangingHostForMainCommands>
     <SkipBuildIfNoSourceFilesChanged>false</SkipBuildIfNoSourceFilesChanged>
@@ -44,20 +46,16 @@
     <MainSourceDirectoryForLocalBuilds>$(ProjectDir)</MainSourceDirectoryForLocalBuilds>
   </Project>
   <Build xsi:type="com.visualgdb.build.make">
-    <MakeFilePathRelativeToSourceDir>Makefile</MakeFilePathRelativeToSourceDir>
-    <MakeConfigurationName>Debug-lx</MakeConfigurationName>
-    <AdditionalMakeArguments />
+    <ToolchainID>
+      <ID>com.sysprogs.toolchain.default-gcc</ID>
+      <Version>
+        <Revision>0</Revision>
+      </Version>
+    </ToolchainID>
     <Toolchain>
-      <Name>Default GCC toolchain on 192.168.200.124</Name>
       <UnixSystem>true</UnixSystem>
-      <GCC>gcc</GCC>
-      <GXX>g++</GXX>
-      <GDB>gdb</GDB>
-      <AR>ar</AR>
-      <OBJCOPY>objcopy</OBJCOPY>
-      <Make>make</Make>
-      <RequireCmdExe>false</RequireCmdExe>
       <RequireCtrlBreak>false</RequireCtrlBreak>
+      <ArgumentEscapingMode>Normal</ArgumentEscapingMode>
       <RequiredLinuxPackages>
         <TestableLinuxPackage>
           <UserFriendlyName>GCC</UserFriendlyName>
@@ -76,7 +74,18 @@
           <BinaryToCheck>make</BinaryToCheck>
         </TestableLinuxPackage>
       </RequiredLinuxPackages>
+      <Name>Default GCC toolchain on 192.168.200.124</Name>
+      <GCC>gcc</GCC>
+      <GXX>g++</GXX>
+      <GDB>gdb</GDB>
+      <AR>ar</AR>
+      <OBJCOPY>objcopy</OBJCOPY>
+      <Make>make</Make>
+      <ShellMode>Direct</ShellMode>
     </Toolchain>
+    <MakeFilePathRelativeToSourceDir>Makefile</MakeFilePathRelativeToSourceDir>
+    <MakeConfigurationName>Debug-lx</MakeConfigurationName>
+    <AdditionalMakeArguments />
     <MakeCommandTemplate>
       <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
       <RemoteHost>
@@ -98,6 +107,39 @@
       <BackgroundMode xsi:nil="true" />
     </MakeCommandTemplate>
   </Build>
+  <CustomBuild>
+    <PreSyncActions />
+    <PreBuildActions />
+    <PostBuildActions />
+    <PreCleanActions />
+    <PostCleanActions />
+  </CustomBuild>
+  <CustomDebug>
+    <PreDebugActions />
+    <PostDebugActions />
+    <DebugStopActions />
+    <BreakMode>Default</BreakMode>
+  </CustomDebug>
+  <CustomShortcuts>
+    <Shortcuts />
+    <ShowMessageAfterExecuting>true</ShowMessageAfterExecuting>
+  </CustomShortcuts>
+  <UserDefinedVariables />
+  <ImportedPropertySheets />
+  <CodeSense>
+    <Enabled>Unknown</Enabled>
+    <ExtraSettings>
+      <HideErrorsInSystemHeaders>true</HideErrorsInSystemHeaders>
+      <SupportLightweightReferenceAnalysis>false</SupportLightweightReferenceAnalysis>
+      <CheckForClangFormatFiles xsi:nil="true" />
+      <FormattingEngine xsi:nil="true" />
+    </ExtraSettings>
+    <CodeAnalyzerSettings>
+      <Enabled>false</Enabled>
+    </CodeAnalyzerSettings>
+  </CodeSense>
+  <Configurations />
+  <ProgramArgumentsSuggestions />
   <Debug xsi:type="com.visualgdb.debug.remote">
     <AdditionalStartupCommands />
     <AdditionalGDBSettings>
@@ -128,6 +170,7 @@
       <DisableSignals>false</DisableSignals>
       <EnableAsyncExecutionMode>false</EnableAsyncExecutionMode>
       <EnableNonStopMode>false</EnableNonStopMode>
+      <MaxBreakpointLimit>0</MaxBreakpointLimit>
     </AdditionalGDBSettings>
     <LaunchGDBSettings xsi:type="GDBLaunchParametersNewInstance">
       <GDBEnvironment>
@@ -151,29 +194,4 @@
     <DeployWhenLaunchedWithoutDebugging>true</DeployWhenLaunchedWithoutDebugging>
     <SuppressTTYCreation>false</SuppressTTYCreation>
   </Debug>
-  <CustomBuild>
-    <PreSyncActions />
-    <PreBuildActions />
-    <PostBuildActions />
-    <PreCleanActions />
-    <PostCleanActions />
-  </CustomBuild>
-  <CustomDebug>
-    <PreDebugActions />
-    <PostDebugActions />
-    <DebugStopActions />
-    <BreakMode>Default</BreakMode>
-  </CustomDebug>
-  <CustomShortcuts>
-    <Shortcuts />
-    <ShowMessageAfterExecuting>true</ShowMessageAfterExecuting>
-  </CustomShortcuts>
-  <UserDefinedVariables />
-  <ImportedPropertySheets />
-  <CodeSense>
-    <Enabled>Unknown</Enabled>
-    <ExtraSettings>
-      <HideErrorsInSystemHeaders>true</HideErrorsInSystemHeaders>
-    </ExtraSettings>
-  </CodeSense>
 </VisualGDBProjectSettings2>
