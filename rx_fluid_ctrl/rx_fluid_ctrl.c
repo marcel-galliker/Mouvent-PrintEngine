@@ -33,7 +33,6 @@
 	
 //--- globals ------------------------------------------------------------
 
-SFluidBoardCfg	RX_FluidBoardCfg;
 SFluidBoardStat	RX_FluidBoardStatus;
 
 static int _AppRunning;

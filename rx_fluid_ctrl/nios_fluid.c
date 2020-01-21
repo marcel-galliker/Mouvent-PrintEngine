@@ -264,14 +264,30 @@ void nios_load(const char *exepath)
 #endif
 }
 
+//--- nois_set_is_cfg --------------------------
+void nois_set_is_cfg(SInkSupplyCfg *pcfg)
+{
+    int no=pcfg->no;
+    if (no>=0 && no<SIZEOF(_Cfg->ink_supply))
+    {
+		_Cfg->ink_supply[no].present         = (pcfg->ink.fileName[0]!=0);
+		if (pcfg->cylinderPresSet<=INK_PRESSURE_MAX) _Cfg->ink_supply[no].cylinderPresSet = pcfg->cylinderPresSet;
+		_Cfg->ink_supply[no].meniscusSet	= pcfg->meniscusSet;
+		_Cfg->ink_supply[no].heaterTemp	    = pcfg->ink.temp*1000;
+		_Cfg->ink_supply[no].heaterTempMax	= pcfg->ink.tempMax*1000;
+		if (pcfg->ink.tempMax>36) _HeaterUsed = TRUE;
+	//	_Cfg->ink_supply[i].condPresOutSet	= pcfg->condPresOutSet[i];
+	//	_Cfg->ink_supply[i].fluid_P			= pcfg->fluid_P[i];
+	}
+}
+
 //--- nios_set_cfg -----------------------------------------------------------
 void nios_set_cfg(SFluidBoardCfg *pcfg)
 {
 	int i;
 	if (!_Init) return;
 	
-	memcpy(&RX_FluidBoardCfg, pcfg, sizeof(RX_FluidBoardCfg));
-	switch(RX_FluidBoardCfg.printerType)
+	switch(pcfg->printerType)
 	{
 	case printer_LB701:		_HeaterUsed=TRUE; break;
 	case printer_LB702_UV:	_HeaterUsed=TRUE; break;
@@ -279,18 +295,6 @@ void nios_set_cfg(SFluidBoardCfg *pcfg)
 	case printer_cleaf:		_HeaterUsed=TRUE; break;
 		
 	default: _HeaterUsed=FALSE;			
-	}
-	for (i=0; i<INK_PER_BOARD; i++) 
-	{
-		_Cfg->ink_supply[i].present         = (RX_FluidBoardCfg.ink_supply[i].ink.fileName[0]!=0);
-		if (pcfg->ink_supply[i].cylinderPresSet<=INK_PRESSURE_MAX) _Cfg->ink_supply[i].cylinderPresSet = pcfg->ink_supply[i].cylinderPresSet;
-		_Cfg->ink_supply[i].meniscusSet		= pcfg->ink_supply[i].meniscusSet;
-		_Cfg->ink_supply[i].heaterTemp	    = pcfg->ink_supply[i].ink.temp*1000;
-		_Cfg->ink_supply[i].heaterTempMax	= pcfg->ink_supply[i].ink.tempMax*1000;
-		if (pcfg->ink_supply[i].ink.tempMax>36) _HeaterUsed = TRUE;
-	//	_Cfg->ink_supply[i].condPresOutSet	= pcfg->condPresOutSet[i];
-	//	_Cfg->ink_supply[i].fluid_P			= pcfg->fluid_P[i];
-		memcpy(_Cfg->ink_supply[i].flushTime, pcfg->ink_supply[i].ink .flushTime, sizeof(_Cfg->ink_supply[i].flushTime));
 	}
 	_Cfg->cmd.lung_enabled		= pcfg->lung_enabled;
 	_Cfg->printerType			= pcfg->printerType;

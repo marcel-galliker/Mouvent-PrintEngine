@@ -1008,6 +1008,7 @@ typedef struct SEncoderStat
 //---  ink-supply Configuration ----------------------------
 typedef struct SInkSupplyCfg
 {
+    int				no;
 	char			inkFileName[64];
 	SInkDefinition	ink;
 	INT32			cylinderPresSet;
@@ -1021,7 +1022,6 @@ typedef struct SFluidBoardCfg
 	EPrinterType	printerType;
 	UINT32			lung_enabled;
 	UINT32			headsPerColor;
-	SInkSupplyCfg	ink_supply[INK_PER_BOARD];	
 } SFluidBoardCfg;
 	
 typedef struct SHeadStateLight
@@ -1621,7 +1621,6 @@ extern SHeadBoardStat	RX_HBStatus[];
 extern SPrinterStatus	RX_PrinterStatus;
 extern SEncoderStat		RX_EncoderStatus;
 extern SEncoderCfg		RX_EncoderCfg;
-extern SFluidBoardCfg	RX_FluidBoardCfg;
 extern SFluidBoardStat	RX_FluidBoardStatus;
 extern SStepperStat	RX_StepperStatus;
 extern SStepperStat	RX_ClnStatus;

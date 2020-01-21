@@ -201,6 +201,7 @@ static int _connection_closed(RX_SOCKET socket, const char *peerName)
 #define SCALE(board, scale) (((board)-1)*6+(scale)-1)
 void fluid_set_config(void)
 {
+    SInkSupplyCfg  iscfg;
 	SFluidBoardCfg cfg;
 	int i, n;
 	
@@ -272,9 +273,11 @@ void fluid_set_config(void)
 			cfg.printerType = RX_Config.printer.type;
 			cfg.lung_enabled = (i==0);
 			for (n=0; n<INK_PER_BOARD; n++) 
-			{
-				memcpy(&cfg.ink_supply[n], &RX_Config.inkSupply[i*INK_PER_BOARD+n], sizeof(cfg.ink_supply[n]));
-				cfg.ink_supply[n].meniscusSet	  = INVALID_VALUE;
+			{				                
+				memcpy(&iscfg, &RX_Config.inkSupply[i*INK_PER_BOARD+n], sizeof(iscfg));
+                iscfg.no			= n;
+				iscfg.meniscusSet	= INVALID_VALUE;
+				sok_send_2(&_FluidThreadPar[i].socket, CMD_FLUID_IS_CFG, sizeof(iscfg), &iscfg);            
 			}    				
 			cfg.headsPerColor = RX_Config.headsPerColor;
 

@@ -34,7 +34,7 @@
 
 //--- buffer ---------------------------------------------------------
 #define MSG_BUF_SIZE	256
-#define MSG_MSG_SIZE	4096
+#define MSG_MSG_SIZE	1024
 typedef struct
 {
 	RX_SOCKET socket;
@@ -44,7 +44,6 @@ typedef struct
 static SFpgaMsg _MsgBuf[MSG_BUF_SIZE];
 static int		_MsgBufIn;
 static int		_MsgBufOut;
-
 
 //--- module globals -----------------------------------------------------------------
 static HANDLE			_HServer;
@@ -186,9 +185,12 @@ static int _handle_ctrl_msg(RX_SOCKET socket, void *msg)
 	{
 	case CMD_ERROR_RESET:		nios_error_reset();											break;
 
+    case CMD_FLUID_IS_CFG:		nois_set_is_cfg		((SInkSupplyCfg*)pdata);				break;
+
 	case CMD_FLUID_CFG:			nios_set_cfg		((SFluidBoardCfg*)pdata);									
 								fpga_cfg			();
 								break;
+                                        
 	case CMD_FLUID_STAT:		_do_fluid_stat		(socket, (SHeadStateLight*)	pdata);		break;
 	case CMD_FLUID_CTRL_MODE:	_do_fluid_ctrlMode	(socket, (SFluidCtrlCmd*)msg);			break;
 	case CMD_SET_PURGE_PAR:		_do_set_purge_par	(socket, (SPurgePar*)	pdata);			break;

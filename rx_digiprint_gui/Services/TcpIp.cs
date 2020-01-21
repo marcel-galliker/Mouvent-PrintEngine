@@ -371,8 +371,8 @@ namespace RX_DigiPrint.Services
         public const UInt32  CMD_ENCODER_UV_ON		= 0x01000113;
         public const UInt32  CMD_ENCODER_UV_OFF		= 0x01000114;
 
-        public const UInt32  CMD_FLUID_STAT			= 0x01000122;
-        public const UInt32  REP_FLUID_STAT			= 0x02000122;
+        public const UInt32  CMD_FLUID_STAT			= 0x01000123;
+        public const UInt32  REP_FLUID_STAT			= 0x02000123;
 
         public const UInt32  CMD_FLUID_CTRL_MODE    = 0x01000124;
         public const UInt32  REP_FLUID_CTRL_MODE	= 0x02000124;

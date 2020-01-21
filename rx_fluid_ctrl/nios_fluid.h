@@ -13,6 +13,7 @@
 #pragma once
 
 #include "rx_def.h"
+#include "rx_fluid_ctrl.h"
 #include "nios_def_fluid.h"
 
 extern char *mode(EnFluidCtrlMode mode);
@@ -25,6 +26,7 @@ void nios_load(const char *exepath);
 void nios_main(int ticks, int menu);
 
 void nios_set_cfg			(SFluidBoardCfg *pcfg);
+void nois_set_is_cfg		(SInkSupplyCfg *pcfg);
 void nios_set_ctrlmode		(int isNo, EnFluidCtrlMode mode);
 // void nios_set_pressure		(int isNo, int pressure);
 void nios_set_purge_par		(int isNo, int delay, int time);

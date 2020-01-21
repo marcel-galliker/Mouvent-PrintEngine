@@ -43,25 +43,34 @@
     <MakeFilePathRelativeToSourceDir>Makefile</MakeFilePathRelativeToSourceDir>
     <MakeConfigurationName>Debug-soc</MakeConfigurationName>
     <AdditionalMakeArguments />
+    <ToolchainID>
+      <ID>com.sysprogs.imported.arm-linux-gnueabi</ID>
+      <Version>
+        <GCC>4.7.1</GCC>
+        <GDB>(crosstool-NG</GDB>
+        <Revision>0</Revision>
+      </Version>
+    </ToolchainID>
     <Toolchain>
+      <UnixSystem>false</UnixSystem>
+      <AdditionalPathDirectories>
+        <string>F:\Compiler\Linaro-Tools\bin</string>
+      </AdditionalPathDirectories>
+      <RequireCtrlBreak>false</RequireCtrlBreak>
+      <ArgumentEscapingMode>Normal</ArgumentEscapingMode>
+      <SourceDirMapping>
+        <Directories />
+        <PathStyle>RemoteUnix</PathStyle>
+      </SourceDirMapping>
       <Name>arm-linux-gnueabi</Name>
       <Location>F:\Compiler\Linaro-Tools\bin</Location>
-      <UnixSystem>false</UnixSystem>
       <GCC>F:\Compiler\Linaro-Tools\bin\arm-linux-gnueabi-gcc.exe</GCC>
       <GXX>F:\Compiler\Linaro-Tools\bin\arm-linux-gnueabi-g++.exe</GXX>
       <GDB>F:\Compiler\Linaro-Tools\bin\arm-linux-gnueabi-gdb.exe</GDB>
       <AR>F:\Compiler\Linaro-Tools\bin\arm-linux-gnueabi-ar.exe</AR>
       <OBJCOPY>F:\Compiler\Linaro-Tools\bin\arm-linux-gnueabi-objcopy.exe</OBJCOPY>
       <Make>$(VISUALGDB_DIR)\make.exe</Make>
-      <AdditionalPathDirectories>
-        <string>F:\Compiler\Linaro-Tools\bin</string>
-      </AdditionalPathDirectories>
-      <RequireCmdExe>true</RequireCmdExe>
-      <RequireCtrlBreak>false</RequireCtrlBreak>
-      <SourceDirMapping>
-        <Directories />
-        <PathStyle>RemoteUnix</PathStyle>
-      </SourceDirMapping>
+      <ShellMode>Direct</ShellMode>
     </Toolchain>
     <MakeCommandTemplate>
       <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
