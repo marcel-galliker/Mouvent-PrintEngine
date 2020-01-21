@@ -34,7 +34,7 @@
 
 //--- buffer ---------------------------------------------------------
 #define MSG_BUF_SIZE	256
-#define MSG_MSG_SIZE	1024
+#define MSG_MSG_SIZE	4096
 typedef struct
 {
 	RX_SOCKET socket;
@@ -128,7 +128,7 @@ static int _save_ctrl_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr
 		else
 		{
 			_MsgBuf[_MsgBufIn].socket = socket;
-			if (len>sizeof(_MsgBuf[0].msg)) 
+            if (len>sizeof(_MsgBuf[0].msg)) 
 				Error(ERR_ABORT, 0, "Message Buffer Overflow, msgsize=%d, bufsize=%d", len, sizeof(_MsgBuf[0].msg));
 			
 			memcpy(_MsgBuf[_MsgBufIn].msg, pmsg, len);

@@ -38,15 +38,17 @@
 #define STEPS_REV		(200*16)	// steps per motor revolution * 16 times oversampling
 #define DIST_REV		2000.0	// moving distance per revolution [µm]
 
-#define POS_CAP					RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height + 8000
+#define POS_CAP			RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height + 8000
+#define CAL_POS_1		50000
 
 static RX_SOCKET	_MainSocket=INVALID_SOCKET;
 static SMovePar	_ParRef;
 static SMovePar	_ParZ_down;
+static SMovePar	_ParZ_calibrate;
 static SMovePar	_ParZ_cap;
-static SMovePar	_ParAlone;
 
 static int		_CmdRunning=0;
+static int		_CmdStep=0;
 static int		_NewCmd = 0;
 
 static char		_CmdName[32];
@@ -67,6 +69,7 @@ static void _lb702_motor_test  (int motor, int steps);
 static void _lb702_do_reference(void);
 static void _lb702_move_to_pos(int cmd, int pos);
 static int  _micron_2_steps(int micron);
+static int  _steps_2_micron(int steps);
 
 //--- lb702_init --------------------------------------
 void lb702_init(void)
@@ -98,7 +101,15 @@ void lb702_init(void)
 	_ParZ_down.encCheck		= chk_std;
 	_ParZ_down.enc_bwd		= TRUE;
 
-	_ParZ_cap.speed			= 5000;
+	_ParZ_calibrate.speed		= 5000;
+	_ParZ_calibrate.accel		= 32000;
+	_ParZ_calibrate.current_acc	= 200.0;
+	_ParZ_calibrate.current_run	= 200.0;
+	_ParZ_calibrate.dis_mux_in	= 0;
+	_ParZ_calibrate.encCheck	= chk_std;
+	_ParZ_calibrate.enc_bwd		= TRUE;
+
+    _ParZ_cap.speed			= 5000;
 	_ParZ_cap.accel			= 32000;
 	_ParZ_cap.current_acc	= 200.0;
 	_ParZ_cap.current_run	= 200.0;
@@ -106,16 +117,7 @@ void lb702_init(void)
 	_ParZ_cap.dis_mux_in	= 0;
 	_ParZ_cap.encCheck		= chk_std;
 	_ParZ_cap.enc_bwd		= TRUE;
-	
-	_ParAlone.speed			= 5000;
-	_ParAlone.accel			= 3200;
-	_ParAlone.current_acc	= 400.0;
-	_ParAlone.current_run	= 400.0;
-	_ParAlone.stop_mux		= 0;
-	_ParAlone.dis_mux_in	= 0;
-	_ParAlone.encCheck		= chk_off;
-	_ParAlone.enc_bwd		= TRUE;
-	
+		
 	if (RX_StepperStatus.robot_used) lbrob_init();
 }
 
@@ -152,34 +154,85 @@ void lb702_main(int ticks, int menu)
 	if (_CmdRunning && motors_move_done(MOTOR_Z_BITS))
 	{
 		RX_StepperStatus.info.moving = FALSE;
-		if (_CmdRunning == CMD_CAP_REFERENCE) 
-		{
-			if (!RX_StepperStatus.info.headUpInput_0) Error(ERR_CONT, 0, "LB702: Command REFERENCE: End Sensor 1 NOT HIGH");
-			if (!RX_StepperStatus.info.headUpInput_1) Error(ERR_CONT, 0, "LB702: Command REFERENCE: End Sensor 2 NOT HIGH");
-			RX_StepperStatus.info.ref_done = RX_StepperStatus.info.headUpInput_0 && RX_StepperStatus.info.headUpInput_1;
-			motors_reset(MOTOR_Z_BITS);				
-		}
-		else if (motors_error(MOTOR_Z_BITS, &motor))
-		{
-			Error(ERR_CONT, 0, "LIFT: Command %s: Motor[%d] blocked", _CmdName, motor+1);			
-			RX_StepperStatus.info.ref_done = FALSE;							
-		}
+        if (_CmdRunning == CMD_CAP_CALIBRATE)
+        {            
+            switch (_CmdStep)
+            {
+            case 0:	//--- referenced on top ----------------- 
+					if (!RX_StepperStatus.info.headUpInput_0) Error(ERR_CONT, 0, "LB702: Command REFERENCE: End Sensor 1 NOT HIGH");
+					if (!RX_StepperStatus.info.headUpInput_1) Error(ERR_CONT, 0, "LB702: Command REFERENCE: End Sensor 2 NOT HIGH");
+					RX_StepperStatus.info.ref_done = RX_StepperStatus.info.headUpInput_0 && RX_StepperStatus.info.headUpInput_1;
+					motors_reset(MOTOR_Z_BITS);
+                    if (RX_StepperStatus.info.ref_done)
+                    {                        
+                        _CmdStep++;
+                        motors_move_to_step(MOTOR_Z_BITS, &_ParZ_down, -1*_micron_2_steps(CAL_POS_1));
+                    }
+                    else 
+                    {
+                        Error(ERR_CONT, 0, "Calibation Error in step%d", _CmdStep);
+						_CmdRunning = FALSE;
+					}
+                    break;
+                   
+            case 1:	//--- motor above tool -----------------------------------------
+					if (motors_error(MOTOR_Z_BITS, &motor))
+					{
+						Error(ERR_CONT, 0, "LIFT: Command %s: Motor[%d] blocked in step %d", _CmdName, motor+1, _CmdStep);			
+						RX_StepperStatus.info.ref_done = FALSE;
+						_CmdRunning = FALSE;
+					}
+                    else
+                    {
+                        _CmdStep++;
+                        motors_move_by_step(MOTOR_Z_BITS, &_ParZ_calibrate, -10000, TRUE);
+                    }
+                    break;
+                    
+            case 2:	//--- motors blocked at tool -------------------------------------------------
+					if (motor_error(MOTOR_Z_0)) Error(LOG, 0, "Motor[0] stopped at step=%d, %dµm", motor_get_step(MOTOR_Z_0), _steps_2_micron(motor_get_step(MOTOR_Z_0)));
+					if (motor_error(MOTOR_Z_1)) Error(LOG, 0, "Motor[1] stopped at step=%d, %dµm", motor_get_step(MOTOR_Z_1), _steps_2_micron(motor_get_step(MOTOR_Z_1)));
+					Error(LOG, 0, "Calibation done");
+                    _CmdRunning = FALSE;
+					break;
+			/*                
+            case 4: //--- done -------------------------------------------------------------------
+					Error(LOG, 0, "Calibation done");
+					_CmdRunning = FALSE;
+					break;
+            */        
+            }
+        }
+        else
+        {
+			if (_CmdRunning == CMD_CAP_REFERENCE) 
+			{
+				if (!RX_StepperStatus.info.headUpInput_0) Error(ERR_CONT, 0, "LB702: Command REFERENCE: End Sensor 1 NOT HIGH");
+				if (!RX_StepperStatus.info.headUpInput_1) Error(ERR_CONT, 0, "LB702: Command REFERENCE: End Sensor 2 NOT HIGH");
+				RX_StepperStatus.info.ref_done = RX_StepperStatus.info.headUpInput_0 && RX_StepperStatus.info.headUpInput_1;
+				motors_reset(MOTOR_Z_BITS);				
+			}
+			else if (motors_error(MOTOR_Z_BITS, &motor))
+			{
+				Error(ERR_CONT, 0, "LIFT: Command %s: Motor[%d] blocked", _CmdName, motor+1);			
+				RX_StepperStatus.info.ref_done = FALSE;							
+			}
 		
-		RX_StepperStatus.info.z_in_ref    = ((_CmdRunning==CMD_CAP_REFERENCE || _CmdRunning==CMD_CAP_UP_POS) && RX_StepperStatus.info.ref_done);
-		RX_StepperStatus.info.z_in_print  = (_CmdRunning==CMD_CAP_PRINT_POS && RX_StepperStatus.info.ref_done && !_CmdRunningRobi);
-		RX_StepperStatus.info.z_in_cap    = (_CmdRunning==CMD_CAP_CAPPING_POS);
+			RX_StepperStatus.info.z_in_ref    = ((_CmdRunning==CMD_CAP_REFERENCE || _CmdRunning==CMD_CAP_UP_POS) && RX_StepperStatus.info.ref_done);
+			RX_StepperStatus.info.z_in_print  = (_CmdRunning==CMD_CAP_PRINT_POS && RX_StepperStatus.info.ref_done && !_CmdRunningRobi);
+			RX_StepperStatus.info.z_in_cap    = (_CmdRunning==CMD_CAP_CAPPING_POS);
 						
-		if (RX_StepperStatus.info.ref_done && _CmdRunning==CMD_CAP_REFERENCE && _Cmd_New && !_CmdRunningRobi)
-		{
-			_lb702_move_to_pos(_Cmd_New, _PrintPos_New);
-			_PrintPos_Act = _PrintPos_New;		
-		}
-		else 
-		{
-			_CmdRunning = FALSE;
-		}
-				
-		_Cmd_New      = 0;
+			if (RX_StepperStatus.info.ref_done && _CmdRunning==CMD_CAP_REFERENCE && _Cmd_New && !_CmdRunningRobi)
+			{
+				_lb702_move_to_pos(_Cmd_New, _PrintPos_New);
+				_PrintPos_Act = _PrintPos_New;		
+			}
+			else 
+			{
+				_CmdRunning = FALSE;
+			}	
+        }
+		_Cmd_New      = 0;            
 	}
 	
 	if (RX_StepperStatus.robot_used && _CmdRunningRobi)
@@ -237,6 +290,7 @@ static void _lb702_handle_menu(char *str)
 		{
 		case 's': lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_STOP,		NULL); break;
 		case 'R': lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_REFERENCE,	NULL); break;
+		case 'C': lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_CALIBRATE,	NULL); break;            
 		case 'r': motors_reset(1<<atoi(&str[1])); break;
 		case 'c': lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_CAPPING_POS,NULL); break;
 		case 'p': lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_PRINT_POS,	&pos); break;
@@ -267,6 +321,7 @@ int lb702_menu(void)
 			term_printf("o: toggle output <no>\n");
 			term_printf("r<n>: reset motor<n>\n");	
 			term_printf("R: Reference\n");
+			term_printf("C: Calibrate (first install calibration tool)\n");
 			term_printf("c: move to cap\n");
 			term_printf("u: move to UP position\n");
 			term_printf("p: move to print\n");
@@ -326,6 +381,12 @@ static int  _micron_2_steps(int micron)
 	return (int)(0.5+STEPS_REV/DIST_REV*micron);
 }
 
+//---_steps_2_micron --------------------------------------------------------------
+static int  _steps_2_micron(int steps)
+{
+	return (int)(0.5+steps/STEPS_REV*DIST_REV);
+}
+
 //--- _lb702_move_to_pos ---------------------------------------------------------------
 static void _lb702_move_to_pos(int cmd, int pos)
 {
@@ -381,7 +442,13 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									_lb702_do_reference();
 									break;
 
-	case CMD_CAP_PRINT_POS:			if(!RX_StepperStatus.info.printhead_en) return Error(ERR_ABORT, 0, "Allow Head Down signal not set!");
+    case CMD_CAP_CALIBRATE:			strcpy(_CmdName, "CMD_CAP_CALIBRATE");
+									_lb702_do_reference();
+									_CmdRunning = msgId;
+                                    _CmdStep=0;
+									break;
+                                       
+    case CMD_CAP_PRINT_POS:			if(!RX_StepperStatus.info.printhead_en) return Error(ERR_ABORT, 0, "Allow Head Down signal not set!");
 									strcpy(_CmdName, "CMD_CAP_PRINT_POS");
 									_PrintHeight   = (*((INT32*)pdata));
 									_Step=0;

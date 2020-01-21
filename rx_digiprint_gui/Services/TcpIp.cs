@@ -472,6 +472,7 @@ namespace RX_DigiPrint.Services
         public const UInt32 CMD_CAP_PRINT_POS		= 0x01000603;
         public const UInt32 CMD_CAP_CAPPING_POS		= 0x01000604;
         public const UInt32 CMD_CAP_UP_POS  		= 0x01000605;
+        public const UInt32 CMD_CAP_CALIBRATE		= 0x01000606;
 
         //---- CAPPING ----
         public const UInt32 CMD_CAP_FILL 			= 0x01000611;
