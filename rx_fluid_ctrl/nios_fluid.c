@@ -498,18 +498,18 @@ static void _display_status(void)
 		
 		term_printf("degass pressure: %6s    ", value_str(_Stat->degass_pressure));
 		id = (UCHAR*)&_Stat->degas_sensorID;
-		term_printf("ID: %d.%d.%d.%d", id[0], id[1], id[2], id[3]);		
+	//	term_printf("ID: %d.%d.%d.%d", id[0], id[1], id[2], id[3]);		
 		term_printf("\n");
 		
 		term_printf("air pressure:    %6s    ", value_str(_Stat->air_pressure));	
 		id = (UCHAR*)&_Stat->air_sensorID;
-		term_printf("ID: %d.%d.%d.%d", id[0], id[1], id[2], id[3]);		
+	//	term_printf("ID: %d.%d.%d.%d", id[0], id[1], id[2], id[3]);		
 		if(_Cfg->test_airPressure) term_printf("(Test %d)", _Cfg->test_airPressure); 
 		term_printf("\n");
 		
 		term_printf("flush pressure:  %6s    ", value_str(_Stat->flush_pressure));
 		id = (UCHAR*)&_Stat->flush_sensorID;
-		term_printf("ID: %d.%d.%d.%d", id[0], id[1], id[2], id[3]);		
+	//	term_printf("ID: %d.%d.%d.%d", id[0], id[1], id[2], id[3]);		
 		term_printf("\n");
 		
 		term_printf("vacc solenoid:   %d", _Stat->vacuum_solenoid); if (_Cfg->test_lungPressure) term_printf("(Test)"); term_printf("\n");
@@ -521,7 +521,7 @@ static void _display_status(void)
 		term_printf("p_sensor_error:  "); for (i=0; i<8; i++) term_printf("%5s ", value_str(_Stat->p_sensor_error[i]));	term_printf("\n");
 		term_printf("pt100temp:       "); for (i=0; i<8; i++) term_printf("%05d ", _Stat->pt100[i]);			term_printf("\n");
 		term_printf("\n");
-		
+		/*
 		term_printf("ID:               ");
 			for (i=0; i<NIOS_INK_SUPPLY_CNT; i++)
 			{
@@ -530,7 +530,7 @@ static void _display_status(void)
 				term_printf("%11s ", str);
 			}
 		term_printf("\n");
-		
+		*/
 		term_printf("ctrl mode:        ");
 			for (i=0; i<NIOS_INK_SUPPLY_CNT; i++)
 			{
@@ -570,8 +570,8 @@ static void _display_status(void)
 		
 		term_printf("\nTest Bleed Line -------------------------\n");
 		term_printf("Pres - valves OFF"); for (i = 0; i < NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str(_Stat->ink_supply[i].TestBleedLine_Pump_Phase1)); term_printf("\n");
-		term_printf("Pump - Air ON	"); for (i = 0; i < NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str(_Stat->ink_supply[i].TestBleedLine_Pump_Phase2)); term_printf("\n");
-		term_printf("Pump - Bleed ON	 "); for (i = 0; i < NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str(_Stat->ink_supply[i].TestBleedLine_Pump_Phase3)); term_printf("\n");
+		term_printf("Pump - Air ON    "); for (i = 0; i < NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str(_Stat->ink_supply[i].TestBleedLine_Pump_Phase2)); term_printf("\n");
+		term_printf("Pump - Bleed ON  "); for (i = 0; i < NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str(_Stat->ink_supply[i].TestBleedLine_Pump_Phase3)); term_printf("\n");
 		
     	if (nios_is_heater_connected()) 
 		{

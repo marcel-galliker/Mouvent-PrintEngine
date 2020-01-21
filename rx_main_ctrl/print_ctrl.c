@@ -525,8 +525,9 @@ static int _print_next(void)
 					if (_Item.id.copy<1) _Item.id.copy=1;
 					if(rx_def_use_pq(RX_Config.printer.type) && (_Item.id.copy > _Item.copies))
 					{
+                        int id=_Item.id.id;
 						memset(&_Item, 0, sizeof(_Item));
-						return Error(ERR_ABORT, 0, "Invalid copy settings");
+						return Error(ERR_ABORT, 0, "ID=%d: Invalid copy settings", id);
 					}
 					_Item.copiesTotal = _Item.copies * (_Item.lastPage - _Item.firstPage + 1);
 				}

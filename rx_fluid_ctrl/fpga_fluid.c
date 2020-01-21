@@ -111,7 +111,8 @@ static void _fpga_display_status(void)
 {
 	if (_Init)
 	{
-		term_printf("FPGA Version: %d.%d.%d.%d           Linux=%d\n", _Stat->version.major, _Stat->version.minor, _Stat->version.revision, _Stat->version.build, _LinuxDeployment);
+//		term_printf("FPGA Version: %d.%d.%d.%d           Linux=%d\n", _Stat->version.major, _Stat->version.minor, _Stat->version.revision, _Stat->version.build, _LinuxDeployment);
+		term_printf("           Linux=%d\n", _LinuxDeployment);	// FPGA version not accessible from ARM processor
 		term_printf("\n");			
 	}
 	else

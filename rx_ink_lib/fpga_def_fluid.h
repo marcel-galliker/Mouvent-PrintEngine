@@ -27,7 +27,7 @@
 //--- adddress mapping -----------------------------------------
 #define ADDR_FPGA_QSYS		0xff200000
 // #define ADDR_FPGA_BASE		0xc0020000				// !!!!! RESERVED FOR NIOS ACCESS ONLY !!!!!
-#define ADDR_FPGA_BASE		0xff210000				// !!!!! RESERVED FOR NIOS ACCESS ONLY !!!!!
+#define ADDR_FPGA_BASE		0xff220000				// !!!!! RESERVED FOR NIOS ACCESS ONLY !!!!!
 
 #define ADDR_FPGA_STAT		(ADDR_FPGA_BASE+0x0000)
 #define ADDR_FPGA_PAR		(ADDR_FPGA_BASE+0x1000)
