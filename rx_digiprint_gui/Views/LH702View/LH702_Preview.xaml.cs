@@ -173,6 +173,25 @@ namespace RX_DigiPrint.Views.LH702View
             }
         }
 
+        //--- MoveDown_Clicked --------------------------------------
+        private void MoveDown_Clicked(object sender, RoutedEventArgs e)
+        {
+            PrintQueueItem item = DataContext as PrintQueueItem;
+            if (item!=null)
+            {
+                RxButton button = sender as RxButton;
+                button.IsChecked = true;
+                MoveUp.Text="";
+                RxNumPad pad = new RxNumPad(MoveUp);
+                if((bool)pad.ShowDialog())
+                {
+                    item.PageMargin -= Rx.StrToDouble(pad.Result);
+                    item.SendMsg(TcpIp.EVT_SET_PRINT_QUEUE);
+                }
+                button.IsChecked = false;
+            }
+        }
+
         //--- MoveLeft_Clicked --------------------------------------
         private void MoveLeft_Clicked(object sender, RoutedEventArgs e)
         {
@@ -186,6 +205,25 @@ namespace RX_DigiPrint.Views.LH702View
                 if((bool)pad.ShowDialog())
                 {
                     item.PrintGoDist += Rx.StrToDouble(pad.Result);
+                    item.SendMsg(TcpIp.EVT_SET_PRINT_QUEUE);
+                }
+                button.IsChecked = false;
+            }
+        }
+
+        //--- MoveRight_Clicked --------------------------------------
+        private void MoveRight_Clicked(object sender, RoutedEventArgs e)
+        {
+            PrintQueueItem item = DataContext as PrintQueueItem;
+            if (item!=null)
+            {
+                RxButton button = sender as RxButton;
+                button.IsChecked = true;
+                MoveLeft.Text="";
+                RxNumPad pad = new RxNumPad(MoveLeft);
+                if((bool)pad.ShowDialog())
+                {
+                    item.PrintGoDist -= Rx.StrToDouble(pad.Result);
                     item.SendMsg(TcpIp.EVT_SET_PRINT_QUEUE);
                 }
                 button.IsChecked = false;

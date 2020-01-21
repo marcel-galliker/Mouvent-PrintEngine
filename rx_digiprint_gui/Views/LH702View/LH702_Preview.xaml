@@ -71,9 +71,53 @@
             </Border>
 
         </Canvas>
-        
+
+        <!-- old move buttons -->
+        <Grid Width="250" Height="250" HorizontalAlignment="Left" Margin="100,10,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid Grid.Row="0"  Grid.Column="1" >
+                <TextBox x:Name="MoveUp" Visibility="Hidden"/>
+                <common:RxButton Click="MoveUp_Clicked">
+                    <TextBlock Text="é" FontFamily="Wingdings" FontSize="{StaticResource FontSizeXL}"/>
+                </common:RxButton>
+            </Grid>
+
+            <Grid Grid.Row="2"  Grid.Column="1" >
+                <TextBox x:Name="MoveDown" Visibility="Hidden"/>
+                <common:RxButton Click="MoveDown_Clicked">
+                    <TextBlock Text="ê" FontFamily="Wingdings" FontSize="{StaticResource FontSizeXL}"/>
+                </common:RxButton>
+            </Grid>
+
+            <Grid Grid.Row="1" Grid.Column="0">
+                <TextBox x:Name="MoveLeft" Visibility="Hidden"/>
+                <common:RxButton  Click="MoveLeft_Clicked">
+                    <TextBlock Text="ç" FontFamily="Wingdings" FontSize="{StaticResource FontSizeXL}"/>
+                </common:RxButton>
+            </Grid>
+
+            <Grid Grid.Row="1"  Grid.Column="2">
+                <TextBox x:Name="MoveRight" Visibility="Hidden"/>
+                <common:RxButton Click="MoveRight_Clicked">
+                    <TextBlock Text="è" FontFamily="Wingdings" FontSize="{StaticResource FontSizeXL}"/>
+                </common:RxButton>
+            </Grid>
+
+        </Grid>
+
         <!-- move buttons ______________________________________________________________________________________-->
         <StackPanel Width="auto" Height="auto" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="100,10,0,0" Orientation="Horizontal">
+            <!--
             <Grid HorizontalAlignment="Left">
                 <TextBox x:Name="MoveLeft" Visibility="Hidden"/>
                 <common:RxButton  Click="MoveLeft_Clicked">
@@ -87,7 +131,7 @@
                     <TextBlock Text="ô" FontFamily="Wingdings" FontSize="{StaticResource FontSizeXL}"/>
                 </common:RxButton>
             </Grid>
-
+            -->
             <Grid HorizontalAlignment="Right">
                 <TextBox x:Name="Change" Visibility="Hidden"/>
                 <common:RxButton Click="Change_Clicked">

@@ -23,6 +23,7 @@ namespace RX_DigiPrint.Views.LH702View
             InitializeComponent();
 
             CB_PrintGoMode.ItemsSource  = new EN_PgModeList_LH702();
+            RowCopies.Height = new GridLength(0);
         }
 
         //--- Property CanDelete ---------------------------------------
@@ -46,6 +47,7 @@ namespace RX_DigiPrint.Views.LH702View
         {
             if (_Item!=null)
             {
+                _Item.ScanLength = _Item.Copies;
                 _Item.SendMsg(TcpIp.CMD_SET_PRINT_QUEUE);
                 _Item.SaveDefaults();
             }
@@ -93,6 +95,20 @@ namespace RX_DigiPrint.Views.LH702View
                 _Item.PageMargin = ctrl.Value;
                 _Item.SendMsg(TcpIp.EVT_SET_PRINT_QUEUE);       
             }
+        }
+
+        //--- CB_PrintGoMode_SelectionChanged -----------------------------------
+        private void CB_PrintGoMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            TcpIp.EPrintGoMode mode;
+            if (CB_PrintGoMode.SelectedValue==null)
+                mode = _Item.PrintGoMode;
+            else
+                mode = (TcpIp.EPrintGoMode)CB_PrintGoMode.SelectedValue;
+            if (mode==TcpIp.EPrintGoMode.PG_MODE_GAP || mode==TcpIp.EPrintGoMode.PG_MODE_LENGTH)
+                RowCopies.Height = GridLength.Auto;
+            else
+                RowCopies.Height = new GridLength(0);
         }
 
      }

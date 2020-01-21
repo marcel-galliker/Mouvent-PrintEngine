@@ -351,7 +351,8 @@ SPrintQueueItem *pq_get_next_item_LH702(void)
 		if (_List[item].state==PQ_STATE_QUEUED)
 		{
 			_List[item].lengthUnit = PQ_LENGTH_COPIES;
-			_List[item].copies = 1000000;
+			if (_List[item].printGoMode!=PG_MODE_LENGTH && _List[item].printGoMode!=PG_MODE_GAP)
+				_List[item].copies = 1000000;
 			_ActiveState = _List[item].state;
 			Error(LOG, 0, "Next Image >>%s<<", _List[item].filepath);
 			return &_List[item];

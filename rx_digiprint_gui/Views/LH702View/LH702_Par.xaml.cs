@@ -39,6 +39,7 @@ namespace RX_DigiPrint.Views.LH702View
         private void Save_Clicked(object sender, RoutedEventArgs e)
         {
             CB_Material.EndEditMode(true, true);
+            ParPanelMaterial.Send();
             Material material = CB_Material.SelectedItem as Material;
             if (material!=null)
             {
@@ -110,7 +111,6 @@ namespace RX_DigiPrint.Views.LH702View
         {
             Material material = RxGlobals.MaterialList.FindByName(XML_MATERIAL.Value);
             CB_Material.SelectedItem = material;
-            Save_Clicked(this, null);
         }
 
      }

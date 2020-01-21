@@ -38,6 +38,7 @@
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto" x:Name="RowCopies"/>
                     <RowDefinition Height="auto"/>
                 </Grid.RowDefinitions>
                 
@@ -53,6 +54,7 @@
                     Grid.Row="2" Grid.Column="1"
                     SelectedValue="{Binding PrintGoMode}"
                     ImageBox="true"
+                    SelectionChanged="CB_PrintGoMode_SelectionChanged"
                     >
                 </rx:RxComboBox>
 
@@ -73,8 +75,15 @@
                     LostFocus="PageMargin_LostFocus"
                     />
                 <TextBlock Grid.Row="4" Grid.Column="2" Text="mm" FontSize="{StaticResource FontSizeStd}" Padding="3,0,0,0" VerticalAlignment="Center"/>
-                
-                
+
+                <TextBlock Grid.Row="5" Grid.Column="0" Text="Copies"/>
+                <common:RxNumBox Grid.Row="5" Grid.Column="1"
+			        Text="{Binding Copies}"
+			        HorizontalContentAlignment="Right"
+			        Background="Transparent"                    VerticalAlignment="Center"
+                    LostFocus="PageMargin_LostFocus"
+                    />
+
             </Grid>
 
             <Grid Grid.Row="3" Width="250" HorizontalAlignment="Left">

@@ -652,7 +652,7 @@ int plc_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen)
 		case CMD_PLC_REQ_MATERIAL:	_plc_req_material  (socket, FILENAME_MATERIAL, cmd); break;
 		case CMD_PLC_SAVE_MATERIAL:	_plc_save_material (socket, FILENAME_MATERIAL, CMD_PLC_ITM_MATERIAL, (char*)data);
 									lh702_save_material((char*)data);
-									_plc_update_material_list(FILENAME_MATERIAL, FILENAME_MATERIAL_LIST);
+									// _plc_update_material_list(FILENAME_MATERIAL, FILENAME_MATERIAL_LIST);
 									break;
 		case CMD_PLC_DEL_MATERIAL:	_plc_del_material  (socket, FILENAME_MATERIAL, cmd, (char*)data);		break;
 	}
