@@ -15,6 +15,7 @@ REM # All Rights Reserved.                            #
 REM #                                                 #
 REM ###################################################
 
+
 echo SOPC_KIT_NIOS2_15 %SOPC_KIT_NIOS2_15%
 
 REM ######################################
@@ -85,6 +86,11 @@ REM # Launch cygwin nios2eds command shell
 :run_nios2_command_shell
 
 set PROJECT_PATH=%1
+rem remove quotes
+set PROJECT_PATH=%PROJECT_PATH:"=%
+rem remove last backspash
+if "%PROJECT_PATH:~-1%"=="\" set PROJECT_PATH=%PROJECT_PATH:~0,-1%
+
 set FOLDER="%PROJECT_PATH%\software"
 
 REM get project name from source directory
