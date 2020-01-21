@@ -202,7 +202,7 @@ static int _connection_closed(RX_SOCKET socket, const char *peerName)
 #define SCALE(board, scale) (((board)-1)*6+(scale)-1)
 void fluid_set_config(void)
 {
-	SFluidBoardCfgLight cfg;
+	SFluidBoardCfg cfg;
 	int i, n;
 	
 	_Scanning = rx_def_is_scanning(RX_Config.printer.type);
@@ -274,18 +274,9 @@ void fluid_set_config(void)
 			cfg.lung_enabled = (i==0);
 			for (n=0; n<INK_PER_BOARD; n++) 
 			{
-				cfg.present[n]		   = (RX_Config.inkSupply[i*INK_PER_BOARD+n].inkFileName[0]!=0);
-				cfg.cylinderPresSet[n] = RX_Config.inkSupply[i*INK_PER_BOARD+n].cylinderPresSet;
-	//			cfg.meniscusSet[n]	  = RX_Config.inkSupply[i*INK_PER_BOARD+n].ink.meniscus;
-				cfg.meniscusSet[n]	  = INVALID_VALUE;
-	//			cfg.condPresOutSet[n] = RX_Config.inkSupply[i*INK_PER_BOARD+n].ink.condPresOut;
-				cfg.inkTemp[n]        = RX_Config.inkSupply[i*INK_PER_BOARD+n].ink.temp;
-				cfg.inkTempMax[n]	  = RX_Config.inkSupply[i*INK_PER_BOARD+n].ink.tempMax;
-				memcpy(cfg.flushTime[n], RX_Config.inkSupply[i*INK_PER_BOARD+n].ink.flushTime, sizeof(cfg.flushTime[n]));
-    			// fluid board
-    			//cfg.fluid_P[n] = RX_Config.inkSupply[i*INK_PER_BOARD+n].fluid_P;    
-			}
-    				
+				memcpy(&cfg.ink_supply[n], &RX_Config.inkSupply[i*INK_PER_BOARD+n], sizeof(cfg.ink_supply[n]));
+				cfg.ink_supply[n].meniscusSet	  = INVALID_VALUE;
+			}    				
 			cfg.headsPerColor = RX_Config.headsPerColor;
 
 			sok_send_2(&_FluidThreadPar[i].socket, CMD_FLUID_CFG, sizeof(cfg), &cfg);
@@ -559,7 +550,9 @@ static void _control(int fluidNo)
 	//		Error(LOG, 0, "Fluid[%d] in mode >>%s<<", no, FluidCtrlModeStr(_stat->ctrlMode));
 			switch(_stat->ctrlMode)
 			{
-				case ctrl_check_step0:	_send_ctrlMode(no, ctrl_off, TRUE);	break;
+				case ctrl_shutdown:		_send_ctrlMode(no, ctrl_shutdown_done, TRUE);	break;	
+				case ctrl_shutdown_done:_send_ctrlMode(no, ctrl_off, TRUE);				break;	
+				case ctrl_check_step0:	_send_ctrlMode(no, ctrl_off, TRUE);				break;
 			//	case ctrl_check_step0:	_send_ctrlMode(no, ctrl_print_step1, TRUE);	break;
 			//	case ctrl_check_step1:	_send_ctrlMode(no, ctrl_print_step2, TRUE);	break;
 			//	case ctrl_check_step2:	_send_ctrlMode(no, ctrl_print_step3, TRUE);	break;
