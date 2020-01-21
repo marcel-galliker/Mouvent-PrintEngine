@@ -29,15 +29,19 @@
                 <Image Source="../../Resources/Bitmaps/Right.ico"/>
             </common:RxButton>
 
-        <!--
+            <!--
             <common:RxButton Click="Clean_Clicked" ToolTip="Clean" >
                 <Image Source="../../Resources/Bitmaps/clean.ico"/>
             </common:RxButton>
         -->
             <common:RxButton Click="Washing_Clicked" x:Name="Button_Wash">
-                <Image Source="../../Resources/Bitmaps/wash.ico"/>
+                <Grid>
+                    <Image Source="../../Resources/Bitmaps/wash.ico"/>
+                    <TextBlock Text="10s" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{StaticResource FontSizeXL}" x:Name="Wash_Time1" Foreground="White" FontWeight="ExtraBlack"/>
+                    <TextBlock Text="10s" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{StaticResource FontSizeXL}" x:Name="Wash_Time" Foreground="Red" />
+                </Grid>
             </common:RxButton>
-            
+
             <!--
             <common:RxButton Click="Warmup_Clicked">
                 <StackPanel>

@@ -94,10 +94,20 @@ namespace RX_DigiPrint.Views.UserControls
         //--- _Timer ------------------------------------------------------------------
         private void _Timer(int no)
         {
+            string val;
+            RxGlobals.Plc.RequestVar("Application.GUI_00_001_Main"+"\n"
+                +"STA_WEBIN_PREP_FWD"+"\n"
+                +"STA_WEBIN_PREP_BWD"+"\n"
+                +"STA_WASHING_TIMER"+"\n");
+            {
+                val = RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_WASHING_TIMER");
+                int time=Rx.StrToInt32(val);
+                Button_Wash.IsBusy = time>0;
+                Wash_Time.Text = Wash_Time1.Text = val+"s";
+                Wash_Time.Visibility = Wash_Time1.Visibility = (time>0)? Visibility.Visible : Visibility.Collapsed;
+            }
             if (CMD_JOG_FWD.Visibility==Visibility.Visible )
             {
-                string val;
-                RxGlobals.Plc.RequestVar("Application.GUI_00_001_Main"+"\n"+ "STA_WEBIN_PREP_FWD"+"\n"+"STA_WEBIN_PREP_BWD"+"\n");
                 val = RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_WEBIN_PREP_FWD");
                 CMD_JOG_FWD.IsBusy = (val!=null) && val.Equals("TRUE");
                 val = RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_WEBIN_PREP_BWD");
