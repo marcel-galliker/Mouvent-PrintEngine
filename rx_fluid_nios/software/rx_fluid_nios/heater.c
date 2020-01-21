@@ -38,6 +38,11 @@ static int 	_Temp_Tab[NIOS_INK_SUPPLY_CNT][100];
 static int 	_Temp_Average[NIOS_INK_SUPPLY_CNT];
 static int 	_Temp_Inc[NIOS_INK_SUPPLY_CNT];
 
+//--- CEDRIC --- Error Temperature frozen : Auto-reset + yellow message
+static int 	_Temp_Pre[NIOS_INK_SUPPLY_CNT];
+static int 	_Heater_Pre[NIOS_INK_SUPPLY_CNT];
+static int 	_TimeTempFrozen[NIOS_INK_SUPPLY_CNT];
+
 //--- prototypes ----------------------------------
 static void _set_heater_out(int i, int newState);
 
@@ -110,7 +115,7 @@ void heater_tick_10ms(void)
 	{
 		if (((~heater_gpio_in)>>(8+i)) & 0x01)
 		{
-			pRX_Status->ink_supply[i].error |= err_heater_board;
+			if(pRX_Config->ink_supply[i].heaterTempMax > 39000) pRX_Status->ink_supply[i].error |= err_heater_board;
 			pRX_Status->ink_supply[i].heaterTemp = INVALID_VALUE;
 		}
 		else
@@ -131,6 +136,27 @@ void heater_tick_10ms(void)
 			_Temp_Average[i] = 0;
 			for(j=0;j<100;j++) _Temp_Average[i] += _Temp_Tab[i][j];
 			pRX_Status->ink_supply[i].heaterTemp = _Temp_Average[i];
+
+			//--- CEDRIC --- Error Temperature frozen : Auto-reset + EVENT message
+			if(pRX_Config->ink_supply[i].ctrl_mode > ctrl_off)
+			{
+				if((pRX_Status->ink_supply[i].heaterTemp == _Temp_Pre[i]) // temperature frozen
+					&&(_pid_Temp[i].val - _Heater_Pre[i] > 50)) // Heater increasing for more than 5%
+				{
+					_TimeTempFrozen[i]++;
+					if(_TimeTempFrozen[i] > 6000)	// during 20 seconds
+					{
+						init_AMC7891(AVALON_SPI_AMC7891_1_BASE);
+						pRX_Status->ink_supply[i].error |= err_heater_temp_frozen;
+					}
+				}
+				else
+				{
+					_TimeTempFrozen[i] = 0;
+					_Heater_Pre[i] = _pid_Temp[i].val;
+					_Temp_Pre[i] = pRX_Status->ink_supply[i].heaterTemp;
+				}
+			}
 		}
 
 		if(pRX_Status->ink_supply[i].heaterTemp != INVALID_VALUE && pRX_Config->ink_supply[i].ctrl_mode > ctrl_off)

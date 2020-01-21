@@ -24,7 +24,7 @@ void nios_load(const char *exepath);
 
 void nios_main(int ticks, int menu);
 
-void nios_set_cfg			(SFluidBoardCfgLight *pcfg);
+void nios_set_cfg			(SFluidBoardCfg *pcfg);
 void nios_set_ctrlmode		(int isNo, EnFluidCtrlMode mode);
 // void nios_set_pressure		(int isNo, int pressure);
 void nios_set_purge_par		(int isNo, int delay, int time);

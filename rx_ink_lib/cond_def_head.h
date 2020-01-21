@@ -247,7 +247,7 @@ typedef struct SConditionerStat_mcu
 	UINT16			flowResistance;
 	
 	UINT32			pump;				// rpm (calculated based on actual/desired output pressure)
-	UINT32			pump_measured;		// measured rpm
+	UINT32			pump_measured;		// measured ml/min
 	UINT32			tempIn;				// actual Temp (1/1000 °C)
     UINT32			tempHeater;		    // Temperature measured directly on heater cartridge (>= Revision #h) (1/1000 °C)
 	UINT32			heater_percent;		// heater on time (between 0% and 80%)

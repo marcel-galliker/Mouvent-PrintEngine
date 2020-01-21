@@ -214,7 +214,9 @@ namespace RX_DigiPrint.Views.PrintSystemView
         {
             if (_InkSupply.CtrlMode==EFluidCtrlMode.ctrl_off && !_InkSupply.Flushed) 
                 //_command(EFluidCtrlMode.ctrl_warmup); 
-                _command(null, EFluidCtrlMode.ctrl_print, false); 
+                _command(null, EFluidCtrlMode.ctrl_print, false);
+            else if (_InkSupply.CtrlMode==EFluidCtrlMode.ctrl_print)
+                _command(null, EFluidCtrlMode.ctrl_shutdown, false);
             else                                              
                 _command(null, EFluidCtrlMode.ctrl_off, false); 
         }

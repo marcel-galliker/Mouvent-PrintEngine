@@ -1,6 +1,7 @@
 ﻿using RX_Common;
 using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Services;
+using RX_DigiPrint.Views.LB702WBView;
 using RX_DigiPrint.Views.UserControls;
 using System;
 using System.Collections.Generic;
@@ -50,5 +51,6 @@ namespace RX_DigiPrint.Models
         public static Window            BluetoothLoginWnd;
         public static License           License           = new License();
         public static CleafOrder        CleafOrder        = new CleafOrder();
+        public static LB702WB_Machine   LB702WB_Machine;
     }
 }

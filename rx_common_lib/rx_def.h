@@ -1012,30 +1012,17 @@ typedef struct SInkSupplyCfg
 	SInkDefinition	ink;
 	INT32			cylinderPresSet;
 	INT32			meniscusSet;
-	INT32			flushTime;
 	ERectoVerso		rectoVerso;
 	char			scannerSN[16];
 } SInkSupplyCfg;
-
+	
 typedef struct SFluidBoardCfg
-{	
-	SInkSupplyCfg	cfg[INK_PER_BOARD];
-} SFluidBoardCfg;
-
-typedef struct SFluidBoardCfgLight
 {		
+	EPrinterType	printerType;
 	UINT32			lung_enabled;
 	UINT32			headsPerColor;
-	INT32			present			[INK_PER_BOARD];
-	INT32			cylinderPresSet	[INK_PER_BOARD];
-	INT32			meniscusSet		[INK_PER_BOARD];
-//	INT32			condPresOutSet	[INK_PER_BOARD];
-	UINT32			inkTemp			[INK_PER_BOARD];	
-	UINT32			inkTempMax		[INK_PER_BOARD];
-    UINT32			fluid_P         [INK_PER_BOARD];
-    UINT32			flushTime       [INK_PER_BOARD][3];
-	EPrinterType	printerType;
-} SFluidBoardCfgLight;
+	SInkSupplyCfg	ink_supply[INK_PER_BOARD];	
+} SFluidBoardCfg;
 	
 typedef struct SHeadStateLight
 {
@@ -1634,6 +1621,7 @@ extern SHeadBoardStat	RX_HBStatus[];
 extern SPrinterStatus	RX_PrinterStatus;
 extern SEncoderStat		RX_EncoderStatus;
 extern SEncoderCfg		RX_EncoderCfg;
+extern SFluidBoardCfg	RX_FluidBoardCfg;
 extern SFluidBoardStat	RX_FluidBoardStatus;
 extern SStepperStat	RX_StepperStatus;
 extern SStepperStat	RX_ClnStatus;

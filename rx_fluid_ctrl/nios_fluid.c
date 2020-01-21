@@ -72,7 +72,7 @@ static FILE				*_LogFile=NULL;
 static int				 _LogCnt=0;
 static int				 _NiosAlive;
 static int				 _NiosAliveTime;
-static int				 _TempMax=0;
+static int				 _HeaterUsed;
 
 static SSimuData _SimuData[NIOS_INK_SUPPLY_CNT];
 
@@ -173,7 +173,7 @@ static void _nios_check_errors(void)
 	if (_Stat->error&err_amc_fluid)			 ErrorFlag(ERR_ABORT, &RX_FluidBoardStatus.err, err_amc_fluid,           0, "AMC Fluid Temperature Error");
 	if (_Stat->error&err_watchdog)			 ErrorFlag(ERR_ABORT, &RX_FluidBoardStatus.err, err_watchdog,            0, "Watchdog");
 //	if (_Stat->error&err_inkpres_not_reached)ErrorFlag(ERR_CONT,  &RX_FluidBoardStatus.err, err_inkpres_not_reached, 0, "Ink Tank pressure not reached");
-    if (_TempMax>40000 && _Stat->error&err_amc_heater) ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_amc_heater, 0, "No Heater Board connected to Fluid");
+    if (_HeaterUsed && _Stat->error&err_amc_heater) ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_amc_heater, 0, "No Heater Board connected to Fluid");
     
 	int isNo;
 	for (isNo=0; isNo<SIZEOF(_Stat->ink_supply); isNo++)
@@ -184,6 +184,9 @@ static void _nios_check_errors(void)
 //			ErrorFlag (ERR_CONT, (UINT32*)&_Error[isNo],  err_ink_tank_pressure,  0, "InkSupply[%d] Ink Tank Sensor Error", isNo+1);							
 		if (nios_is_heater_connected())
 		{
+			if (_Stat->ink_supply[isNo].error & err_heater_temp_frozen)
+				ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_heater_temp_frozen, 0, "Heater Box temperatures frozen : auto-reset done");
+		
 			if (_Stat->ink_supply[isNo].error & err_heater_board)	ErrorFlag(ERR_CONT, (UINT32*)&_Error[isNo], err_heater_board, 0, "InkSupply[%d] Heater Board Error or Openload", isNo + 1);	
 			if (_Stat->ink_supply[isNo].error & err_watchdog)		ErrorFlag(ERR_CONT, (UINT32*)&_Error[isNo], err_heater_board, 0, "InkSupply[%d] Heater Board Watchdog Error", isNo + 1);	
 			if (_Stat->HeaterBoard_Vsupply_3V < 3000)				ErrorFlag(ERR_CONT, (UINT32*)&_Error[isNo], err_heater_board, 0, "InkSupply[%d] Heater Board 3.3V error", isNo + 1);
@@ -262,23 +265,32 @@ void nios_load(const char *exepath)
 }
 
 //--- nios_set_cfg -----------------------------------------------------------
-void nios_set_cfg(SFluidBoardCfgLight *pcfg)
+void nios_set_cfg(SFluidBoardCfg *pcfg)
 {
 	int i;
 	if (!_Init) return;
-	_TempMax = 0;
+	
+	memcpy(&RX_FluidBoardCfg, pcfg, sizeof(RX_FluidBoardCfg));
+	switch(RX_FluidBoardCfg.printerType)
+	{
+	case printer_LB701:		_HeaterUsed=TRUE; break;
+	case printer_LB702_UV:	_HeaterUsed=TRUE; break;
+	case printer_LH702:		_HeaterUsed=TRUE; break;
+	case printer_cleaf:		_HeaterUsed=TRUE; break;
+		
+	default: _HeaterUsed=FALSE;			
+	}
 	for (i=0; i<INK_PER_BOARD; i++) 
 	{
-		_Cfg->ink_supply[i].present         = pcfg->present;
-		if (pcfg->cylinderPresSet[i]<=INK_PRESSURE_MAX) _Cfg->ink_supply[i].cylinderPresSet = pcfg->cylinderPresSet[i];
-		_Cfg->ink_supply[i].meniscusSet		= pcfg->meniscusSet[i];
-//		_Cfg->ink_supply[i].condPresOutSet	= pcfg->condPresOutSet[i];
-		_Cfg->ink_supply[i].heaterTemp	    = pcfg->inkTemp[i] *1000;
-		_Cfg->ink_supply[i].heaterTempMax	= pcfg->inkTempMax[i] *1000;
-		//_Cfg->ink_supply[i].fluid_P			= pcfg->fluid_P[i];
-		memcpy(_Cfg->ink_supply[i].flushTime, pcfg->flushTime[i], sizeof(_Cfg->ink_supply[i].flushTime));
-		
-		if (_Cfg->ink_supply[i].heaterTemp) _TempMax = _Cfg->ink_supply[i].heaterTemp;
+		_Cfg->ink_supply[i].present         = (RX_FluidBoardCfg.ink_supply[i].ink.fileName[0]!=0);
+		if (pcfg->ink_supply[i].cylinderPresSet<=INK_PRESSURE_MAX) _Cfg->ink_supply[i].cylinderPresSet = pcfg->ink_supply[i].cylinderPresSet;
+		_Cfg->ink_supply[i].meniscusSet		= pcfg->ink_supply[i].meniscusSet;
+		_Cfg->ink_supply[i].heaterTemp	    = pcfg->ink_supply[i].ink.temp*1000;
+		_Cfg->ink_supply[i].heaterTempMax	= pcfg->ink_supply[i].ink.tempMax*1000;
+		if (pcfg->ink_supply[i].ink.tempMax>36) _HeaterUsed = TRUE;
+	//	_Cfg->ink_supply[i].condPresOutSet	= pcfg->condPresOutSet[i];
+	//	_Cfg->ink_supply[i].fluid_P			= pcfg->fluid_P[i];
+		memcpy(_Cfg->ink_supply[i].flushTime, pcfg->ink_supply[i].ink .flushTime, sizeof(_Cfg->ink_supply[i].flushTime));
 	}
 	_Cfg->cmd.lung_enabled		= pcfg->lung_enabled;
 	_Cfg->printerType			= pcfg->printerType;
@@ -421,7 +433,7 @@ void _update_status(void)
 		
 		pstat->info.val = 0x00;
 		pstat->warn.val = 0x00;
-		pstat->err		= 0x00;
+		pstat->err		= _Stat->ink_supply[i].error;  // 0x00;
 
 		pstat->info.connected	= TRUE;
 		pstat->info.bleedValve  = _Stat->ink_supply[i].bleedValve;
@@ -467,7 +479,9 @@ static void _display_status(void)
 		term_printf("Version NIOS:    %-16s sysid=%d, timestamp=%d  ", str, _Stat->qsys_id, _Stat->qsys_timestamp);
 		if (_Stat->error&err_fpga_incompatible) term_printf("ERROR\n");
 		else									term_printf("OK\n");
-		term_printf("alive:           %d               log:%d         heater connected:%d\n", _Stat->alive, _LogCnt, !(_Stat->error&err_amc_heater));
+		term_printf("alive:           %d               log:%d", _Stat->alive, _LogCnt);
+		if (_HeaterUsed)	term_printf("         heater connected:%d", !(_Stat->error&err_amc_heater));
+		term_printf("\n");
 		term_printf("error:           0x%08x    Fluid=%d,  watchdog=%d\n", 
 			_Stat->error,
 			(_Stat->error&err_amc_fluid)!=0,
@@ -551,7 +565,7 @@ static void _display_status(void)
 		term_printf("Pump - Air ON	"); for (i = 0; i < NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str(_Stat->ink_supply[i].TestBleedLine_Pump_Phase2)); term_printf("\n");
 		term_printf("Pump - Bleed ON	 "); for (i = 0; i < NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str(_Stat->ink_supply[i].TestBleedLine_Pump_Phase3)); term_printf("\n");
 		
-    	if (!nios_is_heater_connected()) 
+    	if (nios_is_heater_connected()) 
 		{
 			term_printf("\n");
 			term_printf("--- HEATER ------------------------------------------------------\n");

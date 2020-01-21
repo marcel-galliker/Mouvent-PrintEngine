@@ -176,7 +176,35 @@ typedef enum ENiosInkSupplyErr
 //	err_ink_tank_pressure	= 0x00000001,
 //	err_cal_inkpump_failed	= 0x00000002,
 	err_heater_board    	= 0x00000004,
+	err_heater_temp_frozen 	= 0x00000008,	
 	err_overpressure		= 0x00000040,
+	
+	// Check 1 sequence
+	err_ink_pump			= 0x00000080,
+	err_ink_tube_clogged	= 0x00000100,
+	err_bleed_tube_clogged	= 0x00000200,
+	err_damper				= 0x00000400,
+	err_ink_tube_suck_air	= 0x00000800,
+	err_Foam				= 0x00001000,
+	err_cylinder_empty		= 0x00002000,
+	
+	// Check 2 sequence
+	err_valves_leakage		= 0x00004000,
+	err_air_valve			= 0x00008000,
+	err_bleed_valve			= 0x00010000,
+	err_air_valveOK			= 0x00020000,
+	err_bleed_valveOK		= 0x00040000,
+	err_air_valve_tight		= 0x00080000,
+	err_bleed_valve_tight	= 0x00100000,
+	
+	// Check 4 sequence
+	err_feed_tube			= 0x00200000,
+	err_check4_timeout		= 0x00400000,
+	err_filter_clogged		= 0x00800000,
+	err_return_pipe			= 0x01000000,
+	err_ink_not_heating		= 0x02000000,
+	err_ink_too_hot			= 0x04000000,
+	
 } ENiosInkSupplyErr;
 
 //--- SNiosInkSupplyStat -------------------------

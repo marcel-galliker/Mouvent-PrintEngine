@@ -180,22 +180,23 @@ static int _handle_ctrl_msg(RX_SOCKET socket, void *msg)
 	//--- handle the message --------------
 	reply = REPLY_OK;
 	SMsgHdr *phdr = (SMsgHdr*)msg;
+	void   *pdata =  &phdr[1];
 //	TrPrintfL(1, "Received msgId=0x%08x", phdr->msgId);
 	switch (phdr->msgId)
 	{
-	case CMD_ERROR_RESET:		nios_error_reset();																		break;
+	case CMD_ERROR_RESET:		nios_error_reset();											break;
 
-	case CMD_FLUID_CFG:			nios_set_cfg		((SFluidBoardCfgLight*) &phdr[1]);									
+	case CMD_FLUID_CFG:			nios_set_cfg		((SFluidBoardCfg*)pdata);									
 								fpga_cfg			();
 								break;
-	case CMD_FLUID_STAT:		_do_fluid_stat		(socket, (SHeadStateLight*)	&phdr[1]);	break;
+	case CMD_FLUID_STAT:		_do_fluid_stat		(socket, (SHeadStateLight*)	pdata);		break;
 	case CMD_FLUID_CTRL_MODE:	_do_fluid_ctrlMode	(socket, (SFluidCtrlCmd*)msg);			break;
-	case CMD_SET_PURGE_PAR:		_do_set_purge_par	(socket, (SPurgePar*)	&phdr[1]);		break;
+	case CMD_SET_PURGE_PAR:		_do_set_purge_par	(socket, (SPurgePar*)	pdata);			break;
 
 	case CMD_SCALES_SET_CFG:	 _do_scales_set_cfg(socket, (SScalesCfgMsg*)msg);			break;
 	case CMD_SCALES_GET_CFG:	 _do_scales_get_cfg(socket);								break;
-	case CMD_SCALES_TARA:		 _do_scales_tara(socket, (INT32*)&phdr[1]);					break;	
-	case CMD_SCALES_CALIBRATE:	 _do_scales_calib(socket, (SValue*)&phdr[1]);				break;	
+	case CMD_SCALES_TARA:		 _do_scales_tara(socket, (INT32*)pdata);					break;	
+	case CMD_SCALES_CALIBRATE:	 _do_scales_calib(socket, (SValue*)pdata);					break;	
 	case CMD_SCALES_STAT:		 _do_scales_stat(socket);									break;	
 	default:		
 					{

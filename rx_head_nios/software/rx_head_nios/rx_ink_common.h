@@ -153,12 +153,12 @@ typedef enum EnFluidCtrlMode
 {
     ctrl_undef,          // 0x000:
 	ctrl_shutdown,	     //	0x001:
-//	ctrl_shutdown_done,	 //	0x002:
-	ctrl_error		= 0x002,
-    ctrl_off		= 0x003,            //	0x003:
-    ctrl_warmup,         // 0x004:
-    ctrl_readyToPrint,   // 0x005:
-	ctrl_print,          // 0x006:
+	ctrl_shutdown_done,	 // 0x002:
+	ctrl_error,			 // 0x003:
+    ctrl_off,			 // 0x004:           
+    ctrl_warmup,         // 0x005:
+    ctrl_readyToPrint,   // 0x006:
+	ctrl_print,          // 0x007:
 	
 	ctrl_check_step0		= 0x010,    // 0x010:
 	ctrl_check_step1,			// 0x011
