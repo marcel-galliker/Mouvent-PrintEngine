@@ -196,7 +196,7 @@ int	plc_init(void)
 	if (_SimuPLC)     Error(WARN, 0, "PLC in Simulation");
 	if (_SimuEncoder) Error(WARN, 0, "Encoder in Simulation");
 	
-	if (RX_Config.printer.type==printer_LH702) _SimuPLC = TRUE;
+	if (RX_Config.printer.type==printer_LH702 && !arg_testMachine) _SimuPLC = TRUE;
 	
 	if (_SimuPLC) rx_thread_start(_plc_simu_thread, NULL, 0, "_plc_simu_thread");
 	else		  rx_thread_start(_plc_thread, NULL, 0, "_plc_thread");
@@ -1467,7 +1467,7 @@ static void _plc_state_ctrl()
 		//	TrPrintfL(TRUE, "_heads_to_print: printhead_en=%d, printState=%d (%d)", RX_StepperStatus.info.printhead_en, RX_PrinterStatus.printState, ps_printing);
 		//	Error(LOG, 0, "_heads_to_print: printhead_en=%d, printState=%d (%d)", RX_StepperStatus.info.printhead_en, RX_PrinterStatus.printState, ps_printing);
 		//	if (RX_Config.printer.type!=printer_cleaf || (RX_StepperStatus.info.printhead_en && RX_PrinterStatus.printState==ps_printing))
-			if(RX_PrinterStatus.printState == ps_printing && (RX_StepperStatus.info.printhead_en || (RX_Config.printer.type!=printer_cleaf && RX_Config.printer.type!=printer_LH702)))
+			if(RX_PrinterStatus.printState == ps_printing && (RX_StepperStatus.info.printhead_en || (RX_Config.printer.type!=printer_cleaf && RX_Config.printer.type!=printer_LH702) || arg_testMachine))
 			{
 				step_lift_to_print_pos();
 				_heads_to_print = TRUE;													
@@ -1476,16 +1476,16 @@ static void _plc_state_ctrl()
 				
 		{
 			z_in_print = RX_StepperStatus.info.z_in_print;
-			if (RX_Config.printer.type==printer_LH702)
+			if (RX_Config.printer.type==printer_LH702 && !arg_testMachine)
 			{
 				if (_SimuEncoder) z_in_print = TRUE;
 			}
-			else if (_SimuPLC) z_in_print = TRUE;			
+			else if (_SimuPLC) z_in_print = TRUE;
 		}
 
 		if(_StartPrinting && _StartEncoderItem.pageWidth == 0)
 		{
-	//		Error(LOG, 0, "_StartPrinting=%d, enc_ready=%d, pq_is_ready2print=%d, printState=%d, z_in_print=%d, pageWidth=%d", _StartPrinting, enc_ready(), pq_is_ready2print(&_StartEncoderItem), RX_PrinterStatus.printState, z_in_print, _StartEncoderItem.pageWidth);
+		//	Error(LOG, 0, "_StartPrinting=%d, enc_ready=%d, pq_is_ready2print=%d, printState=%d, z_in_print=%d, pageWidth=%d", _StartPrinting, enc_ready(), pq_is_ready2print(&_StartEncoderItem), RX_PrinterStatus.printState, z_in_print, _StartEncoderItem.pageWidth);
 		}
 		
 		if(_StartPrinting
@@ -1501,7 +1501,6 @@ static void _plc_state_ctrl()
 			enc_enable_printing(TRUE);
 			if(!_SimuPLC)    _plc_set_command("CMD_PRODUCTION", "CMD_RUN");
 			if(_SimuEncoder) ctrl_simu_encoder(_Speed);
-//			step_set_vent(_Speed);
 			memset(&_StartEncoderItem, 0, sizeof(_StartEncoderItem));
 //			TrPrintfL(TRUE, "PLC: CMD_RUN sent");
 		//	Error(LOG, 0, "PLC: CMD_RUN sent");

@@ -1156,7 +1156,6 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 	return REPLY_OK;
 }
 
-
 //--- _data_split_scan -----------------------------------------------------------------------
 static int _data_split_scan(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int lengthPx, int blkNo, int blkCnt, int clearBlockUsed, int same, SPrintListItem *parItem)
 {
@@ -1281,7 +1280,7 @@ static int _data_split_scan(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 					pInfo->blkCnt		= (pInfo->dstLineLen * pBmpInfo->lengthPx + RX_Spooler.dataBlkSize-1) / RX_Spooler.dataBlkSize;
 					if (pInfo->blkCnt>blkCnt) Error(ERR_ABORT, 0, "Data: blkCnt=%d, max=%d", pInfo->blkCnt, blkCnt);
 					if (clearBlockUsed) _BlkNo[pInfo->board][pInfo->head] = (_BlkNo[pInfo->board][pInfo->head]+pInfo->blkCnt)%(RX_Spooler.dataBlkCntHead);
-				//	TrPrintfL(TRUE, "Split[%d]: startPx=%d, WidthPx=%d, fillBt=%d, jetPx0=%d, pixelPerByte=%d, buffer=0x%08x", head, startPx, pInfo->widthPx, pInfo->fillBt,  pInfo->jetPx0, pixelPerByte, pInfo->data);
+					TrPrintfL(TRUE, "Split[%d]: startPx=%d, WidthPx=%d, fillBt=%d, jetPx0=%d, pixelPerByte=%d, buffer=0x%08x", head, startPx, pInfo->widthPx, pInfo->fillBt,  pInfo->jetPx0, pixelPerByte, pInfo->data);
 				}
 				//--- increment ---
 				startPx += RX_Spooler.headWidthPx;

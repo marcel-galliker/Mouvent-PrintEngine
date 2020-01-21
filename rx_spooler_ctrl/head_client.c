@@ -36,7 +36,7 @@ static int	_Trace=0;
 #define SIMU_WRITE	1	// write data to file
 #define SIMU_READ	2	// test reading files, no sending, no writing
 
-static int	_Simulation=SIMU_WRITE;
+static int	_Simulation=SIMU_OFF;
 
 // #define RAW_SOCKET
 
@@ -434,9 +434,9 @@ static void _save_to_file(SBmpSplitInfo *pInfo)
 	}
 	
 	if (rx_def_is_scanning(RX_Spooler.printerType))
-		sprintf(fname, "%strace/%s/Scan%02d-img%d-hd%d_%s.bmp", PATH_HOME PATH_RIPPED_DATA_DIR, RX_ColorNameShort(pInfo->inkSupplyNo), ++_SimuNo[pInfo->colorCode], pInfo->pListItem->id.id, pInfo->head, RX_ColorNameShort(pInfo->inkSupplyNo));
+		sprintf(fname, "%strace/%s/Scan%02d-img%d-hd%d_%s.bmp", PATH_RIPPED_DATA, RX_ColorNameShort(pInfo->inkSupplyNo), ++_SimuNo[pInfo->colorCode], pInfo->pListItem->id.id, pInfo->head, RX_ColorNameShort(pInfo->inkSupplyNo));
 	else
-		sprintf(fname, "%strace/%s/(id=%d, p=%d, c=%d)-%s%d.bmp", PATH_HOME PATH_RIPPED_DATA_DIR, RX_ColorNameShort(pInfo->inkSupplyNo), pInfo->pListItem->id.id, pInfo->pListItem->id.page, pInfo->pListItem->id.copy, RX_ColorNameShort(pInfo->inkSupplyNo), head);
+		sprintf(fname, "%strace/%s/(id=%d, p=%d, c=%d)-%s%d.bmp", PATH_RIPPED_DATA, RX_ColorNameShort(pInfo->inkSupplyNo), pInfo->pListItem->id.id, pInfo->pListItem->id.page, pInfo->pListItem->id.copy, RX_ColorNameShort(pInfo->inkSupplyNo), head);
 	bmp_write(fname, buffer, pInfo->bitsPerPixel, pInfo->widthPx, pInfo->srcLineCnt, pInfo->dstLineLen, FALSE);
 	free(buffer);
 //	Error(LOG, 0, "File saved to >>%s<<", fname);
@@ -717,7 +717,7 @@ static int _send_to_board(SHBThreadPar *par, int head, int blkNo, int blkCnt)
 				par->msg.blkNo = dstBlk;
 				if (RX_Spooler.printerType==printer_LH702)
 				{
-					data_fill_blk(pinfo, i, &par->msg.blkData[1], TRUE);
+					data_fill_blk(pinfo, i, &par->blkData[1], TRUE);
 					memcpy(par->msg.blkData, &par->blkData[1], sizeof(par->msg.blkData));
 				}
 				else data_fill_blk(pinfo, i, par->msg.blkData, FALSE);

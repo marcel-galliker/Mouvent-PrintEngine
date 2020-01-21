@@ -463,9 +463,11 @@ static void _step_set_config(int no)
 	cfg.material_thickness = plc_get_thickness();
 	cfg.boardNo=no;
 		
-	if (RX_Config.printer.type==printer_DP803 && !strcmp(RX_Hostname, "LB701-0001"))
+	if (arg_testMachine)
 	{
-		Error(WARN, 0, "TEST for LB701-0001");
+		if (RX_Config.printer.type==printer_DP803) Error(WARN, 0, "Simulate DP803 by LB701");
+		if (RX_Config.printer.type==printer_LH702) Error(WARN, 0, "Simulate LH702 by LB701");
+
 		cfg.printerType = printer_LB701;
 	}
 	switch(_StepperType)

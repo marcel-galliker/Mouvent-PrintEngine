@@ -740,7 +740,7 @@ static int _print_next(void)
 					{
 						int img_offset=_Item.pageMargin + _Item.pageWidth;
 						int bar_width=RX_Spooler.barWidthPx*25400/1200;
-						if (img_offset>bar_width && RX_Config.printer.type!=printer_LH702) img_offset = bar_width;
+						if (img_offset>bar_width && (RX_Config.printer.type!=printer_LH702 || arg_testMachine)) img_offset = bar_width;
 						
 						{
 							SPrintQueueItem item;

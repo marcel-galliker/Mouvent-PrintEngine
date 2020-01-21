@@ -224,7 +224,7 @@ static void _head_pressure_out_override(SRxConfig *pcfg)
 				if (setup_chapter(file, "head", i+1, READ)==REPLY_OK) 
 				{    									
 					setup_int32_arr(file, "disabledJets",  READ, pcfg->headDisabledJets[i],	sizeof(pcfg->headDisabledJets[i]),	0);					
-					setup_chapter(file, "..", -1, READ); 
+					setup_chapter(file, "..", -1, READ);
 				}	
    			}
    		}
