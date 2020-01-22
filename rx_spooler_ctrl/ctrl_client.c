@@ -459,7 +459,7 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 		SPrintFileMsg	evt;
 		if (msg.flags & FLAG_SMP_LAST_PAGE) _SMP_Flags |= FLAG_SMP_LAST_PAGE;
 		
-		if (RX_Spooler.printerType==printer_LB702_UV && msg.flags&FLAG_SAME)
+		if (RX_Spooler.printerType==printer_LB702_UV && msg.flags&FLAG_SAME && !msg.clearBlockUsed)
 		{
 			data_same(&msg.id);				
 		}
