@@ -99,11 +99,12 @@ static int _ctrl_connected (RX_SOCKET socket, const char *peerName)
 	return REPLY_OK;
 }
 
-//--- ctrl_main_socket --------------------
-RX_SOCKET *ctrl_main_socket()
+//--- ctrl_send_2 --------------------
+int ctrl_send_2(INT32 id, UINT32 dataLen, void *data)
 {
-    return &_MainSocket;
+	return sok_send_2(&_MainSocket, id, dataLen, data);
 }
+
 //--- _ctrl_deconnected ---------------------------------------------------
 static int _ctrl_deconnected (RX_SOCKET socket, const char *peerName)
 {

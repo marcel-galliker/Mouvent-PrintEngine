@@ -456,7 +456,7 @@ void lbrob_main(int ticks, int menu)
 	
 	if (memcpy(&oldSatus.robinfo, &RX_StepperStatus.robinfo, sizeof(RX_StepperStatus.robinfo)))
 	{
-		sok_send_2(ctrl_main_socket(), REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);		
+		ctrl_send_2(REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);		
 	}
 }
 

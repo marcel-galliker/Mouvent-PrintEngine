@@ -720,7 +720,7 @@ static void _scan_state_machine(int menu)
 					RX_StepperStatus.info.curing   = FALSE;	
 
 					RX_StepperStatus.info.moving = FALSE;
-					sok_send_2(ctrl_main_socket(), CMD_PRINT_ABORT, 0, NULL);
+					ctrl_send_2(CMD_PRINT_ABORT, 0, NULL);
 					break;
 		}
 	}

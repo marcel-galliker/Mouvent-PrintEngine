@@ -196,7 +196,7 @@ void lb702_main(int ticks, int menu)
                     RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height = -_incs_2_micron(fpga_encoder_pos(MOTOR_Z_0))+CAL_TOOL_HEIGHT;
                     RX_StepperCfg.robot[RX_StepperCfg.boardNo].head_align = -_incs_2_micron(fpga_encoder_pos(MOTOR_Z_1))+CAL_TOOL_HEIGHT - RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height;
                     Error(LOG, 0, "Calibration done: ref_height=% 6d, head_align=% 3d", RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height, RX_StepperCfg.robot[RX_StepperCfg.boardNo].head_align);
-                    sok_send_2(ctrl_main_socket(), REP_CAP_CALIBRATE, sizeof(RX_StepperCfg.robot[RX_StepperCfg.boardNo]), &RX_StepperCfg.robot[RX_StepperCfg.boardNo]);
+                    ctrl_send_2(REP_CAP_CALIBRATE, sizeof(RX_StepperCfg.robot[RX_StepperCfg.boardNo]), &RX_StepperCfg.robot[RX_StepperCfg.boardNo]);
 					_CmdRunning = FALSE;
 					break;
             }
@@ -258,7 +258,7 @@ void lb702_main(int ticks, int menu)
 	
 	if (memcmp(&oldSatus.info, &RX_StepperStatus.info, sizeof(RX_StepperStatus.info)))
 	{
-		sok_send_2(ctrl_main_socket(), REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);		
+		ctrl_send_2(REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);		
 	}
 }
 
@@ -451,7 +451,7 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 										RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height = 100000;
 										RX_StepperCfg.robot[RX_StepperCfg.boardNo].head_align = 1;
 										Error(LOG, 0, "Calibration done SIMULATION: ref_height=%06d, head_align=%03d", RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height, RX_StepperCfg.robot[RX_StepperCfg.boardNo].head_align);
-										ret=sok_send_2(ctrl_main_socket(), REP_CAP_CALIBRATE, sizeof(RX_StepperCfg.robot[RX_StepperCfg.boardNo]), &RX_StepperCfg.robot[RX_StepperCfg.boardNo]);
+										ret=ctrl_send_2(REP_CAP_CALIBRATE, sizeof(RX_StepperCfg.robot[RX_StepperCfg.boardNo]), &RX_StepperCfg.robot[RX_StepperCfg.boardNo]);
 										_CmdRunning = FALSE;
 									}
 									else

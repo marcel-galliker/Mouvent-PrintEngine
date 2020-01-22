@@ -20,4 +20,4 @@ int ctrl_main(int ticks, int menu);
 
 char *ctrl_cmd_name(int cmd);
 
-RX_SOCKET *ctrl_main_socket();
+int ctrl_send_2(INT32 id, UINT32 dataLen, void *data);

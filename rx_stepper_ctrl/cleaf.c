@@ -315,7 +315,7 @@ void cleaf_main(int ticks, int menu)
 				if (RX_StepperStatus.info.splicing) Error(LOG, 0, "LIFT: printhead_en enabled, splice ended", _CmdRunning);
 				RX_StepperStatus.info.printhead_en = TRUE;
 				RX_StepperStatus.info.splicing = FALSE;
-				sok_send_2(ctrl_main_socket(), REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);
+				ctrl_send_2(REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);
 			}
 		}
 		else // --- Printhead down enable is OFF---
@@ -329,7 +329,7 @@ void cleaf_main(int ticks, int menu)
 					Error(LOG, 0, "LIFT: printhead_en disabled, go up for splice");
 					RX_StepperStatus.info.splicing = TRUE;
 					cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_UP_POS, NULL);
-					sok_send_2(ctrl_main_socket(), REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);
+					ctrl_send_2(REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);
 				}
 				RX_StepperStatus.info.printhead_en = FALSE;  // if 0 then splice is comming and head has to go up, if not in capping
 			}
