@@ -150,7 +150,6 @@ void  nios_main(int ticks, int menu)
 
 	//---  log --------------------------------------------
 	_IS_cond_log(ticks);
-	
 }
 
 //--- _nios_check_errors -------------------------------------
@@ -200,10 +199,10 @@ static void _nios_check_errors(void)
                           0, "InkSupply[%d] Heater Board Watchdog Error",
                           isNo + 1);
 
-            if (_Stat->HeaterBoard_Vsupply_3V < 3000)				ErrorFlag(ERR_CONT, (UINT32*)&_Error[0], err_heater_board, 0, "Heater Board %d.%dV (3.3V)", _Stat->HeaterBoard_Vsupply_3V/1000, _Stat->HeaterBoard_Vsupply_3V%1000);
-			if (_Stat->HeaterBoard_Vsupply_5V < 4800)				ErrorFlag(ERR_CONT, (UINT32*)&_Error[1], err_heater_board, 0, "Heater Board %d.%dV (5.0V)", _Stat->HeaterBoard_Vsupply_5V/1000, _Stat->HeaterBoard_Vsupply_5V%1000);
-			if (_Stat->HeaterBoard_Vsupply_24V < 12000)				ErrorFlag(ERR_CONT, (UINT32*)&_Error[2], err_heater_board, 0, "Heater Board %d.%dV (24V)", _Stat->HeaterBoard_Vsupply_24V/1000, _Stat->HeaterBoard_Vsupply_24V%1000);
-			if (_Stat->HeaterBoard_Vsupply_24VP < 12000)			ErrorFlag(ERR_CONT, (UINT32*)&_Error[3], err_heater_board, 0, "Heater Board %d.%dV (24V)P", _Stat->HeaterBoard_Vsupply_24VP/1000, _Stat->HeaterBoard_Vsupply_24VP%1000);
+            if (_Stat->HeaterBoard_Vsupply_3V < 3000)	 ErrorFlag(ERR_CONT, (UINT32*)&_Error[0], err_heater_board, 0, "Heater Board %d.%dV (3.3V)", _Stat->HeaterBoard_Vsupply_3V/1000, _Stat->HeaterBoard_Vsupply_3V%1000);
+			if (_Stat->HeaterBoard_Vsupply_5V < 4800)	 ErrorFlag(ERR_CONT, (UINT32*)&_Error[1], err_heater_board, 0, "Heater Board %d.%dV (5.0V)", _Stat->HeaterBoard_Vsupply_5V/1000, _Stat->HeaterBoard_Vsupply_5V%1000);
+			if (_Stat->HeaterBoard_Vsupply_24V < 12000)	 ErrorFlag(ERR_CONT, (UINT32*)&_Error[2], err_heater_board, 0, "Heater Board %d.%dV (24V)", _Stat->HeaterBoard_Vsupply_24V/1000, _Stat->HeaterBoard_Vsupply_24V%1000);
+			if (_Stat->HeaterBoard_Vsupply_24VP < 12000) ErrorFlag(ERR_CONT, (UINT32*)&_Error[3], err_heater_board, 0, "Heater Board %d.%dV (24V)P", _Stat->HeaterBoard_Vsupply_24VP/1000, _Stat->HeaterBoard_Vsupply_24VP%1000);
         }        
 	}
 }
@@ -286,6 +285,7 @@ void nois_set_is_cfg(SInkSupplyCfg *pcfg)
 		_Cfg->ink_supply[no].meniscusSet	= pcfg->meniscusSet;
 		_Cfg->ink_supply[no].heaterTemp	    = pcfg->ink.temp*1000;
 		_Cfg->ink_supply[no].heaterTempMax	= pcfg->ink.tempMax*1000;
+        memcpy(_Cfg->ink_supply[no].flushTime, pcfg->ink.flushTime, sizeof(_Cfg->ink_supply[no].flushTime));
 		if (pcfg->ink.tempMax>36) _HeaterUsed = TRUE;
 	//	_Cfg->ink_supply[i].condPresOutSet	= pcfg->condPresOutSet[i];
 	//	_Cfg->ink_supply[i].fluid_P			= pcfg->fluid_P[i];
@@ -450,7 +450,8 @@ void _update_status(void)
 		condTempReady = pstat->info.condTempReady;
 		pstat->info.val = 0x00;
 		pstat->warn.val = 0x00;
-		pstat->err		= _Stat->ink_supply[i].error;  // 0x00;
+		pstat->err		= _Stat->ink_supply[i].error;
+		if (!_HeaterUsed) pstat->err &= ~err_heater_board;
 
 		pstat->info.connected		= TRUE;
 		pstat->info.bleedValve		= _Stat->ink_supply[i].bleedValve;
@@ -479,6 +480,7 @@ void _update_status(void)
 static void _display_status(void)
 {
 	int i, val, len;
+    int errmask;
 	char str[128];
 	UCHAR *id;
 
@@ -501,10 +503,12 @@ static void _display_status(void)
 		term_printf("alive:           %d               log:%d", _Stat->alive, _LogCnt);
 		if (_HeaterUsed)	term_printf("         heater connected:%d", !(_Stat->error&err_amc_heater));
 		term_printf("\n");
-		term_printf("error:           0x%08x    Fluid=%d,  watchdog=%d\n", 
+		term_printf("error:           0x%08x    Fluid=%d,  Watchdog=%d, Heater=%d\n", 
 			_Stat->error,
 			(_Stat->error&err_amc_fluid)!=0,
-			(_Stat->error&err_watchdog)!=0);
+			(_Stat->error&err_watchdog)!=0,
+			(_Stat->error&err_amc_heater)!=0
+		);
 		term_printf("\n");
 		
 		term_printf("degass pressure: %6s    ", value_str(_Stat->degass_pressure));
@@ -542,6 +546,11 @@ static void _display_status(void)
 			}
 		term_printf("\n");
 		*/
+		term_printf("Ink Supply---------");		for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf(" ----%d----  ",i); term_printf("\n");
+        
+        if (!_HeaterUsed) errmask = ~err_heater_board;
+        else errmask=0xffffffff;
+		term_printf("error:             ");	for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("    0x%04x  ", _Stat->ink_supply[i].error&errmask); term_printf("\n");
 		term_printf("ctrl mode:        ");
 			for (i=0; i<NIOS_INK_SUPPLY_CNT; i++)
 			{
@@ -549,6 +558,7 @@ static void _display_status(void)
 				term_printf("%11s ", str);
 			}
 		term_printf("\n");
+	//	term_printf("cylinderPresSet:   "); for (i = 0; i < NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str(_Stat->ink_supply[i].IS_Pressure_Actual)); term_printf("\n");	
 		term_printf("pressure:          ");	
 		if (_Cfg->ink_supply[i].test_cylinderPres) 
 			for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("%5s(%03d)  ", value_str(_Stat->ink_supply[i].IS_Pressure_Actual), _Cfg->ink_supply[i].test_cylinderPres);
@@ -560,19 +570,18 @@ static void _display_status(void)
 				
 		term_printf("bleed valve:       ");	for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("         %d  ", _Stat->ink_supply[i].bleedValve); term_printf("\n");
 		term_printf("air valve:         ");	for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("         %d  ", _Stat->ink_supply[i].airValve); term_printf("\n");
-		term_printf("error:             ");	for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("    0x%04x  ", _Stat->ink_supply[i].error); term_printf("\n");
-		term_printf("Cond. Pressure IN: "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str1(_Cfg->ink_supply[i].condPresIn)); term_printf("\n");	
-		term_printf("\n");
+//		term_printf("Cond. Pressure IN: "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str1(_Cfg->ink_supply[i].condPresIn)); term_printf("\n");	
 //		term_printf("Cond. Pres Out Set:"); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str1(-_Cfg->ink_supply[i].condPresOutSet)); term_printf("\n");	
+//		term_printf("Meniscus avg:      "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str1(_Stat->ink_supply[i].meniscus)); term_printf("\n");	
+		term_printf("flush time:        "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str(_Stat->ink_supply[i].flushTime)); term_printf("\n");	
+//		term_printf("time:              "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str(_Stat->ink_supply[i].time)); term_printf("\n");	
+//		term_printf("diff:              "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str(_Stat->ink_supply[i].diff)); term_printf("\n");	
+		term_printf("\n");
+
+        term_printf("Conditioner--------"); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf(" ----%d----  ",i); term_printf("\n");
 		term_printf("Cond. Pres In:     "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str1(_Cfg->ink_supply[i].condPresIn)); term_printf("\n");	
 		term_printf("Cond. Pres Out:    "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str1(_Cfg->ink_supply[i].condPresOut)); term_printf("\n");	
 		term_printf("Cond. Meniscus:    "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str1(_Cfg->ink_supply[i].condMeniscus)); term_printf("\n");	
-//		term_printf("Meniscus avg:      "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str1(_Stat->ink_supply[i].meniscus)); term_printf("\n");	
-		term_printf("flush time:        "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str(_Stat->ink_supply[i].flushTime)); term_printf("\n");	
-		term_printf("time:              "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str(_Stat->ink_supply[i].time)); term_printf("\n");	
-		term_printf("diff:              "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str(_Stat->ink_supply[i].diff)); term_printf("\n");	
-		term_printf("cylinderPresSet:   "); for (i = 0; i < NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str(_Stat->ink_supply[i].IS_Pressure_Actual)); term_printf("\n");	
-		
 		term_printf("Cond. Pump Speed   "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str(_Cfg->ink_supply[i].condPumpSpeed)); term_printf("\n");	
 		term_printf("Cond. Pump Feedback"); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str1(_Cfg->ink_supply[i].condPumpFeedback)); term_printf("\n");	
 		term_printf("Head Temp:         "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str_temp(_Cfg->ink_supply[i].headTemp)); term_printf("\n");	
@@ -748,7 +757,7 @@ static void _IS_cond_log(int ticks)
 // --- nios_is_heater_connected --------------------------------
 int nios_is_heater_connected(void)
 {
-	return _Init && !(_Stat->error&err_amc_heater);
+	return _Init && _HeaterUsed && !(_Stat->error&err_amc_heater);
 }
 
 // --- nios_set_temp ----------------------------------
