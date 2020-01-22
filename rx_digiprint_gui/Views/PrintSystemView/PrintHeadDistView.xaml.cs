@@ -237,23 +237,32 @@ namespace RX_DigiPrint.Views.PrintSystemView
             _update();
         }
 
+        //--- _tag2head --------------------------------------
+        private void _tag2head(int tag, out int isNo, out int headNo)
+        {
+            isNo=0;
+            headNo=0;
+            if (RxGlobals.PrintSystem.HeadCnt!=0)
+            {
+                int no = tag%100;
+                isNo   = RxGlobals.PrintSystem.IS_Order[no/RxGlobals.PrintSystem.HeadCnt];
+                if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX802)
+                    headNo = RxGlobals.PrintSystem.HeadCnt*isNo + RxGlobals.PrintSystem.HeadCnt-1-(no%RxGlobals.PrintSystem.HeadCnt);
+                else
+                    headNo = RxGlobals.PrintSystem.HeadCnt*isNo + no%RxGlobals.PrintSystem.HeadCnt;
+            }            
+        }
+
         //--- _text_LostFocus ---------------------------------------------------
         void _text_LostFocus(object sender, RoutedEventArgs e)
         {
             RxNumBox text = sender as RxNumBox;    
-            if (text!=null)
+            if (text!=null && RxGlobals.PrintSystem.HeadCnt!=0)
             {
                 try
                 {
-                    int tag     = Convert.ToInt32(text.Tag);
-                    int no      = tag%100;
-                    int inkSupply=no;
-                    int headNo  = no;
-                    if (_Reverse) 
-                    {
-                        inkSupply = RxGlobals.PrintSystem.ColorCnt-1 - inkSupply;
-                        headNo    = (int)RxGlobals.PrintSystem.ColorCnt*(int)RxGlobals.PrintSystem.HeadCnt-no-1;
-                    }
+                    int tag= (int)text.Tag;
+                    _tag2head(tag, out int inkSupply, out int headNo);
                     switch(tag/100)
                     {
                         case 0:     if (RxGlobals.PrintSystem.ColorOffset[inkSupply]!=text.Value)
@@ -312,14 +321,9 @@ namespace RX_DigiPrint.Views.PrintSystemView
             if (_AdjustmentSupported)
             {
                 Int32 tag=_ClusterNo*4+Convert.ToInt32((sender as Button).Tag);
-                int inkSupply=tag/(int)RxGlobals.PrintSystem.HeadCnt;
+                int inkSupply= RxGlobals.PrintSystem.IS_Order[tag/(int)RxGlobals.PrintSystem.HeadCnt];
                 int no       =tag%(int)RxGlobals.PrintSystem.HeadCnt +1;
                 
-                if (_Reverse) 
-                {
-                    inkSupply = RxGlobals.PrintSystem.ColorCnt - inkSupply-1;
-                }
-
                 HeadAdjustment dlg = new HeadAdjustment(sender as Control, inkSupply, no);
                 dlg.ShowDialog();
             }
@@ -348,17 +352,10 @@ namespace RX_DigiPrint.Views.PrintSystemView
             foreach (var ctrl in Canvas.Children)
             {
                 RxNumBox text = ctrl as RxNumBox;
-                if (text!=null)
+                if (text!=null && RxGlobals.PrintSystem.ColorCnt!=0)
                 {
                     int tag = Convert.ToInt32(text.Tag);
-                    int no  = tag%100;
-                    int headNo=no;
-                    int inkSupply  =no;
-                    if (_Reverse) 
-                    {
-                        headNo=cnt-no-1;
-                        inkSupply = RxGlobals.PrintSystem.ColorCnt-no-1;
-                    }
+                    _tag2head(tag, out int inkSupply, out int headNo);
                     if (!text.IsFocused)
                     {
                         try
@@ -386,13 +383,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
                         try 
                         {
                             int tag = Convert.ToInt32(button.Tag);
-                            int inkSupply=(_ClusterNo*4+tag)/(int)RxGlobals.PrintSystem.HeadCnt;
-                            int no       =(_ClusterNo*4+tag)%(int)RxGlobals.PrintSystem.HeadCnt +1;
-                            if (_Reverse)
-                            {   
-                                inkSupply = RxGlobals.PrintSystem.ColorCnt-inkSupply-1;
-                                no        = RxGlobals.PrintSystem.HeadCnt-no+1;
-                            }
+                            _tag2head(_ClusterNo*4+tag, out int inkSupply, out int headNo);
+                            int no=1+headNo%RxGlobals.PrintSystem.HeadCnt;
                             if (RxGlobals.InkSupply.List[inkSupply].InkType==null) button.Background = Brushes.WhiteSmoke;
                             else
                             {

@@ -95,7 +95,39 @@ namespace RX_DigiPrint.Models
         public EPrinterType PrinterType
         {
             get { return _PrinterType; }
-            set { Changed|=SetProperty(ref _PrinterType, value); }
+            set 
+            { 
+                if (SetProperty(ref _PrinterType, value))
+                {
+                    Changed=true;
+                    switch(_PrinterType)
+                    {
+                        /*
+                        case EPrinterType.printer_DP803: IS_Order = new int[] { 0,1,2,3,4,5,6,7 }; break;
+
+                        case EPrinterType.printer_LB701: 
+                            if (RxGlobals.PrintSystem.ColorCnt<=4) IS_Order = new int[] { 0,1,2,3 };
+                            else IS_Order = new int[] { 0,1,2,3,4,5,6,7 };
+                            break;
+
+                        case EPrinterType.printer_LB702_UV:
+                            if (RxGlobals.PrintSystem.ColorCnt <= 4) IS_Order = new int[] { 0, 1, 2, 3 };
+                            else IS_Order = new int[] { 4,5,6,0, 1, 2, 3 };
+                            break;
+
+                        case EPrinterType.printer_LB702_WB:
+                            IS_Order = new int[] {0, 1, 2, 3, 4, 5 };
+                            break;
+                        */
+
+                        case EPrinterType.printer_TX801: IS_Order = new int[] { 7,6,5,4,3,2,1,0 }; break;
+                        case EPrinterType.printer_TX802: IS_Order = new int[] { 7,6,5,4,3,2,1,0 }; break;
+
+                        default: IS_Order = new int[] { 0,1,2,3,4,5,6,7 }; break;
+                    }
+
+                }
+            }
         }
 
         //--- Property ExternalData ---------------------------------------
@@ -134,14 +166,14 @@ namespace RX_DigiPrint.Models
             }
         }
 
-        //--- Property Reverse (head order) ---------------------------------------
-        private bool _Reverse;
-        public bool Reverse
+        //--- Property IS_Order ---------------------------------------
+        private int[] _IS_Order;
+        public int[] IS_Order
         {
-            get { return _Reverse; }
-            set { SetProperty(ref _Reverse, value);}
+            get { return _IS_Order; }
+            private set { SetProperty(ref _IS_Order,value); }
         }
-        
+
         //--- Property CheckedInkSupply ---------------------------------------
         private int _CheckedInkSupply;
         public int CheckedInkSupply
@@ -267,7 +299,6 @@ namespace RX_DigiPrint.Models
             RxGlobals.InkSupply.List[TcpIp.InkSupplyCnt+1].InkType = InkType.Waste;
 
             PrinterType             = msg.type;
-            Reverse                 = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX801 || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX802);
             Overlap                 = msg.overlap>0;
             OffsetVerso             = msg.offset.versoDist;
             ManualFlightTimeComp    = (msg.offset.manualFlightTimeComp/1000.0);

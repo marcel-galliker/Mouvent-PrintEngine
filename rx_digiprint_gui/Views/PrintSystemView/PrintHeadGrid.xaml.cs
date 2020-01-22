@@ -37,31 +37,22 @@ namespace RX_DigiPrint.Views.PrintSystemView
         }
 
         //--- _assign_inksupply --------------------------------------------------------
-        private int  _cnt=0;
-        private bool _reverse = false;
-
         private void _assign_inksupply(int cnt)
         {
-            int i;
-            
-            if (RxGlobals.PrintSystem.Reverse!=_reverse || cnt!=_cnt)
+            int i, no;
+            if (RxGlobals.PrintSystem.HeadCnt!=0)
             {
-                for (i=0; i<PrintHeadStack.Children.Count; i++) 
+                for (i=0;i<PrintHeadStack.Children.Count;i++)
                 {
-                    if (RxGlobals.PrintSystem.Reverse && i<cnt)
-                    {
-                        _PrintHeadView[i].DataContext = RxGlobals.HeadStat.List[cnt-i-1];
-                        _PrintHeadView[i].No = cnt-i-1;
-                    }
-                    else                  
-                    {
-                        _PrintHeadView[i].DataContext = RxGlobals.HeadStat.List[i];
-                        _PrintHeadView[i].No = i;
-                    }
+                    no = RxGlobals.PrintSystem.IS_Order[i/RxGlobals.PrintSystem.HeadCnt] * RxGlobals.PrintSystem.HeadCnt;
+                    if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX802)
+                        no += i%RxGlobals.PrintSystem.HeadCnt;
+                    else
+                        no += RxGlobals.PrintSystem.HeadCnt-1-i%RxGlobals.PrintSystem.HeadCnt;
+                    _PrintHeadView[i].DataContext = RxGlobals.HeadStat.List[no];
+                    _PrintHeadView[i].No = no;
                 }
             }
-            _cnt     = cnt;
-            _reverse = RxGlobals.PrintSystem.Reverse;
         }
 
         //--- show_items --------------------------------------
@@ -79,7 +70,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
             for (i=0; i<PrintHeadStack.Children.Count; i++)
             {
                 no=(int)(i/RxGlobals.PrintSystem.HeadCnt);
-                if (RxGlobals.PrintSystem.Reverse) no =  RxGlobals.PrintSystem.ColorCnt-1 -no;
+                no= RxGlobals.PrintSystem.IS_Order[no];
                 _PrintHeadView[i].Visibility = (i<cnt && (RxGlobals.PrintSystem.AllInkSupplies || no==RxGlobals.PrintSystem.CheckedInkSupply))? Visibility.Visible : Visibility.Collapsed;
             }
             Grid.RowDefinitions[1].Height = new GridLength(25/RxGlobals.Screen.Scale);

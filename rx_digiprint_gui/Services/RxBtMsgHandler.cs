@@ -164,7 +164,9 @@ namespace RX_DigiPrint.Services
             _printerState       = msg.state;
             msg.colorCnt        = RxGlobals.PrintSystem.ColorCnt;
             msg.headsPerColor   = RxGlobals.PrintSystem.HeadCnt;
-            msg.reverse         = Convert.ToInt32(RxGlobals.PrintSystem.Reverse);
+            if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX801 || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX802)
+                 msg.reverse = 1;
+            else msg.reverse = 0;
 
        //     RxGlobals.Events.AddItem(new LogItem("TEST Set Bluetioth.State to WEBIN"));
        //     msg.state=RxBtDef.EBTState.state_webin;

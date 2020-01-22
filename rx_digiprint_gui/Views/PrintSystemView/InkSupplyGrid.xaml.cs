@@ -56,7 +56,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
         private void PrintSystem_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (e.PropertyName.Equals("PrinterType")) _printertype_changed();
-            if (e.PropertyName.Equals("Reverse")) _assign_inksupply(RxGlobals.PrintSystem.ColorCnt);
+        //    if (e.PropertyName.Equals("Reverse")) _assign_inksupply(RxGlobals.PrintSystem.ColorCnt);
         }
 
         //--- _printertype_changed -----------------------------------------
@@ -83,22 +83,13 @@ namespace RX_DigiPrint.Views.PrintSystemView
         }
 
         //--- _assign_inksupply --------------------------------------------------------
-        private int  _cnt=0;
-        private bool _reverse = false;
-
         private void _assign_inksupply(int cnt)
         {
             int i;         
-            if (RxGlobals.PrintSystem.Reverse!=_reverse || cnt!=_cnt)
+            for (i=0; i<cnt; i++) 
             {
-                for (i=0; i<cnt; i++) 
-                {
-                    if (RxGlobals.PrintSystem.Reverse) _InkSupplyView[i].DataContext = _InkSupply.List[cnt-i-1];
-                    else                               _InkSupplyView[i].DataContext = _InkSupply.List[i];
-                }
+                _InkSupplyView[i].DataContext = _InkSupply.List[RxGlobals.PrintSystem.IS_Order[i]];
             }
-            _cnt     = cnt;
-            _reverse = RxGlobals.PrintSystem.Reverse;
         }
 
         //--- show_inkSupplies --------------------------------------
