@@ -515,7 +515,8 @@ static void _headboard_config(int colorCnt, int headsPerColor, int ethPortCnt)
 				if (RX_Config.printer.type==printer_DP803) inkSupply=inkSupply%(RX_Config.inkSupplyCnt/2);	// recto/verso
 				if (rx_def_is_web(RX_Config.printer.type))
 				{
-					if (RX_TestImage.testImage==PQ_TEST_JETS)				offset = 210000*inkSupply;
+                    offset = 0;
+				//	if (RX_TestImage.testImage==PQ_TEST_JETS)				offset = 210000*inkSupply;
 					if (RX_TestImage.testImage==PQ_TEST_FULL_ALIGNMENT)		offset = 350000*inkSupply;
 					if (RX_TestImage.testImage==PQ_TEST_JET_NUMBERS)		offset = 150000*inkSupply;
 					if (RX_TestImage.testImage==PQ_TEST_ENCODER)			offset = 265000*inkSupply;

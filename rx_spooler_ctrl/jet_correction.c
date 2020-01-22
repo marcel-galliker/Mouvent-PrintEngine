@@ -54,8 +54,12 @@ void jc_set_disabled_jets(SDisabledJets *jets)
 		memcpy(&RX_DisabledJets[jets->color], jets, sizeof(RX_DisabledJets[jets->color]));
 		for(h=0; !_Active && h<MAX_HEADS_COLOR; h++)
 		{
-			for (n=0; !_Active && n<MAX_DISABLED_JETS; n++)
-				_Active |= RX_DisabledJets[jets->color].disabledJets[h][n];
+            for (n = 0; !_Active && n < MAX_DISABLED_JETS; n++)
+            {
+	            _Active |= RX_DisabledJets[jets->color].disabledJets[h][n];
+                if (RX_DisabledJets[jets->color].disabledJets[h][n]) 
+                    Error(LOG, 0, "Disable Jet color=%d, head=%d, jet=%d", jets->color, h, RX_DisabledJets[jets->color].disabledJets[h][n]);
+            }
 		}
 	}
 }
@@ -100,7 +104,7 @@ int	jc_correction (SBmpInfo *pBmpInfo,  SPrintListItem *pItem, int fromLine)
 						jet = RX_DisabledJets[color].disabledJets[head][n];
 						if (jet)
 						{
-							Error(LOG, 0, "Disable Jet color=%d, head=%d, jet=%d", color, head, jet);
+						//	Error(LOG, 0, "Disable Jet color=%d, head=%d, jet=%d", color, head, jet);
 							jet += pInfo->startBt*pixelPerByte + pInfo->jetPx0;
 							_disable_jet(*pInfo->data, pBmpInfo->bitsPerPixel, pBmpInfo->lengthPx, pBmpInfo->lineLen, jet, fromLine);
 							/*
@@ -292,5 +296,5 @@ static void _disable_jet(UCHAR *pBuffer, int bitsPerPixel, int length, int bytes
 			}            
         }
 	}
-	Error(LOG, 0, "_disable_jet %d", jet);
+//	Error(LOG, 0, "_disable_jet %d", jet);
 }

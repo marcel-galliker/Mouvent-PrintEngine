@@ -1148,6 +1148,10 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 					bmp.sizeAlloc	= 0;
 					bmp.buffer		=  *pInfo->data;
 					rip_test_data(&bmp, RX_TestData[head]);
+                    if (RX_Spooler.colorCnt==0 || ((id->copy-1)%RX_Spooler.colorCnt)!=color)
+                    {
+                        memset(bmp.buffer, 0, pInfo->srcLineLen* pInfo->srcLineCnt);
+                    }
 				}
 				if (clearBlockUsed) _BlkNo[pInfo->board][pInfo->head] = (_BlkNo[pInfo->board][pInfo->head]+pInfo->blkCnt)%(RX_Spooler.dataBlkCntHead);
 			}

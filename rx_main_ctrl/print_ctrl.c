@@ -334,7 +334,7 @@ static void _load_test(void)
 		RX_TestImage.printGoMode = PG_MODE_LENGTH;
 		RX_TestImage.printGoDist = (UINT32)(height/1200.0*25400.0);
 		if (RX_TestImage.testImage==PQ_TEST_ANGLE_SEPARATED) RX_TestImage.printGoDist=50000;
-		if (!rx_def_is_scanning(RX_Config.printer.type) && RX_TestImage.testImage!=PQ_TEST_GRID && RX_TestImage.testImage!=PQ_TEST_ANGLE_OVERLAP) 
+		if (!rx_def_is_scanning(RX_Config.printer.type) && !rx_def_is_web(RX_Config.printer.type) && RX_TestImage.testImage!=PQ_TEST_GRID && RX_TestImage.testImage!=PQ_TEST_ANGLE_OVERLAP) 
 			RX_TestImage.printGoDist *= (RX_Config.inkSupplyCnt+1);
 		RX_TestImage.dropSizes	= 1;
 		_send_head_info();
@@ -432,6 +432,12 @@ static int _print_next(void)
 	{	
 		if (RX_PrinterStatus.testMode)
 		{
+            if (rx_def_is_web(RX_Config.printer.type))
+            {
+                RX_TestImage.copies *= RX_TestImage.scans;
+                RX_TestImage.scans = 1;
+			}
+            
 			switch (RX_TestImage.testImage)
 			{
 				case PQ_TEST_ANGLE_OVERLAP:  strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "angle.bmp");

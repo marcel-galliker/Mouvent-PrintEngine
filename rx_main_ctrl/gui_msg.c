@@ -1002,6 +1002,14 @@ static void _do_test_start	(RX_SOCKET socket, SPrintQueueEvt* pmsg)
 //	if (rx_def_is_scanning(RX_Config.printer.type) && (RX_TestImage.testImage==PQ_TEST_JETS) ) RX_TestImage.scans=RX_Config.inkSupplyCnt;
 	if (RX_TestImage.testImage==PQ_TEST_SCANNING) RX_TestImage.scans=1;
 	if (RX_Config.printer.type==printer_test_table && (RX_TestImage.testImage==PQ_TEST_JETS || RX_TestImage.testImage==PQ_TEST_JET_NUMBERS)) RX_TestImage.scans=RX_Config.inkSupplyCnt;
+	if (rx_def_is_web(RX_Config.printer.type))
+    { 
+        if (RX_TestImage.testImage==PQ_TEST_JETS 
+		||  RX_TestImage.testImage==PQ_TEST_JET_NUMBERS)
+		{
+            RX_TestImage.scans=RX_Config.inkSupplyCnt;
+		}
+    }
 	if (RX_TestImage.scans<1) RX_TestImage.scans=1;
 //	RX_TestImage.scanMode = PQ_SCAN_STD;
 	RX_TestImage.id.id = RX_TestImage.testImage;
