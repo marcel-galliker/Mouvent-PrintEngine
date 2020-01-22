@@ -29,7 +29,8 @@
 #define STEPS_REV			(200*16)	// steps per motor revolution * 16 microsteps
 
 // Rotation Motor // 200 steps/rev // max 4.2 Amp
-#define CURRENT_HOLD_ROT	200.0
+// #define CURRENT_HOLD_ROT	200.0
+#define CURRENT_HOLD_ROT	50.0	// 2Amp Holding current is too high!
 
 #define MOTOR_ROT			0
 #define MOTOR_ROT_BITS		0x01
@@ -157,7 +158,7 @@ static int _VacuumWaiting = FALSE;
 static int _PosShiftCenter = 0;
 static int _PosShiftEnd = 0;
 
-static SMovePar	_ParRotRef;
+// static SMovePar	_ParRotRef;
 static SMovePar	_ParRotSensRef;
 static SMovePar	_ParRotDrive;
 
@@ -213,9 +214,9 @@ void txrob_init(void)
 	motor_config(MOTOR_SHIFT, CURRENT_HOLD_SHIFT, SHIFT_STEPS_PER_METER, SHIFT_INC_PER_METER);
 
 	//--- movement parameters capping ----------------
-	
-	_ParRotRef.speed = 2; // 10; //90; // speed with max tork: 
-	_ParRotRef.accel =  1; // 2; // 10;
+	/*
+	_ParRotRef.speed =  1000; // 2; // 10; //90; // speed with max tork: 
+	_ParRotRef.accel = 10000; // 1; // 2; // 10;
 	_ParRotRef.current_acc = 150.0; // 200; // max 420 = 4.2 A
 	_ParRotRef.current_run = 150.0; // 200; // max 420 = 4.2 A
 	_ParRotRef.stop_mux = 0;
@@ -223,67 +224,67 @@ void txrob_init(void)
 	_ParRotRef.estop_in_bit[MOTOR_ROT] = ROT_STORED_IN; // Check Input 0
 	_ParRotRef.estop_level = 1; // stopp when sensor on
 	_ParRotRef.encCheck		= chk_txrob_ref;
-	
-	_ParRotSensRef.speed = 500; // speed with max tork: 3200/4
-	_ParRotSensRef.accel =  500;
+	*/
+    
+	_ParRotSensRef.speed = 1000; // 500; // speed with max tork: 3200/4
+	_ParRotSensRef.accel = 10000; // 500;
 	_ParRotSensRef.current_acc = 250.0;	//210.0; // max 420 = 4.2 A
 	_ParRotSensRef.current_run = 250.0;	//210.0; // max 420 = 4.2 A
 	_ParRotSensRef.stop_mux = 0;
 	_ParRotSensRef.dis_mux_in = 1;
-	_ParRotRef.estop_in_bit[MOTOR_ROT] = ROT_STORED_IN; // Check Input 0
+	_ParRotSensRef.estop_in_bit[MOTOR_ROT] = ROT_STORED_IN; // Check Input 0
 	_ParRotSensRef.estop_level = 1; // stopp when sensor on
 	_ParRotSensRef.encCheck		= chk_txrob_ref;
 
-	_ParRotDrive.speed = 500; // speed with max tork:
-	_ParRotDrive.accel = 500;
-	_ParRotDrive.current_acc = 300.0; // max 420 = 4.2 A
+	_ParRotDrive.speed		 = 1000; // speed with max tork:
+	_ParRotDrive.accel		 = 10000;
+	_ParRotDrive.current_acc = 400.0; // max 420 = 4.2 A
 	_ParRotDrive.current_run = 300.0; // max 420 = 4.2 A
-	_ParRotDrive.stop_mux = 0;
-	_ParRotDrive.dis_mux_in = 0;
-	_ParRotDrive.encCheck		= chk_std;
+	_ParRotDrive.stop_mux	 = 0;
+	_ParRotDrive.dis_mux_in  = 0;
+	_ParRotDrive.encCheck	 = chk_std;
 	
 	//--- movement parameters screws ----------------
-	
-	_ParShiftSensRef.speed = 21000; // speed with max tork: 21'333
-	_ParShiftSensRef.accel = 10000;
+	_ParShiftSensRef.speed		 = 21000; // speed with max tork: 21'333
+	_ParShiftSensRef.accel		 = 10000;
 	_ParShiftSensRef.current_acc = 40.0; //  max 67 = 0.67 A
 	_ParShiftSensRef.current_run = 40.0; //  max 67 = 0.67 A
-	_ParShiftSensRef.stop_mux = 0;
-	_ParShiftSensRef.dis_mux_in = 0;
-	_ParRotRef.estop_in_bit[MOTOR_SHIFT] = SHIFT_STORED_IN; // Check Input 0
+	_ParShiftSensRef.stop_mux	 = 0;
+	_ParShiftSensRef.dis_mux_in  = 0;
+	_ParShiftSensRef.estop_in_bit[MOTOR_SHIFT] = SHIFT_STORED_IN; // Check Input 0
 	_ParShiftSensRef.estop_level = 1; // stopp when sensor on
-	_ParShiftSensRef.encCheck		= chk_std;
+	_ParShiftSensRef.encCheck	 = chk_std;
 
-	_ParShiftDrive.speed = 21000; // speed with max tork: 21'333
-	_ParShiftDrive.accel = 10000;
-	_ParShiftDrive.current_acc = 67.0; //  max 67 = 0.67 A
-	_ParShiftDrive.current_run = 67.0; //  max 67 = 0.67 A
-	_ParShiftDrive.stop_mux = 0;
-	_ParShiftDrive.dis_mux_in = 0;
+	_ParShiftDrive.speed		= 21000; // speed with max tork: 21'333
+	_ParShiftDrive.accel		= 10000;
+	_ParShiftDrive.current_acc	= 67.0; //  max 67 = 0.67 A
+	_ParShiftDrive.current_run	= 67.0; //  max 67 = 0.67 A
+	_ParShiftDrive.stop_mux		= 0;
+	_ParShiftDrive.dis_mux_in	= 0;
 	_ParShiftDrive.encCheck		= chk_std;
 	
-	_ParShiftWet.speed = 21000; // speed with max tork: 21'333
-	_ParShiftWet.accel = 10000;
-	_ParShiftWet.current_acc = 67.0; //  max 67 = 0.67 A
-	_ParShiftWet.current_run = 67.0; //  max 67 = 0.67 A
-	_ParShiftWet.stop_mux = 0;
-	_ParShiftWet.dis_mux_in = 0;
+	_ParShiftWet.speed			= 21000; // speed with max tork: 21'333
+	_ParShiftWet.accel			= 10000;
+	_ParShiftWet.current_acc	= 67.0; //  max 67 = 0.67 A
+	_ParShiftWet.current_run	= 67.0; //  max 67 = 0.67 A
+	_ParShiftWet.stop_mux		= 0;
+	_ParShiftWet.dis_mux_in		= 0;
 	_ParShiftWet.encCheck		= chk_std;
 	
-	_ParShiftVac.speed = 21000; // 21000; // speed with max tork: 21'333
-	_ParShiftVac.accel = 10000;
-	_ParShiftVac.current_acc = 67.0; //  80.0; // max 134 = 1.34 A // Amps/Phase Parallel: 0.67 A
-	_ParShiftVac.current_run = 67.0; //  80.0; // max 134 = 1.34 A // Amps/Phase Parallel: 0.67 A
-	_ParShiftVac.stop_mux = 0;
-	_ParShiftVac.dis_mux_in = 0;
+	_ParShiftVac.speed			= 21000; // 21000; // speed with max tork: 21'333
+	_ParShiftVac.accel			= 10000;
+	_ParShiftVac.current_acc	= 67.0; //  80.0; // max 134 = 1.34 A // Amps/Phase Parallel: 0.67 A
+	_ParShiftVac.current_run	= 67.0; //  80.0; // max 134 = 1.34 A // Amps/Phase Parallel: 0.67 A
+	_ParShiftVac.stop_mux		= 0;
+	_ParShiftVac.dis_mux_in		= 0;
 	_ParShiftVac.encCheck		= chk_std;
 	
-	_ParShiftWipe.speed = 21000; // 21000; // speed with max tork: 21'333
-	_ParShiftWipe.accel = 10000;
-	_ParShiftWipe.current_acc = 67.0; //  80.0; // max 134 = 1.34 A // Amps/Phase Parallel: 0.67 A
-	_ParShiftWipe.current_run = 67.0; //  80.0; // max 134 = 1.34 A // Amps/Phase Parallel: 0.67 A
-	_ParShiftWipe.stop_mux = 0;
-	_ParShiftWipe.dis_mux_in = 0;
+	_ParShiftWipe.speed			= 21000; // 21000; // speed with max tork: 21'333
+	_ParShiftWipe.accel			= 10000;
+	_ParShiftWipe.current_acc	= 67.0; //  80.0; // max 134 = 1.34 A // Amps/Phase Parallel: 0.67 A
+	_ParShiftWipe.current_run	= 67.0; //  80.0; // max 134 = 1.34 A // Amps/Phase Parallel: 0.67 A
+	_ParShiftWipe.stop_mux		= 0;
+	_ParShiftWipe.dis_mux_in	= 0;
 	_ParShiftWipe.encCheck		= chk_std;
 	
 	//--- Outputs ----------------
@@ -989,11 +990,13 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 	case CMD_CLN_SHIFT_MOV:		strcpy(_CmdName, "CMD_CLN_SHIFT_MOV");
 		if (!_CmdRunning || _CmdRunning == CMD_FLUID_CTRL_MODE)
 		{
+            /*
 			if (!RX_StepperStatus.robinfo.ref_done && !_ref_done_1)
 			{ 
 				Error(ERR_CONT,0, "Robot not refenenced, cmd=0x%08x", msgId);
 				break;
 			}
+			*/
 			_ref_done_1 = FALSE;
 			pos = *((INT32*)pdata);
 			if (pos < 0) {Error(LOG, 0, "CLN: Command %s: negative position not allowed", _CmdName); break;}
@@ -1028,11 +1031,13 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 	case CMD_CLN_SHIFT_LEFT:	strcpy(_CmdName, "CMD_CLN_SHIFT_LEFT");
 		if (!_CmdRunning || _CmdRunning == CMD_FLUID_CTRL_MODE)
 		{
+            /*
 			if (!RX_StepperStatus.robinfo.ref_done)
 			{ 
 				Error(ERR_CONT,0, "Robot not refenenced, cmd=0x%08x", msgId);
 				break;
 			}
+			*/
 			pos = *((INT32*)pdata);
 			if (pos < 0) {Error(LOG, 0, "CLN: Command %s: negative position not allowed", _CmdName); break;}
 			if (pos >= POS_SHIFT_CNT) {Error(LOG, 0, "CLN: Command %s: too high pos", _CmdName); break;}
@@ -1120,30 +1125,40 @@ static void _txrob_motor_test(int motorNo, int steps)
 	int i;
 
 	memset(&par, 0, sizeof(par));
-	if (motorNo == 0)
-	{
-		par.speed		= 1000;
-		par.accel		= 1000;
-		par.current_acc	= 300.0;
-		par.current_run	= 300.0;
-		motors_config(motors, CURRENT_HOLD_ROT,  L3518_STEPS_PER_METER, L3518_INC_PER_METER);
-	}
-	else
-	{
-		par.speed	= 21000;		//21000;					//21000;				//21000;			//21000;			//21000;					
-		par.accel	= 10000;		//10000;					//10000;				//10000;			//10000;			//10000;				
-		par.current_acc = 67.0;//134.0;	//40.0;	minimum for 0.3 Nm	// 60.0; for 0.4 Nm		// 80.0 for 0.5 Nm	// 100.0 for 0.6 Nm	// 120.0 for 0.7 Nm	// 134.0 for 0.8 Nm	
-		par.current_run = 67.0;//134.0;	//40.0;	minimum for 0.3 Nm	// 60.0; for 0.4 Nm		// 80.0 for 0.5 Nm	// 100.0 for 0.6 Nm	// 120.0 for 0.7 Nm	// 134.0 for 0.8 Nm	
-		motors_config(motors, CURRENT_HOLD_SHIFT, 0.0, 0.0);
-	}
-	
 	par.stop_mux	= 0;
 	par.dis_mux_in	= 0;
 	par.encCheck	= chk_off;
 	RX_StepperStatus.robinfo.moving = TRUE;
 	_CmdRunning = 1;
 	
-	motors_move_by_step(motors, &par, steps, FALSE);			
+	if (motorNo == MOTOR_ROT)
+	{
+        // paramaters tested 14-JAN-20
+        par.speed		= 1000; // speed with max tork: 21'333
+		par.accel		= 10000;
+		par.current_acc = 400.0; //  max 67 = 0.67 A
+		par.current_run = 300.0; //  max 67 = 0.67 A
+		par.stop_mux	= 0;
+		par.dis_mux_in	= 0;
+		par.encCheck    = chk_std;
+
+		motors_config(motors, 0,  L3518_STEPS_PER_METER, L3518_INC_PER_METER);
+		motors_move_by_step(motors, &par, steps, FALSE);			
+	}
+	else
+	{
+        // paramaters tested 14-JAN-20
+        
+        par.speed		= 21000; // speed with max tork: 21'333
+		par.accel		= 10000;
+		par.current_acc = 67.0; //  max 67 = 0.67 A
+		par.current_run = 67.0; //  max 67 = 0.67 A
+		par.stop_mux	= 0;
+		par.dis_mux_in	= 0;
+		par.encCheck	= chk_off;
+		motors_config(motors, CURRENT_HOLD_SHIFT, 0.0, 0.0);
+		motors_move_by_step(motors, &par, steps, FALSE);			
+	}	
 }
 
 //--- _txrob_error_reset ------------------------------------

@@ -419,14 +419,12 @@ int  tx801_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									_CmdRunning = 0;
 									break;	
 
-	case CMD_CAP_REFERENCE:			Error(WARN, 0, "Stepper software not trealeased for this machine");
-									_PrintPos_New=0;
+	case CMD_CAP_REFERENCE:			_PrintPos_New=0;
 									motors_reset(MOTOR_Z_BITS);
 									_tx801_do_reference();
 									break;
 
-	case CMD_CAP_PRINT_POS:			Error(WARN, 0, "Stepper software not trealeased for this machine");
-									pos   = (*((INT32*)pdata));
+	case CMD_CAP_PRINT_POS:			pos   = (*((INT32*)pdata));
 									if (pos<TX_PRINT_POS_MIN) 
 									{
 										pos=TX_PRINT_POS_MIN;

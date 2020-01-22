@@ -25,9 +25,7 @@
 //--- defines ----------------------------------------------------------------
 #define FOR_ALL_MOTORS(motor, motors) for (motor=0; motor<MOTOR_CNT; motor++) if (motors & (1<<motor))
 
-#define MIN_SPEED_HZ				4000		// minimal speed in Hz
-#define ENC_STOP_MIN_SPEED_HZ		4000
-#define MAX_SPEED_HZ				17000		// maximal speed in Hz
+#define MIN_SPEED_HZ		4000		// minimal speed in Hz
 
 #define FIX_POINT			0x10000
 #define FIX_POINT_SPEED		0x1 // 0x10000 // 0x10
@@ -170,6 +168,7 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
 	int			bwd;
 	SMove		*move;
 	int			microsteps;
+    int			minSpeed;
 	
 	// 	t = v/a
 	//	d = (a*t^2)/2 = (v^2/a)/2
@@ -210,8 +209,13 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
 		Fpga.par->mot_bwd &= ~(0x01 << motor);
 		ps_set_backwards(&Fpga.qsys->spi_powerstep[motor], TRUE);
 	}
-	
-	if (speed<MIN_SPEED_HZ+1000) speed=MIN_SPEED_HZ+1000;
+
+    if (speed<MIN_SPEED_HZ+500) 
+    {
+        if (speed<1000) Error(ERR_CONT, 0, "Stepper motor[%d]: Speed=%d, too low", motor, speed);
+        minSpeed = speed-500;    
+	}
+    else minSpeed = MIN_SPEED_HZ;
 	
 	switch(par->encCheck)
 	{	
@@ -261,20 +265,20 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
 		return 0;
 	
 	Fpga.par->cfg[motor].amp_stop	 = Tval_Current_to_Par(par->current_acc);
-	Fpga.par->cfg[motor].v_min_speed = MIN_SPEED_HZ*FIX_POINT_SPEED;
+	Fpga.par->cfg[motor].v_min_speed = minSpeed*FIX_POINT_SPEED;
 	
 	// Calculate ramps	
 	// Rising ramp is always the same
-	dist_rising_ramp = (speed*speed - MIN_SPEED_HZ*MIN_SPEED_HZ) / par->accel / 2;
+	dist_rising_ramp = (speed*speed - minSpeed*minSpeed) / par->accel / 2;
 	
 	dist_falling_ramp = dist_rising_ramp;
 	
 	dist_ramp_total = dist_rising_ramp + dist_falling_ramp;
 	
 	accel = (int)(par->accel*FIX_POINT / 200000.0 + 0.5); // [steps/s/5us]
-	v_max = sqrt(steps*par->accel + MIN_SPEED_HZ*MIN_SPEED_HZ);
+	v_max = sqrt(steps*par->accel + minSpeed*minSpeed);
 	Fpga.par->cfg[motor].stopAcc_256 = -accel;
-	Fpga.par->cfg[motor].stopCC_256  = MIN_SPEED_HZ*FIX_POINT_SPEED;
+	Fpga.par->cfg[motor].stopCC_256  = minSpeed*FIX_POINT_SPEED;
 	
 	// If the total distance is longer than the length of both ramps
 	if (steps > dist_ramp_total)
@@ -289,7 +293,7 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
 		falling_steps = (int)dist_falling_ramp;
 		
 		// Dividing by encoder step to morot step ratio if we drive to a target position based on the encoder
-		min_speed = MIN_SPEED_HZ * FIX_POINT_SPEED;
+		min_speed = minSpeed * FIX_POINT_SPEED;
 		
 		cnt=0;
 		// Set rising ramp parameters
@@ -351,7 +355,7 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
 		// If we drive by encoder steps, we need to 
 		rising_steps  = (int)(steps / 2);
 		falling_steps = (int)(steps - (steps / 2));
-		min_speed = MIN_SPEED_HZ*FIX_POINT_SPEED;
+		min_speed = minSpeed*FIX_POINT_SPEED;
 		
 		// Set rising ramp parameters
 		move[0].cc0_256 = (UINT32)(v_max * FIX_POINT_SPEED);
