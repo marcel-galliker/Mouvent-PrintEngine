@@ -179,7 +179,6 @@ static int				_PAR_WINDER_2_ON=TRUE;
 
 static int				_heads_to_print=FALSE;
 static int				_head_was_up=FALSE;
-
 	
 //--- plc_init ----------------------------------------------------------------
 int	plc_init(void)
@@ -259,7 +258,7 @@ static void _plc_set_par_default(void)
 	{
 		lc_get_value_by_name_FLOAT(UnitID ".PAR_PRINTING_START_POSITION", &start);
 		lc_get_value_by_name_FLOAT(UnitID ".PAR_PRINTING_END_POSITION", &end);
-		if(start == 0.0 || end == 0.0)
+		if(start < 300.0 || end == 700.0)
 		{
 			lc_set_value_by_name_FLOAT(UnitID ".PAR_PRINTING_START_POSITION", 300.0);	
 			lc_set_value_by_name_FLOAT(UnitID ".PAR_PRINTING_END_POSITION", 700.0);
@@ -606,6 +605,7 @@ int  plc_pause_printing(int fromGui)
 {
 	if (fromGui && rx_def_is_tx(RX_Config.printer.type))
 	{
+        Error(LOG, 0, "got PAUSE command from GUI at pos=%d", plc_get_scanner_pos());
 		_GUIPause=TRUE;
 	}
 	else
@@ -1357,13 +1357,18 @@ static void _plc_state_ctrl()
 			}
 		}
 
-		if (rx_def_is_tx(RX_Config.printer.type))
+		if (rx_def_is_tx(RX_Config.printer.type) && _GUIPause)
 		{
-			static UINT32 _scannerpos;
-			UINT32 old=_scannerpos;
-			_scannerpos = plc_get_scanner_pos();
-			if (_GUIPause && _scannerpos>_StartPos*1000 && _scannerpos < (int)(old+2000))
+            UINT32 scannerDir;
+            lc_get_value_by_name_UINT32(UnitID ".STA_SCAN_DIRECTION", (UINT32*)&scannerDir);
+			//	0 =         No Direction
+			//	1 =         OP-Side  -->  Back-Side
+			//  2 =         Back-Side  -->  OP-Side
+
+            Error(LOG, 0, "GUIPause: scannerDir=%d", scannerDir);
+            if (scannerDir==2)
 			{
+                Error(LOG, 0, "GUIPause: SendPause");
 				_GUIPause =FALSE;
 				_SendPause=1;
 			}
@@ -1377,7 +1382,6 @@ static void _plc_state_ctrl()
 				{
 					_SendPause = 2;
 					_GUIPause  = FALSE;
-					rx_sleep(200);
 					_plc_set_command("CMD_PRODUCTION", "CMD_PAUSE");
 				}
 				if(_SendWebIn)
