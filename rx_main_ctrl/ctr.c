@@ -10,6 +10,7 @@
 // ****************************************************************************
 
 #include "rx_def.h"
+#include "rx_error.h"
 #include "rx_setup_file.h"
 #include "rx_hash.h"
 #include "rx_sok.h"
@@ -17,12 +18,16 @@
 #include "ctr.h"
 
 static int		_Time;
+static int		_prodCnt;
+static double	_prodLen;
 
 //--- ctr_init --------------------------------------
 void ctr_init(void)
 {	
 	RX_PrinterStatus.counterAct = 0;
 	RX_PrinterStatus.counterTotal = 0;
+    _prodCnt = 0;
+    _prodLen = 0;
 	_Time   = 0;
 
 	HANDLE file = setup_create();
@@ -63,6 +68,8 @@ void ctr_add(double m)
 {
 	RX_PrinterStatus.counterTotal	+= m;
 	RX_PrinterStatus.counterAct		+= m;
+    _prodLen += m;
+    _prodCnt++;
 }
 
 //--- ctr_reset ---------------------------------------------
@@ -77,6 +84,9 @@ void ctr_save(void)
 {
 	HANDLE file = setup_create();
 	
+    Error(LOG, 0, "Counters: act=%d, total=%d, (products=%d, m=%d) ", (int)RX_PrinterStatus.counterAct, (int)RX_PrinterStatus.counterTotal, (int)_prodCnt, (int)_prodLen);
+    _prodCnt=0;
+    _prodLen=0;
 	if (setup_chapter(file, "Counters", -1, WRITE)==REPLY_OK)
 	{
 		setup_str	(file, "machine", WRITE, RX_Hostname, sizeof(RX_Hostname), "");
