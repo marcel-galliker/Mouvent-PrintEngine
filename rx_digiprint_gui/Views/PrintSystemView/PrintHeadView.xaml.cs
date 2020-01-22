@@ -99,7 +99,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
         //--- _PrinterType_Changed ----------------------------------------------------
         private void _PrinterType_Changed()
         {
-            Visibility visible = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide_only) ? Visibility.Visible : Visibility.Collapsed;
+            Visibility visible   = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide_only) ? Visibility.Visible   : Visibility.Collapsed;
             Visibility collapsed = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide_only) ? Visibility.Collapsed : Visibility.Visible;
             Button_Print.Visibility = visible;
             Button_PurgeHard.Visibility = collapsed;

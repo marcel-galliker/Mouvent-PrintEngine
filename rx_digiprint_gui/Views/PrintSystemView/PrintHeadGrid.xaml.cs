@@ -46,9 +46,9 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 {
                     no = RxGlobals.PrintSystem.IS_Order[i/RxGlobals.PrintSystem.HeadCnt] * RxGlobals.PrintSystem.HeadCnt;
                     if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX802)
-                        no += i%RxGlobals.PrintSystem.HeadCnt;
-                    else
                         no += RxGlobals.PrintSystem.HeadCnt-1-i%RxGlobals.PrintSystem.HeadCnt;
+                    else
+                        no += i%RxGlobals.PrintSystem.HeadCnt;
                     _PrintHeadView[i].DataContext = RxGlobals.HeadStat.List[no];
                     _PrintHeadView[i].No = no;
                 }
@@ -75,7 +75,5 @@ namespace RX_DigiPrint.Views.PrintSystemView
             }
             Grid.RowDefinitions[1].Height = new GridLength(25/RxGlobals.Screen.Scale);
         }
-
     }
-
 }
