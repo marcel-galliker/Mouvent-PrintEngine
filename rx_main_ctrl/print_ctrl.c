@@ -838,8 +838,15 @@ int pc_print_done(int headNo, SPrintDoneMsg *pmsg)
 	{
 		SPrintQueueItem *pnext;
 		int pageDone, jobDone;
-
-		TrPrintf(TRUE, "*** PRINT-DONE #%d *** (id=%d, page=%d, scan=%d, copy=%d) sent=%d, printed=%d, stopping=%d", ++_PrintDoneNo, pmsg->id.id, pmsg->id.page, pmsg->id.scan, pmsg->id.copy, RX_PrinterStatus.sentCnt, RX_PrinterStatus.printedCnt, RX_PrinterStatus.printState==ps_stopping);
+        static int _LastTime;
+		int ticks=rx_get_ticks();
+        int time;
+        
+        if (_PrintDoneNo==0) time=0;
+        else time=ticks-_LastTime;
+        _LastTime = ticks;
+        
+		TrPrintf(TRUE, "*** PRINT-DONE #%d *** (id=%d, page=%d, scan=%d, copy=%d) sent=%d, printed=%d, stopping=%d, time=%d", ++_PrintDoneNo, pmsg->id.id, pmsg->id.page, pmsg->id.scan, pmsg->id.copy, RX_PrinterStatus.sentCnt, RX_PrinterStatus.printedCnt, RX_PrinterStatus.printState==ps_stopping, time);
 
 		_PrintDone[n] = 0;
  
