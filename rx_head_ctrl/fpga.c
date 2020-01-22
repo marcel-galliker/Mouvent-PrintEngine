@@ -1105,7 +1105,11 @@ int  fpga_image	(SFpgaImageCmd *msg)
 			RX_HBStatus[0].head[head].imgBuf = RX_HBStatus[0].head[head].imgInCnt - RX_HBStatus[0].head[head].printGoCnt;
 			_UsedHeads |= (1<<head);
 			_Bidir = msg->image.flags & FLAG_BIDIR;
-			if (_ImgInCnt==0) fpga_set_pg_offsets(msg->image.flags & FLAG_MIRROR);
+			if (_ImgInCnt==0)
+            {
+				TrPrintfL(TRUE, "FirstImage: fpga_set_pg_offsets(%d)", msg->image.flags & FLAG_MIRROR);
+                fpga_set_pg_offsets(msg->image.flags & FLAG_MIRROR);
+            }
 			if (RX_HBStatus[0].head[head].imgInCnt>_ImgInCnt) _ImgInCnt=RX_HBStatus[0].head[head].imgInCnt;
 			/*
 			if (RX_HBStatus[0].head[head].imgInCnt==1) 
@@ -1530,7 +1534,10 @@ int  fpga_abort(void)
 		int i, len;
 		int warn=FALSE;
 		char str[MAX_PATH];
-		for(i=0; i<SIZEOF(Fpga.error->enc_fp); i++)
+
+        _DirchangeTimer=0;						
+		
+        for(i=0; i<SIZEOF(Fpga.error->enc_fp); i++)
 		{
 			if(RX_FpgaData.wf_busy_warn[i] && !warn)				
 			{
@@ -1556,7 +1563,6 @@ int  fpga_abort(void)
 				break;
 			}
 		}
-						
 		nios_set_firepulse_on(FALSE);
 		if(FpgaCfg.encoder->synth.enable)
 		{
@@ -1736,6 +1742,7 @@ void  fpga_main(int ticks, int menu)
 	if (_DirchangeTimer>0 && rx_get_ticks()>_DirchangeTimer)
 	{
 		_DirchangeTimer = 0;
+        TrPrintfL(TRUE, "fpga_set_pg_offsets(%d)", _Direction);
 		fpga_set_pg_offsets(_Direction);
 	}
 	
@@ -1809,9 +1816,9 @@ static int _check_print_done(void)
 					if (_PrintGo_flags==_UsedHeads)
 					{
 						SPageId *pid = &_PageId[i];
-						TrPrintfL(TRUE, "PRINT GO  [%d]: id=%d, page=%d, copy=%d, scan=%d, pos=%d, donepos=%d", i, pid->id, pid->page, pid->copy, pid->scan,  RX_FpgaStat.pg_in_position[head], _PrintDonePos[head][i]);
 						_Direction =_Img[head][(i+1)%MAX_PAGES].flags & FLAG_MIRROR;
 						_DirchangeTimer = rx_get_ticks()+500;
+						TrPrintfL(TRUE, "PRINT GO  [%d]: id=%d, page=%d, copy=%d, scan=%d, pos=%d, donepos=%d, _Direction=%d", i, pid->id, pid->page, pid->copy, pid->scan,  RX_FpgaStat.pg_in_position[head], _PrintDonePos[head][i], _Direction);
 					//	fpga_set_pg_offsets(_Img[head][(i+1)%MAX_PAGES].flags & FLAG_MIRROR);				
 					}					
 				}
