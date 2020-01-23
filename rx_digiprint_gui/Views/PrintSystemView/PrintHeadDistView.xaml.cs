@@ -141,7 +141,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
 
                             //--- offset text box -----------
                             RxNumBox offset = new RxNumBox(){Width=width, HorizontalContentAlignment=HorizontalAlignment.Right};
-                            offset.Tag = colorNo++;
+                            offset.Tag = distNo;//colorNo++;
                             offset.FontSize = (double)Application.Current.Resources["FontSizeSmall"];
                             offset.LostFocus += _text_LostFocus;
                             Canvas.SetLeft(offset, x);
