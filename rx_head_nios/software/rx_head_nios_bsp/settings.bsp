@@ -2,8 +2,8 @@
 <sch:Settings xmlns:sch="http://www.altera.com/embeddedsw/bsp/schema">
         <BspType>hal</BspType>
         <BspVersion>default</BspVersion>
-        <BspGeneratedTimeStamp>12.11.2019 10:02:57</BspGeneratedTimeStamp>
-        <BspGeneratedUnixTimeStamp>1573549377378</BspGeneratedUnixTimeStamp>
+        <BspGeneratedTimeStamp>13.01.2020 09:30:40</BspGeneratedTimeStamp>
+        <BspGeneratedUnixTimeStamp>1578904240472</BspGeneratedUnixTimeStamp>
         <BspGeneratedLocation>C:\Develop\RX-Project\rx_head_nios\software\rx_head_nios_bsp</BspGeneratedLocation>
         <BspSettingsFile>C:\Develop\RX-Project\rx_head_nios\software\rx_head_nios_bsp\settings.bsp</BspSettingsFile>
         <SopcDesignFile>..\..\soc_system.sopcinfo</SopcDesignFile>

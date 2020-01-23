@@ -100,7 +100,9 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/HAL/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="F:/Develop/RX-Project/rx_head_nios/software/rx_head_nios_bsp"/>
+						<entry kind="includePath" name="/rx_head_nios_bsp">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
@@ -232,7 +234,9 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/HAL/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="F:/Develop/RX-Project/rx_head_nios/software/rx_head_nios_bsp"/>
+						<entry kind="includePath" name="/rx_head_nios_bsp">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
@@ -252,7 +256,9 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/HAL/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="F:/Develop/RX-Project/rx_head_nios/software/rx_head_nios_bsp"/>
+						<entry kind="includePath" name="/rx_head_nios_bsp">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
@@ -272,7 +278,9 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/HAL/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="F:/Develop/RX-Project/rx_head_nios/software/rx_head_nios_bsp"/>
+						<entry kind="includePath" name="/rx_head_nios_bsp">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
@@ -292,7 +300,9 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/HAL/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="F:/Develop/RX-Project/rx_head_nios/software/rx_head_nios_bsp"/>
+						<entry kind="includePath" name="/rx_head_nios_bsp">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
@@ -514,7 +524,9 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/HAL/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="F:/Develop/RX-Project/rx_head_nios/software/rx_head_nios_bsp"/>
+						<entry kind="includePath" name="/rx_head_nios_bsp">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
@@ -534,7 +546,9 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/HAL/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="F:/Develop/RX-Project/rx_head_nios/software/rx_head_nios_bsp"/>
+						<entry kind="includePath" name="/rx_head_nios_bsp">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
@@ -622,7 +636,9 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/HAL/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="F:/Develop/RX-Project/rx_head_nios/software/rx_head_nios_bsp"/>
+						<entry kind="includePath" name="/rx_head_nios_bsp">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
@@ -686,7 +702,9 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/HAL/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="F:/Develop/RX-Project/rx_head_nios/software/rx_head_nios_bsp"/>
+						<entry kind="includePath" name="/rx_head_nios_bsp">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
@@ -886,7 +904,9 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/HAL/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="F:/Develop/RX-Project/rx_head_nios/software/rx_head_nios_bsp"/>
+						<entry kind="includePath" name="/rx_head_nios_bsp">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
@@ -1042,7 +1062,9 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/HAL/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="F:/Develop/RX-Project/rx_head_nios/software/rx_head_nios_bsp"/>
+						<entry kind="includePath" name="/rx_head_nios_bsp">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
@@ -1130,7 +1152,9 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/HAL/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="F:/Develop/RX-Project/rx_head_nios/software/rx_head_nios_bsp"/>
+						<entry kind="includePath" name="/rx_head_nios_bsp">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
@@ -1150,7 +1174,9 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/HAL/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="F:/Develop/RX-Project/rx_head_nios/software/rx_head_nios_bsp"/>
+						<entry kind="includePath" name="/rx_head_nios_bsp">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
@@ -1214,7 +1240,9 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/HAL/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="F:/Develop/RX-Project/rx_head_nios/software/rx_head_nios_bsp"/>
+						<entry kind="includePath" name="/rx_head_nios_bsp">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
@@ -1280,7 +1308,9 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/HAL/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="F:/Develop/RX-Project/rx_head_nios/software/rx_head_nios_bsp"/>
+						<entry kind="includePath" name="/rx_head_nios_bsp">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
@@ -1300,7 +1330,9 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/HAL/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="F:/Develop/RX-Project/rx_head_nios/software/rx_head_nios_bsp"/>
+						<entry kind="includePath" name="/rx_head_nios_bsp">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
@@ -1320,7 +1352,9 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/HAL/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="F:/Develop/RX-Project/rx_head_nios/software/rx_head_nios_bsp"/>
+						<entry kind="includePath" name="/rx_head_nios_bsp">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
@@ -1428,7 +1462,9 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/HAL/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="F:/Develop/RX-Project/rx_head_nios/software/rx_head_nios_bsp"/>
+						<entry kind="includePath" name="/rx_head_nios_bsp">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
@@ -1650,7 +1686,9 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/HAL/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="F:/Develop/RX-Project/rx_head_nios/software/rx_head_nios_bsp"/>
+						<entry kind="includePath" name="/rx_head_nios_bsp">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
@@ -1716,7 +1754,9 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/HAL/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="F:/Develop/RX-Project/rx_head_nios/software/rx_head_nios_bsp"/>
+						<entry kind="includePath" name="/rx_head_nios_bsp">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
@@ -1736,7 +1776,9 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/HAL/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="F:/Develop/RX-Project/rx_head_nios/software/rx_head_nios_bsp"/>
+						<entry kind="includePath" name="/rx_head_nios_bsp">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
@@ -1778,7 +1820,9 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/HAL/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="F:/Develop/RX-Project/rx_head_nios/software/rx_head_nios_bsp"/>
+						<entry kind="includePath" name="/rx_head_nios_bsp">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
@@ -2094,7 +2138,9 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/HAL/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="F:/Develop/RX-Project/rx_head_nios/software/rx_head_nios_bsp"/>
+						<entry kind="includePath" name="/rx_head_nios_bsp">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
@@ -2114,7 +2160,9 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/HAL/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="F:/Develop/RX-Project/rx_head_nios/software/rx_head_nios_bsp"/>
+						<entry kind="includePath" name="/rx_head_nios_bsp">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
@@ -2134,7 +2182,9 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/HAL/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="F:/Develop/RX-Project/rx_head_nios/software/rx_head_nios_bsp"/>
+						<entry kind="includePath" name="/rx_head_nios_bsp">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
@@ -2312,7 +2362,9 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/HAL/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="F:/Develop/RX-Project/rx_head_nios/software/rx_head_nios_bsp"/>
+						<entry kind="includePath" name="/rx_head_nios_bsp">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
@@ -2332,7 +2384,9 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/HAL/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="F:/Develop/RX-Project/rx_head_nios/software/rx_head_nios_bsp"/>
+						<entry kind="includePath" name="/rx_head_nios_bsp">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
@@ -2352,7 +2406,9 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/HAL/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="F:/Develop/RX-Project/rx_head_nios/software/rx_head_nios_bsp"/>
+						<entry kind="includePath" name="/rx_head_nios_bsp">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
