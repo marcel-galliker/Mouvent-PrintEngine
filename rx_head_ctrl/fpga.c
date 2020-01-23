@@ -408,6 +408,9 @@ int  fpga_set_config(RX_SOCKET socket)
 //	Error(LOG, 0, "fpga_set_config 5");
 	for (i=0; i<SIZEOF(FpgaCfg.head); i++)
 	{
+
+        TrPrintfL(TRUE, "fpga_set_config start: head[%d].img-info=%d, 1stDataBlock=%d ", i, RX_FpgaError.img_line_err[1][i], RX_FpgaError.img_line_err[0][i]);
+
 		FpgaCfg.head[i]->cmd_enable			= FALSE; // need toggle to reset!
 		FpgaCfg.head[i]->cmd_enable         = (RX_HBConfig.head[i].enabled == dev_on);
 		FpgaCfg.head[i]->encoderNo			= RX_HBConfig.head[i].encoderNo;
@@ -598,6 +601,7 @@ int  fpga_set_config(RX_SOCKET socket)
 		cond_set_config(head, &RX_HBConfig.head[head].cond);
 #endif
 		_check_block_used_flags_clear(head, 0, RX_HBConfig.head[head].blkNo0, RX_HBConfig.head[head].blkCnt);
+        TrPrintfL(TRUE, "fpga_set_config end: head[%d].img-info=%d, 1stDataBlock=%d ", head, RX_FpgaError.img_line_err[1][head], RX_FpgaError.img_line_err[0][head]);
 	}
 
 //	Error(LOG, 0, "fpga_set_config 11");
@@ -1050,6 +1054,7 @@ int  fpga_image	(SFpgaImageCmd *msg)
 	if (_Init)
 	{
 		TrPrintfL(trace, "head[%d].fpga_image[%d]:(id=%d, page=%d, copy=%d, scan=%d) blocks %05d ... %05d (%05d ... %05d), clearBlockUsed=%d", head, idx,  msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->image.blkNo, _PageEnd[head][idx], msg->image.blkNo-RX_HBConfig.head[head].blkNo0, _PageEnd[head][idx]-RX_HBConfig.head[head].blkNo0, msg->image.clearBlockUsed);
+		TrPrintfL(trace, "head[%d].fpga_image[%d]: _Printing=%d, _HeadsLoaded=%d", head, idx, _Printing, _HeadsLoaded);
 //		if (!_TestFSM) Error(LOG,  0, "fpga_image: FSM State=0x%04x", Fpga.stat->info);
 //		_TestFSM = 1;
 
@@ -1114,7 +1119,6 @@ int  fpga_image	(SFpgaImageCmd *msg)
 			if (RX_HBStatus[0].head[head].imgInCnt>_ImgInCnt) _ImgInCnt=RX_HBStatus[0].head[head].imgInCnt;
             
 			_HeadsLoaded |= (1<<head);
-			if (!_Printing) TrPrintfL(TRUE, "fpga_image start _HeadsLoaded=%d", _HeadsLoaded);
 			_Printing = (_HeadsLoaded==_UsedHeads);
 		}
 		for (head=0; head<HEAD_CNT; head++)
@@ -1199,7 +1203,7 @@ static void _fpga_check_fp_errors(int printDone)
 								err=TRUE;
 								break;
 					case 1: 	fpga_trace_registers("img_line_err_1", TRUE);
-								Error(ERR_ABORT, 0, "Head[%d]: img-info missing: imgIn=%d, PG=%d LastPrinted: %s", head, RX_HBStatus[0].head[head].imgInCnt+1, RX_HBStatus[0].head[head].printGoCnt+1, _PrintDoneId);
+								Error(ERR_ABORT, 0, "Head[%d]: img-info missing: imgIn=%d, PG=%d LastPrinted: %s cnt=%d", head, RX_HBStatus[0].head[head].imgInCnt+1, RX_HBStatus[0].head[head].printGoCnt+1, _PrintDoneId, Fpga.error->img_line_err[n][head]);
 							//	rx_sleep(100);
 							//	Error(ERR_ABORT, 0, "Head[%d]: 1st img-line missing due to no img-info: cnt=%d, imgIn=%d, PG=%d", head, Fpga.error->img_line_err[n][head], RX_HBStatus[0].head[head].imgInCnt, RX_HBStatus[0].head[head].printGoCnt);
 								err=TRUE;
@@ -2062,7 +2066,7 @@ static void _check_errors(void)
 	
 	RX_FpgaError.enc_tel_cnt = Fpga.error->enc_tel_cnt;
 	
-	_fpga_check_fp_errors(FALSE);
+	if (_Printing) _fpga_check_fp_errors(FALSE);
 
 	for (i=0; i<2; i++)
 	{
