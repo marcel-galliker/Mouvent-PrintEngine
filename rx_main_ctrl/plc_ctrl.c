@@ -147,7 +147,6 @@ static int				_RunTime=0;
 static SNetworkItem		_NetItem;
 static ULONG			_LastLogIdx=0;
 static int				_StartPrinting=FALSE;
-static int				_FirstParameters=TRUE;
 static int				_RequestPause=FALSE;
 static int				_SendPause=FALSE;
 static int				_GUIPause=FALSE;
@@ -402,14 +401,12 @@ int	plc_get_thickness(void)
 static void _plc_send_par(SPlcPar *pPlcPar)
 {
 //	Error(LOG, 0, "SET PLC Parameter: PAR_PRINTING_START_POSITION=%d, PAR_PRINTING_END_POSITION=%d", (int)pPlcPar->startPos, (int)pPlcPar->endPos);
-	TrPrintfL(TRUE, "_plc_send_par scanning=%d, _FirstParameters=%d", rx_def_is_scanning(RX_Config.printer.type), _FirstParameters);
 	
-	if(rx_def_is_scanning(RX_Config.printer.type) && !_FirstParameters)
+	if(rx_def_is_scanning(RX_Config.printer.type))
 	{
 		Error(LOG, 0, "ctrl_send_head_cfg");
 		ctrl_send_head_cfg();			
 	}
-	_FirstParameters = FALSE;
 	if (_SimuPLC) return;
 	
 	if (_PlcState==plc_webin)
@@ -517,7 +514,6 @@ int  plc_stop_printing(void)
 {
 	if (_SimuEncoder) ctrl_simu_encoder(0);
 	_StartPrinting = FALSE;
-	_FirstParameters = TRUE;
 	_SendRun       = FALSE;
 	_SendPause	   = FALSE;
 	_GUIPause	   = FALSE;

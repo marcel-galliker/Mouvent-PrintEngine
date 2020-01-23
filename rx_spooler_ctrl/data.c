@@ -863,7 +863,7 @@ int	 data_next_id(void)
 {
 	int lastidx=(_OutIdx+PRINT_LIST_SIZE-1)%PRINT_LIST_SIZE;
 	Error(LOG, 0, "data_next_id _SendingId=%d, lastidx=%d, outIdx=%d, sendIdx=%d, last.id=%d, out.id=%d, send.id=%d", _SendingId.id, lastidx, _OutIdx, _SendIdx, _PrintList[lastidx].id.id, _PrintList[_OutIdx].id.id, _PrintList[_SendIdx].id.id);
-	if (_PrintList[lastidx].id.id==_SendingId.id && _PrintList[_OutIdx].id.id!=_SendingId.id)
+	if (_PrintList[lastidx].id.id==_SendingId.id && _PrintList[_OutIdx].id.id!=_SendingId.id && _PrintList[_OutIdx].id.id)
 	{
 		data_send_id(&_PrintList[_OutIdx].id);
 		return TRUE;

@@ -93,12 +93,14 @@ static BYTE		*_AXI_mem=NULL;
 
 static int		_CfgCnt=0;
 static int		_Init=FALSE;
+static int		_Printing=FALSE;
 static int		_Reload_FPGA = FALSE;
 static int		_FpgaErrorTrace=FALSE;
 static int		_Load_Time=0;
 static SPageId	_PageId[MAX_PAGES];
 static UINT32	_PageEnd[HEAD_CNT][MAX_PAGES];
 static UINT32	_PrintDonePos[HEAD_CNT][MAX_PAGES];
+static char		_PrintDoneId[64]="";
 static UINT32	_PrintGoPos[HEAD_CNT];
 static UINT32	_PrintGoPosBase[HEAD_CNT];
 static UINT32	_HeadFpCnt[HEAD_CNT];
@@ -112,11 +114,10 @@ static UINT32	_PrintDoneError;
 static int		_TempWarn=0;
 static int		_TempErr=0;
 static UINT32	_ImgInCnt;
-static UINT32	_FirstImage;
 static UINT32	_PdCnt;
 static UINT32	_UsedHeads;
+static int		_HeadsLoaded;
 static UINT32	_PrintGo_flags;
-static UINT32	_PrintDone_flags;
 static int		_Bidir;
 static UINT32	_DirchangeTimer;
 static int	    _Direction;
@@ -397,7 +398,9 @@ int  fpga_set_config(RX_SOCKET socket)
 	_PrintDoneWarning	= 0;
 	_PrintDoneError		= 0;
 	_FpgaErrorTrace		= FALSE;
-	
+	_UsedHeads			= 0;
+	_HeadsLoaded		= 0;
+
 //	Error(LOG, 0, "fpga_set_config 4");
 
 	//--- head -----------------------------------------------------------------
@@ -432,6 +435,7 @@ int  fpga_set_config(RX_SOCKET socket)
 		//--- check waveform ---
 		if (FpgaCfg.head[i]->cmd_enable)
 		{				
+			_UsedHeads |= (1<<i);
 			for (n=0; n<(int)FpgaCfg.head[i]->fp_subPulses; n++)
 			{
 				if ((n>0 && FpgaCfg.head[i]->fp[n].on<=FpgaCfg.head[i]->fp[n-1].off)
@@ -477,17 +481,17 @@ int  fpga_set_config(RX_SOCKET socket)
 //	Error(WARN, 0, "TEST Overheating");
 	FpgaCfg.cfg->overheat_treshold = MAX_FPGA_TEMP+128;
 	
-	memset(_PageId,	   0, sizeof(_PageId));
-	memset(_PageEnd,   0, sizeof(_PageEnd));
-	memset(_PrintDonePos, 0, sizeof(_PrintDonePos));
-	memset(_PrintGoPos, 0, sizeof(_PrintGoPos));
+	memset(_PageId,			0, sizeof(_PageId));
+	memset(_PageEnd,		0, sizeof(_PageEnd));
+	memset(_PrintDonePos,	0, sizeof(_PrintDonePos));
+	memset(_PrintGoPos,		0, sizeof(_PrintGoPos));
 	memset(_PrintGoPosBase, 0, sizeof(_PrintGoPosBase));
 	memset(_HeadFpCnt,      0, sizeof(_HeadFpCnt));
 	memset(_HeadFpCntBase,  0, sizeof(_HeadFpCntBase));
-	memset(_AliveCnt,  0, sizeof(_AliveCnt));
-	memset(_ImgOutIdx, 0, sizeof(_ImgOutIdx));
-	memset(_TestPgTime,0, sizeof(_TestPgTime));
-//	memset(_Buffer,    0, sizeof(_Buffer));
+	memset(_AliveCnt,		0, sizeof(_AliveCnt));
+	memset(_ImgOutIdx,		0, sizeof(_ImgOutIdx));
+	memset(_TestPgTime,		0, sizeof(_TestPgTime));
+//	memset(_Buffer,			0, sizeof(_Buffer));
 
 	for (i=0; i<SIZEOF(_PageEnd); i++)
 	{
@@ -533,7 +537,6 @@ int  fpga_set_config(RX_SOCKET socket)
 	_PgSimuIn=0;
 	_PgSimuOut=0;
 	_ImgInCnt = 0;
-	_FirstImage = 0;
 	
 	//---  set encoder ---------------------------------------------------
 //	Error(LOG, 0, "fpga_set_config 8");
@@ -632,7 +635,6 @@ void fpga_set_pg_offsets(INT32 backwards)
 	int len=0;
     TrPrintfL(TRUE, "fpga_set_pg_offsets(backwards=%d)", backwards);
 	_PrintGo_flags   = 0;
-	_PrintDone_flags = 0;
 	for (head=0; head<HEAD_CNT; head++)
 	{
 		FpgaCfg.head[head]->offset_stroke		= _PgOffset[head][backwards]/8;
@@ -1103,7 +1105,6 @@ int  fpga_image	(SFpgaImageCmd *msg)
 			Fpga.print->imgInIdx[head] = idx;
 			RX_HBStatus[0].head[head].imgInCnt++;
 			RX_HBStatus[0].head[head].imgBuf = RX_HBStatus[0].head[head].imgInCnt - RX_HBStatus[0].head[head].printGoCnt;
-			_UsedHeads |= (1<<head);
 			_Bidir = msg->image.flags & FLAG_BIDIR;
 			if (_ImgInCnt==0)
             {
@@ -1111,12 +1112,10 @@ int  fpga_image	(SFpgaImageCmd *msg)
                 fpga_set_pg_offsets(msg->image.flags & FLAG_MIRROR);
             }
 			if (RX_HBStatus[0].head[head].imgInCnt>_ImgInCnt) _ImgInCnt=RX_HBStatus[0].head[head].imgInCnt;
-			/*
-			if (RX_HBStatus[0].head[head].imgInCnt==1) 
-			{
-				if (++_FirstImage==4) fpga_trace_registers("IMAGE-loaded");
-			}
-			*/
+            
+			_HeadsLoaded |= (1<<head);
+			if (!_Printing) TrPrintfL(TRUE, "fpga_image start _HeadsLoaded=%d", _HeadsLoaded);
+			_Printing = (_HeadsLoaded==_UsedHeads);
 		}
 		for (head=0; head<HEAD_CNT; head++)
 		{
@@ -1190,25 +1189,27 @@ static void _fpga_check_fp_errors(int printDone)
 				if(!RX_FpgaError.img_line_err[n][head])
 				{
 					int err=FALSE;
+                    char id[64];
+					SPageId *pid = &_PageId[RX_HBStatus[0].head[head].printGoCnt&MAX_PAGES];
+                    sprintf(id, "(id=%d, page=%d, copy=%d, scan=%d)", pid->id, pid->page, pid->copy, pid->scan);
 					switch(n)
 					{
 					case 0: 	fpga_trace_registers("img_line_err_0", TRUE);
-								SPageId *pid = &_PageId[RX_HBStatus[0].head[head].printGoCnt&MAX_PAGES];
-								Error(ERR_ABORT, 0, "Head[%d]: 1st Data Block missing: cnt=%d, imgIn=%d, PG=%d (id=%d, page=%d, copy=%d, scan=%d)", head, Fpga.error->img_line_err[n][head], RX_HBStatus[0].head[head].imgInCnt, RX_HBStatus[0].head[head].printGoCnt, pid->id, pid->page, pid->copy, pid->scan);
+								Error(ERR_ABORT, 0, "Head[%d]: 1st Data Block missing: cnt=%d, imgIn=%d, PG=%d %s", head, Fpga.error->img_line_err[n][head], RX_HBStatus[0].head[head].imgInCnt, RX_HBStatus[0].head[head].printGoCnt, id);
 								err=TRUE;
 								break;
 					case 1: 	fpga_trace_registers("img_line_err_1", TRUE);
-								Error(ERR_ABORT, 0, "Head[%d]: img-info missing: imgIn=%d, PG=%d", head, RX_HBStatus[0].head[head].imgInCnt+1, RX_HBStatus[0].head[head].printGoCnt+1);
+								Error(ERR_ABORT, 0, "Head[%d]: img-info missing: imgIn=%d, PG=%d LastPrinted: %s", head, RX_HBStatus[0].head[head].imgInCnt+1, RX_HBStatus[0].head[head].printGoCnt+1, _PrintDoneId);
 							//	rx_sleep(100);
 							//	Error(ERR_ABORT, 0, "Head[%d]: 1st img-line missing due to no img-info: cnt=%d, imgIn=%d, PG=%d", head, Fpga.error->img_line_err[n][head], RX_HBStatus[0].head[head].imgInCnt, RX_HBStatus[0].head[head].printGoCnt);
 								err=TRUE;
 								break;
 					case 2: 	fpga_trace_registers("img_line_err_2", TRUE);
-								Error(ERR_ABORT, 0, "Head[%d]: not used: cnt=%d, imgIn=%d, PG=%d", head, Fpga.error->img_line_err[n][head], RX_HBStatus[0].head[head].imgInCnt, RX_HBStatus[0].head[head].printGoCnt);
+								Error(ERR_ABORT, 0, "Head[%d]: not used: cnt=%d, imgIn=%d, PG=%d %s", head, Fpga.error->img_line_err[n][head], RX_HBStatus[0].head[head].imgInCnt, RX_HBStatus[0].head[head].printGoCnt, id);
 								err=TRUE;
 								break;
 					case 3: 	fpga_trace_registers("img_line_err_3", TRUE);
-								Error(ERR_ABORT, 0, "Head[%d]: Data Block missing: cnt=%d, imgIn=%d, PG=%d", head, Fpga.error->img_line_err[n][head], RX_HBStatus[0].head[head].imgInCnt, RX_HBStatus[0].head[head].printGoCnt);
+								Error(ERR_ABORT, 0, "Head[%d]: Data Block missing: cnt=%d, imgIn=%d, PG=%d %s", head, Fpga.error->img_line_err[n][head], RX_HBStatus[0].head[head].imgInCnt, RX_HBStatus[0].head[head].printGoCnt, id);
 								err=TRUE;
 								break;	
 					}
@@ -1523,6 +1524,7 @@ void _write_srd(const char *srcName, int subPulses, int stroke, BYTE *data, int 
 int  fpga_abort(void)
 {
     _PrintGo_flags = 0;
+    _Printing=FALSE;
 	if(_Init)
 	{
 		/*
@@ -1734,7 +1736,7 @@ void  fpga_main(int ticks, int menu)
 
 	int time2=rx_get_ticks()-time;
 	int time3=0;
-    if (FpgaCfg.cfg->cmd & CMD_MASTER_ENABLE)
+    if (_Printing)
     {
 		pd = _check_print_done();
 		_check_encoder();
@@ -1860,7 +1862,6 @@ static int _check_print_done(void)
 				
 				TrPrintfL(TRUE, "Head[%d].PrintDone=%d, blocks %05d ... %05d", head, RX_HBStatus[0].head[head].printDoneCnt, img->blkNo, _PageEnd[head][i]);
 				
-				_PrintDone_flags |= (1<<head);
                 /*
 				if (_PrintDone_flags==_UsedHeads)
 				{
@@ -1960,7 +1961,9 @@ static void _handle_pd(int pd)
 		memcpy(&msg.id, &_PageId[_PdCnt%MAX_PAGES], sizeof(msg.id));
 		sok_send(&RX_MainSocket, &msg);
 		
-		TrPrintfL(TRUE, "PRINT DONE[%d]: id=%d, page=%d, copy=%d, scan=%d, pos=%d, lastBlock=%d %d %d %d", _PdCnt+1, msg.id.id, msg.id.page, msg.id.copy, msg.id.scan, RX_HBStatus[0].head[0].encPos, _BlockOutIdx[0], _BlockOutIdx[1], _BlockOutIdx[2], _BlockOutIdx[3]);
+        sprintf(_PrintDoneId, "(id=%d, page=%d, copy=%d, scan=%d)", msg.id.id, msg.id.page, msg.id.copy, msg.id.scan);
+        
+		TrPrintfL(TRUE, "PRINT DONE[%d]: %s pos=%d, lastBlock=%d %d %d %d", _PdCnt+1, _PrintDoneId, RX_HBStatus[0].head[0].encPos, _BlockOutIdx[0], _BlockOutIdx[1], _BlockOutIdx[2], _BlockOutIdx[3]);
 	//	Error(LOG, 0, "PRINT DONE[%d]:id=%d, page=%d, copy=%d, scan=%d, pos=%d (expected %d)", _PdCnt%MAX_PAGES, msg.id.id, msg.id.page, msg.id.copy, msg.id.scan, RX_HBStatus[0].head[0].encPos, _PrintDonePos[0][_PdCnt%MAX_PAGES]);
 		for (i=0; i<HEAD_CNT; i++)
 			_PrintDonePos[i][_PdCnt%MAX_PAGES] = 0;

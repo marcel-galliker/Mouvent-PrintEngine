@@ -43,6 +43,8 @@ namespace RX_DigiPrint
                 Application.Current.Shutdown();
             }
 
+            System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("ch-DE");
+
             Application.Current.DispatcherUnhandledException += _DispatcherUnhandledException;
 
             // problem with touch: https://msdn.microsoft.com/en-us/library/dd901337(v=vs.90).aspx
