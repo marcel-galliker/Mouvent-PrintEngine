@@ -94,6 +94,7 @@ static BYTE		*_AXI_mem=NULL;
 static int		_CfgCnt=0;
 static int		_Init=FALSE;
 static int		_Reload_FPGA = FALSE;
+static int		_Abort=FALSE;
 static int		_FpgaErrorTrace=FALSE;
 static int		_Load_Time=0;
 static SPageId	_PageId[MAX_PAGES];
@@ -397,6 +398,7 @@ int  fpga_set_config(RX_SOCKET socket)
 	_PrintDoneWarning	= 0;
 	_PrintDoneError		= 0;
 	_FpgaErrorTrace		= FALSE;
+    _Abort				= FALSE;
 	
 //	Error(LOG, 0, "fpga_set_config 4");
 
@@ -630,6 +632,7 @@ void fpga_set_pg_offsets(INT32 backwards)
 	int head;
 	char str[100];
 	int len=0;
+    TrPrintfL(TRUE, "fpga_set_pg_offsets(backwards=%d)", backwards);
 	_PrintGo_flags   = 0;
 	_PrintDone_flags = 0;
 	for (head=0; head<HEAD_CNT; head++)
@@ -932,7 +935,7 @@ static int _check_block_used_flags(int head, int blkNo, int blkCnt)
 		if (blk>max) blk=min;
 		bit = blk%32;
 		if (!bit) flags = Fpga.blockUsed[blk/32];
-		if (!(flags & (1<<bit)) && !reply) reply=Error(ERR_CONT, 0, "DataBlock[%d] missing", blk);
+		if (!(flags & (1<<bit)) && !reply) reply=Error(ERR_ABORT, 0, "DataBlock[%d] missing", blk);
 	}
 	return reply;
 }
@@ -1046,6 +1049,7 @@ int  fpga_image	(SFpgaImageCmd *msg)
 
 	if (_Init)
 	{
+		TrPrintfL(trace, "head[%d].fpga_image[%d]:(id=%d, page=%d, copy=%d, scan=%d) blocks %05d ... %05d (%05d ... %05d), clearBlockUsed=%d", head, idx,  msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->image.blkNo, _PageEnd[head][idx], msg->image.blkNo-RX_HBConfig.head[head].blkNo0, _PageEnd[head][idx]-RX_HBConfig.head[head].blkNo0, msg->image.clearBlockUsed);
 //		if (!_TestFSM) Error(LOG,  0, "fpga_image: FSM State=0x%04x", Fpga.stat->info);
 //		_TestFSM = 1;
 
@@ -1068,8 +1072,6 @@ int  fpga_image	(SFpgaImageCmd *msg)
 		memcpy(&_Img[head][idx], &msg->image, sizeof(SFpgaImage));
 		
 		_PageEnd[head][idx] = RX_HBConfig.head[head].blkNo0 + (msg->image.blkNo-RX_HBConfig.head[head].blkNo0+msg->image.blkCnt-1) % RX_HBConfig.head[head].blkCnt;
-
-		TrPrintfL(trace, "head[%d].fpga_image[%d]:(id=%d, page=%d, copy=%d, scan=%d) blocks %05d ... %05d (%05d ... %05d), clearBlockUsed=%d", head, idx,  msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->image.blkNo, _PageEnd[head][idx], msg->image.blkNo-RX_HBConfig.head[head].blkNo0, _PageEnd[head][idx]-RX_HBConfig.head[head].blkNo0, msg->image.clearBlockUsed);
 		TrPrintfL(trace, "head[%d].fpga_image[%d]: width=%d, height=%d, bits=%d", head, idx, msg->image.widthBytes, msg->image.lengthPx,  msg->image.bitPerPixel);
 
 //		if (head==0) 
@@ -1193,7 +1195,8 @@ static void _fpga_check_fp_errors(int printDone)
 					switch(n)
 					{
 					case 0: 	fpga_trace_registers("img_line_err_0", TRUE);
-								Error(ERR_ABORT, 0, "Head[%d]: 1st Data Block missing: cnt=%d, imgIn=%d, PG=%d", head, Fpga.error->img_line_err[n][head], RX_HBStatus[0].head[head].imgInCnt, RX_HBStatus[0].head[head].printGoCnt);
+								SPageId *pid = &_PageId[RX_HBStatus[0].head[head].printGoCnt&MAX_PAGES];
+								Error(ERR_ABORT, 0, "Head[%d]: 1st Data Block missing: cnt=%d, imgIn=%d, PG=%d (id=%d, page=%d, copy=%d, scan=%d)", head, Fpga.error->img_line_err[n][head], RX_HBStatus[0].head[head].imgInCnt, RX_HBStatus[0].head[head].printGoCnt, pid->id, pid->page, pid->copy, pid->scan);
 								err=TRUE;
 								break;
 					case 1: 	fpga_trace_registers("img_line_err_1", TRUE);
@@ -1521,6 +1524,7 @@ void _write_srd(const char *srcName, int subPulses, int stroke, BYTE *data, int 
 //--- fpga_abort -----------------------------------
 int  fpga_abort(void)
 {
+    _Abort = TRUE;
 	if(_Init)
 	{
 		/*
@@ -1535,7 +1539,7 @@ int  fpga_abort(void)
 		int warn=FALSE;
 		char str[MAX_PATH];
 
-        _DirchangeTimer=0;						
+        _DirchangeTimer=0;	
 		
         for(i=0; i<SIZEOF(Fpga.error->enc_fp); i++)
 		{
@@ -1742,7 +1746,6 @@ void  fpga_main(int ticks, int menu)
 	if (_DirchangeTimer>0 && rx_get_ticks()>_DirchangeTimer)
 	{
 		_DirchangeTimer = 0;
-        TrPrintfL(TRUE, "fpga_set_pg_offsets(%d)", _Direction);
 		fpga_set_pg_offsets(_Direction);
 	}
 	
@@ -1803,14 +1806,16 @@ static int _check_print_done(void)
 
 			if (RX_HBStatus[0].head[head].printGoCnt != Fpga.stat->pg_ctr[head])
 			{
-				int i   = (Fpga.stat->pg_ctr[head]-1)%MAX_PAGES;
+                int i   = (RX_HBStatus[0].head[head].printGoCnt-1)%MAX_PAGES;
 				_PrintDonePos[head][i] = RX_FpgaStat.pg_in_position[head] + _Img[head][i].lengthPx;
+
+                RX_HBStatus[0].head[head].printGoCnt++;
 
 				TrPrintfL(TRUE, "Head[%d].PrintGo=%d, pos=%d", head, RX_HBStatus[0].head[head].printGoCnt, RX_FpgaStat.pg_in_position[head]);
 				
 				if (_Bidir)
 				{
-					if (_PrintGo_flags & (1<<head)) Error(ERR_ABORT, 0, "Head[%d]: Direction change not detected", head);
+					if (!_Abort && _PrintGo_flags & (1<<head)) Error(ERR_ABORT, 0, "Head[%d]: Direction change not detected, _PrintGo_flags=0x%02x, _DirchangeTimer=%d", head, _PrintGo_flags, _DirchangeTimer);
 					_PrintGo_flags |= (1<<head);
 				
 					if (_PrintGo_flags==_UsedHeads)
@@ -1818,7 +1823,7 @@ static int _check_print_done(void)
 						SPageId *pid = &_PageId[i];
 						_Direction =_Img[head][(i+1)%MAX_PAGES].flags & FLAG_MIRROR;
 						_DirchangeTimer = rx_get_ticks()+500;
-						TrPrintfL(TRUE, "PRINT GO  [%d]: id=%d, page=%d, copy=%d, scan=%d, pos=%d, donepos=%d, _Direction=%d", i, pid->id, pid->page, pid->copy, pid->scan,  RX_FpgaStat.pg_in_position[head], _PrintDonePos[head][i], _Direction);
+						TrPrintfL(TRUE, "PRINT GO  [%d]: id=%d, page=%d, copy=%d, scan=%d, pos=%d, donepos=%d, _Direction=%d", i, pid->id, pid->page, pid->copy, pid->scan, RX_FpgaStat.pg_in_position[head], _PrintDonePos[head][i], _Direction);
 					//	fpga_set_pg_offsets(_Img[head][(i+1)%MAX_PAGES].flags & FLAG_MIRROR);				
 					}					
 				}
@@ -1833,11 +1838,11 @@ static int _check_print_done(void)
 						SFpgaImage	*img = &_Img[head][idx];
 						_trace_used_flags(head, idx, img->blkNo, img->blkCnt, _PageEnd[head][idx]);							
 					}
-				}				
+				}
 			}
 			int time2=rx_get_ticks()-time;
 						
-			RX_HBStatus[0].head[head].printGoCnt = Fpga.stat->pg_ctr[head];
+//			RX_HBStatus[0].head[head].printGoCnt = Fpga.stat->pg_ctr[head];
 			RX_HBStatus[0].head[head].imgBuf	 = RX_HBStatus[0].head[head].imgInCnt - RX_HBStatus[0].head[head].printDoneCnt;
 			if(Fpga.stat->print_done_ctr[head]>RX_HBStatus[0].head[head].printDoneCnt) 
 			{
@@ -1857,12 +1862,14 @@ static int _check_print_done(void)
 				TrPrintfL(TRUE, "Head[%d].PrintDone=%d, blocks %05d ... %05d", head, RX_HBStatus[0].head[head].printDoneCnt, img->blkNo, _PageEnd[head][i]);
 				
 				_PrintDone_flags |= (1<<head);
+                /*
 				if (_PrintDone_flags==_UsedHeads)
 				{
 					SPageId *pid = &_PageId[i];
 					TrPrintfL(TRUE, "PRINT DONE  [%d]: id=%d, page=%d, copy=%d, scan=%d", i, pid->id, pid->page, pid->copy, pid->scan);
 				}
-
+				*/
+                
 				if (img->clearBlockUsed) _check_block_used_flags_clear(head, RX_HBStatus[0].head[head].printDoneCnt, img->blkNo, img->blkCnt);
 				
 				if (TEST_DEBUG && head==3 && _ImgInCnt>24) 
