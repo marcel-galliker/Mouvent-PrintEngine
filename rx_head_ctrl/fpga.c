@@ -94,7 +94,6 @@ static BYTE		*_AXI_mem=NULL;
 static int		_CfgCnt=0;
 static int		_Init=FALSE;
 static int		_Reload_FPGA = FALSE;
-static int		_Abort=FALSE;
 static int		_FpgaErrorTrace=FALSE;
 static int		_Load_Time=0;
 static SPageId	_PageId[MAX_PAGES];
@@ -398,7 +397,6 @@ int  fpga_set_config(RX_SOCKET socket)
 	_PrintDoneWarning	= 0;
 	_PrintDoneError		= 0;
 	_FpgaErrorTrace		= FALSE;
-    _Abort				= FALSE;
 	
 //	Error(LOG, 0, "fpga_set_config 4");
 
@@ -1524,7 +1522,7 @@ void _write_srd(const char *srcName, int subPulses, int stroke, BYTE *data, int 
 //--- fpga_abort -----------------------------------
 int  fpga_abort(void)
 {
-    _Abort = TRUE;
+    _PrintGo_flags = 0;
 	if(_Init)
 	{
 		/*
@@ -1735,19 +1733,22 @@ void  fpga_main(int ticks, int menu)
 	_AliveCnt[1] = Fpga.stat->udp_alive[1];
 
 	int time2=rx_get_ticks()-time;
+	int time3=0;
+    if (FpgaCfg.cfg->cmd & CMD_MASTER_ENABLE)
+    {
+		pd = _check_print_done();
+		_check_encoder();
 
-	pd = _check_print_done();
-	_check_encoder();
+		time3=rx_get_ticks()-time;
 
-	int time3=rx_get_ticks()-time;
-
-	_handle_pd(pd);
+		_handle_pd(pd);
 	
-	if (_DirchangeTimer>0 && rx_get_ticks()>_DirchangeTimer)
-	{
-		_DirchangeTimer = 0;
-		fpga_set_pg_offsets(_Direction);
-	}
+		if (_DirchangeTimer>0 && rx_get_ticks()>_DirchangeTimer)
+		{
+			_DirchangeTimer = 0;
+			fpga_set_pg_offsets(_Direction);
+		}
+    }
 	
 	int time4=rx_get_ticks()-time;
 
@@ -1806,16 +1807,14 @@ static int _check_print_done(void)
 
 			if (RX_HBStatus[0].head[head].printGoCnt != Fpga.stat->pg_ctr[head])
 			{
-                int i   = (RX_HBStatus[0].head[head].printGoCnt-1)%MAX_PAGES;
+                int i   = RX_HBStatus[0].head[head].printGoCnt%MAX_PAGES;
+                RX_HBStatus[0].head[head].printGoCnt++;
 				_PrintDonePos[head][i] = RX_FpgaStat.pg_in_position[head] + _Img[head][i].lengthPx;
 
-                RX_HBStatus[0].head[head].printGoCnt++;
-
 				TrPrintfL(TRUE, "Head[%d].PrintGo=%d, pos=%d", head, RX_HBStatus[0].head[head].printGoCnt, RX_FpgaStat.pg_in_position[head]);
-				
 				if (_Bidir)
 				{
-					if (!_Abort && _PrintGo_flags & (1<<head)) Error(ERR_ABORT, 0, "Head[%d]: Direction change not detected, _PrintGo_flags=0x%02x, _DirchangeTimer=%d", head, _PrintGo_flags, _DirchangeTimer);
+					if (_PrintGo_flags & (1<<head)) Error(ERR_ABORT, 0, "Head[%d]: Direction change not detected, _PrintGo_flags=0x%02x, _DirchangeTimer=%d", head, _PrintGo_flags, _DirchangeTimer);
 					_PrintGo_flags |= (1<<head);
 				
 					if (_PrintGo_flags==_UsedHeads)
@@ -1823,7 +1822,7 @@ static int _check_print_done(void)
 						SPageId *pid = &_PageId[i];
 						_Direction =_Img[head][(i+1)%MAX_PAGES].flags & FLAG_MIRROR;
 						_DirchangeTimer = rx_get_ticks()+500;
-						TrPrintfL(TRUE, "PRINT GO  [%d]: id=%d, page=%d, copy=%d, scan=%d, pos=%d, donepos=%d, _Direction=%d", i, pid->id, pid->page, pid->copy, pid->scan, RX_FpgaStat.pg_in_position[head], _PrintDonePos[head][i], _Direction);
+						TrPrintfL(TRUE, "PRINT GO  [%d]: id=%d, page=%d, copy=%d, scan=%d, pos=%d, donepos=%d, _Direction=%d", RX_HBStatus[0].head[head].printGoCnt, pid->id, pid->page, pid->copy, pid->scan, RX_FpgaStat.pg_in_position[head], _PrintDonePos[head][i], _Direction);
 					//	fpga_set_pg_offsets(_Img[head][(i+1)%MAX_PAGES].flags & FLAG_MIRROR);				
 					}					
 				}
@@ -1831,7 +1830,7 @@ static int _check_print_done(void)
 				if (TEST_DEBUG)
 				{
 					SPageId *pid = &_PageId[i];
-					TrPrintfL(TRUE, "Head[%d].PRINT GO  [%d]: id=%d, page=%d, copy=%d, scan=%d, pos=%d, donepos=%d, blocks %05d ... %05d", head, i, pid->id, pid->page, pid->copy, pid->scan,  RX_FpgaStat.pg_in_position[head], _PrintDonePos[head][i], _Img[head][i].blkNo, _PageEnd[head][i]);
+					TrPrintfL(TRUE, "Head[%d].PRINT GO  [%d]: id=%d, page=%d, copy=%d, scan=%d, pos=%d, donepos=%d, blocks %05d ... %05d", head, RX_HBStatus[0].head[head].printGoCnt, pid->id, pid->page, pid->copy, pid->scan,  RX_FpgaStat.pg_in_position[head], _PrintDonePos[head][i], _Img[head][i].blkNo, _PageEnd[head][i]);
 					if (head==3 && i==24)
 					{
 						int idx=24;
@@ -1961,7 +1960,7 @@ static void _handle_pd(int pd)
 		memcpy(&msg.id, &_PageId[_PdCnt%MAX_PAGES], sizeof(msg.id));
 		sok_send(&RX_MainSocket, &msg);
 		
-		TrPrintfL(TRUE, "PRINT DONE[%d]: id=%d, page=%d, copy=%d, scan=%d, pos=%d, lastBlock=%d %d %d %d", _PdCnt%MAX_PAGES, msg.id.id, msg.id.page, msg.id.copy, msg.id.scan, RX_HBStatus[0].head[0].encPos, _BlockOutIdx[0], _BlockOutIdx[1], _BlockOutIdx[2], _BlockOutIdx[3]);
+		TrPrintfL(TRUE, "PRINT DONE[%d]: id=%d, page=%d, copy=%d, scan=%d, pos=%d, lastBlock=%d %d %d %d", _PdCnt+1, msg.id.id, msg.id.page, msg.id.copy, msg.id.scan, RX_HBStatus[0].head[0].encPos, _BlockOutIdx[0], _BlockOutIdx[1], _BlockOutIdx[2], _BlockOutIdx[3]);
 	//	Error(LOG, 0, "PRINT DONE[%d]:id=%d, page=%d, copy=%d, scan=%d, pos=%d (expected %d)", _PdCnt%MAX_PAGES, msg.id.id, msg.id.page, msg.id.copy, msg.id.scan, RX_HBStatus[0].head[0].encPos, _PrintDonePos[0][_PdCnt%MAX_PAGES]);
 		for (i=0; i<HEAD_CNT; i++)
 			_PrintDonePos[i][_PdCnt%MAX_PAGES] = 0;
