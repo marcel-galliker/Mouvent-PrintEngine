@@ -447,6 +447,7 @@ static void _plc_send_par(SPlcPar *pPlcPar)
 			lc_set_value_by_name_UINT32(UnitID ".PAR_WINDER_2_ON", 0);
 		}
 		_StartPos = pPlcPar->startPos;
+
 		lc_set_value_by_name_FLOAT(UnitID ".PAR_PRINTING_START_POSITION", (float)pPlcPar->startPos);	
 		lc_set_value_by_name_FLOAT(UnitID ".PAR_PRINTING_END_POSITION", (float)pPlcPar->endPos);
 		lc_set_value_by_name_UINT32(UnitID ".PAR_DRYER_BLOWER_POWER", 75);
@@ -553,6 +554,28 @@ int  plc_abort_printing(void)
 	return plc_stop_printing();
 }
 
+//--- plc_print_go ----------------------------------
+int	 plc_print_go(int printGo)
+{
+    if (!_SimuPLC)
+	{
+        float val;
+        int beltPos, step;
+        static int _oldPos;
+		lc_get_value_by_name_FLOAT(UnitID ".STA_BELT_POSITION", &val);
+        beltPos = (int)(val+0.5);
+        if (printGo>0)
+        {
+            step = (2000+beltPos-_oldPos) % 2000;
+		//	Error(LOG, 0, "PrintGo %d: slidePos=%d, beltPos=%d, old=%d, step=%dmm", printGo, plc_get_scanner_pos(), beltPos, _oldPos, step);
+            if (abs(step-(int)_StepDist) > 2) Error(ERR_ABORT, 0, "BeltStep=%dmm out of tolerance (soll=%d)", step, (int)(_StepDist+0.5));
+		}
+        _oldPos = beltPos;
+    }
+    return REPLY_OK;
+}
+
+
 //--- plc_clean ---------------------------------------------------------
 int  plc_clean(void)
 {
@@ -603,9 +626,9 @@ int	plc_to_cap_pos(void)
 //--- plc_pause_printing ---------------------------------------
 int  plc_pause_printing(int fromGui)
 {
-	if (fromGui && rx_def_is_tx(RX_Config.printer.type))
+	if (rx_def_is_tx(RX_Config.printer.type))
 	{
-        Error(LOG, 0, "got PAUSE command from GUI at pos=%d", plc_get_scanner_pos());
+        if (fromGui) Error(WARN, 0, "PAUSED by Operator");
 		_GUIPause=TRUE;
 	}
 	else
@@ -1365,10 +1388,10 @@ static void _plc_state_ctrl()
 			//	1 =         OP-Side  -->  Back-Side
 			//  2 =         Back-Side  -->  OP-Side
 
-            Error(LOG, 0, "GUIPause: scannerDir=%d", scannerDir);
+			// Error(LOG, 0, "GUIPause: scannerDir=%d", scannerDir);
             if (scannerDir==2)
 			{
-                Error(LOG, 0, "GUIPause: SendPause");
+            //	Error(LOG, 0, "GUIPause: SendPause");
 				_GUIPause =FALSE;
 				_SendPause=1;
 			}

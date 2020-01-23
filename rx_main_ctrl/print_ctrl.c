@@ -931,6 +931,7 @@ void pc_print_go(void)
 		SPageId *pid  = spool_get_id(RX_PrinterStatus.printGoCnt);
 		SPageId *next = spool_get_id(RX_PrinterStatus.printGoCnt+1);
 		
+        plc_print_go(RX_PrinterStatus.printGoCnt);
 	//	Error(LOG, 0, "PrintGo[%d] (id=%d, page=%d, scan=%d, copy=%d)", RX_PrinterStatus.printGoCnt, pid->id, pid->page, pid->scan, pid->copy);
 	//	Error(LOG, 0, "NEXT   [%d] (id=%d, page=%d, scan=%d, copy=%d)", RX_PrinterStatus.printGoCnt, next->id, next->page, next->scan, next->copy);
 		if (!RX_PrinterStatus.testMode && next->id != pid->id) 

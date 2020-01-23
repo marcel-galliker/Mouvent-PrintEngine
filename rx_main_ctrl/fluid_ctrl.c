@@ -245,6 +245,18 @@ void fluid_set_config(void)
 							_FluidToScales[INK_SUPPLY_CNT]   = SCALE(2, 1); //9;	// flush		
 							break;
 		
+    case printer_TX801:
+    case printer_TX802:		_FluidToScales[0] = SCALE(2,4); // Orange 
+							_FluidToScales[1] = SCALE(2,3); // Red
+							_FluidToScales[2] = SCALE(2,2); // Blue 
+							_FluidToScales[3] = SCALE(2,1); // Yellow
+							_FluidToScales[4] = SCALE(1,5); // Magenta
+							_FluidToScales[5] = SCALE(1,4); // Cyan
+							_FluidToScales[6] = SCALE(1,3); // Black
+							_FluidToScales[7] = SCALE(1,2); // Penetration
+							_FluidToScales[INK_SUPPLY_CNT]   = SCALE(1,1);// 4;	// flush		
+						break;
+                        
 	default:			for (i=0; i<SIZEOF(_FluidToScales); i++) _FluidToScales[i]=i;	
 						break; 
 	}

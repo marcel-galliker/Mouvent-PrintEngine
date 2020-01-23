@@ -155,7 +155,8 @@ int ctrl_do_log_evt(RX_SOCKET socket, SLogMsg *msg)
 	
 	ctrl_get_device(socket, &device, &no);
 	SlaveError(device, no, &msg->log);
-	if (msg->log.logType==LOG_TYPE_ERROR_ABORT && !arg_simuPLC) pc_abort_printing();
+//	if (msg->log.logType==LOG_TYPE_ERROR_ABORT && !arg_simuPLC) pc_abort_printing();
+	if (msg->log.logType==LOG_TYPE_ERROR_ABORT) pc_abort_printing();
 	return REPLY_OK;
 }
 

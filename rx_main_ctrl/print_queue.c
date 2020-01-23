@@ -826,6 +826,8 @@ int pq_printed(int headNo, SPageId *pid, int *pageDone, int *jobDone, SPrintQueu
 				_time = rx_get_ticks();
 			}
 			double step=plc_get_step_dist_mm();
+            if (step==0)
+                step=plc_get_step_dist_mm();
 			ctr_add(step / 1000.0);
 			
 			//--- LOG ---
