@@ -1,0 +1,58 @@
+﻿  VisualGDB: C:\Develop\PrintEngine\rx_common_lib => /tmp/VisualGDB/c/Develop/PrintEngine/rx_common_lib: 75 files copied (481KB).
+  VisualGDB: Executing pre-build actions
+  VisualGDB: Transfer files from /tmp/VisualGDB/c/Develop/PrintEngine/rx_common_lib/../rx_ink_lib on localhost:2222 to C:\Develop\PrintEngine\rx_common_lib/../rx_ink_lib
+  VisualGDB: 13 files copied (53KB).
+  VisualGDB: Transfer files from /tmp/VisualGDB/c/Develop/PrintEngine/rx_common_lib/../Externals/libtiff on localhost:2222 to C:\Develop\PrintEngine\rx_common_lib/../Externals/libtiff
+  VisualGDB: 55 files copied (1196KB).
+  VisualGDB: Transfer files from /tmp/VisualGDB/c/Develop/PrintEngine/rx_common_lib/../Externals/mbedtls-1.3.10 on localhost:2222 to C:\Develop\PrintEngine\rx_common_lib/../Externals/mbedtls-1.3.10
+EXEC : warning : Stderr line received 'tar: configs: Zeitstempel 2020-01-23 18:26:30 liegt 3599.3514927 Sekunden in der Zukunft.'
+EXEC : warning : Stderr line received 'tar: doxygen/input: Zeitstempel 2020-01-23 18:26:30 liegt 3599.319491 Sekunden in der Zukunft.'
+EXEC : warning : Stderr line received 'tar: doxygen: Zeitstempel 2020-01-23 18:26:30 liegt 3599.3193847 Sekunden in der Zukunft.'
+EXEC : warning : Stderr line received 'tar: include/polarssl: Zeitstempel 2020-01-23 18:26:30 liegt 3598.9806094 Sekunden in der Zukunft.'
+EXEC : warning : Stderr line received 'tar: include: Zeitstempel 2020-01-23 18:26:30 liegt 3598.9805502 Sekunden in der Zukunft.'
+EXEC : warning : Stderr line received 'tar: library: Zeitstempel 2020-01-23 18:26:30 liegt 3598.5885209 Sekunden in der Zukunft.'
+EXEC : warning : Stderr line received 'tar: programs/aes: Zeitstempel 2020-01-23 18:26:30 liegt 3598.5716341 Sekunden in der Zukunft.'
+EXEC : warning : Stderr line received 'tar: programs/hash: Zeitstempel 2020-01-23 18:26:30 liegt 3598.5459006 Sekunden in der Zukunft.'
+EXEC : warning : Stderr line received 'tar: programs/pkey: Zeitstempel 2020-01-23 18:26:30 liegt 3598.4577884 Sekunden in der Zukunft.'
+EXEC : warning : Stderr line received 'tar: programs/random: Zeitstempel 2020-01-23 18:26:30 liegt 3598.4401905 Sekunden in der Zukunft.'
+EXEC : warning : Stderr line received 'tar: programs/ssl: Zeitstempel 2020-01-23 18:26:30 liegt 3598.3957892 Sekunden in der Zukunft.'
+EXEC : warning : Stderr line received 'tar: programs/test: Zeitstempel 2020-01-23 18:26:31 liegt 3599.365154 Sekunden in der Zukunft.'
+EXEC : warning : Stderr line received 'tar: programs/util: Zeitstempel 2020-01-23 18:26:31 liegt 3599.3513787 Sekunden in der Zukunft.'
+EXEC : warning : Stderr line received 'tar: programs/x509: Zeitstempel 2020-01-23 18:26:31 liegt 3599.3197167 Sekunden in der Zukunft.'
+EXEC : warning : Stderr line received 'tar: programs: Zeitstempel 2020-01-23 18:26:30 liegt 3598.31966 Sekunden in der Zukunft.'
+EXEC : warning : Stderr line received 'tar: tests: Zeitstempel 2020-01-23 18:26:31 liegt 3599.3123377 Sekunden in der Zukunft.'
+  VisualGDB: 198 files copied (2851KB).
+  VisualGDB: Transfer files from /tmp/VisualGDB/c/Develop/PrintEngine/rx_common_lib/../Externals/TinyXML on localhost:2222 to C:\Develop\PrintEngine\rx_common_lib/../Externals/TinyXML
+  VisualGDB: 16 files copied (247KB).
+  VisualGDB: Run "make CONFIG=Release-lx" in directory "/tmp/VisualGDB/c/Develop/PrintEngine/rx_common_lib" on root@localhost:2222 (SSH)
+  mkdir Release-lx
+  gcc -ggdb -ffunction-sections -O0 -pthread  -I../rx_ink_lib -I../Externals/TinyXML -I../Externals/libtiff -I../Externals/mbedtls-1.3.10/include -DNDEBUG -DRELEASE -Dlinux  -c ../Externals/mbedtls-1.3.10/library/sha1.c -o Release-lx/sha1.o -MD -MF Release-lx/sha1.dep
+  gcc -ggdb -ffunction-sections -O0 -pthread  -I../rx_ink_lib -I../Externals/TinyXML -I../Externals/libtiff -I../Externals/mbedtls-1.3.10/include -DNDEBUG -DRELEASE -Dlinux  -c bmp.c -o Release-lx/bmp.o -MD -MF Release-lx/bmp.dep
+  gcc -ggdb -ffunction-sections -O0 -pthread  -I../rx_ink_lib -I../Externals/TinyXML -I../Externals/libtiff -I../Externals/mbedtls-1.3.10/include -DNDEBUG -DRELEASE -Dlinux  -c fastlz.c -o Release-lx/fastlz.o -MD -MF Release-lx/fastlz.dep
+  gcc -ggdb -ffunction-sections -O0 -pthread  -I../rx_ink_lib -I../Externals/TinyXML -I../Externals/libtiff -I../Externals/mbedtls-1.3.10/include -DNDEBUG -DRELEASE -Dlinux  -c hex2bin.c -o Release-lx/hex2bin.o -MD -MF Release-lx/hex2bin.dep
+  gcc -ggdb -ffunction-sections -O0 -pthread  -I../rx_ink_lib -I../Externals/TinyXML -I../Externals/libtiff -I../Externals/mbedtls-1.3.10/include -DNDEBUG -DRELEASE -Dlinux  -c rx_bitmap.c -o Release-lx/rx_bitmap.o -MD -MF Release-lx/rx_bitmap.dep
+  gcc -ggdb -ffunction-sections -O0 -pthread  -I../rx_ink_lib -I../Externals/TinyXML -I../Externals/libtiff -I../Externals/mbedtls-1.3.10/include -DNDEBUG -DRELEASE -Dlinux  -c rx_common.c -o Release-lx/rx_common.o -MD -MF Release-lx/rx_common.dep
+  gcc -ggdb -ffunction-sections -O0 -pthread  -I../rx_ink_lib -I../Externals/TinyXML -I../Externals/libtiff -I../Externals/mbedtls-1.3.10/include -DNDEBUG -DRELEASE -Dlinux  -c rx_crc.c -o Release-lx/rx_crc.o -MD -MF Release-lx/rx_crc.dep
+  gcc -ggdb -ffunction-sections -O0 -pthread  -I../rx_ink_lib -I../Externals/TinyXML -I../Externals/libtiff -I../Externals/mbedtls-1.3.10/include -DNDEBUG -DRELEASE -Dlinux  -c rx_csv.c -o Release-lx/rx_csv.o -MD -MF Release-lx/rx_csv.dep
+  gcc -ggdb -ffunction-sections -O0 -pthread  -I../rx_ink_lib -I../Externals/TinyXML -I../Externals/libtiff -I../Externals/mbedtls-1.3.10/include -DNDEBUG -DRELEASE -Dlinux  -c rx_def.c -o Release-lx/rx_def.o -MD -MF Release-lx/rx_def.dep
+  gcc -ggdb -ffunction-sections -O0 -pthread  -I../rx_ink_lib -I../Externals/TinyXML -I../Externals/libtiff -I../Externals/mbedtls-1.3.10/include -DNDEBUG -DRELEASE -Dlinux  -c rx_embrip_def.c -o Release-lx/rx_embrip_def.o -MD -MF Release-lx/rx_embrip_def.dep
+  gcc -ggdb -ffunction-sections -O0 -pthread  -I../rx_ink_lib -I../Externals/TinyXML -I../Externals/libtiff -I../Externals/mbedtls-1.3.10/include -DNDEBUG -DRELEASE -Dlinux  -c rx_fifo.c -o Release-lx/rx_fifo.o -MD -MF Release-lx/rx_fifo.dep
+  gcc -ggdb -ffunction-sections -O0 -pthread  -I../rx_ink_lib -I../Externals/TinyXML -I../Externals/libtiff -I../Externals/mbedtls-1.3.10/include -DNDEBUG -DRELEASE -Dlinux  -c rx_fpga.c -o Release-lx/rx_fpga.o -MD -MF Release-lx/rx_fpga.dep
+  gcc -ggdb -ffunction-sections -O0 -pthread  -I../rx_ink_lib -I../Externals/TinyXML -I../Externals/libtiff -I../Externals/mbedtls-1.3.10/include -DNDEBUG -DRELEASE -Dlinux  -c rx_hash.c -o Release-lx/rx_hash.o -MD -MF Release-lx/rx_hash.dep
+  gcc -ggdb -ffunction-sections -O0 -pthread  -I../rx_ink_lib -I../Externals/TinyXML -I../Externals/libtiff -I../Externals/mbedtls-1.3.10/include -DNDEBUG -DRELEASE -Dlinux  -c rx_error.c -o Release-lx/rx_error.o -MD -MF Release-lx/rx_error.dep
+  gcc -ggdb -ffunction-sections -O0 -pthread  -I../rx_ink_lib -I../Externals/TinyXML -I../Externals/libtiff -I../Externals/mbedtls-1.3.10/include -DNDEBUG -DRELEASE -Dlinux  -c rx_file.c -o Release-lx/rx_file.o -MD -MF Release-lx/rx_file.dep
+  gcc -ggdb -ffunction-sections -O0 -pthread  -I../rx_ink_lib -I../Externals/TinyXML -I../Externals/libtiff -I../Externals/mbedtls-1.3.10/include -DNDEBUG -DRELEASE -Dlinux  -c rx_led.c -o Release-lx/rx_led.o -MD -MF Release-lx/rx_led.dep
+  gcc -ggdb -ffunction-sections -O0 -pthread  -I../rx_ink_lib -I../Externals/TinyXML -I../Externals/libtiff -I../Externals/mbedtls-1.3.10/include -DNDEBUG -DRELEASE -Dlinux  -c rx_list.c -o Release-lx/rx_list.o -MD -MF Release-lx/rx_list.dep
+  gcc -ggdb -ffunction-sections -O0 -pthread  -I../rx_ink_lib -I../Externals/TinyXML -I../Externals/libtiff -I../Externals/mbedtls-1.3.10/include -DNDEBUG -DRELEASE -Dlinux  -c rx_log.c -o Release-lx/rx_log.o -MD -MF Release-lx/rx_log.dep
+  gcc -ggdb -ffunction-sections -O0 -pthread  -I../rx_ink_lib -I../Externals/TinyXML -I../Externals/libtiff -I../Externals/mbedtls-1.3.10/include -DNDEBUG -DRELEASE -Dlinux  -c rx_mac_address.c -o Release-lx/rx_mac_address.o -MD -MF Release-lx/rx_mac_address.dep
+  gcc -ggdb -ffunction-sections -O0 -pthread  -I../rx_ink_lib -I../Externals/TinyXML -I../Externals/libtiff -I../Externals/mbedtls-1.3.10/include -DNDEBUG -DRELEASE -Dlinux  -c rx_mem.c -o Release-lx/rx_mem.o -MD -MF Release-lx/rx_mem.dep
+  g++ -ggdb -ffunction-sections -O0 -pthread  -I../rx_ink_lib -I../Externals/TinyXML -I../Externals/libtiff -I../Externals/mbedtls-1.3.10/include -DNDEBUG -DRELEASE -Dlinux  -c rx_setup_file.cpp -o Release-lx/rx_setup_file.o -MD -MF Release-lx/rx_setup_file.dep
+  gcc -ggdb -ffunction-sections -O0 -pthread  -I../rx_ink_lib -I../Externals/TinyXML -I../Externals/libtiff -I../Externals/mbedtls-1.3.10/include -DNDEBUG -DRELEASE -Dlinux  -c rx_setup_ink.c -o Release-lx/rx_setup_ink.o -MD -MF Release-lx/rx_setup_ink.dep
+  gcc -ggdb -ffunction-sections -O0 -pthread  -I../rx_ink_lib -I../Externals/TinyXML -I../Externals/libtiff -I../Externals/mbedtls-1.3.10/include -DNDEBUG -DRELEASE -Dlinux  -c rx_sok.c -o Release-lx/rx_sok.o -MD -MF Release-lx/rx_sok.dep
+  gcc -ggdb -ffunction-sections -O0 -pthread  -I../rx_ink_lib -I../Externals/TinyXML -I../Externals/libtiff -I../Externals/mbedtls-1.3.10/include -DNDEBUG -DRELEASE -Dlinux  -c rx_system.c -o Release-lx/rx_system.o -MD -MF Release-lx/rx_system.dep
+  gcc -ggdb -ffunction-sections -O0 -pthread  -I../rx_ink_lib -I../Externals/TinyXML -I../Externals/libtiff -I../Externals/mbedtls-1.3.10/include -DNDEBUG -DRELEASE -Dlinux  -c rx_term.c -o Release-lx/rx_term.o -MD -MF Release-lx/rx_term.dep
+  gcc -ggdb -ffunction-sections -O0 -pthread  -I../rx_ink_lib -I../Externals/TinyXML -I../Externals/libtiff -I../Externals/mbedtls-1.3.10/include -DNDEBUG -DRELEASE -Dlinux  -c rx_threads.c -o Release-lx/rx_threads.o -MD -MF Release-lx/rx_threads.dep
+  gcc -ggdb -ffunction-sections -O0 -pthread  -I../rx_ink_lib -I../Externals/TinyXML -I../Externals/libtiff -I../Externals/mbedtls-1.3.10/include -DNDEBUG -DRELEASE -Dlinux  -c rx_trace.c -o Release-lx/rx_trace.o -MD -MF Release-lx/rx_trace.dep
+  g++ -ggdb -ffunction-sections -O0 -pthread  -I../rx_ink_lib -I../Externals/TinyXML -I../Externals/libtiff -I../Externals/mbedtls-1.3.10/include -DNDEBUG -DRELEASE -Dlinux  -c rx_xml.cpp -o Release-lx/rx_xml.o -MD -MF Release-lx/rx_xml.dep
+  ar -r Release-lx/rx_common_lib.a Release-lx/sha1.o Release-lx/bmp.o Release-lx/fastlz.o Release-lx/hex2bin.o Release-lx/rx_bitmap.o Release-lx/rx_common.o Release-lx/rx_crc.o Release-lx/rx_csv.o Release-lx/rx_def.o Release-lx/rx_embrip_def.o Release-lx/rx_fifo.o Release-lx/rx_fpga.o Release-lx/rx_hash.o Release-lx/rx_error.o Release-lx/rx_file.o Release-lx/rx_led.o Release-lx/rx_list.o Release-lx/rx_log.o Release-lx/rx_mac_address.o Release-lx/rx_mem.o Release-lx/rx_setup_file.o Release-lx/rx_setup_ink.o Release-lx/rx_sok.o Release-lx/rx_system.o Release-lx/rx_term.o Release-lx/rx_threads.o Release-lx/rx_trace.o Release-lx/rx_xml.o
+  ar: creating Release-lx/rx_common_lib.a

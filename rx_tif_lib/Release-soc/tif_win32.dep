@@ -1,0 +1,1 @@
+Release-soc/tif_win32.o: ../Externals/libtiff/tif_win32.c

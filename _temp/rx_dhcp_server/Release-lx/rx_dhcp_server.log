@@ -1,0 +1,9 @@
+﻿  VisualGDB: C:\Develop\PrintEngine\rx_dhcp_server => /tmp/VisualGDB/c/Develop/PrintEngine/rx_dhcp_server: 14 files copied (107KB).
+  VisualGDB: Run "make CONFIG=Release-lx" in directory "/tmp/VisualGDB/c/Develop/PrintEngine/rx_dhcp_server" on root@localhost:2222 (SSH)
+  mkdir Release-lx
+  gcc -ggdb -ffunction-sections -O3 -pthread  -I../rx_common_lib -I../rx_ink_lib -DNDEBUG -DRELEASE -Dlinux  -c dhcp_ip_addr.c -o Release-lx/dhcp_ip_addr.o -MD -MF Release-lx/dhcp_ip_addr.dep
+  gcc -ggdb -ffunction-sections -O3 -pthread  -I../rx_common_lib -I../rx_ink_lib -DNDEBUG -DRELEASE -Dlinux  -c dhcp_packet.c -o Release-lx/dhcp_packet.o -MD -MF Release-lx/dhcp_packet.dep
+  gcc -ggdb -ffunction-sections -O3 -pthread  -I../rx_common_lib -I../rx_ink_lib -DNDEBUG -DRELEASE -Dlinux  -c dhcp_server.c -o Release-lx/dhcp_server.o -MD -MF Release-lx/dhcp_server.dep
+  g++ -o Release-lx/rx_dhcp_server -Wl,-gc-sections -pthread    -Wl,--start-group Release-lx/dhcp_ip_addr.o Release-lx/dhcp_packet.o Release-lx/dhcp_server.o  ../rx_common_lib/Release-lx/rx_common_lib.a ../Externals/TinyXML/Release-lx/TinyXML.a -Wl,--rpath='$ORIGIN' -Wl,--rpath='$ORIGIN/../../rx_common_lib/Release-lx/' -Wl,--rpath='$ORIGIN/../../Externals/TinyXML/Release-lx/'  -Wl,--end-group
+  VisualGDB: Executing post-build actions
+  VisualGDB: Copy file /tmp/VisualGDB/c/Develop/PrintEngine/rx_dhcp_server/Release-lx/rx_dhcp_server on localhost:2222 to C:\Develop\PrintEngine\rx_dhcp_server\..\bin\main\rx_dhcp_server on local computer

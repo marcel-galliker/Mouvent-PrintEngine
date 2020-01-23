@@ -25,6 +25,7 @@
 #include "es_rip.h"
 #include "rip_clnt.h"
 #include "enc_ctrl.h"
+#include "plc_ctrl.h"
 #include "print_ctrl.h"
 #include "machine_ctrl.h"
 #include "fluid_ctrl.h"

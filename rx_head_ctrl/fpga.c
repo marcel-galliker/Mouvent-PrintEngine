@@ -400,7 +400,7 @@ int  fpga_set_config(RX_SOCKET socket)
 	_FpgaErrorTrace		= FALSE;
 	_UsedHeads			= 0;
 	_HeadsLoaded		= 0;
-
+	_Printing			= FALSE;
 //	Error(LOG, 0, "fpga_set_config 4");
 
 	//--- head -----------------------------------------------------------------

@@ -1,0 +1,3 @@
+Release-soc/tif_fax3sm.o: ../Externals/libtiff/tif_fax3sm.c \
+ ../Externals/libtiff/tiff.h ../Externals/libtiff/tiffconf.h \
+ ../Externals/libtiff/tif_fax3.h

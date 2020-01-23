@@ -1,0 +1,20 @@
+﻿  VisualGDB: Executing pre-build actions
+  VisualGDB: Run "C:\Develop\PrintEngine\rx_encoder_ctrl\..\VersionUpdate.exe C:\Develop\PrintEngine\rx_encoder_ctrl\version.c" in directory "" on local computer
+  update >>C:\Develop\PrintEngine\rx_encoder_ctrl\version.c<<
+  txt file >>C:\Develop\PrintEngine\rx_encoder_ctrl\version.txt<<
+  VisualGDB: Run "cmd.exe /c "C:\Program Files (x86)\Sysprogs\VisualGDB\make.exe" CONFIG=Release-soc" in directory "C:\Develop\PrintEngine\rx_encoder_ctrl" on local machine
+  F:/Compiler/altera/13.1/DS-5/bin/arm-linux-gnueabihf-gcc.exe -ggdb -ffunction-sections -O0 -pthread -lrt  -I../rx_common_lib -I../rx_ink_lib -DNDEBUG -DRELEASE -Dlinux -Dsoc  -c ../rx_ink_lib/comm.c -o Release-soc/comm.o -MD -MF Release-soc/comm.dep
+  F:/Compiler/altera/13.1/DS-5/bin/arm-linux-gnueabihf-gcc.exe -ggdb -ffunction-sections -O0 -pthread -lrt  -I../rx_common_lib -I../rx_ink_lib -DNDEBUG -DRELEASE -Dlinux -Dsoc  -c args.c -o Release-soc/args.o -MD -MF Release-soc/args.dep
+  F:/Compiler/altera/13.1/DS-5/bin/arm-linux-gnueabihf-gcc.exe -ggdb -ffunction-sections -O0 -pthread -lrt  -I../rx_common_lib -I../rx_ink_lib -DNDEBUG -DRELEASE -Dlinux -Dsoc  -c enc_ctrl.c -o Release-soc/enc_ctrl.o -MD -MF Release-soc/enc_ctrl.dep
+  F:/Compiler/altera/13.1/DS-5/bin/arm-linux-gnueabihf-gcc.exe -ggdb -ffunction-sections -O0 -pthread -lrt  -I../rx_common_lib -I../rx_ink_lib -DNDEBUG -DRELEASE -Dlinux -Dsoc  -c enc_test.c -o Release-soc/enc_test.o -MD -MF Release-soc/enc_test.dep
+  F:/Compiler/altera/13.1/DS-5/bin/arm-linux-gnueabihf-gcc.exe -ggdb -ffunction-sections -O0 -pthread -lrt  -I../rx_common_lib -I../rx_ink_lib -DNDEBUG -DRELEASE -Dlinux -Dsoc  -c fpga_enc.c -o Release-soc/fpga_enc.o -MD -MF Release-soc/fpga_enc.dep
+  F:/Compiler/altera/13.1/DS-5/bin/arm-linux-gnueabihf-gcc.exe -ggdb -ffunction-sections -O0 -pthread -lrt  -I../rx_common_lib -I../rx_ink_lib -DNDEBUG -DRELEASE -Dlinux -Dsoc  -c help.c -o Release-soc/help.o -MD -MF Release-soc/help.dep
+  F:/Compiler/altera/13.1/DS-5/bin/arm-linux-gnueabihf-gcc.exe -ggdb -ffunction-sections -O0 -pthread -lrt  -I../rx_common_lib -I../rx_ink_lib -DNDEBUG -DRELEASE -Dlinux -Dsoc  -c rx_encoder_ctrl.c -o Release-soc/rx_encoder_ctrl.o -MD -MF Release-soc/rx_encoder_ctrl.dep
+  F:/Compiler/altera/13.1/DS-5/bin/arm-linux-gnueabihf-gcc.exe -ggdb -ffunction-sections -O0 -pthread -lrt  -I../rx_common_lib -I../rx_ink_lib -DNDEBUG -DRELEASE -Dlinux -Dsoc  -c tw8.c -o Release-soc/tw8.o -MD -MF Release-soc/tw8.dep
+  F:/Compiler/altera/13.1/DS-5/bin/arm-linux-gnueabihf-gcc.exe -ggdb -ffunction-sections -O0 -pthread -lrt  -I../rx_common_lib -I../rx_ink_lib -DNDEBUG -DRELEASE -Dlinux -Dsoc  -c version.c -o Release-soc/version.o -MD -MF Release-soc/version.dep
+  F:/Compiler/altera/13.1/DS-5/bin/arm-linux-gnueabihf-g++.exe -o Release-soc/rx_encoder_ctrl -Wl,-gc-sections -pthread -lrt    -Wl,--start-group Release-soc/comm.o Release-soc/args.o Release-soc/enc_ctrl.o Release-soc/enc_test.o Release-soc/fpga_enc.o Release-soc/help.o Release-soc/rx_encoder_ctrl.o Release-soc/tw8.o Release-soc/version.o  ../rx_common_lib/Release-soc/rx_common_lib.a -Wl,--rpath='$ORIGIN' -Wl,--rpath='$ORIGIN/../../rx_common_lib/Release-soc/'  -Wl,--end-group
+  VisualGDB: Executing post-build actions
+  VisualGDB: Skipping disabled action: Copy file $(TargetPath) on local computer to $(ProjectDir)\..\bin\soc\$(TargetFileName) on local computer
+  VisualGDB: Skipping disabled action: Copy file $(TargetPath) on local computer to $(ProjectDir)\..\bin\encoder\$(TargetFileName) on local computer
+  VisualGDB: Copy file C:\Develop\PrintEngine\rx_encoder_ctrl/Release-soc/rx_encoder_ctrl on local computer to C:\Develop\PrintEngine\rx_encoder_ctrl\..\bin\encoder\rx_encoder_ctrl on local computer
+  VisualGDB: Skipping disabled action: Run "cmd.exe /C copy /Y $(LocalSourceDir)\bin\* d:\radex\bin\encoder\" in directory "" on local computer

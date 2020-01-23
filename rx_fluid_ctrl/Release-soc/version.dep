@@ -1,0 +1,1 @@
+Release-soc/version.o: version.c ../rx_common_lib/version.h

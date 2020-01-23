@@ -1,0 +1,566 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<asmv1:assembly xsi:schemaLocation="urn:schemas-microsoft-com:asm.v1 assembly.adaptive.xsd" manifestVersion="1.0" xmlns:asmv1="urn:schemas-microsoft-com:asm.v1" xmlns="urn:schemas-microsoft-com:asm.v2" xmlns:asmv2="urn:schemas-microsoft-com:asm.v2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:co.v1="urn:schemas-microsoft-com:clickonce.v1" xmlns:asmv3="urn:schemas-microsoft-com:asm.v3" xmlns:dsig="http://www.w3.org/2000/09/xmldsig#" xmlns:co.v2="urn:schemas-microsoft-com:clickonce.v2">
+  <asmv1:assemblyIdentity name="RX_DigiPrint.exe" version="1.0.0.5" publicKeyToken="0000000000000000" language="neutral" processorArchitecture="amd64" type="win32" />
+  <description asmv2:iconFile="mouvent.ico" xmlns="urn:schemas-microsoft-com:asm.v1" />
+  <application />
+  <entryPoint>
+    <assemblyIdentity name="RX_DigiPrint" version="1.0.1.7507" language="neutral" processorArchitecture="amd64" />
+    <commandLine file="RX_DigiPrint.exe" parameters="" />
+  </entryPoint>
+  <trustInfo>
+    <security>
+      <applicationRequestMinimum>
+        <PermissionSet version="1" class="System.Security.NamedPermissionSet" Name="LocalIntranet" Description="Default rights given to applications on the local intranet" Unrestricted="true" ID="Custom" SameSite="site" />
+        <defaultAssemblyRequest permissionSetReference="Custom" />
+      </applicationRequestMinimum>
+      <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
+        <!-- UAC Manifest Options
+            If you want to change the Windows User Account Control level replace the 
+            requestedExecutionLevel node with one of the following.
+
+        <requestedExecutionLevel  level="asInvoker" uiAccess="false" />
+        <requestedExecutionLevel  level="requireAdministrator" uiAccess="false" />
+        <requestedExecutionLevel  level="highestAvailable" uiAccess="false" />
+
+            Specifying requestedExecutionLevel node will disable file and registry virtualization.
+            If you want to utilize File and Registry Virtualization for backward 
+            compatibility then delete the requestedExecutionLevel node.
+        -->
+        <requestedExecutionLevel level="asInvoker" uiAccess="false" />
+      </requestedPrivileges>
+    </security>
+  </trustInfo>
+  <dependency>
+    <dependentOS>
+      <osVersionInfo>
+        <os majorVersion="5" minorVersion="1" buildNumber="2600" servicePackMajor="0" />
+      </osVersionInfo>
+    </dependentOS>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="preRequisite" allowDelayedBinding="true">
+      <assemblyIdentity name="Microsoft.Windows.CommonLanguageRuntime" version="4.0.30319.0" />
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="BitMiracle.LibTiff.NET.dll" size="650240">
+      <assemblyIdentity name="BitMiracle.LibTiff.NET" version="2.4.560.0" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>GPYNeysYxk9KeSoChDjU+73s/kpkchqLMO+ly5ifjso=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="InfragisticsWPF4.Controls.Editors.XamComboEditor.v17.2.dll" size="207872">
+      <assemblyIdentity name="InfragisticsWPF4.Controls.Editors.XamComboEditor.v17.2" version="17.2.20172.1000" publicKeyToken="7DD5C3163F2CD0CB" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>Ss1rGm8R4sDzpW+x2AtNGJdwg6wIcrkc5OeuUzJZooU=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="de\InfragisticsWPF4.Controls.Editors.XamComboEditor.v17.2.resources.dll" size="6144">
+      <assemblyIdentity name="InfragisticsWPF4.Controls.Editors.XamComboEditor.v17.2.resources" version="17.2.0.0" publicKeyToken="7DD5C3163F2CD0CB" language="de" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>diNg6Jgyk8ZQEwt9ZCKg0ks+nlPXphGz6H2BwnZh1bU=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="es\InfragisticsWPF4.Controls.Editors.XamComboEditor.v17.2.resources.dll" size="6144">
+      <assemblyIdentity name="InfragisticsWPF4.Controls.Editors.XamComboEditor.v17.2.resources" version="17.2.0.0" publicKeyToken="7DD5C3163F2CD0CB" language="es" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>p8UU+ucB1qrS8YKQvBjKzMI23Whsm6pCeBU7hwFOqRU=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="fr\InfragisticsWPF4.Controls.Editors.XamComboEditor.v17.2.resources.dll" size="6144">
+      <assemblyIdentity name="InfragisticsWPF4.Controls.Editors.XamComboEditor.v17.2.resources" version="17.2.0.0" publicKeyToken="7DD5C3163F2CD0CB" language="fr" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>fqbm8s78UU6SuzIQohRgp91frw09Z5VMmlgvH6zef/0=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="InfragisticsWPF4.Controls.Grids.XamGrid.v17.2.dll" size="1637376">
+      <assemblyIdentity name="InfragisticsWPF4.Controls.Grids.XamGrid.v17.2" version="17.2.20172.1000" publicKeyToken="7DD5C3163F2CD0CB" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>Ltn+5egLx343aZOwqGjwY2whZOcW6ka7P1A+V5NeMNI=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="de\InfragisticsWPF4.Controls.Grids.XamGrid.v17.2.resources.dll" size="22016">
+      <assemblyIdentity name="InfragisticsWPF4.Controls.Grids.XamGrid.v17.2.resources" version="17.2.0.0" publicKeyToken="7DD5C3163F2CD0CB" language="de" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>h+J1INYjDcmAtcarN8R8ORjfBUmAJk4DCh1OQ3GCriw=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="es\InfragisticsWPF4.Controls.Grids.XamGrid.v17.2.resources.dll" size="21504">
+      <assemblyIdentity name="InfragisticsWPF4.Controls.Grids.XamGrid.v17.2.resources" version="17.2.0.0" publicKeyToken="7DD5C3163F2CD0CB" language="es" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>pqOTZ7CN3DkfItzgETzwdwOkdHUL6AZTNC0K/4bdE2s=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="fr\InfragisticsWPF4.Controls.Grids.XamGrid.v17.2.resources.dll" size="22016">
+      <assemblyIdentity name="InfragisticsWPF4.Controls.Grids.XamGrid.v17.2.resources" version="17.2.0.0" publicKeyToken="7DD5C3163F2CD0CB" language="fr" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>+Iu4GFrxW3aQ4NTVyMlHTDWu8TUwZQSrWlZNqLyDSsk=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="InfragisticsWPF4.Controls.Menus.XamMenu.v17.2.dll" size="160768">
+      <assemblyIdentity name="InfragisticsWPF4.Controls.Menus.XamMenu.v17.2" version="17.2.20172.1000" publicKeyToken="7DD5C3163F2CD0CB" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>6+S19jqEn1tOvzitQkd0375kZw/dB5YaOU9oo4kMJ6U=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="de\InfragisticsWPF4.Controls.Menus.XamMenu.v17.2.resources.dll" size="5120">
+      <assemblyIdentity name="InfragisticsWPF4.Controls.Menus.XamMenu.v17.2.resources" version="17.2.0.0" publicKeyToken="7DD5C3163F2CD0CB" language="de" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>saDYRN9OZ2uwN0T/Hh5GRB8c/agQf7q5nV0ILGBV6CY=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="es\InfragisticsWPF4.Controls.Menus.XamMenu.v17.2.resources.dll" size="5120">
+      <assemblyIdentity name="InfragisticsWPF4.Controls.Menus.XamMenu.v17.2.resources" version="17.2.0.0" publicKeyToken="7DD5C3163F2CD0CB" language="es" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>D/o2ch4Wd2qqLPA1aovh6tImjWUFjimFkLzd0kzHVM4=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="fr\InfragisticsWPF4.Controls.Menus.XamMenu.v17.2.resources.dll" size="5120">
+      <assemblyIdentity name="InfragisticsWPF4.Controls.Menus.XamMenu.v17.2.resources" version="17.2.0.0" publicKeyToken="7DD5C3163F2CD0CB" language="fr" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>EN74sgobHSlEOGtuSe6wA05AwFf8xhWEszwf4EyKJNs=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="InfragisticsWPF4.DataManager.v17.2.dll" size="129536">
+      <assemblyIdentity name="InfragisticsWPF4.DataManager.v17.2" version="17.2.20172.1000" publicKeyToken="7DD5C3163F2CD0CB" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>yTe7CRzPiscfpZB6R060/shqqQnwDIVYrM/AOlhTEyk=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="de\InfragisticsWPF4.DataManager.v17.2.resources.dll" size="6656">
+      <assemblyIdentity name="InfragisticsWPF4.DataManager.v17.2.resources" version="17.2.0.0" publicKeyToken="7DD5C3163F2CD0CB" language="de" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>d7WlUt7EGhkUqSr7A3y96xcuItGa9HvtLjAvEmQeDtY=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="es\InfragisticsWPF4.DataManager.v17.2.resources.dll" size="6656">
+      <assemblyIdentity name="InfragisticsWPF4.DataManager.v17.2.resources" version="17.2.0.0" publicKeyToken="7DD5C3163F2CD0CB" language="es" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>dKXoa5+LjAZjmH1RQG5BATi1oXxl2YTkuxq6Bro3YvU=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="fr\InfragisticsWPF4.DataManager.v17.2.resources.dll" size="6656">
+      <assemblyIdentity name="InfragisticsWPF4.DataManager.v17.2.resources" version="17.2.0.0" publicKeyToken="7DD5C3163F2CD0CB" language="fr" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>uYmIMQ8+jcpn7xUvlwS/FPCZWpMQviow6Zazzu8ypXA=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="InfragisticsWPF4.DataPresenter.v17.2.dll" size="4296704">
+      <assemblyIdentity name="InfragisticsWPF4.DataPresenter.v17.2" version="17.2.20172.1000" publicKeyToken="7DD5C3163F2CD0CB" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>OnkWVWKikIcV/MbwuABA+twrOnQZKFnYmY07IyMbHNI=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="de\InfragisticsWPF4.DataPresenter.v17.2.resources.dll" size="30720">
+      <assemblyIdentity name="InfragisticsWPF4.DataPresenter.v17.2.resources" version="17.2.0.0" publicKeyToken="7DD5C3163F2CD0CB" language="de" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>7BcvDi8R4J8P2/ZKclzIFYMabWk9jHUX4YniNP3Zrk0=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="es\InfragisticsWPF4.DataPresenter.v17.2.resources.dll" size="30720">
+      <assemblyIdentity name="InfragisticsWPF4.DataPresenter.v17.2.resources" version="17.2.0.0" publicKeyToken="7DD5C3163F2CD0CB" language="es" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>4ofvMY8yoYuy46GSHCmj52jvpYiojr36Jfl6lRfBmZE=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="fr\InfragisticsWPF4.DataPresenter.v17.2.resources.dll" size="31232">
+      <assemblyIdentity name="InfragisticsWPF4.DataPresenter.v17.2.resources" version="17.2.0.0" publicKeyToken="7DD5C3163F2CD0CB" language="fr" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>c5ziKZhCpAGeEQjSmDWlScv7eBjnNVlhcb3vXokwROA=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="InfragisticsWPF4.Editors.v17.2.dll" size="1106944">
+      <assemblyIdentity name="InfragisticsWPF4.Editors.v17.2" version="17.2.20172.1000" publicKeyToken="7DD5C3163F2CD0CB" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>lM75dOgLUx/6cT38an5yq0sevrF2diLO8AiQZYNbY8A=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="de\InfragisticsWPF4.Editors.v17.2.resources.dll" size="9216">
+      <assemblyIdentity name="InfragisticsWPF4.Editors.v17.2.resources" version="17.2.0.0" publicKeyToken="7DD5C3163F2CD0CB" language="de" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>B4I3jKv6GUjroPtzqyp46VG3gK1CVrWC9KoK6qovGow=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="es\InfragisticsWPF4.Editors.v17.2.resources.dll" size="8704">
+      <assemblyIdentity name="InfragisticsWPF4.Editors.v17.2.resources" version="17.2.0.0" publicKeyToken="7DD5C3163F2CD0CB" language="es" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>rF2ul45Zkj3OB8gdSScmSZsNM8zGK0rzdYPq0qCwfeA=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="fr\InfragisticsWPF4.Editors.v17.2.resources.dll" size="9216">
+      <assemblyIdentity name="InfragisticsWPF4.Editors.v17.2.resources" version="17.2.0.0" publicKeyToken="7DD5C3163F2CD0CB" language="fr" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>Om5FmHk8ElRcIbdE8wGKeM8qaR25ZCNWc0pNBg2jiCo=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="InfragisticsWPF4.Olap.v17.2.dll" size="309760">
+      <assemblyIdentity name="InfragisticsWPF4.Olap.v17.2" version="17.2.20172.1000" publicKeyToken="7DD5C3163F2CD0CB" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>7JSa0R+PvmWxqmQ+iC9iPb61LotobeysLaQNVQcg9FU=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="de\InfragisticsWPF4.Olap.v17.2.resources.dll" size="8192">
+      <assemblyIdentity name="InfragisticsWPF4.Olap.v17.2.resources" version="17.2.0.0" publicKeyToken="7DD5C3163F2CD0CB" language="de" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>5UaNnxve0hHqmoa+MFJx0Xke+T4aoe8/Szh3Z42W7RM=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="es\InfragisticsWPF4.Olap.v17.2.resources.dll" size="8192">
+      <assemblyIdentity name="InfragisticsWPF4.Olap.v17.2.resources" version="17.2.0.0" publicKeyToken="7DD5C3163F2CD0CB" language="es" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>A6j6xV/pctBCfeD7s2CI4ZSCJnMZ/9VpxWlB+fIJeEk=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="fr\InfragisticsWPF4.Olap.v17.2.resources.dll" size="8192">
+      <assemblyIdentity name="InfragisticsWPF4.Olap.v17.2.resources" version="17.2.0.0" publicKeyToken="7DD5C3163F2CD0CB" language="fr" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>fFbeGanYGjdhkZZMKix8GE4R+P/B0GvV14g+z6sv7zw=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="InfragisticsWPF4.v17.2.dll" size="2321920">
+      <assemblyIdentity name="InfragisticsWPF4.v17.2" version="17.2.20172.1000" publicKeyToken="7DD5C3163F2CD0CB" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>dUEFvjULu5Jjh84/pCkkD7J9xk2XF+mh7Jk2VgvYEAM=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="de\InfragisticsWPF4.v17.2.resources.dll" size="27136">
+      <assemblyIdentity name="InfragisticsWPF4.v17.2.resources" version="17.2.0.0" publicKeyToken="7DD5C3163F2CD0CB" language="de" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>Wz4PpDuvuGgmpJy+QzDkr6RGU3UlYTzGSjuAM3sa9Cc=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="es\InfragisticsWPF4.v17.2.resources.dll" size="31232">
+      <assemblyIdentity name="InfragisticsWPF4.v17.2.resources" version="17.2.0.0" publicKeyToken="7DD5C3163F2CD0CB" language="es" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>cggh3doJY/2ZFWadto90kD9kmIsAj9R1lI8BxeHWZoY=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="fr\InfragisticsWPF4.v17.2.resources.dll" size="31232">
+      <assemblyIdentity name="InfragisticsWPF4.v17.2.resources" version="17.2.0.0" publicKeyToken="7DD5C3163F2CD0CB" language="fr" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>d0318EBN+ZganJiiy6QxFXduDAk2TiIkyl9q+IokJnY=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="InTheHand.Net.Personal.dll" size="431616">
+      <assemblyIdentity name="InTheHand.Net.Personal" version="3.5.605.0" publicKeyToken="EA38CAA273134499" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>4GeVtDN3cVBL+mo7XXy4MHu6AMe6orBh1M0iQgfg07o=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="itextsharp.dll" size="3989504">
+      <assemblyIdentity name="itextsharp" version="5.5.1.0" publicKeyToken="8354AE6D2174DDCA" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>9ldseDqNuYxKCZGeoKi4v/cKwXKdOqKTXgfG5jnyUHA=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="QRCoder.dll" size="100352">
+      <assemblyIdentity name="QRCoder" version="1.3.2.0" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>MXOlMKGmQaCyQqKYOy9rPsb2sGHS7L3YJOz1pOENhVc=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="rx_common_lib_cs.dll" size="704000">
+      <assemblyIdentity name="rx_common_lib_cs" version="1.0.0.0" language="neutral" processorArchitecture="amd64" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>gnZPl2pdFKLrhvC2mz6rApnctJ8apyWvp6dWFwmufxM=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="RX_DigiPrint.exe" size="12203008">
+      <assemblyIdentity name="RX_DigiPrint" version="1.0.1.7507" language="neutral" processorArchitecture="amd64" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>8HJ2Q5/Qp8e1oDvWeYUzdPyMntANKTduRVsvu5EYBms=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="UnityEngine.dll" size="619008">
+      <assemblyIdentity name="UnityEngine" version="0.0.0.0" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>DgMvNxrf2kj5H9awGlg+HOEnIsoGEi4Og9X9CaMIRyU=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="ZKWeb.System.Drawing.dll" size="360448">
+      <assemblyIdentity name="ZKWeb.System.Drawing" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>LEmsA8pYyQJzJmnxCsvcSxAZNgrJ8aFOaHszV9dNSa4=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <file name="id_rsa.ppk" size="1464">
+    <hash>
+      <dsig:Transforms>
+        <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+      </dsig:Transforms>
+      <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+      <dsig:DigestValue>O/PnAXBXblhgzrKoAncV+a41gUUnjlLGY0M+GQpDxuo=</dsig:DigestValue>
+    </hash>
+  </file>
+  <file name="mouvent.ico" size="21662">
+    <hash>
+      <dsig:Transforms>
+        <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+      </dsig:Transforms>
+      <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+      <dsig:DigestValue>4Ybd6nHu7p8XbuwpJY1+xkUN39w+4QHQekKpZOW3+mI=</dsig:DigestValue>
+    </hash>
+  </file>
+  <file name="RX_DigiPrint.exe.config" size="1172">
+    <hash>
+      <dsig:Transforms>
+        <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+      </dsig:Transforms>
+      <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+      <dsig:DigestValue>DX+OQX4g66c0S7i0xUdq7zf3HmLz9S2zZpTVfNQNv38=</dsig:DigestValue>
+    </hash>
+  </file>
+  <compatibility xmlns="urn:schemas-microsoft-com:compatibility.v1">
+    <application>
+      <!-- A list of all Windows versions that this application is designed to work with. 
+      Windows will automatically select the most compatible environment.-->
+      <!-- If your application is designed to work with Windows Vista, uncomment the following supportedOS node-->
+      <!--<supportedOS Id="{e2011457-1546-43c5-a5fe-008deee3d3f0}"></supportedOS>-->
+      <!-- If your application is designed to work with Windows 7, uncomment the following supportedOS node-->
+      <!--<supportedOS Id="{35138b9a-5d96-4fbd-8e2d-a2440225f93a}"/>-->
+      <!-- If your application is designed to work with Windows 8, uncomment the following supportedOS node-->
+      <!--<supportedOS Id="{4a2f28e3-53b9-4441-ba9c-d69d4a4a6e38}"></supportedOS>-->
+      <!-- If your application is designed to work with Windows 8.1, uncomment the following supportedOS node-->
+      <!--<supportedOS Id="{1f676c76-80e1-4239-95bb-83d0f6d0da78}"/>-->
+    </application>
+  </compatibility>
+</asmv1:assembly>

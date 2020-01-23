@@ -1,0 +1,2 @@
+﻿  VisualGDB: Run "cmd.exe /c "C:\Program Files (x86)\Sysprogs\VisualGDB\make.exe" CONFIG=Release-soc" in directory "C:\Develop\PrintEngine\Externals\TinyXML" on local machine
+  make: `all' is up to date.

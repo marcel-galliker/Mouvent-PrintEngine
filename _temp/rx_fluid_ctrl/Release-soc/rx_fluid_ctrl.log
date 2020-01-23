@@ -1,0 +1,18 @@
+﻿  VisualGDB: Executing pre-build actions
+  VisualGDB: Run "C:\Develop\PrintEngine\rx_fluid_ctrl\..\VersionUpdate.exe C:\Develop\PrintEngine\rx_fluid_ctrl\version.c" in directory "" on local computer
+  update >>C:\Develop\PrintEngine\rx_fluid_ctrl\version.c<<
+  txt file >>C:\Develop\PrintEngine\rx_fluid_ctrl\version.txt<<
+  VisualGDB: Run "cmd.exe /c "C:\Program Files (x86)\Sysprogs\VisualGDB\make.exe" CONFIG=Release-soc" in directory "C:\Develop\PrintEngine\rx_fluid_ctrl" on local machine
+  F:/Compiler/altera/13.1/DS-5/bin/arm-linux-gnueabihf-gcc.exe -ggdb -ffunction-sections -O3 -pthread -lrt  -I../rx_ink_lib -I../rx_common_lib -DNDEBUG -DRELEASE -Dlinux -Dsoc  -c ../rx_ink_lib/comm.c -o Release-soc/comm.o -MD -MF Release-soc/comm.dep
+  F:/Compiler/altera/13.1/DS-5/bin/arm-linux-gnueabihf-gcc.exe -ggdb -ffunction-sections -O3 -pthread -lrt  -I../rx_ink_lib -I../rx_common_lib -DNDEBUG -DRELEASE -Dlinux -Dsoc  -c ../rx_ink_lib/rx_ink_common.c -o Release-soc/rx_ink_common.o -MD -MF Release-soc/rx_ink_common.dep
+  F:/Compiler/altera/13.1/DS-5/bin/arm-linux-gnueabihf-gcc.exe -ggdb -ffunction-sections -O3 -pthread -lrt  -I../rx_ink_lib -I../rx_common_lib -DNDEBUG -DRELEASE -Dlinux -Dsoc  -c args.c -o Release-soc/args.o -MD -MF Release-soc/args.dep
+  F:/Compiler/altera/13.1/DS-5/bin/arm-linux-gnueabihf-gcc.exe -ggdb -ffunction-sections -O3 -pthread -lrt  -I../rx_ink_lib -I../rx_common_lib -DNDEBUG -DRELEASE -Dlinux -Dsoc  -c daisy_chain.c -o Release-soc/daisy_chain.o -MD -MF Release-soc/daisy_chain.dep
+  F:/Compiler/altera/13.1/DS-5/bin/arm-linux-gnueabihf-gcc.exe -ggdb -ffunction-sections -O3 -pthread -lrt  -I../rx_ink_lib -I../rx_common_lib -DNDEBUG -DRELEASE -Dlinux -Dsoc  -c fluid_ctrl.c -o Release-soc/fluid_ctrl.o -MD -MF Release-soc/fluid_ctrl.dep
+  F:/Compiler/altera/13.1/DS-5/bin/arm-linux-gnueabihf-gcc.exe -ggdb -ffunction-sections -O3 -pthread -lrt  -I../rx_ink_lib -I../rx_common_lib -DNDEBUG -DRELEASE -Dlinux -Dsoc  -c fpga_fluid.c -o Release-soc/fpga_fluid.o -MD -MF Release-soc/fpga_fluid.dep
+  F:/Compiler/altera/13.1/DS-5/bin/arm-linux-gnueabihf-gcc.exe -ggdb -ffunction-sections -O3 -pthread -lrt  -I../rx_ink_lib -I../rx_common_lib -DNDEBUG -DRELEASE -Dlinux -Dsoc  -c nios_fluid.c -o Release-soc/nios_fluid.o -MD -MF Release-soc/nios_fluid.dep
+  F:/Compiler/altera/13.1/DS-5/bin/arm-linux-gnueabihf-gcc.exe -ggdb -ffunction-sections -O3 -pthread -lrt  -I../rx_ink_lib -I../rx_common_lib -DNDEBUG -DRELEASE -Dlinux -Dsoc  -c rx_fluid_ctrl.c -o Release-soc/rx_fluid_ctrl.o -MD -MF Release-soc/rx_fluid_ctrl.dep
+  F:/Compiler/altera/13.1/DS-5/bin/arm-linux-gnueabihf-gcc.exe -ggdb -ffunction-sections -O3 -pthread -lrt  -I../rx_ink_lib -I../rx_common_lib -DNDEBUG -DRELEASE -Dlinux -Dsoc  -c version.c -o Release-soc/version.o -MD -MF Release-soc/version.dep
+  F:/Compiler/altera/13.1/DS-5/bin/arm-linux-gnueabihf-g++.exe -o Release-soc/rx_fluid_ctrl -Wl,-gc-sections -pthread -lrt    -Wl,--start-group Release-soc/comm.o Release-soc/rx_ink_common.o Release-soc/args.o Release-soc/daisy_chain.o Release-soc/fluid_ctrl.o Release-soc/fpga_fluid.o Release-soc/nios_fluid.o Release-soc/rx_fluid_ctrl.o Release-soc/version.o  ../rx_common_lib/Release-soc/rx_common_lib.a -Wl,--rpath='$ORIGIN' -Wl,--rpath='$ORIGIN/../../rx_common_lib/Release-soc/'  -Wl,--end-group
+  VisualGDB: Executing post-build actions
+  VisualGDB: Copy file C:\Develop\PrintEngine\rx_fluid_ctrl/Release-soc/rx_fluid_ctrl on local computer to C:\Develop\PrintEngine\rx_fluid_ctrl\..\bin\fluid\rx_fluid_ctrl on local computer
+  VisualGDB: Skipping disabled action: Copy file $(TargetPath) on local computer to d:\Radex\bin\fluid\$(TargetFileName) on local computer

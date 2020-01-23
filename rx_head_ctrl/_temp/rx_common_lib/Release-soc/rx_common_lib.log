@@ -1,0 +1,2 @@
+﻿  VisualGDB: Run "cmd.exe /c "C:\Program Files (x86)\Sysprogs\VisualGDB\make.exe" CONFIG=Release-soc" in directory "C:\Develop\PrintEngine\rx_common_lib" on local machine
+  make: `all' is up to date.

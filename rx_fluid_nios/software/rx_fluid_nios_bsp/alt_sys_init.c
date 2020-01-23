@@ -4,7 +4,7 @@
  * Machine generated for CPU 'nios2_qsys_0' in SOPC Builder design 'fluid_board_soc'
  * SOPC Builder design path: ../../fluid_board_soc.sopcinfo
  *
- * Generated: Mon Jun 19 17:48:42 CEST 2017
+ * Generated: Thu Jan 23 17:17:47 CET 2020
  */
 
 /*

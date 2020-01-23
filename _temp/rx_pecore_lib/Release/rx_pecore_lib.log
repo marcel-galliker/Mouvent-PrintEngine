@@ -1,0 +1,4 @@
+﻿  rx_pecore.c
+  rx_pecore_itf.c
+  rx_pecore_main.c
+  rx_pecore_lib.vcxproj -> C:\Develop\PrintEngine\rx_pecore_lib\..\_out\Release\rx_pecore_lib.lib
