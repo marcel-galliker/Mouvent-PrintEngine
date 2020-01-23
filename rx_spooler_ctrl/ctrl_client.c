@@ -483,7 +483,11 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 		TrPrintfL(TRUE, "REPLY EVT_PRINT_FILE, bufReady=%d, _ResetCnt=%d, ResetCnt=%d", evt.bufReady, _ResetCnt, RX_Spooler.resetCnt);
 		if(rx_def_is_tx(RX_Spooler.printerType) && (_FirstFile || !same))
 		{
-			if (_FirstFile) data_send_id(NULL);
+			if (_FirstFile) 
+            {
+                TrPrintfL(TRUE, "_do_print_file: FirstFile: data_send_id(NULL)");
+                data_send_id(NULL);
+            }
 			Error(LOG, 0, "Data Loaded: id=%d _ResetCnt=%d, _StartCnt=%d, RX_Spooler.resetCnt=%d", msg.id.id, _ResetCnt, _StartCnt, RX_Spooler.resetCnt);				
 			if (_ResetCnt==_StartCnt)
 			{

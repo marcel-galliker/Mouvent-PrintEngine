@@ -789,10 +789,15 @@ void data_send_id(SPageId *id)
 {
 	if (id)
 	{
+	    TrPrintfL(TRUE, "data_send_id id=%d", id->id);
 		memcpy(&_SendingId, id, sizeof(_SendingId));
 		Error(LOG, 0, "data_send_id _SendingId=%d", _SendingId.id);
 	}
-	else    memset(&_SendingId, 0, sizeof(_SendingId));
+	else
+    {
+	    TrPrintfL(TRUE, "data_send_id id=NULL");
+        memset(&_SendingId, 0, sizeof(_SendingId));
+	}
 }
 
 //--- data_get_next ----------------------------------------------------------------
@@ -800,7 +805,7 @@ SBmpSplitInfo*  data_get_next	(int *headCnt)
 {
 	int idx;
 		
-	TrPrintfL(TRUE, "data_get_next _InIdx=%d, _SendIdx=%d, _OutIdx=%d", _InIdx, _SendIdx, _OutIdx);
+	TrPrintfL(TRUE, "data_get_next _InIdx=%d, _SendIdx=%d, _OutIdx=%d, _SendingId.id=%d", _InIdx, _SendIdx, _OutIdx, _SendingId.id);
 	if (_SendIdx!=_OutIdx) return NULL;
 	if (_SendIdx==_InIdx) return NULL;
 
@@ -1148,10 +1153,13 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 					bmp.sizeAlloc	= 0;
 					bmp.buffer		=  *pInfo->data;
 					rip_test_data(&bmp, RX_TestData[head]);
-                    if (RX_Spooler.colorCnt==0 || ((id->copy-1)%RX_Spooler.colorCnt)!=color)
-                    {
-                        memset(bmp.buffer, 0, pInfo->srcLineLen* pInfo->srcLineCnt);
-                    }
+                    if (rx_def_is_web(RX_Spooler.printerType))
+					{
+						if (RX_Spooler.colorCnt==0 || ((id->copy-1)%RX_Spooler.colorCnt)!=color)
+						{
+							memset(bmp.buffer, 0, pInfo->srcLineLen* pInfo->srcLineCnt);
+						}
+					}
 				}
 				if (clearBlockUsed) _BlkNo[pInfo->board][pInfo->head] = (_BlkNo[pInfo->board][pInfo->head]+pInfo->blkCnt)%(RX_Spooler.dataBlkCntHead);
 			}
