@@ -146,6 +146,7 @@ static int				_PlcThreadRunning;
 static int				_RunTime=0;
 static SNetworkItem		_NetItem;
 static ULONG			_LastLogIdx=0;
+static int				_FirstParSent=FALSE;
 static int				_StartPrinting=FALSE;
 static int				_RequestPause=FALSE;
 static int				_SendPause=FALSE;
@@ -159,6 +160,8 @@ static int				_ErrorFilter=0;
 static int				_ErrorFilterBuf[100];
 #define ERROR_FILTER_TIME	500
 static double			_StepDist;
+static int				_FirstStep;
+static int				_BeltOn;
 static int				_UnwinderLenMin;
 static UINT32			_ActSpeed;
 static double			_StartPos;
@@ -214,6 +217,7 @@ int plc_end(void)
 //--- plc_reset -----------------------------------------------------------
 void plc_reset(void)
 {
+    _FirstParSent=FALSE;
 }
 
 //--- plc_error_reset -----------------------------------------
@@ -333,7 +337,9 @@ static void _plc_set_par(SPrintQueueItem *pItem, SPlcPar *pPlcPar)
 	double		accDistmm=0;
 	
 	_plc_set_par_default();
-	
+
+    if (rx_def_is_tx(RX_Config.printer.type)) lc_get_value_by_name_UINT32(UnitID ".PAR_BELT_ON", &_BeltOn);
+
 	switch(RX_Config.printer.type)
 	{
 		case printer_LB701:		_UnwinderLenMin = 10; break;	
@@ -356,6 +362,7 @@ static void _plc_set_par(SPrintQueueItem *pItem, SPlcPar *pPlcPar)
 			Error(WARN, 0, "Set Speed to %d because flexo used", pPlcPar->speed);
 		}
 	}
+    _FirstStep = TRUE;
 	_StepDist = 43.328;
 	if (RX_Config.printer.type==printer_TX802) _StepDist*=2;
 	
@@ -401,12 +408,11 @@ int	plc_get_thickness(void)
 static void _plc_send_par(SPlcPar *pPlcPar)
 {
 //	Error(LOG, 0, "SET PLC Parameter: PAR_PRINTING_START_POSITION=%d, PAR_PRINTING_END_POSITION=%d", (int)pPlcPar->startPos, (int)pPlcPar->endPos);
-	
-	if(rx_def_is_scanning(RX_Config.printer.type))
+	if(rx_def_is_scanning(RX_Config.printer.type) && _FirstParSent)
 	{
-		Error(LOG, 0, "ctrl_send_head_cfg");
-		ctrl_send_head_cfg();			
+		ctrl_send_head_cfg();
 	}
+    _FirstParSent = TRUE;
 	if (_SimuPLC) return;
 	
 	if (_PlcState==plc_webin)
@@ -553,18 +559,20 @@ int  plc_abort_printing(void)
 //--- plc_print_go ----------------------------------
 int	 plc_print_go(int printGo)
 {
-    if (!_SimuPLC)
+    if (!_SimuPLC && _BeltOn)
 	{
         float val;
         int beltPos, step;
         static int _oldPos;
 		lc_get_value_by_name_FLOAT(UnitID ".STA_BELT_POSITION", &val);
         beltPos = (int)(val+0.5);
-        if (printGo>0)
+        if (!_FirstStep)
         {
             step = (2000+beltPos-_oldPos) % 2000;
+		//	Error(LOG, 0, "BeltStep=%dmm (soll=%d)", step, (int)(_StepDist+0.5));
             if (abs(step-(int)_StepDist) > 2) Error(ERR_ABORT, 0, "BeltStep=%dmm out of tolerance (soll=%d)", step, (int)(_StepDist+0.5));
 		}
+        _FirstStep = FALSE;
         _oldPos = beltPos;
     }
     return REPLY_OK;
