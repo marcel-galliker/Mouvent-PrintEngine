@@ -115,6 +115,7 @@ namespace RX_DigiPrint.Views.TexView
             }
         }
 
+        /*
         private int recursive=0;
         private void CB_Material_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
@@ -131,6 +132,7 @@ namespace RX_DigiPrint.Views.TexView
                 CB_Material.SelectedItem = null;
             }
         }
+        */
       
         //--- XML_MATERIAL_PropertyChanged --------------------------------------------
         private void XML_MATERIAL_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)

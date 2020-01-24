@@ -55,8 +55,9 @@
                                 IsEditable="False"
                                 DropDownClosed="CB_Material_DropDownClosed"
                                 ValueToDisplayTextConverter="{StaticResource MaterialName_Converter}"
-                                SelectedItemChanged="CB_Material_SelectedItemChanged"
+                                
                                />
+                            <!-- SelectedItemChanged="CB_Material_SelectedItemChanged" -->
                             <TextBox Grid.Column="1" x:Name="MaterialName" Text="NAME" Visibility="Collapsed"/>
                         </Grid>
                     </StackPanel>
