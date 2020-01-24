@@ -19,6 +19,7 @@
 //--- external variables -------------------
 int arg_debug		= FALSE;
 char arg_ipAddr[64] = "";
+int arg_tracePQ = FALSE;	
 
 //--- args_init -----------------------------------
 void args_init(int argc, char** argv)

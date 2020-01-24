@@ -488,7 +488,7 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
                 TrPrintfL(TRUE, "_do_print_file: FirstFile: data_send_id(NULL)");
                 data_send_id(NULL);
             }
-			Error(LOG, 0, "Data Loaded: id=%d _ResetCnt=%d, _StartCnt=%d, RX_Spooler.resetCnt=%d", msg.id.id, _ResetCnt, _StartCnt, RX_Spooler.resetCnt);				
+			if (arg_tracePQ) Error(LOG, 0, "Data Loaded: id=%d _ResetCnt=%d, _StartCnt=%d, RX_Spooler.resetCnt=%d", msg.id.id, _ResetCnt, _StartCnt, RX_Spooler.resetCnt);				
 			if (_ResetCnt==_StartCnt)
 			{
 				if (data_next_id()) _StartCnt++;
@@ -510,7 +510,7 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 //--- _do_start_sending ----------------------------
 static void _do_start_sending(UINT32 resetCnt)
 {
-	Error(LOG, 0, "_do_start_sending(%d), RX_Spooler.resetCnt=%d", resetCnt, RX_Spooler.resetCnt);
+	if (arg_tracePQ) Error(LOG, 0, "_do_start_sending(%d), RX_Spooler.resetCnt=%d", resetCnt, RX_Spooler.resetCnt);
 	if (RX_Spooler.resetCnt && resetCnt>RX_Spooler.resetCnt) RX_Spooler.resetCnt=resetCnt;
 	if (resetCnt==RX_Spooler.resetCnt) 
 	{

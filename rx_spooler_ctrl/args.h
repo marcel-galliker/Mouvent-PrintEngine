@@ -12,8 +12,9 @@
 
 #pragma once
 
-
 extern int	arg_debug;
 extern char arg_ipAddr[64];
+
+extern int arg_tracePQ;	
 
 void args_init(int argc, char** argv);

@@ -20,6 +20,7 @@
 #include "rx_tif.h"
 #include "rx_trace.h"
 #include "rx_rip_lib.h"
+#include "args.h"
 #include "bmp.h"
 #include "tcp_ip.h"
 #include "spool_rip.h"
@@ -674,7 +675,7 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 		{
 			_data_multi_copy(id, &bmpInfo, multiCopy);
 			time = rx_get_ticks()-time;
-			if (time) Error(LOG, 0, "MultiCopy time=%d ms", time);				
+		//	if (time) Error(LOG, 0, "MultiCopy time=%d ms", time);				
 		}
 		_data_split(id, &bmpInfo, offsetPx, lengthPx, blkNo, blkCnt, flags, clearBlockUsed, same, &_PrintList[_InIdx]);
 		
@@ -791,7 +792,7 @@ void data_send_id(SPageId *id)
 	{
 	    TrPrintfL(TRUE, "data_send_id id=%d", id->id);
 		memcpy(&_SendingId, id, sizeof(_SendingId));
-		Error(LOG, 0, "data_send_id _SendingId=%d", _SendingId.id);
+		if (arg_tracePQ) Error(LOG, 0, "data_send_id _SendingId=%d", _SendingId.id);
 	}
 	else
     {
@@ -862,13 +863,13 @@ SBmpSplitInfo*  data_get_next	(int *headCnt)
 int	 data_next_id(void)
 {
 	int lastidx=(_OutIdx+PRINT_LIST_SIZE-1)%PRINT_LIST_SIZE;
-	Error(LOG, 0, "data_next_id _SendingId=%d, lastidx=%d, outIdx=%d, sendIdx=%d, last.id=%d, out.id=%d, send.id=%d", _SendingId.id, lastidx, _OutIdx, _SendIdx, _PrintList[lastidx].id.id, _PrintList[_OutIdx].id.id, _PrintList[_SendIdx].id.id);
+	if (arg_tracePQ) Error(LOG, 0, "data_next_id _SendingId=%d, lastidx=%d, outIdx=%d, sendIdx=%d, last.id=%d, out.id=%d, send.id=%d", _SendingId.id, lastidx, _OutIdx, _SendIdx, _PrintList[lastidx].id.id, _PrintList[_OutIdx].id.id, _PrintList[_SendIdx].id.id);
 	if (_PrintList[lastidx].id.id==_SendingId.id && _PrintList[_OutIdx].id.id!=_SendingId.id && _PrintList[_OutIdx].id.id)
 	{
 		data_send_id(&_PrintList[_OutIdx].id);
 		return TRUE;
 	}
-	else Error(LOG, 0, "data_next_id KEEP");
+	else if (arg_tracePQ) Error(LOG, 0, "data_next_id KEEP");
 	return FALSE;
 }
 
@@ -932,7 +933,7 @@ static void _data_multi_copy(SPageId *pid, SBmpInfo *pBmpInfo, UINT8 multiCopy)
 	{
 		int running = _MultiCopyThreadCnt;
 		int done;			
-		Error(LOG, 0, "MultiCopy=%d", multiCopy);
+	//	Error(LOG, 0, "MultiCopy=%d", multiCopy);
 
 		_MultiCopyDone  = rx_sem_create();
 
