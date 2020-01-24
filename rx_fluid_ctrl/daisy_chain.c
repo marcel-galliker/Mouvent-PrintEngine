@@ -280,7 +280,8 @@ static int _daisy_chain_read(void)
 	int				len = 0;
 	int				data = 0;
 	unsigned int	timeout = 0;
-	SAnswerMsg	answer;
+	SAnswerMsg		answer;
+    static int		_error=FALSE;
 	
 	memset(&answer, 0, sizeof(answer));
 	
@@ -298,9 +299,11 @@ static int _daisy_chain_read(void)
 					{
 						if (answer.error)
 						{
+                            if (_error) return REPLY_ERROR;
+                            _error = TRUE;
 							return Error(ERR_CONT, 0, "DAISYCHAIN RECV: NR=%d ID=%d Command=%d, len=%d, err=%d", answer.dev_ctr, answer.dev_id, answer.command, answer.length, answer.error);
 						}
-					
+						_error = FALSE;
 						return _daisy_chain_request_dispatcher(&answer);
 					}
 				}
