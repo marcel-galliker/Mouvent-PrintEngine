@@ -1,9 +1,0 @@
-﻿  VisualGDB: C:\Develop\PrintEngine\Externals\TinyXML => /tmp/VisualGDB/c/Develop/PrintEngine/Externals/TinyXML: 16 files copied (247KB).
-  VisualGDB: Run "make CONFIG=Release-lx" in directory "/tmp/VisualGDB/c/Develop/PrintEngine/Externals/TinyXML" on root@localhost:2222 (SSH)
-  mkdir Release-lx
-  g++ -ggdb -ffunction-sections -O0   -DNDEBUG -DRELEASE -Dlinux  -c tinystr.cpp -o Release-lx/tinystr.o -MD -MF Release-lx/tinystr.dep
-  g++ -ggdb -ffunction-sections -O0   -DNDEBUG -DRELEASE -Dlinux  -c tinyxml.cpp -o Release-lx/tinyxml.o -MD -MF Release-lx/tinyxml.dep
-  g++ -ggdb -ffunction-sections -O0   -DNDEBUG -DRELEASE -Dlinux  -c tinyxmlerror.cpp -o Release-lx/tinyxmlerror.o -MD -MF Release-lx/tinyxmlerror.dep
-  g++ -ggdb -ffunction-sections -O0   -DNDEBUG -DRELEASE -Dlinux  -c tinyxmlparser.cpp -o Release-lx/tinyxmlparser.o -MD -MF Release-lx/tinyxmlparser.dep
-  ar -r Release-lx/TinyXML.a Release-lx/tinystr.o Release-lx/tinyxml.o Release-lx/tinyxmlerror.o Release-lx/tinyxmlparser.o
-  ar: creating Release-lx/TinyXML.a

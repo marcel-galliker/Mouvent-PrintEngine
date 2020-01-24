@@ -1,7 +1,0 @@
-﻿  VisualGDB: Run "cmd.exe /c "C:\Program Files (x86)\Sysprogs\VisualGDB\make.exe" CONFIG=Release-soc" in directory "C:\Develop\PrintEngine\Externals\TinyXML" on local machine
-  F:/Compiler/altera/13.1/DS-5/bin/arm-linux-gnueabihf-g++.exe -ggdb -ffunction-sections -O3   -DNDEBUG -DRELEASE -Dlinux -Dsoc  -c tinystr.cpp -o Release-soc/tinystr.o -MD -MF Release-soc/tinystr.dep
-  F:/Compiler/altera/13.1/DS-5/bin/arm-linux-gnueabihf-g++.exe -ggdb -ffunction-sections -O3   -DNDEBUG -DRELEASE -Dlinux -Dsoc  -c tinyxml.cpp -o Release-soc/tinyxml.o -MD -MF Release-soc/tinyxml.dep
-  F:/Compiler/altera/13.1/DS-5/bin/arm-linux-gnueabihf-g++.exe -ggdb -ffunction-sections -O3   -DNDEBUG -DRELEASE -Dlinux -Dsoc  -c tinyxmlerror.cpp -o Release-soc/tinyxmlerror.o -MD -MF Release-soc/tinyxmlerror.dep
-  F:/Compiler/altera/13.1/DS-5/bin/arm-linux-gnueabihf-g++.exe -ggdb -ffunction-sections -O3   -DNDEBUG -DRELEASE -Dlinux -Dsoc  -c tinyxmlparser.cpp -o Release-soc/tinyxmlparser.o -MD -MF Release-soc/tinyxmlparser.dep
-  F:/Compiler/altera/13.1/DS-5/bin/arm-linux-gnueabihf-ar.exe -r Release-soc/TinyXML.a Release-soc/tinystr.o Release-soc/tinyxml.o Release-soc/tinyxmlerror.o Release-soc/tinyxmlparser.o
-  F:\Compiler\altera\13.1\DS-5\bin\..\sw\gcc\bin\arm-linux-gnueabihf-ar.exe: creating Release-soc/TinyXML.a
