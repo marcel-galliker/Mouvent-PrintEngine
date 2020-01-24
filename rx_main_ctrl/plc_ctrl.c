@@ -369,7 +369,7 @@ static void _plc_set_par(SPrintQueueItem *pItem, SPlcPar *pPlcPar)
 	if (pItem->testImage==PQ_TEST_SCANNING) _StepDist=0;
 	pPlcPar->stepDist = _StepDist;
 
-	if (pItem->speed<20) accDistmm = 100.0;
+	if (pItem->speed<40) accDistmm = 50.0;
 	
 	pPlcPar->startPos = WEB_OFFSET+(pItem->pageMargin)/1000.0-accDistmm;		
 	if (pItem->srcHeight<300)  pPlcPar->endPos = WEB_OFFSET+(pItem->pageMargin+300)/1000.0+accDistmm;
@@ -563,7 +563,6 @@ int	 plc_print_go(int printGo)
         if (printGo>0)
         {
             step = (2000+beltPos-_oldPos) % 2000;
-		//	Error(LOG, 0, "PrintGo %d: slidePos=%d, beltPos=%d, old=%d, step=%dmm", printGo, plc_get_scanner_pos(), beltPos, _oldPos, step);
             if (abs(step-(int)_StepDist) > 2) Error(ERR_ABORT, 0, "BeltStep=%dmm out of tolerance (soll=%d)", step, (int)(_StepDist+0.5));
 		}
         _oldPos = beltPos;
@@ -588,7 +587,11 @@ int  plc_clean(void)
 int plc_to_fill_cap_pos(void)
 {
 	if (rx_def_is_tx(RX_Config.printer.type))
+    {
+        if (_PlcState==plc_error) plc_error_reset();
+		lc_set_value_by_name_UINT32(UnitID ".STA_HEAD_IS_UP", RX_StepperStatus.info.scannerEnable);	    
 		_plc_set_command("CMD_PRODUCTION", "CMD_SLIDE_TO_FILL_CAP");
+    }
 	return REPLY_OK;
 }
 
@@ -596,7 +599,11 @@ int plc_to_fill_cap_pos(void)
 int	plc_to_purge_pos(void)
 {
 	if(rx_def_is_tx(RX_Config.printer.type))
+    {
+		if (_PlcState==plc_error) plc_error_reset();
+		lc_set_value_by_name_UINT32(UnitID ".STA_HEAD_IS_UP", RX_StepperStatus.info.scannerEnable);	    
 		_plc_set_command("CMD_PRODUCTION", "CMD_SLIDE_TO_PURGE");
+    }
 	return REPLY_OK;
 }
 
@@ -604,7 +611,11 @@ int	plc_to_purge_pos(void)
 int	plc_to_wipe_pos(void)
 {
 	if(rx_def_is_tx(RX_Config.printer.type))
+    {
+        if (_PlcState==plc_error) plc_error_reset();
+		lc_set_value_by_name_UINT32(UnitID ".STA_HEAD_IS_UP", RX_StepperStatus.info.scannerEnable);	    
 		_plc_set_command("CMD_PRODUCTION", "CMD_SLIDE_TO_WIPE");
+    }
 	return REPLY_OK;
 }
 
@@ -613,6 +624,8 @@ int	plc_to_cap_pos(void)
 {
 	if(rx_def_is_tx(RX_Config.printer.type))
 	{
+        if (_PlcState==plc_error) plc_error_reset();
+		lc_set_value_by_name_UINT32(UnitID ".STA_HEAD_IS_UP", RX_StepperStatus.info.scannerEnable);	    
 		_plc_set_command("CMD_PRODUCTION", "CMD_SLIDE_TO_WIPE");
 		step_set_vent(FALSE);			
 	}

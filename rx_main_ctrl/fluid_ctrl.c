@@ -602,7 +602,7 @@ static void _control(int fluidNo)
 											_send_ctrlMode(_PurgeFluidNo, ctrl_purge_step1, TRUE);
 											break;
 				
-				case ctrl_wash_step6:	if (steptx_rob_wash_done())
+				case ctrl_wash_step6:		if (steptx_rob_wash_done())
 											{	
 												if (_PurgeCtrlMode == ctrl_undef)	fluid_send_ctrlMode(-1, ctrl_vacuum, TRUE);
 												else								_send_ctrlMode(_PurgeFluidNo, ctrl_purge_step1, TRUE);
@@ -619,7 +619,6 @@ static void _control(int fluidNo)
 													if (!RX_StepperStatus.robinfo.moving && !RX_StepperStatus.info.moving)	steplb_rob_to_wipe_pos(no/2, HeadNo + rob_fct_purge_head0);
 													break;
 												}
-												
 												plc_to_purge_pos();
 												_send_ctrlMode(no, ctrl_purge_step2, TRUE);																										
 											}
@@ -659,7 +658,13 @@ static void _control(int fluidNo)
 													fluid_send_ctrlMode(-1, ctrl_vacuum, TRUE);
 												}
 											}
- 											else if (RX_PrinterStatus.printState==ps_pause) _send_ctrlMode(no, ctrl_print, TRUE);
+ 											else if (RX_PrinterStatus.printState==ps_pause)
+                                            {
+												if (_all_fluids_in_3fluidCtrlModes(ctrl_purge_step4, ctrl_off, ctrl_print))
+												{
+	                                                _send_ctrlMode(-1, ctrl_print, TRUE);
+                                                }											
+                                            }
 											else _send_ctrlMode(no, ctrl_off, TRUE);		
 											break;
 
