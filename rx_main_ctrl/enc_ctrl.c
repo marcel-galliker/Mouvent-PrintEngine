@@ -271,7 +271,7 @@ int  enc_start_printing(SPrintQueueItem *pitem, int restart)
 static void _enc_start_printing(int no, SPrintQueueItem *pitem, int restart)
 {
 	SEncoderCfg msg;
-	double comp;
+	double comp, comp2;
 	memset(&msg, 0, sizeof(msg));
 
 //	Error(LOG, 0, "_enc_start_printing");
@@ -390,14 +390,14 @@ static void _enc_start_printing(int no, SPrintQueueItem *pitem, int restart)
 								}
 								else 
 								{
-									comp = 0.0050 * RX_StepperStatus.posZ * pitem->speed;
-									comp = 0;
-//										test = RX_Config.headDistBackMax-comp;
-									Error(LOG, 0, "Flightime Comp: height=%d speed=%d comp=%d µm", RX_StepperStatus.posZ, pitem->speed, (int)comp);
+									comp =  1000.0 * 0.0090 * (pitem->speed-60);								// ref done at 60m/min
+									Error(LOG, 0, "FlightTimeComp: speed=%d (ref 60m/min): comp=%dµm", pitem->speed, (int)comp);                                                              
+                                    comp2 = 0.0027 * (RX_StepperStatus.posZ-2000) * pitem->speed;		// ref done at 2.0 mm
+									Error(LOG, 0, "FlightTimeComp: height=%d.%03dmm (ref 2.0mm): comp=%dµm", RX_StepperStatus.posZ/1000, RX_StepperStatus.posZ%1000, (int)comp2);
+                                    comp += comp2;
+									Error(LOG, 0, "FlightTimeComp: comp=%dµm", (int)comp);
 								}
-								Error(LOG, 0, "Encoder.pos_pg_bwd: %d µm org", msg.pos_pg_bwd);
 								msg.pos_pg_bwd += (int)comp;  
-								Error(LOG, 0, "Encoder.pos_pg_bwd: %d µm comp", msg.pos_pg_bwd);
 							}
 							break;
 			
