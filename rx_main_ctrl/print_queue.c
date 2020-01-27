@@ -233,7 +233,7 @@ int pq_stop(void)
 	_TimeCompleted = 0;
 	_send_PrintedItem();
 	
-	ctr_save();
+//	ctr_save();
 	
 	if (RX_Config.printer.type==printer_LH702)
 	{	
