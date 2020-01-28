@@ -31,6 +31,7 @@ int		rx_dir_exists	  (const char *path);
 time_t	rx_file_get_mtime (const char *path);
 void    rx_file_set_mtime (const char *path, time_t time);
 INT64	rx_file_get_size  (const char *path);
+void	rx_file_set_readonly(const char *path, int readonly);
 INT64	rx_file_seek	  (FILE *file, INT64 offset, int origin);		
 int		rx_file_del_if_older(const char *path, const char *compPath);	// return 0=not deleted
 int 	rx_file_mount(const char *remotePath, const char *mntPath, const char *user, const char *pwd);

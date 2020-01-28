@@ -31,7 +31,6 @@ void ctr_init(void)
 	_Time   = 0;
 
 	HANDLE file = setup_create();
-
 	setup_load(file, PATH_USER FILENAME_COUNTERS);
 	
 	if (setup_chapter(file, "Counters", -1, READ)==REPLY_OK)

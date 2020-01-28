@@ -140,6 +140,11 @@ INT64 rx_file_get_size(const char *path)
 	return st.st_size;
 }
 
+//--- rx_file_set_readonly ----------------------------------
+void	rx_file_set_readonly(const char *path, int readonly)
+{
+}
+
 //--- rx_file_seek -----------------------------------
 INT64	rx_file_seek	  (FILE *file, INT64 offset, int origin)
 {
@@ -276,6 +281,15 @@ INT64 rx_file_get_size(const char *path)
 	struct stat st;
 	if (stat(path, &st)) return 0;
 	return st.st_size;
+}
+
+//--- rx_file_set_readonly ------------------------
+void	rx_file_set_readonly(const char *path, int readonly)
+{
+	struct stat st;
+	if (stat(path, &st)) return;
+	if (readonly) chmod(path, st.st_mode &~ (S_IWUSR|S_IWGRP|S_IWOTH));
+	else          chmod(path, st.st_mode | S_IWUSR);
 }
 
 INT64	rx_file_seek	  (FILE *file, INT64 offset, int origin)
