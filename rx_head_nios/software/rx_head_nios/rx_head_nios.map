@@ -1202,88 +1202,88 @@ LOAD f:/tools/bin/altera/15.1/nios2eds/bin/gnu/h-x86_64-mingw32/bin/../lib/gcc/n
  .debug_frame   0x0000000000001348       0x8c f:/tools/bin/altera/15.1/nios2eds/bin/gnu/h-x86_64-mingw32/bin/../lib/gcc/nios2-elf/4.9.2/../../../../../H-x86_64-mingw32/nios2-elf/lib/fstack-limit-register-et\libsmallc.a(lib_a-vfprintf.o)
  .debug_frame   0x00000000000013d4       0x38 f:/tools/bin/altera/15.1/nios2eds/bin/gnu/h-x86_64-mingw32/bin/../lib/gcc/nios2-elf/4.9.2/../../../../../H-x86_64-mingw32/nios2-elf/lib/fstack-limit-register-et\libsmallc.a(lib_a-writer.o)
 
-.debug_str      0x0000000000000000     0x2d27
+.debug_str      0x0000000000000000     0x2d2e
  *(.debug_str)
- .debug_str     0x0000000000000000      0x160 obj/default/AMC7891.o
-                                        0x19e (size before relaxing)
- .debug_str     0x0000000000000160       0xb3 obj/default/adc_thermistor.o
-                                        0x1e4 (size before relaxing)
- .debug_str     0x0000000000000213        0xa obj/default/average.o
-                                        0x113 (size before relaxing)
- .debug_str     0x000000000000021d       0x85 obj/default/comm.o
-                                        0x1ac (size before relaxing)
- .debug_str     0x00000000000002a2      0xce8 obj/default/conditioner_bootloader.o
-                                        0xef9 (size before relaxing)
- .debug_str     0x0000000000000f8a       0x47 obj/default/cooler.o
-                                        0xb8a (size before relaxing)
- .debug_str     0x0000000000000fd1       0x7c obj/default/crc_calc.o
-                                        0x19c (size before relaxing)
- .debug_str     0x000000000000104d       0x3b obj/default/fifo.o
-                                        0x168 (size before relaxing)
- .debug_str     0x0000000000001088       0xfe obj/default/head_eeprom.o
-                                        0xc5b (size before relaxing)
- .debug_str     0x0000000000001186        0xf obj/default/i2c.o
-                                        0x183 (size before relaxing)
- .debug_str     0x0000000000001195       0xce obj/default/main.o
-                                        0xdfc (size before relaxing)
- .debug_str     0x0000000000001263       0x1e obj/default/nios_def_head.o
-                                        0x1da (size before relaxing)
- .debug_str     0x0000000000001281       0xc6 obj/default/power.o
-                                        0xd58 (size before relaxing)
- .debug_str     0x0000000000001347       0xa3 obj/default/pres.o
-                                        0xc02 (size before relaxing)
- .debug_str     0x00000000000013ea      0x67b obj/default/rx_ink_common.o
-                                        0x868 (size before relaxing)
- .debug_str     0x0000000000001a65       0x38 obj/default/rx_mem.o
-                                         0xd4 (size before relaxing)
- .debug_str     0x0000000000001a9d      0x180 obj/default/timer.o
-                                        0xe9e (size before relaxing)
- .debug_str     0x0000000000001c1d       0x58 obj/default/trprintf.o
-                                        0x17b (size before relaxing)
- .debug_str     0x0000000000001c75       0xe6 obj/default/uart.o
-                                        0x2ac (size before relaxing)
- .debug_str     0x0000000000001d5b       0x1f obj/default/version.o
-                                        0x16e (size before relaxing)
- .debug_str     0x0000000000001d7a       0x7b obj/default/watchdog.o
-                                        0xbdd (size before relaxing)
- .debug_str     0x0000000000001df5      0x1a1 f:/tools/bin/altera/15.1/nios2eds/bin/gnu/h-x86_64-mingw32/bin/../lib/gcc/nios2-elf/4.9.2/fstack-limit-register-et\libgcc.a(lib2-divmod.o)
+ .debug_str     0x0000000000000000      0x167 obj/default/AMC7891.o
+                                        0x1a5 (size before relaxing)
+ .debug_str     0x0000000000000167       0xb3 obj/default/adc_thermistor.o
+                                        0x1eb (size before relaxing)
+ .debug_str     0x000000000000021a        0xa obj/default/average.o
+                                        0x11a (size before relaxing)
+ .debug_str     0x0000000000000224       0x85 obj/default/comm.o
+                                        0x1b3 (size before relaxing)
+ .debug_str     0x00000000000002a9      0xce8 obj/default/conditioner_bootloader.o
+                                        0xf00 (size before relaxing)
+ .debug_str     0x0000000000000f91       0x47 obj/default/cooler.o
+                                        0xb91 (size before relaxing)
+ .debug_str     0x0000000000000fd8       0x7c obj/default/crc_calc.o
+                                        0x1a3 (size before relaxing)
+ .debug_str     0x0000000000001054       0x3b obj/default/fifo.o
+                                        0x16f (size before relaxing)
+ .debug_str     0x000000000000108f       0xfe obj/default/head_eeprom.o
+                                        0xc62 (size before relaxing)
+ .debug_str     0x000000000000118d        0xf obj/default/i2c.o
+                                        0x18a (size before relaxing)
+ .debug_str     0x000000000000119c       0xce obj/default/main.o
+                                        0xe03 (size before relaxing)
+ .debug_str     0x000000000000126a       0x1e obj/default/nios_def_head.o
+                                        0x1e1 (size before relaxing)
+ .debug_str     0x0000000000001288       0xc6 obj/default/power.o
+                                        0xd5f (size before relaxing)
+ .debug_str     0x000000000000134e       0xa3 obj/default/pres.o
+                                        0xc09 (size before relaxing)
+ .debug_str     0x00000000000013f1      0x67b obj/default/rx_ink_common.o
+                                        0x86f (size before relaxing)
+ .debug_str     0x0000000000001a6c       0x38 obj/default/rx_mem.o
+                                         0xdb (size before relaxing)
+ .debug_str     0x0000000000001aa4      0x180 obj/default/timer.o
+                                        0xea5 (size before relaxing)
+ .debug_str     0x0000000000001c24       0x58 obj/default/trprintf.o
+                                        0x182 (size before relaxing)
+ .debug_str     0x0000000000001c7c       0xe6 obj/default/uart.o
+                                        0x2b3 (size before relaxing)
+ .debug_str     0x0000000000001d62       0x1f obj/default/version.o
+                                        0x175 (size before relaxing)
+ .debug_str     0x0000000000001d81       0x7b obj/default/watchdog.o
+                                        0xbe4 (size before relaxing)
+ .debug_str     0x0000000000001dfc      0x1a1 f:/tools/bin/altera/15.1/nios2eds/bin/gnu/h-x86_64-mingw32/bin/../lib/gcc/nios2-elf/4.9.2/fstack-limit-register-et\libgcc.a(lib2-divmod.o)
                                         0x1ec (size before relaxing)
- .debug_str     0x0000000000001f96      0x11f f:/tools/bin/altera/15.1/nios2eds/bin/gnu/h-x86_64-mingw32/bin/../lib/gcc/nios2-elf/4.9.2/fstack-limit-register-et\libgcc.a(divdf3.o)
+ .debug_str     0x0000000000001f9d      0x11f f:/tools/bin/altera/15.1/nios2eds/bin/gnu/h-x86_64-mingw32/bin/../lib/gcc/nios2-elf/4.9.2/fstack-limit-register-et\libgcc.a(divdf3.o)
                                         0x2bf (size before relaxing)
- .debug_str     0x00000000000020b5       0x43 f:/tools/bin/altera/15.1/nios2eds/bin/gnu/h-x86_64-mingw32/bin/../lib/gcc/nios2-elf/4.9.2/fstack-limit-register-et\libgcc.a(fixdfsi.o)
+ .debug_str     0x00000000000020bc       0x43 f:/tools/bin/altera/15.1/nios2eds/bin/gnu/h-x86_64-mingw32/bin/../lib/gcc/nios2-elf/4.9.2/fstack-limit-register-et\libgcc.a(fixdfsi.o)
                                         0x22a (size before relaxing)
- .debug_str     0x00000000000020f8       0x4c f:/tools/bin/altera/15.1/nios2eds/bin/gnu/h-x86_64-mingw32/bin/../lib/gcc/nios2-elf/4.9.2/fstack-limit-register-et\libgcc.a(floatsidf.o)
+ .debug_str     0x00000000000020ff       0x4c f:/tools/bin/altera/15.1/nios2eds/bin/gnu/h-x86_64-mingw32/bin/../lib/gcc/nios2-elf/4.9.2/fstack-limit-register-et\libgcc.a(floatsidf.o)
                                         0x22e (size before relaxing)
- .debug_str     0x0000000000002144       0x66 f:/tools/bin/altera/15.1/nios2eds/bin/gnu/h-x86_64-mingw32/bin/../lib/gcc/nios2-elf/4.9.2/fstack-limit-register-et\libgcc.a(_clzsi2.o)
+ .debug_str     0x000000000000214b       0x66 f:/tools/bin/altera/15.1/nios2eds/bin/gnu/h-x86_64-mingw32/bin/../lib/gcc/nios2-elf/4.9.2/fstack-limit-register-et\libgcc.a(_clzsi2.o)
                                         0x20e (size before relaxing)
  .debug_str     0x0000000000000000      0x1f1 f:/tools/bin/altera/15.1/nios2eds/bin/gnu/h-x86_64-mingw32/bin/../lib/gcc/nios2-elf/4.9.2/fstack-limit-register-et\libgcc.a(_clz.o)
- .debug_str     0x00000000000021aa      0x16e f:/tools/bin/altera/15.1/nios2eds/bin/gnu/h-x86_64-mingw32/bin/../lib/gcc/nios2-elf/4.9.2/../../../../../H-x86_64-mingw32/nios2-elf/lib/fstack-limit-register-et\libsmallc.a(lib_a-memcmp.o)
+ .debug_str     0x00000000000021b1      0x16e f:/tools/bin/altera/15.1/nios2eds/bin/gnu/h-x86_64-mingw32/bin/../lib/gcc/nios2-elf/4.9.2/../../../../../H-x86_64-mingw32/nios2-elf/lib/fstack-limit-register-et\libsmallc.a(lib_a-memcmp.o)
                                         0x207 (size before relaxing)
- .debug_str     0x0000000000002318       0x58 f:/tools/bin/altera/15.1/nios2eds/bin/gnu/h-x86_64-mingw32/bin/../lib/gcc/nios2-elf/4.9.2/../../../../../H-x86_64-mingw32/nios2-elf/lib/fstack-limit-register-et\libsmallc.a(lib_a-memcpy.o)
+ .debug_str     0x000000000000231f       0x58 f:/tools/bin/altera/15.1/nios2eds/bin/gnu/h-x86_64-mingw32/bin/../lib/gcc/nios2-elf/4.9.2/../../../../../H-x86_64-mingw32/nios2-elf/lib/fstack-limit-register-et\libsmallc.a(lib_a-memcpy.o)
                                         0x21b (size before relaxing)
- .debug_str     0x0000000000002370       0x44 f:/tools/bin/altera/15.1/nios2eds/bin/gnu/h-x86_64-mingw32/bin/../lib/gcc/nios2-elf/4.9.2/../../../../../H-x86_64-mingw32/nios2-elf/lib/fstack-limit-register-et\libsmallc.a(lib_a-memset.o)
+ .debug_str     0x0000000000002377       0x44 f:/tools/bin/altera/15.1/nios2eds/bin/gnu/h-x86_64-mingw32/bin/../lib/gcc/nios2-elf/4.9.2/../../../../../H-x86_64-mingw32/nios2-elf/lib/fstack-limit-register-et\libsmallc.a(lib_a-memset.o)
                                         0x207 (size before relaxing)
- .debug_str     0x00000000000023b4      0x3df f:/tools/bin/altera/15.1/nios2eds/bin/gnu/h-x86_64-mingw32/bin/../lib/gcc/nios2-elf/4.9.2/../../../../../H-x86_64-mingw32/nios2-elf/lib/fstack-limit-register-et\libsmallc.a(lib_a-sprintf.o)
+ .debug_str     0x00000000000023bb      0x3df f:/tools/bin/altera/15.1/nios2eds/bin/gnu/h-x86_64-mingw32/bin/../lib/gcc/nios2-elf/4.9.2/../../../../../H-x86_64-mingw32/nios2-elf/lib/fstack-limit-register-et\libsmallc.a(lib_a-sprintf.o)
                                         0x551 (size before relaxing)
- .debug_str     0x0000000000002793      0x23a f:/tools/bin/altera/15.1/nios2eds/bin/gnu/h-x86_64-mingw32/bin/../lib/gcc/nios2-elf/4.9.2/../../../../../H-x86_64-mingw32/nios2-elf/lib/fstack-limit-register-et\libsmallc.a(lib_a-svfprintf.o)
+ .debug_str     0x000000000000279a      0x23a f:/tools/bin/altera/15.1/nios2eds/bin/gnu/h-x86_64-mingw32/bin/../lib/gcc/nios2-elf/4.9.2/../../../../../H-x86_64-mingw32/nios2-elf/lib/fstack-limit-register-et\libsmallc.a(lib_a-svfprintf.o)
                                         0x6c2 (size before relaxing)
- .debug_str     0x00000000000029cd       0x59 f:/tools/bin/altera/15.1/nios2eds/bin/gnu/h-x86_64-mingw32/bin/../lib/gcc/nios2-elf/4.9.2/../../../../../H-x86_64-mingw32/nios2-elf/lib/fstack-limit-register-et\libsmallc.a(lib_a-vprintf.o)
+ .debug_str     0x00000000000029d4       0x59 f:/tools/bin/altera/15.1/nios2eds/bin/gnu/h-x86_64-mingw32/bin/../lib/gcc/nios2-elf/4.9.2/../../../../../H-x86_64-mingw32/nios2-elf/lib/fstack-limit-register-et\libsmallc.a(lib_a-vprintf.o)
                                         0x512 (size before relaxing)
- .debug_str     0x0000000000002a26       0x81 f:/tools/bin/altera/15.1/nios2eds/bin/gnu/h-x86_64-mingw32/bin/../lib/gcc/nios2-elf/4.9.2/../../../../../H-x86_64-mingw32/nios2-elf/lib/fstack-limit-register-et\libsmallc.a(lib_a-fvwrite_small_dev.o)
+ .debug_str     0x0000000000002a2d       0x81 f:/tools/bin/altera/15.1/nios2eds/bin/gnu/h-x86_64-mingw32/bin/../lib/gcc/nios2-elf/4.9.2/../../../../../H-x86_64-mingw32/nios2-elf/lib/fstack-limit-register-et\libsmallc.a(lib_a-fvwrite_small_dev.o)
                                         0x50c (size before relaxing)
- .debug_str     0x0000000000002aa7       0x64 f:/tools/bin/altera/15.1/nios2eds/bin/gnu/h-x86_64-mingw32/bin/../lib/gcc/nios2-elf/4.9.2/../../../../../H-x86_64-mingw32/nios2-elf/lib/fstack-limit-register-et\libsmallc.a(lib_a-fvwrite_small_str.o)
+ .debug_str     0x0000000000002aae       0x64 f:/tools/bin/altera/15.1/nios2eds/bin/gnu/h-x86_64-mingw32/bin/../lib/gcc/nios2-elf/4.9.2/../../../../../H-x86_64-mingw32/nios2-elf/lib/fstack-limit-register-et\libsmallc.a(lib_a-fvwrite_small_str.o)
                                         0x51f (size before relaxing)
- .debug_str     0x0000000000002b0b       0xfd f:/tools/bin/altera/15.1/nios2eds/bin/gnu/h-x86_64-mingw32/bin/../lib/gcc/nios2-elf/4.9.2/../../../../../H-x86_64-mingw32/nios2-elf/lib/fstack-limit-register-et\libsmallc.a(lib_a-impure.o)
+ .debug_str     0x0000000000002b12       0xfd f:/tools/bin/altera/15.1/nios2eds/bin/gnu/h-x86_64-mingw32/bin/../lib/gcc/nios2-elf/4.9.2/../../../../../H-x86_64-mingw32/nios2-elf/lib/fstack-limit-register-et\libsmallc.a(lib_a-impure.o)
                                         0x4e6 (size before relaxing)
- .debug_str     0x0000000000002c08       0x50 f:/tools/bin/altera/15.1/nios2eds/bin/gnu/h-x86_64-mingw32/bin/../lib/gcc/nios2-elf/4.9.2/../../../../../H-x86_64-mingw32/nios2-elf/lib/fstack-limit-register-et\libsmallc.a(lib_a-memmove.o)
+ .debug_str     0x0000000000002c0f       0x50 f:/tools/bin/altera/15.1/nios2eds/bin/gnu/h-x86_64-mingw32/bin/../lib/gcc/nios2-elf/4.9.2/../../../../../H-x86_64-mingw32/nios2-elf/lib/fstack-limit-register-et\libsmallc.a(lib_a-memmove.o)
                                         0x222 (size before relaxing)
- .debug_str     0x0000000000002c58       0x3d f:/tools/bin/altera/15.1/nios2eds/bin/gnu/h-x86_64-mingw32/bin/../lib/gcc/nios2-elf/4.9.2/../../../../../H-x86_64-mingw32/nios2-elf/lib/fstack-limit-register-et\libsmallc.a(lib_a-strlen.o)
+ .debug_str     0x0000000000002c5f       0x3d f:/tools/bin/altera/15.1/nios2eds/bin/gnu/h-x86_64-mingw32/bin/../lib/gcc/nios2-elf/4.9.2/../../../../../H-x86_64-mingw32/nios2-elf/lib/fstack-limit-register-et\libsmallc.a(lib_a-strlen.o)
                                         0x20d (size before relaxing)
- .debug_str     0x0000000000002c95       0x17 f:/tools/bin/altera/15.1/nios2eds/bin/gnu/h-x86_64-mingw32/bin/../lib/gcc/nios2-elf/4.9.2/../../../../../H-x86_64-mingw32/nios2-elf/lib/fstack-limit-register-et\libsmallc.a(lib_a-vfprintf.o)
+ .debug_str     0x0000000000002c9c       0x17 f:/tools/bin/altera/15.1/nios2eds/bin/gnu/h-x86_64-mingw32/bin/../lib/gcc/nios2-elf/4.9.2/../../../../../H-x86_64-mingw32/nios2-elf/lib/fstack-limit-register-et\libsmallc.a(lib_a-vfprintf.o)
                                         0x6ba (size before relaxing)
- .debug_str     0x0000000000002cac       0x3c f:/tools/bin/altera/15.1/nios2eds/bin/gnu/h-x86_64-mingw32/bin/../lib/gcc/nios2-elf/4.9.2/../../../../../H-x86_64-mingw32/nios2-elf/lib/fstack-limit-register-et\libsmallc.a(lib_a-writer.o)
+ .debug_str     0x0000000000002cb3       0x3c f:/tools/bin/altera/15.1/nios2eds/bin/gnu/h-x86_64-mingw32/bin/../lib/gcc/nios2-elf/4.9.2/../../../../../H-x86_64-mingw32/nios2-elf/lib/fstack-limit-register-et\libsmallc.a(lib_a-writer.o)
                                         0x4e0 (size before relaxing)
- .debug_str     0x0000000000002ce8       0x3f f:/tools/bin/altera/15.1/nios2eds/bin/gnu/h-x86_64-mingw32/bin/../lib/gcc/nios2-elf/4.9.2/../../../../../H-x86_64-mingw32/nios2-elf/lib/fstack-limit-register-et\libsmallc.a(lib_a-int_errno.o)
+ .debug_str     0x0000000000002cef       0x3f f:/tools/bin/altera/15.1/nios2eds/bin/gnu/h-x86_64-mingw32/bin/../lib/gcc/nios2-elf/4.9.2/../../../../../H-x86_64-mingw32/nios2-elf/lib/fstack-limit-register-et\libsmallc.a(lib_a-int_errno.o)
                                         0x200 (size before relaxing)
 
 .debug_loc      0x0000000000000000     0x3fa5

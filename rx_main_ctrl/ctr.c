@@ -90,7 +90,7 @@ static void _calc_check(time_t time, UCHAR *check)
 	_sctr ctr;
 	memset(&ctr, 0, sizeof(ctr));
 	sok_get_mac_address(DEVICE_NAME, &ctr.macAddr);
-	ctr.time  = rx_file_get_mtime(PATH_USER FILENAME_COUNTERS);
+	ctr.time  = time;
 	ctr.act   = RX_PrinterStatus.counterAct;
 	ctr.total = RX_PrinterStatus.counterTotal;
 	rx_hash_mem_str((UCHAR*)&ctr, sizeof(ctr), check);
@@ -212,7 +212,7 @@ static void _ctr_save(int reset, char *machineName)
 		rx_file_set_readonly(PATH_USER FILENAME_COUNTERS, FALSE);
 		setup_save(file, PATH_USER FILENAME_COUNTERS);
 		setup_destroy(file);
-		rx_file_set_mtime(PATH_USER FILENAME_COUNTERS, time);
 		rx_file_set_readonly(PATH_USER FILENAME_COUNTERS, TRUE);
+		rx_file_set_mtime(PATH_USER FILENAME_COUNTERS, time);
 	}
 }
