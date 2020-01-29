@@ -34,7 +34,6 @@
 /rx_head_nios/software/.metadata/.plugins/org.eclipse.ui.workbench.texteditor/dialog_settings.xml
 /rx_head_nios/software/rx_head_nios_bsp/settings.bsp
 /rx_head_nios/software/rx_head_nios_bsp/summary.html
-/Externals/TinyXML/obj/Win32/Debug-lx
 *.dep
 *.o
 *.cache
@@ -46,6 +45,7 @@
 *.elf
 *.map
 *.log
+*.snap
 SysprogsSyncCache
 Release-soc
 version.c
