@@ -79,3 +79,8 @@
 /rx_digiprint_gui/.vs/rx_digiprint_gui/v16
 /rx_digiprint_gui/CodeDB
 /rx_digiprint_gui/obj
+.vs
+_out
+_temp
+obj
+VisualGDBCache
