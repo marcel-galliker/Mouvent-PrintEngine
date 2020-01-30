@@ -694,6 +694,7 @@ static int _print_next(void)
 							l			  = l - 1000*_Item.start.scan;
 							_ScanLengthPx = (UINT32)(l * 1200 / 25.4+0.5);
 							_Item.id.copy = 1;
+							if (_Item.copies!=1) Error(WARN, 0, "Here was the bug: _Item.copies=%d", _Item.copies);
 							_Item.copies  = 1;
 						}
 

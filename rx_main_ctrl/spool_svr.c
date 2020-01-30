@@ -526,8 +526,8 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 	switch (pitem->scanMode)
 	{
 	case PQ_SCAN_BIDIR:	msg.flags |= (FLAG_BIDIR | _SlideIsRight); _SlideIsRight=!_SlideIsRight;	break;
-	case PQ_SCAN_RTL:	msg.flags |= FLAG_MIRROR;  _SlideIsRight=TRUE;								break;
-	default:			_SlideIsRight=TRUE;	break;
+	case PQ_SCAN_RTL:	msg.flags |= FLAG_MIRROR;  _SlideIsRight=FALSE;								break;
+	default:			_SlideIsRight=FALSE;	break;
 	}
 
 	if (pitem->virtualPasses)
