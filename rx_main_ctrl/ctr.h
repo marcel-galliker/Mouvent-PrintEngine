@@ -16,6 +16,7 @@
 void ctr_init(void);
 void ctr_tick(void);
 void ctr_set_total(UINT32 machineMeters);
-void ctr_reset_act(void);
+void ctr_reset(void);
 void calc_reset_key(char *key);
 void ctr_add(double mm);
+void ctr_save(void);
