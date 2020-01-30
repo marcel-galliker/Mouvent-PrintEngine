@@ -196,7 +196,7 @@ int handle_gui_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sende
 		case CMD_EXTERNAL_DATA_OFF:	_do_external_data(socket, FALSE);									break;
 
 		case CMD_RESET_CTR:			{
-										ctr_reset();
+										ctr_reset_act();
 										gui_send_printer_status(&RX_PrinterStatus);
 									}
 									break;
