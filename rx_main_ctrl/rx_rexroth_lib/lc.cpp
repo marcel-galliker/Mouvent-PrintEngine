@@ -297,7 +297,7 @@ int lc_set_value_by_name_UINT32 (const char *name, UINT32 value)
 	char	svalue[128];
 
 	if (strstr(name, "CMD_")) 
-		printf("SET >>%s=%d<<\n",  name, value);
+		TrPrintfL(TRUE, "SET >>%s=%d<<\n",  name, value);
 
 	char_to_wchar(name,  wname, SIZEOF(wname));
 

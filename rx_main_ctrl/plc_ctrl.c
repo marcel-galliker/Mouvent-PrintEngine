@@ -487,7 +487,8 @@ int  plc_set_printpar(SPrintQueueItem *pItem)
 	memcpy(&_StartEncoderItem, pItem, sizeof(_StartEncoderItem));
 	_Speed = _StartEncoderItem.speed;
 	step_set_vent(_Speed);
-	_SendPause = 1;
+//	_SendPause = 1;
+	_GUIPause  = 1;
 	if (RX_PrinterStatus.printState==ps_printing) _StartPrinting=TRUE;
 	
 	return REPLY_OK;
@@ -643,6 +644,7 @@ int	plc_to_cap_pos(void)
 //--- plc_pause_printing ---------------------------------------
 int  plc_pause_printing(int fromGui)
 {
+	TrPrintfL(TRUE, "plc_pause_printing(fromGui=%d)", fromGui);
 	if (rx_def_is_tx(RX_Config.printer.type))
 	{
         if (fromGui) Error(WARN, 0, "PAUSED by Operator");
