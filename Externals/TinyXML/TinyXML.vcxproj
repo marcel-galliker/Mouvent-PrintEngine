@@ -17,9 +17,13 @@
       <Configuration>Debug-Remote</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="Debug-soc|x64">
+    <ProjectConfiguration Include="Debug-soc|Win32">
       <Configuration>Debug-soc</Configuration>
       <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug-soc|x64">
+      <Configuration>Debug-soc</Configuration>
+      <Platform>x64</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
