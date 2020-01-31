@@ -435,7 +435,7 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 //		 Error(WARN, 0, "Spooler not ready");
 
 	SPrintFileCmd msg;
-	
+
 	if (arg_simuHeads) Error(LOG, 0, "Printing ID=%d, page=%d, copy=%d, scan=%d", pid->id, pid->page, pid->copy, pid->scan);
 	
 	_Ready--;

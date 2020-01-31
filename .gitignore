@@ -45,6 +45,7 @@
 *.elf
 *.map
 *.log
+*.snap
 SysprogsSyncCache
 Release-soc
 version.c

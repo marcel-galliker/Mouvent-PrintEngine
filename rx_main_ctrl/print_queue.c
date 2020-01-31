@@ -766,7 +766,7 @@ int pq_printed(int headNo, SPageId *pid, int *pageDone, int *jobDone, SPrintQueu
 	*pageDone  = FALSE;
 	*jobDone   = FALSE;
 	*pnextItem = NULL;
-
+	
 	if(RX_PrinterStatus.testMode || _find_item(pid->id, &idx) == REPLY_OK)
 	{
 		if (RX_PrinterStatus.testMode) pitem = &RX_TestImage;

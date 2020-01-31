@@ -215,9 +215,9 @@ int pc_stop_printing(int userStop)
 		RX_PrinterStatus.printState=ps_stopping;
 		pq_stopping(&_Item);
 		if (rx_def_is_tx(RX_Config.printer.type))
-		    _StopJob = TRUE;
+			_StopJob = TRUE;
 		else
-		    enc_stop_pg("pc_stop_printing");
+			enc_stop_pg("pc_stop_printing");
 		gui_send_printer_status(&RX_PrinterStatus);
 	}
 	return REPLY_OK;
