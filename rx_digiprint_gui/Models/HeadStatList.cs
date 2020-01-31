@@ -17,6 +17,7 @@ namespace RX_DigiPrint.Models
         //--- constructor -----------------------------
         public HeadStatList()
         {
+            SetItemCount(TcpIp.InkSupplyCnt);
         }
 
         //--- Property List ----------------------

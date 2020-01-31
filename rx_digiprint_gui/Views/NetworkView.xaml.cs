@@ -126,6 +126,7 @@ namespace RX_DigiPrint.Views
             NetworkItem item = NetworkGrid.ActiveItem as NetworkItem;
             if (item!=null)
             {
+            //  string par = string.Format("-pw radex -P 777 -raw radex@{0} ", item.IpAddr);
                 string par = string.Format("-i c:\\gui\\id_rsa.ppk -P 777 -raw root@{0} ", item.IpAddr);
                 Rx.StartProcess(_PuttyPath, par);
             //    RxGlobals.Keyboard.Visibility = Visibility.Visible;
@@ -138,6 +139,7 @@ namespace RX_DigiPrint.Views
             NetworkItem item = NetworkGrid.ActiveItem as NetworkItem;
             if (item!=null)
             {
+            //  string par = string.Format("-pw radex -ssh radex@{0}", item.IpAddr);
                 string par = string.Format("-i c:\\gui\\id_rsa.ppk -ssh root@{0}", item.IpAddr);
                 Rx.StartProcess(_PuttyPath, par);
            //     RxGlobals.Keyboard.Visibility = Visibility.Visible;

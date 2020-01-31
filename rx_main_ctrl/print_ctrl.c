@@ -55,6 +55,7 @@ static HANDLE _PrintSem;
 static SPrintQueueItem	_Item;
 static INT32			_PageMargin_Next;
 static int				_ChangeJob;
+static int				_StopJob;
 static char				_FilePathLocal[MAX_PATH];
 static int				_Scanning;
 static char				_DataPath[MAX_PATH];
@@ -173,6 +174,7 @@ int pc_start_printing(void)
 		RX_PrinterStatus.printState=ps_printing;
 		_PrintGo = 0;
 		_ChangeJob = FALSE;
+		_StopJob   = FALSE;
 		memset(_PrintDone, 0, sizeof(_PrintDone));
 		_PrintDoneNo = 0;
 		_PrintDoneFlags = spool_head_board_used_flags();
@@ -212,7 +214,10 @@ int pc_stop_printing(int userStop)
 		if (userStop) Error(ERR_CONT, 0, "STOPPED by Operator");
 		RX_PrinterStatus.printState=ps_stopping;
 		pq_stopping(&_Item);
-		enc_stop_pg("pc_stop_printing");
+		if (rx_def_is_tx(RX_Config.printer.type))
+		    _StopJob = TRUE;
+		else
+		    enc_stop_pg("pc_stop_printing");
 		gui_send_printer_status(&RX_PrinterStatus);
 	}
 	return REPLY_OK;
@@ -429,7 +434,7 @@ static int _print_next(void)
 	static int _ScansNext;
 	static int _CopiesStart;
 	TrPrintfL(TRUE, "_print_next printState=%d, spooler_ready=%d, pq_ready=%d", RX_PrinterStatus.printState, spool_is_ready(), pq_is_ready());
-	while ((RX_PrinterStatus.printState==ps_printing ||RX_PrinterStatus.printState==ps_pause) && spool_is_ready() && pq_is_ready())
+	while ((RX_PrinterStatus.printState==ps_printing || RX_PrinterStatus.printState==ps_pause || (_Scanning&&RX_PrinterStatus.printState==ps_stopping)) && spool_is_ready() && pq_is_ready())
 	{	
 		if (RX_PrinterStatus.testMode)
 		{
@@ -663,6 +668,16 @@ static int _print_next(void)
 						if (RX_Config.printer.overlap)  _ScanOffset += (RX_Spooler.barWidthPx+RX_Spooler.headOverlapPx) / _Item.passes;
 						else                            _ScanOffset += RX_Spooler.barWidthPx / _Item.passes;							
 					}
+				}
+				if (_StopJob)
+				{
+					_StopJob = FALSE;
+					_ScanLengthPx = _ScanOffset;
+					SPrintQueueItem *pitem =pq_get_item(&_Item);
+					int barwidth=RX_Spooler.barWidthPx;
+					if (RX_Config.printer.overlap) barwidth += RX_Spooler.headOverlapPx;
+					pitem->scansStop = (INT32)((_ScanLengthPx+RX_Spooler.maxOffsetPx+barwidth-1) / (barwidth/_Item.passes));
+					pq_set_item(pitem);
 				}
 				spool_print_file(&_Item.id, _DataPath, _ScanOffset, _ScanLengthPx, &_Item, TRUE);
 				return REPLY_OK;

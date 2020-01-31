@@ -245,7 +245,7 @@ typedef struct SPageNumber
 	UINT32	enabled;
 	UINT32	number;
 	UINT32	fontSize;
-	UINT32	imgDist;	// [µm]
+	UINT32	imgDist;	// [ï¿½m]
 } SPageNumber;
 
 //--- print queue ----------------------------
@@ -261,8 +261,8 @@ typedef struct SPrintQueueItem
 	char	material[64];
 	char	testMessage[64];
 	INT32	srcPages;
-	INT32	srcWidth;	// µm
-	INT32	srcHeight;	// µm
+	INT32	srcWidth;	// ï¿½m
+	INT32	srcHeight;	// ï¿½m
 	INT32	firstPage;
 	INT32	lastPage;
 	INT32	copies;
@@ -307,9 +307,9 @@ typedef struct SPrintQueueItem
 			#define PQ_TEST_SCANNING		7
 			#define PQ_TEST_FULL_ALIGNMENT	8	
 
-	INT32	pageWidth;	// µm
-	INT32	pageHeight;	// µm
-	INT32	pageMargin;	// µm
+	INT32	pageWidth;	// ï¿½m
+	INT32	pageHeight;	// ï¿½m
+	INT32	pageMargin;	// ï¿½m
 	INT32	printGoMode;
 			#define PG_MODE_MARK		1	// print mark to PG (IN[0])
 			#define PG_MODE_LENGTH		2	// distance between two GPs
@@ -331,6 +331,7 @@ typedef struct SPrintQueueItem
 	INT32	scansPrinted;
 	INT32	scansStart;
 	INT32	scansTotal;
+	INT32	scansStop;
 	INT32	progress;
 	SPageNumber pageNumber;
 	INT32	checks;
@@ -384,8 +385,8 @@ typedef struct
 #define MAX_WF_POINTS	32
 	
 	// first pulse can start at this position
-#define WF_FIRST_PULSE_POS	144 // 1.80 µs@160MHz
-								// 2.06 µs@140MHz minimum 2.0 (140)
+#define WF_FIRST_PULSE_POS	144 // 1.80 ï¿½s@160MHz
+								// 2.06 ï¿½s@140MHz minimum 2.0 (140)
 								
 #define WF_FILLER	68			// delay of Waveform DAC OLD_OFF_OFFSET - OLD_WF_OFFSET
 
@@ -448,9 +449,9 @@ typedef struct SPrinterCfg
 	UINT32  jetEnabled0;
 	UINT32	jetEnabledCnt;
 
-	INT32	bmpOffsetUM;	// [µm]
-	INT32	bmpHeightUM;	// [µm]
-	INT32	bmpLengthUM;	// [µm]
+	INT32	bmpOffsetUM;	// [ï¿½m]
+	INT32	bmpHeightUM;	// [ï¿½m]
+	INT32	bmpLengthUM;	// [ï¿½m]
 	UINT8	forwardBack;
 	UINT8	upwardDown;
 	
@@ -557,9 +558,9 @@ typedef struct SHeadCfg
 	UINT8	_headNo_unused;	// within color
 	UINT8	enabled;
 	UINT8	encoderNo;
-	INT32	dist;	// [µm] distance correction inside print bar 
-	INT32	distBack;	// [µm] distance correction inside print bar
-	INT32	headHeight;	// [µm] height of printhead above substrate
+	INT32	dist;	// [ï¿½m] distance correction inside print bar 
+	INT32	distBack;	// [ï¿½m] distance correction inside print bar
+	INT32	headHeight;	// [ï¿½m] height of printhead above substrate
 	UINT16	jetEnabled0;
 	UINT16  jetEnabledCnt;
 //	UINT32	bmpJetOffset;
@@ -1226,12 +1227,12 @@ typedef struct SStepperCfg
 	INT32			boardNo;
 			#define		step_lift	0
 			#define		step_clean	1
-	INT32			ref_height;			// distance "Belt" to reference position in µm: "0" is at "Belt" Level
-	INT32			print_height;		// in µm
-	INT32			wipe_height;		// in µm
+	INT32			ref_height;			// distance "Belt" to reference position in ï¿½m: "0" is at "Belt" Level
+	INT32			print_height;		// in ï¿½m
+	INT32			wipe_height;		// in ï¿½m
 	INT32			wipe_delay;			// in ms
 	INT32			wipe_speed;			// in mm/s
-	INT32			cap_height;			// in µm
+	INT32			cap_height;			// in ï¿½m
 	INT32			cap_pos;
 	INT32			adjust_pos;
 	INT32			use_printhead_en;	// if true use PRINTHEAD_EN to allow head going down
@@ -1262,8 +1263,8 @@ typedef struct
 {
     INT32	inkSupplyNo;
     INT32   headNo;
-    INT32   angle;	// in µm
-    INT32   stitch; // in µm
+    INT32   angle;	// in ï¿½m
+    INT32   stitch; // in ï¿½m
 } SHeadAdjustment;
 
 typedef struct SScrewAdjustment

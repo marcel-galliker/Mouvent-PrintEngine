@@ -381,7 +381,7 @@ Disassembly of section .entry:
    10018:	0800683a 	jmp	at
 
 0001001c <_exit>:
-   1001c:	00000000 	call	0 <__alt_mem_onchip_memory_nios_cpu-0x10000>
+   1001c:	00000000 	call	0 <__reset-0x10000>
 
 Disassembly of section .exceptions:
 
@@ -10604,7 +10604,7 @@ int trprintf(const char *format, ...)
 00017840 <get_version>:
 #include "string.h"
 
-const char version[32]="1.0.1.1053";
+const char version[32]="1.0.1.1055";
 
 void get_version(SVersion *pversion)
 {

@@ -60,11 +60,11 @@ static int		_BlkNo;
 static int		_SpoolerCnt;
 static int		_MsgSent, _MsgGot;
 static UINT32	_HeadBoardUsedFlags;
-static int		_SlideIsRight;
 static int		_Pass;
 static int		_DelayPauseTimer=0;
 static SSpoolerInfo		_Spooler[MAX_SPOOLERS];
 static SPageId			_Id[MAX_PAGES];
+static int			_ActId;
 static SLoadedFiles		_LoadedFiles[MAX_PAGES];
 
 //--- Prototypes --------------------------------------------------------------
@@ -357,7 +357,7 @@ void spool_start_printing(void)
 	}
 	memset(_LoadedFiles, 0, sizeof(_LoadedFiles));
 
-	_SlideIsRight = FALSE;
+	_ActId		  = 0;
 	_Pass		  = 0;
 }
 
@@ -430,6 +430,7 @@ int spool_send_test_data(int headNo, char *str)
 //--- spool_print_file ---------------------------------------------------------------
 int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT32 lengthPx, SPrintQueueItem *pitem, int clearBlockUsed)
 {
+	static int	_mirror = FALSE;
 //	if (_Ready<=0) 
 //		 Error(WARN, 0, "Spooler not ready");
 
@@ -523,11 +524,18 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 		msg.lengthPx	= 0;	// unused
 		msg.gapPx		= 0;	// unused
 	}
+
+	if (pid->id!=_ActId) 
+	{
+		_ActId = pid->id;
+		_mirror=FALSE;
+	}
+						
 	switch (pitem->scanMode)
 	{
-	case PQ_SCAN_BIDIR:	msg.flags |= (FLAG_BIDIR | _SlideIsRight); _SlideIsRight=!_SlideIsRight;	break;
-	case PQ_SCAN_RTL:	msg.flags |= FLAG_MIRROR;  _SlideIsRight=FALSE;								break;
-	default:			_SlideIsRight=FALSE;	break;
+	case PQ_SCAN_BIDIR: msg.flags |= (FLAG_BIDIR | _mirror); _mirror=!_mirror;	break;
+	case PQ_SCAN_RTL:	msg.flags |= FLAG_MIRROR;								break;
+	default:																	break;
 	}
 
 	if (pitem->virtualPasses)
