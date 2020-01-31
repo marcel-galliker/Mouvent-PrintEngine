@@ -766,7 +766,7 @@ int pq_printed(int headNo, SPageId *pid, int *pageDone, int *jobDone, SPrintQueu
 	*pageDone  = FALSE;
 	*jobDone   = FALSE;
 	*pnextItem = NULL;
-
+	
 	if(RX_PrinterStatus.testMode || _find_item(pid->id, &idx) == REPLY_OK)
 	{
 		if (RX_PrinterStatus.testMode) pitem = &RX_TestImage;
@@ -844,10 +844,14 @@ int pq_printed(int headNo, SPageId *pid, int *pageDone, int *jobDone, SPrintQueu
 		}
 		else ctr_add(pitem->srcHeight / 1000000.0);		
 	
-		if(pitem->state < PQ_STATE_STOPPING)
+		if(pitem->state <= PQ_STATE_STOPPING)
 		{		
 			if (pid->copy==pitem->copies) spool_file_printed(pid);
-			if(RX_Config.printer.type==printer_DP803 && pitem->copiesTotal && pitem->scansPrinted >= pitem->copiesTotal) 
+			if (pitem->scansStop && pitem->scansPrinted>=pitem->scansStop)
+			{
+				*jobDone = TRUE;
+			}
+			else if(RX_Config.printer.type==printer_DP803 && pitem->copiesTotal && pitem->scansPrinted >= pitem->copiesTotal) 
 			{
 				*jobDone = TRUE;
 			}
@@ -866,7 +870,10 @@ int pq_printed(int headNo, SPageId *pid, int *pageDone, int *jobDone, SPrintQueu
 				if(pitem->state != PQ_STATE_PRINTED)
 				{
 	//				TrPrintfL(TRUE, "%s: complete", _filename(pitem->filepath));
-					Error(LOG, 0, "%d: %s: complete", pitem->id .id, _filename(pitem->filepath));
+					if (pitem->scansStop && pitem->scansPrinted>=pitem->scansStop)
+						Error(LOG, 0, "%d: %s: stopped", pitem->id .id, _filename(pitem->filepath));
+					else
+						Error(LOG, 0, "%d: %s: complete", pitem->id .id, _filename(pitem->filepath));
 //					*jobDone = TRUE;
 					gui_send_print_queue(EVT_GET_PRINT_QUEUE, pitem);
 					if (rx_def_is_scanning(RX_Config.printer.type))

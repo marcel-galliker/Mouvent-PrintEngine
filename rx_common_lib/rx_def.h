@@ -331,6 +331,7 @@ typedef struct SPrintQueueItem
 	INT32	scansPrinted;
 	INT32	scansStart;
 	INT32	scansTotal;
+	INT32	scansStop;
 	INT32	progress;
 	SPageNumber pageNumber;
 	INT32	checks;

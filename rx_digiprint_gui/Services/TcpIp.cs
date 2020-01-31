@@ -703,6 +703,7 @@ namespace RX_DigiPrint.Services
             public Int32   scansPrinted;
             public Int32   scansStart;
             public Int32   scansTotal;
+            public Int32   scansStop;
             public Int32   progress;
 
             public sPageNumber pageNumber;
