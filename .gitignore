@@ -57,3 +57,7 @@ _out
 _temp
 obj
 VisualGDBCache
+.log
+org.eclipse.cdt.core
+org.eclipse.core.resources
+*.objdump

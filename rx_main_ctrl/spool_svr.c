@@ -64,7 +64,7 @@ static int		_Pass;
 static int		_DelayPauseTimer=0;
 static SSpoolerInfo		_Spooler[MAX_SPOOLERS];
 static SPageId			_Id[MAX_PAGES];
-static int				_ActId;
+static int			_ActId;
 static SLoadedFiles		_LoadedFiles[MAX_PAGES];
 
 //--- Prototypes --------------------------------------------------------------

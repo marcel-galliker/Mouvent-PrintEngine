@@ -871,7 +871,7 @@ int pq_printed(int headNo, SPageId *pid, int *pageDone, int *jobDone, SPrintQueu
 				{
 	//				TrPrintfL(TRUE, "%s: complete", _filename(pitem->filepath));
 					if (pitem->scansStop && pitem->scansPrinted>=pitem->scansStop)
-						Error(LOG, 0, "%d: %s: stopped", pitem->id .id, _filename(pitem->filepath));
+						Error(ERR_CONT, 0, "%d: %s: stopped", pitem->id .id, _filename(pitem->filepath));
 					else
 						Error(LOG, 0, "%d: %s: complete", pitem->id .id, _filename(pitem->filepath));
 //					*jobDone = TRUE;
