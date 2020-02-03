@@ -262,7 +262,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 try
                 {
                     int tag= (int)text.Tag;
-                    _tag2head(tag, out int inkSupply, out int headNo);
+                    int inkSupply, headNo;
+                    _tag2head(tag, out inkSupply, out headNo);
                     switch(tag/100)
                     {
                         case 0:     if (RxGlobals.PrintSystem.ColorOffset[inkSupply]!=text.Value)
@@ -355,7 +356,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 if (text!=null && RxGlobals.PrintSystem.ColorCnt!=0)
                 {
                     int tag = Convert.ToInt32(text.Tag);
-                    _tag2head(tag, out int inkSupply, out int headNo);
+                    int inkSupply, headNo;
+                    _tag2head(tag, out inkSupply, out headNo);
                     if (!text.IsFocused)
                     {
                         try
@@ -383,7 +385,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
                         try 
                         {
                             int tag = Convert.ToInt32(button.Tag);
-                            _tag2head(_ClusterNo*4+tag, out int inkSupply, out int headNo);
+                            int inkSupply, headNo;
+                            _tag2head(_ClusterNo*4+tag, out inkSupply, out headNo);
                             int no=1+headNo%RxGlobals.PrintSystem.HeadCnt;
                             if (RxGlobals.InkSupply.List[inkSupply].InkType==null) button.Background = Brushes.WhiteSmoke;
                             else

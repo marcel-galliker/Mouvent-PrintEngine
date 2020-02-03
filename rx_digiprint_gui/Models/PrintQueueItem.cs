@@ -36,15 +36,34 @@ namespace RX_DigiPrint.Models
         {
             DirectoryInfo dir = new DirectoryInfo(FolderName);
 
-            foreach(FileInfo fi in dir.GetFiles())
+            FileInfo[] files=dir.GetFiles();
+            foreach(FileInfo file in files)
             {
-                fi.Delete();
+                try
+                {
+                    FileAttributes attributes = File.GetAttributes(file.FullName);
+                    if ((attributes & FileAttributes.ReadOnly)==FileAttributes.ReadOnly )
+                        File.SetAttributes(file.FullName, attributes & ~FileAttributes.ReadOnly);
+                    file.Delete();
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine("Deleting File>>{0}<< Exception: {1}", file.FullName, ex.Message);
+                }
             }
 
-            foreach (DirectoryInfo di in dir.GetDirectories())
+            DirectoryInfo[] directories=dir.GetDirectories();
+            foreach (DirectoryInfo directory in directories)
             {
-                clearFolder(di.FullName);
-                di.Delete();
+                clearFolder(directory.FullName);
+                try
+                {
+                    directory.Delete();
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine("Deleting Directory >>{0}<< Exception: {1}", directory.FullName, ex.Message);
+                }
             }
         }
 
