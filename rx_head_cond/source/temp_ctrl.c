@@ -667,7 +667,7 @@ void ADC0_IRQHandler(void)
 					if (_ValueIdxValid1)RX_Status.tempHeater = average(_ValueBuf1, VALUE_BUF_SIZE, 0);
 				}
 			}
-			else if ((ADC_CHAN_2 == 5))
+			else if (channel == ADC_CHAN_2)
 			{
 				val = _handle_temp_val(FM4_ADC0->SCFDH & ADC_DATA);
 				if (val==INVALID_VALUE) RX_Status.error |= COND_ERR_temp_inlet_hw;
