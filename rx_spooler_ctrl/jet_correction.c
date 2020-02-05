@@ -230,6 +230,7 @@ static void _disable_jet_old(UCHAR *pBuffer, int bitsPerPixel, int length, int b
 static void _disable_jet(UCHAR *pBuffer, int bitsPerPixel, int length, int bytesPerLine, int jet, int fromLine)
 {
     int jetMax=bytesPerLine*8/bitsPerPixel;
+	int limit=2*_MaxDropSize;
 	
 	if (jet>0 && jet<jetMax)
 	{
@@ -274,6 +275,7 @@ static void _disable_jet(UCHAR *pBuffer, int bitsPerPixel, int length, int bytes
 				{
 					droplets += d;
 					_SetPixel(pBuffer, bytesPerLine, jet, y, 0);
+					if (droplets>limit) droplets=limit;
 				}
 				if (droplets)
 				{
