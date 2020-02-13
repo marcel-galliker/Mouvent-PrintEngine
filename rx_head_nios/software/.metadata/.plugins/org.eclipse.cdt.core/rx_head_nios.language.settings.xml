@@ -14,7 +14,7 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="C:/Develop/PrintEngine-TX80x/rx_ink_lib"/>
+						<entry kind="includePath" name="C:/Develop/PrintEngine-TX80x-ANLU/rx_ink_lib"/>
 						<entry kind="macro" name="ALTERA_AVALON_JTAG_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALTERA_AVALON_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALT_NO_CLEAN_EXIT" value=""/>
@@ -38,7 +38,7 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="C:/Develop/PrintEngine-TX80x/rx_ink_lib"/>
+						<entry kind="includePath" name="C:/Develop/PrintEngine-TX80x-ANLU/rx_ink_lib"/>
 						<entry kind="macro" name="ALTERA_AVALON_JTAG_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALTERA_AVALON_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALT_NO_CLEAN_EXIT" value=""/>
@@ -172,7 +172,7 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="C:/Develop/PrintEngine-TX80x/rx_ink_lib"/>
+						<entry kind="includePath" name="C:/Develop/PrintEngine-TX80x-ANLU/rx_ink_lib"/>
 						<entry kind="macro" name="ALTERA_AVALON_JTAG_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALTERA_AVALON_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALT_NO_CLEAN_EXIT" value=""/>
@@ -394,7 +394,7 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="C:/Develop/PrintEngine-TX80x/rx_ink_lib"/>
+						<entry kind="includePath" name="C:/Develop/PrintEngine-TX80x-ANLU/rx_ink_lib"/>
 						<entry kind="macro" name="ALTERA_AVALON_JTAG_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALTERA_AVALON_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALT_NO_CLEAN_EXIT" value=""/>
@@ -462,7 +462,7 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="C:/Develop/PrintEngine-TX80x/rx_ink_lib"/>
+						<entry kind="includePath" name="C:/Develop/PrintEngine-TX80x-ANLU/rx_ink_lib"/>
 						<entry kind="macro" name="ALTERA_AVALON_JTAG_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALTERA_AVALON_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALT_NO_CLEAN_EXIT" value=""/>
@@ -596,7 +596,7 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="C:/Develop/PrintEngine-TX80x/rx_ink_lib"/>
+						<entry kind="includePath" name="C:/Develop/PrintEngine-TX80x-ANLU/rx_ink_lib"/>
 						<entry kind="macro" name="ALTERA_AVALON_JTAG_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALTERA_AVALON_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALT_NO_CLEAN_EXIT" value=""/>
@@ -818,7 +818,7 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="C:/Develop/PrintEngine-TX80x/rx_ink_lib"/>
+						<entry kind="includePath" name="C:/Develop/PrintEngine-TX80x-ANLU/rx_ink_lib"/>
 						<entry kind="macro" name="ALTERA_AVALON_JTAG_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALTERA_AVALON_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALT_NO_CLEAN_EXIT" value=""/>
@@ -864,7 +864,7 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="C:/Develop/PrintEngine-TX80x/rx_ink_lib"/>
+						<entry kind="includePath" name="C:/Develop/PrintEngine-TX80x-ANLU/rx_ink_lib"/>
 						<entry kind="macro" name="ALTERA_AVALON_JTAG_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALTERA_AVALON_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALT_NO_CLEAN_EXIT" value=""/>
@@ -976,7 +976,7 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="C:/Develop/PrintEngine-TX80x/rx_ink_lib"/>
+						<entry kind="includePath" name="C:/Develop/PrintEngine-TX80x-ANLU/rx_ink_lib"/>
 						<entry kind="macro" name="ALTERA_AVALON_JTAG_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALTERA_AVALON_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALT_NO_CLEAN_EXIT" value=""/>
@@ -1000,7 +1000,7 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="C:/Develop/PrintEngine-TX80x/rx_ink_lib"/>
+						<entry kind="includePath" name="C:/Develop/PrintEngine-TX80x-ANLU/rx_ink_lib"/>
 						<entry kind="macro" name="ALTERA_AVALON_JTAG_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALTERA_AVALON_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALT_NO_CLEAN_EXIT" value=""/>
@@ -1134,7 +1134,7 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="C:/Develop/PrintEngine-TX80x/rx_ink_lib"/>
+						<entry kind="includePath" name="C:/Develop/PrintEngine-TX80x-ANLU/rx_ink_lib"/>
 						<entry kind="macro" name="ALTERA_AVALON_JTAG_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALTERA_AVALON_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALT_NO_CLEAN_EXIT" value=""/>
@@ -1268,7 +1268,7 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="C:/Develop/PrintEngine-TX80x/rx_ink_lib"/>
+						<entry kind="includePath" name="C:/Develop/PrintEngine-TX80x-ANLU/rx_ink_lib"/>
 						<entry kind="macro" name="ALTERA_AVALON_JTAG_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALTERA_AVALON_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALT_NO_CLEAN_EXIT" value=""/>
@@ -1600,7 +1600,7 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="C:/Develop/PrintEngine-TX80x/rx_ink_lib"/>
+						<entry kind="includePath" name="C:/Develop/PrintEngine-TX80x-ANLU/rx_ink_lib"/>
 						<entry kind="macro" name="ALTERA_AVALON_JTAG_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALTERA_AVALON_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALT_NO_CLEAN_EXIT" value=""/>
@@ -1736,7 +1736,7 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="C:/Develop/PrintEngine-TX80x/rx_ink_lib"/>
+						<entry kind="includePath" name="C:/Develop/PrintEngine-TX80x-ANLU/rx_ink_lib"/>
 						<entry kind="macro" name="ALTERA_AVALON_JTAG_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALTERA_AVALON_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALT_NO_CLEAN_EXIT" value=""/>
@@ -1848,7 +1848,7 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="C:/Develop/PrintEngine-TX80x/rx_ink_lib"/>
+						<entry kind="includePath" name="C:/Develop/PrintEngine-TX80x-ANLU/rx_ink_lib"/>
 						<entry kind="macro" name="ALTERA_AVALON_JTAG_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALTERA_AVALON_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALT_NO_CLEAN_EXIT" value=""/>
@@ -1916,7 +1916,7 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="C:/Develop/PrintEngine-TX80x/rx_ink_lib"/>
+						<entry kind="includePath" name="C:/Develop/PrintEngine-TX80x-ANLU/rx_ink_lib"/>
 						<entry kind="macro" name="ALTERA_AVALON_JTAG_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALTERA_AVALON_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALT_NO_CLEAN_EXIT" value=""/>
@@ -1984,7 +1984,7 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="C:/Develop/PrintEngine-TX80x/rx_ink_lib"/>
+						<entry kind="includePath" name="C:/Develop/PrintEngine-TX80x-ANLU/rx_ink_lib"/>
 						<entry kind="macro" name="ALTERA_AVALON_JTAG_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALTERA_AVALON_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALT_NO_CLEAN_EXIT" value=""/>
@@ -2074,7 +2074,7 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="C:/Develop/PrintEngine-TX80x/rx_ink_lib"/>
+						<entry kind="includePath" name="C:/Develop/PrintEngine-TX80x-ANLU/rx_ink_lib"/>
 						<entry kind="macro" name="ALTERA_AVALON_JTAG_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALTERA_AVALON_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALT_NO_CLEAN_EXIT" value=""/>
@@ -2098,7 +2098,7 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="C:/Develop/PrintEngine-TX80x/rx_ink_lib"/>
+						<entry kind="includePath" name="C:/Develop/PrintEngine-TX80x-ANLU/rx_ink_lib"/>
 						<entry kind="macro" name="ALTERA_AVALON_JTAG_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALTERA_AVALON_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALT_NO_CLEAN_EXIT" value=""/>
@@ -2276,7 +2276,7 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="C:/Develop/PrintEngine-TX80x/rx_ink_lib"/>
+						<entry kind="includePath" name="C:/Develop/PrintEngine-TX80x-ANLU/rx_ink_lib"/>
 						<entry kind="macro" name="ALTERA_AVALON_JTAG_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALTERA_AVALON_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALT_NO_CLEAN_EXIT" value=""/>
@@ -2322,7 +2322,7 @@
 						<entry kind="includePath" name="/rx_head_nios_bsp/drivers/inc">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="C:/Develop/PrintEngine-TX80x/rx_ink_lib"/>
+						<entry kind="includePath" name="C:/Develop/PrintEngine-TX80x-ANLU/rx_ink_lib"/>
 						<entry kind="macro" name="ALTERA_AVALON_JTAG_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALTERA_AVALON_UART_SMALL" value=""/>
 						<entry kind="macro" name="ALT_NO_CLEAN_EXIT" value=""/>

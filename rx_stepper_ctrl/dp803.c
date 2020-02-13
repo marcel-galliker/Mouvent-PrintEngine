@@ -32,7 +32,7 @@
 #define POS_UP			-1000
 
 #define STEPS_REV		200*16	// steps per motor revolution * 16 times oversampling
-#define DIST_REV		2000.0	// moving distance per revolution [µm]
+#define DIST_REV		2000.0	// moving distance per revolution [ï¿½m]
 
 //---- CAPPING ----
 // Digital Inputs 
@@ -77,7 +77,7 @@ static void reinit(void);
 //--- dp803_init --------------------------------------
 void dp803_init(void)
 {
-	motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER);
+	motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER, STEPS);
 	memset(_CmdName, 0, sizeof(_CmdName));
 
 	//--- movment parameters ----------------
@@ -269,7 +269,7 @@ static void _dp803_do_reference(void)
 	TrPrintfL(TRUE, "_dp803_do_reference");
 	Error(LOG, 0, "_dp803_do_reference");
 	motors_stop	(MOTOR_Z_BITS);
-	motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER);
+	motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER, STEPS);
 	_CmdRunning  = CMD_CAP_REFERENCE;
 	RX_StepperStatus.info.moving = TRUE;
 	motors_move_by_step	(MOTOR_Z_BITS,  &_ParRef, 500000, TRUE);
@@ -465,6 +465,6 @@ static void _dp803_motor_test(int motorNo, int steps)
 	_CmdRunning = 1; // TEST
 	RX_StepperStatus.info.moving = TRUE;
 	
-	motors_config(motors, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER);
+	motors_config(motors, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER, STEPS);
 	motors_move_by_step(motors, &par, steps, FALSE);			
 }

@@ -33,6 +33,8 @@ static SStepperStat	_Status[STEPPER_CNT];
 static EnFluidCtrlMode		_RobotCtrlMode = ctrl_undef;
 static int					_WashDone   = FALSE;
 
+static void _check_wrinkle_detection(void);
+
 //--- steptx_init ---------------------------------------------------
 void steptx_init(int stepperNo, RX_SOCKET psocket)
 {
@@ -42,16 +44,20 @@ void steptx_init(int stepperNo, RX_SOCKET psocket)
 //--- steptx_handle_gui_msg------------------------------------------------------------------
 int	 steptx_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen)
 {
-	switch(cmd)
+    switch (cmd)
 	{
 	//--- cappping ---------------------------------------------------------
 	case CMD_CAP_REFERENCE:
 				sok_send_2(&_step_socket[0], cmd, 0, NULL);
+				sok_send_2(&_step_socket[1], cmd, 0, NULL);
 				step_set_vent(TRUE);
 				break;
 
 	case CMD_CAP_STOP:
 	case CMD_CAP_UP_POS:
+ 	       		sok_send_2(&_step_socket[0], cmd, 0, NULL);
+				sok_send_2(&_step_socket[1], cmd, 0, NULL);
+				break;
 	case CMD_CAP_CAPPING_POS:
 				sok_send_2(&_step_socket[0], cmd, 0, NULL);
 				break;
@@ -76,7 +82,8 @@ int steptx_handle_status(int no, SStepperStat *pStatus)
 		RX_StepperStatus.info.x_in_cap = plc_in_cap_pos();		
 	}
 	steptx_rob_control(_RobotCtrlMode);
-	gui_send_msg_2(0, REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);
+    _check_wrinkle_detection();
+    gui_send_msg_2(0, REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);
 	return REPLY_OK;
 }
 
@@ -116,6 +123,7 @@ void steptx_lift_to_print_pos(void)
 	{
 		INT32 height = RX_Config.stepper.print_height + plc_get_thickness();
 		sok_send_2(&_step_socket[0], CMD_CAP_PRINT_POS, sizeof(height), &height);		
+		sok_send_2(&_step_socket[1], CMD_CAP_PRINT_POS, sizeof(height), &height);		
 	}
 }
 
@@ -128,7 +136,7 @@ int steptx_lift_in_print_pos(void)
 //--- steptx_lift_to_up_pos -----------------------------------
 void steptx_lift_to_up_pos(void)
 {
-	sok_send_2(&_step_socket[0], CMD_CAP_UP_POS, 0, NULL);		
+	sok_send_2(&_step_socket[0], CMD_CAP_UP_POS, 0, NULL);	
 }
 
 //--- steptx_lift_in_up_pos --------------
@@ -237,6 +245,16 @@ void steptx_rob_wash_start(void)
 int	 steptx_rob_wash_done(void)
 {
 	return _WashDone;
+}
+
+//--- _check_wrinkle_detection -----------------------------------------
+static void _check_wrinkle_detection(void)
+{
+    if (RX_PrinterStatus.printState == ps_printing && _Status[1].robinfo.wrinkle_detected)
+    {
+        pc_pause_printing(FALSE);
+        Error(WARN, 0, "PAUSE because of detected wrinkle!");
+    }
 }
 
 //--- steptx_rob_control -------------------------------------------------

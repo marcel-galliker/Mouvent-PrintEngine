@@ -2,10 +2,10 @@
 <sch:Settings xmlns:sch="http://www.altera.com/embeddedsw/bsp/schema">
         <BspType>hal</BspType>
         <BspVersion>default</BspVersion>
-        <BspGeneratedTimeStamp>04.02.2020 10:37:55</BspGeneratedTimeStamp>
-        <BspGeneratedUnixTimeStamp>1580809075535</BspGeneratedUnixTimeStamp>
-        <BspGeneratedLocation>C:\Develop\PrintEngine-TX80x\rx_head_nios\software\rx_head_nios_bsp</BspGeneratedLocation>
-        <BspSettingsFile>C:\Develop\PrintEngine-TX80x\rx_head_nios\software\rx_head_nios_bsp\settings.bsp</BspSettingsFile>
+        <BspGeneratedTimeStamp>13.02.2020 11:41:10</BspGeneratedTimeStamp>
+        <BspGeneratedUnixTimeStamp>1581590470274</BspGeneratedUnixTimeStamp>
+        <BspGeneratedLocation>C:\Develop\PrintEngine-TX80x-ANLU\rx_head_nios\software\rx_head_nios_bsp</BspGeneratedLocation>
+        <BspSettingsFile>C:\Develop\PrintEngine-TX80x-ANLU\rx_head_nios\software\rx_head_nios_bsp\settings.bsp</BspSettingsFile>
         <SopcDesignFile>..\..\soc_system.sopcinfo</SopcDesignFile>
         <JdiFile>default</JdiFile>
         <Cpu>nios_cpu</Cpu>

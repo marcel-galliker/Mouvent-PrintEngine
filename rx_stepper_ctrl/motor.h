@@ -30,6 +30,9 @@
 
 #define ESTOP_UNUSED	15	// input for uniused E-STOP
 
+#define MICROSTEPS		1
+#define STEPS			16
+
 // max speeds TXxx
 // current=???	max_speed=???
 
@@ -41,7 +44,8 @@ typedef enum
 	chk_txrob,		// 03
 	chk_lbrob,		// 04
 	chk_lb_ref1,	// 05
-	chk_lb_ref2		// 06
+	chk_lb_ref2,	// 06
+    chk_txrob_ref2, // 07
 } EEncCheck;
 	
 typedef struct
@@ -67,8 +71,8 @@ int		motors_init_done(void);
 
 void	motor_trace_move(int motor);
 
-void	motor_config (int motor, int currentHold, double stepsPerMeter, double incPerMeter);
-void	motors_config(int motors, int currentHold, double stepsPerMeter, double incPerMeter);
+void	motor_config (int motor, int currentHold, double stepsPerMeter, double incPerMeter, int steps);
+void	motors_config(int motors, int currentHold, double stepsPerMeter, double incPerMeter, int steps);
 
 INT32	motor_get_step(int motor);
 INT32	motor_get_end_step(int motor);

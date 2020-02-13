@@ -225,9 +225,14 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
 		break;
 		
 	case chk_txrob_ref:
-		Fpga.par->cfg[motor].enc_max_diff		= 50;
+		Fpga.par->cfg[motor].enc_max_diff		= 16;
 		Fpga.par->cfg[motor].enc_max_diff_stop	= 50;	
 		break;
+        
+    case chk_txrob_ref2:
+        Fpga.par->cfg[motor].enc_max_diff		= 17;
+        Fpga.par->cfg[motor].enc_max_diff_stop	= 50;
+        break;
 
 	case chk_txrob:
 		Fpga.par->cfg[motor].enc_max_diff		= 50;
@@ -474,10 +479,10 @@ int	motors_error(int motors, int *err)
 
 
 //--- motor_config ---------------------
-void motor_config(int motor, int currentHold, double stepsPerMeter, double incPerMeter)
+void motor_config(int motor, int currentHold, double stepsPerMeter, double incPerMeter, int microsteps)
 {
-	int microsteps=16;
-	
+	if (microsteps!=MICROSTEPS && microsteps!=STEPS) Error(ERR_ABORT, 0, "Microsteps=%d not allowed", microsteps);
+
 	if (ps_get_power() < 20000) return;
 	if (_init_done & (0x01 << motor)) return;
 	_init_done |= (0x01 << motor);
@@ -509,11 +514,11 @@ void motor_config(int motor, int currentHold, double stepsPerMeter, double incPe
 }
 
 //--- motors_config -----------------------------------------
-void motors_config(int motors, int currentHold, double stepsPerMeter, double incPerMeter)
+void motors_config(int motors, int currentHold, double stepsPerMeter, double incPerMeter, int steps)
 {
 	int motor;
 	FOR_ALL_MOTORS(motor, motors)
 	{
-		motor_config(motor, currentHold, stepsPerMeter, incPerMeter);
+		motor_config(motor, currentHold, stepsPerMeter, incPerMeter, steps);
 	}
 }
