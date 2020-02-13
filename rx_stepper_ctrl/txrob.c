@@ -544,6 +544,7 @@ void txrob_main(int ticks, int menu)
     // --- Executed after each move ---
     if (_CmdRunning && motors_move_done(MOTOR_ALL_ROBOT_BITS) && (_TimeCnt == 0))
     {
+		TrPrintfL(TRUE, "Move done >>%s<<", _CmdName);
         RX_StepperStatus.robinfo.moving = FALSE;
         int loc_move_pos = _NewCmdPos;
         int loc_new_cmd = _NewCmd;
@@ -1029,9 +1030,11 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		break;
 
 	case CMD_CLN_REFERENCE:			strcpy(_CmdName, "CMD_CLN_REFERENCE");
-		if (_CmdRunning && _CmdRunning != CMD_FLUID_CTRL_MODE){ 
+		TrPrintfL(TRUE, "SOCKET[%d]: %s", socket, _CmdName);
+		if (_CmdRunning && _CmdRunning != CMD_FLUID_CTRL_MODE)
+		{ 
             txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_STOP, NULL); _NewCmd = CMD_CLN_REFERENCE; break; 
-            }
+        }
 		motor_reset(MOTOR_ROT); // to recover from move count missalignment
 		motor_reset(MOTOR_SHIFT); // to recover from move count missalignment
 		Fpga.par->output &= ~RO_ALL_OUTPUTS;
@@ -1045,11 +1048,11 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		_NewCmd = FALSE;
 		_WipeWaiting = FALSE;
 		_VacuumWaiting = FALSE;
-		_VacuumState = rob_vacuum_1_to_4;
-		
+		_VacuumState = rob_vacuum_1_to_4;		
 		break;
 		
 	case CMD_CLN_SHIFT_REF:			strcpy(_CmdName, "CMD_CLN_SHIFT_REF");
+		TrPrintfL(TRUE, "SOCKET[%d]: %s", socket, _CmdName);
 		if (_CmdRunning && _CmdRunning != CMD_FLUID_CTRL_MODE){ 
             txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_STOP, NULL); _NewCmd = CMD_CLN_SHIFT_REF; break; 
             }
@@ -1064,6 +1067,7 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		break;
 		
 	case CMD_CLN_ROT_REF:			strcpy(_CmdName, "CMD_CLN_ROT_REF");
+		TrPrintfL(TRUE, "SOCKET[%d]: %s", socket, _CmdName);
 		if (_CmdRunning && _CmdRunning != CMD_FLUID_CTRL_MODE){
             txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_STOP, NULL); _NewCmd = CMD_CLN_ROT_REF; break;
             }
@@ -1079,6 +1083,7 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         break;
 		
 	case CMD_CLN_ROT_REF2:	strcpy(_CmdName, "CMD_CLN_ROT_REF2");
+		TrPrintfL(TRUE, "SOCKET[%d]: %s", socket, _CmdName);
 		if (_CmdRunning && _CmdRunning != CMD_FLUID_CTRL_MODE){ 
             txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_STOP, NULL); _NewCmd = CMD_CLN_ROT_REF2; break; 
             }
@@ -1092,6 +1097,7 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		break;
 		
 	case CMD_CLN_MOVE_POS:		strcpy(_CmdName, "CMD_CLN_MOVE_POS");
+		TrPrintfL(TRUE, "SOCKET[%d]: %s", socket, _CmdName);
 		if (!_CmdRunning || _CmdRunning == CMD_CLN_SHIFT_LEFT)
 		{
 			if (!RX_StepperStatus.robinfo.ref_done)
@@ -1137,6 +1143,7 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		break;
 		
 	case CMD_CLN_SHIFT_MOV:		strcpy(_CmdName, "CMD_CLN_SHIFT_MOV");
+		TrPrintfL(TRUE, "SOCKET[%d]: %s", socket, _CmdName);
 		if (!_CmdRunning || _CmdRunning == CMD_FLUID_CTRL_MODE)
 		{
 			if (!RX_StepperStatus.robinfo.ref_done)
@@ -1191,6 +1198,7 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		break;
 		
 	case CMD_CLN_SHIFT_LEFT:	strcpy(_CmdName, "CMD_CLN_SHIFT_LEFT");
+		TrPrintfL(TRUE, "SOCKET[%d]: %s", socket, _CmdName);
 		if (!_CmdRunning || _CmdRunning == CMD_FLUID_CTRL_MODE)
 		{
 			if (!RX_StepperStatus.robinfo.ref_done)
@@ -1210,6 +1218,7 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		}
 		
 	case CMD_CLN_FILL_CAP :		strcpy(_CmdName, "CMD_CLN_FILL_CAP");
+		TrPrintfL(TRUE, "SOCKET[%d]: %s", socket, _CmdName);
 		if (!_CmdRunning || _CmdRunning == CMD_FLUID_CTRL_MODE)
 		{
 			Fpga.par->output |= PUMP_FLUSH_CAP; // Flush Cap ON
@@ -1220,6 +1229,7 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		break;
 		
 	case CMD_CLN_WAIT :		strcpy(_CmdName, "CMD_CLN_WAIT");
+		TrPrintfL(TRUE, "SOCKET[%d]: %s", socket, _CmdName);
 		if (!_CmdRunning || _CmdRunning == CMD_FLUID_CTRL_MODE)
 		{
 			pos = *((INT32*)pdata);
@@ -1230,6 +1240,7 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		break;
 		
 	case CMD_CLN_TILT_CAP :		strcpy(_CmdName, "CMD_CLN_TILT_CAP");
+		TrPrintfL(TRUE, "SOCKET[%d]: %s", socket, _CmdName);
 		if (!_CmdRunning || _CmdRunning == CMD_FLUID_CTRL_MODE)
 		{
 			if (!RX_StepperStatus.robinfo.ref_done)
@@ -1245,6 +1256,7 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		break;
 		
 	case CMD_CLN_EMPTY_WASTE :		strcpy(_CmdName, "CMD_CLN_EMPTY_WASTE");
+		TrPrintfL(TRUE, "SOCKET[%d]: %s", socket, _CmdName);
 		if (!_CmdRunning || _CmdRunning == CMD_FLUID_CTRL_MODE)
 		{
 			Fpga.par->output |= PUMP_WASTE_BASE; // Waste base ON
@@ -1256,6 +1268,7 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		break;
 		
 	case CMD_CLN_VACUUM :		strcpy(_CmdName, "CMD_CLN_VACUUM");
+		TrPrintfL(TRUE, "SOCKET[%d]: %s", socket, _CmdName);
 		if (!_CmdRunning || _CmdRunning == CMD_FLUID_CTRL_MODE)
 		{
 			Fpga.par->output |= PUMP_WASTE_VAC; // Waste vac ON
@@ -1267,21 +1280,25 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		break;
 
 	case CMD_ERROR_RESET:		
+		TrPrintfL(TRUE, "SOCKET[%d]: %s", socket, _CmdName);
 		fpga_stepper_error_reset();
 		_txrob_error_reset();
 		break;
         
     case CMD_CAP_STOP:
+		TrPrintfL(TRUE, "SOCKET[%d]: %s", socket, _CmdName);
         motors_stop(MOTOR_WD_BITS);
         break;
         
     case CMD_CAP_REFERENCE:				strcpy(_CmdName, "CMD_CAP_REFERENCE");
+		TrPrintfL(TRUE, "SOCKET[%d]: %s", socket, _CmdName);
         motors_reset(MOTOR_WD_BITS);
         RX_StepperStatus.robinfo.ref_done_wd = FALSE;
         _tx801_wrinkledetection_do_reference();
         break;
 
     case CMD_CAP_PRINT_POS:		        strcpy(_CmdName, "CMD_CAP_PRINT_POS");
+		TrPrintfL(TRUE, "SOCKET[%d]: %s", socket, _CmdName);
         pos_wd = (*((INT32 *)pdata));
         if (pos_wd < TX_PRINT_POS_MIN)
         {
@@ -1309,6 +1326,7 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
     case CMD_CAP_WIPE_POS:
     case CMD_CAP_VACUUM_POS:
         strcpy(_CmdName, "CMD_CAP_UP_POS");
+		TrPrintfL(TRUE, "SOCKET[%d]: %s", socket, _CmdName);
         if (!_CmdRunningWD)
         {
             _PrintPos_New = _micron_2_steps(500);

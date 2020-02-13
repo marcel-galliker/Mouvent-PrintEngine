@@ -143,7 +143,7 @@ static FILE	*_LogFile = NULL;
 static int  _fpga_running(void);
 static void _fpga_display_status_test(void);
 static void _fpga_display_status(int showCorrection, int showParam);
-static void _fpga_display_error(void)
+static void _fpga_display_error(void);
 static void _fpga_corr_rotative(SEncoderCfg *pcfg, int restart);
 static void _fpga_corr_linear(SEncoderCfg *pcfg, int restart);
 
