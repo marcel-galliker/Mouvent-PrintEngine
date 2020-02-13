@@ -298,19 +298,27 @@ namespace RX_DigiPrint.Models
 
             if (no==0)
                 no=0;
-
             try
             {
                 int ink = no/(int)RxGlobals.PrintSystem.HeadCnt;
-                Color   = new SolidColorBrush(RxGlobals.InkSupply.List[ink].InkType.Color);
-                ColorFG = new SolidColorBrush(RxGlobals.InkSupply.List[ink].InkType.ColorFG);
+                if (RxGlobals.InkSupply.List[ink].InkType==null)
+                {
+                    Color   = Brushes.Transparent;
+                    ColorFG = Brushes.Black;
+                    Name    = "?-"+(1+no).ToString();
+                }
+                else
+                {
+                    Color   = new SolidColorBrush(RxGlobals.InkSupply.List[ink].InkType.Color);
+                    ColorFG = new SolidColorBrush(RxGlobals.InkSupply.List[ink].InkType.ColorFG);
 
-                string str = new ColorCode_Str().Convert(RxGlobals.InkSupply.List[ink].InkType.ColorCode, null, ink, null).ToString();
+                    string str = new ColorCode_Str().Convert(RxGlobals.InkSupply.List[ink].InkType.ColorCode, null, ink, null).ToString();
 
-                Name    = str+"-"+(1+no%(int)RxGlobals.PrintSystem.HeadCnt).ToString();
-                used = true;
+                    Name    = str+"-"+(1+no%(int)RxGlobals.PrintSystem.HeadCnt).ToString();
+                    used = true;
+                }
             }
-            catch(Exception)
+            catch(Exception ex)
             {
                 Color   = Brushes.Transparent;
                 ColorFG = Brushes.Black;
@@ -373,8 +381,16 @@ namespace RX_DigiPrint.Models
             try
             {
                 int ink = HeadNo/(int)RxGlobals.PrintSystem.HeadCnt;
-                msg.status.color   = Rx.ToArgb(RxGlobals.InkSupply.List[ink].InkType.Color);
-                msg.status.colorFG = Rx.ToArgb(RxGlobals.InkSupply.List[ink].InkType.ColorFG);
+                if(RxGlobals.InkSupply.List[ink].InkType==null)
+                {
+                    msg.status.color   = Rx.ToArgb(Colors.Black);
+                    msg.status.colorFG = Rx.ToArgb(Colors.White);
+                }
+                else
+                {
+                    msg.status.color   = Rx.ToArgb(RxGlobals.InkSupply.List[ink].InkType.Color);
+                    msg.status.colorFG = Rx.ToArgb(RxGlobals.InkSupply.List[ink].InkType.ColorFG);
+                }
             }
             catch(Exception e)
             {
