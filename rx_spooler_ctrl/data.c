@@ -1954,5 +1954,5 @@ int  data_ready		(void)
 //--- data_printList_idx ------------------------------------------
 int	 data_printList_idx(SPrintListItem *pitem)
 {
-	return (pitem-_PrintList);
+	return (int) (pitem-_PrintList);
 };
