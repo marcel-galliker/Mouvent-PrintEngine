@@ -309,7 +309,7 @@ static int _copy_file(SPageId *pid, char *srcDir, char *fileName, char *dstDir)
 		FILE *dst=NULL;
 		BYTE *buf=NULL;
 		int bufsize=10240;
-		int len;
+		UINT64 len;
 		int time, last=0;
 		INT64 size;
 		INT64 copied=0;
@@ -1865,7 +1865,7 @@ int data_sent(SBmpSplitInfo *psplit, int head)
 	if (rx_sem_wait(_SendSem, 1000)==REPLY_OK)
 	{
 		int idx;
-		idx = psplit->pListItem - _PrintList;
+		idx = (int)(psplit->pListItem - _PrintList);
 	//	TrPrintfL(1, "Head[%d.%d]: data_sent used=%d, idx=%d", psplit->board, psplit->head, psplit->pListItem->headsInUse, idx);
 		
 		psplit->pListItem->headsInUse--;

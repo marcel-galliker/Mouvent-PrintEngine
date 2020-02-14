@@ -144,7 +144,11 @@ int hc_head_board_cfg(RX_SOCKET socket, SHeadBoardCfg* cfg)
 		{
 			if (RX_Color[i].lastLine>0)
 			{
-				sprintf(path, PATH_HOME PATH_RIPPED_DATA_DIR "trace/%s", RX_ColorNameShort(i));
+				#ifdef linux
+					sprintf(path, PATH_HOME PATH_RIPPED_DATA_DIR "trace/%s", RX_ColorNameShort(i));
+				#else
+					sprintf(path, "D:/" PATH_RIPPED_DATA_DIR "trace/%s", RX_ColorNameShort(i));
+				#endif
 				rx_mkdir(path);
 			}
 		}
