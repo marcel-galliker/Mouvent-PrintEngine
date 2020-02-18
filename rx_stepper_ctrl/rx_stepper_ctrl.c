@@ -83,9 +83,13 @@ static void _main_loop()
 		{
 		case printer_test_table: 	tt_main(ticks, menu); break;
 		case printer_TX801:			
-		case printer_TX802:			
-									if (RX_StepperCfg.boardNo == 0) tx801_main(ticks, menu); 
-									else							txrob_main(ticks, menu);
+		case printer_TX802:			if (RX_StepperCfg.boardNo == 0)
+									    tx801_main(ticks, menu);
+									else
+									{
+									    txrob_main(ticks, menu);
+									    tx80x_wd_main();
+									}
 									break;
 			
 		case printer_cleaf:			cleaf_main(ticks, menu);	break;			

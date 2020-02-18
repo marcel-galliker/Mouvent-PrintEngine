@@ -804,7 +804,7 @@ static void _txrob_handle_menu(char *str)
 {
     int i, pos;
     
-    if (term_get_str(str, sizeof(str)))
+    if (str)
     {
         switch (str[0])
         {
