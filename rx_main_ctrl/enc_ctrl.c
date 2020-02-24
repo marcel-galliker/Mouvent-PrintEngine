@@ -386,16 +386,16 @@ static void _enc_start_printing(int no, SPrintQueueItem *pitem, int restart)
 								if(RX_Config.printer.offset.manualFlightTimeComp)
 								{
 									comp=RX_Config.printer.offset.manualFlightTimeComp;
-									Error(LOG, 0, "Manual Flightime Comp: %d µm", (int)comp);											
+									Error(LOG, 0, "Manual Flightime Comp: %d ï¿½m", (int)comp);											
 								}
 								else 
 								{
 									comp =  1000.0 * 0.0090 * (pitem->speed-60);								// ref done at 60m/min
-									Error(LOG, 0, "FlightTimeComp: speed=%d (ref 60m/min): comp=%dµm", pitem->speed, (int)comp);                                                              
+									Error(LOG, 0, "FlightTimeComp: speed=%d (ref 60m/min): comp=%dï¿½m", pitem->speed, (int)comp);                                                              
                                     comp2 = 0.0027 * (RX_StepperStatus.posZ-2000) * pitem->speed;		// ref done at 2.0 mm
-									Error(LOG, 0, "FlightTimeComp: height=%d.%03dmm (ref 2.0mm): comp=%dµm", RX_StepperStatus.posZ/1000, RX_StepperStatus.posZ%1000, (int)comp2);
+									Error(LOG, 0, "FlightTimeComp: height=%d.%03dmm (ref 2.0mm): comp=%dï¿½m", RX_StepperStatus.posZ/1000, RX_StepperStatus.posZ%1000, (int)comp2);
                                     comp += comp2;
-									Error(LOG, 0, "FlightTimeComp: comp=%dµm", (int)comp);
+									Error(LOG, 0, "FlightTimeComp: comp=%dï¿½m", (int)comp);
 								}
 								msg.pos_pg_bwd += (int)comp;  
 							}
@@ -473,7 +473,7 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 		
 	//	Error(LOG, 0, "enc_set_pg id=%d, page=%d, copy=%d, scan=%d, dist=%d", pId->id, pId->page, pId->copy, pId->scan, _PrintGo_Dist);						
 
-		_PrintMark_Mode = (pitem->printGoMode==PG_MODE_MARK) || (pitem->printGoMode==PG_MODE_MARK_VRT);
+		_PrintMark_Mode = (pitem->printGoMode==PG_MODE_MARK) || (pitem->printGoMode==PG_MODE_MARK_INV) || (pitem->printGoMode==PG_MODE_MARK_VRT);
 		
 		if (!_PrintMark_Mode) sok_send_2(&_Encoder[0].socket, CMD_ENCODER_PG_DIST, sizeof(dist), &dist);
 
@@ -491,7 +491,8 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 							 break;
 			
 		case PG_MODE_MARK:	 
-		case PG_MODE_MARK_VRT:
+		case PG_MODE_MARK_INV:	 
+		case PG_MODE_MARK_VRT:		
 							 dist.dist		   = pitem->printGoDist;
 							 dist.printGoMode  = PG_MODE_MARK_FILTER;
 							 if (!_FirstPG)

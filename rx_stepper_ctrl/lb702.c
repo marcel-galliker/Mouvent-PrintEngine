@@ -37,7 +37,7 @@
 #define PRINTHEAD_EN		11	// Input from SPS // '1' Allows Head to go down
 
 #define STEPS_REV		(200*16)	// steps per motor revolution * 16 times oversampling
-#define DIST_REV		2000.0	// moving distance per revolution [µm]
+#define DIST_REV		2000.0	// moving distance per revolution [ï¿½m]
 
 #define POS_CAP			RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height + 8000
 #define CAL_POS_1		70000
@@ -78,7 +78,7 @@ void lb702_init(void)
 {
 	RX_StepperStatus.robot_used = fpga_input(ROBOT_USED_IN);
 		
-	motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER);
+	motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER, STEPS);
 	memset(_CmdName, 0, sizeof(_CmdName));
 
 	//--- movment parameters ----------------
@@ -366,7 +366,7 @@ static void _lb702_do_reference(void)
 	else
 	{
 		motors_stop	(MOTOR_Z_BITS);
-		motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER);
+		motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER, STEPS);
 		motors_move_by_step	(MOTOR_Z_BITS,  &_ParRef, 500000, TRUE);		
 	}
 	_CmdRunning  = CMD_CAP_REFERENCE;
@@ -460,7 +460,7 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 										_CmdStep=0;
 										motors_stop	(MOTOR_Z_BITS);
 										motors_reset(MOTOR_Z_BITS);
-										motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER);
+										motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER, STEPS);
 										motors_move_by_step	(MOTOR_Z_BITS,  &_ParRef, 500000, TRUE);		
                                     }
 									break;
@@ -560,6 +560,6 @@ static void _lb702_motor_test(int motorNo, int steps)
 	_CmdRunning = 1; // TEST
 	RX_StepperStatus.info.moving = TRUE;
 	
-	motors_config(motors, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER);
+	motors_config(motors, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER, STEPS);
 	motors_move_by_step(motors, &par, steps, FALSE);			
 }

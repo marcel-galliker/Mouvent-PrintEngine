@@ -188,7 +188,7 @@ static int _step_handle_msg(RX_SOCKET socket, void *msg, int len, struct sockadd
 									default:			ret = steps_handle_status		(	 pStat); break;
 									}
 									
-									fluid_control_robot(_LB_Rob);
+									// fluid_control_robot(_LB_Rob);
 									return ret;
                                    
                 case REP_CAP_CALIBRATE:

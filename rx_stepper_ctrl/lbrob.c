@@ -167,8 +167,8 @@ void lbrob_init(void)
 	_ParCable_drive_purge.estop_level = 0;
 	_ParCable_drive_purge.enc_bwd = TRUE;
 	_ParCable_drive_purge.encCheck = chk_lbrob;
-	
-	motor_config(MOTOR_X_0, CURRENT_HOLD, X_STEPS_PER_METER, X_INC_PER_METER);
+
+    motor_config(MOTOR_X_0, CURRENT_HOLD, X_STEPS_PER_METER, X_INC_PER_METER, STEPS);
 }
 
 //--- _set_waste_pump ------------------------------------------------
@@ -753,7 +753,7 @@ static void _lbrob_motor_test(int motorNo, int steps)
 	_CmdRunning = 1; // TEST
 	RX_StepperStatus.info.moving = TRUE;
 	
-	motors_config(motors, CURRENT_HOLD, X_STEPS_PER_METER, X_INC_PER_METER);
+	motors_config(motors, CURRENT_HOLD, X_STEPS_PER_METER, X_INC_PER_METER, STEPS);
 	motors_move_by_step(motors, &par, steps, FALSE);			
 }
 

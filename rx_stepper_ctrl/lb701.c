@@ -29,7 +29,7 @@
 #define POS_UP			5000
 
 #define STEPS_REV		200*16	// steps per motor revolution * 16 times oversampling
-#define DIST_REV		2000.0	// moving distance per revolution [µm]
+#define DIST_REV		2000.0	// moving distance per revolution [ï¿½m]
 
 static SMovePar	_ParRef;
 static SMovePar	_ParZ_down;
@@ -50,7 +50,7 @@ static int  _micron_2_steps(int micron);
 //--- lb701_init --------------------------------------
 void lb701_init(void)
 {
-	motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER);
+	motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER, STEPS);
 	memset(_CmdName, 0, sizeof(_CmdName));
 
 	//--- movment parameters ----------------
@@ -193,7 +193,7 @@ int lb701_menu(void)
 static void _lb701_do_reference(void)
 {
 	motors_stop	(MOTOR_Z_BITS);
-	motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER);
+	motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER, STEPS);
 	
 	_CmdRunning  = CMD_CAP_REFERENCE;
 	RX_StepperStatus.info.moving = TRUE;
@@ -295,7 +295,7 @@ static void _lb701_motor_test(int motorNo, int steps)
 	_CmdRunning = 1; // TEST
 	RX_StepperStatus.info.moving = TRUE;
 	
-	motors_config(motors, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER);
+	motors_config(motors, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER, STEPS);
 	motors_move_by_step(motors, &par, steps, FALSE);			
 }
 

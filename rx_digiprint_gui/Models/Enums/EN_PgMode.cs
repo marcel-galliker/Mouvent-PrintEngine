@@ -38,6 +38,7 @@ namespace RX_DigiPrint.Models.Enums
             {
                 _List = new List<RxEnum<TcpIp.EPrintGoMode>>();
                 _List.Add(new RxEnum<TcpIp.EPrintGoMode>(TcpIp.EPrintGoMode.PG_MODE_MARK,       "Mark",   new BitmapImage(new Uri("../../Resources/Bitmaps/PG_Mark.ico", UriKind.Relative))));
+                _List.Add(new RxEnum<TcpIp.EPrintGoMode>(TcpIp.EPrintGoMode.PG_MODE_MARK_INV,   "MarkI",  new BitmapImage(new Uri("../../Resources/Bitmaps/PG_Mark_INV.ico", UriKind.Relative))));
                 _List.Add(new RxEnum<TcpIp.EPrintGoMode>(TcpIp.EPrintGoMode.PG_MODE_MARK_VRT,   "MarkV",  new BitmapImage(new Uri("../../Resources/Bitmaps/PG_Mark_Virtual.ico", UriKind.Relative))));
                 _List.Add(new RxEnum<TcpIp.EPrintGoMode>(TcpIp.EPrintGoMode.PG_MODE_LENGTH,     "Length", new BitmapImage(new Uri("../../Resources/Bitmaps/PG_Length.ico", UriKind.Relative)) ));
                 _List.Add(new RxEnum<TcpIp.EPrintGoMode>(TcpIp.EPrintGoMode.PG_MODE_GAP,        "Gap",    new BitmapImage(new Uri("../../Resources/Bitmaps/PG_Gap.ico", UriKind.Relative))));

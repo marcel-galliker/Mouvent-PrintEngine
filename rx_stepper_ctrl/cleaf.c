@@ -43,7 +43,7 @@
 #define HEIGHT_INCREASE_AFTER_MATERIAL_DETECTION	1000	//um
 #define HEIGHT_INCREASE_TIMEOUT						2000	//ms
 
-#define DIST_Z_REV		2000.0	// moving distance per revolution [µm]
+#define DIST_Z_REV		2000.0	// moving distance per revolution [ï¿½m]
 
 // Laser
 #define	LASER_IN				0		// Analog Input 0-3 -> 0 is used for distance sensor before Printheads
@@ -200,7 +200,7 @@ void cleaf_main(int ticks, int menu)
 		
 	if (!motors_init_done())
 	{
-		motors_config(MOTOR_Z_BITS, CURRENT_Z_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER);
+		motors_config(MOTOR_Z_BITS, CURRENT_Z_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER, STEPS);
 	}
 	
 	if (RX_StepperCfg.printerType != printer_cleaf) return; // printer_cleaf

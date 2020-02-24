@@ -1442,6 +1442,7 @@ static void _plc_state_ctrl()
 	if (_PlcState==plc_setup && RX_PrinterStatus.printState==ps_webin)
 	{
 		_plc_set_command("CMD_SETUP", "CMD_WEBIN");
+        step_handle_gui_msg(INVALID_SOCKET, CMD_CAP_UP_POS, NULL, 0);
 	}
 	if(_PlcState == plc_pause)
 	{		

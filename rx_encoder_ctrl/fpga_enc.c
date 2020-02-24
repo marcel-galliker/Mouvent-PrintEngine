@@ -105,8 +105,8 @@ static int		_MemId=0;
 static int		_Init=FALSE;
 static int		_LinuxDeployment=0;
 
-static double	_IncDist	= 1.0040;			// [µm] distance of encoder increments
-static double   _StrokeDist = 25400.0/1200.0;	// [µm] distance between firepulse strokes
+static double	_IncDist	= 1.0040;			// [ï¿½m] distance of encoder increments
+static double   _StrokeDist = 25400.0/1200.0;	// [ï¿½m] distance between firepulse strokes
 
 static int		_UV_Speed   = 0;
 static INT32	_UV_LastPos = 0;
@@ -547,7 +547,7 @@ void fpga_enc_config(int inNo, SEncoderCfg *pCfg, int restart)
 	}
 	else
 	{	
-		_IncDist = 1000000.0/pCfg->incPerMeter; // [µm] distance of encoder increments
+		_IncDist = 1000000.0/pCfg->incPerMeter; // [ï¿½m] distance of encoder increments
 		
 	//	if (tw8_present()) _IncDist *= 2;
 	
@@ -816,7 +816,7 @@ static void _fpga_corr_linear(SEncoderCfg *pCfg, int restart)
 	
 	fpga_enc_config(1, pCfg, restart);
 	
-	_IncDist = 1000000.0/pCfg->incPerMeter; // [µm] distance of encoder increments
+	_IncDist = 1000000.0/pCfg->incPerMeter; // [ï¿½m] distance of encoder increments
 
 	double ratio = _IncDist / _StrokeDist;
 
@@ -969,8 +969,7 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg, int restart)
 		Fpga->cfg.pg[pgNo].enc_start_pos_bwd = _micron2inc(pcfg->pos_pg_bwd+100);
 		Fpga->cfg.pg[pgNo].pos_pg_bwd		 = 10;
 		Fpga->cfg.pg[pgNo].reset_pos		 = TRUE;
-		Fpga->cfg.pg[pgNo].reset_pos		 = FALSE;			
-
+		Fpga->cfg.pg[pgNo].reset_pos		 = FALSE;
 		Fpga->cfg.pg[pgNo].printgo_n	= FALSE;
 
 		//--- FIFO mode ---------------------------
@@ -982,10 +981,11 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg, int restart)
 		{
 			switch(pcfg->printGoMode)
 			{
-			case PG_MODE_MARK:			Fpga->cfg.pg[pgNo].fifos_used = FIFOS_MARKREADER; Fpga->cfg.pg[pgNo].dig_in_sel=0; break;
-			case PG_MODE_MARK_FILTER:	Fpga->cfg.pg[pgNo].fifos_used = FIFOS_MARKFILTER; Fpga->cfg.pg[pgNo].dig_in_sel=0; break;
-			case PG_MODE_MARK_VRT:		Fpga->cfg.pg[pgNo].fifos_used = FIFOS_MARKFILTER; Fpga->cfg.pg[pgNo].dig_in_sel=1; break;
-			default:					Fpga->cfg.pg[pgNo].fifos_used = FIFOS_DIST; 
+			case PG_MODE_MARK:			Fpga->cfg.pg[pgNo].fifos_used = FIFOS_MARKREADER; Fpga->cfg.pg[pgNo].dig_in_sel=0; Fpga->cfg.pg[pgNo].printgo_n=FALSE; break;
+			case PG_MODE_MARK_FILTER:	Fpga->cfg.pg[pgNo].fifos_used = FIFOS_MARKFILTER; Fpga->cfg.pg[pgNo].dig_in_sel=0; Fpga->cfg.pg[pgNo].printgo_n=FALSE; break;
+			case PG_MODE_MARK_INV:		Fpga->cfg.pg[pgNo].fifos_used = FIFOS_MARKFILTER; Fpga->cfg.pg[pgNo].dig_in_sel=0; Fpga->cfg.pg[pgNo].printgo_n=TRUE;  break;
+			case PG_MODE_MARK_VRT:		Fpga->cfg.pg[pgNo].fifos_used = FIFOS_MARKFILTER; Fpga->cfg.pg[pgNo].dig_in_sel=1; Fpga->cfg.pg[pgNo].printgo_n=FALSE; break;
+			default:					Fpga->cfg.pg[pgNo].fifos_used = FIFOS_DIST;
 			}			
 		}
 	}

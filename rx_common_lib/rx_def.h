@@ -316,6 +316,7 @@ typedef struct SPrintQueueItem
 			#define PG_MODE_GAP			3	// gap getween images
 			#define PG_MODE_MARK_FILTER	4	// print mark to PG (IN[0])
 			#define PG_MODE_MARK_VRT	5	// print mark to PG (IN[1])
+			#define PG_MODE_MARK_INV	6	// print mark to PG (IN[0]/INVERSE)
 	
 	INT32	printGoDist;
 	INT32	scanLength; // mm
@@ -1339,11 +1340,11 @@ typedef struct ERobotInfo
 	UINT32 rob_in_vac		: 1;	//	0x00400000
 	UINT32 rob_in_wash		: 1;	//	0x00800000
 	UINT32 rob_in_cap		: 1;	//	0x01000000
-	UINT32 r_info_25		: 1;	//	0x02000000
-	UINT32 r_info_26		: 1;    //  0x04000000
-	UINT32 r_info_27		: 1;	//  0x08000000
-	UINT32 r_info_28		: 1;	//  0x10000000
-	UINT32 r_info_29		: 1;	//	0x20000000
+	UINT32 moving_wd		: 1;	//	0x02000000
+	UINT32 ref_done_wd		: 1;    //  0x04000000
+	UINT32 wd_front_up		: 1;	//  0x08000000
+	UINT32 wd_back_up		: 1;	//  0x10000000
+	UINT32 wrinkle_detected	: 1;	//	0x20000000
 	UINT32 r_info_30		: 1;	//	0x40000000
 	UINT32 r_info_31		: 1;	//	0x80000000
 } ERobotInfo;

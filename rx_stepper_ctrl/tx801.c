@@ -39,7 +39,7 @@
 
 #define STEPS_REV		(200*16)	// steps per motor revolution * 16 times oversampling
 #define INCS_REV		4000		// encoder increments per revolution
-#define DIST_REV		1000.0		// moving distance per revolution [µm]
+#define DIST_REV		1000.0		// moving distance per revolution [ï¿½m]
 
 #define POS_UP			(STEPS_REV/DIST_REV*1000)
 
@@ -50,9 +50,10 @@ static int		_CmdRunning=0;
 static int		_PrintPos_New=0;
 static int		_PrintPos_Act=0;
 static int		_CapHight = -8700;
-static int		_WetWipeHight = -7200;
+static int		_WashHight = -7200;
 static int		_WipeHight = -7700;
-static int		_VacuumHight = -8700;
+static int		_VacuumHight = -8400;
+static int		_VacuumHight_High = -6800;
 
 static int		_VentCtrl;
 static int		_VentCtrlDelay=0;
@@ -79,7 +80,7 @@ static int _tx801_motor_down(RX_SOCKET socket, int msgId, int length);
 //--- tx801_init --------------------------------------
 void tx801_init(void)
 {
-	motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L3518_STEPS_PER_METER, L3518_INC_PER_METER);
+    motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L3518_STEPS_PER_METER, L3518_INC_PER_METER, STEPS);
 	
 	//--- movment parameters ----------------	
 	_ParRef.speed		= 10000;
@@ -194,9 +195,9 @@ void tx801_main(int ticks, int menu)
 		RX_StepperStatus.info.z_in_print		= (_CmdRunning==CMD_CAP_PRINT_POS && RX_StepperStatus.info.ref_done);
 		RX_StepperStatus.info.z_in_cap			= (_CmdRunning==CMD_CAP_CAPPING_POS);
 		RX_StepperStatus.robinfo.z_in_wipe		= (_CmdRunning == CMD_CAP_WIPE_POS);
-		RX_StepperStatus.robinfo.z_in_vacuum	= (_CmdRunning == CMD_CAP_VACUUM_POS);
+        RX_StepperStatus.robinfo.z_in_vacuum	= (_CmdRunning == CMD_CAP_VACUUM_POS) || (_CmdRunning == CMD_CAP_VACUUM_HIGH_POS);
 		RX_StepperStatus.robinfo.z_in_wash		= (_CmdRunning == CMD_CAP_WASH_POS);
-		if (_CmdRunning==CMD_CAP_REFERENCE && _PrintPos_New) 
+		if (_CmdRunning==CMD_CAP_REFERENCE && _PrintPos_New)
 		{
 			_tx801_move_to_pos(CMD_CAP_PRINT_POS, _PrintPos_New);
 			_PrintPos_Act=_PrintPos_New;
@@ -267,7 +268,7 @@ static void _tx801_display_status(void)
 	term_printf("moving:         %d		cmd: %08x\n",	RX_StepperStatus.info.moving, _CmdRunning);	
 	term_printf("Head UP Sensor: %d%d%d%d\n",	fpga_input(HEAD_UP_IN_0), fpga_input(HEAD_UP_IN_1), fpga_input(HEAD_UP_IN_2), fpga_input(HEAD_UP_IN_3));	
 	term_printf("reference done: %d\n",	RX_StepperStatus.info.ref_done);
-	term_printf("z in reference: %d print:%d cap:%d wipe:%d wetwipe:%d vacc:%d\n",	
+	term_printf("z in reference: %d print:%d cap:%d wipe:%d wash:%d vacc:%d\n",	
 				RX_StepperStatus.info.z_in_ref, 
 				RX_StepperStatus.info.z_in_print,
 				RX_StepperStatus.info.z_in_cap,
@@ -300,7 +301,7 @@ int tx801_menu(void)
 	term_printf("t<n>: test move down n in tenth of millimeter in absolute position from ref position\n");
 	term_printf("m<n><steps>: move Motor<n> by <steps>\n");	
 	term_printf("c: move to capping hight  %03d.%d         C<n>: set capping hight in absolute position from ref position\n",  _CapHight/10, _CapHight%10);
-	term_printf("e: move to wet wipe hight %03d.%d         E<n>: set wet wipe hight in absolute position from ref position\n", _CapHight/10, _CapHight%10);
+	term_printf("e: move to wash hight	   %03d.%d         E<n>: set wash hight in absolute position from ref position\n", _WashHight / 10, _WashHight % 10);
 	term_printf("w: move to wipe hight     %03d.%d         W<n>: set wipe hight in absolute position from ref position\n",	   _WipeHight/10, _WipeHight%10);
 	term_printf("a: move to vacuum hight   %03d.%d         A<n>: set vacuum hight in absolute position from ref position\n",   _VacuumHight/10, _VacuumHight%10);
 	term_printf("x: exit\n");
@@ -323,11 +324,11 @@ int tx801_menu(void)
 				  _tx801_set_ventilators(atoi(&str[1]));									break;
 		case 't': _tx801_motor_down(INVALID_SOCKET, CMD_CAP_CAPPING_POS, atoi(&str[1]));	break;
 		case 'c': _tx801_motor_down(INVALID_SOCKET, CMD_CAP_CAPPING_POS, _CapHight);		break;
-		case 'e': _tx801_motor_down(INVALID_SOCKET, CMD_CAP_CAPPING_POS, _WetWipeHight);	break;
+		case 'e': _tx801_motor_down(INVALID_SOCKET, CMD_CAP_CAPPING_POS, _WashHight); break;
 		case 'w': _tx801_motor_down(INVALID_SOCKET, CMD_CAP_CAPPING_POS, _WipeHight);		break;
 		case 'a': _tx801_motor_down(INVALID_SOCKET, CMD_CAP_CAPPING_POS, _VacuumHight);		break;
 		case 'C': _CapHight = atoi(&str[1]);												break;
-		case 'E': _WetWipeHight = atoi(&str[1]);											break;
+		case 'E': _WashHight = atoi(&str[1]);											break;
 		case 'W': _WipeHight = atoi(&str[1]);												break;
 		case 'A': _VacuumHight = atoi(&str[1]);												break;
 		case 'x': return FALSE;
@@ -340,7 +341,7 @@ int tx801_menu(void)
 static void _tx801_do_reference(void)
 {
 	motors_stop	(MOTOR_Z_BITS);
-	motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L3518_STEPS_PER_METER, L3518_INC_PER_METER);
+    motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L3518_STEPS_PER_METER, L3518_INC_PER_METER, STEPS);
 
 	_CmdRunning  = CMD_CAP_REFERENCE;
 	RX_StepperStatus.info.moving = TRUE;
@@ -458,7 +459,7 @@ int  tx801_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									{
 										_CmdRunning  = msgId;
 										RX_StepperStatus.info.moving = TRUE;
-										steps = _micron_2_steps(TX_REF_HEIGHT - _WetWipeHight);
+										steps = _micron_2_steps(TX_REF_HEIGHT - _WashHight);
 										motors_move_to_step(MOTOR_Z_BITS, &_ParZ_down, steps);
 									}
 									break;
@@ -477,6 +478,15 @@ int  tx801_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 										_CmdRunning = msgId;
 										RX_StepperStatus.info.moving = TRUE;
 										steps = _micron_2_steps(TX_REF_HEIGHT - _VacuumHight);
+										motors_move_to_step(MOTOR_Z_BITS, &_ParZ_down, steps);
+									}
+									break;
+	
+	case CMD_CAP_VACUUM_HIGH_POS:	if (!_CmdRunning)
+									{
+										_CmdRunning = msgId;
+										RX_StepperStatus.info.moving = TRUE;
+										steps = _micron_2_steps(TX_REF_HEIGHT - _VacuumHight_High);
 										motors_move_to_step(MOTOR_Z_BITS, &_ParZ_down, steps);
 									}
 									break;
@@ -531,8 +541,8 @@ static void _tx801_motor_test(int motorNo, int steps)
 	
 	_CmdRunning = 1; // TEST
 	RX_StepperStatus.info.moving = TRUE;
-	
-	motors_config(motors, CURRENT_HOLD, L3518_STEPS_PER_METER, L3518_INC_PER_METER);
+
+    motors_config(motors, CURRENT_HOLD, L3518_STEPS_PER_METER, L3518_INC_PER_METER, STEPS);
 	motors_move_by_step(motors, &par, steps, FALSE);			
 }
 

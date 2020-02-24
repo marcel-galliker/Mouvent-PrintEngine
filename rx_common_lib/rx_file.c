@@ -366,6 +366,7 @@ void rx_mkdir_path(const char *dirname)
 {
 	char *ch, old;
 	char dir[MAX_PATH];
+	int ret, err;
 	
 	if (!*dirname) return;
 
@@ -376,7 +377,8 @@ void rx_mkdir_path(const char *dirname)
 		{
 			old = *ch;
 			*ch=0;
-			rx_mkdir(dir);
+			ret=rx_mkdir(dir);
+			err=errno;
 			*ch=old;
 		}
 	}
