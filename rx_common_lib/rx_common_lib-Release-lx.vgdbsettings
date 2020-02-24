@@ -32,14 +32,18 @@
       </FileMasks>
       <TransferNewFilesOnly>true</TransferNewFilesOnly>
       <IncludeSubdirectories>true</IncludeSubdirectories>
-      <SelectedDirectories />
       <DeleteDisappearedFiles>false</DeleteDisappearedFiles>
       <ApplyGlobalExclusionList>true</ApplyGlobalExclusionList>
+      <Extension>
+        <Direction>Outgoing</Direction>
+        <SkipMountPoints>false</SkipMountPoints>
+        <OverwriteTrigger>Stat</OverwriteTrigger>
+      </Extension>
     </MainSourceTransferCommand>
     <AllowChangingHostForMainCommands>false</AllowChangingHostForMainCommands>
-    <SkipBuildIfNoSourceFilesChanged>false</SkipBuildIfNoSourceFilesChanged>
+    <SkipBuildIfNoSourceFilesChanged>true</SkipBuildIfNoSourceFilesChanged>
     <IgnoreFileTransferErrors>false</IgnoreFileTransferErrors>
-    <RemoveRemoteDirectoryOnClean>false</RemoveRemoteDirectoryOnClean>
+    <RemoveRemoteDirectoryOnClean>true</RemoveRemoteDirectoryOnClean>
     <SkipDeploymentTests>false</SkipDeploymentTests>
     <MainSourceDirectoryForLocalBuilds>$(ProjectDir)</MainSourceDirectoryForLocalBuilds>
   </Project>
@@ -131,6 +135,11 @@
         <SelectedDirectories />
         <DeleteDisappearedFiles>false</DeleteDisappearedFiles>
         <ApplyGlobalExclusionList>true</ApplyGlobalExclusionList>
+        <Extension>
+          <Direction>Outgoing</Direction>
+          <SkipMountPoints>false</SkipMountPoints>
+          <OverwriteTrigger>Stat</OverwriteTrigger>
+        </Extension>
       </CustomActionBase>
       <CustomActionBase xsi:type="SourceTransferAction">
         <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
@@ -155,6 +164,11 @@
         <SelectedDirectories />
         <DeleteDisappearedFiles>false</DeleteDisappearedFiles>
         <ApplyGlobalExclusionList>true</ApplyGlobalExclusionList>
+        <Extension>
+          <Direction>Outgoing</Direction>
+          <SkipMountPoints>false</SkipMountPoints>
+          <OverwriteTrigger>Stat</OverwriteTrigger>
+        </Extension>
       </CustomActionBase>
       <CustomActionBase xsi:type="SourceTransferAction">
         <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
@@ -179,6 +193,11 @@
         <SelectedDirectories />
         <DeleteDisappearedFiles>false</DeleteDisappearedFiles>
         <ApplyGlobalExclusionList>true</ApplyGlobalExclusionList>
+        <Extension>
+          <Direction>Outgoing</Direction>
+          <SkipMountPoints>false</SkipMountPoints>
+          <OverwriteTrigger>Stat</OverwriteTrigger>
+        </Extension>
       </CustomActionBase>
       <CustomActionBase xsi:type="SourceTransferAction">
         <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
@@ -203,6 +222,11 @@
         <SelectedDirectories />
         <DeleteDisappearedFiles>false</DeleteDisappearedFiles>
         <ApplyGlobalExclusionList>true</ApplyGlobalExclusionList>
+        <Extension>
+          <Direction>Outgoing</Direction>
+          <SkipMountPoints>false</SkipMountPoints>
+          <OverwriteTrigger>Stat</OverwriteTrigger>
+        </Extension>
       </CustomActionBase>
     </PreBuildActions>
     <PostBuildActions />

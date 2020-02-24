@@ -155,15 +155,16 @@
         </FileMasks>
         <TransferNewFilesOnly>true</TransferNewFilesOnly>
         <IncludeSubdirectories>true</IncludeSubdirectories>
-        <SelectedDirectories />
         <DeleteDisappearedFiles>false</DeleteDisappearedFiles>
         <ApplyGlobalExclusionList>true</ApplyGlobalExclusionList>
+        <Extension>
+          <Direction>Outgoing</Direction>
+          <SkipMountPoints>false</SkipMountPoints>
+          <OverwriteTrigger>Stat</OverwriteTrigger>
+        </Extension>
       </CustomActionBase>
       <CustomActionBase xsi:type="FileTransferAction">
         <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
-        <SourceHost>
-          <Transport>None</Transport>
-        </SourceHost>
         <DestinationHost>
           <HostName>$(DeployHost)</HostName>
           <Transport>SSH</Transport>
@@ -171,7 +172,7 @@
         </DestinationHost>
         <SourceFilePath>$(ProjectDir)\..\Externals\mlpi\bin\linux-gcc-x64\libmlpi.so.1</SourceFilePath>
         <DestinationFilePath>$(DeployDir)/libmlpi.so.1</DestinationFilePath>
-        <OverwriteTrigger>Always</OverwriteTrigger>
+        <OverwriteTrigger>Stat</OverwriteTrigger>
       </CustomActionBase>
       <CustomActionBase xsi:type="SourceTransferAction">
         <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
@@ -187,15 +188,16 @@
         </FileMasks>
         <TransferNewFilesOnly>true</TransferNewFilesOnly>
         <IncludeSubdirectories>true</IncludeSubdirectories>
-        <SelectedDirectories />
         <DeleteDisappearedFiles>false</DeleteDisappearedFiles>
         <ApplyGlobalExclusionList>true</ApplyGlobalExclusionList>
+        <Extension>
+          <Direction>Outgoing</Direction>
+          <SkipMountPoints>false</SkipMountPoints>
+          <OverwriteTrigger>Stat</OverwriteTrigger>
+        </Extension>
       </CustomActionBase>
       <CustomActionBase xsi:type="FileTransferAction">
         <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
-        <SourceHost>
-          <Transport>None</Transport>
-        </SourceHost>
         <DestinationHost>
           <HostName>$(DeployHost)</HostName>
           <Transport>SSH</Transport>
@@ -203,7 +205,7 @@
         </DestinationHost>
         <SourceFilePath>$(ProjectDir)\..\Externals\libxl\lib64\libxl.so</SourceFilePath>
         <DestinationFilePath>$(DeployDir)/libxl.so</DestinationFilePath>
-        <OverwriteTrigger>Always</OverwriteTrigger>
+        <OverwriteTrigger>Stat</OverwriteTrigger>
       </CustomActionBase>
     </PreBuildActions>
     <PostBuildActions>

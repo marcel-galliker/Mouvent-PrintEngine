@@ -27,20 +27,21 @@
         <string>*.mak</string>
         <string>Makefile</string>
       </FileMasks>
-      <TransferNewFilesOnly>false</TransferNewFilesOnly>
+      <TransferNewFilesOnly>true</TransferNewFilesOnly>
       <IncludeSubdirectories>true</IncludeSubdirectories>
+      <SelectedDirectories />
       <DeleteDisappearedFiles>false</DeleteDisappearedFiles>
       <ApplyGlobalExclusionList>true</ApplyGlobalExclusionList>
       <Extension>
         <Direction>Outgoing</Direction>
         <SkipMountPoints>false</SkipMountPoints>
-        <OverwriteTrigger>Always</OverwriteTrigger>
+        <OverwriteTrigger>Stat</OverwriteTrigger>
       </Extension>
     </MainSourceTransferCommand>
     <AllowChangingHostForMainCommands>false</AllowChangingHostForMainCommands>
-    <SkipBuildIfNoSourceFilesChanged>false</SkipBuildIfNoSourceFilesChanged>
+    <SkipBuildIfNoSourceFilesChanged>true</SkipBuildIfNoSourceFilesChanged>
     <IgnoreFileTransferErrors>false</IgnoreFileTransferErrors>
-    <RemoveRemoteDirectoryOnClean>false</RemoveRemoteDirectoryOnClean>
+    <RemoveRemoteDirectoryOnClean>true</RemoveRemoteDirectoryOnClean>
     <SkipDeploymentTests>false</SkipDeploymentTests>
     <MainSourceDirectoryForLocalBuilds>$(ProjectDir)</MainSourceDirectoryForLocalBuilds>
   </Project>
@@ -145,12 +146,14 @@
         <SelectedDirectories />
         <DeleteDisappearedFiles>false</DeleteDisappearedFiles>
         <ApplyGlobalExclusionList>true</ApplyGlobalExclusionList>
+        <Extension>
+          <Direction>Outgoing</Direction>
+          <SkipMountPoints>false</SkipMountPoints>
+          <OverwriteTrigger>Stat</OverwriteTrigger>
+        </Extension>
       </CustomActionBase>
       <CustomActionBase xsi:type="FileTransferAction">
         <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
-        <SourceHost>
-          <Transport>None</Transport>
-        </SourceHost>
         <DestinationHost>
           <HostName>$(BuildHost)</HostName>
           <Transport>SSH</Transport>
@@ -177,12 +180,14 @@
         <SelectedDirectories />
         <DeleteDisappearedFiles>false</DeleteDisappearedFiles>
         <ApplyGlobalExclusionList>true</ApplyGlobalExclusionList>
+        <Extension>
+          <Direction>Outgoing</Direction>
+          <SkipMountPoints>false</SkipMountPoints>
+          <OverwriteTrigger>Stat</OverwriteTrigger>
+        </Extension>
       </CustomActionBase>
       <CustomActionBase xsi:type="FileTransferAction">
         <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
-        <SourceHost>
-          <Transport>None</Transport>
-        </SourceHost>
         <DestinationHost>
           <HostName>$(BuildHost)</HostName>
           <Transport>SSH</Transport>
@@ -190,7 +195,7 @@
         </DestinationHost>
         <SourceFilePath>$(ProjectDir)\..\Externals\libxl\lib64\libxl.so</SourceFilePath>
         <DestinationFilePath>$(TargetDir)/libxl.so</DestinationFilePath>
-        <OverwriteTrigger>Always</OverwriteTrigger>
+        <OverwriteTrigger>Stat</OverwriteTrigger>
       </CustomActionBase>
     </PreBuildActions>
     <PostBuildActions>
