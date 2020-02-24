@@ -85,3 +85,8 @@ org.eclipse.core.resources
 /rx_fluid_nios/software/rx_fluid_nios_bsp/system.h
 /rx_fluid_nios/software/rx_fluid_nios_bsp/obj
 /rx_head_nios/software/rx_head_nios/obj
+/rx_head_nios/software/rx_head_nios_bsp/HAL
+/rx_head_nios/software/rx_head_nios_bsp/drivers
+/rx_fluid_nios/software/rx_fluid_nios_bsp/HAL
+/rx_fluid_nios/software/rx_fluid_nios_bsp/.settings
+/rx_fluid_nios/software/rx_fluid_nios_bsp/drivers
