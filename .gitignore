@@ -44,7 +44,6 @@
 *.snap
 SysprogsSyncCache
 Release-soc
-version.c
 version.txt
 v16
 CodeDB
