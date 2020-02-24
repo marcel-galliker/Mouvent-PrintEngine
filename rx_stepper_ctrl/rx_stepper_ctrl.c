@@ -29,7 +29,6 @@
 #include "cln.h"
 #include "tx801.h"
 #include "txrob.h"
-#include "tx80x_wd.h"
 #include "dp803.h"
 #include "cleaf.h"
 #include "lb701.h"
@@ -83,13 +82,9 @@ static void _main_loop()
 		{
 		case printer_test_table: 	tt_main(ticks, menu); break;
 		case printer_TX801:			
-		case printer_TX802:			if (RX_StepperCfg.boardNo == 0)
-									    tx801_main(ticks, menu);
-									else
-									{
-									    txrob_main(ticks, menu);
-									    tx80x_wd_main();
-									}
+		case printer_TX802:			
+									if (RX_StepperCfg.boardNo == 0) tx801_main(ticks, menu); 
+									else							txrob_main(ticks, menu);
 									break;
 			
 		case printer_cleaf:			cleaf_main(ticks, menu);	break;			
@@ -163,12 +158,8 @@ int main(int argc, char** argv)
 	{
 	case printer_test_table: 	tt_init(); break;
 	case printer_TX801:			
-	case printer_TX802:			if (RX_StepperCfg.boardNo == 0)	tx801_init();
-								else
-								{
-								    txrob_init();
-								    tx80x_wd_init();
-								}
+	case printer_TX802:			if (RX_StepperCfg.boardNo == 0)	tx801_init(); 
+								else						    txrob_init();
 								break;
 		
 	case printer_cleaf:			cleaf_init(); break;

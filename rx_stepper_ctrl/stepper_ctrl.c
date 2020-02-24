@@ -26,7 +26,6 @@
 #include "lb702.h"
 #include "lbrob.h"
 #include "tx801.h"
-#include "tx80x_wd.h"
 #include "dp803.h"
 #include "txrob.h"
 #include "slide.h"
@@ -196,12 +195,8 @@ int _handle_ctrl_msg(RX_SOCKET socket, void *pmsg)//, int len, struct sockaddr *
 		{
 		case printer_test_table:		tt_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]); break;
 		case printer_TX801:				
-		case printer_TX802:				if (RX_StepperCfg.boardNo == step_lift) tx801_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);
-										else
-										{
-										    txrob_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);
-										    tx80x_wd_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);
-										} 
+		case printer_TX802:				if (RX_StepperCfg.boardNo == step_lift)	tx801_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]); 
+										else                                    txrob_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]); 
 										break;
 			
 		case printer_cleaf:				cleaf_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]); break;
@@ -247,12 +242,8 @@ static void _do_config(SStepperCfg *pcfg)
 	case printer_test_slide_only:	break;
 	case printer_test_table:	tt_init(); break;
 	case printer_TX801:			
-	case printer_TX802:			if (RX_StepperCfg.boardNo == step_lift) tx801_init();
-								else
-								{
-								    txrob_init();
-								    tx80x_wd_init();
-								}
+	case printer_TX802:			if (RX_StepperCfg.boardNo == step_lift) tx801_init(); 
+								else                                    txrob_init();
 								break;
 		
 	case printer_cleaf:			cleaf_init();	break;
