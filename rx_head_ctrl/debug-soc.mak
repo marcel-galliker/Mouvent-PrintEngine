@@ -5,12 +5,11 @@
 BINARYDIR := Debug-soc
 
 #Toolchain
-CC := $(TOOLCHAIN_ROOT)/bin/arm-linux-gnueabi-gcc.exe
-CXX := $(TOOLCHAIN_ROOT)/bin/arm-linux-gnueabi-g++.exe
+CC := F:/Compiler/altera/13.1/DS-5/bin/arm-linux-gnueabihf-gcc.exe
+CXX := F:/Compiler/altera/13.1/DS-5/bin/arm-linux-gnueabihf-g++.exe
 LD := $(CXX)
-AR := $(TOOLCHAIN_ROOT)/bin/arm-linux-gnueabi-ar.exe
-OBJCOPY := $(TOOLCHAIN_ROOT)/bin/arm-linux-gnueabi-objcopy.exe
-
+AR := F:/Compiler/altera/13.1/DS-5/bin/arm-linux-gnueabihf-ar.exe
+OBJCOPY := F:/Compiler/altera/13.1/DS-5/bin/arm-linux-gnueabihf-objcopy.exe
 
 #Additional flags
 PREPROCESSOR_MACROS := DEBUG linux soc
