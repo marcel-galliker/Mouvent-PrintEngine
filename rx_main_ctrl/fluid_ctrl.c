@@ -43,7 +43,6 @@
 static int				_FluidThreadRunning=FALSE;
 static UINT32			_Flushed=0x00;
 static EnFluidCtrlMode	_FluidCtrlMode = ctrl_undef;
-static EnFluidCtrlMode	_RobotCtrlMode = ctrl_undef;
 static EnFluidCtrlMode  _PurgeCtrlMode = ctrl_undef;
 static int				_PurgeAll=FALSE;
 static int				_PurgeFluidNo;
@@ -454,7 +453,6 @@ static void _do_fluid_stat(int fluidNo, SFluidBoardStat *pstat)
 	memcpy(&_FluidStatus[fluidNo*INK_PER_BOARD], &pstat->stat[0], INK_PER_BOARD*sizeof(_FluidStatus[0]));
 		
 	if      (_FluidCtrlMode>=ctrl_flush_night && _FluidCtrlMode<=ctrl_flush_done) _control_flush();
-//	else if (_RobotCtrlMode>=ctrl_wipe        && _RobotCtrlMode<ctrl_fill       && fluidNo==0) _control_robot();
 	else _control(fluidNo);
 
 	//--- update overall state --------------------------
@@ -745,245 +743,6 @@ static void _control_flush(void)
 	}
 }								
 
-//--- fluid_control_robot -------------------------------------------------
-void fluid_control_robot(int lbrob)
-{
-	static int	_printing;		
-
-	if (_all_fluids_in_fluidCtrlMode(_RobotCtrlMode))
-	{
-		EnFluidCtrlMode	old =  _RobotCtrlMode;
-		
-		switch(_RobotCtrlMode)
-		{
-		/*
-		//--- ctrl_wetwipe --------------------------------------------------------------------------------------
-		case ctrl_wetwipe:			step_lift_to_top_pos();
-									_RobotCtrlMode = ctrl_wetwipe_step1;
-									break;
-				
-		case ctrl_wetwipe_step1:	if (step_lift_in_top_pos())
-									{
-										if (!step_rob_reference_done()) step_rob_do_reference();
-										plc_to_wipe_pos();
-										_RobotCtrlMode=ctrl_wetwipe_step2;
-									}
-									break;
-			
-		case ctrl_wetwipe_step2:	if (step_rob_reference_done())
-									{
-										step_rob_to_wipe_pos(rob_fct_wetwipe);
-										_RobotCtrlMode=ctrl_wetwipe_step3;
-									}
-									break;
-			
-		case ctrl_wetwipe_step3:	if (plc_in_wipe_pos() && step_rob_in_wipe_pos(rob_fct_wetwipe))
-									{
-										step_lift_to_wipe_pos(ctrl_wetwipe);
-										_RobotCtrlMode=ctrl_wetwipe_step4;
-									}
-									break;
-				
-		case ctrl_wetwipe_step4:	if (step_lift_in_wipe_pos(ctrl_wetwipe))
-									{
-										step_rob_wipe_start(ctrl_wetwipe);
-										_RobotCtrlMode=ctrl_wetwipe_step5;
-									}
-									break;
-				
-		case ctrl_wetwipe_step5:	if (step_rob_wipe_done(ctrl_wetwipe))
-									{
-										step_lift_to_top_pos();
-										//step_rob_to_center_pos();
-										_RobotCtrlMode=ctrl_wetwipe_step6;
-									}
-									break;
-				
-		case ctrl_wetwipe_step6:	if (step_lift_in_top_pos())
-									{
-										_RobotCtrlMode = ctrl_wipe;
-									}
-									break;
-		*/
-			
-		//--- ctrl_wipe -------------------------------------------------------------------------------------
-		case ctrl_wipe:						
-		case ctrl_wash:				step_lift_to_top_pos();
-									_RobotCtrlMode = ctrl_wipe_step1;
-									break;
-				
-		case ctrl_wipe_step1:		if (step_lift_in_top_pos())
-									{
-										if (!step_rob_reference_done()) step_rob_do_reference();
-										plc_to_wipe_pos();
-										_RobotCtrlMode=ctrl_wipe_step2;
-									}
-									break;
-			
-		case ctrl_wipe_step2:		if (step_rob_reference_done())
-									{
-										step_rob_to_wipe_pos(rob_fct_wipe);
-										_RobotCtrlMode=ctrl_wipe_step3;										
-									}
-									break;
-				
-		case ctrl_wipe_step3:		if (plc_in_wipe_pos() && step_rob_in_wipe_pos(rob_fct_wipe))
-									{
-										step_lift_to_wipe_pos(ctrl_wipe);
-										_RobotCtrlMode=ctrl_wipe_step4;
-									}
-									break;
-				
-		case ctrl_wipe_step4:		if (step_lift_in_wipe_pos(ctrl_wipe))
-									{
-										step_rob_wipe_start(ctrl_wipe);
-										_RobotCtrlMode=ctrl_wipe_step5;
-									}
-									break;
-
-		case ctrl_wipe_step5:		if (step_rob_wipe_done(ctrl_wipe))
-									{
-										step_lift_to_top_pos();
-										_RobotCtrlMode=ctrl_wipe_step6;
-									}
-									break;
-
-		case ctrl_wipe_step6:		if (step_lift_in_top_pos())
-									{
-										_RobotCtrlMode = ctrl_vacuum;
-									}
-									break;
-				
-		//--- ctrl_vacuum ----------------------------------------------------
-		case ctrl_vacuum:			step_lift_to_top_pos();
-									_RobotCtrlMode = ctrl_vacuum_step1;
-									break;
-				
-		case ctrl_vacuum_step1:		if (step_lift_in_top_pos())
-									{
-										if (!step_rob_reference_done()) step_rob_do_reference();
-										plc_to_wipe_pos();
-										_RobotCtrlMode=ctrl_vacuum_step2;
-									}
-									break;
-		case ctrl_vacuum_step2:		if (step_rob_reference_done())
-									{
-										step_rob_to_wipe_pos(rob_fct_vacuum);
-										_RobotCtrlMode=ctrl_vacuum_step3;										
-									}
-									break;
-		case ctrl_vacuum_step3:		if (plc_in_wipe_pos() && step_rob_in_wipe_pos(rob_fct_vacuum))
-									{
-										step_lift_to_wipe_pos(ctrl_vacuum);
-										_RobotCtrlMode=ctrl_vacuum_step4;
-									}
-									break;
-				
-		case ctrl_vacuum_step4:		if (step_lift_in_wipe_pos(ctrl_vacuum))
-									{
-										step_rob_wipe_start(ctrl_vacuum);
-										_RobotCtrlMode=ctrl_vacuum_step5;
-									}
-									break;
-				
-		case ctrl_vacuum_step5:		if (step_rob_wipe_done(ctrl_vacuum))
-									{
-										step_lift_to_top_pos();
-										_RobotCtrlMode=ctrl_vacuum_step6;
-									}
-									break;
-				
-		case ctrl_vacuum_step6:		if (step_lift_in_top_pos())
-									{
-										step_rob_to_wipe_pos(rob_fct_vacuum_change);
-										_RobotCtrlMode=ctrl_vacuum_step7;
-									}
-									break;
-				
-		case ctrl_vacuum_step7:		if (step_rob_in_wipe_pos(rob_fct_vacuum_change))
-									{
-										step_rob_to_wipe_pos(rob_fct_vacuum);
-										_RobotCtrlMode=ctrl_vacuum_step8;
-									}
-									break;
-				
-		case ctrl_vacuum_step8:		if (step_rob_in_wipe_pos(rob_fct_vacuum))
-									{
-										step_lift_to_wipe_pos(ctrl_vacuum);
-										_RobotCtrlMode=ctrl_vacuum_step9;
-									}
-									break;
-				
-		case ctrl_vacuum_step9:		if (step_lift_in_wipe_pos(ctrl_vacuum))
-									{
-										step_rob_wipe_start(ctrl_vacuum);
-										_RobotCtrlMode=ctrl_vacuum_step10;
-									}
-									break;
-				
-		case ctrl_vacuum_step10:	if (step_rob_wipe_done(ctrl_vacuum))
-									{
-										_printing = (RX_PrinterStatus.printState==ps_pause);
-										if (_printing) step_lift_to_print_pos();
-										else		   step_lift_to_up_pos();
-										_RobotCtrlMode=ctrl_vacuum_step11;
-									}
-									break;
-				
-		case ctrl_vacuum_step11:	if ((_printing && step_lift_in_print_pos()) || (!_printing && step_lift_in_top_pos()))
-									{
-										Error(LOG, 0, "ctrl_vacuum_step10 printState=%d", RX_PrinterStatus.printState);
-										if (_printing) _RobotCtrlMode = ctrl_print;
-										else		   _RobotCtrlMode = ctrl_off;
-									}
-									break;
-
-		//--- ctrl_cap -----------------------------------------------------------------------------
-		case ctrl_cap:				step_lift_to_top_pos();
-									_RobotCtrlMode=ctrl_cap_step1;
-									break;
-				
-		case ctrl_cap_step1:		if (step_lift_in_top_pos())
-									{
-										if (!step_rob_reference_done()) step_rob_do_reference();
-										plc_to_purge_pos();
-										_RobotCtrlMode=ctrl_cap_step2;
-									}
-									break;	 
-				
-		case ctrl_cap_step2:		if (plc_in_purge_pos() && step_rob_reference_done()) 
-									{
-										step_rob_to_wipe_pos(rob_fct_cap);
-										_RobotCtrlMode=ctrl_cap_step3;
-									}
-									break;
-			
-		case ctrl_cap_step3:		if (step_rob_in_wipe_pos(rob_fct_cap))
-									{
-										plc_to_wipe_pos();
-										_RobotCtrlMode=ctrl_cap_step4;
-									}
-									break;		
-			
-		case ctrl_cap_step4:		if (plc_in_wipe_pos())
-									{
-										step_lift_to_wipe_pos(ctrl_cap);
-										_RobotCtrlMode=ctrl_cap_step5;
-									}
-									break;
-			
-		case ctrl_cap_step5:		if (step_lift_in_wipe_pos(ctrl_cap))
-									{
-										_RobotCtrlMode = ctrl_off;
-									}
-									break;
-		default: return;
-		}
-		if (_RobotCtrlMode!=old)
-			_send_ctrlMode(-1, _RobotCtrlMode, TRUE);
-	}
-}	
-
 //--- fluid_reply_stat ------------------------------------
 void fluid_reply_stat(RX_SOCKET socket)	// to GUI
 {
@@ -1066,13 +825,13 @@ void fluid_send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 	if (ctrlMode==ctrl_purge_hard || ctrlMode == ctrl_purge_hard_wipe || ctrlMode == ctrl_purge || ctrlMode == ctrl_purge_soft) _PurgeFluidNo=no;
 	
 	_FluidCtrlMode = ctrlMode;
-	_RobotCtrlMode = ctrlMode;
+//	_RobotCtrlMode = ctrlMode;
 	_send_ctrlMode(no, ctrlMode, sendToHeads);
 //	Error(LOG, 0, "fluid_send_ctrlMode 0X%04x", ctrlMode);
 	switch (RX_Config.printer.type)
 	{
 	case printer_TX801:
-	case printer_TX802:		steptx_rob_control(ctrlMode);
+	case printer_TX802:		steptx_set_robCtrlMode(ctrlMode);
 							break;
 	case printer_LB701:
 	case printer_LB702_UV:
