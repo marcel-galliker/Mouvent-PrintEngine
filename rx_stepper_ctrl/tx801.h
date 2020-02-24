@@ -15,6 +15,8 @@
 
 #include "rx_sok.h"
 
+#define TX_PRINT_POS_MIN 1200
+
 void tx801_init(void);
 int  tx801_menu(void);
 void tx801_main(int ticks, int menu);

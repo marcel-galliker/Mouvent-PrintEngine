@@ -19,24 +19,17 @@
 #include "power_step.h"
 #include "motor_cfg.h"
 #include "motor.h"
+#include "tx80x_wd.h"
 #include "txrob.h"
-#include "stepper_ctrl.h"
 
 //--- defines ------------------------------------------------
 
 // General
 #define MOTOR_ALL_ROBOT_BITS	0x03
 #define MAIN_PER_SEC			930			// Main executions per sec
-#define STEPS_REV				(200*16)	// steps per motor revolution * 16 microsteps
-#define DIST_REV				1000.0		// moving distance per revolution on wrinkle detection motor [µm]
 
 // Rotation Motor // 200 steps/rev // max 4.2 Amp
-// #define CURRENT_HOLD_ROT	200.0
 #define CURRENT_HOLD_ROT	50.0	// 2Amp Holding current is too high!
-
-#define CURRENT_HOLD_WD		50.0
-#define TX_PRINT_POS_MIN	1200.0
-#define TX_REF_HEIGHT_WD	9000
 
 #define MOTOR_ROT			0
 #define MOTOR_ROT_BITS		0x01
@@ -54,15 +47,6 @@
 #define MOTOR_SHIFT_BITS	0x02
 #define MOTOR_SHIFT_VAR		100 // 20 // 10 // max allowed variance 
 
-#define MOTOR_WRINKLE_DETECTION_FRONT		2
-#define MOTOR_WRINKLE_DETECTION_FRONT_BITS	0x04
-
-#define MOTOR_WRINKLE_DETECTION_BACK		3
-#define MOTOR_WRINKLE_DETECTION_BACK_BITS	0x08
-
-#define MOTOR_WD_BITS					    0x0c
-#define MOTOR_WD_CNT						2
-
 #define SHIFT_STEPS_PER_METER	1600000.0 // 200 * 16 * / 2mm * 1000mm
 #define SHIFT_INC_PER_METER		2000000.0 // 1600000.0 / 0.8
 
@@ -74,8 +58,6 @@
 //#define ROB_FUNCTION_WIPE	3
 //#define ROB_FUNCTION_TILT	4
 #define ROB_FUNCTION_VACUUM_CHANGE	5
-
-
 
 #define ROB_SIDE_MOVINGS	3
 
@@ -89,7 +71,6 @@
 #define POS_ROT_TILT				(POS_ROT_CAP-_TiltSteps)
 #define POS_ROT_VAC_1_TO_4_TO_ALL	(ROT_STEPS_PER_REV/4.0*2.5)
 #define POS_ROT_VAC_5_TO_8_TO_ALL	(ROT_STEPS_PER_REV/4.0*0.5)
-
 
 // ENCODER_ROT Positions
 #define POS_ENC_WIPE				(ROT_INC_PER_REV/4.0*0)
@@ -113,8 +94,6 @@
 #define POS_SHIFT_MAX_TURN		(SHIFT_STEPS_PER_METER*(0.024+0.055))
 //#define POS_SHIFT_START		(SHIFT_STEPS_PER_METER*(0.024-0.024)) // (SHIFT_STEPS_PER_METER*(0.024+0.024))
 
-
-
 #define POS_SHIFT_CENTER	 POS_SHIFT_CENTER_801
 
 // Inputs
@@ -122,9 +101,6 @@
 #define SHIFT_STORED_IN		1
 #define ROT_VAC_OR_WASH_IN	2
 #define ROT_WASH_OR_CAP_IN	3
-#define WD_FRONT_STORED_IN	4
-#define WD_BACK_STORED_IN	5
-#define WRINKLE_DETECTED	6
 
 // Outputs
 #define VAC_ON				0x001 // 0
@@ -178,17 +154,12 @@ static int	POS_SHIFT[POS_SHIFT_CNT] = {
 //--- global  variables -----------------------------------------------------------------------------------------------------------------
 static int	_CmdRunning = 0; 
 static char	_CmdName[32];
-static int	_ResetRetried = 0;
 static int  _LastRobPosCmd = 0;
 static int  _RobFunction = 0;
-static int  _ShowStatus = 0;
 static int	_NewCmd = 0;
 static int	_NewCmdPos = 0;
 static int	_TimeCnt = 0;
-static int  _first_move = 0;
-//static int  _stop_reached = 0;
-static int _CapTilt = 0;
-static int _MoveLeftPos = 0;
+static int  _MoveLeftPos = 0;
 
 static int _WipeWaiting = FALSE;
 static int _VacuumWaiting = FALSE;
@@ -198,6 +169,9 @@ static int _PosShiftEnd = 0;
 
 static int _Reference_Count = 0;
 static int _Max_Reference = 3;
+
+static int _Help = FALSE;
+static int _Menu = 1;
 
 // static SMovePar	_ParRotRef;
 static SMovePar	_ParRotSensRef;
@@ -211,17 +185,7 @@ static SMovePar	_ParShiftWipe;
 
 static ERobotVacuumState _VacuumState;
 
-static SMovePar _ParWDRef;
-static SMovePar _ParWDDrive;
-
 static UINT32	_txrob_Error[5];
-
-// variables for Wrinkle Detection
-static int _CmdRunningWD = 0;
-static int _PrintPos_New = 0;
-static int _PrintPos_Act = 0;
-static int _WD_in_print = 0;
-static int _WrinkleDetected = 0;
 
 
 // Times and Parameters
@@ -231,10 +195,7 @@ static int	_TimeFillCap801 = 14;	// in s
 static int	_TimeFillCap802 = 25;	// in s
 static int	_SpeedShift = 19000; // in steps/s
 static int	_RotRefOffset = 11; // in steps
-static int _TiltSteps = 90;     // in steps
-
-// Times for Wrinkle Detection
-static int _TimeWrinkleDetected = 2000;	// in ms
+static int  _TiltSteps = 90;     // in steps
 
 //--- prototypes --------------------------------------------
 static void _txrob_motor_test(int motor, int steps);
@@ -262,13 +223,6 @@ static int  _vacuum_done(void);
 static int  _vacuum_in_change(void);
 
 static int _robot_left(void);
-
-// Functions for the wrinkle detection
-static void _tx801_wd_main(void);
-static void _tx801_wrinkledetection_do_reference(void);
-static int _micron_2_steps(int micron);
-static int _steps_2_micron(int steps);
-static void _tx801_wd_move_to_pos(int cmd, int pos);
 
 //--- txrob_init --------------------------------------
 void txrob_init(void)
@@ -341,27 +295,6 @@ void txrob_init(void)
 	_ParShiftWipe.encCheck		= chk_std;
 
     //--- movement parameters Wrinkle Detection motors ----------------
-
-    motors_config(MOTOR_WD_BITS, CURRENT_HOLD_WD, L3518_STEPS_PER_METER, L3518_INC_PER_METER, STEPS);
-    
-    _ParWDRef.speed = 10000;
-    _ParWDRef.accel = 32000;
-    _ParWDRef.current_acc = 150;
-    _ParWDRef.current_run = 100;
-    _ParWDRef.estop_in_bit[0] = (1 << WD_FRONT_STORED_IN);
-    _ParWDRef.estop_in_bit[1] = (1 << WD_BACK_STORED_IN);
-    _ParWDRef.estop_level = 1;
-    _ParWDRef.stop_mux = MOTOR_WD_BITS;
-    _ParWDRef.dis_mux_in = TRUE;
-    _ParWDRef.encCheck = chk_std;
-
-    _ParWDDrive.speed = 10000;
-    _ParWDDrive.accel = 32000;
-    _ParWDDrive.current_acc = 200.0;
-    _ParWDDrive.current_run = 100.0;
-    _ParWDDrive.stop_mux = MOTOR_WD_BITS;
-    _ParWDDrive.dis_mux_in = FALSE;
-    _ParWDDrive.encCheck = chk_std;
 	
 	//--- Outputs ----------------
 	Fpga.par->output &= ~RO_ALL_OUTPUTS; // ALL OUTPUTS OFF
@@ -561,7 +494,6 @@ void txrob_main(int ticks, int menu)
                 RX_StepperStatus.robinfo.ref_done = FALSE;
                 Error(ERR_CONT, 0, "Stepper: Command %s: Motor[%d] blocked", _CmdName, motor + 1);
                 _CmdRunning = FALSE;
-                _ResetRetried = 0;
                 Fpga.par->output &= ~RO_ALL_OUTPUTS; // set all output to off
             }
             else if (_rot_pos_check_err(motor_get_step(MOTOR_ROT)))
@@ -632,12 +564,6 @@ void txrob_main(int ticks, int menu)
             motors_reset(MOTOR_ROT_BITS);
             RX_StepperStatus.posZ = _rot_steps_2_rev(motor_get_step(MOTOR_ROT));
             RX_StepperStatus.robinfo.ref_done = TRUE;
-		}
-		
-		// --- tasks after motor stop ---
-		if (_CmdRunning == CMD_CLN_STOP)
-		{
-			_ResetRetried = 0;
 		}
 		
 		//========================================== rot ==========================================
@@ -807,26 +733,24 @@ void txrob_main(int ticks, int menu)
 		// --- Execute next Commands ---
 		switch (loc_new_cmd)
 		{
-		case CMD_CLN_REFERENCE: txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_REFERENCE, NULL); break;
-		case CMD_CLN_SHIFT_REF: txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_SHIFT_REF, NULL); break;
-		case CMD_CLN_ROT_REF:	txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_ROT_REF, NULL); break;
-		case CMD_CLN_ROT_REF2:	txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_ROT_REF2, NULL); break;
-		case CMD_CLN_MOVE_POS:	txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_MOVE_POS, &loc_move_pos); break;
-		case CMD_CLN_SHIFT_MOV: txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_SHIFT_MOV, &loc_move_pos); break;
-		case CMD_CLN_FILL_CAP :	txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_FILL_CAP, NULL); break;
-		case CMD_CLN_TILT_CAP :	txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_TILT_CAP, NULL); break;
-		case CMD_CLN_EMPTY_WASTE: txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_EMPTY_WASTE, NULL); break;
-		case CMD_CLN_VACUUM:	txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_VACUUM, NULL); break;
-		case CMD_CLN_WAIT:	txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_WAIT, &loc_move_pos); break;
+		case CMD_CLN_REFERENCE:		txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_REFERENCE, NULL); break;
+		case CMD_CLN_SHIFT_REF:		txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_SHIFT_REF, NULL); break;
+		case CMD_CLN_ROT_REF:		txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_ROT_REF, NULL); break;
+		case CMD_CLN_ROT_REF2:		txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_ROT_REF2, NULL); break;
+		case CMD_CLN_MOVE_POS:		txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_MOVE_POS, &loc_move_pos); break;
+		case CMD_CLN_SHIFT_MOV:		txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_SHIFT_MOV, &loc_move_pos); break;
+		case CMD_CLN_FILL_CAP :		txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_FILL_CAP, NULL); break;
+		case CMD_CLN_TILT_CAP :		txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_TILT_CAP, NULL); break;
+		case CMD_CLN_EMPTY_WASTE:	txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_EMPTY_WASTE, NULL); break;
+		case CMD_CLN_VACUUM:		txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_VACUUM, NULL); break;
+		case CMD_CLN_WAIT:			txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_WAIT, &loc_move_pos); break;
 		case 0: break;
-		default:				Error(ERR_CONT, 0, "TXROB_MAIN: Command 0x%08x not implemented", loc_new_cmd); break;
+		default:					Error(ERR_CONT, 0, "TXROB_MAIN: Command 0x%08x not implemented", loc_new_cmd); break;
 		}
 		loc_new_cmd = FALSE;
 		loc_move_pos = 0;
 
 	}
-
-    _tx801_wd_main();
 }
 
 //--- txrob_display_status ---------------------------------------------------------
@@ -851,7 +775,7 @@ static void _txrob_display_status(void)
 	}
 	term_printf("\n");
 	term_printf("\n");
-	
+
 	term_printf("TX80x Robot Advanced mechref ---------------------------------\n");
 	term_printf("moving:              %d		cmd: %08x\n", RX_StepperStatus.robinfo.moving, _CmdRunning);
 	term_printf("move ok:             %d\n", RX_StepperStatus.robinfo.move_ok);
@@ -859,20 +783,13 @@ static void _txrob_display_status(void)
 	term_printf("Sensor Ref Shift:    %d\n", RX_StepperStatus.robinfo.x_in_ref);
 	term_printf("Ref done:            %d\n", RX_StepperStatus.robinfo.ref_done);
 	term_printf("Rotation in rev:     %06d\n", RX_StepperStatus.posZ);
-	term_printf("Rotation in steps:   %06d\n", motor_get_step(MOTOR_ROT));
-	term_printf("Rotation in encsteps:%06d\n", Fpga.encoder[MOTOR_ROT].pos);
 	term_printf("Shift in um:         %06d\n", RX_StepperStatus.posX);
-	term_printf("Shift in steps:      %06d\n", motor_get_step(MOTOR_SHIFT));
-	term_printf("Rotation RefOffset:  %06d\n", _RotRefOffset);
 	term_printf("Tilt for Cap:        %06d\n", _TiltSteps);
 	term_printf("Time Waste Vac [s]:  %06d\n", _TimeWastePump);
 	term_printf("Time fill Cap [s]:   %06d\n", _TimeFillCap);
 	term_printf("Speed Shift [mm/s]:  %06d\n", _SpeedShift * 2 / 200 / 16);
 	term_printf("Timer Count:         %06d\n", _TimeCnt);
 	term_printf("\n");
-	term_printf("x position in micro:  %d\n", RX_StepperStatus.posX);	
-	term_printf("y position in micro:  %d\n", RX_StepperStatus.posY);	
-	term_printf("z position in micro:  %d\n", RX_StepperStatus.posZ);
 	term_printf("Vaccum State:         %d\n", _VacuumState);
 	term_printf("Vacuum Ready:         %d\n", RX_StepperStatus.robinfo.vacuum_ready);
 	term_printf("Roboter in Wipe:      %d\n", RX_StepperStatus.robinfo.rob_in_wipe);
@@ -880,11 +797,66 @@ static void _txrob_display_status(void)
 	term_printf("Roboter in Wash:      %d\n", RX_StepperStatus.robinfo.rob_in_wash);
 	term_printf("Roboter in Cap:       %d\n", RX_StepperStatus.robinfo.rob_in_cap);
     term_printf("\n");
-    term_printf("Reference WD done:     %d\n", RX_StepperStatus.robinfo.ref_done_wd);
-    term_printf("WD-Motor Front pos:    %d\n", TX_REF_HEIGHT_WD - _steps_2_micron(motor_get_step(MOTOR_WRINKLE_DETECTION_FRONT)));
-    term_printf("WD-Motor Back pos:     %d\n", TX_REF_HEIGHT_WD - _steps_2_micron(motor_get_step(MOTOR_WRINKLE_DETECTION_BACK)));
-    term_printf("Wrinkle Detected:      %d\n", RX_StepperStatus.robinfo.wrinkle_detected);
-    term_printf("\n");
+
+}
+
+static void _txrob_handle_menu(char *str)
+{
+    int i, pos;
+    
+    if (str)
+    {
+        switch (str[0])
+        {
+        case 's':	txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_STOP, NULL); break;
+        case 'r':   if (str[1] == 0)	for (i = 0; i < MOTOR_CNT; i++) motor_reset(i);
+					else				motor_reset(atoi(&str[1]));
+					break;
+        case 'o':   Fpga.par->output ^= (1 << atoi(&str[1])); break;
+        case 'R':	txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_REFERENCE, NULL);	break;
+        case 'c':	pos = 0;
+					txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_MOVE_POS, &pos);
+					break;
+        case 'e':	pos = 1;
+					txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_MOVE_POS, &pos);
+					break;
+        case 'a':	pos = 2;
+					txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_MOVE_POS, &pos);
+					break;
+        case 'w':	pos = 3;
+					txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_MOVE_POS, &pos);
+					break;
+        case 'b':	pos = 3;
+					txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_SHIFT_MOV, &pos);
+					break;
+        case 'd':	pos = atoi(&str[1]);
+					if (pos < 0) pos = 0;
+					if (pos > 800) pos = 800;
+					_RotRefOffset = pos;
+					break;
+        case 't':	pos = atoi(&str[1]);
+					if (pos < 0) pos = 0;
+					if (pos > 1000) pos = 1000;
+					_TiltSteps = pos;
+					break;
+        case 'p':	pos = atoi(&str[1]);
+					if (pos < 0) pos = 0;
+					if (pos > 300) pos = 300;
+					_TimeWastePump = pos;
+					break;
+        case 'f':	pos = atoi(&str[1]);
+					if (pos < 0) pos = 0;
+					if (pos > 300) pos = 300;
+					_TimeFillCap = pos;
+					break;
+        case 'v':	pos = (atoi(&str[1])) * 200 * 16 / 2;
+					if (pos < 500) pos = 500;
+					if (pos > 21333) pos = 21333;
+					_SpeedShift = pos;
+					break;
+        case 'm':	_txrob_motor_test(str[1] - '0', atoi(&str[2])); break;
+        }
+    }
 }
 
 //--- txrob_menu --------------------------------------------------
@@ -893,84 +865,60 @@ int txrob_menu(void)
 	char str[MAX_PATH];
 	int synth = FALSE;
 	static int cnt = 0;
-	int i;
-	int pos = 10000;
 
 	_txrob_display_status();
-	
-	term_printf("MENU FLO-ROBOT -------------------------\n");
-	term_printf("s: STOP\n");
-	term_printf("R: Reference\n");
-	term_printf("c: move to capping\n");
-	term_printf("e: move to wash\n");
-	term_printf("a: move to vacuum\n");
-	term_printf("w: move to wipe\n");
-	term_printf("b: shift back\n");
-	term_printf("l: shift left\n");
-	term_printf("d<steps>: set Rotation RefOffset <steps>\n");
-	term_printf("t<steps>: set Tilt for Cap <steps>\n");
-	term_printf("p<sec>: set Time Waste Vac <sec>\n");
-	term_printf("f<sec>: set Time fill Cap <sec>\n");
-	term_printf("v<mm/s>: set Speed Shift for wash <mm/s>\n");
-    term_printf("h<um>: set hight for Wrinkle Detection\n");
-    term_printf("u: move Wrinkle Detection to up position\n");
-	term_printf("x: exit\n");
-    term_printf(">");
-	term_flush();
+    tx80x_wd_display_status();
+    if (_Menu == 1)	term_printf("TX ROB MENU --------------------------\n");
+    else			term_printf("TX WRINKLE DETECTION MENU ------------\n");
 
-	if (term_get_str(str, sizeof(str)))
-	{
-		switch (str[0])
-		{
-		case 's': txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_STOP, NULL);
-            txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_STOP, NULL);
-            break;
-        case 'r': if (str[1] == 0) for (i = 0; i < MOTOR_CNT; i++) motor_reset(i);
-			else           motor_reset(atoi(&str[1]));
-			break;
-		case 'o' : Fpga.par->output ^= (1 << atoi(&str[1])); break;
-		case 'R': txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_REFERENCE, NULL);
-				  txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_REFERENCE, NULL);
-				  break;
-        case 'c': pos = 0; txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_MOVE_POS, &pos); break;
-		case 'e': pos = 1; txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_MOVE_POS, &pos); break;
-		case 'a': pos = 2; txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_MOVE_POS, &pos); break;
-		case 'w': pos = 3; txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_MOVE_POS, &pos); break;
-		case 'b': pos = 3; txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_SHIFT_MOV, &pos); break;
-		
-		case 'd' : pos = atoi(&str[1]); 
-			if (pos < 0) pos = 0;
-			if (pos > 800) pos = 800;
-			_RotRefOffset = pos;
-			break;
-		case 't' : pos = atoi(&str[1]); 
-			if (pos < 0) pos = 0;
-			if (pos > 1000) pos = 1000;
-			_TiltSteps = pos;
-			break;
-		case 'p' : pos = atoi(&str[1]); 
-			if (pos < 0) pos = 0;
-			if (pos > 300) pos = 300;
-			_TimeWastePump = pos;
-			break;
-		case 'f' : pos = atoi(&str[1]); 
-			if (pos < 0) pos = 0;
-			if (pos > 300) pos = 300;
-			_TimeFillCap = pos;
-			break;
-		case 'v' : pos  = (atoi(&str[1])) * 200 * 16 / 2; 
-			if (pos < 500) pos = 500;
-			if (pos > 21333) pos = 21333;
-			_SpeedShift = pos;
-			break;
-        case 'h': pos = atoi(&str[1]);
-            txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_PRINT_POS, &pos);
-            break;
-        case 'u': txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_UP_POS, NULL); break;
-        case 'm': _txrob_motor_test(str[1] - '0', atoi(&str[2])); break;
-		case 'x': return FALSE;
-		}
-	}
+    if (_Menu == 1)
+    {
+        if (_Help)
+        {
+            term_printf("s: STOP\n");
+            term_printf("r<n>: reset motor<n>\n");
+            term_printf("o: toggle output <no>\n");
+            term_printf("R: Reference\n");
+            term_printf("c: move to capping\n");
+            term_printf("e: move to wash\n");
+            term_printf("a: move to vacuum\n");
+            term_printf("w: move to wipe\n");
+            term_printf("b: shift back\n");
+            term_printf("d<steps>: set Rotation RefOffset <steps>\n");
+            term_printf("t<steps>: set Tilt for Cap <steps>\n");
+            term_printf("p<sec>: set Time Waste Vac <sec>\n");
+            term_printf("f<sec>: set Time fill Cap <sec>\n");
+            term_printf("v<mm/s>: set Speed Shift for wash <mm/s>\n");
+            term_printf("m<n><steps>: move Motor<n> by <steps>\n");
+            term_printf("x: exit\n");
+            
+        }
+        else
+        {
+            term_printf("?: help\n");
+            term_printf("2: WRINKLE DETECTION menu\n");
+        }
+    }
+    else tx80x_wd_menu(_Help);
+
+    term_printf(">");
+    term_flush();
+
+    if (term_get_str(str, sizeof(str)))
+    {
+        _Help = FALSE;
+        switch (str[0])
+        {
+        case '?': _Help = TRUE; break;
+        case '1': _Menu = 1; break;
+        case '2': _Menu = 2; break;
+        case 'x': return FALSE;
+        default:
+            if (_Menu == 1) _txrob_handle_menu(str);
+            else			tx80x_wd_handle_menu(str);
+        }
+    }
+   
 	return TRUE;
 }
 	
@@ -1004,7 +952,6 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 {	
 	int i;
 	INT32 pos, steps;
-    INT32 pos_wd, steps_wd;
     EnFluidCtrlMode	ctrlMode;
 	int firsttime = 0;
 	
@@ -1217,7 +1164,7 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 			motors_move_to_step(MOTOR_SHIFT_BITS, &_ParShiftWet, pos);
 		}
 		
-	case CMD_CLN_FILL_CAP :		strcpy(_CmdName, "CMD_CLN_FILL_CAP");
+	case CMD_CLN_FILL_CAP:		strcpy(_CmdName, "CMD_CLN_FILL_CAP");
 		TrPrintfL(TRUE, "SOCKET[%d]: %s", socket, _CmdName);
 		if (!_CmdRunning || _CmdRunning == CMD_FLUID_CTRL_MODE)
 		{
@@ -1228,7 +1175,7 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		}
 		break;
 		
-	case CMD_CLN_WAIT :		strcpy(_CmdName, "CMD_CLN_WAIT");
+	case CMD_CLN_WAIT:		strcpy(_CmdName, "CMD_CLN_WAIT");
 		TrPrintfL(TRUE, "SOCKET[%d]: %s", socket, _CmdName);
 		if (!_CmdRunning || _CmdRunning == CMD_FLUID_CTRL_MODE)
 		{
@@ -1239,7 +1186,7 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		}
 		break;
 		
-	case CMD_CLN_TILT_CAP :		strcpy(_CmdName, "CMD_CLN_TILT_CAP");
+	case CMD_CLN_TILT_CAP:		strcpy(_CmdName, "CMD_CLN_TILT_CAP");
 		TrPrintfL(TRUE, "SOCKET[%d]: %s", socket, _CmdName);
 		if (!_CmdRunning || _CmdRunning == CMD_FLUID_CTRL_MODE)
 		{
@@ -1255,7 +1202,7 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		
 		break;
 		
-	case CMD_CLN_EMPTY_WASTE :		strcpy(_CmdName, "CMD_CLN_EMPTY_WASTE");
+	case CMD_CLN_EMPTY_WASTE:		strcpy(_CmdName, "CMD_CLN_EMPTY_WASTE");
 		TrPrintfL(TRUE, "SOCKET[%d]: %s", socket, _CmdName);
 		if (!_CmdRunning || _CmdRunning == CMD_FLUID_CTRL_MODE)
 		{
@@ -1267,7 +1214,7 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		}
 		break;
 		
-	case CMD_CLN_VACUUM :		strcpy(_CmdName, "CMD_CLN_VACUUM");
+	case CMD_CLN_VACUUM:		strcpy(_CmdName, "CMD_CLN_VACUUM");
 		TrPrintfL(TRUE, "SOCKET[%d]: %s", socket, _CmdName);
 		if (!_CmdRunning || _CmdRunning == CMD_FLUID_CTRL_MODE)
 		{
@@ -1286,57 +1233,13 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		break;
         
     case CMD_CAP_STOP:
-		TrPrintfL(TRUE, "SOCKET[%d]: %s", socket, _CmdName);
-        motors_stop(MOTOR_WD_BITS);
-        break;
-        
-    case CMD_CAP_REFERENCE:				strcpy(_CmdName, "CMD_CAP_REFERENCE");
-		TrPrintfL(TRUE, "SOCKET[%d]: %s", socket, _CmdName);
-        motors_reset(MOTOR_WD_BITS);
-        RX_StepperStatus.robinfo.ref_done_wd = FALSE;
-        _tx801_wrinkledetection_do_reference();
-        break;
-
-    case CMD_CAP_PRINT_POS:		        strcpy(_CmdName, "CMD_CAP_PRINT_POS");
-		TrPrintfL(TRUE, "SOCKET[%d]: %s", socket, _CmdName);
-        pos_wd = (*((INT32 *)pdata));
-        if (pos_wd < TX_PRINT_POS_MIN)
-        {
-            pos_wd = TX_PRINT_POS_MIN;
-            Error(WARN, 0, "CMD_CAP_PRINT_POS of Wrinkle Detection set to MIN pos=%d.%03d mm", pos_wd / 1000, pos_wd % 1000);
-        }
-        else if (pos_wd > TX_REF_HEIGHT_WD)
-        {
-            pos_wd = TX_REF_HEIGHT_WD;
-            Error(WARN, 0, "CMD_CAP_PRINT_POS of Wrinkle Detection set to MAX pos=%d.%03d mm", pos_wd / 1000, pos_wd % 1000);
-        }
-        if (!_CmdRunningWD && (!_WD_in_print || (steps_wd != _PrintPos_Act)))
-        {
-            _PrintPos_New = _micron_2_steps(TX_REF_HEIGHT_WD + 500 - pos_wd);
-            if (RX_StepperStatus.robinfo.ref_done_wd)
-                _tx801_wd_move_to_pos(CMD_CAP_PRINT_POS, _PrintPos_New);
-            else
-                _tx801_wrinkledetection_do_reference();
-        }
-        break;
-        
+    case CMD_CAP_REFERENCE:
+    case CMD_CAP_PRINT_POS:
     case CMD_CAP_UP_POS:
     case CMD_CAP_CAPPING_POS:
     case CMD_CAP_WASH_POS:
     case CMD_CAP_WIPE_POS:
-    case CMD_CAP_VACUUM_POS:
-        strcpy(_CmdName, "CMD_CAP_UP_POS");
-		TrPrintfL(TRUE, "SOCKET[%d]: %s", socket, _CmdName);
-        if (!_CmdRunningWD)
-        {
-            _PrintPos_New = _micron_2_steps(500);
-            if (RX_StepperStatus.robinfo.ref_done_wd)
-                _tx801_wd_move_to_pos(CMD_CAP_UP_POS, _PrintPos_New);
-            else
-                _tx801_wrinkledetection_do_reference();
-        }
-        break;
-
+    case CMD_CAP_VACUUM_POS: break;
 
     default:						Error(ERR_CONT, 0, "CLN: Command 0x%08x not implemented", msgId); break;
 	}
@@ -1372,7 +1275,7 @@ static void _txrob_motor_test(int motorNo, int steps)
         motors_config(motors, 0, L3518_STEPS_PER_METER, L3518_INC_PER_METER, MICROSTEPS);
 		motors_move_by_step(motors, &par, steps, FALSE);			
 	}
-	else
+	else if (motorNo == MOTOR_SHIFT)
 	{
         // paramaters tested 14-JAN-20
         
@@ -1481,101 +1384,6 @@ static int _robot_left(void)
 	else return FALSE;
 }
 
-static void _tx801_wd_main(void)
-{
-    int motor, ok;
 
-    if (rx_get_ticks() >= _WrinkleDetected + _TimeWrinkleDetected)
-        _WrinkleDetected = 0;
 
-    // read Inputs
-    RX_StepperStatus.robinfo.wrinkle_detected = fpga_input(WRINKLE_DETECTED) || _WrinkleDetected; // || _WrinkleDetected;
-    if (RX_StepperStatus.robinfo.wrinkle_detected && !_WrinkleDetected)
-    {
-        ctrl_send_2(REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);
-        _WrinkleDetected = rx_get_ticks();
-    }
 
-    if (RX_StepperStatus.robinfo.moving_wd)
-    {
-        _WD_in_print = FALSE;
-		_WrinkleDetected = 0;
-    }
-
-    RX_StepperStatus.robinfo.wd_front_up = fpga_input(WD_FRONT_STORED_IN);
-    RX_StepperStatus.robinfo.wd_back_up = fpga_input(WD_BACK_STORED_IN);
-    if (_CmdRunningWD && motors_move_done(MOTOR_WD_BITS))
-    {
-        RX_StepperStatus.robinfo.moving_wd = FALSE;
-        if (_CmdRunningWD == CMD_CAP_REFERENCE)
-        {
-            for (motor = MOTOR_WRINKLE_DETECTION_FRONT, ok = TRUE; motor < MOTOR_WD_CNT; motor++)
-            {
-                if ((Fpga.stat->statMot[motor].err_estop & ENC_ESTOP_ENC))
-                {
-                    if (!fpga_input(motor))
-                    {
-                        Error(ERR_ABORT, 0, "WRINKLE DETECTION: %s: motor %s blocked", _CmdName, motor+1);
-                        ok = FALSE;
-                    }
-                }
-            }
-            motors_reset(MOTOR_WD_BITS);
-            RX_StepperStatus.robinfo.ref_done_wd = ok && RX_StepperStatus.robinfo.wd_front_up && RX_StepperStatus.robinfo.wd_back_up;
-        }
-        else
-        {
-            for (motor = MOTOR_WRINKLE_DETECTION_FRONT, ok = TRUE; motor < MOTOR_WD_CNT; motor++)
-            {
-                if (motor_error(motor))
-                {
-                    Error(ERR_ABORT, 0, "WRINKLE DETECTION: %s: motor %s blocked", _CmdName, motor + 1);
-                    ok = FALSE;
-                }
-            }
-            if (!ok) RX_StepperStatus.robinfo.ref_done_wd = FALSE;
-        }
-
-        _WD_in_print = (_CmdRunning == CMD_CAP_PRINT_POS && RX_StepperStatus.info.ref_done);
-        
-        if (_CmdRunningWD == CMD_CAP_REFERENCE && _PrintPos_New)
-        {
-            _tx801_wd_move_to_pos(CMD_CAP_PRINT_POS, _PrintPos_New);
-            _PrintPos_Act = _PrintPos_New;
-            _PrintPos_New = 0;
-        }
-        else
-            _CmdRunningWD = FALSE;
-    }
-}
-
-//--- _tx801_wrinkledetection_do_reference ----------------------------------------------------------------
-static void _tx801_wrinkledetection_do_reference(void)
-{
-    motors_stop(MOTOR_WD_BITS);
-    //motors_config(MOTOR_WD_BITS, CURRENT_HOLD_WD, L3518_STEPS_PER_METER, L3518_INC_PER_METER, STEPS);
-
-    _CmdRunningWD = CMD_CAP_REFERENCE;
-    RX_StepperStatus.robinfo.moving_wd = TRUE;
-    motors_move_by_step(MOTOR_WD_BITS, &_ParWDRef, -100000, TRUE);
-}
-//--- _tx801_wd_move_to_pos -----------------------------------------------------------------
-
-static void _tx801_wd_move_to_pos(int cmd, int pos)
-{
-    _CmdRunningWD = cmd;
-    RX_StepperStatus.info.moving = TRUE;
-    motors_move_to_step(MOTOR_WD_BITS, &_ParWDDrive, pos);
-}
-
-//---_micron_2_steps --------------------------------------------------------------
-static int _micron_2_steps(int micron)
-{
-    return (int)(0.5 + STEPS_REV / DIST_REV * micron);
-}
-
-//---_steps_2_micron --------------------------------------------------------------
-static int _steps_2_micron(int steps)
-{
-    return (int)(DIST_REV * steps / STEPS_REV + 0.5);
-}

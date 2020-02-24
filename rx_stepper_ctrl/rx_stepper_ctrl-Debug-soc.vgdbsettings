@@ -215,7 +215,7 @@
     <LaunchGDBSettings xsi:type="GDBLaunchParametersNewInstance">
       <DebuggedProgram>$(TargetPath)</DebuggedProgram>
       <GDBServerPort>2000</GDBServerPort>
-      <ProgramArguments>-debug +flo +floro +tt +test +cln +lb701 -lb702 +cleaf +tx801</ProgramArguments>
+      <ProgramArguments>-debug +flo +floro +tt +test +cln +lb701 +lb702 +cleaf +tx801 +txro</ProgramArguments>
     </LaunchGDBSettings>
     <GenerateCtrlBreakInsteadOfCtrlC>false</GenerateCtrlBreakInsteadOfCtrlC>
     <DeploymentTargetPath />
