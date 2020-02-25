@@ -5,11 +5,11 @@
 BINARYDIR := Debug-soc
 
 #Toolchain
-CC := $(TOOLCHAIN_ROOT)/bin/arm-linux-gnueabi-gcc.exe
-CXX := $(TOOLCHAIN_ROOT)/bin/arm-linux-gnueabi-g++.exe
+CC := $(TOOLCHAIN_ROOT)/bin/arm-linux-gnueabihf-gcc.exe
+CXX := $(TOOLCHAIN_ROOT)/bin/arm-linux-gnueabihf-g++.exe
 LD := $(CXX)
-AR := $(TOOLCHAIN_ROOT)/bin/arm-linux-gnueabi-ar.exe
-OBJCOPY := $(TOOLCHAIN_ROOT)/bin/arm-linux-gnueabi-objcopy.exe
+AR := $(TOOLCHAIN_ROOT)/bin/arm-linux-gnueabihf-ar.exe
+OBJCOPY := $(TOOLCHAIN_ROOT)/bin/arm-linux-gnueabihf-objcopy.exe
 
 
 #Additional flags

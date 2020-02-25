@@ -43,9 +43,9 @@
   </Project>
   <Build xsi:type="com.visualgdb.build.make">
     <ToolchainID>
-      <ID>com.sysprogs.imported.arm-linux-gnueabi</ID>
+      <ID>com.sysprogs.imported.arm-linux-gnueabi2</ID>
       <Version>
-        <GCC>4.7.1</GCC>
+        <GCC>4.7.3</GCC>
         <GDB>(crosstool-NG</GDB>
         <Revision>0</Revision>
       </Version>
@@ -76,10 +76,6 @@
     <AdditionalMakeArguments />
     <MakeCommandTemplate>
       <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
-      <RemoteHost>
-        <HostName>BuildMachine</HostName>
-        <Transport>BuiltinShortcut</Transport>
-      </RemoteHost>
       <Command>cmd.exe</Command>
       <Arguments>/c "$(VISUALGDB_DIR)\make.exe"</Arguments>
       <WorkingDirectory>$(BuildDir)</WorkingDirectory>
