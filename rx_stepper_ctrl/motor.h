@@ -45,7 +45,6 @@ typedef enum
 	chk_lbrob,		// 04
 	chk_lb_ref1,	// 05
 	chk_lb_ref2,	// 06
-    chk_txrob_ref2, // 07
 } EEncCheck;
 	
 typedef struct

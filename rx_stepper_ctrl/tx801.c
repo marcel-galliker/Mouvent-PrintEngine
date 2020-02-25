@@ -24,7 +24,6 @@
 #define VENT_MAX_ERROR	50	// * 100 ms intervals
 
 #define TX_REF_HEIGHT		16000
-#define TX_PRINT_POS_MIN	 1200
 
 #define MOTOR_Z_0		0
 #define MOTOR_Z_CNT		4
