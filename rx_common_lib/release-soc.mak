@@ -5,11 +5,11 @@
 BINARYDIR := Release-soc
 
 #Toolchain
-CC := F:/Compiler/altera/13.1/DS-5/bin/arm-linux-gnueabihf-gcc.exe
-CXX := F:/Compiler/altera/13.1/DS-5/bin/arm-linux-gnueabihf-g++.exe
+CC := $(TOOLCHAIN_ROOT)/bin/arm-linux-gnueabihf-gcc.exe
+CXX := $(TOOLCHAIN_ROOT)/bin/arm-linux-gnueabihf-g++.exe
 LD := $(CXX)
-AR := F:/Compiler/altera/13.1/DS-5/bin/arm-linux-gnueabihf-ar.exe
-OBJCOPY := F:/Compiler/altera/13.1/DS-5/bin/arm-linux-gnueabihf-objcopy.exe
+AR := $(TOOLCHAIN_ROOT)/bin/arm-linux-gnueabihf-ar.exe
+OBJCOPY := $(TOOLCHAIN_ROOT)/bin/arm-linux-gnueabihf-objcopy.exe
 
 #Additional flags
 PREPROCESSOR_MACROS := NDEBUG RELEASE soc linux
