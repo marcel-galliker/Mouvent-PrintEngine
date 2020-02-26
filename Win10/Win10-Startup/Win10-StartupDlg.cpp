@@ -331,6 +331,7 @@ void CWin10StartupDlg::OnTimer(UINT_PTR nIDEvent)
 		if (REMOTE)
 		{
 			sprintf(cmd, "net.exe use \\\\%s\\gui /USER:%s %s", _HostName, USER, PASSWORD);
+//			ret= rx_process_execute(cmd, "c:/radex/trace.txt", 1000);
 			ret= rx_process_execute(cmd, NULL, 1000);
 			if (ret==0 && !m_started) 
 			{
