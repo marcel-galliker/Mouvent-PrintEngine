@@ -243,8 +243,8 @@ void txrob_init(void)
 	//_ParRotSensRef.estop_level = 1; // stopp when sensor on
 	_ParRotSensRef.encCheck		= chk_txrob_ref;
 
-	_ParRotDrive.speed		 = 1000; // speed with max tork:
-	_ParRotDrive.accel		 = 1000;
+	_ParRotDrive.speed		 = 800; // speed with max tork:
+	_ParRotDrive.accel		 = 800;
 	_ParRotDrive.current_acc = 400.0; // max 420 = 4.2 A
 	_ParRotDrive.current_run = 400.0; // max 420 = 4.2 A
 	_ParRotDrive.stop_mux	 = 0;
@@ -325,62 +325,70 @@ static int  _rot_pos_check_err(int steps)
 	{
 		if (abs(POS_ENC_ROT[CAP_POS] - Fpga.encoder[MOTOR_ROT].pos) <= MOTOR_SHIFT_VAR)
 		{
-			_VacuumState = rob_vacuum_5_to_8;
-			return FALSE;
+            if (!RX_StepperStatus.robinfo.rob_in_cap)
+                Error(ERR_CONT, 0, "Stepper: Command %s: Motor seems to have slippage, please check connection motor to clutch.", _CmdName);
+            else
+            {
+                _VacuumState = rob_vacuum_5_to_8;
+                return FALSE;
+            }
+            
 		}
 		else
-		{
-            i = Fpga.encoder[MOTOR_ROT].pos;
 			Error(ERR_CONT, 0, "Stepper: Command %s: Motor Encoder at invalid position", _CmdName);
-		}
 	}
+    
 	else if (abs(POS_ROT_TILT - steps) <= MOTOR_ROT_VAR)
 	{
 		if (abs(POS_ENC_TILT - Fpga.encoder[MOTOR_ROT].pos) <= MOTOR_SHIFT_VAR)
-		{
 			return FALSE;
-		}
 		else
-		{
 			Error(ERR_CONT, 0, "Stepper: Command %s: Motor Encoder at invalid position", _CmdName);
-		}
 	}
+    
 	else if (abs(POS_ROT[WASH_POS] - steps) <= MOTOR_ROT_VAR)
 	{
 		if (abs(POS_ENC_ROT[WASH_POS] - Fpga.encoder[MOTOR_ROT].pos) <= MOTOR_SHIFT_VAR)
 		{
-			return FALSE;
+            if (!RX_StepperStatus.robinfo.rob_in_wash)
+                Error(ERR_CONT, 0, "Stepper: Command %s: Motor seems to have slippage, please check connection motor to clutch.", _CmdName);
+            else
+                return FALSE;
 		}
 		else
-		{	
-			i = Fpga.encoder[MOTOR_ROT].pos;
 			Error(ERR_CONT, 0, "Stepper: Command %s: Motor Encoder at invalid position", _CmdName);
-		}
 	}
+    
 	else if (abs(POS_ROT[VAC_POS] - steps) <= MOTOR_ROT_VAR)
 	{
 		if (abs(POS_ENC_ROT[VAC_POS] - Fpga.encoder[MOTOR_ROT].pos) <= MOTOR_SHIFT_VAR)
 		{
-			return FALSE;
+            if (!RX_StepperStatus.robinfo.rob_in_vac)
+                Error(ERR_CONT, 0, "Stepper: Command %s: Motor seems to have slippage, please check connection motor to clutch.", _CmdName);
+            else
+                return FALSE;
 		}
 		else
-		{
-			i = Fpga.encoder[MOTOR_ROT].pos;
 			Error(ERR_CONT, 0, "Stepper: Command %s: Motor Encoder at invalid position", _CmdName);
-		}
 	}
+    
 	else if (abs(POS_ROT[WIPE_POS] - steps) <= MOTOR_ROT_VAR)
 	{
 		if (abs(POS_ENC_ROT[WIPE_POS] - Fpga.encoder[MOTOR_ROT].pos) <= MOTOR_SHIFT_VAR)
 		{
-			_VacuumState = rob_vacuum_1_to_4;
-			return FALSE;
+            if (!RX_StepperStatus.robinfo.rob_in_wipe)
+                Error(ERR_CONT, 0, "Stepper: Command %s: Motor seems to have slippage, please check connection motor to clutch.", _CmdName);
+            else
+            {
+                _VacuumState = rob_vacuum_1_to_4;
+                return FALSE;
+            }
+            
 		}
 		else
-		{
 			Error(ERR_CONT, 0, "Stepper: Command %s: Motor Encoder at invalid position", _CmdName);
-		}
 	}
+    
 	else if (abs(POS_ROT[VAC_POS_1_TO_4_TO_ALL] - steps) <= MOTOR_ROT_VAR)
 	{
 		if (abs(POS_ENC_ROT[VAC_POS_1_TO_4_TO_ALL] - Fpga.encoder[MOTOR_ROT].pos) <= MOTOR_SHIFT_VAR)
@@ -389,10 +397,9 @@ static int  _rot_pos_check_err(int steps)
 			return FALSE;
 		}
 		else
-		{
 			Error(ERR_CONT, 0, "Stepper: Command %s: Motor Encoder at invalid position", _CmdName);
-		}
 	}
+    
 	else if (abs(POS_ROT[VAC_POS_5_TO_8_TO_ALL] - steps) <= MOTOR_ROT_VAR)
 	{
 		if (abs(POS_ENC_ROT[VAC_POS_5_TO_8_TO_ALL] - Fpga.encoder[MOTOR_ROT].pos) <= MOTOR_SHIFT_VAR)
@@ -401,14 +408,11 @@ static int  _rot_pos_check_err(int steps)
 			return FALSE;
 		}
 		else
-		{
 			Error(ERR_CONT, 0, "Stepper: Command %s: Motor Encoder at invalid position", _CmdName);
-		}
 	}
+    
 	else
-	{
 		Error(ERR_CONT, 0, "Stepper: Command %s: Motor Steps at invalid position", _CmdName);
-	}
 	return TRUE;
 }
 
@@ -1056,14 +1060,14 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 			if (pos < rob_fct_cap) {Error(LOG, 0, "CLN: Command %s: negative position not allowed", _CmdName); break;}
 			if (pos > rob_fct_vacuum_all) {Error(LOG, 0, "CLN: Command %s: too high pos", _CmdName); break;}
 
-			if (POS_SHIFT[POS_SHIFT_MAX_TURN_POS] < motor_get_step(MOTOR_SHIFT) && RX_StepperStatus.robinfo.moving == FALSE)
+			if (POS_SHIFT[POS_SHIFT_MAX_TURN_POS] + MOTOR_SHIFT_VAR < motor_get_step(MOTOR_SHIFT) && RX_StepperStatus.robinfo.moving == FALSE)
 			{
 				_CmdRunning = 0;
 				int left_pos = POS_SHIFT_MAX_TURN_POS;
 				txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_SHIFT_LEFT, &left_pos);
 				_MoveLeftPos = pos;
 			}
-			else if (POS_SHIFT[POS_SHIFT_MAX_TURN_POS] >= motor_get_step(MOTOR_SHIFT))
+			else if (POS_SHIFT[POS_SHIFT_MAX_TURN_POS] + MOTOR_SHIFT_VAR >= motor_get_step(MOTOR_SHIFT))
 			{
 				_CmdRunning = msgId;
 				RX_StepperStatus.robinfo.cap_ready = FALSE;
@@ -1156,7 +1160,7 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 			pos = *((INT32*)pdata);
 			if (pos < 0) {Error(LOG, 0, "CLN: Command %s: negative position not allowed", _CmdName); break;}
 			if (pos >= POS_SHIFT_CNT) {Error(LOG, 0, "CLN: Command %s: too high pos", _CmdName); break;}
-			if (_RobFunction == rob_fct_cap && pos != 1) {Error(LOG, 0, "CLN: Command %s: cancle shift, robot in capping", _CmdName); break;}
+			//if (_RobFunction == rob_fct_cap && pos != 1) {Error(LOG, 0, "CLN: Command %s: cancle shift, robot in capping", _CmdName); break;}
 			_CmdRunning = msgId;
 			RX_StepperStatus.robinfo.moving = TRUE;
 			pos = POS_SHIFT[pos];
