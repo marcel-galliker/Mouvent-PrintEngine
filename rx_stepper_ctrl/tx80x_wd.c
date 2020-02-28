@@ -37,7 +37,7 @@
 
 #define CURRENT_HOLD_WD     50.0            // 50 -> 0.5A
 
-#define TX_REF_HEIGHT_WD    10200           // in um
+#define TX_REF_HEIGHT_WD    9000    //10200           // in um
 
 // Inputs
 #define WD_FRONT_STORED_IN  4
@@ -122,8 +122,7 @@ void tx80x_wd_main(void)
         RX_StepperStatus.robinfo.moving_wd = FALSE;
         if (_CmdRunning == CMD_CAP_REFERENCE)
         {
-            for (motor = MOTOR_WD_FRONT, ok = TRUE;
-                 motor < MOTOR_WD_CNT; motor++)
+            for (motor = MOTOR_WD_FRONT, ok = TRUE; motor < MOTOR_WD_CNT; motor++)
             {
                 if ((Fpga.stat->statMot[motor].err_estop & ENC_ESTOP_ENC))
                 {
@@ -135,9 +134,7 @@ void tx80x_wd_main(void)
                 }
             }
             motors_reset(MOTOR_WD_BITS);
-            RX_StepperStatus.robinfo.ref_done_wd =
-                ok && RX_StepperStatus.robinfo.wd_front_up &&
-                RX_StepperStatus.robinfo.wd_back_up;
+            RX_StepperStatus.robinfo.ref_done_wd = ok && RX_StepperStatus.robinfo.wd_front_up && RX_StepperStatus.robinfo.wd_back_up;
         }
         else
         {
@@ -155,8 +152,7 @@ void tx80x_wd_main(void)
             if (!ok) RX_StepperStatus.robinfo.ref_done_wd = FALSE;
         }
 
-        _WD_in_print = (_CmdRunning == CMD_CAP_PRINT_POS &&
-                        RX_StepperStatus.info.ref_done);
+        _WD_in_print = (_CmdRunning == CMD_CAP_PRINT_POS && RX_StepperStatus.info.ref_done);
 
         if (_CmdRunning == CMD_CAP_REFERENCE && _PrintPos_New)
         {
@@ -256,6 +252,7 @@ int tx80x_wd_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         break;
 
     case CMD_CAP_REFERENCE:
+        _PrintPos_New = 0;
         strcpy(_CmdName, "CMD_CAP_REFERENCE");
         TrPrintfL(TRUE, "SOCKET[%d]: %s", socket, _CmdName);
         motors_reset(MOTOR_WD_BITS);
@@ -270,18 +267,12 @@ int tx80x_wd_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         if (pos < TX_PRINT_POS_MIN)
         {
             pos = TX_PRINT_POS_MIN;
-            Error(WARN, 0,
-                  "CMD_CAP_PRINT_POS of Wrinkle Detection set to MIN "
-                  "pos=%d.%03d mm",
-                  pos / 1000, pos % 1000);
+            Error(WARN, 0, "CMD_CAP_PRINT_POS of Wrinkle Detection set to MIN pos=%d.%03d mm", pos / 1000, pos % 1000);
         }
         else if (pos > TX_REF_HEIGHT_WD)
         {
             pos = TX_REF_HEIGHT_WD;
-            Error(WARN, 0,
-                  "CMD_CAP_PRINT_POS of Wrinkle Detection set to MAX "
-                  "pos=%d.%03d mm",
-                  pos / 1000, pos % 1000);
+            Error(WARN, 0, "CMD_CAP_PRINT_POS of Wrinkle Detection set to MAX pos=%d.%03d mm", pos / 1000, pos % 1000);
         }
         if (!_CmdRunning && (!_WD_in_print || (steps != _PrintPos_Act)))
         {
@@ -395,7 +386,34 @@ static void _tx80x_wd_motor_test(int motorNo, int steps)
     RX_StepperStatus.robinfo.moving_wd = TRUE;
     _CmdRunning = 1;
 
-    if (motorNo == MOTOR_WD_BACK || motorNo == MOTOR_WD_FRONT)
+    if (motorNo == 0)
+    {
+        // paramaters tested 14-JAN-20
+        par.speed = 1000; // speed with max tork: 21'333
+        par.accel = 10000;
+        par.current_acc = 400.0; //  max 67 = 0.67 A
+        par.current_run = 300.0; //  max 67 = 0.67 A
+        par.stop_mux = 0;
+        par.dis_mux_in = 0;
+        par.encCheck = chk_std;
+        motors_config(motors, 0, L3518_STEPS_PER_METER, L3518_INC_PER_METER, MICROSTEPS);
+        motors_move_by_step(motors, &par, steps, FALSE);
+    }
+    else if (motorNo == 1)
+    {
+        // paramaters tested 14-JAN-20
+
+        par.speed = 21000; // speed with max tork: 21'333
+        par.accel = 10000;
+        par.current_acc = 40.0; //  max 67 = 0.67 A
+        par.current_run = 40.0; //  max 67 = 0.67 A
+        par.stop_mux = 0;
+        par.dis_mux_in = 0;
+        par.encCheck = chk_off;
+        motors_config(motors, 7.0, 0.0, 0.0, STEPS);
+        motors_move_by_step(motors, &par, steps, TRUE);
+    }
+    else if (motorNo == MOTOR_WD_BACK || motorNo == MOTOR_WD_FRONT)
     {
         // paramaters tested 14-JAN-20
         par.speed = 10000; // speed with max tork: 21'333
@@ -405,8 +423,19 @@ static void _tx80x_wd_motor_test(int motorNo, int steps)
         par.stop_mux = 0;
         par.dis_mux_in = 0;
         par.encCheck = chk_std;
-
-        motors_config(motors, 0, L3518_STEPS_PER_METER, L3518_INC_PER_METER, STEPS);
+        motors_config(motors, CURRENT_HOLD_WD, L3518_STEPS_PER_METER, L3518_INC_PER_METER, STEPS);
         motors_move_by_step(motors, &par, steps, FALSE);
+    }
+    else
+    {
+        par.speed = 1000;
+        par.accel = 1000;
+        par.current_acc = 250.0;
+        par.current_run = 250.0;
+        par.stop_mux = 0;
+        par.dis_mux_in = 0;
+        par.encCheck = chk_off;
+        motors_config(motors, 50, L3518_STEPS_PER_METER, L3518_INC_PER_METER, STEPS);
+        motors_move_by_step(motors, &par, steps, FALSE); 
     }
 }
