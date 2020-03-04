@@ -547,6 +547,11 @@ int	 fluid_purge_fluidNo(void)
 	return _PurgeFluidNo;				
 }
 
+void undefine_PurgeCtrlMode(void)
+{
+    _PurgeCtrlMode = ctrl_undef;
+}
+
 //--- _control -------------------------------------------------
 static void _control(int fluidNo)
 {
@@ -557,6 +562,7 @@ static void _control(int fluidNo)
 	int	lbrob = (RX_Config.printer.type==printer_LB702_UV || RX_Config.printer.type == printer_LB702_WB);
 	int HeadNo = ctrl_singleHead();
 	if (HeadNo != -1) HeadNo %= 8;
+   // Error(LOG, 0, "_PurgeCtrlMode: %x", _PurgeCtrlMode);
 	
 	if (lbrob && RX_Config.stepper.wipe_speed == 0) RX_Config.stepper.wipe_speed = 10;
 
@@ -596,8 +602,12 @@ static void _control(int fluidNo)
 											case ctrl_purge_hard_wipe:	_send_purge_par(no, TIME_HARD_PURGE); break;
 											case ctrl_purge_hard:		_send_purge_par(no, TIME_HARD_PURGE); break;
 											}
-											if (txrob && _PurgeFluidNo<0) steptx_rob_wash_start();
-											_send_ctrlMode(_PurgeFluidNo, ctrl_purge_step1, TRUE);
+                                            if (txrob && _PurgeFluidNo < 0 && state_RobotCtrlMode() != ctrl_wash_step1 && state_RobotCtrlMode() != ctrl_wash_step2)
+                                            {
+                                               steptx_rob_wash_start();
+                                               Error(LOG, 0, "_RobotCtrlMode: %x", state_RobotCtrlMode());
+                                            }
+                                            _send_ctrlMode(_PurgeFluidNo, ctrl_purge_step1, TRUE);
 											break;
 				
 				case ctrl_wash_step6:		if (steptx_rob_wash_done())

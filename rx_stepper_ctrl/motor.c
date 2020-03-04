@@ -225,7 +225,7 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
 		break;
 		
 	case chk_txrob_ref:
-		Fpga.par->cfg[motor].enc_max_diff		= 16;
+		Fpga.par->cfg[motor].enc_max_diff		= 14;
 		Fpga.par->cfg[motor].enc_max_diff_stop	= 50;	
 		break;
 
