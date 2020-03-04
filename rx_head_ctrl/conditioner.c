@@ -553,6 +553,23 @@ void cond_ctrlMode(int headNo, EnFluidCtrlMode ctrlMode)
 	_CtrlMode[headNo] = ctrlMode;
 }
 
+//--- cond_trace_user_eeprom -------------------------------------
+void cond_trace_user_eeprom(void)
+{
+	int i;
+	char str[MAX_PATH];
+	int len;
+
+	SHeadEEpromMvt mem[MAX_HEADS_BOARD];
+	for (i=0; i<MAX_HEADS_BOARD; i++)
+		memcpy(&mem[i], _NiosStat->user_eeprom[i], sizeof(mem[i]));
+
+	len=sprintf(str, "--- EEPROM ---    "); for (i=0; i<4; i++) len+=sprintf(&str[len], " ----- %d ----  ", i); TrPrintf(TRUE, str);
+	len=sprintf(str, "clusterNo:        "); for (i=0; i<4; i++) len+=sprintf(&str[len], "%12s   ", mem[i].clusterNo); TrPrintf(TRUE,str);
+	len=sprintf(str, "flowResistance:   "); for (i=0; i<4; i++) len+=sprintf(&str[len], "%12s   ", mem[i].flowResistance); TrPrintf(TRUE,str);
+	len=sprintf(str, "dropletsPrinted:  "); for (i=0; i<4; i++) len+=sprintf(&str[len], "%12s   ", mem[i].dropletsPrinted); TrPrintf(TRUE,str);
+}
+
 //--- cond_ctrlMode2 --------------------------------------------------------------------
 void cond_ctrlMode2(int headNo, EnFluidCtrlMode ctrlMode)
 {

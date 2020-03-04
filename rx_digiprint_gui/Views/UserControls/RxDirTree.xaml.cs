@@ -41,7 +41,7 @@ namespace RX_DigiPrint.Views.UserControls
             if (TreeWiew.Items.Count>0)
             {
                 TreeViewItem item = TreeWiew.Items[0] as TreeViewItem;
-                item.IsExpanded = true;
+                if (item!=null) item.IsExpanded = true;
             }
             
           //  TreeWiew.Items.Add(_getDir(_source_data));

@@ -355,7 +355,7 @@ void CWin10StartupDlg::OnTimer(UINT_PTR nIDEvent)
 			else
 			{
 				sprintf(cmd, "cmd /C net use \"\\\\%s\\gui\" /DELETE", _HostName);
-//				ret= rx_process_execute(cmd, NULL, 1000);
+				ret= rx_process_execute(cmd, NULL, 1000);
 //				system(cmd);
 			}
 		}
