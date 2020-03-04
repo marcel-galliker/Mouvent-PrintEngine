@@ -37,7 +37,7 @@
 
 #define CURRENT_HOLD_WD     50.0            // 50 -> 0.5A
 
-#define TX_REF_HEIGHT_WD    9000    //10200           // in um
+#define TX_REF_HEIGHT_WD    10200           // in um
 
 // Inputs
 #define WD_FRONT_STORED_IN  4
