@@ -39,6 +39,8 @@
 
 #define TX_REF_HEIGHT_WD    10200           // in um
 
+#define WD_UNDER_PRINT_HIGH 600             // in um
+
 // Inputs
 #define WD_FRONT_STORED_IN  4
 #define WD_BACK_STORED_IN   5
@@ -276,7 +278,8 @@ int tx80x_wd_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         }
         if (!_CmdRunning && (!_WD_in_print || (steps != _PrintPos_Act)))
         {
-            _PrintPos_New = _micron_2_steps(TX_REF_HEIGHT_WD + 500 - pos);
+            _PrintPos_New =
+                _micron_2_steps(TX_REF_HEIGHT_WD + WD_UNDER_PRINT_HIGH - pos);
             if (RX_StepperStatus.robinfo.ref_done_wd)
                 _tx80x_wd_move_to_pos(CMD_CAP_PRINT_POS, _PrintPos_New);
             else

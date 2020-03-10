@@ -167,8 +167,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)_out\$(Configuration)_$(Platform)\</OutDir>
-    <IntDir>$(SolutionDir)_temp\$(MSBuildProjectName)\$(Configuration)_$(Platform)\</IntDir>
+    <OutDir>$(ProjectDir)..\_out\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)..\_temp\$(MSBuildProjectName)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -358,7 +358,7 @@ Exit 0</Command>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>Ws2_32.lib;rx_common_lib.lib;TinyXML.lib;rx_rip_lib.lib;rx_tif_lib.lib;TBarCode11.lib;Shell32.lib;rx_screen_lib.lib</AdditionalDependencies>
+      <AdditionalDependencies>Ws2_32.lib;rx_common_lib.lib;TinyXML.lib;rx_rip_lib.lib;rx_tif_lib.lib;TBarCode11.lib;Shell32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(OutDir);..\Externals\Tec-it\Win\TBarCode11\Lib</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
