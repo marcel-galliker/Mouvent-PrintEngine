@@ -19,7 +19,7 @@ LIBRARY_NAMES := mlpi xl
 ADDITIONAL_LINKER_INPUTS := 
 MACOS_FRAMEWORKS := 
 
-CFLAGS := -pthread -ggdb -ffunction-sections -O0 -fshort-wchar
+CFLAGS := -pthread -ggdb -ffunction-sections -O0 -fshort-wchar -std=gnu99
 CXXFLAGS := -pthread -ggdb -ffunction-sections -O0 -fshort-wchar
 ASFLAGS := 
 LDFLAGS := -Wl,-gc-sections -pthread

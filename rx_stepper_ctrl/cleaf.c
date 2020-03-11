@@ -256,6 +256,7 @@ void cleaf_main(int ticks, int menu)
 		}
 		
 		if (_CmdRunning == CMD_CAP_REFERENCE)
+            
 		{
 			motors_reset(MOTOR_Z_BITS);
 			if (!fpga_input(HEAD_UP_IN_FRONT)) Error(LOG, 0, "Stepper: Command REFERENCE: End Sensor Front NOT HIGH");

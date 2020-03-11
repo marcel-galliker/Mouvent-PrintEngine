@@ -41,7 +41,7 @@
     <AllowChangingHostForMainCommands>false</AllowChangingHostForMainCommands>
     <SkipBuildIfNoSourceFilesChanged>false</SkipBuildIfNoSourceFilesChanged>
     <IgnoreFileTransferErrors>false</IgnoreFileTransferErrors>
-    <RemoveRemoteDirectoryOnClean>false</RemoveRemoteDirectoryOnClean>
+    <RemoveRemoteDirectoryOnClean>true</RemoveRemoteDirectoryOnClean>
     <SkipDeploymentTests>false</SkipDeploymentTests>
     <MainSourceDirectoryForLocalBuilds>$(ProjectDir)</MainSourceDirectoryForLocalBuilds>
   </Project>

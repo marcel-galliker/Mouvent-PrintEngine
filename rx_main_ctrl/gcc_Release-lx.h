@@ -15,7 +15,7 @@
 #define __DBL_MIN_EXP__ (-1021)
 #endif
 #ifndef __UINT_LEAST16_MAX__
-#define __UINT_LEAST16_MAX__ 0xffff
+#define __UINT_LEAST16_MAX__ 65535
 #endif
 #ifndef __ATOMIC_ACQUIRE
 #define __ATOMIC_ACQUIRE 2
@@ -29,9 +29,6 @@
 #ifndef __UINT_LEAST8_TYPE__
 #define __UINT_LEAST8_TYPE__ unsigned char
 #endif
-#ifndef __SIZEOF_FLOAT80__
-#define __SIZEOF_FLOAT80__ 16
-#endif
 #ifndef release
 #define release 1
 #endif
@@ -39,19 +36,19 @@
 #define __CHAR_BIT__ 8
 #endif
 #ifndef __UINT8_MAX__
-#define __UINT8_MAX__ 0xff
+#define __UINT8_MAX__ 255
 #endif
 #ifndef __WINT_MAX__
-#define __WINT_MAX__ 0xffffffffU
+#define __WINT_MAX__ 4294967295U
 #endif
 #ifndef __ORDER_LITTLE_ENDIAN__
 #define __ORDER_LITTLE_ENDIAN__ 1234
 #endif
 #ifndef __SIZE_MAX__
-#define __SIZE_MAX__ 0xffffffffffffffffUL
+#define __SIZE_MAX__ 18446744073709551615UL
 #endif
 #ifndef __WCHAR_MAX__
-#define __WCHAR_MAX__ 0xffff
+#define __WCHAR_MAX__ 65535
 #endif
 #ifndef __GCC_HAVE_SYNC_COMPARE_AND_SWAP_1
 #define __GCC_HAVE_SYNC_COMPARE_AND_SWAP_1 1
@@ -90,7 +87,7 @@
 #define __x86_64 1
 #endif
 #ifndef __UINT_FAST64_MAX__
-#define __UINT_FAST64_MAX__ 0xffffffffffffffffUL
+#define __UINT_FAST64_MAX__ 18446744073709551615UL
 #endif
 #ifndef __SIG_ATOMIC_TYPE__
 #define __SIG_ATOMIC_TYPE__ int
@@ -102,25 +99,25 @@
 #define __FINITE_MATH_ONLY__ 0
 #endif
 #ifndef __GNUC_PATCHLEVEL__
-#define __GNUC_PATCHLEVEL__ 0
+#define __GNUC_PATCHLEVEL__ 3
 #endif
 #ifndef __UINT_FAST8_MAX__
-#define __UINT_FAST8_MAX__ 0xff
+#define __UINT_FAST8_MAX__ 255
 #endif
 #ifndef __DEC64_MAX_EXP__
 #define __DEC64_MAX_EXP__ 385
 #endif
 #ifndef __UINT_LEAST64_MAX__
-#define __UINT_LEAST64_MAX__ 0xffffffffffffffffUL
+#define __UINT_LEAST64_MAX__ 18446744073709551615UL
 #endif
 #ifndef __SHRT_MAX__
-#define __SHRT_MAX__ 0x7fff
+#define __SHRT_MAX__ 32767
 #endif
 #ifndef __LDBL_MAX__
 #define __LDBL_MAX__ 1.18973149535723176502e+4932L
 #endif
 #ifndef __UINT_LEAST8_MAX__
-#define __UINT_LEAST8_MAX__ 0xff
+#define __UINT_LEAST8_MAX__ 255
 #endif
 #ifndef __GCC_ATOMIC_BOOL_LOCK_FREE
 #define __GCC_ATOMIC_BOOL_LOCK_FREE 2
@@ -138,7 +135,7 @@
 #define __unix 1
 #endif
 #ifndef __UINT32_MAX__
-#define __UINT32_MAX__ 0xffffffffU
+#define __UINT32_MAX__ 4294967295U
 #endif
 #ifndef __LDBL_MAX_EXP__
 #define __LDBL_MAX_EXP__ 16384
@@ -150,7 +147,7 @@
 #define __linux__ 1
 #endif
 #ifndef __SCHAR_MAX__
-#define __SCHAR_MAX__ 0x7f
+#define __SCHAR_MAX__ 127
 #endif
 #ifndef __WCHAR_MIN__
 #define __WCHAR_MIN__ 0
@@ -195,7 +192,7 @@
 #define __DEC32_MAX__ 9.999999E96DF
 #endif
 #ifndef __INT32_MAX__
-#define __INT32_MAX__ 0x7fffffff
+#define __INT32_MAX__ 2147483647
 #endif
 #ifndef __SIZEOF_LONG__
 #define __SIZEOF_LONG__ 8
@@ -219,7 +216,7 @@
 #define _REENTRANT 1
 #endif
 #ifndef __GNUC__
-#define __GNUC__ 5
+#define __GNUC__ 4
 #endif
 #ifndef __GXX_RTTI
 #define __GXX_RTTI 1
@@ -240,13 +237,13 @@
 #define __DBL_MAX__ double(1.79769313486231570815e+308L)
 #endif
 #ifndef __INT_FAST32_MAX__
-#define __INT_FAST32_MAX__ 0x7fffffffffffffffL
+#define __INT_FAST32_MAX__ 9223372036854775807L
 #endif
 #ifndef __DBL_HAS_INFINITY__
 #define __DBL_HAS_INFINITY__ 1
 #endif
 #ifndef __INT64_MAX__
-#define __INT64_MAX__ 0x7fffffffffffffffL
+#define __INT64_MAX__ 9223372036854775807L
 #endif
 #ifndef __DEC32_MIN_EXP__
 #define __DEC32_MIN_EXP__ (-94)
@@ -266,7 +263,7 @@
 #define __DEC128_MAX__ 9.999999999999999999999999999999999E6144DL
 #endif
 #ifndef __INT_LEAST32_MAX__
-#define __INT_LEAST32_MAX__ 0x7fffffff
+#define __INT_LEAST32_MAX__ 2147483647
 #endif
 #ifndef __DEC32_MIN__
 #define __DEC32_MIN__ 1E-95DF
@@ -287,7 +284,7 @@
 #define __ATOMIC_HLE_RELEASE 131072
 #endif
 #ifndef __PTRDIFF_MAX__
-#define __PTRDIFF_MAX__ 0x7fffffffffffffffL
+#define __PTRDIFF_MAX__ 9223372036854775807L
 #endif
 #ifndef __amd64
 #define __amd64 1
@@ -299,10 +296,10 @@
 #define __ATOMIC_HLE_ACQUIRE 65536
 #endif
 #ifndef __GNUG__
-#define __GNUG__ 5
+#define __GNUG__ 4
 #endif
 #ifndef __LONG_LONG_MAX__
-#define __LONG_LONG_MAX__ 0x7fffffffffffffffLL
+#define __LONG_LONG_MAX__ 9223372036854775807LL
 #endif
 #ifndef __SIZEOF_SIZE_T__
 #define __SIZEOF_SIZE_T__ 8
@@ -314,7 +311,7 @@
 #define __GCC_HAVE_DWARF2_CFI_ASM 1
 #endif
 #ifndef __GXX_ABI_VERSION
-#define __GXX_ABI_VERSION 1009
+#define __GXX_ABI_VERSION 1002
 #endif
 #ifndef __FLT_MIN_EXP__
 #define __FLT_MIN_EXP__ (-125)
@@ -338,7 +335,7 @@
 #define __REGISTER_PREFIX__ 
 #endif
 #ifndef __UINT16_MAX__
-#define __UINT16_MAX__ 0xffff
+#define __UINT16_MAX__ 65535
 #endif
 #ifndef __DBL_HAS_DENORM__
 #define __DBL_HAS_DENORM__ 1
@@ -353,7 +350,7 @@
 #define __FLT_MANT_DIG__ 24
 #endif
 #ifndef __VERSION__
-#define __VERSION__ "5.4.0 20160609"
+#define __VERSION__ "4.9.3"
 #endif
 #ifndef _STDC_PREDEF_H
 #define _STDC_PREDEF_H 1
@@ -386,16 +383,13 @@
 #define unix 1
 #endif
 #ifndef __INT16_MAX__
-#define __INT16_MAX__ 0x7fff
-#endif
-#ifndef __cpp_rtti
-#define __cpp_rtti 199711
+#define __INT16_MAX__ 32767
 #endif
 #ifndef __SIZE_TYPE__
 #define __SIZE_TYPE__ long unsigned int
 #endif
 #ifndef __UINT64_MAX__
-#define __UINT64_MAX__ 0xffffffffffffffffUL
+#define __UINT64_MAX__ 18446744073709551615UL
 #endif
 #ifndef __INT8_TYPE__
 #define __INT8_TYPE__ signed char
@@ -412,14 +406,11 @@
 #ifndef __LDBL_EPSILON__
 #define __LDBL_EPSILON__ 1.08420217248550443401e-19L
 #endif
-#ifndef __GLIBCXX_BITSIZE_INT_N_0
-#define __GLIBCXX_BITSIZE_INT_N_0 128
-#endif
 #ifndef __k8
 #define __k8 1
 #endif
 #ifndef __SIG_ATOMIC_MAX__
-#define __SIG_ATOMIC_MAX__ 0x7fffffff
+#define __SIG_ATOMIC_MAX__ 2147483647
 #endif
 #ifndef __GCC_ATOMIC_WCHAR_T_LOCK_FREE
 #define __GCC_ATOMIC_WCHAR_T_LOCK_FREE 2
@@ -434,10 +425,10 @@
 #define __DEC32_SUBNORMAL_MIN__ 0.000001E-95DF
 #endif
 #ifndef __INT_FAST16_MAX__
-#define __INT_FAST16_MAX__ 0x7fffffffffffffffL
+#define __INT_FAST16_MAX__ 9223372036854775807L
 #endif
 #ifndef __UINT_FAST32_MAX__
-#define __UINT_FAST32_MAX__ 0xffffffffffffffffUL
+#define __UINT_FAST32_MAX__ 18446744073709551615UL
 #endif
 #ifndef __UINT_LEAST64_TYPE__
 #define __UINT_LEAST64_TYPE__ long unsigned int
@@ -449,7 +440,7 @@
 #define __FLT_MAX_10_EXP__ 38
 #endif
 #ifndef __LONG_MAX__
-#define __LONG_MAX__ 0x7fffffffffffffffL
+#define __LONG_MAX__ 9223372036854775807L
 #endif
 #ifndef __DEC128_SUBNORMAL_MIN__
 #define __DEC128_SUBNORMAL_MIN__ 0.000000000000000000000000000000001E-6143DL
@@ -470,13 +461,13 @@
 #define __PRAGMA_REDEFINE_EXTNAME 1
 #endif
 #ifndef __INT_LEAST16_MAX__
-#define __INT_LEAST16_MAX__ 0x7fff
+#define __INT_LEAST16_MAX__ 32767
 #endif
 #ifndef __DEC64_MANT_DIG__
 #define __DEC64_MANT_DIG__ 16
 #endif
 #ifndef __UINT_LEAST32_MAX__
-#define __UINT_LEAST32_MAX__ 0xffffffffU
+#define __UINT_LEAST32_MAX__ 4294967295U
 #endif
 #ifndef __GCC_ATOMIC_LONG_LOCK_FREE
 #define __GCC_ATOMIC_LONG_LOCK_FREE 2
@@ -494,10 +485,10 @@
 #define __DEC32_MAX_EXP__ 97
 #endif
 #ifndef __INT_FAST8_MAX__
-#define __INT_FAST8_MAX__ 0x7f
+#define __INT_FAST8_MAX__ 127
 #endif
 #ifndef __INTPTR_MAX__
-#define __INTPTR_MAX__ 0x7fffffffffffffffL
+#define __INTPTR_MAX__ 9223372036854775807L
 #endif
 #ifndef linux
 #define linux 1
@@ -536,13 +527,13 @@
 #define __SIZEOF_FLOAT__ 4
 #endif
 #ifndef __UINTPTR_MAX__
-#define __UINTPTR_MAX__ 0xffffffffffffffffUL
+#define __UINTPTR_MAX__ 18446744073709551615UL
 #endif
 #ifndef __DEC64_MIN_EXP__
 #define __DEC64_MIN_EXP__ (-382)
 #endif
 #ifndef __INT_FAST64_MAX__
-#define __INT_FAST64_MAX__ 0x7fffffffffffffffL
+#define __INT_FAST64_MAX__ 9223372036854775807L
 #endif
 #ifndef __GCC_ATOMIC_TEST_AND_SET_TRUEVAL
 #define __GCC_ATOMIC_TEST_AND_SET_TRUEVAL 1
@@ -554,7 +545,7 @@
 #define __UINT_FAST64_TYPE__ long unsigned int
 #endif
 #ifndef __INT_MAX__
-#define __INT_MAX__ 0x7fffffff
+#define __INT_MAX__ 2147483647
 #endif
 #ifndef __amd64__
 #define __amd64__ 1
@@ -571,11 +562,8 @@
 #ifndef __DBL_MANT_DIG__
 #define __DBL_MANT_DIG__ 53
 #endif
-#ifndef __SIZEOF_FLOAT128__
-#define __SIZEOF_FLOAT128__ 16
-#endif
 #ifndef __INT_LEAST64_MAX__
-#define __INT_LEAST64_MAX__ 0x7fffffffffffffffL
+#define __INT_LEAST64_MAX__ 9223372036854775807L
 #endif
 #ifndef __DEC64_MIN__
 #define __DEC64_MIN__ 1E-383DD
@@ -596,7 +584,7 @@
 #define __LDBL_MIN_EXP__ (-16381)
 #endif
 #ifndef __INT_LEAST8_MAX__
-#define __INT_LEAST8_MAX__ 0x7f
+#define __INT_LEAST8_MAX__ 127
 #endif
 #ifndef __SIZEOF_INT128__
 #define __SIZEOF_INT128__ 16
@@ -637,11 +625,8 @@
 #ifndef __DEC_EVAL_METHOD__
 #define __DEC_EVAL_METHOD__ 2
 #endif
-#ifndef __cpp_runtime_arrays
-#define __cpp_runtime_arrays 198712
-#endif
 #ifndef __INTMAX_MAX__
-#define __INTMAX_MAX__ 0x7fffffffffffffffL
+#define __INTMAX_MAX__ 9223372036854775807L
 #endif
 #ifndef __BYTE_ORDER__
 #define __BYTE_ORDER__ __ORDER_LITTLE_ENDIAN__
@@ -650,7 +635,7 @@
 #define __FLT_DENORM_MIN__ 1.40129846432481707092e-45F
 #endif
 #ifndef __INT8_MAX__
-#define __INT8_MAX__ 0x7f
+#define __INT8_MAX__ 127
 #endif
 #ifndef __UINT_FAST32_TYPE__
 #define __UINT_FAST32_TYPE__ long unsigned int
@@ -667,9 +652,6 @@
 #ifndef __SIZEOF_DOUBLE__
 #define __SIZEOF_DOUBLE__ 8
 #endif
-#ifndef __cpp_exceptions
-#define __cpp_exceptions 199711
-#endif
 #ifndef __INTMAX_TYPE__
 #define __INTMAX_TYPE__ long int
 #endif
@@ -680,13 +662,10 @@
 #define __ATOMIC_CONSUME 1
 #endif
 #ifndef __GNUC_MINOR__
-#define __GNUC_MINOR__ 4
-#endif
-#ifndef __GLIBCXX_TYPE_INT_N_0
-#define __GLIBCXX_TYPE_INT_N_0 __int128
+#define __GNUC_MINOR__ 9
 #endif
 #ifndef __UINTMAX_MAX__
-#define __UINTMAX_MAX__ 0xffffffffffffffffUL
+#define __UINTMAX_MAX__ 18446744073709551615UL
 #endif
 #ifndef __DEC32_MANT_DIG__
 #define __DEC32_MANT_DIG__ 7
@@ -737,7 +716,7 @@
 #define __FLT_DECIMAL_DIG__ 9
 #endif
 #ifndef __UINT_FAST16_MAX__
-#define __UINT_FAST16_MAX__ 0xffffffffffffffffUL
+#define __UINT_FAST16_MAX__ 18446744073709551615UL
 #endif
 #ifndef __GNUC_GNU_INLINE__
 #define __GNUC_GNU_INLINE__ 1
@@ -763,18 +742,18 @@
 #endif
 
 // --- Include directories begin --- //
-///usr/include/c++/5
-///usr/include/x86_64-linux-gnu/c++/5
-///usr/include/c++/5/backward
-///usr/lib/gcc/x86_64-linux-gnu/5/include
+///usr/include/c++/4.9
+///usr/include/x86_64-linux-gnu/c++/4.9
+///usr/include/c++/4.9/backward
+///usr/lib/gcc/x86_64-linux-gnu/4.9/include
 ///usr/local/include
-///usr/lib/gcc/x86_64-linux-gnu/5/include-fixed
+///usr/lib/gcc/x86_64-linux-gnu/4.9/include-fixed
 ///usr/include/x86_64-linux-gnu
 ///usr/include
 //../rx_ink_lib
 //../rx_common_lib
 //../Externals/TinyXML
-//./rx_rexroth_lib
+//rx_rexroth_lib
 //../rx_rip_lib
 //../rx_tif_lib
 //../rx_pecore_lib
@@ -786,7 +765,16 @@
 
 
 // --- Library directories begin --- //
-///usr/lib/gcc/x86_64-linux-gnu/5/:/usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/5/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/5/../../../:/lib/:/usr/lib/
+///usr/lib/gcc/x86_64-linux-gnu/4.9/
+///usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/
+///usr/lib/gcc/x86_64-linux-gnu/4.9/../../../../lib/
+///lib/x86_64-linux-gnu/
+///lib/../lib/
+///usr/lib/x86_64-linux-gnu/
+///usr/lib/../lib/
+///usr/lib/gcc/x86_64-linux-gnu/4.9/../../../
+///lib/
+///usr/lib/
 // --- Library directories begin --- //
 
 #pragma clang diagnostic pop

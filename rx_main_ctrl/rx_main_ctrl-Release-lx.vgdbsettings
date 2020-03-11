@@ -29,6 +29,7 @@
       </FileMasks>
       <TransferNewFilesOnly>true</TransferNewFilesOnly>
       <IncludeSubdirectories>true</IncludeSubdirectories>
+      <SelectedDirectories />
       <DeleteDisappearedFiles>false</DeleteDisappearedFiles>
       <ApplyGlobalExclusionList>true</ApplyGlobalExclusionList>
       <Extension>
@@ -38,7 +39,7 @@
       </Extension>
     </MainSourceTransferCommand>
     <AllowChangingHostForMainCommands>false</AllowChangingHostForMainCommands>
-    <SkipBuildIfNoSourceFilesChanged>true</SkipBuildIfNoSourceFilesChanged>
+    <SkipBuildIfNoSourceFilesChanged>false</SkipBuildIfNoSourceFilesChanged>
     <IgnoreFileTransferErrors>false</IgnoreFileTransferErrors>
     <RemoveRemoteDirectoryOnClean>true</RemoveRemoteDirectoryOnClean>
     <SkipDeploymentTests>false</SkipDeploymentTests>
@@ -96,10 +97,6 @@
     <AdditionalMakeArguments />
     <MakeCommandTemplate>
       <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
-      <RemoteHost>
-        <HostName>BuildMachine</HostName>
-        <Transport>BuiltinShortcut</Transport>
-      </RemoteHost>
       <Command>make</Command>
       <WorkingDirectory>$(BuildDir)</WorkingDirectory>
       <Environment>
@@ -142,6 +139,7 @@
         </FileMasks>
         <TransferNewFilesOnly>true</TransferNewFilesOnly>
         <IncludeSubdirectories>true</IncludeSubdirectories>
+        <SelectedDirectories />
         <DeleteDisappearedFiles>false</DeleteDisappearedFiles>
         <ApplyGlobalExclusionList>true</ApplyGlobalExclusionList>
         <Extension>
@@ -175,6 +173,7 @@
         </FileMasks>
         <TransferNewFilesOnly>true</TransferNewFilesOnly>
         <IncludeSubdirectories>true</IncludeSubdirectories>
+        <SelectedDirectories />
         <DeleteDisappearedFiles>false</DeleteDisappearedFiles>
         <ApplyGlobalExclusionList>true</ApplyGlobalExclusionList>
         <Extension>

@@ -269,6 +269,11 @@ void steptx_set_robCtrlMode(EnFluidCtrlMode ctrlMode)
 	_steptx_rob_control();
 }
 
+EnFluidCtrlMode state_RobotCtrlMode(void)
+{
+    return _RobotCtrlMode;
+}
+
 //--- _steptx_rob_control -------------------------------------------------
 static void _steptx_rob_control(void)
 {
@@ -280,7 +285,7 @@ static void _steptx_rob_control(void)
 	{		
 	//--- ctrl_wash --------------------------------------------------------------------------------------
 	case ctrl_wash:				_RobotCtrlMode = ctrl_wash_step1;
-								if (!step_lift_in_up_pos())	step_lift_to_print_pos();
+								if (!step_lift_in_up_pos() || !step_lift_in_print_pos())	step_lift_to_print_pos();
 								break;
 				
 	case ctrl_wash_step1:		if (step_lift_in_print_pos() || step_lift_in_up_pos())
@@ -298,7 +303,7 @@ static void _steptx_rob_control(void)
 								}
 								break;
 			
-	case ctrl_wash_step3:		if (plc_in_wipe_pos() && step_rob_in_wipe_pos(rob_fct_wash))
+	case ctrl_wash_step3:		if (plc_in_wipe_pos() && step_rob_in_wipe_pos(rob_fct_wash) && (step_lift_in_print_pos() || step_lift_in_up_pos()))
 								{
 									_RobotCtrlMode = ctrl_wash_step4;
 									step_lift_to_wipe_pos(ctrl_wash);
@@ -531,6 +536,8 @@ static void _steptx_rob_control(void)
 								break;
 		
 	case ctrl_off:				_RobotCtrlMode = ctrl_off;
+								undefine_PurgeCtrlMode();
+                                //Error(LOG, 0, "Program goes though ctrl_off");
 								break;
 	default: return;
 	}

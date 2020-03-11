@@ -64,6 +64,9 @@
     <ClInclude Include="jet_correction.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="screening.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ctrl_client.c">
