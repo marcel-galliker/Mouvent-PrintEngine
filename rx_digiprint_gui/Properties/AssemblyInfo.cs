@@ -57,8 +57,8 @@ using System.Windows;
 
 // "$Revision: 4007 $"
 
-[assembly: AssemblyVersion("1.0.1.7592")]
-[assembly: AssemblyFileVersion("1.0.1.7592")]
+[assembly: AssemblyVersion("1.0.1.7589")]
+[assembly: AssemblyFileVersion("1.0.1.7589")]
 
 //  http://www.radex-net.com/Downloads/RX-Gui/publish.htm
 //  G1EhZ$ETMf
