@@ -7,7 +7,7 @@
       <PathStyle>RemoteUnix</PathStyle>
     </CustomSourceDirectories>
     <DeploymentHost>
-      <HostName>192.168.200.10</HostName>
+      <HostName>192.168.200.9</HostName>
       <Transport>SSH</Transport>
       <UserName>root</UserName>
     </DeploymentHost>
@@ -73,10 +73,6 @@
     <AdditionalMakeArguments />
     <MakeCommandTemplate>
       <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
-      <RemoteHost>
-        <HostName>BuildMachine</HostName>
-        <Transport>BuiltinShortcut</Transport>
-      </RemoteHost>
       <Command>cmd.exe</Command>
       <Arguments>/c "$(VISUALGDB_DIR)\make.exe"</Arguments>
       <WorkingDirectory>$(BuildDir)</WorkingDirectory>
@@ -214,8 +210,8 @@
     </AdditionalGDBSettings>
     <LaunchGDBSettings xsi:type="GDBLaunchParametersNewInstance">
       <DebuggedProgram>$(TargetPath)</DebuggedProgram>
-      <GDBServerPort>2002</GDBServerPort>
-      <ProgramArguments>-debug +flo +floro +tt +test +cln +lb701 +lb702 +cleaf +tx801 +txro</ProgramArguments>
+      <GDBServerPort>2003</GDBServerPort>
+      <ProgramArguments>-debug +flo +floro +tt +test +cln +lb701 +lb702 +cleaf +tx801 -txro</ProgramArguments>
     </LaunchGDBSettings>
     <GenerateCtrlBreakInsteadOfCtrlC>false</GenerateCtrlBreakInsteadOfCtrlC>
     <DeploymentTargetPath />

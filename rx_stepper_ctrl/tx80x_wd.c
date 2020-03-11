@@ -335,9 +335,7 @@ int tx80x_wd_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
     case CMD_CLN_SHIFT_LEFT:
     case CMD_CLN_FILL_CAP:
     case CMD_CLN_WAIT:
-    case CMD_CLN_TILT_CAP:
-    case CMD_CLN_EMPTY_WASTE:
-    case CMD_CLN_VACUUM: break;
+    case CMD_CLN_TILT_CAP: break;
 
     default:
         Error(ERR_CONT, 0, "CLN: Command 0x%08x not implemented", msgId);

@@ -108,10 +108,7 @@
 #define PUMP_WASTE_VAC		0x020 // 5 Waste 1
 #define PUMP_FLUSH_WET		0x040 // 6 Flush 1
 #define PUMP_WASTE_BASE		0x080 // 7 Waste 2
-//#define PUMP_FLUSH_CAP		3
-//#define PUMP_WASTE_VAC		4
-//#define PUMP_FLUSH_WET		5
-//#define PUMP_WASTE_BASE		6
+
 #define RO_ALL_OUTPUTS		0x1FF //  ALL Outputs
 
 // Vectors
@@ -189,13 +186,15 @@ static UINT32	_txrob_Error[5];
 
 
 // Times and Parameters
-static int	_TimeWastePump = 5; //20; // in s
+static int	_TimeWastePump = 10000; //20; // in ms
 static int	_TimeFillCap = 14; // in s
 static int	_TimeFillCap801 = 14;	// in s
 static int	_TimeFillCap802 = 25;	// in s
 static int	_SpeedShift = 19000; // in steps/s
 static int	_RotRefOffset = 11; // in steps
 static int  _TiltSteps = 90;     // in steps
+
+static int _TimeWastePumpStart = 0;
 
 //--- prototypes --------------------------------------------
 static void _txrob_motor_test(int motor, int steps);
@@ -461,6 +460,7 @@ void txrob_main(int ticks, int menu)
 		RX_StepperStatus.robinfo.vacuum_in_change = FALSE;
 		RX_StepperStatus.robinfo.wash_ready = FALSE;
 		RX_StepperStatus.robinfo.wash_done = FALSE;
+        _TimeWastePumpStart = 0;
 	}
 	else
 	{
@@ -472,6 +472,18 @@ void txrob_main(int ticks, int menu)
 		RX_StepperStatus.robinfo.wash_ready = _step_rob_in_wash();
 		RX_StepperStatus.robinfo.wash_done = _wash_done();
         _ParRotSensRef.encCheck = chk_txrob_ref;
+        if (!_TimeWastePumpStart) _TimeWastePumpStart = rx_get_ticks();
+    }
+
+    if (_TimeWastePumpStart && _TimeWastePumpStart > rx_get_ticks() - _TimeWastePump)
+    {
+        Fpga.par->output |= PUMP_WASTE_BASE;
+        Fpga.par->output |= PUMP_WASTE_VAC;
+    }
+    else
+    {
+        Fpga.par->output &= ~PUMP_WASTE_BASE;
+        Fpga.par->output &= ~PUMP_WASTE_VAC;
     }
 
     if (RX_StepperStatus.robinfo.ref_done) _Reference_Count = 0;
@@ -487,7 +499,6 @@ void txrob_main(int ticks, int menu)
         int loc_new_cmd = _NewCmd;
 
         Fpga.par->output &= ~PUMP_FLUSH_WET; // PUMP_FLUSH_WET OFF
-        Fpga.par->output &= ~PUMP_WASTE_VAC; // Waste OFF
 
         // --- tasks after motor error ---
         if ((_CmdRunning != CMD_CLN_REFERENCE) && (_CmdRunning != CMD_CLN_ROT_REF) && (_CmdRunning != CMD_CLN_ROT_REF2) && (_CmdRunning != FALSE) && (_CmdRunning != CMD_CLN_SHIFT_REF))
@@ -661,7 +672,6 @@ void txrob_main(int ticks, int menu)
 					break;
 	
 				case rob_fct_vacuum:	// Vacuum
-					Fpga.par->output |= PUMP_WASTE_VAC; // Waste ON
 					break;
 				
 				case rob_fct_wipe: // Wipe
@@ -682,7 +692,7 @@ void txrob_main(int ticks, int menu)
 					break;
 	
 				case rob_fct_vacuum:	// Vacuum -> drive back
-					Fpga.par->output |= PUMP_WASTE_VAC; // Waste ON
+                    Fpga.par->output &= ~VAC_ON; // Vacuum OFF
 					break;
 				
 				case rob_fct_wipe: // Wipe
@@ -691,9 +701,6 @@ void txrob_main(int ticks, int menu)
 				case rob_fct_tilt: // Tilt
 					break;
 				}
-				break;
-			case 4: // End for Vacuum
-				loc_new_cmd = CMD_CLN_VACUUM;
 				break;
 			}
 		}
@@ -708,21 +715,7 @@ void txrob_main(int ticks, int menu)
 			Fpga.par->output &= ~PUMP_FLUSH_CAP; // Flush Cap OFF
 			loc_new_cmd = CMD_CLN_TILT_CAP; // empty cap partially by tilting the cap
 		}
-		
-		if (_CmdRunning == CMD_CLN_VACUUM) 
-		{
-			loc_new_cmd = CMD_CLN_EMPTY_WASTE;
-			Fpga.par->output &= ~PUMP_WASTE_BASE; // Waste base OFF
-			Fpga.par->output &= ~PUMP_WASTE_VAC; // Waste base OFF
-			Fpga.par->output &= ~VAC_ON; // VACUUM OFF
-		}
-		
-		if (_CmdRunning == CMD_CLN_EMPTY_WASTE) 
-		{
-			Fpga.par->output &= ~PUMP_WASTE_BASE; // Waste base OFF
-			Fpga.par->output &= ~PUMP_WASTE_VAC; // Waste base OFF
-			Fpga.par->output &= ~VAC_ON; // VACUUM OFF
-		}
+        
 		if (_CmdRunning == CMD_CLN_SHIFT_LEFT)
 		{
 			txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_MOVE_POS, &_MoveLeftPos);
@@ -745,8 +738,6 @@ void txrob_main(int ticks, int menu)
 		case CMD_CLN_SHIFT_MOV:		txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_SHIFT_MOV, &loc_move_pos); break;
 		case CMD_CLN_FILL_CAP :		txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_FILL_CAP, NULL); break;
 		case CMD_CLN_TILT_CAP :		txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_TILT_CAP, NULL); break;
-		case CMD_CLN_EMPTY_WASTE:	txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_EMPTY_WASTE, NULL); break;
-		case CMD_CLN_VACUUM:		txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_VACUUM, NULL); break;
 		case CMD_CLN_WAIT:			txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_WAIT, &loc_move_pos); break;
 		case 0: break;
 		default:					Error(ERR_CONT, 0, "TXROB_MAIN: Command 0x%08x not implemented", loc_new_cmd); break;
@@ -800,6 +791,10 @@ static void _txrob_display_status(void)
 	term_printf("Roboter in Vac:       %d\n", RX_StepperStatus.robinfo.rob_in_vac);
 	term_printf("Roboter in Wash:      %d\n", RX_StepperStatus.robinfo.rob_in_wash);
 	term_printf("Roboter in Cap:       %d\n", RX_StepperStatus.robinfo.rob_in_cap);
+    if ((_TimeWastePumpStart + _TimeWastePump - rx_get_ticks()) / 1000 > 0)
+        term_printf("Time for waste pumps  %d\n", _TimeWastePumpStart / 1000 + _TimeWastePump / 1000 - rx_get_ticks() / 1000);
+    else
+        term_printf("Time for waste pumps  %d\n", 0);
     term_printf("\n");
 
 }
@@ -1119,6 +1114,7 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 			}
 			else if (pos == 3 || pos == 4)
 			{
+                if (RX_StepperStatus.robinfo.rob_in_vac) Fpga.par->output |= VAC_ON;
 				if (_RobFunction == rob_fct_vacuum || _RobFunction == rob_fct_vacuum_all)
 				{
 					if (abs(POS_SHIFT[3] - motor_get_step(MOTOR_SHIFT) <= MOTOR_SHIFT_VAR) || abs(POS_SHIFT[6] - motor_get_step(MOTOR_SHIFT) <= MOTOR_SHIFT_VAR))	pos = POS_SHIFT[4];
@@ -1204,30 +1200,6 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 			motors_move_to_step(MOTOR_ROT_BITS, &_ParRotDrive, POS_ROT_TILT);
 		}
 		
-		break;
-		
-	case CMD_CLN_EMPTY_WASTE:		strcpy(_CmdName, "CMD_CLN_EMPTY_WASTE");
-		TrPrintfL(TRUE, "SOCKET[%d]: %s", socket, _CmdName);
-		if (!_CmdRunning || _CmdRunning == CMD_FLUID_CTRL_MODE)
-		{
-			Fpga.par->output |= PUMP_WASTE_BASE; // Waste base ON
-			Fpga.par->output |= PUMP_WASTE_VAC; // Waste vac ON
-			_CmdRunning = msgId;
-			RX_StepperStatus.robinfo.moving = TRUE;
-			_TimeCnt = _TimeWastePump * MAIN_PER_SEC;
-		}
-		break;
-		
-	case CMD_CLN_VACUUM:		strcpy(_CmdName, "CMD_CLN_VACUUM");
-		TrPrintfL(TRUE, "SOCKET[%d]: %s", socket, _CmdName);
-		if (!_CmdRunning || _CmdRunning == CMD_FLUID_CTRL_MODE)
-		{
-			Fpga.par->output |= PUMP_WASTE_VAC; // Waste vac ON
-			Fpga.par->output |= VAC_ON; // VACUUM ON
-			_CmdRunning = msgId;
-			RX_StepperStatus.robinfo.moving = TRUE;
-			_TimeCnt = 5 * MAIN_PER_SEC;
-		}
 		break;
 
 	case CMD_ERROR_RESET:		
@@ -1391,7 +1363,7 @@ static int _wash_done(void)
 
 static int _vacuum_done(void)
 {
-	if ((RX_StepperStatus.robinfo.moving == FALSE || _CmdRunning == CMD_CLN_EMPTY_WASTE) && abs(POS_ROT[VAC_POS] - motor_get_step(MOTOR_ROT)) <= MOTOR_ROT_VAR && _VacuumWaiting == FALSE)
+	if ((RX_StepperStatus.robinfo.moving == FALSE) && abs(POS_ROT[VAC_POS] - motor_get_step(MOTOR_ROT)) <= MOTOR_ROT_VAR && _VacuumWaiting == FALSE)
 	{
 		return TRUE;
 	}

@@ -417,8 +417,8 @@ int  tx801_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 	{
 	case CMD_CAP_STOP:				motors_stop(MOTOR_Z_BITS);
 									_CmdRunning = 0;
-									break;
-                                    
+									break;	
+
 	case CMD_CAP_REFERENCE:			_PrintPos_New=0;
 									motors_reset(MOTOR_Z_BITS);
 									_tx801_do_reference();
@@ -454,8 +454,7 @@ int  tx801_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									}
 									break;
 		
-	case CMD_CAP_WASH_POS:			Error(LOG, 0, "CMD_CAP_WASH_POS enter with _CmdRunning %x", _CmdRunning);
-									if (!_CmdRunning)
+	case CMD_CAP_WASH_POS:			if (!_CmdRunning)
 									{
 										_CmdRunning  = msgId;
 										RX_StepperStatus.info.moving = TRUE;
