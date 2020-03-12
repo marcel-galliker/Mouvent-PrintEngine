@@ -391,19 +391,6 @@ double	 plc_get_step_dist_mm(void)
 	return _StepDist;
 }
 
-//--- plc_get_thickness --------------------
-int	plc_get_thickness(void)
-{
-#ifdef linux
-	FLOAT thickness;
-	if (_SimuPLC) thickness = 1.0;
-	else lc_get_value_by_name_FLOAT(UnitID ".PAR_MATERIAL_THIKNESS",	&thickness);
-	return (int)(thickness*1000);
-#else
-	return 0;
-#endif
-}
-
 //--- _plc_send_par -------------------------------------
 static void _plc_send_par(SPlcPar *pPlcPar)
 {
@@ -1402,6 +1389,7 @@ static void _plc_state_ctrl()
 		
 		if (RX_Config.stepper.ref_height!=0 || RX_Config.stepper.print_height!=0)
 		{
+			lc_set_value_by_name_UINT32(UnitID ".STA_HEAD_IS_UP", RX_StepperStatus.info.scannerEnable);	
 			if(rx_def_is_web(RX_Config.printer.type) || RX_StepperStatus.info.scannerEnable)
 			{
 				if(_SendPause == 1)
@@ -1423,7 +1411,6 @@ static void _plc_state_ctrl()
 				step_handle_gui_msg(INVALID_SOCKET, CMD_CAP_UP_POS, NULL, 0);				
 			}
 		}
-		lc_set_value_by_name_UINT32(UnitID ".STA_HEAD_IS_UP", RX_StepperStatus.info.scannerEnable);	
 	}
 
 	/*	Label

@@ -42,3 +42,4 @@ int  enc_uv_off(void);
 int  enc_is_uv_on(void);
 int  enc_is_uv_ready(void);
 int	 enc_is_analog(void);
+int	 enc_is_connected(void);

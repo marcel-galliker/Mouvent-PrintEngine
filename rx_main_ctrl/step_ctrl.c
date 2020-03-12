@@ -467,7 +467,7 @@ static void _step_set_config(int no)
 	memcpy(&cfg, &RX_Config.stepper, sizeof(cfg));
 	cfg.printerType		   = RX_Config.printer.type;
 	cfg.use_printhead_en   = RX_Config.printer.type==printer_LH702;
-	cfg.material_thickness = plc_get_thickness();
+	cfg.material_thickness = RX_Config.stepper.material_thickness;
 	cfg.boardNo=no;
 		
 	if (arg_testMachine)

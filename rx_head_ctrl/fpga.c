@@ -637,7 +637,7 @@ void fpga_set_pg_offsets(INT32 backwards)
 	int head;
 	char str[100];
 	int len=0;
-    TrPrintfL(TRUE, "fpga_set_pg_offsets(backwards=%d)", backwards);
+//  TrPrintfL(TRUE, "fpga_set_pg_offsets(backwards=%d)", backwards);
 	_PrintGo_flags   = 0;
 	for (head=0; head<HEAD_CNT; head++)
 	{
@@ -646,6 +646,7 @@ void fpga_set_pg_offsets(INT32 backwards)
 		len += sprintf(&str[len], "%06d.%d  ",	FpgaCfg.head[head]->offset_stroke, FpgaCfg.head[head]->offset_substroke);
 	}		
 //	Error(LOG, 0, "fpga_set_pg_offsets(backwards=%d) %s", backwards, str);
+	TrPrintfL(TRUE, "fpga_set_pg_offsets(backwards=%d) %s", backwards, str);
 }
 
 //--- fpga_enc_config ---------------------------------------------------
@@ -1827,7 +1828,7 @@ static int _check_print_done(void)
 					{
 						SPageId *pid = &_PageId[i];
 						_Direction =_Img[head][(i+1)%MAX_PAGES].flags & FLAG_MIRROR;
-						_DirchangeTimer = rx_get_ticks()+500;
+						_DirchangeTimer = rx_get_ticks()+200;
 						TrPrintfL(TRUE, "PRINT GO  [%d]: id=%d, page=%d, copy=%d, scan=%d, pos=%d, donepos=%d, _Direction=%d", RX_HBStatus[0].head[head].printGoCnt, pid->id, pid->page, pid->copy, pid->scan, RX_FpgaStat.pg_in_position[head], _PrintDonePos[head][i], _Direction);
 					//	fpga_set_pg_offsets(_Img[head][(i+1)%MAX_PAGES].flags & FLAG_MIRROR);				
 					}					

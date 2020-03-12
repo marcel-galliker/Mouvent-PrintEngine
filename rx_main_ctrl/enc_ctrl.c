@@ -170,6 +170,7 @@ static int   _enc_closed(RX_SOCKET socket, const char *peerName)
 	{
 		if (socket==_Encoder[i].socket)	
 		{
+			_EncoderStatus[i].info.connected = FALSE;
 			sok_close(&_Encoder[i].socket);
 			TrPrintf(TRUE, "Encoder[%d].closed", i);
 		}
@@ -386,16 +387,16 @@ static void _enc_start_printing(int no, SPrintQueueItem *pitem, int restart)
 								if(RX_Config.printer.offset.manualFlightTimeComp)
 								{
 									comp=RX_Config.printer.offset.manualFlightTimeComp;
-									Error(LOG, 0, "Manual Flightime Comp: %d �m", (int)comp);											
+									Error(LOG, 0, "Manual Flightime Comp: %d µm", (int)comp);											
 								}
 								else 
 								{
 									comp =  1000.0 * 0.0090 * (pitem->speed-60);								// ref done at 60m/min
-									Error(LOG, 0, "FlightTimeComp: speed=%d (ref 60m/min): comp=%d�m", pitem->speed, (int)comp);                                                              
-                                    comp2 = 0.0027 * (RX_StepperStatus.posZ-2000) * pitem->speed;		// ref done at 2.0 mm
-									Error(LOG, 0, "FlightTimeComp: height=%d.%03dmm (ref 2.0mm): comp=%d�m", RX_StepperStatus.posZ/1000, RX_StepperStatus.posZ%1000, (int)comp2);
+									Error(LOG, 0, "FlightTimeComp: speed=%d (ref 60m/min): comp=%dµm", pitem->speed, (int)comp);
+                                    comp2 = 0.0027 * (RX_Config.stepper.print_height-2000) * pitem->speed;		// ref done at 2.0 mm (height above material, don't add material_thickness) 
+									Error(LOG, 0, "FlightTimeComp: height=%d.%03dmm (ref 2.0mm): comp=%dµm", RX_Config.stepper.print_height/1000, RX_Config.stepper.print_height%1000, (int)comp2);
                                     comp += comp2;
-									Error(LOG, 0, "FlightTimeComp: comp=%d�m", (int)comp);
+									Error(LOG, 0, "FlightTimeComp: comp=%dµm", (int)comp);
 								}
 								msg.pos_pg_bwd += (int)comp;  
 							}
@@ -632,6 +633,7 @@ int  enc_uv_off(void)
 int  enc_is_uv_on(void)    { return _EncoderStatus[0].info.uv_on; }
 int  enc_is_uv_ready(void) { return _EncoderStatus[0].info.uv_ready;}
 int  enc_is_analog(void)   { return _EncoderStatus[0].info.analog_encoder;}	
+int  enc_is_connected(void)   { return _EncoderStatus[0].info.connected;}	
 
 //--- _handle_enc_msg ------------------------------------------------------------------
 static int _handle_enc_msg(RX_SOCKET socket, void *msg, int len, struct sockaddr *sender, void *par)
@@ -666,6 +668,8 @@ static int _handle_enc_msg(RX_SOCKET socket, void *msg, int len, struct sockaddr
 static void _handle_status(int no, SEncoderStat* pstat)
 {
 	SEncoderInfo info=_EncoderStatus[no].info;
+
+
 	//--- test ------------------
 	if (!_Scanning && !arg_simuEncoder && !_StopPG)
 	{
@@ -679,7 +683,12 @@ static void _handle_status(int no, SEncoderStat* pstat)
 	//	if (pstat->PG_cnt>_EncoderStatus[no].PG_cnt) ErrorEx(dev_enc, no, LOG, 0, "PrintGo %d/%d", pstat->PG_cnt, _TotalPgCnt);			
 	}
 	
+	if (!_EncoderStatus[no].info.connected) 
+	{
+		ctrl_set_max_speed();
+	}
 	memcpy(&_EncoderStatus[no], pstat, sizeof(_EncoderStatus[no]));
+	_EncoderStatus[no].info.connected = TRUE;
 	if (_Encoder[no].printGoCnt==-1 && _EncoderStatus[no].PG_cnt==0) _Encoder[no].printGoCnt = 0;
 	if (_Encoder[no].printGoCnt>=0  && _EncoderStatus[no].PG_cnt != _Encoder[no].printGoCnt)	
 	{
