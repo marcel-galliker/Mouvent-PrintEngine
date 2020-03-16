@@ -149,5 +149,14 @@ namespace RX_DigiPrint.Views.PrintQueueView
         {
         //  Checks_Settings.Visibility= Visibility.Collapsed; 
         }
-   }
+
+        private void LengthUnitMM_Checked(object sender,RoutedEventArgs e)
+        {
+            NumBox_ScanLen.IsInt=false;
+        }
+        private void LengthUnitCopies_Checked(object sender,RoutedEventArgs e)
+        {
+            NumBox_ScanLen.IsInt=true;
+        }
+    }
 }

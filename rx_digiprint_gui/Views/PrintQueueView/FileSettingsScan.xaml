@@ -51,10 +51,10 @@
                     <RowDefinition Height="auto" />
                 </Grid.RowDefinitions>
                 <TextBlock Grid.Row="0" Grid.Column="0" Text="Length" />
-                <common:RxNumBox   Grid.Row="0" Grid.Column="1" Text="{Binding ScanLength}" HorizontalContentAlignment="Right" Width="60" Min="0" IsInt="True"/>
+                <common:RxNumBox   Grid.Row="0" Grid.Column="1" Text="{Binding ScanLength}" HorizontalContentAlignment="Right" Width="60" Min="0" IsInt="False" x:Name="NumBox_ScanLen"/>
                 <StackPanel  Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" Orientation="Horizontal">
-                    <common:RxRadioButton Content="m"       Background="Transparent" IsChecked="{Binding LengthUnitMM}" x:Name="LengthUnit"/>
-                    <common:RxRadioButton Content="copies"  Background="Transparent" IsChecked="{Binding LengthUnitCopies}" Last="True"/>
+                    <common:RxRadioButton Content="m"       Background="Transparent" IsChecked="{Binding LengthUnitMM}" x:Name="LengthUnit" Checked="LengthUnitMM_Checked"/>
+                    <common:RxRadioButton Content="copies"  Background="Transparent" IsChecked="{Binding LengthUnitCopies}" Last="True" Checked="LengthUnitCopies_Checked"/>
                 </StackPanel>
             
                 <TextBlock         Grid.Row="1" Grid.Column="0" Text="Start at" />
