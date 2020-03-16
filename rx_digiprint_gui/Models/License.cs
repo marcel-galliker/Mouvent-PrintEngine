@@ -108,7 +108,7 @@ namespace RX_DigiPrint.Models
                         string[] d   = lic[5].Split('.');
                         int day=Rx.StrToInt32(d[0]);
                         int month=Rx.StrToInt32(d[1]);
-                        int year = Rx.StrToInt32(d[2])/10;
+                        int year = Rx.StrToInt32(d[2].Substring(0,4));
                         _Expiring = new DateTime(year, month, day);
                         if (_Expiring>=DateTime.Today)
                         {
@@ -127,7 +127,7 @@ namespace RX_DigiPrint.Models
                         return;
                     }
                 }
-                catch(Exception)
+                catch(Exception ex)
                 {
                     Valid=false;
                     RxGlobals.Events.AddItem(new LogItem("License invalid"){LogType=ELogType.eErrWarn});                
