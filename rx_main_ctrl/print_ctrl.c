@@ -502,9 +502,11 @@ static int _print_next(void)
 			SPrintQueueItem *item = pq_get_next_item();
 			if (item) 
 			{
+				pq_trace_item(item);
+
 				memcpy(&_Item, item, sizeof(_Item));
 				_first		  = TRUE;
-						
+				
 				_local_path(_Item.filepath, _FilePathLocal);
 				
 				_Item.id.copy = _Item.start.copy;

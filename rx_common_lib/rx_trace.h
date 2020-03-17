@@ -24,6 +24,7 @@ extern "C"{
 	void Trace_set_server(HANDLE hServer);
 	void Trace_to_screen(int trace);
 	void Trace_to_file(int trace);
+	void TrPrint  (int level, const char *str);
 	void TrPrintf (int level, const char *format, ...);
 	void TrPrintfL(int level, const char *format, ...);
  

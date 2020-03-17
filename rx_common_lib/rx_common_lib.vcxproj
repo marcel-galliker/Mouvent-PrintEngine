@@ -303,13 +303,12 @@
     <NMakeReBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /rebuild "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeReBuildCommandLine>
     <NMakeCleanCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /clean "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeCleanCommandLine>
     <NMakeOutput>$(ProjectDir)rx_common_lib-Release-soc.vgdbsettings</NMakeOutput>
-    <NMakeIncludeSearchPath>f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1;f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1\arm-linux-gnueabi;f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1\backward;f:\compiler\linaro-tools\lib\gcc\arm-linux-gnueabi\4.7.1\include;f:\compiler\linaro-tools\lib\gcc\arm-linux-gnueabi\4.7.1\include-fixed;f:\compiler\linaro-tools\arm-linux-gnueabi\include;f:\compiler\linaro-tools\arm-linux-gnueabi\libc\usr\include\arm-linux-gnueabi;f:\compiler\linaro-tools\arm-linux-gnueabi\libc\usr\include;../rx_fluid_nios/software/rx_fluid_nios;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\include\c++\4.7.1;$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\include\c++\4.7.1\arm-linux-gnueabi;$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\include\c++\4.7.1\backward;$(TOOLCHAIN_ROOT)\lib\gcc\arm-linux-gnueabi\4.7.1\include;$(TOOLCHAIN_ROOT)\lib\gcc\arm-linux-gnueabi\4.7.1\include-fixed;$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\include;$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\libc\usr\include\arm-linux-gnueabi;$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\libc\usr\include;../rx_fluid_nios/software/rx_fluid_nios;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(ProjectDir)\gcc_Release-soc.h;$(VISUALGDB_DIR)\gcc_compat.h;$(NMakeForcedIncludes)</NMakeForcedIncludes>
     <OutDir>$(SolutionDir)_out\$(Configuration)\</OutDir>
     <NMakePreprocessorDefinitions>__VisualGDB_CFG_Release_soc;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-soc|x64'">
-    <NMakePreprocessorDefinitions>__VisualGDB_CFG_Release_soc;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
     <IncludePath />
     <ReferencePath />
     <LibraryPath />
@@ -317,10 +316,11 @@
     <NMakeReBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /rebuild "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeReBuildCommandLine>
     <NMakeCleanCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /clean "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeCleanCommandLine>
     <NMakeOutput>$(ProjectDir)rx_common_lib-Release-soc.vgdbsettings</NMakeOutput>
-    <NMakeIncludeSearchPath>f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1;f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1\arm-linux-gnueabi;f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1\backward;f:\compiler\linaro-tools\lib\gcc\arm-linux-gnueabi\4.7.1\include;f:\compiler\linaro-tools\lib\gcc\arm-linux-gnueabi\4.7.1\include-fixed;f:\compiler\linaro-tools\arm-linux-gnueabi\include;f:\compiler\linaro-tools\arm-linux-gnueabi\libc\usr\include\arm-linux-gnueabi;f:\compiler\linaro-tools\arm-linux-gnueabi\libc\usr\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\include\c++\4.7.1;$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\include\c++\4.7.1\arm-linux-gnueabi;$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\include\c++\4.7.1\backward;$(TOOLCHAIN_ROOT)\lib\gcc\arm-linux-gnueabi\4.7.1\include;$(TOOLCHAIN_ROOT)\lib\gcc\arm-linux-gnueabi\4.7.1\include-fixed;$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\include;$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\libc\usr\include\arm-linux-gnueabi;$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\libc\usr\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(ProjectDir)\gcc_Release-soc.h;$(VISUALGDB_DIR)\gcc_compat.h;$(NMakeForcedIncludes)</NMakeForcedIncludes>
     <LinkIncremental>true</LinkIncremental>
     <TargetExt>.lib</TargetExt>
+    <NMakePreprocessorDefinitions>__VisualGDB_CFG_Release_soc;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-lx|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -333,7 +333,7 @@
     <NMakeReBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /rebuild "$(ProjectPath)" "/solution:$(SolutionPath)"  "/config:$(Configuration)" "/platform:$(Platform)"</NMakeReBuildCommandLine>
     <NMakeCleanCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /clean "$(ProjectPath)" "/solution:$(SolutionPath)"  "/config:$(Configuration)" "/platform:$(Platform)"</NMakeCleanCommandLine>
     <NMakeOutput>$(ProjectDir)rx_common_lib-Release-lx.vgdbsettings</NMakeOutput>
-    <NMakeIncludeSearchPath>$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.200.124\0000\include\c++\4.8;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.200.124\0000\include\x86_64-linux-gnu\c++\4.8;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.200.124\0000\include\c++\4.8\backward;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.200.124\0001\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.200.124\0003\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.200.124\0002\include-fixed;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.200.124\0000\include\x86_64-linux-gnu;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.200.124\0000\include;..\rx_ink_lib;..\Externals\TinyXML;..\Externals\libtiff;..\Externals\mbedtls-1.3.10\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\c++\4.9;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\x86_64-linux-gnu\c++\4.9;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\c++\4.9\backward;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0004\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0003\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0005\include-fixed;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\x86_64-linux-gnu;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include;..\rx_ink_lib;..\Externals\TinyXML;..\Externals\libtiff;..\Externals\mbedtls-1.3.10\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(ProjectDir)\gcc_Release-lx.h;$(VISUALGDB_DIR)\gcc_compat.h;$(NMakeForcedIncludes)</NMakeForcedIncludes>
     <OutDir>$(SolutionDir)_out\$(Configuration)\</OutDir>
     <NMakePreprocessorDefinitions>__VisualGDB_CFG_Release_lx;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>

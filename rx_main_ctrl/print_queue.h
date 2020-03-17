@@ -34,6 +34,7 @@ int pq_abort(void);
 
 SPrintQueueItem *pq_get_next_item(void);
 
+void pq_trace_item(SPrintQueueItem *pitem);
 int pq_preflight(SPageId *pid);
 int pq_ripping(SPrintQueueItem *pitem);
 int pq_loading(int spoolerNo, SPageId *pid, char *txt);

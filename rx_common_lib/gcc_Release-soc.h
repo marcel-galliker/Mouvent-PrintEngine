@@ -1054,26 +1054,26 @@
 #endif
 
 // --- Include directories begin --- //
-//f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1
-//f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1\arm-linux-gnueabi
-//f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1\backward
-//f:\compiler\linaro-tools\lib\gcc\arm-linux-gnueabi\4.7.1\include
-//f:\compiler\linaro-tools\lib\gcc\arm-linux-gnueabi\4.7.1\include-fixed
-//f:\compiler\linaro-tools\arm-linux-gnueabi\include
-//f:\compiler\linaro-tools\arm-linux-gnueabi\libc\usr\include\arm-linux-gnueabi
-//f:\compiler\linaro-tools\arm-linux-gnueabi\libc\usr\include
+//$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\include\c++\4.7.1
+//$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\include\c++\4.7.1\arm-linux-gnueabi
+//$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\include\c++\4.7.1\backward
+//$(TOOLCHAIN_ROOT)\lib\gcc\arm-linux-gnueabi\4.7.1\include
+//$(TOOLCHAIN_ROOT)\lib\gcc\arm-linux-gnueabi\4.7.1\include-fixed
+//$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\include
+//$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\libc\usr\include\arm-linux-gnueabi
+//$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\libc\usr\include
 // --- Include directories end --- //
 
 
 // --- Library directories begin --- //
-//f:\compiler\linaro-tools\lib\gcc\arm-linux-gnueabi\4.7.1\
-//f:\compiler\linaro-tools\lib\gcc\arm-linux-gnueabi\
-//f:\compiler\linaro-tools\lib\gcc\
-//f:\compiler\linaro-tools\arm-linux-gnueabi\lib\
-//f:\compiler\linaro-tools\arm-linux-gnueabi\libc\lib\arm-linux-gnueabi\
-//f:\compiler\linaro-tools\arm-linux-gnueabi\libc\lib\
-//f:\compiler\linaro-tools\arm-linux-gnueabi\libc\usr\lib\arm-linux-gnueabi\
-//f:\compiler\linaro-tools\arm-linux-gnueabi\libc\usr\lib\
+//$(TOOLCHAIN_ROOT)\lib\gcc\arm-linux-gnueabi\4.7.1\
+//$(TOOLCHAIN_ROOT)\lib\gcc\arm-linux-gnueabi\
+//$(TOOLCHAIN_ROOT)\lib\gcc\
+//$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\lib\
+//$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\libc\lib\arm-linux-gnueabi\
+//$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\libc\lib\
+//$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\libc\usr\lib\arm-linux-gnueabi\
+//$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\libc\usr\lib\
 // --- Library directories begin --- //
 
 #pragma clang diagnostic pop

@@ -156,6 +156,42 @@ const char *Trace_get_path(void)
 	return 	_TraceFilePath;				
 }
 
+//--- TrPrint ---------------------------------------------------
+void TrPrint  (int level, const char *str)
+{
+	if (level && (_TraceToScreen || _TraceToFile))
+	{			
+		if(_Mutex)
+		{
+			int strLen=strlen(str);
+			int strPos=0;
+			int	next;
+			rx_mutex_lock(_Mutex);
+			while(strPos<strLen)
+			{
+				memcpy(_TraceStr[_TraceStrIn], &str[strPos], sizeof(_TraceStr[0])-1);
+				_TraceStr[_TraceStrIn][TRACE_STR_LEN-1]=0;
+				strPos+=sizeof(_TraceStr[0]);
+				next = (_TraceStrIn+1) % TRACE_STR_CNT;
+				for(int tio=0; ; tio++) 
+				{
+					if (tio>20)
+						break;
+					if (next!=_TraceStrOut) 
+					{
+						_TraceStrIn = next;
+						break;
+					}
+					rx_sleep(1);
+				}
+				rx_sem_post(hTraceSem);
+			}
+			rx_mutex_unlock(_Mutex);
+		}
+		else printf(str, NULL);
+	}
+} // end TrPrintf
+
 
 //--- TrPrintf ------------------------------------------------------
 void TrPrintf(int level, const char *format, ...)

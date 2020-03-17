@@ -86,6 +86,18 @@ int setup_save(HANDLE hsetup, const char *filename)
 	return setup->xml->SaveFile(filename);
 }
 
+//--- setup_to_str --------------------------------------------
+char* setup_to_str(HANDLE hsetup)
+{
+	SSetupFile *setup=(SSetupFile*)hsetup;
+	TiXmlPrinter printer;
+	printer.SetIndent( "\t" );
+	setup->xml->Accept(&printer);
+	char *buffer=(char*)malloc(printer.Size()+1);
+	strcpy(buffer, printer.CStr());
+	return buffer;
+}
+
 //--- setup_chapter ---------------------------------------------
 int setup_chapter(HANDLE hsetup, const char *name, int no, EN_setup_Action action)
 {
