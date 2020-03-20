@@ -462,6 +462,7 @@ SPrintQueueItem *pq_get_item(SPrintQueueItem *pitem)
 SPrintQueueItem *pq_set_item(SPrintQueueItem *pitem)
 {
 	int i;
+	if (pitem->scansStop) Error(LOG, 0, "pq_set_item: scansStop=%d", pitem->scansStop);
 	if (_find_item(pitem->id.id, &i)==REPLY_OK)
 	{
 		pitem->state = _List[i].state;
