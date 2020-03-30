@@ -1100,16 +1100,21 @@ static void* _client_thread_tcp_send(void* lpParameter)
 		while(par->msgOutIdx!=par->msgInIdx)
 		{
 			if (!par->sendThreadRunning) break;
-			sent=send(par->socket, par->msgbuf[par->msgOutIdx], par->msglen[par->msgOutIdx], MSG_NOSIGNAL);
-			if (sent==SOCKET_ERROR)
+			RX_SOCKET socket=par->socket;
+			if (socket!=INVALID_SOCKET)
 			{
-				char peerName[64];
-				char errStr[200];
-				int err;
-				err = sok_error(&par->socket);
-				err_system_error(err, errStr, sizeof(errStr));
-				sok_get_peer_name(par->socket, peerName, NULL, NULL);
-				Error(LOG, 0, "_client_thread_tcp_send >>%s<<, error=>>%s<<", peerName, errStr);
+			    int time0=rx_get_ticks();
+			    sent=send(par->socket, par->msgbuf[par->msgOutIdx], par->msglen[par->msgOutIdx], MSG_NOSIGNAL);
+			    if (sent==SOCKET_ERROR)
+			    {
+				    char clientName[64];
+				    char errStr[200];
+				    int err;
+				    sok_get_socket_name(socket, clientName, NULL, NULL);
+				    err = sok_error(&par->socket);
+				    err_system_error(err, errStr, sizeof(errStr));
+				    Error(LOG, 0, "_client_thread_tcp_send socket=%d >>%s<<, error=>>%s<<, sending-time=%d", socket, clientName, errStr, rx_get_ticks()-time0);
+			    }
 			}
 			par->msgTime = 0; 
 			par->msglen[par->msgOutIdx]=0;
@@ -1239,7 +1244,9 @@ int sok_receiver(HANDLE hserver, RX_SOCKET *psocket, msg_handler handle_msg, voi
 					if (phdr->msgLen > len) break;
 
 					if (pserver) rx_mutex_lock(pserver->mutex);
+				//	TrPrintfL(TRUE, "Socket[%d].handleMsg=0x%08x", *psocket, phdr->msgId);
 					handle_msg(*psocket, phdr, phdr->msgLen, NULL, par);
+				//	TrPrintfL(TRUE, "Socket[%d].handleMsg=0x%08x done", *psocket, phdr->msgId);
 					if (pserver) rx_mutex_unlock(pserver->mutex);					
 					start += phdr->msgLen;
 					len -= phdr->msgLen;
@@ -1420,7 +1427,6 @@ int sok_send_2(RX_SOCKET *socket, INT32 id, UINT32 dataLen, void *data)
 	size = sizeof(SMsgHdr)+dataLen;
 	if (size > sizeof(buffer)) 
 		return Error(ERR_CONT, 0, "Message too large, id=0x%08x, len=%d, max=%d", id, size, sizeof(buffer));
-
 	pmsg = (SMsgHdr*)buffer;
 	pmsg->msgId = id;
 	pmsg->msgLen = size;
@@ -1471,7 +1477,7 @@ int sok_check_addr_32(RX_SOCKET *psocket, UINT32 addr, char *file, int line)
 
 //--- sok_send_to_clients ----------------------------------------
 // return:  Client Count
-int sok_send_to_clients(HANDLE hserver, void *pmsg)
+int sok_send_to_clients(HANDLE hserver, RX_SOCKET *socket, void *pmsg)
 {
 	SMsgHdr* phdr 	 = (SMsgHdr*)pmsg;
 	SServer *pserver = (SServer*)hserver;
@@ -1487,7 +1493,7 @@ int sok_send_to_clients(HANDLE hserver, void *pmsg)
 		for (thread = 0; thread < pserver->maxConnections; thread++)
 		{
 			par = &pserver->threadPar[thread];
-			if (par->hthread && par->socket && par->socket!=INVALID_SOCKET && par->sendSem)
+			if (par->hthread && par->socket && par->socket!=INVALID_SOCKET && par->sendSem && (socket==NULL || *socket==INVALID_SOCKET || *socket==0 || *socket==par->socket))
 			{
 				idx = (par->msgInIdx+1) % FIFO_SIZE;
 				if(idx==par->msgOutIdx)
@@ -1514,7 +1520,7 @@ int sok_send_to_clients(HANDLE hserver, void *pmsg)
 
 //--- sok_send_to_clients_2 -----------------------------------------------------
 // return:  Client Count
-int sok_send_to_clients_2(HANDLE hserver, INT32 id, UINT32 len, void *data)
+int sok_send_to_clients_2(HANDLE hserver, RX_SOCKET *socket, INT32 id, UINT32 len, void *data)
 {
 	SMsgHdr	*pmsg;
 	int		size, cnt;
@@ -1525,7 +1531,7 @@ int sok_send_to_clients_2(HANDLE hserver, INT32 id, UINT32 len, void *data)
 	pmsg->msgId  = id;
 	pmsg->msgLen = size;
 	if(len && data) memcpy(&pmsg[1], data, len);
-	cnt = sok_send_to_clients(hserver, pmsg);
+	cnt = sok_send_to_clients(hserver, socket, pmsg);
 	free(pmsg);
 	return cnt;
 }

@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              mc:Ignorable="d"
              d:DesignHeight="70" 
              d:DesignWidth="900"
@@ -13,7 +13,7 @@
             <common:RxButton x:Name="Button_Start" Click="Start_Clicked" ToolTip="Start Printing">
                 <Image Source="{StaticResource start_ico}"/>
             </common:RxButton>
-            <common:RxButton x:Name="Button_Pause"  Click="Pause_Clicked" ToolTip="Pause Printing">
+            <common:RxButton x:Name="Button_Pause"  Click="Pause_Clicked" ToolTip="Pause Printing" >
                 <Image Source="{StaticResource pause_ico}"/>
             </common:RxButton>
             <common:RxButton x:Name="Button_Stop" Click="Stop_Clicked" ToolTip="Stop Printing" >

@@ -7,7 +7,7 @@
       <PathStyle>RemoteUnix</PathStyle>
     </CustomSourceDirectories>
     <DeploymentHost>
-      <HostName>192.168.200.10</HostName>
+      <HostName>192.168.200.40</HostName>
       <Transport>SSH</Transport>
       <UserName>root</UserName>
     </DeploymentHost>
@@ -73,10 +73,6 @@
     <AdditionalMakeArguments />
     <MakeCommandTemplate>
       <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
-      <RemoteHost>
-        <HostName>BuildMachine</HostName>
-        <Transport>BuiltinShortcut</Transport>
-      </RemoteHost>
       <Command>cmd.exe</Command>
       <Arguments>/c "$(VISUALGDB_DIR)\make.exe"</Arguments>
       <WorkingDirectory>$(BuildDir)</WorkingDirectory>

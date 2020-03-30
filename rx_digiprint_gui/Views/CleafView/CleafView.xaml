@@ -52,7 +52,7 @@
             </StackPanel>
             <cleaf:CleafCommands Grid.Column="2" MinWidth="150"/>
             <cleaf:CleafServiceCommands Grid.Row="2" Grid.Column="3" x:Name="ServiveCmmands"/>
-            <rx_uc:CleaningView Grid.Column="4" Width="300"/>
+            <rx_uc:StepperView Grid.Column="4" Width="300"/>
         </Grid>
 
         <!--- Order ___________________________________________________________-->

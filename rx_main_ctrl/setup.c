@@ -109,6 +109,7 @@ int setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action)
 	if (setup_chapter(file, "Configuration", -1, action)!=REPLY_OK) return REPLY_ERROR;
 
 	setup_uchar(file, "Simulation", action, &pcfg->simulation, 0);
+	setup_str  (file, "material", action,  pcfg->material,	sizeof(pcfg->material),	"");
 
 	//--- printer ---
 	if (setup_chapter(file, "Printer", -1, action)==REPLY_OK) 
@@ -171,7 +172,10 @@ int setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action)
 			if (setup_chapter(file, "robot", i, action)==REPLY_OK) 
 			{	
 				setup_int32(file, "ref_height",	  action, &pcfg->stepper.robot[i].ref_height,	0);
-				setup_int32(file, "head_align",	  action, &pcfg->stepper.robot[i].head_align,	0);				
+				setup_int32(file, "head_align",	  action, &pcfg->stepper.robot[i].head_align,	0);
+				setup_int32(file, "ref_height_back", action, &pcfg->stepper.robot[i].ref_height_back, 0);
+				setup_int32(file, "ref_height_front", action, &pcfg->stepper.robot[i].ref_height_front, 0);
+				setup_int32(file, "cap_height", action, &pcfg->stepper.robot[i].cap_height, 0);
 				setup_chapter(file, "..", -1, action);
 			}				
 		}

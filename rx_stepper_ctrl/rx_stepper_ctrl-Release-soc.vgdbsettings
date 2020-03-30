@@ -76,6 +76,10 @@
     <AdditionalMakeArguments />
     <MakeCommandTemplate>
       <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
+      <RemoteHost>
+        <HostName>BuildMachine</HostName>
+        <Transport>BuiltinShortcut</Transport>
+      </RemoteHost>
       <Command>cmd.exe</Command>
       <Arguments>/c "$(VISUALGDB_DIR)\make.exe"</Arguments>
       <WorkingDirectory>$(BuildDir)</WorkingDirectory>

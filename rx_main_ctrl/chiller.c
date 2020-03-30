@@ -19,6 +19,7 @@
 #include "rx_trace.h"
 #include "tcp_ip.h"
 #include "args.h"
+#include "gui_svr.h"
 #include "chiller.h"
 
 //--- telegrams ------------------------------------------------
@@ -29,8 +30,8 @@ static const char *_convert="0123456789ABCDEF";
 #define READ_REGISTERS	0x03
 #define WRITE_REGISTER	0x06
 
-#define CHILLER_TEMP_SET		280	// temperature in 0.1°C
-#define CHILLER_TEMP_SET_UV		400	// temperature in 0.1°C
+#define CHILLER_TEMP_SET		280	// temperature in 0.1ï¿½C
+#define CHILLER_TEMP_SET_UV		400	// temperature in 0.1ï¿½C
 
 #define TIMEOUT 2
 
@@ -203,7 +204,7 @@ void chiller_error_reset(void)
 //--- fluid_reply_stat ------------------------------------
 void chiller_reply_stat(RX_SOCKET socket)	// to GUI
 {
-	sok_send_2(&socket, REP_CHILLER_STAT, sizeof(_ChillerStatus), &_ChillerStatus);
+	gui_send_msg_2(socket, REP_CHILLER_STAT, sizeof(_ChillerStatus), &_ChillerStatus);
 }
 
 //--- _read_register -------------------------------------------

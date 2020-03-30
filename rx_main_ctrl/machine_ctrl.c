@@ -71,7 +71,6 @@ int		machine_end(void)
 //--- machine_tick -------------------------------
 int		machine_tick(void)
 {
-	lh702_tick();
 	return REPLY_OK;
 }
 
@@ -182,7 +181,7 @@ int		machine_abort_printing(void)
 	{
 	case mi_none:	return enc_abort_printing();
 	case mi_tt:		return tt_abort_printing();
-	case mi_plc:	// if (!rx_def_is_scanning(RX_Config.printer.type)) step_handle_gui_msg(INVALID_SOCKET, CMD_CAP_UP_POS, NULL, 0);
+	case mi_plc:	// if (!rx_def_is_scanning(RX_Config.printer.type)) step_handle_gui_msg(INVALID_SOCKET, CMD_LIFT_UP_POS, NULL, 0);
 					step_abort_printing();
 					return plc_abort_printing();
 	}

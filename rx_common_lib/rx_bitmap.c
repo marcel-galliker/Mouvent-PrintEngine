@@ -31,18 +31,17 @@ int bmp_create(RX_Bitmap *pbmp, int width, int height, int bppx)
 //--- bmp_clear -----------------------------------------------------------
 int bmp_clear  (RX_Bitmap *pbmp, int x, int y, int width, int height)
 {
-	if (pbmp->bppx==1)
+	BYTE *dst;
+	int pxPerByte = 8/pbmp->bppx;		
+
+	x = ((x+pxPerByte-1)/pxPerByte)*pxPerByte;
+	if (x+width>pbmp->width) width=pbmp->width-x;
+	width /= pxPerByte;
+	if (y+height>pbmp->height) height=pbmp->height-y;
+	dst = &pbmp->buffer[y*pbmp->lineLen];
+	for (; height>0; y++, height--, dst+=pbmp->lineLen)
 	{
-		BYTE *dst;
-		x &= ~7;
-		if (x+width>pbmp->width) width=pbmp->width-x;
-		width /= 8;
-		if (y+height>pbmp->height) height=pbmp->height-y;
-		dst = &pbmp->buffer[y*pbmp->lineLen];
-		for (; height>0; y++, height--, dst+=pbmp->lineLen)
-		{
-			memset(dst, 0, width);
-		}
+		memset(dst, 0x00, width);
 	}
 	return REPLY_OK;
 }

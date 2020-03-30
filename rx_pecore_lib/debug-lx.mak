@@ -19,7 +19,7 @@ LIBRARY_NAMES :=
 ADDITIONAL_LINKER_INPUTS := 
 MACOS_FRAMEWORKS := 
 
-CFLAGS := -ggdb -ffunction-sections -O0 -pthread
+CFLAGS := -ggdb -ffunction-sections -O0 -pthread  -std=gnu99
 CXXFLAGS := -ggdb -ffunction-sections -O0 -pthread
 ASFLAGS := 
 LDFLAGS := -Wl,-gc-sections -pthread

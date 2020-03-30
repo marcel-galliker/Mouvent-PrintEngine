@@ -36,7 +36,7 @@ namespace RX_DigiPrint.Models
                 if (par.Length<2) break;
                 _Par.Add(new SParVal(){ID=par[0],   val=new StringBuilder(32).Append(par[1])});
                 
-                if (par[0].Equals("PAR_HEAD_HEIGHT"))  
+                if (par[0].Equals("XML_HEAD_HEIGHT"))  
                     RxGlobals.MaterialXML.PrintHeight = Rx.StrToDouble(par[1]);
             }
         }
@@ -98,6 +98,17 @@ namespace RX_DigiPrint.Models
                 }
             }
             _Par.Add(new SParVal(){ID=id,   val=new StringBuilder(32).Append(val)});
+        }
+
+        public void Trace(string title)
+        {
+            int i;
+            RxGlobals.Events.AddItem(new LogItem(title)); 
+            if (_Par==null) return;
+            for (i=0; i<_Par.Count; i++)
+            {
+                RxGlobals.Events.AddItem(new LogItem(string.Format("{0}={1}", _Par[i].ID, _Par[i].val))); 
+            }
         }
 
         //--- _parstr ------------------------------------------------------------

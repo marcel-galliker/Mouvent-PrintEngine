@@ -97,6 +97,17 @@ namespace RX_DigiPrint.Views.LH702View
             }
         }
 
+        //--- Copies_LostFocus -----------------------------------------------------------
+        private void Copies_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (RxGlobals.PrinterStatus.PrintState==EPrintState.ps_printing && _Item!=null)
+            {
+                RxNumBox ctrl = e.Source as RxNumBox;
+                _Item.Copies = (Int32)(ctrl.Value+0.5);
+                _Item.SendMsg(TcpIp.EVT_SET_PRINT_QUEUE);       
+            }
+        }
+
         //--- CB_PrintGoMode_SelectionChanged -----------------------------------
         private void CB_PrintGoMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {

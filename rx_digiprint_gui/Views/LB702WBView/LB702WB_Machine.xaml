@@ -70,14 +70,78 @@
                     <rx_uc:PlcParCtrl Grid.Column="3" ID="STA_FLEXO_1_IDLE_RUN"      Label="" LabelWidth="0" Unit="" UnitWidth="0" Type="Led" />
                 </Grid>
 
-                <rx_uc:PlcParCtrl Grid.Column="2" Grid.Row="1" ID="STA_DRYER_1_TEMP_ZONE_1"    Label="" Unit="°C" Format="1" />
-                <rx_uc:PlcParCtrl Grid.Column="2" Grid.Row="3" ID="STA_DRYER_1_TEMP_ZONE_2"    Label="" Unit="°C" Format="1" />
-                <rx_uc:PlcParCtrl Grid.Column="2" Grid.Row="2" ID="STA_DRYER_1_TEMP_ZONE_3"    Label="" Unit="°C" Format="1" />
+                <Grid Grid.Column="2" Grid.Row="1" Margin="5,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>                    
+                    <rx_uc:PlcParCtrl Grid.Column="0" ID="STA_DRYER_1_TEMP_ZONE_1"    Label="" Unit="°C" Format="1"/>
+                    <rx_uc:PlcParCtrl Grid.Column="1" ID="STA_DRYER_1_BUSE_UP_PRESSURE"    Label="" Unit="Pa" Format="1"/>
+                </Grid>
+                <Grid Grid.Column="2" Grid.Row="2" Margin="5,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
 
-                <rx_uc:PlcParCtrl Grid.Column="5" Grid.Row="1" ID="STA_DRYER_2_TEMP_ZONE_1"    Label="" Unit="°C" Format="1" />
-                <rx_uc:PlcParCtrl Grid.Column="5" Grid.Row="3" ID="STA_DRYER_2_TEMP_ZONE_2"    Label="" Unit="°C" Format="1" />
-                <rx_uc:PlcParCtrl Grid.Column="5" Grid.Row="2" ID="STA_DRYER_2_TEMP_ZONE_3"    Label="" Unit="°C" Format="1" />
+                    <rx_uc:PlcParCtrl Grid.Column="0" ID="STA_DRYER_1_TEMP_ZONE_2"    Label="" Unit="°C" Format="1"/>
+                    <rx_uc:PlcParCtrl Grid.Column="1" ID="STA_DRYER_1_EXHAUST_UP_PRESSURE"    Label="" Unit="Pa" Format="1"/>
+                </Grid>
+                <Grid Grid.Column="2" Grid.Row="3" Margin="5,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
 
+                    <rx_uc:PlcParCtrl Grid.Column="0" ID="STA_DRYER_1_TEMP_ZONE_3"    Label="" Unit="°C" Format="1"/>
+                    <rx_uc:PlcParCtrl Grid.Column="1" ID="STA_DRYER_1_BUSE_DOWN_PRESSURE"    Label="" Unit="Pa" Format="1"/>
+                </Grid>
+                <Grid Grid.Column="2" Grid.Row="4" Margin="5,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <rx_uc:PlcParCtrl Grid.Column="1" ID="STA_DRYER_1_EXHAUST_DOWN_PRESSURE"    Label="" Unit="Pa" Format="1"/>
+                </Grid>
+
+                <Grid Grid.Column="5" Grid.Row="1" Margin="5,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <rx_uc:PlcParCtrl Grid.Column="0" ID="STA_DRYER_2_TEMP_ZONE_1"    Label="" Unit="°C" Format="1"/>
+                    <rx_uc:PlcParCtrl Grid.Column="1" ID="STA_DRYER_2_BUSE_UP_PRESSURE"    Label="" Unit="Pa" Format="1"/>
+                </Grid>
+                <Grid Grid.Column="5" Grid.Row="2" Margin="5,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <rx_uc:PlcParCtrl Grid.Column="0" ID="STA_DRYER_2_TEMP_ZONE_2"    Label="" Unit="°C" Format="1"/>
+                    <rx_uc:PlcParCtrl Grid.Column="1" ID="STA_DRYER_2_EXHAUST_UP_PRESSURE"    Label="" Unit="Pa" Format="1"/>
+                </Grid>
+                <Grid Grid.Column="5" Grid.Row="3" Margin="5,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <rx_uc:PlcParCtrl Grid.Column="0" ID="STA_DRYER_2_TEMP_ZONE_3"    Label="" Unit="°C" Format="1"/>
+                    <rx_uc:PlcParCtrl Grid.Column="1" ID="STA_DRYER_2_BUSE_DOWN_PRESSURE"    Label="" Unit="Pa" Format="1"/>
+                </Grid>
+                <Grid Grid.Column="5" Grid.Row="4" Margin="5,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <rx_uc:PlcParCtrl Grid.Column="1" ID="STA_DRYER_2_EXHAUST_DOWN_PRESSURE"    Label="" Unit="Pa" Format="1"/>
+                </Grid>
+
+                
+                
                 <Grid Grid.Column="6" Grid.Row="1" Margin="5,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -92,10 +156,42 @@
                     <rx_uc:PlcParCtrl Grid.Column="3" ID="STA_FLEXO_2_IDLE_RUN"      Label="" LabelWidth="0" Unit="" UnitWidth="0" Type="Led" />
                 </Grid>
 
-                <rx_uc:PlcParCtrl Grid.Column="7" Grid.Row="1" ID="STA_DRYER_3_TEMP_ZONE_1"    Label="" Unit="°C" Format="1" />
-                <rx_uc:PlcParCtrl Grid.Column="7" Grid.Row="3" ID="STA_DRYER_3_TEMP_ZONE_2"    Label="" Unit="°C" Format="1" />
-                <rx_uc:PlcParCtrl Grid.Column="7" Grid.Row="2" ID="STA_DRYER_3_TEMP_ZONE_3"    Label="" Unit="°C" Format="1" />
 
+                <Grid Grid.Column="7" Grid.Row="1" Margin="5,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <rx_uc:PlcParCtrl Grid.Column="0" ID="STA_DRYER_3_TEMP_ZONE_1"    Label="" Unit="°C" Format="1"/>
+                    <rx_uc:PlcParCtrl Grid.Column="1" ID="STA_DRYER_3_BUSE_UP_PRESSURE"    Label="" Unit="Pa" Format="1"/>
+                </Grid>
+                <Grid Grid.Column="7" Grid.Row="2" Margin="5,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <rx_uc:PlcParCtrl Grid.Column="0" ID="STA_DRYER_3_TEMP_ZONE_2"    Label="" Unit="°C" Format="1"/>
+                    <rx_uc:PlcParCtrl Grid.Column="1" ID="STA_DRYER_3_EXHAUST_UP_PRESSURE"    Label="" Unit="Pa" Format="1"/>
+                </Grid>
+                <Grid Grid.Column="7" Grid.Row="3" Margin="5,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <rx_uc:PlcParCtrl Grid.Column="0" ID="STA_DRYER_3_TEMP_ZONE_3"    Label="" Unit="°C" Format="1"/>
+                    <rx_uc:PlcParCtrl Grid.Column="1" ID="STA_DRYER_3_BUSE_DOWN_PRESSURE"    Label="" Unit="Pa" Format="1"/>
+                </Grid>
+                <Grid Grid.Column="7" Grid.Row="4" Margin="5,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <rx_uc:PlcParCtrl Grid.Column="1" ID="STA_DRYER_3_EXHAUST_DOWN_PRESSURE"    Label="" Unit="Pa" Format="1"/>
+                </Grid>
+                
                 <rx_uc:PlcParCtrl Grid.Column="0" Grid.Row="1" ID="PAR_WIND_DIRECTION_WINDER1" Label=""     Unit="" Visibility="Collapsed" />
 
                 <Grid Grid.Column="9" Grid.RowSpan="10">

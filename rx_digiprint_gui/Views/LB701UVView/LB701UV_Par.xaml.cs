@@ -43,7 +43,9 @@ namespace RX_DigiPrint.Views.LB701UVView
             CB_Material.EndEditMode(true, true);
             ParPanelMaterial.Send();
             RxGlobals.RxInterface.SendCommand(TcpIp.CMD_PLC_SAVE_PAR);
-            Material material = CB_Material.SelectedItem as Material;
+
+        //  Material material = CB_Material.SelectedItem as Material;
+            Material material = RxGlobals.MaterialList.FindByName(CB_Material.DisplayText);
             if (material!=null)
             {
                 ParPanelMaterial.SaveValues(material);
@@ -60,7 +62,8 @@ namespace RX_DigiPrint.Views.LB701UVView
         //--- Delete_Clicked ---------------------------------------------
         private void Delete_Clicked(object sender, RoutedEventArgs e)
         {
-            Material  material = CB_Material.SelectedItem as Material;
+        //  Material material = CB_Material.SelectedItem as Material;
+            Material material = RxGlobals.MaterialList.FindByName(CB_Material.DisplayText);
             if (material!=null)
             {
                 if (RxMessageBox.YesNo("Delte", string.Format("Delete Material {0}?", material.Name),  MessageBoxImage.Question, false))
@@ -81,10 +84,11 @@ namespace RX_DigiPrint.Views.LB701UVView
         //--- CB_Material_DropDownClosed ----------------------------------------------
         private void CB_Material_DropDownClosed(object sender, RoutedEventArgs e)
         {
-            Material item = CB_Material.SelectedItem as Material;
-            if (item!=null)
+        //  Material material = CB_Material.SelectedItem as Material;
+            Material material = RxGlobals.MaterialList.FindByName(CB_Material.DisplayText);
+            if (material!=null)
             {
-                if (item.Name.Equals("--- NEW ---"))
+                if (material.Name.Equals("--- NEW ---"))
                 {
                     MaterialName.Visibility = Visibility.Visible;
                     RxTextPad pad = new RxTextPad(MaterialName);
@@ -102,8 +106,8 @@ namespace RX_DigiPrint.Views.LB701UVView
                 }
                 else
                 {
-                    XML_MATERIAL.Value = item.Name;
-                    ParPanelMaterial.SetValues(item);
+                    XML_MATERIAL.Value = material.Name;
+                    ParPanelMaterial.SetValues(material);
                 }
             }
         }

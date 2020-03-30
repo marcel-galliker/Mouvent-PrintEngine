@@ -19,6 +19,5 @@ extern int arg_simuEncoder;
 extern int arg_simuHeads;
 extern int arg_simuChiller;
 extern int arg_hamster;
-extern int arg_testMachine;
 
 void args_init(int argc, char** argv);

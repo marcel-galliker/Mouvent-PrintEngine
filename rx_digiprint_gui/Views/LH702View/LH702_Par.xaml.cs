@@ -40,10 +40,13 @@ namespace RX_DigiPrint.Views.LH702View
         {
             CB_Material.EndEditMode(true, true);
             ParPanelMaterial.Send();
-            Material material = CB_Material.SelectedItem as Material;
+
+        //  Material material = CB_Material.SelectedItem as Material;
+            Material material = RxGlobals.MaterialList.FindByName(CB_Material.DisplayText);
             if (material!=null)
             {
                 ParPanelMaterial.SaveValues(material);
+             //   material.Trace("Save");
                 material.Send(TcpIp.CMD_PLC_SAVE_MATERIAL);
             }
         }

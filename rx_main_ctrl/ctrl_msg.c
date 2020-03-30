@@ -43,8 +43,7 @@ static int _do_head_stat		(RX_SOCKET socket, int headNo, SHeadBoardStat	*pstat);
 static int _do_trace_evt		(RX_SOCKET socket, STraceMsg		*msg);
 static void _do_fluidCtrlMode	(RX_SOCKET socket, SFluidCtrlCmd	*pmsg); 
 static int _do_save_file_hdr	(RX_SOCKET socket, int headNo, SFSDirEntry		*msg); 
-static int _do_save_file_blk	(RX_SOCKET socket, int headNo, SDataBlockMsg	*msg);
-//static int _ctrl_do_log_evt(RX_SOCKET socket, SLogMsg *msg);
+static int _do_save_file_blk	(RX_SOCKET socket, int headNo, SDataBlockMsg	*msg); 
 
 //--- Statics -----------------------------------------------------------------
 

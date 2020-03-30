@@ -77,6 +77,7 @@ static INT32	_TimePIDstable;
 static INT32	_Meniscus_Timeout;
 static INT32	_PurgeDelay;
 static INT32	_PurgeTime;
+static INT32	_SetpointShutdown;
 
 // ---- NEW : flow resistance  -----
 // static INT32	_TimeFlowResistancestablePRINT;
@@ -250,26 +251,27 @@ void pump_tick_10ms(void)
 		case ctrl_shutdown:	
 
 				if(_ShutdownPrint > 0)					
-				{
-					
+				{					
 					_TimeMeniscusStability = 0;
 					_NbPresShutdown = 0;
 					_PumpPID.Setpoint = -RX_Status.meniscus;
 				}
+				_SetpointShutdown = RX_Config.meniscus_setpoint - 150;
+				if(_SetpointShutdown < 100) _SetpointShutdown = 100;
 				RX_Status.mode = RX_Config.mode;
 				break;
 		
 		case ctrl_shutdown_done:	
 		
 				// Bring Meniscus to Setpoint (WF) + 15mbars
-				if(_ShutdownPrint > 0)
+				if((_ShutdownPrint > 0)&&(RX_Status.info.valve == TO_INK))	// valve on TO_FLUSH if Error detected, so no shutdown phase
 				{
 					_ShutdownPrint++;
 					_NbPresShutdown++;
 					if(_NbPresShutdown > 10)
 					{
-						if(_PumpPID.Setpoint > RX_Config.meniscus_setpoint - 150) _PumpPID.Setpoint --;
-						else _PumpPID.Setpoint = RX_Config.meniscus_setpoint - 150;
+						if(_PumpPID.Setpoint > _SetpointShutdown) _PumpPID.Setpoint --;
+						else _PumpPID.Setpoint = _SetpointShutdown;
 						_NbPresShutdown = 0;
 					}
 					_pump_pid(FALSE);	// disable meniscus error
@@ -302,6 +304,7 @@ void pump_tick_10ms(void)
 									
 						pid_reset(&_PumpPID);			
 						_PumpPID.start_integrator = 0;
+						_PumpPID.Setpoint = RX_Config.meniscus_setpoint;
 						_Start_PID = START_PID_OFF;
 						_TimePIDstable = 0;
 //						_TimeSwitchingOFF = 0;
@@ -784,6 +787,7 @@ void pump_tick_10ms(void)
 						temp_ctrl_on(FALSE);
 						_set_valve(TO_INK);
 						_pump_pid(TRUE);
+						if(_PumpPID.val == _PumpPID.val_min) pid_reset(&_PumpPID);
 						max_pressure = MBAR_500;
 						if (RX_Config.mode==ctrl_fill_step2 
 						||  (RX_Config.mode==ctrl_fill_step3 && RX_Status.pressure_in!=INVALID_VALUE && RX_Status.pressure_in>0)) 
@@ -1023,6 +1027,7 @@ static void _set_pump_speed(UINT32 speed)
         // report actual pump speed, not in percent anymore
 		RX_Status.pump  = (100 * speed) / _PumpPID.val_max;
 	}
+	else RX_Status.pump=INVALID_VALUE;
 }
 
 //--- turn_off_pump --------------------------------

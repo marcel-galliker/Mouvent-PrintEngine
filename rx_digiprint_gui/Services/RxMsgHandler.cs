@@ -55,6 +55,7 @@ namespace RX_DigiPrint.Services
                     case TcpIp.REP_SET_PRINTER_CFG:                             break;
 
                     case TcpIp.REP_GET_STEPPER_CFG: handle_stepper_cfg(msg);    break;
+                    case TcpIp.REP_STEPPER_STAT:    handle_stepper_stat(msg);    break;    
 
                     case TcpIp.REP_PLC_GET_INFO:    handle_plc_info(msg);        break;       
                     case TcpIp.REP_PLC_GET_LOG:     handle_plc_log(msg);         break;
@@ -65,7 +66,6 @@ namespace RX_DigiPrint.Services
                     case TcpIp.REP_CHILLER_STAT:    handle_chiller_stat(msg);    break;
                     case TcpIp.REP_ENCODER_STAT:    handle_encoder_stat(msg);    break;
                     case TcpIp.REP_HEAD_STAT:       handle_head_stat(msg);       break;
-                    case TcpIp.REP_TT_STAT:         handle_tt_stat(msg);         break;    
 
                     case TcpIp.REP_PLC_GET_VAR:     handle_plc_var(msg);         break;
                     case TcpIp.REP_PLC_LOAD_PAR:    handle_plc_load_par(msg);    break;
@@ -288,14 +288,14 @@ namespace RX_DigiPrint.Services
             else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length SHeadBoardStatMsg"));
         }
 
-        //--- handle_tt_stat -----------------------------------------
-        private void handle_tt_stat(Byte[] buf)
+        //--- handle_stepper_stat -----------------------------------------
+        private void handle_stepper_stat(Byte[] buf)
         {            
             TcpIp.SStepperStat msg;
             int len=RxStructConvert.ToStruct(out msg, buf);
             if (len==msg.hdr.msgLen)
             {
-                RxGlobals.TestTableStatus.Update(msg);
+                RxGlobals.StepperStatus[msg.no].Update(msg);
             }
             else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length SStepperStat")); 
         }

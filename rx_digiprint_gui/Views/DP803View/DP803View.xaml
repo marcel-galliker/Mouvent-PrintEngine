@@ -78,7 +78,7 @@
                 </GroupBox>
                 
                 <!-- Cleaning Station ____________________________________________________________
-                <rx_uc:CleaningView HorizontalAlignment="Right" Width="200"/>
+                <rx_uc:StepperView HorizontalAlignment="Right" Width="200"/>
                 -->
                 
             </StackPanel>

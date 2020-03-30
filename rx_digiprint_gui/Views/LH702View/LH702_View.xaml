@@ -24,7 +24,7 @@
         <!-- toolbar LEFT _______________________________________________________ -->
         <rx_uc:CommandButtons/>
         <common:RxButton x:Name="Button_Add" Click="Add_Clicked" HorizontalAlignment="Right">
-            <Image Source="{StaticResource add_ico}"/>
+            <Image Source="{StaticResource add_ico}" MaxHeight="100"/>
         </common:RxButton>
 
         <!--
@@ -68,7 +68,7 @@
 
                     <local:LH702_Par Grid.Column="0"  Width="300"/>
                     <local:LH702_ImgSettings Grid.Column="1" x:Name="ImgSettings" HorizontalAlignment="Stretch"/>
-                    <rx_uc:CleaningView Grid.Column="2" Width="250" HorizontalAlignment="Right"/>
+                    <rx_uc:StepperView Grid.Column="2" Width="250" HorizontalAlignment="Right"/>
                 </Grid>
                 
             </Grid>

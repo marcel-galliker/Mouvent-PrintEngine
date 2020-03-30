@@ -178,7 +178,6 @@ namespace RX_DigiPrint.Views
             TcpIp.SLogReqMsg msg = new TcpIp.SLogReqMsg();
             msg.first           = 0;
             msg.count           = 200;
-            msg.count           = 2000;
 //          msg.count           = 100000;
             
             RxGlobals.RxInterface.SendMsg(TcpIp.CMD_EXPORT_LOG, ref msg);

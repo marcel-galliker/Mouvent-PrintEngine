@@ -15,7 +15,6 @@ namespace RX_DigiPrint.Models
         public PrintSystem()
         {
             RxGlobals.Stepper.PropertyChanged += Stepper_PropertyChanged;
-
         }
 
         private void Stepper_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -72,6 +71,20 @@ namespace RX_DigiPrint.Models
             }
         }
 
+        //--- Property IsTx ---------------------------------------
+        public bool IsTx
+        {
+            get 
+            { 
+                switch(_PrinterType)
+	            {
+                case EPrinterType.printer_TX801:			    return true;
+	            case EPrinterType.printer_TX802:			    return true;
+	            default: return false;
+	            }
+            }
+        }
+
         //--- Property HasHeater ---------------------------------------
         public bool HasHeater
         {
@@ -89,7 +102,16 @@ namespace RX_DigiPrint.Models
 	            }
             }
         }
-                      
+
+        //--- Property HostName ---------------------------------------
+        private string _HostName;
+        public string HostName
+        {
+            get { return _HostName; }
+            set { SetProperty(ref _HostName,value); }
+        }
+
+
         //--- Property PrinterType ---------------------------------------
         private EPrinterType _PrinterType;
         public EPrinterType PrinterType
@@ -125,9 +147,16 @@ namespace RX_DigiPrint.Models
 
                         default: IS_Order = new int[] { 0,1,2,3,4,5,6,7 }; break;
                     }
-
                 }
             }
+        }
+
+        //--- Property LH702_simulation ---------------------------------------
+        private bool _LH702_simulation=false;
+        public bool LH702_simulation
+        {
+            get { return _LH702_simulation; }
+            set { SetProperty(ref _LH702_simulation,value); }
         }
 
         //--- Property ExternalData ---------------------------------------
@@ -298,6 +327,9 @@ namespace RX_DigiPrint.Models
             RxGlobals.InkSupply.List[TcpIp.InkSupplyCnt].InkType = InkType.Flush;
             RxGlobals.InkSupply.List[TcpIp.InkSupplyCnt+1].InkType = InkType.Waste;
 
+            LH702_simulation = (msg.type==EPrinterType.printer_LH702) && !msg.hostName.StartsWith("LH702");
+
+            HostName                = msg.hostName;
             PrinterType             = msg.type;
             Overlap                 = msg.overlap>0;
             OffsetVerso             = msg.offset.versoDist;

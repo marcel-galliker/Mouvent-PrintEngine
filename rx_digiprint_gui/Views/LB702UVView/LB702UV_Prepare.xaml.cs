@@ -42,14 +42,16 @@ namespace RX_DigiPrint.Views.LB702UVView
                         Grid.SetColumnSpan(ctrl, 2);
                     }
                     Image img = new Image();
-                    Grid.SetRow(img, n+1);
+                    if(n<8) Grid.SetRow(img, n+1);
+                    else Grid.SetRow(img, n + 2);
                     Grid.SetColumn(img, 1);
                     img.Source  = _img_ok;
                     img.Height  = 20;
                     img.Tag     = ctrl.Tag;
-                    _Image.Add(img);
+                    _Image.Add(img);                    
                     PrepGrid.Children.Add(_Image[n]);
                     n++;
+                    
                 }
             }
         }
@@ -58,7 +60,9 @@ namespace RX_DigiPrint.Views.LB702UVView
         public void Update()
         {
             string str;
-            int value, n;
+            int value=0;
+            int n;
+
             str = RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_MACHINE_STATE");
             try
             {
@@ -68,15 +72,27 @@ namespace RX_DigiPrint.Views.LB702UVView
                 this.Visibility = (value==4 || value==5) ?  Visibility.Visible:Visibility.Collapsed;                        
 
                 str = RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_PREPARE_ACTIVE");
-
+               
                 value=Rx.StrToInt32(str);
-                if (RxGlobals.PrinterStatus.DataReady)      value |= 1<<16;
-                if (RxGlobals.TestTableStatus.Z_in_print)   value |= 1<<17;
-                if (RxGlobals.TestTableStatus.RefDone)      value |= 1<<18;
-
+                
                 for (n=0; n<_Image.Count; n++)
                 {
-                    _Image[n].Visibility = ((value & (1<<Convert.ToInt32(_Image[n].Tag)))==0)? Visibility.Collapsed : Visibility.Visible;
+                    if(Convert.ToInt32(_Image[n].Tag) < 16) _Image[n].Visibility = ((value & (1<<Convert.ToInt32(_Image[n].Tag)))==0)? Visibility.Collapsed : Visibility.Visible;
+                    else if(Convert.ToInt32(_Image[n].Tag) == 16)
+                    {
+                        if (RxGlobals.PrinterStatus.DataReady) _Image[n].Visibility = Visibility.Visible;
+                        else _Image[n].Visibility = Visibility.Collapsed;
+                    }
+                    else if(Convert.ToInt32(_Image[n].Tag) == 17)
+                    {
+                        if (RxGlobals.StepperStatus[0].Z_in_print) _Image[n].Visibility = Visibility.Visible;
+                        else _Image[n].Visibility = Visibility.Collapsed;
+                    }
+                    else if(Convert.ToInt32(_Image[n].Tag) == 18)
+                    {
+                        if (RxGlobals.StepperStatus[0].RefDone) _Image[n].Visibility = Visibility.Visible;
+                        else _Image[n].Visibility = Visibility.Collapsed;
+                    }
                 }
             }
             catch(Exception)

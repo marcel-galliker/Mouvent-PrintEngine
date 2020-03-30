@@ -24,7 +24,7 @@ namespace RX_DigiPrint.Views.TexView
         public TexStepper()
         {
             InitializeComponent();
-            DataContext = RxGlobals.TestTableStatus;
+            DataContext = RxGlobals.StepperStatus;
         }
     }
 }

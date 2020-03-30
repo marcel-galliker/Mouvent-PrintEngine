@@ -103,8 +103,8 @@ int  sok_send			(RX_SOCKET *socket, void *msg);
 int  sok_send_wide		(RX_SOCKET *socket, void *msg);
 int  sok_send_2			(RX_SOCKET *socket, INT32 id, UINT32 dataLen, void *data);
 // int  sok_send_3         (RX_SOCKET *socket, UINT32 dataLen, void *data);
-int  sok_send_to_clients(HANDLE hserver, void *msg);	// return=clients count
-int  sok_send_to_clients_2(HANDLE hserver, INT32 id, UINT32 len, void *data);
+int  sok_send_to_clients(HANDLE hserver, RX_SOCKET *socket, void *msg);	// return=clients count
+int  sok_send_to_clients_2(HANDLE hserver,  RX_SOCKET *socket, INT32 id, UINT32 len, void *data);
 int  sok_send_to_clients_telnet(HANDLE hserver, const void *data, UINT32 lrn);
 int  sok_sendto			(HANDLE hserver, const void *buf, UINT32 len, int flags, const struct sockaddr *dest_addr, int addrlen);
 int  sok_broadcast		(RX_SOCKET socket, const void *buf, UINT32 len, const char *ipAddr, int port);

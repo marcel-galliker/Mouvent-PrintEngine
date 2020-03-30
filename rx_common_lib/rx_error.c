@@ -431,7 +431,7 @@ static int error(EDevice device, int no, ELogItemType type, const char *file, in
 
 	rx_mutex_unlock(sMutex);
 		
-	if (shServer) sok_send_to_clients_2(shServer, EVT_GET_EVT, sizeof(log), &log);
+	if (shServer) sok_send_to_clients_2(shServer, NULL, EVT_GET_EVT, sizeof(log), &log);
 	if (sClient)  sok_send_2(&sClient, EVT_GET_EVT, sizeof(log), &log);
 	
 	if (_OnError) _OnError(sErrorType, deviceStr, no, sErrorStrTemp);

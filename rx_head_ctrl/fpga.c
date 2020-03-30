@@ -668,8 +668,8 @@ static void _fpga_enc_config(int khz)
 	
 	SET_FLAG(FpgaCfg.encoder->cmd, ENC_ENABLE, FALSE);
 	
-	FpgaCfg.encoder->dist_pm			= 21166667; // 21.16 µm 
-	FpgaCfg.encoder->dist_pm			=  1951000; // 1 µm
+	FpgaCfg.encoder->dist_pm			= 21166667; // 21.16 ï¿½m 
+	FpgaCfg.encoder->dist_pm			=  1951000; // 1 ï¿½m
 	FpgaCfg.encoder->shake_interval		= 0;
 
 	if (khz>1)
@@ -1053,8 +1053,9 @@ int  fpga_image	(SFpgaImageCmd *msg)
 
 	if (_Init)
 	{
-		TrPrintfL(trace, "head[%d].fpga_image[%d]:(id=%d, page=%d, copy=%d, scan=%d) blocks %05d ... %05d (%05d ... %05d), clearBlockUsed=%d", head, idx,  msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->image.blkNo, _PageEnd[head][idx], msg->image.blkNo-RX_HBConfig.head[head].blkNo0, _PageEnd[head][idx]-RX_HBConfig.head[head].blkNo0, msg->image.clearBlockUsed);
-		TrPrintfL(trace, "head[%d].fpga_image[%d]: _Printing=%d, _HeadsLoaded=%d", head, idx, _Printing, _HeadsLoaded);
+		idx = Fpga.print->imgInIdx[head];
+
+	//	TrPrintfL(trace, "head[%d].fpga_image[%d]: _Printing=%d, _HeadsLoaded=%d", head, idx, _Printing, _HeadsLoaded);
 //		if (!_TestFSM) Error(LOG,  0, "fpga_image: FSM State=0x%04x", Fpga.stat->info);
 //		_TestFSM = 1;
 
@@ -1068,16 +1069,14 @@ int  fpga_image	(SFpgaImageCmd *msg)
 
 	//	TrPrintfL(trace, "imageListInIdx  = %d, %d, %d, %d", Fpga.print->imgInIdx[0], Fpga.print->imgInIdx[1], Fpga.print->imgInIdx[2], Fpga.print->imgInIdx[3]);
 	//	TrPrintfL(trace, "imageListOutIdx = %d, %d, %d, %d", Fpga.data->imgOutIdx[0][0], Fpga.data->imgOutIdx[1][0], Fpga.data->imgOutIdx[2][0], Fpga.data->imgOutIdx[3][0]);
-
-		idx = Fpga.print->imgInIdx[head];
-
 	//	if (head==0) Error(LOG, 0, "head[%d][%d].fpga_image(id=%d, page=%d, copy=%d) idx=%d, len=%d", head, idx, msg->id.id, msg->id.page, msg->id.copy, idx, msg->image.lengthPx);
 		
 		memcpy(&_PageId[idx], &msg->id, sizeof(SPageId));
 		memcpy(&_Img[head][idx], &msg->image, sizeof(SFpgaImage));
 		
 		_PageEnd[head][idx] = RX_HBConfig.head[head].blkNo0 + (msg->image.blkNo-RX_HBConfig.head[head].blkNo0+msg->image.blkCnt-1) % RX_HBConfig.head[head].blkCnt;
-		TrPrintfL(trace, "head[%d].fpga_image[%d]: width=%d, height=%d, bits=%d", head, idx, msg->image.widthBytes, msg->image.lengthPx,  msg->image.bitPerPixel);
+	//	TrPrintfL(trace, "head[%d].fpga_image[%d]: width=%d, height=%d, bits=%d", head, idx, msg->image.widthBytes, msg->image.lengthPx,  msg->image.bitPerPixel);
+		TrPrintfL(trace, "head[%d].fpga_image[%d]:(id=%d, page=%d, copy=%d, scan=%d) blocks %05d ... %05d (%05d ... %05d), clearBlockUsed=%d", head, idx,  msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->image.blkNo, _PageEnd[head][idx], msg->image.blkNo-RX_HBConfig.head[head].blkNo0, _PageEnd[head][idx]-RX_HBConfig.head[head].blkNo0, msg->image.clearBlockUsed);
 
 //		if (head==0) 
 		if (TEST_DEBUG && head==3) // _ImgInCnt>23   )
@@ -2099,7 +2098,7 @@ static void _check_errors(void)
 			if (++_TempErr==100)
 			{
 				TrPrintfL(TRUE, "Head FPGA overheated temp=%d row=%d", RX_HBStatus[0].tempFpga, Fpga.stat->temp);
-				if (ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err,  err_fpga_overheated, 0, "Head FPGA overheated (%d °C)", RX_HBStatus[0].tempFpga)) fpga_overheated();
+				if (ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err,  err_fpga_overheated, 0, "Head FPGA overheated (%d ï¿½C)", RX_HBStatus[0].tempFpga)) fpga_overheated();
 			}
 		}
 		else 
@@ -2107,7 +2106,7 @@ static void _check_errors(void)
 			_TempErr = 0;
 			if(RX_HBStatus[0].tempFpga > (MAX_FPGA_TEMP - 5)) 
 			{
-				if(++_TempWarn == 100)	ErrorFlag(WARN, (UINT32*)&RX_HBStatus[0].err,  err_firepulse_missed_0, 0, "Head FPGA is getting too hot (%d °C)", RX_HBStatus[0].tempFpga);
+				if(++_TempWarn == 100)	ErrorFlag(WARN, (UINT32*)&RX_HBStatus[0].err,  err_firepulse_missed_0, 0, "Head FPGA is getting too hot (%d ï¿½C)", RX_HBStatus[0].tempFpga);
 			}
 			else _TempWarn=0;
 		}
@@ -2145,7 +2144,7 @@ static void _count_dots(void)
 	{		
 		droplets = Fpga.stat->head_dot_cnt[i];
 		RX_HBStatus[0].head[i].dotCnt += droplets;
-		cond_volume_printed(i, (int)(droplets*(RX_HBStatus[0].head[i].dropVolume*1000000000.0)/diff)); // [µl/s]
+		cond_volume_printed(i, (int)(droplets*(RX_HBStatus[0].head[i].dropVolume*1000000000.0)/diff)); // [ï¿½l/s]
 	}
 	_time = time;
 }

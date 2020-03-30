@@ -54,7 +54,11 @@ namespace RX_DigiPrint.Models
         private bool _Connected;
         public bool Connected
         {
-            get { return _Connected; }
+            get 
+            { 
+                if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LH702 && !RxGlobals.PrintSystem.LH702_simulation) _Connected=true;
+                return _Connected; 
+            }
             set 
             { 
                 if (value!=_Connected)

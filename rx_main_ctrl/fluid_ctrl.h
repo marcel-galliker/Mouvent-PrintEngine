@@ -15,6 +15,7 @@
 #include "rx_sok.h"
 
 int	 fluid_init(void);
+void fluid_init_flushed(void);
 int  fluid_end(void);
 
 void fluid_tick(void);
@@ -39,3 +40,5 @@ INT32 fluid_get_pumpSpeed	   (int no);
 INT32 fluid_get_pumpFeedback   (int no);
 // INT32 fluid_get_amcTemp        (int no);
 INT32 fluid_get_error          (int no);
+
+void fluid_control_robot(int lbrob);

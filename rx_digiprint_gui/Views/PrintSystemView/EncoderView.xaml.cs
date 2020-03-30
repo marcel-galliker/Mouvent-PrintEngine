@@ -27,15 +27,11 @@ namespace RX_DigiPrint.Views.PrintSystemView
         {
             InitializeComponent();
 
-            for (int i=0; i<RxGlobals.Encoder.Length; i++)
-                if (RxGlobals.Encoder[i]==null) RxGlobals.Encoder[i] = new RX_DigiPrint.Models.Encoder(i);
-
             DataContext = RxGlobals.Encoder[0];
             TX_AmplOld_1.DataContext = RxGlobals.Encoder[1];
             TX_AmplNew_1.DataContext = RxGlobals.Encoder[1];
        //   TX_Percent_1.DataContext = RxGlobals.Encoder[1];
             BN_IsValid_1.DataContext = RxGlobals.Encoder[1];
-
 
             RxGlobals.PrintSystem.PropertyChanged += _PrintSystem_PropertyChanged;
         }

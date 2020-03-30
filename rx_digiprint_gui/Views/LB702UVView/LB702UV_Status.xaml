@@ -21,10 +21,12 @@
                     <TextBlock Text="Curing Lamp"/> 
                     <TextBlock HorizontalAlignment="Right" x:Name="CuringLamp"/>
                 </Grid>
+
+                <rx_uc:PlcParCtrl ID="STA_WINDER_DIAMETER_1"       Label="Unwinder diameter"  Unit="mm" Format="n"/>
+                <rx_uc:PlcParCtrl ID="STA_WINDER_DIAMETER_2"       Label="Rewinder diameter"  Unit="mm" Format="n"/>
                 <rx_uc:PlcParCtrl ID="STA_PAPERLENGTH_IN"       Label="Length IN"  Unit="m" Format="n"/>
                 <rx_uc:PlcParCtrl ID="STA_PAPERLENGTH_OUT"      Label="Length OUT" Unit="m" Format="n"/>
-                <rx_uc:PlcParCtrl ID="STA_REMAININGLENGTH_OUT " Label="Left OUT"   Unit="m" Format="n"/>
-
+                <rx_uc:PlcParCtrl ID="STA_REMAININGLENGTH_OUT"  Label="Left OUT"   Unit="m" Format="n"/>                            
                 <rx_uc:PlcParCtrl ID="STA_PREPARE_ACTIVE"               Label="Prepare" Visibility="Collapsed"/>
                 <local:LB702UV_Prepare x:Name="Prepare"/>
 

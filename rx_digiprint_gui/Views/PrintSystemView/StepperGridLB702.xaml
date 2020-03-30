@@ -12,9 +12,11 @@
     <GroupBox Header="Stepper" Style="{StaticResource RxGroupBox}">
         <Grid x:Name="MainGrid">
             <Grid.RowDefinitions>
-                <RowDefinition Height="5"/>
+                <RowDefinition Height="2"/>
+                <RowDefinition Height="22"/>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto" x:Name="CapHeight"/>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto" x:Name="WipingDelay_Height"/>
                 <RowDefinition Height="auto" x:Name="WipingSpeed_Height"/>
@@ -28,11 +30,19 @@
                 <ColumnDefinition Width="45"/>
             </Grid.ColumnDefinitions>
             
-            <TextBlock       Grid.Row="1" Grid.Column="0" Text="Ref Height"/>
-            <TextBlock       Grid.Row="2" Grid.Column="0"><Run Language="de-ch" Text="Head Align"/></TextBlock>
+            <TextBlock       Grid.Row="1" Grid.Column="0" Text="Basket"/>
+            <TextBlock       Grid.Row="2" Grid.Column="0" Text="Ref Height (back)"/>
+            <TextBlock       Grid.Row="3" Grid.Column="0" Text="Ref Height (front)"/>
+            <TextBlock       Grid.Row="4" Grid.Column="0" Text="Capping Height"/>
 
-            <TextBlock       Grid.Row="1" Grid.Column="5" Text=" mm" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center"/>
+            <TextBlock       Grid.Row="1" Grid.Column="1" Text="1" FontSize="{StaticResource FontSizeStd}" HorizontalAlignment="Center"/>
+            <TextBlock       Grid.Row="1" Grid.Column="2" Text="2" FontSize="{StaticResource FontSizeStd}" HorizontalAlignment="Center"/>
+            <TextBlock       Grid.Row="1" Grid.Column="3" Text="3" FontSize="{StaticResource FontSizeStd}" HorizontalAlignment="Center"/>
+            <TextBlock       Grid.Row="1" Grid.Column="4" Text="4" FontSize="{StaticResource FontSizeStd}" HorizontalAlignment="Center"/>
+            
             <TextBlock       Grid.Row="2" Grid.Column="5" Text=" mm" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center"/>
+            <TextBlock       Grid.Row="3" Grid.Column="5" Text=" mm" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center"/>
+            <TextBlock       Grid.Row="4" Grid.Column="5" Text=" mm" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center"/>
 
             <Grid Grid.Column="1" Grid.RowSpan="3" >
                 <Grid.ColumnDefinitions>
@@ -67,17 +77,17 @@
                 <Rectangle Grid.Column="1" x:Name="Col7" Fill="{Binding InkType, Converter={StaticResource InkType_ColorBG}}"/>
             </Grid>
  
-            <TextBlock Grid.Row="3"      Text="FlightTime"/>
-            <common:RxNumBox Grid.Row="3" Grid.Column="1" Text="{Binding ManualFlightTimeComp}" HorizontalContentAlignment="Right" HorizontalAlignment="Stretch" x:Name="ManualFlightTimeComp" />
-            <TextBlock       Grid.Row="3" Grid.Column="5" Text=" mm" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center"/>
+            <TextBlock Grid.Row="5"      Text="FlightTime"/>
+            <common:RxNumBox Grid.Row="5" Grid.Column="1" Text="{Binding ManualFlightTimeComp}" HorizontalContentAlignment="Right" HorizontalAlignment="Stretch" x:Name="ManualFlightTimeComp" />
+            <TextBlock       Grid.Row="5" Grid.Column="5" Text=" mm" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center"/>
 
-            <TextBlock       Grid.Row="4" Grid.Column="0" Text="Wiping Delay"/>
-            <common:RxNumBox Grid.Row="4" Grid.Column="1" Text="{Binding WipeDelay}" HorizontalContentAlignment="Right"/>
-            <TextBlock       Grid.Row="4" Grid.Column="2" Text=" ms" FontSize="{StaticResource FontSizeStd}"/>
+            <TextBlock       Grid.Row="6" Grid.Column="0" Text="Wiping Delay"/>
+            <common:RxNumBox Grid.Row="6" Grid.Column="1" Text="{Binding WipeDelay}" HorizontalContentAlignment="Right"/>
+            <TextBlock       Grid.Row="6" Grid.Column="2" Text=" ms" FontSize="{StaticResource FontSizeStd}"/>
 
-            <TextBlock       Grid.Row="5" Grid.Column="0" Text="Wiping Speed"/>
-            <common:RxNumBox Grid.Row="5" Grid.Column="1" Text="{Binding WipeSpeed}" HorizontalContentAlignment="Right"/>
-            <TextBlock       Grid.Row="5" Grid.Column="2" Text=" mm/s" FontSize="{StaticResource FontSizeStd}"/>
+            <TextBlock       Grid.Row="7" Grid.Column="0" Text="Wiping Speed"/>
+            <common:RxNumBox Grid.Row="7" Grid.Column="1" Text="{Binding WipeSpeed}" HorizontalContentAlignment="Right"/>
+            <TextBlock       Grid.Row="7" Grid.Column="2" Text=" mm/s" FontSize="{StaticResource FontSizeStd}"/>
 
         </Grid>
     </GroupBox>

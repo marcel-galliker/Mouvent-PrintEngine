@@ -72,9 +72,13 @@ namespace RX_DigiPrint.Models
         {
             if (_First)
             {
+                _First=false;
+                Thread t=new Thread(()=>
+                {
                 Directory.CreateDirectory(_TempPath);
                 clearFolder(_TempPath);
-                _First=false;
+                });
+                t.Start();
             }
         }
 

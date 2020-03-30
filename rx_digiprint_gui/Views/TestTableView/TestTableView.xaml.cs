@@ -58,7 +58,7 @@ namespace RX_DigiPrint.Views.TestTableView
             RxGlobals.PrintQueue.Queue.CollectionChanged += OnPrintQueueChanged;
             CommandButtons.StartClicked += Start_Clicked;
             RxGlobals.PrintSystem.PropertyChanged += PrintSystem_PropertyChanged;
-            Button_UV.DataContext         = RxGlobals.TestTableStatus;
+            Button_UV.DataContext         = RxGlobals.StepperStatus;
         }
 
         //--- OnPrintQueueChanged -----------------------------------------
@@ -207,12 +207,12 @@ namespace RX_DigiPrint.Views.TestTableView
             PrintQueueItem item = (DataContext as PrintQueueItem);
             if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_test_table && item!=null)
             {
-                if (RxGlobals.TestTableStatus.CoverOpen)
+                if (RxGlobals.StepperStatus[0].CoverOpen)
                 {
                     RxMessageBox.YesNo("Cover", "Cover is open.",  MessageBoxImage.Error, true);
                     return false;
                 }
-                if (item.CuringPasses>0 && !RxGlobals.TestTableStatus.UV_Ready)
+                if (item.CuringPasses>0 && !RxGlobals.StepperStatus[0].UV_Ready)
                 {
                     if (!RxMessageBox.YesNo("UV Dryer", "UV Dryer is OFF. Start printing",  MessageBoxImage.Question, false))
                         return false;

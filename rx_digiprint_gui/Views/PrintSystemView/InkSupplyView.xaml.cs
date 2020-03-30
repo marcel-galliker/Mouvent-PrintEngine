@@ -42,7 +42,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
             Visibility visibility  = (RxGlobals.User.UserType >= EUserType.usr_service) ? Visibility.Visible : Visibility.Collapsed; 
             ServiceGrid.Visibility = visibility;
             Line_Calibrate.Visibility = visibility;
-            Button_Calibrate.Visibility = visibility;
+           // Button_Calibrate.Visibility = visibility;
             InkType.IsEnabled       =  (RxGlobals.User.UserType >= EUserType.usr_service);
             CB_RectoVerso.IsEnabled =  (RxGlobals.User.UserType >= EUserType.usr_service);
         }
@@ -191,7 +191,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 //--- do this also for other printers? --------------
                 if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf)
                 {
-                    if (name!=null) // && !RxGlobals.TestTableStatus.Z_in_cap)
+                    if (name!=null) // && !RxGlobals.StepperStatus[0].Z_in_cap)
                     {
                         if (!RxMessageBox.YesNo(name, "Insert purge tray. Continue?",  MessageBoxImage.Question, true)) return;
                     }

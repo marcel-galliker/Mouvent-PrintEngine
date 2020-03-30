@@ -309,7 +309,7 @@ static int _copy_file(SPageId *pid, char *srcDir, char *fileName, char *dstDir)
 		FILE *dst=NULL;
 		BYTE *buf=NULL;
 		int bufsize=10240;
-		int len;
+		INT64 len;
 		int time, last=0;
 		INT64 size;
 		INT64 copied=0;
@@ -322,7 +322,7 @@ static int _copy_file(SPageId *pid, char *srcDir, char *fileName, char *dstDir)
 			size = rx_file_get_size(srcPath);
 			while ((len=fread(buf, 1, bufsize, src)) && !_Abort)
 			{
-				if (fwrite(buf, 1, len, dst)!=len) break;
+				if ((size_t)fwrite(buf, 1, (UINT32)len, dst)!=len) break;
 				copied+=len;
 				time = rx_get_ticks()/1000;
 				if (time!=last) 
@@ -333,7 +333,7 @@ static int _copy_file(SPageId *pid, char *srcDir, char *fileName, char *dstDir)
 			}
 		}
 		TrPrintfL(TRUE, "end Transfer: errno=%d\n", errno);
-		if(buf) free(buf);
+		if (buf) free(buf);
 		if (src) fclose(src);
 		if (dst) fclose(dst);
 		if (_Abort) remove(dstPath);
@@ -424,6 +424,7 @@ UINT64 data_memsize(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPix
 	memsize = (UINT64)lineLen*height;			
 	switch(printMode)
 	{
+    case PM_TEST:				memsize*=RX_Spooler.headsPerColor; break; // Density Test
 	case PM_TEST_JETS:			memsize*=RX_Spooler.headsPerColor; break;
 	case PM_TEST_SINGLE_COLOR:	memsize*=RX_Spooler.headsPerColor; break;
 	default:													   break;
@@ -667,7 +668,7 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 	{	
 		_PrintList[_InIdx].lengthPx		 = bmpInfo.lengthPx;
 		_PrintList[_InIdx].virtualPasses = virtualPasses; 
-		_PrintList[_InIdx].virtualPass   = virtualPass;	
+		_PrintList[_InIdx].virtualPass   = virtualPass;
 		_SmpFlags   = flags;
 		_SmpBufSize = smp_bufSize;
 		int time=rx_get_ticks();
@@ -1103,12 +1104,11 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 				pInfo->same				= same;
 				pInfo->data				= pBmpInfo->buffer[color];
 			
-				if ((id->id==PQ_TEST_JETS || id->id==PQ_TEST_JET_NUMBERS) && pInfo->data && n>0)
+				if ((id->id==PQ_TEST_JETS || id->id==PQ_TEST_JET_NUMBERS) && pInfo->data)
 				{
 					_TestBuf[color][n] = (*pBmpInfo->buffer[color])+n*pBmpInfo->dataSize;
+					if (id->copy==1 && n) memcpy(_TestBuf[color][n], *pBmpInfo->buffer[color], pBmpInfo->dataSize);					
 					pInfo->data	= &_TestBuf[color][n];
-					memset(*pInfo->data, 0, 256);
-					memcpy(*pInfo->data, *pBmpInfo->buffer[color], pBmpInfo->dataSize);					
 				}
 			
 				pInfo->used			= TRUE;
@@ -1142,8 +1142,25 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 					pInfo->dstLineLen	= 32; // align to 256 Bits (32 Bytes)				
 					pInfo->blkCnt		= 1;
 				}
+
+				if (rx_def_is_web(RX_Spooler.printerType) 
+				&& (id->id==PQ_TEST_JETS || id->id==PQ_TEST_JET_NUMBERS)  
+				&& (RX_Spooler.colorCnt==0 || ((id->copy-1)%RX_Spooler.colorCnt)!=color))
+				{
+					//--- only one color per PrintGo  -------
+					pInfo->data			= NULL;
+					pInfo->bitsPerPixel	= 1;
+					pInfo->widthPx		= 1;
+					pInfo->widthBt		= 1;
+					pInfo->srcWidthBt	= 1;
+					pInfo->srcLineLen	= 1;
+					pInfo->srcLineCnt	= 1;
+					pInfo->dstLineLen	= 32; // align to 256 Bits (32 Bytes)				
+					pInfo->blkCnt		= 1;				
+				}
 				
-				if ((id->id==PQ_TEST_JETS || id->id==PQ_TEST_JET_NUMBERS)&& pInfo->data)
+				//--- rip the test data -----------------------------------------
+				if (pInfo->data && (id->id==PQ_TEST_JETS || id->id==PQ_TEST_JET_NUMBERS))
 				{
 					RX_Bitmap bmp;
 					bmp.bppx		= pInfo->bitsPerPixel;
@@ -1154,13 +1171,6 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 					bmp.sizeAlloc	= 0;
 					bmp.buffer		=  *pInfo->data;
 					rip_test_data(&bmp, RX_TestData[head]);
-                    if (rx_def_is_web(RX_Spooler.printerType))
-					{
-						if (RX_Spooler.colorCnt==0 || ((id->copy-1)%RX_Spooler.colorCnt)!=color)
-						{
-							memset(bmp.buffer, 0, pInfo->srcLineLen* pInfo->srcLineCnt);
-						}
-					}
 				}
 				if (clearBlockUsed) _BlkNo[pInfo->board][pInfo->head] = (_BlkNo[pInfo->board][pInfo->head]+pInfo->blkCnt)%(RX_Spooler.dataBlkCntHead);
 			}
@@ -1292,8 +1302,13 @@ static int _data_split_scan(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 					pInfo->dstLineLen	= (pInfo->widthBt+31) & ~31; // align to 256 Bits (32 Bytes)
 					pInfo->blkCnt		= (pInfo->dstLineLen * pBmpInfo->lengthPx + RX_Spooler.dataBlkSize-1) / RX_Spooler.dataBlkSize;
 					if (pInfo->blkCnt>blkCnt) Error(ERR_ABORT, 0, "Data: blkCnt=%d, max=%d", pInfo->blkCnt, blkCnt);
-					if (clearBlockUsed) _BlkNo[pInfo->board][pInfo->head] = (_BlkNo[pInfo->board][pInfo->head]+pInfo->blkCnt)%(RX_Spooler.dataBlkCntHead);
-					TrPrintfL(TRUE, "Split[%d]: startPx=%d, WidthPx=%d, fillBt=%d, jetPx0=%d, pixelPerByte=%d, buffer=0x%08x", head, startPx, pInfo->widthPx, pInfo->fillBt,  pInfo->jetPx0, pixelPerByte, pInfo->data);
+					if (clearBlockUsed)
+					{
+						int blkNo=_BlkNo[pInfo->board][pInfo->head];
+						_BlkNo[pInfo->board][pInfo->head] = (_BlkNo[pInfo->board][pInfo->head]+pInfo->blkCnt)%(RX_Spooler.dataBlkCntHead);
+						// TrPrintfL(TRUE, "Split[%d.%d]: blkOld=%d, blkNew=%d", pInfo->board, pInfo->head, blkNo, _BlkNo[pInfo->board][pInfo->head]);
+					}
+					// TrPrintfL(TRUE, "Split[%d.%d]: startPx=%d, WidthPx=%d, fillBt=%d, jetPx0=%d, pixelPerByte=%d, buffer=0x%08x, blkNo=%d", pInfo->board, pInfo->head, startPx, pInfo->widthPx, pInfo->fillBt,  pInfo->jetPx0, pixelPerByte, pInfo->data, pInfo->blk0);
 				}
 				//--- increment ---
 				startPx += RX_Spooler.headWidthPx;
@@ -1345,7 +1360,7 @@ static int _data_split_scan(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 			}
 		}	
 	}
-
+	
 	//for (color=0; color<SIZEOF(pBmpInfo->colorCode); color++)
 	//{
 	//	rx_mem_free(&pBmpInfo->buffer[color]);
@@ -1495,7 +1510,7 @@ static int _data_split_scan_no_overlap(SPageId *id, SBmpInfo *pBmpInfo, int offs
 						TrPrintfL(TRUE, "SPLIT _BlkNo[%d][%d]: idx=%d, act=%d, cnt=%d, next=%d, blk0=%d, buffer=%03d, test=%d", pInfo->board, pInfo->head, idx, blk, pInfo->blkCnt, _BlkNo[pInfo->board][pInfo->head], pInfo->blk0, ctrl_get_bufferNo(*pInfo->data), pInfo->test);
 						rx_sleep(1);
 					}
-					TrPrintfL(TRUE, "Split[head=%d]: startPx=%d, WidthPx=%d, FillBt=%d, buffer=%03d, blk0=%d, blkCnt=%d", head, startPx, pInfo->widthPx, pInfo->fillBt, ctrl_get_bufferNo(*pInfo->data), pInfo->blk0, pInfo->blkCnt);
+					TrPrintfL(TRUE, "Split[%d.%d]: startPx=%d, WidthPx=%d, FillBt=%d, buffer=%03d, blk0=%d, blkCnt=%d", pInfo->board,  pInfo->head, startPx, pInfo->widthPx, pInfo->fillBt, ctrl_get_bufferNo(*pInfo->data), pInfo->blk0, pInfo->blkCnt);
 				}				
 
 				//--- increment ---
@@ -1595,11 +1610,11 @@ static void _data_fill_blk_scan(SBmpSplitInfo *psplit, int blkNo, BYTE *dst, int
 	BYTE	*test1  = &dst[RX_Spooler.dataBlkSize];
 	BYTE    t0=*test0;
 	BYTE	t1=*test1;
-	
+
 	if (test)
 	{
 		*test0 = 0x33;
-		*test1 = 0x66;			
+		*test1 = 0x66;
 	}
 	
 	if (RX_Color[psplit->inkSupplyNo].rectoVerso==rv_verso) mirror = !mirror;
@@ -1630,8 +1645,8 @@ static void _data_fill_blk_scan(SBmpSplitInfo *psplit, int blkNo, BYTE *dst, int
 				memset(&dst[size], 0x00, RX_Spooler.dataBlkSize-size);
 				if (test)
 				{
-				 	if (*test0!=0x33) Error(ERR_ABORT, 0, "_data_fill_blk_scan lower border");
-				 	if (*test1!=0x66) Error(ERR_ABORT, 0, "_data_fill_blk_scan upper border");
+				 	if (*test0!=0x33) Error(ERR_STOP, 0, "_data_fill_blk_scan lower border");
+				 	if (*test1!=0x66) Error(ERR_STOP, 0, "_data_fill_blk_scan upper border");
 				 	*test0=t0;
 				 	*test1=t1;
 				}
@@ -1640,8 +1655,10 @@ static void _data_fill_blk_scan(SBmpSplitInfo *psplit, int blkNo, BYTE *dst, int
 			memset(&dst[size], 0x00, l);
 			if (test)
 			{
-			 	if (*test0!=0x33) Error(ERR_ABORT, 0, "_data_fill_blk_scan lower border");
-			 	if (*test1!=0x66) Error(ERR_ABORT, 0, "_data_fill_blk_scan upper border");
+			 	if (*test0!=0x33) 
+					Error(ERR_STOP, 0, "_data_fill_blk_scan lower border");
+			 	if (*test1!=0x66) 
+					Error(ERR_STOP, 0, "_data_fill_blk_scan upper border");
 			}
 	//		printf("head=%d, blkNo=%d, fill(%d, %d), dstLen=%d\n", psplit->head, blkNo, size, l, dstLen-l);
 			size   += l;
@@ -1676,8 +1693,8 @@ static void _data_fill_blk_scan(SBmpSplitInfo *psplit, int blkNo, BYTE *dst, int
 				memcpy(&dst[size+len], src+start, l);
 				if (test)
 				{
-					if (*test0!=0x33) Error(ERR_ABORT, 0, "_data_fill_blk_scan lower border size=%d, len=%d, l=%d, max=%d, data=%d", size, len, l, RX_Spooler.dataBlkSize, dst[RX_Spooler.dataBlkSize]);
-					if (*test1!=0x66) Error(ERR_ABORT, 0, "_data_fill_blk_scan upper border size=%d, len=%d, l=%d, max=%d, data=%d", size, len, l, RX_Spooler.dataBlkSize, dst[RX_Spooler.dataBlkSize]);	
+					if (*test0!=0x33) Error(ERR_STOP, 0, "_data_fill_blk_scan lower border size=%d, len=%d, l=%d, max=%d, data=%d", size, len, l, RX_Spooler.dataBlkSize, dst[RX_Spooler.dataBlkSize]);
+					if (*test1!=0x66) Error(ERR_STOP, 0, "_data_fill_blk_scan upper border size=%d, len=%d, l=%d, max=%d, data=%d", size, len, l, RX_Spooler.dataBlkSize, dst[RX_Spooler.dataBlkSize]);	
 				}
 				start=0;
 				srcWidthBt = psplit->srcWidthBt;
@@ -1686,8 +1703,8 @@ static void _data_fill_blk_scan(SBmpSplitInfo *psplit, int blkNo, BYTE *dst, int
 			if (dstLen>srcLen && srcLen>0) memset(&dst[size+srcLen], 0x00, dstLen-srcLen);
 			if (test)
 			{
-			 	if (*test0!=0x33) Error(ERR_ABORT, 0, "_data_fill_blk_scan lower border");
-			 	if (*test1!=0x66) Error(ERR_ABORT, 0, "_data_fill_blk_scan upper border");					
+			 	if (*test0!=0x33) Error(ERR_STOP, 0, "_data_fill_blk_scan lower border");
+			 	if (*test1!=0x66) Error(ERR_STOP, 0, "_data_fill_blk_scan upper border");					
 			}
 		}
 		
@@ -1734,8 +1751,8 @@ static void _data_fill_blk_scan(SBmpSplitInfo *psplit, int blkNo, BYTE *dst, int
 	if (size<RX_Spooler.dataBlkSize) memset(&dst[size], 0x00, RX_Spooler.dataBlkSize-size);
 	if (test)
 	{
-	 	if (*test0!=0x33) Error(ERR_ABORT, 0, "_data_fill_blk_scan lower border");
-	 	if (*test1!=0x66) Error(ERR_ABORT, 0, "_data_fill_blk_scan upper border");
+	 	if (*test0!=0x33) Error(ERR_STOP, 0, "_data_fill_blk_scan lower border");
+	 	if (*test1!=0x66) Error(ERR_STOP, 0, "_data_fill_blk_scan upper border");
 	 	*test0=t0;
 	 	*test1=t1;		
 	}

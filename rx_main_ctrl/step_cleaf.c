@@ -65,28 +65,28 @@ int	 stepc_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen)
 		{
 			switch (cmd)
 			{
-			case CMD_CAP_STOP:
-				sok_send_2(&_step_socket[no], CMD_CAP_STOP, 0, NULL);
+			case CMD_LIFT_STOP:
+				sok_send_2(&_step_socket[no], CMD_LIFT_STOP, 0, NULL);
 				break;
 
-			case CMD_CAP_REFERENCE:
-				sok_send_2(&_step_socket[no], CMD_CAP_REFERENCE, 0, NULL); // ref Lift
+			case CMD_LIFT_REFERENCE:
+				sok_send_2(&_step_socket[no], CMD_LIFT_REFERENCE, 0, NULL); // ref Lift
 				break;
 
-			case CMD_CAP_UP_POS:
-				if (!arg_simuPLC && RX_StepperStatus.info.DripPans_InfeedDOWN && RX_StepperStatus.info.DripPans_OutfeedDOWN) sok_send_2(&_step_socket[no], CMD_CAP_UP_POS, 0, NULL);
+			case CMD_LIFT_UP_POS:
+				if (!arg_simuPLC && RX_StepperStatus.info.DripPans_InfeedDOWN && RX_StepperStatus.info.DripPans_OutfeedDOWN) sok_send_2(&_step_socket[no], CMD_LIFT_UP_POS, 0, NULL);
 				break;
 
-			case CMD_CAP_PRINT_POS:
-				if ( RX_StepperStatus.info.DripPans_InfeedDOWN && RX_StepperStatus.info.DripPans_OutfeedDOWN)sok_send_2(&_step_socket[no], CMD_CAP_PRINT_POS, sizeof(RX_Config.stepper.print_height), &RX_Config.stepper.print_height);			
+			case CMD_LIFT_PRINT_POS:
+				if ( RX_StepperStatus.info.DripPans_InfeedDOWN && RX_StepperStatus.info.DripPans_OutfeedDOWN)sok_send_2(&_step_socket[no], CMD_LIFT_PRINT_POS, sizeof(RX_Config.stepper.print_height), &RX_Config.stepper.print_height);			
 				break;
 
-			case CMD_CAP_CAPPING_POS:
-				sok_send_2(&_step_socket[no], CMD_CAP_CAPPING_POS, 0, NULL);
+			case CMD_LIFT_CAPPING_POS:
+				sok_send_2(&_step_socket[no], CMD_LIFT_CAPPING_POS, 0, NULL);
 				break;
 				
-			case CMD_CLN_DRIP_PANS:
-				sok_send_2(&_step_socket[no], CMD_CLN_DRIP_PANS, 0, NULL);
+			case CMD_ROB_DRIP_PANS:
+				sok_send_2(&_step_socket[no], CMD_ROB_DRIP_PANS, 0, NULL);
 				break;
 			}
 		}
@@ -156,8 +156,8 @@ int stepc_handle_status(int no, SStepperStat *pStatus)
 			
 			if (allowed != _allow_stepper_move_down)
 			{
-				if (allowed) sok_send_2(&_step_socket[i], CMD_CAP_ALLOW_MOVE_DOWN, 0, NULL);
-				else sok_send_2(&_step_socket[i], CMD_CAP_NOT_ALLOW_MOVE_DOWN, 0, NULL);
+				if (allowed) sok_send_2(&_step_socket[i], CMD_LIFT_ALLOW_MOVE_DOWN, 0, NULL);
+				else sok_send_2(&_step_socket[i], CMD_LIFT_NOT_ALLOW_MOVE_DOWN, 0, NULL);
 			}
 		}
 	}
@@ -207,7 +207,7 @@ int stepc_handle_status(int no, SStepperStat *pStatus)
 	
 	memcpy(&RX_StepperStatus.info, &info, sizeof(RX_StepperStatus.info));
 
-	gui_send_msg_2(0, REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);
+	gui_send_msg_2(INVALID_SOCKET, REP_STEPPER_STAT, sizeof(RX_StepperStatus), &RX_StepperStatus);
 
 	return REPLY_OK;
 }
@@ -215,20 +215,20 @@ int stepc_handle_status(int no, SStepperStat *pStatus)
 //--- stepc_abort_printing --------------------
 int stepc_abort_printing(void)
 {
-	stepc_handle_gui_msg(INVALID_SOCKET, CMD_CAP_UP_POS, NULL, 0);
+	stepc_handle_gui_msg(INVALID_SOCKET, CMD_LIFT_UP_POS, NULL, 0);
 	return REPLY_OK;
 }
 
 //--- stepc_to_print_pos --------------------------------
 int	 stepc_to_print_pos(void)
 {
-	stepc_handle_gui_msg(INVALID_SOCKET, CMD_CAP_PRINT_POS, NULL, 0);
+	stepc_handle_gui_msg(INVALID_SOCKET, CMD_LIFT_PRINT_POS, NULL, 0);
 	return REPLY_OK;
 }
 
 //--- stepc_to_up_pos --------------------------------
 int	 stepc_to_up_pos(void)
 {
-	stepc_handle_gui_msg(INVALID_SOCKET, CMD_CAP_UP_POS, NULL, 0);
+	stepc_handle_gui_msg(INVALID_SOCKET, CMD_LIFT_UP_POS, NULL, 0);
 	return REPLY_OK;
 }

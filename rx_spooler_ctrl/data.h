@@ -27,6 +27,7 @@ typedef struct
 	int						headsInUse;
 	int						lengthPx;
 	int						decompressing;
+	int						testOffsetPx;
 	struct SBmpSplitInfo	*splitInfo;	// splitInfo[splitInfoCnt];
 } SPrintListItem;
 

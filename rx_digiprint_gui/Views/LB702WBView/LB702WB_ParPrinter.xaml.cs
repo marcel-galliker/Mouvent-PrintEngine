@@ -1,4 +1,5 @@
 ﻿using RX_DigiPrint.Models;
+using RX_DigiPrint.Models.Enums;
 using RX_DigiPrint.Views.UserControls;
 using System.Windows;
 using System.Windows.Controls;
@@ -13,6 +14,8 @@ namespace RX_DigiPrint.Views.LB702WBView
         public LB702WB_ParPrinter()
         {
             InitializeComponent();
+            CB_Mode.ItemsSource = new EN_OnOffAuto();
+            
             ParPanel.PropertyChanged +=ParPanel_PropertyChanged;
         }
 

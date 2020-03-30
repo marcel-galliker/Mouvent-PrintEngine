@@ -74,15 +74,15 @@ int	 steptest_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataL
 						break;
 
 			//--- cappping ---------------------------------------------------------
-			case CMD_CAP_STOP:
-			case CMD_CAP_REFERENCE:
-			case CMD_CAP_UP_POS:
-			case CMD_CAP_CAPPING_POS:
+			case CMD_LIFT_STOP:
+			case CMD_LIFT_REFERENCE:
+			case CMD_LIFT_UP_POS:
+			case CMD_LIFT_CAPPING_POS:
 						sok_send_2(&_step_socket[no], cmd, 0, NULL);
 						break;
 		
-			case CMD_CAP_PRINT_POS:
-						sok_send_2(&_step_socket[no], CMD_CAP_PRINT_POS, sizeof(RX_Config.stepper.print_height), &RX_Config.stepper.print_height);
+			case CMD_LIFT_PRINT_POS:
+						sok_send_2(&_step_socket[no], CMD_LIFT_PRINT_POS, sizeof(RX_Config.stepper.print_height), &RX_Config.stepper.print_height);
 						break;
 			}
 		}
@@ -138,7 +138,7 @@ int steptest_handle_status(int no, SStepperStat *pStatus)
 	memcpy(&RX_StepperStatus.info, &info, sizeof(RX_StepperStatus.info));
 	RX_StepperStatus.info.x_in_cap = plc_in_cap_pos();
 
-	gui_send_msg_2(0, REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);
+	gui_send_msg_2(INVALID_SOCKET, REP_STEPPER_STAT, sizeof(RX_StepperStatus), &RX_StepperStatus);
 	return REPLY_OK;
 }
 
@@ -146,6 +146,6 @@ int steptest_handle_status(int no, SStepperStat *pStatus)
 int	 steptest_to_print_pos(void)
 {
 //	Error(LOG, 0, "Setting Printhead Height to %d", RX_Config.stepper.print_height);
-	sok_send_2(&_step_socket[0], CMD_CAP_PRINT_POS, sizeof(RX_Config.stepper.print_height), &RX_Config.stepper.print_height);
+	sok_send_2(&_step_socket[0], CMD_LIFT_PRINT_POS, sizeof(RX_Config.stepper.print_height), &RX_Config.stepper.print_height);
 	return REPLY_OK;									
 }

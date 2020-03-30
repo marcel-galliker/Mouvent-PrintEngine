@@ -21,6 +21,8 @@ namespace RX_DigiPrint.Views.LB702WBView
         public LB702WB_ParFlexo()
         {
             InitializeComponent();
+            CB_Mode.ItemsSource = new EN_OnOffAuto();
+            
             ParPanel.PropertyChanged +=ParPanel_PropertyChanged;
         }
 

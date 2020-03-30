@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300">
+             d:DesignHeight="300" d:DesignWidth="330">
     <Grid>
         <GroupBox Header="Consumables" Style="{StaticResource RxGroupBox}">
             <StackPanel> <!-- Margin="5,0,0,0" -->

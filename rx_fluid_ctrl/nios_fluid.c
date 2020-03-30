@@ -190,6 +190,14 @@ static void _nios_check_errors(void)
                           err_heater_temp_frozen, 0,
                           "Heater Box temperatures frozen : auto-reset done");
 
+	        if (_Stat->ink_supply[isNo].error & err_amc_config_lost)
+		        ErrorFlag(ERR_CONT,
+			        &RX_FluidBoardStatus.err,
+			        err_amc_config_lost,
+			        0,
+			        "Heater Box ADC config lost. Registers Power=%d, GPIO config=%d, Enable=%d, Gain=%d", _Stat->AMC_Register_Power, _Stat->AMC_Register_GPIO_Config, _Stat->AMC_Register_Enable, _Stat->AMC_Register_Gain);
+
+	        
             if (_Stat->ink_supply[isNo].error & err_heater_board)
                 ErrorFlag(ERR_CONT, (UINT32 *)&_Error[isNo], err_heater_board,
                           0, "InkSupply[%d] Heater Board Error or Openload",
@@ -199,8 +207,8 @@ static void _nios_check_errors(void)
                           0, "InkSupply[%d] Heater Board Watchdog Error",
                           isNo + 1);
 
-            if (_Stat->HeaterBoard_Vsupply_3V < 3000)	 ErrorFlag(ERR_CONT, (UINT32*)&_Error[0], err_heater_board, 0, "Heater Board %d.%dV (3.3V)", _Stat->HeaterBoard_Vsupply_3V/1000, _Stat->HeaterBoard_Vsupply_3V%1000);
-			if (_Stat->HeaterBoard_Vsupply_5V < 4800)	 ErrorFlag(ERR_CONT, (UINT32*)&_Error[1], err_heater_board, 0, "Heater Board %d.%dV (5.0V)", _Stat->HeaterBoard_Vsupply_5V/1000, _Stat->HeaterBoard_Vsupply_5V%1000);
+            if (_Stat->HeaterBoard_Vsupply_3V < 2500)	 ErrorFlag(ERR_CONT, (UINT32*)&_Error[0], err_heater_board, 0, "Heater Board %d.%dV (3.3V)", _Stat->HeaterBoard_Vsupply_3V/1000, _Stat->HeaterBoard_Vsupply_3V%1000);
+			if (_Stat->HeaterBoard_Vsupply_5V < 4000)	 ErrorFlag(ERR_CONT, (UINT32*)&_Error[1], err_heater_board, 0, "Heater Board %d.%dV (5.0V)", _Stat->HeaterBoard_Vsupply_5V/1000, _Stat->HeaterBoard_Vsupply_5V%1000);
 			if (_Stat->HeaterBoard_Vsupply_24V < 12000)	 ErrorFlag(ERR_CONT, (UINT32*)&_Error[2], err_heater_board, 0, "Heater Board %d.%dV (24V)", _Stat->HeaterBoard_Vsupply_24V/1000, _Stat->HeaterBoard_Vsupply_24V%1000);
 			if (_Stat->HeaterBoard_Vsupply_24VP < 12000) ErrorFlag(ERR_CONT, (UINT32*)&_Error[3], err_heater_board, 0, "Heater Board %d.%dV (24V)P", _Stat->HeaterBoard_Vsupply_24VP/1000, _Stat->HeaterBoard_Vsupply_24VP%1000);
         }        
@@ -462,6 +470,7 @@ void _update_status(void)
 		else						pstat->presLung = INVALID_VALUE;
 		pstat->condPresOut		= _Cfg->ink_supply[i].condPresOut;
 		pstat->condPresIn		= _Cfg->ink_supply[i].condPresIn;
+		pstat->condPumpSpeed	= _Cfg->ink_supply[i].condPumpFeedback;
 		pstat->condTemp			= _Cfg->ink_supply[i].headTemp;
 //		pstat->meniscus			= _Cfg->ink_supply[i].condMeniscus; //_Stat->ink_supply[i].meniscus;
 		pstat->ctrlMode			= _Stat->ink_supply[i].ctrl_state;
@@ -558,7 +567,6 @@ static void _display_status(void)
 				term_printf("%11s ", str);
 			}
 		term_printf("\n");
-	//	term_printf("cylinderPresSet:   "); for (i = 0; i < NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str(_Stat->ink_supply[i].IS_Pressure_Actual)); term_printf("\n");	
 		term_printf("pressure:          ");	
 		if (_Cfg->ink_supply[i].test_cylinderPres) 
 			for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("%5s(%03d)  ", value_str(_Stat->ink_supply[i].IS_Pressure_Actual), _Cfg->ink_supply[i].test_cylinderPres);

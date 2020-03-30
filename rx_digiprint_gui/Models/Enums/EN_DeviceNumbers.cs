@@ -52,6 +52,7 @@ namespace RX_DigiPrint.Models.Enums
                                                         {
                                                             try 
                                                             { 
+                                                                if (RxGlobals.InkSupply.List[color].InkType!=null)
                                                                 _List.Add(new RxEnum<int>(no+1, string.Format("{0}", InkType.ColorNameShort(RxGlobals.InkSupply.List[color].InkType.ColorCode))));
                                                             }
                                                             catch(Exception)

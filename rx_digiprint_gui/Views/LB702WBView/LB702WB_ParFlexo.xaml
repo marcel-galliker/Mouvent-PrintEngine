@@ -16,8 +16,18 @@
     <GroupBox x:Name="GroupBox" Header="Flexo" Style="{StaticResource RxGroupBox}">
         <Grid>
             <rx_uc:PlcParPanel x:Name="ParPanel" UnitID="Application.GUI_00_001_Main" ReadOnly="False" LabelWidth="120">
-                <rx_uc:PlcParCtrl ID="PAR_FLEXO_1_CLICHE_DIAM"      Label="Diameter"     Unit="mm"   UnitWidth="50" Format="1" />
-                <rx_uc:PlcParCtrl ID="PAR_FLEXO_1_TENSION"          Label="Tension"      Unit="N/mm" UnitWidth="50" Format="1" />
+                <rx_uc:PlcParCtrl ID="PAR_FLEXO_2_CLICHE_DIAM"      Label="Diameter"     Unit="mm"   UnitWidth="50" Format="1" />
+                <rx_uc:PlcParCtrl ID="PAR_FLEXO2_SPEED_MIXER_MOTOR"               Label="Mixer Speed"  Unit="%"       UnitWidth="50" Format="n"/>
+                <rx_uc:PlcTitle   Header="Dryer"/>
+                <rx_uc:PlcParCtrl ID="PAR_DRYER3_MODE"                        Label="Mode"         Unit=""  UnitWidth="50" Type="Combo" x:Name="CB_Mode" />
+                <rx_uc:PlcParCtrl ID="PAR_DRYER3_IR_LAMPS_ZONE1_SETPOINT"     Label="Zone 1"       Unit="°C" UnitWidth="50" Format="1" />
+                <rx_uc:PlcParCtrl ID="PAR_DRYER3_IR_LAMPS_ZONE2_SETPOINT"     Label="Zone 2"       Unit="°C" UnitWidth="50" Format="1" />
+                <rx_uc:PlcParCtrl ID="PAR_DRYER3_IR_LAMPS_ZONE3_SETPOINT"     Label="Zone 3"       Unit="°C" UnitWidth="50" Format="1" />
+                <rx_uc:PlcParCtrl ID="PAR_DRYER3_BUSES_UP_SETPOINT"           Label="Buses Up"     Unit="Pa" UnitWidth="50" Format="n" />
+                <rx_uc:PlcParCtrl ID="PAR_DRYER3_EXHAUST_UP_SETPOINT"         Label="Exhaust Up"   Unit="Pa" UnitWidth="50" Format="n" />
+                <rx_uc:PlcParCtrl ID="PAR_DRYER3_BUSES_DOWN_SETPOINT"         Label="Buses Down"   Unit="Pa" UnitWidth="50" Format="n" />
+                <rx_uc:PlcParCtrl ID="PAR_DRYER3_EXHAUST_DOWN_SETPOINT"       Label="Exhaust Down" Unit="Pa" UnitWidth="50" Format="n" />
+
             </rx_uc:PlcParPanel>
             <Grid VerticalAlignment="Bottom">
                 <Grid.ColumnDefinitions>

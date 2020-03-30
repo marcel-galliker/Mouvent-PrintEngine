@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
              xmlns:local="clr-namespace:RX_DigiPrint.Views.LB702UVView"
              xmlns:tex="clr-namespace:RX_DigiPrint.Views.TexView"
@@ -10,6 +11,11 @@
              mc:Ignorable="d" 
              d:DesignHeight="800" d:DesignWidth="1500">
 
+    <UserControl.Resources>
+        <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">32</sys:Double>
+        <sys:Double x:Key="{x:Static SystemParameters.HorizontalScrollBarHeightKey}">32</sys:Double>
+    </UserControl.Resources>
+    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
@@ -54,6 +60,8 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" PanningMode="Both">
+                    <StackPanel>
                 <StackPanel x:Name="SettingsTab" Grid.Row="0" Orientation="Horizontal" Background="Transparent">
                     <common:RxRadioButton x:Name="RB_Main"          Content="Main"          IsChecked="true"/>
                     <common:RxRadioButton x:Name="RB_Log"           Content="Log"           />
@@ -65,9 +73,9 @@
                 <Grid Grid.Row="1" Visibility="{Binding ElementName=RB_Main, Path=IsChecked, Converter={StaticResource IntToVisible_Converter}}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="680"/>
-                        <ColumnDefinition Width="250"/>
-                        <ColumnDefinition Width="200"/>
-                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="310"/>
+                        <ColumnDefinition Width="225"/>
+                        <ColumnDefinition Width="100"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
@@ -77,7 +85,7 @@
                         <local:LB702UV_Status/>
                         <local:LB702UV_Cmd/>
                     </StackPanel>
-                    <rx_uc:CleaningView Grid.Column="2"/>
+                    <rx_uc:StepperView Grid.Column="2"/>
                 </Grid>
                 
                 <!-- TAB: PLC Log ____________________________________________________________-->
@@ -94,6 +102,8 @@
                 <!--
                 <local:LB702UV_Cfg Grid.Row="1" Visibility="{Binding ElementName=RB_Cfg, Path=IsChecked, Converter={StaticResource IntToVisible_Converter}}"/>
                 -->
+                    </StackPanel>
+                </ScrollViewer>
             </Grid>
         </Grid>
 

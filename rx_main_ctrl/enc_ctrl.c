@@ -23,6 +23,7 @@
 #include "print_ctrl.h"
 #include "machine_ctrl.h"
 #include "setup.h"
+#include "gui_svr.h"
 #include "ctrl_msg.h"
 #include "ctrl_svr.h"
 #include "network.h"
@@ -279,7 +280,7 @@ static void _enc_start_printing(int no, SPrintQueueItem *pitem, int restart)
 	msg.restart		= restart;
 	msg.simulation  = arg_simuEncoder;
 	msg.printerType = RX_Config.printer.type;
-	if (arg_testMachine) msg.printerType=printer_LB701;
+	// if (arg_testMachine) msg.printerType=printer_LB701;
 
 	if (pitem->printGoMode==PG_MODE_MARK) msg.printGoMode = PG_MODE_MARK_FILTER;
 	else                                  msg.printGoMode = pitem->printGoMode;
@@ -411,7 +412,7 @@ static void _enc_start_printing(int no, SPrintQueueItem *pitem, int restart)
 		_Encoder[no].timeout = 2;
 		sok_send_2(&_Encoder[no].socket, CMD_ENCODER_CFG, sizeof(msg), &msg);
 	}
-	Error(LOG, 0, "CMD_ENCODER_CFG");
+//	Error(LOG, 0, "CMD_ENCODER_CFG");
 }
 
 //--- enc_sent_document ------------------------
@@ -702,7 +703,7 @@ static void _handle_status(int no, SEncoderStat* pstat)
 //--- enc_reply_stat ---------------------------------------------------------------
 void enc_reply_stat(RX_SOCKET socket)
 {
-	sok_send_2(&socket, REP_ENCODER_STAT, sizeof(_EncoderStatus), _EncoderStatus);
+	gui_send_msg_2(socket, REP_ENCODER_STAT, sizeof(_EncoderStatus), _EncoderStatus);
 }
 
 //--- enc_save_par ---------------------------------------------------

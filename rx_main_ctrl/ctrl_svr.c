@@ -517,8 +517,8 @@ static void _headboard_config(int colorCnt, int headsPerColor, int ethPortCnt)
 				{
                     offset = 0;
 				//	if (RX_TestImage.testImage==PQ_TEST_JETS)				offset = 210000*inkSupply;
-					if (RX_TestImage.testImage==PQ_TEST_FULL_ALIGNMENT)		offset = 350000*inkSupply;
-					if (RX_TestImage.testImage==PQ_TEST_JET_NUMBERS)		offset = 150000*inkSupply;
+				//	if (RX_TestImage.testImage==PQ_TEST_FULL_ALIGNMENT)		offset = 350000*inkSupply;
+				//	if (RX_TestImage.testImage==PQ_TEST_JET_NUMBERS)		offset = 150000*inkSupply;
 					if (RX_TestImage.testImage==PQ_TEST_ENCODER)			offset = 265000*inkSupply;
 					if (RX_TestImage.testImage==PQ_TEST_ANGLE_SEPARATED)	offset =  50000*inkSupply;
 					pBoard->head[i].dist	 += offset;	// recto
@@ -727,7 +727,8 @@ int ctrl_send_purge_par(int fluidNo, int time)
 			par.no = head%HEAD_CNT;
 			sok_send_2(&_HeadCtrl[head/HEAD_CNT].socket, CMD_SET_PURGE_PAR, sizeof(par), &par);
 			if (par.delay+par.time>timeTotal) timeTotal = par.delay+par.time;
-			par.delay+=delay;
+		//	par.delay+=delay;
+			par.delay+=(delay + 5000);
 		}
 	}
 	return timeTotal;
@@ -975,7 +976,7 @@ void ctrl_reply_stat(RX_SOCKET socket)
 	//	RX_HBStatus[i].info.flushed   = (_HeadsFlushed & (0x01LL<<i)) != 0;
 
 		if (_HeadCtrl[i].running) 
-			sok_send_2(&socket, REP_HEAD_STAT, sizeof(SHeadBoardStat), &RX_HBStatus[i]);
+			gui_send_msg_2(socket, REP_HEAD_STAT, sizeof(SHeadBoardStat), &RX_HBStatus[i]);
 	}
 }
 

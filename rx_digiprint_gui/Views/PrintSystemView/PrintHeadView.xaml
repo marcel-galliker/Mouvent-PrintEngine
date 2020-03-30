@@ -99,22 +99,22 @@
 
             <StackPanel  Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
                 <TextBlock Text="{Binding PresIn,  Converter={StaticResource HeadVal_Converter10}}"   />
-                <TextBlock Text=" (" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
+          <!--      <TextBlock Text=" (" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
                 <TextBlock Text="{Binding PresIn_str}" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
-                <TextBlock Text=")" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
+                <TextBlock Text=")" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/> -->
             </StackPanel>
 
             <StackPanel  Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
                 <TextBlock Text="{Binding PresOut,  Converter={StaticResource HeadVal_Converter10}}"/>
-                <TextBlock Text=" (~" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
+                <!--     <TextBlock Text=" (~" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
                 <TextBlock Text="{Binding PresOut_diff, Converter={StaticResource HeadVal_Converter10}}" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
-                <TextBlock Text=")" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
+                <TextBlock Text=")" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/> -->
             </StackPanel>
            
             <StackPanel  Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
                 <TextBlock Text="{Binding Meniscus,  Converter={StaticResource HeadVal_Converter10}}"/>
-                <TextBlock Text=" (~" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
-                <TextBlock Text="{Binding Meniscus_diff, Converter={StaticResource HeadVal_Converter10}}" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
+                <TextBlock Text=" (-" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding Meniscus_setpoint, Converter={StaticResource HeadVal_Converter10}}" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
                 <TextBlock Text=")" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
             </StackPanel>
             

@@ -11,7 +11,7 @@
             <ColumnDefinition Width="auto"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <rx_uc:CleaningView HorizontalAlignment="Right" Width="200"/>
+        <rx_uc:StepperView HorizontalAlignment="Right" Width="200"/>
 
         <Grid Grid.Column="1">
             <Image Source="..\..\Resources\Bitmaps\Tex\TX801-CleaningStation.tif"/>

@@ -246,6 +246,14 @@ namespace RX_DigiPrint.Models
             get { return _Meniscus_diff; }
             set { SetProperty(ref _Meniscus_diff, value); }
         }
+
+        //--- Property Meniscus_setpoint ---------------------------------------
+        private Int32 _Meniscus_setpoint;
+        public Int32 Meniscus_setpoint
+        {
+            get { return _Meniscus_setpoint; }
+            set { SetProperty(ref _Meniscus_setpoint, value); }
+        }
         
         //--- Property PumpSpeed ---------------------------------------
         private UInt32 _PumpSpeed;
@@ -296,29 +304,21 @@ namespace RX_DigiPrint.Models
             bool used=false;
             HeadNo  = no;
 
-            if (no==0)
-                no=0;
             try
             {
                 int ink = no/(int)RxGlobals.PrintSystem.HeadCnt;
-                if (RxGlobals.InkSupply.List[ink].InkType==null)
+                if (RxGlobals.InkSupply.List[ink].InkType!=null)
                 {
-                    Color   = Brushes.Transparent;
-                    ColorFG = Brushes.Black;
-                    Name    = "?-"+(1+no).ToString();
-                }
-                else
-                {
-                    Color   = new SolidColorBrush(RxGlobals.InkSupply.List[ink].InkType.Color);
-                    ColorFG = new SolidColorBrush(RxGlobals.InkSupply.List[ink].InkType.ColorFG);
+                Color   = new SolidColorBrush(RxGlobals.InkSupply.List[ink].InkType.Color);
+                ColorFG = new SolidColorBrush(RxGlobals.InkSupply.List[ink].InkType.ColorFG);
 
-                    string str = new ColorCode_Str().Convert(RxGlobals.InkSupply.List[ink].InkType.ColorCode, null, ink, null).ToString();
+                string str = new ColorCode_Str().Convert(RxGlobals.InkSupply.List[ink].InkType.ColorCode, null, ink, null).ToString();
 
-                    Name    = str+"-"+(1+no%(int)RxGlobals.PrintSystem.HeadCnt).ToString();
-                    used = true;
-                }
+                Name    = str+"-"+(1+no%(int)RxGlobals.PrintSystem.HeadCnt).ToString();
+                used = true;
             }
-            catch(Exception ex)
+            }
+            catch(Exception)
             {
                 Color   = Brushes.Transparent;
                 ColorFG = Brushes.Black;
@@ -353,9 +353,10 @@ namespace RX_DigiPrint.Models
             PresOut     = item.presOut;
             PresOut_diff = item.presOut_diff;
             Meniscus     = item.meniscus;
-            Meniscus_diff= item.meniscus_diff;
+            Meniscus_diff       = item.meniscus_diff;
+            Meniscus_setpoint   = item.meniscus_Setpoint;
             PumpSpeed   = item.pumpSpeed; 
-            PumpFeedback= item.pumpFeedback;
+            PumpFeedback        = item.pumpFeedback;
             if (item.printingSeconds==TcpIp.INVALID_VALUE) PrintingTime="-----";
             else
             {
@@ -378,25 +379,13 @@ namespace RX_DigiPrint.Models
             RxBtDef.SBtHeadStatMsg msg = new RxBtDef.SBtHeadStatMsg();
             msg.no           = HeadNo;
             msg.status.name  = Name;
-            try
+            msg.status.color   = Rx.ToArgb(Colors.Black);
+            msg.status.colorFG = Rx.ToArgb(Colors.White);
+            int ink = HeadNo/(int)RxGlobals.PrintSystem.HeadCnt;
+            if (RxGlobals.InkSupply.List[ink].InkType!=null)
             {
-                int ink = HeadNo/(int)RxGlobals.PrintSystem.HeadCnt;
-                if(RxGlobals.InkSupply.List[ink].InkType==null)
-                {
-                    msg.status.color   = Rx.ToArgb(Colors.Black);
-                    msg.status.colorFG = Rx.ToArgb(Colors.White);
-                }
-                else
-                {
-                    msg.status.color   = Rx.ToArgb(RxGlobals.InkSupply.List[ink].InkType.Color);
-                    msg.status.colorFG = Rx.ToArgb(RxGlobals.InkSupply.List[ink].InkType.ColorFG);
-                }
-            }
-            catch(Exception e)
-            {
-                Console.WriteLine("Exception {0}", e.Message);
-                msg.status.color   = Rx.ToArgb(Colors.Black);
-                msg.status.colorFG = Rx.ToArgb(Colors.White);
+                msg.status.color   = Rx.ToArgb(RxGlobals.InkSupply.List[ink].InkType.Color);
+                msg.status.colorFG = Rx.ToArgb(RxGlobals.InkSupply.List[ink].InkType.ColorFG);
             }
             msg.status.ctrlMode = (RxBtDef.EFluidCtrlMode)CtrlMode;
             msg.status.temp     = (Int32)TempHead;

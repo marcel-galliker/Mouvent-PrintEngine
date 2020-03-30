@@ -37,6 +37,7 @@
                     Source="{Binding Preview}"
                     RenderTransformOrigin="0.5,0.5"
                     MouseUp="Image_Clicked"
+                    SizeChanged="Image_SizeChanged"
                     >
                         <Image.LayoutTransform>
                             <RotateTransform Angle="90"/>
@@ -61,6 +62,7 @@
                     Source="{Binding Preview}"
                     RenderTransformOrigin="0.5,0.5"
                     MouseUp="NextImage_Clicked"
+                    SizeChanged="Image_SizeChanged"
                     >
                         <Image.LayoutTransform>
                             <RotateTransform Angle="90"/>

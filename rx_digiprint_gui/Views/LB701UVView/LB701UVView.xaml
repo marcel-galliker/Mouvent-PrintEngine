@@ -79,7 +79,7 @@
                         <local:LB701UV_Status/>
                         <local:LB701UV_Cmd/>
                     </StackPanel>
-                    <rx_uc:CleaningView Grid.Column="2"/>
+                    <rx_uc:StepperView Grid.Column="2"/>
                 </Grid>
                 
                 <!-- TAB: PLC Log ____________________________________________________________-->

@@ -13,6 +13,7 @@
 
 //--- includes ----------------------------------------------------------------
 #include "rx_error.h"
+#include "rx_mac_address.h"
 #include "rx_threads.h"
 #include "rx_trace.h"
 #include "gui_svr.h"
@@ -197,7 +198,7 @@ int	plc_init(void)
 	if (_SimuPLC)     Error(WARN, 0, "PLC in Simulation");
 	if (_SimuEncoder) Error(WARN, 0, "Encoder in Simulation");
 	
-	if (RX_Config.printer.type==printer_LH702 && !arg_testMachine) _SimuPLC = TRUE;
+	if (RX_Config.printer.type==printer_LH702 && str_start(RX_Hostname, "LH702")) _SimuPLC = TRUE;
 	
 	if (_SimuPLC) rx_thread_start(_plc_simu_thread, NULL, 0, "_plc_simu_thread");
 	else		  rx_thread_start(_plc_thread, NULL, 0, "_plc_thread");
@@ -212,6 +213,12 @@ int plc_end(void)
 {
 	_PlcThreadRunning = FALSE;
 	return REPLY_OK;
+}
+
+//--- plc_in_simu -------------------------------
+int	plc_in_simu(void)
+{
+	return _SimuPLC;
 }
 
 //--- plc_reset -----------------------------------------------------------
@@ -307,7 +314,7 @@ static void _plc_set_command(char *mode, char *cmd)
 		_plc_set_par_default();
 		if (!arg_simuEncoder && !RX_StepperStatus.info.ref_done) 
 		{
-			step_handle_gui_msg(INVALID_SOCKET, CMD_CAP_REFERENCE, NULL, 0);
+			step_handle_gui_msg(INVALID_SOCKET, CMD_LIFT_REFERENCE, NULL, 0);
 			_SendWebIn = TRUE;
 			return;
 		}
@@ -472,10 +479,10 @@ int  plc_set_printpar(SPrintQueueItem *pItem)
 		_head_was_up   = (RX_StepperStatus.info.z_in_print || RX_StepperStatus.info.z_in_ref);
 		if (_head_was_up)
 		{
-			_heads_to_print= TRUE;
+			_heads_to_print= FALSE;
 			step_lift_to_print_pos();
 		}
-		else _heads_to_print= FALSE;
+		else _heads_to_print= TRUE;
 	}
 	
 //	Error(LOG, 0, "PrintPar: PageMargin=%d.%03d", pItem->pageMargin/1000, pItem->pageMargin%1000);
@@ -508,9 +515,10 @@ int  plc_start_printing(void)
 		plc_error_reset();
 		if (rx_def_is_web(RX_Config.printer.type) && RX_Config.printer.type!=printer_cleaf) enc_restart_pg();
 		_SendRun		= TRUE;
-		_heads_to_print	= FALSE;
 	}
-//	Error(LOG, 0, "plc_start_printing: heads_to_print=%d, z_in_print=%d",_heads_to_print, RX_StepperStatus.info.z_in_print);
+	if (!_SimuPLC) _heads_to_print	= TRUE;
+
+	Error(LOG, 0, "plc_start_printing: heads_to_print=%d, z_in_print=%d",_heads_to_print, RX_StepperStatus.info.z_in_print);
 	step_set_vent(_Speed);
 //	if (_SimuEncoder) ctrl_simu_encoder(_Speed);
 	return REPLY_OK;
@@ -526,11 +534,11 @@ int  plc_stop_printing(void)
 	_GUIPause	   = FALSE;
 	_RequestPause  = FALSE;
 	_head_was_up   = FALSE;
+	_heads_to_print= FALSE;
 	step_set_vent(FALSE);
 	if (_SimuPLC)
 	{
 		RX_PrinterStatus.printState = ps_off;
-		_heads_to_print				= FALSE;
 		if (chiller_is_running()) RX_PrinterStatus.printState = ps_ready_power;
 		gui_send_printer_status(&RX_PrinterStatus);
 	}
@@ -657,6 +665,7 @@ int  plc_pause_printing(int fromGui)
 		_head_was_up   = FALSE;
 		_SendRun       = FALSE;
 		_RequestPause  = FALSE;
+		_heads_to_print= FALSE;
 		if (_SimuEncoder && rx_def_is_scanning(RX_Config.printer.type)) ctrl_simu_encoder(0);
 
 		if (!_SimuPLC)
@@ -706,13 +715,14 @@ static void _simu_init(void)
 {
 	memset(&_NetItem, 0, sizeof(_NetItem));
 	_NetItem.deviceType		= dev_plc;
+	_NetItem.macAddr		= MAC_SIMU_PLC;
 	strcpy(_NetItem.deviceTypeStr, DeviceStr[dev_plc]);
 	_NetItem.deviceNo		= 0;
 	strncpy(_NetItem.serialNo, "SIMULATION", sizeof(_NetItem.serialNo));
 	net_device_to_ipaddr(_NetItem.deviceType, _NetItem.deviceNo, _NetItem.ipAddr, sizeof(_NetItem.ipAddr));
 	_NetItem.connected = TRUE;
 
-	net_register(&_NetItem);
+	if (!str_start(RX_Hostname, "LH702")) net_register(&_NetItem);
 }
 
 //--- plc_simu_thread ---------------------------------------------
@@ -735,11 +745,15 @@ static void _plc_load_par(void)
 	rex_load(PATH_USER FILENAME_PLC_CFG);
 	rex_load(PATH_USER FILENAME_PLC_PAR);
 
-	if (lc_get_value_by_name(UnitID ".PAR_HEAD_HEIGHT", value)==REPLY_OK)
+	if (lc_get_value_by_name(UnitID ".XML_HEAD_HEIGHT", value)==REPLY_OK)			
 		RX_Config.stepper.print_height=(UINT32)(1000*atof(value));
-
-	if (lc_get_value_by_name(UnitID ".XML_ENC_OFFSET", value)==REPLY_OK)
+	if (lc_get_value_by_name(UnitID ".XML_MATERIAL_THICKNESS", value)==REPLY_OK)	
+		RX_Config.stepper.material_thickness=(UINT32)(1000*atof(value));
+	if (lc_get_value_by_name(UnitID ".XML_ENC_OFFSET", value)==REPLY_OK)			
 		RX_Config.printer.offset.incPerMeter[0] = atoi(value);
+
+	if (lc_get_value_by_name(UnitID ".PAR_ENC_OFFSET", value)==REPLY_OK)			
+		Error(LOG, 0, "Encoder Offset=%d", atoi(value));
 
 	/*
 	if (rx_def_is_scanning(RX_Config.printer.type))
@@ -758,7 +772,7 @@ static void _plc_load_par(void)
 	}
 
 	_plc_set_command("", "CMD_SET_PARAMETER");
-	gui_send_msg_2(0, REP_PLC_LOAD_PAR, 0, NULL);
+	gui_send_msg_2(INVALID_SOCKET, REP_PLC_LOAD_PAR, 0, NULL);
 }
 
 //--- _plc_save_par -------------------------------------------------
@@ -888,15 +902,11 @@ static void _plc_set_var(RX_SOCKET socket, char *varList)
 			}
 						
 			//--- XML_STEPPER_PRINT_HEIGHT special -----------------------------------------------
-			if (!strcmp(var, "PAR_HEAD_HEIGHT")) 
+			if (!strcmp(var, "XML_HEAD_HEIGHT"))		
 				RX_Config.stepper.print_height = (INT32)(0.5+1000*strtod(val, NULL));
 			if (!strcmp(var, "XML_MATERIAL_THICKNESS")) 
 				RX_Config.stepper.material_thickness = (INT32)(0.5+1000*strtod(val, NULL));
-			
-			//--- XML_ special -----------------------------------------------
-			if (!strcmp(var, "XML_ENC_OFFSET")) 
-				RX_Config.printer.offset.incPerMeter[0] = atoi(val);
-
+			if (!strcmp(var, "XML_ENC_OFFSET"))			RX_Config.printer.offset.incPerMeter[0] = atoi(val);
 		}
 		str = end;
 	}
@@ -913,7 +923,7 @@ static void _plc_save_material	(RX_SOCKET socket, char *filename, int cmd, char 
 	char *val;
 	char var[128];
 		
-	gui_send_msg_2(0, cmd, strlen(varList), varList);
+	gui_send_msg_2(INVALID_SOCKET, cmd, strlen(varList), varList);
 
 	sprintf(path, PATH_USER"%s", filename);
 	HANDLE file = setup_create();
@@ -932,8 +942,11 @@ static void _plc_save_material	(RX_SOCKET socket, char *filename, int cmd, char 
 				break;					
 			}
 			setup_str(file, "XML_MATERIAL", READ, attrname, sizeof(attrname), "");
-			if (!stricmp(attrname, str)) 
+			if (!stricmp(attrname, str))
+			{
+				strncpy(RX_Config.material, str, sizeof(RX_Config.material));
 				break;	// found
+		}
 		}
 		*end++='\n';
 	}
@@ -948,25 +961,25 @@ static void _plc_save_material	(RX_SOCKET socket, char *filename, int cmd, char 
 		*val++='=';
 		printf(">>%s<< = >>%s<<\n",  var, val);
 		setup_str(file, var, WRITE,  val,	32,	"");
-		if (RX_Config.printer.type==printer_LH702)
-		{
 			if (!strcmp(var, "XML_HEAD_HEIGHT"))
 				RX_Config.stepper.print_height			= (INT32)(0.5+1000*strtod(val, NULL));
 			if (!strcmp(var, "XML_MATERIAL_THICKNESS")) 
 				RX_Config.stepper.material_thickness	= (INT32)(0.5+1000*strtod(val, NULL));
 			if (!strcmp(var, "XML_ENC_OFFSET"))			RX_Config.printer.offset.incPerMeter[0] = atoi(val);
-		}
-		else
-		{
-			if (!strcmp(var, "PAR_HEAD_HEIGHT")) 
-				RX_Config.stepper.print_height = (INT32)(0.5+1000*strtod(val, NULL));				
-		}
 	
 		*end++='\n';
 		str = end;
 	}
 	setup_save(file, path);
 	setup_destroy(file);
+
+	//--- save in config --------------------------
+	{
+		SRxConfig cfg;
+		setup_config(PATH_USER FILENAME_CFG, &cfg, READ);
+		strncpy(cfg.material, RX_Config.material, sizeof(cfg.material));
+		setup_config(PATH_USER FILENAME_CFG, &cfg, WRITE);
+	}
 }
 
 //--- _plc_material_list -------------------------------------
@@ -1009,7 +1022,7 @@ static void _plc_del_material	(RX_SOCKET socket, char *filename, int cmd, char *
 	char path[2048];
 	int len;
 	
-	gui_send_msg_2(0, cmd, strlen(name), name);	
+	gui_send_msg_2(INVALID_SOCKET, cmd, strlen(name), name);	
 
 	HANDLE file = setup_create();
 	HANDLE attribute =NULL;
@@ -1057,10 +1070,7 @@ static void _plc_req_material	(RX_SOCKET socket, char *filename, int cmd)
 			setup_str_next(file, &attribute, name, sizeof(name), val, sizeof(val));
 			if (len==0) len = sprintf(str, "%s\n", val);
 			if (!*name) break;
-			len += sprintf(&str[len], "%s=%s\n", name, val);
-			
-//			if (!strcmp(name, "PAR_HEAD_HEIGHT")) 
-//				RX_Config.stepper.print_height = (INT32)(0.5+1000*strtod(val, NULL));
+			len += snprintf(&str[len], sizeof(str)-len-1, "%s=%s\n", name, val);
 		}
 		str[len]=0;
 		sok_send_2(&socket, cmd | EVT_X, len, str);	// CMD_PLC_ITM_MATERIAL | CMD_PLC_ITM_SPLICEPAR
@@ -1091,10 +1101,25 @@ void plc_load_material(char *material)
 				load=!stricmp(val, material);
 			if (load) 
 			{
+                strncpy(RX_Config.material, material, sizeof(RX_Config.material));
 				printf("LOAD %s=%s\n", name, val);
 				sprintf(str, UnitID ".%s", name);
 				lc_set_value_by_name(str, val);
+				if (!strcmp(name, "XML_HEAD_HEIGHT"))			
+					RX_Config.stepper.print_height			= (INT32)(0.5+1000*strtod(val, NULL));
+				if (!strcmp(name, "XML_MATERIAL_THICKNESS"))	
+					RX_Config.stepper.material_thickness	= (INT32)(0.5+1000*strtod(val, NULL));
+				if (!strcmp(name, "XML_ENC_OFFSET"))			RX_Config.printer.offset.incPerMeter[0] = atoi(val);
 			}
+			}
+
+		//--- save in config --------------------------
+		if (load)
+		{
+			SRxConfig cfg;
+			setup_config(PATH_USER FILENAME_CFG, &cfg, READ);
+			strncpy(cfg.material, RX_Config.material, sizeof(cfg.material));
+			setup_config(PATH_USER FILENAME_CFG, &cfg, WRITE);
 		}
 	}				
 }
@@ -1325,7 +1350,7 @@ static void _plc_get_status()
 	{
 		if(_ErrorFilter == 0 || rx_get_ticks() > _ErrorFilter) 
 		{
-			gui_send_msg_2(0, REP_PLC_GET_LOG, sizeof(item), &item);
+			gui_send_msg_2(INVALID_SOCKET, REP_PLC_GET_LOG, sizeof(item), &item);
 			if(!_MpliStarting)
 			{
 				if (item.state == active)
@@ -1383,7 +1408,9 @@ static void _plc_state_ctrl()
 			}
 		}
 
-		if (rx_def_is_tx(RX_Config.printer.type) && _GUIPause)
+		if (_GUIPause)
+		{
+			if (rx_def_is_tx(RX_Config.printer.type))
 		{
             UINT32 scannerDir;
             lc_get_value_by_name_UINT32(UnitID ".STA_SCAN_DIRECTION", (UINT32*)&scannerDir);
@@ -1395,6 +1422,12 @@ static void _plc_state_ctrl()
             if (scannerDir==2)
 			{
             //	Error(LOG, 0, "GUIPause: SendPause");
+				_GUIPause =FALSE;
+				_SendPause=1;
+			}
+		}
+			else
+			{
 				_GUIPause =FALSE;
 				_SendPause=1;
 			}
@@ -1420,7 +1453,7 @@ static void _plc_state_ctrl()
 			} 
 			else if (_SendPause==1 && !RX_StepperStatus.info.moving)
 			{
-				step_handle_gui_msg(INVALID_SOCKET, CMD_CAP_UP_POS, NULL, 0);				
+				step_handle_gui_msg(INVALID_SOCKET, CMD_LIFT_UP_POS, NULL, 0);				
 			}
 		}
 		lc_set_value_by_name_UINT32(UnitID ".STA_HEAD_IS_UP", RX_StepperStatus.info.scannerEnable);	
@@ -1442,7 +1475,6 @@ static void _plc_state_ctrl()
 	if (_PlcState==plc_setup && RX_PrinterStatus.printState==ps_webin)
 	{
 		_plc_set_command("CMD_SETUP", "CMD_WEBIN");
-        step_handle_gui_msg(INVALID_SOCKET, CMD_CAP_UP_POS, NULL, 0);
 	}
 	if(_PlcState == plc_pause)
 	{		
@@ -1493,21 +1525,20 @@ static void _plc_state_ctrl()
 			}
 		}
 
-		if(!_heads_to_print)
+		if(_heads_to_print)
 		{
 		//	TrPrintfL(TRUE, "_heads_to_print: printhead_en=%d, printState=%d (%d)", RX_StepperStatus.info.printhead_en, RX_PrinterStatus.printState, ps_printing);
-		//	Error(LOG, 0, "_heads_to_print: printhead_en=%d, printState=%d (%d)", RX_StepperStatus.info.printhead_en, RX_PrinterStatus.printState, ps_printing);
-		//	if (RX_Config.printer.type!=printer_cleaf || (RX_StepperStatus.info.printhead_en && RX_PrinterStatus.printState==ps_printing))
-			if(RX_PrinterStatus.printState == ps_printing && (RX_StepperStatus.info.printhead_en || (RX_Config.printer.type!=printer_cleaf && RX_Config.printer.type!=printer_LH702) || arg_testMachine))
+			Error(LOG, 0, "_heads_to_print: printhead_en=%d, printState=%d (%d)", RX_StepperStatus.info.printhead_en, RX_PrinterStatus.printState, ps_printing);
+			if (RX_Config.printer.type!=printer_cleaf || (RX_StepperStatus.info.printhead_en && RX_PrinterStatus.printState==ps_printing))
 			{
 				step_lift_to_print_pos();
-				_heads_to_print = TRUE;													
+				_heads_to_print = FALSE;													
 			}
 		}
 				
 		{
 			z_in_print = RX_StepperStatus.info.z_in_print;
-			if (RX_Config.printer.type==printer_LH702 && !arg_testMachine)
+			if (RX_Config.printer.type==printer_LH702)
 			{
 				if (_SimuEncoder) z_in_print = TRUE;
 			}
@@ -1565,7 +1596,6 @@ static void _plc_state_ctrl()
 	{
 		RX_PrinterStatus.actSpeed = 0;
 		_CanRun = FALSE;
-		_heads_to_print=FALSE;
 		if (RX_PrinterStatus.printState>plc_stop)
 			RX_PrinterStatus.printState = chiller_is_running() ? ps_ready_power : ps_off;
 	}

@@ -83,7 +83,7 @@ namespace RX_DigiPrint.Models
             msg.headNo      = headNo;
             msg.angle       = (Int32)(Angle*1000);
             msg.stitch      = (Int32)(Stitch*1000);
-            RxGlobals.RxInterface.SendMsg(TcpIp.CMD_CLN_ADJUST, ref msg);
+            RxGlobals.RxInterface.SendMsg(TcpIp.CMD_ROB_ADJUST, ref msg);
         }        
 
     }

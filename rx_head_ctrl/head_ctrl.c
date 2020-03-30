@@ -274,7 +274,7 @@ static int _do_block_used	(RX_SOCKET socket, SBlockUsedCmd *msg)
 	SBlockUsedRep 	reply;
 	UINT32			min, max;
 
-//	TrPrintfL(TRUE, "_do_block_used id=%d, blkNo=%d, blkCnt=%d (blk %d .. %d)", msg->id, msg->blkNo, msg->blkCnt, msg->blkNo, msg->blkNo+msg->blkCnt);
+	TrPrintfL(TRUE, "head[%d]._do_block_used id=%d, blkNo=%d, blkCnt=%d (blk %d .. %d)", msg->headNo, msg->id, msg->blkNo, msg->blkCnt, msg->blkNo, msg->blkNo+msg->blkCnt);
 	
 	min=RX_HBConfig.head[msg->headNo].blkNo0;
 	max=min+RX_HBConfig.head[msg->headNo].blkCnt;

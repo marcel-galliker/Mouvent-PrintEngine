@@ -137,7 +137,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 //--- do this also for other printers? --------------
                 if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf)
                 {
-                    if (name!=null && !RxGlobals.TestTableStatus.X_in_cap) // when slide not under printhead
+                    if (name!=null && !RxGlobals.StepperStatus[0].X_in_cap) // when slide not under printhead
                     {
                         if (!RxMessageBox.YesNo(name, "Printhead NOT in capping position. Continue?",  MessageBoxImage.Question, true)) return;
                     }

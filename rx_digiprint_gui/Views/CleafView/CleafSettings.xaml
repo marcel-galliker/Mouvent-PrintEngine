@@ -51,8 +51,8 @@
                             <rx_uc:PlcParCtrl ID="PAR_PRINTING_SPEED"           Label="Speed"           Unit="m/min" UnitWidth="50"  Format="n"  />
                             <rx_uc:PlcParCtrl ID="PAR_PRINTING_SPEED_MAX"       Label="Speed Max"       Unit="m/min" UnitWidth="50" Format="n"/>
 
-                            <rx_uc:PlcParCtrl ID="PAR_MATERIAL_THIKNESS"        Label="Thickness"       Unit="mm"    UnitWidth="50" Format="1"/>
-                            <rx_uc:PlcParCtrl ID="PAR_HEAD_HEIGHT"              Label="Print Height"    Unit="mm"    UnitWidth="50" Format="1"/>
+                            <rx_uc:PlcParCtrl ID="XML_MATERIAL_THIKNESS"        Label="Thickness"       Unit="mm"    UnitWidth="50" Format="1"/>
+                            <rx_uc:PlcParCtrl ID="XML_HEAD_HEIGHT"              Label="Print Height"    Unit="mm"    UnitWidth="50" Format="1"/>
 
                             <rx_uc:PlcParCtrl ID="PAR_WINDER_TENSION_1"         Label="Tension UW"      Unit="N"    UnitWidth="50" Format="n"/>
                             <rx_uc:PlcParCtrl ID="PAR_WINDER_TENSION_2"         Label="Tension RW"      Unit="N"    UnitWidth="50" Format="n"/>

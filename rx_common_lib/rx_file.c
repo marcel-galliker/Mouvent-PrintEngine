@@ -366,7 +366,6 @@ void rx_mkdir_path(const char *dirname)
 {
 	char *ch, old;
 	char dir[MAX_PATH];
-	int ret, err;
 	
 	if (!*dirname) return;
 
@@ -377,8 +376,7 @@ void rx_mkdir_path(const char *dirname)
 		{
 			old = *ch;
 			*ch=0;
-			ret=rx_mkdir(dir);
-			err=errno;
+			rx_mkdir(dir);
 			*ch=old;
 		}
 	}
@@ -420,7 +418,7 @@ int rx_remove_old_files(const char *searchPath, int days)
 	
 	gettimeofday(&now, NULL);
 
-	TrPrintfL(TRUE, "rx_remove_old_files(>>%s<<, %d days)\n", searchPath, days);
+	TrPrintfL(TRUE, "rx_remove_old_files(>>%s<<, %d days)", searchPath, days);
 	search = rx_search_open(searchPath, "*");
 	while (rx_search_next(search, fileName, sizeof(fileName), &fileTime, &filesize, &isDir))
 	{

@@ -106,21 +106,68 @@ namespace RX_DigiPrint.Views.LB702WBView
         void Rect_MouseDown(object sender, MouseButtonEventArgs e)
         {
             Rectangle r = sender as Rectangle;
-            int i;
-            for (i=0; i<FrontRect.Count(); i++)
+            int no=0;
+
+            if ((r == FrontRect[1]) || (r == FrontRect[2]))
             {
-                if (r==FrontRect[i]) 
+                if (BackRect[1].Fill == Brushes.Transparent)
                 {
-                    BackRect[i].Fill = Fill[2];
-                    BackRect[i].Stroke = Brushes.DarkCyan;
-                    if (DeviceSelected!=null) DeviceSelected(i);
+                    BackRect[1].Fill = Fill[2];
+                    BackRect[1].Stroke = Brushes.DarkCyan;
+                    BackRect[2].Fill = Fill[2];
+                    BackRect[2].Stroke = Brushes.DarkCyan;
                 }
                 else
                 {
-                    BackRect[i].Fill = Brushes.Transparent;
-                    BackRect[i].Stroke = Brushes.Gray;
+                    BackRect[1].Fill = Brushes.Transparent;
+                    BackRect[1].Stroke = Brushes.Gray;
+                    BackRect[2].Fill = Brushes.Transparent;
+                    BackRect[2].Stroke = Brushes.Gray;
                 }
             }
+            else if ((r == FrontRect[3]) || (r == FrontRect[4]) || (r == FrontRect[5]))
+            {
+                if (BackRect[3].Fill == Brushes.Transparent)
+                {
+                    BackRect[3].Fill = Fill[2];
+                    BackRect[3].Stroke = Brushes.DarkCyan;
+                    BackRect[4].Fill = Fill[2];
+                    BackRect[4].Stroke = Brushes.DarkCyan;
+                    BackRect[5].Fill = Fill[2];
+                    BackRect[5].Stroke = Brushes.DarkCyan;
+                }
+                else
+                {
+                    BackRect[3].Fill = Brushes.Transparent;
+                    BackRect[3].Stroke = Brushes.Gray;
+                    BackRect[4].Fill = Brushes.Transparent;
+                    BackRect[4].Stroke = Brushes.Gray;
+                    BackRect[5].Fill = Brushes.Transparent;
+                    BackRect[5].Stroke = Brushes.Gray;
+                }
+            }
+            else if ((r == FrontRect[6]) || (r == FrontRect[7]))
+            {
+                if (BackRect[6].Fill == Brushes.Transparent)
+                {
+                    BackRect[6].Fill = Fill[2];
+                    BackRect[6].Stroke = Brushes.DarkCyan;
+                    BackRect[7].Fill = Fill[2];
+                    BackRect[7].Stroke = Brushes.DarkCyan;
+                }
+                else
+                {
+                    BackRect[6].Fill = Brushes.Transparent;
+                    BackRect[6].Stroke = Brushes.Gray;
+                    BackRect[7].Fill = Brushes.Transparent;
+                    BackRect[7].Stroke = Brushes.Gray;
+                }
+            }
+            no = 0;
+            if (BackRect[1].Fill == Fill[2]) no += 1;
+            if (BackRect[3].Fill == Fill[2]) no += 10;
+            if (BackRect[6].Fill == Fill[2]) no += 100;
+            if (DeviceSelected != null) DeviceSelected(no);          
         }
     }
 }

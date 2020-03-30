@@ -192,7 +192,7 @@ void TrPrintf(int level, const char *format, ...)
 		else printf(str, NULL);
 		
 		strncpy(msg.message, str, sizeof(msg.message)-3);
-		sok_send_to_clients(_hServer, &msg);
+		sok_send_to_clients(_hServer, NULL, &msg);
 	}
 } // end TrPrintf
 

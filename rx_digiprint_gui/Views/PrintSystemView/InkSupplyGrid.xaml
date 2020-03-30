@@ -62,15 +62,18 @@
             <TextBlock Grid.Row="1" Grid.Column="0" Text="Pressure Inlet Cond." VerticalAlignment="Top"/>
             <TextBlock Grid.Row="1" Grid.Column="1" Padding="3,0,0,0" Text="mbar"/>
 
-            <TextBlock Grid.Row="2" Grid.Column="0" Text="Pressure Ink Tank"/>
-            <TextBlock Grid.Row="2" Grid.Column="1" Padding="3,0,0,0" Text="mbar"/>
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="Pumps speed Cond." VerticalAlignment="Top"/>
+            <TextBlock Grid.Row="2" Grid.Column="1" Padding="3,0,0,0" Text="ml/min"/>
 
-            <TextBlock Grid.Row="3" Grid.Column="0" Text="Pump Speed"/>
-            <TextBlock Grid.Row="3" Grid.Column="1" Padding="3,0,0,0" Text="ml/s"/>
+            <TextBlock Grid.Row="3" Grid.Column="0" Text="Pressure Ink Tank"/>
+            <TextBlock Grid.Row="3" Grid.Column="1" Padding="3,0,0,0" Text="mbar"/>
 
-            <TextBlock Grid.Row="4" Grid.Column="0" Text="Bleed Valve"/>
+            <TextBlock Grid.Row="4" Grid.Column="0" Text="Pump Speed"/>
+            <TextBlock Grid.Row="4" Grid.Column="1" Padding="3,0,0,0" Text="ml/s"/>
+
+            <TextBlock Grid.Row="5" Grid.Column="0" Text="Bleed Valve"/>
            
-            <TextBlock Grid.Row="5" Grid.Column="0" Text="Air Valve"/>
+            <TextBlock Grid.Row="6" Grid.Column="0" Text="Air Valve"/>
         </Grid>
         
         <ScrollViewer x:Name="InkSupplyScroll"

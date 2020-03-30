@@ -26,14 +26,10 @@
 
     <UserControl.Resources>
         <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">32</sys:Double>
-        <!--    <sys:Double x:Key="{x:Static SystemParameters.HorizontalScrollBarHeightKey}">50</sys:Double> -->
+        <sys:Double x:Key="{x:Static SystemParameters.HorizontalScrollBarHeightKey}">32</sys:Double>
     </UserControl.Resources>
-
     <Grid x:Name="MainGrid" HorizontalAlignment="Stretch" Background="Transparent">
-        <Grid x:Name="Settings" 
-              HorizontalAlignment="Stretch"
-              Background="Transparent"
-              >
+        <Grid x:Name="Settings" HorizontalAlignment="Stretch" Background="Transparent">
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="*"/>
@@ -67,7 +63,7 @@
                 </StackPanel>
             </Grid>
 
-            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" PanningMode="VerticalOnly">
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" PanningMode="Both">
                 <StackPanel>
                     <!-- Print System ___________________________________________________________________________________________-->
                     <StackPanel x:Name="PrintSystemPanel">

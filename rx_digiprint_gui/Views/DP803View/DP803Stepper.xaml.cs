@@ -24,7 +24,7 @@ namespace RX_DigiPrint.Views.DP803View
         public DP803Stepper()
         {
             InitializeComponent();
-            DataContext = RxGlobals.TestTableStatus;
+            DataContext = RxGlobals.StepperStatus;
         }
     }
 }

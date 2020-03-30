@@ -308,7 +308,7 @@ void ink_tick_10ms(void)
 					if(_ShutdownTimeStability[isNo] > 500)	pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
 
 					_ShutdownTimeOut[isNo]++;
-					if(_ShutdownTimeOut[isNo] > 6000) pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
+					if(_ShutdownTimeOut[isNo] > 12000) pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
 				}
 				else pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
 				break;

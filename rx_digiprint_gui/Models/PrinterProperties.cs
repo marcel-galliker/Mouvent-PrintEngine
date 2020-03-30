@@ -64,6 +64,7 @@ namespace RX_DigiPrint.Models
             settings.dhcp     = Convert.ToUInt32(Host_DHCP);
             settings.hostname = Host_Name;
             int i;
+            if (Host_Address==null) return;
             try
             {
                 string[] addr=Host_Address.Split('.');

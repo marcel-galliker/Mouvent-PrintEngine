@@ -45,4 +45,6 @@
 
 #define MAC_NO_MASK			mac_as_i64("00:00:00:00:ff:ff")
 
+#define MAC_SIMU_PLC		mac_as_i64("00:07:ee:01:02:03")
+
 void macAddr_udp(int udpNo, int serialNo, UINT64 *macAddr);

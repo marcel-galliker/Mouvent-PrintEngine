@@ -34,7 +34,6 @@
 static SMovePar	_ParRef;
 static SMovePar	_ParZ_down;
 static SMovePar	_ParZ_cap;
-static int		_CmdRunning=0;
 static char		_CmdName[32];
 static int		_PrintPos_New=0;
 static int		_PrintPos_Act=0;
@@ -50,7 +49,7 @@ static int  _micron_2_steps(int micron);
 //--- lb701_init --------------------------------------
 void lb701_init(void)
 {
-	motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER, STEPS);
+	motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER);
 	memset(_CmdName, 0, sizeof(_CmdName));
 
 	//--- movment parameters ----------------
@@ -92,14 +91,15 @@ void lb701_main(int ticks, int menu)
 	if (RX_StepperStatus.info.moving)
 	{
 		RX_StepperStatus.info.z_in_ref   = FALSE;
+		RX_StepperStatus.info.z_in_up    = FALSE;
 		RX_StepperStatus.info.z_in_print = FALSE;
 		RX_StepperStatus.info.z_in_cap   = FALSE;			
 	}
-	if (_CmdRunning==0) RX_StepperStatus.info.moving = FALSE;
-	if (_CmdRunning && motors_move_done(MOTOR_Z_BITS)) 
+	if (RX_StepperStatus.cmdRunning==0) RX_StepperStatus.info.moving = FALSE;
+	if (RX_StepperStatus.cmdRunning && motors_move_done(MOTOR_Z_BITS)) 
 	{
 		RX_StepperStatus.info.moving = FALSE;
-		if (_CmdRunning == CMD_CAP_REFERENCE) 
+		if (RX_StepperStatus.cmdRunning == CMD_LIFT_REFERENCE) 
 		{
 			if (!RX_StepperStatus.info.headUpInput_0) Error(ERR_CONT, 0, "LB702: Command REFERENCE: End Sensor 1 NOT HIGH");
 			RX_StepperStatus.info.ref_done = RX_StepperStatus.info.headUpInput_0;
@@ -115,19 +115,20 @@ void lb701_main(int ticks, int menu)
 			Error(ERR_CONT, 0, "LIFT: Command %s: Motor[%d] blocked", _CmdName, motor+1);
 			RX_StepperStatus.info.ref_done = FALSE;							
 		}
-		RX_StepperStatus.info.z_in_ref    = ((_CmdRunning==CMD_CAP_REFERENCE || _CmdRunning==CMD_CAP_UP_POS) && RX_StepperStatus.info.ref_done);
-		RX_StepperStatus.info.z_in_print  = (_CmdRunning==CMD_CAP_PRINT_POS && RX_StepperStatus.info.ref_done);
-		RX_StepperStatus.info.z_in_cap    = (_CmdRunning==CMD_CAP_CAPPING_POS);
-		if (RX_StepperStatus.info.ref_done && _CmdRunning == CMD_CAP_REFERENCE && _PrintPos_New) 
+		RX_StepperStatus.info.z_in_ref    = (RX_StepperStatus.cmdRunning==CMD_LIFT_REFERENCE && RX_StepperStatus.info.ref_done);
+		RX_StepperStatus.info.z_in_up     = (RX_StepperStatus.cmdRunning==CMD_LIFT_UP_POS	 && RX_StepperStatus.info.ref_done);
+		RX_StepperStatus.info.z_in_print  = (RX_StepperStatus.cmdRunning==CMD_LIFT_PRINT_POS && RX_StepperStatus.info.ref_done);
+		RX_StepperStatus.info.z_in_cap    = (RX_StepperStatus.cmdRunning==CMD_LIFT_CAPPING_POS);
+		if (RX_StepperStatus.info.ref_done && RX_StepperStatus.cmdRunning==CMD_LIFT_REFERENCE && _PrintPos_New) 
 		{
-			if (_PrintPos_New==POS_UP) _lb701_move_to_pos(CMD_CAP_UP_POS,    _PrintPos_New);
-			else                       _lb701_move_to_pos(CMD_CAP_PRINT_POS, _PrintPos_New);
+			if (_PrintPos_New==POS_UP) _lb701_move_to_pos(CMD_LIFT_UP_POS,    _PrintPos_New);
+			else                       _lb701_move_to_pos(CMD_LIFT_PRINT_POS, _PrintPos_New);
 			_PrintPos_Act = _PrintPos_New;
 			_PrintPos_New = 0;
 		}
 		else {
 		//	RX_StepperStatus.info.move_tgl = !RX_StepperStatus.info.move_tgl;
-			_CmdRunning = FALSE;
+			RX_StepperStatus.cmdRunning = FALSE;
 		}
 	}	
 }
@@ -136,10 +137,11 @@ void lb701_main(int ticks, int menu)
 static void _lb701_display_status(void)
 {
 	term_printf("LB 701 ---------------------------------\n");
-	term_printf("moving:         %d		cmd: %08x\n",	RX_StepperStatus.info.moving, _CmdRunning);	
+	term_printf("moving:         %d		cmd: %08x\n",	RX_StepperStatus.info.moving, RX_StepperStatus.cmdRunning);	
 	term_printf("Head UP Sensor: %d\n",	fpga_input(HEAD_UP_IN));	
 	term_printf("reference done: %d\n",	RX_StepperStatus.info.ref_done);
 	term_printf("z in reference: %d\n",	RX_StepperStatus.info.z_in_ref);
+	term_printf("z in up:        %d\n",	RX_StepperStatus.info.z_in_up);
 	term_printf("z in print:     %d\n",	RX_StepperStatus.info.z_in_print);
 	term_printf("z in capping:   %d\n",	RX_StepperStatus.info.z_in_cap);
 	term_printf("\n");
@@ -173,12 +175,12 @@ int lb701_menu(void)
 	{
 		switch (str[0])
 		{
-		case 's': lb701_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_STOP,			NULL); break;
-		case 'R': lb701_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_REFERENCE,		NULL); break;
+		case 's': lb701_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_STOP,			NULL); break;
+		case 'R': lb701_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_REFERENCE,		NULL); break;
 		case 'r': motor_reset(atoi(&str[1]));										   break;
-		case 'c': lb701_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_CAPPING_POS,	NULL); break;
-		case 'p': lb701_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_PRINT_POS,		&pos); break;
-		case 'u': lb701_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_UP_POS,			NULL); break;
+		case 'c': lb701_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_CAPPING_POS,	NULL); break;
+		case 'p': lb701_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_PRINT_POS,		&pos); break;
+		case 'u': lb701_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_UP_POS,		NULL); break;
 		case 'o': fpga_output_toggle(atoi(&str[1]));break;
 		case 'z': _lb701_motor_z_test(atoi(&str[1]));break;
 		case 'm': _lb701_motor_test(str[1]-'0', atoi(&str[2]));break;			
@@ -193,9 +195,9 @@ int lb701_menu(void)
 static void _lb701_do_reference(void)
 {
 	motors_stop	(MOTOR_Z_BITS);
-	motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER, STEPS);
+	motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER);
 	
-	_CmdRunning  = CMD_CAP_REFERENCE;
+	RX_StepperStatus.cmdRunning  = CMD_LIFT_REFERENCE;
 	RX_StepperStatus.info.moving = TRUE;
 	motors_move_by_step	(MOTOR_Z_BITS,  &_ParRef, -500000, TRUE);
 }
@@ -209,7 +211,7 @@ static int  _micron_2_steps(int micron)
 //--- _lb701_move_to_pos ---------------------------------------------------------------
 static void _lb701_move_to_pos(int cmd, int pos)
 {
-	_CmdRunning  = cmd;
+	RX_StepperStatus.cmdRunning  = cmd;
 	RX_StepperStatus.info.moving = TRUE;
 	motors_move_to_step(MOTOR_Z_BITS, &_ParZ_down, pos);
 }
@@ -221,39 +223,39 @@ int  lb701_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 	
 	switch(msgId)
 	{
-	case CMD_CAP_STOP:				strcpy(_CmdName, "CMD_CAP_STOP");
+	case CMD_LIFT_STOP:				strcpy(_CmdName, "CMD_LIFT_STOP");
 									motors_stop(MOTOR_Z_BITS);
-									_CmdRunning = 0;
+									RX_StepperStatus.cmdRunning = 0;
 									break;	
 
-	case CMD_CAP_REFERENCE:			strcpy(_CmdName, "CMD_CAP_REFERENCE");
+	case CMD_LIFT_REFERENCE:		strcpy(_CmdName, "CMD_LIFT_REFERENCE");
 									_PrintPos_New=0;
 									_lb701_do_reference();	
 									break;
 
-	case CMD_CAP_PRINT_POS:			strcpy(_CmdName, "CMD_CAP_PRINT_POS");
+	case CMD_LIFT_PRINT_POS:			strcpy(_CmdName, "CMD_LIFT_PRINT_POS");
 									pos   = (*((INT32*)pdata));
 									steps = _micron_2_steps(RX_StepperCfg.ref_height - pos);
-									if (!_CmdRunning && (!RX_StepperStatus.info.z_in_print || steps!=_PrintPos_Act))
+									if (!RX_StepperStatus.cmdRunning && (!RX_StepperStatus.info.z_in_print || steps!=_PrintPos_Act))
 									{
 										_PrintPos_New = _micron_2_steps(RX_StepperCfg.ref_height - pos);
-										if (RX_StepperStatus.info.ref_done) _lb701_move_to_pos(CMD_CAP_PRINT_POS, _PrintPos_New);
+										if (RX_StepperStatus.info.ref_done) _lb701_move_to_pos(CMD_LIFT_PRINT_POS, _PrintPos_New);
 										else								_lb701_do_reference();
 									}
 									break;
 		
-	case CMD_CAP_UP_POS:			strcpy(_CmdName, "CMD_CAP_UP_POS");
-									if (!_CmdRunning)
+	case CMD_LIFT_UP_POS:			strcpy(_CmdName, "CMD_LIFT_UP_POS");
+									if (!RX_StepperStatus.cmdRunning)
 									{
-										if (RX_StepperStatus.info.ref_done) _lb701_move_to_pos(CMD_CAP_UP_POS, POS_UP);
+										if (RX_StepperStatus.info.ref_done) _lb701_move_to_pos(CMD_LIFT_UP_POS, POS_UP);
 										else								_lb701_do_reference();
 									}
 									break;
 
-	case CMD_CAP_CAPPING_POS:		strcpy(_CmdName, "CMD_CAP_CAPPING_POS");
-									if (!_CmdRunning)
+	case CMD_LIFT_CAPPING_POS:		strcpy(_CmdName, "CMD_LIFT_CAPPING_POS");
+									if (!RX_StepperStatus.cmdRunning)
 									{
-										_CmdRunning  = msgId;
+										RX_StepperStatus.cmdRunning  = msgId;
 										RX_StepperStatus.info.moving = TRUE;
 										motors_move_to_step	(MOTOR_Z_BITS,  &_ParZ_cap, _micron_2_steps(RX_StepperCfg.cap_height));
 									}
@@ -262,8 +264,8 @@ int  lb701_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 	case CMD_ERROR_RESET:			fpga_stepper_error_reset();
 									break;
 		
-	case CMD_CAP_VENT:	break;
-	case CMD_CLN_STOP:	break;
+	case CMD_LIFT_VENT:	break;
+	case CMD_ROB_STOP:	break;
 	default:						Error(ERR_CONT, 0, "LIFT: Command 0x%08x not implemented", msgId); break;
 	}
 }
@@ -271,7 +273,7 @@ int  lb701_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 //--- _lb701_motor_z_test ----------------------------------------------------------------------
 void _lb701_motor_z_test(int steps)
 {	
-	_CmdRunning = 1; // TEST
+	RX_StepperStatus.cmdRunning = 1; // TEST
 	RX_StepperStatus.info.moving = TRUE;
 	motors_move_by_step(MOTOR_Z_BITS, &_ParZ_down, steps, TRUE);
 }
@@ -292,10 +294,10 @@ static void _lb701_motor_test(int motorNo, int steps)
 	par.dis_mux_in	= 0;
 	par.encCheck	= chk_off;
 	
-	_CmdRunning = 1; // TEST
+	RX_StepperStatus.cmdRunning = 1; // TEST
 	RX_StepperStatus.info.moving = TRUE;
 	
-	motors_config(motors, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER, STEPS);
+	motors_config(motors, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER);
 	motors_move_by_step(motors, &par, steps, FALSE);			
 }
 

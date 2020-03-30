@@ -29,14 +29,14 @@ namespace RX_DigiPrint.Models
         public static RxBtProdState     BtProdState       = new RxBtProdState();
         public static StepperCfg        Stepper           = new StepperCfg();
         public static PrintSystem       PrintSystem       = new PrintSystem();
+        public static StepperStatus[]   StepperStatus     = new StepperStatus[4] { new StepperStatus(0), new StepperStatus(1), new StepperStatus(2), new StepperStatus(3)}; 
         public static InkFamilyList     InkFamilies       = new InkFamilyList();
         public static InkTypeList       InkTypes          = new InkTypeList();
         public static InkSupplyList     InkSupply         = new InkSupplyList();
         public static HeadStatList      HeadStat          = new HeadStatList();
-        public static TestTableStatus   TestTableStatus   = new TestTableStatus();
         public static Plc               Plc               = new Plc();
         public static Chiller           Chiller           = new Chiller();
-        public static Encoder[]         Encoder           = new Encoder[2];
+        public static Encoder[]         Encoder           = new Encoder[2] { new Encoder(0), new Encoder(1) };
         public static NetworkList       Network           = new NetworkList();
         public static RxScreen          Screen            = new RxScreen();
         public static PreviewCash       PreviewCash       = new PreviewCash();

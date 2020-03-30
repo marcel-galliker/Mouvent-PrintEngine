@@ -93,7 +93,6 @@ namespace RX_DigiPrint.Views.LH702View
 
             MainGrid.Clip = geometry;
 
-//          Image.Height = ActualHeight-50;
             Image.Width     = ActualHeight-50;
             NextImage.Width = ActualHeight-50;
 
@@ -101,6 +100,49 @@ namespace RX_DigiPrint.Views.LH702View
             Canvas.SetLeft(Direction,  (ActualWidth-Direction.ActualWidth)/2);
             Canvas.SetLeft(Direction2, (ActualWidth-Direction.ActualWidth)/2);
             Canvas.SetTop (Direction2, ActualHeight-Direction.ActualHeight);
+        }
+
+        //--- Image_SizeChanged -----------------------------------------
+        private void Image_SizeChanged(object sender,SizeChangedEventArgs e)
+        {
+            Image image = sender as Image;
+            if (image!=null)
+            {
+                double h=this.ActualHeight;
+                double w=this.ActualWidth/4;
+                if (image.ActualHeight>w)
+                {     
+                    /*
+                    RectangleGeometry rect=new RectangleGeometry();
+                    rect.Rect = new Rect() { Width=h, Height=w, X=0, Y=image.ActualHeight-w};
+                    image.Clip = rect;
+                    */
+
+                    //- before rotating
+                    double top=0;
+                    double r=50;
+                    double width=image.ActualHeight;
+                    PathFigure path = new PathFigure();
+                    
+                    path.StartPoint = new Point(0, width);
+                    path.Segments.Add(new LineSegment  (new Point( 0, width-w), true));
+                    path.Segments.Add(new LineSegment  (new Point( h, width-w), true));
+                 //   path.Segments.Add(new BezierSegment(new Point( 0+50,   width-w+50), new Point( h/2-50, width-w-50), new Point( h/2, width-w), true));
+                 //   path.Segments.Add(new BezierSegment(new Point( h/2+50, width-w+50), new Point( h-50, width-w-50), new Point( h, width-w), true));
+                    path.Segments.Add(new LineSegment  (new Point( h, width), true));
+
+                    PathGeometry geometry = new PathGeometry();
+                    geometry.Figures.Add(path);
+                    image.Clip = geometry;
+
+                    image.Margin = new Thickness(0, 0, -image.ActualHeight+w, 0);
+                }
+                else
+                {
+                    image.Clip=null;
+                    image.Margin=new Thickness(0);
+                }
+            }
         }
 
         //--- addLineH -----------------------------------------------------------------------------------

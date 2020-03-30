@@ -20,6 +20,7 @@
 
 int	 plc_init(void);
 int  plc_end(void);
+int	plc_in_simu(void);
 void plc_reset(void);
 void plc_error_reset(void);
 int  plc_set_printpar(SPrintQueueItem *pItem);

@@ -678,7 +678,9 @@ static char* _filename(char *path)
 //--- pq_next_page ----------------------------------------
 void pq_next_page(SPrintQueueItem *pitem, SPageId *pid)
 {
+	if (RX_PrinterStatus.testMode) return;
 	pid->id = pitem->id.id;
+
 	if(rx_def_is_scanning(RX_Config.printer.type))
 	{
 		if(pitem->srcPages>1)
@@ -770,15 +772,18 @@ int pq_printed(int headNo, SPageId *pid, int *pageDone, int *jobDone, SPrintQueu
 	if(RX_PrinterStatus.testMode || _find_item(pid->id, &idx) == REPLY_OK)
 	{
 		if (RX_PrinterStatus.testMode) pitem = &RX_TestImage;
-		else pitem = &_List[idx];
+		else 
+		{
+			pitem = &_List[idx];
 		pitem->id.page = pid->page;
 		pitem->id.copy = pid->copy;
+		}
 		_Speed = pitem->speed;
 		
 		pq_next_page(pitem, &pitem->start);
 		
 		printed = pitem->copiesPrinted;
-		if(pitem->scans > 0)
+		if(rx_def_is_scanning(RX_Config.printer.type))
 		{
 			pitem->scansPrinted++;
 			*pageDone = TRUE;
@@ -1018,7 +1023,7 @@ int pq_is_ready(void)
 		}		
 	}
 	
-	if(RX_Config.printer.type == printer_LH702)				return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printGoCnt) < 5;	// minimize buffer, independent on format!
+	if(RX_Config.printer.type == printer_LH702)				return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printGoCnt) < 10;	// minimize buffer, independent on format!
 	else if(RX_Config.printer.type == printer_cleaf)		return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printedCnt) < 16;
 	else if (rx_def_is_scanning(RX_Config.printer.type))	return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printedCnt) < 20;
 	else													return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printedCnt) < 64;

@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
-             xmlns:local="clr-namespace:RX_DigiPrint.Views.LB701UVView"
+             xmlns:local="clr-namespace:RX_DigiPrint.Views.LB702WBView"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
 
@@ -14,15 +14,14 @@
                 <rx_uc:PlcParCtrl ID="STA_VERSION"                      Label="Version"/>
                 <rx_uc:PlcParCtrl ID="STA_MACHINE_STATE"                Label="Machine State" x:Name="CB_MainState" Type="ComboStr"/>
 
-                <rx_uc:PlcParCtrl ID="STA_UV_LAMPS_READY"              Label="Curing Lamp OK"   Visibility="Collapsed"/>
-                <rx_uc:PlcParCtrl ID="STA_UV_LAMP_1_ON_TIMER"          Label="ON  Timer"        Visibility="Collapsed"/>
-                <rx_uc:PlcParCtrl ID="STA_UV_LAMP_1_OFF_TIMER"         Label="OFF Timer"        Visibility="Collapsed"/>
-                <!--
                 <rx_uc:PlcParCtrl ID="STA_WINDER_DIAMETER_1"            Label="Unwinder Ø"                   Format="f"/>
                 <rx_uc:PlcParCtrl ID="STA_WINDER_DIAMETER_2"            Label="Rewinder Ø"                   Format="f"/>
-                -->
+                <rx_uc:PlcParCtrl ID="STA_PAPERLENGTH_IN"               Label="Length IN"  Unit="m" Format="n"/>
+                <rx_uc:PlcParCtrl ID="STA_PAPERLENGTH_OUT"              Label="Length OUT" Unit="m" Format="n"/>
+                <rx_uc:PlcParCtrl ID="STA_REMAININGLENGTH_OUT"          Label="Left OUT"   Unit="m" Format="n"/>
+                
                 <rx_uc:PlcParCtrl ID="STA_PREPARE_ACTIVE"               Label="Prepare" Visibility="Collapsed"/>
-                <local:LB701UV_Prepare x:Name="MlPrepare"/>
+                <local:LB702WB_Prepare x:Name="MlPrepare"/>
 
             </rx_uc:PlcParPanel>
         </Grid>

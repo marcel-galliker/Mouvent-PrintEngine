@@ -771,7 +771,7 @@
 //../rx_ink_lib
 //../rx_common_lib
 //../Externals/TinyXML
-//./rx_rexroth_lib
+//rx_rexroth_lib
 //../rx_rip_lib
 //../rx_tif_lib
 //../rx_pecore_lib

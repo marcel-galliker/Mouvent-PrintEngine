@@ -507,6 +507,7 @@ void putty_display_cond_status(int show, int status)
 				RX_HBStatus->head[i].presOut_diff		= RX_NiosStat.cond[i].pressure_out_diff;
 				RX_HBStatus->head[i].meniscus			= RX_NiosStat.cond[i].meniscus;
 				RX_HBStatus->head[i].meniscus_diff		= RX_NiosStat.cond[i].meniscus_diff;
+				RX_HBStatus->head[i].meniscus_Setpoint  = RX_NiosStat.cond[i].meniscus_setpoint;
 				RX_HBStatus->head[i].pumpSpeed			= RX_NiosStat.cond[i].pump;
 				RX_HBStatus->head[i].pumpFeedback		= RX_NiosStat.cond[i].pump_measured * 60/100;	// in 0.1 ml
 				RX_HBStatus->head[i].printingSeconds	= RX_NiosStat.cond[i].pumptime;

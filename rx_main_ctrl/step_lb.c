@@ -25,6 +25,7 @@
 #include "step_ctrl.h"
 #include "step_lb.h"
 #include "fluid_ctrl.h"
+#include "setup.h"
 
 #define STEPPER_CNT		4
 
@@ -32,18 +33,26 @@ static RX_SOCKET		_step_socket[STEPPER_CNT]={0};
 
 static SStepperStat		_Status[STEPPER_CNT];
 static int				_AbortPrinting=FALSE;
+static UINT32			_Flushed = 0x00;		// For capping function which is same than flushing (need to purge after cap)
+
+static int				_StatReadCnt[STEPPER_CNT];
 
 static EnFluidCtrlMode	_RobotCtrlMode[STEPPER_CNT] = {ctrl_undef};
 
 //--- steplb_init ---------------------------------------------------
 void steplb_init(int no, RX_SOCKET psocket)
 {
+	int i;
+	
+	setup_fluid_system(PATH_USER FILENAME_FLUID_STATE, &_Flushed, READ);
 	if (no>=0 && no<STEPPER_CNT)
 	{
 		_step_socket[no] = psocket;
 		memset(&_Status[no], 0, sizeof(_Status[no]));
 	}
 	memset(_Status, 0, sizeof(_Status));
+	// All steppers board variables reset
+	for (i = 0; i < STEPPER_CNT; i++) _StatReadCnt[i] = 0;
 }
 
 //--- steplb_handle_gui_msg------------------------------------------------------------------
@@ -82,20 +91,18 @@ int	 steplb_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen
 						break;
 
 			//--- cappping ---------------------------------------------------------
-			case CMD_CAP_STOP:
-			case CMD_CAP_UP_POS:
-			case CMD_CAP_CAPPING_POS:
-						sok_send_2(&_step_socket[no], cmd, 0, NULL);
-						break;
-
-			case CMD_CAP_REFERENCE:
-						TrPrintfL(TRUE, "Stepper[%d].CMD_CAP_REFERENCE", no);
+			case CMD_LIFT_STOP:
+			case CMD_LIFT_UP_POS:
+			case CMD_LIFT_CAPPING_POS:
+			case CMD_LIFT_REFERENCE:
+			case CMD_ROB_REFERENCE:
 						sok_send_2(&_step_socket[no], cmd, 0, NULL);
 						break;
 		
-			case CMD_CAP_PRINT_POS:
+			case CMD_LIFT_PRINT_POS:
 						_AbortPrinting=FALSE;
-						sok_send_2(&_step_socket[no], CMD_CAP_PRINT_POS, sizeof(RX_Config.stepper.print_height), &RX_Config.stepper.print_height);
+						int height=RX_Config.stepper.print_height+RX_Config.stepper.material_thickness;
+						sok_send_2(&_step_socket[no], CMD_LIFT_PRINT_POS, sizeof(height), &height);
 						break;
 			}
 		}
@@ -110,8 +117,22 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
 	int robot_used=FALSE;
 	ETestTableInfo info;
 	ERobotInfo		robinfo;
+ 
 	memcpy(&_Status[no], pStatus, sizeof(_Status[no]));
+	_Status[no].no=no;
+	gui_send_msg_2(0, REP_STEPPER_STAT, sizeof(RX_StepperStatus), &_Status[no]);
 
+	// Don't refresh the main variable until all steppers board status have been received (after  a call of steplb_init())
+	_StatReadCnt[no]++;
+
+	for (i = 0; i < STEPPER_CNT; i++)
+	{
+		if (_step_socket[i] && _step_socket[i] != INVALID_SOCKET)
+		{
+			if (_StatReadCnt[i]==0) return REPLY_OK;
+		}
+	}	
+	
 	memset(&info, 0, sizeof(info));
 	memset(&robinfo, 0, sizeof(robinfo));
 	info.printhead_en	= TRUE;
@@ -125,12 +146,11 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
 	robinfo.ref_done = TRUE;
 				
 //	TrPrintf(TRUE, "steplb_handle_Status(%d)", no);
-	
 	for (i=0; i<STEPPER_CNT; i++)
 	{
 		if (_step_socket[i] && _step_socket[i]!=INVALID_SOCKET)
 		{
-//			TrPrintf(TRUE, "Stepper[%d]: ref_done=%d moving=%d  z_in_print=%d  z_in_ref=%d", i, _Status[i].info.ref_done, _Status[i].info.moving, _Status[i].info.z_in_print, _Status[i].info.z_in_ref);
+			//TrPrintf(TRUE, "Stepper[%d]: ref_done=%d moving=%d  z_in_print=%d  z_in_ref=%d", i, _Status[i].info.ref_done, _Status[i].info.moving, _Status[i].info.z_in_print, _Status[i].info.z_in_ref);
 			info.ref_done		&= _Status[i].info.ref_done;
 			info.printhead_en	&= _Status[i].info.printhead_en;
 			info.moving			|= _Status[i].info.moving;
@@ -160,10 +180,11 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
 	}
 	else if (RX_Config.printer.type==printer_LB702_WB || RX_Config.printer.type==printer_LB702_UV) 
 	{
-		info.headUpInput_0 = _Status[0].info.headUpInput_0 && _Status[0].info.headUpInput_1;
-		info.headUpInput_1 = _Status[1].info.headUpInput_0 && _Status[1].info.headUpInput_1;
-		info.headUpInput_2 = _Status[2].info.headUpInput_0 && _Status[2].info.headUpInput_1;
-		info.headUpInput_3 = _Status[3].info.headUpInput_0 && _Status[3].info.headUpInput_1;
+		info.headUpInput_0 = _Status[0].info.z_in_ref; //_Status[0].info.headUpInput_0 && _Status[0].info.headUpInput_1;
+		info.headUpInput_1 = _Status[1].info.z_in_ref; //_Status[1].info.headUpInput_0 && _Status[1].info.headUpInput_1;
+		info.headUpInput_2 = _Status[2].info.z_in_ref; //_Status[2].info.headUpInput_0 && _Status[2].info.headUpInput_1;
+		info.headUpInput_3 = _Status[3].info.z_in_ref; //_Status[3].info.headUpInput_0 && _Status[3].info.headUpInput_1;
+	
 	}
 	RX_StepperStatus.robot_used = robot_used;
 	
@@ -186,15 +207,17 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
 		
 	memcpy(&RX_StepperStatus.info, &info, sizeof(RX_StepperStatus.info));
 	memcpy(&RX_StepperStatus.robinfo, &robinfo, sizeof(RX_StepperStatus.robinfo));
-	RX_StepperStatus.info.x_in_cap = plc_in_cap_pos();
+	// if (rx_def_is_tx(RX_Config.printer.type)) RX_StepperStatus.info.x_in_cap = plc_in_cap_pos();
 	RX_StepperStatus.robinfo.rob_in_cap = robinfo.rob_in_cap;
 	
+	/*
 	for (int no = 0; no < STEPPER_CNT; no++)
 	{
 		if (_step_socket[no] && _step_socket[no]!=INVALID_SOCKET) steplb_rob_control(_RobotCtrlMode[no], no);
 	}
-	
-	gui_send_msg_2(0, REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);
+	*/
+
+	if (_step_socket[no] && _step_socket[no]!=INVALID_SOCKET) steplb_rob_control(_RobotCtrlMode[no], no);
 	return REPLY_OK;
 }
 
@@ -204,7 +227,8 @@ int	 steplb_to_print_pos(void)
 	_AbortPrinting = FALSE;
 	for (int no=0; no<SIZEOF(_step_socket); no++)
 	{
-		sok_send_2(&_step_socket[no], CMD_CAP_PRINT_POS, sizeof(RX_Config.stepper.print_height), &RX_Config.stepper.print_height);
+		int height=RX_Config.stepper.print_height+RX_Config.stepper.material_thickness;
+		sok_send_2(&_step_socket[no], CMD_LIFT_PRINT_POS, sizeof(height), &height);
 	}
 	return REPLY_OK;									
 }
@@ -221,7 +245,7 @@ void steplb_lift_to_top_pos(void)
 {
 	for (int no=0; no<SIZEOF(_step_socket); no++)
 	{
-		sok_send_2(&_step_socket[no], CMD_CAP_REFERENCE, 0, NULL);
+		sok_send_2(&_step_socket[no], CMD_LIFT_REFERENCE, 0, NULL);
 	}
 	_AbortPrinting = FALSE;
 }
@@ -237,7 +261,7 @@ void steplb_lift_to_up_pos(void)
 {
 	for (int no=0; no<SIZEOF(_step_socket); no++)
 	{
-		sok_send_2(&_step_socket[no], CMD_CAP_UP_POS, 0, NULL);
+		sok_send_2(&_step_socket[no], CMD_LIFT_UP_POS, 0, NULL);
 	}
 	_AbortPrinting = FALSE;
 }
@@ -251,7 +275,7 @@ int	 steplb_lift_in_up_pos(void)
 //--- steplb_lift_to_up_pos_individually -------------------
 void steplb_lift_to_up_pos_individually(int no)
 {
-	sok_send_2(&_step_socket[no], CMD_CAP_UP_POS, 0, NULL);
+	sok_send_2(&_step_socket[no], CMD_LIFT_UP_POS, 0, NULL);
 }
 
 //--- steplb_lift_in_up_pos_individually -------------------
@@ -265,7 +289,7 @@ int	 steplb_lift_in_up_pos_individually(int no)
 //--- steplb_rob_to_wipe_pos --------------------------
 void steplb_rob_to_wipe_pos(int no, ERobotFunctions rob_function)
 {
-	sok_send_2(&_step_socket[no], CMD_CLN_MOVE_POS, sizeof(rob_function), &rob_function);		
+	sok_send_2(&_step_socket[no], CMD_ROB_MOVE_POS, sizeof(rob_function), &rob_function);		
 }
 
 //--- steplb_rob_in_wipe_pos --------------------------
@@ -307,7 +331,7 @@ int steplb_rob_in_wipe_pos_all(ERobotFunctions rob_function)
 void steplb_rob_wipe_start(int no, ERobotFunctions rob_function)
 {
 	if (_step_socket[no]==INVALID_SOCKET) return;
-	sok_send_2(&_step_socket[no], CMD_CLN_FILL_CAP, sizeof(rob_function), &rob_function);
+	sok_send_2(&_step_socket[no], CMD_ROB_FILL_CAP, sizeof(rob_function), &rob_function);
 }
 
 //--- steplb_rob_wipe_done --------------------------------------
@@ -329,8 +353,8 @@ void steplb_rob_stop(void)
 {
 	for (int no = 0; no<SIZEOF(_step_socket); no++)
 	{
-		sok_send_2(&_step_socket[no], CMD_CLN_STOP, 0, NULL);
-		sok_send_2(&_step_socket[no], CMD_CAP_STOP, 0, NULL);
+		if (_Status[no].robot_used) sok_send_2(&_step_socket[no], CMD_ROB_STOP, 0, NULL);
+		sok_send_2(&_step_socket[no], CMD_LIFT_STOP, 0, NULL);
 	}	
 }
 
@@ -340,7 +364,7 @@ void steplb_rob_do_reference(void)
 	for (int no = 0; no < SIZEOF(_step_socket); no++)
 	{
 		//if (_step_socket[no] != INVALID_SOCKET)
-		sok_send_2(&_step_socket[no], CMD_CLN_REFERENCE, 0, NULL);
+		sok_send_2(&_step_socket[no], CMD_ROB_REFERENCE, 0, NULL);
 	}
 }
 
@@ -355,7 +379,7 @@ void steplb_lift_to_wipe_pos(int no, ERobotFunctions rob_function)
 {
 	switch (rob_function)
 	{
-	case rob_fct_cap: sok_send_2(&_step_socket[no], CMD_CAP_CAPPING_POS, 0, NULL); break;
+	case rob_fct_cap: sok_send_2(&_step_socket[no], CMD_LIFT_CAPPING_POS, 0, NULL); break;
 	default: break;
 	}
 }
@@ -377,6 +401,16 @@ void steplb_rob_control_all(EnFluidCtrlMode ctrlMode)
 	for (int no = 0; no < SIZEOF(_step_socket); no++)
 	{
 		if (_step_socket[no] != INVALID_SOCKET)		steplb_rob_control(ctrlMode, no);
+	}
+}
+
+
+//--- steplb_rob_control -------------------------------
+void steplb_rob_start_cap_all(void)
+{
+	for (int no = 0; no < SIZEOF(_step_socket); no++)
+	{
+		if (_step_socket[no] != INVALID_SOCKET)		_RobotCtrlMode[no] = ctrl_cap;
 	}
 }
 
@@ -413,10 +447,17 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
 									}
 									break;
 		
-		case ctrl_cap_step4:		if (steplb_lift_in_wipe_pos(no, rob_fct_cap))																_RobotCtrlMode[no] = ctrl_off;
+		case ctrl_cap_step4:		if (steplb_lift_in_wipe_pos(no, rob_fct_cap))
+									{
+										_Flushed |= (0x3 << (no*2));
+										Error(LOG, 0, "ctrl_cap_step4 OK, no=%d, _Flushed=%d",no,_Flushed);
+										setup_fluid_system(PATH_USER FILENAME_FLUID_STATE, &_Flushed, WRITE);
+										fluid_init_flushed();
+										_RobotCtrlMode[no] = ctrl_off;
+									}										 
 									break;
 		
-		case ctrl_robi_out:			sok_send_2(&_step_socket[no], CMD_CLN_REFERENCE, 0, NULL);
+		case ctrl_robi_out:			sok_send_2(&_step_socket[no], CMD_ROB_REFERENCE, 0, NULL);
 									_RobotCtrlMode[no] = ctrl_robi_out_step1;
 									break;
 	

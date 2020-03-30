@@ -158,8 +158,8 @@
                             <Button                       Content="Fill"        Click="Fill_Clicked"      Padding="10" />
                             <Button                       Content="Empty"       Click="Empty_Clicked"     Padding="10" Visibility="{Binding Running, Converter={StaticResource BoolToInVisible_Converter}}"/>
                             <Rectangle x:Name="Line_Calibrate"  Fill="{StaticResource RX.Green}" HorizontalAlignment="Stretch" Height="1" Margin="-16, 8"/>
-                            <Button x:Name="Button_Calibrate" Content="Calibrate"   Click="Calibrate_Clicked" Padding="10"/>
-                            <Button  Content="Check"                                Click="Check_Clicked" Padding="10"/>
+                     <!--       <Button x:Name="Button_Calibrate" Content="Calibrate"   Click="Calibrate_Clicked" Padding="10"/>  -->
+                       <!--     <Button  Content="Check"                                Click="Check_Clicked" Padding="10"/>  -->
                         </StackPanel>
                     </GroupBox>
                 </Grid>
@@ -204,7 +204,7 @@
             <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
                 <TextBlock Text="{Binding Temp,  Converter={StaticResource HeadVal_ConverterTemp}}"/>
                 <TextBlock Text=" (" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
-                <TextBlock Text="{Binding TempSetpoint, Converter={StaticResource HeadVal_ConverterTemp}}" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding TempMaxSetpoint, Converter={StaticResource HeadVal_ConverterTemp}}" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
                 <TextBlock Text=")" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
             </StackPanel>
             <Rectangle Grid.Row="4" Fill="Yellow"         Visibility="{Binding CondTempReady, Converter={StaticResource BoolToInVisible_Converter}}"/>
@@ -225,6 +225,7 @@
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
                 </Grid.RowDefinitions>
 
 <!--                <TextBlock  Grid.Row="0" HorizontalAlignment="Right" Text="{Binding Humitity,       Converter={StaticResource HeadVal_Converter}}" /> -->
@@ -233,20 +234,23 @@
                     <TextBlock  Text="{Binding CondPresIn, Converter={StaticResource HeadVal_Converter10}}" VerticalAlignment="Center" Padding="3,0"/>
                     <common:RxNumBox Text="{Binding CylinderPresSet, Converter={StaticResource HeadVal_Converter10}}" MinWidth="40" LostFocus="Pressure_LostFocus" HorizontalContentAlignment="Right"/>
                 </StackPanel>
-                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                <StackPanel Grid.Row="2" HorizontalAlignment="Right" Orientation="Horizontal">
+                    <TextBlock  Text="{Binding CondPumpSpeed, Converter={StaticResource HeadVal_Converter10}}" VerticalAlignment="Center" Padding="3,0"/>
+                </StackPanel>
+                <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
                     <TextBlock Text="{Binding CylinderPres,      Converter={StaticResource HeadVal_Converter}}" />
                     <TextBlock Text=" ("/>
                     <TextBlock Text="{Binding CylinderSetpoint,      Converter={StaticResource HeadVal_Converter}}"/>
                     <TextBlock Text=")"/>
                 </StackPanel>
-                <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">                    
+                <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">                    
                     <TextBlock Text="{Binding PumpSpeed,      Converter={StaticResource HeadVal_Converter}}" />
                     <TextBlock Text=" ("/>
                     <TextBlock Text="{Binding PumpSpeedSet,      Converter={StaticResource HeadVal_Converter}}"/>
                     <TextBlock Text=")"/>
                 </StackPanel>
-                <TextBlock Grid.Row="4" HorizontalAlignment="Right" Text="{Binding BleedValve}" />
-                <TextBlock Grid.Row="5" HorizontalAlignment="Right" Text="{Binding AirCusionValve}" />
+                <TextBlock Grid.Row="5" HorizontalAlignment="Right" Text="{Binding BleedValve}" />
+                <TextBlock Grid.Row="6" HorizontalAlignment="Right" Text="{Binding AirCusionValve}" />
             </Grid>
 
             <!-- NO Connection _______________________________________________________________________-->

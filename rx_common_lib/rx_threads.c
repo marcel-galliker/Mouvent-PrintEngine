@@ -81,6 +81,7 @@ int    rx_sem_wait(HANDLE sem, int time)
 	if (!time) time=INFINITE;
 	ret= WaitForSingleObject(sem, time);
 	if (ret==WAIT_OBJECT_0) return REPLY_OK;
+	else if (ret==-1) return GetLastError();
 	else return ret;
 }
 
@@ -588,6 +589,7 @@ int    rx_sem_wait(HANDLE sem, int time)
 			ret=ret;
 		return ret;
 	}
+	else if (sem==NULL) return REPLY_ERROR;
 	else sem_wait((sem_t*)sem);
 	return REPLY_OK;
 }
@@ -595,6 +597,7 @@ int    rx_sem_wait(HANDLE sem, int time)
 //--- rx_sem_post(linux) -------------------------------------------
 int    rx_sem_post(HANDLE sem)
 {
+	if (sem==NULL) return REPLY_ERROR;
 	sem_post((sem_t*)sem);
 	return REPLY_OK;
 }

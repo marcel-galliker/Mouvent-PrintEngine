@@ -26,7 +26,8 @@ namespace RX_DigiPrint.Models
             Description = msg.description;
             CanFlush    = msg.flushTime[0]!=0 || msg.flushTime[1]!=0 || msg.flushTime[2]!=0;
             Color=new Color(){R=msg.r, G=msg.g, B=msg.b, A=255};
-            Temp        = (double)msg.temp*1000.0;
+            Temp = (double)msg.temp * 1000.0;
+            TempMax = (double)msg.tempMax * 1000.0;
             if (_PrintingSpeed==null) _PrintingSpeed = new Int32[msg.printingSpeed.Length];
             int i;
             for (i=0; i<msg.printingSpeed.Length; i++) _PrintingSpeed[i] = msg.printingSpeed[i];
@@ -109,6 +110,14 @@ namespace RX_DigiPrint.Models
         {
             get { return _Temp; }
             set { SetProperty(ref _Temp, value); }
+        }
+
+        //--- Property TempMax ---------------------------------------
+        private double _TempMax;
+        public double TempMax
+        {
+            get { return _TempMax; }
+            set { SetProperty(ref _TempMax, value); }
         }
         
         //--- Property Family ---------------------------------------

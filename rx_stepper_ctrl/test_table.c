@@ -40,7 +40,6 @@ static SMovePar	_ParY_ref;
 static SMovePar	_ParY_print;
 static SMovePar	_ParZ_up;
 static SMovePar	_ParZ_down;
-static int		_CmdRunning;
 static int		_CmdWaiting;
 static int		_ScanCnt;
 static int		_ScanStep;
@@ -81,9 +80,9 @@ void tt_init(void)
 {
 	slide_init();
 
-    motor_config(MOTOR_Y_LEFT, CURRENT_HOLD, 0.0, 0.0, STEPS);
-    motor_config(MOTOR_Y_RIGHT, CURRENT_HOLD, 0.0, 0.0, STEPS);
-    motor_config(MOTOR_Z, 0, 0.0, 0.0, STEPS);	
+	motor_config(MOTOR_Y_LEFT,  CURRENT_HOLD, 0.0, 0.0);
+	motor_config(MOTOR_Y_RIGHT, CURRENT_HOLD, 0.0, 0.0);
+	motor_config(MOTOR_Z,	    0,            0.0, 0.0);	
 
 	//--- movment parameters ----------------
 	_ParY_ref.speed			= 2000;
@@ -236,7 +235,7 @@ void tt_main(int ticks, int menu)
 	if (menu)
 	{
 		term_printf("Test Table ---------------------------------\n");
-		term_printf("CmdRunning:    0x%08x\n", _CmdRunning);
+		term_printf("CmdRunning:    0x%08x\n", RX_StepperStatus.cmdRunning);
 		term_printf("CmdWaiting:    0x%08x\n", _CmdWaiting);
 		term_printf("ScanStep:      0x%08x\n", _ScanStep);		
 		term_printf("Error:         0x%08x\n", RX_StepperStatus.err);
@@ -245,7 +244,7 @@ void tt_main(int ticks, int menu)
 		term_printf("\n");
 	}
 	
-	switch(_CmdRunning)
+	switch(RX_StepperStatus.cmdRunning)
 	{
 	case CMD_TT_START_REF:	if (motor_move_done(MOTOR_Z))
 							{
@@ -275,7 +274,7 @@ void tt_main(int ticks, int menu)
 							{
 								RX_StepperStatus.info.ref_done = TRUE;
 								RX_StepperStatus.info.moving   = FALSE;
-								_CmdRunning = 0;
+								RX_StepperStatus.cmdRunning = 0;
 								if (_CmdWaiting)
 								{
 									tt_start_cmd(_CmdWaiting);
@@ -293,7 +292,7 @@ void tt_main(int ticks, int menu)
 	case CMD_TT_MOVE_CAP+110: if (motor_move_done(MOTOR_Z))
 							{								
 								RX_StepperStatus.info.moving   = FALSE;
-								_CmdRunning = 0;								
+								RX_StepperStatus.cmdRunning = 0;								
 								if (_CmdWaiting)
 								{
 									tt_start_cmd(_CmdWaiting);
@@ -309,7 +308,7 @@ void tt_main(int ticks, int menu)
 							if (motor_move_done(MOTOR_Y_LEFT) && motor_move_done(MOTOR_Y_RIGHT) && slide_move_done())
 							{
 								RX_StepperStatus.info.moving = FALSE;									
-								_CmdRunning = 0;
+								RX_StepperStatus.cmdRunning = 0;
 								Fpga.par->output &= ~TT_VACUUM_OUT;
 								if (!RX_StepperStatus.info.ref_done)
 									_start_ref();
@@ -321,7 +320,7 @@ void tt_main(int ticks, int menu)
 							break;
 		
 	case CMD_TT_SCAN_RIGHT:	
-	case CMD_TT_SCAN_LEFT:	if (slide_move_done()) _CmdRunning = 0; 
+	case CMD_TT_SCAN_LEFT:	if (slide_move_done()) RX_StepperStatus.cmdRunning = 0; 
 							break;
 	}
 }
@@ -333,16 +332,16 @@ int  tt_start_cmd(int cmd)
 	{
 	case CMD_TT_ABORT:				_abort();			return REPLY_OK;
 	case CMD_TT_STOP:				_stop();			return REPLY_OK;
-	case CMD_TT_START_REF:			if (!_CmdRunning) {RX_StepperStatus.err=0; _start_ref();	  }	return REPLY_OK;
-	case CMD_TT_MOVE_TABLE:			if (!_CmdRunning) {RX_StepperStatus.err=0; _move_table();	  } return REPLY_OK;
+	case CMD_TT_START_REF:			if (!RX_StepperStatus.cmdRunning) {RX_StepperStatus.err=0; _start_ref();	  }	return REPLY_OK;
+	case CMD_TT_MOVE_TABLE:			if (!RX_StepperStatus.cmdRunning) {RX_StepperStatus.err=0; _move_table();	  } return REPLY_OK;
 	case CMD_TT_VACUUM:				_vacuum();														return REPLY_OK;
-	case CMD_TT_SCAN:				if (!_CmdRunning) {RX_StepperStatus.err=0; _scan();		  }	return REPLY_OK;
-	case CMD_TT_MOVE_LOAD:			if (!_CmdRunning) {RX_StepperStatus.err=0; _move_load_pos();}	return REPLY_OK;
-	case CMD_TT_MOVE_CAP:			if (!_CmdRunning) {RX_StepperStatus.err=0; _move_cap_pos(); }	return REPLY_OK;
-	case CMD_TT_MOVE_PURGE:		    if (!_CmdRunning) {RX_StepperStatus.err=0; _move_purge(0);  }	return REPLY_OK;
-	case CMD_TT_MOVE_ADJUST:		if (!_CmdRunning) {RX_StepperStatus.err=0; _move_adjust(0); }	return REPLY_OK;
-	case CMD_TT_SCAN_RIGHT:			if (!_CmdRunning) _scan_right();								return REPLY_OK;
-	case CMD_TT_SCAN_LEFT:			if (!_CmdRunning) _scan_left();									return REPLY_OK;
+	case CMD_TT_SCAN:				if (!RX_StepperStatus.cmdRunning) {RX_StepperStatus.err=0; _scan();		  }	return REPLY_OK;
+	case CMD_TT_MOVE_LOAD:			if (!RX_StepperStatus.cmdRunning) {RX_StepperStatus.err=0; _move_load_pos();}	return REPLY_OK;
+	case CMD_TT_MOVE_CAP:			if (!RX_StepperStatus.cmdRunning) {RX_StepperStatus.err=0; _move_cap_pos(); }	return REPLY_OK;
+	case CMD_TT_MOVE_PURGE:		    if (!RX_StepperStatus.cmdRunning) {RX_StepperStatus.err=0; _move_purge(0);  }	return REPLY_OK;
+	case CMD_TT_MOVE_ADJUST:		if (!RX_StepperStatus.cmdRunning) {RX_StepperStatus.err=0; _move_adjust(0); }	return REPLY_OK;
+	case CMD_TT_SCAN_RIGHT:			if (!RX_StepperStatus.cmdRunning) _scan_right();								return REPLY_OK;
+	case CMD_TT_SCAN_LEFT:			if (!RX_StepperStatus.cmdRunning) _scan_left();									return REPLY_OK;
 	}	
 	return REPLY_ERROR;
 }
@@ -366,7 +365,7 @@ static void _stop(void)
 {
 	slide_stop();
 	motors_stop(MOTOR_Y_BITS);
-	_CmdRunning = 0;
+	RX_StepperStatus.cmdRunning = 0;
 	_CmdWaiting = 0;
 }
 
@@ -388,7 +387,7 @@ static int _ref_started(int cmd)
 	}
 	if (!(Fpga.stat->input & TT_CAP_DOWN_IN))
 	{
-		_CmdRunning = CMD_TT_MOVE_CAP+110;
+		RX_StepperStatus.cmdRunning = CMD_TT_MOVE_CAP+110;
 		_CmdWaiting = cmd;
 		if (motor_error(MOTOR_Z)) motor_reset(MOTOR_Z);
 		motor_move_by_step	(MOTOR_Z,  &_ParZ_down, -100000);
@@ -406,7 +405,7 @@ static void _start_ref(void)
 		RX_StepperStatus.info.ref_done=TRUE;
 		return;
 	}
-	_CmdRunning = CMD_TT_START_REF;
+	RX_StepperStatus.cmdRunning = CMD_TT_START_REF;
 	RX_StepperStatus.info.moving=TRUE;
 	
 	motor_reset			(MOTOR_Z);
@@ -416,7 +415,7 @@ static void _start_ref(void)
 //--- _start_ref1 -------------------------
 static void _start_ref1(void)
 {
-	_CmdRunning = CMD_TT_START_REF+101;
+	RX_StepperStatus.cmdRunning = CMD_TT_START_REF+101;
 	
 	slide_start_ref();
 	motor_reset			(MOTOR_Y_LEFT);
@@ -455,7 +454,7 @@ static void _start_ref1(void)
 //--- _start_ref2 -------------------------
 static void _start_ref2(void)
 {
-	_CmdRunning = CMD_TT_START_REF+102;
+	RX_StepperStatus.cmdRunning = CMD_TT_START_REF+102;
 	motor_reset			(MOTOR_Y_LEFT);
 	motor_reset			(MOTOR_Y_RIGHT);
 
@@ -482,7 +481,7 @@ static void _start_ref2(void)
 //--- _start_ref3 -------------------------
 static void _start_ref3(void)
 {
-	_CmdRunning = CMD_TT_START_REF+103;
+	RX_StepperStatus.cmdRunning = CMD_TT_START_REF+103;
 	RX_StepperStatus.info.moving = TRUE;
 
 	slide_scan_left();
@@ -494,7 +493,7 @@ static void _move_table(void)
 {
 	if (_ref_started(CMD_TT_MOVE_TABLE)) return;
 	
-	_CmdRunning = CMD_TT_MOVE_TABLE;
+	RX_StepperStatus.cmdRunning = CMD_TT_MOVE_TABLE;
 	RX_StepperStatus.info.moving = TRUE;
 
 	slide_move_table();
@@ -506,7 +505,7 @@ static void _move_load_pos(void)
 {	
 	if (_ref_started(CMD_TT_MOVE_LOAD)) return;
 
-	_CmdRunning = CMD_TT_MOVE_LOAD;
+	RX_StepperStatus.cmdRunning = CMD_TT_MOVE_LOAD;
 	RX_StepperStatus.info.moving=TRUE;
 
 	slide_scan_left();
@@ -518,7 +517,7 @@ static void _move_cap_pos(void)
 {	
 	if (_ref_started(CMD_TT_MOVE_CAP)) return;
 
-	_CmdRunning = CMD_TT_MOVE_CAP;
+	RX_StepperStatus.cmdRunning = CMD_TT_MOVE_CAP;
 	RX_StepperStatus.info.moving=TRUE;
 
 	slide_scan_left();
@@ -528,7 +527,7 @@ static void _move_cap_pos(void)
 //--- _move_cap_up --------------------------------------------------
 static void _move_cap_up(void)
 {
-	_CmdRunning = CMD_TT_MOVE_CAP+110;
+	RX_StepperStatus.cmdRunning = CMD_TT_MOVE_CAP+110;
 	motors_reset(MOTOR_Z_BITS);
 	motors_move_to_step	(MOTOR_Z_BITS, &_ParZ_up, POSZ_CAP);
 }
@@ -538,7 +537,7 @@ static void _scan_left(void)
 {
 	if (_ref_started(CMD_TT_SCAN_LEFT)) return;
 
-	_CmdRunning = CMD_TT_SCAN_LEFT;
+	RX_StepperStatus.cmdRunning = CMD_TT_SCAN_LEFT;
 	slide_scan_left();			
 }
 
@@ -547,7 +546,7 @@ static void _scan_right(void)
 {
 	if (_ref_started(CMD_TT_SCAN_RIGHT)) return;
 
-	_CmdRunning = CMD_TT_SCAN_RIGHT;
+	RX_StepperStatus.cmdRunning = CMD_TT_SCAN_RIGHT;
 	slide_scan_right();						
 }
 
@@ -556,7 +555,7 @@ static void _move_purge(int head)
 {
 	if (_ref_started(CMD_TT_MOVE_PURGE)) return;
 
-	_CmdRunning = CMD_TT_MOVE_PURGE;
+	RX_StepperStatus.cmdRunning = CMD_TT_MOVE_PURGE;
 	RX_StepperStatus.info.moving=TRUE;
 
 	slide_scan_left();
@@ -568,7 +567,7 @@ static void _move_adjust(int head)
 {
 	if (_ref_started(CMD_TT_MOVE_ADJUST)) return;
 
-	_CmdRunning = CMD_TT_MOVE_ADJUST;
+	RX_StepperStatus.cmdRunning = CMD_TT_MOVE_ADJUST;
 	RX_StepperStatus.info.moving=TRUE;
 
 	slide_scan_left();
@@ -593,8 +592,8 @@ static void _scan(void)
 {
 	if (_ref_started(CMD_TT_SCAN)) return;
 	
-	if (_CmdRunning) return;
-	_CmdRunning = CMD_TT_SCAN;
+	if (RX_StepperStatus.cmdRunning) return;
+	RX_StepperStatus.cmdRunning = CMD_TT_SCAN;
 	RX_StepperStatus.err = 0;
 	_CureCnt  = 0;
 	_scan_start();
@@ -715,7 +714,7 @@ static void _scan_state_machine(int menu)
 					break;
 
 		case 100: 	//--- done ------------------
-					_CmdRunning = 0;
+					RX_StepperStatus.cmdRunning = 0;
 					RX_StepperStatus.info.printing = FALSE;
 					RX_StepperStatus.info.curing   = FALSE;	
 
@@ -748,8 +747,8 @@ static void _tt_motor_y_test(int steps)
 	par.stop_mux	 = motor;
 	par.dis_mux_in	 = 0;
 	par.encCheck	 = chk_std;
-
-    for (i = 0; i < 2; i++) motor_config(i, CURRENT_HOLD, 0.0, 0.0, STEPS);
+	
+	for (i=0; i<2; i++) motor_config(i, CURRENT_HOLD, 0.0, 0.0);
 	motors_move_by_step(motor, &par, steps, TRUE);
 }
 
@@ -767,6 +766,6 @@ static void _tt_motor_z_test(int steps)
 	par.estop_in_bit[MOTOR_Z] = (1<<0);
 	par.estop_level	 = 1;
 	par.encCheck	 = chk_std;
-    motor_config(MOTOR_Z, CURRENT_HOLD, 0.0, 0.0, STEPS);
+	motor_config(MOTOR_Z,  CURRENT_HOLD, 0.0, 0.0);
 	motor_move_by_step(MOTOR_Z, &par, steps);
 }

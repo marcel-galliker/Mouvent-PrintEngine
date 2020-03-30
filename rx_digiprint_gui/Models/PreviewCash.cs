@@ -30,17 +30,20 @@ namespace RX_DigiPrint.Models
         //--- GetPreview --------------------------------
         public BitmapImage GetPreview(string preview_path)
         {                 
-            //---  search in list -------------------
-            for (int i=0; i<_List.Count(); i++)
+            if (preview_path!=null)
             {
-                if (preview_path.Equals(_List[i].path)) 
-                {  
-                    if  (i>0)
-                    { 
-                        _List.Insert(0, _List[i]);
-                        _List.RemoveAt(i+1);
+                //---  search in list -------------------
+                for (int i=0; i<_List.Count(); i++)
+                {
+                    if (_List[i].path!=null && preview_path.Equals(_List[i].path)) 
+                    {  
+                        if  (i>0)
+                        { 
+                            _List.Insert(0, _List[i]);
+                            _List.RemoveAt(i+1);
+                        }
+                        return _List[0].img;
                     }
-                    return _List[0].img;
                 }
             }
 

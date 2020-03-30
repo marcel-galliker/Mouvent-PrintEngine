@@ -51,6 +51,8 @@ namespace RX_DigiPrint.Views.UserControls
                 if (button!=null) button.Height = small;
             }
 
+            Button_Pause.Visibility = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LH702 && !RxGlobals.PrintSystem.LH702_simulation)? Visibility.Collapsed : Visibility.Visible; 
+            
             //--- size --------------------------------------------------------
             Button_Pause.Height     = (RxGlobals.PrinterStatus.PrintState==EPrintState.ps_printing)? large : small;
             Button_Stop.Height      = ( RxGlobals.PrinterStatus.PrintState==EPrintState.ps_printing 
@@ -112,7 +114,7 @@ namespace RX_DigiPrint.Views.UserControls
         {
             if (StartClicked!=null && !StartClicked()) return;
             #if !DEBUG
-            if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf && !(RxGlobals.TestTableStatus.DripPans_InfeedDOWN && RxGlobals.TestTableStatus.DripPans_OutfeedDOWN))
+            if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf && !(RxGlobals.StepperStatus[0].DripPans_InfeedDOWN && RxGlobals.StepperStatus[0].DripPans_OutfeedDOWN))
             {
                 RxMessageBox.YesNo("Print System", "Drip Pans below the clusters. Move it out before printing", MessageBoxImage.Question, true);
                 return;
@@ -154,7 +156,7 @@ namespace RX_DigiPrint.Views.UserControls
         //--- Test_Clicked -------------------------------------------------
         private void Test_Clicked(object sender, RoutedEventArgs e)
         {
-            if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf && !(RxGlobals.TestTableStatus.DripPans_InfeedDOWN && RxGlobals.TestTableStatus.DripPans_OutfeedDOWN))
+            if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf && !(RxGlobals.StepperStatus[0].DripPans_InfeedDOWN && RxGlobals.StepperStatus[0].DripPans_OutfeedDOWN))
             {
                 RxMessageBox.YesNo("Print System", "Drip Pans below the clusters. Move it out before printing", MessageBoxImage.Question, true);
                 return;

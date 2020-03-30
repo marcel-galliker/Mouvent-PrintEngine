@@ -13,7 +13,7 @@
 #pragma once
 
 #include "rx_def.h"
-#include "rx_fluid_ctrl.h"
+//#include "rx_fluid_ctrl.h"
 #include "nios_def_fluid.h"
 
 extern char *mode(EnFluidCtrlMode mode);

@@ -452,6 +452,8 @@ namespace RX_DigiPrint.Services
         public const UInt32 CMD_PLC_DEL_MATERIAL    = 0x01000367;
 
         //--- STEPPER -------------------------------------------------
+        public const UInt32 CMD_STEPPER_STAT		= 0x01000402;
+        public const UInt32 REP_STEPPER_STAT		= 0x02000402;
         public const UInt32 CMD_STEPPER_TEST		= 0x01000403;
 
         //--- Test Table Commands ------------------------------------------
@@ -466,42 +468,40 @@ namespace RX_DigiPrint.Services
         public const UInt32 CMD_TT_MOVE_CAP	        = 0x01000509;
         public const UInt32 CMD_TT_MOVE_PURGE	    = 0x0100050a;
         public const UInt32 CMD_TT_MOVE_ADJUST	    = 0x0100050b;
-        public const UInt32 CMD_TT_STAT		        = 0x01000510;
-        public const UInt32 REP_TT_STAT		        = 0x02000510;
 
         //--- Capping Commands ---------------------------------------------------
-        public const UInt32 CMD_CAP_STOP			= 0x01000601;
-        public const UInt32 CMD_CAP_REFERENCE		= 0x01000602;
-        public const UInt32 CMD_CAP_PRINT_POS		= 0x01000603;
-        public const UInt32 CMD_CAP_CAPPING_POS		= 0x01000604;
-        public const UInt32 CMD_CAP_UP_POS  		= 0x01000605;
-        public const UInt32 CMD_CAP_CALIBRATE		= 0x01000606;
+        public const UInt32 CMD_LIFT_STOP			= 0x01000601;
+        public const UInt32 CMD_LIFT_REFERENCE		= 0x01000602;
+        public const UInt32 CMD_LIFT_PRINT_POS		= 0x01000603;
+        public const UInt32 CMD_LIFT_CAPPING_POS	= 0x01000604;
+        public const UInt32 CMD_LIFT_UP_POS  		= 0x01000605;
+        public const UInt32 CMD_LIFT_CALIBRATE		= 0x01000606;
 
         //---- CAPPING ----
-        public const UInt32 CMD_CAP_FILL 			= 0x01000611;
-        public const UInt32 CMD_CAP_EMPTY 			= 0x01000612;
+        public const UInt32 CMD_LIFT_FILL 			= 0x01000611;
+        public const UInt32 CMD_LIFT_EMPTY 			= 0x01000612;
 
         //---- WIPING -----
-        public const UInt32 CMD_CAP_WIPE_POS        = 0x01000614;
-        public const UInt32 CMD_CAP_VACUUM_POS      = 0x01000615;
-        public const UInt32 CMD_CAP_WASH_POS        = 0x01000616;
+        public const UInt32 CMD_LIFT_WIPE_POS        = 0x01000614;
+        public const UInt32 CMD_LIFT_VACUUM_POS      = 0x01000615;
+        public const UInt32 CMD_LIFT_WASH_POS        = 0x01000616;
         //---- END OF CAPPING ----
 
-        public const UInt32 CMD_CLN_STOP			= 0x01000701;
-        public const UInt32 CMD_CLN_REFERENCE		= 0x01000702;
-        public const UInt32 CMD_CLN_MOVE_POS		= 0x01000703;
-        public const UInt32 CMD_CLN_SCREW_REF		= 0x01000704;
-        public const UInt32 CMD_CLN_SCREW_0_POS		= 0x01000705;
-        public const UInt32 CMD_CLN_SCREW_1_POS		= 0x01000706;
-        public const UInt32 CMD_CLN_SCREW_2_POS		= 0x01000707;
-        public const UInt32 CMD_CLN_SCREW_3_POS		= 0x01000708;
-        public const UInt32 CMD_CLN_WIPE			= 0x01000709;
+        public const UInt32 CMD_ROB_STOP			= 0x01000701;
+        public const UInt32 CMD_ROB_REFERENCE		= 0x01000702;
+        public const UInt32 CMD_ROB_MOVE_POS		= 0x01000703;
+        public const UInt32 CMD_ROB_SCREW_REF		= 0x01000704;
+        public const UInt32 CMD_ROB_SCREW_0_POS		= 0x01000705;
+        public const UInt32 CMD_ROB_SCREW_1_POS		= 0x01000706;
+        public const UInt32 CMD_ROB_SCREW_2_POS		= 0x01000707;
+        public const UInt32 CMD_ROB_SCREW_3_POS		= 0x01000708;
+        public const UInt32 CMD_ROB_WIPE			= 0x01000709;
 
-        public const UInt32 CMD_CLN_ADJUST			= 0x01000710;
+        public const UInt32 CMD_ROB_ADJUST			= 0x01000710;
 
-        public const UInt32 CMD_CLN_DRIP_PANS       = 0x01000721;
-        public const UInt32 CMD_CLN_DRIP_PANS_CAP   = 0x01000725;
-        public const UInt32 CMD_CLN_DRIP_PANS_REF   = 0x01000726;
+        public const UInt32 CMD_ROB_DRIP_PANS       = 0x01000721;
+        public const UInt32 CMD_ROB_DRIP_PANS_CAP   = 0x01000725;
+        public const UInt32 CMD_ROB_DRIP_PANS_REF   = 0x01000726;
 
         public const UInt32 EVT_TRACE               = 0x03000100;
 
@@ -647,7 +647,7 @@ namespace RX_DigiPrint.Services
 			PG_MODE_GAP,        // gap getween images
             PG_MODE_MARK_FILTER,
             PG_MODE_MARK_VRT,   // rint mark to PG (IN[1])
-            PG_MODE_MARK_INV,   // rint mark to PG (IN[1]) / INVERSE
+            PG_MODE_MARK_INV,   // rint mark to PG (IN[0]) / INVERSE
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -741,7 +741,7 @@ namespace RX_DigiPrint.Services
             public UInt32 colorCode;
 
             public Int32	temp;
-	        Int32	tempMax;
+	        public Int32	tempMax;
 	        Int32	tempChiller;
 	        Int32	dropletVolume;
 	        Int32	meniscus;
@@ -800,6 +800,8 @@ namespace RX_DigiPrint.Services
         public struct SPrinterCfgMsg
         {
             public SMsgHdr      hdr;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst =64)]
+	        public string       hostName;
             public EPrinterType	type;
             public UInt32		overlap;
             public SOffsetCfg   offset;
@@ -843,6 +845,9 @@ namespace RX_DigiPrint.Services
         {
             public Int32       ref_height;
             public Int32       head_align;
+            public Int32        ref_height_back;
+            public Int32        ref_height_front;
+            public Int32        cap_height;
         }
         
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -907,6 +912,7 @@ namespace RX_DigiPrint.Services
 	        public Int32    presLung;			//  Lung pressure
             public Int32    condPresOut;  
             public Int32    condPresIn;
+            public Int32    condPumpSpeed;
 	        public Int32	condTemp;
 	        public Int32	temp;				//	Temperature
 	        public Int32	pumpSpeedSet;		//	Consumption pump speed
@@ -1054,6 +1060,7 @@ namespace RX_DigiPrint.Services
 	        public Int32			presOut_diff;
             public Int32			meniscus;
             public Int32			meniscus_diff;
+            public Int32            meniscus_Setpoint;
             public Int32			pid_offset;
 
             public float			dropVolume;	// in pl
@@ -1126,6 +1133,9 @@ namespace RX_DigiPrint.Services
         public struct SStepperStat
         {
 	        public SMsgHdr      hdr;
+
+            public UInt32       no;
+
 	        public UInt64		macAddr;
 	        public UInt64		serialNo;
 
@@ -1133,6 +1143,8 @@ namespace RX_DigiPrint.Services
 	        SVersion	        fpgaVersion;
 
             public Int32		robot_used;
+
+            public UInt32       cmdRunning;
 
             public UInt32		info;
             public UInt32		robinfo;
@@ -1152,7 +1164,7 @@ namespace RX_DigiPrint.Services
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 5)]
 	        public SStepperMotor[]	motor;
 
-            public Int32		set_io_cnt;
+  //          public Int32		set_io_cnt;
         };
 
         //--- CLEAF Orders ------------------------------------------------------

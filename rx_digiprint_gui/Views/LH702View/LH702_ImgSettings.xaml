@@ -41,14 +41,14 @@
                     <RowDefinition Height="auto" x:Name="RowCopies"/>
                     <RowDefinition Height="auto"/>
                 </Grid.RowDefinitions>
-                
+
                 <TextBlock Grid.Row="0" Grid.Column="0" Text="Image"/>
                 <TextBlock Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="10"
 			        Text="{Binding FilePath, Converter={StaticResource FileName_Converter}}"
 			        Background="Transparent"
                     VerticalAlignment="Center"
                     />
-                
+
                 <TextBlock Grid.Row="2" Grid.Column="0" Text="PrintGo"/>
                 <rx:RxComboBox x:Name="CB_PrintGoMode"
                     Grid.Row="2" Grid.Column="1"
@@ -80,8 +80,8 @@
                 <common:RxNumBox Grid.Row="5" Grid.Column="1"
 			        Text="{Binding Copies}"
 			        HorizontalContentAlignment="Right"
-			        Background="Transparent"                    VerticalAlignment="Center"
-                    LostFocus="PageMargin_LostFocus"
+			        Background="Transparent"
+                    LostFocus="Copies_LostFocus" Margin="0,1"
                     />
 
             </Grid>

@@ -84,7 +84,7 @@ void step_tick(void)
 {
 	for (int i=0; i<SIZEOF(_step_Socket); i++)
 	{
-		sok_send_2(&_step_Socket[i], CMD_TT_STATUS, 0, NULL);
+		sok_send_2(&_step_Socket[i], CMD_STEPPER_STAT, 0, NULL);
 	}	
 }
 
@@ -137,6 +137,24 @@ static int _setp_socket_closed(RX_SOCKET socket, const char *peerName)
 			default: 			steps_init		(   INVALID_SOCKET);
 			}
 			memset(&RX_StepperStatus, 0, sizeof(RX_StepperStatus));
+
+			//--- new ----------------
+			{
+				SStepperStat stat;
+				memset(&stat, 0, sizeof(stat));
+				stat.no = i;
+				switch(_StepperType)
+				{
+				case STEPPER_CLEAF: stepc_handle_status		(i, &stat); break;
+				case STEPPER_TX:	steptx_handle_status	(i, &stat); break;
+				case STEPPER_LB:	steplb_handle_status	(i, &stat); break;
+				case STEPPER_DP:	stepdp_handle_status	(i, &stat); break;
+				case STEPPER_TEST:	steptest_handle_status	(i, &stat); break;
+				default:			steps_handle_status		(	&stat); break;
+				}
+			}
+			//------------------------------
+
 			if (i==1) RX_PrinterStatus.txRobot = FALSE;
 			return REPLY_OK;				
 		}
@@ -176,7 +194,7 @@ static int _step_handle_msg(RX_SOCKET socket, void *msg, int len, struct sockadd
 				case CMD_PRINT_ABORT:pc_abort_printing(); 
 									return REPLY_OK;
 				
-				case REP_TT_STATUS:	switch(_StepperType)
+				case REP_STEPPER_STAT:	switch(_StepperType)
 									{
 									case STEPPER_CLEAF: ret = stepc_handle_status		(no, pStat); break;
 									case STEPPER_TX:	ret = steptx_handle_status		(no, pStat); break;
@@ -188,10 +206,10 @@ static int _step_handle_msg(RX_SOCKET socket, void *msg, int len, struct sockadd
 									default:			ret = steps_handle_status		(	 pStat); break;
 									}
 									
-									// fluid_control_robot(_LB_Rob);
+									fluid_control_robot(_LB_Rob);
 									return ret;
                                    
-                case REP_CAP_CALIBRATE:
+                case REP_LIFT_CALIBRATE:
 									gui_set_stepper_offsets(no, (SRobotOffsets*)pStat);
 									return REPLY_OK;
 			default:				
@@ -442,7 +460,7 @@ void step_set_vent(int speed)
 	INT32 value;
 	if(speed) value=20;
 	else      value=0;
-	sok_send_2(&_step_Socket[0], CMD_CAP_VENT, sizeof(value), &value);
+	sok_send_2(&_step_Socket[0], CMD_LIFT_VENT, sizeof(value), &value);
 }
 
 //--- step_handle_gui_msg------------------------------------------------------------------
@@ -466,17 +484,16 @@ static void _step_set_config(int no)
 
 	memcpy(&cfg, &RX_Config.stepper, sizeof(cfg));
 	cfg.printerType		   = RX_Config.printer.type;
-	cfg.use_printhead_en   = RX_Config.printer.type==printer_LH702;
+	cfg.use_printhead_en   = (RX_Config.printer.type==printer_LH702) && str_start(RX_Hostname, "LH702");
 	cfg.material_thickness = plc_get_thickness();
 	cfg.boardNo=no;
 		
-	if (arg_testMachine)
+	if (RX_Config.printer.type==printer_LH702 && !str_start(RX_Hostname, "LH702")) 
 	{
-		if (RX_Config.printer.type==printer_DP803) Error(WARN, 0, "Simulate DP803 by LB701");
-		if (RX_Config.printer.type==printer_LH702) Error(WARN, 0, "Simulate LH702 by LB701");
-
-		cfg.printerType = printer_LB701;
+		Error(WARN, 0, "Simulate LH702 by LB702");
+		cfg.printerType = printer_LB702_UV;
 	}
+
 	switch(_StepperType)
 	{
 	case STEPPER_CLEAF:	stepc_init		(no, _step_Socket[no]); break;

@@ -83,7 +83,7 @@ void ctr_save(void)
 {
 	HANDLE file = setup_create();
 	
-    Error(LOG, 0, "Counters: act=%d, total=%d, (products=%d, m=%d.%03d) ", (int)RX_PrinterStatus.counterAct, (int)RX_PrinterStatus.counterTotal, (int)_prodCnt, (int)_prodLen, (int)(_prodLen*1000.0)%1000);
+    //Error(LOG, 0, "Counters: act=%d, total=%d, (products=%d, m=%d) ", (int)RX_PrinterStatus.counterAct, (int)RX_PrinterStatus.counterTotal, (int)_prodCnt, (int)_prodLen);
     _prodCnt=0;
     _prodLen=0;
 	if (setup_chapter(file, "Counters", -1, WRITE)==REPLY_OK)

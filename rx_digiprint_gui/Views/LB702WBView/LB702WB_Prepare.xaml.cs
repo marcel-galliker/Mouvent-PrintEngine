@@ -1,4 +1,5 @@
-﻿using RX_DigiPrint.Models;
+﻿using RX_Common;
+using RX_DigiPrint.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,18 +28,31 @@ namespace RX_DigiPrint.Views.LB702WBView
         public LB702WB_Prepare()
         {
             InitializeComponent();
-            
+
             Visibility = Visibility.Collapsed;
-            int i;
-            for (i=0; i<PrepGrid.RowDefinitions.Count(); i++)
+            int i,n;
+            for (i = 0, n = 0; i < PrepGrid.Children.Count; i++)
             {
+               TextBlock ctrl = PrepGrid.Children[i] as TextBlock;
+                if (ctrl != null)
+                {
+                    if ((n & 1) != 0)
+            {
+                        ctrl.Background = Application.Current.Resources["XamGrid_Alternate"] as Brush;
+                        Grid.SetColumnSpan(ctrl, 2);
+                    }
                 Image img = new Image();
-                Grid.SetRow(img, i+1);
+                    if (n < 10) Grid.SetRow(img, n + 1);
+                    else Grid.SetRow(img, n + 2);
                 Grid.SetColumn(img, 1);
                 img.Source = _img_ok;
                 img.Height = 20;
+                    img.Tag = ctrl.Tag;
                 _Image.Add(img);
-                PrepGrid.Children.Add(_Image[i]);
+                    PrepGrid.Children.Add(_Image[n]);
+                    n++;
+
+                }
             }
         }
 
@@ -46,19 +60,37 @@ namespace RX_DigiPrint.Views.LB702WBView
         public void Update()
         {
             string str;
-            int i, n;
+            int n;
+            int value = 0;
             str = RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_MACHINE_STATE");
             try
             {
-                // visible when state="PREPARE"(4)
-                i=System.Convert.ToInt32(str);
-                this.Visibility = (i==4) ?  Visibility.Visible:Visibility.Collapsed;                        
+                // visible when state="PREPARE"(14)
+                value = Rx.StrToInt32(str);
+                this.Visibility = (value == 4 || value == 5) ? Visibility.Visible : Visibility.Collapsed;                         
 
                 str = RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_PREPARE_ACTIVE");
-                i=System.Convert.ToInt32(str);
-                for (n=0; n<_Image.Count; n++)
+
+                value = Rx.StrToInt32(str);
+
+                for (n = 0; n < _Image.Count; n++)
                 {
-                    _Image[n].Visibility = ((i & (1<<n))==0)? Visibility.Collapsed : Visibility.Visible;
+                    if (Convert.ToInt32(_Image[n].Tag) < 16) _Image[n].Visibility = ((value & (1 << Convert.ToInt32(_Image[n].Tag))) == 0) ? Visibility.Collapsed : Visibility.Visible;
+                    else if (Convert.ToInt32(_Image[n].Tag) == 16)
+                    {
+                        if (RxGlobals.PrinterStatus.DataReady) _Image[n].Visibility = Visibility.Visible;
+                        else _Image[n].Visibility = Visibility.Collapsed;
+                    }
+                    else if (Convert.ToInt32(_Image[n].Tag) == 17)
+                    {
+                        if (RxGlobals.StepperStatus[0].Z_in_print) _Image[n].Visibility = Visibility.Visible;
+                        else _Image[n].Visibility = Visibility.Collapsed;
+                    }
+                    else if (Convert.ToInt32(_Image[n].Tag) == 18)
+                {
+                        if (RxGlobals.StepperStatus[0].RefDone) _Image[n].Visibility = Visibility.Visible;
+                        else _Image[n].Visibility = Visibility.Collapsed;
+                    }
                 }
             }
             catch(Exception)

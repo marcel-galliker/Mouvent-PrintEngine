@@ -80,8 +80,8 @@
                             <RowDefinition Height="auto"/>
                             <RowDefinition Height="auto"/>
                         </Grid.RowDefinitions>
-                        <rx_uc:PlcParCtrl Grid.Row="0" Grid.Column="0"                       ID="PAR_MATERIAL_THIKNESS"         Label="Thickness"           Unit="mm" UnitWidth="30" Format="1" UserEnabled="usr_supervisor"  Background="{DynamicResource XamGrid_Alternate}"/>
-                        <rx_uc:PlcParCtrl Grid.Row="1" Grid.Column="0"                       ID="PAR_HEAD_HEIGHT"               Label="Print Height"        Unit="mm" UnitWidth="30" Format="1" UserEnabled="usr_supervisor"/>
+                        <rx_uc:PlcParCtrl Grid.Row="0" Grid.Column="0"                       ID="XML_MATERIAL_THIKNESS"         Label="Thickness"           Unit="mm" UnitWidth="30" Format="1" UserEnabled="usr_supervisor"  Background="{DynamicResource XamGrid_Alternate}"/>
+                        <rx_uc:PlcParCtrl Grid.Row="1" Grid.Column="0"                       ID="XML_HEAD_HEIGHT"               Label="Print Height"        Unit="mm" UnitWidth="30" Format="1" UserEnabled="usr_supervisor"/>
                         <rx_uc:PlcParCtrl Grid.Row="0" Grid.Column="2"                       ID="PAR_MAX_WEB_TEMP"              Label="Dryer Temp"          Unit="°C" UnitWidth="30" Format="n" UserEnabled="usr_supervisor" Background="{DynamicResource XamGrid_Alternate}"/>
                         
 <!--

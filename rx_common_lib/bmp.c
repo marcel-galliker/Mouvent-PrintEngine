@@ -120,12 +120,12 @@ int bmp_load(const char *path, BYTE **buffer, int bufsize, SBmpInfo *info)
 	time = rx_get_ticks();
 
 	file = rx_fopen(path, "rb", _SH_DENYNO);
-	TrPrintfL(50,  "open time=%d", rx_get_ticks()-time);
+//	TrPrintfL(50,  "open time=%d", rx_get_ticks()-time);
 	if (file!=NULL)
 	{
 		if (fread(&header, 1, sizeof(header), file))
 		{				
-			TrPrintfL(50,  "read1=%d", rx_get_ticks()-time);
+//			TrPrintfL(50,  "read1=%d", rx_get_ticks()-time);
 		
 			if (strncmp((char*)&header.bfType, "BM", 2)) return Error(ERR_CONT, 0, "File >>%s<< is not a valid BMP file", path);
 			size = header.bfOffBits - sizeof(BITMAPFILEHEADER);
@@ -136,7 +136,7 @@ int bmp_load(const char *path, BYTE **buffer, int bufsize, SBmpInfo *info)
 				fclose(file);
 				return Error(ERR_CONT, 0, "File >>%s<< is not a valid BMP file", path);
 			}
-			TrPrintfL(50,  "read2=%d", rx_get_ticks()-time);
+		//	TrPrintfL(50,  "read2=%d", rx_get_ticks()-time);
 			if(pHeaderInfo->biClrUsed) palsize = pHeaderInfo->biClrUsed;
 			else
 			{
@@ -189,17 +189,17 @@ int bmp_load(const char *path, BYTE **buffer, int bufsize, SBmpInfo *info)
 			}
 			else 
 			{	
-				ret=(int)fread(*buffer, 1, (int)info->dataSize, file);
+				ret=(int)fread(*buffer, 1, (size_t)info->dataSize, file);
 				if (info->inverseColor) 
 					for(i=info->dataSize, pdat=*buffer; i; i--, pdat++)
 						(*pdat) = ~(*pdat);						  
 			}
 			info->inverseColor  = FALSE;
 
-			TrPrintfL(50, "read time=%d", rx_get_ticks()-time);
+		//	TrPrintfL(50, "read time=%d", rx_get_ticks()-time);
 			fclose(file);
 		}
-		TrPrintfL(50,  "load time=%d", rx_get_ticks()-time);
+	//	TrPrintfL(50,  "load time=%d", rx_get_ticks()-time);
 		return REPLY_OK;
 	}
 	return REPLY_NOT_FOUND;

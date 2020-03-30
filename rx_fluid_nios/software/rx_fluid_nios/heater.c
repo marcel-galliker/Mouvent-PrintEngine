@@ -33,6 +33,8 @@
 
 #define HEATER_TEMP_TOLERANCE	1000
 
+#define VOLTAGES_AVG_NB		50
+
 //--- statics -----------------------------------------------
 SPID_par	_pid_Temp[NIOS_INK_SUPPLY_CNT];			// PID temperature heater
 static int 	_DutyTemp_Count[NIOS_INK_SUPPLY_CNT];
@@ -44,6 +46,12 @@ static int 	_Temp_Inc[NIOS_INK_SUPPLY_CNT];
 static int 	_Temp_Pre[NIOS_INK_SUPPLY_CNT];
 static int 	_Heater_Pre[NIOS_INK_SUPPLY_CNT];
 static int 	_TimeTempFrozen[NIOS_INK_SUPPLY_CNT];
+
+static int _PS3V_Sum;
+static int _PS5V_Sum;
+static int _PS24V_Sum;
+static int _PS24VP_Sum;
+static int _PS_inc;
 
 //--- prototypes ----------------------------------
 static void _set_heater_out(int i, int newState);
@@ -74,6 +82,13 @@ void heater_init(void)
 	{
 		_set_heater_out(i, FALSE);
 	}
+
+	// initiliazes voltages to theoric values and so avoid error log message
+	_PS_inc = 0;
+	pRX_Status->HeaterBoard_Vsupply_3V 		= 3300;
+	pRX_Status->HeaterBoard_Vsupply_5V 		= 5000;
+	pRX_Status->HeaterBoard_Vsupply_24V 	= 24000;
+	pRX_Status->HeaterBoard_Vsupply_24VP 	= 24000;
 }
 
 //--- heater_tick_10ms ---------------------------------------------------------------
@@ -96,21 +111,35 @@ void heater_tick_10ms(void)
 	}
 
 	// Vsupply HeaterBoard
+	if(_PS_inc > VOLTAGES_AVG_NB - 1) _PS_inc = 0;
 	temp = IORD_16DIRECT(AVALON_SPI_AMC7891_1_BASE, AMC7891_ADC0_DATA) & 0x3ff;
 	temp = IORD_16DIRECT(AVALON_SPI_AMC7891_1_BASE, AMC7891_ADC0_DATA) & 0x3ff;
-	pRX_Status->HeaterBoard_Vsupply_3V = temp * 5000 / 1024;
+	_PS3V_Sum += temp * 5000 / 1024;
 
 	temp = IORD_16DIRECT(AVALON_SPI_AMC7891_1_BASE, AMC7891_ADC0_DATA + 2) & 0x3ff;
 	temp = IORD_16DIRECT(AVALON_SPI_AMC7891_1_BASE, AMC7891_ADC0_DATA + 2) & 0x3ff;
-	pRX_Status->HeaterBoard_Vsupply_5V = temp * 5000 / 1024;
+	_PS5V_Sum += temp * 5000 / 1024;
 
 	temp = IORD_16DIRECT(AVALON_SPI_AMC7891_1_BASE, AMC7891_ADC0_DATA + 4) & 0x3ff;
 	temp = IORD_16DIRECT(AVALON_SPI_AMC7891_1_BASE, AMC7891_ADC0_DATA + 4) & 0x3ff;
-	pRX_Status->HeaterBoard_Vsupply_24V = temp * 5000 / 1024 * 115 / 15;
+	_PS24V_Sum += temp * 5000 / 1024 * 115 / 15;
 
 	temp = IORD_16DIRECT(AVALON_SPI_AMC7891_1_BASE, AMC7891_ADC0_DATA + 6) & 0x3ff;
 	temp = IORD_16DIRECT(AVALON_SPI_AMC7891_1_BASE, AMC7891_ADC0_DATA + 6) & 0x3ff;
-	pRX_Status->HeaterBoard_Vsupply_24VP = temp * 5000 / 1024 * 115 / 15;
+	_PS24VP_Sum += temp * 5000 / 1024 * 115 / 15;
+
+	if(++_PS_inc >= VOLTAGES_AVG_NB)
+	{
+		pRX_Status->HeaterBoard_Vsupply_3V 	= _PS3V_Sum / VOLTAGES_AVG_NB;
+		pRX_Status->HeaterBoard_Vsupply_5V 	= _PS5V_Sum / VOLTAGES_AVG_NB;
+		pRX_Status->HeaterBoard_Vsupply_24V = _PS24V_Sum / VOLTAGES_AVG_NB;
+		pRX_Status->HeaterBoard_Vsupply_24VP= _PS24VP_Sum / VOLTAGES_AVG_NB;
+		_PS3V_Sum = 0;
+		_PS5V_Sum = 0;
+		_PS24V_Sum = 0;
+		_PS24VP_Sum = 0;
+		_PS_inc = 0;
+	}
 
 	// Thermistor Heaterboard
 	for(i=0; i<NIOS_INK_SUPPLY_CNT; i++)
@@ -146,7 +175,7 @@ void heater_tick_10ms(void)
 				if(pRX_Status->ink_supply[i].heaterTemp == _Temp_Pre[i]) // temperature frozen
 				{
 					_TimeTempFrozen[i]++;
-					if(_TimeTempFrozen[i] > 6000)	// during 20 seconds
+					if(_TimeTempFrozen[i] > 6000)	// during 60 seconds
 					{
 						init_AMC7891(AVALON_SPI_AMC7891_1_BASE);
 						pRX_Status->ink_supply[i].error |= err_heater_temp_frozen;
@@ -226,5 +255,22 @@ static void _set_heater_out(int heaterNo, int newState)
 void heater_tick_1000ms(void)
 {
 	IOWR_16DIRECT(AVALON_SPI_AMC7891_1_BASE,AMC7891_GPIO_OUT, 0);	// set All Heaters OFF (Security)
+
+	// Read config AMC to detect that it restart
+	int readbackPOWER 	= IORD_16DIRECT(AVALON_SPI_AMC7891_1_BASE, AMC7891_AMC_POWER);
+	int readbackCONFIG 	= IORD_16DIRECT(AVALON_SPI_AMC7891_1_BASE, AMC7891_GPIO_CONFIG);
+	int readbackENABLE 	= IORD_16DIRECT(AVALON_SPI_AMC7891_1_BASE, AMC7891_ADC_ENABLE);
+	int readbackGAIN 	= IORD_16DIRECT(AVALON_SPI_AMC7891_1_BASE, AMC7891_ADC_GAIN);
+
+	if((readbackPOWER != 0x6000)||(readbackCONFIG != 0x0FF)||(readbackENABLE != 0x6DE0)||(readbackGAIN != 0xFF00))
+	{
+
+		pRX_Status->AMC_Register_Power 			= readbackPOWER;
+		pRX_Status->AMC_Register_GPIO_Config 	= readbackCONFIG;
+		pRX_Status->AMC_Register_Enable			= readbackENABLE;
+		pRX_Status->AMC_Register_Gain 			= readbackGAIN;
+		pRX_Status->error |= err_amc_config_lost;
+	}
+
 }
 

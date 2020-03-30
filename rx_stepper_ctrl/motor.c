@@ -116,13 +116,22 @@ void  motor_main(int ticks, int menu)
 {
 	if (ps_main())
 	{
-		if (_message_written == FALSE)	Error(ERR_CONT, 0, "Motor Power Supply OFF");
+		if (_message_written == FALSE)	Error(ERR_CONT, 0, "Motor Power Supply OFF (Emergency stop pressed or power supply down)");
 		_init_done = 0;
 		_message_written = TRUE;
 		RX_StepperStatus.info.ref_done = FALSE;
+		RX_StepperStatus.info.z_in_ref		= FALSE;
+		RX_StepperStatus.info.z_in_print	= FALSE;
+		RX_StepperStatus.info.z_in_cap		= FALSE;
 		RX_StepperStatus.robinfo.ref_done = FALSE;
 	}
 	else	_message_written = FALSE;
+}
+
+//-- Error reset ----//
+void  motor_errors_reset(void)
+{
+	_message_written = FALSE;
 }
 
 //--- motors_init_done -----------------------
@@ -212,7 +221,7 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
 
     if (speed<MIN_SPEED_HZ+500) 
     {
-        if (speed<1000 && microsteps!=MICROSTEPS) Error(ERR_CONT, 0, "Stepper motor[%d]: Speed=%d, too low", motor, speed);
+        if (speed<1000) Error(ERR_CONT, 0, "Stepper motor[%d]: Speed=%d, too low", motor, speed);
         minSpeed = speed-500;    
 	}
     else minSpeed = MIN_SPEED_HZ;
@@ -225,14 +234,9 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
 		break;
 		
 	case chk_txrob_ref:
-		Fpga.par->cfg[motor].enc_max_diff		= 16;
+		Fpga.par->cfg[motor].enc_max_diff		= 50;
 		Fpga.par->cfg[motor].enc_max_diff_stop	= 50;	
 		break;
-        
-    case chk_txrob_ref2:
-        Fpga.par->cfg[motor].enc_max_diff		= 17;
-        Fpga.par->cfg[motor].enc_max_diff_stop	= 50;
-        break;
 
 	case chk_txrob:
 		Fpga.par->cfg[motor].enc_max_diff		= 50;
@@ -479,10 +483,10 @@ int	motors_error(int motors, int *err)
 
 
 //--- motor_config ---------------------
-void motor_config(int motor, int currentHold, double stepsPerMeter, double incPerMeter, int microsteps)
+void motor_config(int motor, int currentHold, double stepsPerMeter, double incPerMeter)
 {
-	if (microsteps!=MICROSTEPS && microsteps!=STEPS) Error(ERR_ABORT, 0, "Microsteps=%d not allowed", microsteps);
-
+	int microsteps=16;
+	
 	if (ps_get_power() < 20000) return;
 	if (_init_done & (0x01 << motor)) return;
 	_init_done |= (0x01 << motor);
@@ -505,20 +509,20 @@ void motor_config(int motor, int currentHold, double stepsPerMeter, double incPe
 	
 	Fpga.par->cfg[motor].disable_mux_in  = 0;
 	
-	Fpga.par->cfg[motor].enc_mot_ratio	= (int)((double)stepsPerMeter / microsteps/  (double)incPerMeter * 16777216); // todo peb
+	Fpga.par->cfg[motor].enc_mot_ratio	= (int)((double)stepsPerMeter / MICRO_STEPS/  (double)incPerMeter * 16777216); // todo peb
 	Fpga.par->cfg[motor].dec_off_delay	= 10;	// todo peb
 	Fpga.par->cfg[motor].acc_on_delay	= 10;	// todo peb
 
-	Fpga.par->cfg[motor].microsteps		= microsteps-1;
+	Fpga.par->cfg[motor].microsteps		= MICRO_STEPS-1;
 	motor_reset(motor);
 }
 
 //--- motors_config -----------------------------------------
-void motors_config(int motors, int currentHold, double stepsPerMeter, double incPerMeter, int steps)
+void motors_config(int motors, int currentHold, double stepsPerMeter, double incPerMeter)
 {
 	int motor;
 	FOR_ALL_MOTORS(motor, motors)
 	{
-		motor_config(motor, currentHold, stepsPerMeter, incPerMeter, steps);
+		motor_config(motor, currentHold, stepsPerMeter, incPerMeter);
 	}
 }

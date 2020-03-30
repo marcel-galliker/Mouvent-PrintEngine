@@ -177,6 +177,7 @@ namespace RX_DigiPrint.Services
                 if (Connected && _Client.Client!=null)
                 {
                     LocalAddress = _Client.Client.LocalEndPoint.ToString();
+                 //   _Client.ReceiveTimeout = 1000;
 
                     while(true)
                     { 
@@ -266,6 +267,7 @@ namespace RX_DigiPrint.Services
                 }                 
                 if (_Running) Connected = false;
                 _Client.Close();
+                Thread.Sleep(1000); // Close needs time and there is no feedback when it is done! If we are connecting again too early it gives "cannot access a disposed object" error!
             };
 
          //   Marshal.FreeHGlobal(phdr);
@@ -320,7 +322,7 @@ namespace RX_DigiPrint.Services
         //--- SendMsgBuf ----------------------------------------
         public void SendMsgBuf(UInt32 msgId, string str)
         {
-            if (Connected)
+            if (Connected && _Stream!=null)
             {
                 char[] msg = new char[str.Length];
                 str.CopyTo(0, msg, 0, str.Length);

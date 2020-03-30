@@ -60,6 +60,7 @@ static char				_LastFilename[MAX_PATH];
 static int				_LastPage;
 static int				_LastWakeup;
 static int				_LastGap;
+static int				_LastOffsetWidth;
 static SPageId			_LoadedId;
 static UINT16			_SMP_Flags;
 #define					BUFFER_CNT 2
@@ -100,6 +101,7 @@ int ctrl_start(const char *ipAddrMain)
 	memset(_LastFilename, 0, sizeof(_LastFilename));
 	memset(&_LoadedId, 0, sizeof(_LoadedId));
 	_LastPage=0;
+	_LastOffsetWidth = 0;
 	_LastWakeup = 0;
 	_LastGap = 0;
 	_SMP_Flags=0;
@@ -370,16 +372,17 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 	_Running = TRUE;
 	hc_start_printing();
 		
-	same = (!strcmp(msg.filename, _LastFilename) &&  msg.id.page==_LastPage && msg.wakeup==_LastWakeup && msg.gapPx==_LastGap);
+	same = (!strcmp(msg.filename, _LastFilename) &&  msg.id.page==_LastPage && msg.wakeup==_LastWakeup && msg.gapPx==_LastGap && msg.offsetWidth==_LastOffsetWidth);
 	if (RX_Spooler.printerType==printer_LB702_UV && msg.printMode==PM_SINGLE_PASS) same = ((msg.flags&FLAG_SAME)!=0);
 	_LastPage   = msg.id.page;
 	_LastGap	= msg.gapPx;
 	_LastWakeup = msg.wakeup;
+	_LastOffsetWidth = msg.offsetWidth;
 	
 	if (msg.virtualPass>msg.virtualPasses)
 		Error(ERR_ABORT, 0, "programming Error");
 	
-	TrPrintfL(TRUE, "_do_print_file[%d] >>%s<<  id=%d, page=%d, copy=%d, scan=%d, same=%d, blkNo=%d", _MsgGot, msg.filename, msg.id.id, msg.id.page, msg.id.copy, msg.id.scan ,same, msg.blkNo);
+	TrPrintfL(TRUE, "_do_print_file[%d] >>%s<<  id=%d, page=%d, copy=%d, scan=%d, same=%d, clearBlockUsed=%d, offsetWidth=%d, blkNo=%d", _MsgGot, msg.filename, msg.id.id, msg.id.page, msg.id.copy, msg.id.scan ,same, msg.clearBlockUsed, msg.offsetWidth, msg.blkNo);
 //	if (msg.id.scan==1) Error(LOG, 0, "_do_print_file[%d] >>%s<<  id=%d, page=%d, copy=%d, scan=%d, same=%d, blkNo=%d", _MsgGot, msg.filename, msg.id.id, msg.id.page, msg.id.copy, msg.id.scan ,same, msg.blkNo);
 	
 //	if(msg.smp_flags & SMP_LAST_PAGE) Error(LOG, 0, "_do_print_file[%d] >>%s<< id=%d, page=%d, copy=%d, scan=%d, same=%d, LAST PAGE", _MsgGot, msg.filename, msg.id.id, msg.id.page, msg.id.copy, msg.id.scan, same); 
@@ -438,7 +441,7 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 				data_clear(_Buffer[_BufferNo]);
 			}
 //			TrPrintfL(TRUE, "data_malloc (id=%d, page=%d, copy=%d, scan=%d) _BufferNo=%d", msg.id.id, msg.id.page, msg.id.copy, _BufferNo);
-			ret = data_malloc (msg.printMode, widthPx, lengthPx, bitsPerPixel, RX_Color, SIZEOF(RX_Color), &_BufferSize[_BufferNo], _Buffer[_BufferNo]);			
+			ret = data_malloc (msg.printMode, widthPx, lengthPx, bitsPerPixel, RX_Color, SIZEOF(RX_Color), &_BufferSize[_BufferNo], _Buffer[_BufferNo]);
 		}
 		if (_Abort)
 			return REPLY_ERROR;
@@ -468,7 +471,7 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 		//	Error(LOG, 0, "Spooler Copy=%d, Offset=%d: Load Data", msg.id.copy, msg.offsetWidth);
 	//		if (data_load(&msg.id, path, msg.offsetWidth, msg.lengthPx, msg.gapPx, msg.blkNo, msg.printMode, msg.variable, msg.flags, msg.clearBlockUsed, same, _SMP_Flags | (msg.flags & FLAH_SMP_FIRST_PAGE), msg.smp_bufSize, _Buffer[_BufferNo])!=REPLY_OK && !_Abort)
 			if (data_load(&msg.id, path, msg.offsetWidth, msg.lengthPx, multiCopy, msg.gapPx, msg.blkNo, reply.blkCnt, msg.printMode, msg.variable, msg.virtualPasses , msg.virtualPass, msg.flags, msg.clearBlockUsed, same, msg.smp_bufSize, _Buffer[_BufferNo])!=REPLY_OK && !_Abort)
-				return Error(ERR_STOP, 0, "Could not load file >>%s<<", str_start_cut(msg.filename, PATH_RIPPED_DATA));										
+				return Error(ERR_STOP, 0, "Could not load file >>%s<<", str_start_cut(msg.filename, PATH_RIPPED_DATA));
 		}
 
 		//--- send spool state -------------------------------------------------------------

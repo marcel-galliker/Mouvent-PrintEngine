@@ -441,53 +441,46 @@ namespace RX_DigiPrint.Views.UserControls
                                              break;
 
                     default:
-                        if (value.Equals("ERROR"))
-                        { 
-                            _Value = value;
-                        }
-                        else
+                        try
                         {
-                            try
+                            double factor = 1.0;
+                            int digits =1;
+                            if (_Unit!=null)
                             {
-                                double factor = 1.0;
-                                int digits =1;
-                                if (_Unit!=null)
+                                if (TextEditCtrl.Tag!=null && TextEditCtrl.Tag.Equals("RxNumPad"))
                                 {
-                                    if (TextEditCtrl.Tag!=null && TextEditCtrl.Tag.Equals("RxNumPad"))
-                                    {
-                                        TextEditCtrl.Tag=null;
-                                        digits=3;
-                                    }
-                                    else if (_UpdateValue) factor=_Unit.Factor;
-                                    if (factor!=1.0) digits=3;
+                                    TextEditCtrl.Tag=null;
+                                    digits=3;
                                 }
-                                switch(_Format)
-                                {
-                                    case 'b':
-                                            {
-                                               UInt32 val = Convert.ToUInt32(value);
-                                               char[] str = new char[9];
-                                               int i, n;
-                                               for (i=0, n=8; i<8; i++)
-                                               {
-                                                   if ((val & (1<<i))!=0) str[n--]='1';
-                                                   else                   str[n--]='0';
-                                                   if ((i%4)==3 && n>0) str[n--]=' ';
-                                               }
-                                               _Value = new String(str); 
-                                            }
-                                            break;
-                                    case 'h': _Value = string.Format("{0:X}", Convert.ToInt64(value));  break;
-                                    case 'f': _Value = Rx.StrNumFormat(value, 3,      factor); break;
-                                    case '1': _Value = Rx.StrNumFormat(value, digits, factor); break;
-                                    case 'n': _Value = Rx.StrNumFormat(value, 0,      factor); break;
-                                    case 'l': _Value = value.Replace(';', '\n'); break;
-                                    default : _Value = value; break;
-                                }
+                                else if (_UpdateValue) factor=_Unit.Factor;
+                                if (factor!=1.0) digits=3;
                             }
-                            catch(Exception ex) 
-                            { _Value = value;}
+                            switch(_Format)
+                            {
+                                case 'b':
+                                        {
+                                           UInt32 val = Convert.ToUInt32(value);
+                                           char[] str = new char[9];
+                                           int i, n;
+                                           for (i=0, n=8; i<8; i++)
+                                           {
+                                               if ((val & (1<<i))!=0) str[n--]='1';
+                                               else                   str[n--]='0';
+                                               if ((i%4)==3 && n>0) str[n--]=' ';
+                                           }
+                                           _Value = new String(str); 
+                                        }
+                                        break;
+                                case 'h': _Value = string.Format("{0:X}", Convert.ToInt64(value));  break;
+                                case 'f': _Value = Rx.StrNumFormat(value, 3,      factor); break;
+                                case '1': _Value = Rx.StrNumFormat(value, digits, factor); break;
+                                case 'n': _Value = Rx.StrNumFormat(value, 0,      factor); break;
+                                case 'l': _Value = value.Replace(';', '\n'); break;
+                                default : _Value = value; break;
+                            }
                         }
+                        catch(Exception) 
+                        { _Value = value;}
                         if (!_UpdateValue) Changed = (value!=_ValueInit);
                         break;
                     }
@@ -524,7 +517,7 @@ namespace RX_DigiPrint.Views.UserControls
                         else 
                         {
                             string val=TextEditCtrl.Text;
-                            if (_Format=='n')
+                            if (_Format=='n' || _Format=='f' || _Format=='1')
                             {   // remove formatting spaces, commas (very special!)
                                 for (int i=0; i<val.Length; )
                                 {

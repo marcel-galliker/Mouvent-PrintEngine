@@ -15,7 +15,7 @@ namespace RX_DigiPrint.Views.LB702WBView
         {
             InitializeComponent();
 
-            CB_RotUW.ItemsSource = CB_RotUW.ItemsSource = new EN_RotationList();
+       //     CB_RotUW.ItemsSource = CB_RotUW.ItemsSource = new EN_RotationList();
             CB_Corona.ItemsSource     = new EN_OnOff();
             ParPanel.PropertyChanged +=ParPanel_PropertyChanged;
         }

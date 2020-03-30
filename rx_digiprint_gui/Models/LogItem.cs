@@ -157,7 +157,7 @@ namespace RX_DigiPrint.Models
                     case EDeviceType.dev_head:      try
                                                     {
                                                         int head0 = (_DevNo*(int)TcpIp.HEAD_CNT)%RxGlobals.PrintSystem.HeadCnt;
-                                                        if (RxGlobals.PrintSystem.HeadCnt==TcpIp.HEAD_CNT) 
+                                                        if (RxGlobals.PrintSystem.HeadCnt==TcpIp.HEAD_CNT && RxGlobals.InkSupply.List[_DevNo].InkType!=null) 
                                                             return string.Format("CL {0}", InkType.ColorNameShort(RxGlobals.InkSupply.List[_DevNo].InkType.ColorCode), _DevNo+1, _DevNo+4);
                                                         if (RxGlobals.PrintSystem.HeadCnt > TcpIp.HEAD_CNT)
                                                         {

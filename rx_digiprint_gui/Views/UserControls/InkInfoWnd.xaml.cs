@@ -46,7 +46,7 @@ namespace RX_DigiPrint.Views.UserControls
         //---Tara_Clicked ----------------------------------------
         private void Tara_Clicked(object sender, RoutedEventArgs e)
         {
-            if (RxMessageBox.YesNo("Set TARA", string.Format("Set Tara for {0}?", Title),  MessageBoxImage.Question, false))
+            if (RxMessageBox.YesNo("Set TARA", string.Format("Set Tara for {0}?", _InkSupply.InkType.Name), MessageBoxImage.Question, false))
             {
                 TcpIp.SValue msg = new TcpIp.SValue(){no=_InkSupply.No-1};
                 RxGlobals.RxInterface.SendMsg(TcpIp.CMD_SCALES_TARA, ref msg);
@@ -56,7 +56,7 @@ namespace RX_DigiPrint.Views.UserControls
         //---Correct_Clicked ----------------------------------------
         private void Correct_Clicked(object sender, RoutedEventArgs e)
         {
-            if (RxMessageBox.YesNo("Set TARA", string.Format("Set Tara for {0}?", Title),  MessageBoxImage.Question, false))
+            if (RxMessageBox.YesNo("Set TARA", string.Format("Set Tara for {0}?", _InkSupply.InkType.Name), MessageBoxImage.Question, false))
             {
                 TcpIp.SValue msg = new TcpIp.SValue(){no=_InkSupply.No-1};
                 RxGlobals.RxInterface.SendMsg(TcpIp.CMD_SCALES_TARA, ref msg);

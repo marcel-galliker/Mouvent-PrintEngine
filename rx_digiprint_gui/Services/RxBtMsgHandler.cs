@@ -223,7 +223,7 @@ namespace RX_DigiPrint.Services
         //--- handle_stepper_state -----------------------------------------------------
         public void handle_stepper_state(RxBtClient client)
         {
-            foreach (StepperMotor motor in RxGlobals.TestTableStatus.Motors)
+            foreach (StepperMotor motor in RxGlobals.StepperStatus[0].Motors)
                 motor.SendBt(client);
         }
 
@@ -232,8 +232,8 @@ namespace RX_DigiPrint.Services
         {
             RxBtDef.SBtStepperTestMsg msg;
             RxStructConvert.ToStruct(out msg, buf);
-            if (RxGlobals.TestTableStatus.Motors.Count()>msg.motorNo)
-                RxGlobals.TestTableStatus.Motors[msg.motorNo].DoTest(msg.moveUp!=0);
+            if (RxGlobals.StepperStatus[0].Motors.Count()>msg.motorNo)
+                RxGlobals.StepperStatus[0].Motors[msg.motorNo].DoTest(msg.moveUp!=0);
         }
 
         //--- handle_stepper_cmd ----------------------
@@ -241,11 +241,11 @@ namespace RX_DigiPrint.Services
         {
             switch(cmd)
             {
-                case RxBtDef.BT_CMD_STEPPER_STOP:   RxGlobals.RxInterface.SendCommand(TcpIp.CMD_CAP_STOP);          break;
-                case RxBtDef.BT_CMD_STEPPER_REF:    RxGlobals.RxInterface.SendCommand(TcpIp.CMD_CAP_REFERENCE);     break;
-                case RxBtDef.BT_CMD_STEPPER_UP:     RxGlobals.RxInterface.SendCommand(TcpIp.CMD_CAP_UP_POS);        break;
-                case RxBtDef.BT_CMD_STEPPER_PRINT:  RxGlobals.RxInterface.SendCommand(TcpIp.CMD_CAP_PRINT_POS);     break;
-                case RxBtDef.BT_CMD_STEPPER_CAP:    RxGlobals.RxInterface.SendCommand(TcpIp.CMD_CAP_CAPPING_POS);   break;
+                case RxBtDef.BT_CMD_STEPPER_STOP:   RxGlobals.RxInterface.SendCommand(TcpIp.CMD_LIFT_STOP);          break;
+                case RxBtDef.BT_CMD_STEPPER_REF:    RxGlobals.RxInterface.SendCommand(TcpIp.CMD_LIFT_REFERENCE);     break;
+                case RxBtDef.BT_CMD_STEPPER_UP:     RxGlobals.RxInterface.SendCommand(TcpIp.CMD_LIFT_UP_POS);        break;
+                case RxBtDef.BT_CMD_STEPPER_PRINT:  RxGlobals.RxInterface.SendCommand(TcpIp.CMD_LIFT_PRINT_POS);     break;
+                case RxBtDef.BT_CMD_STEPPER_CAP:    RxGlobals.RxInterface.SendCommand(TcpIp.CMD_LIFT_CAPPING_POS);   break;
                 default:                                                                                            break;
             }
         }

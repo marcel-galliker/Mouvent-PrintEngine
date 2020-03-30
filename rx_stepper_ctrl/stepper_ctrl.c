@@ -163,10 +163,10 @@ char *ctrl_cmd_name(int cmd)
 	static char str[32];
 	switch (cmd)
 	{
-	case CMD_CAP_REFERENCE:		strcpy(str, "Reference");	break; 
-	case CMD_CAP_PRINT_POS:		strcpy(str, "Goto Print");	break; 
-	case CMD_CAP_UP_POS:		strcpy(str, "Go UP");		break; 
-	case CMD_CAP_CAPPING_POS:	strcpy(str, "Capping");		break; 
+	case CMD_LIFT_REFERENCE:	strcpy(str, "Reference");	break; 
+	case CMD_LIFT_PRINT_POS:	strcpy(str, "Goto Print");	break; 
+	case CMD_LIFT_UP_POS:		strcpy(str, "Go UP");		break; 
+	case CMD_LIFT_CAPPING_POS:	strcpy(str, "Capping");		break; 
 	default:  					sprintf(str, "0x%08x", cmd);		
 	}
 	return str;
@@ -186,7 +186,7 @@ int _handle_ctrl_msg(RX_SOCKET socket, void *pmsg)//, int len, struct sockaddr *
     switch (phdr->msgId)
 	{
 	case CMD_STEPPER_CFG:			_do_config((SStepperCfg*)&phdr[1]);	break;
-	case CMD_TT_STATUS:				sok_send_2(&socket, REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);	
+	case CMD_STEPPER_STAT:		//	sok_send_2(&socket, REP_STEPPER_STAT, sizeof(RX_StepperStatus), &RX_StepperStatus);	
 									break;
 
 //	case CMD_PING:					_do_ping			(socket);							 break;
@@ -217,7 +217,7 @@ int _handle_ctrl_msg(RX_SOCKET socket, void *pmsg)//, int len, struct sockaddr *
 		default:	Error(ERR_CONT, 0, "PrinterType %d not implemented, msgId=0x%08x", RX_StepperCfg.printerType, phdr->msgId);
 		}			
 	}
-	
+	sok_send_2(&socket, REP_STEPPER_STAT, sizeof(RX_StepperStatus), &RX_StepperStatus);
 	return reply;
 };
 
@@ -236,6 +236,8 @@ static void _do_config(SStepperCfg *pcfg)
 {	
 	memcpy(&RX_StepperCfg, pcfg, sizeof(RX_StepperCfg));
 		
+	RX_StepperStatus.no = RX_StepperCfg.boardNo;
+
 	switch (RX_StepperCfg.printerType)
 	{
 	case printer_test_slide:		break;

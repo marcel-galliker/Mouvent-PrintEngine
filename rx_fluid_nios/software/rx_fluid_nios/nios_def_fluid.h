@@ -164,6 +164,7 @@ typedef enum ENiosFluidErr
 	err_fpga_incompatible	= 0x00000008,			
 	err_amc_fluid			= 0x00000010,
 	err_amc_heater			= 0x00000020,
+	err_amc_config_lost 	= 0x00000040,
 //	err_overpressure		= 0x00000040,
 //	err_inkpres_not_reached = 0x00000080,
 	err_watchdog	        = 0x00000100,	
@@ -302,6 +303,12 @@ typedef struct SNiosFluidStat
 	INT32	HeaterBoard_Vsupply_5V;
 	INT32	HeaterBoard_Vsupply_24V;
 	INT32	HeaterBoard_Vsupply_24VP;
+	
+	// AMC registers
+	INT32	AMC_Register_Power;
+	INT32	AMC_Register_GPIO_Config;
+	INT32	AMC_Register_Enable;
+	INT32	AMC_Register_Gain;	
 
 } SNiosFluidStat;
 

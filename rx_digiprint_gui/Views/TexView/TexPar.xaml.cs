@@ -51,6 +51,7 @@ namespace RX_DigiPrint.Views.TexView
             CB_Material.EndEditMode(true, true);
             ParPanelMaterial.Send();
             RxGlobals.RxInterface.SendCommand(TcpIp.CMD_PLC_SAVE_PAR);            
+
             Material material = RxGlobals.MaterialList.FindByName(XML_MATERIAL.Value);
             if (material!=null)
             {
@@ -88,7 +89,8 @@ namespace RX_DigiPrint.Views.TexView
         //--- CB_Material_DropDownClosed ----------------------------------------------
         private void CB_Material_DropDownClosed(object sender, RoutedEventArgs e)
         {
-            Material item = CB_Material.SelectedItem as Material;
+        //  Material item = CB_Material.SelectedItem as Material;
+            Material item = RxGlobals.MaterialList.FindByName(CB_Material.DisplayText);
             if (item!=null)
             {
                 if (item.Name.Equals("--- NEW ---"))

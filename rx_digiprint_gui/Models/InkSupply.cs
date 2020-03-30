@@ -136,6 +136,14 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _CondPresIn, value); }
         }
 
+        //--- Property CondPumpSpeed ---------------------------------------
+        private Int32 _CondPumpSpeed;
+        public Int32 CondPumpSpeed
+        {
+            get { return _CondPumpSpeed; }
+            set { SetProperty(ref _CondPumpSpeed, value); }
+        }
+
         //--- Property FlushTime ---------------------------------------
         private int _FlushTime;
         public int FlushTime
@@ -158,6 +166,14 @@ namespace RX_DigiPrint.Models
         {
             get { return _TempSetpoint; }
             set { SetProperty(ref _TempSetpoint, value); }
+        }
+
+        //--- Property TempSetpoint ---------------------------------------
+        private double _TempMaxSetpoint;
+        public double TempMaxSetpoint
+        {
+            get { return _TempMaxSetpoint; }
+            set { SetProperty(ref _TempMaxSetpoint, value); }
         }       
 
         //--- Property Temp ---------------------------------------
@@ -269,6 +285,8 @@ namespace RX_DigiPrint.Models
                 {
                     if (_InkType==null) TempSetpoint = 0;
                     else                TempSetpoint = _InkType.Temp;
+                    if (_InkType == null) TempMaxSetpoint = 0;
+                    else TempMaxSetpoint = _InkType.TempMax;
                 }
             }
         }
@@ -308,6 +326,7 @@ namespace RX_DigiPrint.Models
             PresLung        = msg.presLung;
             CondPresOut     = msg.condPresOut;
             CondPresIn      = msg.condPresIn;
+            CondPumpSpeed   = msg.condPumpSpeed;
             CondTemp        = msg.condTemp;
             FlushTime       = msg.flushTime;
             Temp            = msg.temp;

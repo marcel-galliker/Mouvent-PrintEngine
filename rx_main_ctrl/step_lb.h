@@ -52,5 +52,6 @@ void steplb_rob_stop(void);
 
 void steplb_rob_control_all(EnFluidCtrlMode ctrlMode);
 void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no);
+void steplb_rob_start_cap_all(void);
 
 //void _check_pump(void);

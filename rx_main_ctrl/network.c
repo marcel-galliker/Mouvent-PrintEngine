@@ -195,7 +195,7 @@ int net_register(SNetworkItem *item)	// register and calculate IP-Address
 		}
 	}
 
-	Error(LOG, 0, "net_register: Device >>%s %d (serial=%s)<<", _Network.item[i].deviceTypeStr, _Network.item[i].deviceNo+1, _Network.item[i].serialNo);
+	Error(LOG, 0, "net_register: Device >>%s %d (serial=%s)<<", item->deviceTypeStr, item->deviceNo+1, item->serialNo);
 
 	//--- search first gap ---
 	for (i = 0; i < SIZEOF(_Network.item); i++)
@@ -496,7 +496,7 @@ static void _send_item(RX_SOCKET socket, int i)
 		printf("Error\n");
 	memcpy(&msg.item, &_Network.item[i], sizeof(msg.item));
 	net_device_to_ipaddr((EDevice)_Network.item[i].deviceType, _Network.item[i].deviceNo, msg.item.ipAddr, sizeof(msg.item.ipAddr));
-	msg.item.connected = _Connected[i] || !strcmp(msg.item.ipAddr, RX_CTRL_MAIN) || (msg.item.deviceType==dev_plc && arg_simuPLC);
+	msg.item.connected = _Connected[i] || !strcmp(msg.item.ipAddr, RX_CTRL_MAIN) || (msg.item.macAddr==MAC_SIMU_PLC);
 //						|| (msg.item.deviceType==dev_spooler) 
 //						|| (msg.item.deviceType==dev_main);
 //						|| ctrl_is_connected((EDevice)_Network.item[i].deviceType, _Network.item[i].deviceNo);

@@ -13,7 +13,6 @@
     <converters:ColorCode_Str               x:Key="ColorCode_Str"/>
     <converters:Copies_Converter            x:Key="Copies_Converter"/>
     <converters:Counter_Converter           x:Key="Counter_Converter"/>
-    <converters:CleaningState_Converter     x:Key="CleaningState_Converter"/>
     <converters:Connected_Converter         x:Key="Connected_Converter" />
     <converters:CtrlMode_Str                x:Key="CtrlMode_Str"/>
     <converters:DeviceType_Converter        x:Key="DeviceType_Converter"/>

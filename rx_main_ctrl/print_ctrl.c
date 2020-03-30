@@ -139,9 +139,10 @@ int pc_start_printing(void)
 		if (!RX_StepperStatus.info.z_in_print && 
 			(RX_Config.printer.type==printer_TX801 
 		  || RX_Config.printer.type==printer_TX802
+		  || (RX_Config.printer.type==printer_LH702 && plc_in_simu())
 			))
 		{
-			step_handle_gui_msg(INVALID_SOCKET, CMD_CAP_PRINT_POS, NULL, 0);				
+			step_handle_gui_msg(INVALID_SOCKET, CMD_LIFT_PRINT_POS, NULL, 0);				
 		}
 		
 		TrPrintfL(TRUE, "pc_start_printing: ref_done=%d", RX_StepperStatus.info.ref_done);		
@@ -150,13 +151,13 @@ int pc_start_printing(void)
 		{
 			if(!RX_StepperStatus.info.ref_done)
 			{
-				TrPrintfL(TRUE, "pc_start_printing: CMD_CAP_REFERENCE");		
-				step_handle_gui_msg(INVALID_SOCKET, CMD_CAP_REFERENCE, NULL, 0);					
+				TrPrintfL(TRUE, "pc_start_printing: CMD_LIFT_REFERENCE");		
+				step_handle_gui_msg(INVALID_SOCKET, CMD_LIFT_REFERENCE, NULL, 0);					
 			}
 			else if (RX_StepperStatus.info.z_in_cap)
 			{
-				TrPrintfL(TRUE, "pc_start_printing: CMD_CAP_UP_POS");		
-				step_handle_gui_msg(INVALID_SOCKET, CMD_CAP_UP_POS, NULL, 0);										
+				TrPrintfL(TRUE, "pc_start_printing: CMD_LIFT_UP_POS");		
+				step_handle_gui_msg(INVALID_SOCKET, CMD_LIFT_UP_POS, NULL, 0);										
 			}
 		}
 		_Scanning = rx_def_is_scanning(RX_Config.printer.type);
@@ -236,7 +237,7 @@ int pc_off(void)
 	if (RX_PrinterStatus.printState==ps_stopping)
 	{
 		RX_PrinterStatus.printState=ps_off;
-//		if (RX_Config.printer.type==printer_cleaf) step_handle_gui_msg(INVALID_SOCKET, CMD_CAP_CAPPING_POS, NULL, 0);
+//		if (RX_Config.printer.type==printer_cleaf) step_handle_gui_msg(INVALID_SOCKET, CMD_LIFT_CAPPING_POS, NULL, 0);
 		if (chiller_is_running()) RX_PrinterStatus.printState = ps_ready_power;
 		RX_PrinterStatus.testMode   = FALSE;
 		gui_send_printer_status(&RX_PrinterStatus);
@@ -267,7 +268,8 @@ int pc_pause_printing(int fromGui)
 	TrPrintfL(TRUE, "pc_pause_printing");
 	RX_PrinterStatus.printState=ps_goto_pause;
 	if (RX_PrinterStatus.printState==ps_printing) Error(LOG, 0, "PAUSE called by user");
-//	RX_PrinterStatus.printState=ps_pause;
+//	if (RX_Config.printer.type == printer_LB702_UV) RX_PrinterStatus.printState = ps_pause;
+	if (rx_def_is_web(RX_Config.printer.type)) RX_PrinterStatus.printState = ps_pause;
 	gui_send_printer_status(&RX_PrinterStatus);
 	enc_stop_pg("pc_pause_printing");
 	machine_pause_printing(fromGui);
@@ -332,8 +334,8 @@ static void _load_test(void)
 	// see also gui_msg.c::_do_test_start
 	if (((int)RX_PrinterStatus.sentCnt) < (int)(RX_TestImage.copies*RX_TestImage.scans))
 	{
-		RX_TestImage.id.scan++;
-		if(!_Scanning) RX_TestImage.id.copy++;
+		if (_Scanning)	RX_TestImage.id.scan++;
+		else			RX_TestImage.id.copy++;
 		bmp_get_size(RX_TestImage.filepath, &width, &height, &bitsPerPixel, &memsize);
 		RX_TestImage.pageHeight = RX_TestImage.srcHeight = (UINT32)(height/1200.0*25400.0);
 		RX_TestImage.pageWidth  = RX_TestImage.srcWidth  = (UINT32)(width/1200.0*25400.0);
@@ -479,10 +481,11 @@ static int _print_next(void)
 											 break;
 				default:					 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "fuji.bmp");	break;
 			}
-			int scan=RX_TestImage.id.scan;
+			RX_TestImage.collate     = FALSE;
 			RX_TestImage.copiesTotal = RX_TestImage.copies;
+			_first=(RX_TestImage.id.copy==0) && (RX_TestImage.id.scan==0);
 			_load_test();
-			if (scan==0) 
+			if (_first)
 			{
 				if (_PreloadCnt>RX_TestImage.scans) _PreloadCnt = RX_TestImage.scans;
 				machine_set_printpar(&RX_TestImage);
@@ -765,11 +768,8 @@ static int _print_next(void)
 					{
 						int img_offset=_Item.pageMargin + _Item.pageWidth;
 						int bar_width=RX_Spooler.barWidthPx*25400/1200;
-						if (img_offset>bar_width && (RX_Config.printer.type!=printer_LH702 || arg_testMachine)) img_offset = bar_width;
-						
-						{
-							SPrintQueueItem item;
-							int clearBlockUsed=(_Item.id.copy >= _Item.copies) || (_Item.firstPage!=_Item.lastPage);
+						int clearBlockUsed=(_Item.id.copy >= _Item.copies) || (_Item.firstPage!=_Item.lastPage) || (_Item.pageMargin!=_PageMargin_Next);
+						if (img_offset>bar_width && RX_Config.printer.type!=printer_LH702) img_offset = bar_width;
 							if (_ChangeJob==1)
 							{	
 								Error(LOG, 0, "PrintCtrl: New Job: copy=%d, scansSent=%d", _Item.id.copy, _Item.scansSent);
@@ -779,18 +779,13 @@ static int _print_next(void)
 								pitem->copiesTotal = _Item.id.copy;
 								pq_set_item(pitem);									
 							}
-							else if (_Item.pageMargin!=_PageMargin_Next)
-							{	
-							//	Error(LOG, 0, "PrintCtrl: PageMargin old=%d, new=%d", _Item.pageMargin, _PageMargin_Next);
-								clearBlockUsed = TRUE;
-							}
+						SPrintQueueItem item;
 							memcpy(&item, &_Item, sizeof(item));
 							item.lengthUnit = PQ_LENGTH_UNDEF;
 							spool_print_file(&_Item.id, _DataPath, img_offset, 0, &item, clearBlockUsed);
 							_Item.pageMargin=_PageMargin_Next;
 						}
 					}
-				}
 				return REPLY_OK;
 			}		
 		}

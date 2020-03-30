@@ -773,6 +773,7 @@ typedef struct SHeadStat
 	INT32			presOut_diff;
 	INT32			meniscus;
 	INT32			meniscus_diff;
+	INT32			meniscus_Setpoint;
 	INT32			pid_offset;
 	
 	FLOAT			dropVolume;	// in pl
@@ -1151,6 +1152,7 @@ typedef struct SInkSupplyStat
 	INT32   presLung;			//  Lung pressure
 	INT32	condPresOut;	
 	INT32	condPresIn;  
+	INT32   condPumpSpeed;
 	INT32	condTemp;
 	INT32	temp;				//	Temperature
 	INT32	pumpSpeedSet;		//	Consumption pump speed
@@ -1185,6 +1187,9 @@ typedef struct SRobotOffsets
 {
 	INT32			ref_height;
 	INT32			head_align;
+	INT32			ref_height_back;
+	INT32			ref_height_front;
+	INT32			cap_height;
 } SRobotOffsets;
 	
 typedef enum ERobotFunctions
@@ -1286,7 +1291,7 @@ typedef struct ETestTableInfo
 	UINT32 z_in_ref			: 1;	//	0x00000010
 	UINT32 z_in_print		: 1;	//	0x00000020
 	UINT32 z_in_cap			: 1;	//	0x00000040
-	UINT32 info_07			: 1;	//	0x00000080
+	UINT32 z_in_up			: 1;	//	0x00000080
 	UINT32 x_in_cap			: 1;	//	0x00000100
 	UINT32 x_in_ref			: 1;	//	0x00000200
 	UINT32 printing			: 1;	//	0x00000400
@@ -1340,11 +1345,11 @@ typedef struct ERobotInfo
 	UINT32 rob_in_vac		: 1;	//	0x00400000
 	UINT32 rob_in_wash		: 1;	//	0x00800000
 	UINT32 rob_in_cap		: 1;	//	0x01000000
-	UINT32 moving_wd		: 1;	//	0x02000000
-	UINT32 ref_done_wd		: 1;    //  0x04000000
-	UINT32 wd_front_up		: 1;	//  0x08000000
-	UINT32 wd_back_up		: 1;	//  0x10000000
-	UINT32 wrinkle_detected	: 1;	//	0x20000000
+	UINT32 r_info_25		: 1;	//	0x02000000
+	UINT32 r_info_26		: 1;    //  0x04000000
+	UINT32 r_info_27		: 1;	//  0x08000000
+	UINT32 r_info_28		: 1;	//  0x10000000
+	UINT32 r_info_29		: 1;	//	0x20000000
 	UINT32 r_info_30		: 1;	//	0x40000000
 	UINT32 r_info_31		: 1;	//	0x80000000
 } ERobotInfo;
@@ -1388,7 +1393,7 @@ typedef struct ETestTableWarn
 //--- SStepperMotor -------------------------------------- 
 typedef struct SStepperMotor
 {
-	INT32	state;
+	UINT32	state;
 		#define MOTOR_STATE_UNDEF		0
 		#define MOTOR_STATE_IDLE		1	
 		#define MOTOR_STATE_MOVING_FWD	2
@@ -1401,6 +1406,7 @@ typedef struct SStepperMotor
 //--- SStepperStat -------------------------------------- 
 typedef struct SStepperStat
 {
+	UINT32		no;
 	//--- rom values, stored in head board ----
 	UINT64		macAddr;
 	UINT64		serialNo;
@@ -1409,6 +1415,8 @@ typedef struct SStepperStat
 
 	INT32		robot_used;
 	
+	INT32		cmdRunning;
+
 	//--- warnings/errors ----------------
 	ETestTableInfo	info;		// UINT32
 	ERobotInfo		robinfo;	// UINT32
@@ -1433,7 +1441,7 @@ typedef struct SStepperStat
 
 	INT32			inputs;
 	SStepperMotor	motor[MAX_STEPPER_MOTORS];
-	INT32			unused_set_io_cnt;
+//	INT32			unused_set_io_cnt;
 } SStepperStat;
 
 	
@@ -1527,13 +1535,13 @@ typedef struct SRxConfig
 {
 	UINT8			simulation;
 	UINT8			inkSupplyCnt;
-	UINT8			printBarCnt;
 	UINT8			headsPerColor;
 	INT32			headDist[MAX_HEAD_DIST];
 	INT32			headDistBack[MAX_HEAD_DIST];
 	INT32			headDistMax;
 	INT32			headDistBackMax;
 	INT32			colorOffset[INK_SUPPLY_CNT];
+	char			material[64];
 	SPrinterCfg		printer;
 	SEncoderCfg		encoder[ENC_CNT];
 	SStepperCfg		stepper;

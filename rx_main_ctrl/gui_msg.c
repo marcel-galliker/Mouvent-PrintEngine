@@ -110,8 +110,10 @@ int handle_gui_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sende
 {
 	SMsgHdr* phdr = (SMsgHdr*)pmsg;
 
-//	TrPrintfL(TRUE, "received GUI.MsgId=0x%08x", phdr->msgId);
+//	TrPrintfL(TRUE, "GUI[%d]: received GUI.MsgId=0x%08x", socket, phdr->msgId);
 		
+	gui_recv(socket);
+
 	if (FALSE)
 	{
 		char str[64];
@@ -119,10 +121,10 @@ int handle_gui_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sende
 		TrPrintfL(TRUE, "handle_gui_msg: sender=>>%s<< msgId=0x%08x", str, phdr->msgId);
 	}
 		
-	if (phdr->msgId >= CMD_PLC_0 && phdr->msgId < CMD_PLC_END)		plc_handle_gui_msg(socket, phdr->msgId, &phdr[1], phdr->msgLen - sizeof(SMsgHdr));
+	if      (phdr->msgId >= CMD_PLC_0 && phdr->msgId < CMD_PLC_END)	plc_handle_gui_msg (socket, phdr->msgId, &phdr[1], phdr->msgLen - sizeof(SMsgHdr));
 	else if (phdr->msgId >= CMD_TT_0 && phdr->msgId < CMD_TT_END)	step_handle_gui_msg(socket, phdr->msgId, &phdr[1], phdr->msgLen - sizeof(SMsgHdr));
-	else if (phdr->msgId >= CMD_CAP_0 && phdr->msgId < CMD_CAP_END)	step_handle_gui_msg(socket, phdr->msgId, &phdr[1], phdr->msgLen - sizeof(SMsgHdr));
-	else if (phdr->msgId >= CMD_CLN_0 && phdr->msgId < CMD_CLN_END)	step_handle_gui_msg(socket, phdr->msgId, &phdr[1], phdr->msgLen - sizeof(SMsgHdr));
+	else if (phdr->msgId >= CMD_LIFT_0 && phdr->msgId < CMD_LIFT_END)	step_handle_gui_msg(socket, phdr->msgId, &phdr[1], phdr->msgLen - sizeof(SMsgHdr));
+	else if (phdr->msgId >= CMD_ROB_0 && phdr->msgId < CMD_ROB_END)	step_handle_gui_msg(socket, phdr->msgId, &phdr[1], phdr->msgLen - sizeof(SMsgHdr));
 	else
 	{
 		switch (phdr->msgId)
@@ -262,7 +264,7 @@ static void _do_status(RX_SOCKET socket)
 	msg.hdr.msgLen = sizeof(msg);
 	msg.hdr.msgId = REP_STATUS;
 
-	sok_send(&socket, &msg);
+	gui_send_msg(socket, &msg);
 }
 
 //--- _do_evt_confirm ------------------------------------------------------------------------
@@ -292,7 +294,7 @@ static void _do_get_evt(RX_SOCKET socket)
 	SLogItem *item;
 	int i;
 
-	TrPrintf(TRUE, "_do_get_evt");
+//	TrPrintf(TRUE, "_do_get_evt");
 	msg.hdr.msgLen = sizeof(msg);
 	msg.hdr.msgId = EVT_GET_EVT;
 
@@ -300,10 +302,12 @@ static void _do_get_evt(RX_SOCKET socket)
 	// TrPrintf(TRUE, "sizeof(item)=%d", sizeof(*item));
 	while ((item=err_get_log_item(i++)))
 	{
+//		TrPrintf(TRUE, "_do_get_evt item=%d", i);
 	//	TrPrintf(TRUE, "log >>%s<<", item->formatStr);
 		memcpy(&msg.log, item, sizeof(msg.log));
-		sok_send(&socket, &msg);
+		gui_send_msg(socket, &msg);
 	}
+//	TrPrintf(TRUE, "_do_get_evt done");
 }
 
 //--- _do_req_log ----------------------------------------------------
@@ -556,7 +560,7 @@ static void _do_get_print_queue(RX_SOCKET socket)
 	TrPrintf(TRUE, "_do_get_print_queue");
 	msg.hdr.msgLen = sizeof(msg.hdr);
 	msg.hdr.msgId = REP_GET_PRINT_QUEUE;
-	sok_send(&socket, &msg);
+	gui_send_msg(socket, &msg);
 
 	msg.hdr.msgLen = sizeof(msg);
 	msg.hdr.msgId = EVT_GET_PRINT_QUEUE;
@@ -566,7 +570,7 @@ static void _do_get_print_queue(RX_SOCKET socket)
 	{
 		TrPrintf(TRUE, "queue[%d]: >>%s<<", i, item->filepath);
 		memcpy(&msg.item, item, sizeof(msg.item));
-		sok_send(&socket, &msg);
+		gui_send_msg(socket, &msg);
 		#ifndef linux
 		rx_sleep(20);
 		#endif
@@ -732,10 +736,10 @@ static void _do_get_ink_def(RX_SOCKET socket)
 	TrPrintf(TRUE, "_do_get_ink_def");
 	msg.hdr.msgLen = sizeof(msg.hdr);
 	msg.hdr.msgId = REP_GET_INK_DEF;
-	sok_send(&socket, &msg);
+	gui_send_msg(socket, &msg);
 
 	msg.hdr.msgId = BEG_GET_INK_DEF;
-	sok_send(&socket, &msg);
+	gui_send_msg(socket, &msg);
 
 	msg.hdr.msgLen = sizeof(msg);
 	msg.hdr.msgId = ITM_GET_INK_DEF;
@@ -765,7 +769,7 @@ static void _do_get_ink_def(RX_SOCKET socket)
 						if (setup_ink(fpath, &msg.ink, READ)==REPLY_OK)
 						{
 							strcpy(msg.ink.family, familyName);	
-							sok_send(&socket, &msg);
+							gui_send_msg(socket, &msg);
 						}
 					}
 				}
@@ -777,7 +781,7 @@ static void _do_get_ink_def(RX_SOCKET socket)
 
 	msg.hdr.msgLen = sizeof(msg.hdr);
 	msg.hdr.msgId = END_GET_INK_DEF;
-	sok_send(&socket, &msg);
+	gui_send_msg(socket, &msg);
 }
 
 //--- _do_head_fluidCtrlMode ---
@@ -841,6 +845,7 @@ static void _do_get_printer_cfg(RX_SOCKET socket)
 	memset(&msg, 0, sizeof(msg));
 	msg.hdr.msgLen	= sizeof(msg);
 	msg.hdr.msgId	= REP_GET_PRINTER_CFG;
+	memcpy(msg.hostName, RX_Hostname, sizeof(msg.hostName));
 	msg.type		= RX_Config.printer.type;
 	msg.overlap		= RX_Config.printer.overlap;
 	msg.headsPerColor = RX_Config.headsPerColor;
@@ -860,8 +865,7 @@ static void _do_get_printer_cfg(RX_SOCKET socket)
 	memcpy(&msg.offset, &RX_Config.printer.offset, sizeof(msg.offset));
 //	ctrl_set_config();
 	
-	if (socket==INVALID_SOCKET) gui_send_msg(socket, &msg);
-	else						sok_send(&socket, &msg);
+	gui_send_msg(socket, &msg);
 	
 	if (RX_Config.printer.type==printer_cleaf) co_send_order(socket);
 }
@@ -919,7 +923,7 @@ static void _do_set_printer_cfg(RX_SOCKET socket, SPrinterCfgMsg* pmsg)
 	memcpy(&RX_Config.printer.offset,		&pmsg->offset,				sizeof(RX_Config.printer.offset));
 	setup_config(PATH_USER FILENAME_CFG, &RX_Config, WRITE);
 
-	sok_send_2(&socket, REP_SET_PRINTER_CFG, 0, NULL);	 
+	gui_send_msg_2(socket, REP_SET_PRINTER_CFG, 0, NULL);	 
 
 	_do_get_printer_cfg(INVALID_SOCKET);
 }
@@ -938,16 +942,17 @@ void gui_set_stepper_offsets(int no, SRobotOffsets *poffsets)
 //--- _do_get_stepper_cfg --------------------------------------
 static void _do_get_stepper_cfg	(RX_SOCKET socket)
 {
-	if (socket==INVALID_SOCKET) gui_send_msg_2(socket, REP_GET_STEPPER_CFG, sizeof(RX_Config.stepper), &RX_Config.stepper);
-	else						sok_send_2(&socket, REP_GET_STEPPER_CFG, sizeof(RX_Config.stepper), &RX_Config.stepper);
+	gui_send_msg_2(socket, REP_GET_STEPPER_CFG, sizeof(RX_Config.stepper), &RX_Config.stepper);
 }
 
 //--- _do_set_stepper_cfg ----------------------------------------
 static void _do_set_stepper_cfg (RX_SOCKET socket, SStepperCfg *pmsg)
 {
 	int print_height = RX_Config.stepper.print_height;
+	int material_thickness = RX_Config.stepper.material_thickness;
 	memcpy(&RX_Config.stepper, pmsg, sizeof(RX_Config.stepper));
 	RX_Config.stepper.print_height = print_height;
+	RX_Config.stepper.material_thickness = material_thickness;
 	
 	gui_send_msg_2(0, REP_GET_STEPPER_CFG, sizeof(RX_Config.stepper), &RX_Config.stepper);
 	step_set_config();
@@ -1005,7 +1010,8 @@ static void _do_test_start	(RX_SOCKET socket, SPrintQueueEvt* pmsg)
 	if (rx_def_is_web(RX_Config.printer.type))
     { 
         if (RX_TestImage.testImage==PQ_TEST_JETS 
-		||  RX_TestImage.testImage==PQ_TEST_JET_NUMBERS)
+		||  RX_TestImage.testImage==PQ_TEST_JET_NUMBERS
+		||  RX_TestImage.testImage==PQ_TEST_FULL_ALIGNMENT)
 		{
             RX_TestImage.scans=RX_Config.inkSupplyCnt;
 		}

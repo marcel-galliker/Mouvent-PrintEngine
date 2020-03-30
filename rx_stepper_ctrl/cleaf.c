@@ -103,7 +103,6 @@
 
 
 //--- global  variables -----------------------------------------------------------------------------------------------------------------
-static int	_CmdRunning = 0;
 static char	_CmdName[32];
 static int  _LastRobPosCmd = 0;
 static int	_PrintPos;
@@ -200,7 +199,7 @@ void cleaf_main(int ticks, int menu)
 		
 	if (!motors_init_done())
 	{
-		motors_config(MOTOR_Z_BITS, CURRENT_Z_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER, STEPS);
+		motors_config(MOTOR_Z_BITS, CURRENT_Z_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER);
 	}
 	
 	if (RX_StepperCfg.printerType != printer_cleaf) return; // printer_cleaf
@@ -214,18 +213,19 @@ void cleaf_main(int ticks, int menu)
 	
 	RX_StepperStatus.posZ = REF_HEIGHT - _z_steps_2_micron(motor_get_step(0));
 		
-	// Drip Pans : enabled when the main send a command CMD_CLN_DRIP_PANS
+	// Drip Pans : enabled when the main send a command CMD_ROB_DRIP_PANS
 	RX_StepperStatus.info.DripPans_InfeedDOWN	= (RX_StepperCfg.boardNo==0) && fpga_input(DRIP_PANS_INFEED_DOWN);
 	RX_StepperStatus.info.DripPans_InfeedUP		= (RX_StepperCfg.boardNo==0) && fpga_input(DRIP_PANS_INFEED_UP);
 	RX_StepperStatus.info.DripPans_OutfeedDOWN	= (RX_StepperCfg.boardNo==0) && fpga_input(DRIP_PANS_OUTFEED_DOWN);
 	RX_StepperStatus.info.DripPans_OutfeedUP	= (RX_StepperCfg.boardNo==0) && fpga_input(DRIP_PANS_OUTFEED_UP);
 
 	// --- set positions False while moving ---
-	RX_StepperStatus.info.moving = (_CmdRunning!=0);
+	RX_StepperStatus.info.moving = (RX_StepperStatus.cmdRunning!=0);
 
-	if (_CmdRunning && _CmdRunning != CMD_CLN_DRIP_PANS)
+	if (RX_StepperStatus.cmdRunning && RX_StepperStatus.cmdRunning != CMD_ROB_DRIP_PANS)
 	{
 		RX_StepperStatus.info.z_in_ref   = FALSE;
+		RX_StepperStatus.info.z_in_up    = FALSE;
 		RX_StepperStatus.info.z_in_print = FALSE;
 		RX_StepperStatus.info.z_in_cap   = FALSE;
 	}
@@ -236,12 +236,12 @@ void cleaf_main(int ticks, int menu)
 
 
 	// --- Executed after each move ---
-	if (_CmdRunning && motors_move_done(MOTOR_ALL_BITS))
+	if (RX_StepperStatus.cmdRunning && motors_move_done(MOTOR_ALL_BITS))
 	{		
 		RX_StepperStatus.info.moving = FALSE;
 				
 		// --- tasks after motor error ---
-		if (_CmdRunning != CMD_CAP_REFERENCE)
+		if (RX_StepperStatus.cmdRunning != CMD_LIFT_REFERENCE)
 		{
 			if (motors_error(MOTOR_ALL_BITS, &motor))
 			{
@@ -250,12 +250,12 @@ void cleaf_main(int ticks, int menu)
 				if      (motor==MOTOR_Z_FRONT)	Error(ERR_CONT, 0, "Stepper: Command %s: Motor Front blocked", _CmdName);
 				else if (motor==MOTOR_Z_BACK)	Error(ERR_CONT, 0, "Stepper: Command %s: Motor Back blocked", _CmdName);
 				else							Error(ERR_CONT, 0, "Stepper: Command %s: Motor[%d] blocked", _CmdName, motor + 1);
-				_CmdRunning = FALSE;
+				RX_StepperStatus.cmdRunning = FALSE;
 				Fpga.par->output &= ~RO_ALL_OUTPUTS; // set all output to off
 			}			
 		}
 		
-		if (_CmdRunning == CMD_CAP_REFERENCE)
+		if (RX_StepperStatus.cmdRunning == CMD_LIFT_REFERENCE)
 		{
 			motors_reset(MOTOR_Z_BITS);
 			if (!fpga_input(HEAD_UP_IN_FRONT)) Error(LOG, 0, "Stepper: Command REFERENCE: End Sensor Front NOT HIGH");
@@ -264,12 +264,12 @@ void cleaf_main(int ticks, int menu)
 			motors_move_to_step(MOTOR_Z_BITS, &_ParZ_down, 100);			
 		}
 		
-		if (_CmdRunning == CMD_CAP_UP_POS)
+		if (RX_StepperStatus.cmdRunning == CMD_LIFT_UP_POS)
 		{
 			Fpga.par->output |= LASER_BEFORE_HEAD_OUT;			// Laser for supervision OFF
 		}
 
-		if (_CmdRunning == CMD_CLN_DRIP_PANS)
+		if (RX_StepperStatus.cmdRunning == CMD_ROB_DRIP_PANS)
 		{
 			if (rx_get_ticks() > _DripPanTime + DRIPPAN_TIMEOUT /*&& RX_StepperStatus.info.z_in_ref*/)
 			{
@@ -291,15 +291,16 @@ void cleaf_main(int ticks, int menu)
 					Fpga.par->output |= DRIP_PANS_VALVE_UP;
 				}
 				_DripPanTime = 0;
-				_CmdRunning = 0;
+				RX_StepperStatus.cmdRunning = 0;
 			}
 		}
 		else
 		{
-			RX_StepperStatus.info.z_in_ref   = (_CmdRunning == CMD_CAP_REFERENCE || _CmdRunning == CMD_CAP_UP_POS);
-			RX_StepperStatus.info.z_in_print = (_CmdRunning == CMD_CAP_PRINT_POS);
-			RX_StepperStatus.info.z_in_cap   = (_CmdRunning == CMD_CAP_CAPPING_POS);
-			_CmdRunning = 0;
+			RX_StepperStatus.info.z_in_ref   = (RX_StepperStatus.cmdRunning == CMD_LIFT_REFERENCE);
+			RX_StepperStatus.info.z_in_up    = (RX_StepperStatus.cmdRunning == CMD_LIFT_UP_POS);
+			RX_StepperStatus.info.z_in_print = (RX_StepperStatus.cmdRunning == CMD_LIFT_PRINT_POS);
+			RX_StepperStatus.info.z_in_cap   = (RX_StepperStatus.cmdRunning == CMD_LIFT_CAPPING_POS);
+			RX_StepperStatus.cmdRunning = 0;
 		}
 		
 	}	
@@ -312,10 +313,10 @@ void cleaf_main(int ticks, int menu)
 			if (((++_PrintHeadEn_On) == HEAD_DOWN_EN_DELAY) && (RX_StepperStatus.info.printhead_en == FALSE)) // (_PrintHeadEn_On < HEAD_DOWN_EN_DELAY) && 
 			{
 			//	Error(LOG, 0, "LIFT: printhead_en enabled");
-				if (RX_StepperStatus.info.splicing) Error(LOG, 0, "LIFT: printhead_en enabled, splice ended", _CmdRunning);
+				if (RX_StepperStatus.info.splicing) Error(LOG, 0, "LIFT: printhead_en enabled, splice ended", RX_StepperStatus.cmdRunning);
 				RX_StepperStatus.info.printhead_en = TRUE;
 				RX_StepperStatus.info.splicing = FALSE;
-				ctrl_send_2(REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);
+				ctrl_send_2(REP_STEPPER_STAT, sizeof(RX_StepperStatus), &RX_StepperStatus);
 			}
 		}
 		else // --- Printhead down enable is OFF---
@@ -323,13 +324,13 @@ void cleaf_main(int ticks, int menu)
 			_PrintHeadEn_On = 0;
 			if (((++_PrintHeadEn_Off) == HEAD_DOWN_EN_DELAY) && (RX_StepperStatus.info.printhead_en == TRUE)) // (_PrintHeadEn_Off < HEAD_DOWN_EN_DELAY) && 
 			{
-			//	Error(LOG, 0, "LIFT: printhead_en disabled", _CmdRunning);
+			//	Error(LOG, 0, "LIFT: printhead_en disabled", RX_StepperStatus.cmdRunning);
 				if (RX_StepperStatus.info.z_in_print)
 				{	
 					Error(LOG, 0, "LIFT: printhead_en disabled, go up for splice");
 					RX_StepperStatus.info.splicing = TRUE;
-					cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_UP_POS, NULL);
-					ctrl_send_2(REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);
+					cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_UP_POS, NULL);
+					ctrl_send_2(REP_STEPPER_STAT, sizeof(RX_StepperStatus), &RX_StepperStatus);
 				}
 				RX_StepperStatus.info.printhead_en = FALSE;  // if 0 then splice is comming and head has to go up, if not in capping
 			}
@@ -390,7 +391,7 @@ static void _cleaf_check_laser(void)
 			if (_LaserTimeThin && (rx_get_ticks()-_LaserTimeThin) > LASER_TIMEOUT)
 			{
 				Error(WARN, 0, "WEB: Laser detects too thin material. Moving head up. (measured %d, expected %d)", RX_StepperStatus.posY, RX_StepperCfg.material_thickness);
-				cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_UP_POS, NULL);			
+				cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_UP_POS, NULL);			
 				_LaserTimeThin = 0;
 			}
 		}
@@ -418,19 +419,19 @@ static void _check_material_supervision(void)
 		if (!_PrintHeightTemp) _PrintHeightTemp = RX_StepperStatus.posZ;
 		pos = RX_StepperStatus.posZ + HEIGHT_INCREASE_AFTER_MATERIAL_DETECTION;
 		_MaterialDetected = TRUE;
-		cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_PRINT_POS, &pos);
+		cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_PRINT_POS, &pos);
 	}
 	else if (_MaterialDetected && _MaterialDetectedInput && RX_StepperStatus.info.z_in_print)
 	{
 		Error(ERR_CONT, 0, "Laser detects material in front of Printhead.");
-		cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_UP_POS, NULL);
+		cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_UP_POS, NULL);
 	}
 	else if (_MaterialDetected && !_MaterialDetectedInput)
 	{
 		if (!_PrintHeight_Time) _PrintHeight_Time = rx_get_ticks();
 		if (rx_get_ticks() > _PrintHeight_Time + HEIGHT_INCREASE_TIMEOUT && !_MaterialDetectedInput)
 		{
-			cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_PRINT_POS, &_PrintHeightTemp);
+			cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_PRINT_POS, &_PrintHeightTemp);
 			_MaterialDetected = FALSE;
 			_PrintHeight_Time = 0;
 			_PrintHeightTemp = 0;
@@ -459,7 +460,7 @@ void cleaf_display_status(void)
 	
 	{
 	//	term_printf("Cleaf Stepper LIFT ---------------------------------\n");
-		term_printf("moving:            %d		cmd: %08x\n", RX_StepperStatus.info.moving, _CmdRunning);	
+		term_printf("moving:            %d		cmd: %08x\n", RX_StepperStatus.info.moving, RX_StepperStatus.cmdRunning);	
 		term_printf("refheight:         %06d  ", RX_StepperCfg.ref_height);
 		term_printf("pos in um:         %06d  \n", RX_StepperStatus.posZ);
 		term_printf("LASER in um:       %06d  row=%06d \n", RX_StepperStatus.posY, Fpga.stat->analog_in[LASER_IN]);	
@@ -467,7 +468,7 @@ void cleaf_display_status(void)
 		term_printf("reference done:    %d\n", RX_StepperStatus.info.ref_done);
 		term_printf("allow move down:   %d \n", _AllowMoveDown);
 		term_printf("Material detected: %d \n", _MaterialDetectedInput);
-		term_printf("z in ref:%d print: %d cap:%d\n", RX_StepperStatus.info.z_in_ref, RX_StepperStatus.info.z_in_print, RX_StepperStatus.info.z_in_cap);
+		term_printf("z in ref:%d up:%d print: %d cap:%d\n", RX_StepperStatus.info.z_in_ref, RX_StepperStatus.info.z_in_up, RX_StepperStatus.info.z_in_print, RX_StepperStatus.info.z_in_cap);
 		if (RX_StepperCfg.boardNo==0)
 		{
 			term_printf("drips pans valve: up=%d down=%d\n", (Fpga.par->output&DRIP_PANS_VALVE_UP)!=0, (Fpga.par->output&DRIP_PANS_VALVE_DOWN)!=0);
@@ -521,22 +522,22 @@ int cleaf_menu(void)
 		switch (str[0])
 		{
 		case 'o': Fpga.par->output ^= (1 << atoi(&str[1])); break;
-		case 's': cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_STOP, NULL); break;
+		case 's': cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_STOP, NULL); break;
 		case 'r': motor_reset(atoi(&str[1])); break;
 		case 'm': _cleaf_motor_test(str[1] - '0', atoi(&str[2])); break;
 		
-		case 'R': cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_REFERENCE, NULL); break;
-		case 'c': cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_CAPPING_POS, NULL); break;
+		case 'R': cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_REFERENCE, NULL); break;
+		case 'c': cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_CAPPING_POS, NULL); break;
 		case 'p': pos=atoi(&str[1]);
 				   if (arg_debug && REF_HEIGHT==0) REF_HEIGHT=90000;
 				  old =  _AllowMoveDown;
 				  _AllowMoveDown=TRUE;
-				  cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_PRINT_POS, &pos); 
+				  cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_PRINT_POS, &pos); 
 				  _AllowMoveDown = old;	
 				  break;
-		case 'u': cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CAP_UP_POS, NULL); break;
+		case 'u': cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_UP_POS, NULL); break;
 		case 'i': Fpga.par->adc_rst = TRUE; break;
-		case 'd': cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_CLN_DRIP_PANS, NULL); break;
+		case 'd': cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_DRIP_PANS, NULL); break;
 		case 'z': _cleaf_motor_z_test(atoi(&str[1])); break;
 		case 'x': return FALSE;
 		case '?': _showMenu=!_showMenu; return TRUE;
@@ -568,40 +569,40 @@ int  cleaf_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 	{	
 		// ============================================================== Hub ==============================================================
 
-	case CMD_CAP_STOP:				strcpy(_CmdName, "CMD_CAP_STOP");
+	case CMD_LIFT_STOP:				strcpy(_CmdName, "CMD_LIFT_STOP");
 		motors_stop(MOTOR_ALL_BITS); // Stops Hub and Robot
 		Fpga.par->output &= ~RO_ALL_OUTPUTS; // set all output to off
 		RX_StepperStatus.info.moving = TRUE;
-		_CmdRunning = msgId;
+		RX_StepperStatus.cmdRunning = msgId;
 		_MaterialDetected = FALSE;
 		break;
 
-	case CMD_CAP_REFERENCE:			strcpy(_CmdName, "CMD_CAP_REFERENCE");
-	//	Error(LOG, 0, "got CMD_CAP_REFERENCE");
-		if (!_CmdRunning)
+	case CMD_LIFT_REFERENCE:			strcpy(_CmdName, "CMD_LIFT_REFERENCE");
+	//	Error(LOG, 0, "got CMD_LIFT_REFERENCE");
+		if (!RX_StepperStatus.cmdRunning)
 		{ 
 			motors_reset(MOTOR_ALL_BITS); // to recover from move count missalignment
 			RX_StepperStatus.info.ref_done		= FALSE;
 			Fpga.par->output &= ~RO_ALL_OUTPUTS;
 			Fpga.par->output |= LASER_BEFORE_HEAD_OUT;			// Laser for supervision OFF
-			_CmdRunning  = CMD_CAP_REFERENCE;
+			RX_StepperStatus.cmdRunning  = CMD_LIFT_REFERENCE;
 			RX_StepperStatus.info.moving = TRUE;
 			motors_move_by_step(MOTOR_Z_BITS, &_Par_Z_ref, -500000, TRUE);
 			_MaterialDetected = FALSE;
 		}
 		break;
 
-	case CMD_CAP_PRINT_POS:			strcpy(_CmdName, "CMD_CAP_PRINT_POS");
+	case CMD_LIFT_PRINT_POS:			strcpy(_CmdName, "CMD_LIFT_PRINT_POS");
 		pos = (*((INT32*)pdata));
 		if (pos<PRINT_HEIGHT_MIN) 
 		{
 			pos = PRINT_HEIGHT_MIN;				
-			Error(WARN, 0, "PrintHeight set to minimum (%d.%03 mm)", PRINT_HEIGHT_MIN/1000, PRINT_HEIGHT_MIN%1000);
+			Error(WARN, 0, "PrintHeight set to minimum (%d.%03d mm)", PRINT_HEIGHT_MIN/1000, PRINT_HEIGHT_MIN%1000);
 		}
 		if (pos >= REF_HEIGHT - 1000) pos = REF_HEIGHT - 1000;
 		_PrintPos   = RX_StepperCfg.material_thickness + pos;
-//		Error(LOG, 0, "got CMD_CAP_PRINT_POS %d, _CmdRunning=0x%08x ", _PrintPos, _CmdRunning);
-		if(!_CmdRunning && _AllowMoveDown)
+//		Error(LOG, 0, "got CMD_LIFT_PRINT_POS %d, RX_StepperStatus.cmdRunning=0x%08x ", _PrintPos, RX_StepperStatus.cmdRunning);
+		if(!RX_StepperStatus.cmdRunning && _AllowMoveDown)
 		{
 			if      (!RX_StepperStatus.info.ref_done)				Error(ERR_CONT, 0, "Reference not done");
 			else if (!_AllowMoveDown)								Error(ERR_CONT, 0, "Stepper: Command 0x%08x: printhead_en signal not set", msgId);
@@ -612,7 +613,7 @@ int  cleaf_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 			else
 			{
 				if (REF_HEIGHT<87000) Error(WARN, 0, "Reference Height is only %d.02d mm", REF_HEIGHT/100, REF_HEIGHT%100);
-				_CmdRunning = CMD_CAP_PRINT_POS;
+				RX_StepperStatus.cmdRunning = CMD_LIFT_PRINT_POS;
 				motor_move_to_step(MOTOR_Z_FRONT, &_ParZ_down, _z_micron_2_steps(REF_HEIGHT - _PrintPos));
 				motor_move_to_step(MOTOR_Z_BACK,  &_ParZ_down, _z_micron_2_steps(REF_HEIGHT - _PrintPos + HEAD_ALIGN));
 				motors_start(MOTOR_Z_BITS, TRUE);
@@ -623,10 +624,10 @@ int  cleaf_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		break;
 		
 	/*
-	case CMD_CAP_CAPPING_POS:		strcpy(_CmdName, "CMD_CAP_CAPPING_POS");
-		if (!_CmdRunning && RX_StepperStatus.info.ref_done)
+	case CMD_LIFT_CAPPING_POS:		strcpy(_CmdName, "CMD_LIFT_CAPPING_POS");
+		if (!RX_StepperStatus.cmdRunning && RX_StepperStatus.info.ref_done)
 		{
-			_CmdRunning = msgId;
+			RX_StepperStatus.cmdRunning = msgId;
 			motor_move_to_step(MOTOR_Z_FRONT, &_ParZ_cap, _z_micron_2_steps(CAPPING_HEIGHT));		
 			motor_move_to_step(MOTOR_Z_BACK,  &_ParZ_cap, _z_micron_2_steps(CAPPING_HEIGHT));		
 			motors_start(MOTOR_Z_BITS, FALSE);
@@ -634,27 +635,27 @@ int  cleaf_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		break;
 	*/
 		
-	case CMD_CAP_UP_POS:			
-		strcpy(_CmdName, "CMD_CAP_UP_POS");
-//		Error(LOG, 0, "got CMD_CAP_UP_POS _CmdRunning=0x%08x", _CmdRunning);
-		if (!_CmdRunning && RX_StepperStatus.info.ref_done)
+	case CMD_LIFT_UP_POS:			
+		strcpy(_CmdName, "CMD_LIFT_UP_POS");
+//		Error(LOG, 0, "got CMD_LIFT_UP_POS RX_StepperStatus.cmdRunning=0x%08x", RX_StepperStatus.cmdRunning);
+		if (!RX_StepperStatus.cmdRunning && RX_StepperStatus.info.ref_done)
 		{
-			_CmdRunning = msgId;
+			RX_StepperStatus.cmdRunning = msgId;
 			motors_move_to_step(MOTOR_Z_BITS, &_ParZ_down, POS_UP);
 			_MaterialDetected = FALSE;
 			//Fpga.par->output |= LASER_BEFORE_HEAD_OUT;			// Laser for supervision OFF
 		}
 		break;
 		
-	case CMD_CLN_DRIP_PANS:
-		if (RX_StepperStatus.info.z_in_ref) 
+	case CMD_ROB_DRIP_PANS:
+		if (RX_StepperStatus.info.z_in_ref||RX_StepperStatus.info.z_in_up) 
 		{
 			/*
 			First it should move for 0.5 seconds to the position it is already and only then it should move the other way, 
 			this is to fill the tubes and so it shouldn't move too fast down. The other part is in the cleaf_main().
 			Here it moves first to the position, it is already.
 			*/
-			_CmdRunning = msgId;
+			RX_StepperStatus.cmdRunning = msgId;
 			_DripPanTime = rx_get_ticks();
 			if (fpga_input(DRIP_PANS_INFEED_UP) || fpga_input(DRIP_PANS_OUTFEED_UP))
 			{
@@ -669,11 +670,11 @@ int  cleaf_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		}
 		break;
 				
-	case CMD_CAP_ALLOW_MOVE_DOWN:
+	case CMD_LIFT_ALLOW_MOVE_DOWN:
 		_AllowMoveDown = 1;
 		break;
 		
-	case CMD_CAP_NOT_ALLOW_MOVE_DOWN:
+	case CMD_LIFT_NOT_ALLOW_MOVE_DOWN:
 		_AllowMoveDown = 0;
 		break;
 										
@@ -684,7 +685,7 @@ int  cleaf_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		_cleaf_Error = 0;
 		break;
 		
-	case CMD_CAP_VENT:	break;
+	case CMD_LIFT_VENT:	break;
 		
 	default:	Error(WARN, 0, "LIFT: Command 0x%08x not implemented", msgId); break;
 	}
@@ -713,7 +714,7 @@ static void _cleaf_motor_test(int motorNo, int steps)
 	par.encCheck		= chk_off;
 	par.dis_mux_in		= FALSE;
 	RX_StepperStatus.info.moving = TRUE;
-	_CmdRunning = 1; // TEST
+	RX_StepperStatus.cmdRunning = 1; // TEST
 
 	motors_move_by_step(motor, &par, mot_steps, FALSE);
 }
@@ -721,7 +722,7 @@ static void _cleaf_motor_test(int motorNo, int steps)
 //--- _cleaf_motor_z_test ----------------------------------------------------------------------
 void _cleaf_motor_z_test(int steps)
 {	
-	_CmdRunning = 1; // TEST
+	RX_StepperStatus.cmdRunning = 1; // TEST
 	RX_StepperStatus.info.moving = TRUE;
 	motors_move_by_step(MOTOR_Z_BITS, &_ParZ_down, -steps, TRUE);
 }

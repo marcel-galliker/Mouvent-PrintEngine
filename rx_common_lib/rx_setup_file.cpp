@@ -245,6 +245,36 @@ void setup_uchar(HANDLE hsetup, const char *name, EN_setup_Action action, UCHAR 
 	}
 }
 
+//--- setup_uchar_arr ------------------------------------------------------------------
+void setup_uchar_arr(HANDLE hsetup, const char *name, EN_setup_Action action, UCHAR  *val, int cnt, INT32 def)
+{
+	SSetupFile *setup=(SSetupFile*)hsetup;
+	if (action == WRITE)
+	{
+		int i, len;
+		int strsize = 10*cnt;
+		char *str = (char*)malloc(strsize);
+		memset(str, 0, strsize);
+		for (i=0, len=0; i<cnt; i++) len+=snprintf(&str[len], strsize-len, "%d ", val[i]);
+		setup->actChapter->SetAttribute(name, str);
+	}
+	else
+	{
+		int i, pos;
+		for (i=0; i<cnt; i++) val[i]=def;
+		const char *str = setup->actChapter->Attribute(name);
+		if (str==NULL) return;
+		for (i=0, pos=0; i<cnt; i++)
+		{
+			if (!str[pos]) break;
+			val[i] = atoi(&str[pos]);
+			while (str[pos] && str[pos]!=' ') pos++;
+			pos++;
+		}
+	}
+}
+
+
 //--- setup_enum8 ---------------------------------------------
 void setup_enum8(HANDLE hsetup, const char *name, EN_setup_Action action, UCHAR *val, enumToStr converter)
 {

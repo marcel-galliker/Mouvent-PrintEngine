@@ -30,7 +30,7 @@
 
 //--- Defines -----------------------------------------------------------------
 // static int	_Trace=2;
-static int	_Trace=0;
+static int	_Trace=2;
 
 #define SIMU_OFF	0	// no simulation
 #define SIMU_WRITE	1	// write data to file
@@ -55,10 +55,13 @@ typedef struct
 	RX_SOCKET		dataSocket[MAX_ETH_PORT];
 #endif
 	RX_SOCKET		ctrlSocket;
+	HANDLE			mutex;
+
 	UINT32			blockUsedSize;
 	UINT32			blockOutIdx;
 	UINT32			*blockUsed;
 	UINT8			blockUsedId;
+	UINT8			checkBlocksFree;
 	UINT8			reqUsedId[HEAD_CNT][MAX_USED_ID];
 	SBmpSplitInfo	*pBmpSplitPar[HEAD_CNT];
 	SUDPDataBlockMsg msg;
@@ -86,6 +89,8 @@ static int				_TestLastBlock;
 
 static int				_StressTestRunning;
 
+static char				_send_image_cmd_flags[MAX_PATH];
+
 //--- prototypes --------------------------------------------------------------
 static void *_head_board_ctrl_thread(void *par);
 static int _handle_head_ctrl_msg(RX_SOCKET socket, void *msg, int len, struct sockaddr *sender, void *par);
@@ -95,7 +100,7 @@ static int _do_block_used	(SHBThreadPar *par, SBlockUsedRep *msg);
 static int _send_to_board	(SHBThreadPar *par, int head, int blkNo, int blkCnt);
 static int _send_image_data	(SBmpSplitInfo *pBmpSplitInfo);
 static int _send_image_cmd 	(SBmpSplitInfo *pBmpSplitInfo);
-static void _save_to_file	(SBmpSplitInfo *pInfo);
+static void _save_to_file	(SBmpSplitInfo *pInfo, int log);
 static int _check_image_blocks (SHBThreadPar *par, SBmpSplitInfo *pBmpSplitInfo, int minBlk, int maxBlk);
 
 static void *_stress_test_thread(void *ppar);
@@ -137,19 +142,22 @@ int hc_head_board_cfg(RX_SOCKET socket, SHeadBoardCfg* cfg)
 
 	_StressTestRunning = FALSE;
 	
-	if (_Simulation) 
+	if (_Simulation || RX_Spooler.printerType==printer_LH702) 
 	{ //--- prepare simulation directory ------------------------------		
 		rx_mkdir(PATH_HOME PATH_RIPPED_DATA_DIR "trace/");
 		for (i=0; i<SIZEOF(RX_Color); i++)
 		{
 			if (RX_Color[i].lastLine>0)
 			{
-				sprintf(path, PATH_HOME PATH_RIPPED_DATA_DIR "trace/%s", RX_ColorNameShort(i));
+				sprintf(path, PATH_RIPPED_DATA "trace/%s", RX_ColorNameShort(i));
 				rx_mkdir(path);
+				#ifdef linux
+				rx_remove_old_files(path, 0);
+				#endif
 			}
 		}
 		#ifndef linux
-		system("del "  PATH_HOME PATH_RIPPED_DATA_DIR "trace\\*.* /S /Q");
+		system("del "  PATH_RIPPED_DATA "trace\\*.* /S /Q");
 		#endif
 		memset(_SimuNo, 0, sizeof(_SimuNo));
 	}
@@ -183,6 +191,7 @@ int hc_head_board_cfg(RX_SOCKET socket, SHeadBoardCfg* cfg)
 		#else
 			for (i=0; i<MAX_ETH_PORT; i++) _HBPar[cfg->no]->dataSocket[i]=INVALID_SOCKET;
 		#endif
+		_HBPar[cfg->no]->mutex = rx_mutex_create();
 	}
 	else
 	{
@@ -200,6 +209,9 @@ int hc_head_board_cfg(RX_SOCKET socket, SHeadBoardCfg* cfg)
 	_HBPar[cfg->no]->boardNo     = cfg->no;
 	_HBPar[cfg->no]->blockOutIdx = 0;
 	_HBPar[cfg->no]->pdCnt		 = 0;
+	_HBPar[cfg->no]->blkData[0]  = 0x33;
+	if (cfg->dataBlkSize>sizeof(_HBPar[cfg->no]->blkData)-2) Error(ERR_ABORT, 0, "blkData overflow");
+	_HBPar[cfg->no]->blkData[cfg->dataBlkSize+1]  = 0x66;
 	memset(&_HBPar[cfg->no]->lastId, 0, sizeof(_HBPar[cfg->no]->lastId));
 	memcpy(&_HBPar[cfg->no]->cfg, cfg, sizeof(_HBPar[cfg->no]->cfg));
 	size =  (cfg->dataBlkCntHead*MAX_HEADS_BOARD)/sizeof(UINT32);
@@ -214,6 +226,7 @@ int hc_head_board_cfg(RX_SOCKET socket, SHeadBoardCfg* cfg)
 	_HBPar[cfg->no]->errorSent = FALSE;
 	_HBUsed[cfg->no]=(cfg->spoolerNo==RX_SpoolerNo);
 	hc_check();
+
 	return REPLY_OK;
 }
 
@@ -319,11 +332,15 @@ void hc_send_next()
 	SBmpSplitInfo *pSplitInfo, *pInfo;
 	if ((pSplitInfo=data_get_next(&headCnt)))
 	{
+		memset(_send_image_cmd_flags, ' ', sizeof(_send_image_cmd_flags));
+		_send_image_cmd_flags[headCnt+headCnt/4+5]=0;
 		for (i=0, pInfo=pSplitInfo; i<headCnt; i++, pInfo++)
 		{
 			if (pInfo->used)
 			{
-				TrPrintfL(_Trace, "Head[%d.%d]: send color >>%s<<, present=%d", pInfo->board, pInfo->head, RX_ColorNameLong(pInfo->colorCode), _HBPar[pInfo->board]->cfg.present);
+				_send_image_cmd_flags[5*pInfo->board+pInfo->head] = '-';
+
+				// TrPrintfL(_Trace, "Head[%d.%d]: send color >>%s<<, present=%d", pInfo->board, pInfo->head, RX_ColorNameLong(pInfo->colorCode), _HBPar[pInfo->board]->cfg.present);
 				switch (_HBPar[pInfo->board]->cfg.present)
 				{
 				case dev__undef:	break;
@@ -336,7 +353,7 @@ void hc_send_next()
 											Error(LOG, 0, "File (id=%d, page=%d, copy=%d, scan=%d) headsUsed=%d", pid->id, pid->page, pid->copy, pid->scan, pInfo->pListItem->headsUsed);	
 										}
 										*/
-										_save_to_file(pInfo);
+										_save_to_file(pInfo, FALSE);
 										if(data_sent(pInfo,i)) 
 										{
 											SPrintDoneMsg evt;
@@ -398,10 +415,9 @@ void hc_send_next()
 									break;
 
 				case dev_on:		//if (pInfo->pListItem->id.scan<2 && pInfo->colorCode==0) 
-									if (FALSE)
-									{										
-										_save_to_file(pInfo);
-										Error(LOG, 0, "File (id=%d, page=%d, copy=%d, scan=%d) buffer=%03d, blk0=%d, blkCnt=%d saved to File", pInfo->pListItem->id.id, pInfo->pListItem->id.page, pInfo->pListItem->id.copy, pInfo->pListItem->id.scan, ctrl_get_bufferNo(*pInfo->data), pInfo->blk0, pInfo->blkCnt);
+									if (RX_Spooler.printerType==printer_LH702)
+									{
+									//	_save_to_file(pInfo);
 									}
 									_send_image_data(pInfo);
 									break;
@@ -415,14 +431,14 @@ void hc_send_next()
 }
 
 //--- _save_to_file ---------------------------------
-static void _save_to_file(SBmpSplitInfo *pInfo)
+static void _save_to_file(SBmpSplitInfo *pInfo, int log)
 {
 	int		size=pInfo->blkCnt * RX_Spooler.dataBlkSize;
 	int		head, blk;
 	char	fname[100];
 	BYTE   *buffer;
 
-	buffer = (BYTE*)malloc(size);
+	buffer = (BYTE*)malloc(size+2);
 	if (buffer==NULL)
 		return;
 	
@@ -430,16 +446,16 @@ static void _save_to_file(SBmpSplitInfo *pInfo)
 	
 	for (blk=0; blk<pInfo->blkCnt; blk++)
 	{
-		data_fill_blk(pInfo, blk, &buffer[blk*RX_Spooler.dataBlkSize], TRUE);
+		data_fill_blk(pInfo, blk, &buffer[blk*RX_Spooler.dataBlkSize+1], TRUE);
 	}
 	
 	if (rx_def_is_scanning(RX_Spooler.printerType))
 		sprintf(fname, "%strace/%s/Scan%02d-img%d-hd%d_%s.bmp", PATH_RIPPED_DATA, RX_ColorNameShort(pInfo->inkSupplyNo), ++_SimuNo[pInfo->colorCode], pInfo->pListItem->id.id, pInfo->head, RX_ColorNameShort(pInfo->inkSupplyNo));
 	else
 		sprintf(fname, "%strace/%s/(id=%d, p=%d, c=%d)-%s%d.bmp", PATH_RIPPED_DATA, RX_ColorNameShort(pInfo->inkSupplyNo), pInfo->pListItem->id.id, pInfo->pListItem->id.page, pInfo->pListItem->id.copy, RX_ColorNameShort(pInfo->inkSupplyNo), head);
-	bmp_write(fname, buffer, pInfo->bitsPerPixel, pInfo->widthPx, pInfo->srcLineCnt, pInfo->dstLineLen, FALSE);
+	bmp_write(fname, buffer+1, pInfo->bitsPerPixel, pInfo->widthPx, pInfo->srcLineCnt, pInfo->dstLineLen, FALSE);
 	free(buffer);
-//	Error(LOG, 0, "File saved to >>%s<<", fname);
+	if (log) Error(LOG, 0, "File saved to >>%s<<", fname);
 }
 
 //--- _send_image_data ---------------------------------------------
@@ -458,9 +474,12 @@ static int _send_image_data(SBmpSplitInfo *pInfo)
 		TrPrintfL(_Trace, "Head[%d.%d]: _send_image_data pl[%d](id=%d, p=%d, c=%d, s=%d) blocks[%d .. %d] ", pInfo->board, pInfo->head, idx, pid->id, pid->page, pid->copy, pid->scan, pInfo->blk0, pInfo->blk0+pInfo->blkCnt);
 		pInfo->sendFromBlk	= 0;
 
-		_HBPar[pInfo->board]->pBmpSplitPar[pInfo->head] = pInfo;
 		TrPrintfL(_Trace, "Head[%d.%d]: NEW BMP _req_used_flags blkN0=%d, blkCnt=%d", pInfo->board, pInfo->head, pInfo->blk0, pInfo->blkCnt);
+		_HBPar[pInfo->board]->pBmpSplitPar[pInfo->head] = pInfo;
+		_HBPar[pInfo->board]->checkBlocksFree = TRUE;
+	//	if (RX_Spooler.printerType==printer_LH702) _save_to_file(pInfo, TRUE);
 		_req_used_flags(_HBPar[pInfo->board], pInfo->head, pInfo->blk0, pInfo->blkCnt, __LINE__);				
+		TrPrintfL(_Trace, "Head[%d.%d]: NEW BMP _req_used_flags blkN0=%d, blkCnt=%d", pInfo->board, pInfo->head, pInfo->blk0, pInfo->blkCnt);
 	}
 	return REPLY_OK;
 }
@@ -498,8 +517,9 @@ static int _send_image_cmd(SBmpSplitInfo *pInfo)
 	else
 		TrPrintfL(_Trace, "SENT _BlkNo[%d][%d]: idx=%d, blk=%d, cnt=%d, buffer=%03d, test=%d, SENT", pInfo->board, pInfo->head, _TestImgNo[pInfo->board][pInfo->head], pInfo->blk0, pInfo->blkCnt, ctrl_get_bufferNo(*pInfo->data), pInfo->test);
 
+	_send_image_cmd_flags[5*pInfo->board+pInfo->head] = '*';
 	SPageId *pid = &pInfo->pListItem->id;
-	TrPrintfL(_Trace, "_send_image_cmd[%d.%d].img[%d] (id=%d, page=%d, copy=%d, scan=%d)", pInfo->board, pInfo->head, ++_TestImgNo[pInfo->board][pInfo->head], pid->id, pid->page, pid->copy, pid->scan);
+	TrPrintfL(_Trace, "_send_image_cmd[%d.%d].img[%d] (id=%d, page=%d, copy=%d, scan=%d) flags=%s", pInfo->board, pInfo->head, ++_TestImgNo[pInfo->board][pInfo->head], pid->id, pid->page, pid->copy, pid->scan, _send_image_cmd_flags);
 	sok_send(&_HBPar[pInfo->board]->ctrlSocket, &imageCmd);
 
 //	pInfo->blkCnt = -pInfo->blkCnt;
@@ -618,8 +638,9 @@ static int _do_block_used(SHBThreadPar *par, SBlockUsedRep *msg)
 			str[l]=0;
 			TrPrintfL(TRUE, "blk[%03d]: %s", blk, str);
 		}
-		TrPrintfL(_Trace, "Head[%d.%d]: _do_block_used id=%d, blkNo=%d, blkCnt=%d, (Block %d .. %d), blkOutIdx=%d END", par->cfg.no, msg->headNo, msg->id, msg->blkNo, msg->blkCnt, msg->blkNo, msg->blkNo+msg->blkCnt, msg->blockOutIdx);
+		TrPrintfL(_Trace, "Head[%d.%d]: _do_block_used id=%d, blkNo=%d, blkCnt=%d, (Block %d .. %d), blkOutIdx=%d", par->cfg.no, msg->headNo, msg->id, msg->blkNo, msg->blkCnt, msg->blkNo, msg->blkNo+msg->blkCnt, msg->blockOutIdx);
 	}
+	
 	par->blockOutIdx = msg->blockOutIdx;
 	_send_to_board(par, msg->headNo, msg->blkNo, msg->blkCnt);
 	return REPLY_OK;
@@ -630,9 +651,11 @@ static void _req_used_flags(SHBThreadPar *par, int head, int blkNo, int blkCnt, 
 {
 	SBlockUsedCmd	*pcmd = &par->blockUsedCmd;	// save stack
 	SHeadCfg		*pHead;
+	int				ret;
 
 	if (_Abort) return;
-	
+
+	rx_mutex_lock(par->mutex);
 	pcmd->hdr.msgLen	= sizeof(SBlockUsedCmd);
 	pcmd->hdr.msgId	= CMD_GET_BLOCK_USED;
 	
@@ -657,12 +680,13 @@ static void _req_used_flags(SHBThreadPar *par, int head, int blkNo, int blkCnt, 
 		par->blockUsedId = (par->blockUsedId+1)%MAX_USED_ID;
 		if (head<SIZEOF(_TestBlockUsedReqTime))
 			_TestBlockUsedReqTime[head][par->blockUsedId] = rx_get_ticks();
-		TrPrintfL(_Trace, "Head[%d.%d]: req block used: id=%d, blkNo=%d, blkCnt=%d (blk %d .. %d) line=%d", par->cfg.no, head, pcmd->id, pcmd->blkNo, pcmd->blkCnt, pcmd->blkNo, pcmd->blkNo+pcmd->blkCnt, line);
-
-		sok_send(&par->ctrlSocket, pcmd);
+	//	TrPrintfL(_Trace, "Head[%d.%d]: _req_used_flags: id=%d, blkNo=%d, blkCnt=%d (blk %d .. %d) line=%d", par->cfg.no, head, pcmd->id, pcmd->blkNo, pcmd->blkCnt, pcmd->blkNo, pcmd->blkNo+pcmd->blkCnt, line);		
+		ret=sok_send(&par->ctrlSocket, pcmd);
+		TrPrintfL(_Trace, "Head[%d.%d]: _req_used_flags: id=%d, blkNo=%d, blkCnt=%d (blk %d .. %d) line=%d, ret=%d", par->cfg.no, head, pcmd->id, pcmd->blkNo, pcmd->blkCnt, pcmd->blkNo, pcmd->blkNo+pcmd->blkCnt, line, ret);
 		blkCnt -= pcmd->blkCnt;
 		blkNo  += pcmd->blkCnt;
 	} while (blkCnt>0);
+	rx_mutex_unlock(par->mutex);
 }
 
 //--- _send_to_board ----------------------------------------------------------------
@@ -687,6 +711,25 @@ static int _send_to_board(SHBThreadPar *par, int head, int blkNo, int blkCnt)
 	par->msg.blkNo = -1;
 	
 	pinfo = par->pBmpSplitPar[head];
+
+	if (FALSE && par->checkBlocksFree)
+	{
+		int i, n, blk;
+		int end   = par->cfg.head[head].blkNo0+par->cfg.head[head].blkCnt;
+
+		blk=pinfo->blk0;
+		par->checkBlocksFree = FALSE;
+		TrPrintfL(_Trace>=2, "Head[%d.%d]: checkBlocksFree", par->cfg.no, head);
+		for (i=blk, n=0; n<pinfo->blkCnt; n++)
+		{	
+			if (par->blockUsed[i/32] & (1<<(i%32)))
+			{
+				Error(ERR_STOP, 0, "Head[%d.%d]: _do_block_used blkNo=%d, blkCnt=%d, (Block %d .. %d): Block[%d] not free", par->cfg.no, head, pinfo->blk0, pinfo->blkCnt, par->cfg.head[head].blkNo0, par->cfg.head[head].blkNo0+pinfo->blkCnt, i);
+				break;
+			}
+			if (++i==end) i=par->cfg.head[head].blkNo0;
+		}
+	}
 
 	blkCnt = pinfo->blkCnt;
 	if (pinfo!=NULL)
@@ -717,7 +760,11 @@ static int _send_to_board(SHBThreadPar *par, int head, int blkNo, int blkCnt)
 				par->msg.blkNo = dstBlk;
 				if (RX_Spooler.printerType==printer_LH702)
 				{
+					if (par->blkData[0]!=0x33) 
+						Error(LOG, 0, "Error");
 					data_fill_blk(pinfo, i, &par->blkData[1], TRUE);
+					if (par->blkData[0]!=0x33) 
+						Error(LOG, 0, "Error");
 					memcpy(par->msg.blkData, &par->blkData[1], sizeof(par->msg.blkData));
 				}
 				else data_fill_blk(pinfo, i, par->msg.blkData, FALSE);
@@ -763,7 +810,8 @@ static int _send_to_board(SHBThreadPar *par, int head, int blkNo, int blkCnt)
 				#else
 					sent=send(par->dataSocket[par->udpNo], (char*)&par->msg, sizeof(par->msg.blkNo)+par->cfg.dataBlkSize, 0);
 				#endif
-				par->udpNo = 1-par->udpNo;
+				if (RX_Spooler.printerType!=printer_LH702)
+					par->udpNo = 1-par->udpNo;
 
 				cnt++;
 				if ((dstBlk%100)==0 || cnt==1) TrPrintfL(_Trace>1, "Head[%d.%d]: Send Block %d", par->cfg.no, head, dstBlk);

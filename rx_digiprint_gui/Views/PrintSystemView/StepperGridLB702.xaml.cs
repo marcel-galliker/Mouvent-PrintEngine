@@ -8,7 +8,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
 {
     public partial class StepperGridLB702 : UserControl
     {
-        private RxNumBox[,] _numbox= new  RxNumBox[4,2];
+        private RxNumBox[,] _numbox= new  RxNumBox[4,3];
 
         public StepperGridLB702()
         {
@@ -16,14 +16,14 @@ namespace RX_DigiPrint.Views.PrintSystemView
             DataContext = RxGlobals.Stepper;
             ManualFlightTimeComp.DataContext = RxGlobals.PrintSystem;
             RxGlobals.Stepper.PropertyChanged += Stepper_PropertyChanged;
-            Col0.DataContext = RxGlobals.InkSupply.List[0];
+            /*Col0.DataContext = RxGlobals.InkSupply.List[0];
             Col1.DataContext = RxGlobals.InkSupply.List[1];
             Col2.DataContext = RxGlobals.InkSupply.List[2];
             Col3.DataContext = RxGlobals.InkSupply.List[3];
             Col4.DataContext = RxGlobals.InkSupply.List[4];
             Col5.DataContext = RxGlobals.InkSupply.List[5];
             Col6.DataContext = RxGlobals.InkSupply.List[6];
-            Col7.DataContext = RxGlobals.InkSupply.List[7];
+            Col7.DataContext = RxGlobals.InkSupply.List[7];*/
 
             //--- allocate boxes ---------------------------
             int x, y;
@@ -36,7 +36,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                     _numbox[x,y].LostFocus += box_LostFocus;
                     _numbox[x,y].HorizontalContentAlignment = System.Windows.HorizontalAlignment.Right;
                     Grid.SetColumn(_numbox[x,y], 1+x);
-                    Grid.SetRow(_numbox[x,y], 1+y);
+                    Grid.SetRow(_numbox[x,y], 2+y);
                     MainGrid.Children.Add(_numbox[x,y]);
                 }
             }
@@ -60,8 +60,9 @@ namespace RX_DigiPrint.Views.PrintSystemView
             int row=tag%100;
             switch(row)
             {
-                case 0: RxGlobals.Stepper.Robot[no].ref_height  = (System.Int32)(box.Value*1000); break;
-                case 1: RxGlobals.Stepper.Robot[no].head_align  = (System.Int32)(box.Value*1000); break;
+                case 0: RxGlobals.Stepper.Robot[no].ref_height_back = (System.Int32)(box.Value * 1000); break;
+                case 1: RxGlobals.Stepper.Robot[no].ref_height_front = (System.Int32)(box.Value * 1000); break;
+                case 2: RxGlobals.Stepper.Robot[no].cap_height          = (System.Int32)(box.Value * 1000); break;
                 default: break;
             }
             RxGlobals.Stepper.Changed=true;
@@ -74,18 +75,21 @@ namespace RX_DigiPrint.Views.PrintSystemView
             int no;
             for (no=0; no<4; no++)
             {
-                _numbox[no,0].Text = (RxGlobals.Stepper.Robot[no].ref_height /1000.0).ToString();
-                _numbox[no,1].Text = (RxGlobals.Stepper.Robot[no].head_align /1000.0).ToString();
+                _numbox[no,0].Text = (RxGlobals.Stepper.Robot[no].ref_height_back /1000.0).ToString();
+                _numbox[no,1].Text = (RxGlobals.Stepper.Robot[no].ref_height_front / 1000.0).ToString();
+                _numbox[no,2].Text = (RxGlobals.Stepper.Robot[no].cap_height / 1000.0).ToString();
             }
-            if (RxGlobals.TestTableStatus.RobotUsed || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_WB)
+            if (RxGlobals.StepperStatus[0].RobotUsed || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_WB)
             {
                 WipingDelay_Height.Height = GridLength.Auto;
                 WipingSpeed_Height.Height = GridLength.Auto;
+                CapHeight.Height = GridLength.Auto;
             }
             else
             {
                 WipingDelay_Height.Height = _hidden;
                 WipingSpeed_Height.Height = _hidden;
+                CapHeight.Height = _hidden;
             }
         }
     }

@@ -76,29 +76,29 @@ int	 stepdp_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen
 						break;
 
 			//--- cappping ---------------------------------------------------------
-			case CMD_CAP_STOP:
-			case CMD_CAP_UP_POS:
-			case CMD_CLN_DRIP_PANS:
+			case CMD_LIFT_STOP:
+			case CMD_LIFT_UP_POS:
+			case CMD_ROB_DRIP_PANS:
 			
-			case CMD_CLN_DRIP_PANS_REF:
+			case CMD_ROB_DRIP_PANS_REF:
 						sok_send_2(&_step_socket[no], cmd, 0, NULL);
 						break;		
 						
-			case CMD_CAP_FILL:
-			case CMD_CAP_EMPTY:			
-			case CMD_CLN_DRIP_PANS_CAP:
-			case CMD_CAP_CAPPING_POS:
+			case CMD_LIFT_FILL:
+			case CMD_LIFT_EMPTY:			
+			case CMD_ROB_DRIP_PANS_CAP:
+			case CMD_LIFT_CAPPING_POS:
 						sok_send_2(&_step_socket[no], cmd, 0, NULL);
 						break;
 
-			case CMD_CAP_REFERENCE:
-						TrPrintfL(TRUE, "Stepper[%d].CMD_CAP_REFERENCE", no);
+			case CMD_LIFT_REFERENCE:
+						TrPrintfL(TRUE, "Stepper[%d].CMD_LIFT_REFERENCE", no);
 						sok_send_2(&_step_socket[no], cmd, 0, NULL);
 						break;
 		
-			case CMD_CAP_PRINT_POS:
+			case CMD_LIFT_PRINT_POS:
 						_AbortPrinting=FALSE;
-						sok_send_2(&_step_socket[no], CMD_CAP_PRINT_POS, sizeof(RX_Config.stepper.print_height), &RX_Config.stepper.print_height);
+						sok_send_2(&_step_socket[no], CMD_LIFT_PRINT_POS, sizeof(RX_Config.stepper.print_height), &RX_Config.stepper.print_height);
 						break;
 			}
 		}
@@ -165,11 +165,11 @@ int stepdp_handle_status(int no, SStepperStat *pStatus)
 	memcpy(&RX_StepperStatus.info, &info, sizeof(RX_StepperStatus.info));
 	RX_StepperStatus.info.x_in_cap = plc_in_cap_pos();
 
-	gui_send_msg_2(0, REP_TT_STATUS, sizeof(RX_StepperStatus), &RX_StepperStatus);
+	gui_send_msg_2(INVALID_SOCKET, REP_STEPPER_STAT, sizeof(RX_StepperStatus), &RX_StepperStatus);
 	return REPLY_OK;
 }
 
-//--- steplb_to_print_pos --------------------------------
+//--- stepdp_to_print_pos --------------------------------
 int	 stepdp_to_print_pos(void)
 {
 	_AbortPrinting = FALSE;
@@ -177,7 +177,7 @@ int	 stepdp_to_print_pos(void)
 	{
 		if (_step_socket[no]!=INVALID_SOCKET)
 		{
-			sok_send_2(&_step_socket[no], CMD_CAP_PRINT_POS, sizeof(RX_Config.stepper.print_height), &RX_Config.stepper.print_height);
+			sok_send_2(&_step_socket[no], CMD_LIFT_PRINT_POS, sizeof(RX_Config.stepper.print_height), &RX_Config.stepper.print_height);
 		}
 	}
 	return REPLY_OK;									
@@ -199,7 +199,7 @@ int	 stepdp_to_up_pos(void)
 	{
 		if (_step_socket[no]!=INVALID_SOCKET)
 		{
-			sok_send_2(&_step_socket[no], CMD_CAP_UP_POS, 0, NULL);
+			sok_send_2(&_step_socket[no], CMD_LIFT_UP_POS, 0, NULL);
 		}
 	}
 	_AbortPrinting = FALSE;

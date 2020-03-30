@@ -21,7 +21,7 @@ namespace RX_DigiPrint.Views.LB702WBView
             Device_selected(0);
             Machine.DeviceSelected +=  Device_selected;
 
-            foreach(var ctrl in DeviceGrid.Children)
+ /*           foreach(var ctrl in DeviceGrid.Children)
             {
                 IPlcParPanel panel = ctrl as IPlcParPanel;
                 if (panel!=null) 
@@ -29,17 +29,35 @@ namespace RX_DigiPrint.Views.LB702WBView
                     ParMain.SendParameters  += panel.Send;
                     ParMain.ResetParameters += panel.Reset;
                 }
-            }
+            }*/
         }
 
         //--- Device_selected -------------------------------------
         private void Device_selected(int no)
         {
-            int i;
-            for (i=0; i<DeviceGrid.Children.Count; i++)
+            int yes=no;
+
+            if (yes >= 100)
             {
-                DeviceGrid.Children[i].Visibility = (i==no)? Visibility.Visible : Visibility.Collapsed;
+                ParMain.FlexoUnit.Visibility = Visibility.Visible;
+                yes -= 100;
             }
+            else ParMain.FlexoUnit.Visibility = Visibility.Collapsed;
+
+            if (yes >= 10)
+            {
+                ParMain.PrintUnit.Visibility = Visibility.Visible;
+                yes -= 10;
+            }
+            else ParMain.PrintUnit.Visibility = Visibility.Collapsed;
+
+            if (yes >= 1)
+                ParMain.CoatingUnit.Visibility = Visibility.Visible;
+            else ParMain.CoatingUnit.Visibility = Visibility.Collapsed;
+
+            ParMain.CoatingUnitSeparation.Visibility = ParMain.CoatingUnit.Visibility;
+            ParMain.PrintUnitSeparation.Visibility = ParMain.PrintUnit.Visibility;
+            ParMain.FlexoUnitSeparation.Visibility = ParMain.FlexoUnit.Visibility;
         }
     }
 }

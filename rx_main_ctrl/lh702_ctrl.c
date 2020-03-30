@@ -71,10 +71,10 @@ static int   _lh702_closed(RX_SOCKET socket, const char *peerName);
 static int  _lh702_handle_msg		(RX_SOCKET socket, void *msg, int len, struct sockaddr *sender, void *par);
 static void _handle_dist			(int value);
 static void _handle_lateral			(int value);
-static void _handle_material		(char *material);
 static void _handle_thickness		(int value);
 static void _handle_headheight		(int value);
 static void _handle_encoffset		(int value);
+static void  _lh702_tick			(void);
 
 //--- lh702_init -------------------------------------------------
 void lh702_init(void)
@@ -83,6 +83,8 @@ void lh702_init(void)
 	_Status.hdr.msgLen = sizeof(_Status);
 	_Status.hdr.msgId  = EVT_STATE;
 		
+	lh702_load_material(RX_Config.material);
+
 	_Socket=INVALID_SOCKET;
 	if(!_lh702ThreadRunning)
 	{
@@ -142,12 +144,12 @@ void lh702_save_material	(char *varList)
 		printf(">>%s<< = >>%s<<\n",  var, val);
 		if (!strcmp(var, "XML_MATERIAL"))			strncpy(_Status.material, val, sizeof(_Status.material)-1);
 		if (!strcmp(var, "XML_HEAD_HEIGHT"))		_Status.head_height = (INT32)(atof(val)*1000);
-		if (!strcmp(var, "XML_MATERIAL_THICKNESS"))	_Status.thickness   = atoi(val);
+		if (!strcmp(var, "XML_MATERIAL_THICKNESS"))	_Status.thickness   = (INT32)(atof(val)*1000);
 		if (!strcmp(var, "XML_ENC_OFFSET"))			_Status.encoder_adj = atoi(val);
 		*end++='\n';
 		str = end;
 	}
-	lh702_tick();
+	_lh702_tick();
 }
 
 //--- lh702_set_printpar -----------------------------------------------------
@@ -168,7 +170,7 @@ void lh702_set_printpar(SPrintQueueItem *pitem)
 		_Status.lateral			= pitem->pageMargin;
 		_Status.printState		= PS_STARTING;
 	}
-	lh702_tick();
+	_lh702_tick();
 }
 
 //--- lh702_on_error --------------------------------------------------------
@@ -218,7 +220,8 @@ static void *_lh702_thread(void *lpParameter)
 					TrPrintfL(TRUE, "Connected");
 					ErrorEx(dev_plc, -1, LOG, 0, "Connected");
 				}
-			}							
+			}
+			_lh702_tick();
 		}
 		
 		rx_sleep(1000);
@@ -236,16 +239,24 @@ static int _lh702_closed(RX_SOCKET socket, const char *peerName)
 }
 
 //--- lh702_tick --------------------------------------------
-void  lh702_tick(void)
+static void  _lh702_tick(void)
 {
+//	TrPrintfL(TRUE, "_lh702_tick socket=%d", _Socket);
+	if (_Socket!=INVALID_SOCKET)
+	{
 	switch(RX_PrinterStatus.printState)
 	{
 	case ps_printing:	_Status.printState = PS_PRINTING; break;
 	case ps_stopping:	_Status.printState = PS_PRINTING; break;
 	default:			_Status.printState = PS_OFF;
 	}
+		strncpy(_Status.material, RX_Config.material, sizeof(_Status.material));
+		_Status.head_height    = RX_Config.stepper.print_height;
+		_Status.thickness	   = RX_Config.stepper.material_thickness;
+		_Status.encoder_adj	   = RX_Config.printer.offset.incPerMeter[0];
 	_Status.copies_printed = RX_PrinterStatus.printedCnt;
 	sok_send(&_Socket, &_Status); 
+	}
 }
 
 //--- lh702_menu ----------------------------------------------
@@ -269,7 +280,7 @@ void lh702_menu(char *str)
 
 		case 'd':	_handle_dist(atoi(&str[1]));	   break;
 		case 'l':	_handle_lateral(atoi(&str[1]));	   break;
-		case 'm':	_handle_material(&str[1]);		   break;		
+		case 'm':	lh702_load_material(&str[1]);		   break;		
 		case 't':	_handle_thickness(atoi(&str[1]));  break;
 		case 'h':	_handle_headheight(atoi(&str[1])); break;
 		case 'e':	_handle_encoffset(atoi(&str[1]));  break;
@@ -293,39 +304,39 @@ static int _lh702_handle_msg(RX_SOCKET socket, void *pmsg, int len, struct socka
 		Error(LOG, 0, "received msg (len=%d, id=0x%08x)", phdr->msgLen, phdr->msgId);
 		switch(phdr->msgId)
 		{
-		case CMD_START_PRINTING:  	Error(LOG, 0, "received CMD_START_PRINTING");	
+		case CMD_START_PRINTING:  	Error(LOG, 0, "DM5 -> CMD_START_PRINTING");	
 									pc_start_printing();
 									break;
 			
-		case CMD_STOP_PRINTING:		Error(LOG, 0, "received CMD_STOP_PRINTING");	
+		case CMD_STOP_PRINTING:		Error(LOG, 0, "DM5 -> CMD_STOP_PRINTING");	
 									pc_abort_printing();
 									break;
 			
-		case CMD_CHANGE_JOB:		Error(LOG, 0, "received CMD_CHANGE_JOB");		
+		case CMD_CHANGE_JOB:		Error(LOG, 0, "DM5 -> CMD_CHANGE_JOB");		
 									pc_change_job();
 									break;
 		
-		case PAR_MATERIAL:			Error(LOG, 0, "Received PAR_MATERIAL >>%s<<", str->str);
-									_handle_material(str->str);
+		case PAR_MATERIAL:			Error(LOG, 0, "DM5 -> PAR_MATERIAL=>>%s<<", str->str);
+									lh702_load_material(str->str);
 									break;
 			
-		case PAR_THICKNESS:			Error(LOG, 0, "Received PAR_THICKNESS %d", val->value);
+		case PAR_THICKNESS:			Error(LOG, 0, "DM5 -> PAR_THICKNESS=%d", val->value);
 									_handle_thickness(val->value);
 									break;
 		
-		case PAR_HEAD_HEIGHT:		Error(LOG, 0, "Received PAR_HEAD_HEIGHT %d", val->value);
+		case PAR_HEAD_HEIGHT:		Error(LOG, 0, "DM5 -> PAR_HEAD_HEIGHT=%d", val->value);
 									_handle_headheight(val->value);
 									break;
 			
-		case PAR_ENCODER_ADJ:		Error(LOG, 0, "Received PAR_ENCODER_ADJ %d", val->value);
+		case PAR_ENCODER_ADJ:		Error(LOG, 0, "DM5 -> PAR_ENCODER_ADJ=%d", val->value);
 									_handle_encoffset(val->value);
 									break;
 			
-		case CMD_ADD_DIST:			Error(LOG, 0, "Received CMD_ADD_DIST %d", val->value);
+		case CMD_ADD_DIST:			Error(LOG, 0, "DM5 -> CMD_ADD_DIST=%d", val->value);
 									_handle_dist(val->value);
 									break;
 			
-		case CMD_ADD_LATERAL:		Error(LOG, 0, "Received CMD_ADD_LATERAL %d", val->value);
+		case CMD_ADD_LATERAL:		Error(LOG, 0, "DM5 -> CMD_ADD_LATERAL=%d", val->value);
 									_handle_lateral(val->value);
 									break;
 			
@@ -365,17 +376,17 @@ static void _handle_lateral	(int value)
 	}
 }
 
-//--- _handle_material ---------------------------
-static void _handle_material(char *material)
+//--- lh702_load_material ---------------------------
+void lh702_load_material(char *material)
 {
-	plc_load_material(material);
+	if (RX_Config.printer.type==printer_LH702) plc_load_material(material);
 }
 
 //--- _handle_thickness --------------------------
 static void _handle_thickness(int value)
 {
 	char varList[128];
-	sprintf(varList, UnitID "\n" "XML_MATERIAL_THICKNESS=%d\n", value);
+	sprintf(varList, UnitID "\n" "XML_MATERIAL_THICKNESS=%f\n", value/1000.0);
 	plc_handle_gui_msg(INVALID_SOCKET, CMD_PLC_SET_VAR, varList, strlen(varList));
 }
 
@@ -383,7 +394,7 @@ static void _handle_thickness(int value)
 static void _handle_headheight(int value)
 {
 	char varList[128];
-	sprintf(varList, UnitID "\n" "XML_HEAD_HEIGHT=%d\n", value);
+	sprintf(varList, UnitID "\n" "XML_HEAD_HEIGHT=%f\n", value/1000.0);
 	plc_handle_gui_msg(INVALID_SOCKET, CMD_PLC_SET_VAR, varList, strlen(varList));
 }
 

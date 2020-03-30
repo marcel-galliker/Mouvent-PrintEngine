@@ -95,12 +95,13 @@ namespace RX_DigiPrint.Models
             get { return _Connected; }
             set 
             { 
-             //   if (value!=_Connected)
+                if (value!=_Connected)
                 { 
                     _Connected = value;
                     if (DeviceType==EDeviceType.dev_plc)    RxGlobals.Plc.Connected=_Connected;
                     if (DeviceType==EDeviceType.dev_head)   RxGlobals.HeadStat.SetConnected(DeviceNo-1, _Connected);
                     if (DeviceType==EDeviceType.dev_fluid)  RxGlobals.InkSupply.SetConnected(DeviceNo-1, _Connected);
+                //  if (DeviceType==EDeviceType.dev_stepper && DeviceNo<=RxGlobals.StepperStatus.Length) RxGlobals.StepperStatus[DeviceNo-1].SetConnected(_Connected);
                 }
             }
         }

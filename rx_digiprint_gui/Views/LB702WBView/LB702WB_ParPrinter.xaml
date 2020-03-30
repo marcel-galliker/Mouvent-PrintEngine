@@ -16,8 +16,15 @@
     <GroupBox Header="Printer" Style="{StaticResource RxGroupBox}">
         <Grid>
             <rx_uc:PlcParPanel x:Name="ParPanel" UnitID="Application.GUI_00_001_Main" ReadOnly="False" LabelWidth="120" Margin="0,1,0,0">
-                <rx_uc:PlcParCtrl ID="PAR_HEAD_HEIGHT"      Label="Print Height" Unit="mm"      UnitWidth="50" Format="1"/>
-                <rx_uc:PlcParCtrl ID="PAR_NIP_TENSION_1"    Label="Tension"      Unit="N/mm" UnitWidth="50" Format="1" />
+                <rx_uc:PlcParCtrl ID="PAR_DRYER2_MODE"                        Label="Mode"         Unit=""  UnitWidth="50" Type="Combo" x:Name="CB_Mode" />
+                <rx_uc:PlcParCtrl ID="PAR_DRYER2_IR_LAMPS_ZONE1_SETPOINT"     Label="Zone 1"       Unit="°C" UnitWidth="50" Format="1" />
+                <rx_uc:PlcParCtrl ID="PAR_DRYER2_IR_LAMPS_ZONE2_SETPOINT"     Label="Zone 2"       Unit="°C" UnitWidth="50" Format="1" />
+                <rx_uc:PlcParCtrl ID="PAR_DRYER2_IR_LAMPS_ZONE3_SETPOINT"     Label="Zone 3"       Unit="°C" UnitWidth="50" Format="1" />
+                <rx_uc:PlcParCtrl ID="PAR_DRYER2_BUSES_UP_SETPOINT"           Label="Buses Up"     Unit="Pa" UnitWidth="50" Format="n" />
+                <rx_uc:PlcParCtrl ID="PAR_DRYER2_EXHAUST_UP_SETPOINT"         Label="Exhaust Up"   Unit="Pa" UnitWidth="50" Format="n" />
+                <rx_uc:PlcParCtrl ID="PAR_DRYER2_BUSES_DOWN_SETPOINT"         Label="Buses Down"   Unit="Pa" UnitWidth="50" Format="n" />
+                <rx_uc:PlcParCtrl ID="PAR_DRYER2_EXHAUST_DOWN_SETPOINT"       Label="Exhaust Down" Unit="Pa" UnitWidth="50" Format="n" />
+                
             </rx_uc:PlcParPanel>
             <Grid VerticalAlignment="Bottom">
                 <Grid.ColumnDefinitions>
