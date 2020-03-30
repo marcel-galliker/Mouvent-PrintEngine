@@ -506,7 +506,7 @@ static int _print_next(void)
 
 				memcpy(&_Item, item, sizeof(_Item));
 				_first		  = TRUE;
-				
+				_Item.scansStop = 0;
 				if (_Item.scansStop) Error(LOG, 0, "_print_next:NewItem.scansStop=%d ", _Item.scansStop);
 
 				_local_path(_Item.filepath, _FilePathLocal);

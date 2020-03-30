@@ -266,6 +266,7 @@ namespace RX_DigiPrint.Services
                 }                 
                 if (_Running) Connected = false;
                 _Client.Close();
+                Thread.Sleep(1000); // Close needs time and there is no feedback when it is done! If we are connecting again too early it gives "cannot access a disposed object" error!
             };
 
          //   Marshal.FreeHGlobal(phdr);
