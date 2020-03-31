@@ -80,9 +80,9 @@ void tt_init(void)
 {
 	slide_init();
 
-	motor_config(MOTOR_Y_LEFT,  CURRENT_HOLD, 0.0, 0.0);
-	motor_config(MOTOR_Y_RIGHT, CURRENT_HOLD, 0.0, 0.0);
-	motor_config(MOTOR_Z,	    0,            0.0, 0.0);	
+	motor_config(MOTOR_Y_LEFT,  CURRENT_HOLD, 0.0, 0.0, STEPS);
+	motor_config(MOTOR_Y_RIGHT, CURRENT_HOLD, 0.0, 0.0, STEPS);
+	motor_config(MOTOR_Z,	    0,            0.0, 0.0, STEPS);	
 
 	//--- movment parameters ----------------
 	_ParY_ref.speed			= 2000;
@@ -748,7 +748,7 @@ static void _tt_motor_y_test(int steps)
 	par.dis_mux_in	 = 0;
 	par.encCheck	 = chk_std;
 	
-	for (i=0; i<2; i++) motor_config(i, CURRENT_HOLD, 0.0, 0.0);
+	for (i=0; i<2; i++) motor_config(i, CURRENT_HOLD, 0.0, 0.0, STEPS);
 	motors_move_by_step(motor, &par, steps, TRUE);
 }
 
@@ -766,6 +766,6 @@ static void _tt_motor_z_test(int steps)
 	par.estop_in_bit[MOTOR_Z] = (1<<0);
 	par.estop_level	 = 1;
 	par.encCheck	 = chk_std;
-	motor_config(MOTOR_Z,  CURRENT_HOLD, 0.0, 0.0);
+	motor_config(MOTOR_Z,  CURRENT_HOLD, 0.0, 0.0, STEPS);
 	motor_move_by_step(MOTOR_Z, &par, steps);
 }

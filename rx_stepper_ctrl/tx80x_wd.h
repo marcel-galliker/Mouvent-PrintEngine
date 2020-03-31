@@ -1,6 +1,6 @@
 // ****************************************************************************
 //
-//	DIGITAL PRINTING - tx801.h
+//	DIGITAL PRINTING - tx80x_wd.h
 //
 //	Communication between ARM processor and FPGA
 //
@@ -11,16 +11,9 @@
 //
 // ****************************************************************************
 
-#pragma once
-
-#include "rx_sok.h"
-
-#define TX_PRINT_POS_MIN 1200
-
-void tx801_init(void);
-int  tx801_menu(void);
-void tx801_main(int ticks, int menu);
-	
-int  tx801_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata);
-
-
+void tx80x_wd_init(void);
+void tx80x_wd_main(void);
+void tx80x_wd_handle_menu(char *str);
+void tx80x_wd_menu(int help);
+void tx80x_wd_display_status(void);
+int tx80x_wd_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata);

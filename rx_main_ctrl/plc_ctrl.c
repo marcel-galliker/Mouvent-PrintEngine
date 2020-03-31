@@ -1422,6 +1422,7 @@ static void _plc_state_ctrl()
 		
 		if (RX_Config.stepper.ref_height!=0 || RX_Config.stepper.print_height!=0)
 		{
+			lc_set_value_by_name_UINT32(UnitID ".STA_HEAD_IS_UP", RX_StepperStatus.info.scannerEnable);	
 			if(rx_def_is_web(RX_Config.printer.type) || RX_StepperStatus.info.scannerEnable)
 			{
 				if(_SendPause == 1)
@@ -1443,7 +1444,6 @@ static void _plc_state_ctrl()
 				step_handle_gui_msg(INVALID_SOCKET, CMD_LIFT_UP_POS, NULL, 0);				
 			}
 		}
-		lc_set_value_by_name_UINT32(UnitID ".STA_HEAD_IS_UP", RX_StepperStatus.info.scannerEnable);	
 	}
 
 	/*	Label

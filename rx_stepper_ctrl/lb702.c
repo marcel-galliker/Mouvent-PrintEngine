@@ -38,7 +38,7 @@ static char		*_MotorName[2] = {"BACK", "FRONT"};
 #define ROBOT_USED_IN		10
 #define PRINTHEAD_EN		11	// Input from SPS // '1' Allows Head to go down
 
-#define STEPS_REV		(200*MICRO_STEPS)	// steps per motor revolution * MICRO_STEPS times oversampling
+#define STEPS_REV		(200*STEPS)	// steps per motor revolution * STEPS times oversampling
 #define DIST_REV		2000.0	// moving distance per revolution [�m]
 
 #define POS_CAP			8000
@@ -81,7 +81,7 @@ void lb702_init(void)
 {
 	RX_StepperStatus.robot_used = fpga_input(ROBOT_USED_IN);
 		
-	motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER);
+	motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER, STEPS);
 	memset(_CmdName, 0, sizeof(_CmdName));
 
 	//--- movment parameters ----------------
@@ -265,10 +265,10 @@ void lb702_main(int ticks, int menu)
 
 				for (motor=MOTOR_Z_BACK; motor<=MOTOR_Z_FRONT; motor++)
 				{
-					offset[motor] = _PrintPos_New[motor] - Fpga.stat->statMot[motor].position * MICRO_STEPS;
+					offset[motor] = _PrintPos_New[motor] - Fpga.stat->statMot[motor].position * STEPS;
 					if (abs(offset[motor]) > 64)  
 					{
-						Error(WARN, 0, "Motor %s position error: %d", _MotorName[motor], offset[motor] * 10 / MICRO_STEPS);
+						Error(WARN, 0, "Motor %s position error: %d", _MotorName[motor], offset[motor] * 10 / STEPS);
 						motor_move_by_step(motor, &_ParZ_down, offset[motor]);
 						adjustMotors |= 1<<motor;
 					}
@@ -437,7 +437,7 @@ static void _lb702_do_reference(void)
 		motors_stop	(MOTOR_Z_BITS);
 		rx_sleep(100);
 		motors_reset(MOTOR_Z_BITS);
-		motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER);
+		motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER, STEPS);
 		motors_move_by_step	(MOTOR_Z_BITS,  &_ParRef, 500000, TRUE);		
 		RX_StepperStatus.cmdRunning  = CMD_LIFT_REFERENCE;
 	}
@@ -519,7 +519,7 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									_CmdStep=0;
 									motors_stop	(MOTOR_Z_BITS);
 									motors_reset(MOTOR_Z_BITS);
-									motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER);
+									motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER, STEPS);
 									motors_move_by_step	(MOTOR_Z_BITS,  &_ParRef, 500000, TRUE);
 									*/
 									Error(WARN, 0, "Calibration not available yet");
@@ -624,8 +624,8 @@ void _lb702_motor_z_test(int steps)
 	{
 		RX_StepperStatus.cmdRunning = 1; // TEST both motors
 		RX_StepperStatus.info.moving = TRUE;
-		_PrintPos_New[MOTOR_Z_BACK]  = Fpga.encoder[MOTOR_Z_BACK]._pos_motor * MICRO_STEPS + steps;
-		_PrintPos_New[MOTOR_Z_FRONT] = Fpga.encoder[MOTOR_Z_FRONT]._pos_motor * MICRO_STEPS + steps;
+		_PrintPos_New[MOTOR_Z_BACK]  = Fpga.encoder[MOTOR_Z_BACK]._pos_motor * STEPS + steps;
+		_PrintPos_New[MOTOR_Z_FRONT] = Fpga.encoder[MOTOR_Z_FRONT]._pos_motor * STEPS + steps;
 		motors_move_by_step(MOTOR_Z_BITS, &_ParZ_down, steps, TRUE);
 	}
 }
@@ -651,7 +651,7 @@ static void _lb702_motor_test(int motorNo, int steps)
 		RX_StepperStatus.cmdRunning = 2; // TEST 1 motor
 		RX_StepperStatus.info.moving = TRUE;
 	
-		motors_config(motors, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER);
+		motors_config(motors, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER, STEPS);
 		motors_move_by_step(motors, &_ParZ_down, steps, FALSE);			
 	}
 		

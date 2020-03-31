@@ -753,8 +753,10 @@ namespace RX_DigiPrint.Models
                 string[] fname = Directory.GetFiles(filePath, "*.tif");
                 if (fname.Length>0 && _read_tiff_properties(fname[0])) return;
             }
-            catch (Exception)
-            {};
+            catch (Exception ex)
+            {
+                Console.WriteLine("Exception >>{0}<<", ex.Message);
+            };
         //    if (_read_tiff_properties(filePath)) return;
 
             //--- label ----------------------------
@@ -879,23 +881,29 @@ namespace RX_DigiPrint.Models
                 {
                     while(xml.Read())
                     {
-                        if (xml.NodeType==XmlNodeType.Element && xml.Name.Equals("Defaults"))
-                        {
-                            for  (int i=0; i<xml.AttributeCount; i++)
+                        if (xml.NodeType==XmlNodeType.Element)
+                        {   
+                            if (xml.Name.Equals("Defaults"))
                             {
-                                xml.MoveToAttribute(i);
-                                var prop = GetType().GetProperty(xml.Name);
-                                if (prop!=null) prop.SetValue(this, TypeDescriptor.GetConverter(prop.PropertyType).ConvertFromString(xml.Value));
+                                for  (int i=0; i<xml.AttributeCount; i++)
+                                {
+                                    xml.MoveToAttribute(i);
+                                    var prop = GetType().GetProperty(xml.Name);
+                                    if (prop!=null) prop.SetValue(this, TypeDescriptor.GetConverter(prop.PropertyType).ConvertFromString(xml.Value));
+                                }
+                            }
+                            else if(xml.Name.Equals("PageNumber")) 
+                            { 
+                                PageNumber = new PageNumber(xml);
                             }
                             xml.MoveToElement();
                         }
-                        if (xml.NodeType==XmlNodeType.Element && xml.Name.Equals("PageNumber"))
-                            PageNumber = new PageNumber(xml);
                     }            
                 }
 
-                catch(Exception)
+                catch(Exception ex)
                 {
+                    Console.WriteLine("Exception >>{0}<<", ex.Message);
                 }            
             }
         }

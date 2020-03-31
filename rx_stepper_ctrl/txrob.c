@@ -209,8 +209,8 @@ static int _robot_left(void);
 void txrob_init(void)
 {
 	// Init Motors
-	motor_config(MOTOR_ROT,   CURRENT_HOLD_ROT,   ROT_STEPS_PER_REV, ROT_INC_PER_REV);
-	motor_config(MOTOR_SHIFT, CURRENT_HOLD_SHIFT, SHIFT_STEPS_PER_METER, SHIFT_INC_PER_METER);
+	motor_config(MOTOR_ROT,   CURRENT_HOLD_ROT,   ROT_STEPS_PER_REV, ROT_INC_PER_REV, STEPS);
+	motor_config(MOTOR_SHIFT, CURRENT_HOLD_SHIFT, SHIFT_STEPS_PER_METER, SHIFT_INC_PER_METER, STEPS);
 
 	//--- movement parameters capping ----------------
 	/*
@@ -413,8 +413,8 @@ void txrob_main(int ticks, int menu)
 	
 	if (!motors_init_done())
 	{
-		motor_config(MOTOR_ROT, CURRENT_HOLD_ROT, ROT_STEPS_PER_REV, ROT_INC_PER_REV);
-		motor_config(MOTOR_SHIFT, CURRENT_HOLD_SHIFT, SHIFT_STEPS_PER_METER, SHIFT_INC_PER_METER);
+		motor_config(MOTOR_ROT, CURRENT_HOLD_ROT, ROT_STEPS_PER_REV, ROT_INC_PER_REV, STEPS);
+		motor_config(MOTOR_SHIFT, CURRENT_HOLD_SHIFT, SHIFT_STEPS_PER_METER, SHIFT_INC_PER_METER, STEPS);
 	}
 	
 	// --- read Inputs ---
@@ -1141,7 +1141,7 @@ static void _txrob_motor_test(int motorNo, int steps)
 		par.dis_mux_in	= 0;
 		par.encCheck    = chk_std;
 
-		motors_config(motors, 0,  L3518_STEPS_PER_METER, L3518_INC_PER_METER);
+		motors_config(motors, 0,  L3518_STEPS_PER_METER, L3518_INC_PER_METER, STEPS);
 		motors_move_by_step(motors, &par, steps, FALSE);			
 	}
 	else
@@ -1155,7 +1155,7 @@ static void _txrob_motor_test(int motorNo, int steps)
 		par.stop_mux	= 0;
 		par.dis_mux_in	= 0;
 		par.encCheck	= chk_off;
-		motors_config(motors, CURRENT_HOLD_SHIFT, 0.0, 0.0);
+		motors_config(motors, CURRENT_HOLD_SHIFT, 0.0, 0.0, STEPS);
 		motors_move_by_step(motors, &par, steps, FALSE);			
 	}	
 }

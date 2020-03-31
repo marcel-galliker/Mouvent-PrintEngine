@@ -372,10 +372,14 @@ void ctrl_set_max_speed(void)
 	{
 		if (*RX_Config.inkSupply[color].ink.name)
 		{
+			char str[MAX_PATH];
+			int len=0;
 			for (n=0; n<MAX_DROP_SIZES; n++)
 			{
+				len += sprintf(&str[len], " %d", RX_Config.inkSupply[color].ink.maxSpeed[n]);
 				if (RX_Config.inkSupply[color].ink.maxSpeed[n] < inkSpeed[n]) inkSpeed[n] = RX_Config.inkSupply[color].ink.maxSpeed[n];
 			}
+			TrPrintfL(TRUE, "Waveform[%s].maxSpeed:%s m/s", RX_Config.inkSupply[color].ink.name, str);
 		}
 	}
 
@@ -389,6 +393,7 @@ void ctrl_set_max_speed(void)
 								else 
 								{
 									maxSpeed[0]=  60; maxSpeed[1]=  60; maxSpeed[2]=  60; maxSpeed[3]=  40;
+									if (enc_is_connected()) Error(WARN, 0, "No Communication to analog encoder board! Limited speed!");
 								}
 								break;
 		case printer_LB701:		maxSpeed[0]= 100; maxSpeed[1]= 100; maxSpeed[2]= 100; maxSpeed[3]= 100; break;

@@ -581,6 +581,7 @@ static void _control(int fluidNo)
 	
 	int HeadNo = ctrl_singleHead();
 	if (HeadNo != -1) HeadNo %= 8;
+   // Error(LOG, 0, "_PurgeCtrlMode: %x", _PurgeCtrlMode);
 	
 	if (lbrob && RX_Config.stepper.wipe_speed == 0) RX_Config.stepper.wipe_speed = 10;
 

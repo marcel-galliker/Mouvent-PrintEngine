@@ -505,9 +505,13 @@ static int _print_next(void)
 			SPrintQueueItem *item = pq_get_next_item();
 			if (item) 
 			{
+				pq_trace_item(item);
+
 				memcpy(&_Item, item, sizeof(_Item));
 				_first		  = TRUE;
-						
+				_Item.scansStop = 0;
+				if (_Item.scansStop) Error(LOG, 0, "_print_next:NewItem.scansStop=%d ", _Item.scansStop);
+
 				_local_path(_Item.filepath, _FilePathLocal);
 				
 				_Item.id.copy = _Item.start.copy;
@@ -680,6 +684,7 @@ static int _print_next(void)
 					int barwidth=RX_Spooler.barWidthPx;
 					if (RX_Config.printer.overlap) barwidth += RX_Spooler.headOverlapPx;
 					pitem->scansStop = (INT32)((_ScanLengthPx+RX_Spooler.maxOffsetPx+barwidth-1) / (barwidth/_Item.passes));
+					Error(LOG, 0, "_print_next:_StopJob");
 					pq_set_item(pitem);
 				}
 				spool_print_file(&_Item.id, _DataPath, _ScanOffset, _ScanLengthPx, &_Item, TRUE);

@@ -5,6 +5,12 @@
 	It is needed for IntelliSense to parse other header files correctly.
 */
 #if defined(_MSC_VER) || defined (__SYSPROGS_CODESENSE__)
+#pragma clang diagnostic push
+
+#pragma clang diagnostic ignored "-Wreserved-id-macro"
+#ifndef __SSP_STRONG__
+#define __SSP_STRONG__ 3
+#endif
 #ifndef __DBL_MIN_EXP__
 #define __DBL_MIN_EXP__ (-1021)
 #endif
@@ -16,6 +22,9 @@
 #endif
 #ifndef __FLT_MIN__
 #define __FLT_MIN__ 1.17549435082228750797e-38F
+#endif
+#ifndef __GCC_IEC_559_COMPLEX
+#define __GCC_IEC_559_COMPLEX 2
 #endif
 #ifndef __UINT_LEAST8_TYPE__
 #define __UINT_LEAST8_TYPE__ unsigned char
@@ -56,11 +65,17 @@
 #ifndef __GCC_ATOMIC_CHAR_LOCK_FREE
 #define __GCC_ATOMIC_CHAR_LOCK_FREE 2
 #endif
+#ifndef __GCC_IEC_559
+#define __GCC_IEC_559 2
+#endif
 #ifndef __FLT_EVAL_METHOD__
 #define __FLT_EVAL_METHOD__ 0
 #endif
 #ifndef __unix__
 #define __unix__ 1
+#endif
+#ifndef __cpp_binary_literals
+#define __cpp_binary_literals 201304
 #endif
 #ifndef __GCC_ATOMIC_CHAR32_T_LOCK_FREE
 #define __GCC_ATOMIC_CHAR32_T_LOCK_FREE 2
@@ -81,7 +96,7 @@
 #define __FINITE_MATH_ONLY__ 0
 #endif
 #ifndef __GNUC_PATCHLEVEL__
-#define __GNUC_PATCHLEVEL__ 4
+#define __GNUC_PATCHLEVEL__ 3
 #endif
 #ifndef __UINT_FAST8_MAX__
 #define __UINT_FAST8_MAX__ 255
@@ -183,7 +198,7 @@
 #define __STDC_IEC_559__ 1
 #endif
 #ifndef __STDC_ISO_10646__
-#define __STDC_ISO_10646__ 201103L
+#define __STDC_ISO_10646__ 201505L
 #endif
 #ifndef __DECIMAL_DIG__
 #define __DECIMAL_DIG__ 21
@@ -241,6 +256,7 @@
 #endif
 //VS2005-2012 treats all files as C++, while VS2013+ can treat C files correctly.
 #if defined(_MSC_VER) && (_MSC_VER < 1800 || defined(__cplusplus))
+#undef __cplusplus
 #define __cplusplus 199711L
 #endif
 #ifndef __DEC128_MAX__
@@ -334,7 +350,7 @@
 #define __FLT_MANT_DIG__ 24
 #endif
 #ifndef __VERSION__
-#define __VERSION__ "4.8.4"
+#define __VERSION__ "4.9.3"
 #endif
 #ifndef _STDC_PREDEF_H
 #define _STDC_PREDEF_H 1
@@ -570,9 +586,6 @@
 #ifndef __INT_LEAST8_MAX__
 #define __INT_LEAST8_MAX__ 127
 #endif
-#ifndef __SSP__
-#define __SSP__ 1
-#endif
 #ifndef __SIZEOF_INT128__
 #define __SIZEOF_INT128__ 16
 #endif
@@ -646,7 +659,7 @@
 #define __ATOMIC_CONSUME 1
 #endif
 #ifndef __GNUC_MINOR__
-#define __GNUC_MINOR__ 8
+#define __GNUC_MINOR__ 9
 #endif
 #ifndef __UINTMAX_MAX__
 #define __UINTMAX_MAX__ 18446744073709551615UL
@@ -726,12 +739,12 @@
 #endif
 
 // --- Include directories begin --- //
-///usr/include/c++/4.8
-///usr/include/x86_64-linux-gnu/c++/4.8
-///usr/include/c++/4.8/backward
-///usr/lib/gcc/x86_64-linux-gnu/4.8/include
+///usr/include/c++/4.9
+///usr/include/x86_64-linux-gnu/c++/4.9
+///usr/include/c++/4.9/backward
+///usr/lib/gcc/x86_64-linux-gnu/4.9/include
 ///usr/local/include
-///usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed
+///usr/lib/gcc/x86_64-linux-gnu/4.9/include-fixed
 ///usr/include/x86_64-linux-gnu
 ///usr/include
 //../rx_ink_lib
@@ -742,6 +755,16 @@
 
 
 // --- Library directories begin --- //
-///usr/lib/gcc/x86_64-linux-gnu/4.8/:/usr/lib/gcc/x86_64-linux-gnu/4.8/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/4.8/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/4.8/../../../:/lib/:/usr/lib/
+///usr/lib/gcc/x86_64-linux-gnu/4.9/
+///usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/
+///usr/lib/gcc/x86_64-linux-gnu/4.9/../../../../lib/
+///lib/x86_64-linux-gnu/
+///lib/../lib/
+///usr/lib/x86_64-linux-gnu/
+///usr/lib/../lib/
+///usr/lib/gcc/x86_64-linux-gnu/4.9/../../../
+///lib/
+///usr/lib/
 // --- Library directories begin --- //
 
+#pragma clang diagnostic pop

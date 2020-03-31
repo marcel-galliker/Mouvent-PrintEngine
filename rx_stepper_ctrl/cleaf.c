@@ -199,7 +199,7 @@ void cleaf_main(int ticks, int menu)
 		
 	if (!motors_init_done())
 	{
-		motors_config(MOTOR_Z_BITS, CURRENT_Z_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER);
+		motors_config(MOTOR_Z_BITS, CURRENT_Z_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER, STEPS);
 	}
 	
 	if (RX_StepperCfg.printerType != printer_cleaf) return; // printer_cleaf

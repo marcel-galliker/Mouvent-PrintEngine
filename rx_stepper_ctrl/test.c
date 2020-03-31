@@ -95,6 +95,6 @@ static void _test_motor_test(int motorNo, int steps)
 	RX_StepperStatus.info.moving = TRUE;
 	
 //	motors_config(motors,  CURRENT_HOLD, 0.0, 0.0);
-	motors_config(motors,  0, L3518_STEPS_PER_METER, L3518_INC_PER_METER);
+	motors_config(motors,  0, L3518_STEPS_PER_METER, L3518_INC_PER_METER, STEPS);
 	motors_move_by_step(motors, &par, steps, FALSE);			
 }

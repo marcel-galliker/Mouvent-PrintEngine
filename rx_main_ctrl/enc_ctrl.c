@@ -669,6 +669,8 @@ static int _handle_enc_msg(RX_SOCKET socket, void *msg, int len, struct sockaddr
 static void _handle_status(int no, SEncoderStat* pstat)
 {
 	SEncoderInfo info=_EncoderStatus[no].info;
+
+
 	//--- test ------------------
 	if (!_Scanning && !arg_simuEncoder && !_StopPG)
 	{
