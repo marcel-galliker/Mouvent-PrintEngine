@@ -123,7 +123,7 @@ namespace RX_DigiPrint.Views.UserControls
             _send_children(Children);
             if (RxGlobals.PrintSystem.PrinterType!=EPrinterType.printer_LH702 || RxGlobals.PrintSystem.LH702_simulation)
             {
-            string str = string.Format("{0}\n{1}={2}\n", UnitID, "CMD_SET_PARAMETER", 1);
+                string str = string.Format("{0}\n{1}={2}\n", UnitID, "CMD_SET_PARAMETER", 1);
                 RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_SET_VAR, str);
             }
             Changed=false;

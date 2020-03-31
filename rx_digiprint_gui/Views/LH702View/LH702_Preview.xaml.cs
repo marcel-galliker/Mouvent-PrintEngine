@@ -119,8 +119,6 @@ namespace RX_DigiPrint.Views.LH702View
                     */
 
                     //- before rotating
-                    double top=0;
-                    double r=50;
                     double width=image.ActualHeight;
                     PathFigure path = new PathFigure();
                     

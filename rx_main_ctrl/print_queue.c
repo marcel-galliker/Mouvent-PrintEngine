@@ -142,6 +142,16 @@ static int setup_item(HANDLE file, int idx, SPrintQueueItem *item, EN_setup_Acti
 	else return REPLY_ERROR;
 }
 
+//--- pq_trace_item -------------------------------------------------------------
+void pq_trace_item(SPrintQueueItem *pitem)
+{
+	HANDLE file = setup_create();
+	setup_item(file, 1, pitem, WRITE);
+	char* str=setup_to_str(file);
+	TrPrintf(TRUE, str);
+	free(str);
+}
+
 //--- pq_load ------------------------------------------------------------------
 int pq_load(const char *filepath)
 {
@@ -775,8 +785,8 @@ int pq_printed(int headNo, SPageId *pid, int *pageDone, int *jobDone, SPrintQueu
 		else 
 		{
 			pitem = &_List[idx];
-		pitem->id.page = pid->page;
-		pitem->id.copy = pid->copy;
+		    pitem->id.page = pid->page;
+		    pitem->id.copy = pid->copy;
 		}
 		_Speed = pitem->speed;
 		

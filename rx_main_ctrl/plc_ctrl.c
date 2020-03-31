@@ -398,19 +398,6 @@ double	 plc_get_step_dist_mm(void)
 	return _StepDist;
 }
 
-//--- plc_get_thickness --------------------
-int	plc_get_thickness(void)
-{
-#ifdef linux
-	FLOAT thickness;
-	if (_SimuPLC) thickness = 1.0;
-	else lc_get_value_by_name_FLOAT(UnitID ".PAR_MATERIAL_THIKNESS",	&thickness);
-	return (int)(thickness*1000);
-#else
-	return 0;
-#endif
-}
-
 //--- _plc_send_par -------------------------------------
 static void _plc_send_par(SPlcPar *pPlcPar)
 {
@@ -946,7 +933,7 @@ static void _plc_save_material	(RX_SOCKET socket, char *filename, int cmd, char 
 			{
 				strncpy(RX_Config.material, str, sizeof(RX_Config.material));
 				break;	// found
-		}
+		    }
 		}
 		*end++='\n';
 	}
@@ -961,11 +948,11 @@ static void _plc_save_material	(RX_SOCKET socket, char *filename, int cmd, char 
 		*val++='=';
 		printf(">>%s<< = >>%s<<\n",  var, val);
 		setup_str(file, var, WRITE,  val,	32,	"");
-			if (!strcmp(var, "XML_HEAD_HEIGHT"))
-				RX_Config.stepper.print_height			= (INT32)(0.5+1000*strtod(val, NULL));
-			if (!strcmp(var, "XML_MATERIAL_THICKNESS")) 
-				RX_Config.stepper.material_thickness	= (INT32)(0.5+1000*strtod(val, NULL));
-			if (!strcmp(var, "XML_ENC_OFFSET"))			RX_Config.printer.offset.incPerMeter[0] = atoi(val);
+		if (!strcmp(var, "XML_HEAD_HEIGHT"))
+			RX_Config.stepper.print_height			= (INT32)(0.5+1000*strtod(val, NULL));
+		if (!strcmp(var, "XML_MATERIAL_THICKNESS")) 
+			RX_Config.stepper.material_thickness	= (INT32)(0.5+1000*strtod(val, NULL));
+		if (!strcmp(var, "XML_ENC_OFFSET"))			RX_Config.printer.offset.incPerMeter[0] = atoi(val);
 	
 		*end++='\n';
 		str = end;
@@ -1475,6 +1462,7 @@ static void _plc_state_ctrl()
 	if (_PlcState==plc_setup && RX_PrinterStatus.printState==ps_webin)
 	{
 		_plc_set_command("CMD_SETUP", "CMD_WEBIN");
+        step_handle_gui_msg(INVALID_SOCKET, CMD_LIFT_UP_POS, NULL, 0);
 	}
 	if(_PlcState == plc_pause)
 	{		

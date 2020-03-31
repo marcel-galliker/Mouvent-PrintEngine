@@ -44,7 +44,5 @@ int		plc_in_purge_pos(void);
 int		plc_in_wipe_pos(void);
 int		plc_is_splicing(void);
 double	plc_get_step_dist_mm(void);
-int		plc_get_thickness(void);
-
 
 int plc_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen);

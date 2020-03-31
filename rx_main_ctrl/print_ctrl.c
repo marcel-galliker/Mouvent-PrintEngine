@@ -770,22 +770,22 @@ static int _print_next(void)
 						int bar_width=RX_Spooler.barWidthPx*25400/1200;
 						int clearBlockUsed=(_Item.id.copy >= _Item.copies) || (_Item.firstPage!=_Item.lastPage) || (_Item.pageMargin!=_PageMargin_Next);
 						if (img_offset>bar_width && RX_Config.printer.type!=printer_LH702) img_offset = bar_width;
-							if (_ChangeJob==1)
-							{	
-								Error(LOG, 0, "PrintCtrl: New Job: copy=%d, scansSent=%d", _Item.id.copy, _Item.scansSent);
-								clearBlockUsed = TRUE;
-								_ChangeJob = 2;
-								SPrintQueueItem *pitem =pq_get_item(&_Item);
-								pitem->copiesTotal = _Item.id.copy;
-								pq_set_item(pitem);									
-							}
-						SPrintQueueItem item;
-							memcpy(&item, &_Item, sizeof(item));
-							item.lengthUnit = PQ_LENGTH_UNDEF;
-							spool_print_file(&_Item.id, _DataPath, img_offset, 0, &item, clearBlockUsed);
-							_Item.pageMargin=_PageMargin_Next;
+						if (_ChangeJob==1)
+						{	
+							Error(LOG, 0, "PrintCtrl: New Job: copy=%d, scansSent=%d", _Item.id.copy, _Item.scansSent);
+							clearBlockUsed = TRUE;
+							_ChangeJob = 2;
+							SPrintQueueItem *pitem =pq_get_item(&_Item);
+							pitem->copiesTotal = _Item.id.copy;
+							pq_set_item(pitem);									
 						}
+						SPrintQueueItem item;
+						memcpy(&item, &_Item, sizeof(item));
+						item.lengthUnit = PQ_LENGTH_UNDEF;
+						spool_print_file(&_Item.id, _DataPath, img_offset, 0, &item, clearBlockUsed);
+						_Item.pageMargin=_PageMargin_Next;
 					}
+				}
 				return REPLY_OK;
 			}		
 		}

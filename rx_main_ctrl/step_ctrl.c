@@ -206,7 +206,7 @@ static int _step_handle_msg(RX_SOCKET socket, void *msg, int len, struct sockadd
 									default:			ret = steps_handle_status		(	 pStat); break;
 									}
 									
-									fluid_control_robot(_LB_Rob);
+									// fluid_control_robot(_LB_Rob);
 									return ret;
                                    
                 case REP_LIFT_CALIBRATE:
@@ -485,7 +485,7 @@ static void _step_set_config(int no)
 	memcpy(&cfg, &RX_Config.stepper, sizeof(cfg));
 	cfg.printerType		   = RX_Config.printer.type;
 	cfg.use_printhead_en   = (RX_Config.printer.type==printer_LH702) && str_start(RX_Hostname, "LH702");
-	cfg.material_thickness = plc_get_thickness();
+	cfg.material_thickness = RX_Config.stepper.material_thickness;
 	cfg.boardNo=no;
 		
 	if (RX_Config.printer.type==printer_LH702 && !str_start(RX_Hostname, "LH702")) 

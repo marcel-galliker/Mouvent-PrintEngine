@@ -637,7 +637,7 @@ void fpga_set_pg_offsets(INT32 backwards)
 	int head;
 	char str[100];
 	int len=0;
-    TrPrintfL(TRUE, "fpga_set_pg_offsets(backwards=%d)", backwards);
+//  TrPrintfL(TRUE, "fpga_set_pg_offsets(backwards=%d)", backwards);
 	_PrintGo_flags   = 0;
 	for (head=0; head<HEAD_CNT; head++)
 	{
@@ -646,6 +646,7 @@ void fpga_set_pg_offsets(INT32 backwards)
 		len += sprintf(&str[len], "%06d.%d  ",	FpgaCfg.head[head]->offset_stroke, FpgaCfg.head[head]->offset_substroke);
 	}		
 //	Error(LOG, 0, "fpga_set_pg_offsets(backwards=%d) %s", backwards, str);
+	TrPrintfL(TRUE, "fpga_set_pg_offsets(backwards=%d) %s", backwards, str);
 }
 
 //--- fpga_enc_config ---------------------------------------------------
@@ -1053,9 +1054,8 @@ int  fpga_image	(SFpgaImageCmd *msg)
 
 	if (_Init)
 	{
-		idx = Fpga.print->imgInIdx[head];
-
-	//	TrPrintfL(trace, "head[%d].fpga_image[%d]: _Printing=%d, _HeadsLoaded=%d", head, idx, _Printing, _HeadsLoaded);
+		TrPrintfL(trace, "head[%d].fpga_image[%d]:(id=%d, page=%d, copy=%d, scan=%d) blocks %05d ... %05d (%05d ... %05d), clearBlockUsed=%d", head, idx,  msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->image.blkNo, _PageEnd[head][idx], msg->image.blkNo-RX_HBConfig.head[head].blkNo0, _PageEnd[head][idx]-RX_HBConfig.head[head].blkNo0, msg->image.clearBlockUsed);
+		TrPrintfL(trace, "head[%d].fpga_image[%d]: _Printing=%d, _HeadsLoaded=%d", head, idx, _Printing, _HeadsLoaded);
 //		if (!_TestFSM) Error(LOG,  0, "fpga_image: FSM State=0x%04x", Fpga.stat->info);
 //		_TestFSM = 1;
 
@@ -1069,14 +1069,16 @@ int  fpga_image	(SFpgaImageCmd *msg)
 
 	//	TrPrintfL(trace, "imageListInIdx  = %d, %d, %d, %d", Fpga.print->imgInIdx[0], Fpga.print->imgInIdx[1], Fpga.print->imgInIdx[2], Fpga.print->imgInIdx[3]);
 	//	TrPrintfL(trace, "imageListOutIdx = %d, %d, %d, %d", Fpga.data->imgOutIdx[0][0], Fpga.data->imgOutIdx[1][0], Fpga.data->imgOutIdx[2][0], Fpga.data->imgOutIdx[3][0]);
+
+		idx = Fpga.print->imgInIdx[head];
+
 	//	if (head==0) Error(LOG, 0, "head[%d][%d].fpga_image(id=%d, page=%d, copy=%d) idx=%d, len=%d", head, idx, msg->id.id, msg->id.page, msg->id.copy, idx, msg->image.lengthPx);
 		
 		memcpy(&_PageId[idx], &msg->id, sizeof(SPageId));
 		memcpy(&_Img[head][idx], &msg->image, sizeof(SFpgaImage));
 		
 		_PageEnd[head][idx] = RX_HBConfig.head[head].blkNo0 + (msg->image.blkNo-RX_HBConfig.head[head].blkNo0+msg->image.blkCnt-1) % RX_HBConfig.head[head].blkCnt;
-	//	TrPrintfL(trace, "head[%d].fpga_image[%d]: width=%d, height=%d, bits=%d", head, idx, msg->image.widthBytes, msg->image.lengthPx,  msg->image.bitPerPixel);
-		TrPrintfL(trace, "head[%d].fpga_image[%d]:(id=%d, page=%d, copy=%d, scan=%d) blocks %05d ... %05d (%05d ... %05d), clearBlockUsed=%d", head, idx,  msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->image.blkNo, _PageEnd[head][idx], msg->image.blkNo-RX_HBConfig.head[head].blkNo0, _PageEnd[head][idx]-RX_HBConfig.head[head].blkNo0, msg->image.clearBlockUsed);
+		TrPrintfL(trace, "head[%d].fpga_image[%d]: width=%d, height=%d, bits=%d", head, idx, msg->image.widthBytes, msg->image.lengthPx,  msg->image.bitPerPixel);
 
 //		if (head==0) 
 		if (TEST_DEBUG && head==3) // _ImgInCnt>23   )
@@ -1826,7 +1828,7 @@ static int _check_print_done(void)
 					{
 						SPageId *pid = &_PageId[i];
 						_Direction =_Img[head][(i+1)%MAX_PAGES].flags & FLAG_MIRROR;
-						_DirchangeTimer = rx_get_ticks()+500;
+						_DirchangeTimer = rx_get_ticks()+200;
 						TrPrintfL(TRUE, "PRINT GO  [%d]: id=%d, page=%d, copy=%d, scan=%d, pos=%d, donepos=%d, _Direction=%d", RX_HBStatus[0].head[head].printGoCnt, pid->id, pid->page, pid->copy, pid->scan, RX_FpgaStat.pg_in_position[head], _PrintDonePos[head][i], _Direction);
 					//	fpga_set_pg_offsets(_Img[head][(i+1)%MAX_PAGES].flags & FLAG_MIRROR);				
 					}					

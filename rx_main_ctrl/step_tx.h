@@ -50,4 +50,6 @@ int	 steptx_rob_wash_done(void);
 
 void steptx_rob_stop(void);
 
-void steptx_rob_control(EnFluidCtrlMode ctrlMode);
+void steptx_set_robCtrlMode(EnFluidCtrlMode ctrlMode);
+
+EnFluidCtrlMode state_RobotCtrlMode(void);

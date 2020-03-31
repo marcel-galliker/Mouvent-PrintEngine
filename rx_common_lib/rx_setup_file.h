@@ -21,6 +21,7 @@ void   setup_destroy(HANDLE setup);
 
 int setup_load(HANDLE hsetup, const char *filename);
 int setup_save(HANDLE hsetup, const char *filename);
+char *setup_to_str(HANDLE hsetup);
 
 char	*setup_get_error_str(HANDLE hsetup);
 

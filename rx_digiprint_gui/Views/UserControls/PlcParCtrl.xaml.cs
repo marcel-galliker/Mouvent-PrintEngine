@@ -441,6 +441,12 @@ namespace RX_DigiPrint.Views.UserControls
                                              break;
 
                     default:
+                        if (value.Equals("ERROR"))
+                        { 
+                            _Value = value;
+                        }
+                        else
+                        {
                         try
                         {
                             double factor = 1.0;
@@ -479,8 +485,9 @@ namespace RX_DigiPrint.Views.UserControls
                                 default : _Value = value; break;
                             }
                         }
-                        catch(Exception) 
+                            catch(Exception ex) 
                         { _Value = value;}
+                        }
                         if (!_UpdateValue) Changed = (value!=_ValueInit);
                         break;
                     }
