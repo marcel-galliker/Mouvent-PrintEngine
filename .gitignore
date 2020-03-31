@@ -89,3 +89,6 @@ org.eclipse.core.resources
 /rx_fluid_nios/software/rx_fluid_nios_bsp/HAL
 /rx_fluid_nios/software/rx_fluid_nios_bsp/.settings
 /rx_fluid_nios/software/rx_fluid_nios_bsp/drivers
+/rx_head_nios/software/rx_head_nios/rx_head_nios.objdump
+/rx_head_nios/software/rx_head_nios/rx_head_nios.elf
+/rx_head_nios/software/rx_head_nios/rx_head_nios.map

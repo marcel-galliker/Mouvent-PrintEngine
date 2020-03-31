@@ -7,7 +7,7 @@
       <PathStyle>RemoteUnix</PathStyle>
     </CustomSourceDirectories>
     <DeploymentHost>
-      <HostName>192.168.200.5</HostName>
+      <HostName>192.168.200.6</HostName>
       <Transport>SSH</Transport>
       <UserName>root</UserName>
     </DeploymentHost>
