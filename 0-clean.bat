@@ -1,3 +1,4 @@
+
 rd ".\Workspace\RemoteSystemsTempFiles" /S /Q
 
 rd ".\metadata"
@@ -15,7 +16,7 @@ del *.db /S /Q
 
 
 rd .\ipch /S /Q
-rd .\.sv /S /Q
+rd .sv /S /Q
 rd .\CodeDB /S /Q
 rd .\_out /S /Q
 rd .\_temp /S /Q
@@ -41,6 +42,7 @@ for /F "delims=\" %%I in ('dir /ad /b .\') DO (
     rd /S /Q "Obj"
     rd /S /Q "Bin"
     rd /S /Q "VisualGDBCache"
+    rd /S /Q ".vs"
     cd..
 )
 rd /S /Q .\rx_head_nios\software\SAPE_65\obj
