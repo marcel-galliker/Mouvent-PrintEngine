@@ -44,13 +44,19 @@ namespace RX_DigiPrint.Views.PrintSystemView
             {
                 for (i=0;i<PrintHeadStack.Children.Count;i++)
                 {
-                    no = RxGlobals.PrintSystem.IS_Order[i/RxGlobals.PrintSystem.HeadCnt] * RxGlobals.PrintSystem.HeadCnt;
-                    if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX802)
-                        no += RxGlobals.PrintSystem.HeadCnt-1-i%RxGlobals.PrintSystem.HeadCnt;
-                    else
-                        no += i%RxGlobals.PrintSystem.HeadCnt;
-                    _PrintHeadView[i].DataContext = RxGlobals.HeadStat.List[no];
-                    _PrintHeadView[i].No = no;
+                    try
+                    {
+                        no = RxGlobals.PrintSystem.IS_Order[i/RxGlobals.PrintSystem.HeadCnt] * RxGlobals.PrintSystem.HeadCnt;
+                        if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX802)
+                            no += RxGlobals.PrintSystem.HeadCnt-1-i%RxGlobals.PrintSystem.HeadCnt;
+                        else
+                            no += i%RxGlobals.PrintSystem.HeadCnt;
+                        _PrintHeadView[i].DataContext = RxGlobals.HeadStat.List[no];
+                        _PrintHeadView[i].No = no;
+                    }
+                    catch(Exception ex)
+                    {
+                    }
                 }
             }
         }

@@ -2,8 +2,8 @@
 <sch:Settings xmlns:sch="http://www.altera.com/embeddedsw/bsp/schema">
         <BspType>hal</BspType>
         <BspVersion>default</BspVersion>
-        <BspGeneratedTimeStamp>01.04.2020 14:49:38</BspGeneratedTimeStamp>
-        <BspGeneratedUnixTimeStamp>1585745378375</BspGeneratedUnixTimeStamp>
+        <BspGeneratedTimeStamp>03.04.2020 09:53:28</BspGeneratedTimeStamp>
+        <BspGeneratedUnixTimeStamp>1585900408596</BspGeneratedUnixTimeStamp>
         <BspGeneratedLocation>C:\Develop\PrintEngine-Master\rx_fluid_nios\software\rx_fluid_nios_bsp</BspGeneratedLocation>
         <BspSettingsFile>C:\Develop\PrintEngine-Master\rx_fluid_nios\software\rx_fluid_nios_bsp\settings.bsp</BspSettingsFile>
         <SopcDesignFile>..\..\fluid_board_soc.sopcinfo</SopcDesignFile>
