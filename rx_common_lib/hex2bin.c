@@ -37,7 +37,7 @@ void hex2bin(const char *hexfilepath, BYTE *buffer, INT32 bufSize, INT32 *puseds
 	int		line, len, i, n;
 	char	str[256];
 	BYTE	cnt, type;
-	UINT16	addr;
+	UINT32	addr;
 	UINT32  segaddr=0;
 
 	*pusedsize = 0;

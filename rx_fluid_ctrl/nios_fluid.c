@@ -32,7 +32,7 @@
 //--- defines ------------------------------------------------------
 
 #define	NIOS_EXE_ADDR	0xc0000000
-#define NIOS_EXE_SIZE	0x00010000 // 0x00018000 // 0x00010000
+#define NIOS_EXE_SIZE	0x00018000 // 0x00010000
 
 #define NIOS_MEM_ADDR	0xc0060000
 #define NIOS_MEM_SIZE	0x00010000	

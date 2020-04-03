@@ -1,4 +1,4 @@
-//Legal Notice: (C)2018 Altera Corporation. All rights reserved.  Your
+//Legal Notice: (C)2020 Altera Corporation. All rights reserved.  Your
 //use of Altera Corporation's design tools, logic functions and other
 //software and tools, and its AMPP partner logic functions, and any
 //output files any of the foregoing (including device programming or
@@ -29,6 +29,7 @@ module fluid_board_soc_onchip_memory_nios_arm (
                                                  clk,
                                                  clken,
                                                  clken2,
+                                                 freeze,
                                                  reset,
                                                  reset_req,
                                                  write,
@@ -56,6 +57,7 @@ module fluid_board_soc_onchip_memory_nios_arm (
   input            clk;
   input            clken;
   input            clken2;
+  input            freeze;
   input            reset;
   input            reset_req;
   input            write;
@@ -63,13 +65,14 @@ module fluid_board_soc_onchip_memory_nios_arm (
   input   [ 15: 0] writedata;
   input   [ 15: 0] writedata2;
 
-  wire             clocken0;
-  wire             not_clken;
-  wire             not_clken2;
-  wire    [ 15: 0] readdata;
-  wire    [ 15: 0] readdata2;
-  wire             wren;
-  wire             wren2;
+
+wire             clocken0;
+wire             not_clken;
+wire             not_clken2;
+wire    [ 15: 0] readdata;
+wire    [ 15: 0] readdata2;
+wire             wren;
+wire             wren2;
   assign wren = chipselect & write & clken;
   assign not_clken = ~clken;
   assign not_clken2 = ~clken2;

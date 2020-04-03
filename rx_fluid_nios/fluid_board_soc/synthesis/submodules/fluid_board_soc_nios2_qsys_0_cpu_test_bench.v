@@ -1,4 +1,4 @@
-//Legal Notice: (C)2018 Altera Corporation. All rights reserved.  Your
+//Legal Notice: (C)2020 Altera Corporation. All rights reserved.  Your
 //use of Altera Corporation's design tools, logic functions and other
 //software and tools, and its AMPP partner logic functions, and any
 //output files any of the foregoing (including device programming or
@@ -24,12 +24,13 @@ module fluid_board_soc_nios2_qsys_0_cpu_test_bench (
                                                       A_ctrl_ld_non_io,
                                                       A_en,
                                                       A_exc_active_no_break_no_crst,
+                                                      A_exc_allowed,
                                                       A_exc_any_active,
-                                                      A_exc_cpu_reset_pri2_nxt,
-                                                      A_exc_hbreak_pri1_nxt,
+                                                      A_exc_cpu_reset_pri2,
+                                                      A_exc_hbreak_pri1,
                                                       A_exc_highest_pri_exc_id,
                                                       A_exc_inst_fetch,
-                                                      A_exc_norm_intr_pri5_nxt,
+                                                      A_exc_norm_intr_pri5,
                                                       A_st_data,
                                                       A_valid,
                                                       A_wr_data_unfiltered,
@@ -38,7 +39,6 @@ module fluid_board_soc_nios2_qsys_0_cpu_test_bench (
                                                       M_bht_ptr_unfiltered,
                                                       M_bht_wr_data_unfiltered,
                                                       M_bht_wr_en_unfiltered,
-                                                      M_exc_allowed,
                                                       M_mem_baddr,
                                                       M_target_pcb,
                                                       M_valid,
@@ -91,12 +91,13 @@ module fluid_board_soc_nios2_qsys_0_cpu_test_bench (
   input            A_ctrl_ld_non_io;
   input            A_en;
   input            A_exc_active_no_break_no_crst;
+  input            A_exc_allowed;
   input            A_exc_any_active;
-  input            A_exc_cpu_reset_pri2_nxt;
-  input            A_exc_hbreak_pri1_nxt;
+  input            A_exc_cpu_reset_pri2;
+  input            A_exc_hbreak_pri1;
   input   [ 31: 0] A_exc_highest_pri_exc_id;
   input            A_exc_inst_fetch;
-  input            A_exc_norm_intr_pri5_nxt;
+  input            A_exc_norm_intr_pri5;
   input   [ 31: 0] A_st_data;
   input            A_valid;
   input   [ 31: 0] A_wr_data_unfiltered;
@@ -105,9 +106,8 @@ module fluid_board_soc_nios2_qsys_0_cpu_test_bench (
   input   [  7: 0] M_bht_ptr_unfiltered;
   input   [  1: 0] M_bht_wr_data_unfiltered;
   input            M_bht_wr_en_unfiltered;
-  input            M_exc_allowed;
   input   [ 18: 0] M_mem_baddr;
-  input   [ 16: 0] M_target_pcb;
+  input   [ 17: 0] M_target_pcb;
   input            M_valid;
   input   [ 31: 0] W_badaddr_reg;
   input   [ 31: 0] W_bstatus_reg;
@@ -123,7 +123,7 @@ module fluid_board_soc_nios2_qsys_0_cpu_test_bench (
   input   [  5: 0] W_iw_opx;
   input   [ 18: 0] W_mem_baddr;
   input   [  3: 0] W_mem_byte_en;
-  input   [ 16: 0] W_pcb;
+  input   [ 17: 0] W_pcb;
   input   [ 31: 0] W_status_reg;
   input            W_valid;
   input   [ 71: 0] W_vinst;
@@ -133,223 +133,221 @@ module fluid_board_soc_nios2_qsys_0_cpu_test_bench (
   input   [  3: 0] d_byteenable;
   input            d_read;
   input            d_write;
-  input   [ 16: 0] i_address;
+  input   [ 17: 0] i_address;
   input            i_read;
   input            i_readdatavalid;
   input            reset_n;
 
-  wire             A_iw_invalid;
-  reg     [ 18: 0] A_mem_baddr;
-  reg     [ 16: 0] A_target_pcb;
-  reg              A_valid_crst;
-  reg              A_valid_hbreak;
-  reg              A_valid_intr;
-  wire    [ 31: 0] A_wr_data_filtered;
-  wire             A_wr_data_unfiltered_0_is_x;
-  wire             A_wr_data_unfiltered_10_is_x;
-  wire             A_wr_data_unfiltered_11_is_x;
-  wire             A_wr_data_unfiltered_12_is_x;
-  wire             A_wr_data_unfiltered_13_is_x;
-  wire             A_wr_data_unfiltered_14_is_x;
-  wire             A_wr_data_unfiltered_15_is_x;
-  wire             A_wr_data_unfiltered_16_is_x;
-  wire             A_wr_data_unfiltered_17_is_x;
-  wire             A_wr_data_unfiltered_18_is_x;
-  wire             A_wr_data_unfiltered_19_is_x;
-  wire             A_wr_data_unfiltered_1_is_x;
-  wire             A_wr_data_unfiltered_20_is_x;
-  wire             A_wr_data_unfiltered_21_is_x;
-  wire             A_wr_data_unfiltered_22_is_x;
-  wire             A_wr_data_unfiltered_23_is_x;
-  wire             A_wr_data_unfiltered_24_is_x;
-  wire             A_wr_data_unfiltered_25_is_x;
-  wire             A_wr_data_unfiltered_26_is_x;
-  wire             A_wr_data_unfiltered_27_is_x;
-  wire             A_wr_data_unfiltered_28_is_x;
-  wire             A_wr_data_unfiltered_29_is_x;
-  wire             A_wr_data_unfiltered_2_is_x;
-  wire             A_wr_data_unfiltered_30_is_x;
-  wire             A_wr_data_unfiltered_31_is_x;
-  wire             A_wr_data_unfiltered_3_is_x;
-  wire             A_wr_data_unfiltered_4_is_x;
-  wire             A_wr_data_unfiltered_5_is_x;
-  wire             A_wr_data_unfiltered_6_is_x;
-  wire             A_wr_data_unfiltered_7_is_x;
-  wire             A_wr_data_unfiltered_8_is_x;
-  wire             A_wr_data_unfiltered_9_is_x;
-  wire             E_add_br_to_taken_history_filtered;
-  wire             E_add_br_to_taken_history_unfiltered_is_x;
-  wire    [  7: 0] M_bht_ptr_filtered;
-  wire             M_bht_ptr_unfiltered_0_is_x;
-  wire             M_bht_ptr_unfiltered_1_is_x;
-  wire             M_bht_ptr_unfiltered_2_is_x;
-  wire             M_bht_ptr_unfiltered_3_is_x;
-  wire             M_bht_ptr_unfiltered_4_is_x;
-  wire             M_bht_ptr_unfiltered_5_is_x;
-  wire             M_bht_ptr_unfiltered_6_is_x;
-  wire             M_bht_ptr_unfiltered_7_is_x;
-  wire    [  1: 0] M_bht_wr_data_filtered;
-  wire             M_bht_wr_data_unfiltered_0_is_x;
-  wire             M_bht_wr_data_unfiltered_1_is_x;
-  wire             M_bht_wr_en_filtered;
-  wire             M_bht_wr_en_unfiltered_is_x;
-  reg     [ 31: 0] W_badaddr_reg_prev;
-  wire             W_badaddr_reg_prev_is_x;
-  reg     [ 31: 0] W_bstatus_reg_prev;
-  wire             W_bstatus_reg_prev_is_x;
-  reg     [ 31: 0] W_cdsr_reg_prev;
-  wire             W_cdsr_reg_prev_is_x;
-  reg              W_cmp_result;
-  reg     [ 31: 0] W_cpuid_reg_prev;
-  wire             W_cpuid_reg_prev_is_x;
-  reg     [ 31: 0] W_estatus_reg_prev;
-  wire             W_estatus_reg_prev_is_x;
-  reg              W_exc_any_active;
-  reg     [ 31: 0] W_exc_highest_pri_exc_id;
-  reg     [ 31: 0] W_exception_reg_prev;
-  wire             W_exception_reg_prev_is_x;
-  reg     [ 31: 0] W_ienable_reg_prev;
-  wire             W_ienable_reg_prev_is_x;
-  reg     [ 31: 0] W_ipending_reg_prev;
-  wire             W_ipending_reg_prev_is_x;
-  wire             W_is_opx_inst;
-  reg              W_iw_invalid;
-  wire             W_op_add;
-  wire             W_op_addi;
-  wire             W_op_and;
-  wire             W_op_andhi;
-  wire             W_op_andi;
-  wire             W_op_beq;
-  wire             W_op_bge;
-  wire             W_op_bgeu;
-  wire             W_op_blt;
-  wire             W_op_bltu;
-  wire             W_op_bne;
-  wire             W_op_br;
-  wire             W_op_break;
-  wire             W_op_bret;
-  wire             W_op_call;
-  wire             W_op_callr;
-  wire             W_op_cmpeq;
-  wire             W_op_cmpeqi;
-  wire             W_op_cmpge;
-  wire             W_op_cmpgei;
-  wire             W_op_cmpgeu;
-  wire             W_op_cmpgeui;
-  wire             W_op_cmplt;
-  wire             W_op_cmplti;
-  wire             W_op_cmpltu;
-  wire             W_op_cmpltui;
-  wire             W_op_cmpne;
-  wire             W_op_cmpnei;
-  wire             W_op_crst;
-  wire             W_op_custom;
-  wire             W_op_div;
-  wire             W_op_divu;
-  wire             W_op_eret;
-  wire             W_op_flushd;
-  wire             W_op_flushda;
-  wire             W_op_flushi;
-  wire             W_op_flushp;
-  wire             W_op_hbreak;
-  wire             W_op_initd;
-  wire             W_op_initda;
-  wire             W_op_initi;
-  wire             W_op_intr;
-  wire             W_op_jmp;
-  wire             W_op_jmpi;
-  wire             W_op_ldb;
-  wire             W_op_ldbio;
-  wire             W_op_ldbu;
-  wire             W_op_ldbuio;
-  wire             W_op_ldh;
-  wire             W_op_ldhio;
-  wire             W_op_ldhu;
-  wire             W_op_ldhuio;
-  wire             W_op_ldl;
-  wire             W_op_ldw;
-  wire             W_op_ldwio;
-  wire             W_op_mul;
-  wire             W_op_muli;
-  wire             W_op_mulxss;
-  wire             W_op_mulxsu;
-  wire             W_op_mulxuu;
-  wire             W_op_nextpc;
-  wire             W_op_nor;
-  wire             W_op_op_rsv02;
-  wire             W_op_op_rsv09;
-  wire             W_op_op_rsv10;
-  wire             W_op_op_rsv17;
-  wire             W_op_op_rsv18;
-  wire             W_op_op_rsv25;
-  wire             W_op_op_rsv26;
-  wire             W_op_op_rsv33;
-  wire             W_op_op_rsv34;
-  wire             W_op_op_rsv41;
-  wire             W_op_op_rsv42;
-  wire             W_op_op_rsv49;
-  wire             W_op_op_rsv57;
-  wire             W_op_op_rsv61;
-  wire             W_op_op_rsv62;
-  wire             W_op_op_rsv63;
-  wire             W_op_opx_rsv00;
-  wire             W_op_opx_rsv10;
-  wire             W_op_opx_rsv15;
-  wire             W_op_opx_rsv17;
-  wire             W_op_opx_rsv21;
-  wire             W_op_opx_rsv25;
-  wire             W_op_opx_rsv33;
-  wire             W_op_opx_rsv34;
-  wire             W_op_opx_rsv35;
-  wire             W_op_opx_rsv42;
-  wire             W_op_opx_rsv43;
-  wire             W_op_opx_rsv44;
-  wire             W_op_opx_rsv47;
-  wire             W_op_opx_rsv50;
-  wire             W_op_opx_rsv51;
-  wire             W_op_opx_rsv55;
-  wire             W_op_opx_rsv56;
-  wire             W_op_opx_rsv60;
-  wire             W_op_opx_rsv63;
-  wire             W_op_or;
-  wire             W_op_orhi;
-  wire             W_op_ori;
-  wire             W_op_rdctl;
-  wire             W_op_rdprs;
-  wire             W_op_ret;
-  wire             W_op_rol;
-  wire             W_op_roli;
-  wire             W_op_ror;
-  wire             W_op_sll;
-  wire             W_op_slli;
-  wire             W_op_sra;
-  wire             W_op_srai;
-  wire             W_op_srl;
-  wire             W_op_srli;
-  wire             W_op_stb;
-  wire             W_op_stbio;
-  wire             W_op_stc;
-  wire             W_op_sth;
-  wire             W_op_sthio;
-  wire             W_op_stw;
-  wire             W_op_stwio;
-  wire             W_op_sub;
-  wire             W_op_sync;
-  wire             W_op_trap;
-  wire             W_op_wrctl;
-  wire             W_op_wrprs;
-  wire             W_op_xor;
-  wire             W_op_xorhi;
-  wire             W_op_xori;
-  reg     [ 31: 0] W_st_data;
-  reg     [ 31: 0] W_status_reg_prev;
-  wire             W_status_reg_prev_is_x;
-  reg     [ 16: 0] W_target_pcb;
-  reg              W_valid_crst;
-  reg              W_valid_hbreak;
-  reg              W_valid_intr;
-  reg     [ 31: 0] W_wr_data_filtered;
-  wire             test_has_ended;
+
+wire             A_iw_invalid;
+reg     [ 18: 0] A_mem_baddr;
+reg     [ 17: 0] A_target_pcb;
+wire    [ 31: 0] A_wr_data_filtered;
+wire             A_wr_data_unfiltered_0_is_x;
+wire             A_wr_data_unfiltered_10_is_x;
+wire             A_wr_data_unfiltered_11_is_x;
+wire             A_wr_data_unfiltered_12_is_x;
+wire             A_wr_data_unfiltered_13_is_x;
+wire             A_wr_data_unfiltered_14_is_x;
+wire             A_wr_data_unfiltered_15_is_x;
+wire             A_wr_data_unfiltered_16_is_x;
+wire             A_wr_data_unfiltered_17_is_x;
+wire             A_wr_data_unfiltered_18_is_x;
+wire             A_wr_data_unfiltered_19_is_x;
+wire             A_wr_data_unfiltered_1_is_x;
+wire             A_wr_data_unfiltered_20_is_x;
+wire             A_wr_data_unfiltered_21_is_x;
+wire             A_wr_data_unfiltered_22_is_x;
+wire             A_wr_data_unfiltered_23_is_x;
+wire             A_wr_data_unfiltered_24_is_x;
+wire             A_wr_data_unfiltered_25_is_x;
+wire             A_wr_data_unfiltered_26_is_x;
+wire             A_wr_data_unfiltered_27_is_x;
+wire             A_wr_data_unfiltered_28_is_x;
+wire             A_wr_data_unfiltered_29_is_x;
+wire             A_wr_data_unfiltered_2_is_x;
+wire             A_wr_data_unfiltered_30_is_x;
+wire             A_wr_data_unfiltered_31_is_x;
+wire             A_wr_data_unfiltered_3_is_x;
+wire             A_wr_data_unfiltered_4_is_x;
+wire             A_wr_data_unfiltered_5_is_x;
+wire             A_wr_data_unfiltered_6_is_x;
+wire             A_wr_data_unfiltered_7_is_x;
+wire             A_wr_data_unfiltered_8_is_x;
+wire             A_wr_data_unfiltered_9_is_x;
+wire             E_add_br_to_taken_history_filtered;
+wire             E_add_br_to_taken_history_unfiltered_is_x;
+wire    [  7: 0] M_bht_ptr_filtered;
+wire             M_bht_ptr_unfiltered_0_is_x;
+wire             M_bht_ptr_unfiltered_1_is_x;
+wire             M_bht_ptr_unfiltered_2_is_x;
+wire             M_bht_ptr_unfiltered_3_is_x;
+wire             M_bht_ptr_unfiltered_4_is_x;
+wire             M_bht_ptr_unfiltered_5_is_x;
+wire             M_bht_ptr_unfiltered_6_is_x;
+wire             M_bht_ptr_unfiltered_7_is_x;
+wire    [  1: 0] M_bht_wr_data_filtered;
+wire             M_bht_wr_data_unfiltered_0_is_x;
+wire             M_bht_wr_data_unfiltered_1_is_x;
+wire             M_bht_wr_en_filtered;
+wire             M_bht_wr_en_unfiltered_is_x;
+reg     [ 31: 0] W_badaddr_reg_prev;
+wire             W_badaddr_reg_prev_is_x;
+reg     [ 31: 0] W_bstatus_reg_prev;
+wire             W_bstatus_reg_prev_is_x;
+reg     [ 31: 0] W_cdsr_reg_prev;
+wire             W_cdsr_reg_prev_is_x;
+reg              W_cmp_result;
+reg     [ 31: 0] W_cpuid_reg_prev;
+wire             W_cpuid_reg_prev_is_x;
+reg     [ 31: 0] W_estatus_reg_prev;
+wire             W_estatus_reg_prev_is_x;
+reg              W_exc_any_active;
+reg     [ 31: 0] W_exc_highest_pri_exc_id;
+reg     [ 31: 0] W_exception_reg_prev;
+wire             W_exception_reg_prev_is_x;
+reg     [ 31: 0] W_ienable_reg_prev;
+wire             W_ienable_reg_prev_is_x;
+reg     [ 31: 0] W_ipending_reg_prev;
+wire             W_ipending_reg_prev_is_x;
+wire             W_is_opx_inst;
+reg              W_iw_invalid;
+wire             W_op_add;
+wire             W_op_addi;
+wire             W_op_and;
+wire             W_op_andhi;
+wire             W_op_andi;
+wire             W_op_beq;
+wire             W_op_bge;
+wire             W_op_bgeu;
+wire             W_op_blt;
+wire             W_op_bltu;
+wire             W_op_bne;
+wire             W_op_br;
+wire             W_op_break;
+wire             W_op_bret;
+wire             W_op_call;
+wire             W_op_callr;
+wire             W_op_cmpeq;
+wire             W_op_cmpeqi;
+wire             W_op_cmpge;
+wire             W_op_cmpgei;
+wire             W_op_cmpgeu;
+wire             W_op_cmpgeui;
+wire             W_op_cmplt;
+wire             W_op_cmplti;
+wire             W_op_cmpltu;
+wire             W_op_cmpltui;
+wire             W_op_cmpne;
+wire             W_op_cmpnei;
+wire             W_op_crst;
+wire             W_op_custom;
+wire             W_op_div;
+wire             W_op_divu;
+wire             W_op_eret;
+wire             W_op_flushd;
+wire             W_op_flushda;
+wire             W_op_flushi;
+wire             W_op_flushp;
+wire             W_op_hbreak;
+wire             W_op_initd;
+wire             W_op_initda;
+wire             W_op_initi;
+wire             W_op_intr;
+wire             W_op_jmp;
+wire             W_op_jmpi;
+wire             W_op_ldb;
+wire             W_op_ldbio;
+wire             W_op_ldbu;
+wire             W_op_ldbuio;
+wire             W_op_ldh;
+wire             W_op_ldhio;
+wire             W_op_ldhu;
+wire             W_op_ldhuio;
+wire             W_op_ldl;
+wire             W_op_ldw;
+wire             W_op_ldwio;
+wire             W_op_mul;
+wire             W_op_muli;
+wire             W_op_mulxss;
+wire             W_op_mulxsu;
+wire             W_op_mulxuu;
+wire             W_op_nextpc;
+wire             W_op_nor;
+wire             W_op_op_rsv02;
+wire             W_op_op_rsv09;
+wire             W_op_op_rsv10;
+wire             W_op_op_rsv17;
+wire             W_op_op_rsv18;
+wire             W_op_op_rsv25;
+wire             W_op_op_rsv26;
+wire             W_op_op_rsv33;
+wire             W_op_op_rsv34;
+wire             W_op_op_rsv41;
+wire             W_op_op_rsv42;
+wire             W_op_op_rsv49;
+wire             W_op_op_rsv57;
+wire             W_op_op_rsv61;
+wire             W_op_op_rsv62;
+wire             W_op_op_rsv63;
+wire             W_op_opx_rsv00;
+wire             W_op_opx_rsv10;
+wire             W_op_opx_rsv15;
+wire             W_op_opx_rsv17;
+wire             W_op_opx_rsv21;
+wire             W_op_opx_rsv25;
+wire             W_op_opx_rsv33;
+wire             W_op_opx_rsv34;
+wire             W_op_opx_rsv35;
+wire             W_op_opx_rsv42;
+wire             W_op_opx_rsv43;
+wire             W_op_opx_rsv44;
+wire             W_op_opx_rsv47;
+wire             W_op_opx_rsv50;
+wire             W_op_opx_rsv51;
+wire             W_op_opx_rsv55;
+wire             W_op_opx_rsv56;
+wire             W_op_opx_rsv60;
+wire             W_op_opx_rsv63;
+wire             W_op_or;
+wire             W_op_orhi;
+wire             W_op_ori;
+wire             W_op_rdctl;
+wire             W_op_rdprs;
+wire             W_op_ret;
+wire             W_op_rol;
+wire             W_op_roli;
+wire             W_op_ror;
+wire             W_op_sll;
+wire             W_op_slli;
+wire             W_op_sra;
+wire             W_op_srai;
+wire             W_op_srl;
+wire             W_op_srli;
+wire             W_op_stb;
+wire             W_op_stbio;
+wire             W_op_stc;
+wire             W_op_sth;
+wire             W_op_sthio;
+wire             W_op_stw;
+wire             W_op_stwio;
+wire             W_op_sub;
+wire             W_op_sync;
+wire             W_op_trap;
+wire             W_op_wrctl;
+wire             W_op_wrprs;
+wire             W_op_xor;
+wire             W_op_xorhi;
+wire             W_op_xori;
+reg     [ 31: 0] W_st_data;
+reg     [ 31: 0] W_status_reg_prev;
+wire             W_status_reg_prev_is_x;
+reg     [ 17: 0] W_target_pcb;
+reg              W_valid_crst;
+reg              W_valid_hbreak;
+reg              W_valid_intr;
+reg     [ 31: 0] W_wr_data_filtered;
+wire             test_has_ended;
   assign W_op_call = W_iw_op == 0;
   assign W_op_jmpi = W_iw_op == 1;
   assign W_op_op_rsv02 = W_iw_op == 2;
@@ -535,27 +533,9 @@ module fluid_board_soc_nios2_qsys_0_cpu_test_bench (
   always @(posedge clk or negedge reset_n)
     begin
       if (reset_n == 0)
-          A_valid_hbreak <= 0;
-      else if (A_en)
-          A_valid_hbreak <= M_exc_allowed & A_exc_hbreak_pri1_nxt;
-    end
-
-
-  always @(posedge clk or negedge reset_n)
-    begin
-      if (reset_n == 0)
           W_valid_hbreak <= 0;
       else 
-        W_valid_hbreak <= A_valid_hbreak;
-    end
-
-
-  always @(posedge clk or negedge reset_n)
-    begin
-      if (reset_n == 0)
-          A_valid_crst <= 0;
-      else if (A_en)
-          A_valid_crst <= M_exc_allowed & A_exc_cpu_reset_pri2_nxt;
+        W_valid_hbreak <= A_exc_allowed & A_exc_hbreak_pri1;
     end
 
 
@@ -564,16 +544,7 @@ module fluid_board_soc_nios2_qsys_0_cpu_test_bench (
       if (reset_n == 0)
           W_valid_crst <= 0;
       else 
-        W_valid_crst <= A_valid_crst;
-    end
-
-
-  always @(posedge clk or negedge reset_n)
-    begin
-      if (reset_n == 0)
-          A_valid_intr <= 0;
-      else if (A_en)
-          A_valid_intr <= M_exc_allowed & A_exc_norm_intr_pri5_nxt;
+        W_valid_crst <= A_exc_allowed & A_exc_cpu_reset_pri2;
     end
 
 
@@ -582,7 +553,7 @@ module fluid_board_soc_nios2_qsys_0_cpu_test_bench (
       if (reset_n == 0)
           W_valid_intr <= 0;
       else 
-        W_valid_intr <= A_valid_intr;
+        W_valid_intr <= A_exc_allowed & A_exc_norm_intr_pri5;
     end
 
 

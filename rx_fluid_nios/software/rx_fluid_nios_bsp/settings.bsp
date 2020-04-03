@@ -2,8 +2,8 @@
 <sch:Settings xmlns:sch="http://www.altera.com/embeddedsw/bsp/schema">
         <BspType>hal</BspType>
         <BspVersion>default</BspVersion>
-        <BspGeneratedTimeStamp>03.04.2020 09:53:28</BspGeneratedTimeStamp>
-        <BspGeneratedUnixTimeStamp>1585900408596</BspGeneratedUnixTimeStamp>
+        <BspGeneratedTimeStamp>03.04.2020 10:33:27</BspGeneratedTimeStamp>
+        <BspGeneratedUnixTimeStamp>1585902807908</BspGeneratedUnixTimeStamp>
         <BspGeneratedLocation>C:\Develop\PrintEngine-Master\rx_fluid_nios\software\rx_fluid_nios_bsp</BspGeneratedLocation>
         <BspSettingsFile>C:\Develop\PrintEngine-Master\rx_fluid_nios\software\rx_fluid_nios_bsp\settings.bsp</BspSettingsFile>
         <SopcDesignFile>..\..\fluid_board_soc.sopcinfo</SopcDesignFile>
@@ -888,8 +888,8 @@
         </Setting>
         <MemoryMap>
                 <slaveDescriptor>jtag_uart</slaveDescriptor>
-                <addressRange>0x00000000 - 0x0000000F</addressRange>
-                <addressSpan>16</addressSpan>
+                <addressRange>0x00000000 - 0x00000007</addressRange>
+                <addressSpan>8</addressSpan>
                 <attributes>printable</attributes>
         </MemoryMap>
         <MemoryMap>
@@ -900,26 +900,26 @@
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>pio_input</slaveDescriptor>
-                <addressRange>0x00000010 - 0x0000002F</addressRange>
-                <addressSpan>32</addressSpan>
+                <addressRange>0x00000010 - 0x0000001F</addressRange>
+                <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>pio_output</slaveDescriptor>
-                <addressRange>0x00000020 - 0x0000005F</addressRange>
-                <addressSpan>64</addressSpan>
+                <addressRange>0x00000020 - 0x0000003F</addressRange>
+                <addressSpan>32</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>timer_1</slaveDescriptor>
-                <addressRange>0x00000040 - 0x0000007F</addressRange>
-                <addressSpan>64</addressSpan>
+                <addressRange>0x00000040 - 0x0000005F</addressRange>
+                <addressSpan>32</addressSpan>
                 <attributes>timer</attributes>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>timer_0</slaveDescriptor>
-                <addressRange>0x00000060 - 0x0000009F</addressRange>
-                <addressSpan>64</addressSpan>
+                <addressRange>0x00000060 - 0x0000007F</addressRange>
+                <addressSpan>32</addressSpan>
                 <attributes>timer</attributes>
         </MemoryMap>
         <MemoryMap>
@@ -966,20 +966,20 @@
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>flush_pump_pwm_freq</slaveDescriptor>
-                <addressRange>0x000000C0 - 0x000000DF</addressRange>
-                <addressSpan>32</addressSpan>
+                <addressRange>0x000000C0 - 0x000000CF</addressRange>
+                <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>flush_pump_pwm_duty_cycle</slaveDescriptor>
-                <addressRange>0x000000D0 - 0x000000EF</addressRange>
-                <addressSpan>32</addressSpan>
+                <addressRange>0x000000D0 - 0x000000DF</addressRange>
+                <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>timer_2</slaveDescriptor>
-                <addressRange>0x000000E0 - 0x0000011F</addressRange>
-                <addressSpan>64</addressSpan>
+                <addressRange>0x000000E0 - 0x000000FF</addressRange>
+                <addressSpan>32</addressSpan>
                 <attributes>timer</attributes>
         </MemoryMap>
         <MemoryMap>
@@ -1032,27 +1032,27 @@
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>pio_watchdog_cnt</slaveDescriptor>
-                <addressRange>0x00000360 - 0x0000037F</addressRange>
-                <addressSpan>32</addressSpan>
+                <addressRange>0x00000360 - 0x0000036F</addressRange>
+                <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>pio_watchdog_freq</slaveDescriptor>
-                <addressRange>0x00000370 - 0x0000038F</addressRange>
-                <addressSpan>32</addressSpan>
+                <addressRange>0x00000370 - 0x0000037F</addressRange>
+                <addressSpan>16</addressSpan>
+                <attributes/>
+        </MemoryMap>
+        <MemoryMap>
+                <slaveDescriptor>axi_lw_slave_register_0</slaveDescriptor>
+                <addressRange>0x00010000 - 0x0001FFFF</addressRange>
+                <addressSpan>65536</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>onchip_memory_nios_cpu</slaveDescriptor>
-                <addressRange>0x00010000 - 0x0001FFFF</addressRange>
-                <addressSpan>65536</addressSpan>
+                <addressRange>0x00020000 - 0x00037FFF</addressRange>
+                <addressSpan>98304</addressSpan>
                 <attributes>memory</attributes>
-        </MemoryMap>
-        <MemoryMap>
-                <slaveDescriptor>axi_lw_slave_register_0</slaveDescriptor>
-                <addressRange>0x00020000 - 0x0002FFFF</addressRange>
-                <addressSpan>65536</addressSpan>
-                <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>onchip_memory_nios_arm</slaveDescriptor>

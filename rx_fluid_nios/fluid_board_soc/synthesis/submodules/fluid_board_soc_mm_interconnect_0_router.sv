@@ -1,13 +1,13 @@
-// (C) 2001-2016 Altera Corporation. All rights reserved.
-// Your use of Altera Corporation's design tools, logic functions and other 
+// (C) 2001-2017 Intel Corporation. All rights reserved.
+// Your use of Intel Corporation's design tools, logic functions and other 
 // software and tools, and its AMPP partner logic functions, and any output 
-// files any of the foregoing (including device programming or simulation 
+// files from any of the foregoing (including device programming or simulation 
 // files), and any associated documentation or information are expressly subject 
-// to the terms and conditions of the Altera Program License Subscription 
-// Agreement, Altera MegaCore Function License Agreement, or other applicable 
+// to the terms and conditions of the Intel Program License Subscription 
+// Agreement, Intel FPGA IP License Agreement, or other applicable 
 // license agreement, including, without limitation, that your use is for the 
-// sole purpose of programming logic devices manufactured by Altera and sold by 
-// Altera or its authorized distributors.  Please refer to the applicable 
+// sole purpose of programming logic devices manufactured by Intel and sold by 
+// Intel or its authorized distributors.  Please refer to the applicable 
 // agreement for further details.
 
 
@@ -24,9 +24,9 @@
 // agreement for further details.
 
 
-// $Id: //acds/rel/15.1/ip/merlin/altera_merlin_router/altera_merlin_router.sv.terp#1 $
+// $Id: //acds/rel/17.1std/ip/merlin/altera_merlin_router/altera_merlin_router.sv.terp#1 $
 // $Revision: #1 $
-// $Date: 2015/08/09 $
+// $Date: 2017/07/30 $
 // $Author: swbranch $
 
 // -------------------------------------------------------
@@ -162,8 +162,8 @@ module fluid_board_soc_mm_interconnect_0_router
     localparam PAD25 = log2ceil(64'h380 - 64'h370); 
     localparam PAD26 = log2ceil(64'h1800 - 64'h1000); 
     localparam PAD27 = log2ceil(64'h20000 - 64'h10000); 
-    localparam PAD28 = log2ceil(64'h30000 - 64'h20000); 
-    localparam PAD29 = log2ceil(64'h30000 - 64'h20000); 
+    localparam PAD28 = log2ceil(64'h20000 - 64'h10000); 
+    localparam PAD29 = log2ceil(64'h40000 - 64'h20000); 
     localparam PAD30 = log2ceil(64'h58000 - 64'h50000); 
     // -------------------------------------------------------
     // Work out which address bits are significant based on the
@@ -388,21 +388,21 @@ module fluid_board_soc_mm_interconnect_0_router
     end
 
     // ( 0x10000 .. 0x20000 )
-    if ( {address[RG:PAD27],{PAD27{1'b0}}} == 19'h10000   ) begin
-            src_channel = 32'b0000000000000000001000000000000;
-            src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 21;
-    end
-
-    // ( 0x20000 .. 0x30000 )
-    if ( {address[RG:PAD28],{PAD28{1'b0}}} == 19'h20000  && write_transaction  ) begin
+    if ( {address[RG:PAD27],{PAD27{1'b0}}} == 19'h10000  && write_transaction  ) begin
             src_channel = 32'b0000000000000000000000000000001;
             src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 8;
     end
 
-    // ( 0x20000 .. 0x30000 )
-    if ( {address[RG:PAD29],{PAD29{1'b0}}} == 19'h20000  && read_transaction  ) begin
+    // ( 0x10000 .. 0x20000 )
+    if ( {address[RG:PAD28],{PAD28{1'b0}}} == 19'h10000  && read_transaction  ) begin
             src_channel = 32'b0000000000000000000000000000010;
             src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 8;
+    end
+
+    // ( 0x20000 .. 0x40000 )
+    if ( {address[RG:PAD29],{PAD29{1'b0}}} == 19'h20000   ) begin
+            src_channel = 32'b0000000000000000001000000000000;
+            src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 21;
     end
 
     // ( 0x50000 .. 0x58000 )

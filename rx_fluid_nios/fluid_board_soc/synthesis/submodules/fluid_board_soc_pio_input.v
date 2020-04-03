@@ -1,4 +1,4 @@
-//Legal Notice: (C)2018 Altera Corporation. All rights reserved.  Your
+//Legal Notice: (C)2020 Altera Corporation. All rights reserved.  Your
 //use of Altera Corporation's design tools, logic functions and other
 //software and tools, and its AMPP partner logic functions, and any
 //output files any of the foregoing (including device programming or
@@ -44,12 +44,13 @@ module fluid_board_soc_pio_input (
   input            write_n;
   input   [ 31: 0] writedata;
 
-  wire             clk_en;
-  wire    [ 14: 0] data_in;
-  wire             irq;
-  reg     [ 14: 0] irq_mask;
-  wire    [ 14: 0] read_mux_out;
-  reg     [ 31: 0] readdata;
+
+wire             clk_en;
+wire    [ 14: 0] data_in;
+wire             irq;
+reg     [ 14: 0] irq_mask;
+wire    [ 14: 0] read_mux_out;
+reg     [ 31: 0] readdata;
   assign clk_en = 1;
   //s1, which is an e_avalon_slave
   assign read_mux_out = ({15 {(address == 0)}} & data_in) |

@@ -1,4 +1,4 @@
-//Legal Notice: (C)2018 Altera Corporation. All rights reserved.  Your
+//Legal Notice: (C)2020 Altera Corporation. All rights reserved.  Your
 //use of Altera Corporation's design tools, logic functions and other
 //software and tools, and its AMPP partner logic functions, and any
 //output files any of the foregoing (including device programming or
@@ -29,6 +29,7 @@ module fluid_board_soc_onchip_memory_nios_cpu (
                                                  clk,
                                                  clken,
                                                  clken2,
+                                                 freeze,
                                                  reset,
                                                  reset_req,
                                                  write,
@@ -47,8 +48,8 @@ module fluid_board_soc_onchip_memory_nios_cpu (
 
   output  [ 31: 0] readdata;
   output  [ 31: 0] readdata2;
-  input   [ 13: 0] address;
-  input   [ 13: 0] address2;
+  input   [ 14: 0] address;
+  input   [ 14: 0] address2;
   input   [  3: 0] byteenable;
   input   [  3: 0] byteenable2;
   input            chipselect;
@@ -56,6 +57,7 @@ module fluid_board_soc_onchip_memory_nios_cpu (
   input            clk;
   input            clken;
   input            clken2;
+  input            freeze;
   input            reset;
   input            reset_req;
   input            write;
@@ -63,13 +65,14 @@ module fluid_board_soc_onchip_memory_nios_cpu (
   input   [ 31: 0] writedata;
   input   [ 31: 0] writedata2;
 
-  wire             clocken0;
-  wire             not_clken;
-  wire             not_clken2;
-  wire    [ 31: 0] readdata;
-  wire    [ 31: 0] readdata2;
-  wire             wren;
-  wire             wren2;
+
+wire             clocken0;
+wire             not_clken;
+wire             not_clken2;
+wire    [ 31: 0] readdata;
+wire    [ 31: 0] readdata2;
+wire             wren;
+wire             wren2;
   assign wren = chipselect & write & clken;
   assign not_clken = ~clken;
   assign not_clken2 = ~clken2;
@@ -99,9 +102,9 @@ module fluid_board_soc_onchip_memory_nios_cpu (
            the_altsyncram.indata_reg_b = "CLOCK0",
            the_altsyncram.init_file = INIT_FILE,
            the_altsyncram.lpm_type = "altsyncram",
-           the_altsyncram.maximum_depth = 16384,
-           the_altsyncram.numwords_a = 16384,
-           the_altsyncram.numwords_b = 16384,
+           the_altsyncram.maximum_depth = 24576,
+           the_altsyncram.numwords_a = 24576,
+           the_altsyncram.numwords_b = 24576,
            the_altsyncram.operation_mode = "BIDIR_DUAL_PORT",
            the_altsyncram.outdata_reg_a = "UNREGISTERED",
            the_altsyncram.outdata_reg_b = "UNREGISTERED",
@@ -111,8 +114,8 @@ module fluid_board_soc_onchip_memory_nios_cpu (
            the_altsyncram.width_b = 32,
            the_altsyncram.width_byteena_a = 4,
            the_altsyncram.width_byteena_b = 4,
-           the_altsyncram.widthad_a = 14,
-           the_altsyncram.widthad_b = 14,
+           the_altsyncram.widthad_a = 15,
+           the_altsyncram.widthad_b = 15,
            the_altsyncram.wrcontrol_wraddress_reg_b = "CLOCK0";
 
   //s1, which is an e_avalon_slave
