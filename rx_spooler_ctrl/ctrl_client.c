@@ -372,7 +372,8 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 	_Running = TRUE;
 	hc_start_printing();
 		
-	same = (!strcmp(msg.filename, _LastFilename) &&  msg.id.page==_LastPage && msg.wakeup==_LastWakeup && msg.gapPx==_LastGap && msg.offsetWidth==_LastOffsetWidth);
+	same = (!strcmp(msg.filename, _LastFilename) &&  msg.id.page==_LastPage && msg.wakeup==_LastWakeup && msg.gapPx==_LastGap);
+	if (rx_def_is_web(RX_Spooler.printerType)) same &= (msg.offsetWidth==_LastOffsetWidth);
 	if (RX_Spooler.printerType==printer_LB702_UV && msg.printMode==PM_SINGLE_PASS) same = ((msg.flags&FLAG_SAME)!=0);
 	_LastPage   = msg.id.page;
 	_LastGap	= msg.gapPx;

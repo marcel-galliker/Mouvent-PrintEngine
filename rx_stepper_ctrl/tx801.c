@@ -195,7 +195,7 @@ void tx801_main(int ticks, int menu)
 		RX_StepperStatus.info.z_in_print		= (RX_StepperStatus.cmdRunning == CMD_LIFT_PRINT_POS && RX_StepperStatus.info.ref_done);
 		RX_StepperStatus.info.z_in_cap			= (RX_StepperStatus.cmdRunning == CMD_LIFT_CAPPING_POS);
 		RX_StepperStatus.robinfo.z_in_wipe		= (RX_StepperStatus.cmdRunning == CMD_LIFT_WIPE_POS);
-		RX_StepperStatus.robinfo.z_in_vacuum	= (RX_StepperStatus.cmdRunning == CMD_LIFT_VACUUM_POS);
+		RX_StepperStatus.robinfo.z_in_vacuum	= (RX_StepperStatus.cmdRunning == CMD_LIFT_VACUUM_POS || RX_StepperStatus.cmdRunning == CMD_LIFT_VACUUM_HIGH_POS);
 		RX_StepperStatus.robinfo.z_in_wash		= (RX_StepperStatus.cmdRunning == CMD_LIFT_WASH_POS);
 		if (RX_StepperStatus.cmdRunning==CMD_LIFT_REFERENCE && _PrintPos_New) 
 		{
@@ -479,6 +479,15 @@ int  tx801_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 										RX_StepperStatus.cmdRunning = msgId;
 										RX_StepperStatus.info.moving = TRUE;
 										steps = _micron_2_steps(TX_REF_HEIGHT - _VacuumHight);
+										motors_move_to_step(MOTOR_Z_BITS, &_ParZ_down, steps);
+									}
+									break;
+	
+	case CMD_LIFT_VACUUM_HIGH_POS:	if (!RX_StepperStatus.cmdRunning)
+									{
+										RX_StepperStatus.cmdRunning = msgId;
+										RX_StepperStatus.info.moving = TRUE;
+										steps = _micron_2_steps(TX_REF_HEIGHT - _VacuumHight_High);
 										motors_move_to_step(MOTOR_Z_BITS, &_ParZ_down, steps);
 									}
 									break;

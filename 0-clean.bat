@@ -16,7 +16,7 @@ del *.db /S /Q
 
 
 rd .\ipch /S /Q
-rd .sv /S /Q
+rd .vs /S /Q
 rd .\CodeDB /S /Q
 rd .\_out /S /Q
 rd .\_temp /S /Q

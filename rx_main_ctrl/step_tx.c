@@ -128,7 +128,6 @@ void steptx_lift_to_print_pos(void)
 	{
 		INT32 height = RX_Config.stepper.print_height + RX_Config.stepper.material_thickness;
 		sok_send_2(&_step_socket[0], CMD_LIFT_PRINT_POS, sizeof(height), &height);		
-		sok_send_2(&_step_socket[1], CMD_LIFT_PRINT_POS, sizeof(height), &height);		
 	}
 }
 
@@ -147,7 +146,7 @@ void steptx_lift_to_up_pos(void)
 //--- steptx_lift_in_up_pos --------------
 int	 steptx_lift_in_up_pos(void)
 {
-	return _Status[0].info.z_in_ref;
+	return _Status[0].info.z_in_up || _Status[0].info.z_in_ref;
 }
 
 //--- steptx_lift_stop ------------------------------
@@ -265,6 +264,8 @@ static void _check_wrinkle_detection(void)
 //--- steptx_set_robCtrlMode -------------------------------------------------
 void steptx_set_robCtrlMode(EnFluidCtrlMode ctrlMode)
 {
+	if (ctrlMode==ctrl_off)
+		printf("OFF\n");
 	_RobotCtrlMode = ctrlMode;
 	_steptx_rob_control();
 }

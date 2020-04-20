@@ -163,7 +163,7 @@ void TrPrint  (int level, const char *str)
 	{			
 		if(_Mutex)
 		{
-			int strLen=strlen(str);
+			int strLen=(int)strlen(str);
 			int strPos=0;
 			int	next;
 			rx_mutex_lock(_Mutex);

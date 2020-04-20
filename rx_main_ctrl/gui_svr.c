@@ -206,7 +206,7 @@ void gui_tick(void)
 		_CheckSend[i]=0;
 	}
 
-	TrPrintfL(TRUE, "GUI Check: %s, TimeoutCnt=%d", str, _TimeoutCnt);
+//	TrPrintfL(TRUE, "GUI Check: %s, TimeoutCnt=%d", str, _TimeoutCnt);
 }
 
 //--- gui_test -------------------------------------------------------

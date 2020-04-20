@@ -19,7 +19,7 @@ LIBRARY_NAMES :=
 ADDITIONAL_LINKER_INPUTS := 
 MACOS_FRAMEWORKS := 
 
-CFLAGS := -ggdb -ffunction-sections -O0 -pthread -Wno-deprecated-declarations
+CFLAGS := -ggdb -ffunction-sections -O0 -pthread -Wno-deprecated-declarations -std=gnu99
 CXXFLAGS := -ggdb -ffunction-sections -O0 -pthread -Wno-deprecated-declarations
 ASFLAGS := 
 LDFLAGS := -Wl,-gc-sections -pthread
