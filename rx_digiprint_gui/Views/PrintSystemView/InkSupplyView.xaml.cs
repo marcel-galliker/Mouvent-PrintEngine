@@ -212,10 +212,10 @@ namespace RX_DigiPrint.Views.PrintSystemView
         //--- OnOff_Clicked ----------------------------------------------------------
         private void OnOff_Clicked  (object sender, RoutedEventArgs e)
         {
-            if (_InkSupply.CtrlMode==EFluidCtrlMode.ctrl_off && !_InkSupply.Flushed) 
-                //_command(EFluidCtrlMode.ctrl_warmup); 
+            /* if (_InkSupply.CtrlMode==EFluidCtrlMode.ctrl_off && !_InkSupply.Flushed) 
                 _command(null, EFluidCtrlMode.ctrl_print, false);
-            else if (_InkSupply.CtrlMode==EFluidCtrlMode.ctrl_print)
+            else */
+            if (_InkSupply.CtrlMode==EFluidCtrlMode.ctrl_print)
                 _command(null, EFluidCtrlMode.ctrl_shutdown, false);
             else                                              
                 _command(null, EFluidCtrlMode.ctrl_off, false); 
