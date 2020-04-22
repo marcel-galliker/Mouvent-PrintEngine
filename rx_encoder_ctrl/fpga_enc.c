@@ -648,7 +648,7 @@ void fpga_enc_simu(int khz)
 }
 
 //--- fpga_encoder_enable -------------------------------------
-void  fpga_encoder_enable(int enable)
+void  fpga_encoder_enable(int enable, int test)
 {
 	int i;	
 	
@@ -661,8 +661,8 @@ void  fpga_encoder_enable(int enable)
 
 			Fpga->cfg.encOut[i].reset_min_max	= TRUE;
 			Fpga->cfg.encIn[i].reset_min_max	= TRUE;
-			Fpga->cfg.encIn[i].enable			= enable && _Enabled[i];		
-			Fpga->cfg.encIn[i].index_en			= enable && _Enabled[i];	
+			Fpga->cfg.encIn[i].enable			= enable && (test||_Enabled[i]);		
+			Fpga->cfg.encIn[i].index_en			= enable && (test||_Enabled[i]);	
 			
 // for Debuging
 //			Fpga->cfg.encOut[i].scanning		= FALSE;

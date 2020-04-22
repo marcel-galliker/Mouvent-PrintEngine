@@ -84,7 +84,7 @@ void main_menu()
 					fpga_enc_simu(atoi(&str[1]));
 					break;
 			
-		case 'n':	fpga_encoder_enable(atoi(&str[1])); break;
+		case 'n':	fpga_encoder_enable(atoi(&str[1]), TRUE); break;
 
 		case 'd':	fpga_shift_delay(atoi(&str[1])); break;
 			

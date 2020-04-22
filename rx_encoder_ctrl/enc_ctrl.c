@@ -234,8 +234,8 @@ static int _handle_ctrl_msg(RX_SOCKET socket, void *pmsg)
 	case CMD_ENCODER_UV_OFF:	fpga_uv_off();											
 								_do_encoder_stat(socket);
 								break;
-	case CMD_ENCODER_DISABLE:	fpga_encoder_enable(FALSE);	break;
-	case CMD_ENCODER_ENABLE:	fpga_encoder_enable(TRUE);	break;
+	case CMD_ENCODER_DISABLE:	fpga_encoder_enable(FALSE, FALSE);	break;
+	case CMD_ENCODER_ENABLE:	fpga_encoder_enable(TRUE, FALSE);	break;
 	default:		Error(LOG, 0, "Unknown Command 0x%04x", phdr->msgId);
 					reply = REPLY_ERROR;
 					break;
