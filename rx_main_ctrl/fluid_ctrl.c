@@ -573,10 +573,11 @@ void undefine_PurgeCtrlMode(void)
 //--- _control -------------------------------------------------
 static void _control(int fluidNo)
 {
+	static int	_txrob;
+
 	int i;
 	int no = fluidNo*INK_PER_BOARD;
 	SInkSupplyStat *_stat = &_FluidStatus[no];
-	int	txrob = rx_def_is_tx(RX_Config.printer.type) && step_active(1);
 	int	lbrob = RX_StepperStatus.robot_used; //(RX_Config.printer.type==printer_LB702_UV ||RX_Config.printer.type == printer_LB702_WB);
 	
 	int HeadNo = ctrl_singleHead();
@@ -614,14 +615,15 @@ static void _control(int fluidNo)
 											else	   step_lift_to_top_pos();
 				
 											_PurgeCtrlMode = _stat->ctrlMode;
+											_txrob = rx_def_is_tx(RX_Config.printer.type) && step_active(1);
 											switch(_stat->ctrlMode)
 											{
-											case ctrl_purge_soft:		_send_purge_par(no, TIME_SOFT_PURGE); break;
-											case ctrl_purge:			_send_purge_par(no, TIME_PURGE);	  break;
+											case ctrl_purge_soft:		_send_purge_par(no, TIME_SOFT_PURGE); _txrob=FALSE; break;
+											case ctrl_purge:			_send_purge_par(no, TIME_PURGE);	  _txrob=FALSE; break;
 											case ctrl_purge_hard_wipe:	_send_purge_par(no, TIME_HARD_PURGE); break;
-											case ctrl_purge_hard:		_send_purge_par(no, TIME_HARD_PURGE); break;
+											case ctrl_purge_hard:		_send_purge_par(no, TIME_HARD_PURGE); _txrob=FALSE; break;
 											}
-                                            if (txrob && _PurgeFluidNo < 0 && state_RobotCtrlMode() != ctrl_wash_step1 && state_RobotCtrlMode() != ctrl_wash_step2)
+                                            if (_txrob && _PurgeFluidNo < 0 && state_RobotCtrlMode() != ctrl_wash_step1 && state_RobotCtrlMode() != ctrl_wash_step2)
                                             {
                                                steptx_rob_wash_start();
                                                Error(LOG, 0, "_RobotCtrlMode: %x", state_RobotCtrlMode());
@@ -634,13 +636,12 @@ static void _control(int fluidNo)
 												if (_PurgeCtrlMode == ctrl_undef)	fluid_send_ctrlMode(-1, ctrl_vacuum, TRUE);
 												else								_send_ctrlMode(_PurgeFluidNo, ctrl_purge_step1, TRUE);
 												break;
-											}	
-												
+											}													
 											break;
 											
 				case ctrl_purge_step1:		if ((!lbrob && step_lift_in_top_pos()) || (lbrob && steplb_rob_in_wipe_pos(no / 2, rob_fct_purge_all)))  // steplb_lift_in_up_pos_individually(no / 2))
 											{
-												if (txrob && _PurgeFluidNo < 0 && !steptx_rob_wash_done()) break;
+												if (_txrob && _PurgeFluidNo < 0 && !steptx_rob_wash_done()) break;
 												/*
 												if (lbrob && !steplb_rob_in_wipe_pos(no/2, HeadNo + rob_fct_purge_head0))
 												{
@@ -670,21 +671,23 @@ static void _control(int fluidNo)
 												setup_fluid_system(PATH_USER FILENAME_FLUID_STATE, &_Flushed, WRITE);				
 											}
 
-											if (txrob && _PurgeFluidNo < 0) 
+											if (_txrob && _PurgeFluidNo < 0) 
 											{
 												if (_all_fluids_in_fluidCtrlMode(ctrl_purge_step4)) 
-												{
+												{													
 													if (_PurgeCtrlMode==ctrl_purge_hard_wipe)
 														fluid_send_ctrlMode(-1, ctrl_wipe, TRUE);
 													else
 														fluid_send_ctrlMode(-1, ctrl_vacuum, TRUE);
+													_PurgeCtrlMode = ctrl_undef;
 												}
 											}
-											else if (txrob)
+											else if (_txrob)
 											{
 												if (_all_fluids_in_3fluidCtrlModes(ctrl_purge_step4, ctrl_off, ctrl_print))
 												{
 													fluid_send_ctrlMode(-1, ctrl_vacuum, TRUE);
+													_PurgeCtrlMode = ctrl_undef;
 												}
 											}
  											else if (RX_PrinterStatus.printState==ps_pause)
@@ -692,9 +695,14 @@ static void _control(int fluidNo)
 												if (_all_fluids_in_3fluidCtrlModes(ctrl_purge_step4, ctrl_off, ctrl_print))
 												{
 	                                                _send_ctrlMode(-1, ctrl_print, TRUE);
+													_PurgeCtrlMode = ctrl_undef;
                                                 }											
                                             }
-											else _send_ctrlMode(no, ctrl_off, TRUE);		
+											else 
+											{
+												_send_ctrlMode(no, ctrl_off, TRUE);
+												if (!_Flushed) _PurgeCtrlMode = ctrl_undef;
+											}
 											break;
 
 				
