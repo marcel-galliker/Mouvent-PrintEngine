@@ -111,7 +111,7 @@ REM ----------------------------------------------------------------------------
 
 :LIB_X32
 	set BUILD=32
-	set FLAGS=/m /property:Configuration=Release
+	set FLAGS=/m /property:Configuration=Release /property:SolutionDir=%BATCH_PATH%..\
 	call :BUILD_PROJECT rx_common_lib, vcxproj
 	call :BUILD_PROJECT rx_common_lib_cs, csproj
 	call :BUILD_PROJECT rx_tif_lib, vcxproj
@@ -123,7 +123,7 @@ REM ----------------------------------------------------------------------------
 
 :BIN_X32
 	set BUILD=32
-	set FLAGS=/m /property:Configuration=Release
+	set FLAGS=/m /property:Configuration=Release /property:SolutionDir=%BATCH_PATH%..\
 	call :BUILD_PROJECT rx_main_ctrl, vcxproj
 	call :BUILD_PROJECT rx_spooler_ctrl, vcxproj
 	goto :EOF
@@ -131,7 +131,7 @@ REM ----------------------------------------------------------------------------
 
 :LIB_X64
 	set BUILD=64
-	set FLAGS=/m /property:Configuration=Release /property:Platform=x64
+	set FLAGS=/m /property:Configuration=Release /property:Platform=x64 /property:SolutionDir=%BATCH_PATH%..\
 	call :BUILD_PROJECT rx_common_lib, vcxproj
 	call :BUILD_PROJECT rx_common_lib_cs, csproj
 	call :BUILD_PROJECT TinyXML, vcxproj, Externals\
@@ -141,7 +141,7 @@ REM ----------------------------------------------------------------------------
 
 :BIN_X64
 	set BUILD=64
-	set FLAGS=/m /property:Configuration=Release /property:Platform=x64
+	set FLAGS=/m /property:Configuration=Release /property:Platform=x64 /property:SolutionDir=%BATCH_PATH%..\
 	call :BUILD_PROJECT rx_digiprint_gui, sln
 	call :BUILD_PROJECT Win10-Install, vcxproj, Win10\
 	call :BUILD_PROJECT Win10-Startup, vcxproj, Win10\
@@ -248,8 +248,8 @@ REM Parameter [3]: optional subpath of projectfile ending with '\'
 	REM get warnings and errors from logfile
 	set WARN_FILE=warn.tmp
 	set ERROR_FILE=error.tmp
-	powershell -Command "Select-String -Path %LOG_FILE% -Pattern '(\d*) (Warning\(s\)|Warnung\(en\))$' | %% { $_.Matches.groups[1] } | %% { $_.Value }" > %WARN_FILE%
-	powershell -Command "Select-String -Path %LOG_FILE% -Pattern '(\d*) (Error\(s\)|Fehler)$' | %% { $_.Matches.groups[1] } | %% { $_.Value }" > %ERROR_FILE%
+	powershell -Command "Select-String -Path %LOG_FILE% -Pattern '(\d*) (Warning\(s\)|Warnung\(en\)|Avertissement\(s\))$' | %% { $_.Matches.groups[1] } | %% { $_.Value }" > %WARN_FILE%
+	powershell -Command "Select-String -Path %LOG_FILE% -Pattern '(\d*) (Error\(s\)|Fehler|Erreur\(s\))$' | %% { $_.Matches.groups[1] } | %% { $_.Value }" > %ERROR_FILE%
 	set /p WARN= < %WARN_FILE%
 	set /p ERR= < %ERROR_FILE%
 	set WARN_STR=Warnings: %WARN%
