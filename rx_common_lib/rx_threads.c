@@ -192,46 +192,46 @@ void   rx_exit(int exitCode)
 }
 
 //--- rx_process_running_cnt -------------------------------------------
-#ifdef _WIN64
-	int rx_process_running_cnt(const char *process, const char *arg)//, HANDLE *phandle, HMODULE *pmodule)
-	{
-		int start, count=0;
-		char *filepath = "D:/temp/tasklist.txt";
-		FILE *file;
-		char dir[100];
-		char str[100];
+int rx_process_running_cnt(const char *process, const char *arg)//, HANDLE *phandle, HMODULE *pmodule)
+{
+	int start, count=0;
+	char *filepath = PATH_TEMP "tasklist.txt";
+	FILE *file;
+	char dir[100];
+	char str[100];
 
-		for (start = (int)strlen(process); start > 0; start--)
+	for (start = (int)strlen(process); start > 0; start--)
+	{
+		if (process[start] == '\\' || process[start] == '/')
 		{
-			if (process[start] == '\\' || process[start] == '/')
-			{
-				start++;
-				break;
-			}
+			start++;
+			break;
 		}
+	}
 
 //		int ret=(int)ShellExecute(NULL,  "open", "tasklist.exe", " > D:/temp/tasklist.txt", NULL, SW_SHOW);
 
-		GetCurrentDirectory(sizeof(dir), dir);
-		SetCurrentDirectory("D:/temp");
-		sprintf(str, "tasklist.exe >%s", filepath);
-		system(str);
-		SetCurrentDirectory(dir);
-		file = fopen(filepath, "r");
-		if (file)
-		{
-			while (fgets(str, sizeof(str), file))
-			{
-				if (str_start(str, &process[start])) count++;
-			}
-			fclose(file);
-			remove(filepath);
-		}
-		return count;
-	}
-#else
-	int rx_process_running_cnt(const char *process, const char *arg)//, HANDLE *phandle, HMODULE *pmodule)
+	GetCurrentDirectory(sizeof(dir), dir);
+	SetCurrentDirectory(PATH_TEMP);
+	sprintf(str, "tasklist.exe >%s", filepath);
+	system(str);
+	SetCurrentDirectory(dir);
+	file = fopen(filepath, "r");
+	if (file)
 	{
+		while (fgets(str, sizeof(str), file))
+		{
+			if (str_start(str, &process[start])) count++;
+		}
+		fclose(file);
+		remove(filepath);
+	}
+	return count;
+}
+
+/* !!! this does not list x64 processes !!!! ----------------------------------------------------
+int rx_process_running_cnt(const char *process, const char *arg)//, HANDLE *phandle, HMODULE *pmodule)
+{
 		unsigned int	i;
 		int				count, start;
 		DWORD			aProcesses[1024], cbNeeded, cProcesses;
@@ -273,8 +273,8 @@ void   rx_exit(int exitCode)
 		}
 
 		return count;
-	}
-#endif
+}
+*/
 
 //--- rx_run_in_backgrund -------------------------------
 void rx_run_in_backgrund()
