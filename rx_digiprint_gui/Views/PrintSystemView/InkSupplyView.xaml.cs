@@ -243,10 +243,19 @@ namespace RX_DigiPrint.Views.PrintSystemView
         }
         private void PurgeWipe_Clicked      (object sender, RoutedEventArgs e) 
         {
+            /*
             if (RxMessageBox.YesNo("Purge + Wipe", "PURGE and WIPE all printheads?",  MessageBoxImage.Question, true))
             {
                 _command("Purge+Wipe",   EFluidCtrlMode.ctrl_purge_hard_wipe, true); 
             }
+            */
+            PurgeMsgBox box = new PurgeMsgBox("Purge and Wipe "+_InkSupply.InkType.Name+" ?");
+            bool? ret = (bool)box.ShowDialog(); 
+            if (ret!=null && (bool)ret)
+            {
+                _command("Purge+Wipe",   EFluidCtrlMode.ctrl_purge_hard_wipe, (box.Result==2)); 
+            }
+
         }
         private void Done_Clicked       (object sender, RoutedEventArgs e) {_command(null, _InkSupply.CtrlMode+1, false);           }
 

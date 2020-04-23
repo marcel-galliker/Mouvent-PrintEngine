@@ -5,6 +5,9 @@
 	It is needed for IntelliSense to parse other header files correctly.
 */
 #if defined(_MSC_VER) || defined (__SYSPROGS_CODESENSE__)
+#pragma clang diagnostic push
+
+#pragma clang diagnostic ignored "-Wreserved-id-macro"
 #ifndef __DBL_MIN_EXP__
 #define __DBL_MIN_EXP__ (-1021)
 #endif
@@ -367,6 +370,7 @@
 #endif
 //VS2005-2012 treats all files as C++, while VS2013+ can treat C files correctly.
 #if defined(_MSC_VER) && (_MSC_VER < 1800 || defined(__cplusplus))
+#undef __cplusplus
 #define __cplusplus 199711L
 #endif
 #ifndef __DEC128_MAX__
@@ -1047,14 +1051,14 @@
 #endif
 
 // --- Include directories begin --- //
-//f:\compiler\linaro-tools\bin\../lib/gcc/arm-linux-gnueabi/4.7.1/../../../../arm-linux-gnueabi/include/c++/4.7.1
-//f:\compiler\linaro-tools\bin\../lib/gcc/arm-linux-gnueabi/4.7.1/../../../../arm-linux-gnueabi/include/c++/4.7.1/arm-linux-gnueabi
-//f:\compiler\linaro-tools\bin\../lib/gcc/arm-linux-gnueabi/4.7.1/../../../../arm-linux-gnueabi/include/c++/4.7.1/backward
-//f:\compiler\linaro-tools\bin\../lib/gcc/arm-linux-gnueabi/4.7.1/include
-//f:\compiler\linaro-tools\bin\../lib/gcc/arm-linux-gnueabi/4.7.1/include-fixed
-//f:\compiler\linaro-tools\bin\../lib/gcc/arm-linux-gnueabi/4.7.1/../../../../arm-linux-gnueabi/include
-//f:\compiler\linaro-tools\bin\../arm-linux-gnueabi/libc/usr/include/arm-linux-gnueabi
-//f:\compiler\linaro-tools\bin\../arm-linux-gnueabi/libc/usr/include
+//$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\include\c++\4.7.1
+//$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\include\c++\4.7.1\arm-linux-gnueabi
+//$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\include\c++\4.7.1\backward
+//$(TOOLCHAIN_ROOT)\lib\gcc\arm-linux-gnueabi\4.7.1\include
+//$(TOOLCHAIN_ROOT)\lib\gcc\arm-linux-gnueabi\4.7.1\include-fixed
+//$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\include
+//$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\libc\usr\include\arm-linux-gnueabi
+//$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\libc\usr\include
 //../Externals/TinyXML
 //../Externals/libtiff
 //../Externals/mbedtls-1.3.10/include
@@ -1062,13 +1066,14 @@
 
 
 // --- Library directories begin --- //
-//f:/compiler/linaro-tools/bin/../lib/gcc/arm-linux-gnueabi/4.7.1/
-//f:/compiler/linaro-tools/bin/../lib/gcc/arm-linux-gnueabi/
-//f:/compiler/linaro-tools/bin/../lib/gcc/
-//f:/compiler/linaro-tools/bin/../lib/gcc/arm-linux-gnueabi/4.7.1/../../../../arm-linux-gnueabi/lib/
-//f:/compiler/linaro-tools/bin/../arm-linux-gnueabi/libc/lib/arm-linux-gnueabi/
-//f:/compiler/linaro-tools/bin/../arm-linux-gnueabi/libc/lib/
-//f:/compiler/linaro-tools/bin/../arm-linux-gnueabi/libc/usr/lib/arm-linux-gnueabi/
-//f:/compiler/linaro-tools/bin/../arm-linux-gnueabi/libc/usr/lib/
+//$(TOOLCHAIN_ROOT)\lib\gcc\arm-linux-gnueabi\4.7.1\
+//$(TOOLCHAIN_ROOT)\lib\gcc\arm-linux-gnueabi\
+//$(TOOLCHAIN_ROOT)\lib\gcc\
+//$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\lib\
+//$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\libc\lib\arm-linux-gnueabi\
+//$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\libc\lib\
+//$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\libc\usr\lib\arm-linux-gnueabi\
+//$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\libc\usr\lib\
 // --- Library directories begin --- //
 
+#pragma clang diagnostic pop

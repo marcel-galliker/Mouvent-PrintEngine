@@ -397,6 +397,7 @@ static void _steptx_rob_control(void)
 									step_rob_to_wipe_pos(rob_fct_vacuum_all);
 								}
 								break;
+
 	case ctrl_vacuum_step3:		if (plc_in_wipe_pos() && step_rob_in_wipe_pos(rob_fct_vacuum))
 								{
 									_RobotCtrlMode=ctrl_vacuum_step4;

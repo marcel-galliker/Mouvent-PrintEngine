@@ -35,7 +35,8 @@ namespace RxWfTool.Helpers
         void RxNumBox_TouchUp(object sender, TouchEventArgs e)
         {
             IsPadActive = true;
-            RxNumPad pad = new RxNumPad(this, true);
+         //   RxNumPad pad = new RxNumPad(this, true);
+            RxNumPad pad = new RxNumPad(this);
             bool? result=pad.ShowDialog();
             IsPadActive = false;
             if (result!=null && (bool)result == true)

@@ -435,6 +435,10 @@ void txrob_main(int ticks, int menu)
 	RX_StepperStatus.robinfo.rob_in_vac = fpga_input(ROT_VAC_OR_WASH_IN) && !fpga_input(ROT_WASH_OR_CAP_IN) && !fpga_input(ROT_STORED_IN);
 	RX_StepperStatus.robinfo.rob_in_wash = fpga_input(ROT_VAC_OR_WASH_IN) && fpga_input(ROT_WASH_OR_CAP_IN) && !fpga_input(ROT_STORED_IN);
 	RX_StepperStatus.robinfo.rob_in_cap = fpga_input(ROT_WASH_OR_CAP_IN) && !fpga_input(ROT_VAC_OR_WASH_IN) && !fpga_input(ROT_STORED_IN);
+	
+	if (RX_StepperStatus.robinfo.rob_in_cap) _ParRotDrive.speed = 600;
+	else if (RX_StepperStatus.robinfo.rob_in_vac || RX_StepperStatus.robinfo.rob_in_wash || RX_StepperStatus.robinfo.rob_in_wipe) _ParRotDrive.speed = 800;
+
     if (fpga_input(ROT_STORED_IN) && (fpga_input(ROT_VAC_OR_WASH_IN) || fpga_input(ROT_WASH_OR_CAP_IN)))
 	{
 		Error(ERR_CONT, 0, "CLN Command %s: Invalid position sensors combination", _CmdName);
@@ -1039,7 +1043,10 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		break;
 		
 	case CMD_ROB_MOVE_POS:		strcpy(_CmdName, "CMD_ROB_MOVE_POS");
-		TrPrintfL(TRUE, "SOCKET[%d]: %s", socket, _CmdName);
+		pos = *((INT32*)pdata);
+		TrPrintfL(TRUE, "SOCKET[%d]: %s rob_function=%d", socket, _CmdName, pos);
+		// Error(LOG, 0, "%s rob_function=%d: wipe_ready=%d, vacuum_ready=%d", _CmdName, pos, RX_StepperStatus.robinfo.wipe_ready, RX_StepperStatus.robinfo.vacuum_ready);
+
 		if (!RX_StepperStatus.cmdRunning || RX_StepperStatus.cmdRunning == CMD_ROB_SHIFT_LEFT)
 		{
 			if (!RX_StepperStatus.robinfo.ref_done)
@@ -1047,7 +1054,7 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 				Error(ERR_CONT,0, "Robot not referenced, cmd=0x%08x", msgId);
 				break;
 			}
-			pos = *((INT32*)pdata);
+
 			if (pos < rob_fct_cap) {Error(LOG, 0, "CLN: Command %s: negative position not allowed", _CmdName); break;}
 			if (pos > rob_fct_vacuum_all) {Error(LOG, 0, "CLN: Command %s: too high pos", _CmdName); break;}
 
@@ -1082,6 +1089,7 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 				motors_move_to_step(MOTOR_ROT_BITS, &_ParRotDrive, pos);
 			}		
 		}
+		// else Error(WARN, 0, "Command refused (cmdRunning=0x%08x)", RX_StepperStatus.cmdRunning);
 		break;
 		
 	case CMD_ROB_SHIFT_MOV:		strcpy(_CmdName, "CMD_ROB_SHIFT_MOV");
