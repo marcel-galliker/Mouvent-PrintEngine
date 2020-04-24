@@ -610,6 +610,7 @@ static void _control(int fluidNo)
 				
 				case ctrl_purge:
 				case ctrl_purge_hard_wipe:	
+				case ctrl_purge_hard_vacc:	
 				case ctrl_purge_soft:
 				case ctrl_purge_hard:		if (lbrob) steplb_rob_to_wipe_pos(no / 2, rob_fct_purge_all);  //steplb_rob_to_wipe_pos(no / 2, HeadNo + rob_fct_purge_head0);
 											else	   step_lift_to_top_pos();
@@ -621,6 +622,7 @@ static void _control(int fluidNo)
 											case ctrl_purge_soft:		_send_purge_par(no, TIME_SOFT_PURGE); _txrob=FALSE; break;
 											case ctrl_purge:			_send_purge_par(no, TIME_PURGE);	  _txrob=FALSE; break;
 											case ctrl_purge_hard_wipe:	_send_purge_par(no, TIME_HARD_PURGE); break;
+											case ctrl_purge_hard_vacc:	_send_purge_par(no, TIME_HARD_PURGE); break;
 											case ctrl_purge_hard:		_send_purge_par(no, TIME_HARD_PURGE); _txrob=FALSE; break;
 											}
                                             if (_txrob && _PurgeFluidNo < 0 && state_RobotCtrlMode() != ctrl_wash_step1 && state_RobotCtrlMode() != ctrl_wash_step2)
@@ -665,7 +667,7 @@ static void _control(int fluidNo)
 											// if (lbrob) steplb_rob_wipe_start(no/2, HeadNo + rob_fct_purge_head0);
 											break;
 
-				case ctrl_purge_step4:		if (_PurgeCtrlMode==ctrl_purge_hard || _PurgeCtrlMode==ctrl_purge_hard_wipe)
+				case ctrl_purge_step4:		if (_PurgeCtrlMode==ctrl_purge_hard || _PurgeCtrlMode==ctrl_purge_hard_wipe || _PurgeCtrlMode==ctrl_purge_hard_vacc)
 											{
 												_Flushed &= ~(0x01<<no);
 												setup_fluid_system(PATH_USER FILENAME_FLUID_STATE, &_Flushed, WRITE);				
@@ -677,7 +679,7 @@ static void _control(int fluidNo)
 												{													
 													if (_PurgeCtrlMode==ctrl_purge_hard_wipe)
 														fluid_send_ctrlMode(-1, ctrl_wipe, TRUE);
-													else 
+													else if (_PurgeCtrlMode==ctrl_purge_hard_vacc)
 														fluid_send_ctrlMode(-1, ctrl_vacuum, TRUE);
 													_PurgeCtrlMode = ctrl_undef;
 												}
@@ -889,7 +891,7 @@ void fluid_send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 		for (int i=0; i<RX_Config.inkSupplyCnt; i++) _send_ctrlMode(i, ctrlMode, sendToHeads);	
 	}
 	if (ctrlMode==ctrl_off) step_rob_stop();	
-	if (ctrlMode==ctrl_purge_hard || ctrlMode == ctrl_purge_hard_wipe || ctrlMode == ctrl_purge || ctrlMode == ctrl_purge_soft) _PurgeFluidNo=no;
+	if (ctrlMode==ctrl_purge_hard || ctrlMode == ctrl_purge_hard_wipe || ctrlMode == ctrl_purge_hard_vacc || ctrlMode == ctrl_purge || ctrlMode == ctrl_purge_soft) _PurgeFluidNo=no;
 	
 	_FluidCtrlMode = ctrlMode;
 	_RobotCtrlMode = ctrlMode;

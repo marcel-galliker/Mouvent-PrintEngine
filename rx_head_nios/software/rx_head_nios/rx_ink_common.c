@@ -58,6 +58,7 @@ char *FluidCtrlModeStr(EnFluidCtrlMode mode)
 	case ctrl_purge:				return "PRG";		//  0x101:
 	case ctrl_purge_hard:			return "PRG-H";		//  0x102:
 	case ctrl_purge_hard_wipe:		return "PRG+WPE";	//  0x103:
+	case ctrl_purge_hard_vacc:		return "PRG+VAC";	//  0x104:
 	case ctrl_purge_step1:			return "PRG/1";		//  0x111:
 	case ctrl_purge_step2:			return "PRG/2";		//  0x112:
 	case ctrl_purge_step3:			return "PRG/3";		//  0x113:

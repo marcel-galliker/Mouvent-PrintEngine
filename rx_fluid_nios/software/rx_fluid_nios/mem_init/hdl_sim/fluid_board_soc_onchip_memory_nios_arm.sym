@@ -132,10 +132,10 @@
 00029ff0 G my_table
 0002a1d0 g impure_data
 0002a2b0 G jtag_uart
-0002b2e8 g RETRY.3438
-0002b2ec g init.2298
-0002b2f0 g period_timer_0.3415
-0002b2f4 g period_timer_1.3416
+0002b2e8 g RETRY.3439
+0002b2ec g init.2299
+0002b2f0 g period_timer_0.3416
+0002b2f4 g period_timer_1.3417
 0002b2f8 G _global_impure_ptr
 0002b2fc G _impure_ptr
 0002b300 G alt_priority_mask
@@ -156,7 +156,7 @@
 0002c650 b _FlushPump
 0002c654 b _AirPressureTime
 0002c658 b _FillPressure
-0002c65c b cnt.3234
+0002c65c b cnt.3235
 0002c660 B _PumpOFFTime
 0002c664 B _PumpBeforeOFF
 0002c668 b _cnt
@@ -164,7 +164,7 @@
 0002c670 b _Watchdog_ok
 0002c674 B pRX_Status
 0002c678 B pRX_Config
-0002c67c b _on.2268
+0002c67c b _on.2269
 0002c680 b Timer_10_in
 0002c684 b Timer_10_out
 0002c688 b Timer_1000_in

@@ -162,6 +162,7 @@ namespace RX_DigiPrint.Services
 	    ctrl_purge,				//	0x101:
 	    ctrl_purge_hard,		//  0x102:
 	    ctrl_purge_hard_wipe,	//  0x103:
+	    ctrl_purge_hard_vacc,	//  0x104:
 	    ctrl_purge_step1=0x111,	//	0x111:
 	    ctrl_purge_step2,		//	0x112:
 	    ctrl_purge_step3,		//	0x113:

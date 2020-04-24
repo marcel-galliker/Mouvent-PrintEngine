@@ -153,6 +153,7 @@
                             <Rectangle Fill="{StaticResource RX.Green}" HorizontalAlignment="Stretch" Height="1" Margin="-16, 8"/>
                             <Button x:Name="FlushButton"  Content="Flush"       Click="Flush_Clicked"     Padding="10" Visibility="{Binding CanFlush, Converter={StaticResource BoolToVisible_Converter}}"/>
                             <Button                       Content="Purge"       Click="Purge_Clicked"     Padding="10"/>
+                            <Button                       Content="Prg+Vac"     Click="PurgeVacc_Clicked" Padding="10" x:Name="Button_PurgeVacc"/>
                             <Button                       Content="Prg+Wpe"     Click="PurgeWipe_Clicked" Padding="10" x:Name="Button_PurgeWipe"/>
                             <Rectangle Fill="{StaticResource RX.Green}" HorizontalAlignment="Stretch" Height="1" Margin="-16, 8"/>
                             <Button                       Content="Fill"        Click="Fill_Clicked"      Padding="10" />

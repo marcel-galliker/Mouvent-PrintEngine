@@ -113,6 +113,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
             if (RxGlobals.PrintSystem.HasHeater) SettingsGrid.RowDefinitions[3].Height = new GridLength(1, GridUnitType.Auto);
             else                                 SettingsGrid.RowDefinitions[3].Height = new GridLength(0);
 
+            Button_PurgeVacc.Visibility = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX801 || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX802)? Visibility.Visible : Visibility.Collapsed;          //  SettingsGrid.RowDefinitions[5].Height = new GridLength(0); // Canistzer Level
             Button_PurgeWipe.Visibility = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX801 || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX802)? Visibility.Visible : Visibility.Collapsed;          //  SettingsGrid.RowDefinitions[5].Height = new GridLength(0); // Canistzer Level
         }
 
@@ -241,21 +242,23 @@ namespace RX_DigiPrint.Views.PrintSystemView
             }
 
         }
+        private void PurgeVacc_Clicked      (object sender, RoutedEventArgs e) 
+        {
+            PurgeMsgBox box = new PurgeMsgBox("Purge and Vacuum "+_InkSupply.InkType.Name+" ?");
+            bool? ret = (bool)box.ShowDialog(); 
+            if (ret!=null && (bool)ret)
+            {
+                _command("Purge+Vacc",   EFluidCtrlMode.ctrl_purge_hard_vacc, (box.Result==2)); 
+            }
+        }
         private void PurgeWipe_Clicked      (object sender, RoutedEventArgs e) 
         {
-            /*
-            if (RxMessageBox.YesNo("Purge + Wipe", "PURGE and WIPE all printheads?",  MessageBoxImage.Question, true))
-            {
-                _command("Purge+Wipe",   EFluidCtrlMode.ctrl_purge_hard_wipe, true); 
-            }
-            */
             PurgeMsgBox box = new PurgeMsgBox("Purge and Wipe "+_InkSupply.InkType.Name+" ?");
             bool? ret = (bool)box.ShowDialog(); 
             if (ret!=null && (bool)ret)
             {
                 _command("Purge+Wipe",   EFluidCtrlMode.ctrl_purge_hard_wipe, (box.Result==2)); 
             }
-
         }
         private void Done_Clicked       (object sender, RoutedEventArgs e) {_command(null, _InkSupply.CtrlMode+1, false);           }
 
