@@ -33,8 +33,12 @@ if not exist %LOG_PATH% (
 	md %LOG_PATH%
 	echo log directory created
 ) else (
-	del /q %LOG_PATH%\*
-	echo old log files deleted
+	if not "%2"=="-no-delete" (
+		del /q %LOG_PATH%\*
+		echo old log files deleted
+	) else (
+		echo keeping old log files
+	)
 )
 
 if not exist %LOG_PASS% (
