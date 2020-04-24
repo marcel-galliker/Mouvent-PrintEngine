@@ -18,8 +18,12 @@
 #include "rx_error.h"
 #include "rx_term.h"
 #include "nios_def_head.h"
+#include "rx_head_ctrl.h"
 #include "tse_regs.h"
 #include "tse.h"
+
+//--- defines ---------------------------------------------------------------
+#define UDP_OVERLOAD_WARNING	110000	// [KB]: physical limit ~ 120000 (@ 1GB/Sec)
 
 typedef struct
 {
@@ -35,6 +39,7 @@ typedef struct
 static int			_MemId=0;
 static UINT32		*_TSE[UDP_PORT_CNT];
 static INT32		_Speed[UDP_PORT_CNT];
+static INT32		_UdpOverloadCtr[UDP_PORT_CNT];
 static STseErrors	_TseErrors[UDP_PORT_CNT];
 static UINT64		_MacAddr[UDP_PORT_CNT];
 static int			_ErrorDelay=0;
@@ -65,6 +70,7 @@ void tse_error_reset(void)
 	int i;
 	for (i=0; i<UDP_PORT_CNT; i++)
 		_TseErrors[i].flags=0;
+	memset(_UdpOverloadCtr, 0, sizeof(_UdpOverloadCtr));
 }
 
 //--- tse_set_mac_addr -----------------------
@@ -227,8 +233,41 @@ void tse_display_status(INT32 speed[2])
 	term_printf("UDP speed:       % 4d  % 4d     msg/s %06d %06d	     MB/s %7s %7s\n", _Speed[0], _Speed[1], speed[0], speed[1], mb[0], mb[1]);
 }
 
+//--- _check_udp_speed -----------------------------------------------------
+static void _check_udp_speed(int ticks)
+{
+	static int _time=0;
+	static UINT16 _udp[2]={0,0};
+	int cnt;
+	int i, speed;
+	
+	if (_time && _time!=ticks)
+	{
+		for (i=0; i<UDP_PORT_CNT; i++)
+		{
+			cnt = fpga_get_msgCnt(i);
+			speed = (cnt - _udp[i]) & 0xffff;
+			RX_UdpSpeed[i] = speed*1000/(ticks-_time);
+			_udp     [i]   = cnt;
+			
+			if (_TSE[i] && _MacAddr[i])
+			{
+				int kb=RX_UdpSpeed[i]*RX_HBConfig.dataBlkSize/1024;
+			//	TrPrintfL(TRUE, "UDP[%d]: Speed=%d KB, ctr=%d", i, kb, _UdpOverloadCtr[i]);
+				if (kb>UDP_OVERLOAD_WARNING)
+				{
+					if (_UdpOverloadCtr[i]<10) _UdpOverloadCtr[i]++;
+					else ErrorFlag(WARN, &_TseErrors[i].flags, 0x20<<i,	0, "TSE: UDP %d approaching maximum load", i);
+				}
+				else if (_UdpOverloadCtr[i]>0) _UdpOverloadCtr[i]--;
+			}
+		}
+	}	
+	_time=ticks;	
+}
+
 //--- tse_check_errors ----------------------------
-int tse_check_errors(int menu)
+int tse_check_errors(int ticks, int menu)
 {
 	int i;		
 	for (i=0; i<SIZEOF(_TSE); i++)
@@ -251,6 +290,7 @@ int tse_check_errors(int menu)
 	
 	if (_ErrorDelay==0)
 	{
+		if (menu) _check_udp_speed(ticks);
 		for (i=0; i<SIZEOF(_TSE); i++)
 		{
 			if (RX_HBConfig.dataAddr[i])

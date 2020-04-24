@@ -164,7 +164,6 @@ static int _check_block_used_flags_clear(int head, int imgNo, int blkNo, int blk
 static int _trace_used_flags(int head, int imgNo, int blkNo, int blkCnt, int blkEnd);
 static void _fpga_copy_status(void);
 static void _fpga_check_fp_errors(int printDone);
-static void _check_udp_speed(int ticks);
 
 //*** functions ********************************************
 
@@ -1019,6 +1018,12 @@ UINT32 fpga_get_aliveCnt(int udpNo)
 	return _AliveCnt[udpNo];
 }
 
+//--- fpga_get_msgCnt -------------------
+UINT32 fpga_get_msgCnt(int udpNo)
+{
+	return Fpga.stat->eth_ctr[udpNo].frames_all;
+}
+
 //--- _set_ip_addr --------------------------------------------
 static void _set_ip_addr(SFpgaEthCfg *ethcfg, UINT32 ipAddr)
 {
@@ -1723,7 +1728,6 @@ void  fpga_main(int ticks, int menu)
 		
 		//--- user interface ------------------------------				
 		_fpga_copy_status();
-		_check_udp_speed(ticks);	
 
 		//----- activate TCP/IP --------------
 		if (_UdpIsLocal && RX_HBConfig.dataBlkSize==DATA_BLOCK_SIZE_STD && led)
@@ -1762,26 +1766,6 @@ void  fpga_main(int ticks, int menu)
 	int time4=rx_get_ticks()-time;
 
 	if (time4>200) Error(WARN, 0, "fpga_main(%d) t1=%d, t2=%d, t3=%d, t4=%d", menu, time1, time2, time3, time4);
-}
-
-//--- _check_udp_speed -----------------------------------------------------
-static void _check_udp_speed(int ticks)
-{
-	static int _time=0;
-	static UINT16 _udp[2]={0,0};
-	int i, speed;
-	int cnt[2]={Fpga.stat->eth_ctr[0].frames_all, Fpga.stat->eth_ctr[1].frames_all};
-	
-	if (_time && _time!=ticks)
-	{
-		for (i=0; i<2; i++)
-		{
-			speed = (cnt[i] - _udp[i]) & 0xffff;		
-			RX_UdpSpeed[i] = speed*1000/(ticks-_time);
-			_udp     [i] = cnt[i];
-		}
-	}	
-	_time=ticks;	
 }
 
 //--- _check_print_done -----------------------------------------------------------------

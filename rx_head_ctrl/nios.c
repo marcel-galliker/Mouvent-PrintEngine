@@ -592,7 +592,7 @@ int  nios_main(int ticks, int menu)
 	{
 		if (_NiosMem) cond_main(ticks);
 		
-		tse_check_errors(menu);
+		tse_check_errors(ticks, menu);
 		if (menu) 	
 		{
 			nios_check_errors();		

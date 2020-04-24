@@ -40,6 +40,7 @@ int   fpga_udp_block_size(void);
 UINT32 fpga_get_block_used(int headNo, UINT32 blkNo, UINT32 blkCnt, UINT32 *buffer);
 UINT32 fpga_get_blockOutIdx(int headNo);
 UINT32 fpga_get_aliveCnt(int udpNo);
+UINT32 fpga_get_msgCnt(int udpNo);
 
 int  fpga_set_config(RX_SOCKET socket);
 void fpga_enc_config(int synth);

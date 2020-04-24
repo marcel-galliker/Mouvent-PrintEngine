@@ -351,6 +351,7 @@ static int _do_error_reset(void)
 {
 	RX_HBStatus[0].warn = 0;
 	RX_HBStatus[0].err  = 0;
+
 	nios_error_reset();
 
 	return REPLY_OK;				
