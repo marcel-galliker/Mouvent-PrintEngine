@@ -427,13 +427,17 @@ UINT32 net_head_ctrl_addr	(int headNo)
 }
 
 //--- net_head_data_addr -----------------------------------------------
-UINT32 net_head_data_addr	(int headNo, int udpNo, int portCnt)
+UINT32 net_head_data_addr	(int headNo, int udpNo, int ethPortCnt, int udpPortCnt)
+// udpPortCnt:  number of IP-Ports on the server
+// dataPortCnt: number of Data- IP-Ports on the head board
 {
 	char ipAddr[64];
 	int addr[4];
+	int port;
 	net_device_to_ipaddr(dev_head, headNo, ipAddr, sizeof(ipAddr));
 	sscanf(ipAddr, "%d.%d.%d.%d", &addr[0], &addr[1], &addr[2], &addr[3]);
-	if (portCnt)	sprintf(ipAddr, "%d.%d.%d.%d", addr[0], addr[1], addr[2] + 1 + ((headNo*UDP_PORT_CNT + udpNo) % portCnt), addr[3]);
+	if (udpNo>=udpPortCnt) return 0;
+	if (ethPortCnt)	sprintf(ipAddr, "%d.%d.%d.%d", addr[0], addr[1], addr[2] + 1 + ((headNo*udpPortCnt + udpNo) % ethPortCnt), addr[3]);
 	else			sprintf(ipAddr, "%d.%d.%d.%d", addr[0], addr[1], addr[2], 50+10*udpNo+headNo);
 	return sok_addr_32(ipAddr);
 }

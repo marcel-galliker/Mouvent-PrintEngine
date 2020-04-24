@@ -93,7 +93,7 @@ int tse_set_mac_addr(int no, UINT64 macAddr)
 	
 	_TSE[no][TSE_PHY_BASIC_CONTROL] = 0x0140;			// Basic control	-> disable Auto-negotiation, Full-Duplex, 1000Mbps
 	
-	_TSE[no][TSE_MDIO_ADDR_0] = PHY_ADDRESS;			// Bits[4:0] 		—> 5-bit PHY address
+	_TSE[no][TSE_MDIO_ADDR_0] = PHY_ADDRESS;			// Bits[4:0] 		ï¿½> 5-bit PHY address
 
 	// RGMII Control Signal Pad Skew
 	rx_dv = 0x07;		// default (0.0ns) 4bit Reg
@@ -249,23 +249,26 @@ int tse_check_errors(int menu)
 	{
 		for (i=0; i<SIZEOF(_TSE); i++)
 		{
-//			if (_TseErrors[i].remote_fault)				ErrorFlag(ERR_CONT, &_TseErrors[i].flags, 0x00, 0, "TSE: Remote fault occurred on UDP %d", i);
-			if (_TseErrors[i].link_down_fault)			ErrorFlag(ERR_CONT, &_TseErrors[i].flags, 0x01, 0, "TSE: Link-down occurred on UDP %d", i);
-			if (_TseErrors[i].parallel_detect_fault)	ErrorFlag(ERR_CONT, &_TseErrors[i].flags, 0x02, 0, "TSE: Parallel detect fault occurred on UDP %d", i);
-			if (_TseErrors[i].receive_error)			ErrorFlag(ERR_CONT, &_TseErrors[i].flags, 0x04,	0, "TSE: Receive error occurred on UDP %d", i);
-				
-			if (_Speed[i]==0)	ErrorFlag(ERR_CONT, &_TseErrors[i].flags, 0x08, 0, "UDP %d not connected", i);
-			if (_Speed[i]==100) ErrorFlag(ERR_CONT, &_TseErrors[i].flags, 0x10, 0, "UDP %d only at 100 Mbit/s (needs 1 Gbit/s)", i);
-				
-			if (RX_HBConfig.printerType==printer_DP803)
+			if (RX_HBConfig.dataAddr[i])
 			{
-				if (_Speed[i]==1000 && _TseErrors[i].flags&0x08)
-				{
-					Error(LOG, 0, "UDP %d reconnected", i);
-					_TseErrors[i].flags &= ~0x08;					
-				}
-			}				
-		}
+	//			if (_TseErrors[i].remote_fault)				ErrorFlag(ERR_CONT, &_TseErrors[i].flags, 0x00, 0, "TSE: Remote fault occurred on UDP %d", i);
+			    if (_TseErrors[i].link_down_fault)			ErrorFlag(ERR_CONT, &_TseErrors[i].flags, 0x01, 0, "TSE: Link-down occurred on UDP %d", i);
+			    if (_TseErrors[i].parallel_detect_fault)	ErrorFlag(ERR_CONT, &_TseErrors[i].flags, 0x02, 0, "TSE: Parallel detect fault occurred on UDP %d", i);
+				if (_TseErrors[i].receive_error)			ErrorFlag(ERR_CONT, &_TseErrors[i].flags, 0x04,	0, "TSE: Receive error occurred on UDP %d", i);			
+
+			    if (_Speed[i]==0)	ErrorFlag(ERR_CONT, &_TseErrors[i].flags, 0x08, 0, "UDP %d not connected", i);
+			    if (_Speed[i]==100) ErrorFlag(ERR_CONT, &_TseErrors[i].flags, 0x10, 0, "UDP %d only at 100 Mbit/s (needs 1 Gbit/s)", i);
+				    
+			    if (RX_HBConfig.printerType==printer_DP803)
+			    {
+				    if (_Speed[i]==1000 && _TseErrors[i].flags&0x08)
+				    {
+					    Error(LOG, 0, "UDP %d reconnected", i);
+					    _TseErrors[i].flags &= ~0x08;					
+				    }
+			    }				
+		    }
+	    }
 	}
 	
 	if(menu && _ErrorDelay>0) _ErrorDelay--;

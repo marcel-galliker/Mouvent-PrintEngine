@@ -39,7 +39,7 @@ int  net_device_to_ipaddr	(EDevice dev, int no, char *ipAddr, int size);
 void net_ipaddr_to_device	(const char *ipAddr, EDevice *pdev, int *pno);
 
 UINT32 net_head_ctrl_addr	(int headNo);
-UINT32 net_head_data_addr	(int headNo, int udpNo, int portCnt);
+UINT32 net_head_data_addr	(int headNo, int udpNo, int ethPortCnt, int udpPortCnt);
 
 void net_send_config		(RX_SOCKET socket);
 void net_set_config	  		(RX_SOCKET socket, SIfConfig *config);

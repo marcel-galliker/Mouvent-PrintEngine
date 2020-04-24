@@ -433,6 +433,7 @@ static void _headboard_config(int colorCnt, int headsPerColor, int ethPortCnt)
 	//--- scanning: All Heads on one PrintBar ----------------------
 	int i;
 	int board, head, port;
+	int udpPortCnt;
 	char ipAddr[32];
 	SHeadBoardCfg	*pBoard;
 
@@ -458,6 +459,8 @@ static void _headboard_config(int colorCnt, int headsPerColor, int ethPortCnt)
 		pBoard->ctrlAddr	 = sok_addr_32(ipAddr);
 		pBoard->ctrlPort     = PORT_CTRL_HEAD;			
 		if (head%headsPerColor==0) port=200;
+		if (rx_def_is_tx(RX_Config.printer.type))udpPortCnt=1;
+		else                                     udpPortCnt=2;
 		for (i=0; i<SIZEOF(pBoard->dataAddr); i++)
 		{
 			port++;
@@ -472,7 +475,7 @@ static void _headboard_config(int colorCnt, int headsPerColor, int ethPortCnt)
 			}
 			else 
 			{
-				pBoard->dataAddr[i]  = net_head_data_addr(pBoard->no, i, ethPortCnt);
+				pBoard->dataAddr[i]  = net_head_data_addr(pBoard->no, i, ethPortCnt, udpPortCnt);
 			}
 		}
 

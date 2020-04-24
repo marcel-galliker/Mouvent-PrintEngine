@@ -260,6 +260,7 @@ void fpga_init(char *rbfFileName)
 			sprintf(str, "192.168.200.%d", no+20);
 			RX_HBConfig.dataAddr[1] = sok_addr_32(str);
 		}
+		/*
 		else
 		{
 			sprintf(str, "192.168.201.%d", no);
@@ -267,6 +268,7 @@ void fpga_init(char *rbfFileName)
 			sprintf(str, "192.168.202.%d", no);
 			RX_HBConfig.dataAddr[1] = sok_addr_32(str);
 		}
+		*/
 	//		RX_HBConfig.dataPort[0] = PORT_UDP_DATA;
 	//		RX_HBConfig.dataPort[1] = PORT_UDP_DATA;
 
