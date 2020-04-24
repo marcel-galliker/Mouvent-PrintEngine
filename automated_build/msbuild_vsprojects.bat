@@ -44,13 +44,13 @@ if not exist %LOG_PATH% (
 if not exist %LOG_PASS% (
 	md %LOG_PASS%
 ) else (
-	del /q %LOG_PASS%\*
+	if not "%2"=="-no-delete" del /q %LOG_PASS%\*
 )
 
 if not exist %LOG_FAIL% (
 	md %LOG_FAIL%
 ) else (
-	del /q %LOG_FAIL%\*
+	if not "%2"=="-no-delete" del /q %LOG_FAIL%\*
 )
 
 if not exist %BIN_PATH% (
