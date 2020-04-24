@@ -217,10 +217,14 @@ int tse_set_mac_addr(int no, UINT64 macAddr)
 //--- tse_display_status --------------------------------------
 void tse_display_status(INT32 speed[2])
 {		
-	int i, mb[2];
+	int i;
+	char mb[2][32];
 	for (i=0; i<2; i++)
-		mb[i]=speed[i]*RX_HBConfig.dataBlkSize/1024;
-	term_printf("UDP speed:       % 4d  % 4d     msg/s %06d %06d	     MB/s %7s %7s\n", _Speed[0], _Speed[1], speed[0], speed[1], value_str3(mb[0]), value_str3(mb[1]));
+	{
+		int val=speed[i]*RX_HBConfig.dataBlkSize/1024;
+		strcpy(mb[i], value_str3(val));
+	}
+	term_printf("UDP speed:       % 4d  % 4d     msg/s %06d %06d	     MB/s %7s %7s\n", _Speed[0], _Speed[1], speed[0], speed[1], mb[0], mb[1]);
 }
 
 //--- tse_check_errors ----------------------------

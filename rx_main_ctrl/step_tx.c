@@ -264,8 +264,6 @@ static void _check_wrinkle_detection(void)
 //--- steptx_set_robCtrlMode -------------------------------------------------
 void steptx_set_robCtrlMode(EnFluidCtrlMode ctrlMode)
 {
-	if (ctrlMode==ctrl_off)
-		printf("OFF\n");
 	_RobotCtrlMode = ctrlMode;
 	_steptx_rob_control();
 }
