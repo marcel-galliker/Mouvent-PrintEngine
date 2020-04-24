@@ -1403,8 +1403,10 @@ static void _init_purge(int isNo, int pressure)
 		{
 			switch(pRX_Config->printerType)
 			{
-				case printer_TX801 : _InkSupply[isNo].purgePressure = 200 + pressure; break;
-				default : _InkSupply[isNo].purgePressure = 40 * pRX_Config->headsPerColor + pressure; break;
+				case printer_TX801 :
+				case printer_TX802 :
+									_InkSupply[isNo].purgePressure = 100 + 100*pRX_Config->headsPerColor + pressure; break;
+				default : 			_InkSupply[isNo].purgePressure = 40 * pRX_Config->headsPerColor + pressure; break;
 			}
 		}
 
