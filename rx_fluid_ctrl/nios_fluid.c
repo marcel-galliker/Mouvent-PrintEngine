@@ -325,6 +325,23 @@ void nios_set_cfg(SFluidBoardCfg *pcfg)
 void nios_set_ctrlmode(int isNo, EnFluidCtrlMode mode)
 {
 	if (isNo<0 || isNo>NIOS_INK_SUPPLY_CNT) return;
+	if (mode!=_Cfg->ink_supply[isNo].ctrl_mode && mode>=ctrl_check_step0 && mode<=ctrl_check_step9)
+	{
+		switch(mode)
+		{
+        case ctrl_check_step0: Error(LOG, 0, "Fluid[%d]: Checks Started (~ ???)", isNo, mode-ctrl_check_step0); break;
+        case ctrl_check_step1: Error(LOG, 0, "Fluid[%d]: Check%d Started (~15 sec, description)", isNo, mode-ctrl_check_step0); break;
+        case ctrl_check_step2: Error(LOG, 0, "Fluid[%d]: Check%d Started (~3 min, description)", isNo, mode-ctrl_check_step0); break;
+        case ctrl_check_step3: Error(LOG, 0, "Fluid[%d]: Check%d Started (~1 sec, description)", isNo, mode-ctrl_check_step0); break;
+        case ctrl_check_step4: Error(LOG, 0, "Fluid[%d]: Check%d Started (~1 sec, description)", isNo, mode-ctrl_check_step0); break;
+        case ctrl_check_step5: Error(LOG, 0, "Fluid[%d]: Check%d Started (???)", isNo, mode-ctrl_check_step0); break;
+        case ctrl_check_step6: Error(LOG, 0, "Fluid[%d]: Check%d Started (???)", isNo, mode-ctrl_check_step0); break;
+        case ctrl_check_step7: Error(LOG, 0, "Fluid[%d]: Check%d Started (???)", isNo, mode-ctrl_check_step0); break;
+        case ctrl_check_step8: Error(LOG, 0, "Fluid[%d]: Check%d Started (???)", isNo, mode-ctrl_check_step0); break;
+        case ctrl_check_step9: Error(LOG, 0, "Fluid[%d]: Check%d Started (???)", isNo, mode-ctrl_check_step0); break;
+		}
+	}
+
 	_Cfg->ink_supply[isNo].ctrl_mode = mode;
 }
 
@@ -473,6 +490,10 @@ void _update_status(void)
 		pstat->condPumpSpeed	= _Cfg->ink_supply[i].condPumpFeedback;
 		pstat->condTemp			= _Cfg->ink_supply[i].headTemp;
 //		pstat->meniscus			= _Cfg->ink_supply[i].condMeniscus; //_Stat->ink_supply[i].meniscus;
+		if (_Stat->ink_supply[i].ctrl_state!=pstat->ctrlMode && _Stat->ink_supply[i].ctrl_state>ctrl_check_step0 && _Stat->ink_supply[i].ctrl_state<=ctrl_check_step9)
+		{
+			Error(LOG, 0, "Fluid[%d]: Check%d Done", i, _Stat->ink_supply[i].ctrl_state-ctrl_check_step0);	
+		}
 		pstat->ctrlMode			= _Stat->ink_supply[i].ctrl_state;
 		pstat->cylinderPresSet	= _Stat->ink_supply[i].cylinderPresSet;		
 		pstat->cylinderSetpoint	= _Stat->ink_supply[i].IS_Pressure_Setpoint;

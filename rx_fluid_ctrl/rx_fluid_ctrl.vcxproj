@@ -43,9 +43,9 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-soc|Win32'">
-    <NMakeBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /build "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeBuildCommandLine>
-    <NMakeReBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /rebuild "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeReBuildCommandLine>
-    <NMakeCleanCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /clean "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeCleanCommandLine>
+    <NMakeBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /build "$(ProjectPath)" "/solution:$(SolutionPath)"  "/config:$(Configuration)" "/platform:$(Platform)"</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /rebuild "$(ProjectPath)" "/solution:$(SolutionPath)"  "/config:$(Configuration)" "/platform:$(Platform)"</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /clean "$(ProjectPath)" "/solution:$(SolutionPath)"  "/config:$(Configuration)" "/platform:$(Platform)"</NMakeCleanCommandLine>
     <NMakeOutput>$(ProjectDir)rx_fluid_ctrl-Release-soc.vgdbsettings</NMakeOutput>
     <NMakeIncludeSearchPath>f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1;f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1\arm-linux-gnueabi;f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1\backward;f:\compiler\linaro-tools\lib\gcc\arm-linux-gnueabi\4.7.1\include;f:\compiler\linaro-tools\lib\gcc\arm-linux-gnueabi\4.7.1\include-fixed;f:\compiler\linaro-tools\arm-linux-gnueabi\include;f:\compiler\linaro-tools\arm-linux-gnueabi\libc\usr\include\arm-linux-gnueabi;f:\compiler\linaro-tools\arm-linux-gnueabi\libc\usr\include;../rx_ink_lib;../rx_common_lib;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(ProjectDir)\gcc_Release-soc.h;$(VISUALGDB_DIR)\gcc_compat.h;$(NMakeForcedIncludes)</NMakeForcedIncludes>

@@ -142,11 +142,11 @@ static int 	_ShutdownTimeOut[NIOS_INK_SUPPLY_CNT] = {0};
 // static int 	_DecreaseSpeedCalibration[NIOS_INK_SUPPLY_CNT] = {0};
 
 // --- Check
-// static SCheckSequence 	_CheckSequence[NIOS_INK_SUPPLY_CNT];
-// static int 	_TimeStabitilityCheck[NIOS_INK_SUPPLY_CNT] = {0};
-// static int 	_CheckStep4_PinletSaved[NIOS_INK_SUPPLY_CNT] = {0};
-// static int 	_CheckStep4_PoutletSaved[NIOS_INK_SUPPLY_CNT] = {0};
-// static int 	_CheckHeaterBoard_Temperature[NIOS_INK_SUPPLY_CNT] = {0};
+static SCheckSequence 	_CheckSequence[NIOS_INK_SUPPLY_CNT];
+static int 	_TimeStabitilityCheck[NIOS_INK_SUPPLY_CNT] = {0};
+static int 	_CheckStep4_PinletSaved[NIOS_INK_SUPPLY_CNT] = {0};
+static int 	_CheckStep4_PoutletSaved[NIOS_INK_SUPPLY_CNT] = {0};
+static int 	_CheckHeaterBoard_Temperature[NIOS_INK_SUPPLY_CNT] = {0};
 
 // --- Purge
 //static int 	_TimeStabitilityPurgePressure[NIOS_INK_SUPPLY_CNT] = {0};
@@ -477,7 +477,7 @@ void ink_tick_10ms(void)
 
 			case ctrl_readyToPrint:
 				break;
-/*
+
 			case ctrl_check_step0:
 				_set_bleed_valve(isNo, FALSE);
 				_set_air_valve(isNo, FALSE);
@@ -937,7 +937,7 @@ void ink_tick_10ms(void)
 
 				pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
 				break;
-				*/
+
 /*
 			case ctrl_cal_start:
 				_TimeStabitilityCalibration[isNo] = 0;

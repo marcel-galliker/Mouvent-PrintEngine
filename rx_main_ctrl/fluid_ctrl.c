@@ -596,17 +596,17 @@ static void _control(int fluidNo)
 			{
 				case ctrl_shutdown:		_send_ctrlMode(no, ctrl_shutdown_done, TRUE);	break;	
 				case ctrl_shutdown_done:_send_ctrlMode(no, ctrl_off, TRUE);				break;	
-				case ctrl_check_step0:	_send_ctrlMode(no, ctrl_off, TRUE);				break;
-			//	case ctrl_check_step0:	_send_ctrlMode(no, ctrl_print_step1, TRUE);	break;
-			//	case ctrl_check_step1:	_send_ctrlMode(no, ctrl_print_step2, TRUE);	break;
-			//	case ctrl_check_step2:	_send_ctrlMode(no, ctrl_print_step3, TRUE);	break;
-			//	case ctrl_check_step3:	_send_ctrlMode(no, ctrl_print_step4, TRUE);	break;
-			//	case ctrl_check_step4:	_send_ctrlMode(no, ctrl_print_step5, TRUE);	break;
-			//	case ctrl_check_step5:	_send_ctrlMode(no, ctrl_print_step6, TRUE);	break;
-			//	case ctrl_check_step6:	_send_ctrlMode(no, ctrl_print_step7, TRUE);	break;
-			//	case ctrl_check_step7:	_send_ctrlMode(no, ctrl_print_step8, TRUE);	break;
-			//	case ctrl_check_step8:	_send_ctrlMode(no, ctrl_print_step9, TRUE);	break;
-			//	case ctrl_check_step9:	_send_ctrlMode(no, ctrl_print_run,   TRUE);	break;
+			//	case ctrl_check_step0:	_send_ctrlMode(no, ctrl_off, TRUE);				break;
+				case ctrl_check_step0:	_send_ctrlMode(no, ctrl_check_step1, TRUE);	break;
+				case ctrl_check_step1:	_send_ctrlMode(no, ctrl_check_step2, TRUE);	break;
+				case ctrl_check_step2:	_send_ctrlMode(no, ctrl_check_step3, TRUE);	break;
+				case ctrl_check_step3:	_send_ctrlMode(no, ctrl_check_step4, TRUE);	break;
+				case ctrl_check_step4:	_send_ctrlMode(no, ctrl_check_step5, TRUE);	break;
+				case ctrl_check_step5:	_send_ctrlMode(no, ctrl_check_step6, TRUE);	break;
+				case ctrl_check_step6:	_send_ctrlMode(no, ctrl_check_step7, TRUE);	break;
+				case ctrl_check_step7:	_send_ctrlMode(no, ctrl_check_step8, TRUE);	break;
+				case ctrl_check_step8:	_send_ctrlMode(no, ctrl_check_step9, TRUE);	break;
+				case ctrl_check_step9:	_send_ctrlMode(no, ctrl_off,		 TRUE);	break;
 				
 				case ctrl_purge:
 				case ctrl_purge_hard_wipe:	
