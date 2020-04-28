@@ -174,7 +174,7 @@ namespace RX_DigiPrint.Views.TexView
                                 RW_Flexibility.ID="PAR_SPEED_CORRECTION_RW";
                                 RW_Flexibility.Label="Fabric Position";
                                 RW_Flexibility.Unit="mm";
-                                RW_Tension.Unit = "N";
+                                RW_Tension.Unit = "%";
                                 break;
 
                     case 2:     // rewinder without buffer, WITH Laser, NEW diameter 

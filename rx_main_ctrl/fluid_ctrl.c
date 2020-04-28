@@ -617,13 +617,14 @@ static void _control(int fluidNo)
 				
 											_PurgeCtrlMode = _stat->ctrlMode;
 											_txrob = rx_def_is_tx(RX_Config.printer.type) && step_active(1);
+                                            int time = (RX_Config.printer.type==printer_TX802)? (2*TIME_HARD_PURGE) : TIME_HARD_PURGE;
 											switch(_stat->ctrlMode)
 											{
 											case ctrl_purge_soft:		_send_purge_par(no, TIME_SOFT_PURGE); _txrob=FALSE; break;
 											case ctrl_purge:			_send_purge_par(no, TIME_PURGE);	  _txrob=FALSE; break;
-											case ctrl_purge_hard_wipe:	_send_purge_par(no, TIME_HARD_PURGE); break;
-											case ctrl_purge_hard_vacc:	_send_purge_par(no, TIME_HARD_PURGE); break;
-											case ctrl_purge_hard:		_send_purge_par(no, TIME_HARD_PURGE); _txrob=FALSE; break;
+											case ctrl_purge_hard_wipe:	_send_purge_par(no, time); break;
+											case ctrl_purge_hard_vacc:	_send_purge_par(no, time); break;
+											case ctrl_purge_hard:		_send_purge_par(no, time); _txrob=FALSE; break;
 											}
                                             if (_txrob && _PurgeFluidNo < 0 && state_RobotCtrlMode() != ctrl_wash_step1 && state_RobotCtrlMode() != ctrl_wash_step2)
                                             {

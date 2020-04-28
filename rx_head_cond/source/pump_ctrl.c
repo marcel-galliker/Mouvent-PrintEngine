@@ -674,6 +674,7 @@ void pump_tick_10ms(void)
 		case ctrl_purge:
 		case ctrl_purge_hard:
 		case ctrl_purge_hard_wipe:
+		case ctrl_purge_hard_vacc:
 						temp_ctrl_on(FALSE);
 						turn_off_pump();
 						RX_Status.pressure_in_max=INVALID_VALUE;

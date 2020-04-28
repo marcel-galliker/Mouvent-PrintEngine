@@ -35,9 +35,9 @@
 #define 	PRESSURE_HARD_PURGE			320
 #define 	PRESSURE_FLUSH				1000
 
-#define		TIME_SOFT_PURGE				2000
-#define 	TIME_PURGE					3000
-#define 	TIME_HARD_PURGE				10000
+// #define	TIME_SOFT_PURGE				2000
+// #define 	TIME_PURGE					3000
+// #define 	TIME_HARD_PURGE				10000
 
 #define 	TIME_EMPTY					3000
 #define 	TIME_PRESSURE_FOR_FLUSH		200
@@ -1113,6 +1113,7 @@ void ink_tick_10ms(void)
 			case ctrl_purge:			_init_purge(isNo, PRESSURE_PURGE); 		break;
 			case ctrl_purge_hard:		_init_purge(isNo, PRESSURE_HARD_PURGE); break;
 			case ctrl_purge_hard_wipe:	_init_purge(isNo, PRESSURE_HARD_PURGE); break;
+			case ctrl_purge_hard_vacc:	_init_purge(isNo, PRESSURE_HARD_PURGE); break;
 
 			case ctrl_purge_step1: // build up pressure
 			case ctrl_purge_step2: // build up pressure
