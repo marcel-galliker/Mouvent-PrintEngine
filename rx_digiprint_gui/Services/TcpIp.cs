@@ -972,6 +972,7 @@ namespace RX_DigiPrint.Services
             public Int32 ampl_new;
             public Int32 percentage;
             public UInt32 meters;
+            public UInt32 speed;
         }
 
 		public const Byte SCL_READY         = 0x01;

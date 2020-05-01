@@ -286,7 +286,7 @@ namespace RX_DigiPrint.Services
                 RxStructConvert.ToBuffer<TcpIp.SMsgHdr>(out buffer, hdr);
                 try
                 {
-                    _Stream.Write(buffer, 0, hdr.msgLen);
+                    _Stream?.Write(buffer, 0, hdr.msgLen);
                 }
                 catch (Exception e)
                 {

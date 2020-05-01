@@ -84,6 +84,15 @@ namespace RX_DigiPrint.Models
             }
         }
 
+        //--- Property Speed ---------------------------------------
+        private UInt32 _Speed;
+        public UInt32 Speed
+        {
+            get { return _Speed; }
+            set { SetProperty(ref _Speed,value); }
+        }
+
+
         //--- Property CanRestart ---------------------------------------
         private bool _CanStart = false;
         public bool CanStart
@@ -111,6 +120,7 @@ namespace RX_DigiPrint.Models
             AmplNew     = msg.ampl_new;
             Percentage  = msg.percentage;
             Meters      = msg.meters;
+            Speed       = msg.speed;
             CanStart    = (msg.info & 0x00000010)!=0;
         }
     }
