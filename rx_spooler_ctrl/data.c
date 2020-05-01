@@ -579,8 +579,9 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 				if (rx_def_is_web(RX_Spooler.printerType)) newOffsets =TRUE;
 			}
 		}		
-			
-		if (/*id->id!=_LastId.id || */ id->page!=_LastId.page || strcmp(filepath, _LastFilePath) || _WakeupLen!=_LastWakeupLen || newOffsets || rx_file_get_mtime (_FileTimePath)!=_LastFileTime || printMode==PM_TEST_JETS)
+		
+	//	if (/*id->id!=_LastId.id || */ id->page!=_LastId.page || strcmp(filepath, _LastFilePath) || _WakeupLen!=_LastWakeupLen || newOffsets || rx_file_get_mtime (_FileTimePath)!=_LastFileTime || printMode==PM_TEST_JETS)
+		if (/*id->id!=_LastId.id || */ id->page!=_LastId.page || strcmp(filepath, _LastFilePath) || _WakeupLen!=_LastWakeupLen || newOffsets || rx_file_get_mtime (_FileTimePath)!=_LastFileTime) // || printMode==PM_TEST_JETS) Overwrites head info!
 		{
 			ret = 1;
 			loaded = TRUE;
@@ -597,12 +598,12 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 						ret=bmp_load(filepath, &buffer[color], 100000, &bmpInfo);
 						if (ret==REPLY_OK) strcpy(_FileTimePath, filepath);
 //						ret=tif_load_simple(filepath, &buffer[color], 100000, &bmpInfo);
-						if (FALSE)
+						if (TRUE)
 						{
 							char str[MAX_PATH];
 							sprintf(str, "%sTEST.bmp", PATH_TEMP);
 
-							bmp_write(str, buffer[0], bmpInfo.bitsPerPixel, bmpInfo.srcWidthPx, bmpInfo.lengthPx, bmpInfo.lineLen, TRUE);
+							bmp_write(str, buffer[color], bmpInfo.bitsPerPixel, bmpInfo.srcWidthPx, bmpInfo.lengthPx, bmpInfo.lineLen, TRUE);
 						}
 						bmpInfo.buffer[color] = &buffer[color];
 						bmpInfo.inkSupplyNo[color]=0;
@@ -1113,7 +1114,7 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 				if ((id->id==PQ_TEST_JETS || id->id==PQ_TEST_JET_NUMBERS) && pInfo->data)
 				{
 					_TestBuf[color][n] = (*pBmpInfo->buffer[color])+n*pBmpInfo->dataSize;
-					if (id->copy==1 && n) memcpy(_TestBuf[color][n], *pBmpInfo->buffer[color], pBmpInfo->dataSize);					
+					if (id->copy+id->scan==1 && n) memcpy(_TestBuf[color][n], *pBmpInfo->buffer[color], pBmpInfo->dataSize);					
 					pInfo->data	= &_TestBuf[color][n];
 				}
 			

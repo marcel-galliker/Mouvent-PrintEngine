@@ -36,7 +36,7 @@ static int	_Trace=2;
 #define SIMU_WRITE	1	// write data to file
 #define SIMU_READ	2	// test reading files, no sending, no writing
 
-static int	_Simulation=SIMU_OFF;
+static int	_Simulation=SIMU_WRITE;
 
 // #define RAW_SOCKET
 
@@ -810,7 +810,7 @@ static int _send_to_board(SHBThreadPar *par, int head, int blkNo, int blkCnt)
 				#else
 					sent=send(par->dataSocket[par->udpNo], (char*)&par->msg, sizeof(par->msg.blkNo)+par->cfg.dataBlkSize, 0);
 				#endif
-				if (par->dataSocket[1]) par->udpNo = 1-par->udpNo;
+				if (par->dataSocket[1]!=INVALID_SOCKET) par->udpNo = 1-par->udpNo;
 
 				cnt++;
 				if ((dstBlk%100)==0 || cnt==1) TrPrintfL(_Trace>1, "Head[%d.%d]: Send Block %d", par->cfg.no, head, dstBlk);
