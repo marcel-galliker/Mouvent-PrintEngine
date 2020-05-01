@@ -31,6 +31,7 @@ int  enc_stop_printing(void);
 int	 enc_abort_printing(void);
 int	 enc_enable_printing(int enable);
 int  enc_ready(void);
+int  enc_speed(void);
 int	 enc_simu_encoder(int khz);
 void enc_error_reset(void);
 void enc_reply_stat(RX_SOCKET socket);

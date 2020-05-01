@@ -108,6 +108,20 @@ SColorName RX_ColorName[] =
 	{54,   "Light Spot Color 1",		"LS1" }
 };
 
+char *PrintStateStr[] =
+{
+	"ps_undef",			// 00
+	"ps_off",			// 01
+	"ps_ready_power",	// 02
+	"ps_printing",		// 03
+	"ps_stopping",		// 04
+    "ps_goto_pause",	// 05
+    "ps_pause",			// 06
+    "ps_cleaning",		// 07
+	"ps_webin",			// 08
+	"ps_setup",			// 09
+};
+
 //--- RX_Color_InkSupplyPerSide -----------------------
 static char _ColorShortName[INK_SUPPLY_CNT][8];
 void RX_ColorNameInit (int inkSupplyNo, ERectoVerso	rectoVerso, char *fileName, int colorCode)

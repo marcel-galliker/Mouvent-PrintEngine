@@ -749,6 +749,12 @@ int  enc_ready(void)
 	return TRUE;
 }
 
+//--- enc_speed ----------------------------------
+int  enc_speed(void)
+{
+	return _EncoderStatus[0].speed;
+}
+
 //--- enc_simu_encoder ----------------------
 #define LH702_SPEED 20	
 

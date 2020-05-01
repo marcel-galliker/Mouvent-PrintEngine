@@ -332,6 +332,12 @@ void  fpga_main(int ticks, int menu, int showCorrection, int showParam)
 	if (menu)
 	{
 		test_do(ticks);
+		{
+			double freq = Fpga->stat.encOut[0].speed*23/1000;	// Hz
+			double mmin = 60*freq/1200*0.0254;
+			RX_EncoderStatus.speed = (int)mmin;
+		}
+
 		if (arg_test) _fpga_display_status_test();
 		else		  _fpga_display_status(showCorrection, showParam);
 		if (arg_simu_uv && RX_EncoderStatus.info.uv_on)

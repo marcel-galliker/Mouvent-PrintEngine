@@ -475,6 +475,8 @@ typedef enum
 	ps_setup,		// 09
 } EPrintState;
 
+extern char *PrintStateStr[];
+
 typedef struct SPrinterStatus
 {
 	EPrintState		printState;
@@ -1006,6 +1008,7 @@ typedef struct SEncoderStat
 	INT32			ampl_new;
 	INT32			percentage;
 	UINT32			meters;
+	INT32			speed;	// [m/min]
 } SEncoderStat;
 
 //---  ink-supply Configuration ----------------------------

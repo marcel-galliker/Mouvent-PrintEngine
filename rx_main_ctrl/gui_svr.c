@@ -17,6 +17,7 @@
 #include "rx_threads.h"
 #include "rx_trace.h"
 #include "tcp_ip.h"
+#include "enc_ctrl.h"
 #include "gui_msg.h"
 #include "gui_svr.h"
 
@@ -89,6 +90,11 @@ int gui_send_msg(RX_SOCKET socket, void *msg)
 		if (socket==_Sockets[i])
 		{
 			_CheckSend[i]++;
+			if (RX_Config.printer.type==printer_LH702) 
+			{
+				SMsgHdr		*phdr = (SMsgHdr*)msg;
+				TrPrintfL(TRUE, "GUI[%d]: send1 ID=0x%08x", i, phdr->msgId);
+			}
 			break;
 		}
 	}
@@ -104,6 +110,7 @@ int gui_send_msg_2(RX_SOCKET socket, UINT32 cmd, int dataSize, void *data)
 		if (socket==_Sockets[i])
 		{
 			_CheckSend[i]++;
+			if (RX_Config.printer.type==printer_LH702) TrPrintfL(TRUE, "GUI[%d]: send2 ID=0x%08x", i, cmd);
 			break;
 		}
 	}
@@ -206,7 +213,7 @@ void gui_tick(void)
 		_CheckSend[i]=0;
 	}
 
-//	TrPrintfL(TRUE, "GUI Check: %s, TimeoutCnt=%d", str, _TimeoutCnt);
+	if (RX_Config.printer.type==printer_LH702) TrPrintfL(TRUE, "GUI Check: %s, TimeoutCnt=%d, printState=%s, speed=%d", str, _TimeoutCnt, RX_PrinterStatus.printState, enc_speed());
 }
 
 //--- gui_test -------------------------------------------------------
