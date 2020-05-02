@@ -2,10 +2,10 @@
 <sch:Settings xmlns:sch="http://www.altera.com/embeddedsw/bsp/schema">
         <BspType>hal</BspType>
         <BspVersion>default</BspVersion>
-        <BspGeneratedTimeStamp>01.05.2020 08:58:18</BspGeneratedTimeStamp>
-        <BspGeneratedUnixTimeStamp>1588316298076</BspGeneratedUnixTimeStamp>
-        <BspGeneratedLocation>C:\Develop\PrintEngine-Master\rx_head_nios\software\rx_head_nios_bsp</BspGeneratedLocation>
-        <BspSettingsFile>C:\Develop\PrintEngine-Master\rx_head_nios\software\rx_head_nios_bsp\settings.bsp</BspSettingsFile>
+        <BspGeneratedTimeStamp>02.05.2020 11:25:47</BspGeneratedTimeStamp>
+        <BspGeneratedUnixTimeStamp>1588411547293</BspGeneratedUnixTimeStamp>
+        <BspGeneratedLocation>C:\Develop\feature\253_reference_wrinkle_detection\rx_head_nios\software\rx_head_nios_bsp</BspGeneratedLocation>
+        <BspSettingsFile>C:\Develop\feature\253_reference_wrinkle_detection\rx_head_nios\software\rx_head_nios_bsp\settings.bsp</BspSettingsFile>
         <SopcDesignFile>..\..\soc_system.sopcinfo</SopcDesignFile>
         <JdiFile>default</JdiFile>
         <Cpu>nios_cpu</Cpu>
