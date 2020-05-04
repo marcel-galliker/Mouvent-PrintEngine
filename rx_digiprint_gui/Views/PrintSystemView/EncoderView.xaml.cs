@@ -60,7 +60,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
         //--- _Tick --------------------------------------------
         private void _Tick(int no)
         {
-            RxGlobals.Encoder[0].Request();
+            RxGlobals.Encoder[0]?.Request();
         }
 
         //--- Save_Clicked ---------------------------------------------
