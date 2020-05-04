@@ -30,7 +30,13 @@
 
 
 //--- Globals -----------------------------------------------------------------
+typedef struct
+{
+	int time;
+	int msgId;
+} SGuiMsg;
 
+#define GUI_MSG_CNT	64
 static HANDLE	_HGuiSvr=NULL;
 
 static int			_TimeoutCnt=0;
@@ -38,6 +44,11 @@ static RX_SOCKET	_Sockets[MAX_CONNECTIONS];
 static int			_CheckSend[MAX_CONNECTIONS];
 static int			_CheckRecv[MAX_CONNECTIONS];
 static int			_CheckTime[MAX_CONNECTIONS];
+
+
+static SGuiMsg	_GuiMsg[MAX_CONNECTIONS][GUI_MSG_CNT];
+static int		_GuiMsgIn[MAX_CONNECTIONS];
+
 
 //--- Prototypes ---------------------------------------------------------------
 static int _gui_connected(RX_SOCKET socket, const char *peername);
@@ -47,9 +58,11 @@ static int _gui_closed(RX_SOCKET socket, const char *peername);
 int	gui_start()
 {
 	for (int i=0; i<MAX_CONNECTIONS; i++) _Sockets[i]=INVALID_SOCKET;
-	memset(_CheckRecv, 0, sizeof(_CheckRecv));
-	memset(_CheckSend, 0, sizeof(_CheckSend));
-	memset(_CheckTime, 0, sizeof(_CheckTime));
+	memset(_CheckRecv,	0, sizeof(_CheckRecv));
+	memset(_CheckSend,	0, sizeof(_CheckSend));
+	memset(_CheckTime,	0, sizeof(_CheckTime));
+	memset(_GuiMsg,		0, sizeof(_GuiMsg));
+	memset(_GuiMsgIn,	0, sizeof(_GuiMsgIn));
 	sok_start_server(&_HGuiSvr, NULL, PORT_GUI, SOCK_STREAM, MAX_CONNECTIONS, handle_gui_msg, _gui_connected, _gui_closed);
 	err_set_server(_HGuiSvr);
 	return REPLY_OK;
@@ -60,6 +73,17 @@ int	gui_end(void)
 {
 	sok_stop_server(&_HGuiSvr);
 	return REPLY_OK;
+}
+
+//--- _log ----------------------------------------------------------------
+static void _log(int guiNo, int cmd, void *msg)
+{
+	SMsgHdr *phdr = (SMsgHdr*)msg;
+	SGuiMsg *log  = &_GuiMsg[guiNo][_GuiMsgIn[guiNo]];
+	log->time = rx_get_ticks();
+	if (phdr==NULL) log->msgId = cmd;
+	else			log->msgId = phdr->msgId;
+	_GuiMsgIn[guiNo] = (_GuiMsgIn[guiNo]+1) % GUI_MSG_CNT;
 }
 
 //--- gui_send_cmd ------------------------------------------------------------
@@ -90,11 +114,7 @@ int gui_send_msg(RX_SOCKET socket, void *msg)
 		if (socket==_Sockets[i])
 		{
 			_CheckSend[i]++;
-			if (RX_Config.printer.type==printer_LH702) 
-			{
-				SMsgHdr		*phdr = (SMsgHdr*)msg;
-				TrPrintfL(TRUE, "GUI[%d]: send1 ID=0x%08x", i, phdr->msgId);
-			}
+			if (RX_Config.printer.type==printer_LH702) _log(i, 0, msg);
 			break;
 		}
 	}
@@ -110,7 +130,7 @@ int gui_send_msg_2(RX_SOCKET socket, UINT32 cmd, int dataSize, void *data)
 		if (socket==_Sockets[i])
 		{
 			_CheckSend[i]++;
-			if (RX_Config.printer.type==printer_LH702) TrPrintfL(TRUE, "GUI[%d]: send2 ID=0x%08x", i, cmd);
+			if (RX_Config.printer.type==printer_LH702) _log(i, cmd, NULL);
 			break;
 		}
 	}
@@ -199,21 +219,28 @@ void gui_tick(void)
 	str[0]=0;
 	for (int i=0; i<MAX_CONNECTIONS; i++)
 	{
-		if (_Sockets[i]!=INVALID_SOCKET) 
+		if (_CheckTime[i]) 
 		{
 			len += sprintf(&str[len], "gui[%d](sok=%d, r=%03d, s=%03d)", i, _Sockets[i], _CheckRecv[i], _CheckSend[i]);
-			if (_CheckTime[i] && time-_CheckTime[i]>TIMEOUT)
+			if (time-_CheckTime[i]>TIMEOUT)
 			{
 				_TimeoutCnt++;
 				Error(ERR_CONT, 0, "GUI Connection Timeout! (cnt=%d)", _TimeoutCnt);
-				sok_close(&_Sockets[i]); 
+				sok_close(&_Sockets[i]);
+				int n=_GuiMsgIn[i];
+				for (int m=0; m<GUI_MSG_CNT; m++)
+				{
+					TrPrintfL(TRUE, "GuiMsg[%d]: %d.%03d id=0x%08x", m, _GuiMsg[i][n].time/1000, _GuiMsg[i][n].time%1000, _GuiMsg[i][n].msgId);
+					n=(n+1)%GUI_MSG_CNT;
+				}
+				_CheckTime[i]=0;
 			}
 		}
 		_CheckRecv[i]=0;
 		_CheckSend[i]=0;
 	}
 
-	if (RX_Config.printer.type==printer_LH702) TrPrintfL(TRUE, "GUI Check: %s, TimeoutCnt=%d, printState=%s, speed=%d", str, _TimeoutCnt, RX_PrinterStatus.printState, enc_speed());
+	if (RX_Config.printer.type==printer_LH702) TrPrintfL(TRUE, "GUI Check: %s, TimeoutCnt=%d, printState=%s, speed=%d", str, _TimeoutCnt, PrintStateStr[RX_PrinterStatus.printState], enc_speed());
 }
 
 //--- gui_test -------------------------------------------------------

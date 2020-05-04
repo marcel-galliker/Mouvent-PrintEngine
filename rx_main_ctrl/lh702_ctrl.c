@@ -255,6 +255,7 @@ static void  _lh702_tick(void)
 		_Status.thickness	   = RX_Config.stepper.material_thickness;
 		_Status.encoder_adj	   = RX_Config.printer.offset.incPerMeter[0];
 	_Status.copies_printed = RX_PrinterStatus.printedCnt;
+	TrPrintfL(TRUE, "SendToLH702: printState=%d, id=%d, copies=%d", _Status.printState, _Status.id, _Status.copies_printed);
 	sok_send(&_Socket, &_Status); 
 	}
 }
