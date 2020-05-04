@@ -2,8 +2,8 @@
 <sch:Settings xmlns:sch="http://www.altera.com/embeddedsw/bsp/schema">
         <BspType>hal</BspType>
         <BspVersion>default</BspVersion>
-        <BspGeneratedTimeStamp>02.05.2020 11:25:24</BspGeneratedTimeStamp>
-        <BspGeneratedUnixTimeStamp>1588411524193</BspGeneratedUnixTimeStamp>
+        <BspGeneratedTimeStamp>04.05.2020 16:28:40</BspGeneratedTimeStamp>
+        <BspGeneratedUnixTimeStamp>1588602520408</BspGeneratedUnixTimeStamp>
         <BspGeneratedLocation>C:\Develop\feature\253_reference_wrinkle_detection\rx_fluid_nios\software\rx_fluid_nios_bsp</BspGeneratedLocation>
         <BspSettingsFile>C:\Develop\feature\253_reference_wrinkle_detection\rx_fluid_nios\software\rx_fluid_nios_bsp\settings.bsp</BspSettingsFile>
         <SopcDesignFile>..\..\fluid_board_soc.sopcinfo</SopcDesignFile>

@@ -33,7 +33,6 @@
 #include "lh702_ctrl.h"
 
 //--- Defines -----------------------------------------------------------------
-	
 
 #define IP_ADDR_SERVER	"192.168.20.192"
 #define IP_PORT_SERVER	2000
@@ -242,20 +241,24 @@ static int _lh702_closed(RX_SOCKET socket, const char *peerName)
 static void  _lh702_tick(void)
 {
 //	TrPrintfL(TRUE, "_lh702_tick socket=%d", _Socket);
-	if (_Socket!=INVALID_SOCKET)
+	if (FALSE && _Socket!=INVALID_SOCKET)
 	{
-	switch(RX_PrinterStatus.printState)
-	{
-	case ps_printing:	_Status.printState = PS_PRINTING; break;
-	case ps_stopping:	_Status.printState = PS_PRINTING; break;
-	default:			_Status.printState = PS_OFF;
-	}
+		// When this is enabled TCP/IP to the GUI blocks after several minutes!!!
+		// I think the PLC does not use this message, then the buffer overfills and finally Linux blocks the communication over "em2" interface.
+		
+		switch(RX_PrinterStatus.printState)
+		{
+		case ps_printing:	_Status.printState = PS_PRINTING; break;
+		case ps_stopping:	_Status.printState = PS_PRINTING; break;
+		default:			_Status.printState = PS_OFF;
+		}
 		strncpy(_Status.material, RX_Config.material, sizeof(_Status.material));
 		_Status.head_height    = RX_Config.stepper.print_height;
 		_Status.thickness	   = RX_Config.stepper.material_thickness;
 		_Status.encoder_adj	   = RX_Config.printer.offset.incPerMeter[0];
-	_Status.copies_printed = RX_PrinterStatus.printedCnt;
-	sok_send(&_Socket, &_Status); 
+		_Status.copies_printed = RX_PrinterStatus.printedCnt;
+		TrPrintfL(TRUE, "SendToLH702: printState=%d, id=%d, copies=%d", _Status.printState, _Status.id, _Status.copies_printed);
+		sok_send(&_Socket, &_Status); 
 	}
 }
 
