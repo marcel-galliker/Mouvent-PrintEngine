@@ -241,8 +241,11 @@ static int _lh702_closed(RX_SOCKET socket, const char *peerName)
 static void  _lh702_tick(void)
 {
 //	TrPrintfL(TRUE, "_lh702_tick socket=%d", _Socket);
-	if (_Socket!=INVALID_SOCKET)
+	if (FALSE && _Socket!=INVALID_SOCKET)
 	{
+		// When this is enabled TCP/IP to the GUI blocks after several minutes!!!
+		// I think the PLC does not use this message, then the buffer overfills and finally Linux blocks the communication over "em2" interface.
+		
 		switch(RX_PrinterStatus.printState)
 		{
 		case ps_printing:	_Status.printState = PS_PRINTING; break;

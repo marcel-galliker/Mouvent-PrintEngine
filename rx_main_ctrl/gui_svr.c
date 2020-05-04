@@ -219,7 +219,7 @@ void gui_tick(void)
 	str[0]=0;
 	for (int i=0; i<MAX_CONNECTIONS; i++)
 	{
-		if (_CheckTime[i]) 
+		if (_CheckTime[i] || _CheckRecv[i] || _Sockets[i]!=INVALID_SOCKET) 
 		{
 			len += sprintf(&str[len], "gui[%d](sok=%d, r=%03d, s=%03d)", i, _Sockets[i], _CheckRecv[i], _CheckSend[i]);
 			if (time-_CheckTime[i]>TIMEOUT)
