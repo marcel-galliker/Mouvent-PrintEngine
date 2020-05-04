@@ -127,7 +127,8 @@ void steptx_lift_to_print_pos(void)
 	else // TX801/TX802
 	{
 		INT32 height = RX_Config.stepper.print_height + RX_Config.stepper.material_thickness;
-		sok_send_2(&_step_socket[0], CMD_LIFT_PRINT_POS, sizeof(height), &height);		
+		sok_send_2(&_step_socket[0], CMD_LIFT_PRINT_POS, sizeof(height), &height);
+        sok_send_2(&_step_socket[1], CMD_LIFT_PRINT_POS, sizeof(height), &height);
 	}
 }
 
