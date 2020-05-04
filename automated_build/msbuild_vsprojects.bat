@@ -5,12 +5,12 @@ REM if started directly by double-click the script should pause at the end
 if not "%~2"=="" set NO_PAUSE=1
 
 REM vcvars batch file has to be executed first to be able to compile from CLI
-set VCVARS_PATH="C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat"
+set VCVARS_PATH="C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\VC\Auxiliary\Build\vcvars32.bat"
 if exist %VCVARS_PATH% (
 	call %VCVARS_PATH%
 ) else (
 	echo %VCVARS_PATH% could not be found!
-	echo Are you sure Visual Studio 2013 is installed?
+	echo Are you sure Visual Studio Professional 2019 is installed?
 	goto EOF
 )
 
@@ -154,7 +154,7 @@ REM ----------------------------------------------------------------------------
 
 :LIB_SOC
 	set BUILD=SOC
-	set FLAGS=/m /property:Configuration=Release-soc
+	set FLAGS=/m /property:Configuration=Release-soc /property:Platform=Win32
 	call :BUILD_PROJECT rx_common_lib, vcxproj
 	call :BUILD_PROJECT TinyXML, vcxproj, Externals\
 	call :BUILD_PROJECT rx_tif_lib, vcxproj
@@ -162,7 +162,7 @@ REM ----------------------------------------------------------------------------
 
 :BIN_SOC
 	set BUILD=SOC
-	set FLAGS=/m /property:Configuration=Release-soc
+	set FLAGS=/m /property:Configuration=Release-soc /property:Platform=Win32
 	call :BUILD_PROJECT rx_boot, sln
 	call :BUILD_PROJECT rx_encoder_ctrl, sln
 	call :BUILD_PROJECT rx_fluid_ctrl, sln
@@ -173,7 +173,7 @@ REM ----------------------------------------------------------------------------
 
 :LIB_LX
 	set BUILD=LX
-	set FLAGS=/m /property:Configuration=Release-lx
+	set FLAGS=/m /property:Configuration=Release-lx /property:Platform=Win32
 	call :BUILD_PROJECT rx_common_lib, vcxproj
 	call :BUILD_PROJECT TinyXML, vcxproj, Externals\
 	call :BUILD_PROJECT rx_pecore_lib, vcxproj
@@ -183,7 +183,7 @@ REM ----------------------------------------------------------------------------
 
 :BIN_LX
 	set BUILD=LX
-	set FLAGS=/m /property:Configuration=Release-lx
+	set FLAGS=/m /property:Configuration=Release-lx /property:Platform=Win32
 	call :BUILD_PROJECT rx_dhcp_server, sln
 	call :BUILD_PROJECT rx_spooler_ctrl, sln
 	call :BUILD_PROJECT rx_boot, sln
