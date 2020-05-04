@@ -182,7 +182,6 @@ void tx80x_wd_handle_menu(char *str)
                     break;
         case 'o':   Fpga.par->output ^= (1 << atoi(&str[1])); break;
         case 'R':   tx80x_wd_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_REFERENCE, NULL); break;
-        case 'D':   tx80x_wd_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_MOVE_LOWEST, NULL); break;
         case 'p':   pos = atoi(&str[1]);
                     tx80x_wd_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_PRINT_POS, &pos);
                     break;
@@ -206,7 +205,6 @@ void tx80x_wd_menu(int help)
         term_printf("r<n>: reset motor<n>\n");
         term_printf("o: toggle output <no>\n");
         term_printf("R: Reference\n");
-        term_printf("D: Move to the lowest possible position\n");
         term_printf("p<um>: set hight for Wrinkle Detection\n");
         term_printf("u: move Wrinkle Detection to up position\n");
         term_printf("a: move down to adjust wrinkle detection\n");
@@ -244,17 +242,6 @@ static void _tx80x_wd_do_reference(void)
     motors_move_by_step(MOTOR_WD_BITS, &_ParRef, -100000, TRUE);
 }
 
-//--- _tx80x_wd_move_lowest
-//----------------------------------------------------------------
-static void _tx80x_wd_move_lowest(void)
-{
-    motors_stop(MOTOR_WD_BITS);
-
-    _CmdRunning = CMD_LIFT_MOVE_LOWEST;
-    RX_StepperStatus.robinfo.moving_wd = TRUE;
-    motors_move_by_step(MOTOR_WD_BITS, &_ParRef, 100000, TRUE);
-}
-
 //--- tx80x_wd_handle_ctrl_msg -----------------------------------
 int tx80x_wd_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 {
@@ -273,12 +260,6 @@ int tx80x_wd_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         motors_reset(MOTOR_WD_BITS);
         RX_StepperStatus.robinfo.ref_done_wd = FALSE;
         _tx80x_wd_do_reference();
-        break;
-
-    case CMD_LIFT_MOVE_LOWEST:
-        strcpy(_CmdName, "CMD_LIFT_MOVE_LOWEST");
-        TrPrintfL(TRUE, "SOCKET[%d]: %s", socket, _CmdName);
-        _tx80x_wd_move_lowest();
         break;
 
     case CMD_LIFT_PRINT_POS:
