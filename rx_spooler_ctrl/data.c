@@ -1114,7 +1114,7 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 				if ((id->id==PQ_TEST_JETS || id->id==PQ_TEST_JET_NUMBERS) && pInfo->data)
 				{
 					_TestBuf[color][n] = (*pBmpInfo->buffer[color])+n*pBmpInfo->dataSize;
-					if (id->copy+id->scan==1 && n) memcpy(_TestBuf[color][n], *pBmpInfo->buffer[color], pBmpInfo->dataSize);					
+					if ((id->copy|id->scan)==1 && n) memcpy(_TestBuf[color][n], *pBmpInfo->buffer[color], pBmpInfo->dataSize);					
 					pInfo->data	= &_TestBuf[color][n];
 				}
 			
