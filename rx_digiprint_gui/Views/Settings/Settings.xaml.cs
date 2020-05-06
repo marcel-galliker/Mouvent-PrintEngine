@@ -104,6 +104,7 @@ namespace RX_DigiPrint.Views.Settings
             FileVersionInfo info = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location);
             DateTime date = GetBuildTime();
             Version.Text = info.FileVersion;
+            Build.Text = GetBuild();
             Date.Text    = string.Format("{0} {1} {2}", date.Day, Rx.MonthName[date.Month], date.Year);
             LocalIpAddr.Text = RxGlobals.RxInterface.LocalAddress;
 
@@ -286,18 +287,36 @@ namespace RX_DigiPrint.Views.Settings
             dlg.ShowDialog();
         }
 
+        private string GetVersionAttribute(string key)
+        {
+            string result;
+            if (GetAssemblyAttribute<AssemblyInformationalVersionAttribute>()
+               .InformationalVersion.ToString().Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)
+               .Select(part => part.Split('='))
+               .ToDictionary(split => split[0], split => split[1]).TryGetValue(key, out result))
+            {
+                return result;
+            }
+            else
+            {
+                return string.Empty;
+            }
+        }
+
+        private string GetBuild()
+        {
+            return GetVersionAttribute("Build");
+        }
+
 
         private DateTime GetBuildTime()
         {
-            AssemblyInformationalVersionAttribute infoVerAttr = GetAssemblyAttribute<AssemblyInformationalVersionAttribute>();
-            if (null != infoVerAttr)
+
+            string str = GetVersionAttribute("BuiltOn");
+            string[] aStr = str.Split('.');
+            if (3 == aStr.Length)
             {
-                string str = infoVerAttr.InformationalVersion.ToString().Replace("BuiltOn=", string.Empty);
-                string[] aStr = str.Split('.');
-                if (3 == aStr.Length)
-                {
-                    return new DateTime(Int32.Parse(aStr[2]), Int32.Parse(aStr[1]), Int32.Parse(aStr[0]));
-                }
+                return new DateTime(Int32.Parse(aStr[2]), Int32.Parse(aStr[1]), Int32.Parse(aStr[0]));
             }
 
             return File.GetLastWriteTime(Assembly.GetExecutingAssembly().Location);

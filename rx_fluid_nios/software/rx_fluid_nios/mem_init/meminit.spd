@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<simPackage>
-<file path="hdl_sim/fluid_board_soc_onchip_memory_nios_arm.dat" type="DAT" initParamName="INIT_FILE" memoryPath="onchip_memory_nios_arm" />
-<file path="hdl_sim/fluid_board_soc_onchip_memory_nios_cpu.dat" type="DAT" initParamName="INIT_FILE" memoryPath="onchip_memory_nios_cpu" />
-<file path="fluid_board_soc_onchip_memory_nios_arm.hex" type="HEX" initParamName="INIT_FILE" memoryPath="onchip_memory_nios_arm" />
-<file path="fluid_board_soc_onchip_memory_nios_cpu.hex" type="HEX" initParamName="INIT_FILE" memoryPath="onchip_memory_nios_cpu" />
-</simPackage>

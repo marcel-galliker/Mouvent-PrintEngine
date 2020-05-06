@@ -3,7 +3,6 @@
 /bin/fluid/rx_fluid_nios
 /bin/gui/rx_common_lib_cs.dll
 /bin/gui/RX_DigiPrint.exe
-/bin/gui/rx_rip_lib.dll
 /bin/head/rx_head_cond
 /bin/head/rx_head_ctrl
 /bin/head/rx_head_nios
@@ -29,7 +28,7 @@
 /rx_head_nios/software/.metadata/.plugins/org.eclipse.core.runtime/.settings/org.eclipse.ui.ide.prefs
 /rx_head_nios/software/.metadata/.plugins/org.eclipse.ui.workbench.texteditor/dialog_settings.xml
 /rx_head_nios/software/rx_head_nios_bsp/settings.bsp
-*/summary.html
+summary.html
 *.dep
 *.o
 *.cache
@@ -92,3 +91,13 @@ org.eclipse.core.resources
 /rx_head_nios/software/rx_head_nios/rx_head_nios.objdump
 /rx_head_nios/software/rx_head_nios/rx_head_nios.elf
 /rx_head_nios/software/rx_head_nios/rx_head_nios.map
+rx_fluid_nios/software/rx_fluid_nios/mem_init/
+rx_head_nios/software/rx_head_nios/mem_init/
+rx_digiprint_gui/Properties/AssemblyInfo.cs
+*.sdf
+*.opensdf
+*.suo
+rx_rip_lib.dll
+*.csproj.user
+rx_fluid_nios/software/.metadata/
+rx_head_nios/software/.metadata/

@@ -3,7 +3,6 @@
 #All other changes you make in this file will be preserved.
 #Visit http://visualgdb.com/makefiles for more details
 
-#VisualGDB: AutoSourceFiles		#<--- remove this line to disable auto-updating of SOURCEFILES and EXTERNAL_LIBS
 
 TARGETNAME := rx_tif_lib.a
 #TARGETTYPE can be APP, STATIC or SHARED

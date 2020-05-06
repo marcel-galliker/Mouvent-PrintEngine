@@ -109,6 +109,9 @@ echo === build NIOS BSP
 
 set BSP_FOLDER=%PROJECT_PATH_UNIX%_bsp
 set BSP_SETTINGS_FILE=%BSP_FOLDER%/settings.bsp
+REM copy the original BSP to avoid modification during generation
+mkdir %FOLDER%\%PROJECT_NAME%_bsp
+copy %FOLDER%\settings.bsp %FOLDER%\%PROJECT_NAME%_bsp
 
 %BASH_PATH% -c '%_NIOS2EDS_ROOT%/nios2_command_shell.sh nios2-bsp-generate-files --settings="%BSP_SETTINGS_FILE%" --bsp-dir="%BSP_FOLDER%"
 

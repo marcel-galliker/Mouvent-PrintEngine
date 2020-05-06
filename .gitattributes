@@ -7,4 +7,7 @@ rx_encoder_rbf binary
 *.sln -merge -text
 *.csproj -merge -text
 *.vcxproj -merge -text
+*.qip text eol=lf
+*.spd text eol=lf
+*.dat text eol=lf
 
