@@ -260,7 +260,7 @@ namespace RX_DigiPrint.Services
         public static string RX_RIPPED_DATA_ROOT = "\\ripped-data";    
 
         public const Int32  InkSupplyCnt = 16;
-        public const UInt32 HEAD_CNT	= 4;
+        public const Int32  HEAD_CNT	 = 4;
 
         public const Int32 PORT_GUI = 7000;
 
