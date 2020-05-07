@@ -46,23 +46,6 @@ namespace RX_DigiPrint.Views.PrintSystemView
             }
         }
 
-        //--- GroupBox_IsVisibleChanged ----------------------------
-        private void GroupBox_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            if ((bool)e.NewValue) 
-            {
-                RxGlobals.Encoder[0].Request();
-                RxGlobals.Timer.TimerFct += _Tick;
-            }
-            else  RxGlobals.Timer.TimerFct -= _Tick;
-        }
-
-        //--- _Tick --------------------------------------------
-        private void _Tick(int no)
-        {
-            RxGlobals.Encoder[0]?.Request();
-        }
-
         //--- Save_Clicked ---------------------------------------------
         private void Save_Clicked(object sender, RoutedEventArgs e)
         {

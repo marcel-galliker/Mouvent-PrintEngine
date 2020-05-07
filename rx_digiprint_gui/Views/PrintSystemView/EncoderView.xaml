@@ -8,8 +8,7 @@
              d:DesignHeight="300" d:DesignWidth="300">
 
     <GroupBox Header="Encoder" Style="{StaticResource RxGroupBox}" 
-              Visibility="{Binding Enabled, Converter={StaticResource BoolToVisible_Converter}}" 
-              IsVisibleChanged="GroupBox_IsVisibleChanged">
+              Visibility="{Binding Enabled, Converter={StaticResource BoolToVisible_Converter}}">
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="135"/>

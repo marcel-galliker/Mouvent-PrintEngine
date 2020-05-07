@@ -100,12 +100,6 @@ namespace RX_DigiPrint.Models
             get { return _CanStart; }
             private set { SetProperty(ref _CanStart, value); }
         }
-              
-        //--- Request --------------------------------- 
-        public void Request()
-        {
-            RxGlobals.RxInterface.SendCommand(TcpIp.CMD_ENCODER_STAT);
-        }
         
         //--- Save ---------------------------------
         public void Save()

@@ -74,7 +74,6 @@ namespace RX_DigiPrint.Views.UserControls
             //--- enable ------------------------------------------------------
             Button_Start.IsEnabled  = RxGlobals.Plc.IsReadyForProduction 
                                       && !RxGlobals.PrinterStatus.Cleaning
-                                      
                                       && 
                                         (RxGlobals.PrinterStatus.PrintState==EPrintState.ps_ready_power 
                                         || (RxGlobals.PrinterStatus.PrintState==EPrintState.ps_pause && (RxGlobals.Encoder[0]!=null && RxGlobals.Encoder[0].CanStart))
@@ -206,8 +205,6 @@ namespace RX_DigiPrint.Views.UserControls
         {            
             string val="####";                
             
-            _SetButtonStates(); // needed?
-
             if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf)
             {
                 RxGlobals.Plc.RequestVar("Application.GUI_00_001_Main"+"\n"+ "STA_PRINT_RELEASE"+"\n");

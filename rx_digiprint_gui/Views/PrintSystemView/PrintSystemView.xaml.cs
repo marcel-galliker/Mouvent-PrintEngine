@@ -151,6 +151,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
         {    
             RxGlobals.RxInterface.SendCommand(TcpIp.CMD_FLUID_STAT);
             RxGlobals.RxInterface.SendCommand(TcpIp.CMD_HEAD_STAT);
+            RxGlobals.RxInterface.SendCommand(TcpIp.CMD_ENCODER_STAT);
         }
 
         //--- UserControl_IsVisibleChanged ----------------------------------
