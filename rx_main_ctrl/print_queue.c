@@ -857,7 +857,20 @@ int pq_printed(int headNo, SPageId *pid, int *pageDone, int *jobDone, SPrintQueu
 				}				
 			}
 		}
-		else ctr_add(pitem->srcHeight / 1000000.0);		
+		else 
+		{
+			{ //---------- test --------------------------------
+				static int _id=0;
+				if (_PrintDoneCnt==0)_id=pitem->id.id;
+				if (pitem->id.id!=_id)
+				{
+					_id = pitem->id.id;
+					if (pitem->srcHeight==0) Error(ERR_CONT, 0, "Counter: new jobId=%d, srcHeight=%d, file >>%s<<", pitem->id.id, pitem->srcHeight,  _filename(pitem->filepath));
+				}
+			}
+
+			ctr_add(pitem->srcHeight / 1000000.0);		
+		}
 	
 		if(pitem->state <= PQ_STATE_STOPPING)
 		{		
