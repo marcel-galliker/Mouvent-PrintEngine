@@ -1,4 +1,0 @@
-Test: Lesen des Barcodes auf den DENX Boards
-
-Distanz Linse - Barcode: 80mm
-

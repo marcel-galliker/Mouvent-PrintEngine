@@ -1,9 +1,0 @@
-﻿<ResourceDictionary
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:converters="clr-namespace:RX_LabelComposer.Converters">
-
-    <converters:LabelPath_Converter          x:Key="LabelPath_Converter" />
-    <converters:DoubleToString_Converter     x:Key="DoubleToString_Converter" />
-
-</ResourceDictionary>

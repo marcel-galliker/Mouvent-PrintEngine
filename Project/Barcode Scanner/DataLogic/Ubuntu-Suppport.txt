@@ -1,5 +1,0 @@
-Dieser Command braucht es, um den USB in Ubuntu freizuschalten:
-
->sudo modprobe cdc-acm
-
--> Port ist /dev/ttyACM0

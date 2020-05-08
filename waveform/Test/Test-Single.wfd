@@ -1,9 +1,0 @@
-<WaveForm>
-  <Ink Name="Black MI-900" ColorCode="0" Description="NOVACRON Black MI-900" ColorRGB="#FF3F3F40" Temp="30" TempMax="0" GreyLevel="8 12 13 15 " MaxFreq="39138" Viscosity="1" Density="2" />
-  <item Position="0" Voltage="0" />
-  <item Position="100" Voltage="30" />
-  <item Position="1800" Voltage="30" />
-  <item Position="1900" Voltage="0" />
-  <item Position="2000" Voltage="0" />
-  <check>6AE68D652005F32C746EB71DFA9D75FA21002530</check>
-</WaveForm>
