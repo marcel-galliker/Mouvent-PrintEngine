@@ -37,7 +37,7 @@ int main(int argc, char* argv[])
 	system("powercfg -change -monitor-timeout-ac 0");
 	system("powercfg -change -standby-timeout-ac 0");
 
-	system("powercfg -setacvalueindex SCHEME_CURRENT SUB_BUTTONS PBUTTONACTION 0");
+//	system("powercfg -setacvalueindex SCHEME_CURRENT SUB_BUTTONS PBUTTONACTION 0");
 	system("powercfg -setacvalueindex SCHEME_CURRENT SUB_VIDEO aded5e82-b909-4619-9949-f5d71dac0bcb 100"); // Display Brightness
 	system("powercfg -setdcvalueindex SCHEME_CURRENT SUB_VIDEO aded5e82-b909-4619-9949-f5d71dac0bcb 100"); // Display Brightness
 
@@ -45,6 +45,9 @@ int main(int argc, char* argv[])
 	system("reg add \"HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced\" /f /v HideFileExt /t REG_DWORD /d 0");
 
 	system("reg add \"HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\AutoRotation\" /f /v Enable /t REG_DWORD /d 0");
+
+	system("reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Services\\LanmanWorkstation\\Parameters\" /f /v AllowInsecureGuestAuth /t REG_DWORD /d 1");
+	system("reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters\" /f /v IPEnableRouter /t REG_DWORD /d 1");
 
 	system("netsh advfirewall firewall add rule name=\"ICMP Allow incoming V4 echo request\" protocol=icmpv4:8,any dir=in action=allow");
 	system("netsh advfirewall firewall add rule name=\"ICMP Allow incoming V6 echo request\" protocol=icmpv6:8,any dir=in action=allow");
