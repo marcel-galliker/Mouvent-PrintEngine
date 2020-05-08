@@ -1,0 +1,79 @@
+﻿<UserControl x:Class="RX_DigiPrint.Views.CleafView.CleafView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+             xmlns:tex="clr-namespace:RX_DigiPrint.Views.TexView"
+             xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
+             xmlns:igWPF="http://schemas.infragistics.com/xaml/wpf"
+             xmlns:cleaf="clr-namespace:RX_DigiPrint.Views.CleafView"
+             mc:Ignorable="d" 
+             d:DesignHeight="800" d:DesignWidth="1500">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- toolbar _______________________________________________________ -->
+        <rx_uc:CommandButtons/>
+        <rx_uc:Splicing/>
+
+        <!-- MAIN Window _________________________________________________________________________-->
+        <cleaf:CleafMachine  Grid.Row="1" Grid.ColumnSpan="10"/>
+
+        <StackPanel x:Name="SettingsTab" Grid.Row="2" Orientation="Horizontal" Background="Transparent">
+            <common:RxRadioButton x:Name="RB_Main"          Content="Main" IsChecked="True"/>
+            <common:RxRadioButton x:Name="RB_Order"         Content="Order"/>
+            <common:RxRadioButton x:Name="RB_Log"           Content="Log" />
+            <common:RxRadioButton x:Name="RB_Cfg"           Content="Configuration" />
+            <common:RxRadioButton x:Name="RB_PlcInfo"       Content="Plc Info"  Last="True"/>
+        </StackPanel>
+        
+        <!-- Settings __________________________________________________________________________ -->
+        <Grid Grid.Row="3" Visibility="{Binding ElementName=RB_Main, Path=IsChecked, Converter={StaticResource IntToVisible_Converter}}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <cleaf:CleafSettings Grid.Column="0" Width="450"/>
+            <StackPanel  Grid.Column="1">
+                <cleaf:CleafStatus/>
+                <GroupBox Header="Consumables" Style="{StaticResource RxGroupBox}">
+                        <rx_uc:ConsumablesView Height="250" HorizontalAlignment="Center"/>
+                </GroupBox>
+            </StackPanel>
+            <cleaf:CleafCommands Grid.Column="2" MinWidth="150"/>
+            <cleaf:CleafServiceCommands Grid.Row="2" Grid.Column="3" x:Name="ServiveCmmands"/>
+            <rx_uc:StepperView Grid.Column="4" Width="300"/>
+        </Grid>
+
+        <!--- Order ___________________________________________________________-->
+        <cleaf:CleafOrderView Grid.Row="3" 
+                      HorizontalAlignment="Stretch"
+                      VerticalAlignment="Stretch"
+                      Visibility="{Binding ElementName=RB_Order, Path=IsChecked, Converter={StaticResource IntToVisible_Converter}}"
+                      />
+
+        <!--- LOG ___________________________________________________________-->
+        <rx_uc:PlcLog Grid.Row="3" 
+                      HorizontalAlignment="Left"
+                      VerticalAlignment="Stretch"
+                      Visibility="{Binding ElementName=RB_Log, Path=IsChecked, Converter={StaticResource IntToVisible_Converter}}"
+                      />
+
+        <!-- Configuration ____________________________________________________________-->
+        <cleaf:CleafConfig Grid.Row="3" Visibility="{Binding ElementName=RB_Cfg, Path=IsChecked, Converter={StaticResource IntToVisible_Converter}}" HorizontalAlignment="Left"/>
+
+        <!--- PLC Info ___________________________________________________________-->
+        <rx_uc:PlcStatus Grid.Row="3" HorizontalAlignment="Left" Visibility="{Binding ElementName=RB_PlcInfo, Path=IsChecked, Converter={StaticResource IntToVisible_Converter}}"/>        
+        
+    </Grid>
+</UserControl>

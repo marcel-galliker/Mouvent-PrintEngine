@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ContentView xmlns="http://xamarin.com/schemas/2014/forms" 
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:DigiPrint.Pages.PrintSystemView"             
+             x:Class="DigiPrint.Pages.PrintSystemView.PrintSystemView">
+    <ContentView.Content>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="25"/>
+                <RowDefinition Height="15"/>
+                <RowDefinition Height="15"/>
+                <RowDefinition Height="15"/>
+            
+                <RowDefinition Height="*"/>
+
+            </Grid.RowDefinitions>
+
+            <Label Grid.Row="1" Grid.Column="0" Text="Meniscus"   FontSize="Micro" />
+            <Label Grid.Row="2" Grid.Column="0" Text="Temp"       FontSize="Micro"/>
+            <Label Grid.Row="3" Grid.Column="0" Text="Mode"       FontSize="Micro"/>
+
+            <ScrollView Grid.Column="1" Grid.RowSpan="4" Orientation="Horizontal" VerticalOptions="Start" Padding="0,0,0,10" SizeChanged="ScrollView_SizeChanged">
+                <StackLayout x:Name="HeadList" Orientation="Horizontal"/>
+            </ScrollView>
+
+            <local:HeadDetailsView Grid.Row="4" Grid.Column="1" x:Name="ActiveHead" HorizontalOptions="Center"/>
+        </Grid>
+    </ContentView.Content>
+</ContentView>

@@ -1,0 +1,86 @@
+﻿<Window x:Class="RX_DigiPrint.Views.UserControls.InkInfoWnd"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+        xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
+        Height="300"
+        Width="500"
+        ResizeMode="NoResize"
+        WindowStyle="None"
+        ShowInTaskbar="False"
+        Topmost="True"
+        >
+    <Border BorderBrush="{DynamicResource Brush03}" BorderThickness="2">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
+
+            <Border Grid.ColumnSpan="2" Background="{DynamicResource Brush03}" Padding="4">
+                <TextBlock x:Name="MsgTitle" HorizontalAlignment="Center" FontWeight="Bold" Text="Title"/>
+            </Border>
+
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="auto" MinWidth="20"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="BarcodeScanner" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="{StaticResource FontSizeSmall}"/>
+                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding ScannerSN}" VerticalAlignment="Center" HorizontalAlignment="Left" TextWrapping="Wrap" FontSize="{StaticResource FontSizeSmall}"/>
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Info" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding BarCode}" VerticalAlignment="Center" HorizontalAlignment="Left" TextWrapping="Wrap"/>
+
+                <rx_uc:InkLevel Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" x:Name="Level" />
+            </Grid>
+
+            <!-- buttons _______________________________________________________-->
+            <Border Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="1" VerticalAlignment="Bottom">
+                <Border.Background>
+                    <SolidColorBrush Color="{DynamicResource Color_007}"/>
+                </Border.Background>
+                <Grid >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <common:RxButton Grid.Column="0"  Click="Trigger_Clicked">
+                        <StackPanel>
+                            <TextBlock Text="Trigger"   HorizontalAlignment="Center"/>
+                            <TextBlock Text="Scanner"   HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </common:RxButton>
+
+                    <common:RxButton Grid.Column="1"  Click="Init_Clicked" x:Name="Init_Button">
+                        <StackPanel>
+                            <TextBlock Text="Init"      HorizontalAlignment="Center"/>
+                            <TextBlock Text="Scanner"   HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </common:RxButton>
+                    
+                    <common:RxButton Grid.Column="2" Click="Tara_Clicked" x:Name="Tara_button">
+                        <TextBlock Text="TARA"/>
+                    </common:RxButton>
+                    
+                    <common:RxButton Grid.Column="3" Click="Calibrate_Clicked" x:Name="Calibrate_button">
+                        <TextBlock Text="Calib"/>
+                    </common:RxButton>
+
+                    <common:RxButton Grid.Column="4"  x:Name="Button_Candel" Click="Cancel_Clicked">
+                        <Image Source="{StaticResource No_ico}"/>
+                    </common:RxButton>
+                </Grid>
+            </Border>
+        </Grid>
+    </Border>
+</Window>

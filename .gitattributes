@@ -1,0 +1,13 @@
+rx_stepper_rbf binary
+rx_headtemp_rbf binary
+rx_head_rbf binary
+rx_fluid_rbf binary
+rx_encoder_rbf binary
+*.suo binary
+*.sln -merge -text
+*.csproj -merge -text
+*.vcxproj -merge -text
+*.qip text eol=lf
+*.spd text eol=lf
+*.dat text eol=lf
+

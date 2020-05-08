@@ -1,0 +1,10 @@
+<WaveForm>
+  <Ink Name="Single 25V" ColorCode="0" Description="Single Firepulse 25V" ColorRGB="#FF3F3F40" Temp="30" GreyLevel="8 12 13 15 " MaxFreq="213" />
+  <item Position="696" Voltage="0" />
+  <item Position="752" Voltage="25" />
+  <item Position="875" Voltage="25" />
+  <item Position="927" Voltage="0" />
+  <item Position="2000" Voltage="0" />
+  <item Position="2000" Voltage="0" />
+  <check>16A6ECD977D2581C10012BA594C8ACF23A2A3169</check>
+</WaveForm>

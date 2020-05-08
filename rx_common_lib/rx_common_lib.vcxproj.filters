@@ -1,0 +1,240 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="bmp.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rx_bitmap.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rx_common.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rx_def.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rx_error.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rx_file.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rx_led.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rx_log.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rx_mem.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rx_sok.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rx_threads.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rx_trace.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rx_xml.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="fastlz.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Externals\mbedtls-1.3.10\library\sha1.c">
+      <Filter>encryption</Filter>
+    </ClCompile>
+    <ClCompile Include="rx_hash.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="hex2bin.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rx_setup_file.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rx_setup_ink.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rx_mac_address.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rx_system.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rx_term.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rx_crc.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rx_csv.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rx_fpga.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rx_embrip_def.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rx_fifo.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rx_list.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="bmp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fastlz.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rx_common.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rx_error.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rx_def.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rx_file.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rx_led.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rx_log.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rx_mem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rx_sok.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rx_threads.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rx_trace.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rx_xml.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tcp_ip.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="gcc_Debug-lx.h">
+      <Filter>Make Files</Filter>
+    </ClInclude>
+    <ClInclude Include="gcc_Release-soc.h">
+      <Filter>Make Files</Filter>
+    </ClInclude>
+    <ClInclude Include="gcc_Release-lx.h">
+      <Filter>Make Files</Filter>
+    </ClInclude>
+    <ClInclude Include="gcc_Debug-soc.h">
+      <Filter>Make Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Externals\mbedtls-1.3.10\include\polarssl\sha1.h">
+      <Filter>encryption</Filter>
+    </ClInclude>
+    <ClInclude Include="rx_hash.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rx_mac_address.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="hex2bin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rx_setup_file.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rx_setup_ink.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fpga_def_head.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rx_system.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rx_term.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rx_crc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rx_csv.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rx_fpga.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rx_embrip_def.h" />
+    <ClInclude Include="version.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rx_fifo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rx_list.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="debug-baw.mak">
+      <Filter>Make Files</Filter>
+    </None>
+    <None Include="debug-lx.mak">
+      <Filter>Make Files</Filter>
+    </None>
+    <None Include="debug-soc.mak">
+      <Filter>Make Files</Filter>
+    </None>
+    <None Include="Makefile">
+      <Filter>Make Files</Filter>
+    </None>
+    <None Include="release-baw.mak">
+      <Filter>Make Files</Filter>
+    </None>
+    <None Include="release-lx.mak">
+      <Filter>Make Files</Filter>
+    </None>
+    <None Include="release-soc.mak">
+      <Filter>Make Files</Filter>
+    </None>
+    <None Include="rx_common_lib-Debug-soc.vgdbsettings">
+      <Filter>Make Files</Filter>
+    </None>
+    <None Include="rx_common_lib-Release-soc.vgdbsettings">
+      <Filter>Make Files</Filter>
+    </None>
+    <None Include="rx_common_lib-Debug-lx.vgdbsettings">
+      <Filter>Make Files</Filter>
+    </None>
+    <None Include="rx_common_lib-Release-lx.vgdbsettings">
+      <Filter>Make Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{53f0a407-130e-4454-a87a-4deb83680f54}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{a2aec1d2-d533-479b-b0c5-e485fd07a1fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Make Files">
+      <UniqueIdentifier>{30717bce-dd2c-43e2-8b5e-286fdfbbef1d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="encryption">
+      <UniqueIdentifier>{a2e4adf8-a267-4473-a94e-7270b57d702f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

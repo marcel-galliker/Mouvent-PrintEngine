@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source files">
+      <UniqueIdentifier>{45871a90-8f10-4d06-931b-09908e36ead2}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header files">
+      <UniqueIdentifier>{909e9b52-8ea8-4514-a48c-72ab0c73c02b}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource files">
+      <UniqueIdentifier>{a842f2d9-7b27-49c3-87b6-97c970686f33}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+    <Filter Include="Make files">
+      <UniqueIdentifier>{b781ae51-b747-4409-8d78-fae59b350986}</UniqueIdentifier>
+      <Extensions>*.mak</Extensions>
+    </Filter>
+    <Filter Include="Linux Scripts">
+      <UniqueIdentifier>{6a34d1a7-fc1a-454c-9e68-fc21e1317e8f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="debug-baw.mak">
+      <Filter>Make files</Filter>
+    </None>
+    <None Include="debug-soc.mak">
+      <Filter>Make files</Filter>
+    </None>
+    <None Include="release-soc.mak">
+      <Filter>Make files</Filter>
+    </None>
+    <None Include="release-baw.mak">
+      <Filter>Make files</Filter>
+    </None>
+    <None Include="debug-lx.mak">
+      <Filter>Make files</Filter>
+    </None>
+    <None Include="release-lx.mak">
+      <Filter>Make files</Filter>
+    </None>
+    <None Include="radex.sh">
+      <Filter>Linux Scripts</Filter>
+    </None>
+    <None Include="info">
+      <Filter>Linux Scripts</Filter>
+    </None>
+    <None Include="Makefile">
+      <Filter>Make files</Filter>
+    </None>
+    <None Include="rx_boot-Debug-soc.vgdbsettings">
+      <Filter>Make files</Filter>
+    </None>
+    <None Include="rx_boot-Release-soc.vgdbsettings">
+      <Filter>Make files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="gcc_Debug.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="gcc_Release.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="gcc_Debug-baw.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="boot_client.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="file_server.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="rx_boot.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="file_server.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="boot_client.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

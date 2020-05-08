@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.40629.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "rx_ink_lib", "rx_ink_lib", "{91C09631-5A23-4CE5-ACFB-8662C143A72C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "source files", "source files", "{5E321E3E-6650-43BB-B6F3-8811DF7C2142}"
+	ProjectSection(SolutionItems) = preProject
+		comm.c = comm.c
+		fifo.c = fifo.c
+		rx_ink_common.c = rx_ink_common.c
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "header files", "header files", "{1311E9DA-2FD0-4745-8C3A-00B92E93F2E6}"
+	ProjectSection(SolutionItems) = preProject
+		comm.h = comm.h
+		cond_def_head.h = cond_def_head.h
+		fifo.h = fifo.h
+		nios_def_head.h = nios_def_head.h
+		rx_ink_common.h = rx_ink_common.h
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|ARM = Debug|ARM
+		Debug|Win32 = Debug|Win32
+		Debug|x64 = Debug|x64
+		Release|ARM = Release|ARM
+		Release|Win32 = Release|Win32
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{5E321E3E-6650-43BB-B6F3-8811DF7C2142} = {91C09631-5A23-4CE5-ACFB-8662C143A72C}
+		{1311E9DA-2FD0-4745-8C3A-00B92E93F2E6} = {91C09631-5A23-4CE5-ACFB-8662C143A72C}
+	EndGlobalSection
+EndGlobal

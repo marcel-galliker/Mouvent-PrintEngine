@@ -1,0 +1,249 @@
+﻿<Page
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:igDP="http://infragistics.com/DataPresenter"
+        xmlns:igWPF="http://schemas.infragistics.com/xaml/wpf"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:RxCommon="clr-namespace:RX_Common;assembly=rx_Common_lib_cs"
+        xmlns:common="clr-namespace:RX_LabelComposer.Common"
+        xmlns:models="clr-namespace:RX_LabelComposer.Models"
+        xmlns:rx="clr-namespace:RX_LabelComposer.External"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" x:Class="RX_LabelComposer.Views.FileView"
+
+        WindowTitle="Data Definition" Height="auto" Width="auto"
+        Loaded="Page_Loaded" 
+        Unloaded="Page_Unloaded"
+        SizeChanged="Page_SizeChanged"
+        d:DesignWidth="771"
+    
+        x:Name="Ctrl"
+        >
+
+    <Page.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Resources/styles/RX_Styles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <Style x:Key="RX-HeaderStyle" TargetType="{x:Type igDP:HeaderPresenter}" >
+                <EventSetter Event="PreviewMouseLeftButtonDown" Handler="DataRecords_PreviewHeaderMouseLeftButtonDown"/>
+            </Style>
+            
+        </ResourceDictionary>
+    </Page.Resources>
+    
+    <Grid x:Name="MainGrid">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" /> <!-- toolbar     -->
+            <RowDefinition Height="*" />    <!-- main window -->
+            <RowDefinition Height="Auto" /> <!-- status      -->
+        </Grid.RowDefinitions>
+        
+        <Grid>
+            <DockPanel
+                Dock="Right"
+                Width="300"
+                HorizontalAlignment="Right"
+                x:Name="FileDefBox"
+                >
+                
+                <Grid x:Name="Definitions"
+                      Grid.Column="2"
+                      Grid.Row="0"
+                      DataContext="{Binding FileDef}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                  
+                    <GroupBox 
+                        Header="File"
+                        >
+                        <Grid
+						    x:Name="FileDefinition" 
+						    Margin="8,2"
+                            >
+
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="80"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0" Text="File" VerticalAlignment="Center"/>
+                            <TextBox   Grid.Row="0" Grid.Column="1" Text="{Binding DataFilename}" Height="23" VerticalAlignment="Top"/>
+                            <Button    Grid.Row="0" Grid.Column="1" Content=" ... " HorizontalAlignment="Right" Click="Filename_Click"/>
+
+                            <TextBlock Grid.Row="1" Text="Code Page" VerticalAlignment="Center"/>
+                            <igWPF:XamComboEditor 
+							    Grid.Row="1"
+							    Grid.Column="1" 
+							    ItemsSource="{Binding CodePageList}"
+							    Value="{Binding CodePage}"
+                                DisplayMemberPath="Display" 
+                                ValuePath="Value"
+                                />
+                            <!-- Theme ="Metro" -->
+
+                            <TextBlock Grid.Row="2" Text="Header" VerticalAlignment="Center"/>
+                            <!-- <TextBox   Grid.Row="2" Grid.Column="1" Text="{Binding Header}" KeyDown="Header_KeyDown"/> -->
+                            <igWPF:XamTextEditor Grid.Row="2" Grid.Column="1" Theme="Metro" Text="{Binding Header}" KeyDown="Header_KeyDown"/>
+
+                            <TextBlock Grid.Row="3" Text="Format" VerticalAlignment="Center"/>
+                            <igWPF:XamComboEditor 
+                                x:Name="FileFormatCombo"
+                                Grid.Row="3"
+							    Grid.Column="1"
+                                ItemsSource="{Binding FileFormatList}" 
+                                Value="{Binding FileFormat}"
+                                DisplayMemberPath="Display" 
+                                ValuePath="Value" 
+                                DropDownResizeMode="None"
+                                SelectedItemChanged="FileFormat_Changed"
+                                />
+
+                            <TextBlock Grid.Row="4" Text="Length" VerticalAlignment="Center" Visibility="{Binding ShowFixFormat}"/>
+                            <TextBox   Grid.Row="4" Grid.Column="1" Text="{Binding ReordLen}" KeyDown="ReordLen_KeyDown" Visibility="{Binding ShowFixFormat}" VerticalAlignment="Center"/>
+
+                            <TextBlock Grid.Row="5" Text="Field Sep." VerticalAlignment="Center" Visibility="{Binding ShowVarFormat}"/>
+                            <igWPF:XamComboEditor 
+							    Grid.Row="5"
+							    Grid.Column="1"
+                                Visibility="{Binding ShowVarFormat}"
+                                ItemsSource="{Binding FieldSeparatorList}" 
+                                Value="{Binding FieldSeparator}"
+                                DisplayMemberPath="Display"
+                                ValuePath="Value"
+                                DropDownResizeMode="None"
+                                />
+
+                            <TextBlock Grid.Row="6" Text="Filter [&quot;]" Visibility="{Binding ShowVarFormat}"/>
+                            <CheckBox 
+                                Grid.Row="6"
+                                Grid.Column="1"
+                                Visibility="{Binding ShowVarFormat}"
+                                VerticalAlignment="Center"
+                                IsChecked="{Binding Filter}"
+                                />
+                        </Grid>
+                    </GroupBox>
+                        
+                    <GroupBox
+                        Grid.Row="1"
+					    BorderThickness="2" 
+					    BorderBrush="Gray"
+					    Header="Fields"
+                        >
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" /> <!-- toolbar -->
+                                <RowDefinition Height="*" />    <!-- list -->
+                            </Grid.RowDefinitions>
+                            
+                            <StackPanel x:Name="FieldToolbar" Orientation="Horizontal" HorizontalAlignment="Right" Width="286">
+                                <Button Click="FieldInsBefore_Clicked">
+                                    <Image Source="../Resources/Bitmaps/FieldAddBefore.bmp"/>
+                                </Button>
+                                <Button Click="FieldInsAfter_Clicked">
+                                    <Image Source="../Resources/Bitmaps/FieldAddAfter.bmp"/>
+                                </Button>
+                                <Button Click="FieldRemove_Clicked">
+                                    <Image Source="../Resources/Bitmaps/FieldDelete.bmp"/>
+                                </Button>
+
+                            <!--    <Slider Minimum="8" Maximum="{Binding Source={StaticResource FontSize}}" x:Name="mySlider" Value="14" Width="100" Background="{DynamicResource RX.ActiveColumn}"/> -->
+                            </StackPanel>
+                            
+                            <igWPF:XamDataGrid 
+							    x:Name="FieldDefGrid"
+                                Grid.Row="1"
+                                Theme="Metro"
+                                GroupByAreaLocation="None"
+							    DataSource="{Binding FieldList}"
+							    KeyDown="OnFieldsKeyDown"
+                                EditModeStarted="FieldDefGrid_EditModeStarted"
+                                EditModeEnding="FieldDefGrid_EditModeEnding"
+							    EditModeEnded="FieldDefGrid_EditModeEnded"
+                                RecordActivated="FieldDefGrid_RecordActivated"
+                                >
+                                <igWPF:XamDataGrid.FieldSettings>
+                                    <igWPF:FieldSettings/>
+                                </igWPF:XamDataGrid.FieldSettings>
+                                <igWPF:XamDataGrid.FieldLayoutSettings>
+                                    <igWPF:FieldLayoutSettings SelectionTypeRecord="Single" HighlightAlternateRecords="True" AllowFieldMoving="No" />
+                                </igWPF:XamDataGrid.FieldLayoutSettings>
+
+                                <igWPF:XamDataGrid.FieldLayouts>
+                                    <igWPF:FieldLayout x:Name="FieldsListLayout">
+                                        <igWPF:Field Name="Name" Label="Name" Width="auto"/>
+                                        <igWPF:Field Name="Pos"  Label="Pos"  Width="40" />
+                                        <igWPF:Field Name="Len"  Label="Len"  Width="40" />
+                                        <igWPF:Field Name="Content"  Label="Content"  Width="*">
+                                            <igWPF:Field.Settings>
+                                                <igWPF:FieldSettings AllowEdit="False"/>
+                                            </igWPF:Field.Settings>
+                                        </igWPF:Field>
+                                    </igWPF:FieldLayout>
+                                </igWPF:XamDataGrid.FieldLayouts>
+                            </igWPF:XamDataGrid>
+                        </Grid>
+                    </GroupBox>
+                    
+                </Grid>
+            </DockPanel>
+
+            <!-- Data Records _______________________________________ -->
+            <Grid Margin="0,0,300,0" DataContext="{Binding Path=FileDef}">
+                <GroupBox
+                    Grid.Row="1"
+                    Header="Data Preview"
+				    Height="auto"
+				    VerticalAlignment="Stretch"
+                    SizeChanged="GroupBox_SizeChanged"
+                    >
+                    <igWPF:XamDataGrid 
+                        x:Name="DataRecords"
+                        Grid.Row="1" 
+                        Theme="Metro" 
+                        DataSource="{Binding GridData}"
+                        GroupByAreaLocation="None"
+                        RecordActivated="DataRecords_RecordActivated"
+                        GroupByAreaMode="DefaultFieldLayoutOnly" 
+                        IsManipulationEnabled="False" 
+                        IsTouchSupportEnabled="False" 
+                        IsNestedDataDisplayEnabled="False"
+                        UpdateMode="OnUpdate"
+                        AutoFit="True">
+                        <igWPF:XamDataGrid.FieldLayoutSettings>
+                            <igWPF:FieldLayoutSettings 
+                                AllowFieldMoving="No" 
+                                AutoArrangeCells="Never"
+                                AutoFitMode="Default"
+                                HeaderPresenterStyle="{StaticResource RX-HeaderStyle}"
+                                />
+                            <!--   -->
+                        </igWPF:XamDataGrid.FieldLayoutSettings>
+                    </igWPF:XamDataGrid>
+                </GroupBox>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,-1,0,0">
+                    <rx:RxButton Click="FontSizePlus_Clicked">
+                        <Image Source="../Resources/Bitmaps/FontSizePlus.ico"/>
+                    </rx:RxButton>
+                    <rx:RxButton Click="FontSizeMinus_Clicked">
+                        <Image Source="../Resources/Bitmaps/FontSizeMinus.ico"/>
+                    </rx:RxButton>
+                </StackPanel>
+            </Grid>
+        </Grid>
+<!--        <TextBlock Grid.Row="2" Text="Status" /> -->
+    </Grid>
+</Page>

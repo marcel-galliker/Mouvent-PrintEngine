@@ -1,0 +1,1700 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{310AEC03-B35E-4E08-9A77-6CFF0597BC46}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>RX_DigiPrint</RootNamespace>
+    <AssemblyName>RX_DigiPrint</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <ExpressionBlendVersion>12.0.41002.1</ExpressionBlendVersion>
+    <PublishUrl>D:\publish\RX-Gui\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Background</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <SupportUrl>http://www.radex-net.com/</SupportUrl>
+    <ErrorReportUrl>http://www.radex-net.com/</ErrorReportUrl>
+    <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
+    <WebPage>publish.htm</WebPage>
+    <ApplicationRevision>5</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <PublishWizardCompleted>true</PublishWizardCompleted>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup>
+    <!--   <TargetPlatformVersion>8.0</TargetPlatformVersion> -->
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\_out\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;RX_DigiPrint</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>_out\Release\</OutputPath>
+    <DefineConstants>_64</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <Prefer32Bit>false</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestCertificateThumbprint>FD2B55EF208F5197BF08BFF6F8BF1923D84F242B</ManifestCertificateThumbprint>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestKeyFile>Orbit-GUI_TemporaryKey.pfx</ManifestKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <GenerateManifests>true</GenerateManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TargetZone>LocalIntranet</TargetZone>
+  </PropertyGroup>
+  <PropertyGroup />
+  <PropertyGroup>
+    <SignManifests>false</SignManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>mouvent.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug-Remote|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>\\192.168.200.2\radex\_out\Debug-Remote\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;RX_DigiPrint</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+  </PropertyGroup>
+  <PropertyGroup />
+  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>_out\Debug_x64\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;RX_DigiPrint;X64</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>_out\Release_x64\</OutputPath>
+    <DefineConstants>RX_DigiPrint;X64</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug-Remote|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>\\192.168.200.2\radex\_out\Debug-Remote_x64\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;RX_DigiPrint;X64</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <DocumentationFile>
+    </DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>RX_DigiPrint.App</StartupObject>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup />
+  <PropertyGroup>
+    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;RX_DigiPrint</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <OutputPath>bin\Release\</OutputPath>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DefineConstants>
+    </DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug-Remote|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>\\192.168.200.2\radex\_out\Debug-Remote\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;RX_DigiPrint</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-soc|x86'">
+    <OutputPath>bin\x86\Release-soc\</OutputPath>
+    <DefineConstants>_64</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-soc|x64'">
+    <OutputPath>bin\x64\Release-soc\</OutputPath>
+    <DefineConstants>RX_DigiPrint;X64</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-soc|AnyCPU'">
+    <OutputPath>bin\Release-soc\</OutputPath>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="BitMiracle.LibTiff.NET">
+      <HintPath>DLL\BitMiracle.LibTiff.NET.dll</HintPath>
+    </Reference>
+    <Reference Include="InfragisticsWPF4.Controls.Editors.XamComboEditor.v17.2, Version=17.2.20172.1000, Culture=neutral, PublicKeyToken=7dd5c3163f2cd0cb, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Externals\Infragistics\2017.2\WPF\CLR4.0\Bin\InfragisticsWPF4.Controls.Editors.XamComboEditor.v17.2.dll</HintPath>
+    </Reference>
+    <Reference Include="InfragisticsWPF4.Controls.Grids.XamGrid.v17.2, Version=17.2.20172.1000, Culture=neutral, PublicKeyToken=7dd5c3163f2cd0cb, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Externals\Infragistics\2017.2\WPF\CLR4.0\Bin\InfragisticsWPF4.Controls.Grids.XamGrid.v17.2.dll</HintPath>
+    </Reference>
+    <Reference Include="InfragisticsWPF4.Controls.Menus.XamMenu.v17.2, Version=17.2.20172.1000, Culture=neutral, PublicKeyToken=7dd5c3163f2cd0cb, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Externals\Infragistics\2017.2\WPF\CLR4.0\Bin\InfragisticsWPF4.Controls.Menus.XamMenu.v17.2.dll</HintPath>
+    </Reference>
+    <Reference Include="InfragisticsWPF4.DataManager.v17.2, Version=17.2.20172.1000, Culture=neutral, PublicKeyToken=7dd5c3163f2cd0cb, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Externals\Infragistics\2017.2\WPF\CLR4.0\Bin\InfragisticsWPF4.DataManager.v17.2.dll</HintPath>
+    </Reference>
+    <Reference Include="InfragisticsWPF4.DataPresenter.v17.2, Version=17.2.20172.1000, Culture=neutral, PublicKeyToken=7dd5c3163f2cd0cb, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Externals\Infragistics\2017.2\WPF\CLR4.0\Bin\InfragisticsWPF4.DataPresenter.v17.2.dll</HintPath>
+    </Reference>
+    <Reference Include="InfragisticsWPF4.Editors.v17.2, Version=17.2.20172.1000, Culture=neutral, PublicKeyToken=7dd5c3163f2cd0cb, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Externals\Infragistics\2017.2\WPF\CLR4.0\Bin\InfragisticsWPF4.Editors.v17.2.dll</HintPath>
+    </Reference>
+    <Reference Include="InfragisticsWPF4.Olap.v17.2, Version=17.2.20172.1000, Culture=neutral, PublicKeyToken=7dd5c3163f2cd0cb, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Externals\Infragistics\2017.2\WPF\CLR4.0\Bin\InfragisticsWPF4.Olap.v17.2.dll</HintPath>
+    </Reference>
+    <Reference Include="InfragisticsWPF4.v17.2, Version=17.2.20172.1000, Culture=neutral, PublicKeyToken=7dd5c3163f2cd0cb, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Externals\Infragistics\2017.2\WPF\CLR4.0\Bin\InfragisticsWPF4.v17.2.dll</HintPath>
+    </Reference>
+    <Reference Include="InTheHand.Net.Personal, Version=3.5.605.0, Culture=neutral, PublicKeyToken=ea38caa273134499, processorArchitecture=MSIL">
+      <HintPath>packages\32feet.NET.3.5.0.0\lib\net\InTheHand.Net.Personal.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="itextsharp">
+      <HintPath>..\Externals\itextsharp.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationFramework.Aero2" />
+    <Reference Include="QRCoder, Version=1.3.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\QRCoder.1.3.2\lib\net40\QRCoder.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Xaml">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="UIAutomationProvider" />
+    <Reference Include="UIAutomationTypes" />
+    <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\QRCoder.1.3.2\lib\net40\UnityEngine.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="ZKWeb.System.Drawing, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\ZKWeb.System.Drawing.4.0.0\lib\net45\ZKWeb.System.Drawing.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+    <Compile Include="Comparers\Date_Comparer.cs" />
+    <Compile Include="Comparers\FileName_Comparer.cs" />
+    <Compile Include="Converters\BluetoothImg_Converter.cs" />
+    <Compile Include="Converters\BoolImg_Converter.cs" />
+    <Compile Include="Converters\BoolToInVisible_Converter.cs" />
+    <Compile Include="Converters\CleafQuality_Converter.cs" />
+    <Compile Include="Converters\ColorCode_Str.cs" />
+    <Compile Include="Converters\Copies_Converter.cs" />
+    <Compile Include="Converters\Counter_Converter.cs" />
+    <Compile Include="Converters\CtrlMode_Str.cs" />
+    <Compile Include="Converters\DeviceNoVisible_Converter.cs" />
+    <Compile Include="Converters\EnumToInt_Converter.cs" />
+    <Compile Include="Converters\Error_Converter.cs" />
+    <Compile Include="Converters\FileName_Converter.cs" />
+    <Compile Include="Converters\Connected_Converter.cs" />
+    <Compile Include="Converters\CheckBox_Converter.cs" />
+    <Compile Include="Converters\FileTypeImage_Converter.cs" />
+    <Compile Include="Converters\Filler_Converter.cs" />
+    <Compile Include="Converters\FlashButtonVisible_Converter.cs" />
+    <Compile Include="Converters\HeadValve_Converter.cs" />
+    <Compile Include="Converters\HeadVal_Converter.cs" />
+    <Compile Include="Converters\InkType_Color.cs" />
+    <Compile Include="Converters\InkType_Name.cs" />
+    <Compile Include="Converters\DirItemVisible_Converter.cs" />
+    <Compile Include="Converters\IntToInVisible_Converter.cs" />
+    <Compile Include="Converters\IntToVisible_Converter.cs" />
+    <Compile Include="Converters\LedImg_Converter.cs" />
+    <Compile Include="Converters\Len_Unit_Converter.cs" />
+    <Compile Include="Converters\LogTypeColor_Converter.cs" />
+    <Compile Include="Converters\MacAddr_Converter.cs" />
+    <Compile Include="Converters\DeviceType_Converter.cs" />
+    <Compile Include="Converters\MaterialName_Converter.cs" />
+    <Compile Include="Converters\mbar_Converter.cs" />
+    <Compile Include="Converters\Add_Converter.cs" />
+    <Compile Include="Converters\Or_Converter.cs" />
+    <Compile Include="Converters\PagesVisible_Converter.cs" />
+    <Compile Include="Converters\PlcLogState_Converter.cs" />
+    <Compile Include="Converters\PrintQueueCheckVisible_Converter.cs" />
+    <Compile Include="Converters\PuttyVisible_Converter.cs" />
+    <Compile Include="Converters\RotateRect_Converter.cs" />
+    <Compile Include="Converters\ScanLengt_Converter.cs" />
+    <Compile Include="Converters\StepperStateImg_Converter.cs" />
+    <Compile Include="Converters\Test_Converter.cs" />
+    <Compile Include="Converters\ToString_Converter.cs" />
+    <Compile Include="Converters\Percent_Converter.cs" />
+    <Compile Include="Converters\UvLampImg_Converter.cs" />
+    <Compile Include="Converters\WlanQuality_Converter.cs" />
+    <Compile Include="External\FastBitmap.cs" />
+    <Compile Include="External\QuadDistort.cs" />
+    <Compile Include="External\RX-Image.cs" />
+    <Compile Include="External\rx_dat.cs" />
+    <Compile Include="External\rx_doc.cs" />
+    <Compile Include="External\rx_rip.cs" />
+    <Compile Include="External\rx_wlan.cs" />
+    <Compile Include="Helpers\ErrorMessage.cs" />
+    <Compile Include="Helpers\RxComboBox.cs" />
+    <Compile Include="Helpers\RxImaging.cs" />
+    <Compile Include="Helpers\Language.cs" />
+    <Compile Include="Helpers\RxBitset.cs" />
+    <Compile Include="Helpers\RxGridSplitter.cs" />
+    <Compile Include="Helpers\RxPopup.cs" />
+    <Compile Include="Helpers\RxTabItem.cs" />
+    <Compile Include="Helpers\RxTextBox.cs" />
+    <Compile Include="Helpers\RxXamGrid.cs" />
+    <Compile Include="Models\Chiller.cs" />
+    <Compile Include="Models\CleafFlexo.cs" />
+    <Compile Include="Models\CleafOrder.cs" />
+    <Compile Include="Models\CleafRoll.cs" />
+    <Compile Include="Models\Comsumables.cs" />
+    <Compile Include="Models\DeviceNumbers.cs" />
+    <Compile Include="Models\Dir.cs" />
+    <Compile Include="Models\DirItem.cs" />
+    <Compile Include="Models\Encoder.cs" />
+    <Compile Include="Models\Enums\Alignment.cs" />
+    <Compile Include="Models\Enums\BarcodeType.cs" />
+    <Compile Include="Models\Enums\BoxType.cs" />
+    <Compile Include="Models\Enums\EN_CleafCuttingInspection.cs" />
+    <Compile Include="Models\Enums\EN_Collate.cs" />
+    <Compile Include="Models\Enums\EN_DeviceNumbers.cs" />
+    <Compile Include="Models\Enums\EN_DropSize.cs" />
+    <Compile Include="Models\Enums\EN_OffAuto.cs" />
+    <Compile Include="Models\Enums\EN_RectoVerso.cs" />
+    <Compile Include="Models\Enums\EN_OnOffAuto.cs" />
+    <Compile Include="Models\Enums\EN_CleafManualSplice.cs" />
+    <Compile Include="Models\Enums\EN_CleafMaterial.cs" />
+    <Compile Include="Models\Enums\EN_CleafSpliceType.cs" />
+    <Compile Include="Models\Enums\EN_CleafWinderReduction.cs" />
+    <Compile Include="Models\Enums\EN_ColorCodes.cs" />
+    <Compile Include="Models\Enums\EN_DeviceType.cs" />
+    <Compile Include="Models\Enums\EN_FluidCtrlMode.cs" />
+    <Compile Include="Models\Enums\EN_LampState.cs" />
+    <Compile Include="Models\Enums\EN_MachineScanner.cs" />
+    <Compile Include="Models\Enums\EN_MachineState.cs" />
+    <Compile Include="Models\Enums\EN_MachineWarn.cs" />
+    <Compile Include="Models\Enums\EN_Material.cs" />
+    <Compile Include="Models\Enums\EN_Numbers.cs" />
+    <Compile Include="Models\Enums\EN_OnOff.cs" />
+    <Compile Include="Models\Enums\EN_Orienation.cs" />
+    <Compile Include="Models\Enums\EN_Passes.cs" />
+    <Compile Include="Models\Enums\EN_PgMode.cs" />
+    <Compile Include="Models\Enums\EN_PrinterType.cs" />
+    <Compile Include="Models\Enums\EN_Rotation.cs" />
+    <Compile Include="Models\Enums\EN_ScanMode.cs" />
+    <Compile Include="Models\Enums\EN_Speed.cs" />
+    <Compile Include="Models\Enums\EN_SpeedTestTable.cs" />
+    <Compile Include="Models\Enums\EN_SpreadRoller.cs" />
+    <Compile Include="Models\Enums\EN_SweepDirection.cs" />
+    <Compile Include="Models\Enums\EN_TestBmp.cs" />
+    <Compile Include="Models\Enums\EN_Units.cs" />
+    <Compile Include="Models\Enums\EN_UserTypes.cs" />
+    <Compile Include="Models\Enums\FieldSeparator.cs" />
+    <Compile Include="Models\Enums\FileFormat.cs" />
+    <Compile Include="Models\EventList.cs" />
+    <Compile Include="Models\HeadAdjustment.cs" />
+    <Compile Include="Models\HeadStat.cs" />
+    <Compile Include="Models\HeadStatList.cs" />
+    <Compile Include="Models\InkFamilyList.cs" />
+    <Compile Include="Models\InkSupplyList.cs" />
+    <Compile Include="Models\InkTypeList.cs" />
+    <Compile Include="Models\InkSupply.cs" />
+    <Compile Include="Models\InkType.cs" />
+    <Compile Include="Models\Label.cs" />
+    <Compile Include="Models\License.cs" />
+    <Compile Include="Models\Maintenance.cs" />
+    <Compile Include="Models\Material.cs" />
+    <Compile Include="Models\MaterialList.cs" />
+    <Compile Include="Models\MaterialXml.cs" />
+    <Compile Include="Models\Network.cs" />
+    <Compile Include="Models\Log.cs" />
+    <Compile Include="Models\NetworkItem.cs" />
+    <Compile Include="Models\LogItem.cs" />
+    <Compile Include="Models\PageNumber.cs" />
+    <Compile Include="Models\Plc.cs" />
+    <Compile Include="Models\PlcLogItem.cs" />
+    <Compile Include="Models\PreviewCash.cs" />
+    <Compile Include="Models\RxBtProdState.cs" />
+    <Compile Include="Models\Settings.cs" />
+    <Compile Include="Models\StepperCfg.cs" />
+    <Compile Include="Models\StepperMotor.cs" />
+    <Compile Include="Models\StepperStatus.cs" />
+    <Compile Include="Models\User.cs" />
+    <Compile Include="Models\UvLamp.cs" />
+    <Compile Include="Models\WlanNetwork.cs" />
+    <Compile Include="Services\RxBluetooth.cs" />
+    <Compile Include="Services\RxBtClient.cs" />
+    <Compile Include="Services\RxBtDef.cs" />
+    <Compile Include="Services\RxBtMsgHandler.cs" />
+    <Compile Include="Services\RxCrypto.cs" />
+    <Compile Include="Services\RxFlz.cs" />
+    <Compile Include="Views\CleafView\CleafCommands.xaml.cs">
+      <DependentUpon>CleafCommands.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\CleafView\CleafConfig.xaml.cs">
+      <DependentUpon>CleafConfig.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\CleafView\CleafFlexoView.xaml.cs">
+      <DependentUpon>CleafFlexoView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\CleafView\CleafMachine.xaml.cs">
+      <DependentUpon>CleafMachine.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\CleafView\CleafOpenOrder.xaml.cs">
+      <DependentUpon>CleafOpenOrder.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\CleafView\CleafOrderView.xaml.cs">
+      <DependentUpon>CleafOrderView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\CleafView\CleafPrepare.xaml.cs">
+      <DependentUpon>CleafPrepare.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\CleafView\CleafRolls.xaml.cs">
+      <DependentUpon>CleafRolls.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\CleafView\CleafServiceCommands.xaml.cs">
+      <SubType>Code</SubType>
+      <DependentUpon>CleafServiceCommands.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\CleafView\CleafSettings.xaml.cs">
+      <DependentUpon>CleafSettings.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\CleafView\CleafStatus.xaml.cs">
+      <DependentUpon>CleafStatus.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\CleafView\CleafView.xaml.cs">
+      <DependentUpon>CleafView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\DP803View\DP803Cfg.xaml.cs">
+      <DependentUpon>DP803Cfg.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\DP803View\DP803Cmd.xaml.cs">
+      <DependentUpon>DP803Cmd.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\DP803View\DP803Machine.xaml.cs">
+      <DependentUpon>DP803Machine.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\DP803View\DP803Par.xaml.cs">
+      <DependentUpon>DP803Par.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\DP803View\DP803Status.xaml.cs">
+      <DependentUpon>DP803Status.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\DP803View\DP803Stepper.xaml.cs">
+      <DependentUpon>DP803Stepper.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\DP803View\DP803View.xaml.cs">
+      <DependentUpon>DP803View.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LB701UVView\LB701UVView.xaml.cs" />
+    <Compile Include="Views\LB701UVView\LB701UV_Cfg.xaml.cs" />
+    <Compile Include="Views\LB701UVView\LB701UV_Cmd.xaml.cs" />
+    <Compile Include="Views\LB701UVView\LB701UV_DiePos.xaml.cs" />
+    <Compile Include="Views\LB701UVView\LB701UV_Par.xaml.cs" />
+    <Compile Include="Views\LB701UVView\LB701UV_Par_diecut.xaml.cs" />
+    <Compile Include="Views\LB701UVView\LB701UV_Prepare.xaml.cs" />
+    <Compile Include="Views\LB701UVView\LB701UV_Status.xaml.cs" />
+    <Compile Include="Views\LB702UVView\LB702UV_Cfg.xaml.cs" />
+    <Compile Include="Views\LB702UVView\LB702UV_Cmd.xaml.cs" />
+    <Compile Include="Views\LB702UVView\LB702UV_Par.xaml.cs" />
+    <Compile Include="Views\LB702UVView\LB702UV_Prepare.xaml.cs" />
+    <Compile Include="Views\LB702UVView\LB702UV_Status.xaml.cs" />
+    <Compile Include="Views\LB702UVView\LB702UV_View.xaml.cs" />
+    <Compile Include="Views\LB702WBView\LB702WBView.xaml.cs">
+      <DependentUpon>LB702WBView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LB702WBView\LB702WB_Cmd.xaml.cs">
+      <DependentUpon>LB702WB_Cmd.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LB702WBView\LB702WB_Machine.xaml.cs">
+      <DependentUpon>LB702WB_Machine.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LB702WBView\LB702WB_ParCoating.xaml.cs">
+      <DependentUpon>LB702WB_ParCoating.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LB702WBView\LB702WB_ParDryer.xaml.cs">
+      <DependentUpon>LB702WB_ParDryer.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LB702WBView\LB702WB_ParFlexo.xaml.cs">
+      <DependentUpon>LB702WB_ParFlexo.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LB702WBView\LB702WB_ParMain.xaml.cs">
+      <DependentUpon>LB702WB_ParMain.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LB702WBView\LB702WB_ParPrinter.xaml.cs">
+      <DependentUpon>LB702WB_ParPrinter.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LB702WBView\LB702WB_ParRewinder.xaml.cs">
+      <DependentUpon>LB702WB_ParRewinder.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LB702WBView\LB702WB_ParUnwinder.xaml.cs">
+      <DependentUpon>LB702WB_ParUnwinder.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LB702WBView\LB702WB_Prepare.xaml.cs">
+      <DependentUpon>LB702WB_Prepare.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LB702WBView\LB702WB_Status.xaml.cs">
+      <DependentUpon>LB702WB_Status.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LH702View\LH702_ImgSettings.xaml.cs">
+      <DependentUpon>LH702_ImgSettings.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LH702View\LH702_Par.xaml.cs">
+      <DependentUpon>LH702_Par.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LH702View\LH702_Preview.xaml.cs">
+      <DependentUpon>LH702_Preview.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LH702View\LH702_View.xaml.cs">
+      <DependentUpon>LH702_View.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PrintQueueView\FileOpen.xaml.cs">
+      <DependentUpon>FileOpen.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PrintQueueView\FileOpen_LB702.xaml.cs">
+      <DependentUpon>FileOpen_LB702.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PrintQueueView\FileSettingsTest.xaml.cs" />
+    <Compile Include="Views\PrintQueueView\PrintQueueAddTest.xaml.cs">
+      <DependentUpon>PrintQueueAddTest.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PrintSystemView\AdjustmentHelp.xaml.cs">
+      <DependentUpon>AdjustmentHelp.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PrintSystemView\StepperGridCleaf.xaml.cs">
+      <DependentUpon>StepperGridCleaf.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PrintSystemView\HeadAdjustment.xaml.cs">
+      <DependentUpon>HeadAdjustment.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PrintSystemView\InkSupplyGrid.xaml.cs">
+      <DependentUpon>InkSupplyGrid.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PrintSystemView\PrintBarDistView.xaml.cs">
+      <DependentUpon>PrintBarDistView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PrintSystemView\PrintHeadDistView.xaml.cs">
+      <DependentUpon>PrintHeadDistView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PrintSystemView\PrintHeadGrid.xaml.cs">
+      <DependentUpon>PrintHeadGrid.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PrintSystemView\PrintHeadView.xaml.cs">
+      <DependentUpon>PrintHeadView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PrintSystemView\PrintSystemGrid.xaml.cs">
+      <DependentUpon>PrintSystemGrid.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PrintSystemView\PurgeMsgBox.xaml.cs">
+      <DependentUpon>PurgeMsgBox.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PrintSystemView\StepperGrid.xaml.cs">
+      <DependentUpon>StepperGrid.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PrintSystemView\OffsetsGrid.xaml.cs">
+      <DependentUpon>OffsetsGrid.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PrintSystemView\StepperGridDP803.xaml.cs">
+      <DependentUpon>StepperGridDP803.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PrintSystemView\StepperGridLB702.xaml.cs">
+      <DependentUpon>StepperGridLB702.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Settings\NetworkItem.xaml.cs">
+      <DependentUpon>NetworkItem.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Settings\Settings.xaml.cs">
+      <DependentUpon>Settings.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Settings\WlanSettings.xaml.cs">
+      <DependentUpon>WlanSettings.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\TestTableView\TestTableView.xaml.cs">
+      <DependentUpon>TestTableView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\TestTableView\TestTableCommands.xaml.cs">
+      <DependentUpon>TestTableCommands.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\TestTableView\TestTableError.xaml.cs">
+      <DependentUpon>TestTableError.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\TestTableView\TestTablePrintSettings.xaml.cs">
+      <DependentUpon>TestTablePrintSettings.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\TestTableView\TestTableStatus.xaml.cs">
+      <DependentUpon>TestTableStatus.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\TexView\TexCfg.xaml.cs">
+      <DependentUpon>TexCfg.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\TexView\TexCmd.xaml.cs">
+      <DependentUpon>TexCmd.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\TexView\TexConsumables.xaml.cs">
+      <DependentUpon>TexConsumables.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\TexView\TexMachine.xaml.cs">
+      <DependentUpon>TexMachine.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\TexView\TexPar.xaml.cs">
+      <DependentUpon>TexPar.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\TexView\TexPrepare.xaml.cs">
+      <DependentUpon>TexPrepare.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\TexView\TexStatus.xaml.cs">
+      <DependentUpon>TexStatus.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\TexView\TexStepper.xaml.cs">
+      <DependentUpon>TexStepper.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UserControls\BluetoothWindow.xaml.cs">
+      <DependentUpon>BluetoothWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PrintSystemView\ChillerView.xaml.cs">
+      <DependentUpon>ChillerView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UserControls\StepperView.xaml.cs">
+      <DependentUpon>StepperView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UserControls\CommandButtons.xaml.cs">
+      <DependentUpon>CommandButtons.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PrintQueueView\PageNumberView.xaml.cs">
+      <DependentUpon>PageNumberView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PrintSystemView\EncoderView.xaml.cs">
+      <DependentUpon>EncoderView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UserControls\FlushWindow.xaml.cs">
+      <DependentUpon>FlushWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UserControls\InkInfoWnd.xaml.cs">
+      <DependentUpon>InkInfoWnd.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UserControls\InkLevel.xaml.cs">
+      <DependentUpon>InkLevel.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UserControls\InkLevelCalibrate.xaml.cs">
+      <DependentUpon>InkLevelCalibrate.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UserControls\PlcStatus.xaml.cs">
+      <DependentUpon>PlcStatus.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UserControls\PlcCommand.xaml.cs">
+      <DependentUpon>PlcCommand.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UserControls\PlcLog.xaml.cs">
+      <DependentUpon>PlcLog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UserControls\PlcParPanel.cs" />
+    <Compile Include="Models\PrinterProperties.cs" />
+    <Compile Include="Models\PrinterStatus.cs" />
+    <Compile Include="Models\PrintQueue.cs" />
+    <Compile Include="Models\PrintQueueItem.cs" />
+    <Compile Include="Models\PrintSystem.cs" />
+    <Compile Include="Helpers\RxCellControl.cs" />
+    <Compile Include="Models\RxGlobals.cs" />
+    <Compile Include="Helpers\RxProgressBar.cs" />
+    <Compile Include="Services\RxInterface.cs" />
+    <Compile Include="Services\RxMsgHandler.cs" />
+    <Compile Include="Services\RxRexroth.cs" />
+    <Compile Include="Services\TcpIp.cs" />
+    <Compile Include="Settings.cs" />
+    <Compile Include="Views\AboutDlg.xaml.cs">
+      <DependentUpon>AboutDlg.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\EnevtView.xaml.cs">
+      <DependentUpon>EnevtView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UserControls\ConsumablesView.xaml.cs">
+      <DependentUpon>ConsumablesView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UserControls\PlcTitle.xaml.cs">
+      <DependentUpon>PlcTitle.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UserControls\RxComboBoxTree.xaml.cs">
+      <DependentUpon>RxComboBoxTree.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UserControls\RxDirTree.xaml.cs">
+      <DependentUpon>RxDirTree.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UserControls\RxProgress.xaml.cs">
+      <DependentUpon>RxProgress.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PrintQueueView\FileSettingsScan.xaml.cs">
+      <DependentUpon>FileSettingsScan.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PrintSystemView\InkSupplyView.xaml.cs">
+      <DependentUpon>InkSupplyView.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Views\PrintSystemView\PrintBarView.xaml.cs">
+      <DependentUpon>PrintBarView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PrintSystemView\PrintSystemView.xaml.cs">
+      <DependentUpon>PrintSystemView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\NetworkView.xaml.cs">
+      <DependentUpon>NetworkView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LogView.xaml.cs">
+      <DependentUpon>LogView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PrintQueueView\FileSettingsWeb.xaml.cs">
+      <DependentUpon>FileSettingsWeb.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PrintQueueView\PrintQueueView.xaml.cs">
+      <DependentUpon>PrintQueueView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PrintQueueView\PrintQueueAdd.xaml.cs">
+      <DependentUpon>PrintQueueAdd.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\TexView\TexView.xaml.cs">
+      <DependentUpon>TexView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UserControls\PlcParCtrl.xaml.cs">
+      <DependentUpon>PlcParCtrl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UserControls\PreviewScan.xaml.cs">
+      <DependentUpon>PreviewScan.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UserControls\PreviewWeb.xaml.cs">
+      <DependentUpon>PreviewWeb.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PrintSystemView\PrintBar.xaml.cs">
+      <DependentUpon>PrintBar.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UserControls\PrinterImage.xaml.cs">
+      <DependentUpon>PrinterImage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UserControls\RxFileOpen.xaml.cs">
+      <DependentUpon>RxFileOpen.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UserControls\RxTaskButton.xaml.cs">
+      <DependentUpon>RxTaskButton.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UserControls\RxTaskSwitch.xaml.cs">
+      <DependentUpon>RxTaskSwitch.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UserControls\SetComputerNameWindow.xaml.cs">
+      <DependentUpon>SetComputerNameWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UserControls\SetupButtons.xaml.cs">
+      <DependentUpon>SetupButtons.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UserControls\Splicing.xaml.cs">
+      <DependentUpon>Splicing.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UserControls\StepperMotorCtrl.xaml.cs">
+      <DependentUpon>StepperMotorCtrl.xaml</DependentUpon>
+    </Compile>
+    <Page Include="Comparers\Comparers.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Converters\Converters.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Resources\AllStyles.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Resources\CheckBox_Styles.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Resources\DirTreeView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Resources\GroupBox.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Resources\ImgComboBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Resources\TabCtrl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Resources\Theme.Colors.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Resources\IconsResourceDictionary.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Resources\ImplicitStylesResourceDictionary.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Resources\XamComboBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Resources\XamGrid2_Styles.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Resources\XamGrid_Styles.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\AboutDlg.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\CleafView\CleafCommands.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\CleafView\CleafConfig.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\CleafView\CleafFlexoView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\CleafView\CleafMachine.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\CleafView\CleafOpenOrder.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\CleafView\CleafOrderView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\CleafView\CleafPrepare.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\CleafView\CleafRolls.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\CleafView\CleafServiceCommands.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\CleafView\CleafSettings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\CleafView\CleafStatus.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\CleafView\CleafView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\DP803View\DP803Cfg.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\DP803View\DP803Cmd.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\DP803View\DP803Machine.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\DP803View\DP803Par.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\DP803View\DP803Status.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\DP803View\DP803Stepper.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\DP803View\DP803View.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\EnevtView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LB701UVView\LB701UVView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LB701UVView\LB701UV_Cfg.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LB701UVView\LB701UV_Cmd.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LB701UVView\LB701UV_DiePos.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LB701UVView\LB701UV_Par.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LB701UVView\LB701UV_Par_diecut.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LB701UVView\LB701UV_Prepare.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LB701UVView\LB701UV_Status.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LB702UVView\LB702UV_Cfg.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LB702UVView\LB702UV_Cmd.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LB702UVView\LB702UV_Par.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LB702UVView\LB702UV_Prepare.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LB702UVView\LB702UV_Status.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LB702UVView\LB702UV_View.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LB702WBView\LB702WBView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LB702WBView\LB702WB_Cmd.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LB702WBView\LB702WB_Machine.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\LB702WBView\LB702WB_ParCoating.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LB702WBView\LB702WB_ParDryer.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LB702WBView\LB702WB_ParFlexo.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LB702WBView\LB702WB_ParMain.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LB702WBView\LB702WB_ParPrinter.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LB702WBView\LB702WB_ParRewinder.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LB702WBView\LB702WB_ParUnwinder.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LB702WBView\LB702WB_Prepare.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LB702WBView\LB702WB_Status.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LH702View\LH702_ImgSettings.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LH702View\LH702_Par.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LH702View\LH702_Preview.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LH702View\LH702_View.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\PrintQueueView\FileOpen.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\PrintQueueView\FileOpen_LB702.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\PrintQueueView\FileSettingsTest.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\PrintQueueView\PrintQueueAddTest.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\PrintSystemView\AdjustmentHelp.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\PrintSystemView\StepperGridCleaf.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\PrintSystemView\HeadAdjustment.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\PrintSystemView\InkSupplyGrid.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\PrintSystemView\PrintBarDistView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\PrintSystemView\PrintHeadDistView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\PrintSystemView\PrintHeadGrid.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\PrintSystemView\PrintHeadView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\PrintSystemView\PrintSystemGrid.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\PrintSystemView\PurgeMsgBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\PrintSystemView\StepperGrid.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\PrintSystemView\OffsetsGrid.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\PrintSystemView\StepperGridDP803.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\PrintSystemView\StepperGridLB702.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\Settings\NetworkItem.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Settings\Settings.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\Settings\WlanSettings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\TestTableView\TestTableView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\TestTableView\TestTableCommands.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\TestTableView\TestTableError.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\TestTableView\TestTablePrintSettings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\TestTableView\TestTableStatus.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\TexView\TexCfg.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\TexView\TexCmd.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\TexView\TexConsumables.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\TexView\TexMachine.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\TexView\TexPar.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\TexView\TexPrepare.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\TexView\TexStatus.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\TexView\TexStepper.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UserControls\BluetoothWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\PrintSystemView\ChillerView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UserControls\StepperView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\UserControls\CommandButtons.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\PrintQueueView\PageNumberView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UserControls\ConsumablesView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\PrintSystemView\EncoderView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\UserControls\FlushWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UserControls\InkInfoWnd.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UserControls\InkLevel.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UserControls\InkLevelCalibrate.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UserControls\PlcLog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UserControls\PlcTitle.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UserControls\RxComboBoxTree.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UserControls\RxDirTree.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UserControls\RxProgress.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\PrintQueueView\FileSettingsScan.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\PrintSystemView\InkSupplyView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\PrintSystemView\PrintBarView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\PrintSystemView\PrintSystemView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\NetworkView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LogView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\MainWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Converters\IsBiggerThanConverter.cs" />
+    <Compile Include="Views\MainWindow.xaml.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Page Include="Views\PrintQueueView\FileSettingsWeb.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\PrintQueueView\PrintQueueView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\PrintQueueView\PrintQueueAdd.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UserControls\PlcStatus.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\TexView\TexView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UserControls\PlcCommand.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UserControls\PlcParCtrl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\UserControls\PreviewScan.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\UserControls\PreviewWeb.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\PrintSystemView\PrintBar.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UserControls\PrinterImage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UserControls\RxFileOpen.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UserControls\RxTaskButton.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UserControls\RxTaskSwitch.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UserControls\SetComputerNameWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UserControls\SetupButtons.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\UserControls\Splicing.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UserControls\StepperMotorCtrl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <Resource Include="Resources\Bitmaps\unchecked.ico" />
+    <Resource Include="Resources\Bitmaps\checked.ico" />
+    <Resource Include="Resources\Bitmaps\PG_Mark_INV.ico" />
+    <Resource Include="Resources\Bitmaps\PG_Mark_Virtual.ico" />
+    <Resource Include="Resources\Bitmaps\RunList.png" />
+    <Resource Include="Resources\Bitmaps\LH702\LH702.jpg" />
+    <Resource Include="Resources\Bitmaps\UV_Lamp_OFF.ico" />
+    <Resource Include="Resources\Bitmaps\LB702\LB702_WB.png" />
+    <Resource Include="Resources\Bitmaps\LB702\LB702_UV.jpg" />
+    <Resource Include="Resources\Bitmaps\wash.ico" />
+    <Resource Include="Resources\Bitmaps\glue.ico" />
+    <Resource Include="Resources\Bitmaps\PageDown.ico" />
+    <Resource Include="Resources\Bitmaps\PageUp.ico" />
+    <Resource Include="Resources\Bitmaps\DP803\DP803.jpg" />
+    <Resource Include="mouvent.ico" />
+    <EmbeddedResource Include="Properties\Licenses.licx" />
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Language\english.resources" />
+    <EmbeddedResource Include="Resources\Language\german.resources" />
+    <None Include="app.config" />
+    <Content Include="id_rsa.ppk">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Properties\app.manifest" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <AppDesigner Include="Properties\" />
+    <None Include="Resources\Language\Compile.bat" />
+    <None Include="Resources\Language\Language.csv" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.5">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.5 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="pictures.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Bitmaps\checked.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Bitmaps\Printer1.ico" />
+    <Resource Include="Resources\Bitmaps\Printer2.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Bitmaps\PrinterOff.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Bitmaps\MoveDown.ico" />
+    <Resource Include="Resources\Bitmaps\MoveUp.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Bitmaps\Confirm.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <PublishFile Include="InfragisticsWPF4.Controls.Editors.XamComboEditor.v17.2">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>Assembly</FileType>
+    </PublishFile>
+    <PublishFile Include="InfragisticsWPF4.Controls.Grids.XamGrid.v17.2">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>Assembly</FileType>
+    </PublishFile>
+    <PublishFile Include="InfragisticsWPF4.Controls.Menus.XamMenu.v17.2">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>Assembly</FileType>
+    </PublishFile>
+    <PublishFile Include="InfragisticsWPF4.DataManager.v17.2">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>Assembly</FileType>
+    </PublishFile>
+    <PublishFile Include="InfragisticsWPF4.DataPresenter.v17.2">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>Assembly</FileType>
+    </PublishFile>
+    <PublishFile Include="InfragisticsWPF4.Editors.v17.2">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>Assembly</FileType>
+    </PublishFile>
+    <PublishFile Include="InfragisticsWPF4.Olap.v17.2">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>Assembly</FileType>
+    </PublishFile>
+    <PublishFile Include="InfragisticsWPF4.v17.2">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>Assembly</FileType>
+    </PublishFile>
+    <PublishFile Include="TBarCode11_x64.dll">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Exclude</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Bitmaps\Load.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Bitmaps\RipSettings.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Bitmaps\radex-wp.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Bitmaps\Bottom.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Bitmaps\Top.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Bitmaps\Search.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Bitmaps\SearchUp.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Bitmaps\SearchDown.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Bitmaps\JogBwd.ico" />
+    <Resource Include="Resources\Bitmaps\JogFwd.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Bitmaps\Tension.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Bitmaps\Maintenance.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Bitmaps\radex_bg.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Bitmaps\Directory.ico" />
+    <Resource Include="Resources\Bitmaps\ImageFile.ico" />
+    <Resource Include="Resources\Bitmaps\Printer0.ico" />
+    <Resource Include="Resources\Bitmaps\Printer3.ico" />
+    <Resource Include="Resources\Bitmaps\Printer4.ico" />
+    <Resource Include="Resources\Bitmaps\LB701UV\LB701UV.jpg" />
+    <Resource Include="Resources\Bitmaps\Clean.ico" />
+    <Resource Include="Resources\Bitmaps\OFF.ico" />
+    <Resource Include="Resources\Language\English.txt" />
+    <Resource Include="Resources\Language\German.txt" />
+    <Resource Include="Resources\Bitmaps\TestTable\TestTable.JPG" />
+    <Resource Include="Resources\Bitmaps\Cleaf\Cleaf.PNG" />
+    <Resource Include="Resources\Bitmaps\TestTable\Slide.png" />
+    <Resource Include="Resources\Bitmaps\Plc\LogReset.ico" />
+    <Resource Include="Resources\Bitmaps\Plc\LogMessage.ico" />
+    <Resource Include="Resources\Bitmaps\UV_Lamp.ico" />
+    <Resource Include="Resources\Bitmaps\Point.ico" />
+    <Resource Include="Resources\Bitmaps\LED_GREEN.ico" />
+    <Resource Include="Resources\Bitmaps\file.png" />
+    <Resource Include="Resources\Bitmaps\Print.ico" />
+    <Resource Include="Resources\Bitmaps\Rotate.ico" />
+    <Resource Include="Resources\Bitmaps\Plc\ErrorActive.ico" />
+    <Resource Include="Resources\Bitmaps\Plc\ErrorPassive.ico" />
+    <Resource Include="Resources\Bitmaps\Plc\WarningActive.ico" />
+    <Resource Include="Resources\Bitmaps\Plc\WarningPassive.ico" />
+    <Resource Include="Resources\Bitmaps\WebIn.ico" />
+    <Resource Include="Resources\Bitmaps\ON.ico" />
+    <Resource Include="Resources\Bitmaps\Refresh.ico" />
+    <Resource Include="Resources\Bitmaps\Changed.ico" />
+    <Resource Include="Resources\Bitmaps\Rotate_CW.ico" />
+    <Resource Include="Resources\Bitmaps\Rotate_CCW.ico" />
+    <Resource Include="Resources\Doc\HeadAdjustment.png" />
+    <Resource Include="Resources\Bitmaps\Mouvent_Logo.PNG" />
+    <Resource Include="Resources\Bitmaps\Tex\TX801.tif" />
+    <Resource Include="Resources\Bitmaps\TeamViewer.ico" />
+    <Resource Include="Resources\Bitmaps\Left.ico" />
+    <Resource Include="Resources\Bitmaps\Right.ico" />
+    <Resource Include="Resources\Bitmaps\RightRight.ico" />
+    <Resource Include="Resources\Bitmaps\LeftLeft.ico" />
+    <Resource Include="Resources\Bitmaps\PuTTY.png" />
+    <Resource Include="Resources\Bitmaps\ON_OFF.ico" />
+    <Resource Include="Resources\Bitmaps\PG_Gap.ico" />
+    <Resource Include="Resources\Bitmaps\PG_Length.ico" />
+    <Resource Include="Resources\Bitmaps\PG_Mark.ico" />
+    <Resource Include="Resources\Bitmaps\kbd.png" />
+    <Resource Include="Resources\Bitmaps\bluetooth.ico" />
+    <Resource Include="Resources\Bitmaps\bluetooth_off.ico" />
+    <Resource Include="Resources\Bitmaps\LED_GREY.ico" />
+    <Resource Include="Resources\Bitmaps\Up.ico" />
+    <Resource Include="Resources\Bitmaps\Down.ico" />
+    <Resource Include="Resources\Bitmaps\Tex\TX801-CleaningStation.tif" />
+    <Resource Include="Resources\Bitmaps\WinSCP.ico" />
+    <Resource Include="Resources\Bitmaps\BarcodeFile.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\rx_common_lib_cs\rx_common_lib_cs.csproj">
+      <Project>{97412d0e-6cd1-4e4e-92f9-1460deedb44a}</Project>
+      <Name>rx_common_lib_cs</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy $(ProjectDir)dll *
+if not exist D:\radex\bin\gui md D:\radex\bin\gui
+if not exist  $(ProjectDir)..\bin\gui md $(ProjectDir)..\bin\gui
+
+IF $(ConfigurationName)_$(PlatformName)==Debug_x86 GOTO :DEBUG_X86
+IF $(ConfigurationName)_$(PlatformName)==Release_x64 GOTO :RELEASE_64
+GOTO :ENDIF
+
+ :DEBUG_X86
+copy $(ProjectDir)..\_out\debug\rx_rip_lib.dll $(ProjectDir)$(OutDir)
+copy $(ProjectDir)..\Externals\Tec-it\Win\TBarCode11\Bin\TBarCode11.dll $(ProjectDir)$(OutDir)
+GOTO :ENDIF
+
+:RELEASE_64
+copy $(ProjectDir)dll\*.dll $(ProjectDir)..\bin\gui
+copy $(ProjectDir)$(OutDir)rx_common_lib_cs.dll $(ProjectDir)..\bin\gui
+copy $(ProjectDir)$(OutDir)rx_rip_gui.dll $(ProjectDir)..\bin\gui
+copy $(ProjectDir)..\ssh\id_rsa.ppk $(ProjectDir)..\bin\gui
+copy $(TargetFileName) $(ProjectDir)..\bin\gui
+rem copy $(ProjectDir)..\_out\release\rx_rip_lib.dll D:\radex\bin\gui
+:ENDIF</PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>call $(ProjectDir)Resources\Language\Compile.bat $(ProjectDir)Resources\Language
+call $(ProjectDir)VersionUpdate.bat $(ProjectDir)Properties\AssemblyInfo.cs.template  $(ProjectDir)Properties\AssemblyInfo.cs
+rem dir $(SolutionDir)_out\$(Configuration)_$(PlatformName)\rx_rip_lib.dll</PreBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -1,0 +1,60 @@
+﻿<UserControl x:Class="RX_DigiPrint.Views.PrintSystemView.OffsetsGrid"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:igWPF="http://schemas.infragistics.com/xaml/wpf"
+             xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
+             xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+             mc:Ignorable="d"
+             Width="250"
+             d:DesignHeight="300" d:DesignWidth="200">
+    
+    <GroupBox Header="Offsets" Style="{StaticResource RxGroupBox}">
+        <StackPanel>
+            <Grid x:Name="Encoder">
+                <TextBlock       Text="Encoder [inc/m]"/>
+                <common:RxNumBox Text="{Binding OffsetIncPerMeter}" HorizontalContentAlignment="Right" Width="70" HorizontalAlignment="Right"/>
+            </Grid>
+
+            <Grid x:Name="Belt">
+                <TextBlock       Text="Belt Step [µm]"/>
+                <common:RxNumBox Text="{Binding OffsetStep}" HorizontalContentAlignment="Right" Width="70" HorizontalAlignment="Right"/>
+            </Grid>
+            
+            <Grid x:Name="Angle">
+                <TextBlock       Text="Angle [stp]"/>
+                <common:RxNumBox Text="{Binding OffsetAngle}" HorizontalContentAlignment="Right" Width="70" HorizontalAlignment="Right"/>
+            </Grid>
+            
+            <Grid x:Name="Overlap">
+                <TextBlock       Text="Overlap"/>
+                <igWPF:XamComboEditor 
+                                x:Name="CB_Overlap"
+			                    Value="{Binding Overlap, Converter={StaticResource EnumToInt_Converter}}"
+			                    DisplayMemberPath="Display"
+			                    ValuePath="Value"
+			                    DropDownResizeMode="None"
+                                Width="70"
+			                    HorizontalAlignment="Right"                                
+                               />
+            </Grid>
+
+            <Grid x:Name="EncoderVerso">
+                <TextBlock       Text="Encoder Verso [inc/m]"/>
+                <common:RxNumBox Text="{Binding OffsetIncPerMeterVerso}" HorizontalContentAlignment="Right" Width="70" HorizontalAlignment="Right"/>
+            </Grid>
+
+            <Grid x:Name="DistVerso">
+                <TextBlock       Text="Dist Verso [mm]"/>
+                <common:RxNumBox Text="{Binding OffsetVerso}" HorizontalContentAlignment="Right" Width="70" HorizontalAlignment="Right"/>
+            </Grid>
+
+            <Grid x:Name="ManualFlightTimeComp">
+                <TextBlock       Text="FlightTime [mm]"/>
+                <common:RxNumBox Text="{Binding ManualFlightTimeComp}" HorizontalContentAlignment="Right" Width="70" HorizontalAlignment="Right"/>
+            </Grid>
+
+        </StackPanel>
+    </GroupBox>
+</UserControl>

@@ -1,0 +1,67 @@
+# This file describes the network interfaces available on your system
+# and how to activate them. For more information, see interfaces(5).
+
+# for more documentation on: https://wiki.ubuntuusers.de/interfaces/
+# for more documentation on: http://manpages.ubuntu.com/manpages/wily/man5/interfaces.5.html
+
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+# The primary network interface
+# auto em1 // for startup type in console: "ifconfig em1 up"
+iface em1 inet dhcp
+
+auto em2
+iface em2 inet static
+address 192.168.200.1
+netmask 255.255.255.0
+broadcast 192.168.200.255
+
+auto p1p1
+iface p2p1 inet static
+address 192.168.201.1
+netmask 255.255.255.0
+mtu 9000
+
+auto p1p2
+iface p2p2 inet static
+address 192.168.202.1
+netmask 255.255.255.0
+mtu 9000
+
+auto p1p3
+iface p2p3 inet static
+address 192.168.203.1
+netmask 255.255.255.0
+mtu 9000
+
+auto p1p4
+iface p2p4 inet static
+address 192.168.204.1
+netkask 255.255.255.0
+mtu 9000
+
+auto p2p1
+iface p2p1 inet static
+address 192.168.205.1
+netmask 255.255.255.0
+mtu 9000
+
+auto p2p2
+iface p2p2 inet static
+address 192.168.206.1
+netmask 255.255.255.0
+mtu 9000
+
+auto p2p3
+iface p2p3 inet static
+address 192.168.207.1
+netmask 255.255.255.0
+mtu 9000
+
+auto p2p4
+iface p2p4 inet static
+address 192.168.208.1
+netkask 255.255.255.0
+mtu 9000

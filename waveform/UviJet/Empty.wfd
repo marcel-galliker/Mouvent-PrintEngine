@@ -1,0 +1,21 @@
+<WaveForm>
+  <Ink Name="Empty" ColorCode="0" Description="Empty" ColorRGB="#FFDBDBDB" Temp="0" TempMax="0" GreyLevel="8 9 13 15 " MaxFreq="56818" Meniscus="0" CondPresOut="0" DropletVolume="0" FlushTime="0 0 0" />
+  <item Position="0" Voltage="0" />
+  <item Position="36" Voltage="0" />
+  <item Position="92" Voltage="30" />
+  <item Position="230" Voltage="30" />
+  <item Position="287" Voltage="0" />
+  <item Position="430" Voltage="0" />
+  <item Position="471" Voltage="23" />
+  <item Position="625" Voltage="23" />
+  <item Position="666" Voltage="0" />
+  <item Position="829" Voltage="0" />
+  <item Position="881" Voltage="30" />
+  <item Position="1024" Voltage="30" />
+  <item Position="1075" Voltage="0" />
+  <item Position="1200" Voltage="0" />
+  <item Position="1220" Voltage="10" />
+  <item Position="1280" Voltage="10" />
+  <item Position="1300" Voltage="0" />
+  <check>1D28CEEE85FD48292E8A592B50E5AE3ADE6A4AF4</check>
+</WaveForm>

@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8" ?> 
+<resources>
+  <style name="SplashTheme.Base" parent="Theme.AppCompat.Light">
+  </style>
+
+  <style name="SplashTheme" parent="SplashTheme.Base">
+  </style>
+
+  <style name="SplashTheme.Splash" parent ="Theme.AppCompat.Light.NoActionBar">
+    <item name="android:windowBackground">@drawable/splash_screen</item>
+    <item name="android:windowNoTitle">true</item>
+    <item name="android:windowFullscreen">true</item>
+  </style>
+</resources>

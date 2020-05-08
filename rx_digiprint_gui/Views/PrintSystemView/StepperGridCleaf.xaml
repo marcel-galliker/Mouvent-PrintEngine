@@ -1,0 +1,53 @@
+﻿<UserControl x:Class="RX_DigiPrint.Views.PrintSystemView.StepperGridCleaf"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
+             xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+             mc:Ignorable="d" 
+             d:DesignHeight="200" 
+             d:DesignWidth="700">
+
+    <GroupBox Header="Stepper" Style="{StaticResource RxGroupBox}">
+        <Grid x:Name="MainGrid">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="150"/>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="45"/>
+            
+                <ColumnDefinition Width="160"/>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="45"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock       Grid.Row="0" Grid.Column="0" Text="Wiping Height"/>
+            <common:RxNumBox Grid.Row="0" Grid.Column="1" Text="{Binding WipeHeight}" HorizontalContentAlignment="Right"/>
+            <TextBlock       Grid.Row="0" Grid.Column="2" Text=" mm" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center"/>
+
+            <TextBlock       Grid.Row="1" Grid.Column="0" Text="Capping Height"/>
+            <common:RxNumBox Grid.Row="1" Grid.Column="1" Text="{Binding CapHeight}" HorizontalContentAlignment="Right"/>
+            <TextBlock       Grid.Row="1" Grid.Column="2" Text=" mm" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center"/>
+
+            <Rectangle Grid.Column="4" Grid.RowSpan="5" x:Name="Col0" Fill="{Binding InkType, Converter={StaticResource InkType_ColorBG}}"/>
+            <Rectangle Grid.Column="5" Grid.RowSpan="5" x:Name="Col1" Fill="{Binding InkType, Converter={StaticResource InkType_ColorBG}}"/>
+            <Rectangle Grid.Column="6" Grid.RowSpan="5" x:Name="Col2" Fill="{Binding InkType, Converter={StaticResource InkType_ColorBG}}"/>
+            <Rectangle Grid.Column="7" Grid.RowSpan="5" x:Name="Col3" Fill="{Binding InkType, Converter={StaticResource InkType_ColorBG}}"/>
+
+            <TextBlock       Grid.Row="0" Grid.Column="3" Text="Ref Height"/>
+            <TextBlock       Grid.Row="1" Grid.Column="3"><Run Language="de-ch" Text="Head Align"/></TextBlock>
+            <TextBlock       Grid.Row="0" Grid.Column="8" Text=" mm" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center"/>
+            <TextBlock       Grid.Row="1" Grid.Column="8" Text=" mm" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center"/>
+
+        </Grid>
+    </GroupBox>
+</UserControl>

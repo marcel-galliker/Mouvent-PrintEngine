@@ -1,0 +1,2405 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>InfragisticsWPF4.Controls.Maps.XamGeographicMap.v17.2</name>
+    </assembly>
+    <members>
+        <member name="T:Infragistics.Controls.Maps.SphericalMercatorHorizontalScaler">
+            <summary>
+            Scaler class used for maps with spherical mercator projections.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.SphericalMercatorHorizontalScaler.#ctor">
+            <summary>
+            SphericalMercatorHorizontalScaler constructor.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.SphericalMercatorHorizontalScaler.GetUnscaledValue(System.Double,Infragistics.Controls.Charts.ScalerParams)">
+            <summary>
+            Gets the unscaled axis value from an scaled viewport value.
+            </summary>
+            <param name="scaledValue">The scaled viewport value.</param>
+            <param name="p">Scaler parameters</param>
+            <returns>The unscaled axis value.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.SphericalMercatorHorizontalScaler.GetScaledValue(System.Double,Infragistics.Controls.Charts.ScalerParams)">
+            <summary>
+            Gets the scaled viewport value from an unscaled axis value.
+            </summary>
+            <param name="unscaledValue">The unscaled axis value.</param>
+            <param name="p">Scaler parameters</param>
+            <returns>The scaled viewport value.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.SphericalMercatorHorizontalScaler.GetScaledValueList(System.Collections.Generic.IList{System.Double},System.Int32,System.Int32,Infragistics.Controls.Charts.ScalerParams)">
+            <summary>
+            Get a list of scaled viewport values from a list of unscaled axis values.
+            </summary>
+            <param name="unscaledValues">The list of unscaled axis values.</param>
+            <param name="startIndex">The index of the first value</param>
+            <param name="count">The number of values</param>
+            <param name="p">Scaler parameters</param>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.SphericalMercatorHorizontalScaler.CalculateRange(Infragistics.Controls.Charts.NumericAxisBase,System.Double,System.Double,System.Double@,System.Double@)">
+            <summary>
+            Calculates the range of this axis scaler based on the given parameters.
+            </summary>
+            <param name="target">The axis in context.</param>
+            <param name="minimumValue">The application-defined axis minimum value, or NaN if the application has not specified an axis minimum.</param>
+            <param name="maximumValue">The application-defined axis maximum value, or NaN if the application has not specified an axis maximum.</param>
+            <param name="actualMinimumValue">The resulting axis scale minimum, determined by the CalculateRange function.</param>
+            <param name="actualMaximumValue">The resulting axis scale maximum, determined by the CalculateRange function.</param>
+        </member>
+        <member name="T:Infragistics.Controls.Maps.SphericalMercatorVerticalScaler">
+            <summary>
+            Scaler class used for maps with spherical mercator projections.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.SphericalMercatorVerticalScaler.GetUnscaledValue(System.Double,Infragistics.Controls.Charts.ScalerParams)">
+            <summary>
+            Gets the unscaled axis value from an scaled viewport value.
+            </summary>
+            <param name="scaledValue">The scaled viewport value.</param>
+            <param name="p">Scaler parameters</param>
+            <returns>The unscaled axis value.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.SphericalMercatorVerticalScaler.GetScaledValue(System.Double,Infragistics.Controls.Charts.ScalerParams)">
+            <summary>
+            Gets the scaled viewport value from an unscaled axis value.
+            </summary>
+            <param name="unscaledValue">The unscaled axis value.</param>
+            <param name="p">Scaler parameters</param>
+            <returns>The scaled viewport value.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.SphericalMercatorVerticalScaler.GetScaledValueList(System.Collections.Generic.IList{System.Double},System.Int32,System.Int32,Infragistics.Controls.Charts.ScalerParams)">
+            <summary>
+            Get a list of scaled viewport values from a list of unscaled axis values.
+            </summary>
+            <param name="unscaledValues">The list of unscaled axis values.</param>
+            <param name="startIndex">Index at which to begin in the list.</param>
+            <param name="count">Number of items to scale in the list.</param>
+            <param name="p">Scaler parameters in context.</param>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.SphericalMercatorVerticalScaler.CalculateRange(Infragistics.Controls.Charts.NumericAxisBase,System.Double,System.Double,System.Double@,System.Double@)">
+            <summary>
+            Calculates the range of this axis scaler based on the given parameters.
+            </summary>
+            <param name="target">The axis in context.</param>
+            <param name="minimumValue">The application-defined axis minimum value, or NaN if the application has not specified an axis minimum.</param>
+            <param name="maximumValue">The application-defined axis maximum value, or NaN if the application has not specified an axis maximum.</param>
+            <param name="actualMinimumValue">The resulting axis scale minimum, determined by the CalculateRange function.</param>
+            <param name="actualMaximumValue">The resulting axis scale maximum, determined by the CalculateRange function.</param>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.SphericalMercatorVerticalScaler.OnPropertyChanged(System.String,System.Object,System.Object)">
+            <summary>
+            Called when a property value changes.
+            </summary>
+            <param name="propertyName">The name of the property that changed.</param>
+            <param name="oldValue">The old value of the property.</param>
+            <param name="newValue">The new value of the property.</param>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.SphericalMercatorVerticalScaler.MaximumValue">
+            <summary>
+            The scale's maximum value.
+            </summary>
+            <remarks>
+            This is a constant value of 85.05112878.
+            </remarks>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.SphericalMercatorVerticalScaler.MinimumValue">
+            <summary>
+            The scale's minimum value.
+            </summary>
+            <remarks>
+            This is a constant value of -85.05112878.
+            </remarks>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.SphericalMercatorVerticalScaler.#ctor">
+            <summary>
+            SphericalMercatorVerticalScaler constructor.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.SphericalMercatorVerticalScaler.GetProjectedValue(System.Double)">
+            <summary>
+            Returns the given value projected as latitude.
+            </summary>
+            <param name="value">The value to project.</param>
+            <returns>The given value, projected as latitude.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.SphericalMercatorVerticalScaler.GetUnprojectedValue(System.Double)">
+            <summary>
+            Returns the given value unprojected from a latitude value.
+            </summary>
+            <param name="value">The latitude to unproject.</param>
+            <returns>The given value, unprojected from a latitude value.</returns>
+        </member>
+        <member name="T:Infragistics.Controls.Maps.BingMapsImageryStyle">
+            <summary>
+            Describes available map styles for the Bing Maps imagery.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.BingMapsImageryStyle.Aerial">
+            <summary>
+            Specifies the Aerial map style without road or labels overlay.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.BingMapsImageryStyle.AerialWithLabels">
+            <summary>
+            Specifies the Aerial map style with road and labels overlay.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.BingMapsImageryStyle.Road">
+            <summary>
+            Specifies the Roads map style without aerial overlay.
+            </summary>
+        </member>
+        <member name="T:Infragistics.Controls.Maps.BingResponse">
+            <summary>
+            Represents a response for the Bing Maps imagery.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.BingResponse.#ctor">
+            <summary>
+            Create an instance of the BingResponse object
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.BingResponse.ResourceSets">
+            <summary>
+            Gets or sets a list of resource sets for the imagery 
+            </summary>
+        </member>
+        <member name="T:Infragistics.Controls.Maps.BingResourceSet">
+            <summary>
+            Represents a resource set for the Bing Maps imagery.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.BingResourceSet.#ctor">
+            <summary>
+            Create an instance of the BingResourceSet object
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.BingResourceSet.Resources">
+            <summary>
+            Gets or sets a list of resources for the imagery 
+            </summary>
+        </member>
+        <member name="T:Infragistics.Controls.Maps.ImageryMetadata">
+            <summary>
+            Represents a metadata for the Bing Maps imagery.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.ImageryMetadata.#ctor">
+            <summary>
+            Create an instance of the ImageryMetadata object
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.ImageryMetadata.ImageUrl">
+            <summary>
+            Gets or sets imagery link
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.ImageryMetadata.ImageUrlSubdomains">
+            <summary>
+            Gets or sets imagery link sub domains
+            </summary>
+        </member>
+        <member name="T:Infragistics.Controls.Maps.BingMapsMapImagery">
+            <summary>
+            UI element class used to display BingMapsMap imagery in the XamGeographicMap.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.BingMapsMapImagery.#ctor">
+            <summary>
+            BingMapsMapImagery constructor.
+            </summary>        
+        </member>
+        <member name="M:Infragistics.Controls.Maps.BingMapsMapImagery.CreateView">
+            <summary>
+            Method called to create the View for this GeographicMapImagery.
+            </summary>
+            <returns>The newly created GeographicMapImageryView.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.BingMapsMapImagery.OnViewCreated(Infragistics.Controls.Maps.GeographicMapImageryView)">
+            <summary>
+            Method called after the View has been created for this GeographicMapImagery.
+            </summary>
+            <param name="view">The View which was just created.</param>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.BingMapsMapImagery.IsInitialized">
+            <summary>
+            Gets a status whether the Bing Maps service is initialized.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.BingMapsMapImagery.IsDeferredLoad">
+            <summary>
+            Gets or sets whether the Bing Maps service should be auto-initialized upon valid property values.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.BingMapsMapImagery.IsDeferredLoadProperty">
+            <summary>
+            Identifies the <see cref="P:Infragistics.Controls.Maps.BingMapsMapImagery.IsDeferredLoad"/> dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.BingMapsMapImagery.TilePath">
+            <summary>
+            Gets or sets the map tile image uri.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.BingMapsMapImagery.TilePathProperty">
+            <summary>
+            Identifies the <see cref="P:Infragistics.Controls.Maps.BingMapsMapImagery.TilePath"/> dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.BingMapsMapImagery.SubDomains">
+            <summary>
+            Gets or sets the collection of image uri subdomains.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.BingMapsMapImagery.SubDomainsProperty">
+            <summary>
+            Identifies the <see cref="P:Infragistics.Controls.Maps.BingMapsMapImagery.SubDomains"/> dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.BingMapsMapImagery.ActualTilePath">
+            <summary>
+            Gets or sets the actual map tile image uri.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.BingMapsMapImagery.ActualSubDomains">
+            <summary>
+            Gets or sets the actual collection of image uri subdomains.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.BingMapsMapImagery.BingImageryRestUri">
+            <summary>
+            Gets or sets the Bing Imagery Rest Uri.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.BingMapsMapImagery.ActualBingImageryRestUri">
+            <summary>
+            Gets or sets the Actual Bing Imagery Rest Uri.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.BingMapsMapImagery.CultureName">
+            <summary>
+            Gets or sets the culture name for this tile source.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.BingMapsMapImagery.CultureNameProperty">
+            <summary>
+            Identifies the <see cref="P:Infragistics.Controls.Maps.BingMapsMapImagery.CultureName"/> dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.BingMapsMapImagery.ApiKey">
+            <summary>
+            Gets or sets an API key required by the Bing Maps imagery service.
+            <remarks>This key must be obtained from the http://www.bingmapsportal.com website. </remarks>
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.BingMapsMapImagery.ApiKeyProperty">
+            <summary>
+            Identifies the <see cref="P:Infragistics.Controls.Maps.BingMapsMapImagery.ApiKey"/> dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.BingMapsMapImagery.ImageryStyle">
+            <summary>
+            <para> Gets or sets a map style of the Bing Maps imagery tiles. </para>
+            <para> For example: Aerial, AerialWithLabels, or Road map style. </para>
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.BingMapsMapImagery.ImageryStyleProperty">
+            <summary>
+            Identifies the <see cref="P:Infragistics.Controls.Maps.BingMapsMapImagery.ImageryStyle"/> dependency property.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.BingMapsMapImagery.RequestMapSettings">
+            <summary>
+            Will Connect to the Bing Rest API and retrieve the required TilePath and Subdomains from the service.  This requires a valid API key to already be set.
+            </summary>
+        </member>
+        <member name="T:Infragistics.Controls.Maps.GeographicMapImagery">
+            <summary>
+            Control class used for displaying multi-scale TileSource imagery.  Designed to be used for background imagery in the XamGeographicMap.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicMapImagery.#ctor(Infragistics.Controls.Maps.XamMultiScaleTileSource)">
+            <summary>
+            GeographicMapImagery constructor.
+            </summary>
+            <param name="tileSource">The TileSource which will provide the imagery.</param>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicMapImagery.OnViewCreated(Infragistics.Controls.Maps.GeographicMapImageryView)">
+            <summary>
+            Method called after the View has been created for this GeographicMapImagery.
+            </summary>
+            <param name="view">The View which was just created.</param>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicMapImagery.CreateView">
+            <summary>
+            Method called to create the View for this GeographicMapImagery.
+            </summary>
+            <returns>The newly created GeographicMapImageryView.</returns>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicMapImagery.View">
+            <summary>
+            The View for this GeographicMapImagery.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicMapImagery.OnApplyTemplate">
+            <summary>
+            Method invoked whenever application code or internal processes call ApplyTemplate.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicMapImagery.DeferralHandler">
+            <summary>
+            The deferral handler to use for deferred refreshes.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicMapImagery.OnPropertyUpdated(System.String,System.Object,System.Object)">
+            <summary>
+            Method invoked whenever a property value is changed.
+            </summary>
+            <param name="propertyName">The name of the changed property.</param>
+            <param name="oldValue">The previous value of the changed property.</param>
+            <param name="newValue">The new value of the changed property.</param>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicMapImagery.WindowRectProperty">
+            <summary>
+            Identifies the WindowRect dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicMapImagery.WindowRect">
+            <summary>
+            A rectangle representing the portion of the map imagery currently in view.
+            </summary>
+            <remarks>
+            A rectangle at X=0, Y=0 with a Height and Width of 1 implies the entire plotting area is in view.  A Height and Width of .5 would imply that the view is halfway zoomed in.
+            </remarks>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicMapImagery.GeographicMap">
+            <summary>
+            The XamGeographicMap which is hosting this GeographicMapImagery control.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicMapImagery.GeographicMapProperty">
+            <summary>
+            Identifies the <see cref="P:Infragistics.Controls.Maps.GeographicMapImagery.GeographicMap"/> dependency property.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicMapImagery.OnGeographicMapChanged(Infragistics.Controls.Maps.XamGeographicMap,Infragistics.Controls.Maps.XamGeographicMap)">
+            <summary>
+            GeographicMapProperty property changed handler.
+            </summary>
+            <param name="oldValue">The old value.</param>
+            <param name="newValue">The new value.</param>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicMapImagery.ClearTileCache">
+            <summary>
+            Removes all cached tile Imagery from the 
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicMapImagery.TileSource">
+            <summary>
+            The TileSource of background images.
+            </summary>
+        </member>
+        <member name="E:Infragistics.Controls.Maps.GeographicMapImagery.PropertyChanged">
+            <summary>
+            Event raised when a property value changes.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicMapImagery.ArrangeOverride(System.Windows.Size)">
+            <summary>
+            Positions child elements and determines a size for this element.
+            </summary>
+            <param name="finalSize">The size available to this element for arranging its children.</param>
+            <returns>The <see cref="T:System.Windows.Size"/> used by this element to arrange its children.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicMapImagery.Refresh(System.Windows.Size)">
+            <summary>
+            Refreshes the view.
+            </summary>
+            <param name="finalSize">The total space available for GeographicMapImagery graphics.</param>
+            <returns>The total space used by GeographicMapImagery graphics.</returns>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicMapImagery.CacheSize">
+            <summary>
+            The maximum number of image tiles to keep in the image cache.
+            </summary>
+            <remarks>
+            The image cache is a simple least-recently-used cache.  Setting this property to a new value will clear the image cache.
+            </remarks>
+        </member>
+        <member name="T:Infragistics.Controls.Maps.OpenStreetMapImagery">
+            <summary>
+            UI element class used to display OpenStreetMap imagery in the XamGeographicMap.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.OpenStreetMapImagery.#ctor">
+            <summary>
+            OpenStreetMapImagery constructor.
+            </summary>        
+        </member>
+        <member name="P:Infragistics.Controls.Maps.OpenStreetMapImagery.TilePath">
+            <summary>
+            Gets or sets the tile path URL.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.OpenStreetMapImagery.TilePathProperty">
+            <summary>
+            Identifies the <see cref="P:Infragistics.Controls.Maps.OpenStreetMapImagery.TilePath"/> dependency property.
+            </summary>
+        </member>
+        <member name="T:Infragistics.Controls.Maps.GeographicHighDensityScatterSeries">
+            <summary>
+            Series class for a geographic map with points marked at given locations.
+            </summary>
+            <remarks>
+            This is the geographic equivalent of a HighDensityScatterSeries.
+            </remarks>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicHighDensityScatterSeries.#ctor">
+            <summary>
+            GeographicHighDensityScatterSeries constructor.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicHighDensityScatterSeries.CreateView">
+            <summary>
+            Creates the view object for this series.
+            </summary>
+            <returns>A GeographicHighDensityScatterSeriesView.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicHighDensityScatterSeries.OnViewCreated(Infragistics.Controls.Charts.SeriesView)">
+            <summary>
+            Called when the view for the series is created.
+            </summary>
+            <param name="view">The created view.</param>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicHighDensityScatterSeries.CreateSeries">
+            <summary>
+            Creates the Series to be hosted by this GeographicMapSeriesHost.
+            </summary>
+            <returns>The series to be hosted.</returns>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicHighDensityScatterSeries.LatitudeMemberPathProperty">
+            <summary>
+            Identifies the LatitudeMemberPath dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicHighDensityScatterSeries.LatitudeMemberPath">
+            <summary>
+            The name of the property of ItemsSource items which contains the latitude coordinate of the symbol.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicHighDensityScatterSeries.LongitudeMemberPathProperty">
+            <summary>
+            Identifies the LongitudeMemberPath dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicHighDensityScatterSeries.LongitudeMemberPath">
+            <summary>
+            The name of the property of ItemsSource items which contains the longitude coordinate of the symbol.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicHighDensityScatterSeries.UseBruteForce">
+            <summary>
+            Gets or sets the whether to use use brute force mode.
+            <para>
+            This is a dependency property.
+            </para>
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicHighDensityScatterSeries.UseBruteForceProperty">
+            <summary>
+            Identifies the UseBruteForce dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicHighDensityScatterSeries.ProgressiveLoad">
+            <summary>
+            Gets or sets the whether to progressively load the data into the chart.
+            <para>
+            This is a dependency property.
+            </para>
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicHighDensityScatterSeries.ProgressiveLoadProperty">
+            <summary>
+            Identifies the ProgressiveLoad dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicHighDensityScatterSeries.MouseOverEnabled">
+            <summary>
+            Gets or sets the whether the chart reacts to mouse move events.
+            <para>
+            This is a dependency property.
+            </para>
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicHighDensityScatterSeries.MouseOverEnabledProperty">
+            <summary>
+            Identifies the MouseOverEnabled dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicHighDensityScatterSeries.HeatMinimum">
+            <summary>
+            Gets or sets the density value that maps to the minimum heat color.
+            <para>
+            This is a dependency property.
+            </para>
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicHighDensityScatterSeries.HeatMinimumProperty">
+            <summary>
+            Identifies the HeatMinimum dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicHighDensityScatterSeries.HeatMaximum">
+            <summary>
+            Gets or sets the value that maps to the maximum heat color.
+            <para>
+            This is a dependency property.
+            </para>
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicHighDensityScatterSeries.HeatMaximumProperty">
+            <summary>
+            Identifies the HeatMaximum dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicHighDensityScatterSeries.HeatMinimumColor">
+            <summary>
+            Gets or sets the color to use for the minimum end of the scale.
+            <para>
+            This is a dependency property.
+            </para>
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicHighDensityScatterSeries.HeatMinimumColorProperty">
+            <summary>
+            Identifies the HeatMinimumColor dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicHighDensityScatterSeries.HeatMaximumColor">
+            <summary>
+            Gets or sets the color to use for the maximum end of the scale.
+            <para>
+            This is a dependency property.
+            </para>
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicHighDensityScatterSeries.HeatMaximumColorProperty">
+            <summary>
+            Identifies the HeatMinimumColor dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicHighDensityScatterSeries.PointExtent">
+            <summary>
+            Gets or sets the the pixel extent of the square data points that are rendered.
+            <para>
+            This is a dependency property.
+            </para>
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicHighDensityScatterSeries.PointExtentProperty">
+            <summary>
+            Identifies the PointExtent dependency property.
+            </summary>
+        </member>
+        <member name="E:Infragistics.Controls.Maps.GeographicHighDensityScatterSeries.ProgressiveLoadStatusChanged">
+            <summary>
+            Raised when the progressive loading state of the series has changed.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicHighDensityScatterSeries.ProgressiveStatus">
+            <summary>
+            Represents the current status of the progressive load of the series. It will range from 0 to 100, where 100 is fully loaded.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicHighDensityScatterSeries.PropertyUpdatedOverride(System.Object,System.String,System.Object,System.Object)">
+            <summary>
+            When overriden in a derived class, gets called whenever a property value is updated
+            on the series or owning chart. Gives the series a chance to respond to the various property udpates.
+            </summary>
+            <param name="sender">The object being updated.</param>
+            <param name="propertyName">The name of the property being updated.</param>
+            <param name="oldValue">The old value of the property.</param>
+            <param name="newValue">The new value of the property.</param>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicHighDensityScatterSeries.UseDeferredMouseEnterAndLeave">
+            <summary>
+            Gets or sets a value indicating whether to use the deferred mouse enter and leave or not.
+            </summary>
+        </member>
+        <member name="T:Infragistics.Controls.Maps.GeographicPolylineSeries">
+            <summary>
+            Series class used for displaying multiple polylines, in a geographic context, for datasources which contain multiple lists of points.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicPolylineSeries.#ctor">
+            <summary>
+            GeographicPolylineSeries constructor.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicPolylineSeries.OnViewCreated(Infragistics.Controls.Charts.SeriesView)">
+            <summary>
+            Called when the view for the series is created.
+            </summary>
+            <param name="view">The created view.</param>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicPolylineSeries.ShapeStyleSelectorProperty">
+            <summary>
+            Identifies the ShapeStyleSelector dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicPolylineSeries.ShapeStyleSelector">
+            <summary>
+            The StyleSelector which is used to select a style for each Shape.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicPolylineSeries.ShapeStyleProperty">
+            <summary>
+            Identifies the ShapeStyle dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicPolylineSeries.ShapeStyle">
+            <summary>
+            The default style to apply to all Shapes in the series.
+            </summary>     
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicPolylineSeries.CreateSeries">
+            <summary>
+            Creates the Series to be hosted by this GeographicMapSeriesHost.
+            </summary>
+            <returns>The series to be hosted.</returns>
+        </member>
+        <member name="T:Infragistics.Controls.Maps.GeographicProportionalSymbolSeries">
+            <summary>
+            Series class for a geographic map with points marked at given locations.
+            </summary>
+            <remarks>
+            This is the geographic equivalent of a ScatterSeries.
+            </remarks>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicProportionalSymbolSeries.#ctor">
+            <summary>
+            GeographicSymbolSeries constructor.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicProportionalSymbolSeries.CreateView">
+            <summary>
+            Creates the view object for this series.
+            </summary>
+            <returns>A GeographicProportionalSizeSeriesView.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicProportionalSymbolSeries.OnViewCreated(Infragistics.Controls.Charts.SeriesView)">
+            <summary>
+            Called when the view for the series is created.
+            </summary>
+            <param name="view">The created view.</param>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicProportionalSymbolSeries.CreateSeries">
+            <summary>
+            Creates the Series to be hosted by this GeographicMapSeriesHost.
+            </summary>
+            <returns>The series to be hosted.</returns>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicProportionalSymbolSeries.LatitudeMemberPathProperty">
+            <summary>
+            Identifies the LatitudeMemberPath dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicProportionalSymbolSeries.LatitudeMemberPath">
+            <summary>
+            The name of the property of ItemsSource items which contains the latitude coordinate of the symbol.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicProportionalSymbolSeries.LongitudeMemberPathProperty">
+            <summary>
+            Identifies the LongitudeMemberPath dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicProportionalSymbolSeries.LongitudeMemberPath">
+            <summary>
+            The name of the property of ItemsSource items which contains the longitude coordinate of the symbol.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicProportionalSymbolSeries.MarkerTypeProperty">
+            <summary>
+            Identifies the MarkerType dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicProportionalSymbolSeries.MarkerType">
+            <summary>
+            Gets or sets the marker type for the current series object.
+            </summary>
+            <remarks>
+            If the MarkerTemplate property is set, the setting of the MarkerType property will be ignored.
+            </remarks>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicProportionalSymbolSeries.MarkerTemplateProperty">
+            <summary>
+            Identifies the MarkerTemplate dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicProportionalSymbolSeries.MarkerTemplate">
+            <summary>
+            Gets or sets the MarkerTemplate for the current series object.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicProportionalSymbolSeries.MarkerBrush">
+            <summary>
+            Gets or sets the brush that specifies how the current series object's marker interiors are painted.
+            <para>
+            This is a dependency property.
+            </para>
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicProportionalSymbolSeries.MarkerBrushProperty">
+            <summary>
+            Identifies the MarkerBrush dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicProportionalSymbolSeries.MarkerOutline">
+            <summary>
+            Gets or sets the brush that specifies how the current series object's marker outlines are painted.
+            <para>
+            This is a dependency property.
+            </para>
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicProportionalSymbolSeries.MarkerOutlineProperty">
+            <summary>
+            Identifies the MarkerOutline dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicProportionalSymbolSeries.MaximumMarkers">
+            <summary>
+            Gets or sets the maximum number of markerItems displayed by the current series.
+            <para>If more than the specified number of markerItems are visible, the series will automatically
+            choose a representative set.</para>
+            <para>This is a dependency property.</para>
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicProportionalSymbolSeries.MaximumMarkersProperty">
+            <summary>
+            Identifies the MaximumMarkers dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicProportionalSymbolSeries.RadiusMemberPath">
+            <summary>
+            Gets or sets the radius mapping property for the current series object.
+            <para>
+            This is a dependency property.
+            </para>
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicProportionalSymbolSeries.RadiusMemberPathProperty">
+            <summary>
+            Identifies the RadiusMemberPath dependency property.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicProportionalSymbolSeries.RadiusScaleProperty">
+            <summary>
+            Identifies the RadiusScale dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicProportionalSymbolSeries.RadiusScale">
+            <summary>
+            Gets or sets the radius size scale for the bubbles.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicProportionalSymbolSeries.LabelMemberPathProperty">
+            <summary>
+            Identifies the LabelMemberPath dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicProportionalSymbolSeries.LabelMemberPath">
+            <summary>
+            Gets or sets the Label mapping property for the current series object.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicProportionalSymbolSeries.FillMemberPathProperty">
+            <summary>
+            Identifies the FillMemberPath dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicProportionalSymbolSeries.FillMemberPath">
+            <summary>
+            Gets or sets the fill mapping property for the current series object.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicProportionalSymbolSeries.FillScaleProperty">
+            <summary>
+            Identifies the FillScale dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicProportionalSymbolSeries.FillScale">
+            <summary>
+            Gets or sets the brush scale for the marker brush.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicProportionalSymbolSeries.PropertyUpdatedOverride(System.Object,System.String,System.Object,System.Object)">
+            <summary>
+            When overridden in a derived class, gets called whenever a property value is updated
+            on the series or owning chart. Gives the series a chance to respond to the various property updates.
+            </summary>
+            <param name="sender">The object being updated.</param>
+            <param name="propertyName">The name of the property being updated.</param>
+            <param name="oldValue">The old value of the property.</param>
+            <param name="newValue">The new value of the property.</param>
+        </member>
+        <member name="T:Infragistics.Controls.Maps.GeographicScatterAreaSeries">
+            <summary>
+            Series class which draws a colored 2D surface, in a geographic context, based on a triangulation of XY data with numeric values assigned to each point.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicScatterAreaSeries.#ctor">
+            <summary>
+            GeographicScatterAreaSeries constructor.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicScatterAreaSeries.ColorMemberPathProperty">
+            <summary>
+            Identifies the ColorMemberPath dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicScatterAreaSeries.ColorMemberPath">
+            <summary>
+            The name of the property on each data item containing a numeric value which can be converted to a color by the ColorScale.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicScatterAreaSeries.ColorScale">
+            <summary>
+            The ColorScale used to resolve the color values of points in the series.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicScatterAreaSeries.OnApplyTemplate">
+            <summary>
+            Method invoked whenever application code or internal processes call ApplyTemplate.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicScatterAreaSeries.CreateSeries">
+            <summary>
+            Creates the Series to be hosted by this GeographicMapSeriesHost.
+            </summary>
+            <returns>The series to be hosted.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicScatterAreaSeries.CreateView">
+            <summary>
+            Creates the view object for this series.
+            </summary>
+            <returns>A GeographicScatterAreaSeriesView.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicScatterAreaSeries.OnViewCreated(Infragistics.Controls.Charts.SeriesView)">
+            <summary>
+            Called when the view for the series is created.
+            </summary>
+            <param name="view">The created view.</param>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicScatterAreaSeries.PropertyUpdatedOverride(System.Object,System.String,System.Object,System.Object)">
+            <summary>
+            When overriden in a derived class, gets called whenever a property value is updated
+            on the series or owning chart. Gives the series a chance to respond to the various property udpates.
+            </summary>
+            <param name="sender">The object being updated.</param>
+            <param name="propertyName">The name of the property being updated.</param>
+            <param name="oldValue">The old value of the property.</param>
+            <param name="newValue">The new value of the property.</param>
+        </member>
+        <member name="E:Infragistics.Controls.Maps.GeographicScatterAreaSeries.TriangulationStatusChanged">
+            <summary>
+            Raised when the status of an ongoing Triangulation has changed.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicScatterAreaSeries.UseDeferredMouseEnterAndLeave">
+            <summary>
+            Gets or sets a value indicating whether to use the deferred mouse enter and leave or not.
+            </summary>
+        </member>
+        <member name="T:Infragistics.Controls.Maps.GeographicShapeSeriesBase">
+            <summary>
+            Base class for series which render polygons on a map.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicShapeSeriesBase.CreateView">
+            <summary>
+            Creates the view object for this series.
+            </summary>
+            <returns>A GeographicShapeSeriesBaseView.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicShapeSeriesBase.OnViewCreated(Infragistics.Controls.Charts.SeriesView)">
+            <summary>
+            Called when the view for the series is created.
+            </summary>
+            <param name="view">The created view.</param>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicShapeSeriesBase.ShapeMemberPathProperty">
+            <summary>
+            Identifies the ShapeMemberPath property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicShapeSeriesBase.ShapeMemberPath">
+            <summary>
+            The name of the property on ItemsSource items which, for each shape, contains a list of points to be converted to a polygon.
+            </summary>
+            <remarks>
+            To be consistent with the Shapefile technical description, it is expected that each list of points is defined as an IEnumerable of IEnumerable of Point, or in other words, a list of lists of points.
+            </remarks>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicShapeSeriesBase.PropertyUpdatedOverride(System.Object,System.String,System.Object,System.Object)">
+            <summary>
+            When overridden in a derived class, gets called whenever a property value is updated
+            on the series or owning chart. Gives the series a chance to respond to the various property updates.
+            </summary>
+            <param name="sender">The object being updated.</param>
+            <param name="propertyName">The name of the property being updated.</param>
+            <param name="oldValue">The old value of the property.</param>
+            <param name="newValue">The new value of the property.</param>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicShapeSeriesBase.ShapeFilterResolutionProperty">
+            <summary>
+            Identifies the ShapeFilterResolution dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicShapeSeriesBase.ShapeFilterResolution">
+            <summary>
+            The resolution at which to filter out shapes in the series.  For example, if the ShapeFilterResolution is set to 3, then elements with a bounding rectangle smaller than 3 X 3 pixels will be filtered out.
+            </summary>
+            <remarks>
+            In the case of GeographicPolylineSeries, the resolution is compared to either dimension, rather than both.  In other words, a polyline will not be filtered if its height or its width exceeds the value of this property.  Whereas with a ShapeSeries, both the height and the width must exceed the value of this property.
+            </remarks>
+        </member>
+        <member name="T:Infragistics.Controls.Maps.GeographicXYTriangulatingSeries">
+            <summary>
+            Base class for geographic series which triangulate XY data prior to rendering.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicXYTriangulatingSeries.CreateView">
+            <summary>
+            Creates the view object for this series.
+            </summary>
+            <returns>A GeographicXYTriangulatingSeriesView.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicXYTriangulatingSeries.OnViewCreated(Infragistics.Controls.Charts.SeriesView)">
+            <summary>
+            Called when the view for the series is created.
+            </summary>
+            <param name="view">The created view.</param>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicXYTriangulatingSeries.LongitudeMemberPathProperty">
+            <summary>
+            Identifies the LongitudeMemberPath dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicXYTriangulatingSeries.LongitudeMemberPath">
+            <summary>
+            The name of the property from which to extract the Longitude for each item in the ItemsSource.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicXYTriangulatingSeries.LatitudeMemberPathProperty">
+            <summary>
+            Identifies the LatitudeMemberPath dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicXYTriangulatingSeries.LatitudeMemberPath">
+            <summary>
+            The name of the property from which to extract the Latitude for each item in the ItemsSource.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicXYTriangulatingSeries.TrianglesSourceProperty">
+            <summary>
+            Identifies the TrianglesSource dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicXYTriangulatingSeries.TrianglesSource">
+            <summary>
+            The source of triangulation data.
+            </summary>
+            <remarks>This property is optional.  If it is left as null, the triangulation will be created based on the items in the ItemsSource.  Triangulation is a demanding operation, so the runtime performance will be better when specifying a TriangulationSource, especially when a large number of data items are present.</remarks>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicXYTriangulatingSeries.TriangleVertexMemberPath1Property">
+            <summary>
+            Identifies the TriangleVertexMemberPath1 dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicXYTriangulatingSeries.TriangleVertexMemberPath1">
+            <summary>
+            The name of the property of the TrianglesSource items which, for each triangle, contains the index of the first vertex point in the ItemsSource.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicXYTriangulatingSeries.TriangleVertexMemberPath2Property">
+            <summary>
+            Identifies the TriangleVertexMemberPath2 dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicXYTriangulatingSeries.TriangleVertexMemberPath2">
+            <summary>
+            The name of the property of the TrianglesSource items which, for each triangle, contains the index of the second vertex point in the ItemsSource.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicXYTriangulatingSeries.TriangleVertexMemberPath3Property">
+            <summary>
+            Identifies the TriangleVertexMemberPath3 dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicXYTriangulatingSeries.TriangleVertexMemberPath3">
+            <summary>
+            The name of the property of the TrianglesSource items which, for each triangle, contains the index of the third vertex point in the ItemsSource.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicXYTriangulatingSeries.PropertyUpdatedOverride(System.Object,System.String,System.Object,System.Object)">
+            <summary>
+            When overriden in a derived class, gets called whenever a property value is updated
+            on the series or owning chart. Gives the series a chance to respond to the various property udpates.
+            </summary>
+            <param name="sender">The object being updated.</param>
+            <param name="propertyName">The name of the property being updated.</param>
+            <param name="oldValue">The old value of the property.</param>
+            <param name="newValue">The new value of the property.</param>
+        </member>
+        <member name="T:Infragistics.Controls.Maps.GeographicContourLineSeries">
+            <summary>
+            Represents a class for Geographic Contour Series displayed on a map.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicContourLineSeries.#ctor">
+            <summary>
+            GeographicContourLineSeries constructor.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicContourLineSeries.OnHostedSeriesUpdated">
+            <summary>
+            Called whenever the value of the HostedSeries property has changed.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicContourLineSeries.CreateSeries">
+            <summary>
+            Creates the Series to be hosted by this GeographicMapSeriesHost.
+            </summary>
+            <returns>The series to be hosted.</returns>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicContourLineSeries.ValueMemberPathProperty">
+            <summary>
+            Identifies the ValueMemberPath dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicContourLineSeries.ValueMemberPath">
+            <summary>
+            The name of the property from which to retrieve the numeric values from the ItemsSource items.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicContourLineSeries.FillScaleProperty">
+            <summary>
+            Identifies the FillScale dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicContourLineSeries.FillScale">
+            <summary>
+            The ValueBrushScale to use when determining Brushes for each contour line, based on the values found in ValueMemberPath.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicContourLineSeries.CreateView">
+            <summary>
+            Creates the view object for this series.
+            </summary>
+            <returns>A GeographicScatterAreaSeriesView.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicContourLineSeries.OnViewCreated(Infragistics.Controls.Charts.SeriesView)">
+            <summary>
+            Called when the view for the series is created.
+            </summary>
+            <param name="view">The created view.</param>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicContourLineSeries.ValueResolverProperty">
+            <summary>
+            Identifies the ValueResolver dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicContourLineSeries.ValueResolver">
+            <summary>
+            The ContourValueResolver used to determine the numeric values of contours.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicContourLineSeries.PropertyUpdatedOverride(System.Object,System.String,System.Object,System.Object)">
+            <summary>
+            When overridden in a derived class, gets called whenever a property value is updated
+            on the series or owning chart. Gives the series a chance to respond to the various property udpates.
+            </summary>
+            <param name="sender">The object being updated.</param>
+            <param name="propertyName">The name of the property being updated.</param>
+            <param name="oldValue">The old value of the property.</param>
+            <param name="newValue">The new value of the property.</param>
+        </member>
+        <member name="E:Infragistics.Controls.Maps.GeographicContourLineSeries.TriangulationStatusChanged">
+            <summary>
+            Raised when the status of an ongoing Triangulation has changed.
+            </summary>
+        </member>
+        <member name="T:Infragistics.Controls.Maps.GeographicMapSeriesHost">
+            <summary>
+            Base class for hosting chart series in a XamGeographicMap.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicMapSeriesHost.#ctor">
+            <summary>
+            GeographicMapSeriesHost constructor.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicMapSeriesHost.IsGeographic">
+            <summary>
+            Checks if this control is geographic coordiante system
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicMapSeriesHost.ResolveHostedSeries">
+            <summary>
+            Resolves this series to its hosted series
+            </summary> 
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicMapSeriesHost.HostedSeries">
+            <summary>
+            The chart series which is being hosted by this map series.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicMapSeriesHost.OnHostedSeriesUpdated">
+            <summary>
+            Called whenever the value of the HostedSeries property has changed.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicMapSeriesHost.GetItem(System.Windows.Point)">
+            <summary>
+            Gets the item that is the best match for the specified world coordinates.
+            </summary>
+            <param name="world">The world coordinates to use.</param>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicMapSeriesHost.CreateSeries">
+            <summary>
+            Creates the Series to be hosted by this GeographicMapSeriesHost.
+            </summary>
+            <returns>The series to be hosted.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicMapSeriesHost.CreateView">
+            <summary>
+            Creates the view object for this series.
+            </summary>
+            <returns>A HostedSeriesView.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicMapSeriesHost.OnViewCreated(Infragistics.Controls.Charts.SeriesView)">
+            <summary>
+            Called when the view for the series is created.
+            </summary>
+            <param name="view">The created view.</param>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicMapSeriesHost.VisibleFromScaleProperty">
+            <summary>
+            Identifies the VisibleFromScale dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicMapSeriesHost.VisibleFromScale">
+            <summary>
+            The minimum scale at which this series becomes visible.
+            </summary>
+            <remarks>
+            The default value for this property is 1.0, which means the series will always be visible.  At a VisibleFromScale setting of 0.0, the series will never be visible.  At a VisibleFromScale setting of 0.5, the series will be visible as long as the map is zoomed in to at least 200%.
+            </remarks>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicMapSeriesHost.PropertyUpdatedOverride(System.Object,System.String,System.Object,System.Object)">
+            <summary>
+            When overridden in a derived class, gets called whenever a property value is updated
+            on the series or owning chart. Gives the series a chance to respond to the various property updates.
+            </summary>
+            <param name="sender">The object being updated.</param>
+            <param name="propertyName">The name of the property being updated.</param>
+            <param name="oldValue">The old value of the property.</param>
+            <param name="newValue">The new value of the property.</param>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicMapSeriesHost.RenderSeries(System.Boolean)">
+            <summary>
+            Renders the series.
+            </summary>
+            <param name="animate">True if the change should be animated.</param>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicMapSeriesHost.RenderAlternateView(System.Windows.Rect,System.Windows.Rect,Infragistics.Controls.Charts.RenderSurface,System.String,System.Double)">
+            <summary>
+            Renders an alternate view for of this series
+            </summary>
+            <param name="viewportRect">The viewport to use.</param>
+            <param name="windowRect">The current window, a rectangle bounded between 0 and 1 representing the pan and zoom position.</param>
+            <param name="surface">The render target.</param>
+            <param name="viewIdentifier">String key to use for this view target</param>
+            <param name="effectiveScalingRatio">The effective scaling ratio.</param>
+        </member>
+        <member name="T:Infragistics.Controls.Maps.GeographicShapeSeries">
+            <summary>
+            Series class which renders polygons as Paths, in a geographic context, based on lists of points in the ItemsSource.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicShapeSeries.#ctor">
+            <summary>
+            GeographicShapeSeries constructor.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicShapeSeries.CreateView">
+            <summary>
+            Creates the view object for this series.
+            </summary>
+            <returns>A GeographicShapeSeriesView.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicShapeSeries.OnViewCreated(Infragistics.Controls.Charts.SeriesView)">
+            <summary>
+            Called when the view for the series is created.
+            </summary>
+            <param name="view">The created view.</param>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicShapeSeries.CreateSeries">
+            <summary>
+            Creates the Series to be hosted by this GeographicMapSeriesHost.
+            </summary>
+            <returns>The series to be hosted.</returns>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicShapeSeries.ShapeStyleSelectorProperty">
+            <summary>
+            Identifies the ShapeStyleSelector dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicShapeSeries.ShapeStyleSelector">
+            <summary>
+            The StyleSelector which is used to select a style for each Shape.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicShapeSeries.ShapeStyleProperty">
+            <summary>
+            Identifies the ShapeStyle dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicShapeSeries.ShapeStyle">
+            <summary>
+            The default style to apply to all Shapes in the series.
+            </summary>     
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicShapeSeries.MarkerType">
+            <summary>
+            Gets or sets the marker type for the current series object.
+            </summary>
+            <remarks>
+            If the MarkerTemplate property is set, the setting of the MarkerType property will be ignored.
+            </remarks>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicShapeSeries.MarkerTypeProperty">
+            <summary>
+            Identifies the MarkerType dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicShapeSeries.MarkerTemplate">
+            <summary>
+            Gets or sets the MarkerTemplate for the current series object.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicShapeSeries.MarkerTemplateProperty">
+            <summary>
+            Identifies the MarkerTemplate dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicShapeSeries.MarkerBrush">
+            <summary>
+            Gets or sets the brush that specifies how the current series object's marker interiors are painted.
+            <para>
+            This is a dependency property.
+            </para>
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicShapeSeries.MarkerBrushProperty">
+            <summary>
+            Identifies the MarkerBrush dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicShapeSeries.MarkerOutline">
+            <summary>
+            Gets or sets the brush that specifies how the current series object's marker outlines are painted.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicShapeSeries.MarkerOutlineProperty">
+            <summary>
+            Identifies the MarkerOutline dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicShapeSeries.MarkerStyle">
+            <summary>
+            Gets or sets the Style to be used for the markers.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicShapeSeries.MarkerStyleProperty">
+            <summary>
+            Identifies the MarkerStyle dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicShapeSeries.MarkerCollisionAvoidance">
+            <summary>
+            The desired behavior for markers in this series which are placed too close together for the current view, resulting in a collision.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicShapeSeries.MarkerCollisionAvoidanceProperty">
+            <summary>
+            Identifies the MarkerCollisionAvoidance dependency property.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicShapeSeries.PropertyUpdatedOverride(System.Object,System.String,System.Object,System.Object)">
+            <summary>
+            When overridden in a derived class, gets called whenever a property value is updated
+            on the series or owning chart. Gives the series a chance to respond to the various property updates.
+            </summary>
+            <param name="sender">The object being updated.</param>
+            <param name="propertyName">The name of the property being updated.</param>
+            <param name="oldValue">The old value of the property.</param>
+            <param name="newValue">The new value of the property.</param>
+        </member>
+        <member name="T:Infragistics.Controls.Maps.GeographicSymbolSeries">
+            <summary>
+            Series class for a geographic map with points marked at given locations.
+            </summary>
+            <remarks>
+            This is the geographic equivalent of a ScatterSeries.
+            </remarks>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicSymbolSeries.#ctor">
+            <summary>
+            GeographicSymbolSeries constructor.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicSymbolSeries.CreateView">
+            <summary>
+            Creates the view object for this series.
+            </summary>
+            <returns>A GeographicSymbolSeriesView.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicSymbolSeries.OnViewCreated(Infragistics.Controls.Charts.SeriesView)">
+            <summary>
+            Called when the view for the series is created.
+            </summary>
+            <param name="view">The created view.</param>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicSymbolSeries.CreateSeries">
+            <summary>
+            Creates the Series to be hosted by this GeographicMapSeriesHost.
+            </summary>
+            <returns>The series to be hosted.</returns>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicSymbolSeries.LatitudeMemberPathProperty">
+            <summary>
+            Identifies the LatitudeMemberPath dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicSymbolSeries.LatitudeMemberPath">
+            <summary>
+            The name of the property of ItemsSource items which contains the latitude coordinate of the symbol.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicSymbolSeries.LongitudeMemberPathProperty">
+            <summary>
+            Identifies the LongitudeMemberPath dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicSymbolSeries.LongitudeMemberPath">
+            <summary>
+            The name of the property of ItemsSource items which contains the longitude coordinate of the symbol.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicSymbolSeries.MarkerTypeProperty">
+            <summary>
+            Identifies the MarkerType dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicSymbolSeries.MarkerType">
+            <summary>
+            Gets or sets the marker type for the current series object.
+            </summary>
+            <remarks>
+            If the MarkerTemplate property is set, the setting of the MarkerType property will be ignored.
+            </remarks>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicSymbolSeries.MarkerTemplateProperty">
+            <summary>
+            Identifies the MarkerTemplate dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicSymbolSeries.MarkerCollisionAvoidance">
+            <summary>
+            The desired behavior for markers in this series which are placed too close together for the current view, resulting in a collision.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicSymbolSeries.MarkerCollisionAvoidanceProperty">
+            <summary>
+            Identifies the MarkerCollisionAvoidance dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicSymbolSeries.MarkerTemplate">
+            <summary>
+            Gets or sets the MarkerTemplate for the current series object.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicSymbolSeries.MarkerBrush">
+            <summary>
+            Gets or sets the brush that specifies how the current series object's marker interiors are painted.
+            <para>
+            This is a dependency property.
+            </para>
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicSymbolSeries.MarkerBrushProperty">
+            <summary>
+            Identifies the MarkerBrush dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicSymbolSeries.MarkerOutline">
+            <summary>
+            Gets or sets the brush that specifies how the current series object's marker outlines are painted.
+            <para>
+            This is a dependency property.
+            </para>
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicSymbolSeries.MarkerOutlineProperty">
+            <summary>
+            Identifies the MarkerOutline dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicSymbolSeries.MaximumMarkers">
+            <summary>
+            Gets or sets the maximum number of markerItems displayed by the current series.
+            <para>If more than the specified number of markerItems are visible, the series will automatically
+            choose a representative set.</para>
+            <para>This is a dependency property.</para>
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicSymbolSeries.MaximumMarkersProperty">
+            <summary>
+            Identifies the MaximumMarkers dependency property.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicSymbolSeries.PropertyUpdatedOverride(System.Object,System.String,System.Object,System.Object)">
+            <summary>
+            When overridden in a derived class, gets called whenever a property value is updated
+            on the series or owning chart. Gives the series a chance to respond to the various property updates.
+            </summary>
+            <param name="sender">The object being updated.</param>
+            <param name="propertyName">The name of the property being updated.</param>
+            <param name="oldValue">The old value of the property.</param>
+            <param name="newValue">The new value of the property.</param>
+        </member>
+        <member name="T:Infragistics.Controls.Maps.XamGeographicMap">
+            <summary>
+            Represents the Infragistics XamGeographicMap control.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.XamGeographicMap.#ctor">
+            <summary>
+            XamGeographicMap constructor.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.XamGeographicMap.#cctor">
+            <summary>
+            Static constructor for the <see cref="T:Infragistics.Controls.Maps.XamGeographicMap"/> class.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.XamGeographicMap.IsZoomingHorizontallyEnabled">
+            <summary>
+            Gets whether or not horizontal zooming is enabled on a map control
+            </summary> 
+        </member>
+        <member name="M:Infragistics.Controls.Maps.XamGeographicMap.IsZoomingVerticallyEnabled">
+            <summary>
+            Gets whether or not vertical zooming is enabled on a map control
+            </summary> 
+        </member>
+        <member name="P:Infragistics.Controls.Maps.XamGeographicMap.Zoomable">
+            <summary>
+            Gets or sets zoomability of the current control
+            <para> This is a dependency property. </para>
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.XamGeographicMap.ZoomableProperty">
+            <summary>
+            Identifies the Zoomable dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.XamGeographicMap.WorldRect">
+            <summary>
+            Gets or sets the world bounding rectangle.
+            </summary>        
+        </member>
+        <member name="F:Infragistics.Controls.Maps.XamGeographicMap.WorldRectProperty">
+            <summary>
+            Identifies the <see cref="P:Infragistics.Controls.Maps.XamGeographicMap.WorldRect"/> dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.XamGeographicMap.ActualWorldRect">
+            <summary>
+            Gets the actual value of the WorldRect.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.XamGeographicMap.PadGeographicRect(System.Windows.Rect)">
+            <summary>
+            Adds padding to the Top and Bottom or to the Left and Right of the input Rect, then returns the result.
+            The resulting Rect has the same aspect ratio as the default WorldRect.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.XamGeographicMap.BackgroundContent">
+            <summary>
+            A UIElement to display behind all series, inside the viewport of the XamGeographicMap control.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.XamGeographicMap.XAxis">
+            <summary>
+            The X-axis for this XamGeographicMap.
+            </summary>
+            <remarks>Under normal circumstances, this property should not be set in application code.  By default, it will be set to a numeric axis with a spherical mercator scaler.</remarks>        
+        </member>
+        <member name="P:Infragistics.Controls.Maps.XamGeographicMap.YAxis">
+            <summary>
+            The Y-axis for this XamGeographicMap.
+            </summary>
+            <remarks>Under normal circumstances, this property should not be set in application code.  By default, it will be set to a numeric axis with a spherical mercator scaler.</remarks>        
+        </member>
+        <member name="M:Infragistics.Controls.Maps.XamGeographicMap.GetZoomRectFromGeoRect(System.Windows.Rect)">
+            <summary>
+            Given the current plot area of the control and a geographic region, get the WindowRect that would encompass that geographic region.
+            </summary>
+            <param name="geographic">The geographic area.</param>
+            <returns>The window zoom area.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.XamGeographicMap.GetZoomFromGeographic(System.Windows.Rect)">
+            <summary>
+            Given the current plot area of the control and a geographic region, get the WindowRect that would encompass that geographic region.
+            </summary>
+            <param name="geographic">The geographic area.</param>
+            <returns>The window zoom area.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.XamGeographicMap.GetZoomFromGeographic(System.Windows.Point,System.Windows.Point)">
+            <summary>
+            Given the current plot area of the control and a geographic region, get the WindowRect that would encompass that geographic region.
+            </summary>
+            <param name="northWest">The north-west point of the geographic region.</param>
+            <param name="southEast">The south-east point of the geographic region.</param>
+            <returns>The window zoom.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.XamGeographicMap.GetGeographicFromZoom(System.Windows.Rect)">
+            <summary>
+            Given a WindowRect and the current plot area, get the geographic region represented by that WindowRect.
+            </summary>
+            <param name="windowRect">The zoom area.</param>
+            <returns>The geographic area.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.XamGeographicMap.GetGeographicPoint(System.Windows.Point)">
+            <summary>
+            Convert a window coordinate to a geographic coordinate.
+            </summary>
+            <param name="windowCoordinate">A window coordinate</param>
+            <returns>The corresponding geographic coordinate</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.XamGeographicMap.GetWindowPoint(System.Windows.Point)">
+            <summary>
+            Convert a geographic coordinate to a window coordinate.
+            </summary>
+            <param name="geographicCoordinate">A geographic coordinate</param>
+            <returns>The corresponding window coordinate</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.XamGeographicMap.ClearTileCache">
+            <summary>
+            Removes all cached tile images from the map imagery assigned to the map's background content.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.XamGeographicMap.GetMarkerBrushByIndex(System.Int32)">
+            <summary>
+            Gets the appropriate marker fill brush for a series with the given index.
+            </summary>
+            <param name="index">The index of the series to return a marker fill brush for.</param>
+            <returns>The appropriate marker fill brush for a series with the given index.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.XamGeographicMap.GetMarkerOutlineByIndex(System.Int32)">
+            <summary>
+            Gets the appropriate marker outline brush for a series with the given index.
+            </summary>
+            <param name="index">The index of the series to return a marker outline brush for.</param>
+            <returns>The appropriate marker outline brush for a series with the given index.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.XamGeographicMap.OnApplyTemplate">
+            <summary>
+            Method invoked whenever application code or internal processes call ApplyTemplate.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.XamGeographicMap.UseFixedAspectZoom">
+            <summary>
+            Boolean method indicating whether or not this SeriesViewer should be zoomed only with a fixed aspect ratio.
+            </summary>
+            <returns>True.</returns>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.XamGeographicMap._geographicTopLeftPeg">
+            <summary>
+            The geographic coordinates of the top-left of the effective viewport, for internal reference.
+            </summary>
+            <remarks>
+            This point should be updated whenever the window rect is set explicitly.  When the plot area changes, this peg should be used to adjust the translation of the actual window rect, ensuring that the geographic top-left of the map remains fixed.  This prevents apparent wiggling or sliding of the map window as the browser size changes.
+            </remarks>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.XamGeographicMap.UpdateGeographicPeg">
+            <summary>
+            Updates the position of the top-left "peg" used for correct panning and zooming of the XamGeographicMap.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.XamGeographicMap.SlideActualWindowRectToGeographicPeg">
+            <summary>
+            Makes corrections to the ActualWindowRect to ensure correct panning of the XamGeographicMap.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.XamGeographicMap._scaleTilesetRect">
+            <summary>
+            The rect, in window scale coordinates, that is spanned by the full tileset
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.XamGeographicMap.CalculateActualWindowRect">
+            <summary>
+            Called to calculate the actual window rectangle.
+            </summary>
+            <returns>The value which should be assigned to the ActualWindowRect property, based on a calculation on the WindowRect property.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.XamGeographicMap.ComputeEffectiveViewport(System.Windows.Rect)">
+            <summary>
+            Method used to calculate the effective viewport bounds.
+            </summary>
+            <param name="viewportRect">The actual viewport bounds.</param>
+            <returns>The effective viewport bounds.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.XamGeographicMap.CreateView">
+            <summary>
+            Creates and returns the view associated with this XamGeographicMap.
+            </summary>
+            <returns>The view object to be associated with this XamGeographicMap.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.XamGeographicMap.GetBrushByIndex(System.Int32)">
+            <summary>
+            Gets the appropriate fill brush for a series with the given index.
+            </summary>
+            <param name="index">The index of the series to return a fill brush for.</param>
+            <returns>The appropriate fill brush for a series with the given index.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.XamGeographicMap.GetOutlineByIndex(System.Int32)">
+            <summary>
+            Gets the appropriate outline brush for a series with the given index.
+            </summary>
+            <param name="index">The index of the series to return an outline brush for.</param>
+            <returns>The appropriate outline brush for a series with the given index.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.XamGeographicMap.OnViewCreated(Infragistics.Controls.SeriesViewerView)">
+            <summary>
+            Method invoked when the view object is created.
+            </summary>
+            <param name="view">The view which has been created.</param>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.XamGeographicMap.OnCreateAutomationPeer">
+            <summary>
+            Called when the automation peer has been created.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.XamGeographicMap.ProcessPlotAreaSizeChanged(System.Windows.Rect,System.Windows.Rect)">
+            <summary>
+            Called so that the viewer can reconcile a plot area size change.
+            </summary>
+            <param name="oldGridAreaRect">The old size of the plot area.</param>
+            <param name="newGridAreaRect">The new size of the plot area.</param>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.XamGeographicMap.WindowScaleProperty">
+            <summary>
+            Identifies the WindowScale dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.XamGeographicMap.WindowScale">
+            <summary>
+            A number between 0 and 1 determining the scale of the horizontal/vertical zoom.
+            </summary>
+            <remarks>
+            This property is effectively a shortcut to the Width/Height of the WindowRect property.
+            </remarks>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.XamGeographicMap.ActualWindowScale">
+            <summary>
+            A number between 0 and 1 determining the scale of the horizontal/vertical zoom.
+            </summary>
+            <remarks>
+            This property is effectively a shortcut to the Width/Height of the ActualWindowRect property.
+            </remarks>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.XamGeographicMap.GetActualWindowScaleHorizontal">
+            <summary>
+            Gets actual window scale for horizontal dimension of the control 
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.XamGeographicMap.GetActualWindowScaleVertical">
+            <summary>
+            Gets actual window scale for vertical dimension of the control 
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.XamGeographicMap.PropertyUpdatedOverride(System.Object,System.String,System.Object,System.Object)">
+            <summary>
+            Method called whenever a property value on the XamGeographicMap is updated.
+            </summary>
+            <param name="sender">The source of the property change.</param>
+            <param name="propertyName">The name of the property which has been updated.</param>
+            <param name="oldValue">The previous value of the property which has been updated.</param>
+            <param name="newValue">The new value of the property which has been updated.</param>
+        </member>
+        <member name="E:Infragistics.Controls.Maps.XamGeographicMap.ImageTilesReady">
+            <summary>
+            This event is fired whenever the image tiles transition from a loading state (e.g. some are fading in) to a loaded state.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.XamGeographicMap.Register(System.Windows.DependencyObject,System.Action{System.Boolean})">
+            <summary>
+            Registers the given DependencyObject as background content.
+            </summary>
+            <param name="source">The DependencyObject to register as background content.</param>
+            <param name="handler">An action to take whenever the background content is being refreshed.</param>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.XamGeographicMap.UnRegister(System.Windows.DependencyObject)">
+            <summary>
+            Unregisters the given DependencyObject as background content.
+            </summary>
+            <param name="source">The DependencyObject to unregister as background content.</param>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.XamGeographicMap.DeferredRefresh">
+            <summary>
+            Calls for a deferred refresh to the GeographicMap's background.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.XamGeographicMap.ExportVisualData">
+            <summary>
+            Returns the chart visuals expressed as a ChartVisualData object.
+            </summary>
+            <returns>A ChartVisualData object representing the current chart visuals.</returns>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.XamGeographicMap.PendingZoomChange">
+            <summary>
+            The pending desired geographic region to show.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.XamGeographicMap.ZoomToGeographic(System.Windows.Rect)">
+            <summary>
+            Zoom in to the geographic region specified, when possible (may need to wait for map to be initialized).
+            </summary>
+            <param name="geographic">The geographic region to zoom to.</param>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.XamGeographicMap.ZoomIsReady">
+            <summary>
+            Gets whether or not the control is ready for zooming
+            </summary>
+        </member>
+        <member name="T:Infragistics.Controls.Maps.AutomationPeers.XamGeographicMapAutomationPeer">
+            <summary>
+            The automation peer for the the data chart
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.AutomationPeers.XamGeographicMapAutomationPeer.#ctor(Infragistics.Controls.Maps.XamGeographicMap)">
+            <summary>
+            Instantiates the automation peer.
+            </summary>
+            <param name="chart">chart control reference</param>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.AutomationPeers.XamGeographicMapAutomationPeer.GetAutomationControlTypeCore">
+            <summary>
+            Overrides the framework invocation of what generic type of control this is.
+            </summary>
+            <returns>The <see cref="T:System.Windows.Automation.Peers.AutomationControlType"/> that describes this control.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.AutomationPeers.XamGeographicMapAutomationPeer.GetClassNameCore">
+            <summary>
+            Overrides the framework invocation requesting a string that describes this control.
+            </summary>
+            <returns>A string describing the name of this control.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.AutomationPeers.XamGeographicMapAutomationPeer.GetNameCore">
+            <summary>
+            Returns the map control's name.
+            </summary>
+            <returns>Map's name</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.AutomationPeers.XamGeographicMapAutomationPeer.GetPattern(System.Windows.Automation.Peers.PatternInterface)">
+            <summary>
+            Overrides the framework invocation of when a request is made for what types of user interaction are avalible. 
+            </summary>
+            <param name="patternInterface">This is the type of user interaction requested.</param>
+            <returns>An object that can handle this pattern or null if none available.</returns>
+        </member>
+        <member name="T:Infragistics.Controls.Maps.ImageUriConverter">
+            <summary>
+            ValueConverter class which converts a Uri to an Image.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.ImageUriConverter.#ctor">
+            <summary>
+            Creates an instance of ImageUriConverter
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.ImageUriConverter.Convert(System.Object,System.Type,System.Object,System.Globalization.CultureInfo)">
+            <summary>
+            Converts a Uri to an ImageBrush
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.ImageUriConverter.ConvertBack(System.Object,System.Type,System.Object,System.Globalization.CultureInfo)">
+            <summary>
+            Converts back a Uri from an ImageBrush
+            </summary>
+        </member>
+        <member name="T:Infragistics.Controls.Maps.ResourceUriToFrozenImageBrushConverter">
+            <summary>
+            ValueConverter class which converts a Uri to a frozen ImageBrush.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.ResourceUriToFrozenImageBrushConverter.#ctor">
+            <summary>
+            Creates an instance of ResourceUriToFrozenImageBrushConverter
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.ResourceUriToFrozenImageBrushConverter.Convert(System.Object,System.Type,System.Object,System.Globalization.CultureInfo)">
+            <summary>
+            Converts a Uri to a frozen ImageBrush
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.ResourceUriToFrozenImageBrushConverter.ConvertBack(System.Object,System.Type,System.Object,System.Globalization.CultureInfo)">
+            <summary>
+            Converts back a Uri from a frozen ImageBrush
+            </summary>
+        </member>
+        <member name="T:Infragistics.Controls.Maps.TokenResponseModel">
+            <summary>
+            Data class representing token information, used for communicating with a map tile server.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.TokenResponseModel.Token">
+            <summary>
+            Gets or sets a token used by a map tile server
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.TokenResponseModel.Expires">
+            <summary>
+            Gets or sets expiration time (in ticks)  
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.TokenResponseModel.Ssl">
+            <summary>
+            Gets or sets a flag for SSL communication protocol with a map tile server
+            </summary>
+        </member>
+        <member name="T:Infragistics.Controls.Maps.MapServerResponseModel">
+            <summary>
+            Data class representing a response from a map tile server.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.MapServerResponseModel.Name">
+            <summary>
+            Gets or sets a name of map server
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.MapServerResponseModel.TileInfo">
+            <summary>
+            Gets or sets info about imagery tiles
+            </summary>
+        </member>
+        <member name="T:Infragistics.Controls.Maps.TileInfoResponseModel">
+            <summary>
+            Data class representing a map tile.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.TileInfoResponseModel.LevelOfDetails">
+            <summary>
+            Gets or sets level of details in imagery tiles
+            </summary>
+        </member>
+        <member name="T:Infragistics.Controls.Maps.LevelOfDetailResponseModel">
+            <summary>
+            Data class representing level of detail metadata about a map tile.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.LevelOfDetailResponseModel.Level">
+            <summary>
+            Gets or sets level of details in imagery tiles
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.LevelOfDetailResponseModel.Resolution">
+            <summary>
+            Gets or sets resolution of imagery tiles
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.LevelOfDetailResponseModel.Scale">
+            <summary>
+            Gets or sets scale of imagery tiles
+            </summary>
+        </member>
+        <member name="T:Infragistics.Controls.Maps.ArcGISOnlineMapImagery">
+            <summary>
+            UI element class used to display ArcGIS Online Map imagery in the XamGeographicMap.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.ArcGISOnlineMapImagery.#ctor">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.ArcGISOnlineMapImagery.MapServerUriProperty">
+            <summary>
+            Identifies the MapServerUri property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.ArcGISOnlineMapImagery.MapServerUri">
+            <summary>
+            Gets or sets the map tile server uri.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.ArcGISOnlineMapImagery.UserNameProperty">
+            <summary>
+            Identifies the UserName property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.ArcGISOnlineMapImagery.UserName">
+            <summary>
+            Gets or sets the UserName.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.ArcGISOnlineMapImagery.PasswordProperty">
+            <summary>
+            Identifies the Password property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.ArcGISOnlineMapImagery.Password">
+            <summary>
+            Gets or sets the Password.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.ArcGISOnlineMapImagery.UserTokenProperty">
+            <summary>
+            Identifies the UserToken property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.ArcGISOnlineMapImagery.UserToken">
+            <summary>
+            Gets or sets the UserToken.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.ArcGISOnlineMapImagery.IsMapPublicProperty">
+            <summary>
+            Identifies the IsMapPublic property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.ArcGISOnlineMapImagery.IsMapPublic">
+            <summary>
+            Gets or sets the IsMapPublic variable.  A value of false requires authentication parameters.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.ArcGISOnlineMapImagery.DefaultTokenTimeout">
+            <summary>
+            Gets or Sets the Default Token Timeout before the Token Expires, this value is in Minutes
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.ArcGISOnlineMapImagery.TokenGenerationEndPoint">
+            <summary>
+            Gets or Sets the current endpoint to retrieve the token.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.ArcGISOnlineMapImagery.RefererUri">
+            <summary>
+            Contains the User Supplied Referer Uri to be used in Token Generation.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.ArcGISOnlineMapImagery.AcquireNewToken">
+            <summary>
+            Retreives a new token based on the preconfigured parameters and updates the UserToken field, Normal this is called automatically.
+            The is provided to the end-user to allow them to reteive tokens on their onw.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.ArcGISOnlineMapImagery.RequestMapServerConfiguration">
+            <summary>
+            Retreives a detailed configuration from the Map Server
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.ArcGISOnlineMapImagery.GetResponseCompleted``1(System.IAsyncResult)">
+            <summary>
+            Handles all http web respones and acts on them.
+            </summary>
+            <typeparam name="T">The type of response to decode</typeparam>
+            <param name="res">The HTTP Request Response</param>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.ArcGISOnlineMapImagery.OnPropertyChanged(System.String,System.Object,System.Object)">
+            <summary>
+            Handles certain property changed events
+            </summary>
+            <param name="propertyName"></param>
+            <param name="oldValue"></param>
+            <param name="newValue"></param>
+        </member>
+        <member name="T:Infragistics.Controls.Maps.GeographicMapImageryView">
+            <summary>
+            View class for GeographicMapImagery objects.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicMapImageryView.#ctor(Infragistics.Controls.Maps.GeographicMapImagery)">
+            <summary>
+            GeographicMapImageryView constructor.
+            </summary>
+            <param name="model">The GeographicMapImagery object being served by this view.</param>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicMapImageryView.Model">
+            <summary>
+            Gets or sets the GeographicMapImagery object being served by this view.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicMapImageryView.PixelScalingRatioChanged(System.Double)">
+            <summary>
+            Changes pixel scaling ratio
+            </summary>
+            <param name="pixelRatio"></param>
+        </member>
+        <member name="T:Infragistics.Controls.Maps.GeographicTileSeries">
+            <summary>
+            Series class used for displaying a tile set, and using shapes to define the areas that should be rendered.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicTileSeries.#ctor">
+            <summary>
+            GeographicTileSeries constructor.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicTileSeries.TileImagery">
+            <summary>
+            The MapImagery which is used to provide the tiles for display.
+            </summary>        
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicTileSeries.ClippingFillRuleProperty">
+            <summary>
+            Identifies the ClippingFillRule dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicTileSeries.ClippingFillRule">
+            <summary>
+            The fill rule to use when clipping the tile imagery to the provided shapes.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicTileSeries.ClearTileCache">
+            <summary>
+            Removes all cached tile Imagery from the 
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicTileSeries.CreateSeries">
+            <summary>
+            Creates the Series to be hosted by this GeographicMapSeriesHost.
+            </summary>
+            <returns>The series to be hosted.</returns>
+        </member>
+        <member name="E:Infragistics.Controls.Maps.GeographicTileSeries.ImageTilesReady">
+            <summary>
+            This event is fired whenever the image tiles transition from a loading state (e.g. some are fading in) to a loaded state.
+            </summary>
+        </member>
+        <member name="T:Infragistics.Controls.Maps.GeographicShapeControlSeries">
+            <summary>
+            Series class which renders polygons as Controls, in a geographic context, based on lists of points in the ItemsSource.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicShapeControlSeries.#ctor">
+            <summary>
+            GeographicShapeControlSeries constructor.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicShapeControlSeries.CreateSeries">
+            <summary>
+            Creates the Series to be hosted by this GeographicMapSeriesHost.
+            </summary>
+            <returns>The series to be hosted.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicShapeControlSeries.CreateView">
+            <summary>
+            Creates the view object for this series.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.GeographicShapeControlSeries.OnViewCreated(Infragistics.Controls.Charts.SeriesView)">
+            <summary>
+            Called when the view for the series is created.
+            </summary>
+            <param name="view">The created view.</param>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicShapeControlSeries.ShapeStyleSelectorProperty">
+            <summary>
+            Identifies the ShapeStyleSelector dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicShapeControlSeries.ShapeStyleSelector">
+            <summary>
+            The StyleSelector which is used to select a style for each Shape.
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Maps.GeographicShapeControlSeries.ShapeStyleProperty">
+            <summary>
+            Identifies the ShapeStyle dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.GeographicShapeControlSeries.ShapeStyle">
+            <summary>
+            The default style to apply to all Shapes in the series.
+            </summary>     
+        </member>
+        <member name="T:Infragistics.Controls.Maps.XamGeographicMapView">
+            <summary>
+            Represents a view class associated with the XamGeographicMap control.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.XamGeographicMapView.#ctor(Infragistics.Controls.Maps.XamGeographicMap)">
+            <summary>
+            XamGeographicMapView constructor.
+            </summary>
+            <param name="model">The XamGeographicMap control associated with this view.</param>
+        </member>
+        <member name="P:Infragistics.Controls.Maps.XamGeographicMapView.MapModel">
+            <summary>
+            A reference to the XamGeographicMap control associated with this view.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.XamGeographicMapView.OnTemplateProvided">
+            <summary>
+            Called when the template is provided.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.XamGeographicMapView.ZoombarsSupported">
+            <summary>
+            Boolean indicating whether or not zoombars are supported by this the current control.
+            </summary>
+            <returns>False.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.XamGeographicMapView.GetMarkerBrushByIndex(System.Int32)">
+            <summary>
+            Gets a Marker Fill Brush based on the index of a series.
+            </summary>
+            <param name="index">The index of the series to get a Marker Fill Brush for.</param>
+            <returns>The Brush to use as a Fill for Markers in a series with the given index.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.XamGeographicMapView.GetMarkerOutlineByIndex(System.Int32)">
+            <summary>
+            Gets a Marker Outline Brush based on the index of a series.
+            </summary>
+            <param name="index">The index of the series to get a Marker Outline Brush for.</param>
+            <returns>The Brush to use as an Outline for Markers in a series with the given index.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.XamGeographicMapView.GetBrushByIndex(System.Int32)">
+            <summary>
+            Gets a Fill Brush based on the index of a series.
+            </summary>
+            <param name="index">The index of the series to get a Fill Brush for.</param>
+            <returns>The Brush to use as a Fill for a series with the given index.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.XamGeographicMapView.GetOutlineByIndex(System.Int32)">
+            <summary>
+            Gets an Outline Brush based on the index of a series.
+            </summary>
+            <param name="index">The index of the series to get an Outline Brush for.</param>
+            <returns>The Brush to use as an Outline for a series with the given index.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.XamGeographicMapView.GetViewport">
+            <summary>
+            Gets the bounds of the map viewport.
+            </summary>
+            <returns>The bounds of the map viewport.</returns>
+        </member>
+        <member name="M:Infragistics.Controls.Maps.XamGeographicMapView.TilesDirty">
+            <summary>
+            Queues a new update to imagery tiles
+            </summary>
+        </member>
+        <member name="T:Infragistics.Controls.Charts.TileSeries">
+            <summary>
+            Represents a tile series class that can render imagery tiles
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.TileSeries.CreateView">
+            <summary>
+            Creates a view for the tile series
+            </summary> 
+        </member>
+        <member name="M:Infragistics.Controls.Charts.TileSeries.OnViewCreated(Infragistics.Controls.Charts.SeriesView)">
+            <summary>
+            Event raised when the view was created for the tile series
+            </summary>
+            <param name="view"></param>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.TileSeries.RequiresShapes">
+            <summary>
+            Gets whether or not the tile series requires rendering of shapes that clip imagery tiles
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.TileSeries.TileView">
+            <summary>
+            Gets or sets a view of the tile series
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.TileSeries.TileImagery">
+            <summary>
+            The MapImagery which is used to provide the tiles for display.
+            </summary>        
+        </member>
+        <member name="P:Infragistics.Controls.Charts.TileSeries.ActualTileImagery">
+            <summary>
+            Gets or sets a actual tiles imagery rendered by the tile series
+            </summary>
+        </member>
+        <member name="F:Infragistics.Controls.Charts.TileSeries.ClippingFillRuleProperty">
+            <summary>
+            Identifies the ClippingFillRule dependency property.
+            </summary>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.TileSeries.ClippingFillRule">
+            <summary>
+            The fill rule to use when clipping the tile imagery to the provided shapes.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.TileSeries.PropertyUpdatedOverride(System.Object,System.String,System.Object,System.Object)">
+            <summary>
+            Overrides logic for handling property updates
+            </summary>
+            <param name="sender"></param>
+            <param name="propertyName"></param>
+            <param name="oldValue"></param>
+            <param name="newValue"></param>
+        </member>
+        <member name="E:Infragistics.Controls.Charts.TileSeries.ImageTilesReady">
+            <summary>
+            This event is fired whenever the image tiles transition from a loading state (e.g. some are fading in) to a loaded state.
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.TileSeries.Register(System.Windows.DependencyObject,System.Action{System.Boolean})">
+            <summary>
+            Registers an action for refreshing tiles
+            </summary>
+            <param name="source"></param>
+            <param name="refresh"></param>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.TileSeries.UnRegister(System.Windows.DependencyObject)">
+            <summary>
+            Removed registered action for refreshing tiles
+            </summary>
+            <param name="source"></param>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.TileSeries.DeferredRefresh">
+            <summary>
+            Defers rendering of the series
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.TileSeries.ViewportRectChangedOverride(System.Windows.Rect,System.Windows.Rect)">
+            <summary>
+            Overrides logic for handling rectangle changes of the viewport
+            </summary>
+            <param name="oldViewportRect"></param>
+            <param name="newViewportRect"></param>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.TileSeries.RenderSeriesOverride(System.Boolean)">
+            <summary>
+            Overrides rendering of the tile series
+            </summary>
+            <param name="animate">specifies whether to animate rendering</param>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.TileSeries.RenderWithView(System.Boolean,Infragistics.Controls.Charts.SeriesView)">
+            <summary>
+            Render the series with its view
+            </summary>
+            <param name="animate"></param>
+            <param name="view"></param>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.TileSeries.RenderAlternateView(System.Windows.Rect,System.Windows.Rect,Infragistics.Controls.Charts.RenderSurface,System.String,System.Double)">
+            <summary>
+            Renders alternate view of the Tiles Series using specified parameters
+            </summary>
+            <param name="viewportRect"></param>
+            <param name="windowRect"></param>
+            <param name="surface"></param>
+            <param name="viewIdentifier"></param>
+            <param name="effectiveScalingRatio"></param>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.TileSeries.ClearRendering(System.Boolean,Infragistics.Controls.Charts.SeriesView)">
+            <summary>
+            Clears the rendering for the series.
+            </summary>
+            <param name="wipeClean">True if the cached visuals should also be cleared.</param>
+            <param name="view">The SeriesView in context.</param>
+        </member>
+        <member name="T:Infragistics.Controls.Charts.TileSeriesView">
+            <summary>
+            Represents a view of Tile Series   
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.TileSeriesView.#ctor(Infragistics.Controls.Charts.TileSeries)">
+            <summary>
+            Creates a new instance of a view of Tile Series 
+            </summary>
+            <param name="model"></param>
+        </member>
+        <member name="P:Infragistics.Controls.Charts.TileSeriesView.TileModel">
+            <summary>
+            Gets or sets Tile Model
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.TileSeriesView.ApplyData(System.Windows.FrameworkElement,System.Windows.Media.PathGeometry)">
+            <summary>
+            Applies path geometry data that clips shape of the Tile Series
+            </summary>
+            <param name="element"></param>
+            <param name="data"></param>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.TileSeriesView.GetShapeGeometry(System.Int32,System.Collections.Generic.List{System.Windows.Media.PointCollection})">
+            <summary>
+            Gets path geometry data from list of points 
+            </summary>
+            <param name="i"></param>
+            <param name="points"></param> 
+        </member>
+        <member name="M:Infragistics.Controls.Charts.TileSeriesView.AttachUI(System.Windows.Controls.Canvas)">
+            <summary>
+            Attaches the the Tile Series to root UI canvas of the map
+            </summary>
+            <param name="rootCanvas"></param>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.TileSeriesView.GetShapeElement(System.Int32,System.Object)">
+            <summary>
+            Gets shape element for specified data item
+            </summary>
+            <param name="i"></param>
+            <param name="item"></param> 
+        </member>
+        <member name="M:Infragistics.Controls.Charts.TileSeriesView.ClearValues(System.Windows.FrameworkElement)">
+            <summary>
+            Clears values of shape element
+            </summary>
+            <param name="element"></param>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.TileSeriesView.ApplyStyling(System.Windows.FrameworkElement,System.Object)">
+            <summary>
+            Applies styling to a shape element associated with data time
+            </summary>
+            <param name="shape"></param>
+            <param name="item"></param>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.TileSeriesView.AttachShapeCanvas(System.Windows.Controls.Canvas)">
+            <summary> 
+            Attaches the shape elements to root UI canvas of the map
+            </summary>
+            <param name="rootCanvas"></param>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.TileSeriesView.InitializeShapes">
+            <summary>
+            Initializes shapes elements that are clipping the Tile Series  
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.TileSeriesView.FinalizeShapes">
+            <summary>
+            Finalizes shapes elements that are clipping the Tile Series  
+            </summary>
+        </member>
+        <member name="M:Infragistics.Controls.Charts.TileSeriesView.ClearClipping">
+            <summary>
+            Clears shapes elements that are clipping the Tile Series  
+            </summary>
+        </member>
+    </members>
+</doc>

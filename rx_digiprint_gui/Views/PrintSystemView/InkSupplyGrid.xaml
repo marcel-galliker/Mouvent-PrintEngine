@@ -1,0 +1,88 @@
+﻿<UserControl x:Class="RX_DigiPrint.Views.PrintSystemView.InkSupplyGrid"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    
+    <Grid x:Name="InkSuplyGrid" Margin="10,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="26"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="50"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Center">
+            <TextBlock Text="Pressure Lung" />
+            <TextBlock Text="{Binding PresLung, Converter={StaticResource HeadVal_Converter}}" x:Name="TX_LungPressure" Margin="5,0"/>
+            <TextBlock Text="mbar" />
+        </StackPanel>
+
+        <TextBlock Grid.Row="0" Grid.Column="1" Text="Ink"  VerticalAlignment="Center"/>
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="Side" VerticalAlignment="Center" x:Name="TX_Side"/>
+
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="Control Mode" VerticalAlignment="Center"/>
+
+        <TextBlock Grid.Row="3" Grid.Column="0" Text="Temperature Inksupply"/>
+        <TextBlock Grid.Row="3" Grid.Column="1" Padding="3,0,0,0" Text="°C"/>
+
+        <TextBlock Grid.Row="4" Grid.Column="0" Text="Temperature Head"/>
+        <TextBlock Grid.Row="4" Grid.Column="1" Padding="3,0,0,0" Text="°C"/>
+
+        <Grid Grid.Row="5" Grid.ColumnSpan="3" x:Name="ServiceGrid">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="0"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200"/>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            
+            <!--
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="Humidity"/>
+            <TextBlock Grid.Row="0" Grid.Column="1" Padding="3,0,0,0" Text="%"/>
+            -->
+            <TextBlock Grid.Row="1" Grid.Column="0" Text="Pressure Inlet Cond." VerticalAlignment="Top"/>
+            <TextBlock Grid.Row="1" Grid.Column="1" Padding="3,0,0,0" Text="mbar"/>
+
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="Pumps speed Cond." VerticalAlignment="Top"/>
+            <TextBlock Grid.Row="2" Grid.Column="1" Padding="3,0,0,0" Text="ml/min"/>
+
+            <TextBlock Grid.Row="3" Grid.Column="0" Text="Pressure Ink Tank"/>
+            <TextBlock Grid.Row="3" Grid.Column="1" Padding="3,0,0,0" Text="mbar"/>
+
+            <TextBlock Grid.Row="4" Grid.Column="0" Text="Pump Speed"/>
+            <TextBlock Grid.Row="4" Grid.Column="1" Padding="3,0,0,0" Text="ml/s"/>
+
+            <TextBlock Grid.Row="5" Grid.Column="0" Text="Bleed Valve"/>
+           
+            <TextBlock Grid.Row="6" Grid.Column="0" Text="Air Valve"/>
+        </Grid>
+        
+        <ScrollViewer x:Name="InkSupplyScroll"
+                            Grid.Row="0" Grid.Column="2" Grid.RowSpan="13" 
+                            VerticalScrollBarVisibility="Hidden" 
+                            HorizontalScrollBarVisibility="Auto">
+
+            <StackPanel x:Name="InkSupplyStack" Orientation="Horizontal" />
+
+        </ScrollViewer>
+    </Grid>
+</UserControl>

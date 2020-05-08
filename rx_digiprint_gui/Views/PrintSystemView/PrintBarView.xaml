@@ -1,0 +1,60 @@
+﻿<UserControl x:Class="RX_DigiPrint.Views.PrintSystemView.PrintBarView"
+             xmlns      ="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x    ="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc   ="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d    ="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:ig   ="http://schemas.infragistics.com/xaml" 
+             xmlns:igWPF="http://schemas.infragistics.com/xaml/wpf"
+             xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    <UserControl.Resources>
+        <CollectionViewSource x:Key='InkTypeList_sorted' Source="{Binding InkTypeList}">
+            <CollectionViewSource.SortDescriptions>
+                <scm:SortDescription PropertyName="Name" />
+            </CollectionViewSource.SortDescriptions>
+        </CollectionViewSource>
+    </UserControl.Resources>
+    <Grid Margin="2,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+
+        <!--             DropDownOpening="ComboBox_DropDownOpening" -->
+        <ig:XamMultiColumnComboEditor x:Name="Color_Combo"
+            HorizontalAlignment="Stretch" VerticalAlignment="Top"
+            ItemsSource="{Binding Source={StaticResource InkTypeList_sorted}}"
+			SelectedItem ="{Binding InkType}"
+            DisplayMemberPath="Name"
+			Background="{Binding InkType, Converter={StaticResource InkType_ColorBG}}"
+            Foreground="{Binding InkType, Converter={StaticResource InkType_ColorFG}}"
+            Style="{DynamicResource Rx_XamMultiColumnComboEditorStyle}"
+            AutoGenerateColumns="False"
+            DropDownOpening="ColorCombo_DropDownOpening" 
+            SelectedItemsResetButtonVisibility="Collapsed"
+            >
+            <ig:XamMultiColumnComboEditor.Columns>
+                <!--
+                <ig:TextComboColumn CellStyle="{x:Null}" HeaderTemplate="{x:Null}" HeaderStyle="{x:Null}" Key="Name" TextBlockStyle="{x:Null}"/>
+                <ig:TextComboColumn CellStyle="{x:Null}" HeaderTemplate="{x:Null}" HeaderStyle="{x:Null}" Key="Description" TextBlockStyle="{x:Null}"/>
+                -->
+                <ig:TextComboColumn Key="Name" />
+                <ig:TextComboColumn Key="Description" />
+            </ig:XamMultiColumnComboEditor.Columns>
+        </ig:XamMultiColumnComboEditor>
+        
+        <TextBlock Grid.Row="1" HorizontalAlignment="Left"  Text="{Binding InkType.ColorCode, Converter={StaticResource ColorCode_Str}}" />
+
+        <!--
+        <igWPF:XamComboEditor Grid.Row="1" 
+                    HorizontalAlignment="Stretch"
+                    ItemsSource="{Binding InkType.ColorCodeList}"
+                    Value="{Binding InkType.ColorCode}"
+                    DisplayMemberPath="Display"
+                    ValuePath="Value" 
+                    DropDownResizeMode="None"
+                    />
+        <TextBlock Grid.Row="2" HorizontalAlignment="Right" Text="{Binding InkLevel}" />
+        -->
+    </Grid>
+</UserControl>

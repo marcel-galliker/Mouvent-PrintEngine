@@ -1,0 +1,117 @@
+﻿<UserControl x:Class="RX_DigiPrint.Views.LB701UVView.LB701UVView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+             xmlns:local="clr-namespace:RX_DigiPrint.Views.LB701UVView"
+             xmlns:tex="clr-namespace:RX_DigiPrint.Views.TexView"
+             xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
+             mc:Ignorable="d" 
+             d:DesignHeight="800" d:DesignWidth="1500">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="auto"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- toolbar LEFT _______________________________________________________ -->
+        <rx_uc:CommandButtons/>
+        <rx_uc:SetupButtons HorizontalAlignment="Right"/>
+        
+        <StackPanel Grid.Row="1" Orientation="Horizontal">
+            <Image x:Name="MachineImg"  
+                Source="..\..\Resources\Bitmaps\LB701UV\LB701UV.jpg"     
+                HorizontalAlignment="Left"
+                Height="250"
+                Margin="100,0"
+            />
+            <!-- Width="{Binding ElementName=MachineGrid, Path=ActualWidth}" 
+                ScrollViewer.VerticalScrollBarVisibility="Disabled"
+            -->
+
+            <!-- Consumables ________________________________________________________________________-->
+            <tex:TexConsumables Grid.Row="1"  Grid.Column="0" HorizontalAlignment="Right"/>
+        </StackPanel>
+
+        <!-- MAIN Window _________________________________________________________________________-->
+        <Grid Grid.Row="2" Margin="0,5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+                <!-- SizeChanged="MachineGrid_SizeChanged" -->
+
+            <Grid Grid.Row="1" Grid.Column="1"  Grid.RowSpan="3">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="32"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <StackPanel x:Name="SettingsTab" Grid.Row="0" Orientation="Horizontal" Background="Transparent">
+                    <common:RxRadioButton x:Name="RB_Main"          Content="Main"          IsChecked="true"/>
+                    <common:RxRadioButton x:Name="RB_Log"           Content="Log"           />
+                    <common:RxRadioButton x:Name="RB_Cfg"           Content="Configuration" />
+                    <common:RxRadioButton x:Name="RB_Plc"           Content="PLC Info"      Last="True"/>
+                </StackPanel>
+
+                <local:LB701UV_DiePos x:Name="DiePos" Grid.Row="0" Grid.RowSpan="2" HorizontalAlignment="Right"/>
+                
+                <!-- TAB: Main ___________________________________________________________________-->
+                <Grid Grid.Row="1" Visibility="{Binding ElementName=RB_Main, Path=IsChecked, Converter={StaticResource IntToVisible_Converter}}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="680"/>
+                        <ColumnDefinition Width="250"/>
+                        <ColumnDefinition Width="200"/>
+                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <local:LB701UV_Par Grid.Column="0"/>
+
+                    <StackPanel Grid.Column="1">
+                        <local:LB701UV_Status/>
+                        <local:LB701UV_Cmd/>
+                    </StackPanel>
+                    <rx_uc:StepperView Grid.Column="2"/>
+                </Grid>
+                
+                <!-- TAB: PLC Log ____________________________________________________________-->
+                <rx_uc:PlcLog Grid.Row="1" 
+                      HorizontalAlignment="Left"
+                      VerticalAlignment="Stretch"
+                      Visibility="{Binding ElementName=RB_Log, Path=IsChecked, Converter={StaticResource IntToVisible_Converter}}"
+                      />
+
+                <!-- TAB: PLC Info ______________________________________________________________________________________-->
+                <rx_uc:PlcStatus Grid.Row="1" Width="550" Visibility="{Binding ElementName=RB_Plc,  Path=IsChecked, Converter={StaticResource IntToVisible_Converter}}"/>
+
+                <!-- TAB: Config ____________________________________________________________-->
+                <local:LB701UV_Cfg Grid.Row="1" Visibility="{Binding ElementName=RB_Cfg, Path=IsChecked, Converter={StaticResource IntToVisible_Converter}}"/>
+            </Grid>
+        </Grid>
+
+        <!-- NO Connection _______________________________________________________________________-->
+        <TextBlock x:Name="PlcNotConnected"
+                Grid.RowSpan="10" Grid.ColumnSpan="10"                
+                Text="PLC NOT CONNECTED" 
+                FontSize="100" 
+                HorizontalAlignment="Center" 
+                VerticalAlignment="Center" 
+                Foreground="Red" 
+                FontWeight="Bold"
+                Visibility="Collapsed"
+                RenderTransformOrigin="0.5,0.5" >
+                <!-- Visibility="{Binding Connected, Converter={StaticResource IntToInVisible_Converter}}" -->
+            <TextBlock.RenderTransform>
+                <RotateTransform Angle="-20"/>
+            </TextBlock.RenderTransform>
+        </TextBlock>
+    </Grid>
+</UserControl>

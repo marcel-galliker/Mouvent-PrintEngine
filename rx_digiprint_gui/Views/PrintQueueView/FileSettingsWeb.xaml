@@ -1,0 +1,245 @@
+﻿<UserControl x:Class="RX_DigiPrint.Views.PrintQueueView.FileSettingsWeb"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:igGrids="http://infragistics.com/DataPresenter"
+             xmlns:ig="http://schemas.infragistics.com/xaml"
+             xmlns:igWPF="http://schemas.infragistics.com/xaml/wpf"
+             xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+             xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
+             xmlns:uc="clr-namespace:RX_DigiPrint.Views.UserControls"
+             mc:Ignorable="d" 
+             d:DesignHeight="500" d:DesignWidth="500"
+             DataContextChanged="UserControl_DataContextChanged"
+             >
+
+    <StackPanel 
+        Width="auto"
+        Height="auto"
+        HorizontalAlignment="Left"
+        x:Name="Settings" Margin="0"
+        >
+        <!-- Background="{DynamicResource Button.Disabled.Background}" -->
+        <!-- Page Definition _______________________________________________________________-->
+        <!--
+        <GroupBox Header="Copies">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="130" />
+                    <ColumnDefinition Width="50" />
+                    <ColumnDefinition Width="80" />
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Copies" />
+                <TextBox   Grid.Row="0" Grid.Column="1" Text="{Binding Copies}" HorizontalAlignment="Stretch" />
+
+                <Grid Grid.Row="1" Grid.ColumnSpan="3" Visibility="{Binding SrcPages, Converter={StaticResource PagesVisible_Converter}}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="130" />
+                        <ColumnDefinition Width="50" />
+                        <ColumnDefinition Width="80" />
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="First Page" />
+                    <TextBox   Grid.Row="0" Grid.Column="1" Text="{Binding FirstPage}"      HorizontalAlignment="Stretch" Background="{Binding FirstPageOk}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding FirstPageRange}" HorizontalAlignment="Stretch" Padding="2,0,0,0"/>
+
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Last Page" />
+                    <TextBox   Grid.Row="1" Grid.Column="1" Text="{Binding LastPage}"       HorizontalAlignment="Stretch" Background="{Binding LastPageOk}"/>
+                    <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding LastPageRange}"  HorizontalAlignment="Stretch" Padding="2,0,0,0"/>
+
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Collate" />
+                    <CheckBox  Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Top" IsChecked="{Binding Collate}"/>
+                </Grid>
+            </Grid>
+        </GroupBox>
+        -->
+        <GroupBox x:Name="Length_Settings"
+            Grid.Row="0" Grid.Column="0" 
+            Header="Length"
+            FontSize="{StaticResource FontSizeXS}"
+            Padding="0,-4,0,-4"
+            >
+            <!-- Visibility ="{Binding Variable, Converter={StaticResource BoolToInVisible_Converter}}" -->
+            <Grid HorizontalAlignment="Left">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="130" />
+                    <ColumnDefinition Width="60" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Length" />
+                <common:RxNumBox   Grid.Row="0" Grid.Column="1" Text="{Binding ScanLength}" HorizontalAlignment="Right" Width="60" x:Name="LengthBox" Min="0"/>
+                <StackPanel  Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" Orientation="Horizontal">
+                    <common:RxRadioButton Content="m"       Background="Transparent" IsChecked="{Binding LengthUnitMM}" x:Name="LengthUnit"/>
+                    <common:RxRadioButton Content="copies"  Background="Transparent" IsChecked="{Binding LengthUnitCopies}" Last="True"/>
+                </StackPanel>
+            </Grid>
+        </GroupBox>
+        
+        <!-- Pages ___________________________________________________________________ -->
+        <GroupBox x:Name="Page_Settings" Header="Pages" FontSize="{StaticResource FontSizeXS}" Padding="0,-4,0,-4">
+            <!-- Visibility="{Binding Variable, Converter={StaticResource BoolToVisible_Converter}}" -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="130" />
+                    <ColumnDefinition Width="60" />
+                    <ColumnDefinition Width="10" />
+                    <ColumnDefinition Width="60" />
+                    <ColumnDefinition Width="100" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
+                
+                <TextBlock Grid.Column="0" Text="From"/>
+                <common:RxNumBox   Grid.Column="1" Text="{Binding FirstPage}" HorizontalContentAlignment="Right" Min="0" IsInt="True"/>
+                <TextBlock Grid.Column="3" Text="To"/>
+                <StackPanel Grid.Column="4" Orientation="Horizontal">
+                    <common:RxNumBox Text="{Binding LastPage}" Width="60" HorizontalContentAlignment="Right" Min="0" IsInt="True"/>
+                    <TextBlock Text=" ("/>
+                    <TextBlock Text="{Binding SrcPages}"/>
+                    <TextBlock Text=")"/>
+                </StackPanel>
+                
+                <TextBlock   Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Text="Copies"/>
+                <common:RxNumBox Grid.Row="1" Grid.Column="1" Text="{Binding Copies}" HorizontalContentAlignment="Right" Min="0" IsInt="True"/>
+
+                <TextBlock Grid.Row="1" Grid.Column="3" Text="Collate"/>
+                <igWPF:XamComboEditor Grid.Row="1" Grid.Column="4" 
+                    HorizontalAlignment="Stretch"
+                    ItemsSource="{Binding CollateList}"
+                    Value="{Binding Collate}"
+                    DisplayMemberPath="Display"
+                    ValuePath="Value" 
+                    DropDownResizeMode="None"
+                    >
+                </igWPF:XamComboEditor>
+
+
+            </Grid>
+        </GroupBox>
+        
+        <!-- Start ___________________________________________________________________ -->
+        <GroupBox x:Name="Start_Settings" Header="Start" FontSize="{StaticResource FontSizeXS}" Padding="0,-4,0,-4">
+            <!-- Visibility="{Binding Variable, Converter={StaticResource BoolToVisible_Converter}}" -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="130" />
+                    <ColumnDefinition Width="60" />
+                    <ColumnDefinition Width="10" />
+                    <ColumnDefinition Width="60" />
+                    <ColumnDefinition Width="100" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="Copy"/>
+                <common:RxNumBox Grid.Column="1" Text="{Binding StartFrom}" HorizontalContentAlignment="Right" Min="0" IsInt="True" x:Name="NumBox_StartFrom"/>
+
+                <TextBlock       x:Name="StartPageTxt" Grid.Column="3" Text="Page" />
+                <common:RxNumBox x:Name="StartPageNum" Grid.Column="4" Text="{Binding StartPage}" HorizontalContentAlignment="Right"/>
+            </Grid>
+        </GroupBox>
+
+        <!-- RIP Settings _____________________________________________________________________________-->
+        <GroupBox Header="Settings" FontSize="{StaticResource FontSizeXS}" Padding="0,-4" HorizontalAlignment="Left">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="140" />
+                    <ColumnDefinition Width="60" />
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Text="Print Environment" Visibility="{Binding Ripped, Converter={StaticResource IntToInVisible_Converter}}"/>
+                <!--
+                <ig:XamComboEditor Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" Width="200" HorizontalAlignment="Left">
+                </ig:XamComboEditor>
+                -->
+                <ComboBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="3" HorizontalAlignment="Stretch"
+                    ItemsSource="{Binding PrintEnvList}"
+                    SelectedValue="{Binding PrintEnv}"
+                    Visibility="{Binding Ripped, Converter={StaticResource IntToInVisible_Converter}}"
+                />
+
+                <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Text="Orientation" Visibility="{Binding Ripped, Converter={StaticResource IntToInVisible_Converter}}"/>
+                <igWPF:XamComboEditor Grid.Row="1" Grid.Column="1" 
+                    HorizontalAlignment="Stretch"
+                    ItemsSource="{Binding OrientationList}"
+                    Value="{Binding Orientation}"
+                    DisplayMemberPath="Display"
+                    ValuePath="Value" 
+                    DropDownResizeMode="None"
+                    Visibility="{Binding Ripped, Converter={StaticResource IntToInVisible_Converter}}"
+                    >
+                </igWPF:XamComboEditor>
+
+                <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Text="Speed"/>
+                <rx:RxComboBox x:Name="CB_Speed"
+                    Grid.Row="2" Grid.Column="1"
+                    SelectedValue="{Binding Speed}"
+                    HorizontalContentAlignment="Right"
+                    />            
+                <TextBlock  Grid.Row="2" Grid.Column="3" Text="m/min" Margin="5,0,0,0" x:Name="SpeedUnit"/>
+
+                <TextBlock          Grid.Row="3" Grid.Column="0" Text="Image Margin" />
+                <common:RxNumBox    Grid.Row="3" Grid.Column="1" Text="{Binding PageMargin, Converter={StaticResource Len_Unit_Converter}, ConverterParameter=mm}" HorizontalAlignment="Stretch"/>
+                <TextBlock          Grid.Row="3" Grid.Column="2" Text="mm" Margin="5,0,0,0" x:Name="MarginUnit"/>
+
+                <TextBlock Grid.Row="4" Grid.Column="0" Text="PrintGo Mode" VerticalAlignment="Center"/>
+                <rx:RxComboBox x:Name="CB_PrintGoMode"
+                    Grid.Row="4" Grid.Column="1"
+                    SelectedValue="{Binding PrintGoMode}"
+                    ImageBox="true"
+                    >
+                </rx:RxComboBox>
+
+                <TextBlock          Grid.Row="5" Grid.Column="0" Text="Image Distance" />
+                <common:RxNumBox    Grid.Row="5" Grid.Column="1" Text="{Binding PrintGoDist, Converter={StaticResource Len_Unit_Converter}, ConverterParameter=mm}" HorizontalAlignment="Stretch" Min="0"/>
+                <TextBlock          Grid.Row="5" Grid.Column="2" Text="mm" Margin="5,0,0,0" x:Name="DistUnit"/>
+
+            </Grid>
+        </GroupBox>
+
+        <uc:PreviewWeb Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="5" 
+                    Width="250"
+                    Height="auto" MinHeight="100"
+                    HorizontalAlignment="Left" 
+                    Margin="40,5,0,0"
+                    Source="{Binding Preview}"
+                    Orientation="{Binding Orientation}"/>
+        <Grid Grid.Row="3" Grid.ColumnSpan="3" x:Name="ShowButtonGrid" Visibility="{Binding Changed, Converter={StaticResource IntToVisible_Converter}}">
+            <common:RxButton x:Name="SaveButton"  Click="Save_Click" HorizontalAlignment="Left">
+                <Image Source="{StaticResource Yes_ico}"/>
+            </common:RxButton>
+
+            <common:RxButton x:Name="CancelButton" Click="Cancel_Click" HorizontalAlignment="Right">
+                <Image Source="{StaticResource No_ico}"/>
+            </common:RxButton>
+        </Grid>
+
+    </StackPanel>
+</UserControl>

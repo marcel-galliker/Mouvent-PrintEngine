@@ -1,0 +1,30 @@
+﻿<UserControl x:Class="RX_DigiPrint.Views.CleafView.CleafServiceCommands"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="400" d:DesignWidth="150">
+    <Grid>
+        <GroupBox Grid.Column="1" Header="Setup Commands" Style="{StaticResource RxGroupBox}">
+            <rx_uc:PlcParPanel UnitID="Application.GUI_00_001_Main">
+          <!--      <rx_uc:PlcCommand ID="CMD_SERVICE"                   Label="Service"/> -->
+
+                <rx_uc:PlcTitle Header="Calibrate Diameter"/>
+                
+                <rx_uc:PlcCommand ID="CMD_CALIBRATE_DIAMETER_SENSOR_WINDER_1"    Label="Diameter UW-R"/>
+                <rx_uc:PlcCommand ID="CMD_CALIBRATE_DIAMETER_SENSOR_WINDER_2"    Label="Diameter UW-L"/>
+                <rx_uc:PlcCommand ID="CMD_CALIBRATE_DIAMETER_SENSOR_WINDER_3"    Label="Diameter RW-R"/>
+                <rx_uc:PlcCommand ID="CMD_CALIBRATE_DIAMETER_SENSOR_WINDER_4"    Label="Diameter RW-L"/>
+
+                <rx_uc:PlcTitle Header="Calibrate Tension"/>
+                
+                <rx_uc:PlcCommand ID="CMD_CALIBRATE_TENSION_SENSORS_1" Label="Tesion UW"/>
+                <rx_uc:PlcCommand ID="CMD_CALIBRATE_TENSION_SENSORS_2" Label="Tesion RW"/>
+                <rx_uc:PlcCommand ID="CMD_CALIBRATE_TENSION_SENSORS_3" Label="Tesion NIP"/>
+
+            </rx_uc:PlcParPanel>
+        </GroupBox>
+    </Grid>
+</UserControl>

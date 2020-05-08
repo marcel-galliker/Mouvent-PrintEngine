@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rx_fluid_nios", "rx_fluid_nios.vcxproj", "{9CFACFD4-6EE4-432A-A687-D52259365D06}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Release-soc|Any CPU = Release-soc|Any CPU
+		Release-soc|Mixed Platforms = Release-soc|Mixed Platforms
+		Release-soc|Win32 = Release-soc|Win32
+		Release-soc|x64 = Release-soc|x64
+		Release-soc|x86 = Release-soc|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9CFACFD4-6EE4-432A-A687-D52259365D06}.Release-soc|Any CPU.ActiveCfg = Release-soc|Win32
+		{9CFACFD4-6EE4-432A-A687-D52259365D06}.Release-soc|Mixed Platforms.ActiveCfg = Release-soc|Win32
+		{9CFACFD4-6EE4-432A-A687-D52259365D06}.Release-soc|Mixed Platforms.Build.0 = Release-soc|Win32
+		{9CFACFD4-6EE4-432A-A687-D52259365D06}.Release-soc|Win32.ActiveCfg = Release-soc|Win32
+		{9CFACFD4-6EE4-432A-A687-D52259365D06}.Release-soc|x64.ActiveCfg = Release-soc|Win32
+		{9CFACFD4-6EE4-432A-A687-D52259365D06}.Release-soc|x86.ActiveCfg = Release-soc|Win32
+		{9CFACFD4-6EE4-432A-A687-D52259365D06}.Release-soc|x86.Build.0 = Release-soc|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {109DFE7D-E30E-4007-B466-503D09A6215E}
+	EndGlobalSection
+EndGlobal

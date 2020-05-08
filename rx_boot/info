@@ -1,0 +1,3 @@
+DeviceType = Head
+SerialNo = 1
+Interface = eth0

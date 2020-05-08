@@ -1,0 +1,261 @@
+﻿<Window x:Class="RX_DigiPrint.Views.MainWindow"
+        xmlns:ig="http://schemas.infragistics.com/xaml"
+        xmlns:igWPF="http://schemas.infragistics.com/xaml/wpf"
+		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
+        xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
+        xmlns:views="clr-namespace:RX_DigiPrint.Views"
+        xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+		xmlns:views_ml="clr-namespace:RX_DigiPrint.Views.LB701UVView"
+		xmlns:views_dp="clr-namespace:RX_DigiPrint.Views.DP803View"
+		xmlns:views_lb702uv="clr-namespace:RX_DigiPrint.Views.LB702UVView"
+		xmlns:views_lb702wb="clr-namespace:RX_DigiPrint.Views.LB702WBView"
+		xmlns:views_lh702="clr-namespace:RX_DigiPrint.Views.LH702View"
+		xmlns:views_tex="clr-namespace:RX_DigiPrint.Views.TexView"
+		xmlns:views_tt="clr-namespace:RX_DigiPrint.Views.TestTableView"
+		xmlns:views_cleaf="clr-namespace:RX_DigiPrint.Views.CleafView"
+        xmlns:views_pq="clr-namespace:RX_DigiPrint.Views.PrintQueueView"
+		xmlns:views_ps="clr-namespace:RX_DigiPrint.Views.PrintSystemView"
+		xmlns:views_settings="clr-namespace:RX_DigiPrint.Views.Settings"     
+        xmlns:converters="clr-namespace:RX_DigiPrint.Converters"
+        xmlns:Custom="http://infragistics.com/Windows" 
+        mc:Ignorable="d"
+        d:DesignWidth="1200"
+        WindowStyle="None"
+        WindowState="Maximized"
+        ResizeMode="NoResize"
+        Loaded="Window_Loaded"
+        Closed="Window_Closed"
+        x:Name="Main"
+        >
+    <!--
+        Height="600"
+        Width="800"
+        WindowState="Maximized"
+        WindowStartupLocation="CenterScreen"
+    -->
+    <!-- 
+    Resolutions:
+    1. 800x600
+    2. 1280x800
+    3. 1440x900
+    4. 1680x1050
+    5. 1920x1200
+    -->
+
+    <Window.Resources>
+        <!--
+        <Style x:Key="{x:Type rx:RxTabItem}" TargetType="{x:Type rx:RxTabItem}" >
+            <Setter Property="Height" Value="50" />
+        </Style>
+        -->
+    </Window.Resources>
+
+  <!--  <Grid DataContext="{StaticResource Windows1ViewModel}"> -->
+    <Grid>
+        <Grid.Background>
+            <ImageBrush ImageSource="/RX_DigiPrint;component/Resources/Bitmaps/radex_bg.jpg" Stretch="Uniform" AlignmentX="Right"/>
+        </Grid.Background>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+
+        <!--
+        <Grid Grid.RowSpan="3" Margin="0,0,100,8" Height="30" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+            <Image Source="..\Resources\Bitmaps\Mouvent_Logo.png" />
+        //  <TextBlock Text="A Bobst Group company  " VerticalAlignment="Bottom" HorizontalAlignment="Right" FontSize="16"/> 
+        </Grid>
+        -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,100,8" HorizontalAlignment="Right">
+            <TextBlock x:Name="Version" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Bottom" Margin="4,0"/>
+            <Image Source="..\Resources\Bitmaps\Mouvent_Logo.png" />
+        </StackPanel>
+
+        <!-- ROW 0: Status line _______________________________________________________________________________________-->
+        <!--
+        <Grid>
+            <TextBlock 
+				Grid.Column="0" 
+				Text="RX DigiPrint" 
+				Foreground="{DynamicResource RX.DarkGreen}" 
+				FontSize="20"
+				HorizontalAlignment="Left"
+            />
+            <TextBlock x:Name="PrinterName" DataContext="{Binding ElementName=Main}" Text="{Binding Name}" HorizontalAlignment="Center" FontSize="20"/>
+        </Grid>
+        -->
+        <TextBlock x:Name="PrinterName" Text="{Binding Host_Name}" HorizontalAlignment="Right"  Margin="0,10,100,0" FontSize="20" FontWeight="SemiBold"/>
+        <StackPanel x:Name="CleafOrder" Orientation="Horizontal"   HorizontalAlignment="Right"  Margin="0,10,500,0" VerticalAlignment="Top">
+            <TextBlock Text="Order " VerticalAlignment="Bottom"/>
+            <TextBlock Text="{Binding Id}"         FontSize="20" FontWeight="SemiBold"/>
+        </StackPanel>
+
+        <!-- ROW 0: Main Screen _______________________________________________________________________________________-->
+        <Grid Grid.Row="0">
+            <Custom:XamTabControl 
+				HorizontalAlignment="Stretch" 
+				VerticalAlignment="Stretch"
+                x:Name="TabCtrl"
+                >
+                <Custom:XamTabControl.Background>
+                    <SolidColorBrush Color="#40FFFFFF" />
+                </Custom:XamTabControl.Background>
+
+                <rx:RxTabItem x:Name="TabPrintQueue" Header="Print Queue" >
+                    <views_pq:PrintQueueView x:Name="PrintQueueView" Loaded="PrintQueueView_Loaded"/>
+                </rx:RxTabItem>
+
+                <rx:RxTabItem x:Name="TabLB701" Header="LB 701" >
+                    <views_ml:LB701UVView/>
+                </rx:RxTabItem>
+                
+                <rx:RxTabItem x:Name="TabLB702UV" Header="LB 702 UV" >
+                    <views_lb702uv:LB702UV_View/>
+                </rx:RxTabItem>
+                
+                <rx:RxTabItem x:Name="TabLB702WB" Header="LB 702 WB" >
+                    <views_lb702wb:LB702WBView/>
+                </rx:RxTabItem>
+
+                <rx:RxTabItem x:Name="TabLH702" Header="LH 702" >
+                    <views_lh702:LH702_View/>
+                </rx:RxTabItem>
+
+                <rx:RxTabItem x:Name="TabDP803" Header="DP 803" >
+                    <views_dp:DP803View/>
+                </rx:RxTabItem>
+
+                <rx:RxTabItem x:Name="TabTex" Header="Textile Press">
+                    <views_tex:TexView/>
+                </rx:RxTabItem>
+
+                <rx:RxTabItem x:Name="TabTestTable" Header="Test Table">
+                    <views_tt:TestTableView/>
+                </rx:RxTabItem>
+
+                <rx:RxTabItem x:Name="TabCleaf" Header="CLEAF" >
+                    <views_cleaf:CleafView/>
+                </rx:RxTabItem>
+
+                <rx:RxTabItem x:Name="TabEvents" Header="Events">
+                    <Grid>
+                        <views:EventView x:Name="Events"/>
+                    </Grid>
+                </rx:RxTabItem>
+
+                <rx:RxTabItem x:Name="TabLog" Header="Log">
+                    <Grid>
+                        <views:LogView x:Name="Log"/>
+                    </Grid>
+                </rx:RxTabItem>
+
+                <rx:RxTabItem x:Name="Network" Header="Network">
+                    <Grid>
+                        <views:NetworkView x:Name="NetworkView"/>
+                    </Grid>
+                </rx:RxTabItem>
+                
+                <rx:RxTabItem x:Name="TabPrintSystem" Header="Print System">
+                    <Grid>
+                        <views_ps:PrintSystemView x:Name="PrintSystemView"/>
+                    </Grid>
+                </rx:RxTabItem>
+
+            </Custom:XamTabControl>
+            
+            <!-- NO Connection _______________________________________________________________________-->
+            <TextBlock x:Name="MainNotConnected"
+                Grid.Row="1" 
+                Text="MAIN-CTRL NOT CONNECTED" 
+                FontSize="80" 
+                HorizontalAlignment="Center" 
+                VerticalAlignment="Center" 
+                Foreground="Red" 
+                FontWeight="Bold"
+                Visibility="{Binding GuiConnected, Converter={StaticResource IntToInVisible_Converter}}"
+                RenderTransformOrigin="0.5,0.5" >
+                <TextBlock.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform/>
+                        <SkewTransform/>
+                        <RotateTransform Angle="-20"/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+                </TextBlock.RenderTransform>
+            </TextBlock>
+
+        </Grid>
+        
+        <!-- ROW 1: Status line _______________________________________________________________________________________-->
+        <StackPanel 
+            x:Name="Status"
+            Grid.Row="1" 
+            Orientation="Horizontal" 
+            >
+            <TextBlock Text="User" Width="50" VerticalAlignment="Center"/>
+            <igWPF:XamComboEditor x:Name="User"
+                Width="100"
+                VerticalAlignment="Center"
+                Value="{Binding UserType}"
+                DisplayMemberPath="Display"
+                ValuePath="Value"
+                PreviewMouseDown="User_PreviewMouseDown"
+                />
+            <StackPanel x:Name="BlueTooth" Orientation="Horizontal">
+                <common:RxButton Height="40" Margin="20,0,0,0" Click="Bluetooth_Clicked">
+                    <Image x:Name="Bluetooth_Img" Source="{Binding IsConnected, Converter={StaticResource BluetoothImg_Converter}}" />
+                </common:RxButton>
+                <TextBlock Text="{Binding UserStr}" VerticalAlignment="Center" FontSize="{StaticResource FontSize}" Margin="10,0"/>
+            </StackPanel>
+
+        </StackPanel>
+
+        <!-- Counters -->
+        <StackPanel x:Name="Counters" Grid.Row="1" HorizontalAlignment="Center" Orientation="Horizontal" Margin="5" >
+            <StackPanel Orientation="Horizontal" MinWidth="100">
+                <TextBlock Text="{Binding ActSpeed, Converter={StaticResource Len_Unit_Converter}, ConverterParameter=m0}"   FontWeight="Bold"     FontSize="{StaticResource FontSizeXL}"    VerticalAlignment="Bottom"/>
+                <TextBlock x:Name="CounterUnit1" Padding="2,0,0,0" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Bottom"/>
+            </StackPanel>
+            <Grid MinWidth="150" Margin="10,0">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <TextBlock Text="{Binding CounterAct, Converter={StaticResource Counter_Converter}}"   FontWeight="Bold"   FontSize="{StaticResource FontSizeLarge}" VerticalAlignment="Bottom"/>
+                    <TextBlock x:Name="CounterUnit2"  Padding="2,0,10,0"                                 FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Bottom"/>
+                </StackPanel>
+                <Rectangle Fill="Transparent" MouseDown="Counter_MouseDown" Stroke="LightGray" StrokeThickness="1"/>
+            </Grid>
+            <Grid MinWidth="150">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <TextBlock Text="{Binding CounterTotal, Converter={StaticResource Counter_Converter}}"  FontWeight="Bold" FontSize="{StaticResource FontSizeLarge}" VerticalAlignment="Bottom"/>
+                    <TextBlock x:Name="CounterUnit3" Padding="2,0,0,0" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Bottom"/>
+                    <TextBlock Text=" tot" Padding="0,0,20,0" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Bottom"/>
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+
+        <!-- ROW 1: Status line _______________________________________________________________________________________-->
+        <StackPanel 
+            Grid.Row="1" 
+            Orientation="Horizontal"
+            HorizontalAlignment="Right"
+            Margin="0,2,0,0"
+            >
+            <rx_uc:PrinterImage x:Name="PrinterStatus" />
+        </StackPanel>
+        
+        <!-- Settings -->
+        <views_settings:Settings
+            x:Name="Settings"
+            Grid.Row="0"
+            Grid.RowSpan="3"
+            HorizontalAlignment="Right"
+            />
+
+        <Grid Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Top" Width="50" MouseDown="Settings_Clicked" Margin="0,5,0,0">
+            <TextBlock Text="" FontFamily="Segoe MDL2 Assets" FontSize="30" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="{DynamicResource RadioButton.Disabled.Glyph}" />
+        </Grid>
+    </Grid>
+</Window>

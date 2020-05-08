@@ -1,0 +1,326 @@
+﻿<UserControl
+      x:Class="RX_DigiPrint.Views.PrintQueueView.PrintQueueView" 
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:igGrids="http://infragistics.com/DataPresenter"
+      xmlns:ig="http://schemas.infragistics.com/xaml"
+      xmlns:System="clr-namespace:System;assembly=mscorlib"
+      xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
+      xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+      xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
+      xmlns:models="clr-namespace:RX_DigiPrint.Models"
+      xmlns:pq_views="clr-namespace:RX_DigiPrint.Views.PrintQueueView"
+      mc:Ignorable="d"
+      d:DesignHeight="600" d:DesignWidth="900"
+      x:Name="Main"
+	  >
+
+    <UserControl.InputBindings>
+        <KeyBinding Key="Delete" Command="{Binding CommandDelete}"/>
+        <KeyBinding Key="Insert" Command="{Binding CommandInsert}"/>
+    </UserControl.InputBindings>
+    
+    <Grid x:Name="MainGrid">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="80*" MinHeight="100"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="20*" MinHeight="100" />
+        </Grid.RowDefinitions>
+
+        <!-- toolbar LEFT _______________________________________________________ -->
+        <rx_uc:CommandButtons/>
+        <rx_uc:Splicing/>
+
+        <!-- toolbar RIGHT _______________________________________________________ -->
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+            <common:RxButton x:Name="Button_Print"  Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" Click="Print_Clicked">
+                <Image Source="../../Resources/Bitmaps/Print.ico"/>
+            </common:RxButton>
+            <common:RxButton x:Name="Button_Refresh"  Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" Click="Refresh_Clicked">
+                <Image Source="../../Resources/Bitmaps/Refresh.ico"/>
+            </common:RxButton>
+            <common:RxButton x:Name="Button_Add" Click="Add_Clicked" ToolTip="Add Image">
+                <Image Source="{StaticResource add_ico}"/>
+            </common:RxButton>
+            <common:RxButton x:Name="Button_Delete" Visibility="Collapsed" Click="Delete_Clicked" ToolTip="Remove Image">
+                <Image Source="{StaticResource delete_ico}"/>
+            </common:RxButton>
+            <common:RxButton x:Name="Button_Up" Visibility="Collapsed" Click="Up_Clicked" ToolTip="Advance Image">
+                <Image Source="../../Resources/Bitmaps/MoveUp.ico"/>
+            </common:RxButton>
+            <common:RxButton x:Name="Button_Down" Visibility="Collapsed" Click="Down_Clicked" ToolTip="Delay Image">
+                <Image Source="../../Resources/Bitmaps/MoveDown.ico"/>
+            </common:RxButton>
+        </StackPanel>
+
+        <!-- PRINT QUEUE ______________________________________________________-->
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="auto"/>
+            </Grid.ColumnDefinitions>
+            
+            <!-- title ____________________________________________________________-->
+            <Grid Grid.Row="1" Background="#FFC6C6C6" Margin="0,1,1,0">
+                <TextBlock Text="Queue" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Grid>
+            <Grid x:Name="SettingsTitle" Grid.Row="1" Grid.Column="2" Background="#FFC6C6C6" Margin="0,1,0,0">
+                <TextBlock Text="Settings" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Grid>
+
+            <!-- Print Queue ______________________________________________________-->
+            <ig:XamGrid 
+			    x:Name="PrintQueueGrid"
+                Grid.Row="2"
+                AutoGenerateColumns="False"
+                ActiveCellChanged="PrintQueueGrid_ActiveCellChanged"
+                HeaderStyle="{DynamicResource XamGridHeaderStyle}"
+                CellStyle="{DynamicResource XamGridCellControlStyle}"
+                Style="{DynamicResource XamGrid-WideScroll-Style}"
+                RowHeight="Dynamic"
+                MinimumRowHeight="36"
+                Background="Transparent"
+                SizeChanged="PrintQueueGrid_SizeChanged"
+                InitializeRow="PrintQueueGrid_InitializeRow"
+                SelectedRowsCollectionChanged="PrintQueueGrid_SelectedRowsCollectionChanged"
+                StylusSystemGesture="PrintQueueGrid_StylusSystemGesture"
+                RowExpansionChanging="PrintQueueGrid_RowExpansionChanging"
+                RowHover="Row"
+                RowExpansionChanged="PrintQueueGrid_RowExpansionChanged"
+                >
+                <ig:XamGrid.SelectionSettings>
+                    <ig:SelectionSettings CellSelection="None" ColumnSelection="None" RowSelection="Single" CellClickAction="SelectRow"/>
+                </ig:XamGrid.SelectionSettings>
+                <ig:XamGrid.ExpansionIndicatorSettings>
+                    <ig:ExpansionIndicatorSettings x:Name="ExpansionIndiator"
+                        HeaderStyle="{DynamicResource XamGridExpansionIndicatorHeaderCellControl}"                        
+                        Style      ="{DynamicResource XamGridExpansionIndicator_Surface}"
+                        />
+                </ig:XamGrid.ExpansionIndicatorSettings>
+                <ig:XamGrid.RowSelectorSettings>
+                    <ig:RowSelectorSettings Visibility="Collapsed"/>
+                </ig:XamGrid.RowSelectorSettings>
+                <ig:XamGrid.Columns>
+                    <ig:TemplateColumn Key="ID" HeaderText="ID" IsFixed="Left">
+                        <ig:TemplateColumn.ItemTemplate>
+                            <DataTemplate>
+                                <Grid PreviewMouseDown="Grid_MouseDown" Height="30" Background="Transparent" >
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="30"/>
+                                        <ColumnDefinition Width="30"/>
+                                        <ColumnDefinition Width="30"/>
+                                    </Grid.ColumnDefinitions>
+                                    <!--
+                                    <Image Grid.Column="0" Source="{StaticResource Yes_ico}"
+                                        Visibility="{Binding IsSelected, Converter={StaticResource BoolToVisible_Converter}}"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Height="34"
+                                        Margin="-5"
+                                    />
+                                    -->
+                                    <CheckBox Grid.Column="2"
+                                        IsChecked="{Binding IsSelected}"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center"
+                                        Visibility="{Binding IsSelected, Converter={StaticResource PrintQueueCheckVisible_Converter}}"
+                                        />
+
+                                    <Image Grid.Column="0" Source="../../Resources/Bitmaps/Changed.ico"
+                                        Visibility="{Binding Changed, Converter={StaticResource BoolToVisible_Converter}}"   
+                                    />
+                                    <!--                                       
+                                        Height="32"
+                                        Margin="-2, -5, 5, -5" 
+                                    -->
+                                    <TextBlock Grid.Column="1" Text="{Binding ID, Converter={StaticResource ToString_Converter}}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                </Grid>                                
+                            </DataTemplate>
+                        </ig:TemplateColumn.ItemTemplate>
+                    </ig:TemplateColumn>
+                    <ig:TextColumn Key="FileName"       HeaderText="File"    Width="auto" ValueConverter="{StaticResource FileName_Converter}"/>
+                    <ig:TextColumn Key="PageStr"        HeaderText="Pages"   Width="auto" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
+                    <ig:TemplateColumn Key="Copies" HeaderText="Copies">
+                        <ig:TemplateColumn.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Converter={StaticResource Copies_Converter}}" HorizontalAlignment="Center" FontSize="{StaticResource FontSizeStd}"/>
+                            </DataTemplate>
+                        </ig:TemplateColumn.ItemTemplate>
+                    </ig:TemplateColumn>
+                    <ig:UnboundColumn Key="ScanLength"  HeaderText="Volume" Width="auto" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" ValueConverter="{StaticResource ScanLength_Converter}"/>
+                    <ig:ImageColumn Key="Ripped"        HeaderText="Ripped" Width="auto" ValueConverter="{StaticResource BoolImg_Converter}" HorizontalContentAlignment="Center"/>
+                    <ig:TemplateColumn Key="Progress"   HeaderText="Printed">
+                        <ig:TemplateColumn.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Width="200" Visibility="{Binding Progress, Converter={StaticResource IntToVisible_Converter}}">
+                                    <rx:RxProgressBar VerticalAlignment="Stretch" ValueStr="{Binding Progress}"/>
+                                    <TextBlock Text="{Binding ProgressStr}" HorizontalAlignment="Center" FontSize="{StaticResource FontSize}"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ig:TemplateColumn.ItemTemplate>
+                    </ig:TemplateColumn>
+                    <ig:UnboundColumn Key="End"     HeaderText=" " Width="*" ValueConverter="{StaticResource Filler_Converter}"/>
+
+                    <ig:TemplateColumnLayout Key="Child" HeaderText="Child" CellStyle="{StaticResource XamGridColumnLayoutStyle}">
+                        <ig:TemplateColumnLayout.Template>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <pq_views:FileSettingsWeb/>
+                                    <pq_views:FileSettingsScan ShowSaveButton="true"/>
+                                    <GroupBox
+                                        Header="Preview"
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Top"
+                                        Visibility="Visible"
+                                        Margin="20,0,0,0"
+                                        IsManipulationEnabled="True"
+                                        >
+                                            <Image Source="{Binding Preview}"
+                                                   HorizontalAlignment="Left"
+                                                   RenderTransformOrigin="0.5,0.5" 
+                                                   TouchDown="Image_TouchDown"
+                                                   Height="300"
+                                                   >
+                                            <Image.LayoutTransform>
+                                                <RotateTransform Angle="{Binding PreviewOrientation}"/>
+                                            </Image.LayoutTransform>
+                                        </Image>
+                                    </GroupBox>
+                                    
+                                    <common:RxButton Click="Rotate_Clicked" VerticalAlignment="Bottom" Height="32" Visibility="Collapsed">
+                                        <Image Source="../../Resources/Bitmaps/rotate.ico"/>
+                                    </common:RxButton>
+                                    
+                                </StackPanel>
+                            </DataTemplate>
+                        </ig:TemplateColumnLayout.Template>
+                    </ig:TemplateColumnLayout>
+                </ig:XamGrid.Columns>
+            </ig:XamGrid>
+
+            <pq_views:FileSettingsWeb x:Name="PrintSettings" Grid.Row="2" Grid.Column="1" VerticalAlignment="Top" HorizontalAlignment="Right"/>
+        </Grid>
+
+       <!-- _______ Splitter ________________________________________________________________-->
+        <rx:RxGridSplitter 
+            Grid.Row="2" Height="32" 
+            HorizontalAlignment="Stretch" 
+            Title="Printed">
+        </rx:RxGridSplitter>
+
+        <!-- _____ printed ___________________________________________________________________-->
+        <Grid Grid.Row="3">
+            <!--
+            <Grid.RowDefinitions>
+                <RowDefinition Height="32" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            < ! - - title ______________________________________________________________
+            <StackPanel  Background="{DynamicResource Brush03}" Margin="1,2,1,0" Orientation="Horizontal" />
+            <TextBlock Text="Printed" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            -->
+            
+            <!-- Printed Queue ______________________________________________________-->
+            <ig:XamGrid 
+			    x:Name="PrintedQueueGrid"
+                AutoGenerateColumns="False"
+                Style="{DynamicResource XamGrid-WideScroll-Style}"
+                CellStyle="{DynamicResource XamGridCellControlStyle}"
+                HeaderStyle="{DynamicResource XamGridHeaderStyle}"
+                Background="Transparent"
+                SelectedRowsCollectionChanged="PrintedQueueGrid_SelectedRowsCollectionChanged"
+                >
+                <!--   
+                HeaderStyle="{DynamicResource XamGridHeaderStyle}"
+                <ig:XamGrid.SelectionSettings>
+                    <ig:SelectionSettings CellSelection="None" ColumnSelection="None" RowSelection="Single" CellClickAction="SelectRow"/>
+                </ig:XamGrid.SelectionSettings>
+                -->
+                <ig:XamGrid.SelectionSettings>
+                    <ig:SelectionSettings CellClickAction="SelectRow"/>
+                </ig:XamGrid.SelectionSettings>
+                <ig:XamGrid.ExpansionIndicatorSettings>
+                    <ig:ExpansionIndicatorSettings x:Name="ExpansionIndiator2"
+                        HeaderStyle="{DynamicResource XamGridExpansionIndicatorHeaderCellControl}"                        
+                        Style      ="{DynamicResource XamGridExpansionIndicator_Surface}"
+                        />
+                </ig:XamGrid.ExpansionIndicatorSettings>
+                <ig:XamGrid.RowSelectorSettings>
+                    <ig:RowSelectorSettings Visibility="Collapsed"/>
+                </ig:XamGrid.RowSelectorSettings>
+                <ig:XamGrid.Columns>
+                    <ig:TextColumn Key="ID"         HeaderText="ID"             Width="auto"/>
+                    <ig:TextColumn Key="FileName"   HeaderText="File"           Width="auto" ValueConverter="{StaticResource FileName_Converter}"/>
+                    <ig:TextColumn Key="PageStr"    HeaderText="Pages"          Width="auto" HorizontalContentAlignment="Right"/>
+                    <ig:TemplateColumn Key="Copies" HeaderText="Copies">
+                        <ig:TemplateColumn.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Converter={StaticResource Copies_Converter}}" HorizontalAlignment="Center" FontSize="{StaticResource FontSizeStd}"/>
+                            </DataTemplate>
+                        </ig:TemplateColumn.ItemTemplate>
+                    </ig:TemplateColumn>
+                    <ig:UnboundColumn Key="ScanLength"  HeaderText="Volume" Width="auto" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" ValueConverter="{StaticResource ScanLength_Converter}"/>
+                    <ig:TextColumn Key="State"      HeaderText="State"          Width="auto" />
+                    <ig:TextColumn Key="ActPage"    HeaderText="Page"           Width="auto" HorizontalContentAlignment="Right"/>
+                    <ig:TextColumn Key="ActCopy"    HeaderText="Copy"           Width="auto" HorizontalContentAlignment="Right"/>
+                    <ig:TextColumn Key="Scans"      HeaderText="Scans"          Width="auto" HorizontalContentAlignment="Right"/>
+                    <ig:TextColumn Key="ScansPrinted"    HeaderText="Scan"      Width="auto" HorizontalContentAlignment="Right"/>
+
+                    <ig:TemplateColumn Key="ProgressStr" HeaderText="Printed">
+                        <ig:TemplateColumn.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Width="200">
+                                    <rx:RxProgressBar VerticalAlignment="Stretch" ValueStr="{Binding Progress}"/>
+                                    <TextBlock Text="{Binding ProgressStr}" HorizontalAlignment="Center" FontSize="{StaticResource FontSize}"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ig:TemplateColumn.ItemTemplate>
+                    </ig:TemplateColumn>
+                   
+                    <ig:TextColumn Key="RipState" HeaderText=" " Width="*"/>                    
+
+                    <ig:TemplateColumnLayout Key="Child" HeaderText="Child" CellStyle="{StaticResource XamGridColumnLayoutStyle}">
+                        <ig:TemplateColumnLayout.Template>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <pq_views:FileSettingsWeb IsEnabled="False"/>
+                                    <pq_views:FileSettingsScan ShowSaveButton="False" IsEnabled="False"/>
+                                    <GroupBox
+                                        Header="Preview"
+                                        HorizontalAlignment="Left"
+                                        Visibility="Visible"
+                                        Margin="20,0,0,0"
+                                        IsManipulationEnabled="True"
+                                        >
+                                        <Image Source="{Binding Preview}" 
+                                                HorizontalAlignment="Left"
+                                                RenderTransformOrigin="0.5,0.5" 
+                                                TouchDown="Image_TouchDown" 
+                                                Height="300"
+                                                >
+                                        </Image>
+                                    </GroupBox>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ig:TemplateColumnLayout.Template>
+                    </ig:TemplateColumnLayout>                   
+                </ig:XamGrid.Columns>
+            </ig:XamGrid>
+
+        </Grid>
+        
+        <!-- FILE OPEN ____________________________________________________________-->
+        <!--
+        <pq_views:FileOpen       Grid.Row="1" Grid.RowSpan="3" x:Name="FileOpen"       Visibility="Hidden" IsVisibleChanged="FileOpen_IsVisibleChanged" />
+        <pq_views:FileOpen_LB702 Grid.Row="1" Grid.RowSpan="3" x:Name="FileOpen_LB702" Visibility="Hidden" IsVisibleChanged="FileOpen_IsVisibleChanged" />
+        -->
+    </Grid>
+</UserControl>

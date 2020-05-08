@@ -1,0 +1,99 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug-soc|Win32">
+      <Configuration>Debug-soc</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release-soc|Win32">
+      <Configuration>Release-soc</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{73EBAA62-29D6-440C-93E0-EC4FBAFBCF44}</ProjectGuid>
+    <ProjectName>rx_encoder_ctrl</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug-soc|Win32'">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-soc|Win32'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Label="VisualGDBPackageDefinitions">
+    <ToolchainID>com.sysprogs.imported.arm-linux-gnueabi</ToolchainID>
+    <ToolchainVersion>4.7.1/(crosstool-NG/r0</ToolchainVersion>
+  </PropertyGroup>
+  <ImportGroup Label="VisualGDBFindComponents">
+    <Import Project="$(LOCALAPPDATA)\VisualGDB\FindComponents.props" />
+  </ImportGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-soc|Win32'">
+    <NMakeBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /build "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /rebuild "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /clean "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeCleanCommandLine>
+    <NMakeOutput>$(ProjectDir)rx_encoder_ctrl-Debug-soc.vgdbsettings</NMakeOutput>
+    <NMakeIncludeSearchPath>f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1;f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1\arm-linux-gnueabi;f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1\backward;f:\compiler\linaro-tools\lib\gcc\arm-linux-gnueabi\4.7.1\include;f:\compiler\linaro-tools\lib\gcc\arm-linux-gnueabi\4.7.1\include-fixed;f:\compiler\linaro-tools\arm-linux-gnueabi\include;f:\compiler\linaro-tools\arm-linux-gnueabi\libc\usr\include\arm-linux-gnueabi;f:\compiler\linaro-tools\arm-linux-gnueabi\libc\usr\include;../rx_common_lib;../rx_ink_lib;../Externals/TinyXML;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeForcedIncludes>$(ProjectDir)\gcc_Debug-soc.h;$(VISUALGDB_DIR)\gcc_compat.h;$(NMakeForcedIncludes)</NMakeForcedIncludes>
+    <OutDir>$(SolutionDir)_out\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)_temp\$(MSBuildProjectName)\$(Configuration)\</IntDir>
+    <NMakePreprocessorDefinitions>__VisualGDB_CFG_Debug_soc;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-soc|Win32'">
+    <NMakeBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /build "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /rebuild "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /clean "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeCleanCommandLine>
+    <NMakeOutput>$(ProjectDir)rx_encoder_ctrl-Release-soc.vgdbsettings</NMakeOutput>
+    <NMakeIncludeSearchPath>f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1;f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1\arm-linux-gnueabi;f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1\backward;f:\compiler\linaro-tools\lib\gcc\arm-linux-gnueabi\4.7.1\include;f:\compiler\linaro-tools\lib\gcc\arm-linux-gnueabi\4.7.1\include-fixed;f:\compiler\linaro-tools\arm-linux-gnueabi\include;f:\compiler\linaro-tools\arm-linux-gnueabi\libc\usr\include\arm-linux-gnueabi;f:\compiler\linaro-tools\arm-linux-gnueabi\libc\usr\include;..\rx_common_lib;..\rx_ink_lib;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeForcedIncludes>$(ProjectDir)\gcc_Release-soc.h;$(VISUALGDB_DIR)\gcc_compat.h;$(NMakeForcedIncludes)</NMakeForcedIncludes>
+    <OutDir>$(SolutionDir)_out\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)_temp\$(MSBuildProjectName)\$(Configuration)\</IntDir>
+    <NMakePreprocessorDefinitions>__VisualGDB_CFG_Release_soc;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="debug-soc.mak" />
+    <None Include="debug.mak" />
+    <None Include="Makefile" />
+    <None Include="release-soc.mak" />
+    <None Include="release.mak" />
+    <None Include="rx_encoder_ctrl-Debug-soc.vgdbsettings">
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\rx_ink_lib\comm.c" />
+    <ClCompile Include="args.c" />
+    <ClCompile Include="enc_ctrl.c" />
+    <ClCompile Include="enc_test.c" />
+    <ClCompile Include="fpga_enc.c" />
+    <ClCompile Include="help.c" />
+    <ClCompile Include="rx_encoder_ctrl.c" />
+    <ClCompile Include="tw8.c" />
+    <ClCompile Include="version.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\rx_ink_lib\comm.h" />
+    <ClInclude Include="args.h" />
+    <ClInclude Include="enc_ctrl.h" />
+    <ClInclude Include="enc_test.h" />
+    <ClInclude Include="fpga_enc.h" />
+    <ClInclude Include="fpga_def_enc.h" />
+    <ClInclude Include="gcc_Debug-soc.h" />
+    <ClInclude Include="gcc_Debug.h" />
+    <ClInclude Include="gcc_Release-soc.h" />
+    <ClInclude Include="help.h" />
+    <ClInclude Include="tw8.h" />
+    <ClInclude Include="tw8_def.h" />
+    <ClInclude Include="tw8_reg.h" />
+    <ClInclude Include="version.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

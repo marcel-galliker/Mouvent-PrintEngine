@@ -1,0 +1,45 @@
+﻿<Window x:Class="RX_DigiPrint.Views.UserControls.FlushWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Flushing"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen"
+        Height="300" 
+        Width="300">
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+
+        <!--
+        <Border Grid.ColumnSpan="2" Background="{DynamicResource Brush03}" Padding="4">
+            <TextBlock x:Name="MsgTitle" HorizontalAlignment="Center" FontWeight="Bold" Text="Title"/>
+        </Border>
+        -->
+        <!-- FLUSH BUTTONS _________________________________________________-->
+        <StackPanel Grid.Row="1" VerticalAlignment="Center">
+            <Button Content="Night"     Click="Night_Clicked"    Width="170" Height="30" Margin="10"/>
+            <Button Content="Weekend"   Click="Weekend_Clicked"  Width="170" Height="30" Margin="10"/>
+            <Button Content="Week"      Click="Week_Clicked"     Width="170" Height="30" Margin="10"/>
+        </StackPanel>
+
+        <!-- buttons _______________________________________________________-->
+        <Border Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="1" VerticalAlignment="Bottom">
+            <Border.Background>
+                <SolidColorBrush Color="{DynamicResource Color_007}"/>
+            </Border.Background>
+            <Grid Margin="50,0">
+                <common:RxButton x:Name="Button_Yes" HorizontalAlignment="Left" Click="Yes_Clicked">
+                    <Image Source="{StaticResource Yes_ico}"/>
+                </common:RxButton>
+                <common:RxButton x:Name="Button_No" HorizontalAlignment="Right" Click="No_Clicked">
+                    <Image Source="{StaticResource No_ico}"/>
+                </common:RxButton>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

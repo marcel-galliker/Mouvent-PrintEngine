@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<TabbedPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:pages="clr-namespace:DigiPrint.Pages"
+             xmlns:common="clr-namespace:DigiPrint.Common"
+             x:Class="DigiPrint.Pages.RxTabbedPage">
+
+    <!-- ICONS must be placed in rx_digiprint_app.Driod.Resources.drawable -->
+    <NavigationPage Icon="production.png" BarBackgroundColor="{Binding EventBackground}" BarTextColor="{Binding EventTextColor}">
+        <x:Arguments>
+            <pages:ProductionPage/>
+        </x:Arguments>
+    </NavigationPage>
+
+    <NavigationPage Icon="machine.png" BarBackgroundColor="{Binding EventBackground}" BarTextColor="{Binding EventTextColor}" >
+        <x:Arguments>
+            <pages:MachinePage      Title="{Binding Name}"/>
+        </x:Arguments>
+    </NavigationPage>
+    
+    <NavigationPage Icon="{Binding EventIcon}" BarBackgroundColor="{Binding EventBackground}" BarTextColor="{Binding EventTextColor}" x:Name="EventTab" >
+        <x:Arguments>
+            <pages:EventsPage       Title="{Binding Name}"/>
+        </x:Arguments>
+    </NavigationPage>
+
+    <NavigationPage Icon="PrintSystem.png" BarBackgroundColor="{Binding EventBackground}" BarTextColor="{Binding EventTextColor}">
+        <x:Arguments>
+            <pages:MachinePage      Title="{Binding Name}" x:Name="PS_View"/>
+        </x:Arguments>
+    </NavigationPage>
+    
+</TabbedPage>

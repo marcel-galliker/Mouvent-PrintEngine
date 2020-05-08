@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:rx="clr-namespace:DigiPrint.Common"
+             x:Class="DigiPrint.Pages.MachineViews.TestView"
+             >
+    <ContentPage.Content>
+        <!-- BUTTONS ____________________________________________________________-->
+        <StackLayout VerticalOptions="End" Orientation="Horizontal">
+            <Button x:Name="Button1" Text="1" Clicked="Button1_Clicked" Unfocused="Button1_Unfocused"/>
+            <Button Text="2" Clicked="Button2_Clicked" />
+
+            <rx:RxButton x:Name="Button3" Image="icon.png" />
+            <rx:RxButton x:Name="Button4" Image="icon.png" />
+        </StackLayout>
+    </ContentPage.Content>
+</ContentView>

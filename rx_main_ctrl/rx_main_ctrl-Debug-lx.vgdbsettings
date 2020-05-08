@@ -1,0 +1,370 @@
+<?xml version="1.0"?>
+<VisualGDBProjectSettings2 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <ConfigurationName>Debug-lx</ConfigurationName>
+  <Project xsi:type="com.visualgdb.project.linux">
+    <CustomSourceDirectories>
+      <Directories />
+      <PathStyle>MinGWUnixSlash</PathStyle>
+    </CustomSourceDirectories>
+    <BuildHost>
+      <HostName>localhost:2222</HostName>
+      <Transport>SSH</Transport>
+      <UserName>root</UserName>
+    </BuildHost>
+    <DeploymentHost>
+      <HostName>192.168.200.1</HostName>
+      <Transport>SSH</Transport>
+      <UserName>root</UserName>
+    </DeploymentHost>
+    <MainSourceTransferCommand>
+      <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
+      <RemoteHost>
+        <HostName>localhost:2222</HostName>
+        <Transport>SSH</Transport>
+        <UserName>root</UserName>
+      </RemoteHost>
+      <LocalDirectory>$(ProjectDir)</LocalDirectory>
+      <RemoteDirectory>/tmp/VisualGDB/$(ProjectDirUnixStyle)</RemoteDirectory>
+      <FileMasks>
+        <string>*.cpp</string>
+        <string>*.h</string>
+        <string>*.c</string>
+        <string>*.mak</string>
+        <string>Makefile</string>
+      </FileMasks>
+      <TransferNewFilesOnly>true</TransferNewFilesOnly>
+      <IncludeSubdirectories>true</IncludeSubdirectories>
+      <SelectedDirectories />
+      <DeleteDisappearedFiles>false</DeleteDisappearedFiles>
+      <ApplyGlobalExclusionList>true</ApplyGlobalExclusionList>
+      <Extension>
+        <Direction>Outgoing</Direction>
+        <SkipMountPoints>false</SkipMountPoints>
+        <OverwriteTrigger>Stat</OverwriteTrigger>
+      </Extension>
+    </MainSourceTransferCommand>
+    <AllowChangingHostForMainCommands>false</AllowChangingHostForMainCommands>
+    <SkipBuildIfNoSourceFilesChanged>false</SkipBuildIfNoSourceFilesChanged>
+    <IgnoreFileTransferErrors>false</IgnoreFileTransferErrors>
+    <RemoveRemoteDirectoryOnClean>true</RemoveRemoteDirectoryOnClean>
+    <SkipDeploymentTests>false</SkipDeploymentTests>
+    <MainSourceDirectoryForLocalBuilds>$(ProjectDir)</MainSourceDirectoryForLocalBuilds>
+  </Project>
+  <Build xsi:type="com.visualgdb.build.make">
+    <ToolchainID>
+      <ID>com.sysprogs.toolchain.default-gcc</ID>
+      <Version>
+        <Revision>0</Revision>
+      </Version>
+    </ToolchainID>
+    <Toolchain>
+      <UnixSystem>true</UnixSystem>
+      <RequireCtrlBreak>false</RequireCtrlBreak>
+      <ArgumentEscapingMode>Normal</ArgumentEscapingMode>
+      <RequiredLinuxPackages>
+        <TestableLinuxPackage>
+          <UserFriendlyName>GCC</UserFriendlyName>
+          <DefaultPackageName>g++</DefaultPackageName>
+          <AlternativeRPMPackageName>gcc-c++</AlternativeRPMPackageName>
+          <BinaryToCheck>g++</BinaryToCheck>
+        </TestableLinuxPackage>
+        <TestableLinuxPackage>
+          <ID>gdb</ID>
+          <UserFriendlyName>GDB</UserFriendlyName>
+          <DefaultPackageName>gdb</DefaultPackageName>
+          <BinaryToCheck>gdb</BinaryToCheck>
+          <AlternativeBinaries>
+            <string>ggdb</string>
+            <string>gdb-apple</string>
+          </AlternativeBinaries>
+          <AlternativeDirectories>
+            <string>/opt/local/bin</string>
+          </AlternativeDirectories>
+        </TestableLinuxPackage>
+        <TestableLinuxPackage>
+          <UserFriendlyName>GNU Make</UserFriendlyName>
+          <DefaultPackageName>make</DefaultPackageName>
+          <BinaryToCheck>make</BinaryToCheck>
+        </TestableLinuxPackage>
+      </RequiredLinuxPackages>
+      <Name>Default GCC toolchain on localhost:2222</Name>
+      <UniqueID>com.sysprogs.toolchain.default-gcc</UniqueID>
+      <GCC>gcc</GCC>
+      <GXX>g++</GXX>
+      <GDB>gdb</GDB>
+      <AR>ar</AR>
+      <OBJCOPY>objcopy</OBJCOPY>
+      <Make>make</Make>
+      <ShellMode>Direct</ShellMode>
+    </Toolchain>
+    <MakeFilePathRelativeToSourceDir>Makefile</MakeFilePathRelativeToSourceDir>
+    <MakeConfigurationName>Debug-lx</MakeConfigurationName>
+    <AdditionalMakeArguments />
+    <MakeCommandTemplate>
+      <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
+      <Command>make</Command>
+      <WorkingDirectory>$(BuildDir)</WorkingDirectory>
+      <Environment>
+        <Records>
+          <Record>
+            <VariableName>LANG</VariableName>
+            <Value>en_US.UTF-8</Value>
+          </Record>
+        </Records>
+        <EnvironmentSetupFiles />
+      </Environment>
+      <BackgroundMode xsi:nil="true" />
+    </MakeCommandTemplate>
+  </Build>
+  <CustomBuild>
+    <PreSyncActions />
+    <PreBuildActions>
+      <CustomActionBase xsi:type="SourceTransferAction">
+        <SkipWhenRunningCommandList>true</SkipWhenRunningCommandList>
+        <RemoteHost>
+          <HostName>$(BuildHost)</HostName>
+          <Transport>SSH</Transport>
+          <UserName>root</UserName>
+        </RemoteHost>
+        <LocalDirectory>$(ProjectDir)/../Externals/matrix/linux</LocalDirectory>
+        <RemoteDirectory>/tmp/VisualGDB/$(ProjectDirUnixStyle)/../Externals/matrix/linux</RemoteDirectory>
+        <FileMasks>
+          <string>*.*</string>
+        </FileMasks>
+        <TransferNewFilesOnly>true</TransferNewFilesOnly>
+        <IncludeSubdirectories>true</IncludeSubdirectories>
+        <SelectedDirectories />
+        <DeleteDisappearedFiles>false</DeleteDisappearedFiles>
+        <ApplyGlobalExclusionList>true</ApplyGlobalExclusionList>
+      </CustomActionBase>
+      <CustomActionBase xsi:type="SourceTransferAction">
+        <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
+        <RemoteHost>
+          <HostName>$(BuildHost)</HostName>
+          <Transport>SSH</Transport>
+          <UserName>root</UserName>
+        </RemoteHost>
+        <LocalDirectory>$(ProjectDir)/../Externals/mlpi</LocalDirectory>
+        <RemoteDirectory>/tmp/VisualGDB/$(ProjectDirUnixStyle)/../Externals/mlpi</RemoteDirectory>
+        <FileMasks>
+          <string>*.*</string>
+        </FileMasks>
+        <TransferNewFilesOnly>true</TransferNewFilesOnly>
+        <IncludeSubdirectories>true</IncludeSubdirectories>
+        <SelectedDirectories />
+        <DeleteDisappearedFiles>false</DeleteDisappearedFiles>
+        <ApplyGlobalExclusionList>true</ApplyGlobalExclusionList>
+        <Extension>
+          <Direction>Outgoing</Direction>
+          <SkipMountPoints>false</SkipMountPoints>
+          <OverwriteTrigger>Stat</OverwriteTrigger>
+        </Extension>
+      </CustomActionBase>
+      <CustomActionBase xsi:type="FileTransferAction">
+        <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
+        <DestinationHost>
+          <HostName>$(DeployHost)</HostName>
+          <Transport>SSH</Transport>
+          <UserName>root</UserName>
+        </DestinationHost>
+        <SourceFilePath>$(ProjectDir)\..\Externals\mlpi\bin\linux-gcc-x64\libmlpi.so.1</SourceFilePath>
+        <DestinationFilePath>$(DeployDir)/libmlpi.so.1</DestinationFilePath>
+        <OverwriteTrigger>Stat</OverwriteTrigger>
+      </CustomActionBase>
+      <CustomActionBase xsi:type="SourceTransferAction">
+        <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
+        <RemoteHost>
+          <HostName>$(BuildHost)</HostName>
+          <Transport>SSH</Transport>
+          <UserName>root</UserName>
+        </RemoteHost>
+        <LocalDirectory>$(ProjectDir)/../Externals/libxl</LocalDirectory>
+        <RemoteDirectory>/tmp/VisualGDB/$(ProjectDirUnixStyle)/../Externals/libxl</RemoteDirectory>
+        <FileMasks>
+          <string>*.*</string>
+        </FileMasks>
+        <TransferNewFilesOnly>true</TransferNewFilesOnly>
+        <IncludeSubdirectories>true</IncludeSubdirectories>
+        <SelectedDirectories />
+        <DeleteDisappearedFiles>false</DeleteDisappearedFiles>
+        <ApplyGlobalExclusionList>true</ApplyGlobalExclusionList>
+        <Extension>
+          <Direction>Outgoing</Direction>
+          <SkipMountPoints>false</SkipMountPoints>
+          <OverwriteTrigger>Stat</OverwriteTrigger>
+        </Extension>
+      </CustomActionBase>
+      <CustomActionBase xsi:type="FileTransferAction">
+        <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
+        <DestinationHost>
+          <HostName>$(DeployHost)</HostName>
+          <Transport>SSH</Transport>
+          <UserName>root</UserName>
+        </DestinationHost>
+        <SourceFilePath>$(ProjectDir)\..\Externals\libxl\lib64\libxl.so</SourceFilePath>
+        <DestinationFilePath>$(DeployDir)/libxl.so</DestinationFilePath>
+        <OverwriteTrigger>Stat</OverwriteTrigger>
+      </CustomActionBase>
+    </PreBuildActions>
+    <PostBuildActions>
+      <CustomActionBase xsi:type="SourceTransferAction">
+        <SkipWhenRunningCommandList>true</SkipWhenRunningCommandList>
+        <RemoteHost>
+          <HostName>$(DeployHost)</HostName>
+          <Transport>SSH</Transport>
+          <UserName>root</UserName>
+        </RemoteHost>
+        <LocalDirectory>$(ProjectDir)</LocalDirectory>
+        <RemoteDirectory>/tmp/VisualGDB/$(ProjectDirUnixStyle)</RemoteDirectory>
+        <FileMasks>
+          <string>*.cpp</string>
+          <string>*.h</string>
+          <string>*.c</string>
+          <string>*.mak</string>
+          <string>Makefile</string>
+        </FileMasks>
+        <TransferNewFilesOnly>true</TransferNewFilesOnly>
+        <IncludeSubdirectories>true</IncludeSubdirectories>
+        <SelectedDirectories />
+        <DeleteDisappearedFiles>false</DeleteDisappearedFiles>
+        <ApplyGlobalExclusionList>true</ApplyGlobalExclusionList>
+      </CustomActionBase>
+      <CustomActionBase xsi:type="FileTransferAction">
+        <SkipWhenRunningCommandList>true</SkipWhenRunningCommandList>
+        <SourceHost>
+          <Transport>None</Transport>
+        </SourceHost>
+        <DestinationHost>
+          <HostName>$(DeployHost)</HostName>
+          <Transport>SSH</Transport>
+          <UserName>root</UserName>
+        </DestinationHost>
+        <SourceFilePath>$(ProjectDir)\..\Externals\matrix\linux\x86_64\libmxlin64.so.2.6.0</SourceFilePath>
+        <DestinationFilePath>$(TargetDir)\libmxlin64.so.2.6</DestinationFilePath>
+        <OverwriteTrigger>Always</OverwriteTrigger>
+      </CustomActionBase>
+      <CustomActionBase xsi:type="FileTransferAction">
+        <SkipWhenRunningCommandList>true</SkipWhenRunningCommandList>
+        <SourceHost>
+          <Transport>None</Transport>
+        </SourceHost>
+        <DestinationHost>
+          <HostName>BuildMachine</HostName>
+          <Transport>BuiltinShortcut</Transport>
+        </DestinationHost>
+        <SourceFilePath>$(ProjectDir)\..\Externals\mlpi\bin\linux-gcc-x64\libmlpi.so.1</SourceFilePath>
+        <DestinationFilePath>$(TargetDir)\libmlpi.so.1</DestinationFilePath>
+        <OverwriteTrigger>Always</OverwriteTrigger>
+      </CustomActionBase>
+      <CustomActionBase xsi:type="FileTransferAction">
+        <SkipWhenRunningCommandList>true</SkipWhenRunningCommandList>
+        <SourceHost>
+          <Transport>None</Transport>
+        </SourceHost>
+        <DestinationHost>
+          <HostName>$(DeployHost)</HostName>
+          <Transport>SSH</Transport>
+          <UserName>root</UserName>
+        </DestinationHost>
+        <SourceFilePath>$(ProjectDir)\..\Externals\libxl\lib64\libxl.so</SourceFilePath>
+        <DestinationFilePath>$(TargetDir)\libxl.so</DestinationFilePath>
+        <OverwriteTrigger>Always</OverwriteTrigger>
+      </CustomActionBase>
+    </PostBuildActions>
+    <PreCleanActions />
+    <PostCleanActions />
+  </CustomBuild>
+  <CustomDebug>
+    <PreDebugActions>
+      <CustomActionBase xsi:type="CommandLineAction">
+        <SkipWhenRunningCommandList>true</SkipWhenRunningCommandList>
+        <RemoteHost>
+          <HostName>$(DeployHost)</HostName>
+          <Transport>SSH</Transport>
+          <UserName>root</UserName>
+        </RemoteHost>
+        <Command>sudo</Command>
+        <Arguments>kill $(pgrep $(TargetFileName)) </Arguments>
+        <WorkingDirectory />
+        <Environment>
+          <Records />
+          <EnvironmentSetupFiles />
+        </Environment>
+        <BackgroundMode xsi:nil="true" />
+      </CustomActionBase>
+    </PreDebugActions>
+    <PostDebugActions />
+    <DebugStopActions />
+    <BreakMode>Default</BreakMode>
+  </CustomDebug>
+  <CustomShortcuts>
+    <Shortcuts />
+    <ShowMessageAfterExecuting>true</ShowMessageAfterExecuting>
+  </CustomShortcuts>
+  <UserDefinedVariables />
+  <ImportedPropertySheets />
+  <CodeSense>
+    <Enabled>Unknown</Enabled>
+    <CFLAGS />
+    <CXXFLAGS />
+    <ExternalSourceFileList />
+    <ExtraSettings>
+      <HideErrorsInSystemHeaders>true</HideErrorsInSystemHeaders>
+      <SupportLightweightReferenceAnalysis>false</SupportLightweightReferenceAnalysis>
+      <CheckForClangFormatFiles xsi:nil="true" />
+      <FormattingEngine xsi:nil="true" />
+    </ExtraSettings>
+    <CodeAnalyzerSettings>
+      <Enabled>false</Enabled>
+    </CodeAnalyzerSettings>
+  </CodeSense>
+  <Configurations />
+  <ProgramArgumentsSuggestions />
+  <Debug xsi:type="com.visualgdb.debug.remote">
+    <AdditionalStartupCommands />
+    <AdditionalGDBSettings>
+      <Features>
+        <DisableAutoDetection>false</DisableAutoDetection>
+        <UseFrameParameter>true</UseFrameParameter>
+        <SimpleValuesFlagSupported>true</SimpleValuesFlagSupported>
+        <ListLocalsSupported>true</ListLocalsSupported>
+        <ByteLevelMemoryCommandsAvailable>true</ByteLevelMemoryCommandsAvailable>
+        <ThreadInfoSupported>true</ThreadInfoSupported>
+        <PendingBreakpointsSupported>true</PendingBreakpointsSupported>
+        <SupportTargetCommand>true</SupportTargetCommand>
+        <ReliableBreakpointNotifications>true</ReliableBreakpointNotifications>
+      </Features>
+      <EnableSmartStepping>false</EnableSmartStepping>
+      <FilterSpuriousStoppedNotifications>false</FilterSpuriousStoppedNotifications>
+      <ForceSingleThreadedMode>false</ForceSingleThreadedMode>
+      <UseAppleExtensions>false</UseAppleExtensions>
+      <CanAcceptCommandsWhileRunning>false</CanAcceptCommandsWhileRunning>
+      <MakeLogFile>false</MakeLogFile>
+      <IgnoreModuleEventsWhileStepping>true</IgnoreModuleEventsWhileStepping>
+      <UseRelativePathsOnly>false</UseRelativePathsOnly>
+      <ExitAction>KillApp</ExitAction>
+      <DisableDisassembly>false</DisableDisassembly>
+      <ExamineMemoryWithXCommand>false</ExamineMemoryWithXCommand>
+      <StepIntoNewInstanceEntry>main</StepIntoNewInstanceEntry>
+      <ExamineRegistersInRawFormat>true</ExamineRegistersInRawFormat>
+      <DisableSignals>false</DisableSignals>
+      <EnableAsyncExecutionMode>false</EnableAsyncExecutionMode>
+      <EnableNonStopMode>false</EnableNonStopMode>
+      <MaxBreakpointLimit>0</MaxBreakpointLimit>
+    </AdditionalGDBSettings>
+    <LaunchGDBSettings xsi:type="GDBLaunchParametersNewInstance">
+      <DebuggedProgram>$(TargetPath)</DebuggedProgram>
+      <GDBServerPort>1938</GDBServerPort>
+      <ProgramArguments>-debug +simuplc +simuencoder -simuchiller</ProgramArguments>
+    </LaunchGDBSettings>
+    <GenerateCtrlBreakInsteadOfCtrlC>false</GenerateCtrlBreakInsteadOfCtrlC>
+    <DeploymentTargetPath />
+    <X11WindowMode>Local</X11WindowMode>
+    <KeepConsoleAfterExit>false</KeepConsoleAfterExit>
+    <RunGDBUnderSudo>false</RunGDBUnderSudo>
+    <DeploymentMode>Auto</DeploymentMode>
+    <LdLibraryPath>/tmp:/opt/radex/bin/main</LdLibraryPath>
+    <DeployWhenLaunchedWithoutDebugging>true</DeployWhenLaunchedWithoutDebugging>
+    <SuppressTTYCreation>false</SuppressTTYCreation>
+  </Debug>
+</VisualGDBProjectSettings2>

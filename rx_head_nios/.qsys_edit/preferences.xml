@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<preferences>
+ <debug showDebugMenu="0" />
+ <systemtable filter="All Interfaces">
+  <columns>
+   <connections preferredWidth="223" />
+   <irq preferredWidth="63" />
+  </columns>
+ </systemtable>
+ <library
+   expandedCategories="Library/Processors and Peripherals,Library/Interface Protocols/PCI Express,Library/Processors and Peripherals/Peripherals,Library,Project,Library/Interface Protocols/PCI Express/QSYS Example Designs,Library/Interface Protocols" />
+ <window width="1684" height="1004" x="-40" y="25" />
+ <generation synthesis="VERILOG" simulation="VHDL" />
+</preferences>

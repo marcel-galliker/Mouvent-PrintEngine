@@ -1,0 +1,32 @@
+﻿<UserControl x:Class="RX_DigiPrint.Views.CleafView.CleafCommands"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="400" d:DesignWidth="300">
+    <Grid>
+        <GroupBox Grid.Column="1" Header="Commands" Style="{StaticResource RxGroupBox}">
+            <rx_uc:PlcParPanel UnitID="Application.GUI_00_001_Main">
+                <rx_uc:PlcCommand ID="CMD_CLEAR_ERROR"              Label="Clear Error"/>
+                
+                <Rectangle Fill="LightGray" StrokeThickness="2" Height="5"/>
+                
+                <rx_uc:PlcCommand ID="CMD_PRODUCTION"               Label="Production"/>
+                <rx_uc:PlcCommand ID="CMD_RUN"                      Label="Run"/>
+                <rx_uc:PlcCommand ID="CMD_PAUSE"                    Label="Pause"/>
+                <rx_uc:PlcCommand ID="CMD_STOP"                     Label="STOP"/>
+                <rx_uc:PlcCommand ID="CMD_BUFFER_REFERENCE"         Label="Ref Buffer" IsEnabled="{Binding ReferenceEnabled}"/>
+
+                <Rectangle Fill="LightGray" StrokeThickness="2" Height="5"/>
+                
+                <rx_uc:PlcCommand ID="CMD_SETUP"                    Label="Setup"/>
+                <rx_uc:PlcCommand ID="CMD_WEBIN"                    Label="Web In"/>
+                <rx_uc:PlcCommand ID="CMD_WEBOUT"                   Label="Web Out"/>                
+                <rx_uc:PlcCommand ID="CMD_MAINTENANCE"              Label="Maintenance"/>
+
+            </rx_uc:PlcParPanel>
+        </GroupBox>
+    </Grid>
+</UserControl>

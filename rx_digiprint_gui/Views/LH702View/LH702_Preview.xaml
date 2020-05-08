@@ -1,0 +1,145 @@
+﻿<UserControl x:Class="RX_DigiPrint.Views.LH702View.LH702_Preview"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+             mc:Ignorable="d"
+             SizeChanged="UserControl_SizeChanged"
+             d:DesignHeight="300" d:DesignWidth="500">
+    <Grid>
+        <Canvas x:Name="MainGrid" OpacityMask="Black">
+            <Canvas.Background>
+                <LinearGradientBrush EndPoint="1,0.5" MappingMode="RelativeToBoundingBox" StartPoint="0,0.5">
+                    <GradientStop Color="{DynamicResource Color_007}"/>
+                    <GradientStop Color="{DynamicResource Color_005}" Offset="1"/>
+                </LinearGradientBrush>
+            </Canvas.Background>
+            <TextBlock x:Name="Direction"  Text="ð ð ð ð ð ð ð ð ð ð ð ð" FontFamily="Wingdings" FontSize="40" Background="Transparent" Foreground="White"/>
+            <TextBlock x:Name="Direction2" Text="ð ð ð ð ð ð ð ð ð ð ð ð" FontFamily="Wingdings" FontSize="40" Background="Transparent" Foreground="White"/>
+
+            <Border x:Name="Border"
+                Canvas.Left="120"
+                Canvas.Top="25"
+                BorderBrush="{StaticResource RX.Green}"
+                BorderThickness="3"
+                MinWidth="200"
+                MinHeight="100"
+                SizeChanged="Border_SizeChanged"
+                >
+                <Grid MouseUp="Image_Clicked">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="19,-32,19,0">
+                        <TextBlock Text="Printing " FontSize="{StaticResource FontSizeLarge}"/>
+                        <TextBlock Text="{Binding CopiesPrinted}" FontSize="{StaticResource FontSizeLarge}"/>
+                    </StackPanel>
+                    <Image 
+                    x:Name="Image"
+                    Source="{Binding Preview}"
+                    RenderTransformOrigin="0.5,0.5"
+                    MouseUp="Image_Clicked"
+                    SizeChanged="Image_SizeChanged"
+                    >
+                        <Image.LayoutTransform>
+                            <RotateTransform Angle="90"/>
+                        </Image.LayoutTransform>
+                    </Image>
+                </Grid>
+
+            </Border>
+            <Rectangle x:Name="PrintMark" Fill="Black" Width="5" Height="20"/>
+
+            <Border x:Name="NextBorder"                
+                Canvas.Left="350"
+                Canvas.Top="25"
+                BorderBrush="{StaticResource RX.Green}"
+                BorderThickness="3"
+                MinWidth="100"
+                MinHeight="100"
+                >
+                <Grid>
+                    <Image 
+                    x:Name="NextImage"
+                    Source="{Binding Preview}"
+                    RenderTransformOrigin="0.5,0.5"
+                    MouseUp="NextImage_Clicked"
+                    SizeChanged="Image_SizeChanged"
+                    >
+                        <Image.LayoutTransform>
+                            <RotateTransform Angle="90"/>
+                        </Image.LayoutTransform>
+                    </Image>
+                    <TextBlock Text="Next" HorizontalAlignment="Center" Margin="0,-32,0,0" FontSize="{StaticResource FontSizeLarge}"/>
+                </Grid>
+            </Border>
+
+        </Canvas>
+
+        <!-- old move buttons -->
+        <Grid Width="250" Height="250" HorizontalAlignment="Left" Margin="100,10,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid Grid.Row="0"  Grid.Column="1" >
+                <TextBox x:Name="MoveUp" Visibility="Hidden"/>
+                <common:RxButton Click="MoveUp_Clicked">
+                    <TextBlock Text="é" FontFamily="Wingdings" FontSize="{StaticResource FontSizeXL}"/>
+                </common:RxButton>
+            </Grid>
+
+            <Grid Grid.Row="2"  Grid.Column="1" >
+                <TextBox x:Name="MoveDown" Visibility="Hidden"/>
+                <common:RxButton Click="MoveDown_Clicked">
+                    <TextBlock Text="ê" FontFamily="Wingdings" FontSize="{StaticResource FontSizeXL}"/>
+                </common:RxButton>
+            </Grid>
+
+            <Grid Grid.Row="1" Grid.Column="0">
+                <TextBox x:Name="MoveLeft" Visibility="Hidden"/>
+                <common:RxButton  Click="MoveLeft_Clicked">
+                    <TextBlock Text="ç" FontFamily="Wingdings" FontSize="{StaticResource FontSizeXL}"/>
+                </common:RxButton>
+            </Grid>
+
+            <Grid Grid.Row="1"  Grid.Column="2">
+                <TextBox x:Name="MoveRight" Visibility="Hidden"/>
+                <common:RxButton Click="MoveRight_Clicked">
+                    <TextBlock Text="è" FontFamily="Wingdings" FontSize="{StaticResource FontSizeXL}"/>
+                </common:RxButton>
+            </Grid>
+
+        </Grid>
+
+        <!-- move buttons ______________________________________________________________________________________-->
+        <StackPanel Width="auto" Height="auto" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="100,10,0,0" Orientation="Horizontal">
+            <!--
+            <Grid HorizontalAlignment="Left">
+                <TextBox x:Name="MoveLeft" Visibility="Hidden"/>
+                <common:RxButton  Click="MoveLeft_Clicked">
+                    <TextBlock Text="ó" FontFamily="Wingdings" FontSize="{StaticResource FontSizeXL}"/>
+                </common:RxButton>
+            </Grid>
+
+            <Grid HorizontalAlignment="Right">
+                <TextBox x:Name="MoveUp" Visibility="Hidden"/>
+                <common:RxButton Click="MoveUp_Clicked">
+                    <TextBlock Text="ô" FontFamily="Wingdings" FontSize="{StaticResource FontSizeXL}"/>
+                </common:RxButton>
+            </Grid>
+            -->
+            <Grid HorizontalAlignment="Right">
+                <TextBox x:Name="Change" Visibility="Hidden"/>
+                <common:RxButton Click="Change_Clicked">
+                    <TextBlock Text="CHG" FontSize="{StaticResource FontSizeXL}"/>
+                </common:RxButton>
+            </Grid>
+        </StackPanel>
+    </Grid>
+</UserControl>

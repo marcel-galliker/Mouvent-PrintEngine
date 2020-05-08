@@ -1,0 +1,8 @@
+<?xml version="1.0" ?>
+<!-- location: /home/radex/digiprint/head_presout.xml -->
+<pressure>
+	<head no="1" pressure="150" heater25w="0"/>
+	<head no="2" pressure="150" heater25w="0"/>
+	<head no="3" pressure="150" heater25w="0"/>
+	<head no="4" pressure="150" heater25w="0"/>
+</pressure>

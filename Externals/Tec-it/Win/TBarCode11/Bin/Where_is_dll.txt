@@ -1,0 +1,4 @@
+
+Source files:	C:\Program Files\TEC-IT
+
+DLL:			C:\Program Files\Common Files\TEC-IT\TBarCode\11.2

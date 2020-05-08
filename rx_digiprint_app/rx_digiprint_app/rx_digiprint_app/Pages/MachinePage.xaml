@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:common="clr-namespace:DigiPrint.Common"
+             x:Class="DigiPrint.Pages.MachinePage">
+    <ContentPage.Content>
+        <Grid BackgroundColor="#a0a0a0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- BACKGROUND ____________________________________________________________-->
+            <Image Grid.RowSpan="2" Source="{common:ImageResource mouvent.png}"  HorizontalOptions="EndAndExpand" VerticalOptions="EndAndExpand"/>
+
+            <!-- TITLE ____________________________________________________________-->
+            <Grid Grid.Row="0" BackgroundColor="LightBlue">
+                <Label x:Name="_Title" FontAttributes="Bold" VerticalOptions="Center" Margin="10,0"/>
+                <Label Text="{Binding Name}" HorizontalOptions="End" VerticalOptions="Center" Margin="10,0" />
+            </Grid>
+
+            <!-- CONTENT ____________________________________________________________-->
+            <Grid Grid.Row="1" x:Name="_Content" BackgroundColor="Transparent">
+                <Grid />
+            </Grid>
+        </Grid>
+    </ContentPage.Content>
+</ContentPage>

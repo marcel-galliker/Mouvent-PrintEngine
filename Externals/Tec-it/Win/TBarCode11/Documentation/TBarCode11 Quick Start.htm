@@ -1,0 +1,924 @@
+<?xml version="1.0"?>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+<title>TBarCode 11: Barcode Generator Quick Start</title>
+<style type="text/css">
+	body 
+	{
+		margin:30px;
+		background-color:#FFFFFF;
+		font-family: Arial, Helvetica, sans-serif;
+		font-size: 10pt; /* use point here! */
+		color:black;
+	}
+	
+	ul 
+	{
+		margin: 0.5em 0em 0.5em 2em;
+		padding:0;
+		list-style: square; 
+	}
+	
+	li 
+	{
+		padding: 0 0 .3em 0.2em;
+	}
+	
+	h1 
+	{
+		font-family: arial,helvetica,sans-serif;
+		font-size: 15pt;
+		font-weight: bold;
+		color: #2A3282;
+		margin-bottom: 0px;
+		margin-top: 0px;
+	}
+	
+	h2 
+	{
+		font-family: arial,helvetica,sans-serif;
+		font-size: 11pt;
+		font-weight: bold;
+		color: #2A3282;
+		margin-top: 3em;
+		margin-bottom: 1em;
+		border-bottom-style: solid; 
+		border-bottom-width: 1px;
+		border-color: #C21428;
+	}
+
+	h3 
+	{
+		margin-top: 1.5em;
+		font-family: arial,helvetica,sans-serif;
+		font-size: 11pt;
+		font-weight: bold;
+	}
+	
+	B
+	{
+		font-weight: bold;
+	}
+	
+    sup {
+    	font-family: arial, helvetica, sans-serif;
+    	font-size: 6pt;
+    	font-weight: bold;
+    	color: #2A3282;
+    	border-bottom-width: 1px;
+    	border-color: #C21428;
+    }
+
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    Classes for TODO Tables 
+    (tables that contain a TODO list)
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/* 
+    The TODO List Table
+*/
+.tabTodoList {
+	border-collapse: collapse;
+	font-size: 10.0pt;
+	font-family: Arial, Helvetica, sans-serif;
+	border-style: none;
+	border-color: inherit;
+	border-width: medium;
+	margin-left: 5.4pt;
+}
+
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    Classes for Description List Tables 
+    (tables that are used to describe a list of items)
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/* 
+    The Description List Table
+*/
+.tabLstDescription {
+	border-collapse: collapse;
+	font-size: 10.0pt;
+	font-family: Arial, Helvetica, sans-serif;
+	border-style: none;
+	border-color: inherit;
+	border-width: medium;
+	margin-left: 5.4pt;
+}
+/* 
+    Header and Cells
+*/
+.tabLstDescription th, .tabLstDescription td {
+	margin: 2.0pt 0cm;
+	border: solid #999999 1.0pt;
+	padding: 2.5pt 5.4pt 2.5pt 5.4pt;
+}
+/* 
+    Header only
+*/
+.tabLstDescription th {
+	font-weight: normal;
+	background: #E6E6E6;
+	text-align: left;
+}
+/* 
+    Cells only
+*/
+.tabLstDescription td {
+	vertical-align: top;
+}
+/* 
+    Left Column (header + normal rows)
+*/
+.tabLstDescription .thLstDescLeft, .tabLstDescription .tdLstDescLeft {
+	width: 180.0pt;
+}
+/* 
+    Left Column (normal rows only)
+*/
+.tabLstDescription .tdLstDescLeft {
+	font-style: italic;
+}
+/* 
+    Right Column (header + normal rows)
+*/
+.tabLstDescription .thLstDescRight, .tabLstDescription .tdLstDescRight {
+	width: 360pt;
+}
+
+.kw {
+	font-weight: bold;
+	color: #2A3282;
+}
+
+.imgTopic {
+	color: #BC0419;
+	font-weight: bold;
+}
+/* 
+    Formatting for Image Texts
+*/
+.imgText {
+	font-size: x-small;
+}
+
+.enumHeaders {
+	padding: 7pt 0pt 5pt 0pt;
+}
+
+.note {
+	border: none;
+	border-left: solid #C21428 1.0pt;
+	padding: 1pt 6pt 1pt 6.0pt;
+	background: #E6E6E6;
+	margin: 10.0pt 0pt 0pt 7.1pt;
+}
+
+.note p{
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+    </style>
+</head>
+
+<body>
+
+<h1>TBarCode 11: Barcode Generator Quick Start </h1>
+<h2>Many thanks for installing TBarCode!</h2>
+<p><b>TBarCode11</b> is an advanced <b><font color="#C21428">barcode generator software component</font></b> supporting more than 100 different barcode symbologies. 
+TBarCode can be used by software developers as well as by users. It contains the following modules: </p>
+<ul>
+	<li>Barcode DLL (Dynamic Link Library)</li>
+	<li>Barcode ActiveX Component</li>
+	<li>Barcode .NET Component</li>
+</ul>
+<div class="note">
+    <p><b>Please note:</b> <span class="kw">TBarCode</span> is a software <em><strong>component</strong></em>. It can't be executed by itself.</p>
+</div>	
+	<p>If you are looking for <em><strong>stand-alone barcode software</strong></em> or <em><strong>specific add-ins</strong></em> please check out the following products:</p>
+	<ul>
+		<li>Barcode Add-In optimized for Word/Excel 2007/2010/2013/2016: Download <span class="kw"><a href="http://www.tec-it.com/software/barcode-software/office/word-excel/Default.aspx?TECITREF=TB11" target="_blank">TBarCode Office</a></span> or watch the <a href="http://www.youtube.com/view_play_list?p=1E807C6F1590D866" target="blank">YouTube videos</a>.</li>
+		<li>Barcode Maker, Barcode Creator: Download <span class="kw"><a href="http://www.tec-it.com/software/barcode-software/barcode-creator/barcode-studio/Default.aspx?TECITREF=TB11" target="_blank">Barcode Studio</a></span> or watch the <a href="http://www.youtube.com/view_play_list?p=143C3D7E8333D767" target="blank">YouTube videos</a>.</li>
+		<li>Label Printing and Report Generator Software: Download <span class="kw"><a href="http://www.tec-it.com/software/label-printing/Default.aspx?TECITREF=TB11" target="_blank">TFORMer Designer</a></span> or watch the <a href="http://www.youtube.com/view_play_list?p=85D3AB80F4A2C5E6" target="blank">YouTube videos</a>.</li>
+		<li>Barcode Printing Solutions for SAP ERP systems: <span class="kw"><a href="http://www.tec-it.com/software/sap/Default.aspx?TECITREF=TB11" target="_blank">Overview</a></span>.</li>
+		<li>System-Level Barcode Extension for Linux, Mac OS X and UNIX: <span class="kw"><a href="http://www.tec-it.com/software/barcode-software/barcode-linux-unix-mac-os-x/overview/Default.aspx?TECITREF=TB11" target="_blank">Overview</a></span>.</li>
+	</ul>
+<h2>Quick-Start</h2>
+<p>This document provides an overview regarding the use of TBarCode. For more detailed information please check out the user and developer 
+    <a href="#chap_docs">manuals</a>. You may also be interested in the <a href="http://youtube.com/tecitsoftware" target="blank">video tutorials hosted on YouTube</a>. In case of questions please contact us via email (support@tec-it.com) or 
+    phone: [++43] (0)7252 72720.
+</p>
+<p><a href="#chap_office">Microsoft Office - First Steps</a> | <a href="#chap_samples">Developers: Example Applications</a> | <a href="#chap_files">Installed Files</a> | <a href="#chap_docs">Documentation</a>  | <a href="http://youtube.com/tecitsoftware" target="blank">YouTube Videos</a> </p>
+       
+<h2><a name="chap_office"></a>Microsoft Office - First Steps</h2>
+<p>This chapter focuses on the use of <span class="kw">TBarCode11</span> with Microsoft<sup>®</sup> 
+Office products.</p>
+<p>
+<a href="#word2016">Word 2016</a>     |<a href="#word2013">Word 2013</a>     | <a href="#word2010">Word 2010</a>      | <a href="#word2007">Word 2007</a>     | <a href="#word2003">Word 2003</a><br/>     
+<a href="#excel2016">Excel 2016</a>   |<a href="#excel2013">Excel 2013</a>   | <a href="#excel2010">Excel 2010</a>    | <a href="#excel2007">Excel 2007</a>   | <a href="#excel2003">Excel 2003</a><br/>
+<a href="#access2016">Access 2016</a> |<a href="#access2013">Access 2013</a> | <a href="#access2010">Access 2010</a>  | <a href="#access2007">Access 2007</a> | <a href="#access2003">Access 2003</a>
+</p>
+<br/>
+<h3><a name="word2016"></a>Microsoft<sup>®</sup> Office Word 2016</h3>
+<table width="100%" class="tabTodoList">
+	<tr>
+		<td valign="top" width="55%">
+    		<ol type="a">
+     			<li>Open Word. </li>
+    			<li>Please check whether the <em>DEVELOPER</em> tool bar is visible 
+    			in the ribbon. <br/>If it <strong>is </strong>visible, please continue 
+    			with <em><strong>f)</strong></em>. </li>
+    			<li>Click the <em>File</em> menu and select <em>Options</em> from menu on the left side.</li>
+    			<li>Select the <em>Customize Ribbon </em>entry from the menu on the left side.</li>
+     			<li>Check the check box <em>Developer</em> in the <em>Main Tabs</em> list and click
+    			<em>Ok </em>to apply the change. Now the <em>DEVELOPER </em>tool bar is visible.
+    			</li>
+    			<li>In the Ribbon shift to the <em>DEVELOPER</em> tool bar. </li>
+    			<li>Select the <em>Legacy Tools</em> item from the <em>Controls</em> chunk.
+    			<span class="imgTopic">(1)</span></li>
+    			<li>Select <em>More Controls</em> from the menu and choose <em>
+    			<strong>TBarCode11</strong></em> from the list to insert a 
+				barcode 
+    			object. <span class="imgTopic">(2)</span></li>
+    			<li>Right click the barcode object and select <em><strong>TBarCode11 
+    			Object</strong>/Properties...</em> from the pop-up 
+    			menu. <span class="imgTopic">(3)</span></li>
+    			<li>Adjust the properties in the property dialog and click <em>Ok</em> 
+    			to apply the changes. </li>
+  		</ol>
+        <br/>
+        
+        <div class="note">
+            <p><span class="imgTopic">New Product Available!</span></p>
+            <p>TEC-IT offers <span class="kw">TBarCode Office</span>, a very easy-to-use <em><strong>barcode add-in</strong></em> for Microsoft Office 2007 and later. This add-in <em><strong>integrates seamlessly</strong></em> into Microsoft Word and Microsoft Excel. All bar codes are <em><strong>pre-configured</strong></em> according to industry standards; thus this barcode add-in is best suited for <em><strong>non-experts</strong></em>.</p>
+            <p>Download <span class="kw">TBarCode Office</span> from <a href="http://www.tec-it.com" target="_blank">http://www.tec-it.com</a> and check out the <a href="http://www.youtube.com/view_play_list?p=1E807C6F1590D866" target="_blank">YouTube videos</a>!</p>
+        </div>
+		</td>
+		<td width="5%"/>
+		<td valign="top" width="40%"><a href="images/w2016g.png"><img alt="TBarCode with Word 2016" border="0" height="379" src="images/w2016.png" title="TBarCode with Word 2016" width="500"/></a><br/>
+		<span class="imgText"><a href="images/w2016g.png">Click to enlarge</a></span></td>
+	</tr>
+</table>
+<h3><a name="word2013"></a>Microsoft<sup>®</sup> Office Word 2013</h3>
+<table width="100%" class="tabTodoList">
+	<tr>
+		<td valign="top" width="55%">
+    		<ol type="a">
+     			<li>Open Word. </li>
+    			<li>Please check whether the <em>DEVELOPER</em> tool bar is visible 
+    			in the ribbon. <br/>If it <strong>is </strong>visible, please continue 
+    			with <em><strong>f)</strong></em>. </li>
+    			<li>Click the <em>File</em> menu and select <em>Options</em> from menu on the left side.</li>
+    			<li>Select the <em>Customize Ribbon </em>entry from the menu on the left side.</li>
+     			<li>Check the check box <em>Developer</em> in the <em>Main Tabs</em> list and click
+    			<em>Ok </em>to apply the change. Now the <em>DEVELOPER </em>tool bar is visible.
+    			</li>
+    			<li>In the Ribbon shift to the <em>DEVELOPER</em> tool bar. </li>
+    			<li>Select the <em>Legacy Tools</em> item from the <em>Controls</em> chunk.
+    			<span class="imgTopic">(1)</span></li>
+    			<li>Select <em>More Controls</em> from the menu and choose <em>
+    			<strong>TBarCode11</strong></em> from the list to insert a 
+				barcode 
+    			object. <span class="imgTopic">(2)</span></li>
+    			<li>Right click the barcode object and select <em><strong>TBarCode11 
+    			Object</strong>/Properties...</em> from the pop-up 
+    			menu. <span class="imgTopic">(3)</span></li>
+    			<li>Adjust the properties in the property dialog and click <em>Ok</em> 
+    			to apply the changes. </li>
+  		</ol>
+        <br/>
+        
+        <div class="note">
+            <p><span class="imgTopic">New Product Available!</span></p>
+            <p>TEC-IT offers <span class="kw">TBarCode Office</span>, a very easy-to-use <em><strong>barcode add-in</strong></em> for Microsoft Office 2007 and later. This add-in <em><strong>integrates seamlessly</strong></em> into Microsoft Word and Microsoft Excel. All bar codes are <em><strong>pre-configured</strong></em> according to industry standards; thus this barcode add-in is best suited for <em><strong>non-experts</strong></em>.</p>
+            <p>Download <span class="kw">TBarCode Office</span> from <a href="http://www.tec-it.com" target="_blank">http://www.tec-it.com</a> and check out the <a href="http://www.youtube.com/view_play_list?p=1E807C6F1590D866" target="_blank">YouTube videos</a>!</p>
+        </div>
+		</td>
+		<td width="5%"/>
+		<td valign="top" width="40%"><a href="images/w2013g.gif"><img alt="TBarCode with Word 2013" border="0" height="379" src="images/w2013.gif" title="TBarCode with Word 2013" width="500"/></a><br/>
+		<span class="imgText"><a href="images/w2013g.gif">Click to enlarge</a></span></td>
+	</tr>
+</table>
+<h3><a name="word2010"></a>Microsoft<sup>®</sup> Office Word 2010</h3>
+<table width="100%" class="tabTodoList">
+	<tr>
+		<td valign="top" width="55%">
+    		<ol type="a">
+    			<li>Open Word. </li>
+    			<li>Please check whether the <em>Developer</em> tool bar is visible 
+    			in the ribbon. <br/>If it <strong>is </strong>visible, please continue 
+    			with <em><strong>f)</strong></em>. </li>
+    			<li>Click the <em>File</em> menu and select <em>Options</em> from menu on the left side.</li>
+    			<li>Select the <em>Customize Ribbon </em>entry from the menu on the left side.</li>
+     			<li>Check the check box <em>Developer</em> in the <em>Main Tabs</em> list and click
+    			<em>Ok </em>to apply the change. Now the Developer tool bar is visible.
+    			</li>
+    			<li>In the Ribbon shift to the <em>Developer</em> tool bar. </li>
+    			<li>Select the <em>Legacy Tools</em> item from the <em>Controls</em> chunk.
+    			<span class="imgTopic">(1)</span></li>
+    			<li>Select <em>More Controls</em> from the menu and choose <em>
+    			<strong>TBarCode11</strong></em> from the list to insert a 
+				barcode 
+    			object. <span class="imgTopic">(2)</span></li>
+    			<li>Right click the barcode object and select <em><strong>TBarCode11 
+    			Object</strong>/Properties...</em> from the pop-up 
+    			menu. <span class="imgTopic">(3)</span></li>
+    			<li>Adjust the properties in the property dialog and click <em>Ok</em> 
+    			to apply the changes. </li>
+     		</ol>
+        <br/>
+        
+       <div class="note">
+            <p><span class="imgTopic">New Product Available!</span></p>
+            <p>TEC-IT offers <span class="kw">TBarCode Office</span>, a very easy-to-use <em><strong>barcode add-in</strong></em> for Microsoft Office 2007 and later. This add-in <em><strong>integrates seamlessly</strong></em> into Microsoft Word and Microsoft Excel. All bar codes are <em><strong>pre-configured</strong></em> according to industry standards; thus this barcode add-in is best suited for <em><strong>non-experts</strong></em>.</p>
+            <p>Download <span class="kw">TBarCode Office</span> from <a href="http://www.tec-it.com" target="_blank">http://www.tec-it.com</a> and check out the <a href="http://www.youtube.com/view_play_list?p=1E807C6F1590D866" target="_blank">YouTube videos</a>!</p>
+        </div>
+		</td>
+		<td width="5%"/>
+		<td valign="top" width="40%"><a href="images/w2010g.gif"><img alt="TBarCode with Word 2010" border="0" height="379" src="images/w2010.gif" title="TBarCode with Word 2010" width="500"/></a><br/>
+		<span class="imgText"><a href="images/w2010g.gif">Click to enlarge</a></span></td>
+	</tr>
+</table>
+<h3><a name="word2007"></a>Microsoft<sup>®</sup> Office Word 2007</h3>
+<table width="100%" class="tabTodoList">
+	<tr>
+		<td valign="top" width="55%">
+    		<ol type="a">
+    			<li>Open Word. </li>
+    			<li>Please check whether the <em>Developer</em> tool bar is visible 
+    			in the ribbon. <br/>If it <strong>is </strong>visible, please continue 
+    			with <em><strong>f)</strong></em>. </li>
+    			<li>Click the <em>Office</em> button in the upper left corner and select
+    			<em>Word Options</em> from the menu. </li>
+    			<li>Select the <em>Popular </em>entry (=first entry) from the menu on 
+    			the left side. <br/></li>
+    			<li>Check the check box <em>Show Developer tab in Ribbon</em> and click
+    			<em>Ok </em>to apply the change. Now the Developer tool bar is visible.
+    			</li>
+    			<li>In the Ribbon shift to the <em>Developer</em> tool bar. </li>
+    			<li>Select the <em>Legacy Tools</em> item from the <em>Tools </em>chunk.
+    			<span class="imgTopic">(1)</span></li>
+    			<li>Select <em>More Controls</em> from the menu and choose <em>
+    			<strong>TBarCode11</strong></em> from the list to insert a 
+				barcode 
+    			object. <span class="imgTopic">(2)</span></li>
+    			<li>Right click the barcode object and select <em><strong>TBarCode11 
+    			Object</strong>/Properties...</em> from the pop-up 
+    			menu. <span class="imgTopic">(3)</span></li>
+    			<li>Adjust the properties in the property dialog and click <em>Ok</em> 
+    			to apply the changes. </li>
+    		</ol>
+        <br/>
+        
+        <div class="note">
+            <p><span class="imgTopic">New Product Available!</span></p>
+            <p>TEC-IT offers <span class="kw">TBarCode Office</span>, a very easy-to-use <em><strong>barcode add-in</strong></em> for Microsoft Office 2007 and later. This add-in <em><strong>integrates seamlessly</strong></em> into Microsoft Word and Microsoft Excel. All bar codes are <em><strong>pre-configured</strong></em> according to industry standards; thus this barcode add-in is best suited for <em><strong>non-experts</strong></em>.</p>
+            <p>Download <span class="kw">TBarCode Office</span> from <a href="http://www.tec-it.com" target="_blank">http://www.tec-it.com</a> and check out the <a href="http://www.youtube.com/view_play_list?p=1E807C6F1590D866" target="_blank">YouTube videos</a>!</p>
+        </div>
+		</td>
+		<td width="5%"/>
+		<td valign="top" width="40%"><a href="images/w2007g.gif"><img alt="TBarCode with Word 2007" border="0" height="379" src="images/w2007.gif" title="TBarCode with Word 2007" width="500"/></a><br/>
+		<span class="imgText"><a href="images/w2007g.gif">Click to enlarge</a></span></td>
+	</tr>
+</table>
+<h3><a name="word2003"></a>Microsoft<sup>®</sup> Office Word 2003</h3>
+<table width="100%" class="tabTodoList">
+	<tr>
+		<td valign="top" width="55%">
+    		<ol type="a">
+    			<li>Open Word. </li>
+    			<li>Select item <em>Object...</em> of the <em>Insert </em>menu.<span class="imgTopic"> 
+    			(1)</span> </li>
+    			<li>Choose <em><strong>TBarCode11</strong></em> from the list box to 
+    			insert a barcode object into the document. <span class="imgTopic">(2)</span>
+    			</li>
+    			<li>Right click the barcode object and select <em><strong>TBarCode11 
+    			Object</strong>/Properties...</em> from the pop-up 
+    			menu. <span class="imgTopic">(3)</span> </li>
+    			<li>Adjust the properties in the property dialog and click <em>Ok</em> 
+    			to apply the changes. </li>
+    		</ol>
+		</td>
+		<td width="5%"/>
+		<td valign="top" width="40%">
+		    <a href="images/w2003g.gif">
+		        <img alt="TBarCode with Word 2003" border="0" height="389" src="images/w2003.gif" title="TBarCode with Word 2003" width="500"/>
+		    </a>
+		<br/><span class="imgText"><a href="images/w2003g.gif">Click to enlarge
+		</a></span></td>
+	</tr>
+</table>
+<h3><a name="excel2016"></a>Microsoft<sup>®</sup> Office Excel<sup>®</sup> 2016</h3>
+<table width="100%" class="tabTodoList">
+	<tr>
+		<td valign="top" width="55%">
+    		<ol type="a">
+    			<li>Open Excel. </li>
+    			<li>Please ensure that the <em>DEVELOPER</em> tool bar is visible in 
+    			the Ribbon. <br/>If it is visible, please continue with <em>
+    			<strong>f)</strong></em>. </li>
+    			<li>Click the <em>File</em> menu and select <em>Options</em> from menu on the left side.</li>
+    			<li>Select the <em>Customize Ribbon </em>entry from the menu on the left side.</li>
+     			<li>Check the check box <em>Developer</em> in the <em>Main Tabs</em> list and click
+    			<em>Ok </em>to apply the change. Now the <em>DEVELOPER </em>tool bar is visible.
+    			</li>
+    			<li>In the Ribbon shift to the <em>DEVELOPER</em> tool bar. </li>
+    			<li>Select the <em>Insert</em> item from the <em>Controls</em> chunk.
+    			<span class="imgTopic">(1)</span><br/></li>
+    			<li>Select <em>More Controls</em> from the menu and choose <em>
+    			<strong>TBarCode11</strong></em> from the list, and insert a 
+				barcode 
+    			object by drawing a rectangle on the surface. <span class="imgTopic">
+    			(2)</span></li>
+    			<li>Right click the barcode object and select <em><strong>TBarCode11 
+    			Object</strong>/Properties...</em> from the pop-up 
+    			menu. <span class="imgTopic">(3)</span></li>
+    			<li>Adjust the properties in the property dialog and click <em>Ok</em> 
+    			to apply the changes. <br/></li>
+    		</ol>
+			<br/>
+			<div class="note">
+            <p><span class="imgTopic">New Product Available!</span></p>
+            <p>TEC-IT offers <span class="kw">TBarCode Office</span>, a very easy-to-use <em><strong>barcode add-in</strong></em> for Microsoft Office 2007 and later. This add-in <em><strong>integrates seamlessly</strong></em> into Microsoft Word and Microsoft Excel. All bar codes are <em><strong>pre-configured</strong></em> according to industry standards; thus this barcode add-in is best suited for <em><strong>non-experts</strong></em>.</p>
+            <p>Download <span class="kw">TBarCode Office</span> from <a href="http://www.tec-it.com" target="_blank">http://www.tec-it.com</a> and check out the <a href="http://www.youtube.com/view_play_list?p=1E807C6F1590D866" target="_blank">YouTube videos</a>!</p>
+        </div>
+
+		</td>
+		<td width="5%"/>
+		<td valign="top" width="40%"><a href="images/e2016g.png">
+		<img alt="TBarCode with Excel 2016" border="0" height="426" src="images/e2016.png" title="TBarCode with Excel 2016" width="500"/></a>
+		<br/><span class="imgText"><a href="images/e2016g.png">Click to enlarge</a></span></td>
+	</tr>
+</table>
+<h3><a name="excel2013"></a>Microsoft<sup>®</sup> Office Excel<sup>®</sup> 2013</h3>
+<table width="100%" class="tabTodoList">
+	<tr>
+		<td valign="top" width="55%">
+    		<ol type="a">
+    			<li>Open Excel. </li>
+    			<li>Please ensure that the <em>DEVELOPER</em> tool bar is visible in 
+    			the Ribbon. <br/>If it is visible, please continue with <em>
+    			<strong>f)</strong></em>. </li>
+    			<li>Click the <em>File</em> menu and select <em>Options</em> from menu on the left side.</li>
+    			<li>Select the <em>Customize Ribbon </em>entry from the menu on the left side.</li>
+     			<li>Check the check box <em>Developer</em> in the <em>Main Tabs</em> list and click
+    			<em>Ok </em>to apply the change. Now the <em>DEVELOPER </em>tool bar is visible.
+    			</li>
+    			<li>In the Ribbon shift to the <em>DEVELOPER</em> tool bar. </li>
+    			<li>Select the <em>Insert</em> item from the <em>Controls</em> chunk.
+    			<span class="imgTopic">(1)</span><br/></li>
+    			<li>Select <em>More Controls</em> from the menu and choose <em>
+    			<strong>TBarCode11</strong></em> from the list, and insert a 
+				barcode 
+    			object by drawing a rectangle on the surface. <span class="imgTopic">
+    			(2)</span></li>
+    			<li>Right click the barcode object and select <em><strong>TBarCode11 
+    			Object</strong>/Properties...</em> from the pop-up 
+    			menu. <span class="imgTopic">(3)</span></li>
+    			<li>Adjust the properties in the property dialog and click <em>Ok</em> 
+    			to apply the changes. <br/></li>
+    		</ol>
+			<br/>
+			<div class="note">
+            <p><span class="imgTopic">New Product Available!</span></p>
+            <p>TEC-IT offers <span class="kw">TBarCode Office</span>, a very easy-to-use <em><strong>barcode add-in</strong></em> for Microsoft Office 2007 and later. This add-in <em><strong>integrates seamlessly</strong></em> into Microsoft Word and Microsoft Excel. All bar codes are <em><strong>pre-configured</strong></em> according to industry standards; thus this barcode add-in is best suited for <em><strong>non-experts</strong></em>.</p>
+            <p>Download <span class="kw">TBarCode Office</span> from <a href="http://www.tec-it.com" target="_blank">http://www.tec-it.com</a> and check out the <a href="http://www.youtube.com/view_play_list?p=1E807C6F1590D866" target="_blank">YouTube videos</a>!</p>
+        </div>
+
+		</td>
+		<td width="5%"/>
+		<td valign="top" width="40%"><a href="images/e2013g.gif">
+		<img alt="TBarCode with Excel 2013" border="0" height="426" src="images/e2013.gif" title="TBarCode with Excel 2013" width="500"/></a>
+		<br/><span class="imgText"><a href="images/e2013g.gif">Click to enlarge</a></span></td>
+	</tr>
+</table>
+<h3><a name="excel2010"></a>Microsoft<sup>®</sup> Office Excel<sup>®</sup> 2010</h3>
+<table width="100%" class="tabTodoList">
+	<tr>
+		<td valign="top" width="55%">
+    		<ol type="a">
+    			<li>Open Excel. </li>
+    			<li>Please ensure that the <em>Developer</em> tool bar is visible in 
+    			the Ribbon. <br/>If it is visible, please continue with <em>
+    			<strong>f)</strong></em>. </li>
+    			<li>Click the <em>File</em> menu and select <em>Options</em> from menu on the left side.</li>
+    			<li>Select the <em>Customize Ribbon </em>entry from the menu on the left side.</li>
+     			<li>Check the check box <em>Developer</em> in the <em>Main Tabs</em> list and click
+    			<em>Ok </em>to apply the change. Now the Developer tool bar is visible.
+    			</li>
+    			<li>In the Ribbon shift to the <em>Developer</em> tool bar. </li>
+    			<li>Select the <em>Insert</em> item from the <em>Controls</em> chunk.
+    			<span class="imgTopic">(1)</span><br/></li>
+    			<li>Select <em>More Controls</em> from the menu and choose <em>
+    			<strong>TBarCode11</strong></em> from the list, and insert a 
+				barcode 
+    			object by drawing a rectangle on the surface. <span class="imgTopic">
+    			(2)</span></li>
+    			<li>Right click the barcode object and select <em><strong>TBarCode11 
+    			Object</strong>/Properties...</em> from the pop-up 
+    			menu. <span class="imgTopic">(3)</span></li>
+    			<li>Adjust the properties in the property dialog and click <em>Ok</em> 
+    			to apply the changes. <br/></li>
+    		</ol>
+			<br/>
+			<div class="note">
+            <p><span class="imgTopic">New Product Available!</span></p>
+            <p>TEC-IT offers <span class="kw">TBarCode Office</span>, a very easy-to-use <em><strong>barcode add-in</strong></em> for Microsoft Office 2007 and later. This add-in <em><strong>integrates seamlessly</strong></em> into Microsoft Word and Microsoft Excel. All bar codes are <em><strong>pre-configured</strong></em> according to industry standards; thus this barcode add-in is best suited for <em><strong>non-experts</strong></em>.</p>
+            <p>Download <span class="kw">TBarCode Office</span> from <a href="http://www.tec-it.com" target="_blank">http://www.tec-it.com</a> and check out the <a href="http://www.youtube.com/view_play_list?p=1E807C6F1590D866" target="_blank">YouTube videos</a>!</p>
+        </div>
+
+		</td>
+		<td width="5%"/>
+		<td valign="top" width="40%"><a href="images/e2010g.gif">
+		<img alt="TBarCode with Excel 2010" border="0" height="426" src="images/e2010.gif" title="TBarCode with Excel 2010" width="500"/></a>
+		<br/><span class="imgText"><a href="images/e2010g.gif">Click to enlarge</a></span></td>
+	</tr>
+</table>
+<h3><a name="excel2007"></a>Microsoft<sup>®</sup> Office Excel<sup>®</sup> 2007</h3>
+<table width="100%" class="tabTodoList">
+	<tr>
+		<td valign="top" width="55%">
+    		<ol type="a">
+    			<li>Open Excel. </li>
+    			<li>Please ensure that the <em>Developer</em> tool bar is visible in 
+    			the Ribbon. <br/>If it is visible, please continue with <em>
+    			<strong>f)</strong></em>. </li>
+    			<li>Click the <em>Office</em> button in the upper left corner and select
+    			<em>Excel Options</em> from the menu. </li>
+    			<li>Select the <em>Popular </em>entry (=first entry) from the menu on 
+    			the left side. <br/></li>
+    			<li>Check the check box <em>Show Developer tab in Ribbon</em> and click
+    			<em>Ok </em>to apply the change. Now the Developer tool bar is visible.
+    			</li>
+    			<li>In the Ribbon shift to the <em>Developer</em> tool bar. </li>
+    			<li>Select the <em>Insert</em> item from the <em>Tools </em>chunk.
+    			<span class="imgTopic">(1)</span><br/></li>
+    			<li>Select <em>More Controls</em> from the menu and choose <em>
+    			<strong>TBarCode11</strong></em> from the list, and insert a 
+				barcode 
+    			object by drawing a rectangle on the surface. <span class="imgTopic">
+    			(2)</span></li>
+    			<li>Right click the barcode object and select <em><strong>TBarCode11 
+    			Object</strong>/Properties...</em> from the pop-up 
+    			menu. <span class="imgTopic">(3)</span></li>
+    			<li>Adjust the properties in the property dialog and click <em>Ok</em> 
+    			to apply the changes. <br/></li>
+    		</ol>
+			<br/>
+		<div class="note">
+            <p><span class="imgTopic">New Product Available!</span></p>
+            <p>TEC-IT offers <span class="kw">TBarCode Office</span>, a very easy-to-use <em><strong>barcode add-in</strong></em> for Microsoft Office 2007 and later. This add-in <em><strong>integrates seamlessly</strong></em> into Microsoft Word and Microsoft Excel. All bar codes are <em><strong>pre-configured</strong></em> according to industry standards; thus this barcode add-in is best suited for <em><strong>non-experts</strong></em>.</p>
+            <p>Download <span class="kw">TBarCode Office</span> from <a href="http://www.tec-it.com" target="_blank">http://www.tec-it.com</a> and check out the <a href="http://www.youtube.com/view_play_list?p=1E807C6F1590D866" target="_blank">YouTube videos</a>!</p>
+        </div>
+
+		</td>
+		<td width="5%"/>
+		<td valign="top" width="40%"><a href="images/e2007g.gif">
+		<img alt="TBarCode with Excel 2007" border="0" height="426" src="images/e2007.gif" title="TBarCode with Excel 2007" width="500"/></a>
+		<br/><span class="imgText"><a href="images/e2007g.gif">Click to enlarge</a></span></td>
+	</tr>
+</table>
+<h3><a name="excel2003"></a>Microsoft<sup>®</sup> Office Excel<sup>®</sup> 2003</h3>
+<table width="100%" class="tabTodoList">
+	<tr>
+		<td valign="top" width="55%">
+    		<ol type="a">
+    			<li>Open Excel. </li>
+    			<li>Select item <em>Object...</em> of the menu <em>Insert</em>.
+    			<span class="imgTopic">(1)</span></li>
+    			<li>Choose <em><strong>TBarCode11</strong></em> from the list box to 
+    			insert a barcode object into the document. <span class="imgTopic">(2)</span></li>
+    			<li>Please ensure that <em>Design Mode</em> is active. The design mode 
+    			icon in the <em>Visual Basic</em> tool bar must be selected. </li>
+    			<li>Right click the barcode object and select <em><strong>TBarCode11 
+    			Object</strong>/Properties...</em> from the pop-up 
+    			menu. <span class="imgTopic">(3)</span></li>
+    			<li>Adjust the properties in the property dialog and click <em>Ok
+    			</em>to apply the changes.<br/></li>
+    		</ol>
+		</td>
+		<td width="5%"/>
+		<td width="40%"><a href="images/e2003g.gif">
+		<img alt="TBarCode with Excel 2003" border="0" height="329" src="images/e2003.gif" title="TBarCode with Excel 2003" width="500"/></a><br/>
+		<span class="imgText"><a href="images/e2003g.gif">Click to enlarge</a></span></td>
+	</tr>
+</table>
+<h3><a id="access2016" name="access2016"></a>Microsoft<sup>®</sup> Office Access™ 2016</h3>
+<table width="100%" class="tabTodoList">
+	<tr>
+		<td valign="top" width="55%">
+    		<ol type="a">
+    			<li>Open Access. </li>
+    			<li>Click on the menu <em>DESIGN</em> and ensure that <em>Design View
+    			</em>is active.</li>
+    			<li>Flap down the controls list.</li>
+    			<li>Select item <em>ActiveX Controls ...</em>.
+    			<span class="imgTopic">(1)</span></li>
+    			<li>Choose <strong><em>TBarCode11</em> </strong>from the list box to 
+    			insert a barcode object into the document. <span class="imgTopic">(2)</span><br/>
+    			</li>
+    			<li>Right click the barcode object and select <em><strong>TBarCode11 
+    			Object</strong>/Properties...</em> from the pop-up 
+    			menu. <span class="imgTopic">(3)</span></li>
+    			<li>Adjust the properties in the property dialog and click <em>Ok</em> 
+    			to apply the changes. <br/></li>
+    		</ol>
+		</td>
+		<td width="5%"/>
+		<td valign="top" width="40%"><a href="images/a2016g.png">
+		<img alt="TBarCode with Access 2016" border="0" height="378" src="images/a2016.png" title="TBarCode with Access 2016" width="500"/></a>
+		<br/><span class="imgText"><a href="images/a2016g.png">Click to enlarge</a></span></td>
+	</tr>
+</table>
+<h3><a id="access2013" name="access2013"></a>Microsoft<sup>®</sup> Office Access™ 2013</h3>
+<table width="100%" class="tabTodoList">
+	<tr>
+		<td valign="top" width="55%">
+    		<ol type="a">
+    			<li>Open Access. </li>
+    			<li>Click on the menu <em>DESIGN</em> and ensure that <em>Design View
+    			</em>is active.</li>
+    			<li>Flap down the controls list.</li>
+    			<li>Select item <em>ActiveX Controls ...</em>.
+    			<span class="imgTopic">(1)</span></li>
+    			<li>Choose <strong><em>TBarCode11</em> </strong>from the list box to 
+    			insert a barcode object into the document. <span class="imgTopic">(2)</span><br/>
+    			</li>
+    			<li>Right click the barcode object and select <em><strong>TBarCode11 
+    			Object</strong>/Properties...</em> from the pop-up 
+    			menu. <span class="imgTopic">(3)</span></li>
+    			<li>Adjust the properties in the property dialog and click <em>Ok</em> 
+    			to apply the changes. <br/></li>
+    		</ol>
+		</td>
+		<td width="5%"/>
+		<td valign="top" width="40%"><a href="images/a2013g.gif">
+		<img alt="TBarCode with Access 2013" border="0" height="378" src="images/a2013.gif" title="TBarCode with Access 2013" width="500"/></a>
+		<br/><span class="imgText"><a href="images/a2013g.gif">Click to enlarge</a></span></td>
+	</tr>
+</table>
+<h3><a id="access2010" name="access2010"></a>Microsoft<sup>®</sup> Office Access™ 2010</h3>
+<table width="100%" class="tabTodoList">
+	<tr>
+		<td valign="top" width="55%">
+    		<ol type="a">
+    			<li>Open Access. </li>
+    			<li>Click on the menu <em>Design</em> and ensure that <em>Design View
+    			</em>is active.</li>
+    			<li>Flap down the controls list.</li>
+    			<li>Select item <em>ActiveX Controls ...</em>.
+    			<span class="imgTopic">(1)</span></li>
+    			<li>Choose <strong><em>TBarCode11</em> </strong>from the list box to 
+    			insert a barcode object into the document. <span class="imgTopic">(2)</span><br/>
+    			</li>
+    			<li>Right click the barcode object and select <em><strong>TBarCode11 
+    			Object</strong>/Properties...</em> from the pop-up 
+    			menu. <span class="imgTopic">(3)</span></li>
+    			<li>Adjust the properties in the property dialog and click <em>Ok</em> 
+    			to apply the changes. <br/></li>
+    		</ol>
+		</td>
+		<td width="5%"/>
+		<td valign="top" width="40%"><a href="images/a2010g.gif">
+		<img alt="TBarCode with Access 2010" border="0" height="378" src="images/a2010.gif" title="TBarCode with Access 2010" width="500"/></a>
+		<br/><span class="imgText"><a href="images/a2010g.gif">Click to enlarge</a></span></td>
+	</tr>
+</table>
+<h3><a id="access2007" name="access2007"></a>Microsoft<sup>®</sup> Office Access™ 2007</h3>
+<table width="100%" class="tabTodoList">
+	<tr>
+		<td valign="top" width="55%">
+    		<ol type="a">
+    			<li>Open Access. </li>
+    			<li>Click on the menu <em>Design</em> and ensure that <em>Design View
+    			</em>is active.</li>
+    			<li>Select item <em>ActiveX Controls ...</em> of the menu <em>Design</em>.
+    			<span class="imgTopic">(1)</span></li>
+    			<li>Choose <strong><em>TBarCode11</em> </strong>from the list box to 
+    			insert a barcode object into the document. <span class="imgTopic">(2)</span><br/>
+    			</li>
+    			<li>Right click the barcode object and select <em><strong>TBarCode11 
+    			Object</strong>/Properties...</em> from the pop-up 
+    			menu. <span class="imgTopic">(3)</span></li>
+    			<li>Adjust the properties in the property dialog and click <em>Ok</em> 
+    			to apply the changes. <br/></li>
+    		</ol>
+		</td>
+		<td width="5%"/>
+		<td valign="top" width="40%"><a href="images/a2007g.gif">
+		<img alt="TBarCode with Access 2007" border="0" height="378" src="images/a2007.gif" title="TBarCode with Access 2007" width="500"/></a>
+		<br/><span class="imgText"><a href="images/a2007g.gif">Click to enlarge</a></span></td>
+	</tr>
+</table>
+<h3><a id="access2003" name="access2003"></a>Microsoft<sup>®</sup> Office Access™ 2003</h3>
+<table width="100%" class="tabTodoList">
+	<tr>
+		<td valign="top" width="55%">
+		<ol type="a">
+			<li>Open Access. </li>
+			<li>Select item <em>ActiveX Control ...</em> of the menu <em>Insert</em>.
+			<span class="imgTopic">(1)</span></li>
+			<li>Choose <em><strong>TBarCode11 </strong></em>from the list box to 
+			insert a barcode object into the document. <span class="imgTopic">(2)</span></li>
+			<li>Please ensure that <em>Design Mode</em> is active. The design mode 
+			icon in the <em>Visual Basic</em> tool bar must be selected. </li>
+			<li>Right click the barcode object and select <em><strong>TBarCode11 
+			Object</strong>/Properties...</em> from the pop-up menu.
+			<span class="imgTopic">(3)</span></li>
+			<li>Adjust the properties in the property dialog and click <em>Ok
+			</em>to apply the changes. <br/></li>
+		</ol>
+		</td>
+		<td width="5%"/>
+		<td valign="top" width="40%"><a href="images/a2003g.gif">
+		<img alt="TBarCode with Access 2003" border="0" height="330" src="images/a2003.gif" title="TBarCode with Access 2003" width="500"/></a>
+		<br/><span class="imgText"><a href="images/a2003g.gif">Click to enlarge</a></span></td>
+	</tr>
+</table>
+<!-- ****************************** -->
+
+<h2><a name="chap_samples"></a>Developers: Example Applications</h2>
+<p>
+    TEC-IT provides samples that demonstrate the use of TBarCode SDK - DLL, OCX and .NET - in various applications and development environments.
+    Sample applications for the development environments listed below are <a id="ID_SAMPLES_HTML1" target="_blank" href="file:///C:\ProgramData\TEC-IT\TBarCode\11.6\Examples\TBarCode Examples.htm">installed by default</a>. More samples are available on <a href="http://www.tec-it.com/download" target="_blank">http://www.tec-it.com/download</a>. If you are not able to find a suitable example, please do not hesitate to contact our <a href="mailto:support@tec-it.com">support@tec-it.com</a>.
+</p>
+<p><a id="ID_SAMPLES_HTML2" target="_blank" href="file:///C:\ProgramData\TEC-IT\TBarCode\11.6\Examples\TBarCode Examples.htm">Click here</a> to browse the installed example applications.</p>
+<ul>
+    <li>Microsoft<sup>®</sup> Visual Studio C++ / C# / VB / ASP.NET</li>
+    <li>Microsoft<sup>®</sup> Word<sup>®</sup></li>
+    <li>Microsoft<sup>®</sup> Excel<sup>®</sup></li>
+    <li>Microsoft<sup>®</sup> Access™</li>
+    <li>Microsoft<sup>®</sup> InfoPath</li>
+    <li>Microsoft<sup>®</sup> SQL Reporting Services</li>
+    <li>Microsoft<sup>®</sup> Navision</li>
+    <li>Microsoft<sup>®</sup> Visual Basic 6</li>
+    <li>Barcode Service for Crystal Reports, SSRS and Web Applications</li>
+    <li>Delphi</li>
+    <li>PHP</li>
+    <li>and more...</li>
+</ul>
+<!-- ****************************** -->
+
+<h2><a name="chap_files"></a>Installed Files</h2>
+<h3>Installation Folders</h3>
+<p><span class="kw">TBarCode</span> is installed by default in the folders specified below. Please note, that the base-folder for a 32-Bit TBarCode installation on a 64-Bit system is <i><b>C:\Program Files (x86)</b></i>.</p>
+<ul>
+<li>
+    <div class="enumHeaders">Documentation and auxiliary files: <b><i>C:\Program Files\TEC-IT\TBarCode11</i></b></div>
+    <table class="tabLstDescription">
+    	<tr>
+    		<th class="thLstDescLeft">Sub Folder</th>
+    		<th class="thLstDescRight">Description</th>
+    	</tr>
+    	<tr>
+    		<td class="tdLstDescLeft">Documentation</td>
+    		<td class="tdLstDescRight">Documentation files; see also chapter “<i>Documentation</i>”.</td>
+    	</tr>
+    	<tr>
+    		<td class="tdLstDescLeft">Include</td>
+    		<td class="tdLstDescRight">C/C++ header files of <span class="kw">TBarCode Library</span> (TBarCode DLL).</td>
+    	</tr>
+    	<tr>
+    		<td class="tdLstDescLeft">Lib</td>
+    		<td class="tdLstDescRight">C/C++ .lib files of <span class="kw">TBarCode Library</span> (TBarCode DLL).</td>
+    	</tr>
+    </table>
+</li>  
+<li>
+    <div class="enumHeaders">Binaries: <b><i>C:\Program Files\Common Files\TEC-IT\TBarCode\11.0</i></b></div>
+    <table class="tabLstDescription">
+    	<tr>
+    		<th class="thLstDescLeft">File</th>
+    		<th class="thLstDescRight">Description</th>
+    	</tr>
+    	<tr>
+    		<td class="tdLstDescLeft">TBarCode11.dll</td>
+    		<td class="tdLstDescRight"><span class="kw">TBarCode DLL</span>, the barcode generator library 
+    		(required by all components).</td>
+    	</tr>
+    	<tr>
+    		<td class="tdLstDescLeft">TBarCode11.ocx</td>
+    		<td class="tdLstDescRight"><span class="kw">TBarCode OCX</span>, the barcode ActiveX component.</td>
+    	</tr>
+    	<tr>
+    		<td class="tdLstDescLeft">TECIT.TBarCode.dll</td>
+    		<td class="tdLstDescRight"><span class="kw">TBarCode .NET</span>, the .NET assembly for the .NET 
+    		barcode library and controls.</td>
+    	</tr>
+    	<tr>
+    		<td class="tdLstDescLeft">zlib1.dll</td>
+    		<td class="tdLstDescRight">A compression library.</td>
+    	</tr>
+    </table>
+</li>
+<li>
+    <div class="enumHeaders">Examples, Demos and Services: <b><i>C:\ProgramData\TEC-IT\TBarCode\11.0</i></b></div>
+    <table class="tabLstDescription">
+    	<tr>
+    		<th class="thLstDescLeft">Sub Folder</th>
+    		<th class="thLstDescRight">Description</th>
+    	</tr>
+    	<tr>
+    		<td class="tdLstDescLeft">Examples</td>
+    		<td class="tdLstDescRight">Several examples, which demonstrate how to use <span class="kw">TBarCode</span>; 
+    		see “<i>Samples</i>”. The samples include the Barcode Service for Crystal Reports, SSRS and web applications.</td>
+    	</tr>
+    	<tr>
+    		<td class="tdLstDescLeft">Links</td>
+    		<td class="tdLstDescRight">Important links to our website.</td>
+    	</tr>
+    </table>
+</li>
+</ul>
+<h3>Redistribution</h3>
+<p>If you want to redistribute <span class="kw">TBarCode</span> with your own application, 
+you will have to include the proper binaries in your application's setup. 
+For a more detailed explanation please examine the according <i>Developer Manual</i> or <i>Developer Reference</i>.</p>
+<!-- ****************************** -->
+
+<h2><a name="chap_docs"></a>Documentation</h2>
+<p>The documentation files are installed in the <i>Documentation</i> folder.</p>
+<ul> 
+	<li>If you are new to bar coding or you need a source for specific information 
+	about barcode symbologies and barcode parameters we suggest downloading TEC-IT´s
+	<i>Barcode Reference</i>:
+	<a href="http://www.tec-it.com/download/PDF/Barcode_Reference_EN.pdf">http://www.tec-it.com/download/PDF/Barcode_Reference_EN.pdf</a>.
+	</li>
+	<li>If you need further information that you could not find in these documents, 
+	please do not hesitate to contact our support:
+	<a href="mailto:support@tec-it.com">support@tec-it.com</a>. </li>
+</ul>
+<h3>TBarCode DLL Documentation</h3>
+<table class="tabLstDescription">
+	<tr>
+		<th class="thLstDescLeft">Documentation</th>
+		<th class="thLstDescRight">Description</th>
+	</tr>
+	<tr>
+		<td class="tdLstDescLeft">TBarCode DLL Developer Manual</td>
+		<td class="tdLstDescRight">The manual explains how you can use the DLL in your own applications 
+		and provides some sample source code.</td>
+	</tr>
+	<tr>
+		<td class="tdLstDescLeft">TBarCode DLL Developer Reference</td>
+		<td class="tdLstDescRight">The reference describes the API (<b>A</b>pplication <b>P</b>rogramming
+		<b>I</b>nterface) of <span class="kw">TBarCode DLL</span>.</td>
+	</tr>
+</table>
+<h3>TBarCode OCX Documentation</h3>
+<table class="tabLstDescription">
+	<tr>
+		<th class="thLstDescLeft">Documentation</th>
+		<th class="thLstDescRight">Description</th>
+	</tr>
+	<tr>
+		<td class="tdLstDescLeft">TBarCode OCX User Manual</td>
+		<td class="tdLstDescRight">The manual shows how to use <span class="kw">TBarCode OCX</span> (ActiveX 
+		component) in applications like Microsoft Office. Further, the ActiveX property 
+		pages are explained in detail.</td>
+	</tr>
+	<tr>
+		<td class="tdLstDescLeft">TBarCode OCX Developer Manual</td>
+		<td class="tdLstDescRight">The manual shows how to use <span class="kw">TBarCode OCX</span> with 
+		various IDEs (<b>I</b>ntegrated <b>D</b>evelopment <b>E</b>nvironments) 
+		like Visual Studio.</td>
+	</tr>
+	<tr>
+		<td class="tdLstDescLeft">TBarCode OCX Developer Reference</td>
+		<td class="tdLstDescRight">The reference describes the API of <span class="kw">TBarCode OCX</span>.</td>
+	</tr>
+</table>
+<h3>TBarCode .NET Documentation</h3>
+<table class="tabLstDescription">
+	<tr>
+		<th class="thLstDescLeft">Documentation</th>
+		<th class="thLstDescRight">Description</th>
+	</tr>
+	<tr>
+		<td class="tdLstDescLeft">TBarCode .NET Developer Manual</td>
+		<td class="tdLstDescRight">The manual shows how to create barcodes in self written .NET applications 
+		(Windows Forms and ASP.NET 2.0).</td>
+	</tr>
+	<tr>
+		<td class="tdLstDescLeft">TBarCode .NET Developer Reference</td>
+		<td class="tdLstDescRight">The reference describes the API of <span class="kw">TBarCode .NET</span>.</td>
+	</tr>
+</table>
+<h3>TBarCode Videos</h3>
+<table class="tabLstDescription">
+	<tr>
+		<th class="thLstDescLeft">Video Channel</th>
+		<th class="thLstDescRight">Description</th>
+	</tr>
+	<tr>
+		<td class="tdLstDescLeft">TBarCode Product Videos</td>
+		<td class="tdLstDescRight">Check out TBarCode tutorials and how-to <a href="http://youtube.com/tecitsoftware" target="blank">videos hosted on YouTube.com</a>.</td>
+	</tr>
+</table>
+<p style="font-size: 8pt">© 1998-2018 - all rights reserved by TEC-IT Datenverarbeitung 
+GmbH <br/>
+Hans-Wagner-Str. 6, A-4400 Steyr, Austria/Europe <br/>
+<a href="http://www.tec-it.com" title="TEC-IT Barcode Software">www.tec-it.com</a>
+</p>
+
+</body>
+
+</html>
