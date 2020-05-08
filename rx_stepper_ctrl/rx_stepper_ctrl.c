@@ -145,8 +145,7 @@ int main(int argc, char** argv)
 
 	TrPrintfL(1, "RxStepperCtrl %s started", version);
 	
-	get_version((int*)&RX_StepperStatus.swVersion);
-	sscanf(version, "d.d.d.d", &RX_StepperStatus.swVersion.major, &RX_StepperStatus.swVersion.minor, &RX_StepperStatus.swVersion.revision, &RX_StepperStatus.swVersion.build);
+	sscanf(version, "%ld.%ld.%ld.%ld", &RX_StepperStatus.swVersion.major, &RX_StepperStatus.swVersion.minor, &RX_StepperStatus.swVersion.revision, &RX_StepperStatus.swVersion.build);
 	sok_get_mac_address("eth0", &RX_StepperStatus.macAddr);
 	RX_StepperStatus.serialNo = swap_uint16((RX_StepperStatus.macAddr>>32) & 0xffff);
 

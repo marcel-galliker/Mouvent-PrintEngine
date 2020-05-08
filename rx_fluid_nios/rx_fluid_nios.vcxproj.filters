@@ -17,6 +17,12 @@
       <UniqueIdentifier>{fc4f3832-8201-4d14-b831-9e229f36c200}</UniqueIdentifier>
       <Extensions>*.vgdbsettings</Extensions>
     </Filter>
+    <Filter Include="Source files">
+      <UniqueIdentifier>{aa8712fc-d587-4b9e-b161-eef790469f33}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files">
+      <UniqueIdentifier>{82d7f3de-a2ab-4016-a4d1-71cc94593660}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="rx_fluid_nios-Debug.vgdbsettings">
@@ -25,5 +31,137 @@
     <None Include="rx_fluid_nios-Release.vgdbsettings">
       <Filter>VisualGDB settings</Filter>
     </None>
+    <None Include="software\rx_fluid_nios\Makefile">
+      <Filter>Source files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="software\rx_fluid_nios\adc_thermistor.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="software\rx_fluid_nios\AMC7891.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="software\rx_fluid_nios\average.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="software\rx_fluid_nios\comm.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="software\rx_fluid_nios\fifo.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="software\rx_fluid_nios\heater.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="software\rx_fluid_nios\i2c.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="software\rx_fluid_nios\ink_ctrl.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="software\rx_fluid_nios\log.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="software\rx_fluid_nios\main.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="software\rx_fluid_nios\MAX31865.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="software\rx_fluid_nios\pid.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="software\rx_fluid_nios\pres.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="software\rx_fluid_nios\rx_ink_common.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="software\rx_fluid_nios\timer.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="software\rx_fluid_nios\trprintf.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="software\rx_fluid_nios\version.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="software\rx_fluid_nios\readme.txt">
+      <Filter>Source files</Filter>
+    </Text>
+    <Text Include="software\rx_fluid_nios\version.txt">
+      <Filter>Source files</Filter>
+    </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="software\rx_fluid_nios\adc_thermistor.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="software\rx_fluid_nios\AMC7891.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="software\rx_fluid_nios\average.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="software\rx_fluid_nios\comm.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="software\rx_fluid_nios\cond_def_head.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="software\rx_fluid_nios\fifo.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="software\rx_fluid_nios\fpga_def_fluid.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="software\rx_fluid_nios\heater.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="software\rx_fluid_nios\i2c.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="software\rx_fluid_nios\ink_ctrl.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="software\rx_fluid_nios\log.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="software\rx_fluid_nios\main.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="software\rx_fluid_nios\MAX31865.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="software\rx_fluid_nios\nios_def_fluid.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="software\rx_fluid_nios\nios_def_head.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="software\rx_fluid_nios\pid.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="software\rx_fluid_nios\pio.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="software\rx_fluid_nios\pres.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="software\rx_fluid_nios\rx_ink_common.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="software\rx_fluid_nios\timer.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="software\rx_fluid_nios\trprintf.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="software\rx_fluid_nios\version.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

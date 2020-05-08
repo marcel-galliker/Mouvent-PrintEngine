@@ -101,3 +101,4 @@ rx_rip_lib.dll
 *.csproj.user
 rx_fluid_nios/software/.metadata/
 rx_head_nios/software/.metadata/
+version.c

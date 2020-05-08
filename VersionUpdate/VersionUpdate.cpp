@@ -24,68 +24,32 @@
 
 //	static char *revisionStr = "$Revision: 81 $";
 
-//	static int ver_major = 1;
-//	static int ver_minor = 0;
-//	static int ver_revision = 81;
-//	static int ver_build = 3;
 //	const char version[32]="1.0.81.3";
 
 //--- END OF FILE ----------------
 
-static int  _ver_major;
-static int  _ver_minor;
-static int  _ver_revision;
+static int _ver_major;
+static int _ver_minor;
+static int _ver_revision;
+static int _ver_build = -1;
 
-//--- val -----
-int val(char *str)
-{
-	while (*str )
-	{
-		if (*str>='0' && *str<='9') return atoi(str);
-		str++;
-	}
-	return 0;
-}
 
 //--- get_version ---------------------------------
-void get_version(char *versionPath, char *root, char *str)
+void get_version()
 {
-	FILE *src;
-	char path[_MAX_PATH];
-	char line[2048];
-	char *ch;
-	int i;
+    char psBuffer[128];
+    FILE *pipe =
+        _popen("git describe --match \"v[0-9]*.[0-9]*\"", "rt");
 
-	if (versionPath!=NULL)
-	{
-		strcpy(path, versionPath);
-	}
-	else
-	{
-		while (*str!='"') str++;
-		str++;
-		if (root[0]=='.') strcpy(path, str);
-		else
-		{
-			strcpy(path, root);
-			i=strlen(path);
-			while (--i>=0 && path[i]!='\\' && path[i]!='/') path[i]=0;
-			sprintf(&path[i], "/%s", str);
-		}
-		i=strlen(path);
-		while(--i>0 && (path[i]<=' ' || path[i]=='"')) path[i]=0;
-	}
-	src = fopen(path, "r");
-	if (src!=NULL)
-	{
-		while (fgets(line, sizeof(line), src))
-		{
-			if      (ch=strstr(line, "VER_MAJOR"))		_ver_major    = val(ch);
-			else if (ch=strstr(line, "VER_MINOR"))		_ver_minor    = val(ch);
-			else if (ch=strstr(line, "VER_REVISION"))	_ver_revision = val(ch);
-		}
-		fclose(src);
-	}
+	fgets(psBuffer, 128, pipe);
+
+	sscanf(psBuffer, "v%d.%d-%d", &_ver_major, &_ver_minor, &_ver_revision);
+    char* buildid=getenv("BUILD_BUILDID");
+    if (buildid != NULL)
+    {
+        sscanf(buildid, "%d", &_ver_build);
+    }
+
 }
 
 //--- write_txt_file ---------------------
@@ -112,59 +76,49 @@ void write_txt_file(const char *hdr_path, int major, int minor, int revision, in
 
 
 //--- update ----------------------------------------
-int update(char *path, char *versionPath)
+int update(char *path)
 {
-	char tempname[256];
 	FILE *src;
 	FILE *dst;
 	char  line[2048];
-	char  *ch;
 	int	  build=0;
 
 	printf("update >>%s<<\n", path);
 
-	src = fopen(path, "r");
-	if (src!=NULL)
+	get_version();
+    if (_ver_build == -1)
+    {
+        src = fopen(path, "rt");
+        _ver_build = 0;
+        if (src != NULL)
+        {
+            int major, minor, revision, build;
+            fgets(line, sizeof(line), src);
+            sscanf(line, "const char version[32]=\"%d.%d.%d.%d\";\n", &major, &minor, &revision, &build);
+            if (revision == _ver_revision) _ver_build = build + 1;
+            fclose(src);
+        }
+    }
+        
+	dst = fopen(path, "wt");
+	if (!dst)
 	{
-		sprintf(tempname, "%s.tmp", path);
-		dst = fopen(tempname, "w");
-		if (!dst)
-		{
-			printf("cound not create file >>%s<<\n", tempname);
-			return 1;
-		}
-		while (fgets(line, sizeof(line), src))
-		{
-			if (ch=strstr(line, "version.h"))
-			{
-				get_version(versionPath, path, line);
-			}
-			else if (ch=strstr(line, "version[32]"))
-			{
-				int major, minor, revision, cnt;
-				while (*ch!='"') ch++;
-				ch++;
-				cnt=sscanf(ch, "%d.%d.%d.%d", &major, &minor, &revision, &build);
-				if (revision==_ver_revision) build++;
-				else						 build=1;
-				sprintf(line, "const char version[32]=\"%d.%d.%d.%d\";\n", _ver_major, _ver_minor, _ver_revision, build);
-			}
-
-			fputs(line, dst);
-		}
-		fclose(dst);	
-		fclose(src);
-		remove(path);
-		rename(tempname, path);
-		write_txt_file(path, _ver_major, _ver_minor, _ver_revision, build);
-		return 0;
+		printf("cound not create file >>%s<<\n", path);
+		return 1;
 	}
-	return 1;
+
+	sprintf(line, "const char version[32]=\"%d.%d.%d.%d\";\n", _ver_major,
+            _ver_minor, _ver_revision, _ver_build);
+    puts(line);
+	fputs(line, dst);
+	fclose(dst);	
+	write_txt_file(path, _ver_major, _ver_minor, _ver_revision, _ver_build);
+	return 0;
 }
 
 //--- main ------------------------
 int main(int argc, char* argv[])
 {
-	if (argc>1) return update(argv[1], argv[2]);
+	if (argc>1) return update(argv[1]);
 }
 

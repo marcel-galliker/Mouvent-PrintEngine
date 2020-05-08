@@ -67,6 +67,54 @@
   <ItemGroup>
     <None Include="rx_fluid_nios-Debug.vgdbsettings" />
     <None Include="rx_fluid_nios-Release.vgdbsettings" />
+    <None Include="software\rx_fluid_nios\Makefile" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="software\rx_fluid_nios\adc_thermistor.c" />
+    <ClCompile Include="software\rx_fluid_nios\AMC7891.c" />
+    <ClCompile Include="software\rx_fluid_nios\average.c" />
+    <ClCompile Include="software\rx_fluid_nios\comm.c" />
+    <ClCompile Include="software\rx_fluid_nios\fifo.c" />
+    <ClCompile Include="software\rx_fluid_nios\heater.c" />
+    <ClCompile Include="software\rx_fluid_nios\i2c.c" />
+    <ClCompile Include="software\rx_fluid_nios\ink_ctrl.c" />
+    <ClCompile Include="software\rx_fluid_nios\log.c" />
+    <ClCompile Include="software\rx_fluid_nios\main.c" />
+    <ClCompile Include="software\rx_fluid_nios\MAX31865.c" />
+    <ClCompile Include="software\rx_fluid_nios\pid.c" />
+    <ClCompile Include="software\rx_fluid_nios\pres.c" />
+    <ClCompile Include="software\rx_fluid_nios\rx_ink_common.c" />
+    <ClCompile Include="software\rx_fluid_nios\timer.c" />
+    <ClCompile Include="software\rx_fluid_nios\trprintf.c" />
+    <ClCompile Include="software\rx_fluid_nios\version.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="software\rx_fluid_nios\readme.txt" />
+    <Text Include="software\rx_fluid_nios\version.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="software\rx_fluid_nios\adc_thermistor.h" />
+    <ClInclude Include="software\rx_fluid_nios\AMC7891.h" />
+    <ClInclude Include="software\rx_fluid_nios\average.h" />
+    <ClInclude Include="software\rx_fluid_nios\comm.h" />
+    <ClInclude Include="software\rx_fluid_nios\cond_def_head.h" />
+    <ClInclude Include="software\rx_fluid_nios\fifo.h" />
+    <ClInclude Include="software\rx_fluid_nios\fpga_def_fluid.h" />
+    <ClInclude Include="software\rx_fluid_nios\heater.h" />
+    <ClInclude Include="software\rx_fluid_nios\i2c.h" />
+    <ClInclude Include="software\rx_fluid_nios\ink_ctrl.h" />
+    <ClInclude Include="software\rx_fluid_nios\log.h" />
+    <ClInclude Include="software\rx_fluid_nios\main.h" />
+    <ClInclude Include="software\rx_fluid_nios\MAX31865.h" />
+    <ClInclude Include="software\rx_fluid_nios\nios_def_fluid.h" />
+    <ClInclude Include="software\rx_fluid_nios\nios_def_head.h" />
+    <ClInclude Include="software\rx_fluid_nios\pid.h" />
+    <ClInclude Include="software\rx_fluid_nios\pio.h" />
+    <ClInclude Include="software\rx_fluid_nios\pres.h" />
+    <ClInclude Include="software\rx_fluid_nios\rx_ink_common.h" />
+    <ClInclude Include="software\rx_fluid_nios\timer.h" />
+    <ClInclude Include="software\rx_fluid_nios\trprintf.h" />
+    <ClInclude Include="software\rx_fluid_nios\version.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

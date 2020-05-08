@@ -78,6 +78,22 @@ void main_error_reset(void)
 	//init_AMC7891(AXI_LW_SLAVE_REGISTER_0_BASE);
 }
 
+void get_version(SVersion *pversion)
+{
+	int val[4], i;
+	const char *ch;
+	memset(val, 0, sizeof(val));
+	for (i=0,ch=version; *ch; ch++)
+	{
+		if (*ch=='.') i++;
+		if (*ch>='0' && *ch<='9') val[i] = 10*val[i]+*ch-'0';
+	}
+	pversion->major 	= val[0];
+	pversion->minor 	= val[1];
+	pversion->revision 	= val[2];
+	pversion->build 	= val[3];
+};
+
 //--- main --------------------------
 int main()
 {
