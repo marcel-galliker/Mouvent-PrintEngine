@@ -178,7 +178,7 @@ static void _nios_check_errors(void)
 	for (isNo=0; isNo<SIZEOF(_Stat->ink_supply); isNo++)
 	{
 		if (_Stat->ink_supply[isNo].error&err_overpressure)		 
-			ErrorFlag(ERR_CONT,  &RX_FluidBoardStatus.err, err_overpressure,      0, "InkSupply[%d] Ink Tank overpressure", isNo+1);
+			ErrorFlag(ERR_CONT,  &RX_FluidBoardStatus.err, err_overpressure, 0, "InkSupply[%d] Ink Tank overpressure", isNo+1);
         //		if (_Stat->ink_supply[isNo].error & err_ink_tank_pressure)
         //			ErrorFlag (ERR_CONT, (UINT32*)&_Error[isNo],
         //err_ink_tank_pressure,  0, "InkSupply[%d] Ink Tank Sensor Error",
@@ -186,32 +186,66 @@ static void _nios_check_errors(void)
         if (nios_is_heater_connected())
         {
             if (_Stat->ink_supply[isNo].error & err_heater_temp_frozen)
-                ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err,
-                          err_heater_temp_frozen, 0,
-                          "Heater Box temperatures frozen : auto-reset done");
+                ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err,err_heater_temp_frozen, 0,"Heater Box temperatures frozen : auto-reset done");
 
 	        if (_Stat->ink_supply[isNo].error & err_amc_config_lost)
-		        ErrorFlag(ERR_CONT,
-			        &RX_FluidBoardStatus.err,
-			        err_amc_config_lost,
-			        0,
-			        "Heater Box ADC config lost. Registers Power=%d, GPIO config=%d, Enable=%d, Gain=%d", _Stat->AMC_Register_Power, _Stat->AMC_Register_GPIO_Config, _Stat->AMC_Register_Enable, _Stat->AMC_Register_Gain);
+		        ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err,err_amc_config_lost,0,"Heater Box ADC config lost. Registers Power=%d, GPIO config=%d, Enable=%d, Gain=%d", _Stat->AMC_Register_Power, _Stat->AMC_Register_GPIO_Config, _Stat->AMC_Register_Enable, _Stat->AMC_Register_Gain);
 
-	        
-            if (_Stat->ink_supply[isNo].error & err_heater_board)
-                ErrorFlag(ERR_CONT, (UINT32 *)&_Error[isNo], err_heater_board,
-                          0, "InkSupply[%d] Heater Board Error or Openload",
-                          isNo + 1);
-            if (_Stat->ink_supply[isNo].error & err_watchdog)
-                ErrorFlag(ERR_CONT, (UINT32 *)&_Error[isNo], err_heater_board,
-                          0, "InkSupply[%d] Heater Board Watchdog Error",
-                          isNo + 1);
+            if (_Stat->ink_supply[isNo].error & err_heater_board)	ErrorFlag(ERR_CONT, (UINT32 *)&_Error[isNo], err_heater_board,0, "InkSupply[%d] Heater Board Error or Openload", isNo + 1);
+            if (_Stat->ink_supply[isNo].error & err_watchdog)		ErrorFlag(ERR_CONT, (UINT32 *)&_Error[isNo], err_heater_board, 0, "InkSupply[%d] Heater Board Watchdog Error", isNo + 1);
 
             if (_Stat->HeaterBoard_Vsupply_3V < 2500)	 ErrorFlag(ERR_CONT, (UINT32*)&_Error[0], err_heater_board, 0, "Heater Board %d.%dV (3.3V)", _Stat->HeaterBoard_Vsupply_3V/1000, _Stat->HeaterBoard_Vsupply_3V%1000);
 			if (_Stat->HeaterBoard_Vsupply_5V < 4000)	 ErrorFlag(ERR_CONT, (UINT32*)&_Error[1], err_heater_board, 0, "Heater Board %d.%dV (5.0V)", _Stat->HeaterBoard_Vsupply_5V/1000, _Stat->HeaterBoard_Vsupply_5V%1000);
 			if (_Stat->HeaterBoard_Vsupply_24V < 12000)	 ErrorFlag(ERR_CONT, (UINT32*)&_Error[2], err_heater_board, 0, "Heater Board %d.%dV (24V)", _Stat->HeaterBoard_Vsupply_24V/1000, _Stat->HeaterBoard_Vsupply_24V%1000);
 			if (_Stat->HeaterBoard_Vsupply_24VP < 12000) ErrorFlag(ERR_CONT, (UINT32*)&_Error[3], err_heater_board, 0, "Heater Board %d.%dV (24V)P", _Stat->HeaterBoard_Vsupply_24VP/1000, _Stat->HeaterBoard_Vsupply_24VP%1000);
-        }        
+		}
+		
+		// Check 0 error
+		if (_Stat->ink_supply[isNo].error&err_ink_pump)		 
+			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_ink_pump, 0, "Fluid[%d]: Check0 Ink pump not running (defected OR not connected)", isNo+1);
+		if (_Stat->ink_supply[isNo].error&err_ink_tube_clogged)		 
+			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_ink_tube_clogged, 0, "Fluid[%d]: Check0 INK tube clogged", isNo+1);
+		if (_Stat->ink_supply[isNo].error&err_bleed_tube_clogged)		 
+			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_bleed_tube_clogged, 0, "Fluid[%d]: Check0 BLEED tube clogged OR AIR valve not opening", isNo+1);
+		if (_Stat->ink_supply[isNo].error&err_damper)		 
+			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_damper, 0, "Fluid[%d]: Check0 damper defected or not present", isNo+1);
+		if (_Stat->ink_supply[isNo].error&err_ink_tube_suck_air)		 
+			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_ink_tube_suck_air, 0, "Fluid[%d]: Check0 INK tube sucking air OR canister empty", isNo+1);
+		if (_Stat->ink_supply[isNo].error&err_Foam)		 
+			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_Foam, 0, "Fluid[%d]: Check0 Foam was present in cylinder and removed (Restart CHECK)", isNo+1);
+		if (_Stat->ink_supply[isNo].error&err_cylinder_empty)		 
+			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_cylinder_empty, 0, "Fluid[%d]: Check0 Cylinder empty or sucking a lot of air. FILL the cylinder and restart check", isNo+1);
+				
+		// Check 1 error
+		if (_Stat->ink_supply[isNo].error&err_valves_leakage)		 
+			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_valves_leakage, 0, "Fluid[%d]: Check1 Valves (air OR bleed) leakage", isNo);
+		if (_Stat->ink_supply[isNo].error&err_air_valve)		 
+			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_air_valve, 0, "Fluid[%d]: Check1 Air valve opened, P=%d mbars Maximum reachable (possible ink tube crooked, or canister empty, or air valve leakage)", isNo+1, _Stat->ink_supply[isNo].TestBleedLine_Pump_Phase2);
+		if (_Stat->ink_supply[isNo].error&err_bleed_valve)		 
+			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_bleed_valve, 0, "Fluid[%d]: Check1 Bleed valve opened, P=%d mbars Maximum reachable (possible ink tube crooked, or canister empty, or air valve leakage)", isNo+1, _Stat->ink_supply[isNo].TestBleedLine_Pump_Phase3);
+		if (_Stat->ink_supply[isNo].error&err_air_valveOK)		 
+			ErrorFlag(LOG, &RX_FluidBoardStatus.err, err_air_valveOK, 0, "Fluid[%d]: Check1 Air valve opened, P=1bar OK, Ink Pump = %d ", isNo+1, _Stat->ink_supply[isNo].TestBleedLine_Pump_Phase2);
+		if (_Stat->ink_supply[isNo].error&err_bleed_valveOK)		 
+			ErrorFlag(LOG, &RX_FluidBoardStatus.err, err_bleed_valveOK, 0, "Fluid[%d]: Check1 Bleed valve opened, P=1bar OK, Ink Pump = %d ", isNo+1, _Stat->ink_supply[isNo].TestBleedLine_Pump_Phase3);
+		if (_Stat->ink_supply[isNo].error&err_air_valve_tight)		 
+			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_air_valve_tight, 0, "Fluid[%d]: Check1 Air valve opened, Pump speed too low = %d (possible bleed line crooked) ", isNo+1, _Stat->ink_supply[isNo].TestBleedLine_Pump_Phase2);
+		if (_Stat->ink_supply[isNo].error&err_bleed_valve_tight)		 
+			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_bleed_valve_tight, 0, "Fluid[%d]: Check1 Bleed valve opened, Pump speed too low = %d (possible bleed line crooked)", isNo+1, _Stat->ink_supply[isNo].TestBleedLine_Pump_Phase3);
+		
+		// Check 3 error
+		if (_Stat->ink_supply[isNo].error&err_feed_tube)		 
+			ErrorFlag(ERR_ABORT, &RX_FluidBoardStatus.err, err_feed_tube, 0, "Fluid[%d]: Check3 Feed tube clogged or disconnected", isNo + 1);
+		if (_Stat->ink_supply[isNo].error&err_check4_timeout)		 
+			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_check4_timeout, 0, "Fluid[%d]: Check4 Conditioners pump 40% could not be reached after 3 minutes", isNo + 1);
+		if (_Stat->ink_supply[isNo].error&err_filter_clogged)		 
+			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_filter_clogged, 0, "Fluid[%d]: Check4 Filter clogged, need to be changed (IS pressure too high)", isNo + 1);
+		if (_Stat->ink_supply[isNo].error&err_return_pipe)		 
+			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_return_pipe, 0, "Fluid[%d]: Check3 Return pipe clogged or disconnected", isNo + 1);
+		if (_Stat->ink_supply[isNo].error&err_ink_not_heating)		 
+			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_ink_not_heating, 0, "Fluid[%d]: Check4 heater board error, ink not heating", isNo + 1);
+		if (_Stat->ink_supply[isNo].error&err_ink_too_hot)		 
+			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_ink_too_hot, 0, "Fluid[%d]: Check4 heater board error, ink too hot", isNo + 1);
+		        
 	}
 }
 
@@ -329,16 +363,16 @@ void nios_set_ctrlmode(int isNo, EnFluidCtrlMode mode)
 	{
 		switch(mode)
 		{
-        case ctrl_check_step0: Error(LOG, 0, "Fluid[%d]: Checks Started (~ ???)", isNo, mode-ctrl_check_step0); break;
-        case ctrl_check_step1: Error(LOG, 0, "Fluid[%d]: Check%d Started (~15 sec, description)", isNo, mode-ctrl_check_step0); break;
-        case ctrl_check_step2: Error(LOG, 0, "Fluid[%d]: Check%d Started (~3 min, description)", isNo, mode-ctrl_check_step0); break;
-        case ctrl_check_step3: Error(LOG, 0, "Fluid[%d]: Check%d Started (~1 sec, description)", isNo, mode-ctrl_check_step0); break;
-        case ctrl_check_step4: Error(LOG, 0, "Fluid[%d]: Check%d Started (~1 sec, description)", isNo, mode-ctrl_check_step0); break;
-        case ctrl_check_step5: Error(LOG, 0, "Fluid[%d]: Check%d Started (???)", isNo, mode-ctrl_check_step0); break;
-        case ctrl_check_step6: Error(LOG, 0, "Fluid[%d]: Check%d Started (???)", isNo, mode-ctrl_check_step0); break;
-        case ctrl_check_step7: Error(LOG, 0, "Fluid[%d]: Check%d Started (???)", isNo, mode-ctrl_check_step0); break;
-        case ctrl_check_step8: Error(LOG, 0, "Fluid[%d]: Check%d Started (???)", isNo, mode-ctrl_check_step0); break;
-        case ctrl_check_step9: Error(LOG, 0, "Fluid[%d]: Check%d Started (???)", isNo, mode-ctrl_check_step0); break;
+        case ctrl_check_step0: Error(LOG, 0, "Fluid[%d]: Checks Started (~1 sec, Initialize testing parameters)", isNo, mode-ctrl_check_step0); break;
+        case ctrl_check_step1: Error(LOG, 0, "Fluid[%d]: Check%d Started (~15 sec, Ink Supply diagnostic)", isNo, mode-ctrl_check_step0); break;
+        case ctrl_check_step2: Error(LOG, 0, "Fluid[%d]: Check%d Started (~3 min, Ink Supply valves leakage detection)", isNo, mode-ctrl_check_step0); break;
+        case ctrl_check_step3: Error(LOG, 0, "Fluid[%d]: Check%d Started (~3 sec, Waiting for cylinder pressure < 50mbars)", isNo, mode-ctrl_check_step0); break;
+        case ctrl_check_step4: Error(LOG, 0, "Fluid[%d]: Check%d Started (~30 sec, Check tubes between Ink Supply and clusters)", isNo, mode-ctrl_check_step0); break;
+        case ctrl_check_step5: Error(LOG, 0, "Fluid[%d]: Check%d Started (~3 min, Check clusters and reach needed pressures)", isNo, mode-ctrl_check_step0); break;
+    //    case ctrl_check_step6: Error(LOG, 0, "Fluid[%d]: Check%d Started (???)", isNo, mode-ctrl_check_step0); break;
+    //    case ctrl_check_step7: Error(LOG, 0, "Fluid[%d]: Check%d Started (???)", isNo, mode-ctrl_check_step0); break;
+    //    case ctrl_check_step8: Error(LOG, 0, "Fluid[%d]: Check%d Started (???)", isNo, mode-ctrl_check_step0); break;
+    //    case ctrl_check_step9: Error(LOG, 0, "Fluid[%d]: Check%d Started (???)", isNo, mode-ctrl_check_step0); break;
 		}
 	}
 
