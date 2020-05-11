@@ -804,7 +804,7 @@ void ink_tick_10ms(void)
 				_set_air_valve(isNo, TRUE);
 				_set_bleed_valve(isNo, FALSE);
 				_set_pump_speed(isNo, 0);
-				if((pRX_Status->ink_supply[isNo].IS_Pressure_Actual < 50)||(pRX_Status->ink_supply[isNo].error))
+				if((pRX_Status->ink_supply[isNo].IS_Pressure_Actual < 50)||(pRX_Status->ink_supply[isNo].error >= err_ink_pump))
 				{
 					_TimeStabitilityCheck[isNo]++;
 					pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
@@ -820,7 +820,7 @@ void ink_tick_10ms(void)
 				_set_flush_pump(isNo, FALSE);
 
 				if(((_CheckSequence[isNo].Ctrl_Check_State == 0)&&(_CheckSequence[isNo].TimeState > 100))
-					||(pRX_Status->ink_supply[isNo].error))
+					||(pRX_Status->ink_supply[isNo].error >= err_ink_pump))
 					pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
 
 				_pump_ctrl(isNo, _PressureSetpoint[isNo], PUMP_CTRL_INK_RECIRCULATION);
@@ -875,7 +875,7 @@ void ink_tick_10ms(void)
 				_set_bleed_valve(isNo, FALSE);
 				_set_flush_pump(isNo, FALSE);
 
-				if(_CheckSequence[isNo].Ctrl_Check_State == 0)
+				if((_CheckSequence[isNo].Ctrl_Check_State == 0)||(pRX_Status->ink_supply[isNo].error >= err_ink_pump))
 					pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
 
 				_pump_ctrl(isNo, _PressureSetpoint[isNo], PUMP_CTRL_INK_RECIRCULATION);
@@ -883,37 +883,33 @@ void ink_tick_10ms(void)
 				_CheckSequence[isNo].TimeState++;
 				if(pRX_Status->ink_supply[isNo].ctrl_state != ctrl_check_step5)
 				{
-					switch(_CheckSequence[isNo].Ctrl_Check_State)
+					if(_CheckSequence[isNo].TimeState > 18000)
 					{
-						case 3 :	// Timeout 3 minutes
-							if(_CheckSequence[isNo].TimeState > 18000)
-							{
-								pRX_Status->ink_supply[isNo].error |= err_check4_timeout;
-								_CheckSequence[isNo].Ctrl_Check_State = 0;
-							}
-							// IS pressure > 900 mbars
-							else if(pRX_Status->ink_supply[isNo].IS_Pressure_Actual > 900)
-							{
-								pRX_Status->ink_supply[isNo].error |= err_filter_clogged;
-								_CheckSequence[isNo].Ctrl_Check_State = 0;
-							}
-							// OK
-							else if(pRX_Config->ink_supply[isNo].condPumpFeedback >= 400)
-							{
-								pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
-
-								// Check heater board
-								if(pRX_Config->ink_supply[isNo].heaterTempMax > 39000)	// means heater board connected
-								{
-									// Not heating
-									if(pRX_Config->ink_supply[isNo].heaterTempMax - _CheckHeaterBoard_Temperature[isNo] < 5000)
-										pRX_Status->ink_supply[isNo].error |= err_ink_not_heating;
-									else if(_CheckHeaterBoard_Temperature[isNo] - pRX_Config->ink_supply[isNo].heaterTempMax > 2000)
-										pRX_Status->ink_supply[isNo].error |= err_ink_too_hot;
-								}
-							}
-							break;
+						pRX_Status->ink_supply[isNo].error |= err_check4_timeout;
+						_CheckSequence[isNo].Ctrl_Check_State = 0;
 					}
+					// IS pressure > 900 mbars
+					else if(pRX_Status->ink_supply[isNo].IS_Pressure_Actual > 900)
+					{
+						pRX_Status->ink_supply[isNo].error |= err_filter_clogged;
+						_CheckSequence[isNo].Ctrl_Check_State = 0;
+					}
+					// OK
+					else if(pRX_Config->ink_supply[isNo].condPumpFeedback >= 400)
+					{
+						pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
+
+						// Check heater board
+						if(pRX_Config->ink_supply[isNo].heaterTempMax > 39000)	// means heater board connected
+						{
+							// Not heating
+							if(pRX_Config->ink_supply[isNo].heaterTempMax - _CheckHeaterBoard_Temperature[isNo] < 5000)
+								pRX_Status->ink_supply[isNo].error |= err_ink_not_heating;
+							else if(_CheckHeaterBoard_Temperature[isNo] - pRX_Config->ink_supply[isNo].heaterTempMax > 2000)
+								pRX_Status->ink_supply[isNo].error |= err_ink_too_hot;
+						}
+					}
+
 				}
 				break;
 
@@ -1236,36 +1232,6 @@ void ink_tick_10ms(void)
 				_set_air_valve(isNo, FALSE);
 				pRX_Status->ink_supply[isNo].ctrl_state = ctrl_empty_step3;
 				break;
-
-				/*
-			case ctrl_shutdown:
-				//--- stop pumps, open air valve and wait until pressure low ---
-				if (pRX_Config->ink_supply[isNo].ctrl_mode != pRX_Status->ink_supply[isNo].ctrl_state)
-					_shutdown_timeout = 6000;
-
-				if (_shutdown_timeout)
-					--_shutdown_timeout;
-
-				_set_bleed_valve(isNo, FALSE);
-				_set_pressure_value(FALSE);
-				_set_pump_speed(isNo, 0);
-				_set_air_valve(isNo, FALSE);
-				_PurgePressure = 0;
-				_PurgeNo = -1;
-
-				if (pRX_Status->ink_supply[isNo].cylinderPres <= INK_LOW_PRESSURE &&
-					_shutdown_timeout == 0)
-				{
-					_set_air_valve(isNo, FALSE);
-					pRX_Status->ink_supply[isNo].ctrl_state = ctrl_shutdown_done;
-				}
-				else
-				{
-					_set_air_valve(isNo, TRUE);
-					pRX_Status->ink_supply[isNo].ctrl_state = ctrl_shutdown;
-				}
-				break;
-				*/
 
 			default:
 				if (pRX_Config->ink_supply[isNo].ctrl_mode>=ctrl_wipe && pRX_Config->ink_supply[isNo].ctrl_mode<ctrl_fill)

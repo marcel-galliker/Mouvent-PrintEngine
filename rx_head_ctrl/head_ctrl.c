@@ -365,15 +365,15 @@ static int _do_head_stat(RX_SOCKET socket, SFluidStateLight *pmsg)
 	
 	memcpy(RX_FluidStat, pmsg, sizeof(RX_FluidStat));
 
-	/*
+	
 	int head;
 	for (head = 0; head < MAX_HEADS_BOARD; head++)
 	{
-		_NiosMem->cfg.cond[head].cylinderPressure    = RX_FluidStat[head].cylinderPressure;
-		_NiosMem->cfg.cond[head].cylinderPressureSet = RX_FluidStat[head].cylinderPressureSet;
+	//	_NiosMem->cfg.cond[head].cylinderPressure    = RX_FluidStat[head].cylinderPressure;
+	//	_NiosMem->cfg.cond[head].cylinderPressureSet = RX_FluidStat[head].cylinderPressureSet;
     	_NiosMem->cfg.cond[head].fluidErr            = RX_FluidStat[head].fluidErr;
 	}
-	*/
+	
 	_rep_head_stat(socket);
 	return REPLY_OK;
 }

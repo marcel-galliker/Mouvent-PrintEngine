@@ -282,6 +282,9 @@ void cond_error_check(void)
         	if (_NiosStat->cond[head].error&COND_ERR_p_in_too_high)				ErrorFlag(level=WARN,		pwrn, COND_ERR_p_in_too_high,			0, "Conditioner %s: input pressure too high", headName);
         	if (_NiosStat->cond[head].error&COND_ERR_p_out_too_high)			ErrorFlag(level=ERR(abort),	perr, COND_ERR_p_out_too_high,			0, "Conditioner %s: output pressure too high", headName);
         	if (_NiosStat->cond[head].error&COND_ERR_pump_no_ink)				ErrorFlag(level=WARN,       perr, COND_ERR_pump_no_ink,				0, "Conditioner %s: no ink: actVal=%d, sum=%d", headName, pstat->pressure_out, pstat->pid_sum);
+			if (_NiosStat->cond[head].error&COND_ERR_valve)						ErrorFlag(level = ERR(abort), perr, COND_ERR_valve, 0, "Conditioner %s: valve not switching to INK", headName);
+	    	if (_NiosStat->cond[head].error&COND_ERR_return_pipe)				ErrorFlag(level = ERR(abort), perr, COND_ERR_return_pipe, 0, "Conditioner %s: Return pipe clogged or disconnected", headName);
+	    	
 	    	/*
 	    	if (_NiosStat->cond[head].error&COND_ERR_pump_no_ink)				
 	    	{

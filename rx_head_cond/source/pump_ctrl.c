@@ -120,7 +120,7 @@ static INT32 	_PoutAvgCalibration;
 static INT32 	_SumAvgPoutCalibration;
 static INT32 	_ThresholdDetectOKCalibration;
 static INT32 	_PinCalibration;
-static INT32 	_PoutCalibration;
+static INT32 	_PoutCalibration; */
 
 // --- Check ---
 static INT32 	_TimeStabilityCheck;
@@ -129,7 +129,7 @@ static INT32	_CheckStep4_Pin;
 static INT32	_CheckStep4_Pout;
 static INT32	_CheckStep4_Meniscus;
 static INT32	_CheckStep4_Pump;
-static INT32	_CheckStep4_PumpMeasured;*/
+static INT32	_CheckStep4_PumpMeasured;
 
 static UINT32 _flow = 0;
 // --- END NEW ---
@@ -568,14 +568,14 @@ void pump_tick_10ms(void)
 		case ctrl_check_step0:	RX_Status.mode = RX_Config.mode; break;
 		case ctrl_check_step1:	RX_Status.mode = RX_Config.mode; break;
 		case ctrl_check_step2:	RX_Status.mode = RX_Config.mode; break;
-		case ctrl_check_step3:	RX_Status.mode = RX_Config.mode; break;
+	/*	case ctrl_check_step3:	RX_Status.mode = RX_Config.mode; break;
 		case ctrl_check_step4:	RX_Status.mode = RX_Config.mode; break;
 		case ctrl_check_step5:	RX_Status.mode = RX_Config.mode; break;
 		case ctrl_check_step6:	RX_Status.mode = RX_Config.mode; break;
 		case ctrl_check_step7:	RX_Status.mode = RX_Config.mode; break;
 		case ctrl_check_step8:	RX_Status.mode = RX_Config.mode; break;
-		case ctrl_check_step9:	RX_Status.mode = RX_Config.mode; break;
-	/*	case ctrl_check_step3:	
+		case ctrl_check_step9:	RX_Status.mode = RX_Config.mode; break;		*/  
+		case ctrl_check_step3:	
 						RX_Status.mode = RX_Config.mode; 						
 											
 						_PumpPID.start_integrator = 0;
@@ -584,7 +584,7 @@ void pump_tick_10ms(void)
 						_TimeStabilityCheck = 0;
 						RX_Status.mode = RX_Config.mode; 
 						_CheckSequence = 1;
-						_PumpPID.val_max = 3000;	// max 75% to avoid high pressure in case of return tube is clogged
+						_PumpPID.val_max = 3000;	// max 75% to avoid high pressure in case of return tube is clogged		 
 						break;
 		
 		case ctrl_check_step4:	
@@ -625,7 +625,7 @@ void pump_tick_10ms(void)
 									}
 								}
 								else _TimeStabilityCheck = 0;
-						}
+						}	
 						
 						break;
 						
@@ -646,7 +646,7 @@ void pump_tick_10ms(void)
 							// Pinlet sensor defected
 							else if(abs(RX_Status.pressure_out - _CheckStep4_Pout) < 50)
 								RX_Status.error |= COND_ERR_pres_out_hw;
-						}			
+						}				
 						RX_Status.mode = RX_Config.mode; 
 						break;
 		
@@ -665,9 +665,9 @@ void pump_tick_10ms(void)
 							turn_off_pump();
 							_ShutdownPrint = 0;
 						}
-						_PumpPID.val_max = 4095;
+						_PumpPID.val_max = 4095;	
 						RX_Status.mode = RX_Config.mode; 
-						break;*/
+						break;		  
 						
         //--- PURGE --------------------------------------------
 		case ctrl_purge_soft:
