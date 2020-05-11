@@ -53,6 +53,7 @@
 
                             <rx_uc:PlcParCtrl ID="XML_MATERIAL_THIKNESS"        Label="Thickness"       Unit="mm"    UnitWidth="50" Format="1"/>
                             <rx_uc:PlcParCtrl ID="XML_HEAD_HEIGHT"              Label="Print Height"    Unit="mm"    UnitWidth="50" Format="1"/>
+                            <rx_uc:PlcParCtrl ID="XML_ENC_OFFSET"               Label="Encoder Offset"  Unit="inc/m" UnitWidth="50" Format="1"/>
 
                             <rx_uc:PlcParCtrl ID="PAR_WINDER_TENSION_1"         Label="Tension UW"      Unit="N"    UnitWidth="50" Format="n"/>
                             <rx_uc:PlcParCtrl ID="PAR_WINDER_TENSION_2"         Label="Tension RW"      Unit="N"    UnitWidth="50" Format="n"/>

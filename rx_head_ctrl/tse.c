@@ -254,12 +254,14 @@ static void _check_udp_speed(int ticks)
 			{
 				int kb=RX_UdpSpeed[i]*RX_HBConfig.dataBlkSize/1024;
 			//	TrPrintfL(TRUE, "UDP[%d]: Speed=%d KB, ctr=%d", i, kb, _UdpOverloadCtr[i]);
+				/* --- message shows up at startup! ---
 				if (kb>UDP_OVERLOAD_WARNING)
 				{
 					if (_UdpOverloadCtr[i]<10) _UdpOverloadCtr[i]++;
 					else ErrorFlag(WARN, &_TseErrors[i].flags, 0x20<<i,	0, "TSE: UDP %d approaching maximum load", i);
 				}
 				else if (_UdpOverloadCtr[i]>0) _UdpOverloadCtr[i]--;
+				*/
 			}
 		}
 	}	

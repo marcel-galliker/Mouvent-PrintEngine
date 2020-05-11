@@ -21,7 +21,7 @@
 #include <time.h>
 
 #define DEVICE_NAME	"em2"
-#define NEW_COUNTER FALSE
+#define NEW_COUNTER	FALSE
 
 //--- structs ------------------------------
 
@@ -66,8 +66,8 @@ void ctr_init(void)
 		setup_double(file, "actual", READ, &RX_PrinterStatus.counterAct,   0);
 		setup_double(file, "total",  READ, &RX_PrinterStatus.counterTotal, 0);
 		setup_str   (file, "check",  READ, check1, sizeof(check1), "");
-        #ifndef NEW_COUNTER
-		RX_PrinterStatus.counterTotal = RX_PrinterStatus.counterAct;
+        #if NEW_COUNTER==0
+			RX_PrinterStatus.counterTotal = RX_PrinterStatus.counterAct;
         #endif
 	}
 	setup_destroy(file);
@@ -75,19 +75,19 @@ void ctr_init(void)
 	_calc_check(rx_file_get_mtime(PATH_USER FILENAME_COUNTERS), check2);
 	
 	_Manipulated = (strcmp(check1, check2))!=0;
-    #ifdef NEW_COUNTER
-	if (_Manipulated)
-	{
-		_calc_reset_key(RX_Hostname, check2);
-		if (!strcmp(check1, check2))
+    #if NEW_COUNTER==1
+		if (_Manipulated)
 		{
-			_Manipulated = FALSE;
-			RX_PrinterStatus.counterTotal=0;
+			_calc_reset_key(RX_Hostname, check2);
+			if (!strcmp(check1, check2))
+			{
+				_Manipulated = FALSE;
+				RX_PrinterStatus.counterTotal=0;
+			}
 		}
-	}
-	if (_Manipulated) Error(ERR_CONT, 0, "Counters manipulated");
+		if (_Manipulated) Error(ERR_CONT, 0, "Counters manipulated");
 	
-	_ctr_save(FALSE, NULL);	
+		_ctr_save(FALSE, NULL);	
     #endif
 }
 
@@ -120,12 +120,12 @@ static void _calc_reset_key(char *machineName, UCHAR *key)
 //--- ctr_set_total -----------------------------
 void ctr_set_total(UINT32 machineMeters)
 {
-    #ifndef NEW_COUNTER
-	if (machineMeters>RX_PrinterStatus.counterTotal) 
-	{
-		RX_PrinterStatus.counterTotal=machineMeters;		
-		gui_send_printer_status(&RX_PrinterStatus);		
-	}
+    #if NEW_COUNTER==0
+		if (machineMeters>RX_PrinterStatus.counterTotal) 
+		{
+			RX_PrinterStatus.counterTotal=machineMeters;		
+			gui_send_printer_status(&RX_PrinterStatus);		
+		}
     #endif
 }
 

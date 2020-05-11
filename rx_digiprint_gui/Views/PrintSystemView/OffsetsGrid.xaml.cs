@@ -98,6 +98,9 @@ namespace RX_DigiPrint.Views.PrintSystemView
                                                             ManualFlightTimeComp.Visibility = Visibility.Collapsed;
                                                             break;
 
+                case EPrinterType.printer_cleaf:            this.Visibility         = Visibility.Collapsed;
+                                                            break;
+
                 default:                                    this.Visibility         = Visibility.Visible;
                                                             Encoder.Visibility      = Visibility.Visible;
                                                             Angle.Visibility        = Visibility.Collapsed;

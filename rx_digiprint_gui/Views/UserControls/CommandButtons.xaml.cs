@@ -1,4 +1,5 @@
-﻿using RX_Common;
+﻿using iTextSharp.text.pdf.qrcode;
+using RX_Common;
 using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Models;
 using RX_DigiPrint.Services;
@@ -130,6 +131,16 @@ namespace RX_DigiPrint.Views.UserControls
             {
                 if (!RxMessageBox.YesNo("UV Lamp", "The UV Lamp is NOT READY.\n\nStart Printing?",  MessageBoxImage.Question, false))
                     return;
+            }
+
+            if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf)
+            {
+                int mode = Rx.StrToInt32(RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "PAR_UV_LAMP_3_MODE"));
+                if (mode==0)
+                {
+                    if (!RxMessageBox.YesNo("UV Lamp", "The UV Lamp at printer is NOT READY.\n\nStart Printing?",  MessageBoxImage.Question, false))
+                        return;
+                }
             }
             RxGlobals.RxInterface.SendCommand(TcpIp.CMD_START_PRINTING);
         }
