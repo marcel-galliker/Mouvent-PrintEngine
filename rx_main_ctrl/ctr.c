@@ -15,6 +15,7 @@
 #include "rx_setup_file.h"
 #include "rx_hash.h"
 #include "rx_sok.h"
+#include "rx_trace.h"
 #include "gui_svr.h"
 #include "ctr.h"
 
@@ -173,7 +174,8 @@ void calc_reset_key(char *machineName)
 //--- _ctr_save --------------------------------------------------
 static void _ctr_save(int reset, char *machineName)
 {
-    Error(LOG, 0, "Counters: act=%d, total=%d, (products=%d, m=%d.%03d) ", (int)RX_PrinterStatus.counterAct, (int)RX_PrinterStatus.counterTotal, (int)_prodCnt, (int)_prodLen, (int)(_prodLen*1000.0)%1000);
+//    Error(LOG, 0, "Counters: act=%d, total=%d, (products=%d, m=%d.%03d) ", (int)RX_PrinterStatus.counterAct, (int)RX_PrinterStatus.counterTotal, (int)_prodCnt, (int)_prodLen, (int)(_prodLen*1000.0)%1000);
+    TrPrintfL(TRUE, "Counters: act=%d, total=%d, (products=%d, m=%d.%03d) ", (int)RX_PrinterStatus.counterAct, (int)RX_PrinterStatus.counterTotal, (int)_prodCnt, (int)_prodLen, (int)(_prodLen*1000.0)%1000);
     _prodCnt=0;
     _prodLen=0;
 
@@ -195,6 +197,11 @@ static void _ctr_save(int reset, char *machineName)
 			setup_str	(file, "machine", WRITE, name, sizeof(name), "");
 			setup_double(file, "actual", WRITE, &RX_PrinterStatus.counterAct, 0);
 			setup_double(file, "total",  WRITE, &RX_PrinterStatus.counterTotal, 0);
+
+			#if NEW_COUNTER==0
+				_Manipulated = FALSE;
+				reset		 = FALSE;
+			#endif
 			if (reset)
 			{
 				_calc_reset_key(name, check);
