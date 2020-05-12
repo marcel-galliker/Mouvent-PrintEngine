@@ -861,12 +861,19 @@ int pq_printed(int headNo, SPageId *pid, int *pageDone, int *jobDone, SPrintQueu
 		{
 			{ //---------- test --------------------------------
 				static int _id=0;
-				if (_PrintDoneCnt==0)_id=pitem->id.id;
+				static int _srcHeight=0;
+				if (_PrintDoneCnt==0)
+				{
+					_id=pitem->id.id;
+					_srcHeight = 1;
+				}
 				if (pitem->id.id!=_id)
 				{
 					_id = pitem->id.id;
 					if (pitem->srcHeight==0) Error(ERR_CONT, 0, "Counter: new jobId=%d, srcHeight=%d, file >>%s<<", pitem->id.id, pitem->srcHeight,  _filename(pitem->filepath));
 				}
+				if (pitem->srcHeight==0 && _srcHeight!=0) Error(ERR_CONT, 0, "Counter: new jobId=%d, copy=%d, srcHeight=%d, file >>%s<<", pitem->id.id, pitem->id.copy, pitem->srcHeight,  _filename(pitem->filepath));
+				_srcHeight = pitem->srcHeight;
 			}
 
 			ctr_add(pitem->srcHeight / 1000000.0);		
