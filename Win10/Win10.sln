@@ -32,6 +32,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rx_net_bridge", "rx_net_bri
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rx_route", "rx_route\rx_route.vcxproj", "{885D5E76-D32E-4BAC-9449-2213DB94720B}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "InstallElo", "InstallElo\InstallElo.vdproj", "{E1741AA0-DA48-491A-A4FE-8D9DB1757EAE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		CD_ROM|Any CPU = CD_ROM|Any CPU
@@ -331,6 +333,30 @@ Global
 		{885D5E76-D32E-4BAC-9449-2213DB94720B}.SingleImage|Win32.ActiveCfg = Release|Win32
 		{885D5E76-D32E-4BAC-9449-2213DB94720B}.SingleImage|Win32.Build.0 = Release|Win32
 		{885D5E76-D32E-4BAC-9449-2213DB94720B}.SingleImage|x64.ActiveCfg = Release|Win32
+		{E1741AA0-DA48-491A-A4FE-8D9DB1757EAE}.CD_ROM|Any CPU.ActiveCfg = Release
+		{E1741AA0-DA48-491A-A4FE-8D9DB1757EAE}.CD_ROM|Mixed Platforms.ActiveCfg = Release
+		{E1741AA0-DA48-491A-A4FE-8D9DB1757EAE}.CD_ROM|Win32.ActiveCfg = Release
+		{E1741AA0-DA48-491A-A4FE-8D9DB1757EAE}.CD_ROM|x64.ActiveCfg = Release
+		{E1741AA0-DA48-491A-A4FE-8D9DB1757EAE}.Debug|Any CPU.ActiveCfg = Debug
+		{E1741AA0-DA48-491A-A4FE-8D9DB1757EAE}.Debug|Mixed Platforms.ActiveCfg = Debug
+		{E1741AA0-DA48-491A-A4FE-8D9DB1757EAE}.Debug|Win32.ActiveCfg = Debug
+		{E1741AA0-DA48-491A-A4FE-8D9DB1757EAE}.Debug|x64.ActiveCfg = Debug
+		{E1741AA0-DA48-491A-A4FE-8D9DB1757EAE}.Debug-Remote|Any CPU.ActiveCfg = Debug
+		{E1741AA0-DA48-491A-A4FE-8D9DB1757EAE}.Debug-Remote|Mixed Platforms.ActiveCfg = Debug
+		{E1741AA0-DA48-491A-A4FE-8D9DB1757EAE}.Debug-Remote|Win32.ActiveCfg = Debug
+		{E1741AA0-DA48-491A-A4FE-8D9DB1757EAE}.Debug-Remote|x64.ActiveCfg = Debug
+		{E1741AA0-DA48-491A-A4FE-8D9DB1757EAE}.DVD-5|Any CPU.ActiveCfg = Debug
+		{E1741AA0-DA48-491A-A4FE-8D9DB1757EAE}.DVD-5|Mixed Platforms.ActiveCfg = Debug
+		{E1741AA0-DA48-491A-A4FE-8D9DB1757EAE}.DVD-5|Win32.ActiveCfg = Debug
+		{E1741AA0-DA48-491A-A4FE-8D9DB1757EAE}.DVD-5|x64.ActiveCfg = Debug
+		{E1741AA0-DA48-491A-A4FE-8D9DB1757EAE}.Release|Any CPU.ActiveCfg = Release
+		{E1741AA0-DA48-491A-A4FE-8D9DB1757EAE}.Release|Mixed Platforms.ActiveCfg = Release
+		{E1741AA0-DA48-491A-A4FE-8D9DB1757EAE}.Release|Win32.ActiveCfg = Release
+		{E1741AA0-DA48-491A-A4FE-8D9DB1757EAE}.Release|x64.ActiveCfg = Release
+		{E1741AA0-DA48-491A-A4FE-8D9DB1757EAE}.SingleImage|Any CPU.ActiveCfg = Release
+		{E1741AA0-DA48-491A-A4FE-8D9DB1757EAE}.SingleImage|Mixed Platforms.ActiveCfg = Release
+		{E1741AA0-DA48-491A-A4FE-8D9DB1757EAE}.SingleImage|Win32.ActiveCfg = Release
+		{E1741AA0-DA48-491A-A4FE-8D9DB1757EAE}.SingleImage|x64.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
