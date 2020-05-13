@@ -67,6 +67,6 @@
     <Library Include="..\..\Externals\WinpkFilter\Kernel\bin\dll\i386\ndisapi.lib" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\Externals\WinpkFilter\Kernel\bin\dll\i386\ndisapi.dll" />
+    <None Include="..\..\Externals\WinpkFilter\Kernel\bin\dll\amd64\ndisapi.dll" />
   </ItemGroup>
 </Project>

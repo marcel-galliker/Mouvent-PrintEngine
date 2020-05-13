@@ -34,7 +34,7 @@ static int _findAdapter(IP_ADAPTER_INFO *info, char *id);
 int bridge_init(char *provider, char *client)
 {	
 	memset(&_Args, 0, sizeof(_Args));
-	_fsopen(&_TraceFile, "c:/radex/rx_bridge_trace.txt", "w", _SH_DENYNO);
+//	_TraceFile = _fsopen("c:/radex/rx_bridge_trace.txt", "w", _SH_DENYNO);
 	if (_TraceFile==NULL) _TraceFile = stdout;
 	fprintf(_TraceFile, "Provider: "); _findAdapter(&_ProviderAdapter, provider);
 	fprintf(_TraceFile, "Client:   "); _findAdapter(&_ClientAdapter,   client);

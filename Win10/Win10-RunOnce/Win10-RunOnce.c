@@ -1,6 +1,10 @@
 // Win10-RunOnce.cpp : Defines the entry point for the console application.
 //
 
+//--- alternat start method: regedit
+//	[HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce]
+//	"Win10-RunOnce"="\"c:\\Program Files (x86)\\Mouvent\\Win10-RunOnce.exe\""
+
 #include "stdafx.h"
 #include "windows.h"
 
@@ -44,6 +48,9 @@ int main(int argc, char* argv[])
 	system("reg add \"HKCU\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon\" /f /v Shell /d \"%ProgramFiles(x86)%\\mouvent\\Win10-Startup.exe\"");
 	system("reg add \"HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced\" /f /v HideFileExt /t REG_DWORD /d 0");
 
+	system("reg add \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon\" /f /v AutoAdminLogon /t REG_DWORD /d 1");
+	system("reg add \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon\" /f /v DefaultUserName /d \"mouvent\"");
+	system("reg add \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon\" /f /v DefaultPassword /d \"mouvent\"");
 	system("reg add \"HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\AutoRotation\" /f /v Enable /t REG_DWORD /d 0");
 
 	system("reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Services\\LanmanWorkstation\\Parameters\" /f /v AllowInsecureGuestAuth /t REG_DWORD /d 1");
