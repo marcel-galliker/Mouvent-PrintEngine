@@ -20,3 +20,4 @@ void ctr_reset(void);
 void calc_reset_key(char *key);
 void ctr_add(double mm);
 // void ctr_save(void);
+void reset_job_Len(void);

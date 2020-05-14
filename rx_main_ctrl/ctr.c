@@ -39,6 +39,7 @@ static int		_Manipulated=FALSE;
 static int		_Time;
 static int		_prodCnt;
 static double	_prodLen;
+static double	_jobLen;
 
 //--- prototypes ---------------------------------------
 static void _calc_check(time_t time, UCHAR *check);
@@ -56,6 +57,7 @@ void ctr_init(void)
 	RX_PrinterStatus.counterTotal = 0;
     _prodCnt = 0;
     _prodLen = 0;
+    _jobLen = 0;
 	_Time   = 0;
 
 	//--- read file ------------	
@@ -143,10 +145,20 @@ void ctr_tick(void)
 //--- ctr_add -------------------------------------------
 void ctr_add(double m)
 {
-	RX_PrinterStatus.counterTotal	+= m;
-	RX_PrinterStatus.counterAct		+= m;
+    double encoderOffset=0; 
+	if (rx_def_is_tx(RX_Config.printer.type)) encoderOffset=(double)RX_Spooler.maxOffsetPx;
     _prodLen += m;
+    _jobLen += m;
     _prodCnt++;
+    if ((_jobLen*1000000 >= encoderOffset))
+    {
+        if ((_jobLen * 1000000 - encoderOffset) <= m * 1000000)
+        {
+            m = (_jobLen - (encoderOffset)/1000000);
+        }
+		RX_PrinterStatus.counterTotal	+= m;
+		RX_PrinterStatus.counterAct		+= m;
+    }  
 }
 
 //--- ctr_reset ---------------------------------------------
@@ -231,4 +243,9 @@ static void _ctr_save(int reset, char *machineName)
 		rx_file_set_readonly(PATH_USER FILENAME_COUNTERS, TRUE);
 		rx_file_set_mtime(PATH_USER FILENAME_COUNTERS, time);
 	}
+}
+
+void reset_job_Len(void)
+{
+        _jobLen = 0;
 }
