@@ -148,7 +148,7 @@ void lh702_save_material	(char *varList)
 		*end++='\n';
 		str = end;
 	}
-	_lh702_send_status();
+//	_lh702_send_status();
 }
 
 //--- lh702_set_printpar -----------------------------------------------------
@@ -169,7 +169,7 @@ void lh702_set_printpar(SPrintQueueItem *pitem)
 		_Status.lateral			= pitem->pageMargin;
 		_Status.printState		= PS_STARTING;
 	}
-	_lh702_send_status();
+//	_lh702_send_status();
 }
 
 //--- lh702_on_error --------------------------------------------------------

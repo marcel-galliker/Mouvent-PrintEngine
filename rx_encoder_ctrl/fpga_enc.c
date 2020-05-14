@@ -355,9 +355,10 @@ static void _check_ftc(int ticks)
 	static int _lastTicks=0;
 	if(RX_EncoderCfg.ftc && Fpga->cfg.encIn[0].enable)
 	{
-		if (ticks-_lastTicks>=5*1000)
+		if (ticks-_lastTicks>=1*1000)
 		{
-			Error(LOG, 0, "Flight Time Correction: Speed=%d, Corr=%d", RX_EncoderStatus.speed, Fpga->stat.ftc_shift_delay_strokes_tel);
+			Error(LOG, 0, "Flight Time Correction: ftc_speed=%d,  ftc_ratio=%d, speed=%d, corr=%d", Fpga->cfg.general.ftc_speed, Fpga->cfg.general.ftc_ratio, RX_EncoderStatus.speed, Fpga->stat.ftc_shift_delay_strokes_tel);
+
 			_lastTicks = ticks;
 		}			
 	}
@@ -933,7 +934,8 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg, int restart)
 		_FirstMarkPos=0;		
 	}
 	
-	if (pcfg->printGoMode==PG_MODE_MARK || pcfg->printGoMode==PG_MODE_MARK_FILTER || RX_EncoderCfg.printGoMode==PG_MODE_MARK_VRT)
+//	if (pcfg->printGoMode==PG_MODE_MARK || pcfg->printGoMode==PG_MODE_MARK_FILTER || RX_EncoderCfg.printGoMode==PG_MODE_MARK_VRT)
+	if (pcfg->ftc)
 	{
 		//	Fpga->cfg.general.min_mark_len	  = 1000;
 		Fpga->cfg.general.shift_delay_tel		= (int)((pcfg->printGoDist   -Fpga->cfg.general.min_mark_len)/_StrokeDist);				
@@ -948,6 +950,7 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg, int restart)
 		Fpga->cfg.general.ftc_ratio = (int)ratio;
 		TrPrintfL(TRUE, "fpga_pg_config start: set ftc_speed=%d", (int)speed);
 		TrPrintfL(TRUE, "fpga_pg_config start: set ftc_ratio=%d", (int)ratio);
+		Error(LOG, 0, "ftc_speed=%d,  ftc_ratio=%d", Fpga->cfg.general.ftc_speed, Fpga->cfg.general.ftc_ratio);
 	}
 	else
 	{

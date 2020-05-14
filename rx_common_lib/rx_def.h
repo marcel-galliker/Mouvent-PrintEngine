@@ -445,8 +445,7 @@ typedef struct SPrinterCfg
 	EPrinterType	type;
 
 	UINT16	inkSupplyCnt;
-	UINT16	printBarCnt;
-	
+
 	UINT32  jetEnabled0;
 	UINT32	jetEnabledCnt;
 

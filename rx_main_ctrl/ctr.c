@@ -161,6 +161,12 @@ void ctr_add(double m)
     }  
 }
 
+//--- ctr_reset_jobLen ---------------
+void ctr_reset_jobLen(void)
+{
+	_jobLen = 0;
+}
+
 //--- ctr_reset ---------------------------------------------
 void ctr_reset(void)
 {
@@ -168,8 +174,8 @@ void ctr_reset(void)
 	_ctr_save(FALSE, NULL);
 }
 
-//--- calc_reset_key -------------------------------------------
-void calc_reset_key(char *machineName)
+//--- ctr_calc_reset_key -------------------------------------------
+void ctr_calc_reset_key(char *machineName)
 {
 	UINT64	macAddr;
 	UCHAR   key[64];
@@ -245,7 +251,4 @@ static void _ctr_save(int reset, char *machineName)
 	}
 }
 
-void reset_job_Len(void)
-{
-        _jobLen = 0;
-}
+
