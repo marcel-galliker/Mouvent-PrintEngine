@@ -98,7 +98,7 @@ static int  _data_split		           (SPageId *id, SBmpInfo *pBmpInfo, int offset
 static int  _data_split_scan           (SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int lengthPx, int blkNo, int blkCnt, int clearBlockUsed, int same, SPrintListItem *pItem);
 static int  _data_split_scan_no_overlap(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int lengthPx, int blkNo, int blkCnt, int clearBlockUsed, int same, SPrintListItem *pItem);
 static int  _data_split_test           (SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int lengthPx, int blkNo, int blkCnt, int clearBlockUsed, int same, SPrintListItem *pItem);
-static int _data_split_prod			   (SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int lengthPx, int blkNo, int blkCnt, int clearBlockUsed, int same, SPrintListItem *pItem);
+static int  _data_split_prod		   (SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int lengthPx, int blkNo, int blkCnt, int clearBlockUsed, int same, SPrintListItem *pItem);
 
 static void _data_multi_copy		   (SPageId *id, SBmpInfo *pBmpInfo, UINT8 multiCopy);
 static void _data_multi_copy_64		   (SPageId *id, SBmpInfo *pBmpInfo, UINT8 multiCopy);
@@ -1072,11 +1072,12 @@ static int _data_split(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int length
 
 		case PM_SCANNING:			
 		case PM_SCAN_MULTI_PAGE:	return _data_split_prod(id, pBmpInfo, offsetPx, lengthPx, blkNo, blkCnt, clearBlockUsed, same, pItem);
-
+									/*
 									if (RX_Spooler.overlap)	
 										return _data_split_scan(id, pBmpInfo, offsetPx, lengthPx, blkNo, blkCnt,clearBlockUsed, same, pItem);
 									else		
 										return _data_split_scan_no_overlap(id, pBmpInfo, offsetPx, lengthPx, blkNo, blkCnt ,clearBlockUsed, same, pItem);
+									*/
 
 		case PM_SINGLE_PASS:		// return _data_split_prod(id, pBmpInfo, offsetPx, min(RX_Spooler.barWidthPx, (int)pBmpInfo->srcWidthPx), blkNo, blkCnt, clearBlockUsed, same, pItem);
 									return _data_split_scan(id, pBmpInfo, offsetPx, min(RX_Spooler.barWidthPx, (int)pBmpInfo->srcWidthPx), blkNo, blkCnt, clearBlockUsed, same, pItem);
@@ -1211,7 +1212,7 @@ static int _data_split_prod(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 		return REPLY_ERROR;
 	pixelPerByte = 8/pBmpInfo->bitsPerPixel;
 
-	barWidthPx  = RX_Spooler.barWidthPx + RX_Spooler.headOverlapPx;	// stitch on right
+	barWidthPx  = RX_Spooler.barWidthPx + RX_Spooler.headOverlapPx;		// stitch on right
 	if (RX_Spooler.overlap) barWidthPx	+= RX_Spooler.headOverlapPx;	// stitch on left+right
 
 	//--- do the split ------------------------------------------------
@@ -1221,8 +1222,8 @@ static int _data_split_prod(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 		{
 //			rx_mem_use(pBmpInfo->buffer[color]);
 
-			headWidthPx = RX_Spooler.headWidthPx+RX_Spooler.headOverlapPx;
-			if (RX_Spooler.overlap) headWidthPx += RX_Spooler.headOverlapPx;
+			headWidthPx = RX_Spooler.headWidthPx;
+			if (RX_Spooler.overlap || RX_Spooler.headsPerColor>1) headWidthPx += RX_Spooler.headOverlapPx;
 
 			colorOffset = RX_Color[color].offsetPx;
 
@@ -1304,7 +1305,8 @@ static int _data_split_prod(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 				else									   
 				{
 					startPx    += (RX_Spooler.headWidthPx - firstFillPx);
-					if (n+2>=RX_Spooler.headsPerColor) headWidthPx = RX_Spooler.headWidthPx;
+					if (!RX_Spooler.overlap && n+2>=RX_Spooler.headsPerColor) 
+						headWidthPx = RX_Spooler.headWidthPx;
 				}
 				firstFillPx =0;
 				n++;
