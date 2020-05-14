@@ -179,6 +179,23 @@ static void _nios_check_errors(void)
 	{
 		if (_Stat->ink_supply[isNo].error&err_overpressure)		 
 			ErrorFlag(ERR_CONT,  &RX_FluidBoardStatus.err, err_overpressure, 0, "InkSupply[%d] Ink Tank overpressure", isNo+1);
+
+		if (_Stat->ink_supply[isNo].error&err_filter_clogged)
+		{														
+			if(_Stat->ink_supply[isNo].COND_Pressure_Actual > 100) 
+				ErrorFlag(WARN,  &RX_FluidBoardStatus.err, err_filter_clogged,      0, "InkSupply[%d] Filter need to be changed soon (P > 900mbars AND flow > 10ml/min)", isNo+1);
+			else ErrorFlag(ERR_CONT,  &RX_FluidBoardStatus.err, err_filter_clogged,      0, "InkSupply[%d] Filter need to be changed (P > 900mbars AND flow < 10ml/min)", isNo+1);
+		}		 
+			
+
+		//  if ((isNo == 0) &&(_Cfg->cmd.lung_needed))
+        {
+            if (_Stat->ink_supply[0].error&err_degasser_clogged)		 
+				ErrorFlag(WARN, (UINT32*)&_Error[0], err_ink_tube_suck_air, 0, "Degasser air tube probably clogged (Degas pressure never decrease, Duty=0%) %d %d", isNo, _Cfg->cmd.lung_needed);
+			if (_Stat->ink_supply[0].error&err_degasser_leakage)		 
+				ErrorFlag(WARN, (UINT32*)&_Error[0], err_degasser_leakage, 0, "Degasser Duty>20% (=%d) : Air leakage in degasser OR a lot of air in the ink %d %d",_Stat->duty_degasser, isNo, _Cfg->cmd.lung_needed);
+        }
+        
         //		if (_Stat->ink_supply[isNo].error & err_ink_tank_pressure)
         //			ErrorFlag (ERR_CONT, (UINT32*)&_Error[isNo],
         //err_ink_tank_pressure,  0, "InkSupply[%d] Ink Tank Sensor Error",
@@ -353,6 +370,11 @@ void nios_set_cfg(SFluidBoardCfg *pcfg)
 	_Cfg->printerType			= pcfg->printerType;
 	_Cfg->headsPerColor			= pcfg->headsPerColor;
 	nios_error_reset();
+}
+
+void nios_set_degasser(int *degas)
+{
+	 _Cfg->cmd.lung_needed		= *degas;
 }
 
 //--- nios_set_ctrlmode ------------------------------------
@@ -591,7 +613,7 @@ static void _display_status(void)
 	//	term_printf("ID: %d.%d.%d.%d", id[0], id[1], id[2], id[3]);		
 		term_printf("\n");
 		
-		term_printf("vacc solenoid:   %d", _Stat->vacuum_solenoid); if (_Cfg->test_lungPressure) term_printf("(Test)"); term_printf("\n");
+		term_printf("vacc solenoid:   %d, %d%%", _Stat->vacuum_solenoid, _Stat->duty_degasser); if (_Cfg->test_lungPressure) term_printf("(Test)"); term_printf("\n");
 		term_printf("pressure sol:    %d, time=%dms\n", _Stat->air_pressure_solenoid, _Stat->airPressureTime);
 		term_printf("flush pump:      %d,  %d%%,   %d\n", _Stat->flush_pump, _Stat->flush_pump_val, _Stat->flush_pres_head);
 		term_printf("air pump:        %d\n", _Stat->air_pump);
@@ -633,18 +655,19 @@ static void _display_status(void)
 				
 		term_printf("bleed valve:       ");	for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("         %d  ", _Stat->ink_supply[i].bleedValve); term_printf("\n");
 		term_printf("air valve:         ");	for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("         %d  ", _Stat->ink_supply[i].airValve); term_printf("\n");
-//		term_printf("Cond. Pressure IN: "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str1(_Cfg->ink_supply[i].condPresIn)); term_printf("\n");	
-//		term_printf("Cond. Pres Out Set:"); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str1(-_Cfg->ink_supply[i].condPresOutSet)); term_printf("\n");	
-//		term_printf("Meniscus avg:      "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str1(_Stat->ink_supply[i].meniscus)); term_printf("\n");	
-		term_printf("flush time:        "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str(_Stat->ink_supply[i].flushTime)); term_printf("\n");	
-//		term_printf("time:              "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str(_Stat->ink_supply[i].time)); term_printf("\n");	
-//		term_printf("diff:              "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str(_Stat->ink_supply[i].diff)); term_printf("\n");	
+		term_printf("error:             ");	for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("    0x%04x  ", _Stat->ink_supply[i].error); term_printf("\n");
+		term_printf("Cond. Pressure IN: "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str1(_Cfg->ink_supply[i].condPresIn)); term_printf("\n");	
 		term_printf("\n");
-
-        term_printf("Conditioner--------"); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf(" ----%d----  ",i); term_printf("\n");
+//		term_printf("Cond. Pres Out Set:"); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str1(-_Cfg->ink_supply[i].condPresOutSet)); term_printf("\n");	
 		term_printf("Cond. Pres In:     "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str1(_Cfg->ink_supply[i].condPresIn)); term_printf("\n");	
 		term_printf("Cond. Pres Out:    "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str1(_Cfg->ink_supply[i].condPresOut)); term_printf("\n");	
 		term_printf("Cond. Meniscus:    "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str1(_Cfg->ink_supply[i].condMeniscus)); term_printf("\n");	
+//		term_printf("Meniscus avg:      "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str1(_Stat->ink_supply[i].meniscus)); term_printf("\n");	
+		term_printf("flush time:        "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str(_Stat->ink_supply[i].flushTime)); term_printf("\n");	
+		term_printf("time:              "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str(_Stat->ink_supply[i].time)); term_printf("\n");	
+		term_printf("diff:              "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str(_Stat->ink_supply[i].diff)); term_printf("\n");	
+		term_printf("cylinderPresSet:   "); for (i = 0; i < NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str(_Stat->ink_supply[i].IS_Pressure_Actual)); term_printf("\n");	
+		
 		term_printf("Cond. Pump Speed   "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str(_Cfg->ink_supply[i].condPumpSpeed)); term_printf("\n");	
 		term_printf("Cond. Pump Feedback"); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str1(_Cfg->ink_supply[i].condPumpFeedback)); term_printf("\n");	
 		term_printf("Head Temp:         "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str_temp(_Cfg->ink_supply[i].headTemp)); term_printf("\n");	
@@ -732,7 +755,7 @@ static void _IS_cond_log(int ticks)
 		sprintf(name, PATH_TEMP "Regulators_IS1.csv");
 		_plog_file_IS1 = fopen(name, "w");
 		fprintf(_plog_file_IS1, "pump_ticks(ms);PID1_SP-PresINcond (mbar);PID1_FB-PresIN (mbar);PID1_Output-PID2-_P;meniscus cond(mbar);cond pump measured (ml/min x 10);PID1-P;PID1-I; ");
-		fprintf(_plog_file_IS1, "PID2_SP-PID1_Output;PID2_Feedback-ISpres (mbar);PID2_Output-PumpSpeed (%);PID2-P;PID2-I\n");
+		fprintf(_plog_file_IS1, "PID2_SP-PID1_Output;PID2_Feedback-ISpres (mbar);PID2_Output-PumpSpeed (%);PID2-P;PID2-I;Degas-Duty(%)\n");
 		fflush(_plog_file_IS1);
 		_LogTimer = rx_get_ticks();
 	}
@@ -793,7 +816,7 @@ static void _IS_cond_log(int ticks)
 			{
 			case 0 : 
 				fprintf(_plog_file_IS1, "%d;%d;%d;%d;%d;%d;%d;%d;", time, _Cfg->ink_supply[i].cylinderPresSet, Condpressure, _Stat->ink_supply[i].PIDsetpoint_Output, CondMeniscus, CondSpeed, _Stat->ink_supply[i].fluid_PIDsetpoint_P, _Stat->ink_supply[i].fluid_PIDsetpoint_I);
-				fprintf(_plog_file_IS1, "%d;%s;%d;%d;%d\n", _Stat->ink_supply[i].PIDsetpoint_Output, value_str(ISpressure), ISspeed, _Stat->ink_supply[i].fluid_PIDpump_P, _Stat->ink_supply[i].fluid_PIDpump_I); 
+				fprintf(_plog_file_IS1, "%d;%s;%d;%d;%d;%d\n", _Stat->ink_supply[i].PIDsetpoint_Output, value_str(ISpressure), ISspeed, _Stat->ink_supply[i].fluid_PIDpump_P, _Stat->ink_supply[i].fluid_PIDpump_I,  _Stat->duty_degasser); 
 				break;
 			case 1 : 
 				fprintf(_plog_file_IS2, "%d;%d;%d;%d;%d;%d;%d;%d;%d;", time, _Cfg->ink_supply[i].cylinderPresSet, Condpressure, _Stat->ink_supply[i].PIDsetpoint_Output, CondMeniscus, CondSpeed, _Stat->ink_supply[i].fluid_PIDsetpoint_P, _Stat->ink_supply[i].fluid_PIDsetpoint_I, _Stat->ink_supply[i].PIDairvalve_Output);

@@ -175,7 +175,7 @@ void heater_tick_10ms(void)
 				if(pRX_Status->ink_supply[i].heaterTemp == _Temp_Pre[i]) // temperature frozen
 				{
 					_TimeTempFrozen[i]++;
-					if(_TimeTempFrozen[i] > 6000)	// during 60 seconds
+					if(_TimeTempFrozen[i] > 3000)	// during 30 seconds
 					{
 						init_AMC7891(AVALON_SPI_AMC7891_1_BASE);
 						pRX_Status->ink_supply[i].error |= err_heater_temp_frozen;

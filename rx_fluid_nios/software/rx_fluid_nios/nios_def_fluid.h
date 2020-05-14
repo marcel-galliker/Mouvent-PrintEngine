@@ -27,7 +27,7 @@ typedef struct SNiosFluidCmd
 	UINT32	error_reset:1;		// 	01: 
 	UINT32	logging:1;			// 	02: 
 	UINT32	lung_enabled:1;		// 	03:  
-	UINT32	cmd_04:1;		// 	04:
+	UINT32	lung_needed:1;		// 	04:
 	UINT32	cmd_05:1;		// 	05:
 	UINT32	cmd_06:1;		// 	06:
 	UINT32	cmd_07:1;		// 	07:
@@ -176,7 +176,9 @@ typedef enum ENiosInkSupplyErr
 //	err_ink_tank_pressure	= 0x00000001,
 //	err_cal_inkpump_failed	= 0x00000002,
 	err_heater_board    	= 0x00000004,
-	err_heater_temp_frozen 	= 0x00000008,	
+	err_heater_temp_frozen 	= 0x00000008,
+	err_degasser_clogged	= 0x00000010,
+	err_degasser_leakage	= 0x00000020,		
 	err_overpressure		= 0x00000040,
 	
 	// Check 1 sequence
@@ -283,6 +285,7 @@ typedef struct SNiosFluidStat
 	INT32	flush_pump_val;
 	INT32	flush_pres_head;
 	INT32	air_pressure;
+	INT32	duty_degasser;
 	
 	UINT32	pt100[8];
 	

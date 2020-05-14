@@ -35,6 +35,7 @@ void nios_set_temp			(int isNo, int temp);
 void nios_start_log			(void);
 void nios_start_temp_log	(void);
 void nios_error_reset		(void);
+void nios_set_degasser		(int *degas);
 
 void nios_test_stop			(void);
 void nios_test_air_valve	(int isNo);

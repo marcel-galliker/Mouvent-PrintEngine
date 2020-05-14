@@ -256,8 +256,8 @@ void pump_tick_10ms(void)
 					_NbPresShutdown = 0;
 					_PumpPID.Setpoint = -RX_Status.meniscus;
 				}
-				_SetpointShutdown = RX_Config.meniscus_setpoint - 150;
-				if(_SetpointShutdown < 100) _SetpointShutdown = 100;
+				if(RX_Config.meniscus_setpoint < 180) _SetpointShutdown = 100;		// WB machine setpoint -10 mbars
+				else _SetpointShutdown = 180;										// UV machine setpoint -18 mbars (to avoid leakage on the paper after 1 night OFF)
 				RX_Status.mode = RX_Config.mode;
 				break;
 		

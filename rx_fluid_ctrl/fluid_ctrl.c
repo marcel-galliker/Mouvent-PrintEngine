@@ -193,6 +193,7 @@ static int _handle_ctrl_msg(RX_SOCKET socket, void *msg)
                                         
 	case CMD_FLUID_STAT:		_do_fluid_stat		(socket, (SHeadStateLight*)	pdata);		break;
 	case CMD_FLUID_CTRL_MODE:	_do_fluid_ctrlMode	(socket, (SFluidCtrlCmd*)msg);			break;
+    case CMD_FLUID_DEGASSER:	nios_set_degasser	((int*)pdata);							break;
 	case CMD_SET_PURGE_PAR:		_do_set_purge_par	(socket, (SPurgePar*)	pdata);			break;
 
 	case CMD_SCALES_SET_CFG:	 _do_scales_set_cfg(socket, (SScalesCfgMsg*)msg);			break;

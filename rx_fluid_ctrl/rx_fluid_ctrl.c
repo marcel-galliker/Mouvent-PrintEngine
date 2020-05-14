@@ -53,13 +53,13 @@ static void main_menu()
 	term_printf("\nMENU -------------------------\n");
 //	if (status) term_printf("s: hide status\n");
 //	else        term_printf("s: show status\n");
-	term_printf("o:          switch off all tests\n");			
+	term_printf("o:          switch off all tests\n");
 	term_printf("a<n>:       Air-Valve[n]: switch\n");		
 	term_printf("b<n>:       Bleed-Valve[n]: switch\n");		
 	term_printf("i<n><mbar>: Ink-Pump[n] on until ink pressure > [mbar]\n");
 	term_printf("v<mbar>:    Vacuum to [mbar] (0=test off)\n");
 	term_printf("p<mbar>:    Pressure to [mbar] (0=test off)\n");
-	term_printf("l<n>:          Test bleed line\n");			
+	term_printf("l<n>:       Test bleed line\n");			
 	term_printf("f<x>:       Flush\n");	
 	
 	if (_DisplayBalance) 
@@ -84,7 +84,7 @@ static void main_menu()
 		switch (str[0])
 		{
 //		case 's': status = !status;							break;
-		case 'o':	nios_test_stop();						break;
+		case 'o':	nios_test_stop(); nios_test_vacuum(0);	break;
 		case 'a':	nios_test_air_valve(no);				break;
 		case 'B':   _DisplayBalance = !_DisplayBalance;		break;
 		case 'f':	nios_test_flush(atoi(&str[1]));			break;

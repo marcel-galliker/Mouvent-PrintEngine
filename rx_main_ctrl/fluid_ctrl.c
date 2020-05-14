@@ -477,19 +477,33 @@ static void _do_fluid_stat(int fluidNo, SFluidBoardStat *pstat)
 	SPrinterStatus stat;
 	int i;
 	memcpy(&stat, &RX_PrinterStatus, sizeof(stat));
+	int OLdNeedDegasser = stat.NeedDegasser;
 	stat.inkSupilesOff = TRUE;
 	stat.inkSupilesOn  = TRUE;
 	stat.tempReady	   = TRUE;
+	stat.NeedDegasser	= FALSE;
 	for (i=0; i<RX_Config.inkSupplyCnt; i++)
 	{
 		if (RX_Config.inkSupply[i].inkFileName[0]) 
 		{
-			if (_FluidStatus[i].ctrlMode<=ctrl_off) stat.inkSupilesOn =FALSE;
-			if (_FluidStatus[i].ctrlMode>ctrl_off)  stat.inkSupilesOff=FALSE;
-			if (!_FluidStatus[i].info.condTempReady) stat.tempReady = FALSE;
+			if (_FluidStatus[i].ctrlMode<=ctrl_off)			stat.inkSupilesOn	= FALSE;
+			if (_FluidStatus[i].ctrlMode>ctrl_off)			stat.inkSupilesOff	= FALSE;
+			if (!_FluidStatus[i].info.condTempReady)        stat.tempReady      = FALSE;
+			if (_FluidStatus[i].ctrlMode == ctrl_print)		stat.NeedDegasser	= TRUE;
 		}
 	}
 	if (stat.printState==ps_off) stat.printState = ps_ready_power;
+    if (OLdNeedDegasser != stat.NeedDegasser)
+    {
+        for (i=0; i<FLUID_BOARD_CNT; i++)
+		{
+			if (_FluidThreadPar[i].socket!=INVALID_SOCKET)
+			{
+				int degas = stat.NeedDegasser;
+				sok_send_2(&_FluidThreadPar[i].socket, CMD_FLUID_DEGASSER, sizeof(degas), &degas);
+			}
+		}
+	}
 	if (memcmp(&stat, &RX_PrinterStatus, sizeof(stat)))
 	{
 		memcpy(&RX_PrinterStatus, &stat, sizeof(stat));

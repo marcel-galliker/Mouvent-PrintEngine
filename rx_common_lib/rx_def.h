@@ -497,6 +497,7 @@ typedef struct SPrinterStatus
 		UINT32			txRobot:1;			// 0x0080
 		UINT32			tempReady:1;		// 0x0100
 		UINT32			lbRobot : 1;		// 0x0200
+		UINT32			NeedDegasser : 1;	// 0x0400
 		};
 		UINT32 flags;		
 	};
@@ -1538,6 +1539,7 @@ typedef struct SRxConfig
 {
 	UINT8			simulation;
 	UINT8			inkSupplyCnt;
+	UINT8			printBarCnt;
 	UINT8			headsPerColor;
 	INT32			headDist[MAX_HEAD_DIST];
 	INT32			headDistBack[MAX_HEAD_DIST];

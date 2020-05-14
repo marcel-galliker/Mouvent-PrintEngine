@@ -137,6 +137,16 @@ static int 	_ShutdownPrint[NIOS_INK_SUPPLY_CNT] = {0};
 static int 	_ShutdownTimeStability[NIOS_INK_SUPPLY_CNT] = {0};
 static int 	_ShutdownTimeOut[NIOS_INK_SUPPLY_CNT] = {0};
 
+// --- Detect Filter clogged in PRINT mode ---
+static int 	_FilterCloggedTime[NIOS_INK_SUPPLY_CNT] = {0};
+
+// --- Calcul duty for degasing to detect air leakage ---
+static INT32	_DutyDegasserCalcul	= 1; // avoid 0% when first start
+static INT32 	_DutyDegasserTimeClogged	= 0;
+static INT32 	_DutyDegasserTimeLeakage	= 0;
+static INT32    _DutyDegasserDuty	= 0;
+static INT32    _DutyDegasserFirst	= 1;
+
 // --- Calibration
 // static int 	_TimeStabitilityCalibration[NIOS_INK_SUPPLY_CNT] = {0};
 // static int 	_DecreaseSpeedCalibration[NIOS_INK_SUPPLY_CNT] = {0};
@@ -272,6 +282,9 @@ void ink_tick_10ms(void)
 				pRX_Status->ink_supply[isNo].error |= err_overpressure;
 			}
 		}
+
+		// duty degasse
+		pRX_Status->duty_degasser = _DutyDegasserCalcul;
 	}
 
 	for(isNo = 0 ; isNo < NIOS_INK_SUPPLY_CNT ; isNo++)
@@ -333,7 +346,7 @@ void ink_tick_10ms(void)
 				_set_flush_pump(isNo, FALSE);
 				_set_pump_speed(isNo, 0);
 
-				_InkSupply[isNo].degassing=FALSE;
+				_InkSupply[isNo].degassing=pRX_Config->cmd.lung_needed && pRX_Config->cmd.lung_enabled;
 				_InkSupply[isNo].purgeTime=0;
 				_InkSupply[isNo].purgePressure=0;
 				pRX_Status->ink_supply[isNo].flushTime = 0;
@@ -370,6 +383,15 @@ void ink_tick_10ms(void)
 					}
 				}
 				pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
+
+				// --- Detect filter clogged -------
+				if(pRX_Status->ink_supply[isNo].IS_Pressure_Actual > 900)
+				{
+					_FilterCloggedTime[isNo]++;
+					if(_FilterCloggedTime[isNo] > 6000)		// 1 minute over 900 mbars
+						pRX_Status->ink_supply[isNo].error |= err_filter_clogged;
+				}
+				else _FilterCloggedTime[isNo] = 0;
 
 				// ----- END NEW  -------
 
@@ -1441,7 +1463,11 @@ static int _degass_ctrl(void)
 	{
 		if (!degassing || pRX_Status->degass_pressure==INVALID_VALUE) 	  pRX_Status->vacuum_solenoid = FALSE;
 		else if ((-pRX_Status->degass_pressure) >= _LungVacc) 	  pRX_Status->vacuum_solenoid = FALSE;
-		else if ((-pRX_Status->degass_pressure) <  _LungVacc-50)  pRX_Status->vacuum_solenoid = TRUE;
+		else if ((-pRX_Status->degass_pressure) <  _LungVacc-50)
+		{
+			pRX_Status->vacuum_solenoid = TRUE;
+			_DutyDegasserTimeLeakage 	= 0;
+		}
 	}
 
 	if (pRX_Status->vacuum_solenoid!=act)
@@ -1451,6 +1477,30 @@ static int _degass_ctrl(void)
 		else
 			IOWR_ALTERA_AVALON_PIO_CLEAR_BITS(PIO_OUTPUT_BASE, DEGASS_VALVE_OUT);	// Vaccum Solenoid = off
 	}
+
+	if(degassing)
+	{
+		// Duty calculation to detect air leakage
+		_DutyDegasserTimeClogged++;
+		_DutyDegasserTimeLeakage++;
+		if(pRX_Status->vacuum_solenoid) _DutyDegasserDuty++;
+		// First time calcul to avoid 0%
+		if(_DutyDegasserFirst) _DutyDegasserCalcul 	= (_DutyDegasserDuty * 100) / _DutyDegasserTimeClogged;
+		if(_DutyDegasserTimeClogged >= 30000)	// every 5 minutes
+		{
+			_DutyDegasserCalcul 		= (_DutyDegasserDuty * 100) / _DutyDegasserTimeClogged;
+			_DutyDegasserTimeClogged 	= 0;
+			_DutyDegasserDuty 			= 0;
+			_DutyDegasserFirst			= 0;
+
+			// if duty > 20% -> air leakage
+			if(_DutyDegasserCalcul > 20) pRX_Status->ink_supply[0].error |= err_degasser_leakage;
+		}
+
+		// if air pump never ON during 10 minutes -> tube clogged
+		if(_DutyDegasserTimeClogged >= 6000) pRX_Status->ink_supply[0].error |= err_degasser_clogged;
+	}
+
 	return (pRX_Status->vacuum_solenoid);
 }
 
@@ -1640,7 +1690,15 @@ static void _set_flush_pump(int isNo, int state)
 	if (state) _FlushPump |=  (1<<isNo);
 	else	   _FlushPump &= ~(1<<isNo);
 
-	if (pRX_Config->test_flush) pRX_Status->flush_pump_val = pRX_Config->test_flush;
+	if (pRX_Config->test_flush)
+	{
+		if (pRX_Status->flush_pressure < 1200) pRX_Status->flush_pump_val = pRX_Config->test_flush;
+		else
+		{
+			pRX_Status->flush_pump_val = 0;
+			pRX_Status->ink_supply[isNo].ctrl_state = ctrl_error;
+		}
+	}
 	else
 	{
 		if (!_FlushPump)  pRX_Status->flush_pump_val=0;
