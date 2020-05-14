@@ -73,7 +73,7 @@ static void _handle_lateral			(int value);
 static void _handle_thickness		(int value);
 static void _handle_headheight		(int value);
 static void _handle_encoffset		(int value);
-static void  _lh702_tick			(void);
+static void _lh702_send_status		(void);
 
 //--- lh702_init -------------------------------------------------
 void lh702_init(void)
@@ -148,7 +148,7 @@ void lh702_save_material	(char *varList)
 		*end++='\n';
 		str = end;
 	}
-	_lh702_tick();
+	_lh702_send_status();
 }
 
 //--- lh702_set_printpar -----------------------------------------------------
@@ -169,7 +169,7 @@ void lh702_set_printpar(SPrintQueueItem *pitem)
 		_Status.lateral			= pitem->pageMargin;
 		_Status.printState		= PS_STARTING;
 	}
-	_lh702_tick();
+	_lh702_send_status();
 }
 
 //--- lh702_on_error --------------------------------------------------------
@@ -220,7 +220,7 @@ static void *_lh702_thread(void *lpParameter)
 					ErrorEx(dev_plc, -1, LOG, 0, "Connected");
 				}
 			}
-			_lh702_tick();
+		//	_lh702_send_status();
 		}
 		
 		rx_sleep(1000);
@@ -237,11 +237,10 @@ static int _lh702_closed(RX_SOCKET socket, const char *peerName)
 	return REPLY_OK;
 }
 
-//--- lh702_tick --------------------------------------------
-static void  _lh702_tick(void)
+//--- _lh702_send_status ---------------------------------------------
+static void _lh702_send_status(void)
 {
-//	TrPrintfL(TRUE, "_lh702_tick socket=%d", _Socket);
-	if (FALSE && _Socket!=INVALID_SOCKET)
+	if (_Socket!=INVALID_SOCKET)
 	{
 		// When this is enabled TCP/IP to the GUI blocks after several minutes!!!
 		// I think the PLC does not use this message, then the buffer overfills and finally Linux blocks the communication over "em2" interface.
@@ -319,6 +318,10 @@ static int _lh702_handle_msg(RX_SOCKET socket, void *pmsg, int len, struct socka
 									pc_change_job();
 									break;
 		
+        case CMD_GET_STATE:			Error(LOG, 0, "DM5 -> CMD_GET_STATE");		
+									_lh702_send_status();
+									break;
+
 		case PAR_MATERIAL:			Error(LOG, 0, "DM5 -> PAR_MATERIAL=>>%s<<", str->str);
 									lh702_load_material(str->str);
 									break;
