@@ -916,6 +916,10 @@ int pq_printed(int headNo, SPageId *pid, int *pageDone, int *jobDone, SPrintQueu
 						enc_enable_printing(FALSE);
 						if(*pnextItem==NULL) pc_abort_printing();
 					}
+					if (RX_Config.printer.type==printer_LH702 && *pnextItem)
+					{
+						enc_change();
+					}
 				}
 				pitem->state = PQ_STATE_PRINTED;
 			}

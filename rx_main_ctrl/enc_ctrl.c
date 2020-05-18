@@ -35,7 +35,7 @@
 
 //--- Externals ---------------------------------------------------------------
 SEncoderStat	_EncoderStatus[ENC_CNT];
-SPageId			_ID;
+static SPageId	_ID;
 
 //--- Statics -----------------------------------------------------------------
 
@@ -62,6 +62,8 @@ static int		_PrintMark_Mode;
 static int		_Scanning=FALSE;
 static int		_DistTelCnt=0;
 static int		_FirstPG;
+static UINT32	_PrintingId; 
+
 static int		_TotalPgCnt;
 static int		_StopPG;
 static int		_Printing=FALSE;
@@ -79,6 +81,10 @@ typedef struct
 static SBufItem	_PrintBuf[PRINT_BUF_SIZE];
 static int		_PrintBufIn;
 static int		_PrintBufOut;
+
+#define CHANGE_FIFO_SIZE 32
+static SPrintQueueItem*	_ChangeFifo[CHANGE_FIFO_SIZE];
+static int				_ChangeFifoIdx;
 
 //--- Prototypes --------------------------------------------------------------
 
@@ -98,6 +104,7 @@ void enc_init(void)
 	memset(_Encoder, 0, sizeof(_Encoder));
 	memset(_EncoderStatus, 0, sizeof(_EncoderStatus));
 	memset(&_ID, 0, sizeof(_ID));
+	_ChangeFifoIdx = 0;
 	for (i=0; i<ENC_CNT; i++)
 	{
 		net_device_to_ipaddr(dev_enc, i, _Encoder[i].ipAddrStr, SIZEOF(_Encoder[i].ipAddrStr));
@@ -186,7 +193,7 @@ int	 enc_set_config(void)
 {	
 	int no;
 	
-//	Error(LOG, 0, "enc_set_config");
+	if (RX_Config.printer.type==printer_LH702) Error(LOG, 0, "enc_set_config");
 	
 	_Scanning = rx_def_is_scanning(RX_Config.printer.type);
 		
@@ -276,7 +283,7 @@ static void _enc_start_printing(int no, SPrintQueueItem *pitem, int restart)
 	double comp, comp2;
 	memset(&msg, 0, sizeof(msg));
 
-//	Error(LOG, 0, "_enc_start_printing");
+	if (RX_Config.printer.type==printer_LH702) Error(LOG, 0, "_enc_start_printing");
 		
 	msg.restart		= restart;
 	msg.simulation  = arg_simuEncoder;
@@ -429,11 +436,27 @@ void enc_sent_document(int pages, SPageId *pId)
 	*/
 }
 
+//--- enc_change ---------------------------------------------------
+int enc_change(void)
+{
+	if (RX_Config.printer.type==printer_LH702) Error(LOG, 0, "enc_change");
+
+    if (_ChangeFifoIdx<1) return Error(ERR_ABORT, 0, "ChangeFIFO empty");
+	enc_set_config();
+	enc_start_printing(_ChangeFifo[0], FALSE);
+	memcpy(&_ID, &_ChangeFifo[0]->id, sizeof(_ID));
+	for (int i=0; i<_ChangeFifoIdx; i++)
+	{
+        enc_set_pg(_ChangeFifo[i], &_ChangeFifo[i]->id);
+	}
+	_ChangeFifoIdx=0;
+	_FirstPG = TRUE;
+}
+
 //--- enc_set_pg ----------------------------------------
 int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 {
 	int no;
-	static UINT32 _LastId; 
 	
 	if (!memcmp(pId, &_PrintBuf[_PrintBufOut].id, sizeof(SPageId)))
 	{
@@ -443,15 +466,17 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 		TrPrintf(TRUE, "enc_sent_document(%d) _TotalPgCnt=%d", _PrintBuf[_PrintBufOut].pages, _TotalPgCnt);
 	}
 	
-	if (RX_Config.printer.type==printer_LH702 && pId->id!=_LastId)
+	if (RX_Config.printer.type==printer_LH702 && _ID.id && pId->id!=_ID.id)
 	{
-		_LastId  = pId->id;
-		_FirstPG = TRUE;			
+		if (_ChangeFifoIdx>=CHANGE_FIFO_SIZE) return Error(ERR_ABORT, 0, "Fifo Overflow");
+		_ChangeFifo[_ChangeFifoIdx++] = pitem;
+		Error(LOG, 0, "enc_set_pg (id=%d, page=%d, copy=%d, scan=%d) to ChangeFIFO", pId->id, pId->page, pId->copy, pId->scan);
+		return REPLY_OK;
 	}
 		
 	if (pId->scan==0xffffffff) return REPLY_OK; // flush
 
-//	Error(LOG, 0, "enc_set_pg");
+	if (RX_Config.printer.type==printer_LH702) Error(LOG, 0, "enc_set_pg (id=%d, page=%d, copy=%d, scan=%d)", pId->id, pId->page, pId->copy, pId->scan);
 	
 	/*
 	//--- put to fifo
