@@ -26,6 +26,7 @@
 #include "gui_svr.h"
 #include "ctrl_msg.h"
 #include "ctrl_svr.h"
+#include "enc_ctrl.h"
 #include "network.h"
 #include "label.h"
 #include "spool_svr.h"
@@ -450,7 +451,6 @@ int enc_change(void)
         enc_set_pg(_ChangeFifo[i], &_ChangeFifo[i]->id);
 	}
 	_ChangeFifoIdx=0;
-	_FirstPG = TRUE;
 }
 
 //--- enc_set_pg ----------------------------------------

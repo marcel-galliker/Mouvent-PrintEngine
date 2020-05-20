@@ -22,6 +22,7 @@
 #include "network.h"
 #include "setup.h"
 #include "args.h"
+#include "ctr.h"
 #include "enc_ctrl.h"
 #include "chiller.h"
 #include "fluid_ctrl.h"
