@@ -34,6 +34,7 @@
 //--- globals ------------------------------------------------------------
 
 SFluidBoardStat	RX_FluidBoardStatus;
+SInkSupplyCfg	RX_InkSupplyCfg[INK_PER_BOARD];
 
 static int _AppRunning;
 static int _DisplayBalance=FALSE;

@@ -20,6 +20,7 @@
 #include "rx_threads.h"
 #include "rx_trace.h"
 #include "tcp_ip.h"
+#include "rx_fluid_ctrl.h"
 #include "nios_fluid.h"
 #include "daisy_chain.h"
 #include "fpga_fluid.h"

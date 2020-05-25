@@ -145,6 +145,7 @@
     <ClInclude Include="gcc_Debug.h" />
     <ClInclude Include="gcc_Release-soc.h" />
     <ClInclude Include="nios_fluid.h" />
+    <ClInclude Include="rx_fluid_ctrl.h" />
     <ClInclude Include="version.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

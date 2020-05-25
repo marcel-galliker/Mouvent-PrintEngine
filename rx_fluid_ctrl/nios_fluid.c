@@ -27,12 +27,14 @@
 #include "args.h"
 #include "fpga_fluid.h"
 #include "nios_def_fluid.h"
+#include "rx_fluid_ctrl.h"
 #include "nios_fluid.h"
 
 //--- defines ------------------------------------------------------
 
 #define	NIOS_EXE_ADDR	0xc0000000
-#define NIOS_EXE_SIZE	0x00018000 // 0x00010000
+// #define	NIOS_EXE_ADDR	0xc0020000
+#define NIOS_EXE_SIZE	0x00018000
 
 #define NIOS_MEM_ADDR	0xc0060000
 #define NIOS_MEM_SIZE	0x00010000	
@@ -175,23 +177,23 @@ static void _nios_check_errors(void)
     if (_HeaterUsed && _Stat->error&err_amc_heater) ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_amc_heater, 0, "No Heater Board connected to Fluid");
 		
 	int isNo;
+
 	for (isNo=0; isNo<SIZEOF(_Stat->ink_supply); isNo++)
 	{
 		if (_Stat->ink_supply[isNo].error&err_overpressure)		 
-			ErrorFlag(ERR_CONT,  &RX_FluidBoardStatus.err, err_overpressure, 0, "InkSupply[%d] Ink Tank overpressure", isNo+1);
+			ErrorFlag(ERR_CONT, (UINT32 *)&_Error[isNo], err_overpressure, 0, "InkSupply[%d-%s] Ink Tank overpressure", isNo+1, RX_ColorNameShort(isNo));
 
 		if (_Stat->ink_supply[isNo].error&err_filter_clogged)
 		{														
 			if(_Stat->ink_supply[isNo].COND_Pressure_Actual > 100) 
-				ErrorFlag(WARN,  &RX_FluidBoardStatus.err, err_filter_clogged,      0, "InkSupply[%d] Filter need to be changed soon (P > 900mbars AND flow > 10ml/min)", isNo+1);
-			else ErrorFlag(ERR_CONT,  &RX_FluidBoardStatus.err, err_filter_clogged,      0, "InkSupply[%d] Filter need to be changed (P > 900mbars AND flow < 10ml/min)", isNo+1);
+				ErrorFlag(WARN,  (UINT32 *)&_Error[isNo], err_filter_clogged,      0, "InkSupply[%d-%s] Filter need to be changed soon (P > 900mbars AND flow > 10ml/min)", isNo+1, RX_ColorNameShort(isNo));
+			else ErrorFlag(ERR_CONT, (UINT32 *)&_Error[isNo], err_filter_clogged,      0, "InkSupply[%d-%s] Filter need to be changed (P > 900mbars AND flow < 10ml/min)", isNo+1, RX_ColorNameShort(isNo));
 		}		 
 			
-
 		//  if ((isNo == 0) &&(_Cfg->cmd.lung_needed))
         {
-        //    if (_Stat->ink_supply[0].error&err_degasser_clogged)		 
-		//		ErrorFlag(WARN, (UINT32*)&_Error[0], err_ink_tube_suck_air, 0, "Degasser air tube probably clogged (Degas pressure never decreases, Duty=0)");
+            if (_Stat->ink_supply[0].error&err_degasser_clogged)		 
+				ErrorFlag(WARN, (UINT32*)&_Error[0], err_ink_tube_suck_air, 0, "Degasser air tube probably clogged (Degas pressure never decreases, Duty=0)");
 			if (_Stat->ink_supply[0].error&err_degasser_leakage)		 
 				ErrorFlag(WARN, (UINT32*)&_Error[0], err_degasser_leakage, 0, "Degasser Duty>20% (=%d) : Air leakage in degasser OR a lot of air in the ink %d degasserOn=%d",_Stat->duty_degasser, isNo, _Cfg->cmd.lung_needed);
         }
@@ -208,8 +210,8 @@ static void _nios_check_errors(void)
 	        if (_Stat->ink_supply[isNo].error & err_amc_config_lost)
 		        ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err,err_amc_config_lost,0,"Heater Box ADC config lost. Registers Power=%d, GPIO config=%d, Enable=%d, Gain=%d", _Stat->AMC_Register_Power, _Stat->AMC_Register_GPIO_Config, _Stat->AMC_Register_Enable, _Stat->AMC_Register_Gain);
 
-            if (_Stat->ink_supply[isNo].error & err_heater_board)	ErrorFlag(ERR_CONT, (UINT32 *)&_Error[isNo], err_heater_board,0, "InkSupply[%d] Heater Board Error or Openload", isNo + 1);
-            if (_Stat->ink_supply[isNo].error & err_watchdog)		ErrorFlag(ERR_CONT, (UINT32 *)&_Error[isNo], err_heater_board, 0, "InkSupply[%d] Heater Board Watchdog Error", isNo + 1);
+            if (_Stat->ink_supply[isNo].error & err_heater_board)	ErrorFlag(ERR_CONT, (UINT32 *)&_Error[isNo], err_heater_board,0, "InkSupply[%d-%s] Heater Board Error or Openload", isNo + 1, RX_ColorNameShort(isNo));
+            if (_Stat->ink_supply[isNo].error & err_watchdog)		ErrorFlag(ERR_CONT, (UINT32 *)&_Error[isNo], err_heater_board, 0, "InkSupply[%d-%s] Heater Board Watchdog Error", isNo + 1, RX_ColorNameShort(isNo));
 
             if (_Stat->HeaterBoard_Vsupply_3V < 2500)	 ErrorFlag(ERR_CONT, (UINT32*)&_Error[0], err_heater_board, 0, "Heater Board %d.%dV (3.3V)", _Stat->HeaterBoard_Vsupply_3V/1000, _Stat->HeaterBoard_Vsupply_3V%1000);
 			if (_Stat->HeaterBoard_Vsupply_5V < 4000)	 ErrorFlag(ERR_CONT, (UINT32*)&_Error[1], err_heater_board, 0, "Heater Board %d.%dV (5.0V)", _Stat->HeaterBoard_Vsupply_5V/1000, _Stat->HeaterBoard_Vsupply_5V%1000);
@@ -219,49 +221,49 @@ static void _nios_check_errors(void)
 		
 		// Check 0 error
 		if (_Stat->ink_supply[isNo].error&err_ink_pump)		 
-			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_ink_pump, 0, "Fluid[%d]: Check0 Ink pump not running (defected OR not connected)", isNo+1);
+			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_ink_pump, 0, "Fluid[%d-%s]: Check0 Ink pump not running (defected OR not connected)", isNo+1, RX_ColorNameShort(isNo));
 		if (_Stat->ink_supply[isNo].error&err_ink_tube_clogged)		 
-			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_ink_tube_clogged, 0, "Fluid[%d]: Check0 INK tube clogged", isNo+1);
+			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_ink_tube_clogged, 0, "Fluid[%d-%s]: Check0 INK tube clogged", isNo+1, RX_ColorNameShort(isNo));
 		if (_Stat->ink_supply[isNo].error&err_bleed_tube_clogged)		 
-			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_bleed_tube_clogged, 0, "Fluid[%d]: Check0 BLEED tube clogged OR AIR valve not opening", isNo+1);
+			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_bleed_tube_clogged, 0, "Fluid[%d-%s]: Check0 BLEED tube clogged OR AIR valve not opening", isNo+1, RX_ColorNameShort(isNo));
 		if (_Stat->ink_supply[isNo].error&err_damper)		 
-			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_damper, 0, "Fluid[%d]: Check0 damper defected or not present", isNo+1);
+			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_damper, 0, "Fluid[%d]: Check0 damper defected or not present", isNo+1, RX_ColorNameShort(isNo));
 		if (_Stat->ink_supply[isNo].error&err_ink_tube_suck_air)		 
-			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_ink_tube_suck_air, 0, "Fluid[%d]: Check0 INK tube sucking air OR canister empty", isNo+1);
+			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_ink_tube_suck_air, 0, "Fluid[%d-%s]: Check0 INK tube sucking air OR canister empty", isNo+1, RX_ColorNameShort(isNo));
 		if (_Stat->ink_supply[isNo].error&err_Foam)		 
-			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_Foam, 0, "Fluid[%d]: Check0 Foam was present in cylinder and removed (Restart CHECK)", isNo+1);
+			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_Foam, 0, "Fluid[%d-%s]: Check0 Foam was present in cylinder and removed (Restart CHECK)", isNo+1, RX_ColorNameShort(isNo));
 		if (_Stat->ink_supply[isNo].error&err_cylinder_empty)		 
-			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_cylinder_empty, 0, "Fluid[%d]: Check0 Cylinder empty or sucking a lot of air. FILL the cylinder and restart check", isNo+1);
+			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_cylinder_empty, 0, "Fluid[%d-%s]: Check0 Cylinder empty or sucking a lot of air. FILL the cylinder and restart check", isNo+1, RX_ColorNameShort(isNo));
 				
 		// Check 1 error
 		if (_Stat->ink_supply[isNo].error&err_valves_leakage)		 
-			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_valves_leakage, 0, "Fluid[%d]: Check1 Valves (air OR bleed) leakage", isNo);
+			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_valves_leakage, 0, "Fluid[%d-%s]: Check1 Valves (air OR bleed) leakage", isNo, RX_ColorNameShort(isNo));
 		if (_Stat->ink_supply[isNo].error&err_air_valve)		 
-			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_air_valve, 0, "Fluid[%d]: Check1 Air valve opened, P=%d mbars Maximum reachable (possible ink tube crooked, or canister empty, or air valve leakage)", isNo+1, _Stat->ink_supply[isNo].TestBleedLine_Pump_Phase2);
+			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_air_valve, 0, "Fluid[%d-%s]: Check1 Air valve opened, P=%d mbars Maximum reachable (possible ink tube crooked, or canister empty, or air valve leakage)", isNo+1, RX_ColorNameShort(isNo), _Stat->ink_supply[isNo].TestBleedLine_Pump_Phase2);
 		if (_Stat->ink_supply[isNo].error&err_bleed_valve)		 
-			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_bleed_valve, 0, "Fluid[%d]: Check1 Bleed valve opened, P=%d mbars Maximum reachable (possible ink tube crooked, or canister empty, or air valve leakage)", isNo+1, _Stat->ink_supply[isNo].TestBleedLine_Pump_Phase3);
+			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_bleed_valve, 0, "Fluid[%d-%s]: Check1 Bleed valve opened, P=%d mbars Maximum reachable (possible ink tube crooked, or canister empty, or air valve leakage)", isNo+1, RX_ColorNameShort(isNo), _Stat->ink_supply[isNo].TestBleedLine_Pump_Phase3);
 		if (_Stat->ink_supply[isNo].error&err_air_valveOK)		 
-			ErrorFlag(LOG, &RX_FluidBoardStatus.err, err_air_valveOK, 0, "Fluid[%d]: Check1 Air valve opened, P=1bar OK, Ink Pump = %d ", isNo+1, _Stat->ink_supply[isNo].TestBleedLine_Pump_Phase2);
+			ErrorFlag(LOG, &RX_FluidBoardStatus.err, err_air_valveOK, 0, "Fluid[%d-%s]: Check1 Air valve opened, P=1bar OK, Ink Pump = %d ", isNo+1, RX_ColorNameShort(isNo), _Stat->ink_supply[isNo].TestBleedLine_Pump_Phase2);
 		if (_Stat->ink_supply[isNo].error&err_bleed_valveOK)		 
-			ErrorFlag(LOG, &RX_FluidBoardStatus.err, err_bleed_valveOK, 0, "Fluid[%d]: Check1 Bleed valve opened, P=1bar OK, Ink Pump = %d ", isNo+1, _Stat->ink_supply[isNo].TestBleedLine_Pump_Phase3);
+			ErrorFlag(LOG, &RX_FluidBoardStatus.err, err_bleed_valveOK, 0, "Fluid[%d-%s]: Check1 Bleed valve opened, P=1bar OK, Ink Pump = %d ", isNo+1, RX_ColorNameShort(isNo), _Stat->ink_supply[isNo].TestBleedLine_Pump_Phase3);
 		if (_Stat->ink_supply[isNo].error&err_air_valve_tight)		 
-			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_air_valve_tight, 0, "Fluid[%d]: Check1 Air valve opened, Pump speed too low = %d (possible bleed line crooked) ", isNo+1, _Stat->ink_supply[isNo].TestBleedLine_Pump_Phase2);
+			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_air_valve_tight, 0, "Fluid[%d-%s]: Check1 Air valve opened, Pump speed too low = %d (possible bleed line crooked) ", isNo+1, RX_ColorNameShort(isNo), _Stat->ink_supply[isNo].TestBleedLine_Pump_Phase2);
 		if (_Stat->ink_supply[isNo].error&err_bleed_valve_tight)		 
-			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_bleed_valve_tight, 0, "Fluid[%d]: Check1 Bleed valve opened, Pump speed too low = %d (possible bleed line crooked)", isNo+1, _Stat->ink_supply[isNo].TestBleedLine_Pump_Phase3);
+			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_bleed_valve_tight, 0, "Fluid[%d-%s]: Check1 Bleed valve opened, Pump speed too low = %d (possible bleed line crooked)", isNo+1, RX_ColorNameShort(isNo), _Stat->ink_supply[isNo].TestBleedLine_Pump_Phase3);
 		
 		// Check 3 error
 		if (_Stat->ink_supply[isNo].error&err_feed_tube)		 
-			ErrorFlag(ERR_ABORT, &RX_FluidBoardStatus.err, err_feed_tube, 0, "Fluid[%d]: Check3 Feed tube clogged or disconnected", isNo + 1);
+			ErrorFlag(ERR_ABORT, &RX_FluidBoardStatus.err, err_feed_tube, 0, "Fluid[%d-%s]: Check3 Feed tube clogged or disconnected", isNo + 1, RX_ColorNameShort(isNo));
 		if (_Stat->ink_supply[isNo].error&err_check4_timeout)		 
-			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_check4_timeout, 0, "Fluid[%d]: Check4 Conditioners pump 40% could not be reached after 3 minutes", isNo + 1);
+			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_check4_timeout, 0, "Fluid[%d-%s]: Check4 Conditioners pump 40% could not be reached after 3 minutes", isNo + 1, RX_ColorNameShort(isNo));
 		if (_Stat->ink_supply[isNo].error&err_filter_clogged)		 
-			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_filter_clogged, 0, "Fluid[%d]: Check4 Filter clogged, need to be changed (IS pressure too high)", isNo + 1);
+			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_filter_clogged, 0, "Fluid[%d-%s]: Check4 Filter clogged, need to be changed (IS pressure too high)", isNo + 1, RX_ColorNameShort(isNo));
 		if (_Stat->ink_supply[isNo].error&err_return_pipe)		 
-			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_return_pipe, 0, "Fluid[%d]: Check3 Return pipe clogged or disconnected", isNo + 1);
+			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_return_pipe, 0, "Fluid[%d-%s]: Check3 Return pipe clogged or disconnected", isNo + 1, RX_ColorNameShort(isNo));
 		if (_Stat->ink_supply[isNo].error&err_ink_not_heating)		 
-			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_ink_not_heating, 0, "Fluid[%d]: Check4 heater board error, ink not heating", isNo + 1);
+			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_ink_not_heating, 0, "Fluid[%d-%s]: Check4 heater board error, ink not heating", isNo + 1, RX_ColorNameShort(isNo));
 		if (_Stat->ink_supply[isNo].error&err_ink_too_hot)		 
-			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_ink_too_hot, 0, "Fluid[%d]: Check4 heater board error, ink too hot", isNo + 1);
+			ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_ink_too_hot, 0, "Fluid[%d-%s]: Check4 heater board error, ink too hot", isNo + 1, RX_ColorNameShort(isNo));
 		        
 	}
 }
@@ -339,6 +341,8 @@ void nois_set_is_cfg(SInkSupplyCfg *pcfg)
     int no=pcfg->no;
     if (no>=0 && no<SIZEOF(_Cfg->ink_supply))
     {
+		memcpy(&RX_InkSupplyCfg[no], pcfg, sizeof(SInkSupplyCfg));
+		RX_ColorNameInit(no, FALSE, RX_InkSupplyCfg[no].ink.fileName, RX_InkSupplyCfg[no].ink.colorCode);
 		_Cfg->ink_supply[no].present         = (pcfg->ink.fileName[0]!=0);
 		if (pcfg->cylinderPresSet<=INK_PRESSURE_MAX) _Cfg->ink_supply[no].cylinderPresSet = pcfg->cylinderPresSet;
 		_Cfg->ink_supply[no].meniscusSet	= pcfg->meniscusSet;

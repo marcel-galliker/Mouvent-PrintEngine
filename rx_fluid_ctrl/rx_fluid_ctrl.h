@@ -14,3 +14,6 @@
 
 #include "rx_def.h"
 
+extern SFluidBoardStat	RX_FluidBoardStatus;
+extern SInkSupplyCfg	RX_InkSupplyCfg[INK_PER_BOARD];
+

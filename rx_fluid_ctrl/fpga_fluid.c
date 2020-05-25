@@ -30,6 +30,7 @@
 #include "rx_mac_address.h"
 #include "rx_term.h"
 #include "rx_trace.h"
+#include "rx_fluid_ctrl.h"
 #include "fpga_def_fluid.h"
 #include "fpga_fluid.h"
 
@@ -70,7 +71,8 @@ void fpga_init()
 	
 	_Qsys = (SFpgaQSys*)rx_fpga_map_page(_MemId, ADDR_FPGA_QSYS, sizeof(SFpgaQSys),	0x20020);
 	_Stat = (SFluidFpgaStatus*)rx_fpga_map_page(_MemId, ADDR_FPGA_STAT, sizeof(SFluidFpgaStatus),	0x005c);
-	
+
+	TrPrintfL(TRUE, "QSYS ID=%d, timestamp=%d", _Qsys->qsys_id, _Qsys->qsys_timestamp);	
 	TrPrintfL(TRUE, "Version: %d.%d.%d.%d", _Stat->version.major, _Stat->version.minor, _Stat->version.revision, _Stat->version.build);
 
 	_Init = TRUE;

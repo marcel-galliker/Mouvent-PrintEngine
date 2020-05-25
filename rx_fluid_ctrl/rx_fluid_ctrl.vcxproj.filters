@@ -120,5 +120,8 @@
     <ClInclude Include="daisy_chain_reg.h">
       <Filter>Header files</Filter>
     </ClInclude>
+    <ClInclude Include="rx_fluid_ctrl.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
