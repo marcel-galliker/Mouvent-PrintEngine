@@ -49,7 +49,7 @@ module fluid_board_soc_sysid (
 
   wire    [ 31: 0] readdata;
   //control_slave, which is an e_avalon_slave
-  assign readdata = address ? 1578390116 : 6;
+  assign readdata = address ? 1590157369 : 7;
 
 endmodule
 

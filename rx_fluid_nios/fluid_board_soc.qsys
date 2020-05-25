@@ -312,7 +312,7 @@
    {
       datum _lockedAddress
       {
-         value = "0";
+         value = "1";
          type = "boolean";
       }
       datum baseAddress
@@ -638,7 +638,7 @@
       }
       datum sopceditor_expanded
       {
-         value = "1";
+         value = "0";
          type = "boolean";
       }
    }
@@ -677,7 +677,7 @@
       }
       datum sopceditor_expanded
       {
-         value = "1";
+         value = "0";
          type = "boolean";
       }
    }
@@ -685,7 +685,7 @@
    {
       datum _lockedAddress
       {
-         value = "0";
+         value = "1";
          type = "boolean";
       }
       datum baseAddress
@@ -703,7 +703,7 @@
       }
       datum baseAddress
       {
-         value = "0";
+         value = "131072";
          type = "String";
       }
    }
@@ -776,7 +776,7 @@
    {
       datum _lockedAddress
       {
-         value = "0";
+         value = "1";
          type = "boolean";
       }
       datum baseAddress
@@ -987,17 +987,22 @@
          value = "40";
          type = "int";
       }
+      datum sopceditor_expanded
+      {
+         value = "0";
+         type = "boolean";
+      }
    }
    element uart_cond.s1
    {
       datum _lockedAddress
       {
-         value = "0";
+         value = "1";
          type = "boolean";
       }
       datum baseAddress
       {
-         value = "131072";
+         value = "65536";
          type = "String";
       }
    }
@@ -2442,7 +2447,7 @@
    kind="altera_avalon_sysid_qsys"
    version="17.1"
    enabled="1">
-  <parameter name="id" value="6" />
+  <parameter name="id" value="7" />
  </module>
  <module name="timer_0" kind="altera_avalon_timer" version="17.1" enabled="1">
   <parameter name="alwaysRun" value="false" />
@@ -2808,7 +2813,7 @@
    start="hps_0.h2f_axi_master"
    end="uart_cond.s1">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x00020000" />
+  <parameter name="baseAddress" value="0x00010000" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -2817,7 +2822,7 @@
    start="hps_0.h2f_axi_master"
    end="onchip_memory_nios_cpu.s2">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="baseAddress" value="0x00020000" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection

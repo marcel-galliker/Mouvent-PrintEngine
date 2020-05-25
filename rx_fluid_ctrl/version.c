@@ -1,1 +1,1 @@
-const char version[32]="1.3.105.8";
+const char version[32]="1.3.106.7";

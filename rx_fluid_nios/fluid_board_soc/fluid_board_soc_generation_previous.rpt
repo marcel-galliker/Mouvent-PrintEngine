@@ -1,5 +1,5 @@
 Info: Starting: Create block symbol file (.bsf)
-Info: qsys-generate /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc.qsys --block-symbol-file --output-directory=/home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc --family="Cyclone V" --part=5CSEBA2U23C8
+Info: qsys-generate /home/Radex/git/VHDL/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc.qsys --block-symbol-file --output-directory=/home/Radex/git/VHDL/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc --family="Cyclone V" --part=5CSEBA2U23C8
 Progress: Loading fluid_board_soc/fluid_board_soc.qsys
 Progress: Reading input file
 Progress: Adding avalon2fpga_slave_0 [avalon2fpga_slave 5.1]
@@ -100,7 +100,7 @@ Info: qsys-generate succeeded.
 Info: Finished: Create block symbol file (.bsf)
 Info: 
 Info: Starting: Create HDL design files for synthesis
-Info: qsys-generate /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc.qsys --synthesis=VHDL --output-directory=/home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis --family="Cyclone V" --part=5CSEBA2U23C8
+Info: qsys-generate /home/Radex/git/VHDL/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc.qsys --synthesis=VHDL --output-directory=/home/Radex/git/VHDL/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis --family="Cyclone V" --part=5CSEBA2U23C8
 Progress: Loading fluid_board_soc/fluid_board_soc.qsys
 Progress: Reading input file
 Progress: Adding avalon2fpga_slave_0 [avalon2fpga_slave 5.1]
@@ -209,7 +209,7 @@ Info: avalon_spi_amc7891_1: "fluid_board_soc" instantiated avalon_spi_amc7891 "a
 Info: avalon_spi_max31865_0: "fluid_board_soc" instantiated avalon_spi_max31865 "avalon_spi_max31865_0"
 Info: axi_lw_slave_register_0: "fluid_board_soc" instantiated axi_lw_slave_register "axi_lw_slave_register_0"
 Info: flush_pump_pwm_duty_cycle: Starting RTL generation for module 'fluid_board_soc_flush_pump_pwm_duty_cycle'
-Info: flush_pump_pwm_duty_cycle:   Generation command is [exec /home/Radex/altera/17.1/quartus/linux64/perl/bin/perl -I /home/Radex/altera/17.1/quartus/linux64/perl/lib -I /home/Radex/altera/17.1/quartus/sopc_builder/bin/europa -I /home/Radex/altera/17.1/quartus/sopc_builder/bin/perl_lib -I /home/Radex/altera/17.1/quartus/sopc_builder/bin -I /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/common -I /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio -- /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio/generate_rtl.pl --name=fluid_board_soc_flush_pump_pwm_duty_cycle --dir=/tmp/alt8267_3204168978764186647.dir/0168_flush_pump_pwm_duty_cycle_gen/ --quartus_dir=/home/Radex/altera/17.1/quartus --verilog --config=/tmp/alt8267_3204168978764186647.dir/0168_flush_pump_pwm_duty_cycle_gen//fluid_board_soc_flush_pump_pwm_duty_cycle_component_configuration.pl  --do_build_sim=0  ]
+Info: flush_pump_pwm_duty_cycle:   Generation command is [exec /home/Radex/altera/17.1/quartus/linux64/perl/bin/perl -I /home/Radex/altera/17.1/quartus/linux64/perl/lib -I /home/Radex/altera/17.1/quartus/sopc_builder/bin/europa -I /home/Radex/altera/17.1/quartus/sopc_builder/bin/perl_lib -I /home/Radex/altera/17.1/quartus/sopc_builder/bin -I /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/common -I /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio -- /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio/generate_rtl.pl --name=fluid_board_soc_flush_pump_pwm_duty_cycle --dir=/tmp/alt8404_3846859185924985511.dir/0006_flush_pump_pwm_duty_cycle_gen/ --quartus_dir=/home/Radex/altera/17.1/quartus --verilog --config=/tmp/alt8404_3846859185924985511.dir/0006_flush_pump_pwm_duty_cycle_gen//fluid_board_soc_flush_pump_pwm_duty_cycle_component_configuration.pl  --do_build_sim=0  ]
 Info: flush_pump_pwm_duty_cycle: Done RTL generation for module 'fluid_board_soc_flush_pump_pwm_duty_cycle'
 Info: flush_pump_pwm_duty_cycle: "fluid_board_soc" instantiated altera_avalon_pio "flush_pump_pwm_duty_cycle"
 Info: fpga_only_master: "fluid_board_soc" instantiated altera_jtag_avalon_master "fpga_only_master"
@@ -219,38 +219,38 @@ Info: hps_0: HPS peripherial PLL counter settings: n = 0  m = 39
 Info: hps_0: "fluid_board_soc" instantiated altera_hps "hps_0"
 Info: i2c_master_d: "fluid_board_soc" instantiated i2c_master "i2c_master_d"
 Info: jtag_uart: Starting RTL generation for module 'fluid_board_soc_jtag_uart'
-Info: jtag_uart:   Generation command is [exec /home/Radex/altera/17.1/quartus/linux64/perl/bin/perl -I /home/Radex/altera/17.1/quartus/linux64/perl/lib -I /home/Radex/altera/17.1/quartus/sopc_builder/bin/europa -I /home/Radex/altera/17.1/quartus/sopc_builder/bin/perl_lib -I /home/Radex/altera/17.1/quartus/sopc_builder/bin -I /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/common -I /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_jtag_uart -- /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_jtag_uart/generate_rtl.pl --name=fluid_board_soc_jtag_uart --dir=/tmp/alt8267_3204168978764186647.dir/0170_jtag_uart_gen/ --quartus_dir=/home/Radex/altera/17.1/quartus --verilog --config=/tmp/alt8267_3204168978764186647.dir/0170_jtag_uart_gen//fluid_board_soc_jtag_uart_component_configuration.pl  --do_build_sim=0  ]
+Info: jtag_uart:   Generation command is [exec /home/Radex/altera/17.1/quartus/linux64/perl/bin/perl -I /home/Radex/altera/17.1/quartus/linux64/perl/lib -I /home/Radex/altera/17.1/quartus/sopc_builder/bin/europa -I /home/Radex/altera/17.1/quartus/sopc_builder/bin/perl_lib -I /home/Radex/altera/17.1/quartus/sopc_builder/bin -I /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/common -I /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_jtag_uart -- /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_jtag_uart/generate_rtl.pl --name=fluid_board_soc_jtag_uart --dir=/tmp/alt8404_3846859185924985511.dir/0008_jtag_uart_gen/ --quartus_dir=/home/Radex/altera/17.1/quartus --verilog --config=/tmp/alt8404_3846859185924985511.dir/0008_jtag_uart_gen//fluid_board_soc_jtag_uart_component_configuration.pl  --do_build_sim=0  ]
 Info: jtag_uart: Done RTL generation for module 'fluid_board_soc_jtag_uart'
 Info: jtag_uart: "fluid_board_soc" instantiated altera_avalon_jtag_uart "jtag_uart"
 Info: nios2_qsys_0: "fluid_board_soc" instantiated altera_nios2_gen2 "nios2_qsys_0"
 Info: onchip_memory_nios_arm: Starting RTL generation for module 'fluid_board_soc_onchip_memory_nios_arm'
-Info: onchip_memory_nios_arm:   Generation command is [exec /home/Radex/altera/17.1/quartus/linux64/perl/bin/perl -I /home/Radex/altera/17.1/quartus/linux64/perl/lib -I /home/Radex/altera/17.1/quartus/sopc_builder/bin/europa -I /home/Radex/altera/17.1/quartus/sopc_builder/bin/perl_lib -I /home/Radex/altera/17.1/quartus/sopc_builder/bin -I /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/common -I /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_onchip_memory2 -- /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_onchip_memory2/generate_rtl.pl --name=fluid_board_soc_onchip_memory_nios_arm --dir=/tmp/alt8267_3204168978764186647.dir/0171_onchip_memory_nios_arm_gen/ --quartus_dir=/home/Radex/altera/17.1/quartus --verilog --config=/tmp/alt8267_3204168978764186647.dir/0171_onchip_memory_nios_arm_gen//fluid_board_soc_onchip_memory_nios_arm_component_configuration.pl  --do_build_sim=0  ]
+Info: onchip_memory_nios_arm:   Generation command is [exec /home/Radex/altera/17.1/quartus/linux64/perl/bin/perl -I /home/Radex/altera/17.1/quartus/linux64/perl/lib -I /home/Radex/altera/17.1/quartus/sopc_builder/bin/europa -I /home/Radex/altera/17.1/quartus/sopc_builder/bin/perl_lib -I /home/Radex/altera/17.1/quartus/sopc_builder/bin -I /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/common -I /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_onchip_memory2 -- /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_onchip_memory2/generate_rtl.pl --name=fluid_board_soc_onchip_memory_nios_arm --dir=/tmp/alt8404_3846859185924985511.dir/0009_onchip_memory_nios_arm_gen/ --quartus_dir=/home/Radex/altera/17.1/quartus --verilog --config=/tmp/alt8404_3846859185924985511.dir/0009_onchip_memory_nios_arm_gen//fluid_board_soc_onchip_memory_nios_arm_component_configuration.pl  --do_build_sim=0  ]
 Info: onchip_memory_nios_arm: Done RTL generation for module 'fluid_board_soc_onchip_memory_nios_arm'
 Info: onchip_memory_nios_arm: "fluid_board_soc" instantiated altera_avalon_onchip_memory2 "onchip_memory_nios_arm"
 Info: onchip_memory_nios_cpu: Starting RTL generation for module 'fluid_board_soc_onchip_memory_nios_cpu'
-Info: onchip_memory_nios_cpu:   Generation command is [exec /home/Radex/altera/17.1/quartus/linux64/perl/bin/perl -I /home/Radex/altera/17.1/quartus/linux64/perl/lib -I /home/Radex/altera/17.1/quartus/sopc_builder/bin/europa -I /home/Radex/altera/17.1/quartus/sopc_builder/bin/perl_lib -I /home/Radex/altera/17.1/quartus/sopc_builder/bin -I /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/common -I /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_onchip_memory2 -- /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_onchip_memory2/generate_rtl.pl --name=fluid_board_soc_onchip_memory_nios_cpu --dir=/tmp/alt8267_3204168978764186647.dir/0172_onchip_memory_nios_cpu_gen/ --quartus_dir=/home/Radex/altera/17.1/quartus --verilog --config=/tmp/alt8267_3204168978764186647.dir/0172_onchip_memory_nios_cpu_gen//fluid_board_soc_onchip_memory_nios_cpu_component_configuration.pl  --do_build_sim=0  ]
+Info: onchip_memory_nios_cpu:   Generation command is [exec /home/Radex/altera/17.1/quartus/linux64/perl/bin/perl -I /home/Radex/altera/17.1/quartus/linux64/perl/lib -I /home/Radex/altera/17.1/quartus/sopc_builder/bin/europa -I /home/Radex/altera/17.1/quartus/sopc_builder/bin/perl_lib -I /home/Radex/altera/17.1/quartus/sopc_builder/bin -I /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/common -I /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_onchip_memory2 -- /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_onchip_memory2/generate_rtl.pl --name=fluid_board_soc_onchip_memory_nios_cpu --dir=/tmp/alt8404_3846859185924985511.dir/0010_onchip_memory_nios_cpu_gen/ --quartus_dir=/home/Radex/altera/17.1/quartus --verilog --config=/tmp/alt8404_3846859185924985511.dir/0010_onchip_memory_nios_cpu_gen//fluid_board_soc_onchip_memory_nios_cpu_component_configuration.pl  --do_build_sim=0  ]
 Info: onchip_memory_nios_cpu: Done RTL generation for module 'fluid_board_soc_onchip_memory_nios_cpu'
 Info: onchip_memory_nios_cpu: "fluid_board_soc" instantiated altera_avalon_onchip_memory2 "onchip_memory_nios_cpu"
 Info: pio_input: Starting RTL generation for module 'fluid_board_soc_pio_input'
-Info: pio_input:   Generation command is [exec /home/Radex/altera/17.1/quartus/linux64/perl/bin/perl -I /home/Radex/altera/17.1/quartus/linux64/perl/lib -I /home/Radex/altera/17.1/quartus/sopc_builder/bin/europa -I /home/Radex/altera/17.1/quartus/sopc_builder/bin/perl_lib -I /home/Radex/altera/17.1/quartus/sopc_builder/bin -I /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/common -I /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio -- /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio/generate_rtl.pl --name=fluid_board_soc_pio_input --dir=/tmp/alt8267_3204168978764186647.dir/0173_pio_input_gen/ --quartus_dir=/home/Radex/altera/17.1/quartus --verilog --config=/tmp/alt8267_3204168978764186647.dir/0173_pio_input_gen//fluid_board_soc_pio_input_component_configuration.pl  --do_build_sim=0  ]
+Info: pio_input:   Generation command is [exec /home/Radex/altera/17.1/quartus/linux64/perl/bin/perl -I /home/Radex/altera/17.1/quartus/linux64/perl/lib -I /home/Radex/altera/17.1/quartus/sopc_builder/bin/europa -I /home/Radex/altera/17.1/quartus/sopc_builder/bin/perl_lib -I /home/Radex/altera/17.1/quartus/sopc_builder/bin -I /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/common -I /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio -- /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio/generate_rtl.pl --name=fluid_board_soc_pio_input --dir=/tmp/alt8404_3846859185924985511.dir/0011_pio_input_gen/ --quartus_dir=/home/Radex/altera/17.1/quartus --verilog --config=/tmp/alt8404_3846859185924985511.dir/0011_pio_input_gen//fluid_board_soc_pio_input_component_configuration.pl  --do_build_sim=0  ]
 Info: pio_input: Done RTL generation for module 'fluid_board_soc_pio_input'
 Info: pio_input: "fluid_board_soc" instantiated altera_avalon_pio "pio_input"
 Info: pio_output: Starting RTL generation for module 'fluid_board_soc_pio_output'
-Info: pio_output:   Generation command is [exec /home/Radex/altera/17.1/quartus/linux64/perl/bin/perl -I /home/Radex/altera/17.1/quartus/linux64/perl/lib -I /home/Radex/altera/17.1/quartus/sopc_builder/bin/europa -I /home/Radex/altera/17.1/quartus/sopc_builder/bin/perl_lib -I /home/Radex/altera/17.1/quartus/sopc_builder/bin -I /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/common -I /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio -- /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio/generate_rtl.pl --name=fluid_board_soc_pio_output --dir=/tmp/alt8267_3204168978764186647.dir/0174_pio_output_gen/ --quartus_dir=/home/Radex/altera/17.1/quartus --verilog --config=/tmp/alt8267_3204168978764186647.dir/0174_pio_output_gen//fluid_board_soc_pio_output_component_configuration.pl  --do_build_sim=0  ]
+Info: pio_output:   Generation command is [exec /home/Radex/altera/17.1/quartus/linux64/perl/bin/perl -I /home/Radex/altera/17.1/quartus/linux64/perl/lib -I /home/Radex/altera/17.1/quartus/sopc_builder/bin/europa -I /home/Radex/altera/17.1/quartus/sopc_builder/bin/perl_lib -I /home/Radex/altera/17.1/quartus/sopc_builder/bin -I /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/common -I /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio -- /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio/generate_rtl.pl --name=fluid_board_soc_pio_output --dir=/tmp/alt8404_3846859185924985511.dir/0012_pio_output_gen/ --quartus_dir=/home/Radex/altera/17.1/quartus --verilog --config=/tmp/alt8404_3846859185924985511.dir/0012_pio_output_gen//fluid_board_soc_pio_output_component_configuration.pl  --do_build_sim=0  ]
 Info: pio_output: Done RTL generation for module 'fluid_board_soc_pio_output'
 Info: pio_output: "fluid_board_soc" instantiated altera_avalon_pio "pio_output"
 Info: pio_reset_nios: Starting RTL generation for module 'fluid_board_soc_pio_reset_nios'
-Info: pio_reset_nios:   Generation command is [exec /home/Radex/altera/17.1/quartus/linux64/perl/bin/perl -I /home/Radex/altera/17.1/quartus/linux64/perl/lib -I /home/Radex/altera/17.1/quartus/sopc_builder/bin/europa -I /home/Radex/altera/17.1/quartus/sopc_builder/bin/perl_lib -I /home/Radex/altera/17.1/quartus/sopc_builder/bin -I /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/common -I /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio -- /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio/generate_rtl.pl --name=fluid_board_soc_pio_reset_nios --dir=/tmp/alt8267_3204168978764186647.dir/0175_pio_reset_nios_gen/ --quartus_dir=/home/Radex/altera/17.1/quartus --verilog --config=/tmp/alt8267_3204168978764186647.dir/0175_pio_reset_nios_gen//fluid_board_soc_pio_reset_nios_component_configuration.pl  --do_build_sim=0  ]
+Info: pio_reset_nios:   Generation command is [exec /home/Radex/altera/17.1/quartus/linux64/perl/bin/perl -I /home/Radex/altera/17.1/quartus/linux64/perl/lib -I /home/Radex/altera/17.1/quartus/sopc_builder/bin/europa -I /home/Radex/altera/17.1/quartus/sopc_builder/bin/perl_lib -I /home/Radex/altera/17.1/quartus/sopc_builder/bin -I /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/common -I /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio -- /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio/generate_rtl.pl --name=fluid_board_soc_pio_reset_nios --dir=/tmp/alt8404_3846859185924985511.dir/0013_pio_reset_nios_gen/ --quartus_dir=/home/Radex/altera/17.1/quartus --verilog --config=/tmp/alt8404_3846859185924985511.dir/0013_pio_reset_nios_gen//fluid_board_soc_pio_reset_nios_component_configuration.pl  --do_build_sim=0  ]
 Info: pio_reset_nios: Done RTL generation for module 'fluid_board_soc_pio_reset_nios'
 Info: pio_reset_nios: "fluid_board_soc" instantiated altera_avalon_pio "pio_reset_nios"
 Info: pll_0: "fluid_board_soc" instantiated altera_pll "pll_0"
 Info: sysid: "fluid_board_soc" instantiated altera_avalon_sysid_qsys "sysid"
 Info: timer_0: Starting RTL generation for module 'fluid_board_soc_timer_0'
-Info: timer_0:   Generation command is [exec /home/Radex/altera/17.1/quartus/linux64//perl/bin/perl -I /home/Radex/altera/17.1/quartus/linux64//perl/lib -I /home/Radex/altera/17.1/quartus/sopc_builder/bin/europa -I /home/Radex/altera/17.1/quartus/sopc_builder/bin/perl_lib -I /home/Radex/altera/17.1/quartus/sopc_builder/bin -I /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/common -I /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_timer -- /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_timer/generate_rtl.pl --name=fluid_board_soc_timer_0 --dir=/tmp/alt8267_3204168978764186647.dir/0178_timer_0_gen/ --quartus_dir=/home/Radex/altera/17.1/quartus --verilog --config=/tmp/alt8267_3204168978764186647.dir/0178_timer_0_gen//fluid_board_soc_timer_0_component_configuration.pl  --do_build_sim=0  ]
+Info: timer_0:   Generation command is [exec /home/Radex/altera/17.1/quartus/linux64//perl/bin/perl -I /home/Radex/altera/17.1/quartus/linux64//perl/lib -I /home/Radex/altera/17.1/quartus/sopc_builder/bin/europa -I /home/Radex/altera/17.1/quartus/sopc_builder/bin/perl_lib -I /home/Radex/altera/17.1/quartus/sopc_builder/bin -I /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/common -I /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_timer -- /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_timer/generate_rtl.pl --name=fluid_board_soc_timer_0 --dir=/tmp/alt8404_3846859185924985511.dir/0016_timer_0_gen/ --quartus_dir=/home/Radex/altera/17.1/quartus --verilog --config=/tmp/alt8404_3846859185924985511.dir/0016_timer_0_gen//fluid_board_soc_timer_0_component_configuration.pl  --do_build_sim=0  ]
 Info: timer_0: Done RTL generation for module 'fluid_board_soc_timer_0'
 Info: timer_0: "fluid_board_soc" instantiated altera_avalon_timer "timer_0"
 Info: uart_cond: Starting RTL generation for module 'fluid_board_soc_uart_cond'
-Info: uart_cond:   Generation command is [exec /home/Radex/altera/17.1/quartus/linux64/perl/bin/perl -I /home/Radex/altera/17.1/quartus/linux64/perl/lib -I /home/Radex/altera/17.1/quartus/sopc_builder/bin/europa -I /home/Radex/altera/17.1/quartus/sopc_builder/bin/perl_lib -I /home/Radex/altera/17.1/quartus/sopc_builder/bin -I /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/common -I /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_uart -- /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_uart/generate_rtl.pl --name=fluid_board_soc_uart_cond --dir=/tmp/alt8267_3204168978764186647.dir/0179_uart_cond_gen/ --quartus_dir=/home/Radex/altera/17.1/quartus --verilog --config=/tmp/alt8267_3204168978764186647.dir/0179_uart_cond_gen//fluid_board_soc_uart_cond_component_configuration.pl  --do_build_sim=0  ]
+Info: uart_cond:   Generation command is [exec /home/Radex/altera/17.1/quartus/linux64/perl/bin/perl -I /home/Radex/altera/17.1/quartus/linux64/perl/lib -I /home/Radex/altera/17.1/quartus/sopc_builder/bin/europa -I /home/Radex/altera/17.1/quartus/sopc_builder/bin/perl_lib -I /home/Radex/altera/17.1/quartus/sopc_builder/bin -I /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/common -I /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_uart -- /home/Radex/altera/17.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_uart/generate_rtl.pl --name=fluid_board_soc_uart_cond --dir=/tmp/alt8404_3846859185924985511.dir/0017_uart_cond_gen/ --quartus_dir=/home/Radex/altera/17.1/quartus --verilog --config=/tmp/alt8404_3846859185924985511.dir/0017_uart_cond_gen//fluid_board_soc_uart_cond_component_configuration.pl  --do_build_sim=0  ]
 Info: uart_cond: Done RTL generation for module 'fluid_board_soc_uart_cond'
 Info: uart_cond: "fluid_board_soc" instantiated altera_avalon_uart "uart_cond"
 Info: avalon_st_adapter: Inserting error_adapter: error_adapter_0
@@ -303,25 +303,25 @@ Info: p2b_adapter: "fpga_only_master" instantiated channel_adapter "p2b_adapter"
 Info: fpga_interfaces: "hps_0" instantiated altera_interface_generator "fpga_interfaces"
 Info: hps_io: "hps_0" instantiated altera_hps_io "hps_io"
 Info: cpu: Starting RTL generation for module 'fluid_board_soc_nios2_qsys_0_cpu'
-Info: cpu:   Generation command is [exec /home/Radex/altera/17.1/quartus/linux64//eperlcmd -I /home/Radex/altera/17.1/quartus/linux64//perl/lib -I /home/Radex/altera/17.1/quartus/sopc_builder/bin/europa -I /home/Radex/altera/17.1/quartus/sopc_builder/bin/perl_lib -I /home/Radex/altera/17.1/quartus/sopc_builder/bin -I /home/Radex/altera/17.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2/cpu_lib -I /home/Radex/altera/17.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2/nios_lib -I /home/Radex/altera/17.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2 -I /home/Radex/altera/17.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2 -- /home/Radex/altera/17.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2/generate_rtl.epl --name=fluid_board_soc_nios2_qsys_0_cpu --dir=/tmp/alt8267_3204168978764186647.dir/0193_cpu_gen/ --quartus_bindir=/home/Radex/altera/17.1/quartus/linux64/ --verilog --config=/tmp/alt8267_3204168978764186647.dir/0193_cpu_gen//fluid_board_soc_nios2_qsys_0_cpu_processor_configuration.pl  --do_build_sim=0  ]
-Info: cpu: # 2020.01.06 21:01:48 (*) Starting Nios II generation
-Info: cpu: # 2020.01.06 21:01:48 (*)   Checking for plaintext license.
-Info: cpu: # 2020.01.06 21:01:49 (*)   Plaintext license not found.
-Info: cpu: # 2020.01.06 21:01:49 (*)   Checking for encrypted license (non-evaluation).
-Info: cpu: # 2020.01.06 21:01:49 (*)   Encrypted license found.  SOF will not be time-limited.
-Info: cpu: # 2020.01.06 21:01:49 (*)   Elaborating CPU configuration settings
-Info: cpu: # 2020.01.06 21:01:49 (*)   Creating all objects for CPU
-Info: cpu: # 2020.01.06 21:01:49 (*)     Testbench
-Info: cpu: # 2020.01.06 21:01:50 (*)     Instruction decoding
-Info: cpu: # 2020.01.06 21:01:50 (*)       Instruction fields
-Info: cpu: # 2020.01.06 21:01:50 (*)       Instruction decodes
-Info: cpu: # 2020.01.06 21:01:50 (*)       Signals for RTL simulation waveforms
-Info: cpu: # 2020.01.06 21:01:50 (*)       Instruction controls
-Info: cpu: # 2020.01.06 21:01:50 (*)     Pipeline frontend
-Info: cpu: # 2020.01.06 21:01:50 (*)     Pipeline backend
-Info: cpu: # 2020.01.06 21:01:52 (*)   Generating RTL from CPU objects
-Info: cpu: # 2020.01.06 21:01:53 (*)   Creating encrypted RTL
-Info: cpu: # 2020.01.06 21:01:54 (*) Done Nios II generation
+Info: cpu:   Generation command is [exec /home/Radex/altera/17.1/quartus/linux64//eperlcmd -I /home/Radex/altera/17.1/quartus/linux64//perl/lib -I /home/Radex/altera/17.1/quartus/sopc_builder/bin/europa -I /home/Radex/altera/17.1/quartus/sopc_builder/bin/perl_lib -I /home/Radex/altera/17.1/quartus/sopc_builder/bin -I /home/Radex/altera/17.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2/cpu_lib -I /home/Radex/altera/17.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2/nios_lib -I /home/Radex/altera/17.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2 -I /home/Radex/altera/17.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2 -- /home/Radex/altera/17.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2/generate_rtl.epl --name=fluid_board_soc_nios2_qsys_0_cpu --dir=/tmp/alt8404_3846859185924985511.dir/0031_cpu_gen/ --quartus_bindir=/home/Radex/altera/17.1/quartus/linux64/ --verilog --config=/tmp/alt8404_3846859185924985511.dir/0031_cpu_gen//fluid_board_soc_nios2_qsys_0_cpu_processor_configuration.pl  --do_build_sim=0  ]
+Info: cpu: # 2020.05.22 10:46:31 (*) Starting Nios II generation
+Info: cpu: # 2020.05.22 10:46:31 (*)   Checking for plaintext license.
+Info: cpu: # 2020.05.22 10:46:31 (*)   Plaintext license not found.
+Info: cpu: # 2020.05.22 10:46:31 (*)   Checking for encrypted license (non-evaluation).
+Info: cpu: # 2020.05.22 10:46:32 (*)   Encrypted license found.  SOF will not be time-limited.
+Info: cpu: # 2020.05.22 10:46:32 (*)   Elaborating CPU configuration settings
+Info: cpu: # 2020.05.22 10:46:32 (*)   Creating all objects for CPU
+Info: cpu: # 2020.05.22 10:46:32 (*)     Testbench
+Info: cpu: # 2020.05.22 10:46:32 (*)     Instruction decoding
+Info: cpu: # 2020.05.22 10:46:32 (*)       Instruction fields
+Info: cpu: # 2020.05.22 10:46:32 (*)       Instruction decodes
+Info: cpu: # 2020.05.22 10:46:33 (*)       Signals for RTL simulation waveforms
+Info: cpu: # 2020.05.22 10:46:33 (*)       Instruction controls
+Info: cpu: # 2020.05.22 10:46:33 (*)     Pipeline frontend
+Info: cpu: # 2020.05.22 10:46:33 (*)     Pipeline backend
+Info: cpu: # 2020.05.22 10:46:34 (*)   Generating RTL from CPU objects
+Info: cpu: # 2020.05.22 10:46:35 (*)   Creating encrypted RTL
+Info: cpu: # 2020.05.22 10:46:36 (*) Done Nios II generation
 Info: cpu: Done RTL generation for module 'fluid_board_soc_nios2_qsys_0_cpu'
 Info: cpu: "nios2_qsys_0" instantiated altera_nios2_gen2_unit "cpu"
 Info: nios2_qsys_0_data_master_translator: "mm_interconnect_0" instantiated altera_merlin_master_translator "nios2_qsys_0_data_master_translator"
@@ -329,10 +329,10 @@ Info: jtag_uart_avalon_jtag_slave_translator: "mm_interconnect_0" instantiated a
 Info: nios2_qsys_0_data_master_agent: "mm_interconnect_0" instantiated altera_merlin_master_agent "nios2_qsys_0_data_master_agent"
 Info: hps_0_h2f_lw_axi_master_agent: "mm_interconnect_0" instantiated altera_merlin_axi_master_ni "hps_0_h2f_lw_axi_master_agent"
 Info: axi_lw_slave_register_0_altera_axi4lite_slave_agent: "mm_interconnect_0" instantiated altera_merlin_axi_slave_ni "axi_lw_slave_register_0_altera_axi4lite_slave_agent"
-Info: Reusing file /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_avalon_sc_fifo.v
-Info: Reusing file /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_merlin_address_alignment.sv
+Info: Reusing file /home/Radex/git/VHDL/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_avalon_sc_fifo.v
+Info: Reusing file /home/Radex/git/VHDL/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_merlin_address_alignment.sv
 Info: jtag_uart_avalon_jtag_slave_agent: "mm_interconnect_0" instantiated altera_merlin_slave_agent "jtag_uart_avalon_jtag_slave_agent"
-Info: Reusing file /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_merlin_burst_uncompressor.sv
+Info: Reusing file /home/Radex/git/VHDL/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_merlin_burst_uncompressor.sv
 Info: router: "mm_interconnect_0" instantiated altera_merlin_router "router"
 Info: router_001: "mm_interconnect_0" instantiated altera_merlin_router "router_001"
 Info: router_002: "mm_interconnect_0" instantiated altera_merlin_router "router_002"
@@ -347,24 +347,24 @@ Info: router_022: "mm_interconnect_0" instantiated altera_merlin_router "router_
 Info: router_029: "mm_interconnect_0" instantiated altera_merlin_router "router_029"
 Info: router_036: "mm_interconnect_0" instantiated altera_merlin_router "router_036"
 Info: fpga_only_master_master_limiter: "mm_interconnect_0" instantiated altera_merlin_traffic_limiter "fpga_only_master_master_limiter"
-Info: Reusing file /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_avalon_sc_fifo.v
-Info: Reusing file /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_avalon_st_pipeline_base.v
+Info: Reusing file /home/Radex/git/VHDL/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_avalon_sc_fifo.v
+Info: Reusing file /home/Radex/git/VHDL/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_avalon_st_pipeline_base.v
 Info: jtag_uart_avalon_jtag_slave_burst_adapter: "mm_interconnect_0" instantiated altera_merlin_burst_adapter "jtag_uart_avalon_jtag_slave_burst_adapter"
-Info: Reusing file /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_merlin_address_alignment.sv
-Info: Reusing file /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_avalon_st_pipeline_stage.sv
-Info: Reusing file /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_avalon_st_pipeline_base.v
+Info: Reusing file /home/Radex/git/VHDL/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_merlin_address_alignment.sv
+Info: Reusing file /home/Radex/git/VHDL/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_avalon_st_pipeline_stage.sv
+Info: Reusing file /home/Radex/git/VHDL/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_avalon_st_pipeline_base.v
 Info: cmd_demux: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "cmd_demux"
 Info: cmd_demux_001: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "cmd_demux_001"
 Info: cmd_demux_002: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "cmd_demux_002"
 Info: cmd_mux: "mm_interconnect_0" instantiated altera_merlin_multiplexer "cmd_mux"
 Info: cmd_mux_002: "mm_interconnect_0" instantiated altera_merlin_multiplexer "cmd_mux_002"
-Info: Reusing file /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: Reusing file /home/Radex/git/VHDL/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_merlin_arbitrator.sv
 Info: cmd_mux_010: "mm_interconnect_0" instantiated altera_merlin_multiplexer "cmd_mux_010"
-Info: Reusing file /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: Reusing file /home/Radex/git/VHDL/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_merlin_arbitrator.sv
 Info: cmd_mux_011: "mm_interconnect_0" instantiated altera_merlin_multiplexer "cmd_mux_011"
-Info: Reusing file /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: Reusing file /home/Radex/git/VHDL/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_merlin_arbitrator.sv
 Info: cmd_mux_012: "mm_interconnect_0" instantiated altera_merlin_multiplexer "cmd_mux_012"
-Info: Reusing file /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: Reusing file /home/Radex/git/VHDL/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_merlin_arbitrator.sv
 Info: rsp_demux: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "rsp_demux"
 Info: rsp_demux_002: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "rsp_demux_002"
 Info: rsp_demux_010: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "rsp_demux_010"
@@ -372,18 +372,18 @@ Info: rsp_demux_011: "mm_interconnect_0" instantiated altera_merlin_demultiplexe
 Info: rsp_demux_012: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "rsp_demux_012"
 Info: rsp_demux_024: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "rsp_demux_024"
 Info: rsp_mux: "mm_interconnect_0" instantiated altera_merlin_multiplexer "rsp_mux"
-Info: Reusing file /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: Reusing file /home/Radex/git/VHDL/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_merlin_arbitrator.sv
 Info: rsp_mux_001: "mm_interconnect_0" instantiated altera_merlin_multiplexer "rsp_mux_001"
-Info: Reusing file /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: Reusing file /home/Radex/git/VHDL/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_merlin_arbitrator.sv
 Info: rsp_mux_002: "mm_interconnect_0" instantiated altera_merlin_multiplexer "rsp_mux_002"
-Info: Reusing file /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: Reusing file /home/Radex/git/VHDL/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_merlin_arbitrator.sv
 Info: i2c_master_is1_avalon_slave_rsp_width_adapter: "mm_interconnect_0" instantiated altera_merlin_width_adapter "i2c_master_is1_avalon_slave_rsp_width_adapter"
-Info: Reusing file /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_merlin_address_alignment.sv
-Info: Reusing file /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_merlin_burst_uncompressor.sv
+Info: Reusing file /home/Radex/git/VHDL/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_merlin_address_alignment.sv
+Info: Reusing file /home/Radex/git/VHDL/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_merlin_burst_uncompressor.sv
 Info: crosser: "mm_interconnect_0" instantiated altera_avalon_st_handshake_clock_crosser "crosser"
-Info: Reusing file /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_avalon_st_clock_crosser.v
-Info: Reusing file /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_avalon_st_pipeline_base.v
-Info: Reusing file /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_std_synchronizer_nocut.v
+Info: Reusing file /home/Radex/git/VHDL/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_avalon_st_clock_crosser.v
+Info: Reusing file /home/Radex/git/VHDL/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_avalon_st_pipeline_base.v
+Info: Reusing file /home/Radex/git/VHDL/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_std_synchronizer_nocut.v
 Info: avalon_st_adapter: "mm_interconnect_0" instantiated altera_avalon_st_adapter "avalon_st_adapter"
 Info: avalon_st_adapter_001: "mm_interconnect_0" instantiated altera_avalon_st_adapter "avalon_st_adapter_001"
 Info: avalon_st_adapter_015: "mm_interconnect_0" instantiated altera_avalon_st_adapter "avalon_st_adapter_015"
@@ -392,10 +392,10 @@ Info: router_002: "mm_interconnect_1" instantiated altera_merlin_router "router_
 Info: router_004: "mm_interconnect_1" instantiated altera_merlin_router "router_004"
 Info: cmd_demux: "mm_interconnect_1" instantiated altera_merlin_demultiplexer "cmd_demux"
 Info: cmd_mux: "mm_interconnect_1" instantiated altera_merlin_multiplexer "cmd_mux"
-Info: Reusing file /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: Reusing file /home/Radex/git/VHDL/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_merlin_arbitrator.sv
 Info: rsp_demux: "mm_interconnect_1" instantiated altera_merlin_demultiplexer "rsp_demux"
 Info: rsp_mux: "mm_interconnect_1" instantiated altera_merlin_multiplexer "rsp_mux"
-Info: Reusing file /home/Radex/svn/VHDL/trunk/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: Reusing file /home/Radex/git/VHDL/fluid_board/2_qsys/fluid_board_soc/fluid_board_soc/synthesis/submodules/altera_merlin_arbitrator.sv
 Info: border: "hps_io" instantiated altera_interface_generator "border"
 Info: error_adapter_0: "avalon_st_adapter" instantiated error_adapter "error_adapter_0"
 Info: error_adapter_0: "avalon_st_adapter_001" instantiated error_adapter "error_adapter_0"

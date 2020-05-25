@@ -5,11 +5,11 @@
  version="1.0"
  fabric="QSYS">
  <!-- Format version 17.1 590 (Future versions may contain additional information.) -->
- <!-- 2020.01.07.10:41:57 -->
+ <!-- 2020.05.22.16:23:01 -->
  <!-- A collection of modules and connections -->
  <parameter name="AUTO_GENERATION_ID">
   <type>java.lang.Integer</type>
-  <value>1578390116</value>
+  <value>1590157369</value>
   <derived>false</derived>
   <enabled>true</enabled>
   <visible>false</visible>
@@ -23918,7 +23918,7 @@ parameters are a RESULT of the module parameters. -->
     <moduleName>uart_cond</moduleName>
     <slaveName>s1</slaveName>
     <name>uart_cond.s1</name>
-    <baseAddress>131072</baseAddress>
+    <baseAddress>65536</baseAddress>
     <span>32</span>
    </memoryBlock>
    <memoryBlock>
@@ -23926,7 +23926,7 @@ parameters are a RESULT of the module parameters. -->
     <moduleName>onchip_memory_nios_cpu</moduleName>
     <slaveName>s2</slaveName>
     <name>onchip_memory_nios_cpu.s2</name>
-    <baseAddress>0</baseAddress>
+    <baseAddress>131072</baseAddress>
     <span>98304</span>
    </memoryBlock>
    <memoryBlock>
@@ -50389,7 +50389,7 @@ parameters are a RESULT of the module parameters. -->
     <moduleName>uart_cond</moduleName>
     <slaveName>s1</slaveName>
     <name>uart_cond.s1</name>
-    <baseAddress>131072</baseAddress>
+    <baseAddress>65536</baseAddress>
     <span>32</span>
    </memoryBlock>
    <memoryBlock>
@@ -50397,7 +50397,7 @@ parameters are a RESULT of the module parameters. -->
     <moduleName>onchip_memory_nios_cpu</moduleName>
     <slaveName>s2</slaveName>
     <name>onchip_memory_nios_cpu.s2</name>
-    <baseAddress>0</baseAddress>
+    <baseAddress>131072</baseAddress>
     <span>98304</span>
    </memoryBlock>
    <memoryBlock>
@@ -51912,7 +51912,7 @@ parameters are a RESULT of the module parameters. -->
     <moduleName>uart_cond</moduleName>
     <slaveName>s1</slaveName>
     <name>uart_cond.s1</name>
-    <baseAddress>3221356544</baseAddress>
+    <baseAddress>3221291008</baseAddress>
     <span>32</span>
    </memoryBlock>
    <memoryBlock>
@@ -51920,7 +51920,7 @@ parameters are a RESULT of the module parameters. -->
     <moduleName>onchip_memory_nios_cpu</moduleName>
     <slaveName>s2</slaveName>
     <name>onchip_memory_nios_cpu.s2</name>
-    <baseAddress>3221225472</baseAddress>
+    <baseAddress>3221356544</baseAddress>
     <span>98304</span>
    </memoryBlock>
    <memoryBlock>
@@ -52783,7 +52783,7 @@ parameters are a RESULT of the module parameters. -->
     <moduleName>uart_cond</moduleName>
     <slaveName>s1</slaveName>
     <name>uart_cond.s1</name>
-    <baseAddress>3221356544</baseAddress>
+    <baseAddress>3221291008</baseAddress>
     <span>32</span>
    </memoryBlock>
    <memoryBlock>
@@ -52791,7 +52791,7 @@ parameters are a RESULT of the module parameters. -->
     <moduleName>onchip_memory_nios_cpu</moduleName>
     <slaveName>s2</slaveName>
     <name>onchip_memory_nios_cpu.s2</name>
-    <baseAddress>3221225472</baseAddress>
+    <baseAddress>3221356544</baseAddress>
     <span>98304</span>
    </memoryBlock>
    <memoryBlock>
@@ -99840,11 +99840,11 @@ parameters are a RESULT of the module parameters. -->
 the requested settings for a module instance. -->
   <assignment>
    <name>embeddedsw.CMacro.ID</name>
-   <value>6</value>
+   <value>7</value>
   </assignment>
   <assignment>
    <name>embeddedsw.CMacro.TIMESTAMP</name>
-   <value>1578390116</value>
+   <value>1590157369</value>
   </assignment>
   <assignment>
    <name>embeddedsw.dts.compatible</name>
@@ -99860,11 +99860,11 @@ the requested settings for a module instance. -->
   </assignment>
   <assignment>
    <name>embeddedsw.dts.params.id</name>
-   <value>6</value>
+   <value>7</value>
   </assignment>
   <assignment>
    <name>embeddedsw.dts.params.timestamp</name>
-   <value>1578390116</value>
+   <value>1590157369</value>
   </assignment>
   <assignment>
    <name>embeddedsw.dts.vendor</name>
@@ -99872,7 +99872,7 @@ the requested settings for a module instance. -->
   </assignment>
   <parameter name="id">
    <type>int</type>
-   <value>6</value>
+   <value>7</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>true</visible>
@@ -99880,7 +99880,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="timestamp">
    <type>int</type>
-   <value>1578390116</value>
+   <value>1590157369</value>
    <derived>true</derived>
    <enabled>false</enabled>
    <visible>false</visible>
@@ -113148,7 +113148,7 @@ parameters are a RESULT of the module parameters. -->
   </parameter>
   <parameter name="baseAddress">
    <type>java.math.BigInteger</type>
-   <value>0x00020000</value>
+   <value>0x00010000</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>true</visible>
@@ -113199,7 +113199,7 @@ parameters are a RESULT of the module parameters. -->
   </parameter>
   <parameter name="baseAddress">
    <type>java.math.BigInteger</type>
-   <value>0x0000</value>
+   <value>0x00020000</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>true</visible>

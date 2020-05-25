@@ -134,8 +134,8 @@ module fluid_board_soc_mm_interconnect_1_router
     // Figure out the number of bits to mask off for each slave span
     // during address decoding
     // -------------------------------------------------------
-    localparam PAD0 = log2ceil(64'h20000 - 64'h0); 
-    localparam PAD1 = log2ceil(64'h20020 - 64'h20000); 
+    localparam PAD0 = log2ceil(64'h10020 - 64'h10000); 
+    localparam PAD1 = log2ceil(64'h40000 - 64'h20000); 
     localparam PAD2 = log2ceil(64'h68000 - 64'h60000); 
     // -------------------------------------------------------
     // Work out which address bits are significant based on the
@@ -190,16 +190,16 @@ module fluid_board_soc_mm_interconnect_1_router
         // Sets the channel and destination ID based on the address
         // --------------------------------------------------
 
-    // ( 0x0 .. 0x20000 )
-    if ( {address[RG:PAD0],{PAD0{1'b0}}} == 19'h0   ) begin
-            src_channel = 3'b010;
-            src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 1;
-    end
-
-    // ( 0x20000 .. 0x20020 )
-    if ( {address[RG:PAD1],{PAD1{1'b0}}} == 19'h20000   ) begin
+    // ( 0x10000 .. 0x10020 )
+    if ( {address[RG:PAD0],{PAD0{1'b0}}} == 19'h10000   ) begin
             src_channel = 3'b001;
             src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 2;
+    end
+
+    // ( 0x20000 .. 0x40000 )
+    if ( {address[RG:PAD1],{PAD1{1'b0}}} == 19'h20000   ) begin
+            src_channel = 3'b010;
+            src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 1;
     end
 
     // ( 0x60000 .. 0x68000 )

@@ -1466,7 +1466,7 @@ static int _degass_ctrl(void)
 		else if ((-pRX_Status->degass_pressure) <  _LungVacc-50)
 		{
 			pRX_Status->vacuum_solenoid = TRUE;
-			_DutyDegasserTimeLeakage 	= 0;
+			_DutyDegasserTimeClogged 	= 0;
 		}
 	}
 
@@ -1485,10 +1485,10 @@ static int _degass_ctrl(void)
 		_DutyDegasserTimeLeakage++;
 		if(pRX_Status->vacuum_solenoid) _DutyDegasserDuty++;
 		// First time calcul to avoid 0%
-		if(_DutyDegasserFirst) _DutyDegasserCalcul 	= (_DutyDegasserDuty * 100) / _DutyDegasserTimeClogged;
-		if(_DutyDegasserTimeClogged >= 30000)	// every 5 minutes
+		if(_DutyDegasserFirst) _DutyDegasserCalcul 	= (_DutyDegasserDuty * 100) / _DutyDegasserTimeLeakage;
+		if(_DutyDegasserTimeLeakage >= 30000)	// every 5 minutes
 		{
-			_DutyDegasserCalcul 		= (_DutyDegasserDuty * 100) / _DutyDegasserTimeClogged;
+			_DutyDegasserCalcul 		= (_DutyDegasserDuty * 100) / _DutyDegasserTimeLeakage;
 			_DutyDegasserTimeClogged 	= 0;
 			_DutyDegasserDuty 			= 0;
 			_DutyDegasserFirst			= 0;
@@ -1498,7 +1498,7 @@ static int _degass_ctrl(void)
 		}
 
 		// if air pump never ON during 10 minutes -> tube clogged
-		if(_DutyDegasserTimeClogged >= 6000) pRX_Status->ink_supply[0].error |= err_degasser_clogged;
+		if(_DutyDegasserTimeClogged >= 60000) pRX_Status->ink_supply[0].error |= err_degasser_clogged;
 	}
 
 	return (pRX_Status->vacuum_solenoid);
