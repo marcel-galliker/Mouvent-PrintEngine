@@ -154,7 +154,7 @@ static void  _corr_ctrl(void);
 static void  _simu_markreader(void);
 
 static void  _check_errors(void);
-static void	 _check_ftc(int ticks);
+// static void	 _check_ftc(int ticks);
 
 static void _fpga_poslog(void);
 
@@ -345,11 +345,12 @@ void  fpga_main(int ticks, int menu, int showCorrection, int showParam)
 		{
 			_UV_SimuCnt++;
 		}
-		_check_ftc(ticks);
+	//	_check_ftc(ticks);
 	}
 }
 
 //--- _check_ftc ------------------------------------------------------
+/*
 static void _check_ftc(int ticks)
 {
 	static int _lastTicks=0;
@@ -363,7 +364,8 @@ static void _check_ftc(int ticks)
 		}			
 	}
 }
-	
+*/
+
 //--- fpga_start_poslog -----------------------------------------
 void fpga_start_poslog(void)
 {
@@ -948,9 +950,9 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg, int restart)
 		
 		Fpga->cfg.general.ftc_speed = (int)speed;
 		Fpga->cfg.general.ftc_ratio = (int)ratio;
-		TrPrintfL(TRUE, "fpga_pg_config start: set ftc_speed=%d", (int)speed);
-		TrPrintfL(TRUE, "fpga_pg_config start: set ftc_ratio=%d", (int)ratio);
-		Error(LOG, 0, "ftc_speed=%d,  ftc_ratio=%d", Fpga->cfg.general.ftc_speed, Fpga->cfg.general.ftc_ratio);
+	//	TrPrintfL(TRUE, "fpga_pg_config start: set ftc_speed=%d", (int)speed);
+	//	TrPrintfL(TRUE, "fpga_pg_config start: set ftc_ratio=%d", (int)ratio);
+	//	Error(LOG, 0, "ftc_speed=%d,  ftc_ratio=%d", Fpga->cfg.general.ftc_speed, Fpga->cfg.general.ftc_ratio);
 	}
 	else
 	{
@@ -1033,7 +1035,7 @@ void fpga_pg_init(int restart)
 	int pgNo;
 	int tio=0;
 	
-	Error(LOG, 0, "fpga_pg_init restart=%d", restart);
+//	Error(LOG, 0, "fpga_pg_init restart=%d", restart);
 
 	TrPrintfL(TRUE, "fpga_pg_init");
 
@@ -1089,7 +1091,7 @@ void  fpga_pg_stop(void)
 {
 	int tio=0;
 	
-	Error(LOG, 0, "fpga_pg_stop");
+//	Error(LOG, 0, "fpga_pg_stop");
 	
 	RX_EncoderStatus.distTelCnt -=  FpgaQSys->window_status.fill_level;
 	
@@ -1201,7 +1203,7 @@ static void  _pg_ctrl(void)
 		{
 		case FIFOS_DIST:	if (Fpga->stat.pg_fifo_empty_err && RX_EncoderStatus.fifoEmpty_PG != Fpga->stat.pg_fifo_empty_err)
 							{
-								Error(LOG, 0, "pg_fifo_empty_err=%d (distTelCnt=%d, fill_level=%d, PG_Cnt=%d)", Fpga->stat.pg_fifo_empty_err, RX_EncoderStatus.distTelCnt, FpgaQSys->printGo_status.fill_level, RX_EncoderStatus.PG_cnt);
+							//	Error(LOG, 0, "pg_fifo_empty_err=%d (distTelCnt=%d, fill_level=%d, PG_Cnt=%d)", Fpga->stat.pg_fifo_empty_err, RX_EncoderStatus.distTelCnt, FpgaQSys->printGo_status.fill_level, RX_EncoderStatus.PG_cnt);
 							}
 							break;
 			

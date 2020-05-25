@@ -587,7 +587,7 @@ int  enc_stop_pg(char *reason)
 {
 	if (!_Scanning)
 	{
-		Error(LOG, 0, "enc_stop_pg(%s)", reason);
+	//	Error(LOG, 0, "enc_stop_pg(%s)", reason);
 		_StopPG = TRUE;
 		sok_send_2(&_Encoder[0].socket, CMD_ENCODER_PG_STOP, 0, NULL);			
 	}

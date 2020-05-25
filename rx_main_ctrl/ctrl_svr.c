@@ -820,7 +820,7 @@ void ctrl_send_head_cfg(void)
 	int i;
 	_HeadResetCnt++;
     ctr_reset_jobLen();
-	Error(LOG, 0, "ctrl_send_head_cfg(%d)", _HeadResetCnt);
+//	Error(LOG, 0, "ctrl_send_head_cfg(%d)", _HeadResetCnt);
 	for (i=0; i<SIZEOF(_HeadCtrl); i++) _send_head_cfg(i);
 }
 

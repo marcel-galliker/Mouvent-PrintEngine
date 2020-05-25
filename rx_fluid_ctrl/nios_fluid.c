@@ -190,8 +190,8 @@ static void _nios_check_errors(void)
 
 		//  if ((isNo == 0) &&(_Cfg->cmd.lung_needed))
         {
-            if (_Stat->ink_supply[0].error&err_degasser_clogged)		 
-				ErrorFlag(WARN, (UINT32*)&_Error[0], err_ink_tube_suck_air, 0, "Degasser air tube probably clogged (Degas pressure never decreases, Duty=0)");
+        //    if (_Stat->ink_supply[0].error&err_degasser_clogged)		 
+		//		ErrorFlag(WARN, (UINT32*)&_Error[0], err_ink_tube_suck_air, 0, "Degasser air tube probably clogged (Degas pressure never decreases, Duty=0)");
 			if (_Stat->ink_supply[0].error&err_degasser_leakage)		 
 				ErrorFlag(WARN, (UINT32*)&_Error[0], err_degasser_leakage, 0, "Degasser Duty>20% (=%d) : Air leakage in degasser OR a lot of air in the ink %d degasserOn=%d",_Stat->duty_degasser, isNo, _Cfg->cmd.lung_needed);
         }

@@ -505,7 +505,7 @@ int  plc_start_printing(void)
 	}
 	if (!_SimuPLC) _heads_to_print	= TRUE;
 
-	Error(LOG, 0, "plc_start_printing: heads_to_print=%d, z_in_print=%d",_heads_to_print, RX_StepperStatus.info.z_in_print);
+//	Error(LOG, 0, "plc_start_printing: heads_to_print=%d, z_in_print=%d",_heads_to_print, RX_StepperStatus.info.z_in_print);
 	step_set_vent(_Speed);
 //	if (_SimuEncoder) ctrl_simu_encoder(_Speed);
 	return REPLY_OK;
@@ -1516,7 +1516,7 @@ static void _plc_state_ctrl()
 		if(_heads_to_print)
 		{
 		//	TrPrintfL(TRUE, "_heads_to_print: printhead_en=%d, printState=%d (%d)", RX_StepperStatus.info.printhead_en, RX_PrinterStatus.printState, ps_printing);
-			Error(LOG, 0, "_heads_to_print: printhead_en=%d, printState=%d (%d)", RX_StepperStatus.info.printhead_en, RX_PrinterStatus.printState, ps_printing);
+		//	Error(LOG, 0, "_heads_to_print: printhead_en=%d, printState=%d (%d)", RX_StepperStatus.info.printhead_en, RX_PrinterStatus.printState, ps_printing);
 			if (RX_Config.printer.type!=printer_cleaf || (RX_StepperStatus.info.printhead_en && RX_PrinterStatus.printState==ps_printing))
 			{
 				step_lift_to_print_pos();
