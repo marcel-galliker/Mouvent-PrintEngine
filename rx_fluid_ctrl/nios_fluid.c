@@ -183,12 +183,14 @@ static void _nios_check_errors(void)
 		if (_Stat->ink_supply[isNo].error&err_overpressure)		 
 			ErrorFlag(ERR_CONT, (UINT32 *)&_Error[isNo], err_overpressure, 0, "InkSupply[%d-%s] Ink Tank overpressure", isNo+1, RX_ColorNameShort(isNo));
 
+		/*--- check not working correct yet!
 		if (_Stat->ink_supply[isNo].error&err_filter_clogged)
 		{														
 			if(_Stat->ink_supply[isNo].COND_Pressure_Actual > 100) 
 				ErrorFlag(WARN,  (UINT32 *)&_Error[isNo], err_filter_clogged,      0, "InkSupply[%d-%s] Filter need to be changed soon (P > 900mbars AND flow > 10ml/min)", isNo+1, RX_ColorNameShort(isNo));
 			else ErrorFlag(ERR_CONT, (UINT32 *)&_Error[isNo], err_filter_clogged,      0, "InkSupply[%d-%s] Filter need to be changed (P > 900mbars AND flow < 10ml/min)", isNo+1, RX_ColorNameShort(isNo));
-		}		 
+		}
+		*/
 			
 		//  if ((isNo == 0) &&(_Cfg->cmd.lung_needed))
         {
