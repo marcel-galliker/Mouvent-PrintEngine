@@ -12,6 +12,7 @@
 #define __ink_ctrl_h__
 
 void ink_init(void);
+void ink_error_reset(void);
 void ink_tick_10ms(void);
 void ink_tick_1000ms(void);
 

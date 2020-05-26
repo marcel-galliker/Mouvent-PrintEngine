@@ -224,6 +224,17 @@ void ink_init(void)
 	_ValveOut      = 0;
 }
 
+//--- ink_error_reset ----------------------------------------------------
+void ink_error_reset(void)
+{
+	int i;
+	for (i=0; i<NIOS_INK_SUPPLY_CNT; i++)
+	{
+		pRX_Status->ink_supply[i].error = 0;
+		_FilterCloggedTime[i]=0;
+	}
+}
+
 //--- ink_tick_10ms -------------------------
 void ink_tick_10ms(void)
 {
@@ -385,6 +396,7 @@ void ink_tick_10ms(void)
 				pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
 
 				// --- Detect filter clogged -------
+				/* not working at CLEAF !!
 				if(pRX_Status->ink_supply[isNo].IS_Pressure_Actual > 900)
 				{
 					_FilterCloggedTime[isNo]++;
@@ -392,7 +404,7 @@ void ink_tick_10ms(void)
 						pRX_Status->ink_supply[isNo].error |= err_filter_clogged;
 				}
 				else _FilterCloggedTime[isNo] = 0;
-
+				*/
 				// ----- END NEW  -------
 
 				_pump_ctrl(isNo, _PressureSetpoint[isNo], PUMP_CTRL_MODE_PRINT);

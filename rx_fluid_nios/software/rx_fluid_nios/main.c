@@ -66,11 +66,9 @@ static void _delay(void)
 //--- main_error_reset ------------------------------
 void main_error_reset(void)
 {
-	int i;
 	pRX_Status->error = _StaticErrors;
 
-	for (i=0; i<NIOS_INK_SUPPLY_CNT; i++)
-		pRX_Status->ink_supply[i].error = 0;
+	ink_error_reset();
 
 	// re-initialize SPI after error to be able to read temperature
 	init_AMC7891(AVALON_SPI_AMC7891_1_BASE);
