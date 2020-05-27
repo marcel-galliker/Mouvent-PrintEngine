@@ -375,6 +375,10 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 	same = (!strcmp(msg.filename, _LastFilename) &&  msg.id.page==_LastPage && msg.wakeup==_LastWakeup && msg.gapPx==_LastGap);
 	if (rx_def_is_web(RX_Spooler.printerType)) same &= (msg.offsetWidth==_LastOffsetWidth);
 	if (RX_Spooler.printerType==printer_LB702_UV && msg.printMode==PM_SINGLE_PASS) same = ((msg.flags&FLAG_SAME)!=0);
+
+	if (rx_def_is_web(RX_Spooler.printerType))
+		msg.gapPx += 1;	// Bug in FPGA: (when srcLineCnt==12300, gap=0 it sometimes prints an additional line of old data [instead of blank] between the labels)
+
 	_LastPage   = msg.id.page;
 	_LastGap	= msg.gapPx;
 	_LastWakeup = msg.wakeup;

@@ -36,7 +36,7 @@ static int	_Trace=2;
 #define SIMU_WRITE	1	// write data to file
 #define SIMU_READ	2	// test reading files, no sending, no writing
 
-static int	_Simulation=SIMU_WRITE;
+static int	_Simulation=SIMU_OFF;
 
 // #define RAW_SOCKET
 
@@ -500,6 +500,8 @@ static int _send_image_cmd(SBmpSplitInfo *pInfo)
 	imageCmd.image.blkCnt			= pInfo->blkCnt;
 	imageCmd.image.jetPx0			= pInfo->jetPx0;
 	imageCmd.image.lengthPx			= pInfo->srcLineCnt;
+	if (rx_def_is_web(RX_Spooler.printerType))
+		imageCmd.image.lengthPx		= pInfo->srcLineCnt-1;	// Bug in FPGA: (when srcLineCnt==12300, gap=0 it sometimes prints an additional line of old data [instead of blank] between the labels)
 	imageCmd.image.widthPx			= pInfo->widthPx;
 	imageCmd.image.widthBytes		= pInfo->widthBt;
 	imageCmd.image.flipHorizontal	= FALSE;
