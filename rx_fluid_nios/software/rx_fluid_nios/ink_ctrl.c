@@ -396,15 +396,14 @@ void ink_tick_10ms(void)
 				pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
 
 				// --- Detect filter clogged -------
-				/* not working at CLEAF !!
-				if(pRX_Status->ink_supply[isNo].IS_Pressure_Actual > 900)
+				if(pRX_Status->ink_supply[isNo].IS_Pressure_Actual!=INVALID_VALUE
+				&& pRX_Status->ink_supply[isNo].IS_Pressure_Actual > 900)
 				{
 					_FilterCloggedTime[isNo]++;
 					if(_FilterCloggedTime[isNo] > 6000)		// 1 minute over 900 mbars
 						pRX_Status->ink_supply[isNo].error |= err_filter_clogged;
 				}
 				else _FilterCloggedTime[isNo] = 0;
-				*/
 				// ----- END NEW  -------
 
 				_pump_ctrl(isNo, _PressureSetpoint[isNo], PUMP_CTRL_MODE_PRINT);
