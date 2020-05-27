@@ -253,6 +253,11 @@ namespace RX_DigiPrint.Views.PrintSystemView
                     else
                         headNo = RxGlobals.PrintSystem.HeadCnt*isNo + no%RxGlobals.PrintSystem.HeadCnt;
                 }
+                else if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_test_table)
+                {
+                    isNo   = no;
+                    headNo = 0;
+                }
                 else
                 {
                     isNo   = RxGlobals.PrintSystem.IS_Order[(_ClusterNo*TcpIp.HEAD_CNT)/RxGlobals.PrintSystem.HeadCnt];
@@ -291,7 +296,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
                                     }
                                     break;
 
-                        case 2:     if (RxGlobals.PrintSystem.HeadDist[headNo] != text.Value)
+                        case 2:     if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_test_table) headNo=inkSupply;
+                                    if (RxGlobals.PrintSystem.HeadDist[headNo] != text.Value)
                                     {
                                         if (RxGlobals.PrintSystem.IsScanning)
                                         { 
@@ -311,7 +317,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
                                     }
                                     break;
                         
-                        case 3:     if (RxGlobals.PrintSystem.HeadDistBack[headNo] != text.Value)
+                        case 3:     if(RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_test_table) headNo=inkSupply;
+                                    if (RxGlobals.PrintSystem.HeadDistBack[headNo] != text.Value)
                                     {
                                         RxGlobals.PrintSystem.HeadDistBack[headNo] = text.Value;
                                         RxGlobals.PrintSystem.Changed = true;
@@ -376,9 +383,17 @@ namespace RX_DigiPrint.Views.PrintSystemView
                                 case 0: _tag2head(tag, out inkSupply, out headNo);
                                         text.Text = RxGlobals.PrintSystem.ColorOffset[inkSupply].ToString();break;
                                 case 1: text.Text = Math.Round(RxGlobals.PrintSystem.ColorOffset[inkSupply]/_StrokeDist).ToString();break;
-                                case 2: text.Text = RxGlobals.PrintSystem.HeadDist[headNo].ToString(); break;
+                                case 2: if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_test_table)
+                                            text.Text = RxGlobals.PrintSystem.HeadDist[inkSupply].ToString();
+                                        else 
+                                            text.Text = RxGlobals.PrintSystem.HeadDist[headNo].ToString(); 
+                                        break;
                                 case 3: text.Visibility = visible;                          
-                                        text.Text = RxGlobals.PrintSystem.HeadDistBack[headNo].ToString(); break;
+                                        if(RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_test_table)
+                                            text.Text = RxGlobals.PrintSystem.HeadDistBack[inkSupply].ToString();
+                                        else
+                                            text.Text = RxGlobals.PrintSystem.HeadDistBack[headNo].ToString(); 
+                                        break;
                             }
                         }
                         catch(Exception)

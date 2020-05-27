@@ -384,6 +384,7 @@ SPrintQueueItem *pq_get_next_item(void)
 //		if (_List[item].state==PQ_STATE_QUEUED && _List[item].scanLength>0)
 		if ((slide || _List[item].state==PQ_STATE_QUEUED) && (_List[item].copies>0 || _List[item].scanLength>0))
 		{
+			if (slide) _List[item].start.copy=0;
 			_Item = item+1;
 			_ActiveState = _List[item].state;
 			return &_List[item];

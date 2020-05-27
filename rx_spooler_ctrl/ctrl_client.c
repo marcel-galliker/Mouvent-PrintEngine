@@ -400,7 +400,7 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 	//	Error(LOG, 0, "load file >>%s<< id=%d, page=%d, copy=%d", msg.filename, msg.id.id, msg.id.page, msg.id.copy);
 		_BufferNo = (_BufferNo+1)%BUFFER_CNT;
 
-		if(msg.printMode==PM_SCANNING)
+		if(msg.printMode==PM_SCANNING && rx_def_is_tx(RX_Spooler.printerType))
 			data_set_wakeuplen(WAKEUP_BAR_LEN*(RX_Spooler.colorCnt+1), msg.wakeup);
 		else			 
 			data_set_wakeuplen(0, FALSE);

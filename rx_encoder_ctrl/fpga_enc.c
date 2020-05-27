@@ -1536,7 +1536,9 @@ static void _fpga_display_status(int showCorrection, int showParam)
 			term_printf("  diff:          "); for (i=0; i<1; i++)   term_printf("%09d  ", Fpga->stat.encOut[0].pg_start_pos-Fpga->stat.encIn[i].position);	
 			term_printf("Backwards: %d\n", RX_EncoderStatus.info.backwards);
 			
-			term_printf("  pos_pg_fwd:    "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->cfg.pg[i].pos_pg_fwd);			term_printf("\n");
+			term_printf("  pos_pg_fwd:    "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->cfg.pg[i].enc_start_pos_fwd);	term_printf("\n");
+			term_printf("  pos_pg_bwd:    "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->cfg.pg[i].enc_start_pos_bwd);	term_printf("\n");
+		//	term_printf("  enc_start_bwd: "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->cfg.pg[i].enc_start_pos_bwd);	term_printf("\n");
 	//		term_printf("  StepTime:      "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encIn[i].step_time);		term_printf("\n");
 	//		term_printf("  StepTime Min:  "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encIn[i].setp_time_min);	term_printf("\n");
 	//		term_printf("  StepTime Max:  "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encIn[i].step_time_max);	term_printf("\n");

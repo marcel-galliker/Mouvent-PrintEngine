@@ -273,7 +273,6 @@ int  enc_start_printing(SPrintQueueItem *pitem, int restart)
 			sok_send_2(&_Encoder[no].socket, CMD_FPGA_SIMU_ENCODER, sizeof(_Khz), &_Khz);						
 		}
 	}
-
 	return REPLY_OK;
 }
 
@@ -372,7 +371,10 @@ static void _enc_start_printing(int no, SPrintQueueItem *pitem, int restart)
 	if (_Scanning)
 	{
 		msg.pos_pg_fwd  = _Encoder[no].webOffset_mm*1000 + pitem->pageMargin - (_WakeupLen*25400/1200);
-		msg.pos_pg_bwd  = _Encoder[no].webOffset_mm*1000 + pitem->pageMargin + pitem->srcHeight + 13350 + 5000 + (_WakeupLen*25400/1200);	// add extra 5000 for nagative distance
+		if (rx_def_is_tx(RX_Config.printer.type))
+			msg.pos_pg_bwd  = _Encoder[no].webOffset_mm*1000 + pitem->pageMargin + pitem->srcHeight + 13350 + 5000 + (_WakeupLen*25400/1200);	// add extra 5000 for nagative distance
+		else // test table
+			msg.pos_pg_bwd  = _Encoder[no].webOffset_mm*1000 + pitem->pageMargin + pitem->srcHeight + 13350 + RX_Config.headDistBackMax;
 	}
 	else
 	{

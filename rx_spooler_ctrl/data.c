@@ -1067,6 +1067,7 @@ static int _data_split(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int length
 	switch(pBmpInfo->printMode)
 	{
 		case PM_TEST_SINGLE_COLOR:
+        case PM_TEST:
 		case PM_TEST_JETS:
 									return _data_split_test(id, pBmpInfo, offsetPx, lengthPx, blkNo, blkCnt, clearBlockUsed, same, pItem);
 

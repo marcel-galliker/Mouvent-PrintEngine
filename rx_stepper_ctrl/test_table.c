@@ -80,26 +80,28 @@ void tt_init(void)
 {
 	slide_init();
 
-	motor_config(MOTOR_Y_LEFT,  CURRENT_HOLD, 0.0, 0.0, STEPS);
-	motor_config(MOTOR_Y_RIGHT, CURRENT_HOLD, 0.0, 0.0, STEPS);
-	motor_config(MOTOR_Z,	    0,            0.0, 0.0, STEPS);	
+	motor_config(MOTOR_Y_LEFT,  CURRENT_HOLD, 995, 1550, STEPS);
+	motor_config(MOTOR_Y_RIGHT, CURRENT_HOLD, 995, 1550, STEPS);
+	motor_config(MOTOR_Z,	    0,            L3518_STEPS_PER_METER, L3518_INC_PER_METER, STEPS);
 
 	//--- movment parameters ----------------
 	_ParY_ref.speed			= 2000;
-	_ParY_ref.accel			= 1000;
-	_ParY_ref.current_acc	= 200;
-	_ParY_ref.current_run	= 200;
+	_ParY_ref.accel			= 32000;
+	_ParY_ref.current_acc	= 300;
+	_ParY_ref.current_run	= 300;
 	_ParY_ref.stop_mux		= 0; // MOTOR_Y_BITS;
 	_ParY_ref.dis_mux_in	= 0;
+	_ParY_ref.enc_bwd		= TRUE;
 	_ParY_ref.encCheck		= chk_std;
 
 	_ParY_print.speed		= 32000;
-	_ParY_print.accel		= 35000;
+	_ParY_print.accel		= 32000;
 	_ParY_print.current_acc	= 500;
 	_ParY_print.current_run	= 500;
 	_ParY_print.stop_mux	= MOTOR_Y_BITS;
+	_ParY_print.enc_bwd		= TRUE;
 	_ParY_print.dis_mux_in	= 0;
-	_ParY_print.encCheck	= chk_std;
+	_ParY_print.encCheck	= chk_lbrob;
 	
 	_ParZ_down.speed		= 5000;
 	_ParZ_down.accel		= 2000;
@@ -113,7 +115,7 @@ void tt_init(void)
 	_ParZ_up.accel			= 2000;
 	_ParZ_up.current_acc	= 50.0;
 	_ParZ_up.current_run	= 50.0;
-	_ParZ_up.encCheck		= chk_std;
+	_ParZ_up.encCheck		= chk_lbrob;
 }
 
 //--- tt_end ------------------------------
@@ -275,6 +277,8 @@ void tt_main(int ticks, int menu)
 								RX_StepperStatus.info.ref_done = TRUE;
 								RX_StepperStatus.info.moving   = FALSE;
 								RX_StepperStatus.cmdRunning = 0;
+								motor_reset(MOTOR_Y_LEFT);
+								motor_reset(MOTOR_Y_RIGHT);
 								if (_CmdWaiting)
 								{
 									tt_start_cmd(_CmdWaiting);
@@ -437,6 +441,7 @@ static void _start_ref1(void)
 		par.accel			= _ParY_print.accel;
 		par.current_acc		= _ParY_print.current_acc;
 		par.current_run		= _ParY_print.current_run;
+		par.enc_bwd			= _ParY_print.enc_bwd;
 		par.stop_mux		= 0;
 		par.dis_mux_in		= 0;
 		par.estop_in_bit[MOTOR_Y_LEFT]	= (1<<10);
@@ -467,6 +472,7 @@ static void _start_ref2(void)
 		par.accel		= _ParY_ref.accel;
 		par.current_acc	= _ParY_ref.current_acc;
 		par.current_run	= _ParY_ref.current_run;
+		par.enc_bwd		= _ParY_ref.enc_bwd;
 		par.stop_mux	= 0;
 		par.dis_mux_in	= 0;
 		par.estop_in_bit[MOTOR_Y_LEFT]	= (1<<10);
@@ -741,14 +747,14 @@ static void _tt_motor_y_test(int steps)
 	memset(&par, 0, sizeof(par));
 
 	par.speed		 = 5000;
-	par.accel		 = 2000;
+	par.accel		 = 32000;
 	par.current_acc	 = 318.0;
 	par.current_run	 = 318.0;
-	par.stop_mux	 = motor;
+	par.stop_mux	 = 0;// motor;
 	par.dis_mux_in	 = 0;
+	par.enc_bwd		 = TRUE;
 	par.encCheck	 = chk_std;
 	
-	for (i=0; i<2; i++) motor_config(i, CURRENT_HOLD, 0.0, 0.0, STEPS);
 	motors_move_by_step(motor, &par, steps, TRUE);
 }
 
@@ -766,6 +772,6 @@ static void _tt_motor_z_test(int steps)
 	par.estop_in_bit[MOTOR_Z] = (1<<0);
 	par.estop_level	 = 1;
 	par.encCheck	 = chk_std;
-	motor_config(MOTOR_Z,  CURRENT_HOLD, 0.0, 0.0, STEPS);
+	motor_config(MOTOR_Z,  CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER, STEPS);
 	motor_move_by_step(MOTOR_Z, &par, steps);
 }

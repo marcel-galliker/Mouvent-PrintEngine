@@ -502,7 +502,7 @@ void motor_config(int motor, int currentHold, double stepsPerMeter, double incPe
 	Fpga.par->cfg[motor].enc_stop_index = FALSE;
 	Fpga.par->cfg[motor].estopIn  = ESTOP_UNUSED;
 	
-	_enc_mot_ratio[motor] = (double)((double)stepsPerMeter / (double)incPerMeter); // mot/enc=ratio
+//	_enc_mot_ratio[motor] = (double)((double)stepsPerMeter / (double)incPerMeter); // mot/enc=ratio
 	
 	Fpga.par->cfg[motor].enc_max_diff		= 50;
 	Fpga.par->cfg[motor].enc_max_diff_stop	= 50;

@@ -509,8 +509,9 @@ static void _headboard_config(int colorCnt, int headsPerColor, int ethPortCnt)
 			pBoard->head[i].blkNo0    = i*RX_Spooler.dataBlkCntHead;
 			pBoard->head[i].blkCnt    = RX_Spooler.dataBlkCntHead;
 			pBoard->head[i].dist	  = RX_Config.headDist[board*MAX_HEADS_BOARD+i];			
-			if (rx_def_is_web(RX_Config.printer.type))	pBoard->head[i].distBack = pBoard->head[i].dist;
-			else										pBoard->head[i].distBack = 5000+RX_Config.headDistBack[board*MAX_HEADS_BOARD+i]-pBoard->head[i].dist;
+			if (rx_def_is_web(RX_Config.printer.type))		pBoard->head[i].distBack = pBoard->head[i].dist;
+			else if (rx_def_is_tx(RX_Config.printer.type))	pBoard->head[i].distBack = 5000+RX_Config.headDistBack[board*MAX_HEADS_BOARD+i]-pBoard->head[i].dist;
+			else pBoard->head[i].distBack = RX_Config.headDistBack[board*MAX_HEADS_BOARD+i];
 			
 			TrPrintfL(TRUE, "Head[%d]: dist=%06d  distback=%06d", board*MAX_HEADS_BOARD+i, pBoard->head[i].dist, pBoard->head[i].distBack);
 			
