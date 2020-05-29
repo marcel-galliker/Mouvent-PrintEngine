@@ -134,6 +134,7 @@ int stepc_handle_status(int no, SStepperStat *pStatus)
 	info.DripPans_OutfeedUP		= _status[0].info.DripPans_OutfeedUP;
 	allowed = info.DripPans_InfeedDOWN && info.DripPans_OutfeedDOWN && !info.DripPans_InfeedUP && !info.DripPans_OutfeedUP;
 
+	RX_StepperStatus.cmdRunning=0;
 	for (int i = 0; i < STEPPER_CNT; i++)
 	{
 		if (_step_socket[i] != INVALID_SOCKET)
@@ -153,6 +154,7 @@ int stepc_handle_status(int no, SStepperStat *pStatus)
 			RX_StepperStatus.posX += _status[i].posX;
 			RX_StepperStatus.posY += _status[i].posY;
 			RX_StepperStatus.posZ += _status[i].posZ;
+			if (_status[i].cmdRunning) RX_StepperStatus.cmdRunning = _status[i].cmdRunning;
 			
 			if (allowed != _allow_stepper_move_down)
 			{

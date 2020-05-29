@@ -351,7 +351,7 @@ static void _enc_start_printing(int no, SPrintQueueItem *pitem, int restart)
 								}
 								break;
 
-	case printer_cleaf:			msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter= 180200; msg.pos_actual = 0; break;
+	case printer_cleaf:			msg.orientation = TRUE;		msg.scanning=FALSE; msg.incPerMeter= 180200; msg.pos_actual = 0; break;
 	default:					msg.orientation = TRUE;		msg.scanning=TRUE;  msg.incPerMeter=1000000; msg.pos_actual = 0; break;
 	}
 		

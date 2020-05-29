@@ -55,11 +55,12 @@ namespace RX_DigiPrint.Views.UserControls
                     }
                 }
                 
-                /*
-                InkLevel waste = new InkLevel(){DataContext = RxGlobals.InkSupply.List[TcpIp.InkSupplyCnt+1]};
-                Grid.SetColumn(waste, TcpIp.InkSupplyCnt+1);
-                MainGrid.Children.Add(waste);
-                */
+                if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf)
+                {
+                    InkLevel waste = new InkLevel(){DataContext = RxGlobals.InkSupply.List[TcpIp.InkSupplyCnt+1]};
+                    Grid.SetColumn(waste, TcpIp.InkSupplyCnt+1);
+                    MainGrid.Children.Add(waste);
+                }
 
                 _PrinterType = RxGlobals.PrintSystem.PrinterType;
             }

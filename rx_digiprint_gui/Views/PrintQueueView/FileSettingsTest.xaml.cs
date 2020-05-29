@@ -88,6 +88,16 @@ namespace RX_DigiPrint.Views.PrintQueueView
                 }
             }
 
+            if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf)
+            {
+                int mode = Rx.StrToInt32(RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "PAR_UV_LAMP_3_MODE"));
+                if (mode==0)
+                {
+                    if (!RxMessageBox.YesNo("UV Lamp", "The UV Lamp at printer is NOT READY.\n\nStart Printing?",  MessageBoxImage.Question, false))
+                        return;
+                }
+            }
+
             _Item.ScanLength = _Item.Copies;
             switch(_Item.TestDotSize)
             {

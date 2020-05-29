@@ -85,6 +85,19 @@ namespace RX_DigiPrint.Models
             }
         }
 
+        //--- Property IsCLEAF ---------------------------------------
+        public bool IsCLEAF
+        {
+            get
+            {
+                switch (_PrinterType)
+                {
+                    case EPrinterType.printer_cleaf:            return true;
+                    default: return false;
+                }
+            }
+        }
+
         //--- Property HasHeater ---------------------------------------
         public bool HasHeater
         {

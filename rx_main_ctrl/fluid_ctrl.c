@@ -250,6 +250,14 @@ void fluid_set_config(void)
 							_FluidToScales[INK_SUPPLY_CNT + 1] = SCALE(2, 4);// 9;	// waste		
 							break;
 		
+    case printer_cleaf:		_FluidToScales[0] = SCALE(1, 1);// 0;	// Cyan 
+							_FluidToScales[1] = SCALE(1, 2);// 1;	// Magenta
+							_FluidToScales[2] = SCALE(1, 3);// 2;	// Yellow 
+							_FluidToScales[3] = SCALE(1, 4);// 3;	// Black
+						//	_FluidToScales[INK_SUPPLY_CNT]	   = SCALE(2, 3);// flush		
+							_FluidToScales[INK_SUPPLY_CNT + 1] = SCALE(2, 1);// waste		
+							break;
+
 	case printer_LH702:		_FluidToScales[0] = SCALE(2,5); // unused 
 							_FluidToScales[1] = SCALE(2,2); // white
 							_FluidToScales[2] = SCALE(2,3); // orange 
@@ -814,6 +822,13 @@ void fluid_reply_stat(RX_SOCKET socket)	// to GUI
 	case printer_TX802:	canisterLow   = 1500;
 						canisterEmpty = 500;
 						break;
+
+    case printer_cleaf:	canisterLow   = 1500;
+						canisterEmpty =  500;
+						wasteHigh	  = 6000;
+						wasteFull	  = 7000;
+						break;
+
 	default:			canisterLow   = 1500;
 						canisterEmpty = 500;
 						wasteHigh	  = 18500;
@@ -858,7 +873,7 @@ void fluid_reply_stat(RX_SOCKET socket)	// to GUI
 	
 	// waste
 	
-	if (RX_Config.printer.type == printer_LB702_WB)
+	if (RX_Config.printer.type == printer_LB702_WB || RX_Config.printer.type == printer_cleaf )
 	{
 		_FluidStatus[INK_SUPPLY_CNT + 1].canisterLevel  = _ScalesStatus[_FluidToScales[INK_SUPPLY_CNT + 1]];
 		

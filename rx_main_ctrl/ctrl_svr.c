@@ -736,9 +736,9 @@ int ctrl_send_purge_par(int fluidNo, int time)
 		{
 			par.no = head%HEAD_CNT;
 			sok_send_2(&_HeadCtrl[head/HEAD_CNT].socket, CMD_SET_PURGE_PAR, sizeof(par), &par);
+	//		Error(LOG, 0, "head[%d.%d]: purge_par(no=%d, delay=%d, time=%d)", head/HEAD_CNT, head%HEAD_CNT, par.no, par.delay, par.time);
 			if (par.delay+par.time>timeTotal) timeTotal = par.delay+par.time;
-		//	par.delay+=delay;
-			par.delay+=(delay + 5000);
+			par.delay+=delay;
 		}
 	}
 	return timeTotal;

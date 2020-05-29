@@ -210,7 +210,8 @@ static void _nios_check_errors(void)
 	        if (_Stat->ink_supply[isNo].error & err_amc_config_lost)
 		        ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err,err_amc_config_lost,0,"Heater Box ADC config lost. Registers Power=%d, GPIO config=%d, Enable=%d, Gain=%d", _Stat->AMC_Register_Power, _Stat->AMC_Register_GPIO_Config, _Stat->AMC_Register_Enable, _Stat->AMC_Register_Gain);
 
-            if (_Stat->ink_supply[isNo].error & err_heater_board)	ErrorFlag(ERR_CONT, (UINT32 *)&_Error[isNo], err_heater_board,0, "InkSupply[%d-%s] Heater Board Error or Openload", isNo + 1, RX_ColorNameShort(isNo));
+            if (RX_InkSupplyCfg[isNo].ink.fileName[0] && _Stat->ink_supply[isNo].error & err_heater_board)	
+				ErrorFlag(ERR_CONT, (UINT32 *)&_Error[isNo], err_heater_board,0, "InkSupply[%d-%s] Heater Board Error or Openload", isNo + 1, RX_ColorNameShort(isNo));
             if (_Stat->ink_supply[isNo].error & err_watchdog)		ErrorFlag(ERR_CONT, (UINT32 *)&_Error[isNo], err_heater_board, 0, "InkSupply[%d-%s] Heater Board Watchdog Error", isNo + 1, RX_ColorNameShort(isNo));
 
             if (_Stat->HeaterBoard_Vsupply_3V < 2500)	 ErrorFlag(ERR_CONT, (UINT32*)&_Error[0], err_heater_board, 0, "Heater Board %d.%dV (3.3V)", _Stat->HeaterBoard_Vsupply_3V/1000, _Stat->HeaterBoard_Vsupply_3V%1000);

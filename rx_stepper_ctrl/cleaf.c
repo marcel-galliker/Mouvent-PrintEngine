@@ -197,6 +197,9 @@ void cleaf_main(int ticks, int menu)
 	int lift_pos;
 	SStepperStat	oldStatus;
 		
+	SStepperStat oldSatus;
+	memcpy(&oldSatus, &RX_StepperStatus, sizeof(RX_StepperStatus));
+
 	if (!motors_init_done())
 	{
 		motors_config(MOTOR_Z_BITS, CURRENT_Z_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER, STEPS);
@@ -316,7 +319,7 @@ void cleaf_main(int ticks, int menu)
 				if (RX_StepperStatus.info.splicing) Error(LOG, 0, "LIFT: printhead_en enabled, splice ended", RX_StepperStatus.cmdRunning);
 				RX_StepperStatus.info.printhead_en = TRUE;
 				RX_StepperStatus.info.splicing = FALSE;
-				ctrl_send_2(REP_STEPPER_STAT, sizeof(RX_StepperStatus), &RX_StepperStatus);
+			//	ctrl_send_2(REP_STEPPER_STAT, sizeof(RX_StepperStatus), &RX_StepperStatus);
 			}
 		}
 		else // --- Printhead down enable is OFF---
@@ -330,7 +333,7 @@ void cleaf_main(int ticks, int menu)
 					Error(LOG, 0, "LIFT: printhead_en disabled, go up for splice");
 					RX_StepperStatus.info.splicing = TRUE;
 					cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_UP_POS, NULL);
-					ctrl_send_2(REP_STEPPER_STAT, sizeof(RX_StepperStatus), &RX_StepperStatus);
+				//	ctrl_send_2(REP_STEPPER_STAT, sizeof(RX_StepperStatus), &RX_StepperStatus);
 				}
 				RX_StepperStatus.info.printhead_en = FALSE;  // if 0 then splice is comming and head has to go up, if not in capping
 			}
@@ -339,6 +342,12 @@ void cleaf_main(int ticks, int menu)
 	
 	_cleaf_check_laser();
 	_check_material_supervision();
+
+	if (memcmp(&oldSatus.info, &RX_StepperStatus.info, sizeof(RX_StepperStatus.info)))
+	{
+		ctrl_send_2(REP_STEPPER_STAT, sizeof(RX_StepperStatus), &RX_StepperStatus);		
+	}
+
 }
 
 //--- _cleaf_check_laser ------------------------------------------
@@ -423,7 +432,7 @@ static void _check_material_supervision(void)
 	}
 	else if (_MaterialDetected && _MaterialDetectedInput && RX_StepperStatus.info.z_in_print)
 	{
-		Error(ERR_CONT, 0, "Laser detects material in front of Printhead.");
+		Error(ERR_ABORT, 0, "Laser detects material in front of Printhead.");
 		cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_UP_POS, NULL);
 	}
 	else if (_MaterialDetected && !_MaterialDetectedInput)

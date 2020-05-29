@@ -396,7 +396,7 @@ static void  _check_errors(void)
 		if (_ErrorCnt[2]==5) _ErrorFlags=Error(ERR_CONT, 0, "Current Error: Current of 24V Supply is %d A", VAL_TO_MV(Fpga.stat->current_24v) * 5600.0 / 680.0);
 		if (_ErrorCnt[3]==5) _ErrorFlags=Error(WARN,     0, "Voltage Error: 24V Level is %d V", v24);
 		if (_ErrorCnt[4]==5) _ErrorFlags=Error(LOG,      0, "Voltage OK: 24V Level is %d V", v24);
-		if (_ErrorCnt[5]==5) _ErrorFlags=Error(ERR_CONT, 0, "Temperature Error: Temp Level is %d °C, row=%d", temp, rowTemp);	
+		if (_ErrorCnt[5]==5) _ErrorFlags=Error(LOG, 0, "Temperature Error: Temp Level is %d Â°C, row=%d", temp, rowTemp);	
 	}	
 }
 
