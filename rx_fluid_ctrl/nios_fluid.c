@@ -44,6 +44,9 @@
 #define NIOS_RESET_ADDR	0xFF220000	// 0xFF220010
 #define NIOS_RESET_SIZE	0x00001000
 
+#define CHECK_VERSION_FPGA	"1.0.1.342"
+#define CHECK_QSYS_ID		6
+#define CHECK_TIMESTAMP		1535028175
 
 //--- structures --------------------------------------------
 
@@ -362,17 +365,29 @@ void nois_set_is_cfg(SInkSupplyCfg *pcfg)
 void nios_set_cfg(SFluidBoardCfg *pcfg)
 {
 	int i;
+	char str[32];
 	if (!_Init) return;
-	
+	static EPrinterType printerType=printer_undef;
+
 	switch(pcfg->printerType)
 	{
 	case printer_LB701:		_HeaterUsed=TRUE; break;
 	case printer_LB702_UV:	_HeaterUsed=TRUE; break;
 	case printer_LH702:		_HeaterUsed=TRUE; break;
-	case printer_cleaf:		_HeaterUsed=TRUE; break;
+	case printer_cleaf:		_HeaterUsed=TRUE;
+							if (printerType!=printer_cleaf)
+							{
+								sprintf(str, "%d.%d.%d.%d", _Stat->FpgaVersion.major, _Stat->FpgaVersion.minor, _Stat->FpgaVersion.revision, _Stat->FpgaVersion.build);
+								if ((strcmp(str, CHECK_VERSION_FPGA))		
+								||  (fpga_qsys_id() != CHECK_QSYS_ID)
+								||  (fpga_qsys_timestamp()!=CHECK_TIMESTAMP))
+									Error(ERR_ABORT, 0, "Cleaf Project needs FPGA Version=>>%s<<, QSysID=%d, Timestamp=%d", CHECK_VERSION_FPGA, CHECK_QSYS_ID, CHECK_TIMESTAMP);
+							}
+							break;
 		
 	default: _HeaterUsed=FALSE;			
 	}
+	printerType = pcfg->printerType;
 	_Cfg->cmd.lung_enabled		= pcfg->lung_enabled;
 	_Cfg->printerType			= pcfg->printerType;
 	_Cfg->headsPerColor			= pcfg->headsPerColor;
