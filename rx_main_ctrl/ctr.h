@@ -18,6 +18,6 @@ void ctr_tick(void);
 void ctr_set_total(UINT32 machineMeters);
 void ctr_reset(void);
 void ctr_calc_reset_key(char *key);
-void ctr_add(double mm);
+void ctr_add(int mm);
 // void ctr_save(void);
 void ctr_reset_jobLen(void);

@@ -39,8 +39,8 @@ namespace RX_DigiPrint.Models
             LbRobot             = (msg.status.flags & 0x0200) != 0;
             MaxSpeeds           = msg.status.maxSpeed;
             ActSpeed            = (double)msg.status.actSpeed;
-            CounterAct          = msg.status.counterAct;
-            CounterTotal        = msg.status.counterTotal;
+            CounterAct          = msg.status.counterAct/1000.0;
+            CounterTotal        = msg.status.counterTotal/1000.0;
         }
         
         //--- Printing ------------------------------------

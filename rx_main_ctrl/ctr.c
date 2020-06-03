@@ -28,8 +28,8 @@
 
 typedef struct
 {
-	double act;
-	double total;
+	INT64 act;
+	INT64 total;
 	UINT64	macAddr;
 	time_t time;
 } _sctr;
@@ -38,8 +38,8 @@ typedef struct
 static int		_Manipulated=FALSE;
 static int		_Time;
 static int		_prodCnt;
-static double	_prodLen;
-static double	_jobLen;
+static int		_prodLen;
+static int		_jobLen;
 
 //--- prototypes ---------------------------------------
 static void _calc_check(time_t time, UCHAR *check);
@@ -66,8 +66,8 @@ void ctr_init(void)
 	
 	if (setup_chapter(file, "Counters", -1, READ)==REPLY_OK)
 	{
-		setup_double(file, "actual", READ, &RX_PrinterStatus.counterAct,   0);
-		setup_double(file, "total",  READ, &RX_PrinterStatus.counterTotal, 0);
+		setup_int64(file, "actual", READ, &RX_PrinterStatus.counterAct,   0);
+		setup_int64(file, "total",  READ, &RX_PrinterStatus.counterTotal, 0);
 		setup_str   (file, "check",  READ, check1, sizeof(check1), "");
         #if NEW_COUNTER==0
 			RX_PrinterStatus.counterTotal = RX_PrinterStatus.counterAct;
@@ -124,6 +124,7 @@ static void _calc_reset_key(char *machineName, UCHAR *key)
 void ctr_set_total(UINT32 machineMeters)
 {
     #if NEW_COUNTER==0
+		machineMeters*=1000;
 		if (machineMeters>RX_PrinterStatus.counterTotal) 
 		{
 			RX_PrinterStatus.counterTotal=machineMeters;		
@@ -143,21 +144,21 @@ void ctr_tick(void)
 }
 
 //--- ctr_add -------------------------------------------
-void ctr_add(double m)
+void ctr_add(int mm)
 {
-    double encoderOffset=0; 
+    int encoderOffset=0; 
 	if (rx_def_is_tx(RX_Config.printer.type)) encoderOffset=(double)RX_Spooler.maxOffsetPx;
-    _prodLen += m;
-    _jobLen += m;
+    _prodLen += mm;
+    _jobLen += mm;
     _prodCnt++;
-    if ((_jobLen*1000000 >= encoderOffset))
+    if ((_jobLen*1000 >= encoderOffset))
     {
-        if ((_jobLen * 1000000 - encoderOffset) <= m * 1000000)
+        if ((_jobLen * 1000 - encoderOffset) <= mm * 1000)
         {
-            m = (_jobLen - (encoderOffset)/1000000);
+            mm = (_jobLen - (encoderOffset)/1000);
         }
-		RX_PrinterStatus.counterTotal	+= m;
-		RX_PrinterStatus.counterAct		+= m;
+		RX_PrinterStatus.counterTotal	+= mm;
+		RX_PrinterStatus.counterAct		+= mm;
     }  
 }
 
@@ -192,8 +193,7 @@ void ctr_calc_reset_key(char *machineName)
 //--- _ctr_save --------------------------------------------------
 static void _ctr_save(int reset, char *machineName)
 {
-//    Error(LOG, 0, "Counters: act=%d, total=%d, (products=%d, m=%d.%03d) ", (int)RX_PrinterStatus.counterAct, (int)RX_PrinterStatus.counterTotal, (int)_prodCnt, (int)_prodLen, (int)(_prodLen*1000.0)%1000);
-    TrPrintfL(TRUE, "Counters: act=%d, total=%d, (products=%d, m=%d.%03d) ", (int)RX_PrinterStatus.counterAct, (int)RX_PrinterStatus.counterTotal, (int)_prodCnt, (int)_prodLen, (int)(_prodLen*1000.0)%1000);
+    TrPrintfL(TRUE, "Counters: act=%d, total=%d, (products=%d, m=%d.%03d) ", (int)RX_PrinterStatus.counterAct, (int)RX_PrinterStatus.counterTotal, (int)_prodCnt, _prodLen/1000, _prodLen%1000);
     _prodCnt=0;
     _prodLen=0;
 
@@ -213,8 +213,8 @@ static void _ctr_save(int reset, char *machineName)
 		if (setup_chapter(file, "Counters", -1, WRITE)==REPLY_OK)
 		{
 			setup_str	(file, "machine", WRITE, name, sizeof(name), "");
-			setup_double(file, "actual", WRITE, &RX_PrinterStatus.counterAct, 0);
-			setup_double(file, "total",  WRITE, &RX_PrinterStatus.counterTotal, 0);
+			setup_int64 (file, "actual", WRITE, &RX_PrinterStatus.counterAct, 0);
+			setup_int64 (file, "total",  WRITE, &RX_PrinterStatus.counterTotal, 0);
 
 			#if NEW_COUNTER==0
 				_Manipulated = FALSE;
@@ -250,5 +250,3 @@ static void _ctr_save(int reset, char *machineName)
 		rx_file_set_mtime(PATH_USER FILENAME_COUNTERS, time);
 	}
 }
-
-

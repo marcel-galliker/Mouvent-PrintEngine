@@ -154,7 +154,7 @@ static void  _corr_ctrl(void);
 static void  _simu_markreader(void);
 
 static void  _check_errors(void);
-// static void	 _check_ftc(int ticks);
+static void	 _check_ftc(int ticks);
 
 static void _fpga_poslog(void);
 
@@ -345,12 +345,12 @@ void  fpga_main(int ticks, int menu, int showCorrection, int showParam)
 		{
 			_UV_SimuCnt++;
 		}
-	//	_check_ftc(ticks);
+		_check_ftc(ticks);
 	}
 }
 
 //--- _check_ftc ------------------------------------------------------
-/*
+
 static void _check_ftc(int ticks)
 {
 	static int _lastTicks=0;
@@ -358,13 +358,12 @@ static void _check_ftc(int ticks)
 	{
 		if (ticks-_lastTicks>=1*1000)
 		{
-			Error(LOG, 0, "Flight Time Correction: ftc_speed=%d,  ftc_ratio=%d, speed=%d, corr=%d", Fpga->cfg.general.ftc_speed, Fpga->cfg.general.ftc_ratio, RX_EncoderStatus.speed, Fpga->stat.ftc_shift_delay_strokes_tel);
+			Error(LOG, 0, "Flight Time Correction: ftc_speed=%d,  ftc_ratio=%d, speed=%d, corr=%d, pos=%d", Fpga->cfg.general.ftc_speed, Fpga->cfg.general.ftc_ratio, RX_EncoderStatus.speed, Fpga->stat.ftc_shift_delay_strokes_tel, Fpga->stat.encIn[0].position);
 
 			_lastTicks = ticks;
 		}			
 	}
 }
-*/
 
 //--- fpga_start_poslog -----------------------------------------
 void fpga_start_poslog(void)

@@ -508,8 +508,8 @@ typedef struct SPrinterStatus
 	UINT32			printedCnt;
 	UINT32			maxSpeed[MAX_DROP_SIZES];	// [m/min]
 	UINT32			actSpeed;
-	double			counterAct;
-    double			counterTotal;
+	INT64			counterAct;	// [mm]
+    INT64			counterTotal;	// [mm]
 }  SPrinterStatus;
 
 //--- SSpoolerCfg ----------------------------------

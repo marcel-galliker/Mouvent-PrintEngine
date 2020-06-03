@@ -837,8 +837,8 @@ namespace RX_DigiPrint.Services
             [MarshalAs(UnmanagedType.ByValArray, SizeConst =4)]
             public UInt32[]     maxSpeed;   // [m/min]
             public UInt32		actSpeed;
-            public double       counterAct;
-            public double       counterTotal;
+            public Int64        counterAct;
+            public Int64        counterTotal;
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]

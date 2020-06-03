@@ -844,7 +844,7 @@ int pq_printed(int headNo, SPageId *pid, int *pageDone, int *jobDone, SPrintQueu
 			double step=plc_get_step_dist_mm();
             if (step==0)
                 step=plc_get_step_dist_mm();
-			ctr_add(step / 1000.0);
+			ctr_add(step);
 			
 			//--- LOG ---
 			{	
@@ -877,7 +877,7 @@ int pq_printed(int headNo, SPageId *pid, int *pageDone, int *jobDone, SPrintQueu
 				_srcHeight = pitem->srcHeight;
 			}
 
-			ctr_add(pitem->srcHeight / 1000000.0);		
+			ctr_add(pitem->srcHeight / 1000);		
 		}
 	
 		if(pitem->state <= PQ_STATE_STOPPING)
