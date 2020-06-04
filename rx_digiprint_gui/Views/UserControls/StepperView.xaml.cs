@@ -156,9 +156,9 @@ namespace RX_DigiPrint.Views.UserControls
                 Button_Fill.Visibility        = visibility;
                 Button_Empty.Visibility       = visibility;
 
-                RefSensors.Visibility = (RxGlobals.PrintSystem.IsTx) ? Visibility.Visible : Visibility.Collapsed;
+                RefSensors.Visibility = (RxGlobals.PrintSystem.IsTx || RxGlobals.PrintSystem.IsCLEAF) ? Visibility.Visible : Visibility.Collapsed;
                 for (int i=0; i<STEPPER_CNT; i++)
-                    _RefDone[i].Visibility   = (RxGlobals.PrintSystem.IsTx) ? Visibility.Collapsed : Visibility.Visible;
+                    _RefDone[i].Visibility   = (RxGlobals.PrintSystem.IsTx || RxGlobals.PrintSystem.IsCLEAF) ? Visibility.Collapsed : Visibility.Visible;
             }   
         }
 

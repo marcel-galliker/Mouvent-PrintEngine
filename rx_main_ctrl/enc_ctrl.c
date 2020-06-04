@@ -631,7 +631,11 @@ int  enc_abort_printing(void)
 //--- enc_enable_printing ----------------------------
 int	 enc_enable_printing(int enable)
 {
-//	Error(LOG, 0, "enc_enable_printing(%d)", enable);
+	/*
+	static int _enable=FALSE;
+	if (enable!=_enable) Error(LOG, 0, "enc_enable_printing(%d)", enable);
+	_enable = enable;
+	*/		
 
 	int no;
 	for(no=0; no<ENC_CNT; no++)

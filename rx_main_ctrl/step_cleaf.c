@@ -185,7 +185,8 @@ int stepc_handle_status(int no, SStepperStat *pStatus)
 		enc_enable_printing(FALSE);
 		_enc_disabled = TRUE;
 	}
-	if (info.z_in_print && _enc_disabled)
+
+	if (info.z_in_print && _enc_disabled && !info.splicing)
 	{
 		enc_enable_printing(TRUE);
 		_enc_disabled=FALSE;

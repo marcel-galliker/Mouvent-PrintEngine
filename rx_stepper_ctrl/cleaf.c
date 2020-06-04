@@ -165,7 +165,7 @@ void cleaf_init(void)
 	_Par_Z_ref.estop_in_bit[MOTOR_Z_FRONT]	= (1<<HEAD_UP_IN_FRONT);
 	_Par_Z_ref.estop_in_bit[MOTOR_Z_BACK]	= (1<<HEAD_UP_IN_BACK); 
 	
-	_ParZ_down.speed		= 16000; 
+    _ParZ_down.speed		= 30000; // 16000; too slow for checks
 	_ParZ_down.accel		= 32000; 
 	_ParZ_down.current_acc	= 320.0; 	
 	_ParZ_down.current_run	= 300.0; 	
@@ -615,10 +615,10 @@ int  cleaf_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		{
 			if      (!RX_StepperStatus.info.ref_done)				Error(ERR_CONT, 0, "Reference not done");
 			else if (!_AllowMoveDown)								Error(ERR_CONT, 0, "Stepper: Command 0x%08x: printhead_en signal not set", msgId);
-#ifdef debug
+// #ifdef debug
 			else if (RX_StepperStatus.posY < (RX_StepperCfg.material_thickness - LASER_VARIATION) 
 				||   RX_StepperStatus.posY > (RX_StepperCfg.material_thickness + LASER_VARIATION)) Error(ERR_CONT, 0, "WEB: Laser detects material out of range. (measured %d, expected %d)", RX_StepperStatus.posY, RX_StepperCfg.material_thickness);
-#endif
+// #endif
 			else
 			{
 				if (REF_HEIGHT<87000) Error(WARN, 0, "Reference Height is only %d.02d mm", REF_HEIGHT/100, REF_HEIGHT%100);

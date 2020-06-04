@@ -166,11 +166,13 @@ namespace RX_DigiPrint.Views.UserControls
         //--- Test_Clicked -------------------------------------------------
         private void Test_Clicked(object sender, RoutedEventArgs e)
         {
+            #if !DEBUG
             if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf && !(RxGlobals.StepperStatus[0].DripPans_InfeedDOWN && RxGlobals.StepperStatus[0].DripPans_OutfeedDOWN))
             {
                 RxMessageBox.YesNo("Print System", "Drip Pans below the clusters. Move it out before printing", MessageBoxImage.Question, true);
                 return;
             }
+            #endif
             PrintQueueAddTest dlg = new PrintQueueAddTest();     
             dlg.ShowDialog();      
         }
