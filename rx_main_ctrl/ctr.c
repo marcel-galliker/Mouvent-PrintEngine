@@ -243,10 +243,10 @@ static void _ctr_save(int reset, char *machineName)
 			setup_str	(file, "check", WRITE, check, sizeof(check), "");
 		}
 
-		rx_file_set_readonly(PATH_USER FILENAME_COUNTERS, FALSE);
+	//	rx_file_set_readonly(PATH_USER FILENAME_COUNTERS, FALSE);
 		setup_save(file, PATH_USER FILENAME_COUNTERS);
 		setup_destroy(file);
-		rx_file_set_readonly(PATH_USER FILENAME_COUNTERS, TRUE);
+	//	rx_file_set_readonly(PATH_USER FILENAME_COUNTERS, TRUE);
 		rx_file_set_mtime(PATH_USER FILENAME_COUNTERS, time);
 	}
 }
