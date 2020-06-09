@@ -98,7 +98,7 @@ int	ctrl_start(void)
 //	ctrl_set_config();
 	step_set_config();
 	fluid_set_config();
-	enc_set_config();
+	enc_set_config(FALSE);
 	
 	return REPLY_OK;
 }

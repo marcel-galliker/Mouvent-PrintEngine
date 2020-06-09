@@ -211,14 +211,15 @@ int  ctrl_main(int ticks, int menu)
 static int _handle_ctrl_msg(RX_SOCKET socket, void *pmsg)
 {
 	SMsgHdr *phdr = (SMsgHdr*)pmsg;
-	int reply = REPLY_OK;;
+	int reply = REPLY_OK;
 
 	//--- handle the message --------------
 	switch (phdr->msgId)
 	{
 	case CMD_ENCODER_CFG:		_do_encoder_cfg	(socket, (SEncoderCfg*) &phdr[1]);		break;
 	case CMD_ENCODER_PG_INIT:	_PgNo = 0;
-								fpga_pg_init(FALSE);		
+								int *restart=(int*)&phdr[1]; 
+								fpga_pg_init(*restart);		
 								break;
 	case CMD_ERROR_RESET:		tw8_reset_error(); break;
 	case CMD_ENCODER_PG_DIST:	_do_encoder_pg_dist(socket, (SEncoderPgDist*)&phdr[1]);	break;

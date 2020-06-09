@@ -978,7 +978,11 @@ SPrintQueueItem *pq_got_printGo(SPageId *pid)
 int pq_is_ready2print(SPrintQueueItem *pitem)
 {
 	int i;
-	if (RX_PrinterStatus.testMode) return _TestDataSent>=(int)RX_TestImage.copies; // TEST PRINT
+	if (RX_PrinterStatus.testMode)
+	{
+	//	Error(LOG,0, "pq_is_ready2print test: sent=%d, copies=%d", _TestDataSent, RX_TestImage.copies);
+		return _TestDataSent>5 || _TestDataSent>=(int)RX_TestImage.copies; // TEST PRINT
+	}
 	if (pitem->id.id==0) return TRUE;
 	if (_find_item(pitem->id.id, &i)==REPLY_OK)
 	{
@@ -1009,7 +1013,7 @@ int pq_is_ready(void)
 		if (RX_PrinterStatus.sentCnt!=sent || RX_PrinterStatus.transferredCnt!=transferred || RX_PrinterStatus.printGoCnt!=printGoCnt)
 		{
 			// if (RX_PrinterStatus.sentCnt) Error(LOG, 0, "Buffered pages=%d", RX_PrinterStatus.sentCnt-RX_PrinterStatus.printedCnt);
-			TrPrintfL(TRUE, "Buffer: sent=%d, transferred=%d, printGoCnt=%d, buffered=%d", RX_PrinterStatus.sentCnt, RX_PrinterStatus.transferredCnt, RX_PrinterStatus.printGoCnt, RX_PrinterStatus.transferredCnt-RX_PrinterStatus.printGoCnt);
+			TrPrintfL(TRUE, "pq_is_ready: Buffer: sent=%d, transferred=%d, printGoCnt=%d, buffered=%d", RX_PrinterStatus.sentCnt, RX_PrinterStatus.transferredCnt, RX_PrinterStatus.printGoCnt, RX_PrinterStatus.transferredCnt-RX_PrinterStatus.printGoCnt);
 			sent=RX_PrinterStatus.sentCnt;
 			transferred=RX_PrinterStatus.transferredCnt;
 			printGoCnt=RX_PrinterStatus.printGoCnt;
@@ -1058,7 +1062,11 @@ int pq_is_ready(void)
 		}		
 	}
 	
-	if(RX_Config.printer.type == printer_LH702)				return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printGoCnt) < 10;	// minimize buffer, independent on format!
+	if(RX_Config.printer.type == printer_LH702)				
+	{
+		TrPrintfL(TRUE, "pq_is_ready: sentCnt=%d, printGoCnt=%d", RX_PrinterStatus.sentCnt, RX_PrinterStatus.printGoCnt);
+		return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printGoCnt) < 10;	// minimize buffer, independent on format!
+	}
 	else if(RX_Config.printer.type == printer_cleaf)		return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printedCnt) < 16;
 	else if (rx_def_is_scanning(RX_Config.printer.type))	return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printedCnt) < 20;
 	else													return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printedCnt) < 64;

@@ -70,6 +70,7 @@ static int		_StopPG;
 static int		_Printing=FALSE;
 static int		_Khz=0;
 static UINT32	_WarnMarkReaderPos;
+static INT32	_LH702_printGoMode=0;
 
 typedef struct
 {
@@ -190,11 +191,11 @@ static int   _enc_closed(RX_SOCKET socket, const char *peerName)
 }
 
 //--- enc_set_config -----------------------------------
-int	 enc_set_config(void)
+int	 enc_set_config(int restart)
 {	
 	int no;
 	
-	if (RX_Config.printer.type==printer_LH702) Error(LOG, 0, "enc_set_config");
+	if (RX_Config.printer.type==printer_LH702) Error(LOG, 0, "enc_set_config(restart=%d)");
 	
 	_Scanning = rx_def_is_scanning(RX_Config.printer.type);
 		
@@ -225,7 +226,7 @@ int	 enc_set_config(void)
 	default:					_Encoder[0].webOffset_mm=5;   break;
 	}
 	_PrintGo_Dist	= 10000;
-	_PrintMark_Mode		= FALSE;
+	_PrintMark_Mode	= FALSE;
 	_DistTelCnt		= 0;
 	_FirstPG		= TRUE;
 	_TotalPgCnt		= 0;
@@ -236,8 +237,8 @@ int	 enc_set_config(void)
 	
 	for (no=0; no<ENC_CNT; no++) 
 	{
-		_Encoder[no].printGoCnt= -1;
-		if (_Encoder[no].used) sok_send_2(&_Encoder[no].socket, CMD_ENCODER_PG_INIT, 0, NULL);
+		if (!restart) _Encoder[no].printGoCnt= -1;
+		if (_Encoder[no].used) sok_send_2(&_Encoder[no].socket, CMD_ENCODER_PG_INIT, sizeof(restart), &restart);
 	}
 //	Error(LOG, 0, "CMD_ENCODER_PG_INIT");
 	return REPLY_OK;		
@@ -442,15 +443,17 @@ void enc_sent_document(int pages, SPageId *pId)
 //--- enc_change ---------------------------------------------------
 int enc_change(void)
 {
-	if (RX_Config.printer.type==printer_LH702) Error(LOG, 0, "enc_change");
-
-    if (_ChangeFifoIdx<1) return Error(ERR_ABORT, 0, "ChangeFIFO empty");
-	enc_set_config();
-	enc_start_printing(_ChangeFifo[0], FALSE);
-	memcpy(&_ID, &_ChangeFifo[0]->id, sizeof(_ID));
-	for (int i=0; i<_ChangeFifoIdx; i++)
+	if (RX_Config.printer.type==printer_LH702) Error(LOG, 0, "enc_change idx=%d", _ChangeFifoIdx);
+	if (_ChangeFifoIdx>0)
 	{
-        enc_set_pg(_ChangeFifo[i], &_ChangeFifo[i]->id);
+		if (_ChangeFifoIdx<1) return Error(ERR_ABORT, 0, "ChangeFIFO empty");
+		enc_set_config(TRUE);
+		enc_start_printing(_ChangeFifo[0], FALSE);
+		memcpy(&_ID, &_ChangeFifo[0]->id, sizeof(_ID));
+		for (int i=0; i<_ChangeFifoIdx; i++)
+		{
+			enc_set_pg(_ChangeFifo[i], &_ChangeFifo[i]->id);
+		}
 	}
 	_ChangeFifoIdx=0;
 }
@@ -468,14 +471,18 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 		TrPrintf(TRUE, "enc_sent_document(%d) _TotalPgCnt=%d", _PrintBuf[_PrintBufOut].pages, _TotalPgCnt);
 	}
 	
-	if (RX_Config.printer.type==printer_LH702 && _ID.id && pId->id!=_ID.id)
-	{
-		if (_ChangeFifoIdx>=CHANGE_FIFO_SIZE) return Error(ERR_ABORT, 0, "Fifo Overflow");
-		_ChangeFifo[_ChangeFifoIdx++] = pitem;
-		Error(LOG, 0, "enc_set_pg (id=%d, page=%d, copy=%d, scan=%d) to ChangeFIFO", pId->id, pId->page, pId->copy, pId->scan);
-		return REPLY_OK;
+	if (RX_Config.printer.type==printer_LH702)
+	{	
+		if (_ID.id && pId->id!=_ID.id && pitem->printGoMode!=_LH702_printGoMode)
+		{
+			if (_ChangeFifoIdx>=CHANGE_FIFO_SIZE) return Error(ERR_ABORT, 0, "Fifo Overflow");
+			_ChangeFifo[_ChangeFifoIdx++] = pitem;
+			Error(LOG, 0, "enc_set_pg (id=%d, page=%d, copy=%d, scan=%d) to ChangeFIFO", pId->id, pId->page, pId->copy, pId->scan);
+			return REPLY_OK;
+		}
+		_LH702_printGoMode = pitem->printGoMode;
 	}
-		
+
 	if (pId->scan==0xffffffff) return REPLY_OK; // flush
 
 	if (RX_Config.printer.type==printer_LH702) Error(LOG, 0, "enc_set_pg (id=%d, page=%d, copy=%d, scan=%d)", pId->id, pId->page, pId->copy, pId->scan);
@@ -489,7 +496,7 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 	
 	if (_Encoder[0].socket==INVALID_SOCKET) return REPLY_OK;
 	
-	TrPrintfL(TRUE, "enc_set_pg id=%d, page=%d, copy=%d, scan=%d", pId->id, pId->page, pId->copy, pId->scan);						
+	TrPrintfL(TRUE, "enc_set_pg id=%d, page=%d, copy=%d, scan=%d, printGoMode=%d", pId->id, pId->page, pId->copy, pId->scan, pitem->printGoMode);						
 	
 	if (!_Scanning)
 	{
@@ -625,17 +632,18 @@ int  enc_abort_printing(void)
 	int no;
 	_Printing = FALSE;
 	for(no=0; no<ENC_CNT; no++) sok_send_2(&_Encoder[no].socket, CMD_ABORT_PRINTING, 0, NULL);
+	memset(&_ID, 0, sizeof(_ID));
+	_LH702_printGoMode = 0;
 	return REPLY_OK;
 }
 
 //--- enc_enable_printing ----------------------------
 int	 enc_enable_printing(int enable)
 {
-	/*
 	static int _enable=FALSE;
-	if (enable!=_enable) Error(LOG, 0, "enc_enable_printing(%d)", enable);
+//	if (enable!=_enable) 
+	Error(LOG, 0, "enc_enable_printing(%d)", enable);
 	_enable = enable;
-	*/		
 
 	int no;
 	for(no=0; no<ENC_CNT; no++)
@@ -721,10 +729,20 @@ static void _handle_status(int no, SEncoderStat* pstat)
 	}
 	memcpy(&_EncoderStatus[no], pstat, sizeof(_EncoderStatus[no]));
 	_EncoderStatus[no].info.connected = TRUE;
-	if (_Encoder[no].printGoCnt==-1 && _EncoderStatus[no].PG_cnt==0) _Encoder[no].printGoCnt = 0;
+	if (no==0 &&_Encoder[no].printGoCnt==-1)
+	{
+		TrPrintfL(TRUE, "*** _Encoder.printGoCnt=-1: PG_cnt=%d ***", _EncoderStatus[no].PG_cnt);
+	}
+	if (_Encoder[no].printGoCnt==-1 && _EncoderStatus[no].PG_cnt==0) 
+	{
+		TrPrintfL(TRUE, "Reset PrintGoCnt");
+		_Encoder[no].printGoCnt = 0;
+	}
 	if (_Encoder[no].printGoCnt>=0  && _EncoderStatus[no].PG_cnt != _Encoder[no].printGoCnt)	
 	{
 		_Encoder[no].printGoCnt = _EncoderStatus[no].PG_cnt;
+
+		TrPrintfL(TRUE, "");
 
 		while ((UINT32)_Encoder[no].printGoCnt > RX_PrinterStatus.printGoCnt)
 		{

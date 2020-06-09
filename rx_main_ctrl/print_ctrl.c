@@ -67,6 +67,7 @@ static int				_PrintGo;
 static int				_PrintDone[MAX_PAGES];
 static int				_PrintDoneFlags;
 static int				_PrintDoneNo;
+static int				_PrintGoNo;
 static int				ERR_z_in_print;
 
 //--- pc_init ----------------------------------------------------------------
@@ -166,7 +167,7 @@ int pc_start_printing(void)
 		err_clear_all();
 		gui_send_cmd(REP_EVT_CONFIRM);
 		ctrl_set_config();
-		enc_set_config();
+		enc_set_config(FALSE);
 		machine_reset();
 		RX_PrinterStatus.dataReady = FALSE;
 		RX_PrinterStatus.sentCnt=0;
@@ -178,6 +179,7 @@ int pc_start_printing(void)
 		_StopJob   = FALSE;
 		memset(_PrintDone, 0, sizeof(_PrintDone));
 		_PrintDoneNo = 0;
+		_PrintGoNo	 = 0;
 		_PrintDoneFlags = spool_head_board_used_flags();
 		_SetPrintPar   = TRUE;
 //		fluid_start_printing();
@@ -956,7 +958,7 @@ void pc_print_go(void)
 	{
 		SPageId *pid  = spool_get_id(RX_PrinterStatus.printGoCnt);
 		SPageId *next = spool_get_id(RX_PrinterStatus.printGoCnt+1);
-		
+
         plc_print_go(RX_PrinterStatus.printGoCnt);
 	//	Error(LOG, 0, "PrintGo[%d] (id=%d, page=%d, scan=%d, copy=%d)", RX_PrinterStatus.printGoCnt, pid->id, pid->page, pid->scan, pid->copy);
 	//	Error(LOG, 0, "NEXT   [%d] (id=%d, page=%d, scan=%d, copy=%d)", RX_PrinterStatus.printGoCnt, next->id, next->page, next->scan, next->copy);
@@ -964,6 +966,11 @@ void pc_print_go(void)
 		{
 			if (!arg_simuEncoder) machine_pause_printing(FALSE);			
 		}
+	}
+	else
+	{
+		SPageId *pid  = spool_get_id(RX_PrinterStatus.printGoCnt);
+		TrPrintf(TRUE, "*** PRINT-GO #%d *** (id=%d, page=%d, scan=%d, copy=%d)", ++_PrintGoNo, pid->id, pid->page, pid->scan, pid->copy);
 	}
 }
  

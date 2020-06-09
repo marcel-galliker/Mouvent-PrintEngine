@@ -153,7 +153,7 @@ static void  _pg_ctrl(void);
 static void  _corr_ctrl(void);
 static void  _simu_markreader(void);
 
-static void  _check_errors(void);
+static void  _check_errors(int reset);
 static void	 _check_ftc(int ticks);
 
 static void _fpga_poslog(void);
@@ -283,7 +283,7 @@ void  fpga_main(int ticks, int menu, int showCorrection, int showParam)
 	static int _lastTicks=0;
 	if (_Init)
 	{
-		_check_errors();
+		_check_errors(FALSE);
 		_uv_ctrl();
 		_pg_ctrl();
 		_corr_ctrl();
@@ -345,12 +345,12 @@ void  fpga_main(int ticks, int menu, int showCorrection, int showParam)
 		{
 			_UV_SimuCnt++;
 		}
-		_check_ftc(ticks);
+	//	_check_ftc(ticks);
 	}
 }
 
 //--- _check_ftc ------------------------------------------------------
-
+/*
 static void _check_ftc(int ticks)
 {
 	static int _lastTicks=0;
@@ -359,11 +359,11 @@ static void _check_ftc(int ticks)
 		if (ticks-_lastTicks>=1*1000)
 		{
 			Error(LOG, 0, "Flight Time Correction: ftc_speed=%d,  ftc_ratio=%d, speed=%d, corr=%d, pos=%d", Fpga->cfg.general.ftc_speed, Fpga->cfg.general.ftc_ratio, RX_EncoderStatus.speed, Fpga->stat.ftc_shift_delay_strokes_tel, Fpga->stat.encIn[0].position);
-
 			_lastTicks = ticks;
 		}			
 	}
 }
+*/
 
 //--- fpga_start_poslog -----------------------------------------
 void fpga_start_poslog(void)
@@ -631,6 +631,8 @@ void fpga_enc_config(int inNo, SEncoderCfg *pCfg, int restart)
 	_PM_Filtered_Cnt = Fpga->stat.encOut[0].mark_edge_warn;
 	_PM_SimuCnt		 = 0;
 	_Restarted		 = restart;
+
+	_check_errors(TRUE);
 	
 	TrPrintfL(TRUE, "fpga_enc_config end: marks:%06d ok:%06d filtred=%06d missed=%06d dist=%06d pos=%06d\n", _PM_Cnt, Fpga->stat.encOut[0].PG_cnt, _PM_Filtered_Cnt, _PM_Missed_Cnt, Fpga->stat.encIn[0].digin_edge_dist, Fpga->stat.encOut[0].position);
 	TrPrintfL(TRUE, "fpga_enc_config end: enable=%d, position=%d, enc_start_pos_fwd=%d, pg_start_pos=%d", Fpga->cfg.encIn[0].enable, Fpga->stat.encIn[0].position, Fpga->cfg.pg[0].enc_start_pos_fwd, Fpga->stat.encOut[0].pg_start_pos);
@@ -1034,7 +1036,7 @@ void fpga_pg_init(int restart)
 	int pgNo;
 	int tio=0;
 	
-//	Error(LOG, 0, "fpga_pg_init restart=%d", restart);
+	Error(LOG, 0, "fpga_pg_init(restart=%d)", restart);
 
 	TrPrintfL(TRUE, "fpga_pg_init");
 
@@ -1779,7 +1781,7 @@ static void _fpga_display_error(void)
 }
 
 //--- _check_errors ---------------------------------------------------------------------
-static void  _check_errors(void)
+static void  _check_errors(int reset)
 {	
 	if (_Scanning)	return;
 	
@@ -1792,7 +1794,7 @@ static void  _check_errors(void)
 
 	for (i=0; i<2; i++)
 	{
-		if(Fpga->cfg.encIn[i].enable && Fpga->cfg.encIn[i].index_en)
+		if(!reset && Fpga->cfg.encIn[i].enable && Fpga->cfg.encIn[i].index_en)
 		{
 			//--- check first index -------------------------------
 			p = _pos[i];

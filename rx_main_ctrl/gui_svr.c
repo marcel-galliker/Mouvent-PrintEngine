@@ -240,7 +240,7 @@ void gui_tick(void)
 		_CheckSend[i]=0;
 	}
 
-	if (RX_Config.printer.type==printer_LH702) TrPrintfL(TRUE, "GUI Check: %s, TimeoutCnt=%d, printState=%s, speed=%d", str, _TimeoutCnt, PrintStateStr[RX_PrinterStatus.printState], enc_speed());
+//	if (RX_Config.printer.type==printer_LH702) TrPrintfL(TRUE, "GUI Check: %s, TimeoutCnt=%d, printState=%s, speed=%d", str, _TimeoutCnt, PrintStateStr[RX_PrinterStatus.printState], enc_speed());
 }
 
 //--- gui_test -------------------------------------------------------
