@@ -330,31 +330,40 @@ static void _load_test(void)
 {
 	UINT32 width, height, memsize;
 	UINT8  bitsPerPixel;
+	int ret;
 
 	// see also gui_msg.c::_do_test_start
 	if (((int)RX_PrinterStatus.sentCnt) < (int)(RX_TestImage.copies*RX_TestImage.scans))
 	{
 		if (_Scanning)	RX_TestImage.id.scan++;
 		else			RX_TestImage.id.copy++;
-		bmp_get_size(RX_TestImage.filepath, &width, &height, &bitsPerPixel, &memsize);
+		if (RX_TestImage.id.copy==0) RX_TestImage.id.copy=1;
+		ret=bmp_get_size(RX_TestImage.filepath, &width, &height, &bitsPerPixel, &memsize);
+		if (ret) tif_get_size(RX_TestImage.filepath, 0, 0, &width, &height, &bitsPerPixel);
 		RX_TestImage.pageHeight = RX_TestImage.srcHeight = (UINT32)(height/1200.0*25400.0);
 		RX_TestImage.pageWidth  = RX_TestImage.srcWidth  = (UINT32)(width/1200.0*25400.0);
 		RX_TestImage.printGoMode = PG_MODE_LENGTH;
 		RX_TestImage.printGoDist = (UINT32)(height/1200.0*25400.0);
-		if (RX_TestImage.testImage==PQ_TEST_ANGLE_SEPARATED) RX_TestImage.printGoDist=50000;
-		if (!rx_def_is_scanning(RX_Config.printer.type) && !rx_def_is_web(RX_Config.printer.type) && RX_TestImage.testImage!=PQ_TEST_GRID && RX_TestImage.testImage!=PQ_TEST_ANGLE_OVERLAP) 
+		if (RX_TestImage.testImage==PQ_TEST_ANGLE_SEPARATED)
+		{
+			if (rx_def_is_tx(RX_Config.printer.type)) RX_TestImage.printGoDist=50000;
+			else									  RX_TestImage.printGoDist=50000*RX_Config.inkSupplyCnt;
+		}
+		else if (!rx_def_is_scanning(RX_Config.printer.type) && !rx_def_is_web(RX_Config.printer.type) && RX_TestImage.testImage!=PQ_TEST_GRID && RX_TestImage.testImage!=PQ_TEST_ANGLE_OVERLAP) 
 			RX_TestImage.printGoDist *= (RX_Config.inkSupplyCnt+1);
-		RX_TestImage.dropSizes	= 1;
+		if (bitsPerPixel>1) strcpy(RX_TestImage.dots, "SML");
 		_send_head_info();
 	//	spool_print_file(&RX_TestImage.id, RX_TestImage.filepath, 0, height, PG_MODE_GAP, 0, PQ_LENGTH_COPIES, 0, RX_TestImage.scanMode, 1, TRUE);
 		{
 			SPrintQueueItem item;
+			int clearBlockUsed;
 			memset(&item, 0, sizeof(item));
 			item.printGoMode = PG_MODE_GAP;
 			item.lengthUnit  = PQ_LENGTH_COPIES;
 			item.scanMode    = RX_TestImage.scanMode;
 			item.srcPages    = 1;
-			spool_print_file(&RX_TestImage.id, RX_TestImage.filepath, 0, height, &item, TRUE);		
+			clearBlockUsed	 = ((int)RX_PrinterStatus.sentCnt+1) >= (int)(RX_TestImage.copies*RX_TestImage.scans);
+			spool_print_file(&RX_TestImage.id, RX_TestImage.filepath, 0, height, &item, clearBlockUsed);	
 		}
 	}
 }

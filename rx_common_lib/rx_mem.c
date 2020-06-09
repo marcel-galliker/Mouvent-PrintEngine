@@ -14,6 +14,7 @@
 	#include <sys/mman.h>
 #endif
 #include "rx_threads.h"
+#include "rx_trace.h"
 #include "rx_mem.h"
 #include "errno.h"
 
@@ -89,7 +90,7 @@ void rx_mem_use(BYTE *ptr)
 		if (buf->count<0)
 			buf->count=buf->count;
 		buf->count++;
-		// printf("rx_mem_use %p, cnt=%d, _Buffers=%d\n", ptr, buf->count, _Buffers);
+		TrPrintfL(TRUE, "rx_mem_use %p, cnt=%d, _Buffers=%d\n", ptr, buf->count, _Buffers);
 		rx_mutex_unlock(_Mutex);
 	}
 }
@@ -103,7 +104,7 @@ void  rx_mem_unuse(BYTE **ptr)
 		SBuffer *buf = ((SBuffer*)*ptr) - 1;
 		rx_mutex_lock(_Mutex);
 		if (buf->count>0) buf->count--;
-		// printf("rx_mem_unuse %p, cnt=%d, _Buffers=%d\n", *ptr, buf->count, _Buffers);
+		TrPrintfL(TRUE, "rx_mem_unuse %p, cnt=%d, _Buffers=%d\n", *ptr, buf->count, _Buffers);
 		rx_mutex_unlock(_Mutex);
 	}
 }

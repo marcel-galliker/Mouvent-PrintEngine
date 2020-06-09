@@ -373,12 +373,8 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 	hc_start_printing();
 		
 	same = (!strcmp(msg.filename, _LastFilename) &&  msg.id.page==_LastPage && msg.wakeup==_LastWakeup && msg.gapPx==_LastGap);
-	if (rx_def_is_web(RX_Spooler.printerType)) same &= (msg.offsetWidth==_LastOffsetWidth);
+	if (rx_def_is_web(RX_Spooler.printerType)) same &= msg.offsetWidth==_LastOffsetWidth;
 	if (RX_Spooler.printerType==printer_LB702_UV && msg.printMode==PM_SINGLE_PASS) same = ((msg.flags&FLAG_SAME)!=0);
-
-	if (rx_def_is_web(RX_Spooler.printerType))
-		msg.gapPx += 1;	// Bug in FPGA: (when srcLineCnt==12300, gap=0 it sometimes prints an additional line of old data [instead of blank] between the labels)
-
 	_LastPage   = msg.id.page;
 	_LastGap	= msg.gapPx;
 	_LastWakeup = msg.wakeup;
@@ -478,6 +474,8 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 			if (data_load(&msg.id, path, msg.offsetWidth, msg.lengthPx, multiCopy, msg.gapPx, msg.blkNo, reply.blkCnt, msg.printMode, msg.variable, msg.virtualPasses , msg.virtualPass, msg.flags, msg.clearBlockUsed, same, msg.smp_bufSize, _Buffer[_BufferNo])!=REPLY_OK && !_Abort)
 				return Error(ERR_STOP, 0, "Could not load file >>%s<<", str_start_cut(msg.filename, PATH_RIPPED_DATA));
 		}
+
+		if (_Abort) return REPLY_OK;
 
 		//--- send spool state -------------------------------------------------------------
  		evt.hdr.msgId   = EVT_PRINT_FILE;
