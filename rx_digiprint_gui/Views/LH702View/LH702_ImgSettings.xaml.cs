@@ -27,13 +27,16 @@ namespace RX_DigiPrint.Views.LH702View
         }
 
         //--- Property CanDelete ---------------------------------------
+        private bool _CanDelete=false;
         public bool CanDelete
         {
             set 
             { 
+                _CanDelete = value;
                 if (value) ButtonDelete.Visibility = Visibility.Visible;
                 else       ButtonDelete.Visibility = Visibility.Collapsed;
             }
+            get { return _CanDelete;}
         }
         
         //--- _DataContextChanged -
@@ -100,7 +103,8 @@ namespace RX_DigiPrint.Views.LH702View
         //--- Copies_LostFocus -----------------------------------------------------------
         private void Copies_LostFocus(object sender, RoutedEventArgs e)
         {
-            if (RxGlobals.PrinterStatus.PrintState==EPrintState.ps_printing && _Item!=null)
+         //   if (RxGlobals.PrinterStatus.PrintState==EPrintState.ps_printing && _Item!=null)
+            if (!CanDelete && _Item!=null)
             {
                 RxNumBox ctrl = e.Source as RxNumBox;
                 _Item.Copies = (Int32)(ctrl.Value+0.5);
