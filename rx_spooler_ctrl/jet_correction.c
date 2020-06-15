@@ -19,9 +19,10 @@
 
 
 //-----------------------------------------------------------------------
-SDisabledJets RX_DisabledJets[MAX_COLORS];
+INT16 RX_DisabledJets[MAX_COLORS*MAX_HEADS_COLOR][MAX_DISABLED_JETS];
 static int _Active;
 static int _MaxDropSize=3;
+static int _First;
 
 //--- prototypes --------------------------------------------------------
 
@@ -44,24 +45,18 @@ int jc_init(void)
 }
 
 //--- jc_set_disabled_jets -----------------------
-void jc_set_disabled_jets(SDisabledJets *jets)
+void jc_set_disabled_jets(SDisabledJetsMsg *pmsg)
 {
-	int h, n;
-	if (RX_Spooler.printerType==printer_TX801 || RX_Spooler.printerType==printer_TX802) return;
+	int n;
+//	if (RX_Spooler.printerType==printer_TX801 || RX_Spooler.printerType==printer_TX802) return;
 
-	if (jets->color>=0 && jets->color<MAX_COLORS)
+	if (pmsg->head>=0 && pmsg->head<SIZEOF(RX_DisabledJets))
 	{
-		memcpy(&RX_DisabledJets[jets->color], jets, sizeof(RX_DisabledJets[jets->color]));
-		for(h=0; !_Active && h<MAX_HEADS_COLOR; h++)
-		{
-            for (n = 0; !_Active && n < MAX_DISABLED_JETS; n++)
-            {
-	            _Active |= RX_DisabledJets[jets->color].disabledJets[h][n];
-                if (RX_DisabledJets[jets->color].disabledJets[h][n]) 
-                    Error(LOG, 0, "Disable Jet color=%d, head=%d, jet=%d", jets->color, h, RX_DisabledJets[jets->color].disabledJets[h][n]);
-            }
-		}
+		memcpy(&RX_DisabledJets[pmsg->head], pmsg->disabledJets, sizeof(RX_DisabledJets[pmsg->head]));
+		for (n=0; !_Active && n<MAX_DISABLED_JETS; n++)
+			_Active |= (pmsg->disabledJets[n]>=0);
 	}
+	_First = TRUE;
 }
 
 //--- jc_active ---------------------------------------------------
@@ -76,6 +71,9 @@ int	jc_correction (SBmpInfo *pBmpInfo,  SPrintListItem *pItem, int fromLine)
 	int color, n, head, jet;
 	int pixelPerByte;
 	SBmpSplitInfo	*pInfo; 
+
+	if (pBmpInfo->bitsPerPixel==8) return REPLY_OK;	// correction whils screening 
+    if (rx_def_is_tx(RX_Spooler.printerType)) return REPLY_OK;
 
 	if (pBmpInfo->bitsPerPixel<2)
 	{
@@ -101,10 +99,10 @@ int	jc_correction (SBmpInfo *pBmpInfo,  SPrintListItem *pItem, int fromLine)
 				{
 					for (n=0; n<MAX_DISABLED_JETS; n++)
 					{
-						jet = RX_DisabledJets[color].disabledJets[head][n];
-						if (jet)
+						jet = RX_DisabledJets[color*RX_Spooler.headsPerColor+head][n];
+						if (jet>=0)
 						{
-						//	Error(LOG, 0, "Disable Jet color=%d, head=%d, jet=%d", color, head, jet);
+							if (_First) Error(LOG, 0, "Disable Jet color=%d, head=%d, jet=%d", color, head, jet);
 							jet += pInfo->startBt*pixelPerByte + pInfo->jetPx0;
 							_disable_jet(*pInfo->data, pBmpInfo->bitsPerPixel, pBmpInfo->lengthPx, pBmpInfo->lineLen, jet, fromLine);
 							/*
@@ -131,6 +129,7 @@ int	jc_correction (SBmpInfo *pBmpInfo,  SPrintListItem *pItem, int fromLine)
 		//	if (pBmpInfo->printMode==PM_SCANNING || pBmpInfo->printMode==PM_SINGLE_PASS) break;
 		}
 	}
+	_First = FALSE;
 	return REPLY_OK;							
 }
 
@@ -167,66 +166,6 @@ static void _set_pixel2(UCHAR *pBuffer, int bytesPerLine, int x, int y, int val)
 }
 
 //--- _disable_jet -----------------------------------------------------
-static void _disable_jet_old(UCHAR *pBuffer, int bitsPerPixel, int length, int bytesPerLine, int jet, int fromLine)
-{
-	int y, size, s;
-	int offset;
-	int jetMax=bytesPerLine*8/bitsPerPixel;
-	
-	if (jet>0 && jet<jetMax)
-	{
-		//--- special for "Jet Numbers" Image
-		if (fromLine)
-		{
-			for (y=0; y<50; y++)
-			{
-				for (s=-15; s<=15; s++)
-					_SetPixel(pBuffer, bytesPerLine, jet+s, fromLine-y, 3);
-			}
-			for (y=0; y<20; y++)
-			{
-				//--- arrow on top ----------------------------------------
-				_SetPixel(pBuffer, bytesPerLine, jet-y-1, fromLine-y-1, 0);
-				_SetPixel(pBuffer, bytesPerLine, jet-y,   fromLine-y-1, 0);
-				_SetPixel(pBuffer, bytesPerLine, jet,     fromLine-y-1, 0);
-				_SetPixel(pBuffer, bytesPerLine, jet+y,   fromLine-y-1, 0);
-				_SetPixel(pBuffer, bytesPerLine, jet+y+1, fromLine-y-1, 0);
-
-				//--- arrow at bottom -------------------------------------
-				_SetPixel(pBuffer, bytesPerLine, jet-y-1, length-25+y, 3);
-				_SetPixel(pBuffer, bytesPerLine, jet-y,   length-25+y, 3);
-				_SetPixel(pBuffer, bytesPerLine, jet,     length-25+y, 3);
-				_SetPixel(pBuffer, bytesPerLine, jet+y,   length-25+y, 3);
-				_SetPixel(pBuffer, bytesPerLine, jet+y+1, length-25+y, 3);
-			}
-		}
-
-		for (y=fromLine; y<length; y++)
-		{
-			if (FALSE)
-			{
-				_SetPixel(pBuffer, bytesPerLine, jet-1, y, 0);
-				_SetPixel(pBuffer, bytesPerLine, jet,   y, 3);
-				_SetPixel(pBuffer, bytesPerLine, jet+1, y, 0);
-			}
-			else
-			{
-				if (size=_GetPixel(pBuffer, bytesPerLine, jet, y))
-				{
-					if (y&1) offset=1;
-					else	 offset=-1;
-					s=_GetPixel(pBuffer, bytesPerLine, jet-offset, y);
-					if (s<_MaxDropSize) _SetPixel(pBuffer, bytesPerLine, jet-offset, y, s+1);
-					else				_SetPixel(pBuffer, bytesPerLine, jet+offset, y, s+_GetPixel(pBuffer, bytesPerLine, jet+offset, y));
-				}
-				_SetPixel(pBuffer, bytesPerLine, jet, y, 0);
-			}
-		}
-	}
-	Error(LOG, 0, "_disable_jet %d", jet);
-}
-
-//--- _disable_jet ----------------------------------------------
 static void _disable_jet(UCHAR *pBuffer, int bitsPerPixel, int length, int bytesPerLine, int jet, int fromLine)
 {
     int jetMax=bytesPerLine*8/bitsPerPixel;

@@ -10,8 +10,8 @@ namespace RX_Common
         //--- constructor  -------------------------------------
         public RxRadioButton()
         {
-            Error   = false;
-            Warning = false;
+            Error   = false; // unused?
+            Warning = false; // unused?
             Last    = false;
             PreviewMouseDown += RxRadioButton_PreviewMouseDown;
         }
@@ -20,7 +20,7 @@ namespace RX_Common
         void RxRadioButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
             e.Handled=true;
-            this.IsChecked = (bool)!this.IsChecked;
+            this.IsChecked = true; // (bool)!this.IsChecked;
         }
 
         //--- property Error -----------------------------------------

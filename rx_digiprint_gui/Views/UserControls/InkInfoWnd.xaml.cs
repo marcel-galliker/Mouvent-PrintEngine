@@ -41,6 +41,10 @@ namespace RX_DigiPrint.Views.UserControls
             {
                 Calibrate_button.Visibility = Visibility.Collapsed;
             }
+
+            #if DEBUG
+            this.Topmost = false;
+            #endif
         }
 
         //---Tara_Clicked ----------------------------------------

@@ -92,7 +92,7 @@
     <IncludePath />
     <ReferencePath />
     <LibraryPath />
-    <OutDir>$(SolutionDir)_out\$(Configuration)\</OutDir>
+    <OutDir>$(ProjectDir)..\_out\$(Configuration)_$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)_temp\$(MSBuildProjectName)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-soc|Win32'">
@@ -102,8 +102,8 @@
     <NMakeOutput>$(ProjectDir)rx_head_ctrl-Debug-soc.vgdbsettings</NMakeOutput>
     <NMakeIncludeSearchPath>$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\include\c++\4.7.1;$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\include\c++\4.7.1\arm-linux-gnueabi;$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\include\c++\4.7.1\backward;$(TOOLCHAIN_ROOT)\lib\gcc\arm-linux-gnueabi\4.7.1\include;$(TOOLCHAIN_ROOT)\lib\gcc\arm-linux-gnueabi\4.7.1\include-fixed;$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\include;$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\libc\usr\include\arm-linux-gnueabi;$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\libc\usr\include;../rx_ink_lib;../rx_common_lib;../rx_tif_lib;../Externals/TinyXML;../Externals/libtiff;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(ProjectDir)\gcc_Debug-soc.h;$(VISUALGDB_DIR)\gcc_compat.h;$(NMakeForcedIncludes)</NMakeForcedIncludes>
-    <OutDir>$(SolutionDir)_out\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)_temp\$(MSBuildProjectName)\$(Configuration)\</IntDir>
+    <OutDir>$(ProjectDir)..\_out\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)..\_temp\$(MSBuildProjectName)\$(Configuration)\</IntDir>
     <NMakePreprocessorDefinitions>__VisualGDB_CFG_Debug_soc;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-soc|Win32'">
@@ -113,14 +113,14 @@
     <NMakeOutput>$(ProjectDir)rx_head_ctrl-Release-soc.vgdbsettings</NMakeOutput>
     <NMakeIncludeSearchPath>f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1;f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1\arm-linux-gnueabi;f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1\backward;f:\compiler\linaro-tools\lib\gcc\arm-linux-gnueabi\4.7.1\include;f:\compiler\linaro-tools\lib\gcc\arm-linux-gnueabi\4.7.1\include-fixed;f:\compiler\linaro-tools\arm-linux-gnueabi\include;f:\compiler\linaro-tools\arm-linux-gnueabi\libc\usr\include\arm-linux-gnueabi;f:\compiler\linaro-tools\arm-linux-gnueabi\libc\usr\include;../rx_common_lib;../rx_ink_lib;../rx_tif_lib;../Externals/TinyXML;../Externals/libtiff;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(ProjectDir)\gcc_Release-soc.h;$(VISUALGDB_DIR)\gcc_compat.h;$(NMakeForcedIncludes)</NMakeForcedIncludes>
-    <OutDir>$(SolutionDir)_out\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)_temp\$(MSBuildProjectName)\$(Configuration)\</IntDir>
+    <OutDir>$(ProjectDir)..\_out\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)..\_temp\$(MSBuildProjectName)\$(Configuration)\</IntDir>
     <NMakePreprocessorDefinitions>__VisualGDB_CFG_Release_soc;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-lx|Win32'">
-    <NMakeBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /build "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeBuildCommandLine>
-    <NMakeCleanCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /clean "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeCleanCommandLine>
-    <NMakeReBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /rebuild "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeReBuildCommandLine>
+    <NMakeBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /build "$(ProjectPath)" "/solution:$(SolutionPath)"  "/config:$(Configuration)" "/platform:$(Platform)"</NMakeBuildCommandLine>
+    <NMakeCleanCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /clean "$(ProjectPath)" "/solution:$(SolutionPath)"  "/config:$(Configuration)" "/platform:$(Platform)"</NMakeCleanCommandLine>
+    <NMakeReBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /rebuild "$(ProjectPath)" "/solution:$(SolutionPath)"  "/config:$(Configuration)" "/platform:$(Platform)"</NMakeReBuildCommandLine>
     <NMakeOutput>$(ProjectDir)rx_head_ctrl-Debug-lx.vgdbsettings</NMakeOutput>
     <IncludePath />
     <ReferencePath />

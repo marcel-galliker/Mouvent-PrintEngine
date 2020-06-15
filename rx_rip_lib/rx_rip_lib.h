@@ -100,11 +100,11 @@ typedef struct
 {
 	INT32	size;
 	INT32	id;
-	INT32	width;		// in µm
-	INT32	height;		// in µm
-	INT32	webWidth;	// in µm
+	INT32	width;		// in ï¿½m
+	INT32	height;		// in ï¿½m
+	INT32	webWidth;	// in ï¿½m
 	INT32	columns;
-	INT32	columnDist;	// in µm
+	INT32	columnDist;	// in ï¿½m
 
 	char	label[256];
 	char	colorLayer[256];
@@ -152,7 +152,7 @@ EXPORT int  rip_get_print_env	(const char *path, char *printEnv);
 
 EXPORT int  rip_bmp_copy		(int *srcBmp, int srcWidth, int srcHeight, int srcStride, int srcBppx, int dist, int cnt, int *dstBmp, int dstStride);
 
-EXPORT int  rip_test_data		(RX_Bitmap *pBmp, char *text);
+EXPORT int  rip_test_data		(RX_Bitmap *pBmp, int testImage, char *text);
 
 #ifdef __cplusplus
 }

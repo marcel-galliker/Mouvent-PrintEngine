@@ -115,9 +115,10 @@ static void _TraceFileOpen(const char *path, const char *appName)
 	{
 		char			str[MAX_PATH];
 		char			name[MAX_PATH];
+		char			ext[10];
 		int				no;
 		
-		split_path(appName, NULL, name, NULL);
+		split_path(appName, NULL, name, ext);
 		
 		#ifdef linux			
 			//--- delete old files

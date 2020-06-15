@@ -92,7 +92,6 @@ static int setup_item(HANDLE file, int idx, SPrintQueueItem *item, EN_setup_Acti
 		setup_uint32	(file, "copies",		action, &item->copies,			1);
 		setup_uchar		(file, "collate",		action, &item->collate,			1);
 		setup_uchar		(file, "variable",		action, &item->variable,		0);
-		setup_uchar 	(file, "dropSizes",		action, &item->dropSizes,		3);
 		setup_uchar 	(file, "wakeup",		action, &item->wakeup,			0);
 		setup_uchar		(file, "lengthUnit",	action, &item->lengthUnit,		PQ_LENGTH_MM);
 		setup_uchar 	(file, "orientation",	action, &item->orientation,		0);
@@ -422,7 +421,6 @@ SPrintQueueItem *pq_add_item(SPrintQueueItem *pitem)
 		if (pitem->firstPage<1) pitem->firstPage=1;
 		if (pitem->lastPage<pitem->firstPage) pitem->lastPage=pitem->firstPage;
 		if (!rx_def_use_pq(RX_Config.printer.type) && pitem->copies<1) pitem->copies=1;
-		if (pitem->dropSizes==0) pitem->dropSizes=3;
 		pitem->id.id = ++_ID;
 		pitem->state = PQ_STATE_QUEUED;
 		TrPrintf(TRUE, "pq_add_item id=%d, >>%s<< pages: %d..%d copies=%d", pitem->id, pitem->filepath, pitem->firstPage, pitem->lastPage, pitem->copies);
@@ -844,7 +842,7 @@ int pq_printed(int headNo, SPageId *pid, int *pageDone, int *jobDone, SPrintQueu
 			double step=plc_get_step_dist_mm();
             if (step==0)
                 step=plc_get_step_dist_mm();
-			ctr_add(step);
+			ctr_add((int)step);
 			
 			//--- LOG ---
 			{	

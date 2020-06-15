@@ -26,6 +26,7 @@ namespace RX_DigiPrint.Models.Enums
                 _List.Add(new RxEnum<ETestImage>( ETestImage.encoder,         "Encoder"));
                 _List.Add(new RxEnum<ETestImage>( ETestImage.scanning,        "Scanning"));
                 _List.Add(new RxEnum<ETestImage>( ETestImage.fullAlignment,   "Full Alignment"));
+                _List.Add(new RxEnum<ETestImage>( ETestImage.density,         "Density"));
             }
         }
 

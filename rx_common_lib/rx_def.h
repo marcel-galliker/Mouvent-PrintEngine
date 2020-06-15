@@ -97,12 +97,12 @@ void rx_def_init();
 #define FILENAME_MATERIAL_LIST	"materialList.xml"
 #define FILENAME_SPLICE_PAR		"splicepar.xml"
 #define FILENAME_HEAD_PRESOUT	"head_presout.xml"
-#define FILENAME_COUNTERS		"counters.xml"
+#define FILENAME_COUNTERS		".counters.xml"
 
 //--- defines ---------------------------------
 
-#define PRINT_BAR_CNT		8
-#define INK_SUPPLY_CNT		16
+#define INK_SUPPLY_CNT		24
+#define MAX_HEADS_INKCYLINDER 12
 #define ENC_CNT				2
 #define FLUID_BOARD_CNT		4
 #define FLUID_SCALE_SENSORS 3
@@ -116,8 +116,10 @@ void rx_def_init();
 #define MAX_COLORS			16
 #define MAX_SCALES			(MAX_COLORS+2)
 #define MAX_HEADS_COLOR		48
-#define MAX_HEAD_DIST		128
+#define MAX_HEAD_DIST		(INK_SUPPLY_CNT*MAX_HEADS_INKCYLINDER) // 128
 #define MAX_DISABLED_JETS	32
+#define MAX_DENSITY_VALUES	(2+10)
+#define MAX_DENSITY_FACTORS	(2048+128)
 	
 #define HEAD_BOARD_CNT		(MAX_HEAD_DIST/MAX_HEADS_BOARD) // head boards per print bar
 
@@ -129,7 +131,7 @@ void rx_def_init();
 #define DPI_X				1200
 
 #define MAX_DATA_SIZE		2048
-#define MAX_TEST_DATA_SIZE	256
+#define MAX_TEST_DATA_SIZE	512
 
 #define WAKEUP_BAR_LEN		128	// dots to wakeup lazy jets
 
@@ -268,7 +270,6 @@ typedef struct SPrintQueueItem
 	INT32	copies;
 	INT8	collate;
 	INT8	variable;	// variable data job
-	INT8	dropSizes;
 
 	UINT8	state;
 			#define PQ_STATE_UNDEF		0
@@ -305,7 +306,8 @@ typedef struct SPrintQueueItem
 			#define PQ_TEST_GRID			5
 			#define PQ_TEST_ENCODER			6
 			#define PQ_TEST_SCANNING		7
-			#define PQ_TEST_FULL_ALIGNMENT	8	
+			#define PQ_TEST_FULL_ALIGNMENT	8
+			#define PQ_TEST_DENSITY			9
 
 	INT32	pageWidth;	// µm
 	INT32	pageHeight;	// µm
@@ -348,19 +350,41 @@ typedef struct
 {
 	int			colorCode; // 0 to sizeof RX_ColorName
 	char		name[64]; // colorname used in pdf i.e.: Cyan, Magenta, Yellow, Black, Blue, Orange, Green, Spot1, Micr ...
+	char		shortName[8];	// file extension
 	UINT8		rgbR;	// 0 to 0xFF used to simulated color in rgb for display
 	UINT8		rgbG;	// "
 	UINT8		rgbB;	// "
+	int			technical; // color is technical type: 0: no, 1: yes
+	int			penetrationFluid; // color is penetrationFluid type: 0: no, 1: yes
+	int			inMaxInk; // color to be compute to calculate TotalMaxInk
+	int			preserveBlack; // color for preserveBlack for APPE
+	int			dieCutType; // color for dieCut for APPE
+	int			mergeInBlack; // color to merge in black (plane 3)
+	int			outRectoIdx; // outputpath for recto color plane idx. Default: 0
+	int			outVersoIdx; // outputpath for recto color plane idx. Default: same as Recto
+	int			DropSize[3];	// size of drop 1, 2 and 3 in femtoliter (10 exp-15)
 } SColorConfig;
 
+typedef struct SPoint
+{
+	INT32	x;
+	INT32	y;
+} SPoint;
+
+#define MAX_OUTPATH 8
 // --- SColorSpaceConfig --------------------------------------------
 typedef struct
 {
 	char		name[64];
 	int			duplex;		// 0:no, 1:yes
+	SPoint		resol;
 	int			count;
+	INT64		maxWidth;
 	SColorConfig color[MAX_COLORS];
-	int		DropSize[3];	// size of drop 1, 2 and 3 in femtoliter (10 exp-15)
+	int			defDropSize[3];	// default size of drop 1, 2 and 3 in femtoliter (10 exp-15)
+	int			outPathInit;
+	int			countPath;
+	char		outPath[MAX_OUTPATH][2 * MAX_PATH];
 } SColorSpaceConfig;
 
 //--- Colornames ------------------------------
@@ -738,13 +762,21 @@ typedef struct
 
 typedef struct
 {
-	UINT16	clusterNo;	
-	UINT16	flowResistance;
-	UINT8	flowResistanceCRC;
-	UINT32	dropletsPrinted;	// multiply with 1'000'000'000 to get droplets
-	UINT8	dropletsPrintedCRC;
-	INT16	disabledJets[MAX_DISABLED_JETS];
-} SHeadEEpromMvt;
+	UINT16	clusterNo;			//	0x00
+	UINT16	flowResistance;		//	0x02
+	UINT8	flowResistanceCRC;	//	0x04
+	UINT32	dropletsPrinted_old;	//  0x05..0x08
+	UINT8	dropletsPrintedCRC_old;	//	0x09
+	INT16	disabledJets[MAX_DISABLED_JETS];	// 0x0a..0x4b
+	UINT8	disabledJetsCRC;					//	0x4a
+	INT16	densityValue[MAX_DENSITY_VALUES];	// 0x4b..0x62
+	UINT8	densityValueCRC;					// 0x63
+	UINT8	voltage;							// 0x64: Firepulse voltage
+	UINT8	voltageCRC;							// 0x65
+	UINT64	dropletsPrinted;					// 0x66..0x6d
+	UINT8	dropletsPrintedCRC;					// 0x6e
+	UINT8	res_6f[0x80-0x6f];	
+} SHeadEEpromMvt;	// size must be 0x80!!
 	
 typedef struct SHeadStat
 {	
@@ -782,7 +814,7 @@ typedef struct SHeadStat
 	UINT32			pumpSpeed;
 	UINT32			pumpFeedback;
 	UINT32			printingSeconds;
-	UINT32			printedDroplets;
+	UINT64			printedDroplets;
 	INT32			presIn_0out;
 	EnFluidCtrlMode	ctrlMode;
 	
@@ -1520,25 +1552,14 @@ typedef struct SColorSplitCfg
 	SSplitCfg		split[MAX_HEADS_COLOR];
 } SColorSplitCfg;
 
-typedef struct SDisabledJets
-{
-	int		color;
-	INT16	disabledJets[MAX_HEADS_COLOR][MAX_DISABLED_JETS];
-} SDisabledJets;
-
-typedef struct SPoint
-{
-	INT32	x;
-	INT32	y;
-} SPoint;
-
 //--- print system -------------------------------
 
 typedef struct SRxConfig
 {
 	UINT8			simulation;
 	UINT8			inkSupplyCnt;
-	UINT8			printBarCnt;
+	UINT8			inkCylindersPerColor;
+	UINT8			colorCnt;
 	UINT8			headsPerColor;
 	INT32			headDist[MAX_HEAD_DIST];
 	INT32			headDistBack[MAX_HEAD_DIST];
@@ -1559,7 +1580,7 @@ typedef struct SRxConfig
 		INT32			tara[MAX_SCALES];
 		INT32			calib[MAX_SCALES];			
 	} scales;
-	INT32			headDisabledJets[MAX_HEAD_DIST][MAX_DISABLED_JETS];
+//	INT16			headDisabledJets[MAX_HEAD_DIST][MAX_DISABLED_JETS];
 } SRxConfig;
 
 /*
@@ -1598,7 +1619,7 @@ typedef struct
 	INT32 bitsPerPixel;
 	INT32 lineLen;		// in bytes
 	INT32 aligment;	// 8, 16, 32 ,....
-	INT32 dataSize;
+	UINT64 dataSize;
 	INT32 inverseColor;	// value 1=white
 	INT32 topFirst;		// first line is top line
 	SPoint resol;
@@ -1619,6 +1640,7 @@ typedef struct
 	UINT64 DropCount[MAX_COLORS][3]; //Drop count for drop size 1, 2, and 3 per plane
 	INT8 multiCopy;
 	INT8 colorCnt;
+	char file_ext[4];
 } SBmpInfo;
 
 //--- global variables -----------------------------
@@ -1628,13 +1650,12 @@ extern SRxNetwork		RX_Network;
 extern int				RX_SpoolerNo;
 extern SSpoolerCfg		RX_Spooler;
 extern SColorSplitCfg	RX_Color[MAX_COLORS];
-extern SDisabledJets	RX_DisabledJets[MAX_COLORS];
 extern SHeadBoardCfg	RX_HBConfig;
 extern SHeadBoardStat	RX_HBStatus[];
 extern SPrinterStatus	RX_PrinterStatus;
 extern SEncoderStat		RX_EncoderStatus;
 extern SEncoderCfg		RX_EncoderCfg;
-
+extern SFluidBoardStat	RX_FluidBoardStatus;
 extern SStepperStat	RX_StepperStatus;
 extern SStepperStat	RX_ClnStatus;
 extern SPrintQueueItem  RX_TestImage;

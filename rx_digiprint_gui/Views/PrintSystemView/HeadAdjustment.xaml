@@ -4,6 +4,7 @@
         xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
         xmlns:rx   ="clr-namespace:RX_DigiPrint.Helpers"
         xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
+        xmlns:local="clr-namespace:RX_DigiPrint.Views.PrintSystemView"
         ShowInTaskbar="False"
         ResizeMode="NoResize"
         WindowStyle="None"
@@ -14,13 +15,23 @@
     <Grid>
         <Border x:Name="Back" BorderBrush="#66808080" BorderThickness="10"/>
         <Canvas>
-            <Grid x:Name="Dialog" Background="White" SizeChanged="Dialog_SizeChanged">
+            <Grid x:Name="Dialog" Background="White" SizeChanged="Dialog_SizeChanged" PreviewMouseLeftButtonDown="Dialog_PreviewMouseLeftButtonDown">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" x:Name="RobotRow"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="200"/>
+                </Grid.ColumnDefinitions>
                 <GroupBox  
                   Header="^ Head Adjustment" 
                   Style="{StaticResource RxGroupBox}" 
                   HorizontalAlignment="Left" 
                   VerticalAlignment="Top"
-                  Margin="10">
+                  Margin="10"
+                  Visibility="{Binding RobotVisible}">
                     <Grid Margin="2,10,2,0" >
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="100"/>
@@ -55,11 +66,37 @@
                         <Grid Grid.Row="4" Grid.ColumnSpan="4">
                             <Button Margin="10,2" Content="Adjust" HorizontalAlignment="Left"  Click="Adjust_Clicked" Visibility="{Binding Done, Converter={StaticResource BoolToInVisible_Converter}}"/>
                             <Button Margin="10,2" Content="Done"   HorizontalAlignment="Left"  Click="Done_Clicked"   Visibility="{Binding Done, Converter={StaticResource BoolToVisible_Converter}}"/>
-                            <Button Margin="10,2" Content="Cancel" HorizontalAlignment="Right" Click="Cancel_Clicked"/>
                         </Grid>
                     </Grid>
                 </GroupBox>
-                <common:RxButton Content="?" HorizontalAlignment="Right" VerticalAlignment="Top" Height="30" Margin="0,-2,0,0" Click="Help_Clicked" Background="#CCFFFFFF"/>
+
+                <GroupBox Grid.Row="1" Header="Density" Style="{StaticResource RxGroupBox}">
+                    <local:DensityView x:Name="Density"/>
+                </GroupBox>
+                <common:RxButton Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Top" Height="32" Click="LoadDensity_Clicked">
+                    <TextBlock Text="1" FontFamily="Wingdings" />
+                </common:RxButton>
+
+                <GroupBox Grid.Row="1" Grid.Column="1" Header="Disabled Jets" Style="{StaticResource RxGroupBox}">
+                    <local:DisabledJetsView x:Name="DisabledJets" Loaded="DisabledJets_Loaded" MaxHeight="400"/>
+                </GroupBox>
+                <common:RxButton Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top" Height="32" Click="LoadDisabledJets_Clicked">
+                    <TextBlock Text="1" FontFamily="Wingdings" />
+                </common:RxButton>
+
+                <Grid Grid.Row="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <common:RxButton  Grid.Column="0" Click="Save_Clicked">
+                        <Image Source="{StaticResource Yes_ico}"/>
+                    </common:RxButton>
+                    <common:RxButton Grid.Column="1" Click="Cancel_Clicked" x:Name="Button_Cancel">
+                        <Image Source="{StaticResource No_ico}"/>
+                    </common:RxButton>
+                </Grid>
+                <common:RxButton Content="?" HorizontalAlignment="Right" VerticalAlignment="Top" Height="30" Margin="0,-2,0,0" Click="Help_Clicked" Background="#CCFFFFFF" Visibility="{Binding RobotVisible}"/>
             </Grid>
         </Canvas>
     </Grid>

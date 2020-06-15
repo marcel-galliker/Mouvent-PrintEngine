@@ -150,7 +150,7 @@ static int _prepare_config()
 
 	memset(&RX_Spooler, 0, sizeof(RX_Spooler));
 	RX_Spooler.printerType = RX_Config.printer.type;
-	RX_Spooler.overlap	   = RX_Config.printer.overlap;
+	RX_Spooler.overlap	   = rx_def_is_scanning(RX_Config.printer.type) && RX_Config.printer.overlap;
 	
 	//--- ethernet ports on additional interface board -------------------
 #ifdef linux
@@ -158,6 +158,9 @@ static int _prepare_config()
 	if (RX_Config.printer.type==printer_cleaf)		ethPortCnt=4;
 	if (RX_Config.printer.type==printer_test_table) ethPortCnt=0;	// historic
 	if (arg_hamster)								ethPortCnt=0;
+
+	if (ethPortCnt==0) Error(WARN, 0, "No PxPx Ports"); 
+
 #else
 	ethPortCnt=0;
 #endif
@@ -177,7 +180,7 @@ static int _prepare_config()
 	RX_Spooler.barStartPx		= HEAD_OVERLAP_SAMBA;
 	RX_Spooler.headsPerBoard	= MAX_HEADS_BOARD;
 	RX_Spooler.barEndPx			= RX_Config.headsPerColor*RX_Spooler.headWidthPx;
-	RX_Spooler.colorCnt			= RX_Config.inkSupplyCnt;
+	RX_Spooler.colorCnt			= RX_Config.colorCnt;
 	RX_Spooler.headsPerColor	= RX_Config.headsPerColor;
 	RX_Spooler.barWidthPx		= RX_Spooler.headWidthPx*RX_Spooler.headsPerColor - RX_Spooler.headOverlapPx;
 
@@ -193,13 +196,13 @@ static int _prepare_config()
 	}
 	
 	//--- alignment printheads and boards to colors --------------
-	_headboard_config(RX_Config.inkSupplyCnt, RX_Config.headsPerColor, ethPortCnt);
+	_headboard_config(RX_Config.colorCnt, RX_Config.headsPerColor, ethPortCnt);
 
 	memset(RX_Color, 0, sizeof(RX_Color));
 	maxTemp		= 0;
 	chillerTemp = 1000;
 	for (n=0; n<SIZEOF(RX_Config.headBoard); n++) RX_Config.headBoard[n].present=dev__undef;
-	for (color=0, head=0; color<RX_Config.inkSupplyCnt; color++)
+	for (color=0, head=0; color<RX_Config.colorCnt; color++)
 	{
 		if(RX_Config.inkSupply[color].ink.fileName[0] == 0)
 		{
@@ -252,7 +255,7 @@ static int _prepare_config()
 					pBoard->printerType									= RX_Config.printer.type;
 					pBoard->reverseHeadOrder							= (RX_Config.printer.type==printer_TX801 || RX_Config.printer.type==printer_TX802);
 					pBoard->head[head % MAX_HEADS_BOARD].enabled   		= dev_on;
-					pBoard->head[head % MAX_HEADS_BOARD].inkSupply 		= isNo = color;
+					pBoard->head[head % MAX_HEADS_BOARD].inkSupply 		= isNo = (color*RX_Config.inkCylindersPerColor)+(n*RX_Config.inkCylindersPerColor)/RX_Config.headsPerColor;
 					pBoard->head[head % MAX_HEADS_BOARD].encoderNo 		= 0;
 					pBoard->spoolerNo									= RX_Color[color].spoolerNo;		
 					if(rx_def_is_scanning(RX_Config.printer.type))
@@ -312,8 +315,6 @@ static int _prepare_config()
 //					RX_Color[color].split[n].blockCnt = RX_Spooler.dataBlkCnt;
 					if (n > 0)									RX_Color[color].split[n].firstPx -= overlap;
 					if (n > 0 && n < RX_Config.headsPerColor)	RX_Color[color].split[n].widthPx += overlap;
-
-					memcpy(RX_DisabledJets[color].disabledJets[n], RX_Config.headDisabledJets[head], sizeof(RX_DisabledJets[color].disabledJets[n]));
 				} 
 			}
 		}
@@ -325,7 +326,7 @@ static int _prepare_config()
 	{
 		if(rx_def_is_tx(RX_Config.printer.type) && RX_Config.headsPerColor)
 		{
-			for (head=0; head<RX_Config.inkSupplyCnt * RX_Config.headsPerColor; head++)
+			for (head=0; head<RX_Config.colorCnt * RX_Config.headsPerColor; head++)
 			{
 				RX_Config.headBoard[head/MAX_HEADS_BOARD].head[head%MAX_HEADS_BOARD].encoderNo = 7-(head/RX_Config.headsPerColor);
 			}
@@ -369,9 +370,9 @@ void ctrl_set_max_speed(void)
 	int maxSpeed[4];
 
 	for (n=0; n<MAX_DROP_SIZES; n++) inkSpeed[n] = 1000;
-	for (color=0; color<RX_Config.inkSupplyCnt; color++)
+	for (color=0; color<RX_Config.colorCnt; color++)
 	{
-		if (*RX_Config.inkSupply[color].ink.name)
+		if (*RX_Config.inkSupply[color*RX_Config.inkCylindersPerColor].ink.name)
 		{
 			char str[MAX_PATH];
 			int len=0;
@@ -460,7 +461,7 @@ static void _headboard_config(int colorCnt, int headsPerColor, int ethPortCnt)
 		pBoard->ctrlAddr	 = sok_addr_32(ipAddr);
 		pBoard->ctrlPort     = PORT_CTRL_HEAD;			
 		if (head%headsPerColor==0) port=200;
-		if (rx_def_is_tx(RX_Config.printer.type))udpPortCnt=1;
+		if (rx_def_is_tx(RX_Config.printer.type) || ethPortCnt<2)udpPortCnt=1;
 		else                                     udpPortCnt=2;
 		for (i=0; i<SIZEOF(pBoard->dataAddr); i++)
 		{
@@ -531,13 +532,20 @@ static void _headboard_config(int colorCnt, int headsPerColor, int ethPortCnt)
 				//	if (RX_TestImage.testImage==PQ_TEST_JET_NUMBERS)		offset = 150000*inkSupply;
 					if (RX_TestImage.testImage==PQ_TEST_ENCODER)			offset = 265000*inkSupply;
 					if (RX_TestImage.testImage==PQ_TEST_ANGLE_SEPARATED)	offset =  50000*inkSupply;
+					if (RX_TestImage.testImage==PQ_TEST_DENSITY && rx_def_is_tx(RX_Config.printer.type)) 
+						offset = 150000*inkSupply;
 					pBoard->head[i].dist	 += offset;	// recto
 					pBoard->head[i].distBack += offset;	// verso				
+				}
+				else if (rx_def_is_tx(RX_Config.printer.type) && RX_TestImage.testImage==PQ_TEST_DENSITY && RX_TestImage.copies>1)
+				{
+					pBoard->head[i].dist	 += 150000*(inkSupply%2);	
+					pBoard->head[i].distBack += 150000*(inkSupply%2);				
 				}
 				else if (RX_TestImage.testImage==PQ_TEST_ANGLE_SEPARATED)
 				{
 					pBoard->head[i].dist	 += 50000*inkSupply;
-					pBoard->head[i].distBack =  25000*inkSupply;
+					pBoard->head[i].distBack -= 50000*inkSupply;
 				}
 			}
 			if (pBoard->head[i].dist>RX_Config.headDistMax)			RX_Config.headDistMax = pBoard->head[i].dist;
@@ -609,8 +617,20 @@ static void _send_ink_def(int headNo, char *dots)
 				memcpy(msg.dots, dots, sizeof(msg.dots));
 				
 				no = headNo*HEAD_CNT+n;
+				if (RX_Config.headFpVoltage[no]) 
+				{
 				msg.fpVoltage = RX_Config.headFpVoltage[no];
-				if(_HeadCtrl[headNo].cfg->reverseHeadOrder) no = RX_Config.inkSupplyCnt*RX_Config.headsPerColor-1-no;
+					Error(LOG, 0, "Using User Firepulse Voltage=%d%%", msg.fpVoltage);
+				}
+				else if (RX_HBStatus[headNo].head[n].eeprom_mvt.voltage)
+					msg.fpVoltage = RX_HBStatus[headNo].head[n].eeprom_mvt.voltage;
+				else
+				{
+					msg.fpVoltage = RX_HBStatus[headNo].head[n].eeprom.voltage;
+					Error(LOG, 0, "Using Fuji Firepulse Voltage=%d%%", msg.fpVoltage);
+				}
+
+				if(_HeadCtrl[headNo].cfg->reverseHeadOrder) no = RX_Config.colorCnt*RX_Config.headsPerColor-1-no;
 				memcpy(&msg.ink, &RX_Config.inkSupply[inksupply].ink, sizeof(msg.ink));
 				TrPrintfL(TRUE, "Board[%d].head[%d].ink = >>%s<<", headNo, n, RX_Config.inkSupply[inksupply].ink.description);
 				sok_check_addr_32(&_HeadCtrl[headNo].socket, _HeadCtrl[headNo].cfg->ctrlAddr, __FILE__, __LINE__);
@@ -823,6 +843,20 @@ void ctrl_send_head_cfg(void)
     ctr_reset_jobLen();
 //	Error(LOG, 0, "ctrl_send_head_cfg(%d)", _HeadResetCnt);
 	for (i=0; i<SIZEOF(_HeadCtrl); i++) _send_head_cfg(i);
+}
+
+//--- ctrl_set_density_values ------------------------------------------
+void ctrl_set_density_values(SDensityValuesMsg *pmsg)
+{
+	Error(LOG, 0, "ctrl_set_density_values head=%d", pmsg->head);
+	sok_send(&_HeadCtrl[pmsg->head/MAX_HEADS_BOARD].socket, pmsg);
+}
+
+//--- ctrl_set_disalbled_jets ------------------------------------------
+void ctrl_set_disalbled_jets(SDisabledJetsMsg *pmsg)
+{
+	Error(LOG, 0, "SDisabledJetsMsg head=%d", pmsg->head);
+	sok_send(&_HeadCtrl[pmsg->head/MAX_HEADS_BOARD].socket, pmsg);
 }
 
 //--- ctrl_abort_printing ------------------------------------------------------

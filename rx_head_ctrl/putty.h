@@ -19,5 +19,5 @@ void putty_handle_menu(char *str);
 
 void putty_display_fpga_status(void);
 void putty_display_fpga_error(void);
-void putty_display_nios_status(int nios, int status, int eeprom);
-void putty_display_cond_status(int show, int status);
+void putty_display_nios_status(int nios, int status);
+void putty_display_cond_status(int status);

@@ -1,0 +1,26 @@
+﻿<Window x:Class="RX_DigiPrint.Views.UserControls.RxTaskSwitch"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
+        Title="Task Switch"
+        ResizeMode="NoResize"
+        Top="0"
+        SizeToContent="WidthAndHeight"
+        VerticalAlignment="Top"
+        IsVisibleChanged="Window_IsVisibleChanged"
+        Loaded="Window_Loaded"
+        Height="auto" 
+        Width="auto"
+        >
+
+    <StackPanel x:Name="TaskList" Orientation="Horizontal" VerticalAlignment="Top">
+
+        <!--
+        <rx_uc:RxTaskButton Image="..\..\Mouvent.ico" Text="GUI"/>
+
+        <rx_uc:RxTaskButton Image="WinSCP.ico" Text="WinSCP"/>
+
+        <rx_uc:RxTaskButton Image="putty.png" Text="Putty"/>
+        -->
+    </StackPanel>
+</Window>

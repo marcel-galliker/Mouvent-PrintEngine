@@ -1,0 +1,122 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="rx_luts.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rx_screen_fmb_4x3.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rx_screen_fme_4x3.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rx_tas.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rx_screen_fms_1.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rx_screen.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rx_oversampling.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rx_antibleeding.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rx_screen_fms_1x2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rx_screen_fms_1x3.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="rx_screen.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="gcc_Debug-lx.h">
+      <Filter>Make Files</Filter>
+    </ClInclude>
+    <ClInclude Include="gcc_Release-soc.h">
+      <Filter>Make Files</Filter>
+    </ClInclude>
+    <ClInclude Include="gcc_Release-lx.h">
+      <Filter>Make Files</Filter>
+    </ClInclude>
+    <ClInclude Include="gcc_Debug-soc.h">
+      <Filter>Make Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rx_luts.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rx_screen_fmb_4x3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rx_screen_fme_4x3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rx_tas.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rx_screen_fms_1.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rx_oversampling.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rx_antibleeding.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rx_screen_fms_1x2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rx_screen_fms_1x3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="debug-lx.mak">
+      <Filter>Make Files</Filter>
+    </None>
+    <None Include="debug-soc.mak">
+      <Filter>Make Files</Filter>
+    </None>
+    <None Include="Makefile">
+      <Filter>Make Files</Filter>
+    </None>
+    <None Include="release-lx.mak">
+      <Filter>Make Files</Filter>
+    </None>
+    <None Include="release-soc.mak">
+      <Filter>Make Files</Filter>
+    </None>
+    <None Include="rx_screen_lib-Debug-lx.vgdbsettings">
+      <Filter>vgdbsettings</Filter>
+    </None>
+    <None Include="rx_screen_lib-Debug-soc.vgdbsettings">
+      <Filter>vgdbsettings</Filter>
+    </None>
+    <None Include="rx_screen_lib-Release-lx.vgdbsettings">
+      <Filter>vgdbsettings</Filter>
+    </None>
+    <None Include="rx_screen_lib-Release-soc.vgdbsettings">
+      <Filter>vgdbsettings</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{53f0a407-130e-4454-a87a-4deb83680f54}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{a2aec1d2-d533-479b-b0c5-e485fd07a1fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Make Files">
+      <UniqueIdentifier>{30717bce-dd2c-43e2-8b5e-286fdfbbef1d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vgdbsettings">
+      <UniqueIdentifier>{d124d154-9196-4f19-b6d6-243fd12a46bf}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

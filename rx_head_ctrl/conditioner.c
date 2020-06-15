@@ -281,7 +281,7 @@ void cond_error_check(void)
         	if (_NiosStat->cond[head].error&COND_ERR_temp_tank_too_low)		    ErrorFlag(level=ERR(cont),	perr, COND_ERR_temp_tank_too_low,		0, "Conditioner %s: temp_tank_too_low", headName);
         	if (_NiosStat->cond[head].error&COND_ERR_p_in_too_high)				ErrorFlag(level=WARN,		pwrn, COND_ERR_p_in_too_high,			0, "Conditioner %s: input pressure too high", headName);
         	if (_NiosStat->cond[head].error&COND_ERR_p_out_too_high)			ErrorFlag(level=ERR(abort),	perr, COND_ERR_p_out_too_high,			0, "Conditioner %s: output pressure too high", headName);
-        	if (_NiosStat->cond[head].error&COND_ERR_pump_no_ink)				ErrorFlag(level=WARN,       perr, COND_ERR_pump_no_ink,				0, "Conditioner %s: no ink: actVal=%d, sum=%d", headName, pstat->pressure_out, pstat->pid_sum);
+        	if (_NiosStat->cond[head].error&COND_ERR_pump_no_ink)				ErrorFlag(level = ERR(cont),  perr, COND_ERR_pump_no_ink,				0, "Conditioner %s: no ink: actVal=%d, sum=%d", headName, pstat->pressure_out, pstat->pid_sum);
 			if (_NiosStat->cond[head].error&COND_ERR_valve)						ErrorFlag(level = ERR(abort), perr, COND_ERR_valve, 0, "Conditioner %s: valve not switching to INK", headName);
 	    	if (_NiosStat->cond[head].error&COND_ERR_return_pipe)				ErrorFlag(level = ERR(abort), perr, COND_ERR_return_pipe, 0, "Conditioner %s: Return pipe clogged or disconnected", headName);
 	    	
@@ -350,18 +350,37 @@ static void _update_clusterNo(void)
 	int clusterNo;
 	SHeadEEpromMvt mem;
 
+	if (sizeof(SHeadEEpromMvt)!=EEPROM_DATA_SIZE) Error(ERR_CONT, 0, "Head User EEPROM size mismatch (size=0x%x, expected=0x%x)", sizeof(SHeadEEpromMvt), EEPROM_DATA_SIZE);
+
 	memset(_cntr, 0, sizeof(_cntr));
 	for (condNo=0; condNo<MAX_HEADS_BOARD;  condNo++)
 	{
 		memcpy(&mem, _NiosStat->user_eeprom[condNo], sizeof(mem));
+		memcpy(&RX_HBStatus[0].head[condNo].eeprom_mvt, _NiosStat->user_eeprom[condNo], sizeof(mem));
+
 		_count(mem.clusterNo);
-	//	_count(_NiosStat->cond[condNo].clusterNo);
 				
-		if(mem.dropletsPrintedCRC==rx_crc8(&mem.dropletsPrinted, sizeof(mem.dropletsPrinted)))
+		if(mem.dropletsPrintedCRC!=rx_crc8(&mem.dropletsPrinted, sizeof(mem.dropletsPrinted)))
+		{
+			mem.dropletsPrinted = 0;
+			mem.dropletsPrintedCRC = rx_crc8(&mem.dropletsPrinted, sizeof(mem.dropletsPrinted));
+			nios_set_user_eeprom(condNo, &mem);	
+		}
 			RX_HBStatus->head[condNo].printedDroplets = mem.dropletsPrinted; 
-		else
-			RX_HBStatus->head[condNo].printedDroplets = 0; 
 		RX_HBStatus[0].head[condNo].dropVolume = 0.0000000000024;
+		
+		if (RX_HBStatus[0].head[condNo].eeprom_mvt.densityValueCRC!=rx_crc8(RX_HBStatus[0].head[condNo].eeprom_mvt.densityValue, sizeof(RX_HBStatus[0].head[condNo].eeprom_mvt.densityValue)))
+		{
+			cond_set_densityValues(condNo, NULL);	
+		}
+		if (RX_HBStatus[0].head[condNo].eeprom_mvt.voltageCRC!=rx_crc8(&RX_HBStatus[0].head[condNo].eeprom_mvt.voltage, sizeof(RX_HBStatus[0].head[condNo].eeprom_mvt.voltage)))
+		{
+			cond_set_voltage(condNo, 0);	
+		}
+		if (RX_HBStatus[0].head[condNo].eeprom_mvt.disabledJetsCRC!=rx_crc8(RX_HBStatus[0].head[condNo].eeprom_mvt.disabledJets, sizeof(RX_HBStatus[0].head[condNo].eeprom_mvt.disabledJets)))
+		{
+			cond_set_disabledJets(condNo, NULL);		
+		}
 	}
 
 	int cnt=0, idx=0;
@@ -618,6 +637,65 @@ void cond_set_flowResistance(int headNo, int value)
 	nios_set_user_eeprom(headNo, &mem);
 
 	_NiosMem->cfg.cond[headNo].flowResistance = value;
+}
+
+//--- cond_set_disabledJets --------------------------------------------
+void cond_set_disabledJets(int headNo, INT16 *jets)
+{
+	headNo = headNo % MAX_HEADS_BOARD;
+
+	SHeadEEpromMvt mem;
+	memcpy(&mem, _NiosStat->user_eeprom[headNo], sizeof(mem));
+	if (jets==NULL || memcmp(jets, mem.disabledJets, sizeof(mem.disabledJets)))
+	{
+		if (jets) memcpy(mem.disabledJets, jets, sizeof(mem.disabledJets));
+		else	  memset(mem.disabledJets, -1,   sizeof(mem.disabledJets));
+		mem.disabledJetsCRC = rx_crc8(mem.disabledJets, sizeof(mem.disabledJets));
+		nios_set_user_eeprom(headNo, &mem);
+	}
+}
+
+//--- cond_set_densityValues ---------------------------------------------
+void cond_set_densityValues(int headNo, INT16 *values)
+{
+	headNo = headNo % MAX_HEADS_BOARD;
+
+	SHeadEEpromMvt mem;
+	memcpy(&mem, _NiosStat->user_eeprom[headNo], sizeof(mem));
+	if (values==NULL || memcmp(values, mem.densityValue, sizeof(mem.densityValue)))
+	{
+		if (values) memcpy(mem.densityValue, values, sizeof(mem.densityValue));
+		else		memset(mem.densityValue, 0,      sizeof(mem.densityValue));
+		mem.densityValueCRC = rx_crc8(mem.densityValue, sizeof(mem.densityValue));
+		nios_set_user_eeprom(headNo, &mem);
+		/*
+		{
+			char str[100];
+			int i;
+			int len=sprintf(str, "cond_set_densityValues[%d]: ", headNo);
+			for(i=0; i<SIZEOF(mem.densityValue); i++)
+			{
+				len += sprintf(&str[len], "%d ", mem.densityValue[i]);
+			}
+			Error(LOG, 0, str);
+		}
+		*/
+	}
+}
+
+//--- cond_set_voltage -----------------------------------------------
+void cond_set_voltage(int headNo, UINT8 voltage)
+{
+	headNo = headNo % MAX_HEADS_BOARD;
+
+	SHeadEEpromMvt mem;
+	memcpy(&mem, _NiosStat->user_eeprom[headNo], sizeof(mem));
+	if (voltage!=mem.voltage)
+	{
+		mem.voltage		= voltage;
+		mem.voltageCRC	= rx_crc8(&mem.voltage, sizeof(mem.voltage));
+		nios_set_user_eeprom(headNo, &mem);
+	}
 }
 
 //--- cond_set_purge_par -----------------------------------------

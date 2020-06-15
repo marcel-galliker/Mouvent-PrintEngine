@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Security.Permissions;
 
 namespace RX_DigiPrint.Services
 {
@@ -110,6 +111,8 @@ namespace RX_DigiPrint.Services
 	    printer_TX801     = 2000,		// 2000: Fashionn stanrard output
 	    printer_TX802,				// 2001: Fashion high outpput
 
+        printer_CB612 = 3001,
+
 	    //--- special projects ----------------
 	    printer_cleaf = 10000,		// 10000: Cleaf machine	
     };
@@ -125,6 +128,7 @@ namespace RX_DigiPrint.Services
         encoder,                // 06
         scanning,               // 07
         fullAlignment,          // 08
+        density,                // 09
     };
 
     public enum EFluidCtrlMode : int
@@ -259,7 +263,7 @@ namespace RX_DigiPrint.Services
         public static string RX_SOURCE_DATA_ROOT = "\\source-data";    
         public static string RX_RIPPED_DATA_ROOT = "\\ripped-data";    
 
-        public const Int32  InkSupplyCnt = 16;
+        public const Int32 InkSupplyCnt = 24;
         public const Int32  HEAD_CNT	 = 4;
 
         public const Int32 PORT_GUI = 7000;
@@ -334,7 +338,6 @@ namespace RX_DigiPrint.Services
         public const UInt32 REP_DN_PRINT_QUEUE  = 0x02000046;
         public const UInt32 EVT_DN_PRINT_QUEUE  = 0x03000046;
 
-
         public const UInt32 CMD_GET_PRINT_ENV   = 0x01000047;
         public const UInt32 REP_GET_PRINT_ENV   = 0x02000047;
         public const UInt32 BEG_GET_PRINT_ENV   = 0x04000047;
@@ -359,7 +362,15 @@ namespace RX_DigiPrint.Services
         
         public const UInt32  CMD_HEAD_FLUID_CTRL_MODE = 0x01000104;
         public const UInt32  REP_HEAD_FLUID_CTRL_MODE = 0x02000104;
+        
+        public const UInt32  CMD_GET_DISABLED_JETS=	0x01000105;
+        public const UInt32  REP_GET_DISABLED_JETS=	0x02000105;
+        public const UInt32  CMD_SET_DISABLED_JETS=	0x01000106;
 
+        public const UInt32 CMD_GET_DENSITY_VAL	  = 0x01000107;
+        public const UInt32 REP_GET_DENSITY_VAL	  = 0x02000107;
+        public const UInt32 CMD_SET_DENSITY_VAL	  = 0x01000108;
+        
         public const UInt32 CMD_ENCODER_CFG			= 0x01000111;
         public const UInt32 REP_ENCODER_CFG			= 0x02000111;
 
@@ -679,7 +690,6 @@ namespace RX_DigiPrint.Services
 	        public Int32    copies;
 	        public byte	    collate;
 	        public byte	    variable;
-	        public byte	    dropSizes;
 
 	        public EPQState	     state;
             public EPQLengthUnit lengthUnit;
@@ -809,16 +819,21 @@ namespace RX_DigiPrint.Services
             public Int32        externalData;		
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst =16*64)]
 	        public string       inkFileNames;     // comma separated list
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst =16)]	
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst =6*4)]	// color*cylinders
             public ERectoVerso[]    rectoVerso;
+
+            public Int32 colorCnt;
             public Int32		headsPerColor;
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst =128)]	
-            public Int32[]		headFpVoltage;	
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst =128)]	
-            public Int32[]		headDist;	
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst =128)]	
-            public Int32[]		headDistBack;	
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst =16)]	
+            public Int32 inkSupplyCnt;
+            public Int32 InkCylindersPerColor;
+
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst =(6*48))] // color*heads
+            public Int32[]		headFpVoltage;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst =(6*48))] // color*heads
+            public Int32[]		headDist;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst =(6*48))] // color*heads
+            public Int32[]		headDistBack;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst =16)]
             public Int32[]		colorOffset;
         }
 
@@ -1021,15 +1036,29 @@ namespace RX_DigiPrint.Services
             public UInt16[] badJets;
         };
 
+        public const UInt32 MAX_DENSITY_VALUES  = 12;
+        public const UInt32 MAX_DISABLED_JETS   = 32;
+        
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct SHeadEEpromMvt
         {
+            public UInt16	        clusterNo;
             public UInt16	        flowResistance;
-            public UInt16	        flowResistanceCheck;
-	        public Int16	        clusterNo;
-	        public UInt32	        dropletsPrinted;
+            public Byte             flowResistanceCRC;
+	        private UInt32	        dropletsPrinted_old;
+            private Byte             dropletsPrintedCRC_old;
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
-	        public Int16[]			disabledJets;	
+	        public UInt16[]			disabledJets;
+            public Byte             disabledJetsCRC;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 12)]
+            public Int16[]          densityValue;
+            public Byte             densityValueCRC;
+            public Byte             voltage;
+            public Byte             voltageCRC;
+	        public UInt64	        dropletsPrinted;
+            public Byte             dropletsPrintedCRC;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 17)]
+            public Byte[]           res_6f;
         };
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -1069,12 +1098,12 @@ namespace RX_DigiPrint.Services
 	        public UInt32			pumpSpeed;
 	        public UInt32			pumpFeedback;
 	        public UInt32			printingSeconds;
-	        public UInt32			printedDroplets;
+	        public UInt64			printedDroplets;
             public Int32			presIn_0out;
 	        public EFluidCtrlMode   ctrlMode;
 
             SHeadEEpromInfo         eeprom;
-        	SHeadEEpromMvt	        eeprom_mvt;
+        	public SHeadEEpromMvt	eeprom_mvt;
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -1116,6 +1145,31 @@ namespace RX_DigiPrint.Services
         {
             public SMsgHdr          hdr;
             public SHeadBoardStat   stat;
+        }
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct SDensityValues
+        {
+	        public Int32 head;
+            public byte voltage;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2+10)]
+	        public Int16[] value;
+        }
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct SDensityValuesMsg
+        {
+            public SMsgHdr          hdr;
+            public SDensityValues   values;
+        }
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct SDisabledJetsMsg
+        {
+	        public SMsgHdr	hdr;
+	        public int		head;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
+	        public UInt16[]	disabledJets;
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]

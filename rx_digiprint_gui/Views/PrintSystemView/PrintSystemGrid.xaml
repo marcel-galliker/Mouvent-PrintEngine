@@ -39,7 +39,7 @@
         <common:RxNumBox Grid.Row="1" Grid.Column="1" Text="{Binding ColorCnt}"/>
 
         <TextBlock   Grid.Row="2" Grid.Column="0" Text="Heads/Color"/>
-        <common:RxNumBox Grid.Row="2" Grid.Column="1" Text="{Binding HeadCnt}"/>
+        <common:RxNumBox Grid.Row="2" Grid.Column="1" Text="{Binding HeadsPerColor}"/>
 
         <!--        
         <TextBlock   Grid.Row="3" Grid.Column="0" Text="External Data"/>

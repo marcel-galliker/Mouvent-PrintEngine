@@ -17,6 +17,7 @@
     <converters:CtrlMode_Str                x:Key="CtrlMode_Str"/>
     <converters:DeviceType_Converter        x:Key="DeviceType_Converter"/>
     <converters:DeviceNoVisible_Converter   x:Key="DeviceNoVisible_Converter"/>
+    <converters:DisabledJet_Converter       x:Key="DisabledJet_Converter"/>
     <converters:DirItemVisible_Converter    x:Key="DirItemVisible_Converter"/>
     <converters:EnumToInt_Converter         x:Key="EnumToInt_Converter"/>
     <converters:Error_Converter             x:Key="Error_Converter"/>

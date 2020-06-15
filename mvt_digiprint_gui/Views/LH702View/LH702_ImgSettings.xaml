@@ -1,0 +1,121 @@
+﻿<UserControl x:Class="RX_DigiPrint.Views.LH702View.LH702_ImgSettings"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:igWPF="http://schemas.infragistics.com/xaml/wpf"
+             xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
+             xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
+             xmlns:local="clr-namespace:RX_DigiPrint.Views.LH702View"
+             mc:Ignorable="d"
+             d:DesignHeight="700" 
+             d:DesignWidth="600"
+             DataContextChanged="_DataContextChanged"
+             >
+    <UserControl.Resources>
+        <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">32</sys:Double>
+    </UserControl.Resources>
+
+    <GroupBox Grid.Column="0" Header="Image Settings" Style="{StaticResource MvtGroupBox}">
+        <Grid x:Name="Grid">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
+
+            <Grid x:Name="ParamsGrid" Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="120"/>
+                    <ColumnDefinition Width="70"/>
+                    <ColumnDefinition Width="50"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="0"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto" x:Name="RowCopies"/>
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Image"/>
+                <TextBlock Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="10"
+			        Text="{Binding FilePath, Converter={StaticResource FileName_Converter}}"
+			        Background="Transparent"
+                    VerticalAlignment="Center"
+                    />
+
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="PrintGo"/>
+                <rx:RxComboBox x:Name="CB_PrintGoMode"
+                    Grid.Row="2" Grid.Column="1"
+                    SelectedValue="{Binding PrintGoMode}"
+                    ImageBox="true"
+                    SelectionChanged="CB_PrintGoMode_SelectionChanged"
+                    >
+                </rx:RxComboBox>
+
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="Distance"/>
+                <common:MvtNumBox Grid.Row="3" Grid.Column="1" 
+			        Text="{Binding PrintGoDist}"
+			        HorizontalContentAlignment="Right"
+			        Background="Transparent"
+                    VerticalAlignment="Center"
+                    />
+                <TextBlock Grid.Row="3" Grid.Column="2" Text="mm" FontSize="{StaticResource FontSizeStd}" Padding="3,0,0,0" VerticalAlignment="Center"/>
+
+                <TextBlock Grid.Row="4" Grid.Column="0" Text="Lateral"/>
+                <common:MvtNumBox Grid.Row="4" Grid.Column="1"
+			        Text="{Binding PageMargin}"
+			        HorizontalContentAlignment="Right"
+			        Background="Transparent"                    VerticalAlignment="Center"
+                    LostFocus="PageMargin_LostFocus"
+                    />
+                <TextBlock Grid.Row="4" Grid.Column="2" Text="mm" FontSize="{StaticResource FontSizeStd}" Padding="3,0,0,0" VerticalAlignment="Center"/>
+
+                <TextBlock Grid.Row="5" Grid.Column="0" Text="Copies"/>
+                <common:MvtNumBox Grid.Row="5" Grid.Column="1"
+			        Text="{Binding Copies}"
+			        HorizontalContentAlignment="Right"
+			        Background="Transparent"                    VerticalAlignment="Center"
+                     LostFocus="Copies_LostFocus" Margin="0,1"
+                    />
+
+            </Grid>
+
+            <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
+                <common:MvtButton Grid.Column="0" Margin="15, 5, 15, 5"
+                              Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}" 
+                              Click="Save_Clicked" IsChecked="{Binding Changed}">
+                    <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" 
+                                            HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="20" Height="20"
+                                                Kind="Check">
+                    </iconPacks:PackIconMaterial>
+                </common:MvtButton>
+
+                <common:MvtButton Grid.Column="0" Margin="15, 5, 15, 5"
+                              Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}" 
+                              Click="Reload_Clicked">
+                    <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" 
+                                            HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="20" Height="20"
+                                                Kind="Reload" Margin="3, 0,0,0"></iconPacks:PackIconMaterial>
+                </common:MvtButton>
+
+                <common:MvtButton Grid.Column="0" Margin="15, 5, 15, 5"
+                              Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}" 
+                              Click="Delete_Clicked"
+                                  x:Name="ButtonDelete">
+                    <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" 
+                                            HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="20" Height="20"
+                                                Kind="Delete"></iconPacks:PackIconMaterial>
+                </common:MvtButton>
+
+            </StackPanel>
+
+        </Grid>
+    </GroupBox>
+</UserControl>

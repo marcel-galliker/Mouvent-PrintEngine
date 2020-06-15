@@ -14,6 +14,7 @@
 //--- includes ----------------------------------------------------------------
 #include <stdio.h>
 #include "rx_common.h"
+#include "rx_trace.h"
 #include "mem_test.h"
 
 

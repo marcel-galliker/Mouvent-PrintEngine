@@ -1,0 +1,65 @@
+﻿<Window x:Class="RX_DigiPrint.Views.PrintSystemExtendedView.InkSupplyCommands"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                     xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+        xmlns:rx   ="clr-namespace:RX_DigiPrint.Helpers"
+        Title="Ink Supply Commands"  Width="300" Height="auto">
+    
+    <Window.Resources>
+       
+    </Window.Resources>
+
+    <Grid>
+
+        <StackPanel>
+            <Rectangle x:Name="Rectangle" Fill="{StaticResource Mouvent.MainColorBrush}" HorizontalAlignment="Stretch" Height="0"/>
+            <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40"  x:Name="Button_OnOff" Content="OFF" Margin="5" Click="OnOff_Clicked"/>
+            <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Print" Click="Print_Clicked" Margin="5" Visibility="{Binding Flushed, Converter={StaticResource BoolToInVisible_Converter}}"/>
+            <Rectangle Fill="{StaticResource Mouvent.MainColorBrush}" HorizontalAlignment="Stretch" Height="1"/>
+            <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" x:Name="FlushButton"  Content="Flush"  Margin="5" Click="Flush_Clicked" Visibility="{Binding CanFlush, Converter={StaticResource BoolToVisible_Converter}}"/>
+            <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40" Content="Purge" Margin="5" Click="Purge_Clicked"/>
+            <Button  Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40" Content="Purge + Wipe"  Margin="5" Click="PurgeWipe_Clicked" x:Name="Button_PurgeWipe"/>
+            <Rectangle Fill="{StaticResource Mouvent.MainColorBrush}" HorizontalAlignment="Stretch" Height="1"/>
+            <Button    Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40" Content="Fill" Margin="5" Click="Fill_Clicked"/>
+            <Button   Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40" Content="Empty" Margin="5" Click="Empty_Clicked" Visibility="{Binding Running, Converter={StaticResource BoolToInVisible_Converter}}"/>
+            <Rectangle x:Name="Line_Calibrate"  Fill="{StaticResource Mouvent.MainColorBrush}" HorizontalAlignment="Stretch" Height="1" Margin="-16, 8"/>
+            <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40" x:Name="Button_Calibrate" Content="Calibrate" Margin="5" Click="Calibrate_Clicked"/>
+            <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40"  Content="Check" Margin="5" Click="Check_Clicked"/>
+        </StackPanel>
+        
+        <rx:RxPopup x:Name="FlushPopup"
+                   PlacementTarget="{Binding ElementName=FlushButton}"
+                   Width="auto"
+                   MinWidth="100"
+                   IsHitTestVisible="False"
+                   OpacityMask="White"
+                   >
+            <Grid Background="White">
+                <GroupBox Width="150" Style="{StaticResource MvtGroupBox}" Header="^">
+                    <StackPanel Margin="10,2">
+                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Night" Click="Flush_Clicked_0" Margin="5"/>
+                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Weekend" Click="Flush_Clicked_1" Margin="5"/>
+                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Week" Click="Flush_Clicked_2" Margin="5"/>
+                    </StackPanel>
+                </GroupBox>
+            </Grid>
+        </rx:RxPopup>
+
+        <rx:RxPopup x:Name="MsgPopup"
+                   PlacementTarget="{Binding ElementName=Rectangle}"
+                   Width="auto"
+                   MinWidth="100" IsHitTestVisible="False"
+                   OpacityMask="White"
+                   >
+            <Grid Background="White">
+                <GroupBox Width="150" Style="{StaticResource MvtGroupBox}" Header="^">
+                    <StackPanel Margin="10,2">
+                        <TextBlock x:Name="MsgText" TextWrapping="Wrap"/>
+                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40" Content="Done" Click="Done_Clicked"/>
+                    </StackPanel>
+                </GroupBox>
+            </Grid>
+        </rx:RxPopup>
+    </Grid>
+</Window>

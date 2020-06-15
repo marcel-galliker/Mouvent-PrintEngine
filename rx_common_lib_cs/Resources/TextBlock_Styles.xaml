@@ -1,13 +1,6 @@
 ﻿<ResourceDictionary
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
-    xmlns:igGrids="http://infragistics.com/DataPresenter"
-    xmlns:igPrim="http://schemas.infragistics.com/xaml/primitives"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:AvalonLambdas="http://schemas.AvalonLambdas/AvalonLambdas"
-    xmlns:models="clr-namespace:RX_DigiPrint.Models"
-    xmlns:ig="http://schemas.infragistics.com/xaml"
-    xmlns:Helpers="clr-namespace:RX_DigiPrint.Helpers"
-    >
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="RxBasics.xaml" />

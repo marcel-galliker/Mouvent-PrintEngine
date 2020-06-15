@@ -29,6 +29,7 @@
         <string>*.cpp</string>
         <string>*.h</string>
         <string>*.c</string>
+        <string>*.cu</string>
         <string>*.mak</string>
         <string>Makefile</string>
       </FileMasks>
@@ -148,6 +149,17 @@
         </DestinationHost>
         <SourceFilePath>$(ProjectDir)\..\Externals\Tec-it\Linux\Tec-it-11\lib\libtbarcode11.so.0</SourceFilePath>
         <DestinationFilePath>$(DeployDir)/libtbarcode11.so.0</DestinationFilePath>
+        <OverwriteTrigger>Stat</OverwriteTrigger>
+      </CustomActionBase>
+      <CustomActionBase xsi:type="FileTransferAction">
+        <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
+        <DestinationHost>
+          <HostName>$(DeployHost)</HostName>
+          <Transport>SSH</Transport>
+          <UserName>root</UserName>
+        </DestinationHost>
+        <SourceFilePath>$(ProjectDir)\..\Externals\cuda\lib\ubuntu\libcudart.so.10.2</SourceFilePath>
+        <DestinationFilePath>$(DeployDir)/libcudart.so.10.2</DestinationFilePath>
         <OverwriteTrigger>Stat</OverwriteTrigger>
       </CustomActionBase>
     </PreBuildActions>

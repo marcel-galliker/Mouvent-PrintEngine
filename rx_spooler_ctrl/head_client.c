@@ -18,10 +18,12 @@
 #include "rx_mem.h"
 #include "rx_sok.h"
 #include "rx_threads.h"
+#include "rx_tif.h"
 #include "rx_trace.h"
 #include "spool_arp.h"
 #include "tcp_ip.h"
 #include "data.h"
+#include "screening.h"
 #include "bmp.h"
 #include "ctrl_client.h"
 
@@ -49,11 +51,7 @@ static int	_Simulation=SIMU_OFF;
 typedef struct
 {
 	SHeadBoardCfg	cfg;
-#ifdef RAW_SOCKET
-	RX_RAW_SOCKET	dataSocket[MAX_ETH_PORT];
-#else
 	RX_SOCKET		dataSocket[MAX_ETH_PORT];
-#endif
 	RX_SOCKET		ctrlSocket;
 	HANDLE			mutex;
 
@@ -86,7 +84,7 @@ static int				_TestImgNo[HEAD_BOARD_CNT][MAX_HEADS_BOARD];
 static UINT16			_TestBlockSent[MAX_HEADS_BOARD][140000];
 static int				_TestBlockUsedReqTime[MAX_HEADS_BOARD][MAX_USED_ID];
 static int				_TestLastBlock;
-
+static int				_ScreeningTime;
 static int				_StressTestRunning;
 
 static char				_send_image_cmd_flags[MAX_PATH];
@@ -137,13 +135,15 @@ int hc_head_board_cfg(RX_SOCKET socket, SHeadBoardCfg* cfg)
 {
 	int i;
 	UINT32 size;
-	char path[MAX_PATH];
 	TrPrintfL(TRUE, "hc_head_board_cfg[%d]", cfg->no);
 
 	_StressTestRunning = FALSE;
+	_ScreeningTime	   = 0;
 	
-	if (_Simulation || RX_Spooler.printerType==printer_LH702) 
+    #ifdef DEBUG
+//	if (_Simulation) 
 	{ //--- prepare simulation directory ------------------------------		
+		char path[MAX_PATH];
 		rx_mkdir(PATH_HOME PATH_RIPPED_DATA_DIR "trace/");
 		for (i=0; i<SIZEOF(RX_Color); i++)
 		{
@@ -151,20 +151,16 @@ int hc_head_board_cfg(RX_SOCKET socket, SHeadBoardCfg* cfg)
 			{
 				sprintf(path, PATH_RIPPED_DATA "trace/%s", RX_ColorNameShort(i));
 				rx_mkdir(path);
-				#ifdef linux
 				rx_remove_old_files(path, 0);
-				#endif
 			}
 		}
-		#ifndef linux
-		system("del "  PATH_RIPPED_DATA "trace\\*.* /S /Q");
-		#endif
 		memset(_SimuNo, 0, sizeof(_SimuNo));
 	}
+	#endif
 
 	if (_Simulation) 
 	{
-		Error(WARN, 0, "Head-Client in simulation");
+		Error(WARN, 0, "Head-Client in Simulation");
 		if (_Simulation) cfg->present=dev_simu;
 		if (_Simulation==SIMU_READ) rx_mem_clear_caches();
 	}
@@ -186,11 +182,7 @@ int hc_head_board_cfg(RX_SOCKET socket, SHeadBoardCfg* cfg)
 		_HBPar[cfg->no]=(SHBThreadPar*)malloc(sizeof(SHBThreadPar));
 		memset(_HBPar[cfg->no], 0, sizeof(SHBThreadPar));
 		_HBPar[cfg->no]->ctrlSocket = INVALID_SOCKET;
-		#ifdef RAW_SOCKET
-			for (i=0; i<MAX_ETH_PORT; i++) _HBPar[cfg->no]->dataSocket[i]=NULL;
-		#else
 			for (i=0; i<MAX_ETH_PORT; i++) _HBPar[cfg->no]->dataSocket[i]=INVALID_SOCKET;
-		#endif
 		_HBPar[cfg->no]->mutex = rx_mutex_create();
 	}
 	else
@@ -199,11 +191,7 @@ int hc_head_board_cfg(RX_SOCKET socket, SHeadBoardCfg* cfg)
 		if (_HBPar[cfg->no]->cfg.ctrlAddr!=cfg->ctrlAddr) sok_close(&_HBPar[cfg->no]->ctrlSocket);
 		for (i=0; i<UDP_PORT_CNT; i++)
 		{
-			#ifdef RAW_SOCKET
-				if (_HBPar[cfg->no]->cfg.dataAddr[i]!=cfg->dataAddr[i]) sok_close_raw(&_HBPar[cfg->no]->dataSocket[i]);
-			#else
 				if (_HBPar[cfg->no]->cfg.dataAddr[i]!=cfg->dataAddr[i]) sok_close(&_HBPar[cfg->no]->dataSocket[i]);
-			#endif
 		}
 	}
 	_HBPar[cfg->no]->boardNo     = cfg->no;
@@ -261,42 +249,26 @@ static int _open_data_channel(SHBThreadPar *par)
 	//--- open UDP data channel -----
 	for (i=0; i<SIZEOF(par->cfg.dataAddr); i++)
 	{
-	#ifdef RAW_SOCKET
-		if (par->dataSocket[i]==NULL && par->cfg.dataAddr[i])
-	#else
 		if (par->dataSocket[i]==INVALID_SOCKET && par->cfg.dataAddr[i])
-	#endif
 		{
 	//		TrPrintfL(TRUE, "Connect Data Channel[%d] to >>%s<<", i, sok_addr_str(par->cfg.dataAddr[i], str));
 
-			#ifdef RAW_SOCKET
-			{
-				UCHAR grp=(UCHAR)((par->cfg.dataAddr[i]&0x00ff0000)>>16);
-				char ifname[16];
-				sprintf(ifname, "p2p%d", grp-200);
-				printf("%s\n", ifname);
-				errno=sok_open_raw(&par->dataSocket[i], ifname, sok_addr_str(par->cfg.dataAddr[i], str), par->cfg.dataPort[i]);	
-			}
-			#else
 			{
 				errno=sok_open_client(&par->dataSocket[i], sok_addr_str(par->cfg.dataAddr[i], str), par->cfg.dataPort[i], SOCK_DGRAM);			
 			}
-			#endif
 			if (errno)
 			{
 				char err[256];
 				TrPrintfL(1, "Connecting >>%s:%d<<Socket Error >>%s<<", str, par->cfg.dataPort[i], err_system_error(errno, err, sizeof(err)));
 			}
-		#ifndef RAW_SOCKET
 			else TrPrintfL(TRUE, "%s connected to HeadData[%d]", sok_get_peer_name(par->dataSocket[i], str, NULL, NULL), i);
-		#endif
 		}
 	//	arp_request(par->dataSocket[0], par->cfg.dataAddr[0]);
 	}
 	return REPLY_OK;
 }
 
-//--- hc_atart_printing ----------------------------------------------
+//--- hc_start_printing ----------------------------------------------
 void hc_start_printing(void)
 {
 	_Abort = FALSE;
@@ -308,7 +280,6 @@ void hc_abort_printing(void)
 {
 	_Abort = TRUE;
 	_Checking = FALSE;
-	
 	if (_TestLastBlock)
 	{
 		int i;
@@ -329,11 +300,26 @@ void hc_send_next()
 {
 	int i, headCnt;
 	int blkNo=0;
+	int	time=rx_get_ticks();
+
 	SBmpSplitInfo *pSplitInfo, *pInfo;
 	if ((pSplitInfo=data_get_next(&headCnt)))
 	{
-		memset(_send_image_cmd_flags, ' ', sizeof(_send_image_cmd_flags));
-		_send_image_cmd_flags[headCnt+headCnt/4+5]=0;
+		//--- tracing --------------------------------------
+		memset(_send_image_cmd_flags, '_', sizeof(_send_image_cmd_flags));
+		_send_image_cmd_flags[((headCnt+3)/4)*5]=0;
+		for (i=4; _send_image_cmd_flags[i]; i+=5) _send_image_cmd_flags[i]=' ';
+
+		//--- ----------------------------------------------
+		if (pSplitInfo->bitsPerPixel==8)
+		{
+			if (scr_wait(5000)) 
+			{
+				Error(ERR_STOP, 0, "Screening Timeout");
+				return;
+			}
+		}
+
 		for (i=0, pInfo=pSplitInfo; i<headCnt; i++, pInfo++)
 		{
 			if (pInfo->used)
@@ -345,18 +331,18 @@ void hc_send_next()
 				{
 				case dev__undef:	break;
 				case dev_off:		break;
-				case dev_simu:		if(_Simulation==SIMU_WRITE) 
-									{
+				case dev_simu:		{
 										/*
 										{
 											SPageId *pid = &pInfo->pListItem->id;
 											Error(LOG, 0, "File (id=%d, page=%d, copy=%d, scan=%d) headsUsed=%d", pid->id, pid->page, pid->copy, pid->scan, pInfo->pListItem->headsUsed);	
 										}
 										*/
-										_save_to_file(pInfo, FALSE);
+										if(_Simulation==SIMU_WRITE) _save_to_file(pInfo, FALSE);
 										if(data_sent(pInfo,i)) 
 										{
 											SPrintDoneMsg evt;
+											SPageId *pid = &pInfo->pListItem->id;
 
 											evt.hdr.msgId   = EVT_PRINT_DONE;
 											evt.hdr.msgLen  = sizeof(evt);
@@ -367,58 +353,38 @@ void hc_send_next()
 										//	evt.spoolerNo   = RX_SpoolerNo;
 										//	evt.bufReady	= data_ready();
 											ctrl_send(&evt);
-			
+											if(_Simulation==SIMU_WRITE)	
 											{
-												SPageId *pid = &pInfo->pListItem->id;
 												if (rx_def_is_scanning(RX_Spooler.printerType))
 													Error(LOG, 0, "File (id=%d, page=%d, copy=%d, scan=%d) saved to File", pid->id, pid->page, pid->copy, pid->scan);												
 												else
 													Error(LOG, 0, "File (id=%d, page=%d, copy=%d) saved to File", pid->id, pid->page, pid->copy);												
 											}
-											
-											hc_send_next();												
-										}
-									}
-									else if (_Simulation==SIMU_READ)
-									{
-										if(data_sent(pInfo,i)) 
+											else
 										{
-											{
-												SPrintDoneMsg evt;
-
-												evt.hdr.msgId   = EVT_PRINT_DONE;
-												evt.hdr.msgLen  = sizeof(evt);
-												evt.boardNo		= pInfo->board;
-												evt.pd			= _HBPar[pInfo->board]->pdCnt++;
-												memcpy(&evt.id, &pInfo->pListItem->id, sizeof(evt.id));
-											//	evt.evt			= DATA_PRINT_DONE;
-											//	evt.spoolerNo   = RX_SpoolerNo;
-											//	evt.bufReady	= data_ready();
-												ctrl_send(&evt);												
-											}
-
 											static int _time=0;
 											int time = rx_get_ticks();
 											double lengthPx = pInfo->pListItem->lengthPx/(1200.0*40.0);
 											double speed=1000;
-											if (time!=_time)
-											{
-												speed= lengthPx * 60 * 1000 / (time-_time);
-											}
-											SPageId *pid = &pInfo->pListItem->id;
+												if (time!=_time) speed= lengthPx * 60 * 1000 / (time-_time);
 											Error(LOG, 0, "SIMU_READ FILE SENT: (id=%d, page=%d, copy=%d, scan=%d) cycletime=%d ms, speed=%d m/min", pid->id, pid->page, pid->copy, pid->scan, time-_time, (int)speed);
 											_time=time;
-											
+											}
 											hc_send_next();								
 										}
 									}
 									break;
 
-				case dev_on:		//if (pInfo->pListItem->id.scan<2 && pInfo->colorCode==0) 
-									if (RX_Spooler.printerType==printer_LH702)
-									{
-									//	_save_to_file(pInfo);
+				case dev_on:		if (FALSE && pInfo->colorCode==0)	// see rx_def.c: RX_ColorName
+									{						
+										_save_to_file(pInfo, FALSE);
+										Error(LOG, 0, "File (id=%d, page=%d, copy=%d, scan=%d) blk0=%d, blkCnt=%d saved to File", pInfo->pListItem->id.id, pInfo->pListItem->id.page, pInfo->pListItem->id.copy, pInfo->pListItem->id.scan, pInfo->blk0, pInfo->blkCnt);
 									}
+									
+								//	Error(LOG, 0, "Screening[%d,%d]: (id=%d, p=%d, c=%d, s=%d)", pInfo->board, pInfo->head, id.id, id.page, id.copy, id.scan);
+
+									TrPrintfL(TRUE, "_send_image_data copy=%d, head=%d, bitsPerPixel=%d, data=0x%08x, blk0=%d, blkCnt=%d", pInfo->pListItem->id.copy, i, pInfo->bitsPerPixel, pInfo->data, pInfo->blk0, pInfo->blkCnt);
+
 									_send_image_data(pInfo);
 									break;
 
@@ -450,10 +416,44 @@ static void _save_to_file(SBmpSplitInfo *pInfo, int log)
 	}
 	
 	if (rx_def_is_scanning(RX_Spooler.printerType))
-		sprintf(fname, "%strace/%s/Scan%02d-img%d-hd%d_%s.bmp", PATH_RIPPED_DATA, RX_ColorNameShort(pInfo->inkSupplyNo), ++_SimuNo[pInfo->colorCode], pInfo->pListItem->id.id, pInfo->head, RX_ColorNameShort(pInfo->inkSupplyNo));
+	{
+		#ifdef linux
+	//	sprintf(fname, "%strace/%s/Scan%02d-img%d-hd%d_%s.bmp", PATH_HOME PATH_RIPPED_DATA_DIR, RX_ColorNameShort(pInfo->inkSupplyNo), ++_SimuNo[pInfo->colorCode], pInfo->pListItem->id.id, pInfo->head, RX_ColorNameShort(pInfo->inkSupplyNo));
+		sprintf(fname, "%strace/%s/sent(id=%d, p=%d, c=%d, s=%d, h=%d).bmp",  PATH_HOME PATH_RIPPED_DATA_DIR, RX_ColorNameShort(pInfo->inkSupplyNo), pInfo->pListItem->id.id, pInfo->pListItem->id.page, pInfo->pListItem->id.copy, pInfo->pListItem->id.scan, head);
+		#else
+		sprintf(fname, "d:/%strace/%s/Scan%02d-img%d-hd%d_%s.bmp", PATH_RIPPED_DATA_DIR, RX_ColorNameShort(pInfo->inkSupplyNo), ++_SimuNo[pInfo->colorCode], pInfo->pListItem->id.id, pInfo->head, RX_ColorNameShort(pInfo->inkSupplyNo));
+		#endif
+	}
 	else
-		sprintf(fname, "%strace/%s/(id=%d, p=%d, c=%d)-%s%d.bmp", PATH_RIPPED_DATA, RX_ColorNameShort(pInfo->inkSupplyNo), pInfo->pListItem->id.id, pInfo->pListItem->id.page, pInfo->pListItem->id.copy, RX_ColorNameShort(pInfo->inkSupplyNo), head);
-	bmp_write(fname, buffer+1, pInfo->bitsPerPixel, pInfo->widthPx, pInfo->srcLineCnt, pInfo->dstLineLen, FALSE);
+	{
+		#ifdef linux
+		sprintf(fname, "%strace/%s/(id=%d, p=%d, c=%d)-%s%d.bmp", PATH_HOME PATH_RIPPED_DATA_DIR, RX_ColorNameShort(pInfo->inkSupplyNo), pInfo->pListItem->id.id, pInfo->pListItem->id.page, pInfo->pListItem->id.copy, RX_ColorNameShort(pInfo->inkSupplyNo), head);
+		#else
+		sprintf(fname, "d:/%strace/%s/(id=%d, p=%d, c=%d)-%s%d.bmp", PATH_RIPPED_DATA_DIR, RX_ColorNameShort(pInfo->inkSupplyNo), pInfo->pListItem->id.id, pInfo->pListItem->id.page, pInfo->pListItem->id.copy, RX_ColorNameShort(pInfo->inkSupplyNo), head);
+		#endif
+	}
+	if (pInfo->bitsPerPixel<8)	
+		bmp_write(fname, &buffer[1], pInfo->bitsPerPixel, pInfo->widthPx, pInfo->srcLineCnt, pInfo->dstLineLen, FALSE);
+	else
+	{
+		char dir[MAX_PATH];
+		char fname[MAX_PATH];
+		sprintf(dir, PATH_RIPPED_DATA "trace/%s", RX_ColorNameShort(pInfo->inkSupplyNo));
+		sprintf(fname, "(id=%d, p=%d, c=%d, s=%d)-%s%d", pInfo->pListItem->id.id, pInfo->pListItem->id.page, pInfo->pListItem->id.copy, pInfo->pListItem->id.scan, RX_ColorNameShort(pInfo->inkSupplyNo), head);
+		SBmpInfo info;
+		memset(&info, 0, sizeof(info));
+		info.planes = 1;
+		info.srcWidthPx   = pInfo->widthPx;
+		info.lengthPx	  = pInfo->srcLineCnt;	
+		info.lineLen	  = pInfo->dstLineLen;
+		info.bitsPerPixel = pInfo->bitsPerPixel;
+		info.resol.x	  = 1200;
+		info.resol.y	  = 1200;
+		info.colorCode[0] = pInfo->colorCode;
+		info.inkSupplyNo[0] = 0;
+		info.buffer[0]     = &buffer;
+		tif_write(dir, fname, &info);
+	}
 	free(buffer);
 	if (log) Error(LOG, 0, "File saved to >>%s<<", fname);
 }
@@ -461,6 +461,16 @@ static void _save_to_file(SBmpSplitInfo *pInfo, int log)
 //--- _send_image_data ---------------------------------------------
 static int _send_image_data(SBmpSplitInfo *pInfo)
 {
+	{
+		SPageId *pid=&pInfo->pListItem->id;
+		int idx=data_printList_idx(pInfo->pListItem);
+
+		TrPrintfL(_Trace, "Head[%d.%d]: _send_image_data pl[%d](id=%d, p=%d, c=%d, s=%d) blocks[%d .. %d] SAME=%d", pInfo->board, pInfo->head, idx, pid->id, pid->page, pid->copy, pid->scan, pInfo->blk0, pInfo->blk0+pInfo->blkCnt, pInfo->same);		
+		//--- Test ------------------------
+		TrPrintfL(_Trace, "Head[%d.%d]: widthPx=%d, bitsPerPixel=%d, widthBt=%d, dstLineLen=%d, srcLineCnt=%d, blkCnt=%d", pInfo->board, pInfo->head, pInfo->widthPx, pInfo->bitsPerPixel, pInfo->widthBt, pInfo->dstLineLen, pInfo->srcLineCnt , pInfo->blkCnt);		
+		//---------------------------------
+	}
+
 	if(!rx_def_is_scanning(RX_Spooler.printerType) && pInfo->same)
 	{
 		_HBPar[pInfo->board]->pBmpSplitPar[pInfo->head] = pInfo;
@@ -468,10 +478,12 @@ static int _send_image_data(SBmpSplitInfo *pInfo)
 	}
 	else
 	{
-		static int test=0;
-		SPageId *pid=&pInfo->pListItem->id;
-		int idx=data_printList_idx(pInfo->pListItem);
-		TrPrintfL(_Trace, "Head[%d.%d]: _send_image_data pl[%d](id=%d, p=%d, c=%d, s=%d) blocks[%d .. %d] ", pInfo->board, pInfo->head, idx, pid->id, pid->page, pid->copy, pid->scan, pInfo->blk0, pInfo->blk0+pInfo->blkCnt);
+        {
+		    static int test=0;
+		    SPageId *pid=&pInfo->pListItem->id;
+		    int idx=data_printList_idx(pInfo->pListItem);
+		    TrPrintfL(_Trace, "Head[%d.%d]: _send_image_data pl[%d](id=%d, p=%d, c=%d, s=%d) blocks[%d .. %d] ", pInfo->board, pInfo->head, idx, pid->id, pid->page, pid->copy, pid->scan, pInfo->blk0, pInfo->blk0+pInfo->blkCnt);
+        }
 		pInfo->sendFromBlk	= 0;
 
 		TrPrintfL(_Trace, "Head[%d.%d]: NEW BMP _req_used_flags blkN0=%d, blkCnt=%d", pInfo->board, pInfo->head, pInfo->blk0, pInfo->blkCnt);
@@ -515,9 +527,9 @@ static int _send_image_cmd(SBmpSplitInfo *pInfo)
 	}
 
 	if (pInfo->data==NULL)
-		TrPrintfL(_Trace, "SENT _BlkNo[%d][%d]: idx=%d, blk=%d, cnt=%d, buffer=NULL, test=%d, SENT", pInfo->board, pInfo->head, _TestImgNo[pInfo->board][pInfo->head], pInfo->blk0, pInfo->blkCnt, pInfo->test);
+		TrPrintfL(_Trace, "SENT _BlkNo[%d][%d]: idx=%d, blk=%d, cnt=%d, buffer=NULL, SENT", pInfo->board, pInfo->head, _TestImgNo[pInfo->board][pInfo->head], pInfo->blk0, pInfo->blkCnt);
 	else
-		TrPrintfL(_Trace, "SENT _BlkNo[%d][%d]: idx=%d, blk=%d, cnt=%d, buffer=%03d, test=%d, SENT", pInfo->board, pInfo->head, _TestImgNo[pInfo->board][pInfo->head], pInfo->blk0, pInfo->blkCnt, ctrl_get_bufferNo(*pInfo->data), pInfo->test);
+		TrPrintfL(_Trace, "SENT _BlkNo[%d][%d]: idx=%d, blk=%d, cnt=%d, buffer=%03d, SENT", pInfo->board, pInfo->head, _TestImgNo[pInfo->board][pInfo->head], pInfo->blk0, pInfo->blkCnt, ctrl_get_bufferNo(*pInfo->data));
 
 	_send_image_cmd_flags[5*pInfo->board+pInfo->head] = '*';
 	SPageId *pid = &pInfo->pListItem->id;
@@ -543,11 +555,7 @@ static void *_head_board_ctrl_thread(void *ppar)
 	
 	TrPrintfL(TRUE, "_head_board_ctrl_thread[%d] ended", par->cfg.no);
 	sok_close(&par->ctrlSocket);
-	#ifdef RAW_SOCKET
-		for (i=0; i<SIZEOF(par->dataSocket); i++)	sok_close_raw(&par->dataSocket[i]);
-	#else
 		for (i=0; i<SIZEOF(par->dataSocket); i++)	sok_close(&par->dataSocket[i]);
-	#endif
 	
 	par->errorSent = FALSE;
 	return NULL;	
@@ -653,7 +661,6 @@ static void _req_used_flags(SHBThreadPar *par, int head, int blkNo, int blkCnt, 
 {
 	SBlockUsedCmd	*pcmd = &par->blockUsedCmd;	// save stack
 	SHeadCfg		*pHead;
-	int				ret;
 
 	if (_Abort) return;
 
@@ -682,9 +689,9 @@ static void _req_used_flags(SHBThreadPar *par, int head, int blkNo, int blkCnt, 
 		par->blockUsedId = (par->blockUsedId+1)%MAX_USED_ID;
 		if (head<SIZEOF(_TestBlockUsedReqTime))
 			_TestBlockUsedReqTime[head][par->blockUsedId] = rx_get_ticks();
-	//	TrPrintfL(_Trace, "Head[%d.%d]: _req_used_flags: id=%d, blkNo=%d, blkCnt=%d (blk %d .. %d) line=%d", par->cfg.no, head, pcmd->id, pcmd->blkNo, pcmd->blkCnt, pcmd->blkNo, pcmd->blkNo+pcmd->blkCnt, line);		
-		ret=sok_send(&par->ctrlSocket, pcmd);
-		TrPrintfL(_Trace, "Head[%d.%d]: _req_used_flags: id=%d, blkNo=%d, blkCnt=%d (blk %d .. %d) line=%d, ret=%d", par->cfg.no, head, pcmd->id, pcmd->blkNo, pcmd->blkCnt, pcmd->blkNo, pcmd->blkNo+pcmd->blkCnt, line, ret);
+		TrPrintfL(_Trace, "Head[%d.%d]: req block used: id=%d, blkNo=%d, blkCnt=%d (blk %d .. %d) line=%d", par->cfg.no, head, pcmd->id, pcmd->blkNo, pcmd->blkCnt, pcmd->blkNo, pcmd->blkNo+pcmd->blkCnt, line);
+
+		sok_send(&par->ctrlSocket, pcmd);
 		blkCnt -= pcmd->blkCnt;
 		blkNo  += pcmd->blkCnt;
 	} while (blkCnt>0);
@@ -807,12 +814,9 @@ static int _send_to_board(SHBThreadPar *par, int head, int blkNo, int blkCnt)
 				}
 				*/
 
-				#ifdef RAW_SOCKET
-					sent=sok_send_raw_udp(&par->dataSocket[0], MAC_OUI_ALTERA | MAC_HEAD_CTRL_UDP0 | 0x39,  par->cfg.dataAddr[0], par->cfg.dataPort[0], (char*)&par->msg, sizeof(par->msg.blkNo)+par->cfg.dataBlkSize);
-				#else
 					sent=send(par->dataSocket[par->udpNo], (char*)&par->msg, sizeof(par->msg.blkNo)+par->cfg.dataBlkSize, 0);
-				#endif
-				if (par->dataSocket[1]!=INVALID_SOCKET) par->udpNo = 1-par->udpNo;
+				if (par->dataSocket[1]!=INVALID_SOCKET) 
+					par->udpNo = 1-par->udpNo;
 
 				cnt++;
 				if ((dstBlk%100)==0 || cnt==1) TrPrintfL(_Trace>1, "Head[%d.%d]: Send Block %d", par->cfg.no, head, dstBlk);
@@ -887,13 +891,6 @@ void hc_check(void)
 			for (port=0; port<SIZEOF(_HBPar[0]->dataSocket); port++)
 			{
 				msg.blkNo  = 0xffffffff;
-			#ifdef RAW_SOCKET
-				if (_HBPar[board]!=NULL && _HBPar[board]->dataSocket[port]!=NULL && _HBPar[board]->dataSocket[port]!=0)
-				{
-					len=sok_send_raw_udp(&_HBPar[board]->dataSocket[0], mac_as_i64("00:07:ed:02:00:39"), _HBPar[board]->cfg.dataAddr[0], _HBPar[board]->cfg.dataPort[0], (char*)&msg, sizeof(msg.blkNo)+RX_Spooler.dataBlkSize);
-					sent++;
-				}
-			#else
 				if (_HBPar[board]!=NULL && _HBPar[board]->dataSocket[port]!=INVALID_SOCKET && _HBPar[board]->dataSocket[port]!=0)
 				{
 					len=send(_HBPar[board]->dataSocket[port], (char*)&msg, sizeof(msg.blkNo)+RX_Spooler.dataBlkSize, MSG_NOSIGNAL);
@@ -918,7 +915,6 @@ void hc_check(void)
 					}
 					*/
 				}
-			#endif
 			}
 		}
 		time++;

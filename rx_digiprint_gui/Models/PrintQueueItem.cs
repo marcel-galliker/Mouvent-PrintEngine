@@ -211,14 +211,6 @@ namespace RX_DigiPrint.Models
             get { return _SrcHeight; }
             set { SetProperty(ref _SrcHeight, Math.Round(value,3)); }
         }
-
-        //--- Property DropSizes ---------------------------------------
-        private int _DropSizes;
-        public int DropSizes
-        {
-            get { return _DropSizes; }
-            set { SetProperty(ref _DropSizes, value); }
-        }
         
         //--- Property Dots ---------------------------------------
         private string _Dots;
@@ -931,7 +923,6 @@ namespace RX_DigiPrint.Models
                     RxSettingsBase.SaveProperty(this, xml, "PageMargin");
                     RxSettingsBase.SaveProperty(this, xml, "PrintGoMode");
                     RxSettingsBase.SaveProperty(this, xml, "PrintGoDist");
-                    RxSettingsBase.SaveProperty(this, xml, "DropSizes");
                     RxSettingsBase.SaveProperty(this, xml, "Dots");
                     RxSettingsBase.SaveProperty(this, xml, "LengthUnit");
                     RxSettingsBase.SaveProperty(this, xml, "FirstPage");
@@ -976,7 +967,6 @@ namespace RX_DigiPrint.Models
             LastPage        = msg.lastPage;
             StartPage       = msg.start.page;
             Copies          = msg.copies;
-            DropSizes       = msg.dropSizes;
             Wakeup          = msg.wakeup;
             Dots            = msg.dots;
             ScanMode        = (EScanMode)(msg.scanMode);
@@ -1145,7 +1135,6 @@ namespace RX_DigiPrint.Models
             msg.item.collate        = (Byte)Collate;
             msg.item.lengthUnit     = LengthUnit;
             msg.item.variable       = Convert.ToByte(Variable);
-            msg.item.dropSizes      = Convert.ToByte(DropSizes);
             msg.item.wakeup         = Convert.ToByte(Wakeup);
             msg.item.orientation    = Convert.ToByte(Orientation);
             msg.item.pageWidth      = (Int32)(1000*PageWidth);

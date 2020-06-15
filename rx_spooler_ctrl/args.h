@@ -12,6 +12,7 @@
 
 #pragma once
 
+
 extern int	arg_debug;
 extern char arg_ipAddr[64];
 

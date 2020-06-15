@@ -69,8 +69,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
         //--- _set_checkbox_style ------------------------------
         private void _set_checkbox_style()
         {
-//            RxGlobals.PrintSystem.AllInkSupplies = (RxGlobals.PrintSystem.ColorCnt * RxGlobals.PrintSystem.HeadCnt)<=16;
-            RxGlobals.PrintSystem.AllInkSupplies = (RxGlobals.PrintSystem.ColorCnt * RxGlobals.PrintSystem.HeadCnt)<=8;
+//            RxGlobals.PrintSystem.AllInkSupplies = (RxGlobals.PrintSystem.ColorCnt * RxGlobals.PrintSystem.HeadsPerColor)<=16;
+            RxGlobals.PrintSystem.AllInkSupplies = (RxGlobals.PrintSystem.ColorCnt * RxGlobals.PrintSystem.HeadsPerColor)<=8;
             CheckBox.Style = (Style)this.Resources[RxGlobals.PrintSystem.AllInkSupplies ? "CheckBoxStyle_OFF":"CheckBoxStyle_ON"];
             if (_ActiveItem<RxGlobals.InkSupply.List.Count)
             {
@@ -82,7 +82,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
         //--- PrintSystem_PropertyChanged ----------------------------------
         void PrintSystem_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if  (e.PropertyName.Equals("ColorCnt") || e.PropertyName.Equals("HeadCnt"))
+            if  (e.PropertyName.Equals("ColorCnt") || e.PropertyName.Equals("HeadsPerColor"))
             {
                 _set_checkbox_style();
             }

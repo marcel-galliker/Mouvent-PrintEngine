@@ -1,11 +1,6 @@
 // ****************************************************************************
 //
 //	rx_main_ctrl.c
-//	Configurations:	
-//		Debug-lx Win32
-//		Release-lx Win32
-//		Debug Win32
-//		Release Win32
 //
 // ****************************************************************************
 //
@@ -62,7 +57,6 @@ SSpoolerCfg		RX_Spooler;
 //SRxStatus		RX_Status;
 SRxNetwork		RX_Network;
 SColorSplitCfg	RX_Color[MAX_COLORS];
-SDisabledJets	RX_DisabledJets[MAX_COLORS];
 SPrinterStatus	RX_PrinterStatus;
 SStepperStat	RX_StepperStatus;
 SStepperStat	RX_ClnStatus;

@@ -1,0 +1,96 @@
+﻿<UserControl x:Class="RX_DigiPrint.Views.TexView.TexMachine"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             mc:Ignorable="d" 
+             d:DesignHeight="260" >
+    
+    <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+        <Image
+                x:Name="MachineImg" 
+                Stretch="Uniform"
+                Source="..\..\Resources\Bitmaps\Tex\TX801.png" 
+                ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                Height="250"
+            />
+        <Grid x:Name="ButtonsGrid">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30*"/>
+                <RowDefinition Height="40*"/>
+                <RowDefinition Height="32*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="9*" /> <!-- 0 -->
+                <ColumnDefinition Width="15*" /> <!-- 1 Unwinder -->
+                <ColumnDefinition Width="5*" />  <!-- 2 Presure Roller-->
+                <ColumnDefinition Width="12*" /> <!-- 3 gap -->
+                <ColumnDefinition Width="5*" />  <!-- 4 Air Knife -->
+                <ColumnDefinition Width="7*" />  <!-- 5 Washing Unit -->
+                <ColumnDefinition Width="11*" /> <!-- 6 gap -->
+                <ColumnDefinition Width="12*" /> <!-- 7 dryer -->
+                <ColumnDefinition Width="15*" /> <!-- 8 rewinder -->
+                <ColumnDefinition Width="10*" /> <!-- 9 gap-->
+            </Grid.ColumnDefinitions>
+
+            <common:MvtButton Grid.Row="0" Grid.Column="0" x:Name="PAR_ALL_ON" Click="OnOff_Clicked"
+                              Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}">
+                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="20" Height="20"
+                                                Kind="Power"></iconPacks:PackIconMaterial>
+            </common:MvtButton>
+
+            <TextBlock Grid.Row="1" Grid.Column="0" Text="ALL" HorizontalAlignment="Center" FontSize="{StaticResource FontSizeLarge}" FontWeight="Bold"/>
+
+            <common:MvtButton Grid.Row="0" Grid.Column="1" x:Name="PAR_WINDER_1_ON" Click="OnOff_Clicked"
+                              Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}">
+                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="20" Height="20"
+                                                Kind="Power"></iconPacks:PackIconMaterial>
+            </common:MvtButton>
+
+            <common:MvtButton Grid.Row="0" Grid.Column="2" x:Name="PAR_PRESSURE_ROLLER_ON" Click="OnOff_Clicked" VerticalAlignment="Bottom"
+                              Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}">
+                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="20" Height="20"
+                                                Kind="Power"></iconPacks:PackIconMaterial>
+            </common:MvtButton>
+
+            <common:MvtButton Grid.Row="0" Grid.Column="3" x:Name="PAR_SLIDE_ON" Click="OnOff_Clicked"
+                              Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}">
+                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="20" Height="20"
+                                                Kind="Power"></iconPacks:PackIconMaterial>
+            </common:MvtButton>
+
+            <common:MvtButton Grid.Row="1" Grid.Column="3" x:Name="PAR_BELT_ON" Click="OnOff_Clicked"
+                              Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}">
+                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="20" Height="20"
+                                                Kind="Power"></iconPacks:PackIconMaterial>
+            </common:MvtButton>
+
+            <common:MvtButton Grid.Row="2" Grid.Column="5" x:Name="PAR_WASHING_UNIT_ON" Click="OnOff_Clicked" HorizontalAlignment="Left" VerticalAlignment="Top"
+                              Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}">
+                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="20" Height="20"
+                                                Kind="Power"></iconPacks:PackIconMaterial>
+            </common:MvtButton>
+
+            <common:MvtButton Grid.Row="1" Grid.Column="6" HorizontalAlignment="Left" VerticalAlignment="Bottom" x:Name="PAR_FABRIC_SENSOR_ON" Click="OnOff_Clicked"
+                              Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}">
+                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="20" Height="20"
+                                                Kind="Power"></iconPacks:PackIconMaterial>
+            </common:MvtButton>
+
+            <common:MvtButton Grid.Row="0" Grid.Column="7" x:Name="PAR_DRYER_ON" Click="OnOff_Clicked"
+                              Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}">
+                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="20" Height="20"
+                                                Kind="Power"></iconPacks:PackIconMaterial>
+            </common:MvtButton>
+
+            <common:MvtButton Grid.Row="0" Grid.Column="8" x:Name="PAR_WINDER_2_ON" Click="OnOff_Clicked"
+                              Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}">
+                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="20" Height="20"
+                                                Kind="Power"></iconPacks:PackIconMaterial>
+            </common:MvtButton>
+            
+        </Grid>
+    </Grid>
+</UserControl>

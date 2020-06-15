@@ -36,6 +36,14 @@ void (*OnConnected)  (void) = NULL;
 void (*OnDeconnected)(void) = NULL;
 void (*OnError)      (void) = NULL;
 
+//--- Bug in MLPI library: Workaround ------------------
+#if _MSC_VER>=1900
+FILE _iob[] = {*stdin, *stdout, *stderr};
+extern "C" FILE * __cdecl __iob_func(void)
+{
+    return _iob;
+}
+#endif
 
 //--- rex_connect -----------------------------------------------------
 int  rex_connect(const char *ipAddr, connected_callback onConnected,  connected_callback onDeconnected, error_callback onError)

@@ -26,6 +26,7 @@
 #include "bmp.h"
 #include "jet_correction.h"
 #include "rx_rip_lib.h"
+#include "screening.h"
 #include "spool_rip.h"
 #include "head_client.h"
 #include "ctrl_client.h"
@@ -78,7 +79,8 @@ static int _handle_main_ctrl_msg(RX_SOCKET socket, void *msg, int len, struct so
 
 static int _do_spool_cfg	(RX_SOCKET socket, SSpoolerCfg	  *cfg);
 static int _do_color_cfg	(RX_SOCKET socket, SColorSplitCfg *cfg);
-static int _do_disabled_jets(RX_SOCKET socket, SDisabledJets  *jets);
+static int _do_disabled_jets(RX_SOCKET socket, SDisabledJetsMsg  *jets);
+static int _do_density_values(RX_SOCKET socket, SDensityValuesMsg *pmsg);
 static int _do_print_file	(RX_SOCKET socket, SPrintFileCmd  *msg);
 static void _do_start_sending(UINT32 resetCnt);
 static int _do_print_abort	(RX_SOCKET socket);
@@ -227,9 +229,10 @@ static void *_print_file_thread(void *par)
 }
 
 //--- _handle_main_ctrl_msg --------------------------------------------------------
-static int _handle_main_ctrl_msg(RX_SOCKET socket, void *msg, int len, struct sockaddr	*sender, void *par)
+static int _handle_main_ctrl_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr	*sender, void *par)
 {
-	SMsgHdr *phdr = (SMsgHdr*)msg;
+	SMsgHdr *phdr = (SMsgHdr*)pmsg;
+	void    *pdata = &phdr[1];
 	static UINT32 _UnknownMsgId=0;
 
 	_MsgId = phdr->msgId;
@@ -237,20 +240,21 @@ static int _handle_main_ctrl_msg(RX_SOCKET socket, void *msg, int len, struct so
 	{
 	case CMD_PING:					break;
 
-	case CMD_SET_SPOOL_CFG:			_do_spool_cfg		(socket, (SSpoolerCfg*)		&phdr[1]);	break;
-	case CMD_HEAD_BOARD_CFG:		hc_head_board_cfg	(socket, (SHeadBoardCfg*)	&phdr[1]);	break;
-	case CMD_COLOR_CFG:				_do_color_cfg		(socket, (SColorSplitCfg*)	&phdr[1]);	break;
-	case CMD_DISABLED_JETS:			_do_disabled_jets	(socket, (SDisabledJets*)	&phdr[1]);	break;
+	case CMD_SET_SPOOL_CFG:			_do_spool_cfg		(socket, (SSpoolerCfg*)		pdata);	break;
+	case CMD_HEAD_BOARD_CFG:		hc_head_board_cfg	(socket, (SHeadBoardCfg*)	pdata);	break;
+	case CMD_COLOR_CFG:				_do_color_cfg		(socket, (SColorSplitCfg*)	pdata);	break;
+	case CMD_SET_DISABLED_JETS:		_do_disabled_jets	(socket, (SDisabledJetsMsg*) pmsg);	break;
+	case CMD_SET_DENSITY_VAL:		_do_density_values	(socket, (SDensityValuesMsg*)pmsg);	break;
 	case CMD_PRINT_FILE:			_MsgGot0++;
 									_PrintFile_Socket = socket;
-									memcpy(&_PrintFile_Msg, msg, sizeof(_PrintFile_Msg));
+									memcpy(&_PrintFile_Msg, pmsg, sizeof(_PrintFile_Msg));
 									rx_sem_post(_PrintFile_Sem);
 									break;
 
-	case CMD_START_PRINTING:		_do_start_sending	(*(UINT32*)&phdr[1]);					break;
+	case CMD_START_PRINTING:		_do_start_sending	(*(UINT32*)pdata);						break;
 	case CMD_PRINT_ABORT:			_do_print_abort		(socket);								break;
 	
-	case BEG_SET_LAYOUT:			sr_set_layout_start (socket, (char*)&phdr[1]);				break;
+	case BEG_SET_LAYOUT:			sr_set_layout_start (socket, (char*)pdata);					break;
 	case ITM_SET_LAYOUT:			sr_set_layout_blk   (socket, phdr);							break;
 	case END_SET_LAYOUT:			sr_set_layout_end   (socket, phdr);							break;
 	
@@ -258,16 +262,16 @@ static int _handle_main_ctrl_msg(RX_SOCKET socket, void *msg, int len, struct so
 	case ITM_SET_FILEDEF:			sr_set_filedef_blk  (socket, phdr);							break;
 	case END_SET_FILEDEF:			sr_set_filedef_end  (socket, phdr);							break;
 
-	case CMD_SET_CTRDEF:			ctr_set_def	((SCounterDef*)		&phdr[1]);					break;
+	case CMD_SET_CTRDEF:			ctr_set_def	((SCounterDef*)		pdata);						break;
 		
-	case CMD_PRINT_DATA:			sr_data_record		((SPrintDataMsg*) msg);					break;
+	case CMD_PRINT_DATA:			sr_data_record		((SPrintDataMsg*) pmsg);				break;
 
-	case CMD_PRINT_TEST_DATA:		_do_print_test_data(socket, (SPrintTestDataMsg*)msg);	    break;
+	case CMD_PRINT_TEST_DATA:		_do_print_test_data(socket, (SPrintTestDataMsg*)pmsg);	    break;
 
-	case CMD_RFS_SAVE_FILE_HDR:		_do_save_file_hdr	(socket, (SFSDirEntry*)  msg);			break;
-	case CMD_RFS_SAVE_FILE_BLOCK:	_do_save_file_block(socket, (SDataBlockMsg*)msg);			break;
+	case CMD_RFS_SAVE_FILE_HDR:		_do_save_file_hdr	(socket, (SFSDirEntry*)  pmsg);			break;
+	case CMD_RFS_SAVE_FILE_BLOCK:	_do_save_file_block(socket, (SDataBlockMsg*)pmsg);			break;
 //	case CMD_FONTS_UPDATED:			rip_add_fonts(PATH_FONTS);									break;
-	case CMD_FONTS_UPDATED:			rip_add_fonts((char*)&phdr[1]);								break;
+	case CMD_FONTS_UPDATED:			rip_add_fonts((char*)pdata);								break;
 
 	default:					
 		if (phdr->msgId != _UnknownMsgId)
@@ -308,6 +312,7 @@ static int _do_spool_cfg(RX_SOCKET socket, SSpoolerCfg *pmsg)
 	_FirstFile	 = TRUE;
 	_Paused		 = FALSE;
 	_StartCnt	 = RX_Spooler.resetCnt;
+	if (hc_in_simu()) _ResetCnt = _StartCnt; 
 	_SMP_Flags	 = 0;
 	_MsgGot = _MsgSent = _MsgGot0 = 0;
 	if (!rx_def_is_tx(RX_Spooler.printerType)) data_send_id(NULL);
@@ -342,9 +347,16 @@ static int _do_color_cfg		(RX_SOCKET socket, SColorSplitCfg* cfg)
 }
 
 //--- _do_disabled_jets ---------------------------------------------------------------------
-static int _do_disabled_jets(RX_SOCKET socket, SDisabledJets *jets)
+static int _do_disabled_jets(RX_SOCKET socket, SDisabledJetsMsg *pmsg)
 {
-	jc_set_disabled_jets(jets);
+	jc_set_disabled_jets(pmsg);
+	return REPLY_OK;
+}
+
+//--- _do_density_values ---------------------------------------------------------------------
+static int _do_density_values(RX_SOCKET socket, SDensityValuesMsg *pmsg)
+{
+	scr_set_values(pmsg->head, 0, 1000, pmsg->value);
 	return REPLY_OK;
 }
 
@@ -383,6 +395,9 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 	if (msg.virtualPass>msg.virtualPasses)
 		Error(ERR_ABORT, 0, "programming Error");
 	
+	if (rx_def_is_web(RX_Spooler.printerType))
+		msg.gapPx += 1;	// Bug in FPGA: (when srcLineCnt==12300, gap=0 it sometimes prints an additional line of old data [instead of blank] between the labels)
+
 	TrPrintfL(TRUE, "_do_print_file[%d] >>%s<<  id=%d, page=%d, copy=%d, scan=%d, same=%d, clearBlockUsed=%d, offsetWidth=%d, blkNo=%d", _MsgGot, msg.filename, msg.id.id, msg.id.page, msg.id.copy, msg.id.scan ,same, msg.clearBlockUsed, msg.offsetWidth, msg.blkNo);
 //	if (msg.id.scan==1) Error(LOG, 0, "_do_print_file[%d] >>%s<<  id=%d, page=%d, copy=%d, scan=%d, same=%d, blkNo=%d", _MsgGot, msg.filename, msg.id.id, msg.id.page, msg.id.copy, msg.id.scan ,same, msg.blkNo);
 	
@@ -471,7 +486,7 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 		{
 		//	Error(LOG, 0, "Spooler Copy=%d, Offset=%d: Load Data", msg.id.copy, msg.offsetWidth);
 	//		if (data_load(&msg.id, path, msg.offsetWidth, msg.lengthPx, msg.gapPx, msg.blkNo, msg.printMode, msg.variable, msg.flags, msg.clearBlockUsed, same, _SMP_Flags | (msg.flags & FLAH_SMP_FIRST_PAGE), msg.smp_bufSize, _Buffer[_BufferNo])!=REPLY_OK && !_Abort)
-			if (data_load(&msg.id, path, msg.offsetWidth, msg.lengthPx, multiCopy, msg.gapPx, msg.blkNo, reply.blkCnt, msg.printMode, msg.variable, msg.virtualPasses , msg.virtualPass, msg.flags, msg.clearBlockUsed, same, msg.smp_bufSize, _Buffer[_BufferNo])!=REPLY_OK && !_Abort)
+			if (data_load(&msg.id, path, msg.offsetWidth, msg.lengthPx, multiCopy, msg.gapPx, msg.blkNo, reply.blkCnt, msg.printMode, msg.variable, msg.virtualPasses , msg.virtualPass, msg.flags, msg.clearBlockUsed, same, msg.smp_bufSize, msg.dots, _Buffer[_BufferNo])!=REPLY_OK && !_Abort)
 				return Error(ERR_STOP, 0, "Could not load file >>%s<<", str_start_cut(msg.filename, PATH_RIPPED_DATA));
 		}
 

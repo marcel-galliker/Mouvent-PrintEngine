@@ -74,6 +74,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
             case EPrinterType.printer_LB702_WB: _AdjustmentSupported = true;  break;
             case EPrinterType.printer_LH702:    _AdjustmentSupported = true;  break;
             case EPrinterType.printer_DP803:    _AdjustmentSupported = true;  break;
+            case EPrinterType.printer_test_slide:   _AdjustmentSupported = true;  break;
             case EPrinterType.printer_TX801:    _AdjustmentSupported = true;  _Reverse=true; break;
             case EPrinterType.printer_TX802:    _AdjustmentSupported = true;  _Reverse=true; break;
             default:                            _AdjustmentSupported = false; break;
@@ -99,7 +100,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
             double gap=10;
             double top=40;
 
-            colorNo = (_ClusterNo*TcpIp.HEAD_CNT) / RxGlobals.PrintSystem.HeadCnt; 
+            colorNo = (_ClusterNo*TcpIp.HEAD_CNT) / RxGlobals.PrintSystem.HeadsPerColor; 
             for (i=0; i<TcpIp.HEAD_CNT; i++, distNo++)
             {
                 x = (width+gap)*i+gap/2;
@@ -242,26 +243,21 @@ namespace RX_DigiPrint.Views.PrintSystemView
         {
             isNo=0;
             headNo=0;
-            if (RxGlobals.PrintSystem.HeadCnt!=0)
+            if (RxGlobals.PrintSystem.HeadsPerColor!=0)
             {
                 int no = tag%100;
                 if (RxGlobals.PrintSystem.IsTx)
                 {
-                    isNo   = RxGlobals.PrintSystem.IS_Order[no/RxGlobals.PrintSystem.HeadCnt];
+                isNo   = RxGlobals.PrintSystem.IS_Order[no/RxGlobals.PrintSystem.HeadsPerColor];
                     if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX802)
-                        headNo = RxGlobals.PrintSystem.HeadCnt*isNo + RxGlobals.PrintSystem.HeadCnt-1-(no%RxGlobals.PrintSystem.HeadCnt);
+                    headNo = RxGlobals.PrintSystem.HeadsPerColor*isNo + RxGlobals.PrintSystem.HeadsPerColor-1-(no%RxGlobals.PrintSystem.HeadsPerColor);
                     else
-                        headNo = RxGlobals.PrintSystem.HeadCnt*isNo + no%RxGlobals.PrintSystem.HeadCnt;
-                }
-                else if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_test_table)
-                {
-                    isNo   = no;
-                    headNo = 0;
+                    headNo = RxGlobals.PrintSystem.HeadsPerColor*isNo + no%RxGlobals.PrintSystem.HeadsPerColor;
                 }
                 else
                 {
-                    isNo   = RxGlobals.PrintSystem.IS_Order[(_ClusterNo*TcpIp.HEAD_CNT)/RxGlobals.PrintSystem.HeadCnt];
-                    headNo = RxGlobals.PrintSystem.HeadCnt*isNo + no%RxGlobals.PrintSystem.HeadCnt;
+                    isNo   = RxGlobals.PrintSystem.IS_Order[(_ClusterNo*TcpIp.HEAD_CNT)/RxGlobals.PrintSystem.HeadsPerColor];
+                    headNo = RxGlobals.PrintSystem.HeadsPerColor*isNo + no%RxGlobals.PrintSystem.HeadsPerColor;
                 }
             }            
         }
@@ -270,7 +266,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
         void _text_LostFocus(object sender, RoutedEventArgs e)
         {
             RxNumBox text = sender as RxNumBox;    
-            if (text!=null && RxGlobals.PrintSystem.HeadCnt!=0)
+            if (text!=null && RxGlobals.PrintSystem.HeadsPerColor!=0)
             {
                 try
                 {
@@ -310,7 +306,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                                             {
                                                 RxGlobals.PrintSystem.HeadDist[headNo++] += diff;
                                             }
-                                            while ((headNo%RxGlobals.PrintSystem.HeadCnt)!=0);
+                                            while ((headNo%RxGlobals.PrintSystem.HeadsPerColor)!=0);
                                             RxGlobals.PrintSystem.OnPropertyChanged();  // call _update() for all heads
                                         }
                                         RxGlobals.PrintSystem.Changed = true;
@@ -338,8 +334,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
             if (_AdjustmentSupported)
             {
                 Int32 tag=_ClusterNo*TcpIp.HEAD_CNT+Convert.ToInt32((sender as Button).Tag);
-                int inkSupply= RxGlobals.PrintSystem.IS_Order[tag/(int)RxGlobals.PrintSystem.HeadCnt];
-                int no       =tag%(int)RxGlobals.PrintSystem.HeadCnt +1;
+                int inkSupply= RxGlobals.PrintSystem.IS_Order[tag/(int)RxGlobals.PrintSystem.HeadsPerColor];
+                int no       =tag%(int)RxGlobals.PrintSystem.HeadsPerColor +1;
                 
                 HeadAdjustment dlg = new HeadAdjustment(sender as Control, inkSupply, no);
                 dlg.ShowDialog();
@@ -363,7 +359,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
             }
 
             DirText.Visibility = visible;
-            int cnt=(int)(RxGlobals.PrintSystem.ColorCnt*RxGlobals.PrintSystem.HeadCnt);
+            int cnt=(int)(RxGlobals.PrintSystem.ColorCnt*RxGlobals.PrintSystem.HeadsPerColor);
             if (_Reverse) Title.Text = String.Format("Cluster {0}", (cnt+TcpIp.HEAD_CNT-1)/TcpIp.HEAD_CNT-_ClusterNo);
             else          Title.Text = String.Format("Cluster {0}", 1+_ClusterNo);
             foreach (var ctrl in Canvas.Children)
@@ -412,7 +408,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                             int tag = Convert.ToInt32(button.Tag);
                             int inkSupply, headNo;
                             _tag2head(_ClusterNo*TcpIp.HEAD_CNT+tag, out inkSupply, out headNo);
-                            int no=1+headNo%RxGlobals.PrintSystem.HeadCnt;
+                            int no=1+headNo%RxGlobals.PrintSystem.HeadsPerColor;
                             if (RxGlobals.InkSupply.List[inkSupply].InkType==null) button.Background = Brushes.WhiteSmoke;
                             else
                             {

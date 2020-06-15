@@ -9,6 +9,8 @@ TARGETNAME := rx_spooler_ctrl
 #TARGETTYPE can be APP, STATIC or SHARED
 TARGETTYPE := APP
 
+NVCC := /usr/local/cuda-10.2/bin/nvcc
+
 to_lowercase = $(subst A,a,$(subst B,b,$(subst C,c,$(subst D,d,$(subst E,e,$(subst F,f,$(subst G,g,$(subst H,h,$(subst I,i,$(subst J,j,$(subst K,k,$(subst L,l,$(subst M,m,$(subst N,n,$(subst O,o,$(subst P,p,$(subst Q,q,$(subst R,r,$(subst S,s,$(subst T,t,$(subst U,u,$(subst V,v,$(subst W,w,$(subst X,x,$(subst Y,y,$(subst Z,z,$1))))))))))))))))))))))))))
 
 CONFIG ?= DEBUG
@@ -34,8 +36,9 @@ error:
 	$(error Invalid configuration, please check your inputs)
 endif
 
-SOURCEFILES := args.c ctrl_client.c data.c head_client.c jet_correction.c rx_flz.c rx_spooler_ctrl.c spool_rip.c rs_tec-it.cpp test.c version.c
-EXTERNAL_LIBS := ../rx_common_lib/$(BINARYDIR)/rx_common_lib.a ../rx_tif_lib/$(BINARYDIR)/rx_tif_lib.a ../rx_rip_lib/$(BINARYDIR)/rx_rip_lib.a ../Externals/TinyXML/$(BINARYDIR)/TinyXML.a
+SOURCEFILES := args.c ctrl_client.c data.c head_client.c jet_correction.c rx_spooler_ctrl.c screening.c spool_rip.c rs_tec-it.cpp test.c version.c
+CUDA_FILES := rx_slicescreen_fms_1x3_gpu.cu
+EXTERNAL_LIBS := ../rx_common_lib/$(BINARYDIR)/rx_common_lib.a ../rx_screen_lib/$(BINARYDIR)/rx_slicescreen_lib.a ../rx_tif_lib/$(BINARYDIR)/rx_tif_lib.a ../rx_rip_lib/$(BINARYDIR)/rx_rip_lib.a ../Externals/TinyXML/$(BINARYDIR)/TinyXML.a
 EXTERNAL_LIBS_COPIED := $(foreach lib, $(EXTERNAL_LIBS),$(BINARYDIR)/$(notdir $(lib)))
 
 CFLAGS += $(COMMONFLAGS)
@@ -82,10 +85,13 @@ else
 	all_source_files := $(STARTUPFILES) $(filter-out $(STARTUPFILES),$(SOURCEFILES))
 endif
 
+all_source_files += $(CUDA_FILES)
+
 source_obj1 := $(all_source_files:.cpp=.o)
-source_obj2 := $(source_obj1:.c=.o)
-source_obj3 := $(source_obj2:.s=.o)
-source_objs := $(source_obj3:.S=.o)
+source_obj2 := $(source_obj1:.cu=.o)
+source_obj3 := $(source_obj2:.c=.o)
+source_obj4 := $(source_obj3:.s=.o)
+source_objs := $(source_obj4:.S=.o)
 
 all_objs := $(addprefix $(BINARYDIR)/, $(notdir $(source_objs)))
 
@@ -126,6 +132,9 @@ endif
 $(BINARYDIR):
 	mkdir $(BINARYDIR)
 
+$(BINARYDIR)/%.o : %.cu $(all_make_files)
+	$(NVCC) $(addprefix -I,$(INCLUDE_DIRS)) -c $< -o $@ -MT $(@:.o=.dep) -gencode arch=compute_60,code=sm_60 -g
+
 #VisualGDB: FileSpecificTemplates		#<--- VisualGDB will use the following lines to define rules for source files in subdirectories
 $(BINARYDIR)/%.o : %.cpp $(all_make_files) |$(BINARYDIR)
 	$(CXX) $(CXXFLAGS) -c $< -o $@ -MD -MF $(@:.o=.dep)
@@ -142,6 +151,9 @@ $(BINARYDIR)/%.o : %.s $(all_make_files) |$(BINARYDIR)
 #VisualGDB: GeneratedRules				#<--- All lines below are auto-generated
 $(BINARYDIR)/rx_common_lib.a : ../rx_common_lib/$(BINARYDIR)/rx_common_lib.a
 	$(CP) ../rx_common_lib/$(BINARYDIR)/rx_common_lib.a $(BINARYDIR)/rx_common_lib.a
+
+$(BINARYDIR)/rx_slicescreen_lib.a : ../rx_screen_lib/$(BINARYDIR)/rx_slicescreen_lib.a
+	$(CP) ../rx_screen_lib/$(BINARYDIR)/rx_slicescreen_lib.a $(BINARYDIR)/rx_slicescreen_lib.a
 
 $(BINARYDIR)/rx_tif_lib.a : ../rx_tif_lib/$(BINARYDIR)/rx_tif_lib.a
 	$(CP) ../rx_tif_lib/$(BINARYDIR)/rx_tif_lib.a $(BINARYDIR)/rx_tif_lib.a

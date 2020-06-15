@@ -1,0 +1,59 @@
+﻿<UserControl x:Class="RX_DigiPrint.Views.LB702WBView.LB702WB_ParFlexo"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:igWPF="http://schemas.infragistics.com/xaml/wpf"
+             xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+             xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
+             xmlns:local="clr-namespace:RX_DigiPrint.Views.LB701UVView"
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             mc:Ignorable="d"
+             d:DesignHeight="700" 
+             d:DesignWidth="300"
+             >
+
+    <GroupBox x:Name="GroupBox"  Style="{StaticResource MvtGroupBox}" Header="Flexo">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
+
+            <rx_uc:PlcParPanel x:Name="ParPanel" UnitID="Application.GUI_00_001_Main" ReadOnly="False" LabelWidth="120">
+                <rx_uc:PlcParCtrl ID="PAR_FLEXO_2_CLICHE_DIAM"      Label="Diameter"     Unit="mm"   UnitWidth="50" Format="1" />
+                <rx_uc:PlcParCtrl ID="PAR_FLEXO2_SPEED_MIXER_MOTOR"               Label="Mixer Speed"  Unit="%"       UnitWidth="50" Format="n"/>
+                <rx_uc:PlcTitle   Header="Dryer"/>
+                <rx_uc:PlcParCtrl ID="PAR_DRYER3_MODE"                        Label="Mode"         Unit=""  UnitWidth="50" Type="Combo" x:Name="CB_Mode" />
+                <rx_uc:PlcParCtrl ID="PAR_DRYER3_IR_LAMPS_ZONE1_SETPOINT"     Label="Zone 1"       Unit="°C" UnitWidth="50" Format="1" />
+                <rx_uc:PlcParCtrl ID="PAR_DRYER3_IR_LAMPS_ZONE2_SETPOINT"     Label="Zone 2"       Unit="°C" UnitWidth="50" Format="1" />
+                <rx_uc:PlcParCtrl ID="PAR_DRYER3_IR_LAMPS_ZONE3_SETPOINT"     Label="Zone 3"       Unit="°C" UnitWidth="50" Format="1" />
+                <rx_uc:PlcParCtrl ID="PAR_DRYER3_BUSES_UP_SETPOINT"           Label="Buses Up"     Unit="Pa" UnitWidth="50" Format="n" />
+                <rx_uc:PlcParCtrl ID="PAR_DRYER3_EXHAUST_UP_SETPOINT"         Label="Exhaust Up"   Unit="Pa" UnitWidth="50" Format="n" />
+                <rx_uc:PlcParCtrl ID="PAR_DRYER3_BUSES_DOWN_SETPOINT"         Label="Buses Down"   Unit="Pa" UnitWidth="50" Format="n" />
+                <rx_uc:PlcParCtrl ID="PAR_DRYER3_EXHAUST_DOWN_SETPOINT"       Label="Exhaust Down" Unit="Pa" UnitWidth="50" Format="n" />
+
+            </rx_uc:PlcParPanel>
+
+            <StackPanel VerticalAlignment="Bottom" Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
+                <common:MvtButton Grid.Column="0" Margin="15, 5, 15, 5"
+                              Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}" 
+                              Click="Save_Clicked"
+                              IsChecked="{Binding ElementName=ParPanel, Path=Changed}">
+                    <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" 
+                                            HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="20" Height="20"
+                                                Kind="Check"></iconPacks:PackIconMaterial>
+                </common:MvtButton>
+
+                <common:MvtButton Grid.Column="0" Margin="15, 5, 15, 5"
+                              Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}" 
+                              Click="Reload_Clicked">
+                    <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" 
+                                            HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="20" Height="20"
+                                                Kind="Reload" Margin="3, 0,0,0"></iconPacks:PackIconMaterial>
+                </common:MvtButton>
+            </StackPanel>
+        </Grid>
+    </GroupBox>
+</UserControl>

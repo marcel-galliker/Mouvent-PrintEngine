@@ -213,6 +213,7 @@ static int _gui_closed(RX_SOCKET socket, const char *peername)
 //--- gui_tick ----------------------
 void gui_tick(void)
 {
+#ifndef DEBUG
 	char str[MAX_PATH];
 	int len = 0;
 	int time=rx_get_ticks();
@@ -240,7 +241,8 @@ void gui_tick(void)
 		_CheckSend[i]=0;
 	}
 
-//	if (RX_Config.printer.type==printer_LH702) TrPrintfL(TRUE, "GUI Check: %s, TimeoutCnt=%d, printState=%s, speed=%d", str, _TimeoutCnt, PrintStateStr[RX_PrinterStatus.printState], enc_speed());
+	if (RX_Config.printer.type==printer_LH702) TrPrintfL(TRUE, "GUI Check: %s, TimeoutCnt=%d, printState=%s, speed=%d", str, _TimeoutCnt, PrintStateStr[RX_PrinterStatus.printState], enc_speed());
+#endif
 }
 
 //--- gui_test -------------------------------------------------------

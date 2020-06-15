@@ -1,0 +1,50 @@
+﻿<UserControl x:Class="RX_DigiPrint.Views.LB702WBView.LB702WB_ParRewinder"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:igWPF="http://schemas.infragistics.com/xaml/wpf"
+             xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+             xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
+             xmlns:local="clr-namespace:RX_DigiPrint.Views.LB701UVView"
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             mc:Ignorable="d"
+             d:DesignHeight="700" 
+             d:DesignWidth="300"
+             >
+
+    <GroupBox Style="{StaticResource MvtGroupBox}" Header="Rewinder">
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
+
+            <rx_uc:PlcParPanel Grid.Row="0" x:Name="ParPanel" UnitID="Application.GUI_00_001_Main" ReadOnly="False" LabelWidth="120">
+                <rx_uc:PlcParCtrl x:Name="CB_RotUW"    ID="PAR_WIND_DIRECTION_WINDER2" Label="Rotation"     Unit=""     UnitWidth="50" Type="ImgCombo"/>
+                <rx_uc:PlcParCtrl                      ID="PAR_WINDER_TENSION_2"       Label="Tension"      Unit="N/mm" UnitWidth="50" Format="1" />
+            </rx_uc:PlcParPanel>
+            
+            <StackPanel VerticalAlignment="Bottom" Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
+                <common:MvtButton Grid.Column="0" Margin="15, 5, 15, 5"
+                              Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}" 
+                              Click="Save_Clicked"
+                              IsChecked="{Binding ElementName=ParPanel, Path=Changed}">
+                    <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" 
+                                            HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="20" Height="20"
+                                                Kind="Check"></iconPacks:PackIconMaterial>
+                </common:MvtButton>
+
+                <common:MvtButton Grid.Column="0" Margin="15, 5, 15, 5"
+                              Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}" 
+                              Click="Reload_Clicked">
+                    <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" 
+                                            HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="20" Height="20"
+                                                Kind="Reload" Margin="3, 0,0,0"></iconPacks:PackIconMaterial>
+                </common:MvtButton>
+            </StackPanel>
+        </Grid>
+    </GroupBox>
+</UserControl>

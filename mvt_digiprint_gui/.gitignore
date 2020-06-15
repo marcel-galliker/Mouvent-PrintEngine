@@ -1,0 +1,10 @@
+_out
+_temp
+bin
+CodeDB
+obj
+*.suo
+*.csproj.user
+*.user
+packages
+!packages/repositories.config

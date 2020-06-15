@@ -167,7 +167,13 @@
 #define CMD_HEAD_FLUID_CTRL_MODE 0x01000104
 #define REP_HEAD_FLUID_CTRL_MODE 0x02000104
 
-#define CMD_DISABLED_JETS		0x01000105
+#define CMD_GET_DISABLED_JETS	0x01000105
+#define REP_GET_DISABLED_JETS	0x02000105
+#define CMD_SET_DISABLED_JETS	0x01000106
+
+#define CMD_GET_DENSITY_VAL		0x01000107
+#define REP_GET_DENSITY_VAL		0x02000107
+#define CMD_SET_DENSITY_VAL		0x01000108
 
 #define CMD_ENCODER_CFG			0x01000111
 #define REP_ENCODER_CFG			0x02000111
@@ -613,14 +619,34 @@ typedef struct
 	UINT32			overlap;
 	SOffsetCfg		offset;
 	INT32			externalData;
-	char			inkFileNames[INK_SUPPLY_CNT*64];
+	char			inkFileNames[MAX_COLORS*64];
+//	ERectoVerso		rectoVerso[MAX_COLORS];
 	ERectoVerso		rectoVerso[INK_SUPPLY_CNT];
+	UINT32			colorCnt;
 	UINT32			headsPerColor;			
+	UINT32			inkSupplyCnt;
+	UINT32			inkCylindersPerColor;
 	INT32			headFpVoltage[MAX_HEAD_DIST];
 	INT32			headDist[MAX_HEAD_DIST];
 	INT32			headDistBack[MAX_HEAD_DIST];
-	INT32			colorOffset[INK_SUPPLY_CNT];
+	INT32			colorOffset[MAX_COLORS];
 } SPrinterCfgMsg;
+
+typedef struct SDensityValuesMsg
+{
+	SMsgHdr	hdr;
+	int		head;
+	UINT8	voltage;
+	INT16	value[MAX_DENSITY_VALUES];
+} SDensityValuesMsg;
+
+typedef struct SDisabledJetsMsg
+{
+	SMsgHdr	hdr;
+	int		head;
+	INT16	disabledJets[MAX_DISABLED_JETS];
+} SDisabledJetsMsg;
+
 
 //--- message CMD_SEND_DATA -------------------------------------------
 
@@ -682,6 +708,7 @@ typedef struct SPrintFileCmd
 	UINT8		clearBlockUsed;
 	UINT8		wakeup;
 	char		filename[256];
+	char		dots[4];
 } SPrintFileCmd;
 
 typedef struct SPrintFileRep

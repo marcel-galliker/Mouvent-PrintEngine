@@ -1,0 +1,50 @@
+﻿<UserControl x:Class="RX_DigiPrint.Views.PrintSystemView.StepperGrid"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
+             xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+
+    <GroupBox Style="{StaticResource MvtGroupBox}" Header="Stepper">
+       <Grid x:Name="MainGrid"> 
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="70"/>
+                <ColumnDefinition Width="30"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock   Margin="0, 0, 0, 5"    Grid.Row="0" Grid.Column="0" Text="Ref Height"/>
+            <common:MvtNumBox Margin="0, 0, 0, 5" Grid.Row="0" Grid.Column="1" Text="{Binding RefHeight}" HorizontalContentAlignment="Right"/>
+            <TextBlock   Margin="0, 0, 0, 5"    Grid.Row="0" Grid.Column="2" Text=" mm" FontSize="{StaticResource FontSizeStd}"/>
+
+            <TextBlock    Margin="0, 0, 0, 5"   Grid.Row="1" Grid.Column="0" Text="Wiping Height"/>
+            <common:MvtNumBox  Margin="0, 0, 0, 5" Grid.Row="1" Grid.Column="1" Text="{Binding WipeHeight}" HorizontalContentAlignment="Right"/>
+            <TextBlock     Margin="0, 0, 0, 5"  Grid.Row="1" Grid.Column="2" Text=" mm" FontSize="{StaticResource FontSizeStd}"/>
+
+            <TextBlock    Margin="0, 0, 0, 5"   Grid.Row="2" Grid.Column="0" Text="Capping Height"/>
+            <common:MvtNumBox  Margin="0, 0, 0, 5" Grid.Row="2" Grid.Column="1" Text="{Binding CapHeight}" HorizontalContentAlignment="Right"/>
+            <TextBlock      Margin="0, 0, 0, 5" Grid.Row="2" Grid.Column="2" Text=" mm" FontSize="{StaticResource FontSizeStd}"/>
+
+            <TextBlock    Margin="0, 0, 0, 5"   Grid.Row="3" Grid.Column="0" Text="Adjust Position"/>
+            <common:MvtNumBox Margin="0, 0, 0, 5" Grid.Row="3" Grid.Column="1" Text="{Binding AdjustPos}" HorizontalContentAlignment="Right"/>
+            <TextBlock     Margin="0, 0, 0, 5"  Grid.Row="3" Grid.Column="2" Text=" mm" FontSize="{StaticResource FontSizeStd}"/>
+
+            <TextBlock    Margin="0, 0, 0, 5"   Grid.Row="4" Grid.Column="0" Text="FlightTime"/>
+            <common:MvtNumBox Margin="0, 0, 0, 5" Grid.Row="4" Grid.Column="1" Text="{Binding ManualFlightTimeComp}" HorizontalContentAlignment="Right" x:Name="ManualFlightTimeComp"/>
+            <TextBlock     Margin="0, 0, 0, 5"  Grid.Row="4" Grid.Column="2" Text=" mm" FontSize="{StaticResource FontSizeStd}"/>
+
+        </Grid>
+    </GroupBox>
+</UserControl>

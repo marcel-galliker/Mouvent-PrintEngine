@@ -141,7 +141,7 @@ namespace RX_DigiPrint.Services
 
         private void TcpIpThread()
         {
-            byte[] buffer = new Byte[4096];
+            byte[] buffer = new Byte[6*1024];
 
             Int32 read, len;
             int size;

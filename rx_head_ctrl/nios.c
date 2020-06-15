@@ -243,8 +243,8 @@ int  nios_NiosLoaded(void)
 //--- _sample_wf ----------------------------------------
 
 #define OLD_WF_OFFSET		-20
-#define OLD_ON_OFFSET		  0 // 0.6 µs
-#define OLD_OFF_OFFSET		 48 // 0.6 µs
+#define OLD_ON_OFFSET		  0 // 0.6 ï¿½s
+#define OLD_OFF_OFFSET		 48 // 0.6 ï¿½s
 #define OLD_ALL_ON_OFFSET	 -50	// ALL-ON has to be set 50 cycles before last sub-pulse starts
 #define FP_VALUE_30			1564
 #define FP_VALUE_36			1820	//for test only
@@ -570,6 +570,7 @@ int  nios_is_firepulse_on(void)
 //--- nios_set_user_eeprom ------------------------------------
 void nios_set_user_eeprom(int no, SHeadEEpromMvt *data)
 {
+	memcpy(&RX_HBStatus[0].head[no].eeprom_mvt, data, sizeof(RX_HBStatus[0].head[no].eeprom_mvt));
 	if (_NiosMem)
 	{
 		if (sizeof(SHeadEEpromMvt)<=sizeof(_NiosMem->cfg.user_eeprom[no])) 
@@ -641,7 +642,7 @@ void nios_check_errors(void)
 			if (_NiosStat->error.cooler_temp_hw)		ErrorFlag(WARN,		 (UINT32*)&RX_HBStatus[0].err, err_therm_cooler,      0, "Cooler Thermistor hardware");
     		if (_NiosStat->error.cooler_overheated)	
 	    	{
-	    		if (ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err, err_cooler_overheated, 0, "Cooler too hot (%d°C)", _NiosStat->cooler_temp / 1000))
+	    		if (ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err, err_cooler_overheated, 0, "Cooler too hot (%dÂ°C)", _NiosStat->cooler_temp / 1000))
 		    	{
 		    	//	fpga_overheated();		    		
 		    	}

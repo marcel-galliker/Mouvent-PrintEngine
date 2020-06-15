@@ -30,7 +30,17 @@ namespace RX_Common
         public static void Invoke(Action action)
         {
             if (action==null) return;
-            if (RxBindable._Dispatcher != null) RxBindable._Dispatcher.Invoke(action);
+            if (RxBindable._Dispatcher != null)
+            {
+                try
+                {
+                    RxBindable._Dispatcher.Invoke(action);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                }
+            }
             else
             {
                 try { action(); }

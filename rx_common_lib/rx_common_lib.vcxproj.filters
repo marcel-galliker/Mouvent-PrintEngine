@@ -85,6 +85,9 @@
     <ClCompile Include="rx_list.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="rx_flz.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bmp.h">
@@ -185,6 +188,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="rx_list.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rx_flz.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

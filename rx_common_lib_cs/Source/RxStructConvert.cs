@@ -19,7 +19,7 @@ namespace RX_Common
         //--- ToBuffer --------------------------------------------
         public static void ToBuffer<Type>(out byte[] dst, Type src)
         {
-            int size    = Marshal.SizeOf(typeof(Type));            
+            int size    = Marshal.SizeOf(typeof(Type));
             IntPtr ptr  = Marshal.AllocHGlobal(size);
             Marshal.StructureToPtr(src, ptr, false);
             dst = new byte[size];

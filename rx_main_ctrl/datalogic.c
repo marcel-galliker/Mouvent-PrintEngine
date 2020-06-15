@@ -17,6 +17,7 @@
 #include "rx_file.h"
 #include "rx_threads.h"
 #include "errno.h"
+#include "setup.h"
 #include "datalogic.h"
 
 //--- defines ------------------------------------
@@ -151,7 +152,7 @@ static void *_dl_thread(void *lpParameter)
 						{	
 							if(_configured_add(_Scanner[no].scannerSN))
 							{								
-								_dl_configure(_Scanner[no].handle);
+							//	_dl_configure(_Scanner[no].handle);
 							}
 
 							//--- set non blocking ---------------------------------------
@@ -176,11 +177,18 @@ static void *_dl_thread(void *lpParameter)
 						if(len>0)
 						{
 							buf[len-1]=0;
-							if (!strcmp(buf, IDENTIFY_STR))
+							if (_Identify>=0 && !strcmp(buf, IDENTIFY_STR))
 							{
-								ErrorEx(dev_fluid, _Identify, LOG, 0, "Identified Barcode Scanner >>%s<< SAVE CONFIGURATION!", _Scanner[no].scannerSN);
+								ErrorEx(dev_fluid, _Identify, LOG, 0, "Identified Barcode Scanner >>%s<<", _Scanner[no].scannerSN);
 								strcpy(RX_Config.inkSupply[_Identify].scannerSN, _Scanner[no].scannerSN);
+								{
+									SRxConfig cfg;
+									setup_config(PATH_USER FILENAME_CFG, &cfg, READ);
+									strcpy(cfg.inkSupply[_Identify].scannerSN, _Scanner[no].scannerSN);
+									setup_config(PATH_USER FILENAME_CFG, &RX_Config, WRITE);
+								}								
 								_Identify = -1;
+								_dl_configure(_Scanner[no].handle);
 								for (i=0; i<SIZEOF(_Scanner); i++)
 								{
 									if (_Scanner[i].handle>0) 
@@ -193,11 +201,8 @@ static void *_dl_thread(void *lpParameter)
 							}
 							else
 							{
-								if (_Identify<0)
-								{
 									ErrorEx(dev_fluid, _Scanner[no].isNo, LOG, 0, "TTY%d: Got Barcode >>%s<<", no, buf);
 									strcpy(_Scanner[no].code, buf);																	
-								}
 								write(_Scanner[no].handle, "OFF", 3);
 								close(_Scanner[no].handle);
 								_Scanner[no].handle	= 0;	
@@ -221,10 +226,14 @@ static void *_dl_thread(void *lpParameter)
 void dl_trigger(int isNo)
 {	
 	int i;
+	printf("dl_trigger(isNo=%d)\n", isNo);
 	for (i=0; i<SIZEOF(_Scanner); i++)
 	{
 		if (_Scanner[i].handle>0 && (isNo<0 || _Scanner[i].isNo==isNo)) 
+		{
+			printf("Scanner[%d]: Write >>ON<<\n", i);
 			write(_Scanner[i].handle, "ON", 2);			
+	}
 	}
 }	
 

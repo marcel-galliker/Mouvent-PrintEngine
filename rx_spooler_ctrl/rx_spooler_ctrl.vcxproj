@@ -54,7 +54,7 @@
     <ProjectGuid>{244C0F1D-D67E-44C8-AF32-3B67E0290272}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>RxSpoolCtrlwin</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -72,7 +72,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-Remote|x64'" Label="Configuration">
@@ -91,7 +91,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -121,6 +121,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 10.2.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -145,8 +146,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IntDir>$(projectDir)..\_temp\$(MSBuildProjectName)\$(Configuration)\</IntDir>
-    <OutDir>$(ProjectDir)..\_out\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)..\_temp\$(MSBuildProjectName)\$(Configuration)_$(Platform)\</IntDir>
+    <OutDir>$(ProjectDir)..\_out\$(Configuration)_$(Platform)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-Remote|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -155,8 +156,10 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(SolutionDir)_out\$(Configuration)_$(Platform)\</OutDir>
-    <IntDir>$(SolutionDir)_temp\$(MSBuildProjectName)\$(Configuration)_$(Platform)\</IntDir>
+    <OutDir>$(ProjectDir)..\_out\$(Configuration)_$(Platform)\</OutDir>
+    <IntDir>$(ProjectDir)..\_temp\$(MSBuildProjectName)\$(Configuration)_$(Platform)\</IntDir>
+    <IgnoreImportLibrary>true</IgnoreImportLibrary>
+    <GenerateManifest>false</GenerateManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-Remote|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -170,8 +173,9 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)_out\$(Configuration)_$(Platform)\</OutDir>
-    <IntDir>$(SolutionDir)_temp\$(MSBuildProjectName)\$(Configuration)_$(Platform)\</IntDir>
+    <OutDir>$(ProjectDir)..\_out\$(Configuration)_$(Platform)\</OutDir>
+    <IntDir>$(ProjectDir)..\_temp\$(MSBuildProjectName)\$(Configuration)_$(Platform)\</IntDir>
+    <GenerateManifest>false</GenerateManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-lx|Win32'">
     <NMakeBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /build "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeBuildCommandLine>
@@ -181,10 +185,10 @@
     <IncludePath />
     <ReferencePath />
     <LibraryPath />
-    <NMakeIncludeSearchPath>$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\c++\5;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\x86_64-linux-gnu\c++\5;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\c++\5\backward;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0001\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0003\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0002\include-fixed;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\x86_64-linux-gnu;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include;..\rx_ink_lib;..\rx_common_lib;..\rx_rip_lib;..\rx_tif_lib;..\Externals\Tec-it\Linux\Tec-it-11\include\libtbarcode11;..\Externals\libtiff;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\c++\4.9;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\x86_64-linux-gnu\c++\4.9;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\c++\4.9\backward;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0004\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0003\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0005\include-fixed;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\x86_64-linux-gnu;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include;..\rx_ink_lib;..\rx_common_lib;..\rx_rip_lib;..\rx_tif_lib;..\rx_screen_lib;..\Externals\Tec-it\Linux\Tec-it-11\include\libtbarcode11;..\Externals\libtiff;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(ProjectDir)\gcc_Debug-lx.h;$(VISUALGDB_DIR)\gcc_compat.h;$(NMakeForcedIncludes)</NMakeForcedIncludes>
-    <OutDir>$(SolutionDir)_out\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)_temp\$(MSBuildProjectName)\$(Configuration)\</IntDir>
+    <OutDir>$(ProjectDir)..\_out\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)..\_temp\$(MSBuildProjectName)\$(Configuration)\</IntDir>
     <NMakePreprocessorDefinitions>__VisualGDB_CFG_Debug_lx;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-lx|x64'">
@@ -207,9 +211,9 @@
     <IncludePath />
     <ReferencePath />
     <LibraryPath />
-    <NMakeIncludeSearchPath>$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\c++\4.9;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\x86_64-linux-gnu\c++\4.9;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\c++\4.9\backward;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0004\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0003\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0005\include-fixed;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\x86_64-linux-gnu;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include;..\rx_ink_lib;..\rx_common_lib;..\rx_rip_lib;..\rx_tif_lib;..\Externals\Tec-it\Linux\Tec-it-11\include\libtbarcode11;..\Externals\libtiff;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\c++\4.9;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\x86_64-linux-gnu\c++\4.9;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\c++\4.9\backward;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0004\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0003\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0005\include-fixed;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\x86_64-linux-gnu;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include;..\rx_ink_lib;..\rx_common_lib;..\rx_rip_lib;..\rx_tif_lib;..\rx_screen_lib;..\Externals\Tec-it\Linux\Tec-it-11\include\libtbarcode11;..\Externals\libtiff;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(ProjectDir)\gcc_Release-lx.h;$(VISUALGDB_DIR)\gcc_compat.h;$(NMakeForcedIncludes)</NMakeForcedIncludes>
-    <OutDir>$(SolutionDir)_out\$(Configuration)\</OutDir>
+    <OutDir>$(ProjectDir)..\_out\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_temp\$(MSBuildProjectName)\$(Configuration)\</IntDir>
     <NMakePreprocessorDefinitions>__VisualGDB_CFG_Release_lx;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
   </PropertyGroup>
@@ -257,18 +261,18 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WIN32;_DEBUG;DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalUsingDirectories>
       </AdditionalUsingDirectories>
-      <AdditionalIncludeDirectories>../rx_ink_lib;../rx_common_lib;../rx_rip_lib;..\Externals\Tec-it\Win\TBarCode11\Include;../rx_tif_lib;../Externals/libtiff</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../rx_ink_lib;../rx_common_lib;../rx_screen_lib;../rx_rip_lib;..\Externals\Tec-it\Win\TBarCode11\Include;../rx_tif_lib;../Externals/libtiff</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(OutDir);..\Externals\Tec-it\Win\TBarCode11\Lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Ws2_32.lib;rx_common_lib.lib;TinyXML.lib;rx_rip_lib.lib;TBarCode11.lib;rx_tif_lib.lib</AdditionalDependencies>
+      <AdditionalDependencies>Ws2_32.lib;rx_common_lib.lib;TinyXML.lib;rx_rip_lib.lib;TBarCode11.lib;rx_tif_lib.lib;rx_screen_lib.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug-Remote|Win32'">
@@ -301,15 +305,25 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalUsingDirectories>
       </AdditionalUsingDirectories>
-      <AdditionalIncludeDirectories>../rx_ink_lib;../rx_common_lib;../rx_rip_lib;../Externals/Tec-it/Win/TBarCode11/Include;../rx_tif_lib;../Externals/libtiff</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../rx_ink_lib;../rx_common_lib;../rx_rip_lib;../Externals/Tec-it/Win/TBarCode11/Include;../rx_tif_lib;../rx_screen_lib;../Externals/libtiff</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+      <SupportJustMyCode>false</SupportJustMyCode>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(OutDir);..\Externals\Tec-it\Win\TBarCode11\Lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Ws2_32.lib;rx_common_lib.lib;rx_rip_lib.lib;TBarCode11_x64.lib;Shell32.lib;Iphlpapi.lib;rx_tif_lib.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir);..\Externals\Tec-it\Win\TBarCode11\Lib;..\Externals\cuda\lib\x64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Ws2_32.lib;rx_common_lib.lib;TinyXML.lib;rx_rip_lib.lib;TBarCode11_x64.lib;Shell32.lib;Iphlpapi.lib;rx_tif_lib.lib;rx_slicescreen_lib.lib;cudart.lib</AdditionalDependencies>
     </Link>
+    <CudaCompile>
+      <TargetMachinePlatform>64</TargetMachinePlatform>
+      <AdditionalCompilerOptions>
+      </AdditionalCompilerOptions>
+    </CudaCompile>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug-Remote|x64'">
     <ClCompile>
@@ -347,7 +361,7 @@ Exit 0</Command>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>../rx_ink_lib;../rx_common_lib;../rx_rip_lib;..\Externals\Tec-it\Win\TBarCode11\Include;../rx_tif_lib;../Externals/libtiff</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../rx_ink_lib;../rx_common_lib;../rx_rip_lib;..\Externals\Tec-it\Win\TBarCode11\Include;../rx_tif_lib;../rx_screen_lib;../Externals/libtiff</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
@@ -355,7 +369,7 @@ Exit 0</Command>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>Ws2_32.lib;rx_common_lib.lib;TinyXML.lib;rx_rip_lib.lib;rx_tif_lib.lib;TBarCode11.lib;Shell32.lib</AdditionalDependencies>
+      <AdditionalDependencies>Ws2_32.lib;rx_common_lib.lib;TinyXML.lib;rx_rip_lib.lib;rx_tif_lib.lib;TBarCode11.lib;Shell32.lib;rx_screen_lib.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(OutDir);..\Externals\Tec-it\Win\TBarCode11\Lib</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
@@ -379,26 +393,28 @@ copy "$(OutDir)rx_rip_lib.dll" "d:\Radex\bin\spooler\win\"</Command>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>../rx_common_lib;../rx_rip_lib;..\Externals\Tec-it\Win\TBarCode11\Include;../Externals/libtiff</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../rx_ink_lib;../rx_common_lib;../rx_rip_lib;../Externals/Tec-it/Win/TBarCode11/Include;../rx_tif_lib;../rx_screen_lib;../Externals/libtiff</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>Ws2_32.lib;rx_common_lib.lib;rx_rip_lib.lib;TBarCode11_x64.lib;Shell32.lib;Iphlpapi.lib;</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(OutDir);..\Externals\Tec-it\Win\TBarCode11\Lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Ws2_32.lib;rx_common_lib.lib;TinyXML.lib;rx_rip_lib.lib;TBarCode11_x64.lib;Shell32.lib;Iphlpapi.lib;rx_tif_lib.lib;rx_slicescreen_lib.lib;cudart.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir);..\Externals\Tec-it\Win\TBarCode11\Lib;..\Externals\cuda\lib\x64</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>mkdir "$(SolutionDir)bin\win"
-copy "$(OutDir)$(TargetName)$(TargetExt)" "$(SolutionDir)bin\win\"
-mkdir "d:\Radex\bin\spooler\win"
-copy "$(OutDir)$(TargetName)$(TargetExt)" "d:\Radex\bin\spooler\win\"</Command>
+      <Command>mkdir "$(ProjectDir)..\bin\win"
+copy "$(OutDir)$(TargetName)$(TargetExt)" "$(ProjectDir)..\bin\win\"
+</Command>
     </PostBuildEvent>
     <PreBuildEvent>
       <Command>..\VersionUpdate $(ProjectDir)version.c</Command>
     </PreBuildEvent>
+    <CudaCompile>
+      <TargetMachinePlatform>64</TargetMachinePlatform>
+    </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -411,7 +427,8 @@ copy "$(OutDir)$(TargetName)$(TargetExt)" "d:\Radex\bin\spooler\win\"</Command>
     <ClInclude Include="gcc_Debug.h" />
     <ClInclude Include="gcc_Release.h" />
     <ClInclude Include="jet_correction.h" />
-    <ClInclude Include="rx_flz.h" />
+    <ClInclude Include="rx_slicescreen_fms_1x3_gpu.h" />
+    <ClInclude Include="screening.h" />
     <ClInclude Include="spool_arp.h" />
     <ClInclude Include="test.h" />
     <ClInclude Include="head_client.h" />
@@ -425,8 +442,8 @@ copy "$(OutDir)$(TargetName)$(TargetExt)" "d:\Radex\bin\spooler\win\"</Command>
     <ClCompile Include="data.c" />
     <ClCompile Include="head_client.c" />
     <ClCompile Include="jet_correction.c" />
-    <ClCompile Include="rx_flz.c" />
     <ClCompile Include="rx_spooler_ctrl.c" />
+    <ClCompile Include="screening.c" />
     <ClCompile Include="spool_rip.c" />
     <ClCompile Include="rs_tec-it.cpp" />
     <ClCompile Include="test.c" />
@@ -441,7 +458,11 @@ copy "$(OutDir)$(TargetName)$(TargetExt)" "d:\Radex\bin\spooler\win\"</Command>
     </None>
     <None Include="rx_spooler_ctrl-Release-lx.vgdbsettings" />
   </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="rx_slicescreen_fms_1x3_gpu.cu" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 10.2.targets" />
   </ImportGroup>
 </Project>

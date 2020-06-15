@@ -54,6 +54,7 @@ static RX_Bitmap	*_ColorBmp;
 //--- prototypes ---------------------------------------------------
 static void _copy_bmp1(RX_Bitmap *rxbmp, int x, int y, FT_Bitmap *ftbmp, int black);
 static void _copy_bmp2(RX_Bitmap *rxbmp, int x, int y, FT_Bitmap *ftbmp, int black);
+static void _copy_bmp8(RX_Bitmap *rxbmp, int x, int y, FT_Bitmap *ftbmp, int black);
 
 //--- _load_library ---------------------------------------
 static void _load_library(void)
@@ -369,6 +370,88 @@ static void _copy_bmp2(RX_Bitmap *rxbmp, int x, int y, FT_Bitmap *ftbmp, int bla
 	}
 }
 
+//--- copy_bmp8 -------------------------------------------------------------
+static void _copy_bmp8(RX_Bitmap *rxbmp, int x, int y, FT_Bitmap *ftbmp, int black)
+{
+	int 	h, width, x0, xx;
+	int     lineWidth;
+	int		dotSize;
+	BYTE	*src;
+	BYTE	*dst;
+	int w;
+
+	if (x>=rxbmp->width) return;
+	if (y>rxbmp->height) return;
+
+	lineWidth = rxbmp->lineLen;
+	src = ftbmp->buffer;	
+	h=ftbmp->rows;
+	if (y<0) 
+	{
+		src-=y*ftbmp->pitch;
+		h+=y;
+		y=0;
+	}
+	dst = rxbmp->buffer+y*lineWidth;
+	if (y+h>rxbmp->height) h=rxbmp->height-y;
+	if (x+ftbmp->pitch*8>rxbmp->width)	width=rxbmp->width-x;
+	else								width=ftbmp->width;
+	if (h<=0) return;
+	x0=(x<0)?-x:0;
+	if (_ColorBmp && _ColorBmp->buffer)
+	{
+		dotSize = 0x03<<6;
+		BYTE *color;
+		BYTE *d;
+		BYTE mask;		
+		
+		Error(ERR_ABORT, 0, "_copy_bmp8: Not Implemented");
+
+		color = dst-rxbmp->buffer+_ColorBmp->buffer;
+		if (h<=0) return;
+		for (; h; h--)
+		{
+			for (w=x0, xx=x+x0; w<width; w++, xx++)
+			{
+				if (src[w>>3] & (0x80>>(w&0x07))) 
+				{	
+					mask  = dotSize >> (2*(xx&0x03));
+					d  = &dst[xx>>2];
+					*d = (*d&~mask) | (color[xx>>2] & mask);
+				}
+			}
+			/*
+			memcpy(dst, buf, bmp->pitch);
+			buf+=bmp->pitch;
+			*/
+			src   += ftbmp->pitch;
+			dst   += lineWidth;
+			color += lineWidth; // _ColorBmp->lineLen;
+		}
+	}
+	else
+	{
+		dotSize = 0xff;
+		for (; h; h--)
+		{
+			for (w=x0, xx=x+x0; w<width; w++, xx++)
+			{
+				if (src[w >> 3] & (0x80 >> (w & 0x07)))
+				{
+					if (black) dst[xx] = dotSize;	// black
+					else	   dst[xx] = 0;			// white
+				}
+			}
+			/*
+			memcpy(dst, buf, bmp->pitch);
+			buf+=bmp->pitch;
+			*/
+			src+=ftbmp->pitch;
+			dst += lineWidth;
+		}
+	}
+}
+
 //--- ft_load_font -------------------------------------------
 FT_Face ft_load_font(char *fontname)
 {
@@ -473,7 +556,8 @@ void ft_text_out(RX_Bitmap *pBmp, int x, int y, FT_Face font, int size, int orie
 
 		//--- draw the bitmap -------------------------------
 		if (pBmp->bppx==1) _copy_bmp1(pBmp, x + slot->bitmap_left, y - slot->bitmap_top, &slot->bitmap, black);
-		else			   _copy_bmp2(pBmp, x + slot->bitmap_left, y - slot->bitmap_top, &slot->bitmap, black);
+		else if (pBmp->bppx==2)	_copy_bmp2(pBmp, x + slot->bitmap_left, y - slot->bitmap_top, &slot->bitmap, black);
+		else if (pBmp->bppx==8) _copy_bmp8(pBmp, x + slot->bitmap_left, y - slot->bitmap_top, &slot->bitmap, black);
 		
 		//--- increment position ----------------------------
 		x += slot->advance.x >> 6; 
@@ -637,7 +721,8 @@ void ft_text_out(
 
 		//--- draw the bitmap -------------------------------
 		if (pBmp->bppx == 1) _copy_bmp1(pBmp, x + slot->bitmap_left, y - slot->bitmap_top, &slot->bitmap, black);
-		else			     _copy_bmp2(pBmp, x + slot->bitmap_left, y - slot->bitmap_top, &slot->bitmap, black);
+		else if (pBmp->bppx == 2)	_copy_bmp2(pBmp, x + slot->bitmap_left, y - slot->bitmap_top, &slot->bitmap, black);
+		else if (pBmp->bppx == 8)	_copy_bmp8(pBmp, x + slot->bitmap_left, y - slot->bitmap_top, &slot->bitmap, black);
 
 		//--- increment position ----------------------------
 		x += slot->advance.x >> 6;

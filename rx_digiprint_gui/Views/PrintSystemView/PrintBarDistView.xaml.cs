@@ -36,7 +36,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
              {
                 _ShowControls();
              }
-             if (e.PropertyName.Equals("ColorCnt") || e.PropertyName.Equals("HeadCnt"))
+             if (e.PropertyName.Equals("ColorCnt") || e.PropertyName.Equals("HeadsPerColor"))
              {
                 _CreateControls();
                 _ShowControls();
@@ -47,14 +47,14 @@ namespace RX_DigiPrint.Views.PrintSystemView
         private void _CreateControls()
         {
             int i, n;
-            int headCnt = RxGlobals.PrintSystem.ColorCnt*(int)RxGlobals.PrintSystem.HeadCnt;
+            int headCnt = RxGlobals.PrintSystem.ColorCnt*(int)RxGlobals.PrintSystem.HeadsPerColor;
             n = (headCnt+3)/4;
             if (n!=Panel.Children.Count)
             {
                 Panel.Children.RemoveRange(0, Panel.Children.Count);
                 for (i=0; i<n; i++)
                 {                
-                    PrintHeadDistView view = new PrintHeadDistView(i, (int)RxGlobals.PrintSystem.HeadCnt);
+                    PrintHeadDistView view = new PrintHeadDistView(i, (int)RxGlobals.PrintSystem.HeadsPerColor);
                     Panel.Children.Add(view);
                 }
             }
@@ -64,11 +64,11 @@ namespace RX_DigiPrint.Views.PrintSystemView
         private void _ShowControls()
         {
             int i, inkSupply;
-            int headCnt=RxGlobals.PrintSystem.HeadCnt;
+            int headCnt=RxGlobals.PrintSystem.HeadsPerColor;
             if (headCnt==0) return;
             for (i=0; i<Panel.Children.Count; i++)
             {
-                inkSupply = RxGlobals.PrintSystem.IS_Order[(int)((i*4)/RxGlobals.PrintSystem.HeadCnt)];
+                inkSupply = RxGlobals.PrintSystem.IS_Order[(int)((i*4)/RxGlobals.PrintSystem.HeadsPerColor)];
                 if (RxGlobals.PrintSystem.AllInkSupplies || headCnt<4) 
                     Panel.Children[i].Visibility = (RxGlobals.PrintSystem.AllInkSupplies || (inkSupply/headCnt)==(RxGlobals.PrintSystem.CheckedInkSupply/headCnt)) ? Visibility.Visible : Visibility.Collapsed;
                 else

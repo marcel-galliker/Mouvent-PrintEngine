@@ -1,0 +1,213 @@
+﻿<UserControl x:Class="RX_DigiPrint.Views.PrintSystemExtendedView.PrintHeadView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             DataContextChanged="PrintHeadViewDataContextChanged"
+             xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
+             mc:Ignorable="d" 
+             d:DesignHeight="520" d:DesignWidth="300">
+    
+    <UserControl.Resources>
+        <SolidColorBrush x:Key="GridAlternate" Color= "#fffafafa"/>
+        <Style x:Key="StatusButton" TargetType="{x:Type Button}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Grid Background="Transparent">
+                            <Ellipse HorizontalAlignment="Center" VerticalAlignment="Center" Width="10" Height ="10" Margin="5" Fill ="{TemplateBinding BorderBrush}"/>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+       
+    </UserControl.Resources>
+    
+    
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Background="{StaticResource GridAlternate}"></Border>
+        <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Background="{StaticResource GridAlternate}"></Border>
+        <Border Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" Background="{StaticResource GridAlternate}"></Border>
+
+        <Border Grid.Row="0" Grid.RowSpan="7" Grid.Column="1" BorderBrush="WhiteSmoke" BorderThickness="0,0,2,0" ></Border>
+        
+        <TextBlock Margin="0, 0, 5, 0" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="0" Text="{Binding Name}" VerticalAlignment="Center" HorizontalAlignment="Center"></TextBlock>
+
+        <Button VerticalAlignment="Center" Margin="0, 0, 5, 0" Style="{StaticResource PrintSystemStatusButton}"
+                    BorderBrush="{Binding Connected, Converter={StaticResource InkSupplyStatusColorConverter_Connected}}" Grid.Row="1" Grid.Column="0"></Button>
+        <TextBlock Margin="0, 0, 5, 0" Grid.Column="1" Grid.Row="1" VerticalAlignment="Center"
+                   Text="{Binding Connected, Converter={StaticResource InkSupplyStatusTextConverter_Connected}}"></TextBlock>
+
+        <Button VerticalAlignment="Center" Margin="0, 0, 5, 0" Style="{StaticResource PrintSystemStatusButton}"
+                    BorderBrush="{Binding Err, Converter={StaticResource InkSupplyStatusColorConverter_Int32}}"
+                    Grid.Row="2" Grid.Column="0"></Button>
+        <TextBlock VerticalAlignment="Center"
+                   Margin="0, 0, 5, 0" Grid.Column="1" Grid.Row="2" Text="{Binding Err, Converter={StaticResource InkSupplyStatusTextConverter_Int32}}"></TextBlock>
+
+        <TextBlock Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Center" HorizontalAlignment="Center"
+                       Text="{Binding CtrlMode, Converter={StaticResource CtrlMode_Str}}"/>
+        
+        <Button VerticalAlignment="Center" Margin="0, 0, 5, 0" Style="{StaticResource PrintSystemStatusButton}"
+                    BorderBrush="{Binding FlowResistance, Converter={StaticResource FlowResistanceConverter}}"
+                    Grid.Row="4" Grid.Column="0"></Button>
+        <TextBlock VerticalAlignment="Center" Margin="0, 0, 5, 0" Grid.Column="1" Grid.Row="4" Text="{Binding FlowResistance, StringFormat=N2}"></TextBlock>
+
+        <Button VerticalAlignment="Center" Margin="0, 0, 5, 0" Style="{StaticResource PrintSystemStatusButton}"
+                    BorderBrush="{Binding TempReady, Converter={StaticResource InkSupplyStatusColorConverter_TempReady}}" Grid.Row="5" Grid.Column="0"></Button>
+        <TextBlock Margin="0, 0, 5, 0" Grid.Column="1" Grid.Row="5" VerticalAlignment="Center">
+            <TextBlock.Text>
+                <MultiBinding Converter="{StaticResource HeadMultiVal_ConverterTemp}">
+                    <Binding Path="TempHead"></Binding>
+                    <Binding Path="TempSetpoint"></Binding>
+                </MultiBinding>
+            </TextBlock.Text>
+        </TextBlock>
+
+        <Grid x:Name="ServiceGrid" Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="3" IsVisibleChanged="ServiceGrid_IsVisibleChanged">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30" MaxHeight="30"/>
+                <RowDefinition Height="30" MaxHeight="30"/>
+                <RowDefinition Height="30" MaxHeight="30"/>
+                <RowDefinition Height="30" MaxHeight="30"/>
+                <RowDefinition Height="30" MaxHeight="30"/>
+                <RowDefinition Height="30" MaxHeight="30"/>
+                <RowDefinition Height="30" MaxHeight="30"/>
+                <RowDefinition Height="30" MaxHeight="30"/>
+                <RowDefinition Height="30" MaxHeight="30"/>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
+            
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Background="{StaticResource GridAlternate}"></Border>
+            <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Background="{StaticResource GridAlternate}"></Border>
+            <Border Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" Background="{StaticResource GridAlternate}"></Border>
+            <Border Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="3" Background="{StaticResource GridAlternate}"></Border>
+            <Border Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="3" Background="{StaticResource GridAlternate}"></Border>
+
+            <Border Grid.Row="0" Grid.RowSpan="10" Grid.Column="1" BorderBrush="WhiteSmoke" BorderThickness="0,0,2,0" ></Border>
+
+            <TextBlock Margin="0, 0, 5, 0" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center"
+                       Text="{Binding TempCond, Converter={StaticResource HeadVal_ConverterTemp}}"></TextBlock>
+
+            <common:MvtNumBox Margin="2,0,2,0" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                              HorizontalContentAlignment="Right" x:Name="FpVoltage"
+                              TextChanged="FpVoltage_TextChanged" IsInt="True" Min="0" Max="120"/>
+
+            <TextBlock Margin="0, 0, 5, 0" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" VerticalAlignment="Center" HorizontalAlignment="Center">
+                <TextBlock.Text>
+                    <MultiBinding Converter="{StaticResource HeadMultiVal_SetPointAsText_Converter10}">
+                        <Binding Path="PresIn"></Binding>
+                        <Binding Path="PresIn_str"></Binding>
+                    </MultiBinding>
+                </TextBlock.Text>
+            </TextBlock>
+
+            <TextBlock Margin="0, 0, 5, 0" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="3" VerticalAlignment="Center" HorizontalAlignment="Center">
+                <TextBlock.Text>
+                    <MultiBinding Converter="{StaticResource HeadMultiVal_SetPoint_Converter10}">
+                        <Binding Path="PresOut"></Binding>
+                        <Binding Path="PresOut_diff"></Binding>
+                    </MultiBinding>
+                </TextBlock.Text>
+            </TextBlock>
+
+            <TextBlock Margin="0, 0, 5, 0" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="4" VerticalAlignment="Center" HorizontalAlignment="Center">
+                <TextBlock.Text>
+                    <MultiBinding Converter="{StaticResource HeadMultiVal_SetPoint_Converter10}">
+                        <Binding Path="Meniscus"></Binding>
+                        <Binding Path="Meniscus_setpoint"></Binding>
+                    </MultiBinding>
+                </TextBlock.Text>
+            </TextBlock>
+
+            <TextBlock Margin="0, 0, 5, 0" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="5" VerticalAlignment="Center" HorizontalAlignment="Center">
+                <TextBlock.Text>
+                    <MultiBinding Converter="{StaticResource HeadMultiVal_PumpSpeedConverter}">
+                        <Binding Path="PumpFeedback"></Binding>
+                        <Binding Path="PumpSpeed"></Binding>
+                    </MultiBinding>
+                </TextBlock.Text>
+            </TextBlock>
+
+            <TextBlock Margin="0, 0, 5, 0" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="6" VerticalAlignment="Center" HorizontalAlignment="Center"
+                       Text="{Binding Valve, Converter={StaticResource HeadValve_Converter}}"/>
+
+            <TextBlock Margin="0, 0, 5, 0" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="7" VerticalAlignment="Center" HorizontalAlignment="Center"
+                       Text="{Binding PrintingTime}"/>
+
+            <TextBlock Margin="0, 0, 5, 0" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="8" VerticalAlignment="Center" HorizontalAlignment="Center">
+                <TextBlock.Text>
+                    <MultiBinding Converter="{StaticResource HeadMultiVal_Int_Converter}">
+                        <Binding Path="ImgInCnt"></Binding>
+                        <Binding Path="ImgBuf"></Binding>
+                    </MultiBinding>
+                </TextBlock.Text>
+            </TextBlock>
+            
+            <common:MvtButton
+            x:Name="CmdButton" Margin="0, 10, 0, 0" Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="2"
+                              Click="Command_Clicked" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeS}"
+                              HorizontalAlignment="Center" IsEnabled="{Binding IsValid}">
+                <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="15" Height="15" 
+                                                Kind="DotsHorizontal"></iconPacks:PackIconMaterial>
+            </common:MvtButton>
+        </Grid> 
+
+        <rx:RxPopup x:Name="CmdPopup" 
+               PlacementTarget="{Binding ElementName=CmdButton}"
+               Width="auto"
+               MinWidth="100" IsHitTestVisible="False"
+               OpacityMask="White"
+               >
+            <Grid Background="White">
+                <GroupBox x:Name="CommandGrid" Width="150" Style="{StaticResource MvtGroupBox}" Header="^">
+                    <StackPanel Margin="10,2">
+                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Content="OFF" Height="40" Click="OFF_Clicked"
+                                x:Name="Button_Off"/>
+                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Content="Print"  Height="40"
+                                Click="Print_Clicked" Padding="10" x:Name="Button_Print"/>
+
+                        <Rectangle Fill="{StaticResource Mouvent.MainColorBrush}" HorizontalAlignment="Stretch" Height="1" Margin="-16, 8"/>
+
+                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Purge Micro" Click="PurgeMicro_Clicked"
+                                Padding="10" x:Name="Button_PurgeMicro"/>
+                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Purge Soft" Click="PurgeSoft_Clicked"
+                                Padding="10" x:Name="Button_PurgeSoft"/>
+                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Purge"
+                                Click="Purge_Clicked"/>
+                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Purge Hard"
+                                Click="PurgeHard_Clicked" x:Name="Button_PurgeHard"/>
+                        <Rectangle Fill="{StaticResource Mouvent.MainColorBrush}" HorizontalAlignment="Stretch" Height="1" Margin="-16, 8"/>
+                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Wipe" Click="Wipe_Clicked"
+                                x:Name="Button_Wipe"/>
+                    </StackPanel>
+                </GroupBox>
+            </Grid>
+        </rx:RxPopup>
+
+    </Grid>
+</UserControl>

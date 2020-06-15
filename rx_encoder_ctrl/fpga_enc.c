@@ -561,6 +561,7 @@ void fpga_enc_config(int inNo, SEncoderCfg *pCfg, int restart)
 	
 	if (pCfg->simulation)
 	{
+		Error(WARN, 0, "Encoder in SIMULATION");
 		for (i=0; i<SIZEOF(Fpga->cfg.pg); i++)
 		{	
 			Fpga->cfg.encIn[i].reset_pos		= 0;
@@ -1036,7 +1037,7 @@ void fpga_pg_init(int restart)
 	int pgNo;
 	int tio=0;
 	
-	Error(LOG, 0, "fpga_pg_init(restart=%d)", restart);
+//	Error(LOG, 0, "fpga_pg_init restart=%d", restart);
 
 	TrPrintfL(TRUE, "fpga_pg_init");
 

@@ -134,30 +134,35 @@ static int _handle_spool_msg(RX_SOCKET socket, void *msg, int len, struct sockad
 	SMsgHdr	*phdr = (SMsgHdr*)msg;
 	int spoolerNo;
 	
-	for (spoolerNo=0; spoolerNo<MAX_SPOOLERS && _Spooler[spoolerNo].socket!=socket; spoolerNo++);
-	
-//	TrPrintfL(TRUE, "received Spooler[%d].MsgId=0x%08x", spoolerNo, phdr->msgId);
-	
-	switch(phdr->msgId)
+	for (spoolerNo=0; spoolerNo<MAX_SPOOLERS; spoolerNo++)
 	{
-	case CMD_REQ_SPOOL_CFG:	spool_set_config	(socket, ctrl_headResetCnt());				break;
-	case REP_SET_SPOOL_CFG:	_do_spool_cfg_rep	(socket);							break;
-	case REP_PRINT_FILE:	_do_print_file_rep	(socket, spoolerNo, (SPrintFileRep*)	msg);	break;
-	case REP_PRINT_ABORT:															break;
-	case EVT_PRINT_FILE:	_do_print_file_evt	(socket, (SPrintFileMsg*)	msg);	break;
-	case EVT_PRINT_DONE:	_do_print_done_evt	(socket, (SPrintDoneMsg*)	msg);	break;
-		
-	case EVT_GET_EVT:		_do_log_evt			(socket, (SLogMsg*)			phdr);	break;
-
-	case REP_RFS_SAVE_FILE_HDR:		label_rep_file_hdr();							break;
-	case REP_RFS_SAVE_FILE_BLOCK:	label_rep_file_block();							break;
-		
-	case CMD_PAUSE_PRINTING:	_do_pause_printing(socket);							break;
-	case CMD_START_PRINTING:	_do_start_printing(socket);							break;
-		
-	default: Error(WARN, 0, "Got unknown MessageId=0x%08x", phdr->msgId);
+		if (_Spooler[spoolerNo].socket==socket)
+		{
+		    //	TrPrintfL(TRUE, "received Spooler[%d].MsgId=0x%08x", spoolerNo, phdr->msgId);
+    
+	        switch(phdr->msgId)
+	        {
+	        case CMD_REQ_SPOOL_CFG:	spool_set_config	(socket, ctrl_headResetCnt());				break;
+	        case REP_SET_SPOOL_CFG:	_do_spool_cfg_rep	(socket);							break;
+	        case REP_PRINT_FILE:	_do_print_file_rep	(socket, spoolerNo, (SPrintFileRep*)	msg);	break;
+	        case REP_PRINT_ABORT:															break;
+	        case EVT_PRINT_FILE:	_do_print_file_evt	(socket, (SPrintFileMsg*)	msg);	break;
+	        case EVT_PRINT_DONE:	_do_print_done_evt	(socket, (SPrintDoneMsg*)	msg);	break;
+        
+	        case EVT_GET_EVT:		_do_log_evt			(socket, (SLogMsg*)			phdr);	break;
+        
+	        case REP_RFS_SAVE_FILE_HDR:		label_rep_file_hdr();							break;
+	        case REP_RFS_SAVE_FILE_BLOCK:	label_rep_file_block();							break;
+        
+	        case CMD_PAUSE_PRINTING:	_do_pause_printing(socket);							break;
+	        case CMD_START_PRINTING:	_do_start_printing(socket);							break;
+        
+	        default: Error(WARN, 0, "Got unknown MessageId=0x%08x", phdr->msgId);
+	    }
+	    return REPLY_OK;
+		}
 	}
-	return REPLY_OK;
+	return REPLY_ERROR;
 }
 
 //--- _handle_spool_connected --------------------------------------------------------------------
@@ -284,11 +289,41 @@ int	spool_set_config(RX_SOCKET socket, UINT32 resetCnt)
 
 	//--- send bitmap split config (all info) --------------------------
 	if (RX_Config.printer.type==printer_DP803) Error(LOG, 0, "Send CMD_COLOR_CFG only to used spooler");
+
 	for (color=0; color<SIZEOF(RX_Color); color++)
 	{
 		cnt=spool_send_msg_2(CMD_COLOR_CFG,		sizeof(RX_Color[color]),		&RX_Color[color],		 FALSE);
-		RX_DisabledJets[color].color = color;
-		cnt=spool_send_msg_2(CMD_DISABLED_JETS,	sizeof(RX_DisabledJets[color]), &RX_DisabledJets[color], FALSE);
+		for (no=0; no<RX_Config.headsPerColor; no++)
+		{
+			if (RX_Color[color].lastLine)
+			{
+				int head  = color*RX_Config.headsPerColor+no;
+				{
+					SDisabledJetsMsg msg;
+					msg.hdr.msgId  = CMD_SET_DISABLED_JETS;
+					msg.hdr.msgLen = sizeof(msg);
+					msg.head  = head;
+					memcpy(msg.disabledJets, RX_HBStatus[head/MAX_HEADS_BOARD].head[head%MAX_HEADS_BOARD].eeprom_mvt.disabledJets, sizeof(msg.disabledJets));
+					cnt=spool_send_msg(&msg);
+				}
+				{
+					SDensityValuesMsg msg;
+					msg.hdr.msgId  = CMD_SET_DENSITY_VAL;
+					msg.hdr.msgLen = sizeof(msg);
+					msg.head  = head;
+					memcpy(msg.value, RX_HBStatus[head/MAX_HEADS_BOARD].head[head%MAX_HEADS_BOARD].eeprom_mvt.densityValue, sizeof(msg.value));
+					if (FALSE)
+					{
+						char str[128];
+						int len = sprintf(str, "scr_set_values[%d.%d]: ", head/4, head%4);
+						for (int i=0; i<MAX_DENSITY_VALUES; i++) len += sprintf(&str[len], "%d ", msg.value[i]);
+						TrPrintfL(TRUE, str);
+						Error(LOG, 0, str);
+					}
+					cnt=spool_send_msg(&msg);
+				}
+			}
+		}
 	}
 
 	//--- send head board configurations ------------------------
@@ -344,6 +379,7 @@ void spool_start_printing(void)
 		Error(LOG, 0, "Check or restart spoolers");
 	}
 
+//	#ifndef DEBUG
 	//--- check local spooler is running ------------------
 	if (rx_process_running_cnt(FILENAME_SPOOLER_CTRL, NULL)==0)
 	{
@@ -355,6 +391,7 @@ void spool_start_printing(void)
 		rx_sleep(500);
 		Error(WARN, 0, "rx_spooler_ctrl restarted");
 	}
+//	#endif
 	memset(_LoadedFiles, 0, sizeof(_LoadedFiles));
 
 	_ActId		  = 0;
@@ -449,9 +486,10 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 	msg.flags			= 0;
 	msg.clearBlockUsed	= clearBlockUsed;
 	msg.wakeup			  = pitem->wakeup;
-	msg.penetrationPasses = pitem->penetrationPasses; 
+	msg.penetrationPasses = pitem->penetrationPasses;
 	
 	strncpy(msg.filename, filename, sizeof(msg.filename));
+	strncpy(msg.dots,     pitem->dots, sizeof(msg.dots));
 	memcpy(&msg.id, pid, sizeof(msg.id));
 	memcpy(&_Id[RX_PrinterStatus.sentCnt%MAX_PAGES], pid, sizeof(msg.id));
 
@@ -476,7 +514,7 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 	if (RX_PrinterStatus.testMode)
 	{
 		msg.printMode     = PM_TEST;
-		if (RX_Config.printer.type==printer_test_table && (RX_TestImage.testImage==PQ_TEST_JETS || RX_TestImage.testImage==PQ_TEST_JET_NUMBERS) || RX_TestImage.testImage==PQ_TEST_ENCODER)
+		if (RX_Config.printer.type==printer_test_table && (RX_TestImage.testImage==PQ_TEST_JETS || RX_TestImage.testImage==PQ_TEST_JET_NUMBERS  || RX_TestImage.testImage==PQ_TEST_DENSITY) || RX_TestImage.testImage==PQ_TEST_ENCODER)
 		{
 			msg.printMode = PM_TEST_SINGLE_COLOR;
 		}

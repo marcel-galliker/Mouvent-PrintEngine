@@ -93,7 +93,8 @@ namespace RX_DigiPrint.Views.UserControls
                 InkSupply supply = DataContext as InkSupply;
                 try 
                 { 
-                    supply.InkType   = ctrl.ActiveCell.Row.Data as InkType;
+                    InkType ink = ctrl.ActiveCell.Row.Data as InkType;
+                    supply.InkType = ink;
                 }
                 catch(Exception)
                 { 

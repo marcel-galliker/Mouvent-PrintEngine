@@ -118,6 +118,8 @@ namespace RX_Common
         {
          //   return val;
 
+            if (val==null || val[0]<'0' || val[0]>'9') return val;
+
             if (factor!=1.0)
             {
                 double value=StrToDouble(val);

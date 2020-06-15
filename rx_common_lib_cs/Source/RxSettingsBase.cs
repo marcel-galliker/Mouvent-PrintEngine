@@ -101,8 +101,10 @@ namespace RX_Common
 
                 xml.Close();
              }
-             catch(Exception)
-             {}
+             catch(Exception e)
+             {
+                 Console.WriteLine(e.Message);
+             }
         }
     }
 }

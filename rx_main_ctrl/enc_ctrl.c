@@ -327,10 +327,12 @@ static void _enc_start_printing(int no, SPrintQueueItem *pitem, int restart)
 		
 	case printer_LB701:			msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; 
 								msg.diameter[0]=79; msg.diameter[1]=74;
-								msg.correction=CORR_ROTATIVE;
-								#ifndef linux
-									msg.correction=CORR_OFF; // special for testmachine in Seon
-								#endif
+								msg.correction=CORR_ROTATIVE;								
+								if (FALSE)
+								{
+									msg.correction=CORR_OFF;
+									Error(WARN, 0, "Encoder Correction OFF for tests");
+								}
 								break;
 		
 	case printer_LB702_UV:		msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_ROTATIVE; msg.diameter[0]=78; msg.diameter[1]=74; break;	
@@ -399,7 +401,7 @@ static void _enc_start_printing(int no, SPrintQueueItem *pitem, int restart)
 								if(RX_Config.printer.offset.manualFlightTimeComp)
 								{
 									comp=RX_Config.printer.offset.manualFlightTimeComp;
-									Error(LOG, 0, "Manual Flightime Comp: %d µm", (int)comp);											
+									Error(LOG, 0, "Manual Flightime Comp: %dµm", (int)comp);											
 								}
 								else 
 								{
@@ -456,6 +458,7 @@ int enc_change(void)
 		}
 	}
 	_ChangeFifoIdx=0;
+	return REPLY_OK;
 }
 
 //--- enc_set_pg ----------------------------------------

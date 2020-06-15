@@ -40,21 +40,21 @@ namespace RX_DigiPrint.Views.PrintSystemView
         private void _assign_inksupply(int cnt)
         {
             int i, no;
-            if (RxGlobals.PrintSystem.HeadCnt!=0)
+            if (RxGlobals.PrintSystem.HeadsPerColor!=0)
             {
                 for (i=0;i<PrintHeadStack.Children.Count;i++)
                 {
                     try
                     {
-                        no = RxGlobals.PrintSystem.IS_Order[i/RxGlobals.PrintSystem.HeadCnt] * RxGlobals.PrintSystem.HeadCnt;
+                    no = RxGlobals.PrintSystem.IS_Order[i/RxGlobals.PrintSystem.HeadsPerColor] * RxGlobals.PrintSystem.HeadsPerColor;
                         if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX802)
-                            no += RxGlobals.PrintSystem.HeadCnt-1-i%RxGlobals.PrintSystem.HeadCnt;
+                        no += RxGlobals.PrintSystem.HeadsPerColor-1-i%RxGlobals.PrintSystem.HeadsPerColor;
                         else
-                            no += i%RxGlobals.PrintSystem.HeadCnt;
+                        no += i%RxGlobals.PrintSystem.HeadsPerColor;
                         _PrintHeadView[i].DataContext = RxGlobals.HeadStat.List[no];
                         _PrintHeadView[i].No = no;
                     }
-                    catch(Exception ex)
+                    catch(Exception)
                     {
                     }
                 }
@@ -75,7 +75,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
             _assign_inksupply(cnt);
             for (i=0; i<PrintHeadStack.Children.Count; i++)
             {
-                no=(int)(i/RxGlobals.PrintSystem.HeadCnt);
+                no=(int)(i/RxGlobals.PrintSystem.HeadsPerColor);
                 no= RxGlobals.PrintSystem.IS_Order[no];
                 _PrintHeadView[i].Visibility = (i<cnt && (RxGlobals.PrintSystem.AllInkSupplies || no==RxGlobals.PrintSystem.CheckedInkSupply))? Visibility.Visible : Visibility.Collapsed;
             }

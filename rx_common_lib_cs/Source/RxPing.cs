@@ -32,8 +32,10 @@ namespace RX_Common
                     return false;
                 }
             }
-            catch(Exception)
-            { }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
             return false;
         }
     }

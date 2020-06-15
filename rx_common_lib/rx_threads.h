@@ -21,8 +21,13 @@ extern "C" {
 
 typedef void* (*thread_routine)	(void *par);
 
+#ifndef INFINITE
+#define INFINITE 0
+#endif
 
 HANDLE rx_thread_start(thread_routine thread, void *param, UINT32 stacksize, const char *name);
+
+int rx_get_thread_id(void);
 
 HANDLE rx_mutex_create(void);
 int    rx_mutex_destroy(HANDLE *mutex);
@@ -34,7 +39,7 @@ int    rx_sem_destroy(HANDLE *sem);
 int	   rx_sem_wait(HANDLE sem, int timeout);
 int	   rx_sem_post(HANDLE sem);
 
-int	   rx_sleep(UINT32 ms);
+void   rx_sleep(UINT32 ms);
 // int	   rx_get_ticks(void);
 
 int    rx_process_start			(const char *process, const char *params);
@@ -44,6 +49,7 @@ int    rx_process_kill 			(const char *process, const char *arg);
 int    rx_process_running_cnt	(const char *process, const char *arg);
 
 int	   rx_core_cnt				(void);
+int	   rx_get_maxnumthreads(void *dummy);
 
 void   rx_run_in_backgrund();
 int    rx_startup(const char* name, int debug);

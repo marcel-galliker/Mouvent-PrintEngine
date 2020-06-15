@@ -55,7 +55,7 @@
 
 //--- module globals ----------------------------------------------------------------
 
-#define FIFO_SIZE	128
+#define FIFO_SIZE	256
 
 typedef struct SCilentThreadPar
 {
@@ -681,10 +681,14 @@ int sok_sockaddr(struct sockaddr_in *ipAddr, const char *addr, int port)
 		#ifdef linux
 		if (inet_pton(ipAddr->sin_family, addr, &ipAddr->sin_addr)) return REPLY_OK;
 		#else
-			UCHAR a[20];
+			int a[4];
 			if (sscanf(addr, "%d.%d.%d.%d", &a[0], &a[1], &a[2], &a[3])==4) 
 			{
-				memcpy(&ipAddr->sin_addr, a, 4);
+				UCHAR *sin_addr=(UCHAR*)&ipAddr->sin_addr;
+				sin_addr[0] = a[0];
+				sin_addr[1] = a[1];
+				sin_addr[2] = a[2];
+				sin_addr[3] = a[3];
 				return REPLY_OK;
 			}
 		#endif
@@ -1305,7 +1309,7 @@ static void *_client_thread_udp(void *hserver)
 	//--- end using the socket --------------------
 	TrPrintf(1, "_client_thread_udp ended socket=%d\n", par->socket);
 	sok_close(&par->socket);
-	return (void*)reply;
+	return NULL;
 }
 
 //--- sok_debug -----------------------------------------------------------

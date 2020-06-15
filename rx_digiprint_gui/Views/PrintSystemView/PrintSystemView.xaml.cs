@@ -42,16 +42,16 @@ namespace RX_DigiPrint.Views.PrintSystemView
             if (e.PropertyName.Equals("ColorCnt")) 
             {
                 InkSupplyGrid.show_inkSupplies(_PrintSystem.ColorCnt);
-                PrintHeadGrid.show_items((int)(_PrintSystem.ColorCnt*_PrintSystem.HeadCnt));
+                PrintHeadGrid.show_items((int)(_PrintSystem.ColorCnt*_PrintSystem.HeadsPerColor));
             }
 
-            if (e.PropertyName.Equals("HeadCnt")) 
+            if (e.PropertyName.Equals("HeadsPerColor")) 
             {
-                PrintHeadGrid.show_items((int)(_PrintSystem.ColorCnt*_PrintSystem.HeadCnt));
+                PrintHeadGrid.show_items((int)(_PrintSystem.ColorCnt*_PrintSystem.HeadsPerColor));
             }
             if (e.PropertyName.Equals("CheckedInkSupply") || e.PropertyName.Equals("AllInkSupplies"))
             {
-                PrintHeadGrid.show_items((int)(_PrintSystem.ColorCnt*_PrintSystem.HeadCnt));
+                PrintHeadGrid.show_items((int)(_PrintSystem.ColorCnt*_PrintSystem.HeadsPerColor));
             }
             if (e.PropertyName.Equals("PrinterType"))
             {

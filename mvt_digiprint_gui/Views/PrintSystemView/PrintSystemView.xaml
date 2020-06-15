@@ -1,0 +1,127 @@
+﻿<UserControl
+             x:Class="RX_DigiPrint.Views.PrintSystemView.PrintSystemView"
+ 
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:ig="http://schemas.infragistics.com/xaml"
+             xmlns:igGrids="http://infragistics.com/DataPresenter"
+             xmlns:igWPF="http://schemas.infragistics.com/xaml/wpf"
+             xmlns:igWin="http://infragistics.com/Windows" 
+             xmlns:converters="clr-namespace:RX_DigiPrint.Converters"
+             xmlns:models="clr-namespace:RX_DigiPrint.Models"
+             xmlns:Infragistics="clr-namespace:Infragistics;assembly=InfragisticsWPF4.Controls.Grids.XamGrid.v13.2"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
+             xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+             xmlns:rxView="clr-namespace:RX_DigiPrint.Views.PrintSystemView"
+             xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
+             mc:Ignorable="d"
+             d:DesignHeight="1000" d:DesignWidth="1500"
+             Background="Transparent"
+             HorizontalAlignment="Stretch"
+             IsVisibleChanged="UserControl_IsVisibleChanged"
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+            >
+
+    <UserControl.Resources>
+        <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">32</sys:Double>
+        <!--    <sys:Double x:Key="{x:Static SystemParameters.HorizontalScrollBarHeightKey}">50</sys:Double> -->
+    </UserControl.Resources>
+
+    <Grid x:Name="MainGrid" HorizontalAlignment="Stretch" Background="Transparent">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="70" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Grid.ColumnSpan="2" Grid.Column="0" Background="{StaticResource Mouvent.MainColorBrush}" ShowGridLines="False" >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            
+            <rx_uc:Splicing VerticalAlignment="Center" HorizontalAlignment="Center"></rx_uc:Splicing>
+            
+            <rx_uc:MouventTopToolBar  HorizontalAlignment="Right" Grid.Column="0"></rx_uc:MouventTopToolBar>
+            
+            <StackPanel Grid.Row="0" HorizontalAlignment="Left" Orientation="Horizontal">
+                <common:MvtButton x:Name="Button_Save" Grid.Row="0" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" Click="Save_Clicked" Margin="15, 5, 0, 5"
+                                  IsChecked="{Binding Changed}">
+                    <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                        Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20" Kind="ContentSave"></iconPacks:PackIconMaterial>
+                </common:MvtButton>
+
+                <common:MvtButton  x:Name="Button_Reload" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" Click="Reload_Clicked" Margin="15, 0, 15, 0"
+                                  IsChecked="{Binding Changed}">
+                    <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                        Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Margin="-3, 0, 0, 0" Width="20" Height="20" Kind="Restore"></iconPacks:PackIconMaterial>
+                </common:MvtButton>
+            </StackPanel>
+        </Grid>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" PanningMode="VerticalOnly">
+            <StackPanel>
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Hidden">
+                    <!-- Print System ___________________________________________________________________________________________-->
+                    <Grid x:Name="PrintSystemPanel">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <rxView:PrintSystemGrid Grid.Column="0" Margin="10,10,0,0"/>
+                        <rxView:OffsetsGrid x:Name="OffsetsGrid" Grid.Column="1" Margin="10,10,0,0"/>
+                        <Grid x:Name="StepperGrid" Grid.Column="2"/>
+                        <rxView:EncoderView x:Name="EncoderGrid" Grid.Column="3" Margin="10,10,0,0"/>
+                        <rxView:ChillerView Grid.Column="4" Margin="10,10,0,0"/>
+                    </Grid>
+                </ScrollViewer>
+               
+                <!-- Ink Supply ________________________________________________________________________________________________________________________ -->
+                <GroupBox Style="{StaticResource MvtGroupBox}" Header="Ink Supply" Margin="10,10,10,0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="100"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <rxView:InkSupplyGrid x:Name="InkSupplyGrid"/>
+                        <TextBlock x:Name="ChillerError" Text="Chiller not running" Visibility="{Binding Running, Converter={StaticResource BoolToInVisible_Converter}}" Foreground="Crimson" FontWeight="Bold" FontSize="40" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <StackPanel Grid.Column="1" x:Name="RobotButtons" Visibility="{Binding TxRobot, Converter={StaticResource BoolToVisible_Converter}}">
+                            <Button Margin="5" Style="{StaticResource Mouvent.StandardButton}" Content="CAP"      Click="Cap_Clicked"/>
+                            <Button Margin="5" Style="{StaticResource Mouvent.StandardButton}" Content="Wipe"     Click="Wipe_Clicked"/>
+                            <Button Margin="5" Style="{StaticResource Mouvent.StandardButton}" Content="Vacuum"   Click="Vacuum_Clicked"/>
+                            <Button Margin="5"  Style="{StaticResource Mouvent.StandardButton}" Content="Wash"     Click="Wash_Clicked"/>
+                        </StackPanel>
+                    </Grid>
+                </GroupBox>
+
+                <!--<TextBlock Text="Print Heads" Background="{StaticResource Brush03}" FontWeight="Bold" Padding="5,0,0,0" Margin="0,5,0,0" />-->
+
+                <!-- Print Heads ____________________________________________________________________________________________________________-->
+                <GroupBox Style="{StaticResource MvtGroupBox}" Header="Print Heads" Margin="10,10,10,10">
+                    <Grid>
+                        <rxView:PrintHeadGrid x:Name="PrintHeadGrid"/>
+                    </Grid>
+                </GroupBox>
+                
+                <!--
+               Head Distance
+                <StackPanel x:Name="HeadDistPanel" Margin="10, 0, 10, 0">
+                    <GroupBox Header="Head Distance [mm]" Style="{StaticResource MvtGroupBox}"> 
+                        <Grid x:Name="PrintBar" Visibility="Visible" >
+                            <rxView:PrintBarDistView/>
+                        </Grid>
+                    </GroupBox>
+                </StackPanel>-->
+            </StackPanel>
+        </ScrollViewer>
+
+    </Grid>
+
+</UserControl>

@@ -1,0 +1,140 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:converters="clr-namespace:RX_DigiPrint.Converters" 
+                    xmlns:alignment_converters="clr-namespace:RX_DigiPrint.Converters.Alignment"
+                    
+                    xmlns:local="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    >
+    
+    <converters:Add_Converter               x:Key="Add_Converter"/>
+    <converters:BluetoothImg_Converter      x:Key="BluetoothImg_Converter"/>
+    <converters:BluetoothIcon_Converter      x:Key="BluetoothIcon_Converter"/>
+    
+    <converters:BoolImg_Converter           x:Key="BoolImg_Converter"/>
+    <converters:BoolToVisible_Converter     x:Key="BoolToVisible_Converter"/>
+    <converters:BoolToInVisible_Converter   x:Key="BoolToInVisible_Converter"/>
+    <converters:CheckBox_Converter          x:Key="CheckBox_Converter" />
+    <converters:NetworkView_IdentifyCheckedConverter          x:Key="NetworkView_IdentifyCheckedConverter" />
+    <converters:CleafQuality_Converter      x:Key="CleafQuality_Converter" />
+    <converters:ColorCode_Str               x:Key="ColorCode_Str"/>
+    <converters:Copies_Converter            x:Key="Copies_Converter"/>
+    <converters:Counter_Converter           x:Key="Counter_Converter"/>
+    <converters:CleaningState_Converter     x:Key="CleaningState_Converter"/>
+    <converters:Connected_Converter         x:Key="Connected_Converter" />
+    <converters:ConnectedIconConverter      x:Key="ConnectedIconConverter" />
+    <converters:ConnectedIconColorConverter      x:Key="ConnectedIconColorConverter" />
+    
+    <converters:CtrlMode_Str                x:Key="CtrlMode_Str"/>
+    <converters:DeviceType_Converter        x:Key="DeviceType_Converter"/>
+    <converters:DeviceNoVisible_Converter   x:Key="DeviceNoVisible_Converter"/>
+    <converters:DirItemVisible_Converter    x:Key="DirItemVisible_Converter"/>
+    <converters:EnumToInt_Converter         x:Key="EnumToInt_Converter"/>
+    <converters:Error_Converter             x:Key="Error_Converter"/>
+    <converters:Filler_Converter            x:Key="Filler_Converter"/>
+    <converters:FileName_Converter          x:Key="FileName_Converter"/>
+    <converters:FileTypeImage_Converter     x:Key="FileTypeImage_Converter"/>
+    <converters:FlashButtonVisible_Converter x:Key="FlashButtonVisible_Converter"/>
+    
+    <converters:HeadVal_Converter10 x:Key="HeadVal_Converter10"/>
+    <converters:HeadMultiVal_SetPointAsText_Converter10 x:Key="HeadMultiVal_SetPointAsText_Converter10"/>
+    <converters:HeadMultiVal_SetPoint_Converter10 x:Key="HeadMultiVal_SetPoint_Converter10"/>
+    <converters:HeadMultiVal_PumpSpeedConverter x:Key="HeadMultiVal_PumpSpeedConverter"/>
+    
+
+    <converters:HeadVal_Converter x:Key="HeadVal_Converter"/>
+    <converters:HeadVal_SetPoint_Converter x:Key="HeadVal_SetPoint_Converter"/>
+
+    <converters:HeadVal_ConverterTemp x:Key="HeadVal_ConverterTemp"/>
+    <converters:HeadVal_SetPoint_ConverterTemp x:Key="HeadVal_SetPoint_ConverterTemp"/>
+    
+    <converters:HeadMultiVal_ConverterTemp x:Key="HeadMultiVal_ConverterTemp"/>
+    <converters:HeadMultiVal_Int_Converter x:Key="HeadMultiVal_Int_Converter"/>
+
+    
+
+    <converters:HeadValve_Converter         x:Key="HeadValve_Converter"/>
+    <converters:InkType_Name                x:Key="InkType_Name"/>
+    <converters:InkType_ColorBG             x:Key="InkType_ColorBG"/>
+    <converters:InkType_ColorBG_Stroke             x:Key="InkType_ColorBG_Stroke"/>
+    <converters:PrintHeadViewStrokeConverter             x:Key="PrintHeadViewStrokeConverter"/>
+    
+    <converters:InkType_ColorFG             x:Key="InkType_ColorFG"/>
+    <converters:IntToVisible_Converter      x:Key="IntToVisible_Converter" />
+    <converters:IntToInVisible_Converter    x:Key="IntToInVisible_Converter" />
+    <converters:ExtendedIntToInVisible_Converter x:Key="ExtendedIntToInVisible_Converter" />
+    
+    <converters:IsBiggerThanConverter       x:Key="IsBiggerThanConverter" />
+    <converters:LedImg_Converter            x:Key="LedImg_Converter"/>
+    <converters:Len_Unit_Converter          x:Key="Len_Unit_Converter"/>
+    <converters:LogTypeColor_Converter      x:Key="LogTypeColor_Converter" />
+    <converters:LogTypeColorButton_Converter x:Key="LogTypeColorButton_Converter" />
+    <converters:UnboundColumnToLogTypeConverter x:Key="UnboundColumnToLogTypeConverter" />
+    <converters:MacAddr_Converter           x:Key="MacAddr_Converter" />
+    <converters:MaterialName_Converter      x:Key="MaterialName_Converter" />
+    <converters:mbar_Converter              x:Key="mbar_Converter"/>
+    <converters:Or_Converter                x:Key="Or_Converter"/>
+    <converters:PagesVisible_Converter      x:Key="PagesVisible_Converter" />
+    <converters:Percent_Converter           x:Key="Percent_Converter" />
+    <converters:PlcLogState_Converter       x:Key="PlcLogState_Converter"/>
+    <converters:PlcLogNo_Converter          x:Key="PlcLogNo_Converter"/>
+    <converters:PuttyVisible_Converter      x:Key="PuttyVisible_Converter"/>
+    <converters:PrintQueueCheckVisible_Converter      x:Key="PrintQueueCheckVisible_Converter"/>
+    <converters:PuttyDbgVisible_Converter   x:Key="PuttyDbgVisible_Converter"/>
+    <converters:RotateRect_Converter        x:Key="RotateRect_Converter"/>
+    <converters:ScanLength_Converter        x:Key="ScanLength_Converter"/>
+    <converters:StepperStateImg_Converter   x:Key="StepperStateImg_Converter"/>
+    <converters:ToString_Converter          x:Key="ToString_Converter"/>
+    <converters:Test_Converter              x:Key="Test_Converter"/>
+    <converters:UvLampImg_Converter         x:Key="UvLampImg_Converter"/>
+    <converters:UvLampIcon_Converter         x:Key="UvLampIcon_Converter"/>
+    <converters:UvLampVisibile_Converter         x:Key="UvLampVisibile_Converter"/>
+    <converters:UvLampInvisibile_Converter         x:Key="UvLampInvisibile_Converter"/>
+
+    <converters:WlanQuality_Converter       x:Key="WlanQuality_Converter"/>
+
+    <converters:BooleanToSideSelectionHeightConverter x:Key="BooleanToSideSelectionHeightConverter"/>
+    <converters:StartPauseIconConverter x:Key="StartPauseIconConverter"/>
+    <converters:StartPauseToolTipConverter x:Key="StartPauseToolTipConverter"/>
+    
+    <converters:StartPauseMarginConverter x:Key="StartPauseMarginConverter"/>
+    
+    <local:BooleanToVisibilityConverter x:Key="BooleanToVisibleConverter" />
+    <BooleanToVisibilityConverter x:Key="VisibleIfTrueConverter" />
+ 
+    <alignment_converters:BooleanToVisibleOrHiddenConverter x:Key="BooleanToVisibleOrHiddenConverter" />
+
+    <alignment_converters:BooleanNotToVisibilityConverter x:Key="BooleanNotToVisibleConverter"/>
+    <alignment_converters:BooleanNotToVisibilityHideConverter x:Key="BooleanNotToVisibilityHideConverter"/>
+    
+    <alignment_converters:BooleanOrToVisibilityConverter x:Key="BooleanOrToVisibleConverter"/>
+    <alignment_converters:BooleanAndNotToVisibilityConverter x:Key="BooleanAndNotToVisibilityConverter"/>
+    
+    <alignment_converters:BooleanAndToVisibilityConverter x:Key="BooleanAndToVisibleConverter"/>
+    
+    <alignment_converters:ColorOffsetCorrectionIconConverter x:Key="ColorOffsetCorrectionIconConverter"/>
+    <alignment_converters:BooleanToHeaderColumnWidthConverter x:Key="BooleanToHeaderColumnWidthConverter"/>
+    <alignment_converters:ScanningMachinesVisibilityConverter x:Key="ScanningMachinesVisibilityConverter"/>
+    <alignment_converters:ColorOffsetUnitConverter x:Key="ColorOffsetUnitConverter"/>
+   
+    <alignment_converters:AngleCorrectionsUnitConverter x:Key="AngleCorrectionsUnitConverter"/>
+    <alignment_converters:StitchCorrectionsUnitConverter x:Key="StitchCorrectionsUnitConverter"/>
+    <alignment_converters:RegisterCorrectionsUnitConverter x:Key="RegisterCorrectionsUnitConverter"/>
+    <alignment_converters:FaultTypeConverter x:Key="FaultTypeConverter"/>
+
+    <converters:InkSupplyStatusColorConverter_Connected x:Key="InkSupplyStatusColorConverter_Connected"/>
+    <converters:InkSupplyStatusTextConverter_Connected x:Key="InkSupplyStatusTextConverter_Connected"/>
+    <converters:InkSupplyStatusColorConverter_Int32 x:Key="InkSupplyStatusColorConverter_Int32"/>
+    <converters:InkSupplyStatusTextConverter_Int32 x:Key="InkSupplyStatusTextConverter_Int32"/>
+    <converters:InkSupplyStatusColorConverter_UndefinedStatus x:Key="InkSupplyStatusColorConverter_UndefinedStatus"/>
+    <converters:InkSupplyStatusColorConverter_TempReady x:Key="InkSupplyStatusColorConverter_TempReady"/>
+    <converters:InkCylinderGlobalStatusConverter x:Key="InkCylinderGlobalStatusConverter"/>
+    <converters:FlowResistanceConverter x:Key="FlowResistanceConverter"/>
+    <converters:JetCompensation_RowColorConverter  x:Key="JetCompensation_RowColorConverter"/>
+    <converters:JetCompensation_ActivatedIconConverter  x:Key="JetCompensation_ActivatedIconConverter"/>
+    <converters:JetCompensation_JetsListedConverter  x:Key="JetCompensation_JetsListedConverter"/>
+
+    <converters:BooleanNotConverter  x:Key="BooleanNotConverter"/>
+
+    <converters:SelectedTabConverter x:Key="SelectedTabConverter"/>
+
+</ResourceDictionary>

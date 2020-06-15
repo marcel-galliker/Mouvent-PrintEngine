@@ -27,6 +27,7 @@
         <string>*.cpp</string>
         <string>*.h</string>
         <string>*.c</string>
+        <string>*.cu</string>
         <string>*.mak</string>
         <string>Makefile</string>
       </FileMasks>
@@ -136,28 +137,25 @@
       <CustomActionBase xsi:type="FileTransferAction">
         <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
         <SourceHost>
-          <Transport>None</Transport>
-        </SourceHost>
-        <DestinationHost>
-          <Transport>None</Transport>
-        </DestinationHost>
-        <SourceFilePath>$(ProjectDir)\..\Externals\Tec-it\Linux\Tec-it-11\lib\libtbarcode11.so.0</SourceFilePath>
-        <DestinationFilePath>$(ProjectDir)\..\bin\spooler\libtbarcode11.so.0</DestinationFilePath>
-        <OverwriteTrigger>Always</OverwriteTrigger>
-      </CustomActionBase>
-      <CustomActionBase xsi:type="FileTransferAction">
-        <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
-        <SourceHost>
           <HostName>$(BuildHost)</HostName>
           <Transport>SSH</Transport>
           <UserName>root</UserName>
         </SourceHost>
-        <DestinationHost>
-          <Transport>None</Transport>
-        </DestinationHost>
         <SourceFilePath>$(TargetPath)</SourceFilePath>
         <DestinationFilePath>$(ProjectDir)\..\bin\spooler\$(TargetFileName)</DestinationFilePath>
-        <OverwriteTrigger>Always</OverwriteTrigger>
+        <OverwriteTrigger>Stat</OverwriteTrigger>
+      </CustomActionBase>
+      <CustomActionBase xsi:type="FileTransferAction">
+        <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
+        <SourceFilePath>$(ProjectDir)\..\Externals\Tec-it\Linux\Tec-it-11\lib\libtbarcode11.so.0</SourceFilePath>
+        <DestinationFilePath>$(ProjectDir)\..\bin\spooler\libtbarcode11.so.0</DestinationFilePath>
+        <OverwriteTrigger>Stat</OverwriteTrigger>
+      </CustomActionBase>
+      <CustomActionBase xsi:type="FileTransferAction">
+        <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
+        <SourceFilePath>$(ProjectDir)\..\Externals\cuda\lib\ubuntu\libcudart.so.10.2</SourceFilePath>
+        <DestinationFilePath>$(ProjectDir)\..\bin\spooler\libcudart.so.10.2</DestinationFilePath>
+        <OverwriteTrigger>Stat</OverwriteTrigger>
       </CustomActionBase>
     </PostBuildActions>
     <PreCleanActions />

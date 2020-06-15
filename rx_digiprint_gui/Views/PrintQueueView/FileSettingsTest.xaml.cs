@@ -23,7 +23,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
 
             InitializeComponent();
 
-            if (init) _Item = new PrintQueueItem(){TestImage=ETestImage.jets, Copies=1, LengthUnit=EPQLengthUnit.copies, Dots="S", DropSizes=1};
+            if (init) _Item = new PrintQueueItem(){TestImage=ETestImage.jets, Copies=1, LengthUnit=EPQLengthUnit.copies, Dots="S"};
             this.DataContext = _Item;
             CB_TestImage.ItemsSource = new EN_TestImageList();
             CB_ScanMode.ItemsSource  = new EN_ScanModeList();

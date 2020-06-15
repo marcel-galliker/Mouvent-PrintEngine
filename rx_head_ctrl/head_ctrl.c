@@ -79,6 +79,8 @@ static int _do_inkdef			(RX_SOCKET socket, SInkDefMsg	    *pmsg);
 static int _do_print_abort		(RX_SOCKET socket);
 static int _do_set_FluidCtrlMode(RX_SOCKET socket, SFluidCtrlCmd	*pmsg);
 static int _do_set_purge_par	(RX_SOCKET socket, SPurgePar		*ppar);
+static int _do_disabled_jets	(RX_SOCKET socket, SDisabledJetsMsg  *pmsg);
+static int _do_density_values	(RX_SOCKET socket, SDensityValuesMsg *pmsg);
 
 //--- ctrl_init --------------------------------------------------------------------
 int ctrl_init()
@@ -217,15 +219,16 @@ static int _handle_ctrl_msg(RX_SOCKET socket, void *pmsg)
 	case CMD_FPGA_IMAGE:			_do_fpga_image		(socket, (SFpgaImageCmd*)	 pmsg);	 break;
 	case CMD_FPGA_WRITE_BMP:		_do_write_image		(socket, (SFpgaWriteBmpCmd*) pmsg);	 break;
 	case CMD_FPGA_SIMU_PRINT:		_do_simu_print		(socket);							 break;
-	case CMD_FPGA_SIMU_ENCODER:		_do_simu_encoder	(socket, (UINT32*)		   &phdr[1]);break;
+	case CMD_FPGA_SIMU_ENCODER:		_do_simu_encoder	(socket, (UINT32*)		   &phdr[1]);	break;
 	case CMD_GET_BLOCK_USED:		_do_block_used		(socket, (SBlockUsedCmd*)	pmsg);	 break;
-	case CMD_HEAD_BOARD_CFG:		_do_head_board_cfg	(socket, (SHeadBoardCfg*)  &phdr[1]);break;
+	case CMD_HEAD_BOARD_CFG:		_do_head_board_cfg	(socket, (SHeadBoardCfg*)  &phdr[1]);	break;
 	case CMD_PRINT_ABORT:			_do_print_abort		(socket);							 break;		
 	case CMD_HEAD_STAT:				_do_head_stat       (socket, (SFluidStateLight*) &phdr[1]); break;
 	case SET_GET_INK_DEF:			_do_inkdef			(socket, (SInkDefMsg*)		pmsg);	 break;
 	case CMD_HEAD_FLUID_CTRL_MODE:	_do_set_FluidCtrlMode(socket, (SFluidCtrlCmd*)  pmsg);	 break;
 	case CMD_SET_PURGE_PAR:			_do_set_purge_par	(socket, (SPurgePar*)	&phdr[1]);	 break;
-
+    case CMD_SET_DISABLED_JETS:		_do_disabled_jets	(socket, (SDisabledJetsMsg*)pmsg);		break;
+    case CMD_SET_DENSITY_VAL:		_do_density_values	(socket, (SDensityValuesMsg*)pmsg);		break;
 	default:		Error(LOG, 0, "Unknown Command 0x%04x", phdr->msgId);
 					reply = REPLY_ERROR;
 					break;
@@ -274,7 +277,7 @@ static int _do_block_used	(RX_SOCKET socket, SBlockUsedCmd *msg)
 	SBlockUsedRep 	reply;
 	UINT32			min, max;
 
-//	TrPrintfL(TRUE, "_do_block_used id=%d, blkNo=%d, blkCnt=%d (blk %d .. %d)", msg->id, msg->blkNo, msg->blkCnt, msg->blkNo, msg->blkNo+msg->blkCnt);
+//	TrPrintfL(TRUE, "head[%d]._do_block_used id=%d, blkNo=%d, blkCnt=%d (blk %d .. %d)", msg->headNo, msg->id, msg->blkNo, msg->blkCnt, msg->blkNo, msg->blkNo+msg->blkCnt);
 	
 	min=RX_HBConfig.head[msg->headNo].blkNo0;
 	max=min+RX_HBConfig.head[msg->headNo].blkCnt;
@@ -351,7 +354,6 @@ static int _do_error_reset(void)
 {
 	RX_HBStatus[0].warn = 0;
 	RX_HBStatus[0].err  = 0;
-
 	nios_error_reset();
 
 	return REPLY_OK;				
@@ -362,18 +364,18 @@ static int _do_head_stat(RX_SOCKET socket, SFluidStateLight *pmsg)
 {	
 //	TrPrintfL(TRUE, "*** _do_head_stat(socket=%d) time=%d ***", socket, rx_get_ticks()-_StatusReqTime);
 	_StatusReqTime = rx_get_ticks();
-	
+
 	memcpy(RX_FluidStat, pmsg, sizeof(RX_FluidStat));
 
-	
+	/*
 	int head;
 	for (head = 0; head < MAX_HEADS_BOARD; head++)
 	{
-	//	_NiosMem->cfg.cond[head].cylinderPressure    = RX_FluidStat[head].cylinderPressure;
-	//	_NiosMem->cfg.cond[head].cylinderPressureSet = RX_FluidStat[head].cylinderPressureSet;
+		_NiosMem->cfg.cond[head].cylinderPressure    = RX_FluidStat[head].cylinderPressure;
+		_NiosMem->cfg.cond[head].cylinderPressureSet = RX_FluidStat[head].cylinderPressureSet;
     	_NiosMem->cfg.cond[head].fluidErr            = RX_FluidStat[head].fluidErr;
 	}
-	
+	*/
 	_rep_head_stat(socket);
 	return REPLY_OK;
 }
@@ -415,6 +417,21 @@ static int _do_set_FluidCtrlMode(RX_SOCKET socket, SFluidCtrlCmd *pmsg)
 static int _do_set_purge_par(RX_SOCKET socket, SPurgePar *ppar)
 {
 	cond_set_purge_par(ppar->no, ppar->delay, ppar->time);
+	return REPLY_OK;
+}
+
+//--- _do_disabled_jets ----------------------------------------------
+static int _do_disabled_jets(RX_SOCKET socket, SDisabledJetsMsg *pmsg)
+{
+	cond_set_disabledJets(pmsg->head, pmsg->disabledJets);
+	return REPLY_OK;
+}
+
+//--- _do_density_values ----------------------------------------------
+static int _do_density_values	(RX_SOCKET socket, SDensityValuesMsg *pmsg)
+{
+	cond_set_densityValues(pmsg->head, pmsg->value);
+	cond_set_voltage(pmsg->head, pmsg->voltage);
 	return REPLY_OK;
 }
 

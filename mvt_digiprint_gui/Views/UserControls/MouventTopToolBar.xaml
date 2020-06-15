@@ -1,0 +1,30 @@
+﻿<UserControl x:Class="RX_DigiPrint.Views.UserControls.MouventTopToolBar"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
+             
+             mc:Ignorable="d"
+             d:DesignHeight="60"
+             d:DesignWidth="900"
+             >
+    <Grid Background="{StaticResource Mouvent.MainColorBrush}" ShowGridLines="False">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="auto"></ColumnDefinition>
+            <ColumnDefinition Width="auto"></ColumnDefinition>
+            <ColumnDefinition Width="auto"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+
+        <rx_uc:MouventUVToolBar Grid.Column="1" HorizontalAlignment="Left"></rx_uc:MouventUVToolBar>
+        <rx_uc:MouventSetupButtons Margin="15,0,15,0" Grid.Column="2"></rx_uc:MouventSetupButtons>
+        <common:MvtButton Grid.Column="3" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" x:Name="Button_Test" Click="Test_Clicked" ToolTip="Test" Margin="15, 0, 15, 0">
+            <iconPacks:PackIconFontAwesome Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                                        Style="{StaticResource Mouvent.RoundIconButtonStyle.LightFontAwesomeIcon}" Width="25" Height="25" Kind="TasksSolid"></iconPacks:PackIconFontAwesome>
+        </common:MvtButton>
+
+    </Grid>
+</UserControl>

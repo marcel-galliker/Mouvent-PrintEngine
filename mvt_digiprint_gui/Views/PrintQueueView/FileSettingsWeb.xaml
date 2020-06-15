@@ -1,0 +1,203 @@
+﻿<UserControl x:Class="RX_DigiPrint.Views.PrintQueueView.FileSettingsWeb"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:igGrids="http://infragistics.com/DataPresenter"
+             xmlns:ig="http://schemas.infragistics.com/xaml"
+             xmlns:igWPF="http://schemas.infragistics.com/xaml/wpf"
+             xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+             xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
+             xmlns:uc="clr-namespace:RX_DigiPrint.Views.UserControls"
+             xmlns:mahapps="http://metro.mahapps.com/winfx/xaml/controls"
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             mc:Ignorable="d" 
+             d:DesignHeight="520" d:DesignWidth="500"
+             DataContextChanged="UserControl_DataContextChanged"
+             >
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.ToggleSwitch.xaml" />
+                <!-- color -->
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Accents/Orange.xaml" />
+                <!-- and should use the light theme -->
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseLight.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <GroupBox Style="{StaticResource MvtGroupBox}" Header="Settings" >
+    <StackPanel 
+        x:Name="Settings" Margin="0"
+        >
+       
+        <Grid Margin="5, 0, 5, 0" x:Name="Length_Settings">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="140" />
+                <ColumnDefinition Width="60" />
+                <ColumnDefinition Width="70" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="Length"/>
+            <common:MvtNumBox   Grid.Row="0" Grid.Column="1" Text="{Binding ScanLength}" HorizontalAlignment="Right" Width="60" x:Name="LengthBox" Min="0"/>
+
+                <StackPanel  Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" Orientation="Horizontal">
+                    <common:MvtRadioButton  Style="{StaticResource MvtSelectionRadioButton}"  Content="m"       Background="Transparent" IsChecked="{Binding LengthUnitMM}" x:Name="LengthUnit"/>
+                    <common:MvtRadioButton  Style="{StaticResource MvtSelectionRadioButton}"  Content="copies"  Background="Transparent" IsChecked="{Binding LengthUnitCopies}" Last="True"/>
+                </StackPanel>
+        </Grid>
+
+
+        <!-- Pages ___________________________________________________________________ -->
+        <Grid x:Name="Page_Settings" Margin="5, 10, 5, 5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="70" />
+                <ColumnDefinition Width="70" />
+                <ColumnDefinition Width="60" />
+                <ColumnDefinition Width="10" />
+                <ColumnDefinition Width="60" />
+                <ColumnDefinition Width="100" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="Pages" Margin="0, 0, 0, 5"/>
+            <TextBlock Grid.Row="0" Grid.Column="1" Text="From" Margin="0, 0, 0, 5"/>
+            <common:MvtNumBox Grid.Row="0"  Grid.Column="2" Text="{Binding FirstPage}" HorizontalContentAlignment="Right" Min="0" IsInt="True" Margin="0, 0, 0, 5"/>
+            <TextBlock Grid.Row="0" Grid.Column="4" Text="To" Margin="0, 0, 0, 5"/>
+            <StackPanel Margin="0, 0, 0, 5" Grid.Column="5" Grid.Row="0" Orientation="Horizontal">
+                <common:RxNumBox Text="{Binding LastPage}" Width="60" HorizontalContentAlignment="Right" Min="0" IsInt="True"/>
+                <TextBlock Text=" ("/>
+                <TextBlock Text="{Binding SrcPages}"/>
+                <TextBlock Text=")"/>
+            </StackPanel>
+
+            <TextBlock Grid.Row="1" Grid.Column="1" Text="Copies" Margin="0, 0, 0, 5"/>
+            <common:RxNumBox Margin="0, 0, 0, 5" Grid.Row="1" Grid.Column="2" Text="{Binding Copies}" HorizontalContentAlignment="Right" Min="0" IsInt="True"/>
+
+            <TextBlock Grid.Row="1" Margin="0, 0, 0, 5" Grid.Column="4" Text="Collate"/>
+            <igWPF:XamComboEditor Margin="0, 0, 0, 5" Grid.Row="1" Grid.Column="5" 
+                    HorizontalAlignment="Stretch"
+                    ItemsSource="{Binding CollateList}"
+                    Value="{Binding Collate}"
+                    DisplayMemberPath="Display"
+                    ValuePath="Value" 
+                    DropDownResizeMode="None"
+                    >
+            </igWPF:XamComboEditor>
+        </Grid>
+
+        <!-- Start ___________________________________________________________________ -->
+        <Grid x:Name="Start_Settings" Margin="5, 10, 5, 5" >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="70" />
+                <ColumnDefinition Width="70" />
+                <ColumnDefinition Width="60" />
+                <ColumnDefinition Width="10" />
+                <ColumnDefinition Width="60" />
+                <ColumnDefinition Width="100" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="0" Text="Start"/>
+            <TextBlock Grid.Column="1" Text="Copy"/>
+            <common:MvtNumBox  Grid.Row="1" Grid.Column="2" Text="{Binding StartFrom}" Min="0" IsInt="True" x:Name="NumBox_StartFrom"/>
+            <TextBlock Grid.Row="1" x:Name="StartPageTxt" Grid.Column="4" Text="Page" />
+            <common:MvtNumBox  Grid.Row="1"  x:Name="StartPageNum" Grid.Column="5" Text="{Binding StartPage}" />
+        </Grid>
+
+        <!-- RIP Settings _____________________________________________________________________________-->
+        <Grid Margin="5, 10, 5, 5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="140" />
+                <ColumnDefinition Width="60" />
+                <ColumnDefinition Width="170"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock  Margin="0, 0, 0, 5" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Text="Print Environment" Visibility="{Binding Ripped, Converter={StaticResource IntToInVisible_Converter}}"/>
+            <!--
+                <ig:XamComboEditor Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" Width="200" HorizontalAlignment="Left">
+                </ig:XamComboEditor>
+                -->
+            <ComboBox Margin="0, 0, 0, 5" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="3" HorizontalAlignment="Stretch"
+                    ItemsSource="{Binding PrintEnvList}"
+                    SelectedValue="{Binding PrintEnv}"
+                    Visibility="{Binding Ripped, Converter={StaticResource IntToInVisible_Converter}}"
+                />
+
+            <TextBlock Margin="0, 0, 0, 5" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Text="Orientation" Visibility="{Binding Ripped, Converter={StaticResource IntToInVisible_Converter}}"/>
+            <igWPF:XamComboEditor Margin="0, 0, 0, 5" Grid.Row="1" Grid.Column="1" 
+                    HorizontalAlignment="Stretch"
+                    ItemsSource="{Binding OrientationList}"
+                    Value="{Binding Orientation}"
+                    DisplayMemberPath="Display"
+                    ValuePath="Value" 
+                    DropDownResizeMode="None"
+                    Visibility="{Binding Ripped, Converter={StaticResource IntToInVisible_Converter}}"
+                    >
+            </igWPF:XamComboEditor>
+
+            <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="0, 0, 0, 5" Text="Speed"/>
+            <rx:RxComboBox x:Name="CB_Speed"
+                    Grid.Row="2" Grid.Column="1"
+                    SelectedValue="{Binding Speed}"
+                    HorizontalContentAlignment="Right" Margin="0, 0, 0, 5"
+                    />
+            <TextBlock  Margin="5, 0, 0, 5" Grid.Row="2" Grid.Column="3" Text="m/min" x:Name="SpeedUnit"/>
+
+            <TextBlock   Margin="0, 0, 0, 5"       Grid.Row="3" Grid.Column="0" Text="Image Margin" />
+            <common:MvtNumBox Margin="0, 0, 0, 5"   Grid.Row="3" Grid.Column="1" Text="{Binding PageMargin, Converter={StaticResource Len_Unit_Converter}, ConverterParameter=mm}" HorizontalAlignment="Stretch"/>
+            <TextBlock    Margin="5, 0, 0, 5"      Grid.Row="3" Grid.Column="2" Text="mm"  x:Name="MarginUnit"/>
+
+            <TextBlock Margin="0, 0, 0, 5" Grid.Row="4" Grid.Column="0" Text="PrintGo Mode" VerticalAlignment="Center"/>
+            <rx:RxComboBox Margin="0, 0, 0, 5" x:Name="CB_PrintGoMode"
+                    Grid.Row="4" Grid.Column="1"
+                    SelectedValue="{Binding PrintGoMode}"
+                    ImageBox="true"
+                    >
+            </rx:RxComboBox>
+
+            <TextBlock       Margin="0, 0, 0, 5"   Grid.Row="5" Grid.Column="0" Text="Image Distance" />
+            <common:MvtNumBox  Margin="0, 0, 0, 5"  Grid.Row="5" Grid.Column="1" Text="{Binding PrintGoDist, Converter={StaticResource Len_Unit_Converter}, ConverterParameter=mm}" HorizontalAlignment="Stretch" Min="0"/>
+            <TextBlock     Margin="5, 0, 0, 5"     Grid.Row="5" Grid.Column="2" Text="mm" x:Name="DistUnit"/>
+
+        </Grid>
+        
+            <StackPanel Margin="0, 10, 0, 10" Orientation="Horizontal" Grid.Row="2" Grid.ColumnSpan="3" x:Name="ShowButtonGrid" 
+                    HorizontalAlignment="Center" Visibility="{Binding Changed, Converter={StaticResource IntToVisible_Converter}}">
+                <common:MvtButton x:Name="SaveButton"   Click="Save_Click" Margin="0,0,10,0" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}">
+                    <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="20" Height="20"
+                                                Kind="Check"></iconPacks:PackIconMaterial>
+                </common:MvtButton>
+
+                <common:MvtButton  x:Name="CancelButton" Click="Cancel_Click" Margin="0" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}">
+                    <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="20" Height="20"
+                                                Kind="Close"></iconPacks:PackIconMaterial>
+                </common:MvtButton>
+            </StackPanel>
+
+            <uc:PreviewWeb Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="5" 
+                    Width="250"
+                    Height="auto" MinHeight="100"
+                    HorizontalAlignment="Center" 
+                    Margin="0,5,0,0"
+                    Source="{Binding Preview}"
+                    Orientation="{Binding Orientation}"/>
+
+
+    </StackPanel>
+    </GroupBox>
+</UserControl>

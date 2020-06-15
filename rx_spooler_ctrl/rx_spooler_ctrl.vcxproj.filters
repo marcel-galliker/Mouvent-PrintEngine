@@ -58,13 +58,13 @@
     <ClInclude Include="args.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="rx_flz.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="jet_correction.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="screening.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rx_slicescreen_fms_1x3_gpu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -93,13 +93,13 @@
     <ClCompile Include="args.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="rx_flz.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="data.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="jet_correction.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="screening.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -119,5 +119,10 @@
     <None Include="rx_spooler_ctrl-Release-lx.vgdbsettings">
       <Filter>Make files</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="rx_slicescreen_fms_1x3_gpu.cu">
+      <Filter>Source Files</Filter>
+    </CudaCompile>
   </ItemGroup>
 </Project>

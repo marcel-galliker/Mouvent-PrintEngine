@@ -153,6 +153,9 @@
     <ClInclude Include="lh702_ctrl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="rx_main_ctrl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="boot_svr.c">

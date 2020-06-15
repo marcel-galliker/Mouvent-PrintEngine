@@ -4,21 +4,18 @@
     <LocalDebuggerCommandArguments>-ipaddr localhost</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-Remote|Win32'">
-    <LocalDebuggerCommandArguments>-ipaddr localhost</LocalDebuggerCommandArguments>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LocalDebuggerCommandArguments>
+    </LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-Remote|Win32'">
     <LocalDebuggerCommandArguments>-ipaddr localhost</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-Remote|x64'">
     <LocalDebuggerCommandArguments>-ipaddr localhost</LocalDebuggerCommandArguments>
-    <DebuggerFlavor>WindowsRemoteDebugger</DebuggerFlavor>
-    <RemoteDebuggerCommand>$(OutDir)$(TargetFileName)</RemoteDebuggerCommand>
-    <RemoteDebuggerWorkingDirectory>$(OutDir)</RemoteDebuggerWorkingDirectory>
-    <RemoteDebuggerServerName>$(RemoteComputer)</RemoteDebuggerServerName>
-    <RemoteDebuggerCommandArguments>- ipaddr localhost</RemoteDebuggerCommandArguments>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LocalDebuggerCommandArguments>-ipaddr localhost</LocalDebuggerCommandArguments>

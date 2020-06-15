@@ -100,7 +100,7 @@ int setup_network(HANDLE file, SRxNetwork *pnet, EN_setup_Action  action)
 //--- setup_config ----------------------------------------------------------------------------
 int setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action)
 {
-	int i;
+	int i, h;
 	char path[MAX_PATH];
 	HANDLE file = setup_create();
 
@@ -186,8 +186,10 @@ int setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action)
 
 	//--- ink supply ---
 	setup_uchar(file, "InkSupplyCnt", action, &pcfg->inkSupplyCnt, 1);
+	setup_uchar(file, "InkCylindersPerColor", action, &pcfg->inkCylindersPerColor, 1);
 	setup_uchar(file, "HeadsPerColor", action, &pcfg->headsPerColor, 1);
-
+	if (pcfg->inkCylindersPerColor==0) pcfg->inkCylindersPerColor=1;
+	pcfg->colorCnt = pcfg->inkSupplyCnt/pcfg->inkCylindersPerColor;
 	for (i=0; i<pcfg->inkSupplyCnt; i++)
 	{
 		if (setup_chapter(file, "InkSupply", i, action)==REPLY_OK) 
@@ -198,13 +200,40 @@ int setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action)
 			setup_int32(file, "RectoVerso", action, (int*)&pcfg->inkSupply[i].rectoVerso, 0);
 			setup_int32(file, "inkPressureSet", action, (int*)&pcfg->inkSupply[i].cylinderPresSet, 150);
 			if (pcfg->inkSupply[i].cylinderPresSet==INVALID_VALUE) pcfg->inkSupply[i].cylinderPresSet=150; 
-		
-			setup_int32_arr(file, "headFpVoltage", action, &pcfg->headFpVoltage[i*pcfg->headsPerColor], pcfg->headsPerColor,  100);
-			setup_int32_arr(file, "HeadDist",      action, &pcfg->headDist[i*pcfg->headsPerColor],		pcfg->headsPerColor,	0);
-			setup_int32_arr(file, "HeadDistBack",  action, &pcfg->headDistBack[i*pcfg->headsPerColor],	pcfg->headsPerColor,	0);
+
+			int headsPerInkSupply = pcfg->headsPerColor;
+			if (pcfg->inkCylindersPerColor) headsPerInkSupply /= pcfg->inkCylindersPerColor;
+			setup_int32_arr(file, "headFpVoltage", action, &pcfg->headFpVoltage[i*headsPerInkSupply], pcfg->headsPerColor,  100);
+			setup_int32_arr(file, "HeadDist",      action, &pcfg->headDist[i*headsPerInkSupply],	  pcfg->headsPerColor,	0);
+			setup_int32_arr(file, "HeadDistBack",  action, &pcfg->headDistBack[i*headsPerInkSupply],  pcfg->headsPerColor,	0);
 			setup_int32(file, "ColorOffset",	   action, &pcfg->colorOffset[i], 0);
 			setup_str(file, "BarcodeScannerSN",	   action,  pcfg->inkSupply[i].scannerSN,	sizeof(pcfg->inkSupply[i].scannerSN),	"");
 					
+			setup_chapter(file, "..", -1, action);
+		}
+	}
+
+	if (action==WRITE)
+	{
+		if (setup_chapter(file, "Density", -1, action)==REPLY_OK)
+		{
+			for (i=0; i<pcfg->colorCnt; i++)
+			{
+				if (setup_chapter(file, "Color", i, action)==REPLY_OK) 
+				{
+					for (h=0; h<pcfg->headsPerColor; h++)
+					{
+						int n=i*RX_Config.headsPerColor+h;
+						int board = n/MAX_HEADS_BOARD;
+						int head  = n%MAX_HEADS_BOARD;
+						setup_chapter(file, "Head", h, action);
+                        setup_uchar(file, "voltage", action, &RX_HBStatus[board].head[head].eeprom_mvt.voltage, 0);
+						setup_int16_arr(file, "value",  action, RX_HBStatus[board].head[head].eeprom_mvt.densityValue, MAX_DENSITY_VALUES, 0);
+						setup_chapter(file, "..", -1, action);
+					}
+					setup_chapter(file, "..", -1, action);
+				}
+			}
 			setup_chapter(file, "..", -1, action);
 		}
 	}
@@ -229,7 +258,7 @@ static void _head_pressure_out_override(SRxConfig *pcfg)
 			{
 				if (setup_chapter(file, "head", i+1, READ)==REPLY_OK) 
 				{    									
-					setup_int32_arr(file, "disabledJets",  READ, pcfg->headDisabledJets[i],	sizeof(pcfg->headDisabledJets[i]),	0);					
+				//	setup_int16_arr(file, "disabledJets",  READ, pcfg->headDisabledJets[i],	sizeof(pcfg->headDisabledJets[i]),	0);					
 					setup_chapter(file, "..", -1, READ);
 				}	
    			}

@@ -234,7 +234,10 @@ namespace RX_Common
                     pt = obj.PointToScreen(new Point(0, 0));
                     break;
                 }
-                catch(Exception){obj =(FrameworkElement) LogicalTreeHelper.GetParent(obj);}
+                catch(Exception)
+                {
+                    obj =(FrameworkElement) LogicalTreeHelper.GetParent(obj);
+                }
             }
             #if (!DEBUG) 
                 this.Topmost=true;
@@ -313,8 +316,10 @@ namespace RX_Common
                 SetForegroundWindow(_puttyWnd);
                 System.Windows.Forms.SendKeys.SendWait(str);    
             }
-            catch(Exception)
-            { };
+            catch(Exception e)
+            {
+                Console.WriteLine(e.Message); 
+            };
             SetForegroundWindow(wnd);
         }
 

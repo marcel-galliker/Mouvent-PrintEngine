@@ -24,6 +24,7 @@ extern SFpgaHeadBoardCfg	FpgaCfg;
 void  fpga_init(char *rbfFileName);
 int   fpga_is_init(void);
 int	  fpga_is_ready(void);
+int   fpga_is_printing(void);
 void  fpga_master_disable();
 void  fpga_end(void);
 void  fpga_overheated(void);

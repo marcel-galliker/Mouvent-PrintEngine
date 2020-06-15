@@ -127,7 +127,7 @@ namespace RX_DigiPrint.Models
                         return;
                     }
                 }
-                catch(Exception ex)
+                catch(Exception)
                 {
                     Valid=false;
                     RxGlobals.Events.AddItem(new LogItem("License invalid"){LogType=ELogType.eErrWarn});                

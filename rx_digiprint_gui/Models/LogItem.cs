@@ -156,12 +156,12 @@ namespace RX_DigiPrint.Models
                     case EDeviceType.dev_stepper:   return string.Format("Stepper{0}", noStr);
                     case EDeviceType.dev_head:      try
                                                     {
-                                                        int head0 = (_DevNo*(int)TcpIp.HEAD_CNT)%RxGlobals.PrintSystem.HeadCnt;
-                                                        if (RxGlobals.PrintSystem.HeadCnt==TcpIp.HEAD_CNT && RxGlobals.InkSupply.List[_DevNo].InkType!=null) 
+                                                        int head0 = (_DevNo*(int)TcpIp.HEAD_CNT)%RxGlobals.PrintSystem.HeadsPerColor;
+                                                        if (RxGlobals.PrintSystem.HeadsPerColor==TcpIp.HEAD_CNT && RxGlobals.InkSupply.List[_DevNo].InkType!=null) 
                                                             return string.Format("CL {0}", InkType.ColorNameShort(RxGlobals.InkSupply.List[_DevNo].InkType.ColorCode), _DevNo+1, _DevNo+4);
-                                                        if (RxGlobals.PrintSystem.HeadCnt > TcpIp.HEAD_CNT)
+                                                        if (RxGlobals.PrintSystem.HeadsPerColor > TcpIp.HEAD_CNT)
                                                         {
-                                                            int isNo=(int)((_DevNo*TcpIp.HEAD_CNT)/RxGlobals.PrintSystem.HeadCnt);
+                                                            int isNo=(int)((_DevNo*TcpIp.HEAD_CNT)/RxGlobals.PrintSystem.HeadsPerColor);
                                                             string name = InkType.ColorNameShort(RxGlobals.InkSupply.List[isNo].InkType.ColorCode);
                                                             switch(RxGlobals.InkSupply.List[isNo].RectoVerso)
                                                             {

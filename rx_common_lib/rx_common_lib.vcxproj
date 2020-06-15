@@ -63,19 +63,19 @@
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>Common</RootNamespace>
     <ProjectName>rx_common_lib</ProjectName>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-Remote|Win32'" Label="Configuration">
@@ -141,14 +141,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -210,14 +210,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <TargetExt>.lib</TargetExt>
-    <IntDir>$(ProjectDir)..\_temp\$(MSBuildProjectName)\$(Configuration)\</IntDir>
-    <OutDir>$(ProjectDir)..\_out\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)..\_temp\$(MSBuildProjectName)\$(Configuration)_$(Platform)\</IntDir>
+    <OutDir>$(projectDir)..\_out\$(Configuration)_$(Platform)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <TargetExt>.lib</TargetExt>
-    <OutDir>$(SolutionDir)_out\$(Configuration)_$(Platform)\</OutDir>
-    <IntDir>$(SolutionDir)_temp\$(MSBuildProjectName)\$(Configuration)_$(Platform)\</IntDir>
+    <OutDir>$(ProjectDir)..\_out\$(Configuration)_$(Platform)\</OutDir>
+    <IntDir>$(ProjectDir)..\_temp\$(MSBuildProjectName)\$(Configuration)_$(Platform)\</IntDir>
     <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-Remote|Win32'">
@@ -235,7 +235,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-lx|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <TargetExt>.lib</TargetExt>
-    <IntDir>$(SolutionDir)_temp\$(MSBuildProjectName)\$(Configuration)\</IntDir>
+    <IntDir>$(ProjectDir)..\_temp\$(MSBuildProjectName)\$(Configuration)\</IntDir>
     <IncludePath />
     <ReferencePath />
     <LibraryPath />
@@ -245,7 +245,7 @@
     <NMakeOutput>$(ProjectDir)rx_common_lib-Debug-lx.vgdbsettings</NMakeOutput>
     <NMakeIncludeSearchPath>$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\c++\4.9;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\x86_64-linux-gnu\c++\4.9;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\c++\4.9\backward;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0004\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0003\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0005\include-fixed;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\x86_64-linux-gnu;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include;..\rx_ink_lib;..\Externals\TinyXML;..\Externals\libtiff;..\Externals\mbedtls-1.3.10\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(ProjectDir)\gcc_Debug-lx.h;$(VISUALGDB_DIR)\gcc_compat.h;$(NMakeForcedIncludes)</NMakeForcedIncludes>
-    <OutDir>$(SolutionDir)_out\$(Configuration)\</OutDir>
+    <OutDir>$(ProjectDir)..\_out\$(Configuration)\</OutDir>
     <NMakePreprocessorDefinitions>__VisualGDB_CFG_Debug_lx;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-lx|x64'">
@@ -265,7 +265,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-soc|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <TargetExt>.lib</TargetExt>
-    <IntDir>$(SolutionDir)_temp\$(MSBuildProjectName)\$(Configuration)\</IntDir>
+    <IntDir>$(ProjectDir)..\_temp\$(MSBuildProjectName)\$(Configuration)\</IntDir>
     <IncludePath />
     <ReferencePath />
     <LibraryPath />
@@ -275,7 +275,7 @@
     <NMakeOutput>$(ProjectDir)rx_common_lib-Debug-soc.vgdbsettings</NMakeOutput>
     <NMakeIncludeSearchPath>$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\include\c++\4.7.1;$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\include\c++\4.7.1\arm-linux-gnueabi;$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\include\c++\4.7.1\backward;$(TOOLCHAIN_ROOT)\lib\gcc\arm-linux-gnueabi\4.7.1\include;$(TOOLCHAIN_ROOT)\lib\gcc\arm-linux-gnueabi\4.7.1\include-fixed;$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\include;$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\libc\usr\include\arm-linux-gnueabi;$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\libc\usr\include;../Externals/TinyXML;../Externals/libtiff;../Externals/mbedtls-1.3.10/include;../rx_ink_lib;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(ProjectDir)\gcc_Debug-soc.h;$(VISUALGDB_DIR)\gcc_compat.h;$(NMakeForcedIncludes)</NMakeForcedIncludes>
-    <OutDir>$(SolutionDir)_out\$(Configuration)\</OutDir>
+    <OutDir>$(ProjectDir)..\_out\$(Configuration)\</OutDir>
     <NMakePreprocessorDefinitions>__VisualGDB_CFG_Debug_soc;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-soc|x64'">
@@ -295,7 +295,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-soc|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <TargetExt>.lib</TargetExt>
-    <IntDir>$(SolutionDir)_temp\$(MSBuildProjectName)\$(Configuration)\</IntDir>
+    <IntDir>$(ProjectDir)..\_temp\$(MSBuildProjectName)\$(Configuration)\</IntDir>
     <IncludePath />
     <ReferencePath />
     <LibraryPath />
@@ -305,7 +305,7 @@
     <NMakeOutput>$(ProjectDir)rx_common_lib-Release-soc.vgdbsettings</NMakeOutput>
     <NMakeIncludeSearchPath>$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\include\c++\4.7.1;$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\include\c++\4.7.1\arm-linux-gnueabi;$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\include\c++\4.7.1\backward;$(TOOLCHAIN_ROOT)\lib\gcc\arm-linux-gnueabi\4.7.1\include;$(TOOLCHAIN_ROOT)\lib\gcc\arm-linux-gnueabi\4.7.1\include-fixed;$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\include;$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\libc\usr\include\arm-linux-gnueabi;$(TOOLCHAIN_ROOT)\arm-linux-gnueabi\libc\usr\include;../rx_fluid_nios/software/rx_fluid_nios;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(ProjectDir)\gcc_Release-soc.h;$(VISUALGDB_DIR)\gcc_compat.h;$(NMakeForcedIncludes)</NMakeForcedIncludes>
-    <OutDir>$(SolutionDir)_out\$(Configuration)\</OutDir>
+    <OutDir>$(ProjectDir)..\_out\$(Configuration)\</OutDir>
     <NMakePreprocessorDefinitions>__VisualGDB_CFG_Release_soc;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-soc|x64'">
@@ -325,7 +325,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-lx|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <TargetExt>.lib</TargetExt>
-    <IntDir>$(SolutionDir)_temp\$(MSBuildProjectName)\$(Configuration)\</IntDir>
+    <IntDir>$(ProjectDir)..\_temp\$(MSBuildProjectName)\$(Configuration)\</IntDir>
     <IncludePath />
     <ReferencePath />
     <LibraryPath />
@@ -335,7 +335,7 @@
     <NMakeOutput>$(ProjectDir)rx_common_lib-Release-lx.vgdbsettings</NMakeOutput>
     <NMakeIncludeSearchPath>$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\c++\4.9;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\x86_64-linux-gnu\c++\4.9;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\c++\4.9\backward;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0004\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0003\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0005\include-fixed;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\x86_64-linux-gnu;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include;..\rx_ink_lib;..\Externals\TinyXML;..\Externals\libtiff;..\Externals\mbedtls-1.3.10\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(ProjectDir)\gcc_Release-lx.h;$(VISUALGDB_DIR)\gcc_compat.h;$(NMakeForcedIncludes)</NMakeForcedIncludes>
-    <OutDir>$(SolutionDir)_out\$(Configuration)\</OutDir>
+    <OutDir>$(ProjectDir)..\_out\$(Configuration)\</OutDir>
     <NMakePreprocessorDefinitions>__VisualGDB_CFG_Release_lx;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-lx|x64'">
@@ -355,14 +355,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <TargetExt>.lib</TargetExt>
-    <OutDir>$(ProjectDir)..\_out\$(Configuration)_$(Platform)\</OutDir>
-    <IntDir>$(ProjectDir)..\_temp\$(MSBuildProjectName)\$(Configuration)_$(Platform)\</IntDir>
+    <OutDir>$(projectDir)..\_out\$(Configuration)_$(Platform)\</OutDir>
+    <IntDir>$(ProjectDir)..\_temp\$(MSBuildProjectName)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <TargetExt>.lib</TargetExt>
-    <OutDir>$(SolutionDir)_out\$(Configuration)_$(Platform)\</OutDir>
-    <IntDir>$(SolutionDir)_temp\$(MSBuildProjectName)\$(Configuration)_$(Platform)\</IntDir>
+    <OutDir>$(ProjectDir)..\_out\$(Configuration)_$(Platform)\</OutDir>
+    <IntDir>$(ProjectDir)..\_temp\$(MSBuildProjectName)\$(Configuration)_$(Platform)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -611,6 +611,7 @@
     <ClInclude Include="rx_error.h" />
     <ClInclude Include="rx_fifo.h" />
     <ClInclude Include="rx_file.h" />
+    <ClInclude Include="rx_flz.h" />
     <ClInclude Include="rx_fpga.h" />
     <ClInclude Include="rx_hash.h" />
     <ClInclude Include="rx_led.h" />
@@ -644,6 +645,7 @@
     <ClCompile Include="rx_def.c" />
     <ClCompile Include="rx_embrip_def.c" />
     <ClCompile Include="rx_fifo.c" />
+    <ClCompile Include="rx_flz.c" />
     <ClCompile Include="rx_fpga.c" />
     <ClCompile Include="rx_hash.c" />
     <ClCompile Include="rx_error.c" />

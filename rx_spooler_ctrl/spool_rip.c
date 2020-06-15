@@ -173,7 +173,7 @@ void sr_set_layout_end  (RX_SOCKET socket, SMsgHdr *msg)
 	_BmpInfoLabel.srcWidthPx	= _BmpInfoColor.srcWidthPx   = (int)((double)width/25400.0*DPIX);
 	_BmpInfoLabel.lengthPx		= _BmpInfoColor.lengthPx	 = (int)(_Layout.height/25400.0*DPIX);
 	_BmpInfoLabel.lineLen		= _BmpInfoColor.lineLen      = (_BmpInfoLabel.srcWidthPx+7)/8;
-	_BmpInfoLabel.dataSize		= _BmpInfoColor.dataSize     = _BmpInfoLabel.lineLen * _BmpInfoLabel.lengthPx;
+	_BmpInfoLabel.dataSize		= _BmpInfoColor.dataSize	   = (UINT64)_BmpInfoLabel.lineLen * _BmpInfoLabel.lengthPx;
 	
 	split_path(_Layout.label, NULL, filename, NULL);
 

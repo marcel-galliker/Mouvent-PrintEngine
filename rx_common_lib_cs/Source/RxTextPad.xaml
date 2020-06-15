@@ -21,6 +21,7 @@
         -->
     <Window.Resources>
         <ResourceDictionary>
+            <SolidColorBrush x:Key="Rx.OptionMark.Pressed.Border" Color="#FF3C77DD" />
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="..\Resources\RxResources.xaml" />
                 <ResourceDictionary Source="..\Resources\NumButtonStyle.xaml" />
@@ -66,7 +67,7 @@
                         <Button x:Name="Display"
                         Grid.ColumnSpan="3"
                         Background="{StaticResource RX.Green}"
-                        BorderBrush="{StaticResource OptionMark.Pressed.Border}"
+                        BorderBrush="{StaticResource Rx.OptionMark.Pressed.Border}"
                         HorizontalAlignment="Stretch"
                         Width="auto"
                         Margin="0,0,128,0"

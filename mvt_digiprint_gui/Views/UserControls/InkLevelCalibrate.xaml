@@ -1,0 +1,46 @@
+﻿<Window x:Class="RX_DigiPrint.Views.UserControls.InkLevelCalibrate"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+        Topmost="True"
+        Title="Scales Calibration"
+        SizeToContent="WidthAndHeight"
+        Height="auto" Width="auto">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="100"/>
+            <ColumnDefinition Width="70"/>
+            <ColumnDefinition Width="auto"/>
+        </Grid.ColumnDefinitions>
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="Displayed" Margin="10"/>
+        <TextBlock Grid.Row="0" Grid.Column="1" x:Name="Value" Margin="10" HorizontalAlignment="Right"/>
+        <TextBlock Grid.Row="0" Grid.Column="2" Text="Kg" Margin="10"/>
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="Real" Margin="10"/>
+        <common:MvtNumBox Grid.Row="1" Grid.Column="1" x:Name="NBRealValue" Margin="10"/>
+        <TextBlock Grid.Row="1" Grid.Column="2" Text="Kg" Margin="10"/>
+
+        <StackPanel Grid.ColumnSpan="3" Grid.Row="2" Orientation="Horizontal" Margin="10" HorizontalAlignment="Center">
+            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}" Margin="5"
+                                 Click="Ok_Clicked">
+                <iconPacks:PackIconMaterial 
+                                                    Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}"
+                                        Kind="Check"
+                                        VerticalAlignment="Center" HorizontalAlignment="Center" Width="20" Height="20"/>
+            </common:MvtButton>
+
+            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}" Margin="5"
+                                 Click="Cancel_Clicked">
+                <iconPacks:PackIconMaterial 
+                                                    Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}"
+                                        Kind="Close"
+                                        VerticalAlignment="Center" HorizontalAlignment="Center" Width="20" Height="20"/>
+            </common:MvtButton>
+        </StackPanel>
+    </Grid>
+</Window>

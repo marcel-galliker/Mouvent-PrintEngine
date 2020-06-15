@@ -308,6 +308,7 @@
     <Compile Include="Converters\Counter_Converter.cs" />
     <Compile Include="Converters\CtrlMode_Str.cs" />
     <Compile Include="Converters\DeviceNoVisible_Converter.cs" />
+    <Compile Include="Converters\DisabledJet_Converter.cs" />
     <Compile Include="Converters\EnumToInt_Converter.cs" />
     <Compile Include="Converters\Error_Converter.cs" />
     <Compile Include="Converters\FileName_Converter.cs" />
@@ -369,6 +370,7 @@
     <Compile Include="Models\DeviceNumbers.cs" />
     <Compile Include="Models\Dir.cs" />
     <Compile Include="Models\DirItem.cs" />
+    <Compile Include="Models\DisabledJet.cs" />
     <Compile Include="Models\Encoder.cs" />
     <Compile Include="Models\Enums\Alignment.cs" />
     <Compile Include="Models\Enums\BarcodeType.cs" />
@@ -578,6 +580,12 @@
     </Compile>
     <Compile Include="Views\PrintSystemView\AdjustmentHelp.xaml.cs">
       <DependentUpon>AdjustmentHelp.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PrintSystemView\DensityView.xaml.cs">
+      <DependentUpon>DensityView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PrintSystemView\DisabledJetsView.xaml.cs">
+      <DependentUpon>DisabledJetsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\PrintSystemView\StepperGridCleaf.xaml.cs">
       <DependentUpon>StepperGridCleaf.xaml</DependentUpon>
@@ -1087,6 +1095,14 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\PrintSystemView\DensityView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\PrintSystemView\DisabledJetsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\PrintSystemView\StepperGridCleaf.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -1395,6 +1411,7 @@
     <Resource Include="Resources\Bitmaps\checked.ico" />
     <Resource Include="Resources\Bitmaps\PG_Mark_INV.ico" />
     <Resource Include="Resources\Bitmaps\PG_Mark_Virtual.ico" />
+    <Resource Include="Resources\Bitmaps\density.PNG" />
     <Resource Include="Resources\Bitmaps\RunList.png" />
     <Resource Include="Resources\Bitmaps\LH702\LH702.jpg" />
     <Resource Include="Resources\Bitmaps\UV_Lamp_OFF.ico" />
@@ -1687,7 +1704,7 @@ rem copy $(ProjectDir)..\_out\release\rx_rip_lib.dll D:\radex\bin\gui
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>call $(ProjectDir)Resources\Language\Compile.bat $(ProjectDir)Resources\Language
-call $(ProjectDir)VersionUpdate.bat $(ProjectDir)Properties\AssemblyInfo.cs.template  $(ProjectDir)Properties\AssemblyInfo.cs
+call $(ProjectDir)..\VersionUpdate_WPF.exe  $(ProjectDir)Properties\AssemblyInfo.cs  $(ProjectDir)..\rx_common_lib\version.h
 rem dir $(SolutionDir)_out\$(Configuration)_$(PlatformName)\rx_rip_lib.dll</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

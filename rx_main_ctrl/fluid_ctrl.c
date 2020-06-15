@@ -608,7 +608,6 @@ static void _control(int fluidNo)
 	
 	if (lbrob && RX_Config.stepper.wipe_speed == 0) RX_Config.stepper.wipe_speed = 10;
 
-
 	for (i=0; i<INK_PER_BOARD; i++, _stat++, no++)
 	{
 		if (ctrl_check_all_heads_in_fluidCtrlMode(no, _stat->ctrlMode))

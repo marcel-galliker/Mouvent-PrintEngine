@@ -1,0 +1,28 @@
+﻿<UserControl x:Class="RX_DigiPrint.Views.PrintSystemView.PrintHeadDistView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d"
+             Margin="5,0"
+             >
+    <StackPanel>
+        <TextBlock x:Name="Title" Text="Cluster 1" HorizontalAlignment="Center"/>
+        <Grid>
+            <Border x:Name="Border" BorderThickness="1" MinWidth="100" Height="140" VerticalAlignment="Top" BorderBrush="#FF3F3F3F">
+                <Grid x:Name="DirText">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="99*"/>
+                        <RowDefinition/>
+                        <RowDefinition Height="38*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="à" FontFamily="Wingdings" VerticalAlignment="Bottom" Margin="-8,0,0,29" Grid.RowSpan="3"/>
+                    <TextBlock Text="ß" FontFamily="Wingdings" VerticalAlignment="Bottom" Margin="-8,0,0,9" Grid.Row="2"/>
+                </Grid>
+            </Border>
+            <Canvas x:Name="Canvas" Height="200" VerticalAlignment="Top">
+            </Canvas>
+            <!--           <Button Template="{DynamicResource ButtonNoMouseOver}"></Button>-->
+        </Grid>
+    </StackPanel>
+</UserControl>

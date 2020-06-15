@@ -33,6 +33,10 @@ int  ctrl_singleHead(void);
 void ctrl_update_hostname(void);
 int  ctrl_set_config(void);
 void ctrl_send_head_cfg(void);
+void ctrl_get_density_values(RX_SOCKET socket, SValue *pmsg);
+void ctrl_set_density_values(SDensityValuesMsg *pmsg);
+void ctrl_set_disalbled_jets(SDisabledJetsMsg *pmsg);
+
 int  ctrl_head_cfg_done(int headNo, UINT32 resetCnt);
 void ctrl_head_cal_done(int fluidNo);
 UINT32 ctrl_headResetCnt(void);

@@ -13,6 +13,7 @@
 #include "rx_def.h"
 #include "rx_error.h"
 #include "rx_file.h"
+#include "rx_flz.h"
 #include "rx_threads.h"
 #include "rx_tif.h"
 #include "rx_trace.h"
@@ -299,7 +300,7 @@ static void _send_head_info(void)
 	
 	rx_get_system_time_str(time, '-');
 
-	for (color=0, headNo=0; color<RX_Config.inkSupplyCnt; color++)
+	for (color=0, headNo=0; color<RX_Config.colorCnt; color++)
 	{
 		for (n=0; n<RX_Config.headsPerColor; n++, headNo++)
 		{
@@ -309,9 +310,13 @@ static void _send_head_info(void)
 			len += sprintf(&str[len], "%s\n", RX_TestImage.testMessage);
 			len += sprintf(&str[len], "%s-%d                     %s\n", RX_ColorNameShort(color), n+1, time);
 			
-			len += sprintf(&str[len], "cl# %06d  printed %12s l\n", RX_HBStatus[headNo/MAX_HEADS_BOARD].clusterNo, value_str3((int)(1000.0*RX_HBStatus[headNo/MAX_HEADS_BOARD].head[headNo%MAX_HEADS_BOARD].printedDroplets*(1000000000*RX_HBStatus[headNo/MAX_HEADS_BOARD].head[headNo%MAX_HEADS_BOARD].dropVolume))));
-			len += sprintf(&str[len], "s# %d-%02d \n", pinfo->serialNo/100, pinfo->serialNo%100);
-			len += sprintf(&str[len], "volt %d / straight %d / uniform %d\n",pinfo->voltage, pinfo->straightness, pinfo->uniformity);
+			double ml=(double)RX_HBStatus[headNo/MAX_HEADS_BOARD].head[headNo%MAX_HEADS_BOARD].printedDroplets;
+			ml *= 1000000000;
+			ml *= RX_HBStatus[headNo/MAX_HEADS_BOARD].head[headNo%MAX_HEADS_BOARD].dropVolume;
+
+			len += sprintf(&str[len], "cl# %06d  printed %12s l\n", RX_HBStatus[headNo/MAX_HEADS_BOARD].clusterNo, value_str3((int)(1000.0*ml)));
+			len += sprintf(&str[len], "s# %d-%02d\n", pinfo->serialNo/100, pinfo->serialNo%100);
+			len += sprintf(&str[len], "volt %d / straight %d / uniform %d\n", pinfo->voltage, pinfo->straightness, pinfo->uniformity);
 			len += sprintf(&str[len], "bad");
 			for (bad=0; bad<SIZEOF(pinfo->badJets) && pinfo->badJets[bad]; bad++)
 			{
@@ -319,7 +324,16 @@ static void _send_head_info(void)
 			}
 			len += sprintf(&str[len], "\n");
 			len += sprintf(&str[len], "Dots=%s / Men=%d.%d / Pump=%d.%d\n", RX_TestImage.dots, pstat->meniscus/10, abs(pstat->meniscus)%10, pstat->pumpFeedback/10, pstat->pumpFeedback%10);
+			if (RX_TestImage.testImage==PQ_TEST_DENSITY) 
+			{
+				len += sprintf(&str[len], "Density Correction: volt=%d%%\n", pstat->eeprom_mvt.voltage);
+				for (int i=0; i<MAX_DENSITY_VALUES; i++)
+				{
+					len += sprintf(&str[len], "%d  ", pstat->eeprom_mvt.densityValue[i]);			
+				}
 			len += sprintf(&str[len], "\n");
+			}
+//			printf("TestData[%d]: >>%s<<\n", n, str);
 			spool_send_test_data(headNo, str);
 			if (file) fprintf(file, "%s\n", str);
 		}
@@ -352,7 +366,7 @@ static void _load_test(void)
 			else									  RX_TestImage.printGoDist=50000*RX_Config.inkSupplyCnt;
 		}
 		else if (!rx_def_is_scanning(RX_Config.printer.type) && !rx_def_is_web(RX_Config.printer.type) && RX_TestImage.testImage!=PQ_TEST_GRID && RX_TestImage.testImage!=PQ_TEST_ANGLE_OVERLAP) 
-			RX_TestImage.printGoDist *= (RX_Config.inkSupplyCnt+1);
+			RX_TestImage.printGoDist *= (RX_Config.colorCnt+1);
 		if (bitsPerPixel>1) strcpy(RX_TestImage.dots, "SML");
 		_send_head_info();
 	//	spool_print_file(&RX_TestImage.id, RX_TestImage.filepath, 0, height, PG_MODE_GAP, 0, PQ_LENGTH_COPIES, 0, RX_TestImage.scanMode, 1, TRUE);
@@ -374,6 +388,9 @@ static void _load_test(void)
 static int _get_image_size(UINT32 gap)
 {
 	UINT32 length;
+	SFlzInfo info;
+
+	if(flz_get_info(_DataPath, 0, &info)==REPLY_OK) return info.lengthPx+gap;
 
 	if (tif_get_size(_DataPath, 0, gap, &length, NULL, NULL)==REPLY_OK) return length;
 
@@ -459,38 +476,48 @@ static int _print_next(void)
             
 			switch (RX_TestImage.testImage)
 			{
-				case PQ_TEST_ANGLE_OVERLAP:  strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "angle.bmp");
+				case PQ_TEST_ANGLE_OVERLAP:  strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "angle.tif");
 											 RX_TestImage.scansTotal = RX_TestImage.copies;
 											 break;
-				case PQ_TEST_ANGLE_SEPARATED:strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "angle.bmp");	
+				case PQ_TEST_ANGLE_SEPARATED:strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "angle.tif");	
 											 RX_TestImage.scansTotal = RX_TestImage.copies;
 											 break;
-				case PQ_TEST_JETS:			 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "fuji.bmp");
+				case PQ_TEST_JETS:			 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "fuji.tif");
 											 if (RX_Config.printer.type==printer_TX801 
 											 ||  RX_Config.printer.type==printer_TX802 
 											 ||  RX_Config.printer.type==printer_test_table) 
 												 RX_TestImage.scansTotal = RX_TestImage.copies;
 											 break;
-				case PQ_TEST_JET_NUMBERS:	 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "jet_numbers.bmp");
+				case PQ_TEST_JET_NUMBERS:	 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "jet_numbers.tif");
 											 if (RX_Config.printer.type==printer_TX801 
 											 ||  RX_Config.printer.type==printer_TX802 
 											 ||  RX_Config.printer.type==printer_test_table) 
 												 RX_TestImage.scansTotal = RX_TestImage.copies;	
 											 break;
-				case PQ_TEST_GRID:			 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "grid.bmp");	
+				case PQ_TEST_GRID:			 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "grid.tif");	
 											 RX_TestImage.scansTotal = RX_TestImage.copies;
 											 break;
-				case PQ_TEST_ENCODER:		 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "encoder.bmp"); 
+				case PQ_TEST_ENCODER:		 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "encoder.tif"); 
 											 RX_TestImage.scansTotal = RX_TestImage.copies;
 											 break;
-				case PQ_TEST_SCANNING:		 sprintf(RX_TestImage.filepath, PATH_BIN_SPOOLER "scanning_%d.bmp", RX_TestImage.id.scan+1);
+				case PQ_TEST_SCANNING:		 sprintf(RX_TestImage.filepath, PATH_BIN_SPOOLER "scanning_%d.tif", RX_TestImage.id.scan+1);
 											 RX_TestImage.copies=1;	
 											 RX_TestImage.scans=RX_TestImage.scansTotal=8;
 											 break;
-				case PQ_TEST_FULL_ALIGNMENT: strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "FullAlignement.bmp");
+				case PQ_TEST_FULL_ALIGNMENT: strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "FullAlignement.tif");
 											 RX_TestImage.scansTotal = RX_TestImage.copies;
 											 break;
-				default:					 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "fuji.bmp");	break;
+				case PQ_TEST_DENSITY:		 // preparing the bitmap:
+											 // 1. Draw bitmap as 24-Bit BMP in paint
+											 // 2. Open it in IrfanView
+											 // 3. Menu Image/Information change to 1200x1200 DPI
+											 // 4. Save it as TIF
+											 // 5. Rip it in Mouvent DFE
+											 // 6. Copy the black image to the binary
+											 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "density.flz");
+											 RX_TestImage.scansTotal = RX_TestImage.copies;
+											 break;
+				default:					 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "fuji.tif");	break;
 			}
 			RX_TestImage.collate     = FALSE;
 			RX_TestImage.copiesTotal = RX_TestImage.copies;
@@ -794,6 +821,7 @@ static int _print_next(void)
 							pitem->copiesTotal = _Item.id.copy;
 							pq_set_item(pitem);									
 						}
+
 						SPrintQueueItem item;
 						memcpy(&item, &_Item, sizeof(item));
 						item.lengthUnit = PQ_LENGTH_UNDEF;
@@ -897,9 +925,10 @@ int pc_print_done(int headNo, SPrintDoneMsg *pmsg)
 			}
 			else if (RX_Config.printer.type==printer_test_table)
 			{
-				if (arg_simuPLC) pc_abort_printing();
+			//	if (arg_simuPLC) pc_abort_printing();
 
-				// if (RX_PrinterStatus.sentCnt==RX_PrinterStatus.printedCnt) pc_abort_printing(); // curing!
+				if (RX_PrinterStatus.sentCnt==RX_PrinterStatus.printedCnt) 
+					pc_abort_printing(); // curing!
 				return REPLY_OK;
 			}
 			else
@@ -958,7 +987,7 @@ void pc_print_go(void)
 	{
 		SPageId *pid  = spool_get_id(RX_PrinterStatus.printGoCnt);
 		SPageId *next = spool_get_id(RX_PrinterStatus.printGoCnt+1);
-
+		
         plc_print_go(RX_PrinterStatus.printGoCnt);
 	//	Error(LOG, 0, "PrintGo[%d] (id=%d, page=%d, scan=%d, copy=%d)", RX_PrinterStatus.printGoCnt, pid->id, pid->page, pid->scan, pid->copy);
 	//	Error(LOG, 0, "NEXT   [%d] (id=%d, page=%d, scan=%d, copy=%d)", RX_PrinterStatus.printGoCnt, next->id, next->page, next->scan, next->copy);

@@ -19,7 +19,7 @@ namespace RX_DigiPrint.Models
             IpAddr     = item.ipAddr;
             Connected  = (item.connected!=0);
             Flash      = flash;
-            DeviceNoList = new EN_DeviceNumbers(DeviceType, RxGlobals.PrintSystem.ColorCnt, RxGlobals.PrintSystem.HeadCnt);            
+            DeviceNoList = new EN_DeviceNumbers(DeviceType, RxGlobals.PrintSystem.ColorCnt, RxGlobals.PrintSystem.HeadsPerColor);            
             DeviceNoEnabled = RxGlobals.User.UserType >= EUserType.usr_service;
         }
         #endregion

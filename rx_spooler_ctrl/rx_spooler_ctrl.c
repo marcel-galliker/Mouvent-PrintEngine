@@ -16,6 +16,7 @@
 #include "rx_threads.h"
 #include "rx_trace.h"
 #include "args.h"
+#include "rx_slicescreen_fms_1x3_gpu.h"
 #include "ctrl_client.h"
 #include "data_client.h"
 #include "head_client.h"	
@@ -148,6 +149,7 @@ int main(int argc, char* argv[])
 	err_init(FALSE, 100);
 	rx_init();
 	rx_def_init();
+	gpu_is_board_present();
 
 	tecit_version();	// is used to link the library (linux) !!!
 
@@ -158,7 +160,6 @@ int main(int argc, char* argv[])
 	#ifdef WIN32
 		strcpy(_IpAddrMain, "localhost");	
 	#endif
-	if (*arg_ipAddr) strcpy(_IpAddrMain, arg_ipAddr);
 	ctrl_start(_IpAddrMain);
 
 	printf("press \"X\" to stop\n");

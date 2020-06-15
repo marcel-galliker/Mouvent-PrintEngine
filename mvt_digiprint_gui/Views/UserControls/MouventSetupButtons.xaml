@@ -1,0 +1,63 @@
+﻿<UserControl x:Class="RX_DigiPrint.Views.UserControls.MouventSetupButtons"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             mc:Ignorable="d"
+             d:DesignHeight="70" 
+             d:DesignWidth="900"
+             >
+    <Grid>
+        
+        <StackPanel x:Name="ButtonsPanel" Orientation="Horizontal" Background="{StaticResource Mouvent.MainColorBrush}" Height="auto">
+
+            <common:MvtButton Grid.Column="1"  Margin="15,0,15,0" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" x:Name="CMD_WEBIN" Click="WebIn_Clicked" ToolTip="Web In"
+                             IsVisibleChanged="WebIn_IsVisibleChanged" IsEnabled="{Binding WebInEnabled}">
+                <iconPacks:PackIconMaterial Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Center" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="30" Height="30" Kind="ArrowExpandHorizontal"></iconPacks:PackIconMaterial>
+            </common:MvtButton>
+
+            <common:MvtButton Grid.Row="1" Grid.Column="0"  Margin="15,0,15,0" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" x:Name="CMD_JOG_BWD" 
+                             PreviewMouseDown="Jog_PreviewMouseDown"
+                             PreviewMouseUp="Jog_PreviewMouseUp"
+                             ToolTip="Jog Backwards"
+                             >
+                <iconPacks:PackIconMaterial Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Center" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20" Kind="ArrowLeft"></iconPacks:PackIconMaterial>
+            </common:MvtButton>
+
+            <common:MvtButton  Grid.Row="1" Grid.Column="1" Margin="15,0,15,0" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" x:Name="CMD_JOG_FWD" 
+                                      PreviewMouseDown="Jog_PreviewMouseDown" 
+                                      PreviewMouseUp="Jog_PreviewMouseUp" ToolTip="Jog Forward"
+                                      >
+                <iconPacks:PackIconMaterial Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Center" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20" Kind="ArrowRight"></iconPacks:PackIconMaterial>
+            </common:MvtButton>
+
+        <!--
+            <common:MvtButton Click="Clean_Clicked" ToolTip="Clean" >
+                <Image Source="../../Resources/Bitmaps/clean.ico"/>
+            </common:MvtButton>
+        -->
+            
+            <!--
+            <common:MvtButton Click="Warmup_Clicked">
+                <StackPanel>
+                    <TextBlock Text="Belt"      HorizontalAlignment="Center"/>
+                    <TextBlock Text="Warmup"    HorizontalAlignment="Center"/>
+                </StackPanel>
+            </common:MvtButton>
+            -->
+            <common:MvtButton Click="Gluing_Clicked" x:Name="Button_Glue" Margin="15,0,15,0" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" >
+                <iconPacks:PackIconJamIcons Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                                            Style="{StaticResource Mouvent.RoundIconButtonStyle.LightJamIcon}" Width="30" Height="30" Kind="Glue"></iconPacks:PackIconJamIcons>
+            </common:MvtButton>
+
+            <common:MvtButton Click="Washing_Clicked" x:Name="Button_Wash" Margin="15,0,0,0" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" >
+                <iconPacks:PackIconMaterial Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                                            Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="30" Height="30" Kind="ShowerHead"></iconPacks:PackIconMaterial>
+            </common:MvtButton>
+            <TextBlock Margin="5,0,0,0" x:Name="Wash_Time" VerticalAlignment="Center" Text="10s" HorizontalAlignment="Center" FontSize="13" Foreground="White"/>
+
+        </StackPanel>
+    </Grid>
+</UserControl>

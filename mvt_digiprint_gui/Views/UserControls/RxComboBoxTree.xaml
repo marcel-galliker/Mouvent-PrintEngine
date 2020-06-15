@@ -1,0 +1,103 @@
+﻿<UserControl x:Class="RX_DigiPrint.Views.UserControls.RxComboBoxTree"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:ig="http://schemas.infragistics.com/xaml"
+             xmlns:igWPF="http://schemas.infragistics.com/xaml/wpf"
+             xmlns:igDP="http://infragistics.com/DataPresenter"
+             xmlns:igEditors="http://infragistics.com/Editors"
+             xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
+             mc:Ignorable="d"
+             d:DesignHeight="40" d:DesignWidth="100"
+             >
+
+    <Grid x:Name="MainGrid" Height="25">
+
+            <TextBox Grid.Column="1" x:Name="Value"
+                 HorizontalAlignment="Stretch"
+                 VerticalContentAlignment="Center"
+                 IsReadOnly="True" 
+                 FontSize="12"
+                 Margin="0"
+                 Text="{Binding InkType, Converter={StaticResource InkType_Name}}"
+			     PreviewMouseDown="MyPreviewMouseDown"
+                 />
+
+
+        <rx:RxPopup x:Name="TreePopup"
+               PlacementTarget="{Binding ElementName=Value}"
+               Placement="Custom"
+               Width="auto"
+               MinWidth="100"
+               >
+            <Border BorderBrush="Gray" BorderThickness="1">
+                <Grid IsVisibleChanged="Grid_IsVisibleChanged" Background="White">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                    </Grid.RowDefinitions>
+                    <ig:XamGrid
+                        x:Name="DataGrid"
+                        AutoGenerateColumns="False"
+                        HeaderStyle="{DynamicResource XamGridHeaderStyle}"
+                        CellStyle="{DynamicResource XamGridCellControlStyle}"
+                        RowHeight="Dynamic"
+                        >
+                        <ig:XamGrid.SelectionSettings>
+                            <ig:SelectionSettings CellSelection="None" ColumnSelection="None" RowSelection="Single" CellClickAction="SelectRow"/>
+                        </ig:XamGrid.SelectionSettings>
+                        <ig:XamGrid.ExpansionIndicatorSettings>
+                            <ig:ExpansionIndicatorSettings 
+                            HeaderStyle="{DynamicResource XamGridExpansionIndicatorHeaderCellControl}"                        
+                            Style      ="{DynamicResource XamGridExpansionIndicator}"
+                            />
+                        </ig:XamGrid.ExpansionIndicatorSettings>
+                        <ig:XamGrid.RowSelectorSettings>
+                            <ig:RowSelectorSettings Visibility="Collapsed"/>
+                        </ig:XamGrid.RowSelectorSettings>
+                        <ig:XamGrid.Columns>
+                            <ig:UnboundColumn Key="Family"     HeaderText="Family" Width="auto" ValueConverter="{StaticResource ToString_Converter}"/>
+
+                            <ig:TemplateColumnLayout Key="Child" HeaderText="Child" CellStyle="{StaticResource XamGridColumnLayoutStyle}">
+                                <ig:TemplateColumnLayout.Template>
+                                    <DataTemplate>
+                                        <ig:XamGrid
+                                        AutoGenerateColumns="False"
+                                        HeaderStyle="{DynamicResource XamGridHeaderStyle}"
+                                        CellStyle="{DynamicResource XamGridCellControlStyle}"
+                                        Loaded="XamGrid_Loaded"
+                                        ActiveCellChanged="XamGrid_ActiveCellChanged"
+                                        Margin="0,0,28,0"
+                                        >
+                                            <ig:XamGrid.SelectionSettings>
+                                                <ig:SelectionSettings CellSelection="None" ColumnSelection="None" RowSelection="Single" CellClickAction="SelectRow"/>
+                                            </ig:XamGrid.SelectionSettings>
+                                            <ig:XamGrid.Columns>
+                                                <ig:TextColumn Key="Family"      HeaderText="Family"        Width="auto" Visibility="Collapsed"/>
+                                                <ig:TextColumn Key="Name"        HeaderText="Name"          Width="auto" />
+                                                <ig:TextColumn Key="Description" HeaderText="Description"   Width="auto" />
+                                            </ig:XamGrid.Columns>
+                                        </ig:XamGrid>
+                                    </DataTemplate>
+                                </ig:TemplateColumnLayout.Template>
+                            </ig:TemplateColumnLayout>
+                        </ig:XamGrid.Columns>
+                    </ig:XamGrid>
+
+                    <Button Grid.Row="1"  
+                            Content="unused" 
+                            HorizontalContentAlignment="Left" 
+                            Margin="32,0,0,0" 
+                            Padding="5" 
+                            Background="Transparent" 
+                            BorderBrush="Transparent"
+                            Click="Unused_Clicked"
+                            />
+                </Grid>
+            </Border>
+        </rx:RxPopup>
+
+    </Grid>
+
+</UserControl>

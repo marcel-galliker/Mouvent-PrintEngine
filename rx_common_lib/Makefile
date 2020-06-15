@@ -35,7 +35,7 @@ error:
 	$(error Invalid configuration, please check your inputs)
 endif
 
-SOURCEFILES := ../Externals/mbedtls-1.3.10/library/sha1.c bmp.c fastlz.c hex2bin.c rx_bitmap.c rx_common.c rx_crc.c rx_csv.c rx_def.c rx_embrip_def.c rx_fifo.c rx_fpga.c rx_hash.c rx_error.c rx_file.c rx_led.c rx_list.c rx_log.c rx_mac_address.c rx_mem.c rx_setup_file.cpp rx_setup_ink.c rx_sok.c rx_system.c rx_term.c rx_threads.c rx_trace.c rx_xml.cpp
+SOURCEFILES := ../Externals/mbedtls-1.3.10/library/sha1.c bmp.c fastlz.c hex2bin.c rx_bitmap.c rx_common.c rx_crc.c rx_csv.c rx_def.c rx_embrip_def.c rx_fifo.c rx_flz.c rx_fpga.c rx_hash.c rx_error.c rx_file.c rx_led.c rx_list.c rx_log.c rx_mac_address.c rx_mem.c rx_setup_file.cpp rx_setup_ink.c rx_sok.c rx_system.c rx_term.c rx_threads.c rx_trace.c rx_xml.cpp
 EXTERNAL_LIBS := ../Externals/TinyXML/$(BINARYDIR)/TinyXML.a
 EXTERNAL_LIBS_COPIED := $(foreach lib, $(EXTERNAL_LIBS),$(BINARYDIR)/$(notdir $(lib)))
 

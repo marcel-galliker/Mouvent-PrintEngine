@@ -2,6 +2,7 @@
 using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Services;
 using RX_DigiPrint.Views.LB702WBView;
+using RX_DigiPrint.Views.PrintSystemView;
 using RX_DigiPrint.Views.UserControls;
 using System;
 using System.Collections.Generic;
@@ -52,5 +53,7 @@ namespace RX_DigiPrint.Models
         public static License           License           = new License();
         public static CleafOrder        CleafOrder        = new CleafOrder();
         public static LB702WB_Machine   LB702WB_Machine;
+        public static DisabledJetsView  DisabledJetsView;
+        public static DensityView       DensityView;
     }
 }

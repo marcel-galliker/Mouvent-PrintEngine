@@ -32,6 +32,12 @@ HANDLE rx_thread_start(void *(*thread_routine) (void *), void *param, UINT32 sta
 		);
 }
 
+//--- rx_get_thread_id --------------------------------------------
+int rx_get_thread_id(void)	
+{
+	return (int) GetCurrentThreadId();
+}
+
 //--- rx_mutex_create(WIN32) ---------------------------------------------
 HANDLE rx_mutex_create()
 {
@@ -69,7 +75,6 @@ HANDLE rx_sem_create()
 //--- rx_sem_destroy ---------------------------------------------------
 int rx_sem_destroy(HANDLE *sem)
 {
-	
 	CloseHandle(*sem);
 	*sem=NULL;
 	return REPLY_OK;
@@ -94,10 +99,9 @@ int    rx_sem_post(HANDLE sem)
 }
 
 //--- rx_sleep ----------------------------------------
-int	rx_sleep(UINT32 ms)
+void rx_sleep(UINT32 ms)
 {
 	Sleep(ms);
-	return REPLY_OK;
 }
 
 //--- rx_process_start -------------------------------
@@ -195,9 +199,7 @@ void   rx_exit(int exitCode)
 int rx_process_running_cnt(const char *process, const char *arg)//, HANDLE *phandle, HMODULE *pmodule)
 {
 	int start, count=0;
-	char *filepath = PATH_TEMP "tasklist.txt";
 	FILE *file;
-	char dir[100];
 	char str[100];
 
 	for (start = (int)strlen(process); start > 0; start--)
@@ -209,14 +211,7 @@ int rx_process_running_cnt(const char *process, const char *arg)//, HANDLE *phan
 		}
 	}
 
-//		int ret=(int)ShellExecute(NULL,  "open", "tasklist.exe", " > D:/temp/tasklist.txt", NULL, SW_SHOW);
-
-	GetCurrentDirectory(sizeof(dir), dir);
-	SetCurrentDirectory(PATH_TEMP);
-	sprintf(str, "tasklist.exe >%s", filepath);
-	system(str);
-	SetCurrentDirectory(dir);
-	file = fopen(filepath, "r");
+	file = _popen("tasklist.exe", "r");
 	if (file)
 	{
 		while (fgets(str, sizeof(str), file))
@@ -224,7 +219,6 @@ int rx_process_running_cnt(const char *process, const char *arg)//, HANDLE *phan
 			if (str_start(str, &process[start])) count++;
 		}
 		fclose(file);
-		remove(filepath);
 	}
 	return count;
 }
@@ -238,6 +232,7 @@ int rx_process_running_cnt(const char *process, const char *arg)//, HANDLE *phan
 		HMODULE			hMod;
 		HANDLE			hProcess;
 		char			szProcessName[50];
+	char			szFileName[MAX_PATH];
 
 		for (start = (int)strlen(process); start > 0; start--)
 		{
@@ -260,7 +255,8 @@ int rx_process_running_cnt(const char *process, const char *arg)//, HANDLE *phan
 				hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, aProcesses[i]);
 				if (hProcess)
 				{
-					if (EnumProcessModules(hProcess, &hMod, sizeof(hMod), &cbNeeded))
+				strcpy(szFileName, "unknown");
+				if (EnumProcessModulesEx(hProcess, &hMod, sizeof(hMod), &cbNeeded, LIST_MODULES_ALL))
 						GetModuleBaseName(hProcess, hMod, szProcessName, sizeof(szProcessName));
 					if (_strnicmp(szProcessName, &process[start], strlen(&process[start])) == 0)
 					{
@@ -378,6 +374,12 @@ int rx_core_cnt(void)
 	return sysinfo.dwNumberOfProcessors;	
 }
 
+//--- rx_get_maxnumthreads -------------------------
+int	   rx_get_maxnumthreads(void *dummy)
+{
+	return rx_core_cnt();
+}
+
 #else
 
 #include <unistd.h>
@@ -410,9 +412,8 @@ typedef struct SThreadInfo
 
 static SThreadInfo ThreadInfo[THREAD_CNT]={0};
 
-//--- gettid --------------------------------------------
-//	this functtion is not implemented in Ununtu!
-int gettid(void)	
+//--- rx_get_thread_id --------------------------------------------
+int rx_get_thread_id(void)	
 {
 	return (int) syscall (SYS_gettid);
 }
@@ -468,7 +469,7 @@ HANDLE rx_thread_start(void *(*thread_routine) (void *), void *param, UINT32 sta
 
 	if (!ThreadInfo[0].tid)
 	{
-		ThreadInfo[0].tid=gettid();
+		ThreadInfo[0].tid=rx_get_thread_id();
 		strcpy(ThreadInfo[0].name, "main");
 	}
 
@@ -484,7 +485,7 @@ HANDLE rx_thread_start(void *(*thread_routine) (void *), void *param, UINT32 sta
 		}
 		if (!ThreadInfo[idx].tid)
 		{
-			ThreadInfo[idx].tid=gettid();
+			ThreadInfo[idx].tid=rx_get_thread_id();
 			strncpy(ThreadInfo[idx].name, name, sizeof(ThreadInfo[idx].name));
 			ThreadInfo[idx].thread_routine = thread_routine;
 			ThreadInfo[idx].param          = param;
@@ -695,11 +696,17 @@ int rx_core_cnt(void)
 	return atoi(str);	
 }
 
+//--- rx_get_maxnumthreads -------------------------
+int	   rx_get_maxnumthreads(void *dummy)
+{
+	return rx_core_cnt();
+}
+
+
 //--- rx_sleep ----------------------------------------
-int	rx_sleep(UINT32 ms)
+void	rx_sleep(UINT32 ms)
 {
 	usleep(1000*ms);
-	return REPLY_OK;
 }
 
 //--- _process_match --------------------------------

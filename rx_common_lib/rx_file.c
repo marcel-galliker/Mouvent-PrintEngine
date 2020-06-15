@@ -20,7 +20,6 @@
 	#include <string.h>
 	#include <utime.h>
 	#include <time.h>
-	#include <errno.h>
 #else
 	#include <io.h>
 	#include <sys/types.h>
@@ -29,6 +28,8 @@
 	#include <direct.h>
 	#include <time.h>
 #endif
+
+#include <errno.h>
 
 #include "rx_error.h"
 #include "rx_trace.h"
@@ -456,6 +457,9 @@ int rx_remove_old_files(const char *searchStr, int days)
 	ltime = (ltime/day)*day;
 	_localtime64_s(&t, &time); 
 
+
+	if (strstr(searchStr, "*"))
+	{
 	strcpy(path, searchStr);
 	n=(int)strlen(path)-1;
 	while (n>0)
@@ -463,28 +467,37 @@ int rx_remove_old_files(const char *searchStr, int days)
 		if (path[n]=='\\' || path[n]=='/') break;
 		path[n--]=0;
 	}
-
-	hFind = FindFirstFile(searchStr, &findFileData);
+		strcpy (str, searchStr);
+	}
+	else
+	{
+		sprintf(path, "%s/", searchStr);
+		sprintf(str, "%s/*", searchStr);
+	}
+	hFind = FindFirstFile(str, &findFileData);
 	no = -1;
 
 	if (hFind!=INVALID_HANDLE_VALUE) 
 	{
 		do
 		{
-			memcpy(&lftime, &findFileData.ftLastWriteTime, sizeof(lftime));
-			lftime = (lftime/day)*day;
-			diff = (ltime-lftime) / day;
-			if (diff>days || days==0) // delete older files
+			if (findFileData.cFileName[0]!='.')
 			{
-				sprintf(str, "%s%s", path, findFileData.cFileName);
-				DeleteFile(str);
-			}
-			else if (diff==0)
-			{
-				// n = atoi_tab(&findFileData.cFileName[wcslen(findFileData.cFileName)-7], NULL);
-				n = atoi(&findFileData.cFileName[strlen(findFileData.cFileName)-7]);
-				if (n<0) n=0;
-				if (n>no) no=n;
+			    memcpy(&lftime, &findFileData.ftLastWriteTime, sizeof(lftime));
+			    lftime = (lftime/day)*day;
+			    diff = (ltime-lftime) / day;
+			    if (diff>days || days==0) // delete older files
+			    {
+				    sprintf(str, "%s%s", path, findFileData.cFileName);
+				    DeleteFile(str);
+			    }
+			    else if (diff==0)
+			    {
+				    // n = atoi_tab(&findFileData.cFileName[wcslen(findFileData.cFileName)-7], NULL);
+				    n = atoi(&findFileData.cFileName[strlen(findFileData.cFileName)-7]);
+				    if (n<0) n=0;
+				    if (n>no) no=n;
+			    }
 			}
 		} 
 		while (FindNextFile(hFind, &findFileData));

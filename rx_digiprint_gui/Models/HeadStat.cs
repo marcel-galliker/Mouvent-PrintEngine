@@ -298,15 +298,42 @@ namespace RX_DigiPrint.Models
 		    get { return _FluidCtrlModeList;}
 	    }
 
+        //--- DensityValue ---------------------------------------------------
+        private Byte?  _DensityValuesCRC; 
+        public Int16[] DensityValue = new Int16[TcpIp.MAX_DENSITY_VALUES]; 
+
+        //--- DensityValue ---------------------------------------------------
+        private Byte?  _DisabledJetsCRC; 
+        public UInt16[] DisabledJets = new UInt16[TcpIp.MAX_DISABLED_JETS];
+
+        //--- Property Voltage ---------------------------------------
+        private Byte _Voltage;
+        public Byte Voltage
+        {
+            get { return _Voltage; }
+            set { SetProperty(ref _Voltage,value); }
+        }
+
         //--- SetItem ----------------------------------------------
         public void SetItem(int no, TcpIp.SHeadStat item, Int32 tempFpga, Int32 flow)
         {   
             bool used=false;
             HeadNo  = no;
 
+            if (_DensityValuesCRC==null || _DensityValuesCRC != item.eeprom_mvt.densityValueCRC)
+            {
+                for (int i=0; i<DensityValue.Length; i++) DensityValue[i]=item.eeprom_mvt.densityValue[i];
+                _DensityValuesCRC = item.eeprom_mvt.densityValueCRC;
+            }
+            if (_DisabledJetsCRC==null || _DisabledJetsCRC != item.eeprom_mvt.disabledJetsCRC)
+            {
+                for (int i=0; i<DisabledJets.Length; i++) DisabledJets[i]=item.eeprom_mvt.disabledJets[i];
+                _DisabledJetsCRC = item.eeprom_mvt.disabledJetsCRC;
+            }
+            Voltage = item.eeprom_mvt.voltage;
             try
             {
-                int ink = no/(int)RxGlobals.PrintSystem.HeadCnt;
+                int ink = no/(int)RxGlobals.PrintSystem.HeadsPerColor;
                 if (RxGlobals.InkSupply.List[ink].InkType!=null)
                 {
                 Color   = new SolidColorBrush(RxGlobals.InkSupply.List[ink].InkType.Color);
@@ -314,7 +341,7 @@ namespace RX_DigiPrint.Models
 
                 string str = new ColorCode_Str().Convert(RxGlobals.InkSupply.List[ink].InkType.ColorCode, null, ink, null).ToString();
 
-                Name    = str+"-"+(1+no%(int)RxGlobals.PrintSystem.HeadCnt).ToString();
+                    Name    = str+"-"+(1+no%(int)RxGlobals.PrintSystem.HeadsPerColor).ToString();
                 used = true;
             }
             }
@@ -381,7 +408,7 @@ namespace RX_DigiPrint.Models
             msg.status.name  = Name;
             msg.status.color   = Rx.ToArgb(Colors.Black);
             msg.status.colorFG = Rx.ToArgb(Colors.White);
-            int ink = HeadNo/(int)RxGlobals.PrintSystem.HeadCnt;
+            int ink = HeadNo/(int)RxGlobals.PrintSystem.HeadsPerColor;
             if (RxGlobals.InkSupply.List[ink].InkType!=null)
             {
                 msg.status.color   = Rx.ToArgb(RxGlobals.InkSupply.List[ink].InkType.Color);

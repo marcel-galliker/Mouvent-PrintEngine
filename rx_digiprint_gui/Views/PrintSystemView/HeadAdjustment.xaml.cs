@@ -1,5 +1,6 @@
 ﻿using RX_Common;
 using RX_DigiPrint.Models;
+using RX_DigiPrint.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,6 +35,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
             Width=_Screen.Width;
             Height=_Screen.Height;
 
+            RobotRow.Height = new GridLength(0);
+
             Point pt = parent.PointToScreen(new Point(0, parent.ActualHeight));
 
             if (_Screen.Surface) 
@@ -54,6 +57,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
             _headNo      = headNo;
 
             DataContext = RxGlobals.HeadAdjustment;
+            Density.HeadNo  = inkSupplyNo*RxGlobals.PrintSystem.HeadsPerColor + headNo;
+            DisabledJets.HeadNo  = inkSupplyNo*RxGlobals.PrintSystem.HeadsPerColor + headNo;
         }
 
         //--- Dialog_SizeChanged ---------------------------------------------
@@ -62,10 +67,31 @@ namespace RX_DigiPrint.Views.PrintSystemView
             Canvas.SetTop (Dialog, Back.BorderThickness.Top - Dialog.ActualHeight-2);
         }
 
+        //--- LoadDensity_Clicked ---------------------------------------------
+        private void LoadDensity_Clicked(object sender, RoutedEventArgs e)
+        {
+            Density.LoadFile();
+        }
+
+        //--- LoadDisabledJets_Clicked ---------------------------------------------
+        private void LoadDisabledJets_Clicked(object sender, RoutedEventArgs e)
+        {
+            DisabledJets.LoadFile();
+        }
+
+        //--- Save_Clicked ---------------------------------------------
+        private void Save_Clicked(object sender, RoutedEventArgs e)
+        {
+            Density.Save_Clicked(sender, e);
+            DisabledJets.Save_Clicked(sender, e);
+            DialogResult = true;
+        }
+
         //---Adjust_Clicked ------------------------------------------------------
         private void Adjust_Clicked(object sender, RoutedEventArgs e)
         {
             RxGlobals.HeadAdjustment.Adjust(_inkSupplyNo, _headNo);
+            DialogResult = true;
         }
 
         //---Cancel_Clicked ---------------------------------------------------------
@@ -86,6 +112,16 @@ namespace RX_DigiPrint.Views.PrintSystemView
         {
             AdjustmentHelp dlg = new AdjustmentHelp();
             dlg.Show();
+        }
+
+        private void DisabledJets_Loaded(object sender,RoutedEventArgs e)
+        {
+            DisabledJets.MaxHeight = Density.DesiredSize.Height;
+        }
+
+        private void Dialog_PreviewMouseLeftButtonDown(object sender,MouseButtonEventArgs e)
+        {
+
         }
     }
 }

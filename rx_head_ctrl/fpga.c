@@ -35,6 +35,7 @@
 #include "firepulse.h"
 #include "fpga_def_head.h"
 #include "fpga_simu.h"
+#include "head_ctrl.h"
 #include "udp_test.h"
 #include "args.h"
 #include "conditioner.h"
@@ -755,6 +756,12 @@ int	  fpga_is_ready(void)
 	return TRUE;			
 }
 
+//--- fpga_is_printing ---------------------------------------
+int   fpga_is_printing(void)
+{
+	return _Printing;
+}
+
 //--- fpga_udp_block_size ----------------------------------------
 int   fpga_udp_block_size(void)
 {
@@ -1061,7 +1068,9 @@ int  fpga_image	(SFpgaImageCmd *msg)
 
 	if (_Init)
 	{
-		TrPrintfL(trace, "head[%d].fpga_image[%d]: _Printing=%d, _HeadsLoaded=%d", head, idx, _Printing, _HeadsLoaded);
+		idx = Fpga.print->imgInIdx[head];
+
+	//	TrPrintfL(trace, "head[%d].fpga_image[%d]: _Printing=%d, _HeadsLoaded=%d", head, idx, _Printing, _HeadsLoaded);
 //		if (!_TestFSM) Error(LOG,  0, "fpga_image: FSM State=0x%04x", Fpga.stat->info);
 //		_TestFSM = 1;
 
@@ -1075,9 +1084,6 @@ int  fpga_image	(SFpgaImageCmd *msg)
 
 	//	TrPrintfL(trace, "imageListInIdx  = %d, %d, %d, %d", Fpga.print->imgInIdx[0], Fpga.print->imgInIdx[1], Fpga.print->imgInIdx[2], Fpga.print->imgInIdx[3]);
 	//	TrPrintfL(trace, "imageListOutIdx = %d, %d, %d, %d", Fpga.data->imgOutIdx[0][0], Fpga.data->imgOutIdx[1][0], Fpga.data->imgOutIdx[2][0], Fpga.data->imgOutIdx[3][0]);
-
-		idx = Fpga.print->imgInIdx[head];
-
 	//	if (head==0) Error(LOG, 0, "head[%d][%d].fpga_image(id=%d, page=%d, copy=%d) idx=%d, len=%d", head, idx, msg->id.id, msg->id.page, msg->id.copy, idx, msg->image.lengthPx);
 		
 		memcpy(&_PageId[idx], &msg->id, sizeof(SPageId));

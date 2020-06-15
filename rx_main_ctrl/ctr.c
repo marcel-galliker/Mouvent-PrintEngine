@@ -147,7 +147,7 @@ void ctr_tick(void)
 void ctr_add(int mm)
 {
     int encoderOffset=0; 
-	if (rx_def_is_tx(RX_Config.printer.type)) encoderOffset=(double)RX_Spooler.maxOffsetPx;
+	if (rx_def_is_tx(RX_Config.printer.type)) encoderOffset=RX_Spooler.maxOffsetPx;
     _prodLen += mm;
     _jobLen += mm;
     _prodCnt++;

@@ -190,22 +190,24 @@ namespace RX_DigiPrint.Models
                 Changed|=SetProperty(ref _ColorCnt, value); 
                 int i;
                 for (i=0; i<RxGlobals.Network.List.Count; i++)
-                    RxGlobals.Network.List[i].DeviceNoList = new EN_DeviceNumbers(RxGlobals.Network.List[i].DeviceType, _ColorCnt, HeadCnt);
+                    RxGlobals.Network.List[i].DeviceNoList = new EN_DeviceNumbers(RxGlobals.Network.List[i].DeviceType, _ColorCnt, HeadsPerColor);
             }
         }
-        
-        //--- Property HeadCnt  ---------------------------------------
-        private Int32 _HeadCnt ;
-        public Int32 HeadCnt 
+
+        //--- Property HeadsPerColor ---------------------------------------
+        private int _HeadsPerColor;
+        public int HeadsPerColor
         {
-            get { return _HeadCnt; }
-            set 
-            { 
-                Changed|=SetProperty(ref _HeadCnt , value); 
-                int i;
-                for (i=0; i<RxGlobals.Network.List.Count; i++)
-                    RxGlobals.Network.List[i].DeviceNoList = new EN_DeviceNumbers(RxGlobals.Network.List[i].DeviceType, ColorCnt, HeadCnt);
+            get { return _HeadsPerColor; }
+            set { Changed|=SetProperty(ref _HeadsPerColor,value); }
             }
+
+        //--- Property InkSuppliesPerColor ---------------------------------------
+        private int _InkSuppliesPerColor;
+        public int InkSuppliesPerColor
+        {
+            get { return _InkSuppliesPerColor; }
+            set { Changed|=SetProperty(ref _InkSuppliesPerColor,value); }
         }
 
         //--- Property IS_Order ---------------------------------------
@@ -351,7 +353,10 @@ namespace RX_DigiPrint.Models
             OffsetStep              = msg.offset.step;
             OffsetIncPerMeter       = msg.offset.incPerMeter;
             OffsetIncPerMeterVerso  = msg.offset.incPerMeterVerso;
-            HeadCnt                 = msg.headsPerColor;
+            
+            ColorCnt                = msg.colorCnt;
+            HeadsPerColor           = msg.headsPerColor;
+            InkSuppliesPerColor     = msg.InkCylindersPerColor;
 
             _HeadFpVoltage= new Int32[msg.headFpVoltage.Count()];
             for (i=0; i<_HeadFpVoltage.Count(); i++) _HeadFpVoltage[i]    = msg.headFpVoltage[i];
@@ -378,7 +383,11 @@ namespace RX_DigiPrint.Models
             TcpIp.SPrinterCfgMsg msg = new TcpIp.SPrinterCfgMsg();
             InkSupplyList list = RxGlobals.InkSupply;
             StringBuilder str  = new StringBuilder(1024);
-            msg.rectoVerso     = new ERectoVerso[16];
+            msg.rectoVerso     = new ERectoVerso[24];
+            
+            msg.colorCnt                = ColorCnt;
+            msg.headsPerColor           = HeadsPerColor;
+            msg.InkCylindersPerColor    = InkSuppliesPerColor;
 
             msg.type                    = _PrinterType;
             msg.overlap                 = Convert.ToUInt32(_Overlap);
@@ -387,8 +396,7 @@ namespace RX_DigiPrint.Models
             msg.offset.angle            = OffsetAngle;
             msg.offset.step             = OffsetStep;
             msg.offset.incPerMeter      = OffsetIncPerMeter; 
-            msg.offset.incPerMeterVerso = OffsetIncPerMeterVerso; 
-            msg.headsPerColor           = _HeadCnt;
+            msg.offset.incPerMeterVerso = OffsetIncPerMeterVerso;
             msg.externalData            = Convert.ToInt32(ExternalData);
 
             if (_HeadFpVoltage!=null)

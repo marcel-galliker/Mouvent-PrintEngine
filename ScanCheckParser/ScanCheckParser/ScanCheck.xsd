@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="FullAlignment">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="BeltStep">
+          <xs:complexType>
+            <xs:attribute name="Offset" type="xs:unsignedByte" use="required" />
+          </xs:complexType>
+        </xs:element>
+        <xs:element maxOccurs="unbounded" name="InkSupply">
+          <xs:complexType>
+            <xs:attribute name="No" type="xs:unsignedByte" use="required" />
+            <xs:attribute name="AngleCorrection" type="xs:string" use="required" />
+            <xs:attribute name="StitchCorrection" type="xs:string" use="required" />
+            <xs:attribute name="RegisterCorrection" type="xs:string" use="required" />
+            <xs:attribute name="BidirectionalCorrection" type="xs:string" />
+            <xs:attribute name="ColorOffsetCorrection" type="xs:unsignedShort" use="required" />
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+      <xs:attribute name="Datum" type="xs:string" use="required" />
+      <xs:attribute name="Time" type="xs:time" use="required" />
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

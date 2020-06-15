@@ -34,6 +34,7 @@ static int	_status=FALSE;
 static int  _cond=TRUE;
 static int  _nios=TRUE;
 static int  _eeprom=FALSE;
+static int  _mvteeprom=FALSE;
 
 static HANDLE	hPuttyThread;
 static int		_PuttyRunning;
@@ -41,6 +42,7 @@ static int		_PuttyRunning;
 //--- prototypes ----------------------------------------------------------
 static void* _putty_thread(void* lpParameter);
 static void _main_menu(void);
+static void _display_mvteeprom(void);
 
 //--- putty_init --------------------------------------
 void putty_init(void)
@@ -62,8 +64,12 @@ static void* _putty_thread(void* lpParameter)
 		term_printf("rx_head_ctrl %s (%s, %s)", version, __DATE__, __TIME__);
 		putty_display_fpga_error();
 		putty_display_fpga_status();
-		putty_display_nios_status(_nios, _status, _eeprom);
-		putty_display_cond_status(_cond, _status);			
+		putty_display_nios_status(_nios, _status);
+
+		if (_eeprom) eeprom_display();
+		if (_mvteeprom) _display_mvteeprom();
+
+		if (_cond) putty_display_cond_status(_status);			
 		_main_menu();
 	}
 	return NULL;
@@ -113,6 +119,8 @@ static void _main_menu(void)
 	else         term_printf("n: show nios         ");
 	if (_eeprom) term_printf("e: hide eeprom\n");
 	else         term_printf("e: show eeprom\n");
+	if (_mvteeprom) term_printf("m: hide mouvent eeprom\n");
+	else            term_printf("m: show mouvent eeprom\n");
 	
 	term_printf("x: exit\n");
 	term_printf(">");
@@ -131,6 +139,7 @@ void putty_handle_menu(char *str)
 	{
 		case 'e': _eeprom = ! _eeprom;	break;
 		case 's': _status = !_status;	break;
+		case 'm': _mvteeprom = ! _mvteeprom;	break;
 		case 'n': _nios   = !_nios;		break;
 		case 'c': _cond   = !_cond;		break;
 	}
@@ -292,6 +301,43 @@ void putty_display_fpga_status(void)
 	}
 }
 
+//--- _display_mvteeprom -----------------------------------------------------------------------
+static void _display_mvteeprom(void)
+{
+	int				i, n, l;
+	char str[64];
+	char line[90] = {0};
+
+	int no[MAX_HEADS_BOARD];
+		
+	for(i=0; i<MAX_HEADS_BOARD; i++) no[i]= RX_HBConfig.reverseHeadOrder? MAX_HEADS_BOARD-1-i:i;
+	term_printf("\n");
+	term_printf("Mouvent EEprom  ");
+				
+	for (i=0; i<MAX_HEADS_BOARD; i++)
+	{			
+		strcpy(line, "--------------");
+		l = sprintf(str, " %d:%s ", no[i]+1, RX_HBConfig.head[no[i]].name);
+		memcpy(&line[(15-l)/2], str, l);
+			
+		term_color(RX_RGB[no[i]]);
+		term_printf(line);
+		term_color(BLACK);
+		term_printf("  ");
+	};		
+	term_printf("\n");
+
+	term_printf("Voltage:         "); PRINTF(4)("          %03d   ",	RX_HBStatus->head[no[i]].eeprom_mvt.voltage);	term_printf("\n");
+	for (n=0; n<MAX_DENSITY_VALUES; n++)
+	{
+		term_printf("Density[%02d]:     ", n); PRINTF(4)("         %04d   ",	RX_HBStatus->head[no[i]].eeprom_mvt.densityValue[n]);	term_printf("\n");
+	}
+	for (n=0; n<10; n++)
+	{
+		term_printf("DisabledJet[%d]:  ", n); PRINTF(4)("         %04d   ",	RX_HBStatus->head[no[i]].eeprom_mvt.disabledJets[n]);	term_printf("\n");
+	}
+}
+
 //--- putty_display_fpga_error --------------------------------------------------
 void  putty_display_fpga_error(void)
 {
@@ -337,7 +383,7 @@ void  putty_display_fpga_error(void)
 }
 
 //--- putty_display_nios_status ----------------------------
-void putty_display_nios_status(int nios, int status, int eeprom)
+void putty_display_nios_status(int nios, int status)
 {
 	int speed0, speed1, i;
 	int temp;
@@ -408,11 +454,16 @@ void putty_display_nios_status(int nios, int status, int eeprom)
 
 		term_printf("printed: [l]    "); for (i=0; i<MAX_HEADS_BOARD; i++) term_printf("  %14s", value_str((int)(RX_HBStatus->head[no[i]].printedDroplets*(1000000000*RX_HBStatus[0].head[no[i]].dropVolume)))); term_printf("\n");
 		term_printf("Temp Head:      "); for (i=0; i<MAX_HEADS_BOARD; i++) term_printf("  %14s", value_str_temp(RX_NiosStat.head_temp[no[i]])); term_printf("\n");
-
-		if (eeprom) 
-		{			
-			eeprom_display();
+		term_printf("Cluster:  No: %06d", RX_HBStatus->clusterNo);
+		{
+			int h, m, s;
+			s = RX_NiosStat.cond[0].clusterTime%60;
+			h = RX_NiosStat.cond[0].clusterTime/3600;
+			m = (RX_NiosStat.cond[0].clusterTime%3600)/60;					
+			term_printf("  time: %d:%02d:%02d  ", h, m, s);
 		}
+		term_printf("  Machine Meters: %s", value_str(RX_HBStatus->machineMeters));
+		term_printf("\n");
 	}		
 	else 
 	{
@@ -454,7 +505,7 @@ static const char *_ErrorStrings[] =
 };
 
 //--- putty_display_cond_status ----------------------------
-void putty_display_cond_status(int show, int status)
+void putty_display_cond_status(int status)
 {
 	int i, j, l;
 	int alternate = 0;
@@ -542,19 +593,9 @@ void putty_display_cond_status(int show, int status)
 			}
 		}
 		
-		term_printf("Cluster:  No: %06d", RX_HBStatus->clusterNo);
-		{
-			int h, m, s;
-			s = RX_NiosStat.cond[0].clusterTime%60;
-			h = RX_NiosStat.cond[0].clusterTime/3600;
-			m = (RX_NiosStat.cond[0].clusterTime%3600)/60;					
-			term_printf("  time: %d:%02d:%02d  ", h, m, s);
-		}
-		term_printf("  Machine Meters: %s", value_str(RX_HBStatus->machineMeters));
-		
 		term_printf("\n");
 
-		term_printf("\n-- Conditioner -- "); 		
+		term_printf("-- Conditioner -- "); 		
 				
 		for (i=0; i<MAX_HEADS_BOARD; i++)
 		{			
@@ -569,7 +610,6 @@ void putty_display_cond_status(int show, int status)
 		};		
 		term_printf("\n");
 		
-		if (!show) return;
 		term_printf("Version:          ");		
 		memset(line, ' ', 5*16);
 		for (i=0; i<MAX_HEADS_BOARD; i++)

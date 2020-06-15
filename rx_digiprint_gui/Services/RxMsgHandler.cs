@@ -84,6 +84,9 @@ namespace RX_DigiPrint.Services
                     case TcpIp.REP_REQ_LOG:         handle_event_req(msg);      break;
                     case TcpIp.EVT_GET_LOG:         handle_event(msg);          break;
 
+                    case TcpIp.REP_GET_DISABLED_JETS:   handle_disabled_jets(msg);    break;
+                    case TcpIp.REP_GET_DENSITY_VAL:     handle_density_val(msg);    break;
+
                     case TcpIp.REP_CO_GET_ORDER:       handle_co_order(msg);                break;
                     case TcpIp.REP_CO_SET_OPERATOR:    handle_co_operator(msg);           break;
                     case TcpIp.REP_CO_GET_PRODUCTION:  handle_co_production(msg);           break;
@@ -286,6 +289,30 @@ namespace RX_DigiPrint.Services
                 }
             }
             else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length SHeadBoardStatMsg"));
+        }
+
+        //--- handle_disabled_jets -----------------------------------------
+        private void handle_disabled_jets(Byte[] buf)
+        {
+            TcpIp.SDisabledJetsMsg msg;
+            int len=RxStructConvert.ToStruct(out msg, buf);
+            if (len == hdr.msgLen)
+            {
+                if (RxGlobals.DisabledJetsView!=null) RxBindable.Invoke(()=>RxGlobals.DisabledJetsView.SetDisablesJets(msg.disabledJets));
+            }
+            else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length SDensityValues")); 
+        }
+
+        //--- handle_density_val -----------------------------------------
+        private void handle_density_val(Byte[] buf)
+        {
+            TcpIp.SDensityValuesMsg msg;
+            int len=RxStructConvert.ToStruct(out msg, buf);
+            if (len == hdr.msgLen)
+            {
+                if (RxGlobals.DensityView!=null) RxBindable.Invoke(()=>RxGlobals.DensityView.SetValues(msg.values.voltage, msg.values.value));
+            }
+            else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length SDensityValuesMsg")); 
         }
 
         //--- handle_stepper_stat -----------------------------------------
