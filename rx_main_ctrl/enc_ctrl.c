@@ -645,7 +645,7 @@ int	 enc_enable_printing(int enable)
 {
 	static int _enable=FALSE;
 //	if (enable!=_enable) 
-	Error(LOG, 0, "enc_enable_printing(%d)", enable);
+//	Error(LOG, 0, "enc_enable_printing(%d)", enable);
 	_enable = enable;
 
 	int no;

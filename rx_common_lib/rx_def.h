@@ -1640,7 +1640,7 @@ typedef struct
 	UINT64 DropCount[MAX_COLORS][3]; //Drop count for drop size 1, 2, and 3 per plane
 	INT8 multiCopy;
 	INT8 colorCnt;
-	char file_ext[4];
+	INT8 screening;
 } SBmpInfo;
 
 //--- global variables -----------------------------

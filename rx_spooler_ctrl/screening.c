@@ -218,8 +218,8 @@ void scr_set_values(int headNo, int min, int max, INT16 values[MAX_DENSITY_VALUE
 		int v;
 		v = values[i];
 		if (v==0)		 v=max;
-		else if (v<min)  {v=min; ok=FALSE;}
-		else if (v>max)  {v=max; ok=FALSE;}
+		else if (v<min)	{v=min; ok=FALSE;}
+		else if (v>max) {v=max; ok=FALSE;}
 			
 		val[i] = (double)(v - min) / (double)(max - min);
 	}
@@ -335,14 +335,6 @@ static int _rx_screen_write_ta(void * epplaneScreenConfig)
 	Error(LOG, 0, "Written File >>%s<<", fname);
 
 	rx_mem_free(&outplane.buffer);
-	return REPLY_OK;
-}
-
-//--- scr_check ------------------------------------
-int scr_check(SBmpInfo *pBmpInfo)
-{
-	int ret=stricmp(pBmpInfo->file_ext, "flz");
-	if (stricmp(pBmpInfo->file_ext, "flz")) return REPLY_ERROR;
 	return REPLY_OK;
 }
 
@@ -523,7 +515,10 @@ static void _scr_load(SBmpSplitInfo *pInfo, int threadNo)
 			ret = gpu_screen_FMS_1x3g(&linplane, &loutplane, &_PlaneScreenConfig[no], pInfo->pListItem->dots, threadNo);
 
 			_TimeTotal += rx_get_ticks()-time;
-			Error(LOG, 0, "scr_load screening , sizeIn=%dMB, sizeOut=%dMB, time=%d, GPU=%d  %d  %d, total=%d", linplane.dataSize/1024/1024, loutplane.dataSize/1024/1024, rx_get_ticks()-time, gpu_time(0), gpu_time(1), gpu_time(2),_TimeTotal);
+			if (gpu_is_board_present())
+				Error(LOG, 0, "scr_load screening , sizeIn=%dMB, sizeOut=%dMB, time=%d, GPU=%d  %d  %d", linplane.dataSize/1024/1024, loutplane.dataSize/1024/1024, rx_get_ticks()-time, gpu_time(0), gpu_time(1), gpu_time(2),_TimeTotal);
+			else
+				Error(LOG, 0, "scr_load screening , sizeIn=%dMB, sizeOut=%dMB, time=%d", linplane.dataSize/1024/1024, loutplane.dataSize/1024/1024, rx_get_ticks()-time);
 		}
 		else ret=REPLY_OK;
 		if (ret==REPLY_OK)

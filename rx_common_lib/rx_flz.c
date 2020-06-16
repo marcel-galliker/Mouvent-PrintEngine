@@ -152,6 +152,17 @@ int flz_get_info(const char *path, UINT32 page, SFlzInfo *pflzinfo)
 	return REPLY_ERROR;
 }
 
+//--- flz_get_size ----------------------------------------------------------------------
+int flz_get_size(const char *path, UINT32 page, UINT32 spacePx, UINT32 *width, UINT32 *height, UINT8 *bitsPerPixel)
+{
+	SFlzInfo info;
+	flz_get_info(path, page, &info);
+	*width			= info.WidthPx+spacePx;
+	*height			= info.lengthPx;
+	*bitsPerPixel	= info.bitsPerPixel;
+	return REPLY_NOT_FOUND;
+}
+
 //--- flz_abort -----------------------------------------------
 void flz_abort(void)
 {
@@ -186,8 +197,9 @@ int flz_load_simple	(const char *path, BYTE **buffer, int bufsize, SBmpInfo *pin
 		pFlzInfo = (SFlzInfo*)data;
 		bands	 = (SFlzBand*)(data+sizeof(SFlzInfo));
 
-		strcpy(pinfo->file_ext, "flz");
+	//	strcpy(pinfo->file_ext, "flz");
 		pinfo->bitsPerPixel	 = pFlzInfo->bitsPerPixel;
+		pinfo->screening	 = (pinfo->bitsPerPixel==8);
 		pinfo->srcWidthPx    = pFlzInfo->WidthPx;
 		pinfo->lineLen		 = pFlzInfo->lineLen;
 		pinfo->lengthPx		 = pFlzInfo->lengthPx;
@@ -283,9 +295,9 @@ int flz_load(SPageId *id, const char *filedir, const char *filename, int printMo
 			
 			pFlzInfo = (SFlzInfo*)_FileBuf[_FileBufDecompIdx];
 			
-			strcpy(pinfo->file_ext, "flz");
 			pinfo->printMode     = printMode;
 			pinfo->bitsPerPixel	 = pFlzInfo->bitsPerPixel;
+			pinfo->screening     = (pinfo->bitsPerPixel==8);
 			pinfo->srcWidthPx    = pFlzInfo->WidthPx+spacePx;
 			pinfo->lineLen		 = pFlzInfo->lineLen;
 			pinfo->lengthPx		 = pFlzInfo->lengthPx;

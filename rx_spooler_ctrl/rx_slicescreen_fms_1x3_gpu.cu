@@ -62,7 +62,7 @@ typedef struct
 static int		_Init=FALSE;
 
 static cudaDeviceProp	_GpuProp;
-static int				_GPU_Present=FALSE;
+static int				_GPU_Present=-1;
 
 static int				_Time[3];
 
@@ -74,10 +74,14 @@ static int _gpu_malloc(SSLiceInfo *inplane, SSLiceInfo *outplane, int bitsPerPix
 //--- gpu_is_board_present -----------------------------
 int gpu_is_board_present(void)
 {
-	cudaGetDeviceProperties(&_GpuProp, 0);
-	if (_GpuProp.name[0]) TrPrintf(TRUE, "GPU: %s", _GpuProp.name);
-	else				  TrPrintf(TRUE, "GPU: not present");	
-	return (_GpuProp.name[0]!=0);
+	if (_GPU_Present<0)
+	{
+		cudaGetDeviceProperties(&_GpuProp, 0);
+		if (_GpuProp.name[0]) TrPrintf(TRUE, "GPU: %s", _GpuProp.name);
+		else				  TrPrintf(TRUE, "GPU: not present");	
+		_GPU_Present = (_GpuProp.name[0]!=0);
+	}
+	return _GPU_Present;
 }
 
 //--- gpu_init -------------------------------
@@ -87,8 +91,7 @@ int gpu_init(void)
 	{
 		_Init = TRUE;
 		memset(_GPU_Stream, 0, sizeof(_GPU_Stream));
-		cudaGetDeviceProperties(&_GpuProp, 0);
-		_GPU_Present = (_GpuProp.name[0]!=0);
+		_GPU_Present = gpu_is_board_present();
 		if (FALSE && _GPU_Present)
 		{
 			_GPU_Present = FALSE;

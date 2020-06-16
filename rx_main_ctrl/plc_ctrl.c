@@ -1398,21 +1398,21 @@ static void _plc_state_ctrl()
 		if (_GUIPause)
 		{
 			if (rx_def_is_tx(RX_Config.printer.type))
-		{
-            UINT32 scannerDir;
-            lc_get_value_by_name_UINT32(UnitID ".STA_SCAN_DIRECTION", (UINT32*)&scannerDir);
-			//	0 =         No Direction
-			//	1 =         OP-Side  -->  Back-Side
-			//  2 =         Back-Side  -->  OP-Side
-
-			// Error(LOG, 0, "GUIPause: scannerDir=%d", scannerDir);
-            if (scannerDir==2)
 			{
-            //	Error(LOG, 0, "GUIPause: SendPause");
-				_GUIPause =FALSE;
-				_SendPause=1;
+				UINT32 scannerDir;
+				lc_get_value_by_name_UINT32(UnitID ".STA_SCAN_DIRECTION", (UINT32*)&scannerDir);
+				//	0 =         No Direction
+				//	1 =         OP-Side  -->  Back-Side
+				//  2 =         Back-Side  -->  OP-Side
+
+				// Error(LOG, 0, "GUIPause: scannerDir=%d", scannerDir);
+				if (scannerDir==2)
+				{
+				//	Error(LOG, 0, "GUIPause: SendPause");
+					_GUIPause =FALSE;
+					_SendPause=1;
+				}
 			}
-		}
 			else
 			{
 				_GUIPause =FALSE;
