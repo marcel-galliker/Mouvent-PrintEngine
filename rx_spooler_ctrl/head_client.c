@@ -311,8 +311,12 @@ void hc_send_next()
 		for (i=4; _send_image_cmd_flags[i]; i+=5) _send_image_cmd_flags[i]=' ';
 
 		//--- ----------------------------------------------
-		if (pSplitInfo->bitsPerPixel==8)
 		{
+			SPageId *pid = &pSplitInfo->pListItem->id;
+			TrPrintfL(TRUE, "hc_send_next: (id=%d, page=%d, copy=%d, scan=%d) bitsPerPixel=%d", pid->id, pid->page, pid->copy, pid->scan, pSplitInfo->bitsPerPixel);
+		}
+		if (pSplitInfo->screening)
+		{			
 			if (scr_wait(5000)) 
 			{
 				Error(ERR_STOP, 0, "Screening Timeout");

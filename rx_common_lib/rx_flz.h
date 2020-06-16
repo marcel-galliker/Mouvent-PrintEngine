@@ -49,6 +49,7 @@ extern "C"{
 void flz_init(void);
 void flz_abort(void);
 int flz_get_info(const char *path, UINT32 page, SFlzInfo *pflzinfo);
+int flz_get_size(const char *path, UINT32 page, UINT32 spacePx, UINT32 *width, UINT32 *height, UINT8 *bitsPerPixel);
 int flz_load_simple	(const char *path, BYTE **buffer, int bufsize, SBmpInfo *pinfo);
 int flz_load	(SPageId *id, const char *filedir, const char *filename, int printMode, UINT32 spacePx, INT32 wakeupLen, SColorSplitCfg *psplit, int splitCnt, BYTE* buffer[MAX_COLORS], SBmpInfo *pinfo, progress_fct progress, void *ploaded_arg);
 char* flz_last_filepath(void);

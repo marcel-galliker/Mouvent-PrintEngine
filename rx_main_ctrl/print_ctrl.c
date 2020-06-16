@@ -355,7 +355,8 @@ static void _load_test(void)
 		else			RX_TestImage.id.copy++;
 		if (RX_TestImage.id.copy==0) RX_TestImage.id.copy=1;
 		ret=bmp_get_size(RX_TestImage.filepath, &width, &height, &bitsPerPixel, &memsize);
-		if (ret) tif_get_size(RX_TestImage.filepath, 0, 0, &width, &height, &bitsPerPixel);
+		if (ret) ret=tif_get_size(RX_TestImage.filepath, 0, 0, &width, &height, &bitsPerPixel);
+		if (ret) ret=flz_get_size(RX_TestImage.filepath, 0, 0, &width, &height, &bitsPerPixel);
 		RX_TestImage.pageHeight = RX_TestImage.srcHeight = (UINT32)(height/1200.0*25400.0);
 		RX_TestImage.pageWidth  = RX_TestImage.srcWidth  = (UINT32)(width/1200.0*25400.0);
 		RX_TestImage.printGoMode = PG_MODE_LENGTH;

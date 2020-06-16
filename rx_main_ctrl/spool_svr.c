@@ -315,7 +315,7 @@ int	spool_set_config(RX_SOCKET socket, UINT32 resetCnt)
 					if (FALSE)
 					{
 						char str[128];
-						int len = sprintf(str, "scr_set_values[%d.%d]: ", head/4, head%4);
+						int len = sprintf(str, "scr_set_values[%d.%d]: ", head/MAX_HEADS_BOARD, head%MAX_HEADS_BOARD);
 						for (int i=0; i<MAX_DENSITY_VALUES; i++) len += sprintf(&str[len], "%d ", msg.value[i]);
 						TrPrintfL(TRUE, str);
 						Error(LOG, 0, str);
@@ -514,7 +514,7 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 	if (RX_PrinterStatus.testMode)
 	{
 		msg.printMode     = PM_TEST;
-		if (RX_Config.printer.type==printer_test_table && (RX_TestImage.testImage==PQ_TEST_JETS || RX_TestImage.testImage==PQ_TEST_JET_NUMBERS  || RX_TestImage.testImage==PQ_TEST_DENSITY) || RX_TestImage.testImage==PQ_TEST_ENCODER)
+		if (RX_Config.printer.type==printer_test_table && (RX_TestImage.testImage==PQ_TEST_JETS || RX_TestImage.testImage==PQ_TEST_JET_NUMBERS  || RX_TestImage.testImage==PQ_TEST_DENSITY))
 		{
 			msg.printMode = PM_TEST_SINGLE_COLOR;
 		}

@@ -1110,9 +1110,10 @@ static int _data_split(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int length
 	pItem->flags     = flags;
 	pItem->headsUsed = 0;
 		
-	if (pBmpInfo->bitsPerPixel==8)
+	if (pBmpInfo->screening)
 	{
-		if (scr_check(pBmpInfo)) return Error(ERR_ABORT, 0, "%s: File format not supported", str_start_cut(pItem->filepath, PATH_RIPPED_DATA));
+		pItem->splitInfo->screening=TRUE;
+	//	if (scr_check(pBmpInfo)) return Error(ERR_ABORT, 0, "%s: File format not supported", str_start_cut(pItem->filepath, PATH_RIPPED_DATA));
 		scr_wait_ready();
 	}
 
@@ -1139,6 +1140,7 @@ static int _data_split(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int length
 static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int lengthPx, int blkNo, int blkCnt, int clearBlockUsed, int same, SPrintListItem *pItem)
 {
 	int color, n, head;
+	int empty;
 	struct SBmpSplitInfo	*pInfo;
 
 	TrPrintfL(TRUE, "_data_split_test");
@@ -1190,24 +1192,27 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 				pInfo->blkCnt		= (pInfo->dstLineLen*pInfo->srcLineCnt +RX_Spooler.dataBlkSize-1) / RX_Spooler.dataBlkSize;
 				if (pInfo->blkCnt>blkCnt) Error(ERR_ABORT, 0, "Data: blkCnt=%d, max=%d", pInfo->blkCnt, blkCnt);
 
+				empty = FALSE;
 				if (pBmpInfo->printMode==PM_TEST_SINGLE_COLOR && (color+1)!=id->scan)
 				{
-					//--- empty bitmap -------
-					pInfo->data			= NULL;
-					pInfo->bitsPerPixel	= 1;
-					pInfo->widthPx		= 1;
-					pInfo->widthBt		= 1;
-					pInfo->srcWidthBt	= 1;
-					pInfo->srcLineLen	= 1;
-					pInfo->srcLineCnt	= 1;
-					pInfo->dstLineLen	= 32; // align to 256 Bits (32 Bytes)
-					pInfo->blk0		   -= 1;
-					pInfo->blkCnt		= 1;
+					empty=TRUE;
 				}
 
 				if (rx_def_is_web(RX_Spooler.printerType) 
 				&& (id->id==PQ_TEST_JETS || id->id==PQ_TEST_JET_NUMBERS || id->id==PQ_TEST_DENSITY)  
 				&& (RX_Spooler.colorCnt==0 || ((id->copy-1)%RX_Spooler.colorCnt)!=color))
+				{
+					empty=TRUE;
+				}
+				
+				if (rx_def_is_web(RX_Spooler.printerType) 
+				&& (id->id==PQ_TEST_ENCODER)  
+				&& (RX_Spooler.colorCnt<2 || RX_Color[color].color.colorCode!=0)) // encoder only in black
+				{
+					empty=TRUE;
+				}
+
+				if (empty)
 				{
 					//--- only one color per PrintGo  -------
 					pInfo->data			= NULL;
@@ -1221,7 +1226,7 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 					pInfo->blk0		   -= 1;
 					pInfo->blkCnt		= 1;
 				}
-				
+
 				//--- rip the test data -----------------------------------------
 				if (pInfo->data && (id->id==PQ_TEST_JETS || id->id==PQ_TEST_JET_NUMBERS || id->id==PQ_TEST_DENSITY)) 
 				{
