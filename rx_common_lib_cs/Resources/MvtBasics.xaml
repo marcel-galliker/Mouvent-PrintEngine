@@ -1,0 +1,64 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:System="clr-namespace:System;assembly=mscorlib"
+                    x:Class ="RX_Common.Resources.MvtBasics"
+                    >
+
+    <System:Double x:Key="RxScrollBarWidth">32</System:Double>
+    <!-- Mouvent Colors -->
+    <Color x:Key="Mouvent.MainColor">#3b323d</Color>
+    <Color x:Key="Mouvent.BlueLight">#7FF6F9FC</Color>
+    <Color x:Key="Mouvent.BlueMedium">#FFE6EFF7</Color>
+    <Color x:Key="Mouvent.BlueDark">#d8e6f3</Color>
+    <Color x:Key="Mouvent.BlueDarkest">#b1cde7</Color>
+    <Color x:Key="Mouvent.GrayLight">#e8e8e8</Color>
+    <Color x:Key="Mouvent.GrayDark">#cccccc</Color>
+   
+    <SolidColorBrush x:Key="Mouvent.MainColorBrush" Color="{StaticResource Mouvent.MainColor}"></SolidColorBrush>
+    <SolidColorBrush x:Key="Mouvent.BlueLightBrush" Color="{StaticResource Mouvent.BlueLight}"></SolidColorBrush>
+    <SolidColorBrush x:Key="Mouvent.BlueMediumBrush" Color="{StaticResource Mouvent.BlueMedium}"></SolidColorBrush>
+    <SolidColorBrush x:Key="Mouvent.BlueDarkBrush" Color="{StaticResource Mouvent.BlueDark}"></SolidColorBrush>
+    <SolidColorBrush x:Key="Mouvent.BlueDarkestBrush" Color="{StaticResource Mouvent.BlueDarkest}"></SolidColorBrush>
+    <SolidColorBrush x:Key="Mouvent.OrangeBrush" Color="Orange"></SolidColorBrush>
+    <SolidColorBrush x:Key="Mouvent.GrayLightBrush" Color="{StaticResource Mouvent.GrayLight}"></SolidColorBrush>
+    <SolidColorBrush x:Key="Mouvent.GrayDarkBrush" Color="{StaticResource Mouvent.GrayDark}"></SolidColorBrush>
+
+
+    <!-- radex colors _________________________________________________________________________________-->
+    <SolidColorBrush x:Key="Mvt.Static.Background"    Color="#FFDDDDDD"/>
+    <SolidColorBrush x:Key="Mvt.Static.Border"        Color="#FF707070"/>
+    <SolidColorBrush x:Key="Mvt.MouseOver.Background" Color="#FFBEE6FD"/>
+    <SolidColorBrush x:Key="Mvt.MouseOver.Border"     Color="#FF3C7FB1"/>
+    <SolidColorBrush x:Key="Mvt.Pressed.Background"   Color="#FFC4E5F6"/>
+    <SolidColorBrush x:Key="Mvt.Pressed.Border"       Color="#FF2C628B"/>
+    <SolidColorBrush x:Key="Mvt.Disabled.Background"  Color="#FFF4F4F4"/>
+    <SolidColorBrush x:Key="Mvt.Disabled.Border"      Color="#FFADB2B5"/>
+    <SolidColorBrush x:Key="Mvt.Disabled.Foreground"  Color="#FF838383"/>
+    <SolidColorBrush x:Key="Mvt.Checked.Background"   Color="#FFB5E616"/>
+
+    <SolidColorBrush x:Key="Mvt.LightGreen"           Color="#FFEAFFBB"/>
+    <SolidColorBrush x:Key="Mvt.Green"                Color="#FFACDE42"/>
+    <SolidColorBrush x:Key="Mvt.DarkGreen"            Color="#FF85AC1D"/>
+    <SolidColorBrush x:Key="Mvt.CtrlKey"              Color="#FFF4F4F4"/>
+    <SolidColorBrush x:Key="Mvt.Key"                  Color="{DynamicResource {x:Static SystemColors.ControlColorKey}}"/>
+
+    
+    <SolidColorBrush x:Key="Mvt.Paper"                Color="#FF78774B"/>
+
+    <!-- TextBlock ____________________________________________________________-->
+    <Style x:Key="{x:Type TextBlock}" TargetType="{x:Type TextBlock}" >
+        <Setter Property="FontSize" Value="{DynamicResource FontSize}" />
+    </Style>
+
+    <!-- TextBox ______________________________________________________________-->
+    <Style x:Key="{x:Type TextBox}" TargetType="{x:Type TextBox}" >
+        <Setter Property="FontSize" Value="{DynamicResource FontSize}" />
+    </Style>
+
+    <!-- MenuItem ______________________________________________________________-->
+    <Style x:Key="{x:Type MenuItem}" TargetType="{x:Type MenuItem}" >
+        <Setter Property="FontSize" Value="{DynamicResource FontSize}" />
+        <Setter Property="Height" Value="32"/>
+    </Style>
+    
+</ResourceDictionary>

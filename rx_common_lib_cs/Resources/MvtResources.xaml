@@ -1,0 +1,53 @@
+﻿<ResourceDictionary 
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    >
+    
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="MvtBasics.xaml" />
+        <ResourceDictionary Source="MvtGroupBox.xaml" />
+        <ResourceDictionary Source="MvtTextBlockStyles.xaml" />
+        <ResourceDictionary Source="NumButtonStyle.xaml" />
+        <ResourceDictionary Source="Button_Styles.xaml" />
+        <ResourceDictionary Source="Mouvent_Button_Styles.xaml" />
+
+        <!-- the bitmaps _____________________________________-->
+        <ResourceDictionary>
+            <BitmapImage x:Key="abort_ico"          UriSource="pack://application:,,,/rx_common_lib_cs;component/Resources/Bitmaps/Abort.ico"/>
+            <BitmapImage x:Key="add_ico"            UriSource="pack://application:,,,/rx_common_lib_cs;component/Resources/Bitmaps/Add.ico"/>
+            <BitmapImage x:Key="delete_ico"         UriSource="pack://application:,,,/rx_common_lib_cs;component/Resources/Bitmaps/Delete.ico"/>
+            <BitmapImage x:Key="edit_ico"           UriSource="pack://application:,,,/rx_common_lib_cs;component/Resources/Bitmaps/Edit.ico"/>
+            <BitmapImage x:Key="pause_ico"          UriSource="pack://application:,,,/rx_common_lib_cs;component/Resources/Bitmaps/Pause.ico"/>
+            <BitmapImage x:Key="reload_ico"         UriSource="pack://application:,,,/rx_common_lib_cs;component/Resources/Bitmaps/Reload.ico"/>
+            <BitmapImage x:Key="save_ico"           UriSource="pack://application:,,,/rx_common_lib_cs;component/Resources/Bitmaps/Save.ico"/>
+            <BitmapImage x:Key="start_ico"          UriSource="pack://application:,,,/rx_common_lib_cs;component/Resources/Bitmaps/Start.ico"/>
+            <BitmapImage x:Key="stop_ico"           UriSource="pack://application:,,,/rx_common_lib_cs;component/Resources/Bitmaps/Stop.ico"/>
+            <BitmapImage x:Key="roll_ico"           UriSource="pack://application:,,,/rx_common_lib_cs;component/Resources/Bitmaps/Roll.ico"/>
+
+            <BitmapImage x:Key="tcp_offline_ico"    UriSource="pack://application:,,,/rx_common_lib_cs;component/Resources/Bitmaps/tcp_offline.ico"/>
+            <BitmapImage x:Key="tcp_online_ico"     UriSource="pack://application:,,,/rx_common_lib_cs;component/Resources/Bitmaps/tcp_online.ico"/>
+
+            <BitmapImage x:Key="wlan_1_ico"         UriSource="pack://application:,,,/rx_common_lib_cs;component/Resources/Bitmaps/wlan1.ico"/>
+            <BitmapImage x:Key="wlan_2_ico"         UriSource="pack://application:,,,/rx_common_lib_cs;component/Resources/Bitmaps/wlan2.ico"/>
+            <BitmapImage x:Key="wlan_3_ico"         UriSource="pack://application:,,,/rx_common_lib_cs;component/Resources/Bitmaps/wlan3.ico"/>
+            <BitmapImage x:Key="wlan_4_ico"         UriSource="pack://application:,,,/rx_common_lib_cs;component/Resources/Bitmaps/wlan4.ico"/>
+            <BitmapImage x:Key="Mouvent_ico"        UriSource="pack://application:,,,/rx_common_lib_cs;component/Resources/Bitmaps/mouvent.ico"/>
+            
+            
+            <BitmapImage x:Key="Error_ico"          UriSource="pack://application:,,,/rx_common_lib_cs;component/Resources/Bitmaps/MessageBox/Error.ico"/>
+            <BitmapImage x:Key="ErrorGrey_ico"      UriSource="pack://application:,,,/rx_common_lib_cs;component/Resources/Bitmaps/MessageBox/ErrorGrey.ico"/>
+            <BitmapImage x:Key="Warning_ico"        UriSource="pack://application:,,,/rx_common_lib_cs;component/Resources/Bitmaps/MessageBox/Warning.ico"/>
+            <BitmapImage x:Key="WarningGrey_ico"    UriSource="pack://application:,,,/rx_common_lib_cs;component/Resources/Bitmaps/MessageBox/WarningGrey.ico"/>
+            <BitmapImage x:Key="Information_ico"    UriSource="pack://application:,,,/rx_common_lib_cs;component/Resources/Bitmaps/MessageBox/Information.ico"/>
+            <BitmapImage x:Key="LogReset_ico"       UriSource="pack://application:,,,/rx_common_lib_cs;component/Resources/Bitmaps/MessageBox/LogReset.ico"/>
+            <BitmapImage x:Key="Question_ico"       UriSource="pack://application:,,,/rx_common_lib_cs;component/Resources/Bitmaps/MessageBox/Question.ico"/>
+            <BitmapImage x:Key="Yes_ico"            UriSource="pack://application:,,,/rx_common_lib_cs;component/Resources/Bitmaps/MessageBox/Yes.ico"/>
+            <BitmapImage x:Key="YesSave_ico"        UriSource="pack://application:,,,/rx_common_lib_cs;component/Resources/Bitmaps/MessageBox/YesSave.ico"/>
+            <BitmapImage x:Key="No_ico"             UriSource="pack://application:,,,/rx_common_lib_cs;component/Resources/Bitmaps/MessageBox/No.ico"/>
+
+            
+        </ResourceDictionary>
+       
+    </ResourceDictionary.MergedDictionaries>
+
+</ResourceDictionary>
