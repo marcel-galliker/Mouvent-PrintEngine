@@ -20,6 +20,7 @@ namespace RX_DigiPrint.Models
         private Label _Label;
         private static string _TempPath=Path.GetTempPath() + "rx_thumb_nails\\";
         private static bool _First=true;
+        private bool _updating=false;
 
         //--- clearFolder ----------------------------------------------
         private void clearFolder(string FolderName)
@@ -85,7 +86,7 @@ namespace RX_DigiPrint.Models
         public bool Changed
         {
             get { return _Changed; }
-            set { SetProperty(ref _Changed, value); }
+            set { if (!_updating) SetProperty(ref _Changed, value); }
         }
 
         //--- ID -------------------------------------------
@@ -1064,6 +1065,7 @@ namespace RX_DigiPrint.Models
         //--- Update --------------------------------------------
         public void Update(PrintQueueItem item)
         {
+            _updating=true;
             ActPage         = item.ActPage;
             ActCopy         = item.ActCopy;
             Scans           = item.Scans;
@@ -1073,6 +1075,9 @@ namespace RX_DigiPrint.Models
             Progress        = item.Progress;
             ProgressStr     = item.ProgressStr;
             State           = item.State;
+            PageMargin      = item.PageMargin;
+            PrintGoDist     = item.PrintGoDist;
+            _updating=false;
         }
 
         //--- PageNumber_PropertyChanged -----------------------------

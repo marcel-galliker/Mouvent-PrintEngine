@@ -266,6 +266,9 @@ void lh702_menu(char *str)
 {
 	if (RX_Config.printer.type==printer_LH702)
 	{
+		SLH702_Value val;
+		val.hdr.msgLen = sizeof(val);
+		val.value = atoi(&str[1]);
 		switch(str[0])
 		{
 		case '?':	term_printf("--- LH702: commands when not printing -------------\n");
@@ -280,12 +283,31 @@ void lh702_menu(char *str)
 					term_flush();
 					break;	
 
-		case 'd':	_handle_dist(atoi(&str[1]));	   break;
-		case 'l':	_handle_lateral(atoi(&str[1]));	   break;
-		case 'm':	lh702_load_material(&str[1]);		   break;		
-		case 't':	_handle_thickness(atoi(&str[1]));  break;
-		case 'h':	_handle_headheight(atoi(&str[1])); break;
-		case 'e':	_handle_encoffset(atoi(&str[1]));  break;
+		case 'd':	val.hdr.msgId  = CMD_ADD_DIST;
+					_lh702_handle_msg(INVALID_SOCKET, &val, sizeof(val), NULL, NULL);
+					break;
+
+		case 'l':	val.hdr.msgId  = CMD_ADD_LATERAL;
+					_lh702_handle_msg(INVALID_SOCKET, &val, sizeof(val), NULL, NULL);
+					break;
+
+		case 'm':	lh702_load_material(&str[1]);	   
+					break;
+
+		case 't':	// _handle_thickness(atoi(&str[1]));  
+					val.hdr.msgId  = PAR_THICKNESS;
+					_lh702_handle_msg(INVALID_SOCKET, &val, sizeof(val), NULL, NULL);					
+					break;
+
+		case 'h':	// _handle_headheight(atoi(&str[1])); 
+					val.hdr.msgId  = PAR_HEAD_HEIGHT;
+					_lh702_handle_msg(INVALID_SOCKET, &val, sizeof(val), NULL, NULL);					
+					break;
+
+		case 'e':	// _handle_encoffset(atoi(&str[1]));
+					val.hdr.msgId  = PAR_ENCODER_ADJ;
+					_lh702_handle_msg(INVALID_SOCKET, &val, sizeof(val), NULL, NULL);					
+					break;
 		default:	break;
 		}						
 	}
@@ -361,8 +383,11 @@ static void _handle_dist (int value)
 		memset(&evt, 0, sizeof(evt));
 		evt.hdr.msgLen = sizeof(evt);
 		evt.hdr.msgId  = EVT_SET_PRINT_QUEUE;
+		_pItem = pq_get_item(_pItem);
 		memcpy(&evt.item, _pItem, sizeof(evt.item));
+		int old=evt.item.printGoDist;
 		evt.item.printGoDist += value;
+		Error(LOG, 0, "CMD_ADD_DIST %d + %d = %d", old, value, evt.item.printGoDist);
 		handle_gui_msg(INVALID_SOCKET, &evt, evt.hdr.msgLen, NULL, 0);
 	}											
 }
@@ -376,8 +401,11 @@ static void _handle_lateral	(int value)
 		memset(&evt, 0, sizeof(evt));
 		evt.hdr.msgLen = sizeof(evt);
 		evt.hdr.msgId  = EVT_SET_PRINT_QUEUE;
+		_pItem = pq_get_item(_pItem);
 		memcpy(&evt.item, _pItem, sizeof(evt.item));
+		int old=evt.item.pageMargin;
 		evt.item.pageMargin += value;
+		Error(LOG, 0, "CMD_ADD_LATERAL %d + %d = %d", old, value, evt.item.pageMargin);
 		handle_gui_msg(INVALID_SOCKET, &evt, evt.hdr.msgLen, NULL, 0);
 	}
 }

@@ -66,6 +66,13 @@
                                             HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="20" Height="20"
                                                 Kind="Reload" Margin="3,0,0,0"></iconPacks:PackIconMaterial>
                 </common:MvtButton>
+
+                <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}" 
+                                   Margin="15, 5, 15, 5" Grid.Column="2" Click="Delete_Clicked" Height="40">
+                    <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" 
+                                            HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="20" Height="20"
+                                                Kind="Delete" Margin="3,0,0,0"></iconPacks:PackIconMaterial>
+                </common:MvtButton>
             </StackPanel>
         </Grid>
     </GroupBox>

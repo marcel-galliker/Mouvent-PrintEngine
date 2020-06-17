@@ -41,7 +41,6 @@ namespace RX_DigiPrint.Views.LH702View
             CB_Material.EndEditMode(true, true);
             ParPanelMaterial.Send();
 
-        //  Material material = CB_Material.SelectedItem as Material;
             Material material = RxGlobals.MaterialList.FindByName(CB_Material.DisplayText);
             if (material!=null)
             {
@@ -54,7 +53,20 @@ namespace RX_DigiPrint.Views.LH702View
         //--- Reload_Clicked ---------------------------------------------
         private void Reload_Clicked(object sender, RoutedEventArgs e)
         {
-//            ParPanelMaterial.Reset();
+            ParPanelMaterial.Reset();
+        }
+
+        //--- Delete_Clicked ---------------------------------------------
+        private void Delete_Clicked(object sender, RoutedEventArgs e)
+        {
+            Material material = RxGlobals.MaterialList.FindByName(CB_Material.DisplayText);
+            if (material!=null)
+            {
+                if (RxMessageBox.YesNo("Delte", string.Format("Delete Material {0}?", material.Name),  MessageBoxImage.Question, false))
+                {
+                    material.Delete();
+                }
+            }
         }
 
         //--- Grid_Loaded -------------------------
