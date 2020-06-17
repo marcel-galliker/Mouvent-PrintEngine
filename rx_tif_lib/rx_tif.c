@@ -563,51 +563,54 @@ int tif_write(const char *filedir, const char *filename, SBmpInfo *pinfo)
 	_TIFFwarningHandler = _tif_WarningHandler;
 	for (c = 0; c<pinfo->planes; c++)
 	{
-		sprintf(filepath, "%s/%s_%s.tif", filedir, filename, RX_ColorNameShort(pinfo->inkSupplyNo[c]));
-		file = TIFFOpen(filepath, "w");
-		if (file)
+		if (pinfo->buffer[c])
 		{
-			int line;
+			sprintf(filepath, "%s/%s_%s.tif", filedir, filename, RX_ColorNameShort(pinfo->inkSupplyNo[c]));
+			file = TIFFOpen(filepath, "w");
+			if (file)
+			{
+				int line;
 
-			// Header
-			if (!TIFFSetField(file, TIFFTAG_IMAGEWIDTH, pinfo->srcWidthPx))			{ ret = Error(ERR_CONT, 0, "File %s: Could not set width value", filepath);				goto End; }
-			if (!TIFFSetField(file, TIFFTAG_IMAGELENGTH, pinfo->lengthPx))			{ ret = Error(ERR_CONT, 0, "File %s: Could not set length value", filepath);			goto End; }
-			if (!TIFFSetField(file, TIFFTAG_BITSPERSAMPLE, pinfo->bitsPerPixel))	{ ret = Error(ERR_CONT, 0, "File %s: Could not set bit per sample value", filepath);	goto End; }
-			if (!TIFFSetField(file, TIFFTAG_SAMPLESPERPIXEL, 1))					{ ret = Error(ERR_CONT, 0, "File %s: Could not set samples per pixel value", filepath);	goto End; }
-			if (!TIFFSetField(file, TIFFTAG_COMPRESSION, /*COMPRESSION_NONE*/ COMPRESSION_LZW))			{ ret = Error(ERR_CONT, 0, "File %s: Could not set compression value", filepath);		goto End; }
-			if (!TIFFSetField(file, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISWHITE))	{ ret = Error(ERR_CONT, 0, "File %s: Could not set photometric value", filepath);		goto End; }
-			if (!TIFFSetField(file, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG))		{ ret = Error(ERR_CONT, 0, "File %s: Could not set planar config value", filepath);		goto End; }
-			if (!TIFFSetField(file, TIFFTAG_RESOLUTIONUNIT, RESUNIT_INCH))			{ ret = Error(ERR_CONT, 0, "File %s: Could not set resolution unit value", filepath);	goto End; }
-			if (!TIFFSetField(file, TIFFTAG_XRESOLUTION, (double)pinfo->resol.x))	{ ret = Error(ERR_CONT, 0, "File %s: Could not set x resolution value", filepath);		goto End; }
-			if (!TIFFSetField(file, TIFFTAG_YRESOLUTION, (double)pinfo->resol.y))	{ ret = Error(ERR_CONT, 0, "File %s: Could not set y resolution value", filepath);		goto End; }
-			sprintf(desc, "%s (%s)", RX_ColorNameLong(pinfo->colorCode[c]), RX_ColorNameShort(pinfo->inkSupplyNo[c]));
-			if (!TIFFSetField(file, TIFFTAG_IMAGEDESCRIPTION, desc))				{ ret = Error(ERR_CONT, 0, "File %s: Could not set image description value", filepath);	goto End; }
-/*			if (!TIFFSetField(file, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_PALETTE))		{ ret = Error(ERR_CONT, 0, "File %s: Could not set photometric value", filepath);		goto End; }
+				// Header
+				if (!TIFFSetField(file, TIFFTAG_IMAGEWIDTH, pinfo->srcWidthPx))			{ ret = Error(ERR_CONT, 0, "File %s: Could not set width value", filepath);				goto End; }
+				if (!TIFFSetField(file, TIFFTAG_IMAGELENGTH, pinfo->lengthPx))			{ ret = Error(ERR_CONT, 0, "File %s: Could not set length value", filepath);			goto End; }
+				if (!TIFFSetField(file, TIFFTAG_BITSPERSAMPLE, pinfo->bitsPerPixel))	{ ret = Error(ERR_CONT, 0, "File %s: Could not set bit per sample value", filepath);	goto End; }
+				if (!TIFFSetField(file, TIFFTAG_SAMPLESPERPIXEL, 1))					{ ret = Error(ERR_CONT, 0, "File %s: Could not set samples per pixel value", filepath);	goto End; }
+				if (!TIFFSetField(file, TIFFTAG_COMPRESSION, /*COMPRESSION_NONE*/ COMPRESSION_LZW))			{ ret = Error(ERR_CONT, 0, "File %s: Could not set compression value", filepath);		goto End; }
+				if (!TIFFSetField(file, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISWHITE))	{ ret = Error(ERR_CONT, 0, "File %s: Could not set photometric value", filepath);		goto End; }
+				if (!TIFFSetField(file, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG))		{ ret = Error(ERR_CONT, 0, "File %s: Could not set planar config value", filepath);		goto End; }
+				if (!TIFFSetField(file, TIFFTAG_RESOLUTIONUNIT, RESUNIT_INCH))			{ ret = Error(ERR_CONT, 0, "File %s: Could not set resolution unit value", filepath);	goto End; }
+				if (!TIFFSetField(file, TIFFTAG_XRESOLUTION, (double)pinfo->resol.x))	{ ret = Error(ERR_CONT, 0, "File %s: Could not set x resolution value", filepath);		goto End; }
+				if (!TIFFSetField(file, TIFFTAG_YRESOLUTION, (double)pinfo->resol.y))	{ ret = Error(ERR_CONT, 0, "File %s: Could not set y resolution value", filepath);		goto End; }
+				sprintf(desc, "%s (%s)", RX_ColorNameLong(pinfo->colorCode[c]), RX_ColorNameShort(pinfo->inkSupplyNo[c]));
+				if (!TIFFSetField(file, TIFFTAG_IMAGEDESCRIPTION, desc))				{ ret = Error(ERR_CONT, 0, "File %s: Could not set image description value", filepath);	goto End; }
+	/*			if (!TIFFSetField(file, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_PALETTE))		{ ret = Error(ERR_CONT, 0, "File %s: Could not set photometric value", filepath);		goto End; }
 
-			// red          green         blue
-			colormap[0] = colormap[4] = colormap[8] = 65535;  // white
-			colormap[1] = colormap[5] = colormap[9] = 43690;  // pale grey
-			colormap[2] = colormap[6] = colormap[10] = 21845; // dark grey
-			colormap[3] = colormap[7] = colormap[11] = 0;     // black
-			if (!TIFFSetField(file, TIFFTAG_COLORMAP, colormap))			{ ret = Error(ERR_CONT, 0, "File %s: Could not set colormap value", filepath);			goto End; }
-*/
-			// Write lines
-			for (line = 0; line < pinfo->lengthPx; ++line) {
-				dst = *pinfo->buffer[c] + pinfo->lineLen*line;
-				if (TIFFWriteScanline(file, dst , line, 1)<0) { ret = Error(ERR_CONT, 0, "File %s: Could not write line %d", filepath, line);	goto End; }
-//				for (i = 0; i < pinfo->lineLen; i++, dst++ )
-//				if (*dst)
-//					TrPrintf(TRUE, "byte not empty >>%x<< at line %d row %d", *dst, line, i);
+				// red          green         blue
+				colormap[0] = colormap[4] = colormap[8] = 65535;  // white
+				colormap[1] = colormap[5] = colormap[9] = 43690;  // pale grey
+				colormap[2] = colormap[6] = colormap[10] = 21845; // dark grey
+				colormap[3] = colormap[7] = colormap[11] = 0;     // black
+				if (!TIFFSetField(file, TIFFTAG_COLORMAP, colormap))			{ ret = Error(ERR_CONT, 0, "File %s: Could not set colormap value", filepath);			goto End; }
+	*/
+				// Write lines
+				for (line = 0; line < pinfo->lengthPx; ++line) {
+					dst = *pinfo->buffer[c] + pinfo->lineLen*line;
+					if (TIFFWriteScanline(file, dst , line, 1)<0) { ret = Error(ERR_CONT, 0, "File %s: Could not write line %d", filepath, line);	goto End; }
+	//				for (i = 0; i < pinfo->lineLen; i++, dst++ )
+	//				if (*dst)
+	//					TrPrintf(TRUE, "byte not empty >>%x<< at line %d row %d", *dst, line, i);
+				}
+
+
+				// Close 
+				TIFFClose(file);
+				file = NULL;
 			}
-
-
-			// Close 
-			TIFFClose(file);
-			file = NULL;
-		}
-		else 
-		{ 
-			ret = Error(ERR_CONT, 0, "File %s: Could not create", filepath);				goto End; 
+			else 
+			{ 
+				ret = Error(ERR_CONT, 0, "File %s: Could not create", filepath);				goto End; 
+			}
 		}
 	}
 End:

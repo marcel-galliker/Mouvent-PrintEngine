@@ -360,7 +360,7 @@ int  data_get_size	(const char *path, UINT32 page, UINT32 *pspacePx, UINT32 *pwi
 			
 	if(flz_get_info(path, page, &info)==REPLY_OK)
 	{
-		*pwidth			= info.WidthPx;
+		*pwidth			= info.widthPx;
 		*plength		= info.lengthPx;
 		*pbitsPerPixel	= info.bitsPerPixel;
 		ret = REPLY_OK;
@@ -724,33 +724,13 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 		if (FALSE && loaded)
 //		if (loaded)
 		{
-			int i;
-			char str[MAX_PATH];
-			for (i=0; i<SIZEOF(bmpInfo.buffer); i++)
-			{
-			//	if (bmpInfo.buffer[i])
-				if (buffer[i] && RX_ColorNameShort(bmpInfo.inkSupplyNo[i])[0]=='K')
-				{
-				//	sprintf(str, "%sPAGE_%d_%s.bmp", PATH_TEMP, id->page, RX_ColorNameShort(bmpInfo.inkSupplyNo[i]));
-				#ifdef linux
-					sprintf(str, "%sID_%d_%s.bmp", PATH_HOME PATH_RIPPED_DATA_DIR "trace/", id->id, RX_ColorNameShort(bmpInfo.inkSupplyNo[i]));
-				#else
-					sprintf(str, "d:/ripped-data/trace/%s/ID_%d_%s.bmp", RX_ColorNameShort(bmpInfo.inkSupplyNo[i]), id->id, RX_ColorNameShort(bmpInfo.inkSupplyNo[i]));
-				#endif
-					if (bmpInfo.bitsPerPixel<8) bmp_write(str, *bmpInfo.buffer[i], bmpInfo.bitsPerPixel, bmpInfo.srcWidthPx, bmpInfo.lengthPx, bmpInfo.lineLen, FALSE);
-					else
-					{
-						char dir[MAX_PATH];
-						char fname[MAX_PATH];
-						sprintf(dir, PATH_RIPPED_DATA "trace/%s", RX_ColorNameShort(bmpInfo.inkSupplyNo[i]));
-						sprintf(fname, "ID_%d_%s", id->id, RX_ColorNameShort(bmpInfo.inkSupplyNo[i]));
-						bmpInfo.planes = RX_Spooler.colorCnt;
-						tif_write(dir, fname, &bmpInfo);
-					}
-					Error(WARN, 0, "Test: Written bitmap to >>%s<<", str);
-				}
-			}
-			TrPrintfL(TRUE, "Testfile Written");				
+			char dir[MAX_PATH];
+			char fname[MAX_PATH];
+			sprintf(dir, PATH_RIPPED_DATA "trace");
+			sprintf(fname, "ID_%d", id->id);
+			bmpInfo.planes = RX_Spooler.colorCnt;
+			tif_write(dir, fname, &bmpInfo);
+			Error(WARN, 0, "Test: Written bitmap to >>%s\\%s<<", dir, fname);
 		}
 		#endif
 	

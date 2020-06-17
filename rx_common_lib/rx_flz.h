@@ -25,7 +25,7 @@ typedef struct
 //--- SFlzInfo ---------------------------------------------
 typedef struct
 {
-	UINT32 WidthPx;
+	UINT32 widthPx;
 	UINT32 lengthPx;
 	UINT32 bitsPerPixel;
 	UINT32 lineLen;		// in bytes
