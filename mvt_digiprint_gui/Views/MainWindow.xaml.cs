@@ -302,9 +302,8 @@ namespace RX_DigiPrint.Views
         }
 
         private void _ShowPrintSystemTab()
-        {
-            
-            if (RxGlobals.PrintSystem.IsScanning)
+        {            
+            if (RxGlobals.PrintSystem.PrinterType != EPrinterType.printer_CB612)
             {
                 PrintSystemView.Visibility = Visibility.Visible;
                 PrintSystemExtendedView.Visibility = Visibility.Collapsed;

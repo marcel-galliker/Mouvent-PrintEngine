@@ -1,0 +1,112 @@
+﻿<Window x:Class="RX_Common.MvtTextPad"
+		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        ShowInTaskbar="False"
+        WindowState="Maximized"
+        WindowStyle="None"        
+        ResizeMode="NoResize"                
+        AllowsTransparency="True"
+        Background="Transparent"
+        TouchUp="Window_TouchUp"
+        Loaded="Window_Loaded"
+        Closing="Window_Closing"
+        IsVisibleChanged="Window_IsVisibleChanged"
+        SizeChanged="Window_SizeChanged"
+        >
+       
+    <Window.Resources>
+        <ResourceDictionary>
+            
+            <SolidColorBrush x:Key="Rx.OptionMark.Pressed.Border" Color="#FF3C77DD" />
+            
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="..\Resources\MvtResources.xaml" />
+                <ResourceDictionary Source="..\Resources\MouventNumButtonStyle.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+    
+    <Grid x:Name="MainGrid" Background="Transparent">
+        <Grid x:Name="Back">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100" x:Name="_Left"/>
+                <ColumnDefinition Width="100" x:Name="_Width"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="100" x:Name="_Top"/>
+                <RowDefinition Height="10" x:Name="_Height"/>
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Rectangle Grid.Row="0" Grid.Column="0" Fill="#66808080"/>
+            <Rectangle Grid.Row="0" Grid.Column="1" Fill="#66808080"/>
+            <Rectangle Grid.Row="0" Grid.Column="2" Fill="#66808080"/>
+            <Rectangle Grid.Row="1" Grid.Column="0" Fill="#66808080"/>
+            <Rectangle Grid.Row="1" Grid.Column="2" Fill="#66808080"/>
+            <Rectangle Grid.Row="2" Grid.Column="0" Fill="#66808080"/>
+            <Rectangle Grid.Row="2" Grid.Column="1" Fill="#66808080"/>
+            <Rectangle Grid.Row="2" Grid.Column="2" Fill="#66808080"/>
+        </Grid>
+
+        <Canvas>
+            <Grid x:Name="Pad" SizeChanged="Pad_SizeChanged">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0">
+                    <Grid x:Name="TopRow">
+                        <Button x:Name="Display"
+                        Grid.ColumnSpan="3"
+                        Background="{StaticResource Mouvent.BlueDarkestBrush}"
+                        BorderBrush="{StaticResource Rx.OptionMark.Pressed.Border}"
+                        HorizontalAlignment="Stretch"
+                        Width="auto"
+                        Margin="0,0,128,0"
+                        Content="{Binding Result}" 
+                        />
+
+                        <Button x:Name="ClearButton"
+                        Background="{StaticResource Mvt.CtrlKey}"
+                        Content="Clear"
+                        Click="button_Click"
+                        HorizontalAlignment="Right"
+                        Margin="0,0,64,0"
+                        />
+                            
+                        <Button 
+                        Background="{StaticResource Mvt.CtrlKey}"
+                        Content="Esc"
+                        Click="button_Click"
+                        HorizontalAlignment="Right"
+                        />
+                    </Grid>
+
+                    <Button x:Name="CloseButton"
+                        Background="{StaticResource Mvt.CtrlKey}"
+                        Click="close_Clicked"
+                        HorizontalAlignment="Right" FontFamily="Wingdings" FontSize="48"
+                        >
+                        <Image Source="{DynamicResource No_ico}"/>
+                    </Button>
+                </Grid>
+
+                <StackPanel Grid.Row="1" Orientation="Horizontal"/>
+                <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="16,0,0,0"/>
+                <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="32,0,0,0"/>
+                <StackPanel Grid.Row="4" Orientation="Horizontal" />
+                <Grid Grid.Row="5">
+                    <Button Content="Shift" Click="button_Click" HorizontalAlignment="Left"/>
+                    <Button Content=" "     Click="button_Click" HorizontalAlignment="Stretch" Margin="64,0" Width="auto"/>
+                    <Button Content="Shift" Click="button_Click" HorizontalAlignment="Right"/>
+                </Grid>
+
+            </Grid>
+        </Canvas>
+    </Grid>
+</Window>
