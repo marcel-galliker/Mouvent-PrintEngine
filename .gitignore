@@ -96,7 +96,6 @@ rx_head_nios/software/rx_head_nios/mem_init/
 rx_digiprint_gui/Properties/AssemblyInfo.cs
 *.sdf
 *.opensdf
-*.suo
 rx_rip_lib.dll
 *.csproj.user
 rx_fluid_nios/software/.metadata/
