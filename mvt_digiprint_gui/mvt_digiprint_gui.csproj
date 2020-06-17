@@ -1914,7 +1914,7 @@ rem copy $(ProjectDir)..\_out\release\rx_rip_lib.dll D:\radex\bin\newgui
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>call $(ProjectDir)Resources\Language\Compile.bat $(ProjectDir)Resources\Language
-rem call $(ProjectDir)VersionUpdate.bat $(ProjectDir)Properties\AssemblyInfo.cs.template  $(ProjectDir)Properties\AssemblyInfo.cs
+call $(ProjectDir)VersionUpdate.bat $(ProjectDir)Properties\AssemblyInfo.cs.template  $(ProjectDir)Properties\AssemblyInfo.cs
 rem dir $(SolutionDir)_out\$(Configuration)_$(PlatformName)\rx_rip_lib.dll
 
 </PreBuildEvent>

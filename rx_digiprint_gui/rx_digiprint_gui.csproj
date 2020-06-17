@@ -1704,7 +1704,7 @@ rem copy $(ProjectDir)..\_out\release\rx_rip_lib.dll D:\radex\bin\gui
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>call $(ProjectDir)Resources\Language\Compile.bat $(ProjectDir)Resources\Language
-call $(ProjectDir)..\VersionUpdate_WPF.exe  $(ProjectDir)Properties\AssemblyInfo.cs  $(ProjectDir)..\rx_common_lib\version.h
+call $(ProjectDir)VersionUpdate.bat $(ProjectDir)Properties\AssemblyInfo.cs.template  $(ProjectDir)Properties\AssemblyInfo.cs
 rem dir $(SolutionDir)_out\$(Configuration)_$(PlatformName)\rx_rip_lib.dll</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

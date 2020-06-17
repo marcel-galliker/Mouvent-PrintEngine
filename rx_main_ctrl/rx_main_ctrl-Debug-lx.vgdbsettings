@@ -205,6 +205,13 @@
         <DestinationFilePath>$(DeployDir)/libxl.so</DestinationFilePath>
         <OverwriteTrigger>Stat</OverwriteTrigger>
       </CustomActionBase>
+      <CustomActionBase xsi:type="CommandLineAction">
+        <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
+        <Command>..\VersionUpdate.exe</Command>
+        <Arguments>version.c</Arguments>
+        <WorkingDirectory>$(ProjectDir)</WorkingDirectory>
+        <BackgroundMode>false</BackgroundMode>
+      </CustomActionBase>
     </PreBuildActions>
     <PostBuildActions>
       <CustomActionBase xsi:type="SourceTransferAction">

@@ -123,14 +123,10 @@
     <PreBuildActions>
       <CustomActionBase xsi:type="CommandLineAction">
         <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
-        <Command>$(ProjectDir)\..\VersionUpdate.exe</Command>
-        <Arguments>$(ProjectDir)\version.c</Arguments>
-        <WorkingDirectory />
-        <Environment>
-          <Records />
-          <EnvironmentSetupFiles />
-        </Environment>
-        <BackgroundMode xsi:nil="true" />
+        <Command>..\VersionUpdate.exe</Command>
+        <Arguments>version.c</Arguments>
+        <WorkingDirectory>$(ProjectDir)</WorkingDirectory>
+        <BackgroundMode>false</BackgroundMode>
       </CustomActionBase>
     </PreBuildActions>
     <PostBuildActions>

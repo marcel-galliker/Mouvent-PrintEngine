@@ -1,7 +1,7 @@
-07:41:46 **** Incremental Build of configuration Nios II for project rx_head_nios_bsp ****
+17:10:25 **** Incremental Build of configuration Nios II for project rx_head_nios_bsp ****
 make all 
 [BSP build complete]
-07:41:47 **** Incremental Build of configuration Nios II for project rx_head_nios ****
+17:10:26 **** Incremental Build of configuration Nios II for project rx_head_nios ****
 make all 
 Info: Building ../rx_head_nios_bsp
 F:/Tools/Bin/Altera/15.1/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../rx_head_nios_bsp
@@ -10,7 +10,7 @@ Info: Compiling version.c to obj/default/version.o
 nios2-elf-gcc -xc -MP -MMD -c -I../rx_head_nios_bsp/HAL/inc -I../rx_head_nios_bsp -I../rx_head_nios_bsp/drivers/inc -I../../../rx_ink_lib  -pipe -D__hal__ -DALT_NO_C_PLUS_PLUS -DALT_NO_CLEAN_EXIT -D'exit(a)=_exit(a)' -DALT_NO_EXIT -DALT_NO_INSTRUCTION_EMULATION -DALT_STACK_CHECK -fstack-limit-register=et -DSMALL_C_LIB -DALT_SINGLE_THREADED -DALTERA_AVALON_JTAG_UART_SMALL -DALTERA_AVALON_UART_SMALL  -DNIOS  -O0 -g -Wall   -mno-hw-div -mhw-mul -mno-hw-mulx  -o obj/default/version.o version.c
 Info: Linking rx_head_nios.elf
 nios2-elf-g++  -T'../rx_head_nios_bsp/linker.x' -msys-crt0='../rx_head_nios_bsp/obj/HAL/src/crt0.o' -msys-lib=hal_bsp -L../rx_head_nios_bsp  -fstack-limit-register=et -msmallc  -Wl,-Map=rx_head_nios.map -DNIOS  -O0 -g -Wall   -mno-hw-div -mhw-mul -mno-hw-mulx  -o rx_head_nios.elf obj/default/AMC7891.o obj/default/adc_thermistor.o obj/default/average.o obj/default/comm.o obj/default/conditioner_bootloader.o obj/default/cooler.o obj/default/crc_calc.o obj/default/fifo.o obj/default/head_eeprom.o obj/default/i2c.o obj/default/main.o obj/default/nios_def_head.o obj/default/power.o obj/default/pres.o obj/default/rx_ink_common.o obj/default/rx_mem.o obj/default/timer.o obj/default/trprintf.o obj/default/uart.o obj/default/version.o obj/default/watchdog.o -lm 
-nios2-elf-insert rx_head_nios.elf --thread_model hal --cpu_name nios_cpu --qsys true --simulation_enabled false --id 2899645188 --sidp 0x10000 --timestamp 1560758923 --stderr_dev jtag_uart --stdin_dev jtag_uart --stdout_dev jtag_uart --sopc_system_name soc_system --sopcinfo C:/Develop/PrintEngine-Master-1.3/rx_head_nios/software/rx_head_nios_bsp/../../soc_system.sopcinfo
+nios2-elf-insert rx_head_nios.elf --thread_model hal --cpu_name nios_cpu --qsys true --simulation_enabled false --id 2899645188 --sidp 0x10000 --timestamp 1560758923 --stderr_dev jtag_uart --stdin_dev jtag_uart --stdout_dev jtag_uart --sopc_system_name soc_system --sopcinfo C:/Develop/PrintEngine-Master-1.4/rx_head_nios/software/rx_head_nios_bsp/../../soc_system.sopcinfo
 Info: (rx_head_nios.elf) 48 KBytes program size (code + initialized data).
 Info:                    12 KBytes free for stack + heap.
 Info: Creating rx_head_nios.objdump
