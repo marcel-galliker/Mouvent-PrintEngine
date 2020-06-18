@@ -46,18 +46,22 @@ namespace RX_DigiPrint.Views.PrintSystemView
             if (e.PropertyName.Equals("ColorCnt") || e.PropertyName.Equals("InkCylindersPerColor"))
             {
                 InkSupplyGrid.show_inkSupplies(_PrintSystem.ColorCnt * _PrintSystem.InkCylindersPerColor);
-                if (_PrintSystem.AllInkSupplies) PrintHeadGrid.show_items((int)(_PrintSystem.ColorCnt * _PrintSystem.HeadsPerColor));
-                else PrintHeadGrid.show_items((int)(_PrintSystem.HeadsPerInkCylinder));
+                PrintHeadGrid.show_items((int)(_PrintSystem.ColorCnt * _PrintSystem.HeadsPerColor));
+                /*if (_PrintSystem.AllInkSupplies) PrintHeadGrid.show_items((int)(_PrintSystem.ColorCnt * _PrintSystem.HeadsPerColor));
+                else PrintHeadGrid.show_items((int)(_PrintSystem.HeadsPerInkCylinder));*/
             }
-            if (e.PropertyName.Equals("HeadPerColor")) 
+            if (e.PropertyName.Equals("HeadsPerColor"))
             {
+                PrintHeadGrid.show_items((int)(_PrintSystem.ColorCnt * _PrintSystem.HeadsPerColor));
+                /*
                 if (_PrintSystem.AllInkSupplies) PrintHeadGrid.show_items((int)(_PrintSystem.ColorCnt * _PrintSystem.HeadsPerColor));
-                else PrintHeadGrid.show_items((int)(_PrintSystem.HeadsPerInkCylinder));
+                else PrintHeadGrid.show_items((int)(_PrintSystem.HeadsPerInkCylinder));*/
             }
             if (e.PropertyName.Equals("CheckedInkSupply") || e.PropertyName.Equals("AllInkSupplies"))
             {
-                if (_PrintSystem.AllInkSupplies) PrintHeadGrid.show_items((int)(_PrintSystem.ColorCnt * _PrintSystem.HeadsPerColor));
-                else PrintHeadGrid.show_items((int)(_PrintSystem.HeadsPerInkCylinder));
+                PrintHeadGrid.show_items((int)(_PrintSystem.ColorCnt * _PrintSystem.HeadsPerColor));
+/*                if (_PrintSystem.AllInkSupplies) PrintHeadGrid.show_items((int)(_PrintSystem.ColorCnt * _PrintSystem.HeadsPerColor));
+                else PrintHeadGrid.show_items((int)(_PrintSystem.HeadsPerInkCylinder));*/
             }
             if (e.PropertyName.Equals("PrinterType"))
             {
