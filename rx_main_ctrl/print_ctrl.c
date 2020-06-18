@@ -389,10 +389,8 @@ static void _load_test(void)
 static int _get_image_size(UINT32 gap)
 {
 	UINT32 length;
-	SFlzInfo info;
 
-	if(flz_get_info(_DataPath, 0, &info)==REPLY_OK) return info.widthPx+gap;
-
+	if (flz_get_size(_DataPath, 0, gap, &length, NULL, NULL)==REPLY_OK) return length;
 	if (tif_get_size(_DataPath, 0, gap, &length, NULL, NULL)==REPLY_OK) return length;
 
 	UINT32 height, memSize;
