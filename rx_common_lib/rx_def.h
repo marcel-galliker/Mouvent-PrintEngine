@@ -129,6 +129,7 @@ void rx_def_init();
 #define IP_ADDR_SIZE		32
 
 #define DPI_X				1200
+#define DPI_Y				1200
 
 #define MAX_DATA_SIZE		2048
 #define MAX_TEST_DATA_SIZE	512
@@ -1596,7 +1597,7 @@ typedef struct SRxStatus
 //--- SPlaneInfo ---------------------------------------------
 typedef struct
 {
-	UINT32 WidthPx;
+	UINT32 widthPx;
 	UINT32 lengthPx;
 	UINT32 bitsPerPixel;
 	UINT32 lineLen;		// in bytes

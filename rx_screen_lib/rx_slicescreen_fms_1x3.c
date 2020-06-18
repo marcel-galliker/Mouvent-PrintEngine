@@ -55,7 +55,7 @@ int rx_screen_slice_FMS_1x3s(SSLiceInfo *inplane, SSLiceInfo *outplane, void * e
 		pSrc = inplane->buffer + (l * inplane->lineLen);
 		modl = l % pta->heigth;
 		pDst = outplane->buffer + (l * outplane->lineLen);
-		for (i = 0; i < (int)inplane->WidthPx; i++)
+		for (i = 0; i < (int)inplane->widthPx; i++)
 		{
 			if (pSrc[i])
 			{
@@ -160,7 +160,7 @@ int rx_screen_slice_FMS_1x3g(SSLiceInfo *inplane, SSLiceInfo *outplane, void * e
 		pSrc = inplane->buffer + (l * inplane->lineLen);
 		modl = l % pta->heigth;
 		pDst = outplane->buffer + (l * outplane->lineLen);
-		for (i = 0; i < (int)inplane->WidthPx; i++)
+		for (i = 0; i < (int)inplane->widthPx; i++)
 		{
 			if (pSrc[i])
 			{
@@ -240,7 +240,7 @@ int rx_screen_slice_FMS_1x3g_mag(SSLiceInfo *inplane, SSLiceInfo *outplane, void
 		pSrc = inplane->buffer + l*inplane->lineLen;
 		pDst = outplane->buffer+ l*outplane->lineLen;
 		taPtr   = &pta->ta16[(l % pta->heigth) * ta_width];
-		for (i = 0; i < (int)inplane->WidthPx; )
+		for (i = 0; i < (int)inplane->widthPx; )
 		{
 			WSrc = ((UINT16)*pSrc++) * pplaneScreenConfig->densityFactor[i];
 
@@ -294,7 +294,7 @@ int rx_screen_slice_FMS_1x3r(SSLiceInfo *inplane, SSLiceInfo *outplane, void * e
 		pSrc = inplane->buffer + (l * inplane->lineLen);
 		modl = l % pta->heigth;
 		pDst = outplane->buffer + (l * outplane->lineLen);
-		for (i = 0; i < (int)inplane->WidthPx; i++)
+		for (i = 0; i < (int)inplane->widthPx; i++)
 		{
 			if (pSrc[i])
 			{

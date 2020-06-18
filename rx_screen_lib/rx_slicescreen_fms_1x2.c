@@ -55,7 +55,7 @@ int rx_screen_slice_FMS_1x2g(SSLiceInfo *inplane, SSLiceInfo *outplane, void * e
 		pSrc = inplane->buffer + (l * inplane->lineLen);
 		modl = l % pta->heigth;
 		pDst = outplane->buffer + (l * outplane->lineLen);
-		for (i = 0; i < (int)inplane->WidthPx; i++)
+		for (i = 0; i < (int)inplane->widthPx; i++)
 		{
 			if (pSrc[i])
 			{
@@ -125,7 +125,7 @@ int rx_screen_slice_FMS_1x2s(SSLiceInfo *inplane, SSLiceInfo *outplane, void * e
 		pSrc = inplane->buffer + (l * inplane->lineLen);
 		modl = l % pta->heigth;
 		pDst = outplane->buffer + (l * outplane->lineLen);
-		for (i = 0; i < (int)inplane->WidthPx; i++)
+		for (i = 0; i < (int)inplane->widthPx; i++)
 		{
 			if (pSrc[i])
 			{
@@ -210,7 +210,7 @@ int rx_screen_slice_FMS_1x2r(SSLiceInfo *inplane, SSLiceInfo *outplane, void * e
 		pSrc = inplane->buffer + (l * inplane->lineLen);
 		modl = l % pta->heigth;
 		pDst = outplane->buffer + (l * outplane->lineLen);
-		for (i = 0; i < (int)inplane->WidthPx; i++)
+		for (i = 0; i < (int)inplane->widthPx; i++)
 		{
 			if (pSrc[i])
 			{

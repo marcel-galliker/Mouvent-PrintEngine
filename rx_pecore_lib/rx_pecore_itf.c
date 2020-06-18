@@ -304,7 +304,7 @@ int i_peGetBitmap(int pageNum, void *PAGE, int bitmap, SPlaneInfo *planeInfo, in
 
 	memset(planeInfo, 0, sizeof(SPlaneInfo));
 	rx_mutex_lock(_hMutexPage);
-	planeInfo->WidthPx = page->width;
+	planeInfo->widthPx = page->width;
 	planeInfo->lengthPx = page->height;
 	planeInfo->aligment = page->alignment;
 	planeInfo->lineLen = page->lineLen;
