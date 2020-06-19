@@ -102,3 +102,4 @@ rx_fluid_nios/software/.metadata/
 rx_head_nios/software/.metadata/
 version.c
 /bin/newgui/*.dll
+*.suo
