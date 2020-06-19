@@ -245,22 +245,16 @@ void setup_str_next	(HANDLE hsetup, HANDLE *attribute, char *name, int namesize,
 }
 
 //--- setup_uchar ---------------------------------------------
-int setup_uchar(HANDLE hsetup, const char *name, EN_setup_Action action, UCHAR *val, UCHAR def)
+void setup_uchar(HANDLE hsetup, const char *name, EN_setup_Action action, UCHAR *val, UCHAR def)
 {
-	int returnValue = REPLY_OK;
 	SSetupFile *setup=(SSetupFile*)hsetup;
 	if (action == WRITE) setup->actChapter->SetAttribute(name, *val);
 	else
 	{
 		int i=def;
-		const char* result = setup->actChapter->Attribute(name, &i);
-		if(result == NULL)
-		{
-			returnValue = REPLY_ERROR; // attribute was not found
-		}
+		setup->actChapter->Attribute(name, &i);
 		*val=i;
 	}
-	return returnValue;
 }
 
 //--- setup_uchar_arr ------------------------------------------------------------------

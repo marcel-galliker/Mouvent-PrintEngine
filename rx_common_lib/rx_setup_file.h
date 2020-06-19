@@ -37,7 +37,7 @@ int  setup_chapter_add	 (HANDLE hsetup, char *name);
 int  setup_chapter_delete(HANDLE hsetup);
 void setup_text		(HANDLE hsetup, EN_setup_Action action,  char  *val, int size, const char* def);
 void setup_str		(HANDLE hsetup, const char *name, EN_setup_Action action,  char  *val, int size, const char* def);
-int setup_uchar	(HANDLE hsetup, const char *name, EN_setup_Action action, UCHAR  *val, UCHAR  def);
+void setup_uchar	(HANDLE hsetup, const char *name, EN_setup_Action action, UCHAR  *val, UCHAR  def);
 void setup_uchar_arr(HANDLE hsetup, const char *name, EN_setup_Action action, UCHAR  *val, int cnt, INT32 def);
 // void setup_uint8	(HANDLE hsetup, const char *name, EN_setup_Action action, UINT8  *val, UINT8  def);
 void setup_int16	(HANDLE hsetup, const char *name, EN_setup_Action action, INT16  *val, INT16  def);

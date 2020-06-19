@@ -185,34 +185,18 @@ int setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action)
 	setup_int32_arr(file, "Calib", action, pcfg->scales.calib, MAX_SCALES, 0);
 
 	//--- ink supply ---
-	// First check if we have a 'standard' config file:
-	if(setup_uchar(file, "InkSupplyCnt", action, &pcfg->inkSupplyCnt, 1) == REPLY_OK)
+	setup_uchar(file, "InkSupplyCnt", action, &pcfg->inkSupplyCnt, 1);
+	setup_uchar(file, "HeadsPerColor", action, &pcfg->headsPerColor, 1);
+	setup_uchar(file, "InkCylinderPerColorCnt", action, &pcfg->inkCylindersPerColor, 1); // if value is not available yet, the value is set to 1
+	if(pcfg->inkCylindersPerColor != 0)
 	{
-		// we do have a 'standard' config file
-		setup_uchar(file, "HeadsPerColor", action, &pcfg->headsPerColor, 1);
-		pcfg->inkCylindersPerColor = 1;
 		pcfg->colorCnt = pcfg->inkSupplyCnt / pcfg->inkCylindersPerColor;
 	}
-	else // InkSupplyCnt entry not fund -> we might have an 'extended' config file (incl. ink cylinders per color)
+	else
 	{
-		if(setup_uchar(file, "InkCylinderPerColorCnt", action, &pcfg->inkCylindersPerColor, 1) == REPLY_OK) 
-		{
-			// we do have an 'extended' config file
-			int headsPerCylinder = 1;
-			setup_uchar(file, "ColorCnt", action, &pcfg->colorCnt, 1);
-			setup_uchar(file, "HeadsPerInkCylinderCnt", action, &headsPerCylinder, 1);
-			pcfg->inkSupplyCnt = pcfg->colorCnt * pcfg->inkCylindersPerColor;
-			pcfg->headsPerColor = headsPerCylinder * pcfg->inkCylindersPerColor;
-		}
-		else // no config file at all -> set all values to default
-		{
-			pcfg->inkCylindersPerColor = 1;
-			pcfg->inkSupplyCnt = 1;
-			pcfg->colorCnt = 1;
-			pcfg->headsPerColor = 1;
-		}
+		pcfg->colorCnt = 1; // invalid config! -> set to 1 (Default)
 	}
-
+	
 	for (i=0; i<pcfg->inkSupplyCnt; i++)
 	{
 		if (setup_chapter(file, "InkSupply", i, action)==REPLY_OK) 
