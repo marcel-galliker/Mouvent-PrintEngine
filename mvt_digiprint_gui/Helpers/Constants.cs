@@ -9,5 +9,7 @@ namespace RX_DigiPrint.Helpers
     class Constants
     {
         public const int JetsPerHead = 2048;
+
+        public const int PrintSystem_MaxPrintHeads = 8;
     }
 }

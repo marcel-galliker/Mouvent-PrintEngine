@@ -971,25 +971,25 @@ namespace RX_DigiPrint.Services
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct SEncoderStat
         {
-	        public Int32	info;
-	        public Int32	warn;
-	        public Int32	err;
-	        public Int32	distTelCnt;
-	        public Int32	PG_cnt;
-	        public Int32	PG_stop;
-	        public Int32	fifoEmpty_PG;
-	        public Int32	fifoEmpty_IGN;
-	        public Int32	fifoEmpty_WND;
+	        public UInt32	info;
+	        public UInt32	warn;
+	        public UInt32	err;
+	        public UInt32	distTelCnt;
+	        public UInt32	PG_cnt;
+	        public UInt32	PG_stop;
+	        public UInt32	fifoEmpty_PG;
+	        public UInt32	fifoEmpty_IGN;
+	        public UInt32	fifoEmpty_WND;
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
 	        public Int32[]	corrRotPar;	// parameters for CORR_LINEAR
             public Int32 ampl_old;
             public Int32 ampl_new;
             public Int32 percentage;
             public UInt32 meters;
-            public UInt32 speed;
+            public Int32 speed;
         }
 
-		public const Byte SCL_READY         = 0x01;
+        public const Byte SCL_READY         = 0x01;
 		public const Byte SCL_CAL_ZERO      = 0x02;
 		public const Byte SCL_CAL_SENSOR1   = 0x03;
 		public const Byte SCL_CAL_SENSOR2   = 0x04;

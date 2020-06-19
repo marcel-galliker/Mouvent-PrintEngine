@@ -22,7 +22,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
         //--- User_PropertyChanged --------------------------------------
         private void User_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            Visibility visibility  =  (RxGlobals.User.UserType >= EUserType.usr_service) ? Visibility.Visible : Visibility.Collapsed; 
+            Visibility visibility = (RxGlobals.User.UserType >= EUserType.usr_service) ? Visibility.Visible : Visibility.Collapsed;
             ServiceGrid.Visibility = visibility;
         }
 
@@ -41,7 +41,6 @@ namespace RX_DigiPrint.Views.PrintSystemView
                             no += RxGlobals.PrintSystem.HeadsPerColor - 1 - i % RxGlobals.PrintSystem.HeadsPerColor;
                         else
                             no += i % RxGlobals.PrintSystem.HeadsPerColor;
-
                         _PrintHeadView[i].DataContext = RxGlobals.HeadStat.List[no];
                         _PrintHeadView[i].No = no;
                     }
@@ -55,36 +54,27 @@ namespace RX_DigiPrint.Views.PrintSystemView
             }
         }
 
+        //--- show_items --------------------------------------
         public void show_items(int cnt)
         {
-            // add items to Print head stack if there are not enough:
-            int totalHeadCnt = RxGlobals.PrintSystem.ColorCnt * RxGlobals.PrintSystem.HeadsPerColor;
-            
-            RxGlobals.HeadStat.SetItemCount(totalHeadCnt); // this ensures that there are enough elements in HeadStat.List
-
-            // Add elements to PrintHeadStack if necessary:
-            for (int i = PrintHeadStack.Children.Count; i < cnt; i++)
+            int i, no;
+            RxGlobals.HeadStat.SetItemCount(cnt);
+            for (i = PrintHeadStack.Children.Count; i < cnt; i++)
             {
                 _PrintHeadView.Add(new PrintHeadView(i));
-                try
-                {
-                    _PrintHeadView[i].DataContext = RxGlobals.HeadStat.List[i];
-                }
-                catch (Exception ex)
-                {
-                    // RxGlobals.HeadStat.List does not contain enough elements!
-                    Console.WriteLine(ex.Message);
-                }
+                _PrintHeadView[i].DataContext = RxGlobals.HeadStat.List[i];
                 PrintHeadStack.Children.Add(_PrintHeadView[i]);
             }
-
             _assign_inksupply(cnt);
-            for (int i = 0; i < PrintHeadStack.Children.Count; i++)
+            for (i = 0; i < PrintHeadStack.Children.Count; i++)
             {
-                int no = (int)(i / RxGlobals.PrintSystem.HeadsPerColor);
+                no = (int)(i / RxGlobals.PrintSystem.HeadsPerColor);
                 no = RxGlobals.PrintSystem.IS_Order[no];
                 _PrintHeadView[i].Visibility = (i < cnt && (RxGlobals.PrintSystem.AllInkSupplies || no == RxGlobals.PrintSystem.CheckedInkSupply)) ? Visibility.Visible : Visibility.Collapsed;
             }
+            Grid.RowDefinitions[1].Height = new GridLength(25 / RxGlobals.Screen.Scale);
         }
     }
 }
+
+

@@ -85,8 +85,8 @@ namespace RX_DigiPrint.Models
         }
         
         //--- Property Speed ---------------------------------------
-        private UInt32 _Speed;
-        public UInt32 Speed
+        private Int32 _Speed;
+        public Int32 Speed
         {
             get { return _Speed; }
             set { SetProperty(ref _Speed, value); }

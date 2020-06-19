@@ -203,7 +203,7 @@ namespace RX_DigiPrint.Models
         public int HeadsPerColor
         {
             get { return (_HeadsPerColor==0)? 1:_HeadsPerColor; }
-            set { SetProperty(ref _HeadsPerColor, Math.Max(value,1 )); }
+            set { Changed |= SetProperty(ref _HeadsPerColor, Math.Max(value,1 )); }
         }
 
         //--- HeadsPerInkCylinder -----------------------------------
