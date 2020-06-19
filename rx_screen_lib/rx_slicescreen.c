@@ -452,11 +452,11 @@ int rx_screen_slice(SSLiceInfo *inplane, SSLiceInfo *outplane, SPlaneScreenConfi
 //--- rx_screen_outslice_init ----------------------------------------------------------------------
 int rx_screen_outslice_init(SSLiceInfo *inplane, SSLiceInfo *outplane, SPlaneScreenConfig* pplaneScreenConfig)
 {
-	outplane->WidthPx = inplane->WidthPx;
+	outplane->widthPx = inplane->widthPx;
 	outplane->lengthPx = inplane->lengthPx;
 	outplane->bitsPerPixel = pplaneScreenConfig->outputbitsPerPixel;
 	outplane->aligment = 8;
-	outplane->lineLen = ((outplane->WidthPx * outplane->bitsPerPixel) + outplane->aligment - 1) / outplane->aligment;
+	outplane->lineLen = ((outplane->widthPx * outplane->bitsPerPixel) + outplane->aligment - 1) / outplane->aligment;
 	outplane->planeNumber = inplane->planeNumber;
 	outplane->Xoffset = inplane->Xoffset;
 

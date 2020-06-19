@@ -50,28 +50,28 @@ int rx_screen_slice_FME_1x1(SSLiceInfo *inplane, SSLiceInfo *outplane, void * ep
 		return REPLY_ERROR;
 
 	// alloc line for data
-	pLine = (UINT16 *)rx_mem_alloc(inplane->WidthPx * sizeof(UINT16));
+	pLine = (UINT16 *)rx_mem_alloc(inplane->widthPx * sizeof(UINT16));
 	if (pLine == NULL) return Error(ERR_CONT, 0, "No buffer line for screening: %d");
 	pWNewSrc = pLine;
 
 	// alloc line for error
-	pError = pLineError = (int *)rx_mem_alloc((inplane->WidthPx) * sizeof(int));
+	pError = pLineError = (int *)rx_mem_alloc((inplane->widthPx) * sizeof(int));
 	if (pLineError == NULL) {
 		rx_mem_free((BYTE**)&pLine);
 		return Error(ERR_CONT, 0, "No buffer line for screening: %d");
 	}
-	memset(pLineError, 0, (inplane->WidthPx) * sizeof(int));
+	memset(pLineError, 0, (inplane->widthPx) * sizeof(int));
 
 	for (l = 0; l < inplane->lengthPx; l++)
 	{
 
 		// from 8 bits
 			pSrc = (BYTE *)(inplane->buffer + (l * inplane->lineLen));
-			for (i = 0; i < (int)inplane->WidthPx; i++)
+			for (i = 0; i < (int)inplane->widthPx; i++)
 				pWNewSrc[i] = pSrc[i] * 257;
 
 		// add error from previous line if any
-		for (i = 0; i < (int)inplane->WidthPx; i++)
+		for (i = 0; i < (int)inplane->widthPx; i++)
 		{
 			if (pError[i]) {
 				if (pWNewSrc[i]) {
@@ -96,7 +96,7 @@ int rx_screen_slice_FME_1x1(SSLiceInfo *inplane, SSLiceInfo *outplane, void * ep
 		if ((l % 2) == 0) {
 			pDst = outplane->buffer + (l * outplane->lineLen);
 
-			for (i = 0; i < (int)inplane->WidthPx; i++)
+			for (i = 0; i < (int)inplane->widthPx; i++)
 			{
 				if (pWNewSrc[i]) {
 
@@ -120,7 +120,7 @@ int rx_screen_slice_FME_1x1(SSLiceInfo *inplane, SSLiceInfo *outplane, void * ep
 						valError /= 16;
 
 						// distribute 7/16 at right
-						if (i + 1 < (int)inplane->WidthPx) {
+						if (i + 1 < (int)inplane->widthPx) {
 							if (pWNewSrc[i + 1]) {
 								distError = valError * 7;
 								if (distError > 0) {
@@ -161,7 +161,7 @@ int rx_screen_slice_FME_1x1(SSLiceInfo *inplane, SSLiceInfo *outplane, void * ep
 		// F&S odd line
 		else {
 			pDst = outplane->buffer + ((l + 1) * outplane->lineLen) - 1;
-			for (i = (int)inplane->WidthPx - 1; i > 0; i--)
+			for (i = (int)inplane->widthPx - 1; i > 0; i--)
 			{
 				if (pWNewSrc[i]) {
 
@@ -207,7 +207,7 @@ int rx_screen_slice_FME_1x1(SSLiceInfo *inplane, SSLiceInfo *outplane, void * ep
 						}
 
 						// distribute 3/16 next line right
-						if (i < (int)inplane->WidthPx - 1) {
+						if (i < (int)inplane->widthPx - 1) {
 							pError[i + 1] += valError * 3;
 						}
 
@@ -326,21 +326,21 @@ int rx_screen_slice_FME_1x2g(SSLiceInfo *inplane, SSLiceInfo *outplane, void * e
 	}
 
 	// alloc line for data
-	pLine = (UINT16 *)rx_mem_alloc(inplane->WidthPx * sizeof(UINT16));
+	pLine = (UINT16 *)rx_mem_alloc(inplane->widthPx * sizeof(UINT16));
 	if (pLine == NULL) {
 		ret = Error(ERR_CONT, 0, "No buffer line for screening: %d"); goto End;
 	}
 	pWNewSrc = pLine;
 
 	// alloc line for error
-	pError = pLineError = (int *)rx_mem_alloc((inplane->WidthPx) * sizeof(int));
+	pError = pLineError = (int *)rx_mem_alloc((inplane->widthPx) * sizeof(int));
 	if (pLineError == NULL) {
 		ret = Error(ERR_CONT, 0, "No buffer line for screening: %d"); goto End;
 	}
-	memset(pLineError, 0, (inplane->WidthPx) * sizeof(int));
+	memset(pLineError, 0, (inplane->widthPx) * sizeof(int));
 
 	// alloc line for limit
-	pLineLim = (BYTE *)rx_mem_alloc((outplane->WidthPx) * sizeof(BYTE));
+	pLineLim = (BYTE *)rx_mem_alloc((outplane->widthPx) * sizeof(BYTE));
 	if (pLineLim == NULL) {
 		ret = Error(ERR_CONT, 0, "No buffer line for screening: %d"); goto End;
 	}
@@ -350,11 +350,11 @@ int rx_screen_slice_FME_1x2g(SSLiceInfo *inplane, SSLiceInfo *outplane, void * e
 
 		// from 8 bits
 			pSrc = (BYTE *)(inplane->buffer + (l * inplane->lineLen));
-			for (i = 0; i < (int)inplane->WidthPx; i++)
+			for (i = 0; i < (int)inplane->widthPx; i++)
 				pWNewSrc[i] = pSrc[i] * 257;
 
 		// add error from previous line if any
-		for (i = 0; i < (int)inplane->WidthPx; i++)
+		for (i = 0; i < (int)inplane->widthPx; i++)
 		{
 			pLineLim[i] = Val1;
 			if (pWNewSrc[i] > WLimit)
@@ -385,7 +385,7 @@ int rx_screen_slice_FME_1x2g(SSLiceInfo *inplane, SSLiceInfo *outplane, void * e
 		if ((l % 2) == 0) {
 			pDst = outplane->buffer + (l * outplane->lineLen);
 
-			for (i = 0; i < (int)inplane->WidthPx; i++)
+			for (i = 0; i < (int)inplane->widthPx; i++)
 			{
 				if (pWNewSrc[i]) {
 
@@ -410,7 +410,7 @@ int rx_screen_slice_FME_1x2g(SSLiceInfo *inplane, SSLiceInfo *outplane, void * e
 						valError /= 16;
 
 						// distribute 7/16 at right
-						if (i + 1 < (int)inplane->WidthPx) {
+						if (i + 1 < (int)inplane->widthPx) {
 							if (pWNewSrc[i + 1]) {
 								distError = valError * 7;
 								if (distError > 0) {
@@ -451,7 +451,7 @@ int rx_screen_slice_FME_1x2g(SSLiceInfo *inplane, SSLiceInfo *outplane, void * e
 		// F&S odd line
 		else {
 			pDst = outplane->buffer + ((l + 1) * outplane->lineLen) - 1;
-			for (i = (int)inplane->WidthPx - 1; i > 0; i--)
+			for (i = (int)inplane->widthPx - 1; i > 0; i--)
 			{
 				if (pWNewSrc[i]) {
 
@@ -498,7 +498,7 @@ int rx_screen_slice_FME_1x2g(SSLiceInfo *inplane, SSLiceInfo *outplane, void * e
 						}
 
 						// distribute 3/16 next line right
-						if (i < (int)inplane->WidthPx - 1) {
+						if (i < (int)inplane->widthPx - 1) {
 							pError[i + 1] += valError * 3;
 						}
 
@@ -612,21 +612,21 @@ int rx_screen_slice_FME_1x3g(SSLiceInfo *inplane, SSLiceInfo *outplane, void * e
 	}
 
 	// alloc line for data
-	pLine = (UINT16 *)rx_mem_alloc(inplane->WidthPx * sizeof(UINT16));
+	pLine = (UINT16 *)rx_mem_alloc(inplane->widthPx * sizeof(UINT16));
 	if (pLine == NULL) {
 		ret = Error(ERR_CONT, 0, "No buffer line for screening: %d"); goto End;
 	}
 	pWNewSrc = pLine;
 
 	// alloc line for error
-	pError = pLineError = (int *)rx_mem_alloc((inplane->WidthPx) * sizeof(int));
+	pError = pLineError = (int *)rx_mem_alloc((inplane->widthPx) * sizeof(int));
 	if (pLineError == NULL) {
 		ret = Error(ERR_CONT, 0, "No buffer line for screening: %d"); goto End;
 	}
-	memset(pLineError, 0, (inplane->WidthPx) * sizeof(int));
+	memset(pLineError, 0, (inplane->widthPx) * sizeof(int));
 
 	// alloc line for limit
-	pLineLim = (BYTE *)rx_mem_alloc((outplane->WidthPx) * sizeof(BYTE));
+	pLineLim = (BYTE *)rx_mem_alloc((outplane->widthPx) * sizeof(BYTE));
 	if (pLineLim == NULL) {
 		ret = Error(ERR_CONT, 0, "No buffer line for screening: %d"); goto End;
 	}
@@ -637,11 +637,11 @@ int rx_screen_slice_FME_1x3g(SSLiceInfo *inplane, SSLiceInfo *outplane, void * e
 
 		//  from 8 bits
 		pSrc = (BYTE *)(inplane->buffer + (l * inplane->lineLen));
-		for (i = 0; i < (int)inplane->WidthPx; i++)
+		for (i = 0; i < (int)inplane->widthPx; i++)
 			pWNewSrc[i] = lut16[pSrc[i] * 257];
 
 		// add error from previous line if any
-		for (i = 0; i < (int)inplane->WidthPx; i++)
+		for (i = 0; i < (int)inplane->widthPx; i++)
 		{
 			pLineLim[i] = 1;
 			if (pWNewSrc[i] > WLimit2) {
@@ -679,7 +679,7 @@ int rx_screen_slice_FME_1x3g(SSLiceInfo *inplane, SSLiceInfo *outplane, void * e
 		if ((l % 2) == 0) {
 			pDst = outplane->buffer + (l * outplane->lineLen);
 
-			for (i = 0; i < (int)inplane->WidthPx; i++)
+			for (i = 0; i < (int)inplane->widthPx; i++)
 			{
 				if (pWNewSrc[i]) {
 
@@ -704,7 +704,7 @@ int rx_screen_slice_FME_1x3g(SSLiceInfo *inplane, SSLiceInfo *outplane, void * e
 						valError /= 16;
 
 						// distribute 7/16 at right
-						if (i + 1 < (int)inplane->WidthPx) {
+						if (i + 1 < (int)inplane->widthPx) {
 							if (pWNewSrc[i + 1]) {
 								distError = valError * 7;
 								if (distError > 0) {
@@ -745,7 +745,7 @@ int rx_screen_slice_FME_1x3g(SSLiceInfo *inplane, SSLiceInfo *outplane, void * e
 		// F&S odd line
 		else {
 			pDst = outplane->buffer + ((l + 1) * outplane->lineLen) - 1;
-			for (i = (int)inplane->WidthPx - 1; i > 0; i--)
+			for (i = (int)inplane->widthPx - 1; i > 0; i--)
 			{
 				if (pWNewSrc[i]) {
 
@@ -792,7 +792,7 @@ int rx_screen_slice_FME_1x3g(SSLiceInfo *inplane, SSLiceInfo *outplane, void * e
 						}
 
 						// distribute 3/16 next line right
-						if (i < (int)inplane->WidthPx - 1) {
+						if (i < (int)inplane->widthPx - 1) {
 							pError[i + 1] += valError * 3;
 						}
 

@@ -283,8 +283,8 @@ static void _write_tif(char *title, SBmpSplitInfo *pInfo, PBYTE *buffer, int lin
 	info.lengthPx	    = pInfo->srcLineCnt;	
 	info.lineLen	    = lineLen;
 	info.bitsPerPixel   = pInfo->bitsPerPixel;
-	info.resol.x	    = 1200;
-	info.resol.y	    = 1200;
+	info.resol.x	    = DPI_X;
+	info.resol.y	    = DPI_Y;
 	info.colorCode[0]   = pInfo->colorCode;
 	info.inkSupplyNo[0] = 0;
 	info.buffer[0]      = buffer;
@@ -300,11 +300,11 @@ static int _rx_screen_write_ta(void * epplaneScreenConfig)
 	SPlaneScreenConfig* pplaneScreenConfig = epplaneScreenConfig;
 
 	memset(&outplane, 0, sizeof(outplane));
-	outplane.WidthPx		= pplaneScreenConfig->TA->width;
+	outplane.widthPx		= pplaneScreenConfig->TA->width;
 	outplane.lengthPx		= pplaneScreenConfig->TA->heigth;
 	outplane.bitsPerPixel	= 16;
 	outplane.aligment		= 8;
-	outplane.lineLen		= ((outplane.WidthPx * outplane.bitsPerPixel) + outplane.aligment - 1) / outplane.aligment;
+	outplane.lineLen		= ((outplane.widthPx * outplane.bitsPerPixel) + outplane.aligment - 1) / outplane.aligment;
 	outplane.planeNumber	= 0;
 	outplane.Xoffset		= 0;
 
@@ -321,12 +321,12 @@ static int _rx_screen_write_ta(void * epplaneScreenConfig)
 	SBmpInfo info;
 	memset(&info, 0, sizeof(info));
 	info.planes			= 1;
-	info.srcWidthPx		= outplane.WidthPx;
+	info.srcWidthPx		= outplane.widthPx;
 	info.lengthPx		= outplane.lengthPx;	
 	info.lineLen		= outplane.lineLen;
 	info.bitsPerPixel	= outplane.bitsPerPixel;
-	info.resol.x		= 1200;
-	info.resol.y		= 1200;
+	info.resol.x		= DPI_X;
+	info.resol.y		= DPI_Y;
 	info.colorCode[0]	= 0;
 	info.inkSupplyNo[0] = 0;
 	info.buffer[0]      = &outplane.buffer;
@@ -482,20 +482,26 @@ static void _scr_load(SBmpSplitInfo *pInfo, int threadNo)
 
 		linplane.planeNumber	= pInfo->inkSupplyNo;	// plane number
 		linplane.Xoffset		= 0;					// X offset of the slice
-		linplane.WidthPx		= pInfo->widthPx;
+		linplane.widthPx		= pInfo->widthPx;
 		linplane.lengthPx		= pInfo->srcLineCnt;
 		linplane.bitsPerPixel	= pInfo->bitsPerPixel;
 		linplane.lineLen		= pInfo->dstLineLen;			// in bytes
 		linplane.aligment		= 0; // lbmp.aligment;			// 8, 16, 32 ,....
+		memcpy(&linplane.resol, &pInfo->pListItem->splitInfo->resol, sizeof(linplane.resol));
+        linplane.resol.x		= (pInfo->resol.x)? pInfo->resol.x : DPI_X;
+        linplane.resol.y		= (pInfo->resol.y)? pInfo->resol.y : DPI_Y;
 		linplane.dataSize		= pInfo->srcLineCnt*pInfo->dstLineLen;
 		linplane.buffer			= _ScrMem[b][h].separated;
 
 		memset(&loutplane, 0, sizeof(loutplane));		
-		loutplane.WidthPx		= linplane.WidthPx;
-		loutplane.lengthPx		= linplane.lengthPx;
+		loutplane.resol.x		= DPI_X;
+		loutplane.resol.y		= DPI_Y;
+		loutplane.widthPx		= linplane.widthPx*loutplane.resol.x/linplane.resol.x;
+		loutplane.lengthPx		= linplane.lengthPx*loutplane.resol.y/linplane.resol.y;
 		loutplane.bitsPerPixel	= 2; //pplaneScreenConfig->outputbitsPerPixel;
 		loutplane.aligment		= 8;
-		loutplane.lineLen		= pInfo->dstLineLen*loutplane.bitsPerPixel/linplane.bitsPerPixel; // ((loutplane.WidthPx * loutplane.bitsPerPixel) + loutplane.aligment - 1) / loutplane.aligment;
+		loutplane.lineLen		= pInfo->dstLineLen*loutplane.bitsPerPixel/linplane.bitsPerPixel;
+		loutplane.lineLen		= ((loutplane.widthPx * loutplane.bitsPerPixel) + loutplane.aligment - 1) / loutplane.aligment; // pInfo->dstLineLen*loutplane.bitsPerPixel/linplane.bitsPerPixel; // ((loutplane.widthPx * loutplane.bitsPerPixel) + loutplane.aligment - 1) / loutplane.aligment;
 		loutplane.planeNumber	= linplane.planeNumber;
 		loutplane.Xoffset		= linplane.Xoffset;
 
