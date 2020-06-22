@@ -144,7 +144,7 @@ int hc_head_board_cfg(RX_SOCKET socket, SHeadBoardCfg* cfg)
 //	if (_Simulation) 
 	{ //--- prepare simulation directory ------------------------------		
 		char path[MAX_PATH];
-		rx_mkdir(PATH_HOME PATH_RIPPED_DATA_DIR "trace/");
+		rx_mkdir(PATH_RIPPED_DATA "trace/");
 		for (i=0; i<SIZEOF(RX_Color); i++)
 		{
 			if (RX_Color[i].lastLine>0)
@@ -311,6 +311,7 @@ void hc_send_next()
 		for (i=4; _send_image_cmd_flags[i]; i+=5) _send_image_cmd_flags[i]=' ';
 
 		//--- ----------------------------------------------
+		if (pSplitInfo->pListItem)
 		{
 			SPageId *pid = &pSplitInfo->pListItem->id;
 			TrPrintfL(TRUE, "hc_send_next: (id=%d, page=%d, copy=%d, scan=%d) bitsPerPixel=%d", pid->id, pid->page, pid->copy, pid->scan, pSplitInfo->bitsPerPixel);
@@ -425,7 +426,7 @@ static void _save_to_file(SBmpSplitInfo *pInfo, int log)
 	//	sprintf(fname, "%strace/%s/Scan%02d-img%d-hd%d_%s.bmp", PATH_HOME PATH_RIPPED_DATA_DIR, RX_ColorNameShort(pInfo->inkSupplyNo), ++_SimuNo[pInfo->colorCode], pInfo->pListItem->id.id, pInfo->head, RX_ColorNameShort(pInfo->inkSupplyNo));
 		sprintf(fname, "%strace/%s/sent(id=%d, p=%d, c=%d, s=%d, h=%d).bmp",  PATH_HOME PATH_RIPPED_DATA_DIR, RX_ColorNameShort(pInfo->inkSupplyNo), pInfo->pListItem->id.id, pInfo->pListItem->id.page, pInfo->pListItem->id.copy, pInfo->pListItem->id.scan, head);
 		#else
-		sprintf(fname, "d:/%strace/%s/Scan%02d-img%d-hd%d_%s.bmp", PATH_RIPPED_DATA_DIR, RX_ColorNameShort(pInfo->inkSupplyNo), ++_SimuNo[pInfo->colorCode], pInfo->pListItem->id.id, pInfo->head, RX_ColorNameShort(pInfo->inkSupplyNo));
+		sprintf(fname, PATH_RIPPED_DATA "trace/%s/Scan%02d-img%d-hd%d_%s.bmp", RX_ColorNameShort(pInfo->inkSupplyNo), ++_SimuNo[pInfo->colorCode], pInfo->pListItem->id.id, pInfo->head, RX_ColorNameShort(pInfo->inkSupplyNo));
 		#endif
 	}
 	else

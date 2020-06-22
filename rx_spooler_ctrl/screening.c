@@ -283,8 +283,8 @@ static void _write_tif(char *title, SBmpSplitInfo *pInfo, PBYTE *buffer, int lin
 	info.lengthPx	    = pInfo->srcLineCnt;	
 	info.lineLen	    = lineLen;
 	info.bitsPerPixel   = pInfo->bitsPerPixel;
-	info.resol.x	    = 1200;
-	info.resol.y	    = 1200;
+	info.resol.x	    = DPI_X;
+	info.resol.y	    = DPI_Y;
 	info.colorCode[0]   = pInfo->colorCode;
 	info.inkSupplyNo[0] = 0;
 	info.buffer[0]      = buffer;
@@ -300,11 +300,11 @@ static int _rx_screen_write_ta(void * epplaneScreenConfig)
 	SPlaneScreenConfig* pplaneScreenConfig = epplaneScreenConfig;
 
 	memset(&outplane, 0, sizeof(outplane));
-	outplane.WidthPx		= pplaneScreenConfig->TA->width;
+	outplane.widthPx		= pplaneScreenConfig->TA->width;
 	outplane.lengthPx		= pplaneScreenConfig->TA->heigth;
 	outplane.bitsPerPixel	= 16;
 	outplane.aligment		= 8;
-	outplane.lineLen		= ((outplane.WidthPx * outplane.bitsPerPixel) + outplane.aligment - 1) / outplane.aligment;
+	outplane.lineLen		= ((outplane.widthPx * outplane.bitsPerPixel) + outplane.aligment - 1) / outplane.aligment;
 	outplane.planeNumber	= 0;
 	outplane.Xoffset		= 0;
 
@@ -321,12 +321,12 @@ static int _rx_screen_write_ta(void * epplaneScreenConfig)
 	SBmpInfo info;
 	memset(&info, 0, sizeof(info));
 	info.planes			= 1;
-	info.srcWidthPx		= outplane.WidthPx;
+	info.srcWidthPx		= outplane.widthPx;
 	info.lengthPx		= outplane.lengthPx;	
 	info.lineLen		= outplane.lineLen;
 	info.bitsPerPixel	= outplane.bitsPerPixel;
-	info.resol.x		= 1200;
-	info.resol.y		= 1200;
+	info.resol.x		= DPI_X;
+	info.resol.y		= DPI_Y;
 	info.colorCode[0]	= 0;
 	info.inkSupplyNo[0] = 0;
 	info.buffer[0]      = &outplane.buffer;
@@ -482,20 +482,26 @@ static void _scr_load(SBmpSplitInfo *pInfo, int threadNo)
 
 		linplane.planeNumber	= pInfo->inkSupplyNo;	// plane number
 		linplane.Xoffset		= 0;					// X offset of the slice
-		linplane.WidthPx		= pInfo->widthPx;
+		linplane.widthPx		= pInfo->widthPx*pInfo->resol.x/DPI_X;
 		linplane.lengthPx		= pInfo->srcLineCnt;
 		linplane.bitsPerPixel	= pInfo->bitsPerPixel;
-		linplane.lineLen		= pInfo->dstLineLen;			// in bytes
+		linplane.lineLen		= pInfo->dstLineLen*pInfo->resol.x/DPI_X;			// in bytes
 		linplane.aligment		= 0; // lbmp.aligment;			// 8, 16, 32 ,....
+		memcpy(&linplane.resol, &pInfo->pListItem->splitInfo->resol, sizeof(linplane.resol));
+        linplane.resol.x		= (pInfo->resol.x)? pInfo->resol.x : DPI_X;
+        linplane.resol.y		= (pInfo->resol.y)? pInfo->resol.y : DPI_Y;
 		linplane.dataSize		= pInfo->srcLineCnt*pInfo->dstLineLen;
 		linplane.buffer			= _ScrMem[b][h].separated;
 
 		memset(&loutplane, 0, sizeof(loutplane));		
-		loutplane.WidthPx		= linplane.WidthPx;
-		loutplane.lengthPx		= linplane.lengthPx;
+		loutplane.resol.x		= DPI_X;
+		loutplane.resol.y		= DPI_Y;
+		loutplane.widthPx		= linplane.widthPx*loutplane.resol.x/linplane.resol.x;
+		loutplane.lengthPx		= linplane.lengthPx*loutplane.resol.y/linplane.resol.y;
 		loutplane.bitsPerPixel	= 2; //pplaneScreenConfig->outputbitsPerPixel;
 		loutplane.aligment		= 8;
-		loutplane.lineLen		= pInfo->dstLineLen*loutplane.bitsPerPixel/linplane.bitsPerPixel; // ((loutplane.WidthPx * loutplane.bitsPerPixel) + loutplane.aligment - 1) / loutplane.aligment;
+	//	loutplane.lineLen		= pInfo->dstLineLen*loutplane.bitsPerPixel/linplane.bitsPerPixel;
+		loutplane.lineLen		= ((loutplane.widthPx * loutplane.bitsPerPixel) + loutplane.aligment - 1) / loutplane.aligment;
 		loutplane.planeNumber	= linplane.planeNumber;
 		loutplane.Xoffset		= linplane.Xoffset;
 
@@ -508,7 +514,14 @@ static void _scr_load(SBmpSplitInfo *pInfo, int threadNo)
 			time=rx_get_ticks();
 			_scr_fill_blk(pInfo, _ScrMem[b][h].separated);
 			if (trace) Error(LOG, 0, "scr_load time2=%d", rx_get_ticks()-time);
-			
+			if (FALSE)
+			{
+				int widthPx=pInfo->widthPx;
+				pInfo->widthPx = linplane.widthPx;
+				_write_tif("org", pInfo, &_ScrMem[b][h].separated, linplane.lineLen);
+				pInfo->widthPx=widthPx;
+			}
+
 		//	ret=_rx_screen_write_ta(&_PlaneScreenConfig[no]);
 		//	ret = rx_screen_slice_FMS_1x3g(&linplane, &loutplane, &_PlaneScreenConfig[no]);
 		//	ret = rx_screen_slice_FMS_1x3g_mag(&linplane, &loutplane, &_PlaneScreenConfig[no]);
@@ -527,7 +540,8 @@ static void _scr_load(SBmpSplitInfo *pInfo, int threadNo)
 			int oldbppx = pInfo->bitsPerPixel;
 			pInfo->bitsPerPixel = 2;
 			pInfo->data			= &_ScrMem[b][h].screened[_ScrMem[b][h].screenedIdx];
-			pInfo->srcLineLen	= pInfo->dstLineLen*pInfo->bitsPerPixel/oldbppx;
+			pInfo->srcLineCnt	= pInfo->srcLineCnt*loutplane.resol.y/linplane.resol.y;
+			pInfo->srcLineLen	= loutplane.lineLen;
 			pInfo->srcWidthBt	= (pInfo->widthPx*pInfo->bitsPerPixel+7)/8;
 			pInfo->dstLineLen	= (pInfo->srcWidthBt+31)&~31;	// align to 512 bit
 			pInfo->fillBt		= 0;
@@ -538,7 +552,7 @@ static void _scr_load(SBmpSplitInfo *pInfo, int threadNo)
 		//	_ScrMem[b][h].screenedIdx = (_ScrMem[b][h].screenedIdx+1) % SCR_BUF_SIZE;
 		//	Error(LOG, 0, "Head[%d.%d]:widthPx=%d, bitsPerPixel=%d, srcWidthBt=%d, widthBt=%d, srcLineLen=%d, dstLineLen=%d, blkCnt=%d", b, h, pInfo->widthPx, pInfo->bitsPerPixel, pInfo->srcWidthBt, pInfo->widthBt, pInfo->srcLineLen, pInfo->dstLineLen, pInfo->blkCnt);
 		}
-
+		
 		//--- output -------------------------------------
 		if (trace && ret==REPLY_OK) 
 			_write_tif("screened", pInfo, pInfo->data, pInfo->srcLineLen);
@@ -553,16 +567,26 @@ static void _scr_fill_blk(SBmpSplitInfo *psplit, BYTE *dst)
 	int		len, l;
 	int		line	= 0;
 	int		start   = 0;
-	int		fillLen = psplit->fillBt;
-	int		endLine = psplit->srcLineCnt;
+	int		startBt    = psplit->startBt;
+	int		srcWidthBt = psplit->srcWidthBt;
+	int		dstLineLen = psplit->dstLineLen;
+	int		fillLen    = psplit->fillBt;
+	int		endLine    = psplit->srcLineCnt;
 
 	BYTE**	ptr     = psplit->data;
 	BYTE	*src    = *ptr;
 	BYTE	*s;
 	
+	if (psplit->resol.x!=1200)
+	{
+		startBt    = startBt*psplit->resol.x/1200;
+		dstLineLen = dstLineLen*psplit->resol.x/1200;
+		fillLen    = fillLen*psplit->resol.x/1200;
+	}
+
 	//	printf("head=%d, blkNo=%d, dstLen=%d\n", psplit->head, blkNo, dstLen);
-	if (fillLen>psplit->dstLineLen) 
-		fillLen=psplit->dstLineLen;
+	if (fillLen>dstLineLen) 
+		fillLen=dstLineLen;
 
 	if (RX_Color[psplit->inkSupplyNo].rectoVerso==rv_verso) mirror = !mirror;
 	if (mirror)
@@ -580,14 +604,14 @@ static void _scr_fill_blk(SBmpSplitInfo *psplit, BYTE *dst)
 			memset(dst, 0x00, fillLen);
 			dst += fillLen;
 		}
-		start = (psplit->startBt) % psplit->srcWidthBt;
-		len   = psplit->dstLineLen-fillLen;
+		start = (startBt) % srcWidthBt;
+		len   = dstLineLen-fillLen;
 		s     = src+start;
 
 		//--- copy the image data ----------------------------
 		while (len)
 		{
-			l = (len>psplit->srcWidthBt) ? psplit->srcWidthBt : len;
+			l = (len>srcWidthBt) ? srcWidthBt : len;
 			len -=l;
 			memcpy(dst, s, l);
 			dst+=l;
@@ -606,4 +630,3 @@ static void _scr_fill_blk(SBmpSplitInfo *psplit, BYTE *dst)
 		}
 	}
 }
-

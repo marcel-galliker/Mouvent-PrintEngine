@@ -19,15 +19,16 @@ typedef struct
 {
 	UINT32 planeNumber;		// plane number
 	UINT32 Xoffset;			// X offset of the slice
-	UINT32 WidthPx;
+	UINT32 widthPx;
 	UINT32 lengthPx;
 	UINT32 bitsPerPixel;
 	UINT32 lineLen;		// in bytes
 	UINT32 aligment;	// 8, 16, 32 ,....
+	SPoint resol;
+
 	UINT64 dataSize;
 	PBYTE buffer;
 } SSLiceInfo;
-
 
 // --- SRatio --------------------------------------------
 typedef struct

@@ -49,7 +49,7 @@ int rx_screen_slice_FMS_1x1(SSLiceInfo *inplane, SSLiceInfo *outplane, void * ep
 		pSrc = inplane->buffer + (l * inplane->lineLen);
 		modl = l % pta->heigth;
 		pDst = outplane->buffer + (l * outplane->lineLen);
-		for (i = 0; i < (int)inplane->WidthPx; i++)
+		for (i = 0; i < (int)inplane->widthPx; i++)
 		{
 			if (pSrc[i])
 			{

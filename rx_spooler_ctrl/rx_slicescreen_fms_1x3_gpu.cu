@@ -92,7 +92,7 @@ int gpu_init(void)
 		_Init = TRUE;
 		memset(_GPU_Stream, 0, sizeof(_GPU_Stream));
 		_GPU_Present = gpu_is_board_present();
-		if (FALSE && _GPU_Present)
+		if (_GPU_Present)
 		{
 			_GPU_Present = FALSE;
 			Error(WARN, 0, "Disable GPU for tests");
@@ -179,6 +179,46 @@ __global__ void _screen_fms_sml_kernel(UINT8 *in, UINT8 *out, UINT16 *pta, UINT1
 	}
 }
 
+//--- _screen_fms_sml_600_kernel ----------------------
+__global__ void _screen_fms_sml_600_kernel(UINT8 *in, UINT8 *out, UINT16 *pta, UINT16 *densityFactor, UINT32 lineLen, UINT32 dstHeight, UINT32 dstLineLen, UINT32 sectorWidth, UINT32 limitM, UINT32 limitL)
+{
+	// creates 2 bit/pixel
+	// if limitL == 0: output = (s,m) else output = (s,m,l)
+
+	int y = (blockDim.x * blockIdx.x + threadIdx.x)*sectorWidth;
+	int x;
+	UINT8 *pSrc=&in[y];
+	UINT8 *pSrcStart=pSrc;
+	UINT8 *pDst=&out[y/4];
+	x = y%lineLen;
+	y = y/lineLen;
+	UINT16* taLine=&pta[(y%TA_HEIGHT)*TA_WIDTH];
+	UINT8  dst;
+	UINT32 src;	// need 32 bits for compensating disabled jets
+	UINT16  ta;
+
+	if (x+sectorWidth<lineLen) sectorWidth=x+sectorWidth;
+	else                       sectorWidth=lineLen;
+
+	if (y<dstHeight)
+	{
+		if (y&1) pSrc      = pSrcStart; // repeat line
+		else     pSrcStart = pSrc;
+		while (x<sectorWidth)
+		{
+			src = *pSrc * densityFactor[x];
+			if (x&1) pSrc++;
+			ta  = taLine[x%TA_WIDTH];
+			dst <<= 2;
+			if (limitL && src > limitL + ta)	dst |= 0x03;
+			else if (src > limitM + ta)			dst |= 0x02;
+			else if (src > ta)					dst |= 0x01;
+
+			if (!(++x & 3)) *pDst++=dst;
+		}
+	}
+}
+
 //--- _screen_fms_sml ----------------------
 static void _screen_fms_sml(UINT32 y, UINT8 *in, UINT8 *out, UINT16 *pta, UINT16 *densityFactor, UINT32 lineLen, UINT32 height, UINT32 sectorWidth, UINT32 limitM, UINT32 limitL)
 {
@@ -203,6 +243,43 @@ static void _screen_fms_sml(UINT32 y, UINT8 *in, UINT8 *out, UINT16 *pta, UINT16
 		while (x<sectorWidth)
 		{
 			src = *pSrc++ * densityFactor[x];
+			ta  = taLine[x%TA_WIDTH];
+			dst <<= 2;
+			if (limitL && src > limitL + ta)	dst |= 0x03;
+			else if (src > limitM + ta)			dst |= 0x02;
+			else if (src > ta)					dst |= 0x01;
+
+			if (!(++x & 3)) *pDst++=dst;
+		}
+	}
+}
+
+//--- _screen_fms_sml_600 ----------------------
+//		600 dpi
+static void _screen_fms_sml_600(UINT32 y, UINT8 *in, UINT8 *out, UINT16 *pta, UINT16 *densityFactor, UINT32 srcLineLen, UINT32 dstHeight, UINT32 dstLineLen, UINT32 sectorWidth, UINT32 limitM, UINT32 limitL)
+{
+	// creates 2 bit/pixel
+	// if limitL == 0: output = (s,m) else output = (s,m,l)
+
+	UINT32 x;
+	x = y%srcLineLen;
+	y = y/srcLineLen;
+	UINT8 *pDst=&out[y*dstLineLen];
+	UINT8 *pSrc=&in[y/2*srcLineLen];
+	UINT16* taLine=&pta[(y%TA_HEIGHT)*TA_WIDTH];
+	UINT8  dst=0;
+	UINT32 src;	// need 32 bits for compensating disabled jets
+	UINT16  ta;
+
+	if (x+sectorWidth<srcLineLen*2) sectorWidth=x+sectorWidth;
+	else						    sectorWidth=srcLineLen*2;
+
+	if (y<dstHeight)
+	{
+		while (x<sectorWidth)
+		{
+			src = *pSrc * densityFactor[x];
+			if (x&1) pSrc++;
 			ta  = taLine[x%TA_WIDTH];
 			dst <<= 2;
 			if (limitL && src > limitL + ta)	dst |= 0x03;
@@ -263,7 +340,10 @@ int gpu_screen_FMS_1x3g(SSLiceInfo *inplane, SSLiceInfo *outplane, void *epplane
 		int threadsPerBlock = 32; //_GpuProp.maxThreadsPerBlock;
 		int blocksPerGrid   = (((inplane->lengthPx*inplane->lineLen)/sectorWidth) + threadsPerBlock - 1) / threadsPerBlock;
 
-		_screen_fms_sml_kernel <<<blocksPerGrid, threadsPerBlock, 0, pstream->stream >>> (pstream->in, pstream->out, pstream->ta, pstream->df, inplane->lineLen, inplane->lengthPx, sectorWidth, limitM, limitL);
+		if (inplane->resol.x==600)
+			_screen_fms_sml_600_kernel <<<blocksPerGrid, threadsPerBlock, 0, pstream->stream >>> (pstream->in, pstream->out, pstream->ta, pstream->df, inplane->lineLen, outplane->lengthPx, outplane->lineLen, sectorWidth, limitM, limitL);
+		else
+			_screen_fms_sml_kernel <<<blocksPerGrid, threadsPerBlock, 0, pstream->stream >>> (pstream->in, pstream->out, pstream->ta, pstream->df, inplane->lineLen, inplane->lengthPx, sectorWidth, limitM, limitL);
 
 		cudaStreamSynchronize(pstream->stream);
 		pstream->time[2]=rx_get_ticks();
@@ -282,9 +362,19 @@ int gpu_screen_FMS_1x3g(SSLiceInfo *inplane, SSLiceInfo *outplane, void *epplane
 	else
 	{
 		int time0=rx_get_ticks();
-		for (UINT32 y=0; y<inplane->lengthPx; y++)
+		if (inplane->resol.x==600)
 		{
-			_screen_fms_sml(y*inplane->lineLen, inplane->buffer, outplane->buffer, pplaneScreenConfig->TA->ta16, pplaneScreenConfig->densityFactor, inplane->lineLen, inplane->lengthPx, inplane->lineLen, limitM, limitL);
+			for (UINT32 y=0; y<outplane->lengthPx; y++)
+			{
+				_screen_fms_sml_600(y*inplane->lineLen, inplane->buffer, outplane->buffer, pplaneScreenConfig->TA->ta16, pplaneScreenConfig->densityFactor, inplane->lineLen, outplane->lengthPx, outplane->lineLen, outplane->widthPx, limitM, limitL);
+			}
+		}
+		else
+		{
+			for (UINT32 y=0; y<inplane->lengthPx; y++)
+			{
+				_screen_fms_sml(y*inplane->lineLen, inplane->buffer, outplane->buffer, pplaneScreenConfig->TA->ta16, pplaneScreenConfig->densityFactor, inplane->lineLen, inplane->lengthPx, inplane->lineLen, limitM, limitL);
+			}
 		}
 		_Time[0]=0;
 		_Time[1]=rx_get_ticks()-time0;

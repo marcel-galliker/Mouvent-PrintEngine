@@ -139,7 +139,7 @@ int flz_get_info(const char *path, UINT32 page, SFlzInfo *pflzinfo)
 
 			_flz_color_path(path, page, "", RX_ColorNameShort(color), filepath);	
 		}
-	
+
 		file=fopen (filepath, "rb");
 		if (file==NULL) return REPLY_NOT_FOUND;
 
@@ -147,6 +147,7 @@ int flz_get_info(const char *path, UINT32 page, SFlzInfo *pflzinfo)
 		else										   ret = Error(ERR_CONT, 0, "File %s: error reading flz info", path); 
 
 		fclose(file);
+
 		return ret;	
 	}
 	return REPLY_ERROR;
@@ -156,11 +157,15 @@ int flz_get_info(const char *path, UINT32 page, SFlzInfo *pflzinfo)
 int flz_get_size(const char *path, UINT32 page, UINT32 spacePx, UINT32 *width, UINT32 *height, UINT8 *bitsPerPixel)
 {
 	SFlzInfo info;
-	flz_get_info(path, page, &info);
-	*width			= info.widthPx+spacePx;
-	*height			= info.lengthPx;
-	*bitsPerPixel	= info.bitsPerPixel;
-	return REPLY_NOT_FOUND;
+	int ret;
+	ret = flz_get_info(path, page, &info);
+	if (ret==REPLY_OK)
+	{
+		if (width!=NULL)		*width			= info.widthPx*1200/info.resol.x+spacePx;
+		if (height!=NULL)		*height			= info.lengthPx*1200/info.resol.y;
+		if (bitsPerPixel!=NULL)	*bitsPerPixel	= info.bitsPerPixel;
+	}
+	return ret;
 }
 
 //--- flz_abort -----------------------------------------------
@@ -295,6 +300,7 @@ int flz_load(SPageId *id, const char *filedir, const char *filename, int printMo
 			
 			pFlzInfo = (SFlzInfo*)_FileBuf[_FileBufDecompIdx];
 			
+			memcpy(&pinfo->resol, &pFlzInfo->resol, sizeof(pinfo->resol));
 			pinfo->printMode     = printMode;
 			pinfo->bitsPerPixel	 = pFlzInfo->bitsPerPixel;
 			pinfo->screening     = (pinfo->bitsPerPixel==8);
@@ -305,9 +311,12 @@ int flz_load(SPageId *id, const char *filedir, const char *filename, int printMo
 			pinfo->buffer[c]	 = &buffer[c];
 			pinfo->colorCnt++;
 
+            int wul= pFlzInfo->resol.y ? wakeupLen*pFlzInfo->resol.y/DPI_Y : wakeupLen;
+            int wub= pFlzInfo->resol.y ? WAKEUP_BAR_LEN*pFlzInfo->resol.y/DPI_Y : WAKEUP_BAR_LEN;
+
 			_DecompressPar.loaded_arg = loaded_arg;
 			_DecompressPar.fileSize	  = fileSize;
-			_DecompressPar.buffer     = buffer[c]+wakeupLen*pFlzInfo->lineLen;
+			_DecompressPar.buffer     = buffer[c]+wul*pFlzInfo->lineLen;
 			_DecompressPar.height     = pFlzInfo->lengthPx;
 			_DecompressPar.progress   = 0;
 			if (psplit[c].lastLine<_DecompressPar.height) _DecompressPar.height=psplit[c].lastLine;			
@@ -322,20 +331,20 @@ int flz_load(SPageId *id, const char *filedir, const char *filename, int printMo
 			if (progress!=NULL) progress(id, RX_ColorNameShort(pinfo->inkSupplyNo[c]), 100);					
 
 			//--- add wakeup ----------------------
-			if (wakeupLen)
+			if (wul)
 			{
 				BYTE* buf = buffer[c];
-				memset(buf,                                            0x00, wakeupLen * pinfo->lineLen);
-				memset(buf+(pinfo->lengthPx+wakeupLen)*pinfo->lineLen, 0x00, wakeupLen * pinfo->lineLen);
+				memset(buf,                                      0x00, wul * pinfo->lineLen);
+				memset(buf+(pinfo->lengthPx+wul)*pinfo->lineLen, 0x00, wul * pinfo->lineLen);
 				
 				if (wakeupOn)
 				{
-					int start=(c*WAKEUP_BAR_LEN);
-					memset(buf+start*pinfo->lineLen, 0xff, WAKEUP_BAR_LEN * pinfo->lineLen);
-					memset(buf+(pinfo->lengthPx+2*wakeupLen-(c+1)*WAKEUP_BAR_LEN)*pinfo->lineLen, 0xff, WAKEUP_BAR_LEN * pinfo->lineLen);															
+					int start=(c*wub);
+					memset(buf+start*pinfo->lineLen, 0xff, wub * pinfo->lineLen);
+					memset(buf+(pinfo->lengthPx+2*wul-(c+1)*wub)*pinfo->lineLen, 0xff, wub * pinfo->lineLen);															
 				}
 			}
-			pinfo->lengthPx += 2*wakeupLen;
+			pinfo->lengthPx += 2*wul;
 			pinfo->dataSize = pinfo->lengthPx * pinfo->lineLen; 
 
 		//  TrPrintfL(TRUE, "DECOMPRESSING >>%s<<, page %d, time=%d ms", filepath, id->page, rx_get_ticks()-time);

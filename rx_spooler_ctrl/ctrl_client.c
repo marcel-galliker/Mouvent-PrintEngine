@@ -415,6 +415,7 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 			data_set_wakeuplen(WAKEUP_BAR_LEN*(RX_Spooler.colorCnt+1), msg.wakeup);
 		else			 
 			data_set_wakeuplen(0, FALSE);
+
 		memset(_LastFilename, 0, sizeof(_LastFilename));
 	//	sr_mnt_path(msg.filename, path);
 		data_cache(&msg.id, msg.filename, path, RX_Color, SIZEOF(RX_Color));

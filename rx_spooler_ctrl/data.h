@@ -62,6 +62,8 @@ typedef struct SBmpSplitInfo
 	int clearBlockUsed;
 	int	same;
 	int	screening;
+	SPoint resol;
+
 //	int	scanStartBt;//
 //	int usedSize;	// size of the used flags
 //	BYTE *used;		// used flags
