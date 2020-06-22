@@ -1119,7 +1119,6 @@ namespace RX_DigiPrint.Services
 	        //--- values stored in head-board (no reset) ---------
 	        public UInt32		clusterNo;	
 	        public UInt32		clusterTime; 
-	        public UInt32		machineMeters; 
 
             public Int32        tempFpga;
             public Int32        flow;

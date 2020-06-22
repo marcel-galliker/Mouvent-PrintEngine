@@ -406,18 +406,13 @@ static void _update_counters(void)
 	{
 		if (_NiosStat->cond[condNo].mode==ctrl_print) printing = TRUE;
 		if (_NiosStat->cond[condNo].clusterTime   > RX_HBStatus->clusterTime)   RX_HBStatus->clusterTime   = _NiosStat->cond[condNo].clusterTime;
-		if (_NiosStat->cond[condNo].machineMeters > machineMeters)				machineMeters = _NiosStat->cond[condNo].machineMeters;
 	}
 	if (printing) RX_HBStatus->clusterTime++;
 
-	RX_HBStatus->machineMeters = machineMeters;
-	
 //	TrPrintfL(TRUE, "_update_counters");
 	for (condNo=0; condNo<MAX_HEADS_BOARD;  condNo++)
 	{
 		_NiosCfg->cond[condNo].clusterTime   = RX_HBStatus->clusterTime;
-		if (RX_FluidStat[0].machineMeters!=INVALID_VALUE)// && RX_FluidStat[0].machineMeters>_NiosCfg->cond[condNo].machineMeters)
-			_NiosCfg->cond[condNo].machineMeters = RX_FluidStat[0].machineMeters;
 	}
 //	TrPrintfL(TRUE, "_update_counters ok");
 }

@@ -6,11 +6,8 @@
       <Directories />
       <PathStyle>RemoteUnix</PathStyle>
     </CustomSourceDirectories>
-    <BuildHost>
-      <Transport>None</Transport>
-    </BuildHost>
     <DeploymentHost>
-      <HostName>192.168.200.11</HostName>
+      <HostName>192.168.200.12</HostName>
       <Transport>SSH</Transport>
       <UserName>root</UserName>
     </DeploymentHost>
