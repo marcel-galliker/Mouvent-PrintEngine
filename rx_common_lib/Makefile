@@ -3,8 +3,6 @@
 #All other changes you make in this file will be preserved.
 #Visit http://visualgdb.com/makefiles for more details
 
-#VisualGDB: AutoSourceFiles		#<--- remove this line to disable auto-updating of SOURCEFILES and EXTERNAL_LIBS
-
 TARGETNAME := rx_common_lib.a
 #TARGETTYPE can be APP, STATIC or SHARED
 TARGETTYPE := STATIC
@@ -145,7 +143,4 @@ $(BINARYDIR)/%.o : %.s $(all_make_files) |$(BINARYDIR)
 
 $(BINARYDIR)/sha1.o : ../Externals/mbedtls-1.3.10/library/sha1.c $(all_make_files) |$(BINARYDIR)
 	$(CC) $(CFLAGS) -c $< -o $@ -MD -MF $(@:.o=.dep)
-
-$(BINARYDIR)/TinyXML.a : ../Externals/TinyXML/$(BINARYDIR)/TinyXML.a
-	$(CP) ../Externals/TinyXML/$(BINARYDIR)/TinyXML.a $(BINARYDIR)/TinyXML.a
 

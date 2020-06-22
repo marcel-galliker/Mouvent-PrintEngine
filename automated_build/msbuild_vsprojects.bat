@@ -14,6 +14,13 @@ if exist %VCVARS_PATH% (
 	goto EOF
 )
 
+REM Special case to restore dotnet package
+if "%1"=="dotnet" (
+	dotnet restore
+	SET RETURNCODE=0
+	goto :EOF
+)
+
 REM cmd /c "bash -c 'sudo ssh-restart.sh'"
 REM call "C:\utils\start-ssh.bat"
 
@@ -74,7 +81,11 @@ set BINFILES[0]=
 set TARGETS=/t:Build
 REM build sequence
 
+echo Build %1
+echo ========================
+
 if "%1"=="other" (
+  dotnet restore %BATCH_PATH%..
   call :LIB_X64
   call :BIN_X64
   call :LIB_X32
@@ -83,26 +94,25 @@ if "%1"=="other" (
   call :BIN_SOC
   call :LIB_LX
   call :BIN_LX
-)
-
-if "%1"=="nios" (
+) else if "%1"=="nios" (
   call :NIOS
-)
-
-if "%1"=="keil" (
+) else if "%1"=="keil" (
   call :KEIL
+) else (
+  REM Default Action to run partial build (X64, LX, SOC or X32)
+  call :LIB_%1
+  call :BIN_%1
 )
 
+echo ========================
 goto :EVAL
 
 REM ----------------------------------------------------------------------------
 :NIOS
-	set TARGETS=/t:Build
 	set BUILD=32
 	set FLAGS=/m /property:Configuration=Release-soc
 	call :BUILD_PROJECT rx_fluid_nios, vcxproj
 	call :BUILD_PROJECT rx_head_nios, vcxproj
-	set TARGETS=/t:Clean,Build
 	goto :EOF
 REM ----------------------------------------------------------------------------
 
@@ -111,13 +121,11 @@ REM ----------------------------------------------------------------------------
 	set FLAGS=/m /property:Configuration=Release
 	call :BUILD_PROJECT rx_head_cond, vcxproj
 	goto :EOF
-REM ----------------------------------------------------------------------------
 
 :LIB_X32
 	set BUILD=32
 	set FLAGS=/m /property:Configuration=Release /property:SolutionDir=%BATCH_PATH%..\
 	call :BUILD_PROJECT rx_common_lib, vcxproj
-	call :BUILD_PROJECT rx_common_lib_cs, csproj
 	call :BUILD_PROJECT rx_tif_lib, vcxproj
 	call :BUILD_PROJECT rx_pecore_lib, vcxproj
 	call :BUILD_PROJECT TinyXML, vcxproj, Externals\
@@ -129,7 +137,6 @@ REM ----------------------------------------------------------------------------
 	set BUILD=32
 	set FLAGS=/m /property:Configuration=Release /property:SolutionDir=%BATCH_PATH%..\
 	call :BUILD_PROJECT rx_main_ctrl, vcxproj
-	call :BUILD_PROJECT rx_spooler_ctrl, vcxproj
 	goto :EOF
 REM ----------------------------------------------------------------------------
 
@@ -138,15 +145,20 @@ REM ----------------------------------------------------------------------------
 	set FLAGS=/m /property:Configuration=Release /property:Platform=x64 /property:SolutionDir=%BATCH_PATH%..\
 	call :BUILD_PROJECT rx_common_lib, vcxproj
 	call :BUILD_PROJECT rx_common_lib_cs, csproj
+	call :BUILD_PROJECT ScanCheckParser, sln
 	call :BUILD_PROJECT TinyXML, vcxproj, Externals\
 	REM rx_rip_lib must be built after TinyXML
 	call :BUILD_PROJECT rx_rip_lib, vcxproj
+	call :BUILD_PROJECT rx_tif_lib, vcxproj
+	call :BUILD_PROJECT rx_slicescreen_lib, vcxproj
 	goto :EOF
 
 :BIN_X64
 	set BUILD=64
 	set FLAGS=/m /property:Configuration=Release /property:Platform=x64 /property:SolutionDir=%BATCH_PATH%..\
+	call :BUILD_PROJECT rx_spooler_ctrl, vcxproj
 	call :BUILD_PROJECT rx_digiprint_gui, sln
+	call :BUILD_PROJECT mvt_digiprint_gui, sln
 	call :BUILD_PROJECT Win10-Install, vcxproj, Win10\
 	call :BUILD_PROJECT Win10-Startup, vcxproj, Win10\
 	goto :EOF
@@ -183,11 +195,14 @@ REM ----------------------------------------------------------------------------
 
 :BIN_LX
 	set BUILD=LX
+	REM Important to clean to ensure the Linux folder is empty
+	set TARGETS=/t:Clean,Build
 	set FLAGS=/m /property:Configuration=Release-lx /property:Platform=Win32
 	call :BUILD_PROJECT rx_dhcp_server, sln
 	call :BUILD_PROJECT rx_spooler_ctrl, sln
 	call :BUILD_PROJECT rx_boot, sln
 	call :BUILD_PROJECT rx_main_ctrl, sln
+	set TARGETS=/t:Build
 	goto :EOF
 REM ----------------------------------------------------------------------------
 
@@ -235,8 +250,7 @@ REM Parameter [3]: optional subpath of projectfile ending with '\'
 	echo === compiling %~1 {%BUILD%} ===
 	msbuild.exe -nodeReuse:False -maxcpucount:1 %FLAGS% %BATCH_PATH%..\%PROJ_FILE% %TARGETS% > %LOG_FILE%
 	if errorlevel 1 (
-		REM uncomment following line to display failed log files directly
-		REM powershell -Command "&{ cat %LOGPATH% }"
+		type %LOG_FILE%
 		echo [91mbuild FAILED[0m
 		set FAILED_BUILDS=%FAILED_BUILDS%  %~1 {%BUILD%}
 		set LOGPATH_2=%LOG_FAIL%%BUILD%_%~1.log
@@ -250,12 +264,9 @@ REM Parameter [3]: optional subpath of projectfile ending with '\'
 	set /a BIN_CNT+=1
 
 	REM get warnings and errors from logfile
-	set WARN_FILE=warn.tmp
-	set ERROR_FILE=error.tmp
-	powershell -Command "Select-String -Path %LOG_FILE% -Pattern '(\d*) (Warning\(s\)|Warnung\(en\)|Avertissement\(s\))$' | %% { $_.Matches.groups[1] } | %% { $_.Value }" > %WARN_FILE%
-	powershell -Command "Select-String -Path %LOG_FILE% -Pattern '(\d*) (Error\(s\)|Fehler|Erreur\(s\))$' | %% { $_.Matches.groups[1] } | %% { $_.Value }" > %ERROR_FILE%
-	set /p WARN= < %WARN_FILE%
-	set /p ERR= < %ERROR_FILE%
+	FOR /F "tokens=* USEBACKQ" %%F IN (`powershell -Command "Select-String -Path %LOG_FILE% -Pattern '(\d*) (Warning\(s\)|Warnung\(en\)|Avertissement\(s\))$' | %% { $_.Matches.groups[1] } | %% { $_.Value }"`) DO SET WARN=%%F
+	FOR /F "tokens=* USEBACKQ" %%F IN (`powershell -Command "Select-String -Path %LOG_FILE% -Pattern '(\d*) (Error\(s\)|Fehler|Erreur\(s\))$' | %% { $_.Matches.groups[1] } | %% { $_.Value }"`) DO SET ERR=%%F
+
 	set WARN_STR=Warnings: %WARN%
 	set ERR_STR=Errors:   %ERR%
 
@@ -270,9 +281,6 @@ REM Parameter [3]: optional subpath of projectfile ending with '\'
 	) else (
 		echo %ERR_STR%
 	)
-
-	del %WARN_FILE%
-	del %ERROR_FILE%
 
 	move %LOG_FILE% %LOGPATH_2% > nul
 	REM echo LOG: %LOGPATH_2%
@@ -299,10 +307,12 @@ REM Summarize all passed and failed builds
 	echo %DATE% %TIME%
 	echo Finished building projects in %BATCH_PATH%
 
+	REM set the error code to 2 for no run done
+	set RETURNCODE=2
 	if "%FAILED_BUILDS%"=="" (
 		echo [92m
 		echo ALL BUILDS SUCCEEDED [%PASS_CNT%]
-		set RETURNCODE=0
+		IF "%PASS_CNT%" neq "0" set RETURNCODE=0
 	) else (
 		echo [92m
 		echo SUCCEEDED BUILDS [%PASS_CNT%/%BIN_CNT%]
@@ -324,4 +334,5 @@ REM Summarize all passed and failed builds
 
 REM End of file
 :EOF
+	echo ========================
 	exit /b %RETURNCODE%
