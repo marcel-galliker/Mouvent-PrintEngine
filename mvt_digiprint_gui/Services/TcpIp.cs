@@ -989,7 +989,7 @@ namespace RX_DigiPrint.Services
             public Int32 speed;
         }
 
-		public const Byte SCL_READY         = 0x01;
+        public const Byte SCL_READY         = 0x01;
 		public const Byte SCL_CAL_ZERO      = 0x02;
 		public const Byte SCL_CAL_SENSOR1   = 0x03;
 		public const Byte SCL_CAL_SENSOR2   = 0x04;
