@@ -186,10 +186,17 @@ int setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action)
 
 	//--- ink supply ---
 	setup_uchar(file, "InkSupplyCnt", action, &pcfg->inkSupplyCnt, 1);
-	setup_uchar(file, "InkCylindersPerColor", action, &pcfg->inkCylindersPerColor, 1);
 	setup_uchar(file, "HeadsPerColor", action, &pcfg->headsPerColor, 1);
-	if (pcfg->inkCylindersPerColor==0) pcfg->inkCylindersPerColor=1;
-	pcfg->colorCnt = pcfg->inkSupplyCnt/pcfg->inkCylindersPerColor;
+	setup_uchar(file, "InkCylinderPerColorCnt", action, &pcfg->inkCylindersPerColor, 1); // if value is not available yet, the value is set to 1
+	if(pcfg->inkCylindersPerColor != 0)
+	{
+		pcfg->colorCnt = pcfg->inkSupplyCnt / pcfg->inkCylindersPerColor;
+	}
+	else
+	{
+		pcfg->colorCnt = 1; // invalid config! -> set to 1 (Default)
+	}
+	
 	for (i=0; i<pcfg->inkSupplyCnt; i++)
 	{
 		if (setup_chapter(file, "InkSupply", i, action)==REPLY_OK) 
