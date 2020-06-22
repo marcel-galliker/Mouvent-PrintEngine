@@ -5,7 +5,7 @@ REM if started directly by double-click the script should pause at the end
 if not "%~2"=="" set NO_PAUSE=1
 
 REM vcvars batch file has to be executed first to be able to compile from CLI
-set VCVARS_PATH="C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\VC\Auxiliary\Build\vcvars32.bat"
+set VCVARS_PATH="C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\VC\Auxiliary\Build\vcvars64.bat"
 if exist %VCVARS_PATH% (
 	call %VCVARS_PATH%
 ) else (
