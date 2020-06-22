@@ -23,11 +23,6 @@ void ctr_save(void)
 		eeprom_write_setting32(EE_ADDR_CLUSTER_TIME, RX_Config.clusterTime);
 		RX_Status.clusterTime = RX_Config.clusterTime;
 	}
-	if (RX_Config.machineMeters && RX_Config.machineMeters != RX_Status.machineMeters) 
-	{
-		eeprom_write_setting32(EE_ADDR_MACHINE_METERS, RX_Config.machineMeters);
-		RX_Status.machineMeters = RX_Config.machineMeters;
-	}
 }
 
 // --- ctr_load -----------------------------
@@ -36,6 +31,5 @@ void ctr_load(void)
     eeprom_read_setting32(EE_ADDR_PUMPTIME, 		(INT32*)&RX_Status.pumptime);
 	eeprom_read_setting32(EE_ADDR_CLUSTER_NO, 		(INT32*)&RX_Status.clusterNo);
 	eeprom_read_setting32(EE_ADDR_CLUSTER_TIME, 	(INT32*)&RX_Status.clusterTime);
-	eeprom_read_setting32(EE_ADDR_MACHINE_METERS, 	(INT32*)&RX_Status.machineMeters);
 }
 

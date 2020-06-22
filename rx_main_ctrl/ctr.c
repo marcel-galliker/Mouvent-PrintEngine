@@ -22,7 +22,6 @@
 #include <time.h>
 
 #define DEVICE_NAME	"em2"
-#define NEW_COUNTER	FALSE
 
 //--- structs ------------------------------
 
@@ -69,29 +68,24 @@ void ctr_init(void)
 		setup_int64(file, "actual", READ, &RX_PrinterStatus.counterAct,   0);
 		setup_int64(file, "total",  READ, &RX_PrinterStatus.counterTotal, 0);
 		setup_str   (file, "check",  READ, check1, sizeof(check1), "");
-        #if NEW_COUNTER==0
-			RX_PrinterStatus.counterTotal = RX_PrinterStatus.counterAct;
-        #endif
 	}
 	setup_destroy(file);
 	
 	_calc_check(rx_file_get_mtime(PATH_USER FILENAME_COUNTERS), check2);
 	
 	_Manipulated = (strcmp(check1, check2))!=0;
-    #if NEW_COUNTER==1
-		if (_Manipulated)
+	if (_Manipulated)
+	{
+		_calc_reset_key(RX_Hostname, check2);
+		if (!strcmp(check1, check2))
 		{
-			_calc_reset_key(RX_Hostname, check2);
-			if (!strcmp(check1, check2))
-			{
-				_Manipulated = FALSE;
-				RX_PrinterStatus.counterTotal=0;
-			}
+			_Manipulated = FALSE;
+			RX_PrinterStatus.counterTotal=0;
 		}
-		if (_Manipulated) Error(ERR_CONT, 0, "Counters manipulated");
+	}
+	if (_Manipulated) Error(ERR_CONT, 0, "Counters manipulated");
 	
-		_ctr_save(FALSE, NULL);	
-    #endif
+	_ctr_save(FALSE, NULL);	
 }
 
 //--- _calc_check ---------------------------------
@@ -118,19 +112,6 @@ static void _calc_reset_key(char *machineName, UCHAR *key)
 	t=localtime(&rawtime);
 	sprintf(str, "%s:%d-%d-%d", machineName, 1900+t->tm_year, 1+t->tm_mon, t->tm_mday);
 	rx_hash_mem_str(str, strlen(str), key);
-}
-
-//--- ctr_set_total -----------------------------
-void ctr_set_total(UINT32 machineMeters)
-{
-    #if NEW_COUNTER==0
-		machineMeters*=1000;
-		if (machineMeters>RX_PrinterStatus.counterTotal) 
-		{
-			RX_PrinterStatus.counterTotal=machineMeters;		
-			gui_send_printer_status(&RX_PrinterStatus);		
-		}
-    #endif
 }
 
 //--- ctr_tick -----------------------------
@@ -216,10 +197,6 @@ static void _ctr_save(int reset, char *machineName)
 			setup_int64 (file, "actual", WRITE, &RX_PrinterStatus.counterAct, 0);
 			setup_int64 (file, "total",  WRITE, &RX_PrinterStatus.counterTotal, 0);
 
-			#if NEW_COUNTER==0
-				_Manipulated = FALSE;
-				reset		 = FALSE;
-			#endif
 			if (reset)
 			{
 				_calc_reset_key(name, check);

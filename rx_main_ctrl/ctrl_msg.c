@@ -100,7 +100,6 @@ static int _do_head_stat(RX_SOCKET socket, int headNo, SHeadBoardStat	*pstat)
 	if (headNo<HEAD_BOARD_CNT)
 	{
 		ctrl_head_alive(headNo);
-		ctr_set_total(pstat->machineMeters);
 		memcpy(&RX_HBStatus[headNo], pstat, sizeof(RX_HBStatus[0]));
 		if (RX_HBStatus[headNo].err & 
 			( err_fpga_overheated

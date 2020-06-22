@@ -860,8 +860,6 @@ typedef struct SHeadBoardStat
 	//--- values stored in head-board (no reset) ---------
 	UINT32		clusterNo;
 	UINT32		clusterTime;
-	UINT32		machineMeters;
-
 	INT32		tempFpga;
 	UINT32		flow;
 	

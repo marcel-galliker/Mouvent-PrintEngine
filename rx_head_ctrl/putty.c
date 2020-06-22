@@ -462,7 +462,6 @@ void putty_display_nios_status(int nios, int status)
 			m = (RX_NiosStat.cond[0].clusterTime%3600)/60;					
 			term_printf("  time: %d:%02d:%02d  ", h, m, s);
 		}
-		term_printf("  Machine Meters: %s", value_str(RX_HBStatus->machineMeters));
 		term_printf("\n");
 	}		
 	else 

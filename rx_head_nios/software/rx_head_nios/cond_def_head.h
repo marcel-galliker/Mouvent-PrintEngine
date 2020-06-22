@@ -212,7 +212,6 @@ typedef struct SConditionerCfg_mcu
 	//--- Counters ----------------------------------
 	UINT32	clusterNo;
 	UINT32	clusterTime;
-	UINT32	machineMeters;
 } SConditionerCfg_mcu;
 
 typedef struct

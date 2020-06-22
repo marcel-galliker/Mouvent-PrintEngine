@@ -46,10 +46,10 @@ using System.Windows;
 //      Build Number
 //      Revision
 
-[assembly: AssemblyVersion("1.4.16")]
-[assembly: AssemblyFileVersion("1.4.16")]
+[assembly: AssemblyVersion("1.4.32")]
+[assembly: AssemblyFileVersion("1.4.32")]
 
 //  http://www.radex-net.com/Downloads/RX-Gui/publish.htm
 //  G1EhZ$ETMf
 
-[assembly: AssemblyInformationalVersion("BuiltOn=22.06.2020;Build=7bfc650c*")]
+[assembly: AssemblyInformationalVersion("BuiltOn=22.06.2020;Build=05917397*")]
