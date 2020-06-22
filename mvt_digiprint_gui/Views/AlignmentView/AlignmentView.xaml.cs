@@ -272,21 +272,20 @@ namespace RX_DigiPrint.Views.Alignment
         private void _DrawClusters(int inkSupplyNumber)
         {
             int inkCylinderCnt = RxGlobals.PrintSystem.ColorCnt * RxGlobals.PrintSystem.InkCylindersPerColor;
-            int totalNumberOfClusters = (RxGlobals.PrintSystem.HeadsPerColor + 3) / 4;
+            int totalNumberOfClusters = ((inkCylinderCnt * RxGlobals.PrintSystem.HeadsPerInkCylinder) + 3) / 4;
             int firstClusterNumber = 0;
             int lastClusterNumber = 0;
             if (RxGlobals.PrintSystem.IsScanning)
             {
                 int remainder = (4 - ((inkCylinderCnt * RxGlobals.PrintSystem.HeadsPerColor) % 4)) % 4;
-                firstClusterNumber = 0;// (inkSupplyNumber * RxGlobals.PrintSystem. + remainder) / 4;
-                lastClusterNumber  = 0; // ((inkSupplyNumber * RxGlobals.PrintSystem.PrintHeadsPerInkCylinderCnt) + (RxGlobals.PrintSystem.PrintHeadsPerInkCylinderCnt - 1) + remainder) / 4;
+                firstClusterNumber = (inkSupplyNumber * RxGlobals.PrintSystem.HeadsPerInkCylinder + remainder) / 4;
+                lastClusterNumber = ((inkSupplyNumber * RxGlobals.PrintSystem.HeadsPerInkCylinder) + (RxGlobals.PrintSystem.HeadsPerInkCylinder - 1) + remainder) / 4;
             }
             else
             {
-                firstClusterNumber = 0; // (inkSupplyNumber * RxGlobals.PrintSystem.PrintHeadsPerInkCylinderCnt) / 4;
-                lastClusterNumber  = 0; //((inkSupplyNumber * RxGlobals.PrintSystem.PrintHeadsPerInkCylinderCnt) + RxGlobals.PrintSystem.PrintHeadsPerInkCylinderCnt - 1) / 4;
+                firstClusterNumber = (inkSupplyNumber * RxGlobals.PrintSystem.HeadsPerInkCylinder) / 4;
+                lastClusterNumber  = ((inkSupplyNumber * RxGlobals.PrintSystem.HeadsPerInkCylinder) + RxGlobals.PrintSystem.HeadsPerInkCylinder - 1) / 4;
             }
-
 
             // add views if neccessary:
             int clusterCount = totalNumberOfClusters;

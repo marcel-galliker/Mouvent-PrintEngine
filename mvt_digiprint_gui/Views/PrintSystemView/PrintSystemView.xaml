@@ -76,7 +76,7 @@
                         
                         <rxView:PrintSystemGrid Grid.Column="0" Margin="10,10,0,0"/>
                         <rxView:OffsetsGrid x:Name="OffsetsGrid" Grid.Column="1" Margin="10,10,0,0"/>
-                        <Grid x:Name="StepperGrid" Grid.Column="2"/>
+                        <Grid x:Name="StepperGrid" Grid.Column="2" Margin="10,10,0,0"/>
                         <rxView:EncoderView x:Name="EncoderGrid" Grid.Column="3" Margin="10,10,0,0"/>
                         <rxView:ChillerView Grid.Column="4" Margin="10,10,0,0"/>
                     </Grid>

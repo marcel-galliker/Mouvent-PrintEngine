@@ -2,18 +2,8 @@
 using RX_DigiPrint.Services;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace RX_DigiPrint.Views.PrintSystemView
 {
@@ -32,7 +22,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
         //--- User_PropertyChanged --------------------------------------
         private void User_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            Visibility visibility  =  (RxGlobals.User.UserType >= EUserType.usr_service) ? Visibility.Visible : Visibility.Collapsed; 
+            Visibility visibility = (RxGlobals.User.UserType >= EUserType.usr_service) ? Visibility.Visible : Visibility.Collapsed;
             ServiceGrid.Visibility = visibility;
         }
 
@@ -51,7 +41,6 @@ namespace RX_DigiPrint.Views.PrintSystemView
                             no += RxGlobals.PrintSystem.HeadsPerColor - 1 - i % RxGlobals.PrintSystem.HeadsPerColor;
                         else
                             no += i % RxGlobals.PrintSystem.HeadsPerColor;
-
                         _PrintHeadView[i].DataContext = RxGlobals.HeadStat.List[no];
                         _PrintHeadView[i].No = no;
                     }
@@ -65,89 +54,27 @@ namespace RX_DigiPrint.Views.PrintSystemView
             }
         }
 
-
+        //--- show_items --------------------------------------
         public void show_items(int cnt)
         {
-            // add items to Print head stack if there are not enough:
-            int totalHeadCnt = RxGlobals.PrintSystem.ColorCnt * RxGlobals.PrintSystem.HeadsPerColor;
-
-            RxGlobals.HeadStat.SetItemCount(totalHeadCnt);
-            for (int i = PrintHeadStack.Children.Count; i < cnt; i++)
+            int i, no;
+            RxGlobals.HeadStat.SetItemCount(cnt);
+            for (i = PrintHeadStack.Children.Count; i < cnt; i++)
             {
                 _PrintHeadView.Add(new PrintHeadView(i));
-                try
-                {
                     _PrintHeadView[i].DataContext = RxGlobals.HeadStat.List[i];
-                }
-                catch (Exception ex)
-                {
-                    // RxGlobals.HeadStat.List does not contain enough elements!
-                    Console.WriteLine(ex.Message);
-                }
                 PrintHeadStack.Children.Add(_PrintHeadView[i]);
             }
-
-            // Assign data context:
-            if (RxGlobals.PrintSystem.AllInkSupplies)
-            {
-                for (int i = 0; i < totalHeadCnt; i++)
-                {
-                    int no = i;
-                    if (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_TX802)
+            _assign_inksupply(cnt);
+            for (i = 0; i < PrintHeadStack.Children.Count; i++)
                     {
-                        no = totalHeadCnt - 1 - i;
+                no = (int)(i / RxGlobals.PrintSystem.HeadsPerColor);
+                no = RxGlobals.PrintSystem.IS_Order[no];
+                _PrintHeadView[i].Visibility = (i < cnt && (RxGlobals.PrintSystem.AllInkSupplies || no == RxGlobals.PrintSystem.CheckedInkSupply)) ? Visibility.Visible : Visibility.Collapsed;
                     }
-                    try
-                    {
-                        _PrintHeadView[i].DataContext = RxGlobals.HeadStat.List[no];
-                        _PrintHeadView[i].No = no;
-                        _PrintHeadView[i].Visibility = System.Windows.Visibility.Visible;
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine(ex.Message);
-                    }
+            Grid.RowDefinitions[1].Height = new GridLength(25 / RxGlobals.Screen.Scale);
                 }
             }
-            else
-            {
-                int globalInkCylinderIndex = RxGlobals.PrintSystem.CheckedInkSupply;
-                int firstPrintHeadIndex = globalInkCylinderIndex * RxGlobals.PrintSystem.HeadsPerInkCylinder;
-                int lastPrintHeadIndex  = firstPrintHeadIndex + RxGlobals.PrintSystem.HeadsPerInkCylinder - 1;
-                int no = 0;
-                for (int i = 0; i < RxGlobals.PrintSystem.HeadsPerInkCylinder; i++)
-                {
-                    no = firstPrintHeadIndex + i;
-                    if (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_TX802)
-                    {
-                        int diff = no - firstPrintHeadIndex;
-                        no = lastPrintHeadIndex - diff;
-                        // no = ((RxGlobals.PrintSystem.PrintHeadsPerInkCylinderCnt - 1) - (firstPrintHeadIndex + i)) % RxGlobals.PrintSystem.PrintHeadsPerInkCylinderCnt;
-                        // no += globalInkCylinderIndex * RxGlobals.PrintSystem.PrintHeadsPerInkCylinderCnt;
-                    }
-
-                    try
-                    {
-                        _PrintHeadView[i].DataContext = RxGlobals.HeadStat.List[no];
-                        _PrintHeadView[i].No = no;
-                        _PrintHeadView[i].Visibility = System.Windows.Visibility.Visible;
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine(ex.Message);
-                    }
-                }
-            }
-
-
-            // hide all unnecessary items
-            for (int i = cnt; i < PrintHeadStack.Children.Count; i++)
-            {
-                if (i < _PrintHeadView.Count)
-                {
-                    _PrintHeadView[i].Visibility = System.Windows.Visibility.Collapsed;
-                }
-            }
-        }
-    }
 }
+
+
