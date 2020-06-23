@@ -13,7 +13,7 @@ OBJCOPY := objcopy
 
 #Additional flags
 PREPROCESSOR_MACROS := NDEBUG RELEASE linux
-INCLUDE_DIRS := ../rx_ink_lib ../rx_common_lib ../rx_rip_lib ../rx_tif_lib ../rx_screen_lib ../Externals/Tec-it/Linux/Tec-it-11/include/libtbarcode11 ../Externals/libtiff ../rx_screen_lib
+INCLUDE_DIRS := ../rx_ink_lib ../rx_common_lib ../rx_rip_lib ../rx_tif_lib ../rx_slicescreen_lib ../Externals/Tec-it/Linux/Tec-it-11/include/libtbarcode11 ../Externals/libtiff
 #LIBRARY_DIRS := /usr/local/lib
 LIBRARY_DIRS := /usr/local/lib /usr/local/cuda/lib64 /usr/lib64
 LIBRARY_NAMES := tbarcode11 cudadevrt cudart

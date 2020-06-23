@@ -38,7 +38,7 @@ endif
 
 SOURCEFILES := args.c ctrl_client.c data.c head_client.c jet_correction.c rx_spooler_ctrl.c screening.c spool_rip.c rs_tec-it.cpp test.c version.c
 CUDA_FILES := rx_slicescreen_fms_1x3_gpu.cu
-EXTERNAL_LIBS := ../rx_common_lib/$(BINARYDIR)/rx_common_lib.a ../rx_screen_lib/$(BINARYDIR)/rx_slicescreen_lib.a ../rx_tif_lib/$(BINARYDIR)/rx_tif_lib.a ../rx_rip_lib/$(BINARYDIR)/rx_rip_lib.a ../Externals/TinyXML/$(BINARYDIR)/TinyXML.a
+EXTERNAL_LIBS := ../rx_common_lib/$(BINARYDIR)/rx_common_lib.a ../rx_slicescreen_lib/$(BINARYDIR)/rx_slicescreen_lib.a ../rx_tif_lib/$(BINARYDIR)/rx_tif_lib.a ../rx_rip_lib/$(BINARYDIR)/rx_rip_lib.a ../Externals/TinyXML/$(BINARYDIR)/TinyXML.a
 EXTERNAL_LIBS_COPIED := $(foreach lib, $(EXTERNAL_LIBS),$(BINARYDIR)/$(notdir $(lib)))
 
 CFLAGS += $(COMMONFLAGS)
@@ -152,8 +152,8 @@ $(BINARYDIR)/%.o : %.s $(all_make_files) |$(BINARYDIR)
 $(BINARYDIR)/rx_common_lib.a : ../rx_common_lib/$(BINARYDIR)/rx_common_lib.a
 	$(CP) ../rx_common_lib/$(BINARYDIR)/rx_common_lib.a $(BINARYDIR)/rx_common_lib.a
 
-$(BINARYDIR)/rx_slicescreen_lib.a : ../rx_screen_lib/$(BINARYDIR)/rx_slicescreen_lib.a
-	$(CP) ../rx_screen_lib/$(BINARYDIR)/rx_slicescreen_lib.a $(BINARYDIR)/rx_slicescreen_lib.a
+$(BINARYDIR)/rx_slicescreen_lib.a : ../rx_slicescreen_lib/$(BINARYDIR)/rx_slicescreen_lib.a
+	$(CP) ../rx_slicescreen_lib/$(BINARYDIR)/rx_slicescreen_lib.a $(BINARYDIR)/rx_slicescreen_lib.a
 
 $(BINARYDIR)/rx_tif_lib.a : ../rx_tif_lib/$(BINARYDIR)/rx_tif_lib.a
 	$(CP) ../rx_tif_lib/$(BINARYDIR)/rx_tif_lib.a $(BINARYDIR)/rx_tif_lib.a
