@@ -589,6 +589,11 @@ static int _print_next(void)
 							
 				if(_Item.copiesTotal < 1)_Item.copiesTotal = 1;
 
+				if (_Item.variable)
+				{
+					label_load(&_Item, _FilePathLocal);
+				}
+
 //				Error(LOG, 0, "Printig2: copies=%d, copy=%d, copiesTotal=%d", _Item.copies, _Item.id.copy, _Item.copiesTotal);
 				if (rx_def_is_web(RX_Config.printer.type)) Error(LOG, 0, "%d: %s: Started, %d copies", _Item.id.id, _filename(_Item.filepath), _Item.copies);
 				TrPrintfL(TRUE, "PRINT-NEXT: >>%s<<, copiesTotal=%d", _Item.filepath, _Item.copiesTotal);
@@ -824,6 +829,7 @@ static int _print_next(void)
 						SPrintQueueItem item;
 						memcpy(&item, &_Item, sizeof(item));
 						item.lengthUnit = PQ_LENGTH_UNDEF;
+						if (_Item.variable) label_send_data(&_Item.id);
 						spool_print_file(&_Item.id, _DataPath, img_offset, 0, &item, clearBlockUsed);
 						_Item.pageMargin=_PageMargin_Next;
 					}

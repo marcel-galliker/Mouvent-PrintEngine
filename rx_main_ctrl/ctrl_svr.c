@@ -619,7 +619,7 @@ static void _send_ink_def(int headNo, char *dots)
 				no = headNo*HEAD_CNT+n;
 				if (RX_Config.headFpVoltage[no]) 
 				{
-				msg.fpVoltage = RX_Config.headFpVoltage[no];
+					msg.fpVoltage = RX_Config.headFpVoltage[no];
 					Error(LOG, 0, "Using User Firepulse Voltage=%d%%", msg.fpVoltage);
 				}
 				else if (RX_HBStatus[headNo].head[n].eeprom_mvt.voltage)

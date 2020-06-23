@@ -22,6 +22,7 @@ namespace RX_DigiPrint.Models.Enums
                 _List.Add(new RxEnum<ETestImage>( ETestImage.angle_separated, "Angle Separated"));
                 _List.Add(new RxEnum<ETestImage>( ETestImage.jets,            "Jets"));
                 _List.Add(new RxEnum<ETestImage>( ETestImage.jet_numbers,     "Jet Numbers"));
+                _List.Add(new RxEnum<ETestImage>( ETestImage.density,         "Density"));                
                 _List.Add(new RxEnum<ETestImage>( ETestImage.grid,            "Grid"));
                 _List.Add(new RxEnum<ETestImage>( ETestImage.encoder,         "Encoder"));
                 _List.Add(new RxEnum<ETestImage>( ETestImage.scanning,        "Scanning"));

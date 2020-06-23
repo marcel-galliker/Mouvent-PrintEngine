@@ -109,7 +109,7 @@ void label_rep_file_block()
 
 
 //--- label_load -------------------------------------------------------
-int label_load(SPrintQueueItem *pitem, char *datapath, int size)
+int label_load(SPrintQueueItem *pitem, char *datapath)
 {
 	if (strcmp(pitem->filepath, _ActFilePath))
 	{

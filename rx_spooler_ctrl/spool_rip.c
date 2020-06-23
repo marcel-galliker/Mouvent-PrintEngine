@@ -348,6 +348,7 @@ int  sr_rip_label(BYTE* buffer[MAX_COLORS], SBmpInfo *pInfo)
 	for (color=0; color<MAX_COLORS; color++)
 	{
 		pInfo->buffer[color] = &buffer[color];
+		pInfo->inkSupplyNo[color] = RX_Color[color].inkSupplyNo; 
 //		TrPrintfL(1, "use buffer[%d], 0x%08x, size=%d", color, pInfo->buffer[color], pInfo->dataSize);
 		if (buffer[color])
 		{
