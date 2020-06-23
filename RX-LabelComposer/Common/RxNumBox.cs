@@ -45,7 +45,7 @@ namespace RX_LabelComposer.Common
             IsPadActive = true;
             // Comment made by Samuel de Santis on June, 7th 2018.
             // I had to set the second parameter to false but don't know why.
-            RxNumPad pad = new RxNumPad(this, false);
+            RxNumPad pad = new RxNumPad(this);
             bool? result=pad.ShowDialog();
             IsPadActive = false;
             if (result!=null && (bool)result == true)
