@@ -136,9 +136,9 @@ Global
 		{531D50FB-5C99-4DF6-B152-8A0CFB84D4C7}.Debug-Remote|Win32.ActiveCfg = Debug-Remote|Win32
 		{531D50FB-5C99-4DF6-B152-8A0CFB84D4C7}.Debug-Remote|Win32.Build.0 = Debug-Remote|Win32
 		{531D50FB-5C99-4DF6-B152-8A0CFB84D4C7}.Debug-Remote|x64.ActiveCfg = Debug-Remote|Win32
-		{531D50FB-5C99-4DF6-B152-8A0CFB84D4C7}.Debug-soc|Win32.ActiveCfg = Debug-soc|x64
-		{531D50FB-5C99-4DF6-B152-8A0CFB84D4C7}.Debug-soc|x64.ActiveCfg = Debug-soc|x64
-		{531D50FB-5C99-4DF6-B152-8A0CFB84D4C7}.Debug-soc|x64.Build.0 = Debug-soc|x64
+		{531D50FB-5C99-4DF6-B152-8A0CFB84D4C7}.Debug-soc|Win32.ActiveCfg = Debug-soc|Win32
+		{531D50FB-5C99-4DF6-B152-8A0CFB84D4C7}.Debug-soc|Win32.Build.0 = Debug-soc|Win32
+		{531D50FB-5C99-4DF6-B152-8A0CFB84D4C7}.Debug-soc|x64.ActiveCfg = Debug-soc|Win32
 		{531D50FB-5C99-4DF6-B152-8A0CFB84D4C7}.Release|Win32.ActiveCfg = Release|Win32
 		{531D50FB-5C99-4DF6-B152-8A0CFB84D4C7}.Release|Win32.Build.0 = Release|Win32
 		{531D50FB-5C99-4DF6-B152-8A0CFB84D4C7}.Release|x64.ActiveCfg = Release|x64

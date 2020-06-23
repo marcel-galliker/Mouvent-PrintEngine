@@ -217,10 +217,17 @@ int sys_get_new_log_item(SPlcLogItem *pItem, ULONG *idx)
 	ULONG numElementsRet = 0;
 
 	mlpiSystemGetNewestDiagnosisIndex(_Connection, &indexNewest);
+	if (*idx==0)
+	{
+		int oldest;
+		mlpiSystemGetOldestDiagnosisIndex(_Connection, &oldest);
+		if (indexNewest-100>oldest) (*idx)=indexNewest-100;
+		else (*idx)=oldest;
+	}
+
 	if (*idx < indexNewest)
 	{
-		if (*idx==0) mlpiSystemGetOldestDiagnosisIndex(_Connection, idx);
-		else		(*idx)++;
+		(*idx)++;
 		mlpiSystemGetDiagnosisLog(_Connection, *idx, &diagnosis, 1, &numElementsRet);
 		_plclog_to_rxlog(-1, &diagnosis, pItem);
 		return REPLY_OK;

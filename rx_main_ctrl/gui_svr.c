@@ -22,7 +22,7 @@
 #include "gui_svr.h"
 
 //--- Defines -----------------------------------------------------------------
-#define BUFFER_SIZE 4096
+#define BUFFER_SIZE		4096
 #define MAX_CONNECTIONS	10
 #define TIMEOUT			10000	// ms
 
@@ -45,6 +45,7 @@ static int			_CheckSend[MAX_CONNECTIONS];
 static int			_CheckRecv[MAX_CONNECTIONS];
 static int			_CheckTime[MAX_CONNECTIONS];
 
+static int			_LOG_MsgIg=FALSE;
 
 static SGuiMsg	_GuiMsg[MAX_CONNECTIONS][GUI_MSG_CNT];
 static int		_GuiMsgIn[MAX_CONNECTIONS];
@@ -114,7 +115,7 @@ int gui_send_msg(RX_SOCKET socket, void *msg)
 		if (socket==_Sockets[i])
 		{
 			_CheckSend[i]++;
-			if (RX_Config.printer.type==printer_LH702) _log(i, 0, msg);
+			if (_LOG_MsgIg) _log(i, 0, msg);
 			break;
 		}
 	}
@@ -130,7 +131,7 @@ int gui_send_msg_2(RX_SOCKET socket, UINT32 cmd, int dataSize, void *data)
 		if (socket==_Sockets[i])
 		{
 			_CheckSend[i]++;
-			if (RX_Config.printer.type==printer_LH702) _log(i, cmd, NULL);
+			if (_LOG_MsgIg) _log(i, cmd, NULL);
 			break;
 		}
 	}
@@ -213,7 +214,7 @@ static int _gui_closed(RX_SOCKET socket, const char *peername)
 //--- gui_tick ----------------------
 void gui_tick(void)
 {
-#ifndef DEBUG
+//#ifndef DEBUG
 	char str[MAX_PATH];
 	int len = 0;
 	int time=rx_get_ticks();
@@ -231,7 +232,8 @@ void gui_tick(void)
 				int n=_GuiMsgIn[i];
 				for (int m=0; m<GUI_MSG_CNT; m++)
 				{
-					TrPrintfL(TRUE, "GuiMsg[%d]: %d.%03d id=0x%08x", m, _GuiMsg[i][n].time/1000, _GuiMsg[i][n].time%1000, _GuiMsg[i][n].msgId);
+					if (_GuiMsg[i][n].msgId)
+						TrPrintfL(TRUE, "GuiMsg[%d]: %d.%03d id=0x%08x", m, _GuiMsg[i][n].time/1000, _GuiMsg[i][n].time%1000, _GuiMsg[i][n].msgId);
 					n=(n+1)%GUI_MSG_CNT;
 				}
 				_CheckTime[i]=0;
@@ -241,8 +243,9 @@ void gui_tick(void)
 		_CheckSend[i]=0;
 	}
 
-	if (RX_Config.printer.type==printer_LH702) TrPrintfL(TRUE, "GUI Check: %s, TimeoutCnt=%d, printState=%s, speed=%d", str, _TimeoutCnt, PrintStateStr[RX_PrinterStatus.printState], enc_speed());
-#endif
+	if (_LOG_MsgIg) 
+		TrPrintfL(TRUE, "GUI Check: %s, TimeoutCnt=%d, printState=%s, speed=%d", str, _TimeoutCnt, PrintStateStr[RX_PrinterStatus.printState], enc_speed());
+// #endif
 }
 
 //--- gui_test -------------------------------------------------------
