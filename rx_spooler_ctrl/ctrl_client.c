@@ -457,7 +457,7 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 				Error(LOG, 0, "data_clear");				
 				data_clear(_Buffer[_BufferNo]);
 			}
-//			TrPrintfL(TRUE, "data_malloc (id=%d, page=%d, copy=%d, scan=%d) _BufferNo=%d", msg.id.id, msg.id.page, msg.id.copy, _BufferNo);
+			TrPrintfL(TRUE, "data_malloc (id=%d, page=%d, copy=%d, scan=%d) _BufferNo=%d", msg.id.id, msg.id.page, msg.id.copy, msg.id.scan, _BufferNo);
 			ret = data_malloc (msg.printMode, widthPx, lengthPx, bitsPerPixel, RX_Color, SIZEOF(RX_Color), &_BufferSize[_BufferNo], _Buffer[_BufferNo]);
 		}
 		if (_Abort)

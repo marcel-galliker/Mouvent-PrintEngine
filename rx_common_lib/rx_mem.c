@@ -95,17 +95,20 @@ void rx_mem_use(BYTE *ptr)
 }
 
 //--- rx_mem_unuse -------------------------------------------------------
-void  rx_mem_unuse(BYTE **ptr)
+int  rx_mem_unuse(BYTE **ptr)
 {
+	int cnt=0;
 	// decrement counter, free memory when zero
 	if (*ptr)
 	{
 		SBuffer *buf = ((SBuffer*)*ptr) - 1;
 		rx_mutex_lock(_Mutex);
 		if (buf->count>0) buf->count--;
+		cnt = buf->count;
 		// printf("rx_mem_unuse %p, cnt=%d, _Buffers=%d\n", *ptr, buf->count, _Buffers);
 		rx_mutex_unlock(_Mutex);
 	}
+	return cnt;
 }
 
 //--- rx_mem_cnt --------------------------
