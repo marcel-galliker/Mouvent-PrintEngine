@@ -54,9 +54,9 @@ static ELogItemType	_ErrLevel = LOG_TYPE_UNDEF;
 //--- prototypes ------------------------------------------
 
 static void _write_log(void);
+static void _cond_copy_status(void);
 static void _cond_preslog(int ticks);
 static void	_update_clusterNo(void);
-
 
 //#define LOG_FLUID
 
@@ -418,9 +418,10 @@ static void _update_counters(void)
 }
 
 //--- cond_main ---------------------------------------------
-void cond_main(int ticks)
+void cond_main(int ticks, int menu)
 {	
 	static int _ticks=0;
+	if (menu) _cond_copy_status();
 	if (ticks-_ticks>1000)
 	{
 		if (_UpdateClusterTimer>0 && --_UpdateClusterTimer<=0)
@@ -433,7 +434,70 @@ void cond_main(int ticks)
 	_cond_preslog(ticks);
     
     if (!(ticks%10)) _write_log();
-}			
+}
+
+//--- _cond_copy_status -------------------------------------------------------------
+static void _cond_copy_status(void)
+{
+	int i;
+	if (nios_loaded())
+	{
+		for (i=0; i<SIZEOF(RX_HBStatus->head); i++)
+		{
+			// only valid data if conditioner is connected and not in a test mode
+			if (RX_NiosStat.cond[i].info.connected)
+			{
+				RX_HBStatus->head[i].info				= RX_NiosStat.cond[i].info;
+				RX_HBStatus->head[i].tempHead			= RX_NiosStat.head_temp[i];
+				RX_HBStatus->head[i].tempCond			= RX_NiosStat.cond[i].tempIn;
+//				RX_HBStatus->head[i].tempSetpoint		= _NiosMem->cfg.cond[i].temp; //RX_NiosStat.cond[i].tempSetpoint;
+				RX_HBStatus->head[i].tempReady			= RX_NiosStat.cond[i].tempReady;
+				RX_HBStatus->head[i].presIn_ID			= RX_NiosStat.cond[i].pressure_in_ID;
+				RX_HBStatus->head[i].presIn				= RX_NiosStat.cond[i].pressure_in;
+				RX_HBStatus->head[i].presIn_max			= RX_NiosStat.cond[i].pressure_in_max;
+				RX_HBStatus->head[i].presIn_diff	    = RX_NiosStat.cond[i].pressure_in_diff;
+				RX_HBStatus->head[i].presOut_ID			= RX_NiosStat.cond[i].pressure_out_ID;
+				RX_HBStatus->head[i].presOut			= RX_NiosStat.cond[i].pressure_out;
+				RX_HBStatus->head[i].presOut_diff		= RX_NiosStat.cond[i].pressure_out_diff;
+				RX_HBStatus->head[i].meniscus			= RX_NiosStat.cond[i].meniscus;
+				RX_HBStatus->head[i].meniscus_diff		= RX_NiosStat.cond[i].meniscus_diff;
+				RX_HBStatus->head[i].meniscus_Setpoint  = RX_NiosStat.cond[i].meniscus_setpoint;
+				RX_HBStatus->head[i].pumpSpeed			= RX_NiosStat.cond[i].pump;
+				RX_HBStatus->head[i].pumpFeedback		= RX_NiosStat.cond[i].pump_measured * 60/100;	// in 0.1 ml
+				RX_HBStatus->head[i].printingSeconds	= RX_NiosStat.cond[i].pumptime;
+				RX_HBStatus->head[i].ctrlMode			= RX_NiosStat.cond[i].mode;
+				
+				if (RX_NiosStat.cond[i].error & COND_ERR_status_struct_missmatch)
+					printf("Error status_struct_missmatch\n");						
+
+				/*
+				if (RX_HBStatus->head[i].presIn < -20)
+				{		
+					TrPrintfL(TRUE, "Sensor Error Conditioner=%d: Version=%lu.%lu.%lu.%lu", i, RX_NiosStat.cond[i].version.major, RX_NiosStat.cond[i].version.minor, RX_NiosStat.cond[i].version.revision, RX_NiosStat.cond[i].version.build);					
+				}
+				*/
+			}
+			else				
+			{
+				RX_HBStatus->head[i].info.flags		= 0;
+				RX_HBStatus->head[i].tempHead		= INVALID_VALUE;
+				RX_HBStatus->head[i].tempCond		= INVALID_VALUE;
+				RX_HBStatus->head[i].tempSetpoint	= INVALID_VALUE;
+				RX_HBStatus->head[i].tempReady		= INVALID_VALUE;
+				RX_HBStatus->head[i].presIn			= INVALID_VALUE;
+				RX_HBStatus->head[i].presOut		= INVALID_VALUE;
+				RX_HBStatus->head[i].pumpSpeed		= INVALID_VALUE;
+				RX_HBStatus->head[i].pumpFeedback	= INVALID_VALUE;
+				RX_HBStatus->head[i].printingSeconds= INVALID_VALUE;
+				RX_HBStatus->head[i].printedDroplets= INVALID_VALUE;
+				RX_HBStatus->head[i].ctrlMode		= INVALID_VALUE;	
+				RX_HBStatus->head[i].presIn_0out    = INVALID_VALUE;
+				RX_NiosStat.cond[i].pcb_rev		    = '-';	
+			}
+		}
+	}
+}
+
 
 //---_cond_load --------------------------------
 int _cond_load(const char *exepath)

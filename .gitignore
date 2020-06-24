@@ -83,3 +83,4 @@ rx_head_nios/software/.metadata/
 version.c
 /bin/newgui/*.dll
 *.suo
+/RX-LabelComposer/Properties/AssemblyInfo.cs

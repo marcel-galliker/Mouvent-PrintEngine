@@ -206,6 +206,8 @@ int flz_load_simple	(const char *path, BYTE **buffer, int bufsize, SBmpInfo *pin
 		pinfo->bitsPerPixel	 = pFlzInfo->bitsPerPixel;
 		pinfo->screening	 = (pinfo->bitsPerPixel==8);
 		pinfo->srcWidthPx    = pFlzInfo->widthPx;
+		pinfo->resol.x		 = pFlzInfo->resol.x;
+		pinfo->resol.y		 = pFlzInfo->resol.y;
 		pinfo->lineLen		 = pFlzInfo->lineLen;
 		pinfo->lengthPx		 = pFlzInfo->lengthPx;
 		pinfo->dataSize		 = pFlzInfo->dataSize;

@@ -34,7 +34,7 @@ error:
 endif
 
 SOURCEFILES := rx_slicescreen.c rx_slicescreen_fme_4x3.c rx_slicescreen_fms_1.c rx_slicescreen_fms_1x2.c rx_slicescreen_fms_1x3.c rx_tas.cpp
-EXTERNAL_LIBS := 
+EXTERNAL_LIBS := ../Externals/TinyXML/$(BINARYDIR)/TinyXML.a
 EXTERNAL_LIBS_COPIED := $(foreach lib, $(EXTERNAL_LIBS),$(BINARYDIR)/$(notdir $(lib)))
 
 CFLAGS += $(COMMONFLAGS)
@@ -139,3 +139,6 @@ $(BINARYDIR)/%.o : %.s $(all_make_files) |$(BINARYDIR)
 	$(CC) $(CFLAGS) $(ASFLAGS) -c $< -o $@ -MD -MF $(@:.o=.dep)
 
 #VisualGDB: GeneratedRules				#<--- All lines below are auto-generated
+$(BINARYDIR)/TinyXML.a : ../Externals/TinyXML/$(BINARYDIR)/TinyXML.a
+	$(CP) ../Externals/TinyXML/$(BINARYDIR)/TinyXML.a $(BINARYDIR)/TinyXML.a
+

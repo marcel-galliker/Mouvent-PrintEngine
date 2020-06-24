@@ -60,8 +60,6 @@ using System.Windows;
 
 // "$Revision: 5424 $"
 
-[assembly: AssemblyVersion("1.0.5420.38")]
-[assembly: AssemblyFileVersion("1.0.5420.38")]
-
-//  http://www.radex-net.com/Downloads/RX-LabelComposer/publish.htm
-//  G1EhZ$ETMf
+[assembly: AssemblyVersion("#VERSION#")]
+[assembly: AssemblyFileVersion("#VERSION#")]
+[assembly: AssemblyInformationalVersion("BuiltOn=#DATE#;Build=#COMMIT#")]

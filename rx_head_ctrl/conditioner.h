@@ -21,7 +21,7 @@ extern SFluidStateLight		RX_FluidStat[MAX_HEADS_BOARD];
 int  cond_init(void);
 int  cond_end(void);
 void cond_shutdown(void);
-void cond_main(int ticks);
+void cond_main(int ticks, int menu);
 
 int  cond_restart_loader(int condNo);
 int  cond_restart_app(int condNo);

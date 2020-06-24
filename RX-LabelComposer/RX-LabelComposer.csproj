@@ -476,13 +476,15 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>call $(ProjectDir)..\VersionUpdate_WPF.exe  $(ProjectDir)Properties\AssemblyInfo.cs
-copy $(TargetDir)rx_rip_lib.dll $(ProjectDir)
-EXIT 0</PreBuildEvent>
+    <PreBuildEvent>call $(ProjectDir)VersionUpdate.bat $(ProjectDir)Properties\AssemblyInfo.cs.template  $(ProjectDir)Properties\AssemblyInfo.cs</PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent>rem copy $(ProjectDir)$(OutDir)rx_rip_lib.dll $(ProjectDir)
-EXIT 0</PostBuildEvent>
+    <PostBuildEvent>rem dir $(ProjectDir)rx_rip_lib.dll
+rem dir $(ProjectDir)$(OutDir)
+
+copy $(ProjectDir)rx_rip_lib.dll $(ProjectDir)$(OutDir)
+
+</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
