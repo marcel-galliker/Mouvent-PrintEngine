@@ -110,7 +110,7 @@ goto :EVAL
 REM ----------------------------------------------------------------------------
 :NIOS
 	set BUILD=32
-	set FLAGS=/m /property:Configuration=Release-soc
+	set FLAGS=/m /property:Configuration=Release-soc /property:Platform=Win32
 	call :BUILD_PROJECT rx_fluid_nios, vcxproj
 	call :BUILD_PROJECT rx_head_nios, vcxproj
 	goto :EOF
@@ -118,13 +118,13 @@ REM ----------------------------------------------------------------------------
 
 :KEIL
 	set BUILD=32
-	set FLAGS=/m /property:Configuration=Release
+	set FLAGS=/m /property:Configuration=Release /property:Platform=Win32
 	call :BUILD_PROJECT rx_head_cond, vcxproj
 	goto :EOF
 
 :LIB_X32
 	set BUILD=32
-	set FLAGS=/m /property:Configuration=Release /property:SolutionDir=%BATCH_PATH%..\
+	set FLAGS=/m /property:Configuration=Release /property:Platform=Win32 /property:SolutionDir=%BATCH_PATH%..\
 	call :BUILD_PROJECT rx_common_lib, vcxproj
 	call :BUILD_PROJECT rx_tif_lib, vcxproj
 	call :BUILD_PROJECT rx_pecore_lib, vcxproj
@@ -135,7 +135,7 @@ REM ----------------------------------------------------------------------------
 
 :BIN_X32
 	set BUILD=32
-	set FLAGS=/m /property:Configuration=Release /property:SolutionDir=%BATCH_PATH%..\
+	set FLAGS=/m /property:Configuration=Release /property:Platform=Win32 /property:SolutionDir=%BATCH_PATH%..\
 	call :BUILD_PROJECT rx_main_ctrl, vcxproj
 	goto :EOF
 REM ----------------------------------------------------------------------------
