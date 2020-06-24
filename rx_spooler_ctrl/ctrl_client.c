@@ -518,9 +518,6 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 			_FirstFile = FALSE;
 		}
 		
-		if (!same)
-			printf("NOT SAME\n");
-
 		if (_ResetCnt==RX_Spooler.resetCnt || hc_in_simu()) 
 			hc_send_next();			
 			

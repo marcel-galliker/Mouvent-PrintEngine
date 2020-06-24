@@ -333,9 +333,11 @@ int  sr_rip_label(BYTE* buffer[MAX_COLORS], SBmpInfo *pInfo)
 	int				column, len, color;
 	int				dataOut, data;
 	int				black;
+	int				time0;
 	RX_Bitmap		bmp, bmpLabel, bmpColor;
 	SPrintDataMsg	*pmsg = (SPrintDataMsg*)&_DataBuf[_DataBufOut];
 
+	time0 = rx_get_ticks();
 	bmp.width	 = _BmpInfoLabel.srcWidthPx;
 	bmp.height	 = _BmpInfoLabel.lengthPx;
 	bmp.bppx	 = _BmpInfoLabel.bitsPerPixel;
@@ -352,6 +354,7 @@ int  sr_rip_label(BYTE* buffer[MAX_COLORS], SBmpInfo *pInfo)
 //		TrPrintfL(1, "use buffer[%d], 0x%08x, size=%d", color, pInfo->buffer[color], pInfo->dataSize);
 		if (buffer[color])
 		{
+			int time1=rx_get_ticks();
 			bmp.buffer		= buffer[color];
 			bmpLabel.buffer = _BufferLabel[color];
 			if (*_Layout.colorLayer) bmpColor.buffer = _BufferColor[color];
@@ -368,6 +371,8 @@ int  sr_rip_label(BYTE* buffer[MAX_COLORS], SBmpInfo *pInfo)
 				rip_data(&_Layout, column*_Layout.columnDist, 0, &bmp, &bmpLabel, &bmpColor, black);		
 				data = (data+1) % DATA_BUF_SIZE;
 			}
+		
+			TrPrintfL(TRUE, "Rip Time[%d]=%dms", color, rx_get_ticks()-time1);
 
 			//--- TEST ------------------------------
 			if (TRUE)
@@ -378,6 +383,8 @@ int  sr_rip_label(BYTE* buffer[MAX_COLORS], SBmpInfo *pInfo)
 			}
 		}
 	}
+	TrPrintfL(TRUE, "Rip TimeTotal=%dms", rx_get_ticks()-time0);
+
 	_DataBufOut = data;
 	return REPLY_OK;
 }

@@ -31,6 +31,7 @@ typedef struct
 {
 	INT32   count;
 	UINT64  size;
+	HANDLE	sem_IsFree;
 	BYTE	data[0];
 } SBuffer;
 
@@ -70,7 +71,7 @@ BYTE* rx_mem_alloc(UINT64 size)
 		_SizeAllocated += size;
 
 		buf->count=0;
-
+		buf->sem_IsFree = rx_sem_create();
 		buf->size = size;
 //		TrPrintfL(TRUE, "rx_mem_alloc %p (%d)", &buf->data[0], size);
 		return &buf->data[0];
@@ -107,6 +108,7 @@ int  rx_mem_unuse(BYTE **ptr)
 		cnt = buf->count;
 		// printf("rx_mem_unuse %p, cnt=%d, _Buffers=%d\n", *ptr, buf->count, _Buffers);
 		rx_mutex_unlock(_Mutex);
+		if (cnt==0 && buf->sem_IsFree) rx_sem_post(buf->sem_IsFree);
 	}
 	return cnt;
 }
@@ -134,6 +136,7 @@ void  rx_mem_use_clear(BYTE *ptr)
 		rx_mutex_lock(_Mutex);
 		buf->count=0;
 		rx_mutex_unlock(_Mutex);
+		if (buf->sem_IsFree) rx_sem_post(buf->sem_IsFree);
 	}
 }
 
@@ -155,6 +158,7 @@ void  rx_mem_free(BYTE **ptr)
 			#endif
 			_Buffers--;
 			_SizeAllocated-=buf->size;
+			if (buf->sem_IsFree) rx_sem_destroy(&buf->sem_IsFree);
 			free(buf);
 			*ptr=NULL;
 		} 
@@ -180,12 +184,25 @@ void  rx_mem_free_force(BYTE **ptr)
 			#endif
 			_Buffers--;
 			_SizeAllocated-=buf->size;
+			if (buf->sem_IsFree) rx_sem_destroy(&buf->sem_IsFree);
 			free(buf);
 			*ptr=NULL;
 		} 
 		rx_mutex_unlock(_Mutex);
 	}
 }
+
+//--- rx_mem_await_free -----------------------------------
+int  rx_mem_await_free(BYTE *ptr, int timeout)
+{
+	if (ptr)
+	{
+		SBuffer *buf = ((SBuffer*)ptr) - 1;
+		return rx_sem_wait(buf->sem_IsFree, timeout);
+	}
+	return REPLY_ERROR;
+}
+
 
 //--- rx_mem_physical --------------------------------
 UINT64	rx_mem_physical(void)

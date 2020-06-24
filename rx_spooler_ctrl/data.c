@@ -91,6 +91,7 @@ static int				_MultiCopyThreadCnt=0;
 static SMultiCopyPar   *_MultiCopyPar=NULL;
 static HANDLE			_MultiCopyDone;	// semaphore
 static int				_ThreadRunning = TRUE;
+static int				_AwaitFree=FALSE;
 
 
 static int  _local_path(const char *filepath, char *localPath);
@@ -112,6 +113,8 @@ static void *_multicopy_thread(void* lpParameter);
 void data_init(RX_SOCKET socket, int headCnt)
 {
 	int i;
+
+	TrPrintfL(TRUE, "data_init _AwaitFree=%d", _AwaitFree);
 
 	if (_SendSem==NULL)
 	{
@@ -187,6 +190,8 @@ void data_end()
 //--- data_abort ------------------
 void data_abort		(void)
 {	
+	TrPrintfL(TRUE, "data_abort _AwaitFree=%d", _AwaitFree);
+
 	_Abort=TRUE;
 	tif_abort();
 	flz_abort();
@@ -412,6 +417,7 @@ int  data_get_size	(const char *path, UINT32 page, UINT32 *pspacePx, UINT32 *pwi
 void data_clear(BYTE* buffer[MAX_COLORS])
 {
 	int n;
+	TrPrintfL(TRUE, "data_clear _AwaitFree=%d", _AwaitFree);
 	for (n=0; n<MAX_COLORS; n++)
 		rx_mem_use_clear(buffer[n]);		
 }
@@ -455,18 +461,23 @@ int  data_malloc(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPixel,
 		if (height<10*DPI_X) time=0;
 		else time=10;
 	//	Error(LOG, 0, "data_malloc: use mem %dMB of %dMB", memsize/1024/1024, (*pBufSize)/1024/1024);
+		_AwaitFree = TRUE;
 		for (i=0; i<MAX_COLORS; i++)
 		{
 			if (psplit[i].color.name[0] && psplit[i].lastLine>psplit[i].firstLine)
 			{
 				TrPrintfL(1, "buffer[%d]: WAIT UNUSED %p, used=%d, abort=%d", i, buffer[i], rx_mem_cnt(buffer[i]), _Abort);
+				/*
 				while (!_Abort && rx_mem_cnt(buffer[i]))
 				{
 					rx_sleep(time);
 				}
-				TrPrintfL(1, "buffer[%d]: IS UNUSED", i);								
+				*/
+				rx_mem_await_free(buffer[i], INFINITE);
+				TrPrintfL(1, "buffer[%d]: IS UNUSED", i);
 			}
 		}
+		_AwaitFree=FALSE;
 	}
 	else
 	{
@@ -2145,7 +2156,8 @@ int data_sent(SBmpSplitInfo *psplit, int head)
 		if (psplit->data)
 		{
 			int cnt1=rx_mem_unuse(psplit->data);
-			if (cnt1==0) rx_sleep(0);
+//			if (cnt1==0) rx_sleep(0);
+			if (cnt1==0) TrPrintfL(TRUE, "rx_mem_unused");
 		//	if (head==0)
 		//		Error(LOG, 0, "rx_mem_unuse[%d]=%d\n", head, cnt1);
 		}
