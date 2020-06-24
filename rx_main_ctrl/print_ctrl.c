@@ -604,7 +604,19 @@ static int _print_next(void)
 				_CopiesStart = _Item.copiesPrinted;
 				if (RX_Config.printer.type==printer_DP803 && _Item.lastPage!=_Item.firstPage)
 					_CopiesStart = (_Item.copiesPrinted* (_Item.lastPage - _Item.firstPage + 1) + _Item.start.page)-1;
-				
+
+				if (_Item.srcWidth==0 || _Item.srcHeight==0)
+				{
+					UINT32 width, height;
+					Error(WARN, 0, "ID=%d: %s: size=%dx%d", _Item.id.id, _filename(_Item.filepath), _Item.srcWidth, _Item.srcHeight);
+					if (tif_get_size(_FilePathLocal, 0, 0, &width, &height, NULL)==REPLY_OK)
+					{
+						_Item.srcWidth = width*25400/1200;
+						_Item.srcHeight = height*25400/1200;
+						Error(LOG, 0, "Changed size to %dx%d", width, height);
+					}
+				}
+
 				pq_set_item(&_Item);
 				pl_start(&_Item, _FilePathLocal);
 				if (_SetPrintPar)
