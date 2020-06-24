@@ -591,11 +591,7 @@ int  nios_main(int ticks, int menu)
 	
 	if (_NiosLoaded)
 	{
-		if (_NiosMem) 
-		{
-			TrPrintfL(TRUE, "nios_main(ticks=%d, menu=%d)", ticks, menu);
-			cond_main(ticks, menu);
-		}
+		if (_NiosMem) cond_main(ticks, menu);
 		
 		tse_check_errors(ticks, menu);
 		if (menu) 	
