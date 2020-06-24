@@ -110,7 +110,7 @@ goto :EVAL
 REM ----------------------------------------------------------------------------
 :NIOS
 	set BUILD=32
-	set FLAGS=/m /property:Configuration=Release-soc
+	set FLAGS=/m /property:Configuration=Release-soc /property:Platform=Win32
 	call :BUILD_PROJECT rx_fluid_nios, vcxproj
 	call :BUILD_PROJECT rx_head_nios, vcxproj
 	goto :EOF
@@ -118,13 +118,13 @@ REM ----------------------------------------------------------------------------
 
 :KEIL
 	set BUILD=32
-	set FLAGS=/m /property:Configuration=Release
+	set FLAGS=/m /property:Configuration=Release /property:Platform=Win32
 	call :BUILD_PROJECT rx_head_cond, vcxproj
 	goto :EOF
 
 :LIB_X32
 	set BUILD=32
-	set FLAGS=/m /property:Configuration=Release /property:SolutionDir=%BATCH_PATH%..\
+	set FLAGS=/m /property:Configuration=Release /property:Platform=Win32 /property:SolutionDir=%BATCH_PATH%..\
 	call :BUILD_PROJECT rx_common_lib, vcxproj
 	call :BUILD_PROJECT rx_tif_lib, vcxproj
 	call :BUILD_PROJECT rx_pecore_lib, vcxproj
@@ -135,7 +135,7 @@ REM ----------------------------------------------------------------------------
 
 :BIN_X32
 	set BUILD=32
-	set FLAGS=/m /property:Configuration=Release /property:SolutionDir=%BATCH_PATH%..\
+	set FLAGS=/m /property:Configuration=Release /property:Platform=Win32 /property:SolutionDir=%BATCH_PATH%..\
 	call :BUILD_PROJECT rx_main_ctrl, vcxproj
 	goto :EOF
 REM ----------------------------------------------------------------------------
@@ -185,7 +185,7 @@ REM ----------------------------------------------------------------------------
 
 :LIB_LX
 	set BUILD=LX
-	set FLAGS=/m /property:Configuration=Release-lx /property:Platform=Win32
+	set FLAGS=/m:1 /property:Configuration=Release-lx /property:Platform=Win32
 	call :BUILD_PROJECT rx_common_lib, vcxproj
 	call :BUILD_PROJECT TinyXML, vcxproj, Externals\
 	call :BUILD_PROJECT rx_pecore_lib, vcxproj
@@ -197,7 +197,7 @@ REM ----------------------------------------------------------------------------
 	set BUILD=LX
 	REM Important to clean to ensure the Linux folder is empty
 	set TARGETS=/t:Clean,Build
-	set FLAGS=/m /property:Configuration=Release-lx /property:Platform=Win32
+	set FLAGS=/m:1 /property:Configuration=Release-lx /property:Platform=Win32
 	call :BUILD_PROJECT rx_dhcp_server, sln
 	call :BUILD_PROJECT rx_spooler_ctrl, sln
 	call :BUILD_PROJECT rx_boot, sln
@@ -248,7 +248,7 @@ REM Parameter [3]: optional subpath of projectfile ending with '\'
 	set PROJ_FILE=%~3%~1\%~1.%~2
 	set LOG_FILE=%LOG_PATH%%BUILD%_%~1.log
 	echo === compiling %~1 {%BUILD%} ===
-	msbuild.exe -nodeReuse:False -maxcpucount:1 %FLAGS% %BATCH_PATH%..\%PROJ_FILE% %TARGETS% > %LOG_FILE%
+	msbuild.exe -nodeReuse:False %FLAGS% %BATCH_PATH%..\%PROJ_FILE% %TARGETS% > %LOG_FILE%
 	if errorlevel 1 (
 		type %LOG_FILE%
 		echo [91mbuild FAILED[0m
