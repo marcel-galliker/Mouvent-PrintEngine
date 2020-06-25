@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!--Printer Environment File Date: Donnerstag, 26. März 2020  13:00:01-->
+<PrinterEnvSet xmlns="http://www.mouvent.com">
+  <TimeStamp Time="2020-03-26T13:00:01.5269183+01:00" />
+  <Screen Type="4" Name="FMS_1x3g" Method="2" InputResol="1200" OverSampling="0" BitsPerPixel="8" DropSize="123" FillMethod="1" DropCount="0" TotalInkLimit="100" MinPenetrationFluid="0" Output="0" Noise="0" AntiBleeding="0" ScreenByPrinter="1" />
+  <RenderIntent Type="1" Name="Relative Colorimetric" />
+  <ColorSpace Name="cmyk.cfg" />
+  <IccOverride Type="0" />
+  <PreserveBlack Type="0" />
+  <PreserveCMYK Type="0" />
+</PrinterEnvSet>

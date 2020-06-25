@@ -92,6 +92,7 @@ static SMultiCopyPar   *_MultiCopyPar=NULL;
 static HANDLE			_MultiCopyDone;	// semaphore
 static int				_ThreadRunning = TRUE;
 static int				_AwaitFree=FALSE;
+static BYTE				**_AwaitFreeBuf;
 
 
 static int  _local_path(const char *filepath, char *localPath);
@@ -196,6 +197,10 @@ void data_abort		(void)
 	tif_abort();
 	flz_abort();
 	scr_abort();
+	if (_AwaitFreeBuf)
+	{
+		for (int i=0; i<MAX_COLORS; i++) rx_mem_await_abort(_AwaitFreeBuf[i]);
+	}
 }
 
 //--- data_set_wakeuplen -------------------------------------------------
@@ -462,6 +467,7 @@ int  data_malloc(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPixel,
 		else time=10;
 	//	Error(LOG, 0, "data_malloc: use mem %dMB of %dMB", memsize/1024/1024, (*pBufSize)/1024/1024);
 		_AwaitFree = TRUE;
+		_AwaitFreeBuf = buffer;
 		for (i=0; i<MAX_COLORS; i++)
 		{
 			if (psplit[i].color.name[0] && psplit[i].lastLine>psplit[i].firstLine)
@@ -477,6 +483,7 @@ int  data_malloc(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPixel,
 				TrPrintfL(1, "buffer[%d]: IS UNUSED", i);
 			}
 		}
+		_AwaitFreeBuf = NULL;
 		_AwaitFree=FALSE;
 	}
 	else

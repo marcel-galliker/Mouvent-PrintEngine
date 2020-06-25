@@ -203,6 +203,17 @@ int  rx_mem_await_free(BYTE *ptr, int timeout)
 	return REPLY_ERROR;
 }
 
+//--- rx_mem_await_abort ----------------------------
+int  rx_mem_await_abort(BYTE *ptr)
+{
+	if (ptr)
+	{
+		SBuffer *buf = ((SBuffer*)ptr) - 1;
+		return rx_sem_post(buf->sem_IsFree);
+	}	
+}
+
+
 
 //--- rx_mem_physical --------------------------------
 UINT64	rx_mem_physical(void)

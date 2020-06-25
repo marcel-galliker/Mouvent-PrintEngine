@@ -28,6 +28,7 @@ int   rx_mem_unuse	(BYTE **ptr);		// rx_mem_unuse decrements the counter
 void  rx_mem_free	(BYTE **ptr);		// rx_free frees it when the counter is zero
 void  rx_mem_free_force	(BYTE **ptr);		// rx_free frees also when counter is nuôn zero
 int  rx_mem_await_free(BYTE *ptr, int timeout);
+int  rx_mem_await_abort(BYTE *ptr);
 
 UINT32 rx_mem_get_totalMB(void);
 UINT32 rx_mem_get_freeMB(void);
