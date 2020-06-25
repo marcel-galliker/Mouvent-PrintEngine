@@ -254,6 +254,9 @@
       <AdditionalLibraryDirectories>$(OutDir);..\Externals\Tec-it\Win\TBarCode11\Lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>Ws2_32.lib;rx_common_lib.lib;rx_rip_lib.lib;TBarCode11_x64.lib;Shell32.lib;Iphlpapi.lib;rx_tif_lib.lib</AdditionalDependencies>
     </Link>
+    <PreBuildEvent>
+      <Command>..\VersionUpdate $(ProjectDir)version.c</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
