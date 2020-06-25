@@ -1118,7 +1118,7 @@ static int _data_split(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int length
 									return _data_split_test(id, pBmpInfo, offsetPx, lengthPx, blkNo, blkCnt, clearBlockUsed, same, pItem);
 
 		case PM_SCANNING:			
-		case PM_SCAN_MULTI_PAGE:	return _data_split_prod(id, pBmpInfo, offsetPx, lengthPx, blkNo, blkCnt, clearBlockUsed, same, pItem);
+		case PM_SCAN_MULTI_PAGE:	return _data_split_prod(id, pBmpInfo, offsetPx, lengthPx, blkNo, blkCnt, clearBlockUsed, FALSE && same, pItem);
 
 		case PM_SINGLE_PASS:		return _data_split_prod(id, pBmpInfo, offsetPx, min(RX_Spooler.barWidthPx, (int)pBmpInfo->srcWidthPx), blkNo, blkCnt, clearBlockUsed, same, pItem);
 
@@ -1358,16 +1358,18 @@ static int _data_split_prod(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 					pInfo->resol.y		= pBmpInfo->resol.y;
 					if (pInfo->bitsPerPixel==8)
 					{
+						if (RX_Color[color].color.colorCode==0)
+							printf("black\n");
 						int blkSize=gpu_blk_size();
 						pInfo->dstLineLen	= ((pInfo->widthBt/4+blkSize-1)/blkSize)*blkSize; // align to 4 bits/pixel
 						pInfo->blkCnt		= (pInfo->dstLineLen * pBmpInfo->lengthPx + RX_Spooler.dataBlkSize-1) / RX_Spooler.dataBlkSize;
-						pInfo->dstLineLen	= ((pInfo->widthBt+blkSize-1)/blkSize)*blkSize; // align to 4 bits/pixel
+						pInfo->dstLineLen	= ((pInfo->widthBt+blkSize-1)/blkSize)*blkSize; // must be multiple of blkSize
 						scr_start(pInfo);
 					}
 					else
 					{
-					pInfo->dstLineLen	= (pInfo->widthBt+31) & ~31; // align to 256 Bits (32 Bytes)
-					pInfo->blkCnt		= (pInfo->dstLineLen * pBmpInfo->lengthPx + RX_Spooler.dataBlkSize-1) / RX_Spooler.dataBlkSize;
+						pInfo->dstLineLen	= (pInfo->widthBt+31) & ~31; // align to 256 Bits (32 Bytes)
+						pInfo->blkCnt		= (pInfo->dstLineLen * pBmpInfo->lengthPx + RX_Spooler.dataBlkSize-1) / RX_Spooler.dataBlkSize;
 					}
 					if (pInfo->blkCnt>blkCnt) Error(ERR_ABORT, 0, "Data: blkCnt=%d, max=%d", pInfo->blkCnt, blkCnt);
 					if (clearBlockUsed) _BlkNo[pInfo->board][pInfo->head] = (_BlkNo[pInfo->board][pInfo->head]+pInfo->blkCnt)%(RX_Spooler.dataBlkCntHead);
@@ -2158,17 +2160,13 @@ int data_sent(SBmpSplitInfo *psplit, int head)
 	//	TrPrintfL(1, "Head[%d.%d]: data_sent used=%d, idx=%d", psplit->board, psplit->head, psplit->pListItem->headsInUse, idx);
 		
 		psplit->pListItem->headsInUse--;
-		
+
 //		TrPrintfL(TRUE, "data_sent: headsInUse=%d, data=0x%08x", psplit->pListItem->headsInUse, psplit->data);
-		if (psplit->data)
+		if (psplit->data) 
 		{
-			int cnt1=rx_mem_unuse(psplit->data);
-//			if (cnt1==0) rx_sleep(0);
-			if (cnt1==0) TrPrintfL(TRUE, "rx_mem_unused");
-		//	if (head==0)
-		//		Error(LOG, 0, "rx_mem_unuse[%d]=%d\n", head, cnt1);
+			rx_mem_unuse(psplit->data);
+			psplit->data = NULL;
 		}
-		psplit->data = NULL;
 
 		if (FALSE)
 		{

@@ -500,6 +500,9 @@ static void _scr_load(SBmpSplitInfo *pInfo, int threadNo)
 		loutplane.lengthPx		= linplane.lengthPx*loutplane.resol.y/linplane.resol.y;
 		loutplane.bitsPerPixel	= 2; //pplaneScreenConfig->outputbitsPerPixel;
 		loutplane.aligment		= 8;
+		if (b==3)
+			printf("b=3\n");
+
 	//	loutplane.lineLen		= pInfo->dstLineLen*loutplane.bitsPerPixel/linplane.bitsPerPixel;
 		loutplane.lineLen		= ((loutplane.widthPx * loutplane.bitsPerPixel) + loutplane.aligment - 1) / loutplane.aligment;
 		loutplane.planeNumber	= linplane.planeNumber;
@@ -513,6 +516,7 @@ static void _scr_load(SBmpSplitInfo *pInfo, int threadNo)
 		{
 			time=rx_get_ticks();
 			_scr_fill_blk(pInfo, _ScrMem[b][h].separated);
+			if (pInfo->board==3 && pInfo->head==1) _write_tif("org", pInfo, &_ScrMem[b][h].separated, pInfo->dstLineLen);
 			if (trace) Error(LOG, 0, "scr_load time2=%d", rx_get_ticks()-time);
 			if (FALSE)
 			{
@@ -528,10 +532,12 @@ static void _scr_load(SBmpSplitInfo *pInfo, int threadNo)
 			ret = gpu_screen_FMS_1x3g(&linplane, &loutplane, &_PlaneScreenConfig[no], pInfo->pListItem->dots, threadNo);
 
 			_TimeTotal += rx_get_ticks()-time;
+			/*
 			if (gpu_is_board_present())
 				Error(LOG, 0, "scr_load screening , sizeIn=%dMB, sizeOut=%dMB, time=%d, GPU=%d  %d  %d", linplane.dataSize/1024/1024, loutplane.dataSize/1024/1024, rx_get_ticks()-time, gpu_time(0), gpu_time(1), gpu_time(2),_TimeTotal);
 			else
 				Error(LOG, 0, "scr_load screening , sizeIn=%dMB, sizeOut=%dMB, time=%d", linplane.dataSize/1024/1024, loutplane.dataSize/1024/1024, rx_get_ticks()-time);
+			*/
 		}
 		else ret=REPLY_OK;
 		if (ret==REPLY_OK)
@@ -551,11 +557,10 @@ static void _scr_load(SBmpSplitInfo *pInfo, int threadNo)
 
 		//	_ScrMem[b][h].screenedIdx = (_ScrMem[b][h].screenedIdx+1) % SCR_BUF_SIZE;
 		//	Error(LOG, 0, "Head[%d.%d]:widthPx=%d, bitsPerPixel=%d, srcWidthBt=%d, widthBt=%d, srcLineLen=%d, dstLineLen=%d, blkCnt=%d", b, h, pInfo->widthPx, pInfo->bitsPerPixel, pInfo->srcWidthBt, pInfo->widthBt, pInfo->srcLineLen, pInfo->dstLineLen, pInfo->blkCnt);
-		}
-		
-		//--- output -------------------------------------
-		if (trace && ret==REPLY_OK) 
-			_write_tif("screened", pInfo, pInfo->data, pInfo->srcLineLen);
+
+			if (pInfo->board==3 && pInfo->head==1)
+				_write_tif("screened", pInfo, pInfo->data, pInfo->srcLineLen);
+		}		
 	}
 //	TrPrintfL(TRUE, "_scr_load[%d] END", threadNo);
 }

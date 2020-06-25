@@ -42,6 +42,8 @@
 
 //--- prototypes -----------------------
 static void _on_error(ELogItemType type, char *deviceStr, int no, char *msg);
+static void _set_src_size(SPrintQueueItem *pItem, const char *path);
+
 static int _print_next(void);
 
 //--- processes ----------------------
@@ -401,6 +403,30 @@ static int _get_image_size(UINT32 gap)
 	return 0;
 }
 
+//--- _set_src_size ---------------------------------------------------------------
+static void _set_src_size(SPrintQueueItem *pItem, const char *path)
+{
+	UINT32 width, height;
+	int ret;
+
+	ret = flz_get_size(path, 0, 0, &width, &height, NULL);
+	if (ret) ret = tif_get_size(path, 0, 0, &width, &height, NULL);
+	if (ret) 
+	{
+		UINT32 height, memSize;
+		UINT8  bitsPerPixel;
+		char p[MAX_PATH];
+		bmp_color_path(path, RX_ColorNameShort(0), p);
+		ret = bmp_get_size(p, (UINT32*) &width, &height, &bitsPerPixel, &memSize);
+	}
+	if (ret==REPLY_OK)
+	{
+		pItem->srcWidth  = width *25400/1200;
+		pItem->srcHeight = height*25400/1200;
+	}
+}
+
+
 //--- _local_path  -----------------------------------------------------
 static void _local_path(const char *global, char *local)
 {
@@ -605,17 +631,7 @@ static int _print_next(void)
 				if (RX_Config.printer.type==printer_DP803 && _Item.lastPage!=_Item.firstPage)
 					_CopiesStart = (_Item.copiesPrinted* (_Item.lastPage - _Item.firstPage + 1) + _Item.start.page)-1;
 
-				if (_Item.srcWidth==0 || _Item.srcHeight==0)
-				{
-					UINT32 width, height;
-					Error(WARN, 0, "ID=%d: %s: size=%dx%d", _Item.id.id, _filename(_Item.filepath), _Item.srcWidth, _Item.srcHeight);
-					if (tif_get_size(_FilePathLocal, 0, 0, &width, &height, NULL)==REPLY_OK)
-					{
-						_Item.srcWidth = width*25400/1200;
-						_Item.srcHeight = height*25400/1200;
-						Error(LOG, 0, "Changed size to %dx%d", width, height);
-					}
-				}
+				_set_src_size(&_Item, _FilePathLocal);
 
 				pq_set_item(&_Item);
 				pl_start(&_Item, _FilePathLocal);

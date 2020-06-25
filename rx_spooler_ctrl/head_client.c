@@ -182,7 +182,7 @@ int hc_head_board_cfg(RX_SOCKET socket, SHeadBoardCfg* cfg)
 		_HBPar[cfg->no]=(SHBThreadPar*)malloc(sizeof(SHBThreadPar));
 		memset(_HBPar[cfg->no], 0, sizeof(SHBThreadPar));
 		_HBPar[cfg->no]->ctrlSocket = INVALID_SOCKET;
-			for (i=0; i<MAX_ETH_PORT; i++) _HBPar[cfg->no]->dataSocket[i]=INVALID_SOCKET;
+		for (i=0; i<MAX_ETH_PORT; i++) _HBPar[cfg->no]->dataSocket[i]=INVALID_SOCKET;
 		_HBPar[cfg->no]->mutex = rx_mutex_create();
 	}
 	else
@@ -380,15 +380,13 @@ void hc_send_next()
 									}
 									break;
 
-				case dev_on:		if (FALSE && pInfo->colorCode==0)	// see rx_def.c: RX_ColorName
+				case dev_on:	//	if (FALSE && pInfo->colorCode==0)	// see rx_def.c: RX_ColorName
 									{						
 										_save_to_file(pInfo, FALSE);
 										Error(LOG, 0, "File (id=%d, page=%d, copy=%d, scan=%d) blk0=%d, blkCnt=%d saved to File", pInfo->pListItem->id.id, pInfo->pListItem->id.page, pInfo->pListItem->id.copy, pInfo->pListItem->id.scan, pInfo->blk0, pInfo->blkCnt);
 									}
 									
 								//	Error(LOG, 0, "Screening[%d,%d]: (id=%d, p=%d, c=%d, s=%d)", pInfo->board, pInfo->head, id.id, id.page, id.copy, id.scan);
-
-									TrPrintfL(TRUE, "_send_image_data copy=%d, head=%d, bitsPerPixel=%d, data=0x%08x, blk0=%d, blkCnt=%d", pInfo->pListItem->id.copy, i, pInfo->bitsPerPixel, pInfo->data, pInfo->blk0, pInfo->blkCnt);
 
 									_send_image_data(pInfo);
 									break;
@@ -469,8 +467,11 @@ static int _send_image_data(SBmpSplitInfo *pInfo)
 	{
 		SPageId *pid=&pInfo->pListItem->id;
 		int idx=data_printList_idx(pInfo->pListItem);
+		int blk0=_HBPar[pInfo->board]->cfg.head[pInfo->head].blkNo0;
+		int blkCnt=_HBPar[pInfo->board]->cfg.head[pInfo->head].blkCnt;
+		int end=((pInfo->blk0-blk0)+pInfo->blkCnt)%blkCnt + blk0;
 
-		TrPrintfL(_Trace, "Head[%d.%d]: _send_image_data pl[%d](id=%d, p=%d, c=%d, s=%d) blocks[%d .. %d] SAME=%d", pInfo->board, pInfo->head, idx, pid->id, pid->page, pid->copy, pid->scan, pInfo->blk0, pInfo->blk0+pInfo->blkCnt, pInfo->same);		
+		TrPrintfL(TRUE || _Trace, "Head[%d.%d]: _send_image_data pl[%d](id=%d, p=%d, c=%d, s=%d) blocks[%d .. %d] SAME=%d", pInfo->board, pInfo->head, idx, pid->id, pid->page, pid->copy, pid->scan, pInfo->blk0, end, pInfo->same);
 		//--- Test ------------------------
 		TrPrintfL(_Trace, "Head[%d.%d]: widthPx=%d, bitsPerPixel=%d, widthBt=%d, dstLineLen=%d, srcLineCnt=%d, blkCnt=%d", pInfo->board, pInfo->head, pInfo->widthPx, pInfo->bitsPerPixel, pInfo->widthBt, pInfo->dstLineLen, pInfo->srcLineCnt , pInfo->blkCnt);		
 		//---------------------------------

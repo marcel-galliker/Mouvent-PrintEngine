@@ -144,7 +144,7 @@ static int _gpu_malloc(SSLiceInfo *inplane, SSLiceInfo *outplane, int bitsPerPix
 }
 
 //--- _screen_fms_kernel ----------------------
-__global__ void _screen_fms_kernel(UINT8 *in, UINT8 *out, UINT16 *pta, UINT16 *densityFactor, UINT32 lineLen, UINT32 height, UINT32 sectorWidth, UINT32 limitM, UINT32 limitL)
+__global__ void _screen_fms_kernel(UINT8 *in, UINT8 *out, UINT16 *pta, UINT16 *densityFactor, UINT32 inLineLen, UINT32 height, UINT32 outLineLen, UINT32 sectorWidth, UINT32 limitM, UINT32 limitL)
 {
 	// creates 2 bit/pixel
 	// if limitL == 0: output = (s,m) else output = (s,m,l)
@@ -152,16 +152,16 @@ __global__ void _screen_fms_kernel(UINT8 *in, UINT8 *out, UINT16 *pta, UINT16 *d
 	int y = (blockDim.x * blockIdx.x + threadIdx.x)*sectorWidth;
 	int x;
 	UINT8 *pSrc=&in[y];
-	UINT8 *pDst=&out[y/4];
-	x = y%lineLen;
-	y = y/lineLen;
+	x = y%inLineLen;
+	y = y/inLineLen;
+	UINT8 *pDst=&out[y*outLineLen+x/4];
 	UINT16* taLine=&pta[(y%TA_HEIGHT)*TA_WIDTH];
 	UINT8  dst;
 	UINT32 src;	// need 32 bits for compensating disabled jets
 	UINT16  ta;
 
-	if (x+sectorWidth<lineLen) sectorWidth=x+sectorWidth;
-	else                       sectorWidth=lineLen;
+	sectorWidth=x+sectorWidth;
+	if (sectorWidth>inLineLen) sectorWidth=inLineLen;
 
 	if (y<height)
 	{
@@ -174,7 +174,7 @@ __global__ void _screen_fms_kernel(UINT8 *in, UINT8 *out, UINT16 *pta, UINT16 *d
 			else if (src > limitM + ta)			dst |= 0x02;
 			else if (src > ta)					dst |= 0x01;
 
-			if (!(++x & 3)) *pDst++=dst;
+			if (!(++x & 3))*pDst++=dst;
 		}
 	}
 }
@@ -261,8 +261,8 @@ static void _screen_fms_600(UINT32 y, UINT8 *in, UINT8 *out, UINT16 *pta, UINT16
 	UINT32 x;
 	x = y%srcLineLen;
 	y = y/srcLineLen;
-	UINT8 *pDst=&out[y*dstLineLen];
 	UINT8 *pSrc=&in[y/2*srcLineLen];
+	UINT8 *pDst=&out[y*dstLineLen+x/4];
 	UINT16* taLine=&pta[(y%TA_HEIGHT)*TA_WIDTH];
 	UINT8  dst=0;
 	UINT32 src;	// need 32 bits for compensating disabled jets
@@ -330,7 +330,7 @@ int gpu_screen_FMS_1x3g(SSLiceInfo *inplane, SSLiceInfo *outplane, void *epplane
 		cudaStreamSynchronize(pstream->stream);
 		pstream->time[1]=rx_get_ticks();
 	//	TrPrintfL(TRUE, "GPU[%d].memcpy(in) done", threadNo);
-//		cudaMemset(_gpu_out, 0x01, outplane->lengthPx * outplane->lineLen);
+		cudaMemset(pstream->out, 0x00, outplane->lengthPx * outplane->lineLen);
 
 		// Each Grid consists of X * Y blocks that each contain 512 * 512 threads. Unused threads will just do nothing. (check inside kernel, see code above)
 		int sectorWidth		= gpu_blk_size();
@@ -340,7 +340,7 @@ int gpu_screen_FMS_1x3g(SSLiceInfo *inplane, SSLiceInfo *outplane, void *epplane
 		if (inplane->resol.x==600)
 			_screen_fms_600_kernel <<<blocksPerGrid, threadsPerBlock, 0, pstream->stream >>> (pstream->in, pstream->out, pstream->ta, pstream->df, inplane->lineLen, outplane->lengthPx, outplane->lineLen, sectorWidth, limitM, limitL);
 		else
-			_screen_fms_kernel <<<blocksPerGrid, threadsPerBlock, 0, pstream->stream >>> (pstream->in, pstream->out, pstream->ta, pstream->df, inplane->lineLen, inplane->lengthPx, sectorWidth, limitM, limitL);
+			_screen_fms_kernel <<<blocksPerGrid, threadsPerBlock, 0, pstream->stream >>> (pstream->in, pstream->out, pstream->ta, pstream->df, inplane->lineLen, inplane->lengthPx, outplane->lineLen, sectorWidth, limitM, limitL);
 
 		cudaStreamSynchronize(pstream->stream);
 		pstream->time[2]=rx_get_ticks();

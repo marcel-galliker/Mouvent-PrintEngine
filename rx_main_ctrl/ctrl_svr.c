@@ -617,18 +617,16 @@ static void _send_ink_def(int headNo, char *dots)
 				memcpy(msg.dots, dots, sizeof(msg.dots));
 				
 				no = headNo*HEAD_CNT+n;
-				if (RX_Config.headFpVoltage[no]) 
-				{
-					msg.fpVoltage = RX_Config.headFpVoltage[no];
-					Error(LOG, 0, "Using User Firepulse Voltage=%d%%", msg.fpVoltage);
-				}
-				else if (RX_HBStatus[headNo].head[n].eeprom_mvt.voltage)
-					msg.fpVoltage = RX_HBStatus[headNo].head[n].eeprom_mvt.voltage;
-				else
-				{
-					msg.fpVoltage = RX_HBStatus[headNo].head[n].eeprom.voltage;
-					Error(LOG, 0, "Using Fuji Firepulse Voltage=%d%%", msg.fpVoltage);
-				}
+				if (RX_Config.headFpVoltage[no])							msg.fpVoltage = RX_Config.headFpVoltage[no];
+				else if (RX_HBStatus[headNo].head[n].eeprom_mvt.voltage)	msg.fpVoltage = RX_HBStatus[headNo].head[n].eeprom_mvt.voltage;
+				else														msg.fpVoltage = RX_HBStatus[headNo].head[n].eeprom.voltage;
+
+                ErrorEx(dev_head, n, LOG, 0, "Head[%d]: FirepulseVoltage=%d%% (user=%d, mvt=%d, fuji=%d)",
+					n+1,
+					msg.fpVoltage,
+					RX_Config.headFpVoltage[no], 
+					RX_HBStatus[headNo].head[n].eeprom_mvt.voltage, 
+					RX_HBStatus[headNo].head[n].eeprom.voltage);
 
 				if(_HeadCtrl[headNo].cfg->reverseHeadOrder) no = RX_Config.colorCnt*RX_Config.headsPerColor-1-no;
 				memcpy(&msg.ink, &RX_Config.inkSupply[inksupply].ink, sizeof(msg.ink));
