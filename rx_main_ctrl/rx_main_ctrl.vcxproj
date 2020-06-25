@@ -352,6 +352,9 @@
       <Command>
       </Command>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>..\VersionUpdate $(ProjectDir)version.c</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -372,6 +375,9 @@
     <PostBuildEvent>
       <Command>copy ..\Externals\Tec-it\win\TBarCode11\Bin\TBarCode11.dll $(OutDir) 2&gt;nul 1&gt;nul  Exit 0</Command>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>..\VersionUpdate $(ProjectDir)version.c</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug-Remote|Win32'">
     <ClCompile>

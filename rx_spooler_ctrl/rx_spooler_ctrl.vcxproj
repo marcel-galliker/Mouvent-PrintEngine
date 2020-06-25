@@ -321,8 +321,7 @@
       </AdditionalCompilerOptions>
     </CudaCompile>
     <PreBuildEvent>
-      <Command>
-      </Command>
+      <Command>..\VersionUpdate $(ProjectDir)version.c</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug-Remote|x64'">
