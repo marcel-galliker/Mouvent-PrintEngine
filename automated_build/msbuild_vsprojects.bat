@@ -88,8 +88,6 @@ if "%1"=="other" (
   dotnet restore %BATCH_PATH%..
   call :LIB_X64
   call :BIN_X64
-  call :LIB_X32
-  call :BIN_X32
   call :LIB_SOC
   call :BIN_SOC
   call :LIB_LX
@@ -122,34 +120,17 @@ REM ----------------------------------------------------------------------------
 	call :BUILD_PROJECT rx_head_cond, vcxproj
 	goto :EOF
 
-:LIB_X32
-	set BUILD=32
-	set FLAGS=/m /property:Configuration=Release /property:Platform=Win32 /property:SolutionDir=%BATCH_PATH%..\
-	call :BUILD_PROJECT rx_common_lib, vcxproj
-	call :BUILD_PROJECT rx_tif_lib, vcxproj
-	call :BUILD_PROJECT rx_pecore_lib, vcxproj
-	call :BUILD_PROJECT TinyXML, vcxproj, Externals\
-	REM rx_rip_lib must be built after TinyXML
-	call :BUILD_PROJECT rx_rip_lib, vcxproj
-	goto :EOF
-
-:BIN_X32
-	set BUILD=32
-	set FLAGS=/m /property:Configuration=Release /property:Platform=Win32 /property:SolutionDir=%BATCH_PATH%..\
-	call :BUILD_PROJECT rx_main_ctrl, vcxproj
-	goto :EOF
-REM ----------------------------------------------------------------------------
-
 :LIB_X64
 	set BUILD=64
 	set FLAGS=/m /property:Configuration=Release /property:Platform=x64 /property:SolutionDir=%BATCH_PATH%..\
 	call :BUILD_PROJECT rx_common_lib, vcxproj
 	call :BUILD_PROJECT rx_common_lib_cs, csproj
+	call :BUILD_PROJECT rx_tif_lib, vcxproj
+	call :BUILD_PROJECT rx_pecore_lib, vcxproj
 	call :BUILD_PROJECT ScanCheckParser, sln
 	call :BUILD_PROJECT TinyXML, vcxproj, Externals\
 	REM rx_rip_lib must be built after TinyXML
 	call :BUILD_PROJECT rx_rip_lib, vcxproj
-	call :BUILD_PROJECT rx_tif_lib, vcxproj
 	call :BUILD_PROJECT rx_slicescreen_lib, vcxproj
 	goto :EOF
 
@@ -157,6 +138,7 @@ REM ----------------------------------------------------------------------------
 	set BUILD=64
 	set FLAGS=/m /property:Configuration=Release /property:Platform=x64 /property:SolutionDir=%BATCH_PATH%..\
 	call :BUILD_PROJECT rx_spooler_ctrl, vcxproj
+	call :BUILD_PROJECT rx_main_ctrl, vcxproj
 	call :BUILD_PROJECT rx_digiprint_gui, sln
 	call :BUILD_PROJECT mvt_digiprint_gui, sln
 	call :BUILD_PROJECT Win10-Install, vcxproj, Win10\
