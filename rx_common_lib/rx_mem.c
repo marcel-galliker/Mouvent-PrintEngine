@@ -210,7 +210,8 @@ int  rx_mem_await_abort(BYTE *ptr)
 	{
 		SBuffer *buf = ((SBuffer*)ptr) - 1;
 		return rx_sem_post(buf->sem_IsFree);
-	}	
+	}
+	return REPLY_OK;
 }
 
 

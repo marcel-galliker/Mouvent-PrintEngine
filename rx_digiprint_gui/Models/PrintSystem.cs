@@ -132,7 +132,7 @@ namespace RX_DigiPrint.Models
             get { return _PrinterType; }
             set 
             { 
-                if (SetProperty(ref _PrinterType, value))
+                if (SetProperty(ref _PrinterType, value) || IS_Order==null)
                 {
                     Changed=true;
                     switch(_PrinterType)
