@@ -493,7 +493,7 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 	memcpy(&msg.id, pid, sizeof(msg.id));
 	memcpy(&_Id[RX_PrinterStatus.sentCnt%MAX_PAGES], pid, sizeof(msg.id));
 
-	if (RX_Config.printer.type==printer_LB702_UV)
+	if (RX_Config.printer.type==printer_LB702_UV && !RX_PrinterStatus.testMode)
 	{
 		int i;
 		SPageId *p; 
