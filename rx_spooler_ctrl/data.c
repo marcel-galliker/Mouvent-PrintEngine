@@ -1089,6 +1089,7 @@ static int _get_blk_cnt(SBmpSplitInfo *pInfo, int bitsPerPixel)
 //--- _data_split -----------------------------------------------------------------------
 static int _data_split(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int lengthPx, int blkNo, int blkCnt, int flags, int clearBlockUsed, int same, SPrintListItem *pItem)
 {		
+	int srcWidthPx;
 	if (pBmpInfo->printMode==PM_SCANNING && id->id!=_LastSplitId)
 	{
 		_LastSplitId = id->id;
@@ -1120,7 +1121,8 @@ static int _data_split(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int length
 		case PM_SCANNING:			
 		case PM_SCAN_MULTI_PAGE:	return _data_split_prod(id, pBmpInfo, offsetPx, lengthPx, blkNo, blkCnt, clearBlockUsed, FALSE && same, pItem);
 
-		case PM_SINGLE_PASS:		return _data_split_prod(id, pBmpInfo, offsetPx, min(RX_Spooler.barWidthPx, (int)pBmpInfo->srcWidthPx), blkNo, blkCnt, clearBlockUsed, same, pItem);
+        case PM_SINGLE_PASS:		srcWidthPx = (pBmpInfo->resol.x)? pBmpInfo->srcWidthPx*DPI_X/pBmpInfo->resol.x : pBmpInfo->srcWidthPx;
+									return _data_split_prod(id, pBmpInfo, offsetPx, min(RX_Spooler.barWidthPx, srcWidthPx), blkNo, blkCnt, clearBlockUsed, same, pItem);
 
 		default:					return Error(ERR_STOP, 0, "Splitting algorithm not implemented");
 	}
