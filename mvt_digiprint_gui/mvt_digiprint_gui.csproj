@@ -350,6 +350,7 @@
     <Compile Include="External\rx_wlan.cs" />
     <Compile Include="Helpers\Constants.cs" />
     <Compile Include="Helpers\CorrectionValue.cs" />
+    <Compile Include="Helpers\CustomWindow.cs" />
     <Compile Include="Helpers\ErrorMessage.cs" />
     <Compile Include="Helpers\MvtInkSupplyRadioButton.cs" />
     <Compile Include="Helpers\ObservableCollectionEx.cs" />
@@ -367,9 +368,11 @@
     <Compile Include="Helpers\RxXamGrid.cs" />
     <Compile Include="Helpers\UnitConversion.cs" />
     <Compile Include="Models\ClusterAlignment.cs" />
+    <Compile Include="Models\Density.cs" />
     <Compile Include="Models\DisabledJets.cs" />
     <Compile Include="Models\HeadAdjustmentHelp.cs" />
     <Compile Include="Models\JetCompensation.cs" />
+    <Compile Include="Models\JetCompensationDensityViewModel.cs" />
     <Compile Include="Models\SoftwareValueCorrection.cs" />
     <Compile Include="Models\StepperStatus.cs" />
     <Compile Include="Views\AlignmentView\AlignmentSettings.xaml.cs">

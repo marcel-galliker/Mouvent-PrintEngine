@@ -1,21 +1,11 @@
 ﻿using RX_DigiPrint.Models;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using RX_Common;
 using RX_DigiPrint.Models.Enums;
 using System.Collections.ObjectModel;
@@ -23,13 +13,14 @@ using RX_DigiPrint.External;
 using System.Threading;
 using RX_DigiPrint.Services;
 using RX_DigiPrint.Views.UserControls;
+using RX_DigiPrint.Helpers;
 
 namespace RX_DigiPrint.Views.Settings
 {
     /// <summary>
     /// Interaction logic for SettingsDlg.xaml
     /// </summary>
-    public partial class SettingsDlg : Window
+    public partial class SettingsDlg : CustomWindow
     {
         private PrinterProperties _Settings;
 
@@ -223,6 +214,11 @@ namespace RX_DigiPrint.Views.Settings
             {
                 Rx.StartProcess("C:\\Windows\\System32\\control.exe", "/name Microsoft.WindowsUpdate");
             }
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            RxGlobals.Screen.PlaceWindow(this);
         }
     }
 }

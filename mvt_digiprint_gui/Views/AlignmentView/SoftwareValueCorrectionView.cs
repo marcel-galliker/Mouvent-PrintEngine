@@ -1,18 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Windows;
-using System.Windows.Input;
+﻿using System.Windows;
 using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Models;
-using RX_Common;
 
 namespace RX_DigiPrint.Views.Alignment
 {
     /// <summary>
     /// Interaction logic for HeadAdjustmentView.xaml
     /// </summary>
-    public partial class SoftwareValueCorrectionView : Window
+    public partial class SoftwareValueCorrectionView : CustomWindow
     {
         private SoftwareValueCorrection _SoftwareValueCorrection;
 
@@ -53,6 +48,11 @@ namespace RX_DigiPrint.Views.Alignment
         public double GetCorrectionValue()
         {
             return  _SoftwareValueCorrection.CorrectionValue.Correction;
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            RxGlobals.Screen.PlaceWindow(this);
         }
     }
 

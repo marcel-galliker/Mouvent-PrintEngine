@@ -1,4 +1,5 @@
-﻿<UserControl x:Class="RX_DigiPrint.Views.PrintSystemExtended.JetCompensation.JetCompensationView"
+﻿
+    <UserControl x:Class="RX_DigiPrint.Views.AlignmentView.DisabledJets.DisabledJetsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -7,10 +8,13 @@
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
              xmlns:ig="http://schemas.infragistics.com/xaml"
-             mc:Ignorable="d" 
-             DataContextChanged="UserControl_DataContextChanged"
-             d:DesignHeight="450" d:DesignWidth="800">
+              xmlns:sys="clr-namespace:System;assembly=mscorlib"
+              mc:Ignorable="d" 
+              d:DesignHeight="450" Width="400">
     <UserControl.Resources>
+
+        <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">32</sys:Double>
+        <sys:Double x:Key="{x:Static SystemParameters.HorizontalScrollBarHeightKey}">32</sys:Double>
 
         <Color x:Key="Mouvent.BlueDarkest">#b1cde7</Color>
         <SolidColorBrush x:Key="Mouvent.BlueDarkestBrush" Color="{StaticResource Mouvent.BlueDarkest}"></SolidColorBrush>
@@ -121,132 +125,40 @@
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="auto"/>
+            <RowDefinition Height="0"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0">
-            
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="auto"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="auto"/>
-                <ColumnDefinition Width="20"/>
-                <ColumnDefinition Width="auto"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="auto"/>
-            </Grid.ColumnDefinitions>
-
-            <common:MvtButton Grid.Column="0" x:Name="PreviousClusterButton" Margin="5" Visibility="{Binding SingleCluster, Converter={StaticResource BooleanNotToVisibleConverter}}"
-                            Click="PreviousCluster_Clicked" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}"
-                              IsEnabled="{Binding IsFirstCluster, Converter={StaticResource BooleanNotConverter}}"
-                            >
-                <iconPacks:PackIconUnicons HorizontalAlignment="Stretch" VerticalAlignment="Center" 
-                                        Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkUniconsIcon}" Width="15" Height="15" 
-                                            Kind="AngleLeftB"></iconPacks:PackIconUnicons>
-            </common:MvtButton>
-           
-            <common:MvtButton Grid.Column="2"
-                    Visibility="{Binding SingleCluster, Converter={StaticResource BooleanNotToVisibleConverter}}" x:Name="NextClusterButton" 
-                                Margin="5"
-                            Click="NextCluster_Clicked" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}"
-                              IsEnabled="{Binding IsLastCluster, Converter={StaticResource BooleanNotConverter}}"
-                            >
-                <iconPacks:PackIconUnicons HorizontalAlignment="Stretch" VerticalAlignment="Center" 
-                                        Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkUniconsIcon}" Width="15" Height="15" 
-                                            Kind="AngleRightB"></iconPacks:PackIconUnicons>
-            </common:MvtButton>
-
-            <Grid Grid.Column="1" x:Name="ClusterHeaderGrid">
-                <Border Height="40" Margin="0,10,0,10" BorderThickness="1" BorderBrush="WhiteSmoke" Background="WhiteSmoke">
-                </Border>
-                <TextBlock x:Name="ClusterName" Grid.Column="1" Margin="5,10,10,10" Foreground="#ff303030" FontWeight="SemiBold" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"
-                               Text="{Binding ClusterName}"/>
-            </Grid>
-
-            <common:MvtButton Grid.Column="4" x:Name="PreviousPrintHeadButton" Margin="5"
-                            Click="PreviousPrintHead_Clicked" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}"
-                               IsEnabled="{Binding IsFirstPrintHead, Converter={StaticResource BooleanNotConverter}}"
-                            >
-                <iconPacks:PackIconUnicons HorizontalAlignment="Stretch" VerticalAlignment="Center" 
-                                        Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkUniconsIcon}" Width="15" Height="15" 
-                                            Kind="AngleLeftB"></iconPacks:PackIconUnicons>
-            </common:MvtButton>
-
-            <common:MvtButton Grid.Column="6"
-                    x:Name="NextPrintHeadButton" 
-                                Margin="5"
-                            Click="NextPrintHead_Clicked" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}"
-                              IsEnabled="{Binding IsLastPrintHead, Converter={StaticResource BooleanNotConverter}}"
-                            >
-                <iconPacks:PackIconUnicons HorizontalAlignment="Stretch" VerticalAlignment="Center" 
-                                        Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkUniconsIcon}" Width="15" Height="15" 
-                                            Kind="AngleRightB"></iconPacks:PackIconUnicons>
-            </common:MvtButton>
-
-            <Grid Grid.Column="5" x:Name="PrintHeadHeaderGrid">
-                <Border Height="40" Margin="0,10,0,10" BorderThickness="1" BorderBrush="WhiteSmoke" Background="WhiteSmoke">
-                </Border>
-                <TextBlock x:Name="HeadName" Grid.Column="1" Margin="5,10,10,10" Foreground="#ff303030" FontWeight="SemiBold" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"
-                               Text="{Binding HeadName}"/>
-            </Grid>
-        </Grid>
-            
         <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="auto"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            
-            <common:MvtButton x:Name="AddJetButton" Margin="5, 5, 30, 5" Grid.Row="1" Grid.Column="0"
+            <StackPanel Orientation="Horizontal">
+                <common:MvtButton x:Name="AddJetButton" Margin="5" 
                               IsEnabled="{Binding CanAddJetNumber, Converter={StaticResource BoolToVisible_Converter}}"
                               Click="AddJet_Clicked" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}"
                               >
-                <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" 
+                    <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" 
                                             Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 
                                                 Kind="Plus"></iconPacks:PackIconMaterial>
-            </common:MvtButton>
+                </common:MvtButton>
 
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" HorizontalAlignment="Right">
-
-                <common:MvtButton x:Name="RemoveSelectedButton" Margin="5" HorizontalAlignment="Right"
-                              Click="RemoveSelectedJets_Clicked" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}"
+                <common:MvtButton x:Name="LoadFileButton" Margin="5"
+                              IsEnabled="{Binding CanAddJetNumber, Converter={StaticResource BoolToVisible_Converter}}"
+                             Click="LoadFile_Clicked"  Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}"
                               >
                     <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" 
                                             Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 
-                                                Kind="Delete"></iconPacks:PackIconMaterial>
+                                                Kind="FolderOpenOutline"></iconPacks:PackIconMaterial>
                 </common:MvtButton>
-
-
-                <common:MvtButton x:Name="ActivateSelectedButton" Margin="5"
-                              Click="ActivateSelected_Clicked" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}"
-                              >
-                    <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" 
-                                            Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 
-                                                Kind="Check"></iconPacks:PackIconMaterial>
-                </common:MvtButton>
-
-                <common:MvtButton x:Name="DeactivateSelectedButton" Margin="5"
-                              Click="DeactivateSelected_Clicked" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}"
-                              >
-                    <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" 
-                                            Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 
-                                                Kind="Close"></iconPacks:PackIconMaterial>
-                </common:MvtButton>
-
 
             </StackPanel>
-
         </Grid>
 
-        <ig:XamGrid  Grid.Row="2"  
+        <ig:XamGrid  Grid.Row="2"
                 Margin="10"
-                ItemsSource="{Binding DisabledJets}"
+                ItemsSource="{Binding JetList}"
                 BorderBrush="WhiteSmoke"
-                        BorderThickness="2"
-                x:Name="JetCompensationNewDataGrid"
+                BorderThickness="2"
                 ColumnWidth="*"
                 AutoGenerateColumns="False"
                 HeaderStyle="{DynamicResource XamGridJetCompensationHeaderStyle}"
@@ -254,7 +166,7 @@
                 RowHover="Row"
                 Background="Transparent"
                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                ScrollViewer.VerticalScrollBarVisibility="Auto"
+                ScrollViewer.VerticalScrollBarVisibility="Visible"
             >
 
             <ig:XamGrid.SelectionSettings>
@@ -267,52 +179,19 @@
 
             <ig:XamGrid.Columns>
 
-                <ig:TemplateColumn Key="IsSelected" Width="80" HeaderText=" ">
-
-                    <ig:TemplateColumn.HeaderTemplate>
-                        <DataTemplate>
-                            <CheckBox Style="{StaticResource CheckBoxStyleLarge}"
-                                      IsChecked="{Binding DataContext.AllSelected, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}"
-                                         Checked="CheckBox_Checked"
-                                         Unchecked="CheckBox_Unchecked"
-                                         Margin="2,0,0,0"></CheckBox>
-                        </DataTemplate>
-                    </ig:TemplateColumn.HeaderTemplate>
-
+                <ig:TemplateColumn Width="50" Key="Index" HeaderText="No" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" >
                     <ig:TemplateColumn.ItemTemplate>
                         <DataTemplate>
-                            <Grid Height="30" Background="Transparent">
-                                <CheckBox Margin="10,0,0,0" Style="{StaticResource CheckBoxStyleLarge}"
-                                              Click="SelectSingle_Click"
-                                        IsChecked="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}"
-                                        VerticalAlignment="Center"
-                                        HorizontalAlignment="Center"
-                                        />
-                            </Grid>
-                        </DataTemplate>
-                    </ig:TemplateColumn.ItemTemplate>
-
-                </ig:TemplateColumn>
-
-
-                <ig:TemplateColumn Width="*" Key="JetNumber" HeaderText="Jet Number" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" >
-                    <ig:TemplateColumn.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding JetNumber}" HorizontalAlignment="Center"/>
+                            <TextBlock Margin="10,0,0,0" Text="{Binding Index}" HorizontalAlignment="Left"/>
                         </DataTemplate>
                     </ig:TemplateColumn.ItemTemplate>
                 </ig:TemplateColumn>
 
-
-                <ig:TemplateColumn Width="*" Key="IsActivated" HeaderText="Activated" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" >
+                <ig:TemplateColumn Width="*" Key="JetNumber" HeaderText="Jet Number"
+                                   HorizontalContentAlignment="Left" VerticalContentAlignment="Center" >
                     <ig:TemplateColumn.ItemTemplate>
                         <DataTemplate>
-                            <common:MvtButton Margin="5" Tag="{Binding JetNumber}" IsChecked="{Binding IsActivated}"
-                                    Click="ActivateToggle_Clicked" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}">
-                                <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center"
-                                            Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="15" Height="15" 
-                                                Kind="{Binding IsActivated, Converter={StaticResource JetCompensation_ActivatedIconConverter }}"></iconPacks:PackIconMaterial>
-                            </common:MvtButton>
+                            <TextBlock Margin="10,0,0,0" Text="{Binding JetNumber}" HorizontalAlignment="Left"/>
                         </DataTemplate>
                     </ig:TemplateColumn.ItemTemplate>
                 </ig:TemplateColumn>
@@ -321,7 +200,7 @@
                     <ig:TemplateColumn.ItemTemplate>
                         <DataTemplate>
                             <common:MvtButton Margin="5" Tag="{Binding JetNumber}"
-                                    Click="RemoveSingleJet_Clicked" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}">
+                                    Click="RemoveJet_Clicked" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}">
                                 <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center"
                                             Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="15" Height="15" 
                                                 Kind="Delete"></iconPacks:PackIconMaterial>
@@ -358,10 +237,9 @@
             Grid.ColumnSpan="2"
             Background="{StaticResource Mouvent.BlueDarkBrush}"
             BorderBrush="{StaticResource Mouvent.BlueDarkBrush}"
-            Content="{Binding Result}"
+            Content="{Binding AddJetPadResult}"
             Width="auto"
             />
-
                 <Button Grid.Row="1" Grid.Column="0" Content="7" Click="AddJetPopup_ButtonClicked" />
                 <Button Grid.Row="1" Grid.Column="1" Content="8" Click="AddJetPopup_ButtonClicked" />
                 <Button Grid.Row="1" Grid.Column="2" Content="9" Click="AddJetPopup_ButtonClicked" />
@@ -402,6 +280,6 @@
         </rx:RxPopup>
 
         <TextBlock Grid.Row="3" HorizontalAlignment="Center" FontStyle="Italic" Margin="10" Foreground="Gray"
-                   Visibility="{Binding DisabledJets, Converter={StaticResource JetCompensation_JetsListedConverter}}">No jets listed</TextBlock>
+                   Visibility="{Binding JetList, Converter={StaticResource JetCompensation_JetsListedConverter}}">No jets listed</TextBlock>
     </Grid>
 </UserControl>

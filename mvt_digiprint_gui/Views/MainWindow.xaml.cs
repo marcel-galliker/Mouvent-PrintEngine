@@ -312,7 +312,7 @@ namespace RX_DigiPrint.Views
             {
                 PrintSystemView.Visibility = Visibility.Collapsed;
                 PrintSystemExtendedView.Visibility = Visibility.Visible;
-            }           
+            }
         }
 
         private void _InitTabs()

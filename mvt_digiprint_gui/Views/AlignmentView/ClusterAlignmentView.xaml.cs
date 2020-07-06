@@ -265,8 +265,12 @@ namespace RX_DigiPrint.Views.Alignment
             }
             globalHeadNumber = ClusterNumber * kHeadsPerCluster + tag;
             RxGlobals.DisabledJets.SetHeadNumber(globalHeadNumber);
+            RxGlobals.DisabledJets.Changed = false;
+            RxGlobals.Density.SetHeadNumber(globalHeadNumber);
+            RxGlobals.Density.Changed = false;
+
             JetCompensationDensityView view = new JetCompensationDensityView();
-            RxGlobals.DensityView.HeadNo = globalHeadNumber;
+            
             view.ShowDialog();
 
         }
@@ -601,53 +605,5 @@ namespace RX_DigiPrint.Views.Alignment
             _Alignment.BackwardsRegisterEditMode = false;
             _Alignment.JetCompensationEditMode = false;
         }
-
-       
-
-
-
-
-        /*
-        private void ColorOffsetCorrectionUnitToggle_Clicked(object sender, RoutedEventArgs e)
-        {
-            
-            if (ColorOffsetCorrectionToggleSwitch.IsChecked == true)
-            {
-                RxGlobals.Alignment.ColorOffsetCorrectionUnitInDots = true;
-            }
-            else
-            {
-                RxGlobals.Alignment.ColorOffsetCorrectionUnitInDots = false;
-            }
-            
-        }
-
-        private void AngleCorrectionUnitToggle_Clicked(object sender, RoutedEventArgs e)
-        {            
-            
-            if (AngleCorrectionToggleSwitch.IsChecked == true)
-            {
-                RxGlobals.Alignment.AngleStitchCorrectionsUnitIsInUM = true;
-            }
-            else
-            {
-                RxGlobals.Alignment.AngleStitchCorrectionsUnitIsInUM = false;
-            }
-            RxGlobals.Alignment.UpdateUnits();
-        }
-
-        private void RegisterCorrectionUnitToggle_Clicked(object sender, RoutedEventArgs e)
-        {
-            if (RegisterCorrectionToggleSwitch.IsChecked == true)
-            {
-                RxGlobals.Alignment.RegisterCorrectionUnitInDots = true;
-            }
-            else
-            {
-                RxGlobals.Alignment.RegisterCorrectionUnitInDots = false;
-            }
-            RxGlobals.Alignment.UpdateUnits();
-        }
-        */
     }
 }

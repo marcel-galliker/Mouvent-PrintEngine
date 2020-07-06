@@ -1,13 +1,7 @@
-﻿using RX_Common;
-using RX_DigiPrint.Helpers;
-using RX_DigiPrint.Models;
+﻿using RX_DigiPrint.Models;
 using RX_DigiPrint.Services;
-using RX_DigiPrint.Views.PrintQueueView;
-using System;
-using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Threading;
 
 namespace RX_DigiPrint.Views.PrintSystemView
 {
@@ -30,6 +24,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
             RxGlobals.Timer.TimerFct += _timer_Tick;
             OffsetsGrid.DataContext = RxGlobals.PrintSystem;
             EncoderGrid.SetDataContext();
+            _PrintSystem.ExpandSettingsPanel = false;
+            _PrintSystem.ChillerEnabled = false;
         }
 
         //--- User_PropertyChanged --------------------------------------
@@ -91,7 +87,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
 
                 case EPrinterType.printer_TX801:
                 case EPrinterType.printer_TX802:    
-                                                    break;            
+                                                    break;
 
                 default:                           
                                                     var stepperGrid = new StepperGrid();
@@ -178,6 +174,12 @@ namespace RX_DigiPrint.Views.PrintSystemView
         {
         //   if ((bool)e.NewValue) RxGlobals.Timer.TimerFct += _timer_Tick;
         //   else                  RxGlobals.Timer.TimerFct -= _timer_Tick;
+        }
+
+        private void ExpandSettings_Clicked(object sender, RoutedEventArgs e)
+        {
+            _PrintSystem.ExpandSettingsPanel = !_PrintSystem.ExpandSettingsPanel;
+            EncoderGrid.UpdateVisibility(_PrintSystem.PrinterType);
         }
     }
 }

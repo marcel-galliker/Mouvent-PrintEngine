@@ -127,6 +127,7 @@
     <alignment_converters:FaultTypeConverter x:Key="FaultTypeConverter"/>
 
     <alignment_converters:ExpandSectionIconConverter x:Key="ExpandSectionIconConverter"/>
+    <alignment_converters:ExitDialogIconConverter x:Key="ExitDialogIconConverter"/>
     
 
     <converters:InkSupplyStatusColorConverter_Connected x:Key="InkSupplyStatusColorConverter_Connected"/>

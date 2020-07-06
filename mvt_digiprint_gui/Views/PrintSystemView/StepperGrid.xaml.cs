@@ -32,7 +32,13 @@ namespace RX_DigiPrint.Views.PrintSystemView
         }
 
         public void UpdateVisibility(EPrinterType type)
-        { 
+        {
+            if (!RxGlobals.PrintSystem.ExpandSettingsPanel)
+            {
+                this.Visibility = Visibility.Collapsed;
+                return;
+            }
+
             switch (type)
             {
                 // TODO(CB612) add case for CB612

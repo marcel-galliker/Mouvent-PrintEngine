@@ -2,13 +2,10 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:igGrids="http://infragistics.com/DataPresenter"
-             xmlns:ig="http://schemas.infragistics.com/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:igWPF="http://schemas.infragistics.com/xaml/wpf"
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
              xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
-             xmlns:uc="clr-namespace:RX_DigiPrint.Views.UserControls"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              mc:Ignorable="d" 
              
@@ -100,10 +97,16 @@
                 </CheckBox>
         </Grid>
 
-        <common:MvtButton Margin="15, 30, 15, 15" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}" Click="Print_Clicked">
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
+        <common:MvtButton Margin="0,0,10,0" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}" Click="Print_Clicked">
             <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 
                                                 Kind="Printer"></iconPacks:PackIconMaterial>
         </common:MvtButton>
 
+        <common:MvtButton Margin="0" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}" Click="Cancel_Clicked">
+            <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 
+                                                Kind="Close"></iconPacks:PackIconMaterial>
+        </common:MvtButton>
+        </StackPanel>
     </StackPanel>
 </UserControl>

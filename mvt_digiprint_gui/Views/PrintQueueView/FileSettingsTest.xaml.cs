@@ -225,5 +225,11 @@ namespace RX_DigiPrint.Views.PrintQueueView
                 }
             }
         }
+
+        private void Cancel_Clicked(object sender, RoutedEventArgs e)
+        {
+            var myWindow = Window.GetWindow(this);
+            myWindow.Close();
+        }
     }
 }

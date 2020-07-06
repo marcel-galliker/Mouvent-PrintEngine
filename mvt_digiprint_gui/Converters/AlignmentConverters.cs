@@ -523,8 +523,6 @@ namespace RX_DigiPrint.Converters.Alignment
         {
             try
             {
-
-
                 bool visible = true;
                 foreach (object value in values)
                     if (value is bool)
@@ -773,6 +771,31 @@ namespace RX_DigiPrint.Converters.Alignment
             }
 
             return PackIconMaterialKind.ChevronRight;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    class ExitDialogIconConverter : IValueConverter
+    {
+        public object Convert(object value,
+                                Type targetType,
+                                object parameter,
+                                System.Globalization.CultureInfo culture)
+        {
+            bool? changed = (bool?)value;
+            if (changed.HasValue)
+            {
+                if ((bool)changed == false)
+                {
+                    return PackIconMaterialKind.Check;
+                }
+            }
+
+            return PackIconMaterialKind.Close;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

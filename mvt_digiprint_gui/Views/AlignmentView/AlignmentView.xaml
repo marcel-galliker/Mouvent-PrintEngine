@@ -104,7 +104,7 @@
         </ScrollViewer>
 
         <Grid Grid.Row="3">
-            <mahapps:ToggleSwitch x:Name="ColorOffsetCorrectionToggleSwitch" Margin="10,5,10,5" Grid.Row="1" Style="{StaticResource MahApps.Metro.Styles.ToggleSwitch.Win10}"
+            <mahapps:ToggleSwitch Margin="10,5,10,5" Grid.Row="1" Style="{StaticResource MahApps.Metro.Styles.ToggleSwitch.Win10}"
                               Visibility="{Binding RegisterEditMode, Converter={StaticResource BoolToVisible_Converter}}"
                           Content="Propagate correction values to all following print heads"
                           IsChecked="{Binding ApplyCorrectionValuesToAllFollowingPrintHeads}">

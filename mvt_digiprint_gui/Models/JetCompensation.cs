@@ -12,7 +12,9 @@ namespace RX_DigiPrint.Models
     {
         public int JetNumber { get; set; }
 
-        // for xam grid only
+        // --- for xam grid only: -------------------- //
+        public int Index { get; set; }
+
         public bool Remove
         {
             get { return true; }

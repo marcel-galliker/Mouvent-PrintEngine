@@ -406,7 +406,6 @@ namespace RX_DigiPrint.Views.Alignment
         {
             AlignmentSettings settings = new AlignmentSettings();
             bool? result = settings.ShowDialog();
-
         }
     }
 }
