@@ -39,6 +39,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 return;
             }
 
+            this.Visibility = Visibility.Visible;
+
             switch (type)
             {
                 // TODO(CB612) add case for CB612

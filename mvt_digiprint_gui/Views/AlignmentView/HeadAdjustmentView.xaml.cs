@@ -26,5 +26,10 @@ namespace RX_DigiPrint.Views.Alignment
         {
             RxGlobals.Screen.PlaceWindow(this);
         }
+
+        private void Cancel_Click(object sender, RoutedEventArgs e)
+        {
+            DialogResult = false;
+        }
     }
 }

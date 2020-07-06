@@ -16,14 +16,11 @@
         Width="600" 
         Height="740"
         ResizeMode="NoResize">
-    <Grid>
-        <!-- 
-        <ScrollViewer>
+    <ScrollViewer>
         <ScrollViewer.Resources>
             <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">30</sys:Double>
             <sys:Double x:Key="{x:Static SystemParameters.HorizontalScrollBarHeightKey}">30</sys:Double>
         </ScrollViewer.Resources>
-        -->
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"></RowDefinition>
@@ -90,7 +87,7 @@
                     <rx:MvtTextBox Grid.Row="3" Grid.Column="1" Margin="2" Text="{Binding Host_Mask}"/>
                 </Grid>
             </GroupBox>
-
+            
             <!-- Commands Grid ___________________________________________________________________-->
             <GroupBox Grid.Row="1" Grid.Column="0" Header="Support Commands" Style="{StaticResource MvtGroupBox}" Margin="10,10,0,0">
                 <StackPanel Margin="5" HorizontalAlignment="Center">
@@ -178,6 +175,5 @@
 
             </StackPanel>
         </Grid>
-        <!-- </ScrollViewer> -->
-    </Grid>
+    </ScrollViewer>
 </rx:CustomWindow>

@@ -1,27 +1,15 @@
 ﻿using RX_Common;
 using RX_DigiPrint.Models;
 using RX_DigiPrint.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace RX_DigiPrint.Views.PrintSystemView
 {
     /// <summary>
     /// Interaction logic for EncoderView.xaml
     /// </summary>
-    
+
     public partial class EncoderView : UserControl
     {
         public bool HasEncoder2 { get; set; }

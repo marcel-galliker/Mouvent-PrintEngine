@@ -9,6 +9,7 @@
         Loaded="Window_Loaded"
         mc:Ignorable="d"
         SizeToContent="WidthAndHeight"
+        ResizeMode="NoResize"
         Title="Head Adjustment">
 
     <Window.Resources>

@@ -4,9 +4,27 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+        xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
         mc:Ignorable="d"
         Loaded="Window_Loaded"
+        ResizeMode="NoResize"
         Title="HeadAdjustment" SizeToContent="WidthAndHeight">
-    <Grid x:Name="MainGrid">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+        <Grid x:Name="MainGrid" Grid.Row="0">
+        </Grid>
+        <StackPanel Grid.Row="1"  Margin="10">
+            <common:MvtButton
+                                     Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}"
+                                 Click="Cancel_Click">
+                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}"
+                                        Kind="Close"
+                                        VerticalAlignment="Center" HorizontalAlignment="Center" Width="20" Height="20"/>
+            </common:MvtButton>
+        </StackPanel>
     </Grid>
 </helpers:CustomWindow>
