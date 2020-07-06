@@ -426,7 +426,6 @@ static void _set_src_size(SPrintQueueItem *pItem, const char *path)
 	}
 }
 
-
 //--- _local_path  -----------------------------------------------------
 static void _local_path(const char *global, char *local)
 {

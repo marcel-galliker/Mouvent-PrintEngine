@@ -532,7 +532,7 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 		case PG_MODE_MARK:	 
 		case PG_MODE_MARK_INV:	 
 		case PG_MODE_MARK_VRT:		
-							 dist.dist		   = pitem->printGoDist;
+							 dist.dist		   = (pitem->printGoDist>0) ? pitem->printGoDist:0;
 							 dist.printGoMode  = PG_MODE_MARK_FILTER;
 							 if (!_FirstPG)
 							 {

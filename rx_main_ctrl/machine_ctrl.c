@@ -22,6 +22,9 @@
 #include "step_cleaf.h"
 #include "fluid_ctrl.h"
 
+
+#define CAPPING_TIMEOUT	120000	// ms 
+
 typedef enum 
 {	
 	mi_none,
@@ -30,6 +33,7 @@ typedef enum
 } EMachineInterface;
 
 static EMachineInterface _MInterface = mi_none;
+static int				 _CappingTimer=0;
 
 //--- set_interface ----------------------------------
 static void set_interface(void)
@@ -71,6 +75,13 @@ int		machine_end(void)
 //--- machine_tick -------------------------------
 int		machine_tick(void)
 {
+	if(rx_def_is_tx(RX_Config.printer.type))
+	{
+		if (_CappingTimer>0 && _CappingTimer<rx_get_ticks())
+		{
+			fluid_send_ctrlMode(-1, ctrl_cap, TRUE);
+		}
+	}
 	return REPLY_OK;
 }
 
@@ -141,6 +152,8 @@ UINT32	machine_get_scanner_pos(void)
 int		machine_start_printing(void)
 {
 	TrPrintfL(TRUE, "machine_start_printing printState=%d", RX_PrinterStatus.printState);
+	_CappingTimer=0;
+
 	switch(_MInterface) 
 	{
 	case mi_none:	return REPLY_OK;
@@ -165,6 +178,7 @@ int		machine_pause_printing(int fromGui)
 //--- machine_stop_printing -----------------------
 int		machine_stop_printing(void)
 {
+	if (_CappingTimer==0) _CappingTimer=rx_get_ticks()+CAPPING_TIMEOUT;
 	switch(_MInterface) 
 	{
 	case mi_none:	return enc_stop_printing();
@@ -177,6 +191,7 @@ int		machine_stop_printing(void)
 //--- machine_abort_printing -----------------------
 int		machine_abort_printing(void)
 {
+	if (_CappingTimer==0) _CappingTimer=rx_get_ticks()+CAPPING_TIMEOUT;
 	switch(_MInterface) 
 	{
 	case mi_none:	return enc_abort_printing();
