@@ -445,8 +445,9 @@ static void _scr_load(SBmpSplitInfo *pInfo, int threadNo)
 	int trace=FALSE;
 
 	//--- original --------------------------------------------------
-	if (FALSE)
+	if (FALSE && pInfo->colorCode==0)
 	{
+		printf("black\n");
 		for (blk=0; blk<pInfo->blkCnt; blk++)
 		{
 			data_fill_blk(pInfo, blk, &_ScrMem[b][h].separated[blk*RX_Spooler.dataBlkSize], FALSE);
@@ -566,7 +567,7 @@ static void _scr_load(SBmpSplitInfo *pInfo, int threadNo)
 static void _scr_fill_blk(SBmpSplitInfo *psplit, BYTE *dst)
 {
 	int		mirror=FALSE; // psplit->pListItem->flags&FLAG_MIRROR; // image is mirrored at sending
-	int		len, l;
+	int		len, l, width;
 	int		line	= 0;
 	int		start   = 0;
 	int		startBt    = psplit->startBt;
@@ -606,18 +607,20 @@ static void _scr_fill_blk(SBmpSplitInfo *psplit, BYTE *dst)
 			memset(dst, 0x00, fillLen);
 			dst += fillLen;
 		}
-		start = (startBt) % srcWidthBt;
+		start = startBt % srcWidthBt;
 		len   = dstLineLen-fillLen;
 		s     = src+start;
+		width = srcWidthBt-start;
 
 		//--- copy the image data ----------------------------
 		while (len)
 		{
-			l = (len>srcWidthBt) ? srcWidthBt : len;
-			len -=l;
+			l = (len>width) ? width : len;
 			memcpy(dst, s, l);
+			len -=l;
 			dst+=l;
 			s=src;
+			width=srcWidthBt;
 		}
 
 		if (mirror)	

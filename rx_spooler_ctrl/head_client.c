@@ -380,7 +380,7 @@ void hc_send_next()
 									}
 									break;
 
-				case dev_on:	//	if (FALSE && pInfo->colorCode==0)	// see rx_def.c: RX_ColorName
+				case dev_on:		if (FALSE && pInfo->colorCode==0)	// see rx_def.c: RX_ColorName
 									{						
 										_save_to_file(pInfo, FALSE);
 										Error(LOG, 0, "File (id=%d, page=%d, copy=%d, scan=%d) blk0=%d, blkCnt=%d saved to File", pInfo->pListItem->id.id, pInfo->pListItem->id.page, pInfo->pListItem->id.copy, pInfo->pListItem->id.scan, pInfo->blk0, pInfo->blkCnt);
