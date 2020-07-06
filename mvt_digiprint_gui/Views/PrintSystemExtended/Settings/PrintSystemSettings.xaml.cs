@@ -1,4 +1,5 @@
-﻿using RX_DigiPrint.Models;
+﻿using RX_DigiPrint.Helpers;
+using RX_DigiPrint.Models;
 using RX_DigiPrint.Models.Enums;
 using RX_DigiPrint.Services;
 using RX_DigiPrint.Views.PrintSystemView;
@@ -10,7 +11,7 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
     /// <summary>
     /// Interaction logic for PrintSystemSettings.xaml
     /// </summary>
-    public partial class PrintSystemSettings : Window, INotifyPropertyChanged
+    public partial class PrintSystemSettings : CustomWindow, INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -361,6 +362,11 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
         private void PrinterTypeCombo_LostFocus(object sender, RoutedEventArgs e)
         {
             UpdateView();
+        }
+
+        private void CustomWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            RxGlobals.Screen.PlaceWindow(this);
         }
     }
 }

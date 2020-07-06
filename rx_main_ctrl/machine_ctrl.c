@@ -23,7 +23,7 @@
 #include "fluid_ctrl.h"
 
 
-#define CAPPING_TIMEOUT	120000	// ms 
+#define CAPPING_TIMEOUT	(20*60*1000)	// ms 
 
 typedef enum 
 {	
@@ -79,6 +79,8 @@ int		machine_tick(void)
 	{
 		if (_CappingTimer>0 && _CappingTimer<rx_get_ticks())
 		{
+			_CappingTimer=0;
+			Error(LOG, 0, "Setting printhead to capping position.");
 			fluid_send_ctrlMode(-1, ctrl_cap, TRUE);
 		}
 	}

@@ -1,6 +1,6 @@
 ﻿using RX_Common;
+using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Models;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;
@@ -10,7 +10,7 @@ namespace RX_DigiPrint.Views.AlignmentView
     /// <summary>
     /// Interaction logic for AlignmentSettings.xaml
     /// </summary>
-    public partial class AlignmentSettings : Window, INotifyPropertyChanged
+    public partial class AlignmentSettings : CustomWindow, INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -127,5 +127,11 @@ namespace RX_DigiPrint.Views.AlignmentView
         {
             DialogResult = false;
         }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            RxGlobals.Screen.PlaceWindow(this);
+        }
     }
 }
+

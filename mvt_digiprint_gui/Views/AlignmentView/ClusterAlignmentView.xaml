@@ -92,9 +92,9 @@
 
         <common:MvtButton Visibility="{Binding IsFirstInView, Converter={StaticResource BoolToVisible_Converter}}" 
                           Grid.Row="2" Grid.RowSpan="4" VerticalAlignment="Top" Grid.Column="0" HorizontalAlignment="Left"  Margin="5,5,5,5"
-                          Click="ExpandColorOffset_Clicked" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeS}">
+                          Click="ExpandColorOffset_Clicked" Style="{StaticResource Mouvent.RoundIconButtonStyle.ExpandCollapseButton}">
             <iconPacks:PackIconMaterial x:Name="ColorOffsetExpandIcon" VerticalAlignment="Center" HorizontalAlignment="Center"
-                                            Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 
+                                            Style="{StaticResource Mouvent.RoundIconButtonStyle.ExpandCollapseIcon}" Width="20" Height="20" 
                                                 Kind="{Binding ColorOffsetEditMode, Converter={StaticResource ExpandSectionIconConverter}}"></iconPacks:PackIconMaterial>
         </common:MvtButton>
 
@@ -113,7 +113,7 @@
                 <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
 
-            <common:MvtButton  Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}" Grid.Column="0"
+            <common:MvtButton  Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}" Grid.Column="0"
                            Margin="5" Tag="0"
                 Click="ColorOffsetInfoButton_Click" ToolTip="ColorOffset">
                 <common:MvtButton.Visibility>
@@ -122,14 +122,14 @@
                         <Binding Path="ShowColorOffset"/>
                     </MultiBinding>
                 </common:MvtButton.Visibility>
-                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}"
+                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}"
                                         Kind="{Binding IsScanning, Converter={StaticResource ColorOffsetCorrectionIconConverter}}"
                                         VerticalAlignment="Center" HorizontalAlignment="Center" Width="20" Height="20"/>
             </common:MvtButton>
 
-            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}"  Grid.Column="1"
+            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}"  Grid.Column="1"
                          Margin="5" Tag="1" Click="ColorOffsetInfoButton_Click" ToolTip="ColorOffset">
-                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}"
+                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}"
                 Kind="{Binding IsScanning, Converter={StaticResource ColorOffsetCorrectionIconConverter}}"
                                         VerticalAlignment="Center" HorizontalAlignment="Center" Width="20" Height="20"/>
                 <common:MvtButton.Visibility>
@@ -140,7 +140,7 @@
                 </common:MvtButton.Visibility>
             </common:MvtButton>
 
-            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}"  Grid.Column="2"
+            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}"  Grid.Column="2"
                           Margin="5" Tag="2" Click="ColorOffsetInfoButton_Click" ToolTip="ColorOffset"
                 >
                 <common:MvtButton.Visibility>
@@ -150,13 +150,13 @@
                     </MultiBinding>
                 </common:MvtButton.Visibility>
 
-                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}"
+                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}"
                                         Kind="{Binding IsScanning, Converter={StaticResource ColorOffsetCorrectionIconConverter}}"
                                         VerticalAlignment="Center" HorizontalAlignment="Center" Width="20" Height="20"/>
             </common:MvtButton>
 
 
-            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}"  Grid.Column="3"
+            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}"  Grid.Column="3"
                         Margin="5" Tag="3" Click="ColorOffsetInfoButton_Click" ToolTip="ColorOffset"
                     >
                 <common:MvtButton.Visibility>
@@ -165,7 +165,7 @@
                         <Binding Path="ShowColorOffset"/>
                     </MultiBinding>
                 </common:MvtButton.Visibility>
-                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" 
+                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" 
                                         Kind="{Binding IsScanning, Converter={StaticResource ColorOffsetCorrectionIconConverter}}"
                                         VerticalAlignment="Center" HorizontalAlignment="Center" Width="20" Height="20"/>
             </common:MvtButton>
@@ -325,9 +325,9 @@
         <!--Angle-->
         <common:MvtButton Visibility="{Binding IsFirstInView, Converter={StaticResource BoolToVisible_Converter}}" 
                           Grid.Row="6" Grid.RowSpan="3" VerticalAlignment="Top" Grid.Column="0" HorizontalAlignment="Left"  Margin="5,5,5,5"
-                          Click="ExpandAngle_Clicked" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeS}">
+                          Click="ExpandAngle_Clicked" Style="{StaticResource Mouvent.RoundIconButtonStyle.ExpandCollapseButton}">
             <iconPacks:PackIconMaterial x:Name="AngleExpandIcon" VerticalAlignment="Center" HorizontalAlignment="Center"
-                                            Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 
+                                            Style="{StaticResource Mouvent.RoundIconButtonStyle.ExpandCollapseIcon}" Width="20" Height="20" 
                                                 Kind="{Binding AngleEditMode, Converter={StaticResource ExpandSectionIconConverter}}"></iconPacks:PackIconMaterial>
         </common:MvtButton>
 
@@ -343,28 +343,28 @@
                 <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
 
-            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}"  Grid.Column="0"
+            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}"  Grid.Column="0"
                          Margin="5" Tag="0" Click="AngleInfoButton_Click"
                 ToolTip="Angle">
-                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Kind="AngleAcute" VerticalAlignment="Center" HorizontalAlignment="Center" Width="20" Height="20"/>
+                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Kind="AngleAcute" VerticalAlignment="Center" HorizontalAlignment="Center" Width="20" Height="20"/>
             </common:MvtButton>
 
-            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}"  Grid.Column="1"
+            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}"  Grid.Column="1"
                         Margin="5" Tag="1" Click="AngleInfoButton_Click" ToolTip="Angle"
                         >
-                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Kind="AngleAcute" VerticalAlignment="Center" HorizontalAlignment="Center" Width="20" Height="20"/>
+                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Kind="AngleAcute" VerticalAlignment="Center" HorizontalAlignment="Center" Width="20" Height="20"/>
             </common:MvtButton>
 
-            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}"  Grid.Column="2"
+            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}"  Grid.Column="2"
                         Margin="5" Tag="2" Click="AngleInfoButton_Click" ToolTip="Angle"
                         >
-                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Kind="AngleAcute"  VerticalAlignment="Center" HorizontalAlignment="Center" Width="20" Height="20"/>
+                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Kind="AngleAcute"  VerticalAlignment="Center" HorizontalAlignment="Center" Width="20" Height="20"/>
             </common:MvtButton>
 
-            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}"  Grid.Column="3"
+            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}"  Grid.Column="3"
                          Margin="5" Tag="3" Click="AngleInfoButton_Click" ToolTip="Angle"
                         >
-                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Kind="AngleAcute" VerticalAlignment="Center" HorizontalAlignment="Center" Width="20" Height="20"/>
+                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Kind="AngleAcute" VerticalAlignment="Center" HorizontalAlignment="Center" Width="20" Height="20"/>
             </common:MvtButton>
         </Grid>
 
@@ -477,9 +477,9 @@
 
             <common:MvtButton Visibility="{Binding IsFirstInView, Converter={StaticResource BoolToVisible_Converter}}" 
                           Grid.Row="0" Grid.RowSpan="3" VerticalAlignment="Top" Grid.Column="0" HorizontalAlignment="Left"  Margin="5,5,5,5"
-                          Click="ExpandStitch_Clicked" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeS}">
+                          Click="ExpandStitch_Clicked" Style="{StaticResource Mouvent.RoundIconButtonStyle.ExpandCollapseButton}">
                 <iconPacks:PackIconMaterial x:Name="StitchExpandIcon" VerticalAlignment="Center" HorizontalAlignment="Center"
-                                            Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 
+                                            Style="{StaticResource Mouvent.RoundIconButtonStyle.ExpandCollapseIcon}" Width="20" Height="20" 
                                                 Kind="{Binding StitchEditMode, Converter={StaticResource ExpandSectionIconConverter}}"></iconPacks:PackIconMaterial>
             </common:MvtButton>
 
@@ -495,24 +495,24 @@
                     <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
 
-                <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}"
+                <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}"
                          Grid.Column="0" Margin="5" Tag="0" Click="StitchInfoButton_Click" ToolTip="Stitch">
-                    <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Kind="ArrowCollapseHorizontal" VerticalAlignment="Center" HorizontalAlignment="Center" Width="20" Height="20"/>
+                    <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Kind="ArrowCollapseHorizontal" VerticalAlignment="Center" HorizontalAlignment="Center" Width="20" Height="20"/>
                 </common:MvtButton>
 
-                <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}"
+                <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}"
                           Grid.Column="1" Margin="5" Tag="1" Click="StitchInfoButton_Click" ToolTip="Stitch">
-                    <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Kind="ArrowCollapseHorizontal" VerticalAlignment="Center" HorizontalAlignment="Center" Width="20" Height="20"/>
+                    <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Kind="ArrowCollapseHorizontal" VerticalAlignment="Center" HorizontalAlignment="Center" Width="20" Height="20"/>
                 </common:MvtButton>
 
-                <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}"
+                <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}"
                           Grid.Column="2"   Margin="5" Tag="2" Click="StitchInfoButton_Click" ToolTip="Stitch">
-                    <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Kind="ArrowCollapseHorizontal" VerticalAlignment="Center" HorizontalAlignment="Center" Width="20" Height="20"/>
+                    <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Kind="ArrowCollapseHorizontal" VerticalAlignment="Center" HorizontalAlignment="Center" Width="20" Height="20"/>
                 </common:MvtButton>
 
-                <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}" 
+                <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}" 
                          Grid.Column="3" Margin="5" Tag="3" Click="StitchInfoButton_Click" ToolTip="Stitch">
-                    <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Kind="ArrowCollapseHorizontal" VerticalAlignment="Center" HorizontalAlignment="Center" Width="20" Height="20"/>
+                    <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Kind="ArrowCollapseHorizontal" VerticalAlignment="Center" HorizontalAlignment="Center" Width="20" Height="20"/>
                 </common:MvtButton>
             </Grid>
 
@@ -635,9 +635,9 @@
                        Text="{Binding RegisterHeader}" Margin="10"></TextBlock>
         <common:MvtButton Visibility="{Binding IsFirstInView, Converter={StaticResource BoolToVisible_Converter}}" Grid.RowSpan="4"
                           Grid.Row="10" Grid.Column="0" VerticalAlignment="Top"  HorizontalAlignment="Left"  Margin="5,5,5,5"
-                          Click="ExpandRegister_Clicked" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeS}">
+                          Click="ExpandRegister_Clicked" Style="{StaticResource Mouvent.RoundIconButtonStyle.ExpandCollapseButton}">
             <iconPacks:PackIconMaterial x:Name="RegisterExpandIcon" VerticalAlignment="Center" HorizontalAlignment="Center"
-                                            Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 
+                                            Style="{StaticResource Mouvent.RoundIconButtonStyle.ExpandCollapseIcon}" Width="20" Height="20" 
                                                Kind="{Binding RegisterEditMode, Converter={StaticResource ExpandSectionIconConverter}}"></iconPacks:PackIconMaterial>
         </common:MvtButton>
 
@@ -649,32 +649,32 @@
                 <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
 
-            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}" Margin="5"  Grid.Column="0"
+            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}" Margin="5"  Grid.Column="0"
                                       Tag="0" Click="RegisterCorrectionButton_Click" x:Name="RegisterCorrectionButton0" ToolTip="Head Distance">
-                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20"
+                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20"
                                             Kind="{Binding IsScanning, Converter={StaticResource RegisterCorrectionIconConverter}}"
                                             HorizontalAlignment="Center"
                                    ></iconPacks:PackIconMaterial>
             </common:MvtButton>
 
-            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}" Margin="5"  Grid.Column="1"
+            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}" Margin="5"  Grid.Column="1"
                                           Tag="1" Click="RegisterCorrectionButton_Click" x:Name="RegisterCorrectionButton1" ToolTip="Head Distance">
-                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20"  
+                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20"  
                                             Kind="{Binding IsScanning, Converter={StaticResource RegisterCorrectionIconConverter}}" HorizontalAlignment="Center"
                                        ></iconPacks:PackIconMaterial>
             </common:MvtButton>
 
-            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}"  Margin="5" Grid.Column="2"
+            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}"  Margin="5" Grid.Column="2"
                                           Tag="2" Click="RegisterCorrectionButton_Click" x:Name="RegisterCorrectionButton2" ToolTip="Head Distance">
-                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20"  
+                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20"  
                                             Kind="{Binding IsScanning, Converter={StaticResource RegisterCorrectionIconConverter}}"
                                             HorizontalAlignment="Center"
                                        ></iconPacks:PackIconMaterial>
             </common:MvtButton>
 
-            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}" Margin="5" Grid.Column="3"
+            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}" Margin="5" Grid.Column="3"
                                           Tag="3" Click="RegisterCorrectionButton_Click" x:Name="RegisterCorrectionButton3" ToolTip="Head Distance">
-                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20" 
+                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 
                                             Kind="{Binding IsScanning, Converter={StaticResource RegisterCorrectionIconConverter}}"
                                             HorizontalAlignment="Center"
                                        ></iconPacks:PackIconMaterial>
@@ -813,9 +813,9 @@
 
             <common:MvtButton Visibility="{Binding IsFirstInView, Converter={StaticResource BoolToVisible_Converter}}" 
                           Grid.Row="0" Grid.RowSpan="4" VerticalAlignment="Top" Grid.Column="0" HorizontalAlignment="Left"  Margin="5,5,5,5"
-                          Click="ExpandBackwardsRegister_Clicked" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeS}">
+                          Click="ExpandBackwardsRegister_Clicked" Style="{StaticResource Mouvent.RoundIconButtonStyle.ExpandCollapseButton}">
                 <iconPacks:PackIconMaterial x:Name="BackwardsRegisterExpandIcon" VerticalAlignment="Center" HorizontalAlignment="Center"
-                                            Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 
+                                            Style="{StaticResource Mouvent.RoundIconButtonStyle.ExpandCollapseIcon}" Width="20" Height="20" 
                                                 Kind="{Binding BackwardsRegisterEditMode, Converter={StaticResource ExpandSectionIconConverter}}"></iconPacks:PackIconMaterial>
             </common:MvtButton>
 
@@ -832,35 +832,35 @@
                     <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
 
-                <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}" Margin="5" Grid.Column="0" 
+                <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}" Margin="5" Grid.Column="0" 
                                       Tag="0" Click="BackwardRegisterCorrectionButton_Click" x:Name="BackwardRegisterCorrectionButton0"
                                          Visibility="{Binding IsScanning, Converter={StaticResource BoolToVisible_Converter}}" ToolTip="Head Distance Backwards">
-                    <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20" 
+                    <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 
                                                 Kind="{Binding IsScanning, Converter={StaticResource BackwardsRegisterCorrectionIconConverter}}"
                                                 HorizontalAlignment="Center"
                                    ></iconPacks:PackIconMaterial>
                 </common:MvtButton>
 
-                <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}" Margin="5"  Grid.Column="1"
+                <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}" Margin="5"  Grid.Column="1"
                                           Tag="1" Click="BackwardRegisterCorrectionButton_Click" x:Name="BackwardRegisterCorrectionButton1"  Visibility="{Binding IsScanning, Converter={StaticResource BoolToVisible_Converter}}" 
                     ToolTip="Head Distance Backwards">
-                    <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20" 
+                    <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 
                                                 Kind="{Binding IsScanning, Converter={StaticResource BackwardsRegisterCorrectionIconConverter}}"
                                                 HorizontalAlignment="Center"
                                        ></iconPacks:PackIconMaterial>
                 </common:MvtButton>
 
-                <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}"  Margin="5"   Grid.Column="2"  Visibility="{Binding IsScanning, Converter={StaticResource BoolToVisible_Converter}}" 
+                <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}"  Margin="5"   Grid.Column="2"  Visibility="{Binding IsScanning, Converter={StaticResource BoolToVisible_Converter}}" 
                                           Tag="2" Click="BackwardRegisterCorrectionButton_Click" x:Name="BackwardRegisterCorrectionButton2" ToolTip="Head Distance Backwards">
-                    <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20"  
+                    <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20"  
                                                 Kind="{Binding IsScanning, Converter={StaticResource BackwardsRegisterCorrectionIconConverter}}"
                                                 HorizontalAlignment="Center"
                                        ></iconPacks:PackIconMaterial>
                 </common:MvtButton>
 
-                <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}" Margin="5" Grid.Column="3"  Visibility="{Binding IsScanning, Converter={StaticResource BoolToVisible_Converter}}" 
+                <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}" Margin="5" Grid.Column="3"  Visibility="{Binding IsScanning, Converter={StaticResource BoolToVisible_Converter}}" 
                                           Tag="3" Click="BackwardRegisterCorrectionButton_Click" x:Name="BackwardRegisterCorrectionButton3" ToolTip="Head Distance Backwards">
-                    <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20" 
+                    <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 
                                                 Kind="{Binding IsScanning, Converter={StaticResource BackwardsRegisterCorrectionIconConverter}}"
                                                 HorizontalAlignment="Center"
                                        ></iconPacks:PackIconMaterial>
@@ -977,7 +977,7 @@
         <Border Grid.Row="15" Grid.Column="1" Grid.RowSpan="4" BorderBrush="WhiteSmoke" BorderThickness="2"></Border>
         <Border Grid.Row="15" Grid.Column="0" Grid.RowSpan="1" BorderBrush="WhiteSmoke" BorderThickness="0,2,0,0"></Border>
         <TextBlock Background="White" Grid.Row="15" Grid.Column="1"  Foreground="#ff303030" FontWeight="SemiBold" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"
-                       Text="Jet Compensation" Margin="10"></TextBlock>
+                       Text="Density and Jet Compensation" Margin="10"></TextBlock>
 
         <Grid Grid.Row="16" Grid.RowSpan="2" Grid.Column="1">
             <Grid.ColumnDefinitions>

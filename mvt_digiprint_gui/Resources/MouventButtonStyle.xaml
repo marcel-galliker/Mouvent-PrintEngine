@@ -493,6 +493,25 @@
         </Setter>
     </Style>
 
+    <Style x:Key="Mouvent.RoundIconButtonStyle.ExpandCollapseButton" TargetType="{x:Type common:MvtButton}">
+        <Setter Property ="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType ="{x:Type common:MvtButton}">
+                    <Grid>
+                        <Ellipse Name ="Ring" Width ="40" Height ="40" Fill ="{StaticResource Mouvent.MainColorBrush}"
+                                 Stroke="{StaticResource Mouvent.MainColorBrush}" StrokeThickness="2"/>
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="Mouvent.RoundIconButtonStyle.ExpandCollapseIcon" TargetType="iconPacks:PackIconMaterial">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="White" />
+    </Style>
+
     <Style x:Key="Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL" TargetType="{x:Type common:MvtButton}">
         <Setter Property ="Template">
             <Setter.Value>

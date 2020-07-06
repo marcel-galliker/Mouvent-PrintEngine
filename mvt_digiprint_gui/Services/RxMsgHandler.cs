@@ -311,7 +311,7 @@ namespace RX_DigiPrint.Services
             int len = RxStructConvert.ToStruct(out msg, buf);
             if (len == hdr.msgLen)
             {
-                if (RxGlobals.DensityView != null) RxBindable.Invoke(() => RxGlobals.DensityView.SetValues(msg.values.voltage, msg.values.value));
+                if (RxGlobals.Density != null) RxBindable.Invoke(() => RxGlobals.Density.SetDensityValues(msg.values.voltage, msg.values.value));
             }
             else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length SDensityValuesMsg"));
         }

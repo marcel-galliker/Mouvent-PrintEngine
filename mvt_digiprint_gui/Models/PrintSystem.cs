@@ -18,6 +18,15 @@ namespace RX_DigiPrint.Models
         public PrintSystem()
         {
             RxGlobals.Stepper.PropertyChanged += Stepper_PropertyChanged;
+            RxGlobals.Chiller.PropertyChanged += Chiller_PropertyChanged;
+        }
+
+        private void Chiller_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName.Equals("Enabled"))
+            {
+                ChillerEnabled = RxGlobals.Chiller.Enabled;
+            }
         }
 
         private void Stepper_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -362,6 +371,23 @@ namespace RX_DigiPrint.Models
             get { return _CorrectionValuesSet; }
             set { SetProperty(ref _CorrectionValuesSet, value); }
         }
+
+        // Property ExpandSettingsPanel
+        private bool _ExpandSettingsPanel;
+        public bool ExpandSettingsPanel
+        {
+            get { return _ExpandSettingsPanel; }
+            set { SetProperty(ref _ExpandSettingsPanel, value); }
+        }
+
+        // Property ChillerEnabled
+        private bool _ChillerEnabled;
+        public bool ChillerEnabled
+        {
+            get { return _ChillerEnabled; }
+            set { SetProperty(ref _ChillerEnabled, value); }
+        }
+
 
         //--- SetPrintCfg ----------------------------------------
         public void SetPrintCfg(TcpIp.SPrinterCfgMsg msg)

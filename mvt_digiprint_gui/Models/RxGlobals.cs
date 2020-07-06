@@ -28,6 +28,7 @@ namespace RX_DigiPrint.Models
         public static RxBluetooth       Bluetooth         = new RxBluetooth();
         public static RxBtProdState     BtProdState       = new RxBtProdState();
         public static StepperCfg        Stepper           = new StepperCfg();
+        public static Chiller Chiller = new Chiller();
         public static PrintSystem       PrintSystem       = new PrintSystem();
         public static StepperStatus[] StepperStatus = new StepperStatus[4] {
             new StepperStatus(0), new StepperStatus(1), new StepperStatus(2), new StepperStatus(3) 
@@ -38,7 +39,7 @@ namespace RX_DigiPrint.Models
         public static HeadStatList      HeadStat          = new HeadStatList();
         
         public static Plc               Plc               = new Plc();
-        public static Chiller           Chiller           = new Chiller();
+        
         public static Encoder[] Encoder = new Encoder[2] { new Encoder(0), new Encoder(1) };
         public static NetworkList       Network           = new NetworkList();
         public static RxScreen          Screen            = new RxScreen();
@@ -58,6 +59,7 @@ namespace RX_DigiPrint.Models
         public static AlignmentResources AlignmentResources = new AlignmentResources();
         public static LB702WB_Machine   LB702WB_Machine;
         public static DisabledJets DisabledJets = new DisabledJets();
-        public static DensityView DensityView = new DensityView();
+        public static Density Density = new Density();
+        
     }
 }

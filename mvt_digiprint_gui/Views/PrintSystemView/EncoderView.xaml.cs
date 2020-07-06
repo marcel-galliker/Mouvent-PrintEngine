@@ -69,6 +69,13 @@ namespace RX_DigiPrint.Views.PrintSystemView
         {
             // TODO(CB612) add case for CB612
 
+            if (!RxGlobals.PrintSystem.ExpandSettingsPanel)
+            {
+                this.Visibility = Visibility.Collapsed;
+                return;
+            }
+            this.Visibility = Visibility.Visible;
+
             if (type == EPrinterType.printer_DP803)
             {
                 ColEncoder2.Width = new GridLength(70);
