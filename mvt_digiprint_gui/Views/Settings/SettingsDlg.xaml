@@ -10,7 +10,7 @@
              xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              mc:Ignorable="d" 
-             Title="Settings" Width="700" Height="700">
+             Title="Settings" Width="700" Height="720">
     <ScrollViewer>
         <ScrollViewer.Resources>
             <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">30</sys:Double>
@@ -154,7 +154,7 @@
                 </Grid>
             </GroupBox>
 
-            <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center">
+            <StackPanel Margin="10" Grid.Row="3" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center">
                 <common:MvtButton Margin="15" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}" Click="About_Clicked">
                     <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 
                                                 Kind="Help"></iconPacks:PackIconMaterial>

@@ -1,14 +1,15 @@
-﻿using RX_DigiPrint.Helpers;
+﻿using MahApps.Metro.IconPacks;
+using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Models;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
-// using static RX_DigiPrint.Views.Alignment.HeadAdjustmentView;
 
 namespace RX_DigiPrint.Converters.Alignment
 {
@@ -30,11 +31,11 @@ namespace RX_DigiPrint.Converters.Alignment
 
                 if (unitIsDots == true) // unit: dots
                 {
-                    return val.CorrectionInDots;
+                    return string.Format("{0:#,0.0}", val.CorrectionInDots);
                 }
-                else // unit: um
+                else // unit: mm
                 {
-                    return val.Correction;
+                    return string.Format("{0:#,0.000}", val.CorrectionInMM);
                 }
             }
             catch
@@ -54,14 +55,15 @@ namespace RX_DigiPrint.Converters.Alignment
                 // value is in dots --> convert to um
                 retVal[0] = new DotsCorrectionValue() { Correction = Helpers.UnitConversion.ConvertDotsToUM(1200, val) };
             }
-            else // value is in um
+            else // value is in mm
             {
-                retVal[0] = new DotsCorrectionValue() { Correction = val };
+                retVal[0] = new DotsCorrectionValue() { Correction = val * 1000.0 };
             }
 
             return retVal;
         }
     }
+
 
     class RegisterCorrectionsUnitConverter : IMultiValueConverter
     {
@@ -80,11 +82,11 @@ namespace RX_DigiPrint.Converters.Alignment
 
                 if (unitIsDots == true)
                 {
-                    return val.CorrectionInDots;
+                    return string.Format("{0:#,0.0}", val.CorrectionInDots);
                 }
-                else // unit is um
+                else // unit is mm
                 {
-                    return val.Correction;
+                    return string.Format("{0:#,0.000}", val.CorrectionInMM);
                 }
             }
             catch
@@ -108,8 +110,8 @@ namespace RX_DigiPrint.Converters.Alignment
                 }
                 else
                 {
-                    // value is in um
-                    retVal[0] = new DotsCorrectionValue() { Correction = val };
+                    // value is in mm
+                    retVal[0] = new DotsCorrectionValue() { Correction = val * 1000.0 };
                 }
 
                 return retVal;
@@ -121,7 +123,7 @@ namespace RX_DigiPrint.Converters.Alignment
             }
         }
     }
-    
+
     class AngleCorrectionsUnitConverter : IMultiValueConverter
     {
         public object Convert(object[] values, Type targetType, object parameter, System.Globalization.CultureInfo culture)
@@ -134,16 +136,17 @@ namespace RX_DigiPrint.Converters.Alignment
                 var val = values[0] as AngleCorrectionValue;
                 if (val == null) return null;
 
-                bool? unitIsUM = values[1] as bool?;
-                if (!unitIsUM.HasValue) return null;
+                bool? unitIsRevolutions = values[1] as bool?;
+                if (!unitIsRevolutions.HasValue) return null;
 
-                if (unitIsUM == true)
+                if (unitIsRevolutions == true)
                 {
-                    return val.Correction;
+                    
+                    return string.Format("{0:#,0.0}", val.CorrectionInRevolutions);
                 }
                 else
                 {
-                    return val.CorrectionInRevolutions;
+                    return string.Format("{0:#,0.000}", val.CorrectionInMM);
                 }
             }
             catch
@@ -159,11 +162,11 @@ namespace RX_DigiPrint.Converters.Alignment
             {
                 double val = double.Parse(value.ToString(), CultureInfo.InvariantCulture);
                 object[] retVal = new object[2];
-                retVal[1] = RxGlobals.Alignment.AngleStitchCorrectionsUnitIsInUM;
-                if (RxGlobals.Alignment.AngleStitchCorrectionsUnitIsInUM == true)
+                retVal[1] = RxGlobals.Alignment.AngleStitchCorrectionsUnitInRevolutions;
+                if (RxGlobals.Alignment.AngleStitchCorrectionsUnitInRevolutions == false)
                 {
-                    // value is in UM --> nothing to do
-                    retVal[0] = new AngleCorrectionValue() { Correction = val };
+                    // value is in mm --> convert to um
+                    retVal[0] = new AngleCorrectionValue() { Correction = val * 1000 };
                 }
                 else
                 {
@@ -183,6 +186,7 @@ namespace RX_DigiPrint.Converters.Alignment
             }
         }
     }
+
     
     class StitchCorrectionsUnitConverter : IMultiValueConverter
     {
@@ -197,16 +201,16 @@ namespace RX_DigiPrint.Converters.Alignment
                 var val = values[0] as StitchCorrectionValue;
                 if (val == null) return null;
 
-                bool? unitIsUM = values[1] as bool?;
-                if (!unitIsUM.HasValue) return null;
+                bool? unitIsRevolutions = values[1] as bool?;
+                if (!unitIsRevolutions.HasValue) return null;
 
-                if (unitIsUM == true)
+                if (unitIsRevolutions == true)
                 {
-                    return val.Correction;
+                    return string.Format("{0:#,0.0}", val.CorrectionInRevolutions);
                 }
                 else
                 {
-                    return val.CorrectionInRevolutions;
+                    return string.Format("{0:#,0.000}", val.CorrectionInMM);
                 }
             }
             catch
@@ -222,11 +226,11 @@ namespace RX_DigiPrint.Converters.Alignment
             {
                 double val = double.Parse(value.ToString(), CultureInfo.InvariantCulture);
                 object[] retVal = new object[2];
-                retVal[1] = RxGlobals.Alignment.AngleStitchCorrectionsUnitIsInUM;
-                if (RxGlobals.Alignment.AngleStitchCorrectionsUnitIsInUM == true)
+                retVal[1] = RxGlobals.Alignment.AngleStitchCorrectionsUnitInRevolutions;
+                if (RxGlobals.Alignment.AngleStitchCorrectionsUnitInRevolutions == false)
                 {
-                    // value is in UM --> nothing to do
-                    retVal[0] = new StitchCorrectionValue() { Correction = val };
+                    // value is in mm --> convert to um
+                    retVal[0] = new StitchCorrectionValue() { Correction = val * 1000.0 };
                 }
                 else
                 {
@@ -294,6 +298,53 @@ namespace RX_DigiPrint.Converters.Alignment
         }
     }
 
+    class ScanningMachinesVisibilityConverter2 : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            try
+            {
+                if (values == null || values.Length != 2)
+                    return null;
+
+                bool? isScanning = values[0] as bool?;
+                var collection = values[1] as Helpers.ObservableCollectionEx<BooleanValue>;
+                if (collection == null || collection.Count == 0)
+                {
+                    return Visibility.Hidden;
+                }
+
+                int? index = Int32.Parse(parameter.ToString()) as int?;
+
+                if (!isScanning.HasValue || !index.HasValue || collection == null)
+                    return null;
+                int visibilityIndex = (int)index;
+                if (isScanning == true)
+                {
+                    visibilityIndex = 3 - (int)index;
+                }
+                if (collection[visibilityIndex].Value == true)
+                {
+                    return Visibility.Visible;
+                }
+                else
+                {
+                    return Visibility.Hidden;
+                }
+            }
+            catch
+            {
+                Console.WriteLine("Exception in ScanningMachinesVisibilityConverter");
+                return null;
+            }
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, System.Globalization.CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     class ColorOffsetCorrectionIconConverter : IValueConverter
     {
         public object Convert(object value,
@@ -303,7 +354,7 @@ namespace RX_DigiPrint.Converters.Alignment
         {
             try
             {
-                string result = "ArrowLeft";
+                string result = "ArrowUp";
                 if (value is bool)
                 {
                     if ((bool)value == true)
@@ -312,6 +363,70 @@ namespace RX_DigiPrint.Converters.Alignment
                     }
                 }
                 return result;
+            }
+            catch
+            {
+                Console.WriteLine("Exception in ColorOffsetCorrectionIconConverter");
+                return null;
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+
+    class RegisterCorrectionIconConverter : IValueConverter
+    {
+        public object Convert(object value,
+                                Type targetType,
+                                object parameter,
+                                System.Globalization.CultureInfo culture)
+        {
+            try
+            {
+                string result = "ArrowRight";
+                if (value is bool)
+                {
+                    if ((bool)value == true)
+                    {
+                        result = "ArrowUp";
+                    }
+                }
+                return result;
+            }
+            catch
+            {
+                Console.WriteLine("Exception in ColorOffsetCorrectionIconConverter");
+                return null;
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    class BackwardsRegisterCorrectionIconConverter : IValueConverter
+    {
+        public object Convert(object value,
+                                Type targetType,
+                                object parameter,
+                                System.Globalization.CultureInfo culture)
+        {
+            try
+            {
+                if (value is bool)
+                {
+                    if ((bool)value == true)
+                    {
+                        return "ArrowDown";
+                    }
+                }
+                return null;
             }
             catch
             {
@@ -633,6 +748,31 @@ namespace RX_DigiPrint.Converters.Alignment
                 Console.WriteLine("Exception in BooleanNotToVisibilityHideConverter");
                 return null;
             }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    class ExpandSectionIconConverter : IValueConverter
+    {
+        public object Convert(object value,
+                                Type targetType,
+                                object parameter,
+                                System.Globalization.CultureInfo culture)
+        {
+            bool? expand = (bool?)value;
+            if (expand.HasValue)
+            {
+                if ((bool)expand == true)
+                {
+                    return PackIconMaterialKind.ChevronDown;
+                }
+            }
+
+            return PackIconMaterialKind.ChevronRight;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

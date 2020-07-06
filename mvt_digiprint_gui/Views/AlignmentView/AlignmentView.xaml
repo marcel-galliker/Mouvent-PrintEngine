@@ -7,20 +7,32 @@
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:mahapps="http://metro.mahapps.com/winfx/xaml/controls"
              mc:Ignorable="d" 
              d:DesignHeight="700" d:DesignWidth="1500"
              Background="Transparent"
              HorizontalAlignment="Stretch"
              >
-    
     <UserControl.Resources>
        
-    </UserControl.Resources>
+            <ResourceDictionary>
+                <ResourceDictionary.MergedDictionaries>
+                    <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.ToggleSwitch.xaml" />
+                    <!-- color -->
+                    <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Accents/Orange.xaml" />
+                    <!-- and should use the light theme -->
+                    <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseLight.xaml" />
+                </ResourceDictionary.MergedDictionaries>
+            </ResourceDictionary>
         
+    </UserControl.Resources>
+    
     <Grid x:Name="MainGrid" HorizontalAlignment="Stretch" Background="Transparent">
         <Grid.RowDefinitions>
             <RowDefinition Height="{Binding Source={StaticResource Mouvent.Layout.TopToolBarHeight}}"/>
+            <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0" Background="{StaticResource Mouvent.MainColorBrush}" ShowGridLines="False" >
@@ -64,45 +76,40 @@
             </StackPanel>
             <rx_uc:Splicing HorizontalAlignment="Center"></rx_uc:Splicing>
         </Grid>
-        
-        <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Visible">
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0" Orientation="Horizontal" x:Name="InkSupplySelectionPanel">
+                <StackPanel x:Name="ColorSelectionPanel" Orientation="Horizontal" Margin="10,5,5,5"/>
+                <StackPanel x:Name="InkCylinderSelectionPanel" Orientation="Horizontal" Margin="10,5,5,5"/>
+            </StackPanel>
+
+            <StackPanel  HorizontalAlignment="Right" Grid.Column="1" Orientation="Horizontal">
+                <TextBlock Margin="10" VerticalAlignment="Center">Debug: Connect Robot</TextBlock>
+                <CheckBox Margin="10" Grid.Column="1" VerticalAlignment="Center" IsChecked="{Binding RobotIsConnected}" Click="RobotConnectButton_Click"></CheckBox>
+            </StackPanel>
+        </Grid>
+
+        <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Visible">
             <ScrollViewer.Resources>
                 <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">30</sys:Double>
                 <sys:Double x:Key="{x:Static SystemParameters.HorizontalScrollBarHeightKey}">30</sys:Double>
             </ScrollViewer.Resources>
 
-            <Grid Grid.Row="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="auto"></RowDefinition>
-                <RowDefinition Height="*"></RowDefinition>
-            </Grid.RowDefinitions>
-
-                <!-- Input -->
-                <Grid Margin="10" Grid.Row="0" Grid.Column="0">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="auto"></RowDefinition>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="auto"></ColumnDefinition>
-                        <ColumnDefinition Width="*"></ColumnDefinition>
-                    </Grid.ColumnDefinitions>
-
-                    <StackPanel Grid.Column="0" Orientation="Horizontal">
-                        <StackPanel x:Name="ColorSelectionPanel" Orientation="Horizontal" Margin="5"/>
-                        <StackPanel x:Name="InkCylinderSelectionPanel" Orientation="Horizontal" Margin="5"/>
-                    </StackPanel>
-
-                    <StackPanel  HorizontalAlignment="Right" Grid.Column="1" Orientation="Horizontal">
-                        <TextBlock Margin="10" VerticalAlignment="Center">Debug: Connect Robot</TextBlock>
-                        <CheckBox Margin="10" Grid.Column="1" VerticalAlignment="Center" IsChecked="{Binding RobotIsConnected}" Click="RobotConnectButton_Click"></CheckBox>
-                    </StackPanel>
-                </Grid>
-
-                <StackPanel Grid.Row="1" Margin="10" x:Name="ClusterStackPanel" Orientation="Horizontal"/>
-
-            </Grid>
+            <StackPanel Grid.Row="2" Margin="10" x:Name="ClusterStackPanel" Orientation="Horizontal"/>
         </ScrollViewer>
 
+        <Grid Grid.Row="3">
+            <mahapps:ToggleSwitch x:Name="ColorOffsetCorrectionToggleSwitch" Margin="10,5,10,5" Grid.Row="1" Style="{StaticResource MahApps.Metro.Styles.ToggleSwitch.Win10}"
+                              Visibility="{Binding RegisterEditMode, Converter={StaticResource BoolToVisible_Converter}}"
+                          Content="Propagate correction values to all following print heads"
+                          IsChecked="{Binding ApplyCorrectionValuesToAllFollowingPrintHeads}">
+            </mahapps:ToggleSwitch>
+        </Grid>
     </Grid>
 
 </UserControl>

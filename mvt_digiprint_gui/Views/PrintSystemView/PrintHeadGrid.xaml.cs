@@ -30,6 +30,12 @@ namespace RX_DigiPrint.Views.PrintSystemView
         private void _assign_inksupply(int cnt)
         {
             int i, no;
+            if (RxGlobals.PrintSystem.IS_Order == null)
+            {
+                //not ready yet
+                return;
+            }
+
             if (RxGlobals.PrintSystem.HeadsPerColor != 0)
             {
                 for (i = 0; i < PrintHeadStack.Children.Count; i++)
@@ -58,6 +64,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
         public void show_items(int cnt)
         {
             int i, no;
+            if (RxGlobals.PrintSystem.IS_Order == null) return; // not ready yet
+
             RxGlobals.HeadStat.SetItemCount(cnt);
             for (i = PrintHeadStack.Children.Count; i < cnt; i++)
             {

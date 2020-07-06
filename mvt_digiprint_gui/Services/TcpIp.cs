@@ -1037,25 +1037,29 @@ namespace RX_DigiPrint.Services
 
         public const UInt32 MAX_DENSITY_VALUES = 12;
         public const UInt32 MAX_DISABLED_JETS = 32;
-        
+        public const UInt32 MAX_HEADS = 288;
+
+
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct SHeadEEpromMvt
         {
-            public UInt16	        clusterNo;
-            public UInt16	        flowResistance;
-            public Byte             flowResistanceCRC;
-	        private UInt32	        dropletsPrinted_old;
-            private Byte             dropletsPrintedCRC_old;
+            public UInt16 clusterNo;
+            public UInt16 flowResistance;
+            public Byte flowResistanceCRC;
+            private UInt32 dropletsPrinted_old;
+            private Byte dropletsPrintedCRC_old;
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
-	        public UInt16[]			disabledJets;
-            public Byte             disabledJetsCRC;
+            public UInt16[] disabledJets;
+            public Byte disabledJetsCRC;
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 12)]
-            public Int16[]          densityValue;
-            public Byte             densityValueCRC;
-	        public UInt64	        dropletsPrinted;
-            public Byte             dropletsPrintedCRC;
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 19)]
-            public Byte[]           res_6d;
+            public Int16[] densityValue;
+            public Byte densityValueCRC;
+            public Byte voltage;
+            public Byte voltageCRC;
+            public UInt64 dropletsPrinted;
+            public Byte dropletsPrintedCRC;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 17)]
+            public Byte[] res_6f;
         };
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -1146,16 +1150,17 @@ namespace RX_DigiPrint.Services
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct SDensityValues
         {
-	        public Int32 head;
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2+10)]
-	        public Int16[] value;
+            public Int32 head;
+            public byte voltage;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2 + 10)]
+            public Int16[] value;
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct SDensityValuesMsg
         {
-            public SMsgHdr          hdr;
-            public SDensityValues   values;
+            public SMsgHdr hdr;
+            public SDensityValues values;
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]

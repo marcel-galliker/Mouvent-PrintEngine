@@ -1,6 +1,7 @@
 ﻿using RX_Common;
 using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Services;
+using RX_DigiPrint.Views.Density;
 using RX_DigiPrint.Views.LB702WBView;
 using RX_DigiPrint.Views.UserControls;
 using System;
@@ -56,7 +57,7 @@ namespace RX_DigiPrint.Models
         public static Alignment Alignment = new Alignment();
         public static AlignmentResources AlignmentResources = new AlignmentResources();
         public static LB702WB_Machine   LB702WB_Machine;
-        
-        public static JetCompensationViewModel JetCompensationViewModel = new JetCompensationViewModel();
+        public static DisabledJets DisabledJets = new DisabledJets();
+        public static DensityView DensityView = new DensityView();
     }
 }

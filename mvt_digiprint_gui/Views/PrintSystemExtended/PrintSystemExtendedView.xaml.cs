@@ -679,31 +679,6 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
         {
             RxGlobals.Stepper.SendStepperCfg();
             _PrintSystem.SendMsg(TcpIp.CMD_SET_PRINTER_CFG);
-            SaveDisabledJets();
-        }
-
-        private void SaveDisabledJets()
-        {
-            int headCnt = _PrintSystem.ColorCnt * _PrintSystem.HeadsPerColor;
-            
-            if (headCnt > 0)
-            {
-                for (int headIndex = 0; headIndex < headCnt; headIndex++)
-                {
-                    if (headIndex < RxGlobals.HeadStat.List.Count)
-                    {
-                        TcpIp.SDisabledJetsMsg msg = new TcpIp.SDisabledJetsMsg();
-                        msg.head = headIndex;
-                        msg.disabledJets = new UInt16[TcpIp.MAX_DISABLED_JETS];
-                        for (int i = 0; i < TcpIp.MAX_DISABLED_JETS; i++) msg.disabledJets[i] = 0xffff;
-                        for (int i = 0; i < TcpIp.MAX_DISABLED_JETS && i < RxGlobals.HeadStat.List[headIndex].DisabledJets.Count(); i++)
-                        {
-                            msg.disabledJets[i] = (UInt16)RxGlobals.HeadStat.List[headIndex].DisabledJets[i].JetNumber;
-                        }
-                        RxGlobals.RxInterface.SendMsg(TcpIp.CMD_SET_DISABLED_JETS, ref msg);
-                    }
-                }
-            }
         }
     }
 }

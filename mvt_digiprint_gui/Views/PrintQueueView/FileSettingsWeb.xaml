@@ -12,7 +12,7 @@
              xmlns:mahapps="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              mc:Ignorable="d" 
-             d:DesignHeight="520" d:DesignWidth="500"
+             d:DesignHeight="580" d:DesignWidth="500"
              DataContextChanged="UserControl_DataContextChanged"
              >
     <UserControl.Resources>
@@ -41,7 +41,7 @@
             </Grid.ColumnDefinitions>
 
             <TextBlock Grid.Row="0" Grid.Column="0" Text="Length"/>
-            <common:MvtNumBox   Grid.Row="0" Grid.Column="1" Text="{Binding ScanLength}" HorizontalAlignment="Right" Width="60" x:Name="LengthBox" Min="0"/>
+                <common:MvtNumBox Height="{Binding ElementName=RefNumBox, Path=ActualHeight}"  Grid.Row="0" Grid.Column="1" Text="{Binding ScanLength}" HorizontalAlignment="Right" Width="60" x:Name="LengthBox" Min="0"/>
 
                 <StackPanel  Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" Orientation="Horizontal">
                     <common:MvtRadioButton  Style="{StaticResource MvtSelectionRadioButton}"  Content="m"       Background="Transparent" IsChecked="{Binding LengthUnitMM}" x:Name="LengthUnit"/>
@@ -159,7 +159,7 @@
             <TextBlock  Margin="5, 0, 0, 5" Grid.Row="2" Grid.Column="3" Text="m/min" x:Name="SpeedUnit"/>
 
             <TextBlock   Margin="0, 0, 0, 5"       Grid.Row="3" Grid.Column="0" Text="Image Margin" />
-            <common:MvtNumBox Margin="0, 0, 0, 5"   Grid.Row="3" Grid.Column="1" Text="{Binding PageMargin, Converter={StaticResource Len_Unit_Converter}, ConverterParameter=mm}" HorizontalAlignment="Stretch"/>
+                <common:MvtNumBox  x:Name="RefNumBox" Margin="0, 0, 0, 5"   Grid.Row="3" Grid.Column="1" Text="{Binding PageMargin, Converter={StaticResource Len_Unit_Converter}, ConverterParameter=mm}" HorizontalAlignment="Stretch"/>
             <TextBlock    Margin="5, 0, 0, 5"      Grid.Row="3" Grid.Column="2" Text="mm"  x:Name="MarginUnit"/>
 
             <TextBlock Margin="0, 0, 0, 5" Grid.Row="4" Grid.Column="0" Text="PrintGo Mode" VerticalAlignment="Center"/>

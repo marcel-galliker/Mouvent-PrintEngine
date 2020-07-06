@@ -27,7 +27,10 @@ namespace RX_DigiPrint.Models
         public double Stitch    
         {
             get { return _Stitch; }
-            set { SetProperty(ref _Stitch, value); }
+            set 
+            {
+                SetProperty(ref _Stitch, value); 
+            }
         }
 
         //--- Property Angle ---------------------------------------
@@ -35,7 +38,10 @@ namespace RX_DigiPrint.Models
         public double Angle
         {
             get { return _Angle; }
-            set { SetProperty(ref _Angle, value); }
+            set 
+            { 
+                SetProperty(ref _Angle, value); 
+            }
         }
 
         //--- Property Progress ---------------------------------------
@@ -69,7 +75,14 @@ namespace RX_DigiPrint.Models
             get { return _Done; }
             set { SetProperty(ref _Done, value); }
         }
-        
+
+        private bool _ShowHelp;
+        public bool ShowHelp
+        {
+            get { return _ShowHelp; }
+            set { SetProperty(ref _ShowHelp, value); }
+        }
+
         //--- Adjust -------------------------------------
         public void Adjust(int inkSupplyNo, int headNo)
         {

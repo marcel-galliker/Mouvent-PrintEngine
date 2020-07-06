@@ -88,6 +88,19 @@ namespace RX_DigiPrint.Models
             }
         }
 
+        //--- Property IsCLEAF ---------------------------------------
+        public bool IsCLEAF
+        {
+            get
+            {
+                switch (_PrinterType)
+                {
+                    case EPrinterType.printer_cleaf:            return true;
+                    default: return false;
+                }
+            }
+        }
+
         //--- Property HasHeater ---------------------------------------
         public bool HasHeater
         {
@@ -123,7 +136,7 @@ namespace RX_DigiPrint.Models
             get { return _PrinterType; }
             set 
             { 
-                if (SetProperty(ref _PrinterType, value))
+                if (SetProperty(ref _PrinterType, value) || IS_Order==null)
                 {
                     Changed=true;
                     switch(_PrinterType)
@@ -403,7 +416,7 @@ namespace RX_DigiPrint.Models
                 _ColorOffset[i] = msg.colorOffset[i] / 1000.0;                
             }
             CorrectionValuesSet = true;
-
+            
             ExternalData            = msg.externalData!=0;
             
             Changed = false;

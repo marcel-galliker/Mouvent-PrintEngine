@@ -112,14 +112,22 @@
     <alignment_converters:BooleanAndToVisibilityConverter x:Key="BooleanAndToVisibleConverter"/>
     
     <alignment_converters:ColorOffsetCorrectionIconConverter x:Key="ColorOffsetCorrectionIconConverter"/>
+    <alignment_converters:BackwardsRegisterCorrectionIconConverter x:Key="BackwardsRegisterCorrectionIconConverter"/>
+    <alignment_converters:RegisterCorrectionIconConverter x:Key="RegisterCorrectionIconConverter"/>
+
+
     <alignment_converters:BooleanToHeaderColumnWidthConverter x:Key="BooleanToHeaderColumnWidthConverter"/>
-    <alignment_converters:ScanningMachinesVisibilityConverter x:Key="ScanningMachinesVisibilityConverter"/>
+    <alignment_converters:ScanningMachinesVisibilityConverter x:Key="ScanningMachinesVisibilityConverter2"/>
+    <alignment_converters:ScanningMachinesVisibilityConverter2 x:Key="ScanningMachinesVisibilityConverter"/>
     <alignment_converters:ColorOffsetUnitConverter x:Key="ColorOffsetUnitConverter"/>
-   
+    
     <alignment_converters:AngleCorrectionsUnitConverter x:Key="AngleCorrectionsUnitConverter"/>
     <alignment_converters:StitchCorrectionsUnitConverter x:Key="StitchCorrectionsUnitConverter"/>
     <alignment_converters:RegisterCorrectionsUnitConverter x:Key="RegisterCorrectionsUnitConverter"/>
     <alignment_converters:FaultTypeConverter x:Key="FaultTypeConverter"/>
+
+    <alignment_converters:ExpandSectionIconConverter x:Key="ExpandSectionIconConverter"/>
+    
 
     <converters:InkSupplyStatusColorConverter_Connected x:Key="InkSupplyStatusColorConverter_Connected"/>
     <converters:InkSupplyStatusTextConverter_Connected x:Key="InkSupplyStatusTextConverter_Connected"/>

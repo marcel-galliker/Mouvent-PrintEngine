@@ -15,8 +15,15 @@ namespace RX_DigiPrint.Helpers
             }
             set
             {
-                _correction = value;
-                OnPropertyChanged("Correction");
+                SetProperty(ref _correction, value);
+            }
+        }
+
+        public double CorrectionInMM
+        {
+            get
+            {
+                return _correction / 1000.0;
             }
         }
     }

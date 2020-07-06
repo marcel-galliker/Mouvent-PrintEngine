@@ -363,14 +363,15 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;MLPI_SERVER_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\rx_common_lib;..\Externals\TinyXml;..\rx_rip_lib;rx_rexroth_lib;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\rx_ink_lib;..\rx_common_lib;..\Externals\TinyXml;..\rx_rip_lib;..\Externals\libtiff;..\rx_tif_lib;rx_rexroth_lib;..\rx_pecore_lib;..\Externals\matrix\win\h;..\Externals\mlpi\include;..\Externals\libxl\include_c</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Ws2_32.lib;rx_common_lib.lib;TinyXML.lib;rx_rip_lib.lib;rx_rexroth_lib.lib;Shell32.lib;Iphlpapi.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(OutDir)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Ws2_32.lib;rx_common_lib.lib;TinyXML.lib;rx_rip_lib.lib;rx_tif_lib.lib;rx_pecore_lib.lib;libmlpiwin64.lib;wininet.lib;Dbghelp.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir);..\Externals\mlpi\lib;..\Externals\matrix\win\lib</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>LIBCMT</IgnoreSpecificDefaultLibraries>
     </Link>
     <PostBuildEvent>
       <Command>copy ..\Externals\Tec-it\win\TBarCode11\Bin\TBarCode11.dll $(OutDir) 2&gt;nul 1&gt;nul  Exit 0</Command>

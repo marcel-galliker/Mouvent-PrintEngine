@@ -1,6 +1,5 @@
 ﻿using RX_DigiPrint.Models;
 using RX_DigiPrint.Services;
-using RX_DigiPrint.Views.PrintSystemExtended.JetCompensation;
 using System;
 using System.ComponentModel;
 using System.Windows;
@@ -26,7 +25,6 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
 
         private InkCylinderView InkCylinderDetailView;
         private PrintHeadDetailsView PrintHeadDetailView;
-        private JetCompensationView JetCompensationView;
         
         private PrintSystemExtendedView ParentView = null;
 
@@ -45,14 +43,10 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
 
             InkCylinderDetailView = new InkCylinderView();
             PrintHeadDetailView = new PrintHeadDetailsView();
-            JetCompensationView = new PrintSystemExtended.JetCompensation.JetCompensationView();
-
+            
             InkCylinderGrid.Children.Add(InkCylinderDetailView);
             PrintHeadsDetailGrid.Children.Add(PrintHeadDetailView);
-            JetCompensationGrid.Children.Add(JetCompensationView);
-
-            RB_JetCompensation.DataContext = this;
-
+            
             SuperUser = false;
         }
 
@@ -80,7 +74,6 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
 
             PrintHeadDetailView.SetInkCylinderIndex(inkCylinderIndex);
             PrintHeadDetailView.SetUser();
-            JetCompensationView.SetInkCylinderIndex(inkCylinderIndex);
         }
 
         private void RadioButton_Checked(object sender, RoutedEventArgs e)

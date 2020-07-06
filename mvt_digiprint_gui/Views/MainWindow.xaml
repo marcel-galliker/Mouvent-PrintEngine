@@ -163,7 +163,7 @@
                 <TabItem.Header>
                     <Grid Width="200" Height="50" Background="{Binding SelectedTabName, Converter={StaticResource SelectedTabConverter}, ConverterParameter=TabTestTable}">
 
-                        <StackPanel HorizontalAlignment="Center">
+                        <StackPanel HorizontalAlignment="Center"  VerticalAlignment="Center">
                             <TextBlock FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White">Test Table</TextBlock>
                             <Rectangle Fill="Transparent" Width="auto" Height="2"></Rectangle>
                         </StackPanel>

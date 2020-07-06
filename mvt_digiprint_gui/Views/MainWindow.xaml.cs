@@ -123,7 +123,7 @@ namespace RX_DigiPrint.Views
 
         void User_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            _ShowTab((RxGlobals.User.UserType >= EUserType.usr_supervisor), TabAlignment);
+            _ShowTab(true/*(RxGlobals.User.UserType >= EUserType.usr_supervisor)*/, TabAlignment);
             _ShowTab((RxGlobals.User.UserType >= EUserType.usr_service), TabNetwork);
             _ShowTab(RxGlobals.User.UserType >= EUserType.usr_mouvent, TabLog);
         }
@@ -322,7 +322,7 @@ namespace RX_DigiPrint.Views
             _ShowTab(RxGlobals.User.UserType >= EUserType.usr_mouvent, TabLog); // only used for mouvent
             _ShowTab(true, TabPrintSystem);
 
-            _ShowTab((RxGlobals.User.UserType >= EUserType.usr_supervisor), TabAlignment);
+            _ShowTab(/*(RxGlobals.User.UserType >= EUserType.usr_supervisor)*/ true, TabAlignment);
             
             _ShowTab((RxGlobals.User.UserType >= EUserType.usr_service), TabNetwork);
             

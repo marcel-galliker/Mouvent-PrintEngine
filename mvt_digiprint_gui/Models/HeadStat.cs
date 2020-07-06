@@ -18,7 +18,6 @@ namespace RX_DigiPrint.Models
         //--- Constructor ----------------------------------------
         public HeadStat()
         {
-            DisabledJets = new ObservableCollection<JetCompensation>();
         }
 
         //--- Property HeadNo ---------------------------------------
@@ -315,14 +314,21 @@ namespace RX_DigiPrint.Models
 		    get { return _FluidCtrlModeList;}
 	    }
 
-        private ObservableCollection<JetCompensation> _DisabledJets;
-        public ObservableCollection<JetCompensation> DisabledJets
-        {
-            get { return _DisabledJets; }
-            set { SetProperty(ref _DisabledJets, value); }
-        }
+        //--- DensityValue ---------------------------------------------------
+        private Byte? _DensityValuesCRC;
+        public Int16[] DensityValue = new Int16[TcpIp.MAX_DENSITY_VALUES];
 
-        private static bool _first=true;
+        //--- DensityValue ---------------------------------------------------
+        private Byte? _DisabledJetsCRC;
+        public UInt16[] DisabledJets = new UInt16[TcpIp.MAX_DISABLED_JETS];
+
+        //--- Property Voltage ---------------------------------------
+        private Byte _Voltage;
+        public Byte Voltage
+        {
+            get { return _Voltage; }
+            set { SetProperty(ref _Voltage, value); }
+        }
 
         //--- SetItem ----------------------------------------------
         public void SetItem(int no, TcpIp.SHeadStat item, Int32 tempFpga, Int32 flow)
@@ -330,11 +336,22 @@ namespace RX_DigiPrint.Models
             bool used=false;
             HeadNo  = no;
 
+            if (_DensityValuesCRC == null || _DensityValuesCRC != item.eeprom_mvt.densityValueCRC)
+            {
+                for (int i = 0; i < DensityValue.Length; i++) DensityValue[i] = item.eeprom_mvt.densityValue[i];
+                _DensityValuesCRC = item.eeprom_mvt.densityValueCRC;
+            }
+            
+            if (_DisabledJetsCRC == null || _DisabledJetsCRC != item.eeprom_mvt.disabledJetsCRC)
+            {
+                for (int i = 0; i < DisabledJets.Length; i++) DisabledJets[i] = item.eeprom_mvt.disabledJets[i];
+                _DisabledJetsCRC = item.eeprom_mvt.disabledJetsCRC;
+            }
+            
+            Voltage = item.eeprom_mvt.voltage;
+
             try
             {
-                if (_first) RxGlobals.Events.AddItem(new LogItem("Change HeadsPerColor to HeadsPerInkCylinder"));
-                    _first=false;
-            //    int ink = no/RxGlobals.PrintSystem.HeadsPerInkCylinder;
                 int ink;
                 if (RxGlobals.PrintSystem.HeadsPerColor!=0) ink = no/RxGlobals.PrintSystem.HeadsPerColor;
                 else ink=no;
@@ -407,24 +424,6 @@ namespace RX_DigiPrint.Models
             {
                 FlowResistance = pressureDifference / PumpFeedback;
             }
-        }
-
-        public void SetDisablesJets(UInt16[] disabledJets)
-        {
-            DisabledJets.Clear();
-            for (int i = 0; i < disabledJets.Length && i < TcpIp.MAX_DISABLED_JETS; i++)
-            {
-                if (disabledJets[i] == 0xffff || disabledJets[i] == 0)
-                {
-                    break;
-                }
-                DisabledJets.Add(new JetCompensation()
-                {
-                    JetNumber = disabledJets[i],
-                    IsActivated = true,
-                    IsSelected = false,
-                });
-            }   
         }
 
         //--- SendBt ----------------------------------------------------

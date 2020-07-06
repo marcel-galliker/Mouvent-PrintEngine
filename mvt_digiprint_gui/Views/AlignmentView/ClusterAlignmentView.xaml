@@ -24,126 +24,97 @@
 
     <Grid Margin="5">
         <Grid.RowDefinitions>
-            <!--Header-->
-            <RowDefinition Height="40"></RowDefinition>
-
-            <!--Color indicator-->
+            <RowDefinition Height="40"/>
             <RowDefinition Height="auto"></RowDefinition>
 
-            <!--Color Offset-->
+            <!--Color offset-->
+            <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"></RowDefinition>
             <RowDefinition Height="auto"></RowDefinition>
             <RowDefinition Height="auto"></RowDefinition>
 
             <!--Angle-->
+            <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"></RowDefinition>
             <RowDefinition Height="auto"></RowDefinition>
 
             <!--Stitch-->
-            <RowDefinition Height="auto"></RowDefinition>
-            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="auto"/>
 
             <!--Register-->
+            <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"></RowDefinition>
             <RowDefinition Height="auto"></RowDefinition>
             <RowDefinition Height="auto"></RowDefinition>
 
-            <!--Backward register-->
-            <RowDefinition Height="auto"></RowDefinition>
-            <RowDefinition Height="auto"></RowDefinition>
-            <RowDefinition Height="auto"></RowDefinition>
+            <!--Backwards Register-->
+            <RowDefinition Height="auto"/>
+
+            <!--Jet Compensation-->
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+
+            <!--Density-->
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto"></ColumnDefinition>
-            <ColumnDefinition Width="*" MinWidth="100"></ColumnDefinition>
-            <ColumnDefinition Width="*" MinWidth="100"></ColumnDefinition>
-            <ColumnDefinition Width="*" MinWidth="100"></ColumnDefinition>
-            <ColumnDefinition Width="*" MinWidth="100"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
-<!--
-        <mahapps:ToggleSwitch x:Name="ColorOffsetCorrectionToggleSwitch" Margin="5,0,15,0" Grid.Column="0" Grid.Row="3" Style="{StaticResource MahApps.Metro.Styles.ToggleSwitch.Win10}"
-                              HorizontalAlignment="Left"
-                                    VerticalAlignment="Center"
-                                    IsChecked="{Binding ColorOffsetCorrectionUnitInDots}"
-                                    Click="ColorOffsetCorrectionUnitToggle_Clicked"
-                                    OffLabel="µm"
-                                    OnLabel="dt"
-                              Visibility="{Binding IsFirstInView, Converter={StaticResource BooleanToVisibleConverter}}"
-                             >
-            
-        </mahapps:ToggleSwitch>
 
-        <mahapps:ToggleSwitch x:Name="AngleCorrectionToggleSwitch" Margin="5,0,15,0" Grid.Column="0" Grid.Row="6" Style="{StaticResource MahApps.Metro.Styles.ToggleSwitch.Win10}"
-                        HorizontalAlignment="Left"
-                            VerticalAlignment="Center"
-                            IsChecked="{Binding AngleStitchCorrectionsUnitIsInUM}"
-                        Click="AngleCorrectionUnitToggle_Clicked"
-                            OffLabel="rev"
-                            OnLabel="µm"
-                              Visibility="{Binding IsFirstInView, Converter={StaticResource BooleanToVisibleConverter}}">
-        </mahapps:ToggleSwitch>
+        <Border Grid.Column="1" Grid.Row="0" BorderThickness="2,2,2,0" BorderBrush="WhiteSmoke" Background="WhiteSmoke"></Border>
 
-        <mahapps:ToggleSwitch x:Name="StitchCorrectionToggleSwitch" Margin="5,0,15,0" Grid.Column="0" Grid.Row="8" Style="{StaticResource MahApps.Metro.Styles.ToggleSwitch.Win10}"
-                        HorizontalAlignment="Left"
-                            VerticalAlignment="Center"
-                            IsChecked="{Binding AngleStitchCorrectionsUnitIsInUM}"
-                        Click="AngleCorrectionUnitToggle_Clicked"
-                            OffLabel="rev"
-                            OnLabel="µm"
-                              Visibility="{Binding IsFirstInView, Converter={StaticResource BooleanToVisibleConverter}}"
-                        >
-        </mahapps:ToggleSwitch>
+        <Grid Grid.Column="1" Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+                <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+                <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+                <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
 
-        <mahapps:ToggleSwitch x:Name="RegisterCorrectionToggleSwitch"  Margin="5,0,15,0" Grid.Column="0" Grid.Row="10" Style="{StaticResource MahApps.Metro.Styles.ToggleSwitch.Win10}"
-                        HorizontalAlignment="Left"
-                            VerticalAlignment="Center"
-                            IsChecked="{Binding RegisterCorrectionUnitInDots}"
-                        Click="RegisterCorrectionUnitToggle_Clicked"
-                            OffLabel="µm"
-                            OnLabel="dt"
-                              Visibility="{Binding IsFirstInView, Converter={StaticResource BooleanToVisibleConverter}}">
-        </mahapps:ToggleSwitch>
--->
-        <Line Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="4"
-            VerticalAlignment="Top" Stroke="WhiteSmoke" StrokeThickness="2"
-            X2="{Binding Path=ActualWidth, RelativeSource={RelativeSource Self}}" />
-
-        <Line Grid.Row="9" Grid.Column="1" Grid.ColumnSpan="4"
-            VerticalAlignment="Top" Stroke="WhiteSmoke" StrokeThickness="2"
-            X2="{Binding Path=ActualWidth, RelativeSource={RelativeSource Self}}" />
+            <Border Grid.Column="0" Grid.ColumnSpan="4" Grid.Row="0" BorderThickness="2,2,2,0" BorderBrush="WhiteSmoke" Background="Transparent"></Border>
 
 
-        <Border BorderBrush="WhiteSmoke" BorderThickness="2" Grid.Row="0" Grid.Column="1" Grid.RowSpan="15" Grid.ColumnSpan="4"></Border>
-        <Border Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="4"  BorderThickness="2" BorderBrush="WhiteSmoke" Background="WhiteSmoke">
-            <TextBlock Foreground="#ff303030" FontWeight="SemiBold" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"
-                       Text="{Binding ClusterName}">
-            </TextBlock>
-        </Border>
-        <Line Grid.Row="1" Grid.Column="1" Grid.RowSpan="14"
-            HorizontalAlignment="Right" Stroke="WhiteSmoke" StrokeThickness="2"
-            Y2="{Binding Path=ActualHeight, RelativeSource={RelativeSource Self}}"></Line>
-        <Line Grid.Row="1" Grid.Column="2" Grid.RowSpan="14"
-            HorizontalAlignment="Right" Stroke="WhiteSmoke" StrokeThickness="2"
-            Y2="{Binding Path=ActualHeight, RelativeSource={RelativeSource Self}}"></Line>
-        <Line Grid.Row="1" Grid.Column="3" Grid.RowSpan="14"
-            HorizontalAlignment="Right" Stroke="WhiteSmoke" StrokeThickness="2"
-            Y2="{Binding Path=ActualHeight, RelativeSource={RelativeSource Self}}"></Line>
-
-
-
-        <common:MvtButton Grid.Row="1" Grid.Column="1"
+            <common:MvtButton Grid.Row="1" Grid.Column="0"
                               x:Name="PrintHeadColor0" Style="{DynamicResource Mouvent.Alignment.PrintHeadColorButton}" Margin="10" ></common:MvtButton>
-        <common:MvtButton Grid.Row="1" Grid.Column="2"
+            <common:MvtButton Grid.Row="1" Grid.Column="1"
                               x:Name="PrintHeadColor1" Style="{DynamicResource Mouvent.Alignment.PrintHeadColorButton}" Margin="10" ></common:MvtButton>
-        <common:MvtButton Grid.Row="1" Grid.Column="3"
+            <common:MvtButton Grid.Row="1" Grid.Column="2"
                               x:Name="PrintHeadColor2" Style="{DynamicResource Mouvent.Alignment.PrintHeadColorButton}" Margin="10" ></common:MvtButton>
-        <common:MvtButton Grid.Row="1" Grid.Column="4"
+            <common:MvtButton Grid.Row="1" Grid.Column="3"
                               x:Name="PrintHeadColor3" Style="{DynamicResource Mouvent.Alignment.PrintHeadColorButton}" Margin="10" ></common:MvtButton>
 
+        </Grid>
 
-            <common:MvtButton  Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}" Grid.Column="1"
-                           Grid.Row="2" Margin="5" Tag="0"
+        <common:MvtButton Visibility="{Binding IsFirstInView, Converter={StaticResource BoolToVisible_Converter}}" 
+                          Grid.Row="2" Grid.RowSpan="4" VerticalAlignment="Top" Grid.Column="0" HorizontalAlignment="Left"  Margin="5,5,5,5"
+                          Click="ExpandColorOffset_Clicked" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeS}">
+            <iconPacks:PackIconMaterial x:Name="ColorOffsetExpandIcon" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                            Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 
+                                                Kind="{Binding ColorOffsetEditMode, Converter={StaticResource ExpandSectionIconConverter}}"></iconPacks:PackIconMaterial>
+        </common:MvtButton>
+
+        <TextBlock Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="4" Foreground="#ff303030" FontWeight="SemiBold" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"
+                       Text="{Binding ClusterName}">
+        </TextBlock>
+
+        <Border Grid.Row="2" Grid.RowSpan="4" Grid.Column="0" Grid.ColumnSpan="5" BorderBrush="WhiteSmoke" BorderThickness="2,2,2,0"></Border>
+        <TextBlock Background="White" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="4" Foreground="#ff303030" FontWeight="SemiBold" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"
+                       Text="{Binding ColorOffsetHeader}" Margin="10"></TextBlock>
+        <Grid Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="4" Visibility="{Binding ColorOffsetEditMode, Converter={StaticResource BooleanToVisibleConverter}}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+                <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+                <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+                <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+
+            <common:MvtButton  Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}" Grid.Column="0"
+                           Margin="5" Tag="0"
                 Click="ColorOffsetInfoButton_Click" ToolTip="ColorOffset">
                 <common:MvtButton.Visibility>
                     <MultiBinding StringFormat="N3" Converter="{StaticResource ScanningMachinesVisibilityConverter}" ConverterParameter="0">
@@ -156,8 +127,8 @@
                                         VerticalAlignment="Center" HorizontalAlignment="Center" Width="20" Height="20"/>
             </common:MvtButton>
 
-            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}"  Grid.Column="2"
-                         Grid.Row="2" Margin="5" Tag="1" Click="ColorOffsetInfoButton_Click" ToolTip="ColorOffset">
+            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}"  Grid.Column="1"
+                         Margin="5" Tag="1" Click="ColorOffsetInfoButton_Click" ToolTip="ColorOffset">
                 <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}"
                 Kind="{Binding IsScanning, Converter={StaticResource ColorOffsetCorrectionIconConverter}}"
                                         VerticalAlignment="Center" HorizontalAlignment="Center" Width="20" Height="20"/>
@@ -169,8 +140,8 @@
                 </common:MvtButton.Visibility>
             </common:MvtButton>
 
-            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}"  Grid.Column="3"
-                          Grid.Row="2" Margin="5" Tag="2" Click="ColorOffsetInfoButton_Click" ToolTip="ColorOffset"
+            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}"  Grid.Column="2"
+                          Margin="5" Tag="2" Click="ColorOffsetInfoButton_Click" ToolTip="ColorOffset"
                 >
                 <common:MvtButton.Visibility>
                     <MultiBinding StringFormat="N3" Converter="{StaticResource ScanningMachinesVisibilityConverter}" ConverterParameter="2">
@@ -185,8 +156,8 @@
             </common:MvtButton>
 
 
-            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}"  Grid.Column="4"
-                          Grid.Row="2" Margin="5" Tag="3" Click="ColorOffsetInfoButton_Click" ToolTip="ColorOffset"
+            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}"  Grid.Column="3"
+                        Margin="5" Tag="3" Click="ColorOffsetInfoButton_Click" ToolTip="ColorOffset"
                     >
                 <common:MvtButton.Visibility>
                     <MultiBinding StringFormat="N3" Converter="{StaticResource ScanningMachinesVisibilityConverter}" ConverterParameter="3">
@@ -198,8 +169,17 @@
                                         Kind="{Binding IsScanning, Converter={StaticResource ColorOffsetCorrectionIconConverter}}"
                                         VerticalAlignment="Center" HorizontalAlignment="Center" Width="20" Height="20"/>
             </common:MvtButton>
+        </Grid>
 
-            <TextBlock Grid.Row="3" Margin="5" Grid.Column="1"
+        <Grid Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+                <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+                <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+                <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Margin="5" Grid.Column="0" Grid.Row="0"
                    HorizontalAlignment="Center" VerticalAlignment="Center">
                 <TextBlock.Text>
                     <MultiBinding StringFormat="N3" Converter="{StaticResource ColorOffsetUnitConverter}">
@@ -215,7 +195,7 @@
                 </TextBlock.Visibility>
             </TextBlock>
 
-            <TextBlock Grid.Row="3" Margin="5" Grid.Column="2"
+            <TextBlock  Margin="5" Grid.Column="1"
                 HorizontalAlignment="Center" VerticalAlignment="Center">
                 <TextBlock.Text>
                     <MultiBinding StringFormat="N3" Converter="{StaticResource ColorOffsetUnitConverter}">
@@ -231,7 +211,7 @@
                 </TextBlock.Visibility>
             </TextBlock>
 
-            <TextBlock Grid.Row="3" Margin="5" Grid.Column="3" 
+            <TextBlock  Margin="5" Grid.Column="2" 
                 HorizontalAlignment="Center" VerticalAlignment="Center">
                 <TextBlock.Text>
                     <MultiBinding StringFormat="N3" Converter="{StaticResource ColorOffsetUnitConverter}">
@@ -247,7 +227,7 @@
                 </TextBlock.Visibility>
             </TextBlock>
 
-            <TextBlock Grid.Row="3" Margin="5" Grid.Column="4" 
+            <TextBlock   Margin="5" Grid.Column="3" 
                 HorizontalAlignment="Center" VerticalAlignment="Center">
                 <TextBlock.Text>
                     <MultiBinding StringFormat="N3" Converter="{StaticResource ColorOffsetUnitConverter}">
@@ -256,14 +236,23 @@
                     </MultiBinding>
                 </TextBlock.Text>
                 <TextBlock.Visibility>
-                    <MultiBinding StringFormat="N3" Converter="{StaticResource ScanningMachinesVisibilityConverter}" ConverterParameter="3">
+                    <MultiBinding StringFormat="N3" Converter="{StaticResource ScanningMachinesVisibilityConverter2}" ConverterParameter="3">
                         <Binding Path="IsScanning" />
                         <Binding Path="ShowColorOffset"/>
                     </MultiBinding>
                 </TextBlock.Visibility>
             </TextBlock>
+        </Grid>
 
-            <common:MvtNumBox  Margin="10" LostFocus="CorrectionValueNumBoxLostFocus" Grid.Row="4" Grid.Column="1"
+        <Grid Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="4" Visibility="{Binding ColorOffsetEditMode, Converter={StaticResource BooleanToVisibleConverter}}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+                <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+                <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+                <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+
+            <common:MvtNumBox  Margin="10" LostFocus="CorrectionValueNumBoxLostFocus" Grid.Column="0"
                           >
                 <common:MvtNumBox.Text>
                     <MultiBinding StringFormat="N3" Converter="{StaticResource ColorOffsetUnitConverter}">
@@ -280,7 +269,7 @@
             </common:MvtNumBox>
 
 
-            <common:MvtNumBox Margin="10" LostFocus="CorrectionValueNumBoxLostFocus"  Grid.Row="4" Grid.Column="2"
+            <common:MvtNumBox Margin="10" LostFocus="CorrectionValueNumBoxLostFocus" Grid.Column="1"
                         >
                 <common:MvtNumBox.Text>
                     <MultiBinding StringFormat="N3" Converter="{StaticResource ColorOffsetUnitConverter}">
@@ -297,7 +286,7 @@
                 </common:MvtNumBox.Visibility>
             </common:MvtNumBox>
 
-            <common:MvtNumBox Margin="10" LostFocus="CorrectionValueNumBoxLostFocus"  Grid.Row="4" Grid.Column="3"
+            <common:MvtNumBox Margin="10" LostFocus="CorrectionValueNumBoxLostFocus" Grid.Column="2"
                          >
                 <common:MvtNumBox.Text>
                     <MultiBinding StringFormat="N3" Converter="{StaticResource ColorOffsetUnitConverter}">
@@ -313,7 +302,7 @@
                 </common:MvtNumBox.Visibility>
             </common:MvtNumBox>
 
-            <common:MvtNumBox Margin="10" LostFocus="CorrectionValueNumBoxLostFocus"  Grid.Row="4" Grid.Column="4"
+            <common:MvtNumBox Margin="10" LostFocus="CorrectionValueNumBoxLostFocus"  Grid.Column="3"
                          >
                 <common:MvtNumBox.Text>
                     <MultiBinding StringFormat="N3" Converter="{StaticResource ColorOffsetUnitConverter}">
@@ -328,262 +317,379 @@
                     </MultiBinding>
                 </common:MvtNumBox.Visibility>
             </common:MvtNumBox>
+        </Grid>
 
+
+
+
+        <!--Angle-->
+        <common:MvtButton Visibility="{Binding IsFirstInView, Converter={StaticResource BoolToVisible_Converter}}" 
+                          Grid.Row="6" Grid.RowSpan="3" VerticalAlignment="Top" Grid.Column="0" HorizontalAlignment="Left"  Margin="5,5,5,5"
+                          Click="ExpandAngle_Clicked" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeS}">
+            <iconPacks:PackIconMaterial x:Name="AngleExpandIcon" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                            Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 
+                                                Kind="{Binding AngleEditMode, Converter={StaticResource ExpandSectionIconConverter}}"></iconPacks:PackIconMaterial>
+        </common:MvtButton>
+
+        <Border Grid.Row="6" Grid.RowSpan="3" Grid.Column="0" Grid.ColumnSpan="5" BorderBrush="WhiteSmoke" BorderThickness="2,2,2,0"></Border>
+        <TextBlock Background="White" Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="4" Foreground="#ff303030" FontWeight="SemiBold" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"
+                       Text="{Binding AngleHeader}" Margin="10"></TextBlock>
+
+        <Grid Grid.Row="7" Grid.Column="1" Grid.ColumnSpan="4" Visibility="{Binding AngleEditMode, Converter={StaticResource BoolToVisible_Converter}}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+                <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+                <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+                <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+
+            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}"  Grid.Column="0"
+                         Margin="5" Tag="0" Click="AngleInfoButton_Click"
+                ToolTip="Angle">
+                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Kind="AngleAcute" VerticalAlignment="Center" HorizontalAlignment="Center" Width="20" Height="20"/>
+            </common:MvtButton>
 
             <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}"  Grid.Column="1"
-                          Grid.Row="5" Margin="5" Tag="0" Click="AngleInfoButton_Click"
-                ToolTip="Angle" IsEnabled="{Binding InfoButtonsEnabled}">
+                        Margin="5" Tag="1" Click="AngleInfoButton_Click" ToolTip="Angle"
+                        >
                 <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Kind="AngleAcute" VerticalAlignment="Center" HorizontalAlignment="Center" Width="20" Height="20"/>
             </common:MvtButton>
 
             <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}"  Grid.Column="2"
-                         Grid.Row="5" Margin="5" Tag="1" Click="AngleInfoButton_Click" ToolTip="Angle"
-                        IsEnabled="{Binding InfoButtonsEnabled}">
-                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Kind="AngleAcute" VerticalAlignment="Center" HorizontalAlignment="Center" Width="20" Height="20"/>
-            </common:MvtButton>
-
-            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}"  Grid.Column="3"
-                          Grid.Row="5" Margin="5" Tag="2" Click="AngleInfoButton_Click" ToolTip="Angle"
-                        IsEnabled="{Binding InfoButtonsEnabled}">
+                        Margin="5" Tag="2" Click="AngleInfoButton_Click" ToolTip="Angle"
+                        >
                 <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Kind="AngleAcute"  VerticalAlignment="Center" HorizontalAlignment="Center" Width="20" Height="20"/>
             </common:MvtButton>
 
-            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}"  Grid.Column="4"
-                          Grid.Row="5" Margin="5" Tag="3" Click="AngleInfoButton_Click" ToolTip="Angle"
-                        IsEnabled="{Binding InfoButtonsEnabled}" >
+            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}"  Grid.Column="3"
+                         Margin="5" Tag="3" Click="AngleInfoButton_Click" ToolTip="Angle"
+                        >
                 <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Kind="AngleAcute" VerticalAlignment="Center" HorizontalAlignment="Center" Width="20" Height="20"/>
             </common:MvtButton>
+        </Grid>
+
+        <Grid Grid.Column="1" Grid.ColumnSpan="4" Grid.Row="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+                <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+                <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+                <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
 
             <common:MvtNumBox Visibility="{Binding RobotIsConnected, Converter={StaticResource BooleanToVisibleOrHiddenConverter}}"
-                        Margin="10" LostFocus="CorrectionValueNumBoxLostFocus" Grid.Row="6" Grid.Column="1"
+                        Margin="10" LostFocus="CorrectionValueNumBoxLostFocus" Grid.Column="0"
                          >
                 <common:MvtNumBox.Text>
-                    <MultiBinding StringFormat="N3" Converter="{StaticResource AngleCorrectionsUnitConverter}">
+                    <MultiBinding  Converter="{StaticResource AngleCorrectionsUnitConverter}">
                         <Binding Path="AngleCorrectionValues[0]"></Binding>
-                        <Binding Path="AngleStitchCorrectionsUnitIsInUM"></Binding>
+                        <Binding Path="AngleStitchCorrectionsUnitInRevolutions"></Binding>
                     </MultiBinding>
                 </common:MvtNumBox.Text>
             </common:MvtNumBox>
+
             <common:MvtNumBox Visibility="{Binding RobotIsConnected, Converter={StaticResource BooleanToVisibleOrHiddenConverter}}"
-                         Margin="10" LostFocus="CorrectionValueNumBoxLostFocus"  Grid.Row="6" Grid.Column="2"
+                         Margin="10" LostFocus="CorrectionValueNumBoxLostFocus" Grid.Column="1"
                          >
                 <MultiBinding StringFormat="N3" Converter="{StaticResource AngleCorrectionsUnitConverter}">
                     <Binding Path="AngleCorrectionValues[1]"></Binding>
-                    <Binding Path="AngleStitchCorrectionsUnitIsInUM"></Binding>
+                    <Binding Path="AngleStitchCorrectionsUnitInRevolutions"></Binding>
                 </MultiBinding>
             </common:MvtNumBox>
             <common:MvtNumBox Visibility="{Binding RobotIsConnected, Converter={StaticResource BooleanToVisibleOrHiddenConverter}}"
-                         Margin="10" LostFocus="CorrectionValueNumBoxLostFocus"  Grid.Row="6" Grid.Column="3"
+                         Margin="10" LostFocus="CorrectionValueNumBoxLostFocus" Grid.Column="2"
                          >
                 <MultiBinding StringFormat="N3" Converter="{StaticResource AngleCorrectionsUnitConverter}">
                     <Binding Path="AngleCorrectionValues[2]"></Binding>
-                    <Binding Path="AngleStitchCorrectionsUnitIsInUM"></Binding>
+                    <Binding Path="AngleStitchCorrectionsUnitInRevolutions"></Binding>
                 </MultiBinding>
             </common:MvtNumBox>
 
             <common:MvtNumBox Visibility="{Binding RobotIsConnected, Converter={StaticResource BooleanToVisibleOrHiddenConverter}}"
-                        Margin="10" LostFocus="CorrectionValueNumBoxLostFocus"  Grid.Row="6" Grid.Column="4"
+                        Margin="10" LostFocus="CorrectionValueNumBoxLostFocus"  Grid.Column="3"
                         >
                 <MultiBinding StringFormat="N3" Converter="{StaticResource AngleCorrectionsUnitConverter}">
                     <Binding Path="AngleCorrectionValues[3]"></Binding>
-                    <Binding Path="AngleStitchCorrectionsUnitIsInUM"></Binding>
+                    <Binding Path="AngleStitchCorrectionsUnitInRevolutions"></Binding>
                 </MultiBinding>
             </common:MvtNumBox>
 
             <TextBlock HorizontalAlignment="Center" Visibility="{Binding RobotIsConnected, Converter={StaticResource BooleanNotToVisibilityHideConverter}}"
-                    Margin="5" Grid.Row="6" Grid.Column="1"
+                    Margin="5"  Grid.Column="0"
                   >
                 <TextBlock.Text>
                     <MultiBinding StringFormat="N3" Converter="{StaticResource AngleCorrectionsUnitConverter}">
                         <Binding Path="AngleCorrectionValues[0]"></Binding>
-                        <Binding Path="AngleStitchCorrectionsUnitIsInUM"></Binding>
+                        <Binding Path="AngleStitchCorrectionsUnitInRevolutions"></Binding>
                     </MultiBinding>
                 </TextBlock.Text>
             </TextBlock>
             <TextBlock HorizontalAlignment="Center" Visibility="{Binding RobotIsConnected, Converter={StaticResource BooleanNotToVisibilityHideConverter}}"
-                    Margin="5" Grid.Row="6"  Grid.Column="2"
+                    Margin="5"  Grid.Column="1"
                    >
                 <TextBlock.Text>
                     <MultiBinding StringFormat="N3" Converter="{StaticResource AngleCorrectionsUnitConverter}">
                         <Binding Path="AngleCorrectionValues[1]"></Binding>
-                        <Binding Path="AngleStitchCorrectionsUnitIsInUM"></Binding>
+                        <Binding Path="AngleStitchCorrectionsUnitInRevolutions"></Binding>
                     </MultiBinding>
                 </TextBlock.Text>
             </TextBlock>
             <TextBlock HorizontalAlignment="Center" Visibility="{Binding RobotIsConnected, Converter={StaticResource BooleanNotToVisibilityHideConverter}}"
-                   Margin="5" Grid.Row="6" Grid.Column="3"
+                   Margin="5" Grid.Column="2"
                    >
                 <TextBlock.Text>
                     <MultiBinding StringFormat="N3" Converter="{StaticResource AngleCorrectionsUnitConverter}">
                         <Binding Path="AngleCorrectionValues[2]"></Binding>
-                        <Binding Path="AngleStitchCorrectionsUnitIsInUM"></Binding>
+                        <Binding Path="AngleStitchCorrectionsUnitInRevolutions"></Binding>
                     </MultiBinding>
                 </TextBlock.Text>
             </TextBlock>
             <TextBlock HorizontalAlignment="Center" Visibility="{Binding RobotIsConnected, Converter={StaticResource BooleanNotToVisibilityHideConverter}}"
-                    Margin="5" Grid.Row="6" Grid.Column="4"
+                    Margin="5"  Grid.Column="3"
                    >
                 <TextBlock.Text>
                     <MultiBinding StringFormat="N3" Converter="{StaticResource AngleCorrectionsUnitConverter}">
                         <Binding Path="AngleCorrectionValues[3]"></Binding>
-                        <Binding Path="AngleStitchCorrectionsUnitIsInUM"></Binding>
+                        <Binding Path="AngleStitchCorrectionsUnitInRevolutions"></Binding>
                     </MultiBinding>
                 </TextBlock.Text>
             </TextBlock>
+        </Grid>
 
 
-            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}"
-                         Grid.Column="1" Grid.Row="7" Margin="5" Tag="0" Click="StitchInfoButton_Click" ToolTip="Stitch" IsEnabled="{Binding InfoButtonsEnabled}">
-                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Kind="ArrowCollapseHorizontal" VerticalAlignment="Center" HorizontalAlignment="Center" Width="20" Height="20"/>
+
+
+
+
+
+
+
+        <!--Stitch-->
+        <Grid Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="2" Visibility="{Binding Path=HasStitchEditMode, Converter={StaticResource BoolToVisible_Converter}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"></RowDefinition>
+                <RowDefinition Height="auto"></RowDefinition>
+                <RowDefinition Height="auto"></RowDefinition>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+
+            <common:MvtButton Visibility="{Binding IsFirstInView, Converter={StaticResource BoolToVisible_Converter}}" 
+                          Grid.Row="0" Grid.RowSpan="3" VerticalAlignment="Top" Grid.Column="0" HorizontalAlignment="Left"  Margin="5,5,5,5"
+                          Click="ExpandStitch_Clicked" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeS}">
+                <iconPacks:PackIconMaterial x:Name="StitchExpandIcon" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                            Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 
+                                                Kind="{Binding StitchEditMode, Converter={StaticResource ExpandSectionIconConverter}}"></iconPacks:PackIconMaterial>
             </common:MvtButton>
 
-            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}"
-                          Grid.Column="2" Grid.Row="7" Margin="5" Tag="1" Click="StitchInfoButton_Click" ToolTip="Stitch" IsEnabled="{Binding InfoButtonsEnabled}">
-                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Kind="ArrowCollapseHorizontal" VerticalAlignment="Center" HorizontalAlignment="Center" Width="20" Height="20"/>
-            </common:MvtButton>
+            <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="5" Grid.RowSpan="3" BorderBrush="WhiteSmoke" BorderThickness="2,2,2,0"></Border>
+            <TextBlock Background="White" Grid.Row="0" Grid.Column="1"  Foreground="#ff303030" FontWeight="SemiBold" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"
+                       Text="{Binding StitchHeader}" Margin="10"></TextBlock>
 
-            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}"
-                          Grid.Column="3" Grid.Row="7"  Margin="5" Tag="2" Click="StitchInfoButton_Click" ToolTip="Stitch" IsEnabled="{Binding InfoButtonsEnabled}">
-                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Kind="ArrowCollapseHorizontal" VerticalAlignment="Center" HorizontalAlignment="Center" Width="20" Height="20"/>
-            </common:MvtButton>
+            <Grid Grid.Column="1" Grid.Row="1" Visibility="{Binding StitchEditMode, Converter={StaticResource BoolToVisible_Converter}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+                    <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+                    <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+                    <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
 
-            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}" 
-                         Grid.Column="4" Grid.Row="7" Margin="5" Tag="3" Click="StitchInfoButton_Click" ToolTip="Stitch" IsEnabled="{Binding InfoButtonsEnabled}">
-                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Kind="ArrowCollapseHorizontal" VerticalAlignment="Center" HorizontalAlignment="Center" Width="20" Height="20"/>
-            </common:MvtButton>
+                <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}"
+                         Grid.Column="0" Margin="5" Tag="0" Click="StitchInfoButton_Click" ToolTip="Stitch">
+                    <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Kind="ArrowCollapseHorizontal" VerticalAlignment="Center" HorizontalAlignment="Center" Width="20" Height="20"/>
+                </common:MvtButton>
 
+                <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}"
+                          Grid.Column="1" Margin="5" Tag="1" Click="StitchInfoButton_Click" ToolTip="Stitch">
+                    <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Kind="ArrowCollapseHorizontal" VerticalAlignment="Center" HorizontalAlignment="Center" Width="20" Height="20"/>
+                </common:MvtButton>
 
-            <common:MvtNumBox Visibility="{Binding RobotIsConnected, Converter={StaticResource BooleanToVisibleOrHiddenConverter}}"
-                         LostFocus="CorrectionValueNumBoxLostFocus" Margin="5" Grid.Row="8" Grid.Column="1"
+                <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}"
+                          Grid.Column="2"   Margin="5" Tag="2" Click="StitchInfoButton_Click" ToolTip="Stitch">
+                    <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Kind="ArrowCollapseHorizontal" VerticalAlignment="Center" HorizontalAlignment="Center" Width="20" Height="20"/>
+                </common:MvtButton>
+
+                <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}" 
+                         Grid.Column="3" Margin="5" Tag="3" Click="StitchInfoButton_Click" ToolTip="Stitch">
+                    <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Kind="ArrowCollapseHorizontal" VerticalAlignment="Center" HorizontalAlignment="Center" Width="20" Height="20"/>
+                </common:MvtButton>
+            </Grid>
+
+            <Grid Grid.Row="2" Grid.Column="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+                    <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+                    <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+                    <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+
+                <common:MvtNumBox Visibility="{Binding RobotIsConnected, Converter={StaticResource BooleanToVisibleOrHiddenConverter}}"
+                         LostFocus="CorrectionValueNumBoxLostFocus" Margin="5" Grid.Column="0"
                          >
-                <common:MvtNumBox.Text>
-                    <MultiBinding StringFormat="N3" Converter="{StaticResource StitchCorrectionsUnitConverter}">
-                        <Binding Path="StitchCorrectionValues[0]"></Binding>
+                    <common:MvtNumBox.Text>
+                        <MultiBinding StringFormat="N3" Converter="{StaticResource StitchCorrectionsUnitConverter}">
+                            <Binding Path="StitchCorrectionValues[0]"></Binding>
 
-                        
-                        <Binding Path="AngleStitchCorrectionsUnitIsInUM"></Binding>
 
-                    </MultiBinding>
-                </common:MvtNumBox.Text>
-            </common:MvtNumBox>
+                            <Binding Path="AngleStitchCorrectionsUnitInRevolutions"></Binding>
 
-            <common:MvtNumBox Visibility="{Binding RobotIsConnected, Converter={StaticResource BooleanToVisibleOrHiddenConverter}}"
-                         LostFocus="CorrectionValueNumBoxLostFocus" Margin="5" Grid.Row="8" Grid.Column="2"
+                        </MultiBinding>
+                    </common:MvtNumBox.Text>
+                </common:MvtNumBox>
+
+                <common:MvtNumBox Visibility="{Binding RobotIsConnected, Converter={StaticResource BooleanToVisibleOrHiddenConverter}}"
+                         LostFocus="CorrectionValueNumBoxLostFocus" Margin="5"  Grid.Column="1"
                          >
-                <common:MvtNumBox.Text>
-                    <MultiBinding StringFormat="N3" Converter="{StaticResource StitchCorrectionsUnitConverter}">
-                        <Binding Path="StitchCorrectionValues[1]"></Binding>
+                    <common:MvtNumBox.Text>
+                        <MultiBinding StringFormat="N3" Converter="{StaticResource StitchCorrectionsUnitConverter}">
+                            <Binding Path="StitchCorrectionValues[1]"></Binding>
 
-                        <Binding Path="AngleStitchCorrectionsUnitIsInUM"></Binding>
+                            <Binding Path="AngleStitchCorrectionsUnitInRevolutions"></Binding>
 
-                    </MultiBinding>
-                </common:MvtNumBox.Text>
-            </common:MvtNumBox>
-            <common:MvtNumBox Visibility="{Binding RobotIsConnected, Converter={StaticResource BooleanToVisibleOrHiddenConverter}}"
-                          LostFocus="CorrectionValueNumBoxLostFocus" Margin="5" Grid.Row="8" Grid.Column="3"
+                        </MultiBinding>
+                    </common:MvtNumBox.Text>
+                </common:MvtNumBox>
+                <common:MvtNumBox Visibility="{Binding RobotIsConnected, Converter={StaticResource BooleanToVisibleOrHiddenConverter}}"
+                          LostFocus="CorrectionValueNumBoxLostFocus" Margin="5" Grid.Column="2"
                          >
-                <common:MvtNumBox.Text>
-                    <MultiBinding StringFormat="N3" Converter="{StaticResource StitchCorrectionsUnitConverter}">
-                        <Binding Path="StitchCorrectionValues[2]"></Binding>
+                    <common:MvtNumBox.Text>
+                        <MultiBinding StringFormat="N3" Converter="{StaticResource StitchCorrectionsUnitConverter}">
+                            <Binding Path="StitchCorrectionValues[2]"></Binding>
 
-                        <Binding Path="AngleStitchCorrectionsUnitIsInUM"></Binding>
+                            <Binding Path="AngleStitchCorrectionsUnitInRevolutions"></Binding>
 
-                    </MultiBinding>
-                </common:MvtNumBox.Text>
+                        </MultiBinding>
+                    </common:MvtNumBox.Text>
 
-            </common:MvtNumBox>
-            <common:MvtNumBox Visibility="{Binding RobotIsConnected, Converter={StaticResource BooleanToVisibleOrHiddenConverter}}"
-                         LostFocus="CorrectionValueNumBoxLostFocus" Margin="5" Grid.Row="8" Grid.Column="4"
+                </common:MvtNumBox>
+                <common:MvtNumBox Visibility="{Binding RobotIsConnected, Converter={StaticResource BooleanToVisibleOrHiddenConverter}}"
+                         LostFocus="CorrectionValueNumBoxLostFocus" Margin="5"  Grid.Column="3"
                          >
-                <common:MvtNumBox.Text>
-                    <MultiBinding StringFormat="N3" Converter="{StaticResource StitchCorrectionsUnitConverter}">
-                        <Binding Path="StitchCorrectionValues[3]"></Binding>
+                    <common:MvtNumBox.Text>
+                        <MultiBinding StringFormat="N3" Converter="{StaticResource StitchCorrectionsUnitConverter}">
+                            <Binding Path="StitchCorrectionValues[3]"></Binding>
 
-                        <Binding Path="AngleStitchCorrectionsUnitIsInUM"></Binding>
+                            <Binding Path="AngleStitchCorrectionsUnitInRevolutions"></Binding>
 
-                    </MultiBinding>
-                </common:MvtNumBox.Text>
-            </common:MvtNumBox>
-        
-        
-            <TextBlock HorizontalAlignment="Center" Visibility="{Binding RobotIsConnected, Converter={StaticResource BooleanNotToVisibilityHideConverter}}"
-                   Margin="5" Grid.Row="8" Grid.Column="1"
+                        </MultiBinding>
+                    </common:MvtNumBox.Text>
+                </common:MvtNumBox>
+
+                <TextBlock HorizontalAlignment="Center" Visibility="{Binding RobotIsConnected, Converter={StaticResource BooleanNotToVisibilityHideConverter}}"
+                   Margin="5"  Grid.Column="0"
                    >
-                <TextBlock.Text>
-                    <MultiBinding StringFormat="N3" Converter="{StaticResource StitchCorrectionsUnitConverter}">
-                        <Binding Path="StitchCorrectionValues[0]"></Binding>
+                    <TextBlock.Text>
+                        <MultiBinding StringFormat="N3" Converter="{StaticResource StitchCorrectionsUnitConverter}">
+                            <Binding Path="StitchCorrectionValues[0]"></Binding>
 
-                        <Binding Path="AngleStitchCorrectionsUnitIsInUM"></Binding>
+                            <Binding Path="AngleStitchCorrectionsUnitInRevolutions"></Binding>
 
-                    </MultiBinding>
-                </TextBlock.Text>
+                        </MultiBinding>
+                    </TextBlock.Text>
 
-            </TextBlock>
-            <TextBlock HorizontalAlignment="Center" Visibility="{Binding RobotIsConnected, Converter={StaticResource BooleanNotToVisibilityHideConverter}}"
-                    Margin="5" Grid.Row="8" Grid.Column="2" 
+                </TextBlock>
+                <TextBlock HorizontalAlignment="Center" Visibility="{Binding RobotIsConnected, Converter={StaticResource BooleanNotToVisibilityHideConverter}}"
+                    Margin="5" Grid.Column="1" 
                   >
-                <TextBlock.Text>
-                    <MultiBinding StringFormat="N3" Converter="{StaticResource StitchCorrectionsUnitConverter}">
-                        <Binding Path="StitchCorrectionValues[1]"></Binding>
+                    <TextBlock.Text>
+                        <MultiBinding StringFormat="N3" Converter="{StaticResource StitchCorrectionsUnitConverter}">
+                            <Binding Path="StitchCorrectionValues[1]"></Binding>
 
-                        <Binding Path="AngleStitchCorrectionsUnitIsInUM"></Binding>
+                            <Binding Path="AngleStitchCorrectionsUnitInRevolutions"></Binding>
 
-                    </MultiBinding>
-                </TextBlock.Text>
+                        </MultiBinding>
+                    </TextBlock.Text>
 
-            </TextBlock>
-            <TextBlock HorizontalAlignment="Center" Visibility="{Binding RobotIsConnected, Converter={StaticResource BooleanNotToVisibilityHideConverter}}"
-                   Margin="5" Grid.Row="8" Grid.Column="3" 
+                </TextBlock>
+                <TextBlock HorizontalAlignment="Center" Visibility="{Binding RobotIsConnected, Converter={StaticResource BooleanNotToVisibilityHideConverter}}"
+                   Margin="5"  Grid.Column="2" 
                   >
-                <TextBlock.Text>
-                    <MultiBinding StringFormat="N3" Converter="{StaticResource StitchCorrectionsUnitConverter}">
-                        <Binding Path="StitchCorrectionValues[2]"></Binding>
+                    <TextBlock.Text>
+                        <MultiBinding StringFormat="N3" Converter="{StaticResource StitchCorrectionsUnitConverter}">
+                            <Binding Path="StitchCorrectionValues[2]"></Binding>
 
-                       <Binding Path="AngleStitchCorrectionsUnitIsInUM"></Binding>
+                            <Binding Path="AngleStitchCorrectionsUnitInRevolutions"></Binding>
 
-                    </MultiBinding>
-                </TextBlock.Text>
-            </TextBlock>
-            <TextBlock HorizontalAlignment="Center" Visibility="{Binding RobotIsConnected, Converter={StaticResource BooleanNotToVisibilityHideConverter}}"
-                     Margin="5" Grid.Row="8" Grid.Column="4"
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
+                <TextBlock HorizontalAlignment="Center" Visibility="{Binding RobotIsConnected, Converter={StaticResource BooleanNotToVisibilityHideConverter}}"
+                     Margin="5"   Grid.Column="3"
                    >
-                <TextBlock.Text>
-                    <MultiBinding StringFormat="N3" Converter="{StaticResource StitchCorrectionsUnitConverter}">
-                        <Binding Path="StitchCorrectionValues[3]"></Binding>
+                    <TextBlock.Text>
+                        <MultiBinding StringFormat="N3" Converter="{StaticResource StitchCorrectionsUnitConverter}">
+                            <Binding Path="StitchCorrectionValues[3]"></Binding>
 
-                        <Binding Path="AngleStitchCorrectionsUnitIsInUM"></Binding>
+                            <Binding Path="AngleStitchCorrectionsUnitInRevolutions"></Binding>
 
-                    </MultiBinding>
-                </TextBlock.Text>
-            </TextBlock>
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
+            </Grid>
+        </Grid>
 
+        <!--Register-->
+        <Border Grid.Row="10"  Grid.Column="0" Grid.RowSpan="4" Grid.ColumnSpan="5" BorderBrush="WhiteSmoke" BorderThickness="2,2,2,0"></Border>
+        <TextBlock Background="White" Grid.Row="10" Grid.Column="1" Foreground="#ff303030" FontWeight="SemiBold" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"
+                       Text="{Binding RegisterHeader}" Margin="10"></TextBlock>
+        <common:MvtButton Visibility="{Binding IsFirstInView, Converter={StaticResource BoolToVisible_Converter}}" Grid.RowSpan="4"
+                          Grid.Row="10" Grid.Column="0" VerticalAlignment="Top"  HorizontalAlignment="Left"  Margin="5,5,5,5"
+                          Click="ExpandRegister_Clicked" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeS}">
+            <iconPacks:PackIconMaterial x:Name="RegisterExpandIcon" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                            Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 
+                                               Kind="{Binding RegisterEditMode, Converter={StaticResource ExpandSectionIconConverter}}"></iconPacks:PackIconMaterial>
+        </common:MvtButton>
 
+        <Grid Grid.Column="1" Grid.Row="11" Visibility="{Binding RegisterEditMode, Converter={StaticResource BoolToVisible_Converter}}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+                <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+                <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+                <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
 
-            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}" Margin="5" Grid.Row="9" Grid.Column="1"
+            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}" Margin="5"  Grid.Column="0"
                                       Tag="0" Click="RegisterCorrectionButton_Click" x:Name="RegisterCorrectionButton0" ToolTip="Head Distance">
-                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20" Kind="ArrowUp" HorizontalAlignment="Center"
+                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20"
+                                            Kind="{Binding IsScanning, Converter={StaticResource RegisterCorrectionIconConverter}}"
+                                            HorizontalAlignment="Center"
                                    ></iconPacks:PackIconMaterial>
             </common:MvtButton>
 
-            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}" Margin="5" Grid.Row="9" Grid.Column="2"
+            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}" Margin="5"  Grid.Column="1"
                                           Tag="1" Click="RegisterCorrectionButton_Click" x:Name="RegisterCorrectionButton1" ToolTip="Head Distance">
-                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20"  Kind="ArrowUp" HorizontalAlignment="Center"
+                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20"  
+                                            Kind="{Binding IsScanning, Converter={StaticResource RegisterCorrectionIconConverter}}" HorizontalAlignment="Center"
                                        ></iconPacks:PackIconMaterial>
             </common:MvtButton>
 
-            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}"  Margin="5" Grid.Row="9" Grid.Column="3"
+            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}"  Margin="5" Grid.Column="2"
                                           Tag="2" Click="RegisterCorrectionButton_Click" x:Name="RegisterCorrectionButton2" ToolTip="Head Distance">
-                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20"  Kind="ArrowUp" HorizontalAlignment="Center"
+                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20"  
+                                            Kind="{Binding IsScanning, Converter={StaticResource RegisterCorrectionIconConverter}}"
+                                            HorizontalAlignment="Center"
                                        ></iconPacks:PackIconMaterial>
             </common:MvtButton>
 
-            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}" Margin="5" Grid.Row="9" Grid.Column="4"
+            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}" Margin="5" Grid.Column="3"
                                           Tag="3" Click="RegisterCorrectionButton_Click" x:Name="RegisterCorrectionButton3" ToolTip="Head Distance">
-                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20" Kind="ArrowUp" HorizontalAlignment="Center"
+                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20" 
+                                            Kind="{Binding IsScanning, Converter={StaticResource RegisterCorrectionIconConverter}}"
+                                            HorizontalAlignment="Center"
                                        ></iconPacks:PackIconMaterial>
             </common:MvtButton>
+        </Grid>
 
-            <TextBlock Grid.Row="10" Margin="5" Grid.Column="1" 
+        <Grid Grid.Column="1" Grid.Row="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+                <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+                <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+                <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Margin="5" Grid.Column="0" 
                    HorizontalAlignment="Center" VerticalAlignment="Center">
                 <TextBlock.Text>
                     <MultiBinding StringFormat="N3" Converter="{StaticResource RegisterCorrectionsUnitConverter}">
@@ -593,8 +699,7 @@
                 </TextBlock.Text>
             </TextBlock>
 
-
-            <TextBlock Grid.Row="10" Margin="5" Grid.Column="2"
+            <TextBlock Margin="5" Grid.Column="1"
                    HorizontalAlignment="Center" VerticalAlignment="Center">
                 <TextBlock.Text>
                     <MultiBinding StringFormat="N3" Converter="{StaticResource RegisterCorrectionsUnitConverter}">
@@ -604,7 +709,7 @@
                 </TextBlock.Text>
             </TextBlock>
 
-            <TextBlock Grid.Row="10" Margin="5" Grid.Column="3"
+            <TextBlock   Margin="5" Grid.Column="2"
                    HorizontalAlignment="Center" VerticalAlignment="Center">
                 <TextBlock.Text>
                     <MultiBinding StringFormat="N3" Converter="{StaticResource RegisterCorrectionsUnitConverter}">
@@ -614,7 +719,7 @@
                 </TextBlock.Text>
             </TextBlock>
 
-            <TextBlock Grid.Row="10" Margin="5" Grid.Column="4"
+            <TextBlock   Margin="5" Grid.Column="3"
                    HorizontalAlignment="Center" VerticalAlignment="Center">
                 <TextBlock.Text>
                     <MultiBinding StringFormat="N3" Converter="{StaticResource RegisterCorrectionsUnitConverter}">
@@ -624,8 +729,17 @@
                 </TextBlock.Text>
             </TextBlock>
 
+        </Grid>
 
-            <common:MvtNumBox  LostFocus="RegisterCorrectionValueNumBoxLostFocus" Tag="0" Margin="5" Grid.Row="11" Grid.Column="1"
+        <Grid Grid.Column="1" Grid.Row="13" Visibility="{Binding RegisterEditMode, Converter={StaticResource BoolToVisible_Converter}}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+                <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+                <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+                <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+
+            <common:MvtNumBox  LostFocus="RegisterCorrectionValueNumBoxLostFocus" Tag="0" Margin="5"  Grid.Column="0"
                           >
                 <common:MvtNumBox.Text>
                     <MultiBinding StringFormat="N3" Converter="{StaticResource RegisterCorrectionsUnitConverter}">
@@ -636,7 +750,7 @@
             </common:MvtNumBox>
 
 
-            <common:MvtNumBox LostFocus="RegisterCorrectionValueNumBoxLostFocus" Tag="1" Margin="5" Grid.Row="11" Grid.Column="2" 
+            <common:MvtNumBox LostFocus="RegisterCorrectionValueNumBoxLostFocus" Tag="1" Margin="5" Grid.Column="1" 
                            >
                 <common:MvtNumBox.Text>
                     <MultiBinding StringFormat="N3" Converter="{StaticResource RegisterCorrectionsUnitConverter}">
@@ -648,17 +762,17 @@
 
 
 
-        <common:MvtNumBox LostFocus="RegisterCorrectionValueNumBoxLostFocus" Tag="2" Margin="5" Grid.Row="11" Grid.Column="3"
+            <common:MvtNumBox LostFocus="RegisterCorrectionValueNumBoxLostFocus" Tag="2" Margin="5"  Grid.Column="2"
                           >
-            <common:MvtNumBox.Text>
-                <MultiBinding StringFormat="N3" Converter="{StaticResource RegisterCorrectionsUnitConverter}">
-                    <Binding Path="RegisterCorrectionValues[2]"></Binding>
-                    <Binding Path="RegisterCorrectionUnitInDots"></Binding>
-                </MultiBinding>
-            </common:MvtNumBox.Text>
-        </common:MvtNumBox>
+                <common:MvtNumBox.Text>
+                    <MultiBinding StringFormat="N3" Converter="{StaticResource RegisterCorrectionsUnitConverter}">
+                        <Binding Path="RegisterCorrectionValues[2]"></Binding>
+                        <Binding Path="RegisterCorrectionUnitInDots"></Binding>
+                    </MultiBinding>
+                </common:MvtNumBox.Text>
+            </common:MvtNumBox>
 
-        <common:MvtNumBox  LostFocus="RegisterCorrectionValueNumBoxLostFocus" Tag="3" Margin="5" Grid.Row="11" Grid.Column="4"
+            <common:MvtNumBox  LostFocus="RegisterCorrectionValueNumBoxLostFocus" Tag="3" Margin="5"  Grid.Column="3"
                            >
                 <common:MvtNumBox.Text>
                     <MultiBinding StringFormat="N3" Converter="{StaticResource RegisterCorrectionsUnitConverter}">
@@ -667,130 +781,244 @@
                     </MultiBinding>
                 </common:MvtNumBox.Text>
             </common:MvtNumBox>
+        </Grid>
 
-            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}" Margin="5" Grid.Row="12" Grid.Column="1" 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <!--Backwards Register-->
+        <Grid Grid.Row="14" Grid.Column="0" Grid.ColumnSpan="2" Visibility="{Binding IsScanning, Converter={StaticResource BoolToVisible_Converter}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"></RowDefinition>
+                <RowDefinition Height="auto"></RowDefinition>
+                <RowDefinition Height="auto"></RowDefinition>
+                <RowDefinition Height="auto"></RowDefinition>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+
+            <common:MvtButton Visibility="{Binding IsFirstInView, Converter={StaticResource BoolToVisible_Converter}}" 
+                          Grid.Row="0" Grid.RowSpan="4" VerticalAlignment="Top" Grid.Column="0" HorizontalAlignment="Left"  Margin="5,5,5,5"
+                          Click="ExpandBackwardsRegister_Clicked" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeS}">
+                <iconPacks:PackIconMaterial x:Name="BackwardsRegisterExpandIcon" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                            Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 
+                                                Kind="{Binding BackwardsRegisterEditMode, Converter={StaticResource ExpandSectionIconConverter}}"></iconPacks:PackIconMaterial>
+            </common:MvtButton>
+
+            <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="5" Grid.RowSpan="3" BorderBrush="WhiteSmoke" BorderThickness="2,2,2,0"></Border>
+            <TextBlock Background="White" Grid.Row="0" Grid.Column="1"  Foreground="#ff303030" FontWeight="SemiBold" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"
+                       Text="{Binding BackwardsRegisterHeader}" Margin="10"></TextBlock>
+
+
+            <Grid Grid.Column="1" Grid.Row="1" Visibility="{Binding BackwardsRegisterEditMode, Converter={StaticResource BoolToVisible_Converter}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+                    <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+                    <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+                    <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+
+                <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}" Margin="5" Grid.Column="0" 
                                       Tag="0" Click="BackwardRegisterCorrectionButton_Click" x:Name="BackwardRegisterCorrectionButton0"
                                          Visibility="{Binding IsScanning, Converter={StaticResource BoolToVisible_Converter}}" ToolTip="Head Distance Backwards">
-                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20" Kind="ArrowUp" HorizontalAlignment="Center"
+                    <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20" 
+                                                Kind="{Binding IsScanning, Converter={StaticResource BackwardsRegisterCorrectionIconConverter}}"
+                                                HorizontalAlignment="Center"
                                    ></iconPacks:PackIconMaterial>
-            </common:MvtButton>
+                </common:MvtButton>
 
-            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}" Margin="5" Grid.Row="12"  Grid.Column="2"
+                <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}" Margin="5"  Grid.Column="1"
                                           Tag="1" Click="BackwardRegisterCorrectionButton_Click" x:Name="BackwardRegisterCorrectionButton1"  Visibility="{Binding IsScanning, Converter={StaticResource BoolToVisible_Converter}}" 
                     ToolTip="Head Distance Backwards">
-                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20"  Kind="ArrowUp" HorizontalAlignment="Center"
+                    <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20" 
+                                                Kind="{Binding IsScanning, Converter={StaticResource BackwardsRegisterCorrectionIconConverter}}"
+                                                HorizontalAlignment="Center"
                                        ></iconPacks:PackIconMaterial>
-            </common:MvtButton>
+                </common:MvtButton>
 
-        <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}"  Margin="5" Grid.Row="12"  Grid.Column="3"  Visibility="{Binding IsScanning, Converter={StaticResource BoolToVisible_Converter}}" 
+                <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}"  Margin="5"   Grid.Column="2"  Visibility="{Binding IsScanning, Converter={StaticResource BoolToVisible_Converter}}" 
                                           Tag="2" Click="BackwardRegisterCorrectionButton_Click" x:Name="BackwardRegisterCorrectionButton2" ToolTip="Head Distance Backwards">
-                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20"  Kind="ArrowUp" HorizontalAlignment="Center"
+                    <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20"  
+                                                Kind="{Binding IsScanning, Converter={StaticResource BackwardsRegisterCorrectionIconConverter}}"
+                                                HorizontalAlignment="Center"
                                        ></iconPacks:PackIconMaterial>
-            </common:MvtButton>
+                </common:MvtButton>
 
-        <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}" Margin="5" Grid.Row="12"  Grid.Column="4"  Visibility="{Binding IsScanning, Converter={StaticResource BoolToVisible_Converter}}" 
+                <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundInfoButton.SizeL}" Margin="5" Grid.Column="3"  Visibility="{Binding IsScanning, Converter={StaticResource BoolToVisible_Converter}}" 
                                           Tag="3" Click="BackwardRegisterCorrectionButton_Click" x:Name="BackwardRegisterCorrectionButton3" ToolTip="Head Distance Backwards">
-                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20"  Kind="ArrowUp" HorizontalAlignment="Center"
+                    <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20" 
+                                                Kind="{Binding IsScanning, Converter={StaticResource BackwardsRegisterCorrectionIconConverter}}"
+                                                HorizontalAlignment="Center"
                                        ></iconPacks:PackIconMaterial>
-            </common:MvtButton>
+                </common:MvtButton>
 
-        <TextBlock Grid.Row="13" Margin="5" Grid.Column="1"  Visibility="{Binding IsScanning, Converter={StaticResource BoolToVisible_Converter}}" 
+            </Grid>
+
+            <Grid Grid.Row="2" Grid.Column="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+                    <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+                    <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+                    <ColumnDefinition MinWidth="95" Width="*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock  Margin="5" Grid.Column="0"  Visibility="{Binding IsScanning, Converter={StaticResource BoolToVisible_Converter}}" 
                    HorizontalAlignment="Center" VerticalAlignment="Center">
-                <TextBlock.Text>
-                <MultiBinding StringFormat="N3" Converter="{StaticResource RegisterCorrectionsUnitConverter}">
-                        <Binding Path="BackwardRegisterSetValues[0]"></Binding>
-                        <Binding Path="RegisterCorrectionUnitInDots"></Binding>
-                    </MultiBinding>
-                </TextBlock.Text>
-            </TextBlock>
+                    <TextBlock.Text>
+                        <MultiBinding StringFormat="N3" Converter="{StaticResource RegisterCorrectionsUnitConverter}">
+                            <Binding Path="BackwardRegisterSetValues[0]"></Binding>
+                            <Binding Path="RegisterCorrectionUnitInDots"></Binding>
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
 
-        <TextBlock Grid.Row="13" Margin="5" Grid.Column="2"  Visibility="{Binding IsScanning, Converter={StaticResource BoolToVisible_Converter}}" 
+                <TextBlock  Margin="5" Grid.Column="1"  Visibility="{Binding IsScanning, Converter={StaticResource BoolToVisible_Converter}}" 
                    HorizontalAlignment="Center" VerticalAlignment="Center">
-                <TextBlock.Text>
-                <MultiBinding StringFormat="N3" Converter="{StaticResource RegisterCorrectionsUnitConverter}">
-                        <Binding Path="BackwardRegisterSetValues[1]"></Binding>
-                        <Binding Path="RegisterCorrectionUnitInDots"></Binding>
-                    </MultiBinding>
-                </TextBlock.Text>
-            </TextBlock>
+                    <TextBlock.Text>
+                        <MultiBinding StringFormat="N3" Converter="{StaticResource RegisterCorrectionsUnitConverter}">
+                            <Binding Path="BackwardRegisterSetValues[1]"></Binding>
+                            <Binding Path="RegisterCorrectionUnitInDots"></Binding>
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
 
-        <TextBlock Grid.Row="13" Margin="5" Grid.Column="3"  Visibility="{Binding IsScanning, Converter={StaticResource BoolToVisible_Converter}}" 
+                <TextBlock   Margin="5" Grid.Column="2"  Visibility="{Binding IsScanning, Converter={StaticResource BoolToVisible_Converter}}" 
                    HorizontalAlignment="Center" VerticalAlignment="Center">
-                <TextBlock.Text>
-                <MultiBinding StringFormat="N3" Converter="{StaticResource RegisterCorrectionsUnitConverter}">
-                        <Binding Path="BackwardRegisterSetValues[2]"></Binding>
-                        <Binding Path="RegisterCorrectionUnitInDots"></Binding>
-                    </MultiBinding>
-                </TextBlock.Text>
-            </TextBlock>
+                    <TextBlock.Text>
+                        <MultiBinding StringFormat="N3" Converter="{StaticResource RegisterCorrectionsUnitConverter}">
+                            <Binding Path="BackwardRegisterSetValues[2]"></Binding>
+                            <Binding Path="RegisterCorrectionUnitInDots"></Binding>
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
 
-        <TextBlock Grid.Row="13" Margin="5" Grid.Column="4"  Visibility="{Binding IsScanning, Converter={StaticResource BoolToVisible_Converter}}" 
+                <TextBlock  Margin="5" Grid.Column="3"  Visibility="{Binding IsScanning, Converter={StaticResource BoolToVisible_Converter}}" 
                    HorizontalAlignment="Center" VerticalAlignment="Center">
-                <TextBlock.Text>
-                <MultiBinding StringFormat="N3" Converter="{StaticResource RegisterCorrectionsUnitConverter}">
-                        <Binding Path="BackwardRegisterSetValues[2]"></Binding>
-                        <Binding Path="RegisterCorrectionUnitInDots"></Binding>
-                    </MultiBinding>
-                </TextBlock.Text>
-            </TextBlock>
+                    <TextBlock.Text>
+                        <MultiBinding StringFormat="N3" Converter="{StaticResource RegisterCorrectionsUnitConverter}">
+                            <Binding Path="BackwardRegisterSetValues[3]"></Binding>
+                            <Binding Path="RegisterCorrectionUnitInDots"></Binding>
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
+            </Grid>
 
-        <common:MvtNumBox  LostFocus="CorrectionValueNumBoxLostFocus" Margin="5" Grid.Row="14" Grid.Column="1"  Visibility="{Binding IsScanning, Converter={StaticResource BoolToVisible_Converter}}" 
+            <Grid Grid.Row="3" Grid.Column="1" Visibility="{Binding BackwardsRegisterEditMode, Converter={StaticResource BoolToVisible_Converter}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition MinWidth="95" Width="135*"></ColumnDefinition>
+                    <ColumnDefinition Width="48*"/>
+                    <ColumnDefinition MinWidth="95" Width="182*"></ColumnDefinition>
+                    <ColumnDefinition MinWidth="95" Width="182*"></ColumnDefinition>
+                    <ColumnDefinition MinWidth="95" Width="182*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+
+                <common:MvtNumBox  LostFocus="CorrectionValueNumBoxLostFocus" Margin="5,5,4.8,5" Grid.Column="0"  Visibility="{Binding IsScanning, Converter={StaticResource BoolToVisible_Converter}}" Grid.ColumnSpan="2" 
                                >
-                <common:MvtNumBox.Text>
-                    <MultiBinding StringFormat="N3" Converter="{StaticResource RegisterCorrectionsUnitConverter}">
-                        <Binding Path="BackwardRegisterCorrectionValues[0]"></Binding>
-                        <Binding Path="RegisterCorrectionUnitInDots"></Binding>
-                    </MultiBinding>
-                </common:MvtNumBox.Text>
-            </common:MvtNumBox>
-            <common:MvtNumBox  LostFocus="CorrectionValueNumBoxLostFocus" Grid.Row="14" Margin="5" Grid.Column="2"
+                    <common:MvtNumBox.Text>
+                        <MultiBinding StringFormat="N3" Converter="{StaticResource RegisterCorrectionsUnitConverter}">
+                            <Binding Path="BackwardRegisterCorrectionValues[0]"></Binding>
+                            <Binding Path="RegisterCorrectionUnitInDots"></Binding>
+                        </MultiBinding>
+                    </common:MvtNumBox.Text>
+                </common:MvtNumBox>
+                <common:MvtNumBox  LostFocus="CorrectionValueNumBoxLostFocus" Margin="5.2,5,4.2,5" Grid.Column="2"
                                Visibility="{Binding IsScanning, Converter={StaticResource BoolToVisible_Converter}}" >
-                <common:MvtNumBox.Text>
-                    <MultiBinding StringFormat="N3" Converter="{StaticResource RegisterCorrectionsUnitConverter}">
-                        <Binding Path="BackwardRegisterCorrectionValues[1]"></Binding>
-                        <Binding Path="RegisterCorrectionUnitInDots"></Binding>
-                    </MultiBinding>
-                </common:MvtNumBox.Text>
-            </common:MvtNumBox>
-            <common:MvtNumBox   LostFocus="CorrectionValueNumBoxLostFocus" Grid.Row="14" Margin="5" Grid.Column="3"
+                    <common:MvtNumBox.Text>
+                        <MultiBinding StringFormat="N3" Converter="{StaticResource RegisterCorrectionsUnitConverter}">
+                            <Binding Path="BackwardRegisterCorrectionValues[1]"></Binding>
+                            <Binding Path="RegisterCorrectionUnitInDots"></Binding>
+                        </MultiBinding>
+                    </common:MvtNumBox.Text>
+                </common:MvtNumBox>
+                <common:MvtNumBox   LostFocus="CorrectionValueNumBoxLostFocus" Margin="4.8,5,4.6,5" Grid.Column="3"
                                 Visibility="{Binding IsScanning, Converter={StaticResource BoolToVisible_Converter}}"  >
-                <common:MvtNumBox.Text>
-                    <MultiBinding StringFormat="N3" Converter="{StaticResource RegisterCorrectionsUnitConverter}">
-                        <Binding Path="BackwardRegisterCorrectionValues[2]"></Binding>
-                        <Binding Path="RegisterCorrectionUnitInDots"></Binding>
-                    </MultiBinding>
-                </common:MvtNumBox.Text>
-            </common:MvtNumBox>
-            <common:MvtNumBox LostFocus="CorrectionValueNumBoxLostFocus" Grid.Row="14" Margin="5" Grid.Column="4"
+                    <common:MvtNumBox.Text>
+                        <MultiBinding StringFormat="N3" Converter="{StaticResource RegisterCorrectionsUnitConverter}">
+                            <Binding Path="BackwardRegisterCorrectionValues[2]"></Binding>
+                            <Binding Path="RegisterCorrectionUnitInDots"></Binding>
+                        </MultiBinding>
+                    </common:MvtNumBox.Text>
+                </common:MvtNumBox>
+                <common:MvtNumBox LostFocus="CorrectionValueNumBoxLostFocus" Margin="5.4,5,4,5" Grid.Column="4"
                               Visibility="{Binding IsScanning, Converter={StaticResource BoolToVisible_Converter}}"  >
-                <common:MvtNumBox.Text>
-                    <MultiBinding StringFormat="N3" Converter="{StaticResource RegisterCorrectionsUnitConverter}">
-                        <Binding Path="BackwardRegisterCorrectionValues[3]"></Binding>
-                        <Binding Path="RegisterCorrectionUnitInDots"></Binding>
-                    </MultiBinding>
-                </common:MvtNumBox.Text>
-            </common:MvtNumBox>
+                    <common:MvtNumBox.Text>
+                        <MultiBinding StringFormat="N3" Converter="{StaticResource RegisterCorrectionsUnitConverter}">
+                            <Binding Path="BackwardRegisterCorrectionValues[3]"></Binding>
+                            <Binding Path="RegisterCorrectionUnitInDots"></Binding>
+                        </MultiBinding>
+                    </common:MvtNumBox.Text>
+                </common:MvtNumBox>
+            </Grid>
+        </Grid>
 
-        <iconPacks:PackIconMaterial Margin="5" Grid.Row="9" Grid.Column="0" VerticalAlignment="Center"
-                                    Kind="ArrowRight" Foreground="Gray">
-            <iconPacks:PackIconMaterial.Visibility>
-                <MultiBinding Converter="{StaticResource BooleanAndToVisibleConverter}">
-                    <Binding Path="IsScanning"/>
-                    <Binding Path="IsFirstInView"/>
-                </MultiBinding>
-            </iconPacks:PackIconMaterial.Visibility>
-        </iconPacks:PackIconMaterial>
+        <!-- Jet Compensation-->
+        <!--<common:MvtButton Grid.RowSpan="2" Grid.Row="15" Grid.Column="0"  Visibility="{Binding IsFirstInView, Converter={StaticResource BoolToVisible_Converter}}" 
+                          VerticalAlignment="Top" HorizontalAlignment="Left"  Margin="5,5,5,5"
+                          Click="ExpandJetCompensation_Clicked" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeS}">
+            <iconPacks:PackIconMaterial  VerticalAlignment="Center" HorizontalAlignment="Center"
+                                            Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 
+                                               Kind="{Binding JetCompensationEditMode, Converter={StaticResource ExpandSectionIconConverter}}"></iconPacks:PackIconMaterial>
+        </common:MvtButton>-->
 
-        <iconPacks:PackIconMaterial Margin="5" Grid.Row="12" Grid.Column="0" VerticalAlignment="Center"
-                                    Kind="ArrowLeft" Foreground="Gray">
-            <iconPacks:PackIconMaterial.Visibility>
-                <MultiBinding Converter="{StaticResource BooleanAndToVisibleConverter}">
-                    <Binding Path="IsScanning"/>
-                    <Binding Path="IsFirstInView"/>
-                </MultiBinding>
-            </iconPacks:PackIconMaterial.Visibility>
-        </iconPacks:PackIconMaterial>
+        <Border Grid.Row="15" Grid.Column="1" Grid.RowSpan="4" BorderBrush="WhiteSmoke" BorderThickness="2"></Border>
+        <Border Grid.Row="15" Grid.Column="0" Grid.RowSpan="1" BorderBrush="WhiteSmoke" BorderThickness="0,2,0,0"></Border>
+        <TextBlock Background="White" Grid.Row="15" Grid.Column="1"  Foreground="#ff303030" FontWeight="SemiBold" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"
+                       Text="Jet Compensation" Margin="10"></TextBlock>
 
+        <Grid Grid.Row="16" Grid.RowSpan="2" Grid.Column="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}" Margin="5" Grid.Column="0" 
+                                      Tag="0" Click="EditJetCompensationButton_Click"
+                              ToolTip="Edit Jet Compensation">
+                <iconPacks:PackIconMaterial  Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 
+                                                Kind="PlaylistEdit"
+                                                HorizontalAlignment="Center"
+                                   ></iconPacks:PackIconMaterial>
+            </common:MvtButton>
+            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}" Margin="5" Grid.Column="1" 
+                                      Tag="1" Click="EditJetCompensationButton_Click"
+                              ToolTip="Edit Jet Compensation">
+                <iconPacks:PackIconMaterial  Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 
+                                                Kind="PlaylistEdit"
+                                                HorizontalAlignment="Center"
+                                   ></iconPacks:PackIconMaterial>
+            </common:MvtButton>
+            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}" Margin="5" Grid.Column="2" 
+                                      Tag="2" Click="EditJetCompensationButton_Click"
+                              ToolTip="Edit Jet Compensation">
+                <iconPacks:PackIconMaterial  Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 
+                                                Kind="PlaylistEdit"
+                                                HorizontalAlignment="Center"
+                                   ></iconPacks:PackIconMaterial>
+            </common:MvtButton>
+            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}" Margin="5" Grid.Column="3" 
+                                      Tag="3" Click="EditJetCompensationButton_Click"
+                              ToolTip="Edit Jet Compensation">
+                <iconPacks:PackIconMaterial  Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 
+                                                Kind="PlaylistEdit"
+                                                HorizontalAlignment="Center"
+                                   ></iconPacks:PackIconMaterial>
+            </common:MvtButton>
+        </Grid>
 
     </Grid>
 

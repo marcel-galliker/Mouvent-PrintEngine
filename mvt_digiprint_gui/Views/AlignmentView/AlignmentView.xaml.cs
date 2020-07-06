@@ -21,25 +21,9 @@ namespace RX_DigiPrint.Views.Alignment
     /// <summary>
     /// Interaction logic for AlignmentView.xaml
     /// </summary>
-    public partial class AlignmentView : UserControl, INotifyPropertyChanged
+    public partial class AlignmentView : UserControl
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged(string name)
-        {
-            PropertyChangedEventHandler handler = PropertyChanged;
-            if (handler != null)
-            {
-                handler(this, new PropertyChangedEventArgs(name));
-            }
-        }
-
-        // Will be removed when "real robot" is available
-        private bool _robotIsConnected;
-        public bool RobotIsConnected
-        {
-            get { return _robotIsConnected; }
-            set { _robotIsConnected = value; OnPropertyChanged("RobotIsConnected"); }
-        }
+        private Models.Alignment _Alignment = RxGlobals.Alignment;
 
         private int CurrentSelectedInkCylinderIndex { get; set; } // ink cylinder index (inside one color)
         private int CurrentSelectedColorIndex { get; set; }
@@ -49,10 +33,7 @@ namespace RX_DigiPrint.Views.Alignment
         public AlignmentView()
         {
             InitializeComponent();
-            DataContext = this;
-            Button_SaveCorrectionValues.DataContext = RxGlobals.Alignment;
-
-            RobotIsConnected = RxGlobals.Alignment.RobotIsConnected;
+            DataContext = _Alignment;
 
             ClusterAlignmentViewList = new List<ClusterAlignmentView>();
 
@@ -307,18 +288,23 @@ namespace RX_DigiPrint.Views.Alignment
                 {
                     for (int i = 0; i < totalNumberOfClusters; i++)
                     {
-                        ClusterAlignmentViewList[i].SetContext(i, i == 0 ? true : false, RobotIsConnected);
+                        ClusterAlignmentViewList[i].SetContext(i, i == 0 ? true : false, _Alignment.RobotIsConnected);
                         ClusterAlignmentViewList[i].Visibility = Visibility.Visible;
                     }
+
+                    // color selection is not necessary
+                    InkSupplySelectionPanel.Visibility = Visibility.Collapsed;
                 }
                 else
                 {
                     for (int i = 0; i < clusterCount; i++)
                     {
                         int clusterIndex = firstClusterNumber + i;
-                        ClusterAlignmentViewList[i].SetContext(clusterIndex, clusterIndex == firstClusterNumber ? true : false, RobotIsConnected);
+                        ClusterAlignmentViewList[i].SetContext(clusterIndex, clusterIndex == firstClusterNumber ? true : false, _Alignment.RobotIsConnected);
                         ClusterAlignmentViewList[i].Visibility = Visibility.Visible;
                     }
+
+                    InkSupplySelectionPanel.Visibility = Visibility.Visible;
                 }
             }
             else
@@ -329,18 +315,22 @@ namespace RX_DigiPrint.Views.Alignment
                     for (int i = 0; i  < clusterCount; i++)
                     {
                         int index = totalNumberOfClusters - i - 1;
-                        ClusterAlignmentViewList[i].SetContext(index, i == 0 ? true : false, RobotIsConnected);
+                        ClusterAlignmentViewList[i].SetContext(index, i == 0 ? true : false, _Alignment.RobotIsConnected);
                         ClusterAlignmentViewList[i].Visibility = Visibility.Visible;
                     }
+
+                    // color selection is not necessary
+                    InkSupplySelectionPanel.Visibility = Visibility.Collapsed;
                 }
                 else
                 {
                     for (int i = 0; i < clusterCount; i++)
                     {
                         int clusterIndex = lastClusterNumber - i;
-                        ClusterAlignmentViewList[i].SetContext(clusterIndex, i == 0 ? true : false, RobotIsConnected);
+                        ClusterAlignmentViewList[i].SetContext(clusterIndex, i == 0 ? true : false, _Alignment.RobotIsConnected);
                         ClusterAlignmentViewList[i].Visibility = Visibility.Visible;
                     }
+                    InkSupplySelectionPanel.Visibility = Visibility.Visible;
                 }
             }
         }
@@ -370,7 +360,7 @@ namespace RX_DigiPrint.Views.Alignment
 
         private void ScanCheckImportButton_Click(object sender, RoutedEventArgs e)
         {
-            RxGlobals.Alignment.ImportScanCheckValues();
+            _Alignment.ImportScanCheckValues();
         }
 
         private void ScanCheckClearButton_Click(object sender, RoutedEventArgs e)
@@ -378,19 +368,19 @@ namespace RX_DigiPrint.Views.Alignment
             bool result = MvtMessageBox.YesNo("Reset Values", "Do you want to reset all values?", MessageBoxImage.Question, false);
             if (result == true)
             {
-                RxGlobals.Alignment.ClearCorrectionValues();
+                _Alignment.ClearCorrectionValues();
             }
         }
 
         private void SaveCorrectionValuesButton_Click(object sender, RoutedEventArgs e)
         {
-            foreach (var elem in RxGlobals.Alignment.ClusterAlignmentDictionary)
+            foreach (var elem in _Alignment.ClusterAlignmentDictionary)
             {
                 elem.Value.SaveCorrectionValues();
             }
 
             RxGlobals.PrintSystem.SendMsg(TcpIp.CMD_SET_PRINTER_CFG);
-            RxGlobals.Alignment.CorrectionValuesChanged = false;
+            _Alignment.CorrectionValuesChanged = false;
 
             _DrawClusters(CurrentSelectedInkCylinderIndex);
         }
@@ -398,7 +388,7 @@ namespace RX_DigiPrint.Views.Alignment
         private void RobotConnectButton_Click(object sender, RoutedEventArgs e)
         {
             bool isChecked = (bool)(sender as CheckBox).IsChecked;
-            RxGlobals.Alignment.RobotIsConnected = isChecked;
+            _Alignment.RobotIsConnected = isChecked;
 
             foreach (var elem in ClusterStackPanel.Children)
             {

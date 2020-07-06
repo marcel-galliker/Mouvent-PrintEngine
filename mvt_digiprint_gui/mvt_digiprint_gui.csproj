@@ -366,6 +366,11 @@
     <Compile Include="Helpers\RxTextBox.cs" />
     <Compile Include="Helpers\RxXamGrid.cs" />
     <Compile Include="Helpers\UnitConversion.cs" />
+    <Compile Include="Models\ClusterAlignment.cs" />
+    <Compile Include="Models\DisabledJets.cs" />
+    <Compile Include="Models\HeadAdjustmentHelp.cs" />
+    <Compile Include="Models\JetCompensation.cs" />
+    <Compile Include="Models\SoftwareValueCorrection.cs" />
     <Compile Include="Models\StepperStatus.cs" />
     <Compile Include="Views\AlignmentView\AlignmentSettings.xaml.cs">
       <DependentUpon>AlignmentSettings.xaml</DependentUpon>
@@ -376,14 +381,26 @@
     <Compile Include="Views\AlignmentView\ClusterAlignmentView.xaml.cs">
       <DependentUpon>ClusterAlignmentView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\AlignmentView\DisabledJetsDensity\DensityView.xaml.cs" />
+    <Compile Include="Views\AlignmentView\DisabledJetsDensity\DisabledJetsView.xaml.cs">
+      <DependentUpon>DisabledJetsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\AlignmentView\DisabledJetsDensity\JetCompensationDensityView.xaml.cs">
+      <DependentUpon>JetCompensationDensityView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\AlignmentView\HeadAdjustmentView.xaml.cs">
       <DependentUpon>HeadAdjustmentView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\AlignmentView\HeadAdjustmentHelpView.xaml.cs">
+      <DependentUpon>HeadAdjustmentHelpView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\AlignmentView\RobotHeadAdjustmentView.xaml.cs">
+      <DependentUpon>RobotHeadAdjustmentView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\AlignmentView\InstructionsView.xaml.cs">
       <DependentUpon>InstructionsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\AlignmentView\SoftwareValueCorrectionView.cs" />
-    <Compile Include="Views\PrintSystemExtended\JetCompensation\JetCompensationViewModel.cs" />
     <Compile Include="Models\Alignment.cs" />
     <Compile Include="Models\AlignmentResources.cs" />
     <Compile Include="Models\Chiller.cs" />
@@ -442,7 +459,6 @@
     <Compile Include="Models\InkTypeList.cs" />
     <Compile Include="Models\InkSupply.cs" />
     <Compile Include="Models\InkType.cs" />
-    <Compile Include="Models\JetCompensation.cs" />
     <Compile Include="Models\Label.cs" />
     <Compile Include="Models\License.cs" />
     <Compile Include="Models\Maintenance.cs" />
@@ -471,9 +487,6 @@
     <Compile Include="Services\RxBtMsgHandler.cs" />
     <Compile Include="Services\RxCrypto.cs" />
     <Compile Include="Services\RxFlz.cs" />
-    <Compile Include="Views\PrintSystemExtended\JetCompensation\JetCompensationView.xaml.cs">
-      <DependentUpon>JetCompensationView.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Views\PrintSystemExtended\PrintSystemExtendedView.xaml.cs">
       <DependentUpon>PrintSystemExtendedView.xaml</DependentUpon>
     </Compile>
@@ -962,9 +975,29 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Views\AlignmentView\HeadAdjustmentView.xaml">
+    <Page Include="Views\AlignmentView\DisabledJetsDensity\DensityView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\AlignmentView\DisabledJetsDensity\DisabledJetsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\AlignmentView\DisabledJetsDensity\JetCompensationDensityView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\AlignmentView\HeadAdjustmentView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\AlignmentView\HeadAdjustmentHelpView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\AlignmentView\RobotHeadAdjustmentView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\AlignmentView\InstructionsView.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -973,10 +1006,6 @@
     <Page Include="Views\AlignmentView\SoftwareValueCorrectionView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Views\PrintSystemExtended\JetCompensation\JetCompensationView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\PrintSystemExtended\PrintSystemExtendedView.xaml">
       <SubType>Designer</SubType>
@@ -1558,6 +1587,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Resource Include="Resources\Bitmaps\density.png" />
     <Resource Include="Resources\Bitmaps\Tex\TX801.png" />
     <Resource Include="Resources\Bitmaps\Alignment\AngleAdjustmentLeftStep1.png" />
     <Resource Include="Resources\Bitmaps\Alignment\AngleAdjustmentLeftStep2.png" />

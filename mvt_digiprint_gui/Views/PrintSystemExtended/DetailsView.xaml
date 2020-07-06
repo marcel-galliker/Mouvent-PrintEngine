@@ -25,7 +25,7 @@
             <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Background="Transparent">
                 <rx_common:MvtRadioButton Margin="10,0,0,0" x:Name="RB_InkSupply" Content="Ink Cylinder" IsChecked="True" Style="{StaticResource MvtTabsSelectionRadioButton}"/>
                 <rx_common:MvtRadioButton x:Name="RB_PrintHeads" Content="Print Heads" Style="{StaticResource MvtTabsSelectionRadioButton}"/>
-                <rx_common:MvtRadioButton x:Name="RB_JetCompensation" Content="Jet Compensation" Style="{StaticResource MvtTabsSelectionRadioButton}"/>
+                
                 <!--="{Binding SuperUser, Converter={StaticResource BooleanToVisibleConverter}}"/>-->
             </StackPanel>
 
@@ -34,6 +34,5 @@
 
         <Grid x:Name="InkCylinderGrid" Grid.Row="1" Visibility="{Binding ElementName=RB_InkSupply, Path=IsChecked, Converter={StaticResource IntToVisible_Converter}}"/>
         <Grid x:Name="PrintHeadsDetailGrid" Grid.Row="1" Visibility="{Binding ElementName=RB_PrintHeads, Path=IsChecked, Converter={StaticResource IntToVisible_Converter}}"/>
-        <Grid x:Name="JetCompensationGrid" Grid.Row="1" Visibility="{Binding ElementName=RB_JetCompensation, Path=IsChecked, Converter={StaticResource IntToVisible_Converter}}"/>
     </Grid>
 </UserControl>

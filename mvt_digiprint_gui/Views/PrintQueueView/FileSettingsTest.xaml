@@ -14,63 +14,6 @@
              
              >
 
-    <UserControl.Resources>
-        <Style x:Key="LargeCheckBox" TargetType="CheckBox">
-            <Setter Property="SnapsToDevicePixels" Value="true"/>
-            <Setter Property="OverridesDefaultStyle" Value="true"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="CheckBox">
-                        <BulletDecorator Background="Transparent">
-                            <BulletDecorator.Bullet>
-                                <Border x:Name="Border"  
-              Width="20" 
-              Height="20" 
-              CornerRadius="0" 
-              Background="Transparent"
-              BorderThickness="1"
-              BorderBrush="Gray">
-                                    <Path 
-                Width="15" Height="15" 
-                x:Name="CheckMark"
-                SnapsToDevicePixels="False" 
-                Stroke="Gray"
-                StrokeThickness="2"
-                Data="M 0 0 L 15 15 M 0 15 L 15 0" />
-                                </Border>
-                            </BulletDecorator.Bullet>
-                            <ContentPresenter Margin="10,0,0,0"
-            VerticalAlignment="Center"
-            HorizontalAlignment="Left"
-            RecognizesAccessKey="True"/>
-                        </BulletDecorator>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsChecked" Value="false">
-                                <Setter TargetName="CheckMark" Property="Visibility" Value="Collapsed"/>
-                            </Trigger>
-                            <Trigger Property="IsChecked" Value="{x:Null}">
-                                <Setter TargetName="CheckMark" Property="Data" Value="M 0 15 L 15 0" />
-                            </Trigger>
-                            <Trigger Property="IsMouseOver" Value="true">
-                                <Setter TargetName="Border" Property="Background" Value="Transparent" />
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="true">
-                                <Setter TargetName="Border" Property="Background" Value="Gray" />
-                                <Setter TargetName="Border" Property="BorderBrush" Value="Gray" />
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="false">
-                                <Setter TargetName="Border" Property="Background" Value="WhiteSmoke" />
-                                <Setter TargetName="Border" Property="BorderBrush" Value="LightGray" />
-                                <Setter Property="Foreground" Value="Gray"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-    </UserControl.Resources>
-    
-    
     <StackPanel 
         Width="auto"
         Height="auto"

@@ -23,7 +23,7 @@ namespace RX_DigiPrint.Views.AlignmentView
             }
         }
 
-        const int enumValueUm = 0;
+        const int enumValueMM = 0;
         const int enumValueDots = 1;
         const int enumValueRevolutions = 2;
 
@@ -57,21 +57,21 @@ namespace RX_DigiPrint.Views.AlignmentView
             InitializeComponent();
             DataContext = this;
 
-            var unitUm = new RxEnum<int>(enumValueUm, "µm");
+            var unitMM = new RxEnum<int>(enumValueMM, "mm");
             var unitDots = new RxEnum<int>(enumValueDots, "dots");
             var unitRevolutions = new RxEnum<int>(enumValueRevolutions, "Revolutions");
 
-            UnitListColorOffset = new ObservableCollection<RxEnum<int>> { unitUm, unitDots };
-            UnitListAngle = new ObservableCollection<RxEnum<int>> { unitRevolutions, unitUm };
-            UnitListRegister = new ObservableCollection<RxEnum<int>> { unitUm, unitDots };
+            UnitListColorOffset = new ObservableCollection<RxEnum<int>> { unitMM, unitDots };
+            UnitListAngle = new ObservableCollection<RxEnum<int>> { unitRevolutions, unitMM };
+            UnitListRegister = new ObservableCollection<RxEnum<int>> { unitMM, unitDots };
 
-            if (RxGlobals.Alignment.AngleStitchCorrectionsUnitIsInUM)
+            if (RxGlobals.Alignment.AngleStitchCorrectionsUnitInRevolutions)
             {
-                UnitAngle = unitUm;
+                UnitAngle = unitRevolutions;
             }
             else
             {
-                UnitAngle = unitRevolutions;
+                UnitAngle = unitMM;
             }
             if (RxGlobals.Alignment.ColorOffsetCorrectionUnitInDots)
             {
@@ -79,7 +79,7 @@ namespace RX_DigiPrint.Views.AlignmentView
             }
             else
             {
-                UnitColorOffset = unitUm;
+                UnitColorOffset = unitMM;
             }
             if (RxGlobals.Alignment.RegisterCorrectionUnitInDots)
             {
@@ -87,26 +87,26 @@ namespace RX_DigiPrint.Views.AlignmentView
             }
             else
             {
-                UnitRegister = unitUm;
+                UnitRegister = unitMM;
             }
         }
 
         private void Okay_Clicked(object sender, RoutedEventArgs e)
         {
-            if (UnitAngle.Value == enumValueUm)
+            if (UnitAngle.Value == enumValueRevolutions)
             {
-                RxGlobals.Alignment.AngleStitchCorrectionsUnitIsInUM = true;
+                RxGlobals.Alignment.AngleStitchCorrectionsUnitInRevolutions = true;
             }
-            else if (UnitAngle.Value == enumValueRevolutions)
+            else if (UnitAngle.Value == enumValueMM)
             {
-                RxGlobals.Alignment.AngleStitchCorrectionsUnitIsInUM = false;
+                RxGlobals.Alignment.AngleStitchCorrectionsUnitInRevolutions = false;
             }
 
             if (UnitColorOffset.Value == enumValueDots)
             {
                 RxGlobals.Alignment.ColorOffsetCorrectionUnitInDots = true;
             }
-            else if (UnitColorOffset.Value == enumValueUm)
+            else if (UnitColorOffset.Value == enumValueMM)
             {
                 RxGlobals.Alignment.ColorOffsetCorrectionUnitInDots = false;
             }
@@ -115,7 +115,7 @@ namespace RX_DigiPrint.Views.AlignmentView
             {
                 RxGlobals.Alignment.RegisterCorrectionUnitInDots = true;
             }
-            else if (UnitRegister.Value == enumValueUm)
+            else if (UnitRegister.Value == enumValueMM)
             {
                 RxGlobals.Alignment.RegisterCorrectionUnitInDots = false;
             }
