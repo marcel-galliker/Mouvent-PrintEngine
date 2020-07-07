@@ -919,10 +919,28 @@ void fluid_send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 	{
 		for (int i=0; i<RX_Config.inkSupplyCnt; i++) _send_ctrlMode(i, ctrlMode, sendToHeads);	
 	}
+    if ((RX_StepperStatus.info.z_in_cap || !RX_StepperStatus.info.ref_done) &&
+        ctrlMode == ctrl_print && rx_def_is_scanning(RX_Config.printer.type))
+    {
+
+        if (RX_StepperStatus.info.z_in_cap)
+        {
+            Error(ERR_CONT, 0, "Printheads in capping position");
+            ctrlMode = ctrl_off;
+        }
+        else if (!RX_StepperStatus.info.ref_done)
+        {
+            steptx_lift_to_up_pos();
+        }
+        
+    }
+    
 	if (ctrlMode==ctrl_off) step_rob_stop();	
 	if (ctrlMode==ctrl_purge_hard || ctrlMode == ctrl_purge_hard_wipe || ctrlMode == ctrl_purge_hard_vacc || ctrlMode == ctrl_purge || ctrlMode == ctrl_purge_soft) _PurgeFluidNo=no;
-	
-	_FluidCtrlMode = ctrlMode;
+
+    
+
+    _FluidCtrlMode = ctrlMode;
 	_RobotCtrlMode = ctrlMode;
 	_send_ctrlMode(no, ctrlMode, sendToHeads);
 //	Error(LOG, 0, "fluid_send_ctrlMode 0X%04x", ctrlMode);

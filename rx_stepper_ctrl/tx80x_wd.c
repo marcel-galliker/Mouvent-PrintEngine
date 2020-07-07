@@ -291,6 +291,7 @@ int tx80x_wd_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
     case CMD_LIFT_CAPPING_POS:
     case CMD_LIFT_WASH_POS:
     case CMD_LIFT_WIPE_POS:
+    case CMD_LIFT_VACUUM_HIGH_POS:
     case CMD_LIFT_VACUUM_POS:
         strcpy(_CmdName, "CMD_LIFT_UP_POS");
         TrPrintfL(TRUE, "SOCKET[%d]: %s", socket, _CmdName);

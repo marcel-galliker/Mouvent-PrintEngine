@@ -95,15 +95,16 @@ int steptx_handle_status(int no, SStepperStat *pStatus)
 //--- steptx_lift_to_wipe_pos----------------------------------
 void steptx_lift_to_wipe_pos(EnFluidCtrlMode mode)
 {
-	switch (mode)
-	{
-	case ctrl_wipe:			sok_send_2(&_step_socket[0], CMD_LIFT_WIPE_POS,			0, NULL); break;
-	case ctrl_cap:			sok_send_2(&_step_socket[0], CMD_LIFT_CAPPING_POS,		0, NULL); break;
-	case ctrl_wash:			sok_send_2(&_step_socket[0], CMD_LIFT_WASH_POS,			0, NULL); break;
-	case ctrl_vacuum:		sok_send_2(&_step_socket[0], CMD_LIFT_VACUUM_POS,		0, NULL); break;
-	case ctrl_vacuum_high:	sok_send_2(&_step_socket[0], CMD_LIFT_VACUUM_HIGH_POS,	0, NULL); break;
-	default: break;
-	}
+    switch (mode)
+    {
+    case ctrl_wipe:			sok_send_2(&_step_socket[0], CMD_LIFT_WIPE_POS, 0, NULL); break;
+    case ctrl_cap:			sok_send_2(&_step_socket[0], CMD_LIFT_CAPPING_POS, 0, NULL); break;
+    case ctrl_wash:			sok_send_2(&_step_socket[0], CMD_LIFT_WASH_POS, 0, NULL); break;
+    case ctrl_vacuum:		sok_send_2(&_step_socket[0], CMD_LIFT_VACUUM_POS, 0, NULL); break;
+    case ctrl_vacuum_high:	sok_send_2(&_step_socket[0], CMD_LIFT_VACUUM_HIGH_POS, 0, NULL); break;
+    default: break;
+    }
+    
 		
 }
 
@@ -141,7 +142,11 @@ int steptx_lift_in_print_pos(void)
 //--- steptx_lift_to_up_pos -----------------------------------
 void steptx_lift_to_up_pos(void)
 {
-	sok_send_2(&_step_socket[0], CMD_LIFT_UP_POS, 0, NULL);		
+    int i = 0;
+    for (i = 0; i < SIZEOF(_step_socket); i++)
+    {
+        sok_send_2(&_step_socket[i], CMD_LIFT_UP_POS, 0, NULL);
+    }
 }
 
 //--- steptx_lift_in_up_pos --------------
