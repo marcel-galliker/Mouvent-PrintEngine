@@ -140,7 +140,6 @@ $(BINARYDIR)/%.o : %.s $(all_make_files) |$(BINARYDIR)
 
 #VisualGDB: GeneratedRules				#<--- All lines below are auto-generated
 
-
 $(BINARYDIR)/sha1.o : ../Externals/mbedtls-1.3.10/library/sha1.c $(all_make_files) |$(BINARYDIR)
 	$(CC) $(CFLAGS) -c $< -o $@ -MD -MF $(@:.o=.dep)
 

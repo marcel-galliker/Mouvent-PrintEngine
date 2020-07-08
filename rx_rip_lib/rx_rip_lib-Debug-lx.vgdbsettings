@@ -46,9 +46,41 @@
     <AllowChangingHostForMainCommands>false</AllowChangingHostForMainCommands>
     <SkipBuildIfNoSourceFilesChanged>false</SkipBuildIfNoSourceFilesChanged>
     <IgnoreFileTransferErrors>false</IgnoreFileTransferErrors>
-    <RemoveRemoteDirectoryOnClean>true</RemoveRemoteDirectoryOnClean>
+    <RemoveRemoteDirectoryOnClean>false</RemoveRemoteDirectoryOnClean>
     <SkipDeploymentTests>false</SkipDeploymentTests>
     <MainSourceDirectoryForLocalBuilds>$(ProjectDir)</MainSourceDirectoryForLocalBuilds>
+    <SynchronizedDirectories>
+      <SynchronizedDirectory>
+        <TransferAction>
+          <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
+          <LocalDirectory>$(ProjectDir)/../Externals/FreeType</LocalDirectory>
+          <RemoteDirectory>/tmp/VisualGDB/$(ProjectDirUnixStyle)/../Externals/FreeType</RemoteDirectory>
+          <FileMasks>
+            <string>*.cpp</string>
+            <string>*.h</string>
+            <string>*.hpp</string>
+            <string>*.c</string>
+            <string>*.cc</string>
+            <string>*.cxx</string>
+            <string>*.mak</string>
+            <string>Makefile</string>
+            <string>*.txt</string>
+            <string>*.cmake</string>
+          </FileMasks>
+          <TransferNewFilesOnly>true</TransferNewFilesOnly>
+          <IncludeSubdirectories>true</IncludeSubdirectories>
+          <SelectedDirectories />
+          <DeleteDisappearedFiles>false</DeleteDisappearedFiles>
+          <ApplyGlobalExclusionList>true</ApplyGlobalExclusionList>
+          <Extension>
+            <Direction>Outgoing</Direction>
+            <SkipMountPoints>false</SkipMountPoints>
+            <OverwriteTrigger>Stat</OverwriteTrigger>
+          </Extension>
+        </TransferAction>
+        <Triggers>Build</Triggers>
+      </SynchronizedDirectory>
+    </SynchronizedDirectories>
   </Project>
   <Build xsi:type="com.visualgdb.build.make">
     <ToolchainID>
@@ -115,14 +147,43 @@
     <PreSyncActions />
     <PreBuildActions>
       <CustomActionBase xsi:type="SourceTransferAction">
-        <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
+        <SkipWhenRunningCommandList>true</SkipWhenRunningCommandList>
         <RemoteHost>
           <HostName>$(BuildHost)</HostName>
           <Transport>SSH</Transport>
           <UserName>root</UserName>
         </RemoteHost>
-        <LocalDirectory>$(ProjectDir)/../Externals/FreeType</LocalDirectory>
-        <RemoteDirectory>/tmp/VisualGDB/$(ProjectDirUnixStyle)/../Externals/FreeType</RemoteDirectory>
+        <LocalDirectory>$(ProjectDir)/../Externals/FreeType/include</LocalDirectory>
+        <RemoteDirectory>/tmp/VisualGDB/$(ProjectDirUnixStyle)/../Externals/FreeType/include</RemoteDirectory>
+        <FileMasks>
+          <string>*.cpp</string>
+          <string>*.h</string>
+          <string>*.c</string>
+          <string>*.cc</string>
+          <string>*.cxx</string>
+          <string>*.mak</string>
+          <string>Makefile</string>
+        </FileMasks>
+        <TransferNewFilesOnly>true</TransferNewFilesOnly>
+        <IncludeSubdirectories>true</IncludeSubdirectories>
+        <SelectedDirectories />
+        <DeleteDisappearedFiles>false</DeleteDisappearedFiles>
+        <ApplyGlobalExclusionList>true</ApplyGlobalExclusionList>
+        <Extension>
+          <Direction>Outgoing</Direction>
+          <SkipMountPoints>false</SkipMountPoints>
+          <OverwriteTrigger>OnlyIfMissing</OverwriteTrigger>
+        </Extension>
+      </CustomActionBase>
+      <CustomActionBase xsi:type="SourceTransferAction">
+        <SkipWhenRunningCommandList>true</SkipWhenRunningCommandList>
+        <RemoteHost>
+          <HostName>$(BuildHost)</HostName>
+          <Transport>SSH</Transport>
+          <UserName>root</UserName>
+        </RemoteHost>
+        <LocalDirectory>$(ProjectDir)/../Externals/FreeType/src</LocalDirectory>
+        <RemoteDirectory>/tmp/VisualGDB/$(ProjectDirUnixStyle)/../Externals/FreeType/src</RemoteDirectory>
         <FileMasks>
           <string>*.cpp</string>
           <string>*.h</string>

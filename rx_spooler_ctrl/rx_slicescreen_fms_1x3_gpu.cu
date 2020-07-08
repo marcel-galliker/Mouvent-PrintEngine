@@ -17,6 +17,7 @@
 extern "C"{
 #endif
 
+#include "rx_def.h"
 #include "rx_error.h"
 #include "rx_trace.h"
 #include "rx_threads.h"
@@ -99,6 +100,7 @@ int gpu_init(void)
 		}
 	}
 	Error(LOG, 0, "Screening: GPU=>>%s<<", _GpuProp.name);
+	if (!_GPU_Present && rx_def_is_tx((EPrinterType)RX_Spooler.printerType)) Error(WARN, 0, "GPU not present!");
 
 	if (_GPU_Present) return REPLY_OK;
 	else return REPLY_ERROR;
@@ -385,11 +387,8 @@ int gpu_screen_FMS_1x3g(SSLiceInfo *inplane, SSLiceInfo *outplane, void *epplane
 //--- gpu_time ----------------------
 int  gpu_time(int no)
 {
-	if (_GPU_Present)
-	{
-		return (int)(_GPU_Stream[0].Time[no]+0.5);
-	}
-	return (int)(_Time[no]+0.5);
+	if (_GPU_Present) return (int)(_GPU_Stream[0].Time[no]+0.5);
+	else			  return (int)(_Time[no]+0.5);
 }
 
 #ifdef __cplusplus

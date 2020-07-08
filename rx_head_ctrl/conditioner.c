@@ -717,8 +717,9 @@ void cond_set_disabledJets(int headNo, INT16 *jets)
 //--- cond_set_densityValues ---------------------------------------------
 void cond_set_densityValues(int headNo, INT16 *values)
 {
-	headNo = headNo % MAX_HEADS_BOARD;
+	rx_sleep(100);
 
+	headNo = headNo % MAX_HEADS_BOARD;
 	SHeadEEpromMvt mem;
 	memcpy(&mem, _NiosStat->user_eeprom[headNo], sizeof(mem));
 	if (values==NULL || memcmp(values, mem.densityValue, sizeof(mem.densityValue)))
@@ -727,18 +728,6 @@ void cond_set_densityValues(int headNo, INT16 *values)
 		else		memset(mem.densityValue, 0,      sizeof(mem.densityValue));
 		mem.densityValueCRC = rx_crc8(mem.densityValue, sizeof(mem.densityValue));
 		nios_set_user_eeprom(headNo, &mem);
-		/*
-		{
-			char str[100];
-			int i;
-			int len=sprintf(str, "cond_set_densityValues[%d]: ", headNo);
-			for(i=0; i<SIZEOF(mem.densityValue); i++)
-			{
-				len += sprintf(&str[len], "%d ", mem.densityValue[i]);
-			}
-			Error(LOG, 0, str);
-		}
-		*/
 	}
 }
 

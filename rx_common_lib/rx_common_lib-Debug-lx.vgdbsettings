@@ -175,8 +175,8 @@
           <Transport>SSH</Transport>
           <UserName>root</UserName>
         </RemoteHost>
-        <LocalDirectory>$(ProjectDir)/../Externals/mbedtls-1.3.10</LocalDirectory>
-        <RemoteDirectory>/tmp/VisualGDB/$(ProjectDirUnixStyle)/../Externals/mbedtls-1.3.10</RemoteDirectory>
+        <LocalDirectory>$(ProjectDir)/../rx_ink_lib</LocalDirectory>
+        <RemoteDirectory>/tmp/VisualGDB/$(ProjectDirUnixStyle)/../rx_ink_lib</RemoteDirectory>
         <FileMasks>
           <string>*.cpp</string>
           <string>*.h</string>
@@ -204,8 +204,37 @@
           <Transport>SSH</Transport>
           <UserName>root</UserName>
         </RemoteHost>
-        <LocalDirectory>$(ProjectDir)/../rx_ink_lib</LocalDirectory>
-        <RemoteDirectory>/tmp/VisualGDB/$(ProjectDirUnixStyle)/../rx_ink_lib</RemoteDirectory>
+        <LocalDirectory>$(ProjectDir)/../Externals/mbedtls-1.3.10/include</LocalDirectory>
+        <RemoteDirectory>/tmp/VisualGDB/$(ProjectDirUnixStyle)/../Externals/mbedtls-1.3.10/include</RemoteDirectory>
+        <FileMasks>
+          <string>*.cpp</string>
+          <string>*.h</string>
+          <string>*.c</string>
+          <string>*.cc</string>
+          <string>*.cxx</string>
+          <string>*.mak</string>
+          <string>Makefile</string>
+        </FileMasks>
+        <TransferNewFilesOnly>true</TransferNewFilesOnly>
+        <IncludeSubdirectories>true</IncludeSubdirectories>
+        <SelectedDirectories />
+        <DeleteDisappearedFiles>false</DeleteDisappearedFiles>
+        <ApplyGlobalExclusionList>true</ApplyGlobalExclusionList>
+        <Extension>
+          <Direction>Outgoing</Direction>
+          <SkipMountPoints>false</SkipMountPoints>
+          <OverwriteTrigger>Stat</OverwriteTrigger>
+        </Extension>
+      </CustomActionBase>
+      <CustomActionBase xsi:type="SourceTransferAction">
+        <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
+        <RemoteHost>
+          <HostName>$(BuildHost)</HostName>
+          <Transport>SSH</Transport>
+          <UserName>root</UserName>
+        </RemoteHost>
+        <LocalDirectory>$(ProjectDir)/../Externals/mbedtls-1.3.10/library</LocalDirectory>
+        <RemoteDirectory>/tmp/VisualGDB/$(ProjectDirUnixStyle)/../Externals/mbedtls-1.3.10/library</RemoteDirectory>
         <FileMasks>
           <string>*.cpp</string>
           <string>*.h</string>

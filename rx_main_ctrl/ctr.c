@@ -179,9 +179,17 @@ static void _ctr_save(int reset, char *machineName)
     _prodLen=0;
 
 	{
-		char	name[64];
-		UCHAR check[64];
+		char   name[64];
+		UCHAR  check[64];
 		time_t time;
+
+		#ifdef linux
+			struct timespec now;
+			clock_gettime( CLOCK_REALTIME, &now);
+			time = now.tv_sec;
+		#else
+			_time64(&time);
+		#endif
 
 		HANDLE file = setup_create();
 		if (reset) 
@@ -208,13 +216,6 @@ static void _ctr_save(int reset, char *machineName)
 			}
 			else
 			{
-				#ifdef linux
-					struct timespec now;
-					clock_gettime( CLOCK_REALTIME, &now);
-					time = now.tv_sec;
-				#else
-					_time64(&time);
-				#endif
 				_calc_check(time, check);
 			}
 			setup_str	(file, "check", WRITE, check, sizeof(check), "");

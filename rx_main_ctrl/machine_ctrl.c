@@ -75,6 +75,7 @@ int		machine_end(void)
 //--- machine_tick -------------------------------
 int		machine_tick(void)
 {
+	/*
 	if(rx_def_is_tx(RX_Config.printer.type))
 	{
 		if (_CappingTimer>0 && _CappingTimer<rx_get_ticks())
@@ -84,6 +85,7 @@ int		machine_tick(void)
 			fluid_send_ctrlMode(-1, ctrl_cap, TRUE);
 		}
 	}
+	*/
 	return REPLY_OK;
 }
 

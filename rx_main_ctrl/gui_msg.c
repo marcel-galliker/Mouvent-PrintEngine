@@ -816,7 +816,9 @@ static void _do_get_density_val	  (RX_SOCKET socket, SDensityValuesMsg *pmsg)
 			{   
 				if (setup_chapter(file, "Head", head, READ)==REPLY_OK) 
 				{
-					setup_int16_arr(file, "value",  READ, reply.value,	SIZEOF(reply.value),	0);					
+					setup_uchar    (file, "voltage", READ, &reply.voltage, 0);
+				//	setup_int16_arr(file, "value",    READ, reply.value,	SIZEOF(reply.value),	0);	
+					setup_int16_arr(file, "density",  READ, reply.value,	SIZEOF(reply.value),	0);					
 					setup_chapter(file, "..", -1, READ);
 				}
 				setup_chapter(file, "..", -1, READ);
