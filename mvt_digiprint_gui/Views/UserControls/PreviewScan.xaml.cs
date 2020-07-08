@@ -11,8 +11,6 @@ namespace RX_DigiPrint.Views.UserControls
     /// </summary>
     public partial class PreviewScan : UserControl
     {
-        private Thickness _ImageMargin = new Thickness(0,0,30,0);
-
         //--- constructor ------------------------------------------------
         public PreviewScan()
         {
@@ -57,31 +55,28 @@ namespace RX_DigiPrint.Views.UserControls
             double left, right, top, bottom;
             
             //--- set rectangle -----------------
-            right =  MainGrid.ActualWidth-border;            
-            if (Orientation==90 || Orientation==270)
+            right =  border;            
+            if (Orientation==0 || Orientation==180)
             {
-                _ImageMargin.Right = border;
-                left   = MainGrid.ActualWidth - Image.ActualWidth - border;
+                left   = border;
+                right  = border + Image.ActualWidth;
                 top    = (MainGrid.ActualHeight-Image.ActualHeight)/2;
                 bottom = (MainGrid.ActualHeight+Image.ActualHeight)/2;
             }
             else
             {
-                _ImageMargin.Right = border + (Image.ActualHeight-Image.ActualWidth)/2;
                 left   = MainGrid.ActualWidth - Image.ActualHeight - border;
+                right  = border + (Image.ActualHeight-Image.ActualWidth)/2;
                 top    = (MainGrid.ActualHeight-Image.ActualWidth)/2;
                 bottom = (MainGrid.ActualHeight+Image.ActualWidth)/2;
             }
 
-      //      addLineV(left-12, top,                     bottom,   -10, 1);   // height           
-      //      addLineH(left,    right,                   bottom+2, -10, 2);   // width       
-      //      addLineH(right,   MainGrid.ActualWidth,    bottom+2, -10, 3);   // border
-      //      addLineV(right,   top,                     top-distY/2,0, 4);   // gap-Y           
-            addLineH(right,   MainGrid.ActualWidth,    bottom+2, -10, 1);   // border
+      //      addLineH(right,   MainGrid.ActualWidth,    bottom+2, -10, 1);   // border
+            addLineH(0,   left,    bottom+2, -10, 1);   // border
             addLineV(right,   top,                     top-distY/2,0, 2);   // gap-Y           
-            Image.Margin = _ImageMargin;
+            Image.Margin = new Thickness(border, 0, border,0);
             
-            Image2.Margin= new Thickness(0, -(bottom-top)*2-distY, _ImageMargin.Right,0);
+            Image2.Margin= new Thickness(border, -(bottom-top)*2-distY, border,0);
         }
 
         //--- addLineH -----------------------------------------------------------------------------------

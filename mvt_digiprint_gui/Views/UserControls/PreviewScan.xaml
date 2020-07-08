@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              mc:Ignorable="d" 
-             d:DesignHeight="114" d:DesignWidth="190"
+             d:DesignHeight="175" d:DesignWidth="190"
              SizeChanged="UserControl_SizeChanged"
              >
     <!-- Background="{DynamicResource {x:Static SystemColors.MenuBrushKey}}" -->
@@ -18,29 +18,28 @@
         </Grid.Background>
         
         <StackPanel>
-            <TextBlock Text="ñ" FontFamily="Wingdings" FontSize="40" Background="Transparent" Foreground="White"/>
-            <TextBlock Text="ñ" FontFamily="Wingdings" FontSize="40" Background="Transparent" Foreground="white"/>
-            <TextBlock Text="ñ" FontFamily="Wingdings" FontSize="40" Background="Transparent" Foreground="White"/>
+            <TextBlock Text="ò" FontFamily="Wingdings" FontSize="40" Background="Transparent" Foreground="White"/>
+            <TextBlock Text="ò" FontFamily="Wingdings" FontSize="40" Background="Transparent" Foreground="white"/>
+            <TextBlock Text="ò" FontFamily="Wingdings" FontSize="40" Background="Transparent" Foreground="White"/>
+            <TextBlock Text="ò" FontFamily="Wingdings" FontSize="40" Background="Transparent" Foreground="White"/>
         </StackPanel>
         
         <StackPanel HorizontalAlignment="Right">
-            <TextBlock Text="ñ" FontFamily="Wingdings" FontSize="40" Background="Transparent" Foreground="Beige"/>
-            <TextBlock Text="ñ" FontFamily="Wingdings" FontSize="40" Background="Transparent" Foreground="Beige"/>
-            <TextBlock Text="ñ" FontFamily="Wingdings" FontSize="40" Background="Transparent" Foreground="Beige"/>
+            <TextBlock Text="ò" FontFamily="Wingdings" FontSize="40" Background="Transparent" Foreground="Beige"/>
+            <TextBlock Text="ò" FontFamily="Wingdings" FontSize="40" Background="Transparent" Foreground="Beige"/>
+            <TextBlock Text="ò" FontFamily="Wingdings" FontSize="40" Background="Transparent" Foreground="Beige"/>
+            <TextBlock Text="ò" FontFamily="Wingdings" FontSize="40" Background="Transparent" Foreground="Beige"/>
         </StackPanel>
         
         <Image 
             x:Name="Image"
             Source="{Binding Source}" 
             RenderTransformOrigin="0.5,0.5" 
-            HorizontalAlignment="Right"
+            HorizontalAlignment="Left"
             MaxWidth="90"
             MaxHeight="90"
             >
-            <!--                 MaxWidth="90"
-                SizeChanged="Image_SizeChanged"
-
-         -->
+            <!--
             <Image.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform/>
@@ -49,19 +48,21 @@
                     <TranslateTransform/>
                 </TransformGroup>
             </Image.RenderTransform>
+            -->
             </Image>
 
         <Image 
             x:Name="Image2"
             Source="{Binding Source}" 
             RenderTransformOrigin="0.5,0.5" 
-            HorizontalAlignment="Right"
+            HorizontalAlignment="Left"
             MaxWidth="90"
             MaxHeight="90"
             >
             <!--              MaxWidth="90"
            SizeChanged="Image_SizeChanged"
  -->
+            <!--
             <Image.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform/>
@@ -70,6 +71,7 @@
                     <TranslateTransform/>
                 </TransformGroup>
             </Image.RenderTransform>
+            -->
         </Image>
         
         <!-- Source="{Binding Source}" -->
@@ -79,9 +81,10 @@
             BorderThickness="1" RenderTransformOrigin="0.5,0.5"
             Width="{Binding ElementName=Image,Path=ActualWidth}"
             Height="{Binding ElementName=Image, Path=ActualHeight}"
-            HorizontalAlignment="Right"
+            HorizontalAlignment="Left"
             Margin="{Binding ElementName=Image, Path=Margin}"
             >
+            <!--
         <Border.RenderTransform>
             <TransformGroup>
                 <ScaleTransform/>
@@ -90,6 +93,7 @@
                 <TranslateTransform/>
             </TransformGroup>
         </Border.RenderTransform>
+            -->
         </Border>
         
         <Border
@@ -98,9 +102,10 @@
             BorderThickness="1" RenderTransformOrigin="0.5,0.5"
             Width="{Binding ElementName=Image,Path=ActualWidth}"
             Height="{Binding ElementName=Image, Path=ActualHeight}"
-            HorizontalAlignment="Right"
+            HorizontalAlignment="Left"
             Margin="{Binding ElementName=Image2, Path=Margin}"
             >
+            <!--
             <Border.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform/>
@@ -109,6 +114,7 @@
                     <TranslateTransform/>
                 </TransformGroup>
             </Border.RenderTransform>
+            -->
         </Border>
 
         <Canvas x:Name="MyCanvas" Loaded="MyCanvas_Loaded"/>

@@ -417,12 +417,26 @@ namespace RX_DigiPrint.Views.PrintQueueView
             {
                 PrintedQueueGrid.ActiveItem=null;
 
+                bool selected = false;
                 foreach (var row in e.NewSelectedItems)
                 {
                     var item = row.Data as PrintQueueItem;
                     if (item != null && row.IsSelected == true)
                     {
                         item.IsSelected = true;
+                        selected = true;
+                    }
+                }
+                if (selected)
+                {
+                    //--- remove selection in printed list ----
+                    PrintedQueueGrid.ActiveItem = null;
+                    foreach (Row row in PrintedQueueGrid.Rows)
+                    {
+                        row.IsSelected = false;
+                        PrintQueueItem item = row.Data as PrintQueueItem;
+                        if (item != null) item.IsSelected = false;
+                        if (row.Control != null) row.Control.Background = Brushes.Transparent;
                     }
                 }
             }
@@ -455,8 +469,13 @@ namespace RX_DigiPrint.Views.PrintQueueView
 
             //--- remove selection in printed list ----
             PrintedQueueGrid.ActiveItem=null;
-            foreach(Row row in PrintedQueueGrid.Rows)
-                row.IsSelected=false;
+            foreach (Row row in PrintedQueueGrid.Rows)
+            {
+                row.IsSelected = false;
+                PrintQueueItem item = row.Data as PrintQueueItem;
+                if (item != null) item.IsSelected = false;
+                if (row.Control != null) row.Control.Background = Brushes.Transparent;
+            }
             //--------------------------
 
             _update_selected_items();
@@ -520,13 +539,21 @@ namespace RX_DigiPrint.Views.PrintQueueView
         {
             if (e.NewSelectedItems.Count>0)
             {
-                foreach(Row row in PrintQueueGrid.Rows) row.IsSelected = false;
+                foreach (Row row in PrintQueueGrid.Rows)
+                {
+                    row.IsSelected = false;
+                    PrintQueueItem item = row.Data as PrintQueueItem;
+                    if (item != null) item.IsSelected = false;
+                }
+                PrintQueueGrid.ActiveItem = null;
 
                 Button_Delete.Visibility = Visibility.Collapsed;
                 Button_Down.Visibility   = Visibility.Collapsed;
 //              Button_Up.Visibility   = (PrintedQueueGrid.ActiveItem as PrintQueueItem).Progress>=100 ? Visibility.Visible:Visibility.Collapsed;
                 Button_Up.Visibility     = Visibility.Visible;
                 _update_selected_items();
+
+                Button_Up.Visibility = Visibility.Visible;
             }
 
         }

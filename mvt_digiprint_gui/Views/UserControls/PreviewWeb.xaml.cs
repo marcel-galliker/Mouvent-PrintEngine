@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using static RX_DigiPrint.Services.TcpIp;
 
 namespace RX_DigiPrint.Views.UserControls
 {
@@ -84,8 +85,29 @@ namespace RX_DigiPrint.Views.UserControls
             }
         }
 
-        //--- addMeasurement ------------------------------------------------------------
-        private void addMeasurement()
+		public TcpIp.EPrintGoMode PrintGoMode
+		{
+			get { return (TcpIp.EPrintGoMode)GetValue(PrintGoModeProperty); }
+			set { SetValue(PrintGoModeProperty,value); }
+		}
+
+		// Using a DependencyProperty as the backing store for PrintGoMode.  This enables animation, styling, binding, etc...
+		public static readonly DependencyProperty PrintGoModeProperty =
+			DependencyProperty.Register("PrintGoMode",typeof(TcpIp.EPrintGoMode),typeof(PreviewWeb), new PropertyMetadata(TcpIp.EPrintGoMode.PG_MODE_GAP,  new PropertyChangedCallback(OnPrintGoModeChanged)));
+
+        private static void OnPrintGoModeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            PreviewWeb p = (PreviewWeb)d;
+
+            //--- measurement ---
+            if (p.FirstMesurementChild>0)
+            {
+                p.addMeasurement();
+            }
+        }
+
+		//--- addMeasurement ------------------------------------------------------------
+		private void addMeasurement()
         {
             //--- remove old ---
             if (FirstMesurementChild>0)
@@ -99,12 +121,26 @@ namespace RX_DigiPrint.Views.UserControls
             //---  add new ---
             if (Orientation==0 || Orientation==180)
             {
-                double x;
-                addLineV(ImageX+(Image.ActualWidth+Image.ActualHeight)/2, ImageY+(Image.ActualHeight-Image.ActualWidth)/2, 0, 1);
-                addLineH(ImageX+(Image.ActualWidth+Image.ActualHeight)/2, x=ImageX+(Image.ActualWidth+Image.ActualHeight)/2+35, ImageY+20, -10, 2);
-                MainGrid.Children.Add(new Line(){X1=x, Y1=ImageY+16-2, X2=x, Y2=ImageY+16+2, Stroke=Brushes.Red, StrokeThickness=5});
-                addLineH(ImageX+(Image.ActualWidth+Image.ActualHeight)/2, ImageX2+(Image.ActualWidth+Image.ActualHeight)/2, ImageY+(Image.ActualHeight-Image.ActualWidth)/2, 10, 3);
-                addLineH(ImageX+(Image.ActualWidth-Image.ActualHeight)/2, ImageX2+(Image.ActualWidth+Image.ActualHeight)/2, ImageY+20, -10, 4);
+                addLineV(ImageX+(Image.ActualWidth+Image.ActualHeight)/2, ImageY+(Image.ActualHeight+Image.ActualWidth)/2, ActualHeight, 1);
+                switch(PrintGoMode)
+				{
+                    case EPrintGoMode.PG_MODE_GAP:
+                                        addLineH(ImageX+(Image.ActualWidth-Image.ActualHeight)/2, ImageX2+(Image.ActualWidth+Image.ActualHeight)/2, ImageY+(Image.ActualHeight-Image.ActualWidth)/2, 10, 2);
+                                        break;
+                    case EPrintGoMode.PG_MODE_LENGTH:
+                                        addLineH(ImageX+(Image.ActualWidth+Image.ActualHeight)/2, ImageX2+(Image.ActualWidth+Image.ActualHeight)/2, ImageY+(Image.ActualHeight-Image.ActualWidth)/2, 10, 2);
+                                        break;
+                    case EPrintGoMode.PG_MODE_MARK:
+                    case EPrintGoMode.PG_MODE_MARK_FILTER:
+                    case EPrintGoMode.PG_MODE_MARK_INV:
+                    case EPrintGoMode.PG_MODE_MARK_VRT:
+                        double x=ImageX+(Image.ActualWidth+Image.ActualHeight)/2+35;
+                        double y=16;
+                        MainGrid.Children.Add(new Line(){X1=x, Y1=y-2, X2=x, Y2=y+2, Stroke=Brushes.Red, StrokeThickness=5});
+                        addLineH(ImageX+(Image.ActualWidth+Image.ActualHeight)/2, x, y, -10, 2);
+                        break;
+                    default: break;
+				}
             }
             else
             {
@@ -124,7 +160,7 @@ namespace RX_DigiPrint.Views.UserControls
         {
             MainGrid.Children.Add(new Line(){X1=x1, Y1=y, X2=x1,   Y2=y-h, Stroke=Brushes.Black});
             MainGrid.Children.Add(new Line(){X1=x2, Y1=y, X2=x2,   Y2=y-h, Stroke=Brushes.Black});
-            MainGrid.Children.Add(new Line(){X1=x1, Y1=y-h/2, X2=x2, Y2=y-h/2,  Stroke=Brushes.Black});
+            MainGrid.Children.Add(new Line(){X1=x1, Y1=y-h/2, X2=x2, Y2=y-h/2,  Stroke=Brushes.Blue});
             TextBlock text=new TextBlock(){Text=((char)(0x80+number)).ToString(), FontFamily=new FontFamily("Wingdings") };
             Canvas.SetLeft(text, (x1+x2)/2-5);
             if (h>0) Canvas.SetTop(text, y-21);
@@ -152,15 +188,13 @@ namespace RX_DigiPrint.Views.UserControls
                 FirstMesurementChild = MainGrid.Children.Count;
                 if (e.NewSize.Height>e.NewSize.Width) 
                 {
-                    Image.Height=90;
-                    Image2.Height=90;
-                    ImageY = 20;
+                    ImageY = 10;
+                    Image2.Height = Image.Height=ActualHeight-ImageY;
                 }
                 else
                 {
-                    Image.Width=90;
-                    Image2.Width=90;
-                    ImageY = 55; // 50
+                    ImageY = 35;
+                    Image2.Width = Image.Width=ActualHeight-30;
                 }
             }
             Canvas.SetTop(Image, ImageY);
