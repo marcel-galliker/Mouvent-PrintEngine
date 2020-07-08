@@ -19,7 +19,7 @@ namespace RX_DigiPrint.Services
             result_error,
         };
 
-        public delegate EBtResult DelegateConnect(string deviceName);
+        public delegate EBtResult DelegateConnect(string deviceName, string pin);
         public DelegateConnect Connect; // add platform dependent function here
         public Action          OnLogin;
         public Action          OnDisconnect;

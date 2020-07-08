@@ -25,7 +25,7 @@ namespace DigiPrint.Droid
         }
 
         //--- Connect -----------------------------------------------------
-        public new EBtResult Connect(string deviceAddress)
+        public new EBtResult Connect(string deviceAddress, string pin)
         {
             try
             {
@@ -33,8 +33,20 @@ namespace DigiPrint.Droid
                 if (!BluetoothAdapter.DefaultAdapter.IsEnabled) return EBtResult.result_disabled;
 
                 BluetoothDevice device = BluetoothAdapter.DefaultAdapter.GetRemoteDevice(deviceAddress);
+                
+                if (device.BondState!=Bond.Bonded) 
+                {
+                    Boolean ok=device.CreateBond();
 
-                if (device.BondState!=Bond.Bonded) return EBtResult.result_not_bound;
+                    int i=0;
+                    do 
+					{
+                        i++;
+                        Console.WriteLine("BondState[{0}]={1}", i, device.BondState.ToString());
+                        Thread.Sleep(100);
+                        if (i>100) return EBtResult.result_not_bound;
+					} while (device.BondState!=Bond.Bonded);
+                }
 
                 _Socket = device.CreateRfcommSocketToServiceRecord(MouventBlueToothGuid);
                 _Socket.Connect();

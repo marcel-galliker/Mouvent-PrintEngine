@@ -80,7 +80,7 @@ namespace DigiPrint.Pages
             {
             //    EBtResult res = AppGlobals.Bluetooth.Connect(line[0]);
 			//	Task.Delay(1000);
-                switch (AppGlobals.Bluetooth.Connect(line[0]))
+                switch (AppGlobals.Bluetooth.Connect(line[0], line[2]))
                 {
                     case EBtResult.result_ok:
                         if (AppGlobals.Bluetooth.IsConnected)
@@ -97,7 +97,8 @@ namespace DigiPrint.Pages
                         break;
 
                     case EBtResult.result_disabled:     RxError.Error(this, "Check BLUETOOTH is enabled");break;
-                    case EBtResult.result_not_bound:    RxError.Error(this, "Can not start BLUETOOTH connection. Check that device is paired."); break;
+                    case EBtResult.result_not_bound:    RxError.Error(this, "Can not start BLUETOOTH connection. Check that device is paired."); 
+                                                        break;
                     case EBtResult.result_error:        RxError.Error(this, "BLUETOOTH. Exception."); break;
                 }
             }

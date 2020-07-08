@@ -217,7 +217,7 @@ namespace DigiPrint.Droid
         {
             if (_vibrator==null) _vibrator =  (Vibrator) GetSystemService(Context.VibratorService);
             _vibrator.Vibrate(time);
-        }
+        }   
     }
 }
 
