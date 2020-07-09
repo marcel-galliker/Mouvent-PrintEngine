@@ -188,7 +188,11 @@ namespace RX_DigiPrint.Models
         public Int32 PresIn
         {
             get { return _PresIn; }
-            set { SetProperty(ref _PresIn, value); }
+            set 
+            { 
+                if (SetProperty(ref _PresIn, value))
+                    Console.WriteLine("PriedIn={0}", _PresIn); 
+            }
         }
 
         //--- Property PresMax ---------------------------------------

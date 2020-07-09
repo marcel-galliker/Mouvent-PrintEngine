@@ -24,6 +24,8 @@
 
 
 #define CAPPING_TIMEOUT	(20*60*1000)	// ms 
+static int				 _CappingTimer=0;
+
 
 typedef enum 
 {	
@@ -33,7 +35,6 @@ typedef enum
 } EMachineInterface;
 
 static EMachineInterface _MInterface = mi_none;
-static int				 _CappingTimer=0;
 
 //--- set_interface ----------------------------------
 static void set_interface(void)
@@ -75,17 +76,15 @@ int		machine_end(void)
 //--- machine_tick -------------------------------
 int		machine_tick(void)
 {
-	/*
 	if(rx_def_is_tx(RX_Config.printer.type))
 	{
 		if (_CappingTimer>0 && _CappingTimer<rx_get_ticks())
 		{
 			_CappingTimer=0;
-			Error(LOG, 0, "Setting printhead to capping position.");
+			Error(LOG, 0, "Setting printhead to capping position. CtrlMode=%d %d", fluid_get_ctrlMode(0),fluid_get_ctrlMode(1));
 			fluid_send_ctrlMode(-1, ctrl_cap, TRUE);
 		}
 	}
-	*/
 	return REPLY_OK;
 }
 

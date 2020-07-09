@@ -1337,8 +1337,8 @@ static int _data_split_prod(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 					}
 					pInfo->widthPx		= endPx-startPx+pInfo->fillBt*pixelPerByte;
 					
-					if (color==4 && id->scan==6)
-						printf("Black\n");
+				//	if (color==4 && id->scan==6)
+				//		printf("Black\n");
 
 					if (pInfo->widthPx>barWidthPx)	pInfo->widthPx=barWidthPx;
 					if (pInfo->widthPx>headWidthPx)	pInfo->widthPx=headWidthPx;
@@ -1360,11 +1360,17 @@ static int _data_split_prod(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 					pInfo->resol.y		= pBmpInfo->resol.y;
 					if (pInfo->bitsPerPixel==8)
 					{
-						if (RX_Color[color].color.colorCode==0)
-							printf("black\n");
+						//--- calculation for final data ------
+						int dstLineLen;
+						int bitsPerPixel=2;
+						int lengthPx  = pBmpInfo->lengthPx*DPI_X/pBmpInfo->resol.x;
+						dstLineLen	  = (pInfo->widthPx*bitsPerPixel+7)/8;
+						dstLineLen    = (dstLineLen+31)&~31; // align to 256 bit
+						pInfo->blkCnt = (dstLineLen * lengthPx + RX_Spooler.dataBlkSize-1) / RX_Spooler.dataBlkSize;
+
+						TrPrintfL(TRUE, "BlkCnt[%d][%d]: dstLineLen=%d, lengthPx=%d, blkCnt=%d", pInfo->board, pInfo->head, dstLineLen, lengthPx, pInfo->blkCnt);
+						//--- calculation for intermediate data (screening:_scr_fill_blk) --- 
 						int blkSize=gpu_blk_size();
-						pInfo->dstLineLen	= ((pInfo->widthBt/4+blkSize-1)/blkSize)*blkSize; // align to 4 bits/pixel
-						pInfo->blkCnt		= (pInfo->dstLineLen * pBmpInfo->lengthPx + RX_Spooler.dataBlkSize-1) / RX_Spooler.dataBlkSize;
 						pInfo->dstLineLen	= ((pInfo->widthBt+blkSize-1)/blkSize)*blkSize; // must be multiple of blkSize
 						scr_start(pInfo);
 					}

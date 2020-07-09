@@ -386,7 +386,7 @@ int scr_wait(int timeout)
 	}
 	_TimeEnd=rx_get_ticks();
 	TrPrintfL(TRUE, "Screening WAIT END time=%d ms (%d threads)", _TimeEnd-_TimeStart, _ScrThreadCnt);
-	Error(LOG, 0, "Screening (id=%d, page=%d, copy=%d, scan=%d) time=%d ms (%d threads)", _Id.id, _Id.page, _Id.copy, _Id.scan, _TimeEnd-_TimeStart, _ScrThreadCnt);
+	Error(LOG, 0, "Screening (id=%d, page=%d, copy=%d, scan=%d) time=%d ms (%d threads, GPU=%d)", _Id.id, _Id.page, _Id.copy, _Id.scan, _TimeEnd-_TimeStart, _ScrThreadCnt, gpu_is_board_present());
 	_TimeStart=0;
 	rx_sem_post(_SemScreeningReady);
 	return REPLY_OK;
@@ -447,7 +447,7 @@ static void _scr_load(SBmpSplitInfo *pInfo, int threadNo)
 	//--- original --------------------------------------------------
 	if (FALSE && pInfo->colorCode==0)
 	{
-		printf("black\n");
+//		printf("black\n");
 		for (blk=0; blk<pInfo->blkCnt; blk++)
 		{
 			data_fill_blk(pInfo, blk, &_ScrMem[b][h].separated[blk*RX_Spooler.dataBlkSize], FALSE);
@@ -542,19 +542,29 @@ static void _scr_load(SBmpSplitInfo *pInfo, int threadNo)
 		{
 			//--- change from 8 bitsPerPixel to 4 bitsPerPixel ----------------------------------
 			int oldbppx = pInfo->bitsPerPixel;
+			int blk0   = pInfo->blk0;
+			int blkCnt = pInfo->blkCnt;
 			pInfo->bitsPerPixel = 2;
 			pInfo->data			= &_ScrMem[b][h].screened[_ScrMem[b][h].screenedIdx];
 			pInfo->srcLineCnt	= pInfo->srcLineCnt*loutplane.resol.y/linplane.resol.y;
 			pInfo->srcLineLen	= loutplane.lineLen;
 			pInfo->srcWidthBt	= (pInfo->widthPx*pInfo->bitsPerPixel+7)/8;
-			pInfo->dstLineLen	= (pInfo->srcWidthBt+31)&~31;	// align to 512 bit
+			pInfo->dstLineLen	= (pInfo->srcWidthBt+31)&~31;	// align to 256 bit
 			pInfo->fillBt		= 0;
 			pInfo->startBt		= 0;
 			pInfo->widthBt		= pInfo->srcWidthBt;
 			pInfo->blkCnt		= (pInfo->dstLineLen * pInfo->srcLineCnt + RX_Spooler.dataBlkSize-1) / RX_Spooler.dataBlkSize;
 
+			if (pInfo->blkCnt!=blkCnt)
+			{
+				TrPrintfL(TRUE, "Screening[%d][%d] ERROR: blk0=%d, blkCnt=%d, blk0=%d, blkCnt=%d", b, h, blk0, blkCnt, pInfo->blk0, pInfo->blkCnt);
+				TrPrintfL(TRUE, "SrcBlkCnt[%d][%d]: dstLineLen=%d, lengthPx=%d, blkCnt=%d", pInfo->board, pInfo->head, pInfo->dstLineLen, pInfo->srcLineCnt, pInfo->blkCnt);
+			}
+
 		//	_ScrMem[b][h].screenedIdx = (_ScrMem[b][h].screenedIdx+1) % SCR_BUF_SIZE;
 		//	Error(LOG, 0, "Head[%d.%d]:widthPx=%d, bitsPerPixel=%d, srcWidthBt=%d, widthBt=%d, srcLineLen=%d, dstLineLen=%d, blkCnt=%d", b, h, pInfo->widthPx, pInfo->bitsPerPixel, pInfo->srcWidthBt, pInfo->widthBt, pInfo->srcLineLen, pInfo->dstLineLen, pInfo->blkCnt);
+			
+			TrPrintfL(TRUE, "Screening[%d][%d]: blk0=%d, blkCnt=%d, blk0=%d, blkCnt=%d", b, h, blk0, blkCnt, pInfo->blk0, pInfo->blkCnt);
 
 			if (FALSE && pInfo->board==2 && pInfo->head==1)
 				_write_tif("screened", pInfo, pInfo->data, pInfo->srcLineLen);

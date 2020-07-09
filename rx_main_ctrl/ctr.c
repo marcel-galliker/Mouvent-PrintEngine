@@ -83,7 +83,8 @@ void ctr_init(void)
 			RX_PrinterStatus.counterTotal=0;
 		}
 	}
-	if (_Manipulated) Error(ERR_CONT, 0, "Counters manipulated");
+	if (_Manipulated) 
+		Error(ERR_CONT, 0, "Counters manipulated");
 	
 	_ctr_save(FALSE, NULL);	
 }
@@ -181,15 +182,7 @@ static void _ctr_save(int reset, char *machineName)
 	{
 		char   name[64];
 		UCHAR  check[64];
-		time_t time;
-
-		#ifdef linux
-			struct timespec now;
-			clock_gettime( CLOCK_REALTIME, &now);
-			time = now.tv_sec;
-		#else
-			_time64(&time);
-		#endif
+		time_t time=rx_file_get_mtime(PATH_USER FILENAME_COUNTERS);
 
 		HANDLE file = setup_create();
 		if (reset) 
@@ -216,6 +209,13 @@ static void _ctr_save(int reset, char *machineName)
 			}
 			else
 			{
+				#ifdef linux
+					struct timespec now;
+					clock_gettime( CLOCK_REALTIME, &now);
+					time = now.tv_sec;
+				#else
+					_time64(&time);
+				#endif
 				_calc_check(time, check);
 			}
 			setup_str	(file, "check", WRITE, check, sizeof(check), "");

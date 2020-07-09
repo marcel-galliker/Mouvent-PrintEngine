@@ -429,19 +429,19 @@ void txrob_main(int ticks, int menu)
 	}
 
 	// --- read Inputs ---
-	RX_StepperStatus.robinfo.z_in_ref = fpga_input(ROT_STORED_IN); // Reference Sensor Rotation
-	RX_StepperStatus.robinfo.x_in_ref = fpga_input(SHIFT_STORED_IN); // Reference Sensor Shift
-	RX_StepperStatus.robinfo.rob_in_wipe = fpga_input(ROT_STORED_IN) && !fpga_input(ROT_VAC_OR_WASH_IN) && !fpga_input(ROT_WASH_OR_CAP_IN);
-	RX_StepperStatus.robinfo.rob_in_vac = fpga_input(ROT_VAC_OR_WASH_IN) && !fpga_input(ROT_WASH_OR_CAP_IN) && !fpga_input(ROT_STORED_IN);
-	RX_StepperStatus.robinfo.rob_in_wash = fpga_input(ROT_VAC_OR_WASH_IN) && fpga_input(ROT_WASH_OR_CAP_IN) && !fpga_input(ROT_STORED_IN);
-	RX_StepperStatus.robinfo.rob_in_cap = fpga_input(ROT_WASH_OR_CAP_IN) && !fpga_input(ROT_VAC_OR_WASH_IN) && !fpga_input(ROT_STORED_IN);
+	RX_StepperStatus.robinfo.z_in_ref		= fpga_input(ROT_STORED_IN); // Reference Sensor Rotation
+	RX_StepperStatus.robinfo.x_in_ref		= fpga_input(SHIFT_STORED_IN); // Reference Sensor Shift
+	RX_StepperStatus.robinfo.rob_in_wipe	= fpga_input(ROT_STORED_IN) && !fpga_input(ROT_VAC_OR_WASH_IN) && !fpga_input(ROT_WASH_OR_CAP_IN);
+	RX_StepperStatus.robinfo.rob_in_vac		= fpga_input(ROT_VAC_OR_WASH_IN) && !fpga_input(ROT_WASH_OR_CAP_IN) && !fpga_input(ROT_STORED_IN);
+	RX_StepperStatus.robinfo.rob_in_wash	= fpga_input(ROT_VAC_OR_WASH_IN) && fpga_input(ROT_WASH_OR_CAP_IN) && !fpga_input(ROT_STORED_IN);
+	RX_StepperStatus.robinfo.rob_in_cap		= fpga_input(ROT_WASH_OR_CAP_IN) && !fpga_input(ROT_VAC_OR_WASH_IN) && !fpga_input(ROT_STORED_IN);
 	
 	if (RX_StepperStatus.robinfo.rob_in_cap) _ParRotDrive.speed = 600;
 	else if (RX_StepperStatus.robinfo.rob_in_vac || RX_StepperStatus.robinfo.rob_in_wash || RX_StepperStatus.robinfo.rob_in_wipe) _ParRotDrive.speed = 800;
 
     if (fpga_input(ROT_STORED_IN) && (fpga_input(ROT_VAC_OR_WASH_IN) || fpga_input(ROT_WASH_OR_CAP_IN)))
 	{
-		Error(ERR_CONT, 0, "CLN Command %s: Invalid position sensors combination", _CmdName);
+		ErrorFlag(ERR_CONT, &_txrob_Error, 0x01, 0, "CLN Command %s: Invalid position sensors combination", _CmdName);
 		RX_StepperStatus.robinfo.ref_done = FALSE; 
 		RX_StepperStatus.cmdRunning = FALSE;
 		_NewCmd = FALSE;

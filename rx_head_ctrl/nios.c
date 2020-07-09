@@ -570,16 +570,15 @@ int  nios_is_firepulse_on(void)
 //--- nios_set_user_eeprom ------------------------------------
 void nios_set_user_eeprom(int no, SHeadEEpromMvt *data)
 {
-    int timeout=500;
-	while(_NiosMem->cfg.cmd.cmd & (WRITE_USER_EEPROM<<no))
+    int timeout;
+	for(timeout=500; _NiosMem->cfg.cmd.cmd & (WRITE_USER_EEPROM<<no); timeout-=10)
 	{
 		if (timeout<0) 
 		{
 			Error(ERR_CONT, 0, "Head User EEPROM ready Timeout");
 			return;
 		}
-		rx_sleep(10);
-		timeout-=10;
+		rx_sleep(10);		
 	}
 	memcpy(&RX_HBStatus[0].head[no].eeprom_mvt, data, sizeof(RX_HBStatus[0].head[no].eeprom_mvt));
 	if (_NiosMem)
@@ -592,7 +591,8 @@ void nios_set_user_eeprom(int no, SHeadEEpromMvt *data)
 		else Error(ERR_CONT, 0, "Head User EEPROM overflow");
 	}
 
-	while(_NiosMem->cfg.cmd.cmd & (WRITE_USER_EEPROM<<no))
+	timeout=500;
+	for(timeout=500; _NiosMem->cfg.cmd.cmd & (WRITE_USER_EEPROM<<no); timeout-=10)
 	{
 		if (timeout<0) 
 		{
@@ -600,7 +600,6 @@ void nios_set_user_eeprom(int no, SHeadEEpromMvt *data)
 			return;
 		}
 		rx_sleep(10);
-		timeout-=10;
 	}
 }
 

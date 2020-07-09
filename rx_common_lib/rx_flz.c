@@ -241,6 +241,8 @@ int flz_load(SPageId *id, const char *filedir, const char *filename, int printMo
 	char filepath[MAX_PATH];
 	BYTE* dst;
 
+	TrPrintfL(TRUE, "flz_load(%s%s)", filedir, filename);
+
 	int	wakeupOn;
 	wakeupOn = FALSE;
 	if(wakeupLen > 0) wakeupOn = TRUE;
