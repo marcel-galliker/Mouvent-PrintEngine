@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="if not exist D:\radex\bin\newgui md D:\radex\bin\newgui&#xD;&#xA;if not exist  $(ProjectDir)..\..\bin\newgui md $(ProjectDir)..\..\bin\newgui&#xD;&#xA;if not exist $(ProjectDir)..\..\mvt_digiprint_gui\_out\$(ConfigurationName)_x64\ md $(ProjectDir)..\..\mvt_digiprint_gui\_out\$(ConfigurationName)_x64\&#xD;&#xA;&#xD;&#xA;copy $(TargetPath) $(ProjectDir)..\..\mvt_digiprint_gui\_out\$(ConfigurationName)_x64\&#xD;&#xA;&#xD;&#xA;IF $(ConfigurationName)_$(PlatformName)==Release_x64 (&#xD;&#xA;copy $(TargetPath) $(ProjectDir)..\..\bin\newgui&#xD;&#xA;copy $(TargetPath)D:\radex\bin\newgui&#xD;&#xA;copy $(ProjectDir)ScanCheck.xsd $(ProjectDir)..\..\bin\newgui&#xD;&#xA;copy $(ProjectDir)ScanCheck.xsd D:\radex\bin\newgui&#xD;&#xA;)&#xD;&#xA;IF $(ConfigurationName)_$(PlatformName)==Debug_x64 (&#xD;&#xA;copy $(ProjectDir)ScanCheck.xsd $(ProjectDir)..\..\mvt_digiprint_gui\_out\Debug_x64&#xD;&#xA;)" />
+    <Exec Command="if not exist  $(ProjectDir)..\..\bin\gui md $(ProjectDir)..\..\bin\gui&#xD;&#xA;if not exist $(ProjectDir)..\..\mvt_digiprint_gui\_out\$(ConfigurationName)_x64\ md $(ProjectDir)..\..\mvt_digiprint_gui\_out\$(ConfigurationName)_x64\&#xD;&#xA;&#xD;&#xA;copy $(TargetPath) $(ProjectDir)..\..\mvt_digiprint_gui\_out\$(ConfigurationName)_x64\&#xD;&#xA;&#xD;&#xA;IF $(ConfigurationName)_$(PlatformName)==Release_x64 (&#xD;&#xA;copy $(TargetPath) $(ProjectDir)..\..\bin\gui&#xD;&#xA;copy $(ProjectDir)ScanCheck.xsd $(ProjectDir)..\..\bin\gui&#xD;&#xA;)&#xD;&#xA;IF $(ConfigurationName)_$(PlatformName)==Debug_x64 (&#xD;&#xA;copy $(ProjectDir)ScanCheck.xsd $(ProjectDir)..\..\mvt_digiprint_gui\_out\Debug_x64&#xD;&#xA;)" />
   </Target>
 
 </Project>

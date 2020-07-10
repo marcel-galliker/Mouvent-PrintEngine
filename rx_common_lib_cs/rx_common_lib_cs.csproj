@@ -356,17 +356,30 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>IF $(ConfigurationName)_$(PlatformName)==Debug_x86 GOTO :DEBUG_X86
+
 IF $(ConfigurationName)_$(PlatformName)==Release_x64 GOTO :RELEASE_64
-GOTO :ENDIF
+
+GOTO :END
+
+
 
 :RELEASE_64
-md $(ProjectDir)..\bin\newgui
-copy $(ProjectDir)_out\release_x64\*.dll $(ProjectDir)..\bin\newgui
+
+rem md $(ProjectDir)..\bin\gui 
+
+rem copy $(ProjectDir)_out\release_x64\*.dll $(ProjectDir)..\bin\gui
+
+
+
+GOTO :END
 
 :DEBUG_X86
-GOTO :ENDIF
 
-:ENDIF
+GOTO :END
+
+
+
+:END
 </PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

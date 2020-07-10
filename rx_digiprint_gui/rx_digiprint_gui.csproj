@@ -1681,8 +1681,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy $(ProjectDir)dll *
-if not exist D:\radex\bin\gui md D:\radex\bin\gui
-if not exist  $(ProjectDir)..\bin\gui md $(ProjectDir)..\bin\gui
+if not exist  $(ProjectDir)..\bin\oldgui md $(ProjectDir)..\bin\oldgui
 
 IF $(ConfigurationName)_$(PlatformName)==Debug_x86 GOTO :DEBUG_X86
 IF $(ConfigurationName)_$(PlatformName)==Release_x64 GOTO :RELEASE_64
@@ -1694,12 +1693,12 @@ copy $(ProjectDir)..\Externals\Tec-it\Win\TBarCode11\Bin\TBarCode11.dll $(Projec
 GOTO :ENDIF
 
 :RELEASE_64
-copy $(ProjectDir)dll\*.dll $(ProjectDir)..\bin\gui
-copy $(ProjectDir)$(OutDir)rx_common_lib_cs.dll $(ProjectDir)..\bin\gui
-copy $(ProjectDir)$(OutDir)rx_rip_gui.dll $(ProjectDir)..\bin\gui
-copy $(ProjectDir)..\ssh\id_rsa.ppk $(ProjectDir)..\bin\gui
-copy $(TargetFileName) $(ProjectDir)..\bin\gui
-rem copy $(ProjectDir)..\_out\release\rx_rip_lib.dll D:\radex\bin\gui
+copy $(ProjectDir)dll\*.dll $(ProjectDir)..\bin\oldgui
+copy $(ProjectDir)$(OutDir)rx_common_lib_cs.dll $(ProjectDir)..\bin\oldgui
+copy $(ProjectDir)$(OutDir)rx_rip_gui.dll $(ProjectDir)..\bin\oldgui
+copy $(ProjectDir)..\ssh\id_rsa.ppk $(ProjectDir)..\bin\oldgui
+copy $(TargetFileName) $(ProjectDir)..\bin\oldgui
+rem copy $(ProjectDir)..\_out\release\rx_rip_lib.dll D:\radex\bin\oldgui
 :ENDIF</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>

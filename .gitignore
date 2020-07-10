@@ -84,3 +84,5 @@ version.c
 /bin/newgui/*.dll
 *.suo
 /RX-LabelComposer/Properties/AssemblyInfo.cs
+/bin/gui/*.dll
+/bin/gui/*.ppk
