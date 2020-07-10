@@ -40,11 +40,6 @@ namespace RX_DigiPrint.Views.Alignment
             _InitInkSupplySelection();
             RxGlobals.PrintSystem.PropertyChanged += PrintSystem_PropertyChanged;
 
-            for (int i = 0; i < RxGlobals.InkSupply.List.Count; i++)
-            {
-                RxGlobals.InkSupply.List[i].PropertyChanged += InkSupplyList_PropertyChanged;
-            }
-
             CurrentSelectedColorIndex = -1;
             CurrentSelectedInkCylinderIndex = -1;
         }
@@ -63,11 +58,6 @@ namespace RX_DigiPrint.Views.Alignment
                 }
                 _InitInkSupplySelection();
             }
-        }
-
-        private void InkSupplyList_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            _InitInkSupplySelection();
         }
 
         private void _InitInkSupplySelection()
@@ -406,6 +396,14 @@ namespace RX_DigiPrint.Views.Alignment
         {
             AlignmentSettings settings = new AlignmentSettings();
             bool? result = settings.ShowDialog();
+        }
+
+        private void UserControl_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if ((bool)e.NewValue)
+            {
+                _InitInkSupplySelection();
+            }
         }
     }
 }

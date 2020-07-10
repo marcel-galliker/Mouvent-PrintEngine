@@ -197,7 +197,7 @@
 
             <uc:PreviewWeb Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="5" 
                     Width="250"
-                    Height="auto" MinHeight="100"
+                    Height="auto" MinHeight="130"
                     HorizontalAlignment="Center" 
                     Margin="0,5,0,0"
                     Source="{Binding Preview}"

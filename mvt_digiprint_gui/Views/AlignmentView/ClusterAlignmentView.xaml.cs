@@ -269,7 +269,7 @@ namespace RX_DigiPrint.Views.Alignment
             RxGlobals.Density.SetHeadNumber(globalHeadNumber);
             RxGlobals.Density.Changed = false;
 
-            JetCompensationDensityView view = new JetCompensationDensityView();
+            JetCompensationDensityView view = new JetCompensationDensityView(globalHeadNumber);
             
             view.ShowDialog();
 

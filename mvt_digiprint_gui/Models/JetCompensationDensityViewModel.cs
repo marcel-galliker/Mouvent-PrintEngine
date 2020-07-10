@@ -28,8 +28,28 @@ namespace RX_DigiPrint.Models
             }
         }
 
-        public JetCompensationDensityViewModel()
+        private string _HeadName;
+        public string HeadName
         {
+            get { return _HeadName; }
+            set { SetProperty(ref _HeadName, value); }
+        }
+
+        public JetCompensationDensityViewModel(int globalHeadNumber)
+        {
+            HeadName = "";
+            if (globalHeadNumber < RxGlobals.HeadStat.List.Count)
+            {
+                if (!string.IsNullOrEmpty(RxGlobals.HeadStat.List[globalHeadNumber].Name))
+                {
+                    HeadName = "Print Head: " + RxGlobals.HeadStat.List[globalHeadNumber].Name;
+                }
+            }
+            if (string.IsNullOrEmpty(HeadName))
+            {
+                HeadName = "Print Head: ?";
+            }
+
             _DisabledJets.PropertyChanged +=
                 new PropertyChangedEventHandler(JetCompensationDensityPropertyChanged);
             _Density.PropertyChanged += new PropertyChangedEventHandler(JetCompensationDensityPropertyChanged);

@@ -7,7 +7,7 @@
              xmlns:rx   ="clr-namespace:RX_DigiPrint.Helpers"
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
-             mc:Ignorable="d" 
+             mc:Ignorable="d"
              d:DesignHeight="400"
              d:DesignWidth="100"
              Loaded="UserControl_Loaded"

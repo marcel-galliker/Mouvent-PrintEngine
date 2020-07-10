@@ -10,12 +10,12 @@ namespace RX_DigiPrint.Views.AlignmentView.DisabledJets
     /// </summary>
     public partial class JetCompensationDensityView : CustomWindow
     {
-        private JetCompensationDensityViewModel viewModel = new JetCompensationDensityViewModel();
+        private JetCompensationDensityViewModel viewModel;
 
-        public JetCompensationDensityView()
+        public JetCompensationDensityView(int globalHeadNumber)
         {
             InitializeComponent();
-
+            viewModel = new JetCompensationDensityViewModel(globalHeadNumber);
             DataContext = viewModel;
         }
 

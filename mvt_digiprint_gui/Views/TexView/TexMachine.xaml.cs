@@ -1,20 +1,9 @@
 ﻿using RX_Common;
 using RX_DigiPrint.Models;
 using RX_DigiPrint.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace RX_DigiPrint.Views.TexView
 {
@@ -42,7 +31,7 @@ namespace RX_DigiPrint.Views.TexView
                 str.AppendFormat("{0}\n", RxGlobals.Plc.UnitID);
                 for (i=0; i<ButtonsGrid.Children.Count; i++)
                 {
-                    RxButton button = ButtonsGrid.Children[i] as RxButton;
+                    MvtButton button = ButtonsGrid.Children[i] as MvtButton;
                     if (button!=null) str.AppendFormat("{0}\n", button.Name);
                 }
 
@@ -57,7 +46,7 @@ namespace RX_DigiPrint.Views.TexView
             int i;
             for (i=0; i<ButtonsGrid.Children.Count; i++)
             {
-                RxButton button = ButtonsGrid.Children[i] as RxButton;
+                MvtButton button = ButtonsGrid.Children[i] as MvtButton;
                 if (button!=null)
                 {
                     string str = RxGlobals.Plc.GetVar(RxGlobals.Plc.UnitID, button.Name);
@@ -80,7 +69,7 @@ namespace RX_DigiPrint.Views.TexView
             bool enabled = (RxGlobals.PrinterStatus.PrintState!=EPrintState.ps_printing) && (RxGlobals.PrinterStatus.PrintState!=EPrintState.ps_stopping);
             for (int i=0; i<ButtonsGrid.Children.Count; i++)
             {
-                RxButton button = ButtonsGrid.Children[i] as RxButton;
+                MvtButton button = ButtonsGrid.Children[i] as MvtButton;
                 if (button!=null)
                 {
                     if (button.Name.Equals("PAR_ALL_ON")) 
@@ -96,7 +85,7 @@ namespace RX_DigiPrint.Views.TexView
         //--- OnOff_Clicked --------------------------------------------
         private void OnOff_Clicked(object sender, RoutedEventArgs e)
         {
-            RxButton button = sender as RxButton;
+            MvtButton button = sender as MvtButton;
             if (button!=null && button.IsEnabled) 
             {
                 bool check = button.IsChecked;

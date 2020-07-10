@@ -7,6 +7,73 @@
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              mc:Ignorable="d" 
              d:DesignHeight="260" >
+
+    <UserControl.Resources>
+        <Style x:Key="MouventTexMachineButtonStyle" TargetType="{x:Type common:MvtButton}">
+            <Setter Property ="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType ="{x:Type common:MvtButton}">
+                        <Grid>
+                            <Ellipse Name ="Ring" Width ="50" Height ="50"
+                                 Stroke="{StaticResource Mouvent.MainColorBrush}" StrokeThickness="4" Fill="White"/>
+                            <Ellipse Name="BusyEllipse"
+                                 HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Width ="50" Height ="50"
+                                 Fill="{StaticResource Mouvent.LightOrangeBrush}" Visibility="Hidden" RenderTransformOrigin="0.5,0.5"
+                                 StrokeThickness="4" 
+                                 >
+                                <Ellipse.Stroke>
+                                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                        <GradientStop Color="{StaticResource Mouvent.OrangeColor}" Offset="0.8"/>
+                                        <GradientStop Color="{StaticResource Mouvent.MainColor}" Offset="0.4"/>
+                                    </LinearGradientBrush>
+                                </Ellipse.Stroke>
+                                <Ellipse.RenderTransform>
+                                    <RotateTransform Angle="0"/>
+                                </Ellipse.RenderTransform>
+                            </Ellipse>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Ring"  Property ="Stroke" Value="{StaticResource Mouvent.MainColorTransparentBrush}"></Setter>
+                            </Trigger>
+                            <Trigger Property ="IsMouseOver" Value ="True">
+                                <Setter TargetName ="Ring" Property ="StrokeThickness" Value="4"/>
+                            </Trigger>
+                            <Trigger Property ="IsPressed" Value ="True">
+                                <Setter TargetName ="Ring" Property ="Fill" Value="{StaticResource Mouvent.OrangeColorBrush}"/>
+                            </Trigger>
+                            <Trigger Property="common:MvtButton.IsChecked" Value ="True">
+                                <Setter TargetName ="Ring" Property ="Stroke" Value="{StaticResource Mouvent.OrangeColorBrush}"/>
+                                <Setter TargetName="Ring" Property="Fill" Value="{StaticResource Mouvent.LightOrangeBrush}"/>
+                            </Trigger>
+                            <Trigger Property="common:MvtButton.IsBusy" Value="True">
+                                <Setter TargetName="BusyEllipse" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="Ring" Property="Visibility" Value="Hidden"/>
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation
+                                            Storyboard.TargetName="BusyEllipse"
+                                            Storyboard.TargetProperty="RenderTransform.Angle"
+                                            From="0"
+                                            To="360"
+                                            Duration="0:0:2"
+                                            RepeatBehavior="Forever" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                            </Trigger>
+                            <Trigger Property="common:MvtButton.IsBusy" Value="False">
+                                <Setter TargetName="BusyEllipse" Property="Visibility" Value="Hidden"/>
+                                <Setter TargetName="Ring" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
     
     <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
         <Image
@@ -36,7 +103,7 @@
             </Grid.ColumnDefinitions>
 
             <common:MvtButton Grid.Row="0" Grid.Column="0" x:Name="PAR_ALL_ON" Click="OnOff_Clicked"
-                              Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}">
+                              Style="{StaticResource MouventTexMachineButtonStyle}">
                 <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="20" Height="20"
                                                 Kind="Power"></iconPacks:PackIconMaterial>
             </common:MvtButton>
@@ -44,49 +111,49 @@
             <TextBlock Grid.Row="1" Grid.Column="0" Text="ALL" HorizontalAlignment="Center" FontSize="{StaticResource FontSizeLarge}" FontWeight="Bold"/>
 
             <common:MvtButton Grid.Row="0" Grid.Column="1" x:Name="PAR_WINDER_1_ON" Click="OnOff_Clicked"
-                              Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}">
+                              Style="{StaticResource MouventTexMachineButtonStyle}">
                 <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="20" Height="20"
                                                 Kind="Power"></iconPacks:PackIconMaterial>
             </common:MvtButton>
 
             <common:MvtButton Grid.Row="0" Grid.Column="2" x:Name="PAR_PRESSURE_ROLLER_ON" Click="OnOff_Clicked" VerticalAlignment="Bottom"
-                              Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}">
+                              Style="{StaticResource MouventTexMachineButtonStyle}">
                 <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="20" Height="20"
                                                 Kind="Power"></iconPacks:PackIconMaterial>
             </common:MvtButton>
 
             <common:MvtButton Grid.Row="0" Grid.Column="3" x:Name="PAR_SLIDE_ON" Click="OnOff_Clicked"
-                              Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}">
+                              Style="{StaticResource MouventTexMachineButtonStyle}">
                 <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="20" Height="20"
                                                 Kind="Power"></iconPacks:PackIconMaterial>
             </common:MvtButton>
 
             <common:MvtButton Grid.Row="1" Grid.Column="3" x:Name="PAR_BELT_ON" Click="OnOff_Clicked"
-                              Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}">
+                              Style="{StaticResource MouventTexMachineButtonStyle}">
                 <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="20" Height="20"
                                                 Kind="Power"></iconPacks:PackIconMaterial>
             </common:MvtButton>
 
             <common:MvtButton Grid.Row="2" Grid.Column="5" x:Name="PAR_WASHING_UNIT_ON" Click="OnOff_Clicked" HorizontalAlignment="Left" VerticalAlignment="Top"
-                              Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}">
+                              Style="{StaticResource MouventTexMachineButtonStyle}">
                 <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="20" Height="20"
                                                 Kind="Power"></iconPacks:PackIconMaterial>
             </common:MvtButton>
 
             <common:MvtButton Grid.Row="1" Grid.Column="6" HorizontalAlignment="Left" VerticalAlignment="Bottom" x:Name="PAR_FABRIC_SENSOR_ON" Click="OnOff_Clicked"
-                              Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}">
+                              Style="{StaticResource MouventTexMachineButtonStyle}">
                 <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="20" Height="20"
                                                 Kind="Power"></iconPacks:PackIconMaterial>
             </common:MvtButton>
 
             <common:MvtButton Grid.Row="0" Grid.Column="7" x:Name="PAR_DRYER_ON" Click="OnOff_Clicked"
-                              Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}">
+                              Style="{StaticResource MouventTexMachineButtonStyle}">
                 <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="20" Height="20"
                                                 Kind="Power"></iconPacks:PackIconMaterial>
             </common:MvtButton>
 
             <common:MvtButton Grid.Row="0" Grid.Column="8" x:Name="PAR_WINDER_2_ON" Click="OnOff_Clicked"
-                              Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}">
+                              Style="{StaticResource MouventTexMachineButtonStyle}">
                 <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="20" Height="20"
                                                 Kind="Power"></iconPacks:PackIconMaterial>
             </common:MvtButton>

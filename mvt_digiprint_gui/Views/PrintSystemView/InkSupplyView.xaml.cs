@@ -247,7 +247,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
         private void Flush_Clicked_1    (object sender, RoutedEventArgs e) {_command("Flush",   EFluidCtrlMode.ctrl_flush_weekend,  false);}
         private void Flush_Clicked_2    (object sender, RoutedEventArgs e) {_command("Flush",   EFluidCtrlMode.ctrl_flush_week,     false);}
 
-        private void Purge_Clicked(object sender, RoutedEventArgs e) 
+        private void Purge_Clicked(object sender, RoutedEventArgs e)
         {
             RX_Common.MvtMessageBox.EPurgeResult result =
                 MvtMessageBox.Purge("Purge", "Purge " + _InkSupply.InkType.Name + " ?");

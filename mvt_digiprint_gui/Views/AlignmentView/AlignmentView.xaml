@@ -12,7 +12,7 @@
              d:DesignHeight="700" d:DesignWidth="1500"
              Background="Transparent"
              HorizontalAlignment="Stretch"
-             >
+             IsVisibleChanged="UserControl_IsVisibleChanged">
     <UserControl.Resources>
        
             <ResourceDictionary>

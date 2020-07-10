@@ -10,11 +10,12 @@
         xmlns:density="clr-namespace:RX_DigiPrint.Views.Density"
         mc:Ignorable="d"
         Title="Density and Jet Compensation"
-        Height="auto" Width="985"
+        Height="650" Width="990"
                       ResizeMode="NoResize"
                       Loaded="CustomWindow_Loaded">
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
@@ -22,13 +23,20 @@
             <ColumnDefinition Width="auto"/>
             <ColumnDefinition Width="auto"/>
         </Grid.ColumnDefinitions>
-        <GroupBox Grid.Row="0" Margin="10" Grid.Column="0" Style="{StaticResource MvtGroupBox}" Header="Density">
+
+        <Border Margin="10,5,10,5" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Height="40" BorderThickness="1" BorderBrush="WhiteSmoke" Background="WhiteSmoke">
+            <Label Foreground="#ff303030" FontWeight="SemiBold" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"
+                   Content="{Binding HeadName}">
+            </Label>
+        </Border>
+
+        <GroupBox Grid.Row="1" Margin="10" Grid.Column="0" Style="{StaticResource MvtGroupBox}" Header="Density">
         <density:DensityView x:Name="Density" Margin="5"></density:DensityView>
         </GroupBox>
-        <GroupBox Grid.Row="0" Margin="10" Grid.Column="1" Style="{StaticResource MvtGroupBox}" Header="Jet Compensation">
+        <GroupBox Grid.Row="1" Margin="10" Grid.Column="1" Style="{StaticResource MvtGroupBox}" Header="Jet Compensation">
             <local:DisabledJetsView x:Name="DisabledJets" Margin="5"></local:DisabledJetsView>
         </GroupBox>
-        <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
+        <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2">
             <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
                 <common:MvtButton 
                     Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}" Margin="5"

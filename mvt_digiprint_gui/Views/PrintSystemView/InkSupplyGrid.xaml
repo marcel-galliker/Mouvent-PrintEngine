@@ -76,14 +76,9 @@
            
             <TextBlock Grid.Row="5" Grid.Column="0" Text="Air Valve"/>
         </Grid>
-        
-        <ScrollViewer x:Name="InkSupplyScroll"
-                            Grid.Row="0" Grid.Column="2" Grid.RowSpan="8" 
-                            VerticalScrollBarVisibility="Hidden" 
-                            HorizontalScrollBarVisibility="Auto">
 
+        <Grid  Grid.Row="0" Grid.Column="2" Grid.RowSpan="8" >
             <StackPanel x:Name="InkSupplyStack" Orientation="Horizontal" />
-
-        </ScrollViewer>
+        </Grid>
     </Grid>
 </UserControl>

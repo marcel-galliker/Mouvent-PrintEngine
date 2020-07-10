@@ -109,7 +109,8 @@
                 </ScrollViewer>
 
                 <!-- Ink Supply ________________________________________________________________________________________________________________________ -->
-                <GroupBox Style="{StaticResource MvtGroupBox}" Header="Ink Supply" Margin="10,10,10,0">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Hidden" Margin="10,10,10,0">
+                    <GroupBox Style="{StaticResource MvtGroupBox}" Header="Ink Supply" >
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="auto"/>
@@ -118,7 +119,7 @@
 
                         <rxView:InkSupplyGrid x:Name="InkSupplyGrid"/>
                         <TextBlock x:Name="ChillerError" Text="Chiller not running" Visibility="{Binding Running, Converter={StaticResource BoolToInVisible_Converter}}" Foreground="Crimson" FontWeight="Bold" FontSize="40" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        <StackPanel Grid.Column="1" x:Name="RobotButtons" Visibility="{Binding TxRobot, Converter={StaticResource BoolToVisible_Converter}}">
+                        <StackPanel Margin="20,0,0,0" Grid.Column="1" x:Name="RobotButtons" Visibility="{Binding TxRobot, Converter={StaticResource BoolToVisible_Converter}}">
                             <Button Margin="5" Style="{StaticResource Mouvent.StandardButton}" Content="CAP"      Click="Cap_Clicked"/>
                             <Button Margin="5" Style="{StaticResource Mouvent.StandardButton}" Content="Wipe"     Click="Wipe_Clicked"/>
                             <Button Margin="5" Style="{StaticResource Mouvent.StandardButton}" Content="Vacuum"   Click="Vacuum_Clicked"/>
@@ -126,16 +127,19 @@
                         </StackPanel>
                     </Grid>
                 </GroupBox>
+                </ScrollViewer>
 
+                
                 <!--<TextBlock Text="Print Heads" Background="{StaticResource Brush03}" FontWeight="Bold" Padding="5,0,0,0" Margin="0,5,0,0" />-->
 
                 <!-- Print Heads ____________________________________________________________________________________________________________-->
-                <GroupBox Style="{StaticResource MvtGroupBox}" Header="Print Heads" Margin="10,10,10,10">
-                    <Grid>
-                        <rxView:PrintHeadGrid x:Name="PrintHeadGrid"/>
-                    </Grid>
-                </GroupBox>
-
+                <ScrollViewer HorizontalScrollBarVisibility="Auto"  Margin="10,10,10,10" VerticalScrollBarVisibility="Hidden">
+                    <GroupBox Style="{StaticResource MvtGroupBox}" Header="Print Heads">
+                        <Grid>
+                            <rxView:PrintHeadGrid x:Name="PrintHeadGrid"/>
+                        </Grid>
+                    </GroupBox>
+                </ScrollViewer>
                 <!--
                Head Distance
                 <StackPanel x:Name="HeadDistPanel" Margin="10, 0, 10, 0">

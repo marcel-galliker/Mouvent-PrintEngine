@@ -73,14 +73,9 @@
             <TextBlock Grid.Row="8" Grid.Column="0" Text="Image In Cnt (Buffer)"/>
         </Grid>
 
-        <ScrollViewer x:Name="HeadScroll"
-                            Grid.Row="0" Grid.Column="2" Grid.RowSpan="13" 
-                            VerticalScrollBarVisibility="Hidden" 
-                            HorizontalScrollBarVisibility="Auto"
-                            PanningMode="HorizontalOnly">
-
+        <Grid Grid.Row="0" Grid.Column="2" Grid.RowSpan="13">
             <StackPanel x:Name="PrintHeadStack" Orientation="Horizontal"/>
-        </ScrollViewer>
+        </Grid>
     </Grid>
 
 </UserControl>
