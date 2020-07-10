@@ -379,6 +379,9 @@ static void _plc_set_par(SPrintQueueItem *pItem, SPlcPar *pPlcPar)
 	}
 	
 	_StepDist += ((double)(RX_Config.printer.offset.step))/1000.0;	
+
+	Error(LOG, 0, "BeltStep=%d, overlap=%d", (int)(1000.0*_StepDist), RX_Config.printer.overlap);
+
 	if (pItem->passes>1) _StepDist /= pItem->passes;
 	if (pItem->testImage==PQ_TEST_SCANNING) _StepDist=0;
 	pPlcPar->stepDist = _StepDist;

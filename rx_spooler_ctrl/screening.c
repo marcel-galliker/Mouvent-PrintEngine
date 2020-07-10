@@ -80,7 +80,7 @@ static int					_ScrThreadCnt;
 
 static void _write_tif(char *title, SBmpSplitInfo *pInfo, PBYTE *buffer, int lineLen);
 
-static void _scr_fill_blk(SBmpSplitInfo *psplit, BYTE *dst);
+static void _scr_fill_blk(SBmpSplitInfo *psplit, int dstLineLen, BYTE *dst);
 static void _scr_load(SBmpSplitInfo *pInfo, int threadNo);
 static void *_screening_thread(void* lpParameter);
 
@@ -357,6 +357,16 @@ void scr_start(SBmpSplitInfo *pInfo)
 		return;
 	}
 	
+	//--- calculating blkCnt -------------------
+	{
+		int dstLineLen;
+		int bitsPerPixel=2;
+		int lengthPx		= pInfo->srcLineCnt*DPI_X/pInfo->resol.x;
+		dstLineLen			= (pInfo->widthPx*bitsPerPixel+7)/8;
+		pInfo->dstLineLen   = (dstLineLen+31)&~31; // align to 256 bit
+		pInfo->blkCnt		= (dstLineLen * lengthPx + RX_Spooler.dataBlkSize-1) / RX_Spooler.dataBlkSize;
+	}
+
 	memcpy(&_Id, &pInfo->pListItem->id, sizeof(_Id));
 	if (_TimeStart==0)
 	{
@@ -443,19 +453,6 @@ static void _scr_load(SBmpSplitInfo *pInfo, int threadNo)
 	#endif
 
 	int trace=FALSE;
-
-	//--- original --------------------------------------------------
-	if (FALSE && pInfo->colorCode==0)
-	{
-//		printf("black\n");
-		for (blk=0; blk<pInfo->blkCnt; blk++)
-		{
-			data_fill_blk(pInfo, blk, &_ScrMem[b][h].separated[blk*RX_Spooler.dataBlkSize], FALSE);
-		}
-		Error(LOG, 0, "scr_load time1=%d", rx_get_ticks()-time);
-		_write_tif("org", pInfo, &_ScrMem[b][h].separated, pInfo->dstLineLen);
-//      return;
-	}
 	
 	if (FALSE)
 	{
@@ -486,12 +483,16 @@ static void _scr_load(SBmpSplitInfo *pInfo, int threadNo)
 		linplane.widthPx		= pInfo->widthPx*pInfo->resol.x/DPI_X;
 		linplane.lengthPx		= pInfo->srcLineCnt;
 		linplane.bitsPerPixel	= pInfo->bitsPerPixel;
-		linplane.lineLen		= pInfo->dstLineLen*pInfo->resol.x/DPI_X;			// in bytes
+		{
+			int blkSize=gpu_blk_size();
+			int widthBt				= pInfo->widthBt*pInfo->resol.x/DPI_X;
+			linplane.lineLen        = ((widthBt+blkSize-1)/blkSize)*blkSize; // must be multiple of blkSize
+		}
 		linplane.aligment		= 0; // lbmp.aligment;			// 8, 16, 32 ,....
 		memcpy(&linplane.resol, &pInfo->pListItem->splitInfo->resol, sizeof(linplane.resol));
         linplane.resol.x		= (pInfo->resol.x)? pInfo->resol.x : DPI_X;
         linplane.resol.y		= (pInfo->resol.y)? pInfo->resol.y : DPI_Y;
-		linplane.dataSize		= pInfo->srcLineCnt*pInfo->dstLineLen;
+		linplane.dataSize		= linplane.lengthPx*linplane.lineLen;
 		linplane.buffer			= _ScrMem[b][h].separated;
 
 		memset(&loutplane, 0, sizeof(loutplane));		
@@ -514,7 +515,7 @@ static void _scr_load(SBmpSplitInfo *pInfo, int threadNo)
 		if (rx_def_is_scanning(RX_Spooler.printerType) || !pInfo->same)
 		{
 			time=rx_get_ticks();
-			_scr_fill_blk(pInfo, _ScrMem[b][h].separated);
+			_scr_fill_blk(pInfo, linplane.lineLen, _ScrMem[b][h].separated);
 			if (trace) Error(LOG, 0, "scr_load time2=%d", rx_get_ticks()-time);
 			if (FALSE && pInfo->board==2 && pInfo->head==1)
 			{
@@ -574,26 +575,24 @@ static void _scr_load(SBmpSplitInfo *pInfo, int threadNo)
 }
 
 //--- _scr_fill_blk ---------------------------------------------
-static void _scr_fill_blk(SBmpSplitInfo *psplit, BYTE *dst)
+static void _scr_fill_blk(SBmpSplitInfo *psplit, int dstLineLen, BYTE *dst)
 {
-	int		mirror=FALSE; // psplit->pListItem->flags&FLAG_MIRROR; // image is mirrored at sending
+//	int		mirror=FALSE; // psplit->pListItem->flags&FLAG_MIRROR; // image is mirrored at sending
 	int		len, l, width;
-	int		line	= 0;
-	int		start   = 0;
+	int		line	   = 0;
+	int		start	   = 0;
 	int		startBt    = psplit->startBt;
 	int		srcWidthBt = psplit->srcWidthBt;
-	int		dstLineLen = psplit->dstLineLen;
 	int		fillLen    = psplit->fillBt;
 	int		endLine    = psplit->srcLineCnt;
 
 	BYTE**	ptr     = psplit->data;
 	BYTE	*src    = *ptr;
 	BYTE	*s;
-	
+
 	if (psplit->resol.x!=1200)
 	{
 		startBt    = startBt*psplit->resol.x/1200;
-		dstLineLen = dstLineLen*psplit->resol.x/1200;
 		fillLen    = fillLen*psplit->resol.x/1200;
 	}
 
@@ -601,6 +600,7 @@ static void _scr_fill_blk(SBmpSplitInfo *psplit, BYTE *dst)
 	if (fillLen>dstLineLen) 
 		fillLen=dstLineLen;
 
+	/*
 	if (RX_Color[psplit->inkSupplyNo].rectoVerso==rv_verso) mirror = !mirror;
 	if (mirror)
 	{
@@ -608,7 +608,8 @@ static void _scr_fill_blk(SBmpSplitInfo *psplit, BYTE *dst)
 		endLine  = -1;
 		src += (UINT64)line*psplit->srcLineLen; // +psplit->startBt%psplit->srcLineLen;
 	}
-	
+	*/
+
 	while (line!=endLine)
 	{
 		//--- each line ---------------------
@@ -632,13 +633,14 @@ static void _scr_fill_blk(SBmpSplitInfo *psplit, BYTE *dst)
 			s=src;
 			width=srcWidthBt;
 		}
-
+		/*
 		if (mirror)	
 		{
 			src	-= psplit->srcLineLen;
 			line--;
 		}
 		else
+		*/
 		{
 			src	+= psplit->srcLineLen;
 			line++;
