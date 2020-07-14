@@ -747,11 +747,12 @@ void cond_set_voltage(int headNo, UINT8 voltage)
 }
 
 //--- cond_set_purge_par -----------------------------------------
-void cond_set_purge_par (int headNo, int delay, int time)
+void cond_set_purge_par (int headNo, int delay_pos_y, int time, int act_pos_y)
 {
 	if (headNo<0 || headNo>=MAX_HEADS_BOARD || _NiosMem==NULL) return;	
 	
-	_NiosMem->cfg.cond[headNo].purgeDelay = delay;
+    _NiosMem->cfg.cond[headNo].purgeDelayPos_y = delay_pos_y;
+    //_NiosMem->cfg.cond[headNo].purge_pos_y = act_pos_y;
 	_NiosMem->cfg.cond[headNo].purgeTime  = time;		
 }
 

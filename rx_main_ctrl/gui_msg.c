@@ -887,6 +887,7 @@ static void _do_head_fluidCtrlMode(RX_SOCKET socket, SFluidCtrlCmd* pmsg)
 //--- _do_fluidCtrlMode ---
 static void _do_fluidCtrlMode(RX_SOCKET socket, SFluidCtrlCmd* pmsg)
 {
+    if (pmsg->ctrlMode == ctrl_off) ctrl_empty_PurgeBuffer(pmsg->no);
 	fluid_send_ctrlMode(pmsg->no, pmsg->ctrlMode, TRUE);
 }
 

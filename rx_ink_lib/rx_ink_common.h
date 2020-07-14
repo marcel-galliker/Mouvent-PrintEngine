@@ -155,10 +155,12 @@ typedef enum EnFluidCtrlMode
 	ctrl_shutdown,	     //	0x001:
 	ctrl_shutdown_done,	 // 0x002:
 	ctrl_error,			 // 0x003:
-    ctrl_off,			 // 0x004:           
-    ctrl_warmup,         // 0x005:
-    ctrl_readyToPrint,   // 0x006:
-	ctrl_print,          // 0x007:
+    ctrl_wait,			 // 0x004:
+    ctrl_off,			 // 0x005:           
+    ctrl_warmup,         // 0x006:
+    ctrl_readyToPrint,   // 0x007:
+	ctrl_print,          // 0x008:
+    
 	
 	ctrl_check_step0		= 0x010,    // 0x010:
 	ctrl_check_step1,			// 0x011
@@ -286,7 +288,9 @@ char *DownloadStateStr(EnDownloadState mode);
 typedef struct SPurgePar
 {
 	INT32 no;
-	INT32 delay;
+    // INT32 delay;
+    INT32 delay_pos_y;
+    INT32 act_pos_y;
 	INT32 time;
 } SPurgePar;
 

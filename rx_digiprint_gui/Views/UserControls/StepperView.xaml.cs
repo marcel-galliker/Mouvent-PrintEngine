@@ -104,12 +104,19 @@ namespace RX_DigiPrint.Views.UserControls
                     _LedCap  [stat.No].Source = (stat.Z_in_cap)  ? _GreenLedImg : null;
 
                     bool refDone=RxGlobals.StepperStatus[0].RefDone;
+                    Visibility visible = (RxGlobals.StepperStatus[0].RobotUsed)? Visibility.Visible : Visibility.Collapsed;
+
                     for (int i=0; i<RxGlobals.StepperStatus.Length; i++)
                     {
                         if (RxGlobals.StepperStatus[i].CmdRunning==0 && RxGlobals.StepperStatus[i].RefDone) refDone=true;
+                        if (RxGlobals.StepperStatus[i].RobotUsed) visible = Visibility.Visible;
                     }
-                    Button_Up.IsEnabled     = refDone;
-                    Button_Print.IsEnabled  = refDone;
+                    //Button_Up.IsEnabled     = refDone;
+                    //Button_Print.IsEnabled  = refDone;
+                    //Button_Cap.IsEnabled = refDone;
+                    Button_Wash.Visibility = visible;
+                    Button_Vacuum.Visibility = visible;
+                    Button_RefRobot.Visibility = visible;
                 }
                 else
                 {
@@ -137,6 +144,7 @@ namespace RX_DigiPrint.Views.UserControls
         //--- PrintSystem_PropertyChanged -----------------------------------
         private void PrintSystem_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
+            StepperStatus stat = sender as StepperStatus;
             if (e.PropertyName.Equals("PrinterType"))
             {
                 Visibility visibility;
@@ -216,7 +224,12 @@ namespace RX_DigiPrint.Views.UserControls
             _button_active(sender as CheckBox);
             if (RxMessageBox.YesNo("Capping", "Goto Capping position?",  MessageBoxImage.Question, false))
             {   
-                if (RxGlobals.StepperStatus[0].RobotUsed)
+                bool RobotUsed = RxGlobals.StepperStatus[0].RobotUsed;
+                for (int i = 0; i < RxGlobals.StepperStatus.Length; i++)
+                {
+                    if (RxGlobals.StepperStatus[i].RobotUsed) RobotUsed = true;
+                }
+                if (RobotUsed)
                 {
                     TcpIp.SFluidCtrlCmd msg = new TcpIp.SFluidCtrlCmd();
                     msg.no       = -1;
@@ -227,6 +240,24 @@ namespace RX_DigiPrint.Views.UserControls
                     RxGlobals.RxInterface.SendCommand(TcpIp.CMD_LIFT_CAPPING_POS);
             }
             if (SIMU) for(int i=0; i<4; i++) RxGlobals.StepperStatus[i].CmdRunning = TcpIp.CMD_LIFT_CAPPING_POS;
+        }
+
+        private void Wash_clicked(object sender, RoutedEventArgs e)
+        {
+            _button_active(sender as CheckBox);
+            TcpIp.SFluidCtrlCmd msg = new TcpIp.SFluidCtrlCmd();
+            msg.no = -1;
+            msg.ctrlMode = EFluidCtrlMode.ctrl_wash;
+            RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_CTRL_MODE, ref msg);
+        }
+
+        private void Vacuum_clicked(object sender, RoutedEventArgs e)
+        {
+            _button_active(sender as CheckBox);
+            TcpIp.SFluidCtrlCmd msg = new TcpIp.SFluidCtrlCmd();
+            msg.no = -1;
+            msg.ctrlMode = EFluidCtrlMode.ctrl_vacuum;
+            RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_CTRL_MODE, ref msg);
         }
 
         //--- CapUp_clicked -------------------------------------------

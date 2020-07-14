@@ -201,8 +201,9 @@ typedef struct SConditionerCfg_mcu
 	UINT32	mode;					// EnFluidCtrlMode
 	UINT32	volume_printed;			// [ml/min]
 	UINT16	flowResistance;
-	UINT32	purgeDelay;				// ms wait before opening the valve
+	INT32	purgeDelayPos_y;		// um wait before opening the valve
 	UINT32	purgeTime;				// ms the valve is open
+    INT32  purge_pos_y;			// um the position of the cleaning robot referenced to the head 0	
 		
 	//--- status of fluid system -------------------
     INT32   cylinderPressure;

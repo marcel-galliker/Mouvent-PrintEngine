@@ -136,10 +136,11 @@ namespace RX_DigiPrint.Services
         ctrl_shutdown,          //  0x001:
         ctrl_shutdown_done,     //  0x002:
         ctrl_error,             //  0x003:
-	    ctrl_off,               //  0x004:
-	    ctrl_warmup,			//  0x005:
-	    ctrl_readyToPrint,		//  0x006:
-	    ctrl_print,			    //  0x007:
+        ctrl_wait,              //  0x004:
+        ctrl_off,               //  0x005:
+	    ctrl_warmup,			//  0x006:
+	    ctrl_readyToPrint,		//  0x007:
+	    ctrl_print,			    //  0x008:
 	    
         ctrl_check_step0 = 0x010,   // 0x010:
 	    ctrl_check_step1,			// 0x011
@@ -1204,12 +1205,18 @@ namespace RX_DigiPrint.Services
 
             public UInt32		info;
             public UInt32		robinfo;
+            public UInt32       screwerinfo;
 	        public UInt32		warn;
 	        public UInt32		err;
 
 	        public Int32		posX;
-	        public Int32		posY;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
+            public Int32[]		posY;
 	        public Int32		posZ;
+            public Int32        posZ_back;
+
+            public Int32        screw_posX;
+            public Int32        screw_posY;
 
             public Int32        adjustmentProgress;
 

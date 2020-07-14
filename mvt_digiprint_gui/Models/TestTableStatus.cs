@@ -51,8 +51,8 @@ namespace RX_DigiPrint.Models
         }
 
         //--- Property PosY ---------------------------------------
-        private Int32 _PosY;
-        public Int32 PosY
+        private Int32[] _PosY;
+        public Int32[] PosY
         {
             get { return _PosY; }
             set { SetProperty(ref _PosY, value); }
@@ -293,8 +293,11 @@ namespace RX_DigiPrint.Models
             drip_pans_enabled = Z_in_ref;
 
             PosX    = msg.posX;
-            PosY    = msg.posY;
             PosZ    = msg.posZ;
+            for (int i = 0; i < PosY.Length; i++)
+            {
+                PosY[i] = msg.posY[i];
+            }
             Error   = msg.err;
 
             //cap_enabled = RefDone && DripPans_InfeedUP && DripPans_OutfeedUP && (X_in_cap || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB701 || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_cleaf);

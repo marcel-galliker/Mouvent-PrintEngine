@@ -21,6 +21,7 @@
 #include "motor.h"
 #include "motor_cfg.h"
 #include "fpga_stepper.h"
+#include "stepper_ctrl.h"
 #include "test_table.h"
 
 //--- defines ----------------------------------------------
@@ -221,7 +222,7 @@ void tt_main(int ticks, int menu)
 	slide_main(ticks, menu);
 
 	RX_StepperStatus.posX = slide_get_pos();
-	RX_StepperStatus.posY = motor_get_step(MOTOR_Y_LEFT);
+	RX_StepperStatus.posY[0] = motor_get_step(MOTOR_Y_LEFT);
 	RX_StepperStatus.posZ = motor_get_step(MOTOR_Z);
 
 //	RX_StepperStatus.info.cover_open = FALSE; // !(Fpga.stat->input & TT_COVER_CLOSED_IN);

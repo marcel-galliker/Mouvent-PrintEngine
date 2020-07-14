@@ -269,7 +269,7 @@ static int _do_fluid_ctrlMode	(RX_SOCKET socket, SFluidCtrlCmd *pmsg)
 //--- _do_set_purge_par ---------------------------------------------
 static int _do_set_purge_par(RX_SOCKET socket, SPurgePar *ppar)
 {
-	nios_set_purge_par(ppar->no, ppar->delay, ppar->time);
+	nios_set_purge_par(ppar->no, ppar->delay_pos_y, ppar->time, ppar->act_pos_y);
 	return REPLY_OK;
 }
 

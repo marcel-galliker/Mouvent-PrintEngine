@@ -76,8 +76,8 @@ namespace RX_DigiPrint.Models
         }
 
         //--- Property PosY ---------------------------------------
-        private Int32 _PosY;
-        public Int32 PosY
+        private Int32[] _PosY;
+        public Int32[] PosY
         {
             get { return _PosY; }
             set { SetProperty(ref _PosY, value); }
@@ -339,8 +339,11 @@ namespace RX_DigiPrint.Models
             CmdRunning = msg.cmdRunning;
 
             PosX    = msg.posX;
-            PosY    = msg.posY;
             PosZ    = msg.posZ;
+            for (int i = 0; i < PosY.Length; i++)
+            {
+                PosY[i] = msg.posY[i];
+            }
 
             //--- LiftState ------------------          
             {
@@ -381,7 +384,7 @@ namespace RX_DigiPrint.Models
             else
             {
                 if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_WB)
-                    cap_enabled = RefDone & RobotUsed;
+                    cap_enabled = /*RefDone &*/ RobotUsed;
                 else
                     cap_enabled = RefDone;  // Testtable?
                 capDP803_enabled = false;

@@ -84,6 +84,9 @@ typedef struct
 
 	int			purgePressure;
 	int			purgeTime;
+
+	int 		last_pos;
+	int 		act_pos;
 } SInkSupply;
 
 typedef struct
@@ -338,6 +341,7 @@ void ink_tick_10ms(void)
 				break;
 
 			case ctrl_undef:
+			case ctrl_wait:
 			case ctrl_off:
 
 				pid_reset(&_InkSupply[isNo].pid_Pump);
@@ -1162,7 +1166,12 @@ void ink_tick_10ms(void)
 				break;
 
 			case ctrl_purge_step4:
-				if (_InkSupply[isNo].purgeTime<pRX_Config->ink_supply[isNo].purgeTime)
+				if (pRX_Config->ink_supply[isNo].delay_pos_y && pRX_Config->ink_supply[isNo].act_pos_y <= pRX_Config->ink_supply[isNo].delay_pos_y)
+				{
+					_pump_ctrl(isNo, _InkSupply[isNo].purgePressure, PUMP_CTRL_MODE_DEFAULT);
+					_set_bleed_valve(isNo, FALSE);
+				}
+				else if (_InkSupply[isNo].purgeTime<pRX_Config->ink_supply[isNo].purgeTime)
 				{
 					_pump_ctrl(isNo, _InkSupply[isNo].purgePressure, PUMP_CTRL_MODE_DEFAULT);
 					_set_bleed_valve(isNo, FALSE);

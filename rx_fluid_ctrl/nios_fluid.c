@@ -424,10 +424,12 @@ void nios_set_ctrlmode(int isNo, EnFluidCtrlMode mode)
 }
 
 //--- nios_set_purge_par --------------------------------------
-void nios_set_purge_par(int isNo, int delay, int time)
+void nios_set_purge_par(int isNo, int delay_pos_y, int time, int act_pos_y)
 {
 	if (isNo<0 || isNo>NIOS_INK_SUPPLY_CNT) return;
 	_Cfg->ink_supply[isNo].purgeTime = time;
+    _Cfg->ink_supply[isNo].delay_pos_y = delay_pos_y;
+    //_Cfg->ink_supply[isNo].act_pos_y = act_pos_y;
 }
 
 //--- _set_testmode -----------------------------
@@ -459,6 +461,7 @@ void nios_set_head_state(int isNo, SHeadStateLight *pstat)
 	_Cfg->ink_supply[isNo].condMeniscus				  = pstat->condMeniscus;
 	_Cfg->ink_supply[isNo].condMeniscusDiff			  = pstat->condMeniscusDiff;
 	_Cfg->ink_supply[isNo].canisterEmpty			  = pstat->canisterEmpty;
+    _Cfg->ink_supply[isNo].act_pos_y			      = pstat->act_pos_y;
 	_Cfg->ink_supply[isNo].alive++;
 }
 

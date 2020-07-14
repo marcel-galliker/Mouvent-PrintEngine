@@ -136,6 +136,12 @@ void rx_def_init();
 
 #define WAKEUP_BAR_LEN		128	// dots to wakeup lazy jets
 
+#define SCREW_X_LEFT		-18800 // um
+#define SCREW_X_RIGHT		75700 // um       // SCREW_X_LEFT + 94500
+
+#define SCREW_Y_FRONT		-55100 // um
+#define SCREW_Y_BACK		-38700  // um       // SCREW_Y_BACK + 16400
+
 //--- simple value ----------------------------------------------	
 typedef struct SValue
 {
@@ -1072,6 +1078,7 @@ typedef struct SHeadStateLight
 	INT32			condMeniscusDiff;
 	INT32			condTempReady;
 	INT32			canisterEmpty;
+    INT32			act_pos_y;
 } SHeadStateLight;
 			
 typedef struct SFluidStateLight
@@ -1083,6 +1090,7 @@ typedef struct SFluidStateLight
 	INT32			amcTemp;
 	INT32			fluidErr;
 	UINT32			machineMeters;
+    INT32			act_pos_y;
 } SFluidStateLight;
 	
 typedef struct SInkSupplyInfo
@@ -1244,7 +1252,15 @@ typedef enum ERobotFunctions
 	rob_fct_purge_head5,	// 13: Purge head 5
 	rob_fct_purge_head6,	// 14: Purge head 6
 	rob_fct_purge_head7,	// 15: Purge head 7
-
+    rob_fct_move,          // 16: Wash heads
+    rob_fct_screw_head0,   // 17: Screw Pos head 0
+    rob_fct_screw_head1,   // 18: Screw Pos head 1
+    rob_fct_screw_head2,   // 19: Screw Pos head 2
+    rob_fct_screw_head3,   // 20: Screw Pos head 3
+    rob_fct_screw_head4,   // 21: Screw Pos head 4
+    rob_fct_screw_head5,   // 22: Screw Pos head 5
+    rob_fct_screw_head6,   // 23: Screw Pos head 6
+    rob_fct_screw_head7,   // 24: Screw Pos head 7
 } ERobotFunctions;
 	
 typedef enum ERobotVaccumState
@@ -1325,13 +1341,13 @@ typedef struct ETestTableInfo
 	UINT32 z_in_ref			: 1;	//	0x00000010
 	UINT32 z_in_print		: 1;	//	0x00000020
 	UINT32 z_in_cap			: 1;	//	0x00000040
-	UINT32 z_in_up			: 1;	//	0x00000080
-	UINT32 x_in_cap			: 1;	//	0x00000100
-	UINT32 x_in_ref			: 1;	//	0x00000200
-	UINT32 printing			: 1;	//	0x00000400
-	UINT32 curing			: 1;	//	0x00000800
-	UINT32 info_12			: 1;	//	0x00001000
-	UINT32 info_13			: 1;	//	0x00002000
+    UINT32 z_in_wash		: 1;	//  0x00000080
+    UINT32 z_in_up			: 1;	//	0x00000100
+	UINT32 x_in_cap			: 1;	//	0x00000200
+	UINT32 x_in_ref			: 1;	//	0x00000400
+	UINT32 printing			: 1;	//	0x00000800
+	UINT32 curing			: 1;	//	0x00001000
+	UINT32 z_in_screw		: 1;	//	0x00002000
 	UINT32 info_14			: 1;	//	0x00004000
 	UINT32 info_15			: 1;	//	0x00008000
 	UINT32 info_16			: 1;	//	0x00010000
@@ -1387,6 +1403,42 @@ typedef struct ERobotInfo
 	UINT32 r_info_30		: 1;	//	0x40000000
 	UINT32 r_info_31		: 1;	//	0x80000000
 } ERobotInfo;
+
+typedef struct EScrewerInfo
+{
+    UINT32 ref_done : 1;			//	0x00000001
+    UINT32 moving : 1;				//	0x00000002
+    UINT32 y_in_ref : 1;			//	0x00000004
+    UINT32 robi_in_ref : 1;			//	0x00000008
+    UINT32 x_in_pos : 1;			//	0x00000010
+    UINT32 y_in_pos: 1;				//	0x00000020
+    UINT32 z_in_down : 1;		    //	0x00000040
+    UINT32 z_in_up : 1;				//	0x00000080
+    UINT32 screw_loosed : 1;		//	0x00000100
+    UINT32 screw_tight : 1;	        //	0x00000200
+    UINT32 screws_found : 1;		//	0x00000400
+    UINT32 r_info_11 : 1;		    //	0x00000800
+    UINT32 r_info_12 : 1;		    //	0x00001000
+    UINT32 r_info_13 : 1;		    //	0x00002000
+    UINT32 r_info_14 : 1;		    //	0x00004000
+    UINT32 r_info_15 : 1;		    //	0x00008000
+    UINT32 r_info_16 : 1;		    //	0x00010000
+    UINT32 r_info_17 : 1;		    //	0x00020000
+    UINT32 r_info_18 : 1;		    //	0x00040000
+    UINT32 r_info_19 : 1;			//	0x00080000
+    UINT32 r_info_20 : 1;		    //	0x00100000
+    UINT32 r_info_21 : 1;		    //	0x00200000
+    UINT32 r_info_22 : 1;		    //	0x00400000
+    UINT32 r_info_23 : 1;		    //	0x00800000
+    UINT32 r_info_24 : 1;		    //	0x01000000
+    UINT32 r_info_25 : 1;		    //	0x02000000
+    UINT32 r_info_26 : 1;		    //  0x04000000
+    UINT32 r_info_27 : 1;		    //  0x08000000
+    UINT32 r_info_28 : 1;		    //  0x10000000
+    UINT32 r_info_29 : 1;			//	0x20000000
+    UINT32 r_info_30 : 1;		    //	0x40000000
+    UINT32 r_info_31 : 1;		    //	0x80000000
+} EScrewerInfo;
 
 typedef struct ETestTableWarn
 {
@@ -1454,6 +1506,7 @@ typedef struct SStepperStat
 	//--- warnings/errors ----------------
 	ETestTableInfo	info;		// UINT32
 	ERobotInfo		robinfo;	// UINT32
+    EScrewerInfo screwerinfo;	// UINT32
 
 	UINT32		warn;
 	
@@ -1467,8 +1520,12 @@ typedef struct SStepperStat
 		#define TT_ERR_COVER_OPEN		0x00000040
 
 	INT32		posX;
-	INT32		posY;
+	INT32		posY[4];
 	INT32		posZ;
+    INT32		posZ_back;
+
+    INT32		screw_posX;
+    INT32		screw_posY;
 	
 	INT32		adjustmentProgress;
 	UINT32		alive[2];

@@ -58,9 +58,19 @@ typedef struct
 	msg_handler	handle_msg;
 } SHeadCtrlPar;
 
+typedef struct SBufferFluidCmd
+{
+    int headNo;
+    EnFluidCtrlMode ctrlMode;
+    int sendToFluid;
+    int fromGui;
+    int used;
+} SBufferFluidCmd;
+
 HANDLE	_HeadCtrlSvr;
 
 SHeadCtrlPar _HeadCtrl[HEAD_BOARD_CNT];
+SBufferFluidCmd _BufferFluidCmd[INK_SUPPLY_CNT];
 static int	_HeadResetCnt;
 static int	 _SingleHead;
 static int	 _AwaitHeadCfg;
@@ -75,6 +85,7 @@ static void _headboard_config(int colorCnt, int headsPerColor, int ethPortCnt);	
 static void _ping_test(int cnt);
 static void _send_head_cfg(int headNo);
 static void _send_ink_def(int headNo, char *drops);
+static int _ctrl_check_stepper_in_purgeMode(int fluidNo);
 
 //static void Data_Test_TCP();
 //static void Data_Test_UDP();
@@ -560,6 +571,8 @@ void ctrl_tick(void)
 	int i, head, inkSupply;
 	int time = rx_get_ticks();
 	SFluidStateLight stat[MAX_HEADS_BOARD];
+    int Cluster_Per_Stepper = 2 * RX_Config.headsPerColor / MAX_HEADS_BOARD;
+    static int _PurgeTime = 0;
 
 #define TIMEOUT 3000
 	for (i=0; i<SIZEOF(_HeadCtrl); i++)
@@ -589,11 +602,39 @@ void ctrl_tick(void)
 					stat[head].cylinderPressureSet = fluid_get_cylinderPresSet(inkSupply);
 					stat[head].fluidErr            = fluid_get_error(inkSupply);
 					stat[head].machineMeters	   = (UINT32)RX_PrinterStatus.counterTotal;
+                    if (RX_Config.inkSupplyCnt % 2 == 0 && Cluster_Per_Stepper)
+                    {
+                        stat[head].act_pos_y =
+                            -1 * RX_StepperStatus.posY[i / Cluster_Per_Stepper];
+                    }
+                    else if (Cluster_Per_Stepper)
+                    {
+                        stat[head].act_pos_y =
+                            -1 *
+                            RX_StepperStatus.posY[(i + Cluster_Per_Stepper/2) / Cluster_Per_Stepper];
+                    }
 				}
 				sok_send_2(&_HeadCtrl[i].socket, CMD_HEAD_STAT, sizeof(stat), stat);
 			} //if (_HeadCtrl[i].aliveTime && ..
 		} // if (_HeadCtrl[i].running)
 	} // for
+    
+    if (RX_StepperStatus.robot_used)
+    {
+        for (i = 0; i < SIZEOF(_BufferFluidCmd); i++)
+        {
+            if (_BufferFluidCmd[i].used && !_ctrl_check_stepper_in_purgeMode(_BufferFluidCmd[i].headNo) && rx_get_ticks() >= _PurgeTime + TIMEOUT)
+            {
+                _BufferFluidCmd[i].used = 0;
+                ctrl_send_head_fluidCtrlMode(
+                    _BufferFluidCmd[i].headNo, _BufferFluidCmd[i].ctrlMode,
+                    _BufferFluidCmd[i].sendToFluid, _BufferFluidCmd[i].fromGui);
+                _PurgeTime = rx_get_ticks();
+                //i = SIZEOF(_BufferFluidCmd);
+                return;
+            }
+        }
+    }
 }
 
 //--- _send_ink_def ------------------------------------------------
@@ -691,14 +732,90 @@ int  ctrl_singleHead(void)
 	return _SingleHead;
 }
 
+void ctrl_empty_PurgeBuffer(int fluidNo)
+{
+    int i, j;
+    for (i = 0; i < RX_Config.headsPerColor; i++)
+    {
+        for (j = 0; j < sizeof(_BufferFluidCmd); j++)
+        {
+            if (_BufferFluidCmd[j].headNo ==
+                fluidNo * RX_Config.headsPerColor + i)
+            {
+                _BufferFluidCmd[j].used = 0;
+                SFluidCtrlCmd cmd;
+                cmd.hdr.msgId = CMD_HEAD_FLUID_CTRL_MODE;
+                cmd.hdr.msgLen = sizeof(cmd);
+                cmd.no = _BufferFluidCmd[j].headNo % HEAD_CNT;
+                cmd.ctrlMode = ctrl_off;
+                sok_send(&_HeadCtrl[_BufferFluidCmd[j].headNo / HEAD_CNT].socket, &cmd);
+            }
+            
+        }
+        
+    }
+    
+}
+
 //--- ctrl_send_head_fluidCtrlMode --------------------------------------------------------------
 void ctrl_send_head_fluidCtrlMode(int headNo, EnFluidCtrlMode ctrlMode, int sendToFluid, int fromGui)
 {
+    if (ctrlMode >= ctrl_purge_soft && ctrlMode <= ctrl_purge_step6 && _ctrl_check_stepper_in_purgeMode(headNo) && RX_StepperStatus.robot_used && fromGui)
+    {
+        int i;
+        for (i = 0; i < SIZEOF(_BufferFluidCmd); i++)
+        {
+            if (!_BufferFluidCmd[i].used)
+            {
+                _BufferFluidCmd[i].headNo = headNo;
+                _BufferFluidCmd[i].ctrlMode = ctrlMode;
+                _BufferFluidCmd[i].sendToFluid = sendToFluid;
+                _BufferFluidCmd[i].fromGui = fromGui;
+                _BufferFluidCmd[i].used = 1;
+                
+                SFluidCtrlCmd cmd;
+                cmd.hdr.msgId = CMD_HEAD_FLUID_CTRL_MODE;
+                cmd.hdr.msgLen = sizeof(cmd);
+                cmd.no = headNo % HEAD_CNT;
+                cmd.ctrlMode = ctrl_wait;
+                sok_send(&_HeadCtrl[headNo / HEAD_CNT].socket, &cmd);
+                //if (sendToFluid) fluid_send_ctrlMode(RX_Config.headBoard[headNo/HEAD_CNT].head[headNo%HEAD_CNT].inkSupply, ctrl_wait, FALSE);
+                return;
+            }
+        }
+        Error(WARN, 0, "Too many heads in waiting buffer");
+        return;
+    }
+    if (ctrlMode == ctrl_off && fromGui)
+    {
+        int i;
+        for (i = 0; i < SIZEOF(_BufferFluidCmd); i++)
+        {
+            if (headNo == _BufferFluidCmd[i].headNo || headNo == -1)
+            {
+                _BufferFluidCmd[i].used = 0;
+                Error(LOG, 0, "HeadNo: %d; Buffer Pos: %d", headNo, i);
+            }
+        }
+    }
+    
 	int mode=RX_HBStatus[headNo/HEAD_CNT].head[headNo%HEAD_CNT].ctrlMode;
+    if (mode == ctrl_wait && ctrlMode == ctrl_off && fromGui)
+    {
+        SFluidCtrlCmd cmd;
+        cmd.hdr.msgId = CMD_HEAD_FLUID_CTRL_MODE;
+        cmd.hdr.msgLen = sizeof(cmd);
+        cmd.no = headNo % HEAD_CNT;
+        cmd.ctrlMode = ctrlMode;
+        sok_send(&_HeadCtrl[headNo / HEAD_CNT].socket, &cmd);
+        //if (sendToFluid) fluid_send_ctrlMode(RX_Config.headBoard[headNo/HEAD_CNT].head[headNo%HEAD_CNT].inkSupply, ctrlMode, FALSE);
+        return;
+    }
+
 	if (mode==INVALID_VALUE || (mode==ctrl_off && ctrlMode==ctrl_off)) return;
 	if (fromGui) 
 	{
-		if (ctrlMode>=ctrl_purge_soft && ctrlMode<ctrl_purge_step1)
+		if (ctrlMode>=ctrl_purge_soft && ctrlMode<ctrl_purge_step1 && !RX_StepperStatus.robot_used)
 			fluid_send_ctrlMode(RX_Config.headBoard[headNo/HEAD_CNT].head[headNo%HEAD_CNT].inkSupply, ctrl_off, TRUE);
 		_SingleHead = headNo;
 	}
@@ -710,11 +827,46 @@ void ctrl_send_head_fluidCtrlMode(int headNo, EnFluidCtrlMode ctrlMode, int send
 		cmd.hdr.msgLen	= sizeof(cmd);
 		cmd.no			= headNo%HEAD_CNT;
 		cmd.ctrlMode	= ctrlMode;
+        if (ctrlMode == ctrl_off)
+        {
+            int i = 0;
+        }
+        if (!(ctrlMode == ctrl_off && mode == ctrl_wait))
+        {
 		sok_send(&_HeadCtrl[headNo/HEAD_CNT].socket, &cmd);
+        }
+        
+
+        //if (_ctrl_check_stepper_in_purgeMode(headNo/RX_Config.headsPerColor)) sendToFluid = FALSE;
 
 		if (sendToFluid) fluid_send_ctrlMode(RX_Config.headBoard[headNo/HEAD_CNT].head[headNo%HEAD_CNT].inkSupply, ctrlMode, FALSE);
 	}
 }	
+
+static int _ctrl_check_stepper_in_purgeMode(int headNo)
+{
+    if (_SingleHead == -1) return FALSE;
+    int fluidNo = headNo / RX_Config.headsPerColor;
+    int Cluster_Per_Stepper = 2 * RX_Config.headsPerColor / MAX_HEADS_BOARD;
+    int i, j;
+    if (RX_Config.inkSupplyCnt % 2 == 0)
+    {
+        if (fluidNo % 2 != 0) fluidNo--;
+        for (i = 0; i < Cluster_Per_Stepper; i++)
+        {
+            for (j = 0; j < HEAD_CNT; j++)
+            {
+                if ((fluidNo *2 +i)*HEAD_CNT+j)
+                if ((RX_HBStatus[fluidNo * 2 + i].head[j].ctrlMode >= ctrl_purge_soft && 
+                    RX_HBStatus[fluidNo*2 + i].head[j].ctrlMode <= ctrl_purge_step6)
+                            && (fluidNo * 2 +i)*HEAD_CNT+j != headNo)
+                return TRUE;
+            }
+            
+        }
+    }
+    return FALSE;
+}
 
 //--- ctrl_send_all_heads_fluidCtrlMode ------------------------------------
 void ctrl_send_all_heads_fluidCtrlMode(int fluidNo, EnFluidCtrlMode ctrlMode)
@@ -736,16 +888,17 @@ int ctrl_send_purge_par(int fluidNo, int time)
 {
 #define HEAD_WIDTH	43000
 	int head;
-	int delay;
-	int timeTotal;
+    int delay_pos_y;
 	SPurgePar par;
 	SHeadCfg *pcfg;
 	
-	if (RX_Config.stepper.wipe_speed) delay =  HEAD_WIDTH / RX_Config.stepper.wipe_speed;
-	else delay=0;
+    if (RX_Config.stepper.wipe_speed)
+        delay_pos_y = HEAD_WIDTH;
+    else
+        delay_pos_y = 0;
 
-	timeTotal = 0;
-	par.delay = 0;
+    int timeTotal = 0;
+    par.delay_pos_y = 0;
 	par.time  = time;
 	for (head=0; head<SIZEOF(RX_Config.headBoard)*MAX_HEADS_BOARD; head++)
 	{
@@ -754,9 +907,9 @@ int ctrl_send_purge_par(int fluidNo, int time)
 		{
 			par.no = head%HEAD_CNT;
 			sok_send_2(&_HeadCtrl[head/HEAD_CNT].socket, CMD_SET_PURGE_PAR, sizeof(par), &par);
-	//		Error(LOG, 0, "head[%d.%d]: purge_par(no=%d, delay=%d, time=%d)", head/HEAD_CNT, head%HEAD_CNT, par.no, par.delay, par.time);
-			if (par.delay+par.time>timeTotal) timeTotal = par.delay+par.time;
-			par.delay+=delay;
+            if (delay_pos_y)
+                timeTotal = par.time;
+			par.delay_pos_y+=delay_pos_y;
 		}
 	}
 	return timeTotal;

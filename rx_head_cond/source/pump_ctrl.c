@@ -75,7 +75,6 @@ static INT32	_TimePIDstable;
 // static INT32	_TimeSwitchingOFF;
 // static INT32 _PhaseOFFMeniscusPre;
 static INT32	_Meniscus_Timeout;
-static INT32	_PurgeDelay;
 static INT32	_PurgeTime;
 static INT32	_SetpointShutdown;
 
@@ -296,6 +295,7 @@ void pump_tick_10ms(void)
 		case ctrl_off:
 		case ctrl_undef:
 		case ctrl_error:
+		case ctrl_wait:
 						temp_ctrl_on(FALSE);
 						turn_off_pump();		
 						RX_Status.logCnt = 0;
@@ -690,16 +690,14 @@ void pump_tick_10ms(void)
 						turn_off_pump();
 						_presure_in_max();
 						max_pressure = MBAR_500;
-						_PurgeDelay = 0;
 						_PurgeTime  = 0;
                         RX_Status.mode = RX_Config.mode;
 						break;
 		
 		case ctrl_purge_step4:
 						_presure_in_max();
-						if (_PurgeDelay<RX_Config.purgeDelay || _PurgeTime>RX_Config.purgeTime)
+						if (RX_Config.purge_pos_y<RX_Config.purgeDelayPos_y || _PurgeTime>RX_Config.purgeTime)
 						{
-							_PurgeDelay+=cycle_time;
 							temp_ctrl_on(FALSE);
 							_set_valve(TO_FLUSH);
 						}

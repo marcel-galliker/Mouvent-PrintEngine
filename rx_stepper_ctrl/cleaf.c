@@ -20,6 +20,7 @@
 #include "power_step.h"
 #include "motor_cfg.h"
 #include "motor.h"
+#include "stepper_ctrl.h"
 #include "cleaf.h"
 
 //--- defines -----------------------------------------------------------------------------------------------------------------------------
@@ -360,7 +361,7 @@ static void _cleaf_check_laser(void)
 
 	if ((++_LaserCnt) == LASER_ANALOG_AVR)
 	{
-		RX_StepperStatus.posY = _LaserAvr / LASER_ANALOG_AVR;
+		RX_StepperStatus.posY[0] = _LaserAvr / LASER_ANALOG_AVR;
 		_LaserAvr = 0;
 		_LaserCnt = 0;
 	}
@@ -372,19 +373,19 @@ static void _cleaf_check_laser(void)
 	{
 		if(RX_StepperStatus.info.z_in_print)
 		{
-			if(RX_StepperStatus.posY >= (RX_StepperCfg.material_thickness - LASER_VARIATION) && RX_StepperStatus.posY <= (RX_StepperCfg.material_thickness + LASER_VARIATION))
+			if(RX_StepperStatus.posY[0] >= (RX_StepperCfg.material_thickness - LASER_VARIATION) && RX_StepperStatus.posY <= (RX_StepperCfg.material_thickness + LASER_VARIATION))
 			{
 				_LaserTimeThin  = 0;
 				_LaserTimeThick = 0;				
 			}
 			else
 			{
-				if(RX_StepperStatus.posY < RX_StepperCfg.material_thickness - LASER_VARIATION)
+				if(RX_StepperStatus.posY[0] < RX_StepperCfg.material_thickness - LASER_VARIATION)
 				{
 					_LaserTimeThick = 0;
 					if (!_LaserTimeThin) _LaserTimeThin  = rx_get_ticks();
 				}
-				if(RX_StepperStatus.posY > RX_StepperCfg.material_thickness + LASER_VARIATION)
+				if(RX_StepperStatus.posY[0] > RX_StepperCfg.material_thickness + LASER_VARIATION)
 				{
 					_LaserTimeThin = 0;
 					if (!_LaserTimeThick) _LaserTimeThick  = rx_get_ticks();
@@ -393,13 +394,13 @@ static void _cleaf_check_laser(void)
 	
 			if (_LaserTimeThick && (rx_get_ticks()-_LaserTimeThick) > LASER_TIMEOUT)
 			{
-				Error(WARN, 0, "WEB: Laser detects too thick material. Moving head up. (measured %d, expected %d)", RX_StepperStatus.posY, RX_StepperCfg.material_thickness);
+				Error(WARN, 0, "WEB: Laser detects too thick material. Moving head up. (measured %d, expected %d)", RX_StepperStatus.posY[0], RX_StepperCfg.material_thickness);
 				_LaserTimeThick = 0; // start next check
 			}
 			
 			if (_LaserTimeThin && (rx_get_ticks()-_LaserTimeThin) > LASER_TIMEOUT)
 			{
-				Error(WARN, 0, "WEB: Laser detects too thin material. Moving head up. (measured %d, expected %d)", RX_StepperStatus.posY, RX_StepperCfg.material_thickness);
+				Error(WARN, 0, "WEB: Laser detects too thin material. Moving head up. (measured %d, expected %d)", RX_StepperStatus.posY[0], RX_StepperCfg.material_thickness);
 				cleaf_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_UP_POS, NULL);			
 				_LaserTimeThin = 0;
 			}
@@ -472,7 +473,7 @@ void cleaf_display_status(void)
 		term_printf("moving:            %d		cmd: %08x\n", RX_StepperStatus.info.moving, RX_StepperStatus.cmdRunning);	
 		term_printf("refheight:         %06d  ", RX_StepperCfg.ref_height);
 		term_printf("pos in um:         %06d  \n", RX_StepperStatus.posZ);
-		term_printf("LASER in um:       %06d  row=%06d \n", RX_StepperStatus.posY, Fpga.stat->analog_in[LASER_IN]);	
+		term_printf("LASER in um:       %06d  row=%06d \n", RX_StepperStatus.posY[0], Fpga.stat->analog_in[LASER_IN]);	
 		term_printf("Head UP Sensor:    front: %d  back: %d\n",	fpga_input(HEAD_UP_IN_FRONT), fpga_input(HEAD_UP_IN_BACK));	
 		term_printf("reference done:    %d\n", RX_StepperStatus.info.ref_done);
 		term_printf("allow move down:   %d \n", _AllowMoveDown);
@@ -616,8 +617,8 @@ int  cleaf_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 			if      (!RX_StepperStatus.info.ref_done)				Error(ERR_CONT, 0, "Reference not done");
 			else if (!_AllowMoveDown)								Error(ERR_CONT, 0, "Stepper: Command 0x%08x: printhead_en signal not set", msgId);
 // #ifdef debug
-			else if (RX_StepperStatus.posY < (RX_StepperCfg.material_thickness - LASER_VARIATION) 
-				||   RX_StepperStatus.posY > (RX_StepperCfg.material_thickness + LASER_VARIATION)) Error(ERR_CONT, 0, "WEB: Laser detects material out of range. (measured %d, expected %d)", RX_StepperStatus.posY, RX_StepperCfg.material_thickness);
+			else if (RX_StepperStatus.posY[0] < (RX_StepperCfg.material_thickness - LASER_VARIATION) 
+				||   RX_StepperStatus.posY[0] > (RX_StepperCfg.material_thickness + LASER_VARIATION)) Error(ERR_CONT, 0, "WEB: Laser detects material out of range. (measured %d, expected %d)", RX_StepperStatus.posY, RX_StepperCfg.material_thickness);
 // #endif
 			else
 			{

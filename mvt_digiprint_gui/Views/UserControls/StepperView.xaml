@@ -22,6 +22,9 @@
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="100"/>
@@ -52,15 +55,17 @@
                 <CheckBox x:Name="Button_Ref"   Grid.Row="2" Content="Ref"   Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10" Click="CapReference_clicked" />
                 <CheckBox x:Name="Button_Up"    Grid.Row="3" Content="Up"    Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10" Click="CapUp_clicked" />
                 <CheckBox x:Name="Button_Print" Grid.Row="4" Content="Print" Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10" Click="CapPrint_clicked" />
-                <CheckBox x:Name="Button_Cap"   Grid.Row="6" Content="Cap"   Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10,10,0,10" Click="CapCapping_clicked"     IsEnabled="{Binding cap_enabled}" HorizontalAlignment="Left" Width="80"/>
-                <CheckBox x:Name="Button_RefRobot"   Grid.Row="7" Content="Ref Robot"   Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10,10,0,10" Click="CapRefRobot_clicked"     HorizontalAlignment="Left" Width="80" Visibility="{Binding RobotUsed, Converter={StaticResource BoolToVisible_Converter}}"/>
-                <CheckBox x:Name="Button_DripPans" Grid.Row="8" Content="DRIP PANS"  Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10" Click="CapDripPans_clicked"        IsEnabled="{Binding capDP803_enabled}"/>
-                <CheckBox x:Name="Button_DripPansCAP" Grid.Row="8" Content="Carriage CAP"  Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10" Click="CapDripPansCAP_clicked"        IsEnabled="{Binding capDP803_enabled}"/>
-                <CheckBox x:Name="Button_DripPansREF" Grid.Row="8" Grid.Column="1" Content="Carriage REF"  Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10" Click="CapDripPansREF_clicked"        IsEnabled="{Binding capDP803_enabled}"/>
-                <CheckBox x:Name="Button_Fill" Grid.Row="9" Content="Fill 5sec"  Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10" Click="CapFill_clicked"        IsEnabled="{Binding capDP803_enabled}"/>
-                <CheckBox x:Name="Button_Empty" Grid.Row="9" Grid.Column="1" Content="Empty 2min"  Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10" Click="CapEmpty_clicked"        IsEnabled="{Binding capDP803_enabled}"/>
+                <CheckBox x:Name="Button_Cap"   Grid.Row="6" Content="Cap"   Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10,10,0,10" Click="CapCapping_clicked"     HorizontalAlignment="Left" Width="80"/>
+                <CheckBox x:Name="Button_Wash"  Grid.Row="7" Content="Wash"  Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10,10,0,10" Click="Wash_clicked"           HorizontalAlignment="Left" Width="80" Visibility="{Binding RobotUsed, Converter={StaticResource BoolToVisible_Converter}}"/>
+                <CheckBox x:Name="Button_Vacuum"  Grid.Row="8" Content="Vacuum"  Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10,10,0,10" Click="Vacuum_clicked"     HorizontalAlignment="Left" Width="80" Visibility="{Binding RobotUsed, Converter={StaticResource BoolToVisible_Converter}}"/>
+                <CheckBox x:Name="Button_RefRobot"   Grid.Row="9" Content="Ref Robot"   Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10,10,0,10" Click="CapRefRobot_clicked"     HorizontalAlignment="Left" Width="80" Visibility="{Binding RobotUsed, Converter={StaticResource BoolToVisible_Converter}}"/>
+                <CheckBox x:Name="Button_DripPans" Grid.Row="10" Content="DRIP PANS"  Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10" Click="CapDripPans_clicked"        IsEnabled="{Binding capDP803_enabled}"/>
+                <CheckBox x:Name="Button_DripPansCAP" Grid.Row="10" Content="Carriage CAP"  Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10" Click="CapDripPansCAP_clicked"        IsEnabled="{Binding capDP803_enabled}"/>
+                <CheckBox x:Name="Button_DripPansREF" Grid.Row="10" Grid.Column="1" Content="Carriage REF"  Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10" Click="CapDripPansREF_clicked"        IsEnabled="{Binding capDP803_enabled}"/>
+                <CheckBox x:Name="Button_Fill" Grid.Row="11" Content="Fill 5sec"  Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10" Click="CapFill_clicked"        IsEnabled="{Binding capDP803_enabled}"/>
+                <CheckBox x:Name="Button_Empty" Grid.Row="11" Grid.Column="1" Content="Empty 2min"  Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10" Click="CapEmpty_clicked"        IsEnabled="{Binding capDP803_enabled}"/>
 
-                <Grid x:Name="Leds_DripPans" Grid.Row="8" Grid.Column="1" Grid.ColumnSpan="10">
+                <Grid x:Name="Leds_DripPans" Grid.Row="10" Grid.Column="1" Grid.ColumnSpan="10">
                     <StackPanel Orientation="Horizontal">
                         <Image  Source="../../Resources/Bitmaps/LED_GREEN.ico" Visibility="{Binding DripPans_InfeedDOWN,   Converter={StaticResource BoolToVisible_Converter}}" HorizontalAlignment="Left"/>
                         <Image  Source="../../Resources/Bitmaps/LED_GREY.ico"  Visibility="{Binding DripPans_InfeedDOWN,   Converter={StaticResource BoolToInVisible_Converter}}" HorizontalAlignment="Left"/>
@@ -75,8 +80,8 @@
                         <Image  Source="../../Resources/Bitmaps/LED_GREY.ico"  Visibility="{Binding DripPans_OutfeedDOWN,   Converter={StaticResource BoolToInVisible_Converter}}" HorizontalAlignment="Left"/>
                     </StackPanel>
                 </Grid>
-                <TextBlock Grid.Row="8" Grid.Column="0" Text="Laser" VerticalAlignment="Center" FontSize="{StaticResource FontSizeStd}" Margin="5,0" x:Name="LaserTX"/>
-                <StackPanel Grid.Row="8" Grid.Column="1" Grid.ColumnSpan="10" Orientation="Horizontal" x:Name="LaserVal">
+                <TextBlock Grid.Row="10" Grid.Column="0" Text="Laser" VerticalAlignment="Center" FontSize="{StaticResource FontSizeStd}" Margin="5,0" x:Name="LaserTX"/>
+                <StackPanel Grid.Row="10" Grid.Column="1" Grid.ColumnSpan="10" Orientation="Horizontal" x:Name="LaserVal">
                     <TextBlock Text="{Binding PosY, Converter={StaticResource HeadVal_ConverterTemp}}" VerticalAlignment="Center" FontSize="{StaticResource FontSizeStd}"/>
                     <TextBlock Text="mm" Margin="5,0"/>
                 </StackPanel>

@@ -28,6 +28,7 @@ void ctrl_send_head_fluidCtrlMode(int headNo, EnFluidCtrlMode ctrlMode, int send
 void ctrl_send_all_heads_fluidCtrlMode(int fluidNo, EnFluidCtrlMode ctrlMode);	// send ctrlMode to all heads connected to this fluid module
 int  ctrl_send_purge_par(int fluidNo, int time);	// return=total time
 int  ctrl_check_all_heads_in_fluidCtrlMode(int fluidNo, EnFluidCtrlMode ctrlMode);	// send ctrlMode to all heads connected to this fluid module
+int ctrl_check_no_head_in_purge_Mode(int fluidNo);
 int  ctrl_singleHead(void);
 
 void ctrl_update_hostname(void);
@@ -51,4 +52,4 @@ void ctrl_tick(void);
 
 void ctrl_head_alive(int headNo);
 
-
+void ctrl_empty_PurgeBuffer(int fluidNo);

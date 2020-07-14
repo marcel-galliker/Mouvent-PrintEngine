@@ -29,10 +29,12 @@ char *FluidCtrlModeStr(EnFluidCtrlMode mode)
 	case ctrl_shutdown:				return "SHUTDOWN";	//  0x001:
 	case ctrl_shutdown_done:		return "SD-done";	//  0x002:
 	case ctrl_error:				return "ERROR";		//  0x003:
-	case ctrl_off:					return "OFF";		//  0x004:
-	case ctrl_warmup:				return "WARM ";		//  0x005:
-	case ctrl_readyToPrint:			return "READY";		//  0x006:
-	case ctrl_print:				return "PRINT";		//  0x007:
+    case ctrl_wait:					return "WAIT";		//  0x004:
+	case ctrl_off:					return "OFF";		//  0x005:
+	case ctrl_warmup:				return "WARM ";		//  0x006:
+	case ctrl_readyToPrint:			return "READY";		//  0x007:
+	case ctrl_print:				return "PRINT";		//  0x008:
+    
 
 	case ctrl_check_step0:			return "CHECK/0";	//  0x010:
 	case ctrl_check_step1:			return "CHECK/1";	// 	0x011
