@@ -373,7 +373,7 @@ static void _plc_set_par(SPrintQueueItem *pItem, SPlcPar *pPlcPar)
 	_StepDist = 43.328;
 	if (RX_Config.printer.type==printer_TX802) _StepDist*=2;
 	
-	if (!RX_Config.printer.overlap) 
+	if (!RX_Config.printer.overlap)
 	{
 		_StepDist -= (128.0*25.4/1200.0);
 	}

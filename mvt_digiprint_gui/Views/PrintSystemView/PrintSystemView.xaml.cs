@@ -15,7 +15,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
             InitializeComponent();
           //  DataContext = this;
             DataContext = _PrintSystem;
-            RobotButtons.DataContext = RxGlobals.PrinterStatus;
+            TxRobotButton.DataContext = RxGlobals.PrinterStatus;
             ChillerError.DataContext = RxGlobals.Chiller;
             _PrintSystem.PropertyChanged += _PrintSystem_PropertyChanged;
             RxGlobals.PrinterStatus.PropertyChanged += PrinterStatusChanged;
@@ -64,11 +64,13 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 // TODO(CB612) add case for CB612
 
                 StepperGrid.Children.Clear();
+                
                 switch (RxGlobals.PrintSystem.PrinterType)
                 {
                 case EPrinterType.printer_cleaf:    
                                                     var stepperGridCleaf = new StepperGridCleaf();
                                                     stepperGridCleaf.SetDataContext();
+                                                    StepperGrid.Margin = new Thickness(10, 0, 0, 0);
                                                     StepperGrid.Children.Add(stepperGridCleaf);
                                                     break; 
 
@@ -76,6 +78,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                                                     var stepperGridDP803 = new StepperGridDP803();
                                                     stepperGridDP803.SetDataContext();
                                                     StepperGrid.Children.Add(stepperGridDP803);
+                                                    StepperGrid.Margin = new Thickness(10, 0, 0, 0);
                                                     break;
 
                 case EPrinterType.printer_LB702_UV:
@@ -83,6 +86,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 case EPrinterType.printer_LH702:    var stepperGridLB702 = new StepperGridLB702();
                                                     stepperGridLB702.SetDataContext();
                                                     StepperGrid.Children.Add(stepperGridLB702);
+                                                    StepperGrid.Margin = new Thickness(10, 0, 0, 0);
                                                     break;
 
                 case EPrinterType.printer_TX801:
@@ -93,7 +97,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
                                                     var stepperGrid = new StepperGrid();
                                                     stepperGrid.SetDataContext();
                                                     StepperGrid.Children.Add(stepperGrid);
-                                                    break;                               
+                                                    StepperGrid.Margin = new Thickness(10, 0, 0, 0);
+                                                    break;
                 }
             }
         }
@@ -135,24 +140,28 @@ namespace RX_DigiPrint.Views.PrintSystemView
         private void Cap_Clicked(object sender, RoutedEventArgs e)
         {            
             _SetCtrlMode(EFluidCtrlMode.ctrl_cap);
+            TxRobotPopup.IsOpen = false;
         }
 
         //--- Wipe_Clicked -------------------------------------------------
         private void Wipe_Clicked(object sender, RoutedEventArgs e)
         {            
             _SetCtrlMode(EFluidCtrlMode.ctrl_wipe);
+            TxRobotPopup.IsOpen = false;
         }
 
         //--- WetWipe_Clicked -------------------------------------------------
         private void Vacuum_Clicked(object sender, RoutedEventArgs e)
         {            
             _SetCtrlMode(EFluidCtrlMode.ctrl_vacuum);
+            TxRobotPopup.IsOpen = false;
         }
 
         //--- Wash_Clicked -------------------------------------------------
         private void Wash_Clicked(object sender, RoutedEventArgs e)
         {            
             _SetCtrlMode(EFluidCtrlMode.ctrl_wash);
+            TxRobotPopup.IsOpen = false;
         }
 
         //--- Purge_Clicked -------------------------------------------------
@@ -180,6 +189,20 @@ namespace RX_DigiPrint.Views.PrintSystemView
         {
             _PrintSystem.ExpandSettingsPanel = !_PrintSystem.ExpandSettingsPanel;
             EncoderGrid.UpdateVisibility(_PrintSystem.PrinterType);
+            if (RxGlobals.Encoder[0].Enabled)
+            {
+                EncoderGrid.Margin = new Thickness(10, 0, 0, 0);
+            }
+            else
+            {
+                EncoderGrid.Margin = new Thickness(0);
+            }
+
+        }
+
+        private void TxRobot_Clicked(object sender, RoutedEventArgs e)
+        {
+            TxRobotPopup.Open(TxRobotButton);
         }
     }
 }

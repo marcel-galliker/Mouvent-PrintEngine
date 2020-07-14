@@ -4,15 +4,11 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
-             xmlns:igGrids="http://infragistics.com/DataPresenter"
-             xmlns:ig="http://schemas.infragistics.com/xaml"
-             xmlns:Infragistics="clr-namespace:Infragistics;assembly=InfragisticsWPF4.Controls.Grids.XamGrid.v13.2" 
-             xmlns:igPrim="http://schemas.infragistics.com/xaml/primitives"
-             xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
+    xmlns:ig="http://schemas.infragistics.com/xaml"
+    xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
-    xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
-
-             x:Class="RX_DigiPrint.Views.LogView"
+    xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks" xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
+    x:Class="RX_DigiPrint.Views.LogView"
  
              mc:Ignorable="d" 
              d:DesignHeight="300" 
@@ -130,7 +126,7 @@
                 <ig:UnboundColumn Width="40" HorizontalContentAlignment="Center" Key="Log Type" HeaderText=" " ValueConverter="{StaticResource UnboundColumnToLogTypeConverter}">
                     <ig:UnboundColumn.ItemTemplate>
                         <DataTemplate>
-                            <Button>
+                            <Button  Click="ColorButton_Click">
                                 <Button.Style>
                                     <MultiBinding Converter="{StaticResource LogTypeColorButton_Converter}">
                                         <MultiBinding.Bindings>
@@ -145,8 +141,8 @@
                     </ig:UnboundColumn.ItemTemplate>
                 </ig:UnboundColumn>
 
-                <ig:TextColumn Key="TimeStr"    TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="Time"    Width="auto" MinimumWidth="200"/>
-                <ig:TextColumn Key="DeviceStr"  TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="Device"  Width="100"/>
+                <ig:TextColumn Key="TimeStr"    TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="Time"    Width="auto"/>
+                <ig:TextColumn Key="DeviceStr"  TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="Device"  Width="auto"/>
                 <ig:TextColumn Key="Error"      TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="No"/>
                 <ig:TextColumn Key="Message"    TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="Message" Width="*"/>
                 <ig:TextColumn Key="File"       TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="File"    Width="auto"/>
@@ -160,5 +156,17 @@
 			HorizontalAlignment="Left" 
 			VerticalAlignment="Stretch"
 			ValueChanged="Scroll_ValueChanged"/>
+
+        <rx:RxPopup x:Name="LongTextPopUp"
+                   Panel.ZIndex="10"
+                   Width="auto"
+                   IsHitTestVisible="False"
+                   OpacityMask="White"
+                   >
+            <Border Background="{StaticResource Mouvent.LightOrangeBrush}" Margin="5" CornerRadius="5">
+                <TextBlock Margin="10" x:Name="PopUpText" TextWrapping="Wrap"></TextBlock>
+            </Border>
+        </rx:RxPopup>
+
     </Grid>
 </UserControl>

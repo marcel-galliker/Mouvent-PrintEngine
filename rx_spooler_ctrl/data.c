@@ -79,6 +79,7 @@ static SPageId			_SendingId;
 static char				_LastFilePath[MAX_PATH];
 static char				_FileTimePath[MAX_PATH];
 static time_t			_LastFileTime;
+static int				_LastGapPx;
 
 static SBmpInfo			_LastBmpInfo;
 static int				_LastColorOffset[MAX_COLORS];
@@ -130,6 +131,7 @@ void data_init(RX_SOCKET socket, int headCnt)
 	_InIdx   = 0;
 	_OutIdx  = 0;
 	_SendIdx = 0;
+	_LastGapPx=0;
 	_LastSplitId = 0;
 	_CacheInfo = FALSE;
 	_Abort   = FALSE;
@@ -606,9 +608,10 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 			}
 		}		
 		
-		if (/*id->id!=_LastId.id || */ id->page!=_LastId.page || strcmp(filepath, _LastFilePath) || _WakeupLen!=_LastWakeupLen || newOffsets || rx_file_get_mtime (_FileTimePath)!=_LastFileTime) // || printMode==PM_TEST_JETS) Overwrites head info!
+		if (/*id->id!=_LastId.id || */ id->page!=_LastId.page || strcmp(filepath, _LastFilePath) || _WakeupLen!=_LastWakeupLen || newOffsets || rx_file_get_mtime (_FileTimePath)!=_LastFileTime || gapPx!=_LastGapPx) // || printMode==PM_TEST_JETS) Overwrites head info!
 		{
 			ret = 1;
+			_LastGapPx = gapPx;
 			loaded = TRUE;
 			memset(_LastFilePath, 0, sizeof(_LastFilePath));
 			if (_PrintMode==PM_SCAN_MULTI_PAGE && !(flags & FLAG_SMP_FIRST_PAGE))
@@ -639,12 +642,14 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 					}
 				}
 				#ifdef DEBUG
-				if (FALSE)
+				// if (FALSE)
 				{
 					bmpInfo.planes = 1;//RX_Spooler.colorCnt;
 					bmpInfo.resol.x=1200;
 					bmpInfo.resol.y=1200;					
-					tif_write(PATH_TEMP, "TEST", &bmpInfo);						
+					char fname[20];
+					sprintf(fname, "TEST-%d", id->scan);
+					tif_write(PATH_TEMP, fname, &bmpInfo);						
 				}
 				#endif
 			}
@@ -1149,6 +1154,8 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 				pInfo = &pItem->splitInfo[head];
 				rx_mem_use(*pBmpInfo->buffer[color]);
 			
+				int blk0=RX_Spooler.dataBlkCntHead*(pInfo->head%RX_Spooler.headsPerBoard);
+
 				pItem->headsUsed++;
 				pInfo->pListItem		= pItem;
 				pInfo->printMode		= pBmpInfo->printMode;
@@ -1167,8 +1174,7 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 				pInfo->used			= TRUE;
 				pInfo->board		= head/RX_Spooler.headsPerBoard;
 				pInfo->head			= head%RX_Spooler.headsPerBoard;
-				pInfo->blk0			= RX_Spooler.dataBlkCntHead*(pInfo->head%RX_Spooler.headsPerBoard) + _BlkNo[pInfo->board][pInfo->head];
-				pInfo->blk0		   += 1;
+				pInfo->blk0			= blk0+1 + _BlkNo[pInfo->board][pInfo->head];
 				pInfo->bitsPerPixel	= pBmpInfo->bitsPerPixel;
 				pInfo->colorCode	= RX_Color[color].color.colorCode;
 				pInfo->inkSupplyNo  = RX_Color[color].inkSupplyNo;
@@ -1217,7 +1223,7 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 					pInfo->srcLineLen	= 1;
 					pInfo->srcLineCnt	= 1;
 					pInfo->dstLineLen	= 32; // align to 256 Bits (32 Bytes)				
-					pInfo->blk0		   -= 1;
+					pInfo->blk0		    = blk0;
 					pInfo->blkCnt		= 1;
 				}
 
@@ -1239,7 +1245,7 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 					scr_start(pInfo);
 				}
 
-				if (clearBlockUsed) _BlkNo[pInfo->board][pInfo->head] = (_BlkNo[pInfo->board][pInfo->head]+pInfo->blkCnt)%(RX_Spooler.dataBlkCntHead);
+				if (clearBlockUsed) _BlkNo[pInfo->board][pInfo->head] += pInfo->blkCnt; // (_BlkNo[pInfo->board][pInfo->head]+pInfo->blkCnt)%(RX_Spooler.dataBlkCntHead);
 				TrPrintfL(TRUE, "Split[head=%d]: startPx=%d, widthPx=%d, FillBt=%d, blk0=%d, blkCnt=%d, data=0x%08x", head, 0, pInfo->widthPx, pInfo->fillBt, pInfo->blk0, pInfo->blkCnt, pInfo->data);
 			}
 		}	
@@ -1306,14 +1312,14 @@ static int _data_split_prod(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 				{	
 					rx_mem_use(*pBmpInfo->buffer[color]);
 					pItem->headsUsed++;
-					pInfo->printMode	= pBmpInfo->printMode;
+					pInfo->printMode	  = pBmpInfo->printMode;
 					pInfo->clearBlockUsed = clearBlockUsed;
 					pInfo->same			  = same;
-					pInfo->data			= pBmpInfo->buffer[color];
-					pInfo->pListItem	= pItem;
-					pInfo->used			= TRUE;
-					pInfo->board		= head/RX_Spooler.headsPerBoard;
-					pInfo->head			= head%RX_Spooler.headsPerBoard;
+					pInfo->data			  = pBmpInfo->buffer[color];
+					pInfo->pListItem	  = pItem;
+					pInfo->used			  = TRUE;
+					pInfo->board		  = head/RX_Spooler.headsPerBoard;
+					pInfo->head			  = head%RX_Spooler.headsPerBoard;
 				//	if (RX_Spooler.printerType==printer_LB702_UV)
 					if (rx_def_is_web(RX_Spooler.printerType))
 						pInfo->blk0			= blkNo+RX_Spooler.dataBlkCntHead*(pInfo->head%RX_Spooler.headsPerBoard);
@@ -1976,10 +1982,13 @@ static void _data_fill_blk_scan(SBmpSplitInfo *psplit, int blkNo, BYTE *dst, int
 		&& (psplit->pListItem->penetrationPasses<2 || psplit->colorCode!=30)) // penetration is colorode 30
 		{	
 			if ((line % psplit->pListItem->virtualPasses) != psplit->pListItem->virtualPass) memset(&dst[size], 0x00, dstLen);
-			if (*test0!=0x33) 
-				Error(ERR_ABORT, 0, "_data_fill_blk_scan lower border");
-			if (*test1!=0x66) 
-				Error(ERR_ABORT, 0, "_data_fill_blk_scan upper border");
+			if (test)
+			{
+				if (*test0!=0x33) 
+					Error(ERR_ABORT, 0, "_data_fill_blk_scan lower border");
+				if (*test1!=0x66) 
+					Error(ERR_ABORT, 0, "_data_fill_blk_scan upper border");
+			}
 
 			/*
 			if (TRUE)

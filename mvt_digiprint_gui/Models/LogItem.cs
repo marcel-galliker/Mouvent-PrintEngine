@@ -20,11 +20,11 @@ namespace RX_DigiPrint.Models
             StringBuilder str = new StringBuilder(100);
             str.AppendFormat("{0:D2}:{1:D2}:{2:D2}", DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
             TimeStr = str.ToString();
-
+            
             StackTrace st = new StackTrace(true);
             StackFrame sf = st.GetFrame(1);
             File    = sf.GetFileName();
-            Line    =(uint)sf.GetFileLineNumber();      
+            Line    =(uint)sf.GetFileLineNumber();
             LogType = ELogType.eErrLog;
             DevType = EDeviceType.dev_gui;
             DevNo       =-1;
@@ -60,13 +60,22 @@ namespace RX_DigiPrint.Models
 
         #endregion
 
-        //--- Prpperty TimeStr ----------------------------------------
         #region Properties
+
+        //--- Prpperty TimeStr ----------------------------------------
         private string _TimeStr;
         public string TimeStr
         {
             get { return _TimeStr; }
             set { _TimeStr = value; }
+        }
+
+        //--- Prpperty TimeStrShort ----------------------------------------
+        private string _TimeStrShort;
+        public string TimeStrShort
+        {
+            get { return _TimeStrShort; }
+            set { _TimeStrShort = value; }
         }
 
         //--- Property FileTime ------------------------------------
@@ -82,7 +91,10 @@ namespace RX_DigiPrint.Models
                     StringBuilder str = new StringBuilder(100);
                     DateTime t = DateTime.FromFileTime(_FileTime);
                     str.AppendFormat("{0:D2}.{1:D2}.{2:D2}   {3:D2}:{4:D2}:{5:D2}.{6:D3}", t.Day, Rx.MonthName[t.Month], t.Year, t.Hour, t.Minute, t.Second, t.Millisecond);
-                    TimeStr = str.ToString(); 
+                    TimeStr = str.ToString();
+                    StringBuilder strShort = new StringBuilder(100);
+                    strShort.AppendFormat("{0:D2}.{1:D2}.{2:D2} | {3:D2}:{4:D2}:{5:D2}", t.Day, t.Month, t.Year, t.Hour, t.Minute, t.Second);
+                    TimeStrShort = strShort.ToString();
                 }
                 catch (Exception ex)
                 {

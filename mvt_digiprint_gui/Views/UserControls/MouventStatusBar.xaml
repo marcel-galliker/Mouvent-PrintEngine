@@ -40,10 +40,6 @@
                 <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" MouseDown="ResetCounters_Click">
                     <TextBlock Margin="15, 0, 0, 0" Style="{StaticResource Mouvent.FooterTextBlockStyle}" Text="{Binding CounterAct, Converter={StaticResource Counter_Converter}}"/>
                     <TextBlock Margin="5, 0, 0, 0" x:Name="CounterUnit2" Style="{StaticResource Mouvent.FooterTextBlockStyle}" Text="m"/>
-                    <!--<common:MvtButton Name="ResetCounters" Style="{StaticResource RoundButtonStyleSizeS_Inverted}" Margin="15, 0, 15, 0" Click="ResetCounters_Click">
-                        <iconPacks:PackIconMaterial Margin="-3,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Center" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 
-                                                Kind="Restore"></iconPacks:PackIconMaterial>
-                    </common:MvtButton>-->
                 </StackPanel>
             </Grid>
             <Grid MinWidth="150" Margin="20, 0, 0, 0" >

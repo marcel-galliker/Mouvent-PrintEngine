@@ -1,4 +1,5 @@
-﻿using RX_Common;
+﻿using Infragistics.Controls.Grids;
+using RX_Common;
 using RX_DigiPrint.Models;
 using RX_DigiPrint.Services;
 using System;
@@ -216,5 +217,36 @@ namespace RX_DigiPrint.Views
             else       Scroll.Value = 0;
         }
 
-     }
+        private void ColorButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Button button = sender as Button;
+                if (button != null)
+                {
+                    Infragistics.Controls.Grids.UnboundColumnDataContext context = button.DataContext as Infragistics.Controls.Grids.UnboundColumnDataContext;
+                    LogItem item = context.RowData as LogItem;
+
+                    if (context != null)
+                    {
+                        PopUpText.Text = item.Message;
+                        CellControl cell = Infragistics.Windows.Utilities.GetAncestorFromType(button, typeof(CellControl), false) as CellControl;
+                        if (cell != null)
+                        {
+                            Row row = cell.Cell.Row as Row; // <== Actual Row 
+                            var cellControl = row.Cells["Message"];
+                            LongTextPopUp.PlacementTarget = (System.Windows.UIElement)cellControl.Control;
+                            LongTextPopUp.Width = cellControl.Control.ActualWidth;
+                            LongTextPopUp.Height = 100;
+                            LongTextPopUp.IsOpen = true;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+    }
 }

@@ -200,6 +200,7 @@ static void _ctr_save(int reset, char *machineName)
 
 			if (reset)
 			{
+				time = rx_get_system_sec();
 				_calc_reset_key(name, check);
 			}
 			else if (_Manipulated) 
@@ -209,13 +210,7 @@ static void _ctr_save(int reset, char *machineName)
 			}
 			else
 			{
-				#ifdef linux
-					struct timespec now;
-					clock_gettime( CLOCK_REALTIME, &now);
-					time = now.tv_sec;
-				#else
-					_time64(&time);
-				#endif
+				time = rx_get_system_sec();
 				_calc_check(time, check);
 			}
 			setup_str	(file, "check", WRITE, check, sizeof(check), "");

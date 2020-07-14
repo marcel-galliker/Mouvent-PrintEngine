@@ -11,6 +11,9 @@
     <Color x:Key="Mouvent.BlueDark">#d8e6f3</Color>
     <Color x:Key="Mouvent.OrangeColor">Orange</Color>
 
+
+    <SolidColorBrush x:Key="Mouvent.BlueMediumBrush" Color="#FFE6EFF7"></SolidColorBrush>
+    
     <Color x:Key="Mouvent.MainColor">#3b323d</Color>
     <SolidColorBrush x:Key="Mouvent.MainColorBrush" Color="{StaticResource Mouvent.MainColor}"></SolidColorBrush>
     <SolidColorBrush x:Key="Mouvent.OrangeColorBrush" Color="Orange"></SolidColorBrush>

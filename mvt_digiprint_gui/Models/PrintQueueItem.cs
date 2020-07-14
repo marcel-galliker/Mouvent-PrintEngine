@@ -852,9 +852,11 @@ namespace RX_DigiPrint.Models
 
                     if (len==size)
                     {
+                        if (filePath.Contains("-J-0001"))
+                            Console.WriteLine("TEST");
                         SrcWidth  = info.WidthPx;
                         SrcHeight = info.lengthPx;
-                        if (info.resx==0) info.resx=info.resy;
+                        if (info.resx<100) info.resx=info.resy;
                         if (info.resx!=0) SrcWidth  = info.WidthPx  * 25.4 / info.resx;
                         if (info.resy!=0) SrcHeight = info.lengthPx * 25.4 / info.resy;
                         PageWidth    = SrcWidth;

@@ -2,12 +2,13 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="WRITE_USER_EEPROM" key="selection"/>
+		<item value="_do_250ms_timer" key="selection"/>
 		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
+			<item value="_do_250ms_timer"/>
 			<item value="WRITE_USER_EEPROM"/>
 			<item value="_stop_fpga"/>
 			<item value="PIO_ALL_ON_EN_BASE"/>
@@ -15,7 +16,6 @@
 			<item value="pressure"/>
 			<item value="err_overheating"/>
 			<item value="cooler_overheated"/>
-			<item value="36"/>
 		</list>
 		<list key="replacehistory">
 		</list>

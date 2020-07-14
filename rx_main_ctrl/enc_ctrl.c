@@ -401,16 +401,16 @@ static void _enc_start_printing(int no, SPrintQueueItem *pitem, int restart)
 								if(RX_Config.printer.offset.manualFlightTimeComp)
 								{
 									comp=RX_Config.printer.offset.manualFlightTimeComp;
-									Error(LOG, 0, "Manual Flightime Comp: %dµm", (int)comp);											
+								//	Error(LOG, 0, "Manual Flightime Comp: %dµm", (int)comp);											
 								}
 								else 
 								{
 									comp =  1000.0 * 0.0090 * (pitem->speed-60);								// ref done at 60m/min
-									Error(LOG, 0, "FlightTimeComp: speed=%d (ref 60m/min): comp=%dµm", pitem->speed, (int)comp);
+								//	Error(LOG, 0, "FlightTimeComp: speed=%d (ref 60m/min): comp=%dµm", pitem->speed, (int)comp);
                                     comp2 = 0.0027 * (RX_Config.stepper.print_height-2000) * pitem->speed;		// ref done at 2.0 mm (height above material, don't add material_thickness) 
-									Error(LOG, 0, "FlightTimeComp: height=%d.%03dmm (ref 2.0mm): comp=%dµm", RX_Config.stepper.print_height/1000, RX_Config.stepper.print_height%1000, (int)comp2);
+								//	Error(LOG, 0, "FlightTimeComp: height=%d.%03dmm (ref 2.0mm): comp=%dµm", RX_Config.stepper.print_height/1000, RX_Config.stepper.print_height%1000, (int)comp2);
                                     comp += comp2;
-									Error(LOG, 0, "FlightTimeComp: comp=%dµm", (int)comp);
+								//	Error(LOG, 0, "FlightTimeComp: comp=%dµm", (int)comp);
 								}
 								msg.pos_pg_bwd += (int)comp;  
 							}

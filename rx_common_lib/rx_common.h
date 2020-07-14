@@ -185,6 +185,7 @@ time_t	FiletimeToTimet(const LPFILETIME pft);
 #else
 time_t	FiletimeToTimet(const UINT64 pft);
 #endif
+time_t rx_get_system_sec(void);
 void rx_get_system_time(UINT64 *pFileTime);
 void rx_get_system_time_str(char *str, char separator);
 void rx_get_system_hms(int *hour, int *min, int *sec);

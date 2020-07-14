@@ -134,6 +134,27 @@ static void _do_250ms_timer(void)
 	UINT32 val=IORD_16DIRECT(AMC7891_0_BASE,AMC7891_TEMP_DATA)&0x3ff;
 	if (val==0x3ff) pRX_Status->headcon_amc_temp = INVALID_VALUE;
 	else            pRX_Status->headcon_amc_temp = 1000*val/8;
+
+	//---  command exe_valid -------------------------------
+	if (pRX_Config->cmd.exe_valid)
+	{
+		pRX_Config->cmd.exe_valid = FALSE;
+		memset(&pRX_Status->cond, 0, sizeof(pRX_Status->cond));
+		bootloader_start();
+	}
+
+	//--- user eeprom ----------------------------------------
+	{
+		int head;
+		for (head=0; head<SIZEOF(pRX_Config->user_eeprom); head++)
+		{
+			if (pRX_Config->cmd.cmd & (WRITE_USER_EEPROM<<head))
+			{
+				head_eeprom_change_user_data(head, pRX_Status->user_eeprom[head], pRX_Config->user_eeprom[head], sizeof(pRX_Config->user_eeprom[head]), 0);
+				pRX_Config->cmd.cmd &= ~(WRITE_USER_EEPROM<<head);
+			}
+		}
+	}
 }
 
 //--- _temp_savety_100ms ---------------
@@ -155,32 +176,11 @@ static void _do_1000ms_timer(void)
 
 	IOWR_ALTERA_AVALON_PIO_DATA(PIO_NIOS_LED_BASE, ~IORD_ALTERA_AVALON_PIO_DATA(PIO_NIOS_LED_BASE));
 
-	//---  command exe_valid -------------------------------
-	if (pRX_Config->cmd.exe_valid)
-	{
-		pRX_Config->cmd.exe_valid = FALSE;
-		memset(&pRX_Status->cond, 0, sizeof(pRX_Status->cond));
-		bootloader_start();
-	}
-
 	//---  command error_reset -------------------------------
 	if(pRX_Config->cmd.error_reset)
 	{
 		main_error_reset();
 		pRX_Config->cmd.error_reset = FALSE;
-	}
-
-	//--- user eeprom ----------------------------------------
-	{
-		int head;
-		for (head=0; head<SIZEOF(pRX_Config->user_eeprom); head++)
-		{
-			if (pRX_Config->cmd.cmd & (WRITE_USER_EEPROM<<head))
-			{
-				head_eeprom_change_user_data(head, pRX_Status->user_eeprom[head], pRX_Config->user_eeprom[head], sizeof(pRX_Config->user_eeprom[head]), 0);
-				pRX_Config->cmd.cmd &= ~(WRITE_USER_EEPROM<<head);
-			}
-		}
 	}
 }
 

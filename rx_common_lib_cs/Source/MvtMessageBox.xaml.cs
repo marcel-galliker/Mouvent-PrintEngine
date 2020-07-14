@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -136,15 +136,15 @@ namespace RX_Common
         //--- Yes_Clicked -----------------------------------------------
         private void Yes_Clicked(object sender, RoutedEventArgs e)
         {
-            DialogResult = true;
             PurgeResult = EPurgeResult.PurgeResultYes;
+            DialogResult = true;
         }
 
         //--- No_Clicked -------------------------------------------------
         private void No_Clicked(object sender, RoutedEventArgs e)
         {
-            DialogResult = false;
             PurgeResult = EPurgeResult.PurgeResultCancel;
+            DialogResult = false;
         }
 
         //--- Question_Clicked -------------------------------------------------
@@ -158,6 +158,7 @@ namespace RX_Common
         private void PurgeAll_Clicked(object sender, RoutedEventArgs e)
         {
             PurgeResult = EPurgeResult.PurgeResultAll;
+            Close();
         }
     }
 }

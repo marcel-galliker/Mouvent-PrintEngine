@@ -75,6 +75,13 @@ int rx_get_ticks()
 #endif
 
 #ifdef linux
+time_t rx_get_system_sec(void)
+{
+	struct timespec now;
+	clock_gettime( CLOCK_REALTIME, &now);
+	return now.tv_sec;
+}
+
 void rx_get_system_time(UINT64 *pFileTime)
 {
 	#define EPOCH_DIFF 11644473600LL
@@ -114,6 +121,14 @@ void rx_get_system_day_str(char *str, char separator)
 	sprintf(str, "%d%c%s%c%d", tm.tm_mday, separator, RX_MonthStr[tm.tm_mon], separator, tm.tm_year + 1900);
 }
 #else
+
+time_t rx_get_system_sec(void)
+{
+	time_t time;
+	_time64(&time);
+	return time;
+}
+
 void rx_get_system_time(UINT64 *pFileTime)
 {
 	GetSystemTimeAsFileTime((LPFILETIME) pFileTime);

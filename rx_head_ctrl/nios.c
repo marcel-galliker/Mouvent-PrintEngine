@@ -62,6 +62,7 @@ int						NIOS_FixedDropSize=0;
 int						NIOS_Droplets=0;
 static int				_NiosReady=FALSE;
 static int				_MaxSpeed;
+static int				_EEpromTimeout=0;
 
 //--- prototypes -----------------------------------
 
@@ -570,36 +571,27 @@ int  nios_is_firepulse_on(void)
 //--- nios_set_user_eeprom ------------------------------------
 void nios_set_user_eeprom(int no, SHeadEEpromMvt *data)
 {
-    int timeout;
-	for(timeout=500; _NiosMem->cfg.cmd.cmd & (WRITE_USER_EEPROM<<no); timeout-=10)
+	if (_NiosMem && memcmp(&RX_HBStatus[0].head[no].eeprom_mvt, data, sizeof(RX_HBStatus[0].head[no].eeprom_mvt)))
 	{
-		if (timeout<0) 
+		int timeout;
+		for(timeout=500; _NiosMem->cfg.cmd.cmd & (WRITE_USER_EEPROM<<no); timeout-=10)
 		{
-			Error(ERR_CONT, 0, "Head User EEPROM ready Timeout");
-			return;
+			if (timeout<0) 
+			{
+				Error(ERR_CONT, 0, "Head[%d] User EEPROM ready Timeout", no);
+				return;
+			}
+			rx_sleep(10);		
 		}
-		rx_sleep(10);		
-	}
-	memcpy(&RX_HBStatus[0].head[no].eeprom_mvt, data, sizeof(RX_HBStatus[0].head[no].eeprom_mvt));
-	if (_NiosMem)
-	{
+		memcpy(&RX_HBStatus[0].head[no].eeprom_mvt, data, sizeof(RX_HBStatus[0].head[no].eeprom_mvt));
 		if (sizeof(SHeadEEpromMvt)<=sizeof(_NiosMem->cfg.user_eeprom[no])) 
 		{
 			memcpy(_NiosMem->cfg.user_eeprom[no], data, sizeof(_NiosMem->cfg.user_eeprom[no]));
 			_NiosMem->cfg.cmd.cmd |= (WRITE_USER_EEPROM<<no);
 		}
 		else Error(ERR_CONT, 0, "Head User EEPROM overflow");
-	}
 
-	timeout=500;
-	for(timeout=500; _NiosMem->cfg.cmd.cmd & (WRITE_USER_EEPROM<<no); timeout-=10)
-	{
-		if (timeout<0) 
-		{
-			Error(ERR_CONT, 0, "Head User EEPROM write Timeout");
-			return;
-		}
-		rx_sleep(10);
+		_EEpromTimeout = rx_get_ticks()+500;
 	}
 }
 
@@ -619,7 +611,16 @@ int  nios_main(int ticks, int menu)
 		{
 			nios_check_errors();		
 			_nios_copy_status();			
-		}		
+		}
+
+		if (_EEpromTimeout && _EEpromTimeout>ticks)
+		{
+			_EEpromTimeout = 0;
+			for(int head=0; head<SIZEOF(FpgaCfg.head); head++)
+			{
+				if (_NiosMem->cfg.cmd.cmd & (WRITE_USER_EEPROM<<head)) Error(ERR_CONT, 0, "Head[%d] User EEPROM write Timeout", head);
+			} 			
+		}
 	}
 	return REPLY_OK;
 }

@@ -231,7 +231,7 @@ namespace RX_DigiPrint.Views.UserControls
 
         private void Button_Settings_Click(object sender, RoutedEventArgs e)
         {
-            SettingsClicked(this, EventArgs.Empty);
+           SettingsClicked(this, EventArgs.Empty);
         }
 
     }

@@ -381,7 +381,7 @@ static void _load_test(void)
 			item.lengthUnit  = PQ_LENGTH_COPIES;
 			item.scanMode    = RX_TestImage.scanMode;
 			item.srcPages    = 1;
-			clearBlockUsed	 = ((int)RX_PrinterStatus.sentCnt+1) >= (int)(RX_TestImage.copies*RX_TestImage.scans);
+			clearBlockUsed	 = (RX_TestImage.testImage==PQ_TEST_SCANNING) || ((int)RX_PrinterStatus.sentCnt+1) >= (int)(RX_TestImage.copies*RX_TestImage.scans);
 			spool_print_file(&RX_TestImage.id, RX_TestImage.filepath, 0, height, &item, clearBlockUsed);	
 		}
 	}
