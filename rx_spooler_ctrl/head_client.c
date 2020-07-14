@@ -380,7 +380,7 @@ void hc_send_next()
 									}
 									break;
 
-				case dev_on:		if (pInfo->colorCode==0)	// see rx_def.c: RX_ColorName
+				case dev_on:		if (FALSE && pInfo->colorCode==0)	// see rx_def.c: RX_ColorName
 									{						
 										_save_to_file(pInfo, FALSE);
 										Error(LOG, 0, "File (id=%d, page=%d, copy=%d, scan=%d) blk0=%d, blkCnt=%d saved to File", pInfo->pListItem->id.id, pInfo->pListItem->id.page, pInfo->pListItem->id.copy, pInfo->pListItem->id.scan, pInfo->blk0, pInfo->blkCnt);
@@ -750,7 +750,10 @@ static int _send_to_board(SHBThreadPar *par, int head, int blkNo, int blkCnt)
 	if (pinfo!=NULL)
 	{
 		TrPrintfL(_Trace, "Head[%d.%d]: First Block=%d, sendFromBlk=%d", par->cfg.no, head, pinfo->blk0+pinfo->sendFromBlk, pinfo->sendFromBlk);
-		TrPrintfL(_Trace, "Head[%d.%d]: _send_to_board id=%d, page=%d, copy=%d, scan=%d (Block %d .. %d), sendFrom=%d", par->cfg.no, head, pinfo->pListItem->id.id, pinfo->pListItem->id.page, pinfo->pListItem->id.copy, pinfo->pListItem->id.scan, pinfo->blk0, pinfo->blk0+pinfo->blkCnt-1, pinfo->blk0+pinfo->sendFromBlk);
+		if (pinfo->pListItem!=NULL)
+			TrPrintfL(_Trace, "Head[%d.%d]: _send_to_board (id=%d, page=%d, copy=%d, scan=%d) (Block %d .. %d), sendFrom=%d", par->cfg.no, head, pinfo->pListItem->id.id, pinfo->pListItem->id.page, pinfo->pListItem->id.copy, pinfo->pListItem->id.scan, pinfo->blk0, pinfo->blk0+pinfo->blkCnt-1, pinfo->blk0+pinfo->sendFromBlk);
+		else
+			TrPrintfL(_Trace, "Head[%d.%d]: _send_to_board (NULL) (Block %d .. %d), sendFrom=%d", par->cfg.no, head, pinfo->blk0, pinfo->blk0+pinfo->blkCnt-1, pinfo->blk0+pinfo->sendFromBlk);
 		TrPrintfL(_Trace, "Head[%d.%d]: Send blocks from %d to %d", par->cfg.no, head, blkNo, blkNo+blkCnt);
 		dstBlk = pinfo->blk0 + pinfo->sendFromBlk;
 		for(i=pinfo->sendFromBlk, cnt=0; i<pinfo->blkCnt && cnt<BLOCK_BURST_CNT; i++, dstBlk++)

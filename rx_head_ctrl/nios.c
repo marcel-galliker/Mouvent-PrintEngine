@@ -583,6 +583,7 @@ void nios_set_user_eeprom(int no, SHeadEEpromMvt *data)
 			}
 			rx_sleep(10);		
 		}
+		_EEpromTimeout = rx_get_ticks()+500;
 		memcpy(&RX_HBStatus[0].head[no].eeprom_mvt, data, sizeof(RX_HBStatus[0].head[no].eeprom_mvt));
 		if (sizeof(SHeadEEpromMvt)<=sizeof(_NiosMem->cfg.user_eeprom[no])) 
 		{
@@ -590,8 +591,6 @@ void nios_set_user_eeprom(int no, SHeadEEpromMvt *data)
 			_NiosMem->cfg.cmd.cmd |= (WRITE_USER_EEPROM<<no);
 		}
 		else Error(ERR_CONT, 0, "Head User EEPROM overflow");
-
-		_EEpromTimeout = rx_get_ticks()+500;
 	}
 }
 
@@ -613,7 +612,7 @@ int  nios_main(int ticks, int menu)
 			_nios_copy_status();			
 		}
 
-		if (_EEpromTimeout && _EEpromTimeout>ticks)
+		if (_EEpromTimeout && ticks>_EEpromTimeout)
 		{
 			_EEpromTimeout = 0;
 			for(int head=0; head<SIZEOF(FpgaCfg.head); head++)

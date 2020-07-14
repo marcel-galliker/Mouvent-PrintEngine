@@ -1154,7 +1154,6 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 				pInfo = &pItem->splitInfo[head];
 				rx_mem_use(*pBmpInfo->buffer[color]);
 			
-				int blk0=RX_Spooler.dataBlkCntHead*(pInfo->head%RX_Spooler.headsPerBoard);
 
 				pItem->headsUsed++;
 				pInfo->pListItem		= pItem;
@@ -1174,7 +1173,8 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 				pInfo->used			= TRUE;
 				pInfo->board		= head/RX_Spooler.headsPerBoard;
 				pInfo->head			= head%RX_Spooler.headsPerBoard;
-				pInfo->blk0			= blk0+1 + _BlkNo[pInfo->board][pInfo->head];
+				int blk0			= RX_Spooler.dataBlkCntHead*(pInfo->head%RX_Spooler.headsPerBoard);
+				pInfo->blk0			= blk0+ 1 + _BlkNo[pInfo->board][pInfo->head];
 				pInfo->bitsPerPixel	= pBmpInfo->bitsPerPixel;
 				pInfo->colorCode	= RX_Color[color].color.colorCode;
 				pInfo->inkSupplyNo  = RX_Color[color].inkSupplyNo;

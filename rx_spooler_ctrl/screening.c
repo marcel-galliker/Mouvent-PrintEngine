@@ -357,6 +357,7 @@ void scr_start(SBmpSplitInfo *pInfo)
 		return;
 	}
 	
+	memcpy(&_Id, &pInfo->pListItem->id, sizeof(_Id));
 	//--- calculating blkCnt -------------------
 	{
 		int dstLineLen;
@@ -364,10 +365,11 @@ void scr_start(SBmpSplitInfo *pInfo)
 		int lengthPx		= pInfo->srcLineCnt*DPI_X/pInfo->resol.x;
 		dstLineLen			= (pInfo->widthPx*bitsPerPixel+7)/8;
 		pInfo->dstLineLen   = (dstLineLen+31)&~31; // align to 256 bit
-		pInfo->blkCnt		= (dstLineLen * lengthPx + RX_Spooler.dataBlkSize-1) / RX_Spooler.dataBlkSize;
+		pInfo->blkCnt		= (pInfo->dstLineLen * lengthPx + RX_Spooler.dataBlkSize-1) / RX_Spooler.dataBlkSize;
+	//	if (_Id.copy==4 && _Id.scan==36 && pInfo->board==3 && pInfo->head==1)
+	//		TrPrintfL(TRUE, "BLK1: srcLineCnt=%d, lengthPx=%d, widthPx=%d, dstLineLen=%d, blkCnt=%d\n",  pInfo->srcLineCnt, lengthPx, pInfo->widthPx, dstLineLen, pInfo->blkCnt);
 	}
 
-	memcpy(&_Id, &pInfo->pListItem->id, sizeof(_Id));
 	if (_TimeStart==0)
 	{
 		_TimeStart=rx_get_ticks();
@@ -556,10 +558,14 @@ static void _scr_load(SBmpSplitInfo *pInfo, int threadNo)
 			pInfo->widthBt		= pInfo->srcWidthBt;
 			pInfo->blkCnt		= (pInfo->dstLineLen * pInfo->srcLineCnt + RX_Spooler.dataBlkSize-1) / RX_Spooler.dataBlkSize;
 
+
 			if (pInfo->blkCnt!=blkCnt)
-			{
+			{				
+		//	if (_Id.copy==4 && _Id.scan==36 && pInfo->board==3 && pInfo->head==1)
+		//		TrPrintfL(TRUE, "BLK2: srcLineCnt=%d, lengthPx=%d, widthPx=%d, dstLineLen=%d, blkCnt=%d\n",  pInfo->srcLineCnt, pInfo->srcLineCnt, pInfo->widthPx, pInfo->dstLineLen, pInfo->blkCnt);
 				TrPrintfL(TRUE, "Screening[%d][%d] ERROR: blk0=%d, blkCnt=%d, blk0=%d, blkCnt=%d", b, h, blk0, blkCnt, pInfo->blk0, pInfo->blkCnt);
 				TrPrintfL(TRUE, "SrcBlkCnt[%d][%d]: dstLineLen=%d, lengthPx=%d, blkCnt=%d", pInfo->board, pInfo->head, pInfo->dstLineLen, pInfo->srcLineCnt, pInfo->blkCnt);
+				Error(ERR_CONT, 0,"BlkCnt Mismatch, (id=%d, page=%d, copy=%d, scan=%d) time=%d ms (board=%d, head=%d)", _Id.id, _Id.page, _Id.copy, _Id.scan, pInfo->board, pInfo->head);
 			}
 
 		//	_ScrMem[b][h].screenedIdx = (_ScrMem[b][h].screenedIdx+1) % SCR_BUF_SIZE;

@@ -1555,6 +1555,7 @@ int  fpga_abort(void)
 		
 		int i, len;
 		int warn=FALSE;
+		int err=FALSE;
 		char str[MAX_PATH];
 
         _DirchangeTimer=0;	
@@ -1573,8 +1574,9 @@ int  fpga_abort(void)
 				warn=TRUE;
 			}
 					
-			if(RX_FpgaError.enc_fp[i].waveform_busy)				
+			if(RX_FpgaError.enc_fp[i].waveform_busy && !err)				
 			{
+				err = TRUE;
 				Error(ERR_CONT,
 					0,
 					"Overspeed Counters: %d  %d  %d  %d", 
