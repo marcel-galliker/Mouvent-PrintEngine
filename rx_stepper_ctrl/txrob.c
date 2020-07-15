@@ -975,7 +975,13 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		_VacuumWaiting = FALSE;
 		break;
 
-	case CMD_ROB_REFERENCE:			strcpy(_CmdName, "CMD_ROB_REFERENCE");
+	case CMD_ROB_REFERENCE:
+        if (RX_StepperStatus.cmdRunning == CMD_ROB_REFERENCE ||
+            RX_StepperStatus.cmdRunning == CMD_ROB_SHIFT_REF ||
+            RX_StepperStatus.cmdRunning == CMD_ROB_ROT_REF ||
+            RX_StepperStatus.cmdRunning == CMD_ROB_ROT_REF2)
+            break;
+        strcpy(_CmdName, "CMD_ROB_REFERENCE");
 		TrPrintfL(TRUE, "SOCKET[%d]: %s", socket, _CmdName);
 		if (RX_StepperStatus.cmdRunning && RX_StepperStatus.cmdRunning != CMD_FLUID_CTRL_MODE)
 		{ 

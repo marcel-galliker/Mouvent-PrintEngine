@@ -1398,8 +1398,11 @@ static void _plc_state_ctrl()
 				}
 			}
 		}
-
-		if (_GUIPause)
+        UINT32 door_open;
+        lc_get_value_by_name_UINT32(UnitID ".STA_DOOR_OPEN", &door_open);
+        RX_PrinterStatus.door_open = door_open;
+        
+        if (_GUIPause)
 		{
 			if (rx_def_is_tx(RX_Config.printer.type))
 			{
@@ -1579,11 +1582,11 @@ static void _plc_state_ctrl()
 		else if(rx_def_is_tx(RX_Config.printer.type))
 		{ // calculate speed
 			UINT32 speed;
-			// speed = time for one scanner movement!
+            // speed = time for one scanner movement!
 			lc_get_value_by_name_UINT32(UnitID ".STA_PRINTING_CYCLE_TIME", &speed);
 			if(speed == 0) RX_PrinterStatus.actSpeed = 0;
 			else		   RX_PrinterStatus.actSpeed = _ActSpeed;
-		}
+        }
 	}
 	else if (_PlcState==plc_stop) 
 	{
