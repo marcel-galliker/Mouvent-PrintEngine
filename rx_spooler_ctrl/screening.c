@@ -558,7 +558,6 @@ static void _scr_load(SBmpSplitInfo *pInfo, int threadNo)
 			pInfo->widthBt		= pInfo->srcWidthBt;
 			pInfo->blkCnt		= (pInfo->dstLineLen * pInfo->srcLineCnt + RX_Spooler.dataBlkSize-1) / RX_Spooler.dataBlkSize;
 
-
 			if (pInfo->blkCnt!=blkCnt)
 			{				
 		//	if (_Id.copy==4 && _Id.scan==36 && pInfo->board==3 && pInfo->head==1)

@@ -131,7 +131,6 @@ void data_init(RX_SOCKET socket, int headCnt)
 	_InIdx   = 0;
 	_OutIdx  = 0;
 	_SendIdx = 0;
-	_LastGapPx=0;
 	_LastSplitId = 0;
 	_CacheInfo = FALSE;
 	_Abort   = FALSE;
@@ -144,6 +143,7 @@ void data_init(RX_SOCKET socket, int headCnt)
 		memset(_FileTimePath, 0, sizeof(_FileTimePath));
 		memset(&_LastBmpInfo, 0, sizeof(_LastBmpInfo));
 		memset(_LastColorOffset, 0, sizeof(_LastColorOffset));
+		_LastGapPx = -1;
 	}
 	memset(_BlkNo, 0, sizeof(_BlkNo));
 	memset(_SmpOffset, 0xff, sizeof(_SmpOffset));
@@ -736,8 +736,8 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 			else if (printMode!=PM_TEST && printMode!=PM_TEST_SINGLE_COLOR)  jc_correction(&bmpInfo, &_PrintList[_InIdx], 0);
 		}
 		#ifdef DEBUG
-//		if (loaded)
-		if (FALSE)
+		if (loaded)
+//		if (FALSE)
 		{
 			char dir[MAX_PATH];
 			char fname[MAX_PATH];
