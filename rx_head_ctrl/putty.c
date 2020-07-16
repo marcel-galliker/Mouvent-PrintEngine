@@ -111,6 +111,11 @@ static void _main_menu(void)
 		term_printf("z<x>:   Calibrate pressure sensor\n");
     	term_printf("u<x>:   Delete user calibrated offset\n");
 	}
+	if (_mvteeprom)
+	{
+		term_printf("ra<h><angle>:   set rob_angle[<h>]=<angle>\n");
+    	term_printf("rd<h><dist>:    set rob_dist [<h>]=<dist>\n");
+	}
 	if (_status) term_printf("s: hide status       ");
 	else         term_printf("s: show status       ");
 	if (_cond)   term_printf("c: hide conditioner  ");
@@ -336,6 +341,8 @@ static void _display_mvteeprom(void)
 	{
 		term_printf("DisabledJet[%d]:  ", n); PRINTF(4)("         %04d   ",	RX_HBStatus->head[no[i]].eeprom_mvt.disabledJets[n]);	term_printf("\n");
 	}
+	term_printf("Robot-Angle:     "); PRINTF(4)("         %04d   ",	RX_HBStatus->head[no[i]].eeprom_mvt.rob_angle);	term_printf("\n");
+	term_printf("Robot-Dist:      "); PRINTF(4)("         %04d   ",	RX_HBStatus->head[no[i]].eeprom_mvt.rob_dist);	term_printf("\n");
 }
 
 //--- putty_display_fpga_error --------------------------------------------------

@@ -256,7 +256,7 @@
                             <DataTemplate x:Key="DoesNotStartWithOperand">
                                 <Grid x:Name="DoesnotBeginWith">
                                     <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-                                        <TextBlock FontSize="10" Text="A" TextDecorations="Underline">
+                                        <TextBlock FontSize="{StaticResource MvtFontSizeStd}" Text="A" TextDecorations="Underline">
                                             <TextBlock.Foreground>
                                                 <LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
                                                     <GradientStop Color="#FFA3AEB9" Offset="0"/>
@@ -265,7 +265,7 @@
                                                     <GradientStop Color="#FF617583" Offset="1"/>
                                                 </LinearGradientBrush>
                                             </TextBlock.Foreground><Run Text="A"/></TextBlock>
-                                        <TextBlock FontSize="10" Text="a">
+                                        <TextBlock FontSize="{StaticResource MvtFontSizeStd}" Text="a">
                                             <TextBlock.Foreground>
                                                 <LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
                                                     <GradientStop Color="#FFA3AEB9" Offset="0"/>
@@ -457,7 +457,7 @@
                             </DataTemplate>
                             <DataTemplate x:Key="EndsWithOperand">
                                 <StackPanel x:Name="EndsWith" HorizontalAlignment="Center" Orientation="Horizontal">
-                                    <TextBlock FontSize="10" Text="a">
+                                    <TextBlock FontSize="{StaticResource MvtFontSizeStd}" Text="a">
                                         <TextBlock.Foreground>
                                             <LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
                                                 <GradientStop Color="#FFA3AEB9" Offset="0"/>
@@ -466,7 +466,7 @@
                                                 <GradientStop Color="#FF617583" Offset="1"/>
                                             </LinearGradientBrush>
                                         </TextBlock.Foreground><Run Text="a"/></TextBlock>
-                                    <TextBlock FontSize="10" Text="A" TextDecorations="Underline">
+                                    <TextBlock FontSize="{StaticResource MvtFontSizeStd}" Text="A" TextDecorations="Underline">
                                         <TextBlock.Foreground>
                                             <LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
                                                 <GradientStop Color="#FFA3AEB9" Offset="0"/>
@@ -602,7 +602,7 @@
                             <DataTemplate x:Key="DoesNotEndWithOperand">
                                 <Grid x:Name="DoesnotendWith">
                                     <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-                                        <TextBlock FontSize="10" Text="a">
+                                        <TextBlock FontSize="{StaticResource MvtFontSizeStd}" Text="a">
                                             <TextBlock.Foreground>
                                                 <LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
                                                     <GradientStop Color="#FFA3AEB9" Offset="0"/>
@@ -611,7 +611,7 @@
                                                     <GradientStop Color="#FF617583" Offset="1"/>
                                                 </LinearGradientBrush>
                                             </TextBlock.Foreground><Run Text="a"/></TextBlock>
-                                        <TextBlock FontSize="10" Text="A" TextDecorations="Underline">
+                                        <TextBlock FontSize="{StaticResource MvtFontSizeStd}" Text="A" TextDecorations="Underline">
                                             <TextBlock.Foreground>
                                                 <LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
                                                     <GradientStop Color="#FFA3AEB9" Offset="0"/>
@@ -637,7 +637,7 @@
                             </DataTemplate>
                             <DataTemplate x:Key="StartsWithOperand">
                                 <StackPanel x:Name="BeginsWith" HorizontalAlignment="Center" Orientation="Horizontal">
-                                    <TextBlock FontSize="10" Text="A" TextDecorations="Underline">
+                                    <TextBlock FontSize="{StaticResource MvtFontSizeStd}" Text="A" TextDecorations="Underline">
                                         <TextBlock.Foreground>
                                             <LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
                                                 <GradientStop Color="#FFA3AEB9" Offset="0"/>
@@ -646,7 +646,7 @@
                                                 <GradientStop Color="#FF617583" Offset="1"/>
                                             </LinearGradientBrush>
                                         </TextBlock.Foreground><Run Text="A"/></TextBlock>
-                                    <TextBlock FontSize="10" Text="a">
+                                    <TextBlock FontSize="{StaticResource MvtFontSizeStd}" Text="a">
                                         <TextBlock.Foreground>
                                             <LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
                                                 <GradientStop Color="#FFA3AEB9" Offset="0"/>

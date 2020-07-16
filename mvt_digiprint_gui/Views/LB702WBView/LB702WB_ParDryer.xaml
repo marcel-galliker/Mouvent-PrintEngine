@@ -18,12 +18,13 @@
     
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="40"/>
+            <RowDefinition Height="30"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0" Background="WhiteSmoke" ShowGridLines="false">
-            <TextBlock x:Name="Header" Grid.Row="0" Foreground="#ff303030" Text="Dryer" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            <TextBlock x:Name="Header" Grid.Row="0" Foreground="#ff303030" Text="Dryer"
+                      FontSize="{StaticResource MvtFontSize}" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" />
         </Grid>
 
         <Grid Grid.Row="1" Margin="0,5,0,0">

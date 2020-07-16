@@ -20,9 +20,15 @@ namespace RX_DigiPrint.Helpers
             //--- default values ------------------------
             IsEditable=false;
             SelectedValuePath="Value";
-            TextSize=(double)FindResource("FontSize");
-            Style   =(Style)FindResource("ImgComboBox");
-
+            try
+            {
+                TextSize = (double)FindResource("MvtFontSize");
+                Style = (Style)FindResource("ImgComboBox");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
             PreviewMouseDown        += RxComboBox_PreviewMouseDown;
             PreviewStylusButtonDown += RxComboBox_PreviewStylusButtonDown;
             IsVisibleChanged += RxComboBox_IsVisibleChanged;
@@ -79,7 +85,15 @@ namespace RX_DigiPrint.Helpers
                     {
                         FrameworkElementFactory text = new FrameworkElementFactory(typeof(TextBlock));
                         text.SetBinding(TextBlock.TextProperty, new Binding("Display"));
-                        double fontSize = (double)FindResource("FontSize");
+                        double fontSize = 14.0;
+                        try
+                        {
+                            fontSize = (double)FindResource("MvtFontSize");
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                        }
                         text.SetValue(TextBlock.FontFamilyProperty, this.FontFamily);            
                         text.SetValue(TextBlock.FontSizeProperty, fontSize);            
                         text.SetValue(TextBlock.MarginProperty, new Thickness(0,4,0,4));

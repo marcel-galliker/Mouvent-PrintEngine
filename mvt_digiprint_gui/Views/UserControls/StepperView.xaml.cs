@@ -216,7 +216,7 @@ namespace RX_DigiPrint.Views.UserControls
             _button_active(sender as CheckBox);
             if (RxMessageBox.YesNo("Capping", "Goto Capping position?",  MessageBoxImage.Question, false))
             {   
-                if (RxGlobals.StepperStatus[0].RobotUsed)
+                if (RxGlobals.StepperStatus[0].RobotUsed || RxGlobals.PrintSystem.IsTx)
                 {
                     TcpIp.SFluidCtrlCmd msg = new TcpIp.SFluidCtrlCmd();
                     msg.no       = -1;

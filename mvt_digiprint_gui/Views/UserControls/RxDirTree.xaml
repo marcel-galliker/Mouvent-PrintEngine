@@ -180,7 +180,7 @@
                                       >
                                 <ContentPresenter x:Name="PART_Header" ContentSource="Header">
                                 <ContentPresenter.Content>
-                                    <TextBlock Text="{TemplateBinding Header}" FontSize="{StaticResource FontSizeLarge}" Padding="2,5"/>
+                                    <TextBlock Text="{TemplateBinding Header}" FontSize="{StaticResource MvtFontSizeLarge}" Padding="2,5"/>
                                 </ContentPresenter.Content>
                                 </ContentPresenter>
                             </Border>
@@ -219,13 +219,13 @@
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="40"/>
+            <RowDefinition Height="30"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         
         <Border Background="WhiteSmoke" BorderThickness="2" BorderBrush="WhiteSmoke" Margin="0,1,0,0">
-            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="#ff303030" Text="Directory"/>
+            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{StaticResource MvtFontSize}" FontWeight="SemiBold" Foreground="#ff303030" Text="Directory"/>
         </Border>
         
         

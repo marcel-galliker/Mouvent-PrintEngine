@@ -27,7 +27,7 @@
         </Grid.ColumnDefinitions>
 
         <Image     Grid.Row="0" Grid.Column="0" Height="30" HorizontalAlignment="Left" x:Name="WlanStatus" Margin="0,5" MouseLeftButtonUp="WlanStatus_MouseLeftButtonUp"/>
-        <TextBlock Grid.Row="0" Grid.Column="1" x:Name="WlanNetwork" FontSize="{StaticResource FontSizeLarge}" Margin="35,0" MouseLeftButtonUp="WlanStatus_MouseLeftButtonUp"/>
+        <TextBlock Grid.Row="0" Grid.Column="1" x:Name="WlanNetwork" FontSize="{StaticResource MvtFontSizeLarge}" Margin="35,0" MouseLeftButtonUp="WlanStatus_MouseLeftButtonUp"/>
         <Rectangle Grid.Row="1" Grid.ColumnSpan="2" Fill="{StaticResource Mouvent.MainColorBrush}" Height="1"/>
         <ScrollViewer  Grid.Row="2" Grid.ColumnSpan="2" VerticalScrollBarVisibility="Auto">
             <StackPanel x:Name="NetworkList"/>

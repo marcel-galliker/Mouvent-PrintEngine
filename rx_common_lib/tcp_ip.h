@@ -174,6 +174,7 @@
 #define CMD_GET_DENSITY_VAL		0x01000107
 #define REP_GET_DENSITY_VAL		0x02000107
 #define CMD_SET_DENSITY_VAL		0x01000108
+#define CMD_SET_ROB_POS			0x01000109
 
 #define CMD_ENCODER_CFG			0x01000111
 #define REP_ENCODER_CFG			0x02000111
@@ -646,6 +647,15 @@ typedef struct SDisabledJetsMsg
 	int		head;
 	INT16	disabledJets[MAX_DISABLED_JETS];
 } SDisabledJetsMsg;
+
+typedef struct SRobPositionMsg
+{
+	SMsgHdr	hdr;
+	int		printBar;
+	int		head;
+	INT16	angle;
+	INT16	dist;
+} SRobPositionMsg;
 
 
 //--- message CMD_SEND_DATA -------------------------------------------

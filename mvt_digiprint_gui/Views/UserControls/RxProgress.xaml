@@ -18,7 +18,7 @@
         
             <Grid x:Name="ProgressBack" Width="20" Margin="2,0">
                 <ProgressBar x:Name="ProgressBar" Width="5" Maximum="100" Orientation="Vertical" Background="Transparent" BorderBrush="Transparent"/>
-                <TextBlock x:Name="ProgressStr" Grid.Row="1" HorizontalAlignment="left" VerticalAlignment="Center" FontSize="{StaticResource FontSizeStd}" Padding="4,0">
+                <TextBlock x:Name="ProgressStr" Grid.Row="1" HorizontalAlignment="left" VerticalAlignment="Center" FontSize="{StaticResource MvtFontSize}" Padding="4,0">
                     <TextBlock.LayoutTransform>
                         <RotateTransform Angle="270"/>
                     </TextBlock.LayoutTransform>

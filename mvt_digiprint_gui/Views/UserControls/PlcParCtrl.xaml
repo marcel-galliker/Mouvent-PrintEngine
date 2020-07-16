@@ -14,13 +14,13 @@
     <UserControl.Resources>
         <DataTemplate x:Key="ImgComboBoxDataTemplate">
             <Grid>
-                <TextBlock Text="{Binding Display}" FontSize="{DynamicResource FontSizeLarge}" HorizontalAlignment="Center"/>
+                <TextBlock Text="{Binding Display}" FontSize="{DynamicResource MvtFontSizeLarge}" HorizontalAlignment="Center"/>
             </Grid>
         </DataTemplate>
 
         <DataTemplate x:Key="ImgComboBoxDataTemplate_Fix40">
             <Grid Width="40">
-                <TextBlock Text="{Binding Display}" FontSize="{DynamicResource FontSizeLarge}" HorizontalAlignment="Center"/>
+                <TextBlock Text="{Binding Display}" FontSize="{DynamicResource MvtFontSizeLarge}" HorizontalAlignment="Center"/>
             </Grid>
         </DataTemplate>
 
@@ -148,7 +148,7 @@
             />
 
         <!-- UNIT _______________________________________________-->
-        <TextBlock x:Name="TB_Unit" FontSize="{StaticResource FontSizeStd}" Grid.Column="2" Padding="3,0,0,0" VerticalAlignment="Center" Visibility="Visible"/>
+        <TextBlock x:Name="TB_Unit" FontSize="{StaticResource MvtFontSize}" Grid.Column="2" Padding="3,0,0,0" VerticalAlignment="Center" Visibility="Visible"/>
 
         <!-- check boxes ____________________________________________-->
         <Grid x:Name="CheckBoxCtrl" Grid.Column="1"/>

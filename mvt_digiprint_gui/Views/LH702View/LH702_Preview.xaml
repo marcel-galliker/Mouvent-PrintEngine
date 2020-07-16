@@ -30,8 +30,8 @@
                 >
                 <Grid MouseUp="Image_Clicked">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="19,-32,19,0">
-                        <TextBlock Text="Printing " FontSize="{StaticResource FontSizeLarge}"/>
-                        <TextBlock Text="{Binding CopiesPrinted}" FontSize="{StaticResource FontSizeLarge}"/>
+                        <TextBlock Text="Printing " FontSize="{StaticResource MvtFontSizeLarge}"/>
+                        <TextBlock Text="{Binding CopiesPrinted}" FontSize="{StaticResource MvtFontSizeLarge}"/>
                     </StackPanel>
                     <Image 
                     x:Name="Image"
@@ -69,7 +69,7 @@
                             <RotateTransform Angle="90"/>
                         </Image.LayoutTransform>
                     </Image>
-                    <TextBlock Text="Next" HorizontalAlignment="Center" Margin="0,-32,0,0" FontSize="{StaticResource FontSizeLarge}"/>
+                    <TextBlock Text="Next" HorizontalAlignment="Center" Margin="0,-32,0,0" FontSize="{StaticResource MvtFontSizeLarge}"/>
                 </Grid>
             </Border>
 

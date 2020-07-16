@@ -66,7 +66,7 @@
 			        Background="Transparent"
                     VerticalAlignment="Center"
                     />
-                <TextBlock Grid.Row="3" Grid.Column="2" Text="mm" FontSize="{StaticResource FontSizeStd}" Padding="3,0,0,0" VerticalAlignment="Center"/>
+                <TextBlock Grid.Row="3" Grid.Column="2" Text="mm" FontSize="{StaticResource MvtFontSize}" Padding="3,0,0,0" VerticalAlignment="Center"/>
 
                 <TextBlock Grid.Row="4" Grid.Column="0" Text="Lateral"/>
                 <common:MvtNumBox Grid.Row="4" Grid.Column="1"
@@ -75,7 +75,7 @@
 			        Background="Transparent"                    VerticalAlignment="Center"
                     LostFocus="PageMargin_LostFocus"
                     />
-                <TextBlock Grid.Row="4" Grid.Column="2" Text="mm" FontSize="{StaticResource FontSizeStd}" Padding="3,0,0,0" VerticalAlignment="Center"/>
+                <TextBlock Grid.Row="4" Grid.Column="2" Text="mm" FontSize="{StaticResource MvtFontSize}" Padding="3,0,0,0" VerticalAlignment="Center"/>
 
                 <TextBlock Grid.Row="5" Grid.Column="0" Text="Copies"/>
                 <common:MvtNumBox Grid.Row="5" Grid.Column="1"

@@ -24,10 +24,9 @@
             <ColumnDefinition Width="auto"/>
         </Grid.ColumnDefinitions>
 
-        <Border Margin="10,5,10,5" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Height="40" BorderThickness="1" BorderBrush="WhiteSmoke" Background="WhiteSmoke">
-            <Label Foreground="#ff303030" FontWeight="SemiBold" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"
-                   Content="{Binding HeadName}">
-            </Label>
+        <Border Margin="10,5,10,5" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Height="30" BorderThickness="1" BorderBrush="WhiteSmoke" Background="WhiteSmoke">
+            <TextBlock Foreground="#ff303030" FontWeight="SemiBold" FontSize="{StaticResource MvtFontSize}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                       Text="{Binding HeadName}"></TextBlock>
         </Border>
 
         <GroupBox Grid.Row="1" Margin="10" Grid.Column="0" Style="{StaticResource MvtGroupBox}" Header="Density">

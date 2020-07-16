@@ -381,6 +381,12 @@ static void _update_clusterNo(void)
 		{
 			cond_set_disabledJets(condNo, NULL);		
 		}
+		if (RX_HBStatus[0].head[condNo].eeprom_mvt.rob_CRC!=rx_crc8(&RX_HBStatus[0].head[condNo].eeprom_mvt.rob_angle, 2*sizeof(UINT16)))
+		{
+			RX_HBStatus[0].head[condNo].eeprom_mvt.rob_angle = 0xFFFF;
+			RX_HBStatus[0].head[condNo].eeprom_mvt.rob_dist = 0xFFFF;
+		}
+
 	}
 
 	int cnt=0, idx=0;
@@ -775,6 +781,19 @@ void cond_add_droplets_printed(int headNo, UINT64 droplets64)
 	}
 
 //	_NiosMem->cfg.cond[headNo].flowResistance = value;
+}
+
+//--- cond_set_rob_pos ------------------------------------
+void cond_set_rob_pos(int headNo, int angle, int dist)
+{
+	if (headNo<0 || headNo>=MAX_HEADS_BOARD || _NiosMem==NULL) return;	
+
+	SHeadEEpromMvt mem;
+	memcpy(&mem, _NiosStat->user_eeprom[headNo], sizeof(mem));
+	if (angle>=0) mem.rob_angle = angle;
+	if (dist>=0)  mem.rob_dist  = dist;
+	mem.rob_CRC   = rx_crc8(&mem.rob_angle, 2*sizeof(mem.rob_angle));
+	nios_set_user_eeprom(headNo, &mem);
 }
 
 //--- cond_set_clusterNo --------------------------------

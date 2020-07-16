@@ -2,6 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:System="clr-namespace:System;assembly=mscorlib"
                     x:Class ="RX_Common.Resources.MvtBasics"
+                   xmlns:common="clr-namespace:RX_Common"
                     >
 
     <System:Double x:Key="RxScrollBarWidth">32</System:Double>
@@ -42,17 +43,26 @@
     <SolidColorBrush x:Key="Mvt.CtrlKey"              Color="#FFF4F4F4"/>
     <SolidColorBrush x:Key="Mvt.Key"                  Color="{DynamicResource {x:Static SystemColors.ControlColorKey}}"/>
 
-    
+
     <SolidColorBrush x:Key="Mvt.Paper"                Color="#FF78774B"/>
+    <System:Double x:Key="MvtFontSizeStd">14.66</System:Double>
+    <System:Double x:Key="MvtFontSize">14.66</System:Double>
+    <System:Double x:Key="MvtFontSizeLarge">20</System:Double>
+    <System:Double x:Key="MvtFontSizeXL">32</System:Double>
+    <System:Double x:Key="MvtFontSizeSmall">12</System:Double>
+    <System:Double x:Key="MvtFontSizeXS">10</System:Double>
+    <System:Double x:Key="MvtFontSizeTabHeader">10</System:Double>
+    <System:Double x:Key="MvtFontSizeFooter">18</System:Double>
+
 
     <!-- TextBlock ____________________________________________________________-->
     <Style x:Key="{x:Type TextBlock}" TargetType="{x:Type TextBlock}" >
-        <Setter Property="FontSize" Value="{DynamicResource FontSize}" />
+        <Setter Property="FontSize" Value="{DynamicResource MvtFontSize}" />
     </Style>
 
     <!-- TextBox ______________________________________________________________-->
     <Style x:Key="{x:Type TextBox}" TargetType="{x:Type TextBox}" >
-        <Setter Property="FontSize" Value="{DynamicResource FontSize}" />
+        <Setter Property="FontSize" Value="{DynamicResource MvtFontSize}" />
     </Style>
 
     <!-- MenuItem ______________________________________________________________-->
@@ -60,5 +70,9 @@
         <Setter Property="FontSize" Value="{DynamicResource FontSize}" />
         <Setter Property="Height" Value="32"/>
     </Style>
-    
+
+    <Style x:Key="{x:Type common:MvtNumBox}" TargetType="{x:Type common:MvtNumBox}" >
+        <Setter Property="FontSize" Value="{DynamicResource MvtFontSize}" />
+    </Style>
+
 </ResourceDictionary>

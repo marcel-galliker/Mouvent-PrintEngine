@@ -16,7 +16,7 @@
                         <ContentPresenter>
                             <ContentPresenter.Content>
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="{TemplateBinding Content}" FontSize="18"/>
+                                    <TextBlock Text="{TemplateBinding Content}" FontSize="{StaticResource MvtFontSizeTabHeader}"/>
                                 </StackPanel>
                             </ContentPresenter.Content>
                         </ContentPresenter>

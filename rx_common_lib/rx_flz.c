@@ -461,8 +461,13 @@ static void *_flz_decompress_thread(void* lpParameter)
 					if (pFlzInfo->dataSize > bufsize) 
 					{ 
 						if (buf) free(buf);
-						bufsize = pFlzInfo->dataSize;
+						bufsize = (int)pFlzInfo->dataSize;
 						buf = malloc(bufsize);
+						if (buf==NULL) 
+						{
+							Error(ERR_ABORT, 0, "Could not allocate memory");
+							break;
+						}
 					}
 					ret	= fastlz_decompress(cmpbuf, (int)band->bandSize, buf, bufsize);
 					BYTE *src = buf;

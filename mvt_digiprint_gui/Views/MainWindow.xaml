@@ -64,7 +64,7 @@
                 <Style TargetType="{x:Type dragablz:DragablzItem}" BasedOn="{StaticResource MaterialDesignDragableTabItemVerticalStyle}">
                     <Setter Property="Width" Value="{Binding Source={StaticResource Mouvent.Layout.TabCtrlHeaderSectionWidth}}" />
                     <Setter Property="Height" Value="50" />
-                    <Setter Property="FontSize" Value="14"></Setter>
+                    <Setter Property="FontSize" Value="{StaticResource MvtFontSizeTabHeader}"></Setter>
                     
                  </Style>
             </dragablz:TabablzControl.ItemContainerStyle>
@@ -73,7 +73,7 @@
                 <TabItem.Header>
                     <Grid Width="200" Height="50" Background="{Binding SelectedTabName, Converter={StaticResource SelectedTabConverter}, ConverterParameter=TabPrintQueue}">
                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <TextBlock FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White">Print Queue</TextBlock>
+                            <TextBlock FontSize="{StaticResource MvtFontSizeTabHeader}"  FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White">Print Queue</TextBlock>
                             <Rectangle Fill="Transparent" Width="auto" Height="2"></Rectangle>
                         </StackPanel>
                     </Grid>
@@ -86,7 +86,7 @@
                     <Grid Width="200" Height="50" Background="{Binding SelectedTabName, Converter={StaticResource SelectedTabConverter}, ConverterParameter=TabLB701}">
 
                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <TextBlock FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White">LB 701</TextBlock>
+                            <TextBlock FontSize="{StaticResource MvtFontSizeTabHeader}"  FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White">LB 701</TextBlock>
                         <Rectangle Fill="Transparent" Width="auto" Height="2"></Rectangle>
                         </StackPanel>
                     </Grid>
@@ -99,7 +99,7 @@
                     <Grid Width="200" Height="50" Background="{Binding SelectedTabName, Converter={StaticResource SelectedTabConverter}, ConverterParameter=TabLB702UV}">
 
                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <TextBlock FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White">LB 702 UV</TextBlock>
+                            <TextBlock FontSize="{StaticResource MvtFontSizeTabHeader}"  FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White">LB 702 UV</TextBlock>
                             <Rectangle Fill="Transparent" Width="auto" Height="2"></Rectangle>
                         </StackPanel>
                     </Grid>
@@ -112,7 +112,7 @@
                     <Grid Width="200" Height="50" Background="{Binding SelectedTabName, Converter={StaticResource SelectedTabConverter}, ConverterParameter=TabLB702WB}">
 
                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <TextBlock FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White">LB 702 WB</TextBlock>
+                            <TextBlock FontSize="{StaticResource MvtFontSizeTabHeader}"  FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White">LB 702 WB</TextBlock>
                             <Rectangle Fill="Transparent" Width="auto" Height="2"></Rectangle>
                         </StackPanel>
                     </Grid>
@@ -125,7 +125,7 @@
                     <Grid Width="200" Height="50" Background="{Binding SelectedTabName, Converter={StaticResource SelectedTabConverter}, ConverterParameter=TabLH702}">
 
                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <TextBlock FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White">LH 702</TextBlock>
+                            <TextBlock FontSize="{StaticResource MvtFontSizeTabHeader}"  FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White">LH 702</TextBlock>
                             <Rectangle Fill="Transparent" Width="auto" Height="2"></Rectangle>
                         </StackPanel>
                     </Grid>
@@ -151,7 +151,7 @@
                     <Grid Width="200" Height="50" Background="{Binding SelectedTabName, Converter={StaticResource SelectedTabConverter}, ConverterParameter=TabTex}">
 
                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <TextBlock FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White">Textile Press</TextBlock>
+                            <TextBlock FontSize="{StaticResource MvtFontSizeTabHeader}" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White">Textile Press</TextBlock>
                             <Rectangle Fill="Transparent" Width="auto" Height="2"></Rectangle>
                         </StackPanel>
                     </Grid>
@@ -164,7 +164,7 @@
                     <Grid Width="200" Height="50" Background="{Binding SelectedTabName, Converter={StaticResource SelectedTabConverter}, ConverterParameter=TabTestTable}">
 
                         <StackPanel HorizontalAlignment="Center"  VerticalAlignment="Center">
-                            <TextBlock FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White">Test Table</TextBlock>
+                            <TextBlock FontSize="{StaticResource MvtFontSizeTabHeader}" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White">Test Table</TextBlock>
                             <Rectangle Fill="Transparent" Width="auto" Height="2"></Rectangle>
                         </StackPanel>
                     </Grid>
@@ -176,7 +176,7 @@
                 <TabItem.Header>
                     <Grid Width="200" Height="50" Background="{Binding SelectedTabName, Converter={StaticResource SelectedTabConverter}, ConverterParameter=TabCleaf}">
                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <TextBlock FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White">CLEAF</TextBlock>
+                            <TextBlock FontSize="{StaticResource MvtFontSizeTabHeader}" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White">CLEAF</TextBlock>
                             <Rectangle Fill="Transparent" Width="auto" Height="2"></Rectangle>
                         </StackPanel>
                     </Grid>
@@ -189,7 +189,7 @@
                     <Grid Width="200" Height="50" Background="{Binding SelectedTabName, Converter={StaticResource SelectedTabConverter}, ConverterParameter=TabEvents}">
 
                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <TextBlock FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White">Events</TextBlock>
+                            <TextBlock FontSize="{StaticResource MvtFontSizeTabHeader}"  FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White">Events</TextBlock>
                             <Rectangle x:Name="TabHeaderUnderline" Fill="{Binding TabHeaderUnderlineColor}" Width="auto" Height="2"></Rectangle>
                         </StackPanel>
                     </Grid>
@@ -204,7 +204,7 @@
                     <Grid Width="200" Height="50" Background="{Binding SelectedTabName, Converter={StaticResource SelectedTabConverter}, ConverterParameter=TabLog}">
 
                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <TextBlock FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White">Log</TextBlock>
+                            <TextBlock FontSize="{StaticResource MvtFontSizeTabHeader}"  FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White">Log</TextBlock>
                             <Rectangle Fill="Transparent" Width="auto" Height="2"></Rectangle>
                         </StackPanel>
                     </Grid>
@@ -219,7 +219,7 @@
                     <Grid Width="200" Height="50" Background="{Binding SelectedTabName, Converter={StaticResource SelectedTabConverter}, ConverterParameter=TabNetwork}">
 
                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <TextBlock FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White">Network</TextBlock>
+                            <TextBlock FontSize="{StaticResource MvtFontSizeTabHeader}"  FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White">Network</TextBlock>
                             <Rectangle Fill="Transparent" Width="auto" Height="2"></Rectangle>
                         </StackPanel>
                     </Grid>
@@ -232,9 +232,8 @@
             <TabItem x:Name="TabPrintSystem">
                 <TabItem.Header>
                     <Grid Width="200" Height="50" Background="{Binding SelectedTabName, Converter={StaticResource SelectedTabConverter}, ConverterParameter=TabPrintSystem}">
-
                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <TextBlock FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White">Print System</TextBlock>
+                            <TextBlock FontSize="{StaticResource MvtFontSizeTabHeader}"  FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White">Print System</TextBlock>
                             <Rectangle Fill="Transparent" Width="auto" Height="2"></Rectangle>
                         </StackPanel>
                     </Grid>
@@ -249,7 +248,7 @@
                 <TabItem.Header>
                     <Grid Width="200" Height="50" Background="{Binding SelectedTabName, Converter={StaticResource SelectedTabConverter}, ConverterParameter=TabAlignment}">
                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <TextBlock FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White">Alignment</TextBlock>
+                            <TextBlock FontSize="{StaticResource MvtFontSizeTabHeader}" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White">Alignment</TextBlock>
                             <Rectangle Fill="Transparent" Width="auto" Height="2"></Rectangle>
                         </StackPanel>
                     </Grid>

@@ -49,14 +49,13 @@
                 <ColumnDefinition Width="45"/>
             </Grid.ColumnDefinitions>
 
-            
             <TextBlock    Margin="0, 0, 0, 5"   Grid.Row="1" Grid.Column="0" Text="Wiping Height"/>
             <common:MvtNumBox Margin="0, 0, 0, 5" Grid.Row="1" Grid.Column="1" Text="{Binding WipeHeight}" HorizontalContentAlignment="Right"/>
-            <TextBlock  Margin="0, 0, 0, 5"     Grid.Row="1" Grid.Column="2" Text=" mm" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center"/>
+            <TextBlock  Margin="0, 0, 0, 5"     Grid.Row="1" Grid.Column="2" Text=" mm" FontSize="{StaticResource MvtFontSize}" VerticalAlignment="Center"/>
 
             <TextBlock   Margin="0, 0, 0, 5"    Grid.Row="2" Grid.Column="0" Text="Capping Height"/>
             <common:MvtNumBox Margin="0, 0, 0, 5" Grid.Row="2" Grid.Column="1" Text="{Binding CapHeight}" HorizontalContentAlignment="Right"/>
-            <TextBlock   Margin="0, 0, 0, 5"    Grid.Row="2" Grid.Column="2" Text=" mm" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center"/>
+            <TextBlock   Margin="0, 0, 0, 5"    Grid.Row="2" Grid.Column="2" Text=" mm" FontSize="{StaticResource MvtFontSize}" VerticalAlignment="Center"/>
 
             <!--<Rectangle Grid.Column="4" Grid.RowSpan="5" x:Name="Col0" Fill="{Binding InkType, Converter={StaticResource InkType_ColorBG}}"/>
             <Rectangle Grid.Column="5" Grid.RowSpan="5" x:Name="Col1" Fill="{Binding InkType, Converter={StaticResource InkType_ColorBG}}"/>
@@ -75,8 +74,8 @@
 
             <TextBlock Margin="0, 0, 0, 5"      Grid.Row="1" Grid.Column="3" Text="Ref Height"/>
             <TextBlock    Margin="0, 0, 0, 5"   Grid.Row="2" Grid.Column="3"><Run Language="de-ch" Text="Head Align"/></TextBlock>
-            <TextBlock   Margin="0, 0, 0, 5"    Grid.Row="1" Grid.Column="8" Text=" mm" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center"/>
-            <TextBlock   Margin="0, 0, 0, 5"    Grid.Row="2" Grid.Column="8" Text=" mm" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center"/>
+            <TextBlock   Margin="0, 0, 0, 5"    Grid.Row="1" Grid.Column="8" Text=" mm" FontSize="{StaticResource MvtFontSize}" VerticalAlignment="Center"/>
+            <TextBlock   Margin="0, 0, 0, 5"    Grid.Row="2" Grid.Column="8" Text=" mm" FontSize="{StaticResource MvtFontSize}" VerticalAlignment="Center"/>
 
         </Grid>
     </GroupBox>

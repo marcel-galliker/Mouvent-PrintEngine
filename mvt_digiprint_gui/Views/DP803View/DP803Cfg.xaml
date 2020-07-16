@@ -39,13 +39,13 @@
                         </Grid.ColumnDefinitions>
                         <rx_uc:PlcTitle Grid.Row="0" Grid.ColumnSpan="3" Header="Washing Unit"/>
                         <rx_uc:PlcParCtrl Grid.Row="1"                     ID="CFG_WATER_ON_TIME"                   Label="Water ON  Time"      Format="n" UserEnabled="usr_service"/>
-                        <TextBlock Grid.Row="1" Grid.Column="1"             Text="s" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1"             Text="s" FontSize="{StaticResource MvtFontSize}" VerticalAlignment="Center"/>
                         <rx_uc:PlcParCtrl Grid.Row="2"                     ID="CFG_WATER_OFF_TIME"                  Label="Water OFF Time"      Format="n" UserEnabled="usr_service"/>
-                        <TextBlock Grid.Row="2" Grid.Column="1"             Text="s" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="2" Grid.Column="1"             Text="s" FontSize="{StaticResource MvtFontSize}" VerticalAlignment="Center"/>
 
                         <rx_uc:PlcTitle   Grid.Row="3" Grid.ColumnSpan="3" Header="Gluing"/>
                         <rx_uc:PlcParCtrl Grid.Row="4"                      ID="PAR_SPEED_GLUE"                      Label="Glue Speed"          Format="f" UserEnabled="usr_service"/>
-                        <TextBlock Grid.Row="4" Grid.Column="1"             Text="m/min" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="4" Grid.Column="1"             Text="m/min" FontSize="{StaticResource MvtFontSize}" VerticalAlignment="Center"/>
 
                         <rx_uc:PlcTitle Grid.Row="5" Grid.ColumnSpan="3" Header="Spread Roller"/>
                         <rx_uc:PlcParCtrl Grid.Row="6" ID="CFG_SPREADERROLLER_CONFIGURATION" Label="Active"  Type="Combo"      x:Name="CB_SpreadRoller" UserEnabled="usr_service"/>

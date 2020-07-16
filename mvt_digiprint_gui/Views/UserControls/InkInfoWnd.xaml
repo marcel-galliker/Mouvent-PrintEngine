@@ -29,8 +29,8 @@
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="BarcodeScanner" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="{StaticResource FontSizeSmall}"/>
-                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding ScannerSN}" VerticalAlignment="Center" HorizontalAlignment="Left" TextWrapping="Wrap" FontSize="{StaticResource FontSizeSmall}"/>
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="BarcodeScanner" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="{StaticResource MvtFontSizeSmall}"/>
+                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding ScannerSN}" VerticalAlignment="Center" HorizontalAlignment="Left" TextWrapping="Wrap" FontSize="{StaticResource MvtFontSizeSmall}"/>
                 <TextBlock Grid.Row="1" Grid.Column="0" Text="Info" VerticalAlignment="Center" HorizontalAlignment="Left"/>
                 <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding BarCode}" VerticalAlignment="Center" HorizontalAlignment="Left" TextWrapping="Wrap"/>
 
@@ -54,10 +54,10 @@
                              Margin="5"
                              HorizontalAlignment="Center">
                         <StackPanel>
-                            <TextBlock Foreground="#ff303030" FontWeight="SemiBold" FontSize="10"
+                            <TextBlock Foreground="#ff303030" FontWeight="SemiBold" FontSize="{StaticResource MvtFontSize}"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center">Trigger</TextBlock>
-                            <TextBlock Foreground="#ff303030" FontWeight="SemiBold" FontSize="10"
+                            <TextBlock Foreground="#ff303030" FontWeight="SemiBold" FontSize="{StaticResource MvtFontSize}"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center">Scanner</TextBlock>
                         </StackPanel>
@@ -69,10 +69,10 @@
                              Margin="5"
                              HorizontalAlignment="Center">
                         <StackPanel>
-                            <TextBlock Foreground="#ff303030" FontWeight="SemiBold" FontSize="10"
+                            <TextBlock Foreground="#ff303030" FontWeight="SemiBold" FontSize="{StaticResource MvtFontSize}"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center">Init</TextBlock>
-                            <TextBlock Foreground="#ff303030" FontWeight="SemiBold" FontSize="10"
+                            <TextBlock Foreground="#ff303030" FontWeight="SemiBold" FontSize="{StaticResource MvtFontSize}"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center">Scanner</TextBlock>
                         </StackPanel>
@@ -84,7 +84,7 @@
                              Margin="5"
                              HorizontalAlignment="Center">
                         <StackPanel>
-                            <TextBlock Foreground="#ff303030" FontWeight="SemiBold" FontSize="10"
+                            <TextBlock Foreground="#ff303030" FontWeight="SemiBold" FontSize="{StaticResource MvtFontSize}"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center">TARA</TextBlock>
                         </StackPanel>
@@ -96,7 +96,7 @@
                              Margin="5"
                              HorizontalAlignment="Center">
                         <StackPanel>
-                            <TextBlock Foreground="#ff303030" FontWeight="SemiBold" FontSize="10"
+                            <TextBlock Foreground="#ff303030" FontWeight="SemiBold" FontSize="{StaticResource MvtFontSize}"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center">Calib</TextBlock>
                         </StackPanel>

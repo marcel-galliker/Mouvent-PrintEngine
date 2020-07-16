@@ -26,18 +26,16 @@
             <rx_uc:MouventTopToolBar Grid.Row="0" HorizontalAlignment="Right"></rx_uc:MouventTopToolBar>
 
             <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
-                
+
                 <common:MvtButton HorizontalAlignment="Left" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" Margin="15, 0, 15, 0"
                               x:Name="Button_UV"  Grid.Row="0" Click="UV_Clicked" ToolTip="UV Dryer"
                              IsChecked="{Binding UV_On}" 
                      IsBusy="{Binding UV_Busy}"
                      Visibility="{Binding Visibility, ElementName=TT_PrintSettings}">
-                    
+
                     <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}"
                                                 Width="25" Height="25" Kind="LightbulbOn"></iconPacks:PackIconMaterial>
                 </common:MvtButton>
-                
-               
             </StackPanel>
             
         </Grid>

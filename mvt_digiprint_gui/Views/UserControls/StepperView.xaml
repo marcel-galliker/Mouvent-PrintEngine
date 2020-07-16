@@ -75,9 +75,9 @@
                         <Image  Source="../../Resources/Bitmaps/LED_GREY.ico"  Visibility="{Binding DripPans_OutfeedDOWN,   Converter={StaticResource BoolToInVisible_Converter}}" HorizontalAlignment="Left"/>
                     </StackPanel>
                 </Grid>
-                <TextBlock Grid.Row="8" Grid.Column="0" Text="Laser" VerticalAlignment="Center" FontSize="{StaticResource FontSizeStd}" Margin="5,0" x:Name="LaserTX"/>
+                <TextBlock Grid.Row="8" Grid.Column="0" Text="Laser" VerticalAlignment="Center" FontSize="{StaticResource MvtFontSize}" Margin="5,0" x:Name="LaserTX"/>
                 <StackPanel Grid.Row="8" Grid.Column="1" Grid.ColumnSpan="10" Orientation="Horizontal" x:Name="LaserVal">
-                    <TextBlock Text="{Binding PosY, Converter={StaticResource HeadVal_ConverterTemp}}" VerticalAlignment="Center" FontSize="{StaticResource FontSizeStd}"/>
+                    <TextBlock Text="{Binding PosY, Converter={StaticResource HeadVal_ConverterTemp}}" VerticalAlignment="Center" FontSize="{StaticResource MvtFontSize}"/>
                     <TextBlock Text="mm" Margin="5,0"/>
                 </StackPanel>
 

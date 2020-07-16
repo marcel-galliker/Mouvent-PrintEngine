@@ -47,7 +47,7 @@
             </igWPF:XamComboEditor>
 
             <TextBlock      Grid.Row="1" Grid.Column="0" Text="Distance"/>
-            <common:RxNumBox    Grid.Row="1" Grid.Column="1" Text="{Binding ImgDist}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Right" Margin="5,0"/>
+            <common:MvtNumBox    Grid.Row="1" Grid.Column="1" Text="{Binding ImgDist}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Right" Margin="5,0"/>
             <TextBlock      Grid.Row="1" Grid.Column="2" Text="mm"/>
 
         </Grid>
