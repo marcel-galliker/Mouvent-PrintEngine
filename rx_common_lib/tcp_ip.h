@@ -354,6 +354,8 @@
 #define CMD_ROB_TURN_SCREW		0x01000704
 #define CMD_SEARCH_ALL_SCREWS	0x01000705
 
+#define CMD_ROB_ADJUST			0x01000710
+
 #define CMD_ROB_DRIP_PANS			0x01000721
 // #define CMD_ROB_DRIP_PANS_EN		0x01000722		// Main ask board 0 for positions of drip pans
 #define CMD_LIFT_ALLOW_MOVE_DOWN		0x01000723

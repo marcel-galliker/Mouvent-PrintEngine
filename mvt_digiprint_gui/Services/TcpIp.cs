@@ -502,12 +502,8 @@ namespace RX_DigiPrint.Services
         public const UInt32 CMD_ROB_STOP			= 0x01000701;
         public const UInt32 CMD_ROB_REFERENCE		= 0x01000702;
         public const UInt32 CMD_ROB_MOVE_POS		= 0x01000703;
-        public const UInt32 CMD_ROB_SCREW_REF		= 0x01000704;
-        public const UInt32 CMD_ROB_SCREW_0_POS		= 0x01000705;
-        public const UInt32 CMD_ROB_SCREW_1_POS		= 0x01000706;
-        public const UInt32 CMD_ROB_SCREW_2_POS		= 0x01000707;
-        public const UInt32 CMD_ROB_SCREW_3_POS		= 0x01000708;
-        public const UInt32 CMD_ROB_WIPE			= 0x01000709;
+        public const UInt32 CMD_ROB_TURN_SCREW		= 0x01000704;
+        public const UInt32 CMD_SEARCH_ALL_SCREWS	= 0x01000705;
 
         public const UInt32 CMD_ROB_ADJUST			= 0x01000710;
 
@@ -865,6 +861,13 @@ namespace RX_DigiPrint.Services
             public Int32        ref_height_front;
             public Int32        cap_height;
         }
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct SScrewPositions
+        {
+            public Int32 posX;
+            public Int32 posY;
+        }
         
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct SStepperCfgMsg
@@ -885,6 +888,9 @@ namespace RX_DigiPrint.Services
 
             [MarshalAs(UnmanagedType.ByValArray, SizeConst =4)]
             public SRobotOffsets[] robot;
+
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
+            public SScrewPositions[] screwpositions;
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -900,10 +906,10 @@ namespace RX_DigiPrint.Services
         public struct SHeadAdjustmentMsg
         {
             public SMsgHdr      hdr;
-            public Int32        inkSupplyNo;
+            public Int32        printbarNo;
             public Int32        headNo;
-            public Int32        angle;
-            public Int32        stitch;
+            public Int32        axis;
+            public Int32        steps;
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]

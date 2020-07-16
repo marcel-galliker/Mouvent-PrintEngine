@@ -611,3 +611,15 @@ void step_error_reset(void)
 {
 	for (int i=0; i<SIZEOF(_step_Socket); i++) sok_send_2(&_step_Socket[i], CMD_ERROR_RESET, 0, NULL);
 }
+
+void step_adjust_heads(RX_SOCKET socket, SHeadAdjustment *headAdjustment)
+{
+    switch (_StepperType)
+    {
+    case STEPPER_LB:
+        steplb_adjust_heads(socket, (SHeadAdjustment*) headAdjustment);
+        break;
+    default:
+        break;
+    }
+}

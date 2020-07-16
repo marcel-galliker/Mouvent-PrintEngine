@@ -129,8 +129,8 @@ void lb702_init(void)
 		
 	if (RX_StepperStatus.robot_used) lbrob_init();
 
-    // RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_back = 100000;
-    // RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_front = 101000;
+    RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_back = 100000;
+    RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_front = 100000;
     
 }
 
@@ -576,7 +576,7 @@ static void _lb702_move_to_pos(int cmd, int pos0, int pos1)
 	int adjust=0;
 	RX_StepperStatus.cmdRunning  = cmd;
 	
-    if (RX_StepperStatus.robot_used && !_CmdRunningRobi && !RX_StepperStatus.screwerinfo.y_in_ref && RX_StepperStatus.cmdRunning != CMD_LIFT_REFERENCE && RX_StepperStatus.cmdRunning != CMD_LIFT_SCREW/*&& robi_connected()*/)
+    if (RX_StepperStatus.robot_used && !_CmdRunningRobi && !RX_StepperStatus.screwerinfo.y_in_ref && RX_StepperStatus.cmdRunning != CMD_LIFT_REFERENCE && RX_StepperStatus.cmdRunning != CMD_LIFT_SCREW /*&& robi_connected()*/)
     {
         _CmdRunningRobi = CMD_ROBI_MOVE_TO_GARAGE;
         robi_handle_ctrl_msg(INVALID_SOCKET, _CmdRunningRobi, NULL);

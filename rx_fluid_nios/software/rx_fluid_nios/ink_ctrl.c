@@ -66,6 +66,8 @@
 #define		TIME_BLEED_LINE_TIMEOUT40	4000
 #define		TIME_BLEED_LINE_TIMEOUT90	9000
 
+#define 	MAX_POS_VARIANCE			2000		// um
+
 // -- END NEW
 
 //--- statics -----------------------------------------------
@@ -1166,7 +1168,7 @@ void ink_tick_10ms(void)
 				break;
 
 			case ctrl_purge_step4:
-				if (pRX_Config->ink_supply[isNo].delay_pos_y && pRX_Config->ink_supply[isNo].act_pos_y <= pRX_Config->ink_supply[isNo].delay_pos_y)
+				if (pRX_Config->ink_supply[isNo].delay_pos_y && pRX_Config->ink_supply[isNo].act_pos_y <= (pRX_Config->ink_supply[isNo].delay_pos_y - MAX_POS_VARIANCE))
 				{
 					_pump_ctrl(isNo, _InkSupply[isNo].purgePressure, PUMP_CTRL_MODE_DEFAULT);
 					_set_bleed_valve(isNo, FALSE);

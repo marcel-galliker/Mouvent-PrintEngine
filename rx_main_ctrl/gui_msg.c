@@ -171,6 +171,8 @@ int handle_gui_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sende
         case CMD_GET_DISABLED_JETS:	_do_get_disalbled_jets(socket, (SDisabledJetsMsg*)pmsg);		break;
         case CMD_SET_DISABLED_JETS:	ctrl_set_disalbled_jets((SDisabledJetsMsg*)pmsg);				break;
 
+        case CMD_ROB_ADJUST:		step_adjust_heads(socket, (SHeadAdjustment*)pmsg);				break;
+
 		case CMD_FLUID_STAT:		fluid_reply_stat(socket);											
 									chiller_reply_stat(socket);
 									break;

@@ -92,10 +92,10 @@ namespace RX_DigiPrint.Models
 
             TcpIp.SHeadAdjustmentMsg msg = new  TcpIp.SHeadAdjustmentMsg();
 
-            msg.inkSupplyNo = inkSupplyNo;
+            msg.printbarNo  = inkSupplyNo;
             msg.headNo      = headNo;
-            msg.angle       = (Int32)(Angle*1000);
-            msg.stitch      = (Int32)(Stitch*1000);
+            msg.axis        = (Int32)(Angle*1000);
+            msg.steps       = (Int32)(Stitch*1000);
             RxGlobals.RxInterface.SendMsg(TcpIp.CMD_ROB_ADJUST, ref msg);
         }
 

@@ -571,7 +571,7 @@ void ctrl_tick(void)
 	int i, head, inkSupply;
 	int time = rx_get_ticks();
 	SFluidStateLight stat[MAX_HEADS_BOARD];
-    int Cluster_Per_Stepper = 2 * RX_Config.headsPerColor / MAX_HEADS_BOARD;
+    int Colors_Per_Stepper = 2 * RX_Config.headsPerColor / MAX_HEADS_BOARD;
     static int _PurgeTime = 0;
 
 #define TIMEOUT 3000
@@ -602,16 +602,13 @@ void ctrl_tick(void)
 					stat[head].cylinderPressureSet = fluid_get_cylinderPresSet(inkSupply);
 					stat[head].fluidErr            = fluid_get_error(inkSupply);
 					stat[head].machineMeters	   = (UINT32)RX_PrinterStatus.counterTotal;
-                    if (RX_Config.inkSupplyCnt % 2 == 0 && Cluster_Per_Stepper)
+                    if (RX_Config.inkSupplyCnt % 2 == 0 && RX_StepperStatus.robot_used)
                     {
-                        stat[head].act_pos_y =
-                            -1 * RX_StepperStatus.posY[i / Cluster_Per_Stepper];
+                        stat[head].act_pos_y = -1 * RX_StepperStatus.posY[i / Colors_Per_Stepper];
                     }
-                    else if (Cluster_Per_Stepper)
+                    else if (RX_StepperStatus.robot_used)
                     {
-                        stat[head].act_pos_y =
-                            -1 *
-                            RX_StepperStatus.posY[(i + Cluster_Per_Stepper/2) / Cluster_Per_Stepper];
+                        stat[head].act_pos_y = -1 * RX_StepperStatus.posY[(i + Colors_Per_Stepper/2) / Colors_Per_Stepper];
                     }
 				}
 				sok_send_2(&_HeadCtrl[i].socket, CMD_HEAD_STAT, sizeof(stat), stat);
@@ -621,6 +618,26 @@ void ctrl_tick(void)
     
     if (RX_StepperStatus.robot_used)
     {
+        if (_BufferFluidCmd[0].used &&
+            !_ctrl_check_stepper_in_purgeMode(_BufferFluidCmd[0].headNo) &&
+            rx_get_ticks() >= _PurgeTime + TIMEOUT)
+        {
+            _BufferFluidCmd[0].used = 0;
+            ctrl_send_head_fluidCtrlMode(
+                _BufferFluidCmd[0].headNo, _BufferFluidCmd[0].ctrlMode,
+                _BufferFluidCmd[0].sendToFluid, _BufferFluidCmd[0].fromGui);
+            _PurgeTime = rx_get_ticks();
+            for (i = 1; i < SIZEOF(_BufferFluidCmd); i++)
+            {
+                if (_BufferFluidCmd[i - 1].used == 0 && _BufferFluidCmd[i].used)
+                {
+                    _BufferFluidCmd[i - 1] = _BufferFluidCmd[i];
+                    _BufferFluidCmd[i].used = 0;
+                }
+            }
+            return;
+        }
+        /*
         for (i = 0; i < SIZEOF(_BufferFluidCmd); i++)
         {
             if (_BufferFluidCmd[i].used && !_ctrl_check_stepper_in_purgeMode(_BufferFluidCmd[i].headNo) && rx_get_ticks() >= _PurgeTime + TIMEOUT)
@@ -633,7 +650,7 @@ void ctrl_tick(void)
                 //i = SIZEOF(_BufferFluidCmd);
                 return;
             }
-        }
+        }*/
     }
 }
 
@@ -737,7 +754,7 @@ void ctrl_empty_PurgeBuffer(int fluidNo)
     int i, j;
     for (i = 0; i < RX_Config.headsPerColor; i++)
     {
-        for (j = 0; j < sizeof(_BufferFluidCmd); j++)
+        for (j = 0; j < SIZEOF(_BufferFluidCmd); j++)
         {
             if (_BufferFluidCmd[j].headNo ==
                 fluidNo * RX_Config.headsPerColor + i)
@@ -794,7 +811,12 @@ void ctrl_send_head_fluidCtrlMode(int headNo, EnFluidCtrlMode ctrlMode, int send
             if (headNo == _BufferFluidCmd[i].headNo || headNo == -1)
             {
                 _BufferFluidCmd[i].used = 0;
-                Error(LOG, 0, "HeadNo: %d; Buffer Pos: %d", headNo, i);
+            }
+            if (i >= 1 && _BufferFluidCmd[i - 1].used == 0 &&
+                _BufferFluidCmd[i].used)
+            {
+                _BufferFluidCmd[i - 1] = _BufferFluidCmd[i];
+                _BufferFluidCmd[i].used = 0;
             }
         }
     }

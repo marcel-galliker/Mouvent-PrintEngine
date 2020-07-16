@@ -1269,6 +1269,12 @@ typedef enum ERobotVaccumState
 	rob_vacuum_5_to_8,
 	rob_vacuum_all,
 } ERobotVacuumState;
+
+typedef struct SScrewPositions
+{
+    INT32 posX;
+    INT32 posY;
+} SScrewPositions;
 	
 //--- Stepper Board --------------------
 typedef struct SStepperCfg
@@ -1295,6 +1301,8 @@ typedef struct SStepperCfg
 	INT32			material_thickness;
 	
 	SRobotOffsets	robot[4];
+    
+    SScrewPositions screwpositions[2][8][2];		// 1. printbarNo, 2. headNo, 3. axis
 } SStepperCfg;
 	
 typedef struct SStepperMotorTest
@@ -1318,12 +1326,16 @@ typedef struct
 typedef struct
 {
     INT32 printbarNo;
+#define LEFT		0
+#define RIGHT		1
     INT32 headNo;
     INT32 axis;
-#define AXE_ANGLE 0
-#define AXE_DIST 1
+#define AXE_ANGLE	0
+#define AXE_DIST	1
     INT32 steps; // in steps
 } SHeadAdjustment;
+
+
 	
 	//--- check also GUI: RX_DigiPrint.Models.TestTableStatus.Update
 typedef struct ETestTableInfo

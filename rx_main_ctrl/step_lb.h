@@ -55,4 +55,6 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no);
 void steplb_rob_start_cap_all(void);
 void steplb_rob_wash_all(void);
 
+void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustment *headAdjustment);
+
 //void _check_pump(void);

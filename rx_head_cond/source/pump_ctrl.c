@@ -32,6 +32,8 @@
 
 #define CALIBRATION_NB_VAL		30
 
+#define MAX_POS_VARIANCE		2000		// um
+
 static const INT32 MENISCUS_TIMEOUT 	= 500; //2000;
 static const INT32 NO_INK_TIMEOUT 		= 1000; //2000;
 static const INT32 MENISCUS_CHECK_TIME 	= 60*100;
@@ -696,7 +698,7 @@ void pump_tick_10ms(void)
 		
 		case ctrl_purge_step4:
 						_presure_in_max();
-						if (RX_Config.purge_pos_y<RX_Config.purgeDelayPos_y || _PurgeTime>RX_Config.purgeTime)
+						if (RX_Config.purge_pos_y<(RX_Config.purgeDelayPos_y - MAX_POS_VARIANCE) || _PurgeTime>RX_Config.purgeTime)
 						{
 							temp_ctrl_on(FALSE);
 							_set_valve(TO_FLUSH);

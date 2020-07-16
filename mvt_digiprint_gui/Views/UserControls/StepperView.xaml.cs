@@ -280,13 +280,6 @@ namespace RX_DigiPrint.Views.UserControls
             RxGlobals.RxInterface.SendCommand(TcpIp.CMD_LIFT_EMPTY);
         }
 
-        //--- CapWiping_clicked -------------------------------------------
-        private void CapWiping_clicked(object sender, RoutedEventArgs e)
-        {
-            _button_active(sender as CheckBox);
-            RxGlobals.RxInterface.SendCommand(TcpIp.CMD_ROB_WIPE);
-        }
-
         //--- CapDripPans_clicked -------------------------------------------
         private void CapDripPans_clicked(object sender, RoutedEventArgs e)
         {
