@@ -275,7 +275,7 @@ static void _plc_set_par_default(void)
 		//	_plc_set_command("", "CMD_SET_PARAMETER");
 		}
 	}
-	else if (rx_def_is_web(RX_Config.printer.type))
+	else if (rx_def_is_lb(RX_Config.printer.type))
 	{
 		UINT32 val;
 		lc_get_value_by_name_UINT32(UnitID ".PAR_COREDIAMETER_IN", &val);
@@ -504,7 +504,7 @@ int  plc_start_printing(void)
 	if (_CanRun && !_SimuPLC)
 	{		
 		plc_error_reset();
-		if (rx_def_is_web(RX_Config.printer.type) && RX_Config.printer.type!=printer_cleaf) enc_restart_pg();
+		if (rx_def_is_lb(RX_Config.printer.type) && RX_Config.printer.type!=printer_cleaf) enc_restart_pg();
 		_SendRun		= TRUE;
 	}
 	if (!_SimuPLC) _heads_to_print	= TRUE;
@@ -1430,7 +1430,7 @@ static void _plc_state_ctrl()
 		if (RX_Config.stepper.ref_height!=0 || RX_Config.stepper.print_height!=0)
 		{
 			lc_set_value_by_name_UINT32(UnitID ".STA_HEAD_IS_UP", RX_StepperStatus.info.scannerEnable);	
-			if(rx_def_is_web(RX_Config.printer.type) || RX_StepperStatus.info.scannerEnable)
+			if(rx_def_is_lb(RX_Config.printer.type) || RX_StepperStatus.info.scannerEnable)
 			{
 				if(_SendPause == 1)
 				{
@@ -1515,7 +1515,7 @@ static void _plc_state_ctrl()
 			if(scan_state != scan_moving)
 			{
 				enc_start_printing(&_StartEncoderItem, RX_PrinterStatus.printGoCnt);
-				if (rx_def_is_web(RX_Config.printer.type)) 	enc_enable_printing(FALSE);
+				if (rx_def_is_lb(RX_Config.printer.type)) 	enc_enable_printing(FALSE);
 				_StartEncoderItem.pageWidth = 0;
 				return;
 			}
@@ -1566,7 +1566,7 @@ static void _plc_state_ctrl()
 	}
 	else if (_PlcState==plc_run)
 	{
-		if (rx_def_is_web(RX_Config.printer.type)) 
+		if (rx_def_is_lb(RX_Config.printer.type)) 
 		{
 			UINT32 length;
 //			UINT32	max;
@@ -1608,7 +1608,7 @@ static void _plc_state_ctrl()
 		}		
 	}
 	
-	if (rx_def_is_web(RX_Config.printer.type)) 
+	if (rx_def_is_lb(RX_Config.printer.type)) 
 	{
 		static int _time=0;
 		int ticks=rx_get_ticks();

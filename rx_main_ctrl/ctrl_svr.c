@@ -510,7 +510,7 @@ static void _headboard_config(int colorCnt, int headsPerColor, int ethPortCnt)
 			pBoard->head[i].blkNo0    = i*RX_Spooler.dataBlkCntHead;
 			pBoard->head[i].blkCnt    = RX_Spooler.dataBlkCntHead;
 			pBoard->head[i].dist	  = RX_Config.headDist[board*MAX_HEADS_BOARD+i];			
-			if (rx_def_is_web(RX_Config.printer.type))		pBoard->head[i].distBack = pBoard->head[i].dist;
+			if (rx_def_is_lb(RX_Config.printer.type))		pBoard->head[i].distBack = pBoard->head[i].dist;
 			else if (rx_def_is_tx(RX_Config.printer.type))	pBoard->head[i].distBack = 5000+RX_Config.headDistBack[board*MAX_HEADS_BOARD+i]-pBoard->head[i].dist;
 			else pBoard->head[i].distBack = RX_Config.headDistBack[board*MAX_HEADS_BOARD+i];
 			
@@ -524,7 +524,7 @@ static void _headboard_config(int colorCnt, int headsPerColor, int ethPortCnt)
 				int offset;
 				int inkSupply = pBoard->head[i].inkSupply;
 				if (RX_Config.printer.type==printer_DP803) inkSupply=inkSupply%(RX_Config.inkSupplyCnt/2);	// recto/verso
-				if (rx_def_is_web(RX_Config.printer.type))
+				if (rx_def_is_lb(RX_Config.printer.type))
 				{
                     offset = 0;
 				//	if (RX_TestImage.testImage==PQ_TEST_JETS)				offset = 210000*inkSupply;

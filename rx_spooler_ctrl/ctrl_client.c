@@ -385,17 +385,19 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 	hc_start_printing();
 		
 	same = (!strcmp(msg.filename, _LastFilename) &&  msg.id.page==_LastPage && msg.wakeup==_LastWakeup && msg.gapPx==_LastGap);
-	if (rx_def_is_web(RX_Spooler.printerType)) same &= msg.offsetWidth==_LastOffsetWidth;
-	if (RX_Spooler.printerType==printer_LB702_UV && msg.printMode==PM_SINGLE_PASS) same = ((msg.flags&FLAG_SAME)!=0);
+//	if (rx_def_is_lb(RX_Spooler.printerType)) same &= msg.offsetWidth==_LastOffsetWidth;
+	if (rx_def_is_lb(RX_Spooler.printerType) && msg.printMode==PM_SINGLE_PASS) same = ((msg.flags&FLAG_SAME)!=0) && (msg.offsetWidth==_LastOffsetWidth);
 	_LastPage   = msg.id.page;
 	_LastGap	= msg.gapPx;
 	_LastWakeup = msg.wakeup;
 	_LastOffsetWidth = msg.offsetWidth;
 	
+//	Error(LOG, 0, "_do_print_file (id=%d, page=%d, copy=%d) FLAG_SAME=%d, same=%d", msg.id.id, msg.id.page, msg.id.copy, msg.flags&FLAG_SAME, same);
+
 	if (msg.virtualPass>msg.virtualPasses)
 		Error(ERR_ABORT, 0, "programming Error");
 	
-	if (rx_def_is_web(RX_Spooler.printerType))
+	if (rx_def_is_lb(RX_Spooler.printerType))
 		msg.gapPx += 1;	// Bug in FPGA: (when srcLineCnt==12300, gap=0 it sometimes prints an additional line of old data [instead of blank] between the labels)
 
 	TrPrintfL(TRUE, "_do_print_file[%d] >>%s<<  id=%d, page=%d, copy=%d, scan=%d, same=%d, clearBlockUsed=%d, offsetWidth=%d, blkNo=%d", _MsgGot, msg.filename, msg.id.id, msg.id.page, msg.id.copy, msg.id.scan ,same, msg.clearBlockUsed, msg.offsetWidth, msg.blkNo);
@@ -479,9 +481,9 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 		SPrintFileMsg	evt;
 		if (msg.flags & FLAG_SMP_LAST_PAGE) _SMP_Flags |= FLAG_SMP_LAST_PAGE;
 		
-		if (RX_Spooler.printerType==printer_LB702_UV && msg.flags&FLAG_SAME && !msg.clearBlockUsed)
+		if (msg.flags&FLAG_SAME)
 		{
-			data_same(&msg.id);				
+			data_same(&msg.id, msg.clearBlockUsed);				
 		}
 		else
 		{

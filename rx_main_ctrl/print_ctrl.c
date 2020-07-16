@@ -151,7 +151,7 @@ int pc_start_printing(void)
 		
 		TrPrintfL(TRUE, "pc_start_printing: ref_done=%d", RX_StepperStatus.info.ref_done);		
 		
-		if ((rx_def_is_web(RX_Config.printer.type) || RX_Config.printer.type==printer_cleaf) && (RX_Config.stepper.ref_height||RX_Config.stepper.print_height))
+		if (rx_def_is_lb(RX_Config.printer.type))
 		{
 			if(!RX_StepperStatus.info.ref_done)
 			{
@@ -274,7 +274,7 @@ int pc_pause_printing(int fromGui)
 	RX_PrinterStatus.printState=ps_goto_pause;
 	if (RX_PrinterStatus.printState==ps_printing) Error(LOG, 0, "PAUSE called by user");
 //	if (RX_Config.printer.type == printer_LB702_UV) RX_PrinterStatus.printState = ps_pause;
-	if (rx_def_is_web(RX_Config.printer.type)) RX_PrinterStatus.printState = ps_pause;
+	if (rx_def_is_lb(RX_Config.printer.type)) RX_PrinterStatus.printState = ps_pause;
 	gui_send_printer_status(&RX_PrinterStatus);
 	enc_stop_pg("pc_pause_printing");
 	machine_pause_printing(fromGui);
@@ -368,7 +368,7 @@ static void _load_test(void)
 			if (rx_def_is_tx(RX_Config.printer.type)) RX_TestImage.printGoDist=50000;
 			else									  RX_TestImage.printGoDist=50000*RX_Config.inkSupplyCnt;
 		}
-		else if (!rx_def_is_scanning(RX_Config.printer.type) && !rx_def_is_web(RX_Config.printer.type) && RX_TestImage.testImage!=PQ_TEST_GRID && RX_TestImage.testImage!=PQ_TEST_ANGLE_OVERLAP) 
+		else if (!rx_def_is_scanning(RX_Config.printer.type) && !rx_def_is_lb(RX_Config.printer.type) && RX_TestImage.testImage!=PQ_TEST_GRID && RX_TestImage.testImage!=PQ_TEST_ANGLE_OVERLAP) 
 			RX_TestImage.printGoDist *= (RX_Config.colorCnt+1);
 		if (bitsPerPixel>1) strcpy(RX_TestImage.dots, "SML");
 		_send_head_info();
@@ -492,7 +492,7 @@ static int _print_next(void)
 	{	
 		if (RX_PrinterStatus.testMode)
 		{
-            if (rx_def_is_web(RX_Config.printer.type))
+            if (rx_def_is_lb(RX_Config.printer.type))
             {
                 RX_TestImage.copies *= RX_TestImage.scans;
                 RX_TestImage.scans = 1;
@@ -620,7 +620,7 @@ static int _print_next(void)
 				}
 
 //				Error(LOG, 0, "Printig2: copies=%d, copy=%d, copiesTotal=%d", _Item.copies, _Item.id.copy, _Item.copiesTotal);
-				if (rx_def_is_web(RX_Config.printer.type)) Error(LOG, 0, "%d: %s: Started, %d copies", _Item.id.id, _filename(_Item.filepath), _Item.copies);
+				if (rx_def_is_lb(RX_Config.printer.type)) Error(LOG, 0, "%d: %s: Started, %d copies", _Item.id.id, _filename(_Item.filepath), _Item.copies);
 				TrPrintfL(TRUE, "PRINT-NEXT: >>%s<<, copiesTotal=%d", _Item.filepath, _Item.copiesTotal);
 	//			Error(LOG, 0, "copiesTotal=%d", _Item.copiesTotal);
 				_Item.scans=0; 

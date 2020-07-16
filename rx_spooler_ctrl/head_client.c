@@ -518,7 +518,7 @@ static int _send_image_cmd(SBmpSplitInfo *pInfo)
 	imageCmd.image.blkCnt			= pInfo->blkCnt;
 	imageCmd.image.jetPx0			= pInfo->jetPx0;
 	imageCmd.image.lengthPx			= pInfo->srcLineCnt;
-	if (rx_def_is_web(RX_Spooler.printerType) && pInfo->srcLineCnt>1)
+	if (rx_def_is_lb(RX_Spooler.printerType) && pInfo->srcLineCnt>1)
 		imageCmd.image.lengthPx		= pInfo->srcLineCnt-1;	// Bug in FPGA: (when srcLineCnt==12300, gap=0 it sometimes prints an additional line of old data [instead of blank] between the labels)
 	imageCmd.image.widthPx			= pInfo->widthPx;
 	imageCmd.image.widthBytes		= pInfo->widthBt;
@@ -535,7 +535,7 @@ static int _send_image_cmd(SBmpSplitInfo *pInfo)
 	if (pInfo->data==NULL)
 		TrPrintfL(_Trace, "SENT _BlkNo[%d][%d]: idx=%d, blk=%d, cnt=%d, buffer=NULL, SENT", pInfo->board, pInfo->head, _TestImgNo[pInfo->board][pInfo->head], pInfo->blk0, pInfo->blkCnt);
 	else
-		TrPrintfL(_Trace, "SENT _BlkNo[%d][%d]: idx=%d, blk=%d, cnt=%d, buffer=%03d, SENT", pInfo->board, pInfo->head, _TestImgNo[pInfo->board][pInfo->head], pInfo->blk0, pInfo->blkCnt, ctrl_get_bufferNo(*pInfo->data));
+		TrPrintfL(_Trace, "SENT _BlkNo[%d][%d]: idx=%d, blk=%d, cnt=%d, buffer=%03d, clearBlockUsed=%d, SENT", pInfo->board, pInfo->head, _TestImgNo[pInfo->board][pInfo->head], pInfo->blk0, pInfo->blkCnt, ctrl_get_bufferNo(*pInfo->data), pInfo->clearBlockUsed);
 
 	_send_image_cmd_flags[5*pInfo->board+pInfo->head] = '*';
 	SPageId *pid = &pInfo->pListItem->id;
@@ -835,7 +835,8 @@ static int _send_to_board(SHBThreadPar *par, int head, int blkNo, int blkCnt)
 
 		if (_Abort) return REPLY_OK;
 		
-		if (pinfo->sendFromBlk >= pinfo->blkCnt || (RX_Spooler.printerType==printer_LB702_UV && (endReached && (cnt==0 || (pinfo->pListItem->flags&FLAG_SAME)))))
+//		if (pinfo->sendFromBlk >= pinfo->blkCnt || (RX_Spooler.printerType==printer_LB702_UV && (endReached && (cnt==0 || (pinfo->pListItem->flags&FLAG_SAME)))))
+		if (pinfo->sendFromBlk >= pinfo->blkCnt || pinfo->pListItem->flags&FLAG_SAME)
 		{
 			SPageId *pid   = &pinfo->pListItem->id;
 			SPageId *plast = &par->lastId[head];

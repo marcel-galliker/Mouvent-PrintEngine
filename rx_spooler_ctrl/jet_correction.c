@@ -47,14 +47,21 @@ int jc_init(void)
 //--- jc_set_disabled_jets -----------------------
 void jc_set_disabled_jets(SDisabledJetsMsg *pmsg)
 {
-	int n;
-//	if (RX_Spooler.printerType==printer_TX801 || RX_Spooler.printerType==printer_TX802) return;
+	int n, ok;
+
+	for (n=0, ok=FALSE; n<MAX_DISABLED_JETS; n++)
+	{
+		ok=(pmsg->disabledJets[n]!=0);
+	}
+	if (ok) memcpy(&RX_DisabledJets[pmsg->head], pmsg->disabledJets, sizeof(RX_DisabledJets[pmsg->head]));
+	else    memset(&RX_DisabledJets[pmsg->head], -1, sizeof(RX_DisabledJets[pmsg->head]));
 
 	if (pmsg->head>=0 && pmsg->head<SIZEOF(RX_DisabledJets))
 	{
-		memcpy(&RX_DisabledJets[pmsg->head], pmsg->disabledJets, sizeof(RX_DisabledJets[pmsg->head]));
 		for (n=0; !_Active && n<MAX_DISABLED_JETS; n++)
+		{
 			_Active |= (pmsg->disabledJets[n]>=0);
+		}
 	}
 	_First = TRUE;
 }

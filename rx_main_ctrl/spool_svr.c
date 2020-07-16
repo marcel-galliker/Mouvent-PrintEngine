@@ -493,10 +493,10 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 	memcpy(&msg.id, pid, sizeof(msg.id));
 	memcpy(&_Id[RX_PrinterStatus.sentCnt%MAX_PAGES], pid, sizeof(msg.id));
 
-	if (RX_Config.printer.type==printer_LB702_UV && !RX_PrinterStatus.testMode)
+	if (rx_def_is_lb(RX_Config.printer.type) && RX_Config.printer.type!=printer_DP803 && !RX_PrinterStatus.testMode)
 	{
 		int i;
-		SPageId *p; 
+		SPageId *p;
 		for (i=0; i<SIZEOF(_LoadedFiles); i++)
 		{
 			p=&_LoadedFiles[i].id;
@@ -509,6 +509,7 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 		}
 		if(pitem->srcPages>1 && pid->copy<pitem->copies) msg.clearBlockUsed=FALSE;
 	//	if (arg_simuHeads) Error(LOG, 0, "same=%d, clearBlockUsed=%d", msg.flags&FLAG_SAME, msg.clearBlockUsed);
+	//	Error(LOG, 0, "spool_print_file (id=%d, page=%d, copy=%d): same=%d, clearBlockUsed=%d", pid->id, pid->page, pid->copy, msg.flags&FLAG_SAME, msg.clearBlockUsed);
 	}
 	
 	if (RX_PrinterStatus.testMode)
