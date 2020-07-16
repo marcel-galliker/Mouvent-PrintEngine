@@ -1315,22 +1315,16 @@ typedef struct
 	INT32		curingPasses;
 } STestTableScanPar;
 
-typedef struct 
+typedef struct
 {
-    INT32	inkSupplyNo;
-    INT32   headNo;
-    INT32   angle;	// in µm
-    INT32   stitch; // in µm
+    INT32 printbarNo;
+    INT32 headNo;
+    INT32 axis;
+#define AXE_ANGLE 0
+#define AXE_DIST 1
+    INT32 steps; // in steps
 } SHeadAdjustment;
-
-typedef struct SScrewAdjustment
-{
-	INT32	nr;
-	INT32   rot;	// in rotations
-	INT32   bar;
-} SScrewAdjustment;
 	
-
 	//--- check also GUI: RX_DigiPrint.Models.TestTableStatus.Update
 typedef struct ETestTableInfo
 {
