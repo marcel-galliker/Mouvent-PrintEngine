@@ -154,9 +154,6 @@
                     <StackPanel Margin="10,2">
 
                         <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40"  x:Name="Button_Cap" Content="CAP"  Margin="5" Click="Cap_Clicked"/>
-                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40"  x:Name="Button_Wipe" Content="Wipe"  Margin="5" Click="Wipe_Clicked"/>
-                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40"  x:Name="Button_Vacuum" Content="Vacuum"  Margin="5" Click="Vacuum_Clicked"/>
-                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40"  x:Name="Button_Wash" Content="Wash"  Margin="5" Click="Wash_Clicked"/>
 
                     </StackPanel>
                 </GroupBox>

@@ -143,27 +143,6 @@ namespace RX_DigiPrint.Views.PrintSystemView
             TxRobotPopup.IsOpen = false;
         }
 
-        //--- Wipe_Clicked -------------------------------------------------
-        private void Wipe_Clicked(object sender, RoutedEventArgs e)
-        {            
-            _SetCtrlMode(EFluidCtrlMode.ctrl_wipe);
-            TxRobotPopup.IsOpen = false;
-        }
-
-        //--- WetWipe_Clicked -------------------------------------------------
-        private void Vacuum_Clicked(object sender, RoutedEventArgs e)
-        {            
-            _SetCtrlMode(EFluidCtrlMode.ctrl_vacuum);
-            TxRobotPopup.IsOpen = false;
-        }
-
-        //--- Wash_Clicked -------------------------------------------------
-        private void Wash_Clicked(object sender, RoutedEventArgs e)
-        {            
-            _SetCtrlMode(EFluidCtrlMode.ctrl_wash);
-            TxRobotPopup.IsOpen = false;
-        }
-
         //--- Purge_Clicked -------------------------------------------------
         private void Purge_Clicked(object sender, RoutedEventArgs e)
         {

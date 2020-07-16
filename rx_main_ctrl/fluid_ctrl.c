@@ -662,8 +662,8 @@ static void _control(int fluidNo)
 												break;
 											}													
 											break;
-											
-				case ctrl_purge_step1:		if ((!lbrob && step_lift_in_top_pos()) || (lbrob && steplb_rob_in_wipe_pos(no / 2, rob_fct_purge_all)))  // steplb_lift_in_up_pos_individually(no / 2))
+
+                case ctrl_purge_step1:		if ((!lbrob && step_lift_in_top_pos()) || (lbrob && steplb_rob_in_wipe_pos(no / 2, rob_fct_purge_all)))  // steplb_lift_in_up_pos_individually(no / 2))
 											{
 												if (_txrob && _PurgeFluidNo < 0 && !steptx_rob_wash_done()) break;
 												/*
@@ -748,7 +748,7 @@ static void _control(int fluidNo)
 				
 				//--- ctrl_print -------------------------------------------------------------------
 				case ctrl_print:			_PurgeAll=FALSE;
-											break;
+                                            break;
 				
 				//--- ctrl_off ---------------------------------------------------------------------
 				case ctrl_off:				_PurgeAll=FALSE;
@@ -922,17 +922,7 @@ void fluid_send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
     if ((RX_StepperStatus.info.z_in_cap || !RX_StepperStatus.info.ref_done) &&
         ctrlMode == ctrl_print && rx_def_is_scanning(RX_Config.printer.type))
     {
-
-        if (RX_StepperStatus.info.z_in_cap)
-        {
-            Error(ERR_CONT, 0, "Printheads in capping position");
-            ctrlMode = ctrl_off;
-        }
-        else if (!RX_StepperStatus.info.ref_done)
-        {
-            steptx_lift_to_up_pos();
-        }
-        
+            steptx_lift_to_print_pos();
     }
     
 	if (ctrlMode==ctrl_off) step_rob_stop();	

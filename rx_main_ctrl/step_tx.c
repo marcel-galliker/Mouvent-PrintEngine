@@ -35,6 +35,7 @@ static int					_WashDone   = FALSE;
 
 static void _check_wrinkle_detection(void);
 static void _steptx_rob_control(void);
+static void _empty_cap(void);
 
 
 //--- steptx_init ---------------------------------------------------
@@ -76,16 +77,18 @@ int steptx_handle_status(int no, SStepperStat *pStatus)
 {
 	memcpy(&_Status[no], pStatus, sizeof(_Status[no]));
 
-	if (no==0)
+    if (no==0)
 	{
 		memcpy(&RX_StepperStatus, pStatus, sizeof(RX_StepperStatus));
-		RX_StepperStatus.info.uv_on    = enc_is_uv_on();
+        if (_step_socket[1] != INVALID_SOCKET) memcpy(&RX_StepperStatus.robinfo, &_Status[1].robinfo, sizeof(RX_StepperStatus.robinfo));
+        RX_StepperStatus.info.uv_on    = enc_is_uv_on();
 		RX_StepperStatus.info.uv_ready = enc_is_uv_ready();
-		RX_StepperStatus.info.x_in_cap = plc_in_cap_pos();		
-	}
+		RX_StepperStatus.info.x_in_cap = plc_in_cap_pos();
+    }
 	if (no==1)
 	{
-		_steptx_rob_control();
+        _empty_cap();
+        _steptx_rob_control();
 	    _check_wrinkle_detection();
 	}
     gui_send_msg_2(0, REP_STEPPER_STAT, sizeof(RX_StepperStatus), &RX_StepperStatus);
@@ -136,7 +139,7 @@ void steptx_lift_to_print_pos(void)
 //--- steptx_lift_in_print_pos ----------------------
 int steptx_lift_in_print_pos(void)
 {
-	return _Status[0].info.z_in_print;
+    return _Status[0].info.z_in_print && (_step_socket[1] == INVALID_SOCKET || _Status[1].info.z_in_print);
 }
 
 //--- steptx_lift_to_up_pos -----------------------------------
@@ -279,14 +282,41 @@ EnFluidCtrlMode state_RobotCtrlMode(void)
     return _RobotCtrlMode;
 }
 
+static void _empty_cap(void)
+{
+    static int time;
+    int waitTime = 20000; // ms
+
+    if ((RX_StepperStatus.info.z_in_print || RX_StepperStatus.info.z_in_up || RX_StepperStatus.info.z_in_ref) &&
+        (!RX_StepperStatus.robinfo.ref_done || RX_StepperStatus.robinfo.rob_in_cap) && 
+        !RX_StepperStatus.robinfo.moving && !RX_StepperStatus.info.moving &&
+        !RX_PrinterStatus.door_open)
+    {
+        if (!time)	time = rx_get_ticks();
+    }
+    else
+        time = 0;
+
+    if (!_Status[1].robinfo.ref_done && rx_get_ticks() >= time + waitTime && time)
+    {
+        step_rob_do_reference();
+        time = 0;
+    }
+    else if (_Status[1].robinfo.rob_in_cap && rx_get_ticks() >= time + waitTime && time)
+    {
+        step_rob_to_wipe_pos(rob_fct_wipe);
+        time = 0;
+    }
+}
+
 //--- _steptx_rob_control -------------------------------------------------
 static void _steptx_rob_control(void)
 {
 	static int	_printing;		
 	EnFluidCtrlMode	old =  _RobotCtrlMode;
 	static int _RisingEdge = FALSE;
-	
-	switch(_RobotCtrlMode)
+
+    switch(_RobotCtrlMode)
 	{		
 	//--- ctrl_wash --------------------------------------------------------------------------------------
 	case ctrl_wash:				_RobotCtrlMode = ctrl_wash_step1;
@@ -537,8 +567,8 @@ static void _steptx_rob_control(void)
 			
 	case ctrl_cap_step5:		if (step_lift_in_wipe_pos(ctrl_cap))
 								{
-									_RobotCtrlMode = ctrl_off;
-								}
+                                    _RobotCtrlMode = ctrl_shutdown;
+                                }
 								break;
 		
 	case ctrl_off:				_RobotCtrlMode = ctrl_off;
