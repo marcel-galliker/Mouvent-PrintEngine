@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Shapes;
 
 namespace RX_DigiPrint.Views.PrintQueueView
 {
@@ -445,6 +446,13 @@ namespace RX_DigiPrint.Views.PrintQueueView
         //--- Grid_MouseDown ------------------------------------------------
         private void Grid_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            if (e.OriginalSource is Ellipse)
+            {
+                // button was clicked
+                return;
+            }
+
+
             Grid grid = sender as Grid;
             foreach(Row row in PrintQueueGrid.Rows)
             {
@@ -576,8 +584,8 @@ namespace RX_DigiPrint.Views.PrintQueueView
             StackPanel panel = sender as StackPanel;
             if (panel!=null)
             {
-                if (RxGlobals.PrintSystem.IsScanning) panel.Children.Insert(0, new FileSettingsScan(){ShowSaveButton=true});
-                else                                  panel.Children.Insert(0, new FileSettingsWeb());
+                if (RxGlobals.PrintSystem.IsScanning) panel.Children.Insert(0, new FileSettingsScan()); //{ ShowSaveButton = true }); 
+                else panel.Children.Insert(0, new FileSettingsWeb());
             }
         }
 
@@ -742,6 +750,39 @@ namespace RX_DigiPrint.Views.PrintQueueView
             {
                 PrintQueueGrid.BringIntoView();
             }
+        }
+
+        private void Save_Click(object sender, MouseButtonEventArgs e)
+        {
+            MvtButton button = sender as MvtButton;
+            if (button != null)
+            {
+                PrintQueueItem item = button.DataContext as PrintQueueItem;
+
+                if (item != null)
+                {
+                    if (item._hasPageSettings) item.ScanLength = 0;
+                    item.SendMsg(TcpIp.CMD_SET_PRINT_QUEUE);
+                    item.SaveDefaults();
+                }
+            }
+            e.Handled = true;
+        }
+
+        private void Cancel_Click(object sender, MouseButtonEventArgs e)
+        {
+            MvtButton button = sender as MvtButton;
+            if (button != null)
+            {
+                PrintQueueItem item = button.DataContext as PrintQueueItem;
+                if (item != null) item.SendMsg(TcpIp.CMD_GET_PRINT_QUEUE_ITM);
+            }
+            e.Handled = true;
+        }
+
+        private void StackPanel_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            e.Handled = true;
         }
     }
 }

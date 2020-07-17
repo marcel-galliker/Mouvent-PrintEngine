@@ -467,7 +467,7 @@ static char* _filename(char *path)
 	char ripped_data[32];
 	int pos, len;
 	strcpy(ripped_data, PATH_RIPPED_DATA_DIR);
-	len = strlen(ripped_data);
+	len = (int)strlen(ripped_data);
 	ripped_data[--len]=0;
 	for (pos=0; path[pos]; pos++)
 	{

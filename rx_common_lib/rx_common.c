@@ -484,6 +484,17 @@ char *str_tolower(char *str)
 	return src;
 }
 
+//--- memempty --------------------------------------
+int	memempty(void *ptr, int length)
+{
+	BYTE *ch;
+	for (ch=ptr; length; length--)
+	{
+		if (*ch++) return FALSE;
+	}
+	return TRUE;
+}
+
 //--- color_path ---------------------------------------------------------------------------
 char *color_path(const char *path, const char *colorname, char *colorPath, int size)
 {

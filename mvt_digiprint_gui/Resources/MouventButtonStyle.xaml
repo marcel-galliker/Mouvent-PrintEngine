@@ -223,6 +223,20 @@
         </Style.Triggers>
     </Style>
 
+    <Style x:Key="Mouvent.RoundIconButtonStyle.LightIconOcticons" TargetType="iconPacks:PackIconOcticons">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="White" />
+        <Style.Triggers>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Foreground" Value="{StaticResource Mouvent.CommandButtonDisabledIcon}"/>
+            </Trigger>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Foreground" Value="White" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+
     <Style x:Key="Mouvent.RoundIconButtonStyle.LightIconPicol" TargetType="iconPacks:PackIconPicolIcons">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Foreground" Value="White" />
@@ -429,6 +443,7 @@
         </Setter>
     </Style>
 
+    
     <Style x:Key="Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeS" TargetType="{x:Type common:MvtButton}">
         <Setter Property ="Template">
             <Setter.Value>

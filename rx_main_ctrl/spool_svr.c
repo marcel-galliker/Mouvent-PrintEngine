@@ -411,7 +411,7 @@ int spool_set_layout(SLayoutDef *playout, char *dataPath)
 	UCHAR *data;
 
 	TrPrintfL(TRUE, "send spool_set_layout");
-	spool_send_msg_2(BEG_SET_LAYOUT, strlen(dataPath)+1, dataPath, TRUE);
+	spool_send_msg_2(BEG_SET_LAYOUT, (int)strlen(dataPath)+1, dataPath, TRUE);
 	for (len=sizeof(SLayoutDef), data=(UCHAR*)playout; len>0; )
 	{
 		if (len>2000) l=2000;

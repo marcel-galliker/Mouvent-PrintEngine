@@ -341,8 +341,8 @@ static void _display_mvteeprom(void)
 	{
 		term_printf("DisabledJet[%d]:  ", n); PRINTF(4)("         %04d   ",	RX_HBStatus->head[no[i]].eeprom_mvt.disabledJets[n]);	term_printf("\n");
 	}
-	term_printf("Robot-Angle:     "); PRINTF(4)("         %04d   ",	RX_HBStatus->head[no[i]].eeprom_mvt.rob_angle);	term_printf("\n");
-	term_printf("Robot-Dist:      "); PRINTF(4)("         %04d   ",	RX_HBStatus->head[no[i]].eeprom_mvt.rob_dist);	term_printf("\n");
+	term_printf("Robot-Angle:     "); PRINTF(4)("         %s   ",	value_str_screw(RX_HBStatus->head[no[i]].eeprom_mvt.rob_angle));	term_printf("\n");
+	term_printf("Robot-Dist:      "); PRINTF(4)("         %s   ",	value_str_screw(RX_HBStatus->head[no[i]].eeprom_mvt.rob_dist));	term_printf("\n");
 }
 
 //--- putty_display_fpga_error --------------------------------------------------

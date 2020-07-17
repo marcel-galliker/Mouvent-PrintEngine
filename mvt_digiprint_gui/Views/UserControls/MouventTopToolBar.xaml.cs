@@ -24,8 +24,7 @@ namespace RX_DigiPrint.Views.UserControls
         {
             InitializeComponent();
             DataContext = this;
-            TxRobotButton.DataContext = RxGlobals.PrinterStatus;
-
+            
             _SetButtonStates();
             
             RxGlobals.PrinterStatus.PropertyChanged += PrinterStatusChanged;
@@ -73,14 +72,6 @@ namespace RX_DigiPrint.Views.UserControls
             }
             PrintQueueAddTest dlg = new PrintQueueAddTest();
             dlg.ShowDialog();
-        }
-
-        private void TxRobot_Clicked(object sender, RoutedEventArgs e)
-        {
-            TcpIp.SFluidCtrlCmd msg = new TcpIp.SFluidCtrlCmd();
-            msg.no = -1;
-            msg.ctrlMode = EFluidCtrlMode.ctrl_cap;
-            RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_CTRL_MODE, ref msg);
         }
 
         /*

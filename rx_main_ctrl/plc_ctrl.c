@@ -914,7 +914,7 @@ static void _plc_save_material	(RX_SOCKET socket, char *filename, int cmd, char 
 	char *val;
 	char var[128];
 		
-	gui_send_msg_2(INVALID_SOCKET, cmd, strlen(varList), varList);
+	gui_send_msg_2(INVALID_SOCKET, cmd, (int)strlen(varList), varList);
 
 	sprintf(path, PATH_USER"%s", filename);
 	HANDLE file = setup_create();
@@ -1013,7 +1013,7 @@ static void _plc_del_material	(RX_SOCKET socket, char *filename, int cmd, char *
 	char path[2048];
 	int len;
 	
-	gui_send_msg_2(INVALID_SOCKET, cmd, strlen(name), name);	
+	gui_send_msg_2(INVALID_SOCKET, cmd, (int)strlen(name), name);	
 
 	HANDLE file = setup_create();
 	HANDLE attribute =NULL;
@@ -1802,7 +1802,7 @@ static void* _plc_thread(void *par)
 					{
 						lc_get_value_all(msg.data, sizeof(msg.data));	
 						msg.hdr.msgId  = REP_PLC_GET_VAR;
-						msg.hdr.msgLen = sizeof(msg.hdr) + strlen(msg.data); 
+						msg.hdr.msgLen = sizeof(msg.hdr) + (int)strlen(msg.data); 
 						gui_send_msg(0, &msg);
 					}
 

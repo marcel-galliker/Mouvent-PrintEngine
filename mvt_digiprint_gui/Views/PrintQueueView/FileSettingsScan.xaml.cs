@@ -57,7 +57,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
             InitializeComponent();          
             Visibility = RxGlobals.PrintSystem.IsScanning ? Visibility.Visible : Visibility.Collapsed;
             Print_Settings.Visibility = Visibility.Visible;
-            ShowButtonGrid.Visibility = Visibility.Collapsed;
+            //ShowButtonGrid.Visibility = Visibility.Collapsed;
             Number_Settings.Visibility= Visibility.Collapsed;
 
             CB_ScanMode.ItemsSource     = new EN_ScanModeList(); 
@@ -127,10 +127,10 @@ namespace RX_DigiPrint.Views.PrintQueueView
         }
 
         //--- Property ShowSaveButton -----------------------------------------------
-        public bool ShowSaveButton
-        {
-            set { ShowButtonGrid.Visibility = value? Visibility.Visible:Visibility.Collapsed;}
-        }
+        //  public bool ShowSaveButton
+        // {
+           // set { ShowButtonGrid.Visibility = value? Visibility.Visible:Visibility.Collapsed;}
+        // }
 
         //--- Save_Clicked --------------------------------------------------------------------
         private void Save_Clicked(object sender, RoutedEventArgs e)

@@ -443,7 +443,6 @@ static void *_screening_thread(void* lpParameter)
 //--- scr_load -----------------------------------------------------------
 static void _scr_load(SBmpSplitInfo *pInfo, int threadNo)
 {
-	int blk;
 	int b=pInfo->board;
 	int h=pInfo->head;
 	int no=pInfo->board*MAX_HEADS_BOARD +pInfo->head;

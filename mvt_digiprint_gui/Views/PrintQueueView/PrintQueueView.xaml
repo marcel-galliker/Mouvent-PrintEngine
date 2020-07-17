@@ -138,28 +138,39 @@
                     <ig:TemplateColumn Key="ID" HeaderText="ID" IsFixed="Left">
                         <ig:TemplateColumn.ItemTemplate>
                             <DataTemplate>
-                                <Grid PreviewMouseDown="Grid_MouseDown" Height="30" Background="Transparent" >
+                                <Grid PreviewMouseDown="Grid_MouseDown" Height="auto" Background="Transparent" >
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="30"/>
                                         <ColumnDefinition Width="30"/>
-                                        <ColumnDefinition Width="30"/>
-                                        
+                                        <ColumnDefinition Width="auto"/>
                                     </Grid.ColumnDefinitions>
 
-                                    <CheckBox Grid.Column="2"
+                                    <StackPanel MouseDown="StackPanel_MouseDown" Orientation="Horizontal" Grid.Column="2" VerticalAlignment="Center"
+                                                HorizontalAlignment="Left" Visibility="{Binding Changed, Converter={StaticResource PrintQueueSaveCancelVisible_Converter}}"
+                                                Panel.ZIndex="10">
+
+                                        <common:MvtButton  PreviewMouseLeftButtonDown="Save_Click" IsHitTestVisible="True" 
+                                                           Margin="0,0,10,0" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}">
+                                            <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="20" Height="20"
+                                                Kind="Check"></iconPacks:PackIconMaterial>
+                                        </common:MvtButton>
+
+                                        <common:MvtButton  PreviewMouseLeftButtonDown="Cancel_Click"  IsHitTestVisible="True" 
+                                                           Margin="0" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}">
+                                            <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="20" Height="20"
+                                                Kind="Close"></iconPacks:PackIconMaterial>
+                                        </common:MvtButton>
+                                    </StackPanel>
+
+                                    <TextBlock Grid.Column="0" Text="{Binding ID, Converter={StaticResource ToString_Converter}}"
+                                               VerticalAlignment="Center" HorizontalAlignment="Center"/>
+
+                                    <CheckBox Grid.Column="1"
                                         IsChecked="{Binding IsSelected}"
                                         VerticalAlignment="Center"
                                         HorizontalAlignment="Center"
                                         Visibility="{Binding IsSelected, Converter={StaticResource PrintQueueCheckVisible_Converter}}"
                                         />
-
-                                    <iconPacks:PackIconMaterial
-                                        HorizontalAlignment="Center" VerticalAlignment="Center"
-                                        Kind="ContentSave" Visibility="{Binding Changed, Converter={StaticResource BoolToVisible_Converter}}"
-                                                                Foreground="{StaticResource Mouvent.MainColorBrush}" Width="20" Height="20"
-                                                                ></iconPacks:PackIconMaterial >
-                                    
-                                    <TextBlock Grid.Column="1" Text="{Binding ID, Converter={StaticResource ToString_Converter}}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                 </Grid>
                             </DataTemplate>
                         </ig:TemplateColumn.ItemTemplate>
@@ -198,7 +209,7 @@
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
                                     <pq_views:FileSettingsWeb Margin="0,10,0,0"/>
-                                    <pq_views:FileSettingsScan Margin="0,10,0,0" ShowSaveButton="true"/>
+                                    <pq_views:FileSettingsScan Margin="0,10,0,0" />
                                     <GroupBox Style="{StaticResource MvtGroupBox}"
                                         Header="Preview"
                                         HorizontalAlignment="Left"
@@ -230,6 +241,7 @@
                 </ig:XamGrid.Columns>
             </ig:XamGrid>
             
+            <!--LB702_UV only:-->
             <pq_views:FileSettingsWeb Margin="0,10,0,0" x:Name="PrintSettings" Grid.Row="1" Grid.RowSpan="2" Grid.Column="1" VerticalAlignment="Top" HorizontalAlignment="Right"/>
         </Grid>
 
@@ -308,7 +320,8 @@
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
                                     <pq_views:FileSettingsWeb IsEnabled="False"/>
-                                    <pq_views:FileSettingsScan ShowSaveButton="False" IsEnabled="False"/>
+                                    <pq_views:FileSettingsScan
+                                        IsEnabled="False"/>
                                     <GroupBox Style="{StaticResource MvtGroupBox}"
                                         Header="Preview"
                                         HorizontalAlignment="Left"

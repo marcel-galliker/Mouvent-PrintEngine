@@ -436,8 +436,8 @@ namespace RX_DigiPrint.Models
                     
                     if (RxGlobals.PrintSystem.IsScanning)
                     {
-                        int remainder = (4 - ((RxGlobals.PrintSystem.ColorCnt * RxGlobals.PrintSystem.HeadsPerColor) % 4)) % 4;
-                        thisClusterNumber = (nextHeadNumber + remainder) / 4;
+                        // int remainder = (4 - ((RxGlobals.PrintSystem.ColorCnt * RxGlobals.PrintSystem.HeadsPerColor) % 4)) % 4;
+                        thisClusterNumber = nextHeadNumber / 4;
                     }
                     else
                     {

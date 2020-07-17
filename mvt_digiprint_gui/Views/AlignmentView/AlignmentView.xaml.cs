@@ -265,9 +265,9 @@ namespace RX_DigiPrint.Views.Alignment
             int lastClusterNumber = 0;
             if (RxGlobals.PrintSystem.IsScanning)
             {
-                int remainder = (4 - ((inkCylinderCnt * RxGlobals.PrintSystem.HeadsPerColor) % 4)) % 4;
-                firstClusterNumber = (inkSupplyNumber * RxGlobals.PrintSystem.HeadsPerInkCylinder + remainder) / 4;
-                lastClusterNumber = ((inkSupplyNumber * RxGlobals.PrintSystem.HeadsPerInkCylinder) + (RxGlobals.PrintSystem.HeadsPerInkCylinder - 1) + remainder) / 4;
+                // int remainder = (4 - ((inkCylinderCnt * RxGlobals.PrintSystem.HeadsPerColor) % 4)) % 4;
+                firstClusterNumber = (inkSupplyNumber * RxGlobals.PrintSystem.HeadsPerInkCylinder) / 4;
+                lastClusterNumber = ((inkSupplyNumber * RxGlobals.PrintSystem.HeadsPerInkCylinder) + (RxGlobals.PrintSystem.HeadsPerInkCylinder - 1)) / 4;
             }
             else
             {

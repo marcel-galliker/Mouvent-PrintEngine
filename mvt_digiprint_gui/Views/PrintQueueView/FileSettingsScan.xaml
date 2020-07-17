@@ -35,7 +35,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
+           
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto"/>
@@ -203,32 +203,6 @@
                 VerticalAlignment="Top"
                 HorizontalAlignment="Left"
                 />
-        <!--
-        <Grid Grid.Row="2" Grid.ColumnSpan="3" x:Name="ShowButtonGrid">
-            <StackPanel 
-                Orientation="Horizontal" 
-                HorizontalAlignment="Center"
-                Margin="0,5,0,0"
-                Visibility="{Binding Changed, Converter={StaticResource IntToVisible_Converter}}"
-                >
-                <Button x:Name="SaveButton"   Content="Save"            Width="120" Click="Save_Click"   Margin="10,0" />
-                <Button x:Name="SaveDefault"  Content="Save as Default" Width="120" Click="Save_Default_Click"   Margin="10,0" />
-                <Button x:Name="CancelButton" Content="Cancel"          Width="120" Click="Cancel_Click" Margin="10,0" />
-            </StackPanel>
-        </Grid>
-    -->
-        <StackPanel Orientation="Horizontal" Grid.Row="2" Grid.ColumnSpan="3" x:Name="ShowButtonGrid" Visibility="{Binding Changed, Converter={StaticResource IntToVisible_Converter}}"
-                    HorizontalAlignment="Center" >
-            <common:MvtButton x:Name="SaveButton"   Click="Save_Clicked" Margin="15" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}">
-                <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="20" Height="20"
-                                                Kind="Check"></iconPacks:PackIconMaterial>
-            </common:MvtButton>
-
-            <common:MvtButton  x:Name="CancelButton" Click="Cancel_Clicked" Margin="15" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}">
-                <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="20" Height="20"
-                                                Kind="Close"></iconPacks:PackIconMaterial>
-            </common:MvtButton>
-        </StackPanel>
-
+        
     </Grid>
 </UserControl>

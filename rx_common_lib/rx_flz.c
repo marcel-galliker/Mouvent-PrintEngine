@@ -471,7 +471,7 @@ static void *_flz_decompress_thread(void* lpParameter)
 					}
 					ret	= fastlz_decompress(cmpbuf, (int)band->bandSize, buf, bufsize);
 					BYTE *src = buf;
-					for(int y=0; y<band->rows; y++)
+					for(UINT32 y=0; y<band->rows; y++)
 					{
 						memcpy(dst, src, pFlzInfo->lineLen);
 						memset(dst+pFlzInfo->lineLen, 0, par->spaceBt);

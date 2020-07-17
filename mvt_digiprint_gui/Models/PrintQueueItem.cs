@@ -73,6 +73,8 @@ namespace RX_DigiPrint.Models
             }
         }
 
+        public bool _hasPageSettings { get; set; }
+
         //--- Property IsSelected ---------------------------------------
         private bool _IsSelected = false;
         public bool IsSelected
@@ -554,16 +556,16 @@ namespace RX_DigiPrint.Models
         {
             get { return _LengthUnit; }
             set 
-            { 
-                _LengthUnit = value;
-                if (_LengthUnit==EPQLengthUnit.mm     && StartFrom==1) StartFrom=0;
-                if (_LengthUnit==EPQLengthUnit.copies && StartFrom==0) StartFrom=1;
-                if (value!=_LengthUnit)
+            {
+                if (SetProperty(ref _LengthUnit, value))
                 {
                     OnPropertyChanged("LengthUnitMM");
                     OnPropertyChanged("LengthUnitCopies");
                     Changed = true;
                 }
+                
+                if (_LengthUnit == EPQLengthUnit.mm && StartFrom == 1) StartFrom = 0;
+                if (_LengthUnit == EPQLengthUnit.copies && StartFrom == 0) StartFrom = 1;
             }
         }
 

@@ -165,7 +165,7 @@ void ctr_calc_reset_key(char *machineName)
 	sok_get_mac_address(DEVICE_NAME, &macAddr);
 	//printf("Mac-Addr: %08x%08x\n", macAddr >> 32, macAddr);
 
-	if (macAddr==0x0000f7b6bf661fc8 || macAddr == 0x0000397db0eaf108)
+//	if (macAddr==0x0000f7b6bf661fc8 || macAddr == 0x0000397db0eaf108)
 	{
 		_calc_reset_key(machineName, key);
 		printf("KEY:\n%s\n", key);

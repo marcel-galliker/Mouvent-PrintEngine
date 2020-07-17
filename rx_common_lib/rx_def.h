@@ -777,8 +777,8 @@ typedef struct
 	UINT8	voltageCRC;							// 0x65
 	UINT64	dropletsPrinted;					// 0x66..0x6d
 	UINT8	dropletsPrintedCRC;					// 0x6e
-	INT16	rob_angle;							// 0x6f..0x70
-	INT16	rob_dist;							// 0x71..0x72
+	INT16	rob_angle;							// 0x6f..0x70	// 0=undef
+	INT16	rob_dist;							// 0x71..0x72	// 0=undef
 	UINT8	rob_CRC;							// 0x73
 	UINT8	res_74[0x80-0x74];	
 } SHeadEEpromMvt;	// size must be 0x80!!

@@ -196,7 +196,7 @@ static int _do_save_file_blk	(RX_SOCKET socket, int headNo, SDataBlockMsg *msg)
 	
 	if (f!=NULL)
 	{
-		len=fwrite(msg->data, 1, msg->hdr.msgLen-sizeof(msg->hdr), f);
+		len=(int)fwrite(msg->data, 1, msg->hdr.msgLen-sizeof(msg->hdr), f);
 		if (len >= (int)hdr->size)
 		{
 			fclose(f);

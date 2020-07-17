@@ -96,8 +96,8 @@ void handle_menu(char *str)
 	
 	if      (no=str_start(str, "cluster"))		cond_set_clusterNo(atoi(&str[no]));
 	else if (no=str_start(str, "resetinkctr"))	cond_volume_printed(atoi(&str[no]), 0);			
-	else if (no=str_start(str,"ra"))			cond_set_rob_pos(str[no]-'0', atoi(&str[no+1]), -1);
-	else if (no=str_start(str,"rd"))			cond_set_rob_pos(str[no]-'0', -1, atoi(&str[no+1]));
+	else if (no=str_start(str,"ra"))			cond_set_rob_pos(str[no]-'0', str_to_screw(&str[no+1]), 0);
+	else if (no=str_start(str,"rd"))			cond_set_rob_pos(str[no]-'0', 0, str_to_screw(&str[no+1]));
 	else
 	{
 		no = str[1] - '0';

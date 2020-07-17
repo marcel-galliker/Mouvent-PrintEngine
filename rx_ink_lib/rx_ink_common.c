@@ -210,6 +210,34 @@ char *value_str_u(int val)
 	return str;
 }
 
+//--- value_str_screw ---------------------------------------------
+char *value_str_screw(INT16 val)
+{
+	static char str[32];
+	if (val<=0)	strcpy(str, "----");
+	else		sprintf(str, "%02d.%d", val/6, val%6);
+	return str;
+}
+
+//--- str_to_screw ----------------------------------------
+int str_to_screw(const char *str)
+{
+	int val=0;
+	int nachkomma=0;
+	const char *ch;
+	for (ch=str; *ch; ch++)
+	{
+		if (*ch>='0' && *ch<='9') val=(val*10)+*ch-'0';
+		if (*ch=='.' || *ch==',') 
+		{
+			ch++;
+			if (*ch>='0' && *ch<='9') nachkomma=*ch-'0';
+			break;
+		}
+	}
+	if (nachkomma>5) nachkomma=5;
+	return 6*val+nachkomma;
+}
 //--- value_str3 ---------------------------------------------
 char *value_str3(int val)
 {

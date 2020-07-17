@@ -421,7 +421,7 @@ static void _handle_thickness(int value)
 {
 	char varList[128];
 	sprintf(varList, UnitID "\n" "XML_MATERIAL_THICKNESS=%f\n", value/1000.0);
-	plc_handle_gui_msg(INVALID_SOCKET, CMD_PLC_SET_VAR, varList, strlen(varList));
+	plc_handle_gui_msg(INVALID_SOCKET, CMD_PLC_SET_VAR, varList, (int)strlen(varList));
 }
 
 //--- _handle_headheight --------------------------
@@ -429,7 +429,7 @@ static void _handle_headheight(int value)
 {
 	char varList[128];
 	sprintf(varList, UnitID "\n" "XML_HEAD_HEIGHT=%f\n", value/1000.0);
-	plc_handle_gui_msg(INVALID_SOCKET, CMD_PLC_SET_VAR, varList, strlen(varList));
+	plc_handle_gui_msg(INVALID_SOCKET, CMD_PLC_SET_VAR, varList, (int)strlen(varList));
 }
 
 //--- _handle_encoffset --------------------------
@@ -437,5 +437,5 @@ static void _handle_encoffset(int value)
 {
 	char varList[128];
 	sprintf(varList, UnitID "\n" "XML_ENC_OFFSET=%d\n", value);
-	plc_handle_gui_msg(INVALID_SOCKET, CMD_PLC_SET_VAR, varList, strlen(varList));
+	plc_handle_gui_msg(INVALID_SOCKET, CMD_PLC_SET_VAR, varList, (int)strlen(varList));
 }

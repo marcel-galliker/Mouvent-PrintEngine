@@ -349,7 +349,7 @@ static void _dl_write(int handle, char *str)
 	strcpy(buf, str);
 	buf[strlen(buf)-1]=0;
 	printf("Request: >>%s<<\n", buf);
-	len = strlen(str);
+	len = (int)strlen(str);
 	len = write(handle, str, len);
 	if (len<0) 
 	{
@@ -366,7 +366,7 @@ static void _dl_write_str(int handle, char *str, char *par, int parlen)
 	char buf[256];
 	int len, i;
 	
-	len =strlen(str);
+	len =(int)strlen(str);
 	strcpy(buf, str);
 	for(i=0; i<parlen; i++)
 	{

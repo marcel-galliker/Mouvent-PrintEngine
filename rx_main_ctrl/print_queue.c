@@ -574,7 +574,7 @@ int pq_loading(int spoolerNo, SPageId *pid, char *txt)
 			_ListText[i][spoolerNo][sizeof(_ListText[i][spoolerNo])] = 0;
 			for (n=0, len=0; n<SPOOL_CNT; n++)
 			{
-				l = strlen(_ListText[i][n]);
+				l = (int)strlen(_ListText[i][n]);
 				if (len+l>=sizeof(_List[i].ripState)) 
 					break;
 				len += sprintf(&_List[i].ripState[len], "%8s", _ListText[i][n]);
@@ -670,7 +670,7 @@ static char* _filename(char *path)
 	char ripped_data[32];
 	int pos, len;
 	strcpy(ripped_data, PATH_RIPPED_DATA_DIR);
-	len = strlen(ripped_data);
+	len = (int)strlen(ripped_data);
 	ripped_data[--len]=0;
 	for (pos=0; path[pos]; pos++)
 	{
