@@ -567,7 +567,7 @@ static void _steptx_rob_control(void)
 			
 	case ctrl_cap_step5:		if (step_lift_in_wipe_pos(ctrl_cap))
 								{
-                                    _RobotCtrlMode = ctrl_shutdown;
+                                    _RobotCtrlMode = ctrl_off;
                                 }
 								break;
 		

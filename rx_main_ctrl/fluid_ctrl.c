@@ -616,7 +616,12 @@ static void _control(int fluidNo)
 			switch(_stat->ctrlMode)
 			{
 				case ctrl_shutdown:		_send_ctrlMode(no, ctrl_shutdown_done, TRUE);	break;	
-				case ctrl_shutdown_done:_send_ctrlMode(no, ctrl_off, TRUE);				break;	
+				case ctrl_shutdown_done:
+					_txrob = rx_def_is_tx(RX_Config.printer.type) && step_active(1);
+					if (_txrob)	fluid_send_ctrlMode(-1, ctrl_cap, TRUE);
+					else		_send_ctrlMode(no, ctrl_off, TRUE);				
+					break;
+
 			//	case ctrl_check_step0:	_send_ctrlMode(no, ctrl_off, TRUE);				break;
 				case ctrl_check_step0:	_send_ctrlMode(no, ctrl_check_step1, TRUE);	break;
 				case ctrl_check_step1:	_send_ctrlMode(no, ctrl_check_step2, TRUE);	break;
@@ -795,12 +800,25 @@ static void _control_flush(void)
 								break;
 		
 		case ctrl_flush_done:	ErrorEx(dev_fluid, -1, LOG, 0, "Flush complete");
-								_FluidCtrlMode=ctrl_off; 
+								
+								if (rx_def_is_tx(RX_Config.printer.type) && step_active(1))
+								{
+									fluid_send_ctrlMode(-1, ctrl_cap, TRUE);
+									_FluidCtrlMode = ctrl_cap;
+								}
+								else
+								{
+									_FluidCtrlMode = ctrl_off;
+								}
 								break; // send to all
 		default: break;		
 		}
 		
-		for (int i=0; i<RX_Config.inkSupplyCnt; i++) _send_ctrlMode(i, _FluidCtrlMode, TRUE);
+		if (_FluidCtrlMode != ctrl_cap)
+		{
+			for (int i = 0; i < RX_Config.inkSupplyCnt; i++) _send_ctrlMode(i, _FluidCtrlMode, TRUE);
+		}
+			
 
 	//	TrPrintfL(TRUE, "Next mode %d", _FluidCtrlMode);
 	}
