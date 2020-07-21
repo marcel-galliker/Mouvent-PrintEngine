@@ -434,7 +434,7 @@ namespace RX_DigiPrint.Models
                 {
                     int thisClusterNumber = -1;
                     
-                    if (RxGlobals.PrintSystem.IsScanning)
+                    if (RxGlobals.PrintSystem.IsTx)
                     {
                         // int remainder = (4 - ((RxGlobals.PrintSystem.ColorCnt * RxGlobals.PrintSystem.HeadsPerColor) % 4)) % 4;
                         thisClusterNumber = nextHeadNumber / 4;
@@ -446,7 +446,7 @@ namespace RX_DigiPrint.Models
                     try
                     {
                         int h = nextHeadNumber % 4;
-                        if (RxGlobals.PrintSystem.IsScanning)
+                        if (RxGlobals.PrintSystem.IsTx)
                         {
                             h = (3 - h);
                         }

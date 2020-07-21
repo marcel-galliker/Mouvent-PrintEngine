@@ -55,7 +55,7 @@ namespace RX_DigiPrint.Views.Alignment
             if (clusterNumber < _Alignment.ClusterAlignmentDictionary.Count)
             {
                 _Alignment.ClusterAlignmentDictionary[clusterNumber].SetIsFirstInView(isFirstInView);
-                _Alignment.ClusterAlignmentDictionary[clusterNumber].SetIsScanning(RxGlobals.PrintSystem.IsScanning);
+             //   _Alignment.ClusterAlignmentDictionary[clusterNumber].SetIsScanning(RxGlobals.PrintSystem.IsTx);
                 _Alignment.ClusterAlignmentDictionary[clusterNumber].SetRobotIsConnected(robotIsConnected);
                 DataContext = _Alignment.ClusterAlignmentDictionary[clusterNumber];
             }
@@ -83,7 +83,7 @@ namespace RX_DigiPrint.Views.Alignment
             for (int h = 0; h < kHeadsPerCluster; h++)
             {
                 int globalHeadNumber = 0;
-                if (RxGlobals.PrintSystem.IsScanning)
+                if (RxGlobals.PrintSystem.IsTx)
                 {
                     globalHeadNumber = ClusterNumber * kHeadsPerCluster + h;
                 }
@@ -92,7 +92,7 @@ namespace RX_DigiPrint.Views.Alignment
                     globalHeadNumber = ClusterNumber * kHeadsPerCluster + h;
                 }
                 Button button = printHeadColorButtons[h];
-                if (RxGlobals.PrintSystem.IsScanning) button = printHeadColorButtons[3 - h];
+                if (RxGlobals.PrintSystem.IsTx) button = printHeadColorButtons[3 - h];
                 if (globalHeadNumber >= 0)
                 {
                     brush = Brushes.WhiteSmoke;
@@ -155,7 +155,7 @@ namespace RX_DigiPrint.Views.Alignment
             }
 
             int globalHeadNumber = -1;
-            if (RxGlobals.PrintSystem.IsScanning)
+            if (RxGlobals.PrintSystem.IsTx)
             {
                 tag = (kHeadsPerCluster - 1) - tag;
             }
@@ -173,7 +173,7 @@ namespace RX_DigiPrint.Views.Alignment
             else // instructions only
             {
                 HeadAdjustmentView view = new HeadAdjustmentView();
-                view.Init(HeadAdjustmentHelp.HeadAdjustmentType.TypeAngle, correctionValueAngle, _Alignment.RobotIsConnected);
+                view.Init(HeadAdjustmentHelp.HeadAdjustmentType.TypeAngle, correctionValueAngle, _Alignment.RobotIsConnected, globalHeadNumber);
                 view.ShowDialog();
             }
         }
@@ -213,7 +213,7 @@ namespace RX_DigiPrint.Views.Alignment
             }
 
             int globalHeadNumber = -1;
-            if (RxGlobals.PrintSystem.IsScanning)
+            if (RxGlobals.PrintSystem.IsTx)
             {
                 tag = (kHeadsPerCluster - 1) - tag;
             }
@@ -232,7 +232,7 @@ namespace RX_DigiPrint.Views.Alignment
             else // instructions only
             {
                 HeadAdjustmentView view = new HeadAdjustmentView();
-                view.Init(HeadAdjustmentHelp.HeadAdjustmentType.TypeStitch, correctionValueStitch, _Alignment.RobotIsConnected);
+                view.Init(HeadAdjustmentHelp.HeadAdjustmentType.TypeStitch, correctionValueStitch, _Alignment.RobotIsConnected, globalHeadNumber);
                 view.ShowDialog();
             }
         }
@@ -259,7 +259,7 @@ namespace RX_DigiPrint.Views.Alignment
             }
 
             int globalHeadNumber = -1;
-            if (RxGlobals.PrintSystem.IsScanning)
+            if (RxGlobals.PrintSystem.IsTx)
             {
                 tag = (kHeadsPerCluster - 1) - tag;
             }
@@ -306,9 +306,16 @@ namespace RX_DigiPrint.Views.Alignment
                 MvtMessageBox.InformationAndExit("Error", "");
             }
             
+            int globalHeadNumber = -1;
+            int h = tag;
+            if (RxGlobals.PrintSystem.IsTx)
+            {
+                h = (kHeadsPerCluster - 1) - h;
+            }
+            globalHeadNumber = ClusterNumber * kHeadsPerCluster + h;
 
             SoftwareValueCorrection.SoftwareValueType type = SoftwareValueCorrection.SoftwareValueType.TypeRegister;
-            SoftwareValueCorrectionView wnd = new SoftwareValueCorrectionView(type, correctionValue);
+            SoftwareValueCorrectionView wnd = new SoftwareValueCorrectionView(type, correctionValue, globalHeadNumber);
             bool result = (bool)wnd.ShowDialog();
             if (result == true)
             {
@@ -316,13 +323,6 @@ namespace RX_DigiPrint.Views.Alignment
                 // clusterAlignment.RegisterCorrectionValues[tag] = new DotsCorrectionValue { Correction = newCorrection };
                 if(correctionValue != newCorrection)
                 {
-                    int globalHeadNumber = -1;
-                    int h = tag;
-                    if (RxGlobals.PrintSystem.IsScanning)
-                    {
-                        h = (kHeadsPerCluster - 1) - h;
-                    }
-                    globalHeadNumber = ClusterNumber * kHeadsPerCluster + h;
                     _Alignment.UpdateRegisterCorrectionValues(ClusterNumber, globalHeadNumber, newCorrection);
                     _Alignment.CorrectionValuesChanged = true;
                 }
@@ -359,10 +359,17 @@ namespace RX_DigiPrint.Views.Alignment
                 // software internal problem!
                 MvtMessageBox.InformationAndExit("Error", "");
             }
-            
 
+            int globalHeadNumber = -1;
+            int h = tag;
+            if (RxGlobals.PrintSystem.IsTx)
+            {
+                h = (kHeadsPerCluster - 1) - h;
+            }
+            globalHeadNumber = ClusterNumber * kHeadsPerCluster + h;
+            
             SoftwareValueCorrection.SoftwareValueType type =  SoftwareValueCorrection.SoftwareValueType.TypeRegisterBackwards;
-            SoftwareValueCorrectionView wnd = new SoftwareValueCorrectionView(type, correctionValue);
+            SoftwareValueCorrectionView wnd = new SoftwareValueCorrectionView(type, correctionValue, globalHeadNumber);
             bool result = (bool)wnd.ShowDialog();
             if (result == true)
             {
@@ -395,7 +402,6 @@ namespace RX_DigiPrint.Views.Alignment
             {
                 return;
             }
-
             
             try
             {
@@ -408,7 +414,7 @@ namespace RX_DigiPrint.Views.Alignment
             }
             
             SoftwareValueCorrection.SoftwareValueType type = SoftwareValueCorrection.SoftwareValueType.TypeColorOffset;
-            SoftwareValueCorrectionView wnd = new SoftwareValueCorrectionView(type, correctionValue);
+            SoftwareValueCorrectionView wnd = new SoftwareValueCorrectionView(type, correctionValue, -1);
             bool result = (bool)wnd.ShowDialog();
             if (result == true)
             {
@@ -484,7 +490,7 @@ namespace RX_DigiPrint.Views.Alignment
                 }
 
                 int globalHeadNumber = -1;
-                if (RxGlobals.PrintSystem.IsScanning)
+                if (RxGlobals.PrintSystem.IsTx)
                 {
                     //int remainder = (4 - ((RxGlobals.PrintSystem.ColorCnt * RxGlobals.PrintSystem.HeadsPerColor) % 4)) % 4;
                     //globalHeadNumber = ClusterNumber * kHeadsPerCluster + h - remainder;
@@ -605,5 +611,5 @@ namespace RX_DigiPrint.Views.Alignment
             _Alignment.BackwardsRegisterEditMode = false;
             _Alignment.JetCompensationEditMode = false;
         }
-    }
+	}
 }

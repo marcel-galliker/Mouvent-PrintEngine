@@ -20,13 +20,19 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto"></ColumnDefinition>
             <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
-
-        <Grid Grid.Row="0" Grid.Column="0" Visibility="{Binding ShowSelectionView, Converter={StaticResource BooleanToVisibleConverter}}">
+        
+        <Border Margin="10,5,10,5" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Height="30" BorderThickness="1" BorderBrush="WhiteSmoke" Background="WhiteSmoke">
+            <TextBlock Foreground="#ff303030" FontWeight="SemiBold" FontSize="{StaticResource MvtFontSize}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                       Text="{Binding Name}" x:Name="TX_HeadName"/>
+        </Border>
+        
+        <Grid Grid.Row="1" Grid.Column="0" Visibility="{Binding ShowSelectionView, Converter={StaticResource BooleanToVisibleConverter}}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto"></RowDefinition>
                 <RowDefinition Height="auto"></RowDefinition>
@@ -43,7 +49,7 @@
             </StackPanel>
         </Grid>
 
-        <Grid Grid.Row="0" Grid.Column="1"  Visibility="{Binding ShowSelectionView, Converter={StaticResource BooleanNotToVisibleConverter}}">
+        <Grid Grid.Row="1" Grid.Column="1"  Visibility="{Binding ShowSelectionView, Converter={StaticResource BooleanNotToVisibleConverter}}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto"></RowDefinition>
                 <RowDefinition Height="*"></RowDefinition>

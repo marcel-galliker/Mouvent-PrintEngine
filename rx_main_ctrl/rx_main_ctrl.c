@@ -104,7 +104,7 @@ long WINAPI exception(LPEXCEPTION_POINTERS ExceptionInfo)
 //--- _menu --------------------------------------------------------
 static void _menu(void)
 {
-	char str[32];
+	char str[64];
 	
 	term_get_str(str, sizeof(str));
 	if (str[0]) 

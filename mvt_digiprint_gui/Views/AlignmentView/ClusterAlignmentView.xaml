@@ -788,21 +788,6 @@
             </common:MvtNumBox>
         </Grid>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         <!--Backwards Register-->
         <Grid Grid.Row="14" Grid.Column="0" Grid.ColumnSpan="2" Visibility="{Binding IsScanning, Converter={StaticResource BoolToVisible_Converter}}">
             <Grid.RowDefinitions>

@@ -88,7 +88,7 @@ static INT32			_FluidToScales[INK_SUPPLY_CNT+2];
 
 static SHeadStateLight	_HeadState[INK_SUPPLY_CNT];
 static SHeadStateLight	_HeadStateCnt[INK_SUPPLY_CNT];
-static INT32			_HeadErr[INK_SUPPLY_CNT];
+static INT32			_HeadErr[INK_SUPPLY_CNT+2];
 static INT32			_HeadPumpSpeed[INK_SUPPLY_CNT][2];	// min/max
 // EnFluidCtrlMode			_FluidMode[INK_SUPPLY_CNT];
 
@@ -910,15 +910,12 @@ void fluid_reply_stat(RX_SOCKET socket)	// to GUI
 		
 		_FluidStatus[INK_SUPPLY_CNT + 1].canisterErr = _ScalesErr[INK_SUPPLY_CNT + 1];
 	}
-	
 
-//	sok_send_2(&socket, REP_FLUID_STAT, 10*sizeof(SInkSupplyStat), _FluidStatus);
 	{
 		SInkSupplyStatMsg msg;
 		msg.hdr.msgId  = REP_FLUID_STAT;
 		msg.hdr.msgLen = sizeof(msg);
 		
-//		for (msg.no=0; msg.no<RX_Config.inkSupplyCnt; msg.no++)
 		for (msg.no=0; msg.no<SIZEOF(_FluidStatus); msg.no++)
 		{
 			if (msg.no<RX_Config.inkSupplyCnt || msg.no>=INK_SUPPLY_CNT)	// send also flush and waste
@@ -944,9 +941,7 @@ void fluid_send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
     }
     
 	if (ctrlMode==ctrl_off) step_rob_stop();	
-	if (ctrlMode==ctrl_purge_hard || ctrlMode == ctrl_purge_hard_wipe || ctrlMode == ctrl_purge_hard_vacc || ctrlMode == ctrl_purge || ctrlMode == ctrl_purge_soft) _PurgeFluidNo=no;
-
-    
+	if (ctrlMode==ctrl_purge_hard || ctrlMode == ctrl_purge_hard_wipe || ctrlMode == ctrl_purge_hard_vacc || ctrlMode == ctrl_purge || ctrlMode == ctrl_purge_soft) _PurgeFluidNo=no;    
 
     _FluidCtrlMode = ctrlMode;
 	_RobotCtrlMode = ctrlMode;

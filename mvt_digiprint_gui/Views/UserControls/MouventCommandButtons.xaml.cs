@@ -1,6 +1,7 @@
 ﻿using RX_Common;
 using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Models;
+using RX_DigiPrint.Models.Enums;
 using RX_DigiPrint.Services;
 using RX_DigiPrint.Views.PrintQueueView;
 using System;
@@ -148,12 +149,13 @@ namespace RX_DigiPrint.Views.UserControls
             }
 #endif
 
-
             if (ShowPauseButton == true) // pasue button is shown
             {
                 RxGlobals.RxInterface.SendCommand(TcpIp.CMD_PAUSE_PRINTING);
                 return;
             }
+
+            if (InkSupply.AnyFlushed()) return;
 
             if (!RxGlobals.PrinterStatus.AllInkSupliesOn)
             {
@@ -233,6 +235,5 @@ namespace RX_DigiPrint.Views.UserControls
         {
            SettingsClicked(this, EventArgs.Empty);
         }
-
-    }
+	}
 }

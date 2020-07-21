@@ -233,9 +233,12 @@ int setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action)
 						int n=i*RX_Config.headsPerColor+h;
 						int board = n/MAX_HEADS_BOARD;
 						int head  = n%MAX_HEADS_BOARD;
+						UCHAR	voltage;
 						setup_chapter(file, "Head", h, action);
-                        setup_uchar(file, "voltage", action, &RX_HBStatus[board].head[head].eeprom_mvt.voltage, 0);
-					//	setup_int16_arr(file, "value",  action, RX_HBStatus[board].head[head].eeprom_mvt.densityValue, MAX_DENSITY_VALUES, 0);
+						if (pcfg->headFpVoltage[n]) voltage=pcfg->headFpVoltage[n];
+						else if (RX_HBStatus[board].head[head].eeprom_mvt.voltage) voltage=RX_HBStatus[board].head[head].eeprom_mvt.voltage;
+						else voltage=RX_HBStatus[board].head[head].eeprom.voltage;
+                        setup_uchar(file, "voltage", action, &voltage, 0);
 						setup_int16_arr(file, "density",  action, RX_HBStatus[board].head[head].eeprom_mvt.densityValue, MAX_DENSITY_VALUES, 0);
 						setup_chapter(file, "..", -1, action);
 					}

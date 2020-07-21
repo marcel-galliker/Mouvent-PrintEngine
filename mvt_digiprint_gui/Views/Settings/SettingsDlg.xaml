@@ -164,11 +164,12 @@
                 <iconPacks:PackIconMaterial Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Center" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 
                                                 Kind="Check"></iconPacks:PackIconMaterial>
             </common:MvtButton>
+            <!--
             <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}" Margin="15" Click="User_Click">
                 <iconPacks:PackIconMaterial Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Center" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 
                                                 Kind="Account"></iconPacks:PackIconMaterial>
             </common:MvtButton>
-
+            -->
         </StackPanel>
     </Grid>
 </rx:CustomWindow>

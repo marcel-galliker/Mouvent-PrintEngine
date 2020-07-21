@@ -1,4 +1,5 @@
 ﻿using Infragistics.Controls.Grids;
+using Infragistics.Windows.Controls;
 using RX_Common;
 using RX_DigiPrint.Models;
 using RX_DigiPrint.Services;
@@ -33,6 +34,7 @@ namespace RX_DigiPrint.Views
             Search_clicked(this, null);
 
             RxGlobals.Log.List.CollectionChanged += Log_CollectionChanged;
+          //  LogGrid_SizeChanged(this, null);
 
             //--- test publish number -------------------------------------------------
             // needs "System.Deployment" in References
@@ -57,6 +59,7 @@ namespace RX_DigiPrint.Views
             {
                 Scroll.Value=RxGlobals.Log.Pos;
             }
+            LogGrid_SizeChanged(this, null);
         }
 
         //--- LogGrid_CellControlAttached ---------------------------------------------------------------------------------------------------
@@ -100,21 +103,26 @@ namespace RX_DigiPrint.Views
         }
 
         //--- LogGrid_SizeChanged ----------------------------------------------------------
+        private double _rowHeight=0;
         private void LogGrid_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if (LogGrid.MinimumRowHeight!=0)
+            UInt32 rows = 10;
+            if (LogGrid.Rows.Count>0 && LogGrid.Rows[0].ActualHeight!=_rowHeight && LogGrid.Rows[0].ActualHeight!=0)
             {
-                UInt32 rows;
-                rows = (UInt32)(LogGrid.ActualHeight/LogGrid.MinimumRowHeight);
+                _rowHeight = LogGrid.Rows[0].ActualHeight;
+                rows = (UInt32)(LogGrid.ActualHeight/_rowHeight);
+                
                 if (RxScreen.Screen.Surface) rows-=2;
                 else rows-=1;
-
+            }
+            if (rows>Scroll.ViewportSize)
+			{
                 Scroll.ViewportSize = rows;
                 if (rows>2) Scroll.LargeChange  = rows-2;
                 else        Scroll.LargeChange  = 1;
                 Scroll.SmallChange = 1;
                 SendLogRequest("", "", Scroll.Value, rows);
-            }
+			}
         }
 
         //--- Scroll_ValueChanged -----------------------------------------------------------------

@@ -328,7 +328,7 @@ namespace RX_DigiPrint.Models
             BackwardRegisterSetValues = new Helpers.ObservableCollectionEx<DotsCorrectionValue>();
             ShowColorOffset = new Helpers.ObservableCollectionEx<BooleanValue>();
             HasVisibleColorOffsetCorrectionValue = false;
-            IsScanning = RxGlobals.PrintSystem.IsScanning;
+            IsScanning = RxGlobals.PrintSystem.IsTx;
             ColorOffsetEditMode = RxGlobals.Alignment.ColorOffsetEditMode;
             AngleEditMode = RxGlobals.Alignment.AngleEditMode;
             StitchEditMode = RxGlobals.Alignment.StitchEditMode;
@@ -356,12 +356,12 @@ namespace RX_DigiPrint.Models
         {
             IsFirstInView = isFirst;
         }
-
+        
         public void SetIsScanning(bool isScanning)
         {
             IsScanning = isScanning;
         }
-
+        
         public void InitCorrectionValues()
         {
             if (RxGlobals.PrintSystem.ColorCnt == 0 || RxGlobals.PrintSystem.InkCylindersPerColor == 0

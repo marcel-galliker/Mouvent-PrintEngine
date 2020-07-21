@@ -132,6 +132,7 @@ int tif_get_size(const char *path, UINT32 page, UINT32 spacePx, UINT32 *width, U
 {
 	TIFF* file;
 	INT16 data;
+	INT32 val;
 	int color;
 	char filepath[MAX_PATH];
 
@@ -174,7 +175,8 @@ int tif_get_size(const char *path, UINT32 page, UINT32 spacePx, UINT32 *width, U
 			if (!TIFFGetField (file, TIFFTAG_SAMPLESPERPIXEL, &data)) return Error(ERR_CONT, 0, "File %s: Encoded using %d planes. Only one plane supported",  data, filepath);
 
 			//--- bit per pixel ---
-			if (bitsPerPixel && (!TIFFGetField (file, TIFFTAG_BITSPERSAMPLE, bitsPerPixel))) return Error(ERR_CONT, 0, "File %s: Could not get bit per sample value", filepath);
+			if (bitsPerPixel && (!TIFFGetField (file, TIFFTAG_BITSPERSAMPLE, &val))) return Error(ERR_CONT, 0, "File %s: Could not get bit per sample value", filepath);
+			if (bitsPerPixel) *bitsPerPixel = (UCHAR)val;
 	//		if (*bitsPerPixel<(UINT8)1 || *bitsPerPixel>(UINT8)2) return Error(ERR_CONT, 0, "File %s: %d bit per pixel encoded. Can only process 1, 2 bit per pixel", filepath, *bitsPerPixel);
 			/*
 			if (*bitsPerPixel ==1) 
@@ -628,7 +630,6 @@ int tif_load_simple	(const char *path, BYTE **buffer, int bufsize, SBmpInfo *pin
 	int srcLen;
 	int spaceLen;
 	int	ok=FALSE;
-	char filepath[MAX_PATH];
 	TIFF *file;
 	BYTE *dst;
 	
@@ -641,10 +642,9 @@ int tif_load_simple	(const char *path, BYTE **buffer, int bufsize, SBmpInfo *pin
 	if (file=TIFFOpen (path, "r"))
 	{
 		ok = TRUE;
-		TrPrintf(TRUE, "tif_load >>%s<<", filepath);
-		if (!TIFFGetField (file, TIFFTAG_BITSPERSAMPLE, &pinfo->bitsPerPixel))	return Error(ERR_CONT, 0, "File %s: Could not get bit per sample value", filepath);
-		if (!TIFFGetField (file, TIFFTAG_IMAGEWIDTH,    &pinfo->srcWidthPx))	return Error(ERR_CONT, 0, "File %s: Could not get image width", filepath);
-		if (!TIFFGetField (file, TIFFTAG_IMAGELENGTH,   &pinfo->lengthPx))		return Error(ERR_CONT, 0, "File %s: Could not get image height", filepath);
+		if (!TIFFGetField (file, TIFFTAG_BITSPERSAMPLE, &pinfo->bitsPerPixel))	return Error(ERR_CONT, 0, "File %s: Could not get bit per sample value", path);
+		if (!TIFFGetField (file, TIFFTAG_IMAGEWIDTH,    &pinfo->srcWidthPx))	return Error(ERR_CONT, 0, "File %s: Could not get image width", path);
+		if (!TIFFGetField (file, TIFFTAG_IMAGELENGTH,   &pinfo->lengthPx))		return Error(ERR_CONT, 0, "File %s: Could not get image height", path);
 
 		srcLen				= (pinfo->srcWidthPx*pinfo->bitsPerPixel+7)/8; 
 		pinfo->srcWidthPx	+= 0; 

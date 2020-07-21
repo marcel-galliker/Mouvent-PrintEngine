@@ -47,6 +47,8 @@ namespace RX_DigiPrint.Views.UserControls
 
             FileVersionInfo info = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location);
             Version.Text = "V "+info.FileVersion;
+
+            UserType_Init();
         }
 
         protected void OnPropertyChanged(string name)
@@ -122,5 +124,18 @@ namespace RX_DigiPrint.Views.UserControls
                     RxGlobals.RxInterface.SendCommand(TcpIp.CMD_RESET_CTR);
             }
         }
+
+        private void UserType_Init()
+		{
+            UserType.DataContext    = RxGlobals.User;
+            UserType.ItemsSource    = new EN_UserTypeList();
+            UserType.SelectedValue  = RxGlobals.User.UserType;
+		}
+
+		private void UserType_SelectionChanged(object sender,SelectionChangedEventArgs e)
+		{
+            RxGlobals.User.UserType = (EUserType)UserType.SelectedValue;
+		}
+
     }
 }

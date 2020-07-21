@@ -2,6 +2,7 @@
 using RX_DigiPrint.Models;
 using RX_DigiPrint.Models.Enums;
 using RX_DigiPrint.Services;
+using System;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -87,6 +88,14 @@ namespace RX_DigiPrint.Views.PrintQueueView
         //--- Print_Clicked --------------------------------------------------------------------
         private void Print_Clicked(object sender, RoutedEventArgs e)
         {
+            if (InkSupply.AnyFlushed()) return;
+
+            if (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_cleaf && !(RxGlobals.StepperStatus[0].DripPans_InfeedDOWN && RxGlobals.StepperStatus[0].DripPans_OutfeedDOWN))
+            {
+                MvtMessageBox.YesNo("Print System", "Drip Pans below the clusters. Move it out before printing", MessageBoxImage.Question, true);
+                return;
+            }
+
             if (!RxGlobals.PrinterStatus.AllInkSupliesOn)
             {
                 if (MvtMessageBox.YesNo("Print System", "Some ink supplies are OFF. Switch them ON.", MessageBoxImage.Question, true))

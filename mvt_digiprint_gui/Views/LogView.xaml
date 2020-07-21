@@ -72,7 +72,7 @@
                     </StackPanel>
                 </common:MvtButton>
 
-                <common:MvtButton Margin="0, 0, 15, 0" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" x:Name="Export" ToolTip="Go to oldest Message" Click="Export_clicked" >
+                <common:MvtButton Margin="0, 0, 15, 0" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" x:Name="Export" ToolTip="Export LOG as XLS" Click="Export_clicked" >
                     <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center"
                         Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Margin="3, 0, 0, 0" Width="20" Height="20" Kind="Export"></iconPacks:PackIconMaterial>
                 </common:MvtButton>
@@ -113,9 +113,10 @@
 			CellStyle="{DynamicResource XamGridLogCellControlStyle}" 
             SizeChanged="LogGrid_SizeChanged" 
 			BorderThickness="1"
-            VerticalAlignment="Stretch"
+            Height="auto"
             >
             <!--
+            VerticalAlignment="Stretch"
             Style="{DynamicResource XamGrid-NoVScroll-Style}"
             -->
             <ig:XamGrid.SelectionSettings>

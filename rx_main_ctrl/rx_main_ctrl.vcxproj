@@ -545,10 +545,10 @@ rem copy ..\Externals\matrix\win\lib\matrix32.dll d:\radex\bin\main\win
       </Command>
     </CustomBuildStep>
     <PostBuildEvent>
-      <Command>mkdir "$(SolutionDir)bin\win"
-copy "$(OutDir)$(TargetName)$(TargetExt)" "$(SolutionDir)bin\win\"
+      <Command>mkdir "$(ProjectDir)..\bin\win"
+copy "$(OutDir)$(TargetName)$(TargetExt)" "$(ProjectDir)..\bin\win\"
 copy ..\Externals\Tec-it\win\TBarCode11\Bin\TBarCode11_x64.dll $(OutDir)
-copy ..\Externals\Tec-it\win\TBarCode11\Bin\TBarCode11_x64.dll "$(SolutionDir)bin\win"</Command>
+copy ..\Externals\Tec-it\win\TBarCode11\Bin\TBarCode11_x64.dll "$(ProjectDir)..\bin\win"</Command>
     </PostBuildEvent>
     <PreBuildEvent>
       <Command>..\VersionUpdate $(ProjectDir)version.c</Command>

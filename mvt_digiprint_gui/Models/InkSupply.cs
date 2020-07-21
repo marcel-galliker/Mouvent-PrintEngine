@@ -267,6 +267,20 @@ namespace RX_DigiPrint.Models
             }
         }
         
+        //--- AnyFlushed -------------------------------------------
+        public static bool AnyFlushed()
+		{
+            foreach(InkSupply inkSupply in RxGlobals.InkSupply.List)
+			{
+                if (inkSupply.Connected && inkSupply.Flushed)
+				{
+                    MvtMessageBox.Information("Print System", "At least one ink supply is flushed. Please purge first.");
+                    return true;
+				}
+			}
+            return false;
+		}
+
         //--- Property FluidCtrlModeList ---------------------------------------
         private static EN_FluidCtrlList _FluidCtrlModeList = new EN_FluidCtrlList();
 	    public EN_FluidCtrlList FluidCtrlModeList
@@ -314,6 +328,8 @@ namespace RX_DigiPrint.Models
         //--- SetStatus --------------------------------------------------
         public void SetStatus(int no, TcpIp.SInkSupplyStat msg)
         {
+            Console.WriteLine("InkSupply[{0}].connedted={1:x} {2:x}", no, msg.info, (msg.info & 0x00000001));
+
             Info            = msg.info;
             Warn            = msg.warn;
             Err             = msg.err;
@@ -344,6 +360,7 @@ namespace RX_DigiPrint.Models
             Flushed         = (msg.info & 0x00000008)!=0;
             CondTempReady   = (msg.info & 0x00000010)!=0;
             TempReady       = (msg.info & 0x00000020)!=0;
+
         }
     }	
 }

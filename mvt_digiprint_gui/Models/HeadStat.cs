@@ -456,8 +456,8 @@ namespace RX_DigiPrint.Models
             }
             else
             {
-                Console.WriteLine("Error: Tried to access ink type but it is null (ink index="
-                    + ink.ToString() + ", HeadNo=" + HeadNo.ToString() + ")");
+            //    Console.WriteLine("Error: Tried to access ink type but it is null (ink index="
+            //        + ink.ToString() + ", HeadNo=" + HeadNo.ToString() + ")");
                 msg.status.color = Rx.ToArgb(Colors.Black);
                 msg.status.colorFG = Rx.ToArgb(Colors.White);
             }

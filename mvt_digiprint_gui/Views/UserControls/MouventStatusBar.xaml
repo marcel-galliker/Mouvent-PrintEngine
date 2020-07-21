@@ -3,17 +3,14 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:ig="http://schemas.infragistics.com/xaml"
-             xmlns:igWPF="http://schemas.infragistics.com/xaml/wpf"
+             xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
              xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
-             xmlns:views="clr-namespace:RX_DigiPrint.Views"
-             xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
-             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              mc:Ignorable="d" 
              d:DesignHeight="80" d:DesignWidth="1200">
 
     <Grid Background="White" ShowGridLines="False">
         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200"/>            <!-- see MouventCommandButtons Grid.Width -->
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
@@ -21,13 +18,15 @@
             <ColumnDefinition Width="auto"/>
         </Grid.ColumnDefinitions>
 
+            <rx:RxComboBox Grid.Column="0" x:Name="UserType" Margin="10,0" VerticalAlignment="Center" SelectionChanged="UserType_SelectionChanged" Background="Transparent"/>
+
         <!--Printer Name -->
-            <TextBlock Margin="15, 5, 0, 5" Style="{StaticResource Mouvent.FooterTextBlockStyle}" x:Name="PrinterName" Grid.Column="0"
+            <TextBlock Margin="15, 5, 0, 5" Style="{StaticResource Mouvent.FooterTextBlockStyle}" x:Name="PrinterName" Grid.Column="1"
                    Text="{Binding Host_Name}"/>
-            <TextBlock Margin="15, 5, 0, 5" Style="{StaticResource Mouvent.FooterTextBlockStyle}" x:Name="Version" Grid.Column="1"/>
+            <TextBlock Margin="15, 5, 0, 5" Style="{StaticResource Mouvent.FooterTextBlockStyle}" x:Name="Version" Grid.Column="2"/>
         
         <!-- Current Speed -->
-        <StackPanel Grid.Column="2" x:Name="Speed" Orientation="Horizontal" Margin="5" >
+        <StackPanel Grid.Column="3" x:Name="Speed" Orientation="Horizontal" Margin="5" >
             <StackPanel Orientation="Horizontal" MinWidth="100">
                 <TextBlock Margin="10, 0, 0, 0" Style="{StaticResource Mouvent.FooterTextBlockStyle}" Text="{Binding ActSpeed, Converter={StaticResource Len_Unit_Converter}, ConverterParameter=m0}"/>
                 <TextBlock Margin="5, 0, 0, 0" x:Name="CounterUnit1" Style="{StaticResource Mouvent.FooterTextBlockStyle}"/>
@@ -35,7 +34,7 @@
         </StackPanel>
         
         <!-- Counters -->
-        <StackPanel Grid.Column="3" x:Name="Counters" Orientation="Horizontal" Margin="5" >
+        <StackPanel Grid.Column="4" x:Name="Counters" Orientation="Horizontal" Margin="5" >
             <Grid MinWidth="150" Margin="10, 0, 0, 0">
                 <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" MouseDown="ResetCounters_Click">
                     <TextBlock Margin="15, 0, 0, 0" Style="{StaticResource Mouvent.FooterTextBlockStyle}" Text="{Binding CounterAct, Converter={StaticResource Counter_Converter}}"/>
@@ -53,7 +52,7 @@
 
         <StackPanel 
             Grid.Row="0" 
-            Grid.Column="4"
+            Grid.Column="5"
             Orientation="Horizontal"
             HorizontalAlignment="Right"
             Margin="0,2,2,2"

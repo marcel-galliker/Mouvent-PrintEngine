@@ -53,11 +53,11 @@
                                                 Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}"
                                                 Width="20" Height="20" Kind="Import"></iconPacks:PackIconMaterial>
                 </common:MvtButton>
-                <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" ToolTip="Clear all Values"
+                <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" ToolTip="Reset all Values"
                                  x:Name="Button_ScanCheckClearValues" Click="ScanCheckClearButton_Click" Margin="0, 0, 15, 0" >
                     <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" 
                                                 Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}"
-                                                Width="20" Height="20" Kind="Delete"></iconPacks:PackIconMaterial>
+                                                Width="20" Height="20" Kind="Restore"></iconPacks:PackIconMaterial>
                 </common:MvtButton>
                 
                 <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" IsChecked="{Binding CorrectionValuesChanged}"
