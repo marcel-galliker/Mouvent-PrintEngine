@@ -697,7 +697,7 @@ namespace RX_DigiPrint.Models
         public int Wakeup
         {
             get { return _Wakeup; }
-            set { SetProperty(ref _Wakeup, value); }
+            set { Changed |= SetProperty(ref _Wakeup, value); }
         }
         
         //--- Property RipState ---------------------------------------

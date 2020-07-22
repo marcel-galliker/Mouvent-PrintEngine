@@ -328,7 +328,7 @@ namespace RX_DigiPrint.Models
             BackwardRegisterSetValues = new Helpers.ObservableCollectionEx<DotsCorrectionValue>();
             ShowColorOffset = new Helpers.ObservableCollectionEx<BooleanValue>();
             HasVisibleColorOffsetCorrectionValue = false;
-            IsScanning = RxGlobals.PrintSystem.IsTx;
+            IsScanning = RxGlobals.PrintSystem.IsScanning;
             ColorOffsetEditMode = RxGlobals.Alignment.ColorOffsetEditMode;
             AngleEditMode = RxGlobals.Alignment.AngleEditMode;
             StitchEditMode = RxGlobals.Alignment.StitchEditMode;
@@ -386,18 +386,15 @@ namespace RX_DigiPrint.Models
             RegisterSetValues.Clear();
             BackwardRegisterSetValues.Clear();
             ShowColorOffset.Clear();
-
+            double dist;
+            double distBack;
             for (int h = 0; h < Alignment.kHeadsPerCluster; h++)
             {
                 int globalHeadNumber = 0;
-                if (IsScanning)
-                {
-                    globalHeadNumber = ClusterNumber * Alignment.kHeadsPerCluster + h;
-                }
-                else
-                {
-                    globalHeadNumber = ClusterNumber * Alignment.kHeadsPerCluster + h;
-                }
+                globalHeadNumber = ClusterNumber * Alignment.kHeadsPerCluster + h;
+
+                dist = RxGlobals.PrintSystem.HeadDist[globalHeadNumber];
+                distBack = RxGlobals.PrintSystem.HeadDistBack[globalHeadNumber];
 
                 if (globalHeadNumber < 0)
                 {
@@ -470,7 +467,7 @@ namespace RX_DigiPrint.Models
                 }
             }
 
-            if (IsScanning)
+            if (RxGlobals.PrintSystem.IsTx)
             {
 
                 AngleCorrectionValues.ReverseOrder();
@@ -507,19 +504,12 @@ namespace RX_DigiPrint.Models
             for (int h = 0; h < Alignment.kHeadsPerCluster; h++)
             {
                 int globalHeadNumber = 0;
-                if (IsScanning)
-                {
-                    globalHeadNumber = ClusterNumber * Alignment.kHeadsPerCluster + h;
-                }
-                else
-                {
-                    globalHeadNumber = ClusterNumber * Alignment.kHeadsPerCluster + h;
-                }
+                globalHeadNumber = ClusterNumber * Alignment.kHeadsPerCluster + h;
                 if (globalHeadNumber >= 0)
                 {
                     int inkSupplyNumber = globalHeadNumber / RxGlobals.PrintSystem.HeadsPerInkCylinder;
                     int index = h;
-                    if (IsScanning)
+                    if (RxGlobals.PrintSystem.IsTx)
                     {
                         index = 3 - index;
                     }

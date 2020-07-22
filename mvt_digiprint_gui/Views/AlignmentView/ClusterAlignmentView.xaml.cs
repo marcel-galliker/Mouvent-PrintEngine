@@ -55,7 +55,7 @@ namespace RX_DigiPrint.Views.Alignment
             if (clusterNumber < _Alignment.ClusterAlignmentDictionary.Count)
             {
                 _Alignment.ClusterAlignmentDictionary[clusterNumber].SetIsFirstInView(isFirstInView);
-             //   _Alignment.ClusterAlignmentDictionary[clusterNumber].SetIsScanning(RxGlobals.PrintSystem.IsTx);
+                _Alignment.ClusterAlignmentDictionary[clusterNumber].SetIsScanning(RxGlobals.PrintSystem.IsScanning);
                 _Alignment.ClusterAlignmentDictionary[clusterNumber].SetRobotIsConnected(robotIsConnected);
                 DataContext = _Alignment.ClusterAlignmentDictionary[clusterNumber];
             }

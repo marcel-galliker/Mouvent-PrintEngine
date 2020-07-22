@@ -809,7 +809,7 @@
                                         <RectangleGeometry/>
                                     </igPrim:RowsPanel.Clip>
                                 </igPrim:RowsPanel>
-                                <ScrollBar x:Name="VerticalScrollBar" Grid.Column="1" Grid.Row="0" Style="{DynamicResource RxScrollBarStyle}"/>
+                                <ScrollBar x:Name="VerticalScrollBar" Grid.Column="1" Width="32" Grid.Row="0" Style="{DynamicResource RxScrollBarStyle}" />
                                 <ScrollBar x:Name="HorizontalScrollBar" Height="32" Grid.Row="2"/>
                             </Grid>
                             <Border x:Name="ReadOnlyBorder" Background="Black" Opacity="0.2" Visibility="Collapsed"/>

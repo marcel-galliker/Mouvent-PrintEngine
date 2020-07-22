@@ -345,14 +345,15 @@ int flz_load(SPageId *id, const char *filedir, const char *filename, int printMo
 			if (wul)
 			{
 				BYTE* buf = buffer[c];
-				memset(buf,                                      0x00, wul * pinfo->lineLen);
-				memset(buf+(pinfo->lengthPx+wul)*pinfo->lineLen, 0x00, wul * pinfo->lineLen);
+				UINT64 offset;
+				offset=(UINT64)(pinfo->lengthPx+wul)*(UINT64)pinfo->lineLen;
+				memset(buf,       0x00, wul * pinfo->lineLen);
+				memset(buf+offset, 0x00, wul * pinfo->lineLen);
 				
 				if (wakeupOn)
 				{
-					int start=(c*wub);
-					memset(buf+start*pinfo->lineLen, 0xff, wub * pinfo->lineLen);
-					memset(buf+(pinfo->lengthPx+2*wul-(c+1)*wub)*pinfo->lineLen, 0xff, wub * pinfo->lineLen);															
+					memset(buf+(c*wub)*pinfo->lineLen, 0xff, wub * pinfo->lineLen);
+					memset(buf+offset-((c+1)*wub)*pinfo->lineLen, 0xff, wub * pinfo->lineLen);															
 				}
 			}
 			pinfo->lengthPx += 2*wul;
@@ -480,6 +481,10 @@ static void *_flz_decompress_thread(void* lpParameter)
 					}
 				}
 				else ret = fastlz_decompress(cmpbuf, (int)band->bandSize, dst, band->rows * pFlzInfo->lineLen);
+				if (par->no==0 && par->y_from!=par->y_to)
+				{
+					_DecompressPar.progress = 100*(par->y - par->y_from) / (par->y_to - par->y_from);
+				}
 			}			
 			par->result	= REPLY_OK;
 		}

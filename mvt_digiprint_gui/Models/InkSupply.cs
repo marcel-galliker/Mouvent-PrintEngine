@@ -272,7 +272,7 @@ namespace RX_DigiPrint.Models
 		{
             foreach(InkSupply inkSupply in RxGlobals.InkSupply.List)
 			{
-                if (inkSupply.Connected && inkSupply.Flushed)
+                if (inkSupply.InkType!=null && inkSupply.Connected && inkSupply.Flushed)
 				{
                     MvtMessageBox.Information("Print System", "At least one ink supply is flushed. Please purge first.");
                     return true;

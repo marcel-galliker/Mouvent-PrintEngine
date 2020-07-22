@@ -175,7 +175,7 @@ void ctr_calc_reset_key(char *machineName)
 //--- _ctr_save --------------------------------------------------
 static void _ctr_save(int reset, char *machineName)
 {
-    TrPrintfL(TRUE, "Counters: act=%d, total=%d, (products=%d, m=%d.%03d) ", (int)RX_PrinterStatus.counterAct, (int)RX_PrinterStatus.counterTotal, (int)_prodCnt, _prodLen/1000, _prodLen%1000);
+//    TrPrintfL(TRUE, "Counters: act=%d, total=%d, (products=%d, m=%d.%03d) ", (int)RX_PrinterStatus.counterAct, (int)RX_PrinterStatus.counterTotal, (int)_prodCnt, _prodLen/1000, _prodLen%1000);
     _prodCnt=0;
     _prodLen=0;
 

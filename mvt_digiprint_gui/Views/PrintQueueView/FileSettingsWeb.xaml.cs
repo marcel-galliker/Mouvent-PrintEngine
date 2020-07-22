@@ -129,5 +129,11 @@ namespace RX_DigiPrint.Views.PrintQueueView
             PrintQueueItem item = DataContext as PrintQueueItem;
             if (item!=null) item.SendMsg(TcpIp.CMD_GET_PRINT_QUEUE_ITM);
         }
-    }
+
+		private void UserControl_IsVisibleChanged(object sender,DependencyPropertyChangedEventArgs e)
+		{
+            if ((bool)e.NewValue)
+                Specials_LB702.Visibility = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_UV) ? Visibility.Visible : Visibility.Collapsed;
+		}
+	}
 }

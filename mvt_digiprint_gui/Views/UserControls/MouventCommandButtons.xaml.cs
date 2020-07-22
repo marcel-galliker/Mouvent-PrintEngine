@@ -60,8 +60,8 @@ namespace RX_DigiPrint.Views.UserControls
         private void _SetButtonStates()
         {
             //--- checks ---------------------------------------------------------
-            Button_Start.IsChecked  = RxGlobals.PrinterStatus.PrintState==EPrintState.ps_printing;
-            if (Button_Start.IsChecked)
+            // Button_Start.IsChecked  = RxGlobals.PrinterStatus.PrintState==EPrintState.ps_printing;
+            if (RxGlobals.PrinterStatus.PrintState==EPrintState.ps_printing)
             {
                 if (RxGlobals.Plc.IsReadyForProduction && !RxGlobals.PrinterStatus.Splicing)
                 {
@@ -105,7 +105,7 @@ namespace RX_DigiPrint.Views.UserControls
                 Button_Power.IsEnabled = true;
             }
 
-            RxGlobals.BtProdState.SetStartBnState(Button_Start.IsEnabled, Button_Start.IsChecked, false);
+            RxGlobals.BtProdState.SetStartBnState(Button_Start.IsEnabled, false, false);
             // RxGlobals.BtProdState.SetPauseBnState(Button_Pause.IsEnabled, Button_Pause.IsChecked, false);
             RxGlobals.BtProdState.SetStopBnState (Button_Stop.IsEnabled,  Button_Stop.IsChecked,  false);
             RxGlobals.BtProdState.SetAbortBnState(Button_Abort.IsEnabled, Button_Abort.IsChecked, false);

@@ -458,14 +458,6 @@
             </TextBlock>
         </Grid>
 
-
-
-
-
-
-
-
-
         <!--Stitch-->
         <Grid Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="2" Visibility="{Binding Path=HasStitchEditMode, Converter={StaticResource BoolToVisible_Converter}}">
             <Grid.RowDefinitions>

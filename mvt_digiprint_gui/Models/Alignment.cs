@@ -241,7 +241,7 @@ namespace RX_DigiPrint.Models
             for (int c = ClusterAlignmentDictionary.Count; c < NumberOfClusters; c++)
             {
                 ClusterAlignment clusterAlignment = new ClusterAlignment(c);
-                clusterAlignment.IsScanning = (RxGlobals.PrintSystem.PrinterType == Services.EPrinterType.printer_TX801 || RxGlobals.PrintSystem.PrinterType == Services.EPrinterType.printer_TX801);
+                clusterAlignment.IsScanning = RxGlobals.PrintSystem.IsScanning;
                 ClusterAlignmentDictionary[c] = clusterAlignment;
             }
             foreach (var elem in ClusterAlignmentDictionary)

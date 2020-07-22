@@ -80,9 +80,7 @@
     <converters:PuttyVisible_Converter      x:Key="PuttyVisible_Converter"/>
     <converters:PrintQueueCheckVisible_Converter      x:Key="PrintQueueCheckVisible_Converter"/>
     <converters:PrintQueueSaveCancelVisible_Converter      x:Key="PrintQueueSaveCancelVisible_Converter"/>
-    <converters:PrintQueueSaveCancelLB702Visible_Converter      x:Key="PrintQueueSaveCancelLB702Visible_Converter"/>
-    
-    
+
     <converters:PuttyDbgVisible_Converter   x:Key="PuttyDbgVisible_Converter"/>
     <converters:RotateRect_Converter        x:Key="RotateRect_Converter"/>
     <converters:ScanLength_Converter        x:Key="ScanLength_Converter"/>

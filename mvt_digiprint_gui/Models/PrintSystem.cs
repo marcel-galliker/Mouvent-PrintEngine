@@ -76,8 +76,8 @@ namespace RX_DigiPrint.Models
 	            case EPrinterType.printer_test_table:	    return true;
 	            case EPrinterType.printer_test_slide:	    return true;
                 case EPrinterType.printer_test_slide_only:  return true;
-                case EPrinterType.printer_TX801:			    return true;
-	            case EPrinterType.printer_TX802:			    return true;
+                case EPrinterType.printer_TX801:			return true;
+	            case EPrinterType.printer_TX802:			return true;
 	            default: return false;
 	            }
             }
