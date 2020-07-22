@@ -11,7 +11,6 @@
         <ResourceDictionary Source="XamGrid_Styles.xaml" />
         <ResourceDictionary Source="XamGrid2_Styles.xaml" />
         <ResourceDictionary Source="XamComboBox.xaml" />
-        <ResourceDictionary Source="XamComboBoxBlack.xaml" />
         <ResourceDictionary Source="CheckBox_Styles.xaml" />
         <ResourceDictionary Source="MouventStyle.xaml"/>
         <ResourceDictionary Source="DirTreeView.xaml" />

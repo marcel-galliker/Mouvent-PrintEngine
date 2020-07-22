@@ -264,7 +264,7 @@ static void _plc_set_par_default(void)
 	lc_get_value_by_name_UINT32(UnitID ".PAR_PRINTING_SPEED",			&speed);
 	if (speed<10) lc_set_value_by_name_UINT32(UnitID ".PAR_PRINTING_SPEED",		 30);
 
-	if(rx_def_is_scanning(RX_Config.printer.type))
+	if(rx_def_is_tx(RX_Config.printer.type))
 	{
 		lc_get_value_by_name_FLOAT(UnitID ".PAR_PRINTING_START_POSITION", &start);
 		lc_get_value_by_name_FLOAT(UnitID ".PAR_PRINTING_END_POSITION", &end);
@@ -735,6 +735,8 @@ static void _plc_load_par(void)
 
 	rex_load(PATH_USER FILENAME_PLC_CFG);
 	rex_load(PATH_USER FILENAME_PLC_PAR);
+
+	_plc_set_par_default();
 
 	if (lc_get_value_by_name(UnitID ".XML_HEAD_HEIGHT", value)==REPLY_OK)			
 		RX_Config.stepper.print_height=(UINT32)(1000*atof(value));
