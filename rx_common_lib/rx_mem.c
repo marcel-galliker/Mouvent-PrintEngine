@@ -59,6 +59,9 @@ BYTE* rx_mem_alloc(UINT64 size)
 		if (buf==NULL) 
 		{
 			rx_mem_clear_caches();
+            #ifdef USE_MLOCK
+			Error(WARN, 0, "Linux cleared caches.");
+			#endif
 			if (size/(1024*1024)>=rx_mem_get_freeMB()) return NULL;
 			buf = malloc(size+sizeof(SBuffer));
 		}
