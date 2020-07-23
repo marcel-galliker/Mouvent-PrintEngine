@@ -23,7 +23,7 @@ static HANDLE _Mutex = NULL;
 static int _Buffers=0;
 static UINT64 _SizeAllocated=0;
 
-#undef  USE_MLOCK
+#define  USE_MLOCK
 
 //---------------------------------------------------------------------
 //

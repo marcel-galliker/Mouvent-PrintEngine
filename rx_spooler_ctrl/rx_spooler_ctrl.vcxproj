@@ -425,8 +425,8 @@ copy "$(ProjectDir)..\Externals\Tec-it\Win\TBarCode11\Bin\TBarCode11_x64.dll" "$
     <ClInclude Include="data_client.h" />
     <ClInclude Include="gcc_Debug.h" />
     <ClInclude Include="gcc_Release.h" />
+    <ClInclude Include="gpu.h" />
     <ClInclude Include="jet_correction.h" />
-    <ClInclude Include="rx_slicescreen_fms_1x3_gpu.h" />
     <ClInclude Include="screening.h" />
     <ClInclude Include="spool_arp.h" />
     <ClInclude Include="test.h" />
@@ -458,7 +458,7 @@ copy "$(ProjectDir)..\Externals\Tec-it\Win\TBarCode11\Bin\TBarCode11_x64.dll" "$
     <None Include="rx_spooler_ctrl-Release-lx.vgdbsettings" />
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="rx_slicescreen_fms_1x3_gpu.cu" />
+    <CudaCompile Include="gpu.cu" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

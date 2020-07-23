@@ -627,7 +627,6 @@ typedef struct
 	UINT32			headsPerColor;			
 	UINT32			inkSupplyCnt;
 	UINT32			inkCylindersPerColor;
-	INT32			headFpVoltage[MAX_HEAD_DIST];
 	INT32			headDist[MAX_HEAD_DIST];
 	INT32			headDistBack[MAX_HEAD_DIST];
 	INT32			colorOffset[MAX_COLORS];

@@ -41,7 +41,6 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
         {
             InitializeComponent();
 
-            RxGlobals.PrintSystem.PropertyChanged += PrintSystem_PropertyChanged;
             RxGlobals.Chiller.PropertyChanged += Chiller_PropertyChanged;
             RxGlobals.User.PropertyChanged += User_PropertyChanged;
             User_PropertyChanged(null, null);
@@ -53,18 +52,6 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
             Button_PurgeHard.Visibility = collapsed;
             Button_PurgeSoft.Visibility = collapsed;
             Button_PurgeMicro.Visibility = collapsed;
-        }
-
-        private void PrintSystem_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName.Equals("HeadFpVoltage"))
-            {
-                try { FpVoltage.Text = RxGlobals.PrintSystem.HeadFpVoltage[PrintHeadIndex].ToString(); }
-                catch (Exception)
-                {
-                    FpVoltage.Text = "";
-                }
-            }
         }
 
         private void User_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -122,11 +109,6 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
             CmdPopup.Open(CmdButton);
         }
 
-        private void FpVoltage_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            RxGlobals.PrintSystem.SetFpVoltage(PrintHeadIndex, Rx.StrToInt32(FpVoltage.Text));
-        }
-
         private void _command(string name, EFluidCtrlMode cmd)
         {
             HeadStat stat = DataContext as HeadStat;
@@ -165,21 +147,6 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
         private void Flush_Clicked(object sender, RoutedEventArgs e) { _command("Flush", EFluidCtrlMode.ctrl_flush_night); }
         private void Wipe_Clicked(object sender, RoutedEventArgs e) { _command(null, EFluidCtrlMode.ctrl_wipe); }
 
-        private void ServiceGrid_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            if ((bool)e.NewValue)
-            {
-                try
-                {
-                    FpVoltage.Text = RxGlobals.PrintSystem.HeadFpVoltage[PrintHeadIndex].ToString();
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.Message);
-                    FpVoltage.Text = "";
-                }
-            }
-        }
     
     }
 }

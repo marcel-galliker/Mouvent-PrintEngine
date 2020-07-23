@@ -137,18 +137,14 @@
                               IsEnabled="{Binding CanAddJetNumber, Converter={StaticResource BoolToVisible_Converter}}"
                               Click="AddJet_Clicked" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}"
                               >
-                    <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" 
-                                            Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 
-                                                Kind="Plus"></iconPacks:PackIconMaterial>
+                    <iconPacks:PackIconMaterial Kind="Plus" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Height="20"/>
                 </common:MvtButton>
 
                 <common:MvtButton x:Name="LoadFileButton" Margin="5"
                               IsEnabled="{Binding CanAddJetNumber, Converter={StaticResource BoolToVisible_Converter}}"
                              Click="LoadFile_Clicked"  Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}"
                               >
-                    <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" 
-                                            Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 
-                                                Kind="FolderOpenOutline"></iconPacks:PackIconMaterial>
+                    <iconPacks:PackIconMaterial Kind="Import" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Height="20"/>
                 </common:MvtButton>
 
             </StackPanel>

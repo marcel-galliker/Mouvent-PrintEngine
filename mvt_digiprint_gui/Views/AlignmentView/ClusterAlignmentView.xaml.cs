@@ -272,7 +272,6 @@ namespace RX_DigiPrint.Views.Alignment
             JetCompensationDensityView view = new JetCompensationDensityView(globalHeadNumber);
             
             view.ShowDialog();
-
         }
 
         private void RegisterCorrectionButton_Click(object sender, RoutedEventArgs e)

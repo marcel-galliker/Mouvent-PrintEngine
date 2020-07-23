@@ -222,7 +222,11 @@
             </Trigger>
         </Style.Triggers>
     </Style>
-
+    <Style x:Key="Mouvent.RoundIconButtonStyle.LightIconM" TargetType="iconPacks:PackIconMaterial" BasedOn="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}">
+        <Setter Property="Width" Value="20" />
+        <Setter Property="Height" Value="20"/>
+    </Style>
+    
     <Style x:Key="Mouvent.RoundIconButtonStyle.LightIconOcticons" TargetType="iconPacks:PackIconOcticons">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Foreground" Value="White" />
@@ -557,6 +561,9 @@
     <Style x:Key="Mouvent.RoundIconButtonStyle.DarkIcon" TargetType="iconPacks:PackIconMaterial">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Foreground" Value="{StaticResource Mouvent.MainColorBrush}" />
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Width" Value="{Binding Height}" />
         <Style.Triggers>
             <Trigger Property="IsEnabled" Value="False">
                 <Setter Property="Foreground" Value="{StaticResource Mouvent.CommandButtonDisabledIcon_Inverted}"/>

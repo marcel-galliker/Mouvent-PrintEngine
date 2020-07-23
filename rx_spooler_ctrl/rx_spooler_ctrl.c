@@ -16,7 +16,7 @@
 #include "rx_threads.h"
 #include "rx_trace.h"
 #include "args.h"
-#include "rx_slicescreen_fms_1x3_gpu.h"
+#include "gpu.h"
 #include "ctrl_client.h"
 #include "data_client.h"
 #include "head_client.h"	
@@ -161,7 +161,7 @@ int main(int argc, char* argv[])
 		strcpy(_IpAddrMain, "localhost");	
 	#endif
 	ctrl_start(_IpAddrMain);
-
+	
 	printf("press \"X\" to stop\n");
 	while (TRUE)
 	{

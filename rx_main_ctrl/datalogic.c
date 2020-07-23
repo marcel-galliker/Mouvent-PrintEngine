@@ -283,7 +283,6 @@ void dl_get_barcode(int isNo, char *scannerSN, char *barcode)
 	{
 		if (_Scanner[i].handle>0 && (isNo<0 || _Scanner[i].isNo==isNo)) 
 		{
-			TrPrintfL(TRUE, "Copy Barcode isNo=%d", isNo);
 			strncpy(scannerSN, _Scanner[i].scannerSN, sizeof(_Scanner[i].scannerSN));
 			strncpy(barcode,   _Scanner[i].code, sizeof(_Scanner[i].code));
 			return;

@@ -617,14 +617,12 @@ static void _send_ink_def(int headNo, char *dots)
 				memcpy(msg.dots, dots, sizeof(msg.dots));
 				
 				no = headNo*HEAD_CNT+n;
-				if (RX_Config.headFpVoltage[no])							msg.fpVoltage = RX_Config.headFpVoltage[no];
-				else if (RX_HBStatus[headNo].head[n].eeprom_mvt.voltage)	msg.fpVoltage = RX_HBStatus[headNo].head[n].eeprom_mvt.voltage;
-				else														msg.fpVoltage = RX_HBStatus[headNo].head[n].eeprom.voltage;
+				if (RX_HBStatus[headNo].head[n].eeprom_mvt.voltage)	msg.fpVoltage = RX_HBStatus[headNo].head[n].eeprom_mvt.voltage;
+				else												msg.fpVoltage = RX_HBStatus[headNo].head[n].eeprom.voltage;
 
-                ErrorEx(dev_head, n, LOG, 0, "Head[%d]: FirepulseVoltage=%d%% (user=%d, mvt=%d, fuji=%d)",
-					n+1,
+                Error(LOG, 0, "Head %s: FirepulseVoltage=%d%% (mvt=%d, fuji=%d)",
+					RX_Config.headBoard[headNo].head[n].name,
 					msg.fpVoltage,
-					RX_Config.headFpVoltage[no], 
 					RX_HBStatus[headNo].head[n].eeprom_mvt.voltage, 
 					RX_HBStatus[headNo].head[n].eeprom.voltage);
 

@@ -24,7 +24,7 @@
 #include "bmp.h"
 #include "tcp_ip.h"
 #include "spool_rip.h"
-#include "rx_slicescreen_fms_1x3_gpu.h"
+#include "gpu.h"
 #include "ctrl_client.h"
 #include "head_client.h"
 #include "jet_correction.h"
@@ -510,9 +510,9 @@ int  data_malloc(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPixel,
 					TrPrintfL(1, "buffer[%d]: IS FREE", i);
 					if (!_Abort)
 					{
-						TrPrintfL(1, "data_malloc buffer 1[%d], %p, free=%d MB, size=%d MB", i, buffer[i], rx_mem_get_freeMB(), memsize/1024/1024);							
+						TrPrintfL(1, "data_malloc buffer [%d] %p, free=%d MB, size=%d MB start", i, buffer[i], rx_mem_get_freeMB(), memsize/1024/1024);
 						buffer[i] = rx_mem_alloc(memsize);
-						TrPrintfL(1, "data_malloc buffer[%d], %p, free=%d MB, size=%d MB", i, buffer[i], rx_mem_get_freeMB(), memsize/1024/1024);
+						TrPrintfL(1, "data_malloc buffer [%d] %p, free=%d MB, size=%d MB done", i, buffer[i], rx_mem_get_freeMB(), memsize/1024/1024);
 						if (buffer[i]==NULL) error=TRUE;
 						*pBufSize = memsize;
 					}
@@ -735,8 +735,8 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 			else if (printMode!=PM_TEST && printMode!=PM_TEST_SINGLE_COLOR)  jc_correction(&bmpInfo, &_PrintList[_InIdx], 0);
 		}
 		#ifdef DEBUG
-//		if (FALSE)
-		if (loaded)
+		if (FALSE)
+//		if (loaded)
 		{
 			char dir[MAX_PATH];
 			char fname[MAX_PATH];

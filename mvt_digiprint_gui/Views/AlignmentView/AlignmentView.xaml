@@ -49,9 +49,9 @@
                 </common:MvtButton>
                 
                 <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" ToolTip="Import Scan Check Values" x:Name="Button_ScanCheck" Click="ScanCheckImportButton_Click" Margin="0, 5, 15, 5" >
-                    <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" 
-                                                Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}"
-                                                Width="20" Height="20" Kind="Import"></iconPacks:PackIconMaterial>
+                    <iconPacks:PackIconMaterial Kind="Import" HorizontalAlignment="Stretch" VerticalAlignment="Center" 
+                                                Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIconM}"
+                                                Width="20" Height="20"></iconPacks:PackIconMaterial>
                 </common:MvtButton>
                 <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" ToolTip="Reset all Values"
                                  x:Name="Button_ScanCheckClearValues" Click="ScanCheckClearButton_Click" Margin="0, 0, 15, 0" >

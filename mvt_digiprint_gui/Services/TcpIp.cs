@@ -827,8 +827,6 @@ namespace RX_DigiPrint.Services
             public Int32 InkCylindersPerColor;
 
             [MarshalAs(UnmanagedType.ByValArray, SizeConst =(6*48))] // color*heads
-            public Int32[]		headFpVoltage;
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst =(6*48))] // color*heads
             public Int32[]		headDist;
             [MarshalAs(UnmanagedType.ByValArray, SizeConst =(6*48))] // color*heads
             public Int32[]		headDistBack;

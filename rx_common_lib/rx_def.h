@@ -1577,7 +1577,6 @@ typedef struct SRxConfig
 	SHeadBoardCfg	headBoard[HEAD_BOARD_CNT];	
 	INT32			externalData;
 	SConditionerCfg	cond[MAX_HEAD_DIST];
-	INT32			headFpVoltage[MAX_HEAD_DIST];
 	struct
 	{
 		INT32			tara[MAX_SCALES];

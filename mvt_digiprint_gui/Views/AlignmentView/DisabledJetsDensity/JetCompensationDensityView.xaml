@@ -40,10 +40,7 @@
                 <common:MvtButton 
                     Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}" Margin="5"
                                  Click="Save_Click" IsChecked="{Binding Changed}" IsEnabled="{Binding Changed}">
-                    <iconPacks:PackIconMaterial
-                                        Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}"
-                                        Kind="ContentSaveOutline"
-                                        VerticalAlignment="Center" HorizontalAlignment="Center" Width="20" Height="20"/>
+                    <iconPacks:PackIconMaterial Kind="ContentSaveOutline" Height="20" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}"/>
                 </common:MvtButton>
 
                 <common:MvtButton
@@ -51,7 +48,7 @@
                                  Click="Exit_Click">
                     <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}"
                                         Kind="{Binding Changed, Converter={StaticResource ExitDialogIconConverter}}"
-                                        VerticalAlignment="Center" HorizontalAlignment="Center" Width="20" Height="20"/>
+                                        Height="20"/>
                 </common:MvtButton>
             </StackPanel>
         </Grid>

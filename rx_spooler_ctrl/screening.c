@@ -29,7 +29,7 @@
 #include "data_client.h"
 #include "rx_slicescreen.h"
 #include "rx_screen_fms_1x3.h"
-#include "rx_slicescreen_fms_1x3_gpu.h"
+#include "gpu.h"
 
 #include "data.h"
 #include "screening.h"
@@ -358,6 +358,7 @@ void scr_start(SBmpSplitInfo *pInfo)
 	}
 	
 	memcpy(&_Id, &pInfo->pListItem->id, sizeof(_Id));
+    TrPrintfL(TRUE, "Head[%d.%d]: screening START, (id=%d, page=%d, copy=%d, scan=%d)",pInfo->board, pInfo->head, _Id.id, _Id.page, _Id.copy, _Id.scan);
 	//--- calculating blkCnt -------------------
 	{
 		int dstLineLen;
@@ -384,6 +385,7 @@ void scr_start(SBmpSplitInfo *pInfo)
 	rx_mutex_unlock(_ScrFifoMutex);
 	
 	rx_sem_post(_SemScreeningStart);
+    TrPrintfL(TRUE, "Head[%d.%d]: screening STARTED, (id=%d, page=%d, copy=%d, scan=%d)",pInfo->board, pInfo->head, _Id.id, _Id.page, _Id.copy, _Id.scan);
 }
 
 //--- scr_wait -----------------------------------------------------
@@ -417,7 +419,7 @@ static void *_screening_thread(void* lpParameter)
 
 		if (!_ScrThreadRunning) return NULL;
 	
-	//	TrPrintfL(TRUE, "_screening_thread[%d] START", threadNo);
+		TrPrintfL(TRUE, "_screening_thread[%d] START", threadNo);
 		rx_mutex_lock(_ScrFifoMutex);
 		{
 			if (_ScrFifoInIdx==_ScrFifoOutIdx) Error(ERR_ABORT, 0, "ScrFifo Empty");
@@ -434,7 +436,7 @@ static void *_screening_thread(void* lpParameter)
 		}
 		rx_mutex_unlock(_ScrFifoMutex);
 
-	//	TrPrintfL(TRUE, "_screening_thread[%d] END", threadNo);
+		TrPrintfL(TRUE, "_screening_thread[%d] END", threadNo);
 		rx_sem_post(_SemScreeningDone);
 	}
 	return NULL;

@@ -79,6 +79,7 @@ static void _do_print_done_evt	(RX_SOCKET socket, SPrintDoneMsg	*msg);
 static int _do_log_evt			(RX_SOCKET socket, SLogMsg			*msg);
 static int _do_pause_printing	(RX_SOCKET socket);
 static int _do_start_printing	(RX_SOCKET socket);
+static void _start_spooler_ctrl(int no);
 
 // int send_head_configs(RX_SOCKET socket);
 
@@ -213,7 +214,12 @@ static int _handle_spool_deconnected(RX_SOCKET socket, const char *peerName)
 	EDevice device;
 	int no;
 	net_ipaddr_to_device(peerName, &device, &no);
-	if (no<SIZEOF(_Spooler)) _Spooler[no].socket = INVALID_SOCKET;
+	if (no<SIZEOF(_Spooler)) 
+	{
+		ErrorEx(dev_spooler, no, ERR_ABORT, 0, "Connection lost");
+		_Spooler[no].socket = INVALID_SOCKET;
+		_start_spooler_ctrl(no);
+	}
 	return REPLY_OK;
 }
 
@@ -370,6 +376,22 @@ int spool_is_ready(void)
 	return (_Ready!=0) && (_MsgSent==_MsgGot);
 }
 
+//--- _start_spooler_ctrl ----------------------
+static void _start_spooler_ctrl(int no)
+{
+	if (no==0)
+	{
+		#ifdef WIN32
+			rx_process_start(PATH_BIN_WIN FILENAME_SPOOLER_CTRL".exe", NULL);
+		#else
+			rx_process_start(PATH_BIN_SPOOLER FILENAME_SPOOLER_CTRL, NULL);
+		#endif
+//		rx_sleep(500);
+		Error(WARN, 0, "rx_spooler_ctrl[%d] restarted", no);
+	}
+	else Error(ERR_ABORT, 0, "Starting spooler no!=0 not implemented");
+}
+
 //--- spool_start_printing --------------------------------
 void spool_start_printing(void)
 {	
@@ -383,6 +405,8 @@ void spool_start_printing(void)
 	//--- check local spooler is running ------------------
 	if (rx_process_running_cnt(FILENAME_SPOOLER_CTRL, NULL)==0)
 	{
+		_start_spooler_ctrl(0);
+		/*
 		#ifdef WIN32
 			rx_process_start(PATH_BIN_WIN FILENAME_SPOOLER_CTRL".exe", NULL);
 		#else
@@ -390,6 +414,7 @@ void spool_start_printing(void)
 		#endif
 		rx_sleep(500);
 		Error(WARN, 0, "rx_spooler_ctrl restarted");
+		*/
 	}
 //	#endif
 	memset(_LoadedFiles, 0, sizeof(_LoadedFiles));
