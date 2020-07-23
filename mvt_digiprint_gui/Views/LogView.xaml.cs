@@ -23,7 +23,7 @@ namespace RX_DigiPrint.Views
             Scroll.Minimum  = 0;
             Scroll.Maximum  = 0;
             Scroll.Value    = 0;
-            Scroll.ViewportSize = 0;
+            Scroll.ViewportSize = 20;
             
             //--- test assembly number -----------------------------------------------
             Assembly ass = Assembly.GetExecutingAssembly();
@@ -106,7 +106,7 @@ namespace RX_DigiPrint.Views
         private double _rowHeight=0;
         private void LogGrid_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            UInt32 rows = 10;
+            UInt32 rows = 20;
             if (LogGrid.Rows.Count>0 && LogGrid.Rows[0].ActualHeight!=_rowHeight && LogGrid.Rows[0].ActualHeight!=0)
             {
                 _rowHeight = LogGrid.Rows[0].ActualHeight;
@@ -115,6 +115,7 @@ namespace RX_DigiPrint.Views
                 if (RxScreen.Screen.Surface) rows-=2;
                 else rows-=1;
             }
+            if (rows<20) rows=20;
             if (rows>Scroll.ViewportSize)
 			{
                 Scroll.ViewportSize = rows;
