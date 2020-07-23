@@ -23,7 +23,7 @@ namespace RX_DigiPrint.Views
             Scroll.Minimum  = 0;
             Scroll.Maximum  = 0;
             Scroll.Value    = 0;
-            Scroll.ViewportSize = 20;
+            Scroll.ViewportSize = 0;
             
             //--- test assembly number -----------------------------------------------
             Assembly ass = Assembly.GetExecutingAssembly();
@@ -34,7 +34,7 @@ namespace RX_DigiPrint.Views
             Search_clicked(this, null);
 
             RxGlobals.Log.List.CollectionChanged += Log_CollectionChanged;
-          //  LogGrid_SizeChanged(this, null);
+            LogGrid_SizeChanged(this, null);
 
             //--- test publish number -------------------------------------------------
             // needs "System.Deployment" in References
@@ -59,7 +59,7 @@ namespace RX_DigiPrint.Views
             {
                 Scroll.Value=RxGlobals.Log.Pos;
             }
-            LogGrid_SizeChanged(this, null);
+          //  LogGrid_SizeChanged(this, null);
         }
 
         //--- LogGrid_CellControlAttached ---------------------------------------------------------------------------------------------------
@@ -106,7 +106,7 @@ namespace RX_DigiPrint.Views
         private double _rowHeight=0;
         private void LogGrid_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            UInt32 rows = 20;
+            UInt32 rows = 0;
             if (LogGrid.Rows.Count>0 && LogGrid.Rows[0].ActualHeight!=_rowHeight && LogGrid.Rows[0].ActualHeight!=0)
             {
                 _rowHeight = LogGrid.Rows[0].ActualHeight;
@@ -115,15 +115,15 @@ namespace RX_DigiPrint.Views
                 if (RxScreen.Screen.Surface) rows-=2;
                 else rows-=1;
             }
-            if (rows<20) rows=20;
-            if (rows>Scroll.ViewportSize)
+            if (rows<10) rows=10;
+            if (rows!=Scroll.ViewportSize)
 			{
                 Scroll.ViewportSize = rows;
                 if (rows>2) Scroll.LargeChange  = rows-2;
                 else        Scroll.LargeChange  = 1;
-                Scroll.SmallChange = 1;
-                SendLogRequest("", "", Scroll.Value, rows);
+                Scroll.SmallChange = 1;    
 			}
+            SendLogRequest("", "", Scroll.Value, rows);
         }
 
         //--- Scroll_ValueChanged -----------------------------------------------------------------
