@@ -110,7 +110,7 @@
 			HeaderStyle="{DynamicResource XamGridHeaderStyle}" 
             RowHover="Row"
 			CellControlAttached="LogGrid_CellControlAttached"
-			CellStyle="{DynamicResource XamGridLogCellControlStyle}" 
+			CellStyle="{DynamicResource XamGridLogCellControlStyle}"
             SizeChanged="LogGrid_SizeChanged" 
 			BorderThickness="1"
             Height="auto"
@@ -153,11 +153,10 @@
         <ScrollBar x:Name="Scroll"
 			Grid.Row="1" 
 			Grid.Column="1" 
-			Width="20" 
+            Style="{DynamicResource RxScrollBarStyle}"
 			HorizontalAlignment="Left" 
 			VerticalAlignment="Stretch"
 			ValueChanged="Scroll_ValueChanged"/>
-
         <rx:RxPopup x:Name="LongTextPopUp"
                    Panel.ZIndex="10"
                    Width="auto"

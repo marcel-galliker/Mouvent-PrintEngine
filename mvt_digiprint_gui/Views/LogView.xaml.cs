@@ -113,7 +113,7 @@ namespace RX_DigiPrint.Views
                 rows = (UInt32)(LogGrid.ActualHeight/_rowHeight);
                 
                 if (RxScreen.Screen.Surface) rows-=2;
-                else rows-=1;
+              //  else rows-=1;
             }
             if (rows<10) rows=10;
             if (rows!=Scroll.ViewportSize)
@@ -187,9 +187,8 @@ namespace RX_DigiPrint.Views
         {
             TcpIp.SLogReqMsg msg = new TcpIp.SLogReqMsg();
             msg.first           = 0;
-            msg.count           = 200;
-            
-            // msg.count           = 100000;
+            msg.count           = 200;  
+        //  msg.count           = RxGlobals.Log.ItemCount;
 
             RxGlobals.RxInterface.SendMsg(TcpIp.CMD_EXPORT_LOG, ref msg);
         }
@@ -221,7 +220,7 @@ namespace RX_DigiPrint.Views
         //--- Bottom_clicked ----------------------------------------------------------
         private void Bottom_clicked(object sender, System.Windows.RoutedEventArgs e)
         {
-            double val = Scroll.Maximum-Scroll.LargeChange;
+            double val = Scroll.Maximum-Scroll.LargeChange+2;
             if (val>0) Scroll.Value = val;
             else       Scroll.Value = 0;
         }
