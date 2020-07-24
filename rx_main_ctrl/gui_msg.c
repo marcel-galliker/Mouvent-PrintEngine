@@ -329,7 +329,7 @@ static void _do_req_log(RX_SOCKET socket, SLogReqMsg *pmsg)
 	SLogMsg		msg;
 	log_Handle	log=NULL;
 
-	TrPrintf(TRUE, "_do_req_log");
+//	TrPrintf(TRUE, "_do_req_log");
 	_check_format("_do_req_log", pmsg, sizeof(*pmsg));
 	
 	if (pmsg->filepath[0]) log_open(pmsg->filepath, &log, FALSE);
