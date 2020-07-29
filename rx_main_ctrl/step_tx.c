@@ -36,6 +36,8 @@ static int					_WashDone   = FALSE;
 static void _check_wrinkle_detection(void);
 static void _steptx_rob_control(void);
 static void _empty_cap(void);
+static void _steptx_lift_to_clean_pos(void);
+static int	_steptx_lift_in_clean_pos(void);
 
 
 //--- steptx_init ---------------------------------------------------
@@ -139,7 +141,25 @@ void steptx_lift_to_print_pos(void)
 //--- steptx_lift_in_print_pos ----------------------
 int steptx_lift_in_print_pos(void)
 {
-    return _Status[0].info.z_in_print && (_step_socket[1] == INVALID_SOCKET || _Status[1].info.z_in_print);
+    return _Status[0].info.z_in_print && (_step_socket[1] == INVALID_SOCKET || _Status[1].robinfo.z_in_print);
+}
+
+//--- _steptx_lift_to_clean_pos -----------------------------
+static void _steptx_lift_to_clean_pos(void)
+{
+    if (RX_Config.printer.type == printer_test_table)
+        sok_send_2(&_step_socket[0], CMD_LIFT_PRINT_POS, sizeof(UINT32), &RX_Config.stepper.cap_height);
+    else // TX801/TX802
+    {
+        INT32 height = RX_Config.stepper.print_height + RX_Config.stepper.material_thickness;
+        sok_send_2(&_step_socket[0], CMD_LIFT_PRINT_POS, sizeof(height), &height);
+    }
+}
+
+//--- _steptx_lift_in_clean_pos ----------------------
+static int _steptx_lift_in_clean_pos(void)
+{
+    return _Status[0].info.z_in_print;
 }
 
 //--- steptx_lift_to_up_pos -----------------------------------
@@ -320,10 +340,10 @@ static void _steptx_rob_control(void)
 	{		
 	//--- ctrl_wash --------------------------------------------------------------------------------------
 	case ctrl_wash:				_RobotCtrlMode = ctrl_wash_step1;
-								if (!step_lift_in_up_pos() || !step_lift_in_print_pos())	step_lift_to_print_pos();
+								if (!step_lift_in_up_pos() || !_steptx_lift_in_clean_pos())	_steptx_lift_to_clean_pos();
 								break;
 				
-	case ctrl_wash_step1:		if (step_lift_in_print_pos() || step_lift_in_up_pos())
+	case ctrl_wash_step1:		if (_steptx_lift_in_clean_pos() || step_lift_in_up_pos())
 								{
 									_RobotCtrlMode = ctrl_wash_step2;
 									if (!step_rob_reference_done()) step_rob_do_reference();
@@ -338,7 +358,7 @@ static void _steptx_rob_control(void)
 								}
 								break;
 			
-	case ctrl_wash_step3:		if (plc_in_wipe_pos() && step_rob_in_wipe_pos(rob_fct_wash) && (step_lift_in_print_pos() || step_lift_in_up_pos()))
+	case ctrl_wash_step3:		if (plc_in_wipe_pos() && step_rob_in_wipe_pos(rob_fct_wash) && (_steptx_lift_in_clean_pos() || step_lift_in_up_pos()))
 								{
 									_RobotCtrlMode = ctrl_wash_step4;
 									step_lift_to_wipe_pos(ctrl_wash);
@@ -367,10 +387,10 @@ static void _steptx_rob_control(void)
 				
 	//--- ctrl_wipe -------------------------------------------------------------------------------------
 	case ctrl_wipe:				_RobotCtrlMode = ctrl_wipe_step1;
-								if (!step_lift_in_print_pos() && !step_lift_in_up_pos())	step_lift_to_print_pos();
+								if (!_steptx_lift_in_clean_pos() && !step_lift_in_up_pos())	_steptx_lift_to_clean_pos();
 								break;
 				
-	case ctrl_wipe_step1:		if (step_lift_in_print_pos() || step_lift_in_up_pos())
+	case ctrl_wipe_step1:		if (_steptx_lift_in_clean_pos() || step_lift_in_up_pos())
 								{
 									_RobotCtrlMode=ctrl_wipe_step2;
 									if (!step_rob_reference_done()) step_rob_do_reference();
@@ -402,22 +422,22 @@ static void _steptx_rob_control(void)
 	case ctrl_wipe_step5:		if (step_rob_wipe_done(ctrl_wipe))
 								{
 									_RobotCtrlMode=ctrl_wipe_step6;
-									step_lift_to_print_pos();
+									_steptx_lift_to_clean_pos();
 								}
 								break;
 
-	case ctrl_wipe_step6:		if (step_lift_in_print_pos())
+	case ctrl_wipe_step6:		if (_steptx_lift_in_clean_pos())
 								{
 									_RobotCtrlMode = ctrl_vacuum;
 								}
 								break;
 				
 	//--- ctrl_vacuum ----------------------------------------------------
-	case ctrl_vacuum:			if (!step_lift_in_up_pos())	step_lift_to_print_pos();
+	case ctrl_vacuum:			if (!step_lift_in_up_pos())	_steptx_lift_to_clean_pos();
 								_RobotCtrlMode = ctrl_vacuum_step1;
 								break;
 				
-	case ctrl_vacuum_step1:		if (step_lift_in_up_pos() || step_lift_in_print_pos())
+	case ctrl_vacuum_step1:		if (step_lift_in_up_pos() || _steptx_lift_in_clean_pos())
 								{
 									_RobotCtrlMode=ctrl_vacuum_step2;
 									if (!step_rob_reference_done())
@@ -449,11 +469,11 @@ static void _steptx_rob_control(void)
 	case ctrl_vacuum_step5:		if (step_rob_wipe_done(ctrl_vacuum))
 								{
 									_RobotCtrlMode=ctrl_vacuum_step6;
-									step_lift_to_print_pos();
+									_steptx_lift_to_clean_pos();
 								}
 								break;
 				
-	case ctrl_vacuum_step6:		if (step_lift_in_print_pos())
+	case ctrl_vacuum_step6:		if (_steptx_lift_in_clean_pos())
 								{
 									_RobotCtrlMode=ctrl_vacuum_step7;
 									step_rob_to_wipe_pos(rob_fct_vacuum_change);
@@ -483,11 +503,11 @@ static void _steptx_rob_control(void)
 	case ctrl_vacuum_step9:		if (step_rob_wipe_done(ctrl_vacuum))
 								{
 									_RobotCtrlMode = ctrl_vacuum_step10;
-									step_lift_to_print_pos();
+									_steptx_lift_to_clean_pos();
 								}
 								break;
 		
-	case ctrl_vacuum_step10:	if (step_lift_in_print_pos())
+	case ctrl_vacuum_step10:	if (_steptx_lift_in_clean_pos())
 								{
 									_RobotCtrlMode = ctrl_vacuum_step11;
 									_RisingEdge = FALSE;

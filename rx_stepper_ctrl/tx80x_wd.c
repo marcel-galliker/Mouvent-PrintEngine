@@ -58,7 +58,6 @@ static int  _CmdRunning = 0;
 static char _CmdName[32];
 static int  _PrintPos_New = 0;              // in um
 static int  _PrintPos_Act = 0;              // in um
-static int  _WD_in_print = 0;
 static int  _WrinkleDetected = 0;
 
 // Motor movement Parameters
@@ -113,7 +112,7 @@ void tx80x_wd_main(void)
 
     if (RX_StepperStatus.robinfo.moving_wd)
     {
-        _WD_in_print = FALSE;
+        RX_StepperStatus.robinfo.z_in_print = FALSE;
         _WrinkleDetected = 0;
     }
 
@@ -154,7 +153,7 @@ void tx80x_wd_main(void)
             if (!ok) RX_StepperStatus.robinfo.ref_done_wd = FALSE;
         }
 
-        _WD_in_print = (_CmdRunning == CMD_LIFT_PRINT_POS && RX_StepperStatus.info.ref_done);
+        RX_StepperStatus.robinfo.z_in_print = (_CmdRunning == CMD_LIFT_PRINT_POS && RX_StepperStatus.robinfo.ref_done_wd);
 
         if (_CmdRunning == CMD_LIFT_REFERENCE && _PrintPos_New)
         {
@@ -229,6 +228,7 @@ void tx80x_wd_display_status(void)
     term_printf("WD-Motor Front pos:    %d\n", TX_REF_HEIGHT_WD - _steps_2_micron(motor_get_step(MOTOR_WD_FRONT)));
     term_printf("WD-Motor Back pos:     %d\n", TX_REF_HEIGHT_WD - _steps_2_micron(motor_get_step(MOTOR_WD_BACK)));
     term_printf("Wrinkle Detected:      %d\n", RX_StepperStatus.robinfo.wrinkle_detected);
+    term_printf("WD in print pos:       %d\n", RX_StepperStatus.robinfo.z_in_print);
     term_printf("\n");
 }
 
@@ -276,7 +276,7 @@ int tx80x_wd_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             pos = TX_REF_HEIGHT_WD;
             Error(WARN, 0, "CMD_LIFT_PRINT_POS of Wrinkle Detection set to MAX pos=%d.%03d mm", pos / 1000, pos % 1000);
         }
-        if (!_CmdRunning && (!_WD_in_print || (steps != _PrintPos_Act)))
+        if (!_CmdRunning && (!RX_StepperStatus.robinfo.z_in_print || (steps != _PrintPos_Act)))
         {
             _PrintPos_New =
                 _micron_2_steps(TX_REF_HEIGHT_WD + WD_UNDER_PRINT_HIGH - pos);

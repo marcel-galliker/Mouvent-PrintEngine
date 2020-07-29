@@ -453,7 +453,6 @@ void txrob_main(int ticks, int menu)
 	// --- set positions False while moving ---
 	if (RX_StepperStatus.robinfo.moving) //  && (Fpga.stat->moving != 0))
 	{
-		RX_StepperStatus.robinfo.z_in_print = FALSE;
 		RX_StepperStatus.robinfo.z_in_cap = FALSE;
 		RX_StepperStatus.robinfo.move_ok = FALSE;
 		RX_StepperStatus.robinfo.wipe_ready = FALSE;
