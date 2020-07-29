@@ -1544,8 +1544,8 @@ static void _plc_state_ctrl()
 		}
 		
 		if(_StartPrinting
-			&& _StartEncoderItem.pageWidth == 0 
-			&& enc_ready()
+			&& (_StartEncoderItem.pageWidth == 0 
+			&& enc_ready())
 			&& pq_is_ready2print(&_StartEncoderItem) 
 			&& (RX_PrinterStatus.printState == ps_printing || RX_PrinterStatus.printState == ps_ready_power)
 			&& z_in_print)

@@ -69,4 +69,4 @@ int  tt_stop_printing  (void);
 int  tt_abort_printing (void);
 int  tt_clean		   (void);
 int	 tt_cap_to_print_pos(void);
-void step_adjust_heads(RX_SOCKET socket, SHeadAdjustment *headAdjustment);
+void step_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment);

@@ -517,7 +517,7 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
 	}
 }
 
-void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustment *headAdjustment)
+void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
 {
     int stepperno;
     if (RX_Config.inkSupplyCnt % 2 == 0)
@@ -525,5 +525,7 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustment *headAdjustment)
     else
         stepperno = (headAdjustment->headNo+1) / 2;
 
-    sok_send_2(&_step_socket[stepperno], CMD_ROB_TURN_SCREW, sizeof(headAdjustment), &headAdjustment);
+    sok_send(&_step_socket[stepperno], &headAdjustment);
+
+    //sok_send_2(&_step_socket[stepperno], CMD_ROB_TURN_SCREW, sizeof(headAdjustment), &headAdjustment);
 }

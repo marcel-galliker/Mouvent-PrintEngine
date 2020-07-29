@@ -864,7 +864,8 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         _CmdRunning = 0;
         _CmdSearchScrews = 0;
         _CmdScrewing = 0;
-        robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_STOP, NULL);
+        if (robi_connected())
+            robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_STOP, NULL);
         break;
 
     case CMD_ROB_REFERENCE:
@@ -886,7 +887,7 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             }
             break;
         }
-        else if (!RX_StepperStatus.screwerinfo.z_in_down)
+        else if (!RX_StepperStatus.screwerinfo.z_in_down && robi_connected())
         {
             _CmdRunning_Robi = CMD_ROBI_MOVE_Z_DOWN;
             robi_handle_ctrl_msg(INVALID_SOCKET, _CmdRunning_Robi, NULL);
@@ -994,7 +995,7 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
     {
         int pos;
         _RobFunction = fct;
-        if (!RX_StepperStatus.screwerinfo.z_in_down /*&& robi_connected()*/)
+        if (!RX_StepperStatus.screwerinfo.z_in_down && robi_connected())
         {
             _CmdRunning_Robi = CMD_ROBI_MOVE_Z_DOWN;
             robi_handle_ctrl_msg(INVALID_SOCKET, _CmdRunning_Robi, NULL);

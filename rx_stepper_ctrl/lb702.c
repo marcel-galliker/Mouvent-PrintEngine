@@ -255,17 +255,19 @@ void lb702_main(int ticks, int menu)
 				
 				if (RX_StepperStatus.info.ref_done)
 				{
-					motors_reset(MOTOR_Z_BITS);
+                    
+                    motors_reset(MOTOR_Z_BITS);
                     TrPrintfL(TRUE, "CMD_LIFT_REFERENCE done, _Cmd_New=0x%08x",
                               _Cmd_New);
 					if (_Cmd_New)
 					{
+                        RX_StepperStatus.info.z_in_ref = TRUE;
                         _lb702_move_to_pos(_Cmd_New,
                                            _PrintPos_New[MOTOR_Z_BACK],
                                            _PrintPos_New[MOTOR_Z_FRONT]);
                         memcpy(_PrintPos_Act, _PrintPos_New,
                                sizeof(_PrintPos_Act));
-						RX_StepperStatus.cmdRunning = _Cmd_New;
+                        RX_StepperStatus.cmdRunning = _Cmd_New;
 					}
 					else
 					{
@@ -296,6 +298,15 @@ void lb702_main(int ticks, int menu)
                           _CmdName, _MotorName[motor]);
 					RX_StepperStatus.info.ref_done = FALSE;
 				}
+                else if (_Cmd_New)
+                {
+                    RX_StepperStatus.info.z_in_ref = TRUE;
+                    _lb702_move_to_pos(_Cmd_New, _PrintPos_New[MOTOR_Z_BACK],
+                                       _PrintPos_New[MOTOR_Z_FRONT]);
+                    memcpy(_PrintPos_Act, _PrintPos_New, sizeof(_PrintPos_Act));
+                    RX_StepperStatus.cmdRunning = _Cmd_New;
+                }
+                    
 				RX_StepperStatus.cmdRunning = FALSE;
 			}
 		}
@@ -319,7 +330,7 @@ void lb702_main(int ticks, int menu)
 				{
                     offset[motor] = _PrintPos_New[motor] -
                                     Fpga.stat->statMot[motor].position * STEPS;
-					if (abs(offset[motor]) > 64)  
+					if (abs(offset[motor]) > 128)  
 					{
                         Error(WARN, 0, "Motor %s position error: %d",
                               _MotorName[motor], offset[motor] * 10 / STEPS);
@@ -576,7 +587,7 @@ static void _lb702_move_to_pos(int cmd, int pos0, int pos1)
 	int adjust=0;
 	RX_StepperStatus.cmdRunning  = cmd;
 	
-    if (RX_StepperStatus.robot_used && !_CmdRunningRobi && !RX_StepperStatus.screwerinfo.y_in_ref && RX_StepperStatus.cmdRunning != CMD_LIFT_REFERENCE && RX_StepperStatus.cmdRunning != CMD_LIFT_SCREW /*&& robi_connected()*/)
+    if (RX_StepperStatus.robot_used && !_CmdRunningRobi && !RX_StepperStatus.screwerinfo.y_in_ref && RX_StepperStatus.cmdRunning != CMD_LIFT_REFERENCE && RX_StepperStatus.cmdRunning != CMD_LIFT_SCREW && robi_connected())
     {
         _CmdRunningRobi = CMD_ROBI_MOVE_TO_GARAGE;
         robi_handle_ctrl_msg(INVALID_SOCKET, _CmdRunningRobi, NULL);
@@ -612,7 +623,8 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									motors_stop(MOTOR_Z_BITS);
 									RX_StepperStatus.cmdRunning = 0;
 									_Cmd_New = FALSE;
-									if (RX_StepperStatus.robot_used) lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_STOP, NULL);
+                                    _NewCmd = FALSE;
+                                    if (RX_StepperStatus.robot_used) lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_STOP, NULL);
 									break;	
 
 	case CMD_LIFT_REFERENCE:			TrPrintfL(TRUE, "CMD_LIFT_REFERENCE");
@@ -655,7 +667,7 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									{
 										val0 = -1*_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_back  - _PrintHeight);
 										val1 = -1*_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_front - _PrintHeight);
-                                        if (!RX_StepperStatus.screwerinfo.y_in_ref && RX_StepperStatus.robot_used)
+                                        if (!RX_StepperStatus.screwerinfo.y_in_ref && robi_connected() && RX_StepperStatus.robot_used)
                                         {
                                             if (!RX_StepperStatus.info.z_in_ref || RX_StepperStatus.cmdRunning==CMD_LIFT_REFERENCE)
                                             {
@@ -675,7 +687,7 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 										{
 											if (!RX_StepperStatus.info.z_in_ref || RX_StepperStatus.cmdRunning==CMD_LIFT_REFERENCE)
 											{
-												_Cmd_New = msgId;
+                                                _Cmd_New = msgId;
 												_PrintPos_New[MOTOR_Z_BACK]  = val0;
 												_PrintPos_New[MOTOR_Z_FRONT] = val1;
 												if (RX_StepperStatus.cmdRunning!=CMD_LIFT_REFERENCE) _lb702_do_reference();

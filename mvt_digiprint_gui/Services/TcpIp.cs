@@ -370,7 +370,9 @@ namespace RX_DigiPrint.Services
         public const UInt32 CMD_GET_DENSITY_VAL = 0x01000107;
         public const UInt32 REP_GET_DENSITY_VAL = 0x02000107;
         public const UInt32 CMD_SET_DENSITY_VAL = 0x01000108;
-        
+
+        public const UInt32 CMD_HEAD_ADJUST          = 0x01000109;
+
         public const UInt32 CMD_ENCODER_CFG			= 0x01000111;
         public const UInt32 REP_ENCODER_CFG			= 0x02000111;
 
@@ -504,8 +506,6 @@ namespace RX_DigiPrint.Services
         public const UInt32 CMD_ROB_MOVE_POS		= 0x01000703;
         public const UInt32 CMD_ROB_TURN_SCREW		= 0x01000704;
         public const UInt32 CMD_SEARCH_ALL_SCREWS	= 0x01000705;
-
-        public const UInt32 CMD_ROB_ADJUST			= 0x01000710;
 
         public const UInt32 CMD_ROB_DRIP_PANS       = 0x01000721;
         public const UInt32 CMD_ROB_DRIP_PANS_CAP   = 0x01000725;

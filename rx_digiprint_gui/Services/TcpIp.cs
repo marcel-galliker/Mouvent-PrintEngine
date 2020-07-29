@@ -901,10 +901,10 @@ namespace RX_DigiPrint.Services
         public struct SHeadAdjustmentMsg
         {
             public SMsgHdr      hdr;
-            public Int32        inkSupplyNo;
+            public Int32        printbarNo;
             public Int32        headNo;
-            public Int32        angle;
-            public Int32        stitch;
+            public Int32        axis;
+            public Int32        steps;
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]

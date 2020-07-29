@@ -38,6 +38,10 @@
                         <RowDefinition Height="auto"/>
                         <RowDefinition Height="auto"/>
                         <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="auto"/>
@@ -46,13 +50,19 @@
                         <ColumnDefinition Width="auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Row="0" Grid.Column="0" Margin="10">Angle</TextBlock>
-                    <TextBlock Grid.Row="2" Grid.Column="0" Margin="10">Stitch</TextBlock>
-                    <common:MvtNumBox Grid.Row="0" Grid.Column="1" Margin="5" Text="{Binding Angle}"></common:MvtNumBox>
-                    <common:MvtNumBox  Grid.Row="2" Grid.Column="1" Margin="5" Text="{Binding Stitch}"></common:MvtNumBox>
-                    <TextBlock Grid.Row="0" Grid.Column="2" Margin="10">µm</TextBlock>
-                    <TextBlock Grid.Row="2" Grid.Column="2" Margin="10">µm</TextBlock>
-
+                    <TextBlock Grid.Row="0" Grid.Column="0" Margin="10">Axis</TextBlock>
+                    <TextBlock Grid.Row="2" Grid.Column="0" Margin="10">Steps</TextBlock>
+                    <TextBlock Grid.Row="4" Grid.Column="0" Margin="10">PrintbarNo</TextBlock>
+                    <TextBlock Grid.Row="6" Grid.Column="0" Margin="10">HeadNo</TextBlock>
+                    <common:MvtNumBox Grid.Row="0" Grid.Column="1" Margin="5" Text="{Binding Axis}"></common:MvtNumBox>
+                    <common:MvtNumBox  Grid.Row="2" Grid.Column="1" Margin="5" Text="{Binding Steps}"></common:MvtNumBox>
+                    <common:MvtNumBox Grid.Row="4" Grid.Column="1" Margin="5" Text="{Binding PrintbarNo}"></common:MvtNumBox>
+                    <common:MvtNumBox  Grid.Row="6" Grid.Column="1" Margin="5" Text="{Binding HeadNo}"></common:MvtNumBox>
+                    <TextBlock Grid.Row="0" Grid.Column="2" Margin="10"></TextBlock>
+                    <TextBlock Grid.Row="2" Grid.Column="2" Margin="10">1/6 Turn</TextBlock>
+                    <TextBlock Grid.Row="4" Grid.Column="2" Margin="10"></TextBlock>
+                    <TextBlock Grid.Row="6" Grid.Column="2" Margin="10"></TextBlock>
+                    <!--
                     <common:MvtButton Grid.Row="0" Grid.Column="3" Margin="5" Grid.RowSpan="2" VerticalAlignment="Top"
                           Click="AngleInfo_Clicked" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeS}">
                         <iconPacks:PackIconMaterial VerticalAlignment="Center" HorizontalAlignment="Center"
@@ -66,10 +76,10 @@
                                             Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 
                                                 Kind="Help"></iconPacks:PackIconMaterial>
                     </common:MvtButton>
+                    -->
+                    <ProgressBar Grid.Row="8" Grid.Column="1" Grid.ColumnSpan="1" Margin="10" Height="20" HorizontalAlignment="Stretch" Value="{Binding Progress}"  />
 
-                    <ProgressBar Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="1" Margin="10" Height="20" HorizontalAlignment="Stretch" Value="{Binding Progress}"  />
-
-                    <Grid Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="4" Margin="5" HorizontalAlignment="Center">
+                    <Grid Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="4" Margin="5" HorizontalAlignment="Center">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition  Width="auto"/>
                             <ColumnDefinition  Width="auto"/>

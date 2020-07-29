@@ -83,9 +83,9 @@ namespace RX_DigiPrint.Views.Alignment
         {
             _HeadAdjustmentHelp.OnOkay();
             if(_HeadAdjustmentHelp.AdjustmentType == HeadAdjustmentHelp.HeadAdjustmentType.TypeAngle)
-                _HeadAdjustment.Angle = _HeadAdjustmentHelp.CorrectionValue;
+                _HeadAdjustment.Axis = _HeadAdjustmentHelp.CorrectionValue;
             else if (_HeadAdjustmentHelp.AdjustmentType == HeadAdjustmentHelp.HeadAdjustmentType.TypeStitch)
-                _HeadAdjustment.Stitch = _HeadAdjustmentHelp.CorrectionValue;
+                _HeadAdjustment.Steps = _HeadAdjustmentHelp.CorrectionValue;
             _HeadAdjustment.ShowHelp = false;
         }
 

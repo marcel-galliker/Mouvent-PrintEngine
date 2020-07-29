@@ -31,26 +31,38 @@
                             <RowDefinition Height="auto"/>
                             <RowDefinition Height="auto"/>
                             <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
                         </Grid.RowDefinitions>
 
-                        <!-- Angle -->
-                        <TextBlock   Grid.Row="0" Grid.Column="0" Text="Angle"/>
-                        <common:MvtNumBox Grid.Row="0" Grid.Column="1" Text="{Binding Angle}" HorizontalContentAlignment="Right"/>
-                        <TextBlock   Grid.Row="0" Grid.Column="2" Text="µm"/>
+                        <!-- Axis -->
+                        <TextBlock   Grid.Row="0" Grid.Column="0" Text="Axis"/>
+                        <common:MvtNumBox Grid.Row="0" Grid.Column="1" Text="{Binding Axis}" HorizontalContentAlignment="Right"/>
+                        <TextBlock   Grid.Row="0" Grid.Column="2" Text=""/>
 
-                        <!-- Stitch -->
-                        <TextBlock   Grid.Row="1" Grid.Column="0" Text="Stitch"/>
-                        <common:MvtNumBox Grid.Row="1" Grid.Column="1" Text="{Binding Stitch}" HorizontalContentAlignment="Right"/>
-                        <TextBlock   Grid.Row="1" Grid.Column="2" Text="µm"/>
-                        
+                        <!-- Steps -->
+                        <TextBlock   Grid.Row="1" Grid.Column="0" Text="Steps"/>
+                        <common:MvtNumBox Grid.Row="1" Grid.Column="1" Text="{Binding Steps}" HorizontalContentAlignment="Right"/>
+                        <TextBlock   Grid.Row="1" Grid.Column="2" Text="1/6 Turn"/>
+
+                        <!-- PrintbarNo -->
+                        <TextBlock   Grid.Row="2" Grid.Column="0" Text="PrintbarNo"/>
+                        <common:MvtNumBox Grid.Row="2" Grid.Column="1" Text="{Binding PrintbarNo}" HorizontalContentAlignment="Right"/>
+                        <TextBlock   Grid.Row="2" Grid.Column="2" Text=""/>
+
+                        <!-- HeadNo -->
+                        <TextBlock   Grid.Row="3" Grid.Column="0" Text="HeadNo"/>
+                        <common:MvtNumBox Grid.Row="3" Grid.Column="1" Text="{Binding HeadNo}" HorizontalContentAlignment="Right"/>
+                        <TextBlock   Grid.Row="3" Grid.Column="2" Text=""/>
+
 
                         <!--  <rx_uc:PlcTitle Grid.Row="2" Grid.ColumnSpan="4"/> -->
 
                         <!-- Progress -->
-                        <ProgressBar Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Height="10" HorizontalAlignment="Stretch" Value="{Binding Progress}" Margin="0,5"/>
+                        <ProgressBar Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" Height="10" HorizontalAlignment="Stretch" Value="{Binding Progress}" Margin="0,5"/>
 
                         <!-- Buttons -->
-                        <Grid Grid.Row="4" Grid.ColumnSpan="4">
+                        <Grid Grid.Row="6" Grid.ColumnSpan="4">
                             <Button Style="{StaticResource Mouvent.StandardButton}" Margin="10,2" Content="Adjust" HorizontalAlignment="Left"  Click="Adjust_Clicked" Visibility="{Binding Done, Converter={StaticResource BoolToInVisible_Converter}}"/>
                             <Button Style="{StaticResource Mouvent.StandardButton}" Margin="10,2" Content="Done"   HorizontalAlignment="Left"  Click="Done_Clicked"   Visibility="{Binding Done, Converter={StaticResource BoolToVisible_Converter}}"/>
                             <Button Style="{StaticResource Mouvent.StandardButton}" Margin="10,2" Content="Cancel" HorizontalAlignment="Right" Click="Cancel_Clicked"/>

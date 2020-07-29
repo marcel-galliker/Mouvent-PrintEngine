@@ -90,7 +90,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
         //---Adjust_Clicked ------------------------------------------------------
         private void Adjust_Clicked(object sender, RoutedEventArgs e)
         {
-            RxGlobals.HeadAdjustment.Adjust(_inkSupplyNo, _headNo);
+            RxGlobals.HeadAdjustment.Adjust();
             DialogResult = true;
         }
 

@@ -175,6 +175,8 @@
 #define REP_GET_DENSITY_VAL		0x02000107
 #define CMD_SET_DENSITY_VAL		0x01000108
 
+#define CMD_HEAD_ADJUST			0x01000109
+
 #define CMD_ENCODER_CFG			0x01000111
 #define REP_ENCODER_CFG			0x02000111
 
@@ -354,7 +356,7 @@
 #define CMD_ROB_TURN_SCREW		0x01000704
 #define CMD_SEARCH_ALL_SCREWS	0x01000705
 
-#define CMD_ROB_ADJUST			0x01000710
+//#define CMD_ROB_ADJUST			0x01000710
 
 #define CMD_ROB_DRIP_PANS			0x01000721
 // #define CMD_ROB_DRIP_PANS_EN		0x01000722		// Main ask board 0 for positions of drip pans
@@ -667,6 +669,19 @@ typedef struct SDisabledJetsMsg
 	INT16	disabledJets[MAX_DISABLED_JETS];
 } SDisabledJetsMsg;
 
+
+typedef struct
+{
+    SMsgHdr hdr;
+    INT32 printbarNo;
+#define LEFT 0
+#define RIGHT 1
+    INT32 headNo;
+    INT32 axis;
+#define AXE_ANGLE 0
+#define AXE_DIST 1
+    INT32 steps; // in steps
+} SHeadAdjustmentMsg;
 
 //--- message CMD_SEND_DATA -------------------------------------------
 
