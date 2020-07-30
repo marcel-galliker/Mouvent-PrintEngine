@@ -188,6 +188,7 @@
   <ItemGroup>
     <ClCompile Include="args.c" />
     <ClCompile Include="cleaf.c" />
+    <ClCompile Include="comm.c" />
     <ClCompile Include="dp803.c" />
     <ClCompile Include="fpga_stepper.c" />
     <ClCompile Include="lb701.c" />
@@ -195,6 +196,7 @@
     <ClCompile Include="lbrob.c" />
     <ClCompile Include="motor.c" />
     <ClCompile Include="power_step.c" />
+    <ClCompile Include="robi.c" />
     <ClCompile Include="rx_stepper_ctrl.c" />
     <ClCompile Include="stepper_ctrl.c" />
     <ClCompile Include="slide.c" />
@@ -208,6 +210,7 @@
   <ItemGroup>
     <ClInclude Include="args.h" />
     <ClInclude Include="cleaf.h" />
+    <ClInclude Include="comm.h" />
     <ClInclude Include="dp803.h" />
     <ClInclude Include="fpga_def_stepper.h" />
     <ClInclude Include="fpga_stepper.h" />
@@ -227,6 +230,8 @@
     <ClInclude Include="power_step.h" />
     <ClInclude Include="ps_common.h" />
     <ClInclude Include="ps_motor.h" />
+    <ClInclude Include="robi.h" />
+    <ClInclude Include="robi_def.h" />
     <ClInclude Include="stepper_ctrl.h" />
     <ClInclude Include="slide.h" />
     <ClInclude Include="test.h" />

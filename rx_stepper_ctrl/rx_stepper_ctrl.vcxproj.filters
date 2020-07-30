@@ -94,6 +94,12 @@
     <ClCompile Include="tx80x_wd.c">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="comm.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="robi.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="gcc_Debug.h">
@@ -181,6 +187,15 @@
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="tx80x_wd.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="comm.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="robi.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="robi_def.h">
       <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>
