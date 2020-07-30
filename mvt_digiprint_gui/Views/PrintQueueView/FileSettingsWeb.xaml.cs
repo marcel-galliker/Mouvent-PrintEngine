@@ -29,6 +29,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
         {
             InitializeComponent();
             Visibility = RxGlobals.PrintSystem.IsScanning ? Visibility.Collapsed : Visibility.Visible;
+            
             PrintQueueItem item = DataContext as PrintQueueItem;
             CB_PrintGoMode.ItemsSource  = new EN_PgModeList();
             RxGlobals.Settings.PropertyChanged += Settings_PropertyChanged;
@@ -62,11 +63,13 @@ namespace RX_DigiPrint.Views.PrintQueueView
                 {
                     Length_Settings.Visibility = Visibility.Collapsed;
                     Page_Settings.Visibility = StartPageTxt.Visibility = StartPageNum.Visibility = Visibility.Visible;
+                    item._hasPageSettings = true;
                 }
                 else
                 {
                     Length_Settings.Visibility = Visibility.Visible;
                     Page_Settings.Visibility = StartPageTxt.Visibility = StartPageNum.Visibility = Visibility.Collapsed;
+                    item._hasPageSettings = false;
                 }
                 Settings.Visibility = Visibility.Visible;
             }
@@ -108,7 +111,6 @@ namespace RX_DigiPrint.Views.PrintQueueView
                 }
             }
         }
-
         //--- Save_Click --------------------------------------------------------------------
         private void Save_Click(object sender, RoutedEventArgs e)
         {
@@ -127,5 +129,11 @@ namespace RX_DigiPrint.Views.PrintQueueView
             PrintQueueItem item = DataContext as PrintQueueItem;
             if (item!=null) item.SendMsg(TcpIp.CMD_GET_PRINT_QUEUE_ITM);
         }
-    }
+
+		private void UserControl_IsVisibleChanged(object sender,DependencyPropertyChangedEventArgs e)
+		{
+            if ((bool)e.NewValue)
+                Specials_LB702.Visibility = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_UV) ? Visibility.Visible : Visibility.Collapsed;
+		}
+	}
 }

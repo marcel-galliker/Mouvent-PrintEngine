@@ -67,6 +67,7 @@ static int				_EEpromTimeout=0;
 //--- prototypes -----------------------------------
 
 static void _nios_copy_status(void);
+static void _nios_set_user_eeprom(int no);
 
 //#define FASTLOG
 #ifdef FASTLOG	
@@ -569,29 +570,22 @@ int  nios_is_firepulse_on(void)
 }
 
 //--- nios_set_user_eeprom ------------------------------------
-void nios_set_user_eeprom(int no, SHeadEEpromMvt *data)
+static void _nios_set_user_eeprom(int no)
 {
-	if (_NiosMem && memcmp(&RX_HBStatus[0].head[no].eeprom_mvt, data, sizeof(RX_HBStatus[0].head[no].eeprom_mvt)))
-	{
-		int timeout;
-		for(timeout=500; _NiosMem->cfg.cmd.cmd & (WRITE_USER_EEPROM<<no); timeout-=10)
-		{
-			if (timeout<0) 
-			{
-				Error(ERR_CONT, 0, "Head[%d] User EEPROM ready Timeout", no);
-				return;
-			}
-			rx_sleep(10);		
-		}
-		memcpy(&RX_HBStatus[0].head[no].eeprom_mvt, data, sizeof(RX_HBStatus[0].head[no].eeprom_mvt));
-		if (sizeof(SHeadEEpromMvt)<=sizeof(_NiosMem->cfg.user_eeprom[no])) 
-		{
-			memcpy(_NiosMem->cfg.user_eeprom[no], data, sizeof(_NiosMem->cfg.user_eeprom[no]));
-			_NiosMem->cfg.cmd.cmd |= (WRITE_USER_EEPROM<<no);
-		}
-		else Error(ERR_CONT, 0, "Head User EEPROM overflow");
+	if (sizeof(RX_HBStatus[0].head[no].eeprom_mvt)!=128) Error(ERR_ABORT, 0, "SIZE MISMATCH");
+	if (sizeof(_NiosStat->user_eeprom[no])!=128) Error(ERR_ABORT, 0, "SIZE MISMATCH");
 
-		_EEpromTimeout = rx_get_ticks()+500;
+	if (_NiosMem==NULL) return;
+
+	//--- initialize status memory -----------------------
+	if (memempty(&RX_HBStatus[0].head[no].eeprom_mvt, sizeof(SHeadEEpromMvt)) && !memempty(&_NiosStat->head_eeprom[no], sizeof(_NiosStat->head_eeprom[no])))
+		memcpy(&RX_HBStatus[0].head[no].eeprom_mvt, _NiosStat->user_eeprom[no], sizeof(SHeadEEpromMvt));
+
+	//--- save if changed and not NULL ------------------
+	if (!memempty(&RX_HBStatus[0].head[no].eeprom_mvt, sizeof(SHeadEEpromMvt)) && memcmp(_NiosStat->user_eeprom[no], &RX_HBStatus[0].head[no].eeprom_mvt, sizeof(SHeadEEpromMvt)))
+	{
+		memcpy(_NiosMem->cfg.user_eeprom[no], &RX_HBStatus[0].head[no].eeprom_mvt, sizeof(SHeadEEpromMvt));
+		_NiosMem->cfg.cmd.cmd |= (WRITE_USER_EEPROM<<no);
 	}
 }
 
@@ -611,16 +605,13 @@ int  nios_main(int ticks, int menu)
 		{
 			nios_check_errors();		
 			_nios_copy_status();			
-		}
 
-		if (_EEpromTimeout && _EEpromTimeout>ticks)
-		{
-			_EEpromTimeout = 0;
 			for(int head=0; head<SIZEOF(FpgaCfg.head); head++)
 			{
-				if (_NiosMem->cfg.cmd.cmd & (WRITE_USER_EEPROM<<head)) Error(ERR_CONT, 0, "Head[%d] User EEPROM write Timeout", head);
+				_nios_set_user_eeprom(head);
 			} 			
 		}
+
 	}
 	return REPLY_OK;
 }

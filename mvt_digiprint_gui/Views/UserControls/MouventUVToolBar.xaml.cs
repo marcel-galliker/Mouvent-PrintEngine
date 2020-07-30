@@ -25,8 +25,7 @@ namespace RX_DigiPrint.Views.UserControls
         public MouventUVToolBar()
         {
             InitializeComponent();
-            Button_UV.DataContext = RxGlobals.UvLamp;
-
+            UV_Grid.DataContext = RxGlobals.UvLamp;
         }
 
         //--- UV_Clicked ------------------------------------------------------------------------

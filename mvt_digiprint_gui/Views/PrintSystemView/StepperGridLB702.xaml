@@ -35,14 +35,14 @@
             <TextBlock       Grid.Row="3" Grid.Column="0" Text="Ref Height (front)"/>
             <TextBlock       Grid.Row="4" Grid.Column="0" Text="Capping Height"/>
 
-            <TextBlock       Grid.Row="1" Grid.Column="1" Text="1" FontSize="{StaticResource FontSizeStd}" HorizontalAlignment="Center"/>
-            <TextBlock       Grid.Row="1" Grid.Column="2" Text="2" FontSize="{StaticResource FontSizeStd}" HorizontalAlignment="Center"/>
-            <TextBlock       Grid.Row="1" Grid.Column="3" Text="3" FontSize="{StaticResource FontSizeStd}" HorizontalAlignment="Center"/>
-            <TextBlock       Grid.Row="1" Grid.Column="4" Text="4" FontSize="{StaticResource FontSizeStd}" HorizontalAlignment="Center"/>
+            <TextBlock       Grid.Row="1" Grid.Column="1" Text="1" FontSize="{StaticResource MvtFontSize}" HorizontalAlignment="Center"/>
+            <TextBlock       Grid.Row="1" Grid.Column="2" Text="2" FontSize="{StaticResource MvtFontSize}" HorizontalAlignment="Center"/>
+            <TextBlock       Grid.Row="1" Grid.Column="3" Text="3" FontSize="{StaticResource MvtFontSize}" HorizontalAlignment="Center"/>
+            <TextBlock       Grid.Row="1" Grid.Column="4" Text="4" FontSize="{StaticResource MvtFontSize}" HorizontalAlignment="Center"/>
 
-            <TextBlock       Grid.Row="2" Grid.Column="5" Text=" mm" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center"/>
-            <TextBlock       Grid.Row="3" Grid.Column="5" Text=" mm" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center"/>
-            <TextBlock       Grid.Row="4" Grid.Column="5" Text=" mm" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center"/>
+            <TextBlock       Grid.Row="2" Grid.Column="5" Text=" mm" FontSize="{StaticResource MvtFontSize}" VerticalAlignment="Center"/>
+            <TextBlock       Grid.Row="3" Grid.Column="5" Text=" mm" FontSize="{StaticResource MvtFontSize}" VerticalAlignment="Center"/>
+            <TextBlock       Grid.Row="4" Grid.Column="5" Text=" mm" FontSize="{StaticResource MvtFontSize}" VerticalAlignment="Center"/>
 
             <Grid Grid.Column="1" Grid.RowSpan="3" >
                 <Grid.ColumnDefinitions>
@@ -78,16 +78,16 @@
             </Grid>
 
             <TextBlock Grid.Row="5"      Text="FlightTime"/>
-            <common:RxNumBox Grid.Row="5" Grid.Column="1" Text="{Binding ManualFlightTimeComp}" HorizontalContentAlignment="Right" HorizontalAlignment="Stretch" x:Name="ManualFlightTimeComp" />
-            <TextBlock       Grid.Row="5" Grid.Column="2" Text=" mm" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center"/>
+            <common:MvtNumBox Grid.Row="5" Grid.Column="1" Text="{Binding ManualFlightTimeComp}" HorizontalContentAlignment="Right" HorizontalAlignment="Stretch" x:Name="ManualFlightTimeComp" />
+            <TextBlock       Grid.Row="5" Grid.Column="2" Text=" mm" FontSize="{StaticResource MvtFontSize}" VerticalAlignment="Center"/>
 
             <TextBlock       Grid.Row="6" Grid.Column="0" Text="Wiping Delay"/>
-            <common:RxNumBox Grid.Row="6" Grid.Column="1" Text="{Binding WipeDelay}" HorizontalContentAlignment="Right"/>
-            <TextBlock       Grid.Row="6" Grid.Column="2" Text=" ms" FontSize="{StaticResource FontSizeStd}"/>
+            <common:MvtNumBox Grid.Row="6" Grid.Column="1" Text="{Binding WipeDelay}" HorizontalContentAlignment="Right"/>
+            <TextBlock       Grid.Row="6" Grid.Column="2" Text=" ms" FontSize="{StaticResource MvtFontSize}"/>
 
             <TextBlock       Grid.Row="7" Grid.Column="0" Text="Wiping Speed"/>
-            <common:RxNumBox Grid.Row="7" Grid.Column="1" Text="{Binding WipeSpeed}" HorizontalContentAlignment="Right"/>
-            <TextBlock       Grid.Row="7" Grid.Column="2" Text=" mm/s" FontSize="{StaticResource FontSizeStd}"/>
+            <common:MvtNumBox Grid.Row="7" Grid.Column="1" Text="{Binding WipeSpeed}" HorizontalContentAlignment="Right"/>
+            <TextBlock       Grid.Row="7" Grid.Column="2" Text=" mm/s" FontSize="{StaticResource MvtFontSize}"/>
 
         </Grid>
     </GroupBox>

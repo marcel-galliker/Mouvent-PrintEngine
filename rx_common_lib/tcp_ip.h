@@ -174,6 +174,7 @@
 #define CMD_GET_DENSITY_VAL		0x01000107
 #define REP_GET_DENSITY_VAL		0x02000107
 #define CMD_SET_DENSITY_VAL		0x01000108
+#define CMD_SET_ROB_POS			0x01000109
 
 #define CMD_HEAD_ADJUST			0x01000109
 
@@ -648,7 +649,6 @@ typedef struct
 	UINT32			headsPerColor;			
 	UINT32			inkSupplyCnt;
 	UINT32			inkCylindersPerColor;
-	INT32			headFpVoltage[MAX_HEAD_DIST];
 	INT32			headDist[MAX_HEAD_DIST];
 	INT32			headDistBack[MAX_HEAD_DIST];
 	INT32			colorOffset[MAX_COLORS];
@@ -668,6 +668,15 @@ typedef struct SDisabledJetsMsg
 	int		head;
 	INT16	disabledJets[MAX_DISABLED_JETS];
 } SDisabledJetsMsg;
+
+typedef struct SRobPositionMsg
+{
+	SMsgHdr	hdr;
+	int		printBar;
+	int		head;
+	INT16	angle;
+	INT16	dist;
+} SRobPositionMsg;
 
 
 typedef struct

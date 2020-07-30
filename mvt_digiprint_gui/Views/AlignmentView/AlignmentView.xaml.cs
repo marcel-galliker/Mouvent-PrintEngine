@@ -25,6 +25,8 @@ namespace RX_DigiPrint.Views.Alignment
     {
         private Models.Alignment _Alignment = RxGlobals.Alignment;
 
+        private StackPanel InkCylinderSelectionPanel { get; set; }
+
         private int CurrentSelectedInkCylinderIndex { get; set; } // ink cylinder index (inside one color)
         private int CurrentSelectedColorIndex { get; set; }
 
@@ -37,11 +39,26 @@ namespace RX_DigiPrint.Views.Alignment
 
             ClusterAlignmentViewList = new List<ClusterAlignmentView>();
 
+            if (RxScreen.Screen.Surface)
+            {
+                InkCylinderSelectionPanel_Standard.Visibility = Visibility.Collapsed;
+                InkCylinderSelectionPanel_Surface.Visibility = Visibility.Visible;
+                InkCylinderSelectionPanel = InkCylinderSelectionPanel_Surface;
+            }
+            else
+            {
+                InkCylinderSelectionPanel_Standard.Visibility = Visibility.Visible;
+                InkCylinderSelectionPanel_Surface.Visibility = Visibility.Collapsed;
+                InkCylinderSelectionPanel = InkCylinderSelectionPanel_Standard;
+            }
+
             _InitInkSupplySelection();
             RxGlobals.PrintSystem.PropertyChanged += PrintSystem_PropertyChanged;
 
             CurrentSelectedColorIndex = -1;
             CurrentSelectedInkCylinderIndex = -1;
+
+           
         }
 
         //--- PrintSystem_PropertyChanged ----------------------------------
@@ -67,7 +84,7 @@ namespace RX_DigiPrint.Views.Alignment
             CurrentSelectedColorIndex = 0;
             CurrentSelectedInkCylinderIndex = 0;
 
-            if (RxGlobals.PrintSystem.IsScanning)
+            if (RxGlobals.PrintSystem.IsTx)
             {
                 CurrentSelectedColorIndex = RxGlobals.PrintSystem.ColorCnt - 1;
                 CurrentSelectedInkCylinderIndex = RxGlobals.PrintSystem.InkCylindersPerColor - 1;
@@ -92,7 +109,7 @@ namespace RX_DigiPrint.Views.Alignment
             for (int color = 0; color < RxGlobals.PrintSystem.ColorCnt; color++)
             {
                 int colorIndex = color;
-                if (RxGlobals.PrintSystem.IsScanning) colorIndex = RxGlobals.PrintSystem.ColorCnt - 1 - color;
+                if (RxGlobals.PrintSystem.IsTx) colorIndex = RxGlobals.PrintSystem.ColorCnt - 1 - color;
 
                 UpdateColorDescription(colorIndex, ref description);
                 RadioButton button = new RadioButton();
@@ -124,7 +141,7 @@ namespace RX_DigiPrint.Views.Alignment
                 for (int cylinder = 0; cylinder < RxGlobals.PrintSystem.InkCylindersPerColor; cylinder++)
                 {
                     int cylinderIndex = cylinder;
-                    if (RxGlobals.PrintSystem.IsScanning) cylinderIndex = RxGlobals.PrintSystem.InkCylindersPerColor - 1 - cylinder;
+                    if (RxGlobals.PrintSystem.IsTx) cylinderIndex = RxGlobals.PrintSystem.InkCylindersPerColor - 1 - cylinder;
                     RadioButton button = new RadioButton();
                     string displayIndex = (cylinderIndex + 1).ToString();
                     button.Content = "Cylinder " + displayIndex;
@@ -153,7 +170,7 @@ namespace RX_DigiPrint.Views.Alignment
             RadioButton button = sender as RadioButton;
             CurrentSelectedColorIndex = System.Convert.ToInt32(button.Tag);
             CurrentSelectedInkCylinderIndex = 0;
-
+            
             // select first available ink cylinder:
             if (InkCylinderSelectionPanel.Children.Count > 0)
             {
@@ -246,11 +263,11 @@ namespace RX_DigiPrint.Views.Alignment
             int totalNumberOfClusters = ((inkCylinderCnt * RxGlobals.PrintSystem.HeadsPerInkCylinder) + 3) / 4;
             int firstClusterNumber = 0;
             int lastClusterNumber = 0;
-            if (RxGlobals.PrintSystem.IsScanning)
+            if (RxGlobals.PrintSystem.IsTx)
             {
-                int remainder = (4 - ((inkCylinderCnt * RxGlobals.PrintSystem.HeadsPerColor) % 4)) % 4;
-                firstClusterNumber = (inkSupplyNumber * RxGlobals.PrintSystem.HeadsPerInkCylinder + remainder) / 4;
-                lastClusterNumber = ((inkSupplyNumber * RxGlobals.PrintSystem.HeadsPerInkCylinder) + (RxGlobals.PrintSystem.HeadsPerInkCylinder - 1) + remainder) / 4;
+                // int remainder = (4 - ((inkCylinderCnt * RxGlobals.PrintSystem.HeadsPerColor) % 4)) % 4;
+                firstClusterNumber = (inkSupplyNumber * RxGlobals.PrintSystem.HeadsPerInkCylinder) / 4;
+                lastClusterNumber = ((inkSupplyNumber * RxGlobals.PrintSystem.HeadsPerInkCylinder) + (RxGlobals.PrintSystem.HeadsPerInkCylinder - 1)) / 4;
             }
             else
             {
@@ -272,7 +289,7 @@ namespace RX_DigiPrint.Views.Alignment
                 ClusterAlignmentViewList[i].Visibility = Visibility.Collapsed;
             }
 
-            if (!RxGlobals.PrintSystem.IsScanning)
+            if (!RxGlobals.PrintSystem.IsTx)
             {
                 if (totalNumberOfClusters <= 2) // draw all clusters
                 {
@@ -372,7 +389,8 @@ namespace RX_DigiPrint.Views.Alignment
             RxGlobals.PrintSystem.SendMsg(TcpIp.CMD_SET_PRINTER_CFG);
             _Alignment.CorrectionValuesChanged = false;
 
-            _DrawClusters(CurrentSelectedInkCylinderIndex);
+            int globalInkCylinderIndex = CurrentSelectedColorIndex * RxGlobals.PrintSystem.InkCylindersPerColor + CurrentSelectedInkCylinderIndex;
+            _DrawClusters(globalInkCylinderIndex);
         }
 
         private void RobotConnectButton_Click(object sender, RoutedEventArgs e)

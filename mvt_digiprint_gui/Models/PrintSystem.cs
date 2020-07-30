@@ -76,8 +76,8 @@ namespace RX_DigiPrint.Models
 	            case EPrinterType.printer_test_table:	    return true;
 	            case EPrinterType.printer_test_slide:	    return true;
                 case EPrinterType.printer_test_slide_only:  return true;
-                case EPrinterType.printer_TX801:			    return true;
-	            case EPrinterType.printer_TX802:			    return true;
+                case EPrinterType.printer_TX801:			return true;
+	            case EPrinterType.printer_TX802:			return true;
 	            default: return false;
 	            }
             }
@@ -269,21 +269,6 @@ namespace RX_DigiPrint.Models
         }
         
         //--- Property HeadDist ---------------------------------------
-        private Int32[] _HeadFpVoltage;
-        public Int32[] HeadFpVoltage
-        {
-            get { return _HeadFpVoltage; }
-            set { Changed|=SetProperty(ref _HeadFpVoltage, value); }
-        }
-
-        //--- SetFpVoltage -----------------------------
-        public void SetFpVoltage(int no, int voltage)
-        {
-            Changed = (voltage!=_HeadFpVoltage[no]);
-            _HeadFpVoltage[no] = voltage;
-        }
-
-        //--- Property HeadDist ---------------------------------------
         private double[] _HeadDist; // in mm
         public double[] HeadDist
         {
@@ -419,10 +404,6 @@ namespace RX_DigiPrint.Models
             InkCylindersPerColor     = msg.InkCylindersPerColor;
             HeadsPerColor           = msg.headsPerColor;
             
-            _HeadFpVoltage= new Int32[msg.headFpVoltage.Count()];
-            for (i=0; i<_HeadFpVoltage.Count(); i++) _HeadFpVoltage[i]    = msg.headFpVoltage[i];
-            this.OnPropertyChanged("HeadFpVoltage");
-
             _HeadDist = new double[msg.headDist.Count()];
             for (i = 0; i < _HeadDist.Count(); i++)
             {
@@ -479,13 +460,6 @@ namespace RX_DigiPrint.Models
             msg.InkCylindersPerColor    = InkCylindersPerColor;
 
             msg.externalData            = Convert.ToInt32(ExternalData);
-
-            if (_HeadFpVoltage!=null)
-            {
-                msg.headFpVoltage = new Int32[_HeadFpVoltage.Count()];
-                for (i=0; i<msg.headFpVoltage.Count(); i++)
-                    msg.headFpVoltage[i] = _HeadFpVoltage[i];
-            }
 
             if (_HeadDist!=null)
             {

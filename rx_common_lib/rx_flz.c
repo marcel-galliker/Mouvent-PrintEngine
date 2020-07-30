@@ -29,6 +29,7 @@
 typedef struct
 {
 	int			no;
+	int			color;
 	int			result;
 	BYTE	   *fileBuf;
 	INT64		fileSize;
@@ -36,14 +37,17 @@ typedef struct
 	int			y_from;
 	int			y_to;
 	int			y;
+	int			spaceBt;
 	HANDLE		sem_start;
 	HANDLE		sem_done;
 } SFlzThreadPar;
 
 typedef struct
 {
+	INT32		color;
 	INT32		progress;
 	INT32		height;
+	INT32		spaceBt;
 	BYTE	   *buffer;
 	INT64		fileSize;
 	void	   *loaded_arg;
@@ -304,12 +308,13 @@ int flz_load(SPageId *id, const char *filedir, const char *filename, int printMo
 			
 			pFlzInfo = (SFlzInfo*)_FileBuf[_FileBufDecompIdx];
 			
+			int spaceBt = (spacePx*pinfo->bitsPerPixel)/8;
 			memcpy(&pinfo->resol, &pFlzInfo->resol, sizeof(pinfo->resol));
 			pinfo->printMode     = printMode;
 			pinfo->bitsPerPixel	 = pFlzInfo->bitsPerPixel;
 			pinfo->screening     = (pinfo->bitsPerPixel==8);
 			pinfo->srcWidthPx    = pFlzInfo->widthPx+spacePx;
-			pinfo->lineLen		 = pFlzInfo->lineLen;
+			pinfo->lineLen		 = pFlzInfo->lineLen+spaceBt;
 			pinfo->lengthPx		 = pFlzInfo->lengthPx;
 			pinfo->dataSize		 = pFlzInfo->dataSize;
 			pinfo->buffer[c]	 = &buffer[c];
@@ -318,10 +323,12 @@ int flz_load(SPageId *id, const char *filedir, const char *filename, int printMo
             int wul= pFlzInfo->resol.y ? wakeupLen*pFlzInfo->resol.y/DPI_Y : wakeupLen;
             int wub= pFlzInfo->resol.y ? WAKEUP_BAR_LEN*pFlzInfo->resol.y/DPI_Y : WAKEUP_BAR_LEN;
 
+			_DecompressPar.color	  = psplit[c].color.colorCode;
 			_DecompressPar.loaded_arg = loaded_arg;
 			_DecompressPar.fileSize	  = fileSize;
-			_DecompressPar.buffer     = buffer[c]+wul*pFlzInfo->lineLen;
+			_DecompressPar.buffer     = buffer[c]+wul*pinfo->lineLen;
 			_DecompressPar.height     = pFlzInfo->lengthPx;
+			_DecompressPar.spaceBt	  = spaceBt;
 			_DecompressPar.progress   = 0;
 			if (psplit[c].lastLine<_DecompressPar.height) _DecompressPar.height=psplit[c].lastLine;			
 				
@@ -338,14 +345,15 @@ int flz_load(SPageId *id, const char *filedir, const char *filename, int printMo
 			if (wul)
 			{
 				BYTE* buf = buffer[c];
-				memset(buf,                                      0x00, wul * pinfo->lineLen);
-				memset(buf+(pinfo->lengthPx+wul)*pinfo->lineLen, 0x00, wul * pinfo->lineLen);
+				UINT64 offset;
+				offset=(UINT64)(pinfo->lengthPx+wul)*(UINT64)pinfo->lineLen;
+				memset(buf,       0x00, wul * pinfo->lineLen);
+				memset(buf+offset, 0x00, wul * pinfo->lineLen);
 				
 				if (wakeupOn)
 				{
-					int start=(c*wub);
-					memset(buf+start*pinfo->lineLen, 0xff, wub * pinfo->lineLen);
-					memset(buf+(pinfo->lengthPx+2*wul-(c+1)*wub)*pinfo->lineLen, 0xff, wub * pinfo->lineLen);															
+					memset(buf+(c*wub)*pinfo->lineLen, 0xff, wub * pinfo->lineLen);
+					memset(buf+offset-((c+1)*wub)*pinfo->lineLen, 0xff, wub * pinfo->lineLen);															
 				}
 			}
 			pinfo->lengthPx += 2*wul;
@@ -386,10 +394,12 @@ static void *_flz_decompress_master_thread(void* lpParameter)
 		h = pFlzInfo->bands/_ThreadCnt;
 		for (i=0; i<_ThreadCnt; i++)
 		{
-			_ThreadPar[i].no	   = i;	
+			_ThreadPar[i].no	   = i;
+			_ThreadPar[i].color	   = _DecompressPar.color;
 			_ThreadPar[i].fileBuf  = _FileBuf[_FileBufDecompIdx];
 			_ThreadPar[i].fileSize = _DecompressPar.fileSize;
 			_ThreadPar[i].buffer   = _DecompressPar.buffer;
+			_ThreadPar[i].spaceBt  = _DecompressPar.spaceBt;	
 			_ThreadPar[i].y_from   = y;
 			_ThreadPar[i].y_to	   = y+h;
 			y += h;
@@ -422,6 +432,10 @@ static void *_flz_decompress_master_thread(void* lpParameter)
 static void *_flz_decompress_thread(void* lpParameter)
 {
 	SFlzThreadPar *par=(SFlzThreadPar*)lpParameter;
+
+	BYTE *buf=NULL;
+	UINT32 bufsize=0;
+
 	while (_ThreadRunning)
 	{
 		rx_sem_wait(par->sem_start, 0);
@@ -437,19 +451,46 @@ static void *_flz_decompress_thread(void* lpParameter)
 			par->result	= REPLY_ERROR;
 			pFlzInfo	= (SFlzInfo*)par->fileBuf;
 			bands		= (SFlzBand*)(par->fileBuf+sizeof(SFlzInfo));
-										
+								
 			for(par->y=par->y_from; par->y<par->y_to && !_Abort; par->y++)
 			{										
 				band	= &bands[par->y];
-				dst		= par->buffer + ((UINT64)band->start * pFlzInfo->lineLen);
-				cmpbuf  = par->fileBuf + band->offset;
-				ret		= fastlz_decompress(cmpbuf, (int)band->bandSize, dst, band->rows * pFlzInfo->lineLen);
-			}					
-			
+				dst		= par->buffer + ((UINT64)band->start * (pFlzInfo->lineLen+par->spaceBt));
+				cmpbuf  = par->fileBuf + band->offset;			
+				if (par->spaceBt)
+				{
+					if (pFlzInfo->dataSize > bufsize) 
+					{ 
+						if (buf) free(buf);
+						bufsize = (int)pFlzInfo->dataSize;
+						buf = malloc(bufsize);
+						if (buf==NULL) 
+						{
+							Error(ERR_ABORT, 0, "Could not allocate memory");
+							break;
+						}
+					}
+					ret	= fastlz_decompress(cmpbuf, (int)band->bandSize, buf, bufsize);
+					BYTE *src = buf;
+					for(UINT32 y=0; y<band->rows; y++)
+					{
+						memcpy(dst, src, pFlzInfo->lineLen);
+						memset(dst+pFlzInfo->lineLen, 0, par->spaceBt);
+						src += pFlzInfo->lineLen;
+						dst += (pFlzInfo->lineLen+par->spaceBt);
+					}
+				}
+				else ret = fastlz_decompress(cmpbuf, (int)band->bandSize, dst, band->rows * pFlzInfo->lineLen);
+				if (par->no==0 && par->y_from!=par->y_to)
+				{
+					_DecompressPar.progress = 100*(par->y - par->y_from) / (par->y_to - par->y_from);
+				}
+			}			
 			par->result	= REPLY_OK;
 		}
 		
 		rx_sem_post(par->sem_done);
 	}
+	if (buf) free(buf);
 	return NULL;
 }

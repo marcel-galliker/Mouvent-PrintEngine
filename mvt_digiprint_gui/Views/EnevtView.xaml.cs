@@ -2,6 +2,8 @@
 using RX_DigiPrint.Models;
 using RX_DigiPrint.Services;
 using System;
+using System.Globalization;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
@@ -56,6 +58,7 @@ namespace RX_DigiPrint.Views
             RxGlobals.RxInterface.SendCommand(TcpIp.CMD_EVT_CONFIRM);
         }
 
+        
         private void ColorButton_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             try
@@ -65,10 +68,21 @@ namespace RX_DigiPrint.Views
                 {
                     Infragistics.Controls.Grids.UnboundColumnDataContext context = button.DataContext as Infragistics.Controls.Grids.UnboundColumnDataContext;
                     LogItem item = context.RowData as LogItem;
-
+                    string message = item.Message + "\nFile: " + item.File + "\nLine: " + item.Line.ToString();
                     if (context != null)
                     {
-                        PopUpText.Text = item.Message;
+                        var culture = CultureInfo.CurrentCulture;
+                        FormattedText formattedText = new FormattedText(
+                            message,
+                            culture,
+                            FlowDirection.LeftToRight,
+                            new Typeface("Arial"),
+                            PopUpText.FontSize,
+                            Brushes.Black,
+                            VisualTreeHelper.GetDpi(this).PixelsPerDip);
+                        
+
+                        PopUpText.Text = formattedText.Text;
                         CellControl cell = Infragistics.Windows.Utilities.GetAncestorFromType(button, typeof(CellControl), false) as CellControl;
                         if (cell != null)
                         {
@@ -76,7 +90,8 @@ namespace RX_DigiPrint.Views
                             var cellControl = row.Cells["Message"];
                             LongTextPopUp.PlacementTarget = (System.Windows.UIElement)cellControl.Control;
                             LongTextPopUp.Width = cellControl.Control.ActualWidth;
-                            LongTextPopUp.Height = 100;
+                            formattedText.MaxTextWidth = cellControl.Control.ActualWidth;
+                            LongTextPopUp.Height = formattedText.Height + formattedText.Extent;
                             LongTextPopUp.IsOpen = true;
                         }
                     }

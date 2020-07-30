@@ -52,9 +52,9 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Column="0" Grid.Row="1"  Text="Fondo"   FontSize="{StaticResource FontSizeStd}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                    <TextBlock Grid.Column="0" Grid.Row="2"  Text="Anilox"  FontSize="{StaticResource FontSizeStd}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                    <TextBlock Grid.Column="0" Grid.Row="3"  Text="Rollo"   FontSize="{StaticResource FontSizeStd}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <TextBlock Grid.Column="0" Grid.Row="1"  Text="Fondo"   FontSize="{StaticResource MvtFontSize}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <TextBlock Grid.Column="0" Grid.Row="2"  Text="Anilox"  FontSize="{StaticResource MvtFontSize}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <TextBlock Grid.Column="0" Grid.Row="3"  Text="Rollo"   FontSize="{StaticResource MvtFontSize}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0"/>
 
                     <TextBlock Grid.Row="0" Grid.Column="1" Text="Flexo 4" FontWeight="Bold" />
                     <cleaf:CleafFlexoView Grid.Column="1" Grid.Row="1" Grid.RowSpan="3" x:Name="Flexo4"/>
@@ -91,32 +91,32 @@
                 </Grid.ColumnDefinitions>
 
                 <!--Operator __________________________________________-->
-                <TextBlock Grid.Column="0" Grid.Row="0"  Text="Operator"  FontSize="{StaticResource FontSizeStd}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <TextBlock Grid.Column="0" Grid.Row="0"  Text="Operator"  FontSize="{StaticResource MvtFontSize}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0"/>
                 <ComboBox x:Name="CB_Operator" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" 
                   DropDownOpened="Operator_DropDownOpened" 
                   SelectionChanged="Operator_SelectionChanged"
                   SelectedItem="{Binding User}" Margin="0,-2,0.2,2.4"/>
 
-                <TextBlock Grid.Column="0" Grid.Row="1" Text="Length" FontSize="{StaticResource FontSizeStd}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <TextBlock Grid.Column="0" Grid.Row="1" Text="Length" FontSize="{StaticResource MvtFontSize}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0"/>
                 <StackPanel Grid.Column="1" Grid.Row="1" Orientation="Horizontal">
                     <TextBlock Text="{Binding Length}" VerticalAlignment="Center"/>
                     <TextBlock Text=" m" VerticalAlignment="Center"/>
                 </StackPanel>
 
-                <TextBlock Grid.Column="0" Grid.Row="2" Text="Produced" FontSize="{StaticResource FontSizeStd}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <TextBlock Grid.Column="0" Grid.Row="2" Text="Produced" FontSize="{StaticResource MvtFontSize}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0"/>
 
                 <rx:RxProgressBar x:Name="ProgBar" Grid.Column="1" Grid.ColumnSpan="5" Grid.Row="2" VerticalAlignment="Stretch" Margin="0,5"/>
-                <TextBlock        x:Name="ProgStr" Grid.Column="1" Grid.ColumnSpan="5" Grid.Row="2" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="{StaticResource FontSize}"/>
+                <TextBlock        x:Name="ProgStr" Grid.Column="1" Grid.ColumnSpan="5" Grid.Row="2" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="{StaticResource MvtFontSize}"/>
 
-                <TextBlock Grid.Column="0" Grid.Row="3" Text="Waste" FontSize="{StaticResource FontSizeStd}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <TextBlock Grid.Column="0" Grid.Row="3" Text="Waste" FontSize="{StaticResource MvtFontSize}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0"/>
                 <rx:RxProgressBar x:Name="WasteBar" Grid.Column="1" Grid.ColumnSpan="5" Grid.Row="3" VerticalAlignment="Stretch" Margin="0,5"  Foreground="Red"/>
-                <TextBlock        x:Name="WasteStr" Grid.Column="1" Grid.ColumnSpan="5" Grid.Row="3" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="{StaticResource FontSize}"/>
+                <TextBlock        x:Name="WasteStr" Grid.Column="1" Grid.ColumnSpan="5" Grid.Row="3" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="{StaticResource MvtFontSize}"/>
 
-                <TextBlock Grid.Column="0" Grid.Row="4" Text="Ink" FontSize="{StaticResource FontSizeStd}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                <TextBox Grid.Column="1" Grid.Row="4" x:Name="Ink0"  VerticalAlignment="Stretch" HorizontalAlignment="Stretch" IsReadOnly="True" HorizontalContentAlignment="Center" FontSize="{StaticResource FontSize}" BorderThickness="0"/>
-                <TextBox Grid.Column="2" Grid.Row="4" x:Name="Ink1"  VerticalAlignment="Stretch" HorizontalAlignment="Stretch" IsReadOnly="True" HorizontalContentAlignment="Center" FontSize="{StaticResource FontSize}" BorderThickness="0"/>
-                <TextBox Grid.Column="3" Grid.Row="4" x:Name="Ink2"  VerticalAlignment="Stretch" HorizontalAlignment="Stretch" IsReadOnly="True" HorizontalContentAlignment="Center" FontSize="{StaticResource FontSize}" BorderThickness="0"/>
-                <TextBox Grid.Column="4" Grid.Row="4" x:Name="Ink3"  VerticalAlignment="Stretch" HorizontalAlignment="Stretch" IsReadOnly="True" HorizontalContentAlignment="Center" FontSize="{StaticResource FontSize}" BorderThickness="0"/>
+                <TextBlock Grid.Column="0" Grid.Row="4" Text="Ink" FontSize="{StaticResource MvtFontSize}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <TextBox Grid.Column="1" Grid.Row="4" x:Name="Ink0"  VerticalAlignment="Stretch" HorizontalAlignment="Stretch" IsReadOnly="True" HorizontalContentAlignment="Center" FontSize="{StaticResource MvtFontSize}" BorderThickness="0"/>
+                <TextBox Grid.Column="2" Grid.Row="4" x:Name="Ink1"  VerticalAlignment="Stretch" HorizontalAlignment="Stretch" IsReadOnly="True" HorizontalContentAlignment="Center" FontSize="{StaticResource MvtFontSize}" BorderThickness="0"/>
+                <TextBox Grid.Column="3" Grid.Row="4" x:Name="Ink2"  VerticalAlignment="Stretch" HorizontalAlignment="Stretch" IsReadOnly="True" HorizontalContentAlignment="Center" FontSize="{StaticResource MvtFontSize}" BorderThickness="0"/>
+                <TextBox Grid.Column="4" Grid.Row="4" x:Name="Ink3"  VerticalAlignment="Stretch" HorizontalAlignment="Stretch" IsReadOnly="True" HorizontalContentAlignment="Center" FontSize="{StaticResource MvtFontSize}" BorderThickness="0"/>
 
 
             </Grid>

@@ -97,8 +97,8 @@
             <TextBlock Margin="0, 0, 0, 5"       Grid.Row="2" Grid.Column="3" Text="Ref Height"/>
             <TextBlock Margin="0, 0, 0, 5"       Grid.Row="3" Grid.Column="3"><Run Language="de-ch" Text="Head Align"/></TextBlock>
 
-            <TextBlock Margin="0, 0, 0, 5"       Grid.Row="2" Grid.Column="9" Text=" mm" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center"/>
-            <TextBlock Margin="0, 0, 0, 5"       Grid.Row="3" Grid.Column="9" Text=" mm" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center"/>
+            <TextBlock Margin="0, 0, 0, 5"       Grid.Row="2" Grid.Column="9" Text=" mm" FontSize="{StaticResource MvtFontSize}" VerticalAlignment="Center"/>
+            <TextBlock Margin="0, 0, 0, 5"       Grid.Row="3" Grid.Column="9" Text=" mm" FontSize="{StaticResource MvtFontSize}" VerticalAlignment="Center"/>
 
             <TextBlock Margin="0, 0, 0, 5" Grid.Row="0"  Grid.Column="4" Grid.ColumnSpan="2" Text="VERSO" HorizontalAlignment="Center"/>
             <TextBlock Margin="0, 0, 0, 5" Grid.Row="0"   Grid.Column="7" Grid.ColumnSpan="2" Text="RECTO" HorizontalAlignment="Center"/>

@@ -37,7 +37,7 @@ error:
 endif
 
 SOURCEFILES := args.c ctrl_client.c data.c head_client.c jet_correction.c rx_spooler_ctrl.c screening.c spool_rip.c rs_tec-it.cpp test.c version.c
-CUDA_FILES := rx_slicescreen_fms_1x3_gpu.cu
+CUDA_FILES := gpu.cu
 EXTERNAL_LIBS := ../rx_common_lib/$(BINARYDIR)/rx_common_lib.a ../rx_slicescreen_lib/$(BINARYDIR)/rx_slicescreen_lib.a ../rx_tif_lib/$(BINARYDIR)/rx_tif_lib.a ../rx_rip_lib/$(BINARYDIR)/rx_rip_lib.a ../Externals/TinyXML/$(BINARYDIR)/TinyXML.a
 EXTERNAL_LIBS_COPIED := $(foreach lib, $(EXTERNAL_LIBS),$(BINARYDIR)/$(notdir $(lib)))
 

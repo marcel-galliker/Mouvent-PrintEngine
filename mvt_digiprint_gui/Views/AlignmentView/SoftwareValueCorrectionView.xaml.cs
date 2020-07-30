@@ -11,13 +11,14 @@ namespace RX_DigiPrint.Views.Alignment
     {
         private SoftwareValueCorrection _SoftwareValueCorrection;
 
-        public SoftwareValueCorrectionView(SoftwareValueCorrection.SoftwareValueType valueType, double recommendedValue)
+        public SoftwareValueCorrectionView(SoftwareValueCorrection.SoftwareValueType valueType, double recommendedValue, int globalHeadNumber)
         {
             InitializeComponent();
 
             _SoftwareValueCorrection = new SoftwareValueCorrection(valueType, recommendedValue);
 
             DataContext = _SoftwareValueCorrection;
+            if (globalHeadNumber>=0) TX_HeadName.DataContext = RxGlobals.HeadStat.List[globalHeadNumber];
         }
 
         private void SelectionLeftButton_Click(object sender, RoutedEventArgs e)

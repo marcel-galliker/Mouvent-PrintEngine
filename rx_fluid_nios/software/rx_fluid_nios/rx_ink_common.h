@@ -301,6 +301,9 @@ char *value_str1(int val);
 char *value_str3(int val);
 char *value_str_temp(int val);
 char *value_str_u(int val);
+char *value_str_screw(INT16 val);
+int str_to_screw(const char *str);
+
 //INT32 convert_i16_to_i32(INT16 val);
 
 #endif // __RX_INK_COMMON__

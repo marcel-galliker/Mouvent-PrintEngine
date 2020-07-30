@@ -37,7 +37,7 @@
             <common:MvtButton Click="Washing_Clicked" x:Name="Button_Wash">
                 <Grid>
                     <Image Source="../../Resources/Bitmaps/wash.ico"/>
-                    <TextBlock Text="10s" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{StaticResource FontSizeXL}" x:Name="Wash_Time1" Foreground="White" FontWeight="ExtraBlack"/>
+                    <TextBlock Text="10s" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{StaticResource MvtFontSizeXL}" x:Name="Wash_Time1" Foreground="White" FontWeight="ExtraBlack"/>
                     <TextBlock Text="10s" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{StaticResource FontSizeXL}" x:Name="Wash_Time" Foreground="Red" />
                 </Grid>
             </common:MvtButton>

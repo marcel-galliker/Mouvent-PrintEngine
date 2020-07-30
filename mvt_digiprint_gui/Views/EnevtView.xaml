@@ -4,12 +4,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:ig="http://schemas.infragistics.com/xaml"
-    xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
+             xmlns:ig="http://schemas.infragistics.com/xaml"
+             xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
-            xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks" xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
-    mc:Ignorable="d" 
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks" xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
+             mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="1200">
+    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="{Binding Source={StaticResource Mouvent.Layout.TopToolBarHeight}}"/>
@@ -18,16 +19,23 @@
 
         <Grid Grid.Row="0" Background="{StaticResource Mouvent.MainColorBrush}" ShowGridLines="False" >
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <rx_uc:Splicing Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center"></rx_uc:Splicing>
-
-            <rx_uc:MouventTopToolBar Grid.Row="0" HorizontalAlignment="Right"></rx_uc:MouventTopToolBar>
-            
-            <common:MvtButton HorizontalAlignment="Left" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" x:Name="Button_Confirm" Click="Confirm_clicked" Margin="15, 5, 15, 5" >
+            <common:MvtButton HorizontalAlignment="Left"
+                              Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}"
+                              x:Name="Button_Confirm" Click="Confirm_clicked" Margin="15, 5, 15, 5"
+                              Grid.Column="0">
                 <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20" Kind="Check"></iconPacks:PackIconMaterial>
             </common:MvtButton>
+
+            <StackPanel Orientation="Horizontal" Grid.Column="1" HorizontalAlignment="Right">
+                <rx_uc:Splicing Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center"></rx_uc:Splicing>
+
+                <rx_uc:MouventTopToolBar Grid.Row="0" HorizontalAlignment="Right"></rx_uc:MouventTopToolBar>
+
+            </StackPanel>
         </Grid>
 
         <ig:XamGrid 
@@ -36,6 +44,7 @@
             x:Name="EventsGrid"
             Grid.Row="1"
             AutoGenerateColumns="False"
+            Style="{DynamicResource XamGrid-WideScroll-Style}"
             HeaderStyle="{DynamicResource XamGridHeaderStyle}"
             CellControlAttached="EventsGrid_CellControlAttached"
             CellStyle="{DynamicResource XamGridLogCellControlStyle}"
@@ -66,9 +75,7 @@
                 </ig:UnboundColumn.ItemTemplate>
                 </ig:UnboundColumn>
 
-                <ig:TextColumn Key="TimeStrShort"  HeaderText="Time" Width="auto"
-                               TextBlockStyle="{StaticResource XamGridTextBlockStyle}">
-                </ig:TextColumn>
+                <ig:TextColumn Key="TimeStrShort"  HeaderText="Time" Width="auto" TextBlockStyle="{StaticResource XamGridTextBlockStyle}"/>
                 <ig:TextColumn Key="DeviceStr"  TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="Device"  Width="auto" HorizontalContentAlignment="Left"/>
                 <ig:TextColumn Key="Error"      TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="No"      HorizontalContentAlignment="Left"/>
                 <ig:TextColumn Key="Message"    TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="Message" Width="*"/>
@@ -84,7 +91,7 @@
                    OpacityMask="White"
                    >
             <Border Background="{StaticResource Mouvent.LightOrangeBrush}" Margin="5" CornerRadius="5">
-                <TextBlock Margin="10" x:Name="PopUpText" TextWrapping="Wrap"></TextBlock>
+                <TextBlock VerticalAlignment="Top" Margin="10" x:Name="PopUpText" TextWrapping="Wrap"></TextBlock>
             </Border>
         </rx:RxPopup>
     </Grid>

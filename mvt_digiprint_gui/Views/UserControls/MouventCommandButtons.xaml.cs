@@ -1,6 +1,7 @@
 ﻿using RX_Common;
 using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Models;
+using RX_DigiPrint.Models.Enums;
 using RX_DigiPrint.Services;
 using RX_DigiPrint.Views.PrintQueueView;
 using System;
@@ -59,8 +60,8 @@ namespace RX_DigiPrint.Views.UserControls
         private void _SetButtonStates()
         {
             //--- checks ---------------------------------------------------------
-            Button_Start.IsChecked  = RxGlobals.PrinterStatus.PrintState==EPrintState.ps_printing;
-            if (Button_Start.IsChecked)
+            // Button_Start.IsChecked  = RxGlobals.PrinterStatus.PrintState==EPrintState.ps_printing;
+            if (RxGlobals.PrinterStatus.PrintState==EPrintState.ps_printing)
             {
                 if (RxGlobals.Plc.IsReadyForProduction && !RxGlobals.PrinterStatus.Splicing)
                 {
@@ -104,7 +105,7 @@ namespace RX_DigiPrint.Views.UserControls
                 Button_Power.IsEnabled = true;
             }
 
-            RxGlobals.BtProdState.SetStartBnState(Button_Start.IsEnabled, Button_Start.IsChecked, false);
+            RxGlobals.BtProdState.SetStartBnState(Button_Start.IsEnabled, false, false);
             // RxGlobals.BtProdState.SetPauseBnState(Button_Pause.IsEnabled, Button_Pause.IsChecked, false);
             RxGlobals.BtProdState.SetStopBnState (Button_Stop.IsEnabled,  Button_Stop.IsChecked,  false);
             RxGlobals.BtProdState.SetAbortBnState(Button_Abort.IsEnabled, Button_Abort.IsChecked, false);
@@ -148,12 +149,13 @@ namespace RX_DigiPrint.Views.UserControls
             }
 #endif
 
-
             if (ShowPauseButton == true) // pasue button is shown
             {
                 RxGlobals.RxInterface.SendCommand(TcpIp.CMD_PAUSE_PRINTING);
                 return;
             }
+
+            if (InkSupply.AnyFlushed()) return;
 
             if (!RxGlobals.PrinterStatus.AllInkSupliesOn)
             {
@@ -233,6 +235,5 @@ namespace RX_DigiPrint.Views.UserControls
         {
            SettingsClicked(this, EventArgs.Empty);
         }
-
-    }
+	}
 }

@@ -72,7 +72,7 @@
                     </StackPanel>
                 </common:MvtButton>
 
-                <common:MvtButton Margin="0, 0, 15, 0" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" x:Name="Export" ToolTip="Go to oldest Message" Click="Export_clicked" >
+                <common:MvtButton Margin="0, 0, 15, 0" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" x:Name="Export" ToolTip="Export LOG as XLS" Click="Export_clicked" >
                     <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center"
                         Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Margin="3, 0, 0, 0" Width="20" Height="20" Kind="Export"></iconPacks:PackIconMaterial>
                 </common:MvtButton>
@@ -110,12 +110,13 @@
 			HeaderStyle="{DynamicResource XamGridHeaderStyle}" 
             RowHover="Row"
 			CellControlAttached="LogGrid_CellControlAttached"
-			CellStyle="{DynamicResource XamGridLogCellControlStyle}" 
+			CellStyle="{DynamicResource XamGridLogCellControlStyle}"
             SizeChanged="LogGrid_SizeChanged" 
 			BorderThickness="1"
-            VerticalAlignment="Stretch"
+            Height="auto"
             >
             <!--
+            VerticalAlignment="Stretch"
             Style="{DynamicResource XamGrid-NoVScroll-Style}"
             -->
             <ig:XamGrid.SelectionSettings>
@@ -152,11 +153,10 @@
         <ScrollBar x:Name="Scroll"
 			Grid.Row="1" 
 			Grid.Column="1" 
-			Width="20" 
+            Style="{DynamicResource RxScrollBarStyle}"
 			HorizontalAlignment="Left" 
 			VerticalAlignment="Stretch"
 			ValueChanged="Scroll_ValueChanged"/>
-
         <rx:RxPopup x:Name="LongTextPopUp"
                    Panel.ZIndex="10"
                    Width="auto"

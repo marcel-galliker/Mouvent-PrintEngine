@@ -29,8 +29,8 @@
 
         <!-- title ____________________________________________________________-->
         <Grid Margin="10" Grid.Row="0" Grid.ColumnSpan="2" ShowGridLines="false">
-            <Border Height="40"  Background="WhiteSmoke">
-                <TextBlock Foreground="#ff303030" Text="Open File" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            <Border Height="30"  Background="WhiteSmoke">
+                <TextBlock Foreground="#ff303030" Text="Open File" FontSize="{StaticResource MvtFontSize}" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Border>
         </Grid>
 

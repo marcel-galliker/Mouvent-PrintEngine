@@ -374,7 +374,7 @@ int net_device_to_ipaddr(EDevice dev, int no, char *ipAddr, int size)
 					break;
 
 	case dev_head:	if (no<0 || no>100) return REPLY_ERROR; 
-					if (rx_def_is_web(RX_Config.printer.type))
+					if (rx_def_is_lb(RX_Config.printer.type))
 					{
 						int barsize=((RX_Config.headsPerColor+MAX_HEADS_BOARD-1)/MAX_HEADS_BOARD);
 						int color = 0;
@@ -391,7 +391,7 @@ int net_device_to_ipaddr(EDevice dev, int no, char *ipAddr, int size)
 	case dev_plc:	sprintf(ipAddr, RX_CTRL_PLC); 
 					break;
 
-	case dev_stepper:	if (rx_def_is_web(RX_Config.printer.type))
+	case dev_stepper:	if (rx_def_is_lb(RX_Config.printer.type))
 						{
 							if (no<0 || no>3)
 							{

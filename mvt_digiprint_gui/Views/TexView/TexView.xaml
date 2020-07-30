@@ -46,7 +46,7 @@
             <StackPanel x:Name="SettingsTab" Grid.Row="0" Orientation="Horizontal" Background="Transparent" Margin="0,0,0,10">
                 <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Main"     Content="Main"          IsChecked="true"/>
                 <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Stepper"   Content="Stepper"       />
-                <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Log"       Content="Log"           />
+                <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Log"       Content="PLC Log"           />
                 <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Cfg"       Content="Configuration" />
                 <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Plc"       Content="PLC Info"      Last="True"/>
             </StackPanel>
@@ -102,7 +102,8 @@
                     <RotateTransform Angle="-20"/>
                 </TextBlock.RenderTransform>
             </TextBlock>
-
         </Grid>
+        
+        <rx_view:TexConsumables Margin="10" Grid.Row="1" Grid.Column="1" x:Name="Consumables"/>
     </Grid>
 </UserControl>

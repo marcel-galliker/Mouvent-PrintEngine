@@ -64,7 +64,7 @@
     <ClInclude Include="screening.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="rx_slicescreen_fms_1x3_gpu.h">
+    <ClInclude Include="gpu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -121,7 +121,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="rx_slicescreen_fms_1x3_gpu.cu">
+    <CudaCompile Include="gpu.cu">
       <Filter>Source Files</Filter>
     </CudaCompile>
   </ItemGroup>

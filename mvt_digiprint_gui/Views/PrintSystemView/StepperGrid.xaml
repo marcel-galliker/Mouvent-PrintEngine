@@ -27,23 +27,23 @@
 
             <TextBlock   Margin="0, 0, 0, 5"    Grid.Row="0" Grid.Column="0" Text="Ref Height"/>
             <common:MvtNumBox Margin="0, 0, 0, 5" Grid.Row="0" Grid.Column="1" Text="{Binding RefHeight}" HorizontalContentAlignment="Right"/>
-            <TextBlock   Margin="0, 0, 0, 5"    Grid.Row="0" Grid.Column="2" Text=" mm" FontSize="{StaticResource FontSizeStd}"/>
+            <TextBlock   Margin="0, 0, 0, 5"    Grid.Row="0" Grid.Column="2" Text=" mm" FontSize="{StaticResource MvtFontSize}"/>
 
             <TextBlock    Margin="0, 0, 0, 5"   Grid.Row="1" Grid.Column="0" Text="Wiping Height"/>
             <common:MvtNumBox  Margin="0, 0, 0, 5" Grid.Row="1" Grid.Column="1" Text="{Binding WipeHeight}" HorizontalContentAlignment="Right"/>
-            <TextBlock     Margin="0, 0, 0, 5"  Grid.Row="1" Grid.Column="2" Text=" mm" FontSize="{StaticResource FontSizeStd}"/>
+            <TextBlock     Margin="0, 0, 0, 5"  Grid.Row="1" Grid.Column="2" Text=" mm" FontSize="{StaticResource MvtFontSize}"/>
 
             <TextBlock    Margin="0, 0, 0, 5"   Grid.Row="2" Grid.Column="0" Text="Capping Height"/>
             <common:MvtNumBox  Margin="0, 0, 0, 5" Grid.Row="2" Grid.Column="1" Text="{Binding CapHeight}" HorizontalContentAlignment="Right"/>
-            <TextBlock      Margin="0, 0, 0, 5" Grid.Row="2" Grid.Column="2" Text=" mm" FontSize="{StaticResource FontSizeStd}"/>
+            <TextBlock      Margin="0, 0, 0, 5" Grid.Row="2" Grid.Column="2" Text=" mm" FontSize="{StaticResource MvtFontSize}"/>
 
             <TextBlock    Margin="0, 0, 0, 5"   Grid.Row="3" Grid.Column="0" Text="Adjust Position"/>
             <common:MvtNumBox Margin="0, 0, 0, 5" Grid.Row="3" Grid.Column="1" Text="{Binding AdjustPos}" HorizontalContentAlignment="Right"/>
-            <TextBlock     Margin="0, 0, 0, 5"  Grid.Row="3" Grid.Column="2" Text=" mm" FontSize="{StaticResource FontSizeStd}"/>
+            <TextBlock     Margin="0, 0, 0, 5"  Grid.Row="3" Grid.Column="2" Text=" mm" FontSize="{StaticResource MvtFontSize}"/>
 
             <TextBlock    Margin="0, 0, 0, 5"   Grid.Row="4" Grid.Column="0" Text="FlightTime"/>
             <common:MvtNumBox Margin="0, 0, 0, 5" Grid.Row="4" Grid.Column="1" Text="{Binding ManualFlightTimeComp}" HorizontalContentAlignment="Right" x:Name="ManualFlightTimeComp"/>
-            <TextBlock     Margin="0, 0, 0, 5"  Grid.Row="4" Grid.Column="2" Text=" mm" FontSize="{StaticResource FontSizeStd}"/>
+            <TextBlock     Margin="0, 0, 0, 5"  Grid.Row="4" Grid.Column="2" Text=" mm" FontSize="{StaticResource MvtFontSize}"/>
 
         </Grid>
     </GroupBox>

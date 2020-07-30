@@ -466,7 +466,7 @@ typedef struct SOffsetCfg
 
 int rx_def_is_scanning(EPrinterType printerType);
 int rx_def_is_tx(EPrinterType printerType);
-int rx_def_is_web(EPrinterType printerType);
+int rx_def_is_lb(EPrinterType printerType);
 int rx_def_is_test(EPrinterType printerType);
 int rx_def_use_pq(EPrinterType printerType);
 
@@ -527,8 +527,9 @@ typedef struct SPrinterStatus
 		UINT32			txRobot:1;			// 0x0080
 		UINT32			tempReady:1;		// 0x0100
 		UINT32			lbRobot : 1;		// 0x0200
-		UINT32			NeedDegasser : 1;	// 0x0400
-		};
+        UINT32			NeedDegasser : 1;   // 0x0400
+        UINT32			door_open : 1;		// 0x0800
+        };
 		UINT32 flags;		
 	};
 	//--- flags end -------------------------
@@ -782,7 +783,10 @@ typedef struct
 	UINT8	voltageCRC;							// 0x65
 	UINT64	dropletsPrinted;					// 0x66..0x6d
 	UINT8	dropletsPrintedCRC;					// 0x6e
-	UINT8	res_6f[0x80-0x6f];	
+	INT16	rob_angle;							// 0x6f..0x70	// 0=undef
+	INT16	rob_dist;							// 0x71..0x72	// 0=undef
+	UINT8	rob_CRC;							// 0x73
+	UINT8	res_74[0x80-0x74];	
 } SHeadEEpromMvt;	// size must be 0x80!!
 	
 typedef struct SHeadStat
@@ -1636,7 +1640,6 @@ typedef struct SRxConfig
 	SHeadBoardCfg	headBoard[HEAD_BOARD_CNT];	
 	INT32			externalData;
 	SConditionerCfg	cond[MAX_HEAD_DIST];
-	INT32			headFpVoltage[MAX_HEAD_DIST];
 	struct
 	{
 		INT32			tara[MAX_SCALES];

@@ -324,7 +324,7 @@ static void _do_get_evt(RX_SOCKET socket)
 //--- _do_req_log ----------------------------------------------------
 static void _do_req_log(RX_SOCKET socket, SLogReqMsg *pmsg)
 {
-	int i;
+	int idx;
 	int last;
 	int cnt;
 	SLogReqMsg	reply;
@@ -343,20 +343,28 @@ static void _do_req_log(RX_SOCKET socket, SLogReqMsg *pmsg)
 	reply.count		 = log_get_item_cnt(log); 
 	last			 = log_get_last_item_no(log);
 
+	idx = last-reply.first-1;
 	if (*pmsg->find)
 	{
 		if (pmsg->first>=0)	// search downwards
 		{
-			for(reply.first=pmsg->first; log_get_item(log, reply.first, &msg.log)==REPLY_OK && strstr(msg.log.formatStr, pmsg->find)==NULL; reply.first++)
+			for(; ; reply.first++)
 			{
+				if (idx<0) idx+=log_get_item_cnt(log);
+				if (log_get_item(log, idx, &msg.log)) break;
+				if (strstr(msg.log.formatStr, pmsg->find)==NULL) break;
+				idx--;
+				if (idx==last) break;		
 			}
 		}
+		/*
 		else // search upwards
 		{
 			for(reply.first=-pmsg->first; reply.first>=0 && log_get_item(log, reply.first, &msg.log)==REPLY_OK && strstr(msg.log.formatStr, pmsg->find)==NULL; reply.first--)
 			{
 			}
 		}
+		*/
 	}
 	
 	if (reply.first>=reply.count) reply.first=reply.count-1;
@@ -365,10 +373,30 @@ static void _do_req_log(RX_SOCKET socket, SLogReqMsg *pmsg)
 
 	msg.hdr.msgLen=sizeof(msg);
 	msg.hdr.msgId =EVT_GET_LOG;
-	for(i = last-reply.first-1, cnt = pmsg->count; cnt-- && log_get_item(log, i, &msg.log)==REPLY_OK; i--)
+//	TrPrintfL(TRUE, "LOG Start: first=%d, last=%d, idx=%d", reply.first, last, idx);
+	for(cnt = pmsg->count; --cnt; )
 	{
-//		TrPrintf(TRUE, "_do_req_log >>%s<<, size=%d", msg.log.formatStr, sizeof(msg.log));
+		if (idx<0) idx+=log_get_item_cnt(log);
+		if (log_get_item(log, idx, &msg.log)) break;
+
+		#ifdef linux
+		if (FALSE)
+		{
+			time_t tt=FiletimeToTimet(msg.log.time);
+			struct tm tm;
+			char time[32];
+			char str[128];
+			memset(str, 0, sizeof(str));
+			gmtime_r(&tt, &tm);
+			sprintf(time, "%d.%d.%d %02d:%02d.%02d", tm.tm_mday, tm.tm_mon, tm.tm_year+1900, tm.tm_hour, tm.tm_min, tm.tm_sec);
+			snprintf(str, sizeof(str)-1, "LOG[%d] %s: >>%s<<", cnt, time, msg.log.formatStr);
+			for (char *ch=str; *ch; ch++) if (*ch=='%') *ch='&';
+            TrPrintfL(TRUE, "%s", str);
+		}
+		#endif
 		gui_send_msg(socket, &msg);
+		idx--;
+		if (idx==last) break;		
 	}
 	log_close(&log);
 }
@@ -440,8 +468,10 @@ static void _do_export_log(RX_SOCKET socket, SLogReqMsg *pmsg)
 	xlSheetWriteStr(sheet, row, 5, "File",		0);
 	xlSheetWriteStr(sheet, row, 6, "Line",		0);
 	
-	for(i = last-reply.first-1, cnt = pmsg->count; cnt-- && log_get_item(log, i, &item)==REPLY_OK; i--)
+	for(i = last-reply.first-1, cnt = pmsg->count; --cnt>0; i--)
 	{	
+		if (i<0) i=log_get_item_cnt(log)-1;
+		if (log_get_item(log, i, &item)) break;
 		row++;
 		format =format_std;
 		switch (item.logType)
@@ -947,7 +977,6 @@ static void _do_get_printer_cfg(RX_SOCKET socket)
 	msg.headsPerColor = RX_Config.headsPerColor;
     msg.inkSupplyCnt  = RX_Config.inkSupplyCnt;
 	msg.inkCylindersPerColor	= RX_Config.inkCylindersPerColor;
-	memcpy(msg.headFpVoltage,	RX_Config.headFpVoltage,	sizeof(msg.headFpVoltage));
 	memcpy(msg.headDist,		RX_Config.headDist,			sizeof(msg.headDist));
 	memcpy(msg.headDistBack,	RX_Config.headDistBack,		sizeof(msg.headDistBack));
 	memcpy(msg.colorOffset,		RX_Config.colorOffset,		sizeof(msg.colorOffset));
@@ -992,7 +1021,6 @@ static void _do_set_printer_cfg(RX_SOCKET socket, SPrinterCfgMsg* pmsg)
 	RX_Config.headsPerColor		   = pmsg->headsPerColor;
 	RX_Config.inkCylindersPerColor = pmsg->inkCylindersPerColor;
 	RX_Config.inkSupplyCnt		   = pmsg->colorCnt * pmsg->inkCylindersPerColor;
-	memcpy(RX_Config.headFpVoltage, pmsg->headFpVoltage,	sizeof(RX_Config.headFpVoltage));
 	memcpy(RX_Config.headDist,		pmsg->headDist,			sizeof(RX_Config.headDist));
 	memcpy(RX_Config.headDistBack,	pmsg->headDistBack,		sizeof(RX_Config.headDistBack));
 	memcpy(RX_Config.colorOffset,	pmsg->colorOffset,		sizeof(RX_Config.colorOffset));
@@ -1108,7 +1136,7 @@ static void _do_test_start	(RX_SOCKET socket, SPrintQueueEvt* pmsg)
 //	if (rx_def_is_scanning(RX_Config.printer.type) && (RX_TestImage.testImage==PQ_TEST_JETS) ) RX_TestImage.scans=RX_Config.inkSupplyCnt;
 	if (RX_TestImage.testImage==PQ_TEST_SCANNING) RX_TestImage.scans=1;
 	if (RX_Config.printer.type==printer_test_table && (RX_TestImage.testImage==PQ_TEST_JETS || RX_TestImage.testImage==PQ_TEST_JET_NUMBERS)) RX_TestImage.scans=RX_Config.inkSupplyCnt;
-	if (rx_def_is_web(RX_Config.printer.type))
+	if (rx_def_is_lb(RX_Config.printer.type))
     { 
         if (RX_TestImage.testImage==PQ_TEST_JETS 
 		||  RX_TestImage.testImage==PQ_TEST_JET_NUMBERS

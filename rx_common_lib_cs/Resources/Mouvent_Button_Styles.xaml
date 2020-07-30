@@ -373,7 +373,7 @@
         <Setter Property="BorderBrush" Value="{StaticResource Mouvent.BlueDarkestBrush}"/>
         <Setter Property="HorizontalContentAlignment" Value="Center"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="FontSize" Value="12"></Setter>
+        <!--<Setter Property="FontSize" Value="12"></Setter>-->
         <Setter Property="FontWeight" Value="SemiBold"></Setter>
         <Setter Property="Foreground" Value="#ff303030"/>
         <Setter Property="Margin" Value="2"/>

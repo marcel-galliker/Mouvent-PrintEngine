@@ -18,7 +18,7 @@
         <!--<Image Source="..\Resources\Bitmaps\radex_bg.jpg" HorizontalAlignment="Right" />-->
         <StackPanel VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Margin="5">
             <Image Source="..\Resources\Bitmaps\Mouvent_Logo.png" />
-            <TextBlock Text="A Bobst Group company  " HorizontalAlignment="Right" FontSize="8"/>
+            <TextBlock Text="A Bobst Group company  " HorizontalAlignment="Right" FontSize="{StaticResource MvtFontSizeXS}"/>
         </StackPanel>
         <StackPanel Margin="10,30,10,0" >
             <TextBlock Text="RX-DigiPrint"
@@ -47,12 +47,12 @@
                 <TextBlock HorizontalAlignment="Center" Text=" " FontSize="4"/>
                 <Border BorderBrush="LightGray" BorderThickness="1" >
                     <StackPanel>
-                        <TextBlock HorizontalAlignment="Center" Text="Credits" FontSize="8"/>
+                        <TextBlock HorizontalAlignment="Center" Text="Credits" FontSize="{StaticResource MvtFontSizeXS}"/>
                         <TextBlock HorizontalAlignment="Center" Text=" " FontSize="4"/>
-                        <TextBlock HorizontalAlignment="Center" Text="Portions of this software are copyright" FontSize="8"/>
-                        <TextBlock HorizontalAlignment="Center" Text="©2014 The FreeType Project (www.freetype.org)." FontSize="8"/>
-                        <TextBlock HorizontalAlignment="Center" Text="©2013 The TinyXML Project (www.sourceforge.net/projects/tinyxml)." FontSize="8"/>
-                        <TextBlock HorizontalAlignment="Center" Text="All rights reserved." FontSize="8"/>
+                        <TextBlock HorizontalAlignment="Center" Text="Portions of this software are copyright" FontSize="{StaticResource MvtFontSizeXS}"/>
+                        <TextBlock HorizontalAlignment="Center" Text="©2014 The FreeType Project (www.freetype.org)." FontSize="{StaticResource MvtFontSizeXS}"/>
+                        <TextBlock HorizontalAlignment="Center" Text="©2013 The TinyXML Project (www.sourceforge.net/projects/tinyxml)." FontSize="{StaticResource MvtFontSizeXS}"/>
+                        <TextBlock HorizontalAlignment="Center" Text="All rights reserved." FontSize="{StaticResource MvtFontSizeXS}"/>
                     </StackPanel>
                 </Border>
                 

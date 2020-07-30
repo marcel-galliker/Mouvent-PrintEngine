@@ -13,9 +13,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
         public PrintSystemView()
         {
             InitializeComponent();
-          //  DataContext = this;
             DataContext = _PrintSystem;
-            TxRobotButton.DataContext = RxGlobals.PrinterStatus;
+            
             ChillerError.DataContext = RxGlobals.Chiller;
             _PrintSystem.PropertyChanged += _PrintSystem_PropertyChanged;
             RxGlobals.PrinterStatus.PropertyChanged += PrinterStatusChanged;
@@ -33,7 +32,6 @@ namespace RX_DigiPrint.Views.PrintSystemView
         {
             Visibility visibility       =  (RxGlobals.User.UserType >= EUserType.usr_service) ? Visibility.Visible : Visibility.Collapsed; 
             PrintSystemPanel.Visibility = visibility;
-            // HeadDistPanel.Visibility    = visibility; 
         }
 
         //--- _PrintSystem_PropertyChanged -----------------------------------------------
@@ -43,21 +41,14 @@ namespace RX_DigiPrint.Views.PrintSystemView
             {
                 InkSupplyGrid.show_inkSupplies(_PrintSystem.ColorCnt * _PrintSystem.InkCylindersPerColor);
                 PrintHeadGrid.show_items((int)(_PrintSystem.ColorCnt * _PrintSystem.HeadsPerColor));
-                /*if (_PrintSystem.AllInkSupplies) PrintHeadGrid.show_items((int)(_PrintSystem.ColorCnt * _PrintSystem.HeadsPerColor));
-                else PrintHeadGrid.show_items((int)(_PrintSystem.HeadsPerInkCylinder));*/
             }
             if (e.PropertyName.Equals("HeadsPerColor"))
             {
                 PrintHeadGrid.show_items((int)(_PrintSystem.ColorCnt * _PrintSystem.HeadsPerColor));
-                /*
-                if (_PrintSystem.AllInkSupplies) PrintHeadGrid.show_items((int)(_PrintSystem.ColorCnt * _PrintSystem.HeadsPerColor));
-                else PrintHeadGrid.show_items((int)(_PrintSystem.HeadsPerInkCylinder));*/
             }
             if (e.PropertyName.Equals("CheckedInkSupply") || e.PropertyName.Equals("AllInkSupplies"))
             {
                 PrintHeadGrid.show_items((int)(_PrintSystem.ColorCnt * _PrintSystem.HeadsPerColor));
-/*                if (_PrintSystem.AllInkSupplies) PrintHeadGrid.show_items((int)(_PrintSystem.ColorCnt * _PrintSystem.HeadsPerColor));
-                else PrintHeadGrid.show_items((int)(_PrintSystem.HeadsPerInkCylinder));*/
             }
             if (e.PropertyName.Equals("PrinterType"))
             {
@@ -106,9 +97,6 @@ namespace RX_DigiPrint.Views.PrintSystemView
         //--- PrinterStatusChanged ----------------------------------------
         private void PrinterStatusChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            bool enabled = (RxGlobals.PrinterStatus.PrintState!=EPrintState.ps_printing) && (RxGlobals.PrinterStatus.PrintState!=EPrintState.ps_stopping);
-        //    Button_Purge.IsEnabled = enabled;
-        //    Button_Wipe.IsEnabled  = enabled;
         }
 
         //--- Save_Clicked ------------------------------------------
@@ -124,44 +112,6 @@ namespace RX_DigiPrint.Views.PrintSystemView
             _PrintSystem.SendMsg(TcpIp.CMD_GET_INK_DEF);
             _PrintSystem.SendMsg(TcpIp.CMD_GET_PRINTER_CFG);
             _PrintSystem.SendMsg(TcpIp.CMD_GET_STEPPER_CFG);
-        }
-
-        //--- _SetCtrlMode ----------------
-        private void _SetCtrlMode(EFluidCtrlMode ctrlMode)
-        {
-            TcpIp.SFluidCtrlCmd msg = new TcpIp.SFluidCtrlCmd();
-            msg.no       = -1;
-            //msg.ctrlMode = EFluidCtrlMode.ctrl_cap;
-            msg.ctrlMode = ctrlMode;
-            RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_CTRL_MODE, ref msg);
-        }
-
-        //--- Cap_Clicked -------------------------------------------------
-        private void Cap_Clicked(object sender, RoutedEventArgs e)
-        {            
-            _SetCtrlMode(EFluidCtrlMode.ctrl_cap);
-            TxRobotPopup.IsOpen = false;
-        }
-
-        //--- Wipe_Clicked -------------------------------------------------
-        private void Wipe_Clicked(object sender, RoutedEventArgs e)
-        {            
-            _SetCtrlMode(EFluidCtrlMode.ctrl_wipe);
-            TxRobotPopup.IsOpen = false;
-        }
-
-        //--- WetWipe_Clicked -------------------------------------------------
-        private void Vacuum_Clicked(object sender, RoutedEventArgs e)
-        {            
-            _SetCtrlMode(EFluidCtrlMode.ctrl_vacuum);
-            TxRobotPopup.IsOpen = false;
-        }
-
-        //--- Wash_Clicked -------------------------------------------------
-        private void Wash_Clicked(object sender, RoutedEventArgs e)
-        {            
-            _SetCtrlMode(EFluidCtrlMode.ctrl_wash);
-            TxRobotPopup.IsOpen = false;
         }
 
         //--- Purge_Clicked -------------------------------------------------
@@ -181,8 +131,6 @@ namespace RX_DigiPrint.Views.PrintSystemView
         //--- UserControl_IsVisibleChanged ----------------------------------
         private void UserControl_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-        //   if ((bool)e.NewValue) RxGlobals.Timer.TimerFct += _timer_Tick;
-        //   else                  RxGlobals.Timer.TimerFct -= _timer_Tick;
         }
 
         private void ExpandSettings_Clicked(object sender, RoutedEventArgs e)
@@ -198,11 +146,6 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 EncoderGrid.Margin = new Thickness(0);
             }
 
-        }
-
-        private void TxRobot_Clicked(object sender, RoutedEventArgs e)
-        {
-            TxRobotPopup.Open(TxRobotButton);
         }
     }
 }

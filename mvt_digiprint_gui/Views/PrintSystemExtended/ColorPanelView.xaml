@@ -3,14 +3,14 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              mc:Ignorable="d"
              >
-
     <StackPanel Orientation="Horizontal" Background="WhiteSmoke">
         <iconPacks:PackIconMaterial VerticalAlignment="Top" Foreground="{Binding InkColor}" Margin="10" Width="20" Height="20" Kind="Water" />
-        <TextBlock Foreground="#ff303030" Margin="10, 10, 20, 10" Text="{Binding Header}" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        <TextBlock Foreground="#ff303030" Margin="10, 10, 20, 10" Text="{Binding Header}" 
+                   FontSize="{StaticResource MvtFontSize}" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" />
     </StackPanel>
     
 </UserControl>

@@ -45,8 +45,8 @@ void cond_set_flowResistance(int headNo, int value);
 void cond_set_disabledJets(int headNo, INT16 *jets);
 void cond_set_densityValues(int headNo, INT16 *values);
 void cond_set_voltage(int headNo, UINT8 voltage);
-
-void cond_set_purge_par (int headNo, int delay_pos_y, int time, int act_pos_y);
+void cond_set_rob_pos(int headNo, int angle, int dist);
+void cond_set_purge_par (int headNo, int delay, int time);
 void cond_add_droplets_printed(int headNo, UINT64 droplets);
 void cond_set_config	(int headNo, SConditionerCfg *cfg);
 void cond_setInk		(int headNo, SInkDefinition *pink);

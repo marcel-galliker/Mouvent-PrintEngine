@@ -62,13 +62,13 @@
                 <TextBlock Grid.Row="2" Grid.Column="1" Text="Motor"/>
                 <StackPanel Grid.Row="2" Grid.Column="2" Orientation="Horizontal">
                     <TextBlock Text="{Binding MotorPos, Converter={StaticResource ToString_Converter}, ConverterParameter=3}"/>
-                    <TextBlock Text=" mm" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Bottom"/>
+                    <TextBlock Text=" mm" FontSize="{StaticResource MvtFontSize}" VerticalAlignment="Bottom"/>
                 </StackPanel>
 
                 <TextBlock Grid.Row="3" Grid.Column="1" Text="Encoder"/>
                 <StackPanel Grid.Row="3" Grid.Column="2" Orientation="Horizontal" Background="{Binding EncoderColor}">
                     <TextBlock Text="{Binding EncoderPos, Converter={StaticResource ToString_Converter}, ConverterParameter=3}"/>
-                    <TextBlock Text=" mm" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Bottom"/>
+                    <TextBlock Text=" mm" FontSize="{StaticResource MvtFontSize}" VerticalAlignment="Bottom"/>
                 </StackPanel>
             </Grid>
         </Grid>

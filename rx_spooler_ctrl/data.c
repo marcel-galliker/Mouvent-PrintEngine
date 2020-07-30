@@ -24,7 +24,7 @@
 #include "bmp.h"
 #include "tcp_ip.h"
 #include "spool_rip.h"
-#include "rx_slicescreen_fms_1x3_gpu.h"
+#include "gpu.h"
 #include "ctrl_client.h"
 #include "head_client.h"
 #include "jet_correction.h"
@@ -131,7 +131,6 @@ void data_init(RX_SOCKET socket, int headCnt)
 	_InIdx   = 0;
 	_OutIdx  = 0;
 	_SendIdx = 0;
-	_LastGapPx=0;
 	_LastSplitId = 0;
 	_CacheInfo = FALSE;
 	_Abort   = FALSE;
@@ -144,6 +143,7 @@ void data_init(RX_SOCKET socket, int headCnt)
 		memset(_FileTimePath, 0, sizeof(_FileTimePath));
 		memset(&_LastBmpInfo, 0, sizeof(_LastBmpInfo));
 		memset(_LastColorOffset, 0, sizeof(_LastColorOffset));
+		_LastGapPx = -1;
 	}
 	memset(_BlkNo, 0, sizeof(_BlkNo));
 	memset(_SmpOffset, 0xff, sizeof(_SmpOffset));
@@ -180,7 +180,7 @@ void data_init(RX_SOCKET socket, int headCnt)
 	}
 	scr_init();
 	flz_init();
-	if (rx_def_is_web(RX_Spooler.printerType)) RX_Spooler.overlap=FALSE;
+	if (rx_def_is_lb(RX_Spooler.printerType)) RX_Spooler.overlap=FALSE;
 	_HeadCnt = headCnt;
 }
 
@@ -510,9 +510,9 @@ int  data_malloc(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPixel,
 					TrPrintfL(1, "buffer[%d]: IS FREE", i);
 					if (!_Abort)
 					{
-					//	TrPrintfL(1, "data_malloc buffer 1[%d], %p, free=%d MB, size=%d MB", i, buffer[i], rx_mem_get_freeMB(), memsize/1024/1024);
+						TrPrintfL(1, "data_malloc buffer [%d] %p, free=%d MB, size=%d MB start", i, buffer[i], rx_mem_get_freeMB(), memsize/1024/1024);
 						buffer[i] = rx_mem_alloc(memsize);
-						TrPrintfL(1, "data_malloc buffer[%d], %p, free=%d MB, size=%d MB", i, buffer[i], rx_mem_get_freeMB(), memsize/1024/1024);
+						TrPrintfL(1, "data_malloc buffer [%d] %p, free=%d MB, size=%d MB done", i, buffer[i], rx_mem_get_freeMB(), memsize/1024/1024);
 						if (buffer[i]==NULL) error=TRUE;
 						*pBufSize = memsize;
 					}
@@ -577,7 +577,6 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 	char filename[MAX_PATH];
 	char *tiffErr;
 	
-//	Error(LOG, 0, "data_load id=%d, page=%d, copy=%d, scan=%d", id->id, id->page, id->copy, id->scan);
 	TrPrintfL(TRUE, "data_load id=%d, page=%d, copy=%d, scan=%d, offsetPx=%d, data_load >>%s<<", id->id, id->page, id->copy, id->scan, offsetPx, filepath);
 	TrPrintfL(TRUE, "FirstPage=%d, LastPage=%d", flags & FLAG_SMP_FIRST_PAGE, flags & FLAG_SMP_LAST_PAGE);
 	
@@ -604,7 +603,7 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 			if (offsetPx != _LastOffset)
 			{
 				_LastOffset = offsetPx;
-				if (rx_def_is_web(RX_Spooler.printerType)) newOffsets =TRUE;
+				if (rx_def_is_lb(RX_Spooler.printerType)) newOffsets =TRUE;
 			}
 		}		
 		
@@ -736,8 +735,8 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 			else if (printMode!=PM_TEST && printMode!=PM_TEST_SINGLE_COLOR)  jc_correction(&bmpInfo, &_PrintList[_InIdx], 0);
 		}
 		#ifdef DEBUG
-//		if (loaded)
 		if (FALSE)
+//		if (loaded)
 		{
 			char dir[MAX_PATH];
 			char fname[MAX_PATH];
@@ -780,7 +779,7 @@ int  data_reload	(SPageId *id)
 }
 */
 //--- data_same ------------------------------------------------------------------
-int data_same(SPageId *id)
+int data_same(SPageId *id, int clearBlockUsed)
 {
 	int nextIdx;
 	int src;
@@ -789,9 +788,12 @@ int data_same(SPageId *id)
 	if (nextIdx == _OutIdx) 
 		return Error(ERR_CONT, 0, "Print List Overflow");
 
+	TrPrintfL(TRUE, "data_same[%d]: id=%d, page=%d, scan=%d", -1, id->id, id->page, id->scan);
+
 	for (src=0; src<SIZEOF(_PrintList); src++)
 	{
 		SPageId *p = &_PrintList[src].id;
+		TrPrintfL(TRUE, "data_same[%d]: id=%d, page=%d, scan=%d", src, p->id, p->page, p->scan);
 		if ((id->id==p->id) && (id->page==p->page) && (id->scan==p->scan))
 		{				
 			SBmpSplitInfo *ptr=_PrintList[_InIdx].splitInfo;
@@ -799,10 +801,10 @@ int data_same(SPageId *id)
 			_PrintList[_InIdx].splitInfo = ptr;
 			memcpy(_PrintList[_InIdx].splitInfo, _PrintList[src].splitInfo, _SplitInfoSize);
 			memcpy(&_PrintList[_InIdx].id, id, sizeof(_PrintList[_InIdx].id));
-			
 			for (int h=0; h<_HeadCnt; h++)
 			{
 				_PrintList[_InIdx].splitInfo[h].pListItem = &_PrintList[_InIdx];
+				_PrintList[_InIdx].splitInfo[h].clearBlockUsed = clearBlockUsed;
 			}
 		
 			/*
@@ -822,7 +824,6 @@ int data_same(SPageId *id)
 		}
 	}
 	
-
 	return Error(ERR_CONT, 0, "Same Data not found");;
 }
 
@@ -1154,7 +1155,6 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 				pInfo = &pItem->splitInfo[head];
 				rx_mem_use(*pBmpInfo->buffer[color]);
 			
-				int blk0=RX_Spooler.dataBlkCntHead*(pInfo->head%RX_Spooler.headsPerBoard);
 
 				pItem->headsUsed++;
 				pInfo->pListItem		= pItem;
@@ -1174,7 +1174,8 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 				pInfo->used			= TRUE;
 				pInfo->board		= head/RX_Spooler.headsPerBoard;
 				pInfo->head			= head%RX_Spooler.headsPerBoard;
-				pInfo->blk0			= blk0+1 + _BlkNo[pInfo->board][pInfo->head];
+				int blk0			= RX_Spooler.dataBlkCntHead*(pInfo->head%RX_Spooler.headsPerBoard);
+				pInfo->blk0			= blk0+ 1 + _BlkNo[pInfo->board][pInfo->head];
 				pInfo->bitsPerPixel	= pBmpInfo->bitsPerPixel;
 				pInfo->colorCode	= RX_Color[color].color.colorCode;
 				pInfo->inkSupplyNo  = RX_Color[color].inkSupplyNo;
@@ -1198,14 +1199,14 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 					empty=TRUE;
 				}
 
-				if (rx_def_is_web(RX_Spooler.printerType) 
+				if (rx_def_is_lb(RX_Spooler.printerType) 
 				&& (id->id==PQ_TEST_JETS || id->id==PQ_TEST_JET_NUMBERS || id->id==PQ_TEST_DENSITY)  
 				&& (RX_Spooler.colorCnt==0 || ((id->copy-1)%RX_Spooler.colorCnt)!=color))
 				{
 					empty=TRUE;
 				}
 				
-				if (rx_def_is_web(RX_Spooler.printerType) 
+				if (rx_def_is_lb(RX_Spooler.printerType) 
 				&& (id->id==PQ_TEST_ENCODER)  
 				&& (RX_Spooler.colorCnt<2 || RX_Color[color].color.colorCode!=0)) // encoder only in black
 				{
@@ -1321,7 +1322,7 @@ static int _data_split_prod(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 					pInfo->board		  = head/RX_Spooler.headsPerBoard;
 					pInfo->head			  = head%RX_Spooler.headsPerBoard;
 				//	if (RX_Spooler.printerType==printer_LB702_UV)
-					if (rx_def_is_web(RX_Spooler.printerType))
+					if (rx_def_is_lb(RX_Spooler.printerType))
 						pInfo->blk0			= blkNo+RX_Spooler.dataBlkCntHead*(pInfo->head%RX_Spooler.headsPerBoard);
 					else
 						pInfo->blk0			= _BlkNo[pInfo->board][pInfo->head]+RX_Spooler.dataBlkCntHead*(pInfo->head%RX_Spooler.headsPerBoard);
@@ -1376,7 +1377,7 @@ static int _data_split_prod(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 					TrPrintfL(TRUE, "Split[%d.%d]: startPx=%d, widthPx=%d, FillBt=%d, buffer=%03d, blk0=%d, blkCnt=%d", pInfo->board,  pInfo->head, startPx, pInfo->widthPx, pInfo->fillBt, ctrl_get_bufferNo(*pInfo->data), pInfo->blk0, pInfo->blkCnt);
 				}
 				//--- increment ---
-				if (rx_def_is_web(RX_Spooler.printerType)) startPx += RX_Spooler.headWidthPx;
+				if (rx_def_is_lb(RX_Spooler.printerType)) startPx += RX_Spooler.headWidthPx;
 				else									   
 				{
 					startPx    += (RX_Spooler.headWidthPx - firstFillPx);
@@ -1409,7 +1410,7 @@ static int _data_split_prod(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 					pInfo->board		= head/RX_Spooler.headsPerBoard;
 					pInfo->head			= head%RX_Spooler.headsPerBoard;
 				//	if (RX_Spooler.printerType==printer_LB702_UV)
-					if (rx_def_is_web(RX_Spooler.printerType))
+					if (rx_def_is_lb(RX_Spooler.printerType))
 						pInfo->blk0			= blkNo+RX_Spooler.dataBlkCntHead*(pInfo->head%RX_Spooler.headsPerBoard);
 					else
 						pInfo->blk0			= _BlkNo[pInfo->board][pInfo->head]+RX_Spooler.dataBlkCntHead*(pInfo->head%RX_Spooler.headsPerBoard);
@@ -1527,7 +1528,7 @@ static int _data_split_scan(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 					pInfo->used			= TRUE;
 					pInfo->board		= head/RX_Spooler.headsPerBoard;
 					pInfo->head			= head%RX_Spooler.headsPerBoard;
-				//	if (rx_def_is_web(RX_Spooler.printerType))
+				//	if (rx_def_is_lb(RX_Spooler.printerType))
 					if (RX_Spooler.printerType==printer_LB702_UV)
 						pInfo->blk0			= blkNo+RX_Spooler.dataBlkCntHead*(pInfo->head%RX_Spooler.headsPerBoard);
 					else
@@ -1600,7 +1601,7 @@ static int _data_split_scan(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 					pInfo->used			= TRUE;
 					pInfo->board		= head/RX_Spooler.headsPerBoard;
 					pInfo->head			= head%RX_Spooler.headsPerBoard;
-				//	if (rx_def_is_web(RX_Spooler.printerType))
+				//	if (rx_def_is_lb(RX_Spooler.printerType))
 					if (RX_Spooler.printerType==printer_LB702_UV)
 						pInfo->blk0			= blkNo+RX_Spooler.dataBlkCntHead*(pInfo->head%RX_Spooler.headsPerBoard);
 					else
@@ -2211,9 +2212,10 @@ int data_sent(SBmpSplitInfo *psplit, int head)
 			TrPrintfL(TRUE, "*** FILE SENT *** idx=%d (id=%d, page=%d, copy=%d, scan=%d) cycletime=%d ms", _OutIdx, evt.id.id, evt.id.page, evt.id.copy, evt.id.scan, time-_time);
 			_time=time;
 			
-			extern int _MsgGot0, _MsgGot, _MsgSent, _MsgId;
+			// extern int _MsgGot0, _MsgGot, _MsgSent, _MsgId;
 			// TrPrintfL(TRUE, "EVT_PRINT_FILE: DATA_SENT _InIdx=%d, _OutIdx=%d, bufReady=%d, _MsgGot0=%d, _MsgGot=%d, _MsgSent=%d, _MsgId=0x%08x", _InIdx, _OutIdx, evt.bufReady, _MsgGot0, _MsgGot, _MsgSent, _MsgId);
-			{ //--- used for printqueue handling of TX machines ------------------------------
+			if (psplit->clearBlockUsed)
+			{
 				int lastidx=(_OutIdx+PRINT_LIST_SIZE-1)%PRINT_LIST_SIZE;
 				memset(&_PrintList[lastidx].id, 0, sizeof(_PrintList[lastidx].id));
 			}

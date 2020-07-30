@@ -241,7 +241,7 @@ namespace RX_DigiPrint.Models
             for (int c = ClusterAlignmentDictionary.Count; c < NumberOfClusters; c++)
             {
                 ClusterAlignment clusterAlignment = new ClusterAlignment(c);
-                clusterAlignment.IsScanning = (RxGlobals.PrintSystem.PrinterType == Services.EPrinterType.printer_TX801 || RxGlobals.PrintSystem.PrinterType == Services.EPrinterType.printer_TX801);
+                clusterAlignment.IsScanning = RxGlobals.PrintSystem.IsScanning;
                 ClusterAlignmentDictionary[c] = clusterAlignment;
             }
             foreach (var elem in ClusterAlignmentDictionary)
@@ -434,10 +434,10 @@ namespace RX_DigiPrint.Models
                 {
                     int thisClusterNumber = -1;
                     
-                    if (RxGlobals.PrintSystem.IsScanning)
+                    if (RxGlobals.PrintSystem.IsTx)
                     {
-                        int remainder = (4 - ((RxGlobals.PrintSystem.ColorCnt * RxGlobals.PrintSystem.HeadsPerColor) % 4)) % 4;
-                        thisClusterNumber = (nextHeadNumber + remainder) / 4;
+                        // int remainder = (4 - ((RxGlobals.PrintSystem.ColorCnt * RxGlobals.PrintSystem.HeadsPerColor) % 4)) % 4;
+                        thisClusterNumber = nextHeadNumber / 4;
                     }
                     else
                     {
@@ -446,7 +446,7 @@ namespace RX_DigiPrint.Models
                     try
                     {
                         int h = nextHeadNumber % 4;
-                        if (RxGlobals.PrintSystem.IsScanning)
+                        if (RxGlobals.PrintSystem.IsTx)
                         {
                             h = (3 - h);
                         }

@@ -44,20 +44,20 @@
                     </Grid.ColumnDefinitions>
                     <rx_uc:PlcTitle Grid.Row="0" Grid.ColumnSpan="3" Header="Washing Unit"/>
                     <rx_uc:PlcParCtrl Grid.Row="1"                     ID="CFG_WATER_ON_TIME"                   Label="Water ON  Time"      Format="n" UserEnabled="usr_service"/>
-                    <TextBlock Grid.Row="1" Grid.Column="1"             Text="s" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1"             Text="s" FontSize="{StaticResource MvtFontSize}" VerticalAlignment="Center"/>
                     <rx_uc:PlcParCtrl Grid.Row="2"                     ID="CFG_WATER_OFF_TIME"                  Label="Water OFF Time"      Format="n" UserEnabled="usr_service"/>
-                    <TextBlock Grid.Row="2" Grid.Column="1"             Text="s" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="2" Grid.Column="1"             Text="s" FontSize="{StaticResource MvtFontSize}" VerticalAlignment="Center"/>
 
                         <rx_uc:PlcParCtrl Grid.Row="3"                     ID="CFG_ANTIFOAM_PERCENT"                Label="Antifoam"      Format="n" UserEnabled="usr_service"/>
-                        <TextBlock Grid.Row="3" Grid.Column="1"             Text="%" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="3" Grid.Column="1"             Text="%" FontSize="{StaticResource MvtFontSize}" VerticalAlignment="Center"/>
 
                         
                     <rx_uc:PlcTitle   Grid.Row="4" Grid.ColumnSpan="3" Header="Gluing"/>
                     <rx_uc:PlcParCtrl Grid.Row="5"                      ID="PAR_SPEED_GLUE"                      Label="Glue Speed"          Format="f" UserEnabled="usr_service"/>
-                    <TextBlock Grid.Row="5" Grid.Column="1"             Text="m/min" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="5" Grid.Column="1"             Text="m/min" FontSize="{StaticResource MvtFontSize}" VerticalAlignment="Center"/>
 
                     <rx_uc:PlcParCtrl Grid.Row="6"                      ID="CFG_BELTHEATER_MAX"                Label="Belt Heater Max"     Format="n" UserEnabled="usr_service"/>
-                    <TextBlock Grid.Row="6" Grid.Column="1"             Text="%" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="6" Grid.Column="1"             Text="%" FontSize="{StaticResource MvtFontSize}" VerticalAlignment="Center"/>
                     <rx_uc:PlcParCtrl Grid.Row="6" Grid.Column="2"      ID="CFG_BELTHEATER_ON" Label="" Unit="" Type="Combo" UserEnabled="usr_supervisor" x:Name="CB_BeltHeaterOn" />
 
                     <rx_uc:PlcTitle Grid.Row="7" Grid.ColumnSpan="3" Header="Spread Roller"/>

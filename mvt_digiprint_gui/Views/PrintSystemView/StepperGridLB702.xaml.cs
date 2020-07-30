@@ -9,7 +9,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
 {
     public partial class StepperGridLB702 : UserControl
     {
-        private RxNumBox[,] _numbox = new RxNumBox[4, 3];
+        private MvtNumBox[,] _numbox = new MvtNumBox[4, 3];
         private bool IsStandardPrintSystemView { get; set; }
         private EPrinterType CurrentPrinterType { get; set; }
 
@@ -25,7 +25,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
             {
                 for (y = 0; y < _numbox.GetLength(1); y++)
                 {
-                    _numbox[x, y] = new RxNumBox();
+                    _numbox[x, y] = new MvtNumBox();
                     _numbox[x, y].Tag = (100 * x + y).ToString();
                     _numbox[x, y].LostFocus += box_LostFocus;
                     _numbox[x, y].HorizontalContentAlignment = System.Windows.HorizontalAlignment.Right;
@@ -84,7 +84,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
         //--- box_LostFocus ------------------------------------
         private void box_LostFocus(object sender, RoutedEventArgs e)
         {
-            RxNumBox box = sender as RxNumBox;
+            MvtNumBox box = sender as MvtNumBox;
             int tag = Rx.StrToInt32(box.Tag as string);
             int no = tag / 100;
             int row = tag % 100;

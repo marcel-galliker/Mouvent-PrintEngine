@@ -5,7 +5,7 @@
     >
 
     <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="RxBasics.xaml" />
+        <ResourceDictionary Source="MvtBasics.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
     <SolidColorBrush x:Key="Mouvent.Button.MouseOver.Background"    Color="{StaticResource Mouvent.BlueMedium}"/>

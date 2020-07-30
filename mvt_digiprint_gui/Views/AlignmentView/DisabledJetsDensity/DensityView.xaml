@@ -20,9 +20,7 @@
         <common:MvtButton HorizontalAlignment="Left" Margin="5" Grid.Row="0" Grid.ColumnSpan="4"
                              Click="LoadFile_Clicked"  Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}"
                               >
-            <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" 
-                                            Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 
-                                                Kind="FolderOpenOutline"></iconPacks:PackIconMaterial>
+            <iconPacks:PackIconMaterial Kind="Import" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Height="20"/>
         </common:MvtButton>
 
         <Image MaxWidth="480" Grid.Row="1" Margin="5" Grid.ColumnSpan="12"

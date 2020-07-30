@@ -1,20 +1,20 @@
 ﻿<UserControl
-             x:Class="RX_DigiPrint.Views.PrintSystemView.PrintSystemView"
- 
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    x:Class="RX_DigiPrint.Views.PrintSystemView.PrintSystemView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
     xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
-             xmlns:rxView="clr-namespace:RX_DigiPrint.Views.PrintSystemView"
-             xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
-             mc:Ignorable="d"
-             d:DesignHeight="1000" d:DesignWidth="1500"
-             Background="Transparent"
-             HorizontalAlignment="Stretch"
-             IsVisibleChanged="UserControl_IsVisibleChanged"
-             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks" xmlns:rx="clr-namespace:RX_DigiPrint.Helpers">
+    xmlns:rxView="clr-namespace:RX_DigiPrint.Views.PrintSystemView"
+    xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
+    mc:Ignorable="d"
+    d:DesignHeight="1000" d:DesignWidth="1500"
+    Background="Transparent"
+    HorizontalAlignment="Stretch"
+    IsVisibleChanged="UserControl_IsVisibleChanged"
+    xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+    xmlns:rx="clr-namespace:RX_DigiPrint.Helpers">
 
     <UserControl.Resources>
         <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">32</sys:Double>
@@ -29,9 +29,6 @@
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0" Grid.ColumnSpan="2" Grid.Column="0" Background="{StaticResource Mouvent.MainColorBrush}" ShowGridLines="False" >
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
 
             <rx_uc:Splicing VerticalAlignment="Center" HorizontalAlignment="Center"></rx_uc:Splicing>
 
@@ -49,6 +46,7 @@
                     <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center"
                         Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Margin="-3, 0, 0, 0" Width="20" Height="20" Kind="Restore"></iconPacks:PackIconMaterial>
                 </common:MvtButton>
+
             </StackPanel>
         </Grid>
 
@@ -56,7 +54,7 @@
             <StackPanel>
                 <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Hidden" Margin="10">
                     <!-- Print System ___________________________________________________________________________________________-->
-                    <Grid x:Name="PrintSystemPanel">
+                    <Grid x:Name="PrintSystemPanel" Margin="0,0,0,5">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="auto"/>
@@ -64,13 +62,7 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                            <common:MvtButton Margin="0,0,10,0" Name="TxRobotButton" Grid.Column="0" Visibility="{Binding TxRobot, Converter={StaticResource BoolToVisible_Converter}}" 
-                          VerticalAlignment="Top"
-                          Click="TxRobot_Clicked" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}" Height="40">
-                                <iconPacks:PackIconMaterial VerticalAlignment="Center" HorizontalAlignment="Center"
-                                            Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 
-                                                Kind="RobotIndustrial"></iconPacks:PackIconMaterial>
-                            </common:MvtButton>
+
 
                             <common:MvtButton Grid.Column="1" Visibility="{Binding IsFirstInView, Converter={StaticResource BoolToVisible_Converter}}" 
                           Grid.Row="6" Grid.RowSpan="3" VerticalAlignment="Top" HorizontalAlignment="Left"  
@@ -80,10 +72,9 @@
                                                 Kind="{Binding ExpandSettingsPanel, Converter={StaticResource ExpandSectionIconConverter}}"></iconPacks:PackIconMaterial>
                             </common:MvtButton>
                             <Border Margin="10,0,0,0" Visibility="{Binding ExpandSettingsPanel, Converter={StaticResource BoolToInVisible_Converter}}" Background="WhiteSmoke"
-                                    Grid.Column="2" Grid.ColumnSpan="5" Grid.Row="0" Height="40" VerticalAlignment="Top">
-                                <Label Foreground="#ff303030" FontWeight="SemiBold" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <ContentPresenter Margin="0" Content="Settings"/>
-                                </Label>
+                                    Grid.Column="2" Grid.ColumnSpan="5" Grid.Row="0" Height="30" VerticalAlignment="Top">
+                                <TextBlock Foreground="#ff303030" FontSize="{StaticResource MvtFontSize}" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center"
+                       Text="Settings"></TextBlock>
                             </Border>
 
                             <Grid Grid.Row="0" Grid.Column="2">
@@ -141,27 +132,6 @@
                 </ScrollViewer>
             </StackPanel>
         </ScrollViewer>
-
-        <rx:RxPopup x:Name="TxRobotPopup"
-                   PlacementTarget="{Binding ElementName=TxRobotButton}"
-                   Width="auto"
-                   MinWidth="100" 
-                   IsHitTestVisible="False"
-                   OpacityMask="White"
-                   >
-            <Grid Background="White">
-                <GroupBox Width="150" Style="{StaticResource MvtGroupBoxLeftAlignedHeader}" Header="^">
-                    <StackPanel Margin="10,2">
-
-                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40"  x:Name="Button_Cap" Content="CAP"  Margin="5" Click="Cap_Clicked"/>
-                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40"  x:Name="Button_Wipe" Content="Wipe"  Margin="5" Click="Wipe_Clicked"/>
-                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40"  x:Name="Button_Vacuum" Content="Vacuum"  Margin="5" Click="Vacuum_Clicked"/>
-                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40"  x:Name="Button_Wash" Content="Wash"  Margin="5" Click="Wash_Clicked"/>
-
-                    </StackPanel>
-                </GroupBox>
-            </Grid>
-        </rx:RxPopup>
 
     </Grid>
 

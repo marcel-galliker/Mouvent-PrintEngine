@@ -31,6 +31,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="{Binding Source={StaticResource Mouvent.Layout.TopToolBarHeight}}"/>
             <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
@@ -48,15 +49,15 @@
                 </common:MvtButton>
                 
                 <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" ToolTip="Import Scan Check Values" x:Name="Button_ScanCheck" Click="ScanCheckImportButton_Click" Margin="0, 5, 15, 5" >
-                    <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" 
-                                                Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}"
-                                                Width="20" Height="20" Kind="Import"></iconPacks:PackIconMaterial>
+                    <iconPacks:PackIconMaterial Kind="Import" HorizontalAlignment="Stretch" VerticalAlignment="Center" 
+                                                Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIconM}"
+                                                Width="20" Height="20"></iconPacks:PackIconMaterial>
                 </common:MvtButton>
-                <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" ToolTip="Clear all Values"
+                <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" ToolTip="Reset all Values"
                                  x:Name="Button_ScanCheckClearValues" Click="ScanCheckClearButton_Click" Margin="0, 0, 15, 0" >
                     <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" 
                                                 Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}"
-                                                Width="20" Height="20" Kind="Delete"></iconPacks:PackIconMaterial>
+                                                Width="20" Height="20" Kind="Restore"></iconPacks:PackIconMaterial>
                 </common:MvtButton>
                 
                 <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" IsChecked="{Binding CorrectionValuesChanged}"
@@ -85,7 +86,7 @@
 
             <StackPanel Grid.Column="0" Orientation="Horizontal" x:Name="InkSupplySelectionPanel">
                 <StackPanel x:Name="ColorSelectionPanel" Orientation="Horizontal" Margin="10,5,5,5"/>
-                <StackPanel x:Name="InkCylinderSelectionPanel" Orientation="Horizontal" Margin="10,5,5,5"/>
+                <StackPanel x:Name="InkCylinderSelectionPanel_Standard" Orientation="Horizontal" Margin="10,5,5,5"/>
             </StackPanel>
 
             <StackPanel  HorizontalAlignment="Right" Grid.Column="1" Orientation="Horizontal">
@@ -94,7 +95,11 @@
             </StackPanel>
         </Grid>
 
-        <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Visible">
+        <Grid Grid.Row="2">
+            <StackPanel x:Name="InkCylinderSelectionPanel_Surface" Orientation="Horizontal" Margin="10,0,10,5"/>
+        </Grid>
+
+        <ScrollViewer Grid.Row="3" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Visible">
             <ScrollViewer.Resources>
                 <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">30</sys:Double>
                 <sys:Double x:Key="{x:Static SystemParameters.HorizontalScrollBarHeightKey}">30</sys:Double>
@@ -103,7 +108,7 @@
             <StackPanel Grid.Row="2" Margin="10" x:Name="ClusterStackPanel" Orientation="Horizontal"/>
         </ScrollViewer>
 
-        <Grid Grid.Row="3">
+        <Grid Grid.Row="4">
             <mahapps:ToggleSwitch Margin="10,5,10,5" Grid.Row="1" Style="{StaticResource MahApps.Metro.Styles.ToggleSwitch.Win10}"
                               Visibility="{Binding RegisterEditMode, Converter={StaticResource BoolToVisible_Converter}}"
                           Content="Propagate correction values to all following print heads"

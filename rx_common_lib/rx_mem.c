@@ -13,6 +13,7 @@
 	#include <sys/sysinfo.h>
 	#include <sys/mman.h>
 #endif
+#include "rx_error.h"
 #include "rx_threads.h"
 #include "rx_mem.h"
 #include "errno.h"
@@ -21,6 +22,8 @@ static HANDLE _Mutex = NULL;
 
 static int _Buffers=0;
 static UINT64 _SizeAllocated=0;
+
+#define  USE_MLOCK
 
 //---------------------------------------------------------------------
 //
@@ -38,7 +41,9 @@ typedef struct
 //--- rx_mem_init ---------------------------------------------------
 void  rx_mem_init(UINT64 size)
 {
-	return;
+    #ifndef USE_MLOCK
+		Error(LOG, 0, "mlock not used");
+	#endif
 }
 
 //--- rx_mem_alloc ------------------------------------------------------ 
@@ -54,6 +59,9 @@ BYTE* rx_mem_alloc(UINT64 size)
 		if (buf==NULL) 
 		{
 			rx_mem_clear_caches();
+            #ifdef USE_MLOCK
+			Error(WARN, 0, "Linux cleared caches.");
+			#endif
 			if (size/(1024*1024)>=rx_mem_get_freeMB()) return NULL;
 			buf = malloc(size+sizeof(SBuffer));
 		}
@@ -62,10 +70,12 @@ BYTE* rx_mem_alloc(UINT64 size)
 	#endif
 	if  (buf) 
 	{
-		#ifdef linux			
-			// printf("mlock(%p, %u MB)\n", buf, (unsigned)(size/1024/1024));
-			if (mlock(buf, size+sizeof(SBuffer)))
-				err = errno;
+		#ifdef linux 
+			#ifdef USE_MLOCK
+				// printf("mlock(%p, %u MB)\n", buf, (unsigned)(size/1024/1024));
+				if (mlock(buf, size+sizeof(SBuffer)))
+					err = errno;
+			#endif
 		#endif
 		_Buffers ++;
 		_SizeAllocated += size;
@@ -73,7 +83,6 @@ BYTE* rx_mem_alloc(UINT64 size)
 		buf->count=0;
 		buf->sem_IsFree = rx_sem_create();
 		buf->size = size;
-//		TrPrintfL(TRUE, "rx_mem_alloc %p (%d)", &buf->data[0], size);
 		return &buf->data[0];
 	}
 	return NULL;
@@ -86,6 +95,7 @@ void rx_mem_use(BYTE *ptr)
 	if (ptr)
 	{
 		SBuffer *buf = ((SBuffer*)ptr) - 1;
+		
 		rx_mutex_lock(_Mutex);
 		if (buf->count<0)
 			buf->count=buf->count;
@@ -152,9 +162,10 @@ void  rx_mem_free(BYTE **ptr)
 		if (!buf->count)
 		{
 //			TrPrintfL(TRUE, "rx_mem_free 0x%08x", *ptr);
-//			munlock(buf->data, buf->size);
-			#ifdef linux
-				munlock(buf, buf->size+sizeof(SBuffer));
+			#ifdef ___linux
+				#ifdef USE_MLOCK
+					munlock(buf, buf->size+sizeof(SBuffer));
+				#endif
 			#endif
 			_Buffers--;
 			_SizeAllocated-=buf->size;
@@ -180,7 +191,9 @@ void  rx_mem_free_force(BYTE **ptr)
 //			TrPrintfL(TRUE, "rx_mem_free 0x%08x", *ptr);
 //			munlock(buf->data, buf->size);
 			#ifdef linux
-				munlock(buf, buf->size+sizeof(SBuffer));
+				#ifdef USE_MLOCK
+					munlock(buf, buf->size+sizeof(SBuffer));
+				#endif
 			#endif
 			_Buffers--;
 			_SizeAllocated-=buf->size;

@@ -20,10 +20,10 @@
         </Grid.ColumnDefinitions>
 
         <rx_uc:MouventUVToolBar Grid.Column="1" HorizontalAlignment="Left"></rx_uc:MouventUVToolBar>
+
         <rx_uc:MouventSetupButtons Margin="15,0,15,0" Grid.Column="2"></rx_uc:MouventSetupButtons>
         <common:MvtButton Grid.Column="3" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" x:Name="Button_Test" Click="Test_Clicked" ToolTip="Test" Margin="15, 0, 15, 0">
-            <iconPacks:PackIconFontAwesome Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Center"
-                                        Style="{StaticResource Mouvent.RoundIconButtonStyle.LightFontAwesomeIcon}" Width="25" Height="25" Kind="TasksSolid"></iconPacks:PackIconFontAwesome>
+            <iconPacks:PackIconOcticons Kind="Beaker" Width="25" Height="25" HorizontalAlignment="Stretch" VerticalAlignment="Center" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIconOcticons}"/>
         </common:MvtButton>
 
     </Grid>

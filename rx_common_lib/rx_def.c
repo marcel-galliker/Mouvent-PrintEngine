@@ -172,8 +172,8 @@ int rx_def_is_tx(EPrinterType printerType)
 	}
 }
 
-//--- rx_def_is_web ---------------------------------------
-int rx_def_is_web(EPrinterType printerType)
+//--- rx_def_is_lb ---------------------------------------
+int rx_def_is_lb(EPrinterType printerType)
 {
 	switch(printerType)	
 	{

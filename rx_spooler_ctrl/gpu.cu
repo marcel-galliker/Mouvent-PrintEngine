@@ -23,7 +23,7 @@ extern "C"{
 #include "rx_threads.h"
 #include "rx_mem.h"
 #include "rx_slicescreen.h"
-#include "rx_slicescreen_fms_1x3_gpu.h"
+#include "gpu.h"
 
 #ifdef linux
 	#include "errno.h"

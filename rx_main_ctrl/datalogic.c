@@ -283,8 +283,8 @@ void dl_get_barcode(int isNo, char *scannerSN, char *barcode)
 	{
 		if (_Scanner[i].handle>0 && (isNo<0 || _Scanner[i].isNo==isNo)) 
 		{
-			strcpy(scannerSN, _Scanner[i].scannerSN);
-			strcpy(barcode,   _Scanner[i].code);
+			strncpy(scannerSN, _Scanner[i].scannerSN, sizeof(_Scanner[i].scannerSN));
+			strncpy(barcode,   _Scanner[i].code, sizeof(_Scanner[i].code));
 			return;
 		}			
 	}
@@ -349,7 +349,7 @@ static void _dl_write(int handle, char *str)
 	strcpy(buf, str);
 	buf[strlen(buf)-1]=0;
 	printf("Request: >>%s<<\n", buf);
-	len = strlen(str);
+	len = (int)strlen(str);
 	len = write(handle, str, len);
 	if (len<0) 
 	{
@@ -366,7 +366,7 @@ static void _dl_write_str(int handle, char *str, char *par, int parlen)
 	char buf[256];
 	int len, i;
 	
-	len =strlen(str);
+	len =(int)strlen(str);
 	strcpy(buf, str);
 	for(i=0; i<parlen; i++)
 	{

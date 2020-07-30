@@ -15,10 +15,10 @@ namespace RX_DigiPrint.Views.Alignment
         }
 
         public void Init(HeadAdjustmentHelp.HeadAdjustmentType headAdjustmentType,
-            double recommendedValue, bool robotConnected)
+            double recommendedValue, bool robotConnected, int globalHeadNumber)
         {
             HeadAdjustmentHelpView HelpView = new HeadAdjustmentHelpView();
-            HelpView.Init(headAdjustmentType, recommendedValue, robotConnected);
+            HelpView.Init(headAdjustmentType, recommendedValue, robotConnected, globalHeadNumber);
             MainGrid.Children.Add(HelpView);
         }
 

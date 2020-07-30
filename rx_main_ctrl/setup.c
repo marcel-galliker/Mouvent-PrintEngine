@@ -121,20 +121,6 @@ int setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action)
 		setup_chapter(file, "..", -1, action);
 	}
 
-	/*
-	//--- Test-Table ---
-	if (setup_chapter(file, "Test-Table", -1, action)==REPLY_OK) 
-	{
-		setup_int32(file, "offset_angle",  action, (int*)&pcfg->printer.offset.angle, 0);
-		setup_int32(file, "offset_step", action, (int*)&pcfg->printer.offset.step, 0);
-		setup_int32(file, "offset_incPerMeter", action, &pcfg->printer.offset.incPerMeter[0], 0);
-		setup_int32(file, "offset_incPerMeterVerso", action, &pcfg->printer.offset.incPerMeter[1], 0);
-		setup_uint32(file, "offsetVerso", action, &pcfg->printer.offset.versoDist, 0);
-		setup_uint32(file, "manualFlightTimeComp", action, &pcfg->printer.offset.manualFlightTimeComp, 0);
-		setup_chapter(file, "..", -1, action);
-	}
-	*/
-//	if (action==WRITE)
 	//--- offsets ---
 	{
 		if (setup_chapter(file, "Offsets", -1, action)==REPLY_OK)
@@ -210,7 +196,6 @@ int setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action)
 
 			int headsPerInkSupply = pcfg->headsPerColor;
 			if (pcfg->inkCylindersPerColor) headsPerInkSupply /= pcfg->inkCylindersPerColor;
-			setup_int32_arr(file, "headFpVoltage", action, &pcfg->headFpVoltage[i*headsPerInkSupply], pcfg->headsPerColor,  100);
 			setup_int32_arr(file, "HeadDist",      action, &pcfg->headDist[i*headsPerInkSupply],	  pcfg->headsPerColor,	0);
 			setup_int32_arr(file, "HeadDistBack",  action, &pcfg->headDistBack[i*headsPerInkSupply],  pcfg->headsPerColor,	0);
 			setup_int32(file, "ColorOffset",	   action, &pcfg->colorOffset[i], 0);
@@ -233,9 +218,11 @@ int setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action)
 						int n=i*RX_Config.headsPerColor+h;
 						int board = n/MAX_HEADS_BOARD;
 						int head  = n%MAX_HEADS_BOARD;
+						UCHAR	voltage;
 						setup_chapter(file, "Head", h, action);
-                        setup_uchar(file, "voltage", action, &RX_HBStatus[board].head[head].eeprom_mvt.voltage, 0);
-					//	setup_int16_arr(file, "value",  action, RX_HBStatus[board].head[head].eeprom_mvt.densityValue, MAX_DENSITY_VALUES, 0);
+						if (RX_HBStatus[board].head[head].eeprom_mvt.voltage) voltage=RX_HBStatus[board].head[head].eeprom_mvt.voltage;
+						else voltage=(UCHAR)RX_HBStatus[board].head[head].eeprom.voltage;
+                        setup_uchar(file, "voltage", action, &voltage, 0);
 						setup_int16_arr(file, "density",  action, RX_HBStatus[board].head[head].eeprom_mvt.densityValue, MAX_DENSITY_VALUES, 0);
 						setup_chapter(file, "..", -1, action);
 					}

@@ -20,14 +20,13 @@ namespace RX_DigiPrint.Views.Alignment
         }
         
         public void Init(HeadAdjustmentHelp.HeadAdjustmentType headAdjustmentType,
-            double recommendedValue, bool robotConnected)
+            double recommendedValue, bool robotConnected, int globalHeadNumber)
         {
-            
-
             _HeadAdjustmentHelp.Init(headAdjustmentType, recommendedValue, robotConnected);
             _CreateInstructionsImagePanel();
 
             DataContext = _HeadAdjustmentHelp;
+            TX_HeadName.DataContext = RxGlobals.HeadStat.List[globalHeadNumber];
         }
 
         private void SelectionLeftButton_Click(object sender, RoutedEventArgs e)

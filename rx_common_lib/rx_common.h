@@ -198,6 +198,8 @@ int  BitIsSet(UINT32   bitset, int bitNo);
 #define BIT_SET(bitset, bit)	(bitset) |= (bit) 
 #define BIT_CLR(bitset, bit)	(bitset) &= ~(bit) 
 	
+int	memempty(void *ptr, int length);
+
 void unicode_to_utf8(const UINT16 *unicode, char *utf8, int size);
 void utf8_to_unicode(const char *utf8, UINT16 *unicode, int size);
 

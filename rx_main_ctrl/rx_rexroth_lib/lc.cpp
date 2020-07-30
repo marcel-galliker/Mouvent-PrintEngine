@@ -192,7 +192,7 @@ int lc_get_value_all(char *valList, int size)
 	
 	memset(valList, 0, size);
 	strcpy(valList, _Symbols[0].name);
-	for (appNameLen=strlen(valList); appNameLen>0 && valList[appNameLen]!='.'; appNameLen--)
+	for (appNameLen=(int)strlen(valList); appNameLen>0 && valList[appNameLen]!='.'; appNameLen--)
 	{};
 	valList[appNameLen]=0;
 	len = appNameLen;

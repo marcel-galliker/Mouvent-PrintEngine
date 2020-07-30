@@ -34,9 +34,9 @@ namespace RX_DigiPrint.Models
             AllInkSupliesOn     = (msg.status.flags & 0x0010)!=0;
             TestMode            = (msg.status.flags & 0x0020)!=0;
             ExternalData        = (msg.status.flags & 0x0040)!=0;
-            TxRobot             = (msg.status.flags & 0x0080) != 0;
+            TxRobot             = (msg.status.flags & 0x0080)!= 0;
  			TempReady           = (msg.status.flags & 0x0100)!=0;
-            LbRobot             = (msg.status.flags & 0x0200) != 0;
+            LbRobot             = (msg.status.flags & 0x0200)!= 0;
             MaxSpeeds           = msg.status.maxSpeed;
             ActSpeed            = (double)msg.status.actSpeed;
             CounterAct          = msg.status.counterAct/1000.0;
@@ -87,8 +87,7 @@ namespace RX_DigiPrint.Models
             get { return _AllInkSupliesOn; }
             set 
             {
-                SetProperty(ref _AllInkSupliesOn, value);
-                
+                SetProperty(ref _AllInkSupliesOn, value);                
             }
         }        
 

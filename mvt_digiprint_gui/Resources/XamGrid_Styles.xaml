@@ -54,23 +54,23 @@
     
     <!-- XamGrid HeaderStyle -->
      <Style x:Key="XamGridHeaderStyle" TargetType="{x:Type igPrim:HeaderCellControl}">
-        <Setter Property="FontSize"     Value="{DynamicResource FontSize}"/>
+        <Setter Property="FontSize"     Value="{DynamicResource MvtFontSize}"/>
         <Setter Property="Background"   Value="WhiteSmoke"/>
         <Setter Property="IsEnabled"    Value="False"/>
         <Setter Property="BorderBrush" Value="WhiteSmoke"/>
         <Setter Property="Height" Value="40"></Setter>
         <Setter Property="FontWeight" Value="SemiBold"></Setter>
-        <Setter Property="FontSize"     Value="{DynamicResource FontSize}" />
+        <Setter Property="FontSize"     Value="{DynamicResource MvtFontSize}" />
     </Style>
 
     <Style x:Key="XamGridJetCompensationHeaderStyle" TargetType="{x:Type igPrim:HeaderCellControl}">
-        <Setter Property="FontSize"     Value="{DynamicResource FontSize}"/>
+        <Setter Property="FontSize"     Value="{DynamicResource MvtFontSize}"/>
         <Setter Property="Background"   Value="WhiteSmoke"/>
         <Setter Property="IsEnabled"    Value="True"/>
         <Setter Property="BorderBrush" Value="WhiteSmoke"/>
         <Setter Property="Height" Value="40"></Setter>
         <Setter Property="FontWeight" Value="SemiBold"></Setter>
-        <Setter Property="FontSize"     Value="{DynamicResource FontSize}" />
+        <Setter Property="FontSize"     Value="{DynamicResource MvtFontSize}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="igPrim:HeaderCellControl">
@@ -123,13 +123,14 @@
     </Style>
 
     <Style x:Key="XamGridCellStyle" TargetType="{x:Type ig:CellControl}">
-        <Setter Property="FontSize"     Value="{DynamicResource FontSize}" />
+        <Setter Property="FontSize"     Value="{DynamicResource MvtFontSize}" />
         <Setter Property="Foreground"   Value="#ff303030" />
         <Setter Property="MinHeight" Value="40"></Setter>
     </Style>
     <Style x:Key="XamGridTextBlockStyle" TargetType="{x:Type TextBlock}">
         <Setter Property="Margin" Value="8,0,0,0"></Setter>
         <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+        <Setter Property="FontSize" Value="14"/>
     </Style>
     <!-- _________________________ ExpansionIndicator __________________________________________ -->
     <!-- SOURCE F:\Compiler\Infragistics\2013.2\WPF\DefaultStyles\Windows\PrimitivesGeneric_Express.xaml -->
@@ -378,7 +379,7 @@
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="HorizontalContentAlignment" Value="Left"/>
         <Setter Property="Padding" Value="5"/>
-        <Setter Property="FontSize" Value="{DynamicResource FontSize}"/>
+        <Setter Property="FontSize" Value="{DynamicResource MvtFontSize}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ig:CellControl}">
@@ -442,7 +443,7 @@
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="HorizontalContentAlignment" Value="Left"/>
         <Setter Property="Padding" Value="5"/>
-        <Setter Property="FontSize" Value="{DynamicResource FontSize}"/>
+        <Setter Property="FontSize" Value="{DynamicResource MvtFontSize}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ig:CellControl}">
@@ -494,7 +495,7 @@
 
     <!--___ XamGridColumnLayoutStyle ______________________________________________________________________________________________________ -->
     <Style x:Key="XamGridColumnLayoutStyle" TargetType="{x:Type ig:CellControl}">
-        <Setter Property="FontSize"     Value="{DynamicResource FontSize}" />
+        <Setter Property="FontSize"     Value="{DynamicResource MvtFontSize}" />
         <Setter Property="Foreground"   Value="#ff303030" />
         <Setter Property="Template">
             <Setter.Value>
@@ -876,7 +877,7 @@
                             <DataTemplate x:Key="DoesNotStartWithOperand">
                                 <Grid x:Name="DoesnotBeginWith">
                                     <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-                                        <TextBlock FontSize="10" Text="A" TextDecorations="Underline">
+                                        <TextBlock FontSize="{StaticResource MvtFontSizeStd}" Text="A" TextDecorations="Underline">
                                             <TextBlock.Foreground>
                                                 <LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
                                                     <GradientStop Color="#FFA3AEB9" Offset="0"/>
@@ -885,7 +886,7 @@
                                                     <GradientStop Color="#FF617583" Offset="1"/>
                                                 </LinearGradientBrush>
                                             </TextBlock.Foreground><Run Text="A"/></TextBlock>
-                                        <TextBlock FontSize="10" Text="a">
+                                        <TextBlock FontSize="{StaticResource MvtFontSizeStd}" Text="a">
                                             <TextBlock.Foreground>
                                                 <LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
                                                     <GradientStop Color="#FFA3AEB9" Offset="0"/>
@@ -1077,7 +1078,7 @@
                             </DataTemplate>
                             <DataTemplate x:Key="EndsWithOperand">
                                 <StackPanel x:Name="EndsWith" HorizontalAlignment="Center" Orientation="Horizontal">
-                                    <TextBlock FontSize="10" Text="a">
+                                    <TextBlock FontSize="{StaticResource MvtFontSizeStd}" Text="a">
                                         <TextBlock.Foreground>
                                             <LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
                                                 <GradientStop Color="#FFA3AEB9" Offset="0"/>
@@ -1086,7 +1087,7 @@
                                                 <GradientStop Color="#FF617583" Offset="1"/>
                                             </LinearGradientBrush>
                                         </TextBlock.Foreground><Run Text="a"/></TextBlock>
-                                    <TextBlock FontSize="10" Text="A" TextDecorations="Underline">
+                                    <TextBlock FontSize="{StaticResource MvtFontSizeStd}" Text="A" TextDecorations="Underline">
                                         <TextBlock.Foreground>
                                             <LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
                                                 <GradientStop Color="#FFA3AEB9" Offset="0"/>
@@ -1222,7 +1223,7 @@
                             <DataTemplate x:Key="DoesNotEndWithOperand">
                                 <Grid x:Name="DoesnotendWith">
                                     <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-                                        <TextBlock FontSize="10" Text="a">
+                                        <TextBlock FontSize="{StaticResource MvtFontSizeStd}" Text="a">
                                             <TextBlock.Foreground>
                                                 <LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
                                                     <GradientStop Color="#FFA3AEB9" Offset="0"/>
@@ -1231,7 +1232,7 @@
                                                     <GradientStop Color="#FF617583" Offset="1"/>
                                                 </LinearGradientBrush>
                                             </TextBlock.Foreground><Run Text="a"/></TextBlock>
-                                        <TextBlock FontSize="10" Text="A" TextDecorations="Underline">
+                                        <TextBlock FontSize="{StaticResource MvtFontSizeStd}" Text="A" TextDecorations="Underline">
                                             <TextBlock.Foreground>
                                                 <LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
                                                     <GradientStop Color="#FFA3AEB9" Offset="0"/>
@@ -1257,7 +1258,7 @@
                             </DataTemplate>
                             <DataTemplate x:Key="StartsWithOperand">
                                 <StackPanel x:Name="BeginsWith" HorizontalAlignment="Center" Orientation="Horizontal">
-                                    <TextBlock FontSize="10" Text="A" TextDecorations="Underline">
+                                    <TextBlock FontSize="{StaticResource MvtFontSizeStd}" Text="A" TextDecorations="Underline">
                                         <TextBlock.Foreground>
                                             <LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
                                                 <GradientStop Color="#FFA3AEB9" Offset="0"/>
@@ -1266,7 +1267,7 @@
                                                 <GradientStop Color="#FF617583" Offset="1"/>
                                             </LinearGradientBrush>
                                         </TextBlock.Foreground><Run Text="A"/></TextBlock>
-                                    <TextBlock FontSize="10" Text="a">
+                                    <TextBlock FontSize="{StaticResource MvtFontSizeStd}" Text="a">
                                         <TextBlock.Foreground>
                                             <LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
                                                 <GradientStop Color="#FFA3AEB9" Offset="0"/>
@@ -1460,7 +1461,9 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type GridSplitter}">
                     <Border Height="{TemplateBinding Height}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}">
-                        <TextBlock FontSize="{DynamicResource FontSize}" Foreground="#ff303030" FontWeight="SemiBold" Text="{TemplateBinding rx:RxGridSplitter.Title}" VerticalAlignment="Center" HorizontalAlignment="Center" Background="Transparent"/>
+                        <TextBlock FontSize="{DynamicResource MvtFontSize}" Foreground="#ff303030" 
+                                   FontWeight="SemiBold" Text="{TemplateBinding rx:RxGridSplitter.Title}"
+                                   VerticalAlignment="Center" HorizontalAlignment="Center" Background="Transparent"/>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>

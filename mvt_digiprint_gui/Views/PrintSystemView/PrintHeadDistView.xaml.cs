@@ -144,7 +144,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                             //--- offset text box -----------
                             MvtNumBox offset = new MvtNumBox(){Width=width, HorizontalContentAlignment=HorizontalAlignment.Right};
                             offset.Tag = distNo;//colorNo++;
-                            offset.FontSize = (double)Application.Current.Resources["FontSizeSmall"];
+                            offset.FontSize = (double)Application.Current.Resources["MvtFontSizeSmall"];
                             offset.LostFocus += _text_LostFocus;
                             Canvas.SetLeft(offset, x);
                             Canvas.SetTop(offset,  16);
@@ -163,7 +163,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                             Canvas.Children.Add(new Line(){Stroke=Brushes.Black, X1=x+3,  X2=x,   Y1=y-3, Y2=y});
                             Canvas.Children.Add(new Line(){Stroke=Brushes.Black, X1=x+3,  X2=x,   Y1=y+3, Y2=y});
 
-                            TextBlock text = new TextBlock(){Text="mm", FontSize=(double)Application.Current.Resources["FontSizeSmall"], Background=Brushes.White};
+                            TextBlock text = new TextBlock(){Text="mm", FontSize=(double)Application.Current.Resources["MvtFontSizeSmall"], Background=Brushes.White};
                             Canvas.SetLeft(text, x+width/2);
                             Canvas.SetTop (text, y-8);
                             Canvas.Children.Add(text);
@@ -171,7 +171,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                             //--- offset text box -----------
                             MvtNumBox offset = new MvtNumBox(){Width=width, HorizontalContentAlignment=HorizontalAlignment.Right};
                             offset.Tag = colorNo++;
-                            offset.FontSize = (double)Application.Current.Resources["FontSizeSmall"];
+                            offset.FontSize = (double)Application.Current.Resources["MvtFontSizeSmall"];
                             offset.LostFocus += _text_LostFocus;
                             Canvas.SetLeft(offset, x);
                             Canvas.SetTop(offset,  16);
@@ -187,7 +187,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                             Canvas.Children.Add(new Line(){Stroke=Brushes.Black, X1=x+3,  X2=x,   Y1=y-3, Y2=y});
                             Canvas.Children.Add(new Line(){Stroke=Brushes.Black, X1=x+3,  X2=x,   Y1=y+3, Y2=y});
 
-                            TextBlock text = new TextBlock(){Text="dt", FontSize=(double)Application.Current.Resources["FontSizeSmall"], Background=Brushes.White};
+                            TextBlock text = new TextBlock(){Text="dt", FontSize=(double)Application.Current.Resources["MvtFontSizeSmall"], Background=Brushes.White};
                             Canvas.SetLeft(text, x+width/2);
                             Canvas.SetTop (text, y-8);
                             Canvas.Children.Add(text);
@@ -195,7 +195,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                             //--- offset text box -----------
                             MvtNumBox offset = new MvtNumBox(){Width=width, HorizontalContentAlignment=HorizontalAlignment.Right};
                             offset.Tag = 100+colorNo;
-                            offset.FontSize = (double)Application.Current.Resources["FontSizeSmall"];
+                            offset.FontSize = (double)Application.Current.Resources["MvtFontSizeSmall"];
                             offset.LostFocus += _text_LostFocus;
                             Canvas.SetLeft(offset, x);
                             Canvas.SetTop(offset,  16);
@@ -214,7 +214,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 //--- distance text box fore ------------------
                 MvtNumBox dist = new MvtNumBox(){Width=width, HorizontalContentAlignment=HorizontalAlignment.Right};
                 dist.Tag = 200+distNo;
-                dist.FontSize = (double)Application.Current.Resources["FontSizeSmall"];
+                dist.FontSize = (double)Application.Current.Resources["MvtFontSizeSmall"];
                 dist.LostFocus += _text_LostFocus;
                 Canvas.SetLeft(dist, x);
                 Canvas.SetTop(dist, y+12);
@@ -225,7 +225,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 {
                     MvtNumBox distback = new MvtNumBox(){Width=width, HorizontalContentAlignment=HorizontalAlignment.Right};
                     distback.Tag = 300+distNo;
-                    distback.FontSize = (double)Application.Current.Resources["FontSizeSmall"];
+                    distback.FontSize = (double)Application.Current.Resources["MvtFontSizeSmall"];
                     distback.LostFocus += _text_LostFocus;
                     Canvas.SetLeft(distback, x);
                     Canvas.SetTop(distback, y+35);

@@ -17,7 +17,7 @@ namespace RX_DigiPrint.Helpers
         private static void ValueStrChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             RxProgressBar p = d as RxProgressBar;
-            p.FontSize=12;
+            p.FontSize = 12;
             try
             {
                 double val = Convert.ToDouble(e.NewValue);

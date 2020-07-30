@@ -2,15 +2,11 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:igGrids="http://infragistics.com/DataPresenter"
-             xmlns:ig="http://schemas.infragistics.com/xaml"
-             xmlns:igWPF="http://schemas.infragistics.com/xaml/wpf"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
              xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
              xmlns:uc="clr-namespace:RX_DigiPrint.Views.UserControls"
              xmlns:pq_views="clr-namespace:RX_DigiPrint.Views.PrintQueueView"
-             xmlns:mahapps="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              mc:Ignorable="d"
              DataContextChanged="UserControl_DataContextChanged"
@@ -39,7 +35,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
+           
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto"/>
@@ -170,7 +166,7 @@
                     SelectedValue="{Binding Speed}"
                     HorizontalContentAlignment="Right"
                     />
-                <TextBlock  Margin="5, 0, 0, 5"  Grid.Row="3" Grid.Column="3" Text="m/min" FontSize="{DynamicResource FontSizeStd}" VerticalAlignment="Center" x:Name="SpeedUnit"/>
+                <TextBlock  Margin="5, 0, 0, 5"  Grid.Row="3" Grid.Column="3" Text="m/min" FontSize="{DynamicResource MvtFontSize}" VerticalAlignment="Center" x:Name="SpeedUnit"/>
 
                 <TextBlock  Margin="0, 0, 0, 5" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Text="Wakeup"/>
                 <rx:RxComboBox x:Name="CB_Wakeup"  Margin="0, 0, 0, 5"
@@ -183,12 +179,12 @@
                 <TextBlock  Margin="0, 0, 0, 5"  Grid.Row="6" Grid.Column="0" Text="&#x0081;" FontFamily="Wingdings" />
                 <TextBlock   Margin="0, 0, 0, 5" Grid.Row="6" Grid.Column="1" Text="Image Margin"/>
                 <common:MvtNumBox  Margin="0, 0, 0, 5" Grid.Row="6" Grid.Column="2" Text="{Binding PageMargin, Converter={StaticResource Len_Unit_Converter}, ConverterParameter=mm}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Right" Min="0"/>
-                <TextBlock   Grid.Row="6" Grid.Column="3" Text="mm" Margin="5,0,0,5" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center" x:Name="MarginUnit"/>
+                <TextBlock   Grid.Row="6" Grid.Column="3" Text="mm" Margin="5,0,0,5" FontSize="{StaticResource MvtFontSize}" VerticalAlignment="Center" x:Name="MarginUnit"/>
 
                 <TextBlock   Margin="0, 0, 0, 5" Grid.Row="7" Grid.Column="0" Text="&#x0082;" FontFamily="Wingdings" />
                 <TextBlock   Margin="0, 0, 0, 5" Grid.Row="7" Grid.Column="1" Text="Image Gap"/>
                 <common:MvtNumBox  Margin="0, 0, 0, 5" Grid.Row="7" Grid.Column="2" Text="{Binding PrintGoDist, Converter={StaticResource Len_Unit_Converter}, ConverterParameter=mm}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Right" Min="0"/>
-                <TextBlock   Grid.Row="7" Grid.Column="3" Text="mm" Margin="5,0,0,5" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center" x:Name="DistUnit"/>
+                <TextBlock   Grid.Row="7" Grid.Column="3" Text="mm" Margin="5,0,0,5" FontSize="{StaticResource MvtFontSize}" VerticalAlignment="Center" x:Name="DistUnit"/>
 
                 <uc:PreviewScan Grid.Row="1" Grid.Column="4" Grid.RowSpan="7" 
                 Width="250"
@@ -207,32 +203,6 @@
                 VerticalAlignment="Top"
                 HorizontalAlignment="Left"
                 />
-        <!--
-        <Grid Grid.Row="2" Grid.ColumnSpan="3" x:Name="ShowButtonGrid">
-            <StackPanel 
-                Orientation="Horizontal" 
-                HorizontalAlignment="Center"
-                Margin="0,5,0,0"
-                Visibility="{Binding Changed, Converter={StaticResource IntToVisible_Converter}}"
-                >
-                <Button x:Name="SaveButton"   Content="Save"            Width="120" Click="Save_Click"   Margin="10,0" />
-                <Button x:Name="SaveDefault"  Content="Save as Default" Width="120" Click="Save_Default_Click"   Margin="10,0" />
-                <Button x:Name="CancelButton" Content="Cancel"          Width="120" Click="Cancel_Click" Margin="10,0" />
-            </StackPanel>
-        </Grid>
-    -->
-        <StackPanel Orientation="Horizontal" Grid.Row="2" Grid.ColumnSpan="3" x:Name="ShowButtonGrid" Visibility="{Binding Changed, Converter={StaticResource IntToVisible_Converter}}"
-                    HorizontalAlignment="Center" >
-            <common:MvtButton x:Name="SaveButton"   Click="Save_Clicked" Margin="15" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}">
-                <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="20" Height="20"
-                                                Kind="Check"></iconPacks:PackIconMaterial>
-            </common:MvtButton>
-
-            <common:MvtButton  x:Name="CancelButton" Click="Cancel_Clicked" Margin="15" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}">
-                <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="20" Height="20"
-                                                Kind="Close"></iconPacks:PackIconMaterial>
-            </common:MvtButton>
-        </StackPanel>
-
+        
     </Grid>
 </UserControl>

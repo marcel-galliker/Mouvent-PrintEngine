@@ -12,6 +12,6 @@
 
     <StackPanel>
         <Image x:Name="MyImage" Height="40"/>
-        <TextBlock x:Name="MyText" HorizontalAlignment="Center" FontSize="{StaticResource FontSizeStd}"/>
+        <TextBlock x:Name="MyText" HorizontalAlignment="Center" FontSize="{StaticResource MvtFontSize}"/>
     </StackPanel>    
 </Button>

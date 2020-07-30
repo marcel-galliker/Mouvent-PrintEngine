@@ -350,7 +350,8 @@ static void _send_data(int function, INT16 *data, int len)
 	}
 	for (i=1, lrc=0; i<9+4*(len-1); i+=2) 
 	{
-		val = ((strchr(_convert, buf[i])-_convert)<<4) | (strchr(_convert, buf[i+1])-_convert);
+		val  = (char)(strchr(_convert, buf[i])-_convert)<<4;
+		val |= (strchr(_convert, buf[i+1])-_convert);
 		lrc+=val;
 	}
 	lrc=~lrc+1;
@@ -391,7 +392,8 @@ static int  _read_data(int function, INT16 *data, int cnt)
 	buf[idx-2]=0;
 	for (idx=1; idx<len; idx+=2)
 	{
-		msg[idx/2] = ((strchr(_convert, buf[idx])-_convert)<<4) | (strchr(_convert, buf[idx+1])-_convert);
+		msg[idx/2]  = (char)((strchr(_convert, buf[idx])-_convert)<<4);
+		msg[idx/2] |= (strchr(_convert, buf[idx+1])-_convert);
 	}
 	// msg[0]: Address
 	// msg[1]: Function

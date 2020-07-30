@@ -264,7 +264,7 @@ static void _plc_set_par_default(void)
 	lc_get_value_by_name_UINT32(UnitID ".PAR_PRINTING_SPEED",			&speed);
 	if (speed<10) lc_set_value_by_name_UINT32(UnitID ".PAR_PRINTING_SPEED",		 30);
 
-	if(rx_def_is_scanning(RX_Config.printer.type))
+	if(rx_def_is_tx(RX_Config.printer.type))
 	{
 		lc_get_value_by_name_FLOAT(UnitID ".PAR_PRINTING_START_POSITION", &start);
 		lc_get_value_by_name_FLOAT(UnitID ".PAR_PRINTING_END_POSITION", &end);
@@ -275,7 +275,7 @@ static void _plc_set_par_default(void)
 		//	_plc_set_command("", "CMD_SET_PARAMETER");
 		}
 	}
-	else if (rx_def_is_web(RX_Config.printer.type))
+	else if (rx_def_is_lb(RX_Config.printer.type))
 	{
 		UINT32 val;
 		lc_get_value_by_name_UINT32(UnitID ".PAR_COREDIAMETER_IN", &val);
@@ -380,7 +380,7 @@ static void _plc_set_par(SPrintQueueItem *pItem, SPlcPar *pPlcPar)
 	
 	_StepDist += ((double)(RX_Config.printer.offset.step))/1000.0;	
 
-	Error(LOG, 0, "BeltStep=%d, overlap=%d", (int)(1000.0*_StepDist), RX_Config.printer.overlap);
+//	Error(LOG, 0, "BeltStep=%d, overlap=%d", (int)(1000.0*_StepDist), RX_Config.printer.overlap);
 
 	if (pItem->passes>1) _StepDist /= pItem->passes;
 	if (pItem->testImage==PQ_TEST_SCANNING) _StepDist=0;
@@ -393,7 +393,7 @@ static void _plc_set_par(SPrintQueueItem *pItem, SPlcPar *pPlcPar)
 	else                       pPlcPar->endPos = WEB_OFFSET+(pItem->pageMargin+pItem->srcHeight)/1000.0+accDistmm;
 	pPlcPar->endPos += RX_Config.headDistMax/1000.0;
 	pPlcPar->endPos += 10;
-//	Error(LOG, 0, "PLC: w=%d, h=%d,  margin=%d, height=%d, start=%d, end=%d ",  pItem->srcWidth, pItem->srcHeight, pItem->pageMargin, pItem->srcHeight, (int)pPlcPar->startPos, (int)pPlcPar->endPos);
+//	Error(LOG, 0, "PLC: w=%d, h=%d,  margin=%d, heightbelts=%d, start=%d, end=%d ",  pItem->srcWidth, pItem->srcHeight, pItem->pageMargin, pItem->srcHeight, (int)pPlcPar->startPos, (int)pPlcPar->endPos);
 }
 
 //--- plc_get_step_dist_mm ------------------------------------------------------
@@ -504,7 +504,7 @@ int  plc_start_printing(void)
 	if (_CanRun && !_SimuPLC)
 	{		
 		plc_error_reset();
-		if (rx_def_is_web(RX_Config.printer.type) && RX_Config.printer.type!=printer_cleaf) enc_restart_pg();
+		if (rx_def_is_lb(RX_Config.printer.type) && RX_Config.printer.type!=printer_cleaf) enc_restart_pg();
 		_SendRun		= TRUE;
 	}
 	if (!_SimuPLC) _heads_to_print	= TRUE;
@@ -736,6 +736,8 @@ static void _plc_load_par(void)
 	rex_load(PATH_USER FILENAME_PLC_CFG);
 	rex_load(PATH_USER FILENAME_PLC_PAR);
 
+	_plc_set_par_default();
+
 	if (lc_get_value_by_name(UnitID ".XML_HEAD_HEIGHT", value)==REPLY_OK)			
 		RX_Config.stepper.print_height=(UINT32)(1000*atof(value));
 	if (lc_get_value_by_name(UnitID ".XML_MATERIAL_THICKNESS", value)==REPLY_OK)	
@@ -914,7 +916,7 @@ static void _plc_save_material	(RX_SOCKET socket, char *filename, int cmd, char 
 	char *val;
 	char var[128];
 		
-	gui_send_msg_2(INVALID_SOCKET, cmd, strlen(varList), varList);
+	gui_send_msg_2(INVALID_SOCKET, cmd, (int)strlen(varList), varList);
 
 	sprintf(path, PATH_USER"%s", filename);
 	HANDLE file = setup_create();
@@ -1013,7 +1015,7 @@ static void _plc_del_material	(RX_SOCKET socket, char *filename, int cmd, char *
 	char path[2048];
 	int len;
 	
-	gui_send_msg_2(INVALID_SOCKET, cmd, strlen(name), name);	
+	gui_send_msg_2(INVALID_SOCKET, cmd, (int)strlen(name), name);	
 
 	HANDLE file = setup_create();
 	HANDLE attribute =NULL;
@@ -1398,8 +1400,11 @@ static void _plc_state_ctrl()
 				}
 			}
 		}
-
-		if (_GUIPause)
+        UINT32 door_open;
+        lc_get_value_by_name_UINT32(UnitID ".STA_DOOR_OPEN", &door_open);
+        RX_PrinterStatus.door_open = door_open;
+        
+        if (_GUIPause)
 		{
 			if (rx_def_is_tx(RX_Config.printer.type))
 			{
@@ -1427,7 +1432,7 @@ static void _plc_state_ctrl()
 		if (RX_Config.stepper.ref_height!=0 || RX_Config.stepper.print_height!=0)
 		{
 			lc_set_value_by_name_UINT32(UnitID ".STA_HEAD_IS_UP", RX_StepperStatus.info.scannerEnable);	
-			if(rx_def_is_web(RX_Config.printer.type) || RX_StepperStatus.info.scannerEnable)
+			if(rx_def_is_lb(RX_Config.printer.type) || RX_StepperStatus.info.scannerEnable)
 			{
 				if(_SendPause == 1)
 				{
@@ -1512,7 +1517,7 @@ static void _plc_state_ctrl()
 			if(scan_state != scan_moving)
 			{
 				enc_start_printing(&_StartEncoderItem, RX_PrinterStatus.printGoCnt);
-				if (rx_def_is_web(RX_Config.printer.type)) 	enc_enable_printing(FALSE);
+				if (rx_def_is_lb(RX_Config.printer.type)) 	enc_enable_printing(FALSE);
 				_StartEncoderItem.pageWidth = 0;
 				return;
 			}
@@ -1563,7 +1568,7 @@ static void _plc_state_ctrl()
 	}
 	else if (_PlcState==plc_run)
 	{
-		if (rx_def_is_web(RX_Config.printer.type)) 
+		if (rx_def_is_lb(RX_Config.printer.type)) 
 		{
 			UINT32 length;
 //			UINT32	max;
@@ -1579,11 +1584,11 @@ static void _plc_state_ctrl()
 		else if(rx_def_is_tx(RX_Config.printer.type))
 		{ // calculate speed
 			UINT32 speed;
-			// speed = time for one scanner movement!
+            // speed = time for one scanner movement!
 			lc_get_value_by_name_UINT32(UnitID ".STA_PRINTING_CYCLE_TIME", &speed);
 			if(speed == 0) RX_PrinterStatus.actSpeed = 0;
 			else		   RX_PrinterStatus.actSpeed = _ActSpeed;
-		}
+        }
 	}
 	else if (_PlcState==plc_stop) 
 	{
@@ -1605,7 +1610,7 @@ static void _plc_state_ctrl()
 		}		
 	}
 	
-	if (rx_def_is_web(RX_Config.printer.type)) 
+	if (rx_def_is_lb(RX_Config.printer.type)) 
 	{
 		static int _time=0;
 		int ticks=rx_get_ticks();
@@ -1799,7 +1804,7 @@ static void* _plc_thread(void *par)
 					{
 						lc_get_value_all(msg.data, sizeof(msg.data));	
 						msg.hdr.msgId  = REP_PLC_GET_VAR;
-						msg.hdr.msgLen = sizeof(msg.hdr) + strlen(msg.data); 
+						msg.hdr.msgLen = sizeof(msg.hdr) + (int)strlen(msg.data); 
 						gui_send_msg(0, &msg);
 					}
 

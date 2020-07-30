@@ -74,7 +74,7 @@
 
         <TextBlock   Grid.Row="4" Grid.Column="0" Text="Image Margin"/>
         <common:MvtNumBox Grid.Row="4" Grid.Column="1" Text="{Binding PageMargin}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Right"/>
-        <TextBlock   Grid.Row="4" Grid.Column="2" Text="mm" Margin="5,0,0,0" FontSize="{StaticResource FontSizeStd}" VerticalAlignment="Center"/>
+        <TextBlock   Grid.Row="4" Grid.Column="2" Text="mm" Margin="5,0,0,0" FontSize="{StaticResource MvtFontSize}" VerticalAlignment="Center"/>
 
     </Grid>
 </UserControl>

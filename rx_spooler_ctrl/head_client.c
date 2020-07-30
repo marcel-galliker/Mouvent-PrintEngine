@@ -38,7 +38,7 @@ static int	_Trace=0;
 #define SIMU_WRITE	1	// write data to file
 #define SIMU_READ	2	// test reading files, no sending, no writing
 
-static int	_Simulation=SIMU_OFF;
+static int	_Simulation=SIMU_READ;
 
 // #define RAW_SOCKET
 
@@ -380,7 +380,7 @@ void hc_send_next()
 									}
 									break;
 
-				case dev_on:		if (pInfo->colorCode==0)	// see rx_def.c: RX_ColorName
+				case dev_on:		if (FALSE && pInfo->colorCode==0)	// see rx_def.c: RX_ColorName
 									{						
 										_save_to_file(pInfo, FALSE);
 										Error(LOG, 0, "File (id=%d, page=%d, copy=%d, scan=%d) blk0=%d, blkCnt=%d saved to File", pInfo->pListItem->id.id, pInfo->pListItem->id.page, pInfo->pListItem->id.copy, pInfo->pListItem->id.scan, pInfo->blk0, pInfo->blkCnt);
@@ -518,8 +518,8 @@ static int _send_image_cmd(SBmpSplitInfo *pInfo)
 	imageCmd.image.blkCnt			= pInfo->blkCnt;
 	imageCmd.image.jetPx0			= pInfo->jetPx0;
 	imageCmd.image.lengthPx			= pInfo->srcLineCnt;
-	if (rx_def_is_web(RX_Spooler.printerType) && pInfo->srcLineCnt>1)
-		imageCmd.image.lengthPx		= pInfo->srcLineCnt-1;	// Bug in FPGA: (when srcLineCnt==12300, gap=0 it sometimes prints an additional line of old data [instead of blank] between the labels)
+//	if (rx_def_is_lb(RX_Spooler.printerType) && pInfo->srcLineCnt>1)
+//		imageCmd.image.lengthPx		= pInfo->srcLineCnt-1;	// Bug in FPGA: (when srcLineCnt==12300, gap=0 it sometimes prints an additional line of old data [instead of blank] between the labels)
 	imageCmd.image.widthPx			= pInfo->widthPx;
 	imageCmd.image.widthBytes		= pInfo->widthBt;
 	imageCmd.image.flipHorizontal	= FALSE;
@@ -535,7 +535,7 @@ static int _send_image_cmd(SBmpSplitInfo *pInfo)
 	if (pInfo->data==NULL)
 		TrPrintfL(_Trace, "SENT _BlkNo[%d][%d]: idx=%d, blk=%d, cnt=%d, buffer=NULL, SENT", pInfo->board, pInfo->head, _TestImgNo[pInfo->board][pInfo->head], pInfo->blk0, pInfo->blkCnt);
 	else
-		TrPrintfL(_Trace, "SENT _BlkNo[%d][%d]: idx=%d, blk=%d, cnt=%d, buffer=%03d, SENT", pInfo->board, pInfo->head, _TestImgNo[pInfo->board][pInfo->head], pInfo->blk0, pInfo->blkCnt, ctrl_get_bufferNo(*pInfo->data));
+		TrPrintfL(_Trace, "SENT _BlkNo[%d][%d]: idx=%d, blk=%d, cnt=%d, buffer=%03d, clearBlockUsed=%d, SENT", pInfo->board, pInfo->head, _TestImgNo[pInfo->board][pInfo->head], pInfo->blk0, pInfo->blkCnt, ctrl_get_bufferNo(*pInfo->data), pInfo->clearBlockUsed);
 
 	_send_image_cmd_flags[5*pInfo->board+pInfo->head] = '*';
 	SPageId *pid = &pInfo->pListItem->id;
@@ -750,7 +750,10 @@ static int _send_to_board(SHBThreadPar *par, int head, int blkNo, int blkCnt)
 	if (pinfo!=NULL)
 	{
 		TrPrintfL(_Trace, "Head[%d.%d]: First Block=%d, sendFromBlk=%d", par->cfg.no, head, pinfo->blk0+pinfo->sendFromBlk, pinfo->sendFromBlk);
-		TrPrintfL(_Trace, "Head[%d.%d]: _send_to_board id=%d, page=%d, copy=%d, scan=%d (Block %d .. %d), sendFrom=%d", par->cfg.no, head, pinfo->pListItem->id.id, pinfo->pListItem->id.page, pinfo->pListItem->id.copy, pinfo->pListItem->id.scan, pinfo->blk0, pinfo->blk0+pinfo->blkCnt-1, pinfo->blk0+pinfo->sendFromBlk);
+		if (pinfo->pListItem!=NULL)
+			TrPrintfL(_Trace, "Head[%d.%d]: _send_to_board (id=%d, page=%d, copy=%d, scan=%d) (Block %d .. %d), sendFrom=%d", par->cfg.no, head, pinfo->pListItem->id.id, pinfo->pListItem->id.page, pinfo->pListItem->id.copy, pinfo->pListItem->id.scan, pinfo->blk0, pinfo->blk0+pinfo->blkCnt-1, pinfo->blk0+pinfo->sendFromBlk);
+		else
+			TrPrintfL(_Trace, "Head[%d.%d]: _send_to_board (NULL) (Block %d .. %d), sendFrom=%d", par->cfg.no, head, pinfo->blk0, pinfo->blk0+pinfo->blkCnt-1, pinfo->blk0+pinfo->sendFromBlk);
 		TrPrintfL(_Trace, "Head[%d.%d]: Send blocks from %d to %d", par->cfg.no, head, blkNo, blkNo+blkCnt);
 		dstBlk = pinfo->blk0 + pinfo->sendFromBlk;
 		for(i=pinfo->sendFromBlk, cnt=0; i<pinfo->blkCnt && cnt<BLOCK_BURST_CNT; i++, dstBlk++)
@@ -832,7 +835,8 @@ static int _send_to_board(SHBThreadPar *par, int head, int blkNo, int blkCnt)
 
 		if (_Abort) return REPLY_OK;
 		
-		if (pinfo->sendFromBlk >= pinfo->blkCnt || (RX_Spooler.printerType==printer_LB702_UV && (endReached && (cnt==0 || (pinfo->pListItem->flags&FLAG_SAME)))))
+//		if (pinfo->sendFromBlk >= pinfo->blkCnt || (RX_Spooler.printerType==printer_LB702_UV && (endReached && (cnt==0 || (pinfo->pListItem->flags&FLAG_SAME)))))
+		if (pinfo->sendFromBlk >= pinfo->blkCnt || pinfo->pListItem->flags&FLAG_SAME)
 		{
 			SPageId *pid   = &pinfo->pListItem->id;
 			SPageId *plast = &par->lastId[head];

@@ -1,29 +1,20 @@
-﻿using Infragistics.Windows.Controls;
+﻿using Dragablz;
 using RX_Common;
-using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Models;
-using RX_DigiPrint.Models.Enums;
 using RX_DigiPrint.Services;
 using RX_DigiPrint.Views.Settings;
 using RX_DigiPrint.Views.UserControls;
-using RX_LabelComposer.External;
+using RX_DigiPrint.Views;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Text;
 // using System.Net.NetworkInformation;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Navigation;
-using System.Windows.Threading;
 
 // using Windows.UI.ApplicationSettings;
 // using Windows.UI.Popups;
@@ -36,8 +27,6 @@ namespace RX_DigiPrint.Views
     /// </summary>
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
-        private List<TabItem> PrinterTypeTabs;
-
         public static event EventHandler PrinterTypeChangedEventHandler;
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -85,19 +74,13 @@ namespace RX_DigiPrint.Views
             #endif
 
             this.Title=System.IO.Path.GetFileNameWithoutExtension(System.Windows.Forms.Application.ExecutablePath);
-                        
-            TabLB701.DataContext          = RxGlobals.PrintSystem;
-            TabDP803.DataContext          = RxGlobals.PrintSystem;
-            TabLB702WB.DataContext        = RxGlobals.PrintSystem;
-            TabLH702.DataContext          = RxGlobals.PrintSystem;
+
             MainNotConnected.DataContext  = RxGlobals.RxInterface;
             TabHeaderUnderline.DataContext = this;
             TabCtrl.DataContext = this;
 
             RxGlobals.License.Update();
             
-            _InitTabs();
-
             RxGlobals.PrinterStatus.ErrorTypeChangedEvent += _ErrorTypeChanged;
             RxGlobals.PrintSystem.PropertyChanged += PrintSystem_PropertyChanged;
             
@@ -106,6 +89,7 @@ namespace RX_DigiPrint.Views
             MouventCommandButtons.SettingsClicked += new EventHandler(CommandButtonsSettingsClicked);
 
             RxGlobals.User.PropertyChanged += User_PropertyChanged;
+            _UserTypeChanged();
         }
 
         
@@ -123,16 +107,20 @@ namespace RX_DigiPrint.Views
 
         void User_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            _ShowTab(true/*(RxGlobals.User.UserType >= EUserType.usr_supervisor)*/, TabAlignment);
-            _ShowTab((RxGlobals.User.UserType >= EUserType.usr_service), TabNetwork);
-            _ShowTab(RxGlobals.User.UserType >= EUserType.usr_mouvent, TabLog);
+            if (e.PropertyName.Equals("UserType"))  _UserTypeChanged();
+
         }
 
-        //--- Window_Loaded ------------------------------------------------------
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            
-        }
+        private EUserType _UserType = EUserType.usr_undef;
+        private void _UserTypeChanged()
+		{
+            if (RxGlobals.User.UserType!=_UserType)
+			{
+                _ShowTab((RxGlobals.User.UserType >= EUserType.usr_supervisor), TabAlignment, AddLocationHint.Last);
+                _ShowTab((RxGlobals.User.UserType >= EUserType.usr_service), TabNetwork, AddLocationHint.Last);
+                _UserType = RxGlobals.User.UserType;
+			}
+		}
 
         //--- Window_Closed ------------------------------------------
         private void Window_Closed(object sender, EventArgs e)
@@ -194,18 +182,15 @@ namespace RX_DigiPrint.Views
                 ||    RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB702_WB
                 ||    RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LH702
                 ||    RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_DP803;
-
-           bool showPrintQueueTab = !((RxGlobals.PrintSystem.PrinterType  == EPrinterType.printer_test_table 
-                || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide
-                || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide_only
-				|| RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LH702
-                ));
-
-           _ShowTab(showPrintQueueTab, TabPrintQueue);
+           
+            bool pq = (lb||tx) &&  RxGlobals.PrintSystem.PrinterType!=EPrinterType.printer_LH702;
 
            PrinterTypeChangedEventArgs eventArgs = new PrinterTypeChangedEventArgs();
            eventArgs.Textile = tx;
            eventArgs.Label = lb;
+
+
+           _ShowTab(pq, TabPrintQueue, AddLocationHint.First);
 
            PrinterTypeChangedEventHandler(this, eventArgs);
 
@@ -214,91 +199,81 @@ namespace RX_DigiPrint.Views
            _ShowPrintSystemTab();
         }
 
-        //--- _activeView -------------------------------
-        private void _activeView(TabItem activeItem)
+        private void _ShowTab(bool show, TabItem tab, AddLocationHint hint)
         {
-            for (int i=1; i<TabCtrl.Items.Count; i++)
-            {
-                TabItem item = TabCtrl.Items[i] as TabItem;
-                if (item.Name.Equals("TabEvents")) break;
-                if (item.Equals(activeItem)
-                    || (activeItem.Equals(TabLH702) && item.Equals(TabLB702UV) && RxGlobals.PrintSystem.LH702_simulation)
-                    )
-                {
-                    item.Visibility=Visibility.Visible;
-                }
-                else item.Visibility=Visibility.Collapsed;
-            }
+            TabCtrl.AddLocationHint = hint;
+            if (!show) TabCtrl.Items.Remove(tab);
+            else if (!TabCtrl.Items.Contains(tab)) TabCtrl.Items.Add(tab);
         }
 
-        private void _ShowTab(bool show, TabItem tab)
-        {
-            try
-            {
-                if (show)
-                {
-                   TabCtrl.Items.Add(tab);
-                }
-                else
-                {
-                    TabCtrl.Items.Remove(tab);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-        }
-
+        private EPrinterType _PrinterType = EPrinterType.printer_undef;
         private void _ShowPrinterTypeTab(EPrinterType type)
         {
-            foreach (var item in PrinterTypeTabs)
-            {
-                _ShowTab(false, item);
-            }
+            if (type!=_PrinterType)
+			{
+                switch (type)
+                {
+                    case EPrinterType.printer_LB701:
+                        MachineName.Text="LB 701";
+					    TabMachine.Content = new LB701UVView.LB701UVView();
+                        break;
 
-            switch (type)
-            {
-                case EPrinterType.printer_LB701:
-                    _ShowTab(true, TabLB701);
-                    break;
+                    case EPrinterType.printer_LB702_UV:
+                        MachineName.Text="LB 702 UV";
+					    TabMachine.Content = new LB702UVView.LB702UV_View();
+                        break;
 
-                case EPrinterType.printer_LB702_UV:
-                    _ShowTab(true, TabLB702UV);
-                    break;
+                    case EPrinterType.printer_LB702_WB:
+                        MachineName.Text="LB 702 WB";
+					    TabMachine.Content = new LB702WBView.LB702WBView();
+                        break;
 
-                case EPrinterType.printer_LB702_WB:
-                    _ShowTab(true, TabLB702WB);
-                    break;
+                    case EPrinterType.printer_LH702:
+                        MachineName.Text="LH 702";
+					    TabMachine.Content = new LH702View.LH702_View();
+                        break;
 
-                case EPrinterType.printer_LH702:
-                    _ShowTab(true, TabLH702);
-                    break;
+                    case EPrinterType.printer_DP803:
+                        MachineName.Text="DP 803";
+					    TabMachine.Content = new DP803View.DP803View();
+                        break;
 
-                case EPrinterType.printer_DP803:
-                    _ShowTab(true, TabDP803);
-                    break;
+                    case EPrinterType.printer_TX801:
+                        MachineName.Text="TX 801";
+					    TabMachine.Content = new TexView.TexView();
+                        break;
 
-                case EPrinterType.printer_TX801:
-                case EPrinterType.printer_TX802:
-                    _ShowTab(true, TabTex);
-                    break;
+                    case EPrinterType.printer_TX802:
+                        MachineName.Text="TX 802";
+					    TabMachine.Content = new TexView.TexView();
+                        break;
 
-                case EPrinterType.printer_test_slide:
-                case EPrinterType.printer_test_slide_only:
-                case EPrinterType.printer_test_table:
-                    _ShowTab(true, TabTestTable);
-                    break;
+                    case EPrinterType.printer_test_slide:
+                    case EPrinterType.printer_test_slide_only:
+                    case EPrinterType.printer_test_table:
+                        MachineName.Text="Test Table";
+                        TabMachine.Content = new TestTableView.TestTableView();
+                        break;
 
-                case EPrinterType.printer_cleaf:
-                    _ShowTab(true, TabCleaf);
-                    break;
-                    /*
-                case EPrinterType.printer_CB612:
-                    // TODO(CB612) Add tab for CB612
-                    break;
-                    */
-            }
+                    case EPrinterType.printer_cleaf:
+                        MachineName.Text="CLEAF";
+					    TabMachine.Content = new CleafView.CleafView();
+                        break;
+
+                        /*
+                    case EPrinterType.printer_CB612:
+                        // TODO(CB612) Add tab for CB612
+                        break;
+                        */
+                }
+                TabMachine.DataContext = RxGlobals.PrintSystem;
+                _PrinterType = type;
+                if (TabCtrl.SelectedItem == TabMachine) 
+				{
+                    TabCtrl.SelectedItem = null;
+                    TabCtrl.SelectedItem = TabMachine;
+				}
+			}
         }
 
         private void _ShowPrintSystemTab()
@@ -315,39 +290,6 @@ namespace RX_DigiPrint.Views
             }
         }
 
-        private void _InitTabs()
-        {
-            _ShowTab(false, TabPrintQueue);
-            _ShowTab(true, TabEvents);
-            _ShowTab(RxGlobals.User.UserType >= EUserType.usr_mouvent, TabLog); // only used for mouvent
-            _ShowTab(true, TabPrintSystem);
-
-            _ShowTab(/*(RxGlobals.User.UserType >= EUserType.usr_supervisor)*/ true, TabAlignment);
-            
-            _ShowTab((RxGlobals.User.UserType >= EUserType.usr_service), TabNetwork);
-            
-            PrinterTypeTabs = new List<TabItem>()
-            {
-                TabLB701,
-                TabLB702UV,
-                TabLB702WB,
-                TabLH702,
-                TabDP803,
-                TabTex,
-                TabTestTable,
-                TabCleaf,
-                // //TODO(CB612) Add tab for CB612
-            };
-            _ShowPrinterTypeTab(RxGlobals.PrintSystem.PrinterType);
-        }
-
-
-        //--- PrintQueueView_Loaded ---------------------------------------------------
-        private void PrintQueueView_Loaded(object sender, RoutedEventArgs e)
-        {
-
-        }
-
         public class PrinterTypeChangedEventArgs : EventArgs
         {
             public bool Textile { get; set; }
@@ -359,12 +301,12 @@ namespace RX_DigiPrint.Views
             try 
             {
                 var selectedTab = TabCtrl.SelectedItem as TabItem;
-                SelectedTabName = selectedTab.Name;
+                if (selectedTab!=null) SelectedTabName = selectedTab.Name;
             }
             catch(Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
         }
-    }
+	}
 }

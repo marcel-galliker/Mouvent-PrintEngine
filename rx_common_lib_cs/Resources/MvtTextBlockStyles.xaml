@@ -13,7 +13,7 @@
 
     <!-- ____ MvtNumBox _____________________________________________________ -->
     <Style x:Key="MvtNumBox" TargetType="{x:Type TextBoxBase}">
-        <Setter Property="FontSize" Value="{StaticResource FontSize}" />
+        <Setter Property="FontSize" Value="{StaticResource MvtFontSize}" />
         <!--    <Setter Property="IsReadOnly" Value="True"/> -->
         <Setter Property="Template">
             <Setter.Value>

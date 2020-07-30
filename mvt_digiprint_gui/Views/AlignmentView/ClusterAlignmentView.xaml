@@ -24,7 +24,7 @@
 
     <Grid Margin="5">
         <Grid.RowDefinitions>
-            <RowDefinition Height="40"/>
+            <RowDefinition Height="30"/>
             <RowDefinition Height="auto"></RowDefinition>
 
             <!--Color offset-->
@@ -98,12 +98,14 @@
                                                 Kind="{Binding ColorOffsetEditMode, Converter={StaticResource ExpandSectionIconConverter}}"></iconPacks:PackIconMaterial>
         </common:MvtButton>
 
-        <TextBlock Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="4" Foreground="#ff303030" FontWeight="SemiBold" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"
+        <TextBlock Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="4" Foreground="#ff303030" FontWeight="SemiBold" 
+                   FontSize="{StaticResource MvtFontSize}" HorizontalAlignment="Center" VerticalAlignment="Center"
                        Text="{Binding ClusterName}">
         </TextBlock>
 
         <Border Grid.Row="2" Grid.RowSpan="4" Grid.Column="0" Grid.ColumnSpan="5" BorderBrush="WhiteSmoke" BorderThickness="2,2,2,0"></Border>
-        <TextBlock Background="White" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="4" Foreground="#ff303030" FontWeight="SemiBold" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"
+        <TextBlock Background="White" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="4" Foreground="#ff303030"
+                   FontWeight="SemiBold" FontSize="{StaticResource MvtFontSize}" HorizontalAlignment="Center" VerticalAlignment="Center"
                        Text="{Binding ColorOffsetHeader}" Margin="10"></TextBlock>
         <Grid Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="4" Visibility="{Binding ColorOffsetEditMode, Converter={StaticResource BooleanToVisibleConverter}}">
             <Grid.ColumnDefinitions>
@@ -332,7 +334,8 @@
         </common:MvtButton>
 
         <Border Grid.Row="6" Grid.RowSpan="3" Grid.Column="0" Grid.ColumnSpan="5" BorderBrush="WhiteSmoke" BorderThickness="2,2,2,0"></Border>
-        <TextBlock Background="White" Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="4" Foreground="#ff303030" FontWeight="SemiBold" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"
+        <TextBlock Background="White" Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="4" Foreground="#ff303030"
+                   FontWeight="SemiBold" FontSize="{StaticResource MvtFontSize}" HorizontalAlignment="Center" VerticalAlignment="Center"
                        Text="{Binding AngleHeader}" Margin="10"></TextBlock>
 
         <Grid Grid.Row="7" Grid.Column="1" Grid.ColumnSpan="4" Visibility="{Binding AngleEditMode, Converter={StaticResource BoolToVisible_Converter}}">
@@ -455,14 +458,6 @@
             </TextBlock>
         </Grid>
 
-
-
-
-
-
-
-
-
         <!--Stitch-->
         <Grid Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="2" Visibility="{Binding Path=HasStitchEditMode, Converter={StaticResource BoolToVisible_Converter}}">
             <Grid.RowDefinitions>
@@ -484,7 +479,8 @@
             </common:MvtButton>
 
             <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="5" Grid.RowSpan="3" BorderBrush="WhiteSmoke" BorderThickness="2,2,2,0"></Border>
-            <TextBlock Background="White" Grid.Row="0" Grid.Column="1"  Foreground="#ff303030" FontWeight="SemiBold" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"
+            <TextBlock Background="White" Grid.Row="0" Grid.Column="1"  Foreground="#ff303030" 
+                       FontWeight="SemiBold" FontSize="{StaticResource MvtFontSize}" HorizontalAlignment="Center" VerticalAlignment="Center"
                        Text="{Binding StitchHeader}" Margin="10"></TextBlock>
 
             <Grid Grid.Column="1" Grid.Row="1" Visibility="{Binding StitchEditMode, Converter={StaticResource BoolToVisible_Converter}}">
@@ -631,7 +627,8 @@
 
         <!--Register-->
         <Border Grid.Row="10"  Grid.Column="0" Grid.RowSpan="4" Grid.ColumnSpan="5" BorderBrush="WhiteSmoke" BorderThickness="2,2,2,0"></Border>
-        <TextBlock Background="White" Grid.Row="10" Grid.Column="1" Foreground="#ff303030" FontWeight="SemiBold" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"
+        <TextBlock Background="White" Grid.Row="10" Grid.Column="1" Foreground="#ff303030" 
+                   FontWeight="SemiBold" FontSize="{StaticResource MvtFontSize}" HorizontalAlignment="Center" VerticalAlignment="Center"
                        Text="{Binding RegisterHeader}" Margin="10"></TextBlock>
         <common:MvtButton Visibility="{Binding IsFirstInView, Converter={StaticResource BoolToVisible_Converter}}" Grid.RowSpan="4"
                           Grid.Row="10" Grid.Column="0" VerticalAlignment="Top"  HorizontalAlignment="Left"  Margin="5,5,5,5"
@@ -783,21 +780,6 @@
             </common:MvtNumBox>
         </Grid>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         <!--Backwards Register-->
         <Grid Grid.Row="14" Grid.Column="0" Grid.ColumnSpan="2" Visibility="{Binding IsScanning, Converter={StaticResource BoolToVisible_Converter}}">
             <Grid.RowDefinitions>
@@ -820,7 +802,8 @@
             </common:MvtButton>
 
             <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="5" Grid.RowSpan="3" BorderBrush="WhiteSmoke" BorderThickness="2,2,2,0"></Border>
-            <TextBlock Background="White" Grid.Row="0" Grid.Column="1"  Foreground="#ff303030" FontWeight="SemiBold" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"
+            <TextBlock Background="White" Grid.Row="0" Grid.Column="1"  Foreground="#ff303030" 
+                       FontWeight="SemiBold" FontSize="{StaticResource MvtFontSize}" HorizontalAlignment="Center" VerticalAlignment="Center"
                        Text="{Binding BackwardsRegisterHeader}" Margin="10"></TextBlock>
 
 
@@ -967,7 +950,8 @@
 
         <Border Grid.Row="15" Grid.Column="1" Grid.RowSpan="4" BorderBrush="WhiteSmoke" BorderThickness="2"></Border>
         <Border Grid.Row="15" Grid.Column="0" Grid.RowSpan="1" BorderBrush="WhiteSmoke" BorderThickness="0,2,0,0"></Border>
-        <TextBlock Background="White" Grid.Row="15" Grid.Column="1"  Foreground="#ff303030" FontWeight="SemiBold" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"
+        <TextBlock Background="White" Grid.Row="15" Grid.Column="1"  Foreground="#ff303030" 
+                   FontWeight="SemiBold" FontSize="{StaticResource MvtFontSize}" HorizontalAlignment="Center" VerticalAlignment="Center"
                        Text="Density and Jet Compensation" Margin="10"></TextBlock>
 
         <Grid Grid.Row="16" Grid.RowSpan="2" Grid.Column="1">

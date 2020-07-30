@@ -81,6 +81,7 @@ static int _do_set_FluidCtrlMode(RX_SOCKET socket, SFluidCtrlCmd	*pmsg);
 static int _do_set_purge_par	(RX_SOCKET socket, SPurgePar		*ppar);
 static int _do_disabled_jets	(RX_SOCKET socket, SDisabledJetsMsg  *pmsg);
 static int _do_density_values	(RX_SOCKET socket, SDensityValuesMsg *pmsg);
+static int _do_rob_pos		    (RX_SOCKET socket, SRobPositionMsg *pmsg);
 
 //--- ctrl_init --------------------------------------------------------------------
 int ctrl_init()
@@ -214,21 +215,22 @@ static int _handle_ctrl_msg(RX_SOCKET socket, void *pmsg)
 	_LastMsgId = phdr->msgId;
 	switch (phdr->msgId)
 	{
-//	case CMD_PING:					_do_ping			(socket);							 break;
-	case CMD_ERROR_RESET:			_do_error_reset		();									 break;
-	case CMD_FPGA_IMAGE:			_do_fpga_image		(socket, (SFpgaImageCmd*)	 pmsg);	 break;
-	case CMD_FPGA_WRITE_BMP:		_do_write_image		(socket, (SFpgaWriteBmpCmd*) pmsg);	 break;
-	case CMD_FPGA_SIMU_PRINT:		_do_simu_print		(socket);							 break;
+//	case CMD_PING:					_do_ping			(socket);								break;
+	case CMD_ERROR_RESET:			_do_error_reset		();										break;
+	case CMD_FPGA_IMAGE:			_do_fpga_image		(socket, (SFpgaImageCmd*)	 pmsg);		break;
+	case CMD_FPGA_WRITE_BMP:		_do_write_image		(socket, (SFpgaWriteBmpCmd*) pmsg);		break;
+	case CMD_FPGA_SIMU_PRINT:		_do_simu_print		(socket);								break;
 	case CMD_FPGA_SIMU_ENCODER:		_do_simu_encoder	(socket, (UINT32*)		   &phdr[1]);	break;
-	case CMD_GET_BLOCK_USED:		_do_block_used		(socket, (SBlockUsedCmd*)	pmsg);	 break;
+	case CMD_GET_BLOCK_USED:		_do_block_used		(socket, (SBlockUsedCmd*)	pmsg);		break;
 	case CMD_HEAD_BOARD_CFG:		_do_head_board_cfg	(socket, (SHeadBoardCfg*)  &phdr[1]);	break;
-	case CMD_PRINT_ABORT:			_do_print_abort		(socket);							 break;		
+	case CMD_PRINT_ABORT:			_do_print_abort		(socket);								break;		
 	case CMD_HEAD_STAT:				_do_head_stat       (socket, (SFluidStateLight*) &phdr[1]); break;
-	case SET_GET_INK_DEF:			_do_inkdef			(socket, (SInkDefMsg*)		pmsg);	 break;
-	case CMD_HEAD_FLUID_CTRL_MODE:	_do_set_FluidCtrlMode(socket, (SFluidCtrlCmd*)  pmsg);	 break;
-	case CMD_SET_PURGE_PAR:			_do_set_purge_par	(socket, (SPurgePar*)	&phdr[1]);	 break;
+	case SET_GET_INK_DEF:			_do_inkdef			(socket, (SInkDefMsg*)		pmsg);		break;
+	case CMD_HEAD_FLUID_CTRL_MODE:	_do_set_FluidCtrlMode(socket, (SFluidCtrlCmd*)  pmsg);		break;
+	case CMD_SET_PURGE_PAR:			_do_set_purge_par	(socket, (SPurgePar*)	&phdr[1]);		break;
     case CMD_SET_DISABLED_JETS:		_do_disabled_jets	(socket, (SDisabledJetsMsg*)pmsg);		break;
     case CMD_SET_DENSITY_VAL:		_do_density_values	(socket, (SDensityValuesMsg*)pmsg);		break;
+    case CMD_SET_ROB_POS:			_do_rob_pos			(socket, (SRobPositionMsg*)pmsg);			break;
 	default:		Error(LOG, 0, "Unknown Command 0x%04x", phdr->msgId);
 					reply = REPLY_ERROR;
 					break;
@@ -436,6 +438,13 @@ static int _do_density_values	(RX_SOCKET socket, SDensityValuesMsg *pmsg)
 	cond_set_densityValues(pmsg->head, pmsg->value);
 	cond_set_voltage(pmsg->head, pmsg->voltage);
 	return REPLY_OK;
+}
+
+//--- _do_rob_pos -------------------------------------------------------------
+static int _do_rob_pos		    (RX_SOCKET socket, SRobPositionMsg *pmsg)
+{
+	cond_set_rob_pos(pmsg->head, pmsg->angle, pmsg->dist);
+	return REPLY_OK;	
 }
 
 //--- _do_simu_print ------------------------------------------------------

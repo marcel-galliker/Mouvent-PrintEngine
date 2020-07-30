@@ -1,11 +1,6 @@
 ﻿using RX_Common;
 using RX_DigiPrint.Services;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace RX_DigiPrint.Models
@@ -35,6 +30,7 @@ namespace RX_DigiPrint.Models
                 {
                     case Services.EPrinterType.printer_LB701:      Visible = Visibility.Visible; break;
                     case Services.EPrinterType.printer_LB702_UV:   Visible = Visibility.Visible; break;
+                    case Services.EPrinterType.printer_LH702:      Visible = RxGlobals.PrintSystem.LH702_simulation? Visibility.Visible:Visibility.Collapsed; break;
                     default: Visible = Visibility.Collapsed; break;
                 }
             }

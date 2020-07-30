@@ -94,14 +94,10 @@ void handle_menu(char *str)
 	int i;
 	int no;
 	
-	if(no=str_start(str, "cluster"))
-	{
-		cond_set_clusterNo(atoi(&str[no]));
-	}
-	else if (no=str_start(str, "resetinkctr"))
-	{
-		cond_volume_printed(atoi(&str[no]), 0);			
-	}
+	if      (no=str_start(str, "cluster"))		cond_set_clusterNo(atoi(&str[no]));
+	else if (no=str_start(str, "resetinkctr"))	cond_volume_printed(atoi(&str[no]), 0);			
+	else if (no=str_start(str,"ra"))			cond_set_rob_pos(str[no]-'0', str_to_screw(&str[no+1]), 0);
+	else if (no=str_start(str,"rd"))			cond_set_rob_pos(str[no]-'0', 0, str_to_screw(&str[no+1]));
 	else
 	{
 		no = str[1] - '0';
@@ -112,7 +108,7 @@ void handle_menu(char *str)
 		case 'd': nios_fixed_grey_levels(atoi(&str[1]), 3);	break;
 		case 'g': fpga_manual_pg();							break;
 		case 'h': fpga_enc_config(atoi(&str[1]));			break;
-	    case 'p': udp_test_print(&str[1]);					break;
+		case 'p': udp_test_print(&str[1]);					break;
 	//  case 'p': udp_test_print_tif(&str[1]);				break;
 		/*
 		case 'r': fpga_load(PATH_BIN_HEAD FIELNAME_HEAD_RBF);	
@@ -156,7 +152,7 @@ void handle_menu(char *str)
 		case 'b': if (no<4) cond_toggle_psensor_cali_user(no);				break;
 		*/
 		default: putty_handle_menu(str);
-		}		
+		}
 	}
 }
 

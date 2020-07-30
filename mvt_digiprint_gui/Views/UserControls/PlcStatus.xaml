@@ -6,7 +6,7 @@
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
              mc:Ignorable="d"
-             d:DesignHeight="400" d:DesignWidth="370"
+             d:DesignHeight="400"
              HorizontalAlignment="Left">
 
     <UserControl.Resources>

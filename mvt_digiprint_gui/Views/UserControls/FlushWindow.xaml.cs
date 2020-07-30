@@ -53,7 +53,7 @@ namespace RX_DigiPrint.Views.UserControls
         //--- Yes_Clicked -------------------------------------------------
         private void Yes_Clicked(object sender, RoutedEventArgs e)
         {
-            TcpIp.SFluidCtrlCmd msg = new TcpIp.SFluidCtrlCmd(){no=-1, ctrlMode = EFluidCtrlMode.ctrl_shutdown };
+            TcpIp.SFluidCtrlCmd msg = new TcpIp.SFluidCtrlCmd(){no=-1, ctrlMode = EFluidCtrlMode.ctrl_shutdown};
             RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_CTRL_MODE, ref msg);
             RxGlobals.RxInterface.SendCommand(TcpIp.CMD_ENCODER_UV_OFF);
             Close();

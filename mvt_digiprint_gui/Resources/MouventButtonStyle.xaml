@@ -222,6 +222,24 @@
             </Trigger>
         </Style.Triggers>
     </Style>
+    <Style x:Key="Mouvent.RoundIconButtonStyle.LightIconM" TargetType="iconPacks:PackIconMaterial" BasedOn="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}">
+        <Setter Property="Width" Value="20" />
+        <Setter Property="Height" Value="20"/>
+    </Style>
+    
+    <Style x:Key="Mouvent.RoundIconButtonStyle.LightIconOcticons" TargetType="iconPacks:PackIconOcticons">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="White" />
+        <Style.Triggers>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Foreground" Value="{StaticResource Mouvent.CommandButtonDisabledIcon}"/>
+            </Trigger>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Foreground" Value="White" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
 
     <Style x:Key="Mouvent.RoundIconButtonStyle.LightIconPicol" TargetType="iconPacks:PackIconPicolIcons">
         <Setter Property="Background" Value="Transparent" />
@@ -429,6 +447,7 @@
         </Setter>
     </Style>
 
+    
     <Style x:Key="Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeS" TargetType="{x:Type common:MvtButton}">
         <Setter Property ="Template">
             <Setter.Value>
@@ -542,6 +561,9 @@
     <Style x:Key="Mouvent.RoundIconButtonStyle.DarkIcon" TargetType="iconPacks:PackIconMaterial">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Foreground" Value="{StaticResource Mouvent.MainColorBrush}" />
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Width" Value="{Binding Height}" />
         <Style.Triggers>
             <Trigger Property="IsEnabled" Value="False">
                 <Setter Property="Foreground" Value="{StaticResource Mouvent.CommandButtonDisabledIcon_Inverted}"/>

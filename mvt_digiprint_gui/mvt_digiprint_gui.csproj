@@ -218,6 +218,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
+  <PropertyGroup>
+    <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="BitMiracle.LibTiff.NET">
       <HintPath>DLL\BitMiracle.LibTiff.NET.dll</HintPath>
@@ -403,7 +406,6 @@
     <Compile Include="Views\AlignmentView\InstructionsView.xaml.cs">
       <DependentUpon>InstructionsView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\AlignmentView\SoftwareValueCorrectionView.cs" />
     <Compile Include="Models\Alignment.cs" />
     <Compile Include="Models\AlignmentResources.cs" />
     <Compile Include="Models\Chiller.cs" />
@@ -490,6 +492,9 @@
     <Compile Include="Services\RxBtMsgHandler.cs" />
     <Compile Include="Services\RxCrypto.cs" />
     <Compile Include="Services\RxFlz.cs" />
+    <Compile Include="Views\AlignmentView\SoftwareValueCorrectionView.xaml.cs">
+      <DependentUpon>SoftwareValueCorrectionView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\PrintSystemExtended\PrintSystemExtendedView.xaml.cs">
       <DependentUpon>PrintSystemExtendedView.xaml</DependentUpon>
     </Compile>

@@ -36,8 +36,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
             _item.ScanLength = 1;
             _item.Passes     = 1;
 
-            FileSettingsWeb.SaveButton.Visibility=Visibility.Collapsed;
-            FileSettingsScan.SaveButton.Visibility=Visibility.Collapsed;
+            //FileSettingsScan.SaveButton.Visibility=Visibility.Collapsed;
 
             _timer = new DispatcherTimer();
             _timer.Interval = new TimeSpan(0, 0, 0, 0, 100);

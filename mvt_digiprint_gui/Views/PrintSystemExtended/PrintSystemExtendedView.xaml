@@ -24,7 +24,7 @@
             <rx_uc:MouventTopToolBar Grid.Row="0" HorizontalAlignment="Right"></rx_uc:MouventTopToolBar>
 
             <StackPanel Background="{StaticResource Mouvent.MainColorBrush}" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left">
-                <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" ToolTip="Test"
+                <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" ToolTip="Settings"
                                  Margin="15, 5, 15, 5" Click="PrinterSettings_Clicked">
                     <iconPacks:PackIconPicolIcons HorizontalAlignment="Stretch" VerticalAlignment="Center" 
                                                 Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIconPicol}"

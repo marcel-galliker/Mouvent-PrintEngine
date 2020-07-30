@@ -14,41 +14,37 @@
              Top="20" Left="20"
              Title="Settings"
         Width="600" 
-        Height="740"
+        SizeToContent="Height"
         ResizeMode="NoResize">
-    <ScrollViewer>
-        <ScrollViewer.Resources>
-            <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">30</sys:Double>
-            <sys:Double x:Key="{x:Static SystemParameters.HorizontalScrollBarHeightKey}">30</sys:Double>
-        </ScrollViewer.Resources>
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*"></RowDefinition>
-                <RowDefinition Height="*"></RowDefinition>
-                <RowDefinition Height="*"></RowDefinition>
-                <RowDefinition Height="auto"></RowDefinition>
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"></ColumnDefinition>
-                <ColumnDefinition Width="*"></ColumnDefinition>
-            </Grid.ColumnDefinitions>
 
-            <!-- Printer Section __________________________________________-->
-            <GroupBox Grid.Row="0" Grid.Column="0" Header="Printer" Style="{StaticResource MvtGroupBox}" Margin="10,10,0,0">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="100"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="auto"/>
-                        <RowDefinition Height="auto"/>
-                    </Grid.RowDefinitions>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Row="0" Grid.Column="0" Margin="5" Text="IP Address"/>
-                    <rx:MvtTextBox   Grid.Row="0" Grid.Column="1" Margin="5" Text="{Binding IP_Address}"/>
-                    <TextBlock      Grid.Row="1" Grid.Column="0" Margin="5" Text="Units"/>
-                    <igWPF:XamComboEditor Grid.Row="1" Grid.Column="1" Margin="5"
+        <!-- Printer Section __________________________________________-->
+        <GroupBox Grid.Row="0" Grid.Column="0" Header="Printer" Style="{StaticResource MvtGroupBox}" Margin="10,10,0,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.Column="0" Margin="5" Text="IP Address"/>
+                <rx:MvtTextBox   Grid.Row="0" Grid.Column="1" Margin="5" Text="{Binding IP_Address}"/>
+                <TextBlock      Grid.Row="1" Grid.Column="0" Margin="5" Text="Units"/>
+                <igWPF:XamComboEditor Grid.Row="1" Grid.Column="1" Margin="5"
                             x:Name="CB_Units"
                             HorizontalAlignment="Stretch"
                             Value="{Binding Units}"
@@ -56,124 +52,124 @@
                             ValuePath="Value" 
                             DropDownResizeMode="None"
                             />
-                </Grid>
-            </GroupBox>
+            </Grid>
+        </GroupBox>
 
-            <GroupBox Grid.Row="0" Grid.Column="1" Header="Factory Network" Style="{StaticResource MvtGroupBox}" Margin="10,10,10,0">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="100"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="auto"/>
-                        <RowDefinition Height="auto"/>
-                        <RowDefinition Height="auto"/>
-                        <RowDefinition Height="auto"/>
-                    </Grid.RowDefinitions>
+        <GroupBox Grid.Row="0" Grid.Column="1" Header="Factory Network" Style="{StaticResource MvtGroupBox}" Margin="10,10,10,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
 
-                    <StackPanel Grid.Row="0" Grid.ColumnSpan="2" Margin="5" Orientation="Horizontal">
-                        <common:MvtRadioButton Style="{StaticResource MvtSelectionRadioButton}" Content="DHCP" x:Name="HOST_DHCP"/>
-                        <common:MvtRadioButton Style="{StaticResource MvtSelectionRadioButton}" Content="Static"  x:Name="HOST_STATIC"/>
-                    </StackPanel>
+                <StackPanel Grid.Row="0" Grid.ColumnSpan="2" Margin="5" Orientation="Horizontal">
+                    <common:MvtRadioButton Style="{StaticResource MvtSelectionRadioButton}" Content="DHCP" x:Name="HOST_DHCP"/>
+                    <common:MvtRadioButton Style="{StaticResource MvtSelectionRadioButton}" Content="Static"  x:Name="HOST_STATIC"/>
+                </StackPanel>
 
-                    <TextBlock Grid.Row="1" Grid.Column="0" Margin="5" Text="Host Name"/>
-                    <rx:MvtTextBox Grid.Row="1" Grid.Column="1" Margin="2" Text="{Binding Host_Name}" />
+                <TextBlock Grid.Row="1" Grid.Column="0" Margin="5" Text="Host Name"/>
+                <rx:MvtTextBox Grid.Row="1" Grid.Column="1" Margin="2" Text="{Binding Host_Name}" />
 
-                    <TextBlock Grid.Row="2" Grid.Column="0" Margin="5" Text="IP Address"/>
-                    <rx:MvtTextBox Grid.Row="2" Grid.Column="1" Margin="2" Text="{Binding Host_Address}"/>
+                <TextBlock Grid.Row="2" Grid.Column="0" Margin="5" Text="IP Address"/>
+                <rx:MvtTextBox Grid.Row="2" Grid.Column="1" Margin="2" Text="{Binding Host_Address}"/>
 
-                    <TextBlock Grid.Row="3" Grid.Column="0" Margin="5" Text="Net Mask"/>
-                    <rx:MvtTextBox Grid.Row="3" Grid.Column="1" Margin="2" Text="{Binding Host_Mask}"/>
-                </Grid>
-            </GroupBox>
-            
-            <!-- Commands Grid ___________________________________________________________________-->
-            <GroupBox Grid.Row="1" Grid.Column="0" Header="Support Commands" Style="{StaticResource MvtGroupBox}" Margin="10,10,0,0">
-                <StackPanel Margin="5" HorizontalAlignment="Center">
+                <TextBlock Grid.Row="3" Grid.Column="0" Margin="5" Text="Net Mask"/>
+                <rx:MvtTextBox Grid.Row="3" Grid.Column="1" Margin="2" Text="{Binding Host_Mask}"/>
+            </Grid>
+        </GroupBox>
 
-                    <Button Click="Wlan_Clicked" Width="170" x:Name="WlanButton" Margin="0, 0, 0, 10" Style="{StaticResource Mouvent.StandardButton}">
-                        <Grid Width="170">
-                            <Image Height="20" HorizontalAlignment="Left" x:Name="WlanStatus"  Margin="5,1"/>
-                            <TextBlock Text="WLAN" Margin="30,0,0,0" Padding="10,0"/>
-                        </Grid>
-                    </Button>
-                    <rx:RxPopup x:Name="WlanPopup" 
+        <!-- Commands Grid ___________________________________________________________________-->
+        <GroupBox Grid.Row="1" Grid.Column="0" Header="Support Commands" Style="{StaticResource MvtGroupBox}" Margin="10,10,0,0">
+            <StackPanel Margin="5" HorizontalAlignment="Center">
+
+                <Button Click="Wlan_Clicked" Width="170" x:Name="WlanButton" Margin="0, 0, 0, 10" Style="{StaticResource Mouvent.StandardButton}">
+                    <Grid Width="170">
+                        <Image Height="20" HorizontalAlignment="Left" x:Name="WlanStatus"  Margin="5,1"/>
+                        <TextBlock Text="WLAN" Margin="30,0,0,0" Padding="10,0"/>
+                    </Grid>
+                </Button>
+                <rx:RxPopup x:Name="WlanPopup" 
                            PlacementTarget="{Binding ElementName=WlanButton}"
                            Width="auto"
                            MinWidth="100" 
                            >
-                        <Grid>
-                            <local:WlanSettings/>
-                        </Grid>
-                    </rx:RxPopup>
+                    <Grid>
+                        <local:WlanSettings/>
+                    </Grid>
+                </rx:RxPopup>
 
-                    <Button Click="TeamViewer_Clicked"  Width="170" Margin="0, 0, 0, 10" Style="{StaticResource Mouvent.StandardButton}">
-                        <Grid Width="170">
-                            <Image Source="..\..\Resources\Bitmaps\TeamViewer.ico" HorizontalAlignment="Left" Height="20" Margin="5,1"/>
-                            <TextBlock Text="TeamViewer" Margin="30,0,0,0" Padding="10,0"/>
-                        </Grid>
-                    </Button>
+                <Button Click="TeamViewer_Clicked"  Width="170" Margin="0, 0, 0, 10" Style="{StaticResource Mouvent.StandardButton}">
+                    <Grid Width="170">
+                        <Image Source="..\..\Resources\Bitmaps\TeamViewer.ico" HorizontalAlignment="Left" Height="20" Margin="5,1"/>
+                        <TextBlock Text="TeamViewer" Margin="30,0,0,0" Padding="10,0"/>
+                    </Grid>
+                </Button>
 
-                    <Button Click="WinSCP_Clicked" Width="170" Margin="0, 0, 0, 10" Style="{StaticResource Mouvent.StandardButton}">
-                        <Grid Width="170">
-                            <Image Source="..\..\Resources\Bitmaps\WinSCP.ico" HorizontalAlignment="Left" Height="20" Margin="5,1"/>
-                            <TextBlock Text="WinSCP" Margin="30,0,0,0" Padding="10,0"/>
-                        </Grid>
-                    </Button>
-                </StackPanel>
-            </GroupBox>
-
-            <GroupBox Grid.Row="1" Grid.Column="1" Header="Windows Commands" Style="{StaticResource MvtGroupBox}" Margin="10,10,10,0">
-                <StackPanel HorizontalAlignment="Center" >
-                    <Button Content="Restart Main"   Click="RestartMain_Clicked" Margin="0, 10, 0, 10" Width="170" Style="{StaticResource Mouvent.StandardButton}"/>
-                    <Button Content="Restart GUI"    Click="RestartGUI_Clicked" Margin="0, 0, 0, 10"  Width="170" Style="{StaticResource Mouvent.StandardButton}"/>
-                    <Button Content="Shut Down"      Click="ShutDown_Clicked" Margin="0, 0, 0, 10"   Width="170" Style="{StaticResource Mouvent.StandardButton}"/>
-                    <Button Content="Windows Update" Click="Update_Clicked" Margin="0, 0, 0, 10"     Width="170" Style="{StaticResource Mouvent.StandardButton}"/>
-                </StackPanel>
-            </GroupBox>
-
-            <!-- Version Grid ___________________________________________________________________-->
-            <GroupBox Header="Software" Grid.Row="2" Grid.Column="0" Style="{StaticResource MvtGroupBox}" Margin="10,10,0,0">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="100"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="auto"/>
-                        <RowDefinition Height="auto"/>
-                        <RowDefinition Height="auto"/>
-                        <RowDefinition Height="auto"/>
-                        <RowDefinition Height="auto"/>
-                        <RowDefinition Height="auto"/>
-                    </Grid.RowDefinitions>
-                    <TextBlock Grid.Row="0" Margin="5" Text="Version"/>
-                    <TextBlock Grid.Row="0" Margin="5" Grid.Column="1" x:Name="Version"/>
-                    <TextBlock Grid.Row="1" Margin="5" Text="Build"/>
-                    <TextBlock Grid.Row="1" Margin="5" Grid.Column="1" x:Name="Build"/>
-                    <TextBlock Grid.Row="2" Margin="5" Text="Date"/>
-                    <TextBlock Grid.Row="2" Margin="5" Grid.Column="1" x:Name="Date"/>
-                    <TextBlock Grid.Row="3" Margin="5" Text="IP Address"/>
-                    <TextBlock Grid.Row="3" Margin="5" Grid.Column="1" x:Name="LocalIpAddr"/>
-                </Grid>
-            </GroupBox>
-
-            <StackPanel Margin="10" Grid.Row="3" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center">
-                <common:MvtButton Margin="15" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}" Click="About_Clicked">
-                    <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 
-                                                Kind="Help"></iconPacks:PackIconMaterial>
-                </common:MvtButton>
-                <common:MvtButton x:Name="Button_Save" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}" Margin="15" Click="Confirm_Click">
-                    <iconPacks:PackIconMaterial Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Center" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 
-                                                Kind="Check"></iconPacks:PackIconMaterial>
-                </common:MvtButton>
-                <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}" Margin="15" Click="User_Click">
-                    <iconPacks:PackIconMaterial Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Center" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 
-                                                Kind="Account"></iconPacks:PackIconMaterial>
-                </common:MvtButton>
-
+                <Button Click="WinSCP_Clicked" Width="170" Margin="0, 0, 0, 10" Style="{StaticResource Mouvent.StandardButton}">
+                    <Grid Width="170">
+                        <Image Source="..\..\Resources\Bitmaps\WinSCP.ico" HorizontalAlignment="Left" Height="20" Margin="5,1"/>
+                        <TextBlock Text="WinSCP" Margin="30,0,0,0" Padding="10,0"/>
+                    </Grid>
+                </Button>
             </StackPanel>
-        </Grid>
-    </ScrollViewer>
+        </GroupBox>
+
+        <GroupBox Grid.Row="1" Grid.Column="1" Header="Windows Commands" Style="{StaticResource MvtGroupBox}" Margin="10,10,10,0">
+            <StackPanel HorizontalAlignment="Center" >
+                <Button Content="Restart Main"   Click="RestartMain_Clicked" Margin="0, 10, 0, 10" Width="170" Style="{StaticResource Mouvent.StandardButton}"/>
+                <Button Content="Restart GUI"    Click="RestartGUI_Clicked" Margin="0, 0, 0, 10"  Width="170" Style="{StaticResource Mouvent.StandardButton}"/>
+                <Button Content="Shut Down"      Click="ShutDown_Clicked" Margin="0, 0, 0, 10"   Width="170" Style="{StaticResource Mouvent.StandardButton}"/>
+                <Button Content="Windows Update" Click="Update_Clicked" Margin="0, 0, 0, 10"     Width="170" Style="{StaticResource Mouvent.StandardButton}"/>
+            </StackPanel>
+        </GroupBox>
+
+        <!-- Version Grid ___________________________________________________________________-->
+        <GroupBox Header="Software" Grid.Row="2" Grid.Column="0" Style="{StaticResource MvtGroupBox}" Margin="10,10,0,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Margin="5" Text="Version"/>
+                <TextBlock Grid.Row="0" Margin="5" Grid.Column="1" x:Name="Version"/>
+                <TextBlock Grid.Row="1" Margin="5" Text="Build"/>
+                <TextBlock Grid.Row="1" Margin="5" Grid.Column="1" x:Name="Build"/>
+                <TextBlock Grid.Row="2" Margin="5" Text="Date"/>
+                <TextBlock Grid.Row="2" Margin="5" Grid.Column="1" x:Name="Date"/>
+                <TextBlock Grid.Row="3" Margin="5" Text="IP Address"/>
+                <TextBlock Grid.Row="3" Margin="5" Grid.Column="1" x:Name="LocalIpAddr"/>
+            </Grid>
+        </GroupBox>
+
+        <StackPanel Margin="10" Grid.Row="3" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center">
+            <common:MvtButton Margin="15" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}" Click="About_Clicked">
+                <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 
+                                                Kind="Help"></iconPacks:PackIconMaterial>
+            </common:MvtButton>
+            <common:MvtButton x:Name="Button_Save" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}" Margin="15" Click="Confirm_Click">
+                <iconPacks:PackIconMaterial Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Center" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 
+                                                Kind="Check"></iconPacks:PackIconMaterial>
+            </common:MvtButton>
+            <!--
+            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}" Margin="15" Click="User_Click">
+                <iconPacks:PackIconMaterial Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Center" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 
+                                                Kind="Account"></iconPacks:PackIconMaterial>
+            </common:MvtButton>
+            -->
+        </StackPanel>
+    </Grid>
 </rx:CustomWindow>
