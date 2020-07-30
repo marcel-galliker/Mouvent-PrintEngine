@@ -587,7 +587,7 @@ static void _lb702_move_to_pos(int cmd, int pos0, int pos1)
 	int adjust=0;
 	RX_StepperStatus.cmdRunning  = cmd;
 	
-    if (RX_StepperStatus.robot_used && !_CmdRunningRobi && !RX_StepperStatus.screwerinfo.y_in_ref && RX_StepperStatus.cmdRunning != CMD_LIFT_REFERENCE && RX_StepperStatus.cmdRunning != CMD_LIFT_SCREW && robi_connected())
+    if (RX_StepperStatus.robot_used && !_CmdRunningRobi && !RX_StepperStatus.screwerinfo.y_in_ref && RX_StepperStatus.cmdRunning != CMD_LIFT_REFERENCE && RX_StepperStatus.cmdRunning != CMD_LIFT_SCREW /*&& robi_connected()*/)
     {
         _CmdRunningRobi = CMD_ROBI_MOVE_TO_GARAGE;
         robi_handle_ctrl_msg(INVALID_SOCKET, _CmdRunningRobi, NULL);
@@ -648,8 +648,8 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                                     {
 										RX_StepperStatus.cmdRunning  = msgId;
 										if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].cap_height < 5000) Error(WARN, 0, "Reference Height back should be > 5mm");
-										val0 = -1*_micron_2_steps(4000);
-										val1 = -1*_micron_2_steps(4000);
+										val0 = -1*_micron_2_steps(5000);
+										val1 = -1*_micron_2_steps(5000);
                                         if (RX_StepperStatus.info.ref_done) _lb702_move_to_pos(CMD_LIFT_SCREW, val0, val1);
                                     }
                                     break;
@@ -667,7 +667,7 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									{
 										val0 = -1*_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_back  - _PrintHeight);
 										val1 = -1*_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_front - _PrintHeight);
-                                        if (!RX_StepperStatus.screwerinfo.y_in_ref && robi_connected() && RX_StepperStatus.robot_used)
+                                        if (!RX_StepperStatus.screwerinfo.y_in_ref /*&& robi_connected()*/ && RX_StepperStatus.robot_used)
                                         {
                                             if (!RX_StepperStatus.info.z_in_ref || RX_StepperStatus.cmdRunning==CMD_LIFT_REFERENCE)
                                             {

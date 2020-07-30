@@ -897,7 +897,7 @@ static void* receive_thread(void *par)
 	}
 }
 
-int robi_connected(void)
+/*int robi_connected(void)
 {
     return _isConnected;
-}
+}*/
