@@ -28,14 +28,14 @@ namespace RX_DigiPrint.Views.AlignmentView
         private void AngleInfo_Clicked(object sender, RoutedEventArgs e)
         {
             HelpView.Init(HeadAdjustmentHelp.HeadAdjustmentType.TypeAngle,
-                _HeadAdjustment.Axis, true);
+                _HeadAdjustment.Axis, true, (int)_HeadAdjustment.PrintbarNo * RxGlobals.PrintSystem.HeadsPerColor + (int)_HeadAdjustment.HeadNo);
             _HeadAdjustment.ShowHelp = true;
         }
 
         private void StitchInfo_Clicked(object sender, RoutedEventArgs e)
         {
             HelpView.Init(HeadAdjustmentHelp.HeadAdjustmentType.TypeStitch,
-                _HeadAdjustment.Steps, true);
+                _HeadAdjustment.Steps, true, (int)_HeadAdjustment.PrintbarNo * RxGlobals.PrintSystem.HeadsPerColor + (int)_HeadAdjustment.HeadNo);
             _HeadAdjustment.ShowHelp = true;
         }
 
