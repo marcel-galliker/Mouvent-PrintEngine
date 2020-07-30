@@ -5,7 +5,7 @@
     <RemoteDebuggerWorkingDirectory>$(TargetDir)</RemoteDebuggerWorkingDirectory>
     <RemoteDebuggerServerName>192.168.200.1</RemoteDebuggerServerName>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>-debug -simuplc -simuchiller -simuencoder -simuheads +hamster -testmachine</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>-debug +simuplc -simuchiller +simuencoder +simuheads +hamster +testmachine</LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <RemoteDebuggerCommand>$(TargetPath)</RemoteDebuggerCommand>
