@@ -20,6 +20,7 @@
 #include "motor.h"
 #include "stepper_ctrl.h"
 #include "lbrob.h"
+#include "rx_def.h"
 //#include "robi_interface.h"
 #include "lb702.h"
 #include "robi.h"
@@ -37,13 +38,9 @@
 #define CABLE_WASH_POS_FRONT -573000 //	um LB702
 #define CABLE_WASH_POS_BACK -160000  //	um LB702
 #define CABLE_PURGE_POS_BACK -250000 //  um LB702
-#define CABLE_PURGE_POS_FRONT \
-    -561000 //  um LB702        CABLE_PURGE_POS_BACK - (7 * HEAD_WIDTH) - 10000
-            //  -> HEAD_WIDTH = 43000
+#define CABLE_PURGE_POS_FRONT -561000 //  um LB702        CABLE_PURGE_POS_BACK - (7 * HEAD_WIDTH) - 10000  -> HEAD_WIDTH = 43000
 #define CABLE_SCREW_POS_FRONT -452000 //  um LB702
-#define CABLE_SCREW_POS_BACK \
-    -148557 //  um LB702        CABLE_SCREW_POS_BACK + (7 * HEAD_WIDTH) ->
-            //  HEAD_WIDTH = 43349
+#define CABLE_SCREW_POS_BACK  -148557 //  um LB702        CABLE_SCREW_POS_BACK + (7 * HEAD_WIDTH) -> //  HEAD_WIDTH = 43349
 
 #define CURRENT_HOLD 200
 
@@ -336,9 +333,7 @@ void lbrob_main(int ticks, int menu)
                 {
                     _CmdRunning = FALSE;
                     Fpga.par->output &= ~RO_ALL_OUTPUTS;
-                    RX_StepperStatus.robinfo.cap_ready =
-                        RX_StepperStatus.info.x_in_cap &&
-                        !RX_StepperStatus.robinfo.moving;
+                    RX_StepperStatus.robinfo.cap_ready = RX_StepperStatus.info.x_in_cap && !RX_StepperStatus.robinfo.moving;
                     _CapFillTime = 0;
                 }
                 else if (rx_get_ticks() >= _CapFillTime + CAP_FILL_TIME / 2)
@@ -802,7 +797,7 @@ void lbrob_handle_menu(char *str)
             SCREWS_PER_HEAD;
         screw_head.axis = atoi(&str[1]) % SCREWS_PER_HEAD;
         screw_head.steps = _Turns;
-        lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_TURN_SCREW, &screw_head);
+        lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_HEAD_ADJUST, &screw_head);
         break;
     case 'T':
         _Turns = atoi(&str[1]);
@@ -857,7 +852,7 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         _CmdRunning = 0;
         _CmdSearchScrews = 0;
         _CmdScrewing = 0;
-        //if (robi_connected())
+        if (!robi_disabled())
             robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_STOP, NULL);
         break;
 
@@ -880,11 +875,12 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             }
             break;
         }
-        else if (!RX_StepperStatus.screwerinfo.z_in_down /*&& robi_connected()*/)
+        else if (!RX_StepperStatus.screwerinfo.z_in_down && !robi_disabled())
         {
             _CmdRunning_Robi = CMD_ROBI_MOVE_Z_DOWN;
-            robi_handle_ctrl_msg(INVALID_SOCKET, _CmdRunning_Robi, NULL);
             _NewCmd = msgId;
+            robi_handle_ctrl_msg(INVALID_SOCKET, _CmdRunning_Robi, NULL);
+            
             break;
         }
         _CmdRunning = msgId;
@@ -922,17 +918,13 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                 break;
 
             case rob_fct_purge_all:
-                if (RX_StepperCfg.wipe_speed == 0)
-                    Error(ERR_CONT, 0,
-                          "Wipe-Speed is set 0, please chose another value");
+                if (RX_StepperCfg.wipe_speed == 0) Error(ERR_CONT, 0, "Wipe-Speed is set 0, please chose another value");
 
                 if (!RX_StepperStatus.info.z_in_ref)
                 {
                     if (!RX_StepperStatus.info.moving)
                     {
-                        _CmdRunning_Lift = CMD_LIFT_REFERENCE;
-                        lb702_handle_ctrl_msg(INVALID_SOCKET, _CmdRunning_Lift,
-                                              NULL);
+                        _CmdRunning_Lift = CMD_LIFT_REFERENCE; lb702_handle_ctrl_msg(INVALID_SOCKET, _CmdRunning_Lift, NULL);
                         _NewCmd = msgId;
                         break;
                     }
@@ -940,27 +932,19 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                 RX_StepperStatus.robinfo.moving = TRUE;
                 _CmdRunning = msgId;
                 if (RX_StepperCfg.wipe_speed)
-                    _ParCable_drive_purge.speed = _micron_2_steps(
-                        1000 *
-                        RX_StepperCfg.wipe_speed); // multiplied with 1000 to
-                                                   // get from mm/s to um/s
+                    _ParCable_drive_purge.speed = _micron_2_steps(1000 * RX_StepperCfg.wipe_speed); // multiplied with 1000 to get from mm/s to um/s
                 else
-                    _ParCable_drive_purge.speed =
-                        _micron_2_steps(1000 * 10); // multiplied with 1000 to
-                                                    // get from mm/s to um/s
+                    _ParCable_drive_purge.speed = _micron_2_steps(1000 * 10); // multiplied with 1000 to get from mm/s to um/s
                 _PumpWasteTime = rx_get_ticks();
-                motors_move_to_step(MOTOR_X_BITS, &_ParCable_drive_purge,
-                                    _micron_2_steps(CABLE_PURGE_POS_FRONT));
+                motors_move_to_step(MOTOR_X_BITS, &_ParCable_drive_purge, _micron_2_steps(CABLE_PURGE_POS_FRONT));
                 break;
 
             default:
                 break;
             }
         }
-
-    case CMD_ROB_TURN_SCREW:
-        // screw_turn = (INT16)(*((INT32 *)pdata) & 0x0000ffff);
-        // screw_nr = *((INT32 *)pdata) >> 16;
+        break;
+    case CMD_HEAD_ADJUST:
         _turn_screw(*(SHeadAdjustment *)pdata);
 
         break;
@@ -988,21 +972,16 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
     {
         int pos;
         _RobFunction = fct;
-        if (!RX_StepperStatus.screwerinfo.z_in_down /*&& robi_connected()*/)
+        if (!RX_StepperStatus.screwerinfo.z_in_down && !robi_disabled())
         {
             _CmdRunning_Robi = CMD_ROBI_MOVE_Z_DOWN;
-            robi_handle_ctrl_msg(INVALID_SOCKET, _CmdRunning_Robi, NULL);
             _NewCmd = msgId;
+            robi_handle_ctrl_msg(INVALID_SOCKET, _CmdRunning_Robi, NULL);
+            
             return;
         }
-        else if (!RX_StepperStatus.info.z_in_ref &&
-                 !(_RobFunction == rob_fct_move &&
-                   RX_StepperStatus.info.z_in_wash) &&
-                 !(RX_StepperStatus.info.z_in_screw &&
-                   _RobFunction >= rob_fct_screw_head0 &&
-                   _RobFunction <=
-                       rob_fct_screw_head7)) // Here this is for purging and not
-                                             // for vacuum
+        else if (!RX_StepperStatus.info.z_in_ref && !(_RobFunction == rob_fct_move && RX_StepperStatus.info.z_in_wash) &&
+                 !(RX_StepperStatus.info.z_in_screw && _RobFunction >= rob_fct_screw_head0 && _RobFunction <= rob_fct_screw_head7)) // Here this is for purging and not for vacuum
         {
             if (!RX_StepperStatus.info.moving)
             {
@@ -1044,20 +1023,12 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
         case rob_fct_purge_head5:
         case rob_fct_purge_head6:
         case rob_fct_purge_head7:
-            pos = (CABLE_PURGE_POS_BACK +
-                   (((int)_RobFunction - (int)rob_fct_purge_head0) *
-                    (CABLE_PURGE_POS_FRONT - CABLE_PURGE_POS_BACK)) /
-                       7);
+            pos = (CABLE_PURGE_POS_BACK + (((int)_RobFunction - (int)rob_fct_purge_head0) * (CABLE_PURGE_POS_FRONT - CABLE_PURGE_POS_BACK)) / 7);
             _lbrob_move_to_pos(_CmdRunning, _micron_2_steps(pos));
-            // motors_move_to_step(MOTOR_X_BITS, &_ParCable_drive,
-            // _micron_2_steps(pos));
             break;
         case rob_fct_vacuum:
         case rob_fct_wash:
-            _lbrob_move_to_pos(_CmdRunning,
-                               _micron_2_steps(CABLE_PURGE_POS_FRONT));
-            // motors_move_to_step(MOTOR_X_BITS, &_ParCable_drive,
-            // _micron_2_steps(CABLE_PURGE_POS_FRONT));
+            _lbrob_move_to_pos(_CmdRunning, _micron_2_steps(CABLE_PURGE_POS_FRONT));
             break;
 
         case rob_fct_move:
@@ -1556,4 +1527,9 @@ static int _calculate_average_y_pos(int screwNr)
     }
     return y_combined /
            ((screwNr % (SCREWS_PER_HEAD * HEADS_PER_COLOR)) / SCREWS_PER_HEAD);
+}
+
+void lbrob_reset_variables(void)
+{
+    _NewCmd = FALSE;
 }

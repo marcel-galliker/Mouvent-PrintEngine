@@ -83,8 +83,8 @@ void ctr_init(void)
 			RX_PrinterStatus.counterTotal=0;
 		}
 	}
-	if (_Manipulated) 
-		Error(ERR_CONT, 0, "Counters manipulated");
+	/*if (_Manipulated) 
+		Error(ERR_CONT, 0, "Counters manipulated");*/
 	
 	_ctr_save(FALSE, NULL);	
 }
@@ -205,8 +205,8 @@ static void _ctr_save(int reset, char *machineName)
 			}
 			else if (_Manipulated) 
 			{
-				Error(ERR_CONT, 0, "Counters manipulated");
-				strcpy(check, "Manipulated");
+				//Error(ERR_CONT, 0, "Counters manipulated");//
+				//strcpy(check, "Manipulated");
 			}
 			else
 			{

@@ -3,6 +3,8 @@
 #include "rx_term.h"
 #include "tcp_ip.h"
 #include "rx_error.h"
+#include "lb702.h"
+#include "lbrob.h"
 
 #include <stdio.h>
 #include <errno.h>
@@ -86,6 +88,7 @@ static int _CmdStarted = FALSE;
 static int _Search_Screw_Time = 0;
 static int _Loosen_Screw_Time = 0;
 static int _Loosen_Times = 0;
+static int _Robi_Disabled = FALSE;
 
 
 void robi_init(void)
@@ -224,6 +227,15 @@ void robi_main(int ticks, int menu)
             if (RX_StepperStatus.screwerinfo.ref_done)
             {
                 _CmdRunning = 0;
+                if (!(_robiStatus.gpio.inputs & (1UL << Y_IN_REF)))
+                {
+                    Error(ERR_CONT, 0, "Robi-Sensor in Garage not high");
+                    RX_StepperStatus.screwerinfo.ref_done = 0;
+                }
+                else
+                {
+                    RX_StepperStatus.screwerinfo.y_in_ref = TRUE;
+                }
             }
             else
             {
@@ -340,6 +352,7 @@ void robi_menu(int help)
         term_printf("e<micron>: Move to x pos <micron>\n");
         term_printf("f<micron>: Move to y pos <micron>\n");
         term_printf("g: move to garage position\n");
+        term_printf("D: Disable Robi\n");
         term_flush();
 	}
 	else
@@ -409,6 +422,9 @@ void robi_handle_menu(char *str)
     case 'g':
         robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_GARAGE, NULL);
         break;
+    case 'D':
+        _Robi_Disabled = !_Robi_Disabled;
+        break;
     default:
         break;
 	}
@@ -473,10 +489,11 @@ void robi_display_status(void)
     term_printf("MOTOR_XY_0 ref:\t\t%d\n", _robiStatus.motors[MOTOR_XY_0].isReferenced);
 	term_printf("MOTOR_XY_1 ref:\t\t%d\n", _robiStatus.motors[MOTOR_XY_1].isReferenced);
 	term_printf("MOTOR_SCREW ref:\t%d\n", _robiStatus.motors[MOTOR_SCREW].isReferenced);
-	term_printf("Z position: %d\n", _robiStatus.zPos);
+	term_printf("Z position:            %d\n", _robiStatus.zPos);
 	term_printf("Robi position status -------------------------------\n");
-	term_printf("Garage: %d\n", _robiStatus.isInGarage);
-	term_printf("Ref: %d\n", _robiStatus.isInRef);
+	term_printf("Garage:                %d\n", _robiStatus.isInGarage);
+	term_printf("Ref:                   %d\n", _robiStatus.isInRef);
+    term_printf("Robi disabled:         %d\n", _Robi_Disabled);
 }
 
 static void robi_set_output(int num, int val)
@@ -508,6 +525,8 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
     {
         if (!_isInit) Error(ERR_CONT, 0, "Robi is not initalized");
         if (!_isConnected) Error(ERR_CONT, 0, "Robi is not connected");
+        lb702_reset_variables();
+        lbrob_reset_variables();
         return REPLY_ERROR;
     }
     
@@ -733,7 +752,6 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         {
             if (!RX_StepperStatus.screwerinfo.ref_done)
             {
-                _NewCmd = msgId;
                 robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_REFERENCE, NULL);
             }
             else if (!(_robiStatus.gpio.inputs & (1UL << SCREW_IN_DOWN)))
@@ -741,7 +759,7 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                 _NewCmd = msgId;
                 robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_DOWN, NULL);
             }
-            else if (abs(RX_StepperStatus.screw_posX) > MAX_VARIANCE)
+            else if (abs(RX_StepperStatus.screw_posX) >  1000)
             {
                 _NewCmd = msgId;
                 pos = 0;
@@ -897,7 +915,7 @@ static void* receive_thread(void *par)
 	}
 }
 
-/*int robi_connected(void)
+int robi_disabled(void)
 {
-    return _isConnected;
-}*/
+    return _Robi_Disabled;
+}

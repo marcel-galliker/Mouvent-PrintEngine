@@ -22,5 +22,4 @@ void lbrob_handle_menu(char *str);
 void lbrob_main(int ticks, int menu);
 	
 int  lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata);
-
-
+void lbrob_reset_variables(void);

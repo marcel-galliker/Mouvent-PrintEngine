@@ -39,6 +39,8 @@ static int				_StatReadCnt[STEPPER_CNT];
 
 static EnFluidCtrlMode	_RobotCtrlMode[STEPPER_CNT] = {ctrl_undef};
 
+static void _steplb_rob_do_reference(int no);
+
 //--- steplb_init ---------------------------------------------------
 void steplb_init(int no, RX_SOCKET psocket)
 {
@@ -370,6 +372,11 @@ void steplb_rob_do_reference(void)
 	}
 }
 
+static void _steplb_rob_do_reference(int no)
+{
+    sok_send_2(&_step_socket[no], CMD_ROB_REFERENCE, 0, NULL);
+}
+
 //--- steplb_rob_reference_done ---------------------
 int steplb_rob_reference_done(void)
 {
@@ -435,18 +442,18 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
 		EnFluidCtrlMode	old = _RobotCtrlMode[no];
 		switch (ctrlMode)
 		{
-		case ctrl_cap:				if (!steplb_rob_reference_done()) steplb_rob_do_reference();
+		case ctrl_cap:				if (!_Status[no].robinfo.ref_done) _steplb_rob_do_reference(no);
 									_RobotCtrlMode[no] = ctrl_cap_step1;
 									break;
 		
-		case ctrl_cap_step1:		if (steplb_rob_reference_done())
+		case ctrl_cap_step1:		if (_Status[no].robinfo.ref_done)
 									{
 										steplb_rob_to_wipe_pos(no, rob_fct_cap);
 										_RobotCtrlMode[no] = ctrl_cap_step2;
 									}
 									break;
 		
-		case ctrl_cap_step2:		if (steplb_rob_in_wipe_pos_all(rob_fct_cap))
+		case ctrl_cap_step2:		if (steplb_rob_in_wipe_pos(no, rob_fct_cap))
 									{
 										steplb_rob_wipe_start(no, rob_fct_cap);
 										_RobotCtrlMode[no] = ctrl_cap_step3;
@@ -460,7 +467,7 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
 									}
 									break;
 		
-		case ctrl_cap_step4:		if (steplb_lift_in_wipe_pos(no, rob_fct_cap))
+		case ctrl_cap_step4:		if (RX_StepperStatus.info.z_in_cap)
 									{
 										_Flushed |= (0x3 << (no*2));
 										Error(LOG, 0, "ctrl_cap_step4 OK, no=%d, _Flushed=%d",no,_Flushed);
@@ -519,13 +526,14 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
 
 void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
 {
+    SHeadAdjustment msg;
     int stepperno;
     if (RX_Config.inkSupplyCnt % 2 == 0)
-        stepperno = headAdjustment->headNo / 2;
+        stepperno = headAdjustment->printbarNo / 2;
     else
-        stepperno = (headAdjustment->headNo+1) / 2;
+        stepperno = (headAdjustment->printbarNo+1) / 2;
+    
+    headAdjustment->printbarNo %= 2;
 
-    sok_send(&_step_socket[stepperno], &headAdjustment);
-
-    //sok_send_2(&_step_socket[stepperno], CMD_ROB_TURN_SCREW, sizeof(headAdjustment), &headAdjustment);
+    sok_send(&_step_socket[stepperno], headAdjustment);
 }
