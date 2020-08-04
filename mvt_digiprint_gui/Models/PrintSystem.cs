@@ -387,7 +387,7 @@ namespace RX_DigiPrint.Models
             RxGlobals.InkSupply.List[TcpIp.InkSupplyCnt].InkType = InkType.Flush;
             RxGlobals.InkSupply.List[TcpIp.InkSupplyCnt+1].InkType = InkType.Waste;
 
-            LH702_simulation = (msg.type == EPrinterType.printer_LH702) && !msg.hostName.StartsWith("LH702");
+            LH702_simulation = !msg.hostName.StartsWith("LH702");
 
             HostName = msg.hostName;
 
