@@ -405,7 +405,7 @@ namespace RX_DigiPrint.Views.UserControls
                         case ECtrlType.ImgCombo:
                             try
                             {
-                                if (value.Equals("ERROR")) ComboValue = (int)TcpIp.INVALID_VALUE;
+                                if (value.Equals("ERROR") || value.Equals("SIMU")) ComboValue = (int)TcpIp.INVALID_VALUE;
                                 else if (value.Equals("FALSE")) ComboValue = 0;
                                 else if (value.Equals("TRUE")) ComboValue = 1;
                                 else ComboValue = Rx.StrToInt32(value);
@@ -443,7 +443,7 @@ namespace RX_DigiPrint.Views.UserControls
                             break;
 
                         default:
-                            if (value.Equals("ERROR"))
+                            if (value.Equals("ERROR") || value.Equals("SIMU"))
                             {
                                 _Value = value;
                             }

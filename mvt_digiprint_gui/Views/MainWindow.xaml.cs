@@ -89,6 +89,8 @@ namespace RX_DigiPrint.Views
 
             RxGlobals.User.PropertyChanged += User_PropertyChanged;
             _UserTypeChanged();
+
+            _ShowTab(false, TabLH702, AddLocationHint.After);
         }
 
         

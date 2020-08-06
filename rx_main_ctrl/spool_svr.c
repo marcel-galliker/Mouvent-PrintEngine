@@ -218,7 +218,7 @@ static int _handle_spool_deconnected(RX_SOCKET socket, const char *peerName)
 	{
 		ErrorEx(dev_spooler, no, ERR_ABORT, 0, "Connection lost");
 		_Spooler[no].socket = INVALID_SOCKET;
-		_start_spooler_ctrl(no);
+	//	_start_spooler_ctrl(no);
 	}
 	return REPLY_OK;
 }
@@ -501,7 +501,7 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 	if (arg_simuHeads) Error(LOG, 0, "Printing ID=%d, page=%d, copy=%d, scan=%d", pid->id, pid->page, pid->copy, pid->scan);
 	
 	_Ready--;
-		
+	
 	memset(&msg, 0, sizeof(msg));
 	msg.hdr.msgLen		= sizeof(msg);
 	msg.hdr.msgId		= CMD_PRINT_FILE;

@@ -467,7 +467,6 @@ int  data_malloc(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPixel,
 	{
 		if (height<10*DPI_X) time=0;
 		else time=10;
-	//	Error(LOG, 0, "data_malloc: use mem %dMB of %dMB", memsize/1024/1024, (*pBufSize)/1024/1024);
 		_AwaitFree = TRUE;
 		_AwaitFreeBuf = buffer;
 		for (i=0; i<MAX_COLORS; i++)
@@ -490,7 +489,7 @@ int  data_malloc(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPixel,
 	}
 	else
 	{
-	//	Error(LOG, 0, "data_malloc: Change mem from %dMB to %dMB", (*pBufSize)/1024/1024, memsize/1024/1024);
+		TrPrintfL(TRUE, "data_malloc: Change mem from %dMB to %dMB", (*pBufSize)/1024/1024, memsize/1024/1024);
 		for (i=0, error=FALSE; !error && i<MAX_COLORS; i++)
 		{
 			if (psplit[i].color.name[0])
@@ -513,8 +512,8 @@ int  data_malloc(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPixel,
 						TrPrintfL(1, "data_malloc buffer [%d] %p, free=%d MB, size=%d MB start", i, buffer[i], rx_mem_get_freeMB(), memsize/1024/1024);
 						buffer[i] = rx_mem_alloc(memsize);
 						TrPrintfL(1, "data_malloc buffer [%d] %p, free=%d MB, size=%d MB done", i, buffer[i], rx_mem_get_freeMB(), memsize/1024/1024);
-						if (buffer[i]==NULL) error=TRUE;
-						*pBufSize = memsize;
+						if (buffer[i]==NULL) 
+							error=TRUE;
 					}
 				}
 			}
@@ -2238,9 +2237,13 @@ int  data_ready		(void)
 	unsigned int cnt;
 	cnt = _InIdx-_OutIdx;
 	cnt %= PRINT_LIST_SIZE;
-	int ret = rx_mem_allocated()<_MaxMemory && cnt<(unsigned int)_MaxBufers;
+//	int ret = rx_mem_allocated()<_MaxMemory && cnt<(unsigned int)_MaxBufers;	// check not used any more!
+	int ret = cnt<(unsigned int)_MaxBufers;
 	if (ret==0) 
+	{
 		TrPrintfL(TRUE, "bufReady=FALSE, _InIdx=%d, _OutIdx=%d", _InIdx, _OutIdx);
+	//	TrPrintfL(TRUE, "check=%d, rx_mem_allocated=%dMB, _MaxMemory=%dMB, cnt=%d, _MaxBufers=%d", rx_mem_allocated()<_MaxMemory, (UINT32)(rx_mem_allocated()/1024/1024), (UINT32)(_MaxMemory/1024/1024), cnt, (unsigned int)_MaxBufers);
+	}
 	return ret;
 }
 

@@ -466,8 +466,7 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 			return REPLY_ERROR;
 		if (ret==REPLY_ERROR)
 		{
-			Error(ERR_STOP, 0,  "Could not allocate memory file >>%s<<, page=%d", path, msg.id.page);
-			Error(LOG, 0,		"Memory expected=%dMB, free=%d MB", (int)(data_memsize(msg.printMode, widthPx, lengthPx, bitsPerPixel)/1024/1024), rx_mem_get_freeMB());
+			Error(ERR_ABORT, 0,  "Could not allocate memory file >>%s<<, page=%d", path, msg.id.page);
 			if (multiCopy>1)	Error(LOG, 0,   "Make Image width a multilpe of 4 (multicopy=%d)", multiCopy);
 			return REPLY_ERROR;				
 		}

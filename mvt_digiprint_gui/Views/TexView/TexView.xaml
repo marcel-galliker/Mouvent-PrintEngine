@@ -58,16 +58,16 @@
             </StackPanel>
 
             <!-- MAIN Panel ______________________________________________________________________-->
-            <Grid Grid.Row="1"
-                        Visibility="{Binding ElementName=RB_Main, Path=IsChecked, Converter={StaticResource IntToVisible_Converter}}">
+            <Grid Grid.Row="1" Visibility="{Binding ElementName=RB_Main, Path=IsChecked, Converter={StaticResource IntToVisible_Converter}}">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="2*"/>
-                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="auto"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
                 <!-- parameter ____________________________________________________________-->
-                <rx_view:TexPar Grid.Column="0"/>
+                <rx_view:TexPar Grid.Column="0" />
 
                 <!-- status ____________________________________________________________-->
                 <rx_view:TexStatus  Grid.Column="1" Margin="10,0,0,0"/>
