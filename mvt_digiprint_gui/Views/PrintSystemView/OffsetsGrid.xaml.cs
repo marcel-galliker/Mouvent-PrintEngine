@@ -78,7 +78,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                                                             Overlap.Visibility      = Visibility.Visible;
                                                             EncoderVerso.Visibility = Visibility.Collapsed;
                                                             DistVerso.Visibility    = Visibility.Collapsed;
-                                                            ManualFlightTimeComp.Visibility = Visibility.Visible;
+                                                            ManualFlightTimeComp.Visibility = Visibility.Collapsed;
                                                             break;
 
                 case EPrinterType.printer_DP803:            this.Visibility         = Visibility.Visible;

@@ -466,8 +466,7 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 			return REPLY_ERROR;
 		if (ret==REPLY_ERROR)
 		{
-			Error(ERR_STOP, 0,  "Could not allocate memory file >>%s<<, page=%d", path, msg.id.page);
-			Error(LOG, 0,		"Memory expected=%dMB, free=%d MB", (int)(data_memsize(msg.printMode, widthPx, lengthPx, bitsPerPixel)/1024/1024), rx_mem_get_freeMB());
+			Error(ERR_ABORT, 0,  "Could not allocate memory file >>%s<<, page=%d", path, msg.id.page);
 			if (multiCopy>1)	Error(LOG, 0,   "Make Image width a multilpe of 4 (multicopy=%d)", multiCopy);
 			return REPLY_ERROR;				
 		}
@@ -549,6 +548,19 @@ static int _do_print_abort(RX_SOCKET socket)
 	data_abort();
 	hc_abort_printing();
 	sok_send_2(&socket, REP_PRINT_ABORT, 0, NULL);
+
+	//--- memory management (large files on TX) -----------------------
+	{
+		// always start with _Buffer[0], free all other buffers!
+		_BufferNo = BUFFER_CNT-1;
+		for(int b=1; b<BUFFER_CNT; b++)
+		{
+			for (int i=0; i<SIZEOF(_Buffer[b]); i++)
+			{
+				if (_Buffer[b][i]) rx_mem_free(&_Buffer[b][i]);
+			}
+		}
+	}
 	return REPLY_OK;
 }
 

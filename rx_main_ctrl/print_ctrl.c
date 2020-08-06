@@ -124,8 +124,14 @@ static void _on_error(ELogItemType type, char *deviceStr, int no, char *msg)
 										{
 											Error(LOG, 0, "STOP Printing after LOG_TYPE_ERROR_ABORT");
 											pc_abort_printing(); 
-										} break;
+										} 
+										break;
 		default: break;
+		}
+		if (type==LOG_TYPE_ERROR_ABORT)
+		{
+			Error(LOG, 0, "STOP Printing after LOG_TYPE_ERROR_ABORT");
+			pc_abort_printing(); 
 		}
 		lh702_on_error(type, deviceStr, no, msg);
 		gui_send_printer_status(&RX_PrinterStatus);
@@ -488,7 +494,7 @@ static int _print_next(void)
 	static int _ScansNext;
 	static int _CopiesStart;
 	TrPrintfL(TRUE, "_print_next printState=%d, spooler_ready=%d, pq_ready=%d", RX_PrinterStatus.printState, spool_is_ready(), pq_is_ready());
-	while ((RX_PrinterStatus.printState==ps_printing || RX_PrinterStatus.printState==ps_pause || (_Scanning&&RX_PrinterStatus.printState==ps_stopping)) && spool_is_ready() && pq_is_ready())
+	while ((RX_PrinterStatus.printState==ps_printing || RX_PrinterStatus.printState==ps_goto_pause || RX_PrinterStatus.printState==ps_pause || (_Scanning&&RX_PrinterStatus.printState==ps_stopping)) && spool_is_ready() && pq_is_ready())
 	{	
 		if (RX_PrinterStatus.testMode)
 		{

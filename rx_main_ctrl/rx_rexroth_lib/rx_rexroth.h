@@ -91,6 +91,8 @@ DLL_EXPORT int rex_is_connected	 (void);
 
 DLL_EXPORT int rex_save		     (char *filepath, char *filter);
 DLL_EXPORT int rex_load		     (char *filepath);
+DLL_EXPORT void rex_set_simu	 (int simu);
+
 
 DLL_EXPORT int lc_get_var					(int no, char *name, char *value);
 DLL_EXPORT int lc_get_value					(int no, char *value);

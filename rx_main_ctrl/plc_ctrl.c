@@ -852,7 +852,11 @@ static void _plc_get_var(RX_SOCKET socket, char *varList)
 		{
 			strcpy(var, str);				
 			if (lc_get_value_by_name(name, value)==0) len += sprintf(&answer[len], "=%s", value);
-			else									  len += sprintf(&answer[len], "=ERROR");
+			else
+			{
+				if (_SimuPLC)	len += sprintf(&answer[len], "=SIMU");
+				else			len += sprintf(&answer[len], "=ERROR");
+			}
 	//		TrPrintfL(!strcmp(name, "Application.GUI_00_001_Main.PAR_FLEXO_CONFIGURATION"), "_plc_get_var socket=%d >>%s=%s<<", socket, name, value);
 		}
 		len += sprintf(&answer[len], "\n");

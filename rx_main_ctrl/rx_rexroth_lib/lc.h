@@ -18,4 +18,3 @@ void lc_reset_error(void);
 
 int lc_save(rx_doc doc, char *filter);
 int lc_load(rx_doc doc);
-

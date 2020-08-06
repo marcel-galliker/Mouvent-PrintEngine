@@ -1,6 +1,8 @@
 ﻿using RX_DigiPrint.Models;
+using RX_DigiPrint.Services;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -26,6 +28,18 @@ namespace RX_DigiPrint.Views.PrintSystemView
             InitializeComponent();
 
             DataContext = RxGlobals.PrintSystem;
+
+            RxGlobals.PrintSystem.PropertyChanged += PrintSystem_PropertyChanged;
         }
-    }
+
+		private void PrintSystem_PropertyChanged(object sender,PropertyChangedEventArgs e)
+		{
+			if (e.PropertyName.Equals("PrinterType"))
+			{
+                if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_CB612)
+                    InkCylinders_RowHeight.Height = GridLength.Auto;
+                else InkCylinders_RowHeight.Height = new GridLength(0);
+			}
+		}
+	}
 }
