@@ -514,6 +514,8 @@ static void _scr_load(SBmpSplitInfo *pInfo, int threadNo)
 		loutplane.buffer		= _ScrMem[b][h].screened[_ScrMem[b][h].screenedIdx];
 		loutplane.dataSize		= _ScrMem[b][h].sizeScr;
 		time=rx_get_ticks();
+		
+		rx_mem_use(loutplane.buffer);
 
 		if (rx_def_is_scanning(RX_Spooler.printerType) || !pInfo->same)
 		{
@@ -542,6 +544,8 @@ static void _scr_load(SBmpSplitInfo *pInfo, int threadNo)
 			*/
 		}
 		else ret=REPLY_OK;
+		rx_mem_unuse(pInfo->data);
+
 		if (ret==REPLY_OK)
 		{
 			//--- change from 8 bitsPerPixel to 4 bitsPerPixel ----------------------------------

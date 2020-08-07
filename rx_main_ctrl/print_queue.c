@@ -913,7 +913,7 @@ int pq_printed(int headNo, SPageId *pid, int *pageDone, int *jobDone, SPrintQueu
 					if (rx_def_is_scanning(RX_Config.printer.type))
 					{
 						enc_enable_printing(FALSE);
-						if(*pnextItem==NULL) pc_abort_printing();
+						if(*pnextItem==NULL || RX_PrinterStatus.printState==ps_stopping) pc_abort_printing();
 					}
 					if (RX_Config.printer.type==printer_LH702 && *pnextItem)
 					{

@@ -51,6 +51,7 @@ static SPrintFileCmd	_PrintFile_Msg;
 
 static int				_Running;
 static int				_Abort;
+static int				_data_malloc_reply;
 static int				_ResetCnt;
 static int				_StartCnt;
 static int				_FirstFile;
@@ -308,6 +309,7 @@ static int _do_spool_cfg(RX_SOCKET socket, SSpoolerCfg *pmsg)
 	memset(&_LoadedId, 0, sizeof(_LoadedId));
 	_Running	 = FALSE;
 	_Abort		 = FALSE;
+	_data_malloc_reply = REPLY_OK;
 	_ResetCnt	 = 0;
 	_FirstFile	 = TRUE;
 	_Paused		 = FALSE;
@@ -372,11 +374,8 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 	static UINT8			multiCopy;
 	static char				path[MAX_PATH];
 	
-	if (_Abort) 
-	{
-		Error(LOG, 0, "ABORT");
-		return REPLY_ERROR;
-	}
+	if (_Abort) return Error(LOG, 0, "ABORT");
+	if (_data_malloc_reply) return REPLY_ERROR;
 	
 	_MsgGot++;
 	memcpy(&msg, pdata, sizeof(msg)); // local copy as original can be overwritten by the communication task!
@@ -448,7 +447,7 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 		reply.bufReady   = data_ready();
 		if (sok_send(&socket, &reply)==REPLY_OK) _MsgSent++;
 	}
-	
+
 	if (!same)
 	{
 		if (msg.printMode==PM_SCAN_MULTI_PAGE) multiCopy=1;
@@ -460,15 +459,16 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 				data_clear(_Buffer[_BufferNo]);
 			}
 			TrPrintfL(TRUE, "data_malloc (id=%d, page=%d, copy=%d, scan=%d) _BufferNo=%d", msg.id.id, msg.id.page, msg.id.copy, msg.id.scan, _BufferNo);
-			ret = data_malloc (msg.printMode, widthPx, lengthPx, bitsPerPixel, RX_Color, SIZEOF(RX_Color), &_BufferSize[_BufferNo], _Buffer[_BufferNo]);
+			_data_malloc_reply = data_malloc (msg.printMode, widthPx, lengthPx, bitsPerPixel, RX_Color, SIZEOF(RX_Color), &_BufferSize[_BufferNo], _Buffer[_BufferNo]);
 		}
 		if (_Abort)
 			return REPLY_ERROR;
-		if (ret==REPLY_ERROR)
+		if (_data_malloc_reply!=REPLY_OK)
 		{
-			Error(ERR_ABORT, 0,  "Could not allocate memory file >>%s<<, page=%d", path, msg.id.page);
+
+			Error(ERR_STOP, 0,  "Could not allocate memory file >>%s<<, page=%d", path, msg.id.page);
 			if (multiCopy>1)	Error(LOG, 0,   "Make Image width a multilpe of 4 (multicopy=%d)", multiCopy);
-			return REPLY_ERROR;				
+			return REPLY_ERROR;
 		}
 	}
 
@@ -555,10 +555,7 @@ static int _do_print_abort(RX_SOCKET socket)
 		_BufferNo = BUFFER_CNT-1;
 		for(int b=1; b<BUFFER_CNT; b++)
 		{
-			for (int i=0; i<SIZEOF(_Buffer[b]); i++)
-			{
-				if (_Buffer[b][i]) rx_mem_free(&_Buffer[b][i]);
-			}
+			data_free(&_BufferSize[b], _Buffer[b]);
 		}
 	}
 	return REPLY_OK;

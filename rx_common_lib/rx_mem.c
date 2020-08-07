@@ -80,9 +80,10 @@ BYTE* rx_mem_alloc(UINT64 size)
 }
 
 //--- rx_use ---------------------------------------------------------
-void rx_mem_use(BYTE *ptr)
+int rx_mem_use(BYTE *ptr)
 {
 	// increment counter
+	int cnt=0;
 	if (ptr)
 	{
 		SBuffer *buf = ((SBuffer*)ptr) - 1;
@@ -90,10 +91,11 @@ void rx_mem_use(BYTE *ptr)
 		rx_mutex_lock(_Mutex);
 		if (buf->count<0)
 			buf->count=buf->count;
-		buf->count++;
+		cnt = (++buf->count);
 		// printf("rx_mem_use %p, cnt=%d, _Buffers=%d\n", ptr, buf->count, _Buffers);
 		rx_mutex_unlock(_Mutex);
 	}
+	return cnt;
 }
 
 //--- rx_mem_unuse -------------------------------------------------------
@@ -129,16 +131,19 @@ int  rx_mem_cnt	(BYTE *ptr)
 }
 
 //--- rx_mem_use_clear -----------------------------------
-void  rx_mem_use_clear(BYTE *ptr)
+int  rx_mem_use_clear(BYTE *ptr)
 {
+	int cnt=0;
 	if (ptr)
 	{
 		SBuffer *buf = ((SBuffer*)ptr) - 1;
 		rx_mutex_lock(_Mutex);
+		cnt=buf->count;
 		buf->count=0;
 		rx_mutex_unlock(_Mutex);
 		if (buf->sem_IsFree) rx_sem_post(buf->sem_IsFree);
 	}
+	return cnt;
 }
 
 

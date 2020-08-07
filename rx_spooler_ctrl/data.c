@@ -497,7 +497,7 @@ int  data_malloc(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPixel,
 				found = TRUE;
 				if (psplit[i].lastLine>psplit[i].firstLine)
 				{
-					TrPrintfL(1, "buffer[%d]: WAIT FREE %p", i, buffer[i]);
+					TrPrintfL(1, "buffer[%d]: WAIT FREE %p, used=%d", i, buffer[i], rx_mem_cnt(buffer[i]));
 					while (!_Abort)
 					{
 						rx_mem_free(&buffer[i]);
@@ -523,10 +523,6 @@ int  data_malloc(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPixel,
 		
 	if (error || _Abort)
 	{
-		for (i=0; i<MAX_COLORS; i++)
-		{
-			if (buffer[i]) rx_mem_free(&buffer[i]);
-		}
 		*pBufSize=0;
 		return REPLY_ERROR;
 	}
@@ -545,6 +541,7 @@ int  data_malloc(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPixel,
 }
 
 //--- data_free ----------------------------------------------
+
 int  data_free(UINT64 *pBufSize, BYTE* buffer[MAX_COLORS])
 {
 	int i;
@@ -1154,7 +1151,6 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 				pInfo = &pItem->splitInfo[head];
 				rx_mem_use(*pBmpInfo->buffer[color]);
 			
-
 				pItem->headsUsed++;
 				pInfo->pListItem		= pItem;
 				pInfo->printMode		= pBmpInfo->printMode;
@@ -2165,7 +2161,7 @@ int data_sent(SBmpSplitInfo *psplit, int head)
 		psplit->pListItem->headsInUse--;
 
 //		TrPrintfL(TRUE, "data_sent: headsInUse=%d, data=0x%08x", psplit->pListItem->headsInUse, psplit->data);
-		if (psplit->data) 
+		if (psplit->data)
 		{
 			rx_mem_unuse(psplit->data);
 			psplit->data = NULL;
