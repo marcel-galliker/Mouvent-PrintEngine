@@ -390,6 +390,8 @@ static void _tx80x_wd_motor_test(int motorNo, int steps)
 
     if (motorNo == 0)
     {
+    	//---> CALL function from txrob
+
         // paramaters tested 14-JAN-20
         par.speed = 1000; // speed with max tork: 21'333
         par.accel = 10000;
@@ -403,6 +405,7 @@ static void _tx80x_wd_motor_test(int motorNo, int steps)
     }
     else if (motorNo == 1)
     {
+    	//---> CALL function from txrob
         // paramaters tested 14-JAN-20
 
         par.speed = 21000; // speed with max tork: 21'333
@@ -424,6 +427,7 @@ static void _tx80x_wd_motor_test(int motorNo, int steps)
         par.current_run = 300.0;
         par.stop_mux = 0;
         par.dis_mux_in = 0;
+    //  par.encCheck = chk_std;
         par.encCheck = chk_std;
         motors_config(motors, CURRENT_HOLD_WD, L3518_STEPS_PER_METER, L3518_INC_PER_METER, STEPS);
         motors_move_by_step(motors, &par, steps, FALSE);

@@ -800,7 +800,6 @@ static void _txrob_display_status(void)
     else
         term_printf("Time for waste pumps  %d\n", 0);
     term_printf("\n");
-
 }
 
 static void _txrob_handle_menu(char *str)
@@ -1277,6 +1276,7 @@ static void _txrob_motor_test(int motorNo, int steps)
 	}
     else if (motorNo == 2 || motorNo == 3)
     {
+		//---> CALL function from wd
         // paramaters tested 14-JAN-20
         par.speed = 10000; // speed with max tork: 21'333
         par.accel = 32000;
@@ -1284,7 +1284,8 @@ static void _txrob_motor_test(int motorNo, int steps)
         par.current_run = 300.0;
         par.stop_mux = 0;
         par.dis_mux_in = 0;
-        par.encCheck = chk_std;
+    //  par.encCheck = chk_std;
+        par.encCheck = chk_off;
         motors_config(motors, 50.0, L3518_STEPS_PER_METER, L3518_INC_PER_METER, STEPS);
         motors_move_by_step(motors, &par, steps, FALSE);
     }

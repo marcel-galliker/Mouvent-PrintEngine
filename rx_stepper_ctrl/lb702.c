@@ -480,11 +480,9 @@ static void _lb702_move_to_pos(int cmd, int pos0, int pos1)
 		RX_StepperStatus.info.moving = TRUE;
 		_PrintPos_New[MOTOR_Z_BACK]  = pos0;
 		_PrintPos_New[MOTOR_Z_FRONT] = pos1;
-		/*
 		if (cmd == CMD_LIFT_UP_POS) adjust=60;
 		else if (cmd==CMD_LIFT_PRINT_POS) adjust=-60;
 		else adjust=0;
-		*/
 		motor_move_to_step(MOTOR_Z_BACK, &_ParZ_down,  pos0+adjust);
 		motor_move_to_step(MOTOR_Z_FRONT, &_ParZ_down, pos1+adjust);
 
