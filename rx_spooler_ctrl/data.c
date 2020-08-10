@@ -376,6 +376,10 @@ int  data_get_size	(const char *path, UINT32 page, UINT32 *pspacePx, UINT32 *pwi
 		bmp_color_path(path, RX_ColorNameShort(0), filepath);
 		ret = bmp_get_size(filepath, pwidth, plength, pbitsPerPixel, &memsize);
 	}
+
+	// Bug in FPGA: (when srcLineCnt==12300, gap=0 it sometimes prints an additional line of old data [instead of blank] between the labels)
+	if (rx_def_is_lb(RX_Spooler.printerType)) 
+		*plength++;
 	
 	*multiCopy = 1;
 	if (ret==REPLY_OK && (RX_Spooler.printerType==printer_TX801 || RX_Spooler.printerType==printer_TX802))
