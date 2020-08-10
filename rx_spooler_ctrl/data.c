@@ -1195,7 +1195,7 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 				}
 
 				if (rx_def_is_lb(RX_Spooler.printerType) 
-				&& (id->id==PQ_TEST_JETS || id->id==PQ_TEST_JET_NUMBERS || id->id==PQ_TEST_DENSITY)  
+				&& (id->id==PQ_TEST_JETS || id->id==PQ_TEST_JET_NUMBERS || id->id==PQ_TEST_DENSITY || id->id==PQ_TEST_FULL_ALIGNMENT)  
 				&& (RX_Spooler.colorCnt==0 || ((id->copy-1)%RX_Spooler.colorCnt)!=color))
 				{
 					empty=TRUE;
