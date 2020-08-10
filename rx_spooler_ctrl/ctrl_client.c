@@ -431,7 +431,10 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 			ret = data_get_size(path, msg.id.page, &msg.gapPx, &widthPx, &lengthPx, &bitsPerPixel, &multiCopy);
 			TrPrintfL(TRUE, "data_get_size >>%s<<: gapPx=%d, widthPx=%d, lengthPx=%d, bitsPerPixel=%d, multiCopy=%d", path, msg.gapPx, widthPx, lengthPx, bitsPerPixel, multiCopy);
 			if (ret==REPLY_NOT_FOUND) 
-				Error(ERR_STOP, 0, "Could not load file >>%s<<", msg.filename);
+			{
+				if (_MsgGot==1) Error(ERR_ABORT, 0, "Could not load file >>%s<<", msg.filename);
+				else Error(ERR_STOP, 0, "Could not load file >>%s<<", msg.filename);
+			}
 		}
 	}
 	//--- send feedback ---------------------------------------------------------------------
