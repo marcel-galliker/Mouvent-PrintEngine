@@ -39,7 +39,7 @@
 #define BITS_PER_PIXEL_SEP	8
 #define BITS_PER_PIXEL_SCR	2
 
-#define SCR_FIFO_SIZE	32
+#define SCR_FIFO_SIZE	128
 #define SCR_BUF_SIZE	2
 
 //--- local structures -------------------------
