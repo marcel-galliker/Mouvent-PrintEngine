@@ -447,6 +447,8 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 		linelenBt = (linelenBt+31) & ~31;// align to 256 Bits (32 Bytes)
 		reply.blkCnt = (linelenBt *lengthPx +RX_Spooler.dataBlkSize-1) / RX_Spooler.dataBlkSize;
 		memcpy(&reply.id, &msg.id, sizeof(reply.id));
+		reply.offsetWidth = msg.offsetWidth;
+		reply.clearBlockUsed = msg.clearBlockUsed;
 		reply.bufReady   = data_ready();
 		if (sok_send(&socket, &reply)==REPLY_OK) _MsgSent++;
 	}
@@ -485,7 +487,7 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 		
 		if (msg.flags&FLAG_SAME)
 		{
-			data_same(&msg.id, msg.clearBlockUsed);				
+			data_same(&msg.id, msg.offsetWidth, msg.clearBlockUsed);				
 		}
 		else
 		{

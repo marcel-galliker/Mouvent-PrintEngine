@@ -7,17 +7,23 @@
         Title="AlignmentSettings" 
          ResizeMode="NoResize"
         Loaded="Window_Loaded"
-        Height="300"
+        SizeToContent="Height"
         Width="400">
 
-        <GroupBox Margin="10" Style="{StaticResource MvtGroupBox}" Header="Units">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+        
+        <GroupBox Grid.Row="0" Margin="10" Style="{StaticResource MvtGroupBox}" Header="Units">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="10"/>
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="10"/>
-                    <RowDefinition Height="auto"/>
                     <RowDefinition Height="auto"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
@@ -40,8 +46,15 @@
             <ComboBox Grid.Row="4" Grid.Column="1" ItemsSource="{Binding UnitListRegister}"
                     DisplayMemberPath="Display" SelectedValuePath="Value" SelectedItem="{Binding UnitRegister}">
             </ComboBox>
+            </Grid>
+        </GroupBox>
 
-            <StackPanel Orientation="Horizontal" Grid.ColumnSpan="2" Margin="10" Grid.Row="5" HorizontalAlignment="Center">
+        <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="10,0,10,0">
+            <TextBlock Margin="0,5,10,5" Grid.Row="1">Debug: Connect Robot</TextBlock>
+            <CheckBox Margin="20,5,10,5" Grid.Row="1" Grid.Column="1" IsChecked="{Binding DebugConnectRobot}" Click="RobotConnectButton_Click"></CheckBox>
+        </StackPanel>
+        
+        <StackPanel Orientation="Horizontal" Margin="10" Grid.Row="2" HorizontalAlignment="Center">
             <common:MvtButton Click="Okay_Clicked" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}"
                               >
                 <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" 
@@ -56,7 +69,7 @@
                                                 Kind="Close"></iconPacks:PackIconMaterial>
             </common:MvtButton>
             </StackPanel>
+
         </Grid>
-        </GroupBox>
 
 </helpers:CustomWindow>

@@ -7,24 +7,30 @@
              xmlns:local="clr-namespace:RX_DigiPrint.Views.LB702UVView"
              mc:Ignorable="d" 
             d:DesignWidth="300">
-
+    
+    <UserControl.Resources>
+        <Style x:Key="rx_uc:PlcParPanel" TargetType="{x:Type rx_uc:PlcParPanel}">
+            <Setter Property="LabelWidth" Value="120"/>
+        </Style>
+    </UserControl.Resources>
+    
     <GroupBox Style="{StaticResource MvtGroupBox}" Header="Status">
 
         <Grid>
             <rx_uc:PlcParPanel UnitID="Application.GUI_00_001_Main" ReadOnly="True" x:Name="StatusPanel">
-                <rx_uc:PlcParCtrl ID="STA_VERSION"                      Label="Version"/>
-                <rx_uc:PlcParCtrl ID="STA_MACHINE_STATE"                Label="Machine State" x:Name="CB_MainState" Type="ComboStr"/>
+                <rx_uc:PlcParCtrl ID="STA_VERSION"                    Label="Version" LabelWidth="120"/>
+                <rx_uc:PlcParCtrl ID="STA_MACHINE_STATE"              Label="Machine State" x:Name="CB_MainState" Type="ComboStr"/>
 
-                <rx_uc:PlcParCtrl ID="STA_UV_LAMPS_READY"              Label="Curing Lamp OK"   Visibility="Collapsed"/>
-                <rx_uc:PlcParCtrl ID="STA_UV_LAMP_1_ON_TIMER"          Label="ON  Timer"        Visibility="Collapsed"/>
-                <rx_uc:PlcParCtrl ID="STA_UV_LAMP_1_OFF_TIMER"         Label="OFF Timer"        Visibility="Collapsed"/>
+                <rx_uc:PlcParCtrl ID="STA_UV_LAMPS_READY"             Label="Curing Lamp OK"   Visibility="Collapsed"/>
+                <rx_uc:PlcParCtrl ID="STA_UV_LAMP_1_ON_TIMER"         Label="ON  Timer"        Visibility="Collapsed"/>
+                <rx_uc:PlcParCtrl ID="STA_UV_LAMP_1_OFF_TIMER"        Label="OFF Timer"        Visibility="Collapsed"/>
                 <Grid Margin="0,0,5,0">
                     <TextBlock Text="Curing Lamp"/> 
                     <TextBlock HorizontalAlignment="Right" x:Name="CuringLamp"/>
                 </Grid>
                 
-                <rx_uc:PlcParCtrl ID="STA_WINDER_DIAMETER_1"       Label="Unwinder diameter"  Unit="mm" Format="n"/>
-                <rx_uc:PlcParCtrl ID="STA_WINDER_DIAMETER_2"       Label="Rewinder diameter"  Unit="mm" Format="n"/>
+                <rx_uc:PlcParCtrl ID="STA_WINDER_DIAMETER_1"    Label="Unwinder diameter"  Unit="mm" Format="n"/>
+                <rx_uc:PlcParCtrl ID="STA_WINDER_DIAMETER_2"    Label="Rewinder diameter"  Unit="mm" Format="n"/>
                 <rx_uc:PlcParCtrl ID="STA_PAPERLENGTH_IN"       Label="Length IN"  Unit="m" Format="n"/>
                 <rx_uc:PlcParCtrl ID="STA_PAPERLENGTH_OUT"      Label="Length OUT" Unit="m" Format="n"/>
                 <rx_uc:PlcParCtrl ID="STA_REMAININGLENGTH_OUT"  Label="Left OUT"   Unit="m" Format="n"/>

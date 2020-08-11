@@ -342,29 +342,6 @@ namespace RX_DigiPrint.Views.Alignment
             }
         }
 
-        private void _DrawCluster(int clusterNumber, bool isFirstInView, bool robotIsConnected)
-        {
-
-            /*
-                 ClusterAlignmentViewList[clusterNumber].SetContext(clusterNumber, isFirstInView, robotIsConnected);
-                 ClusterAlignmentViewList[i].Visibility = Visibility.Visible;
-
-
-             for (int i = clusterCount; i < ClusterStackPanel.Children.Count; i++)
-             {
-                 if (i < ClusterAlignmentViewList.Count)
-                 {
-                     ClusterAlignmentViewList[i].Visibility = Visibility.Collapsed;
-                 }
-             }
-             */
-        }
-
-        private void CameraInputButton_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
         private void ScanCheckImportButton_Click(object sender, RoutedEventArgs e)
         {
             _Alignment.ImportScanCheckValues();
@@ -393,18 +370,6 @@ namespace RX_DigiPrint.Views.Alignment
             _DrawClusters(globalInkCylinderIndex);
         }
 
-        private void RobotConnectButton_Click(object sender, RoutedEventArgs e)
-        {
-            bool isChecked = (bool)(sender as CheckBox).IsChecked;
-            _Alignment.RobotIsConnected = isChecked;
-
-            foreach (var elem in ClusterStackPanel.Children)
-            {
-                var view = elem as ClusterAlignmentView;
-                view.ConnectRobot(isChecked);
-            }
-        }
-
         private void RobotDownloadButton_Click(object sender, RoutedEventArgs e)
         {
             MvtMessageBox.Information("Robot", "Robot functionality not implemented yet.");
@@ -412,8 +377,20 @@ namespace RX_DigiPrint.Views.Alignment
 
         private void SettingsButton_Click(object sender, RoutedEventArgs e)
         {
-            AlignmentSettings settings = new AlignmentSettings();
-            bool? result = settings.ShowDialog();
+            AlignmentSettings settings = new AlignmentSettings(_Alignment.RobotIsConnected);
+            bool result = (bool)settings.ShowDialog();
+
+            if (result)
+            {
+                bool isChecked = settings.DebugConnectRobot;
+                _Alignment.RobotIsConnected = isChecked;
+
+                foreach (var elem in ClusterStackPanel.Children)
+                {
+                    var view = elem as ClusterAlignmentView;
+                    view.ConnectRobot(isChecked);
+                }
+            }
         }
 
         private void UserControl_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -422,6 +399,11 @@ namespace RX_DigiPrint.Views.Alignment
             {
                 _InitInkSupplySelection();
             }
+        }
+
+        private void UserControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            ColorSelectionPanel.MaxWidth = MainGrid.ActualWidth;
         }
     }
 }

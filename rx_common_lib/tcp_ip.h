@@ -724,10 +724,12 @@ typedef struct SPrintFileRep
 {
 	SMsgHdr		hdr;
 	SPageId		id;
+	INT32		offsetWidth;
 	UINT32		msgNo;
 	UINT32		blkCnt;
 	UINT8		bufReady;
 	UINT8		same;
+	UINT8		clearBlockUsed;
 } SPrintFileRep;
 
 typedef struct SPrintFileMsg

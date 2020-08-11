@@ -12,7 +12,9 @@
              d:DesignHeight="700" d:DesignWidth="1500"
              Background="Transparent"
              HorizontalAlignment="Stretch"
-             IsVisibleChanged="UserControl_IsVisibleChanged">
+             IsVisibleChanged="UserControl_IsVisibleChanged"
+             Loaded="UserControl_Loaded"
+             >
     <UserControl.Resources>
        
             <ResourceDictionary>
@@ -78,22 +80,10 @@
             <rx_uc:Splicing HorizontalAlignment="Center"></rx_uc:Splicing>
         </Grid>
 
-        <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="auto"></ColumnDefinition>
-                <ColumnDefinition Width="*"></ColumnDefinition>
-            </Grid.ColumnDefinitions>
-
-            <StackPanel Grid.Column="0" Orientation="Horizontal" x:Name="InkSupplySelectionPanel">
-                <StackPanel x:Name="ColorSelectionPanel" Orientation="Horizontal" Margin="10,5,5,5"/>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" x:Name="InkSupplySelectionPanel">
+            <WrapPanel x:Name="ColorSelectionPanel" Orientation="Horizontal" Margin="10,5,5,5"/>
                 <StackPanel x:Name="InkCylinderSelectionPanel_Standard" Orientation="Horizontal" Margin="10,5,5,5"/>
             </StackPanel>
-
-            <StackPanel  HorizontalAlignment="Right" Grid.Column="1" Orientation="Horizontal">
-                <TextBlock Margin="10" VerticalAlignment="Center">Debug: Connect Robot</TextBlock>
-                <CheckBox Margin="10" Grid.Column="1" VerticalAlignment="Center" IsChecked="{Binding RobotIsConnected}" Click="RobotConnectButton_Click"></CheckBox>
-            </StackPanel>
-        </Grid>
 
         <Grid Grid.Row="2">
             <StackPanel x:Name="InkCylinderSelectionPanel_Surface" Orientation="Horizontal" Margin="10,0,10,5"/>

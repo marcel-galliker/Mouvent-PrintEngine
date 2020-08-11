@@ -197,7 +197,7 @@ namespace RX_DigiPrint.Views.LH702View
             PrintQueueItem item = DataContext as PrintQueueItem;
             if (item!=null)
             {
-                RxButton button = sender as RxButton;
+                MvtButton button = sender as MvtButton;
                 button.IsChecked = true;
                 MoveUp.Text="";
                 MvtNumPad pad = new MvtNumPad(MoveUp);
@@ -216,7 +216,7 @@ namespace RX_DigiPrint.Views.LH702View
             PrintQueueItem item = DataContext as PrintQueueItem;
             if (item!=null)
             {
-                RxButton button = sender as RxButton;
+                MvtButton button = sender as MvtButton;
                 button.IsChecked = true;
                 MoveUp.Text="";
                 MvtNumPad pad = new MvtNumPad(MoveUp);
@@ -235,7 +235,7 @@ namespace RX_DigiPrint.Views.LH702View
             PrintQueueItem item = DataContext as PrintQueueItem;
             if (item!=null)
             {
-                RxButton button = sender as RxButton;
+                MvtButton button = sender as MvtButton;
                 button.IsChecked = true;
                 MoveLeft.Text="";
                 MvtNumPad pad = new MvtNumPad(MoveLeft);
@@ -254,7 +254,7 @@ namespace RX_DigiPrint.Views.LH702View
             PrintQueueItem item = DataContext as PrintQueueItem;
             if (item!=null)
             {
-                RxButton button = sender as RxButton;
+                MvtButton button = sender as MvtButton;
                 button.IsChecked = true;
                 MoveLeft.Text="";
                 MvtNumPad pad = new MvtNumPad(MoveLeft);

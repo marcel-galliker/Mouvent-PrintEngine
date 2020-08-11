@@ -478,13 +478,11 @@ int  data_malloc(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPixel,
 			if (psplit[i].color.name[0] && psplit[i].lastLine>psplit[i].firstLine)
 			{
 				TrPrintfL(1, "buffer[%d]: WAIT UNUSED %p, used=%d, abort=%d", i, buffer[i], rx_mem_cnt(buffer[i]), _Abort);
-				/*
 				while (!_Abort && rx_mem_cnt(buffer[i]))
 				{
 					rx_sleep(time);
 				}
-				*/
-				rx_mem_await_free(buffer[i], INFINITE);
+			//	rx_mem_await_free(buffer[i], INFINITE);
 				TrPrintfL(1, "buffer[%d]: IS UNUSED", i);
 			}
 		}
@@ -779,7 +777,7 @@ int  data_reload	(SPageId *id)
 }
 */
 //--- data_same ------------------------------------------------------------------
-int data_same(SPageId *id, int clearBlockUsed)
+int data_same(SPageId *id, int offsetWidth, int clearBlockUsed)
 {
 	int nextIdx;
 	int src;
@@ -788,25 +786,38 @@ int data_same(SPageId *id, int clearBlockUsed)
 	if (nextIdx == _OutIdx) 
 		return Error(ERR_CONT, 0, "Print List Overflow");
 
-	TrPrintfL(TRUE, "data_same[%d]: id=%d, page=%d, scan=%d", -1, id->id, id->page, id->scan);
+	TrPrintfL(TRUE, "data_same[%d]: id=%d, page=%d, scan=%d, offsetWidth=%d", -1, id->id, id->page, id->scan, offsetWidth);
 
 	for (src=0; src<SIZEOF(_PrintList); src++)
 	{
 		SPageId *p = &_PrintList[src].id;
-		TrPrintfL(TRUE, "data_same[%d]: id=%d, page=%d, scan=%d", src, p->id, p->page, p->scan);
-		if ((id->id==p->id) && (id->page==p->page) && (id->scan==p->scan))
+		TrPrintfL(TRUE, "data_same[%d]: id=%d, page=%d, scan=%d, offsetWidth=%d", src, p->id, p->page, p->scan, _PrintList[src].offsetWidth);
+		if ((id->id==p->id) && (id->page==p->page) && (id->scan==p->scan) && (offsetWidth==_PrintList[src].offsetWidth))
 		{				
-			SBmpSplitInfo *ptr=_PrintList[_InIdx].splitInfo;
+			SBmpSplitInfo *pInfo=_PrintList[_InIdx].splitInfo;
 			memcpy(&_PrintList[_InIdx], &_PrintList[src], sizeof(_PrintList[_InIdx]));
-			_PrintList[_InIdx].splitInfo = ptr;
+			_PrintList[_InIdx].splitInfo = pInfo;
 			memcpy(_PrintList[_InIdx].splitInfo, _PrintList[src].splitInfo, _SplitInfoSize);
 			memcpy(&_PrintList[_InIdx].id, id, sizeof(_PrintList[_InIdx].id));
 			for (int h=0; h<_HeadCnt; h++)
 			{
-				_PrintList[_InIdx].splitInfo[h].pListItem = &_PrintList[_InIdx];
-				_PrintList[_InIdx].splitInfo[h].clearBlockUsed = clearBlockUsed;
+				pInfo = &_PrintList[_InIdx].splitInfo[h];
+				pInfo->pListItem = &_PrintList[_InIdx];
+				pInfo->clearBlockUsed = clearBlockUsed;
+				/*
+				if (clearBlockUsed)
+				{
+					int old=_BlkNo[pInfo->board][pInfo->head];
+					_BlkNo[pInfo->board][pInfo->head] = (_BlkNo[pInfo->board][pInfo->head]+pInfo->blkCnt)%(RX_Spooler.dataBlkCntHead);
+					TrPrintfL(TRUE, "_BlkNo[%d][%d]=%d (old=%d)", pInfo->board, pInfo->head, _BlkNo[pInfo->board][pInfo->head], old);
+				}
+				*/
 			}
-		
+
+			TrPrintfL(TRUE, "data_same new[%d]: id=%d, page=%d, scan=%d, next=%d, same=%d", _InIdx, p->id, p->page, p->scan, nextIdx, _PrintList[_InIdx].flags&FLAG_SAME);
+			
+			_PrintList[_InIdx].flags |= FLAG_SAME;
+
 			/*
 			TrPrintfL(TRUE, "data_same: PrintList[%d].idx=%d", _InIdx, data_printList_idx(_PrintList[_InIdx].splitInfo[0].pListItem));
 			{
@@ -1104,8 +1115,9 @@ static int _data_split(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int length
 	
 	memset(pItem->splitInfo, 0, _HeadCnt * sizeof(SBmpSplitInfo));
 	memcpy(&pItem->id, id, sizeof(pItem->id));
-	pItem->flags     = flags;
-	pItem->headsUsed = 0;
+	pItem->offsetWidth = offsetPx;
+	pItem->flags       = flags;
+	pItem->headsUsed   = 0;
 		
 	if (pBmpInfo->screening)
 	{
@@ -2217,6 +2229,14 @@ int data_sent(SBmpSplitInfo *psplit, int head)
 			{
 				int lastidx=(_OutIdx+PRINT_LIST_SIZE-1)%PRINT_LIST_SIZE;
 				memset(&_PrintList[lastidx].id, 0, sizeof(_PrintList[lastidx].id));
+				for (int i=0; i<SIZEOF(_PrintList); i++)
+				{
+					SPageId *pid=&_PrintList[i].id;
+					if (pid->id==evt.id.id && pid->page==pid->page && pid->scan==evt.id.scan && _PrintList[i].offsetWidth==psplit->pListItem->offsetWidth)
+					{
+						_PrintList[i].offsetWidth=INVALID_VALUE;
+					}
+				}
 			}
 			_OutIdx = (_OutIdx+1) % PRINT_LIST_SIZE;
 			rx_sem_post(_SendSem);

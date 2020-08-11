@@ -620,11 +620,13 @@ static void _send_ink_def(int headNo, char *dots)
 				if (RX_HBStatus[headNo].head[n].eeprom_mvt.voltage)	msg.fpVoltage = RX_HBStatus[headNo].head[n].eeprom_mvt.voltage;
 				else												msg.fpVoltage = RX_HBStatus[headNo].head[n].eeprom.voltage;
 
+				/*
                 Error(LOG, 0, "Head %s: FirepulseVoltage=%d%% (mvt=%d, fuji=%d)",
 					RX_Config.headBoard[headNo].head[n].name,
 					msg.fpVoltage,
 					RX_HBStatus[headNo].head[n].eeprom_mvt.voltage, 
 					RX_HBStatus[headNo].head[n].eeprom.voltage);
+				*/
 
 				if(_HeadCtrl[headNo].cfg->reverseHeadOrder) no = RX_Config.colorCnt*RX_Config.headsPerColor-1-no;
 				memcpy(&msg.ink, &RX_Config.inkSupply[inksupply].ink, sizeof(msg.ink));

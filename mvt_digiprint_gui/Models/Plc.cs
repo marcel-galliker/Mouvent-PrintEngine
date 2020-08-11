@@ -196,6 +196,9 @@ namespace RX_DigiPrint.Models
             string match=id+'=';
 
             if (!Connected) return "####";
+                                
+            if (id.Equals("XML_MATERIAL_THICKNESS"))
+                Console.WriteLine("XML_MATERIAL_THICKNESS");
 
             for(i=0; i<_Variables.Count; i++)
             {
@@ -206,11 +209,15 @@ namespace RX_DigiPrint.Models
                         if (_Variables[i][n].StartsWith(match))
                         {
                             string[] val = _Variables[i][n].Split('=');
+                            if (id.Equals("XML_MATERIAL_THICKNESS"))
+                                Console.WriteLine("XML_MATERIAL_THICKNESS");
                             return val[1];
                         }
                     }
                 }
             }
+            if (id.Equals("XML_MATERIAL_THICKNESS"))
+                Console.WriteLine("XML_MATERIAL_THICKNESS");
             return null;
         }
 

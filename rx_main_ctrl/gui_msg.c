@@ -701,13 +701,32 @@ static void _do_set_print_queue	(RX_SOCKET socket, SPrintQueueEvt *pmsg)
 static void _do_set_print_queue_evt	(RX_SOCKET socket, SPrintQueueEvt *pmsg)
 {
 	SPrintQueueItem *item;
+
 	_check_format("_do_set_print_queue", pmsg, sizeof(*pmsg));
 	#ifdef linux
 	_chmod(pmsg->item.filepath, S_IRWXU | S_IRWXG | S_IRWXO);
 	#endif
+
+	if (pmsg->item.printGoDist<0)
+	{
+		Error(ERR_CONT, 0, "Distance must be > 0mm!");
+		pmsg->item.printGoDist=0;
+	}
+
+	if (pmsg->item.printGoDist>1000000)
+	{
+		Error(ERR_CONT, 0, "Distance must be < 1000mm!");
+		pmsg->item.printGoDist=1000000;
+	}
+	item=pq_get_item(&pmsg->item);
+
+	if (pmsg->item.printGoDist != item->printGoDist) Error(LOG, 0, "Change Dist from %d to %d", item->printGoDist, pmsg->item.printGoDist);
+	if (pmsg->item.pageMargin  != item->pageMargin)  Error(LOG, 0, "Change Lateral from %d to %d", item->pageMargin, pmsg->item.printGoDist);
+
 	item=pq_set_item(&pmsg->item);
-//	Error(LOG, 0, "GUI: New PageMargin=%d", pmsg->item.pageMargin);
+
 	pc_set_pageMargin(pmsg->item.pageMargin);
+//	Error(LOG, 0, "GUI: New PageMargin=%d", pmsg->item.pageMargin);
 	if (item!=NULL) gui_send_print_queue(EVT_GET_PRINT_QUEUE, item);
 	pq_save(PATH_USER FILENAME_PQ);
 }
