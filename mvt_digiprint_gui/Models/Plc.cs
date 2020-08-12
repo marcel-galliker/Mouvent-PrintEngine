@@ -171,7 +171,8 @@ namespace RX_DigiPrint.Models
                         int state=Rx.StrToInt32(val[1]);
                         InReferencing = (state==13);
                         InWebIn       = (state==9);
-                        WebInEnabled  = (state!=4 && state!=6);
+                     //   WebInEnabled  = (state!=4 && state!=6);
+                        WebInEnabled  = (state!=5 && state!=6);
                     }
                     if (val[0].Equals("STA_REFERENCE_ENABLE")) ReferenceEnabled = (val[1].Equals("TRUE"));
 
@@ -197,9 +198,6 @@ namespace RX_DigiPrint.Models
 
             if (!Connected) return "####";
                                 
-            if (id.Equals("XML_MATERIAL_THICKNESS"))
-                Console.WriteLine("XML_MATERIAL_THICKNESS");
-
             for(i=0; i<_Variables.Count; i++)
             {
                 if (_Variables[i][0].Equals(uintId))
@@ -209,15 +207,11 @@ namespace RX_DigiPrint.Models
                         if (_Variables[i][n].StartsWith(match))
                         {
                             string[] val = _Variables[i][n].Split('=');
-                            if (id.Equals("XML_MATERIAL_THICKNESS"))
-                                Console.WriteLine("XML_MATERIAL_THICKNESS");
                             return val[1];
                         }
                     }
                 }
             }
-            if (id.Equals("XML_MATERIAL_THICKNESS"))
-                Console.WriteLine("XML_MATERIAL_THICKNESS");
             return null;
         }
 

@@ -395,8 +395,6 @@ namespace RX_DigiPrint.Views.UserControls
 
             set
             {
-                if (ID.Equals("XML_MATERIAL_THICKNESS") && value!=null &&  value.Equals("ERROR"))
-                    Console.WriteLine("XML_MATERIAL_THICKNESS");
                 if (value == null) return;
                 if (value != _Value)
                 {

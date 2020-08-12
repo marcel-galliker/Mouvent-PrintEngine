@@ -313,8 +313,6 @@ namespace RX_DigiPrint.Views.UserControls
                 PlcParCtrl par = item as PlcParCtrl;
                 if (par!=null)
                 {
-                    if (par.ID.Equals("XML_MATERIAL_THICKNESS"))
-                            Console.WriteLine("XML_MATERIAL_THICKNESS");
                     string str = RxGlobals.Plc.GetVar(UnitID, par.ID);
                     par.UpdateValue(str);
                     continue;

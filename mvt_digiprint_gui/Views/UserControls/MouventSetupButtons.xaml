@@ -15,7 +15,7 @@
 
             <common:MvtButton Grid.Column="1"  Margin="15,0,15,0" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}"
                               x:Name="CMD_WEBIN" Click="WebIn_Clicked" ToolTip="Web In"
-                             IsVisibleChanged="WebIn_IsVisibleChanged" IsEnabled="{Binding WebInEnabled}">
+                              IsEnabled="{Binding WebInEnabled}">
                 <iconPacks:PackIconMaterial Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Center" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="30" Height="30" Kind="ArrowExpandHorizontal"></iconPacks:PackIconMaterial>
             </common:MvtButton>
 

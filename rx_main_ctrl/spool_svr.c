@@ -790,9 +790,10 @@ int spool_send_msg(void *msg)
 		if(_Spooler[i].used)
 		{
 			if (_Spooler[i].socket!=INVALID_SOCKET && sok_send(&_Spooler[i].socket,msg)==REPLY_OK) cnt++; 
-			else ErrorEx(dev_spooler, i, ERR_ABORT, 0, "not connected");
+		//	else ErrorEx(dev_spooler, i, ERR_ABORT, 0, "not connected");
 		}
 	}
+	if (!cnt) ErrorEx(dev_spooler, i, ERR_ABORT, 0, "not connected");
 	return cnt;
 }
 

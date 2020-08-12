@@ -284,6 +284,7 @@ void lb702_main(int ticks, int menu)
 			RX_StepperStatus.cmdRunning = FALSE;
 		}
 
+		if (RX_StepperStatus.cmdRunning==CMD_LIFT_TEST) RX_StepperStatus.cmdRunning=0;
 		if (!RX_StepperStatus.cmdRunning)
 		{
 			RX_StepperStatus.info.z_in_ref    = (cmd == CMD_LIFT_REFERENCE && RX_StepperStatus.info.ref_done);
@@ -620,7 +621,7 @@ void _lb702_motor_z_test(int steps)
 {	
 	if (!RX_StepperStatus.cmdRunning)
 	{
-		RX_StepperStatus.cmdRunning = 1; // TEST both motors
+		RX_StepperStatus.cmdRunning = CMD_LIFT_TEST; // TEST both motors
 		RX_StepperStatus.info.moving = TRUE;
 		_PrintPos_New[MOTOR_Z_BACK]  = Fpga.encoder[MOTOR_Z_BACK]._pos_motor * STEPS + steps;
 		_PrintPos_New[MOTOR_Z_FRONT] = Fpga.encoder[MOTOR_Z_FRONT]._pos_motor * STEPS + steps;
@@ -646,7 +647,7 @@ static void _lb702_motor_test(int motorNo, int steps)
 	
 	if (!RX_StepperStatus.cmdRunning)
 	{
-		RX_StepperStatus.cmdRunning = 2; // TEST 1 motor
+		RX_StepperStatus.cmdRunning = CMD_LIFT_TEST; // TEST 1 motor
 		RX_StepperStatus.info.moving = TRUE;
 	
 		motors_config(motors, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER, STEPS);
