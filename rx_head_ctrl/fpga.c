@@ -155,6 +155,7 @@ static void  _write_srd(const char *srcName, int subPulses, int stroke, BYTE *da
 
 static int   _check_print_done(void);
 static int   _check_encoder(void);
+static int   _check_encoder_tel_speed(void);
 static void  _handle_pd(int pd);
 static void  _check_errors(void);
 static void  _count_dots(void);
@@ -1746,6 +1747,8 @@ void  fpga_main(int ticks, int menu)
 			udp_test_send(&msg, fpga_udp_block_size()+4);
 		}
 		if (_AliveChk_Timeout) _AliveChk_Timeout--;
+		
+		_check_encoder_tel_speed();
 	}
 	
 	int time1=rx_get_ticks()-time;
@@ -1980,18 +1983,35 @@ static void _handle_pd(int pd)
 	}
 }
 
+//--- _check_encoder_tel_speed -----------------------------------------------
+static int _check_encoder_tel_speed(void)
+{
+	static UINT32 _enc_tel_cnt=0;
+	static int   _cnt=0;
+	if (FpgaCfg.encoder->cmd & ENC_ENABLE) // _EncCheckDelay==0)
+	{
+		UINT32 speed = Fpga.error->enc_tel_cnt-_enc_tel_cnt;
+		if (speed<500000)
+		{
+			_cnt++;
+			if (_cnt>=3) ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err,  err_encoder_not_conected,  0, "Encoder slow communication");
+		} 
+	}
+	else _cnt=0;
+	_enc_tel_cnt =  Fpga.error->enc_tel_cnt;
+}
+
 //--- _check_encoder --------------------------------------------------------
 static int _check_encoder(void)
 {
 	int i;
-	static INT32	_enc_tel_cnt=12345;
+	static UINT32	_enc_tel_cnt=12345;
 	static BYTE		_enc_crc[SIZEOF(Fpga.error->encoder)];
 	
 	if(RX_HBConfig.present==dev_on && FpgaCfg.encoder->cmd & ENC_ENABLE)
 	{
 		if (nios_is_firepulse_on())
 		{
-
 			if (_EncCheckDelay>0) _EncCheckDelay--;
 			else
 			{
