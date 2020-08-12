@@ -17,3 +17,4 @@ void tx80x_wd_handle_menu(char *str);
 void tx80x_wd_menu(int help);
 void tx80x_wd_display_status(void);
 int tx80x_wd_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata);
+int tx80x_wd_motor_test(int motorNo, int steps);

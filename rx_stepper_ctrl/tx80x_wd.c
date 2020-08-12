@@ -51,7 +51,6 @@ static void _tx80x_wd_move_to_pos(int cmd, int pos);
 static int  _steps_2_micron(int steps);
 static int  _micron_2_steps(int micron);
 static void _tx80x_wd_motor_z_test(int steps);
-static void _tx80x_wd_motor_test(int motorNo, int steps);
 
 // global Variables
 static int  _CmdRunning = 0;
@@ -187,12 +186,9 @@ void tx80x_wd_handle_menu(char *str)
         case 'u':   tx80x_wd_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_UP_POS, NULL); break;
         case 'a':   tx80x_wd_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_CALIBRATE, NULL); break;
         case 'z':   _tx80x_wd_motor_z_test(atoi(&str[1])); break;
-        case 'm':   _tx80x_wd_motor_test(str[1] - '0', atoi(&str[2])); break;
-        }
-     
+        case 'm':   txrob_motor_test(str[1] - '0', atoi(&str[2])); break;
+        } 
     }
-    
-   
 }
 
 //--- tx80x_wd_menu ----------------------------------------------
@@ -375,51 +371,21 @@ static void _tx80x_wd_motor_z_test(int steps)
 }
 
 //--- _txrob_motor_test ---------------------------------
-static void _tx80x_wd_motor_test(int motorNo, int steps)
+ int tx80x_wd_motor_test(int motorNo, int steps)
 {
-    int motors = 1 << motorNo;
-    SMovePar par;
-    int i;
-
-    memset(&par, 0, sizeof(par));
-    par.stop_mux = 0;
-    par.dis_mux_in = 0;
-    par.encCheck = chk_off;
-    RX_StepperStatus.robinfo.moving_wd = TRUE;
-    _CmdRunning = 1;
-
-    if (motorNo == 0)
+    if (motorNo == MOTOR_WD_BACK || motorNo == MOTOR_WD_FRONT)
     {
-    	//---> CALL function from txrob
+        int motors = 1 << motorNo;
+        SMovePar par;
+        int i;
 
-        // paramaters tested 14-JAN-20
-        par.speed = 1000; // speed with max tork: 21'333
-        par.accel = 10000;
-        par.current_acc = 400.0; //  max 67 = 0.67 A
-        par.current_run = 300.0; //  max 67 = 0.67 A
-        par.stop_mux = 0;
-        par.dis_mux_in = 0;
-        par.encCheck = chk_std;
-        motors_config(motors, 0, L3518_STEPS_PER_METER, L3518_INC_PER_METER, MICROSTEPS);
-        motors_move_by_step(motors, &par, steps, FALSE);
-    }
-    else if (motorNo == 1)
-    {
-    	//---> CALL function from txrob
-        // paramaters tested 14-JAN-20
-
-        par.speed = 21000; // speed with max tork: 21'333
-        par.accel = 10000;
-        par.current_acc = 40.0; //  max 67 = 0.67 A
-        par.current_run = 40.0; //  max 67 = 0.67 A
+        memset(&par, 0, sizeof(par));
         par.stop_mux = 0;
         par.dis_mux_in = 0;
         par.encCheck = chk_off;
-        motors_config(motors, 7.0, 0.0, 0.0, STEPS);
-        motors_move_by_step(motors, &par, steps, TRUE);
-    }
-    else if (motorNo == MOTOR_WD_BACK || motorNo == MOTOR_WD_FRONT)
-    {
+        RX_StepperStatus.robinfo.moving_wd = TRUE;
+        _CmdRunning = 1;
+
         // paramaters tested 14-JAN-20
         par.speed = 10000; // speed with max tork: 21'333
         par.accel = 32000;
@@ -431,17 +397,7 @@ static void _tx80x_wd_motor_test(int motorNo, int steps)
         par.encCheck = chk_std;
         motors_config(motors, CURRENT_HOLD_WD, L3518_STEPS_PER_METER, L3518_INC_PER_METER, STEPS);
         motors_move_by_step(motors, &par, steps, FALSE);
+        return TRUE;
     }
-    else
-    {
-        par.speed = 1000;
-        par.accel = 1000;
-        par.current_acc = 250.0;
-        par.current_run = 250.0;
-        par.stop_mux = 0;
-        par.dis_mux_in = 0;
-        par.encCheck = chk_off;
-        motors_config(motors, 50, L3518_STEPS_PER_METER, L3518_INC_PER_METER, STEPS);
-        motors_move_by_step(motors, &par, steps, FALSE); 
-    }
+    return FALSE;
 }

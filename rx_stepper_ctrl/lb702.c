@@ -647,7 +647,7 @@ static void _lb702_motor_test(int motorNo, int steps)
 	
 	if (!RX_StepperStatus.cmdRunning)
 	{
-		RX_StepperStatus.cmdRunning = CMD_LIFT_TEST; // TEST 1 motor
+		RX_StepperStatus.cmdRunning  = CMD_LIFT_TEST; // TEST 1 motor
 		RX_StepperStatus.info.moving = TRUE;
 	
 		motors_config(motors, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER, STEPS);

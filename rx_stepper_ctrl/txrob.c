@@ -197,7 +197,6 @@ static int	_TiltSteps = 90; // in steps
 static int _TimeWastePumpStart = 0;
 
 //--- prototypes --------------------------------------------
-static void _txrob_motor_test(int motor, int steps);
 //static void _txrob_turn_screw_to_pos(int screw, int steps);
 static void _txrob_error_reset(void);
 static void _txrob_send_status(RX_SOCKET);
@@ -855,7 +854,7 @@ static void _txrob_handle_menu(char *str)
 					if (pos > 21333) pos = 21333;
 					_SpeedShift = pos;
 					break;
-        case 'm':	_txrob_motor_test(str[1] - '0', atoi(&str[2])); break;
+        case 'm':	txrob_motor_test(str[1] - '0', atoi(&str[2])); break;
         }
     }
 }
@@ -1232,7 +1231,7 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 }
 
 //--- _txrob_motor_test ---------------------------------
-static void _txrob_motor_test(int motorNo, int steps)
+void txrob_motor_test(int motorNo, int steps)
 {
 	int motors = 1 << motorNo;
 	SMovePar par;
@@ -1245,6 +1244,8 @@ static void _txrob_motor_test(int motorNo, int steps)
 	RX_StepperStatus.robinfo.moving = TRUE;
 	RX_StepperStatus.cmdRunning = 1;
 	
+	if (tx80x_wd_motor_test(motorNo, steps)) return;
+
 	if (motorNo == MOTOR_ROT)
 	{
         // paramaters tested 14-JAN-20
@@ -1273,21 +1274,6 @@ static void _txrob_motor_test(int motorNo, int steps)
 		motors_config(motors, CURRENT_HOLD_SHIFT, 0.0, 0.0, STEPS);
 		motors_move_by_step(motors, &par, steps, TRUE);			
 	}
-    else if (motorNo == 2 || motorNo == 3)
-    {
-		//---> CALL function from wd
-        // paramaters tested 14-JAN-20
-        par.speed = 10000; // speed with max tork: 21'333
-        par.accel = 32000;
-        par.current_acc = 400.0;
-        par.current_run = 300.0;
-        par.stop_mux = 0;
-        par.dis_mux_in = 0;
-    //  par.encCheck = chk_std;
-        par.encCheck = chk_off;
-        motors_config(motors, 50.0, L3518_STEPS_PER_METER, L3518_INC_PER_METER, STEPS);
-        motors_move_by_step(motors, &par, steps, FALSE);
-    }
     else
     {
         par.speed = 1000;
