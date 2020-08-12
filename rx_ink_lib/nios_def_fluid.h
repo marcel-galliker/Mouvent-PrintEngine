@@ -92,6 +92,9 @@ typedef struct
 	int		test_airValve;
 	int		test_bleedValve;
 	int		test_cylinderPres;
+	//--- purge putty ---------------
+	int		purge_putty_ON;
+	int		purge_putty_pressure;
 	
 	//--- test bleed line -----
 	int		test_bleed_line;
@@ -252,6 +255,10 @@ typedef struct
 	INT32	TestBleedLine_Pump_Phase1;
 	INT32	TestBleedLine_Pump_Phase2;
 	INT32	TestBleedLine_Pump_Phase3;
+	
+	// check info
+	INT32	Check_State;
+	INT32	Check_Time_State;
 } SNiosInkSupplyStat;
 
 //--- STATUS ----------------------------------------------------
@@ -312,7 +319,6 @@ typedef struct SNiosFluidStat
 	INT32	AMC_Register_GPIO_Config;
 	INT32	AMC_Register_Enable;
 	INT32	AMC_Register_Gain;	
-
 } SNiosFluidStat;
 
 

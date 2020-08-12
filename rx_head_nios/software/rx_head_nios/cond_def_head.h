@@ -195,14 +195,15 @@ typedef struct SConditionerCfg_mcu
 
 	INT32	headsPerColor;			// FOR CALCULATION OF P PARAMETER during start-up phase (OFF->PRINT)
     INT32 	meniscus_setpoint;		// DESIRED MENISCUS PRESSURE (1/10 mbar)
-	UINT32 	temp; 					// desired temperature (1/1000 °C)
-	UINT32 	tempMax; 				// desired temperature (1/1000 °C)
+	UINT32 	temp; 					// desired temperature (1/1000 ï¿½C)
+	UINT32 	tempMax; 				// desired temperature (1/1000 ï¿½C)
 	UINT32	tempHead;				// measured head temperature
 	UINT32	mode;					// EnFluidCtrlMode
 	UINT32	volume_printed;			// [ml/min]
 	UINT16	flowResistance;
 	UINT32	purgeDelay;				// ms wait before opening the valve
 	UINT32	purgeTime;				// ms the valve is open
+	INT32	purge_putty_ON;			// start purge from putty fluidboard
 		
 	//--- status of fluid system -------------------
     INT32   cylinderPressure;
@@ -212,6 +213,7 @@ typedef struct SConditionerCfg_mcu
 	//--- Counters ----------------------------------
 	UINT32	clusterNo;
 	UINT32	clusterTime;
+	UINT32	machineMeters;
 } SConditionerCfg_mcu;
 
 typedef struct
@@ -247,10 +249,10 @@ typedef struct SConditionerStat_mcu
 	
 	UINT32			pump;				// rpm (calculated based on actual/desired output pressure)
 	UINT32			pump_measured;		// measured ml/min
-	UINT32			tempIn;				// actual Temp (1/1000 °C)
-    UINT32			tempHeater;		    // Temperature measured directly on heater cartridge (>= Revision #h) (1/1000 °C)
+	UINT32			tempIn;				// actual Temp (1/1000 ï¿½C)
+    UINT32			tempHeater;		    // Temperature measured directly on heater cartridge (>= Revision #h) (1/1000 ï¿½C)
 	UINT32			heater_percent;		// heater on time (between 0% and 80%)
-	INT32			tempReady;			// temp ink = setpoint +/- 1°C
+	INT32			tempReady;			// temp ink = setpoint +/- 1ï¿½C
 	UINT32			mode;				// EnFluidCtrlMode
 	SCondStatus		gpio_state;			// state of GPIO Inputs
 	UINT32			error;
@@ -263,6 +265,10 @@ typedef struct SConditionerStat_mcu
 	UINT32			pid_P;
 	UINT32			pid_I;
 	INT32			pid_sum;
+
+	// Filters
+	INT32			Filter_Quality;		// = (Pin - Pout) / Pump_speed
+	UINT32			Purge_Needed;		// =0 : No need ; =1 : Need purge ; =2 : FlowRes problem (after 2 purges)
 
 	//Saved values on Flash
 	UINT32 			pumptime;		// count seconds
