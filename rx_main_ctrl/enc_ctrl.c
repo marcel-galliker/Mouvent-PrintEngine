@@ -195,7 +195,7 @@ int	 enc_set_config(int restart)
 {	
 	int no;
 	
-	if (RX_Config.printer.type==printer_LH702) Error(LOG, 0, "enc_set_config(restart=%d)");
+	if (RX_Config.printer.type==printer_LH702) Error(LOG, 0, "enc_set_config(restart=%d)", restart);
 	
 	_Scanning = rx_def_is_scanning(RX_Config.printer.type);
 		

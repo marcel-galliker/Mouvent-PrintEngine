@@ -62,6 +62,7 @@ static void main_menu()
 	term_printf("p<mbar>:    Pressure to [mbar] (0=test off)\n");
 	term_printf("l<n>:       Test bleed line\n");			
 	term_printf("f<x>:       Flush\n");	
+	term_printf("z<n><mbar>: Purge pressure (0= pressure calculated)\n");	
 	
 	if (_DisplayBalance) 
 	{
@@ -105,6 +106,7 @@ static void main_menu()
 */
 		case 'x': _AppRunning=FALSE;						break;
 		case 'T': daisy_chain_do_tara(no);					break;
+		case 'z': nios_set_purge_pressure(no, atoi(&str[2]));		break;
 		}
 	}
 }

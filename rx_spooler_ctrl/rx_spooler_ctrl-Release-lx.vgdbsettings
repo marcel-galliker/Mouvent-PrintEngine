@@ -109,14 +109,10 @@
   <CustomBuild>
     <PreSyncActions>
       <CustomActionBase xsi:type="CommandLineAction">
-        <SkipWhenRunningCommandList>true</SkipWhenRunningCommandList>
+        <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
         <Command>C:\Windows\System32\cmd.exe</Command>
-        <Arguments>/C del $(ProjectDir)\..\bin\spooler\rx_spooler*</Arguments>
-        <WorkingDirectory />
-        <Environment>
-          <Records />
-          <EnvironmentSetupFiles />
-        </Environment>
+        <Arguments>/C del $(TargetFileName)</Arguments>
+        <WorkingDirectory>$(ProjectDir)\..\bin\spooler\</WorkingDirectory>
         <BackgroundMode>false</BackgroundMode>
       </CustomActionBase>
     </PreSyncActions>
@@ -168,7 +164,7 @@
         </SourceHost>
         <SourceFilePath>$(TargetPath)</SourceFilePath>
         <DestinationFilePath>$(ProjectDir)\..\bin\spooler\$(TargetFileName)</DestinationFilePath>
-        <OverwriteTrigger>Stat</OverwriteTrigger>
+        <OverwriteTrigger>Always</OverwriteTrigger>
       </CustomActionBase>
       <CustomActionBase xsi:type="FileTransferAction">
         <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>

@@ -155,7 +155,7 @@ SPID_par _PumpPID =
 	.P				= DEFAULT_P,			// 1000
 	.I				= DEFAULT_I,			// 2000
 	.P_start		= 1,
-	.val_min		= 91,   // 91, => 0.22V start of linear pump function 
+	.val_min		= 0,   	// 91, => 0.22V start of linear pump function 
 	.val_max		= 4095, // 0xfff, 	//max value for pump DAC voltage
 							// Value for DAC, 0x0fff = 9.7V => max, 0x0000 => 32mV => min
 };
