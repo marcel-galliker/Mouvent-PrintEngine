@@ -754,13 +754,13 @@ static void _control(int fluidNo)
                                                 if (_PurgeCtrlMode  != ctrl_undef && _all_fluids_in_3fluidCtrlModes(ctrl_purge_step4, ctrl_off, ctrl_print))
                                                 {
                                                     if (_PurgeCtrlMode == ctrl_purge_hard_vacc)
-                                                        fluid_send_ctrlMode(-1, ctrl_vacuum, TRUE);
+                                                        fluid_send_ctrlMode(no, ctrl_vacuum, TRUE);
                                                     else if (_PurgeCtrlMode == ctrl_purge_hard_wipe)
-                                                        fluid_send_ctrlMode(-1, ctrl_wash, TRUE);
+                                                        fluid_send_ctrlMode(no, ctrl_wash, TRUE);
                                                     else if(RX_PrinterStatus.printState == ps_pause)
-                                                        fluid_send_ctrlMode(-1, ctrl_print, TRUE);
+                                                        fluid_send_ctrlMode(no, ctrl_print, TRUE);
                                                     else
-                                                        fluid_send_ctrlMode(-1, ctrl_off, TRUE);
+                                                        fluid_send_ctrlMode(no, ctrl_off, TRUE);
                                                 }
                                             }
  											else if (RX_PrinterStatus.printState==ps_pause)
@@ -1001,7 +1001,14 @@ void fluid_send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 	case printer_LB701:
 	case printer_LB702_UV:	break;
 	case printer_LB702_WB:	if (ctrlMode == ctrl_cap) steplb_rob_start_cap_all();
-							else steplb_rob_control_all(ctrlMode);
+							//else steplb_rob_control_all(ctrlMode);
+                            else 
+                            {
+                                if (RX_Config.inkSupplyCnt % 2 == 0)
+                                    steplb_rob_control(ctrlMode, no / 2);
+                                else
+                                    steplb_rob_control(ctrlMode, (no + 1) / 2);
+                            }
 							break;
 	default:				break;
 	}
