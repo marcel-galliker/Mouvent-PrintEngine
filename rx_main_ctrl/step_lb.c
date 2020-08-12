@@ -492,7 +492,7 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
 									break;
 
         case ctrl_vacuum:			function = rob_fct_vacuum;
-									sok_send_2(&_step_socket[no], CMD_ROB_MOVE_POS, sizeof(function), &function);
+									if (ctrl_vacuum_step1 != _RobotCtrlMode[no]) sok_send_2(&_step_socket[no], CMD_ROB_MOVE_POS, sizeof(function), &function);
                                     _RobotCtrlMode[no] = ctrl_vacuum_step1;
                                     break;
                                     

@@ -736,7 +736,10 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             else
             {
                 pos = *((INT32 *)pdata);
-                if (pos > 0){Error(ERR_CONT, 0, "Unreachable position %d in y-Axis of Robi", pos); break;}
+                if (pos > 0){
+                    Error(ERR_CONT, 0, "Unreachable position %d in y-Axis of Robi", pos); 
+                    break;
+                    }
                 _CmdRunning = msgId;
                 micron = pos - RX_StepperStatus.screw_posY;
                 steps = _micron_2_steps(micron);

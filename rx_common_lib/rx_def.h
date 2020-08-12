@@ -1256,15 +1256,16 @@ typedef enum ERobotFunctions
 	rob_fct_purge_head5,	// 13: Purge head 5
 	rob_fct_purge_head6,	// 14: Purge head 6
 	rob_fct_purge_head7,	// 15: Purge head 7
-    rob_fct_move,          // 16: Wash heads
-    rob_fct_screw_head0,   // 17: Screw Pos head 0
-    rob_fct_screw_head1,   // 18: Screw Pos head 1
-    rob_fct_screw_head2,   // 19: Screw Pos head 2
-    rob_fct_screw_head3,   // 20: Screw Pos head 3
-    rob_fct_screw_head4,   // 21: Screw Pos head 4
-    rob_fct_screw_head5,   // 22: Screw Pos head 5
-    rob_fct_screw_head6,   // 23: Screw Pos head 6
-    rob_fct_screw_head7,   // 24: Screw Pos head 7
+    rob_fct_move,			// 16: Wash heads
+    rob_fct_screw_cluster,	// 17: Screw Pos cluster
+    rob_fct_screw_head0,	// 18: Screw Pos head 0
+    rob_fct_screw_head1,	// 19: Screw Pos head 1
+    rob_fct_screw_head2,	// 20: Screw Pos head 2
+    rob_fct_screw_head3,	// 21: Screw Pos head 3
+    rob_fct_screw_head4,	// 22: Screw Pos head 4
+    rob_fct_screw_head5,	// 23: Screw Pos head 5
+    rob_fct_screw_head6,	// 24: Screw Pos head 6
+    rob_fct_screw_head7,	// 25: Screw Pos head 7
 } ERobotFunctions;
 	
 typedef enum ERobotVaccumState
@@ -1307,6 +1308,7 @@ typedef struct SStepperCfg
 	SRobotOffsets	robot[4];
     
     SScrewPositions screwpositions[2][8][2];		// 1. printbarNo, 2. headNo, 3. axis
+    SScrewPositions screwclusters[2][1][1];		// 1. printbarNo, 2. headNo, 3. axis
 } SStepperCfg;
 	
 typedef struct SStepperMotorTest
