@@ -119,13 +119,14 @@ void  motor_main(int ticks, int menu)
 		if (_message_written == FALSE)	Error(ERR_CONT, 0, "Motor Power Supply OFF (Emergency stop pressed or power supply down)");
 		_init_done = 0;
 		_message_written = TRUE;
-		RX_StepperStatus.info.ref_done = FALSE;
-		RX_StepperStatus.info.z_in_ref		= FALSE;
-		RX_StepperStatus.info.z_in_up		= FALSE;
-		RX_StepperStatus.info.z_in_print	= FALSE;
-		RX_StepperStatus.info.z_in_cap		= FALSE;
-		RX_StepperStatus.robinfo.ref_done = FALSE;
-	}
+		RX_StepperStatus.info.ref_done			= FALSE;
+		RX_StepperStatus.info.z_in_ref			= FALSE;
+		RX_StepperStatus.info.z_in_up			= FALSE;
+		RX_StepperStatus.info.z_in_print		= FALSE;
+		RX_StepperStatus.info.z_in_cap			= FALSE;
+		RX_StepperStatus.robinfo.ref_done		= FALSE;
+        RX_StepperStatus.robinfo.ref_done_wd	= FALSE;
+    }
 	else	_message_written = FALSE;
 }
 

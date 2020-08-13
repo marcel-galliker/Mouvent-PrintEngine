@@ -115,6 +115,11 @@ void tx80x_wd_main(void)
         _WrinkleDetected = 0;
     }
 
+    if (!RX_StepperStatus.robinfo.ref_done_wd)
+    {
+        RX_StepperStatus.robinfo.z_in_print = FALSE;
+    }
+
     RX_StepperStatus.robinfo.wd_front_up = fpga_input(WD_FRONT_STORED_IN);
     RX_StepperStatus.robinfo.wd_back_up = fpga_input(WD_BACK_STORED_IN);
     if (_CmdRunning && motors_move_done(MOTOR_WD_BITS))
@@ -232,7 +237,7 @@ void tx80x_wd_display_status(void)
 static void _tx80x_wd_do_reference(void)
 {
     motors_stop(MOTOR_WD_BITS);
-
+    motors_config(MOTOR_WD_BITS, CURRENT_HOLD_WD, L3518_STEPS_PER_METER, L3518_INC_PER_METER, STEPS);
     _CmdRunning = CMD_LIFT_REFERENCE;
     RX_StepperStatus.robinfo.moving_wd = TRUE;
     motors_move_by_step(MOTOR_WD_BITS, &_ParRef, -100000, TRUE);
