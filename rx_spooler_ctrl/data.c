@@ -780,7 +780,7 @@ int  data_reload	(SPageId *id)
 int data_same(SPageId *id, int offsetWidth, int clearBlockUsed)
 {
 	int nextIdx;
-	int src;
+	int cnt, src;
 
 	nextIdx = (_InIdx+1) % PRINT_LIST_SIZE;
 	if (nextIdx == _OutIdx) 
@@ -788,13 +788,19 @@ int data_same(SPageId *id, int offsetWidth, int clearBlockUsed)
 
 	TrPrintfL(TRUE, "data_same[%d]: id=%d, page=%d, scan=%d, offsetWidth=%d", -1, id->id, id->page, id->scan, offsetWidth);
 
-	for (src=0; src<SIZEOF(_PrintList); src++)
+	for (cnt=0; cnt<SIZEOF(_PrintList); cnt++)
 	{
+		src = (_InIdx+PRINT_LIST_SIZE-1-cnt) % PRINT_LIST_SIZE; 
 		SPageId *p = &_PrintList[src].id;
-		TrPrintfL(TRUE, "data_same[%d]: id=%d, page=%d, scan=%d, offsetWidth=%d", src, p->id, p->page, p->scan, _PrintList[src].offsetWidth);
+		TrPrintfL(TRUE, "data_same[%d]: id=%d, page=%d, scan=%d, offsetWidth=%d, bitsPerPixel=%d", src, p->id, p->page, p->scan, _PrintList[src].offsetWidth, _PrintList[src].splitInfo->bitsPerPixel);
 		if ((id->id==p->id) && (id->page==p->page) && (id->scan==p->scan) && (offsetWidth==_PrintList[src].offsetWidth))
-		{				
+		{	
+			while(_PrintList[src].splitInfo->bitsPerPixel==8)
+			{
+				rx_sleep(10);
+			}
 			SBmpSplitInfo *pInfo=_PrintList[_InIdx].splitInfo;
+			TrPrintfL(TRUE, "data_same[%d] found: id=%d, page=%d, scan=%d, offsetWidth=%d, bitsPerPixel=%d", src, p->id, p->page, p->scan, _PrintList[src].offsetWidth, _PrintList[src].splitInfo->bitsPerPixel);
 			memcpy(&_PrintList[_InIdx], &_PrintList[src], sizeof(_PrintList[_InIdx]));
 			_PrintList[_InIdx].splitInfo = pInfo;
 			memcpy(_PrintList[_InIdx].splitInfo, _PrintList[src].splitInfo, _SplitInfoSize);
@@ -814,7 +820,7 @@ int data_same(SPageId *id, int offsetWidth, int clearBlockUsed)
 				*/
 			}
 
-			TrPrintfL(TRUE, "data_same new[%d]: id=%d, page=%d, scan=%d, next=%d, same=%d", _InIdx, p->id, p->page, p->scan, nextIdx, _PrintList[_InIdx].flags&FLAG_SAME);
+			TrPrintfL(TRUE, "data_same new[%d]: id=%d, page=%d, scan=%d, next=%d, same=%d, data=%p", _InIdx, p->id, p->page, p->scan, nextIdx, _PrintList[_InIdx].flags&FLAG_SAME, _PrintList[_InIdx].splitInfo->data);
 			
 			_PrintList[_InIdx].flags |= FLAG_SAME;
 
@@ -2177,11 +2183,7 @@ int data_sent(SBmpSplitInfo *psplit, int head)
 		psplit->pListItem->headsInUse--;
 
 //		TrPrintfL(TRUE, "data_sent: headsInUse=%d, data=0x%08x", psplit->pListItem->headsInUse, psplit->data);
-		if (psplit->data)
-		{
-			rx_mem_unuse(psplit->data);
-			psplit->data = NULL;
-		}
+		if (psplit->data) rx_mem_unuse(psplit->data);
 
 		if (FALSE)
 		{

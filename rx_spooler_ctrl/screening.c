@@ -175,6 +175,7 @@ void scr_malloc(UINT32 lengthPx, UINT8 bitsPerPixel)
 								_ScrMem[b][h].sizeScr=0;
 							}
 							else _ScrMem[b][h].sizeScr = sizeScr;
+							TrPrintfL(TRUE, "Head[%d.%d].screened[%d]=%p", b, h, i, &_ScrMem[b][h].screened[i]);
 						}
 						_ScrMem[b][h].screenedIdx=SCR_BUF_SIZE-1;
 					}
@@ -391,18 +392,19 @@ void scr_start(SBmpSplitInfo *pInfo)
 //--- scr_wait -----------------------------------------------------
 int scr_wait(int timeout)
 {
-	int ret;
-
-	TrPrintfL(TRUE, "Screening WAIT");
-	while (_ScrFifoDoneIdx!=_ScrFifoInIdx)
+	if (_ScrFifoDoneIdx!=_ScrFifoInIdx)
 	{
-		ret=rx_sem_wait(_SemScreeningDone, timeout);
+		TrPrintfL(TRUE, "Screening WAIT");
+		while (_ScrFifoDoneIdx!=_ScrFifoInIdx)
+		{
+			rx_sem_wait(_SemScreeningDone, timeout);
+		}
+		_TimeEnd=rx_get_ticks();
+		TrPrintfL(TRUE, "Screening WAIT END time=%d ms (%d threads)", _TimeEnd-_TimeStart, _ScrThreadCnt);
+		Error(LOG, 0, "Screening (id=%d, page=%d, copy=%d, scan=%d) time=%d ms (%d threads, GPU=%d)", _Id.id, _Id.page, _Id.copy, _Id.scan, _TimeEnd-_TimeStart, _ScrThreadCnt, gpu_is_board_present());
+		_TimeStart=0;
+		rx_sem_post(_SemScreeningReady);
 	}
-	_TimeEnd=rx_get_ticks();
-	TrPrintfL(TRUE, "Screening WAIT END time=%d ms (%d threads)", _TimeEnd-_TimeStart, _ScrThreadCnt);
-	Error(LOG, 0, "Screening (id=%d, page=%d, copy=%d, scan=%d) time=%d ms (%d threads, GPU=%d)", _Id.id, _Id.page, _Id.copy, _Id.scan, _TimeEnd-_TimeStart, _ScrThreadCnt, gpu_is_board_present());
-	_TimeStart=0;
-	rx_sem_post(_SemScreeningReady);
 	return REPLY_OK;
 }
 
@@ -554,6 +556,7 @@ static void _scr_load(SBmpSplitInfo *pInfo, int threadNo)
 			int blkCnt = pInfo->blkCnt;
 			pInfo->bitsPerPixel = 2;
 			pInfo->data			= &_ScrMem[b][h].screened[_ScrMem[b][h].screenedIdx];
+			TrPrintfL(TRUE, "Head[%d.%d].data=%p", b, h, pInfo->data);
 			pInfo->srcLineCnt	= pInfo->srcLineCnt*loutplane.resol.y/linplane.resol.y;
 			pInfo->srcLineLen	= loutplane.lineLen;
 			pInfo->srcWidthBt	= (pInfo->widthPx*pInfo->bitsPerPixel+7)/8;
