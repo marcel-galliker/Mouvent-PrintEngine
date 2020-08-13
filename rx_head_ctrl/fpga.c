@@ -130,6 +130,7 @@ static UINT32	_PgSimuIn, _PgSimuOut;
 static int		_UdpIsLocal;
 static BYTE		*_FpgaBase=NULL;
 static int		_EncCheckDelay=0;
+static UINT32	_EncoderTelFreq=0;
 static UINT32*  _Buffer[HEAD_CNT]={NULL,NULL,NULL,NULL};	// for DDR3-Tests
 static UINT32*	_ImgBuf[HEAD_CNT];
 static UINT32	_DataCnt[HEAD_CNT];
@@ -155,7 +156,7 @@ static void  _write_srd(const char *srcName, int subPulses, int stroke, BYTE *da
 
 static int   _check_print_done(void);
 static int   _check_encoder(void);
-static int   _check_encoder_tel_speed(void);
+static int   _check_encoder_tel_freq(void);
 static void  _handle_pd(int pd);
 static void  _check_errors(void);
 static void  _count_dots(void);
@@ -1748,7 +1749,7 @@ void  fpga_main(int ticks, int menu)
 		}
 		if (_AliveChk_Timeout) _AliveChk_Timeout--;
 		
-		_check_encoder_tel_speed();
+		_check_encoder_tel_freq();
 	}
 	
 	int time1=rx_get_ticks()-time;
@@ -1983,15 +1984,15 @@ static void _handle_pd(int pd)
 	}
 }
 
-//--- _check_encoder_tel_speed -----------------------------------------------
-static int _check_encoder_tel_speed(void)
+//--- _check_encoder_tel_freq -----------------------------------------------
+static int _check_encoder_tel_freq(void)
 {
 	static UINT32 _enc_tel_cnt=0;
 	static int   _cnt=0;
 	if (FpgaCfg.encoder->cmd & ENC_ENABLE) // _EncCheckDelay==0)
 	{
-		UINT32 speed = Fpga.error->enc_tel_cnt-_enc_tel_cnt;
-		if (speed<500000)
+		_EncoderTelFreq = Fpga.error->enc_tel_cnt-_enc_tel_cnt;
+		if (_EncoderTelFreq<500000)
 		{
 			_cnt++;
 			if (_cnt>=3) ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err,  err_encoder_not_conected,  0, "Encoder slow communication");
@@ -2000,6 +2001,13 @@ static int _check_encoder_tel_speed(void)
 	else _cnt=0;
 	_enc_tel_cnt =  Fpga.error->enc_tel_cnt;
 }
+
+//--- fpga_get_encTelFreq ----------------------
+UINT32 fpga_get_encTelFreq(void)
+{
+	return _EncoderTelFreq;
+}
+
 
 //--- _check_encoder --------------------------------------------------------
 static int _check_encoder(void)

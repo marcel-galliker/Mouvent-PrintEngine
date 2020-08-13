@@ -1028,7 +1028,11 @@ static void _set_pump_speed(UINT32 speed)
         // report actual pump speed, not in percent anymore
 		RX_Status.pump  = (100 * speed) / _PumpPID.val_max;
 	}
-	else RX_Status.pump=INVALID_VALUE;
+	else 
+	{
+		FM4_DAC->DADR0_f.DA = 0;
+		RX_Status.pump=INVALID_VALUE;
+	}
 }
 
 //--- turn_off_pump --------------------------------
