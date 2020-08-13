@@ -112,6 +112,7 @@ namespace RX_DigiPrint.Views.LH702View
         private void CB_PrintGoMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             TcpIp.EPrintGoMode mode;
+            if (_Item==null) return;
             if (CB_PrintGoMode.SelectedValue==null)
                 mode = _Item.PrintGoMode;
             else

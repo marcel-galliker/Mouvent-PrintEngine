@@ -584,6 +584,8 @@ void _update_status(void)
 		pstat->temp				= _Stat->ink_supply[i].heaterTemp;
 		pstat->pumpSpeedSet		= _Stat->ink_supply[i].inkPumpSpeed_set;		
 		pstat->pumpSpeed		= _Stat->ink_supply[i].inkPumpSpeed_measured;
+
+		pstat->purge_putty_ON	= _Cfg->ink_supply[i].purge_putty_ON;
 	}
 }
 
@@ -692,6 +694,8 @@ static void _display_status(void)
 		term_printf("time:              "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str(_Stat->ink_supply[i].time)); term_printf("\n");	
 		term_printf("diff:              "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str(_Stat->ink_supply[i].diff)); term_printf("\n");	
 		term_printf("cylinderPresSet:   "); for (i = 0; i < NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str(_Stat->ink_supply[i].IS_Pressure_Actual)); term_printf("\n");	
+		term_printf("Purge pres putty:  "); for (i = 0; i < NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str(_Cfg->ink_supply[i].purge_putty_pressure)); term_printf("\n");	
+		term_printf("Check state (Time):"); for (i = 0; i < NIOS_INK_SUPPLY_CNT; i++) term_printf("  %d(%5d)", _Stat->ink_supply[i].Check_State, _Stat->ink_supply[i].Check_Time_State); term_printf("\n");	
 		
 		term_printf("Cond. Pump Speed   "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str(_Cfg->ink_supply[i].condPumpSpeed)); term_printf("\n");	
 		term_printf("Cond. Pump Feedback"); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str1(_Cfg->ink_supply[i].condPumpFeedback)); term_printf("\n");	
@@ -878,4 +882,14 @@ void nios_set_temp(int isNo, int temp)
 	
 	_Cfg->ink_supply[isNo].heaterTemp	 = temp *1000;
 	_Cfg->ink_supply[isNo].heaterTempMax = (temp+10) * 1000;
+}
+
+//--- nios_set_purge_pressure ------------------------------
+void nios_set_purge_pressure(int isNo, int pressure)
+{
+	if (isNo > SIZEOF(_Cfg->ink_supply)) return;
+	
+	_Cfg->ink_supply[isNo].purge_putty_pressure = pressure;
+    if (pressure > 0)	_Cfg->ink_supply[isNo].purge_putty_ON = 1;
+    else				_Cfg->ink_supply[isNo].purge_putty_ON = 0;
 }

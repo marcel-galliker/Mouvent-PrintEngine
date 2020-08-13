@@ -171,7 +171,8 @@ namespace RX_DigiPrint.Models
                         int state=Rx.StrToInt32(val[1]);
                         InReferencing = (state==13);
                         InWebIn       = (state==9);
-                        WebInEnabled  = (state!=4 && state!=6);
+                     //   WebInEnabled  = (state!=4 && state!=6);
+                        WebInEnabled  = (state!=5 && state!=6);
                     }
                     if (val[0].Equals("STA_REFERENCE_ENABLE")) ReferenceEnabled = (val[1].Equals("TRUE"));
 
@@ -196,7 +197,7 @@ namespace RX_DigiPrint.Models
             string match=id+'=';
 
             if (!Connected) return "####";
-
+                                
             for(i=0; i<_Variables.Count; i++)
             {
                 if (_Variables[i][0].Equals(uintId))

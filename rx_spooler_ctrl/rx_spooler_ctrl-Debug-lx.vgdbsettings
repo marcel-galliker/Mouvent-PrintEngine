@@ -260,7 +260,7 @@
     <LaunchGDBSettings xsi:type="GDBLaunchParametersNewInstance">
       <DebuggedProgram>$(TargetPath)</DebuggedProgram>
       <GDBServerPort>2002</GDBServerPort>
-      <ProgramArguments>-debug +ipaddr 192.168.200.124</ProgramArguments>
+      <ProgramArguments>-debug </ProgramArguments>
     </LaunchGDBSettings>
     <GenerateCtrlBreakInsteadOfCtrlC>false</GenerateCtrlBreakInsteadOfCtrlC>
     <DeploymentTargetPath />

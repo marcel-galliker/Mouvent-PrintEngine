@@ -51,14 +51,12 @@ static void _tx80x_wd_move_to_pos(int cmd, int pos);
 static int  _steps_2_micron(int steps);
 static int  _micron_2_steps(int micron);
 static void _tx80x_wd_motor_z_test(int steps);
-static void _tx80x_wd_motor_test(int motorNo, int steps);
 
 // global Variables
 static int  _CmdRunning = 0;
 static char _CmdName[32];
 static int  _PrintPos_New = 0;              // in um
 static int  _PrintPos_Act = 0;              // in um
-static int  _WD_in_print = 0;
 static int  _WrinkleDetected = 0;
 
 // Motor movement Parameters
@@ -113,8 +111,13 @@ void tx80x_wd_main(void)
 
     if (RX_StepperStatus.robinfo.moving_wd)
     {
-        _WD_in_print = FALSE;
+        RX_StepperStatus.robinfo.z_in_print = FALSE;
         _WrinkleDetected = 0;
+    }
+
+    if (!RX_StepperStatus.robinfo.ref_done_wd)
+    {
+        RX_StepperStatus.robinfo.z_in_print = FALSE;
     }
 
     RX_StepperStatus.robinfo.wd_front_up = fpga_input(WD_FRONT_STORED_IN);
@@ -154,7 +157,7 @@ void tx80x_wd_main(void)
             if (!ok) RX_StepperStatus.robinfo.ref_done_wd = FALSE;
         }
 
-        _WD_in_print = (_CmdRunning == CMD_LIFT_PRINT_POS && RX_StepperStatus.info.ref_done);
+        RX_StepperStatus.robinfo.z_in_print = (_CmdRunning == CMD_LIFT_PRINT_POS && RX_StepperStatus.robinfo.ref_done_wd);
 
         if (_CmdRunning == CMD_LIFT_REFERENCE && _PrintPos_New)
         {
@@ -188,12 +191,9 @@ void tx80x_wd_handle_menu(char *str)
         case 'u':   tx80x_wd_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_UP_POS, NULL); break;
         case 'a':   tx80x_wd_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_CALIBRATE, NULL); break;
         case 'z':   _tx80x_wd_motor_z_test(atoi(&str[1])); break;
-        case 'm':   _tx80x_wd_motor_test(str[1] - '0', atoi(&str[2])); break;
-        }
-     
+        case 'm':   txrob_motor_test(str[1] - '0', atoi(&str[2])); break;
+        } 
     }
-    
-   
 }
 
 //--- tx80x_wd_menu ----------------------------------------------
@@ -229,6 +229,7 @@ void tx80x_wd_display_status(void)
     term_printf("WD-Motor Front pos:    %d\n", TX_REF_HEIGHT_WD - _steps_2_micron(motor_get_step(MOTOR_WD_FRONT)));
     term_printf("WD-Motor Back pos:     %d\n", TX_REF_HEIGHT_WD - _steps_2_micron(motor_get_step(MOTOR_WD_BACK)));
     term_printf("Wrinkle Detected:      %d\n", RX_StepperStatus.robinfo.wrinkle_detected);
+    term_printf("WD in print pos:       %d\n", RX_StepperStatus.robinfo.z_in_print);
     term_printf("\n");
 }
 
@@ -236,7 +237,7 @@ void tx80x_wd_display_status(void)
 static void _tx80x_wd_do_reference(void)
 {
     motors_stop(MOTOR_WD_BITS);
-
+    motors_config(MOTOR_WD_BITS, CURRENT_HOLD_WD, L3518_STEPS_PER_METER, L3518_INC_PER_METER, STEPS);
     _CmdRunning = CMD_LIFT_REFERENCE;
     RX_StepperStatus.robinfo.moving_wd = TRUE;
     motors_move_by_step(MOTOR_WD_BITS, &_ParRef, -100000, TRUE);
@@ -276,7 +277,7 @@ int tx80x_wd_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             pos = TX_REF_HEIGHT_WD;
             Error(WARN, 0, "CMD_LIFT_PRINT_POS of Wrinkle Detection set to MAX pos=%d.%03d mm", pos / 1000, pos % 1000);
         }
-        if (!_CmdRunning && (!_WD_in_print || (steps != _PrintPos_Act)))
+        if (!_CmdRunning && (!RX_StepperStatus.robinfo.z_in_print || (steps != _PrintPos_Act)))
         {
             _PrintPos_New =
                 _micron_2_steps(TX_REF_HEIGHT_WD + WD_UNDER_PRINT_HIGH - pos);
@@ -375,48 +376,21 @@ static void _tx80x_wd_motor_z_test(int steps)
 }
 
 //--- _txrob_motor_test ---------------------------------
-static void _tx80x_wd_motor_test(int motorNo, int steps)
+ int tx80x_wd_motor_test(int motorNo, int steps)
 {
-    int motors = 1 << motorNo;
-    SMovePar par;
-    int i;
-
-    memset(&par, 0, sizeof(par));
-    par.stop_mux = 0;
-    par.dis_mux_in = 0;
-    par.encCheck = chk_off;
-    RX_StepperStatus.robinfo.moving_wd = TRUE;
-    _CmdRunning = 1;
-
-    if (motorNo == 0)
+    if (motorNo == MOTOR_WD_BACK || motorNo == MOTOR_WD_FRONT)
     {
-        // paramaters tested 14-JAN-20
-        par.speed = 1000; // speed with max tork: 21'333
-        par.accel = 10000;
-        par.current_acc = 400.0; //  max 67 = 0.67 A
-        par.current_run = 300.0; //  max 67 = 0.67 A
-        par.stop_mux = 0;
-        par.dis_mux_in = 0;
-        par.encCheck = chk_std;
-        motors_config(motors, 0, L3518_STEPS_PER_METER, L3518_INC_PER_METER, MICROSTEPS);
-        motors_move_by_step(motors, &par, steps, FALSE);
-    }
-    else if (motorNo == 1)
-    {
-        // paramaters tested 14-JAN-20
+        int motors = 1 << motorNo;
+        SMovePar par;
+        int i;
 
-        par.speed = 21000; // speed with max tork: 21'333
-        par.accel = 10000;
-        par.current_acc = 40.0; //  max 67 = 0.67 A
-        par.current_run = 40.0; //  max 67 = 0.67 A
+        memset(&par, 0, sizeof(par));
         par.stop_mux = 0;
         par.dis_mux_in = 0;
         par.encCheck = chk_off;
-        motors_config(motors, 7.0, 0.0, 0.0, STEPS);
-        motors_move_by_step(motors, &par, steps, TRUE);
-    }
-    else if (motorNo == MOTOR_WD_BACK || motorNo == MOTOR_WD_FRONT)
-    {
+        RX_StepperStatus.robinfo.moving_wd = TRUE;
+        _CmdRunning = 1;
+
         // paramaters tested 14-JAN-20
         par.speed = 10000; // speed with max tork: 21'333
         par.accel = 32000;
@@ -424,20 +398,11 @@ static void _tx80x_wd_motor_test(int motorNo, int steps)
         par.current_run = 300.0;
         par.stop_mux = 0;
         par.dis_mux_in = 0;
+    //  par.encCheck = chk_std;
         par.encCheck = chk_std;
         motors_config(motors, CURRENT_HOLD_WD, L3518_STEPS_PER_METER, L3518_INC_PER_METER, STEPS);
         motors_move_by_step(motors, &par, steps, FALSE);
+        return TRUE;
     }
-    else
-    {
-        par.speed = 1000;
-        par.accel = 1000;
-        par.current_acc = 250.0;
-        par.current_run = 250.0;
-        par.stop_mux = 0;
-        par.dis_mux_in = 0;
-        par.encCheck = chk_off;
-        motors_config(motors, 50, L3518_STEPS_PER_METER, L3518_INC_PER_METER, STEPS);
-        motors_move_by_step(motors, &par, steps, FALSE); 
-    }
+    return FALSE;
 }

@@ -21,6 +21,7 @@ typedef struct
 	char					filepath[MAX_PATH];
 	char					dots[4];
 	SPageId					id;
+	int						offsetWidth;
 	int						flags;
 	UINT8					virtualPasses;
 	UINT8					virtualPass;
@@ -82,7 +83,7 @@ UINT64 data_memsize(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPix
 int  data_malloc	(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPixel, SColorSplitCfg *psplit, int splitCnt, UINT64 *pBufSize, BYTE* buffer[MAX_COLORS]);
 int  data_free		(UINT64 *pBufSize, BYTE* buffer[MAX_COLORS]);
 int  data_load		(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UINT8 multiCopy, int gapPx, int blkNo, int blkCnt, int printMode, int variable, UINT8 virtualPasses, UINT8 virtualPass, int flags, int clearBlockUsed, int same, int smp_bufsize, const char *dots, BYTE* buffer[MAX_COLORS]);
-int  data_same		(SPageId *id, int clrerearBlockUsed);
+int  data_same		(SPageId *id, int offsetWidth,  int clrerearBlockUsed);
 // int  data_reload	(SPageId *id);
 void data_send_id	(SPageId *id);
 int	 data_next_id	(void);

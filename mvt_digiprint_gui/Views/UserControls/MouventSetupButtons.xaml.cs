@@ -41,11 +41,12 @@ namespace RX_DigiPrint.Views.UserControls
         }
 
         EPrintState _printerState = EPrintState.ps_undef;
+        private int _WebInStartTimer=0;
 
         //--- PrinterStatusChanged --------------------------------------------
         private void PrinterStatusChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (RxGlobals.PrinterStatus.PrintState!=_printerState)
+            if (_WebInStartTimer==0 && RxGlobals.PrinterStatus.PrintState!=_printerState)
             {
                 if (RxGlobals.PrinterStatus.PrintState != _printerState)
                 {
@@ -66,9 +67,8 @@ namespace RX_DigiPrint.Views.UserControls
                     CMD_JOG_FWD.Visibility = visible;
                     CMD_JOG_BWD.Visibility = visible;
                     CMD_WEBIN.Visibility   = invisible;
+                    if (_WebInStartTimer==0 && CMD_WEBIN.Visibility!=Visibility.Visible) CMD_WEBIN.IsChecked=false;
                 //  CMD_WEBIN.IsEnabled    = (RxGlobals.PrinterStatus.PrintState==EPrintState.ps_off || RxGlobals.PrinterStatus.PrintState==EPrintState.ps_ready_power);
-                    if (invisible==Visibility.Collapsed) 
-                        CMD_WEBIN.IsChecked=false;
                 }
            }
 
@@ -87,6 +87,7 @@ namespace RX_DigiPrint.Views.UserControls
         {
             RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_SET_CMD, "CMD_CLEAR_ERROR");
             CMD_WEBIN.IsChecked = true;
+            _WebInStartTimer = 4;
             if (RxGlobals.PrintSystem.IsScanning) RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_SET_CMD, "CMD_SETUP/CMD_WEBIN");
             else RxGlobals.RxInterface.SendCommand(TcpIp.CMD_PAUSE_PRINTING);
         }
@@ -98,7 +99,8 @@ namespace RX_DigiPrint.Views.UserControls
             RxGlobals.Plc.RequestVar("Application.GUI_00_001_Main" + "\n"
                 + "STA_WEBIN_PREP_FWD" + "\n"
                 + "STA_WEBIN_PREP_BWD" + "\n"
-                + "STA_WASHING_TIMER" + "\n");
+                + "STA_WASHING_TIMER" + "\n"
+                + "STA_MACHINE_STATE" + "\n");
             {
                 val = RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_WASHING_TIMER");
                 int time = Rx.StrToInt32(val);
@@ -114,6 +116,13 @@ namespace RX_DigiPrint.Views.UserControls
                 val = RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_WEBIN_PREP_BWD");
                 CMD_JOG_BWD.IsBusy = (val != null) && val.Equals("TRUE");
             }
+
+            int state = Rx.StrToInt32(RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_MACHINE_STATE"));
+            if (_WebInStartTimer>0)
+			{
+                if (--_WebInStartTimer==0 && state==3) WebIn_Clicked(CMD_WEBIN, null);
+			}
+            else if (state==3) CMD_WEBIN.IsChecked=false;
         }
 
         //--- Clean_Clicked -------------------------------------------------
@@ -142,21 +151,13 @@ namespace RX_DigiPrint.Views.UserControls
                 RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_SET_CMD, "CMD_SETUP/CMD_GLUE");
         }
 
-        //--- WebIn_IsVisibleChanged ------------------------------
-        private void WebIn_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            if ((bool)e.NewValue)
-            {
-                PrinterStatusChanged(null, null);
-            }
-        }
-
         //--- Jog_PreviewMouseDown -------------------------------
         private void Jog_PreviewMouseDown(object sender, MouseButtonEventArgs e) 
         {
             MvtButton button = sender as MvtButton;
             if (button!=null) 
             {
+                RxGlobals.Events.AddItem(new LogItem("Mouse down {0}", button.Name)); 
                 Debug.WriteLine("PreviewMouseDown", button.Name);
                 button.IsChecked = true;
                 RxGlobals.Plc.SetVar(button.Name, 1);

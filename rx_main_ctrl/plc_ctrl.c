@@ -495,6 +495,9 @@ int  plc_set_printpar(SPrintQueueItem *pItem)
 //--- plc_start_printing -----------------------------------------------
 int  plc_start_printing(void)
 {
+
+	if (RX_Config.printer.type==printer_LH702 && !_SimuPLC) Error(WARN, 0, "Simulate LH702 by LB702");
+
 	TrPrintfL(TRUE, "plc_start_printing");
 	if (_PlcState!=plc_run)	
 	{
@@ -850,9 +853,13 @@ static void _plc_get_var(RX_SOCKET socket, char *varList)
 		} 
 		else
 		{
-			strcpy(var, str);				
+			strcpy(var, str);
 			if (lc_get_value_by_name(name, value)==0) len += sprintf(&answer[len], "=%s", value);
-			else									  len += sprintf(&answer[len], "=ERROR");
+			else
+			{
+				if (_SimuPLC)	len += sprintf(&answer[len], "=SIMU");
+				else			len += sprintf(&answer[len], "=ERROR");
+			}
 	//		TrPrintfL(!strcmp(name, "Application.GUI_00_001_Main.PAR_FLEXO_CONFIGURATION"), "_plc_get_var socket=%d >>%s=%s<<", socket, name, value);
 		}
 		len += sprintf(&answer[len], "\n");
@@ -1104,7 +1111,7 @@ void plc_load_material(char *material)
 					RX_Config.stepper.material_thickness	= (INT32)(0.5+1000*strtod(val, NULL));
 				if (!strcmp(name, "XML_ENC_OFFSET"))			RX_Config.printer.offset.incPerMeter[0] = atoi(val);
 			}
-			}
+		}
 
 		//--- save in config --------------------------
 		if (load)

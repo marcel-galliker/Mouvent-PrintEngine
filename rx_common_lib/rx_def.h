@@ -1195,6 +1195,7 @@ typedef struct SInkSupplyStat
 	INT32	cylinderSetpoint;		//  Pressure intermediate Tank
 	INT32	airPressureTime;
 	INT32	flushTime;
+	INT32	purge_putty_ON;
 	INT32   presLung;			//  Lung pressure
 	INT32	condPresOut;	
 	INT32	condPresIn;  

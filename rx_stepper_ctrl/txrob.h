@@ -20,5 +20,7 @@ int  txrob_menu(void);
 void txrob_main(int ticks, int menu);
 	
 int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata);
+void txrob_motor_test(int motor, int steps);
+
 
 

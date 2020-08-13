@@ -169,6 +169,7 @@ int		machine_start_printing(void)
 //--- machine_pause_printing ----------------------
 int		machine_pause_printing(int fromGui)
 {
+	if (_CappingTimer==0) _CappingTimer=rx_get_ticks()+CAPPING_TIMEOUT;
 	switch(_MInterface) 
 	{
 	case mi_none:	return REPLY_OK;

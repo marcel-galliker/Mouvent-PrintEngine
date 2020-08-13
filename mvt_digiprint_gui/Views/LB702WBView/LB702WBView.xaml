@@ -50,7 +50,7 @@
                    
                         <StackPanel Grid.Row="0" x:Name="SettingsTab" Orientation="Horizontal" Background="Transparent" Margin="0,0,0,10">
                             <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Main"          Content="Main"          IsChecked="true"/>
-                            <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Log"           Content="Log"           />
+                            <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Log"           Content="PLC Log"           />
                             <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Plc"           Content="PLC Info"      Last="True"/>
                         </StackPanel>
 

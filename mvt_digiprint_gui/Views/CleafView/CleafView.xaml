@@ -56,8 +56,8 @@
         <StackPanel x:Name="SettingsTab" Grid.Row="2" Orientation="Horizontal" Background="Transparent" Margin="10">
             <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Main"          Content="Main" IsChecked="True"/>
             <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Order"         Content="Order"/>
-            <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Log"           Content="Log" />
             <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Cfg"           Content="Configuration" />
+            <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Log"           Content="PLC Log" />
             <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_PlcInfo"       Content="Plc Info"  Last="True"/>
         </StackPanel>
 

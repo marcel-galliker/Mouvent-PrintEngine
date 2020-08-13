@@ -8,6 +8,7 @@
         xmlns:views_pq="clr-namespace:RX_DigiPrint.Views.PrintQueueView"
         xmlns:views_ps="clr-namespace:RX_DigiPrint.Views.PrintSystemView"
         xmlns:views_al="clr-namespace:RX_DigiPrint.Views.Alignment"
+        xmlns:view_lh702="clr-namespace:RX_DigiPrint.Views.LH702View"
         xmlns:views_psex="clr-namespace:RX_DigiPrint.Views.PrintSystemExtendedView"
         xmlns:dragablz="clr-namespace:Dragablz;assembly=Dragablz"
         mc:Ignorable="d"
@@ -34,7 +35,13 @@
     -->
 
     <Window.Resources>
-
+        <Style x:Key="TabItemStyle" TargetType="TextBlock">
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="{StaticResource MvtFontSizeTabHeader}" />
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
     </Window.Resources>
 
     <Grid UseLayoutRounding="True" Background="White" ShowGridLines="False">
@@ -62,10 +69,7 @@
             <TabItem x:Name="TabPrintQueue" IsEnabled="False">
                 <TabItem.Header>
                     <Grid Width="200" Height="50" Background="{Binding SelectedTabName, Converter={StaticResource SelectedTabConverter}, ConverterParameter=TabPrintQueue}" x:Name="PrintQueueName">
-                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <TextBlock FontSize="{StaticResource MvtFontSizeTabHeader}"  FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White">Print Queue</TextBlock>
-                            <Rectangle Fill="Transparent" Width="auto" Height="2"></Rectangle>
-                        </StackPanel>
+                        <TextBlock Style="{StaticResource TabItemStyle}" Text="Print Queue" />
                     </Grid>
                 </TabItem.Header>
                 <views_pq:PrintQueueView x:Name="PrintQueueView"/>
@@ -73,22 +77,29 @@
             
             <TabItem x:Name="TabMachine">
                 <TabItem.Header>
-                    <Grid Width="200" Height="50" Background="{Binding SelectedTabName, Converter={StaticResource SelectedTabConverter}, ConverterParameter=TabLB701}">
-                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <TextBlock FontSize="{StaticResource MvtFontSizeTabHeader}"  FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White" Text="Machine" x:Name="MachineName"/>
-                            <Rectangle Fill="Transparent" Width="auto" Height="2"></Rectangle>
-                        </StackPanel>
+                    <Grid Width="200" Height="50" Background="{Binding SelectedTabName, Converter={StaticResource SelectedTabConverter}, ConverterParameter=TabMachine}" >
+                        <TextBlock Style="{StaticResource TabItemStyle}" Text="Machine" x:Name="MachineName"/>
                     </Grid>
                 </TabItem.Header>
+            </TabItem>
+
+            <TabItem x:Name="TabLH702">
+                <TabItem.Header>
+                    <Grid Width="200" Height="50" Background="{Binding SelectedTabName, Converter={StaticResource SelectedTabConverter}, ConverterParameter=TabLH702}">
+                        <TextBlock Style="{StaticResource TabItemStyle}" Text="LH 702"/>
+                    </Grid>
+                </TabItem.Header>
+                <Grid>
+                    <view_lh702:LH702_View/>
+                </Grid>
             </TabItem>
 
             <TabItem x:Name="TabEvents">
                 <TabItem.Header>
                     <Grid Width="200" Height="50" Background="{Binding SelectedTabName, Converter={StaticResource SelectedTabConverter}, ConverterParameter=TabEvents}">
-
                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <TextBlock FontSize="{StaticResource MvtFontSizeTabHeader}"  FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White">Events</TextBlock>
-                            <Rectangle x:Name="TabHeaderUnderline" Fill="{Binding TabHeaderUnderlineColor}" Width="auto" Height="2"></Rectangle>
+                            <TextBlock Style="{StaticResource TabItemStyle}" Text="Events"/>
+                            <Rectangle Fill="{Binding TabHeaderUnderlineColor}" Width="auto" Height="2"/>
                         </StackPanel>
                     </Grid>
                 </TabItem.Header>
@@ -100,11 +111,7 @@
             <TabItem x:Name="TabLog">
                 <TabItem.Header>
                     <Grid Width="200" Height="50" Background="{Binding SelectedTabName, Converter={StaticResource SelectedTabConverter}, ConverterParameter=TabLog}">
-
-                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <TextBlock FontSize="{StaticResource MvtFontSizeTabHeader}"  FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White">Log</TextBlock>
-                            <Rectangle Fill="Transparent" Width="auto" Height="2"></Rectangle>
-                        </StackPanel>
+                        <TextBlock Style="{StaticResource TabItemStyle}" Text="Log"/>
                     </Grid>
                 </TabItem.Header>
                 <Grid>
@@ -115,11 +122,7 @@
             <TabItem x:Name="TabNetwork">
                 <TabItem.Header>
                     <Grid Width="200" Height="50" Background="{Binding SelectedTabName, Converter={StaticResource SelectedTabConverter}, ConverterParameter=TabNetwork}">
-
-                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <TextBlock FontSize="{StaticResource MvtFontSizeTabHeader}"  FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White">Network</TextBlock>
-                            <Rectangle Fill="Transparent" Width="auto" Height="2"></Rectangle>
-                        </StackPanel>
+                        <TextBlock Style="{StaticResource TabItemStyle}" Text="Network"/>
                     </Grid>
                 </TabItem.Header>
                 <Grid>
@@ -130,14 +133,11 @@
             <TabItem x:Name="TabPrintSystem">
                 <TabItem.Header>
                     <Grid Width="200" Height="50" Background="{Binding SelectedTabName, Converter={StaticResource SelectedTabConverter}, ConverterParameter=TabPrintSystem}">
-                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <TextBlock FontSize="{StaticResource MvtFontSizeTabHeader}"  FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White">Print System</TextBlock>
-                            <Rectangle Fill="Transparent" Width="auto" Height="2"></Rectangle>
-                        </StackPanel>
+                        <TextBlock Style="{StaticResource TabItemStyle}" Text="Print System"/>
                     </Grid>
                 </TabItem.Header>
                 <Grid>
-                   <views_ps:PrintSystemView x:Name="PrintSystemView"/>
+                    <views_ps:PrintSystemView x:Name="PrintSystemView"/>
                     <views_psex:PrintSystemExtendedView x:Name="PrintSystemExtendedView"/>
                 </Grid>
             </TabItem>
@@ -145,30 +145,13 @@
             <TabItem x:Name="TabAlignment">
                 <TabItem.Header>
                     <Grid Width="200" Height="50" Background="{Binding SelectedTabName, Converter={StaticResource SelectedTabConverter}, ConverterParameter=TabAlignment}">
-                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <TextBlock FontSize="{StaticResource MvtFontSizeTabHeader}" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White">Alignment</TextBlock>
-                            <Rectangle Fill="Transparent" Width="auto" Height="2"></Rectangle>
-                        </StackPanel>
+                        <TextBlock Style="{StaticResource TabItemStyle}" Text="Alignment"/>
                     </Grid>
                 </TabItem.Header>
                 <Grid>
                     <views_al:AlignmentView x:Name="AlignmentView"/>
                 </Grid>
             </TabItem>
-
-            <!--
-            <TabItem x:Name="TabCB612">
-                <TabItem.Header>
-                    <StackPanel>
-                        <TextBlock FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White">Print System</TextBlock>
-                        <Rectangle Fill="Transparent" Width="auto" Height="2"></Rectangle>
-                    </StackPanel>
-                </TabItem.Header>
-                <Grid>
-                    <views_cb:CB612View x:Name="CB612View"/>
-                </Grid>
-            </TabItem>
-            -->
 
         </dragablz:TabablzControl>
 

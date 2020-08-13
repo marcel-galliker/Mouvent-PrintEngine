@@ -50,6 +50,7 @@ typedef struct
 	SPageId id;
 	int		blkNo;
 	int		blkCnt;
+	int		offsetWidth;
 } SLoadedFiles;
 
 //--- Statics -----------------------------------------------------------------
@@ -218,7 +219,7 @@ static int _handle_spool_deconnected(RX_SOCKET socket, const char *peerName)
 	{
 		ErrorEx(dev_spooler, no, ERR_ABORT, 0, "Connection lost");
 		_Spooler[no].socket = INVALID_SOCKET;
-		_start_spooler_ctrl(no);
+	//	_start_spooler_ctrl(no);
 	}
 	return REPLY_OK;
 }
@@ -501,7 +502,7 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 	if (arg_simuHeads) Error(LOG, 0, "Printing ID=%d, page=%d, copy=%d, scan=%d", pid->id, pid->page, pid->copy, pid->scan);
 	
 	_Ready--;
-		
+	
 	memset(&msg, 0, sizeof(msg));
 	msg.hdr.msgLen		= sizeof(msg);
 	msg.hdr.msgId		= CMD_PRINT_FILE;
@@ -522,10 +523,11 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 	{
 		int i;
 		SPageId *p;
+		int ow=microns_to_px(offsetWidth, DPI_X);
 		for (i=0; i<SIZEOF(_LoadedFiles); i++)
 		{
 			p=&_LoadedFiles[i].id;
-			if ((p->id==pid->id) && (p->page==pid->page) && (p->scan==pid->scan)) // copy changes! 
+			if ((p->id==pid->id) && (p->page==pid->page) && (p->scan==pid->scan) && ow==_LoadedFiles[i].offsetWidth) // copy changes! 
 			{
 				msg.flags |= FLAG_SAME;
 				msg.blkNo = _LoadedFiles[i].blkNo;
@@ -667,21 +669,33 @@ int spool_abort_printing(void)
 //--- _do_print_file_rep ------------------------------------------------------
 static int _do_print_file_rep(RX_SOCKET socket, int spoolerNo, SPrintFileRep *msg)
 {
+	int i;
 	_MsgGot++;
 //	if (msg->bufReady)
 	{
 		TrPrintfL(TRUE, "****** Spooler[%d]:rep_print_file id=%d, page=%d, copy=%d, scan=%d, bufReady=%d, same=%d, _MsgSent=%d, _MsgGot=%d", spoolerNo, msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->bufReady, msg->same, _MsgSent, _MsgGot);
 			
-		if (!msg->same)
+		if (msg->clearBlockUsed)
 		{
-			int i;
+			for (i=0; i<SIZEOF(_LoadedFiles); i++)
+			{
+				SPageId *pid = &_LoadedFiles[i].id;
+				if (pid->id==msg->id.id && pid->page==msg->id.page && pid->scan==msg->id.scan && _LoadedFiles[i].offsetWidth==msg->offsetWidth)
+				{
+					memset(&_LoadedFiles[i], 0, sizeof(_LoadedFiles[i]));
+				}
+			}
+		}
+		else if (!msg->same)
+		{
 			for (i=0; i<SIZEOF(_LoadedFiles); i++)
 			{
 				if (_LoadedFiles[i].blkCnt==0)
 				{
 					memcpy(&_LoadedFiles[i].id, &msg->id, sizeof(_LoadedFiles[i].id));
-					_LoadedFiles[i].blkNo  = _BlkNo;
-					_LoadedFiles[i].blkCnt = msg->blkCnt;
+					_LoadedFiles[i].offsetWidth = msg->offsetWidth;
+					_LoadedFiles[i].blkNo		= _BlkNo;
+					_LoadedFiles[i].blkCnt		= msg->blkCnt;
 					break;
 				}
 			}
@@ -776,9 +790,10 @@ int spool_send_msg(void *msg)
 		if(_Spooler[i].used)
 		{
 			if (_Spooler[i].socket!=INVALID_SOCKET && sok_send(&_Spooler[i].socket,msg)==REPLY_OK) cnt++; 
-			else ErrorEx(dev_spooler, i, ERR_ABORT, 0, "not connected");
+		//	else ErrorEx(dev_spooler, i, ERR_ABORT, 0, "not connected");
 		}
 	}
+	if (!cnt) ErrorEx(dev_spooler, i, ERR_ABORT, 0, "not connected");
 	return cnt;
 }
 

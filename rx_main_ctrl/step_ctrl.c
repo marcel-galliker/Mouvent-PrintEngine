@@ -488,11 +488,7 @@ static void _step_set_config(int no)
 	cfg.material_thickness = RX_Config.stepper.material_thickness;
 	cfg.boardNo=no;
 		
-	if (RX_Config.printer.type==printer_LH702 && !str_start(RX_Hostname, "LH702")) 
-	{
-		Error(WARN, 0, "Simulate LH702 by LB702");
-		cfg.printerType = printer_LB702_UV;
-	}
+	if (RX_Config.printer.type==printer_LH702 && !str_start(RX_Hostname, "LH702")) cfg.printerType = printer_LB702_UV;
 
 	switch(_StepperType)
 	{

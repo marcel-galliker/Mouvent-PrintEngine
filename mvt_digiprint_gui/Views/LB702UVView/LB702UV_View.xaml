@@ -59,8 +59,8 @@
 
                 <StackPanel Margin="0,0,0,10" Grid.Row="0" x:Name="SettingsTab" Orientation="Horizontal" Background="Transparent">
                     <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Main"          Content="Main"          IsChecked="true"/>
-                <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Cleaning"          Content="Cleaning"/>
-                <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Log"           Content="Log"           />
+                 <!--   <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Cleaning"      Content="Cleaning"/> -->
+                    <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Log"           Content="PLC Log"           />
                     <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Plc"           Content="PLC Info"      Last="True"/>
                 </StackPanel>   
 
@@ -69,28 +69,30 @@
                 <Grid Grid.Row="1" Visibility="{Binding ElementName=RB_Main, Path=IsChecked, Converter={StaticResource IntToVisible_Converter}}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="auto"/>
-                    <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                    <local:LB702UV_Par Grid.Column="0"/>
+                <local:LB702UV_Par Grid.Column="0"/>
 
-                    <ScrollViewer Grid.Column="1" Margin="10,0,0,0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="auto"></RowDefinition>
-                                <RowDefinition Height="*"></RowDefinition>
-                            </Grid.RowDefinitions>
+                <ScrollViewer Grid.Column="1" Margin="5,0,0,0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto"></RowDefinition>
+                            <RowDefinition Height="*"></RowDefinition>
+                        </Grid.RowDefinitions>
 
-                            <local:LB702UV_Status Grid.Row="0"/>
-                            <local:LB702UV_Cmd Margin="0,10,0,0" Grid.Row="1"/>
-                        </Grid>
-                    </ScrollViewer>
+                        <local:LB702UV_Status Grid.Row="0"/>
+                        <local:LB702UV_Cmd Margin="0,10,0,0" Grid.Row="1"/>
+                    </Grid>
+                </ScrollViewer>
+                <rx_uc:StepperView Grid.Column="2" Margin="5,0,0,0"/>
+            </Grid>
 
-                   
-                </Grid>
-
-            <!-- TAB: Cleaning ____________________________________________________________-->
+            <!-- TAB: Cleaning ____________________________________________________________
             <rx_uc:StepperView Visibility="{Binding ElementName=RB_Cleaning, Path=IsChecked, Converter={StaticResource IntToVisible_Converter}}" Grid.Row="1"/>
+            -->
             
             <!-- TAB: PLC Log ____________________________________________________________-->
                 <rx_uc:PlcLog Grid.Row="1"
@@ -100,7 +102,7 @@
                       />
 
                 <!-- TAB: PLC Info ______________________________________________________________________________________-->
-            <rx_uc:PlcStatus HorizontalAlignment="Stretch" Grid.Row="1" Visibility="{Binding ElementName=RB_Plc,  Path=IsChecked, Converter={StaticResource IntToVisible_Converter}}"/>
+                <rx_uc:PlcStatus HorizontalAlignment="Stretch" Grid.Row="1" Visibility="{Binding ElementName=RB_Plc,  Path=IsChecked, Converter={StaticResource IntToVisible_Converter}}"/>
             </Grid>
    
 

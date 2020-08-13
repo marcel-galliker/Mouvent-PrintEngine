@@ -328,13 +328,9 @@ namespace RX_DigiPrint.Models
         //--- SetStatus --------------------------------------------------
         public void SetStatus(int no, TcpIp.SInkSupplyStat msg)
         {
-            Console.WriteLine("InkSupply[{0}].connedted={1:x} {2:x}", no, msg.info, (msg.info & 0x00000001));
-
             Info            = msg.info;
             Warn            = msg.warn;
             Err             = msg.err;
-            if (msg.err!=0)
-                Err             = msg.err;
 
             CylinderPresSet  = msg.cylinderPresSet;
             CylinderPres     = msg.cylinderPres;

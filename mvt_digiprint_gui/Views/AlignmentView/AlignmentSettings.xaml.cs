@@ -4,6 +4,7 @@ using RX_DigiPrint.Models;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace RX_DigiPrint.Views.AlignmentView
 {
@@ -52,7 +53,9 @@ namespace RX_DigiPrint.Views.AlignmentView
             set { _unitRegister = value; OnPropertyChanged("UnitRegister"); }
         }
 
-        public AlignmentSettings()
+        public bool DebugConnectRobot { get; set; }
+
+        public AlignmentSettings(bool robotConnected)
         {
             InitializeComponent();
             DataContext = this;
@@ -89,6 +92,7 @@ namespace RX_DigiPrint.Views.AlignmentView
             {
                 UnitRegister = unitMM;
             }
+            DebugConnectRobot = robotConnected;
         }
 
         private void Okay_Clicked(object sender, RoutedEventArgs e)
@@ -131,6 +135,10 @@ namespace RX_DigiPrint.Views.AlignmentView
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             RxGlobals.Screen.PlaceWindow(this);
+        }
+
+        private void RobotConnectButton_Click(object sender, RoutedEventArgs e)
+        {
         }
     }
 }

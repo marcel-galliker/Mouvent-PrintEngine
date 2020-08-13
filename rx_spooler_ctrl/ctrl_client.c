@@ -51,6 +51,7 @@ static SPrintFileCmd	_PrintFile_Msg;
 
 static int				_Running;
 static int				_Abort;
+static int				_data_malloc_reply;
 static int				_ResetCnt;
 static int				_StartCnt;
 static int				_FirstFile;
@@ -308,6 +309,7 @@ static int _do_spool_cfg(RX_SOCKET socket, SSpoolerCfg *pmsg)
 	memset(&_LoadedId, 0, sizeof(_LoadedId));
 	_Running	 = FALSE;
 	_Abort		 = FALSE;
+	_data_malloc_reply = REPLY_OK;
 	_ResetCnt	 = 0;
 	_FirstFile	 = TRUE;
 	_Paused		 = FALSE;
@@ -372,11 +374,8 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 	static UINT8			multiCopy;
 	static char				path[MAX_PATH];
 	
-	if (_Abort) 
-	{
-		Error(LOG, 0, "ABORT");
-		return REPLY_ERROR;
-	}
+	if (_Abort) return Error(LOG, 0, "ABORT");
+	if (_data_malloc_reply) return REPLY_ERROR;
 	
 	_MsgGot++;
 	memcpy(&msg, pdata, sizeof(msg)); // local copy as original can be overwritten by the communication task!
@@ -432,7 +431,10 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 			ret = data_get_size(path, msg.id.page, &msg.gapPx, &widthPx, &lengthPx, &bitsPerPixel, &multiCopy);
 			TrPrintfL(TRUE, "data_get_size >>%s<<: gapPx=%d, widthPx=%d, lengthPx=%d, bitsPerPixel=%d, multiCopy=%d", path, msg.gapPx, widthPx, lengthPx, bitsPerPixel, multiCopy);
 			if (ret==REPLY_NOT_FOUND) 
-				Error(ERR_STOP, 0, "Could not load file >>%s<<", msg.filename);
+			{
+				if (_MsgGot==1) Error(ERR_ABORT, 0, "Could not load file >>%s<<", msg.filename);
+				else Error(ERR_STOP, 0, "Could not load file >>%s<<", msg.filename);
+			}
 		}
 	}
 	//--- send feedback ---------------------------------------------------------------------
@@ -445,10 +447,12 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 		linelenBt = (linelenBt+31) & ~31;// align to 256 Bits (32 Bytes)
 		reply.blkCnt = (linelenBt *lengthPx +RX_Spooler.dataBlkSize-1) / RX_Spooler.dataBlkSize;
 		memcpy(&reply.id, &msg.id, sizeof(reply.id));
+		reply.offsetWidth = msg.offsetWidth;
+		reply.clearBlockUsed = msg.clearBlockUsed;
 		reply.bufReady   = data_ready();
 		if (sok_send(&socket, &reply)==REPLY_OK) _MsgSent++;
 	}
-	
+
 	if (!same)
 	{
 		if (msg.printMode==PM_SCAN_MULTI_PAGE) multiCopy=1;
@@ -460,16 +464,16 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 				data_clear(_Buffer[_BufferNo]);
 			}
 			TrPrintfL(TRUE, "data_malloc (id=%d, page=%d, copy=%d, scan=%d) _BufferNo=%d", msg.id.id, msg.id.page, msg.id.copy, msg.id.scan, _BufferNo);
-			ret = data_malloc (msg.printMode, widthPx, lengthPx, bitsPerPixel, RX_Color, SIZEOF(RX_Color), &_BufferSize[_BufferNo], _Buffer[_BufferNo]);
+			_data_malloc_reply = data_malloc (msg.printMode, widthPx, lengthPx, bitsPerPixel, RX_Color, SIZEOF(RX_Color), &_BufferSize[_BufferNo], _Buffer[_BufferNo]);
 		}
 		if (_Abort)
 			return REPLY_ERROR;
-		if (ret==REPLY_ERROR)
+		if (_data_malloc_reply!=REPLY_OK)
 		{
+
 			Error(ERR_STOP, 0,  "Could not allocate memory file >>%s<<, page=%d", path, msg.id.page);
-			Error(LOG, 0,		"Memory expected=%dMB, free=%d MB", (int)(data_memsize(msg.printMode, widthPx, lengthPx, bitsPerPixel)/1024/1024), rx_mem_get_freeMB());
 			if (multiCopy>1)	Error(LOG, 0,   "Make Image width a multilpe of 4 (multicopy=%d)", multiCopy);
-			return REPLY_ERROR;				
+			return REPLY_ERROR;
 		}
 	}
 
@@ -483,7 +487,7 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 		
 		if (msg.flags&FLAG_SAME)
 		{
-			data_same(&msg.id, msg.clearBlockUsed);				
+			data_same(&msg.id, msg.offsetWidth, msg.clearBlockUsed);				
 		}
 		else
 		{
@@ -549,6 +553,16 @@ static int _do_print_abort(RX_SOCKET socket)
 	data_abort();
 	hc_abort_printing();
 	sok_send_2(&socket, REP_PRINT_ABORT, 0, NULL);
+
+	//--- memory management (large files on TX) -----------------------
+	{
+		// always start with _Buffer[0], free all other buffers!
+		_BufferNo = BUFFER_CNT-1;
+		for(int b=1; b<BUFFER_CNT; b++)
+		{
+			data_free(&_BufferSize[b], _Buffer[b]);
+		}
+	}
 	return REPLY_OK;
 }
 

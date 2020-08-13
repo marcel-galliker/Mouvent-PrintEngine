@@ -23,8 +23,6 @@ static HANDLE _Mutex = NULL;
 static int _Buffers=0;
 static UINT64 _SizeAllocated=0;
 
-#define  USE_MLOCK
-
 //---------------------------------------------------------------------
 //
 //
@@ -41,9 +39,6 @@ typedef struct
 //--- rx_mem_init ---------------------------------------------------
 void  rx_mem_init(UINT64 size)
 {
-    #ifndef USE_MLOCK
-		Error(LOG, 0, "mlock not used");
-	#endif
 }
 
 //--- rx_mem_alloc ------------------------------------------------------ 
@@ -55,14 +50,12 @@ BYTE* rx_mem_alloc(UINT64 size)
 	
 	if (_Mutex==NULL) _Mutex = rx_mutex_create();
 	#ifdef linux
-		if (size/(1024*1024)<rx_mem_get_freeMB()) buf = malloc(size+sizeof(SBuffer));
+		if (size/(1024*1024)<=rx_mem_get_freeMB()) buf = malloc(size+sizeof(SBuffer));
 		if (buf==NULL) 
 		{
 			rx_mem_clear_caches();
-            #ifdef USE_MLOCK
 			Error(WARN, 0, "Linux cleared caches.");
-			#endif
-			if (size/(1024*1024)>=rx_mem_get_freeMB()) return NULL;
+			if (size/(1024*1024)>rx_mem_get_freeMB()) return NULL;
 			buf = malloc(size+sizeof(SBuffer));
 		}
 	#else
@@ -71,14 +64,12 @@ BYTE* rx_mem_alloc(UINT64 size)
 	if  (buf) 
 	{
 		#ifdef linux 
-			#ifdef USE_MLOCK
-				// printf("mlock(%p, %u MB)\n", buf, (unsigned)(size/1024/1024));
-				if (mlock(buf, size+sizeof(SBuffer)))
-					err = errno;
-			#endif
+			// printf("mlock(%p, %u MB)\n", buf, (unsigned)(size/1024/1024));
+			if (mlock(buf, size+sizeof(SBuffer)))
+				err = errno;
 		#endif
 		_Buffers ++;
-		_SizeAllocated += size;
+		_SizeAllocated += (size+sizeof(SBuffer));
 
 		buf->count=0;
 		buf->sem_IsFree = rx_sem_create();
@@ -89,9 +80,10 @@ BYTE* rx_mem_alloc(UINT64 size)
 }
 
 //--- rx_use ---------------------------------------------------------
-void rx_mem_use(BYTE *ptr)
+int rx_mem_use(BYTE *ptr)
 {
 	// increment counter
+	int cnt=0;
 	if (ptr)
 	{
 		SBuffer *buf = ((SBuffer*)ptr) - 1;
@@ -99,10 +91,11 @@ void rx_mem_use(BYTE *ptr)
 		rx_mutex_lock(_Mutex);
 		if (buf->count<0)
 			buf->count=buf->count;
-		buf->count++;
+		cnt = (++buf->count);
 		// printf("rx_mem_use %p, cnt=%d, _Buffers=%d\n", ptr, buf->count, _Buffers);
 		rx_mutex_unlock(_Mutex);
 	}
+	return cnt;
 }
 
 //--- rx_mem_unuse -------------------------------------------------------
@@ -138,16 +131,19 @@ int  rx_mem_cnt	(BYTE *ptr)
 }
 
 //--- rx_mem_use_clear -----------------------------------
-void  rx_mem_use_clear(BYTE *ptr)
+int  rx_mem_use_clear(BYTE *ptr)
 {
+	int cnt=0;
 	if (ptr)
 	{
 		SBuffer *buf = ((SBuffer*)ptr) - 1;
 		rx_mutex_lock(_Mutex);
+		cnt=buf->count;
 		buf->count=0;
 		rx_mutex_unlock(_Mutex);
 		if (buf->sem_IsFree) rx_sem_post(buf->sem_IsFree);
 	}
+	return cnt;
 }
 
 
@@ -162,13 +158,11 @@ void  rx_mem_free(BYTE **ptr)
 		if (!buf->count)
 		{
 //			TrPrintfL(TRUE, "rx_mem_free 0x%08x", *ptr);
-			#ifdef ___linux
-				#ifdef USE_MLOCK
-					munlock(buf, buf->size+sizeof(SBuffer));
-				#endif
+			#ifdef linux
+				munlock(buf, buf->size+sizeof(SBuffer));
 			#endif
 			_Buffers--;
-			_SizeAllocated-=buf->size;
+			_SizeAllocated -= (buf->size+sizeof(SBuffer));
 			if (buf->sem_IsFree) rx_sem_destroy(&buf->sem_IsFree);
 			free(buf);
 			*ptr=NULL;
@@ -191,12 +185,10 @@ void  rx_mem_free_force(BYTE **ptr)
 //			TrPrintfL(TRUE, "rx_mem_free 0x%08x", *ptr);
 //			munlock(buf->data, buf->size);
 			#ifdef linux
-				#ifdef USE_MLOCK
-					munlock(buf, buf->size+sizeof(SBuffer));
-				#endif
+				munlock(buf, buf->size+sizeof(SBuffer));
 			#endif
 			_Buffers--;
-			_SizeAllocated-=buf->size;
+			_SizeAllocated -= (buf->size+sizeof(SBuffer));
 			if (buf->sem_IsFree) rx_sem_destroy(&buf->sem_IsFree);
 			free(buf);
 			*ptr=NULL;

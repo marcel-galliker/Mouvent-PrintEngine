@@ -76,7 +76,6 @@ namespace RX_DigiPrint.Views
             this.Title=System.IO.Path.GetFileNameWithoutExtension(System.Windows.Forms.Application.ExecutablePath);
 
             MainNotConnected.DataContext  = RxGlobals.RxInterface;
-            TabHeaderUnderline.DataContext = this;
             TabCtrl.DataContext = this;
 
             RxGlobals.License.Update();
@@ -90,6 +89,8 @@ namespace RX_DigiPrint.Views
 
             RxGlobals.User.PropertyChanged += User_PropertyChanged;
             _UserTypeChanged();
+
+            _ShowTab(false, TabLH702, AddLocationHint.After);
         }
 
         
@@ -183,7 +184,7 @@ namespace RX_DigiPrint.Views
                 ||    RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LH702
                 ||    RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_DP803;
            
-            bool pq = (lb||tx) &&  RxGlobals.PrintSystem.PrinterType!=EPrinterType.printer_LH702;
+            bool pq = (lb||tx); // &&  RxGlobals.PrintSystem.PrinterType!=EPrinterType.printer_LH702;
 
            PrinterTypeChangedEventArgs eventArgs = new PrinterTypeChangedEventArgs();
            eventArgs.Textile = tx;
@@ -229,8 +230,8 @@ namespace RX_DigiPrint.Views
                         break;
 
                     case EPrinterType.printer_LH702:
-                        MachineName.Text="LH 702";
-					    TabMachine.Content = new LH702View.LH702_View();
+                        MachineName.Text="LB 702 UV";
+					    TabMachine.Content = new LB702UVView.LB702UV_View();
                         break;
 
                     case EPrinterType.printer_DP803:
@@ -266,13 +267,22 @@ namespace RX_DigiPrint.Views
                         break;
                         */
                 }
-                TabMachine.DataContext = RxGlobals.PrintSystem;
-                _PrinterType = type;
-                if (TabCtrl.SelectedItem == TabMachine) 
+
+                var act=TabCtrl.SelectedItem;
+                TabCtrl.SelectedItem=TabPrintQueue;
+                if (type==EPrinterType.printer_LH702)
 				{
-                    TabCtrl.SelectedItem = null;
-                    TabCtrl.SelectedItem = TabMachine;
+                    _ShowTab(RxGlobals.PrintSystem.LH702_simulation, TabMachine, AddLocationHint.After);
+                    _ShowTab(true, TabLH702, AddLocationHint.After);
 				}
+                else
+				{
+                    _ShowTab(true , TabMachine, AddLocationHint.After);
+                    _ShowTab(false, TabLH702,   AddLocationHint.After);
+				}
+                TabCtrl.SelectedItem=act;
+
+                _PrinterType = type;
 			}
         }
 

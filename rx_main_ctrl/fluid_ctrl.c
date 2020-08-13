@@ -662,7 +662,6 @@ static void _control(int fluidNo)
                                             if (_txrob && _PurgeFluidNo < 0 && state_RobotCtrlMode() != ctrl_wash_step1 && state_RobotCtrlMode() != ctrl_wash_step2)
                                             {
                                                steptx_rob_wash_start();
-                                               Error(LOG, 0, "_RobotCtrlMode: %x", state_RobotCtrlMode());
                                             }
                                             _send_ctrlMode(_PurgeFluidNo, ctrl_purge_step1, TRUE);
 											break;

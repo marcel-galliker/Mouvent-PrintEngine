@@ -32,6 +32,7 @@ void nios_set_ctrlmode		(int isNo, EnFluidCtrlMode mode);
 void nios_set_purge_par		(int isNo, int last_pos, int time, int act_pos);
 void nios_set_head_state	(int isNo, SHeadStateLight *pstate);
 void nios_set_temp			(int isNo, int temp);
+void nios_set_purge_pressure(int isNo, int pressure);
 void nios_start_log			(void);
 void nios_start_temp_log	(void);
 void nios_error_reset		(void);
