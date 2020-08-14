@@ -271,6 +271,7 @@ void scr_set_values(int headNo, int min, int max, INT16 values[MAX_DENSITY_VALUE
 //--- _write_tif --------------------------------------------------------------
 static void _write_tif(char *title, SBmpSplitInfo *pInfo, PBYTE *buffer, int lineLen)
 {
+#ifdef DEBUG
 	char dir[MAX_PATH];
 	char fname[MAX_PATH];
 	int headsPerColor=RX_Spooler.headsPerColor;
@@ -292,6 +293,7 @@ static void _write_tif(char *title, SBmpSplitInfo *pInfo, PBYTE *buffer, int lin
 
 	tif_write(dir, fname, &info);
 	Error(LOG, 0, "Written File >>%s<<", fname);
+#endif
 }
 
 //--- _rx_screen_write_ta -----------------------------------

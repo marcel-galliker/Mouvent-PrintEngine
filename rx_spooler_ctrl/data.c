@@ -478,6 +478,7 @@ int  data_malloc(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPixel,
 			if (psplit[i].color.name[0] && psplit[i].lastLine>psplit[i].firstLine)
 			{
 				TrPrintfL(1, "buffer[%d]: WAIT UNUSED %p, used=%d, abort=%d", i, buffer[i], rx_mem_cnt(buffer[i]), _Abort);
+				TrPrintfL(1, "buffer[%d]: WAIT UNUSED %p, used=%d, abort=%d", i, buffer[i], rx_mem_cnt(buffer[i]), _Abort);
 				while (!_Abort && rx_mem_cnt(buffer[i]))
 				{
 					rx_sleep(time);
@@ -792,15 +793,21 @@ int data_same(SPageId *id, int offsetWidth, int clearBlockUsed)
 	{
 		src = (_InIdx+PRINT_LIST_SIZE-1-cnt) % PRINT_LIST_SIZE; 
 		SPageId *p = &_PrintList[src].id;
-		TrPrintfL(TRUE, "data_same[%d]: id=%d, page=%d, scan=%d, offsetWidth=%d, bitsPerPixel=%d", src, p->id, p->page, p->scan, _PrintList[src].offsetWidth, _PrintList[src].splitInfo->bitsPerPixel);
+	//	TrPrintfL(TRUE, "data_same[%d]: id=%d, page=%d, scan=%d, offsetWidth=%d, bitsPerPixel=%d", src, p->id, p->page, p->scan, _PrintList[src].offsetWidth, _PrintList[src].splitInfo->bitsPerPixel);
 		if ((id->id==p->id) && (id->page==p->page) && (id->scan==p->scan) && (offsetWidth==_PrintList[src].offsetWidth))
 		{	
-			while(_PrintList[src].splitInfo->bitsPerPixel==8)
+			//--- in case of screening: wait until screening done ---
+			for(int i=0; i<_HeadCnt; i++)
 			{
-				rx_sleep(10);
+				SBmpSplitInfo *pInfo=&_PrintList[src].splitInfo[i];
+				while(pInfo->bitsPerPixel==8)
+				{
+					rx_sleep(10);
+				}
 			}
+
 			SBmpSplitInfo *pInfo=_PrintList[_InIdx].splitInfo;
-			TrPrintfL(TRUE, "data_same[%d] found: id=%d, page=%d, scan=%d, offsetWidth=%d, bitsPerPixel=%d", src, p->id, p->page, p->scan, _PrintList[src].offsetWidth, _PrintList[src].splitInfo->bitsPerPixel);
+		//	TrPrintfL(TRUE, "data_same[%d] found: id=%d, page=%d, scan=%d, offsetWidth=%d, bitsPerPixel=%d", src, p->id, p->page, p->scan, _PrintList[src].offsetWidth, _PrintList[src].splitInfo->bitsPerPixel);
 			memcpy(&_PrintList[_InIdx], &_PrintList[src], sizeof(_PrintList[_InIdx]));
 			_PrintList[_InIdx].splitInfo = pInfo;
 			memcpy(_PrintList[_InIdx].splitInfo, _PrintList[src].splitInfo, _SplitInfoSize);
@@ -820,7 +827,7 @@ int data_same(SPageId *id, int offsetWidth, int clearBlockUsed)
 				*/
 			}
 
-			TrPrintfL(TRUE, "data_same new[%d]: id=%d, page=%d, scan=%d, next=%d, same=%d, data=%p", _InIdx, p->id, p->page, p->scan, nextIdx, _PrintList[_InIdx].flags&FLAG_SAME, _PrintList[_InIdx].splitInfo->data);
+		//	TrPrintfL(TRUE, "data_same new[%d]: id=%d, page=%d, scan=%d, next=%d, same=%d, data=%p", _InIdx, p->id, p->page, p->scan, nextIdx, _PrintList[_InIdx].flags&FLAG_SAME, _PrintList[_InIdx].splitInfo->data);
 			
 			_PrintList[_InIdx].flags |= FLAG_SAME;
 

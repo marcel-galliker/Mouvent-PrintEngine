@@ -203,7 +203,6 @@ typedef struct SConditionerCfg_mcu
 	UINT16	flowResistance;
 	UINT32	purgeDelay;				// ms wait before opening the valve
 	UINT32	purgeTime;				// ms the valve is open
-	INT32	purge_putty_ON;			// start purge from putty fluidboard
 		
 	//--- status of fluid system -------------------
     INT32   cylinderPressure;
@@ -213,7 +212,6 @@ typedef struct SConditionerCfg_mcu
 	//--- Counters ----------------------------------
 	UINT32	clusterNo;
 	UINT32	clusterTime;
-	UINT32	machineMeters;
 } SConditionerCfg_mcu;
 
 typedef struct
@@ -265,10 +263,6 @@ typedef struct SConditionerStat_mcu
 	UINT32			pid_P;
 	UINT32			pid_I;
 	INT32			pid_sum;
-
-	// Filters
-	INT32			Filter_Quality;		// = (Pin - Pout) / Pump_speed
-	UINT32			Purge_Needed;		// =0 : No need ; =1 : Need purge ; =2 : FlowRes problem (after 2 purges)
 
 	//Saved values on Flash
 	UINT32 			pumptime;		// count seconds

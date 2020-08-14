@@ -38,7 +38,7 @@ static int	_Trace=0;
 #define SIMU_WRITE	1	// write data to file
 #define SIMU_READ	2	// test reading files, no sending, no writing
 
-static int	_Simulation=SIMU_OFF;
+static int	_Simulation=SIMU_WRITE;
 
 // #define RAW_SOCKET
 
@@ -475,7 +475,7 @@ static int _send_image_data(SBmpSplitInfo *pInfo)
 		int blkCnt=_HBPar[pInfo->board]->cfg.head[pInfo->head].blkCnt;
 		int end=((pInfo->blk0-blk0)+pInfo->blkCnt)%blkCnt + blk0;
 
-		TrPrintfL(TRUE || _Trace, "Head[%d.%d]: _send_image_data pl[%d](id=%d, p=%d, c=%d, s=%d) blocks[%d .. %d] SAME=%d data=%p", pInfo->board, pInfo->head, idx, pid->id, pid->page, pid->copy, pid->scan, pInfo->blk0, end, pInfo->same, pInfo->data);
+		TrPrintfL(TRUE || _Trace, "Head[%d.%d]: _send_image_data pl[%d](id=%d, p=%d, c=%d, s=%d) blocks[%d .. %d] SAME=%d data=%p, blk0=%d, blkCnt=%d", pInfo->board, pInfo->head, idx, pid->id, pid->page, pid->copy, pid->scan, pInfo->blk0, end, pInfo->same, pInfo->data);
 		//--- Test ------------------------
 		TrPrintfL(_Trace, "Head[%d.%d]: widthPx=%d, bitsPerPixel=%d, widthBt=%d, dstLineLen=%d, srcLineCnt=%d, blkCnt=%d", pInfo->board, pInfo->head, pInfo->widthPx, pInfo->bitsPerPixel, pInfo->widthBt, pInfo->dstLineLen, pInfo->srcLineCnt , pInfo->blkCnt);		
 		//---------------------------------
@@ -545,6 +545,22 @@ static int _send_image_cmd(SBmpSplitInfo *pInfo)
 	SPageId *pid = &pInfo->pListItem->id;
 	TrPrintfL(_Trace, "_send_image_cmd[%d.%d].img[%d] (id=%d, page=%d, copy=%d, scan=%d) flags=%s", pInfo->board, pInfo->head, ++_TestImgNo[pInfo->board][pInfo->head], pid->id, pid->page, pid->copy, pid->scan, _send_image_cmd_flags);
 	sok_send(&_HBPar[pInfo->board]->ctrlSocket, &imageCmd);
+
+	if (FALSE)
+	{
+		TrPrintfL(TRUE, "Head[%d.%d].Image INFO -------------------------", pInfo->board, pInfo->head);
+		
+		TrPrintfL(TRUE, "bitPerPixel   =%d", imageCmd.image.bitPerPixel);
+		TrPrintfL(TRUE, "blkNo         =%d", imageCmd.image.blkNo	);
+		TrPrintfL(TRUE, "blkCnt        =%d", imageCmd.image.blkCnt	);
+		TrPrintfL(TRUE, "jetPx0        =%d", imageCmd.image.jetPx0	);
+		TrPrintfL(TRUE, "lengthPx      =%d", imageCmd.image.lengthPx);
+		TrPrintfL(TRUE, "widthPx       =%d", imageCmd.image.widthPx		);
+		TrPrintfL(TRUE, "widthBytes    =%d", imageCmd.image.widthBytes	);
+		TrPrintfL(TRUE, "flipHorizontal=%d", imageCmd.image.flipHorizontal);
+		TrPrintfL(TRUE, "clearBlockUsed=%d", imageCmd.image.clearBlockUsed);
+		TrPrintfL(TRUE, "-------------------------------------");
+	}
 
 //	pInfo->blkCnt = -pInfo->blkCnt;
 
