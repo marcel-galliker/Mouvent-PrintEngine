@@ -1595,6 +1595,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Resource Include="Resources\Bitmaps\PG_Mark_INV.ico" />
     <Resource Include="Resources\Bitmaps\density.png" />
     <Resource Include="Resources\Bitmaps\Tex\TX801.png" />
     <Resource Include="Resources\Bitmaps\Alignment\AngleAdjustmentLeftStep1.png" />

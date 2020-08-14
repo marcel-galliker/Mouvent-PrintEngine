@@ -12,17 +12,15 @@ namespace RX_DigiPrint.Views.PrintQueueView
     /// <summary>
     /// Interaction logic for FileSettings.xaml
     /// </summary>
-    public partial class FileSettingsWeb : UserControl, INotifyPropertyChanged
+    public partial class FileSettingsWeb : UserControl//, INotifyPropertyChanged
     {
+        /*
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string name)
         {
-            PropertyChangedEventHandler handler = PropertyChanged;
-            if (handler != null)
-            {
-                handler(this, new PropertyChangedEventArgs(name));
-            }
-        }
+			PropertyChanged?.Invoke(this,new PropertyChangedEventArgs(name));
+		}
+        */
 
         //--- Constructor -----------------------------------
         public FileSettingsWeb()
@@ -36,6 +34,9 @@ namespace RX_DigiPrint.Views.PrintQueueView
             LengthBox.ShowRolls = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf);
 
             NumBox_StartFrom.DataContext = this;
+
+            if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LH702 && !RxGlobals.PrintSystem.LH702_simulation) SpeedHeight.Height = new GridLength(0);
+            else SpeedHeight.Height = GridLength.Auto;
         }
 
         void Settings_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)

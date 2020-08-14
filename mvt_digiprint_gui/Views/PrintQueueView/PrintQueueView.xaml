@@ -150,15 +150,13 @@
                                                 Panel.ZIndex="10">
 
                                         <common:MvtButton  PreviewMouseLeftButtonDown="Save_Click" IsHitTestVisible="True" 
-                                                           Margin="0,0,10,0" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}">
-                                            <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="20" Height="20"
-                                                Kind="Check"></iconPacks:PackIconMaterial>
+                                                           Margin="0,0,10,0" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}" >
+                                            <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="20" Height="20" Kind="Check" />
                                         </common:MvtButton>
 
                                         <common:MvtButton  PreviewMouseLeftButtonDown="Cancel_Click"  IsHitTestVisible="True" 
-                                                           Margin="0" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}">
-                                            <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="20" Height="20"
-                                                Kind="Close"></iconPacks:PackIconMaterial>
+                                                           Margin="0" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}" >
+                                            <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="20" Height="20" Kind="Close"/>
                                         </common:MvtButton>
                                     </StackPanel>
 

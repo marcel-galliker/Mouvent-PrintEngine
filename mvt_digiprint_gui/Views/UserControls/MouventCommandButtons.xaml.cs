@@ -140,7 +140,6 @@ namespace RX_DigiPrint.Views.UserControls
             if (StartClicked!=null && !StartClicked()) return;
              * */
 
-
 #if !DEBUG
             if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf && !(RxGlobals.StepperStatus[0].DripPans_InfeedDOWN && RxGlobals.StepperStatus[0].DripPans_OutfeedDOWN))
             {
@@ -168,7 +167,10 @@ namespace RX_DigiPrint.Views.UserControls
                 if (!MvtMessageBox.YesNo("UV Lamp", "The UV Lamp is NOT READY.\n\nStart Printing?",  MessageBoxImage.Question, false))
                     return;
             }
-            for (int i = 0; i < 5; i++ )
+         
+            RxGlobals.PrintQueueView?.SaveAll(); 
+
+            // for (int i = 0; i < 5; i++ )
             {
                 RxGlobals.RxInterface.SendCommand(TcpIp.CMD_START_PRINTING);
             }

@@ -55,11 +55,13 @@ namespace RX_DigiPrint.Models
             if (item.State==EPQState.queued)   
             {
                 if (_removeFromList (_Printed, item)) RxBindable.Invoke(() => _Queue.Add(item));
+                /*
                 else if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LH702)
                 {
                     if (_Queue.Count>0) RxBindable.Invoke(()=> _Queue[0] = item);
                     else _addToList(_Queue,   item, top);
                 } 
+                */
                 else _addToList(_Queue,   item, top);
                 if (_Queue.Count()==1) item.SendBtProdState();
                 if (RxGlobals.PrintQueueChanged!=null) RxBindable.Invoke(()=>RxGlobals.PrintQueueChanged());

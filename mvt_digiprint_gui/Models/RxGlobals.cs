@@ -3,6 +3,7 @@ using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Services;
 using RX_DigiPrint.Views.Density;
 using RX_DigiPrint.Views.LB702WBView;
+using RX_DigiPrint.Views.PrintQueueView;
 using RX_DigiPrint.Views.UserControls;
 using System;
 using System.Collections.Generic;
@@ -22,6 +23,7 @@ namespace RX_DigiPrint.Models
         public static PrinterStatus     PrinterStatus     = new PrinterStatus();
         public static PrintQueue        PrintQueue        = new PrintQueue();
         public static Action            PrintQueueChanged = null;
+        public static PrintQueueView    PrintQueueView    = null;  
         public static RxLanguage        Language          = new RxLanguage();
         public static User              User              = new User();
         public static RxInterface       RxInterface       = new RxInterface();
@@ -55,11 +57,11 @@ namespace RX_DigiPrint.Models
         public static Window            BluetoothLoginWnd;
         public static License           License           = new License();
         public static CleafOrder        CleafOrder        = new CleafOrder();
-        public static Alignment Alignment = new Alignment();
-        public static AlignmentResources AlignmentResources = new AlignmentResources();
-        public static LB702WB_Machine   LB702WB_Machine;
-        public static DisabledJets DisabledJets = new DisabledJets();
-        public static Density Density = new Density();
+        public static Alignment             Alignment = new Alignment();
+        public static AlignmentResources    AlignmentResources = new AlignmentResources();
+        public static LB702WB_Machine       LB702WB_Machine;
+        public static DisabledJets          DisabledJets = new DisabledJets();
+        public static Density               Density = new Density();
         
     }
 }
