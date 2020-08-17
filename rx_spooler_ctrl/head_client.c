@@ -38,7 +38,7 @@ static int	_Trace=2;
 #define SIMU_WRITE	1	// write data to file
 #define SIMU_READ	2	// test reading files, no sending, no writing
 
-static int	_Simulation=SIMU_WRITE;
+static int	_Simulation=SIMU_OFF;
 
 // #define RAW_SOCKET
 
@@ -475,7 +475,7 @@ static int _send_image_data(SBmpSplitInfo *pInfo)
 		int blkCnt=_HBPar[pInfo->board]->cfg.head[pInfo->head].blkCnt;
 		int end=((pInfo->blk0-blk0)+pInfo->blkCnt)%blkCnt + blk0;
 
-		TrPrintfL(TRUE || _Trace, "Head[%d.%d]: _send_image_data pl[%d](id=%d, p=%d, c=%d, s=%d) blocks[%d .. %d] SAME=%d data=%p, blk0=%d, blkCnt=%d", pInfo->board, pInfo->head, idx, pid->id, pid->page, pid->copy, pid->scan, pInfo->blk0, end, pInfo->same, pInfo->data);
+		TrPrintfL(TRUE || _Trace, "Head[%d.%d]: _send_image_data pl[%d](id=%d, p=%d, c=%d, s=%d) blocks[%d .. %d] SAME=%d data=%p, blk0=%d, blkCnt=%d", pInfo->board, pInfo->head, idx, pid->id, pid->page, pid->copy, pid->scan, pInfo->blk0, end, pInfo->same, pInfo->data, blk0, pInfo->blkCnt);
 		//--- Test ------------------------
 		TrPrintfL(_Trace, "Head[%d.%d]: widthPx=%d, bitsPerPixel=%d, widthBt=%d, dstLineLen=%d, srcLineCnt=%d, blkCnt=%d", pInfo->board, pInfo->head, pInfo->widthPx, pInfo->bitsPerPixel, pInfo->widthBt, pInfo->dstLineLen, pInfo->srcLineCnt , pInfo->blkCnt);		
 		//---------------------------------
@@ -856,7 +856,7 @@ static int _send_to_board(SHBThreadPar *par, int head, int blkNo, int blkCnt)
 		if (_Abort) return REPLY_OK;
 		
 //		if (pinfo->sendFromBlk >= pinfo->blkCnt || (RX_Spooler.printerType==printer_LB702_UV && (endReached && (cnt==0 || (pinfo->pListItem->flags&FLAG_SAME)))))
-		if (pinfo->sendFromBlk >= pinfo->blkCnt || pinfo->pListItem->flags&FLAG_SAME)
+		if (pinfo->sendFromBlk >= pinfo->blkCnt || pinfo->pListItem->flags&FLAG_SAME || (endReached && (cnt==0)))
 		{
 			SPageId *pid   = &pinfo->pListItem->id;
 			SPageId *plast = &par->lastId[head];
