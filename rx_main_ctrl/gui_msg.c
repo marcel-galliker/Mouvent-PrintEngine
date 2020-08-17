@@ -735,6 +735,7 @@ static void _do_set_print_queue_evt	(RX_SOCKET socket, SPrintQueueEvt *pmsg)
 static void _do_chg_print_queue	(RX_SOCKET socket)
 {
 	pc_change_job();
+	gui_send_cmd(REP_CHG_PRINT_QUEUE);
 }
 
 //--- _do_get_print_queue_item ------------------------------------------

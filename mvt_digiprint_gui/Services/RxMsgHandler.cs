@@ -45,6 +45,7 @@ namespace RX_DigiPrint.Services
                     case TcpIp.EVT_DEL_PRINT_QUEUE: handle_print_queue(msg);    break;
                     case TcpIp.EVT_UP_PRINT_QUEUE:  handle_print_queue(msg);    break;
                     case TcpIp.EVT_DN_PRINT_QUEUE:  handle_print_queue(msg);    break;
+                    case TcpIp.REP_CHG_PRINT_QUEUE: handle_change_job();        break;
 
                     case TcpIp.REP_GET_PRINT_ENV:   handle_print_env(msg);      break;
                     case TcpIp.BEG_GET_PRINT_ENV:   handle_print_env(msg);      break;
@@ -174,16 +175,22 @@ namespace RX_DigiPrint.Services
 
                 switch(msg.hdr.msgId)
                 { 
-                    case TcpIp.REP_GET_PRINT_QUEUE: RxGlobals.PrintQueue.RemoveItem(null);    break;
+                    case TcpIp.REP_GET_PRINT_QUEUE: RxGlobals.PrintQueue.RemoveItem(null);     break;
                     case TcpIp.EVT_GET_PRINT_QUEUE: RxGlobals.PrintQueue.AddItem(item, false); break;
                     case TcpIp.EVT_ADD_PRINT_QUEUE: RxGlobals.PrintQueue.AddItem(item, true);  break;
-                    case TcpIp.EVT_DEL_PRINT_QUEUE: RxGlobals.PrintQueue.RemoveItem(item);    break;
-                    case TcpIp.EVT_UP_PRINT_QUEUE:  RxGlobals.PrintQueue.UpItem(item);        break;
-                    case TcpIp.EVT_DN_PRINT_QUEUE:  RxGlobals.PrintQueue.DownItem(item);      break;
+                    case TcpIp.EVT_DEL_PRINT_QUEUE: RxGlobals.PrintQueue.RemoveItem(item);     break;
+                    case TcpIp.EVT_UP_PRINT_QUEUE:  RxGlobals.PrintQueue.UpItem(item);         break;
+                    case TcpIp.EVT_DN_PRINT_QUEUE:  RxGlobals.PrintQueue.DownItem(item);       break;
                 }
             }
             else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length sPrintQueueMsg"));
         }
+
+        //--- handle_change_job -----------------------------------------
+        private void handle_change_job()
+		{
+            if (RxGlobals.LH702_Preview!=null) RxGlobals.LH702_Preview.ChangeJob(true);
+		}
 
         //--- handle_print_env -----------------------------------------
         private void handle_print_env(Byte[] buf)

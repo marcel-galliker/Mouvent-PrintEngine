@@ -1081,7 +1081,8 @@ namespace RX_DigiPrint.Models
             State           = item.State;
             PageMargin      = item.PageMargin;
             PrintGoDist     = item.PrintGoDist;
-            _updating=false;
+            _updating       = false;
+            if (RxGlobals.LH702_View!=null) RxGlobals.LH702_View.UpdatePrintQueueItem(this);
         }
 
         //--- PageNumber_PropertyChanged -----------------------------

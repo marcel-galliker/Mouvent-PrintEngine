@@ -3,6 +3,7 @@ using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Services;
 using RX_DigiPrint.Views.Density;
 using RX_DigiPrint.Views.LB702WBView;
+using RX_DigiPrint.Views.LH702View;
 using RX_DigiPrint.Views.PrintQueueView;
 using RX_DigiPrint.Views.UserControls;
 using System;
@@ -22,7 +23,6 @@ namespace RX_DigiPrint.Models
         public static EventList         Events            = new EventList();
         public static PrinterStatus     PrinterStatus     = new PrinterStatus();
         public static PrintQueue        PrintQueue        = new PrintQueue();
-        public static Action            PrintQueueChanged = null;
         public static PrintQueueView    PrintQueueView    = null;  
         public static RxLanguage        Language          = new RxLanguage();
         public static User              User              = new User();
@@ -49,7 +49,7 @@ namespace RX_DigiPrint.Models
         public static HeadAdjustment    HeadAdjustment    = new HeadAdjustment();
         public static MaterialList      MaterialList      = new MaterialList();
         public static MaterialXml       MaterialXML       = new MaterialXml();
-        public static MvtTextPad         Keyboard          = new MvtTextPad(null);
+        public static MvtTextPad        Keyboard          = new MvtTextPad(null);
         public static RxTaskSwitch      TaskSwitch        = new RxTaskSwitch();
         public static RxPopup           Popup;
         public static UvLamp            UvLamp            = new UvLamp();
@@ -60,6 +60,8 @@ namespace RX_DigiPrint.Models
         public static Alignment             Alignment = new Alignment();
         public static AlignmentResources    AlignmentResources = new AlignmentResources();
         public static LB702WB_Machine       LB702WB_Machine;
+        public static LH702_View            LH702_View;
+        public static LH702_Preview         LH702_Preview;
         public static DisabledJets          DisabledJets = new DisabledJets();
         public static Density               Density = new Density();
         

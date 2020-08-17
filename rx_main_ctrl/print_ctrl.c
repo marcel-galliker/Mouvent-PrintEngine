@@ -691,11 +691,6 @@ static int _print_next(void)
 						enc_sent_document(_Item.scans, &_Item.id);
 						pq_sent_document(_Item.scans);
 					}
-					else if (RX_Config.printer.type==printer_LH702)
-					{
-						enc_sent_document(_Item.id.copy-_CopiesStart, &_Item.id);
-						pq_sent_document(_Item.id.copy-_CopiesStart);							
-					}
 					else
 					{
 						enc_sent_document(_Item.copiesTotal-_CopiesStart, &_Item.id);
