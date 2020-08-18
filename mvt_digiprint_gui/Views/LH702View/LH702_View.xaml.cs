@@ -95,9 +95,9 @@ namespace RX_DigiPrint.Views.LH702View
 		{
             if (item.State==EPQState.transfer || item.State==EPQState.printing)
 			{
-                if (Preview.Next==null)  Console.WriteLine("PRINTING >>{0}<< {1}: Printing >>{2}<<, NULL", item.FileName, item.CopiesPrinted, _PrintingItem.FileName);
-                else if (_PrintingItem!=null) Console.WriteLine("PRINTING >>{0}<< {1}: Printing >>{2}<<, next >>{3}<<", item.FileName, item.CopiesPrinted, _PrintingItem.FileName, Preview.Next.FileName);
-                else Console.WriteLine("PRINTING >>{0}<<", item.FileName, item.CopiesPrinted);
+             //   if (Preview.Next==null)  Console.WriteLine("PRINTING >>{0}<< {1}: Printing >>{2}<<, NULL", item.FileName, item.CopiesPrinted, _PrintingItem.FileName);
+             //   else if (_PrintingItem!=null) Console.WriteLine("PRINTING >>{0}<< {1}: Printing >>{2}<<, next >>{3}<<", item.FileName, item.CopiesPrinted, _PrintingItem.FileName, Preview.Next.FileName);
+             //   else Console.WriteLine("PRINTING >>{0}<<", item.FileName, item.CopiesPrinted);
                 if (item!=_PrintingItem) 
                     PrintQueueChanged();
 			}

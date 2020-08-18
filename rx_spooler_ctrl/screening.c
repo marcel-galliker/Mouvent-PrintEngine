@@ -343,9 +343,10 @@ static int _rx_screen_write_ta(void * epplaneScreenConfig)
 
 //--- scr_wait_ready ---------------------------------------------
 void scr_wait_ready(void)
-{
+{	
 	TrPrintfL(TRUE, "Screening WAIT ready");
-	rx_sem_wait(_SemScreeningReady, 0);
+	if (rx_sem_wait(_SemScreeningReady, 5000)!=REPLY_OK)
+		Error(ERR_ABORT, 0, "Screening timeout");
 
 	TrPrintfL(TRUE, "Screening is ready");
 }
@@ -394,7 +395,7 @@ void scr_start(SBmpSplitInfo *pInfo)
 //--- scr_wait -----------------------------------------------------
 int scr_wait(int timeout)
 {
-	if (_ScrFifoDoneIdx!=_ScrFifoInIdx)
+//	if (_ScrFifoDoneIdx!=_ScrFifoInIdx)
 	{
 		TrPrintfL(TRUE, "Screening WAIT");
 		while (_ScrFifoDoneIdx!=_ScrFifoInIdx)

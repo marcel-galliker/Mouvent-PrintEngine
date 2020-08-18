@@ -124,7 +124,7 @@
             <StackPanel HorizontalAlignment="Center" >
                 <Button Content="Restart Main"   Click="RestartMain_Clicked" Margin="0, 10, 0, 10" Width="170" Style="{StaticResource Mouvent.StandardButton}"/>
                 <Button Content="Restart GUI"    Click="RestartGUI_Clicked" Margin="0, 0, 0, 10"  Width="170" Style="{StaticResource Mouvent.StandardButton}"/>
-                <Button Content="Shut Down"      Click="ShutDown_Clicked" Margin="0, 0, 0, 10"   Width="170" Style="{StaticResource Mouvent.StandardButton}"/>
+                <Button Content="Shut Down GUI"  Click="ShutDown_Clicked" Margin="0, 0, 0, 10"   Width="170" Style="{StaticResource Mouvent.StandardButton}"/>
                 <Button Content="Windows Update" Click="Update_Clicked" Margin="0, 0, 0, 10"     Width="170" Style="{StaticResource Mouvent.StandardButton}"/>
             </StackPanel>
         </GroupBox>

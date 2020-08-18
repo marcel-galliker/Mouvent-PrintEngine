@@ -379,7 +379,7 @@ void ctrl_set_max_speed(void)
 			for (n=0; n<MAX_DROP_SIZES; n++)
 			{
 				len += sprintf(&str[len], " %d", RX_Config.inkSupply[color].ink.maxSpeed[n]);
-				if (RX_Config.inkSupply[color].ink.maxSpeed[n] < inkSpeed[n]) inkSpeed[n] = RX_Config.inkSupply[color].ink.maxSpeed[n];
+				if (RX_Config.inkSupply[color].ink.maxSpeed[n] && RX_Config.inkSupply[color].ink.maxSpeed[n] < inkSpeed[n]) inkSpeed[n] = RX_Config.inkSupply[color].ink.maxSpeed[n];
 			}
 			TrPrintfL(TRUE, "Waveform[%s].maxSpeed:%s m/s", RX_Config.inkSupply[color].ink.name, str);
 		}
@@ -742,7 +742,7 @@ int ctrl_send_purge_par(int fluidNo, int time)
 	SHeadCfg *pcfg;
 	
 	if (RX_Config.stepper.wipe_speed) delay =  HEAD_WIDTH / RX_Config.stepper.wipe_speed;
-	else delay=0;
+	else delay=5000;
 
 	timeTotal = 0;
 	par.delay = 0;
@@ -755,7 +755,7 @@ int ctrl_send_purge_par(int fluidNo, int time)
 			par.no = head%HEAD_CNT;
 			sok_send_2(&_HeadCtrl[head/HEAD_CNT].socket, CMD_SET_PURGE_PAR, sizeof(par), &par);
 	//		Error(LOG, 0, "head[%d.%d]: purge_par(no=%d, delay=%d, time=%d)", head/HEAD_CNT, head%HEAD_CNT, par.no, par.delay, par.time);
-			if (par.delay+par.time>timeTotal) timeTotal = par.delay+par.time;
+			if (par.time+par.delay>timeTotal) timeTotal = par.time+par.delay;
 			par.delay+=delay;
 		}
 	}

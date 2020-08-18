@@ -42,7 +42,7 @@ static int	_Simulation=SIMU_OFF;
 
 // #define RAW_SOCKET
 
-#define MAX_USED_ID	16
+#define MAX_USED_ID		16
 #define BLOCK_BURST_CNT	3000
 
 //--- Externals ---------------------------------------------------------------
@@ -475,7 +475,7 @@ static int _send_image_data(SBmpSplitInfo *pInfo)
 		int blkCnt=_HBPar[pInfo->board]->cfg.head[pInfo->head].blkCnt;
 		int end=((pInfo->blk0-blk0)+pInfo->blkCnt)%blkCnt + blk0;
 
-		TrPrintfL(TRUE || _Trace, "Head[%d.%d]: _send_image_data pl[%d](id=%d, p=%d, c=%d, s=%d) blocks[%d .. %d] SAME=%d data=%p, blk0=%d, blkCnt=%d", pInfo->board, pInfo->head, idx, pid->id, pid->page, pid->copy, pid->scan, pInfo->blk0, end, pInfo->same, pInfo->data, blk0, pInfo->blkCnt);
+		TrPrintfL(TRUE || _Trace, "Head[%d.%d]: _send_image_data pl[%d](id=%d, p=%d, c=%d, s=%d) blocks[%d .. %d] SAME=%d FLAG_SAME=%d data=%p", pInfo->board, pInfo->head, idx, pid->id, pid->page, pid->copy, pid->scan, pInfo->blk0, end, pInfo->same, pInfo->pListItem->flags&FLAG_SAME, pInfo->data);
 		//--- Test ------------------------
 		TrPrintfL(_Trace, "Head[%d.%d]: widthPx=%d, bitsPerPixel=%d, widthBt=%d, dstLineLen=%d, srcLineCnt=%d, blkCnt=%d", pInfo->board, pInfo->head, pInfo->widthPx, pInfo->bitsPerPixel, pInfo->widthBt, pInfo->dstLineLen, pInfo->srcLineCnt , pInfo->blkCnt);		
 		//---------------------------------

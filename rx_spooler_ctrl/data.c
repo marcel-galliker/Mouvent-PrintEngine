@@ -269,6 +269,7 @@ int	 data_cache	(SPageId *pid, const char *path, char *localPath, SColorSplitCfg
 		
 	//	sprintf(dstDir, PATH_TEMP "%s", &localPath[strlen(PATH_RIPPED_DATA)]);	// TEST
 
+
 		search=rx_search_open(mntPath, "*");
 		while (ret==REPLY_OK && rx_search_next(search, fileName, sizeof(fileName), &time, &filesize, &isDir))
 		{
@@ -800,7 +801,7 @@ int data_same(SPageId *id, int offsetWidth, int clearBlockUsed)
 			for(int i=0; i<_HeadCnt; i++)
 			{
 				SBmpSplitInfo *pInfo=&_PrintList[src].splitInfo[i];
-				while(pInfo->bitsPerPixel==8)
+				while(pInfo->bitsPerPixel==8 && !_Abort)
 				{
 					rx_sleep(10);
 				}
@@ -1164,9 +1165,18 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 {
 	int color, n, head;
 	int empty;
+	int	screeningCnt=0;
 	struct SBmpSplitInfo	*pInfo;
+	static int _FlagEmpty[HEAD_BOARD_CNT][MAX_HEADS_BOARD];
+	static int _FlagData[HEAD_BOARD_CNT][MAX_HEADS_BOARD];
 
 	TrPrintfL(TRUE, "_data_split_test");
+
+	if (id->page==0 && id->copy==1 && id->scan==0)
+	{
+		memset(_FlagEmpty, 0, sizeof(_FlagEmpty));
+		memset(_FlagData, 0, sizeof(_FlagData));
+	}
 
 	for (color=0; color<SIZEOF(RX_Spooler.headNo); color++)
 	{
@@ -1250,6 +1260,13 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 					pInfo->dstLineLen	= 32; // align to 256 Bits (32 Bytes)				
 					pInfo->blk0		    = blk0;
 					pInfo->blkCnt		= 1;
+					pItem->flags	   |= _FlagEmpty[pInfo->board][pInfo->head];
+					_FlagEmpty[pInfo->board][pInfo->head] = FLAG_SAME;
+				}
+				else
+				{
+					pItem->flags	   |= _FlagData[pInfo->board][pInfo->head];
+					_FlagData[pInfo->board][pInfo->head] = FLAG_SAME;
 				}
 
 				//--- rip the test data -----------------------------------------
@@ -1268,13 +1285,15 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 				if (pInfo->bitsPerPixel==8)
 				{
 					scr_start(pInfo);
+					screeningCnt++;
 				}
 
 				if (clearBlockUsed) _BlkNo[pInfo->board][pInfo->head] += pInfo->blkCnt; // (_BlkNo[pInfo->board][pInfo->head]+pInfo->blkCnt)%(RX_Spooler.dataBlkCntHead);
-				TrPrintfL(TRUE, "Split[head=%d]: startPx=%d, widthPx=%d, FillBt=%d, blk0=%d, blkCnt=%d, data=0x%08x", head, 0, pInfo->widthPx, pInfo->fillBt, pInfo->blk0, pInfo->blkCnt, pInfo->data);
+				TrPrintfL(TRUE, "Split[head=%d]: startPx=%d, widthPx=%d, bitsPerPixel=%d, FillBt=%d, blk0=%d, blkCnt=%d, data=0x%08x", head, 0, pInfo->widthPx, pInfo->bitsPerPixel, pInfo->fillBt, pInfo->blk0, pInfo->blkCnt, pInfo->data);
 			}
 		}	
 	}
+	if (screeningCnt==0) scr_wait(10);
 	return REPLY_OK;
 }
 
@@ -2192,7 +2211,7 @@ int data_sent(SBmpSplitInfo *psplit, int head)
 //		TrPrintfL(TRUE, "data_sent: headsInUse=%d, data=0x%08x", psplit->pListItem->headsInUse, psplit->data);
 		if (psplit->data) rx_mem_unuse(psplit->data);
 
-		if (FALSE)
+		if (TRUE)
 		{
 			SPrintFileMsg evt;
 					

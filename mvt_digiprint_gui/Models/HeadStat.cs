@@ -390,8 +390,9 @@ namespace RX_DigiPrint.Models
             TempHead    = item.tempHead;
             TempCond    = item.tempCond;
             TempSetpoint= item.tempSetpoint;
-            if (used) TempReady   = item.tempReady!=0;
-            else TempReady=false;
+         //   if (used) TempReady   = item.tempReady!=0;
+         //   else TempReady=false;
+            TempReady   = (!used) || (item.tempReady!=0 && item.ctrlMode==EFluidCtrlMode.ctrl_print);
             PresIn      = item.presIn;
             PresIn_max  = item.presIn_max;
             PresIn_diff = item.presIn_diff;

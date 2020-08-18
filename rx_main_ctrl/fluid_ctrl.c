@@ -215,29 +215,20 @@ void fluid_set_config(void)
 
 	//---------------------------------------------------
 	memset(_FluidToScales, 0, sizeof(_FluidToScales));
-	
+
 	switch (RX_Config.printer.type)
 	{
-	case printer_LB701:		_FluidToScales[0] = SCALE(1,1);// 0;	// Cyan 
-							_FluidToScales[1] = SCALE(1,2);// 1;	// Magenta
-							_FluidToScales[2] = SCALE(1,3);// 2;	// Yellow 
-							_FluidToScales[3] = SCALE(1,4);// 3;	// Black
-							_FluidToScales[4] = SCALE(2,1);// 6;	// White
-							_FluidToScales[5] = SCALE(2,2);// 7;	// Orange
-							_FluidToScales[6] = SCALE(2,3);// 8;	// Violet
-							_FluidToScales[INK_SUPPLY_CNT]   = SCALE(1,5);// 4;	// flush		
-							_FluidToScales[INK_SUPPLY_CNT+1] = SCALE(2,4);// 9;	// waste
-							break;
-
+	case printer_LB701:
 	case printer_LB702_UV:	
-							_FluidToScales[0] = 0;	// Cyan 
-							_FluidToScales[1] = 1;	// Magenta
-							_FluidToScales[2] = 2;	// Yellow 
-							_FluidToScales[3] = 3;	// Black
-							_FluidToScales[4] = 6;	// White
-							_FluidToScales[5] = 7;	// Orange
-							_FluidToScales[6] = 8;	// Violet
-							_FluidToScales[INK_SUPPLY_CNT]   = 9;	// flush		
+	case printer_LH702:
+							_FluidToScales[0] = SCALE(1,1);	// Cyan 
+							_FluidToScales[1] = SCALE(1,2);	// Magenta
+							_FluidToScales[2] = SCALE(1,3);	// Yellow 
+							_FluidToScales[3] = SCALE(1,4);	// Black
+							_FluidToScales[4] = SCALE(2,1);	// White
+							_FluidToScales[5] = SCALE(2,2);	// Orange
+							_FluidToScales[6] = SCALE(2,3);	// Violet
+							_FluidToScales[INK_SUPPLY_CNT]   = SCALE(2,4);	// flush		
 							break;
 		
 	case printer_LB702_WB:	_FluidToScales[0] = SCALE(1, 1);// 0;	// Cyan 
@@ -257,17 +248,6 @@ void fluid_set_config(void)
 						//	_FluidToScales[INK_SUPPLY_CNT]	   = SCALE(2, 3);// flush		
 							_FluidToScales[INK_SUPPLY_CNT + 1] = SCALE(2, 1);// waste		
 							break;
-
-	case printer_LH702:		_FluidToScales[0] = SCALE(2,5); // unused 
-							_FluidToScales[1] = SCALE(2,2); // white
-							_FluidToScales[2] = SCALE(2,3); // orange 
-							_FluidToScales[3] = SCALE(2,4); // violet
-							_FluidToScales[4] = SCALE(1,1); // cyan
-							_FluidToScales[5] = SCALE(1,2); // magenta
-							_FluidToScales[6] = SCALE(1,3); // yellow
-							_FluidToScales[7] = SCALE(1,4); // black
-							_FluidToScales[INK_SUPPLY_CNT]   = SCALE(2, 1); //9;	// flush		
-							break;
 		
     case printer_TX801:
     case printer_TX802:		_FluidToScales[0] = SCALE(2,4); // Orange 
@@ -284,7 +264,6 @@ void fluid_set_config(void)
 	default:			for (i=0; i<SIZEOF(_FluidToScales); i++) _FluidToScales[i]=i;	
 						break; 
 	}
-	
 	
 	//--- flush time ------------------------
 	if (_Scanning)
