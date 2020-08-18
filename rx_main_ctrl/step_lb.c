@@ -23,6 +23,7 @@
 #include "enc_ctrl.h"
 #include "gui_svr.h"
 #include "step_ctrl.h"
+#include "ctrl_svr.h"
 #include "step_lb.h"
 #include "fluid_ctrl.h"
 #include "setup.h"
@@ -39,7 +40,11 @@ static int				_StatReadCnt[STEPPER_CNT];
 
 static EnFluidCtrlMode	_RobotCtrlMode[STEPPER_CNT] = {ctrl_undef};
 
+static SHeadAdjustmentMsg _HeadAdjustment[STEPPER_CNT] = {0};
+
 static void _steplb_rob_do_reference(int no);
+
+static void _check_screwer(void);
 
 //--- steplb_init ---------------------------------------------------
 void steplb_init(int no, RX_SOCKET psocket)
@@ -119,8 +124,9 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
 	int robot_used=FALSE;
 	ETestTableInfo info;
 	ERobotInfo		robinfo;
- 
-	memcpy(&_Status[no], pStatus, sizeof(_Status[no]));
+    EScrewerInfo	screwerinfo;
+
+    memcpy(&_Status[no], pStatus, sizeof(_Status[no]));
 	_Status[no].no=no;
 	gui_send_msg_2(0, REP_STEPPER_STAT, sizeof(RX_StepperStatus), &_Status[no]);
 
@@ -137,7 +143,7 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
 	
 	memset(&info, 0, sizeof(info));
 	memset(&robinfo, 0, sizeof(robinfo));
-	info.printhead_en	= TRUE;
+    info.printhead_en	= TRUE;
 	info.ref_done		= TRUE;
 	info.z_in_ref		= TRUE;
 	info.z_in_print		= TRUE;
@@ -221,7 +227,10 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
 	*/
 
 	if (_step_socket[no] && _step_socket[no]!=INVALID_SOCKET) steplb_rob_control(_RobotCtrlMode[no], no);
-	return REPLY_OK;
+
+    _check_screwer();
+
+    return REPLY_OK;
 }
 
 //--- steplb_to_print_pos --------------------------------
@@ -524,6 +533,7 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
 	}
 }
 
+//--- steplb_adjust_heads ------------------------------------------------
 void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
 {
     SHeadAdjustment msg;
@@ -532,8 +542,33 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
         stepperno = headAdjustment->printbarNo / 2;
     else
         stepperno = (headAdjustment->printbarNo+1) / 2;
+
+    _HeadAdjustment[stepperno] = *headAdjustment;
     
     headAdjustment->printbarNo %= 2;
 
     sok_send(&_step_socket[stepperno], headAdjustment);
+}
+
+//--- _check_screwer --------------------------------------------------
+static void _check_screwer(void)
+{
+    static int _old_Screwer_State[STEPPER_CNT] = {FALSE};
+    SRobPosition ScrewPosition;
+    int i;
+    for (i = 0; i < SIZEOF(_Status); i++)
+    {
+        if (_Status[i].screwerinfo.screwed && !_old_Screwer_State[i])
+        {
+            ScrewPosition.printBar = _HeadAdjustment[i].printbarNo;
+            ScrewPosition.head = _HeadAdjustment[i].headNo;
+            if (_HeadAdjustment[i].axis == AXE_DIST)
+                ScrewPosition.angle = _HeadAdjustment[i].steps;
+            else if (_HeadAdjustment[i].axis == AXE_ANGLE)
+                ScrewPosition.dist = _HeadAdjustment[i].steps;
+
+            ctrl_set_rob_pos(ScrewPosition);
+        }
+        _old_Screwer_State[i] = _Status[i].screwerinfo.screwed;
+    }
 }

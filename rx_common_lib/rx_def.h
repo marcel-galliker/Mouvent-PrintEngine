@@ -1342,6 +1342,14 @@ typedef struct
     INT32 steps; // in steps
 } SHeadAdjustment;
 
+typedef struct SRobPosition
+{
+    int printBar;
+    int head;
+    INT16 angle;
+    INT16 dist;
+} SRobPosition;
+
 
 	
 	//--- check also GUI: RX_DigiPrint.Models.TestTableStatus.Update
@@ -1430,7 +1438,7 @@ typedef struct EScrewerInfo
     UINT32 screw_loosed : 1;		//	0x00000100
     UINT32 screw_tight : 1;	        //	0x00000200
     UINT32 screws_found : 1;		//	0x00000400
-    UINT32 r_info_11 : 1;		    //	0x00000800
+    UINT32 screwed : 1;				//	0x00000800
     UINT32 r_info_12 : 1;		    //	0x00001000
     UINT32 r_info_13 : 1;		    //	0x00002000
     UINT32 r_info_14 : 1;		    //	0x00004000

@@ -1198,3 +1198,14 @@ void ctrl_reply_stat(RX_SOCKET socket)
 	}
 }
 
+void ctrl_set_rob_pos(SRobPosition robposition)
+{
+    int i;
+    for (i=0; i<SIZEOF(_HeadCtrl); i++)
+		{
+			if (_HeadCtrl[i].running)
+			{
+				sok_send_2(&_HeadCtrl[i].socket, CMD_SET_ROB_POS, sizeof(robposition), &robposition);
+			}
+		}
+}

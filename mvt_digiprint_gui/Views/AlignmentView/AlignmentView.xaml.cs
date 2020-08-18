@@ -372,7 +372,10 @@ namespace RX_DigiPrint.Views.Alignment
 
         private void RobotDownloadButton_Click(object sender, RoutedEventArgs e)
         {
-            MvtMessageBox.Information("Robot", "Robot functionality not implemented yet.");
+            //MvtMessageBox.Information("Robot", "Robot functionality not implemented yet.");
+            RobotHeadAdjustmentView view = new RobotHeadAdjustmentView(0, 0,
+                    0, 0);
+            view.ShowDialog();
         }
 
         private void SettingsButton_Click(object sender, RoutedEventArgs e)

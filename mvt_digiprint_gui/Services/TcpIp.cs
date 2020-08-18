@@ -889,6 +889,9 @@ namespace RX_DigiPrint.Services
 
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
             public SScrewPositions[] screwpositions;
+
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
+            public SScrewPositions[] screwclusters;
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
