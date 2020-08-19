@@ -25,11 +25,7 @@ namespace RX_DigiPrint.Models.Enums
                 _MaxSpeed = (int)maxSpeed;
                 CUnit unit=new CUnit("m/min");
 
-                if (RxGlobals.PrinterProperties.Host_Name == null)
-                {
-                    RxGlobals.PrinterProperties.Host_Name = ""; // otherwise: Exception at "if" line
-                }
-                if (RxGlobals.PrinterProperties.Host_Name.Equals("DropWatcher")) 
+                if (RxGlobals.PrinterProperties.Host_Name!=null && RxGlobals.PrinterProperties.Host_Name.Equals("DropWatcher")) 
                 {
                     for (speed=1; speed<=_MaxSpeed; speed++)
                     {

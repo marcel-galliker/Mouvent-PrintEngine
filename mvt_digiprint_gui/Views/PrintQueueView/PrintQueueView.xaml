@@ -35,7 +35,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <rx_uc:MouventTopToolBar Grid.Row="0" HorizontalAlignment="Right"></rx_uc:MouventTopToolBar>
+            <rx_uc:MouventTopToolBar Grid.Row="0" HorizontalAlignment="Right"/>
 
             <rx_uc:Splicing VerticalAlignment="Center" HorizontalAlignment="Center"></rx_uc:Splicing>
             

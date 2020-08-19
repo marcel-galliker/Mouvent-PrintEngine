@@ -49,10 +49,12 @@
             </Grid>
         </GroupBox>
 
+        <!--
         <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="10,0,10,0">
             <TextBlock Margin="0,5,10,5" Grid.Row="1">Debug: Connect Robot</TextBlock>
             <CheckBox Margin="20,5,10,5" Grid.Row="1" Grid.Column="1" IsChecked="{Binding DebugConnectRobot}" Click="RobotConnectButton_Click"></CheckBox>
         </StackPanel>
+        -->
         
         <StackPanel Orientation="Horizontal" Margin="10" Grid.Row="2" HorizontalAlignment="Center">
             <common:MvtButton Click="Okay_Clicked" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}"
