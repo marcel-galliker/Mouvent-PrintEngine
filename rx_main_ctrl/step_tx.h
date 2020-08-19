@@ -48,6 +48,9 @@ void _steptx_rob_vacuum_start(void);
 void steptx_rob_wash_start(void);
 int	 steptx_rob_wash_done(void);
 
+void steptx_rob_cap_for_flush(void);
+int steptx_rob_cap_flush_prepared(void);
+
 void steptx_rob_stop(void);
 
 void steptx_set_robCtrlMode(EnFluidCtrlMode ctrlMode);

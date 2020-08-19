@@ -456,7 +456,7 @@ static void _do_fluid_stat(int fluidNo, SFluidBoardStat *pstat)
 	
 	memcpy(&_FluidStatus[fluidNo*INK_PER_BOARD], &pstat->stat[0], INK_PER_BOARD*sizeof(_FluidStatus[0]));
 		
-	if      (_FluidCtrlMode>=ctrl_flush_night && _FluidCtrlMode<=ctrl_flush_done) _control_flush();
+	if      (_FluidCtrlMode>=ctrl_flush_night && _FluidCtrlMode<=ctrl_flush_done || _FluidCtrlMode == ctrl_cap_step3) _control_flush();
 //	else if (_RobotCtrlMode>=ctrl_wipe        && _RobotCtrlMode<ctrl_fill       && fluidNo==0) _control_robot();
 	else _control(fluidNo);
 
@@ -746,6 +746,7 @@ static void _control(int fluidNo)
 //--- _control_flush -------------------------------------------------
 static void _control_flush(void)
 {
+    static int _txrob;
 	if (_all_fluids_in_fluidCtrlMode(_FluidCtrlMode))
 	{
 	//	TrPrintfL(TRUE, "All Fluids in mode %d", _FluidCtrlMode);
@@ -754,11 +755,22 @@ static void _control_flush(void)
 		{
 		case ctrl_flush_night:		
 		case ctrl_flush_weekend:		
-		case ctrl_flush_week:	step_lift_to_top_pos();	
-								_FluidCtrlMode=ctrl_flush_step1; 
+		case ctrl_flush_week:
+								_txrob = rx_def_is_tx(RX_Config.printer.type) && step_active(1);
+								step_lift_to_top_pos();
+                                if (_txrob)
+                                {
+                                    steptx_rob_cap_for_flush();
+                                    _FluidCtrlMode = ctrl_cap;
+                                }
+                                else
+                                    _FluidCtrlMode = ctrl_flush_step1;
+                                break;
+                                
+        case ctrl_cap_step3:	if (steptx_rob_cap_flush_prepared()) _FluidCtrlMode = ctrl_flush_step1;
 								break;
-		
-		case ctrl_flush_step1:	if (step_lift_in_up_pos()) 
+
+        case ctrl_flush_step1:	if (step_lift_in_up_pos() && (steptx_rob_cap_flush_prepared() || !_txrob)) 
 								{
 									plc_to_purge_pos();
 									_FluidCtrlMode=ctrl_flush_step2;
@@ -779,10 +791,10 @@ static void _control_flush(void)
 		
 		case ctrl_flush_done:	ErrorEx(dev_fluid, -1, LOG, 0, "Flush complete");
 								
-								if (rx_def_is_tx(RX_Config.printer.type) && step_active(1))
+								if (_txrob)
 								{
-									fluid_send_ctrlMode(-1, ctrl_cap, TRUE);
-									_FluidCtrlMode = ctrl_cap;
+									fluid_send_ctrlMode(-1, ctrl_cap_step4, TRUE);
+									_FluidCtrlMode = ctrl_cap_step4;
 								}
 								else
 								{
@@ -792,7 +804,7 @@ static void _control_flush(void)
 		default: break;		
 		}
 		
-		if (_FluidCtrlMode != ctrl_cap)
+		if (_FluidCtrlMode != ctrl_cap_step4 && _FluidCtrlMode != ctrl_cap_step3)
 		{
 			for (int i = 0; i < RX_Config.inkSupplyCnt; i++) _send_ctrlMode(i, _FluidCtrlMode, TRUE);
 		}
