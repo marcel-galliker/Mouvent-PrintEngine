@@ -176,7 +176,7 @@ typedef enum ENiosFluidErr
 
 typedef enum ENiosInkSupplyErr
 {
-//	err_ink_tank_pressure	= 0x00000001,
+	err_ink_tank_pressure	= 0x00000001,
 //	err_cal_inkpump_failed	= 0x00000002,
 	err_heater_board    	= 0x00000004,
 	err_heater_temp_frozen 	= 0x00000008,

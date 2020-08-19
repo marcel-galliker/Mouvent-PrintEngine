@@ -50,6 +50,8 @@ int  rex_connect(const char *ipAddr, connected_callback onConnected,  connected_
 {
 	MLPIRESULT result;
 	ULONG cnt;
+	char	connect[MAX_PATH];
+	wchar_t	wconnect[MAX_PATH];
 
 	err_init(TRUE, 100);
 
@@ -62,13 +64,18 @@ int  rex_connect(const char *ipAddr, connected_callback onConnected,  connected_
 	if (_Connection != MLPI_INVALIDHANDLE) return 0;
 
 	char_to_wchar(_IpAddr, _WIpAddr, SIZEOF(_WIpAddr));
+
+	sprintf(connect, "%s", ipAddr);
+//	sprintf(connect, "%s -user=%s -password=%s", ipAddr, "indraworks", "boschrexroth");
+	char_to_wchar(connect, wconnect, SIZEOF(wconnect));
+
 	result=mlpiApiSetDefaultTimeout(MLPI_TIMEOUT);
 	if (FALSE)
 	{
 		Error(WARN, 0, "Not connect PLC");
 		result =  MLPI_E_CONNECTFAILED;
 	}
-	else result = mlpiApiConnect(_WIpAddr, &_Connection);
+	else result = mlpiApiConnect(wconnect, &_Connection);
 	if (rex_check_result(result)) return 1;
 	result=mlpiLogicGetNumberOfApplications(_Connection, &cnt);
 	for (int i=0; i<10; i++)

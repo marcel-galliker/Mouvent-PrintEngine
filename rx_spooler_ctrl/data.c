@@ -1260,13 +1260,13 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 					pInfo->dstLineLen	= 32; // align to 256 Bits (32 Bytes)				
 					pInfo->blk0		    = blk0;
 					pInfo->blkCnt		= 1;
-					pItem->flags	   |= _FlagEmpty[pInfo->board][pInfo->head];
-					_FlagEmpty[pInfo->board][pInfo->head] = FLAG_SAME;
+				//	pItem->flags	   |= _FlagEmpty[pInfo->board][pInfo->head];
+				//	_FlagEmpty[pInfo->board][pInfo->head] = FLAG_SAME;
 				}
 				else
 				{
-					pItem->flags	   |= _FlagData[pInfo->board][pInfo->head];
-					_FlagData[pInfo->board][pInfo->head] = FLAG_SAME;
+				//	pItem->flags	   |= _FlagData[pInfo->board][pInfo->head];
+				//	_FlagData[pInfo->board][pInfo->head] = FLAG_SAME;
 				}
 
 				//--- rip the test data -----------------------------------------

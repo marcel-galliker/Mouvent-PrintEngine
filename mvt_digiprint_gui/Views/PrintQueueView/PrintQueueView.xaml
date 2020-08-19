@@ -35,7 +35,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <rx_uc:MouventTopToolBar Grid.Row="0" HorizontalAlignment="Right"></rx_uc:MouventTopToolBar>
+            <rx_uc:MouventTopToolBar Grid.Row="0" HorizontalAlignment="Right"/>
 
             <rx_uc:Splicing VerticalAlignment="Center" HorizontalAlignment="Center"></rx_uc:Splicing>
             
@@ -150,7 +150,8 @@
                                                 Panel.ZIndex="10">
 
                                         <common:MvtButton  PreviewMouseLeftButtonDown="Save_Click" IsHitTestVisible="True" 
-                                                           Margin="0,0,10,0" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}" >
+                                                           Margin="0,0,10,0" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}" 
+                                                           IsChecked="true">
                                             <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="20" Height="20" Kind="Check" />
                                         </common:MvtButton>
 

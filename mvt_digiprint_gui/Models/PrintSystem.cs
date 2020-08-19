@@ -234,6 +234,14 @@ namespace RX_DigiPrint.Models
             return (head+TcpIp.HEAD_CNT-1)/TcpIp.HEAD_CNT;
         }
 
+        //--- Property Color_Order ---------------------------------------
+        private int[] _Color_Order;
+        public int[] Color_Order
+        {
+            get { return _Color_Order; }
+            private set { SetProperty(ref _Color_Order, value); }
+        }
+
         //--- Property IS_Order ---------------------------------------
         private int[] _IS_Order;
         public int[] IS_Order
@@ -247,7 +255,7 @@ namespace RX_DigiPrint.Models
         private int IsOrder_ColorCnt = 0;
         private void _set_IS_Order()
 		{
-            if (IS_Order==null || PrinterType!=_IsOrder_PrinterType || ColorCnt!=IsOrder_ColorCnt)
+            if (IS_Order==null || Color_Order == null || PrinterType!=_IsOrder_PrinterType || ColorCnt!=IsOrder_ColorCnt)
 			{
                 _IsOrder_PrinterType = PrinterType;
                 IsOrder_ColorCnt = ColorCnt;
@@ -264,21 +272,41 @@ namespace RX_DigiPrint.Models
 
                     case EPrinterType.printer_LH702:
                     case EPrinterType.printer_LB702_UV:
-                        if (ColorCnt <= 4) IS_Order = new int[] { 0, 1, 2, 3 };
-                        // else IS_Order = new int[] { 4,5,6, 0, 1, 2, 3 };
-                        else IS_Order = new int[] { 4, 5, 6, 0,1,2,3 };
+                        if (ColorCnt <= 4)
+                        {
+                            IS_Order    = new int[] { 0, 1, 2, 3 };
+                            Color_Order = new int[] { 0, 1, 2, 3 };
+                        }
+                        else
+                        {
+                            IS_Order    = new int[] { 4, 5, 6, 0, 1, 2, 3 };
+                            Color_Order = new int[] { 4, 5, 6, 0, 1, 2, 3 };
+                        }
                         break;
 
                     case EPrinterType.printer_LB702_WB:
-                        IS_Order = new int[] {0, 1, 2, 3, 4, 5 };
+                        IS_Order    = new int[] {0, 1, 2, 3, 4, 5 };
+                        Color_Order = new int[] { 4, 5, 6, 0, 1, 2, 3 };
                         break;
 
-                    case EPrinterType.printer_TX801: IS_Order = new int[] { 7,6,5,4,3,2,1,0 }; break;
-                    case EPrinterType.printer_TX802: IS_Order = new int[] { 7,6,5,4,3,2,1,0 }; break;
+                    case EPrinterType.printer_TX801:
+                        IS_Order    = new int[] { 7, 6, 5, 4, 3, 2, 1, 0 };
+                        Color_Order = new int[] { 7, 6, 5, 4, 3, 2, 1, 0 };
+                        break;
+                    case EPrinterType.printer_TX802:
+                        IS_Order    = new int[] { 7, 6, 5, 4, 3, 2, 1, 0 };
+                        Color_Order = new int[] { 7, 6, 5, 4, 3, 2, 1, 0 };
+                        break;
 
-                    case EPrinterType.printer_CB612: IS_Order = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23 }; break;
+                    case EPrinterType.printer_CB612:
+                        IS_Order    = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23 };
+                        Color_Order = new int[] { 1, 0, 2, 3, 4, 5 }; // order: to be defined !!!
+                        break;
 
-                    default: IS_Order = new int[] { 0,1,2,3,4,5,6,7 }; break;
+                    default:
+                        IS_Order    = new int[] { 0, 1, 2, 3, 4, 5, 6, 7 };
+                        Color_Order = new int[] { 0, 1, 2, 3, 4, 5, 6, 7 }; 
+                        break;
                 }
 			}
         }

@@ -96,6 +96,7 @@ namespace RX_DigiPrint.Views.UserControls
                     if (ctrl.ActiveCell.Row != null && ctrl.ActiveCell.Row.Data != null)
                     {
                         supply.InkType = ctrl.ActiveCell.Row.Data as InkType;
+                        RxGlobals.PrintSystem.Changed = true;
                     }
                 }
             }
@@ -104,7 +105,12 @@ namespace RX_DigiPrint.Views.UserControls
         //--- Unused_Clicked ----------------------------------------------
         private void Unused_Clicked(object sender, RoutedEventArgs e)
         {
-            (DataContext as InkSupply).InkType=null;
+            InkSupply supply = DataContext as InkSupply;
+            if (supply!=null && supply.InkType!=null)
+			{
+                supply.InkType=null;
+                RxGlobals.PrintSystem.Changed = true;
+			}
             TreePopup.IsOpen = false;
         }
 
