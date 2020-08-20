@@ -287,6 +287,7 @@ namespace RX_DigiPrint.Services
             if (len==msg.hdr.msgLen) 
             {
                 RxGlobals.HeadStat.SetConnected((int)msg.stat.boardNo, (msg.stat.info&1)!=0);
+                RxGlobals.ClusterStat.SetItem(msg.stat);
 
                 int i, no;
                 for (i=0; i<TcpIp.HEAD_CNT; i++)
