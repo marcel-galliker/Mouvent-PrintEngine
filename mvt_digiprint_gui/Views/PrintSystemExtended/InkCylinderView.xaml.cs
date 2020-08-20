@@ -93,7 +93,7 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
         {
             if (_InkSupply != null && e.PropertyName.Equals("CtrlMode"))
             {
-                if (_InkSupply.CtrlMode == EFluidCtrlMode.ctrl_fill_step1)
+                if (_InkSupply.CtrlMode == EFluidCtrlMode.ctrl_fill)
                 {
                     MsgText.Text = "Put new ink canister.";
                     MsgPopup.IsOpen = true;

@@ -64,6 +64,7 @@ char *FluidCtrlModeStr(EnFluidCtrlMode mode)
 	case ctrl_empty_step3:			return "EMPTY_s3";	//	0x303:
 	case ctrl_empty_step4:			return "EMPTY_s4";	//	0x304:
 	case ctrl_empty_step5:			return "EMPTY_s5";	//	0x305:
+	case ctrl_empty_step6:			return "EMPTY_s6";	//	0x306
 
 	case ctrl_cal_start:			return "START CAL";	//  0x00a:
 	case ctrl_cal_step1:			return "CAL /1";	//  0x00b:

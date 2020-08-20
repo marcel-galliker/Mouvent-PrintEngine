@@ -518,6 +518,7 @@ void ink_tick_10ms(void)
 				break;
 
 			case ctrl_check_step0:
+			case ctrl_check_step1:
 				_set_bleed_valve(isNo, FALSE);
 				_set_air_valve(isNo, FALSE);
 				_set_flush_pump(isNo, FALSE);
@@ -532,7 +533,7 @@ void ink_tick_10ms(void)
 				pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
 				break;
 
-			case ctrl_check_step1:
+			case ctrl_check_step2:
 
 				// ------ for test (to bypass steps)
 				// _CheckSequence[isNo].Ctrl_Check_State = 0;
@@ -552,7 +553,7 @@ void ink_tick_10ms(void)
 				_set_flush_pump(isNo, FALSE);
 				pRX_Status->ink_supply[isNo].IS_Pressure_Setpoint = 500;
 
-				if(pRX_Status->ink_supply[isNo].ctrl_state != ctrl_check_step1)
+				if(pRX_Status->ink_supply[isNo].ctrl_state != ctrl_check_step2)
 				{
 					switch(_CheckSequence[isNo].Ctrl_Check_State)
 					{
@@ -692,7 +693,7 @@ void ink_tick_10ms(void)
 				}
 				break;
 
-			case ctrl_check_step2:
+			case ctrl_check_step3:
 
 				// ------ for test (to bypass steps)
 				//_CheckSequence[isNo].Ctrl_Check_State = 0;
@@ -709,7 +710,7 @@ void ink_tick_10ms(void)
 					pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
 				}
 
-				if(pRX_Status->ink_supply[isNo].ctrl_state != ctrl_check_step2)
+				if(pRX_Status->ink_supply[isNo].ctrl_state != ctrl_check_step3)
 				{
 					switch(_CheckSequence[isNo].Ctrl_Check_State)
 					{
@@ -835,7 +836,7 @@ void ink_tick_10ms(void)
 				else _TimeStabitilityCheck[isNo] = 0;
 				break;
 
-			case ctrl_check_step3:
+			case ctrl_check_step4:
 
 				_PressureSetpoint[isNo] = 400;
 				pid_reset(&_InkSupply[isNo].pid_Pump);
@@ -853,7 +854,7 @@ void ink_tick_10ms(void)
 				_CheckSequence[isNo].TimeState = 0;
 				break;
 
-			case ctrl_check_step4:
+			case ctrl_check_step5:
 				_set_air_valve(isNo, FALSE);
 				_set_bleed_valve(isNo, FALSE);
 				_set_flush_pump(isNo, FALSE);
@@ -865,7 +866,7 @@ void ink_tick_10ms(void)
 				_pump_ctrl(isNo, _PressureSetpoint[isNo], PUMP_CTRL_INK_RECIRCULATION);
 
 				_CheckSequence[isNo].TimeState++;
-				if(pRX_Status->ink_supply[isNo].ctrl_state != ctrl_check_step4)
+				if(pRX_Status->ink_supply[isNo].ctrl_state != ctrl_check_step5)
 				{
 					switch(_CheckSequence[isNo].Ctrl_Check_State)
 					{
@@ -909,7 +910,7 @@ void ink_tick_10ms(void)
 
 				break;
 
-			case ctrl_check_step5:
+			case ctrl_check_step6:
 				_set_air_valve(isNo, FALSE);
 				_set_bleed_valve(isNo, FALSE);
 				_set_flush_pump(isNo, FALSE);
@@ -920,7 +921,7 @@ void ink_tick_10ms(void)
 				_pump_ctrl(isNo, _PressureSetpoint[isNo], PUMP_CTRL_INK_RECIRCULATION);
 
 				_CheckSequence[isNo].TimeState++;
-				if(pRX_Status->ink_supply[isNo].ctrl_state != ctrl_check_step5)
+				if(pRX_Status->ink_supply[isNo].ctrl_state != ctrl_check_step6)
 				{
 					switch(_CheckSequence[isNo].Ctrl_Check_State)
 					{
@@ -956,7 +957,6 @@ void ink_tick_10ms(void)
 				}
 				break;
 
-			case ctrl_check_step6:
 			case ctrl_check_step7:
 			case ctrl_check_step8:
 			case ctrl_check_step9:
@@ -1194,6 +1194,7 @@ void ink_tick_10ms(void)
 
 			// --- FILL --------------------------------------------------
 			case ctrl_fill:
+
 				_InkSupply[isNo].degassing = FALSE;
 				_set_air_valve(isNo, TRUE);
 				_set_bleed_valve(isNo, FALSE);
@@ -1204,33 +1205,53 @@ void ink_tick_10ms(void)
 				break;
 
 			case ctrl_fill_step1:
-				if (pRX_Status->ink_supply[isNo].IS_Pressure_Actual <= _FillPressure/2)
-					pRX_Status->ink_supply[isNo].ctrl_state = ctrl_fill_step1;
+				pRX_Status->ink_supply[isNo].ctrl_state = ctrl_fill_step1;
 				break;
 
 			case ctrl_fill_step2:
+				pRX_Status->ink_supply[isNo].ctrl_state = ctrl_fill_step2;
+				break;
+
+			case ctrl_fill_step3:
+				if (pRX_Status->ink_supply[isNo].IS_Pressure_Actual <= _FillPressure/2)
+					pRX_Status->ink_supply[isNo].ctrl_state = ctrl_fill_step3;
+				break;
+
+			case ctrl_fill_step4:
 				_set_air_valve(isNo, TRUE);
 				_set_bleed_valve(isNo, FALSE);
 				_set_pressure_value(FALSE);
 				_pump_ctrl(isNo, _FillPressure,PUMP_CTRL_MODE_DEFAULT);
 				pRX_Status->ink_supply[isNo].inkPumpSpeed_set = 100;
-				pRX_Status->ink_supply[isNo].ctrl_state = ctrl_fill_step2;
+				pRX_Status->ink_supply[isNo].ctrl_state = ctrl_fill_step4;
 				break;
 
-			case ctrl_fill_step3:
+			case ctrl_fill_step5:
 				_pump_ctrl(isNo, _FillPressure,PUMP_CTRL_MODE_DEFAULT);
 				if ((pRX_Status->ink_supply[isNo].PIDpump_Output < INK_PUMP_VAL_MAX / 2)&&(pRX_Status->ink_supply[isNo].IS_Pressure_Actual > 100))
-					pRX_Status->ink_supply[isNo].ctrl_state = ctrl_fill_step3;
+					pRX_Status->ink_supply[isNo].ctrl_state = ctrl_fill_step5;
 				break;
 
 			// --- EMPTY -------------------------------------------------
 			case ctrl_empty:
-				_set_bleed_valve(isNo, TRUE);
-				_set_air_valve(isNo, FALSE);
 				pRX_Status->ink_supply[isNo].ctrl_state = ctrl_empty;
 				break;
 
 			case ctrl_empty_step1:
+				pRX_Status->ink_supply[isNo].ctrl_state = ctrl_empty_step1;
+				break;
+
+			case ctrl_empty_step2:
+				pRX_Status->ink_supply[isNo].ctrl_state = ctrl_empty_step2;
+				break;
+
+			case ctrl_empty_step3:
+				_set_bleed_valve(isNo, TRUE);
+				_set_air_valve(isNo, FALSE);
+				pRX_Status->ink_supply[isNo].ctrl_state = ctrl_empty_step3;
+				break;
+
+			case ctrl_empty_step4:
 				_set_bleed_valve(isNo, TRUE);
 				_set_air_valve(isNo, FALSE);
 				for (i=0; i<NIOS_INK_SUPPLY_CNT; i++)
@@ -1241,10 +1262,10 @@ void ink_tick_10ms(void)
 				_pump_ctrl(isNo, 0,PUMP_CTRL_MODE_NO_AIR_VALVE);		// ink-pump
 				_TimeEmpty[isNo] = 0;
 				_EmptyDetecTEndState[isNo] = 1;
-				pRX_Status->ink_supply[isNo].ctrl_state = ctrl_empty_step1;
+				pRX_Status->ink_supply[isNo].ctrl_state = ctrl_empty_step4;
 				break;
 
-			case ctrl_empty_step2:
+			case ctrl_empty_step5:
 				_set_bleed_valve(isNo, TRUE);
 				_set_air_valve(isNo, FALSE);
 				empty_pressure = 100 * pRX_Config->headsPerColor;
@@ -1267,18 +1288,18 @@ void ink_tick_10ms(void)
 						break;
 					case 3 :
 						if(pRX_Status->ink_supply[isNo].IS_Pressure_Actual < _EmptyPressureStored[isNo] / 2)
-							pRX_Status->ink_supply[isNo].ctrl_state = ctrl_empty_step2;
+							pRX_Status->ink_supply[isNo].ctrl_state = ctrl_empty_step5;
 						break;
 				}
 
 				break;
 
-			case ctrl_empty_step3:
+			case ctrl_empty_step6:
 				_set_pressure_value(FALSE);
 				pRX_Status->ink_supply[0].TestBleedLine_Pump_Phase2++;
 				_set_bleed_valve(isNo, FALSE);
 				_set_air_valve(isNo, FALSE);
-				pRX_Status->ink_supply[isNo].ctrl_state = ctrl_empty_step3;
+				pRX_Status->ink_supply[isNo].ctrl_state = ctrl_empty_step6;
 				break;
 
 				/*

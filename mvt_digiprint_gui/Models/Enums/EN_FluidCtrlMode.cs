@@ -112,6 +112,7 @@ namespace RX_DigiPrint.Models.Enums
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_empty_step3,   "Empty /3"      ));
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_empty_step4,   "Empty /4"      ));
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_empty_step5,   "Empty /5"      ));
+                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_empty_step6,   "Empty /6"      ));
 
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_cal_start,     "Calib"         ));
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_cal_step1,     "Calib /1"      ));

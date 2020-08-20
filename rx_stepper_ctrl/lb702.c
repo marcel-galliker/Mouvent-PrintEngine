@@ -47,7 +47,7 @@ static char		*_MotorName[2] = {"BACK", "FRONT"};
 #define CAL_TOOL_HEIGHT	25000
 #define DIST_MECH_REF		500
 
-#define DIST_CAP_WASH   2000
+#define DIST_CAP_WASH   2000		// um
 
 static SMovePar	_ParRef;
 static SMovePar	_ParZ_down;
@@ -129,8 +129,8 @@ void lb702_init(void)
 		
 	if (RX_StepperStatus.robot_used) lbrob_init();
 
-    RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_back = 100000;
-    RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_front = 100000;
+    //RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_back = 50000;
+    //RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_front = 50000;
     
 }
 
@@ -372,7 +372,7 @@ void lb702_main(int ticks, int menu)
                 RX_StepperStatus.info.z_in_print =
                     (cmd == CMD_LIFT_PRINT_POS &&
                      RX_StepperStatus.info.ref_done && !_CmdRunningRobi);
-                RX_StepperStatus.info.z_in_cap = (cmd == CMD_LIFT_CAPPING_POS && RX_StepperStatus.info.ref_done && RX_StepperStatus.screwerinfo.y_in_ref);
+                RX_StepperStatus.info.z_in_cap = (cmd == CMD_LIFT_CAPPING_POS && RX_StepperStatus.info.ref_done && (RX_StepperStatus.screwerinfo.y_in_ref || robi_disabled()));
                 RX_StepperStatus.info.z_in_wash = (cmd == CMD_LIFT_WASH_POS && RX_StepperStatus.info.ref_done);
                 RX_StepperStatus.info.z_in_screw = (cmd == CMD_LIFT_SCREW && RX_StepperStatus.info.ref_done);
             }

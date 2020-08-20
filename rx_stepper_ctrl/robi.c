@@ -173,6 +173,8 @@ void robi_main(int ticks, int menu)
         (_steps_2_micron(_robiStatus.motors[MOTOR_XY_1].motorEncoderPosition -
                          _robiStatus.motors[MOTOR_XY_0].motorEncoderPosition))/2;
 
+    if (RX_StepperStatus.screwerinfo.z_in_up) _Search_Screw_Time = 0;
+
     if (_Search_Screw_Time && rx_get_ticks() > _Search_Screw_Time + TIME_BEFORE_TURN_SCREWER)
     {
         int val = 0;
@@ -183,6 +185,8 @@ void robi_main(int ticks, int menu)
         robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_STEPS, &val);
         _Search_Screw_Time = rx_get_ticks();
     }
+
+    if (RX_StepperStatus.screwerinfo.z_in_down) _Loosen_Screw_Time = 0;
     
     if (_Loosen_Screw_Time && rx_get_ticks() > _Loosen_Screw_Time + TIME_BEFORE_TURN_SCREWER)
     {
@@ -609,7 +613,7 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         break;
 
     case CMD_ROBI_MOVE_Z_UP:
-        if (!_CmdRunning)
+        /*if (!_CmdRunning)
         {
             if ((_robiStatus.gpio.inputs & (1UL << SCREW_IN_UP))) {Error(ERR_CONT, 0, "Screwer is already up"); break;}
             if (!RX_StepperStatus.screwerinfo.ref_done)
@@ -633,23 +637,23 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             {
                 Error(ERR_CONT, 0, "Screw not in position to lift up");
                 break;
-            }
+            }*/
             _CmdRunning = msgId;
             _Search_Screw_Time = rx_get_ticks();
             send_command(MOTOR_MOVE_Z_UP, 0, NULL);
             break;
-        }
+        //}
         break;
         
     case CMD_ROBI_MOVE_Z_DOWN:
-        if (!_CmdRunning)
+        /*if (!_CmdRunning)
         {
-            if ((_robiStatus.gpio.inputs & (1UL << SCREW_IN_DOWN))) {Error(ERR_CONT, 0, "Screwer is already down"); break;}
+            if ((_robiStatus.gpio.inputs & (1UL << SCREW_IN_DOWN))) {Error(ERR_CONT, 0, "Screwer is already down"); break;}*/
             _CmdRunning = msgId;
             _Loosen_Screw_Time = rx_get_ticks();
             send_command(MOTOR_MOVE_Z_DOWN, 0, NULL);
             break;
-        }
+        //}
         break;
         
     case CMD_ROBI_SCREW_STEPS:

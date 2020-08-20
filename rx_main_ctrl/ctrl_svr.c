@@ -855,7 +855,19 @@ void ctrl_send_head_fluidCtrlMode(int headNo, EnFluidCtrlMode ctrlMode, int send
         }
         if (!(ctrlMode == ctrl_off && mode == ctrl_wait))
         {
-		sok_send(&_HeadCtrl[headNo/HEAD_CNT].socket, &cmd);
+			sok_send(&_HeadCtrl[headNo/HEAD_CNT].socket, &cmd);
+            // Set all the Printheads of the same fluid system into off, which are in print, because otherwise it will 
+            int i;
+            for (i = 0; i < HEAD_BOARD_CNT; i++)
+            {
+                if (RX_Config.headBoard[i/HEAD_CNT].head[i%HEAD_CNT].inkSupply == RX_Config.headBoard[headNo/HEAD_CNT].head[headNo%HEAD_CNT].inkSupply 
+                    && RX_HBStatus[i/HEAD_CNT].head[i%HEAD_CNT].ctrlMode == ctrl_print && i != headNo && fromGui == TRUE)
+                {
+                    cmd.no = i % HEAD_CNT;
+                    cmd.ctrlMode = ctrl_off;
+                    sok_send(&_HeadCtrl[i / HEAD_CNT].socket, &cmd);
+                }
+            }
         }
         
 

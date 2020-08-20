@@ -570,6 +570,7 @@ void pump_tick_10ms(void)
 		case ctrl_check_step0:	RX_Status.mode = RX_Config.mode; break;
 		case ctrl_check_step1:	RX_Status.mode = RX_Config.mode; break;
 		case ctrl_check_step2:	RX_Status.mode = RX_Config.mode; break;
+		case ctrl_check_step3:	RX_Status.mode = RX_Config.mode; break;
 	/*	case ctrl_check_step3:	RX_Status.mode = RX_Config.mode; break;
 		case ctrl_check_step4:	RX_Status.mode = RX_Config.mode; break;
 		case ctrl_check_step5:	RX_Status.mode = RX_Config.mode; break;
@@ -577,7 +578,7 @@ void pump_tick_10ms(void)
 		case ctrl_check_step7:	RX_Status.mode = RX_Config.mode; break;
 		case ctrl_check_step8:	RX_Status.mode = RX_Config.mode; break;
 		case ctrl_check_step9:	RX_Status.mode = RX_Config.mode; break;		*/  
-		case ctrl_check_step3:	
+		case ctrl_check_step4:	
 						RX_Status.mode = RX_Config.mode; 						
 											
 						_PumpPID.start_integrator = 0;
@@ -589,7 +590,7 @@ void pump_tick_10ms(void)
 						_PumpPID.val_max = 3000;	// max 75% to avoid high pressure in case of return tube is clogged		 
 						break;
 		
-		case ctrl_check_step4:	
+		case ctrl_check_step5:	
 						_set_valve(TO_INK);
 						RX_Status.mode = RX_Config.mode;						
 						if((_CheckSequence == 0)||(RX_Config.fluidErr))
@@ -631,7 +632,7 @@ void pump_tick_10ms(void)
 						
 						break;
 						
-		case ctrl_check_step5:
+		case ctrl_check_step6:
 						if((_CheckSequence != 0)&&(RX_Config.fluidErr == 0)&&(RX_Status.error == 0))
 						{
 							_pump_pid(FALSE);
@@ -651,8 +652,7 @@ void pump_tick_10ms(void)
 						}				
 						RX_Status.mode = RX_Config.mode; 
 						break;
-		
-		case ctrl_check_step6:	
+			
 		case ctrl_check_step7:	
 		case ctrl_check_step8:	
 		case ctrl_check_step9:	 
@@ -742,6 +742,12 @@ void pump_tick_10ms(void)
 		
 		//--- EMPTY ------------------------------------------------
 		case ctrl_empty:
+		case ctrl_empty_step1:
+		case ctrl_empty_step2:
+						RX_Status.mode = RX_Config.mode;
+						break;
+			
+		case ctrl_empty_step3:
 						temp_ctrl_on(FALSE);
 						_set_valve(TO_INK);
 						// _set_pump_speed((_PumpPID.val_max + 1) / 2);
@@ -751,12 +757,12 @@ void pump_tick_10ms(void)
 						RX_Status.mode = RX_Config.mode;						
 						break;
 		
-        case ctrl_empty_step1:
+    case ctrl_empty_step4:
 						_pump_pid(TRUE);
 						max_pressure = MBAR_500;
 						RX_Status.mode = RX_Config.mode;
 						break;
-		case ctrl_empty_step2:			
+		case ctrl_empty_step5:			
 						if(RX_Status.mode != RX_Config.mode)
 						{
 							max_pressure = MBAR_500;
@@ -770,11 +776,11 @@ void pump_tick_10ms(void)
 							turn_off_pump();
 							_set_valve(TO_FLUSH);
 						}
-                        break;
+             break;
 		
 		//--- FILL -------------------------------------------------------
-		case ctrl_fill:	
-		case ctrl_fill_step1:	
+		case ctrl_fill:
+		case ctrl_fill_step1:
 						pid_reset(&_PumpPID);
 						temp_ctrl_on(FALSE);
 						turn_off_pump();
@@ -784,14 +790,19 @@ void pump_tick_10ms(void)
 						break;
 		
 		case ctrl_fill_step2:
-        case ctrl_fill_step3:  
+		case ctrl_fill_step3:
+						RX_Status.mode = RX_Config.mode;
+						break;
+		
+		case ctrl_fill_step4:
+    case ctrl_fill_step5:  
 						temp_ctrl_on(FALSE);
 						_set_valve(TO_INK);
 						_pump_pid(TRUE);
 						if(_PumpPID.val == _PumpPID.val_min) pid_reset(&_PumpPID);
 						max_pressure = MBAR_500;
-						if (RX_Config.mode==ctrl_fill_step2 
-						||  (RX_Config.mode==ctrl_fill_step3 && RX_Status.pressure_in!=INVALID_VALUE && RX_Status.pressure_in>0)) 
+						if (RX_Config.mode==ctrl_fill_step4 
+						||  (RX_Config.mode==ctrl_fill_step5 && RX_Status.pressure_in!=INVALID_VALUE && RX_Status.pressure_in>0)) 
 							RX_Status.mode = RX_Config.mode;
 						break;
         				
@@ -926,7 +937,7 @@ static void _error_cnt(int err, int *errcnt, int errflag, int timeout)
 				
 	if ((*errcnt) > timeout)
 	{
-		if (RX_Config.mode==ctrl_empty_step2) RX_Status.mode = ctrl_empty_step2;
+		if (RX_Config.mode==ctrl_empty_step5) RX_Status.mode = ctrl_empty_step5;
 		else 
 			RX_Status.error |= errflag;
 		(*errcnt) = 0;
@@ -958,7 +969,7 @@ static void _pump_pid(int Meniscus_Error_Enable)
 			)
 			{        
 				int flow = RX_Status.pump_measured * 60 / 1000;
-				if (RX_Config.mode==ctrl_empty_step2)	_error_cnt((flow > 95), &_no_ink_err_cnt,   COND_ERR_pump_no_ink, NO_INK_TIMEOUT);
+				if (RX_Config.mode==ctrl_empty_step5)	_error_cnt((flow > 95), &_no_ink_err_cnt,   COND_ERR_pump_no_ink, NO_INK_TIMEOUT);
 				else 									_error_cnt((flow > 95), &_no_ink_err_cnt,   COND_ERR_pump_no_ink, NO_INK_TIMEOUT);
 				_error_cnt((RX_Status.meniscus > MENISCUS_MAX), 	&_meniscus_err_cnt, COND_ERR_meniscus, _Meniscus_Timeout);			
 			}

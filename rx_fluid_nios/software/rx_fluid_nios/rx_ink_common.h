@@ -250,6 +250,7 @@ typedef enum EnFluidCtrlMode
     ctrl_empty_step3,   //	0x303:
     ctrl_empty_step4,   //	0x304:
     ctrl_empty_step5,   //	0x305:
+	ctrl_empty_step6,   //	0x306:
 	
 	ctrl_cal_start = 0x400, // 0x400: 
 	ctrl_cal_step1,    		// 0x401: Evaluate PID-Offset to pump 40ml/min

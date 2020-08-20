@@ -228,7 +228,7 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
 
 	if (_step_socket[no] && _step_socket[no]!=INVALID_SOCKET) steplb_rob_control(_RobotCtrlMode[no], no);
 
-    _check_screwer();
+    //_check_screwer();
 
     return REPLY_OK;
 }
@@ -546,8 +546,8 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
     _HeadAdjustment[stepperno] = *headAdjustment;
     
     headAdjustment->printbarNo %= 2;
-
-    sok_send(&_step_socket[stepperno], headAdjustment);
+    _check_screwer();
+    //sok_send(&_step_socket[stepperno], headAdjustment);
 }
 
 //--- _check_screwer --------------------------------------------------
@@ -555,10 +555,10 @@ static void _check_screwer(void)
 {
     static int _old_Screwer_State[STEPPER_CNT] = {FALSE};
     SRobPosition ScrewPosition;
-    int i;
-    for (i = 0; i < SIZEOF(_Status); i++)
+    int i = 1;
+    //for (i = 0; i < SIZEOF(_Status); i++)
     {
-        if (_Status[i].screwerinfo.screwed && !_old_Screwer_State[i])
+        //if (_Status[i].screwerinfo.screwed && !_old_Screwer_State[i])
         {
             ScrewPosition.printBar = _HeadAdjustment[i].printbarNo;
             ScrewPosition.head = _HeadAdjustment[i].headNo;
