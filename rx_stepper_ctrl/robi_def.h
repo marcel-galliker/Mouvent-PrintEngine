@@ -13,19 +13,26 @@
 #define INPUT_COUNT		7
 #define OUTPUT_COUNT	4
 
+// Defines
 #define SIZE_OF_DATA	64
 
 #define COMMAND_PIPELINE_WIDTH	2
-#define COMMAND0 0
-#define COMMAND1 1
+#define COMMAND0				0
+#define COMMAND1				1
 
+// Command Masks
 #define COMMAND_TYPE_MASK	0xFF000000
 
-#define STATUS_MASK	0x10000000
-#define GPIO_MASK	0x20000000
-#define MOTOR_MASK	0x30000000
+#define STATUS_MASK			0x10000000
+#define GPIO_MASK			0x20000000
+#define MOTOR_MASK			0x30000000
+#define COMMUNICATION_MASK	0x40000000
+#define MAIN_MASK			0x50000000
 
+// Commands
 #define IDLE					0
+
+#define NO_CMD					0
 
 #define STATUS_UPDATE			(STATUS_MASK | 0x00000001)
 
@@ -40,7 +47,9 @@
 #define MOTOR_TURN_SCREW_LEFT		(MOTOR_MASK | 0x00000007)
 #define MOTOR_TURN_SCREW_RIGHT		(MOTOR_MASK | 0x00000008)
 #define MOTOR_ESTOP					(MOTOR_MASK | 0x00000009)
+#define MOTOR_SET_SCREW_CURRENT		(MOTOR_MASK | 0x0000000A)
 
+// Errors
 #define NO_ERROR						0x00000000
 #define INVALIDE_COMMAND_TYPE_ERROR		0x00000001
 
@@ -55,34 +64,28 @@
 #define MOTOR_CANT_MOVE_Z				(MOTOR_MASK | 0x00000005)
 #define MOTOR_CANT_REF					(MOTOR_MASK | 0x00000006)
 #define MOTOR_ESTOP_FAILED				(MOTOR_MASK | 0x00000007)
+#define MOTOR_SCREW_CURRENT_ERROR		(MOTOR_MASK | 0x00000008)
 
+#define COMMUNICATION_USB_READ_ERROR				(COMMUNICATION_MASK | 0x00000001)
+#define COMMUNICATION_INVALID_MESSAGE_LENGTH_ERROR	(COMMUNICATION_MASK | 0x00000002)
+#define COMMUNICATION_ANSWER_MESSAGE_ERROR			(COMMUNICATION_MASK | 0x00000003)
 
+#define MAIN_FATAL_ERROR							(MAIN_MASK | 0x00000001)
+#define MAIN_FATAL_RUNTIME_ERROR					(MAIN_MASK | 0x00000002)
+#define MAIN_FATAL_GPIO_TICK_ERROR					(MAIN_MASK | 0x00000003)
+#define MAIN_FATAL_MOTOR_TICK_ERROR					(MAIN_MASK | 0x00000004)
+#define MAIN_FATAL_USB_TICK_ERROR					(MAIN_MASK | 0x00000005)
+#define MAIN_FATAL_COMMUNICATION_TICK_ERROR			(MAIN_MASK | 0x00000006)
+#define MAIN_FATAL_WATCHDOG_TIMEOUT_ERROR			(MAIN_MASK | 0x00000007)
 
+// Data structures
 #pragma pack(1)
-
-typedef struct {
-	uint8_t inputs;
-	uint8_t outputs;
-	uint8_t fan;
-} SGpioStatus;
-
-typedef struct
-{
-	int32_t motorTargetPosition;
-	int32_t motorPosition;
-	int32_t motorVelocity;
-	int32_t motorEncoderPosition;
-	uint32_t timeout;
-	uint8_t isMoving;
-	uint8_t isReferenced;
-	uint8_t isStalled;
-	uint8_t status;
-} SMotorStatus;
 
 typedef struct
 {
 	SGpioStatus gpio;
 	SMotorStatus motors[MOTOR_COUNT];
+	uint8_t screwCurrent;
 	uint8_t zPos;
 	uint8_t isInGarage;
 	uint8_t isInRef;
