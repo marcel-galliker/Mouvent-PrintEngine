@@ -915,7 +915,23 @@ static void* receive_thread(void *par)
 							_isSync = TRUE;
 					
 						memcpy(&_robiStatus, &rxMessage.robi, sizeof(_robiStatus));
-					}
+
+                        if (rxMessage.error)
+                        {
+                            if (rxMessage.length)
+                            {
+                                Error(ERR_CONT, 0,
+                                      "Robi Error. Flag: %d, Message %s",
+                                      rxMessage.error, rxMessage.data);
+                            }
+                            else
+                            {
+                                Error(ERR_CONT, 0,
+                                      "Robi Error. Flag: %d, Message %s",
+                                      rxMessage.error, rxMessage.data);
+                            }
+                        }
+                    }
 				}
 			}
 		}
