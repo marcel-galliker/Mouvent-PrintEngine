@@ -603,8 +603,8 @@ int  nios_main(int ticks, int menu)
 		tse_check_errors(ticks, menu);
 		if (menu) 	
 		{
-			nios_check_errors();		
 			_nios_copy_status();			
+			nios_check_errors(ticks);		
 
 			for(int head=0; head<SIZEOF(FpgaCfg.head); head++)
 			{
@@ -623,7 +623,7 @@ static void _nios_copy_status(void)
 }
 
 //--- nios_check_errors ---------------------------
-void nios_check_errors(void)
+void nios_check_errors(int ticks)
 {	
 	ELogItemType	abort = RX_HBConfig.simuPlc ? LOG_TYPE_WARN : LOG_TYPE_ERROR_ABORT;
 
@@ -678,7 +678,7 @@ void nios_check_errors(void)
 			ErrorFlag(WARN, (UINT32*)&RX_HBStatus[0].info, info_cooler_pcb_present, 0, "No Cooler PCB present");
 		}
 
-		cond_error_check();		
+		cond_error_check(ticks);		
 	}
 }
 

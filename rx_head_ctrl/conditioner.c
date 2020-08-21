@@ -47,6 +47,7 @@ SFpgaHeadBoardCfg	FpgaCfg;
 SVersion			_FileVersion;
 static int			_UpdateClusterTimer;
 static int			_ErrorDelay=0;
+static int			_FlowCheckDelay[MAX_HEADS_BOARD];
 static ELogItemType	_ErrLevel = LOG_TYPE_UNDEF;
 
 #define ERROR_DELAY	200	// ms after reset until errors are checked
@@ -55,6 +56,7 @@ static ELogItemType	_ErrLevel = LOG_TYPE_UNDEF;
 
 static void _write_log(void);
 static void _cond_copy_status(void);
+static void _cond_check_flow(int ticks);
 static void _cond_preslog(int ticks);
 static void	_update_clusterNo(void);
 
@@ -229,7 +231,7 @@ static void _set_fluid_off(int head)
 }
 
 //--- cond_error_check ----------------------------------
-void cond_error_check(void)
+void cond_error_check(int ticks)
 {
 	if (!nios_loaded()) return;
 
@@ -311,7 +313,38 @@ void cond_error_check(void)
 	    	if (level>_ErrLevel)
 	    		_ErrLevel = level;
     	}
-	}				
+	}
+	_cond_check_flow(ticks);
+}
+
+//--- _cond_check_flow ----------------------------------------
+static void _cond_check_flow(int ticks)
+{
+	int i;
+	if (nios_loaded())
+	{
+		for (i=0; i<SIZEOF(RX_HBStatus->head); i++)
+		{	
+			if (valid(RX_HBStatus->head[i].presIn) && valid(RX_HBStatus->head[i].presOut) && valid(RX_HBStatus->head[i].pumpFeedback))
+			{
+				if (RX_HBStatus->head[i].pumpFeedback) RX_HBStatus->head[i].flowFactor = 100*(RX_HBStatus->head[i].presIn-RX_HBStatus->head[i].presOut)/RX_HBStatus->head[i].pumpFeedback;
+				else RX_HBStatus->head[i].flowFactor = 0;
+			}
+			else RX_HBStatus->head[i].flowFactor = INVALID_VALUE;
+
+			if (RX_HBStatus->head[i].ctrlMode==ctrl_print)
+			{					
+				int warn = (RX_HBStatus[0].head[i].warn&COND_ERR_flow_factor);
+				if (valid(RX_HBStatus->head[i].flowFactor) && RX_HBStatus->head[i].flowFactor>200) 
+				{
+					RX_HBStatus[0].head[i].warn |= COND_ERR_flow_factor;				
+					if (ticks>_FlowCheckDelay[i] && !warn) 
+						Error(WARN, 0, "Conditioner %s: Ink flow factor >200", RX_HBConfig.head[i].name);
+				}
+			}
+			else _FlowCheckDelay[i] = ticks+5000;
+		}
+	}
 }
 
 //--- cond_err_level -------------------------------------
@@ -425,6 +458,7 @@ void cond_main(int ticks, int menu)
 {	
 	static int _ticks=0;
 	if (menu) _cond_copy_status();
+
 	if (ticks-_ticks>1000)
 	{
 		if (_UpdateClusterTimer>0 && --_UpdateClusterTimer<=0)
@@ -500,7 +534,6 @@ static void _cond_copy_status(void)
 		}
 	}
 }
-
 
 //---_cond_load --------------------------------
 int _cond_load(const char *exepath)

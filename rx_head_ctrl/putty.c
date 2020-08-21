@@ -699,6 +699,7 @@ void putty_display_cond_status(int status)
     	term_printf("Valve:           "); PRINTF(MAX_HEADS_BOARD)("          %5s ", VALVE_NAME[RX_NiosStat.cond[no[i]].info.valve]); term_printf("\n");
     	term_printf("Printed [ml/min]:"); PRINTF(MAX_HEADS_BOARD)("       %8s ", value_str3(_NiosMem->cfg.cond[no[i]].volume_printed * 60)); term_printf("\n");			
 		term_printf("Pump [ml/min]:   "); PRINTF(MAX_HEADS_BOARD)("    %5s(%4d) ", value_str1(RX_HBStatus->head[no[i]].pumpFeedback), RX_NiosStat.cond[no[i]].pump); term_printf("\n");
+		term_printf("Flow Factor:     "); PRINTF(MAX_HEADS_BOARD)("       %8s ", value_str(RX_HBStatus->head[no[i]].flowFactor)); term_printf("\n");
 
 		term_printf("Printing [h:m:s]: ");
 		for (i = 0; i < MAX_HEADS_BOARD; i++)

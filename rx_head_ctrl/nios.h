@@ -23,7 +23,7 @@ void nios_load(const char *exepath);
 int  nios_loaded(void);
 
 int  nios_main(int ticks, int menu);
-void nios_check_errors(void);
+void nios_check_errors(int ticks);
 void nios_error_reset(void);
 
 void nios_setInk(int headNo, SInkDefinition *pink, char *dots, int fpVoltage);
