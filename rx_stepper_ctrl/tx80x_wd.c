@@ -144,7 +144,7 @@ void tx80x_wd_main(void)
         else
         {
             for (motor = MOTOR_WD_FRONT, ok = TRUE;
-                 motor < MOTOR_WD_CNT; motor++)
+                 motor < MOTOR_WD_FRONT + MOTOR_WD_CNT; motor++)
             {
                 if (motor_error(motor))
                 {

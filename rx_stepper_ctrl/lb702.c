@@ -47,7 +47,7 @@ static char		*_MotorName[2] = {"BACK", "FRONT"};
 #define CAL_TOOL_HEIGHT	25000
 #define DIST_MECH_REF		500
 
-#define DIST_CAP_WASH   2000		// um
+#define DIST_CAP_WASH  4800	//2000		// um -> higher than capping hight
 
 static SMovePar	_ParRef;
 static SMovePar	_ParZ_down;
@@ -425,8 +425,9 @@ void lb702_main(int ticks, int menu)
 static void _lb702_display_status(void)
 {
 	term_printf("LB 702 ---------------------------------\n");
-	term_printf("actpos0:         %06d  newpos0: %06d\n",	_PrintPos_Act[MOTOR_Z_BACK], _PrintPos_New[MOTOR_Z_BACK]);
-	term_printf("actpos1:         %06d  newpos1: %06d\n", _PrintPos_Act[MOTOR_Z_FRONT], _PrintPos_New[MOTOR_Z_FRONT]);
+	term_printf("actpos0:         %06d  newpos0:      %06d\n",	_PrintPos_Act[MOTOR_Z_BACK], _PrintPos_New[MOTOR_Z_BACK]);
+	term_printf("actpos1:         %06d  newpos1:      %06d\n", _PrintPos_Act[MOTOR_Z_FRONT], _PrintPos_New[MOTOR_Z_FRONT]);
+    term_printf("actpos front:    %06d  actpos back:  %06d\n", RX_StepperStatus.posZ, RX_StepperStatus.posZ_back);
 	term_printf("Ref Height back(um):         %06d  Print Height:     %06d\n", RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_back,  _PrintHeight);
 	term_printf("Ref Height front(um):        %06d  Print Height:     %06d\n", RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_front, _PrintHeight);
 	term_printf("Head UP Sensor: BACK=%d  FRONT=%d\n",	fpga_input(HEAD_UP_IN_BACK), fpga_input(HEAD_UP_IN_FRONT));
