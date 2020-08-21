@@ -1087,6 +1087,7 @@ namespace RX_DigiPrint.Services
 	        public Int32			presIn;
 	        public Int32			presIn_max;
 	        public Int32			presIn_diff;
+	        public Int32			flowFactor;
 	        public UInt32			presOut_ID;
 	        public Int32			presOut;
 	        public Int32			presOut_diff;

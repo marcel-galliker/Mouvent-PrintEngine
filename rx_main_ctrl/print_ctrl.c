@@ -746,7 +746,7 @@ static int _print_next(void)
 					Error(LOG, 0, "_print_next:_StopJob");
 					pq_set_item(pitem);
 				}
-				spool_print_file(&_Item.id, _DataPath, _ScanOffset, _ScanLengthPx, &_Item, TRUE);
+				spool_print_file(&_Item.id, _DataPath, _ScanOffset, _ScanLengthPx, &_Item, rx_def_is_tx(RX_Config.printer.type));
 				return REPLY_OK;
 			}
 			{
@@ -816,7 +816,7 @@ static int _print_next(void)
 						pq_set_item(&_Item);
 						pl_start(&_Item, _FilePathLocal);
 					}
-					spool_print_file(&_Item.id, _DataPath, _ScanOffset, _ScanLengthPx, &_Item, TRUE);
+					spool_print_file(&_Item.id, _DataPath, _ScanOffset, _ScanLengthPx, &_Item, rx_def_is_tx(RX_Config.printer.type));
 				}
 				else
 				{

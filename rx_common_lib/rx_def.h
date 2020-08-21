@@ -678,7 +678,7 @@ typedef enum
 typedef enum
 {
 	warn_fpga_overheating = 0x00000001,	// head is overheating
-	warn_1			 = 0x00000002,
+	warn_flow_factor	  = 0x00000002,
 	warn_2			 = 0x00000004,
 	warn_3			 = 0x00000008,
 	warn_4			 = 0x00000010,
@@ -807,6 +807,7 @@ typedef struct SHeadStat
 	INT32			presIn;
 	INT32			presIn_max;
 	INT32			presIn_diff;
+	UINT32			flowFactor;
 	UINT32			presOut_ID;
 	INT32			presOut;
 	INT32			presOut_diff;
@@ -814,7 +815,7 @@ typedef struct SHeadStat
 	INT32			meniscus_diff;
 	INT32			meniscus_Setpoint;
 	INT32			pid_offset;
-	
+
 	FLOAT			dropVolume;	// in pl
 	UINT32			pumpSpeed;
 	UINT32			pumpFeedback;

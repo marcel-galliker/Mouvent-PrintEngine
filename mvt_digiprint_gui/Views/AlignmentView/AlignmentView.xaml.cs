@@ -79,9 +79,9 @@ namespace RX_DigiPrint.Views.Alignment
 
         private void _InitInkSupplySelection()
         {
-            if (RxGlobals.PrintSystem.Color_Order == null || RxGlobals.PrintSystem.Color_Order.Length < RxGlobals.PrintSystem.ColorCnt)
+            if (RxGlobals.PrintSystem.Color_Order == null)
             {
-                Console.WriteLine("Error _InitInkSupplySelection: Invalid Color_Order array!!");
+                Console.WriteLine("Error _InitInkSupplySelection: Invalid Color_Order == null!!");
                 return;
             }
 
@@ -91,13 +91,12 @@ namespace RX_DigiPrint.Views.Alignment
             {
                 int currentSelectedUnsortedColorIndex = 0;
                 int currentSelectedUnsortedInkCylinderIndex = 0;
-                /*
-            if (RxGlobals.PrintSystem.IsTx)
-            {
-                    currentSelectedUnsortedColorIndex = RxGlobals.PrintSystem.ColorCnt - 1;
-                    currentSelectedUnsortedInkCylinderIndex = RxGlobals.PrintSystem.InkCylindersPerColor - 1;
-                }*/
-
+                
+                if (!(currentSelectedUnsortedColorIndex < RxGlobals.PrintSystem.Color_Order.Length))
+                {
+                    Console.WriteLine("Error _InitInkSupplySelection: Invalid Color_Order array!!");
+                    return;
+                }
                 CurrentSelectedColorIndex = RxGlobals.PrintSystem.Color_Order[currentSelectedUnsortedColorIndex];
                 CurrentSelectedInkCylinderIndex = currentSelectedUnsortedInkCylinderIndex;
                 
@@ -122,23 +121,23 @@ namespace RX_DigiPrint.Views.Alignment
 
             for (int color = 0; color < RxGlobals.PrintSystem.ColorCnt; color++)
             {
-                int colorIndex = RxGlobals.PrintSystem.Color_Order[color];
-                /*if (RxGlobals.PrintSystem.IsTx)
+                if (color < RxGlobals.PrintSystem.Color_Order.Length)
                 {
-                    colorIndex = RxGlobals.PrintSystem.Color_Order[RxGlobals.PrintSystem.ColorCnt - 1 - color];
-                }*/
+                    int colorIndex = RxGlobals.PrintSystem.Color_Order[color];
 
-                UpdateColorDescription(colorIndex, ref description);
-                RadioButton button = new RadioButton();
-                button.Content = description.ColorName;
-                button.Background = description.Color;
-                button.BorderBrush = description.StrokeColor;
-                button.Tag = colorIndex;
-                button.Click += _ColorSelection_Clicked;
-                button.Style = colorSelectionStyle;
-                if (colorIndex == CurrentSelectedColorIndex) button.IsChecked = true;
-                else button.IsChecked = false;
-                ColorSelectionPanel.Children.Add(button);
+                    UpdateColorDescription(colorIndex, ref description);
+                    RadioButton button = new RadioButton();
+                    button.Content = description.ColorName;
+                    button.Background = description.Color;
+                    button.BorderBrush = description.StrokeColor;
+                    button.Tag = colorIndex;
+                    button.Click += _ColorSelection_Clicked;
+                    button.Style = colorSelectionStyle;
+                    if (colorIndex == CurrentSelectedColorIndex) button.IsChecked = true;
+                    else button.IsChecked = false;
+                    ColorSelectionPanel.Children.Add(button);
+                }
+                
             }
 
             if (RxGlobals.PrintSystem.InkCylindersPerColor > 1)

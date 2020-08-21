@@ -913,7 +913,7 @@ static void _do_get_disalbled_jets(RX_SOCKET socket, SDisabledJetsMsg *pmsg)
 			{   
 				if (setup_chapter(file, "Head", head, READ)==REPLY_OK) 
 				{
-					setup_int16_arr(file, "value",  READ, reply.disabledJets,	SIZEOF(reply.disabledJets),	-1);					
+					setup_int16_arr(file, "compensate",  READ, reply.disabledJets,	SIZEOF(reply.disabledJets),	-1);					
 					setup_chapter(file, "..", -1, READ);
 				}
 				setup_chapter(file, "..", -1, READ);

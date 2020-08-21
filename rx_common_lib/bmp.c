@@ -160,7 +160,10 @@ int bmp_load(const char *path, BYTE **buffer, int bufsize, SBmpInfo *info)
 			info->lengthPx		= abs(pHeaderInfo->biHeight);
 			info->bitsPerPixel  = pHeaderInfo->biBitCount;
 		//	info->lineLen		= (((info->srcWidthPx) + 15) & ~15)  * (info->bitsPerPixel) / 8;
-			info->lineLen		= pHeaderInfo->biSizeImage / info->lengthPx;
+			if (pHeaderInfo->biSizeImage>0)
+				info->lineLen	= pHeaderInfo->biSizeImage / info->lengthPx;
+			else
+				info->lineLen	= (((info->srcWidthPx) + 15) & ~15)  * (info->bitsPerPixel) / 8;
 			info->dataSize		= (UINT64)(info->lineLen) * (info->lengthPx);
 			info->resol.x		= pHeaderInfo->biXPelsPerMeter * 254 / 10000;
 			info->resol.y		= pHeaderInfo->biYPelsPerMeter * 254 / 10000;

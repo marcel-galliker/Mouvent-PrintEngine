@@ -35,7 +35,7 @@
     #define COND_ERR_temp_head_overheat			(1<< 9)
     #define COND_ERR_temp_ink_overheat			(1<<10)
     #define COND_ERR_temp_heater_overheat		(1<<11)
-    #define COND_ERR_12							(1<<12)
+    #define COND_ERR_flow_factor				(1<<12)
     #define COND_ERR_temp_tank_falling			(1<<13)
     #define COND_ERR_temp_tank_too_low			(1<<14)
     #define COND_ERR_p_in_too_high				(1<<15)

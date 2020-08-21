@@ -23,11 +23,12 @@ namespace RX_DigiPrint.Views.AlignmentView.DisabledJets
         {
             DisabledJets.Save_Clicked();
             Density.Save_Clicked(sender, e);
+            DialogResult = true;
         }
 
         private void Exit_Click(object sender, RoutedEventArgs e)
         {
-            DialogResult = true;
+            DialogResult = false;
         }
 
         private void CustomWindow_Loaded(object sender, RoutedEventArgs e)
