@@ -291,7 +291,7 @@ static void _write_tif(char *title, SBmpSplitInfo *pInfo, PBYTE *buffer, int lin
 	info.inkSupplyNo[0] = 0;
 	info.buffer[0]      = buffer;
 
-	tif_write(dir, fname, &info);
+	tif_write(dir, fname, &info, NULL);
 	Error(LOG, 0, "Written File >>%s<<", fname);
 #endif
 }
@@ -334,7 +334,7 @@ static int _rx_screen_write_ta(void * epplaneScreenConfig)
 	info.inkSupplyNo[0] = 0;
 	info.buffer[0]      = &outplane.buffer;
 
-	tif_write(dir, fname, &info);
+	tif_write(dir, fname, &info, NULL);
 	Error(LOG, 0, "Written File >>%s<<", fname);
 
 	rx_mem_free(&outplane.buffer);

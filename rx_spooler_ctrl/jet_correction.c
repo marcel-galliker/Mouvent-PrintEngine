@@ -108,8 +108,9 @@ int  jc_active(void)
 //--- _jet_correction --------------------------------------------------
 int	jc_correction (SBmpInfo *pBmpInfo,  SPrintListItem *pItem, int fromLine)
 {
-	int color, n, head, jet;
+	int color, n, head, jet, logLen;
 	int pixelPerByte;
+	char logStr[MAX_PATH];
 	SBmpSplitInfo	*pInfo; 
 
 	if (pBmpInfo->bitsPerPixel==8) return REPLY_OK;	// correction whils screening 
@@ -137,12 +138,14 @@ int	jc_correction (SBmpInfo *pBmpInfo,  SPrintListItem *pItem, int fromLine)
 				pInfo = &pItem->splitInfo[RX_Spooler.headNo[color][head]-1];
 				if (pInfo->data && pBmpInfo->buffer[color] && pBmpInfo->bitsPerPixel)
 				{
+					logLen=0;
 					for (n=0; n<MAX_DISABLED_JETS; n++)
 					{
 						jet = RX_DisabledJets[color*RX_Spooler.headsPerColor+head][n];
 						if (jet>=0)
 						{
-							if (_Log) Error(LOG, 0, "Disable Jet color=%d, head=%d, jet=%d", color, head, jet);
+							
+							if(_Log) logLen += sprintf(&logStr[logLen], "%d ", jet);
 							jet += pInfo->startBt*pixelPerByte + pInfo->jetPx0;
 							_disable_jet(*pInfo->data, pBmpInfo->bitsPerPixel, pBmpInfo->lengthPx, pBmpInfo->lineLen, jet, fromLine);
 							/*
@@ -164,6 +167,7 @@ int	jc_correction (SBmpInfo *pBmpInfo,  SPrintListItem *pItem, int fromLine)
 							*/
 						}
 					}
+					if (logLen) Error(LOG, 0, "Disable Jet color=%d, head=%d, jet=%s", color, head, logStr);
 				}
 			}
 		//	if (pBmpInfo->printMode==PM_SCANNING || pBmpInfo->printMode==PM_SINGLE_PASS) break;

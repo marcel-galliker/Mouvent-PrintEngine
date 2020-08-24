@@ -558,7 +558,7 @@ static void *_tif_read_thread(void* lpParameter)
 
 
 //--- tif_write ------------------------------------------------------------------------------------------
-int tif_write(const char *filedir, const char *filename, SBmpInfo *pinfo)
+int tif_write(const char *filedir, const char *filename, SBmpInfo *pinfo, char *color)
 {
 	int c, ret = REPLY_OK;
 	char filepath[MAX_PATH];
@@ -576,6 +576,8 @@ int tif_write(const char *filedir, const char *filename, SBmpInfo *pinfo)
 	{
 		if (pinfo->buffer[c])
 		{
+            if (color && strcmp(RX_ColorNameShort(pinfo->inkSupplyNo[c]), color)) continue;
+
 			sprintf(filepath, "%s/%s_%s.tif", filedir, filename, RX_ColorNameShort(pinfo->inkSupplyNo[c]));
 			file = TIFFOpen(filepath, "w");
 			if (file)

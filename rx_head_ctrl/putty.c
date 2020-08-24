@@ -183,6 +183,7 @@ void putty_display_fpga_status(void)
 	static UINT32 cnt[4]={0,0,0,0};
 					
 	int head, change=FALSE;
+	int f, freq;
 	int blkCnt;
 	char str[32], str1[32];
 	char line[90];
@@ -200,7 +201,16 @@ void putty_display_fpga_status(void)
 	term_printf("Temp:    %d  Overheat.Error: %d  FPGA.cmd=0x%04x\n",		RX_FpgaStat.temp-128, RX_FpgaError.overheat_error, RX_FpgaCmd);
 	term_printf("Encoder:  linkEnable=%d, telCnt=%u, synthEnable=%d, synthKHz=%d\n", (RX_FpgaEncCfg.cmd & ENC_ENABLE)!=0, fpga_get_encTelFreq(), RX_FpgaEncCfg.synth.enable, _speed_160(RX_FpgaEncCfg.synth.value*1000));
 //		term_printf("info:  0x%08x\n", RX_FpgaStat.info);
-	term_printf("speed [Hz]:   "); PRINTF(4)("%08d   ", _speed_160(RX_FpgaStat.enc_speed[i].current));	term_printf("\n");
+	
+	term_printf("Speed [Hz]:   ");
+	freq=0;
+	for(i=0; i<MAX_HEADS_BOARD; i++)
+	{
+		f=_speed_160(RX_FpgaStat.enc_speed[i].current);
+		term_printf("%08d   ", f);
+		if (f>freq) freq=f;
+	}
+	term_printf("     %d m/min\n", (int)(60.0*freq/1200.0*0.0254+0.5));
 //		term_printf("speed min:   "); PRINTF(4)("%08d   ", _speed_160(RX_FpgaStat.enc_speed[i].min));		term_printf("\n");
 //		term_printf("speed max[Hz]:"); PRINTF(4)("%08d   ", _speed_160(RX_FpgaStat.enc_speed[i].max));		term_printf("\n");
 //		term_printf("UDP Blocks sent:%06d  BlkSize=%d  Blk/Head=%d\n",			udp_test_sent_blocks(), fpga_udp_block_size(), RX_HBConfig.head[1].blkNo0);		
