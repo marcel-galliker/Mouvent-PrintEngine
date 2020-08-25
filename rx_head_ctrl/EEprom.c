@@ -85,8 +85,7 @@ void eeprom_init_data(int headNo, BYTE *eeprom, SHeadEEpromInfo *pInfo)
 						break;
 			case 'h':	memcpy(pdata->flexSide,			src,  1); src+= 1; break;
 			case 't':	memcpy(pdata->thermistor,		src,  1); src+= 1; break;
-			case 'v':	memcpy(pdata->driveVoltage,		src,  3); 
-						src+= 3; break;
+			case 'v':	memcpy(pdata->driveVoltage,		src,  3); src+= 3; break;
 			case 'f':	memcpy(pdata->flowResistance,	src,  3); src+= 3; break;
 			case 'l':	memcpy(pdata->dropMass[2],		src,  3); src+= 3; break;
 			case 'm':	memcpy(pdata->dropMass[1],		src,  3); src+= 3; break;

@@ -334,9 +334,10 @@ static void _cond_check_flow(int ticks)
 
 			if (RX_HBStatus->head[i].ctrlMode==ctrl_print)
 			{					
-				int warn = (RX_HBStatus[0].head[i].warn&COND_ERR_flow_factor);
-				if (valid(RX_HBStatus->head[i].flowFactor) && RX_HBStatus->head[i].flowFactor>200) 
+				RX_HBStatus[0].head[i].info.flowFactor_ok = valid(RX_HBStatus->head[i].flowFactor) && RX_HBStatus->head[i].flowFactor<200;
+				if (!RX_HBStatus[0].head[i].info.flowFactor_ok) 
 				{
+					int warn = (RX_HBStatus[0].head[i].warn&COND_ERR_flow_factor);
 					RX_HBStatus[0].head[i].warn |= COND_ERR_flow_factor;				
 					if (ticks>_FlowCheckDelay[i] && !warn) 
 						Error(WARN, 0, "Conditioner %s: Ink flow factor >200", RX_HBConfig.head[i].name);
@@ -488,7 +489,6 @@ static void _cond_copy_status(void)
 				RX_HBStatus->head[i].tempHead			= RX_NiosStat.head_temp[i];
 				RX_HBStatus->head[i].tempCond			= RX_NiosStat.cond[i].tempIn;
 //				RX_HBStatus->head[i].tempSetpoint		= _NiosMem->cfg.cond[i].temp; //RX_NiosStat.cond[i].tempSetpoint;
-				RX_HBStatus->head[i].tempReady			= RX_NiosStat.cond[i].tempReady;
 				RX_HBStatus->head[i].presIn_ID			= RX_NiosStat.cond[i].pressure_in_ID;
 				RX_HBStatus->head[i].presIn				= RX_NiosStat.cond[i].pressure_in;
 				RX_HBStatus->head[i].presIn_max			= RX_NiosStat.cond[i].pressure_in_max;
@@ -520,7 +520,6 @@ static void _cond_copy_status(void)
 				RX_HBStatus->head[i].tempHead		= INVALID_VALUE;
 				RX_HBStatus->head[i].tempCond		= INVALID_VALUE;
 				RX_HBStatus->head[i].tempSetpoint	= INVALID_VALUE;
-				RX_HBStatus->head[i].tempReady		= INVALID_VALUE;
 				RX_HBStatus->head[i].presIn			= INVALID_VALUE;
 				RX_HBStatus->head[i].presOut		= INVALID_VALUE;
 				RX_HBStatus->head[i].pumpSpeed		= INVALID_VALUE;

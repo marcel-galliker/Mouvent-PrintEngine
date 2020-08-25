@@ -68,8 +68,8 @@ typedef union SCondInfo
 			UINT32	info_02 : 1;		// thermistor_test_done : 1;		// 	02:
 			UINT32	meniscus_warn : 1;	// 	03:
             UINT32	zero_offset_calibrated : 1;	 // 04:
-			UINT32	info_05 : 1;        // 05:
-			UINT32	info_06 : 1;        // 	06:
+			UINT32	temp_ready : 1;     //  05:
+			UINT32	flowFactor_ok : 1;  // 	06:
 			UINT32	info_07 : 1;		// 	07:
 			UINT32	info_08 : 1;		// 	08:
 			UINT32	info_09 : 1;		// 	09:
@@ -250,7 +250,7 @@ typedef struct SConditionerStat_mcu
 	UINT32			tempIn;				// actual Temp (1/1000 �C)
     UINT32			tempHeater;		    // Temperature measured directly on heater cartridge (>= Revision #h) (1/1000 �C)
 	UINT32			heater_percent;		// heater on time (between 0% and 80%)
-	INT32			tempReady;			// temp ink = setpoint +/- 1�C
+	INT32			unused_tempReady;	// temp ink = setpoint +/- 1�C
 	UINT32			mode;				// EnFluidCtrlMode
 	SCondStatus		gpio_state;			// state of GPIO Inputs
 	UINT32			error;

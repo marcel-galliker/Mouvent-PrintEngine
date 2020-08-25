@@ -37,16 +37,13 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="0" Grid.Column="0" BorderBrush="Crimson" BorderThickness="2" Grid.RowSpan="11" Panel.ZIndex="99"
-                Visibility="{Binding Err, Converter={StaticResource IntToVisible_Converter}}"></Border>
+        <Border Grid.Row="0" Grid.Column="0" BorderBrush="{Binding StateBrush}" BorderThickness="2" Grid.RowSpan="11" Panel.ZIndex="99" Margin="1,0"/>
 
         <Button Grid.Row="0" Style="{StaticResource InkSupplyColorEllipseStyle}" HorizontalAlignment="Center" BorderBrush="{Binding Color}"
-                Foreground="{Binding Color, Converter={StaticResource PrintHeadViewStrokeConverter}}"></Button>
+            Foreground="{Binding Color, Converter={StaticResource PrintHeadViewStrokeConverter}}"/>
 
-        <TextBlock Grid.Row="1" Text="{Binding Name}"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    />
+        <TextBlock Grid.Row="1" Text="{Binding Name}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        
         <Grid Grid.Row="2" Margin="2,0,2,0">
             <Button x:Name="CmdButton"
                     HorizontalAlignment="Stretch" 

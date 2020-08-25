@@ -606,9 +606,9 @@ void temp_tick_10ms (void)
 	
 	// Message temeprature ready = setpoint +/- 1°C
 	if (RX_Config.tempHead==INVALID_VALUE)
-		RX_Status.tempReady = RX_Status.tempIn   > (RX_Config.temp-TEMP_TOLERANCE);
+		RX_Status.info.temp_ready = RX_Status.tempIn   > (RX_Config.temp-TEMP_TOLERANCE);
 	else 
-		RX_Status.tempReady = RX_Config.tempHead > (RX_Config.temp-TEMP_TOLERANCE);
+		RX_Status.info.temp_ready = RX_Config.tempHead > (RX_Config.temp-TEMP_TOLERANCE);
 }
 
 

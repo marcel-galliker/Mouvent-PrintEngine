@@ -15,6 +15,7 @@
 
 #include "rx_error.h"
 #include "rx_threads.h"
+#include "rx_trace.h"
 #include "rx_xml.h"
 #include "rx_rexroth.h"
 #include "tinyxml.h"
@@ -64,6 +65,7 @@ int  rex_connect(const char *ipAddr, connected_callback onConnected,  connected_
 	MlpiVersion versionInfo;
 	memset(&versionInfo, 0, sizeof(versionInfo));
 	result = mlpiApiGetClientCoreVersion(&versionInfo);
+	TrPrintfL(TRUE, "MLPI client version %d.%d.%d.%d", versionInfo.major, versionInfo.minor, versionInfo.bugfix, versionInfo.patch);
 
 	char_to_wchar(_IpAddr, _WIpAddr, SIZEOF(_WIpAddr));
 	result=mlpiApiSetDefaultTimeout(MLPI_TIMEOUT);

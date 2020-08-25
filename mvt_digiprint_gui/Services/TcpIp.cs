@@ -1082,7 +1082,6 @@ namespace RX_DigiPrint.Services
 	        public UInt32			tempHead;
 	        public UInt32			tempCond;
             public UInt32           tempSetpoint;
-            public Int32            tempReady;
 	        public UInt32			presIn_ID;
 	        public Int32			presIn;
 	        public Int32			presIn_max;

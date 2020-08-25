@@ -3,7 +3,7 @@
              xmlns:x    ="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc   ="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d    ="http://schemas.microsoft.com/expression/blend/2008"
-            xmlns:rxuc ="clr-namespace:RX_DigiPrint.Views.UserControls"
+             xmlns:rxuc ="clr-namespace:RX_DigiPrint.Views.UserControls"
              xmlns:rx   ="clr-namespace:RX_DigiPrint.Helpers"
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
@@ -134,9 +134,9 @@
                     BorderBrush="{Binding InkType, Converter={StaticResource InkType_ColorBG}}"
                     Foreground="{Binding InkType, Converter={StaticResource InkType_ColorBG_Stroke}}"></Button>
             -->
-            <Border Grid.Row="0" Grid.Column="0" BorderBrush="Crimson" BorderThickness="2" Grid.RowSpan="9" Panel.ZIndex="99"
-                    Visibility="{Binding Err, Converter={StaticResource IntToVisible_Converter}}"></Border>
-            
+
+            <Border Grid.Row="0" Grid.Column="0" BorderBrush="{Binding StateBrush}" BorderThickness="2" Grid.RowSpan="9" Panel.ZIndex="99" Margin="1,0"/>
+
             <rxuc:RxComboBoxTree Margin="2,0,2,0" x:Name="InkType" Grid.Row="1"/>
 
             <rx:RxComboBox Margin="2,0,2,0" Grid.Row="2" x:Name="CB_RectoVerso" SelectedValue="{Binding RectoVerso}"/>

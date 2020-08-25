@@ -411,7 +411,7 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
             else if (!inkSupply.TempReady
                 || !inkSupply.CondTempReady
                 || inkSupply.CanisterErr >= RX_DigiPrint.Services.ELogType.eErrWarn
-                || inkSupply.Warn > 0)
+                || inkSupply.Warn)
             {
                 InkCylinderStatusList[inkCylinderIndex].Status = ETotalStatus.STATUS_WARNING;
             }
@@ -465,7 +465,7 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
                                 {
                                     status.Status = ETotalStatus.STATUS_ERROR;
                                 }
-                                else if (!printHeadStatistics.TempReady || printHeadStatistics.Warn != 0)
+                                else if (printHeadStatistics.Warn)
                                 {
                                     status.Status = ETotalStatus.STATUS_WARNING;
                                 }

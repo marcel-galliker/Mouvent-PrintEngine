@@ -72,8 +72,8 @@ namespace RX_DigiPrint.Models
         }
 
         //--- Property Warn ---------------------------------------
-        private UInt32 _Warn;
-        public UInt32 Warn
+        private bool _Warn=false;
+        public bool Warn
         {
             get { return _Warn; }
             set { SetProperty(ref _Warn, value); }
@@ -346,8 +346,16 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _Voltage, value); }
         }
 
-        //--- SetItem ----------------------------------------------
-        public void SetItem(int no, TcpIp.SHeadStat item, Int32 tempFpga, Int32 flow)
+		//--- Property StateBrush ---------------------------------------
+		private Brush _StateBrush;
+		public Brush StateBrush
+		{
+			get { return _StateBrush; }
+			set { SetProperty(ref _StateBrush,value); }
+		}
+
+		//--- SetItem ----------------------------------------------
+		public void SetItem(int no, TcpIp.SHeadStat item, Int32 tempFpga, Int32 flow)
         {   
             bool used=false;
             HeadNo  = no;
@@ -391,7 +399,6 @@ namespace RX_DigiPrint.Models
 
             Connected   = (item.info&0x00000001) != 0;
             Info        = item.info;
-            Warn        = item.warn;
             Err         = item.err;
 
             Valve       = ((item.info&0x02)==0)? 0:1;
@@ -408,7 +415,7 @@ namespace RX_DigiPrint.Models
             TempSetpoint= item.tempSetpoint;
          //   if (used) TempReady   = item.tempReady!=0;
          //   else TempReady=false;
-            TempReady   = (!used) || (item.tempReady!=0 && item.ctrlMode==EFluidCtrlMode.ctrl_print);
+            TempReady   = (!used) || (item.ctrlMode!=EFluidCtrlMode.ctrl_print) || ((item.info&(1<<5))!=0);
             PresIn      = item.presIn;
             PresIn_max  = item.presIn_max;
             PresIn_diff = item.presIn_diff;
@@ -420,7 +427,13 @@ namespace RX_DigiPrint.Models
             Meniscus_diff= item.meniscus_diff;
             PumpSpeed    = item.pumpSpeed;
             FlowFactor   = item.flowFactor;
-            FlowFactorWarning = (item.flowFactor>=200);
+            FlowFactorWarning = (item.flowFactor>=200) && (CtrlMode==EFluidCtrlMode.ctrl_print);
+
+            Warn         = used && (FlowFactorWarning || !TempReady);
+            if (Err!=0)    StateBrush = Brushes.Crimson;
+            else if (Warn) StateBrush = Brushes.Gold;
+            else           StateBrush = Brushes.Transparent; 
+
             Meniscus_setpoint = item.meniscus_Setpoint;
             PumpFeedback= item.pumpFeedback;
             if (item.printingSeconds==TcpIp.INVALID_VALUE) PrintingTime="-----";

@@ -802,7 +802,6 @@ typedef struct SHeadStat
 	UINT32			tempHead;
 	UINT32			tempCond;
 	UINT32			tempSetpoint;
-	INT32			tempReady;
 	UINT32			presIn_ID;
 	INT32			presIn;
 	INT32			presIn_max;
@@ -1076,6 +1075,7 @@ typedef struct SHeadStateLight
 	INT32			condMeniscus;
 	INT32			condMeniscusDiff;
 	INT32			condTempReady;
+	INT32			condFlowfactor_ok;
 	INT32			canisterEmpty;
 } SHeadStateLight;
 			
@@ -1103,7 +1103,7 @@ typedef struct SInkSupplyInfo
 			UINT32 flushed : 1;			// 0x00000008
 			UINT32 condTempReady : 1;	// 0x00000010
 			UINT32 heaterTempReady : 1;	// 0x00000020
-			UINT32 info_6 : 1;			// 0x00000040
+			UINT32 cond_flowFactor_ok : 1;// 0x00000040
 			UINT32 info_7 : 1;			// 0x00000080
 			UINT32 info_8 : 1;			// 0x00000100
 			UINT32 info_9 : 1;			// 0x00000200
