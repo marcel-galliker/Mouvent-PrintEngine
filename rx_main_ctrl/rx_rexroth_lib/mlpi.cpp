@@ -61,6 +61,10 @@ int  rex_connect(const char *ipAddr, connected_callback onConnected,  connected_
 	
 	if (_Connection != MLPI_INVALIDHANDLE) return 0;
 
+	MlpiVersion versionInfo;
+	memset(&versionInfo, 0, sizeof(versionInfo));
+	result = mlpiApiGetClientCoreVersion(&versionInfo);
+
 	char_to_wchar(_IpAddr, _WIpAddr, SIZEOF(_WIpAddr));
 	result=mlpiApiSetDefaultTimeout(MLPI_TIMEOUT);
 	

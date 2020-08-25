@@ -64,7 +64,7 @@
             <TextBlock Grid.Row="0" Grid.Column="1" Text="mbar"/>
             
             <TextBlock Grid.Row="1" Grid.Column="0" Text="Pumps speed Cond." VerticalAlignment="Top"/>
-            <TextBlock Grid.Row="1" Grid.Column="1" Padding="3,0,0,0" Text="ml/min"/>
+            <TextBlock Grid.Row="1" Grid.Column="1" Text="ml/min"/>
 
             <TextBlock Grid.Row="2" Grid.Column="0" Text="Pressure Ink Tank"/>
             <TextBlock Grid.Row="2" Grid.Column="1" Text="mbar"/>

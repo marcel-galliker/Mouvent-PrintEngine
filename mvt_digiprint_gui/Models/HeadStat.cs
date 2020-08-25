@@ -264,8 +264,24 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _Meniscus_setpoint, value); }
         }
 
-        //--- Property PumpSpeed ---------------------------------------
-        private UInt32 _PumpSpeed;
+		//--- Property FlowFactor ---------------------------------------
+		private Int32 _FlowFactor;
+		public Int32 FlowFactor
+		{
+			get { return _FlowFactor; }
+			set { SetProperty(ref _FlowFactor,value); }
+		}
+
+		//--- Property FlowFactorWarning ---------------------------------------
+		private bool _FlowFactorWarning=false;
+		public bool FlowFactorWarning
+		{
+			get { return _FlowFactorWarning; }
+			set { SetProperty(ref _FlowFactorWarning,value); }
+		}
+
+		//--- Property PumpSpeed ---------------------------------------
+		private UInt32 _PumpSpeed;
         public UInt32 PumpSpeed
         {
             get { return _PumpSpeed; }
@@ -398,11 +414,13 @@ namespace RX_DigiPrint.Models
             PresIn_diff = item.presIn_diff;
             if (item.presIn_max==TcpIp.INVALID_VALUE) PresIn_str = string.Format("~{0}", HeadVal_Converter10._convert(PresIn_diff));
             else                                      PresIn_str = string.Format("^{0}", HeadVal_Converter10._convert(PresIn_max)); 
-            PresOut     = item.presOut;
+            PresOut      = item.presOut;
             PresOut_diff = item.presOut_diff;
             Meniscus     = item.meniscus;
             Meniscus_diff= item.meniscus_diff;
-            PumpSpeed   = item.pumpSpeed;
+            PumpSpeed    = item.pumpSpeed;
+            FlowFactor   = item.flowFactor;
+            FlowFactorWarning = (item.flowFactor>=200);
             Meniscus_setpoint = item.meniscus_Setpoint;
             PumpFeedback= item.pumpFeedback;
             if (item.printingSeconds==TcpIp.INVALID_VALUE) PrintingTime="-----";

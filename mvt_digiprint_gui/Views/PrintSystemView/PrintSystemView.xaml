@@ -54,15 +54,13 @@
             <StackPanel>
                 <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Hidden" Margin="10">
                     <!-- Print System ___________________________________________________________________________________________-->
-                    <Grid x:Name="PrintSystemPanel" Margin="0,0,0,5">
+                    <Grid x:Name="PrintSystemPanel" >
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="auto"/>
                                 <ColumnDefinition Width="auto"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-
-
 
                             <common:MvtButton Grid.Column="1" Visibility="{Binding IsFirstInView, Converter={StaticResource BoolToVisible_Converter}}" 
                           Grid.Row="6" Grid.RowSpan="3" VerticalAlignment="Top" HorizontalAlignment="Left"  
@@ -107,7 +105,7 @@
                 </ScrollViewer>
 
                 <!-- Ink Supply ________________________________________________________________________________________________________________________ -->
-                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Hidden" Margin="10,10,10,0">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Hidden" Margin="10,2,10,0">
                     <GroupBox Style="{StaticResource MvtGroupBox}" Header="Ink Supply" >
                         <Grid>
                             <Grid.ColumnDefinitions>

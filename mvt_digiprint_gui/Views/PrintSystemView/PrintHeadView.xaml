@@ -103,6 +103,7 @@
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
             </Grid.RowDefinitions>
 
             <TextBlock Grid.Row="0"  Margin="0,0,2,0"  HorizontalAlignment="Right"  Text="{Binding TempCond,  Converter={StaticResource HeadVal_ConverterTemp}}"  />
@@ -134,9 +135,12 @@
                 <TextBlock Text="{Binding PumpSpeed, Converter={StaticResource HeadVal_Converter}}" />
                 <TextBlock  Margin="0,0,2,0" Text="%)"/>
             </StackPanel>
-            <TextBlock  Grid.Row="5" Margin="0,0,2,0"  HorizontalAlignment="Right"  Text="{Binding Valve, Converter={StaticResource HeadValve_Converter}}" />
-            <TextBlock  Grid.Row="6" Margin="0,0,2,0"  HorizontalAlignment="Right"  Text="{Binding PrintingTime}" />
-            <StackPanel Grid.Row="7" Orientation="Horizontal" HorizontalAlignment="Right">
+
+            <Rectangle  Grid.Row="5" Margin="2,0,2,0"  Fill="Gold" Visibility="{Binding FlowFactorWarning, Converter={StaticResource BoolToVisible_Converter}}"/>
+            <TextBlock  Grid.Row="5" Margin="0,0,2,0"  HorizontalAlignment="Right"  Text="{Binding FlowFactor}" />
+            <TextBlock  Grid.Row="6" Margin="0,0,2,0"  HorizontalAlignment="Right"  Text="{Binding Valve, Converter={StaticResource HeadValve_Converter}}" />
+            <TextBlock  Grid.Row="7" Margin="0,0,2,0"  HorizontalAlignment="Right"  Text="{Binding PrintingTime}" />
+            <StackPanel Grid.Row="8" Orientation="Horizontal" HorizontalAlignment="Right">
                 <TextBlock Text="{Binding ImgInCnt}" />
                 <TextBlock Text=" ("/>
                 <TextBlock Text="{Binding ImgBuf}"/>

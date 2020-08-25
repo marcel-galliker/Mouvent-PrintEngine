@@ -44,6 +44,7 @@
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
@@ -61,12 +62,15 @@
 
             <TextBlock Grid.Row="4" Grid.Column="0" Text="Pump Speed"/>
             <TextBlock Grid.Row="4" Grid.Column="1" Text="ml/min"/>
-
-            <TextBlock Grid.Row="5" Grid.Column="0" Text="Valve"/>
-           
-            <TextBlock Grid.Row="6" Grid.Column="0" Text="Printing Time"/>
             
-            <TextBlock Grid.Row="7" Grid.Column="0" Text="Image In Cnt (Buffer)"/>
+            <TextBlock Grid.Row="5" Grid.Column="0" Text="Flow Factor"/>
+            <TextBlock Grid.Row="5" Grid.Column="1" Text="&lt;200"/>
+            
+            <TextBlock Grid.Row="6" Grid.Column="0" Text="Valve"/>
+           
+            <TextBlock Grid.Row="7" Grid.Column="0" Text="Printing Time"/>
+            
+            <TextBlock Grid.Row="8" Grid.Column="0" Text="Image In Cnt (Buffer)"/>
         </Grid>
 
         <Grid Grid.Row="0" Grid.Column="2" Grid.RowSpan="13">
