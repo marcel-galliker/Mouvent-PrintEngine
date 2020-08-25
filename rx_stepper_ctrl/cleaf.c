@@ -197,9 +197,7 @@ void cleaf_main(int ticks, int menu)
 	int motor;
 	int lift_pos;
 	SStepperStat	oldStatus;
-		
-	SStepperStat oldSatus;
-	memcpy(&oldSatus, &RX_StepperStatus, sizeof(RX_StepperStatus));
+	memcpy(&oldStatus, &RX_StepperStatus, sizeof(RX_StepperStatus));
 
 	if (!motors_init_done())
 	{
@@ -344,7 +342,7 @@ void cleaf_main(int ticks, int menu)
 	_cleaf_check_laser();
 	_check_material_supervision();
 
-	if (memcmp(&oldSatus.info, &RX_StepperStatus.info, sizeof(RX_StepperStatus.info)))
+	if (memcmp(&oldStatus.info, &RX_StepperStatus.info, sizeof(RX_StepperStatus.info)))
 	{
 		ctrl_send_2(REP_STEPPER_STAT, sizeof(RX_StepperStatus), &RX_StepperStatus);		
 	}

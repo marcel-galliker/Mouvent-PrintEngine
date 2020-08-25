@@ -9,6 +9,8 @@
 //
 // ****************************************************************************
 
+#include <string.h>
+
 #include "rx_error.h"
 #include "rx_def.h"
 #include "rx_error.h"
@@ -117,118 +119,149 @@ int	 steplb_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen
 	return REPLY_OK;
 }
 
-//--- steplb_handle_Status ----------------------------------------------------------------------
+//--- steplb_handle_Status
+//----------------------------------------------------------------------
 int steplb_handle_status(int no, SStepperStat *pStatus)
 {
-	int i;
-	int robot_used=FALSE;
-	ETestTableInfo info;
-	ERobotInfo		robinfo;
-    EScrewerInfo	screwerinfo;
+    int i;
+    int robot_used = FALSE;
+    ETestTableInfo info;
+    ERobotInfo robinfo;
+    EScrewerInfo screwerinfo;
 
+    SStepperStat oldStatus[STEPPER_CNT];
+
+    for (i = 0; i < STEPPER_CNT; i++)
+    {
+        memcpy(&oldStatus[i], &_Status[i], sizeof(oldStatus[i]));
+    }
     memcpy(&_Status[no], pStatus, sizeof(_Status[no]));
-	_Status[no].no=no;
-	gui_send_msg_2(0, REP_STEPPER_STAT, sizeof(RX_StepperStatus), &_Status[no]);
+    
+    _Status[no].no = no;
+    gui_send_msg_2(0, REP_STEPPER_STAT, sizeof(RX_StepperStatus), &_Status[no]);
 
-	// Don't refresh the main variable until all steppers board status have been received (after  a call of steplb_init())
-	_StatReadCnt[no]++;
+    // Don't refresh the main variable until all steppers board status have been
+    // received (after  a call of steplb_init())
+    _StatReadCnt[no]++;
 
-	for (i = 0; i < STEPPER_CNT; i++)
-	{
-		if (_step_socket[i] && _step_socket[i] != INVALID_SOCKET)
-		{
-			if (_StatReadCnt[i]==0) return REPLY_OK;
-		}
-	}	
-	
-	memset(&info, 0, sizeof(info));
-	memset(&robinfo, 0, sizeof(robinfo));
-    info.printhead_en	= TRUE;
-	info.ref_done		= TRUE;
-	info.z_in_ref		= TRUE;
-	info.z_in_print		= TRUE;
-	info.z_in_cap		= TRUE;
-	info.x_in_cap		= TRUE;
-	info.x_in_ref		= TRUE;
-	robinfo.rob_in_cap = TRUE;
-	robinfo.ref_done = TRUE;
-				
-//	TrPrintf(TRUE, "steplb_handle_Status(%d)", no);
-	for (i=0; i<STEPPER_CNT; i++)
-	{
-		if (_step_socket[i] && _step_socket[i]!=INVALID_SOCKET)
-		{
-			//TrPrintf(TRUE, "Stepper[%d]: ref_done=%d moving=%d  z_in_print=%d  z_in_ref=%d", i, _Status[i].info.ref_done, _Status[i].info.moving, _Status[i].info.z_in_print, _Status[i].info.z_in_ref);
-			info.ref_done		&= _Status[i].info.ref_done;
-			info.printhead_en	&= _Status[i].info.printhead_en;
-			info.moving			|= _Status[i].info.moving;
-			info.z_in_ref		&= _Status[i].info.z_in_ref;
-			info.z_in_print		&= _Status[i].info.z_in_print;
-			info.z_in_cap		&= _Status[i].info.z_in_cap;
-			info.x_in_cap		&= _Status[i].info.x_in_cap;
-			info.x_in_ref		&= _Status[i].info.x_in_ref;
-			robot_used			|= _Status[i].robot_used;
-			robinfo.rob_in_cap &= _Status[i].robinfo.rob_in_cap;
-			robinfo.ref_done &= _Status[i].robinfo.ref_done;
-			robinfo.moving |= _Status[i].robinfo.moving;
+    for (i = 0; i < STEPPER_CNT; i++)
+    {
+        if (_step_socket[i] && _step_socket[i] != INVALID_SOCKET)
+        {
+            if (_StatReadCnt[i] == 0) return REPLY_OK;
+        }
+    }
+
+    memset(&info, 0, sizeof(info));
+    memset(&robinfo, 0, sizeof(robinfo));
+    info.printhead_en = TRUE;
+    info.ref_done = TRUE;
+    info.z_in_ref = TRUE;
+    info.z_in_print = TRUE;
+    info.z_in_cap = TRUE;
+    info.x_in_cap = TRUE;
+    info.x_in_ref = TRUE;
+    robinfo.rob_in_cap = TRUE;
+    robinfo.ref_done = TRUE;
+
+    //	TrPrintf(TRUE, "steplb_handle_Status(%d)", no);
+    for (i = 0; i < STEPPER_CNT; i++)
+    {
+        if (_step_socket[i] && _step_socket[i] != INVALID_SOCKET)
+        {
+            // TrPrintf(TRUE, "Stepper[%d]: ref_done=%d moving=%d  z_in_print=%d
+            // z_in_ref=%d", i, _Status[i].info.ref_done, _Status[i].info.moving,
+            // _Status[i].info.z_in_print, _Status[i].info.z_in_ref);
+            info.ref_done &= _Status[i].info.ref_done;
+            info.printhead_en &= _Status[i].info.printhead_en;
+            info.moving |= _Status[i].info.moving;
+            info.z_in_ref &= _Status[i].info.z_in_ref;
+            info.z_in_print &= _Status[i].info.z_in_print;
+            info.z_in_cap &= _Status[i].info.z_in_cap;
+            info.x_in_cap &= _Status[i].info.x_in_cap;
+            info.x_in_ref &= _Status[i].info.x_in_ref;
+            robot_used |= _Status[i].robot_used;
+            robinfo.rob_in_cap &= _Status[i].robinfo.rob_in_cap;
+            robinfo.ref_done &= _Status[i].robinfo.ref_done;
+            robinfo.moving |= _Status[i].robinfo.moving;
             RX_StepperStatus.posY[i] = _Status[i].posY[1];
-			if (_Status[i].info.moving) 
-			{
-				RX_StepperStatus.posX = _Status[i].posX;
-				RX_StepperStatus.posZ = _Status[i].posZ;
+            if (_Status[i].info.moving)
+            {
+                RX_StepperStatus.posX = _Status[i].posX;
+                RX_StepperStatus.posZ = _Status[i].posZ;
                 RX_StepperStatus.posZ_back = _Status[i].posZ_back;
-			}
-		}
-	};
-	if (RX_Config.printer.type==printer_LB701) 
-	{
-		info.headUpInput_0 =  _Status[0].info.headUpInput_0;
-		info.headUpInput_1 =  _Status[1].info.headUpInput_0;
-		info.headUpInput_2 =  _Status[2].info.headUpInput_0;
-		info.headUpInput_3 =  _Status[3].info.headUpInput_0;
-	}
-	else if (RX_Config.printer.type==printer_LB702_WB || RX_Config.printer.type==printer_LB702_UV) 
-	{
-		info.headUpInput_0 = _Status[0].info.z_in_ref; //_Status[0].info.headUpInput_0 && _Status[0].info.headUpInput_1;
-		info.headUpInput_1 = _Status[1].info.z_in_ref; //_Status[1].info.headUpInput_0 && _Status[1].info.headUpInput_1;
-		info.headUpInput_2 = _Status[2].info.z_in_ref; //_Status[2].info.headUpInput_0 && _Status[2].info.headUpInput_1;
-		info.headUpInput_3 = _Status[3].info.z_in_ref; //_Status[3].info.headUpInput_0 && _Status[3].info.headUpInput_1;
-	
-	}
-	RX_StepperStatus.robot_used = robot_used;
-	
-//	TrPrintf(TRUE, "STEPPER: ref_done=%d moving=%d  z_in_print=%d  z_in_ref=%d", info.ref_done, info.moving, info.z_in_print, info.z_in_ref);
-	
-	/*
-	if (RX_StepperStatus.info.printhead_en  != info.printhead_en)	Error(LOG, 0, "Steppers.printhead_en=%d",	info.printhead_en);
-	if (RX_StepperStatus.info.z_in_ref		!= info.z_in_ref)		Error(LOG, 0, "Steppers.z_in_ref=%d",		info.z_in_ref);
-	if (RX_StepperStatus.info.z_in_print    != info.z_in_print)		Error(LOG, 0, "Steppers.z_in_print=%d",		info.z_in_print);
-	*/
+            }
+        }
+    };
+    if (RX_Config.printer.type == printer_LB701)
+    {
+        info.headUpInput_0 = _Status[0].info.headUpInput_0;
+        info.headUpInput_1 = _Status[1].info.headUpInput_0;
+        info.headUpInput_2 = _Status[2].info.headUpInput_0;
+        info.headUpInput_3 = _Status[3].info.headUpInput_0;
+    }
+    else if (RX_Config.printer.type == printer_LB702_WB ||
+             RX_Config.printer.type == printer_LB702_UV)
+    {
+        info.headUpInput_0 =
+            _Status[0].info.z_in_ref; //_Status[0].info.headUpInput_0 &&
+                                      //_Status[0].info.headUpInput_1;
+        info.headUpInput_1 =
+            _Status[1].info.z_in_ref; //_Status[1].info.headUpInput_0 &&
+                                      //_Status[1].info.headUpInput_1;
+        info.headUpInput_2 =
+            _Status[2].info.z_in_ref; //_Status[2].info.headUpInput_0 &&
+                                      //_Status[2].info.headUpInput_1;
+        info.headUpInput_3 =
+            _Status[3].info.z_in_ref; //_Status[3].info.headUpInput_0 &&
+                                      //_Status[3].info.headUpInput_1;
+    }
+    RX_StepperStatus.robot_used = robot_used;
 
-	if (!info.moving) 
-	{
-		RX_StepperStatus.posX = _Status[no].posX;
-		RX_StepperStatus.posZ = _Status[no].posZ;
+    //	TrPrintf(TRUE, "STEPPER: ref_done=%d moving=%d  z_in_print=%d
+    //z_in_ref=%d", info.ref_done, info.moving, info.z_in_print, info.z_in_ref);
+
+    /*
+    if (RX_StepperStatus.info.printhead_en  != info.printhead_en)	Error(LOG,
+    0, "Steppers.printhead_en=%d",	info.printhead_en); if
+    (RX_StepperStatus.info.z_in_ref		!= info.z_in_ref)		Error(LOG, 0,
+    "Steppers.z_in_ref=%d",		info.z_in_ref); if (RX_StepperStatus.info.z_in_print    != info.z_in_print)		Error(LOG, 0, "Steppers.z_in_print=%d",		info.z_in_print);
+    */
+
+    if (!info.moving)
+    {
+        RX_StepperStatus.posX = _Status[no].posX;
+        RX_StepperStatus.posZ = _Status[no].posZ;
         RX_StepperStatus.posZ_back = _Status[no].posZ_back;
-	}
-	
-	if (_AbortPrinting && RX_StepperStatus.info.z_in_print) steplb_lift_to_up_pos();
-		
-	memcpy(&RX_StepperStatus.info, &info, sizeof(RX_StepperStatus.info));
-	memcpy(&RX_StepperStatus.robinfo, &robinfo, sizeof(RX_StepperStatus.robinfo));
-	// if (rx_def_is_tx(RX_Config.printer.type)) RX_StepperStatus.info.x_in_cap = plc_in_cap_pos();
-	RX_StepperStatus.robinfo.rob_in_cap = robinfo.rob_in_cap;
-	
-	/*
-	for (int no = 0; no < STEPPER_CNT; no++)
-	{
-		if (_step_socket[no] && _step_socket[no]!=INVALID_SOCKET) steplb_rob_control(_RobotCtrlMode[no], no);
-	}
-	*/
+    }
 
-	if (_step_socket[no] && _step_socket[no]!=INVALID_SOCKET) steplb_rob_control(_RobotCtrlMode[no], no);
+    if (_AbortPrinting && RX_StepperStatus.info.z_in_print)
+        steplb_lift_to_up_pos();
 
-    //_check_screwer();
+    memcpy(&RX_StepperStatus.info, &info, sizeof(RX_StepperStatus.info));
+    memcpy(&RX_StepperStatus.robinfo, &robinfo,
+           sizeof(RX_StepperStatus.robinfo));
+    RX_StepperStatus.robinfo.rob_in_cap = robinfo.rob_in_cap;
+
+    if (_step_socket[no] && _step_socket[no] != INVALID_SOCKET)
+        steplb_rob_control(_RobotCtrlMode[no], no);
+
+    for (i = 0; i < STEPPER_CNT; i++)
+    {
+        if ((memcmp(&oldStatus[i].screwclusters, &_Status[i].screwclusters, sizeof(_Status[i].screwclusters)) ||
+            memcmp(&oldStatus[i].screwpositions, &_Status[i].screwpositions, sizeof(_Status[i].screwpositions)))
+			&& _step_socket[i] != INVALID_SOCKET && RX_StepperStatus.robot_used)
+        {
+            SRxConfig cfg;
+            setup_config(PATH_USER FILENAME_CFG, &cfg, READ);
+            memcpy(cfg.stepper.robot[i].screwclusters, _Status[i].screwclusters, sizeof(_Status[i].screwclusters));
+            memcpy(RX_Config.stepper.robot[i].screwclusters, _Status[i].screwclusters, sizeof(_Status[i].screwclusters));
+            memcpy(cfg.stepper.robot[i].screwpositions, _Status[i].screwpositions, sizeof(_Status[i].screwpositions));
+            memcpy(RX_Config.stepper.robot[i].screwpositions, _Status[i].screwpositions, sizeof(_Status[i].screwpositions));
+            setup_config(PATH_USER FILENAME_CFG, &cfg, WRITE);
+            sok_send_2(&_step_socket[i], CMD_CFG_SCREW_POS, sizeof(RX_Config.stepper.robot[i]), &RX_Config.stepper.robot[i]);
+        }
+    }
 
     return REPLY_OK;
 }

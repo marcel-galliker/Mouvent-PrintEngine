@@ -83,6 +83,26 @@
 
 typedef struct
 {
+    uint8_t inputs;
+    uint8_t outputs;
+    uint8_t fan;
+} SGpioStatus;
+
+typedef struct
+{
+    int32_t motorTargetPosition;
+    int32_t motorPosition;
+    int32_t motorVelocity;
+    int32_t motorEncoderPosition;
+    uint32_t timeout;
+    uint8_t isMoving;
+    uint8_t isReferenced;
+    uint8_t isStalled;
+    uint8_t status;
+} SMotorStatus;
+
+typedef struct
+{
 	SGpioStatus gpio;
 	SMotorStatus motors[MOTOR_COUNT];
 	uint8_t screwCurrent;
@@ -110,5 +130,8 @@ typedef struct
 	uint8_t length;
 	uint8_t data[SIZE_OF_DATA];
 } SUsbRxMsg;
+
+
+
 
 #pragma pack()

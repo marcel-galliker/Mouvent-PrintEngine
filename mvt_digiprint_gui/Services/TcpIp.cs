@@ -859,6 +859,12 @@ namespace RX_DigiPrint.Services
             public Int32        ref_height_back;
             public Int32        ref_height_front;
             public Int32        cap_height;
+
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
+            public SScrewPositions[] screwpositions;
+
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
+            public SScrewPositions[] screwclusters;
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -887,12 +893,6 @@ namespace RX_DigiPrint.Services
 
             [MarshalAs(UnmanagedType.ByValArray, SizeConst =4)]
             public SRobotOffsets[] robot;
-
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
-            public SScrewPositions[] screwpositions;
-
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
-            public SScrewPositions[] screwclusters;
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -1236,7 +1236,13 @@ namespace RX_DigiPrint.Services
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 5)]
 	        public SStepperMotor[]	motor;
 
-  //          public Int32		set_io_cnt;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
+            public SScrewPositions[] screwpositions;
+
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
+            public SScrewPositions[] screwclusters;
+
+            //          public Int32		set_io_cnt;
         };
 
         //--- CLEAF Orders ------------------------------------------------------

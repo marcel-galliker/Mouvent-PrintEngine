@@ -355,6 +355,7 @@
 #define CMD_ROB_REFERENCE		0x01000702
 #define CMD_ROB_MOVE_POS		0x01000703
 #define CMD_SEARCH_ALL_SCREWS	0x01000704
+#define CMD_CFG_SCREW_POS		0x01000705
 
 #define CMD_ROB_DRIP_PANS			0x01000721
 // #define CMD_ROB_DRIP_PANS_EN		0x01000722		// Main ask board 0 for positions of drip pans

@@ -100,7 +100,7 @@ int setup_network(HANDLE file, SRxNetwork *pnet, EN_setup_Action  action)
 //--- setup_config ----------------------------------------------------------------------------
 int setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action)
 {
-	int i, h;
+	int i, h, j, k, l;
 	char path[MAX_PATH];
 	HANDLE file = setup_create();
 
@@ -161,8 +161,8 @@ int setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action)
 				setup_int32(file, "head_align",	  action, &pcfg->stepper.robot[i].head_align,	0);
 				setup_int32(file, "ref_height_back", action, &pcfg->stepper.robot[i].ref_height_back, 0);
 				setup_int32(file, "ref_height_front", action, &pcfg->stepper.robot[i].ref_height_front, 0);
-				setup_int32(file, "cap_height", action, &pcfg->stepper.robot[i].cap_height, 0);
-				setup_chapter(file, "..", -1, action);
+				setup_int32(file, "cap_height", action, &pcfg->stepper.robot[i].cap_height, 0);   
+                setup_chapter(file, "..", -1, action);
 			}				
 		}
 		setup_chapter(file, "..", -1, action);
@@ -231,9 +231,43 @@ int setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action)
 			}
 			setup_chapter(file, "..", -1, action);
 		}
+        
 	}
 
-	if (action==WRITE) setup_save(file, filepath);
+    if (setup_chapter(file, "Screw_Positions", -1, action) == REPLY_OK)
+    {
+        for (i = 0; i < SIZEOF(pcfg->stepper.robot); i++)
+        {
+            if (setup_chapter(file, "Robot", i, action) == REPLY_OK)
+            {
+				for (j = 0; j < SIZEOF(RX_StepperCfg.robot[i].screwpositions); j++)
+				{
+                    setup_chapter(file, "Printbar", j, action);
+                    
+                    setup_int32(file, "Cluster_X_Pos", action, &pcfg->stepper.robot[i].screwclusters[j].posX, 0);
+                    setup_int32(file, "Cluster_Y_Pos", action, &pcfg->stepper.robot[i].screwclusters[j].posY, 0);
+                    
+					for (k = 0; k < SIZEOF(RX_StepperCfg.robot[i].screwpositions[0]); k++)
+					{
+                        setup_chapter(file, "Head", k, action);
+						for (l = 0; l < SIZEOF(RX_StepperCfg.robot[i].screwpositions[0][0]); l++)
+						{
+                            setup_chapter(file, "Axis", k, action);
+                            setup_int32(file, "X_Pos", action, &pcfg->stepper.robot[i].screwpositions[j][k][l].posX, 0);
+                            setup_int32(file, "Y_Pos", action, &pcfg->stepper.robot[i].screwpositions[j][k][l].posY, 0);
+                            setup_chapter(file, "..", -1, action);
+						}
+                        setup_chapter(file, "..", -1, action);
+					}
+                    setup_chapter(file, "..", -1, action);
+				}
+                setup_chapter(file, "..", -1, action);
+            }
+        }
+        setup_chapter(file, "..", -1, action);
+    }
+
+    if (action==WRITE) setup_save(file, filepath);
 	setup_destroy(file);
 
 	if (action==READ) _head_pressure_out_override(pcfg);

@@ -1228,7 +1228,20 @@ typedef struct SChillerStat
 	INT32	pressure;
 	INT32	resistivity;
 	UINT32	status;
-} SChillerStat; 
+} SChillerStat;
+
+typedef enum ERobotVaccumState
+{
+    rob_vacuum_1_to_4,
+    rob_vacuum_5_to_8,
+    rob_vacuum_all,
+} ERobotVacuumState;
+
+typedef struct SScrewPositions
+{
+    INT32 posX;
+    INT32 posY;
+} SScrewPositions;
 	
 typedef struct SRobotOffsets
 {
@@ -1237,6 +1250,8 @@ typedef struct SRobotOffsets
 	INT32			ref_height_back;
 	INT32			ref_height_front;
 	INT32			cap_height;
+    SScrewPositions screwpositions[2][8][2]; // 1. printbarNo, 2. headNo, 3. axis
+    SScrewPositions screwclusters[2];  // 1. printbarNo, 2. headNo, 3. axis
 } SRobotOffsets;
 	
 typedef enum ERobotFunctions
@@ -1269,18 +1284,7 @@ typedef enum ERobotFunctions
     rob_fct_screw_head7,	// 25: Screw Pos head 7
 } ERobotFunctions;
 	
-typedef enum ERobotVaccumState
-{
-	rob_vacuum_1_to_4,
-	rob_vacuum_5_to_8,
-	rob_vacuum_all,
-} ERobotVacuumState;
 
-typedef struct SScrewPositions
-{
-    INT32 posX;
-    INT32 posY;
-} SScrewPositions;
 	
 //--- Stepper Board --------------------
 typedef struct SStepperCfg
@@ -1307,9 +1311,6 @@ typedef struct SStepperCfg
 	INT32			material_thickness;
 	
 	SRobotOffsets	robot[4];
-    
-    SScrewPositions screwpositions[2][8][2];		// 1. printbarNo, 2. headNo, 3. axis
-    SScrewPositions screwclusters[2][1][1];		// 1. printbarNo, 2. headNo, 3. axis
 } SStepperCfg;
 	
 typedef struct SStepperMotorTest
@@ -1553,6 +1554,8 @@ typedef struct SStepperStat
 
 	INT32			inputs;
 	SStepperMotor	motor[MAX_STEPPER_MOTORS];
+    SScrewPositions screwpositions[2][8][2]; // 1. printbarNo, 2. headNo, 3. axis
+    SScrewPositions screwclusters[2];  // 1. printbarNo, 2. headNo, 3. axis
 //	INT32			unused_set_io_cnt;
 } SStepperStat;
 

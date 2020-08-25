@@ -41,8 +41,8 @@
 #endif
 
 #define MAX_CONNECTIONS	5
-#define MSG_BUF_SIZE	512	//256
-#define MSG_MSG_SIZE	512
+#define MSG_BUF_SIZE	2048	//512	//256
+#define MSG_MSG_SIZE	2048	//512
 
 static RX_SOCKET	_MainSocket=INVALID_SOCKET;
 
@@ -134,9 +134,7 @@ static int _save_ctrl_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr
 		{
 			_MsgBuf[_MsgBufIn].socket = socket;
 			if (len>sizeof(_MsgBuf[0].msg))
-                Error(ERR_ABORT, 0,
-                      "Message Buffer Overflow, msgsize=%d, bufsize=%d", len,
-                      sizeof(_MsgBuf[0].msg));
+                Error(ERR_ABORT, 0, "Message Buffer Overflow, msgsize=%d, bufsize=%d", len, sizeof(_MsgBuf[0].msg));
 			
 			memcpy(_MsgBuf[_MsgBufIn].msg, pmsg, len);
 			_MsgBufIn = idx;
