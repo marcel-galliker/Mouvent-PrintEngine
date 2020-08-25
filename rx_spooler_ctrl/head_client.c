@@ -42,7 +42,7 @@ static int	_Simulation=SIMU_OFF;
 
 // #define RAW_SOCKET
 
-#define MAX_USED_ID	16
+#define MAX_USED_ID		16
 #define BLOCK_BURST_CNT	3000
 
 //--- Externals ---------------------------------------------------------------
@@ -77,6 +77,7 @@ static int				_BufSize;
 static int				_Running;
 static int				_Abort;
 static int				_Checking;
+static int				_DeleteFiles=TRUE;
 static int				_HBUsed[HEAD_BOARD_CNT];
 static SHBThreadPar*	_HBPar[HEAD_BOARD_CNT];
 static int				_SimuNo[MAX_COLORS];
@@ -142,6 +143,7 @@ int hc_head_board_cfg(RX_SOCKET socket, SHeadBoardCfg* cfg)
 	
     #ifdef DEBUG
 //	if (_Simulation) 
+	if (_DeleteFiles)
 	{ //--- prepare simulation directory ------------------------------		
 		char path[MAX_PATH];
 		rx_mkdir(PATH_RIPPED_DATA "trace/");
@@ -155,6 +157,7 @@ int hc_head_board_cfg(RX_SOCKET socket, SHeadBoardCfg* cfg)
 			}
 		}
 		memset(_SimuNo, 0, sizeof(_SimuNo));
+		_DeleteFiles = FALSE;
 	}
 	#endif
 
@@ -280,6 +283,7 @@ void hc_abort_printing(void)
 {
 	_Abort = TRUE;
 	_Checking = FALSE;
+	_DeleteFiles = TRUE;
 	if (_TestLastBlock)
 	{
 		int i;
@@ -471,7 +475,7 @@ static int _send_image_data(SBmpSplitInfo *pInfo)
 		int blkCnt=_HBPar[pInfo->board]->cfg.head[pInfo->head].blkCnt;
 		int end=((pInfo->blk0-blk0)+pInfo->blkCnt)%blkCnt + blk0;
 
-		TrPrintfL(TRUE || _Trace, "Head[%d.%d]: _send_image_data pl[%d](id=%d, p=%d, c=%d, s=%d) blocks[%d .. %d] SAME=%d", pInfo->board, pInfo->head, idx, pid->id, pid->page, pid->copy, pid->scan, pInfo->blk0, end, pInfo->same);
+		TrPrintfL(TRUE || _Trace, "Head[%d.%d]: _send_image_data pl[%d](id=%d, p=%d, c=%d, s=%d) blocks[%d .. %d] SAME=%d FLAG_SAME=%d data=%p", pInfo->board, pInfo->head, idx, pid->id, pid->page, pid->copy, pid->scan, pInfo->blk0, end, pInfo->same, pInfo->pListItem->flags&FLAG_SAME, pInfo->data);
 		//--- Test ------------------------
 		TrPrintfL(_Trace, "Head[%d.%d]: widthPx=%d, bitsPerPixel=%d, widthBt=%d, dstLineLen=%d, srcLineCnt=%d, blkCnt=%d", pInfo->board, pInfo->head, pInfo->widthPx, pInfo->bitsPerPixel, pInfo->widthBt, pInfo->dstLineLen, pInfo->srcLineCnt , pInfo->blkCnt);		
 		//---------------------------------
@@ -541,6 +545,22 @@ static int _send_image_cmd(SBmpSplitInfo *pInfo)
 	SPageId *pid = &pInfo->pListItem->id;
 	TrPrintfL(_Trace, "_send_image_cmd[%d.%d].img[%d] (id=%d, page=%d, copy=%d, scan=%d) flags=%s", pInfo->board, pInfo->head, ++_TestImgNo[pInfo->board][pInfo->head], pid->id, pid->page, pid->copy, pid->scan, _send_image_cmd_flags);
 	sok_send(&_HBPar[pInfo->board]->ctrlSocket, &imageCmd);
+
+	if (FALSE)
+	{
+		TrPrintfL(TRUE, "Head[%d.%d].Image INFO -------------------------", pInfo->board, pInfo->head);
+		
+		TrPrintfL(TRUE, "bitPerPixel   =%d", imageCmd.image.bitPerPixel);
+		TrPrintfL(TRUE, "blkNo         =%d", imageCmd.image.blkNo	);
+		TrPrintfL(TRUE, "blkCnt        =%d", imageCmd.image.blkCnt	);
+		TrPrintfL(TRUE, "jetPx0        =%d", imageCmd.image.jetPx0	);
+		TrPrintfL(TRUE, "lengthPx      =%d", imageCmd.image.lengthPx);
+		TrPrintfL(TRUE, "widthPx       =%d", imageCmd.image.widthPx		);
+		TrPrintfL(TRUE, "widthBytes    =%d", imageCmd.image.widthBytes	);
+		TrPrintfL(TRUE, "flipHorizontal=%d", imageCmd.image.flipHorizontal);
+		TrPrintfL(TRUE, "clearBlockUsed=%d", imageCmd.image.clearBlockUsed);
+		TrPrintfL(TRUE, "-------------------------------------");
+	}
 
 //	pInfo->blkCnt = -pInfo->blkCnt;
 
@@ -836,7 +856,7 @@ static int _send_to_board(SHBThreadPar *par, int head, int blkNo, int blkCnt)
 		if (_Abort) return REPLY_OK;
 		
 //		if (pinfo->sendFromBlk >= pinfo->blkCnt || (RX_Spooler.printerType==printer_LB702_UV && (endReached && (cnt==0 || (pinfo->pListItem->flags&FLAG_SAME)))))
-		if (pinfo->sendFromBlk >= pinfo->blkCnt || pinfo->pListItem->flags&FLAG_SAME)
+		if (pinfo->sendFromBlk >= pinfo->blkCnt || pinfo->pListItem->flags&FLAG_SAME || (endReached && (cnt==0)))
 		{
 			SPageId *pid   = &pinfo->pListItem->id;
 			SPageId *plast = &par->lastId[head];

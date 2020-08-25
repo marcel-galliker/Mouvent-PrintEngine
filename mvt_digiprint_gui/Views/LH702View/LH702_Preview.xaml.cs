@@ -28,6 +28,7 @@ namespace RX_DigiPrint.Views.LH702View
         public LH702_Preview()
         {
             InitializeComponent();
+            RxGlobals.LH702_Preview = this;
         }
 
         //--- Property ImgSettings ---------------------------------------
@@ -55,6 +56,8 @@ namespace RX_DigiPrint.Views.LH702View
         private PrintQueueItem _Next;
         public PrintQueueItem Next
         {
+			get { return _Next;}
+
             set 
             {
                 NextImage.DataContext = _Next = value;
@@ -291,5 +294,11 @@ namespace RX_DigiPrint.Views.LH702View
             UpdateSettings();
         }
 
-    }
+		//--- Property ChangeJob ---------------------------------------
+		public void ChangeJob(bool state)
+		{
+            RxBindable.Invoke(()=>Button_CHG.IsChecked = state);
+		}
+
+	}
 }

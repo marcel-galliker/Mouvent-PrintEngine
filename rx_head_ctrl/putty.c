@@ -198,7 +198,7 @@ void putty_display_fpga_status(void)
 	term_printf("--- FPGA Status -----------------------------------\n");
 	term_printf("Version: %d.%d.%d.%d                Linux: V%d\n",			RX_FpgaStat.version.major, RX_FpgaStat.version.minor, RX_FpgaStat.version.revision, RX_FpgaStat.version.build, RX_LinuxDeployment);
 	term_printf("Temp:    %d  Overheat.Error: %d  FPGA.cmd=0x%04x\n",		RX_FpgaStat.temp-128, RX_FpgaError.overheat_error, RX_FpgaCmd);
-	term_printf("Encoder:  linkEnable=%d, telCnt=%u, synthEnable=%d, synthKHz=%d\n", (RX_FpgaEncCfg.cmd & ENC_ENABLE)!=0, RX_FpgaError.enc_tel_cnt, RX_FpgaEncCfg.synth.enable, _speed_160(RX_FpgaEncCfg.synth.value*1000));
+	term_printf("Encoder:  linkEnable=%d, telCnt=%u, synthEnable=%d, synthKHz=%d\n", (RX_FpgaEncCfg.cmd & ENC_ENABLE)!=0, fpga_get_encTelFreq(), RX_FpgaEncCfg.synth.enable, _speed_160(RX_FpgaEncCfg.synth.value*1000));
 //		term_printf("info:  0x%08x\n", RX_FpgaStat.info);
 	term_printf("speed [Hz]:   "); PRINTF(4)("%08d   ", _speed_160(RX_FpgaStat.enc_speed[i].current));	term_printf("\n");
 //		term_printf("speed min:   "); PRINTF(4)("%08d   ", _speed_160(RX_FpgaStat.enc_speed[i].min));		term_printf("\n");

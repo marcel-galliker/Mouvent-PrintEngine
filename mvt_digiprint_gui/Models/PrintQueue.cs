@@ -1,5 +1,6 @@
 ﻿using RX_Common;
 using RX_DigiPrint.Services;
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 
@@ -55,21 +56,16 @@ namespace RX_DigiPrint.Models
             if (item.State==EPQState.queued)   
             {
                 if (_removeFromList (_Printed, item)) RxBindable.Invoke(() => _Queue.Add(item));
-                else if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LH702)
-                {
-                    if (_Queue.Count>0) RxBindable.Invoke(()=> _Queue[0] = item);
-                    else _addToList(_Queue,   item, top);
-                } 
                 else _addToList(_Queue,   item, top);
                 if (_Queue.Count()==1) item.SendBtProdState();
-                if (RxGlobals.PrintQueueChanged!=null) RxBindable.Invoke(()=>RxGlobals.PrintQueueChanged());
+                if (RxGlobals.LH702_View!=null) RxBindable.Invoke(()=>RxGlobals.LH702_View.PrintQueueChanged());
             }
             else
             { 
                 _removeFromList (_Queue,   item);
                 _updateList     (_Printed, item);
                 item.SendBtProdState();
-                if (RxGlobals.PrintQueueChanged!=null) RxBindable.Invoke(()=>RxGlobals.PrintQueueChanged());
+                if (RxGlobals.LH702_View!=null) RxBindable.Invoke(()=>RxGlobals.LH702_View.PrintQueueChanged());
             }
         }
 
@@ -81,7 +77,7 @@ namespace RX_DigiPrint.Models
                 if (item==null) _Queue.Clear();
                 else _removeFromList(_Queue, item);
                 if (_Queue.Count()==0) new PrintQueueItem().SendBtProdState();
-                if (RxGlobals.PrintQueueChanged!=null) RxGlobals.PrintQueueChanged();
+                if (RxGlobals.LH702_View!=null) RxGlobals.LH702_View.PrintQueueChanged();
             });
         }
 
@@ -157,7 +153,7 @@ namespace RX_DigiPrint.Models
         {
             for (int i = 0; i < list.Count(); i++)
             {
-                if (list[i].ID == item.ID)
+                if (list[i].ID == item.ID && list[i].State!=EPQState.stopped)
                 {
                     RxBindable.Invoke(() => list[i].Update(item));
                     return;

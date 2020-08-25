@@ -97,6 +97,22 @@ namespace RX_DigiPrint.Models
             }
         }
 
+        //--- Property IsLb ---------------------------------------
+        public bool IsLb
+        {
+            get
+            {
+                switch (_PrinterType)
+                {
+                    case EPrinterType.printer_LB701:    return true;
+                    case EPrinterType.printer_LB702_UV: return true;
+                    case EPrinterType.printer_LB702_WB: return true;
+                    case EPrinterType.printer_LH702:    return true;
+                    default: return false;
+                }
+            }
+        }
+
         //--- Property IsCLEAF ---------------------------------------
         public bool IsCLEAF
         {
@@ -145,37 +161,10 @@ namespace RX_DigiPrint.Models
             get { return _PrinterType; }
             set 
             { 
-                if (SetProperty(ref _PrinterType, value) || IS_Order==null)
+                if (SetProperty(ref _PrinterType, value))
                 {
                     Changed=true;
-                    switch(_PrinterType)
-                    {
-                        /*
-                        case EPrinterType.printer_DP803: IS_Order = new int[] { 0,1,2,3,4,5,6,7 }; break;
-
-                        case EPrinterType.printer_LB701: 
-                            if (RxGlobals.PrintSystem.ColorCnt<=4) IS_Order = new int[] { 0,1,2,3 };
-                            else IS_Order = new int[] { 0,1,2,3,4,5,6,7 };
-                            break;
-
-                        case EPrinterType.printer_LB702_UV:
-                            if (RxGlobals.PrintSystem.ColorCnt <= 4) IS_Order = new int[] { 0, 1, 2, 3 };
-                            else IS_Order = new int[] { 4,5,6,0, 1, 2, 3 };
-                            break;
-
-                        case EPrinterType.printer_LB702_WB:
-                            IS_Order = new int[] {0, 1, 2, 3, 4, 5 };
-                            break;
-                        */
-
-                        case EPrinterType.printer_TX801: IS_Order = new int[] { 7,6,5,4,3,2,1,0 }; break;
-                        case EPrinterType.printer_TX802: IS_Order = new int[] { 7,6,5,4,3,2,1,0 }; break;
-
-                        case EPrinterType.printer_CB612: IS_Order = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23 }; break;
-
-                        default: IS_Order = new int[] { 0,1,2,3,4,5,6,7 }; break;
-                    }
-
+                    _set_IS_Order();
                 }
             }
         }
@@ -204,6 +193,7 @@ namespace RX_DigiPrint.Models
             set 
             { 
                 Changed|=SetProperty(ref _ColorCnt, Math.Max(value, 1));
+                _set_IS_Order();
                 int i;
                 for (i=0; i<RxGlobals.Network.List.Count; i++)
                     RxGlobals.Network.List[i].DeviceNoList = new EN_DeviceNumbers(RxGlobals.Network.List[i].DeviceType, _ColorCnt, HeadsPerColor);
@@ -250,6 +240,47 @@ namespace RX_DigiPrint.Models
         {
             get { return _IS_Order; }
             private set { SetProperty(ref _IS_Order,value); }
+        }
+
+        //--- _set_IS_Order ---------------------------------------
+        private EPrinterType _IsOrder_PrinterType = EPrinterType.printer_undef;
+        private int IsOrder_ColorCnt = 0;
+        private void _set_IS_Order()
+		{
+            if (IS_Order==null || PrinterType!=_IsOrder_PrinterType || ColorCnt!=IsOrder_ColorCnt)
+			{
+                _IsOrder_PrinterType = PrinterType;
+                IsOrder_ColorCnt = ColorCnt;
+                switch(_PrinterType)
+                {
+                    /*
+                    case EPrinterType.printer_DP803: IS_Order = new int[] { 0,1,2,3,4,5,6,7 }; break;
+
+                    case EPrinterType.printer_LB701: 
+                        if (RxGlobals.PrintSystem.ColorCnt<=4) IS_Order = new int[] { 0,1,2,3 };
+                        else IS_Order = new int[] { 0,1,2,3,4,5,6,7 };
+                        break;
+                    */
+
+                    case EPrinterType.printer_LH702:
+                    case EPrinterType.printer_LB702_UV:
+                        if (ColorCnt <= 4) IS_Order = new int[] { 0, 1, 2, 3 };
+                        // else IS_Order = new int[] { 4,5,6, 0, 1, 2, 3 };
+                        else IS_Order = new int[] { 4, 5, 6, 0,1,2,3 };
+                        break;
+
+                    case EPrinterType.printer_LB702_WB:
+                        IS_Order = new int[] {0, 1, 2, 3, 4, 5 };
+                        break;
+
+                    case EPrinterType.printer_TX801: IS_Order = new int[] { 7,6,5,4,3,2,1,0 }; break;
+                    case EPrinterType.printer_TX802: IS_Order = new int[] { 7,6,5,4,3,2,1,0 }; break;
+
+                    case EPrinterType.printer_CB612: IS_Order = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23 }; break;
+
+                    default: IS_Order = new int[] { 0,1,2,3,4,5,6,7 }; break;
+                }
+			}
         }
 
         //--- Property CheckedInkSupply ---------------------------------------

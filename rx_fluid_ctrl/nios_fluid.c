@@ -177,14 +177,15 @@ static void _nios_check_errors(void)
 	if (_Stat->error&err_amc_fluid)			 ErrorFlag(ERR_ABORT, &RX_FluidBoardStatus.err, err_amc_fluid,           0, "AMC Fluid Temperature Error");
 	if (_Stat->error&err_watchdog)			 ErrorFlag(ERR_ABORT, &RX_FluidBoardStatus.err, err_watchdog,            0, "Watchdog");
 //	if (_Stat->error&err_inkpres_not_reached)ErrorFlag(ERR_CONT,  &RX_FluidBoardStatus.err, err_inkpres_not_reached, 0, "Ink Tank pressure not reached");
-    if (_HeaterUsed && _Stat->error&err_amc_heater) ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_amc_heater, 0, "No Heater Board connected to Fluid");
-		
-	int isNo;
+    if (_HeaterUsed && _Stat->error&err_amc_heater) ErrorFlag(ERR_CONT, &RX_FluidBoardStatus.err, err_amc_heater, 0, "No Heater Board connected to Fluid");		
 
+	int isNo;
 	for (isNo=0; isNo<SIZEOF(_Stat->ink_supply); isNo++)
 	{
+		if (_Stat->ink_supply[isNo].ctrl_state==ctrl_print && _Stat->ink_supply[isNo].IS_Pressure_Actual==INVALID_VALUE)			 
+			ErrorFlag(ERR_ABORT, (UINT32*)&_Error[isNo], err_ink_tank_pressure, 0, "InkSupply[%d-%s] Ink Tank pressure sensor not working", isNo+1, RX_ColorNameShort(isNo));
 		if (_Stat->ink_supply[isNo].error&err_overpressure)		 
-			ErrorFlag(ERR_CONT, (UINT32 *)&_Error[isNo], err_overpressure, 0, "InkSupply[%d-%s] Ink Tank overpressure", isNo+1, RX_ColorNameShort(isNo));
+			ErrorFlag(ERR_CONT, (UINT32*)&_Error[isNo], err_overpressure, 0, "InkSupply[%d-%s] Ink Tank overpressure", isNo+1, RX_ColorNameShort(isNo));
 
 		if (_Stat->ink_supply[isNo].error&err_filter_clogged)
 		{														

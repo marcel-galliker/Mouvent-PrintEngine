@@ -201,7 +201,7 @@ namespace RX_DigiPrint.Views.Settings
         //--- ShutDown_Clicked ---------------------------------------------
         private void ShutDown_Clicked(object sender, RoutedEventArgs e)
         {
-            if (MvtMessageBox.YesNo("Shut Down", "Shutting Down the machine!", MessageBoxImage.Question, false))
+            if (MvtMessageBox.YesNo("Shut Down", "Shutting Down the GUI!", MessageBoxImage.Question, false))
             {
                 Rx.StartProcess("shutdown", "/s /t 0");
             }

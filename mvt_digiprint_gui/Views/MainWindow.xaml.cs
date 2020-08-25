@@ -57,6 +57,8 @@ namespace RX_DigiPrint.Views
         //--- Constructor ------------------------------------------
         public MainWindow()
         {
+            RestService.Start();
+
             RxBindable.Dispatcher = Dispatcher;
 
             InitializeComponent();
@@ -91,6 +93,8 @@ namespace RX_DigiPrint.Views
             _UserTypeChanged();
 
             _ShowTab(false, TabLH702, AddLocationHint.After);
+            
+
         }
 
         

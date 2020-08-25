@@ -686,7 +686,8 @@ static int _do_print_file_rep(RX_SOCKET socket, int spoolerNo, SPrintFileRep *ms
 				}
 			}
 		}
-		else if (!msg->same)
+
+		if (!msg->same)
 		{
 			for (i=0; i<SIZEOF(_LoadedFiles); i++)
 			{

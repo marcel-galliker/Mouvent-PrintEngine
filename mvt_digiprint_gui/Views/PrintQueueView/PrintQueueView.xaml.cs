@@ -1,4 +1,5 @@
 ﻿using Infragistics.Controls.Grids;
+using MahApps.Metro.IconPacks;
 using RX_Common;
 using RX_DigiPrint.Models;
 using RX_DigiPrint.Services;
@@ -32,6 +33,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
         private bool    _UseLB702 = false;
 
         private bool ButtonAddIsChecked = false;
+        private bool[]  _IsExanded = new bool[0];
 
         //--- constructor -----------------------------------------------
         public PrintQueueView()
@@ -45,6 +47,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
 
             RxGlobals.PrintQueue.Queue.CollectionChanged += PrintQueue_CollectionChanged;
             RxGlobals.PrintSystem.PropertyChanged   += PrintSystem_PropertyChanged;
+            RxGlobals.PrintQueueView = this;
             UpdateGridColumns();
 
             CommandDelete = new RxCommand(DoDelete);
@@ -356,58 +359,76 @@ namespace RX_DigiPrint.Views.PrintQueueView
         private void Delete_Clicked(object sender, RoutedEventArgs e)
         {
 			if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_UV) Delete_Clicked_LB702(sender, e);
-			else if (PrintQueueGrid.ActiveItem!=null)
-            {
-                if (MvtMessageBox.YesNo("Delete", "Delete the Item", MessageBoxImage.Question, false))
+			else
+			{
+                int selected=0;
+                for (int i=0; i<PrintQueueGrid.Rows.Count; i++)
+			    {
+                    if (PrintQueueGrid.Rows[i].IsSelected) selected++;
+			    }
+                if (selected>0)
                 {
-                    if (PrintQueueGrid.ActiveItem!=null)
-                        (PrintQueueGrid.ActiveItem as PrintQueueItem).SendMsg(TcpIp.CMD_DEL_PRINT_QUEUE);
-                    AllButtons(Visibility.Collapsed);
+                    if (MvtMessageBox.YesNo("Delete", "Delete the Item", MessageBoxImage.Question, false))
+                    {
+                        for (int i=0; i<PrintQueueGrid.Rows.Count; i++)
+			            {
+                            if (PrintQueueGrid.Rows[i].IsSelected)
+						    {
+                                PrintQueueItem item=PrintQueueGrid.Rows[i].Data as PrintQueueItem;
+                                if (item!=null) item.SendMsg(TcpIp.CMD_DEL_PRINT_QUEUE);
+						    }
+			            }
+
+                        AllButtons(Visibility.Collapsed);
+                    }
                 }
             }
+
+            foreach(Row row in PrintedQueueGrid.Rows) row.IsSelected=false;
         }
 
         //--- Up_Clicked -------------------------------------------------
         private void Up_Clicked(object sender, RoutedEventArgs e)
         {
-			if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_UV)
+            //--- first check printed queue -----------------
+            foreach(Row row in PrintedQueueGrid.Rows)
 			{
-	            foreach(Row row in PrintQueueGrid.Rows)
-	            {
-	                PrintQueueItem item = row.Data as PrintQueueItem;
-	                if (item!=null && item.IsSelected)
-	                    item.SendMsg(TcpIp.CMD_UP_PRINT_QUEUE);
-	            }
+                if (row.IsSelected)
+				{
+                    PrintQueueItem item = row.Data as PrintQueueItem;
+                    if (item!=null) 
+                    {
+                        row.IsSelected = false;
+                        item.SendMsg(TcpIp.CMD_ADD_PRINT_QUEUE);
+                        return;
+                    }
+				}
 			}
-			else if (PrintQueueGrid.ActiveItem!=null) (PrintQueueGrid.ActiveItem as PrintQueueItem).SendMsg(TcpIp.CMD_UP_PRINT_QUEUE);
 
-            if (PrintedQueueGrid.ActiveItem!=null)
-            {
-                PrintQueueItem item = PrintedQueueGrid.ActiveItem as PrintQueueItem;
-                item.StartFrom=0;
-                item.LengthUnit = item.LengthUnit;
-                if (item!=null) item.SendMsg(TcpIp.CMD_ADD_PRINT_QUEUE);
-            }
+            //--- check printqueue ------------
+	        foreach(Row row in PrintQueueGrid.Rows)
+	        {
+	            PrintQueueItem item = row.Data as PrintQueueItem;
+	            if (item!=null && item.IsSelected)
+	                item.SendMsg(TcpIp.CMD_UP_PRINT_QUEUE);
+	        }
         }
 
         //--- Down_Clicked -------------------------------------------------
         private void Down_Clicked(object sender, RoutedEventArgs e)
         {
-			if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_UV)
-			{
-	            int row;
-	            for(row = PrintQueueGrid.Rows.Count; row>0; )
+	        for(int row = PrintQueueGrid.Rows.Count; row>0; )
+	        {
+	            row--;
+	            if (row>=0)
 	            {
-	                row--;
-	                if (row>=0)
-	                {
-	                    PrintQueueItem item = PrintQueueGrid.Rows[row].Data as PrintQueueItem;
-	                    if (item!=null && item.IsSelected)
-	                        item.SendMsg(TcpIp.CMD_DN_PRINT_QUEUE);
-	                }
+	                PrintQueueItem item = PrintQueueGrid.Rows[row].Data as PrintQueueItem;
+	                if (item!=null && item.IsSelected)
+	                    item.SendMsg(TcpIp.CMD_DN_PRINT_QUEUE);
 	            }
-			}
-			else if (PrintQueueGrid.ActiveItem!=null) (PrintQueueGrid.ActiveItem as PrintQueueItem).SendMsg(TcpIp.CMD_DN_PRINT_QUEUE);
+	        }
+            
+            foreach(Row row in PrintedQueueGrid.Rows) row.IsSelected=false;
         }
 
         //--- PrintQueueGrid_SelectedRowsCollectionChanged ---------------------------------------------------
@@ -446,12 +467,10 @@ namespace RX_DigiPrint.Views.PrintQueueView
         //--- Grid_MouseDown ------------------------------------------------
         private void Grid_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (e.OriginalSource is Ellipse)
-            {
-                // button was clicked
+            if (e.Source is MvtButton || e.Source is PackIconMaterial )
+            { 
                 return;
-            }
-
+			}
 
             Grid grid = sender as Grid;
             foreach(Row row in PrintQueueGrid.Rows)
@@ -527,8 +546,6 @@ namespace RX_DigiPrint.Views.PrintQueueView
                         }
                     }
                 }
-
-
                 AllButtons(Visibility.Visible);
             }
             else
@@ -537,7 +554,6 @@ namespace RX_DigiPrint.Views.PrintQueueView
                 {
                     PrintSettings.DataContext = null;
                 }
-
                 AllButtons(Visibility.Collapsed);
             }
         }
@@ -563,7 +579,6 @@ namespace RX_DigiPrint.Views.PrintQueueView
 
                 Button_Up.Visibility = Visibility.Visible;
             }
-
         }
     
         //--- DoDelete --------------------------------------------
@@ -618,6 +633,8 @@ namespace RX_DigiPrint.Views.PrintQueueView
                      e.Row.IsExpanded = false;
                 else e.Row.IsExpanded = true;
             }
+            else if (_IsExanded.Length>e.Row.Index) e.Row.IsExpanded = _IsExanded[e.Row.Index];
+
             PrintQueueItem item = e.Row.Data as PrintQueueItem;
             if (item!=null && RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf) item.PreviewOrientation = 270;
 
@@ -746,28 +763,43 @@ namespace RX_DigiPrint.Views.PrintQueueView
         //--- PrintQueueGrid_RowExpansionChanged -----------------------------------------------
         private void PrintQueueGrid_RowExpansionChanged(object sender, RowExpansionChangedEventArgs e)
         {
-            if (e.Row.IsExpanded)
-            {
-                PrintQueueGrid.BringIntoView();
-            }
+            if (e.Row.IsExpanded) PrintQueueGrid.BringIntoView();
+            if (_IsExanded.Length>e.Row.Index) _IsExanded[e.Row.Index]=e.Row.IsExpanded;
         }
 
+        //--- _save_item -------------------
+        private void _save_item(PrintQueueItem item)
+		{
+            if (item != null)
+            {
+                if (item._hasPageSettings) item.ScanLength = 0;
+                item.SendMsg(TcpIp.CMD_SET_PRINT_QUEUE);
+                item.SaveDefaults();
+            }
+		}
+
+        //--- Save_Click ---------------------
         private void Save_Click(object sender, MouseButtonEventArgs e)
         {
             MvtButton button = sender as MvtButton;
-            if (button != null)
+            if (button != null) 
             {
-                PrintQueueItem item = button.DataContext as PrintQueueItem;
-
-                if (item != null)
-                {
-                    if (item._hasPageSettings) item.ScanLength = 0;
-                    item.SendMsg(TcpIp.CMD_SET_PRINT_QUEUE);
-                    item.SaveDefaults();
-                }
+                _IsExanded = new bool[PrintQueueGrid.Rows.Count];
+                for (int row=0; row<PrintQueueGrid.Rows.Count; row++)
+                    _IsExanded[row] = PrintQueueGrid.Rows[row].IsExpanded; 
+                _save_item(button.DataContext as PrintQueueItem);
             }
             e.Handled = true;
         }
+
+        //--- SaveAll ----------------
+        public void SaveAll()
+		{
+            foreach ( Row row in PrintQueueGrid.Rows)
+			{
+                if (row.IsExpanded) _save_item(row.Data as PrintQueueItem);
+			}
+		}
 
         private void Cancel_Click(object sender, MouseButtonEventArgs e)
         {
@@ -784,5 +816,5 @@ namespace RX_DigiPrint.Views.PrintQueueView
         {
             e.Handled = true;
         }
-    }
+	}
 }

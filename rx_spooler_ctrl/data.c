@@ -269,6 +269,7 @@ int	 data_cache	(SPageId *pid, const char *path, char *localPath, SColorSplitCfg
 		
 	//	sprintf(dstDir, PATH_TEMP "%s", &localPath[strlen(PATH_RIPPED_DATA)]);	// TEST
 
+
 		search=rx_search_open(mntPath, "*");
 		while (ret==REPLY_OK && rx_search_next(search, fileName, sizeof(fileName), &time, &filesize, &isDir))
 		{
@@ -477,6 +478,7 @@ int  data_malloc(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPixel,
 		{
 			if (psplit[i].color.name[0] && psplit[i].lastLine>psplit[i].firstLine)
 			{
+				TrPrintfL(1, "buffer[%d]: WAIT UNUSED %p, used=%d, abort=%d", i, buffer[i], rx_mem_cnt(buffer[i]), _Abort);
 				TrPrintfL(1, "buffer[%d]: WAIT UNUSED %p, used=%d, abort=%d", i, buffer[i], rx_mem_cnt(buffer[i]), _Abort);
 				while (!_Abort && rx_mem_cnt(buffer[i]))
 				{
@@ -780,7 +782,7 @@ int  data_reload	(SPageId *id)
 int data_same(SPageId *id, int offsetWidth, int clearBlockUsed)
 {
 	int nextIdx;
-	int src;
+	int cnt, src;
 
 	nextIdx = (_InIdx+1) % PRINT_LIST_SIZE;
 	if (nextIdx == _OutIdx) 
@@ -788,13 +790,25 @@ int data_same(SPageId *id, int offsetWidth, int clearBlockUsed)
 
 	TrPrintfL(TRUE, "data_same[%d]: id=%d, page=%d, scan=%d, offsetWidth=%d", -1, id->id, id->page, id->scan, offsetWidth);
 
-	for (src=0; src<SIZEOF(_PrintList); src++)
+	for (cnt=0; cnt<SIZEOF(_PrintList); cnt++)
 	{
+		src = (_InIdx+PRINT_LIST_SIZE-1-cnt) % PRINT_LIST_SIZE; 
 		SPageId *p = &_PrintList[src].id;
-		TrPrintfL(TRUE, "data_same[%d]: id=%d, page=%d, scan=%d, offsetWidth=%d", src, p->id, p->page, p->scan, _PrintList[src].offsetWidth);
+	//	TrPrintfL(TRUE, "data_same[%d]: id=%d, page=%d, scan=%d, offsetWidth=%d, bitsPerPixel=%d", src, p->id, p->page, p->scan, _PrintList[src].offsetWidth, _PrintList[src].splitInfo->bitsPerPixel);
 		if ((id->id==p->id) && (id->page==p->page) && (id->scan==p->scan) && (offsetWidth==_PrintList[src].offsetWidth))
-		{				
+		{	
+			//--- in case of screening: wait until screening done ---
+			for(int i=0; i<_HeadCnt; i++)
+			{
+				SBmpSplitInfo *pInfo=&_PrintList[src].splitInfo[i];
+				while(pInfo->bitsPerPixel==8 && !_Abort)
+				{
+					rx_sleep(10);
+				}
+			}
+
 			SBmpSplitInfo *pInfo=_PrintList[_InIdx].splitInfo;
+		//	TrPrintfL(TRUE, "data_same[%d] found: id=%d, page=%d, scan=%d, offsetWidth=%d, bitsPerPixel=%d", src, p->id, p->page, p->scan, _PrintList[src].offsetWidth, _PrintList[src].splitInfo->bitsPerPixel);
 			memcpy(&_PrintList[_InIdx], &_PrintList[src], sizeof(_PrintList[_InIdx]));
 			_PrintList[_InIdx].splitInfo = pInfo;
 			memcpy(_PrintList[_InIdx].splitInfo, _PrintList[src].splitInfo, _SplitInfoSize);
@@ -814,7 +828,7 @@ int data_same(SPageId *id, int offsetWidth, int clearBlockUsed)
 				*/
 			}
 
-			TrPrintfL(TRUE, "data_same new[%d]: id=%d, page=%d, scan=%d, next=%d, same=%d", _InIdx, p->id, p->page, p->scan, nextIdx, _PrintList[_InIdx].flags&FLAG_SAME);
+		//	TrPrintfL(TRUE, "data_same new[%d]: id=%d, page=%d, scan=%d, next=%d, same=%d, data=%p", _InIdx, p->id, p->page, p->scan, nextIdx, _PrintList[_InIdx].flags&FLAG_SAME, _PrintList[_InIdx].splitInfo->data);
 			
 			_PrintList[_InIdx].flags |= FLAG_SAME;
 
@@ -1151,9 +1165,18 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 {
 	int color, n, head;
 	int empty;
+	int	screeningCnt=0;
 	struct SBmpSplitInfo	*pInfo;
+	static int _FlagEmpty[HEAD_BOARD_CNT][MAX_HEADS_BOARD];
+	static int _FlagData[HEAD_BOARD_CNT][MAX_HEADS_BOARD];
 
 	TrPrintfL(TRUE, "_data_split_test");
+
+	if (id->page==0 && id->copy==1 && id->scan==0)
+	{
+		memset(_FlagEmpty, 0, sizeof(_FlagEmpty));
+		memset(_FlagData, 0, sizeof(_FlagData));
+	}
 
 	for (color=0; color<SIZEOF(RX_Spooler.headNo); color++)
 	{
@@ -1237,6 +1260,13 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 					pInfo->dstLineLen	= 32; // align to 256 Bits (32 Bytes)				
 					pInfo->blk0		    = blk0;
 					pInfo->blkCnt		= 1;
+					pItem->flags	   |= _FlagEmpty[pInfo->board][pInfo->head];
+					_FlagEmpty[pInfo->board][pInfo->head] = FLAG_SAME;
+				}
+				else
+				{
+					pItem->flags	   |= _FlagData[pInfo->board][pInfo->head];
+					_FlagData[pInfo->board][pInfo->head] = FLAG_SAME;
 				}
 
 				//--- rip the test data -----------------------------------------
@@ -1255,13 +1285,15 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 				if (pInfo->bitsPerPixel==8)
 				{
 					scr_start(pInfo);
+					screeningCnt++;
 				}
 
 				if (clearBlockUsed) _BlkNo[pInfo->board][pInfo->head] += pInfo->blkCnt; // (_BlkNo[pInfo->board][pInfo->head]+pInfo->blkCnt)%(RX_Spooler.dataBlkCntHead);
-				TrPrintfL(TRUE, "Split[head=%d]: startPx=%d, widthPx=%d, FillBt=%d, blk0=%d, blkCnt=%d, data=0x%08x", head, 0, pInfo->widthPx, pInfo->fillBt, pInfo->blk0, pInfo->blkCnt, pInfo->data);
+				TrPrintfL(TRUE, "Split[head=%d]: startPx=%d, widthPx=%d, bitsPerPixel=%d, FillBt=%d, blk0=%d, blkCnt=%d, data=0x%08x", head, 0, pInfo->widthPx, pInfo->bitsPerPixel, pInfo->fillBt, pInfo->blk0, pInfo->blkCnt, pInfo->data);
 			}
 		}	
 	}
+	if (screeningCnt==0) scr_wait(10);
 	return REPLY_OK;
 }
 
@@ -2177,13 +2209,9 @@ int data_sent(SBmpSplitInfo *psplit, int head)
 		psplit->pListItem->headsInUse--;
 
 //		TrPrintfL(TRUE, "data_sent: headsInUse=%d, data=0x%08x", psplit->pListItem->headsInUse, psplit->data);
-		if (psplit->data)
-		{
-			rx_mem_unuse(psplit->data);
-			psplit->data = NULL;
-		}
+		if (psplit->data) rx_mem_unuse(psplit->data);
 
-		if (FALSE)
+		if (TRUE)
 		{
 			SPrintFileMsg evt;
 					

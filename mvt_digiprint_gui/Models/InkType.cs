@@ -7,8 +7,8 @@ namespace RX_DigiPrint.Models
 {
     public class InkType : RxBindable
     {
-        static public InkType Flush = new InkType(){Name="Flush", ColorFG=Colors.Black, Color=Color.FromRgb(0xf0,0xf0,0xf0)};
-        static public InkType Waste = new InkType(){Name="Waste", ColorFG=Colors.White, Color=Color.FromRgb(0x80,0x80,0x80)};
+        static public InkType Flush = new InkType(){Name="Flush", ColorFG=Colors.Black, Color=Color.FromRgb(0xf0,0xf0,0xf0), ColorCode=888};
+        static public InkType Waste = new InkType(){Name="Waste", ColorFG=Colors.White, Color=Color.FromRgb(0x80,0x80,0x80), ColorCode=999};
 
         //--- constructor -------------------------------
         public InkType()

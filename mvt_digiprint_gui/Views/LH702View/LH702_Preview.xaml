@@ -129,8 +129,7 @@
         <!-- move buttons ______________________________________________________________________________________-->
         <StackPanel Width="auto" Height="auto" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="100,10,0,0" Orientation="Horizontal">
             <Grid HorizontalAlignment="Right">
-                <TextBox x:Name="Change" Visibility="Hidden"/>
-                <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}" Click="Change_Clicked">
+                <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}" Click="Change_Clicked" x:Name="Button_CHG">
                     <TextBlock Text="CHG" FontSize="18" FontWeight="SemiBold"/>
                 </common:MvtButton>
             </Grid>

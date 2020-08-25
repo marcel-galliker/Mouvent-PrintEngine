@@ -108,6 +108,12 @@ namespace RX_DigiPrint.Views.PrintQueueView
                 }
             }
 
+            if (RxGlobals.UvLamp.Visible == Visibility.Visible && !RxGlobals.UvLamp.Ready)
+            {
+                if (!MvtMessageBox.YesNo("UV Lamp", "The UV Lamp is NOT READY.\n\nStart Printing?", MessageBoxImage.Question, false))
+                    return;
+            }
+
             _Item.ScanLength = _Item.Copies;
             switch (_Item.TestDotSize)
             {
