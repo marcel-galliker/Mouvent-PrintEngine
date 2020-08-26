@@ -850,7 +850,9 @@ static void _control(int fluidNo)
 //--- _control_flush -------------------------------------------------
 static void _control_flush(void)
 {
-	if (_all_fluids_in_fluidCtrlMode(_FluidCtrlMode))
+    int _txrob = rx_def_is_tx(RX_Config.printer.type) && step_active(1);
+	int _lbrob = rx_def_is_lb(RX_Config.printer.type) && RX_StepperStatus.robot_used;
+    if (_all_fluids_in_fluidCtrlMode(_FluidCtrlMode))
 	{
 	//	TrPrintfL(TRUE, "All Fluids in mode %d", _FluidCtrlMode);
 	
@@ -858,18 +860,23 @@ static void _control_flush(void)
 		{
 		case ctrl_flush_night:		
 		case ctrl_flush_weekend:		
-		case ctrl_flush_week:	step_lift_to_top_pos();	
+		case ctrl_flush_week:	if (_txrob || _lbrob )step_lift_to_top_pos();	
 								_FluidCtrlMode=ctrl_flush_step1; 
 								break;
 		
-		case ctrl_flush_step1:	if (step_lift_in_up_pos()) 
+		case ctrl_flush_step1:	if (step_lift_in_up_pos() && (_lbrob || _txrob)) 
 								{
-									plc_to_purge_pos();
-									_FluidCtrlMode=ctrl_flush_step2;
+                                    if (_lbrob)
+                                    {
+                                        step_rob_to_wipe_pos(rob_fct_purge_head7);
+                                    }
+                                    else if (_txrob)
+                                        plc_to_purge_pos();
+                                    _FluidCtrlMode=ctrl_flush_step2;
 								}
 								break;
 		
-		case ctrl_flush_step2:	if (plc_in_purge_pos())
+		case ctrl_flush_step2:	if ((plc_in_purge_pos() && _txrob) || (step_rob_in_wipe_pos(rob_fct_purge_head7) && _lbrob) || (!_lbrob && !_txrob))
 								{
 									_FluidCtrlMode=ctrl_flush_step3;
 								}

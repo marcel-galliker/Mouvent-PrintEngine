@@ -856,20 +856,39 @@ void ctrl_send_head_fluidCtrlMode(int headNo, EnFluidCtrlMode ctrlMode, int send
         if (!(ctrlMode == ctrl_off && mode == ctrl_wait))
         {
 			sok_send(&_HeadCtrl[headNo/HEAD_CNT].socket, &cmd);
-            // Set all the Printheads of the same fluid system into off, which are in print, because otherwise it will 
+            // If Purgeg just one head, set all the Printheads of the same fluid system into off, which
+            // are in print, because otherwise it will drop on the paper on the heads which are in print mode
+            if (ctrlMode >= ctrl_purge_soft && ctrlMode <= ctrl_purge_hard)
+            {
+                int i;
+				for (i = 0; i < HEAD_BOARD_CNT; i++)
+				{
+				    if (RX_Config.headBoard[i/HEAD_CNT].head[i%HEAD_CNT].inkSupply == RX_Config.headBoard[headNo/HEAD_CNT].head[headNo%HEAD_CNT].inkSupply 
+				        && RX_HBStatus[i/HEAD_CNT].head[i%HEAD_CNT].ctrlMode == ctrl_print && i != headNo && fromGui == TRUE)
+				    {
+				        cmd.no = i % HEAD_CNT;
+				        cmd.ctrlMode = ctrl_off;
+				        sok_send(&_HeadCtrl[i / HEAD_CNT].socket, &cmd);
+				    }
+				}
+            }
+        }
+
+		// set ink Supply ctrl_off in case all the heads will be in ctrl_off after this command,
+        // otherwise there is ink pressure in the heads and as soon as one head is set to print, a lot of ink will get out of there.
+        if (ctrlMode == ctrl_off)
+        {
+            int _sendToFluid = TRUE;
             int i;
             for (i = 0; i < HEAD_BOARD_CNT; i++)
             {
-                if (RX_Config.headBoard[i/HEAD_CNT].head[i%HEAD_CNT].inkSupply == RX_Config.headBoard[headNo/HEAD_CNT].head[headNo%HEAD_CNT].inkSupply 
-                    && RX_HBStatus[i/HEAD_CNT].head[i%HEAD_CNT].ctrlMode == ctrl_print && i != headNo && fromGui == TRUE)
-                {
-                    cmd.no = i % HEAD_CNT;
-                    cmd.ctrlMode = ctrl_off;
-                    sok_send(&_HeadCtrl[i / HEAD_CNT].socket, &cmd);
-                }
+                if (RX_Config.headBoard[i/HEAD_CNT].head[i%HEAD_CNT].inkSupply == RX_Config.headBoard[headNo/HEAD_CNT].head[headNo%HEAD_CNT].inkSupply
+                    && RX_HBStatus[i/HEAD_CNT].head[i%HEAD_CNT].ctrlMode != ctrl_off && i != headNo)
+                    _sendToFluid = FALSE;
             }
+            sendToFluid = sendToFluid || _sendToFluid;
         }
-        
+
 
         //if (_ctrl_check_stepper_in_purgeMode(headNo/RX_Config.headsPerColor)) sendToFluid = FALSE;
 
@@ -1218,6 +1237,18 @@ void ctrl_set_rob_pos(SRobPosition robposition)
 	    int board;
         board = robposition.printBar * ((RX_Config.headsPerColor+MAX_HEADS_BOARD-1)/MAX_HEADS_BOARD) + robposition.head/MAX_HEADS_BOARD;
 		robposition.head  = robposition.head%MAX_HEADS_BOARD;
+        robposition.angle += RX_HBStatus[board].head[robposition.head].eeprom_mvt.rob_angle;
+        robposition.dist -= RX_HBStatus[board].head[robposition.head].eeprom_mvt.rob_dist;
 		sok_send_2(&_HeadCtrl[board].socket, CMD_SET_ROB_POS, sizeof(robposition), &robposition);
 	}
+}
+
+int ctrl_current_screw_pos(SHeadAdjustmentMsg *robposition)
+{
+    if (robposition->axis == AXE_ANGLE)
+		return RX_HBStatus[robposition->printbarNo].head[robposition->headNo].eeprom_mvt.rob_angle;
+    else if (robposition->axis == AXE_DIST)
+        return RX_HBStatus[robposition->printbarNo].head[robposition->headNo].eeprom_mvt.rob_dist;
+    else
+        return -1;
 }

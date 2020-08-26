@@ -36,6 +36,7 @@ void steplb_lift_to_wipe_pos(int no, ERobotFunctions rob_function);
 int  steplb_lift_in_wipe_pos(int no, ERobotFunctions rob_function);
 
 void steplb_rob_to_wipe_pos(int no, ERobotFunctions rob_function);
+void steplb_rob_to_wipe_pos_all(ERobotFunctions rob_function);
 int	 steplb_rob_in_wipe_pos(int no, ERobotFunctions rob_function);
 int	 steplb_rob_in_wipe_pos_all(ERobotFunctions rob_function);
 
@@ -57,4 +58,4 @@ void steplb_rob_wash_all(void);
 
 void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment);
 
-//void _check_pump(void);
+

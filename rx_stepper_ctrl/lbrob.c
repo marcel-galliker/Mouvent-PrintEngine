@@ -254,6 +254,11 @@ void lbrob_main(int ticks, int menu)
         _HeadPos = FALSE;
     }
 
+    if (RX_StepperStatus.info.moving)
+    {
+        RX_StepperStatus.robinfo.cap_ready = FALSE;
+    }
+
     if (!RX_StepperStatus.robinfo.ref_done)
         RX_StepperStatus.screwerinfo.screws_found = FALSE;
 
@@ -1024,22 +1029,21 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
             return;
         }
         if (_RobFunction == rob_fct_cap && RX_StepperStatus.info.x_in_cap)
+        {
+            RX_StepperStatus.robinfo.rob_in_cap = TRUE;
             return;
+        }
+        
         RX_StepperStatus.robinfo.moving = TRUE;
         _CmdRunning = msgId;
         switch (_RobFunction)
         {
         case rob_fct_cap:
             _lbrob_move_to_pos(_CmdRunning, _micron_2_steps(CABLE_CAP_POS));
-            // motors_move_to_step(MOTOR_X_BITS, &_ParCable_drive,
-            // _micron_2_steps(CABLE_CAP_POS));
             break;
 
         case rob_fct_purge_all:
-            _lbrob_move_to_pos(_CmdRunning,
-                               _micron_2_steps(CABLE_PURGE_POS_BACK));
-            // motors_move_to_step(MOTOR_X_BITS, &_ParCable_drive,
-            // _micron_2_steps(CABLE_PURGE_POS_BACK));
+            _lbrob_move_to_pos(_CmdRunning, _micron_2_steps(CABLE_PURGE_POS_BACK));
             _PumpWasteTime = rx_get_ticks();
             break;
 
@@ -1277,16 +1281,13 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
                     screwSteps = abs(screwSteps);
                     _HeadAdjustment.steps = 12;
                     //_ScrewTurns = 12;
-                    robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_RIGHT,
-                                         &screwSteps);
+                    robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_RIGHT, &screwSteps);
                 }
                 else if (headAdjustment.axis == AXE_ANGLE == screwSteps > 0)
                 {
                     screwSteps += 12;
-                    //_ScrewTurns = -12;
                     _HeadAdjustment.steps = -12;
-                    robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_LEFT,
-                                         &screwSteps);
+                    robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_LEFT, &screwSteps);
                 }
                 else
                 {
@@ -1534,41 +1535,22 @@ static void _search_all_screws()
                 else
                 {
                     pos = RX_StepperCfg.robot[RX_StepperCfg.boardNo]
-                              .screwpositions
-                                  [_SearchScrewNr /
-                                   (SCREWS_PER_HEAD * HEADS_PER_COLOR)]
-                                  [((_SearchScrewNr - 2) % HEADS_PER_COLOR) /
-                                   SCREWS_PER_HEAD]
-                                  [(_SearchScrewNr - 2) % SCREWS_PER_HEAD]
-                              .posX -
+                              .screwpositions[_SearchScrewNr /(SCREWS_PER_HEAD * HEADS_PER_COLOR)]
+                                  [((_SearchScrewNr - 2) % HEADS_PER_COLOR) / SCREWS_PER_HEAD]
+                                  [(_SearchScrewNr - 2) % SCREWS_PER_HEAD].posX -
                           RX_StepperCfg.robot[RX_StepperCfg.boardNo]
-                              .screwclusters[_SearchScrewNr / (SCREWS_PER_HEAD *
-                                                               HEADS_PER_COLOR)]
+                              .screwclusters[_SearchScrewNr / (SCREWS_PER_HEAD *HEADS_PER_COLOR)]
                               .posX;
-                    /*int y_dist_old = ((((_SearchScrewNr-1) % (SCREWS_PER_HEAD
-                       * HEADS_PER_COLOR)) / SCREWS_PER_HEAD)+1) * head_Dist -
-                                     ((((_SearchScrewNr-1) % (SCREWS_PER_HEAD *
-                       HEADS_PER_COLOR))) % SCREWS_PER_HEAD) * screw_Dist;*/
                     int y_dist_old =
-                        ((((_SearchScrewNr - 1 + 1) / SCREWS_PER_HEAD) %
-                          (SCREWS_PER_HEAD * HEADS_PER_COLOR))) *
-                            head_Dist -
-                        ((_SearchScrewNr - 1) % SCREWS_PER_HEAD) * screw_Dist;
+                        ((((_SearchScrewNr - 1 + 1) / SCREWS_PER_HEAD) % (SCREWS_PER_HEAD * HEADS_PER_COLOR))) *
+                            head_Dist - ((_SearchScrewNr - 1) % SCREWS_PER_HEAD) * screw_Dist;
 
-                    // int y_dist = (_SearchScrewNr % (SCREWS_PER_HEAD *
-                    // HEADS_PER_COLOR)) / SCREWS_PER_HEAD * head_Dist +
-                    //    ((_SearchScrewNr % (SCREWS_PER_HEAD *
-                    //    HEADS_PER_COLOR)) % SCREWS_PER_HEAD) * screw_Dist;
                     int y_dist =
-                        ((((_SearchScrewNr + 1) / SCREWS_PER_HEAD) %
-                          (SCREWS_PER_HEAD * HEADS_PER_COLOR))) *
-                            head_Dist -
-                        (_SearchScrewNr % SCREWS_PER_HEAD) * screw_Dist;
+                        ((((_SearchScrewNr + 1) / SCREWS_PER_HEAD) % (SCREWS_PER_HEAD * HEADS_PER_COLOR))) *
+                            head_Dist - (_SearchScrewNr % SCREWS_PER_HEAD) * screw_Dist;
                     pos = RX_StepperCfg.robot[RX_StepperCfg.boardNo]
-                              .screwclusters[_SearchScrewNr / (SCREWS_PER_HEAD *
-                                                               HEADS_PER_COLOR)]
-                              .posX +
-                          pos * y_dist / y_dist_old;
+                              .screwclusters[_SearchScrewNr / (SCREWS_PER_HEAD *HEADS_PER_COLOR)]
+                              .posX + pos * y_dist / y_dist_old;
                 }
                 cmd_Time = rx_get_ticks();
                 robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_X, &pos);
@@ -1802,19 +1784,13 @@ static int _calculate_average_y_pos(int screwNr)
     for (; i < screwNr - 1; i += SCREWS_PER_HEAD)
     {
         if (i == 0 || i == 16)
-            y_combined +=
-                RX_StepperCfg.robot[RX_StepperCfg.boardNo]
-                    .screwclusters[i / (SCREWS_PER_HEAD * HEADS_PER_COLOR)]
-                    .posY;
+            y_combined += RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwclusters[i / (SCREWS_PER_HEAD * HEADS_PER_COLOR)].posY;
         else
         {
             printbarNo = i / (SCREWS_PER_HEAD * HEADS_PER_COLOR);
-            headNo = ((i - 1) % (SCREWS_PER_HEAD * HEADS_PER_COLOR)) /
-                     SCREWS_PER_HEAD;
+            headNo = ((i - 1) % (SCREWS_PER_HEAD * HEADS_PER_COLOR)) / SCREWS_PER_HEAD;
             axis = (i + 1) % SCREWS_PER_HEAD;
-            y_combined += RX_StepperCfg.robot[RX_StepperCfg.boardNo]
-                              .screwpositions[printbarNo][headNo][axis]
-                              .posY;
+            y_combined += RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwpositions[printbarNo][headNo][axis].posY;
         }
     }
     return y_combined /

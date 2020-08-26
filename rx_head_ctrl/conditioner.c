@@ -768,8 +768,8 @@ void cond_set_rob_pos(int headNo, int angle, int dist)
 
 	SHeadEEpromMvt *mvt = &RX_HBStatus[0].head[headNo].eeprom_mvt;
 
-	if (angle>0) mvt->rob_angle = angle;
-	if (dist>0)  mvt->rob_dist  = dist;
+	if (angle>=0) mvt->rob_angle = angle;
+	if (dist>=0)  mvt->rob_dist  = dist;
 	mvt->rob_CRC   = rx_crc8(&mvt->rob_angle, 2*sizeof(mvt->rob_angle));
 }
 

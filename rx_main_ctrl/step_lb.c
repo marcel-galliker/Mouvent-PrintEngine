@@ -163,15 +163,12 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
     info.x_in_ref = TRUE;
     robinfo.rob_in_cap = TRUE;
     robinfo.ref_done = TRUE;
-
-    //	TrPrintf(TRUE, "steplb_handle_Status(%d)", no);
+    robinfo.purge_ready = TRUE;
+    
     for (i = 0; i < STEPPER_CNT; i++)
     {
         if (_step_socket[i] && _step_socket[i] != INVALID_SOCKET)
         {
-            // TrPrintf(TRUE, "Stepper[%d]: ref_done=%d moving=%d  z_in_print=%d
-            // z_in_ref=%d", i, _Status[i].info.ref_done, _Status[i].info.moving,
-            // _Status[i].info.z_in_print, _Status[i].info.z_in_ref);
             info.ref_done &= _Status[i].info.ref_done;
             info.printhead_en &= _Status[i].info.printhead_en;
             info.moving |= _Status[i].info.moving;
@@ -184,6 +181,7 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
             robinfo.rob_in_cap &= _Status[i].robinfo.rob_in_cap;
             robinfo.ref_done &= _Status[i].robinfo.ref_done;
             robinfo.moving |= _Status[i].robinfo.moving;
+            robinfo.purge_ready &= _Status[i].robinfo.purge_ready;
             RX_StepperStatus.posY[i] = _Status[i].posY[1];
             if (_Status[i].info.moving)
             {
@@ -203,30 +201,12 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
     else if (RX_Config.printer.type == printer_LB702_WB ||
              RX_Config.printer.type == printer_LB702_UV)
     {
-        info.headUpInput_0 =
-            _Status[0].info.z_in_ref; //_Status[0].info.headUpInput_0 &&
-                                      //_Status[0].info.headUpInput_1;
-        info.headUpInput_1 =
-            _Status[1].info.z_in_ref; //_Status[1].info.headUpInput_0 &&
-                                      //_Status[1].info.headUpInput_1;
-        info.headUpInput_2 =
-            _Status[2].info.z_in_ref; //_Status[2].info.headUpInput_0 &&
-                                      //_Status[2].info.headUpInput_1;
-        info.headUpInput_3 =
-            _Status[3].info.z_in_ref; //_Status[3].info.headUpInput_0 &&
-                                      //_Status[3].info.headUpInput_1;
+        info.headUpInput_0 = _Status[0].info.z_in_ref;      
+        info.headUpInput_1 = _Status[1].info.z_in_ref; 
+        info.headUpInput_2 = _Status[2].info.z_in_ref; 
+        info.headUpInput_3 = _Status[3].info.z_in_ref; 
     }
     RX_StepperStatus.robot_used = robot_used;
-
-    //	TrPrintf(TRUE, "STEPPER: ref_done=%d moving=%d  z_in_print=%d
-    //z_in_ref=%d", info.ref_done, info.moving, info.z_in_print, info.z_in_ref);
-
-    /*
-    if (RX_StepperStatus.info.printhead_en  != info.printhead_en)	Error(LOG,
-    0, "Steppers.printhead_en=%d",	info.printhead_en); if
-    (RX_StepperStatus.info.z_in_ref		!= info.z_in_ref)		Error(LOG, 0,
-    "Steppers.z_in_ref=%d",		info.z_in_ref); if (RX_StepperStatus.info.z_in_print    != info.z_in_print)		Error(LOG, 0, "Steppers.z_in_print=%d",		info.z_in_print);
-    */
 
     if (!info.moving)
     {
@@ -262,6 +242,8 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
             sok_send_2(&_step_socket[i], CMD_CFG_SCREW_POS, sizeof(RX_Config.stepper.robot[i]), &RX_Config.stepper.robot[i]);
         }
     }
+
+    _check_screwer();
 
     return REPLY_OK;
 }
@@ -338,6 +320,16 @@ void steplb_rob_to_wipe_pos(int no, ERobotFunctions rob_function)
 	sok_send_2(&_step_socket[no], CMD_ROB_MOVE_POS, sizeof(rob_function), &rob_function);		
 }
 
+void steplb_rob_to_wipe_pos_all(ERobotFunctions rob_function)
+{
+    int i;
+    for (i = 0; i < STEPPER_CNT; i++)
+    {
+        if (_step_socket[i] != INVALID_SOCKET)
+			sok_send_2(&_step_socket[i], CMD_ROB_MOVE_POS, sizeof(rob_function), &rob_function);
+    }
+}
+
 //--- steplb_rob_in_wipe_pos --------------------------
 int	 steplb_rob_in_wipe_pos(int no, ERobotFunctions rob_function)
 {
@@ -368,7 +360,8 @@ int steplb_rob_in_wipe_pos_all(ERobotFunctions rob_function)
 {
 	switch (rob_function)
 	{
-	case rob_fct_cap:	return RX_StepperStatus.robinfo.rob_in_cap	&& RX_StepperStatus.robinfo.moving == FALSE; break;
+	case rob_fct_cap:			return RX_StepperStatus.robinfo.rob_in_cap	&& RX_StepperStatus.robinfo.moving == FALSE; break;
+    case rob_fct_purge_head7:	return RX_StepperStatus.robinfo.purge_ready && RX_StepperStatus.robinfo.moving == FALSE; break;
 	default: return FALSE; break;
 	}
 }
@@ -409,8 +402,8 @@ void steplb_rob_do_reference(void)
 {
 	for (int no = 0; no < SIZEOF(_step_socket); no++)
 	{
-		//if (_step_socket[no] != INVALID_SOCKET)
-		sok_send_2(&_step_socket[no], CMD_ROB_REFERENCE, 0, NULL);
+		if (_step_socket[no] != INVALID_SOCKET)
+			sok_send_2(&_step_socket[no], CMD_ROB_REFERENCE, 0, NULL);
 	}
 }
 
@@ -511,10 +504,13 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
 		
 		case ctrl_cap_step4:		if (RX_StepperStatus.info.z_in_cap)
 									{
-										_Flushed |= (0x3 << (no*2));
-										Error(LOG, 0, "ctrl_cap_step4 OK, no=%d, _Flushed=%d",no,_Flushed);
-										setup_fluid_system(PATH_USER FILENAME_FLUID_STATE, &_Flushed, WRITE);
-										fluid_init_flushed();
+                                        if (!rx_def_is_lb(RX_Config.printer.type))
+                                        {
+                                            _Flushed |= (0x3 << (no*2));
+											Error(LOG, 0, "ctrl_cap_step4 OK, no=%d, _Flushed=%d",no,_Flushed);
+                                            setup_fluid_system(PATH_USER FILENAME_FLUID_STATE, &_Flushed, WRITE);
+											fluid_init_flushed();
+                                        }
 										_RobotCtrlMode[no] = ctrl_off;
 									}										 
 									break;
@@ -569,8 +565,33 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
 //--- steplb_adjust_heads ------------------------------------------------
 void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
 {
+    #define MAX_STEPS_DIST		30*6		// 30 turns with 6 steps each turn
+    #define MAX_STEPS_ANGLE		18*6		// 18 turns with 6 steps each turn
+
     SHeadAdjustment msg;
     int stepperno;
+    int current_screwpos = ctrl_current_screw_pos(headAdjustment);
+    if (current_screwpos == -1)
+    {
+        Error(ERR_CONT, 0, "Invalid current screwpositin value");
+        return;
+    }
+    if (headAdjustment->axis == AXE_ANGLE && (current_screwpos + headAdjustment->steps > MAX_STEPS_ANGLE || current_screwpos + headAdjustment->steps < 0))
+    {
+        Error(ERR_CONT, 0, "Screw moves out of range; Printbar: %d, Head: %d, Axis: %d, Turn to reach %d.%d", 
+				headAdjustment->printbarNo, headAdjustment->headNo, headAdjustment->axis, 
+				(current_screwpos + headAdjustment->steps)/6, (current_screwpos + headAdjustment->steps)%6);
+        return;
+    }
+    
+    if (headAdjustment->axis == AXE_DIST && (current_screwpos - headAdjustment->steps > MAX_STEPS_DIST || current_screwpos - headAdjustment->steps < 0))
+    {
+        Error(ERR_CONT, 0, "Screw moves out of range; Printbar: %d, Head: %d, Axis: %d, Turn to reach %d.%d", 
+				headAdjustment->printbarNo, headAdjustment->headNo, headAdjustment->axis, 
+				(current_screwpos + headAdjustment->steps)/6, (current_screwpos + headAdjustment->steps)%6);
+        return;
+    }
+
     if (RX_Config.inkSupplyCnt % 2 == 0)
         stepperno = headAdjustment->printbarNo / 2;
     else
@@ -579,8 +600,8 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
     _HeadAdjustment[stepperno] = *headAdjustment;
     
     headAdjustment->printbarNo %= 2;
-    _check_screwer();
-    //sok_send(&_step_socket[stepperno], headAdjustment);
+    
+    sok_send(&_step_socket[stepperno], headAdjustment);
 }
 
 //--- _check_screwer --------------------------------------------------
@@ -589,9 +610,9 @@ static void _check_screwer(void)
     static int _old_Screwer_State[STEPPER_CNT] = {FALSE};
     SRobPosition ScrewPosition;
     int i = 1;
-    //for (i = 0; i < SIZEOF(_Status); i++)
+    for (i = 0; i < SIZEOF(_Status); i++)
     {
-        //if (_Status[i].screwerinfo.screwed && !_old_Screwer_State[i])
+        if (_Status[i].screwerinfo.screwed && !_old_Screwer_State[i] && _step_socket[i])
         {
             ScrewPosition.printBar = _HeadAdjustment[i].printbarNo;
             ScrewPosition.head = _HeadAdjustment[i].headNo;
