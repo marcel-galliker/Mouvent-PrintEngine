@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Windows;
+using System.Windows.Media;
 
 namespace RX_DigiPrint.Models
 {
@@ -432,6 +433,29 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _ChillerEnabled, value); }
         }
 
+        //--- Property StateBrush ---------------------------------------
+		private Brush _StateBrush=Brushes.Transparent;
+		public Brush StateBrush
+		{
+			get { return _StateBrush; }
+			set { SetProperty(ref _StateBrush,value); }
+		}
+
+        //--- UpdateStateBrush -----------------------------------------
+        public void UpdateStateBrush()
+		{
+            Brush brush=Brushes.Transparent;
+            foreach(InkSupply inkSupply in RxGlobals.InkSupply.List)
+			{
+                if (inkSupply.StateBrush==Rx.BrushError)
+				{
+                    StateBrush=inkSupply.StateBrush;
+                    return;
+				}
+                if (inkSupply.StateBrush==Rx.BrushWarn) brush=inkSupply.StateBrush;
+			}
+            StateBrush = brush;
+		}
 
         //--- SetPrintCfg ----------------------------------------
         public void SetPrintCfg(TcpIp.SPrinterCfgMsg msg)

@@ -11,8 +11,8 @@
         mc:Ignorable="d"
         Title="Density and Jet Compensation"
         Height="650" Width="990"
-                      ResizeMode="NoResize"
-                      Loaded="CustomWindow_Loaded">
+        ResizeMode="NoResize"
+        Loaded="CustomWindow_Loaded">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>

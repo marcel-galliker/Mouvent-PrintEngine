@@ -49,8 +49,15 @@ namespace RX_DigiPrint.Views.UserControls
             }
         }
 
-        //--- _setUserType ---------------
-        private void _setUserType()
+		//--- Property Color ---------------------------------------
+		private Color _Color;
+		public Color Color
+		{
+			set { Line.Fill=new SolidColorBrush(value); }
+		}
+
+		//--- _setUserType ---------------
+		private void _setUserType()
         {
             Visibility = (RxGlobals.User.UserType>=User) ? Visibility.Visible : Visibility.Collapsed;
         }

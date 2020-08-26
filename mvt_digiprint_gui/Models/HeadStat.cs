@@ -430,8 +430,8 @@ namespace RX_DigiPrint.Models
             FlowFactorWarning = (item.flowFactor>=200) && (CtrlMode==EFluidCtrlMode.ctrl_print);
 
             Warn         = used && (FlowFactorWarning || !TempReady);
-            if (Err!=0)    StateBrush = Brushes.Crimson;
-            else if (Warn) StateBrush = Brushes.Gold;
+            if (Err!=0)    StateBrush = Rx.BrushError;
+            else if (Warn) StateBrush = Rx.BrushWarn;
             else           StateBrush = Brushes.Transparent; 
 
             Meniscus_setpoint = item.meniscus_Setpoint;

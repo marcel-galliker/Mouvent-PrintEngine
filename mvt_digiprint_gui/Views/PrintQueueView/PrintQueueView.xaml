@@ -207,8 +207,8 @@
                         <ig:TemplateColumnLayout.Template>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
-                                    <pq_views:FileSettingsWeb Margin="0,10,0,0"/>
-                                    <pq_views:FileSettingsScan Margin="0,10,0,0" />
+                                    <pq_views:FileSettingsWeb/>
+                                    <pq_views:FileSettingsScan/>
                                     <GroupBox Style="{StaticResource MvtGroupBox}"
                                         Header="Preview"
                                         HorizontalAlignment="Left"

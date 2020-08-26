@@ -81,7 +81,7 @@
             </Grid>
         </rx:RxPopup>
 
-        <Rectangle  Margin="2,0,2,0" Grid.Row="3" Fill="Gold" Visibility="{Binding TempReady, Converter={StaticResource BoolToInVisible_Converter}}"/>
+        <Rectangle  Margin="2,0,2,0" Grid.Row="3" Fill="{StaticResource RX.Warn}" Visibility="{Binding TempReady, Converter={StaticResource BoolToInVisible_Converter}}"/>
 
         <StackPanel  Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
             <TextBlock Text="{Binding TempHead,  Converter={StaticResource HeadVal_ConverterTemp}}"/>
@@ -133,7 +133,7 @@
                 <TextBlock  Margin="0,0,2,0" Text="%)"/>
             </StackPanel>
 
-            <Rectangle  Grid.Row="5" Margin="2,0,2,0"  Fill="Gold" Visibility="{Binding FlowFactorWarning, Converter={StaticResource BoolToVisible_Converter}}"/>
+            <Rectangle  Grid.Row="5" Margin="2,0,2,0"  Fill="{StaticResource RX.Warn}" Visibility="{Binding FlowFactorWarning, Converter={StaticResource BoolToVisible_Converter}}"/>
             <TextBlock  Grid.Row="5" Margin="0,0,2,0"  HorizontalAlignment="Right"  Text="{Binding FlowFactor}" />
             <TextBlock  Grid.Row="6" Margin="0,0,2,0"  HorizontalAlignment="Right"  Text="{Binding Valve, Converter={StaticResource HeadValve_Converter}}" />
             <TextBlock  Grid.Row="7" Margin="0,0,2,0"  HorizontalAlignment="Right"  Text="{Binding PrintingTime}" />
@@ -152,7 +152,7 @@
                 FontSize="15" 
                 HorizontalAlignment="Center" 
                 VerticalAlignment="Center" 
-                Foreground="Crimson" 
+                Foreground="{StaticResource RX.Error}" 
                 FontWeight="Bold"
                 Visibility="{Binding Connected, Converter={StaticResource BoolToInVisible_Converter}}"
                 RenderTransformOrigin="0.5,0.5" >

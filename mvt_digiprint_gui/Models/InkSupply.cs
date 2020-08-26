@@ -339,7 +339,13 @@ namespace RX_DigiPrint.Models
 		public Brush StateBrush
 		{
 			get { return _StateBrush; }
-			set { SetProperty(ref _StateBrush,value); }
+			set 
+            { 
+                if (SetProperty(ref _StateBrush,value))
+				{
+                    RxGlobals.PrintSystem.UpdateStateBrush();
+				}
+            }
 		}
 
         //--- SetStatus --------------------------------------------------
@@ -376,8 +382,8 @@ namespace RX_DigiPrint.Models
             FlowFactorOk    = ((msg.info & 0x00000040)!=0) || (CtrlMode!=EFluidCtrlMode.ctrl_print);
             Warn            = !TempReady || !CondTempReady || !FlowFactorOk;
 
-            if (Err!=0)    StateBrush = Brushes.Crimson;
-            else if (Warn) StateBrush = Brushes.Gold;
+            if (Err!=0)    StateBrush = Rx.BrushError;
+            else if (Warn) StateBrush = Rx.BrushWarn;
             else           StateBrush = Brushes.Transparent; 
         }
     }	

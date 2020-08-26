@@ -1,4 +1,5 @@
-﻿using RX_DigiPrint.Converters;
+﻿using RX_Common;
+using RX_DigiPrint.Converters;
 using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Models;
 using RX_DigiPrint.Services;
@@ -73,10 +74,10 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
                         StatusColor = Brushes.SeaGreen;
                         break;
                     case ETotalStatus.STATUS_WARNING:
-                        StatusColor = Brushes.Gold;
+                        StatusColor = Rx.BrushWarn;
                         break;
                     case ETotalStatus.STATUS_ERROR:
-                        StatusColor = Brushes.Crimson;
+                        StatusColor = Rx.BrushError;
                         break;
                     default:
                         StatusColor = Brushes.Transparent;
