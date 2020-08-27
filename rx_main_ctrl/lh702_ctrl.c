@@ -10,6 +10,7 @@
 // ****************************************************************************
 
 #include <stdio.h>
+#include <stdarg.h>
 #include "rx_common.h"
 #include "rx_def.h"
 #include "rx_error.h"
@@ -40,6 +41,11 @@
 #define IP_ADDRESS_MAIN	"192.168.20.118"
 
 //--- Externals ---------------------------------------------------------------
+typedef struct SStringCmd
+{
+	SMsgHdr		hdr;
+	char		str[256];
+} SStringCmd;
 
 //--- Statics -----------------------------------------------------------------
 static RX_SOCKET _Socket=INVALID_SOCKET;
@@ -74,10 +80,12 @@ static void _handle_thickness		(int value);
 static void _handle_headheight		(int value);
 static void _handle_encoffset		(int value);
 static void _lh702_send_status		(void);
+static void _plc_set_var			(const char *format, ...);
 
 //--- lh702_init -------------------------------------------------
 void lh702_init(void)
 {
+	_handle_thickness(1000);
 	memset(&_Status, 0, sizeof(_Status));
 	_Status.hdr.msgLen = sizeof(_Status);
 	_Status.hdr.msgId  = EVT_STATE;
@@ -416,26 +424,36 @@ void lh702_load_material(char *material)
 	if (RX_Config.printer.type==printer_LH702) plc_load_material(material);
 }
 
+//--- _plc_set_var ------------------------------------
+static void _plc_set_var(const char *format, ...)
+{
+	SStringCmd cmd;
+	int len;
+	va_list args;
+	va_start (args, format);
+	len=sprintf(cmd.str, UnitID "\n");
+	len+=vsprintf(&cmd.str[len], format, args);
+	len=sprintf(&cmd.str[len],"\n");	
+	va_end (args);
+	cmd.hdr.msgId  = CMD_PLC_SET_VAR;
+	cmd.hdr.msgLen = sizeof(cmd.hdr)+strlen(cmd.str)+1;
+	plc_handle_gui_msg(INVALID_SOCKET, &cmd, cmd.hdr.msgLen);
+}
+
 //--- _handle_thickness --------------------------
 static void _handle_thickness(int value)
 {
-	char varList[128];
-	sprintf(varList, UnitID "\n" "XML_MATERIAL_THICKNESS=%f\n", value/1000.0);
-	plc_handle_gui_msg(INVALID_SOCKET, CMD_PLC_SET_VAR, varList, (int)strlen(varList));
+	_plc_set_var("XML_MATERIAL_THICKNESS=%f", value/1000.0);
 }
 
 //--- _handle_headheight --------------------------
 static void _handle_headheight(int value)
 {
-	char varList[128];
-	sprintf(varList, UnitID "\n" "XML_HEAD_HEIGHT=%f\n", value/1000.0);
-	plc_handle_gui_msg(INVALID_SOCKET, CMD_PLC_SET_VAR, varList, (int)strlen(varList));
+	_plc_set_var("XML_HEAD_HEIGHT=%f", value/1000.0);
 }
 
 //--- _handle_encoffset --------------------------
 static void _handle_encoffset(int value)
 {
-	char varList[128];
-	sprintf(varList, UnitID "\n" "XML_ENC_OFFSET=%d\n", value);
-	plc_handle_gui_msg(INVALID_SOCKET, CMD_PLC_SET_VAR, varList, (int)strlen(varList));
+	_plc_set_var("XML_ENC_OFFSET=%d", value);
 }

@@ -797,7 +797,7 @@ int spool_send_msg(void *msg)
 	}
 	if (!cnt) 
 	{
-		if (!_ErrorSpooler) Error(ERR_ABORT, 0, "not connected");
+		if (!_ErrorSpooler) ErrorEx(dev_spooler, 0, ERR_ABORT, 0, "not connected");
 		_ErrorSpooler = TRUE;
 	}
 	return cnt;

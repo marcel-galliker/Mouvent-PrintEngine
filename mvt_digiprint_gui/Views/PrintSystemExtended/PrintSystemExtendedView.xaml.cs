@@ -665,10 +665,6 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
 
         private void _timer_Tick(int tickNo)
         {
-            RxGlobals.RxInterface.SendCommand(TcpIp.CMD_FLUID_STAT);
-            RxGlobals.RxInterface.SendCommand(TcpIp.CMD_HEAD_STAT);
-            RxGlobals.RxInterface.SendCommand(TcpIp.CMD_ENCODER_STAT);
-
             for (int i = 0; i < _PrintSystem.InkCylindersPerColor * _PrintSystem.ColorCnt; i++)
             {
                 UpdateInkCylinderStatus(i);

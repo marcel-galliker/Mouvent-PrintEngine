@@ -48,12 +48,12 @@ namespace RX_DigiPrint.Models
         {       
             if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_test_table 
             ||  RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_test_slide_only
-            || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide)
+            ||  RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_test_slide)
             {
                 _addToList      (_Queue,   item, top);
                 return;
             }     
-            if (item.State==EPQState.queued)   
+            if (item.State==EPQState.queued)  
             {
                 if (_removeFromList (_Printed, item)) RxBindable.Invoke(() => _Queue.Add(item));
                 else _addToList(_Queue,   item, top);

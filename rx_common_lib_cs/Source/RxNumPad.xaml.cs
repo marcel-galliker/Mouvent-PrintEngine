@@ -4,14 +4,12 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Globalization;
+using System.Threading;
 
 namespace RX_Common
 {
     public partial class RxNumPad : Window, INotifyPropertyChanged
     {        
-
-        private RxTimer _Timer;
-        private Button  _TouchedButton;
         private double  _OrgValue;
         private Point   _Position;
         private double  _ObjWidth=0;
@@ -25,9 +23,6 @@ namespace RX_Common
             KeyDown += RxNumPad_KeyDown;  
             
             //--- timer as work around first touch behavior of ELO ------
-            _Timer = new RxTimer(50);
-            _Timer.Stop();
-            _Timer.TimerFct += _Tick;
 
             _OrgValue = Rx.StrToDouble(obj.Text);
 
@@ -85,10 +80,9 @@ namespace RX_Common
         }
 
         //--- _Tick ------------------------------------------
-        private void _Tick(int no)
+        private void _Tick(object o)
         {
-            _Timer.Stop();
-            if (_TouchedButton!=null)  button_clicked(_TouchedButton, null);
+            button_clicked(o as Button, null);
         }
 
         //--- Property result ------------------------------------------------
@@ -122,7 +116,6 @@ namespace RX_Common
                 _Time=Environment.TickCount;
             }
             Button button = sender as Button;
-            _TouchedButton = null;
             if (button==null) return;
             if (button.CommandParameter==null)  _handle_key(button.Content.ToString());
             else                                _handle_key(button.CommandParameter.ToString());
@@ -181,8 +174,7 @@ namespace RX_Common
         //--- special for the first touch ---------------------------------------------
         private void Window_TouchUp(object sender, System.Windows.Input.TouchEventArgs e)
         {
-            _TouchedButton = e.Source as Button;
-            _Timer.Start();
+            new Timer(_Tick, e.Source, 50, 0);
         }
 
         private void Rectangle_GiveFeedback(object sender, GiveFeedbackEventArgs e)
