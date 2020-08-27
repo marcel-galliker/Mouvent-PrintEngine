@@ -19,7 +19,9 @@
 #include "average.h"
 
 //--- defines ---------------------------
-#define ADDR_SENSOR    0x78 	// upper address of sensor
+#define ADDR_SENSOR_1_0_BAR 0x78 	// upper address of sensor (old, 1.0 bar)
+#define ADDR_SENSOR_2_5_BAR 0x35	// upper address of sensor (new, 2.5 bar)
+#define ADDR_DAC			0x4C
 
 #define 	BUF_SIZE	5
 
@@ -31,6 +33,10 @@
 #define 	D_SENSOR	5
 #define 	P_SENSOR	6
 #define 	SENSOR_CNT	7
+
+#define		WRITE		0
+#define		READ		1
+#define		LAST_BYTE	1
 
 //--- types ----------------------------------------
 typedef void (*set_power_fct)	(int on);
@@ -48,6 +54,7 @@ typedef struct
 	int				power_timer;
 	int				power_cnt;
 	int				error;
+	int				addr;
 } SSensor;
 
 //--- statics -----------------------------------
@@ -59,7 +66,7 @@ static SSensor _Sensor[SENSOR_CNT];
 // static void _PresOut_power(int on);
 static void _sensor_reset(SSensor *s);
 static void _sensor_read (SSensor *s, int no);
-
+static int _init_sensor_25(SSensor *s);
 
 //--- pres_init -----------------------
 void pres_init(void)
@@ -90,8 +97,42 @@ void pres_init(void)
 
 	for (i=0; i<SENSOR_CNT; i++)
 	{
+		_Sensor[i].addr = ADDR_SENSOR_1_0_BAR;
+		if (i<=IS4_SENSOR)
+		{
+			if(_init_sensor_25(&_Sensor[i])==REPLY_OK)
+			{
+				trprintf("Sensor[%d] is 2.5 bar\n", i);
+				_Sensor[i].addr=ADDR_SENSOR_2_5_BAR;
+			}
+			else trprintf("Sensor[%d] is 1.0 bar\n", i);
+		}
 		_sensor_reset(&_Sensor[i]);
 	}
+}
+
+//--- _init_sensor_25 -----------------------------------
+//--- checks whether an 2.5 mbar sensor is present and switch it on ---
+static int _init_sensor_25(SSensor *s)
+{
+	int ret=0;
+	// CTRL/MS-Byte = 00001111 (PD0+PD1= 0, D7-D4 =1) = 0x0f
+	// LS-Byte = 11110000 (D0-D3 =1, other bits = 0)  = 0xf0
+
+	// Dummy read
+	ret = I2C_start(s->i2c, ADDR_DAC, READ);
+	ret = I2C_read(s->i2c, LAST_BYTE);
+	ret = 0;
+
+	ret = I2C_start(s->i2c, ADDR_DAC, WRITE);
+	if (!ret) ret = I2C_write(s->i2c, 0x0f, !LAST_BYTE);	// write MS-Byte
+	if (!ret) ret = I2C_write(s->i2c, 0xf0, LAST_BYTE);		// write LS-Byte
+	if(ret)
+	{
+		ret = I2C_write(s->i2c, 0x00, LAST_BYTE);		// write Stop
+		return REPLY_ERROR;
+	}
+	return REPLY_OK;
 }
 
 //--- _sensor_reset -------------
@@ -121,7 +162,7 @@ static void _sensor_read(SSensor *s, int no)
 		
 	if(s->power)											//if there is no read error at the moment
 	{
-		I2C_start(s->i2c, ADDR_SENSOR, 1);
+		I2C_start(s->i2c, s->addr, 1);
 		pressure = (I2C_read(s->i2c, FALSE) << 8) | I2C_read(s->i2c, TRUE);
 		if (s->power_timer>0)
 		{
@@ -146,7 +187,14 @@ static void _sensor_read(SSensor *s, int no)
 			s->power_cnt=0;
 			
 			//--- convert value --------------
-			pressure = ((pressure-16500) *2)/27; // *13.5
+			if (s->addr==ADDR_SENSOR_1_0_BAR)
+			{
+				pressure = ((pressure-16500) *2)/27; // *13.5
+			}
+			else
+			{
+				pressure = 1000*(pressure-10714) / ((30000-3000)*2/7); // convert messured value [3000..30000] to -1 .. 2.5 (span 3.5)
+			}
 
 			//--- save to buffer -----
 			s->buf[s->buf_idx++] = pressure;
