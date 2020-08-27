@@ -436,7 +436,7 @@ static void _plc_set_var(const char *format, ...)
 	len=sprintf(&cmd.str[len],"\n");	
 	va_end (args);
 	cmd.hdr.msgId  = CMD_PLC_SET_VAR;
-	cmd.hdr.msgLen = sizeof(cmd.hdr)+strlen(cmd.str)+1;
+	cmd.hdr.msgLen = (int)(sizeof(cmd.hdr)+strlen(cmd.str)+1);
 	plc_handle_gui_msg(INVALID_SOCKET, &cmd, cmd.hdr.msgLen);
 }
 

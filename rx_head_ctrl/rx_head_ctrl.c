@@ -200,7 +200,7 @@ static void _main_loop(void)
 		//	_check_rx_boot();
 		}
 		time5 = rx_get_ticks();
-		if (!ctrlInit && nios_NiosLoaded() && !arg_offline) 
+		if (!ctrlInit && nios_loaded() && !arg_offline) 
 		{
 			ctrlInit=TRUE;
 			ctrl_init();

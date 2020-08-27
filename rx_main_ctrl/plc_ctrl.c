@@ -188,7 +188,7 @@ static int				_head_was_up=FALSE;
 //--- GUI msg fifo -------------
 #define FIFO_SIZE	64
 static HANDLE		_GuiHandleMsg;
-static 	int			_gui_socket[FIFO_SIZE];
+static 	RX_SOCKET	_gui_socket[FIFO_SIZE];
 static 	int			_gui_msglen[FIFO_SIZE];
 static	BYTE		_gui_msgbuf[FIFO_SIZE][MAX_MESSAGE_SIZE];
 static 	int			_gui_msgInIdx=0;

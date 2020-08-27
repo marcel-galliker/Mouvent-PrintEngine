@@ -236,12 +236,6 @@ void nios_load(const char *exepath)
 #endif
 }
 
-//--- nios_NiosLoaded -----------------------------------------
-int  nios_NiosLoaded(void)
-{
-	return _NiosLoaded;
-}
-
 //--- _sample_wf ----------------------------------------
 
 #define OLD_WF_OFFSET		-20

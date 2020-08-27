@@ -125,7 +125,6 @@ namespace RX_DigiPrint.Views.PrintSystemView
         //--- _timer_Tick ---------------------------------------------------
         private void _timer_Tick(int tick)
         {   
-            Console.WriteLine("PrintSystem: Request Info {0}", DateTime.Now.ToString("hh:mm:ss"));
             RxGlobals.RxInterface.SendCommand(TcpIp.CMD_FLUID_STAT);
             RxGlobals.RxInterface.SendCommand(TcpIp.CMD_HEAD_STAT);
             RxGlobals.RxInterface.SendCommand(TcpIp.CMD_ENCODER_STAT);
