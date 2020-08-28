@@ -419,9 +419,10 @@ int  tx801_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 	{
 	case CMD_LIFT_STOP:				motors_stop(MOTOR_Z_BITS);
 									RX_StepperStatus.cmdRunning = 0;
+									RX_StepperStatus.info.ref_done = FALSE;
 									break;	
 
-	case CMD_LIFT_REFERENCE:			_PrintPos_New=0;
+	case CMD_LIFT_REFERENCE:		_PrintPos_New=0;
 									motors_reset(MOTOR_Z_BITS);
 									_tx801_do_reference();
 									break;

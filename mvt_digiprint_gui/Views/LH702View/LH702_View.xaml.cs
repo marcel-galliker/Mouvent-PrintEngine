@@ -93,18 +93,17 @@ namespace RX_DigiPrint.Views.LH702View
         //--- UpdatePrintQueueItem ------------------------------------
         public void UpdatePrintQueueItem(PrintQueueItem item)
 		{
-            if (item.State==EPQState.transfer || item.State==EPQState.printing)
-			{
-             //   if (Preview.Next==null)  Console.WriteLine("PRINTING >>{0}<< {1}: Printing >>{2}<<, NULL", item.FileName, item.CopiesPrinted, _PrintingItem.FileName);
-             //   else if (_PrintingItem!=null) Console.WriteLine("PRINTING >>{0}<< {1}: Printing >>{2}<<, next >>{3}<<", item.FileName, item.CopiesPrinted, _PrintingItem.FileName, Preview.Next.FileName);
-             //   else Console.WriteLine("PRINTING >>{0}<<", item.FileName, item.CopiesPrinted);
-                if (item!=_PrintingItem) 
-                    PrintQueueChanged();
+//            if (item.State==EPQState.transfer || item.State==EPQState.printing)
+            if (item.State==EPQState.printing)
+			{                
+            //	Console.WriteLine("PRINTING >>{0}<< cp{1}: Printing >>{2}<<, next >>{3}<<", item.FileName, item.CopiesPrinted, _PrintingItem?.FileName, Preview?.Next?.FileName);
+
+                if (item!=_PrintingItem) PrintQueueChanged(item);
 			}
 		}
 
         //--- PrintQueueChanged ---------------------------
-        public void PrintQueueChanged()
+        public void PrintQueueChanged(PrintQueueItem item=null)
         {     
             int i=0;
             bool can_print;
@@ -126,8 +125,8 @@ namespace RX_DigiPrint.Views.LH702View
             i=RxGlobals.PrintQueue.Printed.Count;
 			while (--i>=0)
             {
-                if (   RxGlobals.PrintQueue.Printed[i].State==EPQState.transfer
-                    || RxGlobals.PrintQueue.Printed[i].State==EPQState.printing)
+                if (item==null && (RxGlobals.PrintQueue.Printed[i].State==EPQState.transfer || RxGlobals.PrintQueue.Printed[i].State==EPQState.printing)
+                ||  item!=null && RxGlobals.PrintQueue.Printed[i].ID==item.ID)
 				{
                     printing=RxGlobals.PrintQueue.Printed[i];
                     if (i>0) next = RxGlobals.PrintQueue.Printed[i-1];
@@ -145,11 +144,8 @@ namespace RX_DigiPrint.Views.LH702View
 			}
 
             if (!can_print) printing=null;
-        //  if (printing==null) Console.WriteLine("PrintQueueChanged printing=>>NULL<<");
-        //  else                Console.WriteLine("PrintQueueChanged printing={0}:>>{1}<<", printing.ID, printing.FileName);
 
-        //  if (next==null) Console.WriteLine("PrintQueueChanged next=>>NULL<<");
-        //  else            Console.WriteLine("PrintQueueChanged next={0}:>>{1}<<", next.ID, next.FileName);
+            //	Console.WriteLine("PrintQueueChanged printing={0}:>>{1}<< next={0}:>>{1}<<", printing?.ID, printing?.FileName, next?.ID, next?.FileName);
 
             if (printing!=_PrintingItem)
 			{

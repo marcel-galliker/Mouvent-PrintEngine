@@ -569,10 +569,10 @@ static void _nios_set_user_eeprom(int no)
 	if (sizeof(RX_HBStatus[0].head[no].eeprom_mvt)!=128) Error(ERR_ABORT, 0, "SIZE MISMATCH");
 	if (sizeof(_NiosStat->user_eeprom[no])!=128) Error(ERR_ABORT, 0, "SIZE MISMATCH");
 
-	if (_NiosMem==NULL) return;
+	if (_NiosStat==NULL) return;
 
 	//--- initialize status memory -----------------------
-	if (memempty(&RX_HBStatus[0].head[no].eeprom_mvt, sizeof(SHeadEEpromMvt)) && !memempty(&_NiosStat->head_eeprom[no], sizeof(_NiosStat->head_eeprom[no])))
+	if (memempty(&RX_HBStatus[0].head[no].eeprom_mvt, sizeof(SHeadEEpromMvt)) && !memempty(&_NiosStat->user_eeprom[no], sizeof(_NiosStat->user_eeprom[no])))
 		memcpy(&RX_HBStatus[0].head[no].eeprom_mvt, _NiosStat->user_eeprom[no], sizeof(SHeadEEpromMvt));
 
 	//--- save if changed and not NULL ------------------
@@ -593,9 +593,9 @@ int  nios_main(int ticks, int menu)
 	if (_NiosLoaded)
 	{
 		if (_NiosMem) cond_main(ticks, menu);
-		
+
 		tse_check_errors(ticks, menu);
-		if (menu) 	
+		if (menu)
 		{
 			_nios_copy_status();			
 			nios_check_errors(ticks);		
@@ -605,7 +605,6 @@ int  nios_main(int ticks, int menu)
 				_nios_set_user_eeprom(head);
 			} 			
 		}
-
 	}
 	return REPLY_OK;
 }

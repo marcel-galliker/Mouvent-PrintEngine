@@ -29,7 +29,7 @@ namespace RX_DigiPrint.Views.UserControls
         }
 
         //--- _BindValues ------------------------------
-        private static EPrinterType _PrinterType;
+        private EPrinterType _PrinterType;
         private void _BindValues()
         {
             if (RxGlobals.PrintSystem.PrinterType!=_PrinterType)

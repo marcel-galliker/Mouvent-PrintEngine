@@ -1,4 +1,5 @@
-﻿using RX_Common;
+﻿using Infragistics.Windows.Automation.Peers;
+using RX_Common;
 using RX_DigiPrint.Converters;
 using RX_DigiPrint.Models.Enums;
 using RX_DigiPrint.Services;
@@ -55,8 +56,16 @@ namespace RX_DigiPrint.Models
             }
         }
 
-        //--- Property ColorFG ---------------------------------------
-        private Brush _ColorFG;
+		//--- Property InkSupply ---------------------------------------
+		private InkSupply _InkSupply;
+		public InkSupply InkSupply
+		{
+			get { return _InkSupply; }
+			set { SetProperty(ref _InkSupply,value); }
+		}
+
+		//--- Property ColorFG ---------------------------------------
+		private Brush _ColorFG;
         public Brush ColorFG
         {
             get { return _ColorFG; }
@@ -351,7 +360,12 @@ namespace RX_DigiPrint.Models
 		public Brush StateBrush
 		{
 			get { return _StateBrush; }
-			set { SetProperty(ref _StateBrush,value); }
+			set { 
+                    if (SetProperty(ref _StateBrush,value))
+				    {
+                        if (InkSupply!=null) InkSupply.UpdateStateBrush(_StateBrush);
+				    }
+                }
 		}
 
 		//--- SetItem ----------------------------------------------
@@ -379,12 +393,13 @@ namespace RX_DigiPrint.Models
                 int ink;
                 if (RxGlobals.PrintSystem.HeadsPerColor!=0) ink = no/RxGlobals.PrintSystem.HeadsPerColor;
                 else ink=no;
-                if (RxGlobals.InkSupply.List[ink].InkType!=null)
+                InkSupply = RxGlobals.InkSupply.List[ink];
+                if (InkSupply!=null && InkSupply.InkType!=null)
                 {
-                    Color   = new SolidColorBrush(RxGlobals.InkSupply.List[ink].InkType.Color);
-                    ColorFG = new SolidColorBrush(RxGlobals.InkSupply.List[ink].InkType.ColorFG);
+                    Color   = new SolidColorBrush(InkSupply.InkType.Color);
+                    ColorFG = new SolidColorBrush(InkSupply.InkType.ColorFG);
 
-                    string str = new ColorCode_Str().Convert(RxGlobals.InkSupply.List[ink].InkType.ColorCode, null, ink, null).ToString();
+                    string str = new ColorCode_Str().Convert(InkSupply.InkType.ColorCode, null, ink, null).ToString();
 
                     Name    = str+"-"+(1+no%(int)RxGlobals.PrintSystem.HeadsPerColor).ToString();
                     used = true;

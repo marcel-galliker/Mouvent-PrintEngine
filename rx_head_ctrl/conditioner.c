@@ -328,7 +328,7 @@ static void _cond_check_flow(int ticks)
 			if (valid(RX_HBStatus->head[i].presIn) && valid(RX_HBStatus->head[i].presOut) && valid(RX_HBStatus->head[i].pumpFeedback))
 			{
 				if (RX_HBStatus->head[i].pumpFeedback) RX_HBStatus->head[i].flowFactor = 100*(RX_HBStatus->head[i].presIn-RX_HBStatus->head[i].presOut)/RX_HBStatus->head[i].pumpFeedback;
-				else RX_HBStatus->head[i].flowFactor = 0;
+				else RX_HBStatus->head[i].flowFactor = 1000;
 			}
 			else RX_HBStatus->head[i].flowFactor = INVALID_VALUE;
 
@@ -339,8 +339,8 @@ static void _cond_check_flow(int ticks)
 				{
 					int warn = (RX_HBStatus[0].head[i].warn&COND_ERR_flow_factor);
 					RX_HBStatus[0].head[i].warn |= COND_ERR_flow_factor;				
-					if (ticks>_FlowCheckDelay[i] && !warn) 
-						Error(WARN, 0, "Conditioner %s: Ink flow factor >200", RX_HBConfig.head[i].name);
+				//	if (ticks>_FlowCheckDelay[i] && !warn) 
+				//		Error(WARN, 0, "Conditioner %s: Ink flow factor >200", RX_HBConfig.head[i].name);
 				}
 			}
 			else _FlowCheckDelay[i] = ticks+5000;
@@ -746,8 +746,6 @@ void cond_set_disabledJets(int headNo, INT16 *jets)
 //--- cond_set_densityValues ---------------------------------------------
 void cond_set_densityValues(int headNo, INT16 *values)
 {
-	rx_sleep(100);
-
 	headNo = headNo % MAX_HEADS_BOARD;
 	SHeadEEpromMvt *mvt = &RX_HBStatus[0].head[headNo].eeprom_mvt;
 	if (values==NULL) memset(mvt->densityValue, 0,      sizeof(mvt->densityValue));

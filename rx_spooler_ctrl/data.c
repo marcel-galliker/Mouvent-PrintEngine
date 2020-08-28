@@ -479,7 +479,6 @@ int  data_malloc(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPixel,
 			if (psplit[i].color.name[0] && psplit[i].lastLine>psplit[i].firstLine)
 			{
 				TrPrintfL(1, "buffer[%d]: WAIT UNUSED %p, used=%d, abort=%d", i, buffer[i], rx_mem_cnt(buffer[i]), _Abort);
-				TrPrintfL(1, "buffer[%d]: WAIT UNUSED %p, used=%d, abort=%d", i, buffer[i], rx_mem_cnt(buffer[i]), _Abort);
 				while (!_Abort && rx_mem_cnt(buffer[i]))
 				{
 					rx_sleep(time);

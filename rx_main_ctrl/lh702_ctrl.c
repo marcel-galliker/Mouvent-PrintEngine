@@ -85,7 +85,6 @@ static void _plc_set_var			(const char *format, ...);
 //--- lh702_init -------------------------------------------------
 void lh702_init(void)
 {
-	_handle_thickness(1000);
 	memset(&_Status, 0, sizeof(_Status));
 	_Status.hdr.msgLen = sizeof(_Status);
 	_Status.hdr.msgId  = EVT_STATE;
@@ -183,19 +182,22 @@ void lh702_set_printpar(SPrintQueueItem *pitem)
 //--- lh702_on_error --------------------------------------------------------
 void lh702_on_error(ELogItemType type, char *deviceStr, int no, char *txt)
 {
-	SLH702_Message msg;
-	memset(&msg, 0, sizeof(msg));
-	msg.hdr.msgLen = sizeof(msg);
-	switch(type)
+	if (type>LOG_TYPE_LOG)
 	{
-	case LOG_TYPE_UNDEF:	return;
-	case LOG_TYPE_LOG:		msg.hdr.msgId  = EVT_LOG;		break;
-	case LOG_TYPE_WARN:		msg.hdr.msgId  = EVT_WARN;		break;
-	default:				msg.hdr.msgId  = EVT_ERROR;		break;	
+		SLH702_Message msg;
+		memset(&msg, 0, sizeof(msg));
+		msg.hdr.msgLen = sizeof(msg);
+		switch(type)
+		{
+		case LOG_TYPE_UNDEF:	return;
+		case LOG_TYPE_LOG:		msg.hdr.msgId  = EVT_LOG;		break;
+		case LOG_TYPE_WARN:		msg.hdr.msgId  = EVT_WARN;		break;
+		default:				msg.hdr.msgId  = EVT_ERROR;		break;	
+		}
+		strncpy(msg.device, deviceStr, sizeof(msg.device)-1);
+		strncpy(msg.msg,    txt,       sizeof(msg.msg)-1);
+		sok_send(&_Socket, &msg); 
 	}
-	strncpy(msg.device, deviceStr, sizeof(msg.device)-1);
-	strncpy(msg.msg,    txt,       sizeof(msg.msg)-1);
-	sok_send(&_Socket, &msg); 
 }
 
 

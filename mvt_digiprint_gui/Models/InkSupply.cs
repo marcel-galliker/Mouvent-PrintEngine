@@ -341,11 +341,38 @@ namespace RX_DigiPrint.Models
 			get { return _StateBrush; }
 			set 
             { 
-                if (SetProperty(ref _StateBrush,value))
+                if (SetProperty(ref _StateBrush, value))
 				{
                     RxGlobals.PrintSystem.UpdateStateBrush();
 				}
             }
+		}
+
+        //--- UpdateStateBrush -------------------------------------------
+        public void UpdateStateBrush(Brush brush)
+		{
+            if      (brush==Rx.BrushError) StateBrush=Rx.BrushError;
+            else if (brush==Rx.BrushWarn && StateBrush!=Rx.BrushError) StateBrush=Rx.BrushWarn;
+            else 
+			{
+                brush=Brushes.Transparent;
+                foreach(HeadStat head in RxGlobals.HeadStat.List)
+				{
+                    if (head.InkSupply==this)
+					{
+                        if (head.StateBrush==Rx.BrushError)
+						{
+                            brush=Rx.BrushError;
+                            break;
+						}
+                        else if (head.StateBrush==Rx.BrushWarn)
+						{
+                            brush=Rx.BrushWarn;
+						}
+					}
+				}
+                StateBrush = brush;
+			}
 		}
 
         //--- SetStatus --------------------------------------------------
@@ -382,9 +409,11 @@ namespace RX_DigiPrint.Models
             FlowFactorOk    = ((msg.info & 0x00000040)!=0) || (CtrlMode!=EFluidCtrlMode.ctrl_print);
             Warn            = !TempReady || !CondTempReady || !FlowFactorOk;
 
-            if (Err!=0)    StateBrush = Rx.BrushError;
-            else if (Warn) StateBrush = Rx.BrushWarn;
-            else           StateBrush = Brushes.Transparent; 
+            
+            if (Err!=0)    UpdateStateBrush(Rx.BrushError);
+            else if (Warn) UpdateStateBrush(Rx.BrushWarn);
+            else           UpdateStateBrush(Brushes.Transparent); 
+            
         }
     }	
 }
