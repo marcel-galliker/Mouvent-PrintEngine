@@ -196,6 +196,7 @@ int setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action)
 
 			int headsPerInkSupply = pcfg->headsPerColor;
 			if (pcfg->inkCylindersPerColor) headsPerInkSupply /= pcfg->inkCylindersPerColor;
+			setup_int32_arr(file, "headFpVoltage", action, &pcfg->headFpVoltage[i*pcfg->headsPerColor], pcfg->headsPerColor,  100);
 			setup_int32_arr(file, "HeadDist",      action, &pcfg->headDist[i*headsPerInkSupply],	  pcfg->headsPerColor,	0);
 			setup_int32_arr(file, "HeadDistBack",  action, &pcfg->headDistBack[i*headsPerInkSupply],  pcfg->headsPerColor,	0);
 			setup_int32(file, "ColorOffset",	   action, &pcfg->colorOffset[i], 0);

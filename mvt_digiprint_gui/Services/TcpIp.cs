@@ -684,6 +684,7 @@ namespace RX_DigiPrint.Services
 	        public Int32	srcPages;
 	        public Int32	srcWidth;
 	        public Int32	srcHeight;
+            public byte     srcBitsPerPixel;
 
 	        public Int32	firstPage;
 	        public Int32	lastPage;
@@ -827,6 +828,8 @@ namespace RX_DigiPrint.Services
             public Int32 inkSupplyCnt;
             public Int32 InkCylindersPerColor;
 
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst =(6*48))] // color*heads
+            public Int32[]		headFpVoltage;
             [MarshalAs(UnmanagedType.ByValArray, SizeConst =(6*48))] // color*heads
             public Int32[]		headDist;
             [MarshalAs(UnmanagedType.ByValArray, SizeConst =(6*48))] // color*heads

@@ -266,6 +266,7 @@ typedef struct SPrintQueueItem
 	INT32	srcPages;
 	INT32	srcWidth;	// µm
 	INT32	srcHeight;	// µm
+	UINT8	srcBitsPerPixel;
 	INT32	firstPage;
 	INT32	lastPage;
 	INT32	copies;
@@ -1579,6 +1580,7 @@ typedef struct SRxConfig
 	SHeadBoardCfg	headBoard[HEAD_BOARD_CNT];	
 	INT32			externalData;
 	SConditionerCfg	cond[MAX_HEAD_DIST];
+	INT32			headFpVoltage[MAX_HEAD_DIST];
 	struct
 	{
 		INT32			tara[MAX_SCALES];

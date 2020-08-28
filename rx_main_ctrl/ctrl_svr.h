@@ -42,7 +42,7 @@ void ctrl_head_cal_done(int fluidNo);
 UINT32 ctrl_headResetCnt(void);
 void ctrl_set_max_speed(void);
 int	 ctrl_abort_printing(void);
-void ctrl_send_firepulses(char *dots);
+void ctrl_send_firepulses(char *dots, int screenOnPrinter);
 int  ctrl_print_page(SPageId *id);
 int  ctrl_simu_encoder(int khz);
 

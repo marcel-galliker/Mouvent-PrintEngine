@@ -999,6 +999,7 @@ static void _do_get_printer_cfg(RX_SOCKET socket)
 	msg.headsPerColor = RX_Config.headsPerColor;
     msg.inkSupplyCnt  = RX_Config.inkSupplyCnt;
 	msg.inkCylindersPerColor	= RX_Config.inkCylindersPerColor;
+	memcpy(msg.headFpVoltage,	RX_Config.headFpVoltage,	sizeof(msg.headFpVoltage));
 	memcpy(msg.headDist,		RX_Config.headDist,			sizeof(msg.headDist));
 	memcpy(msg.headDistBack,	RX_Config.headDistBack,		sizeof(msg.headDistBack));
 	memcpy(msg.colorOffset,		RX_Config.colorOffset,		sizeof(msg.colorOffset));
@@ -1043,6 +1044,7 @@ static void _do_set_printer_cfg(RX_SOCKET socket, SPrinterCfgMsg* pmsg)
 	RX_Config.headsPerColor		   = pmsg->headsPerColor;
 	RX_Config.inkCylindersPerColor = pmsg->inkCylindersPerColor;
 	RX_Config.inkSupplyCnt		   = pmsg->colorCnt * pmsg->inkCylindersPerColor;
+	memcpy(RX_Config.headFpVoltage, pmsg->headFpVoltage,	sizeof(RX_Config.headFpVoltage));
 	memcpy(RX_Config.headDist,		pmsg->headDist,			sizeof(RX_Config.headDist));
 	memcpy(RX_Config.headDistBack,	pmsg->headDistBack,		sizeof(RX_Config.headDistBack));
 	memcpy(RX_Config.colorOffset,	pmsg->colorOffset,		sizeof(RX_Config.colorOffset));

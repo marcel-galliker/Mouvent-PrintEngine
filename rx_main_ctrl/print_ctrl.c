@@ -71,6 +71,8 @@ static int				_PrintDone[MAX_PAGES];
 static int				_PrintDoneFlags;
 static int				_PrintDoneNo;
 static int				_PrintGoNo;
+static int				_BitsPerPixel;
+
 static int				ERR_z_in_print;
 
 //--- pc_init ----------------------------------------------------------------
@@ -179,6 +181,7 @@ int pc_start_printing(void)
 		memset(_PrintDone, 0, sizeof(_PrintDone));
 		_PrintDoneNo = 0;
 		_PrintGoNo	 = 0;
+		_BitsPerPixel = 0;
 		_PrintDoneFlags = spool_head_board_used_flags();
 		_SetPrintPar   = TRUE;
 //		fluid_start_printing();
@@ -403,14 +406,14 @@ static int _get_image_size(UINT32 gap)
 static void _set_src_size(SPrintQueueItem *pItem, const char *path)
 {
 	UINT32 width, height;
+	UINT8  bitsPerPixel;
 	int ret;
 
-	ret = flz_get_size(path, 0, 0, &width, &height, NULL);
-	if (ret) ret = tif_get_size(path, 0, 0, &width, &height, NULL);
+	ret = flz_get_size(path, 0, 0, &width, &height, &bitsPerPixel);
+	if (ret) ret = tif_get_size(path, 0, 0, &width, &height, &bitsPerPixel);
 	if (ret) 
 	{
 		UINT32 height, memSize;
-		UINT8  bitsPerPixel;
 		char p[MAX_PATH];
 		bmp_color_path(path, RX_ColorNameShort(0), p);
 		ret = bmp_get_size(p, (UINT32*) &width, &height, &bitsPerPixel, &memSize);
@@ -419,6 +422,7 @@ static void _set_src_size(SPrintQueueItem *pItem, const char *path)
 	{
 		pItem->srcWidth  = width *25400/1200;
 		pItem->srcHeight = height*25400/1200;
+		pItem->srcBitsPerPixel = bitsPerPixel;
 	}
 }
 
@@ -627,6 +631,20 @@ static int _print_next(void)
 					_CopiesStart = (_Item.copiesPrinted* (_Item.lastPage - _Item.firstPage + 1) + _Item.start.page)-1;
 
 				_set_src_size(&_Item, _FilePathLocal);
+				if (_BitsPerPixel)
+				{
+					if (((_BitsPerPixel<8) && (_Item.srcBitsPerPixel==8))
+					||  ((_BitsPerPixel==8 && (_Item.srcBitsPerPixel<8))))
+					{
+						Error(WARN, 0, "%d: %s Screening not compatible", _Item.id.id, _filename(_Item.filepath));
+						_Item.state = PQ_STATE_STOPPED;
+						pq_set_item(&_Item);
+						gui_send_print_queue(EVT_GET_PRINT_QUEUE, &_Item);
+						memset(&_Item, 0, sizeof(_Item));
+						return REPLY_OK;;
+					}
+				}
+				_BitsPerPixel = _Item.srcBitsPerPixel;
 
 				pq_set_item(&_Item);
 				pl_start(&_Item, _FilePathLocal);

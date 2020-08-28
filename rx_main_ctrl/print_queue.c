@@ -428,8 +428,8 @@ SPrintQueueItem *pq_set_item(SPrintQueueItem *pitem)
 	int i;
 	if (_find_item(pitem->id.id, &i)==REPLY_OK)
 	{
-		pitem->state = _List[i].state;
-//		pitem->scansPrinted = _List[i].scansPrinted;
+		if (pitem->state!=PQ_STATE_STOPPED) pitem->state = _List[i].state;
+//		pitem->scansPrinted = _List[i].scansPrinted
 		memcpy(&_List[i], pitem, sizeof(_List[i]));		
 		if (_List[i].state<=PQ_STATE_RIPPING)
 		{
