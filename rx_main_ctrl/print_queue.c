@@ -428,8 +428,8 @@ SPrintQueueItem *pq_set_item(SPrintQueueItem *pitem)
 	int i;
 	if (_find_item(pitem->id.id, &i)==REPLY_OK)
 	{
-		if (pitem->state!=PQ_STATE_STOPPED) pitem->state = _List[i].state;
-//		pitem->scansPrinted = _List[i].scansPrinted
+		pitem->state = _List[i].state;
+//		pitem->scansPrinted = _List[i].scansPrinted;
 		memcpy(&_List[i], pitem, sizeof(_List[i]));		
 		if (_List[i].state<=PQ_STATE_RIPPING)
 		{
@@ -624,6 +624,14 @@ int pq_stopping(SPrintQueueItem *pitem)
 		return REPLY_OK;
 	}
 	return REPLY_ERROR;
+}
+
+//--- pq_stopped ----------------------------
+void pq_stopped(SPrintQueueItem *pitem)
+{
+	int i;
+	pitem->state  = PQ_STATE_STOPPED;
+	if (_find_item(pitem->id.id, &i)==REPLY_OK) _List[i].state= PQ_STATE_STOPPED;
 }
 
 //--- _filename ------------------------------------
@@ -1025,7 +1033,7 @@ int pq_is_ready(void)
 	if(RX_Config.printer.type == printer_LH702)				
 	{
 		TrPrintfL(TRUE, "pq_is_ready: sentCnt=%d, printGoCnt=%d", RX_PrinterStatus.sentCnt, RX_PrinterStatus.printGoCnt);
-		return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printGoCnt) < 20;	// minimize buffer, independent on format!
+		return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printGoCnt) < 5;	// minimize buffer, independent on format!
 	}
 	else if(RX_Config.printer.type == printer_cleaf)	return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printedCnt) < 16;
 	else if (rx_def_is_tx(RX_Config.printer.type))		return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printedCnt) < 20;

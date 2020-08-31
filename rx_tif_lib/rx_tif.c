@@ -461,7 +461,7 @@ int tif_load(SPageId *id, const char *filedir, const char *filename, int printMo
 					}
 				}
 			}
-			if (!_Abort) progress(id, "", 100);
+			if (!_Abort && progress) progress(id, "", 100);
 		}
 		rx_sem_destroy(&_SemDone);
 		

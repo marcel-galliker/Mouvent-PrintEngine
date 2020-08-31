@@ -44,6 +44,14 @@ static int				_ThreadRunning;
 static RX_SOCKET		_RxCtrlSocket=INVALID_SOCKET;
 
 
+//--- load file ---------------------------------
+static void				*_load_file_thread(void *par);
+#define LOAD_FILE_BUF_SIZE	8
+static SLoadFileCmd	_LoadFileBuf[LOAD_FILE_BUF_SIZE];
+static int			_LoadFileInIdx;
+static int			_LoadFileOutIdx;
+HANDLE				_LoadFile_Sem;
+
 static void				*_print_file_thread(void *par);
 static HANDLE			_PrintFile_Sem;
 static RX_SOCKET		_PrintFile_Socket;
@@ -69,9 +77,9 @@ static UINT16			_SMP_Flags;
 static int				_BufferNo;
 static UINT64			_BufferSize[BUFFER_CNT];
 static BYTE*			_Buffer[BUFFER_CNT][MAX_COLORS]; // [MAX_HEADS_COLOR];	// buffered in case of same image
-
 int					_MsgGot, _MsgSent, _MsgGot0;
 int					_MsgId=0;
+
 
 //--- prototypes --------------------------------------------------------------
 
@@ -82,6 +90,8 @@ static int _do_spool_cfg	(RX_SOCKET socket, SSpoolerCfg	  *cfg);
 static int _do_color_cfg	(RX_SOCKET socket, SColorSplitCfg *cfg);
 static int _do_disabled_jets(RX_SOCKET socket, SDisabledJetsMsg  *jets);
 static int _do_density_values(RX_SOCKET socket, SDensityValuesMsg *pmsg);
+static int _do_load_file	(RX_SOCKET socket, SLoadFileCmd  *msg);
+
 static int _do_print_file	(RX_SOCKET socket, SPrintFileCmd  *msg);
 static void _do_start_sending(UINT32 resetCnt);
 static int _do_print_abort	(RX_SOCKET socket);
@@ -108,11 +118,14 @@ int ctrl_start(const char *ipAddrMain)
 	_LastWakeup = 0;
 	_LastGap = 0;
 	_SMP_Flags=0;
+	_LoadFileInIdx  = 0;
+	_LoadFileOutIdx = 0;
 
 	rx_mem_init(512*1024*1024);
 	if (!_PrintFile_Sem) _PrintFile_Sem = rx_sem_create();
 
 	rx_thread_start(_main_ctrl_thread, (void*)ipAddrMain, 0, "_main_ctrl_thread");
+	rx_thread_start(_load_file_thread,  NULL,             0, "_load_file_thread");
 	rx_thread_start(_print_file_thread, NULL,             0, "_print_file_thread");
 	hc_start();
 
@@ -246,6 +259,7 @@ static int _handle_main_ctrl_msg(RX_SOCKET socket, void *pmsg, int len, struct s
 	case CMD_COLOR_CFG:				_do_color_cfg		(socket, (SColorSplitCfg*)	pdata);	break;
 	case CMD_SET_DISABLED_JETS:		_do_disabled_jets	(socket, (SDisabledJetsMsg*) pmsg);	break;
 	case CMD_SET_DENSITY_VAL:		_do_density_values	(socket, (SDensityValuesMsg*)pmsg);	break;
+    case CMD_LOAD_FILE:				_do_load_file		(socket, (SLoadFileCmd*)	pmsg);	break;
 	case CMD_PRINT_FILE:			_MsgGot0++;
 									_PrintFile_Socket = socket;
 									memcpy(&_PrintFile_Msg, pmsg, sizeof(_PrintFile_Msg));
@@ -362,6 +376,32 @@ static int _do_density_values(RX_SOCKET socket, SDensityValuesMsg *pmsg)
 	return REPLY_OK;
 }
 
+//--- _do_load_file ---------------------------------------------------
+static int _do_load_file(RX_SOCKET socket, SLoadFileCmd  *pdata)
+{
+	int idx=(_LoadFileInIdx+1) % LOAD_FILE_BUF_SIZE;
+	if (idx==_LoadFileOutIdx) return Error(ERR_ABORT, 0, "Loadfile buffer overflow");
+	memcpy(&_LoadFileBuf[_LoadFileInIdx], pdata, sizeof(_LoadFileBuf[_LoadFileInIdx]));
+	_LoadFileInIdx=idx;
+	rx_sem_post(_LoadFile_Sem);
+	return REPLY_OK;
+}
+
+//---  _load_file_thread ------------------------------------------------------------
+static void *_load_file_thread(void *par)
+{
+	_LoadFile_Sem=rx_sem_create();
+	while (_ThreadRunning)
+	{
+		if (rx_sem_wait(_LoadFile_Sem, 1000)==REPLY_OK)
+		{
+			data_load_file(_LoadFileBuf[_LoadFileOutIdx].filepath, _LoadFileBuf[_LoadFileOutIdx].id.page);
+			_LoadFileOutIdx = (_LoadFileOutIdx+1) % LOAD_FILE_BUF_SIZE;
+		}				
+	}
+	return NULL;
+}
+
 //--- _do_print_file ----------------------------------------------------------------------
 static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 {
@@ -410,7 +450,6 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 	if (!same)
 	{
 	//	Error(LOG, 0, "load file >>%s<< id=%d, page=%d, copy=%d", msg.filename, msg.id.id, msg.id.page, msg.id.copy);
-		_BufferNo = (_BufferNo+1)%BUFFER_CNT;
 
 		if(msg.printMode==PM_SCANNING && rx_def_is_tx(RX_Spooler.printerType))
 			data_set_wakeuplen(WAKEUP_BAR_LEN*(RX_Spooler.colorCnt+1), msg.wakeup);
@@ -458,6 +497,7 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 		if (msg.printMode==PM_SCAN_MULTI_PAGE) multiCopy=1;
 		if (ret==REPLY_OK)
 		{
+			_BufferNo = (_BufferNo+1)%BUFFER_CNT;
 			if (msg.smp_bufSize) 
 			{
 				Error(LOG, 0, "data_clear");				
