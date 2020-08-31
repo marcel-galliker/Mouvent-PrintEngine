@@ -32,6 +32,9 @@
 
 #define STEPPER_CNT		4
 
+#define MAX_STEPS_DIST 30 * 6  // 30 turns with 6 steps each turn
+#define MAX_STEPS_ANGLE 18 * 6 // 18 turns with 6 steps each turn
+
 static RX_SOCKET		_step_socket[STEPPER_CNT]={0};
 
 static SStepperStat		_Status[STEPPER_CNT];
@@ -233,12 +236,12 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
 			&& _step_socket[i] != INVALID_SOCKET && RX_StepperStatus.robot_used)
         {
             SRxConfig cfg;
-            setup_config(PATH_USER FILENAME_CFG, &cfg, READ);
+            setup_screw_positions(PATH_USER FILENAME_SCREW_POS, &cfg, READ);
             memcpy(cfg.stepper.robot[i].screwclusters, _Status[i].screwclusters, sizeof(_Status[i].screwclusters));
             memcpy(RX_Config.stepper.robot[i].screwclusters, _Status[i].screwclusters, sizeof(_Status[i].screwclusters));
             memcpy(cfg.stepper.robot[i].screwpositions, _Status[i].screwpositions, sizeof(_Status[i].screwpositions));
             memcpy(RX_Config.stepper.robot[i].screwpositions, _Status[i].screwpositions, sizeof(_Status[i].screwpositions));
-            setup_config(PATH_USER FILENAME_CFG, &cfg, WRITE);
+            setup_screw_positions(PATH_USER FILENAME_SCREW_POS, &cfg, WRITE);
             sok_send_2(&_step_socket[i], CMD_CFG_SCREW_POS, sizeof(RX_Config.stepper.robot[i]), &RX_Config.stepper.robot[i]);
         }
     }
@@ -385,6 +388,18 @@ int	 steplb_rob_wipe_done(int no, ERobotFunctions rob_function)
 	case rob_fct_cap:		return _Status[no].robinfo.cap_ready;
 	default:				return FALSE;
 	}	
+}
+
+void steplb_rob_vacuum(int time_s)
+{
+    int no;
+    int time_ms = time_s * 1000;
+    for (no = 0; no < STEPPER_CNT; no++)
+    {
+        if (_step_socket[no] != INVALID_SOCKET)
+            sok_send_2(&_step_socket[no], CMD_ROB_VACUUM, sizeof(time_ms), &time_ms);
+    }
+    
 }
 
 //--- steplb_rob_stop ------------------------------
@@ -565,9 +580,6 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
 //--- steplb_adjust_heads ------------------------------------------------
 void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
 {
-    #define MAX_STEPS_DIST		30*6		// 30 turns with 6 steps each turn
-    #define MAX_STEPS_ANGLE		18*6		// 18 turns with 6 steps each turn
-
     SHeadAdjustment msg;
     int stepperno;
     int current_screwpos = ctrl_current_screw_pos(headAdjustment);
@@ -576,7 +588,7 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
         Error(ERR_CONT, 0, "Invalid current screwpositin value");
         return;
     }
-    if (headAdjustment->axis == AXE_ANGLE && (current_screwpos + headAdjustment->steps > MAX_STEPS_ANGLE || current_screwpos + headAdjustment->steps < 0))
+    if (headAdjustment->axis == AXE_ANGLE && (current_screwpos - headAdjustment->steps > MAX_STEPS_ANGLE || current_screwpos - headAdjustment->steps < 0))
     {
         Error(ERR_CONT, 0, "Screw moves out of range; Printbar: %d, Head: %d, Axis: %d, Turn to reach %d.%d", 
 				headAdjustment->printbarNo, headAdjustment->headNo, headAdjustment->axis, 
@@ -584,7 +596,7 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
         return;
     }
     
-    if (headAdjustment->axis == AXE_DIST && (current_screwpos - headAdjustment->steps > MAX_STEPS_DIST || current_screwpos - headAdjustment->steps < 0))
+    if (headAdjustment->axis == AXE_DIST && (current_screwpos + headAdjustment->steps > MAX_STEPS_DIST || current_screwpos + headAdjustment->steps < 0))
     {
         Error(ERR_CONT, 0, "Screw moves out of range; Printbar: %d, Head: %d, Axis: %d, Turn to reach %d.%d", 
 				headAdjustment->printbarNo, headAdjustment->headNo, headAdjustment->axis, 
@@ -598,7 +610,6 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
         stepperno = (headAdjustment->printbarNo+1) / 2;
 
     _HeadAdjustment[stepperno] = *headAdjustment;
-    
     headAdjustment->printbarNo %= 2;
     
     sok_send(&_step_socket[stepperno], headAdjustment);
@@ -612,16 +623,34 @@ static void _check_screwer(void)
     int i = 1;
     for (i = 0; i < SIZEOF(_Status); i++)
     {
+        ScrewPosition.printBar = _HeadAdjustment[i].printbarNo;
+        ScrewPosition.head = _HeadAdjustment[i].headNo;
         if (_Status[i].screwerinfo.screwed && !_old_Screwer_State[i] && _step_socket[i])
         {
-            ScrewPosition.printBar = _HeadAdjustment[i].printbarNo;
-            ScrewPosition.head = _HeadAdjustment[i].headNo;
             if (_HeadAdjustment[i].axis == AXE_DIST)
-                ScrewPosition.angle = _HeadAdjustment[i].steps;
-            else if (_HeadAdjustment[i].axis == AXE_ANGLE)
                 ScrewPosition.dist = _HeadAdjustment[i].steps;
+            else if (_HeadAdjustment[i].axis == AXE_ANGLE)
+                ScrewPosition.angle = _HeadAdjustment[i].steps;
 
-            ctrl_set_rob_pos(ScrewPosition);
+            ctrl_set_rob_pos(ScrewPosition, FALSE, FALSE);
+        }
+        else if (_Status[i].screwerinfo.screwer_blocked_left)
+        {
+            if (_HeadAdjustment[i].axis == AXE_DIST)
+                ScrewPosition.dist = MAX_STEPS_DIST;
+            else if (_HeadAdjustment[i].axis == AXE_ANGLE)
+                ScrewPosition.angle = 0;
+
+            ctrl_set_rob_pos(ScrewPosition, TRUE, _HeadAdjustment[i].axis);
+        }
+        else if (_Status[i].screwerinfo.screwer_blocked_right)
+        {
+            if (_HeadAdjustment[i].axis == AXE_DIST)
+                ScrewPosition.dist = 0;
+            else if (_HeadAdjustment[i].axis == AXE_ANGLE)
+                ScrewPosition.angle = MAX_STEPS_ANGLE;
+
+            ctrl_set_rob_pos(ScrewPosition, TRUE, _HeadAdjustment[i].axis);
         }
         _old_Screwer_State[i] = _Status[i].screwerinfo.screwed;
     }

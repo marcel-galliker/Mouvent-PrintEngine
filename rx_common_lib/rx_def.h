@@ -89,6 +89,7 @@ void rx_def_init();
 #define FILENAME_NETWORK		"network.cfg"
 #define FILENAME_PQ				"print_queue.xml"
 #define FILENAME_CFG			"config.cfg"
+#define FILENAME_SCREW_POS		"screwpos.xml"
 #define FILENAME_FLUID_STATE	"fluid.xml"
 #define FILENAME_HEADS_FLUSHED	"heads_flushed.xml"
 #define FILENAME_PLC_CFG		"plc.cfg"
@@ -1428,38 +1429,38 @@ typedef struct ERobotInfo
 
 typedef struct EScrewerInfo
 {
-    UINT32 ref_done : 1;			//	0x00000001
-    UINT32 moving : 1;				//	0x00000002
-    UINT32 y_in_ref : 1;			//	0x00000004
-    UINT32 robi_in_ref : 1;			//	0x00000008
-    UINT32 x_in_pos : 1;			//	0x00000010
-    UINT32 y_in_pos: 1;				//	0x00000020
-    UINT32 z_in_down : 1;		    //	0x00000040
-    UINT32 z_in_up : 1;				//	0x00000080
-    UINT32 screw_loosed : 1;		//	0x00000100
-    UINT32 screw_tight : 1;	        //	0x00000200
-    UINT32 screws_found : 1;		//	0x00000400
-    UINT32 screwed : 1;				//	0x00000800
-    UINT32 r_info_12 : 1;		    //	0x00001000
-    UINT32 r_info_13 : 1;		    //	0x00002000
-    UINT32 r_info_14 : 1;		    //	0x00004000
-    UINT32 r_info_15 : 1;		    //	0x00008000
-    UINT32 r_info_16 : 1;		    //	0x00010000
-    UINT32 r_info_17 : 1;		    //	0x00020000
-    UINT32 r_info_18 : 1;		    //	0x00040000
-    UINT32 r_info_19 : 1;			//	0x00080000
-    UINT32 r_info_20 : 1;		    //	0x00100000
-    UINT32 r_info_21 : 1;		    //	0x00200000
-    UINT32 r_info_22 : 1;		    //	0x00400000
-    UINT32 r_info_23 : 1;		    //	0x00800000
-    UINT32 r_info_24 : 1;		    //	0x01000000
-    UINT32 r_info_25 : 1;		    //	0x02000000
-    UINT32 r_info_26 : 1;		    //  0x04000000
-    UINT32 r_info_27 : 1;		    //  0x08000000
-    UINT32 r_info_28 : 1;		    //  0x10000000
-    UINT32 r_info_29 : 1;			//	0x20000000
-    UINT32 r_info_30 : 1;		    //	0x40000000
-    UINT32 r_info_31 : 1;		    //	0x80000000
+    UINT32 ref_done : 1;				//	0x00000001
+    UINT32 moving : 1;					//	0x00000002
+    UINT32 y_in_ref : 1;				//	0x00000004
+    UINT32 robi_in_ref : 1;				//	0x00000008
+    UINT32 x_in_pos : 1;				//	0x00000010
+    UINT32 y_in_pos: 1;					//	0x00000020
+    UINT32 z_in_down : 1;				//	0x00000040
+    UINT32 z_in_up : 1;					//	0x00000080
+    UINT32 screw_loosed : 1;			//	0x00000100
+    UINT32 screw_tight : 1;				//	0x00000200
+    UINT32 screws_found : 1;			//	0x00000400
+    UINT32 screwed : 1;					//	0x00000800
+    UINT32 screwer_blocked_left : 1;	//	0x00001000
+    UINT32 screwer_blocked_right : 1;	//	0x00002000
+    UINT32 r_info_14 : 1;				//	0x00004000
+    UINT32 r_info_15 : 1;				//	0x00008000
+    UINT32 r_info_16 : 1;				//	0x00010000
+    UINT32 r_info_17 : 1;				//	0x00020000
+    UINT32 r_info_18 : 1;				//	0x00040000
+    UINT32 r_info_19 : 1;				//	0x00080000
+    UINT32 r_info_20 : 1;				//	0x00100000
+    UINT32 r_info_21 : 1;				//	0x00200000
+    UINT32 r_info_22 : 1;				//	0x00400000
+    UINT32 r_info_23 : 1;				//	0x00800000
+    UINT32 r_info_24 : 1;				//	0x01000000
+    UINT32 r_info_25 : 1;				//	0x02000000
+    UINT32 r_info_26 : 1;				//  0x04000000
+    UINT32 r_info_27 : 1;				//  0x08000000
+    UINT32 r_info_28 : 1;				//  0x10000000
+    UINT32 r_info_29 : 1;				//	0x20000000
+    UINT32 r_info_30 : 1;				//	0x40000000
+    UINT32 r_info_31 : 1;				//	0x80000000
 } EScrewerInfo;
 
 typedef struct ETestTableWarn

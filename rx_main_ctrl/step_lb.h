@@ -43,6 +43,8 @@ int	 steplb_rob_in_wipe_pos_all(ERobotFunctions rob_function);
 void steplb_rob_wipe_start(int no, ERobotFunctions rob_function);
 int	 steplb_rob_wipe_done (int no, ERobotFunctions rob_function);
 
+void steplb_rob_vacuum(int time_s);
+
 int	 steplb_is_printing(int isprinting);
 
 void steplb_rob_do_reference_if_necessary(void);

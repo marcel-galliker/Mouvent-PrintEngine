@@ -1230,16 +1230,29 @@ void ctrl_reply_stat(RX_SOCKET socket)
 }
 
 //--- ctrl_set_rob_pos -------------------------------------
-void ctrl_set_rob_pos(SRobPosition robposition)
+void ctrl_set_rob_pos(SRobPosition robposition, int blocked, int blocked_Axis)
 {
 	if (rx_def_is_lb(RX_Config.printer.type))
 	{
-	    int board;
+        int board;
         board = robposition.printBar * ((RX_Config.headsPerColor+MAX_HEADS_BOARD-1)/MAX_HEADS_BOARD) + robposition.head/MAX_HEADS_BOARD;
-		robposition.head  = robposition.head%MAX_HEADS_BOARD;
-        robposition.angle += RX_HBStatus[board].head[robposition.head].eeprom_mvt.rob_angle;
-        robposition.dist -= RX_HBStatus[board].head[robposition.head].eeprom_mvt.rob_dist;
-		sok_send_2(&_HeadCtrl[board].socket, CMD_SET_ROB_POS, sizeof(robposition), &robposition);
+        robposition.head = robposition.head % MAX_HEADS_BOARD;
+        if (!blocked)
+        {
+			robposition.angle -= RX_HBStatus[board].head[robposition.head].eeprom_mvt.rob_angle;
+			robposition.dist += RX_HBStatus[board].head[robposition.head].eeprom_mvt.rob_dist;
+			sok_send_2(&_HeadCtrl[board].socket, CMD_SET_ROB_POS, sizeof(robposition), &robposition);
+        }
+        else if (blocked && blocked_Axis == AXE_DIST)
+        {
+            robposition.angle = RX_HBStatus[board].head[robposition.head].eeprom_mvt.rob_angle;
+			sok_send_2(&_HeadCtrl[board].socket, CMD_SET_ROB_POS, sizeof(robposition), &robposition);
+        }
+        else if (blocked && blocked_Axis == AXE_ANGLE)
+        {
+            robposition.dist = RX_HBStatus[board].head[robposition.head].eeprom_mvt.rob_dist;
+			sok_send_2(&_HeadCtrl[board].socket, CMD_SET_ROB_POS, sizeof(robposition), &robposition);
+        }
 	}
 }
 

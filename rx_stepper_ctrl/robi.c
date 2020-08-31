@@ -32,7 +32,7 @@
 #define ROBI_SERIAL_PORT	"/dev/ttyS0"
 
 #define TIME_BEFORE_TURN_SCREWER    2600            // us
-#define SCREW_MOVEMENT_CHECK_TIME   900            // us
+#define SCREW_MOVEMENT_CHECK_TIME   1100            // us
 
 // define inputs
 #define SCREW_IN_UP 0
@@ -45,7 +45,7 @@
 
 #define MAX_VARIANCE 100 // um
 
-#define MAX_VAR_SCREW_POS 7000 // um
+#define MAX_VAR_SCREW_POS 6000 // um
 
 
 static int32_t
@@ -89,12 +89,14 @@ static int _Value = 0;
 static int _CmdStarted = FALSE;
 
 static int _Search_Screw_Time = 0;
-static int _Loosen_Screw_Time = 0;
-static int _Loosen_Times = 0;
+static int _Loose_Screw_Time = 0;
 static int _Screwer_Moves_Time = 0;
 static int _Robi_Disabled = FALSE;
 
 static int _Screwer_Blocked_Time = 0;
+static int _TargetPosition = 0;
+
+static int _Buffer_Cmd[10] = {0};
 
 
 void robi_init(void)
@@ -145,7 +147,6 @@ void robi_main(int ticks, int menu)
     RX_StepperStatus.screwerinfo.z_in_down = _robiStatus.gpio.inputs & (1UL << SCREW_IN_DOWN) && !(_robiStatus.gpio.inputs & (1UL << SCREW_IN_UP));
     RX_StepperStatus.screwerinfo.z_in_up    = _robiStatus.gpio.inputs & (1UL << SCREW_IN_UP) && !(_robiStatus.gpio.inputs & (1UL << SCREW_IN_DOWN));
 
-    if (RX_StepperStatus.screwerinfo.z_in_down) _Loosen_Times = 0;
     if (_CmdRunning)	RX_StepperStatus.screwerinfo.moving = TRUE;
     else				RX_StepperStatus.screwerinfo.moving = FALSE;
 
@@ -156,7 +157,7 @@ void robi_main(int ticks, int menu)
         RX_StepperStatus.screwerinfo.x_in_pos = FALSE;
         RX_StepperStatus.screwerinfo.y_in_pos = FALSE;
         RX_StepperStatus.screwerinfo.y_in_ref = FALSE;
-        RX_StepperStatus.screwerinfo.z_in_up = FALSE;
+        //RX_StepperStatus.screwerinfo.z_in_up = FALSE;
         RX_StepperStatus.screwerinfo.screw_loosed = FALSE;
         RX_StepperStatus.screwerinfo.screw_tight = FALSE;
     }
@@ -168,9 +169,7 @@ void robi_main(int ticks, int menu)
     if (!RX_StepperStatus.screwerinfo.ref_done)
     {
         _Search_Screw_Time = 0;
-        _Loosen_Screw_Time = 0;
     }
-
     RX_StepperStatus.screw_posX =
         (_steps_2_micron(_robiStatus.motors[MOTOR_XY_0].motorEncoderPosition +
                          _robiStatus.motors[MOTOR_XY_1].motorEncoderPosition))/2;
@@ -180,8 +179,7 @@ void robi_main(int ticks, int menu)
                          _robiStatus.motors[MOTOR_XY_0].motorEncoderPosition))/2;
 
     if (RX_StepperStatus.screwerinfo.z_in_up) _Search_Screw_Time = 0;
-
-    if (_Search_Screw_Time && rx_get_ticks() > _Search_Screw_Time + TIME_BEFORE_TURN_SCREWER)
+    if (_Search_Screw_Time && rx_get_ticks() > _Search_Screw_Time)
     {
         int val = 0;
         if (RX_StepperStatus.screw_posY >= (SCREW_Y_BACK + SCREW_Y_FRONT)/2)
@@ -189,29 +187,19 @@ void robi_main(int ticks, int menu)
         else
             val = -213333;
         robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_STEPS, &val);
-        _Search_Screw_Time = rx_get_ticks();
+        _Search_Screw_Time = rx_get_ticks() + TIME_BEFORE_TURN_SCREWER;
     }
 
-    if (RX_StepperStatus.screwerinfo.z_in_down) _Loosen_Screw_Time = 0;
-    
-    if (_Loosen_Screw_Time && rx_get_ticks() > _Loosen_Screw_Time + TIME_BEFORE_TURN_SCREWER)
+    if (RX_StepperStatus.screwerinfo.z_in_down) _Loose_Screw_Time = 0;
+    if (_Loose_Screw_Time && rx_get_ticks() > _Loose_Screw_Time)
     {
         int val = 0;
-        if (RX_StepperStatus.screw_posY <= (SCREW_Y_BACK + SCREW_Y_FRONT) / 2)
+        if (RX_StepperStatus.screw_posY >= (SCREW_Y_BACK + SCREW_Y_FRONT) / 2)
             val = -213333;
         else
-            val = 213333;
-        if (_Loosen_Times == 1)
-            val *= (-1);
-        else
-            _Loosen_Times++;
+            val = +213333;
         robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_STEPS, &val);
-        if (_Loosen_Times == 2)
-        {
-            _Loosen_Screw_Time = 0;
-            _Loosen_Times = 0;
-        }
-        
+        _Loose_Screw_Time = rx_get_ticks() + TIME_BEFORE_TURN_SCREWER;
     }
 
     if (!_motors_move_done())
@@ -229,11 +217,13 @@ void robi_main(int ticks, int menu)
     {
         int loc_new_cmd, loc_new_value;
         int val;
-        
+        uint8_t current;
+
         _CmdStarted = FALSE;
         _Search_Screw_Time = 0;
-        _Loosen_Screw_Time = 0;
+        _Loose_Screw_Time = 0;
         RX_StepperStatus.screwerinfo.moving = FALSE;
+        
         switch (_CmdRunning)
         {
         case CMD_ROBI_REFERENCE:
@@ -274,10 +264,12 @@ void robi_main(int ticks, int menu)
             break;
 
         case CMD_ROBI_MOVE_TO_Y:
-                if (abs(RX_StepperStatus.screw_posY - SCREW_Y_BACK) < MAX_VAR_SCREW_POS ||
-                    abs(RX_StepperStatus.screw_posY - SCREW_Y_FRONT) < MAX_VAR_SCREW_POS)
+            _CmdRunning = 0;
+                if (abs(RX_StepperStatus.screw_posY - _TargetPosition) > 1000)
+                    robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_Y, &_TargetPosition);
+                else if (abs(RX_StepperStatus.screw_posY - SCREW_Y_BACK) < MAX_VAR_SCREW_POS || abs(RX_StepperStatus.screw_posY - SCREW_Y_FRONT) < MAX_VAR_SCREW_POS)
                     RX_StepperStatus.screwerinfo.y_in_pos = TRUE;
-                _CmdRunning = 0;
+                
                 break;
 
         case CMD_ROBI_MOVE_TO_X:
@@ -290,8 +282,9 @@ void robi_main(int ticks, int menu)
         case CMD_ROBI_SCREW_RIGHT:
             if (_robiStatus.screwCurrent == TRUE)
             {
-                val = FALSE;
-                send_command(MOTOR_SET_SCREW_CURRENT, sizeof(val), &val);
+                current = FALSE;
+                send_command(MOTOR_SET_SCREW_CURRENT, sizeof(current), &current);
+                _NewCmd = CMD_ROBI_MOVE_Z_DOWN;
             }
             else if (abs(RX_StepperStatus.screw_posY - SCREW_Y_BACK) < MAX_VAR_SCREW_POS)
                 RX_StepperStatus.screwerinfo.screw_tight = TRUE;
@@ -304,16 +297,17 @@ void robi_main(int ticks, int menu)
         case CMD_ROBI_SCREW_LEFT:
             if (_robiStatus.screwCurrent == TRUE)
             {
-                val = FALSE;
-                send_command(MOTOR_SET_SCREW_CURRENT, sizeof(val), &val);
+                current = FALSE;
+                send_command(MOTOR_SET_SCREW_CURRENT, sizeof(current), &current);
+                _NewCmd = CMD_ROBI_MOVE_Z_DOWN;
             }
             else if (abs(RX_StepperStatus.screw_posY - SCREW_Y_FRONT) < MAX_VAR_SCREW_POS)
                 RX_StepperStatus.screwerinfo.screw_tight = TRUE;
             else if (abs(RX_StepperStatus.screw_posY - SCREW_Y_BACK) < MAX_VAR_SCREW_POS)
                 RX_StepperStatus.screwerinfo.screw_loosed = TRUE;
             _CmdRunning = 0;
-            val = FALSE;
-            send_command(MOTOR_SET_SCREW_CURRENT, sizeof(val), &val);
+            current = FALSE;
+            send_command(MOTOR_SET_SCREW_CURRENT, sizeof(current), &current);
             break;
 
         case CMD_ROBI_MOVE_Y:
@@ -327,7 +321,12 @@ void robi_main(int ticks, int menu)
         default:
             break;
         }
-        if (RX_StepperStatus.screwerinfo.ref_done && _NewCmd)
+        if (RX_StepperStatus.screwerinfo.ref_done)
+        {
+            RX_StepperStatus.screwerinfo.screwer_blocked_left = FALSE;
+            RX_StepperStatus.screwerinfo.screwer_blocked_right = FALSE;
+        }
+        if ((RX_StepperStatus.screwerinfo.ref_done && _NewCmd) || _NewCmd == CMD_ROBI_MOVE_Z_DOWN)
         {
             loc_new_cmd = _NewCmd;
             loc_new_value = _Value;
@@ -341,6 +340,7 @@ void robi_main(int ticks, int menu)
             case CMD_ROBI_MOVE_TO_Y:
                 robi_handle_ctrl_msg(INVALID_SOCKET, loc_new_cmd, &loc_new_value);
                 break;
+            case CMD_ROBI_MOVE_Z_DOWN:
             case CMD_ROBI_MOVE_Z_UP:
             case CMD_ROBI_MOVE_TO_GARAGE:
                 robi_handle_ctrl_msg(INVALID_SOCKET, loc_new_cmd, NULL);
@@ -395,6 +395,7 @@ void robi_handle_menu(char *str)
 {
     int num = 0;
     int val = 0;
+    uint8_t current = 0;
 
     if (_isInit == FALSE)
 		return;
@@ -452,8 +453,8 @@ void robi_handle_menu(char *str)
         _Robi_Disabled = !_Robi_Disabled;
         break;
     case 'c':
-        val = atoi(&str[1]);
-        send_command(MOTOR_SET_SCREW_CURRENT, sizeof(val), &val);
+        current = atoi(&str[1]);
+        send_command(MOTOR_SET_SCREW_CURRENT, sizeof(current), &current);
     default:
         break;
 	}
@@ -523,6 +524,8 @@ void robi_display_status(void)
 	term_printf("Garage:                %d\n", _robiStatus.isInGarage);
 	term_printf("Ref:                   %d\n", _robiStatus.isInRef);
     term_printf("Robi disabled:         %d\n", _Robi_Disabled);
+    term_printf("Robi blocked left:     %d\n", RX_StepperStatus.screwerinfo.screwer_blocked_left);
+    term_printf("Robi blocked right:    %d\n", RX_StepperStatus.screwerinfo.screwer_blocked_right);
 }
 
 static void robi_set_output(int num, int val)
@@ -569,7 +572,6 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         break;
     case CMD_ROBI_REFERENCE:
             _CmdRunning = msgId;
-            send_command(MOTOR_MOVE_Z_DOWN, 0, NULL);
             send_command(MOTORS_DO_REFERENCE, 0, NULL);
             break;
         break;
@@ -640,7 +642,6 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
     case CMD_ROBI_MOVE_Z_UP:
         if (!_CmdRunning)
         {
-            if ((_robiStatus.gpio.inputs & (1UL << SCREW_IN_UP))) {Error(ERR_CONT, 0, "Screwer is already up"); break;}
             if (!RX_StepperStatus.screwerinfo.ref_done)
             {
                 _NewCmd = msgId;
@@ -652,7 +653,7 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                 Error(ERR_CONT, 0, "Screwer to close to garage to move up");
                 break;
             }
-            if (_robiStatus.gpio.inputs & (1UL << SCREW_IN_UP))
+            if (RX_StepperStatus.screwerinfo.z_in_up)
             {
                 Error(LOG, 0, "Screwer already in up pos");
                 break;
@@ -664,7 +665,7 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                 break;
             }
             _CmdRunning = msgId;
-            _Search_Screw_Time = rx_get_ticks();
+            _Search_Screw_Time = rx_get_ticks() + TIME_BEFORE_TURN_SCREWER;
             send_command(MOTOR_MOVE_Z_UP, 0, NULL);
             break;
         }
@@ -673,20 +674,15 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
     case CMD_ROBI_MOVE_Z_DOWN:
         if (!_CmdRunning)
         {
-            if ((_robiStatus.gpio.inputs & (1UL << SCREW_IN_DOWN))) {Error(ERR_CONT, 0, "Screwer is already down"); break;}
+            if (RX_StepperStatus.screwerinfo.z_in_down) {Error(ERR_CONT, 0, "Screwer is already down"); break;}
             _CmdRunning = msgId;
-            _Loosen_Screw_Time = rx_get_ticks();
+            _Loose_Screw_Time = rx_get_ticks() + TIME_BEFORE_TURN_SCREWER;
             send_command(MOTOR_MOVE_Z_DOWN, 0, NULL);
             break;
         }
         break;
         
     case CMD_ROBI_SCREW_STEPS:
-        if (!RX_StepperStatus.screwerinfo.ref_done)
-        {
-            Error(ERR_CONT, 0, "Robi reference is missing.");
-            break;
-        }
         steps = *((INT32 *)pdata);
         send_command(MOTOR_TURN_SCREW_RELATIVE, sizeof(steps), &steps);
         break;
@@ -731,8 +727,7 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             }
             else if (RX_StepperStatus.screw_posY - MIN_Y_POS > MAX_VARIANCE)
             {
-                Error(ERR_CONT, 0,
-                      "Screwer to close to garage to move in x axis");
+                Error(ERR_CONT, 0, "Screwer to close to garage to move in x axis");
                 break;
             }
             else
@@ -741,6 +736,7 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                 _CmdRunning = msgId;
                 micron = pos - RX_StepperStatus.screw_posX;
                 steps = _micron_2_steps(micron);
+                _TargetPosition = pos;
                 send_command(MOTOR_MOVE_X_RELATIVE, sizeof(steps), &steps);
             }
             break;
@@ -772,6 +768,7 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                 _CmdRunning = msgId;
                 micron = pos - RX_StepperStatus.screw_posY;
                 steps = _micron_2_steps(micron);
+                _TargetPosition = pos;
                 send_command(MOTOR_MOVE_Y_RELATIVE, sizeof(steps), &steps);
             }
             break;
@@ -826,13 +823,16 @@ static int _motors_move_done()
 static void _check_Screwer_Movement()
 {
     int ticks;
-    if (_CmdRunning == CMD_ROBI_SCREW_RIGHT ||
-        _CmdRunning == CMD_ROBI_SCREW_LEFT)
+    static int _oldScrewState = 0;
+    if ((_CmdRunning == CMD_ROBI_SCREW_RIGHT || _CmdRunning == CMD_ROBI_SCREW_LEFT) && !RX_StepperStatus.screwerinfo.screwer_blocked_left && !RX_StepperStatus.screwerinfo.screwer_blocked_right)
     {
-        static int _OldScrewState = 0;
-        int _NewScrewState = (_robiStatus.gpio.inputs & (1UL << SCREW_IN_REF));
-        if (_Screwer_Moves_Time == 0 || _OldScrewState != _NewScrewState)
+        int _newScrewState = (_robiStatus.gpio.inputs & (1UL << SCREW_IN_REF));
+        if (_Screwer_Moves_Time == 0 || _oldScrewState != _newScrewState)
+        {
             _Screwer_Moves_Time = rx_get_ticks() + SCREW_MOVEMENT_CHECK_TIME;
+            _oldScrewState = _newScrewState;
+        }
+        
         if (rx_get_ticks() > _Screwer_Moves_Time)
         {
             if (_CmdRunning == CMD_ROBI_SCREW_LEFT)
@@ -841,6 +841,9 @@ static void _check_Screwer_Movement()
                 _NewCmd = CMD_ROBI_SCREW_LEFT;
             _Screwer_Blocked_Time = rx_get_ticks() + SCREW_MOVEMENT_CHECK_TIME;
             Error(ERR_CONT, 0, "Screwer blocked");
+            RX_StepperStatus.screwerinfo.screwer_blocked_left = _CmdRunning == CMD_ROBI_SCREW_LEFT;
+            RX_StepperStatus.screwerinfo.screwer_blocked_right = _CmdRunning == CMD_ROBI_SCREW_RIGHT;
+            _Screwer_Moves_Time = 0;
             robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_STOP, NULL);
         }
     }
@@ -849,10 +852,11 @@ static void _check_Screwer_Movement()
         if (_Screwer_Blocked_Time && _motors_move_done() && rx_get_ticks() >= _Screwer_Blocked_Time)
         {
             _Screwer_Blocked_Time = 0;
-            ticks = 6;
-            int val = TRUE;
-            send_command(MOTOR_SET_SCREW_CURRENT, sizeof(val), &val);
+            ticks = 3;
+            uint8_t current = TRUE;
+            send_command(MOTOR_SET_SCREW_CURRENT, sizeof(current), &current);
             robi_handle_ctrl_msg(INVALID_SOCKET, _NewCmd, &ticks);
+                
         }
         _Screwer_Moves_Time = 0;
     }
@@ -889,8 +893,18 @@ static int32_t set_serial_attributs(int fd, int speed, int parity)
 static int32_t send_command(uint32_t commandCode, uint8_t len, void *data)
 {
 	SUsbTxMsg *pTxMessage;
-	
-	int32_t nextFifoIndex = (_txFifoInIndex + 1) % ROBI_FIFO_SIZE;
+    int i;
+
+    if (commandCode != STATUS_UPDATE)
+    {
+        for (i = SIZEOF(_Buffer_Cmd) -2; i >= 0; i--)
+        {
+            _Buffer_Cmd[i + 1] = _Buffer_Cmd[i];
+        }
+        _Buffer_Cmd[0] = commandCode;
+    }
+
+    int32_t nextFifoIndex = (_txFifoInIndex + 1) % ROBI_FIFO_SIZE;
 	if (nextFifoIndex == _txFifoOutIndex) 
 	{
 		term_printf("FIFO Overfilled\n"); 
@@ -978,12 +992,13 @@ static void* receive_thread(void *par)
                         {
                             if (rxMessage.length)
                             {
-                                Error(ERR_CONT, 0, "Robi Error. Flag: %d, Message %s", rxMessage.error, rxMessage.data);
+                                Error(ERR_CONT, 0, "Robi Error. Flag: %x, Message %s", rxMessage.error, rxMessage.data);
                             }
                             else
                             {
-                                Error(ERR_CONT, 0, "Robi Error. Flag: %d, Message %s", rxMessage.error, rxMessage.data);
+                                Error(ERR_CONT, 0, "Robi Error. Flag: %x", rxMessage.error);
                             }
+                            robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_STOP, NULL);
                         }
                     }
 				}

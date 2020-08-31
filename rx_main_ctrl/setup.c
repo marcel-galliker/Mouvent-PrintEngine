@@ -100,7 +100,7 @@ int setup_network(HANDLE file, SRxNetwork *pnet, EN_setup_Action  action)
 //--- setup_config ----------------------------------------------------------------------------
 int setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action)
 {
-	int i, h, j, k, l;
+	int i, h;
 	char path[MAX_PATH];
 	HANDLE file = setup_create();
 
@@ -234,43 +234,11 @@ int setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action)
         
 	}
 
-    if (setup_chapter(file, "Screw_Positions", -1, action) == REPLY_OK)
-    {
-        for (i = 0; i < SIZEOF(pcfg->stepper.robot); i++)
-        {
-            if (setup_chapter(file, "Robot", i, action) == REPLY_OK)
-            {
-				for (j = 0; j < SIZEOF(RX_StepperCfg.robot[i].screwpositions); j++)
-				{
-                    setup_chapter(file, "Printbar", j, action);
-                    
-                    setup_int32(file, "Cluster_X_Pos", action, &pcfg->stepper.robot[i].screwclusters[j].posX, 0);
-                    setup_int32(file, "Cluster_Y_Pos", action, &pcfg->stepper.robot[i].screwclusters[j].posY, 0);
-                    
-					for (k = 0; k < SIZEOF(RX_StepperCfg.robot[i].screwpositions[0]); k++)
-					{
-                        setup_chapter(file, "Head", k, action);
-						for (l = 0; l < SIZEOF(RX_StepperCfg.robot[i].screwpositions[0][0]); l++)
-						{
-                            setup_chapter(file, "Axis", k, action);
-                            setup_int32(file, "X_Pos", action, &pcfg->stepper.robot[i].screwpositions[j][k][l].posX, 0);
-                            setup_int32(file, "Y_Pos", action, &pcfg->stepper.robot[i].screwpositions[j][k][l].posY, 0);
-                            setup_chapter(file, "..", -1, action);
-						}
-                        setup_chapter(file, "..", -1, action);
-					}
-                    setup_chapter(file, "..", -1, action);
-				}
-                setup_chapter(file, "..", -1, action);
-            }
-        }
-        setup_chapter(file, "..", -1, action);
-    }
-
     if (action==WRITE) setup_save(file, filepath);
 	setup_destroy(file);
 
 	if (action==READ) _head_pressure_out_override(pcfg);
+    if (action==READ) setup_screw_positions(PATH_USER FILENAME_SCREW_POS, pcfg, READ);
 	return REPLY_OK;
 }
 
@@ -311,3 +279,55 @@ int setup_fluid_system	(const char *filepath,	UINT32	*pflushed,	EN_setup_Action 
 	return REPLY_OK;									
 }
 
+int setup_screw_positions (const char *filepath, SRxConfig *pcfg, EN_setup_Action action)
+{
+    int i, j, k, l;
+    char path[MAX_PATH];
+    HANDLE file = setup_create();
+
+    setup_load(file, filepath);
+
+    if (setup_chapter(file, "Screw_Positions", -1, action) == REPLY_OK)
+    {
+        for (i = 0; i < SIZEOF(pcfg->stepper.robot); i++)
+        {
+            if (setup_chapter(file, "Robot", i, action) == REPLY_OK)
+            {
+                for (j = 0; j < SIZEOF(RX_StepperCfg.robot[i].screwpositions); j++)
+                {
+                    if (setup_chapter(file, "Printbar", j, action) == REPLY_OK)
+                    {
+                        setup_int32(file, "Cluster_X_Pos", action, &pcfg->stepper.robot[i].screwclusters[j].posX, 0);
+						setup_int32(file, "Cluster_Y_Pos", action, &pcfg->stepper.robot[i].screwclusters[j].posY, 0);
+						for (k = 0; k < SIZEOF(RX_StepperCfg.robot[i].screwpositions[0]); k++)
+						{
+                            if (setup_chapter(file, "Head", k, action) == REPLY_OK)
+                            {
+                                for (l = 0; l < SIZEOF(RX_StepperCfg.robot[i].screwpositions[0][0]); l++)
+								{
+                                    if (setup_chapter(file, "Axis", l, action) == REPLY_OK)
+                                    {
+                                        setup_int32(file, "X_Pos", action, &pcfg->stepper.robot[i].screwpositions[j][k][l].posX, 0);
+										setup_int32(file, "Y_Pos", action,&pcfg->stepper.robot[i].screwpositions[j][k][l].posY, 0);
+										setup_chapter(file, "..", -1, action);
+                                    }
+								}
+								setup_chapter(file, "..", -1, action);
+                            }
+						}
+						setup_chapter(file, "..", -1, action);
+                    }
+                }
+                setup_chapter(file, "..", -1, action);
+            }
+        }
+        setup_chapter(file, "..", -1, action);
+    }
+    else
+        return REPLY_ERROR;
+
+    if (action == WRITE) setup_save(file, filepath);
+    setup_destroy(file);
+    
+    return REPLY_OK;
+}

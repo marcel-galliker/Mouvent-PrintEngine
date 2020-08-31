@@ -639,8 +639,8 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                                     {
 										RX_StepperStatus.cmdRunning  = msgId;
 										if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].cap_height < MIN_CAP_HEIGHT) Error(WARN, 0, "Reference Height back should be > 6mm");
-										val0 = -1*_micron_2_steps(4000);
-										val1 = -1*_micron_2_steps(4000);
+										val0 = -1*_micron_2_steps(4200);
+										val1 = -1*_micron_2_steps(4200);
                                         if (RX_StepperStatus.info.ref_done) _lb702_move_to_pos(CMD_LIFT_SCREW, val0, val1);
                                     }
                                     break;

@@ -56,5 +56,5 @@ void ctrl_head_alive(int headNo);
 
 void ctrl_empty_PurgeBuffer(int fluidNo);
 
-void ctrl_set_rob_pos(SRobPosition robposition);
+void ctrl_set_rob_pos(SRobPosition robposition, int blocked, int blocked_Axis);
 int ctrl_current_screw_pos(SHeadAdjustmentMsg *robposition);

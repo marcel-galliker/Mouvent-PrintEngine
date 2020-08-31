@@ -67,6 +67,7 @@ static void _control_flush();
 static void _fluid_send_flush_time(int no, INT32 time);
 static int  _all_fluids_in_fluidCtrlMode(EnFluidCtrlMode ctrlMode);
 static int  _all_fluids_in_3fluidCtrlModes(EnFluidCtrlMode ctrlMode1, EnFluidCtrlMode ctrlMode2, EnFluidCtrlMode ctrlMode3);
+static int _fluid_get_flush_time(int flush_cycle);
 
 //--- statics -----------------------------------------------------------------
 
@@ -88,7 +89,7 @@ static INT32			_FluidToScales[INK_SUPPLY_CNT+2];
 
 static SHeadStateLight	_HeadState[INK_SUPPLY_CNT];
 static SHeadStateLight	_HeadStateCnt[INK_SUPPLY_CNT];
-static INT32			_HeadErr[INK_SUPPLY_CNT];
+static INT32			_HeadErr[INK_SUPPLY_CNT+2];
 static INT32			_HeadPumpSpeed[INK_SUPPLY_CNT][2];	// min/max
 // EnFluidCtrlMode			_FluidMode[INK_SUPPLY_CNT];
 
@@ -163,15 +164,6 @@ static void *_fluid_thread(void *lpParameter)
 						ErrorEx(dev_fluid, i, LOG, 0, "Connected");
 						_FluidThreadPar[i].aliveTime=0;
 						fluid_set_config();
-						/*
-						{
-							char name[64];
-							char peer[64];
-							sok_get_socket_name(_FluidThreadPar[i].socket, name, NULL, NULL);
-							sok_get_peer_name(_FluidThreadPar[i].socket, peer, NULL, NULL);
-							Error(LOG, 0, "Fluid[%d] connected >>%s<< to >>%s<<", i, name, peer);												
-						}
-						*/
 					}
 					else
 					{
@@ -218,26 +210,17 @@ void fluid_set_config(void)
 	
 	switch (RX_Config.printer.type)
 	{
-	case printer_LB701:		_FluidToScales[0] = SCALE(1,1);// 0;	// Cyan 
-							_FluidToScales[1] = SCALE(1,2);// 1;	// Magenta
-							_FluidToScales[2] = SCALE(1,3);// 2;	// Yellow 
-							_FluidToScales[3] = SCALE(1,4);// 3;	// Black
-							_FluidToScales[4] = SCALE(2,1);// 6;	// White
-							_FluidToScales[5] = SCALE(2,2);// 7;	// Orange
-							_FluidToScales[6] = SCALE(2,3);// 8;	// Violet
-							_FluidToScales[INK_SUPPLY_CNT]   = SCALE(1,5);// 4;	// flush		
-							_FluidToScales[INK_SUPPLY_CNT+1] = SCALE(2,4);// 9;	// waste
-							break;
-
+	case printer_LB701:
 	case printer_LB702_UV:	
-							_FluidToScales[0] = 0;	// Cyan 
-							_FluidToScales[1] = 1;	// Magenta
-							_FluidToScales[2] = 2;	// Yellow 
-							_FluidToScales[3] = 3;	// Black
-							_FluidToScales[4] = 6;	// White
-							_FluidToScales[5] = 7;	// Orange
-							_FluidToScales[6] = 8;	// Violet
-							_FluidToScales[INK_SUPPLY_CNT]   = 9;	// flush		
+	case printer_LH702:
+							_FluidToScales[0] = SCALE(1,1);	// Cyan 
+							_FluidToScales[1] = SCALE(1,2);	// Magenta
+							_FluidToScales[2] = SCALE(1,3);	// Yellow 
+							_FluidToScales[3] = SCALE(1,4);	// Black
+							_FluidToScales[4] = SCALE(2,1);	// White
+							_FluidToScales[5] = SCALE(2,2);	// Orange
+							_FluidToScales[6] = SCALE(2,3);	// Violet
+							_FluidToScales[INK_SUPPLY_CNT]   = SCALE(2,4);	// flush		
 							break;
 		
 	case printer_LB702_WB:	_FluidToScales[0] = SCALE(1, 1);// 0;	// Cyan 
@@ -258,17 +241,6 @@ void fluid_set_config(void)
 							_FluidToScales[INK_SUPPLY_CNT + 1] = SCALE(2, 1);// waste		
 							break;
 
-	case printer_LH702:		_FluidToScales[0] = SCALE(2,5); // unused 
-							_FluidToScales[1] = SCALE(2,2); // white
-							_FluidToScales[2] = SCALE(2,3); // orange 
-							_FluidToScales[3] = SCALE(2,4); // violet
-							_FluidToScales[4] = SCALE(1,1); // cyan
-							_FluidToScales[5] = SCALE(1,2); // magenta
-							_FluidToScales[6] = SCALE(1,3); // yellow
-							_FluidToScales[7] = SCALE(1,4); // black
-							_FluidToScales[INK_SUPPLY_CNT]   = SCALE(2, 1); //9;	// flush		
-							break;
-		
     case printer_TX801:
     case printer_TX802:		_FluidToScales[0] = SCALE(2,4); // Orange 
 							_FluidToScales[1] = SCALE(2,3); // Red
@@ -284,7 +256,6 @@ void fluid_set_config(void)
 	default:			for (i=0; i<SIZEOF(_FluidToScales); i++) _FluidToScales[i]=i;	
 						break; 
 	}
-	
 	
 	//--- flush time ------------------------
 	if (_Scanning)
@@ -488,7 +459,7 @@ static void _do_fluid_stat(int fluidNo, SFluidBoardStat *pstat)
 	
 	memcpy(&_FluidStatus[fluidNo*INK_PER_BOARD], &pstat->stat[0], INK_PER_BOARD*sizeof(_FluidStatus[0]));
 		
-	if      (_FluidCtrlMode>=ctrl_flush_night && _FluidCtrlMode<=ctrl_flush_done) _control_flush();
+	if      ((_FluidCtrlMode>=ctrl_flush_night && _FluidCtrlMode<=ctrl_flush_done) || _FluidCtrlMode == ctrl_cap_step3) _control_flush();
 //	else if (_RobotCtrlMode>=ctrl_wipe        && _RobotCtrlMode<ctrl_fill       && fluidNo==0) _control_robot();
 	else _control(fluidNo);
 
@@ -629,7 +600,11 @@ static void _control(int fluidNo)
 			switch(_stat->ctrlMode)
 			{
 				case ctrl_shutdown:		_send_ctrlMode(no, ctrl_shutdown_done, TRUE);	break;	
-				case ctrl_shutdown_done:_send_ctrlMode(no, ctrl_off, TRUE);				break;	
+				case ctrl_shutdown_done:
+					_txrob = rx_def_is_tx(RX_Config.printer.type) && step_active(1);
+					if (_txrob || lbrob)	fluid_send_ctrlMode(-1, ctrl_cap, TRUE);
+					else					_send_ctrlMode(no, ctrl_off, TRUE);					
+					break;	
 			//	case ctrl_check_step0:	_send_ctrlMode(no, ctrl_off, TRUE);				break;
 				case ctrl_check_step0:	if (lbrob && even_number_of_colors) steplb_rob_to_wipe_pos(no/2, rob_fct_cap);
                                         else if (lbrob && !even_number_of_colors) steplb_rob_to_wipe_pos((no+1)/2, rob_fct_cap);
@@ -852,6 +827,8 @@ static void _control_flush(void)
 {
     int _txrob = rx_def_is_tx(RX_Config.printer.type) && step_active(1);
 	int _lbrob = rx_def_is_lb(RX_Config.printer.type) && RX_StepperStatus.robot_used;
+    static int _start_ctrlMode;
+    static int _Vacuum_Time;
     if (_all_fluids_in_fluidCtrlMode(_FluidCtrlMode))
 	{
 	//	TrPrintfL(TRUE, "All Fluids in mode %d", _FluidCtrlMode);
@@ -860,15 +837,28 @@ static void _control_flush(void)
 		{
 		case ctrl_flush_night:		
 		case ctrl_flush_weekend:		
-		case ctrl_flush_week:	if (_txrob || _lbrob )step_lift_to_top_pos();	
-								_FluidCtrlMode=ctrl_flush_step1; 
+		case ctrl_flush_week:	step_lift_to_top_pos();
+								_start_ctrlMode = _FluidCtrlMode;
+                                _Vacuum_Time = 0;
+                                if (_txrob)
+                                {
+                                    steptx_rob_cap_for_flush();
+                                    _FluidCtrlMode = ctrl_cap;
+                                }
+                                else
+									_FluidCtrlMode=ctrl_flush_step1;
+                                
+                                break;
+								
+		case ctrl_cap_step3:	if (steptx_rob_cap_flush_prepared()) _FluidCtrlMode = ctrl_flush_step1;
 								break;
 		
-		case ctrl_flush_step1:	if (step_lift_in_up_pos() && (_lbrob || _txrob)) 
+		case ctrl_flush_step1:	if ((step_lift_in_up_pos() && (_lbrob || steptx_rob_cap_flush_prepared())) || (!_lbrob && !_txrob)) 
 								{
                                     if (_lbrob)
                                     {
                                         step_rob_to_wipe_pos(rob_fct_purge_head7);
+                                        
                                     }
                                     else if (_txrob)
                                         plc_to_purge_pos();
@@ -879,6 +869,7 @@ static void _control_flush(void)
 		case ctrl_flush_step2:	if ((plc_in_purge_pos() && _txrob) || (step_rob_in_wipe_pos(rob_fct_purge_head7) && _lbrob) || (!_lbrob && !_txrob))
 								{
 									_FluidCtrlMode=ctrl_flush_step3;
+                                    if (_lbrob) steplb_rob_vacuum(_fluid_get_flush_time(_start_ctrlMode - ctrl_flush_night) + 20);
 								}
 								break;
 
@@ -889,12 +880,33 @@ static void _control_flush(void)
 								break;
 		
 		case ctrl_flush_done:	ErrorEx(dev_fluid, -1, LOG, 0, "Flush complete");
-								_FluidCtrlMode=ctrl_off; 
+								if (!_Vacuum_Time && _lbrob)
+                                {
+                                    _Vacuum_Time = rx_get_ticks() + 20000;
+                                    steplb_rob_vacuum(20);
+                                }
+								if (_txrob)
+								{
+									fluid_send_ctrlMode(-1, ctrl_cap_step4, TRUE);
+									_FluidCtrlMode = ctrl_cap_step4;
+								}
+                                else if (_lbrob && rx_get_ticks() >= _Vacuum_Time)
+                                {
+                                    fluid_send_ctrlMode(-1, ctrl_cap, TRUE);
+                                }
+								else if (!_Vacuum_Time)
+								{
+									_FluidCtrlMode=ctrl_off; 
+								}
 								break; // send to all
 		default: break;		
 		}
 		
-		for (int i=0; i<RX_Config.inkSupplyCnt; i++) _send_ctrlMode(i, _FluidCtrlMode, TRUE);
+		if (_FluidCtrlMode < ctrl_cap || _FluidCtrlMode > ctrl_cap_step6)
+		{
+			for (int i=0; i<RX_Config.inkSupplyCnt; i++) _send_ctrlMode(i, _FluidCtrlMode, TRUE);
+		}
+			
 
 	//	TrPrintfL(TRUE, "Next mode %d", _FluidCtrlMode);
 	}
@@ -987,14 +999,11 @@ void fluid_reply_stat(RX_SOCKET socket)	// to GUI
 		_FluidStatus[INK_SUPPLY_CNT + 1].canisterErr = _ScalesErr[INK_SUPPLY_CNT + 1];
 	}
 	
-
-//	sok_send_2(&socket, REP_FLUID_STAT, 10*sizeof(SInkSupplyStat), _FluidStatus);
 	{
 		SInkSupplyStatMsg msg;
 		msg.hdr.msgId  = REP_FLUID_STAT;
 		msg.hdr.msgLen = sizeof(msg);
 		
-//		for (msg.no=0; msg.no<RX_Config.inkSupplyCnt; msg.no++)
 		for (msg.no=0; msg.no<SIZEOF(_FluidStatus); msg.no++)
 		{
 			if (msg.no<RX_Config.inkSupplyCnt || msg.no>=INK_SUPPLY_CNT)	// send also flush and waste
@@ -1014,25 +1023,16 @@ void fluid_send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 		for (int i=0; i<RX_Config.inkSupplyCnt; i++) _send_ctrlMode(i, ctrlMode, sendToHeads);	
 	}
     if ((RX_StepperStatus.info.z_in_cap || !RX_StepperStatus.info.ref_done) &&
-        ctrlMode == ctrl_print && rx_def_is_scanning(RX_Config.printer.type))
+        ctrlMode == ctrl_print && (rx_def_is_scanning(RX_Config.printer.type) || (rx_def_is_lb(RX_Config.printer.type) && RX_StepperStatus.robot_used)))
     {
-
-        if (RX_StepperStatus.info.z_in_cap)
-        {
-            Error(ERR_CONT, 0, "Printheads in capping position");
-            ctrlMode = ctrl_off;
-        }
-        else if (!RX_StepperStatus.info.ref_done)
-        {
-            steptx_lift_to_up_pos();
-        }
-        
+        if (rx_def_is_lb(RX_Config.printer.type) && RX_StepperStatus.robot_used)
+            step_lift_to_top_pos();
+        else
+            steptx_lift_to_print_pos();
     }
     
 	if (ctrlMode==ctrl_off) step_rob_stop();	
 	if (ctrlMode==ctrl_purge_hard || ctrlMode == ctrl_purge_hard_wipe || ctrlMode == ctrl_purge_hard_vacc || ctrlMode == ctrl_purge || ctrlMode == ctrl_purge_soft) _PurgeFluidNo=no;
-
-    
 
     _FluidCtrlMode = ctrlMode;
 	_RobotCtrlMode = ctrlMode;
@@ -1316,11 +1316,11 @@ INT32 fluid_get_pumpFeedback(int no)
 /*
 INT32 fluid_get_amcTemp(int no)
 {
-	if (no >= 0 && no < SIZEOF(_FluidStatus))
-	{
-		return _FluidStatus[no].temp;
-	}
-	return INVALID_VALUE;
+    if (no >= 0 && no < SIZEOF(_FluidStatus))
+    {
+        return _FluidStatus[no].temp;
+    }
+    return INVALID_VALUE;
 }
 */
 //--- fluid_get_error ---------------------------------------
@@ -1331,4 +1331,16 @@ INT32 fluid_get_error(int no)
         return _FluidStatus[no].err;
     }
     return INVALID_VALUE;
+}
+
+int _fluid_get_flush_time(int flush_cycle)
+{
+    int i;
+    int time_s = 0;
+    for (i = 0; i < RX_Config.inkSupplyCnt; i++)
+    {
+        if (*RX_Config.inkSupply[i].ink.fileName && RX_Config.inkSupply[i].ink.flushTime[flush_cycle] > time_s)
+            time_s = RX_Config.inkSupply[i].ink.flushTime[flush_cycle];
+    }
+    return time_s;
 }

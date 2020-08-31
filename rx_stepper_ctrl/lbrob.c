@@ -100,8 +100,6 @@ static char _CmdName[32];
 static int _CmdRunning = 0;
 static int _NewCmd = 0;
 
-static int _TimeNow = 0;
-
 static int _CapFillTime = 0;
 static int _PumpWasteTime = 0;
 
@@ -210,13 +208,12 @@ static void _check_pump(void)
     {
         Fpga.par->output &= ~RO_FLUSH_PUMP;
     }
-    _TimeNow = rx_get_ticks();
 
-    if (_PumpWasteTime && _TimeNow <= _PumpWasteTime + WASTE_PUMP_TIME)
+    if (_PumpWasteTime && rx_get_ticks() <= _PumpWasteTime)
         Fpga.par->output |= RO_WASTE;
     else if (_PumpWasteTime)
     {
-        _PumpWasteTime = FALSE;
+        _PumpWasteTime = 0;
         Fpga.par->output &= ~RO_WASTE;
     }
 }
@@ -253,10 +250,15 @@ void lbrob_main(int ticks, int menu)
         RX_StepperStatus.robinfo.vacuum_done = FALSE;
         _HeadPos = FALSE;
     }
-
+    
     if (RX_StepperStatus.info.moving)
     {
         RX_StepperStatus.robinfo.cap_ready = FALSE;
+    }
+
+    if (RX_StepperStatus.screwerinfo.screwer_blocked_left || RX_StepperStatus.screwerinfo.screwer_blocked_right)
+    {
+        _CmdScrewing = 0;
     }
 
     if (!RX_StepperStatus.robinfo.ref_done)
@@ -277,8 +279,7 @@ void lbrob_main(int ticks, int menu)
                 if (motors_error(MOTOR_X_BITS, &motor))
                 {
                     RX_StepperStatus.robinfo.ref_done = FALSE;
-                    Error(ERR_CONT, 0, "Stepper: Command %s: Motor[%d] blocked",
-                          _CmdName, motor + 1);
+                    Error(ERR_CONT, 0, "Stepper: Command %s: Motor[%d] blocked", _CmdName, motor + 1);
                     _CmdRunning = FALSE;
                     _CmdRunning_Lift = 0;
                     _NewCmd = 0;
@@ -291,9 +292,7 @@ void lbrob_main(int ticks, int menu)
                 }
                 else
                 {
-                    Error(ERR_CONT, 0,
-                          "LBROB: Command %s: End Sensor REF NOT HIGH",
-                          _CmdName);
+                    Error(ERR_CONT, 0, "LBROB: Command %s: End Sensor REF NOT HIGH", _CmdName);
                     RX_StepperStatus.robinfo.ref_done = FALSE;
                     _CmdRunning_old = FALSE;
                 }
@@ -302,16 +301,12 @@ void lbrob_main(int ticks, int menu)
             {
                 if (motors_error(MOTOR_X_BITS, &motor))
                 {
-                    Error(ERR_CONT, 0,
-                          "LIFT: Command %s - 1000 steps: Motor %s blocked",
-                          _CmdName, _MotorName[motor]);
+                    Error(ERR_CONT, 0, "LIFT: Command %s - 1000 steps: Motor %s blocked", _CmdName, _MotorName[motor]);
                     RX_StepperStatus.robinfo.ref_done = FALSE;
                 }
                 else if (!RX_StepperStatus.info.x_in_ref)
                 {
-                    Error(ERR_CONT, 0,
-                          "LBROB: Command %s: End Sensor REF NOT HIGH",
-                          _CmdName);
+                    Error(ERR_CONT, 0, "LBROB: Command %s: End Sensor REF NOT HIGH", _CmdName);
                     RX_StepperStatus.robinfo.ref_done = FALSE;
                     _CmdRunning_old = FALSE;
                 }
@@ -324,8 +319,7 @@ void lbrob_main(int ticks, int menu)
             if (motors_error(MOTOR_X_BITS, &motor))
             {
                 RX_StepperStatus.robinfo.ref_done = FALSE;
-                Error(ERR_CONT, 0, "Stepper: Command %s: Motor %s blocked",
-                      _CmdName, _MotorName[motor]);
+                Error(ERR_CONT, 0, "Stepper: Command %s: Motor %s blocked", _CmdName, _MotorName[motor]);
                 _CmdRunning = FALSE;
                 _CmdRunning_Lift = 0;
                 _NewCmd = 0;
@@ -343,9 +337,7 @@ void lbrob_main(int ticks, int menu)
                 {
                     _CmdRunning = FALSE;
                     Fpga.par->output &= ~RO_ALL_OUTPUTS;
-                    RX_StepperStatus.robinfo.cap_ready =
-                        RX_StepperStatus.info.x_in_cap &&
-                        !RX_StepperStatus.robinfo.moving;
+                    RX_StepperStatus.robinfo.cap_ready = RX_StepperStatus.info.x_in_cap && !RX_StepperStatus.robinfo.moving;
                     _CapFillTime = 0;
                 }
                 else if (rx_get_ticks() >= _CapFillTime + CAP_FILL_TIME / 2)
@@ -369,7 +361,7 @@ void lbrob_main(int ticks, int menu)
             case rob_fct_purge_head6:
             case rob_fct_purge_head7:
                 _CmdRunning = FALSE;
-                _PumpWasteTime = rx_get_ticks();
+                _PumpWasteTime = rx_get_ticks() + WASTE_PUMP_TIME;
                 break;
 
             default:
@@ -385,14 +377,10 @@ void lbrob_main(int ticks, int menu)
             switch (_RobFunction)
             {
             case rob_fct_cap:
-                RX_StepperStatus.robinfo.rob_in_cap =
-                    fpga_input(CAPPING_ENDSTOP);
-                if (!RX_StepperStatus.robinfo.rob_in_cap &&
-                    _NewCmd != CMD_ROB_MOVE_POS)
+                RX_StepperStatus.robinfo.rob_in_cap = fpga_input(CAPPING_ENDSTOP);
+                if (!RX_StepperStatus.robinfo.rob_in_cap && _NewCmd != CMD_ROB_MOVE_POS)
                 {
-                    Error(ERR_CONT, 0,
-                          "LBROB: Command %s: End Sensor Capping NOT HIGH",
-                          _CmdName);
+                    Error(ERR_CONT, 0, "LBROB: Command %s: End Sensor Capping NOT HIGH", _CmdName);
                     RX_StepperStatus.robinfo.ref_done = FALSE;
                 }
                 _CmdRunning = FALSE;
@@ -400,16 +388,10 @@ void lbrob_main(int ticks, int menu)
 
             case rob_fct_purge_all:
                 pos = abs(motor_get_step(MOTOR_X_0));
-                RX_StepperStatus.robinfo.purge_ready =
-                    (abs(motor_get_step(MOTOR_X_0) -
-                         _micron_2_steps(CABLE_PURGE_POS_BACK)) <=
-                     MAX_POS_DIFFERENT);
-                if (!RX_StepperStatus.robinfo.purge_ready &&
-                    _NewCmd != CMD_ROB_MOVE_POS)
+                RX_StepperStatus.robinfo.purge_ready = (abs(motor_get_step(MOTOR_X_0) - _micron_2_steps(CABLE_PURGE_POS_BACK)) <= MAX_POS_DIFFERENT);
+                if (!RX_StepperStatus.robinfo.purge_ready && _NewCmd != CMD_ROB_MOVE_POS)
                 {
-                    Error(ERR_CONT, 0,
-                          "LBROB: Command %s: Robot not in correct position",
-                          _CmdName);
+                    Error(ERR_CONT, 0, "LBROB: Command %s: Robot not in correct position", _CmdName);
                     RX_StepperStatus.robinfo.ref_done = FALSE;
                 }
                 _CmdRunning = FALSE;
@@ -417,15 +399,10 @@ void lbrob_main(int ticks, int menu)
 
                 break;
             case rob_fct_purge_head0:
-                RX_StepperStatus.robinfo.purge_ready =
-                    (abs(motor_get_step(MOTOR_X_0) -
-                         motor_get_end_step(MOTOR_X_0)) <= MAX_POS_DIFFERENT);
-                if (!RX_StepperStatus.robinfo.purge_ready &&
-                    _NewCmd != CMD_ROB_MOVE_POS)
+                RX_StepperStatus.robinfo.purge_ready = (abs(motor_get_step(MOTOR_X_0) - motor_get_end_step(MOTOR_X_0)) <= MAX_POS_DIFFERENT);
+                if (!RX_StepperStatus.robinfo.purge_ready && _NewCmd != CMD_ROB_MOVE_POS)
                 {
-                    Error(ERR_CONT, 0,
-                          "LBROB: Command %s: Robot not in correct position",
-                          _CmdName);
+                    Error(ERR_CONT, 0, "LBROB: Command %s: Robot not in correct position", _CmdName);
                     RX_StepperStatus.robinfo.ref_done = FALSE;
                 }
                 _CmdRunning = FALSE;
@@ -458,8 +435,7 @@ void lbrob_main(int ticks, int menu)
                 _Old_RobFunction = _RobFunction;
                 _CmdRunning = FALSE;
                 _CmdRunning_old = FALSE;
-                lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_MOVE_POS,
-                                      &new_RobFunction);
+                lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_MOVE_POS, &new_RobFunction);
                 break;
 
             case rob_fct_move:
@@ -480,9 +456,7 @@ void lbrob_main(int ticks, int menu)
                 break;
 
             default:
-                Error(ERR_CONT, 0,
-                      "LBROB_MAIN: Rob-Function %d not implemented",
-                      _RobFunction);
+                Error(ERR_CONT, 0, "LBROB_MAIN: Rob-Function %d not implemented", _RobFunction);
                 _CmdRunning = FALSE;
                 RX_StepperStatus.robinfo.ref_done = FALSE;
                 break;
@@ -492,8 +466,7 @@ void lbrob_main(int ticks, int menu)
         else if (_CmdRunning == CMD_ROB_REFERENCE && _CmdRunning_old)
         {
             int loc_new_cmd = 0;
-            if (!RX_StepperStatus.robinfo.moving &&
-                !RX_StepperStatus.info.moving)
+            if (!RX_StepperStatus.robinfo.moving && !RX_StepperStatus.info.moving)
             {
                 loc_new_cmd = _CmdRunning_old;
                 _CmdRunning_old = FALSE;
@@ -503,12 +476,10 @@ void lbrob_main(int ticks, int menu)
             switch (loc_new_cmd)
             {
             case CMD_ROB_MOVE_POS:
-                lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_MOVE_POS,
-                                      &_RobFunction);
+                lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_MOVE_POS, &_RobFunction);
                 break;
             default:
-                Error(ERR_CONT, 0, "LBROB_MAIN: Command 0x%08x not implemented",
-                      _CmdRunning_old);
+                Error(ERR_CONT, 0, "LBROB_MAIN: Command 0x%08x not implemented", _CmdRunning_old);
                 break;
             }
             loc_new_cmd = FALSE;
@@ -523,8 +494,7 @@ void lbrob_main(int ticks, int menu)
     if (_CmdRunning_Lift || _CmdRunning_Robi)
     {
         int loc_new_cmd = 0;
-        if (!RX_StepperStatus.robinfo.moving && !RX_StepperStatus.info.moving &&
-            !RX_StepperStatus.screwerinfo.moving)
+        if (!RX_StepperStatus.robinfo.moving && !RX_StepperStatus.info.moving && !RX_StepperStatus.screwerinfo.moving)
         {
             loc_new_cmd = _NewCmd;
             _NewCmd = FALSE;
@@ -538,12 +508,10 @@ void lbrob_main(int ticks, int menu)
                 lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_REFERENCE, NULL);
                 break;
             case CMD_ROB_MOVE_POS:
-                lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_MOVE_POS,
-                                      &_RobFunction);
+                lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_MOVE_POS, &_RobFunction);
                 break;
             default:
-                Error(ERR_CONT, 0, "LBROB_MAIN: Command 0x%08x not implemented",
-                      loc_new_cmd);
+                Error(ERR_CONT, 0, "LBROB_MAIN: Command 0x%08x not implemented", loc_new_cmd);
                 break;
             }
         }
@@ -552,25 +520,20 @@ void lbrob_main(int ticks, int menu)
 
     static int j = 0;
 
-    if (memcmp(&oldSatus.robinfo, &RX_StepperStatus.robinfo,
-               sizeof(RX_StepperStatus.robinfo)))
+    if (memcmp(&oldSatus.robinfo, &RX_StepperStatus.robinfo, sizeof(RX_StepperStatus.robinfo)))
     {
-        ctrl_send_2(REP_STEPPER_STAT, sizeof(RX_StepperStatus),
-                    &RX_StepperStatus);
+        ctrl_send_2(REP_STEPPER_STAT, sizeof(RX_StepperStatus), &RX_StepperStatus);
     }
     else if (_CmdRunning == CMD_ROB_FILL_CAP)
     {
         if (RX_StepperStatus.posY[1] > j * HEAD_WIDTH)
         {
             j++;
-            ctrl_send_2(REP_STEPPER_STAT, sizeof(RX_StepperStatus),
-                        &RX_StepperStatus);
+            ctrl_send_2(REP_STEPPER_STAT, sizeof(RX_StepperStatus), &RX_StepperStatus);
         }
     }
     else
-    {
         j = 0;
-    }
 
     if (_CmdSearchScrews)
     {
@@ -578,73 +541,50 @@ void lbrob_main(int ticks, int menu)
         _search_all_screws();
     }
     else
-    {
         _SearchScrewNr = 0;
-    }
 
     if (_CmdScrewing)
-    {
         _turn_screw(_HeadAdjustment);
-        //_turn_screw(_ScrewNr, _ScrewTurns);
-    }
     else
-    {
         memset(&_HeadAdjustment, 0, sizeof(_HeadAdjustment));
-        //_ScrewNr = 0;
-        //_ScrewTurns = 0;
-    }
 }
 
-//---_micron_2_steps
-//--------------------------------------------------------------
+//---_micron_2_steps --------------------------------------------------------------
 static int _micron_2_steps(int micron)
 {
     return (int)(0.5 + X_STEPS_PER_REV / X_DIST_PER_REV * micron);
 }
 
-//--- _steps_2_micron
-//-------------------------------------------------------------
+//--- _steps_2_micron /-------------------------------------------------------------
 static int _steps_2_micron(int steps)
 {
     return (int)(0.5 + (double)steps / X_STEPS_PER_REV * X_DIST_PER_REV);
 }
 
-//--- _lbrob_display_status
-//--------------------------------------------------------
+//--- _lbrob_display_status --------------------------------------------------------
 void lbrob_display_status(void)
 {
     term_printf("LB ROB ---------------------------------\n");
     if (RX_StepperStatus.robot_used)
     {
-        term_printf("moving:          %d		cmd: %08x\n",
-                    RX_StepperStatus.robinfo.moving, _CmdRunning);
+        term_printf("moving:          %d		cmd: %08x\n", RX_StepperStatus.robinfo.moving, _CmdRunning);
         term_printf("Screwing-Step    %d\n", _CmdScrewing);
-        term_printf("reference done: %d\n", RX_StepperStatus.robinfo.ref_done);
-        term_printf("x in reference: %d\n", RX_StepperStatus.info.x_in_ref);
-        term_printf("x in cap: %d\n", RX_StepperStatus.info.x_in_cap);
-        term_printf("Cap ready       %d\n", RX_StepperStatus.robinfo.cap_ready);
-        term_printf("Purge ready     %d\n",
-                    RX_StepperStatus.robinfo.purge_ready);
+        term_printf("reference done:  %d\n", RX_StepperStatus.robinfo.ref_done);
+        term_printf("x in reference:  %d\n", RX_StepperStatus.info.x_in_ref);
+        term_printf("x in cap:        %d\n", RX_StepperStatus.info.x_in_cap);
+        term_printf("Cap ready        %d\n", RX_StepperStatus.robinfo.cap_ready);
+        term_printf("Purge ready      %d\n", RX_StepperStatus.robinfo.purge_ready);
         term_printf("actPos Robi:     %dum\n", RX_StepperStatus.posY[0]);
-        term_printf("Wipe-Speed:     %d\n", RX_StepperCfg.wipe_speed);
-        term_printf("Vacuum done:     %d\n",
-                    RX_StepperStatus.robinfo.vacuum_done);
+        term_printf("Wipe-Speed:      %d\n", RX_StepperCfg.wipe_speed);
+        term_printf("Vacuum done:     %d\n", RX_StepperStatus.robinfo.vacuum_done);
         if (_PumpWasteTime)
-        {
-            term_printf("Waste-Pump-Time: %d\n",
-                        (WASTE_PUMP_TIME - (rx_get_ticks() - _PumpWasteTime)) /
-                            1000);
-        }
+            term_printf("Waste-Pump-Time: %d\n", (_PumpWasteTime - rx_get_ticks()) /1000);
         else
-        {
             term_printf("Waste-Pump-Time: 0\n");
-        }
         term_printf("\n");
     }
     else
-    {
         term_printf("No Robot (bridge stepper board not installed)\n");
-    }
 }
 
 //--- lbrob_menu
@@ -664,16 +604,12 @@ void lbrob_menu(int help)
         term_printf("g<n>: Go to purge position of head 1 -8 or for all (0)\n");
         term_printf("p: Move the Robi for Purging all Heads\n");
         term_printf("m<n><steps>: move Motor<n> by <steps>\n");
-        term_printf(
-            "e<steps>: move Cablepull with encoder regulator by <steps>\n");
+        term_printf("e<steps>: move Cablepull with encoder regulator by <steps>\n");
         term_printf("S<speed>: Set Speed for Wash and Vacuum in <speed>mm/s\n");
         term_printf("f: Find all the screws\n");
         term_printf("a<n>: Go to adjustment position of head 0 - 7\n");
-        term_printf("t<screw_nr>: Turn <screw_nr> n/6 Turn (n can be choosen "
-                    "by command \"T\")\n");
+        term_printf("t<screw_nr>: Turn <screw_nr> n/6 Turn (n can be choosen by command \"T\")\n");
         term_printf("T<n>: Make <n>/6 turns with the command t\n");
-
-
         term_flush();
     }
     else
@@ -712,7 +648,7 @@ void lbrob_handle_menu(char *str)
         lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_MOVE_POS, &pos);
         break;
     case 'q':
-        _PumpWasteTime = rx_get_ticks();
+        _PumpWasteTime = rx_get_ticks() + WASTE_PUMP_TIME;
         break;
     case 'v':
         pos = rob_fct_vacuum;
@@ -830,7 +766,7 @@ static void _lbrob_move_to_pos(int cmd, int pos)
 
 static void _lbrob_do_reference()
 {
-    _PumpWasteTime = rx_get_ticks();
+    _PumpWasteTime = rx_get_ticks() + WASTE_PUMP_TIME;
     Fpga.par->output &= ~RO_ALL_OUTPUTS;
     _NewCmd = 0;
     RX_StepperStatus.robinfo.moving = TRUE;
@@ -842,10 +778,7 @@ static void _lbrob_do_reference()
         motors_move_by_step(1 << MOTOR_X_0, &_ParCable_ref, 1000000, TRUE);
     }
     else
-    {
-        motors_move_to_step(MOTOR_X_BITS, &_ParCable_drive,
-                            _micron_2_steps(3000));
-    }
+        motors_move_to_step(MOTOR_X_BITS, &_ParCable_drive, _micron_2_steps(3000));
 }
 
 //--- lbrob_handle_ctrl_msg -----------------------------------
@@ -905,6 +838,11 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         _cln_move_to(msgId, *(ERobotFunctions *)pdata);
         break;
 
+    case CMD_ROB_VACUUM:
+        val = (*(INT32 *)pdata);
+        _PumpWasteTime = rx_get_ticks() + val;
+        break;
+
     case CMD_ROB_FILL_CAP:
         strcpy(_CmdName, "CMD_ROB_FILL_CAP");
         if (!_CmdRunning)
@@ -922,7 +860,7 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             switch (_RobFunction)
             {
             case rob_fct_cap:
-                _PumpWasteTime = 0;
+                _PumpWasteTime = rx_get_ticks();            // Switch off vacuum
                 RX_StepperStatus.robinfo.moving = TRUE;
                 Fpga.par->output &= ~RO_ALL_OUTPUTS;
                 Fpga.par->output |= RO_FLUSH_TO_CAP_LEFT;
@@ -940,8 +878,7 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                     if (!RX_StepperStatus.info.moving)
                     {
                         _CmdRunning_Lift = CMD_LIFT_REFERENCE;
-                        lb702_handle_ctrl_msg(INVALID_SOCKET, _CmdRunning_Lift,
-                                              NULL);
+                        lb702_handle_ctrl_msg(INVALID_SOCKET, _CmdRunning_Lift, NULL);
                         _NewCmd = msgId;
                         break;
                     }
@@ -949,17 +886,11 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                 RX_StepperStatus.robinfo.moving = TRUE;
                 _CmdRunning = msgId;
                 if (RX_StepperCfg.wipe_speed)
-                    _ParCable_drive_purge.speed = _micron_2_steps(
-                        1000 *
-                        RX_StepperCfg.wipe_speed); // multiplied with 1000 to
-                                                   // get from mm/s to um/s
+                    _ParCable_drive_purge.speed = _micron_2_steps(1000 * RX_StepperCfg.wipe_speed); // multiplied with 1000 to get from mm/s to um/s
                 else
-                    _ParCable_drive_purge.speed = _micron_2_steps(
-                        1000 *
-                        10); // multiplied with 1000 to get from mm/s to um/s
-                _PumpWasteTime = rx_get_ticks();
-                motors_move_to_step(MOTOR_X_BITS, &_ParCable_drive_purge,
-                                    _micron_2_steps(CABLE_PURGE_POS_FRONT));
+                    _ParCable_drive_purge.speed = _micron_2_steps(1000 * 10); // multiplied with 1000 to get from mm/s to um/s
+                _PumpWasteTime = rx_get_ticks() + WASTE_PUMP_TIME;
+                motors_move_to_step(MOTOR_X_BITS, &_ParCable_drive_purge, _micron_2_steps(CABLE_PURGE_POS_FRONT));
                 break;
 
             default:
@@ -978,6 +909,7 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 
     case CMD_CFG_SCREW_POS:
         _set_Screwer_Cfg(*(SRobotOffsets *)pdata);
+        break;
 
     case CMD_ERROR_RESET:
         strcpy(_CmdName, "CMD_ERROR_RESET");
@@ -1006,13 +938,8 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
             return;
         }
         else if (!RX_StepperStatus.info.z_in_ref &&
-                 !((_RobFunction == rob_fct_move) &&
-                   RX_StepperStatus.info.z_in_wash) &&
-                 !(RX_StepperStatus.info.z_in_screw &&
-                   _RobFunction >= rob_fct_screw_head0 &&
-                   _RobFunction <=
-                       rob_fct_screw_head7)) // Here this is for purging and not
-                                             // for vacuum
+                 !((_RobFunction == rob_fct_move) && RX_StepperStatus.info.z_in_wash) &&
+                 !(RX_StepperStatus.info.z_in_screw && _RobFunction >= rob_fct_screw_head0 && _RobFunction <= rob_fct_screw_head7)) // Here this is for purging and not for vacuum
         {
             if (!RX_StepperStatus.info.moving)
             {
@@ -1044,7 +971,7 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
 
         case rob_fct_purge_all:
             _lbrob_move_to_pos(_CmdRunning, _micron_2_steps(CABLE_PURGE_POS_BACK));
-            _PumpWasteTime = rx_get_ticks();
+            _PumpWasteTime = rx_get_ticks() + WASTE_PUMP_TIME;
             break;
 
         case rob_fct_purge_head0:
@@ -1055,16 +982,12 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
         case rob_fct_purge_head5:
         case rob_fct_purge_head6:
         case rob_fct_purge_head7:
-            pos = (CABLE_PURGE_POS_BACK +
-                   (((int)_RobFunction - (int)rob_fct_purge_head0) *
-                    (CABLE_PURGE_POS_FRONT - CABLE_PURGE_POS_BACK)) /
-                       7);
+            pos = (CABLE_PURGE_POS_BACK + (((int)_RobFunction - (int)rob_fct_purge_head0) * (CABLE_PURGE_POS_FRONT - CABLE_PURGE_POS_BACK)) / 7);
             _lbrob_move_to_pos(_CmdRunning, _micron_2_steps(pos));
             break;
         case rob_fct_vacuum:
         case rob_fct_wash:
-            _lbrob_move_to_pos(_CmdRunning,
-                               _micron_2_steps(CABLE_PURGE_POS_FRONT));
+            _lbrob_move_to_pos(_CmdRunning, _micron_2_steps(CABLE_PURGE_POS_FRONT));
             break;
 
         case rob_fct_move:
@@ -1075,13 +998,11 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
                     _CmdRunning = FALSE;
                     _CmdRunning_Lift = CMD_LIFT_WASH_POS;
                     _NewCmd = msgId;
-                    lb702_handle_ctrl_msg(INVALID_SOCKET, _CmdRunning_Lift,
-                                          NULL);
+                    lb702_handle_ctrl_msg(INVALID_SOCKET, _CmdRunning_Lift, NULL);
                 }
                 return;
             }
-            motors_move_to_step(MOTOR_X_BITS, &_ParCable_drive_slow,
-                                _micron_2_steps(CABLE_WASH_POS_BACK));
+            motors_move_to_step(MOTOR_X_BITS, &_ParCable_drive_slow, _micron_2_steps(CABLE_WASH_POS_BACK));
             switch (_Old_RobFunction)
             {
             case rob_fct_wash:
@@ -1093,7 +1014,7 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
             default:
                 break;
             }
-            _PumpWasteTime = rx_get_ticks();
+            _PumpWasteTime = rx_get_ticks() + WASTE_PUMP_TIME;
             break;
 
         case rob_fct_screw_cluster:
@@ -1105,13 +1026,8 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
         case rob_fct_screw_head5:
         case rob_fct_screw_head6:
         case rob_fct_screw_head7:
-
-            _PumpWasteTime = 0;
-            Fpga.par->output &= ~RO_WASTE;
-            pos = (CABLE_SCREW_POS_BACK +
-                   (((int)_RobFunction - (int)rob_fct_screw_cluster) *
-                    (CABLE_SCREW_POS_FRONT - CABLE_SCREW_POS_BACK)) /
-                       8);
+            _PumpWasteTime = rx_get_ticks(); // Switch off vacuum
+            pos = (CABLE_SCREW_POS_BACK + (((int)_RobFunction - (int)rob_fct_screw_cluster) * (CABLE_SCREW_POS_FRONT - CABLE_SCREW_POS_BACK)) / 8);
             if (RX_StepperStatus.posY[0] < pos)
             {
                 _lbrob_do_reference();
@@ -1122,8 +1038,7 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
             break;
 
         default:
-            Error(ERR_CONT, 0, "Command %s: Rob-Function %d not implemented",
-                  _CmdName, _RobFunction);
+            Error(ERR_CONT, 0, "Command %s: Rob-Function %d not implemented", _CmdName, _RobFunction);
         }
     }
 }
@@ -1131,23 +1046,19 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
 // static void _turn_screw(int screwNr, int screwTurns)
 static void _turn_screw(SHeadAdjustment headAdjustment)
 {
-    int screwNr;
-    int screwSteps;
-    screwNr = headAdjustment.printbarNo * HEADS_PER_COLOR * SCREWS_PER_HEAD +
-              headAdjustment.headNo * SCREWS_PER_HEAD + headAdjustment.axis + 1;
+    int screwNr, screwSteps, pos;
+    
+    screwNr = headAdjustment.printbarNo * HEADS_PER_COLOR * SCREWS_PER_HEAD + headAdjustment.headNo * SCREWS_PER_HEAD + headAdjustment.axis + 1;
     screwSteps = headAdjustment.steps;
-    if (!RX_StepperStatus.info.moving && !RX_StepperStatus.robinfo.moving &&
-        !RX_StepperStatus.screwerinfo.moving)
+    
+    if (!RX_StepperStatus.info.moving && !RX_StepperStatus.robinfo.moving && !RX_StepperStatus.screwerinfo.moving)
     {
-        if (headAdjustment.headNo < -1 ||
-            (headAdjustment.headNo == -1 && headAdjustment.axis == AXE_ANGLE) ||
-            headAdjustment.headNo >= HEADS_PER_COLOR)
+        if (headAdjustment.headNo < -1 || (headAdjustment.headNo == -1 && headAdjustment.axis == AXE_ANGLE) || headAdjustment.headNo >= HEADS_PER_COLOR)
         {
             Error(ERR_CONT, 0, "Screw does not exist");
             return;
         }
-        else if (headAdjustment.headNo == HEADS_PER_COLOR - 1 &&
-                 headAdjustment.axis == AXE_DIST)
+        else if (headAdjustment.headNo == HEADS_PER_COLOR - 1 && headAdjustment.axis == AXE_DIST)
         {
             Error(ERR_CONT, 0, "Last Screw of each color is pointless to turn");
             return;
@@ -1164,18 +1075,15 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
             _CmdScrewing = 0;
             return;
         }
-        if (!_CmdScrewing && _check_in_screw_pos(headAdjustment))
-        {
-            _CmdScrewing = 4;
-        }
-
-        if (_CmdScrewing == 0) correction_value = 0;
-
-        int pos;
-        if (_CmdScrewing != 6) wait_time = 0;
+        if (!_CmdScrewing && _check_in_screw_pos(headAdjustment))   _CmdScrewing = 4;
+        if (_CmdScrewing == 0)                                      correction_value = 0;
+        if (_CmdScrewing != 6)                                      wait_time = 0;
+        
         switch (_CmdScrewing)
         {
         case 0:
+            RX_StepperStatus.screwerinfo.screwer_blocked_left = FALSE;
+            RX_StepperStatus.screwerinfo.screwer_blocked_right = FALSE;
             RX_StepperStatus.screwerinfo.screwed = FALSE;
             pos = headAdjustment.headNo + rob_fct_screw_head0;
             if (_HeadPos != pos)
@@ -1184,18 +1092,12 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
             break;
 
         case 1:
-            if (RX_StepperStatus.robinfo.ref_done &&
-                _HeadPos == headAdjustment.headNo + rob_fct_screw_head0)
+            if (RX_StepperStatus.robinfo.ref_done && _HeadPos == headAdjustment.headNo + rob_fct_screw_head0)
             {
                 if (headAdjustment.headNo == -1)
                 {
-                    if (RX_StepperCfg.robot[RX_StepperCfg.boardNo]
-                            .screwclusters[headAdjustment.printbarNo]
-                            .posY)
-                        pos = RX_StepperCfg.robot[RX_StepperCfg.boardNo]
-                                  .screwclusters[headAdjustment.printbarNo]
-                                  .posY +
-                              correction_value;
+                    if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwclusters[headAdjustment.printbarNo].posY)
+                        pos = RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwclusters[headAdjustment.printbarNo].posY + correction_value;
                     else
                         pos = SCREW_Y_FRONT + correction_value;
                 }
@@ -1223,28 +1125,15 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
             {
                 if (headAdjustment.headNo == -1)
                 {
-                    if (RX_StepperCfg.robot[RX_StepperCfg.boardNo]
-                            .screwclusters[headAdjustment.printbarNo]
-                            .posX)
-                        pos = RX_StepperCfg.robot[RX_StepperCfg.boardNo]
-                                  .screwclusters[headAdjustment.printbarNo]
-                                  .posX +
-                              correction_value;
+                    if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwclusters[headAdjustment.printbarNo].posX)
+                        pos = RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwclusters[headAdjustment.printbarNo].posX + correction_value;
                     else if (headAdjustment.printbarNo == LEFT)
                         pos = SCREW_X_LEFT;
                     else
                         pos = SCREW_X_RIGHT;
                 }
-                else if (RX_StepperCfg.robot[RX_StepperCfg.boardNo]
-                             .screwpositions[headAdjustment.printbarNo]
-                                            [headAdjustment.headNo]
-                                            [headAdjustment.axis]
-                             .posX)
-                    pos = RX_StepperCfg.robot[RX_StepperCfg.boardNo]
-                              .screwpositions[headAdjustment.printbarNo]
-                                             [headAdjustment.headNo]
-                                             [headAdjustment.axis]
-                              .posX;
+                else if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwpositions[headAdjustment.printbarNo][headAdjustment.headNo][headAdjustment.axis].posX)
+                    pos = RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwpositions[headAdjustment.printbarNo][headAdjustment.headNo][headAdjustment.axis].posX;
                 else if (headAdjustment.printbarNo == LEFT)
                     pos = SCREW_X_LEFT;
                 else
@@ -1323,12 +1212,11 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
         case 6:
             if (RX_StepperStatus.screwerinfo.screw_loosed)
             {
-                if (!wait_time) wait_time = rx_get_ticks();
-                if (rx_get_ticks() > wait_time + 200)
+                if (!wait_time) wait_time = rx_get_ticks() + 200;
+                if (rx_get_ticks() > wait_time)
                 {
                     if (screwSteps >= 0)
-                        robi_handle_ctrl_msg(INVALID_SOCKET,
-                                             CMD_ROBI_SCREW_LEFT, &screwSteps);
+                        robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_LEFT, &screwSteps);
                     else
                     {
                         screwSteps = abs(screwSteps);
@@ -1462,13 +1350,13 @@ static void _search_all_screws()
         int screw_Dist = 16400; // um
 
         if (_CmdSearchScrews == 0) correction_value = 0;
-        if (cmd_Time && rx_get_ticks() > cmd_Time + max_Wait_Time && !repeat)
+        if (cmd_Time && rx_get_ticks() > cmd_Time && !repeat)
         {
             _CmdSearchScrews--;
             repeat = 1;
-            cmd_Time = rx_get_ticks();
+            cmd_Time = rx_get_ticks() + max_Wait_Time;
         }
-        else if (cmd_Time && rx_get_ticks() > cmd_Time + max_Wait_Time &&
+        else if (cmd_Time && rx_get_ticks() > cmd_Time &&
                  repeat)
         {
             Error(ERR_CONT, 0,
@@ -1488,7 +1376,7 @@ static void _search_all_screws()
             if (pos != _HeadPos)
                 lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_MOVE_POS, &pos);
             _CmdSearchScrews++;
-            cmd_Time = rx_get_ticks();
+            cmd_Time = rx_get_ticks() + max_Wait_Time;
             break;
         case 1:
             if (RX_StepperStatus.robinfo.ref_done &&
@@ -1511,7 +1399,7 @@ static void _search_all_screws()
                           SCREW_Y_BACK - SCREW_Y_FRONT + correction_value;
                 else
                     pos = _calculate_average_y_pos(_SearchScrewNr);
-                cmd_Time = rx_get_ticks();
+                cmd_Time = rx_get_ticks() + max_Wait_Time;
                 robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_Y, &pos);
                 _CmdSearchScrews++;
             }
@@ -1552,7 +1440,7 @@ static void _search_all_screws()
                               .screwclusters[_SearchScrewNr / (SCREWS_PER_HEAD *HEADS_PER_COLOR)]
                               .posX + pos * y_dist / y_dist_old;
                 }
-                cmd_Time = rx_get_ticks();
+                cmd_Time = rx_get_ticks() + max_Wait_Time;
                 robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_X, &pos);
                 _CmdSearchScrews++;
             }
@@ -1560,7 +1448,7 @@ static void _search_all_screws()
         case 3:
             if (RX_StepperStatus.screwerinfo.x_in_pos)
             {
-                cmd_Time = rx_get_ticks();
+                cmd_Time = rx_get_ticks() + max_Wait_Time;
                 lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_SCREW, NULL);
                 _CmdSearchScrews++;
             }
@@ -1569,7 +1457,7 @@ static void _search_all_screws()
         case 4:
             if (RX_StepperStatus.info.z_in_screw)
             {
-                cmd_Time = rx_get_ticks();
+                cmd_Time = rx_get_ticks() + max_Wait_Time;
                 robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_UP, NULL);
                 _CmdSearchScrews++;
                 _TimeSearchScrew = rx_get_ticks();
@@ -1709,7 +1597,7 @@ static void _lbrob_motor_enc_reg_test(int steps)
 // static int _check_in_screw_pos(int screwNr)
 static int _check_in_screw_pos(SHeadAdjustment headAdjustment)
 {
-    if (!RX_StepperStatus.screwerinfo.z_in_up) return FALSE;
+    //if (!RX_StepperStatus.screwerinfo.z_in_up) return FALSE;
 
     if ((abs(RX_StepperStatus.screw_posX - SCREW_X_LEFT) > MAX_VAR_SCREW_POS &&
          abs(RX_StepperStatus.screw_posX - SCREW_X_RIGHT) >
