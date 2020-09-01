@@ -585,7 +585,7 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
     int current_screwpos = ctrl_current_screw_pos(headAdjustment);
     if (current_screwpos == -1)
     {
-        Error(ERR_CONT, 0, "Invalid current screwpositin value");
+        Error(ERR_CONT, 0, "Invalid current screwposition value");
         return;
     }
     if (headAdjustment->axis == AXE_ANGLE && (current_screwpos - headAdjustment->steps > MAX_STEPS_ANGLE || current_screwpos - headAdjustment->steps < 0))

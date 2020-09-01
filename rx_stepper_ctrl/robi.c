@@ -165,18 +165,11 @@ void robi_main(int ticks, int menu)
     RX_StepperStatus.screwerinfo.ref_done = _robiStatus.motors[MOTOR_XY_0].isReferenced &&
                _robiStatus.motors[MOTOR_XY_1].isReferenced &&
                _robiStatus.motors[MOTOR_SCREW].isReferenced;
+    
+    RX_StepperStatus.screw_posX = (_steps_2_micron(_robiStatus.motors[MOTOR_XY_0].motorEncoderPosition + _robiStatus.motors[MOTOR_XY_1].motorEncoderPosition))/2;
+    RX_StepperStatus.screw_posY = (_steps_2_micron(_robiStatus.motors[MOTOR_XY_1].motorEncoderPosition - _robiStatus.motors[MOTOR_XY_0].motorEncoderPosition))/2;
 
-    if (!RX_StepperStatus.screwerinfo.ref_done)
-    {
-        _Search_Screw_Time = 0;
-    }
-    RX_StepperStatus.screw_posX =
-        (_steps_2_micron(_robiStatus.motors[MOTOR_XY_0].motorEncoderPosition +
-                         _robiStatus.motors[MOTOR_XY_1].motorEncoderPosition))/2;
-
-    RX_StepperStatus.screw_posY =
-        (_steps_2_micron(_robiStatus.motors[MOTOR_XY_1].motorEncoderPosition -
-                         _robiStatus.motors[MOTOR_XY_0].motorEncoderPosition))/2;
+    if (!RX_StepperStatus.screwerinfo.ref_done) _Search_Screw_Time = 0;
 
     if (RX_StepperStatus.screwerinfo.z_in_up) _Search_Screw_Time = 0;
     if (_Search_Screw_Time && rx_get_ticks() > _Search_Screw_Time)
@@ -194,7 +187,7 @@ void robi_main(int ticks, int menu)
     if (_Loose_Screw_Time && rx_get_ticks() > _Loose_Screw_Time)
     {
         int val = 0;
-        if (RX_StepperStatus.screw_posY >= (SCREW_Y_BACK + SCREW_Y_FRONT) / 2)
+        if ((RX_StepperStatus.screw_posY >= (SCREW_Y_BACK + SCREW_Y_FRONT) / 2 || RX_StepperStatus.screwerinfo.screwer_blocked_right) && !RX_StepperStatus.screwerinfo.screwer_blocked_left)
             val = -213333;
         else
             val = +213333;
@@ -202,16 +195,12 @@ void robi_main(int ticks, int menu)
         _Loose_Screw_Time = rx_get_ticks() + TIME_BEFORE_TURN_SCREWER;
     }
 
-    if (!_motors_move_done())
-    {
-        _CmdStarted = TRUE;
-    }
-    else if (!_CmdRunning)
-    {
-        _CmdStarted = FALSE;
-    }
-
     _check_Screwer_Movement();
+
+    if (!_motors_move_done())
+        _CmdStarted = TRUE;
+    else if (!_CmdRunning)
+        _CmdStarted = FALSE;
     
     if (_CmdRunning && _motors_move_done() && _CmdStarted)
     {
