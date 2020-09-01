@@ -482,7 +482,7 @@ void ink_tick_10ms(void)
 						pRX_Config->ink_supply[isNo].test_bleedValve 	= FALSE;
 
 						_pump_ctrl(isNo, pRX_Config->ink_supply[isNo].test_cylinderPres, PUMP_CTRL_MODE_NO_AIR_VALVE);		// ink-pump
-						_set_pressure_value(pRX_Status->air_pressure < pRX_Config->test_airPressure);	// air-pump
+						_set_pressure_value((pRX_Config->test_airPressure>0) && (pRX_Status->air_pressure < pRX_Config->test_airPressure));	// air-pump
 					}
 				}
 				else
@@ -1370,6 +1370,7 @@ void ink_tick_1000ms(void)
 		int i;
 		trprintf("\n-------------------------------------------------------------------------------------\n");
 		trprintf("ink pressure  :"); PRINTF("  %6d ", pRX_Status->ink_supply[i].IS_Pressure_Actual); trprintf("\n");
+		trprintf("air pressure:  "); trprintf("%6d\n", pRX_Status->air_pressure);
 	}
 	/*
 	if (tr_debug_on())

@@ -467,7 +467,17 @@ void nios_set_head_state(int isNo, SHeadStateLight *pstat)
 void nios_test_stop(void)
 {
 	int isNo;
-	for(isNo=0; isNo<NIOS_INK_SUPPLY_CNT; isNo++) _Cfg->ink_supply[isNo].ctrl_mode = ctrl_off;
+	_Cfg->test_lungPressure	= 0;
+	_Cfg->test_flush		= 0;
+	_Cfg->test_airPressure	= 0;
+	for(isNo=0; isNo<NIOS_INK_SUPPLY_CNT; isNo++) 
+	{
+		_Cfg->ink_supply[isNo].test_airValve	= FALSE;
+		_Cfg->ink_supply[isNo].test_bleed_line	= FALSE;
+		_Cfg->ink_supply[isNo].test_bleedValve	= FALSE;
+		_Cfg->ink_supply[isNo].test_cylinderPres = 0;
+		_Cfg->ink_supply[isNo].ctrl_mode		 = ctrl_off;
+	}
 }
 
 //--- nios_test_air_valve --------------------------------------------

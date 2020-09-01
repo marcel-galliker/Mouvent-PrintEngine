@@ -19,20 +19,20 @@
 #include "average.h"
 
 //--- defines ---------------------------
-#define ADDR_SENSOR_1_0_BAR 0x78 	// upper address of sensor (old, 1.0 bar)
-#define ADDR_SENSOR_2_5_BAR 0x35	// upper address of sensor (new, 2.5 bar)
+#define ADDR_SENSOR_1_0_BAR 0x78 	// upper address of sensor (old, 1.0 bar) 0x1a
+#define ADDR_SENSOR_2_5_BAR 0x35	// upper address of sensor (new, 2.5 bar) 0x35
 #define ADDR_DAC			0x4C
 
 #define 	BUF_SIZE	5
 
-#define 	IS1_SENSOR	0
-#define 	IS2_SENSOR	1
-#define 	IS3_SENSOR	2
-#define 	IS4_SENSOR	3
-#define 	F_SENSOR	4
-#define 	D_SENSOR	5
-#define 	P_SENSOR	6
-#define 	SENSOR_CNT	7
+#define 	IS1_SENSOR		0
+#define 	IS2_SENSOR		1
+#define 	IS3_SENSOR		2
+#define 	IS4_SENSOR		3
+#define 	FLUSH_SENSOR	4
+#define 	DEGAS_SENSOR	5
+#define 	AIR_SENSOR		6
+#define 	SENSOR_CNT		7
 
 #define		WRITE		0
 #define		READ		1
@@ -62,17 +62,27 @@ static SSensor _Sensor[SENSOR_CNT];
 
 //--- prototypes ------------------------
 
-// static void _PresIn_power(int on);
-// static void _PresOut_power(int on);
 static void _sensor_reset(SSensor *s);
 static void _sensor_read (SSensor *s, int no);
-static int _init_sensor_25(SSensor *s);
+static int  _is_sensor_25(SSensor *s);
+static int  _pcb_sensor_25(SSensor *s);
+
+//--- _i2c_wait_time ------------------
+static void _i2c_wait_time(void)
+{
+	// dummy wait for about 110us //TODO verify on fluid!!
+	int i;
+//	for ( i = 0; i < 500; i++);
+	for ( i = 0; i < 2000; i++);
+}
 
 //--- pres_init -----------------------
 void pres_init(void)
 {
 	int i;
 	memset(_Sensor, 0, sizeof(_Sensor));
+
+	_i2c_wait_time();	// wait until power stable
 
 	_Sensor[IS1_SENSOR].i2c 		= I2C_MASTER_IS1_BASE;
 	_Sensor[IS1_SENSOR].pPressure 	= &pRX_Status->ink_supply[0].IS_Pressure_Actual;
@@ -86,55 +96,88 @@ void pres_init(void)
 	_Sensor[IS4_SENSOR].i2c 		= I2C_MASTER_IS4_BASE;
 	_Sensor[IS4_SENSOR].pPressure 	= &pRX_Status->ink_supply[3].IS_Pressure_Actual;
 
-	_Sensor[F_SENSOR].i2c 			= I2C_MASTER_F_BASE;
-	_Sensor[F_SENSOR].pPressure 	= &pRX_Status->flush_pressure;
+	_Sensor[FLUSH_SENSOR].i2c 		= I2C_MASTER_F_BASE;
+	_Sensor[FLUSH_SENSOR].pPressure = &pRX_Status->flush_pressure;
 
-	_Sensor[D_SENSOR].i2c 			= I2C_MASTER_D_BASE;
-	_Sensor[D_SENSOR].pPressure 	= &pRX_Status->degass_pressure;
+	_Sensor[DEGAS_SENSOR].i2c 		= I2C_MASTER_D_BASE;
+	_Sensor[DEGAS_SENSOR].pPressure = &pRX_Status->degass_pressure;
 
-	_Sensor[P_SENSOR].i2c 			= I2C_MASTER_P_BASE;
-	_Sensor[P_SENSOR].pPressure 	= &pRX_Status->air_pressure;
+	_Sensor[AIR_SENSOR].i2c 		= I2C_MASTER_P_BASE;
+	_Sensor[AIR_SENSOR].pPressure 	= &pRX_Status->air_pressure;
 
-	for (i=0; i<SENSOR_CNT; i++)
+	for (i=0; i<=IS4_SENSOR; i++)
 	{
-		_Sensor[i].addr = ADDR_SENSOR_1_0_BAR;
-		if (i<=IS4_SENSOR)
+		trprintf("_is_sensor_25(%d)\n", i);
+
+		if(_is_sensor_25(&_Sensor[i]))
 		{
-			if(_init_sensor_25(&_Sensor[i])==REPLY_OK)
-			{
-				trprintf("Sensor[%d] is 2.5 bar\n", i);
-				_Sensor[i].addr=ADDR_SENSOR_2_5_BAR;
-			}
-			else trprintf("Sensor[%d] is 1.0 bar\n", i);
+			trprintf("Sensor[%d] is 2.5 bar\n", i);
+			_Sensor[i].addr = ADDR_SENSOR_2_5_BAR;
 		}
+		else
+		{
+			trprintf("Sensor[%d] is 1.0 bar\n", i);
+			_Sensor[i].addr = ADDR_SENSOR_1_0_BAR;
+		}
+
 		_sensor_reset(&_Sensor[i]);
 	}
+	for (i=FLUSH_SENSOR; i<=AIR_SENSOR; i++)
+	{
+		trprintf("_pcb_sensor_10(%d)\n", i);
+
+		if(_pcb_sensor_25(&_Sensor[i]))
+		{
+			trprintf("Sensor[%d] is 2.5 bar\n", i);
+			_Sensor[i].addr = ADDR_SENSOR_2_5_BAR;
+		}
+		else
+		{
+			trprintf("Sensor[%d] is 1.0 bar\n", i);
+			_Sensor[i].addr = ADDR_SENSOR_1_0_BAR;
+		}
+
+		_sensor_reset(&_Sensor[i]);
+	}
+	trprintf("Initialized\n");
 }
 
-//--- _init_sensor_25 -----------------------------------
+//--- _is_sensor_25 -----------------------------------
 //--- checks whether an 2.5 mbar sensor is present and switch it on ---
-static int _init_sensor_25(SSensor *s)
+static int _is_sensor_25(SSensor *s)
 {
-	int ret=0;
+	int ret;
 	// CTRL/MS-Byte = 00001111 (PD0+PD1= 0, D7-D4 =1) = 0x0f
 	// LS-Byte = 11110000 (D0-D3 =1, other bits = 0)  = 0xf0
 
 	// Dummy read
 	ret = I2C_start(s->i2c, ADDR_DAC, READ);
 	ret = I2C_read(s->i2c, LAST_BYTE);
-	ret = 0;
 
 	ret = I2C_start(s->i2c, ADDR_DAC, WRITE);
 	if (!ret) ret = I2C_write(s->i2c, 0x0f, !LAST_BYTE);	// write MS-Byte
 	if (!ret) ret = I2C_write(s->i2c, 0xf0, LAST_BYTE);		// write LS-Byte
-	if(ret)
-	{
-		ret = I2C_write(s->i2c, 0x00, LAST_BYTE);		// write Stop
-		return REPLY_ERROR;
-	}
-	return REPLY_OK;
+	if (!ret) return TRUE;
+
+	ret = I2C_write(s->i2c, 0x00, LAST_BYTE);		// write Stop
+	return FALSE;
 }
 
+//--- _pcb_sensor_25 -----------------------
+static int _pcb_sensor_25(SSensor *s)
+{
+	int ret;
+	int pressure;
+
+	ret=I2C_start(s->i2c, ADDR_SENSOR_2_5_BAR, READ);
+	I2C_read(s->i2c, TRUE);
+
+	ret=I2C_start(s->i2c, ADDR_SENSOR_2_5_BAR, READ);
+	pressure = (I2C_read(s->i2c, FALSE) << 8) | I2C_read(s->i2c, TRUE);
+	trprintf("2.5 Bar: ret=%d pressure=%d\n", ret, pressure);
+
+	return (ret==0); // && pressure!=0xffff);
+}
 //--- _sensor_reset -------------
 static void _sensor_reset(SSensor *s)
 {
@@ -162,8 +205,9 @@ static void _sensor_read(SSensor *s, int no)
 		
 	if(s->power)											//if there is no read error at the moment
 	{
-		I2C_start(s->i2c, s->addr, 1);
+		int ret=I2C_start(s->i2c, s->addr, 1);
 		pressure = (I2C_read(s->i2c, FALSE) << 8) | I2C_read(s->i2c, TRUE);
+		trprintf("ret=%d pressure=%d\n", ret, pressure);
 		if (s->power_timer>0)
 		{
 			s->power_timer--;
@@ -188,13 +232,9 @@ static void _sensor_read(SSensor *s, int no)
 			
 			//--- convert value --------------
 			if (s->addr==ADDR_SENSOR_1_0_BAR)
-			{
 				pressure = ((pressure-16500) *2)/27; // *13.5
-			}
 			else
-			{
-				pressure = (3500*(pressure-10714)) / (30000-3000); // convert messured value [3000..30000] to -1 .. 2.5 (span 3.5)
-			}
+				pressure = (3500*(pressure-10714)) / (30000-3000); // convert measured value [3000..30000] to -1 .. 2.5 (span 3.5)
 
 			//--- save to buffer -----
 			s->buf[s->buf_idx++] = pressure;
