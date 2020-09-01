@@ -28,7 +28,7 @@
 //--- defines --------------------------------------------
 #define 	MAX_PRES_DEVIATION			20	// % deviation allowed before Bleed solenoid kicks in
 #define		MAX_PRINT_PRESSURE_FLUID	300
-#define		MAX_PRESSURE_FLUID			1200
+#define		MAX_PRESSURE_FLUID			2000
 
 #define 	PRESSURE_SOFT_PURGE			80
 #define 	PRESSURE_PURGE				160
@@ -482,7 +482,7 @@ void ink_tick_10ms(void)
 						pRX_Config->ink_supply[isNo].test_bleedValve 	= FALSE;
 
 						_pump_ctrl(isNo, pRX_Config->ink_supply[isNo].test_cylinderPres, PUMP_CTRL_MODE_NO_AIR_VALVE);		// ink-pump
-						_set_pressure_value(pRX_Status->air_pressure < pRX_Config->test_airPressure);	// air-pump
+						_set_pressure_value((pRX_Config->test_airPressure>0) && (pRX_Status->air_pressure < pRX_Config->test_airPressure));	// air-pump
 					}
 				}
 				else
@@ -1172,16 +1172,7 @@ void ink_tick_10ms(void)
 				break;
 
 			case ctrl_purge_step4:
-				// purge from putty
-				if(pRX_Config->ink_supply[isNo].purge_putty_ON)
-				{
-					_InkSupply[isNo].purgePressure = pRX_Config->ink_supply[isNo].purge_putty_pressure;
-					_pump_ctrl(isNo, _InkSupply[isNo].purgePressure, PUMP_CTRL_MODE_DEFAULT);
-					_set_bleed_valve(isNo, FALSE);
-					_InkSupply[isNo].purgeTime = pRX_Config->ink_supply[isNo].purgeTime;
-				}
-				// purge from GUI
-				else if (_InkSupply[isNo].purgeTime < pRX_Config->ink_supply[isNo].purgeTime)
+				if (pRX_Config->ink_supply[isNo].purgeTime==0 || _InkSupply[isNo].purgeTime < pRX_Config->ink_supply[isNo].purgeTime)
 				{
 					_pump_ctrl(isNo, _InkSupply[isNo].purgePressure, PUMP_CTRL_MODE_DEFAULT);
 					_set_bleed_valve(isNo, FALSE);
@@ -1370,6 +1361,7 @@ void ink_tick_1000ms(void)
 		int i;
 		trprintf("\n-------------------------------------------------------------------------------------\n");
 		trprintf("ink pressure  :"); PRINTF("  %6d ", pRX_Status->ink_supply[i].IS_Pressure_Actual); trprintf("\n");
+		trprintf("air pressure:  "); trprintf("%6d\n", pRX_Status->air_pressure);
 	}
 	/*
 	if (tr_debug_on())
@@ -1447,7 +1439,7 @@ static void _init_purge(int isNo, int pressure)
 		_set_bleed_valve(isNo, FALSE);
 
 	//	_PurgeNo	   = isNo;
-		if(pRX_Config->ink_supply[isNo].purge_putty_ON)
+		if(pRX_Config->ink_supply[isNo].purge_putty_pressure)
 		{
 			_InkSupply[isNo].purgePressure = pRX_Config->ink_supply[isNo].purge_putty_pressure;
 		}

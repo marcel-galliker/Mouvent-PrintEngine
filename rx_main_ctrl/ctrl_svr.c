@@ -744,6 +744,7 @@ int ctrl_send_purge_par(int fluidNo, int time)
 	
 	if (RX_Config.stepper.wipe_speed) delay =  HEAD_WIDTH / RX_Config.stepper.wipe_speed;
 	else delay=5000;
+	if (time==0) delay=0;
 
 	timeTotal = 0;
 	par.delay = 0;

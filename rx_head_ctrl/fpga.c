@@ -513,7 +513,6 @@ int  fpga_set_config(RX_SOCKET socket)
 		RX_HBStatus[0].head[i].encPgCnt     = 0;
 		RX_HBStatus[0].head[i].printGoCnt   = 0;
 		RX_HBStatus[0].head[i].printDoneCnt = 0;
-		cond_add_droplets_printed(i, RX_HBStatus[0].head[i].dotCnt);
 	}
 	
 //	Error(LOG, 0, "fpga_set_config 7");
@@ -2167,14 +2166,15 @@ static void _count_dots(void)
 	static int _time=0;
 	int			time, diff;
 	UINT32		droplets;
-		
+
 	time = rx_get_ticks();
 	diff = time-_time;
 	for (i=0; i<MAX_HEADS_BOARD; i++) 
 	{		
 		droplets = Fpga.stat->head_dot_cnt[i];
 		RX_HBStatus[0].head[i].dotCnt += droplets;
-		cond_volume_printed(i, (int)(droplets*(RX_HBStatus[0].head[i].dropVolume*1000000000.0)/diff)); // [�l/s]
+		cond_add_droplets_printed(i, droplets, time);
+		cond_volume_printed(i, (int)(droplets*(RX_HBStatus[0].head[i].dropVolume*1000000000.0)/diff)); // [�l/s]		
 	}
 	_time = time;
 }

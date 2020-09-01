@@ -603,7 +603,7 @@ int  nios_main(int ticks, int menu)
 			for(int head=0; head<SIZEOF(FpgaCfg.head); head++)
 			{
 				_nios_set_user_eeprom(head);
-			} 			
+			}		
 		}
 	}
 	return REPLY_OK;

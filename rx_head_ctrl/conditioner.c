@@ -773,21 +773,37 @@ void cond_set_purge_par (int headNo, int delay, int time)
 }
 
 //--- cond_add_droplets_printed ---------------------------------------
-void cond_add_droplets_printed(int headNo, UINT64 droplets64)
+void cond_add_droplets_printed(int headNo, UINT32 droplets, int time)
 {
+	static UINT64 _droplets[MAX_HEADS_BOARD];
+	static int    _time[MAX_HEADS_BOARD];
 	if (headNo<0 || headNo>=MAX_HEADS_BOARD || _NiosMem==NULL) return;	
 
-	UINT32 droplets = (UINT32)(droplets64/1000000000);
-	if (droplets>0)
+	_droplets[headNo]+=(UINT64)droplets;
+	
+	if (_time[headNo]==0) _time[headNo]=time;
+	if (time-_time[headNo]>60000)
 	{
-		SHeadEEpromMvt *mvt = &RX_HBStatus[0].head[headNo].eeprom_mvt;
-		if(mvt->dropletsPrinted==rx_crc8(&mvt->dropletsPrinted, sizeof(mvt->dropletsPrinted)))	
-			mvt->dropletsPrinted += droplets;
-		else
-			mvt->dropletsPrinted  = droplets;
-		mvt->dropletsPrintedCRC = rx_crc8(&mvt->dropletsPrinted, sizeof(mvt->dropletsPrinted));
-		RX_HBStatus->head[headNo].printedDroplets = mvt->dropletsPrinted; 
+		if (_droplets[headNo]>1000000)
+		{		
+			SHeadEEpromMvt *mvt = &RX_HBStatus[0].head[headNo].eeprom_mvt;
+
+			mvt->dropletsPrinted += _droplets[headNo]/1000000;
+			mvt->dropletsPrintedCRC = rx_crc8(&mvt->dropletsPrinted, sizeof(mvt->dropletsPrinted));
+			RX_HBStatus->head[headNo].printedDroplets = mvt->dropletsPrinted; 
+			_droplets[headNo] = 0;
+		}
+		_time[headNo] = time;
 	}
+}
+
+//--- cond_reset_droplets_printed --------------------------------------------
+void cond_reset_droplets_printed(int headNo)
+{
+	if (headNo<0 || headNo>=MAX_HEADS_BOARD || _NiosMem==NULL) return;	
+	SHeadEEpromMvt *mvt = &RX_HBStatus[0].head[headNo].eeprom_mvt;
+	mvt->dropletsPrinted = 0;
+	mvt->dropletsPrintedCRC = rx_crc8(&mvt->dropletsPrinted, sizeof(mvt->dropletsPrinted));
 }
 
 //--- cond_set_rob_pos ------------------------------------

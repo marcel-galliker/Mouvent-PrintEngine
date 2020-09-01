@@ -657,7 +657,7 @@ static int _data_loaded(const char *filepath, int page, SBmpInfo *bmpInfo, BYTE*
 			return REPLY_OK;
 		}
 	}
-	Error(LOG, 0, "NOT FOUND");
+	TrPrintfL(TRUE, "NOT FOUND");
 	return REPLY_NOT_FOUND;
 }
 
@@ -840,15 +840,15 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 			else if (printMode!=PM_TEST && printMode!=PM_TEST_SINGLE_COLOR)  jc_correction(&bmpInfo, &_PrintList[_InIdx], 0);
 		}
 		#ifdef DEBUG
-		if (FALSE)
-//		if (loaded)
+//		if (FALSE)
+		if (loaded)
 		{
 			char dir[MAX_PATH];
 			char fname[MAX_PATH];
 			sprintf(dir, PATH_RIPPED_DATA "trace");
 			sprintf(fname, "ID_%d", id->id);
 			bmpInfo.planes = RX_Spooler.colorCnt;
-			tif_write(dir, fname, &bmpInfo, "K");
+			tif_write(dir, fname, &bmpInfo, "R");
 			Error(WARN, 0, "Test: Written bitmap to >>%s\\%s<<", dir, fname);
 		}
 		#endif

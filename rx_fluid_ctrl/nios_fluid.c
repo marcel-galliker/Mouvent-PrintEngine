@@ -467,7 +467,17 @@ void nios_set_head_state(int isNo, SHeadStateLight *pstat)
 void nios_test_stop(void)
 {
 	int isNo;
-	for(isNo=0; isNo<NIOS_INK_SUPPLY_CNT; isNo++) _Cfg->ink_supply[isNo].ctrl_mode = ctrl_off;
+	_Cfg->test_lungPressure	= 0;
+	_Cfg->test_flush		= 0;
+	_Cfg->test_airPressure	= 0;
+	for(isNo=0; isNo<NIOS_INK_SUPPLY_CNT; isNo++) 
+	{
+		_Cfg->ink_supply[isNo].test_airValve	= FALSE;
+		_Cfg->ink_supply[isNo].test_bleed_line	= FALSE;
+		_Cfg->ink_supply[isNo].test_bleedValve	= FALSE;
+		_Cfg->ink_supply[isNo].test_cylinderPres = 0;
+		_Cfg->ink_supply[isNo].ctrl_mode		 = ctrl_off;
+	}
 }
 
 //--- nios_test_air_valve --------------------------------------------
@@ -583,7 +593,9 @@ void _update_status(void)
 		pstat->pumpSpeedSet		= _Stat->ink_supply[i].inkPumpSpeed_set;		
 		pstat->pumpSpeed		= _Stat->ink_supply[i].inkPumpSpeed_measured;
 
-		pstat->purge_putty_ON	= _Cfg->ink_supply[i].purge_putty_ON;
+		if (pstat->ctrlMode>ctrl_purge_step1 && pstat->ctrlMode<=ctrl_purge_step6) _Cfg->ink_supply[i].purge_putty_pressure=0;
+
+		pstat->purge_putty_ON	= _Cfg->ink_supply[i].purge_putty_pressure>0;
 	}
 }
 
@@ -888,6 +900,4 @@ void nios_set_purge_pressure(int isNo, int pressure)
 	if (isNo > SIZEOF(_Cfg->ink_supply)) return;
 	
 	_Cfg->ink_supply[isNo].purge_putty_pressure = pressure;
-    if (pressure > 0)	_Cfg->ink_supply[isNo].purge_putty_ON = 1;
-    else				_Cfg->ink_supply[isNo].purge_putty_ON = 0;
 }

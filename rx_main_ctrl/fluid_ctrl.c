@@ -590,7 +590,7 @@ static void _control(int fluidNo)
 
 	int i;
 	int no = fluidNo*INK_PER_BOARD;
-	SInkSupplyStat *_stat = &_FluidStatus[no];
+	SInkSupplyStat *pstat = &_FluidStatus[no];
 	int	lbrob = RX_StepperStatus.robot_used; //(RX_Config.printer.type==printer_LB702_UV ||RX_Config.printer.type == printer_LB702_WB);
 	
 	int HeadNo = ctrl_singleHead();
@@ -599,12 +599,12 @@ static void _control(int fluidNo)
 	
 	if (lbrob && RX_Config.stepper.wipe_speed == 0) RX_Config.stepper.wipe_speed = 10;
 
-	for (i=0; i<INK_PER_BOARD; i++, _stat++, no++)
+	for (i=0; i<INK_PER_BOARD; i++, pstat++, no++)
 	{
-		if (ctrl_check_all_heads_in_fluidCtrlMode(no, _stat->ctrlMode))
+		if (ctrl_check_all_heads_in_fluidCtrlMode(no, pstat->ctrlMode))
 		{
 	//		Error(LOG, 0, "Fluid[%d] in mode >>%s<<", no, FluidCtrlModeStr(_stat->ctrlMode));
-			switch(_stat->ctrlMode)
+			switch(pstat->ctrlMode)
 			{
 				case ctrl_shutdown:		_send_ctrlMode(no, ctrl_shutdown_done, TRUE);	break;	
 				case ctrl_shutdown_done:
@@ -632,10 +632,11 @@ static void _control(int fluidNo)
 				case ctrl_purge_hard:		if (lbrob) steplb_rob_to_wipe_pos(no / 2, rob_fct_purge_all);  //steplb_rob_to_wipe_pos(no / 2, HeadNo + rob_fct_purge_head0);
 											else	   step_lift_to_top_pos();
 				
-											_PurgeCtrlMode = _stat->ctrlMode;
+											_PurgeCtrlMode = pstat->ctrlMode;
 											_txrob = rx_def_is_tx(RX_Config.printer.type) && step_active(1);
                                             int time = (RX_Config.printer.type==printer_TX802)? (2*TIME_HARD_PURGE) : TIME_HARD_PURGE;
-											switch(_stat->ctrlMode)
+											if (pstat->purge_putty_ON) time=0;
+											switch(pstat->ctrlMode)
 											{
 											case ctrl_purge_soft:		_send_purge_par(no, TIME_SOFT_PURGE); _txrob=FALSE; break;
 											case ctrl_purge:			_send_purge_par(no, TIME_PURGE);	  _txrob=FALSE; break;

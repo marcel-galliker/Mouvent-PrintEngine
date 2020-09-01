@@ -312,7 +312,7 @@ static void _send_head_info(void)
 			len += sprintf(&str[len], "%s-%d                     %s\n", RX_ColorNameShort(color), n+1, time);
 			
 			double ml=(double)RX_HBStatus[headNo/MAX_HEADS_BOARD].head[headNo%MAX_HEADS_BOARD].printedDroplets;
-			ml *= 1000000000;
+			ml *= 1000000;
 			ml *= RX_HBStatus[headNo/MAX_HEADS_BOARD].head[headNo%MAX_HEADS_BOARD].dropVolume;
 
 			len += sprintf(&str[len], "cl# %06d  printed %12s l\n", RX_HBStatus[headNo/MAX_HEADS_BOARD].clusterNo, value_str3((int)(1000.0*ml)));
@@ -487,7 +487,7 @@ static int _print_next(void)
 	static int _first;
 	static int _ScansNext;
 	static int _CopiesStart;
-	SPrintQueueItem *_NextItem;
+	SPrintQueueItem *_NextItem=NULL;
 	TrPrintfL(TRUE, "_print_next printState=%d, spooler_ready=%d, pq_ready=%d", RX_PrinterStatus.printState, spool_is_ready(), pq_is_ready());
 	while ((RX_PrinterStatus.printState==ps_printing || RX_PrinterStatus.printState==ps_goto_pause || RX_PrinterStatus.printState==ps_pause || (_Scanning&&RX_PrinterStatus.printState==ps_stopping)) && spool_is_ready() && pq_is_ready())
 	{	

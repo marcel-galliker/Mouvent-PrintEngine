@@ -342,6 +342,10 @@ static void _display_mvteeprom(void)
 	};		
 	term_printf("\n");
 
+	term_printf("clusterNo:        "); PRINTF(4)("%12d    ", RX_HBStatus->head[no[i]].eeprom_mvt.clusterNo);		 term_printf("\n");
+	term_printf("flowResistance:   "); PRINTF(4)("%12d    ", RX_HBStatus->head[no[i]].eeprom_mvt.flowResistance); term_printf("\n");
+	term_printf("dropletsPrinted:  "); PRINTF(4)("%12lld    ", RX_HBStatus->head[no[i]].eeprom_mvt.dropletsPrinted);term_printf("\n");
+
 	term_printf("Voltage:         "); PRINTF(4)("          %03d   ",	RX_HBStatus->head[no[i]].eeprom_mvt.voltage);	term_printf("\n");
 	for (n=0; n<MAX_DENSITY_VALUES; n++)
 	{
