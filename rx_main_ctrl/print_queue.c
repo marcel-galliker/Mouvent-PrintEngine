@@ -626,6 +626,14 @@ int pq_stopping(SPrintQueueItem *pitem)
 	return REPLY_ERROR;
 }
 
+//--- pq_stopped ----------------------------
+void pq_stopped(SPrintQueueItem *pitem)
+{
+	int i;
+	pitem->state  = PQ_STATE_STOPPED;
+	if (_find_item(pitem->id.id, &i)==REPLY_OK) _List[i].state= PQ_STATE_STOPPED;
+}
+
 //--- _filename ------------------------------------
 static char* _filename(char *path)
 {
@@ -786,7 +794,7 @@ int pq_printed(int headNo, SPageId *pid, int *pageDone, int *jobDone, SPrintQueu
 				pitem->scansPrinted = (pitem->id.copy-1) * (pitem->lastPage - pitem->firstPage + 1) + pitem->id.page;
 		}
 		
-		TrPrintfL(TRUE, "pq_printed id=%d, scan=%d, scanTotal=%d, scansprinted=%d, copiesPrinted=%d, copies=%d, copiesTotal=%d, state=%d, counterAct=%.3f", pid->id, pid->scan, pitem->scans, pitem->scansPrinted, pitem->copiesPrinted, pitem->copies, pitem->copiesTotal, pitem->state, RX_PrinterStatus.counterAct);
+		TrPrintfL(TRUE, "pq_printed id=%d, scan=%d, scanTotal=%d, scansPrinted=%d, copiesPrinted=%d, copies=%d, copiesTotal=%d, state=%d, counterAct=%.3f", pid->id, pid->scan, pitem->scans, pitem->scansPrinted, pitem->copiesPrinted, pitem->copies, pitem->copiesTotal, pitem->state, RX_PrinterStatus.counterAct);
 				
 		//--- log ----------------------------------------
 		if(rx_def_is_scanning(RX_Config.printer.type))
@@ -871,6 +879,7 @@ int pq_printed(int headNo, SPageId *pid, int *pageDone, int *jobDone, SPrintQueu
 					else
 						Error(LOG, 0, "%d: %s: complete", pitem->id .id, _filename(pitem->filepath));
 //					*jobDone = TRUE;
+					pitem->state = PQ_STATE_PRINTED;
 					gui_send_print_queue(EVT_GET_PRINT_QUEUE, pitem);
 					if (rx_def_is_scanning(RX_Config.printer.type))
 					{
@@ -882,7 +891,6 @@ int pq_printed(int headNo, SPageId *pid, int *pageDone, int *jobDone, SPrintQueu
 						enc_change();
 					}
 				}
-				pitem->state = PQ_STATE_PRINTED;
 			}
 			else pitem->state   = PQ_STATE_PRINTING;
 		}
@@ -1025,7 +1033,7 @@ int pq_is_ready(void)
 	if(RX_Config.printer.type == printer_LH702)				
 	{
 		TrPrintfL(TRUE, "pq_is_ready: sentCnt=%d, printGoCnt=%d", RX_PrinterStatus.sentCnt, RX_PrinterStatus.printGoCnt);
-		return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printGoCnt) < 10;	// minimize buffer, independent on format!
+		return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printGoCnt) < 5;	// minimize buffer, independent on format!
 	}
 	else if(RX_Config.printer.type == printer_cleaf)	return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printedCnt) < 16;
 	else if (rx_def_is_tx(RX_Config.printer.type))		return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printedCnt) < 20;

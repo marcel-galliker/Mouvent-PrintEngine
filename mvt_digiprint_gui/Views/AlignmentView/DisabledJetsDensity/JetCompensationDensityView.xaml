@@ -11,8 +11,8 @@
         mc:Ignorable="d"
         Title="Density and Jet Compensation"
         Height="650" Width="990"
-                      ResizeMode="NoResize"
-                      Loaded="CustomWindow_Loaded">
+        ResizeMode="NoResize"
+        Loaded="CustomWindow_Loaded">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
@@ -47,7 +47,7 @@
                     Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}" Margin="5"
                                  Click="Exit_Click">
                     <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}"
-                                        Kind="{Binding Changed, Converter={StaticResource ExitDialogIconConverter}}"
+                                        Kind="Close"
                                         Height="20"/>
                 </common:MvtButton>
             </StackPanel>

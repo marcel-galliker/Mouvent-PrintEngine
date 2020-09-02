@@ -56,6 +56,7 @@ typedef struct
 //--- Statics -----------------------------------------------------------------
 static HANDLE	_HSpoolServer;
 static int		_Ready;
+static int		_ErrorSpooler=FALSE;
 static int		_Auto;
 static int		_BlkNo;
 static int		_SpoolerCnt;
@@ -490,6 +491,21 @@ int spool_send_test_data(int headNo, char *str)
 	return spool_send_msg(&msg);
 }
 
+//--- spool_load_file ---------------------------------------------------------------------
+int spool_load_file(SPageId *pid, char *path)
+{
+	SLoadFileCmd msg;
+	int cnt;
+
+	msg.hdr.msgLen		= sizeof(msg);
+	msg.hdr.msgId		= CMD_LOAD_FILE;
+	memcpy(&msg.id, pid, sizeof(msg.id));
+	strncpy(msg.filepath, path, sizeof(msg.filepath));
+	cnt=spool_send_msg(&msg);
+
+	return REPLY_OK;
+}
+
 //--- spool_print_file ---------------------------------------------------------------
 int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT32 lengthPx, SPrintQueueItem *pitem, int clearBlockUsed)
 {
@@ -663,6 +679,7 @@ SPageId *spool_get_id(int no)
 int spool_abort_printing(void)
 {	
 	spool_send_msg_2(CMD_PRINT_ABORT, 0, NULL, FALSE);
+	_ErrorSpooler=FALSE;
 	return REPLY_OK;
 }
 
@@ -785,16 +802,19 @@ static int _do_log_evt(RX_SOCKET socket, SLogMsg *msg)
 //--- spool_send_msg ----------------------------------------------
 int spool_send_msg(void *msg)
 {
-	int i, cnt;
+	int i, cnt, err=FALSE;
 	for (i=0, cnt=0; i<SIZEOF(_Spooler); i++)
 	{
 		if(_Spooler[i].used)
 		{
-			if (_Spooler[i].socket!=INVALID_SOCKET && sok_send(&_Spooler[i].socket,msg)==REPLY_OK) cnt++; 
-		//	else ErrorEx(dev_spooler, i, ERR_ABORT, 0, "not connected");
+			if (_Spooler[i].socket!=INVALID_SOCKET && sok_send(&_Spooler[i].socket,msg)==REPLY_OK) cnt++;
 		}
 	}
-	if (!cnt) ErrorEx(dev_spooler, i, ERR_ABORT, 0, "not connected");
+	if (!cnt) 
+	{
+		if (!_ErrorSpooler) ErrorEx(dev_spooler, 0, ERR_ABORT, 0, "not connected");
+		_ErrorSpooler = TRUE;
+	}
 	return cnt;
 }
 

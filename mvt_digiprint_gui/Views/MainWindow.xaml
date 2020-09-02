@@ -133,7 +133,10 @@
             <TabItem x:Name="TabPrintSystem">
                 <TabItem.Header>
                     <Grid Width="200" Height="50" Background="{Binding SelectedTabName, Converter={StaticResource SelectedTabConverter}, ConverterParameter=TabPrintSystem}">
-                        <TextBlock Style="{StaticResource TabItemStyle}" Text="Print System"/>
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource TabItemStyle}" Text="Print System"/>
+                            <Rectangle Width="auto" Height="2" Fill="{Binding StateBrush}" x:Name="PrintSystemState"/>
+                        </StackPanel>
                     </Grid>
                 </TabItem.Header>
                 <Grid>

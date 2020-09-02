@@ -252,6 +252,7 @@ int tx80x_wd_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
     case CMD_LIFT_STOP:
         TrPrintfL(TRUE, "SOCKET[%d]: %s", socket, _CmdName);
         motors_stop(MOTOR_WD_BITS);
+        RX_StepperStatus.info.ref_done = FALSE;
         break;
 
     case CMD_LIFT_REFERENCE:

@@ -1,5 +1,7 @@
-﻿using RX_DigiPrint.Models;
+﻿using RX_Common;
+using RX_DigiPrint.Models;
 using RX_DigiPrint.Services;
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -31,14 +33,35 @@ namespace RX_DigiPrint.Views.UserControls
         }
 
         //--- Property ImageX ---------------------------------------
-        public int ImageX
+        private double _ImageX=110;
+        public double ImageX
         {
-            get { return 100; }
+            set 
+            { 
+                if (value!=_ImageX)
+				{
+                    _ImageX=value; 
+                    Canvas.SetLeft(Image, _ImageX);
+                    Canvas.SetLeft(ImageBorder, _ImageX);
+				}
+            }
+            get { return _ImageX; }
         }
-        //--- Property ImageX ---------------------------------------
-        public int ImageX2
+
+        //--- Property ImageX2 ---------------------------------------
+        private double _ImageX2=2;
+        public double ImageX2
         {
-            get { return 2; }
+            set 
+            { 
+                if (value!=_ImageX2)
+				{
+                    _ImageX2=value; 
+                    Canvas.SetLeft(Image2, _ImageX2);
+                    Canvas.SetLeft(ImageBorder2, _ImageX2);
+				}
+            }
+            get { return _ImageX2; }
         }
         //--- Property ImageY ---------------------------------------
         private int _ImageY;
@@ -183,6 +206,7 @@ namespace RX_DigiPrint.Views.UserControls
         //--- Image_SizeChanged -------------------------------------------------------------------------
         private void Image_SizeChanged(object sender, SizeChangedEventArgs e)
         {
+            ImageX = ActualWidth-150;
             if (FirstMesurementChild==0) 
             { 
                 FirstMesurementChild = MainGrid.Children.Count;
@@ -197,6 +221,7 @@ namespace RX_DigiPrint.Views.UserControls
                     Image2.Width = Image.Width=ActualHeight-30;
                 }
             }
+            ImageX2  = ImageX - Image.ActualWidth - 30;
             Canvas.SetTop(Image, ImageY);
             Canvas.SetTop(ImageBorder, ImageY);      
             Canvas.SetTop(Image2, ImageY);
@@ -230,6 +255,5 @@ namespace RX_DigiPrint.Views.UserControls
             Canvas.SetLeft(Direction2, (ActualWidth-Direction.ActualWidth)/2);
             Canvas.SetTop (Direction2, ActualHeight-Direction.ActualHeight);
         }
-
     }
 }

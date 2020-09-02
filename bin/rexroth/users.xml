@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<accounts version="4" type="mlpi" xmlns="http://www.boschrexroth.com/mlpi/accounts.xsd" lastID="100">
+	<account id="1" user="boschrexroth" description="Initial user for Bosch Rexroth products in delivery state. It is recommended to remove or replace this user." hash="fc041cce84e729770169f79ea494a71656a82694c930c943a33b4123040c2ee0f0c2e73ff3bbc158b09031e2d4ca2a2092bc8fe57e984ec88c1bd77fcce7042d" state="enabled"/>
+	<account id="3" user="indraworks" description="Initial user for Bosch Rexroth products in delivery state. It is recommended to remove or replace this user." hash="a7e71317147b07473490b3de8e8357a3bf9e430b6a8f42196903e6eebb32b0525354e88649187a9d23a94c09fb3a4f3674151005b474580cf8b2f20c2ab18105" state="enabled"/>
+	<account id="4" user="rexroth" hash="18d8f2406be023c8918ced57ed02741bd015778910188288eeca2af6770fea684843846d58a6d42fdab0f85e8b2602cd9d6a922bc594d053538b02529675d216" description="" state="enabled"/>
+</accounts>

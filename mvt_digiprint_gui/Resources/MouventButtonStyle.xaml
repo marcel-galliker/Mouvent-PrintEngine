@@ -711,7 +711,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType ="{x:Type Button}">
                     <Grid Background="Transparent">
-                        <Ellipse HorizontalAlignment="Center" VerticalAlignment="Center" Name ="Ellipse" Width ="16" Height ="16" Fill ="Gold"/>
+                        <Ellipse HorizontalAlignment="Center" VerticalAlignment="Center" Name ="Ellipse" Width ="16" Height ="16" Fill ="{DynamicResource RX.Warn}"/>
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Grid>
                 </ControlTemplate>
@@ -724,7 +724,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType ="{x:Type Button}">
                     <Grid Background="Transparent">
-                        <Ellipse  HorizontalAlignment="Center" VerticalAlignment="Center" Name ="Ellipse" Width ="16" Height ="16" Fill ="Crimson"/>
+                        <Ellipse  HorizontalAlignment="Center" VerticalAlignment="Center" Name ="Ellipse" Width ="16" Height ="16" Fill ="{DynamicResource RX.Error}"/>
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Grid>
                 </ControlTemplate>

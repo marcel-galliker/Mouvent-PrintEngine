@@ -125,7 +125,7 @@ int handle_gui_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sende
 		TrPrintfL(TRUE, "handle_gui_msg: sender=>>%s<< msgId=0x%08x", str, phdr->msgId);
 	}
 		
-	if      (phdr->msgId >= CMD_PLC_0  && phdr->msgId < CMD_PLC_END)	plc_handle_gui_msg (socket, phdr->msgId, &phdr[1], phdr->msgLen - sizeof(SMsgHdr));
+	if      (phdr->msgId >= CMD_PLC_0  && phdr->msgId < CMD_PLC_END)	plc_handle_gui_msg (socket, pmsg, len);
 	else if (phdr->msgId >= CMD_TT_0   && phdr->msgId < CMD_TT_END)		step_handle_gui_msg(socket, phdr->msgId, &phdr[1], phdr->msgLen - sizeof(SMsgHdr));
 	else if (phdr->msgId >= CMD_LIFT_0 && phdr->msgId < CMD_LIFT_END)	step_handle_gui_msg(socket, phdr->msgId, &phdr[1], phdr->msgLen - sizeof(SMsgHdr));
 	else if (phdr->msgId >= CMD_ROB_0  && phdr->msgId < CMD_ROB_END)	step_handle_gui_msg(socket, phdr->msgId, &phdr[1], phdr->msgLen - sizeof(SMsgHdr));
@@ -703,32 +703,37 @@ static void _do_set_print_queue_evt	(RX_SOCKET socket, SPrintQueueEvt *pmsg)
 	SPrintQueueItem *item;
 
 	_check_format("_do_set_print_queue", pmsg, sizeof(*pmsg));
+
 	#ifdef linux
 	_chmod(pmsg->item.filepath, S_IRWXU | S_IRWXG | S_IRWXO);
 	#endif
 
-	if (pmsg->item.printGoDist<0)
-	{
-		Error(ERR_CONT, 0, "Distance must be > 0mm!");
-		pmsg->item.printGoDist=0;
-	}
-
-	if (pmsg->item.printGoDist>1000000)
-	{
-		Error(ERR_CONT, 0, "Distance must be < 1000mm!");
-		pmsg->item.printGoDist=1000000;
-	}
 	item=pq_get_item(&pmsg->item);
+	if (item!=NULL) 
+	{
+		if (pmsg->item.printGoDist<0)
+		{
+			Error(ERR_CONT, 0, "Distance must be > 0mm!");
+			pmsg->item.printGoDist=0;
+		}
 
-	if (pmsg->item.printGoDist != item->printGoDist) Error(LOG, 0, "Change Dist from %d to %d", item->printGoDist, pmsg->item.printGoDist);
-	if (pmsg->item.pageMargin  != item->pageMargin)  Error(LOG, 0, "Change Lateral from %d to %d", item->pageMargin, pmsg->item.printGoDist);
+		if (pmsg->item.printGoDist>1000000)
+		{
+			Error(ERR_CONT, 0, "Distance must be < 1000mm!");
+			pmsg->item.printGoDist=1000000;
+		}
 
-	item=pq_set_item(&pmsg->item);
+		if (pmsg->item.printGoDist != item->printGoDist) Error(LOG, 0, "Change Dist from %d to %d", item->printGoDist, pmsg->item.printGoDist);
+		if (pmsg->item.pageMargin  != item->pageMargin)  Error(LOG, 0, "Change Lateral from %d to %d, copiesPrinted=%d", item->pageMargin, pmsg->item.printGoDist, item->copiesPrinted);
+	
+		item->printGoDist = pmsg->item.printGoDist;
+		item->pageMargin  = pmsg->item.pageMargin;
+		pq_set_item(item);
 
-	pc_set_pageMargin(pmsg->item.pageMargin);
-//	Error(LOG, 0, "GUI: New PageMargin=%d", pmsg->item.pageMargin);
-	if (item!=NULL) gui_send_print_queue(EVT_GET_PRINT_QUEUE, item);
-	pq_save(PATH_USER FILENAME_PQ);
+		pc_set_pageMargin(item->pageMargin);
+		gui_send_print_queue(EVT_GET_PRINT_QUEUE, item);
+		pq_save(PATH_USER FILENAME_PQ);
+	}
 }
 
 //--- _do_chg_print_queue ------------------------------------------
@@ -913,7 +918,7 @@ static void _do_get_disalbled_jets(RX_SOCKET socket, SDisabledJetsMsg *pmsg)
 			{   
 				if (setup_chapter(file, "Head", head, READ)==REPLY_OK) 
 				{
-					setup_int16_arr(file, "value",  READ, reply.disabledJets,	SIZEOF(reply.disabledJets),	-1);					
+					setup_int16_arr(file, "compensate",  READ, reply.disabledJets,	SIZEOF(reply.disabledJets),	-1);					
 					setup_chapter(file, "..", -1, READ);
 				}
 				setup_chapter(file, "..", -1, READ);
@@ -994,6 +999,7 @@ static void _do_get_printer_cfg(RX_SOCKET socket)
 	msg.headsPerColor = RX_Config.headsPerColor;
     msg.inkSupplyCnt  = RX_Config.inkSupplyCnt;
 	msg.inkCylindersPerColor	= RX_Config.inkCylindersPerColor;
+	memcpy(msg.headFpVoltage,	RX_Config.headFpVoltage,	sizeof(msg.headFpVoltage));
 	memcpy(msg.headDist,		RX_Config.headDist,			sizeof(msg.headDist));
 	memcpy(msg.headDistBack,	RX_Config.headDistBack,		sizeof(msg.headDistBack));
 	memcpy(msg.colorOffset,		RX_Config.colorOffset,		sizeof(msg.colorOffset));
@@ -1038,6 +1044,7 @@ static void _do_set_printer_cfg(RX_SOCKET socket, SPrinterCfgMsg* pmsg)
 	RX_Config.headsPerColor		   = pmsg->headsPerColor;
 	RX_Config.inkCylindersPerColor = pmsg->inkCylindersPerColor;
 	RX_Config.inkSupplyCnt		   = pmsg->colorCnt * pmsg->inkCylindersPerColor;
+	memcpy(RX_Config.headFpVoltage, pmsg->headFpVoltage,	sizeof(RX_Config.headFpVoltage));
 	memcpy(RX_Config.headDist,		pmsg->headDist,			sizeof(RX_Config.headDist));
 	memcpy(RX_Config.headDistBack,	pmsg->headDistBack,		sizeof(RX_Config.headDistBack));
 	memcpy(RX_Config.colorOffset,	pmsg->colorOffset,		sizeof(RX_Config.colorOffset));

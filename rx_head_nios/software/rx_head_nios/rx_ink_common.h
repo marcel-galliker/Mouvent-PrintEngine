@@ -206,6 +206,7 @@ typedef enum EnFluidCtrlMode
 	ctrl_cap_step3		= 0x143,	// 0x143:
 	ctrl_cap_step4		= 0x144,	// 0x144:
 	ctrl_cap_step5		= 0x145,	// 0x145:
+    ctrl_cap_step6		= 0x146,	// 0x146:
 	
 	ctrl_vacuum			= 0x150,	// 0x150:
 	ctrl_vacuum_step1	= 0x151,	// 0x151:

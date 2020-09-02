@@ -34,6 +34,9 @@ namespace RX_DigiPrint.Views.PrintSystemView
             RxGlobals.Chiller.PropertyChanged += Chiller_PropertyChanged;
             User_PropertyChanged(null, null);
             Chiller_PropertyChanged(null, null);
+
+//          try{ FpVoltage.Text = RxGlobals.PrintSystem.HeadFpVoltage[_no].ToString();}
+//          catch (Exception) { FpVoltage.Text = "";};
         }
 
         //--- UserControl_DataContextChanged -----------------------------------
@@ -47,6 +50,21 @@ namespace RX_DigiPrint.Views.PrintSystemView
         void stat_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (e.PropertyName.Equals("Name")) Chiller_PropertyChanged(this, null);
+            if (e.PropertyName.Equals("HeadFpVoltage"))
+            {
+                try{ FpVoltage.Text = RxGlobals.PrintSystem.HeadFpVoltage[_No].ToString();}
+                catch (Exception) { FpVoltage.Text = "";};                
+            }
+        }
+
+        //--- ServiceGrid_IsVisibleChanged -----------------
+        private void ServiceGrid_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if ((bool) e.NewValue)
+            {
+                try{ FpVoltage.Text = RxGlobals.PrintSystem.HeadFpVoltage[_No].ToString();}
+                catch (Exception) { FpVoltage.Text = "";};                
+            }
         }
 
         //--- Property No ---------------------------------------
@@ -77,6 +95,11 @@ namespace RX_DigiPrint.Views.PrintSystemView
         private void PrintSystem_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (e.PropertyName.Equals("PrinterType")) _PrinterType_Changed();
+            if (e.PropertyName.Equals("HeadFpVoltage"))
+            {
+                try{ FpVoltage.Text = RxGlobals.PrintSystem.HeadFpVoltage[_No].ToString();}
+                catch (Exception) { FpVoltage.Text = "";};                
+            }
         }
 
         //--- _PrinterType_Changed ----------------------------------------------------
@@ -90,6 +113,12 @@ namespace RX_DigiPrint.Views.PrintSystemView
             Button_PurgeMicro.Visibility = collapsed;
 //          Button_Wipe.Visibility  = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX801 || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_TX802) ? Visibility.Visible : Visibility.Collapsed;
             Grid.RowDefinitions[1].Height = new GridLength(25/RxGlobals.Screen.Scale);
+        }
+        
+        //--- FpVoltage_TextChanged -----------------------------------------
+        private void FpVoltage_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            RxGlobals.PrintSystem.SetFpVoltage(_No, Rx.StrToInt32(FpVoltage.Text));
         }
 
         //--- Cmd_Clicked ---------------------------

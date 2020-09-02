@@ -74,7 +74,7 @@ static void _headboard_config(int colorCnt, int headsPerColor, int ethPortCnt);	
 
 static void _ping_test(int cnt);
 static void _send_head_cfg(int headNo);
-static void _send_ink_def(int headNo, char *drops);
+static void _send_ink_def(int headNo, char *drops, int screenOnPrinter);
 
 //static void Data_Test_TCP();
 //static void Data_Test_UDP();
@@ -399,7 +399,7 @@ void ctrl_set_max_speed(void)
 								}
 								break;
 		case printer_LB701:		maxSpeed[0]= 100; maxSpeed[1]= 100; maxSpeed[2]= 100; maxSpeed[3]= 100; break;
-		case printer_LB702_UV:	maxSpeed[0]= 100; maxSpeed[1]= 100; maxSpeed[2]= 100; maxSpeed[3]= 100; break;
+		case printer_LB702_UV:	maxSpeed[0]= 120; maxSpeed[1]= 120; maxSpeed[2]= 120; maxSpeed[3]= 120; break;
 		case printer_LB702_WB:	maxSpeed[0]= 100; maxSpeed[1]= 100; maxSpeed[2]= 100; maxSpeed[3]= 100; break;
 		case printer_LH702:		maxSpeed[0]= 100; maxSpeed[1]= 100; maxSpeed[2]= 100; maxSpeed[3]= 100; break;
 		case printer_DP803:		maxSpeed[0]= 120; maxSpeed[1]= 120; maxSpeed[2]= 120; maxSpeed[3]= 120; break;
@@ -597,7 +597,7 @@ void ctrl_tick(void)
 }
 
 //--- _send_ink_def ------------------------------------------------
-static void _send_ink_def(int headNo, char *dots)
+static void _send_ink_def(int headNo, char *dots, int screenOnPrinter)
 {
 	int n, no;
 	int inksupply=-1;
@@ -617,9 +617,10 @@ static void _send_ink_def(int headNo, char *dots)
 				memcpy(msg.dots, dots, sizeof(msg.dots));
 				
 				no = headNo*HEAD_CNT+n;
-				if (RX_HBStatus[headNo].head[n].eeprom_mvt.voltage)	msg.fpVoltage = RX_HBStatus[headNo].head[n].eeprom_mvt.voltage;
-				else												msg.fpVoltage = RX_HBStatus[headNo].head[n].eeprom.voltage;
-
+				if (screenOnPrinter && RX_HBStatus[headNo].head[n].eeprom_mvt.voltage)	msg.fpVoltage = RX_HBStatus[headNo].head[n].eeprom_mvt.voltage;
+				else if (RX_Config.headFpVoltage[no]) msg.fpVoltage = RX_Config.headFpVoltage[no];
+				else msg.fpVoltage = RX_HBStatus[headNo].head[n].eeprom.voltage;
+				
 				/*
                 Error(LOG, 0, "Head %s: FirepulseVoltage=%d%% (mvt=%d, fuji=%d)",
 					RX_Config.headBoard[headNo].head[n].name,
@@ -826,11 +827,11 @@ void ctrl_head_cal_done(int inkSupply)
 }
 
 //--- ctrl_send_firepulses -----------------------------------------
-void ctrl_send_firepulses(char *dots)
+void ctrl_send_firepulses(char *dots, int screenOnPrinter)
 {
 	int i;
 //	Error(LOG, 0, "ctrl_send_firepulses >>%s<<", dots);
-	for (i=0; i<SIZEOF(_HeadCtrl); i++) _send_ink_def(i, dots);
+	for (i=0; i<SIZEOF(_HeadCtrl); i++) _send_ink_def(i, dots, screenOnPrinter);
 }
 
 //--- ctrl_send_head_cfg -------------------------
@@ -913,7 +914,7 @@ static void* _head_ctrl_thread(void* lpParameter)
 				ppar->aliveTime = 0;
 				net_send_item(dev_head,ppar->no);
 				_send_head_cfg(ppar->no);
-				_send_ink_def(ppar->no,"SML");
+				_send_ink_def(ppar->no,"SML", FALSE);
 				sok_receiver(NULL,&ppar->socket,handle_headCtrl_msg,&ppar->no);
 				net_send_item(dev_head,ppar->no);
 				ErrorEx(dev_head,ppar->no,ERR_ABORT,0,"TCP/IP Connection lost");

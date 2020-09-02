@@ -1,4 +1,5 @@
-﻿using RX_DigiPrint.Models;
+﻿using RX_Common;
+using RX_DigiPrint.Models;
 using RX_DigiPrint.Services;
 using System.Windows;
 using System.Windows.Controls;
@@ -91,10 +92,10 @@ namespace RX_DigiPrint.Views.UserControls
             switch(errorType)
             {
                 case ELogType.eErrLog:   this.Background= Brushes.Transparent; break;
-                case ELogType.eErrWarn:  this.Background= Brushes.Gold; break;
-                case ELogType.eErrCont:  this.Background= Brushes.Crimson; break;
-                case ELogType.eErrStop: this.Background = Brushes.Crimson; break;
-                case ELogType.eErrAbort: this.Background = Brushes.Crimson; break;
+                case ELogType.eErrWarn:  this.Background= Rx.BrushWarn; break;
+                case ELogType.eErrCont:  this.Background= Rx.BrushError; break;
+                case ELogType.eErrStop: this.Background = Rx.BrushError; break;
+                case ELogType.eErrAbort: this.Background = Rx.BrushError; break;
             }
         }
         

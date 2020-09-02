@@ -308,6 +308,7 @@ int  dp803_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 	case CMD_LIFT_STOP:				strcpy(_CmdName, "CMD_LIFT_STOP");
 									motors_stop(MOTOR_Z_BITS);
 									RX_StepperStatus.cmdRunning = 0;
+									RX_StepperStatus.info.ref_done = FALSE;
 									_TimeCntPumpsCAP = 0;
 									Fpga.par->output &= ~OUT_CAP_FLUSH_OFF;
 									break;	

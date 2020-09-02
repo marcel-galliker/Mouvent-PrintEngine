@@ -1,4 +1,5 @@
-﻿using RX_Common;
+﻿using Infragistics.Windows.Automation.Peers;
+using RX_Common;
 using RX_DigiPrint.Converters;
 using RX_DigiPrint.Models.Enums;
 using RX_DigiPrint.Services;
@@ -55,8 +56,16 @@ namespace RX_DigiPrint.Models
             }
         }
 
-        //--- Property ColorFG ---------------------------------------
-        private Brush _ColorFG;
+		//--- Property InkSupply ---------------------------------------
+		private InkSupply _InkSupply;
+		public InkSupply InkSupply
+		{
+			get { return _InkSupply; }
+			set { SetProperty(ref _InkSupply,value); }
+		}
+
+		//--- Property ColorFG ---------------------------------------
+		private Brush _ColorFG;
         public Brush ColorFG
         {
             get { return _ColorFG; }
@@ -72,8 +81,8 @@ namespace RX_DigiPrint.Models
         }
 
         //--- Property Warn ---------------------------------------
-        private UInt32 _Warn;
-        public UInt32 Warn
+        private bool _Warn=false;
+        public bool Warn
         {
             get { return _Warn; }
             set { SetProperty(ref _Warn, value); }
@@ -264,8 +273,24 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _Meniscus_setpoint, value); }
         }
 
-        //--- Property PumpSpeed ---------------------------------------
-        private UInt32 _PumpSpeed;
+		//--- Property FlowFactor ---------------------------------------
+		private Int32 _FlowFactor;
+		public Int32 FlowFactor
+		{
+			get { return _FlowFactor; }
+			set { SetProperty(ref _FlowFactor,value); }
+		}
+
+		//--- Property FlowFactorWarning ---------------------------------------
+		private bool _FlowFactorWarning=false;
+		public bool FlowFactorWarning
+		{
+			get { return _FlowFactorWarning; }
+			set { SetProperty(ref _FlowFactorWarning,value); }
+		}
+
+		//--- Property PumpSpeed ---------------------------------------
+		private UInt32 _PumpSpeed;
         public UInt32 PumpSpeed
         {
             get { return _PumpSpeed; }
@@ -330,8 +355,21 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _Voltage, value); }
         }
 
-        //--- SetItem ----------------------------------------------
-        public void SetItem(int no, TcpIp.SHeadStat item, Int32 tempFpga, Int32 flow)
+		//--- Property StateBrush ---------------------------------------
+		private Brush _StateBrush;
+		public Brush StateBrush
+		{
+			get { return _StateBrush; }
+			set { 
+                    if (SetProperty(ref _StateBrush,value))
+				    {
+                        if (InkSupply!=null) InkSupply.UpdateStateBrush(_StateBrush);
+				    }
+                }
+		}
+
+		//--- SetItem ----------------------------------------------
+		public void SetItem(int no, TcpIp.SHeadStat item, Int32 tempFpga, Int32 flow)
         {   
             bool used=false;
             HeadNo  = no;
@@ -355,12 +393,13 @@ namespace RX_DigiPrint.Models
                 int ink;
                 if (RxGlobals.PrintSystem.HeadsPerColor!=0) ink = no/RxGlobals.PrintSystem.HeadsPerColor;
                 else ink=no;
-                if (RxGlobals.InkSupply.List[ink].InkType!=null)
+                InkSupply = RxGlobals.InkSupply.List[ink];
+                if (InkSupply!=null && InkSupply.InkType!=null)
                 {
-                    Color   = new SolidColorBrush(RxGlobals.InkSupply.List[ink].InkType.Color);
-                    ColorFG = new SolidColorBrush(RxGlobals.InkSupply.List[ink].InkType.ColorFG);
+                    Color   = new SolidColorBrush(InkSupply.InkType.Color);
+                    ColorFG = new SolidColorBrush(InkSupply.InkType.ColorFG);
 
-                    string str = new ColorCode_Str().Convert(RxGlobals.InkSupply.List[ink].InkType.ColorCode, null, ink, null).ToString();
+                    string str = new ColorCode_Str().Convert(InkSupply.InkType.ColorCode, null, ink, null).ToString();
 
                     Name    = str+"-"+(1+no%(int)RxGlobals.PrintSystem.HeadsPerColor).ToString();
                     used = true;
@@ -375,7 +414,6 @@ namespace RX_DigiPrint.Models
 
             Connected   = (item.info&0x00000001) != 0;
             Info        = item.info;
-            Warn        = item.warn;
             Err         = item.err;
 
             Valve       = ((item.info&0x02)==0)? 0:1;
@@ -392,17 +430,25 @@ namespace RX_DigiPrint.Models
             TempSetpoint= item.tempSetpoint;
          //   if (used) TempReady   = item.tempReady!=0;
          //   else TempReady=false;
-            TempReady   = (!used) || (item.tempReady!=0 && item.ctrlMode==EFluidCtrlMode.ctrl_print);
+            TempReady   = (!used) || (item.ctrlMode!=EFluidCtrlMode.ctrl_print) || ((item.info&(1<<5))!=0);
             PresIn      = item.presIn;
             PresIn_max  = item.presIn_max;
             PresIn_diff = item.presIn_diff;
             if (item.presIn_max==TcpIp.INVALID_VALUE) PresIn_str = string.Format("~{0}", HeadVal_Converter10._convert(PresIn_diff));
             else                                      PresIn_str = string.Format("^{0}", HeadVal_Converter10._convert(PresIn_max)); 
-            PresOut     = item.presOut;
+            PresOut      = item.presOut;
             PresOut_diff = item.presOut_diff;
             Meniscus     = item.meniscus;
             Meniscus_diff= item.meniscus_diff;
-            PumpSpeed   = item.pumpSpeed;
+            PumpSpeed    = item.pumpSpeed;
+            FlowFactor   = item.flowFactor;
+            FlowFactorWarning = (item.flowFactor>=200) && (CtrlMode==EFluidCtrlMode.ctrl_print);
+
+            Warn         = used && (FlowFactorWarning || !TempReady);
+            if (Err!=0)    StateBrush = Rx.BrushError;
+            else if (Warn) StateBrush = Rx.BrushWarn;
+            else           StateBrush = Brushes.Transparent; 
+
             Meniscus_setpoint = item.meniscus_Setpoint;
             PumpFeedback= item.pumpFeedback;
             if (item.printingSeconds==TcpIp.INVALID_VALUE) PrintingTime="-----";

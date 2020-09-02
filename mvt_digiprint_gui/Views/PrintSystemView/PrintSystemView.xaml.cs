@@ -1,5 +1,7 @@
 ﻿using RX_DigiPrint.Models;
 using RX_DigiPrint.Services;
+using System;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -121,8 +123,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
         }
 
         //--- _timer_Tick ---------------------------------------------------
-        private void _timer_Tick(int tickNo)
-        {    
+        private void _timer_Tick(int tick)
+        {   
             RxGlobals.RxInterface.SendCommand(TcpIp.CMD_FLUID_STAT);
             RxGlobals.RxInterface.SendCommand(TcpIp.CMD_HEAD_STAT);
             RxGlobals.RxInterface.SendCommand(TcpIp.CMD_ENCODER_STAT);

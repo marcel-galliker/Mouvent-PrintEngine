@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Windows;
+using System.Windows.Media;
 
 namespace RX_DigiPrint.Models
 {
@@ -234,6 +235,14 @@ namespace RX_DigiPrint.Models
             return (head+TcpIp.HEAD_CNT-1)/TcpIp.HEAD_CNT;
         }
 
+        //--- Property Color_Order ---------------------------------------
+        private int[] _Color_Order;
+        public int[] Color_Order
+        {
+            get { return _Color_Order; }
+            private set { SetProperty(ref _Color_Order, value); }
+        }
+
         //--- Property IS_Order ---------------------------------------
         private int[] _IS_Order;
         public int[] IS_Order
@@ -247,7 +256,7 @@ namespace RX_DigiPrint.Models
         private int IsOrder_ColorCnt = 0;
         private void _set_IS_Order()
 		{
-            if (IS_Order==null || PrinterType!=_IsOrder_PrinterType || ColorCnt!=IsOrder_ColorCnt)
+            if (IS_Order==null || Color_Order == null || PrinterType!=_IsOrder_PrinterType || ColorCnt!=IsOrder_ColorCnt)
 			{
                 _IsOrder_PrinterType = PrinterType;
                 IsOrder_ColorCnt = ColorCnt;
@@ -264,21 +273,41 @@ namespace RX_DigiPrint.Models
 
                     case EPrinterType.printer_LH702:
                     case EPrinterType.printer_LB702_UV:
-                        if (ColorCnt <= 4) IS_Order = new int[] { 0, 1, 2, 3 };
-                        // else IS_Order = new int[] { 4,5,6, 0, 1, 2, 3 };
-                        else IS_Order = new int[] { 4, 5, 6, 0,1,2,3 };
+                        if (ColorCnt <= 4)
+                        {
+                            IS_Order    = new int[] { 0, 1, 2, 3 };
+                            Color_Order = new int[] { 0, 1, 2, 3 };
+                        }
+                        else
+                        {
+                            IS_Order    = new int[] { 4, 5, 6, 0, 1, 2, 3 };
+                            Color_Order = new int[] { 4, 5, 6, 0, 1, 2, 3 };
+                        }
                         break;
 
                     case EPrinterType.printer_LB702_WB:
-                        IS_Order = new int[] {0, 1, 2, 3, 4, 5 };
+                        IS_Order    = new int[] {0, 1, 2, 3, 4, 5 };
+                        Color_Order = new int[] { 4, 5, 6, 0, 1, 2, 3 };
                         break;
 
-                    case EPrinterType.printer_TX801: IS_Order = new int[] { 7,6,5,4,3,2,1,0 }; break;
-                    case EPrinterType.printer_TX802: IS_Order = new int[] { 7,6,5,4,3,2,1,0 }; break;
+                    case EPrinterType.printer_TX801:
+                        IS_Order    = new int[] { 7, 6, 5, 4, 3, 2, 1, 0 };
+                        Color_Order = new int[] { 7, 6, 5, 4, 3, 2, 1, 0 };
+                        break;
+                    case EPrinterType.printer_TX802:
+                        IS_Order    = new int[] { 7, 6, 5, 4, 3, 2, 1, 0 };
+                        Color_Order = new int[] { 7, 6, 5, 4, 3, 2, 1, 0 };
+                        break;
 
-                    case EPrinterType.printer_CB612: IS_Order = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23 }; break;
+                    case EPrinterType.printer_CB612:
+                        IS_Order    = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23 };
+                        Color_Order = new int[] { 1, 0, 2, 3, 4, 5 }; // order: to be defined !!!
+                        break;
 
-                    default: IS_Order = new int[] { 0,1,2,3,4,5,6,7 }; break;
+                    default:
+                        IS_Order    = new int[] { 0, 1, 2, 3, 4, 5, 6, 7 };
+                        Color_Order = new int[] { 0, 1, 2, 3, 4, 5, 6, 7 }; 
+                        break;
                 }
 			}
         }
@@ -298,7 +327,22 @@ namespace RX_DigiPrint.Models
             get { return _AllInkSupplies; }
             set { SetProperty(ref _AllInkSupplies, value); }
         }
-        
+
+        //--- Property HeadDist ---------------------------------------
+        private Int32[] _HeadFpVoltage;
+        public Int32[] HeadFpVoltage
+        {
+            get { return _HeadFpVoltage; }
+            set { Changed|=SetProperty(ref _HeadFpVoltage, value); }
+        }
+
+        //--- SetFpVoltage -----------------------------
+        public void SetFpVoltage(int no, int voltage)
+        {
+            Changed = (voltage!=_HeadFpVoltage[no]);
+            _HeadFpVoltage[no] = voltage;
+        }
+
         //--- Property HeadDist ---------------------------------------
         private double[] _HeadDist; // in mm
         public double[] HeadDist
@@ -404,6 +448,29 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _ChillerEnabled, value); }
         }
 
+        //--- Property StateBrush ---------------------------------------
+		private Brush _StateBrush=Brushes.Transparent;
+		public Brush StateBrush
+		{
+			get { return _StateBrush; }
+			set { SetProperty(ref _StateBrush,value); }
+		}
+
+        //--- UpdateStateBrush -----------------------------------------
+        public void UpdateStateBrush()
+		{
+            Brush brush=Brushes.Transparent;
+            foreach(InkSupply inkSupply in RxGlobals.InkSupply.List)
+			{
+                if (inkSupply.StateBrush==Rx.BrushError)
+				{
+                    StateBrush=inkSupply.StateBrush;
+                    return;
+				}
+                if (inkSupply.StateBrush==Rx.BrushWarn) brush=inkSupply.StateBrush;
+			}
+            StateBrush = brush;
+		}
 
         //--- SetPrintCfg ----------------------------------------
         public void SetPrintCfg(TcpIp.SPrinterCfgMsg msg)
@@ -432,8 +499,12 @@ namespace RX_DigiPrint.Models
             OffsetIncPerMeterVerso  = msg.offset.incPerMeterVerso;
 
             ColorCnt                = msg.colorCnt;
-            InkCylindersPerColor     = msg.InkCylindersPerColor;
+            InkCylindersPerColor    = msg.InkCylindersPerColor;
             HeadsPerColor           = msg.headsPerColor;
+
+            _HeadFpVoltage= new Int32[msg.headFpVoltage.Count()];
+            for (i=0; i<_HeadFpVoltage.Count(); i++) _HeadFpVoltage[i]    = msg.headFpVoltage[i];
+            this.OnPropertyChanged("HeadFpVoltage");
             
             _HeadDist = new double[msg.headDist.Count()];
             for (i = 0; i < _HeadDist.Count(); i++)
@@ -491,6 +562,13 @@ namespace RX_DigiPrint.Models
             msg.InkCylindersPerColor    = InkCylindersPerColor;
 
             msg.externalData            = Convert.ToInt32(ExternalData);
+            
+            if (_HeadFpVoltage!=null)
+            {
+                msg.headFpVoltage = new Int32[_HeadFpVoltage.Count()];
+                for (i=0; i<msg.headFpVoltage.Count(); i++)
+                    msg.headFpVoltage[i] = _HeadFpVoltage[i];
+            }
 
             if (_HeadDist!=null)
             {

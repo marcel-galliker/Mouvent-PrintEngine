@@ -445,7 +445,7 @@ void enc_sent_document(int pages, SPageId *pId)
 //--- enc_change ---------------------------------------------------
 int enc_change(void)
 {
-	if (RX_Config.printer.type==printer_LH702) Error(LOG, 0, "enc_change idx=%d", _ChangeFifoIdx);
+//	if (RX_Config.printer.type==printer_LH702) Error(LOG, 0, "enc_change idx=%d", _ChangeFifoIdx);
 	if (_ChangeFifoIdx>0)
 	{
 		if (_ChangeFifoIdx<1) return Error(ERR_ABORT, 0, "ChangeFIFO empty");
@@ -480,7 +480,7 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 		{
 			if (_ChangeFifoIdx>=CHANGE_FIFO_SIZE) return Error(ERR_ABORT, 0, "Fifo Overflow");
 			_ChangeFifo[_ChangeFifoIdx++] = pitem;
-			Error(LOG, 0, "enc_set_pg (id=%d, page=%d, copy=%d, scan=%d) to ChangeFIFO", pId->id, pId->page, pId->copy, pId->scan);
+		//	Error(LOG, 0, "enc_set_pg (id=%d, page=%d, copy=%d, scan=%d) to ChangeFIFO", pId->id, pId->page, pId->copy, pId->scan);
 			return REPLY_OK;
 		}
 		_LH702_printGoMode = pitem->printGoMode;

@@ -459,7 +459,7 @@ static void _save_to_file(SBmpSplitInfo *pInfo, int log)
 		info.colorCode[0] = pInfo->colorCode;
 		info.inkSupplyNo[0] = 0;
 		info.buffer[0]     = &buffer;
-		tif_write(dir, fname, &info);
+		tif_write(dir, fname, &info, NULL);
 	}
 	free(buffer);
 	if (log) Error(LOG, 0, "File saved to >>%s<<", fname);
@@ -468,6 +468,7 @@ static void _save_to_file(SBmpSplitInfo *pInfo, int log)
 //--- _send_image_data ---------------------------------------------
 static int _send_image_data(SBmpSplitInfo *pInfo)
 {
+	if (FALSE)
 	{
 		SPageId *pid=&pInfo->pListItem->id;
 		int idx=data_printList_idx(pInfo->pListItem);

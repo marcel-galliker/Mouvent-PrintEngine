@@ -23,6 +23,7 @@ INT16 RX_DisabledJets[MAX_COLORS*MAX_HEADS_COLOR][MAX_DISABLED_JETS];
 static int _Active;
 static int _MaxDropSize=3;
 static int _First;
+static int _Log;
 
 //--- prototypes --------------------------------------------------------
 
@@ -64,19 +65,52 @@ void jc_set_disabled_jets(SDisabledJetsMsg *pmsg)
 		}
 	}
 	_First = TRUE;
+	_Log   = TRUE;
 }
 
 //--- jc_active ---------------------------------------------------
 int  jc_active(void)
 {
+	if (_First)
+	{
+		int head, n, m;
+		for (head=0; head<SIZEOF(RX_DisabledJets); head++)
+		{
+			for (n=0; n<MAX_DISABLED_JETS; n++)
+			{
+				//--- disable jet in left overlap ---
+				if (RX_DisabledJets[head][n]>0 && RX_DisabledJets[head][n]<=HEAD_OVERLAP_SAMBA && head>0) 
+				{
+					for (m=0; m<MAX_DISABLED_JETS; m++)
+					{
+						if (RX_DisabledJets[head-1][m]<0) RX_DisabledJets[head-1][m] = RX_DisabledJets[head][n]+HEAD_WIDTH_SAMBA;
+						break;
+					}					
+				}
+
+				//--- disable jet in right overlap ---
+				if (RX_DisabledJets[head][n]>=HEAD_WIDTH_SAMBA && head<SIZEOF(RX_DisabledJets)) 
+				{
+					for (m=0; m<MAX_DISABLED_JETS; m++)
+					{
+						if (RX_DisabledJets[head+1][m]<0) RX_DisabledJets[head-1][m] = RX_DisabledJets[head][n]-HEAD_WIDTH_SAMBA;
+						break;
+					}					
+				}
+
+			}
+		}
+		_First=FALSE;
+	}
 	return _Active;
 }
 
 //--- _jet_correction --------------------------------------------------
 int	jc_correction (SBmpInfo *pBmpInfo,  SPrintListItem *pItem, int fromLine)
 {
-	int color, n, head, jet;
+	int color, n, head, jet, logLen;
 	int pixelPerByte;
+	char logStr[MAX_PATH];
 	SBmpSplitInfo	*pInfo; 
 
 	if (pBmpInfo->bitsPerPixel==8) return REPLY_OK;	// correction whils screening 
@@ -104,12 +138,14 @@ int	jc_correction (SBmpInfo *pBmpInfo,  SPrintListItem *pItem, int fromLine)
 				pInfo = &pItem->splitInfo[RX_Spooler.headNo[color][head]-1];
 				if (pInfo->data && pBmpInfo->buffer[color] && pBmpInfo->bitsPerPixel)
 				{
+					logLen=0;
 					for (n=0; n<MAX_DISABLED_JETS; n++)
 					{
 						jet = RX_DisabledJets[color*RX_Spooler.headsPerColor+head][n];
 						if (jet>=0)
 						{
-							if (_First) Error(LOG, 0, "Disable Jet color=%d, head=%d, jet=%d", color, head, jet);
+							
+							if(_Log) logLen += sprintf(&logStr[logLen], "%d ", jet);
 							jet += pInfo->startBt*pixelPerByte + pInfo->jetPx0;
 							_disable_jet(*pInfo->data, pBmpInfo->bitsPerPixel, pBmpInfo->lengthPx, pBmpInfo->lineLen, jet, fromLine);
 							/*
@@ -131,12 +167,13 @@ int	jc_correction (SBmpInfo *pBmpInfo,  SPrintListItem *pItem, int fromLine)
 							*/
 						}
 					}
+					if (logLen) Error(LOG, 0, "Disable Jet color=%d, head=%d, jet=%s", color, head, logStr);
 				}
 			}
 		//	if (pBmpInfo->printMode==PM_SCANNING || pBmpInfo->printMode==PM_SINGLE_PASS) break;
 		}
 	}
-	_First = FALSE;
+	_Log = FALSE;
 	return REPLY_OK;							
 }
 
@@ -199,11 +236,11 @@ static void _disable_jet(UCHAR *pBuffer, int bitsPerPixel, int length, int bytes
 				_SetPixel(pBuffer, bytesPerLine, jet+y+1, fromLine-y-1, 0);
 
 				//--- arrow at bottom -------------------------------------
-				_SetPixel(pBuffer, bytesPerLine, jet-y-1, length-25+y, 3);
-				_SetPixel(pBuffer, bytesPerLine, jet-y,   length-25+y, 3);
-				_SetPixel(pBuffer, bytesPerLine, jet,     length-25+y, 3);
-				_SetPixel(pBuffer, bytesPerLine, jet+y,   length-25+y, 3);
-				_SetPixel(pBuffer, bytesPerLine, jet+y+1, length-25+y, 3);
+				_SetPixel(pBuffer, bytesPerLine, jet-y-1, length-20+y, 3);
+				_SetPixel(pBuffer, bytesPerLine, jet-y,   length-20+y, 3);
+				_SetPixel(pBuffer, bytesPerLine, jet,     length-20+y, 3);
+				_SetPixel(pBuffer, bytesPerLine, jet+y,   length-20+y, 3);
+				_SetPixel(pBuffer, bytesPerLine, jet+y+1, length-20+y, 3);
 			}
 		}
 

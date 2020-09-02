@@ -379,18 +379,20 @@
 #define REP_SET_SPOOL_CFG		0x02003001
 #define CMD_REQ_SPOOL_CFG		0x04003001
 
-#define CMD_PRINT_FILE			0x01003002
-#define REP_PRINT_FILE			0x02003002
-#define EVT_PRINT_FILE			0x03003002
+#define CMD_LOAD_FILE			0x01003002
 
-#define EVT_PRINT_DONE			0x03003003
+#define CMD_PRINT_FILE			0x01003003
+#define REP_PRINT_FILE			0x02003003
+#define EVT_PRINT_FILE			0x03003003
 
-#define CMD_PRINT_ABORT			0x01003004
-#define REP_PRINT_ABORT			0x02003004
+#define EVT_PRINT_DONE			0x03003004
 
-#define CMD_FONTS_UPDATED		0x01003005
+#define CMD_PRINT_ABORT			0x01003005
+#define REP_PRINT_ABORT			0x02003005
 
-#define CMD_STRESS_TEST			0x01003006
+#define CMD_FONTS_UPDATED		0x01003006
+
+#define CMD_STRESS_TEST			0x01003007
 
 #define BEG_SET_FILEDEF			0x04003010
 #define ITM_SET_FILEDEF			0x05003010	// header + data
@@ -629,9 +631,11 @@ typedef struct
 	UINT32			headsPerColor;			
 	UINT32			inkSupplyCnt;
 	UINT32			inkCylindersPerColor;
+	INT32			headFpVoltage[MAX_HEAD_DIST];
 	INT32			headDist[MAX_HEAD_DIST];
 	INT32			headDistBack[MAX_HEAD_DIST];
 	INT32			colorOffset[MAX_COLORS];
+
 } SPrinterCfgMsg;
 
 typedef struct SDensityValuesMsg
@@ -683,6 +687,14 @@ typedef struct SPrintTestDataMsg
 	UINT32		headNo;
 	char		data[MAX_TEST_DATA_SIZE];
 } SPrintTestDataMsg;
+
+//--- CMD_LOAD_FILE -------------------------
+typedef struct SLoadFileCmd
+{
+	SMsgHdr		hdr;
+	SPageId		id;
+	char		filepath[256];
+} SLoadFileCmd;
 
 //--- CMD_PRINT_FILE -------------------------
 typedef struct SPrintFileCmd

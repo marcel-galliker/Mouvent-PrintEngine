@@ -684,6 +684,7 @@ namespace RX_DigiPrint.Services
 	        public Int32	srcPages;
 	        public Int32	srcWidth;
 	        public Int32	srcHeight;
+            public byte     srcBitsPerPixel;
 
 	        public Int32	firstPage;
 	        public Int32	lastPage;
@@ -827,6 +828,8 @@ namespace RX_DigiPrint.Services
             public Int32 inkSupplyCnt;
             public Int32 InkCylindersPerColor;
 
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst =(6*48))] // color*heads
+            public Int32[]		headFpVoltage;
             [MarshalAs(UnmanagedType.ByValArray, SizeConst =(6*48))] // color*heads
             public Int32[]		headDist;
             [MarshalAs(UnmanagedType.ByValArray, SizeConst =(6*48))] // color*heads
@@ -1082,11 +1085,11 @@ namespace RX_DigiPrint.Services
 	        public UInt32			tempHead;
 	        public UInt32			tempCond;
             public UInt32           tempSetpoint;
-            public Int32            tempReady;
 	        public UInt32			presIn_ID;
 	        public Int32			presIn;
 	        public Int32			presIn_max;
 	        public Int32			presIn_diff;
+	        public Int32			flowFactor;
 	        public UInt32			presOut_ID;
 	        public Int32			presOut;
 	        public Int32			presOut_diff;

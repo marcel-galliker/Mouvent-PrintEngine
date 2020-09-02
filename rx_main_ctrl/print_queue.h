@@ -41,6 +41,7 @@ int pq_loading(int spoolerNo, SPageId *pid, char *txt);
 int pq_sending(int spoolerNo, SPageId *pid);
 int pq_printed(int headNo, SPageId *pid, int *pageDone, int *jobDone, SPrintQueueItem **pnextItem);
 int pq_stopping(SPrintQueueItem *pitem);
+void pq_stopped(SPrintQueueItem *pitem);
 void pq_sent_document(int pages);
 
 SPrintQueueItem *pq_sent(SPageId *pid);

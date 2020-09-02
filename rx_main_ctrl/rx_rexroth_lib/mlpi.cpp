@@ -15,6 +15,7 @@
 
 #include "rx_error.h"
 #include "rx_threads.h"
+#include "rx_trace.h"
 #include "rx_xml.h"
 #include "rx_rexroth.h"
 #include "tinyxml.h"
@@ -61,15 +62,28 @@ int  rex_connect(const char *ipAddr, connected_callback onConnected,  connected_
 	
 	if (_Connection != MLPI_INVALIDHANDLE) return 0;
 
+	MlpiVersion versionInfo;
+	memset(&versionInfo, 0, sizeof(versionInfo));
+	result = mlpiApiGetClientCoreVersion(&versionInfo);
+	TrPrintfL(TRUE, "MLPI client version %d.%d.%d.%d", versionInfo.major, versionInfo.minor, versionInfo.bugfix, versionInfo.patch);
+
 	char_to_wchar(_IpAddr, _WIpAddr, SIZEOF(_WIpAddr));
 	result=mlpiApiSetDefaultTimeout(MLPI_TIMEOUT);
-	if (FALSE)
+	
+	//--- connect to "OLD" PLC version		
+	result = mlpiApiConnect(_WIpAddr, &_Connection);
+	if (rex_check_result(result))
 	{
-		Error(WARN, 0, "Not connect PLC");
-		result =  MLPI_E_CONNECTFAILED;
+		//--- connect to new PLC Version --------------------
+		char str[MAX_PATH];
+		wchar_t wstr[MAX_PATH];
+		sprintf(str, "%s -user=%s -password=%s", _IpAddr, "rexroth", "rexroth");
+		char_to_wchar(str, wstr, SIZEOF(wstr));
+		result = mlpiApiConnect(wstr, &_Connection);
 	}
-	else result = mlpiApiConnect(_WIpAddr, &_Connection);
+
 	if (rex_check_result(result)) return 1;
+
 	result=mlpiLogicGetNumberOfApplications(_Connection, &cnt);
 	for (int i=0; i<10; i++)
 	{

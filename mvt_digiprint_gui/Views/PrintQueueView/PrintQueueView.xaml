@@ -150,7 +150,8 @@
                                                 Panel.ZIndex="10">
 
                                         <common:MvtButton  PreviewMouseLeftButtonDown="Save_Click" IsHitTestVisible="True" 
-                                                           Margin="0,0,10,0" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}" >
+                                                           Margin="0,0,10,0" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}" 
+                                                           IsChecked="true">
                                             <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="20" Height="20" Kind="Check" />
                                         </common:MvtButton>
 
@@ -206,8 +207,8 @@
                         <ig:TemplateColumnLayout.Template>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
-                                    <pq_views:FileSettingsWeb Margin="0,10,0,0"/>
-                                    <pq_views:FileSettingsScan Margin="0,10,0,0" />
+                                    <pq_views:FileSettingsWeb/>
+                                    <pq_views:FileSettingsScan/>
                                     <GroupBox Style="{StaticResource MvtGroupBox}"
                                         Header="Preview"
                                         HorizontalAlignment="Left"

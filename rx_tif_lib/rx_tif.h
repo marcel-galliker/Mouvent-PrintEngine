@@ -41,7 +41,7 @@ int tif_load_simple	(const char *path, BYTE **buffer, int bufsize, SBmpInfo *inf
 int tif_load_8bppx	(const char *path, int printMode, SColorSplitCfg *psplit, int splitCnt, BYTE* buffer[MAX_COLORS], SBmpInfo *pinfo);
 char* tif_last_filepath(void);
 // int tif_write(const char *filedir, const char *filename, const char *ext, SBmpInfo *pinfo, int uncompress);
-int tif_write		(const char *filedir, const char *filename, SBmpInfo *pinfo);
+int tif_write		(const char *filedir, const char *filename, SBmpInfo *pinfo, char *color);
 int tif_write_plane(const char *filepath, SPlaneInfo *pinfo, int uncompress);
 void tif_abort		(void);
 

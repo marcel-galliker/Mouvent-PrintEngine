@@ -31,6 +31,8 @@
     <SolidColorBrush x:Key="RX.Green"                Color="#FFACDE42"/>
     <SolidColorBrush x:Key="RX.DarkGreen"            Color="#FF85AC1D"/>
     <SolidColorBrush x:Key="RX.CtrlKey"              Color="#FFF4F4F4"/>
+    <SolidColorBrush x:Key="RX.Error"                Color="Crimson"/>
+    <SolidColorBrush x:Key="RX.Warn"                 Color="Gold"/>
     <SolidColorBrush x:Key="RX.Key"                  Color="{DynamicResource {x:Static SystemColors.ControlColorKey}}"/>
 
     <!--

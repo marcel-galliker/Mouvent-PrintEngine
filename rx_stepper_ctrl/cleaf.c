@@ -582,6 +582,7 @@ int  cleaf_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		motors_stop(MOTOR_ALL_BITS); // Stops Hub and Robot
 		Fpga.par->output &= ~RO_ALL_OUTPUTS; // set all output to off
 		RX_StepperStatus.info.moving = TRUE;
+		RX_StepperStatus.info.ref_done = FALSE;
 		RX_StepperStatus.cmdRunning = msgId;
 		_MaterialDetected = FALSE;
 		break;

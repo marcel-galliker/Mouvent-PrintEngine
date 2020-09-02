@@ -111,8 +111,10 @@ typedef enum
 
 //--- prototypes -----------------------
 static void* _plc_thread(void *par);
+static void* _gui_msg_thread(void *par);
 static void* _plc_simu_thread(void *par);
 static void _simu_init(void);
+static int _plc_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen);
 static void _plc_set_time();
 static void _plc_set_config();
 static void _plc_get_status();
@@ -182,6 +184,16 @@ static int				_PAR_WINDER_2_ON=TRUE;
 
 static int				_heads_to_print=FALSE;
 static int				_head_was_up=FALSE;
+
+//--- GUI msg fifo -------------
+#define FIFO_SIZE	64
+static HANDLE		_GuiHandleMsg;
+static 	RX_SOCKET	_gui_socket[FIFO_SIZE];
+static 	int			_gui_msglen[FIFO_SIZE];
+static	BYTE		_gui_msgbuf[FIFO_SIZE][MAX_MESSAGE_SIZE];
+static 	int			_gui_msgInIdx=0;
+static 	int			_gui_msgOutIdx=0;
+
 	
 //--- plc_init ----------------------------------------------------------------
 int	plc_init(void)
@@ -203,6 +215,8 @@ int	plc_init(void)
 	if (_SimuPLC) rx_thread_start(_plc_simu_thread, NULL, 0, "_plc_simu_thread");
 	else		  rx_thread_start(_plc_thread, NULL, 0, "_plc_thread");
 
+	_GuiHandleMsg = rx_sem_create();
+	rx_thread_start(_gui_msg_thread, NULL, 0, "_gui_msg_thread");
 //	_simu_init();
 
 	return REPLY_OK;
@@ -675,7 +689,33 @@ int  plc_pause_printing(int fromGui)
 }
 
 //--- plc_handle_gui_msg --------------------------------------------------------
-int plc_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen)
+int plc_handle_gui_msg(RX_SOCKET socket, void *pmsg, int len)
+{
+	int idx=(_gui_msgInIdx+1) % FIFO_SIZE;
+	if (idx==_gui_msgOutIdx) return Error(WARN, 0, "PLC-GUI-MESSAGE FIFO full");
+
+	_gui_msgInIdx = idx;
+	_gui_socket[idx]=socket;
+	_gui_msglen[idx]=len;
+	memcpy(&_gui_msgbuf[idx], pmsg, len);
+	rx_sem_post(_GuiHandleMsg);
+	return REPLY_OK;	
+}
+ 
+static void* _gui_msg_thread(void *par)
+{
+	SMsgHdr* phdr;
+	while (TRUE)
+	{
+		rx_sem_wait(_GuiHandleMsg, 0);
+		phdr = (SMsgHdr*) &_gui_msgbuf[_gui_msgOutIdx];
+		_plc_handle_gui_msg(_gui_socket[_gui_msgOutIdx], phdr->msgId, &phdr[1], phdr->msgLen - sizeof(SMsgHdr));
+		_gui_msgOutIdx = (_gui_msgOutIdx+1) % FIFO_SIZE;
+	}
+	return NULL;
+}
+
+static int _plc_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen)
 {
 	switch(cmd)
 	{

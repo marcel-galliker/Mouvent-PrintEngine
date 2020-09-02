@@ -4,7 +4,6 @@ using RX_DigiPrint.Services;
 using RX_DigiPrint.Views.AlignmentView;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -30,6 +29,7 @@ namespace RX_DigiPrint.Views.Alignment
         private int CurrentSelectedInkCylinderIndex { get; set; } // ink cylinder index (inside one color)
         private int CurrentSelectedColorIndex { get; set; }
 
+        public bool ResetCurrentSelectedIndices { get; set; }
 
         private List<ClusterAlignmentView> ClusterAlignmentViewList { get; set; }
         public AlignmentView()
@@ -57,8 +57,7 @@ namespace RX_DigiPrint.Views.Alignment
 
             CurrentSelectedColorIndex = -1;
             CurrentSelectedInkCylinderIndex = -1;
-
-           
+            ResetCurrentSelectedIndices = true;
         }
 
         //--- PrintSystem_PropertyChanged ----------------------------------
@@ -73,21 +72,35 @@ namespace RX_DigiPrint.Views.Alignment
                     // no colors or print heads defined yet
                     return;
                 }
+                ResetCurrentSelectedIndices = true;
                 _InitInkSupplySelection();
             }
         }
 
         private void _InitInkSupplySelection()
         {
+            if (RxGlobals.PrintSystem.Color_Order == null)
+            {
+                Console.WriteLine("Error _InitInkSupplySelection: Invalid Color_Order == null!!");
+                return;
+            }
+
             int inkCylinderCnt = RxGlobals.PrintSystem.ColorCnt * RxGlobals.PrintSystem.InkCylindersPerColor;
 
-            CurrentSelectedColorIndex = 0;
-            CurrentSelectedInkCylinderIndex = 0;
-
-            if (RxGlobals.PrintSystem.IsTx)
+            if (ResetCurrentSelectedIndices)
             {
-                CurrentSelectedColorIndex = RxGlobals.PrintSystem.ColorCnt - 1;
-                CurrentSelectedInkCylinderIndex = RxGlobals.PrintSystem.InkCylindersPerColor - 1;
+                int currentSelectedUnsortedColorIndex = 0;
+                int currentSelectedUnsortedInkCylinderIndex = 0;
+                
+                if (!(currentSelectedUnsortedColorIndex < RxGlobals.PrintSystem.Color_Order.Length))
+                {
+                    Console.WriteLine("Error _InitInkSupplySelection: Invalid Color_Order array!!");
+                    return;
+                }
+                CurrentSelectedColorIndex = RxGlobals.PrintSystem.Color_Order[currentSelectedUnsortedColorIndex];
+                CurrentSelectedInkCylinderIndex = currentSelectedUnsortedInkCylinderIndex;
+                
+                ResetCurrentSelectedIndices = false;
             }
 
             ColorSelectionPanel.Children.RemoveRange(0, ColorSelectionPanel.Children.Count);
@@ -108,20 +121,23 @@ namespace RX_DigiPrint.Views.Alignment
 
             for (int color = 0; color < RxGlobals.PrintSystem.ColorCnt; color++)
             {
-                int colorIndex = color;
-                if (RxGlobals.PrintSystem.IsTx) colorIndex = RxGlobals.PrintSystem.ColorCnt - 1 - color;
+                if (color < RxGlobals.PrintSystem.Color_Order.Length)
+                {
+                    int colorIndex = RxGlobals.PrintSystem.Color_Order[color];
 
-                UpdateColorDescription(colorIndex, ref description);
-                RadioButton button = new RadioButton();
-                button.Content = description.ColorName;
-                button.Background = description.Color;
-                button.BorderBrush = description.StrokeColor;
-                button.Tag = colorIndex;
-                button.Click += _ColorSelection_Clicked;
-                button.Style = colorSelectionStyle;
-                if (color == 0) button.IsChecked = true;
-                else button.IsChecked = false;
-                ColorSelectionPanel.Children.Add(button);
+                    UpdateColorDescription(colorIndex, ref description);
+                    RadioButton button = new RadioButton();
+                    button.Content = description.ColorName;
+                    button.Background = description.Color;
+                    button.BorderBrush = description.StrokeColor;
+                    button.Tag = colorIndex;
+                    button.Click += _ColorSelection_Clicked;
+                    button.Style = colorSelectionStyle;
+                    if (colorIndex == CurrentSelectedColorIndex) button.IsChecked = true;
+                    else button.IsChecked = false;
+                    ColorSelectionPanel.Children.Add(button);
+                }
+                
             }
 
             if (RxGlobals.PrintSystem.InkCylindersPerColor > 1)
@@ -141,14 +157,13 @@ namespace RX_DigiPrint.Views.Alignment
                 for (int cylinder = 0; cylinder < RxGlobals.PrintSystem.InkCylindersPerColor; cylinder++)
                 {
                     int cylinderIndex = cylinder;
-                    if (RxGlobals.PrintSystem.IsTx) cylinderIndex = RxGlobals.PrintSystem.InkCylindersPerColor - 1 - cylinder;
                     RadioButton button = new RadioButton();
                     string displayIndex = (cylinderIndex + 1).ToString();
                     button.Content = "Cylinder " + displayIndex;
                     button.Tag = cylinderIndex;
                     button.Click += _InkCylinderSelection_Clicked;
                     button.Style = cylinderSelectionStyle;
-                    if (cylinder == 0) button.IsChecked = true;
+                    if (cylinderIndex == CurrentSelectedInkCylinderIndex) button.IsChecked = true;
                     else button.IsChecked = false;
                     InkCylinderSelectionPanel.Children.Add(button);
                 }
@@ -168,6 +183,7 @@ namespace RX_DigiPrint.Views.Alignment
         private void _ColorSelection_Clicked(object sender, RoutedEventArgs e)
         {
             RadioButton button = sender as RadioButton;
+
             CurrentSelectedColorIndex = System.Convert.ToInt32(button.Tag);
             CurrentSelectedInkCylinderIndex = 0;
             

@@ -131,6 +131,7 @@ static int		_UdpIsLocal;
 static BYTE		*_FpgaBase=NULL;
 static int		_EncCheckDelay=0;
 static UINT32	_EncoderTelFreq=0;
+static UINT32	_EncoderTelFreq_delay=0;
 static UINT32*  _Buffer[HEAD_CNT]={NULL,NULL,NULL,NULL};	// for DDR3-Tests
 static UINT32*	_ImgBuf[HEAD_CNT];
 static UINT32	_DataCnt[HEAD_CNT];
@@ -740,6 +741,7 @@ static void _fpga_enc_config(int khz)
 
 //	memcpy(&RX_FpgaEncCfg, FpgaCfg.encoder, sizeof(RX_FpgaEncCfg));
 	_EncCheckDelay = 2;	
+	_EncoderTelFreq_delay = 2;
 }
 	
 //--- fpga_is_init -----------------------------
@@ -1989,13 +1991,17 @@ static int _check_encoder_tel_freq(void)
 {
 	static UINT32 _enc_tel_cnt=0;
 	static int   _cnt=0;
-	if (FpgaCfg.encoder->cmd & ENC_ENABLE) // _EncCheckDelay==0)
+	if (FpgaCfg.encoder->cmd & ENC_ENABLE)
 	{
 		_EncoderTelFreq = Fpga.error->enc_tel_cnt-_enc_tel_cnt;
-		if (_EncoderTelFreq<500000)
+		if (_EncoderTelFreq_delay>0) 
 		{
-			_cnt++;
-			if (_cnt>=3) ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err,  err_encoder_not_conected,  0, "Encoder slow communication");
+			_EncoderTelFreq_delay--;
+			_cnt=0;
+		}
+		else if (_EncoderTelFreq<500000)
+		{
+			if (++_cnt>=3) ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err,  err_encoder_not_conected,  0, "Encoder slow communication");
 		} 
 	}
 	else _cnt=0;

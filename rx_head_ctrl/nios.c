@@ -236,12 +236,6 @@ void nios_load(const char *exepath)
 #endif
 }
 
-//--- nios_NiosLoaded -----------------------------------------
-int  nios_NiosLoaded(void)
-{
-	return _NiosLoaded;
-}
-
 //--- _sample_wf ----------------------------------------
 
 #define OLD_WF_OFFSET		-20
@@ -575,10 +569,10 @@ static void _nios_set_user_eeprom(int no)
 	if (sizeof(RX_HBStatus[0].head[no].eeprom_mvt)!=128) Error(ERR_ABORT, 0, "SIZE MISMATCH");
 	if (sizeof(_NiosStat->user_eeprom[no])!=128) Error(ERR_ABORT, 0, "SIZE MISMATCH");
 
-	if (_NiosMem==NULL) return;
+	if (_NiosStat==NULL) return;
 
 	//--- initialize status memory -----------------------
-	if (memempty(&RX_HBStatus[0].head[no].eeprom_mvt, sizeof(SHeadEEpromMvt)) && !memempty(&_NiosStat->head_eeprom[no], sizeof(_NiosStat->head_eeprom[no])))
+	if (memempty(&RX_HBStatus[0].head[no].eeprom_mvt, sizeof(SHeadEEpromMvt)) && !memempty(&_NiosStat->user_eeprom[no], sizeof(_NiosStat->user_eeprom[no])))
 		memcpy(&RX_HBStatus[0].head[no].eeprom_mvt, _NiosStat->user_eeprom[no], sizeof(SHeadEEpromMvt));
 
 	//--- save if changed and not NULL ------------------
@@ -599,19 +593,18 @@ int  nios_main(int ticks, int menu)
 	if (_NiosLoaded)
 	{
 		if (_NiosMem) cond_main(ticks, menu);
-		
+
 		tse_check_errors(ticks, menu);
-		if (menu) 	
+		if (menu)
 		{
-			nios_check_errors();		
 			_nios_copy_status();			
+			nios_check_errors(ticks);		
 
 			for(int head=0; head<SIZEOF(FpgaCfg.head); head++)
 			{
 				_nios_set_user_eeprom(head);
 			} 			
 		}
-
 	}
 	return REPLY_OK;
 }
@@ -623,7 +616,7 @@ static void _nios_copy_status(void)
 }
 
 //--- nios_check_errors ---------------------------
-void nios_check_errors(void)
+void nios_check_errors(int ticks)
 {	
 	ELogItemType	abort = RX_HBConfig.simuPlc ? LOG_TYPE_WARN : LOG_TYPE_ERROR_ABORT;
 
@@ -678,7 +671,7 @@ void nios_check_errors(void)
 			ErrorFlag(WARN, (UINT32*)&RX_HBStatus[0].info, info_cooler_pcb_present, 0, "No Cooler PCB present");
 		}
 
-		cond_error_check();		
+		cond_error_check(ticks);		
 	}
 }
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RX_Common;
+using System;
 using System.Windows.Data;
 using System.Windows.Media;
 
@@ -35,7 +36,7 @@ namespace RX_DigiPrint.Converters
             {
                 if (System.Convert.ToInt32(value) == 0)
                 {
-                        brush = Brushes.Crimson;
+                    brush = (SolidColorBrush)Rx.BrushError;
                 }
                 else
                 {

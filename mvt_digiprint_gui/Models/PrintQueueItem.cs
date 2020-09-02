@@ -1047,7 +1047,7 @@ namespace RX_DigiPrint.Models
             }
             else
             {
-                if (msg.scans> 0)
+                if (msg.scans>0 && (msg.testImage==0 || msg.testImage==7))
                 {
                     if (msg.scansPrinted>=msg.start.scan) progress = 100.0 * (msg.scansPrinted-msg.scansStart) / (msg.scans-msg.scansStart);
                 }

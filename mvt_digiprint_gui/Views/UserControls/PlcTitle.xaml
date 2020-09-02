@@ -6,7 +6,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="30" d:DesignWidth="300">
     <Grid>
-            <Rectangle Fill="{StaticResource Mouvent.MainColorBrush}" Height="1"/>
+        <Rectangle Fill="{StaticResource Mouvent.MainColorBrush}" Height="1" x:Name="Line"/>
         <TextBlock Text="{Binding Header}" Margin="10,0" Padding="5,0" Background="White" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="{DynamicResource Brush04}" FontSize="12"/>
     </Grid>
 </UserControl>

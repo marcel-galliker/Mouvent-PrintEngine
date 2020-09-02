@@ -1,4 +1,5 @@
-﻿using RX_DigiPrint.Converters;
+﻿using RX_Common;
+using RX_DigiPrint.Converters;
 using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Models;
 using RX_DigiPrint.Services;
@@ -73,10 +74,10 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
                         StatusColor = Brushes.SeaGreen;
                         break;
                     case ETotalStatus.STATUS_WARNING:
-                        StatusColor = Brushes.Gold;
+                        StatusColor = Rx.BrushWarn;
                         break;
                     case ETotalStatus.STATUS_ERROR:
-                        StatusColor = Brushes.Crimson;
+                        StatusColor = Rx.BrushError;
                         break;
                     default:
                         StatusColor = Brushes.Transparent;
@@ -411,7 +412,7 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
             else if (!inkSupply.TempReady
                 || !inkSupply.CondTempReady
                 || inkSupply.CanisterErr >= RX_DigiPrint.Services.ELogType.eErrWarn
-                || inkSupply.Warn > 0)
+                || inkSupply.Warn)
             {
                 InkCylinderStatusList[inkCylinderIndex].Status = ETotalStatus.STATUS_WARNING;
             }
@@ -465,7 +466,7 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
                                 {
                                     status.Status = ETotalStatus.STATUS_ERROR;
                                 }
-                                else if (!printHeadStatistics.TempReady || printHeadStatistics.Warn != 0)
+                                else if (printHeadStatistics.Warn)
                                 {
                                     status.Status = ETotalStatus.STATUS_WARNING;
                                 }
@@ -664,10 +665,6 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
 
         private void _timer_Tick(int tickNo)
         {
-            RxGlobals.RxInterface.SendCommand(TcpIp.CMD_FLUID_STAT);
-            RxGlobals.RxInterface.SendCommand(TcpIp.CMD_HEAD_STAT);
-            RxGlobals.RxInterface.SendCommand(TcpIp.CMD_ENCODER_STAT);
-
             for (int i = 0; i < _PrintSystem.InkCylindersPerColor * _PrintSystem.ColorCnt; i++)
             {
                 UpdateInkCylinderStatus(i);

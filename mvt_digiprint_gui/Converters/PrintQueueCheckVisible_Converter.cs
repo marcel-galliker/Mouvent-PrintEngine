@@ -25,30 +25,23 @@ namespace RX_DigiPrint.Converters
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            if (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB702_UV)
+            if (value == DependencyProperty.UnsetValue)
             {
+                Console.WriteLine("IntToVisible_Converter: Value=DependencyProperty.UnsetValue");
                 return Visibility.Collapsed;
             }
-            else
-            {
-                if (value == DependencyProperty.UnsetValue)
-                {
-                    Console.WriteLine("IntToVisible_Converter: Value=DependencyProperty.UnsetValue");
-                    return Visibility.Collapsed;
-                }
 
-                try
+            try
+            {
+                if (System.Convert.ToInt32(value) > 0)
                 {
-                    if (System.Convert.ToInt32(value) > 0)
-                    {
-                        return Visibility.Visible;
-                    }
-                    else return Visibility.Collapsed;
+                    return Visibility.Visible;
                 }
-                catch
-                {
-                    return Visibility.Collapsed;
-                }
+                else return Visibility.Collapsed;
+            }
+            catch
+            {
+                return Visibility.Collapsed;
             }
         }
 

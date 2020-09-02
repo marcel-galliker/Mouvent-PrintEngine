@@ -19,6 +19,7 @@
 #include "rx_term.h"
 #include "nios_def_head.h"
 #include "rx_head_ctrl.h"
+#include "fpga.h"
 #include "tse_regs.h"
 #include "tse.h"
 

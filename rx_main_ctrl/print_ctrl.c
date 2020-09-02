@@ -71,6 +71,8 @@ static int				_PrintDone[MAX_PAGES];
 static int				_PrintDoneFlags;
 static int				_PrintDoneNo;
 static int				_PrintGoNo;
+static int				_BitsPerPixel;
+
 static int				ERR_z_in_print;
 
 //--- pc_init ----------------------------------------------------------------
@@ -179,6 +181,7 @@ int pc_start_printing(void)
 		memset(_PrintDone, 0, sizeof(_PrintDone));
 		_PrintDoneNo = 0;
 		_PrintGoNo	 = 0;
+		_BitsPerPixel = 0;
 		_PrintDoneFlags = spool_head_board_used_flags();
 		_SetPrintPar   = TRUE;
 //		fluid_start_printing();
@@ -403,14 +406,14 @@ static int _get_image_size(UINT32 gap)
 static void _set_src_size(SPrintQueueItem *pItem, const char *path)
 {
 	UINT32 width, height;
+	UINT8  bitsPerPixel;
 	int ret;
 
-	ret = flz_get_size(path, 0, 0, &width, &height, NULL);
-	if (ret) ret = tif_get_size(path, 0, 0, &width, &height, NULL);
+	ret = flz_get_size(path, 0, 0, &width, &height, &bitsPerPixel);
+	if (ret) ret = tif_get_size(path, 0, 0, &width, &height, &bitsPerPixel);
 	if (ret) 
 	{
 		UINT32 height, memSize;
-		UINT8  bitsPerPixel;
 		char p[MAX_PATH];
 		bmp_color_path(path, RX_ColorNameShort(0), p);
 		ret = bmp_get_size(p, (UINT32*) &width, &height, &bitsPerPixel, &memSize);
@@ -419,6 +422,7 @@ static void _set_src_size(SPrintQueueItem *pItem, const char *path)
 	{
 		pItem->srcWidth  = width *25400/1200;
 		pItem->srcHeight = height*25400/1200;
+		pItem->srcBitsPerPixel = bitsPerPixel;
 	}
 }
 
@@ -483,6 +487,7 @@ static int _print_next(void)
 	static int _first;
 	static int _ScansNext;
 	static int _CopiesStart;
+	SPrintQueueItem *_NextItem = NULL;
 	TrPrintfL(TRUE, "_print_next printState=%d, spooler_ready=%d, pq_ready=%d", RX_PrinterStatus.printState, spool_is_ready(), pq_is_ready());
 	while ((RX_PrinterStatus.printState==ps_printing || RX_PrinterStatus.printState==ps_goto_pause || RX_PrinterStatus.printState==ps_pause || (_Scanning&&RX_PrinterStatus.printState==ps_stopping)) && spool_is_ready() && pq_is_ready())
 	{	
@@ -565,6 +570,7 @@ static int _print_next(void)
 			{
 				pq_trace_item(item);
 
+				_NextItem = NULL;
 				memcpy(&_Item, item, sizeof(_Item));
 				_first		  = TRUE;
 				_Item.scansStop = 0;
@@ -627,6 +633,19 @@ static int _print_next(void)
 					_CopiesStart = (_Item.copiesPrinted* (_Item.lastPage - _Item.firstPage + 1) + _Item.start.page)-1;
 
 				_set_src_size(&_Item, _FilePathLocal);
+				if (_BitsPerPixel)
+				{
+					if (((_BitsPerPixel<8) && (_Item.srcBitsPerPixel==8))
+					||  ((_BitsPerPixel==8 && (_Item.srcBitsPerPixel<8))))
+					{
+						Error(WARN, 0, "%d: %s Screening not compatible", _Item.id.id, _filename(_Item.filepath));
+						pq_stopped(&_Item);
+						gui_send_print_queue(EVT_GET_PRINT_QUEUE, &_Item);
+						memset(&_Item, 0, sizeof(_Item));
+						return REPLY_OK;;
+					}
+				}
+				_BitsPerPixel = _Item.srcBitsPerPixel;
 
 				pq_set_item(&_Item);
 				pl_start(&_Item, _FilePathLocal);
@@ -663,6 +682,7 @@ static int _print_next(void)
 					}
 				}
 
+				if (RX_Config.printer.type==printer_LH702) spool_load_file(&_Item.id, _FilePathLocal);
 				if (RX_Config.printer.type==printer_DP803) Error(LOG, 0, "Start Printing: >>%s<<, copiesTotal=%d, speed=%d m/min", _Item.filepath, _Item.copiesTotal, _Item.speed);
 			}
 		}
@@ -746,7 +766,7 @@ static int _print_next(void)
 					Error(LOG, 0, "_print_next:_StopJob");
 					pq_set_item(pitem);
 				}
-				spool_print_file(&_Item.id, _DataPath, _ScanOffset, _ScanLengthPx, &_Item, TRUE);
+				spool_print_file(&_Item.id, _DataPath, _ScanOffset, _ScanLengthPx, &_Item, rx_def_is_tx(RX_Config.printer.type));
 				return REPLY_OK;
 			}
 			{
@@ -816,7 +836,7 @@ static int _print_next(void)
 						pq_set_item(&_Item);
 						pl_start(&_Item, _FilePathLocal);
 					}
-					spool_print_file(&_Item.id, _DataPath, _ScanOffset, _ScanLengthPx, &_Item, TRUE);
+					spool_print_file(&_Item.id, _DataPath, _ScanOffset, _ScanLengthPx, &_Item, rx_def_is_tx(RX_Config.printer.type));
 				}
 				else
 				{
@@ -850,6 +870,18 @@ static int _print_next(void)
 						if (_Item.variable) label_send_data(&_Item.id);
 						spool_print_file(&_Item.id, _DataPath, img_offset, 0, &item, clearBlockUsed);
 						_Item.pageMargin=_PageMargin_Next;
+					}
+					
+					if (RX_Config.printer.type==printer_LH702 && _NextItem==NULL)
+					{
+						_NextItem = pq_get_next_item();
+						if (_NextItem) 
+						{
+							char path[MAX_PATH];
+							_local_path(_NextItem->filepath, path);
+							if (_NextItem->id.page<_NextItem->start.page) _NextItem->id.page=_NextItem->start.page;
+							spool_load_file(&_NextItem->id, path);
+						}
 					}
 				}
 				return REPLY_OK;
@@ -968,7 +1000,6 @@ int pc_print_done(int headNo, SPrintDoneMsg *pmsg)
 							machine_pause_printing(FALSE);
 							_PreloadCnt = 5;								
 						}
-						else Error(WARN, 0, "file >>%s<< not loaded completely: HERE WAS THE BUG", _filename(pnext->filepath));
 					}
 				}
 			}

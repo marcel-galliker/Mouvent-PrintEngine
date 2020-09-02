@@ -440,7 +440,7 @@ void txrob_main(int ticks, int menu)
 
     if (fpga_input(ROT_STORED_IN) && (fpga_input(ROT_VAC_OR_WASH_IN) || fpga_input(ROT_WASH_OR_CAP_IN)))
 	{
-		ErrorFlag(ERR_CONT, &_txrob_Error, 0x01, 0, "CLN Command %s: Invalid position sensors combination", _CmdName);
+		ErrorFlag(ERR_CONT, &_txrob_Error[0], 0x01, 0, "CLN Command %s: Invalid position sensors combination", _CmdName);
 		RX_StepperStatus.robinfo.ref_done = FALSE; 
 		RX_StepperStatus.cmdRunning = FALSE;
 		_NewCmd = FALSE;
