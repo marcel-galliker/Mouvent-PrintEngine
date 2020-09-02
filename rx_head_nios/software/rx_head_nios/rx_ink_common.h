@@ -289,7 +289,6 @@ typedef struct SPurgePar
 	INT32 no;
 	INT32 delay;
 	INT32 time;
-	int purge_putty_ON;
 } SPurgePar;
 
 int valid(int val);

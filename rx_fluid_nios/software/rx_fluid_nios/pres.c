@@ -18,7 +18,6 @@
 #include "i2c_master.h"
 #include "trprintf.h"
 #include "pres.h"
-#include "average.h"
 
 //--- defines ---------------------------
 #define ADDR_SENSOR_1_0_BAR 0x78 	// upper address of sensor (old, 1.0 bar) 0x1a
@@ -175,7 +174,7 @@ static int _pcb_sensor_25(SSensor *s)
 
 	ret=I2C_start(s->i2c, ADDR_SENSOR_2_5_BAR, READ);
 	pressure = (I2C_read(s->i2c, FALSE) << 8) | I2C_read(s->i2c, TRUE);
-//	trprintf("_pcb_sensor_25: ret=%d pressure=%d\n", ret, pressure);
+	trprintf("_pcb_sensor_25: ret=%d pressure=%d\n", ret, pressure);
 
 	return (ret==0); // && pressure!=0xffff);
 }

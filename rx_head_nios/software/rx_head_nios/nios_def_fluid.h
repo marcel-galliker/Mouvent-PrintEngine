@@ -93,7 +93,6 @@ typedef struct
 	int		test_bleedValve;
 	int		test_cylinderPres;
 	//--- purge putty ---------------
-	int		purge_putty_ON;
 	int		purge_putty_pressure;
 	
 	//--- test bleed line -----

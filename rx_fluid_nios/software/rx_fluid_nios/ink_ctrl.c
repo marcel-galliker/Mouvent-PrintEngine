@@ -22,7 +22,6 @@
 #include "pio.h"
 #include "fpga_def_fluid.h"
 #include "ink_ctrl.h"
-#include "average.h"
 #include "pres.h"
 
 //--- defines --------------------------------------------
