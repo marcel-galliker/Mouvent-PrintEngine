@@ -23,7 +23,6 @@ namespace RX_DigiPrint.Models.Enums
         {
             return (IEnumerator)new RxListEnumerator<RxEnum<int>>(_List);
         }
-
     }
 
     public class EN_RotationList_OFF: IEnumerable

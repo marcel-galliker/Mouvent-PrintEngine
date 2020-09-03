@@ -1,4 +1,5 @@
-﻿using RX_DigiPrint.Models;
+﻿using MahApps.Metro.IconPacks;
+using RX_DigiPrint.Models;
 using RX_DigiPrint.Models.Enums;
 using System;
 using System.Collections.Generic;
@@ -91,14 +92,14 @@ namespace RX_DigiPrint.Views.LB702WBView
             str = RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "PAR_WIND_DIRECTION_WINDER1");
             if (str != null)
             {
-                if (str.Equals("1")) TX_DirUW.Text = "Q";
-                else TX_DirUW.Text = "P";
+                if (str.Equals("1")) Icon_DirUW.Kind = PackIconModernKind.TransformRotateCounterclockwise;
+                else                 Icon_DirUW.Kind = PackIconModernKind.TransformRotateClockwise;
             }
             str = RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "PAR_WIND_DIRECTION_WINDER2");
             if (str != null)
             {
-                if (str.Equals("1")) TX_DirRW.Text = "Q";
-                else TX_DirRW.Text = "P";
+                if (str.Equals("1")) Icon_DirRW.Kind = PackIconModernKind.TransformRotateCounterclockwise;
+                else                 Icon_DirRW.Kind = PackIconModernKind.TransformRotateClockwise;
             }
         }
 
