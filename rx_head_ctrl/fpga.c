@@ -513,7 +513,6 @@ int  fpga_set_config(RX_SOCKET socket)
 		RX_HBStatus[0].head[i].encPgCnt     = 0;
 		RX_HBStatus[0].head[i].printGoCnt   = 0;
 		RX_HBStatus[0].head[i].printDoneCnt = 0;
-		cond_add_droplets_printed(i, RX_HBStatus[0].head[i].dotCnt);
 	}
 	
 //	Error(LOG, 0, "fpga_set_config 7");
@@ -952,7 +951,7 @@ static int _check_block_used_flags(int head, int blkNo, int blkCnt)
 		if (blk>max) blk=min;
 		bit = blk%32;
 		if (!bit) flags = Fpga.blockUsed[blk/32];
-		if (!(flags & (1<<bit)) && !reply) reply=Error(ERR_ABORT, 0, "DataBlock[%d] missing", blk);
+		if (!(flags & (1<<bit)) && !reply) reply=Error(ERR_ABORT, 0, "Head[%d]: DataBlock[%d] missing", head, blk);
 	}
 	return reply;
 }
@@ -1082,7 +1081,7 @@ int  fpga_image	(SFpgaImageCmd *msg)
 
 		if (_check_block_used_flags(head, msg->image.blkNo, msg->image.blkCnt)!=REPLY_OK) 
 		{
-			TrPrintfL(trace, "head[%d].fpga_image(id=%d, page=%d, copy=%d) Block not loaded", head, msg->id.id, msg->id.page, msg->id.copy);
+			TrPrintfL(trace, "head[%d].fpga_image[%d](id=%d, page=%d, copy=%d, scan=%d) Block not loaded, blkNo=%d, blkCnt=%d", head, idx, msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->image.blkNo, msg->image.blkCnt);
 			return REPLY_ERROR;
 		}
 
@@ -2167,14 +2166,15 @@ static void _count_dots(void)
 	static int _time=0;
 	int			time, diff;
 	UINT32		droplets;
-		
+
 	time = rx_get_ticks();
 	diff = time-_time;
 	for (i=0; i<MAX_HEADS_BOARD; i++) 
 	{		
 		droplets = Fpga.stat->head_dot_cnt[i];
 		RX_HBStatus[0].head[i].dotCnt += droplets;
-		cond_volume_printed(i, (int)(droplets*(RX_HBStatus[0].head[i].dropVolume*1000000000.0)/diff)); // [�l/s]
+		cond_add_droplets_printed(i, droplets, time);
+		cond_volume_printed(i, (int)(droplets*(RX_HBStatus[0].head[i].dropVolume*1000000000.0)/diff)); // [�l/s]		
 	}
 	_time = time;
 }

@@ -659,21 +659,21 @@ static int _do_block_used(SHBThreadPar *par, SBlockUsedRep *msg)
 			{
 				str[l]=0;
 				l=0;
-				TrPrintfL(TRUE, "blk[%03d]: %s", blk, str);
+				TrPrintfL(TRUE, "Head[%d.%d]: blk[%03d]: %s", par->cfg.no, msg->headNo, blk, str);
 				blk=i+1;
 			}
 			if (++i==end) 
 			{
 				str[l]=0;
 				l=0;
-				TrPrintfL(TRUE, "blk[%03d]: %s END", blk, str);
+				TrPrintfL(TRUE, "Head[%d.%d]: blk[%03d]: %s END", par->cfg.no, msg->headNo, blk, str);
 				blk=i=par->cfg.head[head].blkNo0;
 			}
 		}
 		if  (l)
 		{
 			str[l]=0;
-			TrPrintfL(TRUE, "blk[%03d]: %s", blk, str);
+			TrPrintfL(TRUE, "Head[%d.%d]: blk[%03d]: %s", par->cfg.no, msg->headNo, blk, str);
 		}
 		TrPrintfL(_Trace, "Head[%d.%d]: _do_block_used id=%d, blkNo=%d, blkCnt=%d, (Block %d .. %d), blkOutIdx=%d", par->cfg.no, msg->headNo, msg->id, msg->blkNo, msg->blkCnt, msg->blkNo, msg->blkNo+msg->blkCnt, msg->blockOutIdx);
 	}
@@ -857,7 +857,8 @@ static int _send_to_board(SHBThreadPar *par, int head, int blkNo, int blkCnt)
 		if (_Abort) return REPLY_OK;
 		
 //		if (pinfo->sendFromBlk >= pinfo->blkCnt || (RX_Spooler.printerType==printer_LB702_UV && (endReached && (cnt==0 || (pinfo->pListItem->flags&FLAG_SAME)))))
-		if (pinfo->sendFromBlk >= pinfo->blkCnt || pinfo->pListItem->flags&FLAG_SAME || (endReached && (cnt==0)))
+		if (pinfo->sendFromBlk >= pinfo->blkCnt || pinfo->pListItem->flags&FLAG_SAME || (rx_def_is_lb(RX_Spooler.printerType) && endReached && (cnt==0)))
+		// why: rx_def_is_lb? In TX machines we normally have a wrap around, as the whole buffer is used. The FPGA removed the block used flags already when the data is loaded!
 		{
 			SPageId *pid   = &pinfo->pListItem->id;
 			SPageId *plast = &par->lastId[head];

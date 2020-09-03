@@ -697,7 +697,7 @@ void pump_tick_10ms(void)
 		
 		case ctrl_purge_step4:
 						_presure_in_max();
-						if (_PurgeDelay<RX_Config.purgeDelay || _PurgeTime>RX_Config.purgeTime)
+						if (_PurgeDelay<RX_Config.purgeDelay || (RX_Config.purgeTime && _PurgeTime>RX_Config.purgeTime))
 						{
 							_PurgeDelay+=cycle_time;
 							temp_ctrl_on(FALSE);

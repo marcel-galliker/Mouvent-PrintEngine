@@ -593,7 +593,9 @@ void _update_status(void)
 		pstat->pumpSpeedSet		= _Stat->ink_supply[i].inkPumpSpeed_set;		
 		pstat->pumpSpeed		= _Stat->ink_supply[i].inkPumpSpeed_measured;
 
-		pstat->purge_putty_ON	= _Cfg->ink_supply[i].purge_putty_ON;
+		if (pstat->ctrlMode>ctrl_purge_step1 && pstat->ctrlMode<=ctrl_purge_step6) _Cfg->ink_supply[i].purge_putty_pressure=0;
+
+		pstat->purge_putty_ON	= _Cfg->ink_supply[i].purge_putty_pressure>0;
 	}
 }
 
@@ -898,6 +900,4 @@ void nios_set_purge_pressure(int isNo, int pressure)
 	if (isNo > SIZEOF(_Cfg->ink_supply)) return;
 	
 	_Cfg->ink_supply[isNo].purge_putty_pressure = pressure;
-    if (pressure > 0)	_Cfg->ink_supply[isNo].purge_putty_ON = 1;
-    else				_Cfg->ink_supply[isNo].purge_putty_ON = 0;
 }

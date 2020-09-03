@@ -22,13 +22,12 @@
 #include "pio.h"
 #include "fpga_def_fluid.h"
 #include "ink_ctrl.h"
-#include "average.h"
 #include "pres.h"
 
 //--- defines --------------------------------------------
 #define 	MAX_PRES_DEVIATION			20	// % deviation allowed before Bleed solenoid kicks in
 #define		MAX_PRINT_PRESSURE_FLUID	300
-#define		MAX_PRESSURE_FLUID			1200
+#define		MAX_PRESSURE_FLUID			2000
 
 #define 	PRESSURE_SOFT_PURGE			80
 #define 	PRESSURE_PURGE				160
@@ -1172,16 +1171,7 @@ void ink_tick_10ms(void)
 				break;
 
 			case ctrl_purge_step4:
-				// purge from putty
-				if(pRX_Config->ink_supply[isNo].purge_putty_ON)
-				{
-					_InkSupply[isNo].purgePressure = pRX_Config->ink_supply[isNo].purge_putty_pressure;
-					_pump_ctrl(isNo, _InkSupply[isNo].purgePressure, PUMP_CTRL_MODE_DEFAULT);
-					_set_bleed_valve(isNo, FALSE);
-					_InkSupply[isNo].purgeTime = pRX_Config->ink_supply[isNo].purgeTime;
-				}
-				// purge from GUI
-				else if (_InkSupply[isNo].purgeTime < pRX_Config->ink_supply[isNo].purgeTime)
+				if (pRX_Config->ink_supply[isNo].purgeTime==0 || _InkSupply[isNo].purgeTime < pRX_Config->ink_supply[isNo].purgeTime)
 				{
 					_pump_ctrl(isNo, _InkSupply[isNo].purgePressure, PUMP_CTRL_MODE_DEFAULT);
 					_set_bleed_valve(isNo, FALSE);
@@ -1448,7 +1438,7 @@ static void _init_purge(int isNo, int pressure)
 		_set_bleed_valve(isNo, FALSE);
 
 	//	_PurgeNo	   = isNo;
-		if(pRX_Config->ink_supply[isNo].purge_putty_ON)
+		if(pRX_Config->ink_supply[isNo].purge_putty_pressure)
 		{
 			_InkSupply[isNo].purgePressure = pRX_Config->ink_supply[isNo].purge_putty_pressure;
 		}
