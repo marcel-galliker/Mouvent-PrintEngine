@@ -951,7 +951,7 @@ static int _check_block_used_flags(int head, int blkNo, int blkCnt)
 		if (blk>max) blk=min;
 		bit = blk%32;
 		if (!bit) flags = Fpga.blockUsed[blk/32];
-		if (!(flags & (1<<bit)) && !reply) reply=Error(ERR_ABORT, 0, "DataBlock[%d] missing", blk);
+		if (!(flags & (1<<bit)) && !reply) reply=Error(ERR_ABORT, 0, "Head[%d]: DataBlock[%d] missing", head, blk);
 	}
 	return reply;
 }
@@ -1081,7 +1081,7 @@ int  fpga_image	(SFpgaImageCmd *msg)
 
 		if (_check_block_used_flags(head, msg->image.blkNo, msg->image.blkCnt)!=REPLY_OK) 
 		{
-			TrPrintfL(trace, "head[%d].fpga_image(id=%d, page=%d, copy=%d) Block not loaded", head, msg->id.id, msg->id.page, msg->id.copy);
+			TrPrintfL(trace, "head[%d].fpga_image[%d](id=%d, page=%d, copy=%d, scan=%d) Block not loaded, blkNo=%d, blkCnt=%d", head, idx, msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->image.blkNo, msg->image.blkCnt);
 			return REPLY_ERROR;
 		}
 

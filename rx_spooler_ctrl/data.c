@@ -637,13 +637,12 @@ static int _data_loaded(const char *filepath, int page, SBmpInfo *bmpInfo, BYTE*
 	char  check[MAX_PATH];
 	sprintf(check, "%s-p%d", filepath, page);
 
-	TrPrintfL(TRUE, "_data_loaded >>%s<<", check);
 	for (int i=0; i<FILEBUF_CNT; i++)
 	{
 		SFileBuffer	*pBuf = &_FileBuf[i];
 		if (!strcmp(check, pBuf->filepath)) 
 		{
-			TrPrintfL(TRUE, "FileBuf[%d] found >>%s<<", i, pBuf->filepath);
+			TrPrintfL(TRUE, "_data_loaded: >>%s<< FileBuf[%d] found >>%s<<", check, i, pBuf->filepath);
 			memcpy(bmpInfo, &pBuf->bmpInfo, sizeof(SBmpInfo));
 			for (int n=0; n<MAX_COLORS; n++)
 			{
@@ -657,7 +656,7 @@ static int _data_loaded(const char *filepath, int page, SBmpInfo *bmpInfo, BYTE*
 			return REPLY_OK;
 		}
 	}
-	TrPrintfL(TRUE, "NOT FOUND");
+	TrPrintfL(TRUE, "_data_loaded: >>%s<< NOT FOUND", check);
 	return REPLY_NOT_FOUND;
 }
 
