@@ -177,7 +177,7 @@ int gui_send_printer_status(SPrinterStatus   *stat)
 //--- _gui_connected -------------------
 static int _gui_connected(RX_SOCKET socket, const char *peername)
 {
-	TrPrintfL(TRUE, "GUI Connected >>%s<<", peername);
+	TrPrintfL(TRUE, "GUI Connected >>%s<< socket=%d", peername, socket);
 	for (int i=0; i<MAX_CONNECTIONS; i++)
 	{
 		if (_Sockets[i]==INVALID_SOCKET)
@@ -196,7 +196,7 @@ static int _gui_connected(RX_SOCKET socket, const char *peername)
 //--- _gui_closed -------------------
 static int _gui_closed(RX_SOCKET socket, const char *peername)
 {
-	TrPrintfL(TRUE, "GUI Closed >>%s<<", peername);
+	TrPrintfL(TRUE, "GUI Closed >>%s<< socket=%d", peername, socket);
 	for (int i=0; i<MAX_CONNECTIONS; i++)
 	{
 		if (socket==_Sockets[i])

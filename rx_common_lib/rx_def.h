@@ -273,6 +273,7 @@ typedef struct SPrintQueueItem
 	INT32	srcPages;
 	INT32	srcWidth;	// µm
 	INT32	srcHeight;	// µm
+	UINT8	srcBitsPerPixel;
 	INT32	firstPage;
 	INT32	lastPage;
 	INT32	copies;
@@ -685,7 +686,7 @@ typedef enum
 typedef enum
 {
 	warn_fpga_overheating = 0x00000001,	// head is overheating
-	warn_1			 = 0x00000002,
+	warn_flow_factor	  = 0x00000002,
 	warn_2			 = 0x00000004,
 	warn_3			 = 0x00000008,
 	warn_4			 = 0x00000010,
@@ -809,11 +810,11 @@ typedef struct SHeadStat
 	UINT32			tempHead;
 	UINT32			tempCond;
 	UINT32			tempSetpoint;
-	INT32			tempReady;
 	UINT32			presIn_ID;
 	INT32			presIn;
 	INT32			presIn_max;
 	INT32			presIn_diff;
+	UINT32			flowFactor;
 	UINT32			presOut_ID;
 	INT32			presOut;
 	INT32			presOut_diff;
@@ -821,7 +822,7 @@ typedef struct SHeadStat
 	INT32			meniscus_diff;
 	INT32			meniscus_Setpoint;
 	INT32			pid_offset;
-	
+
 	FLOAT			dropVolume;	// in pl
 	UINT32			pumpSpeed;
 	UINT32			pumpFeedback;
@@ -1082,6 +1083,7 @@ typedef struct SHeadStateLight
 	INT32			condMeniscus;
 	INT32			condMeniscusDiff;
 	INT32			condTempReady;
+	INT32			condFlowfactor_ok;
 	INT32			canisterEmpty;
     INT32			act_pos_y;
 } SHeadStateLight;
@@ -1111,7 +1113,7 @@ typedef struct SInkSupplyInfo
 			UINT32 flushed : 1;			// 0x00000008
 			UINT32 condTempReady : 1;	// 0x00000010
 			UINT32 heaterTempReady : 1;	// 0x00000020
-			UINT32 info_6 : 1;			// 0x00000040
+			UINT32 cond_flowFactor_ok : 1;// 0x00000040
 			UINT32 info_7 : 1;			// 0x00000080
 			UINT32 info_8 : 1;			// 0x00000100
 			UINT32 info_9 : 1;			// 0x00000200
@@ -1252,7 +1254,8 @@ typedef struct SRobotOffsets
 	INT32			ref_height_front;
 	INT32			cap_height;
     SScrewPositions screwpositions[2][8][2]; // 1. printbarNo, 2. headNo, 3. axis
-    SScrewPositions screwclusters[2];  // 1. printbarNo, 2. headNo, 3. axis
+    SScrewPositions screwclusters[2]; // 1. printbarNo, 2. headNo, 3. axis
+    INT32			screwturns[2];
 } SRobotOffsets;
 	
 typedef enum ERobotFunctions
@@ -1655,6 +1658,7 @@ typedef struct SRxConfig
 	SHeadBoardCfg	headBoard[HEAD_BOARD_CNT];	
 	INT32			externalData;
 	SConditionerCfg	cond[MAX_HEAD_DIST];
+	INT32			headFpVoltage[MAX_HEAD_DIST];
 	struct
 	{
 		INT32			tara[MAX_SCALES];

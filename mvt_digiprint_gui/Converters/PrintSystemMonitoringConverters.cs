@@ -1,4 +1,5 @@
-﻿using RX_DigiPrint.Models;
+﻿using RX_Common;
+using RX_DigiPrint.Models;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -29,7 +30,7 @@ namespace RX_DigiPrint.Converters
                     }
                     else
                     {
-                        return Brushes.Crimson;
+                        return Rx.BrushError;
                     }
                 }
             }
@@ -63,7 +64,7 @@ namespace RX_DigiPrint.Converters
                 }
                 else
                 {
-                    return Brushes.Crimson;
+                    return Rx.BrushError;
                 }
             }
             catch (Exception e)
@@ -183,7 +184,7 @@ namespace RX_DigiPrint.Converters
                     }
                     else
                     {
-                        return Brushes.Gold;
+                        return Rx.BrushWarn;
                     }
                 }
             }
@@ -222,11 +223,11 @@ namespace RX_DigiPrint.Converters
                 }
                 else if (inkCylinderStatus == Views.PrintSystemExtendedView.ETotalStatus.STATUS_WARNING)
                 {
-                    return Brushes.Gold;
+                    return Rx.BrushWarn;
                 }
                 else if (inkCylinderStatus == Views.PrintSystemExtendedView.ETotalStatus.STATUS_ERROR)
                 {
-                    return Brushes.Crimson;
+                    return Rx.BrushError;
                 }
 
             }
@@ -258,7 +259,7 @@ namespace RX_DigiPrint.Converters
                 double val = (double)value;
                 if (val > 1.1)
                 {
-                    return Brushes.Crimson;
+                    return Rx.BrushError;
                 }
                 return Brushes.SeaGreen;
             }

@@ -1,0 +1,199 @@
+<?xml version="1.0"?>
+<groups version="2" lastID="100">
+	<group id="1" name="engineer" description="Default group that provides the necessary MLPI Permissions to execute engineering tasks (e.g. Indraworks Engineering)" state="enabled">
+		<members>
+			<member id="1"/>
+			<member id="3"/>
+		</members>
+		<permissions>
+			<facility name="COMMUNICATION">
+				<permission name="OPCUA"/>
+				<permission name="MLPIS"/>
+				<permission name="MLPI"/>
+				<permission name="SSH"/>
+				<permission name="SFTP"/>
+				<permission name="FTP"/>
+			</facility>
+			<facility name="ACCESSCONTROL">
+				<permission name="SETUP"/>
+				<permission name="INFO"/>
+			</facility>
+			<facility name="ETHERCAT">
+				<permission name="WRITE"/>
+				<permission name="READ"/>
+				<permission name="OPERATION"/>
+				<permission name="INFO"/>
+				<permission name="SETUP"/>
+			</facility>
+			<facility name="SECURITY">
+				<permission name="INFO"/>
+				<permission name="SETUP"/>
+			</facility>
+			<facility name="CONTAINER">
+				<permission name="UPDATE"/>
+				<permission name="SETUP"/>
+				<permission name="INFO"/>
+				<permission name="BROWSE"/>
+			</facility>
+			<facility name="TRACE">
+				<permission name="USE"/>
+				<permission name="SETUP"/>
+				<permission name="INFO"/>
+			</facility>
+			<facility name="ROBOT">
+				<permission name="TEACHIN"/>
+				<permission name="MOVE"/>
+				<permission name="INFO"/>
+				<permission name="SETUP"/>
+			</facility>
+			<facility name="WATCHDOG">
+				<permission name="USE"/>
+			</facility>
+			<facility name="LOGIC">
+				<permission name="WRITE"/>
+				<permission name="READ"/>
+				<permission name="CONTROL"/>
+				<permission name="CONFIG"/>
+				<permission name="INFO"/>
+			</facility>
+			<facility name="TASKLIB">
+				<permission name="TASKEXECUTE"/>
+				<permission name="TASKVIEWER"/>
+				<permission name="SETUP"/>
+			</facility>
+			<facility name="MOTION">
+				<permission name="SETUP"/>
+				<permission name="MOVE"/>
+				<permission name="INFO"/>
+			</facility>
+			<facility name="IO">
+				<permission name="UPDATE"/>
+				<permission name="WRITE"/>
+				<permission name="READ"/>
+				<permission name="INFO"/>
+			</facility>
+			<facility name="SYSTEM">
+				<permission name="TRANSMISSIONCLIENT"/>
+				<permission name="STATUS"/>
+				<permission name="SETUP"/>
+				<permission name="CLEANUP"/>
+			</facility>
+			<facility name="PARAMETER">
+				<permission name="READ"/>
+				<permission name="WRITE"/>
+				<permission name="COMMAND"/>
+			</facility>
+			<facility name="APILIB">
+				<permission name="DEPRECATED"/>
+				<permission name="DEBUG"/>
+				<permission name="MANAGEMENT"/>
+				<permission name="STATUS"/>
+			</facility>
+		</permissions>
+	</group>
+	<group id="2" name="userAdmin" description="Members of this group are able to manage users and their permissions" state="enabled">
+		<members>
+			<member id="1"/>
+		</members>
+		<permissions>
+			<facility name="COMMUNICATION">
+				<permission name="MLPIS"/>
+			</facility>
+			<facility name="ACCESSCONTROL">
+				<permission name="SETUP"/>
+				<permission name="INFO"/>
+			</facility>
+		</permissions>
+	</group>
+	<group id="4" name="rexroth" description="neue Gruppe erstellt von S. Luna am 29.05.2019" state="enabled">
+		<members>
+			<member id="4"/>
+		</members>
+		<permissions>
+			<facility name="COMMUNICATION">
+				<permission name="OPCUA"/>
+				<permission name="MLPIS"/>
+				<permission name="MLPI"/>
+				<permission name="SSH"/>
+				<permission name="SFTP"/>
+				<permission name="FTP"/>
+			</facility>
+			<facility name="ACCESSCONTROL">
+				<permission name="SETUP"/>
+				<permission name="INFO"/>
+			</facility>
+			<facility name="ETHERCAT">
+				<permission name="WRITE"/>
+				<permission name="READ"/>
+				<permission name="OPERATION"/>
+				<permission name="INFO"/>
+				<permission name="SETUP"/>
+			</facility>
+			<facility name="SECURITY">
+				<permission name="INFO"/>
+				<permission name="SETUP"/>
+			</facility>
+			<facility name="CONTAINER">
+				<permission name="UPDATE"/>
+				<permission name="SETUP"/>
+				<permission name="INFO"/>
+				<permission name="BROWSE"/>
+			</facility>
+			<facility name="TRACE">
+				<permission name="USE"/>
+				<permission name="SETUP"/>
+				<permission name="INFO"/>
+			</facility>
+			<facility name="ROBOT">
+				<permission name="TEACHIN"/>
+				<permission name="MOVE"/>
+				<permission name="INFO"/>
+				<permission name="SETUP"/>
+			</facility>
+			<facility name="WATCHDOG">
+				<permission name="USE"/>
+			</facility>
+			<facility name="LOGIC">
+				<permission name="WRITE"/>
+				<permission name="READ"/>
+				<permission name="CONTROL"/>
+				<permission name="CONFIG"/>
+				<permission name="INFO"/>
+			</facility>
+			<facility name="TASKLIB">
+				<permission name="TASKEXECUTE"/>
+				<permission name="TASKVIEWER"/>
+				<permission name="SETUP"/>
+			</facility>
+			<facility name="MOTION">
+				<permission name="SETUP"/>
+				<permission name="MOVE"/>
+				<permission name="INFO"/>
+			</facility>
+			<facility name="IO">
+				<permission name="UPDATE"/>
+				<permission name="WRITE"/>
+				<permission name="READ"/>
+				<permission name="INFO"/>
+			</facility>
+			<facility name="SYSTEM">
+				<permission name="TRANSMISSIONCLIENT"/>
+				<permission name="STATUS"/>
+				<permission name="SETUP"/>
+				<permission name="CLEANUP"/>
+			</facility>
+			<facility name="PARAMETER">
+				<permission name="READ"/>
+				<permission name="WRITE"/>
+				<permission name="COMMAND"/>
+			</facility>
+			<facility name="APILIB">
+				<permission name="DEPRECATED"/>
+				<permission name="DEBUG"/>
+				<permission name="MANAGEMENT"/>
+				<permission name="STATUS"/>
+			</facility>
+		</permissions>
+	</group>
+</groups>
+

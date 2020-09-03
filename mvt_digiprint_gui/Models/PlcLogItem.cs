@@ -60,7 +60,6 @@ namespace RxRexrothGui.Models
             get { return _Text; }
             set { SetProperty(ref _Text, value); }
         }
-
     }
 
     public class CPlcLogCollection : ObservableCollection<CPlcLogItem> { }

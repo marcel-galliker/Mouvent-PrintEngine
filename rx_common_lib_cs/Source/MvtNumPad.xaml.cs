@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Globalization;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -9,8 +10,6 @@ namespace RX_Common
 {
     public partial class MvtNumPad : Window, INotifyPropertyChanged
     {
-
-        private RxTimer _Timer;
         private Button _TouchedButton;
         private double _OrgValue;
         private Point _Position;
@@ -25,9 +24,6 @@ namespace RX_Common
             KeyDown += MvtNumPad_KeyDown;
 
             //--- timer as work around first touch behavior of ELO ------
-            _Timer = new RxTimer(50);
-            _Timer.Stop();
-            _Timer.TimerFct += _Tick;
 
             _OrgValue = Rx.StrToDouble(obj.Text);
 
@@ -86,9 +82,8 @@ namespace RX_Common
         }
 
         //--- _Tick ------------------------------------------
-        private void _Tick(int no)
+        private void _Tick(object o)
         {
-            _Timer.Stop();
             if (_TouchedButton != null) button_clicked(_TouchedButton, null);
         }
 
@@ -193,7 +188,7 @@ namespace RX_Common
         private void Window_TouchUp(object sender, System.Windows.Input.TouchEventArgs e)
         {
             _TouchedButton = e.Source as Button;
-            _Timer.Start();
+			new Timer(_Tick, null, 50, 0);
         }
 
         private void Rectangle_GiveFeedback(object sender, GiveFeedbackEventArgs e)

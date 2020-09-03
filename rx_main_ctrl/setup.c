@@ -161,7 +161,7 @@ int setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action)
 				setup_int32(file, "head_align",	  action, &pcfg->stepper.robot[i].head_align,	0);
 				setup_int32(file, "ref_height_back", action, &pcfg->stepper.robot[i].ref_height_back, 0);
 				setup_int32(file, "ref_height_front", action, &pcfg->stepper.robot[i].ref_height_front, 0);
-				setup_int32(file, "cap_height", action, &pcfg->stepper.robot[i].cap_height, 0);   
+				setup_int32(file, "cap_height", action, &pcfg->stepper.robot[i].cap_height, 0);
                 setup_chapter(file, "..", -1, action);
 			}				
 		}
@@ -196,6 +196,7 @@ int setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action)
 
 			int headsPerInkSupply = pcfg->headsPerColor;
 			if (pcfg->inkCylindersPerColor) headsPerInkSupply /= pcfg->inkCylindersPerColor;
+			setup_int32_arr(file, "headFpVoltage", action, &pcfg->headFpVoltage[i*pcfg->headsPerColor], pcfg->headsPerColor,  100);
 			setup_int32_arr(file, "HeadDist",      action, &pcfg->headDist[i*headsPerInkSupply],	  pcfg->headsPerColor,	0);
 			setup_int32_arr(file, "HeadDistBack",  action, &pcfg->headDistBack[i*headsPerInkSupply],  pcfg->headsPerColor,	0);
 			setup_int32(file, "ColorOffset",	   action, &pcfg->colorOffset[i], 0);
@@ -297,6 +298,7 @@ int setup_screw_positions (const char *filepath, SRxConfig *pcfg, EN_setup_Actio
                 {
                     if (setup_chapter(file, "Printbar", j, action) == REPLY_OK)
                     {
+						setup_int32(file, "Screw_Turns", action, &pcfg->stepper.robot[i].screwturns[j], 0);
                         setup_int32(file, "Cluster_X_Pos", action, &pcfg->stepper.robot[i].screwclusters[j].posX, 0);
 						setup_int32(file, "Cluster_Y_Pos", action, &pcfg->stepper.robot[i].screwclusters[j].posY, 0);
 						for (k = 0; k < SIZEOF(RX_StepperCfg.robot[i].screwpositions[0]); k++)

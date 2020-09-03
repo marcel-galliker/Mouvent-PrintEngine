@@ -19,8 +19,11 @@ namespace RX_Common
 {
     public class Rx
     {
-        public static List<string> MonthName = new List<string>(){"", "JAN", "FEB", "MAR", "APR", "MAI", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"}; 
+        public static Brush BrushError  = (Brush)Application.Current.Resources["RX.Error"];
+        public static Brush BrushWarn   = (Brush)Application.Current.Resources["RX.Warn"];
 
+        public static List<string> MonthName = new List<string>(){"", "JAN", "FEB", "MAR", "APR", "MAI", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
+		
         //--- SplitArrayName ----------------------------------------------------------
         public static void SplitArrayName(string fullname, out string array, out int idx)
         {

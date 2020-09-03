@@ -24,8 +24,7 @@
 
 
 #define CAPPING_TIMEOUT	(20*60*1000)	// ms 
-static int				 _CappingTimer=0;
-
+static int		_CappingTimer=0;
 
 typedef enum 
 {	
@@ -112,8 +111,8 @@ int		machine_set_printpar(SPrintQueueItem *pItem)
 {
 	TrPrintfL(TRUE, "machine_set_printpar");
 	set_interface();
-	
-	ctrl_send_firepulses(pItem->dots);
+
+	ctrl_send_firepulses(pItem->dots, (pItem->srcBitsPerPixel==8));
 
 	if (RX_Config.printer.type==printer_LH702) lh702_set_printpar(pItem);
 		

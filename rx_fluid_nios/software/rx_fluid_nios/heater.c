@@ -271,6 +271,5 @@ void heater_tick_1000ms(void)
 		pRX_Status->AMC_Register_Gain 			= readbackGAIN;
 		pRX_Status->error |= err_amc_config_lost;
 	}
-
 }
 

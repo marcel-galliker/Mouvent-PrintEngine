@@ -193,7 +193,7 @@ static void _sensor_read(SSensor *s, int no)
 			}
 			else
 			{
-				pressure = 1000*(pressure-10714) / ((30000-3000)*2/7); // convert messured value [3000..30000] to -1 .. 2.5 (span 3.5)
+				pressure = (3500*(pressure-10714)) / (30000-3000); // convert messured value [3000..30000] to -1 .. 2.5 (span 3.5)
 			}
 
 			//--- save to buffer -----

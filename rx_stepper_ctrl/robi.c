@@ -95,7 +95,7 @@ static int _Robi_Disabled = FALSE;
 
 static int _Screwer_Blocked_Time = 0;
 static int _TargetPosition = 0;
-
+static int _Position_Correction;
 static int _Buffer_Cmd[10] = {0};
 
 
@@ -153,11 +153,9 @@ void robi_main(int ticks, int menu)
     if (RX_StepperStatus.screwerinfo.moving)
     {
         RX_StepperStatus.screwerinfo.robi_in_ref = FALSE;
-        //RX_StepperStatus.screwerinfo.z_in_down = FALSE;
         RX_StepperStatus.screwerinfo.x_in_pos = FALSE;
         RX_StepperStatus.screwerinfo.y_in_pos = FALSE;
         RX_StepperStatus.screwerinfo.y_in_ref = FALSE;
-        //RX_StepperStatus.screwerinfo.z_in_up = FALSE;
         RX_StepperStatus.screwerinfo.screw_loosed = FALSE;
         RX_StepperStatus.screwerinfo.screw_tight = FALSE;
     }
@@ -187,10 +185,11 @@ void robi_main(int ticks, int menu)
     if (_Loose_Screw_Time && rx_get_ticks() > _Loose_Screw_Time)
     {
         int val = 0;
-        if ((RX_StepperStatus.screw_posY >= (SCREW_Y_BACK + SCREW_Y_FRONT) / 2 || RX_StepperStatus.screwerinfo.screwer_blocked_right) && !RX_StepperStatus.screwerinfo.screwer_blocked_left)
+        if (RX_StepperStatus.screwerinfo.screwer_blocked_right || (!RX_StepperStatus.screwerinfo.screwer_blocked_left && RX_StepperStatus.screw_posY >= (SCREW_Y_BACK + SCREW_Y_FRONT) / 2))
             val = -213333;
         else
             val = +213333;
+            
         robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_STEPS, &val);
         _Loose_Screw_Time = rx_get_ticks() + TIME_BEFORE_TURN_SCREWER;
     }
@@ -254,12 +253,23 @@ void robi_main(int ticks, int menu)
 
         case CMD_ROBI_MOVE_TO_Y:
             _CmdRunning = 0;
-                if (abs(RX_StepperStatus.screw_posY - _TargetPosition) > 1000)
-                    robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_Y, &_TargetPosition);
-                else if (abs(RX_StepperStatus.screw_posY - SCREW_Y_BACK) < MAX_VAR_SCREW_POS || abs(RX_StepperStatus.screw_posY - SCREW_Y_FRONT) < MAX_VAR_SCREW_POS)
-                    RX_StepperStatus.screwerinfo.y_in_pos = TRUE;
-                
-                break;
+            if (abs(RX_StepperStatus.screw_posY - _TargetPosition) > 1000 && !_Position_Correction)
+            {
+                _Position_Correction = TRUE;
+                robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_Y, &_TargetPosition);
+            }
+            else if (abs(RX_StepperStatus.screw_posY - _TargetPosition) > 1000 && _Position_Correction)
+            {
+                _Position_Correction = FALSE;
+                Error(ERR_CONT, 0, "Robi movement blocked in y-Axis");
+                RX_StepperStatus.screwerinfo.ref_done = FALSE;
+            }
+            else if (abs(RX_StepperStatus.screw_posY - SCREW_Y_BACK) < MAX_VAR_SCREW_POS || abs(RX_StepperStatus.screw_posY - SCREW_Y_FRONT) < MAX_VAR_SCREW_POS)
+            {
+                _Position_Correction = FALSE;
+                RX_StepperStatus.screwerinfo.y_in_pos = TRUE;
+            }
+            break;
 
         case CMD_ROBI_MOVE_TO_X:
             if (abs(RX_StepperStatus.screw_posX - SCREW_X_LEFT) < MAX_VAR_SCREW_POS ||
@@ -750,10 +760,11 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             else
             {
                 pos = *((INT32 *)pdata);
-                if (pos > 0){
+                if (pos > 0)
+                {
                     Error(ERR_CONT, 0, "Unreachable position %d in y-Axis of Robi", pos); 
                     break;
-                    }
+                }
                 _CmdRunning = msgId;
                 micron = pos - RX_StepperStatus.screw_posY;
                 steps = _micron_2_steps(micron);

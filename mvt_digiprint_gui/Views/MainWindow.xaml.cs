@@ -77,7 +77,8 @@ namespace RX_DigiPrint.Views
 
             this.Title=System.IO.Path.GetFileNameWithoutExtension(System.Windows.Forms.Application.ExecutablePath);
 
-            MainNotConnected.DataContext  = RxGlobals.RxInterface;
+            MainNotConnected.DataContext = RxGlobals.RxInterface;
+            PrintSystemState.DataContext = RxGlobals.PrintSystem;
             TabCtrl.DataContext = this;
 
             RxGlobals.License.Update();
@@ -156,10 +157,10 @@ namespace RX_DigiPrint.Views
             
             switch(errorType)
             {
-                case ELogType.eErrWarn: TabHeaderUnderlineColor = Brushes.Gold; break;
-                case ELogType.eErrCont: TabHeaderUnderlineColor = Brushes.Crimson; break;
-                case ELogType.eErrStop: TabHeaderUnderlineColor = Brushes.Crimson; break;
-                case ELogType.eErrAbort: TabHeaderUnderlineColor = Brushes.Crimson; break;
+                case ELogType.eErrWarn: TabHeaderUnderlineColor  = Rx.BrushWarn;  break;
+                case ELogType.eErrCont: TabHeaderUnderlineColor  = Rx.BrushError; break;
+                case ELogType.eErrStop: TabHeaderUnderlineColor  = Rx.BrushError; break;
+                case ELogType.eErrAbort: TabHeaderUnderlineColor = Rx.BrushError; break;
                 default: TabHeaderUnderlineColor = Brushes.Transparent; break;
             }
         }

@@ -39,6 +39,7 @@ static RX_SOCKET		_step_socket[STEPPER_CNT]={0};
 
 static SStepperStat		_Status[STEPPER_CNT];
 static int				_AbortPrinting=FALSE;
+static int				_ClusterScrewTurned;
 static UINT32			_Flushed = 0x00;		// For capping function which is same than flushing (need to purge after cap)
 
 static int				_StatReadCnt[STEPPER_CNT];
@@ -232,7 +233,7 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
     for (i = 0; i < STEPPER_CNT; i++)
     {
         if ((memcmp(&oldStatus[i].screwclusters, &_Status[i].screwclusters, sizeof(_Status[i].screwclusters)) ||
-            memcmp(&oldStatus[i].screwpositions, &_Status[i].screwpositions, sizeof(_Status[i].screwpositions)))
+            memcmp(&oldStatus[i].screwpositions, &_Status[i].screwpositions, sizeof(_Status[i].screwpositions)) || _ClusterScrewTurned == TRUE)
 			&& _step_socket[i] != INVALID_SOCKET && RX_StepperStatus.robot_used)
         {
             SRxConfig cfg;
@@ -241,8 +242,10 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
             memcpy(RX_Config.stepper.robot[i].screwclusters, _Status[i].screwclusters, sizeof(_Status[i].screwclusters));
             memcpy(cfg.stepper.robot[i].screwpositions, _Status[i].screwpositions, sizeof(_Status[i].screwpositions));
             memcpy(RX_Config.stepper.robot[i].screwpositions, _Status[i].screwpositions, sizeof(_Status[i].screwpositions));
+            memcpy(cfg.stepper.robot[i].screwturns, RX_Config.stepper.robot[i].screwturns, sizeof(RX_Config.stepper.robot[i].screwturns));
             setup_screw_positions(PATH_USER FILENAME_SCREW_POS, &cfg, WRITE);
             sok_send_2(&_step_socket[i], CMD_CFG_SCREW_POS, sizeof(RX_Config.stepper.robot[i]), &RX_Config.stepper.robot[i]);
+            _ClusterScrewTurned = FALSE;
         }
     }
 
@@ -654,4 +657,9 @@ static void _check_screwer(void)
         }
         _old_Screwer_State[i] = _Status[i].screwerinfo.screwed;
     }
+}
+
+void steplb_cluster_Screw_Turned()
+{
+    _ClusterScrewTurned = TRUE;
 }

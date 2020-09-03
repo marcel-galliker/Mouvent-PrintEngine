@@ -354,6 +354,7 @@ void lb702_main(int ticks, int menu)
 			RX_StepperStatus.cmdRunning = FALSE;
 		}
 
+		if (RX_StepperStatus.cmdRunning==CMD_LIFT_TEST) RX_StepperStatus.cmdRunning=0;
 		if (!RX_StepperStatus.cmdRunning)
 		{
                 RX_StepperStatus.info.z_in_ref = (cmd == CMD_LIFT_REFERENCE && RX_StepperStatus.info.ref_done);
@@ -639,8 +640,8 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                                     {
 										RX_StepperStatus.cmdRunning  = msgId;
 										if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].cap_height < MIN_CAP_HEIGHT) Error(WARN, 0, "Reference Height back should be > 6mm");
-										val0 = -1*_micron_2_steps(4200);
-										val1 = -1*_micron_2_steps(4200);
+										val0 = -1*_micron_2_steps(4400);
+										val1 = -1*_micron_2_steps(4400);
                                         if (RX_StepperStatus.info.ref_done) _lb702_move_to_pos(CMD_LIFT_SCREW, val0, val1);
                                     }
                                     break;
@@ -803,8 +804,7 @@ void _lb702_motor_z_test(int steps)
 {	
 	if (!RX_StepperStatus.cmdRunning)
 	{
-        _ParZ_down.encCheck = chk_off;
-		RX_StepperStatus.cmdRunning = 1; // TEST both motors
+		RX_StepperStatus.cmdRunning = CMD_LIFT_TEST; // TEST both motors
 		RX_StepperStatus.info.moving = TRUE;
 		_PrintPos_New[MOTOR_Z_BACK]  = Fpga.encoder[MOTOR_Z_BACK]._pos_motor * STEPS + steps;
 		_PrintPos_New[MOTOR_Z_FRONT] = Fpga.encoder[MOTOR_Z_FRONT]._pos_motor * STEPS + steps;
@@ -830,7 +830,7 @@ static void _lb702_motor_test(int motorNo, int steps)
 
     if (!RX_StepperStatus.cmdRunning)
     {
-        RX_StepperStatus.cmdRunning = 2; // TEST 1 motor
+		RX_StepperStatus.cmdRunning  = CMD_LIFT_TEST; // TEST 1 motor
         RX_StepperStatus.info.moving = TRUE;
 
         motors_config(motors, CURRENT_HOLD, L5918_STEPS_PER_METER,

@@ -26,7 +26,7 @@ void cond_main(int ticks, int menu);
 int  cond_restart_loader(int condNo);
 int  cond_restart_app(int condNo);
 
-void cond_error_check(void);
+void cond_error_check(int ticks);
 void cond_error_reset(void);
 
 void cond_resetPumpTime(int condNo);

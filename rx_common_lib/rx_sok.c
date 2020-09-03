@@ -1182,7 +1182,7 @@ int sok_receiver(HANDLE hserver, RX_SOCKET *psocket, msg_handler handle_msg, voi
 		{
 			len = recv(*psocket, &buffer[start], bufferLen - start, 0);
 				
-			if (*psocket==_DebugSocket) TrPrintfL(TRUE, "received %d bytes", len);
+			if (*psocket==_DebugSocket) TrPrintfL(TRUE, "socket %d: received %d bytes", socket, len);
 			if (len == 0)
 			{
 				#ifdef linux
@@ -1191,7 +1191,7 @@ int sok_receiver(HANDLE hserver, RX_SOCKET *psocket, msg_handler handle_msg, voi
 					if (WSAGetLastError()==WSAEWOULDBLOCK) continue;
 				#endif // linux			
 				reply = sok_error(psocket);
-				TrPrintf(TRUE, ">>%s<< received %d bytes, err=%d", addr, len, reply);
+				TrPrintfL(TRUE, ">>%s<< received %d bytes, err=%d", addr, len, reply);
 				break;
 			}
 			else if (len<0)
@@ -1202,7 +1202,7 @@ int sok_receiver(HANDLE hserver, RX_SOCKET *psocket, msg_handler handle_msg, voi
 					if (WSAGetLastError()==WSAEWOULDBLOCK) continue;
 				#endif // linux			
 				reply = sok_error(psocket);
-				TrPrintf(TRUE, ">>%s<< received %d bytes, err=%d", addr, len, reply);
+				TrPrintfL(TRUE, ">>%s<< received %d bytes, err=%d", addr, len, reply);
 			//	{
 			//		char str[256];
 			//		Error(ERR_CONT, 0, "Socket %s Error: %d >>%s<<", addr, reply, err_system_error(reply, str, sizeof(str)));
@@ -1230,7 +1230,8 @@ int sok_receiver(HANDLE hserver, RX_SOCKET *psocket, msg_handler handle_msg, voi
 				{
 					phdr = (SMsgHdr*)&buffer[start];
 								
-					if (*psocket==_DebugSocket) TrPrintfL(TRUE, "received hdr(len=%d, id=0x%08x)", phdr->msgLen, phdr->msgId);
+					if (*psocket==_DebugSocket) 
+						TrPrintfL(TRUE, "socket %d: received hdr(len=%d, id=0x%08x), socket=%d", socket, phdr->msgLen, phdr->msgId, *psocket);
 
 					if (phdr->msgLen > bufferLen) 
 					{

@@ -5,6 +5,7 @@ using RX_DigiPrint.Models.Enums;
 using RX_DigiPrint.Services;
 using System;
 using System.Collections.ObjectModel;
+using System.Windows.Media;
 
 namespace RX_DigiPrint.Models
 {
@@ -49,8 +50,8 @@ namespace RX_DigiPrint.Models
         }
 
         //--- Property Warn ---------------------------------------
-        private UInt32 _Warn;
-        public UInt32 Warn
+        private bool _Warn;
+        public bool Warn
         {
             get { return _Warn; }
             set { SetProperty(ref _Warn, value); }
@@ -191,9 +192,17 @@ namespace RX_DigiPrint.Models
             get { return _TempReady; }
             set { SetProperty(ref _TempReady, value); }
         }
-        
-        //--- Property CondTemp ---------------------------------------
-        private Int32 _CondTemp;
+
+		//--- Property FlowFactortOk ---------------------------------------
+		private bool _FlowFactorOk;
+		public bool FlowFactorOk    
+		{
+			get { return _FlowFactorOk; }
+			set { SetProperty(ref _FlowFactorOk,value); }
+		}
+
+		//--- Property CondTemp ---------------------------------------
+		private Int32 _CondTemp;
         public Int32 CondTemp
         {
             get { return _CondTemp; }
@@ -325,11 +334,52 @@ namespace RX_DigiPrint.Models
             }
         }   
 
+        //--- Property StateBrush ---------------------------------------
+		private Brush _StateBrush;
+		public Brush StateBrush
+		{
+			get { return _StateBrush; }
+			set 
+            { 
+                if (SetProperty(ref _StateBrush, value))
+				{
+                    RxGlobals.PrintSystem.UpdateStateBrush();
+				}
+            }
+		}
+
+        //--- UpdateStateBrush -------------------------------------------
+        public void UpdateStateBrush(Brush brush)
+		{
+            if      (brush==Rx.BrushError) StateBrush=Rx.BrushError;
+            else if (brush==Rx.BrushWarn && StateBrush!=Rx.BrushError) StateBrush=Rx.BrushWarn;
+            else 
+			{
+                brush=Brushes.Transparent;
+                foreach(HeadStat head in RxGlobals.HeadStat.List)
+				{
+                    if (head.InkSupply==this)
+					{
+                        if (head.StateBrush==Rx.BrushError)
+						{
+                            brush=Rx.BrushError;
+                            break;
+						}
+                        else if (head.StateBrush==Rx.BrushWarn)
+						{
+                            brush=Rx.BrushWarn;
+						}
+					}
+				}
+                StateBrush = brush;
+			}
+		}
+
         //--- SetStatus --------------------------------------------------
         public void SetStatus(int no, TcpIp.SInkSupplyStat msg)
         {
             Info            = msg.info;
-            Warn            = msg.warn;
+        //  Warn            = msg.warn;
             Err             = msg.err;
 
             CylinderPresSet  = msg.cylinderPresSet;
@@ -356,6 +406,14 @@ namespace RX_DigiPrint.Models
             Flushed         = (msg.info & 0x00000008)!=0;
             CondTempReady   = ((msg.info & 0x00000010)!=0) || (CtrlMode!=EFluidCtrlMode.ctrl_print);
             TempReady       = ((msg.info & 0x00000020)!=0) || (CtrlMode!=EFluidCtrlMode.ctrl_print);
+            FlowFactorOk    = ((msg.info & 0x00000040)!=0) || (CtrlMode!=EFluidCtrlMode.ctrl_print);
+            Warn            = !TempReady || !CondTempReady || !FlowFactorOk;
+
+            
+            if (Err!=0)    UpdateStateBrush(Rx.BrushError);
+            else if (Warn) UpdateStateBrush(Rx.BrushWarn);
+            else           UpdateStateBrush(Brushes.Transparent); 
+            
         }
     }	
 }

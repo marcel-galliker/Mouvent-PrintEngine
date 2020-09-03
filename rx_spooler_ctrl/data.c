@@ -47,6 +47,13 @@ typedef struct
 	HANDLE		sem_start;
 } SMultiCopyPar;
 
+typedef struct
+{
+	char		filepath[MAX_PATH];	// path+page
+	SBmpInfo	bmpInfo;
+	UINT64		size;
+	BYTE*		data[MAX_COLORS];	
+} SFileBuffer;
 
 //--- static variables ---------------------------------------------
 
@@ -62,6 +69,7 @@ static int				_HeadCnt;
 static UINT64			_MaxMemory=0;
 static int				_MaxBufers=64;
 static HANDLE			_SendSem=NULL;
+static HANDLE			_data_load_sem=NULL;
 static int				_Mounted=FALSE;
 static int				_IsLocal=FALSE;
 static int				_IsMain =TRUE;
@@ -96,6 +104,12 @@ static int				_AwaitFree=FALSE;
 static BYTE				**_AwaitFreeBuf;
 
 
+
+#define					FILEBUF_CNT 4
+static int				_FileBufIdx;
+static SFileBuffer		_FileBuf[FILEBUF_CNT];
+
+
 static int  _local_path(const char *filepath, char *localPath);
 static int	_file_used (const char *filename);
 static int  _copy_file (SPageId *pid, char *srcDir, char *filename, char *dstDir);
@@ -126,8 +140,17 @@ void data_init(RX_SOCKET socket, int headCnt)
 		sok_get_socket_name(socket, NULL, addr, NULL);
 		_IsMain  = !strcmp(addr, RX_CTRL_MAIN) || !strcmp(addr, "127.0.0.1");
 		_IsLocal = !strcmp(addr, RX_CTRL_MAIN) || !strcmp(addr, "127.0.0.1");
+
+		_FileBufIdx = 0;
+		memset(_FileBuf, 0, sizeof(_FileBuf));
 	}
 	
+	if (_data_load_sem) rx_sem_destroy(&_data_load_sem);
+	if (_data_load_sem==NULL)
+	{
+		_data_load_sem=rx_sem_create();
+		rx_sem_post(_data_load_sem);
+	}
 	_InIdx   = 0;
 	_OutIdx  = 0;
 	_SendIdx = 0;
@@ -479,7 +502,6 @@ int  data_malloc(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPixel,
 			if (psplit[i].color.name[0] && psplit[i].lastLine>psplit[i].firstLine)
 			{
 				TrPrintfL(1, "buffer[%d]: WAIT UNUSED %p, used=%d, abort=%d", i, buffer[i], rx_mem_cnt(buffer[i]), _Abort);
-				TrPrintfL(1, "buffer[%d]: WAIT UNUSED %p, used=%d, abort=%d", i, buffer[i], rx_mem_cnt(buffer[i]), _Abort);
 				while (!_Abort && rx_mem_cnt(buffer[i]))
 				{
 					rx_sleep(time);
@@ -565,6 +587,80 @@ static void _flz_data_loaded(void *data)
 	hc_send_next();
 }
 
+//--- data_load_file ---------------------------------------------------
+int data_load_file(const char *filepath, int page)
+{
+	char  check[MAX_PATH];
+	sprintf(check, "%s-p%d", filepath, page);
+
+	for (int i=0; i<FILEBUF_CNT; i++)
+	{
+		if (!strcmp(check, _FileBuf[i].filepath)) return REPLY_OK;
+	}
+
+	TrPrintfL(TRUE, "data_load_file: rx_sem_wait(_data_load_sem) >>%s<<", filepath);
+	if (rx_sem_wait(_data_load_sem, 0)==REPLY_OK)
+	{
+		SPageId		id;
+		char		filename[MAX_PATH];
+		int			ret;
+		int			widthPx, lengthPx, gapPx=0;
+		UCHAR		bitsPerPixel;
+		UINT8		multiCopy;
+		SFileBuffer	*pBuf = &_FileBuf[_FileBufIdx];
+
+		TrPrintfL(TRUE, "data_load_file: rx_sem_wait(_data_load_sem) >>%s<< OK", filepath);
+
+		memset(&id, 0, sizeof(id));
+
+		memset(&pBuf->filepath, 0, sizeof(pBuf->filepath));
+		split_path(filepath, NULL, filename, NULL);
+		data_get_size(filepath, id.page, &gapPx, &widthPx, &lengthPx, &bitsPerPixel, &multiCopy);
+		data_malloc (PM_SINGLE_PASS, widthPx, lengthPx, bitsPerPixel, RX_Color, SIZEOF(RX_Color), &pBuf->size, pBuf->data);
+		ret          = flz_load(&id, filepath, filename, PM_SINGLE_PASS, 0, _WakeupLen, RX_Color, SIZEOF(RX_Color), pBuf->data, &pBuf->bmpInfo, NULL, NULL);
+		if (ret) ret = tif_load(&id, filepath, filename, PM_SINGLE_PASS, 0, _WakeupLen, RX_Color, SIZEOF(RX_Color), pBuf->data, &pBuf->bmpInfo, NULL);
+		if (ret==REPLY_OK) strcpy(pBuf->filepath, check);
+		for (int i=0; i<MAX_COLORS; i++)
+		{
+			if (pBuf->data[i]!=NULL) TrPrintfL(TRUE, "Loaded >>%s<< to FileBuf[%d][%d]=%p", filepath, _FileBufIdx, i, pBuf->data[i]);
+		}
+		_FileBufIdx = (_FileBufIdx+1) % FILEBUF_CNT;
+		TrPrintfL(TRUE, "data_load_file: rx_sem_post(_data_load_sem) >>%s<<", filepath);
+		rx_sem_post(_data_load_sem);
+	}
+	return REPLY_OK;
+}
+
+//--- data_loaded -------------------------------------
+static int _data_loaded(const char *filepath, int page, SBmpInfo *bmpInfo, BYTE* buffer[MAX_COLORS])
+{
+	char  check[MAX_PATH];
+	sprintf(check, "%s-p%d", filepath, page);
+
+	TrPrintfL(TRUE, "_data_loaded >>%s<<", check);
+	for (int i=0; i<FILEBUF_CNT; i++)
+	{
+		SFileBuffer	*pBuf = &_FileBuf[i];
+		if (!strcmp(check, pBuf->filepath)) 
+		{
+			TrPrintfL(TRUE, "FileBuf[%d] found >>%s<<", i, pBuf->filepath);
+			memcpy(bmpInfo, &pBuf->bmpInfo, sizeof(SBmpInfo));
+			for (int n=0; n<MAX_COLORS; n++)
+			{
+				if (buffer[n]!=NULL && pBuf->data[n]!=NULL)
+				{
+					TrPrintfL(TRUE, "Copy FileBuf[%d][%d]=%p to buffer[%d]=%p", i,n, pBuf->data[n], n, buffer[n]);
+					memcpy(buffer[n], pBuf->data[n], pBuf->size);
+					bmpInfo->buffer[n]=&buffer[n];
+				}
+			}
+			return REPLY_OK;
+		}
+	}
+	Error(LOG, 0, "NOT FOUND");
+	return REPLY_NOT_FOUND;
+}
+
 //--- data_load ------------------------------------------------------------------------
 int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UINT8 multiCopy, int gapPx, int blkNo, int blkCnt, int printMode, int variable, UINT8 virtualPasses, UINT8 virtualPass, int flags, int clearBlockUsed, int same, int smp_bufSize, const char *dots, BYTE* buffer[MAX_COLORS])
 {
@@ -609,95 +705,104 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 		
 		if (/*id->id!=_LastId.id || */ id->page!=_LastId.page || strcmp(filepath, _LastFilePath) || _WakeupLen!=_LastWakeupLen || newOffsets || rx_file_get_mtime (_FileTimePath)!=_LastFileTime || gapPx!=_LastGapPx) // || printMode==PM_TEST_JETS) Overwrites head info!
 		{
-			ret = 1;
-			_LastGapPx = gapPx;
-			loaded = TRUE;
-			memset(_LastFilePath, 0, sizeof(_LastFilePath));
-			if (_PrintMode==PM_SCAN_MULTI_PAGE && !(flags & FLAG_SMP_FIRST_PAGE))
-				ctrl_pause_printing();
-			bmpInfo.printMode = printMode;
-			if (printMode==PM_TEST || printMode==PM_TEST_JETS || printMode==PM_TEST_SINGLE_COLOR)
+			TrPrintfL(TRUE, "rx_sem_wait(_data_load_sem) (id=%d, page=%d, copy=%d, scan=%d) >>%s<<", id->id, id->page, id->copy, id->scan, filepath);
+			if (rx_sem_wait(_data_load_sem, 0)==REPLY_OK)
 			{
-				for (color=0; color<MAX_COLORS; color++)
-				{
-					if (buffer[color])
-					{
-						if (strstr(filepath, ".flz"))		ret=flz_load_simple(filepath, &buffer[color], 100000, &bmpInfo); 
-						else if (strstr(filepath, ".tif"))	ret=tif_load_simple(filepath, &buffer[color], 100000, &bmpInfo); 
-						else								ret=bmp_load(filepath, &buffer[color], 100000, &bmpInfo);
-						
-						if (ret==REPLY_OK) strcpy(_FileTimePath, filepath);
-						#ifdef DEBUG
-						if (FALSE)
-						{
-							char str[MAX_PATH];
-							sprintf(str, "%sTEST.bmp", PATH_TEMP);
-							bmp_write(str, buffer[0], bmpInfo.bitsPerPixel, bmpInfo.srcWidthPx, bmpInfo.lengthPx, bmpInfo.lineLen, FALSE);
-						}
-						#endif
-						bmpInfo.buffer[color] = &buffer[color];
-						bmpInfo.inkSupplyNo[color]=0;
-						bmpInfo.colorCode[color]=0;
-					}
-				}
-				#ifdef DEBUG
-				// if (FALSE)
-				{
-					bmpInfo.planes = 1;//RX_Spooler.colorCnt;
-					bmpInfo.resol.x=1200;
-					bmpInfo.resol.y=1200;					
-					char fname[20];
-					sprintf(fname, "TEST-%d", id->scan);
-					tif_write(PATH_TEMP, fname, &bmpInfo);						
-				}
-				#endif
-			}
-			split_path(filepath, NULL, filename, NULL);
-			int time0=rx_get_ticks();
-			if (ret)
-			{		
-				if(RX_Spooler.printerType==printer_DP803)
-				{
-					flz_loaded = _flz_data_loaded;
-					ret = flz_load(id, filepath, filename, printMode, gapPx, 0, RX_Color, SIZEOF(RX_Color), buffer, &bmpInfo, NULL, (void*)&_PrintList[_InIdx]);
-					if (ret==REPLY_OK) strcpy(_FileTimePath, flz_last_filepath());
-					else					
-					{
-						ret = tif_load_mt(id, filepath, filename, printMode, gapPx, RX_Color, SIZEOF(RX_Color), buffer, &bmpInfo, NULL);
-						strcpy(_FileTimePath, tif_last_filepath());
-					}
-				}
-				else
-				{
-					flz_loaded = NULL;
-					ret          = flz_load(id, filepath, filename, printMode, gapPx, _WakeupLen, RX_Color, SIZEOF(RX_Color), buffer, &bmpInfo, ctrl_send_load_progress, NULL);
-					if (ret) ret = tif_load(id, filepath, filename, printMode, gapPx, _WakeupLen, RX_Color, SIZEOF(RX_Color), buffer, &bmpInfo, ctrl_send_load_progress);
-					strcpy(_FileTimePath, tif_last_filepath());				
-				}
-				
-				{ // test ------------
-					int i;
-					for (i=0; i<RX_Spooler.colorCnt; i++)
-						TrPrintfL(TRUE, "ColorData[%d] Loaded to buffer %03d", i, ctrl_get_bufferNo(buffer[i]));
-				}
-			}
-//			Error(LOG, 0, "Page %d: Tif Load Time=%d ms, _Abort=%d", id->page, rx_get_ticks()-time0, _Abort);
-			if (ret==REPLY_NOT_FOUND)
-			{
-				tiffErr=tif_error();
-				if (*tiffErr) Error(ERR_CONT, 0, "File not found: >>%s<<", str_start_cut(tiffErr, PATH_RIPPED_DATA));
-			}
-				
-			if (ret) ret = bmp_load_all(filepath, printMode, RX_Color, SIZEOF(RX_Color), buffer, &bmpInfo);
+				TrPrintfL(TRUE, "rx_sem_wait(_data_load_sem) (id=%d, page=%d, copy=%d, scan=%d) >>%s<< OK", id->id, id->page, id->copy, id->scan, filepath);
 
-			/* is done in split !
-			if (printMode==PM_SCANNING)
-			{
-//				Error(LOG, 0, "Reset _BlkNo, blkNo=%d", blkNo);
-				memset(_BlkNo, 0, sizeof(_BlkNo));			
+				ret = 1;
+				_LastGapPx = gapPx;
+				loaded = TRUE;
+				memset(_LastFilePath, 0, sizeof(_LastFilePath));
+				if (_PrintMode==PM_SCAN_MULTI_PAGE && !(flags & FLAG_SMP_FIRST_PAGE))
+					ctrl_pause_printing();
+				bmpInfo.printMode = printMode;
+				if (printMode==PM_TEST || printMode==PM_TEST_JETS || printMode==PM_TEST_SINGLE_COLOR)
+				{
+					for (color=0; color<MAX_COLORS; color++)
+					{
+						if (buffer[color])
+						{
+							if (strstr(filepath, ".flz"))		ret=flz_load_simple(filepath, &buffer[color], 100000, &bmpInfo); 
+							else if (strstr(filepath, ".tif"))	ret=tif_load_simple(filepath, &buffer[color], 100000, &bmpInfo); 
+							else								ret=bmp_load(filepath, &buffer[color], 100000, &bmpInfo);
+						
+							if (ret==REPLY_OK) strcpy(_FileTimePath, filepath);
+							#ifdef DEBUG
+							if (FALSE)
+							{
+								char str[MAX_PATH];
+								sprintf(str, "%sTEST.bmp", PATH_TEMP);
+								bmp_write(str, buffer[0], bmpInfo.bitsPerPixel, bmpInfo.srcWidthPx, bmpInfo.lengthPx, bmpInfo.lineLen, FALSE);
+							}
+							#endif
+							bmpInfo.buffer[color] = &buffer[color];
+							bmpInfo.inkSupplyNo[color]=0;
+							bmpInfo.colorCode[color]=0;
+						}
+					}
+					#ifdef DEBUG
+					// if (FALSE)
+					{
+						bmpInfo.planes = 1;//RX_Spooler.colorCnt;
+						bmpInfo.resol.x=1200;
+						bmpInfo.resol.y=1200;					
+						char fname[20];
+						sprintf(fname, "TEST-%d", id->scan);
+						tif_write(PATH_TEMP, fname, &bmpInfo, NULL);						
+					}
+					#endif
+				}
+				split_path(filepath, NULL, filename, NULL);
+				int time0=rx_get_ticks();
+				if (ret)
+				{		
+					if(RX_Spooler.printerType==printer_DP803)
+					{
+						flz_loaded = _flz_data_loaded;
+						ret=_data_loaded(filepath, id->page, &bmpInfo, buffer);
+						if (ret) ret = flz_load(id, filepath, filename, printMode, gapPx, 0, RX_Color, SIZEOF(RX_Color), buffer, &bmpInfo, NULL, (void*)&_PrintList[_InIdx]);
+						if (ret==REPLY_OK) strcpy(_FileTimePath, flz_last_filepath());
+						else					
+						{
+							ret = tif_load_mt(id, filepath, filename, printMode, gapPx, RX_Color, SIZEOF(RX_Color), buffer, &bmpInfo, NULL);
+							strcpy(_FileTimePath, tif_last_filepath());
+						}
+					}
+					else
+					{
+						flz_loaded = NULL;
+						ret=_data_loaded(filepath, id->page, &bmpInfo, buffer);
+						if (ret) ret = flz_load(id, filepath, filename, printMode, gapPx, _WakeupLen, RX_Color, SIZEOF(RX_Color), buffer, &bmpInfo, ctrl_send_load_progress, NULL);
+						if (ret) ret = tif_load(id, filepath, filename, printMode, gapPx, _WakeupLen, RX_Color, SIZEOF(RX_Color), buffer, &bmpInfo, ctrl_send_load_progress);
+						strcpy(_FileTimePath, tif_last_filepath());				
+					}
+				
+					{ // test ------------
+						int i;
+						for (i=0; i<RX_Spooler.colorCnt; i++)
+							TrPrintfL(TRUE, "ColorData[%d] Loaded to buffer %03d", i, ctrl_get_bufferNo(buffer[i]));
+					}
+				}
+//				Error(LOG, 0, "Page %d: Tif Load Time=%d ms, _Abort=%d", id->page, rx_get_ticks()-time0, _Abort);
+				if (ret==REPLY_NOT_FOUND)
+				{
+					tiffErr=tif_error();
+					if (*tiffErr) Error(ERR_CONT, 0, "File not found: >>%s<<", str_start_cut(tiffErr, PATH_RIPPED_DATA));
+				}
+				
+				if (ret) ret = bmp_load_all(filepath, printMode, RX_Color, SIZEOF(RX_Color), buffer, &bmpInfo);
+
+				/* is done in split !
+				if (printMode==PM_SCANNING)
+				{
+//					Error(LOG, 0, "Reset _BlkNo, blkNo=%d", blkNo);
+					memset(_BlkNo, 0, sizeof(_BlkNo));			
+				}
+				*/
+				if (*_FileTimePath) _LastFileTime=rx_file_get_mtime (_FileTimePath);
+				rx_sem_post(_data_load_sem);
 			}
-			*/
-			if (*_FileTimePath) _LastFileTime=rx_file_get_mtime (_FileTimePath);
 		}
 		else
 		{
@@ -731,7 +836,7 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 		
 		if (loaded || printMode==PM_TEST || printMode==PM_TEST_JETS || printMode==PM_TEST_SINGLE_COLOR)
 		{
-			if      (printMode==PM_TEST_JETS && id->id==PQ_TEST_JET_NUMBERS) jc_correction(&bmpInfo, &_PrintList[_InIdx], 4385);
+			if      (printMode==PM_TEST_JETS && id->id==PQ_TEST_JET_NUMBERS) jc_correction(&bmpInfo, &_PrintList[_InIdx], 4224);
 			else if (printMode!=PM_TEST && printMode!=PM_TEST_SINGLE_COLOR)  jc_correction(&bmpInfo, &_PrintList[_InIdx], 0);
 		}
 		#ifdef DEBUG
@@ -743,7 +848,7 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 			sprintf(dir, PATH_RIPPED_DATA "trace");
 			sprintf(fname, "ID_%d", id->id);
 			bmpInfo.planes = RX_Spooler.colorCnt;
-			tif_write(dir, fname, &bmpInfo);
+			tif_write(dir, fname, &bmpInfo, "K");
 			Error(WARN, 0, "Test: Written bitmap to >>%s\\%s<<", dir, fname);
 		}
 		#endif
@@ -788,7 +893,7 @@ int data_same(SPageId *id, int offsetWidth, int clearBlockUsed)
 	if (nextIdx == _OutIdx) 
 		return Error(ERR_CONT, 0, "Print List Overflow");
 
-	TrPrintfL(TRUE, "data_same[%d]: id=%d, page=%d, scan=%d, offsetWidth=%d", -1, id->id, id->page, id->scan, offsetWidth);
+	TrPrintfL(TRUE, "data_same[%d]: id=%d, page=%d, copy=%d, scan=%d, offsetWidth=%d", -1, id->id, id->page, id->copy, id->scan, offsetWidth);
 
 	for (cnt=0; cnt<SIZEOF(_PrintList); cnt++)
 	{
@@ -818,6 +923,7 @@ int data_same(SPageId *id, int offsetWidth, int clearBlockUsed)
 				pInfo = &_PrintList[_InIdx].splitInfo[h];
 				pInfo->pListItem = &_PrintList[_InIdx];
 				pInfo->clearBlockUsed = clearBlockUsed;
+				if (pInfo->data) rx_mem_use(*pInfo->data);
 				/*
 				if (clearBlockUsed)
 				{
@@ -1167,16 +1273,8 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 	int empty;
 	int	screeningCnt=0;
 	struct SBmpSplitInfo	*pInfo;
-	static int _FlagEmpty[HEAD_BOARD_CNT][MAX_HEADS_BOARD];
-	static int _FlagData[HEAD_BOARD_CNT][MAX_HEADS_BOARD];
 
 	TrPrintfL(TRUE, "_data_split_test");
-
-	if (id->page==0 && id->copy==1 && id->scan==0)
-	{
-		memset(_FlagEmpty, 0, sizeof(_FlagEmpty));
-		memset(_FlagData, 0, sizeof(_FlagData));
-	}
 
 	for (color=0; color<SIZEOF(RX_Spooler.headNo); color++)
 	{
@@ -1260,13 +1358,6 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 					pInfo->dstLineLen	= 32; // align to 256 Bits (32 Bytes)				
 					pInfo->blk0		    = blk0;
 					pInfo->blkCnt		= 1;
-					pItem->flags	   |= _FlagEmpty[pInfo->board][pInfo->head];
-					_FlagEmpty[pInfo->board][pInfo->head] = FLAG_SAME;
-				}
-				else
-				{
-					pItem->flags	   |= _FlagData[pInfo->board][pInfo->head];
-					_FlagData[pInfo->board][pInfo->head] = FLAG_SAME;
 				}
 
 				//--- rip the test data -----------------------------------------
@@ -1289,7 +1380,7 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 				}
 
 				if (clearBlockUsed) _BlkNo[pInfo->board][pInfo->head] += pInfo->blkCnt; // (_BlkNo[pInfo->board][pInfo->head]+pInfo->blkCnt)%(RX_Spooler.dataBlkCntHead);
-				TrPrintfL(TRUE, "Split[head=%d]: startPx=%d, widthPx=%d, bitsPerPixel=%d, FillBt=%d, blk0=%d, blkCnt=%d, data=0x%08x", head, 0, pInfo->widthPx, pInfo->bitsPerPixel, pInfo->fillBt, pInfo->blk0, pInfo->blkCnt, pInfo->data);
+			//	TrPrintfL(TRUE, "Split[head=%d]: startPx=%d, widthPx=%d, bitsPerPixel=%d, FillBt=%d, blk0=%d, blkCnt=%d, data=0x%08x", head, 0, pInfo->widthPx, pInfo->bitsPerPixel, pInfo->fillBt, pInfo->blk0, pInfo->blkCnt, pInfo->data);
 			}
 		}	
 	}
@@ -1417,7 +1508,7 @@ static int _data_split_prod(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 					}
 					if (pInfo->blkCnt>blkCnt) Error(ERR_ABORT, 0, "Data: blkCnt=%d, max=%d", pInfo->blkCnt, blkCnt);
 					if (clearBlockUsed) _BlkNo[pInfo->board][pInfo->head] = (_BlkNo[pInfo->board][pInfo->head]+pInfo->blkCnt)%(RX_Spooler.dataBlkCntHead);
-					TrPrintfL(TRUE, "Split[%d.%d]: startPx=%d, widthPx=%d, FillBt=%d, buffer=%03d, blk0=%d, blkCnt=%d", pInfo->board,  pInfo->head, startPx, pInfo->widthPx, pInfo->fillBt, ctrl_get_bufferNo(*pInfo->data), pInfo->blk0, pInfo->blkCnt);
+				//	TrPrintfL(TRUE, "Split[%d.%d]: startPx=%d, widthPx=%d, FillBt=%d, buffer=%03d, blk0=%d, blkCnt=%d", pInfo->board,  pInfo->head, startPx, pInfo->widthPx, pInfo->fillBt, ctrl_get_bufferNo(*pInfo->data), pInfo->blk0, pInfo->blkCnt);
 				}
 				//--- increment ---
 				if (rx_def_is_lb(RX_Spooler.printerType)) startPx += RX_Spooler.headWidthPx;
@@ -2211,7 +2302,7 @@ int data_sent(SBmpSplitInfo *psplit, int head)
 //		TrPrintfL(TRUE, "data_sent: headsInUse=%d, data=0x%08x", psplit->pListItem->headsInUse, psplit->data);
 		if (psplit->data) rx_mem_unuse(psplit->data);
 
-		if (TRUE)
+		if (FALSE)
 		{
 			SPrintFileMsg evt;
 					
@@ -2260,7 +2351,7 @@ int data_sent(SBmpSplitInfo *psplit, int head)
 				for (int i=0; i<SIZEOF(_PrintList); i++)
 				{
 					SPageId *pid=&_PrintList[i].id;
-					if (pid->id==evt.id.id && pid->page==pid->page && pid->scan==evt.id.scan && _PrintList[i].offsetWidth==psplit->pListItem->offsetWidth)
+					if ((pid->id==evt.id.id) && (pid->page==evt.id.page) && (pid->scan==evt.id.scan) && (_PrintList[i].offsetWidth==psplit->pListItem->offsetWidth))
 					{
 						_PrintList[i].offsetWidth=INVALID_VALUE;
 					}

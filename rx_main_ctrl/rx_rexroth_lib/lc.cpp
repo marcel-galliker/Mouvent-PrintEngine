@@ -120,7 +120,7 @@ void lc_get_symbols(void)
 		result = mlpiLogicReadVariableBySymbolString(_Connection, wsymbols, wvalue, SIZEOF(wvalue));
 		wchar_to_char(wvalue, pvar->value, sizeof(pvar->value));
 
-		TrPrintfL(TRUE, "PLC-Var[%d]:>>%s<< = >>%s<<\n", _SymbolCnt, pvar->name, pvar->value);
+		TrPrintfL(TRUE, "PLC-Var[%d]:>>%s<< = >>%s<<", _SymbolCnt, pvar->name, pvar->value);
 		
 		if (node==-1) 
 			break;

@@ -435,8 +435,10 @@ static int _do_disabled_jets(RX_SOCKET socket, SDisabledJetsMsg *pmsg)
 //--- _do_density_values ----------------------------------------------
 static int _do_density_values	(RX_SOCKET socket, SDensityValuesMsg *pmsg)
 {
+	rx_sleep(100);
 	cond_set_densityValues(pmsg->head, pmsg->value);
 	cond_set_voltage(pmsg->head, pmsg->voltage);
+	rx_sleep(100);
 	return REPLY_OK;
 }
 

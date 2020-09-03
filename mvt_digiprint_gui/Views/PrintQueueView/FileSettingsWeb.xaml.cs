@@ -112,29 +112,5 @@ namespace RX_DigiPrint.Views.PrintQueueView
                 }
             }
         }
-        //--- Save_Click --------------------------------------------------------------------
-        private void Save_Click(object sender, RoutedEventArgs e)
-        {
-            PrintQueueItem item = DataContext as PrintQueueItem;
-            if (item!=null)
-            {
-                if (Page_Settings.Visibility==Visibility.Visible) item.ScanLength = 0;
-                item.SendMsg(TcpIp.CMD_SET_PRINT_QUEUE);
-                item.SaveDefaults();
-            }
-        }
-
-        //--- Cancel_Click --------------------------------------------------------------------
-        private void Cancel_Click(object sender, RoutedEventArgs e)
-        {
-            PrintQueueItem item = DataContext as PrintQueueItem;
-            if (item!=null) item.SendMsg(TcpIp.CMD_GET_PRINT_QUEUE_ITM);
-        }
-
-		private void UserControl_IsVisibleChanged(object sender,DependencyPropertyChangedEventArgs e)
-		{
-            if ((bool)e.NewValue)
-                Specials_LB702.Visibility = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_UV) ? Visibility.Visible : Visibility.Collapsed;
-		}
 	}
 }

@@ -682,6 +682,7 @@ namespace RX_DigiPrint.Services
 	        public Int32	srcPages;
 	        public Int32	srcWidth;
 	        public Int32	srcHeight;
+            public byte     srcBitsPerPixel;
 
 	        public Int32	firstPage;
 	        public Int32	lastPage;
@@ -826,6 +827,8 @@ namespace RX_DigiPrint.Services
             public Int32 InkCylindersPerColor;
 
             [MarshalAs(UnmanagedType.ByValArray, SizeConst =(6*48))] // color*heads
+            public Int32[]		headFpVoltage;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst =(6*48))] // color*heads
             public Int32[]		headDist;
             [MarshalAs(UnmanagedType.ByValArray, SizeConst =(6*48))] // color*heads
             public Int32[]		headDistBack;
@@ -855,8 +858,8 @@ namespace RX_DigiPrint.Services
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct SRobotOffsets
         {
-            public Int32       ref_height;
-            public Int32       head_align;
+            public Int32        ref_height;
+            public Int32        head_align;
             public Int32        ref_height_back;
             public Int32        ref_height_front;
             public Int32        cap_height;
@@ -866,6 +869,9 @@ namespace RX_DigiPrint.Services
 
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
             public SScrewPositions[] screwclusters;
+
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
+            public Int32 screwturns;
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -1093,11 +1099,11 @@ namespace RX_DigiPrint.Services
 	        public UInt32			tempHead;
 	        public UInt32			tempCond;
             public UInt32           tempSetpoint;
-            public Int32            tempReady;
 	        public UInt32			presIn_ID;
 	        public Int32			presIn;
 	        public Int32			presIn_max;
 	        public Int32			presIn_diff;
+	        public Int32			flowFactor;
 	        public UInt32			presOut_ID;
 	        public Int32			presOut;
 	        public Int32			presOut_diff;

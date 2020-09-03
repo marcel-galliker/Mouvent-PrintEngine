@@ -30,6 +30,7 @@
 #include "step_ctrl.h"
 #include "spool_svr.h"
 #include "ctrl_msg.h"
+#include "step_lb.h"
 #include "ctrl_svr.h"
 
 //--- Defines -----------------------------------------------------------------
@@ -84,7 +85,7 @@ static void _headboard_config(int colorCnt, int headsPerColor, int ethPortCnt);	
 
 static void _ping_test(int cnt);
 static void _send_head_cfg(int headNo);
-static void _send_ink_def(int headNo, char *drops);
+static void _send_ink_def(int headNo, char *drops, int screenOnPrinter);
 static int _ctrl_check_stepper_in_purgeMode(int fluidNo);
 
 //static void Data_Test_TCP();
@@ -390,7 +391,7 @@ void ctrl_set_max_speed(void)
 			for (n=0; n<MAX_DROP_SIZES; n++)
 			{
 				len += sprintf(&str[len], " %d", RX_Config.inkSupply[color].ink.maxSpeed[n]);
-				if (RX_Config.inkSupply[color].ink.maxSpeed[n] < inkSpeed[n]) inkSpeed[n] = RX_Config.inkSupply[color].ink.maxSpeed[n];
+				if (RX_Config.inkSupply[color].ink.maxSpeed[n] && RX_Config.inkSupply[color].ink.maxSpeed[n] < inkSpeed[n]) inkSpeed[n] = RX_Config.inkSupply[color].ink.maxSpeed[n];
 			}
 			TrPrintfL(TRUE, "Waveform[%s].maxSpeed:%s m/s", RX_Config.inkSupply[color].ink.name, str);
 		}
@@ -410,7 +411,7 @@ void ctrl_set_max_speed(void)
 								}
 								break;
 		case printer_LB701:		maxSpeed[0]= 100; maxSpeed[1]= 100; maxSpeed[2]= 100; maxSpeed[3]= 100; break;
-		case printer_LB702_UV:	maxSpeed[0]= 100; maxSpeed[1]= 100; maxSpeed[2]= 100; maxSpeed[3]= 100; break;
+		case printer_LB702_UV:	maxSpeed[0]= 120; maxSpeed[1]= 120; maxSpeed[2]= 120; maxSpeed[3]= 120; break;
 		case printer_LB702_WB:	maxSpeed[0]= 100; maxSpeed[1]= 100; maxSpeed[2]= 100; maxSpeed[3]= 100; break;
 		case printer_LH702:		maxSpeed[0]= 100; maxSpeed[1]= 100; maxSpeed[2]= 100; maxSpeed[3]= 100; break;
 		case printer_DP803:		maxSpeed[0]= 120; maxSpeed[1]= 120; maxSpeed[2]= 120; maxSpeed[3]= 120; break;
@@ -655,7 +656,7 @@ void ctrl_tick(void)
 }
 
 //--- _send_ink_def ------------------------------------------------
-static void _send_ink_def(int headNo, char *dots)
+static void _send_ink_def(int headNo, char *dots, int screenOnPrinter)
 {
 	int n, no;
 	int inksupply=-1;
@@ -675,7 +676,8 @@ static void _send_ink_def(int headNo, char *dots)
 				memcpy(msg.dots, dots, sizeof(msg.dots));
 				
 				no = headNo*HEAD_CNT+n;
-				if (RX_HBStatus[headNo].head[n].eeprom_mvt.voltage)	msg.fpVoltage = RX_HBStatus[headNo].head[n].eeprom_mvt.voltage;
+				if (screenOnPrinter && RX_HBStatus[headNo].head[n].eeprom_mvt.voltage)	msg.fpVoltage = RX_HBStatus[headNo].head[n].eeprom_mvt.voltage;
+				else if (RX_Config.headFpVoltage[no]) msg.fpVoltage = RX_Config.headFpVoltage[no];
 				else												msg.fpVoltage = RX_HBStatus[headNo].head[n].eeprom.voltage;
 
 				/*
@@ -1032,11 +1034,11 @@ void ctrl_head_cal_done(int inkSupply)
 }
 
 //--- ctrl_send_firepulses -----------------------------------------
-void ctrl_send_firepulses(char *dots)
+void ctrl_send_firepulses(char *dots, int screenOnPrinter)
 {
 	int i;
 //	Error(LOG, 0, "ctrl_send_firepulses >>%s<<", dots);
-	for (i=0; i<SIZEOF(_HeadCtrl); i++) _send_ink_def(i, dots);
+	for (i=0; i<SIZEOF(_HeadCtrl); i++) _send_ink_def(i, dots, screenOnPrinter);
 }
 
 //--- ctrl_send_head_cfg -------------------------
@@ -1119,7 +1121,7 @@ static void* _head_ctrl_thread(void* lpParameter)
 				ppar->aliveTime = 0;
 				net_send_item(dev_head,ppar->no);
 				_send_head_cfg(ppar->no);
-				_send_ink_def(ppar->no,"SML");
+				_send_ink_def(ppar->no,"SML", FALSE);
 				sok_receiver(NULL,&ppar->socket,handle_headCtrl_msg,&ppar->no);
 				net_send_item(dev_head,ppar->no);
 				ErrorEx(dev_head,ppar->no,ERR_ABORT,0,"TCP/IP Connection lost");
@@ -1237,13 +1239,13 @@ void ctrl_set_rob_pos(SRobPosition robposition, int blocked, int blocked_Axis)
         int board;
         board = robposition.printBar * ((RX_Config.headsPerColor+MAX_HEADS_BOARD-1)/MAX_HEADS_BOARD) + robposition.head/MAX_HEADS_BOARD;
         robposition.head = robposition.head % MAX_HEADS_BOARD;
-        if (!blocked)
+        if (!blocked && robposition.head >= 0)
         {
 			robposition.angle -= RX_HBStatus[board].head[robposition.head].eeprom_mvt.rob_angle;
 			robposition.dist += RX_HBStatus[board].head[robposition.head].eeprom_mvt.rob_dist;
 			sok_send_2(&_HeadCtrl[board].socket, CMD_SET_ROB_POS, sizeof(robposition), &robposition);
         }
-        else if (blocked && blocked_Axis == AXE_DIST)
+        else if (blocked && blocked_Axis == AXE_DIST && robposition.head >= 0)
         {
             robposition.angle = RX_HBStatus[board].head[robposition.head].eeprom_mvt.rob_angle;
 			sok_send_2(&_HeadCtrl[board].socket, CMD_SET_ROB_POS, sizeof(robposition), &robposition);
@@ -1253,12 +1255,23 @@ void ctrl_set_rob_pos(SRobPosition robposition, int blocked, int blocked_Axis)
             robposition.dist = RX_HBStatus[board].head[robposition.head].eeprom_mvt.rob_dist;
 			sok_send_2(&_HeadCtrl[board].socket, CMD_SET_ROB_POS, sizeof(robposition), &robposition);
         }
+        else if (robposition.head == -1)
+        {
+            if ((RX_Config.stepper.robot->screwturns[robposition.printBar] != robposition.dist && blocked) || !blocked)
+                steplb_cluster_Screw_Turned();
+            if (!blocked)
+				RX_Config.stepper.robot->screwturns[robposition.printBar] += robposition.dist;
+            else
+                RX_Config.stepper.robot->screwturns[robposition.printBar] = robposition.dist;
+        }
 	}
 }
 
 int ctrl_current_screw_pos(SHeadAdjustmentMsg *robposition)
 {
-    if (robposition->axis == AXE_ANGLE)
+    if (robposition->headNo == -1)
+        return RX_Config.stepper.robot->screwturns[robposition->printbarNo];
+    else if (robposition->axis == AXE_ANGLE)
 		return RX_HBStatus[robposition->printbarNo].head[robposition->headNo].eeprom_mvt.rob_angle;
     else if (robposition->axis == AXE_DIST)
         return RX_HBStatus[robposition->printbarNo].head[robposition->headNo].eeprom_mvt.rob_dist;
