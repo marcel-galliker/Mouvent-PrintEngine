@@ -146,8 +146,8 @@ int	jc_correction (SBmpInfo *pBmpInfo,  SPrintListItem *pItem, int fromLine)
 						{
 							
 							if(_Log) logLen += sprintf(&logStr[logLen], "%d ", jet);
-							jet += pInfo->startBt*pixelPerByte + pInfo->jetPx0;
-							_disable_jet(*pInfo->data, pBmpInfo->bitsPerPixel, pBmpInfo->lengthPx, pBmpInfo->lineLen, jet, fromLine);
+							jet += (pInfo->startBt - pInfo->fillBt) * pixelPerByte + pInfo->jetPx0;
+							if (jet >= 0) _disable_jet(*pInfo->data, pBmpInfo->bitsPerPixel, pBmpInfo->lengthPx, pBmpInfo->lineLen, jet, fromLine);
 							/*
 							for (jet=0; jet<pBmpInfo->srcWidthPx; jet+=2048)
 							{
