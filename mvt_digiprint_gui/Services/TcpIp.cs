@@ -871,7 +871,7 @@ namespace RX_DigiPrint.Services
             public SScrewPositions[] screwclusters;
 
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
-            public Int32 screwturns;
+            public Int32[] screwturns;
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
