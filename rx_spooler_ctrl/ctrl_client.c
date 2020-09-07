@@ -426,7 +426,7 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 	same = (!strcmp(msg.filename, _LastFilename) &&  msg.id.page==_LastPage && msg.wakeup==_LastWakeup && msg.gapPx==_LastGap);
 //	if (rx_def_is_lb(RX_Spooler.printerType)) same &= msg.offsetWidth==_LastOffsetWidth;
 	if (rx_def_is_lb(RX_Spooler.printerType) && msg.printMode==PM_SINGLE_PASS) same = ((msg.flags&FLAG_SAME)!=0) && (msg.offsetWidth==_LastOffsetWidth);
-	if (jc_changed()) same=FALSE;
+	if (msg.printMode==PM_SINGLE_PASS && jc_changed()) same=FALSE;
 	_LastPage   = msg.id.page;
 	_LastGap	= msg.gapPx;
 	_LastWakeup = msg.wakeup;

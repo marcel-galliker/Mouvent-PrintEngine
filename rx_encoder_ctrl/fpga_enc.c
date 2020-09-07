@@ -943,7 +943,7 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg, int restart)
 	{
 		//	Fpga->cfg.general.min_mark_len	  = 1000;
 		Fpga->cfg.general.shift_delay_tel		= (int)((pcfg->printGoDist   -Fpga->cfg.general.min_mark_len)/_StrokeDist);				
-		
+		TrPrintfL(TRUE, "fpga_pg_config.shift_delay_tel=%d", Fpga->cfg.general.shift_delay_tel);
 		//--- flight time compensation of Mark Reader ----------------------------	
 		double ftc_strokes = pcfg->ftc/_StrokeDist;
 		double hz		   = 100.0/60.0*1000000.0/_StrokeDist;// fix 100 m/min
@@ -1169,6 +1169,7 @@ void  fpga_set_printmark(SEncoderPgDist *pmsg)
 
 	RX_EncoderStatus.distTelCnt++;
 	TrPrintfL(TRUE, "fpga_set_printmark(no=%d, (id=%d, page=%d, copy=%d, scan=%d) cnt=%d, dist=%d, ignore=%d, window=%d) FIFO=%d", RX_EncoderStatus.distTelCnt, pmsg->id.id, pmsg->id.page, pmsg->id.copy, pmsg->id.scan, pmsg->cnt, pmsg->dist, pmsg->ignore, pmsg->window, FpgaQSys->window_status.fill_level);
+	TrPrintfL(TRUE, "fpga_set_printmark.shift_delay_tel=%d", Fpga->cfg.general.shift_delay_tel);
 }
 
 //--- _pg_ctrl ------------------------------------------------------
