@@ -1169,7 +1169,7 @@ void  fpga_set_printmark(SEncoderPgDist *pmsg)
 
 	RX_EncoderStatus.distTelCnt++;
 	TrPrintfL(TRUE, "fpga_set_printmark(no=%d, (id=%d, page=%d, copy=%d, scan=%d) cnt=%d, dist=%d, ignore=%d, window=%d) FIFO=%d", RX_EncoderStatus.distTelCnt, pmsg->id.id, pmsg->id.page, pmsg->id.copy, pmsg->id.scan, pmsg->cnt, pmsg->dist, pmsg->ignore, pmsg->window, FpgaQSys->window_status.fill_level);
-	TrPrintfL(TRUE, "fpga_set_printmark.shift_delay_tel=%d", Fpga->cfg.general.shift_delay_tel);
+	TrPrintfL(TRUE, "fpga_set_printmark.shift_delay_tel=%d, window_mark_pos =%d, avr_med_pos=%d", Fpga->cfg.general.shift_delay_tel, Fpga->stat.encOut[0].window_mark_pos, Fpga->stat.avr_med_pos);
 }
 
 //--- _pg_ctrl ------------------------------------------------------
@@ -1264,6 +1264,8 @@ static void  _pg_ctrl(void)
 						_statlog_timer = rx_get_ticks();
 					}
 					TrPrintfL(TRUE, "PrintMark[%d] ok:%06d filtred=%06d missed=%06d dist=%06d InPos=%06d OutPos=%06d\n", _PM_Cnt, RX_EncoderStatus.PG_cnt, _PM_Filtered_Cnt, _PM_Missed_Cnt, Fpga->stat.encIn[0].digin_edge_dist, Fpga->stat.encIn[0].position, Fpga->stat.encOut[0].position);
+					TrPrintfL(TRUE, "PrintMark[%d]: shift_delay_tel=%d, window_mark_pos =%d, avr_med_pos=%d", _PM_Cnt, Fpga->cfg.general.shift_delay_tel, Fpga->stat.encOut[0].window_mark_pos, Fpga->stat.avr_med_pos);
+
 					_PM_Cnt++;					
 				}
 			}
