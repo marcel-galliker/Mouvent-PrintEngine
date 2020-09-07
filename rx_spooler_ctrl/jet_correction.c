@@ -65,8 +65,8 @@ void jc_set_disabled_jets(SDisabledJetsMsg *pmsg)
 	{
 		for (n=0; n<MAX_DISABLED_JETS; n++)
 		{
-			_Changed |= (RX_DisabledJets[pmsg->head][n]!=old[n]);
-			_Active  |= (pmsg->disabledJets[n]>=0);
+			if (RX_DisabledJets[pmsg->head][n]!=old[n]) _Changed = TRUE;
+			if (pmsg->disabledJets[n]>=0)				_Active  = TRUE;
 		}
 	}
 	_First = TRUE;
@@ -123,6 +123,8 @@ int	jc_correction (SBmpInfo *pBmpInfo,  SPrintListItem *pItem, int fromLine)
 	int pixelPerByte;
 	char logStr[MAX_PATH];
 	SBmpSplitInfo	*pInfo; 
+
+	_Changed = FALSE;
 
 	if (pBmpInfo->bitsPerPixel==8) return REPLY_OK;	// correction whils screening 
     if (rx_def_is_tx(RX_Spooler.printerType)) return REPLY_OK;
@@ -185,7 +187,6 @@ int	jc_correction (SBmpInfo *pBmpInfo,  SPrintListItem *pItem, int fromLine)
 		}
 	}
 	_Log = FALSE;
-	_Changed = FALSE;
 	return REPLY_OK;							
 }
 
