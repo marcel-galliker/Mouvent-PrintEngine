@@ -15,7 +15,7 @@
     <UserControl.Resources>
         <DataTemplate x:Key="ImgComboBoxDataTemplate">
             <Grid>
-                <TextBlock Text="{Binding Display}" FontSize="{DynamicResource MvtFontSizeLarge}" HorizontalAlignment="Center"/>
+                <TextBlock Text="{Binding Display}" FontSize="{DynamicResource MvtFontSizeCombobox}" HorizontalAlignment="Center"/>
             </Grid>
         </DataTemplate>
         
@@ -157,7 +157,7 @@
 			ItemContainerStyle="{DynamicResource ComboBoxItemStyle1}"            >
             <ComboBox.ItemTemplate>
                 <DataTemplate>
-                    <iconPacks:PackIconModern Kind="{Binding Display, Converter={StaticResource IconPacks_ModernKind}}" Width="30" Height="30"/>
+                    <iconPacks:PackIconModern Kind="{Binding Display, Converter={StaticResource IconPacks_ModernKind}}" Width="25" Height="25"/>
                 </DataTemplate>
             </ComboBox.ItemTemplate>
         </ComboBox>

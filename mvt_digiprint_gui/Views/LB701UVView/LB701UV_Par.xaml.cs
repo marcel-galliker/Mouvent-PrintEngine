@@ -26,12 +26,32 @@ namespace RX_DigiPrint.Views.LB701UVView
             CB_Pinning1.ItemsSource   = new EN_OnOffAuto();
             CB_Pinning2.ItemsSource   = new EN_OnOffAuto();
             CB_UVLamp.ItemsSource     = new EN_OnOffAuto();
+
+            CB_DieCut.ItemsSource     = new EN_OnOff();     
+            CB_DcRwUp.ItemsSource     = new EN_OnOff();
+            CB_DcRwDn.ItemsSource     = new EN_OnOff();
             RxGlobals.PrintSystem.PropertyChanged += PrintSystem_PropertyChanged;
             XML_MATERIAL.PropertyChanged          += XML_MATERIAL_PropertyChanged;
+			ParPanelMaterial.Update               += ParPanelMaterial_Update;  
+
         }
 
-        //--- PrintSystem_PropertyChanged ----------------------------------------------------
-        void PrintSystem_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+		//--- ParPanelMaterial_Update -------------------------------------------
+		private bool _DieCutUsed=false;
+		private void ParPanelMaterial_Update()
+		{
+            string str  = RxGlobals.Plc.GetVar(ParPanelMaterial.UnitID, "CFG_DIECUT");
+            bool used=(Rx.StrToInt32(str)!=0);
+            if (used!=_DieCutUsed)
+			{
+                _DieCutUsed = used;
+                COL_DieCutSep.Width = _DieCutUsed? new GridLength(20) : new GridLength(0);
+                COL_DieCut.Width    = _DieCutUsed? GridLength.Auto    : new GridLength(0);
+			}
+		}
+
+		//--- PrintSystem_PropertyChanged ----------------------------------------------------
+		void PrintSystem_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
         //    if (e.PropertyName.Equals("SpeedList"))
         //         CB_Speed.ItemsSource  = RxGlobals.PrintSystem.SpeedList;

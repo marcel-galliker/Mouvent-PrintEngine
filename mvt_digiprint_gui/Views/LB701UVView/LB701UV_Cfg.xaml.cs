@@ -20,9 +20,10 @@ namespace RX_DigiPrint.Views.LB701UVView
         {
             InitializeComponent();
                       
-             _Dist.Add(new RxEnum<int>(240,  "240"));
-             _Dist.Add(new RxEnum<int>(260,  "260"));
-            CB_Dist.ItemsSource =  _Dist;
+            _Dist.Add(new RxEnum<int>(240,  "240"));
+            _Dist.Add(new RxEnum<int>(260,  "260"));
+            CB_Dist.ItemsSource   = _Dist;
+            CB_DieCut.ItemsSource = new EN_OnOff();  
         }
 
         //--- Save_Clicked ---------------------------------------------
