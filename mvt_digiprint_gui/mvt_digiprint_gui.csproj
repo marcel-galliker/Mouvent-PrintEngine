@@ -295,6 +295,7 @@
     <Compile Include="Comparers\FileName_Comparer.cs" />
     <Compile Include="Converters\BooleanConverters.cs" />
     <Compile Include="Converters\IconConverter.cs" />
+    <Compile Include="Converters\IconPacks_ModernKind.cs" />
     <Compile Include="Converters\JetCompensationConverters.cs" />
     <Compile Include="Converters\MainWindowConverters.cs" />
     <Compile Include="Converters\PrintSystemMonitoringConverters.cs" />

@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:igWPF="http://schemas.infragistics.com/xaml/wpf"
              xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
              mc:Ignorable="d"
              d:DesignHeight="50" 
@@ -17,13 +18,7 @@
                 <TextBlock Text="{Binding Display}" FontSize="{DynamicResource MvtFontSizeLarge}" HorizontalAlignment="Center"/>
             </Grid>
         </DataTemplate>
-
-        <DataTemplate x:Key="ImgComboBoxDataTemplate_Fix40">
-            <Grid Width="40">
-                <TextBlock Text="{Binding Display}" FontSize="{DynamicResource MvtFontSizeLarge}" HorizontalAlignment="Center"/>
-            </Grid>
-        </DataTemplate>
-
+        
         <SolidColorBrush x:Key="ComboBoxItem.ItemsviewHover.Background" Color="#1F26A0DA"/>
         <SolidColorBrush x:Key="ComboBoxItem.ItemsviewHover.Border" Color="#A826A0DA"/>
         <SolidColorBrush x:Key="ComboBoxItem.ItemsviewSelected.Background" Color="#3D26A0DA"/>
@@ -159,35 +154,14 @@
 			SelectedIndex="{Binding ComboValue, Converter={StaticResource EnumToInt_Converter}}"
             HorizontalContentAlignment="Center" 
             SelectionChanged="ImgComboCtrl_SelectionChanged" 
-            ItemTemplate="{DynamicResource ImgComboBoxDataTemplate_Fix40}"
-            ItemContainerStyle="{DynamicResource ComboBoxItemStyle1}" 
-            FontFamily="Wingdings 3"
-            />
+			ItemContainerStyle="{DynamicResource ComboBoxItemStyle1}"            >
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <iconPacks:PackIconModern Kind="{Binding Display, Converter={StaticResource IconPacks_ModernKind}}" Width="30" Height="30"/>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
 
         <Image x:Name="LedCtrl" Grid.Column="1" Source="{Binding Value,   Converter={StaticResource LedImg_Converter}}" Height="20"/>
-        
-        <!--
-            PreviewMouseDown="ImgComboCtrl_PreviewMouseDown" 
-        <rx:RxPopup x:Name="CmdPopup" 
-                   PlacementTarget="{Binding ElementName=ImgComboCtrl}"
-                   Width="auto"
-                   MinWidth="100" IsHitTestVisible="False"
-                   OpacityMask="White"
-                   >
-            <Grid Background="White">
-                <GroupBox Width="150" Style="{StaticResource MvtButton}" Header="^">
-                    <StackPanel Margin="10,2">
-                        <Grid MouseUp="ImgCombo_Clicked" Tag="0">
-                            <TextBlock Text="P" FontFamily="Wingdings 3" FontSize="30" HorizontalAlignment="Center" Margin="0,5"/>
-                        </Grid>
-                        <Grid MouseUp="ImgCombo_Clicked" Tag="1">
-                            <TextBlock Text="Q" FontFamily="Wingdings 3" FontSize="30" HorizontalAlignment="Center" Margin="0,5"/>
-                        </Grid>
-                    </StackPanel>
-               </GroupBox>
-            </Grid>
-        </rx:RxPopup>
-        -->
-
     </Grid>
 </UserControl>

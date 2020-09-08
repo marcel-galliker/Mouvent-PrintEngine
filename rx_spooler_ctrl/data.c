@@ -403,7 +403,7 @@ int  data_get_size	(const char *path, UINT32 page, UINT32 *pspacePx, UINT32 *pwi
 
 	// Bug in FPGA: (when srcLineCnt==12300, gap=0 it sometimes prints an additional line of old data [instead of blank] between the labels)
 	if (rx_def_is_lb(RX_Spooler.printerType)) 
-		*plength++;
+		(*plength)++;
 	
 	*multiCopy = 1;
 	if (ret==REPLY_OK && (RX_Spooler.printerType==printer_TX801 || RX_Spooler.printerType==printer_TX802))
@@ -702,7 +702,7 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 			}
 		}		
 		
-		if (/*id->id!=_LastId.id || */ id->page!=_LastId.page || strcmp(filepath, _LastFilePath) || _WakeupLen!=_LastWakeupLen || newOffsets || rx_file_get_mtime (_FileTimePath)!=_LastFileTime || gapPx!=_LastGapPx) // || printMode==PM_TEST_JETS) Overwrites head info!
+		if (/*id->id!=_LastId.id || */ id->page!=_LastId.page || strcmp(filepath, _LastFilePath) || _WakeupLen!=_LastWakeupLen || newOffsets || rx_file_get_mtime (_FileTimePath)!=_LastFileTime || gapPx!=_LastGapPx || jc_changed()) // || printMode==PM_TEST_JETS) Overwrites head info!
 		{
 			TrPrintfL(TRUE, "rx_sem_wait(_data_load_sem) (id=%d, page=%d, copy=%d, scan=%d) >>%s<<", id->id, id->page, id->copy, id->scan, filepath);
 			if (rx_sem_wait(_data_load_sem, 0)==REPLY_OK)
@@ -1493,6 +1493,8 @@ static int _data_split_prod(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 					pInfo->srcWidthBt	= (pBmpInfo->srcWidthPx*pBmpInfo->bitsPerPixel)/8;
 					pInfo->srcLineLen	= pBmpInfo->lineLen;
 					pInfo->srcLineCnt	= pBmpInfo->lengthPx;
+					if (rx_def_is_lb(RX_Spooler.printerType) && pInfo->srcLineCnt>1)
+						pInfo->srcLineCnt++;	// Bug in FPGA: (when srcLineCnt==12300, gap=0 it sometimes prints an additional line of old data [instead of blank] between the labels)
 					pInfo->resol.x		= pBmpInfo->resol.x;
 					pInfo->resol.y		= pBmpInfo->resol.y;
 					if (pInfo->bitsPerPixel==8)

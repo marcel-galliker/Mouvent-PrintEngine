@@ -426,6 +426,7 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 	same = (!strcmp(msg.filename, _LastFilename) &&  msg.id.page==_LastPage && msg.wakeup==_LastWakeup && msg.gapPx==_LastGap);
 //	if (rx_def_is_lb(RX_Spooler.printerType)) same &= msg.offsetWidth==_LastOffsetWidth;
 	if (rx_def_is_lb(RX_Spooler.printerType) && msg.printMode==PM_SINGLE_PASS) same = ((msg.flags&FLAG_SAME)!=0) && (msg.offsetWidth==_LastOffsetWidth);
+	if (jc_changed()) same=FALSE;
 	_LastPage   = msg.id.page;
 	_LastGap	= msg.gapPx;
 	_LastWakeup = msg.wakeup;
@@ -439,7 +440,7 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 //	if (rx_def_is_lb(RX_Spooler.printerType))
 //		msg.gapPx += 1;	// Bug in FPGA: (when srcLineCnt==12300, gap=0 it sometimes prints an additional line of old data [instead of blank] between the labels)
 
-	TrPrintfL(TRUE, "_do_print_file[%d] >>%s<<  id=%d, page=%d, copy=%d, scan=%d, same=%d, clearBlockUsed=%d, offsetWidth=%d, blkNo=%d", _MsgGot, msg.filename, msg.id.id, msg.id.page, msg.id.copy, msg.id.scan ,same, msg.clearBlockUsed, msg.offsetWidth, msg.blkNo);
+	TrPrintfL(TRUE, "_do_print_file[%d] >>%s<<  id=%d, page=%d, copy=%d, scan=%d, same=%d, clearBlockUsed=%d, offsetWidth=%d, blkNo=%d", _MsgGot, msg.filename, msg.id.id, msg.id.page, msg.id.copy, msg.id.scan, same, msg.clearBlockUsed, msg.offsetWidth, msg.blkNo);
 //	if (msg.id.scan==1) Error(LOG, 0, "_do_print_file[%d] >>%s<<  id=%d, page=%d, copy=%d, scan=%d, same=%d, blkNo=%d", _MsgGot, msg.filename, msg.id.id, msg.id.page, msg.id.copy, msg.id.scan ,same, msg.blkNo);
 	
 //	if(msg.smp_flags & SMP_LAST_PAGE) Error(LOG, 0, "_do_print_file[%d] >>%s<< id=%d, page=%d, copy=%d, scan=%d, same=%d, LAST PAGE", _MsgGot, msg.filename, msg.id.id, msg.id.page, msg.id.copy, msg.id.scan, same); 

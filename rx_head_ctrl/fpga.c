@@ -1081,7 +1081,7 @@ int  fpga_image	(SFpgaImageCmd *msg)
 
 		if (_check_block_used_flags(head, msg->image.blkNo, msg->image.blkCnt)!=REPLY_OK) 
 		{
-			TrPrintfL(trace, "head[%d].fpga_image[%d](id=%d, page=%d, copy=%d, scan=%d) Block not loaded, blkNo=%d, blkCnt=%d", head, idx, msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->image.blkNo, msg->image.blkCnt);
+			TrPrintfL(trace, "head[%d].fpga_image[%d]:(id=%d, page=%d, copy=%d, scan=%d) Block not loaded, blkNo=%d, blkCnt=%d", head, idx, msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->image.blkNo, msg->image.blkCnt);
 			return REPLY_ERROR;
 		}
 
