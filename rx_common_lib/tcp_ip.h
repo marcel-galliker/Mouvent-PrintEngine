@@ -22,8 +22,11 @@
 #define MAX_MESSAGE_SIZE	9000 // (8*1024) // jumbo blocks
 #define TCPIP_HEADER_SIZE	  66
 
+#ifndef RX_CTRL_SUBNET // allow to redefine local subnet during compilation
 #define RX_CTRL_SUBNET		"192.168.200."
-#define RX_CTRL_MAIN		RX_CTRL_SUBNET "1"
+#endif // !RX_CTRL_SUBNET
+
+#define RX_CTRL_MAIN RX_CTRL_SUBNET "1"
 #define RX_CTRL_PLC			RX_CTRL_SUBNET "3"
 #define RX_CTRL_ENC_0		4				// 6..8
 #define RX_CTRL_FLUID_0		6				// 6..8
