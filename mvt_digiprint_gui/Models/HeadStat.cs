@@ -442,7 +442,7 @@ namespace RX_DigiPrint.Models
             Meniscus_diff= item.meniscus_diff;
             PumpSpeed    = item.pumpSpeed;
             FlowFactor   = item.flowFactor;
-            FlowFactorWarning = (item.flowFactor>=200) && (CtrlMode==EFluidCtrlMode.ctrl_print);
+            FlowFactorWarning = (CtrlMode==EFluidCtrlMode.ctrl_print) && (item.info&(1<<6))==0;
 
             Warn         = used && (FlowFactorWarning || !TempReady);
             if (Err!=0)    StateBrush = Rx.BrushError;

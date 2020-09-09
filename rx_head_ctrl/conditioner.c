@@ -47,7 +47,6 @@ SFpgaHeadBoardCfg	FpgaCfg;
 SVersion			_FileVersion;
 static int			_UpdateClusterTimer;
 static int			_ErrorDelay=0;
-static int			_FlowCheckDelay[MAX_HEADS_BOARD];
 static ELogItemType	_ErrLevel = LOG_TYPE_UNDEF;
 
 #define ERROR_DELAY	200	// ms after reset until errors are checked
@@ -56,7 +55,6 @@ static ELogItemType	_ErrLevel = LOG_TYPE_UNDEF;
 
 static void _write_log(void);
 static void _cond_copy_status(void);
-static void _cond_check_flow(int ticks);
 static void _cond_preslog(int ticks);
 static void	_update_clusterNo(void);
 
@@ -314,38 +312,6 @@ void cond_error_check(int ticks)
 	    		_ErrLevel = level;
     	}
 	}
-	_cond_check_flow(ticks);
-}
-
-//--- _cond_check_flow ----------------------------------------
-static void _cond_check_flow(int ticks)
-{
-	int i;
-	if (nios_loaded())
-	{
-		for (i=0; i<SIZEOF(RX_HBStatus->head); i++)
-		{	
-			if (valid(RX_HBStatus->head[i].presIn) && valid(RX_HBStatus->head[i].presOut) && valid(RX_HBStatus->head[i].pumpFeedback))
-			{
-				if (RX_HBStatus->head[i].pumpFeedback) RX_HBStatus->head[i].flowFactor = 100*(RX_HBStatus->head[i].presIn-RX_HBStatus->head[i].presOut)/RX_HBStatus->head[i].pumpFeedback;
-				else RX_HBStatus->head[i].flowFactor = 1000;
-			}
-			else RX_HBStatus->head[i].flowFactor = INVALID_VALUE;
-
-			if (RX_HBStatus->head[i].ctrlMode==ctrl_print)
-			{					
-				RX_HBStatus[0].head[i].info.flowFactor_ok = valid(RX_HBStatus->head[i].flowFactor) && RX_HBStatus->head[i].flowFactor<200;
-				if (!RX_HBStatus[0].head[i].info.flowFactor_ok) 
-				{
-					int warn = (RX_HBStatus[0].head[i].warn&COND_ERR_flow_factor);
-					RX_HBStatus[0].head[i].warn |= COND_ERR_flow_factor;				
-				//	if (ticks>_FlowCheckDelay[i] && !warn) 
-				//		Error(WARN, 0, "Conditioner %s: Ink flow factor >200", RX_HBConfig.head[i].name);
-				}
-			}
-			else _FlowCheckDelay[i] = ticks+5000;
-		}
-	}
 }
 
 //--- cond_err_level -------------------------------------
@@ -489,11 +455,9 @@ static void _cond_copy_status(void)
 				RX_HBStatus->head[i].tempHead			= RX_NiosStat.head_temp[i];
 				RX_HBStatus->head[i].tempCond			= RX_NiosStat.cond[i].tempIn;
 //				RX_HBStatus->head[i].tempSetpoint		= _NiosMem->cfg.cond[i].temp; //RX_NiosStat.cond[i].tempSetpoint;
-				RX_HBStatus->head[i].presIn_ID			= RX_NiosStat.cond[i].pressure_in_ID;
 				RX_HBStatus->head[i].presIn				= RX_NiosStat.cond[i].pressure_in;
 				RX_HBStatus->head[i].presIn_max			= RX_NiosStat.cond[i].pressure_in_max;
 				RX_HBStatus->head[i].presIn_diff	    = RX_NiosStat.cond[i].pressure_in_diff;
-				RX_HBStatus->head[i].presOut_ID			= RX_NiosStat.cond[i].pressure_out_ID;
 				RX_HBStatus->head[i].presOut			= RX_NiosStat.cond[i].pressure_out;
 				RX_HBStatus->head[i].presOut_diff		= RX_NiosStat.cond[i].pressure_out_diff;
 				RX_HBStatus->head[i].meniscus			= RX_NiosStat.cond[i].meniscus;
@@ -502,6 +466,7 @@ static void _cond_copy_status(void)
 				RX_HBStatus->head[i].pumpSpeed			= RX_NiosStat.cond[i].pump;
 				RX_HBStatus->head[i].pumpFeedback		= RX_NiosStat.cond[i].pump_measured * 60/100;	// in 0.1 ml
 				RX_HBStatus->head[i].printingSeconds	= RX_NiosStat.cond[i].pumptime;
+				RX_HBStatus->head[i].flowFactor			= RX_NiosStat.cond[i].flowFactor;
 				RX_HBStatus->head[i].ctrlMode			= RX_NiosStat.cond[i].mode;
 				
 				if (RX_NiosStat.cond[i].error & COND_ERR_status_struct_missmatch)

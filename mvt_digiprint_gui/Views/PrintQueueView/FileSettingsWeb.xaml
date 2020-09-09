@@ -101,7 +101,7 @@
                         <ColumnDefinition Width="100" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="1" Text="Copy"/>
+                    <TextBlock Grid.Column="1" Text="From"/>
                 <common:MvtNumBox  Grid.Row="1" Grid.Column="2" Text="{Binding StartFrom}" Min="0" IsInt="True" x:Name="NumBox_StartFrom" HorizontalContentAlignment="Right"/>
                 <TextBlock Grid.Row="1" x:Name="StartPageTxt" Grid.Column="4" Text="Page" />
                 <common:MvtNumBox  Grid.Row="1"  x:Name="StartPageNum" Grid.Column="5" Width="60" HorizontalAlignment="Left" Text="{Binding StartPage}" HorizontalContentAlignment="Right"/>

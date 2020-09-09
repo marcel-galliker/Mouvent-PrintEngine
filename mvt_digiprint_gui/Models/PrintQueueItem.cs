@@ -278,8 +278,8 @@ namespace RX_DigiPrint.Models
         }
 
         //--- StartFrom ---------------------------------
-        private Int32 _StartFrom;
-        public Int32 StartFrom
+        private double _StartFrom;
+        public double StartFrom
         {
             get { return _StartFrom; }
             set 
@@ -1012,16 +1012,20 @@ namespace RX_DigiPrint.Models
             {
                 LengthUnit = EPQLengthUnit.copies;
                 ScanLength = msg.copies;
-                if (msg.start.copy==0) StartFrom = 1;
-                else                   StartFrom = msg.start.copy;
+                if (msg.start.copy==0 || CopiesPrinted == msg.copiesTotal)  
+                    StartFrom = 1;
+                else                                                        
+                    StartFrom = msg.start.copy;
             }
             else
             {
                 ScanLength = msg.scanLength/1000.0;
                 LengthUnit = EPQLengthUnit.mm;
                 if (RxGlobals.PrintSystem.IsScanning) StartFrom = msg.start.scan;
-                else if (msg.copiesTotal!=0)          StartFrom = (int)(ScanLength * ((double)msg.copiesPrinted / (double)msg.copiesTotal));
-                else                                  StartFrom = 0;
+                else if (msg.copiesTotal!=0 &&  CopiesPrinted != msg.copiesTotal) 
+                    StartFrom = (ScanLength * ((double)(msg.copiesPrinted+1) / (double)msg.copiesTotal));
+                else                                  
+                    StartFrom = 0;
             };
 
             if (LastPage > FirstPage)
@@ -1113,20 +1117,20 @@ namespace RX_DigiPrint.Models
             {
                 if (RxGlobals.PrintSystem.IsScanning)
                 {
-                    msg.item.start.page  = StartFrom;
+                    msg.item.start.page  = (int) StartFrom;
                     msg.item.start.copy  = 1;
                 }
                 else
                 {
                     msg.item.start.page  = StartPage;
-                    msg.item.start.copy  = StartFrom;
+                    msg.item.start.copy  = (int) StartFrom;
                 }
                 msg.item.start.scan  = 0;
             }
             else if (msg.item.lengthUnit == EPQLengthUnit.copies)
             {
                 if (ScanLength>0) msg.item.copies = (int)ScanLength;
-                msg.item.start.copy = StartFrom;
+                msg.item.start.copy = (int) StartFrom;
                 msg.item.start.scan = 0;
             }
             else
@@ -1134,8 +1138,8 @@ namespace RX_DigiPrint.Models
                 msg.item.start.scan = 0;
                 msg.item.start.copy = 0;
                 msg.item.start.page = 0;  
-                msg.item.start.scan = StartFrom;
-                if (!RxGlobals.PrintSystem.IsScanning && SrcHeight!=0) msg.item.copiesPrinted = (int)((double)StartFrom*1000 / SrcHeight);
+                msg.item.start.scan = (int) StartFrom;
+                if (!RxGlobals.PrintSystem.IsScanning && SrcHeight!=0) msg.item.copiesPrinted = (int)(StartFrom*1000 / SrcHeight);
             }
             if (RxGlobals.PrintSystem.IsScanning)
             {
