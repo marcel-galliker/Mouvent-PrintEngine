@@ -89,8 +89,8 @@ int rx_mem_use(BYTE *ptr)
 		SBuffer *buf = ((SBuffer*)ptr) - 1;
 		
 		rx_mutex_lock(_Mutex);
-		if (buf->count<0)
-			printf("rx_mem_use %p, cnt=%d ERROR\n", ptr, buf->count);
+//		if (buf->count<0)
+//			printf("rx_mem_use %p, cnt=%d ERROR\n", ptr, buf->count);
 		cnt = (++buf->count);
 		// printf("rx_mem_use %p, cnt=%d, _Buffers=%d\n", ptr, buf->count, _Buffers);
 		rx_mutex_unlock(_Mutex);

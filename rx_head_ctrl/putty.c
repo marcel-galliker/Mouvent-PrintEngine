@@ -630,29 +630,6 @@ void putty_display_cond_status(int status)
 			term_printf("%14s  ", str);		
 		}
 		term_printf("\n");
-
-		if (status)
-		{
-			term_printf("Pressure in ID:  "); 
-			for (i=0; i<MAX_HEADS_BOARD; i++)
-			{
-				UCHAR *id=(UCHAR*)&RX_HBStatus->head[no[i]].presIn_ID;
-			
-				sprintf(str, "%d.%d.%d.%d", id[0], id[1], id[2], id[3]);
-				term_printf(" %14s ", str);
-			}
-			term_printf("\n");
-
-			term_printf("Pressure out ID: "); 
-			for (i=0; i<MAX_HEADS_BOARD; i++)
-			{
-				UCHAR *id=(UCHAR*)&RX_HBStatus->head[no[i]].presOut_ID;
-			
-				sprintf(str, "%d.%d.%d.%d", id[0], id[1], id[2], id[3]);
-				term_printf(" %14s ", str);
-			}
-			term_printf("\n");
-		}	
 		
 		term_printf("Pressure in:     "); 
     	{

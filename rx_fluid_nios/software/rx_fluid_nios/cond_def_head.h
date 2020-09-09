@@ -232,11 +232,9 @@ typedef struct SConditionerStat_mcu
 	SCondCmd		cmdConfirm;
 		
 	//actual values
-	UINT32			pressure_in_ID;
 	INT32			pressure_in;
 	INT32			pressure_in_max;
 	INT32			pressure_in_diff;
-	UINT32			pressure_out_ID;
 	INT32			pressure_out;		
 	INT32			pressure_out_diff;
 	
@@ -244,6 +242,7 @@ typedef struct SConditionerStat_mcu
 	INT32			meniscus_setpoint;
 	INT32			meniscus_diff;
 	UINT16			flowResistance;
+	UINT32			flowFactor;
 	
 	UINT32			pump;				// rpm (calculated based on actual/desired output pressure)
 	UINT32			pump_measured;		// measured ml/min

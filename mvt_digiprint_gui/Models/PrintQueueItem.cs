@@ -1012,16 +1012,20 @@ namespace RX_DigiPrint.Models
             {
                 LengthUnit = EPQLengthUnit.copies;
                 ScanLength = msg.copies;
-                if (msg.start.copy==0 || CopiesPrinted == msg.copiesTotal) StartFrom = 1;
-                else                   StartFrom = msg.start.copy;
+                if (msg.start.copy==0 || CopiesPrinted == msg.copiesTotal)  
+                    StartFrom = 1;
+                else                                                        
+                    StartFrom = msg.start.copy;
             }
             else
             {
                 ScanLength = msg.scanLength/1000.0;
                 LengthUnit = EPQLengthUnit.mm;
                 if (RxGlobals.PrintSystem.IsScanning) StartFrom = msg.start.scan;
-                else if (msg.copiesTotal!=0 &&  CopiesPrinted != msg.copiesTotal) StartFrom = (ScanLength * ((double)(msg.copiesPrinted+1) / (double)msg.copiesTotal));
-                else                                  StartFrom = 0;
+                else if (msg.copiesTotal!=0 &&  CopiesPrinted != msg.copiesTotal) 
+                    StartFrom = (ScanLength * ((double)(msg.copiesPrinted+1) / (double)msg.copiesTotal));
+                else                                  
+                    StartFrom = 0;
             };
 
             if (LastPage > FirstPage)
@@ -1135,7 +1139,7 @@ namespace RX_DigiPrint.Models
                 msg.item.start.copy = 0;
                 msg.item.start.page = 0;  
                 msg.item.start.scan = (int) StartFrom;
-                if (!RxGlobals.PrintSystem.IsScanning && SrcHeight!=0) msg.item.copiesPrinted = (int)((double)StartFrom*1000 / SrcHeight);
+                if (!RxGlobals.PrintSystem.IsScanning && SrcHeight!=0) msg.item.copiesPrinted = (int)(StartFrom*1000 / SrcHeight);
             }
             if (RxGlobals.PrintSystem.IsScanning)
             {
