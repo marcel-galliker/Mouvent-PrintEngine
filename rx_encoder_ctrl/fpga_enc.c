@@ -958,7 +958,7 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg, int restart)
 	}
 	else
 	{
-		Fpga->cfg.general.shift_delay_tel	= 0;							
+	//	Fpga->cfg.general.shift_delay_tel	= 0;	// must be done in fpgha_pg_init!						
 		Fpga->cfg.general.ftc_speed			= 0;
 		Fpga->cfg.general.ftc_ratio			= 0;
 	}
@@ -1080,7 +1080,8 @@ void fpga_pg_init(int restart)
 	RX_EncoderStatus.fifoEmpty_WND = Fpga->stat.window_fifo_empty_err;	
 
 //	if (!restart) RX_EncoderStatus.distTelCnt	= 0;
-	RX_EncoderStatus.distTelCnt	= 0;
+	Fpga->cfg.general.shift_delay_tel	= 0;
+	RX_EncoderStatus.distTelCnt			= 0;
 	_PrintGo_Enabled = TRUE;
 
 	TrPrintfL(TRUE, "fpga_pg_init: enable=%d, position=%d, enc_start_pos_fwd=%d", Fpga->cfg.encIn[0].enable, Fpga->stat.encIn[0].position, Fpga->cfg.pg[0].enc_start_pos_fwd);
