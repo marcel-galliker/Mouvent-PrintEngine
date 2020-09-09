@@ -92,7 +92,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
                     if (item.LengthUnitMM)
                     {
                         CUnit unit = new CUnit("m");
-                        return Math.Round(item.StartFrom * unit.Factor);
+                        return Math.Round(item.StartFrom * unit.Factor * 100) / 100;
                     }
                     return item.StartFrom;
                 }
@@ -106,7 +106,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
                     if (item.LengthUnitMM)
                     {
                         CUnit unit = new CUnit("m");
-                        item.StartFrom = (int)Math.Round(value / unit.Factor);
+                        item.StartFrom = value / unit.Factor;
                     }
                     else item.StartFrom = (int)value;
                 }
