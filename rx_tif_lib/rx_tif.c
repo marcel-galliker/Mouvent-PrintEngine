@@ -426,7 +426,7 @@ int tif_load(SPageId *id, const char *filedir, const char *filename, int printMo
 			pinfo->buffer[c]	= &buffer[c];
 			height = pinfo->lengthPx;
 			if (psplit[c].lastLine<height) height=psplit[c].lastLine;
-			
+
 			ppar->no	   = threadCnt;	
 			ppar->pinfo    = pinfo;
 			ppar->buffer   = buffer[c]+wakeupLen*lineLen;
@@ -490,7 +490,7 @@ int tif_load(SPageId *id, const char *filedir, const char *filename, int printMo
 		{
 			for (i=0; i<threadCnt; i++)
 			{
-				memset(_ThreadPar[i].buffer+((UINT64)pinfo->lengthPx-1)*lineLen, 0x00, lineLen);
+				memset(_ThreadPar[i].buffer+pinfo->dataSize, 0x00, lineLen);
 			}
 		}
 	}
