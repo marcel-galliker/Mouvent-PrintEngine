@@ -105,8 +105,8 @@ static int		_MemId=0;
 static int		_Init=FALSE;
 static int		_LinuxDeployment=0;
 
-static double	_IncDist	= 1.0040;			// [�m] distance of encoder increments
-static double   _StrokeDist = 25400.0/1200.0;	// [�m] distance between firepulse strokes
+static double	_IncDist	= 1.0040;			// [µm] distance of encoder increments
+static double   _FirePulseDist = 25400.0/1200.0;	// [µm] distance between firepulse strokes
 
 static int		_UV_Speed   = 0;
 static INT32	_UV_LastPos = 0;
@@ -572,7 +572,7 @@ void fpga_enc_config(int inNo, SEncoderCfg *pCfg, int restart)
 	}
 	else
 	{	
-		_IncDist = 1000000.0/pCfg->incPerMeter; // [�m] distance of encoder increments
+		_IncDist = 1000000.0/pCfg->incPerMeter; // [µm] distance of encoder increments
 		
 	//	if (tw8_present()) _IncDist *= 2;
 	
@@ -586,7 +586,7 @@ void fpga_enc_config(int inNo, SEncoderCfg *pCfg, int restart)
 		
 		Fpga->cfg.encOut[outNo].encoder_no		= inNo;
 		Fpga->cfg.encOut[outNo].reset_min_max	= TRUE;
-		Fpga->cfg.encOut[outNo].dist_ratio		= (UINT32) ((double) 0x80000000 * _IncDist / _StrokeDist);
+		Fpga->cfg.encOut[outNo].dist_ratio		= (UINT32) ((double) 0x80000000 * _IncDist / _FirePulseDist);
 		Fpga->cfg.encOut[outNo].synthetic_freq	= 0;
 		Fpga->cfg.general.subsample_meas		= 0;
 		if (pCfg->scanning)
@@ -714,8 +714,8 @@ void  fpga_shift_delay(int strokes)
 //--- fpga_encoder_reset_reg -------------------------------------
 void  fpga_encoder_reset_reg(void)
 {
-	double ftc_strokes = _ftc_send / _StrokeDist;
-	double hz		   = 100.0 / 60.0 * 1000000.0 / _StrokeDist;// fix 100 m/min
+	double ftc_strokes = _ftc_send / _FirePulseDist;
+	double hz		   = 100.0 / 60.0 * 1000000.0 / _FirePulseDist;// fix 100 m/min
 	double speed	   = (hz / FPGA_FREQ) * 0x80000000;
 	double ratio       = ftc_strokes / (hz / FPGA_FREQ);
 
@@ -843,9 +843,9 @@ static void _fpga_corr_linear(SEncoderCfg *pCfg, int restart)
 	
 	fpga_enc_config(1, pCfg, restart);
 	
-	_IncDist = 1000000.0/pCfg->incPerMeter; // [�m] distance of encoder increments
+	_IncDist = 1000000.0/pCfg->incPerMeter; // [µm] distance of encoder increments
 
-	double ratio = _IncDist / _StrokeDist;
+	double ratio = _IncDist / _FirePulseDist;
 
 	UINT32 rat = (UINT32) (0x80000000 * ratio);
 
@@ -942,11 +942,12 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg, int restart)
 	if (pcfg->ftc)
 	{
 		//	Fpga->cfg.general.min_mark_len	  = 1000;
-		Fpga->cfg.general.shift_delay_tel		= (int)((pcfg->printGoDist   -Fpga->cfg.general.min_mark_len)/_StrokeDist);				
+		if (pcfg->printGoDist<0) Fpga->cfg.general.shift_delay_tel = 0;
+		else					 Fpga->cfg.general.shift_delay_tel = (int)((pcfg->printGoDist)/_FirePulseDist);				
 		TrPrintfL(TRUE, "fpga_pg_config.shift_delay_tel=%d", Fpga->cfg.general.shift_delay_tel);
 		//--- flight time compensation of Mark Reader ----------------------------	
-		double ftc_strokes = pcfg->ftc/_StrokeDist;
-		double hz		   = 100.0/60.0*1000000.0/_StrokeDist;// fix 100 m/min
+		double ftc_strokes = pcfg->ftc/_FirePulseDist;
+		double hz		   = 100.0/60.0*1000000.0/_FirePulseDist;// fix 100 m/min
 		double speed	   = (hz/FPGA_FREQ)*0x80000000;
 		double ratio       = ftc_strokes / (hz / FPGA_FREQ);
 		
@@ -965,7 +966,7 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg, int restart)
 	
 	{	//--- used for DP803 ---
 		Fpga->cfg.general.shift_delay_pulse_len = (Fpga->cfg.general.min_mark_len*11)/10;
-		Fpga->cfg.general.shift_delay			= (int)((pcfg->printGoOutDist-Fpga->cfg.general.min_mark_len)/_StrokeDist);		
+		Fpga->cfg.general.shift_delay			= (int)((pcfg->printGoOutDist-Fpga->cfg.general.min_mark_len)/_FirePulseDist);		
 	}
 
 	for (pgNo=0; pgNo<SIZEOF(Fpga->cfg.pg); pgNo++)
@@ -1127,7 +1128,7 @@ void  fpga_pg_set_dist(SPageId *pid, int cnt, int dist)
 	{
 		int pgNo;
 		int c=cnt;
-		int incs = (int)(dist/_StrokeDist);
+		int incs = (int)(dist/_FirePulseDist);
 		while (cnt-->0)
 		{
 			FpgaQSys->printGo_fifo = incs;
@@ -1152,7 +1153,7 @@ int	  fpga_get_restart_ignore(void)
 {
 	int ignore = (int)(_IncDist * (Fpga->stat.encOut[0].pg_start_pos - Fpga->stat.encIn[0].position));
 	_FirstMarkPos = Fpga->stat.encOut[0].pg_start_pos;
-	TrPrintfL(TRUE, "fpga_get_restart_ignore (pg_start_pos=%d, InPos=%d), diff=%d, ignore=%d, _IncDist=%f.5", Fpga->stat.encOut[0].pg_start_pos, Fpga->stat.encIn[0].position, (Fpga->stat.encOut[0].pg_start_pos-Fpga->stat.encIn[0].position),ignore , _StrokeDist);
+	TrPrintfL(TRUE, "fpga_get_restart_ignore (pg_start_pos=%d, InPos=%d), diff=%d, ignore=%d, _IncDist=%f.5", Fpga->stat.encOut[0].pg_start_pos, Fpga->stat.encIn[0].position, (Fpga->stat.encOut[0].pg_start_pos-Fpga->stat.encIn[0].position),ignore , _FirePulseDist);
 	return ignore;
 }
 
@@ -1161,11 +1162,15 @@ void  fpga_set_printmark(SEncoderPgDist *pmsg)
 {
 	int pgNo;
 
-	Fpga->cfg.general.shift_delay_tel =  (int)((pmsg->dist-Fpga->cfg.general.min_mark_len)/_StrokeDist);
+	if (pmsg->dist<0) Fpga->cfg.general.shift_delay_tel = 0;
+	else			  Fpga->cfg.general.shift_delay_tel = (int)(pmsg->dist/_FirePulseDist);
+	TrPrintfL(TRUE, "fpga_set_printmark(no=%d, (id=%d, page=%d, copy=%d, scan=%d) dist=%d, min_mark_len=%d, shift_delay_tel=%d)", 
+	RX_EncoderStatus.distTelCnt, pmsg->id.id, pmsg->id.page, pmsg->id.copy, pmsg->id.scan, pmsg->dist, Fpga->cfg.general.min_mark_len, Fpga->cfg.general.shift_delay_tel);
+
 //	Error(LOG, 0, "fpga_set_printmark dist=%d, shift=%d", pmsg->dist, Fpga->cfg.general.shift_delay_tel);
-	FpgaQSys->window_fifo  = _Window = (int)(pmsg->window/_StrokeDist);
-	if (pmsg->ignore>10000) FpgaQSys->ignored_fifo = _Ignore = (int)(pmsg->ignore/_StrokeDist);
-	else                    FpgaQSys->ignored_fifo = _Ignore = (int)(10000/_StrokeDist);
+	FpgaQSys->window_fifo  = _Window = (int)(pmsg->window/_FirePulseDist);
+	if (pmsg->ignore>10000) FpgaQSys->ignored_fifo = _Ignore = (int)(pmsg->ignore/_FirePulseDist);
+	else                    FpgaQSys->ignored_fifo = _Ignore = (int)(10000/_FirePulseDist);
 	for (pgNo=0; pgNo<SIZEOF(Fpga->cfg.pg); pgNo++) Fpga->cfg.pg[pgNo].fifos_ready = TRUE;
 
 	RX_EncoderStatus.distTelCnt++;
@@ -1319,7 +1324,7 @@ static void  _corr_ctrl(void)
 		{
 			UINT32 pos = Fpga->stat.encOut[0].position;
 			UINT32 len = (pos - _lastPos) % 0x100000;
-			UINT32 m   = _rest + len*_StrokeDist;
+			UINT32 m   = _rest + len*_FirePulseDist;
 			if (m > 1000000)
 			{
 				RX_EncoderStatus.meters += m/1000000;
@@ -1599,7 +1604,7 @@ static void _fpga_display_status(int showCorrection, int showParam)
 				FpgaQSys->printGo_status.fill_level, 
 				FpgaQSys->window_status.fill_level, 
 				FpgaQSys->ignored_status.fill_level, 
-				(int)(Fpga->cfg.general.shift_delay_tel*_StrokeDist+500)/1000, 
+				(int)(Fpga->cfg.general.shift_delay_tel*_FirePulseDist+500)/1000, 
 				_InCnt, _PM_Cnt); 
 			term_printf("  PG Cnt:        "); for (i=0; i<cnt; i++) term_printf("%09d  ", Fpga->stat.encOut[i].PG_cnt);				term_printf("\n");
 			term_printf("  PM Par:        window____ %09d  ignore____ %09d\n", _Window, _Ignore); 
