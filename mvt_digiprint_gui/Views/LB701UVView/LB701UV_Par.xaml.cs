@@ -21,32 +21,34 @@ namespace RX_DigiPrint.Views.LB701UVView
 
             CB_Material.ItemsSource   = RxGlobals.MaterialList.List;
 
-            CB_RotUW.ItemsSource      = CB_RotRW.ItemsSource = new EN_RotationList();
+            CB_RotUW.ItemsSource      = new EN_RotationList();
+            CB_RotRW.ItemsSource      = new EN_RotationList();
             CB_Corona.ItemsSource     = new EN_OnOff();
             CB_Pinning1.ItemsSource   = new EN_OnOffAuto();
             CB_Pinning2.ItemsSource   = new EN_OnOffAuto();
             CB_UVLamp.ItemsSource     = new EN_OnOffAuto();
 
-            CB_DieCut.ItemsSource     = new EN_OnOff();     
             CB_DcRwUp.ItemsSource     = new EN_OnOff();
             CB_DcRwDn.ItemsSource     = new EN_OnOff();
             RxGlobals.PrintSystem.PropertyChanged += PrintSystem_PropertyChanged;
             XML_MATERIAL.PropertyChanged          += XML_MATERIAL_PropertyChanged;
-			ParPanelMaterial.Update               += ParPanelMaterial_Update;  
-
+			ParPanelMaterial.Update               += ParPanelMaterial_Update;
         }
 
 		//--- ParPanelMaterial_Update -------------------------------------------
-		private bool _DieCutUsed=false;
+		private bool? _DieCutUsed;
 		private void ParPanelMaterial_Update()
 		{
             string str  = RxGlobals.Plc.GetVar(ParPanelMaterial.UnitID, "CFG_DIECUT");
-            bool used=(Rx.StrToInt32(str)!=0);
+            bool used=(str!=null && str.Equals("TRUE"));
             if (used!=_DieCutUsed)
 			{
                 _DieCutUsed = used;
-                COL_DieCutSep.Width = _DieCutUsed? new GridLength(20) : new GridLength(0);
-                COL_DieCut.Width    = _DieCutUsed? GridLength.Auto    : new GridLength(0);
+                if ((bool)_DieCutUsed) CB_RotRW.ItemsSource = new EN_RotationList_OFF();
+                else                   CB_RotRW.ItemsSource = new EN_RotationList();
+                COL_DieCutSep.Width  = (bool)_DieCutUsed? new GridLength(20) : new GridLength(0);
+                COL_DieCut.Width     = (bool)_DieCutUsed? GridLength.Auto    : new GridLength(0);
+                Reload_Clicked(this, null);
 			}
 		}
 
@@ -156,6 +158,5 @@ namespace RX_DigiPrint.Views.LB701UVView
                 }
             }
         }
-
      }
 }
