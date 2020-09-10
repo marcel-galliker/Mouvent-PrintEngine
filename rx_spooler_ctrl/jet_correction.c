@@ -51,7 +51,7 @@ int jc_init(void)
 void jc_set_disabled_jets(SDisabledJetsMsg *pmsg)
 {
 	int n, ok;
-	INT16	old[MAX_DENSITY_VALUES];
+	INT16	old[MAX_DISABLED_JETS];
 	for (n=0, ok=FALSE; n<MAX_DISABLED_JETS; n++)
 	{
 		ok=(pmsg->disabledJets[n]!=0);
