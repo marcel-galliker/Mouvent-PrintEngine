@@ -716,7 +716,7 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 				if (_PrintMode==PM_SCAN_MULTI_PAGE && !(flags & FLAG_SMP_FIRST_PAGE))
 					ctrl_pause_printing();
 				bmpInfo.printMode = printMode;
-				if (printMode==PM_TEST || printMode==PM_TEST_JETS || printMode==PM_TEST_SINGLE_COLOR)
+			if (rx_pm_is_test(printMode))
 				{
 					for (color=0; color<MAX_COLORS; color++)
 					{
@@ -833,7 +833,7 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 		}
 		_data_split(id, &bmpInfo, offsetPx, lengthPx, blkNo, blkCnt, flags, clearBlockUsed, same, &_PrintList[_InIdx]);
 		
-		if (loaded || printMode==PM_TEST || printMode==PM_TEST_JETS || printMode==PM_TEST_SINGLE_COLOR)
+		if (loaded || rx_pm_is_test(printMode))
 		{
 			if      (printMode==PM_TEST_JETS && id->id==PQ_TEST_JET_NUMBERS) jc_correction(&bmpInfo, &_PrintList[_InIdx], 4224);
 			else if (printMode!=PM_TEST && printMode!=PM_TEST_SINGLE_COLOR)  jc_correction(&bmpInfo, &_PrintList[_InIdx], 0);

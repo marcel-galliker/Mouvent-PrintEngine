@@ -199,6 +199,18 @@ int rx_def_is_test(EPrinterType printerType)
 	}
 }
 
+//--- rx_pm_is_test ---------------------------------
+int rx_pm_is_test(int printmode)
+{
+	switch(printmode)	
+	{
+	case PM_TEST:				return TRUE;
+	case PM_TEST_JETS:			return TRUE;
+	case PM_TEST_SINGLE_COLOR:	return TRUE;
+	default: return FALSE;
+	}
+
+}
 //--- rx_def_use_pq ---------------------------------------
 int rx_def_use_pq(EPrinterType printerType)
 {
