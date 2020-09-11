@@ -402,8 +402,8 @@ int  data_get_size	(const char *path, UINT32 page, UINT32 *pspacePx, UINT32 *pwi
 	}
 
 	// Bug in FPGA: (when srcLineCnt==12300, gap=0 it sometimes prints an additional line of old data [instead of blank] between the labels)
-	if (rx_def_is_lb(RX_Spooler.printerType)) 
-		(*plength)++;
+//	if (rx_def_is_lb(RX_Spooler.printerType)) 
+//		(*plength)+=1;
 	
 	*multiCopy = 1;
 	if (ret==REPLY_OK && (RX_Spooler.printerType==printer_TX801 || RX_Spooler.printerType==printer_TX802))
@@ -847,8 +847,8 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 			sprintf(dir, PATH_RIPPED_DATA "trace");
 			sprintf(fname, "ID_%d", id->id);
 			bmpInfo.planes = RX_Spooler.colorCnt;
-			tif_write(dir, fname, &bmpInfo, "R");
-			Error(WARN, 0, "Test: Written bitmap to >>%s\\%s<<", dir, fname);
+			tif_write(dir, fname, &bmpInfo, "C");
+			Error(WARN, 0, "Test: Written bitmap to >>%s/%s<<", dir, fname);
 		}
 		#endif
 	
@@ -1494,8 +1494,6 @@ static int _data_split_prod(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 					pInfo->srcWidthBt	= (pBmpInfo->srcWidthPx*pBmpInfo->bitsPerPixel)/8;
 					pInfo->srcLineLen	= pBmpInfo->lineLen;
 					pInfo->srcLineCnt	= pBmpInfo->lengthPx;
-					if (rx_def_is_lb(RX_Spooler.printerType) && pInfo->srcLineCnt>1)
-						pInfo->srcLineCnt++;	// Bug in FPGA: (when srcLineCnt==12300, gap=0 it sometimes prints an additional line of old data [instead of blank] between the labels)
 					pInfo->resol.x		= pBmpInfo->resol.x;
 					pInfo->resol.y		= pBmpInfo->resol.y;
 					if (pInfo->bitsPerPixel==8)
