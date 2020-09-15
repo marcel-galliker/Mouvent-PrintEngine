@@ -157,6 +157,8 @@ int lc_get_value (int no, char *value)
 		wchar_to_char(wvalue, pvar->value, SIZEOF(pvar->value));
 		strcpy(value, pvar->value);
 		
+//		TrPrintfL(TRUE, "lc_get_value >>%s<<=>>%s<< ERROR=0x%08x\n", pvar->name, pvar->value, result);
+
 	//	TrPrintfL(!strcmp(pvar->name, "Application.GUI_00_001_Main.PAR_FLEXO_CONFIGURATION"), "lc_get_value >>%s=%s<<\n", pvar->name, value);				
 		return TRUE;
 	}
@@ -167,6 +169,7 @@ int lc_get_value (int no, char *value)
 int lc_get_value_by_name (char *name, char *value)
 {
 	int i;
+
 	for (i=0; i<_SymbolCnt; i++)
 	{
 		if (!strcmp(name, _Symbols[i].name))

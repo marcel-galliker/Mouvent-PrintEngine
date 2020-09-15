@@ -596,7 +596,6 @@
     <Compile Include="Views\LB701UVView\LB701UV_Cmd.xaml.cs" />
     <Compile Include="Views\LB701UVView\LB701UV_DiePos.xaml.cs" />
     <Compile Include="Views\LB701UVView\LB701UV_Par.xaml.cs" />
-    <Compile Include="Views\LB701UVView\LB701UV_Par_diecut.xaml.cs" />
     <Compile Include="Views\LB701UVView\LB701UV_Prepare.xaml.cs" />
     <Compile Include="Views\LB701UVView\LB701UV_Status.xaml.cs" />
     <Compile Include="Views\LB702UVView\LB702UV_Cfg.xaml.cs" />
@@ -1158,10 +1157,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\LB701UVView\LB701UV_Par.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Views\LB701UVView\LB701UV_Par_diecut.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
