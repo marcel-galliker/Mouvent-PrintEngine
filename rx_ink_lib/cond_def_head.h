@@ -64,10 +64,10 @@ typedef union SCondInfo
 		struct
 		{
 			UINT32	connected : 1;		//	00:
-			UINT32	valve   : 1;		//  01:
-			UINT32	info_02 : 1;		// thermistor_test_done : 1;		// 	02:
+			UINT32	valve_ink   : 1;	//  01:
+			UINT32	valve_flush : 1;	// thermistor_test_done : 1;		// 	02:
 			UINT32	meniscus_warn : 1;	// 	03:
-            UINT32	zero_offset_calibrated : 1;	 // 04:
+            UINT32	info_04		: 1;	 // 04:
 			UINT32	temp_ready : 1;     //  05:
 			UINT32	flowFactor_ok : 1;  // 	06:
 			UINT32	info_07 : 1;		// 	07:
@@ -151,11 +151,11 @@ typedef union SCondCmd
 		struct
 		{
 			UINT32 disable_meniscus_check:1;    //00
-			UINT32 disable_psensor_cali:1;		// do not use calibration data of Pressure Sensors
-			UINT32 user_calibration:1;		    //02 toggle between factory and user calibration values
+			UINT32 cmd_1:1;						//01
+			UINT32 cmd_2:1;						//02
 			UINT32 resetPumpTime:1;				//03
 			UINT32 reset_errors:1;				//04
-			UINT32 del_offset:1;				//05
+			UINT32 cmd_05:1;					//05
 			UINT32 set_pid:1;					//06
 			UINT32 save_eeprom:1;				//07
 			UINT32 cmd_08:1;		//08
@@ -235,6 +235,7 @@ typedef struct SConditionerStat_mcu
 	INT32			pressure_in;
 	INT32			pressure_in_max;
 	INT32			pressure_in_diff;
+	INT32			pressure_in2;
 	INT32			pressure_out;		
 	INT32			pressure_out_diff;
 	

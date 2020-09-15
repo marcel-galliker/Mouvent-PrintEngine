@@ -244,7 +244,6 @@ void cond_error_check(int ticks)
 	{		
 		if (_NiosStat->cond[head].cmdConfirm.reset_errors)  _NiosMem->cfg.cond[head].cmd.reset_errors = FALSE;
 		if (_NiosStat->cond[head].cmdConfirm.resetPumpTime) _NiosMem->cfg.cond[head].cmd.resetPumpTime= FALSE;
-		if (_NiosStat->cond[head].cmdConfirm.del_offset)	_NiosMem->cfg.cond[head].cmd.del_offset   = FALSE;
 		if (_NiosStat->cond[head].cmdConfirm.set_pid)		_NiosMem->cfg.cond[head].cmd.set_pid	  = FALSE;
 		if (_NiosStat->cond[head].cmdConfirm.save_eeprom)   _NiosMem->cfg.cond[head].cmd.save_eeprom  = FALSE;
 		
@@ -666,14 +665,6 @@ EnFluidCtrlMode cond_getCtrlMode(int headNo)
 	return _CtrlMode[headNo];		
 }
 
-//--- cond_offset_del --------------------------
-void cond_offset_del(int headNo)
-{
-	int i;
-	if(headNo < MAX_HEADS_BOARD)		  _NiosMem->cfg.cond[headNo].cmd.del_offset = TRUE;
-	else for(i=0; i<MAX_HEADS_BOARD; i++) _NiosMem->cfg.cond[i].cmd.del_offset      = TRUE;
-}
-
 //--- cond_set_config ---------------------------------------
 void cond_set_config(int headNo, SConditionerCfg *cfg)
 {	
@@ -803,7 +794,6 @@ void cond_set_clusterNo(INT32 clusterNo)
 void cond_setInk(int headNo, SInkDefinition *pink)
 {
 	if (headNo<0 || headNo>=MAX_HEADS_BOARD || _NiosMem==NULL) return;
-//	Error(LOG, 0, "Head[%d].temp)=%d", headNo, pink->temp);
 	RX_HBStatus->head[headNo].tempSetpoint		 = pink->temp    *1000;
 	_NiosMem->cfg.cond[headNo].temp				 = pink->temp    *1000;
 	_NiosMem->cfg.cond[headNo].tempMax			 = pink->tempMax *1000;		
@@ -953,17 +943,4 @@ static void _write_log(void)
 			fflush(_LogFile);
 		}
 	}
-}
-
-
-//--- cond_toggle_psensor_cali --------------------------------------------------------------------
-void cond_toggle_psensor_cali(int headNo)
-{
- //   _NiosMem->cfg.cond[headNo].config.disable_psensor_cali = !_NiosMem->cfg.cond[headNo].config.disable_psensor_cali;		
-}
-
-//--- cond_toggle_psensor_cali_user ---------------------------------------------------------------
-void cond_toggle_psensor_cali_user(int headNo)
-{
- //   _NiosMem->cfg.cond[headNo].config.user_calibration = !_NiosMem->cfg.cond[headNo].config.user_calibration;		
 }

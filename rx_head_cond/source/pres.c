@@ -282,12 +282,20 @@ void pres_tick_10ms(void)
 		RX_Status.flowResistance = RX_Config.flowResistance;
 	}
 
+	//--- calculating meniscus and flow factor --------------------------------
 	if (!valid(RX_Status.pressure_in) || !valid(RX_Status.pressure_out) || RX_Status.error&COND_ERR_p_in_too_high)
     {
         RX_Status.meniscus = INVALID_VALUE;
+		RX_Status.flowFactor = INVALID_VALUE;
     }  
 	else
     {
-        RX_Status.meniscus = (INT32)(RX_Status.pressure_in - ((RX_Status.pressure_in - RX_Status.pressure_out) / (0.01 * RX_Config.flowResistance)));
+		int diff=RX_Status.pressure_in - RX_Status.pressure_out;
+        RX_Status.meniscus = (INT32)(RX_Status.pressure_in - (diff / (0.01 * RX_Config.flowResistance)));
+		if (RX_Status.pump_measured==INVALID_VALUE) RX_Status.flowFactor = INVALID_VALUE;
+		else if (RX_Status.pump_measured) RX_Status.flowFactor = 100*diff/(RX_Status.pump_measured*60/100);
+		else RX_Status.flowFactor = 1000;
     }
+	if (RX_Status.mode == ctrl_print) RX_Status.info.flowFactor_ok = (RX_Status.flowFactor < 200);
+	else RX_Status.info.flowFactor_ok = TRUE;
 }

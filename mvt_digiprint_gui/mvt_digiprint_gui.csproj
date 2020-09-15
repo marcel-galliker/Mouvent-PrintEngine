@@ -220,7 +220,7 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-    <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="BitMiracle.LibTiff.NET">
@@ -267,6 +267,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL" />
     <Reference Include="System.Xml" />
@@ -373,6 +374,8 @@
     <Compile Include="Helpers\RxXamGrid.cs" />
     <Compile Include="Helpers\UnitConversion.cs" />
     <Compile Include="Models\ClusterAlignment.cs" />
+    <Compile Include="Models\ClusterStat.cs" />
+    <Compile Include="Models\ClusterStatList.cs" />
     <Compile Include="Models\Density.cs" />
     <Compile Include="Models\DisabledJets.cs" />
     <Compile Include="Models\HeadAdjustmentHelp.cs" />
@@ -380,6 +383,7 @@
     <Compile Include="Models\JetCompensationDensityViewModel.cs" />
     <Compile Include="Models\SoftwareValueCorrection.cs" />
     <Compile Include="Models\StepperStatus.cs" />
+    <Compile Include="Services\RestService.cs" />
     <Compile Include="Views\AlignmentView\AlignmentSettings.xaml.cs">
       <DependentUpon>AlignmentSettings.xaml</DependentUpon>
     </Compile>
@@ -592,6 +596,7 @@
     <Compile Include="Views\LB701UVView\LB701UV_Cmd.xaml.cs" />
     <Compile Include="Views\LB701UVView\LB701UV_DiePos.xaml.cs" />
     <Compile Include="Views\LB701UVView\LB701UV_Par.xaml.cs" />
+    <Compile Include="Views\LB701UVView\LB701UV_Par_diecut.xaml.cs" />
     <Compile Include="Views\LB701UVView\LB701UV_Prepare.xaml.cs" />
     <Compile Include="Views\LB701UVView\LB701UV_Status.xaml.cs" />
     <Compile Include="Views\LB702UVView\LB702UV_Cfg.xaml.cs" />
@@ -1153,6 +1158,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\LB701UVView\LB701UV_Par.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LB701UVView\LB701UV_Par_diecut.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -1776,7 +1785,7 @@
       <IncludeHash>True</IncludeHash>
       <FileType>Assembly</FileType>
     </PublishFile>
-    <PublishFile Include="MahApps.Metro.IconPacks.Entypo">
+    <PublishFile Include="TBarCode11_x64.dll">
       <Visible>False</Visible>
       <Group>
       </Group>
@@ -1784,47 +1793,7 @@
       </TargetPath>
       <PublishState>Exclude</PublishState>
       <IncludeHash>True</IncludeHash>
-      <FileType>Assembly</FileType>
-    </PublishFile>
-    <PublishFile Include="MahApps.Metro.IconPacks.EvaIcons">
-      <Visible>False</Visible>
-      <Group>
-      </Group>
-      <TargetPath>
-      </TargetPath>
-      <PublishState>Exclude</PublishState>
-      <IncludeHash>True</IncludeHash>
-      <FileType>Assembly</FileType>
-    </PublishFile>
-    <PublishFile Include="MahApps.Metro.IconPacks.FeatherIcons">
-      <Visible>False</Visible>
-      <Group>
-      </Group>
-      <TargetPath>
-      </TargetPath>
-      <PublishState>Exclude</PublishState>
-      <IncludeHash>True</IncludeHash>
-      <FileType>Assembly</FileType>
-    </PublishFile>
-    <PublishFile Include="MahApps.Metro.IconPacks.JamIcons">
-      <Visible>False</Visible>
-      <Group>
-      </Group>
-      <TargetPath>
-      </TargetPath>
-      <PublishState>Exclude</PublishState>
-      <IncludeHash>True</IncludeHash>
-      <FileType>Assembly</FileType>
-    </PublishFile>
-    <PublishFile Include="MahApps.Metro.IconPacks.RPGAwesome">
-      <Visible>False</Visible>
-      <Group>
-      </Group>
-      <TargetPath>
-      </TargetPath>
-      <PublishState>Exclude</PublishState>
-      <IncludeHash>True</IncludeHash>
-      <FileType>Assembly</FileType>
+      <FileType>File</FileType>
     </PublishFile>
   </ItemGroup>
   <ItemGroup>
@@ -1957,6 +1926,9 @@
     <PackageReference Include="System.Drawing.Common">
       <Version>4.5.0</Version>
     </PackageReference>
+    <PackageReference Include="System.Text.Json">
+      <Version>4.7.2</Version>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
@@ -1978,6 +1950,7 @@ copy $(ProjectDir)dll\*.dll $(ProjectDir)..\bin\gui
 copy $(ProjectDir)$(OutDir)*.dll $(ProjectDir)..\bin\gui
 copy $(ProjectDir)..\ssh\id_rsa.ppk $(ProjectDir)..\bin\gui
 copy $(TargetFileName) $(ProjectDir)..\bin\gui
+copy $(TargetFileName).* $(ProjectDir)..\bin\gui
 GOTO :END
 
 :END</PostBuildEvent>

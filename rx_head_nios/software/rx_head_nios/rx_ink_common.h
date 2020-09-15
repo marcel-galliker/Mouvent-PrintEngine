@@ -42,6 +42,9 @@
 	#define INT64	int64_t
 
 	#define RX_TYPES
+	
+	#define REPLY_OK	0
+	#define REPLY_ERROR	1
 #else
 	#include "../rx_common_lib/rx_common.h"
 #endif
@@ -259,8 +262,6 @@ typedef enum EnFluidCtrlMode
 
     ctrl_test_watchdog = 0x10000,
     ctrl_test, 				// 0x10001
-	ctrl_offset_cal, 		// 0x10002
-	ctrl_offset_cal_done,	// 
 } EnFluidCtrlMode;
 
 char *FluidCtrlModeStr(EnFluidCtrlMode mode);
