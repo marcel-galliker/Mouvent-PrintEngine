@@ -1481,15 +1481,14 @@ static int _data_split_prod(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 					if (pInfo->widthPx>barWidthPx)	pInfo->widthPx=barWidthPx;
 					if (pInfo->widthPx>headWidthPx)	pInfo->widthPx=headWidthPx;
 
-					pInfo->widthBt		= (pInfo->widthPx+pixelPerByte-1)/pixelPerByte;
 					if (startPx%pixelPerByte)
 					{		
 						if (startPx<0) 	pInfo->jetPx0  = pixelPerByte-(startPx+RX_Spooler.headWidthPx+pixelPerByte)%pixelPerByte;
 						else		    pInfo->jetPx0  = pixelPerByte-(startPx+pixelPerByte)%pixelPerByte;
-						pInfo->widthPx += pixelPerByte;
-						pInfo->widthBt ++;
+						pInfo->widthPx += abs(startPx % pixelPerByte);
 					}
 					else pInfo->jetPx0	= 0;
+					pInfo->widthBt = (pInfo->widthPx + pixelPerByte - 1) / pixelPerByte;
 
 					pInfo->srcWidthBt	= (pBmpInfo->srcWidthPx*pBmpInfo->bitsPerPixel)/8;
 					pInfo->srcLineLen	= pBmpInfo->lineLen;

@@ -426,20 +426,11 @@ static void _save_to_file(SBmpSplitInfo *pInfo, int log)
 	
 	if (rx_def_is_scanning(RX_Spooler.printerType))
 	{
-		#ifdef linux
-	//	sprintf(fname, "%strace/%s/Scan%02d-img%d-hd%d_%s.bmp", PATH_HOME PATH_RIPPED_DATA_DIR, RX_ColorNameShort(pInfo->inkSupplyNo), ++_SimuNo[pInfo->colorCode], pInfo->pListItem->id.id, pInfo->head, RX_ColorNameShort(pInfo->inkSupplyNo));
-		sprintf(fname, "%strace/%s/sent(id=%d, p=%d, c=%d, s=%d, h=%d).bmp",  PATH_HOME PATH_RIPPED_DATA_DIR, RX_ColorNameShort(pInfo->inkSupplyNo), pInfo->pListItem->id.id, pInfo->pListItem->id.page, pInfo->pListItem->id.copy, pInfo->pListItem->id.scan, head);
-		#else
-		sprintf(fname, PATH_RIPPED_DATA "trace/%s/Scan%02d-img%d-hd%d_%s.bmp", RX_ColorNameShort(pInfo->inkSupplyNo), ++_SimuNo[pInfo->colorCode], pInfo->pListItem->id.id, pInfo->head, RX_ColorNameShort(pInfo->inkSupplyNo));
-		#endif
+		sprintf(fname, "%strace/%s/sent(id=%d, p=%d, c=%d, s=%d, h=%d).bmp", PATH_RIPPED_DATA, RX_ColorNameShort(pInfo->inkSupplyNo), pInfo->pListItem->id.id, pInfo->pListItem->id.page, pInfo->pListItem->id.copy, pInfo->pListItem->id.scan, head);
 	}
 	else
 	{
-		#ifdef linux
-		sprintf(fname, "%strace/%s/(id=%d, p=%d, c=%d)-%s%d.bmp", PATH_HOME PATH_RIPPED_DATA_DIR, RX_ColorNameShort(pInfo->inkSupplyNo), pInfo->pListItem->id.id, pInfo->pListItem->id.page, pInfo->pListItem->id.copy, RX_ColorNameShort(pInfo->inkSupplyNo), head);
-		#else
-		sprintf(fname, "d:/%strace/%s/(id=%d, p=%d, c=%d)-%s%d.bmp", PATH_RIPPED_DATA_DIR, RX_ColorNameShort(pInfo->inkSupplyNo), pInfo->pListItem->id.id, pInfo->pListItem->id.page, pInfo->pListItem->id.copy, RX_ColorNameShort(pInfo->inkSupplyNo), head);
-		#endif
+		sprintf(fname, "%strace/%s/(id=%d, p=%d, c=%d)-%s%d.bmp", PATH_RIPPED_DATA, RX_ColorNameShort(pInfo->inkSupplyNo), pInfo->pListItem->id.id, pInfo->pListItem->id.page, pInfo->pListItem->id.copy, RX_ColorNameShort(pInfo->inkSupplyNo), head);
 	}
 	if (pInfo->bitsPerPixel<8)	
 		bmp_write(fname, &buffer[1], pInfo->bitsPerPixel, pInfo->widthPx, pInfo->srcLineCnt, pInfo->dstLineLen, FALSE);

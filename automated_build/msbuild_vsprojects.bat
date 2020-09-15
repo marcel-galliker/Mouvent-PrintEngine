@@ -120,6 +120,24 @@ REM ----------------------------------------------------------------------------
 	call :BUILD_PROJECT rx_head_cond, vcxproj
 	goto :EOF
 
+REM Build a special debug rx_main_ctrl for test (local IP)
+:LIB_TEST
+	set BUILD=64
+	set FLAGS=/m /property:Configuration=Debug /property:Platform=x64 /property:SolutionDir=%BATCH_PATH%..\
+	call :BUILD_PROJECT rx_common_lib, vcxproj
+	call :BUILD_PROJECT rx_tif_lib, vcxproj
+	call :BUILD_PROJECT rx_pecore_lib, vcxproj
+	call :BUILD_PROJECT TinyXML, vcxproj, Externals\
+	call :BUILD_PROJECT rx_rip_lib, vcxproj
+	goto :EOF
+
+:BIN_TEST
+	set BUILD=64
+	set FLAGS=/m /p:DefineConstants="RX_CTRL_SUBNET=\"127.168.200.\"" /property:Configuration=Debug /property:Platform=x64 /property:SolutionDir=%BATCH_PATH%..\
+	call :BUILD_PROJECT rx_main_ctrl, vcxproj
+	goto :EOF
+
+
 :LIB_X64
 	set BUILD=64
 	set FLAGS=/m /property:Configuration=Release /property:Platform=x64 /property:SolutionDir=%BATCH_PATH%..\
@@ -166,13 +184,7 @@ REM ----------------------------------------------------------------------------
 REM ----------------------------------------------------------------------------
 
 :LIB_LX
-	set BUILD=LX
-	set FLAGS=/m:1 /property:Configuration=Release-lx /property:Platform=Win32
-	call :BUILD_PROJECT rx_common_lib, vcxproj
-	call :BUILD_PROJECT TinyXML, vcxproj, Externals\
-	call :BUILD_PROJECT rx_pecore_lib, vcxproj
-	call :BUILD_PROJECT rx_rip_lib, vcxproj
-	call :BUILD_PROJECT rx_tif_lib, vcxproj
+	REM no lib as we are building only solution and clean before build
 	goto :EOF
 
 :BIN_LX
