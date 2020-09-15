@@ -199,18 +199,6 @@ int rx_def_is_test(EPrinterType printerType)
 	}
 }
 
-//--- rx_pm_is_test ---------------------------------
-int rx_pm_is_test(int printmode)
-{
-	switch(printmode)	
-	{
-	case PM_TEST:				return TRUE;
-	case PM_TEST_JETS:			return TRUE;
-	case PM_TEST_SINGLE_COLOR:	return TRUE;
-	default: return FALSE;
-	}
-
-}
 //--- rx_def_use_pq ---------------------------------------
 int rx_def_use_pq(EPrinterType printerType)
 {
@@ -221,4 +209,10 @@ int rx_def_use_pq(EPrinterType printerType)
 	case printer_test_slide_only:	return FALSE;
 	default: return TRUE;
 	}
+}
+
+//--- rx_printMode_is_test -------------------
+int rx_printMode_is_test(int printMode)
+{
+	return printMode==PM_TEST || printMode==PM_TEST_SINGLE_COLOR || printMode==PM_TEST_JETS;
 }

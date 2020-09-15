@@ -71,6 +71,7 @@ static int				_LastPage;
 static int				_LastWakeup;
 static int				_LastGap;
 static int				_LastOffsetWidth;
+static SPageId			_LoadedId;
 static UINT16			_SMP_Flags;
 #define					BUFFER_CNT 2
 static int				_BufferNo;
@@ -111,6 +112,7 @@ int ctrl_start(const char *ipAddrMain)
 	memset(_BufferSize, 0, sizeof(_BufferSize));
 	memset(_Buffer, 0, sizeof(_Buffer));
 	memset(_LastFilename, 0, sizeof(_LastFilename));
+	memset(&_LoadedId, 0, sizeof(_LoadedId));
 	_LastPage=0;
 	_LastOffsetWidth = 0;
 	_LastWakeup = 0;
@@ -318,6 +320,7 @@ static int _do_spool_cfg(RX_SOCKET socket, SSpoolerCfg *pmsg)
 		for (i=0; i<SIZEOF(_Buffer); i++)
 			data_clear(_Buffer[i]);		
 	}
+	memset(&_LoadedId, 0, sizeof(_LoadedId));
 	_Running	 = FALSE;
 	_Abort		 = FALSE;
 	_data_malloc_reply = REPLY_OK;
@@ -434,6 +437,9 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 	if (msg.virtualPass>msg.virtualPasses)
 		Error(ERR_ABORT, 0, "programming Error");
 	
+//	if (rx_def_is_lb(RX_Spooler.printerType))
+//		msg.gapPx += 1;	// Bug in FPGA: (when srcLineCnt==12300, gap=0 it sometimes prints an additional line of old data [instead of blank] between the labels)
+
 	TrPrintfL(TRUE, "_do_print_file[%d] >>%s<<  id=%d, page=%d, copy=%d, scan=%d, same=%d, clearBlockUsed=%d, offsetWidth=%d, blkNo=%d", _MsgGot, msg.filename, msg.id.id, msg.id.page, msg.id.copy, msg.id.scan, same, msg.clearBlockUsed, msg.offsetWidth, msg.blkNo);
 //	if (msg.id.scan==1) Error(LOG, 0, "_do_print_file[%d] >>%s<<  id=%d, page=%d, copy=%d, scan=%d, same=%d, blkNo=%d", _MsgGot, msg.filename, msg.id.id, msg.id.page, msg.id.copy, msg.id.scan ,same, msg.blkNo);
 	
@@ -489,11 +495,10 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 
 	if (!same)
 	{
-		_BufferNo = (_BufferNo+1)%BUFFER_CNT;
-
 		if (msg.printMode==PM_SCAN_MULTI_PAGE) multiCopy=1;
 		if (ret==REPLY_OK)
 		{
+			_BufferNo = (_BufferNo+1)%BUFFER_CNT;
 			if (msg.smp_bufSize) 
 			{
 				Error(LOG, 0, "data_clear");				
@@ -563,10 +568,7 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 		if (_ResetCnt==RX_Spooler.resetCnt || hc_in_simu()) 
 			hc_send_next();			
 			
-		if (rx_pm_is_test(msg.printMode)) 
-			memset(_LastFilename, 0, sizeof(_LastFilename));
-		else
-			memcpy(_LastFilename, &msg.filename, sizeof(_LastFilename));
+		memcpy(&_LastFilename, &msg.filename, sizeof(_LastFilename));
 	}
 	return REPLY_OK;
 }
@@ -602,6 +604,11 @@ static int _do_print_abort(RX_SOCKET socket)
 			data_free(&_BufferSize[b], _Buffer[b]);
 		}
 	}
+	
+	//--- test prints: force reloading file at each print start ---------
+	if (str_start(_LastFilename, PATH_BIN_SPOOLER)) 
+		memset(&_LastFilename, 0, sizeof(_LastFilename));
+
 	return REPLY_OK;
 }
 

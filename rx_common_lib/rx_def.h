@@ -463,9 +463,9 @@ int rx_def_is_scanning(EPrinterType printerType);
 int rx_def_is_tx(EPrinterType printerType);
 int rx_def_is_lb(EPrinterType printerType);
 int rx_def_is_test(EPrinterType printerType);
-int rx_pm_is_test(int printmode);
 int rx_def_use_pq(EPrinterType printerType);
 
+int rx_printMode_is_test(int printMode);
 
 typedef struct SPrinterCfg
 {
