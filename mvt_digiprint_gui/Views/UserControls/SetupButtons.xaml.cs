@@ -77,6 +77,7 @@ namespace RX_DigiPrint.Views.UserControls
            {
                case EPrinterType.printer_TX801: v = Visibility.Visible; break;
                case EPrinterType.printer_TX802: v = Visibility.Visible; break;
+               case EPrinterType.printer_TX404: v = Visibility.Visible; break;
            }
             Button_Wash.Visibility = v;
             Button_Glue.Visibility = v;

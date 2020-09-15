@@ -200,6 +200,7 @@
     <ClCompile Include="slide.c" />
     <ClCompile Include="test.c" />
     <ClCompile Include="test_table.c" />
+    <ClCompile Include="tx404.c" />
     <ClCompile Include="tx801.c" />
     <ClCompile Include="tx80x_wd.c" />
     <ClCompile Include="txrob.c" />
@@ -231,6 +232,7 @@
     <ClInclude Include="slide.h" />
     <ClInclude Include="test.h" />
     <ClInclude Include="test_table.h" />
+    <ClInclude Include="tx404.h" />
     <ClInclude Include="tx801.h" />
     <ClInclude Include="tx80x_wd.h" />
     <ClInclude Include="txrob.h" />

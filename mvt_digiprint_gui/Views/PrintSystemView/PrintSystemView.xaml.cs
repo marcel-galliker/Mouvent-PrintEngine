@@ -83,7 +83,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
                                                     break;
 
                 case EPrinterType.printer_TX801:
-                case EPrinterType.printer_TX802:    
+                case EPrinterType.printer_TX802:
+                case EPrinterType.printer_TX404:
                                                     break;
 
                 default:                           

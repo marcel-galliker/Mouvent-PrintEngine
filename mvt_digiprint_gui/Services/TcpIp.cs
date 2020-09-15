@@ -115,6 +115,7 @@ namespace RX_DigiPrint.Services
 	    //--- scanning printers --------------------------
 	    printer_TX801     = 2000,		// 2000: Fashionn stanrard output
 	    printer_TX802,				// 2001: Fashion high outpput
+        printer_TX404,                  // 2002:
 
         printer_CB612 = 3001,
 

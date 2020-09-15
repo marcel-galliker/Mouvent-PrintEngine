@@ -71,7 +71,6 @@ static int				_LastPage;
 static int				_LastWakeup;
 static int				_LastGap;
 static int				_LastOffsetWidth;
-static SPageId			_LoadedId;
 static UINT16			_SMP_Flags;
 #define					BUFFER_CNT 2
 static int				_BufferNo;
@@ -112,7 +111,6 @@ int ctrl_start(const char *ipAddrMain)
 	memset(_BufferSize, 0, sizeof(_BufferSize));
 	memset(_Buffer, 0, sizeof(_Buffer));
 	memset(_LastFilename, 0, sizeof(_LastFilename));
-	memset(&_LoadedId, 0, sizeof(_LoadedId));
 	_LastPage=0;
 	_LastOffsetWidth = 0;
 	_LastWakeup = 0;
@@ -320,7 +318,6 @@ static int _do_spool_cfg(RX_SOCKET socket, SSpoolerCfg *pmsg)
 		for (i=0; i<SIZEOF(_Buffer); i++)
 			data_clear(_Buffer[i]);		
 	}
-	memset(&_LoadedId, 0, sizeof(_LoadedId));
 	_Running	 = FALSE;
 	_Abort		 = FALSE;
 	_data_malloc_reply = REPLY_OK;

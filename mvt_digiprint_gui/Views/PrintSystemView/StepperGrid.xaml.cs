@@ -53,7 +53,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
 
                 // TX80x -> no Stepper Settings grid, code unused?
                 case EPrinterType.printer_TX801:
-                case EPrinterType.printer_TX802:    MainGrid.RowDefinitions[0].Height = new GridLength(0);
+                case EPrinterType.printer_TX802:
+                case EPrinterType.printer_TX404:    MainGrid.RowDefinitions[0].Height = new GridLength(0);
                                                     MainGrid.RowDefinitions[1].Height = GridLength.Auto;  
                                                     MainGrid.RowDefinitions[2].Height = GridLength.Auto;  
                                                     MainGrid.RowDefinitions[3].Height = GridLength.Auto;  

@@ -157,6 +157,7 @@ int rx_def_is_scanning(EPrinterType printerType)
 	case printer_test_slide_only:	return TRUE;
 	case printer_TX801:				return TRUE;
 	case printer_TX802:				return TRUE;
+	case printer_TX404:				return TRUE;
 	default: return FALSE;
 	}
 }
@@ -168,6 +169,7 @@ int rx_def_is_tx(EPrinterType printerType)
 	{
 	case printer_TX801:				return TRUE;
 	case printer_TX802:				return TRUE;
+	case printer_TX404:				return TRUE;
 	default: return FALSE;
 	}
 }

@@ -255,15 +255,27 @@ void fluid_set_config(void)
 							break;
 		
     case printer_TX801:
-    case printer_TX802:		_FluidToScales[0] = SCALE(2,4); // Orange 
-							_FluidToScales[1] = SCALE(2,3); // Red
-							_FluidToScales[2] = SCALE(2,2); // Blue 
-							_FluidToScales[3] = SCALE(2,1); // Yellow
-							_FluidToScales[4] = SCALE(1,5); // Magenta
-							_FluidToScales[5] = SCALE(1,4); // Cyan
-							_FluidToScales[6] = SCALE(1,3); // Black
-							_FluidToScales[7] = SCALE(1,2); // Penetration
-							_FluidToScales[INK_SUPPLY_CNT]   = SCALE(1,1);// 4;	// flush		
+    case printer_TX802:		
+	case printer_TX404:		if (RX_Config.inkSupplyCnt<=4)
+							{
+								_FluidToScales[3] = SCALE(1,1); // Black
+								_FluidToScales[2] = SCALE(1,2); // Cyan
+								_FluidToScales[1] = SCALE(1,3); // Magenta
+								_FluidToScales[0] = SCALE(1,4); // Yellow
+								_FluidToScales[INK_SUPPLY_CNT]   = SCALE(1,1);// 4;	// flush		
+							}
+							else
+							{
+								_FluidToScales[0] = SCALE(2,4); // Orange 
+							    _FluidToScales[1] = SCALE(2,3); // Red
+							    _FluidToScales[2] = SCALE(2,2); // Blue 
+							    _FluidToScales[3] = SCALE(2,1); // Yellow
+							    _FluidToScales[4] = SCALE(1,5); // Magenta
+							    _FluidToScales[5] = SCALE(1,4); // Cyan
+							    _FluidToScales[6] = SCALE(1,3); // Black
+							    _FluidToScales[7] = SCALE(1,2); // Penetration
+							    _FluidToScales[INK_SUPPLY_CNT]   = SCALE(1,1);// 4;	// flush		
+							}
 						break;
                         
 	default:			for (i=0; i<SIZEOF(_FluidToScales); i++) _FluidToScales[i]=i;	
@@ -641,7 +653,7 @@ static void _control(int fluidNo)
 											
 											_PurgeCtrlMode = pstat->ctrlMode;
 											_txrob = rx_def_is_tx(RX_Config.printer.type) && step_active(1);
-                                            int time = (RX_Config.printer.type==printer_TX802)? (2*TIME_HARD_PURGE) : TIME_HARD_PURGE;
+                                            int time = (RX_Config.printer.type==printer_TX802 || RX_Config.printer.type == printer_TX404)? (2*TIME_HARD_PURGE) : TIME_HARD_PURGE;
 											if (pstat->purge_putty_ON) time=0;
 											switch(pstat->ctrlMode)
 											{
@@ -788,7 +800,7 @@ static void _control_flush(void)
                                     _FluidCtrlMode = ctrl_cap;
                                 }
                                 else
-                                    _FluidCtrlMode = ctrl_flush_step1;
+								_FluidCtrlMode=ctrl_flush_step1; 
                                 break;
                                 
         case ctrl_cap_step3:	if (steptx_rob_cap_flush_prepared()) _FluidCtrlMode = ctrl_flush_step1;
@@ -850,7 +862,8 @@ void fluid_reply_stat(RX_SOCKET socket)	// to GUI
 	switch (RX_Config.printer.type)
 	{
 	case printer_TX801:
-	case printer_TX802:	canisterLow   = 1500;
+	case printer_TX802:	
+	case printer_TX404:	canisterLow   = 1500;
 						canisterEmpty = 500;
 						break;
 
@@ -968,7 +981,8 @@ void fluid_send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 	switch (RX_Config.printer.type)
 	{
 	case printer_TX801:
-	case printer_TX802:		steptx_set_robCtrlMode(ctrlMode);
+	case printer_TX802:		
+	case printer_TX404:		steptx_set_robCtrlMode(ctrlMode);
 							break;
 	case printer_LB701:
 	case printer_LB702_UV:	break;

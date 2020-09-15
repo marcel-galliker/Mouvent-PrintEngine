@@ -639,7 +639,6 @@ typedef struct
 	INT32			headDist[MAX_HEAD_DIST];
 	INT32			headDistBack[MAX_HEAD_DIST];
 	INT32			colorOffset[MAX_COLORS];
-
 } SPrinterCfgMsg;
 
 typedef struct SDensityValuesMsg

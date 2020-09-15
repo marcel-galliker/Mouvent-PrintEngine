@@ -1,6 +1,6 @@
-// ****************************************************************************
+﻿// ****************************************************************************
 //
-//	DIGITAL PRINTING - tx801.c
+//	DIGITAL PRINTING - tx404.c
 //
 //	Communication between ARM processor and FPGA
 //
@@ -19,17 +19,17 @@
 #include "power_step.h"
 #include "motor_cfg.h"
 #include "motor.h"
-#include "tx801.h"
+#include "tx404.h"
 
 #define VENT_MAX_ERROR	50	// * 100 ms intervals
 
-#define TX_REF_HEIGHT		16000
+#define TX_REF_HEIGHT		10000
 
 #define MOTOR_Z_0		0
 #define MOTOR_Z_CNT		4
 #define MOTOR_Z_BITS	0x0f
 
-#define CURRENT_HOLD	50
+#define CURRENT_HOLD	10
 
 #define HEAD_UP_IN_0		0
 #define HEAD_UP_IN_1		1
@@ -37,7 +37,7 @@
 #define HEAD_UP_IN_3		3
 
 #define STEPS_REV		(200*16)	// steps per motor revolution * 16 times oversampling
-#define INCS_REV		4000		// encoder increments per revolution
+#define INCS_REV		500			// encoder increments per revolution
 #define DIST_REV		1000.0		// moving distance per revolution [�m]
 
 #define POS_UP			(STEPS_REV/DIST_REV*1000)
@@ -62,29 +62,29 @@ static int		_VentErrorCnt[6];
 
 //--- prototypes --------------------------------------------
 static void re(void);
-static void _tx801_motor_z_test(int steps);
-static void _tx801_motor_test  (int motor, int steps);
-static void _tx801_do_reference(void);
-static void _tx801_do_ctrlMode(EnFluidCtrlMode ctrlMode);
-static void _tx801_move_to_pos(int cmd, int pos);
-static void _tx801_set_ventilators(int value);
-static void _tx801_control_vents(void);
+static void _tx404_motor_z_test(int steps);
+static void _tx404_motor_test  (int motor, int steps);
+static void _tx404_do_reference(void);
+static void _tx404_do_ctrlMode(EnFluidCtrlMode ctrlMode);
+static void _tx404_move_to_pos(int cmd, int pos);
+static void _tx404_set_ventilators(int value);
+static void _tx404_control_vents(void);
 static int  _micron_2_steps(int micron);// microns to motor steps
 static int  _steps_2_micron(int steps); // motor steps to microns
 static int  _incs_2_micron(int steps);  // encoder_incs to microns
 static char	*_motor_name(int no);
-static int _tx801_motor_down(RX_SOCKET socket, int msgId, int length);
+static int _tx404_motor_down(RX_SOCKET socket, int msgId, int length);
 
-//--- tx801_init --------------------------------------
-void tx801_init(void)
+//--- tx404_init --------------------------------------
+void tx404_init(void)
 {
-    motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L3518_STEPS_PER_METER, L3518_INC_PER_METER, STEPS);
+    motors_config(MOTOR_Z_BITS, CURRENT_HOLD, LA421_STEPS_PER_METER, LA421_INC_PER_METER, STEPS);
 	
 	//--- movment parameters ----------------	
 	_ParRef.speed		= 10000;
 	_ParRef.accel		= 32000;
-	_ParRef.current_acc	= 150;
-	_ParRef.current_run	= 100;
+	_ParRef.current_acc	= 100;				// max 140
+    _ParRef.current_run = 60;				// max 140
 	_ParRef.estop_in_bit[0] = (1<<HEAD_UP_IN_0);
 	_ParRef.estop_in_bit[1] = (1<<HEAD_UP_IN_1);
 	_ParRef.estop_in_bit[2] = (1<<HEAD_UP_IN_2);
@@ -96,22 +96,22 @@ void tx801_init(void)
 	
 	_ParZ_down.speed		= 10000;
 	_ParZ_down.accel		= 32000;
-	_ParZ_down.current_acc	= 200.0;
-	_ParZ_down.current_run	= 100.0;
+    _ParZ_down.current_acc	= 140.0;		// max 140
+    _ParZ_down.current_run	= 70.0;			// max 140
 	_ParZ_down.stop_mux		= MOTOR_Z_BITS;
 	_ParZ_down.dis_mux_in	= FALSE;
 	_ParZ_down.encCheck		= chk_std;
 
 	_ParZ_cap.speed			= 5000;
 	_ParZ_cap.accel			= 32000;
-	_ParZ_cap.current_acc	= 150.0;
-	_ParZ_cap.current_run	= 100.0;
+    _ParZ_cap.current_acc	= 100.0;		// max 140
+    _ParZ_cap.current_run	= 50.0;			// max 140
 	_ParZ_cap.stop_mux		= FALSE;
 	_ParZ_cap.dis_mux_in	= FALSE;
 	_ParZ_cap.encCheck		= chk_std;
 
 	_VentCtrl				= TRUE;
-	_tx801_set_ventilators(0);
+    _tx404_set_ventilators(0);
 	{
 		int i;
 		for (i=0; i<SIZEOF(_LastVentValue); i++)
@@ -119,8 +119,8 @@ void tx801_init(void)
 	}
 }
 
-//--- tx801_main ------------------------------------------------------------------
-void tx801_main(int ticks, int menu)
+//--- tx404_main ------------------------------------------------------------------
+void tx404_main(int ticks, int menu)
 {
 	int motor, ok;
 	motor_main(ticks, menu);
@@ -163,7 +163,7 @@ void tx801_main(int ticks, int menu)
 		RX_StepperStatus.info.moving = FALSE;
 		if (RX_StepperStatus.cmdRunning == CMD_LIFT_REFERENCE)
 		{
-			_tx801_set_ventilators(0);
+            _tx404_set_ventilators(0);
 			for (motor=0, ok=TRUE; motor<MOTOR_Z_CNT; motor++)
 			{
 				if ((Fpga.stat->statMot[motor].err_estop & ENC_ESTOP_ENC))
@@ -184,7 +184,7 @@ void tx801_main(int ticks, int menu)
 			{
 				if (motor_error(motor))
 				{
-					Error(ERR_CONT, 0, "tx801: %s: motor %s blocked", ctrl_cmd_name(RX_StepperStatus.cmdRunning), _motor_name(motor));
+                    Error(ERR_CONT, 0, "tx404: %s: motor %s blocked", ctrl_cmd_name(RX_StepperStatus.cmdRunning), _motor_name(motor));
 					ok=FALSE;
 				}				
 			}
@@ -199,7 +199,7 @@ void tx801_main(int ticks, int menu)
 		RX_StepperStatus.robinfo.z_in_wash		= (RX_StepperStatus.cmdRunning == CMD_LIFT_WASH_POS);
 		if (RX_StepperStatus.cmdRunning==CMD_LIFT_REFERENCE && _PrintPos_New) 
 		{
-			_tx801_move_to_pos(CMD_LIFT_PRINT_POS, _PrintPos_New);
+            _tx404_move_to_pos(CMD_LIFT_PRINT_POS, _PrintPos_New);
 			_PrintPos_Act=_PrintPos_New;
 			_PrintPos_New=0;
 		}
@@ -207,11 +207,11 @@ void tx801_main(int ticks, int menu)
 			RX_StepperStatus.cmdRunning = FALSE;
 		}
 	}
-	if (_VentCtrl) _tx801_control_vents();	
+    if (_VentCtrl) _tx404_control_vents();	
 }
 
-//--- _tx801_control_vents -------------------
-static void _tx801_control_vents(void)
+//--- _tx404_control_vents -------------------
+static void _tx404_control_vents(void)
 {
 	static int _lastTime=0;
 	int i;
@@ -219,8 +219,8 @@ static void _tx801_control_vents(void)
 	
 	if (time-_lastTime>100)
 	{
-		int vent_cnt = (RX_StepperCfg.printerType==printer_TX802)? 6:4;
-		if(_VentSpeed)
+        int vent_cnt = 6;
+        if(_VentSpeed)
 		{			
 			if (time>_VentCtrlDelay)
 			{
@@ -261,8 +261,8 @@ static char *_motor_name(int no)
 	}
 }
 
-//--- _tx801_display_status ---------------------------------------------------------
-static void _tx801_display_status(void)
+//--- _tx404_display_status ---------------------------------------------------------
+static void _tx404_display_status(void)
 {
 	term_printf("CAPPING Unit ---------------------------------\n");
 	term_printf("moving:         %d		cmd: %08x\n",	RX_StepperStatus.info.moving, RX_StepperStatus.cmdRunning);	
@@ -280,23 +280,23 @@ static void _tx801_display_status(void)
 	term_printf("\n");
 }
 
-//--- tx801_menu --------------------------------------------------
-int tx801_menu(void)
+//--- tx404_menu --------------------------------------------------
+int tx404_menu(void)
 {
 	char str[MAX_PATH];
 	int synth=FALSE;
 	static int cnt=0;
 	int pos=10000;
 
-	_tx801_display_status();
-	
-	term_printf("MENU tx801 -------------------------\n");
+    _tx404_display_status();
+
+    term_printf("MENU tx404 -------------------------\n");
 	term_printf("s: STOP\n");
 	term_printf("r<n>: reset motor<n>\n");	
 	term_printf("R: Reference\n");
 	//term_printf("c: move to cap\n");
 	term_printf("u: move to UP position\n");
-	term_printf("p: move to print\n");
+	term_printf("p<n>: move to print height <n>um\n");
 	term_printf("z: move by <steps>\n");
 	term_printf("v: set ventilator (%)\n");	
 	term_printf("t<n>: test move down n in tenth of millimeter in absolute position from ref position\n");
@@ -313,41 +313,44 @@ int tx801_menu(void)
 	{
 		switch (str[0])
 		{
-		case 's': tx801_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_STOP,			NULL);		break;
-		case 'R': tx801_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_REFERENCE,		NULL);		break;
+		case 's': tx404_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_STOP,			NULL);		break;
+		case 'R': tx404_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_REFERENCE,		NULL);		break;
 		case 'r': motor_reset(atoi(&str[1]));												break;
-		//case 'c': tx801_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_CAPPING_POS,	NULL);		break;
-		case 'p': tx801_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_PRINT_POS,		&pos);		break;
-	case 'u': tx801_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_UP_POS,			NULL);		break;
-		case 'z': _tx801_motor_z_test(atoi(&str[1]));										break;
-		case 'm': _tx801_motor_test(str[1]-'0', atoi(&str[2]));								break;			
+        // case 'c': tx404_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_CAPPING_POS,
+        // NULL);		break;
+        case 'p':
+            pos = atoi(&str[1]);
+            tx404_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_PRINT_POS,		&pos);		break;
+		case 'u': tx404_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_UP_POS,			NULL);		break;
+		case 'z': _tx404_motor_z_test(atoi(&str[1]));										break;
+		case 'm': _tx404_motor_test(str[1]-'0', atoi(&str[2]));								break;			
 		case 'v': _VentCtrl = (atoi(&str[1])==0);
-				  _tx801_set_ventilators(atoi(&str[1]));									break;
-		case 't': _tx801_motor_down(INVALID_SOCKET, CMD_LIFT_CAPPING_POS, atoi(&str[1]));	break;
-		case 'c': _tx801_motor_down(INVALID_SOCKET, CMD_LIFT_CAPPING_POS, _CapHeight);		break;
-		case 'e': _tx801_motor_down(INVALID_SOCKET, CMD_LIFT_CAPPING_POS, _WashHeight);		break;
-		case 'w': _tx801_motor_down(INVALID_SOCKET, CMD_LIFT_CAPPING_POS, _WipeHeight);		break;
-		case 'a': _tx801_motor_down(INVALID_SOCKET, CMD_LIFT_CAPPING_POS, _VacuumHeight);	break;
+				  _tx404_set_ventilators(atoi(&str[1]));									break;
+		case 't': _tx404_motor_down(INVALID_SOCKET, CMD_LIFT_CAPPING_POS, atoi(&str[1]));	break;
+		case 'c': _tx404_motor_down(INVALID_SOCKET, CMD_LIFT_CAPPING_POS, _CapHeight);		break;
+		case 'e': _tx404_motor_down(INVALID_SOCKET, CMD_LIFT_CAPPING_POS, _WashHeight);		break;
+		case 'w': _tx404_motor_down(INVALID_SOCKET, CMD_LIFT_CAPPING_POS, _WipeHeight);		break;
+		case 'a': _tx404_motor_down(INVALID_SOCKET, CMD_LIFT_CAPPING_POS, _VacuumHeight);	break;
 		case 'C': _CapHeight = atoi(&str[1]);												break;
-		    case 'E': _WashHeight = atoi(&str[1]);											break;
+		case 'E': _WashHeight = atoi(&str[1]);											break;
 		case 'W': _WipeHeight = atoi(&str[1]);												break;
-	case 'A': _VacuumHeight = atoi(&str[1]);												break;
+		case 'A': _VacuumHeight = atoi(&str[1]);												break;
 		case 'x': return FALSE;
 		}
 	}
 	return TRUE;
 }
 
-//--- _tx801_do_reference ----------------------------------------------------------------
-static void _tx801_do_reference(void)
+//--- _tx404_do_reference ----------------------------------------------------------------
+static void _tx404_do_reference(void)
 {
 	motors_stop	(MOTOR_Z_BITS);
-	motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L3518_STEPS_PER_METER, L3518_INC_PER_METER, STEPS);
+	motors_config(MOTOR_Z_BITS, CURRENT_HOLD, LA421_STEPS_PER_METER, LA421_INC_PER_METER, STEPS);
 
 	RX_StepperStatus.cmdRunning  = CMD_LIFT_REFERENCE;
 	RX_StepperStatus.info.moving = TRUE;
 	motors_move_by_step	(MOTOR_Z_BITS,  &_ParRef, -100000, TRUE);
-	// _tx801_set_ventilators(20);
+    // _tx404_set_ventilators(20);
 }
 
 //---_micron_2_steps --------------------------------------------------------------
@@ -368,16 +371,16 @@ static int  _incs_2_micron(int incs)
 	return (int)(DIST_REV * incs / INCS_REV + 0.5);
 }
 
-//--- _tx801_move_to_pos ---------------------------------------------------------------
-static void _tx801_move_to_pos(int cmd, int pos)
+//--- _tx404_move_to_pos ---------------------------------------------------------------
+static void _tx404_move_to_pos(int cmd, int pos)
 {
 	RX_StepperStatus.cmdRunning  = cmd;
 	RX_StepperStatus.info.moving = TRUE;
 	motors_move_to_step(MOTOR_Z_BITS, &_ParZ_down, pos);
 }
 
-//--- _tx801_set_ventilators ---------------------------------------------------------
-static void _tx801_set_ventilators(int value)
+//--- _tx404_set_ventilators ---------------------------------------------------------
+static void _tx404_set_ventilators(int value)
 {
 //	Error(LOG, 0, "Set Ventilators to %d%%", value);
 	
@@ -392,7 +395,7 @@ static void _tx801_set_ventilators(int value)
 		else					 memcpy(_LastVentValue, _VentValue, sizeof(_LastVentValue));
 		_VentSpeed = value;
 		_VentCtrlDelay = rx_get_ticks() + 1000;
-		_tx801_control_vents();			
+        _tx404_control_vents();			
 	}
 	else
 	{
@@ -403,14 +406,14 @@ static void _tx801_set_ventilators(int value)
 	}	
 }
 
-//--- _tx801_do_ctrlMode -----------------------------------------
-static void _tx801_do_ctrlMode(EnFluidCtrlMode ctrlMode)
+//--- _tx404_do_ctrlMode -----------------------------------------
+static void _tx404_do_ctrlMode(EnFluidCtrlMode ctrlMode)
 {
 //	sok_send_2(&socket, REP_STEPPER_STAT, sizeof(RX_StepperStatus), &RX_StepperStatus);
 }
 
-//--- tx801_handle_ctrl_msg -----------------------------------
-int  tx801_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
+//--- tx404_handle_ctrl_msg -----------------------------------
+int  tx404_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 {	
 	INT32 pos, steps, voltage;
 	SValue	*pvalue;
@@ -419,12 +422,11 @@ int  tx801_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 	{
 	case CMD_LIFT_STOP:				motors_stop(MOTOR_Z_BITS);
 									RX_StepperStatus.cmdRunning = 0;
-									RX_StepperStatus.info.ref_done = FALSE;
 									break;	
 
-	case CMD_LIFT_REFERENCE:		_PrintPos_New=0;
+	case CMD_LIFT_REFERENCE:			_PrintPos_New=0;
 									motors_reset(MOTOR_Z_BITS);
-									_tx801_do_reference();
+                                    _tx404_do_reference();
 									break;
 
 	case CMD_LIFT_PRINT_POS:			pos   = (*((INT32*)pdata));
@@ -436,15 +438,15 @@ int  tx801_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									if (!RX_StepperStatus.cmdRunning && (!RX_StepperStatus.info.z_in_print || steps!=_PrintPos_Act))
 									{
 										_PrintPos_New = _micron_2_steps(TX_REF_HEIGHT - pos);
-										if (RX_StepperStatus.info.ref_done) _tx801_move_to_pos(CMD_LIFT_PRINT_POS, _PrintPos_New);
-										else								_tx801_do_reference();
+										if (RX_StepperStatus.info.ref_done) _tx404_move_to_pos(CMD_LIFT_PRINT_POS, _PrintPos_New);
+										else								_tx404_do_reference();
 									}
 									break;
 		
 	case CMD_LIFT_UP_POS:			if (!RX_StepperStatus.cmdRunning)
 									{
-										if (RX_StepperStatus.info.ref_done) _tx801_move_to_pos(CMD_LIFT_UP_POS, POS_UP);
-										else								_tx801_do_reference();
+										if (RX_StepperStatus.info.ref_done) _tx404_move_to_pos(CMD_LIFT_UP_POS, POS_UP);
+										else								_tx404_do_reference();
 									}
 									break;
 
@@ -498,16 +500,16 @@ int  tx801_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 										SStepperMotorTest *ptest = (SStepperMotorTest*)pdata;
 										RX_StepperStatus.cmdRunning  = msgId;
 										RX_StepperStatus.info.z_in_print  = FALSE;
-										_tx801_motor_test(ptest->motorNo, -1*_micron_2_steps(ptest->microns));
+                                        _tx404_motor_test(ptest->motorNo, -1*_micron_2_steps(ptest->microns));
 									}
 									break;
 		
 	case CMD_LIFT_VENT:				voltage = (*((INT32*)pdata));
-									_tx801_set_ventilators(voltage);				
+									_tx404_set_ventilators(voltage);				
 									break;
 		
 	case CMD_FLUID_CTRL_MODE:		pvalue = (SValue*) pdata;
-									_tx801_do_ctrlMode((EnFluidCtrlMode)pvalue->value);
+									_tx404_do_ctrlMode((EnFluidCtrlMode)pvalue->value);
 									break;
 	
 	case CMD_ERROR_RESET:			fpga_stepper_error_reset();
@@ -516,16 +518,16 @@ int  tx801_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 	return REPLY_OK;
 }
 
-//--- _tx801_motor_z_test ----------------------------------------------------------------------
-void _tx801_motor_z_test(int steps)
+//--- _tx404_motor_z_test ----------------------------------------------------------------------
+void _tx404_motor_z_test(int steps)
 {	
 	RX_StepperStatus.cmdRunning = 1; // TEST
 	RX_StepperStatus.info.moving = TRUE;
 	motors_move_by_step(MOTOR_Z_BITS, &_ParZ_down, steps, TRUE);
 }
 
-//--- _tx801_motor_test ---------------------------------
-static void _tx801_motor_test(int motorNo, int steps)
+//--- _tx404_motor_test ---------------------------------
+static void _tx404_motor_test(int motorNo, int steps)
 {
 	int motors = 1<<motorNo;
 	SMovePar par;
@@ -535,8 +537,8 @@ static void _tx801_motor_test(int motorNo, int steps)
 
 	par.speed		= 1000;
 	par.accel		= 1000;
-	par.current_acc	= 250.0;
-	par.current_run	= 250.0;
+	par.current_acc	= 100.0;
+	par.current_run	= 100.0;
 	par.stop_mux	= 0;
 	par.dis_mux_in	= 0;
 	par.encCheck	= chk_off;
@@ -544,12 +546,12 @@ static void _tx801_motor_test(int motorNo, int steps)
 	RX_StepperStatus.cmdRunning = 1; // TEST
 	RX_StepperStatus.info.moving = TRUE;
 	
-	motors_config(motors, CURRENT_HOLD, L3518_STEPS_PER_METER, L3518_INC_PER_METER, STEPS);
+	motors_config(MOTOR_Z_BITS, CURRENT_HOLD, LA421_STEPS_PER_METER, LA421_INC_PER_METER, STEPS);
 	motors_move_by_step(motors, &par, steps, FALSE);			
 }
 
-//--- _tx801_motor_down ---------------------------------------
-static int _tx801_motor_down(RX_SOCKET socket, int msgId, int length)
+//--- _tx404_motor_down ---------------------------------------
+static int _tx404_motor_down(RX_SOCKET socket, int msgId, int length)
 {
 	INT32 steps;
 	if (!RX_StepperStatus.cmdRunning)

@@ -24,11 +24,14 @@
 // current=300	max_speed=16'000
 // current=420	max_speed=13'000
 
+#define LA421_STEPS_PER_METER	3200
+#define LA421_INC_PER_METER		2000
+
 
 #define L3518_STEPS_PER_METER	3200	// TXxxx: Motor steps/meter
 #define L3518_INC_PER_METER		4000	// TXxxx: Encoder incs/meter
 
-#define ESTOP_UNUSED	15	// input for uniused E-STOP
+#define ESTOP_UNUSED	15	// input for unused E-STOP
 
 #define MICROSTEPS		1
 #define STEPS			16

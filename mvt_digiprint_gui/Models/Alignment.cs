@@ -365,8 +365,7 @@ namespace RX_DigiPrint.Models
                                 Console.WriteLine(ex.Message);
                             }
 
-                            if (RxGlobals.PrintSystem.PrinterType == Services.EPrinterType.printer_TX801 ||
-                                RxGlobals.PrintSystem.PrinterType == Services.EPrinterType.printer_TX802)
+                            if (RxGlobals.PrintSystem.IsTx)
                             {
                                 try
                                 {

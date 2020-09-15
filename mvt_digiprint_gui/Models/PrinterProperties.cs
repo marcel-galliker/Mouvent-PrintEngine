@@ -204,7 +204,8 @@ namespace RX_DigiPrint.Models
                         case EPrinterType.printer_LB702_WB:         SetProperty(ref _Host_Name, "LB702-xxxx"); break; 
                         case EPrinterType.printer_LH702:            SetProperty(ref _Host_Name, "LH702-xxxx"); break; 
                         case EPrinterType.printer_TX801:            SetProperty(ref _Host_Name, "TX801-xxxx"); break; 
-                        case EPrinterType.printer_TX802:            SetProperty(ref _Host_Name, "TX802-xxxx"); break; 
+                        case EPrinterType.printer_TX802:            SetProperty(ref _Host_Name, "TX802-xxxx"); break;
+                        case EPrinterType.printer_TX404:            SetProperty(ref _Host_Name, "TX404-xxxx"); break;
                         case EPrinterType.printer_cleaf:            SetProperty(ref _Host_Name, "PRINTER-xxxx"); break; 
                     }
                 }

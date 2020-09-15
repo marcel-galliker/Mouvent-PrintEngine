@@ -255,7 +255,7 @@ static int _prepare_config()
 					pBoard = &RX_Config.headBoard[head / MAX_HEADS_BOARD];
 					pBoard->present										= dev_on;
 					pBoard->printerType									= RX_Config.printer.type;
-					pBoard->reverseHeadOrder							= (RX_Config.printer.type==printer_TX801 || RX_Config.printer.type==printer_TX802);
+					pBoard->reverseHeadOrder							= rx_def_is_tx(RX_Config.printer.type);
 					pBoard->head[head % MAX_HEADS_BOARD].enabled   		= dev_on;
 					pBoard->head[head % MAX_HEADS_BOARD].inkSupply 		= isNo = (color*RX_Config.inkCylindersPerColor)+(n*RX_Config.inkCylindersPerColor)/RX_Config.headsPerColor;
 					pBoard->head[head % MAX_HEADS_BOARD].encoderNo 		= 0;
@@ -326,7 +326,7 @@ static int _prepare_config()
 	// TX801: CORR_LINEAR: Board[0].Head[0] nearest to Encoder[1]
 	if (!arg_simuPLC)
 	{
-		if(rx_def_is_tx(RX_Config.printer.type) && RX_Config.headsPerColor)
+		if(rx_def_is_tx(RX_Config.printer.type) && RX_Config.printer.type!=printer_TX404 && RX_Config.headsPerColor)
 		{
 			for (head=0; head<RX_Config.colorCnt * RX_Config.headsPerColor; head++)
 			{
@@ -390,7 +390,8 @@ void ctrl_set_max_speed(void)
 	switch(RX_Config.printer.type)
 	{
 		case printer_TX801:		
-		case printer_TX802:		if (enc_is_analog())
+		case printer_TX802:		
+		case printer_TX404:		if (enc_is_analog())
 								{
 									maxSpeed[0]= 100; maxSpeed[1]= 100; maxSpeed[2]= 100; maxSpeed[3]= 100;				
 								}

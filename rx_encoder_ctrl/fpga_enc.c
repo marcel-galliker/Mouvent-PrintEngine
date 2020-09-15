@@ -546,7 +546,7 @@ void fpga_enc_config(int inNo, SEncoderCfg *pCfg, int restart)
 	}
 	
 	if (pCfg->printerType==printer_TX801 || pCfg->printerType==printer_TX802 
-	||  pCfg->printerType==printer_LB701 
+	||  pCfg->printerType==printer_TX404 ||  pCfg->printerType==printer_LB701 
 	||  pCfg->printerType==printer_LB702_UV || pCfg->printerType==printer_LB702_WB
 	||  pCfg->printerType==printer_LH702
 	||  pCfg->printerType==printer_DP803	) 
@@ -1174,8 +1174,8 @@ void  fpga_set_printmark(SEncoderPgDist *pmsg)
 	for (pgNo=0; pgNo<SIZEOF(Fpga->cfg.pg); pgNo++) Fpga->cfg.pg[pgNo].fifos_ready = TRUE;
 
 	RX_EncoderStatus.distTelCnt++;
-	TrPrintfL(TRUE, "fpga_set_printmark(no=%d, (id=%d, page=%d, copy=%d, scan=%d) cnt=%d, dist=%d, ignore=%d, window=%d) FIFO=%d", RX_EncoderStatus.distTelCnt, pmsg->id.id, pmsg->id.page, pmsg->id.copy, pmsg->id.scan, pmsg->cnt, pmsg->dist, pmsg->ignore, pmsg->window, FpgaQSys->window_status.fill_level);
-	TrPrintfL(TRUE, "fpga_set_printmark.shift_delay_tel=%d, window_mark_pos =%d, avr_med_pos=%d", Fpga->cfg.general.shift_delay_tel, Fpga->stat.encOut[0].window_mark_pos, Fpga->stat.avr_med_pos);
+//	TrPrintfL(TRUE, "fpga_set_printmark(no=%d, (id=%d, page=%d, copy=%d, scan=%d) cnt=%d, dist=%d, ignore=%d, window=%d) FIFO=%d", RX_EncoderStatus.distTelCnt, pmsg->id.id, pmsg->id.page, pmsg->id.copy, pmsg->id.scan, pmsg->cnt, pmsg->dist, pmsg->ignore, pmsg->window, FpgaQSys->window_status.fill_level);
+//	TrPrintfL(TRUE, "fpga_set_printmark.shift_delay_tel=%d, window_mark_pos =%d, avr_med_pos=%d", Fpga->cfg.general.shift_delay_tel, Fpga->stat.encOut[0].window_mark_pos, Fpga->stat.avr_med_pos);
 }
 
 //--- _pg_ctrl ------------------------------------------------------

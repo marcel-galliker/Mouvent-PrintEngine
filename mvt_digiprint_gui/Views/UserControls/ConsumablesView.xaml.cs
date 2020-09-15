@@ -37,7 +37,7 @@ namespace RX_DigiPrint.Views.UserControls
                 int offset=0;
                 MainGrid.Children.Clear();
 
-                if (RxGlobals.PrintSystem.IsTx || RxGlobals.PrintSystem.IsLb )
+                if (RxGlobals.PrintSystem.IsTx)
                 {
                     InkLevel flush = new InkLevel(){DataContext = RxGlobals.InkSupply.List[TcpIp.InkSupplyCnt]};
                     Grid.SetColumn(flush, 0);

@@ -149,7 +149,7 @@ namespace RX_DigiPrint.Views.UserControls
             Leds_DripPans.Visibility      = visibility;
             LaserTX.Visibility            = visibility; 
             LaserVal.Visibility           = visibility;
-            Button_Cap.Visibility         = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf || RxGlobals.PrintSystem.IsTx) ? Visibility.Collapsed : Visibility.Visible;
+            Button_Cap.Visibility         = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf/* || RxGlobals.PrintSystem.IsTx*/) ? Visibility.Collapsed : Visibility.Visible;
 
             visibility = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_DP803) ? Visibility.Visible : Visibility.Collapsed;
             Button_DripPans.Visibility    = visibility;
@@ -230,6 +230,36 @@ namespace RX_DigiPrint.Views.UserControls
                     RxGlobals.RxInterface.SendCommand(TcpIp.CMD_LIFT_CAPPING_POS);
             }
             if (SIMU) for(int i=0; i<4; i++) RxGlobals.StepperStatus[i].CmdRunning = TcpIp.CMD_LIFT_CAPPING_POS;
+        }
+
+        //--- Wash_clicked -------------------------------------------
+        private void Wash_clicked(object sender, RoutedEventArgs e)
+        {
+            _button_active(sender as CheckBox);
+            TcpIp.SFluidCtrlCmd msg = new TcpIp.SFluidCtrlCmd();
+            msg.no = -1;
+            msg.ctrlMode = EFluidCtrlMode.ctrl_wash;
+            RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_CTRL_MODE, ref msg);
+        }
+
+        //--- Vacuum_clicked -------------------------------------------
+        private void Vacuum_clicked(object sender, RoutedEventArgs e)
+        {
+            _button_active(sender as CheckBox);
+            TcpIp.SFluidCtrlCmd msg = new TcpIp.SFluidCtrlCmd();
+            msg.no = -1;
+            msg.ctrlMode = EFluidCtrlMode.ctrl_vacuum;
+            RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_CTRL_MODE, ref msg);
+        }
+
+        //--- Wipe_clicked -------------------------------------------
+        private void Wipe_clicked(object sender, RoutedEventArgs e)
+        {
+            _button_active(sender as CheckBox);
+            TcpIp.SFluidCtrlCmd msg = new TcpIp.SFluidCtrlCmd();
+            msg.no = -1;
+            msg.ctrlMode = EFluidCtrlMode.ctrl_wipe;
+            RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_CTRL_MODE, ref msg);
         }
 
         //--- CapUp_clicked -------------------------------------------

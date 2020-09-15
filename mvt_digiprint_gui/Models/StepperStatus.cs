@@ -332,7 +332,7 @@ namespace RX_DigiPrint.Models
             DripPans_InfeedDOWN     = (msg.info & 0x20000000) != 0;
             DripPans_OutfeedUP      = (msg.info & 0x40000000) != 0;
             DripPans_OutfeedDOWN    = (msg.info & 0x80000000) != 0;
-            RobotUsed               = (msg.robot_used!=0);
+            RobotUsed               = (msg.robot_used!=0) || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX404;
 
             drip_pans_enabled = Z_in_ref;
             

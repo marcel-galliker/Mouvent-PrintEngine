@@ -384,8 +384,7 @@ static void _plc_set_par(SPrintQueueItem *pItem, SPlcPar *pPlcPar)
 		}
 	}
     _FirstStep = TRUE;
-	_StepDist = 43.328;
-	if (RX_Config.printer.type==printer_TX802) _StepDist*=2;
+	_StepDist = 43.328 * RX_Config.headsPerColor;
 	
 	if (!RX_Config.printer.overlap)
 	{
@@ -477,8 +476,7 @@ int  plc_set_printpar(SPrintQueueItem *pItem)
 	
 	TrPrintfL(TRUE, "plc_set_printpar");
 	
-	if ((RX_Config.stepper.ref_height || RX_Config.stepper.print_height) 
-	&&  (RX_Config.printer.type==printer_TX801 || RX_Config.printer.type==printer_TX802))
+	if (rx_def_is_tx(RX_Config.printer.type) && (RX_Config.stepper.ref_height || RX_Config.stepper.print_height))
 	{
 		// else wait webtension is ok
 		_head_was_up   = (RX_StepperStatus.info.z_in_print || RX_StepperStatus.info.z_in_ref);
@@ -1549,7 +1547,7 @@ static void _plc_state_ctrl()
 		}
 		if(_StartEncoderItem.pageWidth)	// send position to encoder
 		{			
-			if(RX_Config.printer.type == printer_TX801 || RX_Config.printer.type == printer_TX802)
+			if(rx_def_is_tx(RX_Config.printer.type))
 			{ // calculate speed
 				UINT32 speed;
 				// speed = time for one scanner movement!

@@ -85,6 +85,7 @@ namespace RX_DigiPrint.Models
                 case EPrinterType.printer_test_slide_only:  return true;
                 case EPrinterType.printer_TX801:			return true;
 	            case EPrinterType.printer_TX802:			return true;
+                case EPrinterType.printer_TX404:            return true;
 	            default: return false;
 	            }
             }
@@ -99,11 +100,12 @@ namespace RX_DigiPrint.Models
                 {
                     case EPrinterType.printer_TX801: return true;
                     case EPrinterType.printer_TX802: return true;
+                    case EPrinterType.printer_TX404: return true;
                     default: return false;
                 }
             }
         }
-
+        
         //--- Property IsLb ---------------------------------------
         public bool IsLb
         {
@@ -320,6 +322,18 @@ namespace RX_DigiPrint.Models
                         IS_Order    = new int[] { 7, 6, 5, 4, 3, 2, 1, 0 };
                         Color_Order = new int[] { 7, 6, 5, 4, 3, 2, 1, 0 };
                         break;
+                    case EPrinterType.printer_TX404:
+                        if (ColorCnt <= 4)
+						{
+                            IS_Order    = new int[] { 3, 2, 1, 0 };
+                            Color_Order = new int[] { 3, 2, 1, 0 };
+						}
+                        else
+						{
+                            IS_Order    = new int[] { 7, 6, 5, 4, 3, 2, 1, 0 };
+                            Color_Order = new int[] { 7, 6, 5, 4, 3, 2, 1, 0 };
+						}
+                        break;
 
                     case EPrinterType.printer_CB612:
                         IS_Order    = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23 };
@@ -349,7 +363,7 @@ namespace RX_DigiPrint.Models
             get { return _AllInkSupplies; }
             set { SetProperty(ref _AllInkSupplies, value); }
         }
-
+        
         //--- Property HeadDist ---------------------------------------
         private Int32[] _HeadFpVoltage;
         public Int32[] HeadFpVoltage
@@ -524,7 +538,7 @@ namespace RX_DigiPrint.Models
             ColorCnt                = msg.colorCnt;
             InkCylindersPerColor    = msg.InkCylindersPerColor;
             HeadsPerColor           = msg.headsPerColor;
-
+            
             _HeadFpVoltage= new Int32[msg.headFpVoltage.Count()];
             for (i=0; i<_HeadFpVoltage.Count(); i++) _HeadFpVoltage[i]    = msg.headFpVoltage[i];
             this.OnPropertyChanged("HeadFpVoltage");
