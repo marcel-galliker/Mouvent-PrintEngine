@@ -14,6 +14,10 @@
 #include "i2c_bitbang.h"
 #include "pres.h"
 
+
+// #define PERFORM_EEPROM_TEST
+
+
 #define MAX_NUM_PAGE 1023u
 #define MAX_PAGE_SIZE 255u
 
@@ -34,11 +38,9 @@ void eeprom_init(void)
 	i2c_bb_init();            
 	_Init = TRUE;
 	
-	#if DEBUG
-	eeprom_print_page(EE_SETTINGS_PAGE);
-	#endif
-
 	#if PERFORM_EEPROM_TEST        
+		eeprom_print_page(EE_SETTINGS_PAGE);
+
 		eeprom_write_byte(1, 0xaa, 0xbb);
 		eeprom_delay();
 
@@ -169,7 +171,7 @@ int eeprom_read_long(const UINT32 pagenum, const BYTE byteaddress, UINT32u *data
  *
  * \return 0 on success
  **/
-#if DEBUG
+#if DEBUG & PERFORM_EEPROM_TEST
 int eeprom_fill_page_dummy(const UINT32 pagenum)
 {
 	if (!_Init) return EEPROM_ERROR;
