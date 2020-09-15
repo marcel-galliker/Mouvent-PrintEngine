@@ -28,6 +28,7 @@
 #include "args.h"
 #include "cln.h"
 #include "tx801.h"
+#include "tx404.h"
 #include "txrob.h"
 #include "tx80x_wd.h"
 #include "dp803.h"
@@ -92,6 +93,16 @@ static void _main_loop()
 									}
 									break;
 			
+        case printer_TX404:			if (RX_StepperCfg.boardNo == 0)
+									    tx404_main(ticks, menu);
+									else
+									{
+									    txrob_main(ticks, menu);
+									    tx80x_wd_main();
+									}
+									break;
+										
+			
 		case printer_cleaf:			cleaf_main(ticks, menu);	break;			
 		case printer_LB701: 		lb701_main(ticks, menu);	break;			
 		case printer_LB702_UV: 		
@@ -113,6 +124,9 @@ static void _main_loop()
 			case printer_TX802:			if (RX_StepperCfg.boardNo == 0) _AppRunning = tx801_menu(); 
 										else							_AppRunning = txrob_menu(); 
 										break;
+            case printer_TX404:			if (RX_StepperCfg.boardNo == 0) _AppRunning = tx404_menu(); 
+										else							_AppRunning = txrob_menu(); 
+										break;                            
 			case printer_cleaf:			_AppRunning = cleaf_menu(); break;
 
 			case printer_LB701: 		_AppRunning = lb701_menu();	break;
@@ -163,6 +177,13 @@ int main(int argc, char** argv)
 	case printer_test_table: 	tt_init(); break;
 	case printer_TX801:			
 	case printer_TX802:			if (RX_StepperCfg.boardNo == 0)	tx801_init();
+								else
+								{
+								    txrob_init();
+								    tx80x_wd_init();
+								}
+								break;
+     case printer_TX404:			if (RX_StepperCfg.boardNo == 0)	tx404_init();
 								else
 								{
 								    txrob_init();

@@ -169,7 +169,6 @@ int lc_get_value (int no, char *value)
 int lc_get_value_by_name (char *name, char *value)
 {
 	int i;
-
 	for (i=0; i<_SymbolCnt; i++)
 	{
 		if (!strcmp(name, _Symbols[i].name))

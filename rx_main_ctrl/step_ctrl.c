@@ -104,7 +104,7 @@ static void* _step_thread(void *par)
 				{
 					ErrorEx(dev_stepper, i, LOG, 0, "Connected");
 					_step_set_config(i);
-					if (i==1 && (RX_Config.printer.type==printer_TX801 || RX_Config.printer.type==printer_TX802)) 
+					if (i==1 && rx_def_is_tx(RX_Config.printer.type)) 
 					{
 						RX_PrinterStatus.txRobot = TRUE;
 						Error(LOG, 0, "Robot connected");
@@ -515,7 +515,8 @@ int step_set_config(void)
 	case printer_LH702:			_StepperType = STEPPER_LB;		break;		
 	case printer_DP803:			_StepperType = STEPPER_DP;		break;		
 	case printer_TX801:			_StepperType = STEPPER_TX;		break;		
-	case printer_TX802:			_StepperType = STEPPER_TX;		break;		
+	case printer_TX802:			_StepperType = STEPPER_TX;		break;
+    case printer_TX404:			_StepperType = STEPPER_TX;		break;
 	default:					_StepperType = STEPPER_STD;		break;
 	}
 

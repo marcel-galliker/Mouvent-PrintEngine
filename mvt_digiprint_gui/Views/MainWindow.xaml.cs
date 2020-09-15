@@ -94,8 +94,6 @@ namespace RX_DigiPrint.Views
             _UserTypeChanged();
 
             _ShowTab(false, TabLH702, AddLocationHint.After);
-            
-
         }
 
         
@@ -182,7 +180,7 @@ namespace RX_DigiPrint.Views
         //--- _PrinterTypeChanged ----------------------------------------------------------------
         private void _PrinterTypeChanged()
         {
-            bool tx = RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_TX801 || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX802;
+            bool tx = RxGlobals.PrintSystem.IsTx;
             bool lb = RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB701 
                 ||    RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB702_UV
                 ||    RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB702_WB
@@ -252,6 +250,11 @@ namespace RX_DigiPrint.Views
                     case EPrinterType.printer_TX802:
                         MachineName.Text="TX 802";
 					    TabMachine.Content = new TexView.TexView();
+                        break;
+
+                    case EPrinterType.printer_TX404:
+                        MachineName.Text = "TX 404";
+                        TabMachine.Content = new TexView.TexView();
                         break;
 
                     case EPrinterType.printer_test_slide:

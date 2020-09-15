@@ -94,6 +94,9 @@
     <ClCompile Include="tx80x_wd.c">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="tx404.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="gcc_Debug.h">
@@ -181,6 +184,9 @@
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="tx80x_wd.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="tx404.h">
       <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>

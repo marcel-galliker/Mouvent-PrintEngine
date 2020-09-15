@@ -82,14 +82,9 @@ namespace RX_DigiPrint.Views.UserControls
         {
             double max;
             if (_InkSupply==null) return;
-            switch(RxGlobals.PrintSystem.PrinterType)
-            {
-                //TODO(CB612) Add case CB612
+            if (RxGlobals.PrintSystem.IsTx) max = 10000; 
+            else max=20000;
 
-                case EPrinterType.printer_TX801: max=10000; break;
-                case EPrinterType.printer_TX802: max=10000; break;
-                default: max=20000; break;
-            }
             Progress.Value = (UInt32)_InkSupply.CanisterLevel;
             if (_InkSupply.CanisterLevel==TcpIp.INVALID_VALUE)
             { 

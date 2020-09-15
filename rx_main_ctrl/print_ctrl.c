@@ -138,11 +138,8 @@ int pc_start_printing(void)
 	if (RX_PrinterStatus.printState==ps_ready_power || RX_PrinterStatus.printState==ps_webin)
 	{
 		step_set_config();
-		if (!RX_StepperStatus.info.z_in_print && 
-			(RX_Config.printer.type==printer_TX801 
-		  || RX_Config.printer.type==printer_TX802
-		  || (RX_Config.printer.type==printer_LH702 && plc_in_simu())
-			))
+		if (!RX_StepperStatus.info.z_in_print 
+		&& (rx_def_is_tx(RX_Config.printer.type) || (RX_Config.printer.type==printer_LH702 && plc_in_simu())))
 		{
 			step_handle_gui_msg(INVALID_SOCKET, CMD_LIFT_PRINT_POS, NULL, 0);				
 		}
@@ -509,13 +506,15 @@ static int _print_next(void)
 											 break;
 				case PQ_TEST_JETS:			 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "fuji.tif");
 											 if (RX_Config.printer.type==printer_TX801 
-											 ||  RX_Config.printer.type==printer_TX802 
+											 ||  RX_Config.printer.type==printer_TX802
+											 ||  RX_Config.printer.type==printer_TX404
 											 ||  RX_Config.printer.type==printer_test_table) 
 												 RX_TestImage.scansTotal = RX_TestImage.copies;
 											 break;
 				case PQ_TEST_JET_NUMBERS:	 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "jet_numbers.tif");
 											 if (RX_Config.printer.type==printer_TX801 
 											 ||  RX_Config.printer.type==printer_TX802 
+											 ||  RX_Config.printer.type==printer_TX404
 											 ||  RX_Config.printer.type==printer_test_table) 
 												 RX_TestImage.scansTotal = RX_TestImage.copies;	
 											 break;
