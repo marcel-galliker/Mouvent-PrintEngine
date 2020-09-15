@@ -26,7 +26,6 @@ namespace RX_Common
 
             _OrgValue = Rx.StrToDouble(obj.Text);
 
-        //    _Position  = obj.PointToScreen(new Point(0, 0));
             _Position  = obj.PointToScreen(new Point(0, 0));
             _ObjWidth  = obj.ActualWidth;
             _ObjHeight = obj.ActualHeight;
@@ -77,12 +76,6 @@ namespace RX_Common
             if (left + Pad.ActualWidth  > Width-border )   left = Width-Pad.ActualWidth-border;
             Canvas.SetLeft (Pad, left);        
             Canvas.SetTop  (Pad, top);
-        }
-
-        //--- _Tick ------------------------------------------
-        private void _Tick(object o)
-        {
-            button_clicked(o as Button, null);
         }
 
         //--- Property result ------------------------------------------------
@@ -174,13 +167,7 @@ namespace RX_Common
         //--- special for the first touch ---------------------------------------------
         private void Window_TouchUp(object sender, System.Windows.Input.TouchEventArgs e)
         {
-            new Timer(_Tick, e.Source, 50, 0);
+            button_clicked(e.Source, null);
         }
-
-        private void Rectangle_GiveFeedback(object sender, GiveFeedbackEventArgs e)
-        {
-
-        }
-
     }
 }
