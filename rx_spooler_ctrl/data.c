@@ -847,7 +847,7 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 			sprintf(dir, PATH_RIPPED_DATA "trace");
 			sprintf(fname, "ID_%d", id->id);
 			bmpInfo.planes = RX_Spooler.colorCnt;
-			tif_write(dir, fname, &bmpInfo, "R");
+			tif_write(dir, fname, &bmpInfo, "K");
 			Error(WARN, 0, "Test: Written bitmap to >>%s\\%s<<", dir, fname);
 		}
 		#endif

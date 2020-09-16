@@ -64,7 +64,6 @@ namespace RX_DigiPrint.Models
         public static LH702_View            LH702_View;
         public static LH702_Preview         LH702_Preview;
         public static DisabledJets          DisabledJets = new DisabledJets();
-        public static Density               Density = new Density();
-        
+        public static Density               Density = new Density();       
     }
 }

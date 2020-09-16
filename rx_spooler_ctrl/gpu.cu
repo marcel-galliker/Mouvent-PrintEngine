@@ -163,6 +163,7 @@ __global__ void _screen_fms_kernel(UINT8 *in, UINT8 *out, UINT16 *pta, UINT16 *d
 	UINT8 *pDst=&out[y*outLineLen+x/4];
 	UINT16 *taLine=&pta[(y%TA_HEIGHT)*TA_WIDTH];
 	UINT8  dst=0;
+	UINT8  levels = limitL? 3:2;
 	UINT32 src;	// need 32 bits for compensating disabled jets
 	UINT16  ta;
 
@@ -176,9 +177,12 @@ __global__ void _screen_fms_kernel(UINT8 *in, UINT8 *out, UINT16 *pta, UINT16 *d
 			src = *pSrc++ * densityFactor[x];
 			ta  = taLine[x%TA_WIDTH];
 			dst <<= 2;
-			if (limitL && src > limitL + ta)	dst |= 0x03;
-			else if (src > limitM + ta)			dst |= 0x02;
-			else if (src > ta)					dst |= 0x01;
+			if (src > ta)
+			{
+				if (limitL && src>limitL) dst |= (src-limitL>=ta/3     )? 0x03:0x02;
+				else if (src>limitM)	  dst |= (src-limitM>=ta/levels)? 0x02:0x01;
+				else					  dst |= 0x01;
+			}
 
 			if (!(++x & 3)) *pDst++=dst;
 		}
@@ -198,8 +202,9 @@ static void _screen_fms(UINT32 y, UINT8 *in, UINT8 *out, UINT16 *pta, UINT16 *de
 	UINT8 *pDst=&out[y*outLineLen+x/4];
 	UINT16 *taLine=&pta[(y%TA_HEIGHT)*TA_WIDTH];
 	UINT8  dst=0;
+	UINT8  levels = limitL? 3:2;
 	UINT32 src;	// need 32 bits for compensating disabled jets
-	UINT16  ta;
+	UINT16 ta;
 
 	sectorWidth+=x;
 	if (sectorWidth>inWidthPx) sectorWidth=inWidthPx;
@@ -211,9 +216,12 @@ static void _screen_fms(UINT32 y, UINT8 *in, UINT8 *out, UINT16 *pta, UINT16 *de
 			src = *pSrc++ * densityFactor[x];
 			ta  = taLine[x%TA_WIDTH];
 			dst <<= 2;
-			if (limitL && src > limitL + ta)	dst |= 0x03;
-			else if (src > limitM + ta)			dst |= 0x02;
-			else if (src > ta)					dst |= 0x01;
+			if (src > ta)
+			{
+				if (limitL && src>limitL) dst |= (src-limitL>=ta/3     )? 0x03:0x02;
+				else if (src>limitM)	  dst |= (src-limitM>=ta/levels)? 0x02:0x01;
+				else					  dst |= 0x01;
+			}
 
 			if (!(++x & 3)) *pDst++=dst;
 		}
@@ -234,6 +242,7 @@ __global__ void _screen_fms_600_kernel(UINT8 *in, UINT8 *out, UINT16 *pta, UINT1
 	UINT8 *pDst=&out[y*outLineLen+x/4];
 	UINT16* taLine=&pta[(y%TA_HEIGHT)*TA_WIDTH];
 	UINT8  dst;
+	UINT8  levels = limitL? 3:2;
 	UINT32 src;	// need 32 bits for compensating disabled jets
 	UINT16  ta;
 
@@ -248,9 +257,12 @@ __global__ void _screen_fms_600_kernel(UINT8 *in, UINT8 *out, UINT16 *pta, UINT1
 			if (x&1) pSrc++;
 			ta  = taLine[x%TA_WIDTH];
 			dst <<= 2;
-			if (limitL && src > limitL + ta)	dst |= 0x03;
-			else if (src > limitM + ta)			dst |= 0x02;
-			else if (src > ta)					dst |= 0x01;
+			if (src > ta)
+			{
+				if (limitL && src>limitL) dst |= (src-limitL>=ta/3     )? 0x03:0x02;
+				else if (src>limitM)	  dst |= (src-limitM>=ta/levels)? 0x02:0x01;
+				else					  dst |= 0x01;
+			}
 
 			if (!(++x & 3)) *pDst++=dst;
 		}
@@ -270,6 +282,7 @@ static void _screen_fms_600(UINT32 y, UINT8 *in, UINT8 *out, UINT16 *pta, UINT16
 	UINT8 *pDst=&out[y*outLineLen+x/4];
 	UINT16* taLine=&pta[(y%TA_HEIGHT)*TA_WIDTH];
 	UINT8  dst=0;
+	UINT8  levels = limitL? 3:2;
 	UINT32 src;	// need 32 bits for compensating disabled jets
 	UINT16  ta;
 
@@ -285,9 +298,12 @@ static void _screen_fms_600(UINT32 y, UINT8 *in, UINT8 *out, UINT16 *pta, UINT16
 			if (x&1) pSrc++;
 			ta  = taLine[x%TA_WIDTH];
 			dst <<= 2;
-			if (limitL && src > limitL + ta)	dst |= 0x03;
-			else if (src > limitM + ta)			dst |= 0x02;
-			else if (src > ta)					dst |= 0x01;
+			if (src > ta)
+			{
+				if (limitL && src>limitL) dst |= (src-limitL>=ta/3     )? 0x03:0x02;
+				else if (src>limitM)	  dst |= (src-limitM>=ta/levels)? 0x02:0x01;
+				else					  dst |= 0x01;
+			}
 
 			if (!(++x & 3)) *pDst++=dst;
 		}
@@ -308,6 +324,7 @@ __global__ void _screen_fms_300_kernel(UINT8 *in, UINT8 *out, UINT16 *pta, UINT1
 	UINT8 *pDst=&out[y*outLineLen+x/4];
 	UINT16* taLine=&pta[(y%TA_HEIGHT)*TA_WIDTH];
 	UINT8  dst;
+	UINT8  levels = limitL? 3:2;
 	UINT32 src;	// need 32 bits for compensating disabled jets
 	UINT16  ta;
 
@@ -321,9 +338,12 @@ __global__ void _screen_fms_300_kernel(UINT8 *in, UINT8 *out, UINT16 *pta, UINT1
 			src = *pSrc * densityFactor[x];
 			ta  = taLine[x%TA_WIDTH];
 			dst <<= 2;
-			if (limitL && src > limitL + ta)	dst |= 0x03;
-			else if (src > limitM + ta)			dst |= 0x02;
-			else if (src > ta)					dst |= 0x01;
+			if (src > ta)
+			{
+				if (limitL && src>limitL) dst |= (src-limitL>=ta/3     )? 0x03:0x02;
+				else if (src>limitM)	  dst |= (src-limitM>=ta/levels)? 0x02:0x01;
+				else					  dst |= 0x01;
+			}
 
 			if (!(++x & 3)) 
 			{
@@ -350,6 +370,7 @@ static void _screen_fms_300(UINT32 y, UINT8 *in, UINT8 *out, UINT16 *pta, UINT16
 	UINT8  dst=0;
 	UINT32 src;	// need 32 bits for compensating disabled jets
 	UINT16  ta;
+	UINT8  levels = limitL? 3:2;
 
 	sectorWidth=4*sectorWidth+x;
 	if (sectorWidth>4*inWidthPx) sectorWidth=4*inWidthPx;
@@ -361,9 +382,12 @@ static void _screen_fms_300(UINT32 y, UINT8 *in, UINT8 *out, UINT16 *pta, UINT16
 			src = *pSrc * densityFactor[x];
 			ta  = taLine[x%TA_WIDTH];
 			dst <<= 2;
-			if (limitL && src > limitL + ta)	dst |= 0x03;
-			else if (src > limitM + ta)			dst |= 0x02;
-			else if (src > ta)					dst |= 0x01;
+			if (src > ta)
+			{
+				if (limitL && src>limitL) dst |= (src-limitL>=ta/3     )? 0x03:0x02;
+				else if (src>limitM)	  dst |= (src-limitM>=ta/levels)? 0x02:0x01;
+				else					  dst |= 0x01;
+			}
 
 			if (!(++x & 3)) 
 			{
