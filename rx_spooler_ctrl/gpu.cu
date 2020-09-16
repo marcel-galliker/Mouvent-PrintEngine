@@ -163,7 +163,7 @@ __global__ void _screen_fms_kernel(UINT8 *in, UINT8 *out, UINT16 *pta, UINT16 *d
 	UINT8 *pDst=&out[y*outLineLen+x/4];
 	UINT16 *taLine=&pta[(y%TA_HEIGHT)*TA_WIDTH];
 	UINT8  dst=0;
-	UINT8  levels = limitL? 3:2;
+	INT8   levels = limitL? 3:2;
 	UINT32 src;	// need 32 bits for compensating disabled jets
 	UINT16  ta;
 
@@ -242,7 +242,7 @@ __global__ void _screen_fms_600_kernel(UINT8 *in, UINT8 *out, UINT16 *pta, UINT1
 	UINT8 *pDst=&out[y*outLineLen+x/4];
 	UINT16* taLine=&pta[(y%TA_HEIGHT)*TA_WIDTH];
 	UINT8  dst;
-	UINT8  levels = limitL? 3:2;
+	INT8   levels = limitL? 3:2;
 	UINT32 src;	// need 32 bits for compensating disabled jets
 	UINT16  ta;
 
@@ -324,7 +324,7 @@ __global__ void _screen_fms_300_kernel(UINT8 *in, UINT8 *out, UINT16 *pta, UINT1
 	UINT8 *pDst=&out[y*outLineLen+x/4];
 	UINT16* taLine=&pta[(y%TA_HEIGHT)*TA_WIDTH];
 	UINT8  dst;
-	UINT8  levels = limitL? 3:2;
+	INT8   levels = limitL? 3:2;
 	UINT32 src;	// need 32 bits for compensating disabled jets
 	UINT16  ta;
 
