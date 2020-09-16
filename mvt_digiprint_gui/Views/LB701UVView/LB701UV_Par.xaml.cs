@@ -28,8 +28,9 @@ namespace RX_DigiPrint.Views.LB701UVView
             CB_Pinning2.ItemsSource   = new EN_OnOffAuto();
             CB_UVLamp.ItemsSource     = new EN_OnOffAuto();
 
-            CB_DcRwUp.ItemsSource     = new EN_OnOff();
-            CB_DcRwDn.ItemsSource     = new EN_OnOff();
+            CB_DieMode.ItemsSource      = new EN_OnOff();
+            CB_RW_WASTE.ItemsSource     = new EN_OnOff();
+            CB_RW_DIECUT.ItemsSource    = new EN_OnOff();
             RxGlobals.PrintSystem.PropertyChanged += PrintSystem_PropertyChanged;
             XML_MATERIAL.PropertyChanged          += XML_MATERIAL_PropertyChanged;
 			ParPanelMaterial.Update               += ParPanelMaterial_Update;
@@ -41,6 +42,9 @@ namespace RX_DigiPrint.Views.LB701UVView
 		{
             string str  = RxGlobals.Plc.GetVar(ParPanelMaterial.UnitID, "CFG_DIECUT");
             bool used=(str!=null && str.Equals("TRUE"));
+            #if DEBUG
+			    used=true;
+            #endif
             if (used!=_DieCutUsed)
 			{
                 _DieCutUsed = used;
@@ -48,6 +52,7 @@ namespace RX_DigiPrint.Views.LB701UVView
                 else                   CB_RotRW.ItemsSource = new EN_RotationList();
                 COL_DieCutSep.Width  = (bool)_DieCutUsed? new GridLength(20) : new GridLength(0);
                 COL_DieCut.Width     = (bool)_DieCutUsed? GridLength.Auto    : new GridLength(0);
+                Grid_RW.Visibility   = (bool)_DieCutUsed? Visibility.Collapsed : Visibility.Visible;
                 Reload_Clicked(this, null);
 			}
 		}
@@ -158,5 +163,5 @@ namespace RX_DigiPrint.Views.LB701UVView
                 }
             }
         }
-     }
+	}
 }

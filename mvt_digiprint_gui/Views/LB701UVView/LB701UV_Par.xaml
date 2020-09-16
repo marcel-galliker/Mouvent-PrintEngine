@@ -43,8 +43,8 @@
                                 <ColumnDefinition Width="auto"/>
                                 <ColumnDefinition Width="20"/>
                                 <ColumnDefinition Width="auto"/>
-                                <ColumnDefinition Width="0"  x:Name="COL_DieCutSep"/>
-                                <ColumnDefinition Width="0" x:Name="COL_DieCut"/>
+                                <ColumnDefinition Width="20"   x:Name="COL_DieCutSep"/>
+                                <ColumnDefinition Width="auto" x:Name="COL_DieCut"/>
                                 </Grid.ColumnDefinitions>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="auto"/>
@@ -85,17 +85,17 @@
                             <rx_uc:PlcParCtrl Grid.Row="5" Grid.Column="0" ID="PAR_DISTANCE_TO_STOP"                Label="Stop Dist"    Unit="m"  UnitWidth="50" Format="f"/>
 
                             <rx_uc:PlcTitle Grid.Row="6" Grid.Column="0" Header="Tension"/>
-                            <Grid Grid.Row="7" Grid.Column="0"  Loaded="Grid_Loaded">
+                            <Grid Grid.Row="7" Grid.Column="0" Loaded="Grid_Loaded">
+                                <TextBlock        Text="Nip Tension"/>
+                                <rx_uc:PlcParCtrl                      ID="PAR_NIP_TENSION_1"          Label=""             Unit="N/mm" HorizontalAlignment="Right" Width="100" UnitWidth="50" Format="1" />
+                            </Grid>
+                            <Grid Grid.Row="8" Grid.Column="0"  Loaded="Grid_Loaded">
                                 <rx_uc:PlcParCtrl x:Name="CB_RotUW"    ID="PAR_WIND_DIRECTION_WINDER1" Label="Unwinder"     Unit="" UnitWidth="50" Type="ImgCombo" Padding="0,0,70,0"/>
                                 <rx_uc:PlcParCtrl                      ID="PAR_WINDER_TENSION_1"       Label=""             Unit="N/mm" HorizontalAlignment="Right" Width="100" UnitWidth="50" Format="1" />
                             </Grid>
-                            <Grid Grid.Row="8" Grid.Column="0" Loaded="Grid_Loaded">
+                            <Grid Grid.Row="9" Grid.Column="0" Loaded="Grid_Loaded" x:Name="Grid_RW">
                                 <rx_uc:PlcParCtrl x:Name="CB_RotRW"    ID="PAR_WIND_DIRECTION_WINDER2" Label="Rewinder"     Unit="" UnitWidth="50" Type="ImgCombo" Padding="0,0,70,0"/>
                                 <rx_uc:PlcParCtrl                      ID="PAR_WINDER_TENSION_2"       Label=""             Unit="N/mm" HorizontalAlignment="Right" Width="100" UnitWidth="50" Format="1" />
-                            </Grid>
-                            <Grid Grid.Row="9" Grid.Column="0" Loaded="Grid_Loaded">
-                                <TextBlock        Text="Nip Tension"/>
-                                <rx_uc:PlcParCtrl                      ID="PAR_NIP_TENSION_1"          Label=""             Unit="N/mm" HorizontalAlignment="Right" Width="100" UnitWidth="50" Format="1" />
                             </Grid>
 
                             <rx_uc:PlcTitle Grid.Row="1" Grid.Column="2" Header="Corona"  Margin="0,0,10,0"/>
@@ -131,24 +131,23 @@
                             <Rectangle Grid.Row="1" Grid.Column="3" Grid.RowSpan="10" Fill="{StaticResource Mouvent.MainColorBrush}" Width="1" HorizontalAlignment="Center" />
                             <rx_uc:PlcTitle Grid.Row="1" Grid.Column="4" Header="Die Cut"/>
                             <Grid Grid.Row="2" Grid.Column="4"  Loaded="Grid_Loaded">
-                                <rx_uc:PlcParCtrl x:Name="CB_DcRwUp"   ID="PAR_WINDER_MODE_3"   Label="Winder Waste"     Unit="" UnitWidth="50" Type="Combo" Padding="0,0,70,0"/>
-                                <rx_uc:PlcParCtrl                      ID="PAR_WINDER_TENSION_3"       Label=""             Unit="N/mm" HorizontalAlignment="Right" Width="100" UnitWidth="50" Format="1" />
+                                <rx_uc:PlcParCtrl x:Name="CB_RW_WASTE"  ID="PAR_WINDER_MODE_3"   Label="Winder Waste"     Unit="" UnitWidth="50" Type="Combo" Padding="0,0,70,0"/>
+                                <rx_uc:PlcParCtrl                       ID="PAR_WINDER_TENSION_3"       Label=""             Unit="N/mm" HorizontalAlignment="Right" Width="100" UnitWidth="50" Format="1" />
                             </Grid>
                             <Grid Grid.Row="3" Grid.Column="4" Loaded="Grid_Loaded">
-                                <rx_uc:PlcParCtrl x:Name="CB_DcRwDn"   ID="PAR_WINDER_MODE_4"       Label="Rewinder"     Unit="" UnitWidth="50" Type="Combo" Padding="0,0,70,0"/>
-                                <rx_uc:PlcParCtrl                      ID="PAR_WINDER_TENSION_4"    Label=""             Unit="N/mm" HorizontalAlignment="Right" Width="100" UnitWidth="50" Format="1" />
+                                <rx_uc:PlcParCtrl x:Name="CB_RW_DIECUT" ID="PAR_WINDER_MODE_4"       Label="Rewinder"     Unit="" UnitWidth="50" Type="Combo" Padding="0,0,70,0"/>
+                                <rx_uc:PlcParCtrl                       ID="PAR_WINDER_TENSION_4"    Label=""             Unit="N/mm" HorizontalAlignment="Right" Width="100" UnitWidth="50" Format="1" />
                             </Grid>
                             <Grid Grid.Row="4" Grid.Column="4" Loaded="Grid_Loaded">
                                 <TextBlock        Text="Nip Tension"/>
                                 <rx_uc:PlcParCtrl                      ID="PAR_NIP_TENSION_2"          Label=""             Unit="N/mm" HorizontalAlignment="Right" Width="100" UnitWidth="50" Format="1" />
                             </Grid>
                             <rx_uc:PlcTitle   Grid.Row="5" Grid.Column="4" Header="Cutting"/>
-                            <rx_uc:PlcParCtrl Grid.Row="6" Grid.Column="4" ID="PAR_PRINTSTART_SETPOINT"     Label="Cut Dist"      Unit="m"  UnitWidth="50" Format="f"/>
-                            <rx_uc:PlcParCtrl Grid.Row="7" Grid.Column="4" ID="PAR_REGISTER_SETPOINT"       Label="Register"      Unit="mm" UnitWidth="50" Format="f"/>
-                            <rx_uc:PlcParCtrl Grid.Row="8" Grid.Column="4" ID="PAR_NUMBER_REFERENCE_MARKS"  Label="Masks/Blade"   Unit=""   UnitWidth="50" Format="n"/>
-                            <rx_uc:PlcParCtrl Grid.Row="9" Grid.Column="4" ID="PAR_EFFECTIVE_LENGTH_KAPPA" Label="Mask Length"   Unit="mm" UnitWidth="50" Format="n"/>
-
-
+                            <rx_uc:PlcParCtrl Grid.Row="6" Grid.Column="4"  ID="PAR_DIE_MODE"                Label="Cutting"       Unit=""   UnitWidth="50" Type="Combo" Padding="0,0,70,0" x:Name="CB_DieMode"/>
+                            <rx_uc:PlcParCtrl Grid.Row="7" Grid.Column="4"  ID="PAR_PRINTSTART_SETPOINT"     Label="Cut Dist"      Unit="mm" UnitWidth="50" Format="2"/>
+                            <rx_uc:PlcParCtrl Grid.Row="8" Grid.Column="4"  ID="PAR_REGISTER_SETPOINT"       Label="Register"      Unit="mm" UnitWidth="50" Format="2"/>
+                            <rx_uc:PlcParCtrl Grid.Row="9" Grid.Column="4"  ID="PAR_NUMBER_REFERENCE_MARKS"  Label="Masks/Plate"   Unit=""   UnitWidth="50" Format="n"/>
+                            <rx_uc:PlcParCtrl Grid.Row="10" Grid.Column="4" ID="PAR_EFFECTIVE_LENGTH_KAPPA"  Label="Plate Length"  Unit="mm" UnitWidth="50" Format="2"/>
                         </Grid>
                     </rx_uc:PlcParPanel>
                 </Grid>
