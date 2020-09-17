@@ -252,8 +252,8 @@ if (RX_StepperCfg.printerType==printer_LB702_UV || RX_StepperCfg.printerType==pr
 	term_printf("Pos[steps]:     "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.stat->statMot[i].position);				term_printf("\n"); 
     term_printf("EncPos[steps]:  "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.encoder[i]._pos_motor);					term_printf("\n");
     term_printf("Diff[steps]:    "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.encoder[i].pos_diff);					term_printf("\n");
-	term_printf("Pos rising:     "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.stat->statMot[i].pos_rising);			term_printf("\n"); 
-	term_printf("Pos falling:    "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.stat->statMot[i].pos_falling);			term_printf("\n"); 
+//	term_printf("Pos rising:     "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.stat->statMot[i].pos_rising);			term_printf("\n"); 
+//	term_printf("Pos falling:    "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.stat->statMot[i].pos_falling);			term_printf("\n"); 
 	term_printf("Pos end:        "); PRINTF(MOTOR_CNT)("%06d    ", motor_get_end_step(i));						term_printf("\n"); 
 	term_printf("Speed [Hz]:     "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.stat->statMot[i].speed);				term_printf("\n"); 
 //	term_printf("vEdge:          "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.stat->statMot[i].v_edge);				term_printf("\n"); 

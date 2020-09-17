@@ -193,14 +193,13 @@ namespace RX_DigiPrint.Views
            eventArgs.Textile = tx;
            eventArgs.Label = lb;
 
-
-           _ShowTab(pq, TabPrintQueue, AddLocationHint.First);
-
            PrinterTypeChangedEventHandler(this, eventArgs);
 
            _ShowPrinterTypeTab(RxGlobals.PrintSystem.PrinterType);
 
            _ShowPrintSystemTab();
+
+           _ShowTab(pq, TabPrintQueue, AddLocationHint.First);
         }
 
         private void _ShowTab(bool show, TabItem tab, AddLocationHint hint)

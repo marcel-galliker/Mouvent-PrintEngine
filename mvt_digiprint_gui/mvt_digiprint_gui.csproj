@@ -488,7 +488,6 @@
     <Compile Include="Models\Settings.cs" />
     <Compile Include="Models\StepperCfg.cs" />
     <Compile Include="Models\StepperMotor.cs" />
-    <Compile Include="Models\TestTableStatus.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="Models\UvLamp.cs" />
     <Compile Include="Models\WlanNetwork.cs" />

@@ -154,12 +154,14 @@ static int _prepare_config()
 	
 	//--- ethernet ports on additional interface board -------------------
 #ifdef linux
-	ethPortCnt=sok_get_ifcnt("^p[0-9]+p[0-9]+$");
-	if (RX_Config.printer.type==printer_cleaf)		ethPortCnt=4;
-	if (RX_Config.printer.type==printer_test_table) ethPortCnt=0;	// historic
-	if (arg_hamster)								ethPortCnt=0;
-
-	if (ethPortCnt==0) Error(WARN, 0, "No PxPx Ports"); 
+	if (RX_Config.printer.type==printer_cleaf)			 ethPortCnt=4;
+	else if (RX_Config.printer.type==printer_test_table) ethPortCnt=0;
+	else if (arg_hamster)								 ethPortCnt=0;
+	else 
+	{
+		ethPortCnt=sok_get_ifcnt("^p[0-9]+p[0-9]+$");
+		if (ethPortCnt==0) Error(WARN, 0, "No PxPx Ports"); 
+	}
 
 #else
 	ethPortCnt=0;
