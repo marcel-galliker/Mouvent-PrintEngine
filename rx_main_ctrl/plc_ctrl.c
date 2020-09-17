@@ -1398,7 +1398,7 @@ static void _plc_get_status()
 					logType=_plc_error_filter(&item, text);
 					if(logType)
 					{
-						if(logType==LOG_TYPE_ERROR_CONT)	{   Error(ERR_CONT,	0, "PLC (%X): %s", item.errNo, text); _ErrorFilter = rx_get_ticks() + ERROR_FILTER_TIME; }
+						if(logType==LOG_TYPE_ERROR_CONT)	{   Error(ERR_ABORT,	0, "PLC (%X): %s", item.errNo, text); _ErrorFilter = rx_get_ticks() + ERROR_FILTER_TIME; }
 						else if(logType==LOG_TYPE_WARN)			Error(WARN,		0, "PLC (%X): %s", item.errNo, text);
 						else                                    Error(LOG,		0, "PLC (%X): %s", item.errNo, text);
 					}
