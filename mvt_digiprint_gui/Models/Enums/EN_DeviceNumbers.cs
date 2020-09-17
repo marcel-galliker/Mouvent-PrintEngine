@@ -102,16 +102,17 @@ namespace RX_DigiPrint.Models.Enums
 
                 case EDeviceType.dev_stepper:   switch (RxGlobals.PrintSystem.PrinterType)
                                                 {
-                                                    case EPrinterType.printer_LB701:        cnt=4; break;
-                                                    case EPrinterType.printer_LB702_UV:     cnt=4; break;
-                                                    case EPrinterType.printer_LB702_WB:     cnt=4; break;
-                                                    case EPrinterType.printer_LH702:        cnt=4; break;
-                                                    case EPrinterType.printer_DP803:        cnt=4; break;
-                                                    case EPrinterType.printer_cleaf:        cnt=4; break;
-                                                    case EPrinterType.printer_test_table:   cnt=1; break;
-                                                    case EPrinterType.printer_TX801:        cnt=2; break;
-                                                    case EPrinterType.printer_TX802:        cnt=2; break;
-                                                    case EPrinterType.printer_TX404:        cnt=2; break;
+                                                    case EPrinterType.printer_LB701:            cnt=4; break;
+                                                    case EPrinterType.printer_LB702_UV:         cnt=4; break;
+                                                    case EPrinterType.printer_LB702_WB:         cnt=4; break;
+                                                    case EPrinterType.printer_LH702:            cnt=4; break;
+                                                    case EPrinterType.printer_DP803:            cnt=4; break;
+                                                    case EPrinterType.printer_cleaf:            cnt=4; break;
+                                                    case EPrinterType.printer_test_table:       cnt=1; break;
+                                                    case EPrinterType.printer_TX801:            cnt=2; break;
+                                                    case EPrinterType.printer_TX802:            cnt=2; break;
+                                                    case EPrinterType.printer_TX404:			cnt=2; break;
+                                                    case EPrinterType.printer_test_table_seon:  cnt=3; break;         
                                                     default: cnt=1; break;
                                                 }
                                                 for (color=0; color<cnt && color<4; color++)

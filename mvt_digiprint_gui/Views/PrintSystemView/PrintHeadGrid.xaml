@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300">
+             d:DesignHeight="380" d:DesignWidth="300">
 
     <Grid x:Name="Grid">
         <Grid.ColumnDefinitions>
@@ -21,14 +21,14 @@
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Text="Color"  VerticalAlignment="Center"/>
-        
+
         <TextBlock Grid.Row="1" Grid.Column="0" Text="No" Height="26"  Margin="2" VerticalAlignment="Center"/>
 
         <TextBlock Grid.Row="2" Grid.Column="0" Text="Control Mode" Height="26" VerticalAlignment="Center" />
 
-        <TextBlock Grid.Row="3" Grid.Column="0" Text="Temperature Head"/>
-        <TextBlock Grid.Row="3" Grid.Column="1" Text="°C"/>
-        
+        <TextBlock Grid.Row="3" Grid.Column="0" Text="Temperature Head" Name="Temp_Head"/>
+        <TextBlock Grid.Row="3" Grid.Column="1" Text="°C" Name="Temp_Head_Txt"/>
+
         <Grid Grid.Row="4" Grid.ColumnSpan="2" x:Name="ServiceGrid" >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="200"/>
@@ -36,6 +36,10 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
@@ -66,19 +70,36 @@
 
             <TextBlock Grid.Row="5" Grid.Column="0" Text="Pump Speed"/>
             <TextBlock Grid.Row="5" Grid.Column="1" Text="ml/min"/>
-            
+
             <TextBlock Grid.Row="6" Grid.Column="0" Text="Flow Factor"/>
             <TextBlock Grid.Row="6" Grid.Column="1" Text="&lt;200"/>
-            
+
             <TextBlock Grid.Row="7" Grid.Column="0" Text="Valve"/>
-           
+
             <TextBlock Grid.Row="8" Grid.Column="0" Text="Printing Time"/>
-            
+
             <TextBlock Grid.Row="9" Grid.Column="0" Text="Image In Cnt (Buffer)"/>
+
+            <TextBlock Grid.Row="10" Grid.Column="0" Text="Cooler Pressure" Name="Cooler_Pres"/>
+            <TextBlock Grid.Row="10" Grid.Column="1" Text="mbar" Name="Cooler_Pres_Text"/>
+
+            <TextBlock Grid.Row="11" Grid.Column="0" Text="Cooler Temperature" Name="Cooler_Temp"/>
+            <TextBlock Grid.Row="11" Grid.Column="1" Text="°C" Name="Cooler_Temp_Text"/>
+
+            <TextBlock Grid.Row="12" Grid.Column="0" Text="Cluster No" Name="ClusterNo"/>
+            
+            <TextBlock Grid.Row="13" Grid.Column="0" Text="Drive Voltage" Name="Drive_Voltage"/>
+            <TextBlock Grid.Row="13" Grid.Column="1" Text="%" Name="Drive_Voltage_Text"/>
+
+
         </Grid>
 
         <Grid Grid.Row="0" Grid.Column="2" Grid.RowSpan="13">
-            <StackPanel x:Name="PrintHeadStack" Orientation="Horizontal"/>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="74*"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <StackPanel x:Name="PrintHeadStack" Orientation="Horizontal" Grid.RowSpan="2"/>
         </Grid>
     </Grid>
 

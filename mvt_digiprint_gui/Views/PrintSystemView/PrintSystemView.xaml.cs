@@ -34,6 +34,9 @@ namespace RX_DigiPrint.Views.PrintSystemView
         {
             Visibility visibility       =  (RxGlobals.User.UserType >= EUserType.usr_service) ? Visibility.Visible : Visibility.Collapsed; 
             PrintSystemPanel.Visibility = visibility;
+            visibility = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_table_seon && RxGlobals.User.UserType >= EUserType.usr_mouvent) ? Visibility.Visible : Visibility.Collapsed;
+            FluidCommands.Visibility = visibility;
+            FluidSettings.Visibility = visibility;
         }
 
         //--- _PrintSystem_PropertyChanged -----------------------------------------------
@@ -95,6 +98,9 @@ namespace RX_DigiPrint.Views.PrintSystemView
                                                     break;
                 }
             }
+
+            Visibility visibility = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_table_seon && RxGlobals.User.UserType >= EUserType.usr_mouvent) ? Visibility.Visible : Visibility.Collapsed;
+            FluidCommands.Visibility = visibility;
         }
 
         //--- PrinterStatusChanged ----------------------------------------

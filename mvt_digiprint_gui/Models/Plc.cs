@@ -56,7 +56,9 @@ namespace RX_DigiPrint.Models
         {
             get
             {
-                if (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LH702 && !RxGlobals.PrintSystem.LH702_simulation) _Connected = true;
+                if ((RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LH702 && !RxGlobals.PrintSystem.LH702_simulation) 
+                    || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_table_seon) 
+                    _Connected = true;
                 return _Connected;
             }
             set

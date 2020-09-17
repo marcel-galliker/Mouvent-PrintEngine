@@ -1,0 +1,128 @@
+﻿<UserControl x:Class="RX_DigiPrint.Views.TestTableSeonView.TestTableSeonFluidSettings"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:igWPF="http://schemas.infragistics.com/xaml/wpf"
+             xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+             xmlns:local="clr-namespace:RX_DigiPrint.Views.TestTableSeonView"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+
+    <GroupBox Grid.Column="0" Header="Parameter" Style="{StaticResource RxGroupBox}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="110"/>
+                <ColumnDefinition Width="90"/>
+                <ColumnDefinition Width="90"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="Fluid Valves C1" />
+            <igWPF:XamComboEditor Grid.Row="0" Grid.Column="1"
+                                x:Name="C1_TestFluid"
+                                HorizontalAlignment="Stretch"
+                                ItemsSource="{Binding ScanModeList}"
+                                Value="{Binding ScanMode}"
+                                DisplayMemberPath="Display"
+                                ValuePath="Value" 
+                                DropDownResizeMode="None"
+                                DropDownClosed="TestFluid_DropDownClosed"
+                                />
+            <CheckBox x:Name="Button_C1_Fluid" Grid.Row="0" Grid.Column="2" Style="{DynamicResource RxCommandButton}" Margin="10" Click="C1_IsoXL_Clicked" FontWeight="Bold"/>
+
+            <Grid Grid.Row="0" Grid.Column="3" x:Name="C1_Valves">
+                <StackPanel Orientation="Horizontal">
+                    <Image  Source="../../Resources/Bitmaps/LED_GREEN.ico" Visibility="{Binding TTS_Valve_C1,   Converter={StaticResource BoolToVisible_Converter}}" HorizontalAlignment="Left"/>
+                    <Image  Source="../../Resources/Bitmaps/LED_GREY.ico"  Visibility="{Binding TTS_Valve_C1,   Converter={StaticResource BoolToInVisible_Converter}}" HorizontalAlignment="Left"/>
+
+                </StackPanel>
+            </Grid>
+
+            <TextBlock Grid.Row="1" Grid.Column="0" Text="Fluid Valves C2" />
+            <igWPF:XamComboEditor Grid.Row="1" Grid.Column="1"
+                                x:Name="C2_TestFluid"
+                                HorizontalAlignment="Stretch"
+                                ItemsSource="{Binding ScanModeList}"
+                                Value="{Binding ScanMode}"
+                                DisplayMemberPath="Display"
+                                ValuePath="Value" 
+                                DropDownResizeMode="None"
+                                DropDownClosed="TestFluid_DropDownClosed"
+                                />
+            <CheckBox x:Name="Button_C2_Fluid" Grid.Row="1" Grid.Column="2" Content="Iso/XL"  Style="{DynamicResource RxCommandButton}" Margin="10" Click="C2_IsoXL_Clicked" FontWeight="Bold"/>
+
+
+            <Grid Grid.Row="1" Grid.Column="3" x:Name="C2_Valves">
+                <StackPanel Orientation="Horizontal">
+                    <Image  Source="../../Resources/Bitmaps/LED_GREEN.ico" Visibility="{Binding TTS_Valve_C2,   Converter={StaticResource BoolToVisible_Converter}}" HorizontalAlignment="Left"/>
+                    <Image  Source="../../Resources/Bitmaps/LED_GREY.ico"  Visibility="{Binding TTS_Valve_C2,   Converter={StaticResource BoolToInVisible_Converter}}" HorizontalAlignment="Left"/>
+
+                </StackPanel>
+            </Grid>
+
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="Fluid Valves C3" />
+            <igWPF:XamComboEditor Grid.Row="2" Grid.Column="1"
+                                x:Name="C3_TestFluid"
+                                HorizontalAlignment="Stretch"
+                                ItemsSource="{Binding ScanModeList}"
+                                Value="{Binding ScanMode}"
+                                DisplayMemberPath="Display"
+                                ValuePath="Value" 
+                                DropDownResizeMode="None"
+                                DropDownClosed="TestFluid_DropDownClosed"
+                                />
+            <CheckBox x:Name="Button_C3_Fluid" Grid.Row="2" Grid.Column="2" Content="Iso/XL"  Style="{DynamicResource RxCommandButton}" Margin="10" Click="C3_IsoXL_Clicked" FontWeight="Bold"/>
+
+            <Grid Grid.Row="2" Grid.Column="3" x:Name="C3_Valves">
+                <StackPanel Orientation="Horizontal">
+                    <Image  Source="../../Resources/Bitmaps/LED_GREEN.ico" Visibility="{Binding TTS_Valve_C3,   Converter={StaticResource BoolToVisible_Converter}}" HorizontalAlignment="Left"/>
+                    <Image  Source="../../Resources/Bitmaps/LED_GREY.ico"  Visibility="{Binding TTS_Valve_C3,   Converter={StaticResource BoolToInVisible_Converter}}" HorizontalAlignment="Left"/>
+
+                </StackPanel>
+            </Grid>
+
+            <TextBlock Grid.Row="3" Grid.Column="0" Text="Fluid Valves C4" />
+            <igWPF:XamComboEditor Grid.Row="3" Grid.Column="1"
+                                x:Name="C4_TestFluid"
+                                HorizontalAlignment="Stretch"
+                                ItemsSource="{Binding ScanModeList}"
+                                Value="{Binding ScanMode}"
+                                DisplayMemberPath="Display"
+                                ValuePath="Value" 
+                                DropDownResizeMode="None"
+                                DropDownClosed="TestFluid_DropDownClosed"
+                                />
+            <CheckBox x:Name="Button_C4_Fluid" Grid.Row="3" Grid.Column="2" Content="Iso/XL"  Style="{DynamicResource RxCommandButton}" Margin="10" Click="C4_IsoXL_Clicked" FontWeight="Bold"/>
+
+            <Grid Grid.Row="3" Grid.Column="3" x:Name="C4_Valves">
+                <StackPanel Orientation="Horizontal">
+                    <Image  Source="../../Resources/Bitmaps/LED_GREEN.ico" Visibility="{Binding TTS_Valve_C4,   Converter={StaticResource BoolToVisible_Converter}}" HorizontalAlignment="Left"/>
+                    <Image  Source="../../Resources/Bitmaps/LED_GREY.ico"  Visibility="{Binding TTS_Valve_C4,   Converter={StaticResource BoolToInVisible_Converter}}" HorizontalAlignment="Left"/>
+
+                </StackPanel>
+            </Grid>
+
+            <Grid Grid.Row="4" Grid.Column="1" Margin="0,5,0,-4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <common:RxButton Grid.Column="0" Click="Save_Clicked" Height="40" IsChecked="{Binding ElementName=ParPanelMaterial, Path=Changed}">
+                    <Image Source="{StaticResource Yes_ico}"/>
+                </common:RxButton>
+
+            </Grid>
+
+        </Grid>
+    </GroupBox>
+</UserControl>

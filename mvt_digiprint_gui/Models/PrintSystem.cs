@@ -79,8 +79,9 @@ namespace RX_DigiPrint.Models
                 case EPrinterType.printer_test_slide_only:  return true;
                 case EPrinterType.printer_TX801:			return true;
 	            case EPrinterType.printer_TX802:			return true;
-                case EPrinterType.printer_TX404:            return true;
-	            default: return false;
+	            case EPrinterType.printer_TX404:            return true;
+	            case EPrinterType.printer_test_table_seon:  return true;
+                default: return false;
 	            }
             }
         }
@@ -99,7 +100,7 @@ namespace RX_DigiPrint.Models
                 }
             }
         }
-        
+
         //--- Property IsLb ---------------------------------------
         public bool IsLb
         {
@@ -170,6 +171,14 @@ namespace RX_DigiPrint.Models
                     _set_IS_Order();
                 }
             }
+        }
+
+        //--- Property TTS_simulation ---------------------------------------
+        private bool _TTS_simulation = false;
+        public bool TTS_simulation
+        {
+            get { return _TTS_simulation; }
+            set { SetProperty(ref _TTS_simulation, value); }
         }
 
         //--- Property LH702_simulation ---------------------------------------
@@ -341,7 +350,7 @@ namespace RX_DigiPrint.Models
             get { return _AllInkSupplies; }
             set { SetProperty(ref _AllInkSupplies, value); }
         }
-        
+
         //--- Property HeadDist ---------------------------------------
         private Int32[] _HeadFpVoltage;
         public Int32[] HeadFpVoltage
@@ -500,6 +509,7 @@ namespace RX_DigiPrint.Models
             RxGlobals.InkSupply.List[TcpIp.InkSupplyCnt+1].InkType = InkType.Waste;
 
             LH702_simulation = !msg.hostName.StartsWith("LH702");
+            TTS_simulation = !msg.hostName.StartsWith("TTS");
 
             HostName = msg.hostName;
 
@@ -515,7 +525,7 @@ namespace RX_DigiPrint.Models
             ColorCnt                = msg.colorCnt;
             InkCylindersPerColor    = msg.InkCylindersPerColor;
             HeadsPerColor           = msg.headsPerColor;
-            
+
             _HeadFpVoltage= new Int32[msg.headFpVoltage.Count()];
             for (i=0; i<_HeadFpVoltage.Count(); i++) _HeadFpVoltage[i]    = msg.headFpVoltage[i];
             this.OnPropertyChanged("HeadFpVoltage");

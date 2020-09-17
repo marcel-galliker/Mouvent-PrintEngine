@@ -391,7 +391,7 @@ int net_device_to_ipaddr(EDevice dev, int no, char *ipAddr, int size)
 	case dev_plc:	sprintf(ipAddr, RX_CTRL_PLC); 
 					break;
 
-	case dev_stepper:	if (rx_def_is_lb(RX_Config.printer.type))
+	case dev_stepper:	if (rx_def_is_lb(RX_Config.printer.type) || RX_Config.printer.type == printer_test_table_seon)
 						{
 							if (no<0 || no>3)
 							{

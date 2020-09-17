@@ -1,0 +1,64 @@
+﻿<helpers:CustomWindow x:Class="RX_DigiPrint.Views.UserControls.SetClusterNo"
+                      xmlns:helpers="clr-namespace:RX_DigiPrint.Helpers"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:RX_DigiPrint.Views.UserControls"
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             mc:Ignorable="d"
+             xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+             Title="Set Cluster Number"
+            SizeToContent="WidthAndHeight" MinHeight="200" MinWidth="400"
+            ResizeMode="NoResize">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="15" />
+            <ColumnDefinition Width="90" />
+            <ColumnDefinition Width="100" />
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock   Grid.Row="0" Margin="0, 10, 0, 5" Grid.Column="0" Grid.ColumnSpan="2" Text="Cluster 1 No:"/>
+        <common:MvtNumBox Grid.Row="0" Margin="0, 0, 0, 5" Grid.Column="2"
+                              Text="{Binding C1No}"
+                              HorizontalAlignment="Stretch" />
+        <CheckBox x:Name="Button_C1_Save" Grid.Row="0" Grid.Column="3" Content="Save"  Style="{DynamicResource RxCommandButton}" Margin="10" Click="C1_SaveNo" FontWeight="Bold"/>
+        <TextBlock  Grid.Row="0" Grid.Column="4" Name="ClusterNo1"/>
+
+        <TextBlock   Grid.Row="1" Margin="0, 10, 0, 5" Grid.Column="0" Grid.ColumnSpan="2" Text="Cluster 2 No:"/>
+        <common:MvtNumBox Grid.Row="1" Margin="0, 0, 0, 5" Grid.Column="2"
+                              Text="{Binding C2No}"
+                              HorizontalAlignment="Stretch" />
+        <CheckBox x:Name="Button_C2_Save" Grid.Row="1" Grid.Column="3" Content="Save"  Style="{DynamicResource RxCommandButton}" Margin="10" Click="C2_SaveNo" FontWeight="Bold"/>
+
+        <TextBlock   Grid.Row="2" Margin="0, 10, 0, 5" Grid.Column="0" Grid.ColumnSpan="2" Text="Cluster 3 No:"/>
+        <common:MvtNumBox Grid.Row="2" Margin="0, 0, 0, 5" Grid.Column="2"
+                              Text="{Binding C3No}"
+                              HorizontalAlignment="Stretch" />
+        <CheckBox x:Name="Button_C3_Save" Grid.Row="2" Grid.Column="3" Content="Save"  Style="{DynamicResource RxCommandButton}" Margin="10" Click="C3_SaveNo" FontWeight="Bold"/>
+
+        <TextBlock   Grid.Row="3" Margin="0, 10, 0, 5" Grid.Column="0" Grid.ColumnSpan="2" Text="Cluster 4 No:"/>
+        <common:MvtNumBox Grid.Row="3" Margin="0, 0, 0, 5" Grid.Column="2"
+                              Text="{Binding C4No}"
+                              HorizontalAlignment="Stretch" />
+        <CheckBox x:Name="Button_C4_Save" Grid.Row="3" Grid.Column="3" Content="Save"  Style="{DynamicResource RxCommandButton}" Margin="10" Click="C4_SaveNo" FontWeight="Bold"/>
+
+        <common:MvtButton Grid.Row="4" Grid.Column="2" Margin="10,0,10,0" ToolTip="Close"
+                          Click="Cancel_Clicked" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}">
+                            <iconPacks:PackIconMaterial VerticalAlignment="Center" HorizontalAlignment="Center"
+                                            Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 
+                                                Kind="Close"></iconPacks:PackIconMaterial>
+                        </common:MvtButton>
+
+    </Grid>
+</helpers:CustomWindow>
