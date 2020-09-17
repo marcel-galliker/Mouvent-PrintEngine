@@ -502,16 +502,12 @@ namespace RX_DigiPrint.Services
         public const UInt32 CMD_TT_ABORT            = 0x0100050c;
         public const UInt32 CMD_TT_SCAN_TRAY        = 0x0100050d;
 
-        public const UInt32 CMD_TTS_C1_ISOP_XL      = 0x01000510;
-        public const UInt32 CMD_TTS_C2_ISOP_XL      = 0x01000511;
-        public const UInt32 CMD_TTS_C3_ISOP_XL      = 0x01000512;
-        public const UInt32 CMD_TTS_C4_ISOP_XL      = 0x01000513;
-        public const UInt32 CMD_TTS_WASTE_VALVE     = 0x01000514;
-        public const UInt32 CMD_TTS_PUMP_JET_TRAY   = 0x01000515;
-        public const UInt32 CMD_TTS_PUMP_PURGE      = 0x01000516;
-        public const UInt32 CMD_TTS_JOG_FWD         = 0x01000517;
-        public const UInt32 CMD_TTS_JOG_BWD         = 0x01000518;
-        public const UInt32 CMD_TTS_JOG_STOP        = 0x01000519;
+        public const UInt32 CMD_TTS_WASTE_VALVE     = 0x01000510;
+        public const UInt32 CMD_TTS_PUMP_JET_TRAY   = 0x01000511;
+        public const UInt32 CMD_TTS_PUMP_PURGE      = 0x01000512;
+        public const UInt32 CMD_TTS_JOG_FWD         = 0x01000513;
+        public const UInt32 CMD_TTS_JOG_BWD         = 0x01000514;
+        public const UInt32 CMD_TTS_JOG_STOP        = 0x01000515;
         
 
         public const UInt32 CMD_TT_END              = 0x010005ff;

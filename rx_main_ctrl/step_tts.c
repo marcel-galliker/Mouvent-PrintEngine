@@ -16,6 +16,8 @@
 #include "drive_ctrl.h"
 #include "step_tts.h"
 
+static void _do_fluid_tts(RX_SOCKET socket, SValue* msg);
+
 #define STEPPER_CNT 3
 
 static RX_SOCKET		_step_socket[STEPPER_CNT] = { 0 };
@@ -90,10 +92,6 @@ int steptts_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen
             case CMD_LIFT_UP_POS:
             case CMD_TT_VACUUM:         if (no == 0)    sok_send_2(&_step_socket[no], cmd, 0, NULL); break;
             case CMD_LIFT_PRINT_POS:    if (no == 0)    sok_send_2(&_step_socket[no], cmd, sizeof(RX_Config.stepper.print_height), &RX_Config.stepper.print_height); break;
-            case CMD_TTS_C1_ISOP_XL:
-            case CMD_TTS_C2_ISOP_XL:    if (no == 1)    sok_send_2(&_step_socket[no], cmd, 0, NULL); break;
-            case CMD_TTS_C3_ISOP_XL:
-            case CMD_TTS_C4_ISOP_XL:    if (no == 2)    sok_send_2(&_step_socket[no], cmd, 0, NULL); break;
             case CMD_TT_SCAN_RIGHT:
                 drive_move_start();
                 break;
@@ -120,6 +118,7 @@ int steptts_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen
                 pos = *((INT32*)data);
                 sok_send_2(&_step_socket[0], cmd, sizeof(pos), &pos);
                 break;
+            case CMD_FLUID_TTS:			_do_fluid_tts(socket, (SValue*)data);						break;
 
             case CMD_TTS_JOG_FWD:
             case CMD_TTS_JOG_BWD:
@@ -151,8 +150,8 @@ int steptts_in_top_pos(void)
     return RX_StepperStatus.info.z_in_ref || RX_StepperStatus.info.z_in_up;
 }
 
-//--- do_fluid_tts -------------------------------------------
-void do_fluid_tts(RX_SOCKET socket, SValue* msg)
+//--- _do_fluid_tts -------------------------------------------
+static void _do_fluid_tts(RX_SOCKET socket, SValue* msg)
 {
     if (msg->no <= 1)
         sok_send_2(&_step_socket[1], CMD_FLUID_TTS, sizeof(*msg), msg);
