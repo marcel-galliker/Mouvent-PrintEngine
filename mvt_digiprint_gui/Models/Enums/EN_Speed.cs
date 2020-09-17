@@ -25,17 +25,14 @@ namespace RX_DigiPrint.Models.Enums
                 _MaxSpeed = (int)maxSpeed;
                 CUnit unit=new CUnit("m/min");
 
-                if (RxGlobals.PrinterProperties.Host_Name!=null && RxGlobals.PrinterProperties.Host_Name.Equals("DropWatcher")) 
+                if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX404 || RxGlobals.PrinterProperties.Host_Name!=null && RxGlobals.PrinterProperties.Host_Name.Equals("DropWatcher")) 
                 {
                     for (speed=1; speed<=_MaxSpeed; speed++)
                     {
                         _List.Add(new RxEnum<int>(speed,  string.Format("{0}", speed)));
                     }
                 }
-                else if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX801 
-                    ||   RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX802
-                    ||   RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_DP803
-                    )
+                else if (RxGlobals.PrintSystem.IsTx || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_DP803)
                 {
                     if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX801 && imgHeight<TX801_MIN_HEIGHT) maxSpeed = 85;
                     int[] speeds = RxGlobals.InkSupply.PrintingSpeed();

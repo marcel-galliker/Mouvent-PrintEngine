@@ -306,7 +306,7 @@ typedef struct
 
 	UINT32  shift_delay_tel;          // 0x0060 // 19 bit // strokes // pg delay in strokes for telegram pg (21um strokes) (only encoder 0)
 
-	UINT32  min_mark_len;            // 0x0064 // 19 bit // steps // minimal mark length in encoder steps 
+	UINT32  min_mark_len;            // 0x0064 // 19 bit // steps // minimal mark length in encoder increments 
 	
 	UINT32  ftc_ratio;            	 // 0x0068 // 27 bit // clk // 0 bits after binary point
 	UINT32  ftc_speed;            	 // 0x006c // 24 bit // strokes/clk // 31 bits after binary point

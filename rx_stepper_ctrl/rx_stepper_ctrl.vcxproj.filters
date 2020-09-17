@@ -94,6 +94,15 @@
     <ClCompile Include="tx80x_wd.c">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="tx404.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="tts_lift.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="tts_ink.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
     <ClCompile Include="comm.c">
       <Filter>Source files</Filter>
     </ClCompile>
@@ -187,6 +196,15 @@
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="tx80x_wd.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="tx404.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="tts_lift.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="tts_ink.h">
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="comm.h">

@@ -75,6 +75,7 @@ namespace RX_DigiPrint.Views.UserControls
                     RxGlobals.StepperStatus[i].PropertyChanged += Stepper_PropertyChanged;
                 }
             }
+            PrinterType_changed();
         }
 
         //--- Network_CollectionChanged -----------------------------------------------------------
@@ -142,29 +143,31 @@ namespace RX_DigiPrint.Views.UserControls
         //--- PrintSystem_PropertyChanged -----------------------------------
         private void PrintSystem_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (e.PropertyName.Equals("PrinterType"))
-            {
-                Visibility visibility;
+            if (e.PropertyName.Equals("PrinterType")) PrinterType_changed();
+        }
+
+        private void PrinterType_changed()
+        {
+            Visibility visibility;
                 
-                visibility = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf) ? Visibility.Visible : Visibility.Collapsed;
-                Leds_DripPans.Visibility      = visibility;
-                LaserTX.Visibility            = visibility; 
-                LaserVal.Visibility           = visibility;
-                Button_Cap.Visibility         = (RxGlobals.PrintSystem.PrinterType!=EPrinterType.printer_cleaf) ? Visibility.Visible : Visibility.Collapsed;
+            visibility = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf) ? Visibility.Visible : Visibility.Collapsed;
+            Leds_DripPans.Visibility      = visibility;
+            LaserTX.Visibility            = visibility; 
+            LaserVal.Visibility           = visibility;
+            Button_Cap.Visibility         = (RxGlobals.PrintSystem.PrinterType!=EPrinterType.printer_cleaf) ? Visibility.Visible : Visibility.Collapsed;
 
-                visibility = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_DP803) ? Visibility.Visible : Visibility.Collapsed;
-                Button_DripPans.Visibility    = visibility;
+            visibility = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_DP803) ? Visibility.Visible : Visibility.Collapsed;
+            Button_DripPans.Visibility    = visibility;
+            
+		    visibility = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_DP803) ? Visibility.Visible : Visibility.Collapsed;
+            Button_DripPansCAP.Visibility = visibility;
+            Button_DripPansREF.Visibility = visibility;
+            Button_Fill.Visibility        = visibility;
+            Button_Empty.Visibility       = visibility;
 
-                visibility = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_DP803) ? Visibility.Visible : Visibility.Collapsed;
-                Button_DripPansCAP.Visibility = visibility;
-                Button_DripPansREF.Visibility = visibility;
-                Button_Fill.Visibility        = visibility;
-                Button_Empty.Visibility       = visibility;
-
-                RefSensors.Visibility = (RxGlobals.PrintSystem.IsTx || RxGlobals.PrintSystem.IsCLEAF) ? Visibility.Visible : Visibility.Collapsed;
-                for (int i=0; i<STEPPER_CNT; i++)
-                    _RefDone[i].Visibility   = (RxGlobals.PrintSystem.IsTx || RxGlobals.PrintSystem.IsCLEAF) ? Visibility.Collapsed : Visibility.Visible;
-            }   
+            RefSensors.Visibility = (RxGlobals.PrintSystem.IsTx || RxGlobals.PrintSystem.IsCLEAF) ? Visibility.Visible : Visibility.Collapsed;
+            for (int i=0; i<STEPPER_CNT; i++)
+                _RefDone[i].Visibility   = (RxGlobals.PrintSystem.IsTx || RxGlobals.PrintSystem.IsCLEAF) ? Visibility.Collapsed : Visibility.Visible;
         }
 
         //--- CapStop_clicked -------------------------------------------
@@ -226,7 +229,7 @@ namespace RX_DigiPrint.Views.UserControls
                 {
                     if (RxGlobals.StepperStatus[i].RobotUsed) RobotUsed = true;
                 }
-                if (RobotUsed)
+                if (RobotUsed || RxGlobals.PrintSystem.IsTx)
                 {
                     TcpIp.SFluidCtrlCmd msg = new TcpIp.SFluidCtrlCmd();
                     msg.no       = -1;

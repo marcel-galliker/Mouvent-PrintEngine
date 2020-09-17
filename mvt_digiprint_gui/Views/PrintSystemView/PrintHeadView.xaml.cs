@@ -111,8 +111,17 @@ namespace RX_DigiPrint.Views.PrintSystemView
             Button_PurgeHard.Visibility = collapsed;
             Button_PurgeSoft.Visibility = collapsed;
             Button_PurgeMicro.Visibility = collapsed;
+            visible = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_table_seon) ? Visibility.Visible : Visibility.Collapsed;
+            Button_ToggleMeniscus.Visibility = visible;
 //          Button_Wipe.Visibility  = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX801 || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_TX802) ? Visibility.Visible : Visibility.Collapsed;
             Grid.RowDefinitions[1].Height = new GridLength(25/RxGlobals.Screen.Scale);
+            visible = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_table_seon) ? Visibility.Visible : Visibility.Collapsed;
+            collapsed = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_table_seon) ? Visibility.Collapsed : Visibility.Visible;
+            Cooler_Pres.Visibility = visible;
+            Cooler_Temp.Visibility = visible;
+            ClusterNo.Visibility = visible;
+            Temp_Head.Visibility = collapsed;
+            Temp_Head_Rec.Visibility = collapsed;
         }
         
         //--- FpVoltage_TextChanged -----------------------------------------
@@ -174,5 +183,6 @@ namespace RX_DigiPrint.Views.PrintSystemView
  //       private void Drain_Clicked      (object sender, RoutedEventArgs e) {_command(EFluidCtrlMode.ctrl_drain);        }
         private void Flush_Clicked      (object sender, RoutedEventArgs e) {_command("Flush", EFluidCtrlMode.ctrl_flush_night);   }
         private void Wipe_Clicked       (object sender, RoutedEventArgs e) {_command(null, EFluidCtrlMode.ctrl_wipe);             }
+        private void ToggleMeniscus_Clicked(object sender, RoutedEventArgs e){_command(null, EFluidCtrlMode.ctrl_toggle_meniscus);}
     }
 }

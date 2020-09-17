@@ -53,7 +53,7 @@ namespace RX_DigiPrint.Services
                 d.field = field;
                 d.handle = restdata.Count.ToString();
                 restdata.Add(d);
-                dataBy["var=" + d.id] = d;
+                dataBy["var=" + d.id.ToLower()] = d;
                 dataBy["handles=" + d.handle] = d;
             }
 
@@ -186,7 +186,7 @@ namespace RX_DigiPrint.Services
                             if (key == "var" || key == "handles")
                             {
                                 Data p = null;
-                                foreach (String i in coll[key].Split(','))
+                                foreach (String i in coll[key].ToLower().Split(','))
                                 {
                                     if (dataBy.ContainsKey(key + "=" + i))
                                     {

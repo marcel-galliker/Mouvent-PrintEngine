@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              mc:Ignorable="d" 
              d:DesignHeight="200" d:DesignWidth="1000">
 
@@ -53,7 +54,7 @@
                         <ColumnDefinition Width="56*"/>
                         <ColumnDefinition Width="28*"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock x:Name="TX_DirUW" Grid.Row="1" Grid.Column="1" Text="O" VerticalAlignment="Center" HorizontalAlignment="Center" FontFamily="Wingdings 3" FontSize="60" />
+                    <iconPacks:PackIconModern x:Name="Icon_DirUW" Grid.Row="1" Grid.Column="1" Kind="TransformRotateClockwise"  Width="50" Height="50" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                 </Grid>
 
                 <Grid Grid.Column="1" Grid.Row="1" Margin="5,0">
@@ -205,7 +206,7 @@
                         <ColumnDefinition Width="56*"/>
                         <ColumnDefinition Width="27*"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock x:Name="TX_DirRW" Grid.Row="1" Grid.Column="1" Text="O" VerticalAlignment="Center" HorizontalAlignment="Center" FontFamily="Wingdings 3" FontSize="60" />
+                    <iconPacks:PackIconModern x:Name="Icon_DirRW" Grid.Row="1" Grid.Column="1" Kind="TransformRotateClockwise"  Width="50" Height="50" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                 </Grid>
             </Grid>
         </Grid>

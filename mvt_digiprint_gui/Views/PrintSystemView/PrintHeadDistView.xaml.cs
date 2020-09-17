@@ -76,6 +76,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
             case EPrinterType.printer_DP803:    _AdjustmentSupported = true;  break;
             case EPrinterType.printer_TX801:    _AdjustmentSupported = true;  _Reverse=true; break;
             case EPrinterType.printer_TX802:    _AdjustmentSupported = true;  _Reverse=true; break;
+            case EPrinterType.printer_TX404:    _AdjustmentSupported = true;  _Reverse=true; break;
             case EPrinterType.printer_CB612: _AdjustmentSupported = true; break; 
 
             default:                            _AdjustmentSupported = false; break;
@@ -344,7 +345,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 case EPrinterType.printer_test_table:   visible=Visibility.Visible;     Border.Height=160; _Reverse=false;
                                                         break;
                 case EPrinterType.printer_TX801:
-                case EPrinterType.printer_TX802:        visible=Visibility.Visible;     Border.Height=160; _Reverse=true;
+                case EPrinterType.printer_TX802:        
+                case EPrinterType.printer_TX404:        visible=Visibility.Visible;     Border.Height=160; _Reverse=true;
                                                         break;
                 default:                                visible=Visibility.Collapsed;   Border.Height=140; _Reverse=false; break;
             }

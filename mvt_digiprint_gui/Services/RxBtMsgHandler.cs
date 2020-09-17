@@ -164,7 +164,7 @@ namespace RX_DigiPrint.Services
             _printerState       = msg.state;
             msg.colorCnt        = RxGlobals.PrintSystem.ColorCnt;
             msg.headsPerColor   = RxGlobals.PrintSystem.HeadsPerColor;
-            if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX801 || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX802)
+            if (RxGlobals.PrintSystem.IsTx)
                  msg.reverse = 1;
             else msg.reverse = 0;
 

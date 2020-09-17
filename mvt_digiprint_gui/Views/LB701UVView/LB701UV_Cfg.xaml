@@ -29,6 +29,7 @@
                             <rx_uc:PlcParCtrl ID="STA_REWINDER_SENSOR_DIST"     Label="Rewinder Dist"      Unit="mm" Format="n" IsEnabled="False" />
                             <!-- <rx_uc:PlcParCtrl ID="STA_REWINDER_SENSOR_DIST_MAX" Label="Rewinder Dist MAX"  Unit="mm" Format="n" IsEnabled="False" /> -->
                             <rx_uc:PlcParCtrl ID="CFG_REWINDER_SENSOR_DIST"     Label="Rewinder Dist"      Unit="mm" Type="Combo" UserEnabled="usr_service" x:Name="CB_Dist"/>
+                            <rx_uc:PlcParCtrl ID="CFG_DIECUT"   Label="Die Cutter" Type="Combo" x:Name="CB_DieCut" />
                         </rx_uc:PlcParPanel>
                     </ScrollViewer>
 

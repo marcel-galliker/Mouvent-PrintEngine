@@ -47,11 +47,11 @@ static SMovePar	_ParZ_down;
 static SMovePar	_ParZ_cap;
 static int		_PrintPos_New=0;
 static int		_PrintPos_Act=0;
-static int		_CapHight = -8700;
-static int		_WashHight = -7200;
-static int		_WipeHight = -7700;
-static int		_VacuumHight = -8400;
-static int		_VacuumHight_High = -6800;
+static int		_CapHeight = -8700;
+static int		_WashHeight = -7200;
+static int		_WipeHeight = -7700;
+static int		_VacuumHeight = -8400;
+static int		_VacuumHeight_High = -6800;
 
 static int		_VentCtrl;
 static int		_VentCtrlDelay=0;
@@ -301,10 +301,10 @@ int tx801_menu(void)
 	term_printf("v: set ventilator (%)\n");	
 	term_printf("t<n>: test move down n in tenth of millimeter in absolute position from ref position\n");
 	term_printf("m<n><steps>: move Motor<n> by <steps>\n");	
-	term_printf("c: move to capping hight  %03d.%d         C<n>: set capping hight in absolute position from ref position\n",  _CapHight/10, _CapHight%10);
-	term_printf("e: move to wash hight	   %03d.%d         E<n>: set wash hight in absolute position from ref position\n", _WashHight / 10, _WashHight % 10);
-	term_printf("w: move to wipe hight     %03d.%d         W<n>: set wipe hight in absolute position from ref position\n",	   _WipeHight/10, _WipeHight%10);
-	term_printf("a: move to vacuum hight   %03d.%d         A<n>: set vacuum hight in absolute position from ref position\n",   _VacuumHight/10, _VacuumHight%10);
+	term_printf("c: move to capping height  %03d.%d         C<n>: set capping hight in absolute position from ref position\n",  _CapHeight/10, _CapHeight%10);
+	term_printf("e: move to wash height	    %03d.%d         E<n>: set wash hight in absolute position from ref position\n", _WashHeight / 10, _WashHeight % 10);
+	term_printf("w: move to wipe height     %03d.%d         W<n>: set wipe hight in absolute position from ref position\n",	   _WipeHeight/10, _WipeHeight%10);
+	term_printf("a: move to vacuum height   %03d.%d         A<n>: set vacuum hight in absolute position from ref position\n",   _VacuumHeight/10, _VacuumHeight%10);
 	term_printf("x: exit\n");
 	term_printf(">");
 	term_flush();
@@ -318,20 +318,20 @@ int tx801_menu(void)
 		case 'r': motor_reset(atoi(&str[1]));												break;
 		//case 'c': tx801_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_CAPPING_POS,	NULL);		break;
 		case 'p': tx801_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_PRINT_POS,		&pos);		break;
-		case 'u': tx801_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_UP_POS,			NULL);		break;
+	case 'u': tx801_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_UP_POS,			NULL);		break;
 		case 'z': _tx801_motor_z_test(atoi(&str[1]));										break;
 		case 'm': _tx801_motor_test(str[1]-'0', atoi(&str[2]));								break;			
 		case 'v': _VentCtrl = (atoi(&str[1])==0);
 				  _tx801_set_ventilators(atoi(&str[1]));									break;
 		case 't': _tx801_motor_down(INVALID_SOCKET, CMD_LIFT_CAPPING_POS, atoi(&str[1]));	break;
-		case 'c': _tx801_motor_down(INVALID_SOCKET, CMD_LIFT_CAPPING_POS, _CapHight);		break;
-		case 'e': _tx801_motor_down(INVALID_SOCKET, CMD_LIFT_CAPPING_POS, _WashHight);		break;
-		case 'w': _tx801_motor_down(INVALID_SOCKET, CMD_LIFT_CAPPING_POS, _WipeHight);		break;
-		case 'a': _tx801_motor_down(INVALID_SOCKET, CMD_LIFT_CAPPING_POS, _VacuumHight);	break;
-		case 'C': _CapHight = atoi(&str[1]);												break;
-		case 'E': _WashHight = atoi(&str[1]);											break;
-		case 'W': _WipeHight = atoi(&str[1]);												break;
-		case 'A': _VacuumHight = atoi(&str[1]);												break;
+		case 'c': _tx801_motor_down(INVALID_SOCKET, CMD_LIFT_CAPPING_POS, _CapHeight);		break;
+		case 'e': _tx801_motor_down(INVALID_SOCKET, CMD_LIFT_CAPPING_POS, _WashHeight);		break;
+		case 'w': _tx801_motor_down(INVALID_SOCKET, CMD_LIFT_CAPPING_POS, _WipeHeight);		break;
+		case 'a': _tx801_motor_down(INVALID_SOCKET, CMD_LIFT_CAPPING_POS, _VacuumHeight);	break;
+		case 'C': _CapHeight = atoi(&str[1]);												break;
+		    case 'E': _WashHeight = atoi(&str[1]);											break;
+		case 'W': _WipeHeight = atoi(&str[1]);												break;
+	case 'A': _VacuumHeight = atoi(&str[1]);												break;
 		case 'x': return FALSE;
 		}
 	}
@@ -452,7 +452,7 @@ int  tx801_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									{
 										RX_StepperStatus.cmdRunning  = msgId;
 										RX_StepperStatus.info.moving = TRUE;
-										steps = _micron_2_steps(TX_REF_HEIGHT - _CapHight);
+										steps = _micron_2_steps(TX_REF_HEIGHT - _CapHeight);
 										motors_move_to_step	(MOTOR_Z_BITS,  &_ParZ_cap, steps);
 									}
 									break;
@@ -461,7 +461,7 @@ int  tx801_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									{
 										RX_StepperStatus.cmdRunning  = msgId;
 										RX_StepperStatus.info.moving = TRUE;
-										steps = _micron_2_steps(TX_REF_HEIGHT - _WashHight);
+										steps = _micron_2_steps(TX_REF_HEIGHT - _WashHeight);
 										motors_move_to_step(MOTOR_Z_BITS, &_ParZ_down, steps);
 									}
 									break;
@@ -470,7 +470,7 @@ int  tx801_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									{
 										RX_StepperStatus.cmdRunning = msgId;
 										RX_StepperStatus.info.moving = TRUE;
-										steps = _micron_2_steps(TX_REF_HEIGHT - _WipeHight);
+										steps = _micron_2_steps(TX_REF_HEIGHT - _WipeHeight);
 										motors_move_to_step(MOTOR_Z_BITS, &_ParZ_down, steps);
 									}
 									break;
@@ -479,7 +479,7 @@ int  tx801_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									{
 										RX_StepperStatus.cmdRunning = msgId;
 										RX_StepperStatus.info.moving = TRUE;
-										steps = _micron_2_steps(TX_REF_HEIGHT - _VacuumHight);
+										steps = _micron_2_steps(TX_REF_HEIGHT - _VacuumHeight);
 										motors_move_to_step(MOTOR_Z_BITS, &_ParZ_down, steps);
 									}
 									break;
@@ -488,7 +488,7 @@ int  tx801_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									{
 										RX_StepperStatus.cmdRunning = msgId;
 										RX_StepperStatus.info.moving = TRUE;
-										steps = _micron_2_steps(TX_REF_HEIGHT - _VacuumHight_High);
+										steps = _micron_2_steps(TX_REF_HEIGHT - _VacuumHeight_High);
 										motors_move_to_step(MOTOR_Z_BITS, &_ParZ_down, steps);
 									}
 									break;

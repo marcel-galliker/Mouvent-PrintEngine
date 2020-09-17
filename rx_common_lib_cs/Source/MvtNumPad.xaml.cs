@@ -10,7 +10,6 @@ namespace RX_Common
 {
     public partial class MvtNumPad : Window, INotifyPropertyChanged
     {
-        private Button _TouchedButton;
         private double _OrgValue;
         private Point _Position;
         private double _ObjWidth = 0;
@@ -81,12 +80,6 @@ namespace RX_Common
             Canvas.SetTop(Pad, top);
         }
 
-        //--- _Tick ------------------------------------------
-        private void _Tick(object o)
-        {
-            if (_TouchedButton != null) button_clicked(_TouchedButton, null);
-        }
-
         //--- Property result ------------------------------------------------
         private string _result = "0";
         public string Result
@@ -118,7 +111,6 @@ namespace RX_Common
                 _Time = Environment.TickCount;
             }
             Button button = sender as Button;
-            _TouchedButton = null;
             if (button == null) return;
             if (button.CommandParameter == null) _handle_key(button.Content.ToString());
             else _handle_key(button.CommandParameter.ToString());
@@ -187,8 +179,7 @@ namespace RX_Common
         //--- special for the first touch ---------------------------------------------
         private void Window_TouchUp(object sender, System.Windows.Input.TouchEventArgs e)
         {
-            _TouchedButton = e.Source as Button;
-			new Timer(_Tick, null, 50, 0);
+            button_clicked(e.Source, null);
         }
 
         private void Rectangle_GiveFeedback(object sender, GiveFeedbackEventArgs e)

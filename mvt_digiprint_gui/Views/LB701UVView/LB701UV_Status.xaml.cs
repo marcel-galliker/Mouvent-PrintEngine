@@ -24,7 +24,7 @@ namespace RX_DigiPrint.Views.LB701UVView
         void StatusPanel_Update()
         {
             double timer  = Rx.StrToDouble(RxGlobals.Plc.GetVar(StatusPanel.UnitID, "STA_UV_LAMP_1_TIMER"));
-            string ready    = RxGlobals.Plc.GetVar(StatusPanel.UnitID, "STA_UV_LAMPS_READY");
+            string ready  = RxGlobals.Plc.GetVar(StatusPanel.UnitID, "STA_UV_LAMPS_READY");
 
             if      (timer>0)               CuringLamp.Text = string.Format("{0} ON",  timer);
             else if (timer<0)               CuringLamp.Text = string.Format("{0} OFF", -timer);

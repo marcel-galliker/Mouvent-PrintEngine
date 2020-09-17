@@ -21,6 +21,8 @@
 #include "ctrl_svr.h"
 #include "step_cleaf.h"
 #include "fluid_ctrl.h"
+#include "step_tts.h"
+#include "drive_ctrl.h"
 
 
 #define CAPPING_TIMEOUT	(20*60*1000)	// ms 
@@ -31,6 +33,7 @@ typedef enum
 	mi_none,
 	mi_plc,
 	mi_tt,
+	mi_tts,
 } EMachineInterface;
 
 static EMachineInterface _MInterface = mi_none;
@@ -43,9 +46,11 @@ static void set_interface(void)
 	case printer_test_slide:		_MInterface=mi_none;	break;
 	case printer_test_slide_only:	_MInterface=mi_none;	break;
 	case printer_test_table:		_MInterface=mi_tt;		break;
+	case printer_test_table_seon:	_MInterface=mi_tts;		break;
 	case printer_cleaf:				_MInterface=mi_plc;		break;
 	case printer_TX801:				_MInterface=mi_plc;		break;
 	case printer_TX802:				_MInterface=mi_plc;		break;
+	case printer_TX404:				_MInterface=mi_plc;		break;
 	case printer_LB701:				_MInterface=mi_plc;		break;
 	case printer_LB702_UV:			_MInterface=mi_plc;		break;
 	case printer_LB702_WB:			_MInterface=mi_plc;		break;
@@ -59,6 +64,7 @@ static void set_interface(void)
 int		machine_init(void)
 {
 	plc_init();
+    drive_init();
 	lh702_init();
 	set_interface();
 	return REPLY_OK;
@@ -77,6 +83,8 @@ int		machine_tick(void)
 {
 	if(rx_def_is_tx(RX_Config.printer.type))
 	{
+		if (RX_StepperStatus.info.z_in_cap) _CappingTimer = 0;  // reset timer if already in cap
+
 		if (_CappingTimer>0 && _CappingTimer<rx_get_ticks())
 		{
 			_CappingTimer=0;
@@ -86,7 +94,6 @@ int		machine_tick(void)
 	}
 	return REPLY_OK;
 }
-
 
 //--- machine_reset --------------------------------
 void machine_reset(void)
@@ -104,6 +111,8 @@ void	machine_error_reset(void)
 	ctrl_head_error_reset();
 	step_error_reset();
 	enc_error_reset();
+    tts_error_reset();
+    drive_error_reset();
 }
 
 //--- machine_set_printpar -----------------------
@@ -120,6 +129,8 @@ int		machine_set_printpar(SPrintQueueItem *pItem)
 	{
 	case mi_none:	return enc_start_printing (pItem, FALSE);
 	case mi_tt:		return tt_set_printpar(pItem);
+	case mi_tts:	return drive_set_printbar(pItem);
+        //return enc_start_printing(pItem, FALSE); // drive_set_printbar(pItem);
 	case mi_plc:	return plc_set_printpar(pItem);
 	}
 	return REPLY_OK;
@@ -132,6 +143,7 @@ int		machine_set_scans(int scans)
 	{
 	case mi_none:	return REPLY_OK;
 	case mi_tt:		return tt_set_scans(scans);
+	case mi_tts:	return REPLY_OK;
 	case mi_plc:	return REPLY_OK;
 	}
 	return REPLY_OK;
@@ -145,6 +157,8 @@ UINT32	machine_get_scanner_pos(void)
 	{
 	case mi_none:	return REPLY_OK;
 	case mi_tt:		return tt_get_scanner_pos();
+	case mi_tts:
+			return drive_get_scanner_pos();
 	case mi_plc:	return plc_get_scanner_pos();
 	}
 	return REPLY_OK;
@@ -160,6 +174,10 @@ int		machine_start_printing(void)
 	{
 	case mi_none:	return REPLY_OK;
 	case mi_tt:		return tt_start_printing();
+	case mi_tts:
+        return drive_start_printing();
+        //return REPLY_OK;
+        //drive_start_printing();
 	case mi_plc:	return plc_start_printing();
 	}
 	return REPLY_OK;
@@ -186,6 +204,7 @@ int		machine_stop_printing(void)
 	{
 	case mi_none:	return enc_stop_printing();
 	case mi_tt:		return tt_stop_printing();
+	case mi_tts:    return enc_stop_printing(); // drive_stop_printing();
 	case mi_plc:	return plc_stop_printing();
 	}
 	return REPLY_OK;
@@ -199,6 +218,7 @@ int		machine_abort_printing(void)
 	{
 	case mi_none:	return enc_abort_printing();
 	case mi_tt:		return tt_abort_printing();
+	case mi_tts:    return enc_abort_printing();//drive_abort_printing();
 	case mi_plc:	// if (!rx_def_is_scanning(RX_Config.printer.type)) step_handle_gui_msg(INVALID_SOCKET, CMD_LIFT_UP_POS, NULL, 0);
 					step_abort_printing();
 					return plc_abort_printing();
@@ -213,6 +233,7 @@ int		machine_clean(void)
 	{
 	case mi_none:	return REPLY_OK;
 	case mi_tt:		return tt_clean();
+	case mi_tts:	return REPLY_OK;
 	case mi_plc:	return plc_clean();
 	}
 	return REPLY_OK;

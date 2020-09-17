@@ -245,7 +245,7 @@ int flz_load(SPageId *id, const char *filedir, const char *filename, int printMo
 	char filepath[MAX_PATH];
 	BYTE* dst;
 
-	TrPrintfL(TRUE, "flz_load(%s%s)", filedir, filename);
+//	TrPrintfL(TRUE, "flz_load(%s)", filedir);
 
 	int	wakeupOn;
 	wakeupOn = FALSE;
@@ -359,11 +359,13 @@ int flz_load(SPageId *id, const char *filedir, const char *filename, int printMo
 			pinfo->lengthPx += 2*wul;
 			pinfo->dataSize = pinfo->lengthPx * pinfo->lineLen; 
 			
+			/*
 			// Bug in FPGA: (when srcLineCnt==12300, gap=0 it sometimes prints an additional line of old data [instead of blank] between the labels)
 			if (rx_def_is_lb(RX_Spooler.printerType))		
 			{
-				memset(buffer[c]+pinfo->dataSize-pinfo->lineLen, 0x00, pinfo->lineLen);
+				memset(buffer[c]+pinfo->dataSize, 0x00, pinfo->lineLen);
 			}
+			*/
 
 		//  TrPrintfL(TRUE, "DECOMPRESSING >>%s<<, page %d, time=%d ms", filepath, id->page, rx_get_ticks()-time);
 		}

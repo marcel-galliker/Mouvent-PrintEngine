@@ -482,6 +482,7 @@ namespace RX_DigiPrint.Views.UserControls
                                         case 'h': _Value = string.Format("{0:X}", Convert.ToInt64(value)); break;
                                         case 'f': _Value = Rx.StrNumFormat(value, 3, factor); break;
                                         case '1': _Value = Rx.StrNumFormat(value, digits, factor); break;
+                                        case '2': _Value = Rx.StrNumFormat(value, 2, factor); break;
                                         case 'n': _Value = Rx.StrNumFormat(value, 0, factor); break;
                                         case 'l': _Value = value.Replace(';', '\n'); break;
                                         default: _Value = value; break;
@@ -529,7 +530,7 @@ namespace RX_DigiPrint.Views.UserControls
                         else 
                         {
                             string val=TextEditCtrl.Text;
-                            if (_Format == 'n' || _Format == 'f' || _Format == '1')
+                            if (_Format == 'n' || _Format == 'f' || _Format == '1' || _Format=='2')
                             {   // remove formatting spaces, commas (very special!)
                                 for (int i=0; i<val.Length; )
                                 {

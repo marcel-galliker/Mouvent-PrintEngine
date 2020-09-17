@@ -212,7 +212,8 @@ int	tw8_config(int chip, int speed_mminn, EPrinterType printerType)
 	cfg.MAIN_DSM.calmp		= 0x00; // 1bit // PWM Generator Clamping
 	
 	// cfg.MAIN_INTER
-	if(rx_def_is_scanning(printerType))	cfg.MAIN_INTER	= 2000; // 16bit // AB Output Resolution in Edges
+	if (printerType==printer_TX404)				cfg.MAIN_INTER	=   40; // 16bit // AB Output Resolution in Edges
+	else if(rx_def_is_scanning(printerType))	cfg.MAIN_INTER	= 2000; // 16bit // AB Output Resolution in Edges
 	else								cfg.MAIN_INTER	= 1000; // 16bit // AB Output Resolution in Edges
 	
 	// cfg.MAIN_HYST

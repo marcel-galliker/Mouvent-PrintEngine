@@ -71,7 +71,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
                                                             ManualFlightTimeComp.Visibility = Visibility.Collapsed;
                                                             break;
                 case EPrinterType.printer_TX801:            
-                case EPrinterType.printer_TX802:            this.Visibility         = Visibility.Visible;
+                case EPrinterType.printer_TX802:
+                case EPrinterType.printer_TX404:            this.Visibility         = Visibility.Visible;
                                                             Encoder.Visibility      = Visibility.Visible;
                                                             Angle.Visibility        = Visibility.Collapsed; 
                                                             Belt.Visibility         = Visibility.Visible; 

@@ -342,6 +342,10 @@ static void _display_mvteeprom(void)
 	};		
 	term_printf("\n");
 
+	term_printf("clusterNo:        "); PRINTF(4)("%12d    ", RX_HBStatus->head[no[i]].eeprom_mvt.clusterNo);		 term_printf("\n");
+	term_printf("flowResistance:   "); PRINTF(4)("%12d    ", RX_HBStatus->head[no[i]].eeprom_mvt.flowResistance); term_printf("\n");
+	term_printf("dropletsPrinted:  "); PRINTF(4)("%12lld    ", RX_HBStatus->head[no[i]].eeprom_mvt.dropletsPrinted);term_printf("\n");
+
 	term_printf("Voltage:         "); PRINTF(4)("          %03d   ",	RX_HBStatus->head[no[i]].eeprom_mvt.voltage);	term_printf("\n");
 	for (n=0; n<MAX_DENSITY_VALUES; n++)
 	{
@@ -529,7 +533,6 @@ void putty_display_cond_status(int status)
 	char line[90] = {0};
 	SHeadEEpromMvt mem;
 	static const char ERR[2] = { '.', 'X' };
-	static const char VALVE_NAME[2][6] = { "FLUSH", "  INK" };
 	static const char STATUS_STRING[2][9] = { " enabled", "disabled" };
 
 	int no[MAX_HEADS_BOARD];
@@ -626,29 +629,6 @@ void putty_display_cond_status(int status)
 			term_printf("%14s  ", str);		
 		}
 		term_printf("\n");
-
-		if (status)
-		{
-			term_printf("Pressure in ID:  "); 
-			for (i=0; i<MAX_HEADS_BOARD; i++)
-			{
-				UCHAR *id=(UCHAR*)&RX_HBStatus->head[no[i]].presIn_ID;
-			
-				sprintf(str, "%d.%d.%d.%d", id[0], id[1], id[2], id[3]);
-				term_printf(" %14s ", str);
-			}
-			term_printf("\n");
-
-			term_printf("Pressure out ID: "); 
-			for (i=0; i<MAX_HEADS_BOARD; i++)
-			{
-				UCHAR *id=(UCHAR*)&RX_HBStatus->head[no[i]].presOut_ID;
-			
-				sprintf(str, "%d.%d.%d.%d", id[0], id[1], id[2], id[3]);
-				term_printf(" %14s ", str);
-			}
-			term_printf("\n");
-		}	
 		
 		term_printf("Pressure in:     "); 
     	{
@@ -660,6 +640,16 @@ void putty_display_cond_status(int status)
 					l  += sprintf(&str[l], "~%4s", value_str1(RX_HBStatus->head[no[i]].presIn_diff));
 				else
 					l  += sprintf(&str[l], "^%4s", value_str1(RX_HBStatus->head[no[i]].presIn_max));
+				term_printf("%15s ", str);
+			}
+			term_printf("\n");
+    	}
+		term_printf("Pressure in2:     "); 
+    	{
+			int i, l;
+			for (i=0; i<MAX_HEADS_BOARD; i++)
+			{
+				l   = sprintf(str, "%4s ", value_str1(_NiosMem->stat.cond[no[i]].pressure_in2));
 				term_printf("%15s ", str);
 			}
 			term_printf("\n");
@@ -706,7 +696,7 @@ void putty_display_cond_status(int status)
 		}
 		
 //		PRINTF(MAX_HEADS_BOARD)("     %3s(%3s)%c ", value_str1(RX_HBStatus->head[i].meniscus), value_str1(_NiosMem->cfg.cond[i].pressure_out), ERR[_NiosMem->stat.cond[i].error.meniscus]); term_printf("\n");
-    	term_printf("Valve:           "); PRINTF(MAX_HEADS_BOARD)("          %5s ", VALVE_NAME[RX_NiosStat.cond[no[i]].info.valve]); term_printf("\n");
+    	term_printf("Valve:           "); PRINTF(MAX_HEADS_BOARD)("        f=%d i=%d ", RX_NiosStat.cond[no[i]].info.valve_flush, RX_NiosStat.cond[no[i]].info.valve_ink); term_printf("\n");
     	term_printf("Printed [ml/min]:"); PRINTF(MAX_HEADS_BOARD)("       %8s ", value_str3(_NiosMem->cfg.cond[no[i]].volume_printed * 60)); term_printf("\n");			
 		term_printf("Pump [ml/min]:   "); PRINTF(MAX_HEADS_BOARD)("    %5s(%4d) ", value_str1(RX_HBStatus->head[no[i]].pumpFeedback), RX_NiosStat.cond[no[i]].pump); term_printf("\n");
 		term_printf("Flow Factor:     "); PRINTF(MAX_HEADS_BOARD)("       %8s ", value_str(RX_HBStatus->head[no[i]].flowFactor)); term_printf("\n");
@@ -750,7 +740,7 @@ void putty_display_cond_status(int status)
 							
 		if (status)	{term_printf("Heater   pg/flg:   "); PRINTF(MAX_HEADS_BOARD)("            %d/%d ", RX_NiosStat.cond[no[i]].gpio_state.heater_pg, RX_NiosStat.cond[no[i]].gpio_state.heater_flg); term_printf("\n");}
 		if (status)	{term_printf("24V      pg/flg:   "); PRINTF(MAX_HEADS_BOARD)("            %d/%d ", RX_NiosStat.cond[no[i]].gpio_state.u_24v_pg, RX_NiosStat.cond[no[i]].gpio_state.u_24v_flg); term_printf("\n");}
-		if (status)	{term_printf("Solenoid/Watchdog: "); PRINTF(MAX_HEADS_BOARD)("            %d/%d ", RX_NiosStat.cond[no[i]].info.valve, RX_NiosStat.cond[no[i]].gpio_state.watchdog_reset); term_printf("\n");}
+		if (status)	{term_printf("Solenoid/Watchdog: "); PRINTF(MAX_HEADS_BOARD)("            %d/%d ", RX_NiosStat.cond[no[i]].info.valve_ink, RX_NiosStat.cond[no[i]].gpio_state.watchdog_reset); term_printf("\n");}
 		
 //		if (status)	{term_printf("--- LOW LEVEL ERRORS ---\n"); }
 //		if (status)	{term_printf("baud rate change err:");term_printf("       %04d", RX_NiosStat.baud_rate_change_error); term_printf("\n"); }

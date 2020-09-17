@@ -71,7 +71,6 @@ static int				_LastPage;
 static int				_LastWakeup;
 static int				_LastGap;
 static int				_LastOffsetWidth;
-static SPageId			_LoadedId;
 static UINT16			_SMP_Flags;
 #define					BUFFER_CNT 2
 static int				_BufferNo;
@@ -112,7 +111,6 @@ int ctrl_start(const char *ipAddrMain)
 	memset(_BufferSize, 0, sizeof(_BufferSize));
 	memset(_Buffer, 0, sizeof(_Buffer));
 	memset(_LastFilename, 0, sizeof(_LastFilename));
-	memset(&_LoadedId, 0, sizeof(_LoadedId));
 	_LastPage=0;
 	_LastOffsetWidth = 0;
 	_LastWakeup = 0;
@@ -320,7 +318,6 @@ static int _do_spool_cfg(RX_SOCKET socket, SSpoolerCfg *pmsg)
 		for (i=0; i<SIZEOF(_Buffer); i++)
 			data_clear(_Buffer[i]);		
 	}
-	memset(&_LoadedId, 0, sizeof(_LoadedId));
 	_Running	 = FALSE;
 	_Abort		 = FALSE;
 	_data_malloc_reply = REPLY_OK;
@@ -426,6 +423,7 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 	same = (!strcmp(msg.filename, _LastFilename) &&  msg.id.page==_LastPage && msg.wakeup==_LastWakeup && msg.gapPx==_LastGap);
 //	if (rx_def_is_lb(RX_Spooler.printerType)) same &= msg.offsetWidth==_LastOffsetWidth;
 	if (rx_def_is_lb(RX_Spooler.printerType) && msg.printMode==PM_SINGLE_PASS) same = ((msg.flags&FLAG_SAME)!=0) && (msg.offsetWidth==_LastOffsetWidth);
+	if (msg.printMode==PM_SINGLE_PASS && jc_changed()) same=FALSE;
 	_LastPage   = msg.id.page;
 	_LastGap	= msg.gapPx;
 	_LastWakeup = msg.wakeup;
@@ -439,7 +437,7 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 //	if (rx_def_is_lb(RX_Spooler.printerType))
 //		msg.gapPx += 1;	// Bug in FPGA: (when srcLineCnt==12300, gap=0 it sometimes prints an additional line of old data [instead of blank] between the labels)
 
-	TrPrintfL(TRUE, "_do_print_file[%d] >>%s<<  id=%d, page=%d, copy=%d, scan=%d, same=%d, clearBlockUsed=%d, offsetWidth=%d, blkNo=%d", _MsgGot, msg.filename, msg.id.id, msg.id.page, msg.id.copy, msg.id.scan ,same, msg.clearBlockUsed, msg.offsetWidth, msg.blkNo);
+	TrPrintfL(TRUE, "_do_print_file[%d] >>%s<<  id=%d, page=%d, copy=%d, scan=%d, same=%d, clearBlockUsed=%d, offsetWidth=%d, blkNo=%d", _MsgGot, msg.filename, msg.id.id, msg.id.page, msg.id.copy, msg.id.scan, same, msg.clearBlockUsed, msg.offsetWidth, msg.blkNo);
 //	if (msg.id.scan==1) Error(LOG, 0, "_do_print_file[%d] >>%s<<  id=%d, page=%d, copy=%d, scan=%d, same=%d, blkNo=%d", _MsgGot, msg.filename, msg.id.id, msg.id.page, msg.id.copy, msg.id.scan ,same, msg.blkNo);
 	
 //	if(msg.smp_flags & SMP_LAST_PAGE) Error(LOG, 0, "_do_print_file[%d] >>%s<< id=%d, page=%d, copy=%d, scan=%d, same=%d, LAST PAGE", _MsgGot, msg.filename, msg.id.id, msg.id.page, msg.id.copy, msg.id.scan, same); 
@@ -603,6 +601,11 @@ static int _do_print_abort(RX_SOCKET socket)
 			data_free(&_BufferSize[b], _Buffer[b]);
 		}
 	}
+	
+	//--- test prints: force reloading file at each print start ---------
+	if (str_start(_LastFilename, PATH_BIN_SPOOLER)) 
+		memset(&_LastFilename, 0, sizeof(_LastFilename));
+
 	return REPLY_OK;
 }
 

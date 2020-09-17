@@ -54,8 +54,10 @@ namespace RX_DigiPrint.Views.UserControls
                     Visibility invisible;
                     if (RxGlobals.PrintSystem.IsScanning)
                     {
-                        visible   = (RxGlobals.PrinterStatus.PrintState==EPrintState.ps_webin) ? Visibility.Visible   : Visibility.Collapsed; 
-                        invisible = (RxGlobals.PrinterStatus.PrintState==EPrintState.ps_webin) ? Visibility.Collapsed : Visibility.Visible; 
+                        visible   = (RxGlobals.PrinterStatus.PrintState==EPrintState.ps_webin || 
+                            RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_table_seon) ? Visibility.Visible   : Visibility.Collapsed; 
+                        invisible = (RxGlobals.PrinterStatus.PrintState==EPrintState.ps_webin ||
+                            RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_table_seon) ? Visibility.Collapsed : Visibility.Visible; 
                     }
                     else
                     {
@@ -77,6 +79,7 @@ namespace RX_DigiPrint.Views.UserControls
            {
                case EPrinterType.printer_TX801: v = Visibility.Visible; break;
                case EPrinterType.printer_TX802: v = Visibility.Visible; break;
+               case EPrinterType.printer_TX404: v = Visibility.Visible; break;
            }
             Button_Wash.Visibility = v;
             Button_Glue.Visibility = v;

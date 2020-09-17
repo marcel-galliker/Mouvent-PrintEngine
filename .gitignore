@@ -1,10 +1,6 @@
 /bin
 *.prefs
-/rx_head_nios/software/.metadata/.plugins/org.eclipse.cdt.core/rx_head_nios.language.settings.xml
-/rx_head_nios/software/.metadata/.plugins/org.eclipse.cdt.ui/dialog_settings.xml
-/rx_head_nios/software/.metadata/.plugins/org.eclipse.cdt.ui/global-build.log
-/rx_head_nios/software/.metadata/.plugins/org.eclipse.core.runtime/.settings/org.eclipse.ui.ide.prefs
-/rx_head_nios/software/.metadata/.plugins/org.eclipse.ui.workbench.texteditor/dialog_settings.xml
+language.settings.xml
 /rx_head_nios/software/rx_head_nios_bsp/settings.bsp
 summary.html
 *.dep
@@ -30,7 +26,6 @@ _temp
 obj
 VisualGDBCache
 */org.eclipse.core.resources
-*/software/.metadata/.plugins/org.eclipse.cdt.core
 *.objdump
 org.eclipse.core.resources
 .log
@@ -69,6 +64,12 @@ org.eclipse.core.resources
 /rx_head_nios/software/rx_head_nios/rx_head_nios.objdump
 /rx_head_nios/software/rx_head_nios/rx_head_nios.elf
 /rx_head_nios/software/rx_head_nios/rx_head_nios.map
+__pycache__
+*.pyc
+.vscode/
+TEST-*.xml
+.scannerwork/
+build_wrapper_output_directory/
 rx_fluid_nios/software/rx_fluid_nios/mem_init/
 rx_head_nios/software/rx_head_nios/mem_init/
 rx_digiprint_gui/Properties/AssemblyInfo.cs
@@ -86,3 +87,4 @@ version.c
 /RX-LabelComposer/Properties/AssemblyInfo.cs
 /bin/gui/*.dll
 /bin/gui/*.ppk
+/printed/*.bmp

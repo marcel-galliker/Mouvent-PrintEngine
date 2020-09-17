@@ -97,6 +97,7 @@ namespace RX_DigiPrint.Services
 	    printer_test_table,			// 1:
         printer_test_slide,         // 2:
         printer_test_slide_only,    // 3: 
+        printer_test_table_seon,    // 4:
 
         //--- web printers ------------------------------
         printer_LB701    =1000,	    // 1000: 
@@ -109,6 +110,7 @@ namespace RX_DigiPrint.Services
 	    //--- scanning printers --------------------------
 	    printer_TX801     = 2000,		// 2000: Fashionn stanrard output
 	    printer_TX802,				// 2001: Fashion high outpput
+        printer_TX404,                  // 2002:
 
         printer_CB612 = 3001,
 
@@ -240,12 +242,18 @@ namespace RX_DigiPrint.Services
         ctrl_cal_step4,   	    // 0x404:
 	    ctrl_cal_done,       	// 0x405:
 
+        ctrl_leak_test = 0x500, // 0x500:
+        ctrl_leak_test_step1,   // 0x501:
+        ctrl_leak_test_step2,
+
 	    ctrl_test_watchdog = 0x10000,
 	    ctrl_test,				// 0x10001
         ctrl_offset_cal, 	    // 0x10002
         ctrl_offset_cal_done,	// 0x10003
         ctrl_offset_del_factory,// 0x10004
         ctrl_offset_del_user,   // 0x10005
+
+        ctrl_toggle_meniscus = 0x20000,
     };
 
     public enum ETestTableErr : uint
@@ -398,6 +406,15 @@ namespace RX_DigiPrint.Services
 
         public const UInt32  CMD_FLUID_PRESSURE     = 0x01000126;
 
+        public const UInt32 CMD_FLUID_DEGASSER      = 0x01000127;
+
+        public const UInt32 CMD_FLUID_TTS           = 0x01000128;
+        public const UInt32 REP_FLUID_TTS           = 0x02000128;
+
+        public const UInt32 CMD_FLUID_FLUSH         = 0x01000129;
+
+        public const UInt32 CMD_FLUID_LEAK_TEST     = 0x0100012a;
+
         public const UInt32 CMD_GET_STEPPER_CFG		= 0x01000131;
         public const UInt32 REP_GET_STEPPER_CFG		= 0x02000131;
         public const UInt32 CMD_SET_STEPPER_CFG		= 0x01000132;
@@ -416,6 +433,8 @@ namespace RX_DigiPrint.Services
         public const UInt32 CMD_BCSCANNER_TRIGGER	= 0x01000148;
 
         public const UInt32 REP_CHILLER_STAT		= 0x02000152;
+
+        public const UInt32 CMD_CHANGE_CLUSTER_NO   = 0x01000161;
 
         public const UInt32 CMD_START_PRINTING		= 0x01000201;
         public const UInt32 REP_START_PRINTING		= 0x02000201;
@@ -484,6 +503,18 @@ namespace RX_DigiPrint.Services
         public const UInt32 CMD_TT_MOVE_CAP	        = 0x01000509;
         public const UInt32 CMD_TT_MOVE_PURGE	    = 0x0100050a;
         public const UInt32 CMD_TT_MOVE_ADJUST	    = 0x0100050b;
+        public const UInt32 CMD_TT_ABORT            = 0x0100050c;
+        public const UInt32 CMD_TT_SCAN_TRAY        = 0x0100050d;
+
+        public const UInt32 CMD_TTS_WASTE_VALVE     = 0x01000510;
+        public const UInt32 CMD_TTS_PUMP_JET_TRAY   = 0x01000511;
+        public const UInt32 CMD_TTS_PUMP_PURGE      = 0x01000512;
+        public const UInt32 CMD_TTS_JOG_FWD         = 0x01000513;
+        public const UInt32 CMD_TTS_JOG_BWD         = 0x01000514;
+        public const UInt32 CMD_TTS_JOG_STOP        = 0x01000515;
+        
+
+        public const UInt32 CMD_TT_END              = 0x010005ff;
 
         //--- Capping Commands ---------------------------------------------------
         public const UInt32 CMD_LIFT_STOP			= 0x01000601;
@@ -951,6 +982,7 @@ namespace RX_DigiPrint.Services
 	        public Int32	pumpSpeed;			//	Consumption pump speed
 	        public Int32	canisterLevel;
 	        public Int32	canisterErr;
+            public Int32    flush_pump_val;
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
             public string   scannerSN;
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
@@ -1035,6 +1067,12 @@ namespace RX_DigiPrint.Services
 	        public EFluidCtrlMode   ctrlMode;
         };
 
+        public struct SFluidTestTable
+        {
+            public SMsgHdr hdr;
+            public Int32 index;
+        };
+
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct SHeadEEpromInfo
         {
@@ -1099,12 +1137,10 @@ namespace RX_DigiPrint.Services
 	        public UInt32			tempHead;
 	        public UInt32			tempCond;
             public UInt32           tempSetpoint;
-	        public UInt32			presIn_ID;
 	        public Int32			presIn;
 	        public Int32			presIn_max;
 	        public Int32			presIn_diff;
 	        public Int32			flowFactor;
-	        public UInt32			presOut_ID;
 	        public Int32			presOut;
 	        public Int32			presOut_diff;
             public Int32			meniscus;
@@ -1143,6 +1179,7 @@ namespace RX_DigiPrint.Services
 
             public Int32        tempFpga;
             public Int32        flow;
+            public UInt32       cooler_temp;
  
             //--- warnings/errors ----------------
             public UInt32		info;
@@ -1221,9 +1258,13 @@ namespace RX_DigiPrint.Services
 
             public UInt32		info;
             public UInt32		robinfo;
+            public UInt32		inkinfo;
             public UInt32       screwerinfo;
 	        public UInt32		warn;
 	        public UInt32		err;
+
+            public UInt32       tts_fluidvalves;
+
 
 	        public Int32		posX;
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]

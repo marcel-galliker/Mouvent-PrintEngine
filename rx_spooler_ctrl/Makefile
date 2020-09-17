@@ -133,7 +133,7 @@ $(BINARYDIR):
 	mkdir $(BINARYDIR)
 
 $(BINARYDIR)/%.o : %.cu $(all_make_files)
-	$(NVCC) $(addprefix -I,$(INCLUDE_DIRS)) -c $< -o $@ -MT $(@:.o=.dep) -gencode arch=compute_60,code=sm_60 -g
+	$(NVCC) $(addprefix -I,$(INCLUDE_DIRS)) $(addprefix -D,$(PREPROCESSOR_MACROS)) -c $< -o $@ -MT $(@:.o=.dep) -gencode arch=compute_60,code=sm_60 -g
 
 #VisualGDB: FileSpecificTemplates		#<--- VisualGDB will use the following lines to define rules for source files in subdirectories
 $(BINARYDIR)/%.o : %.cpp $(all_make_files) |$(BINARYDIR)

@@ -22,7 +22,10 @@
 #define MAX_MESSAGE_SIZE	9000 // (8*1024) // jumbo blocks
 #define TCPIP_HEADER_SIZE	  66
 
+#ifndef RX_CTRL_SUBNET // allow to redefine local subnet during compilation
 #define RX_CTRL_SUBNET		"192.168.200."
+#endif // !RX_CTRL_SUBNET
+
 #define RX_CTRL_MAIN		RX_CTRL_SUBNET "1"
 #define RX_CTRL_PLC			RX_CTRL_SUBNET "3"
 #define RX_CTRL_ENC_0		4				// 6..8
@@ -217,6 +220,11 @@
 
 #define CMD_FLUID_DEGASSER		0x02000127
 
+
+
+#define CMD_FLUID_FLUSH			0x01000129
+#define CMD_FLUID_LEAK_TEST		0x0100012a
+
 #define CMD_GET_STEPPER_CFG		0x01000131
 #define REP_GET_STEPPER_CFG		0x02000131
 #define CMD_SET_STEPPER_CFG		0x01000132
@@ -235,6 +243,8 @@
 #define CMD_BCSCANNER_TRIGGER	0x01000148
 
 #define REP_CHILLER_STAT		0x02000152
+
+#define CMD_CHANGE_CLUSTER_NO	0x01000161
 
 #define CMD_START_PRINTING		0x01000201
 #define REP_START_PRINTING		0x02000201
@@ -321,6 +331,16 @@
 #define CMD_TT_MOVE_PURGE		0x0100050a
 #define CMD_TT_MOVE_ADJUST		0x0100050b
 #define CMD_TT_ABORT			0x0100050c
+#define CMD_TT_SCAN_TRAY		0x0100050d
+
+#define CMD_TTS_WASTE_VALVE		0x01000510
+#define CMD_TTS_PUMP_JET_TRAY	0x01000511
+#define CMD_TTS_PUMP_PURGE		0x01000512
+#define CMD_TTS_JOG_FWD			0x01000513
+#define CMD_TTS_JOG_BWD			0x01000514
+#define CMD_TTS_JOG_STOP		0x01000515
+#define CMD_FLUID_TTS			0x01000516
+#define REP_FLUID_TTS			0x02000516
 
 #define CMD_TT_END				0x010005ff
 
@@ -334,8 +354,9 @@
 #define CMD_LIFT_CALIBRATE		0x01000606
 #define REP_LIFT_CALIBRATE		0x02000606
 #define CMD_LIFT_TEST			0x01000607
-#define CMD_LIFT_CLUSTER_CHANGE	0x01000608
-#define CMD_LIFT_SCREW			0x01000609
+#define CMD_LIFT_JET_TRAY		0x01000608
+#define CMD_LIFT_CLUSTER_CHANGE	0x01000609
+#define CMD_LIFT_SCREW			0x0100060a
 #define CMD_LIFT_VENT			0x0100060f
 
 //---- CAPPING ----
@@ -862,6 +883,14 @@ typedef struct SFluidCtrlCmd
 	int				no;
 	EnFluidCtrlMode	ctrlMode;
 } SFluidCtrlCmd;
+
+//--- SFluidTestTable ----------------------------------
+typedef struct SFluidTestTable
+{
+	SMsgHdr			hdr;
+	int				index;
+
+} SFluidTestTable;
 
 //--- SScalesCfgMsg ----------------------
 typedef struct SScalesCfgMsg

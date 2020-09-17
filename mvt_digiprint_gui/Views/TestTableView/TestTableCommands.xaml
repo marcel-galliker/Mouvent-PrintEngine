@@ -8,6 +8,10 @@
     <Grid>
         <GroupBox Header="Commands" Style="{StaticResource MvtGroupBox}">
             <StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <TextBlock Text="Running"/>
+                    <TextBlock Text="{Binding CmdRunning, Converter={StaticResource ToString_Converter}, ConverterParameter=X}" HorizontalAlignment="Right" Margin="20,0"/>
+                </StackPanel>
                 <CheckBox Content="STOP" Click="Stop_Clicked" Style="{DynamicResource RxCommandButton}"/>
                 <TextBlock/>
                 <CheckBox Content="Reference"         Click="StartRef_Clicked"   Style="{DynamicResource RxCommandButton}"/>

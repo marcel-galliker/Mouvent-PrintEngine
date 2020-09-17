@@ -7,7 +7,12 @@ namespace RX_DigiPrint.Converters
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            if (parameter!=null) return string.Format("{0:0.000}", value);
+            if (parameter!=null)
+            {
+                string str=parameter.ToString();
+                if (str.Equals("3")) return string.Format("{0:0.000}", value);
+                if (str.Equals("X")) return string.Format("0x{0:X}", value);
+            }
             return value.ToString();
         }
 

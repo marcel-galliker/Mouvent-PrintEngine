@@ -157,6 +157,8 @@ int rx_def_is_scanning(EPrinterType printerType)
 	case printer_test_slide_only:	return TRUE;
 	case printer_TX801:				return TRUE;
 	case printer_TX802:				return TRUE;
+	case printer_TX404:				return TRUE;
+    case printer_test_table_seon:	return TRUE;
 	default: return FALSE;
 	}
 }
@@ -168,6 +170,7 @@ int rx_def_is_tx(EPrinterType printerType)
 	{
 	case printer_TX801:				return TRUE;
 	case printer_TX802:				return TRUE;
+	case printer_TX404:				return TRUE;
 	default: return FALSE;
 	}
 }
@@ -185,6 +188,18 @@ int rx_def_is_lb(EPrinterType printerType)
 	case printer_cleaf:		return TRUE;
 	default: return FALSE;
 	}
+}
+
+//--- rx_def_is_production_test ---------------------------------------
+int rx_def_is_tts(EPrinterType printerType)
+{
+    switch (printerType)
+    {
+    case printer_test_table_seon:
+        return TRUE;
+    default:
+        return FALSE;
+    }
 }
 
 //--- rx_def_is_test ---------------------------------------
@@ -209,4 +224,10 @@ int rx_def_use_pq(EPrinterType printerType)
 	case printer_test_slide_only:	return FALSE;
 	default: return TRUE;
 	}
+}
+
+//--- rx_printMode_is_test -------------------
+int rx_printMode_is_test(int printMode)
+{
+	return printMode==PM_TEST || printMode==PM_TEST_SINGLE_COLOR || printMode==PM_TEST_JETS;
 }

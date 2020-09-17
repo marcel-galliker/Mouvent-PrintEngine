@@ -46,7 +46,7 @@ namespace RX_DigiPrint.Views.UserControls
         //--- PrinterStatusChanged --------------------------------------------
         private void PrinterStatusChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (_WebInStartTimer==0 && RxGlobals.PrinterStatus.PrintState!=_printerState)
+            if (_WebInStartTimer==0 && RxGlobals.PrinterStatus.PrintState!=_printerState && RxGlobals.PrintSystem.PrinterType != EPrinterType.printer_test_table_seon)
             {
                 if (RxGlobals.PrinterStatus.PrintState != _printerState)
                 {
@@ -71,15 +71,25 @@ namespace RX_DigiPrint.Views.UserControls
                 //  CMD_WEBIN.IsEnabled    = (RxGlobals.PrinterStatus.PrintState==EPrintState.ps_off || RxGlobals.PrinterStatus.PrintState==EPrintState.ps_ready_power);
                 }
            }
+           else if (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_table_seon)
+           {
+                CMD_JOG_FWD.Visibility = Visibility.Visible;
+                CMD_JOG_BWD.Visibility = Visibility.Visible;
+                CMD_WEBIN.Visibility = Visibility.Collapsed;
+           }
 
            Visibility v=Visibility.Collapsed;
+           Visibility a = Visibility.Collapsed;
            switch (RxGlobals.PrintSystem.PrinterType)
            {
                case EPrinterType.printer_TX801: v = Visibility.Visible; break;
                case EPrinterType.printer_TX802: v = Visibility.Visible; break;
+               case EPrinterType.printer_TX404: v = Visibility.Visible; break;
+               case EPrinterType.printer_test_table_seon: a = Visibility.Visible; break;
            }
             Button_Wash.Visibility = v;
             Button_Glue.Visibility = v;
+            Button_ClusterNo.Visibility = a;
         }
 
         //--- WebIn_Clicked -------------------------------------------------
@@ -151,6 +161,13 @@ namespace RX_DigiPrint.Views.UserControls
                 RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_SET_CMD, "CMD_SETUP/CMD_GLUE");
         }
 
+        //--- CusterNo_Clicked -------------------------------------------------
+        private void CusterNo_Clicked(object sender, RoutedEventArgs e)
+        {
+            SetClusterNo view = new SetClusterNo();
+            view.ShowDialog();
+        }
+
         //--- Jog_PreviewMouseDown -------------------------------
         private void Jog_PreviewMouseDown(object sender, MouseButtonEventArgs e) 
         {
@@ -161,6 +178,9 @@ namespace RX_DigiPrint.Views.UserControls
                 Debug.WriteLine("PreviewMouseDown", button.Name);
                 button.IsChecked = true;
                 RxGlobals.Plc.SetVar(button.Name, 1);
+                if (RxGlobals.PrintSystem.PrinterType != EPrinterType.printer_test_table_seon) RxGlobals.Plc.SetVar(button.Name, 1);
+                else if (button.Name.Equals("CMD_JOG_FWD")) RxGlobals.RxInterface.SendCommand(TcpIp.CMD_TTS_JOG_FWD);
+                else if (button.Name.Equals("CMD_JOG_BWD")) RxGlobals.RxInterface.SendCommand(TcpIp.CMD_TTS_JOG_BWD);
             }
             e.Handled = true;
         }
@@ -174,6 +194,8 @@ namespace RX_DigiPrint.Views.UserControls
                 Debug.WriteLine("PreviewMouseUp", button.Name);
                 button.IsChecked = false;
                 RxGlobals.Plc.SetVar(button.Name, 0);
+                if (RxGlobals.PrintSystem.PrinterType != EPrinterType.printer_test_table_seon) RxGlobals.Plc.SetVar(button.Name, 0);
+                else RxGlobals.RxInterface.SendCommand(TcpIp.CMD_TTS_JOG_STOP);
             }
             e.Handled = true;
         } 

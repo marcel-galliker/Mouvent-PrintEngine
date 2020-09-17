@@ -52,6 +52,10 @@ static void delay(void);
  **/
 int i2c_bb_init(void)
 {
+	static int _init=FALSE;
+	
+	if (!_init)
+	{
     // SDA
     bFM4_GPIO_PDOR5_P5 = 1; // set high
     bFM4_GPIO_DDR5_P5 = 1;  // output
@@ -65,7 +69,8 @@ int i2c_bb_init(void)
     bFM4_GPIO_PZR6_P6 = 1;  // open-drain
     // disable use of ADC is necessary for this pin
     bFM4_GPIO_ADE_AN09 = 0; // no ADC
-
+		_init=TRUE;
+	}
     return 1;
 }
 
@@ -187,6 +192,7 @@ BYTE i2c_bb_write_page(const UINT32u address, const BYTE *data, BYTE len)
     return 0;
 }
 
+//--- i2c_bb_read_ack ------------------------------------------------
 BOOL i2c_bb_read_ack(void)
 {
     BYTE ack = 0;
@@ -197,6 +203,26 @@ BOOL i2c_bb_read_ack(void)
     ack = i2c_bb_read_byte(NACK);
     
     return ack;
+}
+
+//--- i2c_bb_read_adc -----------------------------------------------
+BOOL i2c_bb_read_adc(char address, BYTE *ret_values, BYTE len)
+{
+	i2c_bb_init();
+	
+    // initialize read sequence
+    i2c_bb_start();
+	i2c_bb_write_byte(address | READ);
+	
+    // read multiple bytes
+    while (--len)
+        *(ret_values++) = i2c_bb_read_byte(ACK);
+
+    // Respond with NACK to end read cycle
+    *ret_values = i2c_bb_read_byte(NACK);
+
+    i2c_bb_stop();	
+	return 0;
 }
 
 /*******************************************************************************

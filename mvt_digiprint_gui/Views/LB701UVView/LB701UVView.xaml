@@ -65,13 +65,14 @@
                 <Grid Margin="10" Grid.Row="1" Visibility="{Binding ElementName=RB_Main, Path=IsChecked, Converter={StaticResource IntToVisible_Converter}}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="auto"/>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="auto"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
                     <local:LB701UV_Par Grid.Column="0"/>
 
-                    <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                    <StackPanel Grid.Column="1" Margin="10,0,0,0" Width="250">
                         <local:LB701UV_Status/>
                         <local:LB701UV_Cmd/>
                     </StackPanel>
@@ -92,7 +93,7 @@
                 <rx_uc:PlcStatus Margin="10" Grid.Row="1" Width="550" Visibility="{Binding ElementName=RB_Plc,  Path=IsChecked, Converter={StaticResource IntToVisible_Converter}}"/>
 
                 <!-- TAB: Config ____________________________________________________________-->
-                <local:LB701UV_Cfg Margin="10" Grid.Row="1" Grid.Column="0" Width="550" HorizontalAlignment="Left" Visibility="{Binding ElementName=RB_Cfg, Path=IsChecked, Converter={StaticResource IntToVisible_Converter}}"/>
+                <local:LB701UV_Cfg Margin="10" Grid.Row="1" Grid.Column="0" Width="350" HorizontalAlignment="Left" Visibility="{Binding ElementName=RB_Cfg, Path=IsChecked, Converter={StaticResource IntToVisible_Converter}}"/>
             </Grid>
         </Grid>
 

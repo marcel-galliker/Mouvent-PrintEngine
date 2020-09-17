@@ -133,8 +133,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
             if (RxGlobals.PrintSystem.HasHeater) SettingsGrid.RowDefinitions[6].Height = new GridLength(1, GridUnitType.Auto);
             else                                 SettingsGrid.RowDefinitions[6].Height = new GridLength(0);
 
-            Button_PurgeVacc.Visibility = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_TX801 || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_TX802 || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_WB) ? Visibility.Visible : Visibility.Collapsed;
-            Button_PurgeWipe.Visibility = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX801 || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX802 || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_WB)? Visibility.Visible : Visibility.Collapsed;
+            Button_PurgeVacc.Visibility = (RxGlobals.PrintSystem.IsTx || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_WB) ? Visibility.Visible : Visibility.Collapsed;
+            Button_PurgeWipe.Visibility = (RxGlobals.PrintSystem.IsTx || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_WB)? Visibility.Visible : Visibility.Collapsed;
 
         }
 

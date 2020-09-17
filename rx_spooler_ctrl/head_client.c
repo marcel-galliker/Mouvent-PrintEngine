@@ -384,12 +384,14 @@ void hc_send_next()
 									}
 									break;
 
-				case dev_on:		if (FALSE && pInfo->colorCode==0)	// see rx_def.c: RX_ColorName
+				case dev_on:		
+									#ifdef DEBUG
+									if (FALSE && pInfo->colorCode==1)	// see rx_def.c: RX_ColorName
 									{						
 										_save_to_file(pInfo, FALSE);
 										Error(LOG, 0, "File (id=%d, page=%d, copy=%d, scan=%d) blk0=%d, blkCnt=%d saved to File", pInfo->pListItem->id.id, pInfo->pListItem->id.page, pInfo->pListItem->id.copy, pInfo->pListItem->id.scan, pInfo->blk0, pInfo->blkCnt);
 									}
-									
+									#endif
 								//	Error(LOG, 0, "Screening[%d,%d]: (id=%d, p=%d, c=%d, s=%d)", pInfo->board, pInfo->head, id.id, id.page, id.copy, id.scan);
 
 									_send_image_data(pInfo);
@@ -424,20 +426,11 @@ static void _save_to_file(SBmpSplitInfo *pInfo, int log)
 	
 	if (rx_def_is_scanning(RX_Spooler.printerType))
 	{
-		#ifdef linux
-	//	sprintf(fname, "%strace/%s/Scan%02d-img%d-hd%d_%s.bmp", PATH_HOME PATH_RIPPED_DATA_DIR, RX_ColorNameShort(pInfo->inkSupplyNo), ++_SimuNo[pInfo->colorCode], pInfo->pListItem->id.id, pInfo->head, RX_ColorNameShort(pInfo->inkSupplyNo));
-		sprintf(fname, "%strace/%s/sent(id=%d, p=%d, c=%d, s=%d, h=%d).bmp",  PATH_HOME PATH_RIPPED_DATA_DIR, RX_ColorNameShort(pInfo->inkSupplyNo), pInfo->pListItem->id.id, pInfo->pListItem->id.page, pInfo->pListItem->id.copy, pInfo->pListItem->id.scan, head);
-		#else
-		sprintf(fname, PATH_RIPPED_DATA "trace/%s/Scan%02d-img%d-hd%d_%s.bmp", RX_ColorNameShort(pInfo->inkSupplyNo), ++_SimuNo[pInfo->colorCode], pInfo->pListItem->id.id, pInfo->head, RX_ColorNameShort(pInfo->inkSupplyNo));
-		#endif
+		sprintf(fname, "%strace/%s/sent(id=%d, p=%d, c=%d, s=%d, h=%d).bmp", PATH_RIPPED_DATA, RX_ColorNameShort(pInfo->inkSupplyNo), pInfo->pListItem->id.id, pInfo->pListItem->id.page, pInfo->pListItem->id.copy, pInfo->pListItem->id.scan, head);
 	}
 	else
 	{
-		#ifdef linux
-		sprintf(fname, "%strace/%s/(id=%d, p=%d, c=%d)-%s%d.bmp", PATH_HOME PATH_RIPPED_DATA_DIR, RX_ColorNameShort(pInfo->inkSupplyNo), pInfo->pListItem->id.id, pInfo->pListItem->id.page, pInfo->pListItem->id.copy, RX_ColorNameShort(pInfo->inkSupplyNo), head);
-		#else
-		sprintf(fname, "d:/%strace/%s/(id=%d, p=%d, c=%d)-%s%d.bmp", PATH_RIPPED_DATA_DIR, RX_ColorNameShort(pInfo->inkSupplyNo), pInfo->pListItem->id.id, pInfo->pListItem->id.page, pInfo->pListItem->id.copy, RX_ColorNameShort(pInfo->inkSupplyNo), head);
-		#endif
+		sprintf(fname, "%strace/%s/(id=%d, p=%d, c=%d)-%s%d.bmp", PATH_RIPPED_DATA, RX_ColorNameShort(pInfo->inkSupplyNo), pInfo->pListItem->id.id, pInfo->pListItem->id.page, pInfo->pListItem->id.copy, RX_ColorNameShort(pInfo->inkSupplyNo), head);
 	}
 	if (pInfo->bitsPerPixel<8)	
 		bmp_write(fname, &buffer[1], pInfo->bitsPerPixel, pInfo->widthPx, pInfo->srcLineCnt, pInfo->dstLineLen, FALSE);
@@ -523,8 +516,8 @@ static int _send_image_cmd(SBmpSplitInfo *pInfo)
 	imageCmd.image.blkCnt			= pInfo->blkCnt;
 	imageCmd.image.jetPx0			= pInfo->jetPx0;
 	imageCmd.image.lengthPx			= pInfo->srcLineCnt;
-	if (rx_def_is_lb(RX_Spooler.printerType) && pInfo->srcLineCnt>1)
-		imageCmd.image.lengthPx		= pInfo->srcLineCnt-1;	// Bug in FPGA: (when srcLineCnt==12300, gap=0 it sometimes prints an additional line of old data [instead of blank] between the labels)
+//	if (rx_def_is_lb(RX_Spooler.printerType) && pInfo->srcLineCnt>1)
+//		imageCmd.image.lengthPx		= pInfo->srcLineCnt-1;	// Bug in FPGA: (when srcLineCnt==12300, gap=0 it sometimes prints an additional line of old data [instead of blank] between the labels)
 	imageCmd.image.widthPx			= pInfo->widthPx;
 	imageCmd.image.widthBytes		= pInfo->widthBt;
 	imageCmd.image.flipHorizontal	= FALSE;
@@ -659,21 +652,21 @@ static int _do_block_used(SHBThreadPar *par, SBlockUsedRep *msg)
 			{
 				str[l]=0;
 				l=0;
-				TrPrintfL(TRUE, "blk[%03d]: %s", blk, str);
+				TrPrintfL(TRUE, "Head[%d.%d]: blk[%03d]: %s", par->cfg.no, msg->headNo, blk, str);
 				blk=i+1;
 			}
 			if (++i==end) 
 			{
 				str[l]=0;
 				l=0;
-				TrPrintfL(TRUE, "blk[%03d]: %s END", blk, str);
+				TrPrintfL(TRUE, "Head[%d.%d]: blk[%03d]: %s END", par->cfg.no, msg->headNo, blk, str);
 				blk=i=par->cfg.head[head].blkNo0;
 			}
 		}
 		if  (l)
 		{
 			str[l]=0;
-			TrPrintfL(TRUE, "blk[%03d]: %s", blk, str);
+			TrPrintfL(TRUE, "Head[%d.%d]: blk[%03d]: %s", par->cfg.no, msg->headNo, blk, str);
 		}
 		TrPrintfL(_Trace, "Head[%d.%d]: _do_block_used id=%d, blkNo=%d, blkCnt=%d, (Block %d .. %d), blkOutIdx=%d", par->cfg.no, msg->headNo, msg->id, msg->blkNo, msg->blkCnt, msg->blkNo, msg->blkNo+msg->blkCnt, msg->blockOutIdx);
 	}
@@ -857,13 +850,14 @@ static int _send_to_board(SHBThreadPar *par, int head, int blkNo, int blkCnt)
 		if (_Abort) return REPLY_OK;
 		
 //		if (pinfo->sendFromBlk >= pinfo->blkCnt || (RX_Spooler.printerType==printer_LB702_UV && (endReached && (cnt==0 || (pinfo->pListItem->flags&FLAG_SAME)))))
-		if (pinfo->sendFromBlk >= pinfo->blkCnt || pinfo->pListItem->flags&FLAG_SAME || (endReached && (cnt==0)))
+		if (pinfo->sendFromBlk >= pinfo->blkCnt || pinfo->pListItem->flags&FLAG_SAME || (rx_def_is_lb(RX_Spooler.printerType) && endReached && (cnt==0)))
+		// why: rx_def_is_lb? In TX machines we normally have a wrap around, as the whole buffer is used. The FPGA removed the block used flags already when the data is loaded!
 		{
 			SPageId *pid   = &pinfo->pListItem->id;
 			SPageId *plast = &par->lastId[head];
 			if (memcmp(plast, pid, sizeof(SPageId)))
 			{
-				if (pinfo->printMode!=PM_TEST && pinfo->printMode!=PM_TEST_SINGLE_COLOR && pinfo->printMode!=PM_TEST_JETS) _check_image_blocks(par, pinfo, headMin, headMax);
+				if (!rx_printMode_is_test(pinfo->printMode)) _check_image_blocks(par, pinfo, headMin, headMax);
 				_send_image_cmd(pinfo);
 				static int scan=0;
 				TrPrintfL(_Trace, "All sent: blk0=%d, cnt=%d, scan=%d\n", pinfo->blk0, pinfo->blkCnt, ++scan);

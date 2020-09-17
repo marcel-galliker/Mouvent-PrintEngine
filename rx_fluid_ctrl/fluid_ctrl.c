@@ -174,8 +174,9 @@ int ctrl_replies(void)
 static int _handle_ctrl_msg(RX_SOCKET socket, void *msg)
 {
 	int reply = REPLY_ERROR;
+    int no;
 
-	_Socket = socket; 
+    _Socket = socket; 
 	
 	//--- handle the message --------------
 	reply = REPLY_OK;
@@ -202,7 +203,11 @@ static int _handle_ctrl_msg(RX_SOCKET socket, void *msg)
 	case CMD_SCALES_TARA:		 _do_scales_tara(socket, (INT32*)pdata);					break;	
 	case CMD_SCALES_CALIBRATE:	 _do_scales_calib(socket, (SValue*)pdata);					break;	
 	case CMD_SCALES_STAT:		 _do_scales_stat(socket);									break;	
-	default:		
+    case CMD_FLUID_FLUSH:		 nios_test_flush(*(int*)pdata);								break;
+    case CMD_FLUID_LEAK_TEST:	 no = 0;
+								 nios_test_air_valve(no);
+                                 break;
+    default:		
 					{
 						char peer[64];
 						sok_get_peer_name(socket, peer, NULL, NULL);

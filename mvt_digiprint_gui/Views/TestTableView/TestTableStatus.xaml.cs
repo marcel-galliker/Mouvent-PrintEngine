@@ -27,6 +27,5 @@ namespace RX_DigiPrint.Views.TestTableView
 
             DataContext = RxGlobals.StepperStatus;
         }
-
     }
 }

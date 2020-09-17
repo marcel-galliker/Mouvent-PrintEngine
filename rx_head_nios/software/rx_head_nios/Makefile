@@ -154,7 +154,6 @@ C_SRCS += head_eeprom.c
 C_SRCS += pres.c
 C_SRCS += power.c
 C_SRCS += cooler.c
-C_SRCS += average.c
 C_SRCS += comm.c
 C_SRCS += fifo.c
 C_SRCS += nios_def_head.c
