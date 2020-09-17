@@ -210,7 +210,9 @@ int	plc_init(void)
 	if (_SimuPLC)     Error(WARN, 0, "PLC in Simulation");
 	if (_SimuEncoder) Error(WARN, 0, "Encoder in Simulation");
 	
-	if (RX_Config.printer.type==printer_LH702 && str_start(RX_Hostname, "LH702")) _SimuPLC = TRUE;
+	if ((RX_Config.printer.type==printer_LH702 && str_start(RX_Hostname, "LH702")) ||
+		(RX_Config.printer.type==printer_test_table_seon && str_start(RX_Hostname, "Roman"))) 
+		_SimuPLC = TRUE;
 	
 	if (_SimuPLC) rx_thread_start(_plc_simu_thread, NULL, 0, "_plc_simu_thread");
 	else		  rx_thread_start(_plc_thread, NULL, 0, "_plc_thread");
@@ -893,6 +895,10 @@ static void _plc_get_var(RX_SOCKET socket, char *varList)
 		{
 			strcpy(var, str);
 			if (lc_get_value_by_name(name, value)==0) len += sprintf(&answer[len], "=%s", value);
+            else if (RX_Config.printer.type == printer_test_table_seon)
+            {
+                
+            }
 			else
 			{
 				if (_SimuPLC)	len += sprintf(&answer[len], "=SIMU");
@@ -931,7 +937,7 @@ static void _plc_set_var(RX_SOCKET socket, char *varList)
 			*val++=0;
 			strcpy(var, str);
 			for(char *ch=val; *ch; ch++) if (*ch==',') *ch='.';
-			if (!_plc_set_cpu_cmd(name, val))
+			if (!_plc_set_cpu_cmd(name, val) && RX_Config.printer.type != printer_test_table_seon)
 			{
 				ret = lc_set_value_by_name(name, val);
 			//	Error(LOG, 0, "SET %s=%s", name, val);

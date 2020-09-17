@@ -47,6 +47,7 @@
     <ClInclude Include="chiller.h" />
     <ClInclude Include="cleaf_orders.h" />
     <ClInclude Include="ctr.h" />
+    <ClInclude Include="drive_ctrl.h" />
     <ClInclude Include="pe_main.h" />
     <ClInclude Include="prod_log.h" />
     <ClInclude Include="lh702_ctrl.h" />
@@ -83,6 +84,7 @@
     <ClInclude Include="step_ctrl.h" />
     <ClInclude Include="step_std.h" />
     <ClInclude Include="step_test.h" />
+    <ClInclude Include="step_tts.h" />
     <ClInclude Include="step_tx.h" />
     <ClInclude Include="lh702_tcp_ip.h" />
   </ItemGroup>
@@ -91,6 +93,7 @@
     <ClCompile Include="chiller.c" />
     <ClCompile Include="cleaf_orders.c" />
     <ClCompile Include="ctr.c" />
+    <ClCompile Include="drive_ctrl.c" />
     <ClCompile Include="pe_main.c" />
     <ClCompile Include="prod_log.c" />
     <ClCompile Include="lh702_ctrl.c" />
@@ -126,6 +129,7 @@
     <ClCompile Include="step_ctrl.c" />
     <ClCompile Include="step_std.c" />
     <ClCompile Include="step_test.c" />
+    <ClCompile Include="step_tts.c" />
     <ClCompile Include="step_tx.c" />
     <ClCompile Include="version.c" />
   </ItemGroup>
@@ -158,7 +162,6 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <DefineConstants></DefineConstants>
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
@@ -362,7 +365,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>$(DefineConstants);WIN32;_DEBUG;_CONSOLE;_LIB;MLPI_SERVER_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;MLPI_SERVER_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>..\rx_ink_lib;..\rx_common_lib;..\Externals\TinyXml;..\rx_rip_lib;..\Externals\libtiff;..\rx_tif_lib;rx_rexroth_lib;..\rx_pecore_lib;..\Externals\matrix\win\h;..\Externals\mlpi\include;..\Externals\libxl\include_c</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>

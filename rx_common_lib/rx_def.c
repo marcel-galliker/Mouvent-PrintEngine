@@ -158,6 +158,7 @@ int rx_def_is_scanning(EPrinterType printerType)
 	case printer_TX801:				return TRUE;
 	case printer_TX802:				return TRUE;
 	case printer_TX404:				return TRUE;
+    case printer_test_table_seon:	return TRUE;
 	default: return FALSE;
 	}
 }
@@ -187,6 +188,18 @@ int rx_def_is_lb(EPrinterType printerType)
 	case printer_cleaf:		return TRUE;
 	default: return FALSE;
 	}
+}
+
+//--- rx_def_is_production_test ---------------------------------------
+int rx_def_is_tts(EPrinterType printerType)
+{
+    switch (printerType)
+    {
+    case printer_test_table_seon:
+        return TRUE;
+    default:
+        return FALSE;
+    }
 }
 
 //--- rx_def_is_test ---------------------------------------

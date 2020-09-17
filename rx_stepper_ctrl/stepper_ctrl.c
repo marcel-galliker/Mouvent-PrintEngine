@@ -34,6 +34,8 @@
 #include "tcp_ip.h"
 #include "test_table.h"
 #include "cleaf.h"
+#include "tts_lift.h"
+#include "tts_ink.h"
 #include "stepper_ctrl.h"
 
 #ifdef linux
@@ -196,6 +198,12 @@ int _handle_ctrl_msg(RX_SOCKET socket, void *pmsg)//, int len, struct sockaddr *
 		switch (RX_StepperCfg.printerType)
 		{
 		case printer_test_table:		tt_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]); break;
+        case printer_test_table_seon:	if (RX_StepperCfg.boardNo == 0)
+										    tts_lift_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);
+										else
+                                            tts_ink_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);
+										break;
+
 		case printer_TX801:				
 		case printer_TX802:				if (RX_StepperCfg.boardNo == step_lift) tx801_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);
 										else
@@ -256,6 +264,11 @@ static void _do_config(SStepperCfg *pcfg)
 	case printer_test_slide:		break;
 	case printer_test_slide_only:	break;
 	case printer_test_table:	tt_init(); break;
+    case printer_test_table_seon:	if (RX_StepperCfg.boardNo == 0)
+									    tts_lift_init();
+									else
+                                        tts_ink_init();
+									break;
 	case printer_TX801:			
 	case printer_TX802:			if (RX_StepperCfg.boardNo == step_lift) tx801_init();
 								else

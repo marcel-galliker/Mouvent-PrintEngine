@@ -293,6 +293,9 @@ void pump_tick_10ms(void)
 				else RX_Status.mode = RX_Config.mode;
 				break;
 		
+		case ctrl_leak_test:
+		case ctrl_leak_test_step1:
+		case ctrl_leak_test_step2:
 		case ctrl_off:
 		case ctrl_undef:
 		case ctrl_error:

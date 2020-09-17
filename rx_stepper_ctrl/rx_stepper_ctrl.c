@@ -37,6 +37,8 @@
 #include "lb702.h"
 #include "lbrob.h"
 #include "test.h"
+#include "tts_lift.h"
+#include "tts_ink.h"
 #include "stepper_ctrl.h"
 #include "slide.h"
 #include "motor.h"
@@ -83,6 +85,11 @@ static void _main_loop()
 		switch (RX_StepperCfg.printerType)
 		{
 		case printer_test_table: 	tt_main(ticks, menu); break;
+        case printer_test_table_seon:	if (RX_StepperCfg.boardNo == 0)
+										    tts_lift_main(ticks, menu);
+										else
+                                            tts_ink_main(ticks, menu);
+										break;
 		case printer_TX801:			
 		case printer_TX802:			if (RX_StepperCfg.boardNo == 0)
 									    tx801_main(ticks, menu);
@@ -120,6 +127,12 @@ static void _main_loop()
 			switch (RX_StepperCfg.printerType)
 			{
 			case printer_test_table: 	_AppRunning = tt_menu(); break;
+            case printer_test_table_seon:	if (RX_StepperCfg.boardNo == 0)
+											    _AppRunning = tts_lift_menu();
+											else
+                                                _AppRunning = tts_ink_menu();
+											break;
+                
 			case printer_TX801:			
 			case printer_TX802:			if (RX_StepperCfg.boardNo == 0) _AppRunning = tx801_menu(); 
 										else							_AppRunning = txrob_menu(); 
@@ -175,6 +188,11 @@ int main(int argc, char** argv)
 	switch (RX_StepperCfg.printerType)
 	{
 	case printer_test_table: 	tt_init(); break;
+    case printer_test_table_seon:	if (RX_StepperCfg.boardNo == 0)
+									    tts_lift_init();
+									else
+                                        tts_ink_init();
+									break;
 	case printer_TX801:			
 	case printer_TX802:			if (RX_StepperCfg.boardNo == 0)	tx801_init();
 								else

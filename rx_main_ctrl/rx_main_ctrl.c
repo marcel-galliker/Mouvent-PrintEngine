@@ -213,6 +213,7 @@ int main(int argc, char* argv[])
 		arg_simuEncoder		= TRUE;
 //		arg_simuHeads		= TRUE;
 		arg_simuChiller		= TRUE;	
+		arg_simuDrive		= TRUE;
 	}
 
 	net_init();

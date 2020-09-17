@@ -123,7 +123,7 @@ void fpga_init()
 	memset(_PWM_Speed, 0, sizeof(_PWM_Speed));
 	
 	_GuiTimer = rx_get_ticks()+1000;
-	Fpga.par->output |= OUT_GUI_START;
+	//Fpga.par->output |= OUT_GUI_START;
 	_Init = TRUE;
 }
 

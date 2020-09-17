@@ -264,6 +264,11 @@ namespace RX_DigiPrint.Views
                         TabMachine.Content = new TestTableView.TestTableView();
                         break;
 
+                    case EPrinterType.printer_test_table_seon:
+                        MachineName.Text="Test Table Seon";
+                        TabMachine.Content = new TestTableSeonView.TestTableSeonView();
+                        break;
+
                     case EPrinterType.printer_cleaf:
                         MachineName.Text="CLEAF";
 					    TabMachine.Content = new CleafView.CleafView();

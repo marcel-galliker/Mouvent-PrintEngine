@@ -51,4 +51,6 @@ void ctrl_tick(void);
 
 void ctrl_head_alive(int headNo);
 
+void ctrl_set_cluster_no(SValue* pdata);
+
 

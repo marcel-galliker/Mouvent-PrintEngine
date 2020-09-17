@@ -160,6 +160,7 @@ static int   _check_encoder(void);
 static int   _check_encoder_tel_freq(void);
 static void  _handle_pd(int pd);
 static void  _check_errors(void);
+static void  _check_linux_version(void);
 static void  _count_dots(void);
 static void  _check_state_machines(void);
 
@@ -1718,8 +1719,8 @@ void  fpga_main(int ticks, int menu)
 	if (!_Init) return;
 
 	int time=rx_get_ticks();
-	
-	_check_errors();
+    _check_linux_version();
+    _check_errors();
 	if (menu)
 	{
 		//--- LED -------------------------------
@@ -2147,6 +2148,14 @@ static void _check_errors(void)
 		set_err (udp_test_sent_alive(i)-Fpga.stat->udp_alive[i]>10, &RX_HBStatus[0].err, err_udp_alive_0+i, "UDP Alive missing");
 	}
 	*/
+}
+
+//--- _check_linux_version ----------------------------------------------
+static void _check_linux_version()
+{
+    #define MIN_LINUX_VERSION	26
+    if (RX_LinuxDeployment < MIN_LINUX_VERSION && RX_HBConfig.printerType == printer_test_table_seon)
+        Error(ERR_CONT, 0, "Installed Linux-Version: V%d, Needed min: V%d ", RX_LinuxDeployment, MIN_LINUX_VERSION);
 }
 
 //--- _check_state_machines --------------------

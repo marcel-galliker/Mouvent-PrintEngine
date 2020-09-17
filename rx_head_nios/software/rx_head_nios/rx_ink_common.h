@@ -133,6 +133,7 @@ typedef enum EPrinterType
 	printer_test_table,			// 1:
 	printer_test_slide,			// 2:
 	printer_test_slide_only,	// 3:
+	printer_test_table_seon,	// 4:
 
 	//--- web printers ------------------------------
 	printer_LB701=1000,			// 1000: 
@@ -260,9 +261,17 @@ typedef enum EnFluidCtrlMode
     ctrl_cal_step3,   		// 0x403:
     ctrl_cal_step4,   		// 0x404:
 	ctrl_cal_done,       	// 0x405:
+    
+    ctrl_leak_test = 0x500,	// 0x500:
+    ctrl_leak_test_step1,
+	ctrl_leak_test_step2,
 
     ctrl_test_watchdog = 0x10000,
     ctrl_test, 				// 0x10001
+	ctrl_offset_cal, 		// 0x10002
+	ctrl_offset_cal_done,	// 
+
+    ctrl_toggle_meniscus = 0x20000,
 } EnFluidCtrlMode;
 
 char *FluidCtrlModeStr(EnFluidCtrlMode mode);

@@ -374,10 +374,12 @@
     <Compile Include="Helpers\RxXamGrid.cs" />
     <Compile Include="Helpers\UnitConversion.cs" />
     <Compile Include="Models\ClusterAlignment.cs" />
+    <Compile Include="Models\ClusterNo.cs" />
     <Compile Include="Models\ClusterStat.cs" />
     <Compile Include="Models\ClusterStatList.cs" />
     <Compile Include="Models\Density.cs" />
     <Compile Include="Models\DisabledJets.cs" />
+    <Compile Include="Models\Enums\EN_TestFluid.cs" />
     <Compile Include="Models\HeadAdjustmentHelp.cs" />
     <Compile Include="Models\JetCompensation.cs" />
     <Compile Include="Models\JetCompensationDensityViewModel.cs" />
@@ -663,6 +665,12 @@
     <Compile Include="Views\PrintSystemView\AdjustmentHelp.xaml.cs">
       <DependentUpon>AdjustmentHelp.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\PrintSystemView\FluidCommands.xaml.cs">
+      <DependentUpon>FluidCommands.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PrintSystemView\FluidSettings.xaml.cs">
+      <DependentUpon>FluidSettings.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\PrintSystemView\StepperGridCleaf.xaml.cs">
       <DependentUpon>StepperGridCleaf.xaml</DependentUpon>
     </Compile>
@@ -707,6 +715,15 @@
     </Compile>
     <Compile Include="Views\Settings\WlanSettings.xaml.cs">
       <DependentUpon>WlanSettings.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\TestTableSeonView\TestTableSeonCommands.xaml.cs">
+      <DependentUpon>TestTableSeonCommands.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\TestTableSeonView\TestTableSeonStepperSettings.xaml.cs">
+      <DependentUpon>TestTableSeonStepperSettings.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\TestTableSeonView\TestTableSeonView.xaml.cs">
+      <DependentUpon>TestTableSeonView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\TestTableView\TestTableView.xaml.cs">
       <DependentUpon>TestTableView.xaml</DependentUpon>
@@ -884,6 +901,9 @@
     </Compile>
     <Compile Include="Views\UserControls\RxTaskSwitch.xaml.cs">
       <DependentUpon>RxTaskSwitch.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UserControls\SetClusterNo.xaml.cs">
+      <DependentUpon>SetClusterNo.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\UserControls\SetComputerNameWindow.xaml.cs">
       <DependentUpon>SetComputerNameWindow.xaml</DependentUpon>
@@ -1272,6 +1292,14 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\PrintSystemView\FluidCommands.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\PrintSystemView\FluidSettings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\PrintSystemView\StepperGridCleaf.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -1329,6 +1357,18 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Settings\WlanSettings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\TestTableSeonView\TestTableSeonCommands.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\TestTableSeonView\TestTableSeonStepperSettings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\TestTableSeonView\TestTableSeonView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -1553,6 +1593,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\UserControls\SetClusterNo.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\UserControls\SetComputerNameWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -1596,6 +1640,9 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Resource Include="Resources\Bitmaps\Set_Number.ico" />
+    <Resource Include="Resources\Bitmaps\TestTableSeon\Slide.png" />
+    <Resource Include="Resources\Bitmaps\TestTableSeon\TestTableSeon.JPG" />
     <Resource Include="Resources\Bitmaps\PG_Mark_INV.ico" />
     <Resource Include="Resources\Bitmaps\density.png" />
     <Resource Include="Resources\Bitmaps\Tex\TX801.png" />

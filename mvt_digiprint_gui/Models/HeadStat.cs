@@ -35,8 +35,30 @@ namespace RX_DigiPrint.Models
         {
             get { return _Connected; }
             set { SetProperty(ref _Connected, value);}
-        }       
-        
+        }
+
+        //--- Property Meniscus_Disabled ---------------------------------------
+        private Boolean _Meniscus_Disabled = false;
+        public Boolean Meniscus_Disabled
+        {
+            get { return _Meniscus_Disabled; }
+            set { SetProperty(ref _Meniscus_Disabled, value); }
+        }
+
+        private Int32 _Cooler_Pressure = 0;
+        public Int32 Cooler_Pressure
+        {
+            get { return _Cooler_Pressure; }
+            set { SetProperty(ref _Cooler_Pressure, value); }
+        }
+
+        private UInt32 _Cooler_Temp = 0;
+        public UInt32 Cooler_Temp
+        {
+            get { return _Cooler_Temp; }
+            set { SetProperty(ref _Cooler_Temp, value); }
+        }
+
         //--- Property No ---------------------------------------
         private string _Name;
         public string Name
@@ -281,6 +303,13 @@ namespace RX_DigiPrint.Models
 			set { SetProperty(ref _FlowFactor,value); }
 		}
 
+        private UInt32 _ClusterNo;
+        public UInt32 ClusterNo
+        {
+            get { return _ClusterNo; }
+            set { SetProperty(ref _ClusterNo, value); }
+        }
+
 		//--- Property FlowFactorWarning ---------------------------------------
 		private bool _FlowFactorWarning=false;
 		public bool FlowFactorWarning
@@ -355,8 +384,16 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _Voltage, value); }
         }
 
-		//--- Property StateBrush ---------------------------------------
-		private Brush _StateBrush;
+        //--- Property Drive_Voltage ---------------------------------------
+        private UInt16 _Drive_Voltage;
+        public UInt16 Drive_Voltage
+        {
+            get { return _Drive_Voltage; }
+            set { SetProperty(ref _Drive_Voltage, value); }
+        }
+
+        //--- Property StateBrush ---------------------------------------
+        private Brush _StateBrush;
 		public Brush StateBrush
 		{
 			get { return _StateBrush; }
@@ -385,8 +422,9 @@ namespace RX_DigiPrint.Models
                 for (int i = 0; i < DisabledJets.Length; i++) DisabledJets[i] = item.eeprom_mvt.disabledJets[i];
                 _DisabledJetsCRC = item.eeprom_mvt.disabledJetsCRC;
             }
-            
+
             Voltage = item.eeprom_mvt.voltage;
+            Drive_Voltage = item.eeprom.voltage;
 
             try
             {
@@ -423,6 +461,8 @@ namespace RX_DigiPrint.Models
             ImgBuf      = item.imgBuf;
             PrintGoCnt  = item.printGoCnt;
             PrintDoneCnt= item.printDoneCnt;
+
+            ClusterNo = item.eeprom_mvt.clusterNo;
 
             // Conditioner
             TempHead    = item.tempHead;

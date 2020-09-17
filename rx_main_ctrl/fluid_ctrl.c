@@ -29,6 +29,8 @@
 #include "datalogic.h"
 #include "plc_ctrl.h"
 #include "print_ctrl.h"
+#include "drive_ctrl.h"
+#include "step_tts.h"
 #include "fluid_ctrl.h"
 
 //--- SIMULATION ----------------------------------------------
@@ -49,7 +51,10 @@ static int				_PurgeAll=FALSE;
 static int				_PurgeFluidNo;
 static int				_Scanning;
 static int				_ScalesFluidNo=-1;
-	
+static int				_LeakTest = 0;
+static int				_LeakTestNo = 0;
+static int				_LeakTestTime = 0;
+
 //--- prototypes -----------------------
 static void* _fluid_thread(void *par);
 
@@ -276,6 +281,13 @@ void fluid_set_config(void)
 							}
 						break;
                         
+    case printer_test_table_seon:
+							_FluidToScales[0] = 0;
+                            _FluidToScales[1] = 1;
+                            _FluidToScales[2] = 2;
+                            _FluidToScales[3] = 3;
+                            break;
+
 	default:			for (i=0; i<SIZEOF(_FluidToScales); i++) _FluidToScales[i]=i;	
 						break; 
 	}
@@ -599,7 +611,6 @@ void undefine_PurgeCtrlMode(void)
 static void _control(int fluidNo)
 {
 	static int	_txrob;
-
 	int i;
 	int no = fluidNo*INK_PER_BOARD;
 	SInkSupplyStat *pstat = &_FluidStatus[no];
@@ -643,8 +654,10 @@ static void _control(int fluidNo)
 				case ctrl_purge_soft:
 				case ctrl_purge_hard:		if (lbrob) steplb_rob_to_wipe_pos(no / 2, rob_fct_purge_all);  //steplb_rob_to_wipe_pos(no / 2, HeadNo + rob_fct_purge_head0);
 											else	   step_lift_to_top_pos();
-				
-											_PurgeCtrlMode = pstat->ctrlMode;
+
+                                            if (_LeakTest == 2) _LeakTest = 3;
+
+                                            _PurgeCtrlMode = pstat->ctrlMode;
 											_txrob = rx_def_is_tx(RX_Config.printer.type) && step_active(1);
                                             int time = (RX_Config.printer.type==printer_TX802 || RX_Config.printer.type == printer_TX404)? (2*TIME_HARD_PURGE) : TIME_HARD_PURGE;
 											if (pstat->purge_putty_ON) time=0;
@@ -674,26 +687,30 @@ static void _control(int fluidNo)
                 case ctrl_purge_step1:		if ((!lbrob && step_lift_in_top_pos()) || (lbrob && steplb_rob_in_wipe_pos(no / 2, rob_fct_purge_all)))  // steplb_lift_in_up_pos_individually(no / 2))
 											{
 												if (_txrob && _PurgeFluidNo < 0 && !steptx_rob_wash_done()) break;
-												/*
-												if (lbrob && !steplb_rob_in_wipe_pos(no/2, HeadNo + rob_fct_purge_head0))
-												{
-													if (!RX_StepperStatus.robinfo.moving && !RX_StepperStatus.info.moving)	steplb_rob_to_wipe_pos(no/2, HeadNo + rob_fct_purge_head0);
-													break;
-												}
-												*/
 												plc_to_purge_pos();
+                                                if (RX_Config.printer.type == printer_test_table_seon)
+                                                {
+                                                    drive_move_waste();
+                                                }
 												_send_ctrlMode(no, ctrl_purge_step2, TRUE);																										
 											}
 											// else if (lbrob && !RX_StepperStatus.info.moving && RX_StepperStatus.robinfo.moving) steplb_rob_to_wipe_pos(no/2, HeadNo + rob_fct_purge_head0);
 											break;
 								
-				case ctrl_purge_step2:		if (plc_in_purge_pos())
+				case ctrl_purge_step2:		if ((plc_in_purge_pos() && RX_Config.printer.type != printer_test_table_seon) || (RX_Config.printer.type == printer_test_table_seon && drive_in_waste()))
 											{
+                                                if (RX_Config.printer.type == printer_test_table_seon)	steptts_to_print_pos();
 												_send_ctrlMode(no, ctrl_purge_step3, TRUE);												
 											}
 											break;
 
-				case ctrl_purge_step3:		_send_ctrlMode(no, ctrl_purge_step4, TRUE);
+				case ctrl_purge_step3:		
+											if (RX_Config.printer.type != printer_test_table_seon || RX_StepperStatus.info.z_in_print) _send_ctrlMode(no, ctrl_purge_step4, TRUE);
+											if (RX_Config.printer.type == printer_test_table_seon)
+                                            {
+                                                int pos = TRUE;
+                                                steptts_handle_gui_msg(INVALID_SOCKET, CMD_TTS_PUMP_PURGE, &pos, sizeof (pos));
+                                            }
 											// if (lbrob) steplb_rob_wipe_start(no/2, HeadNo + rob_fct_purge_head0);
 											break;
 
@@ -722,7 +739,7 @@ static void _control(int fluidNo)
 													_PurgeCtrlMode = ctrl_undef;
 												}
 											}
- 											else if (RX_PrinterStatus.printState==ps_pause)
+ 											else if (RX_PrinterStatus.printState==ps_pause && !_LeakTest)
                                             {
 												if (_PurgeCtrlMode!=ctrl_undef && _all_fluids_in_3fluidCtrlModes(ctrl_purge_step4, ctrl_off, ctrl_print))
 												{
@@ -730,10 +747,26 @@ static void _control(int fluidNo)
 													_PurgeCtrlMode = ctrl_undef;
                                                 }											
                                             }
+                                            else if (_LeakTest)
+                                            {
+                                                 
+                                                 _send_ctrlMode(no, ctrl_leak_test_step1, TRUE);
+												if (!_Flushed) _PurgeCtrlMode = ctrl_undef;
+                                                if (RX_Config.printer.type == printer_test_table_seon)
+												{
+												    int pos = FALSE;
+												    steptts_handle_gui_msg(INVALID_SOCKET, CMD_TTS_PUMP_PURGE, &pos, sizeof (pos));
+												}
+                                            }
 											else 
 											{
-												_send_ctrlMode(no, ctrl_off, TRUE);
+                                                _send_ctrlMode(no, ctrl_off, TRUE);
 												if (!_Flushed) _PurgeCtrlMode = ctrl_undef;
+                                                if (RX_Config.printer.type == printer_test_table_seon)
+												{
+												    int pos = FALSE;
+												    steptts_handle_gui_msg(INVALID_SOCKET, CMD_TTS_PUMP_PURGE, &pos, sizeof (pos));
+												}
 											}
 											break;
 
@@ -757,10 +790,46 @@ static void _control(int fluidNo)
 				//--- ctrl_print -------------------------------------------------------------------
 				case ctrl_print:			_PurgeAll=FALSE;
                                             break;
-				
-				//--- ctrl_off ---------------------------------------------------------------------
+                                            
+                case ctrl_leak_test:		_LeakTest = 1;
+											_send_ctrlMode(-1, ctrl_off, TRUE);
+											break;
+                    
+                case ctrl_leak_test_step1:	if (!_LeakTestTime) _LeakTestTime = rx_get_ticks()+30000;
+											else if (_LeakTestTime && rx_get_ticks() >= _LeakTestTime)
+                                            {
+												if (_FluidStatus[1].cylinderPres < 250)
+													Error(ERR_CONT, 0, "Ink Pressure too low: %dmbar", _FluidStatus[1].cylinderPres);
+                                                else Error(LOG, 0, "Ink Pressure is ok -> %dmbar", _FluidStatus[1].cylinderPres);
+                                                _LeakTest = FALSE;
+                                                _LeakTestTime = 0;
+                                                _send_ctrlMode(no, ctrl_leak_test_step2, TRUE);
+                                            }
+											break;
+                                            
+                case ctrl_leak_test_step2:	if (!_LeakTestTime) _LeakTestTime = rx_get_ticks()+5000;
+											else if (_LeakTestTime && rx_get_ticks() >= _LeakTestTime)
+                                            {
+                                                _LeakTestTime = 0;
+                                                _send_ctrlMode(-1, ctrl_off, TRUE);    
+                                            }
+                    
+                    break;
+
+                //--- ctrl_off ---------------------------------------------------------------------
 				case ctrl_off:				_PurgeAll=FALSE;
-											//step_rob_stop();
+											if (_LeakTest == 1) 
+                                            {
+                                                int i;
+                                                for (i = 4*_LeakTestNo; i < 4* (_LeakTestNo + 1); i++)
+                                                {
+                                                    ctrl_send_head_fluidCtrlMode(i, ctrl_purge_hard, TRUE, FALSE);
+                                                }
+                                                _LeakTest++;
+                                            }
+                                            else if (_LeakTest == 3 && _LeakTestNo == no)	_LeakTest = 0;
+
+                                            //step_rob_stop();
 											//step_lift_stop();
 					break;				
 			}
@@ -1225,11 +1294,11 @@ INT32 fluid_get_pumpFeedback(int no)
 /*
 INT32 fluid_get_amcTemp(int no)
 {
-	if (no >= 0 && no < SIZEOF(_FluidStatus))
-	{
-		return _FluidStatus[no].temp;
-	}
-	return INVALID_VALUE;
+    if (no >= 0 && no < SIZEOF(_FluidStatus))
+    {
+        return _FluidStatus[no].temp;
+    }
+    return INVALID_VALUE;
 }
 */
 //--- fluid_get_error ---------------------------------------
@@ -1240,4 +1309,35 @@ INT32 fluid_get_error(int no)
         return _FluidStatus[no].err;
     }
     return INVALID_VALUE;
+}
+
+//--- do_fluid_flush_pump ------------------------------------------------
+void do_fluid_flush_pump(RX_SOCKET socket)
+{
+    int i;
+    int power; // %
+    for (i = 0; i < FLUID_BOARD_CNT; i++)
+    {
+        if (_FluidThreadPar[i].socket != INVALID_SOCKET)
+        {
+            if (_FluidStatus[i].flush_pump_val)
+                power = 0;
+            else
+                power = 75;
+            sok_send_2(&_FluidThreadPar[i].socket, CMD_FLUID_FLUSH, sizeof(power), &power);
+        }
+    }
+}
+
+//--- do_fluid_leak_test ---------------------------------------------
+void do_fluid_leak_test(RX_SOCKET socket, SValue *pmsg)
+{
+    if (!_LeakTest)
+    {
+        _LeakTestNo = pmsg->value - 1;
+        _FluidCtrlMode = ctrl_leak_test;
+        //_send_ctrlMode(-1, ctrl_leak_test, TRUE);
+        fluid_send_ctrlMode(-1, ctrl_leak_test, TRUE);
+    }
+    
 }

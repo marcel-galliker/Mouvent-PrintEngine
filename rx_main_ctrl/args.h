@@ -15,6 +15,7 @@
 
 extern int arg_debug;
 extern int arg_simuPLC;
+extern int arg_simuDrive;
 extern int arg_simuEncoder;
 extern int arg_simuHeads;
 extern int arg_simuChiller;
