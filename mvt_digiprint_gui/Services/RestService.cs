@@ -4,18 +4,16 @@ using System.Net;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using RX_DigiPrint.Models;
-using System.Reflection;
 using System.Collections.Specialized;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using Microsoft.SqlServer.Server;
-using System.Linq;
 using System.Diagnostics;
 using System.IO;
+using System.Text.Json;
+using JsonSerializer = System.Text.Json.JsonSerializer;
+using System.Text.Json.Serialization;
 
 namespace RX_DigiPrint.Services
 {
-    public class RestService
+	public class RestService
     {
         // to build the rest response
         public class Data

@@ -516,8 +516,8 @@ static int _send_image_cmd(SBmpSplitInfo *pInfo)
 	imageCmd.image.blkCnt			= pInfo->blkCnt;
 	imageCmd.image.jetPx0			= pInfo->jetPx0;
 	imageCmd.image.lengthPx			= pInfo->srcLineCnt;
-	if (rx_def_is_lb(RX_Spooler.printerType) && pInfo->srcLineCnt>1)
-		imageCmd.image.lengthPx		= pInfo->srcLineCnt-1;	// Bug in FPGA: (when srcLineCnt==12300, gap=0 it sometimes prints an additional line of old data [instead of blank] between the labels)
+//	if (rx_def_is_lb(RX_Spooler.printerType) && pInfo->srcLineCnt>1)
+//		imageCmd.image.lengthPx		= pInfo->srcLineCnt-1;	// Bug in FPGA: (when srcLineCnt==12300, gap=0 it sometimes prints an additional line of old data [instead of blank] between the labels)
 	imageCmd.image.widthPx			= pInfo->widthPx;
 	imageCmd.image.widthBytes		= pInfo->widthBt;
 	imageCmd.image.flipHorizontal	= FALSE;
@@ -857,7 +857,7 @@ static int _send_to_board(SHBThreadPar *par, int head, int blkNo, int blkCnt)
 			SPageId *plast = &par->lastId[head];
 			if (memcmp(plast, pid, sizeof(SPageId)))
 			{
-				if (pinfo->printMode!=PM_TEST && pinfo->printMode!=PM_TEST_SINGLE_COLOR && pinfo->printMode!=PM_TEST_JETS) _check_image_blocks(par, pinfo, headMin, headMax);
+				if (!rx_printMode_is_test(pinfo->printMode)) _check_image_blocks(par, pinfo, headMin, headMax);
 				_send_image_cmd(pinfo);
 				static int scan=0;
 				TrPrintfL(_Trace, "All sent: blk0=%d, cnt=%d, scan=%d\n", pinfo->blk0, pinfo->blkCnt, ++scan);

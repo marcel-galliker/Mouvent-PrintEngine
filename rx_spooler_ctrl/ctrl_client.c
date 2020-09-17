@@ -604,6 +604,11 @@ static int _do_print_abort(RX_SOCKET socket)
 			data_free(&_BufferSize[b], _Buffer[b]);
 		}
 	}
+	
+	//--- test prints: force reloading file at each print start ---------
+	if (str_start(_LastFilename, PATH_BIN_SPOOLER)) 
+		memset(&_LastFilename, 0, sizeof(_LastFilename));
+
 	return REPLY_OK;
 }
 

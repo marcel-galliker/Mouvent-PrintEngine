@@ -80,12 +80,6 @@ namespace RX_Common
             Canvas.SetTop(Pad, top);
         }
 
-        //--- _Tick ------------------------------------------
-        private void _Tick(object o)
-        {
-            if (o is Button) RxBindable.Invoke(()=>button_clicked(o, null));
-        }
-
         //--- Property result ------------------------------------------------
         private string _result = "0";
         public string Result
@@ -185,7 +179,7 @@ namespace RX_Common
         //--- special for the first touch ---------------------------------------------
         private void Window_TouchUp(object sender, System.Windows.Input.TouchEventArgs e)
         {
-			new Timer(_Tick, e.Source as Button, 50, 0);
+            button_clicked(e.Source, null);
         }
 
         private void Rectangle_GiveFeedback(object sender, GiveFeedbackEventArgs e)

@@ -372,6 +372,7 @@ int tif_load(SPageId *id, const char *filedir, const char *filename, int printMo
 	int	wakeupOn;
 	int time;
 	INT32 height, lineLen;
+	FLOAT val;
 	char filepath[MAX_PATH];
 	STifThreadPar *ppar;
 			
@@ -419,7 +420,9 @@ int tif_load(SPageId *id, const char *filedir, const char *filename, int printMo
 			if (!TIFFGetField (ppar->file, TIFFTAG_BITSPERSAMPLE, &pinfo->bitsPerPixel))	return Error(ERR_CONT, 0, "File %s: Could not get bit per sample value", filepath);
 			if (!TIFFGetField (ppar->file, TIFFTAG_IMAGEWIDTH,    &pinfo->srcWidthPx))		return Error(ERR_CONT, 0, "File %s: Could not get image width", filepath);
 			if (!TIFFGetField (ppar->file, TIFFTAG_IMAGELENGTH,   &pinfo->lengthPx))		return Error(ERR_CONT, 0, "File %s: Could not get image height", filepath);
-			
+			if (TIFFGetField (ppar->file, TIFFTAG_XRESOLUTION,   &val))	pinfo->resol.x=(int)val; else pinfo->resol.x=DPI_X;
+            if (TIFFGetField (ppar->file, TIFFTAG_YRESOLUTION,   &val))	pinfo->resol.y=(int)val; else pinfo->resol.y=DPI_Y;
+
 			pinfo->srcWidthPx	+= spacePx; 
 			pinfo->lineLen		= lineLen = (pinfo->srcWidthPx*pinfo->bitsPerPixel+7)/8;
 			pinfo->dataSize		= pinfo->lineLen*pinfo->lengthPx;								
@@ -485,6 +488,7 @@ int tif_load(SPageId *id, const char *filedir, const char *filename, int printMo
 		}
 		pinfo->lengthPx += 2*wakeupLen;
 			
+		/*
 		// Bug in FPGA: (when srcLineCnt==12300, gap=0 it sometimes prints an additional line of old data [instead of blank] between the labels)
 		if (rx_def_is_lb(RX_Spooler.printerType))		
 		{
@@ -493,6 +497,7 @@ int tif_load(SPageId *id, const char *filedir, const char *filename, int printMo
 				memset(_ThreadPar[i].buffer+pinfo->dataSize, 0x00, lineLen);
 			}
 		}
+		*/
 	}
 	
 //	Error(LOG, 0, "Loaded, time=%d ms", rx_get_ticks()-time);

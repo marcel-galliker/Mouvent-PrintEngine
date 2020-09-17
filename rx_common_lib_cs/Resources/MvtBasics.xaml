@@ -48,6 +48,7 @@
     <System:Double x:Key="MvtFontSizeStd">14.66</System:Double>
     <System:Double x:Key="MvtFontSize">14.66</System:Double>
     <System:Double x:Key="MvtFontSizeLarge">20</System:Double>
+    <System:Double x:Key="MvtFontSizeCombobox">18</System:Double>
     <System:Double x:Key="MvtFontSizeXL">32</System:Double>
     <System:Double x:Key="MvtFontSizeSmall">12</System:Double>
     <System:Double x:Key="MvtFontSizeXS">10</System:Double>

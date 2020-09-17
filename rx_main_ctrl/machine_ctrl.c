@@ -77,6 +77,8 @@ int		machine_tick(void)
 {
 	if(rx_def_is_tx(RX_Config.printer.type))
 	{
+		if (RX_StepperStatus.info.z_in_cap) _CappingTimer = 0;  // reset timer if already in cap
+
 		if (_CappingTimer>0 && _CappingTimer<rx_get_ticks())
 		{
 			_CappingTimer=0;
@@ -86,7 +88,6 @@ int		machine_tick(void)
 	}
 	return REPLY_OK;
 }
-
 
 //--- machine_reset --------------------------------
 void machine_reset(void)

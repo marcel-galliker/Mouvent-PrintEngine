@@ -210,3 +210,9 @@ int rx_def_use_pq(EPrinterType printerType)
 	default: return TRUE;
 	}
 }
+
+//--- rx_printMode_is_test -------------------
+int rx_printMode_is_test(int printMode)
+{
+	return printMode==PM_TEST || printMode==PM_TEST_SINGLE_COLOR || printMode==PM_TEST_JETS;
+}

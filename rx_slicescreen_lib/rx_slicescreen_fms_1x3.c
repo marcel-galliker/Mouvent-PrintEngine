@@ -183,13 +183,13 @@ int rx_screen_slice_FMS_1x3g(SSLiceInfo *inplane, SSLiceInfo *outplane, void * e
 							}
 						}
 
-						switch (i % 4) {
-						case 0: *pDst = Dst << 6; break;
-						case 1: *pDst |= Dst << 4; break;
-						case 2: *pDst |= Dst << 2; break;
-						case 3: *pDst |= Dst; break;
-						}
+					switch (i % 4) {
+					case 0: *pDst = Dst << 6; break;
+					case 1: *pDst |= Dst << 4; break;
+					case 2: *pDst |= Dst << 2; break;
+					case 3: *pDst |= Dst; break;
 					}
+				}
 				}
 			}
 			if ((i % 4) == 3)
@@ -240,15 +240,20 @@ int rx_screen_slice_FMS_1x3g_mag(SSLiceInfo *inplane, SSLiceInfo *outplane, void
 		pSrc = inplane->buffer + l*inplane->lineLen;
 		pDst = outplane->buffer+ l*outplane->lineLen;
 		taPtr   = &pta->ta16[(l % pta->heigth) * ta_width];
-		for (i = 0; i < (int)inplane->widthPx; )
+		for (i = 0; i < (int)inplane->widthPx;)
 		{
 			WSrc = ((UINT16)*pSrc++) * pplaneScreenConfig->densityFactor[i];
 
 			ta = taPtr[i % ta_width];
-			if      (WSrc > WLimit2+ta) dot = 0x03;
-			else if (WSrc > WLimit1+ta) dot = 0x02;
-			else if (WSrc > ta)			dot = 0x01;
-			else                        dot = 0x00;
+
+			if (WSrc > ta)
+			{
+				if (WSrc>WLimit2)		dot = ((WSrc-WLimit2) >= ta/3)? 0x03 : 0x02;
+				else if (WSrc>WLimit1)	dot = ((WSrc-WLimit1) >= ta/3)? 0x02 : 0x01;
+				else					dot = 0x01;
+			}
+			else dot=0x00;
+
 			switch(i++&3)
 			{
 			case 0: *pDst    = dot << 6; break;

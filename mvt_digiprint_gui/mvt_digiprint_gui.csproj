@@ -267,7 +267,6 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
-    <Reference Include="System.Web" />
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL" />
     <Reference Include="System.Xml" />
@@ -596,7 +595,6 @@
     <Compile Include="Views\LB701UVView\LB701UV_Cmd.xaml.cs" />
     <Compile Include="Views\LB701UVView\LB701UV_DiePos.xaml.cs" />
     <Compile Include="Views\LB701UVView\LB701UV_Par.xaml.cs" />
-    <Compile Include="Views\LB701UVView\LB701UV_Par_diecut.xaml.cs" />
     <Compile Include="Views\LB701UVView\LB701UV_Prepare.xaml.cs" />
     <Compile Include="Views\LB701UVView\LB701UV_Status.xaml.cs" />
     <Compile Include="Views\LB702UVView\LB702UV_Cfg.xaml.cs" />
@@ -1158,10 +1156,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\LB701UVView\LB701UV_Par.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Views\LB701UVView\LB701UV_Par_diecut.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -1784,16 +1778,6 @@
       <PublishState>Include</PublishState>
       <IncludeHash>True</IncludeHash>
       <FileType>Assembly</FileType>
-    </PublishFile>
-    <PublishFile Include="TBarCode11_x64.dll">
-      <Visible>False</Visible>
-      <Group>
-      </Group>
-      <TargetPath>
-      </TargetPath>
-      <PublishState>Exclude</PublishState>
-      <IncludeHash>True</IncludeHash>
-      <FileType>File</FileType>
     </PublishFile>
   </ItemGroup>
   <ItemGroup>

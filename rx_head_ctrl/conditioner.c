@@ -802,7 +802,8 @@ void cond_set_clusterNo(INT32 clusterNo)
 //--- cond_setInk ---------------------------------------
 void cond_setInk(int headNo, SInkDefinition *pink)
 {
-	if (headNo<0 || headNo>=MAX_HEADS_BOARD || _NiosMem==NULL) return;	
+	if (headNo<0 || headNo>=MAX_HEADS_BOARD || _NiosMem==NULL) return;
+//	Error(LOG, 0, "Head[%d].temp)=%d", headNo, pink->temp);
 	RX_HBStatus->head[headNo].tempSetpoint		 = pink->temp    *1000;
 	_NiosMem->cfg.cond[headNo].temp				 = pink->temp    *1000;
 	_NiosMem->cfg.cond[headNo].tempMax			 = pink->tempMax *1000;		
