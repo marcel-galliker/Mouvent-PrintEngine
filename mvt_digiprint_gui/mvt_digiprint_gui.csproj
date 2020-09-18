@@ -716,9 +716,6 @@
       <DependentUpon>WlanSettings.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\TestTableSeonView\TestTableSeonCommands.xaml.cs" />
-    <Compile Include="Views\TestTableSeonView\TestTableSeonFluidSettings.xaml.cs" />
-    <Compile Include="Views\TestTableSeonView\TestTableSeonPrintSettings.xaml.cs" />
-    <Compile Include="Views\TestTableSeonView\TestTableSeonStatus.xaml.cs" />
     <Compile Include="Views\TestTableSeonView\TestTableSeonStepperSettings.xaml.cs" />
     <Compile Include="Views\TestTableSeonView\TestTableSeonView.xaml.cs" />
     <Compile Include="Views\TestTableView\TestTableView.xaml.cs">
@@ -1357,18 +1354,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\TestTableSeonView\TestTableSeonCommands.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Views\TestTableSeonView\TestTableSeonFluidSettings.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Views\TestTableSeonView\TestTableSeonPrintSettings.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Views\TestTableSeonView\TestTableSeonStatus.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
