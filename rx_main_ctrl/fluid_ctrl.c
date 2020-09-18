@@ -808,6 +808,7 @@ static void _control(int fluidNo)
 												{
 	                                                _send_ctrlMode(-1, ctrl_print, TRUE);
 													_PurgeCtrlMode = ctrl_undef;
+													if (!RX_StepperStatus.robinfo.moving && rx_def_is_tx(RX_Config.printer.type) && step_active(1)) step_empty_waste();
                                                 }											
                                             }
                                             else if (_LeakTest)
@@ -915,8 +916,6 @@ static void _control(int fluidNo)
                                             }
                                             else if (_LeakTest == 3 && _LeakTestNo == no)	_LeakTest = 0;
 
-											//step_rob_stop();
-											//step_lift_stop();
 					break;				
 			}
 		}

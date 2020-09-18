@@ -85,7 +85,7 @@ int		machine_tick(void)
 	{
 		if (RX_StepperStatus.info.z_in_cap) _CappingTimer = 0;  // reset timer if already in cap
 
-		if (_CappingTimer>0 && _CappingTimer<rx_get_ticks())
+		if (_CappingTimer>0 && _CappingTimer<rx_get_ticks() && !RX_PrinterStatus.door_open)
 		{
 			_CappingTimer=0;
 			Error(LOG, 0, "Setting printhead to capping position. CtrlMode=%d %d", fluid_get_ctrlMode(0),fluid_get_ctrlMode(1));

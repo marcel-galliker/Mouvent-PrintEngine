@@ -31,6 +31,7 @@
 #include "print_ctrl.h"
 #include "chiller.h"
 #include "lh702_ctrl.h"
+#include "step_tx.h"
 #include "plc_ctrl.h"
 
 //--- SIMULATION ----------------------------------------------
@@ -1525,6 +1526,10 @@ static void _plc_state_ctrl()
         if (RX_StepperStatus.info.z_in_print)
 			step_handle_gui_msg(INVALID_SOCKET, CMD_LIFT_UP_POS, NULL, 0);
 	}
+	if (_PlcState == plc_glue)
+    {
+        steptx_wd_to_up_pos();
+    }
 	if(_PlcState == plc_pause)
 	{		
 		if(_SendPause==2)

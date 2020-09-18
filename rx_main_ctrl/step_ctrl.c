@@ -440,6 +440,15 @@ void step_rob_stop(void)
 	}
 }
 
+void step_empty_waste(void)
+{
+    switch (_StepperType)
+    {
+    case STEPPER_TX:	steptx_rob_empty_waste(); break;
+    default: break;
+    }
+}
+
 //--- tt_cap_to_print_pos --------------------------------
 int	 tt_cap_to_print_pos(void)
 {

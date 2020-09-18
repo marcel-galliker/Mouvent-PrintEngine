@@ -1475,7 +1475,7 @@ typedef struct ERobotInfo
 	UINT32 wd_front_up		: 1;	//  0x08000000
 	UINT32 wd_back_up		: 1;	//  0x10000000
 	UINT32 wrinkle_detected	: 1;	//	0x20000000
-	UINT32 r_info_30		: 1;	//	0x40000000
+	UINT32 wd_in_up			: 1;	//	0x40000000
 	UINT32 r_info_31		: 1;	//	0x80000000
 } ERobotInfo;
 
