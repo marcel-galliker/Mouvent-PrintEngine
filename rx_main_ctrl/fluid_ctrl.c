@@ -491,7 +491,7 @@ static void _do_fluid_stat(int fluidNo, SFluidBoardStat *pstat)
 		_FluidStatus[fluidNo*INK_PER_BOARD+i].info.cond_flowFactor_ok = flowFactor_ok;
 	}
 		
-	if      (_FluidCtrlMode>=ctrl_flush_night && _FluidCtrlMode<=ctrl_flush_done || _FluidCtrlMode == ctrl_cap_step3) _control_flush();
+	if      ((_FluidCtrlMode>=ctrl_flush_night && _FluidCtrlMode<=ctrl_flush_done) || _FluidCtrlMode == ctrl_cap_step3) _control_flush();
 //	else if (_RobotCtrlMode>=ctrl_wipe        && _RobotCtrlMode<ctrl_fill       && fluidNo==0) _control_robot();
 	else _control(fluidNo);
 
@@ -745,6 +745,7 @@ static void _control(int fluidNo)
 												{
 	                                                _send_ctrlMode(-1, ctrl_print, TRUE);
 													_PurgeCtrlMode = ctrl_undef;
+													if (!RX_StepperStatus.robinfo.moving && rx_def_is_tx(RX_Config.printer.type) && step_active(1)) step_empty_waste();
                                                 }											
                                             }
                                             else if (_LeakTest)
@@ -829,8 +830,6 @@ static void _control(int fluidNo)
                                             }
                                             else if (_LeakTest == 3 && _LeakTestNo == no)	_LeakTest = 0;
 
-                                            //step_rob_stop();
-											//step_lift_stop();
 					break;				
 			}
 		}

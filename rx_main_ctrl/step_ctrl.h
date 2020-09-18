@@ -59,6 +59,7 @@ void step_rob_wipe_start(EnFluidCtrlMode mode);
 int  step_rob_wipe_done(EnFluidCtrlMode mode);
 
 void step_rob_stop(void);
+void step_empty_waste(void);
 	
 UINT32 tt_get_scanner_pos(void);
 int  tt_set_printpar   (SPrintQueueItem *pItem);

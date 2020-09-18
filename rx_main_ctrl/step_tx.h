@@ -30,6 +30,8 @@ int	 steptx_lift_in_print_pos(void);
 void steptx_lift_to_up_pos(void);
 int	 steptx_lift_in_up_pos(void);
 
+void steptx_wd_to_up_pos(void);
+
 void steptx_lift_stop(void);
 
 void steptx_rob_do_reference(void);
@@ -52,6 +54,7 @@ void steptx_rob_cap_for_flush(void);
 int steptx_rob_cap_flush_prepared(void);
 
 void steptx_rob_stop(void);
+void steptx_rob_empty_waste(void);
 
 void steptx_set_robCtrlMode(EnFluidCtrlMode ctrlMode);
 

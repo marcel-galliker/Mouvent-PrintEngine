@@ -148,9 +148,7 @@ void tx80x_wd_main(void)
             {
                 if (motor_error(motor))
                 {
-                    Error(ERR_ABORT, 0,
-                          "WRINKLE DETECTION: %s: motor %s blocked", _CmdName,
-                          motor + 1);
+                    Error(ERR_ABORT, 0, "WRINKLE DETECTION: %s: motor %s blocked", _CmdName, motor + 1);
                     ok = FALSE;
                 }
             }
@@ -158,6 +156,7 @@ void tx80x_wd_main(void)
         }
 
         RX_StepperStatus.robinfo.z_in_print = (_CmdRunning == CMD_LIFT_PRINT_POS && RX_StepperStatus.robinfo.ref_done_wd);
+		RX_StepperStatus.robinfo.wd_in_up = (_CmdRunning == CMD_LIFT_UP_POS && RX_StepperStatus.robinfo.ref_done_wd);
 
         if (_CmdRunning == CMD_LIFT_REFERENCE && _PrintPos_New)
         {

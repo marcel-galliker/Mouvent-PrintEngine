@@ -180,6 +180,13 @@ int	 steptx_lift_in_up_pos(void)
 	return _Status[0].info.z_in_up || _Status[0].info.z_in_ref;
 }
 
+//--- steptx_wd_to_up_pos ----------------------------------------------
+void steptx_wd_to_up_pos(void)
+{
+    if (!_Status[1].robinfo.wd_in_up && !_Status[1].robinfo.moving_wd)
+        sok_send_2(&_step_socket[1], CMD_LIFT_UP_POS, 0, NULL);
+}
+
 //--- steptx_lift_stop ------------------------------
 void steptx_lift_stop(void)
 {
@@ -261,6 +268,12 @@ int	 steptx_rob_wipe_done(EnFluidCtrlMode mode)
 void steptx_rob_stop(void)
 {
 	sok_send_2(&_step_socket[1], CMD_ROB_STOP, 0, NULL);
+}
+
+void steptx_rob_empty_waste(void)
+{
+    if (_step_socket[1] != INVALID_SOCKET)
+        sok_send_2(&_step_socket[1], CMD_ROB_EMPTY_WASTE, 0, NULL);
 }
 
 //--- void _steptx_rob_vacuum_start ------------------------

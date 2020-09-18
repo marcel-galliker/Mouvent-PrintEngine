@@ -1232,6 +1232,10 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		}
 		
 		break;
+		
+	case CMD_ROB_EMPTY_WASTE:
+        _TimeWastePumpStart = rx_get_ticks();
+        break;
 
 	case CMD_ERROR_RESET:		
 		TrPrintfL(TRUE, "SOCKET[%d]: %s", socket, _CmdName);
