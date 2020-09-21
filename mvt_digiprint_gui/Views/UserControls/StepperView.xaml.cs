@@ -68,7 +68,7 @@ namespace RX_DigiPrint.Views.UserControls
                     StepperGrid.Children.Add(_LedPrint[i]);
 
                     _LedCap[i] = new Image();
-                    Grid.SetRow(_LedCap[i], 5);
+                    Grid.SetRow(_LedCap[i], 6);
                     Grid.SetColumn(_LedCap[i], 1+i);
                     StepperGrid.Children.Add(_LedCap[i]);
 
