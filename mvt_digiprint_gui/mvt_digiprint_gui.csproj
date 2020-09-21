@@ -354,6 +354,7 @@
     <Compile Include="External\rx_doc.cs" />
     <Compile Include="External\rx_rip.cs" />
     <Compile Include="External\rx_wlan.cs" />
+    <Compile Include="Filters\Filename_Filter.cs" />
     <Compile Include="Helpers\Constants.cs" />
     <Compile Include="Helpers\CorrectionValue.cs" />
     <Compile Include="Helpers\CustomWindow.cs" />
@@ -380,6 +381,7 @@
     <Compile Include="Models\Density.cs" />
     <Compile Include="Models\DisabledJets.cs" />
     <Compile Include="Models\Enums\EN_TestFluid.cs" />
+    <Compile Include="Models\FileNameFilter.cs" />
     <Compile Include="Models\HeadAdjustmentHelp.cs" />
     <Compile Include="Models\JetCompensation.cs" />
     <Compile Include="Models\JetCompensationDensityViewModel.cs" />
