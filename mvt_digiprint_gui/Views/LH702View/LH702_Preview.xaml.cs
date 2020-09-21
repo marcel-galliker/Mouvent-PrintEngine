@@ -40,6 +40,7 @@ namespace RX_DigiPrint.Views.LH702View
 
         public void UpdateSettings()
         {
+            if (_ImgSettings==null) return;
             try
             {
                 switch (_selected)

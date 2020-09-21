@@ -610,16 +610,13 @@ namespace RX_DigiPrint.Views.UserControls
                             }
                             str = string.Format("{0}\n{1}={2}\n", panel.UnitID, ID, val);
                         }
-                        else 
-                        {
-                            if (_Format=='n' || _Format=='1' || _Format=='f')
-                            {   
-                                double val=Rx.StrToDouble(TextEditCtrl.Text);
-                                if (_Unit!=null) val /= _Unit.Factor;
-                                str = string.Format("{0}\n{1}={2}\n", panel.UnitID, ID, val.ToString(new CultureInfo("en-US")));
-                            }
-                            else str = string.Format("{0}\n{1}={2}\n", panel.UnitID, ID, TextEditCtrl.Text);
+                        else if (_Format=='n' || _Format=='1' || _Format=='2' || _Format=='f')
+                        {   
+                            double val=Rx.StrToDouble(TextEditCtrl.Text);
+                            if (_Unit!=null) val /= _Unit.Factor;
+                            str = string.Format("{0}\n{1}={2}\n", panel.UnitID, ID, val.ToString(new CultureInfo("en-US")));
                         }
+                        else str = string.Format("{0}\n{1}={2}\n", panel.UnitID, ID, TextEditCtrl.Text);
                     }
                 }
 	            if (str!=null) 

@@ -1,5 +1,7 @@
 ﻿using Infragistics.Controls.Grids;
+using Infragistics.Windows.DataPresenter;
 using RX_Common;
+using RX_DigiPrint.Filters;
 using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Models;
 using RX_DigiPrint.Services;
@@ -51,6 +53,8 @@ namespace RX_DigiPrint.Views.PrintQueueView
             _timer = new System.Timers.Timer(10);
             _timer.Elapsed += _timer_Elapsed;
 
+            FileNameFilter.Changed += _FilenameFilter_Changed;
+
             DirItem.OnPreviewChanged = _preview_changed;
             DirItem.OnPreviewStarted = _preview_started;
             DirItem.OnPreviewDone    = _preview_done;
@@ -68,8 +72,32 @@ namespace RX_DigiPrint.Views.PrintQueueView
             View_Clicked(null, null);
         }
 
-        //--- UserControl_Loaded -------------------------------------------
-        private void UserControl_Loaded(object sender, RoutedEventArgs e)
+		//--- FilenameFilter_Changed --------------------------------------------------------
+		private void _FilenameFilter_Changed(object sender, TextChangedEventArgs e)
+		{    
+            MvtTextBox ctrl=sender as MvtTextBox;
+            _filter_files(ctrl.Text);
+		}
+
+        //--- _filter_files --------------------------------------
+        private void _filter_files(string filter)
+		{
+            filter = filter.ToLowerInvariant();
+            if (_dir!=null)
+			{
+                ObservableCollection<DirItem> list = new ObservableCollection<DirItem>();
+                foreach(DirItem item in _dir)
+				{
+                    string[] str=item.FileName.Split('\\');
+                    if (str.Length>1 && str[str.Length-1].ToLowerInvariant().Contains(filter)) 
+                        list.Add(item);
+				}
+                DirGrid.ItemsSource=list;
+			}
+		}
+
+		//--- UserControl_Loaded -------------------------------------------
+		private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
             if (DirTree==null)
             {
@@ -116,7 +144,8 @@ namespace RX_DigiPrint.Views.PrintQueueView
                 {
                         dir = Dir.global_path(dir);
                         ActDirCtrl.Text = dir;
-                        DirGrid.ItemsSource = _dir = new Dir(dir, (bool)RippedData.IsChecked, dir.Equals(_root)).List;
+                        _dir = new Dir(dir, (bool)RippedData.IsChecked, dir.Equals(_root)).List;
+                        _filter_files(RxGlobals.FileNameFilter.Filter);
                         _SetRowHeight(_row_height);
                         MsgRefresh.Visibility = Visibility.Hidden;                
                 });
