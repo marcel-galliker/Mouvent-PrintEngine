@@ -88,8 +88,8 @@ namespace RX_DigiPrint.Views.PrintQueueView
                 ObservableCollection<DirItem> list = new ObservableCollection<DirItem>();
                 foreach(DirItem item in _dir)
 				{
-                    string[] str=item.FileName.ToLowerInvariant().Split('\\');
-                    if (str.Length>1 && str[str.Length-1].Contains(filter)) 
+                    string[] str=item.FileName.Split('\\');
+                    if (str.Length>1 && str[str.Length-1].ToLowerInvariant().Contains(filter)) 
                         list.Add(item);
 				}
                 DirGrid.ItemsSource=list;
