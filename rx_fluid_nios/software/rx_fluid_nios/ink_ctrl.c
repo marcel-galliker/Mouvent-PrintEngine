@@ -1310,13 +1310,15 @@ void ink_tick_10ms(void) {
 					_pump_ctrl(isNo, _InkSupply[isNo].purgePressure, PUMP_CTRL_MODE_DEFAULT);
 					_set_bleed_valve(isNo, FALSE);
 					_InkSupply[isNo].purgeTime+=cycleTime;
-			} else {
+				}
+				else
+				{
 					_InkSupply[isNo].purgePressure = 0;
 					_set_pump_speed(isNo, 0);
-				if (_LeakTest == 2 && isNo == 0)
-					_set_air_valve(0, FALSE);
-				else
-					_set_air_valve(isNo, TRUE);
+					if (_LeakTest == 2 && isNo == 0)
+						_set_air_valve(0, FALSE);
+					else
+						_set_air_valve(isNo, TRUE);
 					pRX_Status->ink_supply[isNo].ctrl_state = ctrl_purge_step4;
 				}
 				break;

@@ -10,6 +10,8 @@
 // ****************************************************************************
 
 #include <string.h>
+#include <stdlib.h>
+
 
 #include "rx_error.h"
 #include "rx_def.h"
@@ -591,19 +593,33 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
         Error(ERR_CONT, 0, "Invalid current screwposition value");
         return;
     }
-    if (headAdjustment->axis == AXE_ANGLE && (current_screwpos - headAdjustment->steps > MAX_STEPS_ANGLE || current_screwpos - headAdjustment->steps < 0))
+    if (headAdjustment->axis == AXE_ANGLE && current_screwpos - headAdjustment->steps > MAX_STEPS_ANGLE)
     {
         Error(ERR_CONT, 0, "Screw moves out of range; Printbar: %d, Head: %d, Axis: %d, Turn to reach %d.%d", 
 				headAdjustment->printbarNo, headAdjustment->headNo, headAdjustment->axis, 
 				(current_screwpos + headAdjustment->steps)/6, (current_screwpos + headAdjustment->steps)%6);
         return;
     }
+    else if (headAdjustment->axis == AXE_ANGLE && current_screwpos - headAdjustment->steps < 0)
+    {
+        Error(ERR_CONT, 0, "Screw moves out of range; Printbar: %d, Head: %d, Axis: %d, Turn to reach -%d.%d", 
+				headAdjustment->printbarNo, headAdjustment->headNo, headAdjustment->axis, 
+				abs((int)(current_screwpos + headAdjustment->steps))/6, abs((int)(current_screwpos + headAdjustment->steps))%6);
+        return;
+    }
     
-    if (headAdjustment->axis == AXE_DIST && (current_screwpos + headAdjustment->steps > MAX_STEPS_DIST || current_screwpos + headAdjustment->steps < 0))
+    if (headAdjustment->axis == AXE_DIST && current_screwpos + headAdjustment->steps > MAX_STEPS_DIST)
     {
         Error(ERR_CONT, 0, "Screw moves out of range; Printbar: %d, Head: %d, Axis: %d, Turn to reach %d.%d", 
 				headAdjustment->printbarNo, headAdjustment->headNo, headAdjustment->axis, 
 				(current_screwpos + headAdjustment->steps)/6, (current_screwpos + headAdjustment->steps)%6);
+        return;
+    }
+    else if (headAdjustment->axis == AXE_DIST && current_screwpos + headAdjustment->steps < 0)
+    {
+        Error(ERR_CONT, 0, "Screw moves out of range; Printbar: %d, Head: %d, Axis: %d, Turn to reach -%d.%d", 
+				headAdjustment->printbarNo, headAdjustment->headNo, headAdjustment->axis, 
+				abs((int)(current_screwpos + headAdjustment->steps))/6, abs((int)(current_screwpos + headAdjustment->steps))%6);
         return;
     }
 

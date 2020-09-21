@@ -947,7 +947,8 @@ int ctrl_send_purge_par(int fluidNo, int time)
 #define HEAD_WIDTH	43000
 	int head;
     int delay_pos_y;
-	SPurgePar par;
+    int delay_time;
+    SPurgePar par;
 	SHeadCfg *pcfg;
 	
     if (RX_Config.stepper.wipe_speed)
@@ -955,9 +956,16 @@ int ctrl_send_purge_par(int fluidNo, int time)
     else
         delay_pos_y = 0;
 
+    if (RX_StepperStatus.robot_used || time == 0)
+        delay_time = 0;
+    else
+        delay_time = 5000;
+
+
     int timeTotal = 0;
     par.delay_pos_y = 0;
-	par.time  = time;
+    par.delay_time = 0;
+    par.time  = time;
 	for (head=0; head<SIZEOF(RX_Config.headBoard)*MAX_HEADS_BOARD; head++)
 	{
 		pcfg = &RX_Config.headBoard[head/MAX_HEADS_BOARD].head[head%MAX_HEADS_BOARD];
@@ -966,9 +974,16 @@ int ctrl_send_purge_par(int fluidNo, int time)
 			par.no = head%HEAD_CNT;
 			sok_send_2(&_HeadCtrl[head/HEAD_CNT].socket, CMD_SET_PURGE_PAR, sizeof(par), &par);
             if (delay_pos_y)
+            {
                 timeTotal = par.time;
-			par.delay_pos_y+=delay_pos_y;
-		}
+                par.delay_pos_y += delay_pos_y;
+            }
+            else
+            {
+                timeTotal = par.time + par.delay_time;
+                par.delay_time += delay_time;
+            }
+        }
 	}
 	return timeTotal;
 }

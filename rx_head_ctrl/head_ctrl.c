@@ -429,7 +429,7 @@ static int _do_set_FluidCtrlMode(RX_SOCKET socket, SFluidCtrlCmd *pmsg)
 //--- _do_set_purge_par -------------------------------------
 static int _do_set_purge_par(RX_SOCKET socket, SPurgePar *ppar)
 {
-	cond_set_purge_par(ppar->no, ppar->delay_pos_y, ppar->time, ppar->act_pos_y);
+	cond_set_purge_par(ppar->no, ppar->delay_pos_y, ppar->time, ppar->act_pos_y, ppar->delay_time);
 	return REPLY_OK;
 }
 

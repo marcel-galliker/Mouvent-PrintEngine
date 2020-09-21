@@ -305,6 +305,7 @@ typedef struct SPurgePar
     INT32 delay_pos_y;
     INT32 act_pos_y;
 	INT32 time;
+    INT32 delay_time;
 } SPurgePar;
 
 int valid(int val);
