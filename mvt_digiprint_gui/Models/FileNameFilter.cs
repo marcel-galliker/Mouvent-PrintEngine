@@ -12,7 +12,7 @@ namespace RX_DigiPrint.Models
 	public class FileNameFilter : RxBindable
 	{
 		//--- Property Filter ---------------------------------------
-		private string _Filter="Filter";
+		private string _Filter="";
 		public string Filter
 		{
 			get { return _Filter; }

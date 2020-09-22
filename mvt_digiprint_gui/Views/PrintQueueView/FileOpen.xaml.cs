@@ -192,11 +192,12 @@ namespace RX_DigiPrint.Views.PrintQueueView
         private void _SetRowHeight(RowHeight height)
         {
             int i;
+            ObservableCollection<DirItem> items = DirGrid.ItemsSource as ObservableCollection<DirItem>;
             _row_height = height;
             for (i=0; i<DirGrid.Rows.Count; i++)
             {
-                if (_dir[i].IsDirectory) DirGrid.Rows[i].Height = _dir_height;
-                else DirGrid.Rows[i].Height = _row_height;
+                if (items[i].IsDirectory) DirGrid.Rows[i].Height = _dir_height;
+                else                      DirGrid.Rows[i].Height = _row_height;
             }
         }
         
