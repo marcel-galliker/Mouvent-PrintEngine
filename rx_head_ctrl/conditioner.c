@@ -746,7 +746,15 @@ void cond_add_droplets_printed(int headNo, UINT32 droplets, int time)
 
 			mvt->dropletsPrinted += _droplets[headNo]/1000000;
 			mvt->dropletsPrintedCRC = rx_crc8(&mvt->dropletsPrinted, sizeof(mvt->dropletsPrinted));
-			RX_HBStatus->head[headNo].printedDroplets = mvt->dropletsPrinted; 
+			RX_HBStatus->head[headNo].printedDroplets = mvt->dropletsPrinted;
+
+			{
+				double ml=(double)RX_HBStatus->head[headNo].printedDroplets;
+				ml *= 1000000;
+				ml *= RX_HBStatus->head[headNo].dropVolume;
+				RX_HBStatus->head[headNo].printed_ml = (UINT64)ml;
+			}
+
 			_droplets[headNo] = 0;
 		}
 		_time[headNo] = time;

@@ -308,11 +308,7 @@ static void _send_head_info(void)
 			len += sprintf(&str[len], "%s\n", RX_TestImage.testMessage);
 			len += sprintf(&str[len], "%s-%d                     %s\n", RX_ColorNameShort(color), n+1, time);
 			
-			double ml=(double)RX_HBStatus[headNo/MAX_HEADS_BOARD].head[headNo%MAX_HEADS_BOARD].printedDroplets;
-			ml *= 1000000;
-			ml *= RX_HBStatus[headNo/MAX_HEADS_BOARD].head[headNo%MAX_HEADS_BOARD].dropVolume;
-
-			len += sprintf(&str[len], "cl# %06d  printed %12s l\n", RX_HBStatus[headNo/MAX_HEADS_BOARD].clusterNo, value_str3((int)(1000.0*ml)));
+			len += sprintf(&str[len], "cl# %06d  printed %12s l\n", RX_HBStatus[headNo/MAX_HEADS_BOARD].clusterNo, value_str3(RX_HBStatus[headNo/MAX_HEADS_BOARD].head[headNo%MAX_HEADS_BOARD].printed_ml));
 			len += sprintf(&str[len], "s# %d-%02d\n", pinfo->serialNo/100, pinfo->serialNo%100);
 			len += sprintf(&str[len], "volt %d / straight %d / uniform %d\n", pinfo->voltage, pinfo->straightness, pinfo->uniformity);
 			len += sprintf(&str[len], "bad");

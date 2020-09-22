@@ -821,6 +821,8 @@ typedef struct SHeadStat
 	UINT32			pumpFeedback;
 	UINT32			printingSeconds;
 	UINT64			printedDroplets;
+	UINT64			printed_ml;
+
 	INT32			presIn_0out;
 	EnFluidCtrlMode	ctrlMode;
 	
