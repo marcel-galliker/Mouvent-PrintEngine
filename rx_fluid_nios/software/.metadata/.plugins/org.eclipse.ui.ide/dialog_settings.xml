@@ -5,6 +5,8 @@
 		<item value="false" key="WizardProjectsImportPage.STORE_COPY_PROJECT_ID"/>
 		<item value="false" key="WizardProjectsImportPage.STORE_ARCHIVE_SELECTED"/>
 		<list key="WizardProjectsImportPage.STORE_DIRECTORIES">
+			<item value="C:\Develop\PrintEngine-Master-1.5\rx_fluid_nios\software\rx_fluid_nios_bsp"/>
+			<item value="C:\Develop\PrintEngine-Master-1.5\rx_fluid_nios\software\rx_fluid_nios"/>
 			<item value="C:\develop\RX-Project\Software\branches\version1-mag-1\rx_fluid_nios\software"/>
 			<item value="C:\develop\RX-Project\Software\branches\version1-mag-1_chiller\rx_fluid_nios\software"/>
 		</list>

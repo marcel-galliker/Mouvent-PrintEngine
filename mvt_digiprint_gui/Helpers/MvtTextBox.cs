@@ -13,8 +13,7 @@ namespace RX_DigiPrint.Helpers
         public MvtTextBox()
         {
             Style = Application.Current.Resources["MvtTextBox"] as Style;
-            PreviewTouchUp += MvtTextBox_TouchUp;
-            
+            PreviewTouchUp += MvtTextBox_TouchUp;           
             PreviewMouseUp += MvtTextBox_MouseUp;
         }
 
