@@ -105,18 +105,22 @@ namespace RX_DigiPrint.Views.PrintSystemView
         //--- _PrinterType_Changed ----------------------------------------------------
         private void _PrinterType_Changed()
         {
+            Grid.RowDefinitions[1].Height = new GridLength(25/RxGlobals.Screen.Scale);
+
+            //--- printer_test_slide_only ------------------------------------------------------------
             Visibility visible   = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide_only) ? Visibility.Visible   : Visibility.Collapsed;
             Visibility collapsed = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide_only) ? Visibility.Collapsed : Visibility.Visible;
             Button_Print.Visibility = visible;
             Button_PurgeHard.Visibility = collapsed;
             Button_PurgeSoft.Visibility = collapsed;
             Button_PurgeMicro.Visibility = collapsed;
-            visible = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_table_seon) ? Visibility.Visible : Visibility.Collapsed;
-            Button_ToggleMeniscus.Visibility = visible;
+
 //          Button_Wipe.Visibility  = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX801 || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_TX802) ? Visibility.Visible : Visibility.Collapsed;
-            Grid.RowDefinitions[1].Height = new GridLength(25/RxGlobals.Screen.Scale);
-            visible = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_table_seon) ? Visibility.Visible : Visibility.Collapsed;
+
+            //--- printer_test_table_seon -----------------------------------------------------------
+            visible   = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_table_seon) ? Visibility.Visible   : Visibility.Collapsed;
             collapsed = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_table_seon) ? Visibility.Collapsed : Visibility.Visible;
+            Button_ToggleMeniscus.Visibility = visible;
             Cooler_Pres.Visibility = visible;
             Cooler_Temp.Visibility = visible;
             ClusterNo.Visibility = visible;

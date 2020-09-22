@@ -53,8 +53,6 @@ namespace RX_DigiPrint.Views.PrintQueueView
             _timer = new System.Timers.Timer(10);
             _timer.Elapsed += _timer_Elapsed;
 
-            FileNameFilter.Changed += _FilenameFilter_Changed;
-
             DirItem.OnPreviewChanged = _preview_changed;
             DirItem.OnPreviewStarted = _preview_started;
             DirItem.OnPreviewDone    = _preview_done;
@@ -62,6 +60,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
             RootButton      = Properties.Settings.Default.FileOpen_DataSource;
             _PreviewSize    = Properties.Settings.Default.FileOpen_Size;
 
+			RxGlobals.FileNameFilter.PropertyChanged += _FileNameFilter_PropertyChanged;
             DirGrid.StylusSystemGesture += RxXamGrid.RxStylusSystemGesture;
 
         //  SmallSize.IsChecked     = (_PreviewSize==0);
@@ -72,19 +71,18 @@ namespace RX_DigiPrint.Views.PrintQueueView
             View_Clicked(null, null);
         }
 
-		//--- FilenameFilter_Changed --------------------------------------------------------
-		private void _FilenameFilter_Changed(object sender, TextChangedEventArgs e)
-		{    
-            MvtTextBox ctrl=sender as MvtTextBox;
-            _filter_files(ctrl.Text);
+		//--- _FileNameFilter_PropertyChanged -----------------------------------------------
+		private void _FileNameFilter_PropertyChanged(object sender,System.ComponentModel.PropertyChangedEventArgs e)
+		{
+			if (e.PropertyName.Equals("Filter")) _filter_files(RxGlobals.FileNameFilter.Filter);
 		}
 
         //--- _filter_files --------------------------------------
         private void _filter_files(string filter)
 		{
-            filter = filter.ToLowerInvariant();
             if (_dir!=null)
 			{
+                filter = filter.ToLowerInvariant();
                 ObservableCollection<DirItem> list = new ObservableCollection<DirItem>();
                 foreach(DirItem item in _dir)
 				{

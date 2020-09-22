@@ -420,9 +420,7 @@ static int _do_set_FluidCtrlMode(RX_SOCKET socket, SFluidCtrlCmd *pmsg)
     if (pmsg->ctrlMode == ctrl_toggle_meniscus)
         cond_toggle_meniscus_check();
     else
-        cond_ctrlMode(pmsg->no, pmsg->ctrlMode);
-    //	rx_sleep(10);
-    //	_rep_head_stat(socket);	// give feedback now!
+	    cond_ctrlMode(pmsg->no, pmsg->ctrlMode);
 	return REPLY_OK;
 }
 
