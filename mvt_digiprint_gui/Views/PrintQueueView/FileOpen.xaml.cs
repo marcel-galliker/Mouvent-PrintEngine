@@ -1,7 +1,6 @@
 ﻿using Infragistics.Controls.Grids;
 using Infragistics.Windows.DataPresenter;
 using RX_Common;
-using RX_DigiPrint.Filters;
 using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Models;
 using RX_DigiPrint.Services;

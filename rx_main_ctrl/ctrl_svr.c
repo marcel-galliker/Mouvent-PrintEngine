@@ -641,20 +641,6 @@ void ctrl_tick(void)
             }
             return;
         }
-        /*
-        for (i = 0; i < SIZEOF(_BufferFluidCmd); i++)
-        {
-            if (_BufferFluidCmd[i].used && !_ctrl_check_stepper_in_purgeMode(_BufferFluidCmd[i].headNo) && rx_get_ticks() >= _PurgeTime + TIMEOUT)
-            {
-                _BufferFluidCmd[i].used = 0;
-                ctrl_send_head_fluidCtrlMode(
-                    _BufferFluidCmd[i].headNo, _BufferFluidCmd[i].ctrlMode,
-                    _BufferFluidCmd[i].sendToFluid, _BufferFluidCmd[i].fromGui);
-                _PurgeTime = rx_get_ticks();
-                //i = SIZEOF(_BufferFluidCmd);
-                return;
-            }
-        }*/
     }
 }
 

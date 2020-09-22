@@ -1,5 +1,4 @@
 ﻿using RX_Common;
-using RX_DigiPrint.Filters;
 using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Services;
 using RX_DigiPrint.Views.Density;

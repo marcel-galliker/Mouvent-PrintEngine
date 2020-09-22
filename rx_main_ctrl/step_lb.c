@@ -50,6 +50,8 @@ static EnFluidCtrlMode	_RobotCtrlMode[STEPPER_CNT] = {ctrl_undef};
 
 static SHeadAdjustmentMsg _HeadAdjustment[STEPPER_CNT] = {0};
 
+static SHeadAdjustmentMsg _HeadAdjustmentBuffer[STEPPER_CNT][MAX_HEAD_DIST];
+
 static void _steplb_rob_do_reference(int no);
 
 static void _check_screwer(void);
@@ -630,8 +632,30 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
 
     _HeadAdjustment[stepperno] = *headAdjustment;
     headAdjustment->printbarNo %= 2;
-    
-    sok_send(&_step_socket[stepperno], headAdjustment);
+    if (!_Status[stepperno].info.moving && !_Status[stepperno].robinfo.moving && !_Status[stepperno].screwerinfo.moving)
+        sok_send(&_step_socket[stepperno], headAdjustment);
+    else
+    {
+        int i;
+        
+        for (i = 0; i < SIZEOF(_HeadAdjustmentBuffer[stepperno]); i++)
+        {
+            if (_HeadAdjustmentBuffer[stepperno][i].steps == 0 || 
+                    (_HeadAdjustmentBuffer[stepperno][i].axis == headAdjustment->axis && _HeadAdjustmentBuffer[stepperno][i].headNo == headAdjustment->headNo &&
+                     _HeadAdjustmentBuffer[stepperno][i].printbarNo == headAdjustment->printbarNo))
+            {
+                if (_HeadAdjustmentBuffer[stepperno][i].steps != 0)
+                    Error(LOG, 0, "Delete Screw-Movement of Printbar %d, Head %d and Axis %d with %d Steps", headAdjustment->printbarNo, headAdjustment->headNo, headAdjustment->axis, _HeadAdjustmentBuffer[stepperno][i].steps);
+                _HeadAdjustmentBuffer[stepperno][i].axis = headAdjustment->axis;
+                _HeadAdjustmentBuffer[stepperno][i].headNo = headAdjustment->headNo;
+                _HeadAdjustmentBuffer[stepperno][i].printbarNo = headAdjustment->printbarNo;
+                _HeadAdjustmentBuffer[stepperno][i].steps = headAdjustment->steps;
+                _HeadAdjustmentBuffer[stepperno][i].hdr = headAdjustment->hdr;
+                Error(LOG, 0, "Save Screw-Movement of Printbar %d, Head %d and Axis %d with %d Steps", headAdjustment->printbarNo, headAdjustment->headNo, headAdjustment->axis, headAdjustment->steps);
+                i = SIZEOF(_HeadAdjustmentBuffer[stepperno]);
+            }
+        }
+    }
 }
 
 //--- _check_screwer --------------------------------------------------
@@ -639,7 +663,7 @@ static void _check_screwer(void)
 {
     static int _old_Screwer_State[STEPPER_CNT] = {FALSE};
     SRobPosition ScrewPosition;
-    int i = 1;
+    int i, j;
     for (i = 0; i < SIZEOF(_Status); i++)
     {
         ScrewPosition.printBar = _HeadAdjustment[i].printbarNo;
@@ -672,6 +696,27 @@ static void _check_screwer(void)
             ctrl_set_rob_pos(ScrewPosition, TRUE, _HeadAdjustment[i].axis);
         }
         _old_Screwer_State[i] = _Status[i].screwerinfo.screwed;
+    }
+
+    
+    for (i = 0; i < SIZEOF(_HeadAdjustmentBuffer); i++)
+    {
+        for (j = 1; j < SIZEOF(_HeadAdjustmentBuffer[i]); j++)
+        if (_HeadAdjustmentBuffer[i][j-1].steps == 0 && _HeadAdjustmentBuffer[i][j].steps != 0)
+        {
+            _HeadAdjustmentBuffer[i][j - 1] = _HeadAdjustmentBuffer[i][j];
+            _HeadAdjustmentBuffer[i][j].steps = 0;
+        }
+    }
+
+    for (i = 0; i < SIZEOF(_HeadAdjustmentBuffer); i++)
+    {
+        if (!_Status[i].info.moving && !_Status[i].robinfo.moving && !_Status[i].screwerinfo.moving && 
+                _HeadAdjustmentBuffer[i][0].steps && RX_PrinterStatus.printState == ps_off && _RobotCtrlMode[i] == ctrl_off &&
+                _Status[i].info.z_in_screw && _Status[i].info.ref_done)
+        {
+            steplb_adjust_heads(INVALID_SOCKET, &_HeadAdjustmentBuffer[i][0]);
+        }
     }
 }
 
