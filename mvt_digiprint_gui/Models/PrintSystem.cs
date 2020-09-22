@@ -273,20 +273,25 @@ namespace RX_DigiPrint.Models
 
                     case EPrinterType.printer_LH702:
                     case EPrinterType.printer_LB702_UV:
-                        if (ColorCnt <= 4)
+                        switch(ColorCnt)
                         {
-                            IS_Order    = new int[] { 0, 1, 2, 3 };
-                            Color_Order = new int[] { 0, 1, 2, 3 };
-                        }
-                        else
-                        {
-                            IS_Order    = new int[] { 4, 5, 6, 0, 1, 2, 3 };
-                            Color_Order = new int[] { 4, 5, 6, 0, 1, 2, 3 };
+                            case 5:
+                                IS_Order    = new int[] { 4, 0, 1, 2, 3 };
+                                Color_Order = new int[] { 4, 0, 1, 2, 3 };
+                                break;
+                            case 7:
+                                IS_Order    = new int[] { 4, 5, 6, 0, 1, 2, 3 };
+                                Color_Order = new int[] { 4, 5, 6, 0, 1, 2, 3 };
+                                break;
+                            default:
+                                IS_Order    = new int[] { 0, 1, 2, 3, 4, 5, 6, 7 };
+                                Color_Order = new int[] { 0, 1, 2, 3, 4, 5, 6, 7 };
+                                break;
                         }
                         break;
 
                     case EPrinterType.printer_LB702_WB:
-                        IS_Order    = new int[] {0, 1, 2, 3, 4, 5 };
+                        IS_Order    = new int[] { 0, 1, 2, 3, 4, 5 };
                         Color_Order = new int[] { 4, 5, 6, 0, 1, 2, 3 };
                         break;
 
