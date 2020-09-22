@@ -7,8 +7,7 @@
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
              xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
-             mc:Ignorable="d" 
-             
+             mc:Ignorable="d"              
              >
 
     <StackPanel 

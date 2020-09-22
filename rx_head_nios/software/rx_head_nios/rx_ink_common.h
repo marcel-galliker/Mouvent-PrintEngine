@@ -271,8 +271,6 @@ typedef enum EnFluidCtrlMode
 
     ctrl_test_watchdog = 0x10000,
     ctrl_test, 				// 0x10001
-	ctrl_offset_cal, 		// 0x10002
-	ctrl_offset_cal_done,	// 
 
     ctrl_toggle_meniscus = 0x20000,
 } EnFluidCtrlMode;

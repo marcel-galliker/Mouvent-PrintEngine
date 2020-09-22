@@ -11,8 +11,6 @@ namespace RX_DigiPrint.Models
 
 	public class FileNameFilter : RxBindable
 	{
-		public static TextChangedEventHandler Changed;
-
 		//--- Property Filter ---------------------------------------
 		private string _Filter="";
 		public string Filter

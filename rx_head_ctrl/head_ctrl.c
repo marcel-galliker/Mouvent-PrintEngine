@@ -421,8 +421,6 @@ static int _do_inkdef(RX_SOCKET socket, SInkDefMsg  *pmsg)
 static int _do_set_FluidCtrlMode(RX_SOCKET socket, SFluidCtrlCmd *pmsg)
 {
 	cond_ctrlMode(pmsg->no, pmsg->ctrlMode);
-//	rx_sleep(10);
-//	_rep_head_stat(socket);	// give feedback now!
 	return REPLY_OK;
 }
 
