@@ -338,6 +338,15 @@ void ink_tick_10ms(void)
 				else pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
 				break;
 
+			case ctrl_leak_test_step2:
+				if (isNo == 0)
+				{
+					_LeakTest = 0;
+					_set_air_valve(isNo, TRUE);
+				}
+				pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
+				break;
+
 		    case ctrl_leak_test:
 		    case ctrl_leak_test_step1:
 			case ctrl_undef:
@@ -1169,6 +1178,7 @@ void ink_tick_10ms(void)
 			case ctrl_purge_step2: // build up pressure
 				_pump_ctrl(isNo, _InkSupply[isNo].purgePressure,PUMP_CTRL_MODE_DEFAULT);
 				pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
+				if (_LeakTest && isNo == 0) _LeakTest = 2;
 				break;
 
 			case ctrl_purge_step3: // build up pressure
@@ -1450,6 +1460,10 @@ static void _init_purge(int isNo, int pressure)
 		{
 			_InkSupply[isNo].purgePressure = pRX_Config->ink_supply[isNo].purge_putty_pressure;
 		}
+		else if (_LeakTest && isNo == 0)
+		{
+			_InkSupply[isNo].purgePressure = PRESSURE_LEAK_TEST;
+		}
 		else
 		{
 		    if(_MaxPrintPressure[isNo] > 0)
@@ -1543,6 +1557,7 @@ static int _degass_ctrl(void)
 //--- _set_air_cussion -----------------------------------------
 void _set_air_valve(int isNo, int newState)
 {
+	if (isNo == 0 && _LeakTest && newState == TRUE) return;
 	if (pRX_Status->ink_supply[isNo].airValve!=newState)
 	{
 		pRX_Status->ink_supply[isNo].airValve = newState;

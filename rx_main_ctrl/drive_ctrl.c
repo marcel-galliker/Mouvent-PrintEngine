@@ -54,6 +54,7 @@ static const char *_convert = "0123456789ABCDEF";
 #define REF_DONE            0x1000
 #define AXIS_CURRENT        0x0800
 #define AXIS_CURRENTLESS    0x0400
+#undef  NO_ERROR
 #define NO_ERROR            0x0100
 
 // differnet Modes to Drive with the motors
@@ -89,6 +90,7 @@ static const char *_convert = "0123456789ABCDEF";
 
 
 // Control Word
+#undef CTRL
 #define CTRL 3
 
 typedef enum
@@ -706,14 +708,14 @@ static int _set_setting(int mode, char* setting, int val)
         int i;
         float reply;
 
-        for (i = 0; i < strlen(setting); i++)
+        for (i = 0; i < (int)strlen(setting); i++)
         {
             buf[i] = setting[i];
         }
-        sprintf(buf, "%s%d", &buf, mode);
+        sprintf(buf, "%s%d", buf, mode);
         buf[strlen(setting) + 1] = '=';
-        sprintf(buf, "%s%d", &buf, val);
-        _send_data(buf, strlen(buf));
+        sprintf(buf, "%s%d", buf, val);
+        _send_data(buf, (int)strlen(buf));
         if (_read_data(WRITE_REGISTER, &reply) == REPLY_OK)
             return REPLY_OK;
         return REPLY_ERROR;
@@ -729,16 +731,15 @@ static float _get_setting(char *object)
 {
     if (_DriveStatus.enabled)
     {
-        int answer;
         char buf[256] = "";
         int i;
         float reply;
 
-        for (i = 0; i < strlen(object); i++)
+        for (i = 0; i < (int)strlen(object); i++)
         {
             buf[i] = object[i];
         }
-        _send_data(buf, strlen(buf));
+        _send_data(buf, (int)strlen(buf));
         if (_read_data(READ_REGISTER, &reply) == REPLY_OK)
             return reply;
        return REPLY_ERROR;
@@ -781,7 +782,6 @@ static int _read_data(int function, float *data)
     char *confirm = "*>\n";
     char *error = "*!";
     
-
     struct timeval timeout;
     fd_set readSet;
 
@@ -816,7 +816,7 @@ static int _read_data(int function, float *data)
     }
     else if (function == READ_REGISTER)
     {
-        *data = atof(&buf[1]);
+        *data = (float)atof(&buf[1]);
         return REPLY_OK;
     }
     return REPLY_OK;

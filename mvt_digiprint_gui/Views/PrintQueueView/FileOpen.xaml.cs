@@ -1,7 +1,6 @@
 ﻿using Infragistics.Controls.Grids;
 using Infragistics.Windows.DataPresenter;
 using RX_Common;
-using RX_DigiPrint.Filters;
 using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Models;
 using RX_DigiPrint.Services;
@@ -192,11 +191,12 @@ namespace RX_DigiPrint.Views.PrintQueueView
         private void _SetRowHeight(RowHeight height)
         {
             int i;
+            ObservableCollection<DirItem> items = DirGrid.ItemsSource as ObservableCollection<DirItem>;
             _row_height = height;
             for (i=0; i<DirGrid.Rows.Count; i++)
             {
-                if (_dir[i].IsDirectory) DirGrid.Rows[i].Height = _dir_height;
-                else DirGrid.Rows[i].Height = _row_height;
+                if (items[i].IsDirectory) DirGrid.Rows[i].Height = _dir_height;
+                else                      DirGrid.Rows[i].Height = _row_height;
             }
         }
         
