@@ -2,16 +2,13 @@
 using RX_DigiPrint.Models.Enums;
 using RX_DigiPrint.Services;
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
-using System.Windows;
 using System.Windows.Media;
 
 namespace RX_DigiPrint.Models
 {
-    public class PrintSystem : RxBindable
+	public class PrintSystem : RxBindable
     {
         private bool _Init=false;
 
@@ -284,20 +281,24 @@ namespace RX_DigiPrint.Models
 
                     case EPrinterType.printer_LH702:
                     case EPrinterType.printer_LB702_UV:
-                        if (ColorCnt <= 4)
+                        switch(ColorCnt)
                         {
-                            IS_Order    = new int[] { 0, 1, 2, 3 };
-                            Color_Order = new int[] { 0, 1, 2, 3 };
-                        }
-                        else
-                        {
-                            IS_Order    = new int[] { 4, 5, 6, 0, 1, 2, 3 };
-                            Color_Order = new int[] { 4, 5, 6, 0, 1, 2, 3 };
-                        }
-                        break;
+                            case 5:
+                                IS_Order    = new int[] { 4, 0, 1, 2, 3 };
+                                Color_Order = new int[] { 4, 0, 1, 2, 3 };
+                                break;
+                            case 7:
+                                IS_Order    = new int[] { 4, 5, 6, 0, 1, 2, 3 };
+                                Color_Order = new int[] { 4, 5, 6, 0, 1, 2, 3 };
+                                break;
+                            default:
+                                IS_Order    = new int[] { 0, 1, 2, 3, 4, 5, 6, 7 };
+                                Color_Order = new int[] { 0, 1, 2, 3, 4, 5, 6, 7 };
+                                break;
+                        }                        break;
 
                     case EPrinterType.printer_LB702_WB:
-                        IS_Order    = new int[] {0, 1, 2, 3, 4, 5 };
+                        IS_Order    = new int[] { 0, 1, 2, 3, 4, 5 };
                         Color_Order = new int[] { 4, 5, 6, 0, 1, 2, 3 };
                         break;
 

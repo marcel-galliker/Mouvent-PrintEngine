@@ -1,21 +1,15 @@
 ﻿using RX_Common;
-using RX_DigiPrint.Filters;
 using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Services;
-using RX_DigiPrint.Views.Density;
 using RX_DigiPrint.Views.LB702WBView;
 using RX_DigiPrint.Views.LH702View;
 using RX_DigiPrint.Views.PrintQueueView;
 using RX_DigiPrint.Views.UserControls;
-using System;
-using System.Collections.Generic;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Threading;
 
 namespace RX_DigiPrint.Models
 {
-    public class RxGlobals
+	public class RxGlobals
     {
         public static RxTimer           Timer             = new RxTimer(500);
         public static Settings          Settings          = new Settings();
