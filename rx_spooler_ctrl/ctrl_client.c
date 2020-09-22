@@ -404,9 +404,9 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 {
 	SPrintFileCmd			msg;
 	int						ret=REPLY_OK;
-	EFileType				fileType=ft_undef;
 	int						same;
 	static SPrintFileRep	reply;
+	static EFileType		fileType=ft_undef;
 	static int				widthPx, lengthPx;
 	static UCHAR			bitsPerPixel;
 	static UINT8			multiCopy;

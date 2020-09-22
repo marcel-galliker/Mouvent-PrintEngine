@@ -419,7 +419,7 @@ static int error(EDevice device, int no, ELogItemType type, const char *file, in
 		if (device==dev_undef) *deviceStr=0;
 		else sprintf(deviceStr, "%s %d", DeviceStr[device], no);
 		if (device==dev_undef)	TrPrintfL(1, "{%s} %s:%s [%s:%d]", 							   timestr, LogItemTypeStr[type], sErrorStrTemp, log.file, log.line);
-		else					TrPrintfL(1, "%s %d: {%s} %s: %s [%s:%d]", DeviceStr[device], no, timestr, LogItemTypeStr[type], sErrorStrTemp, log.file, log.line);
+		else					TrPrintfL(1, "%s[%d] {%s} %s: %s [%s:%d]", DeviceStr[device], no, timestr, LogItemTypeStr[type], sErrorStrTemp, log.file, log.line);
 	}
 
 	if (type>sErrorType || (type==sErrorType && sErrorType<LOG_TYPE_ERROR_CONT))

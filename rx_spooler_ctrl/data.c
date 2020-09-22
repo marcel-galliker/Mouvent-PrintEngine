@@ -408,7 +408,7 @@ int  data_get_size	(const char *path, UINT32 page, EFileType *pFileType, UINT32 
 //		(*plength)++;
 	
 	*multiCopy = 1;
-	if (*pFileType!=ft_undef && (RX_Spooler.printerType==printer_TX801 || RX_Spooler.printerType==printer_TX802))
+	if (*pFileType!=ft_undef && rx_def_is_tx(RX_Spooler.printerType))
 	{
 		*plength += 2*abs(_WakeupLen);
 
@@ -708,7 +708,8 @@ int data_load(SPageId *id, const char *filepath, EFileType fileType, int offsetP
 			}
 		}		
 		
-		if (/*id->id!=_LastId.id || */ id->page!=_LastId.page || strcmp(filepath, _LastFilePath) || _WakeupLen!=_LastWakeupLen || newOffsets || rx_file_get_mtime (_FileTimePath)!=_LastFileTime || gapPx!=_LastGapPx || jc_changed()) // || printMode==PM_TEST_JETS) Overwrites head info!
+		if (/*id->id!=_LastId.id || */ id->page!=_LastId.page || strcmp(filepath, _LastFilePath) || _WakeupLen!=_LastWakeupLen || newOffsets || rx_file_get_mtime (_FileTimePath)!=_LastFileTime 
+		  || gapPx!=_LastGapPx || !rx_def_is_tx(RX_Spooler.printerType) && jc_changed()) // || printMode==PM_TEST_JETS) Overwrites head info!
 		{
 			TrPrintfL(TRUE, "rx_sem_wait(_data_load_sem) (id=%d, page=%d, copy=%d, scan=%d) >>%s<<", id->id, id->page, id->copy, id->scan, filepath);
 			if (rx_sem_wait(_data_load_sem, 0)==REPLY_OK)
@@ -858,8 +859,8 @@ int data_load(SPageId *id, const char *filepath, EFileType fileType, int offsetP
 			else if (printMode!=PM_TEST && printMode!=PM_TEST_SINGLE_COLOR)  jc_correction(&bmpInfo, &_PrintList[_InIdx], 0);
 		}
 		#ifdef DEBUG
-//		if (FALSE)
-		if (loaded)
+		if (FALSE)
+//		if (loaded)
 		{
 			char dir[MAX_PATH];
 			char fname[MAX_PATH];
