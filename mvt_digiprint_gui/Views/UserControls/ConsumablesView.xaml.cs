@@ -30,14 +30,15 @@ namespace RX_DigiPrint.Views.UserControls
 
         //--- _BindValues ------------------------------
         private EPrinterType _PrinterType;
+        private int _ColorCnt;
         private void _BindValues()
         {
-            if (RxGlobals.PrintSystem.PrinterType!=_PrinterType)
+            if (RxGlobals.PrintSystem.PrinterType!=_PrinterType || _ColorCnt!=RxGlobals.PrintSystem.ColorCnt)
             {
                 int offset=0;
                 MainGrid.Children.Clear();
 
-                if (RxGlobals.PrintSystem.IsTx)
+                if (RxGlobals.PrintSystem.IsTx || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_table_seon)
                 {
                     InkLevel flush = new InkLevel(){DataContext = RxGlobals.InkSupply.List[TcpIp.InkSupplyCnt]};
                     Grid.SetColumn(flush, 0);
@@ -65,13 +66,17 @@ namespace RX_DigiPrint.Views.UserControls
                     }
                 }
                 
-                /*
-                InkLevel waste = new InkLevel(){DataContext = RxGlobals.InkSupply.List[TcpIp.InkSupplyCnt+1]};
-                Grid.SetColumn(waste, TcpIp.InkSupplyCnt+1);
-                MainGrid.Children.Add(waste);
-                */
+                if (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_cleaf || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_table_seon)
+                {
+                    InkLevel waste = new InkLevel() { DataContext = RxGlobals.InkSupply.List[TcpIp.InkSupplyCnt + 1] };
+                    Grid.SetColumn(waste, TcpIp.InkSupplyCnt + 1);
+                    MainGrid.Children.Add(waste);
+                }
+                
+                
 
                 _PrinterType = RxGlobals.PrintSystem.PrinterType;
+                _ColorCnt = RxGlobals.PrintSystem.ColorCnt;
             }
         }
 

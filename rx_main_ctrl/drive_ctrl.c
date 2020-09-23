@@ -162,13 +162,8 @@ int drive_init(void)
 {
     
     drive_error_reset();
-
     _drive_load_material(RX_Config.material);
-    
-    
     _Socket = INVALID_SOCKET;
-
-    //_drive_load_material(RX_Config.material);
 
     if (!_DriveThreadRunning)
     {
