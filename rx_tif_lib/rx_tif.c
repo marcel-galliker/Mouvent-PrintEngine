@@ -418,8 +418,8 @@ int tif_load(SPageId *id, const char *filedir, const char *filename, int printMo
 			    if (!TIFFGetField (ppar->file, TIFFTAG_BITSPERSAMPLE, &pinfo->bitsPerPixel))	return Error(ERR_CONT, 0, "File %s: Could not get bit per sample value", filepath);
 			    if (!TIFFGetField (ppar->file, TIFFTAG_IMAGEWIDTH,    &pinfo->srcWidthPx))		return Error(ERR_CONT, 0, "File %s: Could not get image width", filepath);
 			    if (!TIFFGetField (ppar->file, TIFFTAG_IMAGELENGTH,   &pinfo->lengthPx))		return Error(ERR_CONT, 0, "File %s: Could not get image height", filepath);
-				    if (TIFFGetField (ppar->file, TIFFTAG_XRESOLUTION,   &val))	pinfo->resol.x=(int)val; else pinfo->resol.x=DPI_X;
-				    if (TIFFGetField (ppar->file, TIFFTAG_YRESOLUTION,   &val))	pinfo->resol.y=(int)val; else pinfo->resol.y=DPI_Y;
+				if (TIFFGetField (ppar->file, TIFFTAG_XRESOLUTION,   &val))	pinfo->resol.x=(int)val; else pinfo->resol.x=DPI_X;
+				if (TIFFGetField (ppar->file, TIFFTAG_YRESOLUTION,   &val))	pinfo->resol.y=(int)val; else pinfo->resol.y=DPI_Y;
 			}
 
 			pinfo->srcWidthPx	+= spacePx; 
@@ -473,7 +473,7 @@ int tif_load(SPageId *id, const char *filedir, const char *filename, int printMo
 		{
 			for (i=0; i<threadCnt; i++) 
 			{
-				if (pinfo->buffer[c])
+				if (pinfo->buffer[i])
 				{
 				    int start;
 				    start = -(INT32)wakeupLen;
