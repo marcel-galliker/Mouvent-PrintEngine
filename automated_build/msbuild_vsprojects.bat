@@ -157,7 +157,7 @@ REM Build a special debug rx_main_ctrl for test (local IP)
 	set FLAGS=/m /property:Configuration=Release /property:Platform=x64 /property:SolutionDir=%BATCH_PATH%..\
 	call :BUILD_PROJECT rx_spooler_ctrl, vcxproj
 	call :BUILD_PROJECT rx_main_ctrl, vcxproj
-	call :BUILD_PROJECT rx_digiprint_gui, sln
+	REM call :BUILD_PROJECT rx_digiprint_gui, sln
 	call :BUILD_PROJECT mvt_digiprint_gui, sln
 	call :BUILD_PROJECT Win10-Install, vcxproj, Win10\
 	call :BUILD_PROJECT Win10-Startup, vcxproj, Win10\
