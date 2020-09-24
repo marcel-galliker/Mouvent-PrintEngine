@@ -13,11 +13,16 @@
 #include <unistd.h>
 #include <termios.h>
 #include <pthread.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <sys/ioctl.h>
 #include <linux/sockios.h>
 
 #include "robi.h"
 #include "robi_def.h"
+
+#define ROBI_SOFTWARE_FILENAME      ("/opt/radex/bin/stepper/robi.bin")
 
 #define ROBI_CONNECTION_TIMEOUT		1000
 #define ROBI_STATUS_UPDATE_INTERVAL 250
@@ -47,10 +52,12 @@
 
 #define MAX_VAR_SCREW_POS 6000 // um
 
+#define UPDATE_FIFO_THRESHOLD   4
+
 
 static int32_t
 set_serial_attributs(int fd, int speed, int parity);
-static int32_t send_command(uint32_t commandCode, uint8_t len, void *data);
+static int32_t send_command(uint32_t commandCode, uint32_t len, void *data);
 static void* send_thread(void *par);
 static void* receive_thread(void *par);
 static void robi_set_output(int num, int val);
@@ -76,6 +83,8 @@ static uint32_t _MsgsCaptured;
 static uint32_t _MsgsSent;
 
 static int32_t _isConnected;
+static int32_t _isUpdating;
+static int32_t _updateFailed;
 static int32_t _isSync;
 static uint32_t _syncMessageId;
 
@@ -97,6 +106,10 @@ static int _Screwer_Blocked_Time = 0;
 static int _TargetPosition = 0;
 static int _Position_Correction;
 static int _Buffer_Cmd[10] = {0};
+
+static uint32_t current_version;
+
+static HANDLE _sendLock;
 
 
 void robi_init(void)
@@ -123,8 +136,33 @@ void robi_init(void)
 	_txFifoOutIndex = 0;
 	
 	memset(&_robiStatus, 0, sizeof(_robiStatus));
-	
-	_isInit = TRUE;
+
+    if (access(ROBI_SOFTWARE_FILENAME, R_OK) == 0)
+    {
+        int fd = open(ROBI_SOFTWARE_FILENAME, O_RDONLY);
+
+        if (fd == -1)
+        {
+            current_version = 0;
+        }
+        else
+        {
+            lseek(fd, -sizeof(current_version), SEEK_END);
+            read(fd, &current_version, sizeof(current_version));
+            close(fd);
+        }
+    }
+    else
+    {
+        current_version = 0;
+    }
+
+    _isUpdating = FALSE;
+    _updateFailed = FALSE;
+
+    _sendLock = rx_mutex_create();
+
+    _isInit = TRUE;
 	
 	rx_thread_start(send_thread, NULL, 0, "robi_send_thread");
 	rx_thread_start(receive_thread, NULL, 0, "robi_receive_thread");
@@ -890,10 +928,23 @@ static int32_t set_serial_attributs(int fd, int speed, int parity)
 	return REPLY_OK;
 }
 
-static int32_t send_command(uint32_t commandCode, uint8_t len, void *data)
+static int32_t get_output_fifo_capacity(void)
+{
+    if (_txFifoOutIndex > _txFifoInIndex)
+    {
+        return ROBI_FIFO_SIZE - (ROBI_FIFO_SIZE - _txFifoOutIndex + _txFifoInIndex);
+    }
+
+    return ROBI_FIFO_SIZE - (_txFifoInIndex - _txFifoOutIndex);
+}
+
+
+static int32_t send_command(uint32_t commandCode, uint32_t len, void *data)
 {
 	SUsbTxMsg *pTxMessage;
     int i;
+
+    rx_mutex_lock(_sendLock);
 
     if (commandCode != STATUS_UPDATE)
     {
@@ -907,7 +958,6 @@ static int32_t send_command(uint32_t commandCode, uint8_t len, void *data)
     int32_t nextFifoIndex = (_txFifoInIndex + 1) % ROBI_FIFO_SIZE;
 	if (nextFifoIndex == _txFifoOutIndex) 
 	{
-		term_printf("FIFO Overfilled\n"); 
 		return REPLY_ERROR;
 	}
 	
@@ -924,8 +974,108 @@ static int32_t send_command(uint32_t commandCode, uint8_t len, void *data)
 		_msgId = ROBI_MIN_MSG_ID;
 	
 	_txFifoInIndex = nextFifoIndex;
+    
+    rx_mutex_unlock(_sendLock);
 	
 	return REPLY_OK;
+}
+
+static void update_failed(int fd)
+{
+    rx_sleep(100);
+    send_command(BOOTLOADER_RESET_CMD, 0, 0);
+    current_version = 0;
+    _isUpdating = FALSE;
+    _updateFailed = TRUE;
+    close(fd);
+}
+
+static void* update_thread(void *par)
+{
+    int fd = open(ROBI_SOFTWARE_FILENAME, O_RDONLY);
+
+    if (fd != -1)
+    {
+        int32_t error = REPLY_OK;
+        uint8_t *dataBuffer = 0;
+        uint8_t *currentData = 0;
+        uint32_t size = 0, size_read = 0, available_data = 0, total_data = 0;
+        
+        // Get File Size
+        size = lseek(fd, 0L, SEEK_END);
+        lseek(fd, 0L, SEEK_SET);
+
+        // Allocate buffer
+        dataBuffer = (uint8_t *)malloc(size);
+
+        // Read file content (last 4 bytes are the version string, don't read that)
+        size_read = read(fd, dataBuffer, size);
+
+        send_command(BOOTLOADER_INIT_CMD, sizeof(size_read), &size_read);
+
+        while (_robiStatus.bootloaderStatus != WAITING_FOR_DATA)
+        {
+            rx_sleep(100);
+        }
+
+        currentData = dataBuffer;
+        total_data = dataBuffer + size_read;
+        while (currentData < total_data)
+        {
+            while (get_output_fifo_capacity() <= UPDATE_FIFO_THRESHOLD)
+            {
+                rx_sleep(25);
+            }
+            
+            available_data = total_data - (uint32_t)currentData;
+
+            if (available_data > SIZE_OF_DATA)
+            {
+                if (REPLY_OK == send_command(BOOTLOADER_WRITE_DATA_CMD,
+                                             SIZE_OF_DATA, currentData))
+                {
+                    currentData += SIZE_OF_DATA;
+                }
+            }
+            else
+            {
+                if (REPLY_OK == send_command(BOOTLOADER_WRITE_DATA_CMD,
+                                             available_data, currentData))
+                {
+                    currentData += available_data;
+                }
+            }
+
+            if (_robiStatus.bootloaderStatus != WAITING_FOR_DATA)
+            {
+                update_failed(fd);
+            }
+        }
+        
+        while (_robiStatus.bootloaderStatus != WAITING_FOR_CONFIRM)
+        {
+            if (_robiStatus.bootloaderStatus == UNINITIALIZED)
+            {
+                update_failed(fd);
+            }
+            rx_sleep(100);
+            if (get_output_fifo_capacity() == 0)
+            {
+                rx_sleep(100);
+            }
+        }
+
+
+        send_command(BOOTLOADER_CONFIRM_CMD, 0, 0);
+        
+        while (_robiStatus.bootloaderStatus != UNINITIALIZED)
+        {
+            rx_sleep(100);
+        }
+        
+        _isUpdating = FALSE;
+        close(fd);
+    }
 }
 
 static void* send_thread(void *par)
@@ -946,13 +1096,16 @@ static void* send_thread(void *par)
 			comm_encode(pTxMessage, length, buffer, sizeof(buffer), &bufferLength);
 			
 			write(_usbPort, buffer, bufferLength);
-			tcdrain(_usbPort);
-			_msgSentCounter++;
+            if (tcdrain(_usbPort) != 0)
+            {
+                rx_sleep(200);
+            }
+            _msgSentCounter++;
 			if (pTxMessage->command != STATUS_UPDATE)
 				_MsgsSent++;
 			
 			_txFifoOutIndex = (_txFifoOutIndex + 1) % ROBI_FIFO_SIZE;
-			rx_sleep(125);
+			rx_sleep(25);
 		}
 	}
 }
@@ -978,6 +1131,7 @@ static void* receive_thread(void *par)
 					if (length == sizeof(rxMessage) - sizeof(rxMessage.data) + rxMessage.length)
 					{
 						_msgReceivedCounter++;
+                        
 						if (_isConnected == FALSE)
 							_isConnected = TRUE;
 					
@@ -987,6 +1141,13 @@ static void* receive_thread(void *par)
 							_isSync = TRUE;
 					
 						memcpy(&_robiStatus, &rxMessage.robi, sizeof(_robiStatus));
+
+                        if (_isUpdating == FALSE &&
+                            _robiStatus.version < current_version)
+                        {
+                            _isUpdating = TRUE;
+                            rx_thread_start(update_thread, NULL, 0, "robi_update_thread");
+                        }
 
                         if (rxMessage.error)
                         {

@@ -14,7 +14,6 @@
 #include "rx_ink_common.h"
 
 #define COMM_BUF_SIZE	512
-//#define COMM_BUF_SIZE	1024
 
 //--- defines -----------------------------------------------------------------
 
