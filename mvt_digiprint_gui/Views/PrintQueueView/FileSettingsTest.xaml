@@ -7,8 +7,7 @@
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
              xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
-             mc:Ignorable="d" 
-             
+             mc:Ignorable="d"              
              >
 
     <StackPanel 
@@ -25,8 +24,9 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="15" />
                 <ColumnDefinition Width="90" />
-                <ColumnDefinition Width="300" />
-                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="70" />
+                <ColumnDefinition Width="150"/>
+                <ColumnDefinition Width="100"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto"/>
@@ -90,7 +90,7 @@
             <common:MvtNumBox Grid.Row="5" Grid.Column="2" Text="{Binding Copies}" HorizontalAlignment="Stretch" Margin="0, 0, 0, 5"/>
 
             <TextBlock   Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Text="Message" Margin="0, 10, 0, 5"/>
-            <rx:MvtTextBox Grid.Row="6" Grid.Column="2" Grid.ColumnSpan="2" Text="{Binding TestMessage}" HorizontalAlignment="Stretch" Margin="0, 10, 0, 5"/>
+            <rx:MvtTextBox Grid.Row="6" Grid.Column="2" Grid.ColumnSpan="3" Text="{Binding TestMessage}" HorizontalAlignment="Stretch" Margin="0, 10, 0, 5"/>
 
             <CheckBox x:Name="MessageCheckBox" Style="{StaticResource LargeCheckBox}" Grid.ColumnSpan="2" Grid.Row="7" Grid.Column="2" HorizontalAlignment="Left" Content="Auto-generate message"
                     Checked="MessageCheckBoxChanged" Unchecked="MessageCheckBoxChanged" >

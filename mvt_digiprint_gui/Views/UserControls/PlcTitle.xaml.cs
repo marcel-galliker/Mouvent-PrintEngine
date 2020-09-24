@@ -50,7 +50,6 @@ namespace RX_DigiPrint.Views.UserControls
         }
 
 		//--- Property Color ---------------------------------------
-		private Color _Color;
 		public Color Color
 		{
 			set { Line.Fill=new SolidColorBrush(value); }

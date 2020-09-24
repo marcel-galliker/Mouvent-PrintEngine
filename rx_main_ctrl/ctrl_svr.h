@@ -45,14 +45,14 @@ void ctrl_set_max_speed(void);
 int	 ctrl_abort_printing(void);
 void ctrl_send_firepulses(char *dots, int screenOnPrinter);
 int  ctrl_print_page(SPageId *id);
-int  ctrl_simu_enoder(int khz);
-
-
+int  ctrl_simu_encoder(int khz);
 
 void ctrl_reply_stat(RX_SOCKET socket);
 void ctrl_tick(void);
 
 void ctrl_head_alive(int headNo);
+
+void ctrl_set_cluster_no(SValue* pdata);
 
 void ctrl_empty_PurgeBuffer(int fluidNo);
 

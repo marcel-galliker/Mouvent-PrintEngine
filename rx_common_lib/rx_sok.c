@@ -438,7 +438,7 @@ int	sok_get_ifcnt(const char *grep)
 {
 	char cmd[64];
 	FILE *f;
-	sprintf(cmd, "ls -A /sys/class/net | grep %s | wc -l", grep);
+	sprintf(cmd, "ls -A /sys/class/net | grep -E %s | wc -l", grep);
 	f = popen(cmd, "r");
 	char str[32];
 	fgets(str, sizeof(str), f);

@@ -132,6 +132,7 @@
         <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
         <Setter Property="FontSize" Value="14"/>
     </Style>
+    
     <!-- _________________________ ExpansionIndicator __________________________________________ -->
     <!-- SOURCE F:\Compiler\Infragistics\2013.2\WPF\DefaultStyles\Windows\PrimitivesGeneric_Express.xaml -->
     <Style x:Key="XamGridExpansionIndicatorHeaderCellControl" TargetType="igPrim:ExpansionIndicatorHeaderCellControl" >

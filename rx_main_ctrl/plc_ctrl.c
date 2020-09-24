@@ -31,6 +31,7 @@
 #include "print_ctrl.h"
 #include "chiller.h"
 #include "lh702_ctrl.h"
+#include "step_tx.h"
 #include "plc_ctrl.h"
 
 //--- SIMULATION ----------------------------------------------
@@ -210,7 +211,9 @@ int	plc_init(void)
 	if (_SimuPLC)     Error(WARN, 0, "PLC in Simulation");
 	if (_SimuEncoder) Error(WARN, 0, "Encoder in Simulation");
 	
-	if (RX_Config.printer.type==printer_LH702 && str_start(RX_Hostname, "LH702")) _SimuPLC = TRUE;
+	if ((RX_Config.printer.type==printer_LH702 && str_start(RX_Hostname, "LH702")) ||
+		(RX_Config.printer.type==printer_test_table_seon && str_start(RX_Hostname, "Roman"))) 
+		_SimuPLC = TRUE;
 	
 	if (_SimuPLC) rx_thread_start(_plc_simu_thread, NULL, 0, "_plc_simu_thread");
 	else		  rx_thread_start(_plc_thread, NULL, 0, "_plc_thread");
@@ -384,8 +387,7 @@ static void _plc_set_par(SPrintQueueItem *pItem, SPlcPar *pPlcPar)
 		}
 	}
     _FirstStep = TRUE;
-	_StepDist = 43.328;
-	if (RX_Config.printer.type==printer_TX802) _StepDist*=2;
+	_StepDist = 43.328 * RX_Config.headsPerColor;
 	
 	if (!RX_Config.printer.overlap)
 	{
@@ -477,8 +479,7 @@ int  plc_set_printpar(SPrintQueueItem *pItem)
 	
 	TrPrintfL(TRUE, "plc_set_printpar");
 	
-	if ((RX_Config.stepper.ref_height || RX_Config.stepper.print_height) 
-	&&  (RX_Config.printer.type==printer_TX801 || RX_Config.printer.type==printer_TX802))
+	if (rx_def_is_tx(RX_Config.printer.type) && (RX_Config.stepper.ref_height || RX_Config.stepper.print_height))
 	{
 		// else wait webtension is ok
 		_head_was_up   = (RX_StepperStatus.info.z_in_print || RX_StepperStatus.info.z_in_ref);
@@ -895,6 +896,10 @@ static void _plc_get_var(RX_SOCKET socket, char *varList)
 		{
 			strcpy(var, str);
 			if (lc_get_value_by_name(name, value)==0) len += sprintf(&answer[len], "=%s", value);
+            else if (RX_Config.printer.type == printer_test_table_seon)
+            {
+                
+            }
 			else
 			{
 				if (_SimuPLC)	len += sprintf(&answer[len], "=SIMU");
@@ -933,7 +938,7 @@ static void _plc_set_var(RX_SOCKET socket, char *varList)
 			*val++=0;
 			strcpy(var, str);
 			for(char *ch=val; *ch; ch++) if (*ch==',') *ch='.';
-			if (!_plc_set_cpu_cmd(name, val))
+			if (!_plc_set_cpu_cmd(name, val) && RX_Config.printer.type != printer_test_table_seon)
 			{
 				ret = lc_set_value_by_name(name, val);
 			//	Error(LOG, 0, "SET %s=%s", name, val);
@@ -1521,6 +1526,10 @@ static void _plc_state_ctrl()
         if (RX_StepperStatus.info.z_in_print)
 			step_handle_gui_msg(INVALID_SOCKET, CMD_LIFT_UP_POS, NULL, 0);
 	}
+	if (_PlcState == plc_glue)
+    {
+        steptx_wd_to_up_pos();
+    }
 	if(_PlcState == plc_pause)
 	{		
 		if(_SendPause==2)
@@ -1539,7 +1548,7 @@ static void _plc_state_ctrl()
 		}
 		if(_StartEncoderItem.pageWidth)	// send position to encoder
 		{			
-			if(RX_Config.printer.type == printer_TX801 || RX_Config.printer.type == printer_TX802)
+			if(rx_def_is_tx(RX_Config.printer.type))
 			{ // calculate speed
 				UINT32 speed;
 				// speed = time for one scanner movement!

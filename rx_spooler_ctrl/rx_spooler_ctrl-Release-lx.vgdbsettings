@@ -115,8 +115,6 @@
         <WorkingDirectory>$(ProjectDir)\..\bin\spooler\</WorkingDirectory>
         <BackgroundMode>false</BackgroundMode>
       </CustomActionBase>
-    </PreSyncActions>
-    <PreBuildActions>
       <CustomActionBase xsi:type="CommandLineAction">
         <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
         <Command>..\VersionUpdate.exe</Command>
@@ -124,7 +122,9 @@
         <WorkingDirectory>$(ProjectDir)</WorkingDirectory>
         <BackgroundMode>false</BackgroundMode>
       </CustomActionBase>
-      <CustomActionBase xsi:type="SourceTransferAction">
+      </PreSyncActions>
+    <PreBuildActions>
+        <CustomActionBase xsi:type="SourceTransferAction">
         <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
         <RemoteHost>
           <HostName>$(BuildHost)</HostName>

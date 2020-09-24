@@ -24,7 +24,7 @@
 
 // General
 #define STEPS_REV           (200 * 16)      // steps per motor revolution * 16 microsteps
-#define DIST_REV            1000.0          // moving distance per revolution on wrinkle detection motor [µm]
+#define DIST_REV            1000.0          // moving distance per revolution on wrinkle detection motor [Âµm]
 
 #define MOTOR_WD_FRONT      2               
 #define MOTOR_WD_BACK       3               
@@ -148,9 +148,7 @@ void tx80x_wd_main(void)
             {
                 if (motor_error(motor))
                 {
-                    Error(ERR_ABORT, 0,
-                          "WRINKLE DETECTION: %s: motor %s blocked", _CmdName,
-                          motor + 1);
+                    Error(ERR_ABORT, 0, "WRINKLE DETECTION: %s: motor %s blocked", _CmdName, motor + 1);
                     ok = FALSE;
                 }
             }
@@ -158,6 +156,7 @@ void tx80x_wd_main(void)
         }
 
         RX_StepperStatus.robinfo.z_in_print = (_CmdRunning == CMD_LIFT_PRINT_POS && RX_StepperStatus.robinfo.ref_done_wd);
+		RX_StepperStatus.robinfo.wd_in_up = (_CmdRunning == CMD_LIFT_UP_POS && RX_StepperStatus.robinfo.ref_done_wd);
 
         if (_CmdRunning == CMD_LIFT_REFERENCE && _PrintPos_New)
         {
@@ -205,7 +204,7 @@ void tx80x_wd_menu(int help)
         term_printf("r<n>: reset motor<n>\n");
         term_printf("o: toggle output <no>\n");
         term_printf("R: Reference\n");
-        term_printf("p<um>: set hight for Wrinkle Detection\n");
+        term_printf("p<um>: set height for Wrinkle Detection\n");
         term_printf("u: move Wrinkle Detection to up position\n");
         term_printf("a: move down to adjust wrinkle detection\n");
         term_printf("z<steps>: move WD by <steps>\n");

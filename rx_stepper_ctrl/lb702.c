@@ -616,6 +616,7 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									RX_StepperStatus.cmdRunning = 0;
 									_Cmd_New = FALSE;
                                     _NewCmd = FALSE;
+                                    RX_StepperStatus.info.ref_done = FALSE;
                                     if (RX_StepperStatus.robot_used) lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_STOP, NULL);
 									break;	
 

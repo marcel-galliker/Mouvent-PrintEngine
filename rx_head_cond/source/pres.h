@@ -31,8 +31,4 @@ void pres_init(void);
 void pres_tick_10ms(void);
 int  pres_valid(void);
 
-void pres_del_user_offset(void);
-void pres_calibration_start(void);
-int  pres_calibration_done(void);
-
 #endif /* __pres_h__ */

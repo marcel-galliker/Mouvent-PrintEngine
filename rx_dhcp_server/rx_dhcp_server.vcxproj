@@ -279,16 +279,6 @@
       <AdditionalDependencies>Ws2_32.lib;rx_common_lib.lib;rx_rip_lib.lib;TBarCode11.lib;rx_tif_lib.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(OutDir);..\Externals\Tec-it\Win\TBarCode11\Lib</AdditionalLibraryDirectories>
     </Link>
-    <PostBuildEvent>
-      <Command>mkdir "$(SolutionDir)bin\win"
-copy "$(OutDir)$(TargetName)$(TargetExt)" "$(SolutionDir)bin\win\"
-mkdir "d:\Radex\bin\spooler\win"
-copy "$(OutDir)$(TargetName)$(TargetExt)" "d:\Radex\bin\spooler\win\"
-copy "$(OutDir)rx_rip_lib.dll" "d:\Radex\bin\spooler\win\"</Command>
-    </PostBuildEvent>
-    <PreBuildEvent>
-      <Command>..\VersionUpdate $(ProjectDir)version.c</Command>
-    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>

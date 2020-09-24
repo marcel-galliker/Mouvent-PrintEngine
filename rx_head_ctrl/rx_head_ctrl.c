@@ -95,7 +95,11 @@ void handle_menu(char *str)
 	int no;
 	
 	if      (no=str_start(str, "cluster"))		cond_set_clusterNo(atoi(&str[no]));
-	else if (no=str_start(str, "resetinkctr"))	cond_volume_printed(atoi(&str[no]), 0);			
+	else if (no=str_start(str, "resetinkctr"))	
+	{
+		cond_volume_printed(atoi(&str[no]), 0);
+		cond_reset_droplets_printed(atoi(&str[no]));
+	}
 	else if (no=str_start(str,"ra"))			cond_set_rob_pos(str[no]-'0', str_to_screw(&str[no+1]), 0);
 	else if (no=str_start(str,"rd"))			cond_set_rob_pos(str[no]-'0', 0, str_to_screw(&str[no+1]));
 	else
@@ -143,14 +147,6 @@ void handle_menu(char *str)
 		// Only for DEBUGGING purposes
 		// Parameters for tuning the Conditioner's PID controller
 
-		case 'u': if (no<=4) cond_offset_del(no);					break;
-		case 'z': if (no<=4) cond_ctrlMode2(no, ctrl_offset_cal);	break;	
-
-		/*
-		case 'z': if (no<=4) cond_ctrlMode2(no, ctrl_offset_cal);			break; // 4 for all connected heads
-		case 'B': if (no<4) cond_toggle_psensor_cali(no);					break;
-		case 'b': if (no<4) cond_toggle_psensor_cali_user(no);				break;
-		*/
 		default: putty_handle_menu(str);
 		}
 	}

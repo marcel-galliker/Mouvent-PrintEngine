@@ -46,37 +46,42 @@ static void main_menu();
 //--- main_menu ----------------------------------------------------------
 static void main_menu()
 {	
+	static int show=FALSE;
 	static int status=TRUE;
 	int i;
 	char str[MAX_PATH];
 
 	term_printf("\n");
 	term_printf("\nMENU -------------------------\n");
-//	if (status) term_printf("s: hide status\n");
-//	else        term_printf("s: show status\n");
-	term_printf("o:          switch off all tests\n");
-	term_printf("a<n>:       Air-Valve[n]: switch\n");		
-	term_printf("b<n>:       Bleed-Valve[n]: switch\n");		
-	term_printf("i<n><mbar>: Ink-Pump[n] on until ink pressure > [mbar]\n");
-	term_printf("v<mbar>:    Vacuum to [mbar] (0=test off)\n");
-	term_printf("p<mbar>:    Pressure to [mbar] (0=test off)\n");
-	term_printf("l<n>:       Test bleed line\n");			
-	term_printf("f<x>:       Flush\n");	
-	term_printf("z<n><mbar>: Purge pressure (0= pressure calculated)\n");	
-	
-	if (_DisplayBalance) 
+	if (show)
 	{
-		term_printf("T<n<:       Tara balance <n>   \n");
-		term_printf("B:          hide balance       \n");
-	}
-	else         
-		term_printf("B:          show balance       \n");
+	//	if (status) term_printf("s: hide status\n");
+	//	else        term_printf("s: show status\n");
+		term_printf("o:          switch off all tests\n");
+		term_printf("a<n>:       Air-Valve[n]: switch\n");		
+		term_printf("b<n>:       Bleed-Valve[n]: switch\n");		
+		term_printf("i<n><mbar>: Ink-Pump[n] on until ink pressure > [mbar]\n");
+		term_printf("v<mbar>:    Vacuum to [mbar] (0=test off)\n");
+		term_printf("p<mbar>:    Pressure to [mbar] (0=test off)\n");
+		term_printf("l<n>:       Test bleed line\n");			
+		term_printf("f<x>:       Flush\n");	
+		term_printf("z<n><mbar>: Purge pressure (0= pressure calculated)\n");	
 	
-	if(nios_is_heater_connected())	term_printf("t<n><temp>: set Heater[n] Temperature to [temp] (max. 60 degree)\n");
+		if (_DisplayBalance) 
+		{
+			term_printf("T<n<:       Tara balance <n>   \n");
+			term_printf("B:          hide balance       \n");
+		}
+		else         
+			term_printf("B:          show balance       \n");
+	
+		if(nios_is_heater_connected())	term_printf("t<n><temp>: set Heater[n] Temperature to [temp] (max. 60 degree)\n");
 
-	//term_printf("PID: %d %d %d %d\n", _Cfg->controller_P, _Cfg->controller_I, _Cfg->controller_D, _Cfg->controller_offset);
-	term_printf("q: start log\n");
-	term_printf("x: exit\n");
+		//term_printf("PID: %d %d %d %d\n", _Cfg->controller_P, _Cfg->controller_I, _Cfg->controller_D, _Cfg->controller_offset);
+		term_printf("q: start log\n");
+		term_printf("x: exit\n");
+	}
+	else term_printf("?: show menu\n");
 	term_printf(">");
 	term_flush();
 
@@ -86,27 +91,29 @@ static void main_menu()
 		switch (str[0])
 		{
 //		case 's': status = !status;							break;
-		case 'o':	nios_test_stop(); nios_test_vacuum(0);	break;
-		case 'a':	nios_test_air_valve(no);				break;
-		case 'B':   _DisplayBalance = !_DisplayBalance;		break;
-		case 'f':	nios_test_flush(atoi(&str[1]));			break;
-		case 'b':	nios_test_bleed_valve(no);				break;
-		case 'i':	nios_test_ink_pump(no, atoi(&str[2]));	break;
-		case 'v':	nios_test_vacuum(atoi(&str[1]));		break;
-		case 'p':	nios_test_air_pressure(atoi(&str[1]));	break;
-		case 't':	nios_set_temp(no, atoi(&str[2]));		break;
-//		case 'q':	nios_start_temp_log();					break;
-		case 'q':	nios_start_log();						break;
-		case 'l':	nios_test_bleed_line(no); _DisplayTestBleedLine = 1; break;
+		case 'o':	show=FALSE; nios_test_stop(); 						break;
+		case 'a':	show=FALSE; nios_test_air_valve(no);				break;
+		case 'B':   show=FALSE; _DisplayBalance = !_DisplayBalance;		break;
+		case 'f':	show=FALSE; nios_test_flush(atoi(&str[1]));			break;
+		case 'b':	show=FALSE; nios_test_bleed_valve(no);				break;
+		case 'i':	show=FALSE; nios_test_ink_pump(no, atoi(&str[2]));	break;
+		case 'v':	show=FALSE; nios_test_vacuum(atoi(&str[1]));		break;
+		case 'p':	show=FALSE; nios_test_air_pressure(atoi(&str[1]));	break;
+		case 't':	show=FALSE; nios_set_temp(no, atoi(&str[2]));		break;
+//		case 'q':	show=FALSE; nios_start_temp_log();					break;
+		case 'q':	show=FALSE; nios_start_log();						break;
+		case 'l':	show=FALSE; nios_test_bleed_line(no); _DisplayTestBleedLine = 1; break;
 	
 /*
-		case 'c':	cmd.no		= no;
+		case 'c':	show=FALSE; 
+					cmd.no		= no;
 					cmd.weight  = atoi(&str[2]);
 					scl_calibrate(&cmd);					break;
 */
-		case 'x': _AppRunning=FALSE;						break;
-		case 'T': daisy_chain_do_tara(no);					break;
-		case 'z': nios_set_purge_pressure(no, atoi(&str[2]));		break;
+		case 'x': show=FALSE; _AppRunning=FALSE;							break;
+		case 'T': show=FALSE; daisy_chain_do_tara(no);						break;
+		case 'z': show=FALSE; nios_set_purge_pressure(no, atoi(&str[2]));	break;
+        case '?': show=!show;												break;
 		}
 	}
 }

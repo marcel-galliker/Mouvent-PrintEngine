@@ -42,6 +42,9 @@
 	#define INT64	int64_t
 
 	#define RX_TYPES
+	
+	#define REPLY_OK	0
+	#define REPLY_ERROR	1
 #else
 	#include "../rx_common_lib/rx_common.h"
 #endif
@@ -130,6 +133,7 @@ typedef enum EPrinterType
 	printer_test_table,			// 1:
 	printer_test_slide,			// 2:
 	printer_test_slide_only,	// 3:
+	printer_test_table_seon,	// 4:
 
 	//--- web printers ------------------------------
 	printer_LB701=1000,			// 1000: 
@@ -142,6 +146,7 @@ typedef enum EPrinterType
 	//--- scanning printers --------------------------
 	printer_TX801     = 2000,		// 2000: Fashionn stanrard output
 	printer_TX802,					// 2001: Fashion high outpput
+	printer_TX404,					// 2002: 
 
 	//--- special projects ----------------
 	printer_cleaf = 10000,		// 10000: Cleaf machine
@@ -259,11 +264,15 @@ typedef enum EnFluidCtrlMode
     ctrl_cal_step3,   		// 0x403:
     ctrl_cal_step4,   		// 0x404:
 	ctrl_cal_done,       	// 0x405:
+    
+    ctrl_leak_test = 0x500,	// 0x500:
+    ctrl_leak_test_step1,
+	ctrl_leak_test_step2,
 
     ctrl_test_watchdog = 0x10000,
     ctrl_test, 				// 0x10001
-	ctrl_offset_cal, 		// 0x10002
-	ctrl_offset_cal_done,	// 
+
+    ctrl_toggle_meniscus = 0x20000,
 } EnFluidCtrlMode;
 
 char *FluidCtrlModeStr(EnFluidCtrlMode mode);
@@ -294,7 +303,7 @@ typedef struct SPurgePar
     INT32 delay_pos_y;
     INT32 act_pos_y;
 	INT32 time;
-	int purge_putty_ON;
+    INT32 delay_time;
 } SPurgePar;
 
 int valid(int val);

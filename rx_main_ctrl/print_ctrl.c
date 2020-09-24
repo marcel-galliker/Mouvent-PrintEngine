@@ -138,11 +138,8 @@ int pc_start_printing(void)
 	if (RX_PrinterStatus.printState==ps_ready_power || RX_PrinterStatus.printState==ps_webin)
 	{
 		step_set_config();
-		if (!RX_StepperStatus.info.z_in_print && 
-			(RX_Config.printer.type==printer_TX801 
-		  || RX_Config.printer.type==printer_TX802
-		  || (RX_Config.printer.type==printer_LH702 && plc_in_simu())
-			))
+		if (!RX_StepperStatus.info.z_in_print 
+		&& (rx_def_is_tx(RX_Config.printer.type) || (RX_Config.printer.type==printer_LH702 && plc_in_simu())))
 		{
 			step_handle_gui_msg(INVALID_SOCKET, CMD_LIFT_PRINT_POS, NULL, 0);				
 		}
@@ -312,7 +309,7 @@ static void _send_head_info(void)
 			len += sprintf(&str[len], "%s-%d                     %s\n", RX_ColorNameShort(color), n+1, time);
 			
 			double ml=(double)RX_HBStatus[headNo/MAX_HEADS_BOARD].head[headNo%MAX_HEADS_BOARD].printedDroplets;
-			ml *= 1000000000;
+			ml *= 1000000;
 			ml *= RX_HBStatus[headNo/MAX_HEADS_BOARD].head[headNo%MAX_HEADS_BOARD].dropVolume;
 
 			len += sprintf(&str[len], "cl# %06d  printed %12s l\n", RX_HBStatus[headNo/MAX_HEADS_BOARD].clusterNo, value_str3((int)(1000.0*ml)));
@@ -487,7 +484,7 @@ static int _print_next(void)
 	static int _first;
 	static int _ScansNext;
 	static int _CopiesStart;
-	//SPrintQueueItem *_NextItem;
+	SPrintQueueItem *_NextItem=NULL;
 	TrPrintfL(TRUE, "_print_next printState=%d, spooler_ready=%d, pq_ready=%d", RX_PrinterStatus.printState, spool_is_ready(), pq_is_ready());
 	while ((RX_PrinterStatus.printState==ps_printing || RX_PrinterStatus.printState==ps_goto_pause || RX_PrinterStatus.printState==ps_pause || (_Scanning&&RX_PrinterStatus.printState==ps_stopping)) && spool_is_ready() && pq_is_ready())
 	{	
@@ -510,12 +507,14 @@ static int _print_next(void)
 				case PQ_TEST_JETS:			 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "fuji.tif");
 											 if (RX_Config.printer.type==printer_TX801 
 											 ||  RX_Config.printer.type==printer_TX802 
+											 ||  RX_Config.printer.type==printer_TX404
 											 ||  RX_Config.printer.type==printer_test_table) 
 												 RX_TestImage.scansTotal = RX_TestImage.copies;
 											 break;
 				case PQ_TEST_JET_NUMBERS:	 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "jet_numbers.tif");
 											 if (RX_Config.printer.type==printer_TX801 
 											 ||  RX_Config.printer.type==printer_TX802 
+											 ||  RX_Config.printer.type==printer_TX404
 											 ||  RX_Config.printer.type==printer_test_table) 
 												 RX_TestImage.scansTotal = RX_TestImage.copies;	
 											 break;
@@ -570,7 +569,7 @@ static int _print_next(void)
 			{
 				pq_trace_item(item);
 
-				//_NextItem = NULL;
+				_NextItem = NULL;
 				memcpy(&_Item, item, sizeof(_Item));
 				_first		  = TRUE;
 				_Item.scansStop = 0;
@@ -639,9 +638,7 @@ static int _print_next(void)
 					||  ((_BitsPerPixel==8 && (_Item.srcBitsPerPixel<8))))
 					{
 						Error(WARN, 0, "%d: %s Screening not compatible", _Item.id.id, _filename(_Item.filepath));
-						_Item.state = PQ_STATE_STOPPED;
-						pq_set_item(&_Item);
-						//pq_stopped(&_Item);
+						pq_stopped(&_Item);
 						gui_send_print_queue(EVT_GET_PRINT_QUEUE, &_Item);
 						memset(&_Item, 0, sizeof(_Item));
 						return REPLY_OK;;
@@ -684,7 +681,7 @@ static int _print_next(void)
 					}
 				}
 
-				//if (RX_Config.printer.type==printer_LH702) spool_load_file(&_Item.id, _FilePathLocal);
+				if (RX_Config.printer.type==printer_LH702) spool_load_file(&_Item.id, _FilePathLocal);
 				if (RX_Config.printer.type==printer_DP803) Error(LOG, 0, "Start Printing: >>%s<<, copiesTotal=%d, speed=%d m/min", _Item.filepath, _Item.copiesTotal, _Item.speed);
 			}
 		}
@@ -768,7 +765,7 @@ static int _print_next(void)
 					Error(LOG, 0, "_print_next:_StopJob");
 					pq_set_item(pitem);
 				}
-				spool_print_file(&_Item.id, _DataPath, _ScanOffset, _ScanLengthPx, &_Item, rx_def_is_tx(RX_Config.printer.type));
+				spool_print_file(&_Item.id, _DataPath, _ScanOffset, _ScanLengthPx, &_Item, rx_def_is_tx(RX_Config.printer.type) || RX_Config.printer.type==printer_test_table);
 				return REPLY_OK;
 			}
 			{
@@ -838,7 +835,7 @@ static int _print_next(void)
 						pq_set_item(&_Item);
 						pl_start(&_Item, _FilePathLocal);
 					}
-					spool_print_file(&_Item.id, _DataPath, _ScanOffset, _ScanLengthPx, &_Item, rx_def_is_tx(RX_Config.printer.type));
+					spool_print_file(&_Item.id, _DataPath, _ScanOffset, _ScanLengthPx, &_Item, rx_def_is_tx(RX_Config.printer.type)|| RX_Config.printer.type==printer_test_table);
 				}
 				else
 				{
@@ -873,7 +870,7 @@ static int _print_next(void)
 						spool_print_file(&_Item.id, _DataPath, img_offset, 0, &item, clearBlockUsed);
 						_Item.pageMargin=_PageMargin_Next;
 					}
-					/*
+					
 					if (RX_Config.printer.type==printer_LH702 && _NextItem==NULL)
 					{
 						_NextItem = pq_get_next_item();
@@ -884,7 +881,7 @@ static int _print_next(void)
 							if (_NextItem->id.page<_NextItem->start.page) _NextItem->id.page=_NextItem->start.page;
 							spool_load_file(&_NextItem->id, path);
 						}
-					}*/
+					}
 				}
 				return REPLY_OK;
 			}		

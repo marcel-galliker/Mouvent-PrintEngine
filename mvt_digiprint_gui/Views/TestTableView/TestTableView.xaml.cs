@@ -47,7 +47,6 @@ namespace RX_DigiPrint.Views.TestTableView
             RxGlobals.PrintQueue.Queue.CollectionChanged += OnPrintQueueChanged;
             MouventCommandButtons.StartClicked += Start_Clicked;
             
-            RxGlobals.PrintSystem.PropertyChanged += PrintSystem_PropertyChanged;
             Button_UV.DataContext         = RxGlobals.StepperStatus;
         }
 
@@ -58,15 +57,6 @@ namespace RX_DigiPrint.Views.TestTableView
             {
                 DataContext = TT_PrintSettings.DataContext = RxGlobals.PrintQueue.Queue[0];
                 _update_preview();
-            }
-        }
-
-        //--- PrintSystem_PropertyChanged --------------------------
-        void PrintSystem_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName.Equals("PrinterType"))
-            {        
-                TT_PrintSettings.Visibility = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_test_table) ? Visibility.Visible : Visibility.Collapsed;
             }
         }
 
@@ -238,7 +228,6 @@ namespace RX_DigiPrint.Views.TestTableView
             }
             else RxGlobals.RxInterface.SendCommand(TcpIp.CMD_ENCODER_UV_ON);
         }
-
 
         //--- MoveToLoad_Clicked -------------------------------------------------
         private void MoveToLoad_Clicked(object sender, RoutedEventArgs e)

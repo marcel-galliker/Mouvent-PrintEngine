@@ -87,11 +87,11 @@ static void _test_motor_test(int motorNo, int steps)
 	memset(&par, 0, sizeof(par));
 	par.speed		= 5000;
 	par.accel		= 32000;
-	par.current_acc	= 100.0;
-	par.current_run	= 100.0;
+	par.current_acc	= 200.0;
+	par.current_run	= 200.0;
 	par.stop_mux	= 0;
 	par.dis_mux_in	= 0;
-	par.encCheck	= chk_std;
+	par.encCheck	= chk_off;
 	RX_StepperStatus.info.moving = TRUE;
 	
 //	motors_config(motors,  CURRENT_HOLD, 0.0, 0.0);

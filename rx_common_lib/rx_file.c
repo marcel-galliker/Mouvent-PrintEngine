@@ -404,8 +404,30 @@ FILE * rx_fopen(const char * path, const char * mode, int sharemode)
 #endif
 }
 
+#ifndef linux
+int gettimeofday(struct timeval *tp, struct timezone *tzp)
+{
+    // Note: some broken versions only have 8 trailing zero's, the correct epoch
+    // has 9 trailing zero's This magic number is the number of 100 nanosecond
+    // intervals since January 1, 1601 (UTC) until 00:00:00 January 1, 1970
+    static const UINT64 EPOCH = ((UINT64)116444736000000000ULL);
+
+    SYSTEMTIME system_time;
+    FILETIME file_time;
+    UINT64 time;
+
+    GetSystemTime(&system_time);
+    SystemTimeToFileTime(&system_time, &file_time);
+    time = ((UINT64)file_time.dwLowDateTime);
+    time += ((UINT64)file_time.dwHighDateTime) << 32;
+
+    tp->tv_sec = (long)((time - EPOCH) / 10000000L);
+    tp->tv_usec = (long)(system_time.wMilliseconds * 1000);
+    return 0;
+}
+#endif
+
 //--- remove_old_files --------------------------------------
-#ifdef linux
 int rx_remove_old_files(const char *searchPath, int days)
 {
 	SEARCH_Handle	search;
@@ -414,7 +436,6 @@ int rx_remove_old_files(const char *searchPath, int days)
 	UINT64			fileTime;
 	UINT32			filesize;
 	UINT32			isDir;
-	int				copy;
 	struct timeval  now;
 	
 	gettimeofday(&now, NULL);
@@ -440,73 +461,6 @@ int rx_remove_old_files(const char *searchPath, int days)
 
 	return REPLY_OK;
 }
-#else
-int rx_remove_old_files(const char *searchStr, int days)
-{
-	__time64_t		time;
-	ULONGLONG		ltime, lftime, diff, day;
-	struct	tm		t;
-	int				no, n;
-	HANDLE			hFind;
-	WIN32_FIND_DATA findFileData;
-	char			str[MAX_PATH], path[MAX_PATH];
-
-	_time64(&time);
-	TimetToFileTime(time, (FILETIME*)&ltime);
-	day = (ULONGLONG)10000000 * 24*60*60;
-	ltime = (ltime/day)*day;
-	_localtime64_s(&t, &time); 
-
-
-	if (strstr(searchStr, "*"))
-	{
-	strcpy(path, searchStr);
-	n=(int)strlen(path)-1;
-	while (n>0)
-	{
-		if (path[n]=='\\' || path[n]=='/') break;
-		path[n--]=0;
-	}
-		strcpy (str, searchStr);
-	}
-	else
-	{
-		sprintf(path, "%s/", searchStr);
-		sprintf(str, "%s/*", searchStr);
-	}
-	hFind = FindFirstFile(str, &findFileData);
-	no = -1;
-
-	if (hFind!=INVALID_HANDLE_VALUE) 
-	{
-		do
-		{
-			if (findFileData.cFileName[0]!='.')
-			{
-			    memcpy(&lftime, &findFileData.ftLastWriteTime, sizeof(lftime));
-			    lftime = (lftime/day)*day;
-			    diff = (ltime-lftime) / day;
-			    if (diff>days || days==0) // delete older files
-			    {
-				    sprintf(str, "%s%s", path, findFileData.cFileName);
-				    DeleteFile(str);
-			    }
-			    else if (diff==0)
-			    {
-				    // n = atoi_tab(&findFileData.cFileName[wcslen(findFileData.cFileName)-7], NULL);
-				    n = atoi(&findFileData.cFileName[strlen(findFileData.cFileName)-7]);
-				    if (n<0) n=0;
-				    if (n>no) no=n;
-			    }
-			}
-		} 
-		while (FindNextFile(hFind, &findFileData));
-		FindClose(hFind);
-	}
-
-	return no;
-}
-#endif
 
 //--- rx_file_mount -------------------------------------------------------------------
 #ifdef linux

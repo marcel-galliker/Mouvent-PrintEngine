@@ -426,7 +426,7 @@ int tif_load(SPageId *id, const char *filedir, const char *filename, int printMo
 			pinfo->buffer[c]	= &buffer[c];
 			height = pinfo->lengthPx;
 			if (psplit[c].lastLine<height) height=psplit[c].lastLine;
-			
+
 			ppar->no	   = threadCnt;	
 			ppar->pinfo    = pinfo;
 			ppar->buffer   = buffer[c]+wakeupLen*lineLen;
@@ -485,14 +485,16 @@ int tif_load(SPageId *id, const char *filedir, const char *filename, int printMo
 		}
 		pinfo->lengthPx += 2*wakeupLen;
 			
+		/*
 		// Bug in FPGA: (when srcLineCnt==12300, gap=0 it sometimes prints an additional line of old data [instead of blank] between the labels)
 		if (rx_def_is_lb(RX_Spooler.printerType))		
 		{
 			for (i=0; i<threadCnt; i++)
 			{
-				memset(_ThreadPar[i].buffer+((UINT64)pinfo->lengthPx-1)*lineLen, 0x00, lineLen);
+				memset(_ThreadPar[i].buffer+pinfo->dataSize, 0x00, lineLen);
 			}
 		}
+		*/
 	}
 	
 //	Error(LOG, 0, "Loaded, time=%d ms", rx_get_ticks()-time);

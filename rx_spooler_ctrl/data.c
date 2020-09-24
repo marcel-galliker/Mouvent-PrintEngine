@@ -402,8 +402,8 @@ int  data_get_size	(const char *path, UINT32 page, UINT32 *pspacePx, UINT32 *pwi
 	}
 
 	// Bug in FPGA: (when srcLineCnt==12300, gap=0 it sometimes prints an additional line of old data [instead of blank] between the labels)
-	if (rx_def_is_lb(RX_Spooler.printerType)) 
-		*plength++;
+//	if (rx_def_is_lb(RX_Spooler.printerType)) 
+//		(*plength)++;
 	
 	*multiCopy = 1;
 	if (ret==REPLY_OK && (RX_Spooler.printerType==printer_TX801 || RX_Spooler.printerType==printer_TX802))
@@ -637,13 +637,12 @@ static int _data_loaded(const char *filepath, int page, SBmpInfo *bmpInfo, BYTE*
 	char  check[MAX_PATH];
 	sprintf(check, "%s-p%d", filepath, page);
 
-	TrPrintfL(TRUE, "_data_loaded >>%s<<", check);
 	for (int i=0; i<FILEBUF_CNT; i++)
 	{
 		SFileBuffer	*pBuf = &_FileBuf[i];
 		if (!strcmp(check, pBuf->filepath)) 
 		{
-			TrPrintfL(TRUE, "FileBuf[%d] found >>%s<<", i, pBuf->filepath);
+			TrPrintfL(TRUE, "_data_loaded: >>%s<< FileBuf[%d] found >>%s<<", check, i, pBuf->filepath);
 			memcpy(bmpInfo, &pBuf->bmpInfo, sizeof(SBmpInfo));
 			for (int n=0; n<MAX_COLORS; n++)
 			{
@@ -657,7 +656,7 @@ static int _data_loaded(const char *filepath, int page, SBmpInfo *bmpInfo, BYTE*
 			return REPLY_OK;
 		}
 	}
-	Error(LOG, 0, "NOT FOUND");
+	TrPrintfL(TRUE, "_data_loaded: >>%s<< NOT FOUND", check);
 	return REPLY_NOT_FOUND;
 }
 
@@ -703,7 +702,7 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 			}
 		}		
 		
-		if (/*id->id!=_LastId.id || */ id->page!=_LastId.page || strcmp(filepath, _LastFilePath) || _WakeupLen!=_LastWakeupLen || newOffsets || rx_file_get_mtime (_FileTimePath)!=_LastFileTime || gapPx!=_LastGapPx) // || printMode==PM_TEST_JETS) Overwrites head info!
+		if (/*id->id!=_LastId.id || */ id->page!=_LastId.page || strcmp(filepath, _LastFilePath) || _WakeupLen!=_LastWakeupLen || newOffsets || rx_file_get_mtime (_FileTimePath)!=_LastFileTime || gapPx!=_LastGapPx || jc_changed()) // || printMode==PM_TEST_JETS) Overwrites head info!
 		{
 			TrPrintfL(TRUE, "rx_sem_wait(_data_load_sem) (id=%d, page=%d, copy=%d, scan=%d) >>%s<<", id->id, id->page, id->copy, id->scan, filepath);
 			if (rx_sem_wait(_data_load_sem, 0)==REPLY_OK)
@@ -717,7 +716,7 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 				if (_PrintMode==PM_SCAN_MULTI_PAGE && !(flags & FLAG_SMP_FIRST_PAGE))
 					ctrl_pause_printing();
 				bmpInfo.printMode = printMode;
-				if (printMode==PM_TEST || printMode==PM_TEST_JETS || printMode==PM_TEST_SINGLE_COLOR)
+				if (rx_printMode_is_test(printMode))
 				{
 					for (color=0; color<MAX_COLORS; color++)
 					{
@@ -834,14 +833,14 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 		}
 		_data_split(id, &bmpInfo, offsetPx, lengthPx, blkNo, blkCnt, flags, clearBlockUsed, same, &_PrintList[_InIdx]);
 		
-		if (loaded || printMode==PM_TEST || printMode==PM_TEST_JETS || printMode==PM_TEST_SINGLE_COLOR)
+		if (loaded || rx_printMode_is_test(printMode))
 		{
 			if      (printMode==PM_TEST_JETS && id->id==PQ_TEST_JET_NUMBERS) jc_correction(&bmpInfo, &_PrintList[_InIdx], 4224);
 			else if (printMode!=PM_TEST && printMode!=PM_TEST_SINGLE_COLOR)  jc_correction(&bmpInfo, &_PrintList[_InIdx], 0);
 		}
 		#ifdef DEBUG
-		if (FALSE)
-//		if (loaded)
+//		if (FALSE)
+		if (loaded)
 		{
 			char dir[MAX_PATH];
 			char fname[MAX_PATH];
@@ -1482,19 +1481,20 @@ static int _data_split_prod(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 					if (pInfo->widthPx>barWidthPx)	pInfo->widthPx=barWidthPx;
 					if (pInfo->widthPx>headWidthPx)	pInfo->widthPx=headWidthPx;
 
-					pInfo->widthBt		= (pInfo->widthPx+pixelPerByte-1)/pixelPerByte;
 					if (startPx%pixelPerByte)
 					{		
 						if (startPx<0) 	pInfo->jetPx0  = pixelPerByte-(startPx+RX_Spooler.headWidthPx+pixelPerByte)%pixelPerByte;
 						else		    pInfo->jetPx0  = pixelPerByte-(startPx+pixelPerByte)%pixelPerByte;
-						pInfo->widthPx += pixelPerByte;
-						pInfo->widthBt ++;
+						pInfo->widthPx += abs(startPx % pixelPerByte);
 					}
 					else pInfo->jetPx0	= 0;
+					pInfo->widthBt = (pInfo->widthPx + pixelPerByte - 1) / pixelPerByte;
 
 					pInfo->srcWidthBt	= (pBmpInfo->srcWidthPx*pBmpInfo->bitsPerPixel)/8;
 					pInfo->srcLineLen	= pBmpInfo->lineLen;
 					pInfo->srcLineCnt	= pBmpInfo->lengthPx;
+//					if (rx_def_is_lb(RX_Spooler.printerType) && pInfo->srcLineCnt>1)
+//						pInfo->srcLineCnt++;	// Bug in FPGA: (when srcLineCnt==12300, gap=0 it sometimes prints an additional line of old data [instead of blank] between the labels)
 					pInfo->resol.x		= pBmpInfo->resol.x;
 					pInfo->resol.y		= pBmpInfo->resol.y;
 					if (pInfo->bitsPerPixel==8)

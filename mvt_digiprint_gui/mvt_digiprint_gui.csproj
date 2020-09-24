@@ -295,6 +295,7 @@
     <Compile Include="Comparers\FileName_Comparer.cs" />
     <Compile Include="Converters\BooleanConverters.cs" />
     <Compile Include="Converters\IconConverter.cs" />
+    <Compile Include="Converters\IconPacks_ModernKind.cs" />
     <Compile Include="Converters\JetCompensationConverters.cs" />
     <Compile Include="Converters\MainWindowConverters.cs" />
     <Compile Include="Converters\PrintSystemMonitoringConverters.cs" />
@@ -373,10 +374,13 @@
     <Compile Include="Helpers\RxXamGrid.cs" />
     <Compile Include="Helpers\UnitConversion.cs" />
     <Compile Include="Models\ClusterAlignment.cs" />
+    <Compile Include="Models\ClusterNo.cs" />
     <Compile Include="Models\ClusterStat.cs" />
     <Compile Include="Models\ClusterStatList.cs" />
     <Compile Include="Models\Density.cs" />
     <Compile Include="Models\DisabledJets.cs" />
+    <Compile Include="Models\Enums\EN_TestFluid.cs" />
+    <Compile Include="Models\FileNameFilter.cs" />
     <Compile Include="Models\HeadAdjustmentHelp.cs" />
     <Compile Include="Models\JetCompensation.cs" />
     <Compile Include="Models\JetCompensationDensityViewModel.cs" />
@@ -487,7 +491,6 @@
     <Compile Include="Models\Settings.cs" />
     <Compile Include="Models\StepperCfg.cs" />
     <Compile Include="Models\StepperMotor.cs" />
-    <Compile Include="Models\TestTableStatus.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="Models\UvLamp.cs" />
     <Compile Include="Models\WlanNetwork.cs" />
@@ -595,7 +598,6 @@
     <Compile Include="Views\LB701UVView\LB701UV_Cmd.xaml.cs" />
     <Compile Include="Views\LB701UVView\LB701UV_DiePos.xaml.cs" />
     <Compile Include="Views\LB701UVView\LB701UV_Par.xaml.cs" />
-    <Compile Include="Views\LB701UVView\LB701UV_Par_diecut.xaml.cs" />
     <Compile Include="Views\LB701UVView\LB701UV_Prepare.xaml.cs" />
     <Compile Include="Views\LB701UVView\LB701UV_Status.xaml.cs" />
     <Compile Include="Views\LB702UVView\LB702UV_Cfg.xaml.cs" />
@@ -663,6 +665,12 @@
     <Compile Include="Views\PrintSystemView\AdjustmentHelp.xaml.cs">
       <DependentUpon>AdjustmentHelp.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\PrintSystemView\FluidCommands.xaml.cs">
+      <DependentUpon>FluidCommands.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PrintSystemView\FluidSettings.xaml.cs">
+      <DependentUpon>FluidSettings.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\PrintSystemView\StepperGridCleaf.xaml.cs">
       <DependentUpon>StepperGridCleaf.xaml</DependentUpon>
     </Compile>
@@ -708,6 +716,9 @@
     <Compile Include="Views\Settings\WlanSettings.xaml.cs">
       <DependentUpon>WlanSettings.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\TestTableSeonView\TestTableSeonCommands.xaml.cs" />
+    <Compile Include="Views\TestTableSeonView\TestTableSeonStepperSettings.xaml.cs" />
+    <Compile Include="Views\TestTableSeonView\TestTableSeonView.xaml.cs" />
     <Compile Include="Views\TestTableView\TestTableView.xaml.cs">
       <DependentUpon>TestTableView.xaml</DependentUpon>
     </Compile>
@@ -884,6 +895,9 @@
     </Compile>
     <Compile Include="Views\UserControls\RxTaskSwitch.xaml.cs">
       <DependentUpon>RxTaskSwitch.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UserControls\SetClusterNo.xaml.cs">
+      <DependentUpon>SetClusterNo.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\UserControls\SetComputerNameWindow.xaml.cs">
       <DependentUpon>SetComputerNameWindow.xaml</DependentUpon>
@@ -1160,10 +1174,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Views\LB701UVView\LB701UV_Par_diecut.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="Views\LB701UVView\LB701UV_Prepare.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -1276,6 +1286,14 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\PrintSystemView\FluidCommands.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\PrintSystemView\FluidSettings.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Views\PrintSystemView\StepperGridCleaf.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -1335,6 +1353,18 @@
     <Page Include="Views\Settings\WlanSettings.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\TestTableSeonView\TestTableSeonCommands.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\TestTableSeonView\TestTableSeonStepperSettings.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\TestTableSeonView\TestTableSeonView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\TestTableView\TestTableView.xaml">
       <SubType>Designer</SubType>
@@ -1556,6 +1586,10 @@
     <Page Include="Views\UserControls\RxTaskSwitch.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UserControls\SetClusterNo.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\UserControls\SetComputerNameWindow.xaml">
       <SubType>Designer</SubType>
@@ -1784,6 +1818,56 @@
       <IncludeHash>True</IncludeHash>
       <FileType>Assembly</FileType>
     </PublishFile>
+    <PublishFile Include="MahApps.Metro.IconPacks.Entypo">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Exclude</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>Assembly</FileType>
+    </PublishFile>
+    <PublishFile Include="MahApps.Metro.IconPacks.EvaIcons">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Exclude</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>Assembly</FileType>
+    </PublishFile>
+    <PublishFile Include="MahApps.Metro.IconPacks.PicolIcons">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Exclude</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>Assembly</FileType>
+    </PublishFile>
+    <PublishFile Include="MahApps.Metro.IconPacks.RPGAwesome">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Exclude</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>Assembly</FileType>
+    </PublishFile>
+    <PublishFile Include="MahApps.Metro.IconPacks.Zondicons">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Exclude</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>Assembly</FileType>
+    </PublishFile>
     <PublishFile Include="TBarCode11_x64.dll">
       <Visible>False</Visible>
       <Group>
@@ -1955,11 +2039,8 @@ GOTO :END
 :END</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>call $(ProjectDir)Resources\Language\Compile.bat $(ProjectDir)Resources\Language
-call $(ProjectDir)VersionUpdate.bat $(ProjectDir)Properties\AssemblyInfo.cs.template  $(ProjectDir)Properties\AssemblyInfo.cs
-rem dir $(SolutionDir)_out\$(Configuration)_$(PlatformName)\rx_rip_lib.dll
-
-</PreBuildEvent>
+    <PreBuildEvent>IF $(ConfigurationName)==Release call $(ProjectDir)VersionUpdate.bat $(ProjectDir)Properties\AssemblyInfo.cs.template  $(ProjectDir)Properties\AssemblyInfo.cs
+call $(ProjectDir)Resources\Language\Compile.bat $(ProjectDir)Resources\Language</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

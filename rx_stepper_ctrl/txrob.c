@@ -30,7 +30,7 @@
 #define STEPS_REV			(200*16)	// steps per motor revolution * 16 microsteps
 
 // Rotation Motor // 200 steps/rev // max 4.2 Amp
-#define CURRENT_HOLD_ROT	50.0	// 2Amp Holding current is too high!
+#define CURRENT_HOLD_ROT	50.0
 
 #define MOTOR_ROT			0
 #define MOTOR_ROT_BITS		0x01
@@ -39,25 +39,20 @@
 #define ROT_STEPS_PER_REV	3200.0 // 200 steps * 16
 #define ROT_INC_PER_REV		16000	//(4*4000.0) // 3'200 m / 0.8
 
-#define SCREW_MIN_UNIT		4.0 // 360/4.0 = 90� minimal turn
+#define SCREW_MIN_UNIT		4.0 // 360/4.0 = 90° minimal turn
 
 // Shift Motor // 200 steps/rev // 2mm/rev // max 0.67 Amp
 #define CURRENT_HOLD_SHIFT  7.0
 
 #define MOTOR_SHIFT			1
 #define MOTOR_SHIFT_BITS	0x02
-#define MOTOR_SHIFT_VAR		100 // 20 // 10 // max allowed variance 
+#define MOTOR_SHIFT_VAR		100 // max allowed variance 
 
 #define SHIFT_STEPS_PER_METER	1600000.0 // 200 * 16 * / 2mm * 1000mm
 #define SHIFT_INC_PER_METER		2000000.0 // 1600000.0 / 0.8
 
 #define SPEED_SLOW_SHIFT	3200 // in steps/s
 
-//#define ROB_FUNCTION_CAP	0
-//#define ROB_FUNCTION_WASH	1
-//#define ROB_FUNCTION_VACUUM	2
-//#define ROB_FUNCTION_WIPE	3
-//#define ROB_FUNCTION_TILT	4
 #define ROB_FUNCTION_VACUUM_CHANGE	5
 
 #define ROB_SIDE_MOVINGS	3
@@ -68,7 +63,7 @@
 #define POS_ROT_VAC			(ROT_STEPS_PER_REV/4.0*1)
 #define POS_ROT_WASH		(ROT_STEPS_PER_REV/4.0*2)
 #define POS_ROT_CAP			(ROT_STEPS_PER_REV/4.0*3)
-//#define POS_ROT_VAC_CHANGE			(ROT_STEPS_PER_REV/4.0*3)
+
 #define POS_ROT_TILT		(POS_ROT_CAP-_TiltSteps)
 #define POS_ROT_VAC_1_TO_4_TO_ALL	(ROT_STEPS_PER_REV/4.0*2.5)
 #define POS_ROT_VAC_5_TO_8_TO_ALL	(ROT_STEPS_PER_REV/4.0*0.5)
@@ -86,14 +81,16 @@
 // MOTOR_SHIFT Positions
 #define POS_CENTER_OFFSET		(0.001+0.002) // 0.001 // in m
 #define POS_SHIFT_CNT			7
-#define POS_SHIFT_REF			(SHIFT_STEPS_PER_METER*(0/*-POS_CENTER_OFFSET*/))
+#define POS_SHIFT_REF			(SHIFT_STEPS_PER_METER*0)
 #define POS_SHIFT_CENTER_801	(SHIFT_STEPS_PER_METER*(0.024-0.002))
-#define POS_SHIFT_START			(SHIFT_STEPS_PER_METER*(0.024-0.024)) // (SHIFT_STEPS_PER_METER*(0.024+0.024))
-#define POS_SHIFT_END_801		(SHIFT_STEPS_PER_METER*(0.024+0.023))	//(SHIFT_STEPS_PER_METER*(0.024+0.025)) // (SHIFT_STEPS_PER_METER*(0.024-0.024))
+#define POS_SHIFT_START			(SHIFT_STEPS_PER_METER*(0.024-0.024))
+#define POS_SHIFT_END_801		(SHIFT_STEPS_PER_METER*(0.024+0.023))
 #define POS_SHIFT_CENTER_802	(SHIFT_STEPS_PER_METER*(0.024+0.020))
-#define POS_SHIFT_END_802		(SHIFT_STEPS_PER_METER*(0.024+0.066))
+#define POS_SHIFT_END_802		(SHIFT_STEPS_PER_METER*(0.024+0.067))
+#define POS_SHIFT_CENTER_404	(SHIFT_STEPS_PER_METER*(0.024+0.046))
+#define POS_SHIFT_END_404		(SHIFT_STEPS_PER_METER*(0.024+0.170))
 #define POS_SHIFT_MAX_TURN		(SHIFT_STEPS_PER_METER*(0.024+0.055))
-//#define POS_SHIFT_START		(SHIFT_STEPS_PER_METER*(0.024-0.024)) // (SHIFT_STEPS_PER_METER*(0.024+0.024))
+#define POS_SHIFT_MAX_TURN_404	(SHIFT_STEPS_PER_METER*(0.024+0.085))
 
 #define POS_SHIFT_CENTER	 POS_SHIFT_CENTER_801
 
@@ -105,6 +102,7 @@
 
 // Outputs
 #define VAC_ON				0x001 // 0
+#define MAGNET_OFF			0x002 // 1 Magnet
 #define PUMP_FLUSH_CAP		0x010 // 4 Flush 2
 #define PUMP_WASTE_VAC		0x020 // 5 Waste 1
 #define PUMP_FLUSH_WET		0x040 // 6 Flush 1
@@ -228,13 +226,13 @@ void txrob_init(void)
 	// Init Motors
 	motor_config(MOTOR_ROT,   CURRENT_HOLD_ROT,   ROT_STEPS_PER_REV, ROT_INC_PER_REV, MICROSTEPS);
 	motor_config(MOTOR_SHIFT, CURRENT_HOLD_SHIFT, SHIFT_STEPS_PER_METER, SHIFT_INC_PER_METER, STEPS);
-
+    
 	//--- movement parameters capping ----------------
     
 	_ParRotSensRef.speed = 400; // speed with max tork: 3200/4
 	_ParRotSensRef.accel =  400;
-	_ParRotSensRef.current_acc = 210.0;	//210.0; // max 420 = 4.2 A
-	_ParRotSensRef.current_run = 210.0;	//210.0; // max 420 = 4.2 A
+	_ParRotSensRef.current_acc = 400.0;	//210.0; // max 420 = 4.2 A
+	_ParRotSensRef.current_run = 400.0;	//210.0; // max 420 = 4.2 A
 	_ParRotSensRef.stop_mux = 0;
 	_ParRotSensRef.dis_mux_in = 0;
 	//_ParRotSensRef.estop_in_bit[MOTOR_ROT] = 1<<ROT_STORED_IN; // Check Input 0
@@ -259,6 +257,8 @@ void txrob_init(void)
 	//_ParShiftSensRef.estop_in_bit[MOTOR_SHIFT] = 1<<SHIFT_STORED_IN; // Check Input 1
 	//_ParShiftSensRef.estop_level = 1; // stopp when sensor on
 	_ParShiftSensRef.encCheck	 = chk_std;
+    if (RX_StepperCfg.printerType == printer_TX404)
+		_ParShiftSensRef.enc_bwd = TRUE;
 
 	_ParShiftDrive.speed		= 21000; // speed with max tork: 21'333
 	_ParShiftDrive.accel		= 10000;
@@ -267,6 +267,8 @@ void txrob_init(void)
 	_ParShiftDrive.stop_mux		= 0;
 	_ParShiftDrive.dis_mux_in	= 0;
 	_ParShiftDrive.encCheck		= chk_std;
+    if (RX_StepperCfg.printerType == printer_TX404)
+        _ParShiftDrive.enc_bwd = TRUE;
 	
 	_ParShiftWet.speed			= 21000; // speed with max tork: 21'333
 	_ParShiftWet.accel			= 10000;
@@ -275,6 +277,8 @@ void txrob_init(void)
 	_ParShiftWet.stop_mux		= 0;
 	_ParShiftWet.dis_mux_in		= 0;
 	_ParShiftWet.encCheck		= chk_std;
+    if (RX_StepperCfg.printerType == printer_TX404) 
+        _ParShiftWet.enc_bwd = TRUE;
 	
 	_ParShiftVac.speed			= 21000; // 21000; // speed with max tork: 21'333
 	_ParShiftVac.accel			= 10000;
@@ -283,6 +287,8 @@ void txrob_init(void)
 	_ParShiftVac.stop_mux		= 0;
 	_ParShiftVac.dis_mux_in		= 0;
 	_ParShiftVac.encCheck		= chk_std;
+    if (RX_StepperCfg.printerType == printer_TX404) 
+        _ParShiftVac.enc_bwd = TRUE;
 	
 	_ParShiftWipe.speed			= 21000; // 21000; // speed with max tork: 21'333
 	_ParShiftWipe.accel			= 10000;
@@ -291,6 +297,8 @@ void txrob_init(void)
 	_ParShiftWipe.stop_mux		= 0;
 	_ParShiftWipe.dis_mux_in	= 0;
 	_ParShiftWipe.encCheck		= chk_std;
+    if (RX_StepperCfg.printerType == printer_TX404)
+        _ParShiftWipe.enc_bwd = TRUE;
 
     //--- movement parameters Wrinkle Detection motors ----------------
 	
@@ -312,6 +320,13 @@ void txrob_init(void)
 		POS_SHIFT[3] = POS_SHIFT_END_802;
 		_TimeFillCap = 25;		// seconds
 	}
+    else if (RX_StepperCfg.printerType == printer_TX404)
+    {
+        POS_SHIFT[1] = POS_SHIFT_CENTER_404;
+        POS_SHIFT[3] = POS_SHIFT_END_404;
+        POS_SHIFT[6] = POS_SHIFT_MAX_TURN_404;
+        _TimeFillCap = 25; // seconds
+    }
 }
 
 //---_rot_pos_check --------------------------------------------------------------
@@ -425,7 +440,7 @@ void txrob_main(int ticks, int menu)
 	{
 		motor_config(MOTOR_ROT, CURRENT_HOLD_ROT, ROT_STEPS_PER_REV, ROT_INC_PER_REV, MICROSTEPS);
 		motor_config(MOTOR_SHIFT, CURRENT_HOLD_SHIFT, SHIFT_STEPS_PER_METER, SHIFT_INC_PER_METER, STEPS);
-	}
+	}     
 
 	// --- read Inputs ---
 	RX_StepperStatus.robinfo.z_in_ref		= fpga_input(ROT_STORED_IN); // Reference Sensor Rotation
@@ -458,7 +473,6 @@ void txrob_main(int ticks, int menu)
 		RX_StepperStatus.robinfo.wipe_done = FALSE;
 		RX_StepperStatus.robinfo.vacuum_ready = FALSE;
 		RX_StepperStatus.robinfo.vacuum_done = FALSE;
-		RX_StepperStatus.robinfo.vacuum_in_change = FALSE;
 		RX_StepperStatus.robinfo.vacuum_in_change = FALSE;
 		RX_StepperStatus.robinfo.wash_ready = FALSE;
 		RX_StepperStatus.robinfo.wash_done = FALSE;
@@ -501,6 +515,7 @@ void txrob_main(int ticks, int menu)
 		int loc_new_cmd = _NewCmd;
 
 		Fpga.par->output &= ~PUMP_FLUSH_WET; // PUMP_FLUSH_WET OFF
+        Fpga.par->output &= ~MAGNET_OFF;     // Magnet off to set Rot Motor
 
 		// --- tasks after motor error ---
         if ((RX_StepperStatus.cmdRunning != CMD_ROB_REFERENCE) && (RX_StepperStatus.cmdRunning != CMD_ROB_ROT_REF) && (RX_StepperStatus.cmdRunning != CMD_ROB_ROT_REF2) && (RX_StepperStatus.cmdRunning != FALSE) && (RX_StepperStatus.cmdRunning != CMD_ROB_SHIFT_REF))
@@ -526,7 +541,7 @@ void txrob_main(int ticks, int menu)
 		// --- tasks after motor ref ---
         if (RX_StepperStatus.cmdRunning == CMD_ROB_REFERENCE)
         {
-            loc_new_cmd = CMD_ROB_SHIFT_REF; // CMD_ROB_SHIFT_REF; // CMD_ROB_ROT_REF;
+            loc_new_cmd = CMD_ROB_SHIFT_REF; 
 		}
 
         if (RX_StepperStatus.cmdRunning == CMD_ROB_SHIFT_REF && _NewCmd == FALSE)
@@ -787,7 +802,8 @@ static void _txrob_display_status(void)
 	term_printf("Speed Shift [mm/s]:  %06d\n", _SpeedShift * 2 / 200 / 16);
 	term_printf("Timer Count:         %06d\n", _TimeCnt);
 	term_printf("\n");
-	term_printf("Vaccum State:         %d\n", _VacuumState);
+	term_printf("Vacuum State:         %d\n", _VacuumState);
+    term_printf("Vacuum Done:          %d\n", RX_StepperStatus.robinfo.vacuum_done);
 	term_printf("Vacuum Ready:         %d\n", RX_StepperStatus.robinfo.vacuum_ready);
 	term_printf("Roboter in Wipe:      %d\n", RX_StepperStatus.robinfo.rob_in_wipe);
 	term_printf("Roboter in Vac:       %d\n", RX_StepperStatus.robinfo.rob_in_vac);
@@ -1012,7 +1028,7 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		RX_StepperStatus.cmdRunning = msgId;
 		_NewCmd = FALSE;
 		if (fpga_input(SHIFT_STORED_IN) == TRUE){ motors_move_by_step(MOTOR_SHIFT_BITS, &_ParShiftDrive, SHIFT_STEPS_PER_METER * 0.01, TRUE); _NewCmd = CMD_ROB_SHIFT_REF; break; }
-		motors_move_by_step(MOTOR_SHIFT_BITS, &_ParShiftSensRef, -SHIFT_STEPS_PER_METER * 0.09, TRUE);
+		motors_move_by_step(MOTOR_SHIFT_BITS, &_ParShiftSensRef, -SHIFT_STEPS_PER_METER * 0.2, TRUE);
 		break;
 		
 	case CMD_ROB_ROT_REF:			strcpy(_CmdName, "CMD_ROB_ROT_REF");
@@ -1026,6 +1042,7 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		RX_StepperStatus.robinfo.moving = TRUE;
 		RX_StepperStatus.cmdRunning = msgId;
 		_NewCmd = FALSE;
+        Fpga.par->output |= MAGNET_OFF;			// Magent Off
 		if (fpga_input(ROT_STORED_IN) == TRUE){	motors_move_by_step(MOTOR_ROT_BITS, &_ParRotDrive, ROT_STEPS_PER_REV * 0.02, TRUE); _NewCmd = CMD_ROB_ROT_REF; break;}
 		motors_move_by_step(MOTOR_ROT_BITS, &_ParRotSensRef, -ROT_STEPS_PER_REV, TRUE);
         _Reference_Count++;
@@ -1042,6 +1059,7 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		RX_StepperStatus.robinfo.moving = TRUE;
 		RX_StepperStatus.cmdRunning = msgId;
 		_NewCmd = FALSE;
+        Fpga.par->output |= MAGNET_OFF; // Magent Off
 		motors_move_by_step(MOTOR_ROT_BITS, &_ParRotDrive, _RotRefOffset, TRUE);
 		break;
 		
@@ -1080,14 +1098,17 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 				else if (pos == rob_fct_tilt)																					pos = POS_ROT[CAP_POS];
 				else if (pos == rob_fct_vacuum_all)
 				{
-					if (_VacuumState == rob_vacuum_1_to_4)																		pos = POS_ROT[VAC_POS_1_TO_4_TO_ALL];
+                    if (RX_StepperCfg.printerType == printer_TX404)
+                        _VacuumState = rob_vacuum_all;
+                    if (_VacuumState == rob_vacuum_all)																			pos = POS_ROT[VAC_POS];
+					else if (_VacuumState == rob_vacuum_1_to_4)																	pos = POS_ROT[VAC_POS_1_TO_4_TO_ALL];
 					else if (_VacuumState == rob_vacuum_5_to_8)																	pos = POS_ROT[VAC_POS_5_TO_8_TO_ALL];
-					else if (_VacuumState == rob_vacuum_all)																	pos = POS_ROT[VAC_POS];
 				}
 				else																											pos = POS_ROT[pos];
 				
 				_MoveLeftPos = 0;
 				
+                Fpga.par->output |= MAGNET_OFF; // Magent Off
 				sok_send_2(&socket, REP_STEPPER_STAT, sizeof(RX_StepperStatus), &RX_StepperStatus);
 				motors_move_to_step(MOTOR_ROT_BITS, &_ParRotDrive, pos);
 			}		
@@ -1129,9 +1150,12 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 					else																																			pos = POS_SHIFT[pos];
 	
 				}
-				else																																				pos = POS_SHIFT[pos];
-				
-				if (_VacuumState == rob_vacuum_all)	_ParShiftWet.speed = _SpeedShift;
+
+                if (_VacuumState == rob_vacuum_all)
+                {
+                    _ParShiftWet.speed = _SpeedShift;
+                    if (RX_StepperCfg.printerType == printer_TX404) _VacuumState = rob_vacuum_1_to_4;
+                }
 				else								_ParShiftWet.speed = SPEED_SLOW_SHIFT;
 				motors_move_to_step(MOTOR_SHIFT_BITS, &_ParShiftWet, pos);
 				_VacuumWaiting = FALSE;
@@ -1163,7 +1187,6 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 			pos = *((INT32*)pdata);
 			if (pos < 0) {Error(LOG, 0, "CLN: Command %s: negative position not allowed", _CmdName); break;}
 			if (pos >= POS_SHIFT_CNT) {Error(LOG, 0, "CLN: Command %s: too high pos", _CmdName); break;}
-			//if (_RobFunction == rob_fct_cap && pos != 1) {Error(LOG, 0, "CLN: Command %s: cancle shift, robot in capping", _CmdName); break;}
 			RX_StepperStatus.cmdRunning = msgId;
 			RX_StepperStatus.robinfo.moving = TRUE;
 			pos = POS_SHIFT[pos];
@@ -1204,10 +1227,15 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 			}
 			RX_StepperStatus.cmdRunning = msgId;
 			RX_StepperStatus.robinfo.moving = TRUE;
+            Fpga.par->output |= MAGNET_OFF;
 			motors_move_to_step(MOTOR_ROT_BITS, &_ParRotDrive, POS_ROT_TILT);
 		}
 		
 		break;
+		
+	case CMD_ROB_EMPTY_WASTE:
+        _TimeWastePumpStart = rx_get_ticks();
+        break;
 
 	case CMD_ERROR_RESET:		
 		TrPrintfL(TRUE, "SOCKET[%d]: %s", socket, _CmdName);
@@ -1249,15 +1277,16 @@ void txrob_motor_test(int motorNo, int steps)
 	if (motorNo == MOTOR_ROT)
 	{
         // paramaters tested 14-JAN-20
-        par.speed		= 1000; // speed with max tork: 21'333
+        par.speed		= 1000; 
 		par.accel		= 10000;
-		par.current_acc = 400.0; //  max 67 = 0.67 A
-		par.current_run = 300.0; //  max 67 = 0.67 A
+		par.current_acc = 400.0;
+		par.current_run = 300.0; 
 		par.stop_mux	= 0;
 		par.dis_mux_in	= 0;
 		par.encCheck    = chk_std;
 
-        motors_config(motors, 0, L3518_STEPS_PER_METER, L3518_INC_PER_METER, MICROSTEPS);
+        motors_config(motors, 0, ROT_STEPS_PER_REV, ROT_INC_PER_REV, MICROSTEPS);
+        //motors_config(motors, 0, L3518_STEPS_PER_METER, L3518_INC_PER_METER, MICROSTEPS);
 		motors_move_by_step(motors, &par, steps, FALSE);			
 	}
 	else if (motorNo == MOTOR_SHIFT)

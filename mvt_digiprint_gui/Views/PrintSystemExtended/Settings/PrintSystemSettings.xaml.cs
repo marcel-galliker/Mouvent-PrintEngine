@@ -211,6 +211,7 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
 
                 case EPrinterType.printer_TX801:
                 case EPrinterType.printer_TX802:
+                case EPrinterType.printer_TX404:
 
                     break;
 

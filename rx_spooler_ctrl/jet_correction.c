@@ -21,6 +21,7 @@
 //-----------------------------------------------------------------------
 INT16 RX_DisabledJets[MAX_COLORS*MAX_HEADS_COLOR][MAX_DISABLED_JETS];
 static int _Active;
+static int _Changed;
 static int _MaxDropSize=3;
 static int _First;
 static int _Log;
@@ -42,6 +43,7 @@ int jc_init(void)
 {
 	memset(RX_DisabledJets, 0, sizeof(RX_DisabledJets));
 	_Active  = FALSE;
+	_Changed = FALSE;
 	return REPLY_OK;							
 }
 
@@ -49,19 +51,22 @@ int jc_init(void)
 void jc_set_disabled_jets(SDisabledJetsMsg *pmsg)
 {
 	int n, ok;
-
+	INT16	old[MAX_DISABLED_JETS];
 	for (n=0, ok=FALSE; n<MAX_DISABLED_JETS; n++)
 	{
 		ok=(pmsg->disabledJets[n]!=0);
 	}
+
+	memcpy(old, &RX_DisabledJets[pmsg->head], sizeof(old));
 	if (ok) memcpy(&RX_DisabledJets[pmsg->head], pmsg->disabledJets, sizeof(RX_DisabledJets[pmsg->head]));
 	else    memset(&RX_DisabledJets[pmsg->head], -1, sizeof(RX_DisabledJets[pmsg->head]));
 
 	if (pmsg->head>=0 && pmsg->head<SIZEOF(RX_DisabledJets))
 	{
-		for (n=0; !_Active && n<MAX_DISABLED_JETS; n++)
+		for (n=0; n<MAX_DISABLED_JETS; n++)
 		{
-			_Active |= (pmsg->disabledJets[n]>=0);
+			if (RX_DisabledJets[pmsg->head][n]!=old[n]) _Changed = TRUE;
+			if (pmsg->disabledJets[n]>=0)				_Active  = TRUE;
 		}
 	}
 	_First = TRUE;
@@ -105,6 +110,12 @@ int  jc_active(void)
 	return _Active;
 }
 
+//--- jc_changed ------------------------------------------------------
+int jc_changed(void)
+{	
+	return _Changed;
+}
+
 //--- _jet_correction --------------------------------------------------
 int	jc_correction (SBmpInfo *pBmpInfo,  SPrintListItem *pItem, int fromLine)
 {
@@ -112,6 +123,8 @@ int	jc_correction (SBmpInfo *pBmpInfo,  SPrintListItem *pItem, int fromLine)
 	int pixelPerByte;
 	char logStr[MAX_PATH];
 	SBmpSplitInfo	*pInfo; 
+
+	_Changed = FALSE;
 
 	if (pBmpInfo->bitsPerPixel==8) return REPLY_OK;	// correction whils screening 
     if (rx_def_is_tx(RX_Spooler.printerType)) return REPLY_OK;
@@ -146,8 +159,8 @@ int	jc_correction (SBmpInfo *pBmpInfo,  SPrintListItem *pItem, int fromLine)
 						{
 							
 							if(_Log) logLen += sprintf(&logStr[logLen], "%d ", jet);
-							jet += pInfo->startBt*pixelPerByte + pInfo->jetPx0;
-							_disable_jet(*pInfo->data, pBmpInfo->bitsPerPixel, pBmpInfo->lengthPx, pBmpInfo->lineLen, jet, fromLine);
+							jet += (pInfo->startBt - pInfo->fillBt) * pixelPerByte + pInfo->jetPx0;
+							if (jet >= 0) _disable_jet(*pInfo->data, pBmpInfo->bitsPerPixel, pBmpInfo->lengthPx, pBmpInfo->lineLen, jet, fromLine);
 							/*
 							for (jet=0; jet<pBmpInfo->srcWidthPx; jet+=2048)
 							{

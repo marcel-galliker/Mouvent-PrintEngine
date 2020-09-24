@@ -21,9 +21,9 @@ namespace RX_DigiPrint.Models.Enums
                 _List = new List<RxEnum<ETestImage>>();
                 _List.Add(new RxEnum<ETestImage>( ETestImage.jets,            "Jets"));
                 _List.Add(new RxEnum<ETestImage>( ETestImage.jet_numbers,     "Jet Numbers"));
+                _List.Add(new RxEnum<ETestImage>( ETestImage.encoder,         "Encoder"));
                 if (RxGlobals.User.UserType>=EUserType.usr_service)
 				{
-                    _List.Add(new RxEnum<ETestImage>( ETestImage.encoder,         "Encoder"));
                     _List.Add(new RxEnum<ETestImage>( ETestImage.fullAlignment,   "Full Alignment"));
                     _List.Add(new RxEnum<ETestImage>( ETestImage.density,         "Density"));   
                     if (RxGlobals.PrintSystem.IsTx)

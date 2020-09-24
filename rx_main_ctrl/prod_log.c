@@ -172,7 +172,8 @@ static void *_prod_log_thread(void *lpParameter)
 	switch (RX_Config.printer.type)
 	{
 	case printer_TX801:	_pl_stop_tx(pitem); break; 
-	case printer_TX802:	_pl_stop_tx(pitem); break; 
+	case printer_TX802:	_pl_stop_tx(pitem); break;
+	case printer_TX404: _pl_stop_tx(pitem); break;
 	default: break;
 	}
 #endif
@@ -197,7 +198,7 @@ static void _pl_stop_tx(SPrintQueueItem *pitem)
 	double rowHeight;
 	double scale;
 	
-	if (RX_Config.printer.type!=printer_TX801 && RX_Config.printer.type!=printer_TX802) return;
+	if (rx_def_is_tx(RX_Config.printer.type)) return;
 	
 	pitem = pq_get_item(pitem);
 	

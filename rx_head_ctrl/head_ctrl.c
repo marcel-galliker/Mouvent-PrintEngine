@@ -141,6 +141,9 @@ static int _save_ctrl_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr
 {
 	SMsgHdr *phdr = (SMsgHdr*)pmsg;
 	static int time[MSG_BUF_SIZE];	
+    void *pdata = &phdr[1];
+    SValue *data;
+
 	
 	// these functions mustn't use any FPGA Register !!!!
 	switch (phdr->msgId)
@@ -150,6 +153,10 @@ static int _save_ctrl_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr
 						_SpoolerSocket = socket;
 																			break;
 	case CMD_HEAD_STAT: _do_head_stat (socket, (SFluidStateLight*) &phdr[1]); break;
+    case CMD_CHANGE_CLUSTER_NO:
+        data = (SValue *)pdata;
+        cond_set_clusterNo(data->value);
+        break;
 	default:		{
 						// ALL messages that use FPGA Registers
 						int idx = (_MsgBufIn + 1) % MSG_BUF_SIZE;
@@ -368,6 +375,7 @@ static int _do_head_stat(RX_SOCKET socket, SFluidStateLight *pmsg)
 	_StatusReqTime = rx_get_ticks();
 
 	memcpy(RX_FluidStat, pmsg, sizeof(RX_FluidStat));
+	RX_HBStatus[0].cooler_temp = RX_NiosStat.cooler_temp;
 
 	
 	int head;
@@ -413,15 +421,13 @@ static int _do_inkdef(RX_SOCKET socket, SInkDefMsg  *pmsg)
 static int _do_set_FluidCtrlMode(RX_SOCKET socket, SFluidCtrlCmd *pmsg)
 {
 	cond_ctrlMode(pmsg->no, pmsg->ctrlMode);
-//	rx_sleep(10);
-//	_rep_head_stat(socket);	// give feedback now!
 	return REPLY_OK;
 }
 
 //--- _do_set_purge_par -------------------------------------
 static int _do_set_purge_par(RX_SOCKET socket, SPurgePar *ppar)
 {
-	cond_set_purge_par(ppar->no, ppar->delay_pos_y, ppar->time, ppar->act_pos_y);
+	cond_set_purge_par(ppar->no, ppar->delay_pos_y, ppar->time, ppar->act_pos_y, ppar->delay_time);
 	return REPLY_OK;
 }
 

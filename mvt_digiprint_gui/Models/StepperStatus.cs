@@ -306,6 +306,146 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _Motors, value); }
         }
 
+        //--- Property _TTS_Valve_C1_OFF ---------------------------------------
+        private bool _TTS_Valve_C1_OFF;
+        public bool TTS_Valve_C1_OFF
+        {
+            get { return _TTS_Valve_C1_OFF; }
+            set { SetProperty(ref _TTS_Valve_C1_OFF, value); }
+        }
+
+
+        //--- Property _TTS_Valve_C2_OFF ---------------------------------------
+        private bool _TTS_Valve_C2_OFF;
+        public bool TTS_Valve_C2_OFF
+        {
+            get { return _TTS_Valve_C2_OFF; }
+            set { SetProperty(ref _TTS_Valve_C2_OFF, value); }
+        }
+
+
+        //--- Property _TTS_Valve_C3_OFF ---------------------------------------
+        private bool _TTS_Valve_C3_OFF;
+        public bool TTS_Valve_C3_OFF
+        {
+            get { return _TTS_Valve_C3_OFF; }
+            set { SetProperty(ref _TTS_Valve_C3_OFF, value); }
+        }
+
+
+        //--- Property _TTS_Valve_C4_OFF ---------------------------------------
+        private bool _TTS_Valve_C4_OFF;
+        public bool TTS_Valve_C4_OFF
+        {
+            get { return _TTS_Valve_C4_OFF; }
+            set { SetProperty(ref _TTS_Valve_C4_OFF, value); }
+        }
+
+        //--- Property _TTS_Valve_C1_IPA ---------------------------------------
+        private bool _TTS_Valve_C1_IPA;
+        public bool TTS_Valve_C1_IPA
+        {
+            get { return _TTS_Valve_C1_IPA; }
+            set { SetProperty(ref _TTS_Valve_C1_IPA, value); }
+        }
+
+
+        //--- Property _TTS_Valve_C2_IPA ---------------------------------------
+        private bool _TTS_Valve_C2_IPA;
+        public bool TTS_Valve_C2_IPA
+        {
+            get { return _TTS_Valve_C2_IPA; }
+            set { SetProperty(ref _TTS_Valve_C2_IPA, value); }
+        }
+
+
+        //--- Property _TTS_Valve_C3_IPA ---------------------------------------
+        private bool _TTS_Valve_C3_IPA;
+        public bool TTS_Valve_C3_IPA
+        {
+            get { return _TTS_Valve_C3_IPA; }
+            set { SetProperty(ref _TTS_Valve_C3_IPA, value); }
+        }
+
+
+        //--- Property _TTS_Valve_C4_IPA ---------------------------------------
+        private bool _TTS_Valve_C4_IPA;
+        public bool TTS_Valve_C4_IPA
+        {
+            get { return _TTS_Valve_C4_IPA; }
+            set { SetProperty(ref _TTS_Valve_C4_IPA, value); }
+        }
+
+        //--- Property _TTS_Valve_C1_XL ---------------------------------------
+        private bool _TTS_Valve_C1_XL;
+        public bool TTS_Valve_C1_XL
+        {
+            get { return _TTS_Valve_C1_XL; }
+            set { SetProperty(ref _TTS_Valve_C1_XL, value); }
+        }
+
+
+        //--- Property _TTS_Valve_C2_XL ---------------------------------------
+        private bool _TTS_Valve_C2_XL;
+        public bool TTS_Valve_C2_XL
+        {
+            get { return _TTS_Valve_C2_XL; }
+            set { SetProperty(ref _TTS_Valve_C2_XL, value); }
+        }
+
+
+        //--- Property _TTS_Valve_C3_XL ---------------------------------------
+        private bool _TTS_Valve_C3_XL;
+        public bool TTS_Valve_C3_XL
+        {
+            get { return _TTS_Valve_C3_XL; }
+            set { SetProperty(ref _TTS_Valve_C3_XL, value); }
+        }
+
+
+        //--- Property _TTS_Valve_C4_XL ---------------------------------------
+        private bool _TTS_Valve_C4_XL;
+        public bool TTS_Valve_C4_XL
+        {
+            get { return _TTS_Valve_C4_XL; }
+            set { SetProperty(ref _TTS_Valve_C4_XL, value); }
+        }
+
+        //--- Property _TTS_Valve_C1_Waste ---------------------------------------
+        private bool _TTS_Valve_C1_Waste;
+        public bool TTS_Valve_C1_Waste
+        {
+            get { return _TTS_Valve_C1_Waste; }
+            set { SetProperty(ref _TTS_Valve_C1_Waste, value); }
+        }
+
+
+        //--- Property _TTS_Valve_C2_Waste ---------------------------------------
+        private bool _TTS_Valve_C2_Waste;
+        public bool TTS_Valve_C2_Waste
+        {
+            get { return _TTS_Valve_C2_Waste; }
+            set { SetProperty(ref _TTS_Valve_C2_Waste, value); }
+        }
+
+
+        //--- Property _TTS_Valve_C3_Waste ---------------------------------------
+        private bool _TTS_Valve_C3_Waste;
+        public bool TTS_Valve_C3_Waste
+        {
+            get { return _TTS_Valve_C3_Waste; }
+            set { SetProperty(ref _TTS_Valve_C3_Waste, value); }
+        }
+
+
+        //--- Property _TTS_Valve_C4_Waste ---------------------------------------
+        private bool _TTS_Valve_C4_Waste;
+        public bool TTS_Valve_C4_Waste
+        {
+            get { return _TTS_Valve_C4_Waste; }
+            set { SetProperty(ref _TTS_Valve_C4_Waste, value); }
+        }
+
         //--- Update -----------------------------------
         public void Update(TcpIp.SStepperStat msg)
         {
@@ -332,7 +472,24 @@ namespace RX_DigiPrint.Models
             DripPans_InfeedDOWN     = (msg.info & 0x20000000) != 0;
             DripPans_OutfeedUP      = (msg.info & 0x40000000) != 0;
             DripPans_OutfeedDOWN    = (msg.info & 0x80000000) != 0;
-            RobotUsed               = (msg.robot_used!=0);
+            RobotUsed               = (msg.robot_used!=0) || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX404;
+
+            TTS_Valve_C1_Waste = (msg.inkinfo & 0x00000001) != 0;
+            TTS_Valve_C2_Waste = (msg.inkinfo & 0x00000002) != 0;
+            TTS_Valve_C3_Waste = (msg.inkinfo & 0x00000004) != 0;
+            TTS_Valve_C4_Waste = (msg.inkinfo & 0x00000008) != 0;
+            TTS_Valve_C1_IPA = (msg.inkinfo & 0x00000010) != 0;
+            TTS_Valve_C2_IPA = (msg.inkinfo & 0x00000020) != 0;
+            TTS_Valve_C3_IPA = (msg.inkinfo & 0x00000040) != 0;
+            TTS_Valve_C4_IPA = (msg.inkinfo & 0x00000080) != 0;
+            TTS_Valve_C1_XL = (msg.inkinfo & 0x00000100) != 0;
+            TTS_Valve_C2_XL = (msg.inkinfo & 0x00000200) != 0;
+            TTS_Valve_C3_XL = (msg.inkinfo & 0x00000400) != 0;
+            TTS_Valve_C4_XL = (msg.inkinfo & 0x00000800) != 0;
+            TTS_Valve_C1_OFF = !(TTS_Valve_C1_IPA || TTS_Valve_C1_XL);
+            TTS_Valve_C2_OFF = !(TTS_Valve_C2_IPA || TTS_Valve_C2_XL);
+            TTS_Valve_C3_OFF = !(TTS_Valve_C3_IPA || TTS_Valve_C3_XL);
+            TTS_Valve_C4_OFF = !(TTS_Valve_C4_IPA || TTS_Valve_C4_XL);
 
             drip_pans_enabled = Z_in_ref;
             

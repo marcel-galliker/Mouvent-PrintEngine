@@ -180,6 +180,13 @@ int	 steptx_lift_in_up_pos(void)
 	return _Status[0].info.z_in_up || _Status[0].info.z_in_ref;
 }
 
+//--- steptx_wd_to_up_pos ----------------------------------------------
+void steptx_wd_to_up_pos(void)
+{
+    if (!_Status[1].robinfo.wd_in_up && !_Status[1].robinfo.moving_wd)
+        sok_send_2(&_step_socket[1], CMD_LIFT_UP_POS, 0, NULL);
+}
+
 //--- steptx_lift_stop ------------------------------
 void steptx_lift_stop(void)
 {
@@ -252,7 +259,7 @@ int	 steptx_rob_wipe_done(EnFluidCtrlMode mode)
 	{
 	case ctrl_wipe:		return _Status[1].robinfo.wipe_done; break;
 	case ctrl_wash:		return _Status[1].robinfo.wash_done; break;
-	case ctrl_vacuum:	return _Status[1].robinfo.vacuum_done; break;
+	case ctrl_vacuum:	return _Status[1].robinfo.vacuum_done && !_Status[1].robinfo.moving; break;
 	default:			return FALSE; break;
 	}	
 }
@@ -261,6 +268,12 @@ int	 steptx_rob_wipe_done(EnFluidCtrlMode mode)
 void steptx_rob_stop(void)
 {
 	sok_send_2(&_step_socket[1], CMD_ROB_STOP, 0, NULL);
+}
+
+void steptx_rob_empty_waste(void)
+{
+    if (_step_socket[1] != INVALID_SOCKET)
+        sok_send_2(&_step_socket[1], CMD_ROB_EMPTY_WASTE, 0, NULL);
 }
 
 //--- void _steptx_rob_vacuum_start ------------------------
@@ -478,16 +491,26 @@ static void _steptx_rob_control(void)
 				
 	case ctrl_vacuum_step4:		if (step_lift_in_wipe_pos(ctrl_vacuum))
 								{
-									_RobotCtrlMode=ctrl_vacuum_step5;
+                                    _RobotCtrlMode = ctrl_vacuum_step5;                                        
 									step_rob_wipe_start(ctrl_vacuum);
 								}
 								break;
 				
 	case ctrl_vacuum_step5:		if (step_rob_wipe_done(ctrl_vacuum))
 								{
-									_RobotCtrlMode=ctrl_vacuum_step6;
-									_steptx_lift_to_clean_wait_pos();
-								}
+                                    if (RX_Config.printer.type == printer_TX404)
+                                    {
+                                        _RobotCtrlMode = ctrl_vacuum_step8;
+                                        _RisingEdge = FALSE;
+                                        _Status[1].robinfo.vacuum_done = FALSE;
+                                        step_lift_to_wipe_pos(ctrl_vacuum);
+                                    }
+                                    else
+                                    {
+                                        _RobotCtrlMode = ctrl_vacuum_step6;
+									    _steptx_lift_to_clean_wait_pos();
+								    }
+                                }
 								break;
 				
 	case ctrl_vacuum_step6:		if (_steptx_lift_in_clean_wait_pos())
@@ -519,8 +542,15 @@ static void _steptx_rob_control(void)
 				
 	case ctrl_vacuum_step9:		if (step_rob_wipe_done(ctrl_vacuum))
 								{
-									_RobotCtrlMode = ctrl_vacuum_step10;
-									_steptx_lift_to_clean_wait_pos();
+                                    if (RX_Config.printer.type == printer_TX404)
+                                    {
+                                        _RobotCtrlMode = ctrl_vacuum_step13;
+                                    }
+                                    else
+                                    {
+									    _RobotCtrlMode = ctrl_vacuum_step10;
+									    _steptx_lift_to_clean_wait_pos();
+								    }
 								}
 								break;
 		

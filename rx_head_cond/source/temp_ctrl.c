@@ -15,9 +15,9 @@
 /*******************************************************************************
  * Include files
  ******************************************************************************/
+#include <string.h>
 #include "temp_ctrl.h"
 #include "IOMux.h"
-#include "average.h"
 #include "cond_def_head.h"
 #include "debug_printf.h"
 #include "watchdog.h"
@@ -35,7 +35,10 @@
 #define TEMP_ERROR       		TEMP_MAX_HIGH_PUMP + 5000  	// in 1/1000 °C = 90 °C -> compare to thermistor value directly
 #define TEMP_TOLERANCE			1000
 
-#define VALUE_BUF_SIZE		10
+#define BUF_SIZE		10
+
+#define ADC_CHAN_1 2
+#define ADC_CHAN_2 5
 
 #define ADC_INVL	0x1000
 #define ADC_DATA	0xFFF0
@@ -197,13 +200,27 @@ const dsp_lookup_f_t _temp_table[] =
 //@}
 
 //@{
+
+typedef struct
+{	
+	UINT32			*pTemp;
+	UINT32			err;
+	int				errCnt;
+	int				addr;
+    INT32			buf[BUF_SIZE];
+	int				buf_idx;       
+	int				buf_valid;
+} STempSensor;
+	
 /** private variables *********************************************************/
-static INT32	_ValueBuf1[VALUE_BUF_SIZE]	= {0};
-static INT32	_ValueBuf2[VALUE_BUF_SIZE]	= {0};
+
+
 static int		_tank_temp_timeout   = TANK_TEMP_TIMEOUT;
 static int		_head_temp_timeout   = HEAD_TEMP_TIMEOUT;
 static int		_head_target_timeout = RANGE_TIMEOUT;
 static BOOL		_heater_running      = FALSE;
+
+static STempSensor _TempSensor[2];
 //static int		_heater_delay		 = 0;
 
 
@@ -230,6 +247,17 @@ SPID_par _HeatPID =
  **/
 void temp_init(void)
 {
+	//--- initialize sensor -----------------------------------
+	memset(_TempSensor, 0, sizeof(_TempSensor));
+	_TempSensor[0].pTemp = &RX_Status.tempHeater;
+	_TempSensor[0].err   = COND_ERR_temp_heater_hw;
+	_TempSensor[0].addr  = ADC_CHAN_1;
+
+	_TempSensor[1].pTemp = &RX_Status.tempIn;
+	_TempSensor[1].err   = COND_ERR_temp_inlet_hw;
+	_TempSensor[1].addr  = ADC_CHAN_2;
+	//------------------------------------------------------
+		
 	// Disable ADC in any case first
 	FM4_ADC0->ADCEN_f.ENBL = 0u;
 
@@ -297,9 +325,13 @@ void temp_init(void)
 void temp_ctrl_on(int turn_on)
 {
     if (turn_on != _heater_running)
-	{ 
+	{ 			
+		if(RX_Status.pcb_rev>='n') 
+			_HeatPID.val_max = 100;
+
         _heater_running = turn_on;
-		if (!_heater_running) {
+		if (!_heater_running) 
+		{
 			_heater_ctrl(OFF);
 		}
     }
@@ -335,7 +367,7 @@ static void _heater_ctrl(UINT32 percent)
 	else		
     {            
         // HW Revision >= 'h' has a second thermistor
-		if (RX_Status.tempHeater == INVALID_VALUE || RX_Status.tempHeater > TEMP_MAX_HIGH_PUMP) 
+		if (RX_Status.pcb_rev<'n' && (RX_Status.tempHeater==INVALID_VALUE || RX_Status.tempHeater > TEMP_MAX_HIGH_PUMP))
 			RX_Status.heater_percent = 0;
 		else
 			RX_Status.heater_percent = percent;
@@ -567,14 +599,20 @@ void temp_tick_10ms (void)
 	int TempMAX = RX_Config.tempMax;
 	if (TempMAX < _HeatPID.Setpoint + 200) TempMAX = _HeatPID.Setpoint + 200;
 	
-	int tempHeaterOK = 1;
-	if((RX_Status.tempHeater > TEMP_MAX_HIGH_PUMP) && (RX_Status.pump_measured * 60 / 1000 > 10)) tempHeaterOK = 0;
-	if((RX_Status.tempHeater > TEMP_MAX_LOW_PUMP) && (RX_Status.pump_measured * 60 / 1000 <= 10)) tempHeaterOK = 0;
+	/*
+	if ((RX_Status.pump_measured * 60 / 1000 <= 10) && (RX_Status.tempHeater > TEMP_MAX_LOW_PUMP )) tempHeaterOK = FALSE;
+	if ((RX_Status.pump_measured * 60 / 1000 > 10)  && (RX_Status.tempHeater > TEMP_MAX_HIGH_PUMP) && (RX_Status.pcb_rev<'n')) tempHeaterOK = FALSE;
+	if ((RX_Status.pump_measured * 60 / 1000 > 80)) tempHeaterOK = FALSE;
+	*/
+
+	int tempHeaterOK = TRUE;
+	int ml_min=RX_Status.pump_measured * 60 / 1000;
+	if (ml_min<10 || ml_min>80) tempHeaterOK = FALSE;
+	else if ((RX_Status.pcb_rev<'n') && (RX_Status.tempHeater > TEMP_MAX_HIGH_PUMP)) tempHeaterOK = FALSE;
 	
 	if (_heater_running 
-        && (RX_Status.tempIn < TempMAX)
-		&& (tempHeaterOK)
-		&& (RX_Status.pump_measured * 60 / 1000 < 80) )
+		&& tempHeaterOK
+        && (RX_Status.tempIn < TempMAX))
     {
 		if (RX_Config.tempHead==INVALID_VALUE)
 		{
@@ -629,14 +667,8 @@ void temp_tick_50ms (void)
  **/
 void ADC0_IRQHandler(void)
 {
-    #define ADC_CHAN_1 2
-    #define ADC_CHAN_2 5
-    
-	static int	_ValueIdx1		= 0;
-	static int	_ValueIdx2		= 0;
-	static int	_ValueIdxValid1	= FALSE;
-	static int	_ValueIdx2Valid = FALSE;
-
+	int i;
+	STempSensor	*s;
     INT32 channel = 0;
 	INT32 val;
    
@@ -651,37 +683,36 @@ void ADC0_IRQHandler(void)
         if (FM4_ADC0->SCFD_f.INVL == 0)
         {
             channel = FM4_ADC0->SCFDL & ADC_CHAN;
-            if (channel == ADC_CHAN_1)
+
+			for (i=0; i<SIZEOF(_TempSensor); i++)
 			{
-				val = _handle_temp_val(FM4_ADC0->SCFDH & ADC_DATA);
-				if (val==INVALID_VALUE) RX_Status.error |= COND_ERR_temp_heater_hw;
-                else
+				s=&_TempSensor[i];
+				if (channel == s->addr)
 				{
-					_ValueBuf1[_ValueIdx1++] = val;
-					// calculate average temperature when buffer is full
-					if (_ValueIdx1 >= VALUE_BUF_SIZE)
+					val = _handle_temp_val(FM4_ADC0->SCFDH & ADC_DATA);
+					if (val==INVALID_VALUE) 
 					{
-						_ValueIdx1 = 0;
-						_ValueIdxValid1 = TRUE;
+						if (s->errCnt++ > 10) RX_Status.error |= s->err;
 					}
-					if (_ValueIdxValid1)RX_Status.tempHeater = average(_ValueBuf1, VALUE_BUF_SIZE, 0);
-				}
-			}
-			else if (channel == ADC_CHAN_2)
-			{
-				val = _handle_temp_val(FM4_ADC0->SCFDH & ADC_DATA);
-				if (val==INVALID_VALUE) RX_Status.error |= COND_ERR_temp_inlet_hw;
-				else
-				{
-					_ValueBuf2[_ValueIdx2++] = val;
-					if (_ValueIdx2 >= VALUE_BUF_SIZE)
+					else
 					{
-						_ValueIdx2 = 0;
-						_ValueIdx2Valid = TRUE;
+						s->errCnt=0;
+						s->buf[s->buf_idx++] = val;
+						// calculate average temperature when buffer is full
+						if (s->buf_idx >= BUF_SIZE)
+						{
+							s->buf_idx = 0;
+							s->buf_valid = TRUE;
+						}
+						if (s->buf_valid)
+						{
+							int sum, i;
+							for (i=sum=0; i<BUF_SIZE; i++) sum+=s->buf[i];
+							(*s->pTemp) = sum/BUF_SIZE;
+						}
 					}
-					// Thermistor position is switched on revision #h
-					if (_ValueIdx2Valid) RX_Status.tempIn = average(_ValueBuf2, VALUE_BUF_SIZE, 0);
-				}
+					break;
+				}				
 			}
         }
         

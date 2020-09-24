@@ -12,33 +12,37 @@
 #include <string.h>
 #include "IOMux.h"
 #include "cond_def_head.h"
-#include "average.h"
 #include "i2c.h"
 #include "pres.h"
 #include "eeprom.h"
 #include "debug_printf.h"
 
 //--- defines ---------------------------
-#define ADDR_SENSOR         	0x78 	    // upper address of sensor
-    
-static const INT32 ZERO_PRESSURE_OFFSET_FIRST = 16500;
-    
+#define ADDR_SENSOR_1_0_BAR     0x78 	    // upper address of sensor
+#define ADDR_SENSOR_2_5_BAR		0x35
+#define ADDR_SENSOR_0_1_BAR		0x1A
+
+#define PRES_IN		0		// ORDER of sensors is important! (timing on I2C bus!)
+#define PRES_OUT	1
+#define PRES_IN2	2
+#define SENSOR_CNT	3
+
 //--- types ----------------------------------------
 
-#define BUF_SIZE_10	        10
+#define BUF_SIZE	10
 
 typedef void (*set_power_fct)	(int on);
 
 typedef struct
 {
+	int				no;			// for debugging
 	stc_mfsn_t		*pi2c;
 	set_power_fct 	set_power;
 	INT32			*pPressure;
-	INT32			offset_factory;
-//	INT32			offset_user;
+	INT32			offset;
 	INT32			valFactor;
-    INT32			buf10[BUF_SIZE_10];
-	int				buf_idx10;       
+    INT32			buf[BUF_SIZE];
+	int				buf_idx;       
 	int				buf_valid;
 	int				power;
 	int				power_timer;
@@ -46,56 +50,69 @@ typedef struct
 	int				low_cnt;
 	int				high_cnt;
 	int				error;
-	int				calibrating;
-    INT32           EE_ADDR_FACTORY;
-    INT32           EE_ADDR_USER;
+	UINT8			addr;
 } SSensor;
 
 
 //--- statics -----------------------------------
-static  SSensor	_PressureIn;
-static  SSensor	_PressureOut;
-
-UINT16 _PresInOffset=1234;
+static  SSensor	_Sensor[SENSOR_CNT];
 
 //--- prototypes ------------------------
 
 static void _PresIn_power(int on);
 static void _PresOut_power(int on);
+static void _PresAll_power(int on);
 static void _sensor_reset(SSensor *s);
 static void _sensor_read (SSensor *s);
 
 //--- pres_init -----------------------
 void pres_init(void)
 {
-	memset(&_PressureOut, 0, sizeof(_PressureOut));
-	_PressureOut.pi2c 	   			= (stc_mfsn_t*)FM4_MFS2_BASE;
-	_PressureOut.set_power 			= _PresOut_power;
-	_PressureOut.valFactor 			= 1;
-	_PressureOut.pPressure 			= &RX_Status.pressure_out;
-   *_PressureOut.pPressure 			= INVALID_VALUE;
-    _PressureOut.EE_ADDR_FACTORY 	= EE_ADDR_POUT_FACTORY_OFFSET;
-    _PressureOut.EE_ADDR_USER    	= EE_ADDR_POUT_USER_OFFSET;
-   
-	_sensor_reset(&_PressureOut);
-	eeprom_read_setting16(_PressureOut.EE_ADDR_FACTORY, &_PressureOut.offset_factory);
-//	eeprom_read_setting16(_PressureOut.EE_ADDR_USER, 	&_PressureOut.offset_user);
+	memset(&_Sensor, 0, sizeof(_Sensor));
+	_Sensor[PRES_OUT].valFactor 	= 1;
+	_Sensor[PRES_OUT].pPressure 	= &RX_Status.pressure_out;
+	eeprom_read_setting16(EE_ADDR_POUT_FACTORY_OFFSET, &_Sensor[PRES_OUT].offset);
 
-	memset(&_PressureIn, 0, sizeof(_PressureIn));
-	_PressureIn.pi2c 	  		= (stc_mfsn_t*)FM4_MFS3_BASE;
-	_PressureIn.set_power 		= _PresIn_power;
-	_PressureIn.valFactor 		= 10;
-	_PressureIn.pPressure 		= &RX_Status.pressure_in;
-   *_PressureIn.pPressure 		= INVALID_VALUE;
-        
-    _PressureIn.EE_ADDR_FACTORY = EE_ADDR_PIN_FACTORY_OFFSET;
-    _PressureIn.EE_ADDR_USER    = EE_ADDR_PIN_USER_OFFSET;
-    *_PressureIn.pPressure      = INVALID_VALUE;
-	_sensor_reset(&_PressureIn);
-	eeprom_read_setting16(_PressureIn.EE_ADDR_FACTORY, &_PressureIn.offset_factory);
-//	eeprom_read_setting16(_PressureIn.EE_ADDR_USER,    &_PressureIn.offset_user);
+	_Sensor[PRES_IN].pPressure 		= &RX_Status.pressure_in;
+	eeprom_read_setting16(EE_ADDR_PIN_FACTORY_OFFSET, &_Sensor[PRES_IN].offset);
 	
-	_PresInOffset = _PressureIn.offset_factory;
+	_Sensor[PRES_IN2].pPressure 	= &RX_Status.pressure_in2;
+	eeprom_read_setting16(EE_ADDR_PIN2_FACTORY_OFFSET, &_Sensor[PRES_IN2].offset);
+
+	if(RX_Status.pcb_rev>='n')
+	{
+		//--- all addresses are changed! -----------------------
+		_Sensor[PRES_OUT].pi2c 	   	= (stc_mfsn_t*)FM4_MFS3_BASE;
+		_Sensor[PRES_OUT].addr		= ADDR_SENSOR_0_1_BAR;
+		_Sensor[PRES_OUT].set_power	= _PresAll_power;
+		
+		_Sensor[PRES_IN].pi2c 	  	= (stc_mfsn_t*)FM4_MFS2_BASE;
+		_Sensor[PRES_IN].addr		= ADDR_SENSOR_0_1_BAR;
+		_Sensor[PRES_IN].set_power	= _PresAll_power;
+		_Sensor[PRES_IN].valFactor	= 1;
+		
+		_Sensor[PRES_IN2].pi2c 	   	= (stc_mfsn_t*)FM4_MFS2_BASE;
+		_Sensor[PRES_IN2].addr		= ADDR_SENSOR_2_5_BAR;
+		_Sensor[PRES_IN2].set_power	= _PresAll_power;
+	}
+	else
+	{
+		_Sensor[PRES_OUT].pi2c 	   	= (stc_mfsn_t*)FM4_MFS2_BASE;
+		_Sensor[PRES_OUT].addr 		= ADDR_SENSOR_1_0_BAR;
+		_Sensor[PRES_OUT].set_power = _PresOut_power;
+		
+		_Sensor[PRES_IN].pi2c 	   	= (stc_mfsn_t*)FM4_MFS3_BASE;
+		_Sensor[PRES_IN].addr  		= ADDR_SENSOR_1_0_BAR;
+		_Sensor[PRES_IN].set_power 	= _PresIn_power;
+		_Sensor[PRES_IN].valFactor 	= 10;
+	}
+	
+	int i;
+	for (i=0; i<SENSOR_CNT; i++) 
+	{
+		_Sensor[i].no=i;
+		_sensor_reset(&_Sensor[i]);
+	}
 }
 
 //--- _PresIn_power ---------------------
@@ -110,24 +127,45 @@ static void _PresOut_power(int on)
 	Gpio1pin_Put(GPIO1PIN_P35, on);  // DSx_3V3 ON/OFF
 }
 
+//--- _PresAll_power --------------------
+static void _PresAll_power(int on)
+{	
+	Gpio1pin_Put(GPIO1PIN_P30, on);  // DSx_3V3 ON/OFF
+}
+
 //--- _sensor_reset -------------
 static void _sensor_reset(SSensor *s)
 {
 	s->buf_valid = FALSE;
   (*s->pPressure)= INVALID_VALUE;
     
-    s->buf_idx10 = 0;
+    s->buf_idx = 0;
+}
+
+//--- _sensor_error -----------------------
+static void _sensor_error(SSensor *s)
+{
+	s->set_power(FALSE); // DS1_3V3 OFF
+	s->power = FALSE;
+	s->power_timer = 4;
+	s->power_cnt++;
+	if (s->power_cnt>3)
+	{
+		s->power_cnt = 0;
+		*s->pPressure = INVALID_VALUE;
+		//s->error = TRUE;
+	}
 }
 
 //--- _sensor_read -------------------------------
 static void _sensor_read(SSensor *s)
 {	
     INT32	ret;
-    INT32   offset = 0;
-    INT32   pressure = 0;   
-	INT32   pressure10 = 0;   
+    INT32   pressure;   
 	UCHAR	*ppressure = (UCHAR*)&pressure;
 
+	if (!s->addr) return;
+	
 	//--- repower sensor ---
 	if (!s->power)
 	{
@@ -146,24 +184,20 @@ static void _sensor_read(SSensor *s)
     //if there is no read error at the moment
 	if (s->power)											
 	{
-		ret = I2cStartRead(s->pi2c, ADDR_SENSOR);
+		pressure=0; // 32 Bits!
+		ret = I2cStartRead(s->pi2c, s->addr);
 		if (!ret) ret = I2cReceiveByteSeq(s->pi2c, &ppressure[1], FALSE);
 		if (!ret) ret = I2cReceiveByteSeq(s->pi2c, &ppressure[0], TRUE);
 		I2cStopWrite(s->pi2c);	// must be this!
 	
 		// reset sensor on error
 		if (ret || pressure == 0xffff)				
-		{	           
-			s->set_power(FALSE); // DS1_3V3 OFF
-			s->power = FALSE;
-			s->power_timer = 4;
-			s->power_cnt++;
-			if (s->power_cnt>3)
-			{
-				s->power_cnt = 0;
-				*s->pPressure = INVALID_VALUE;
-				//s->error = TRUE;
+		{	        
+			if(RX_Status.pcb_rev>='n')
+			{				
+				for(int i=0; i<SENSOR_CNT; i++)  _sensor_error(&_Sensor[i]);
 			}
+			else _sensor_error(s);			
 		}
 		else if (pressure==0)
 		{
@@ -175,99 +209,72 @@ static void _sensor_read(SSensor *s)
 		}
 		else
 		{	
+			s->power_cnt = 0;
+
 			if (s->low_cnt)  s->low_cnt--;
 			if (s->high_cnt) s->high_cnt--;
-			
-			s->power_cnt = 0;
+
+			//--- convert value ----------------------------------
+			if (s->addr==ADDR_SENSOR_2_5_BAR)
+			{
+				pressure = (35000*(pressure-10714+s->offset)) / (30000-3000); // convert measured value [3000..30000] to -1 .. 2.5 (span 3.5) in (*10) 
+			}
+			else
+			{
+				pressure = ((pressure-16500+s->offset)* s->valFactor *2)/27; // *13.5
+			}
 			
 			//--- save to buffer -----
-			s->buf10[s->buf_idx10++] = pressure;
-			if (s->buf_idx10 >= BUF_SIZE_10) s->buf_idx10   = 0;
-			
-			pressure10 = average(s->buf10,BUF_SIZE_10,0);
-			
-			s->buf_valid = TRUE;						
-			if (s->buf_valid)
-			{                
-				//--- save calibration -----------------------------
-				if (s->calibrating)
-				{
-					//--- select the offset by DEFINE --------------------
-					#if defined (FACTORY_OFFSET)
-						s->offset_factory = pressure; 
-						eeprom_write_setting16(s->EE_ADDR_FACTORY, s->offset_factory);
-					#else
-						/*
-						s->offset_user = pressure; 
-						eeprom_write_setting16(s->EE_ADDR_USER, s->offset_user);
-						*/
-					#endif
-					s->calibrating = FALSE;
-				}
-				
-				//--- convert value --------------
-				if (s->offset_factory)	
-					offset = ZERO_PRESSURE_OFFSET_FIRST - s->offset_factory;
-				else
-				{					
-					RX_Status.error |= COND_ERR_sensor_offset;
-					offset = ZERO_PRESSURE_OFFSET_FIRST;
-				}
-				
-				pressure = (pressure10 - offset) * s->valFactor;
-				*s->pPressure = (pressure * 2)/27; // (Multiplied by 13.5) --> (*2/27, with fix point arithmetics)  
+			s->buf[s->buf_idx++] = pressure;
+			if (s->buf_idx >= BUF_SIZE)
+			{
+				s->buf_valid = TRUE;
+				s->buf_idx   = 0;
 			}
+				
+			if (s->buf_valid)
+			{
+				//--- filter (average without the two extreme values) -----------
+				INT32 min=s->buf[0];
+				INT32 max=s->buf[0];
+				INT32 sum=0;
+				int i;
+				for (i=0; i<BUF_SIZE; i++)
+				{
+					sum += s->buf[i];
+					if (s->buf[i]<min) min=s->buf[i];
+					if (s->buf[i]>max) max=s->buf[i];
+				}
+				*s->pPressure = (sum-min-max) / (BUF_SIZE-2);
+			}			
 		}
 	}
-}
-
-//--- pres_del_user_offset -----------------------
-void pres_del_user_offset(void)
-{
-	/*
-	_PressureIn.offset_user  = 0;
-	_PressureOut.offset_user = 0;
-	eeprom_write_setting32(EE_ADDR_PIN_USER_OFFSET,  _PressureIn.offset_user);
-	eeprom_write_setting32(EE_ADDR_POUT_USER_OFFSET, _PressureOut.offset_user);
-	*/
-}
-
-//--- pres_calibration_start ---------------------------
-void pres_calibration_start(void)
-{
-    _PressureIn.calibrating  = TRUE;
-    _PressureOut.calibrating = TRUE;
-}
-
-//--- pres_calibration_done -----------------
-int pres_calibration_done(void)
-{
-	return !_PressureIn.calibrating && !_PressureOut.calibrating;
 }
 
 //--- pres_valid ---------------------------------------
 int pres_valid(void)
 {
-	return _PressureOut.buf_valid;
+	return _Sensor[PRES_OUT].buf_valid;
 }
 
 //--- pres_tick_10ms ------------------
 void pres_tick_10ms(void)
 {    		
+	int i;
+	
     // todo: sensor never resets
-	if (TRUE || RX_Status.info.valve)
+	if (TRUE || RX_Status.info.valve_ink)
 	{
-		_sensor_read(&_PressureIn);
-		_sensor_read(&_PressureOut);
+		for(i=0; i<SENSOR_CNT; i++) _sensor_read(&_Sensor[i]);
 	}
 	else
 	{
-		_sensor_reset(&_PressureIn);
-		_sensor_reset(&_PressureOut);
+		for(i=0; i<SENSOR_CNT; i++) _sensor_reset(&_Sensor[i]);
 	}
     
-	if (_PressureIn.error)  RX_Status.error |= COND_ERR_pres_in_hw;
-	if (_PressureOut.error) RX_Status.error |= COND_ERR_pres_out_hw;
+	if (_Sensor[PRES_IN].error)  RX_Status.error |= COND_ERR_pres_in_hw;
+	if (_Sensor[PRES_IN2].error) RX_Status.error |= COND_ERR_pres_in_hw;
+	if (_Sensor[PRES_OUT].error) RX_Status.error |= COND_ERR_pres_out_hw;
 	
 	if (RX_Config.flowResistance<100 || RX_Config.flowResistance>500)
 	{
@@ -275,12 +282,20 @@ void pres_tick_10ms(void)
 		RX_Status.flowResistance = RX_Config.flowResistance;
 	}
 
+	//--- calculating meniscus and flow factor --------------------------------
 	if (!valid(RX_Status.pressure_in) || !valid(RX_Status.pressure_out) || RX_Status.error&COND_ERR_p_in_too_high)
     {
         RX_Status.meniscus = INVALID_VALUE;
+		RX_Status.flowFactor = INVALID_VALUE;
     }  
 	else
     {
-        RX_Status.meniscus = (INT32)(RX_Status.pressure_in - ((RX_Status.pressure_in - RX_Status.pressure_out) / (0.01 * RX_Config.flowResistance)));
+		int diff=RX_Status.pressure_in - RX_Status.pressure_out;
+        RX_Status.meniscus = (INT32)(RX_Status.pressure_in - (diff / (0.01 * RX_Config.flowResistance)));
+		if (RX_Status.pump_measured==INVALID_VALUE) RX_Status.flowFactor = INVALID_VALUE;
+		else if (RX_Status.pump_measured) RX_Status.flowFactor = 100*diff/(RX_Status.pump_measured*60/100);
+		else RX_Status.flowFactor = 1000;
     }
+	if (RX_Status.mode == ctrl_print) RX_Status.info.flowFactor_ok = (RX_Status.flowFactor < 200);
+	else RX_Status.info.flowFactor_ok = TRUE;
 }

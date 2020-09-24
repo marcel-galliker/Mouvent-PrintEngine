@@ -40,7 +40,7 @@ namespace RX_DigiPrint.Models
         public static InkSupplyList     InkSupply         = new InkSupplyList();
         public static HeadStatList      HeadStat          = new HeadStatList();
         public static ClusterStatList   ClusterStat       = new ClusterStatList();
-
+        
         public static Plc               Plc               = new Plc();
         
         public static Encoder[] Encoder = new Encoder[2] { new Encoder(0), new Encoder(1) };
@@ -65,6 +65,7 @@ namespace RX_DigiPrint.Models
         public static LH702_Preview         LH702_Preview;
         public static DisabledJets          DisabledJets = new DisabledJets();
         public static Density               Density = new Density();
-        
+        public static ClusterNo             ClusterNo = new ClusterNo();
+        public static FileNameFilter          FileNameFilter = new FileNameFilter();
     }
 }

@@ -64,6 +64,7 @@ static void _tick__100ms(void);
 static void _tick_1000ms(void);
 
 static char _get_pcb_revision(void);
+static int  _get_revision_voltage(void);
 		
 /**
  ******************************************************************************
@@ -130,24 +131,6 @@ int32_t main(void)
     // comment this line if you like to use bt0 for debugging
     Clk_PeripheralClockDisable(ClkGateBt0);
 
-	// Print to debugger console if in DEBUG build
-    RX_Status.pcb_rev = _get_pcb_revision();
-    DBG_PRINTF("RX_Conditioner#%c\n", RX_Status.pcb_rev);
-
-    // Init Board specific Peripherals
-	Gpio1pin_Put(GPIO1PIN_P12,0); 		// Solenoid	OFF
-	Gpio1pin_Put(GPIO1PIN_P80,0); 		// SolenoidR OFF
-	Gpio1pin_Put(GPIO1PIN_P33,0); 		// Heater OFF
-
-	temp_init();
-	comm_init(0);
-	uart_init(115200);
-	       
-	// PCB revision #g and later has an EEPROM
-	if (RX_Status.pcb_rev >= 'g') eeprom_init();
-
-	pres_init();
-    pump_init();
 
     /**
      * Clock calculation as defined in 'system_mb9bf16xl.h'
@@ -171,16 +154,33 @@ int32_t main(void)
      * SystemCoreClock = HCLK = PCLK = 40MHz => t = 25ns
      * Configure SysTick to generate an interrupt every 10ms
      **/
-    returnCode = SysTick_Config(SystemCoreClock / (10 * TIMER_INTERVAL));
-	
-    // Check return code for errors
-	if (returnCode != 0)
-    {
-        HALT();
-	}		
+
+    // Init Board specific Peripherals
+	Gpio1pin_Put(GPIO1PIN_P12,0); 		// Solenoid	OFF
+	Gpio1pin_Put(GPIO1PIN_P80,0); 		// SolenoidR OFF
+	Gpio1pin_Put(GPIO1PIN_P33,0); 		// Heater OFF
+
+	temp_init();
+	comm_init(0);
+	uart_init(115200);
+
+	eeprom_init();
+	// Print to debugger console if in DEBUG build
+    RX_Status.pcb_rev = _get_pcb_revision();
+ //   DBG_PRINTF("RX_Conditioner#%c\n", RX_Status.pcb_rev);
+	       
+	pres_init();
+    pump_init();
 		
     // Read pumptime for Conditioner
 	ctr_load();      
+
+	//--- start timers ----------------------------
+    returnCode = SysTick_Config(SystemCoreClock / (10 * TIMER_INTERVAL));
+	if (returnCode != 0)
+    {
+        HALT();
+	}
 
 	while(1)
 	{
@@ -204,37 +204,44 @@ int32_t main(void)
 
 static char _get_pcb_revision()
 {
-    char revision = '0';
+    char revision = '?';
 
     Gpio1pin_InitIn(GPIO1PIN_P80, Gpio1pin_InitPullup(1u));
     Gpio1pin_InitIn(GPIO1PIN_P00, Gpio1pin_InitPullup(1u));
     Gpio1pin_InitIn(GPIO1PIN_P23, Gpio1pin_InitPullup(1u));  
-    
+
     // needed to read pin correctly    
-    for (volatile int i = 0; i < 0xffff; i++)
-        ;
+ //   for (volatile int i = 0; i < 0xffff; i++)
+ //       ;
     
     if (Gpio1pin_Get(GPIO1PIN_P80))
     {
         revision = 'e';
     }
-    else
-    {                 
-        if (Gpio1pin_Get(GPIO1PIN_P00))
-        {        
-            revision = 'g';
-        }
-        else
-        {
-            // P55 is floating on #f and pulled-up externally on #h
-            Gpio1pin_InitOut(GPIO1PIN_P55, Gpio1pin_InitVal(0u));
-            Gpio1pin_InitIn(GPIO1PIN_P55, Gpio1pin_InitPullup(0u));
+    else if (Gpio1pin_Get(GPIO1PIN_P00))
+	{        
+		revision = 'g';
+	}
+	else
+	{
+		// P55 is floating on #f and pulled-up externally revision higher than #h
+		Gpio1pin_InitOut(GPIO1PIN_P55, Gpio1pin_InitVal(0u));
+		Gpio1pin_InitIn (GPIO1PIN_P55, Gpio1pin_InitPullup(0u));
 
-            if (Gpio1pin_Get(GPIO1PIN_P55))
-                revision = 'h';
-            else
-                revision = 'f';
-        }
+		if (Gpio1pin_Get(GPIO1PIN_P55)==0) 
+		{
+			revision = 'f';
+		}
+		else
+		{							  
+			revision = 'h';	
+			
+			Gpio1pin_InitOut(GPIO1PIN_P80, Gpio1pin_InitVal(0u)); 
+			
+			// read revision voltage back from external adc chip (not present on rev. below 'n')
+			int voltage=_get_revision_voltage();
+			if((voltage>245)&&(voltage<265)) revision ='n';
+		}
     }
         
     switch (revision)
@@ -248,7 +255,7 @@ static char _get_pcb_revision()
         
         case 'g':
             Gpio1pin_InitOut(GPIO1PIN_P00, Gpio1pin_InitVal(0u));
-            Gpio1pin_InitIn(GPIO1PIN_P23, Gpio1pin_InitPullup(0u));  
+            Gpio1pin_InitIn (GPIO1PIN_P23, Gpio1pin_InitPullup(0u));  
             Gpio1pin_InitOut(GPIO1PIN_P80, Gpio1pin_InitVal(0u)); 
             break;
         
@@ -258,13 +265,35 @@ static char _get_pcb_revision()
             SetPinFunc_AN05();        
             Gpio1pin_InitOut(GPIO1PIN_P80, Gpio1pin_InitVal(0u)); 
             break;
-        
+
+		case 'n':
+			Gpio1pin_InitOut(GPIO1PIN_P60, Gpio1pin_InitVal(0u));
+            Gpio1pin_InitIn (GPIO1PIN_P00, Gpio1pin_InitPullup(0u));
+			Gpio1pin_InitIn (GPIO1PIN_P35, Gpio1pin_InitVal( 0u ) ); // SensorPowerFault
+			Gpio1pin_Put(GPIO1PIN_P60, TRUE);  // turn on enable_new_gen
+			break;
+		
         default:
             // error
             DBG_PRINTF("Unknown PCB hardware revision #%c!\n", revision);
     }
     
     return revision;
+}
+
+//--- get_revision_voltage ----------------------
+static int _get_revision_voltage(void)
+{
+	#define REVISION_VOLTAGE_ADDR		0x90	// 0x48 + R/W bit = 0x90/0x91
+
+	int voltage;
+	BYTE data[2]={0x0,0x0};
+
+	i2c_bb_read_adc(REVISION_VOLTAGE_ADDR, data, 2);
+	i2c_bb_read_adc(REVISION_VOLTAGE_ADDR, data, 2);
+
+	voltage = data[0]<<8 | data[1];
+	return voltage;		
 }
 
 void RxMessage_Handler(void)
@@ -283,10 +312,7 @@ void RxMessage_Handler(void)
 		ctr_save();
 	}
 	RX_Status.cmdConfirm.save_eeprom = RX_Config.cmd.save_eeprom;
-		
-    if (RX_Config.cmd.del_offset && !RX_Status.cmdConfirm.del_offset) pres_del_user_offset();
-	RX_Status.cmdConfirm.del_offset = RX_Config.cmd.del_offset;
-	
+			
 	if (RX_Config.cmd.resetPumpTime && !RX_Status.cmdConfirm.resetPumpTime)
 	{
 		RX_Status.pumptime = 0;

@@ -79,7 +79,9 @@ namespace RX_DigiPrint.Models
                 case EPrinterType.printer_test_slide_only:  return true;
                 case EPrinterType.printer_TX801:			return true;
 	            case EPrinterType.printer_TX802:			return true;
-	            default: return false;
+	            case EPrinterType.printer_TX404:            return true;
+	            case EPrinterType.printer_test_table_seon:  return true;
+                default: return false;
 	            }
             }
         }
@@ -93,6 +95,7 @@ namespace RX_DigiPrint.Models
                 {
                     case EPrinterType.printer_TX801: return true;
                     case EPrinterType.printer_TX802: return true;
+                    case EPrinterType.printer_TX404: return true;
                     default: return false;
                 }
             }
@@ -168,6 +171,14 @@ namespace RX_DigiPrint.Models
                     _set_IS_Order();
                 }
             }
+        }
+
+        //--- Property TTS_simulation ---------------------------------------
+        private bool _TTS_simulation = false;
+        public bool TTS_simulation
+        {
+            get { return _TTS_simulation; }
+            set { SetProperty(ref _TTS_simulation, value); }
         }
 
         //--- Property LH702_simulation ---------------------------------------
@@ -297,6 +308,18 @@ namespace RX_DigiPrint.Models
                     case EPrinterType.printer_TX802:
                         IS_Order    = new int[] { 7, 6, 5, 4, 3, 2, 1, 0 };
                         Color_Order = new int[] { 7, 6, 5, 4, 3, 2, 1, 0 };
+                        break;
+                    case EPrinterType.printer_TX404:
+                        if (ColorCnt <= 4)
+						{
+                            IS_Order    = new int[] { 3, 2, 1, 0 };
+                            Color_Order = new int[] { 3, 2, 1, 0 };
+						}
+                        else
+						{
+                            IS_Order    = new int[] { 7, 6, 5, 4, 3, 2, 1, 0 };
+                            Color_Order = new int[] { 7, 6, 5, 4, 3, 2, 1, 0 };
+						}
                         break;
 
                     case EPrinterType.printer_CB612:
@@ -486,6 +509,7 @@ namespace RX_DigiPrint.Models
             RxGlobals.InkSupply.List[TcpIp.InkSupplyCnt+1].InkType = InkType.Waste;
 
             LH702_simulation = !msg.hostName.StartsWith("LH702");
+            TTS_simulation = !msg.hostName.StartsWith("TTS");
 
             HostName = msg.hostName;
 

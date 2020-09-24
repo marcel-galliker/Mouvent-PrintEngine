@@ -133,9 +133,6 @@ char *FluidCtrlModeStr(EnFluidCtrlMode mode)
 	case ctrl_test_watchdog:		return "WATCHDOG";	//0x10000,
 	case ctrl_test:					return "TEST";		//0x10001,
     	
-	case ctrl_offset_cal: 			return "CAL OFFSET";	// 0x10003
-	case ctrl_offset_cal_done: 		return "CAL DONE";		// 0x10004
-
 //	case ctrl_heater_error:	return "HEAT ERR";  //0x12346,
 		
 	default:				sprintf(str, "0x%04x", mode); return str;

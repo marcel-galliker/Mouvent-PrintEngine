@@ -53,6 +53,10 @@
     
 
     <converters:HeadValve_Converter         x:Key="HeadValve_Converter"/>
+
+    <converters:IconPacks_ModernKind        x:Key="IconPacks_ModernKind"/>
+
+
     <converters:InkType_Name                x:Key="InkType_Name"/>
     <converters:InkType_ColorBG             x:Key="InkType_ColorBG"/>
     <converters:InkType_ColorBG_Stroke             x:Key="InkType_ColorBG_Stroke"/>

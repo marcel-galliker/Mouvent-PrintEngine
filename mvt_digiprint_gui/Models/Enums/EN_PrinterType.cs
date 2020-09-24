@@ -18,6 +18,7 @@ namespace RX_DigiPrint.Models.Enums
                 _List.Add(new RxEnum<EPrinterType>(EPrinterType.printer_test_slide,         "radex Test Slide"));
                 _List.Add(new RxEnum<EPrinterType>(EPrinterType.printer_test_slide_only,    "radex Test Slide ONLY"));
                 _List.Add(new RxEnum<EPrinterType>(EPrinterType.printer_test_table,         "Swiss4Jet Test Table"));
+                _List.Add(new RxEnum<EPrinterType>(EPrinterType.printer_test_table_seon,    "Production Test Table"));
                 _List.Add(new RxEnum<EPrinterType>(EPrinterType.printer_LB701,              "Mouvent LB701"   ));
                 _List.Add(new RxEnum<EPrinterType>(EPrinterType.printer_LB702_UV,           "Mouvent LB702-UV"   ));
                 _List.Add(new RxEnum<EPrinterType>(EPrinterType.printer_LB702_WB,           "Mouvent LB702-WB"   ));
@@ -27,6 +28,7 @@ namespace RX_DigiPrint.Models.Enums
 
                 _List.Add(new RxEnum<EPrinterType>(EPrinterType.printer_TX801,              "Mouvent TX801" ));
                 _List.Add(new RxEnum<EPrinterType>(EPrinterType.printer_TX802,              "Mouvent TX802" ));
+                _List.Add(new RxEnum<EPrinterType>(EPrinterType.printer_TX404,              "Mouvent TX404" ));
 
                 _List.Add(new RxEnum<EPrinterType>(EPrinterType.printer_CB612, "Mouvent CB612"));
 

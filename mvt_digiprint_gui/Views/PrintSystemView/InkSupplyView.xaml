@@ -34,7 +34,7 @@
                             </Trigger>
                             <Trigger Property="IsPressed" Value="true">
                             </Trigger>
-                            
+
                             <Trigger Property="IsChecked" Value="true">
                                 <Setter Property="Background" TargetName="templateRoot" Value="{StaticResource OptionMark.Pressed.Background}"/>
                             </Trigger>
@@ -106,9 +106,9 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        
-       
-        
+
+
+
     </UserControl.Resources>
 
     <!--    <CheckBox x:Name="CheckBox" Checked="CheckBox_Checked" IsChecked="{Binding IsChecked}" Style="{StaticResource CheckBoxStyle_OFF}"> -->
@@ -124,13 +124,13 @@
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-           
-            
+
+
             <Button Grid.Column="0" Style="{StaticResource InkSupplyColorEllipseStyle}" HorizontalAlignment="Center"
                     BorderBrush="{Binding InkType, Converter={StaticResource InkType_ColorBG}}"
                     Foreground="{Binding InkType, Converter={StaticResource InkType_ColorBG_Stroke}}"></Button>
 
-<!--            <Button Grid.Column="0" Style="{StaticResource InkSupplyColorDropStyle}" HorizontalAlignment="Center"
+            <!--            <Button Grid.Column="0" Style="{StaticResource InkSupplyColorDropStyle}" HorizontalAlignment="Center"
                     BorderBrush="{Binding InkType, Converter={StaticResource InkType_ColorBG}}"
                     Foreground="{Binding InkType, Converter={StaticResource InkType_ColorBG_Stroke}}"></Button>
             -->

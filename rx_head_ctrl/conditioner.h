@@ -46,8 +46,9 @@ void cond_set_disabledJets(int headNo, INT16 *jets);
 void cond_set_densityValues(int headNo, INT16 *values);
 void cond_set_voltage(int headNo, UINT8 voltage);
 void cond_set_rob_pos(int headNo, int angle, int dist);
-void cond_set_purge_par(int headNo, int delay, int time, int act_pos_y);
-void cond_add_droplets_printed(int headNo, UINT64 droplets);
+void cond_set_purge_par(int headNo, int delay, int time, int act_pos_y, int delay_time);
+void cond_reset_droplets_printed(int headNo);
+void cond_add_droplets_printed(int headNo, UINT32 droplets, int time);
 void cond_set_config	(int headNo, SConditionerCfg *cfg);
 void cond_setInk		(int headNo, SInkDefinition *pink);
 void cond_volume_printed(int headNo, int volume);
@@ -55,8 +56,4 @@ void cond_start_preslog (void);
 ELogItemType cond_err_level		(void);
 
 void cond_start_log(void);
-void cond_offset_cal(int headNo);
-void cond_offset_del(int headNo);
-void cond_toggle_psensor_cali(int headNo);
-void cond_toggle_psensor_cali_user(int headNo);
     

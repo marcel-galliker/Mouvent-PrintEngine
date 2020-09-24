@@ -8,7 +8,7 @@
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
              xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d"
-             d:DesignHeight="300" d:DesignWidth="300"
+             d:DesignHeight="380" d:DesignWidth="300"
              DataContextChanged="UserControl_DataContextChanged">
 
     <UserControl.Resources>
@@ -71,7 +71,8 @@
                         <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Purge Soft"    Click="PurgeSoft_Clicked"   Padding="10" x:Name="Button_PurgeSoft"/>
                         <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Purge"         Click="Purge_Clicked"       Padding="10"/>
                         <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Purge Hard"    Click="PurgeHard_Clicked"   Padding="10" x:Name="Button_PurgeHard"/>
-                   <!-- <Button Content="Flush"         Click="Flush_Clicked"/>     - -->
+                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Toggle Meniscus" Click="ToggleMeniscus_Clicked" Padding="10" x:Name="Button_ToggleMeniscus"/>
+                        <!-- <Button Content="Flush"         Click="Flush_Clicked"/>     - -->
 
                         <Rectangle Fill="{StaticResource Mouvent.MainColorBrush}" HorizontalAlignment="Stretch" Height="1" Margin="-16, 8"/>
 
@@ -81,9 +82,9 @@
             </Grid>
         </rx:RxPopup>
 
-        <Rectangle  Margin="2,0,2,0" Grid.Row="3" Fill="{StaticResource RX.Warn}" Visibility="{Binding TempReady, Converter={StaticResource BoolToInVisible_Converter}}"/>
+        <Rectangle  Name="Temp_Head_Rec" Margin="2,0,2,0" Grid.Row="3" Fill="{StaticResource RX.Warn}" Visibility="{Binding TempReady, Converter={StaticResource BoolToInVisible_Converter}}"/>
 
-        <StackPanel  Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
+        <StackPanel  Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Name="Temp_Head">
             <TextBlock Text="{Binding TempHead,  Converter={StaticResource HeadVal_ConverterTemp}}"/>
             <TextBlock Text=" (" VerticalAlignment="Center"/>
             <TextBlock Text="{Binding TempSetpoint, Converter={StaticResource HeadVal_ConverterTemp}}" VerticalAlignment="Center"/>
@@ -92,6 +93,10 @@
 
         <Grid  Margin="2,0,2,0" Grid.Row="4" x:Name="ServiceGrid" IsVisibleChanged="ServiceGrid_IsVisibleChanged">
             <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
@@ -120,7 +125,8 @@
                 <TextBlock Text="{Binding PresOut_diff, Converter={StaticResource HeadVal_Converter10}}" VerticalAlignment="Center"/>
                 <TextBlock  Margin="0,0,2,0" Text=")" VerticalAlignment="Center"/>
             </StackPanel>
-           
+
+            <Rectangle  Grid.Row="4" Margin="2,0,2,0"  Fill="{StaticResource RX.Warn}" Visibility="{Binding Meniscus_Disabled, Converter={StaticResource BoolToVisible_Converter}}"/>
             <StackPanel  Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
                 <TextBlock Text="{Binding Meniscus,  Converter={StaticResource HeadVal_Converter10}}"/>
                 <TextBlock Text=" (~" VerticalAlignment="Center"/>
@@ -136,7 +142,7 @@
             </StackPanel>
 
             <Rectangle  Grid.Row="6" Margin="2,0,2,0"  Fill="{StaticResource RX.Warn}" Visibility="{Binding FlowFactorWarning, Converter={StaticResource BoolToVisible_Converter}}"/>
-            <TextBlock  Grid.Row="6" Margin="0,0,2,0"  HorizontalAlignment="Right"  Text="{Binding FlowFactor}" />
+            <TextBlock  Grid.Row="6" Margin="0,0,2,0"  HorizontalAlignment="Right"  Text="{Binding FlowFactor, Converter={StaticResource HeadVal_Converter}}" />
             <TextBlock  Grid.Row="7" Margin="0,0,2,0"  HorizontalAlignment="Right"  Text="{Binding Valve, Converter={StaticResource HeadValve_Converter}}" />
             <TextBlock  Grid.Row="8" Margin="0,0,2,0"  HorizontalAlignment="Right"  Text="{Binding PrintingTime}" />
             <StackPanel Grid.Row="9" Orientation="Horizontal" HorizontalAlignment="Right">
@@ -145,6 +151,10 @@
                 <TextBlock Text="{Binding ImgBuf}"/>
                 <TextBlock  Margin="0,0,2,0" Text=")"/>
             </StackPanel>
+            <TextBlock  Grid.Row="10" Margin="0,0,2,0"  HorizontalAlignment="Right"  Text="{Binding Cooler_Pressure}" Name="Cooler_Pres"/>
+            <TextBlock  Grid.Row="11" Margin="0,0,2,0"  HorizontalAlignment="Right"  Text="{Binding Cooler_Temp, Converter={StaticResource HeadVal_ConverterTemp}}" Name="Cooler_Temp"/>
+            <TextBlock  Grid.Row="12" Margin="0,0,2,0"  HorizontalAlignment="Right"  Text="{Binding ClusterNo}" Name="ClusterNo"/>
+            <TextBlock  Grid.Row="13" Margin="0,0,2,0"  HorizontalAlignment="Right"  Text="{Binding Drive_Voltage}" Name="Voltage"/>
         </Grid>
 
         <!-- NO Connection _______________________________________________________________________-->
@@ -162,5 +172,6 @@
                 <RotateTransform Angle="-70"/>
             </TextBlock.LayoutTransform>
         </TextBlock>
+        
     </Grid>
 </UserControl>

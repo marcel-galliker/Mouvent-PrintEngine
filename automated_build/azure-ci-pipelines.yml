@@ -3,35 +3,52 @@ name: $(Build.BuildId)
 
 pool: 'PrintEngine Pool'
 
+
+trigger: 
+  branches:
+    exclude: [release/Release1.0, release/Release1.1, release/Release1.2, release/LB_PrintEngine_Release_1_3_2]
+
 steps:
-- script: automated_build/msbuild_vsprojects.bat other -no-pause
-  displayName: 'Build Others'
-
-- script: automated_build/msbuild_vsprojects.bat nios -no-delete
-  displayName: 'Build NIOS'
-
-- script: automated_build/msbuild_vsprojects.bat keil -no-delete
-  displayName: 'Build Keil'
-
-- task: ArchiveFiles@2
-  displayName: 'Archive Artifacts'
+- task: SonarCloudPrepare@1
   inputs:
-    rootFolderOrFile: bin
-    archiveFile: '$(Build.ArtifactStagingDirectory)/PrintEngine-$(Build.BuildId).zip'
+    SonarCloud: 'SonarCloud-PE'
+    organization: 'mouvent'
+    scannerMode: 'CLI'
+    configMode: 'file'
+  condition:  or(eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
 
-- task: ArchiveFiles@1
-  displayName: 'Archive Logs'
+- script: build-wrapper-win-x86-64.exe  --out-dir  build_wrapper_output_directory python automated_build/build.py 
+  displayName: 'Build Print Engine'
+
+- task: PublishBuildArtifacts@1
   inputs:
-    rootFolder: 'automated_build'
-    archiveType: zip
-    archiveFile: '$(Build.ArtifactStagingDirectory)/log-$(Build.BuildId).zip'
-    replaceExistingArchive: false
-  continueOnError: true
+    PathtoPublish: 'automated_build'
+    ArtifactName: 'log'
+    publishLocation: 'Container'
   condition: always()
+  continueOnError: true
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact: Print Engine'
   inputs:
-    ArtifactName: PrintEngine
-  continueOnError: true
-  condition: always()
+    ArtifactName: bin
+    PathtoPublish: 'bin'
+    publishLocation: 'Container'
+
+- script: python -m pytest -c test\pytest.ini --tb=native --junit-xml=TEST-py.xml test
+  displayName: 'Run tests'
+  
+- task: PublishTestResults@2
+  inputs:
+    testResultsFiles: '**/TEST-*.xml'
+    testRunTitle: 'Publish test results'
+    failTaskOnFailedTests: true
+  condition: succeededOrFailed()
+
+- task: SonarCloudAnalyze@1
+  condition:  or(eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+- task: SonarCloudPublish@1
+  inputs:
+    pollingTimeoutSec: '300'
+  condition:  and(succeeded(), or(eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranch'], 'refs/heads/master')))
+

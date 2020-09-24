@@ -1033,7 +1033,8 @@ int pq_is_ready(void)
 	if(RX_Config.printer.type == printer_LH702)				
 	{
 		TrPrintfL(TRUE, "pq_is_ready: sentCnt=%d, printGoCnt=%d", RX_PrinterStatus.sentCnt, RX_PrinterStatus.printGoCnt);
-		return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printGoCnt) < 5;	// minimize buffer, independent on format!
+		if (RX_PrinterStatus.testMode) return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printGoCnt) < 64;
+		else						   return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printGoCnt) < 5;	// minimize buffer, independent on format!
 	}
 	else if(RX_Config.printer.type == printer_cleaf)	return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printedCnt) < 16;
 	else if (rx_def_is_tx(RX_Config.printer.type))		return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printedCnt) < 20;

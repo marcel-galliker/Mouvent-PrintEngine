@@ -206,6 +206,7 @@ int	 enc_set_config(int restart)
 	{
 	case printer_TX801:			_Encoder[0].webOffset_mm=WEB_OFFSET; break;	// 20
 	case printer_TX802:			_Encoder[0].webOffset_mm=WEB_OFFSET; break;	// 20
+	case printer_TX404:			_Encoder[0].webOffset_mm=WEB_OFFSET; break; // 20
 	case printer_DP803:			_Encoder[0].webOffset_mm=WEB_OFFSET; 
 							//	_Encoder[1].webOffset_mm=WEB_OFFSET+WEB_OFFSET_VERSO+RX_Config.printer.offset.versoDist;
 								_Encoder[1].webOffset_mm=WEB_OFFSET;
@@ -216,6 +217,9 @@ int	 enc_set_config(int restart)
 //	case printer_test_table:	if (RX_Config.inkSupplyCnt<=4) _Encoder[0].webOffset_mm=200;	// CLEAF
 //								else						   _Encoder[0].webOffset_mm=110;	// Bobst
 //								break; 
+	case printer_test_table_seon:
+								_Encoder[0].webOffset_mm = 220;
+								break;
 	case printer_test_table:	_Encoder[0].webOffset_mm=110; break;
 	case printer_LB701:
 	case printer_LB702_UV:
@@ -309,22 +313,24 @@ static void _enc_start_printing(int no, SPrintQueueItem *pitem, int restart)
 								break;
 			
 	case printer_TX801:
-	case printer_TX802:			msg.orientation = FALSE;	msg.scanning=TRUE;  msg.incPerMeter=1000000; msg.pos_actual = machine_get_scanner_pos(); 
+	case printer_TX802:			
+	case printer_TX404:			msg.orientation = FALSE;	msg.scanning=TRUE;  msg.incPerMeter=1000000; msg.pos_actual = machine_get_scanner_pos(); 
 								if (!pitem->testImage) _WakeupLen=WAKEUP_BAR_LEN*(RX_Config.inkSupplyCnt+1);
 								if (!arg_simuPLC) 
 								{
 									if (TRUE) msg.correction=CORR_LINEAR;
 									else Error(WARN, 0, "Encoder compensation OFF");
-								}		
+								}
 								break;
-
-	/*			
-	case printer_TX802:			msg.orientation = FALSE;	msg.scanning=TRUE;  msg.incPerMeter=1000000; msg.pos_actual = machine_get_scanner_pos(); 
-								if (!pitem->testImage) _WakeupLen=WAKEUP_BAR_LEN*(RX_Config.inkSupplyCnt+1);
-								if (!arg_simuPLC) msg.correction=CORR_LINEAR; 
-								break;
-	*/
 		
+    case printer_test_table_seon:
+        msg.orientation = FALSE;
+        msg.scanning = TRUE;
+        msg.incPerMeter = 1000000;
+        msg.pos_actual = machine_get_scanner_pos();
+        break;
+
+
 	case printer_LB701:			msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; 
 								msg.diameter[0]=79; msg.diameter[1]=74;
 								msg.correction=CORR_ROTATIVE;								
@@ -339,6 +345,7 @@ static void _enc_start_printing(int no, SPrintQueueItem *pitem, int restart)
 	case printer_LB702_WB:		msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_ROTATIVE; msg.diameter[0]=78; msg.diameter[1]=74; break;	
 	case printer_LH702:			msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_ROTATIVE; msg.diameter[0]=78; msg.diameter[1]=74; 
 								break;
+
 	case printer_DP803:			msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_ROTATIVE;
 								msg.diameter[0] = 74; 
 								msg.diameter[1] = 76;
@@ -521,6 +528,15 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 		{
 		case PG_MODE_LENGTH: _PrintGo_Dist = pitem->printGoDist; break;
 		case PG_MODE_GAP:	 _PrintGo_Dist = pitem->pageHeight+pitem->printGoDist;
+				 			 // Bug in FPGA: (when srcLineCnt==12300, gap=0 it sometimes prints an additional line of old data [instead of blank] between the labels)
+							 if (pitem->printGoDist<22)
+							 {
+								static int _first=TRUE;
+								if (_first) Error(LOG, 0, "Bugfix Error in FPGA");
+								_first=FALSE;
+								_PrintGo_Dist = pitem->pageHeight+22;
+							 }
+
 							 /*
  							 {
 								if (_DistTelCnt%100==1) Error(WARN, 0, "TEST: Cut image");

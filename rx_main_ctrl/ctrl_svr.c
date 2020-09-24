@@ -166,12 +166,14 @@ static int _prepare_config()
 	
 	//--- ethernet ports on additional interface board -------------------
 #ifdef linux
-	ethPortCnt=sok_get_ifcnt("p");
 	if (RX_Config.printer.type==printer_cleaf)		ethPortCnt=4;
-	if (RX_Config.printer.type==printer_test_table) ethPortCnt=0;	// historic
-	if (arg_hamster)								ethPortCnt=0;
-
+	else if (RX_Config.printer.type==printer_test_table) ethPortCnt=0;
+	else if (arg_hamster)								 ethPortCnt=0;
+	else 
+	{
+		ethPortCnt=sok_get_ifcnt("^p[0-9]+p[0-9]+$");
 	if (ethPortCnt==0) Error(WARN, 0, "No PxPx Ports"); 
+	}
 
 #else
 	ethPortCnt=0;
@@ -265,7 +267,7 @@ static int _prepare_config()
 					pBoard = &RX_Config.headBoard[head / MAX_HEADS_BOARD];
 					pBoard->present										= dev_on;
 					pBoard->printerType									= RX_Config.printer.type;
-					pBoard->reverseHeadOrder							= (RX_Config.printer.type==printer_TX801 || RX_Config.printer.type==printer_TX802);
+					pBoard->reverseHeadOrder							= rx_def_is_tx(RX_Config.printer.type);
 					pBoard->head[head % MAX_HEADS_BOARD].enabled   		= dev_on;
 					pBoard->head[head % MAX_HEADS_BOARD].inkSupply 		= isNo = (color*RX_Config.inkCylindersPerColor)+(n*RX_Config.inkCylindersPerColor)/RX_Config.headsPerColor;
 					pBoard->head[head % MAX_HEADS_BOARD].encoderNo 		= 0;
@@ -336,7 +338,7 @@ static int _prepare_config()
 	// TX801: CORR_LINEAR: Board[0].Head[0] nearest to Encoder[1]
 	if (!arg_simuPLC)
 	{
-		if(rx_def_is_tx(RX_Config.printer.type) && RX_Config.headsPerColor)
+		if(rx_def_is_tx(RX_Config.printer.type) && RX_Config.printer.type!=printer_TX404 && RX_Config.headsPerColor)
 		{
 			for (head=0; head<RX_Config.colorCnt * RX_Config.headsPerColor; head++)
 			{
@@ -400,7 +402,8 @@ void ctrl_set_max_speed(void)
 	switch(RX_Config.printer.type)
 	{
 		case printer_TX801:		
-		case printer_TX802:		if (enc_is_analog())
+		case printer_TX802:		
+		case printer_TX404:		if (enc_is_analog())
 								{
 									maxSpeed[0]= 100; maxSpeed[1]= 100; maxSpeed[2]= 100; maxSpeed[3]= 100;				
 								}
@@ -638,20 +641,6 @@ void ctrl_tick(void)
             }
             return;
         }
-        /*
-        for (i = 0; i < SIZEOF(_BufferFluidCmd); i++)
-        {
-            if (_BufferFluidCmd[i].used && !_ctrl_check_stepper_in_purgeMode(_BufferFluidCmd[i].headNo) && rx_get_ticks() >= _PurgeTime + TIMEOUT)
-            {
-                _BufferFluidCmd[i].used = 0;
-                ctrl_send_head_fluidCtrlMode(
-                    _BufferFluidCmd[i].headNo, _BufferFluidCmd[i].ctrlMode,
-                    _BufferFluidCmd[i].sendToFluid, _BufferFluidCmd[i].fromGui);
-                _PurgeTime = rx_get_ticks();
-                //i = SIZEOF(_BufferFluidCmd);
-                return;
-            }
-        }*/
     }
 }
 
@@ -944,7 +933,8 @@ int ctrl_send_purge_par(int fluidNo, int time)
 #define HEAD_WIDTH	43000
 	int head;
     int delay_pos_y;
-	SPurgePar par;
+    int delay_time;
+    SPurgePar par;
 	SHeadCfg *pcfg;
 	
     if (RX_Config.stepper.wipe_speed)
@@ -952,9 +942,16 @@ int ctrl_send_purge_par(int fluidNo, int time)
     else
         delay_pos_y = 0;
 
+    if (RX_StepperStatus.robot_used || time == 0)
+        delay_time = 0;
+    else
+        delay_time = 5000;
+
+
     int timeTotal = 0;
     par.delay_pos_y = 0;
-	par.time  = time;
+    par.delay_time = 0;
+    par.time  = time;
 	for (head=0; head<SIZEOF(RX_Config.headBoard)*MAX_HEADS_BOARD; head++)
 	{
 		pcfg = &RX_Config.headBoard[head/MAX_HEADS_BOARD].head[head%MAX_HEADS_BOARD];
@@ -963,9 +960,16 @@ int ctrl_send_purge_par(int fluidNo, int time)
 			par.no = head%HEAD_CNT;
 			sok_send_2(&_HeadCtrl[head/HEAD_CNT].socket, CMD_SET_PURGE_PAR, sizeof(par), &par);
             if (delay_pos_y)
+            {
                 timeTotal = par.time;
-			par.delay_pos_y+=delay_pos_y;
-		}
+                par.delay_pos_y += delay_pos_y;
+            }
+            else
+            {
+                timeTotal = par.time + par.delay_time;
+                par.delay_time += delay_time;
+            }
+        }
 	}
 	return timeTotal;
 }
@@ -1229,6 +1233,12 @@ void ctrl_reply_stat(RX_SOCKET socket)
 		if (_HeadCtrl[i].running) 
 			gui_send_msg_2(socket, REP_HEAD_STAT, sizeof(SHeadBoardStat), &RX_HBStatus[i]);
 	}
+}
+
+void ctrl_set_cluster_no(SValue* pdata)
+{
+    if (_HeadCtrl[pdata->no].socket != INVALID_SOCKET)
+		sok_send_2(&_HeadCtrl[pdata->no].socket, CMD_CHANGE_CLUSTER_NO, sizeof(&pdata), pdata);
 }
 
 //--- ctrl_set_rob_pos -------------------------------------

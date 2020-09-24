@@ -17,7 +17,6 @@
 #include "pump_ctrl.h"
 #include "debug_printf.h"
 #include "main.h"
-#include "average.h"
 #include "ctr.h"
 
 //--- defines --------------------
@@ -27,8 +26,9 @@
 #define COND_ALIVE_TIMEOUT_MS 	10000	// ms
 #define RAMP_UP_TIME			500		// 5 Sec rampup time
 
-#define TO_FLUSH	FALSE
-#define TO_INK		TRUE
+#define VALVE_OFF		0
+#define VALVE_FLUSH		1
+#define VALVE_INK		2
 
 #define CALIBRATION_NB_VAL		30
 
@@ -77,6 +77,7 @@ static INT32	_TimePIDstable;
 // static INT32	_TimeSwitchingOFF;
 // static INT32 _PhaseOFFMeniscusPre;
 static INT32	_Meniscus_Timeout;
+static INT32	_PurgeDelay;
 static INT32	_PurgeTime;
 static INT32	_SetpointShutdown;
 
@@ -265,7 +266,7 @@ void pump_tick_10ms(void)
 		case ctrl_shutdown_done:	
 		
 				// Bring Meniscus to Setpoint (WF) + 15mbars
-				if((_ShutdownPrint > 0)&&(RX_Status.info.valve == TO_INK))	// valve on TO_FLUSH if Error detected, so no shutdown phase
+				if((_ShutdownPrint > 0)&&(RX_Status.info.valve_ink))	// valve on TO_FLUSH if Error detected, so no shutdown phase
 				{
 					_ShutdownPrint++;
 					_NbPresShutdown++;
@@ -294,6 +295,9 @@ void pump_tick_10ms(void)
 				else RX_Status.mode = RX_Config.mode;
 				break;
 		
+		case ctrl_leak_test:
+		case ctrl_leak_test_step1:
+		case ctrl_leak_test_step2:
 		case ctrl_off:
 		case ctrl_undef:
 		case ctrl_error:
@@ -324,7 +328,7 @@ void pump_tick_10ms(void)
 							_timer = 0;
                         
 						_timer+=cycle_time;
-						_set_valve(TO_INK);
+						_set_valve(VALVE_INK);
 						max_pressure = MBAR_500;
 						if (_timer<5000)
                             _set_pump_speed(_PumpPID.val_max*75/100+1);
@@ -365,7 +369,7 @@ void pump_tick_10ms(void)
 						}
 						
 						temp_ctrl_on(TRUE);
-						_set_valve(TO_INK);
+						_set_valve(VALVE_INK);
                         max_pressure = MBAR_500;
 						_ShutdownPrint = 1;
         
@@ -378,7 +382,7 @@ void pump_tick_10ms(void)
 						
 						RX_Status.mode = RX_Config.mode; 						
 						temp_ctrl_on(TRUE);
-						_set_valve(TO_INK);
+						_set_valve(VALVE_INK);
 						_PumpPID.start_integrator = 0;
 						pid_reset(&_PumpPID);
 						_ShutdownPrint = 1;
@@ -591,11 +595,11 @@ void pump_tick_10ms(void)
 						break;
 		
 		case ctrl_check_step5:	
-						_set_valve(TO_INK);
+						_set_valve(VALVE_INK);
 						RX_Status.mode = RX_Config.mode;						
 						if((_CheckSequence == 0)||(RX_Config.fluidErr))
 						{
-							_set_valve(TO_FLUSH);
+							_set_valve(VALVE_OFF);
 							turn_off_pump();							 
 						}
 						else _pump_pid(FALSE);
@@ -692,22 +696,24 @@ void pump_tick_10ms(void)
 						turn_off_pump();
 						_presure_in_max();
 						max_pressure = MBAR_500;
+						_PurgeDelay = 0;
 						_PurgeTime  = 0;
                         RX_Status.mode = RX_Config.mode;
 						break;
 		
 		case ctrl_purge_step4:
 						_presure_in_max();
-						if (RX_Config.purge_pos_y<(RX_Config.purgeDelayPos_y - MAX_POS_VARIANCE) || _PurgeTime>RX_Config.purgeTime)
+						if (RX_Config.purge_pos_y<(RX_Config.purgeDelayPos_y - MAX_POS_VARIANCE) || _PurgeTime>RX_Config.purgeTime || (RX_Config.purgeDelayPos_y == 0 && _PurgeDelay < RX_Config.purgeDelayTime))
 						{
+							if (RX_Config.purgeDelayPos_y == 0)_PurgeDelay += cycle_time;
 							temp_ctrl_on(FALSE);
-							_set_valve(TO_FLUSH);
+							_set_valve(VALVE_OFF);
 						}
 						else
 						{
 							_PurgeTime+=cycle_time;
 							temp_ctrl_on(TRUE);
-							_set_valve(TO_INK);
+							_set_valve(VALVE_INK);
 						}
 						_set_pump_speed(0);
 						max_pressure = MBAR_500;
@@ -749,7 +755,7 @@ void pump_tick_10ms(void)
 			
 		case ctrl_empty_step3:
 						temp_ctrl_on(FALSE);
-						_set_valve(TO_INK);
+						_set_valve(VALVE_INK);
 						// _set_pump_speed((_PumpPID.val_max + 1) / 2);
 						pid_reset(&_PumpPID);
 						_pump_pid(TRUE);
@@ -774,7 +780,7 @@ void pump_tick_10ms(void)
 						{
 							temp_ctrl_on(FALSE);
 							turn_off_pump();
-							_set_valve(TO_FLUSH);
+							_set_valve(VALVE_OFF);
 						}
              break;
 		
@@ -797,7 +803,7 @@ void pump_tick_10ms(void)
 		case ctrl_fill_step4:
     case ctrl_fill_step5:  
 						temp_ctrl_on(FALSE);
-						_set_valve(TO_INK);
+						_set_valve(VALVE_INK);
 						_pump_pid(TRUE);
 						if(_PumpPID.val == _PumpPID.val_min) pid_reset(&_PumpPID);
 						max_pressure = MBAR_500;
@@ -806,18 +812,6 @@ void pump_tick_10ms(void)
 							RX_Status.mode = RX_Config.mode;
 						break;
         				
-        //--- SENSOR CALIBRATION ------------------------------------------------
-        case ctrl_offset_cal:
-						temp_ctrl_on(FALSE);
-						turn_off_pump();
-						if (RX_Status.mode!=ctrl_offset_cal && RX_Status.mode!=ctrl_offset_cal_done) 
-						{
-							pres_calibration_start();
-						}
-						if (pres_calibration_done()) RX_Status.mode = ctrl_offset_cal_done;
-						else 						 RX_Status.mode = ctrl_offset_cal;
-                        break;    
-            
 		
 		default:		if (RX_Config.mode>=ctrl_wipe && RX_Config.mode<ctrl_fill)
 						{						
@@ -851,8 +845,27 @@ void pump_tick_10ms(void)
 //--- _set_valve --------------------------------------
 static void _set_valve(int state)
 {
-	RX_Status.info.valve = state;
-	Gpio1pin_Put(GPIO1PIN_P12, state);
+	switch(state)
+	{
+		case VALVE_FLUSH:	RX_Status.info.valve_flush 	= TRUE;
+							RX_Status.info.valve_ink	= FALSE;
+							break;
+		
+		case VALVE_INK:		RX_Status.info.valve_flush 	= FALSE;
+							RX_Status.info.valve_ink	= TRUE;
+							break;
+		default:			RX_Status.info.valve_flush 	= TRUE;
+							RX_Status.info.valve_ink	= FALSE;
+	}
+	if(RX_Status.pcb_rev>='n')
+	{
+		Gpio1pin_Put(GPIO1PIN_P12, RX_Status.info.valve_flush);
+		Gpio1pin_Put(GPIO1PIN_P80, RX_Status.info.valve_ink);
+	}
+	else 
+	{
+		Gpio1pin_Put(GPIO1PIN_P12, RX_Status.info.valve_ink);
+	}
 }
 
 //--- _menicus_minmax_reset ------------------------------
@@ -951,7 +964,7 @@ static void _pump_pid(int Meniscus_Error_Enable)
     static const INT32 MENISCUS_MAX = 1;    // [0.1mbar]
  		
 //	if (RX_Status.pressure_out == INVALID_VALUE || RX_Status.info.valve == TO_FLUSH || RX_Status.error & COND_ERR_meniscus)
-	if (RX_Status.pressure_out == INVALID_VALUE || RX_Status.info.valve == TO_FLUSH || RX_Status.error & (COND_ERR_meniscus|COND_ERR_pump_no_ink))
+	if (RX_Status.pressure_out == INVALID_VALUE || RX_Status.info.valve_ink==FALSE || RX_Status.error & (COND_ERR_meniscus|COND_ERR_pump_no_ink))
     {
 		turn_off_pump();
     }
@@ -1049,7 +1062,7 @@ static void _set_pump_speed(UINT32 speed)
 //--- turn_off_pump --------------------------------
 void turn_off_pump(void)
 {
-    _set_valve(TO_FLUSH);
+    _set_valve(VALVE_OFF);
     _set_pump_speed(0);
 	_menicus_minmax_reset();
 	_rampup_time=0;
