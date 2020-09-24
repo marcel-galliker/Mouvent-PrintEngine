@@ -57,7 +57,7 @@
 
 static int32_t
 set_serial_attributs(int fd, int speed, int parity);
-static int32_t send_command(uint32_t commandCode, uint32_t len, void *data);
+static int32_t send_command(uint32_t commandCode, uint8_t len, void *data);
 static void* send_thread(void *par);
 static void* receive_thread(void *par);
 static void robi_set_output(int num, int val);
@@ -939,7 +939,7 @@ static int32_t get_output_fifo_capacity(void)
 }
 
 
-static int32_t send_command(uint32_t commandCode, uint32_t len, void *data)
+static int32_t send_command(uint32_t commandCode, uint8_t len, void *data)
 {
 	SUsbTxMsg *pTxMessage;
     int i;
@@ -958,6 +958,7 @@ static int32_t send_command(uint32_t commandCode, uint32_t len, void *data)
     int32_t nextFifoIndex = (_txFifoInIndex + 1) % ROBI_FIFO_SIZE;
 	if (nextFifoIndex == _txFifoOutIndex) 
 	{
+        rx_mutex_unlock(_sendLock);
 		return REPLY_ERROR;
 	}
 	
@@ -1143,6 +1144,7 @@ static void* receive_thread(void *par)
 						memcpy(&_robiStatus, &rxMessage.robi, sizeof(_robiStatus));
 
                         if (_isUpdating == FALSE &&
+                            _updateFailed == FALSE &&
                             _robiStatus.version < current_version)
                         {
                             _isUpdating = TRUE;
