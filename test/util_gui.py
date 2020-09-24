@@ -17,8 +17,13 @@ Image.MAX_IMAGE_PIXELS = None
 
 from head_ctrl_mock import head_ctrl
 
+
 class PrinterTests(unittest.TestCase):
     "Master abstract class for printer tests"
+    driver = None
+    head_ctrl = None
+    main_ctrl = None
+    spooler_ctrl = None
     @classmethod
     def setUpClass(self):
         # save config
@@ -41,14 +46,6 @@ class PrinterTests(unittest.TestCase):
         shutil.copy2("test/conf/network.cfg", "D:/radex/user")
         shutil.copytree("test/conf/waveform", "D:/radex/waveform", dirs_exist_ok=True)
 
-        # removed old printed bmp
-        shutil.rmtree("printed", True)
-        # start the head ctrl mock in another thread
-        import threading, logging
-        logging.basicConfig(level=logging.FATAL) # silently
-        self.head_ctrl = threading.Thread(target=head_ctrl.run)
-        self.head_ctrl.start()
-
         #set up appium and start GUI
         desired_caps = { "app" : os.path.join(os.getcwd(), r"bin\gui\RX_DigiPrint.exe"),
                           "platformName" : 'Windows',
@@ -65,6 +62,15 @@ class PrinterTests(unittest.TestCase):
         time.sleep(1) # wait before starting spooler the the main is started
         self.spool_ctrl = subprocess.Popen([r"bin\win\rx_spooler_ctrl.exe"], stdout=subprocess.DEVNULL,
                                         stderr=subprocess.DEVNULL)
+
+        # removed old printed bmp
+        shutil.rmtree("printed", True)
+        # start the head ctrl mock in another thread
+        import threading, logging
+        logging.basicConfig(level=logging.FATAL) # silently
+        self.head_ctrl = threading.Thread(target=head_ctrl.run)
+        self.head_ctrl.start()
+
 
     @classmethod
     def read_configuration(self):
@@ -88,13 +94,20 @@ class PrinterTests(unittest.TestCase):
 
     @classmethod
     def tearDownClass(self):
+        if self.driver:
+            self.driver.quit()
         # stop the mock
         head_ctrl.simulate = False
-        self.head_ctrl.join()
+        if self.head_ctrl:
+            self.head_ctrl.join(5.0)
         # and processes
-        self.driver.quit()
-        self.spool_ctrl.terminate()
-        self.main_ctrl.terminate()
+        if self.main_ctrl:
+            self.main_ctrl.terminate()
+            self.main_ctrl.wait()
+        if self.spool_ctrl:
+            self.spool_ctrl.terminate()
+            self.spool_ctrl.wait()
+
         # restore original configuration
         if os.path.exists("D:/radex/user/config.cfg.ori"):
             os.replace("D:/radex/user/config.cfg.ori", "D:/radex/user/config.cfg")
