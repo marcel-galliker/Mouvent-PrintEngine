@@ -25,57 +25,54 @@
 #include "lb702.h"
 #include "robi.h"
 
-#define MOTOR_X_0 4
+#define MOTOR_X_0               4
 
-#define MOTOR_X_BITS 0x10
-#define MOTOR_ALL_BITS 0x13
+#define MOTOR_X_BITS            0x10
+#define MOTOR_ALL_BITS          0x13
 
-#define X_STEPS_PER_REV 3200.0 // 3214.0  //3200.0
-#define X_INC_PER_REV 16000.0
-#define X_DIST_PER_REV 36000
+#define X_STEPS_PER_REV         3200.0
+#define X_INC_PER_REV           16000.0
+#define X_DIST_PER_REV          36000
 
-#define CABLE_CAP_POS -626000        //	um LB702
-#define CABLE_WASH_POS_FRONT -573000 //	um LB702
-#define CABLE_WASH_POS_BACK -160000  //	um LB702
-#define CABLE_PURGE_POS_BACK -250000 //  um LB702
-#define CABLE_PURGE_POS_FRONT \
-    -561000 //  um LB702        CABLE_PURGE_POS_BACK - (7 * HEAD_WIDTH) - 10000
-            //  -> HEAD_WIDTH = 43000
-#define CABLE_SCREW_POS_FRONT -452000 //  um LB702
-#define CABLE_SCREW_POS_BACK \
-    -105208 //-148557 //  um LB702        CABLE_SCREW_POS_BACK + (7 *
-            // HEAD_WIDTH) -> //  HEAD_WIDTH = 43349
+#define CABLE_CAP_POS           -687000     //	um LB702    old position -626000
+#define CABLE_WASH_POS_FRONT    -634000     //	um LB702    old position -573000
+#define CABLE_WASH_POS_BACK     -221000     //	um LB702    old position -160000
+#define CABLE_PURGE_POS_BACK    -311000     //  um LB702    old position -250000
+#define CABLE_PURGE_POS_FRONT   -622000     //  um LB702    CABLE_PURGE_POS_BACK - (7 * HEAD_WIDTH) - 10000 -> HEAD_WIDTH = 43000  // old position -561000
+#define CABLE_SCREW_POS_FRONT   -513000     //  um LB702    old position -452000
+#define CABLE_SCREW_POS_BACK    -166208     //  um LB702    CABLE_SCREW_POS_BACK + (7 * HEAD_WIDTH) -> HEAD_WIDTH = 43349   // old position -105208
 
-#define CURRENT_HOLD 200
+#define CURRENT_HOLD            200
 
-#define CAP_FILL_TIME 11000        // ms
-#define WASTE_PUMP_TIME 60000      // ms
-#define SCREW_SEARCHING_TIME 21000 // ms
+#define CAP_FILL_TIME           12000   // ms
+#define WASTE_PUMP_TIME         60000   // ms
+#define SCREW_SEARCHING_TIME    21000   // ms
 
 // Digital Inputs
-#define CABLE_PULL_REF 2
-#define CAPPING_ENDSTOP 3
+#define CABLE_PULL_REF          2
+#define CAPPING_ENDSTOP         3
 
 // Digital Outputs
-#define RO_ALL_OUTPUTS 0x06F       // All used outputs -> o0, o1, o2, o3, o5, o6
-#define RO_FLUSH_TO_CAP_LEFT 0x001 // o0
-#define RO_FLUSH_TO_CAP_RIGHT 0x002 // o1
-#define RO_FLUSH_TO_CAP 0x003       // o0 + o1
-#define RO_FLUSH_WIPE_LEFT 0x004    // o2
-#define RO_FLUSH_WIPE_RIGHT 0x008   // o3
-#define RO_FLUSH_WIPE 0x00c         // o2 + o3
-#define RO_FLUSH_PUMP 0x020         // o5
-#define RO_WASTE 0x040              // o6
+#define RO_ALL_OUTPUTS          0x06F   // All used outputs -> o0, o1, o2, o3, o5, o6
+#define RO_FLUSH_WIPE_LEFT      0x001   // o2
+#define RO_FLUSH_WIPE_RIGHT     0x002   // o3
+#define RO_FLUSH_WIPE           0x003   // o2 + o3
+#define RO_FLUSH_TO_CAP_LEFT    0x004   // o0
+#define RO_FLUSH_TO_CAP_RIGHT   0x008   // o1
+#define RO_FLUSH_TO_CAP         0x00c   // o0 + o1
+#define RO_VACUUM_CLEANER       0x010   // o4
+#define RO_FLUSH_PUMP           0x020   // o5
+#define RO_WASTE_VAC            0x040   // o6
 
-#define MAX_POS_DIFFERENT 4000 // steps
+#define MAX_POS_DIFFERENT       4000    // steps
 
-#define HEAD_WIDTH 43000
+#define HEAD_WIDTH              43000
 
-#define HEADS_PER_COLOR 8
-#define COLORS_PER_STEPPER 2
-#define SCREWS_PER_HEAD 2
+#define HEADS_PER_COLOR         8
+#define COLORS_PER_STEPPER      2
+#define SCREWS_PER_HEAD         2
 
-#define MAX_VAR_SCREW_POS 2000 // um
+#define MAX_VAR_SCREW_POS       2000    // um
 /*
 typedef struct E_ScrewPositions
 {
@@ -148,8 +145,8 @@ void lbrob_init(void)
     // config for referencing cable pull motor (motor 4)
     _ParCable_ref.speed = 2000;
     _ParCable_ref.accel = 4000;
-    _ParCable_ref.current_acc = 120.0;
-    _ParCable_ref.current_run = 120.0;
+    _ParCable_ref.current_acc = 250.0;
+    _ParCable_ref.current_run = 250.0;
     _ParCable_ref.stop_mux = 0;
     _ParCable_ref.dis_mux_in = 0;
     _ParCable_ref.estop_level = TRUE;
@@ -210,11 +207,17 @@ static void _check_pump(void)
     }
 
     if (_PumpWasteTime && rx_get_ticks() <= _PumpWasteTime)
-        Fpga.par->output |= RO_WASTE;
+    {
+        Fpga.par->output |= RO_WASTE_VAC;
+        Fpga.par->output |= RO_VACUUM_CLEANER;
+    }
+    
+    
     else if (_PumpWasteTime)
     {
         _PumpWasteTime = 0;
-        Fpga.par->output &= ~RO_WASTE;
+        Fpga.par->output &= ~RO_WASTE_VAC;
+        Fpga.par->output &= ~RO_VACUUM_CLEANER;
     }
 }
 
@@ -232,7 +235,14 @@ void lbrob_main(int ticks, int menu)
     SStepperStat oldSatus;
     memcpy(&oldSatus, &RX_StepperStatus, sizeof(RX_StepperStatus));
 
+    if (sizeof(_Old_RobFunction) == 0)
+    {
+        
+    }
+
     _check_pump();
+    
+    
 
 
     motor_main(ticks, menu);
@@ -431,6 +441,7 @@ void lbrob_main(int ticks, int menu)
                 break;
             case rob_fct_vacuum:
             case rob_fct_wash:
+            case rob_fct_wipe:
                 new_RobFunction = rob_fct_move;
                 _Old_RobFunction = _RobFunction;
                 _CmdRunning = FALSE;
@@ -444,10 +455,14 @@ void lbrob_main(int ticks, int menu)
                 switch (_Old_RobFunction)
                 {
                 case rob_fct_wash:
+                    Error(LOG, 0, "Wash done");
                     RX_StepperStatus.robinfo.wash_done = TRUE;
                     break;
                 case rob_fct_vacuum:
                     RX_StepperStatus.robinfo.vacuum_done = TRUE;
+                    break;
+                case rob_fct_wipe:
+                    RX_StepperStatus.robinfo.wipe_done = TRUE;
                     break;
                 default:
                     break;
@@ -461,7 +476,8 @@ void lbrob_main(int ticks, int menu)
                 RX_StepperStatus.robinfo.ref_done = FALSE;
                 break;
             }
-            if (!_CmdRunning_Lift) _Old_RobFunction = _RobFunction;
+            if (!_CmdRunning_Lift && !(RX_StepperStatus.info.z_in_wash && (_Old_RobFunction == rob_fct_wash || _Old_RobFunction == rob_fct_wipe)))
+                _Old_RobFunction = _RobFunction;
         }
         else if (_CmdRunning == CMD_ROB_REFERENCE && _CmdRunning_old)
         {
@@ -577,6 +593,8 @@ void lbrob_display_status(void)
         term_printf("actPos Robi:     %dum\n", RX_StepperStatus.posY[0]);
         term_printf("Wipe-Speed:      %d\n", RX_StepperCfg.wipe_speed);
         term_printf("Vacuum done:     %d\n", RX_StepperStatus.robinfo.vacuum_done);
+        term_printf("Wash done:       %d\n", RX_StepperStatus.robinfo.wash_done);
+        term_printf("Wipe done:       %d\n", RX_StepperStatus.robinfo.wipe_done);
         if (_PumpWasteTime)
             term_printf("Waste-Pump-Time: %d\n", (_PumpWasteTime - rx_get_ticks()) /1000);
         else
@@ -901,6 +919,7 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             }
         }
         break;
+        
     case CMD_HEAD_ADJUST:
         _turn_screw(*(SHeadAdjustment *)pdata);
 
@@ -941,7 +960,7 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
             return;
         }
         else if (!RX_StepperStatus.info.z_in_ref &&
-                 !((_RobFunction == rob_fct_move) && RX_StepperStatus.info.z_in_wash) &&
+                 !((_RobFunction == rob_fct_move || _RobFunction == rob_fct_wash || _RobFunction == rob_fct_wipe) && RX_StepperStatus.info.z_in_wash) &&
                  !(RX_StepperStatus.info.z_in_screw && _RobFunction >= rob_fct_screw_head0 && _RobFunction <= rob_fct_screw_head7)) // Here this is for purging and not for vacuum
         {
             if (!RX_StepperStatus.info.moving)
@@ -990,6 +1009,7 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
             break;
         case rob_fct_vacuum:
         case rob_fct_wash:
+        case rob_fct_wipe:
             _lbrob_move_to_pos(_CmdRunning, _micron_2_steps(CABLE_PURGE_POS_FRONT));
             break;
 
@@ -1011,8 +1031,10 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
             case rob_fct_wash:
                 Fpga.par->output |= RO_FLUSH_WIPE;
                 Fpga.par->output |= RO_FLUSH_PUMP;
+            case rob_fct_wipe:
             case rob_fct_vacuum:
-                Fpga.par->output |= RO_WASTE;
+                Fpga.par->output |= RO_WASTE_VAC;
+                Fpga.par->output |= RO_VACUUM_CLEANER;
                 break;
             default:
                 break;

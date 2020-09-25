@@ -179,6 +179,7 @@
                         <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40"                      Content="Purge" Margin="5"      Click="Purge_Clicked"     Padding="10"/>
                         <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40"   Content="Prg+Vac"  Margin="5"     Click="PurgeVacc_Clicked" Padding="10" x:Name="Button_PurgeVacc"/>
                         <Button  Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40"                     Content="Prg+Wpe"  Margin="5"   Click="PurgeWipe_Clicked" Padding="10" x:Name="Button_PurgeWipe"/>
+                        <Button  Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40"                     Content="Prg+Wash"  Margin="5"   Click="PurgeWash_Clicked" Padding="10" x:Name="Button_PurgeWash"/>
                         <Rectangle Fill="{StaticResource Mouvent.MainColorBrush}" HorizontalAlignment="Stretch" Height="1" Margin="-16, 8"/>
                         <Button    Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40"                   Content="Fill"    Margin="5"    Click="Fill_Clicked"      Padding="10" />
                         <Button   Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40"                    Content="Empty"    Margin="5"   Click="Empty_Clicked"     Padding="10" Visibility="{Binding Running, Converter={StaticResource BoolToInVisible_Converter}}"/>

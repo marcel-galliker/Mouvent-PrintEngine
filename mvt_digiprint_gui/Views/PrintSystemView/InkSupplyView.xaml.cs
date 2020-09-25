@@ -135,7 +135,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
 
             Button_PurgeVacc.Visibility = (RxGlobals.PrintSystem.IsTx || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_WB) ? Visibility.Visible : Visibility.Collapsed;
             Button_PurgeWipe.Visibility = (RxGlobals.PrintSystem.IsTx || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_WB)? Visibility.Visible : Visibility.Collapsed;
-
+            Button_PurgeWash.Visibility = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB702_WB && RxGlobals.StepperStatus[0].RobotUsed) ? Visibility.Visible : Visibility.Collapsed;
         }
 
         //--- OnInkSupplyPropertyChanged -------------------------
@@ -274,6 +274,14 @@ namespace RX_DigiPrint.Views.PrintSystemView
             if (MvtMessageBox.YesNo("Purge + Wipe", "PURGE and WIPE all printheads?",  MessageBoxImage.Question, true))
             {
                 _command("Purge+Wipe",   EFluidCtrlMode.ctrl_purge_hard_wipe, true);
+            }
+        }
+
+        private void PurgeWash_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (MvtMessageBox.YesNo("Purge + Wash", "PURGE and WASH all printheads?", MessageBoxImage.Question, true))
+            {
+                _command("Purge+Wash", EFluidCtrlMode.ctrl_purge_hard_wash, true);
             }
         }
 

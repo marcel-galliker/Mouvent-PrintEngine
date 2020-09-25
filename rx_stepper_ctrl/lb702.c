@@ -620,7 +620,7 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                                     if (RX_StepperStatus.robot_used) lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_STOP, NULL);
 									break;	
 
-	case CMD_LIFT_REFERENCE:			TrPrintfL(TRUE, "CMD_LIFT_REFERENCE");
+	case CMD_LIFT_REFERENCE:		TrPrintfL(TRUE, "CMD_LIFT_REFERENCE");
 									strcpy(_CmdName, "CMD_LIFT_REFERENCE");
 								//	Error(LOG, 0, "starting 0x%08x %s", msgId, _CmdName);
 									_lb702_do_reference();
