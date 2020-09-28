@@ -107,7 +107,7 @@ static int _TargetPosition = 0;
 static int _Position_Correction;
 static int _Buffer_Cmd[10] = {0};
 
-static uint32_t current_version;
+static uint32_t _currentVersion;
 
 static HANDLE _sendLock;
 
@@ -143,18 +143,18 @@ void robi_init(void)
 
         if (fd == -1)
         {
-            current_version = 0;
+            _currentVersion = 0;
         }
         else
         {
-            lseek(fd, -sizeof(current_version), SEEK_END);
-            read(fd, &current_version, sizeof(current_version));
+            lseek(fd, -sizeof(_currentVersion), SEEK_END);
+            read(fd, &_currentVersion, sizeof(_currentVersion));
             close(fd);
         }
     }
     else
     {
-        current_version = 0;
+        _currentVersion = 0;
     }
 
     _isUpdating = FALSE;
@@ -508,7 +508,7 @@ void robi_display_status(void)
 	
 	term_printf("\n");
 	term_printf("Robi system status ---------------------------------\n");
-	term_printf("Connection: %d\n", _isConnected);
+	term_printf("Connection: %d Updating: %d, CurrentVersion: %d, BoardVersion: %d, BootloaderStatus: %d\n", _isConnected, _isUpdating, _currentVersion, _robiStatus.version, _robiStatus.bootloaderStatus);
 	//term_printf("Sync: %d\n", _isSync);
     term_printf("moving:         %d		cmd: %08x\n",
                 RX_StepperStatus.screwerinfo.moving, _CmdRunning);
@@ -985,7 +985,7 @@ static void update_failed(int fd)
 {
     rx_sleep(100);
     send_command(BOOTLOADER_RESET_CMD, 0, 0);
-    current_version = 0;
+    _currentVersion = 0;
     _isUpdating = FALSE;
     _updateFailed = TRUE;
     close(fd);
@@ -1075,7 +1075,7 @@ static void* update_thread(void *par)
         }
         
         _isUpdating = FALSE;
-        close(fd);
+         close(fd);
     }
 }
 
@@ -1106,7 +1106,7 @@ static void* send_thread(void *par)
 				_MsgsSent++;
 			
 			_txFifoOutIndex = (_txFifoOutIndex + 1) % ROBI_FIFO_SIZE;
-			rx_sleep(25);
+			rx_sleep(50);
 		}
 	}
 }
@@ -1145,7 +1145,7 @@ static void* receive_thread(void *par)
 
                         if (_isUpdating == FALSE &&
                             _updateFailed == FALSE &&
-                            _robiStatus.version < current_version)
+                            _robiStatus.version < _currentVersion)
                         {
                             _isUpdating = TRUE;
                             rx_thread_start(update_thread, NULL, 0, "robi_update_thread");
