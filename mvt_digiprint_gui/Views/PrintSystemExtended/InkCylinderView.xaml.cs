@@ -245,6 +245,14 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
             }
         }
 
+        private void PurgeWash_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (MvtMessageBox.YesNo("Purge + Wash", "PURGE and WASH all printheads?", MessageBoxImage.Question, true))
+            {
+                _command("Purge+Wash", EFluidCtrlMode.ctrl_purge_hard_wash, true);
+            }
+        }
+
         private void Done_Clicked(object sender, RoutedEventArgs e)
         {
             _command(null, _InkSupply.CtrlMode + 1, false);

@@ -1185,6 +1185,7 @@ void ink_tick_10ms(void)
 			case ctrl_purge_hard:		_init_purge(isNo, PRESSURE_HARD_PURGE); break;
 			case ctrl_purge_hard_wipe:	_init_purge(isNo, PRESSURE_HARD_PURGE); break;
 			case ctrl_purge_hard_vacc:	_init_purge(isNo, PRESSURE_HARD_PURGE); break;
+			case ctrl_purge_hard_wash:	_init_purge(isNo, PRESSURE_HARD_PURGE); break;
 
 			case ctrl_purge_step1: // build up pressure
 			case ctrl_purge_step2: // build up pressure

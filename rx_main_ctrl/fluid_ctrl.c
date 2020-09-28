@@ -664,7 +664,8 @@ static void _control(int fluidNo)
 				
 				case ctrl_purge:
 				case ctrl_purge_hard_wipe:	
-				case ctrl_purge_hard_vacc:	
+				case ctrl_purge_hard_vacc:
+                case ctrl_purge_hard_wash:
 				case ctrl_purge_soft:
 				case ctrl_purge_hard:		if (lbrob && even_number_of_colors) steplb_rob_to_wipe_pos(no / 2, HeadNo + rob_fct_purge_head0);
 											else if (lbrob && !even_number_of_colors) steplb_rob_to_wipe_pos((no+1) / 2, HeadNo + rob_fct_purge_head0);
@@ -682,6 +683,7 @@ static void _control(int fluidNo)
 											case ctrl_purge:			_send_purge_par(no, TIME_PURGE);	  _txrob=FALSE; break;
 											case ctrl_purge_hard_wipe:	_send_purge_par(no, time); break;
 											case ctrl_purge_hard_vacc:	_send_purge_par(no, time); break;
+                                            case ctrl_purge_hard_wash:	_send_purge_par(no, time); break;
 											case ctrl_purge_hard:		_send_purge_par(no, time); _txrob=FALSE; break;
 											}
                                             if (_txrob && _PurgeFluidNo < 0 && state_RobotCtrlMode() != ctrl_wash_step1 && state_RobotCtrlMode() != ctrl_wash_step2)
@@ -753,7 +755,7 @@ static void _control(int fluidNo)
                     
 											break;
 
-				case ctrl_purge_step4:		if (_PurgeCtrlMode==ctrl_purge_hard || _PurgeCtrlMode==ctrl_purge_hard_wipe || _PurgeCtrlMode==ctrl_purge_hard_vacc)
+				case ctrl_purge_step4:		if (_PurgeCtrlMode==ctrl_purge_hard || _PurgeCtrlMode==ctrl_purge_hard_wipe || _PurgeCtrlMode==ctrl_purge_hard_vacc || _PurgeCtrlMode == ctrl_purge_hard_wash)
 											{
 												_Flushed &= ~(0x01<<no);
 												setup_fluid_system(PATH_USER FILENAME_FLUID_STATE, &_Flushed, WRITE);				
@@ -794,8 +796,10 @@ static void _control(int fluidNo)
                                                 {
                                                     if (_PurgeCtrlMode == ctrl_purge_hard_vacc)
                                                         fluid_send_ctrlMode(no, ctrl_vacuum, TRUE);
-                                                    else if (_PurgeCtrlMode == ctrl_purge_hard_wipe)
+                                                    else if (_PurgeCtrlMode == ctrl_purge_hard_wash)
                                                         fluid_send_ctrlMode(no, ctrl_wash, TRUE);
+                                                    else if (_PurgeCtrlMode == ctrl_purge_hard_wipe)
+                                                        fluid_send_ctrlMode(no, ctrl_wipe, TRUE);
                                                     else if(RX_PrinterStatus.printState == ps_pause)
                                                         fluid_send_ctrlMode(no, ctrl_print, TRUE);
                                                     else
@@ -1131,9 +1135,10 @@ void fluid_send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
         else
             steptx_lift_to_print_pos();
     }
-    
-	if (ctrlMode==ctrl_off) step_rob_stop();	
-	if (ctrlMode==ctrl_purge_hard || ctrlMode == ctrl_purge_hard_wipe || ctrlMode == ctrl_purge_hard_vacc || ctrlMode == ctrl_purge || ctrlMode == ctrl_purge_soft) _PurgeFluidNo=no;
+
+    if (ctrlMode == ctrl_off) step_rob_stop(); 
+    	
+	if (ctrlMode==ctrl_purge_hard || ctrlMode == ctrl_purge_hard_wipe || ctrlMode == ctrl_purge_hard_vacc || ctrlMode == ctrl_purge || ctrlMode == ctrl_purge_soft || ctrlMode == ctrl_purge_hard_wash) _PurgeFluidNo=no;
 
     _FluidCtrlMode = ctrlMode;
 	_RobotCtrlMode = ctrlMode;
@@ -1149,6 +1154,19 @@ void fluid_send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 	case printer_LB702_UV:	break;
 	case printer_LB702_WB:	if (ctrlMode == ctrl_cap) steplb_rob_start_cap_all();
 							//else steplb_rob_control_all(ctrlMode);
+                            else if (ctrlMode == ctrl_wipe)
+                            {
+                                EWipeSide side;
+                                if (RX_Config.inkSupplyCnt % 2 == no % 2)
+                                    side = wipe_left;
+                                else
+                                    side = wipe_right;
+                                
+                                if (RX_Config.inkSupplyCnt % 2 == 0)
+                                    steplb_rob_wipe_start(side, no / 2);
+                                else
+                                    steplb_rob_wipe_start(side, (no + 1) / 2);
+                            }
                             else 
                             {
                                 if (no == -1) 

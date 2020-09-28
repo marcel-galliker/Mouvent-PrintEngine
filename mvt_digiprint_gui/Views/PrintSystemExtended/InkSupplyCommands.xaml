@@ -20,6 +20,7 @@
             <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" x:Name="FlushButton"  Content="Flush"  Margin="5" Click="Flush_Clicked" Visibility="{Binding CanFlush, Converter={StaticResource BoolToVisible_Converter}}"/>
             <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40" Content="Purge" Margin="5" Click="Purge_Clicked"/>
             <Button  Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40" Content="Purge + Wipe"  Margin="5" Click="PurgeWipe_Clicked" x:Name="Button_PurgeWipe"/>
+            <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40" Content="Purge + Wash" Margin="5" Click="PurgeWash_Clicked" x:Name="Button_PurgeWash"/>
             <Rectangle Fill="{StaticResource Mouvent.MainColorBrush}" HorizontalAlignment="Stretch" Height="1"/>
             <Button    Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40" Content="Fill" Margin="5" Click="Fill_Clicked"/>
             <Button   Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40" Content="Empty" Margin="5" Click="Empty_Clicked" Visibility="{Binding Running, Converter={StaticResource BoolToInVisible_Converter}}"/>

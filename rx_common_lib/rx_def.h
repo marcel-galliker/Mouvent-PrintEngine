@@ -197,6 +197,12 @@ typedef enum ERectoVerso
 	rv_verso,	// 02
 } ERectoVerso;
 
+typedef enum EWipeSide
+{
+    wipe_left,  // 0
+    wipe_right, // 1
+} EWipeSide;
+
 typedef struct SLogItem
 {
 	UINT8			deviceType;
@@ -1495,8 +1501,8 @@ typedef struct EScrewerInfo
     UINT32 screwed : 1;					//	0x00000800
     UINT32 screwer_blocked_left : 1;	//	0x00001000
     UINT32 screwer_blocked_right : 1;	//	0x00002000
-    UINT32 r_info_14 : 1;				//	0x00004000
-    UINT32 r_info_15 : 1;				//	0x00008000
+    UINT32 wipe_left_up : 1;			//	0x00004000
+    UINT32 wipe_right_up : 1;			//	0x00008000
     UINT32 r_info_16 : 1;				//	0x00010000
     UINT32 r_info_17 : 1;				//	0x00020000
     UINT32 r_info_18 : 1;				//	0x00040000

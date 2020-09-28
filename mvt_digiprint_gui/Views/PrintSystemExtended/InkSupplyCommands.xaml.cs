@@ -41,6 +41,11 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
 
         }
 
+        private void PurgeWash_Clicked(object sender, RoutedEventArgs e)
+        {
+
+        }
+
         private void Fill_Clicked(object sender, RoutedEventArgs e)
         {
 
