@@ -4,6 +4,16 @@ Testing a TX802 a 4 colors job
 from util_gui import PrinterTests
 import time
 
+# hack to ensure we stop all thread if unexpected exception
+import sys
+hook = sys.excepthook
+def excepthook(type, value, traceback):
+    sys.excepthook = hook
+    TX.tearDownClass()
+    hook(type, value, traceback)
+sys.excepthook = excepthook
+
+
 class TX(PrinterTests):
     scan = True    
     lenbox = "NumBox_ScanLen"
