@@ -15,7 +15,8 @@ def read_header(header_dir, header):
     "read .h file and set global dictionaries defines and structs"
     in_struct = False
     # read all lines of the file
-    for (n,line) in enumerate(open(os.path.join(header_dir, header))):
+    header_file = open(os.path.join(header_dir, header))
+    for (n,line) in enumerate(header_file):
         # 
         define = re.match(r"\s*#define\s+(\w+)\s+(.*)", line)
         if define:
@@ -40,6 +41,8 @@ def read_header(header_dir, header):
                 raise struct.error(f"struct in struct line {n} of {header}")
             in_struct = True
             struct_cont = ""
+    header_file.close()
+
 
 message_id = {}
 message_name = {}

@@ -312,38 +312,39 @@ async def main():
             local_addr=(SUBNET+"255", 7005))
 
     # wait for board to "boot" to ensure we get the good ip
-    while not all([head["ipaddress"] for head in heads]):
+    while simulate and not all([head["ipaddress"] for head in heads]):
         await asyncio.sleep(1)
 
-    logging.info("all boards booted...")
+    if simulate:
+        logging.info("all boards booted...")
 
-    # open sockets for UDP/TCP of each board
-    for head in heads:
-        no = int(head["DevNo"])
-        board = Board(no)
-        boards.append(board)
-        tcp_ip = head["ipaddress"]
+        # open sockets for UDP/TCP of each board
+        for head in heads:
+            no = int(head["DevNo"])
+            board = Board(no)
+            boards.append(board)
+            tcp_ip = head["ipaddress"]
 
-        _transports.append(await loop.create_server(
-                NewTCPProtocol(board),
-                tcp_ip, tcp_port))
-        logging.info(f"start {tcp_ip}:{tcp_port} for board {no}")
+            _transports.append(await loop.create_server(
+                    NewTCPProtocol(board),
+                    tcp_ip, tcp_port))
+            logging.info(f"start {tcp_ip}:{tcp_port} for board {no}")
 
-        udp_ip = SUBNET + str(50 + no)
-        await loop.create_datagram_endpoint(
-            lambda: UDPProtocol(board),
-            local_addr=(udp_ip, udp_port))
+            udp_ip = SUBNET + str(50 + no)
+            await loop.create_datagram_endpoint(
+                lambda: UDPProtocol(board),
+                local_addr=(udp_ip, udp_port))
 
-    while simulate:
-        await asyncio.sleep(3)
-        # check the end of the printing
-        for board in boards:
-            for img in list(board.fpga_images.values()):
-                if len(img) == len([x for x in board.activate if x]) and not board.abort:
-                    # if done, save bmp in another thread as it could be a long process
-                    fn = functools.partial(save_image, *(board.no, board.blocks, img))
-                    loop.run_in_executor(None, fn)                            
-                    board.print_done(img[0])
+        while simulate:
+            await asyncio.sleep(3)
+            # check the end of the printing
+            for board in boards:
+                for img in list(board.fpga_images.values()):
+                    if len(img) == len([x for x in board.activate if x]) and not board.abort:
+                        # if done, save bmp in another thread as it could be a long process
+                        fn = functools.partial(save_image, *(board.no, board.blocks, img))
+                        loop.run_in_executor(None, fn)                            
+                        board.print_done(img[0])
     
 
 def run():
