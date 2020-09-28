@@ -84,6 +84,7 @@ namespace RX_DigiPrint.Models
                         _SrcWidth  = pq.SrcWidth;
                         _SrcHeight = pq.SrcHeight;
                         _Dots      = pq.Dots;
+                        _ScreenOnPrinter = pq.ScreenOnPrinter;
                         _SetDimension();
                     }
                     catch (Exception ex)
@@ -165,15 +166,23 @@ namespace RX_DigiPrint.Models
         private string _Dimension = null;
         private double _SrcWidth;
         private double _SrcHeight;
-        private string _Dots;          
+        private string _Dots;  
         public string Dimension
         {
             get { return _Dimension; }
             set { SetProperty(ref _Dimension, value); }
         }
-        
-        //--- _SetDimension -----------------------
-        private void _SetDimension()
+
+		//--- Property ScreenOnPrinter ---------------------------------------
+		private bool _ScreenOnPrinter=false;
+		public bool ScreenOnPrinter
+		{
+			get { return _ScreenOnPrinter; }
+			set { SetProperty(ref _ScreenOnPrinter,value); }
+		}
+
+		//--- _SetDimension -----------------------
+		private void _SetDimension()
         {
             CUnit unit=new CUnit("mm");
             if (RxGlobals.Settings.Units==EUnits.imperial)
