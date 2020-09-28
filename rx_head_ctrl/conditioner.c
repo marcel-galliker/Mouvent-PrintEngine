@@ -271,7 +271,8 @@ void cond_error_check(int ticks)
         	if (_NiosStat->cond[head].error&COND_ERR_pump_hw)					ErrorFlag(level=ERR(abort), perr, COND_ERR_pump_hw,					0, "Conditioner %s: Pump Error", headName);
         	if (_NiosStat->cond[head].error&COND_ERR_temp_tank_not_changing)	ErrorFlag(level=LOG,        pwrn, COND_ERR_temp_tank_not_changing,	0, "Conditioner %s: temp_tank_not_changing", headName);
         	if (_NiosStat->cond[head].error&COND_ERR_temp_head_not_changing)	ErrorFlag(level=LOG,        pwrn, COND_ERR_temp_head_not_changing,	0, "Conditioner %s: temp_head_not_changing", headName);
-        	if (_NiosStat->cond[head].error&COND_ERR_temp_head_overheat)		ErrorFlag(level=ERR(abort), perr, COND_ERR_temp_head_overheat,		0, "Conditioner %s: temp_head_overheat", headName);
+ //       	if (_NiosStat->cond[head].error&COND_ERR_temp_head_overheat)		ErrorFlag(level=ERR(abort), perr, COND_ERR_temp_head_overheat,		0, "Conditioner %s: temp_head_overheat", headName);
+        	if (_NiosStat->cond[head].error&COND_ERR_temp_head_overheat)		ErrorFlag(level=ERR(cont),  perr, COND_ERR_temp_head_overheat,		0, "Conditioner %s: temp_head_overheat", headName);
         	if (_NiosStat->cond[head].error&COND_ERR_temp_ink_overheat)			ErrorFlag(level=ERR(abort), perr, COND_ERR_temp_ink_overheat,		0, "Conditioner %s: temp_ink_overheat", headName);
         	if (_NiosStat->cond[head].error&COND_ERR_temp_inlet_hw)				ErrorFlag(level=ERR(cont),	perr, COND_ERR_temp_inlet_hw,			0, "Conditioner %s: inlet thermistor hardware", headName);
         	if (_NiosStat->cond[head].error&COND_ERR_temp_heater_hw)			ErrorFlag(level=ERR(cont),	perr, COND_ERR_temp_heater_hw,			0, "Conditioner %s: heater thermistor hardware", headName);
