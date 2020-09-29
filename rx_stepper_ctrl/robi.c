@@ -40,13 +40,13 @@
 #define SCREW_MOVEMENT_CHECK_TIME   1100            // us
 
 // define inputs
-#define SCREW_IN_UP 0
-#define SCREW_IN_DOWN 1
+#define SCREW_IN_DOWN 0
+#define SCREW_IN_UP 1
 #define SCREW_IN_REF 2
 #define X_IN_REF 3
 #define Y_IN_REF 4
 
-#define MIN_Y_POS -35000
+#define MIN_Y_POS 35000
 
 #define MAX_VARIANCE 100 // um
 
@@ -200,9 +200,7 @@ void robi_main(int ticks, int menu)
         RX_StepperStatus.screwerinfo.wipe_right_up = FALSE;
     }
 
-    RX_StepperStatus.screwerinfo.ref_done = _robiStatus.motors[MOTOR_XY_0].isReferenced &&
-               _robiStatus.motors[MOTOR_XY_1].isReferenced &&
-               _robiStatus.motors[MOTOR_SCREW].isReferenced;
+    RX_StepperStatus.screwerinfo.ref_done = _robiStatus.motors[MOTOR_XY_0].isReferenced && _robiStatus.motors[MOTOR_XY_1].isReferenced && _robiStatus.motors[MOTOR_SCREW].isReferenced;
     
     RX_StepperStatus.screw_posX = (_steps_2_micron(_robiStatus.motors[MOTOR_XY_0].motorEncoderPosition + _robiStatus.motors[MOTOR_XY_1].motorEncoderPosition))/2;
     RX_StepperStatus.screw_posY = (_steps_2_micron(_robiStatus.motors[MOTOR_XY_1].motorEncoderPosition - _robiStatus.motors[MOTOR_XY_0].motorEncoderPosition))/2;
@@ -520,8 +518,7 @@ void robi_display_status(void)
 	term_printf("Robi system status ---------------------------------\n");
 	term_printf("Connection: %d Updating: %d, CurrentVersion: %d, BoardVersion: %d, BootloaderStatus: %d\n", _isConnected, _isUpdating, _currentVersion, _robiStatus.version, _robiStatus.bootloaderStatus);
 	//term_printf("Sync: %d\n", _isSync);
-    term_printf("moving:         %d		cmd: %08x\n",
-                RX_StepperStatus.screwerinfo.moving, _CmdRunning);
+    term_printf("moving:         %d		cmd: %08x\n", RX_StepperStatus.screwerinfo.moving, _CmdRunning);
 	//term_printf("Message id: %d\n", _msgId);
 	//term_printf("Message sent: %d\n", _msgSentCounter);
 	//term_printf("Message received: %d\n", _msgReceivedCounter);
@@ -615,6 +612,10 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
     {
     case CMD_ROBI_STOP:
         _CmdRunning = 0;
+        _Search_Screw_Time = 0;
+        _Loose_Screw_Time = 0;
+        _Screwer_Moves_Time = 0;
+        lb702_reset_variables();
         send_command(MOTOR_ESTOP, 0, NULL);
         break;
     case CMD_ROBI_REFERENCE:
@@ -692,7 +693,7 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                 robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_REFERENCE, NULL);
                 break;
             }
-            if (RX_StepperStatus.screw_posY - MIN_Y_POS > MAX_VARIANCE)
+            if (RX_StepperStatus.screw_posY - MIN_Y_POS < MAX_VARIANCE)
             {
                 Error(ERR_CONT, 0, "Screwer to close to garage to move up");
                 break;
@@ -702,8 +703,7 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                 Error(LOG, 0, "Screwer already in up pos");
                 break;
             }
-            if (abs(RX_StepperStatus.screw_posX - SCREW_X_LEFT) > MAX_VAR_SCREW_POS &&
-                abs(RX_StepperStatus.screw_posX - SCREW_X_RIGHT) > MAX_VAR_SCREW_POS)
+            if (abs(RX_StepperStatus.screw_posX - SCREW_X_LEFT) > MAX_VAR_SCREW_POS && abs(RX_StepperStatus.screw_posX - SCREW_X_RIGHT) > MAX_VAR_SCREW_POS)
             {
                 Error(ERR_CONT, 0, "Screw not in position to lift up");
                 break;
@@ -768,7 +768,7 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                 robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_DOWN, NULL);
                 break;
             }
-            else if (RX_StepperStatus.screw_posY - MIN_Y_POS > MAX_VARIANCE && _NewCmd != CMD_ROB_WIPE_LEFT && _NewCmd != CMD_ROB_WIPE_RIGHT)
+            else if (RX_StepperStatus.screw_posY - MIN_Y_POS < MAX_VARIANCE && _NewCmd != CMD_ROB_WIPE_LEFT && _NewCmd != CMD_ROB_WIPE_RIGHT)
             {
                 Error(ERR_CONT, 0, "Screwer to close to garage to move in x axis");
                 break;
@@ -804,7 +804,7 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             else
             {
                 pos = *((INT32 *)pdata);
-                if (pos > 0)
+                if (pos < 0)
                 {
                     Error(ERR_CONT, 0, "Unreachable position %d in y-Axis of Robi", pos); 
                     break;
