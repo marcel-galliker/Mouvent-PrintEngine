@@ -635,8 +635,16 @@ namespace RX_DigiPrint.Models
             set { Changed |= SetProperty(ref _PageMargin, Math.Round(value, 3));}
         }
 
-        //--- Property PrintGoMode ---------------------------------------
-        private TcpIp.EPrintGoMode _PrintGoMode;
+		//--- Property IsRunList ---------------------------------------
+		private bool _IsRunList=false;
+		public bool IsRunList
+		{
+			get { return _IsRunList; }
+			set { SetProperty(ref _IsRunList,value); }
+		}
+
+		//--- Property PrintGoMode ---------------------------------------
+		private TcpIp.EPrintGoMode _PrintGoMode;
         public TcpIp.EPrintGoMode PrintGoMode
         {
             get { return _PrintGoMode; }
@@ -768,6 +776,14 @@ namespace RX_DigiPrint.Models
             if (_FilePath==null) _FilePath=filePath;
             LoadDefaults();
 
+            //--- check for run list ----
+			{
+                string[] fname = Directory.GetFiles(filePath, "*.rlj");
+                IsRunList = (fname.Length>0);
+			}
+
+            if (_read_flz_properties(filePath)) return;
+
             //--- tif file ---
             try
             {
@@ -796,7 +812,6 @@ namespace RX_DigiPrint.Models
             //---bmp file -----------------------------
             if (_read_bmp_properties(filePath)) return;
 
-            if (_read_flz_properties(filePath)) return;
 
             //--- pdf file -------------
             if (File.Exists(filePath+".pdf"))

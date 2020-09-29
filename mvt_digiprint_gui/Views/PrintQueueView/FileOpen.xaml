@@ -101,7 +101,8 @@
                                     <ColumnDefinition Width="auto"/>
                                     <ColumnDefinition Width="auto"/>
                                 </Grid.ColumnDefinitions>
-                                <Image Source="{Binding FileType, Converter={StaticResource FileTypeImage_Converter}}" Visibility="{Binding FileTypeVisibility}" Height="32" />
+
+                                <iconPacks:PackIconMaterial Kind="{Binding FileType, Converter={StaticResource FileTypeImage_Converter}}" Visibility="{Binding FileTypeVisible}" Height="30" Width="30"/>
 
                                 <common:MvtButton Margin="5" Grid.Column="0" Visibility="{Binding PrintButtonVisibility}" Click="Print_Clicked" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}">
                                     <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" 
