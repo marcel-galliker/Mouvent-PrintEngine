@@ -1180,7 +1180,7 @@ static void* send_thread(void *par)
 				_MsgsSent++;
 			
 			_txFifoOutIndex = (_txFifoOutIndex + 1) % ROBI_FIFO_SIZE;
-			rx_sleep(50);
+			rx_sleep(100);
 		}
 	}
 }

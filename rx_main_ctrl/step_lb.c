@@ -42,6 +42,7 @@ static RX_SOCKET		_step_socket[STEPPER_CNT]={0};
 static SStepperStat		_Status[STEPPER_CNT];
 static int				_AbortPrinting=FALSE;
 static int				_ClusterScrewTurned;
+static int              _WashStarted;
 static UINT32			_Flushed = 0x00;		// For capping function which is same than flushing (need to purge after cap)
 
 static int				_StatReadCnt[STEPPER_CNT];
@@ -552,14 +553,17 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
 									sok_send_2(&_step_socket[no], CMD_ROB_MOVE_POS, sizeof(function), &function);
                                     _RobotCtrlMode[no] = ctrl_wash_step1;
                                     _printing = RX_PrinterStatus.printState == ps_pause;
+                                    _WashStarted = FALSE;
                                     break;
                                     
-        case ctrl_wash_step1:		if (_Status[no].robinfo.wash_done && _printing) _RobotCtrlMode[no] = ctrl_wash_step2;
-									else if (_Status[no].robinfo.wash_done) _RobotCtrlMode[no] = ctrl_off;	
+        case ctrl_wash_step1:		if (_Status[no].robinfo.moving && !_Status[no].robinfo.wash_done) _WashStarted = TRUE;
+                                    if (_Status[no].robinfo.wash_done && _printing && _WashStarted) _RobotCtrlMode[no] = ctrl_wash_step2;
+									else if (_Status[no].robinfo.wash_done && _WashStarted) _RobotCtrlMode[no] = ctrl_off;	
 									break;
                                     
         case ctrl_wash_step2:		if (_printing)	_RobotCtrlMode[no] = ctrl_print;
 									else			_RobotCtrlMode[no] = ctrl_off;
+                                    _WashStarted = FALSE;
 									break;
 
         case ctrl_vacuum:			function = rob_fct_vacuum;

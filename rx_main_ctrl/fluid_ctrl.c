@@ -1238,7 +1238,8 @@ void _send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 				cmd.hdr.msgId	= CMD_FLUID_CTRL_MODE;
 				cmd.hdr.msgLen	= sizeof(cmd);
 				cmd.no			= i%INK_PER_BOARD;
-				if (!RX_Config.inkSupply[i].ink.fileName[0]) cmd.ctrlMode = ctrl_off;
+				if (ctrlMode >= ctrl_wipe && ctrlMode <= ctrl_wash_step6) cmd.ctrlMode = ctrlMode;
+				else if (!RX_Config.inkSupply[i].ink.fileName[0]) cmd.ctrlMode = ctrl_off;
 				else if (i==no) cmd.ctrlMode = ctrlMode;
 				else if (ctrlMode==ctrl_empty) cmd.ctrlMode = ctrl_off;	
 

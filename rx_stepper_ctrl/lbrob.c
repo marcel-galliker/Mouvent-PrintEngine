@@ -960,7 +960,7 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
             return;
         }
         else if (!RX_StepperStatus.info.z_in_ref &&
-                 !((_RobFunction == rob_fct_move || _RobFunction == rob_fct_wash || _RobFunction == rob_fct_wipe) && RX_StepperStatus.info.z_in_wash) &&
+                 !(_RobFunction == rob_fct_move && RX_StepperStatus.info.z_in_wash) &&
                  !(RX_StepperStatus.info.z_in_screw && _RobFunction >= rob_fct_screw_head0 && _RobFunction <= rob_fct_screw_head7)) // Here this is for purging and not for vacuum
         {
             if (!RX_StepperStatus.info.moving)
