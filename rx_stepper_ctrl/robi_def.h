@@ -14,7 +14,7 @@
 #define OUTPUT_COUNT	4
 
 // Defines
-#define SIZE_OF_DATA	64
+#define SIZE_OF_DATA	256
 
 #define COMMAND_PIPELINE_WIDTH	2
 #define COMMAND0				0
