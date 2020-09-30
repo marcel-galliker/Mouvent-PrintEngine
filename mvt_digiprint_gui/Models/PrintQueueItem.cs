@@ -205,6 +205,22 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _SrcHeight, Math.Round(value,3)); }
         }
 
+		//--- Property SrcBitsPerPixel ---------------------------------------
+		private int _SrcBitsPerPixel;
+		public int SrcBitsPerPixel
+		{
+			get { return _SrcBitsPerPixel; }
+			set { SetProperty(ref _SrcBitsPerPixel,value); }
+		}
+
+		//--- Property ScreenOnPrinter ---------------------------------------
+		private bool _ScreenOnPrinter=false;
+		public bool ScreenOnPrinter
+		{
+			get { return _ScreenOnPrinter; }
+			set { SetProperty(ref _ScreenOnPrinter,value); }
+		}
+
         //--- Property DropSizes ---------------------------------------
         private int _DropSizes;
         public int DropSizes
@@ -863,6 +879,8 @@ namespace RX_DigiPrint.Models
                         if (info.resy!=0) SrcHeight = info.lengthPx * 25.4 / info.resy;
                         PageWidth    = SrcWidth;
                         PageHeight   = SrcHeight;
+                        SrcBitsPerPixel = (int)info.bitsPerPixel;
+                        ScreenOnPrinter = (info.bitsPerPixel==8);
                         return true;
                     }
                 }

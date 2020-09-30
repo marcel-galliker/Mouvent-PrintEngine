@@ -84,6 +84,7 @@ namespace RX_DigiPrint.Models
                         _SrcWidth  = pq.SrcWidth;
                         _SrcHeight = pq.SrcHeight;
                         _Dots      = pq.Dots;
+                        _ScreenOnPrinter = pq.ScreenOnPrinter;
                         _SetDimension();
                     }
                     catch (Exception ex)
@@ -171,7 +172,15 @@ namespace RX_DigiPrint.Models
             get { return _Dimension; }
             set { SetProperty(ref _Dimension, value); }
         }
-        
+
+		//--- Property ScreenOnPrinter ---------------------------------------
+		private bool _ScreenOnPrinter=false;
+		public bool ScreenOnPrinter
+		{
+			get { return _ScreenOnPrinter; }
+			set { SetProperty(ref _ScreenOnPrinter,value); }
+		}
+
         //--- _SetDimension -----------------------
         private void _SetDimension()
         {

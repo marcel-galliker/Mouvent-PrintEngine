@@ -129,7 +129,10 @@
                                         <RotateTransform Angle="{Binding PreviewOrientation}"/>
                                     </Image.LayoutTransform>
                                 </Image>
-                                <TextBlock Text="{Binding Dimension}" Background="#99FFFFFF" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" Background="#99FFFFFF" >
+                                    <TextBlock Text="{Binding Dimension}" />
+                                    <iconPacks:PackIconMaterial Kind="Printer" Width="15" VerticalAlignment="Center" Margin="5,0,0,0" Visibility="{Binding ScreenOnPrinter, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                </StackPanel>
                             </Grid>
                         </DataTemplate>
                     </ig:TemplateColumn.ItemTemplate>
