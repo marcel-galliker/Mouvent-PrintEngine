@@ -1104,12 +1104,12 @@ static void* update_thread(void *par)
             
             available_data = total_data - (uint32_t)currentData;
 
-            if (available_data > SIZE_OF_DATA)
+            if (available_data > 64)
             {
                 if (REPLY_OK == send_command(BOOTLOADER_WRITE_DATA_CMD,
-                                             SIZE_OF_DATA, currentData))
+                                             64, currentData))
                 {
-                    currentData += SIZE_OF_DATA;
+                    currentData += 64;
                 }
             }
             else
