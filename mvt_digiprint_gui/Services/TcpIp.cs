@@ -1154,6 +1154,7 @@ namespace RX_DigiPrint.Services
 	        public UInt32			pumpFeedback;
 	        public UInt32			printingSeconds;
 	        public UInt64			printedDroplets;
+	        public UInt64			printed_ml;
             public Int32			presIn_0out;
 	        public EFluidCtrlMode   ctrlMode;
 

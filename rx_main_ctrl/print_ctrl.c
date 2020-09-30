@@ -308,11 +308,7 @@ static void _send_head_info(void)
 			len += sprintf(&str[len], "%s\n", RX_TestImage.testMessage);
 			len += sprintf(&str[len], "%s-%d                     %s\n", RX_ColorNameShort(color), n+1, time);
 			
-			double ml=(double)RX_HBStatus[headNo/MAX_HEADS_BOARD].head[headNo%MAX_HEADS_BOARD].printedDroplets;
-			ml *= 1000000;
-			ml *= RX_HBStatus[headNo/MAX_HEADS_BOARD].head[headNo%MAX_HEADS_BOARD].dropVolume;
-
-			len += sprintf(&str[len], "cl# %06d  printed %12s l\n", RX_HBStatus[headNo/MAX_HEADS_BOARD].clusterNo, value_str3((int)(1000.0*ml)));
+			len += sprintf(&str[len], "cl# %06d  printed %12s l\n", RX_HBStatus[headNo/MAX_HEADS_BOARD].clusterNo, value_str3(RX_HBStatus[headNo/MAX_HEADS_BOARD].head[headNo%MAX_HEADS_BOARD].printed_ml));
 			len += sprintf(&str[len], "s# %d-%02d\n", pinfo->serialNo/100, pinfo->serialNo%100);
 			len += sprintf(&str[len], "volt %d / straight %d / uniform %d\n", pinfo->voltage, pinfo->straightness, pinfo->uniformity);
 			len += sprintf(&str[len], "bad");
@@ -343,7 +339,6 @@ static void _send_head_info(void)
 static void _load_test(void)
 {
 	UINT32 width, height, memsize;
-	UINT8  bitsPerPixel;
 	int ret;
 
 	// see also gui_msg.c::_do_test_start
@@ -352,9 +347,9 @@ static void _load_test(void)
 		if (_Scanning)	RX_TestImage.id.scan++;
 		else			RX_TestImage.id.copy++;
 		if (RX_TestImage.id.copy==0) RX_TestImage.id.copy=1;
-		ret=bmp_get_size(RX_TestImage.filepath, &width, &height, &bitsPerPixel, &memsize);
-		if (ret) ret=tif_get_size(RX_TestImage.filepath, 0, 0, &width, &height, &bitsPerPixel);
-		if (ret) ret=flz_get_size(RX_TestImage.filepath, 0, 0, &width, &height, &bitsPerPixel);
+		ret=bmp_get_size(RX_TestImage.filepath, &width, &height, &RX_TestImage.srcBitsPerPixel, &memsize);
+		if (ret) ret=tif_get_size(RX_TestImage.filepath, 0, 0, &width, &height, &RX_TestImage.srcBitsPerPixel);
+		if (ret) ret=flz_get_size(RX_TestImage.filepath, 0, 0, &width, &height, &RX_TestImage.srcBitsPerPixel);
 		RX_TestImage.pageHeight = RX_TestImage.srcHeight = (UINT32)(height/1200.0*25400.0);
 		RX_TestImage.pageWidth  = RX_TestImage.srcWidth  = (UINT32)(width/1200.0*25400.0);
 		RX_TestImage.printGoMode = PG_MODE_LENGTH;
@@ -366,7 +361,7 @@ static void _load_test(void)
 		}
 		else if (!rx_def_is_scanning(RX_Config.printer.type) && !rx_def_is_lb(RX_Config.printer.type) && RX_TestImage.testImage!=PQ_TEST_GRID && RX_TestImage.testImage!=PQ_TEST_ANGLE_OVERLAP) 
 			RX_TestImage.printGoDist *= (RX_Config.colorCnt+1);
-		if (bitsPerPixel>1) strcpy(RX_TestImage.dots, "SML");
+		if (RX_TestImage.srcBitsPerPixel>1) strcpy(RX_TestImage.dots, "SML");
 		_send_head_info();
 	//	spool_print_file(&RX_TestImage.id, RX_TestImage.filepath, 0, height, PG_MODE_GAP, 0, PQ_LENGTH_COPIES, 0, RX_TestImage.scanMode, 1, TRUE);
 		{

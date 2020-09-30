@@ -214,7 +214,7 @@ int	tw8_config(int chip, int speed_mminn, EPrinterType printerType)
 	// cfg.MAIN_INTER
 	if (printerType==printer_TX404)				cfg.MAIN_INTER	=   40; // 16bit // AB Output Resolution in Edges
 	else if(rx_def_is_scanning(printerType))	cfg.MAIN_INTER	= 2000; // 16bit // AB Output Resolution in Edges
-	else								cfg.MAIN_INTER	= 1000; // 16bit // AB Output Resolution in Edges
+	else										cfg.MAIN_INTER	= 1000; // 16bit // AB Output Resolution in Edges
 	
 	// cfg.MAIN_HYST
 	cfg.MAIN_HYST			= 0x0f; // 9bit // hyst = MAIN_HYSTx360/8192 // max 1FF // 0x00;  // Signal Path Output Hysteresis

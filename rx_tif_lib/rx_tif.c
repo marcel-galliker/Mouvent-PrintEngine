@@ -372,6 +372,7 @@ int tif_load(SPageId *id, const char *filedir, const char *filename, int printMo
 	int	wakeupOn;
 	int time;
 	INT32 height, lineLen;
+	FLOAT val;
 	char filepath[MAX_PATH];
 	STifThreadPar *ppar;
 			
@@ -403,27 +404,29 @@ int tif_load(SPageId *id, const char *filedir, const char *filename, int printMo
 				if (id->page>1) sprintf(filepath, "%s/%s_P%06d_%s.tif", filedir, filename, id->page, RX_ColorNameShort(pinfo->inkSupplyNo[c]));
 				else			sprintf(filepath, "%s/%s_%s.tif", filedir, filename, RX_ColorNameShort(pinfo->inkSupplyNo[c]));							
 				ppar->file = TIFFOpen (filepath, "r");
-				if (ppar->file)
-					strcpy(_LastFilePath, filepath);
-				else
-					Error(ERR_CONT, 0, "Could not open file >>%s<<", filepath);
+				if (ppar->file) strcpy(_LastFilePath, filepath);
+				else Error(LOG, 0, "%d: %s color %s not found", id->id, filename, RX_ColorNameShort(pinfo->inkSupplyNo[c]));
 			}
 			else 
 			{
 				Error(ERR_ABORT, 0, "Straeming not implemented yet");
 			}
 			
-			if (!ppar->file) 
-				return REPLY_NOT_FOUND;
 			pinfo->printMode     = printMode;
-			if (!TIFFGetField (ppar->file, TIFFTAG_BITSPERSAMPLE, &pinfo->bitsPerPixel))	return Error(ERR_CONT, 0, "File %s: Could not get bit per sample value", filepath);
-			if (!TIFFGetField (ppar->file, TIFFTAG_IMAGEWIDTH,    &pinfo->srcWidthPx))		return Error(ERR_CONT, 0, "File %s: Could not get image width", filepath);
-			if (!TIFFGetField (ppar->file, TIFFTAG_IMAGELENGTH,   &pinfo->lengthPx))		return Error(ERR_CONT, 0, "File %s: Could not get image height", filepath);
-			
+			if (ppar->file)
+			{
+			    if (!TIFFGetField (ppar->file, TIFFTAG_BITSPERSAMPLE, &pinfo->bitsPerPixel))	return Error(ERR_CONT, 0, "File %s: Could not get bit per sample value", filepath);
+			    if (!TIFFGetField (ppar->file, TIFFTAG_IMAGEWIDTH,    &pinfo->srcWidthPx))		return Error(ERR_CONT, 0, "File %s: Could not get image width", filepath);
+			    if (!TIFFGetField (ppar->file, TIFFTAG_IMAGELENGTH,   &pinfo->lengthPx))		return Error(ERR_CONT, 0, "File %s: Could not get image height", filepath);
+				if (TIFFGetField (ppar->file, TIFFTAG_XRESOLUTION,   &val))	pinfo->resol.x=(int)val; else pinfo->resol.x=DPI_X;
+				if (TIFFGetField (ppar->file, TIFFTAG_YRESOLUTION,   &val))	pinfo->resol.y=(int)val; else pinfo->resol.y=DPI_Y;
+			}
+
 			pinfo->srcWidthPx	+= spacePx; 
 			pinfo->lineLen		= lineLen = (pinfo->srcWidthPx*pinfo->bitsPerPixel+7)/8;
-			pinfo->dataSize		= pinfo->lineLen*pinfo->lengthPx;								
-			pinfo->buffer[c]	= &buffer[c];
+			pinfo->dataSize		= pinfo->lineLen*pinfo->lengthPx;
+			if (ppar->file) pinfo->buffer[c] = &buffer[c];
+			else			pinfo->buffer[c] = NULL;
 			height = pinfo->lengthPx;
 			if (psplit[c].lastLine<height) height=psplit[c].lastLine;
 
@@ -470,16 +473,19 @@ int tif_load(SPageId *id, const char *filedir, const char *filename, int printMo
 		{
 			for (i=0; i<threadCnt; i++) 
 			{
-				int start;
-				start = -(INT32)wakeupLen;
-				memset(_ThreadPar[i].buffer+start*lineLen,           0x00, wakeupLen * lineLen);
-				memset(_ThreadPar[i].buffer+(UINT64)pinfo->lengthPx*lineLen, 0x00, wakeupLen * lineLen);
-				
-				if (wakeupOn)
+				if (pinfo->buffer[i])
 				{
-					start=(-(INT32)wakeupLen+i*WAKEUP_BAR_LEN);
-					memset(_ThreadPar[i].buffer+start*lineLen, 0xff, WAKEUP_BAR_LEN * lineLen);
-					memset(_ThreadPar[i].buffer+((UINT64)pinfo->lengthPx+wakeupLen-(i+1)*WAKEUP_BAR_LEN)*lineLen, 0xff, WAKEUP_BAR_LEN * lineLen);															
+				    int start;
+				    start = -(INT32)wakeupLen;
+				    memset(_ThreadPar[i].buffer+start*lineLen,           0x00, wakeupLen * lineLen);
+				    memset(_ThreadPar[i].buffer+(UINT64)pinfo->lengthPx*lineLen, 0x00, wakeupLen * lineLen);
+				    
+				    if (wakeupOn)
+				    {
+					    start=(-(INT32)wakeupLen+i*WAKEUP_BAR_LEN);
+					    memset(_ThreadPar[i].buffer+start*lineLen, 0xff, WAKEUP_BAR_LEN * lineLen);
+					    memset(_ThreadPar[i].buffer+((UINT64)pinfo->lengthPx+wakeupLen-(i+1)*WAKEUP_BAR_LEN)*lineLen, 0xff, WAKEUP_BAR_LEN * lineLen);															
+				    }
 				}
 			};				
 		}

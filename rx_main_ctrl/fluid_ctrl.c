@@ -276,8 +276,8 @@ void fluid_set_config(void)
     case printer_test_table_seon:
 							_FluidToScales[0] = 0;
                             _FluidToScales[1] = 1;
-                            _FluidToScales[2] = 2;
-                            _FluidToScales[3] = 3;
+                            _FluidToScales[INK_SUPPLY_CNT] = 2;
+                            _FluidToScales[INK_SUPPLY_CNT+1] = 3;
 						break;
                         
 	default:			for (i=0; i<SIZEOF(_FluidToScales); i++) _FluidToScales[i]=i;	
@@ -1083,7 +1083,7 @@ void fluid_reply_stat(RX_SOCKET socket)	// to GUI
 	
 	// waste
 	
-	if (RX_Config.printer.type == printer_LB702_WB || RX_Config.printer.type == printer_cleaf )
+	if (RX_Config.printer.type == printer_LB702_WB || RX_Config.printer.type == printer_cleaf || RX_Config.printer.type == printer_test_table_seon )
 	{
 		_FluidStatus[INK_SUPPLY_CNT + 1].canisterLevel  = _ScalesStatus[_FluidToScales[INK_SUPPLY_CNT + 1]];
 		

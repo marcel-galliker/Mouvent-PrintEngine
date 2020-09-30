@@ -392,7 +392,7 @@ static void *_load_file_thread(void *par)
 	{
 		if (rx_sem_wait(_LoadFile_Sem, 1000)==REPLY_OK)
 		{
-			data_load_file(_LoadFileBuf[_LoadFileOutIdx].filepath, _LoadFileBuf[_LoadFileOutIdx].id.page);
+			data_load_file(_LoadFileBuf[_LoadFileOutIdx].filepath, &_LoadFileBuf[_LoadFileOutIdx].id);
 			_LoadFileOutIdx = (_LoadFileOutIdx+1) % LOAD_FILE_BUF_SIZE;
 		}				
 	}
@@ -406,6 +406,7 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 	int						ret=REPLY_OK;
 	int						same;
 	static SPrintFileRep	reply;
+	static EFileType		fileType=ft_undef;
 	static int				widthPx, lengthPx;
 	static UCHAR			bitsPerPixel;
 	static UINT8			multiCopy;
@@ -465,7 +466,7 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 		}
 		else
 		{
-			ret = data_get_size(path, msg.id.page, &msg.gapPx, &widthPx, &lengthPx, &bitsPerPixel, &multiCopy);
+			data_get_size(path, msg.id.page, &fileType, &msg.gapPx, &widthPx, &lengthPx, &bitsPerPixel, &multiCopy);
 			TrPrintfL(TRUE, "data_get_size >>%s<<: gapPx=%d, widthPx=%d, lengthPx=%d, bitsPerPixel=%d, multiCopy=%d", path, msg.gapPx, widthPx, lengthPx, bitsPerPixel, multiCopy);
 			if (ret==REPLY_NOT_FOUND) 
 			{
@@ -493,7 +494,7 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 	if (!same)
 	{
 		if (msg.printMode==PM_SCAN_MULTI_PAGE) multiCopy=1;
-		if (ret==REPLY_OK)
+		if (fileType!=ft_undef)
 		{
 			_BufferNo = (_BufferNo+1)%BUFFER_CNT;
 			if (msg.smp_bufSize) 
@@ -508,7 +509,6 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 			return REPLY_ERROR;
 		if (_data_malloc_reply!=REPLY_OK)
 		{
-
 			Error(ERR_STOP, 0,  "Could not allocate memory file >>%s<<, page=%d", path, msg.id.page);
 			if (multiCopy>1)	Error(LOG, 0,   "Make Image width a multilpe of 4 (multicopy=%d)", multiCopy);
 			return REPLY_ERROR;
@@ -529,9 +529,7 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 		}
 		else
 		{
-		//	Error(LOG, 0, "Spooler Copy=%d, Offset=%d: Load Data", msg.id.copy, msg.offsetWidth);
-		//	if (data_load(&msg.id, path, msg.offsetWidth, msg.lengthPx, msg.gapPx, msg.blkNo, msg.printMode, msg.variable, msg.flags, msg.clearBlockUsed, same, _SMP_Flags | (msg.flags & FLAH_SMP_FIRST_PAGE), msg.smp_bufSize, _Buffer[_BufferNo])!=REPLY_OK && !_Abort)
-			if (data_load(&msg.id, path, msg.offsetWidth, msg.lengthPx, multiCopy, msg.gapPx, msg.blkNo, reply.blkCnt, msg.printMode, msg.variable, msg.virtualPasses , msg.virtualPass, msg.flags, msg.clearBlockUsed, same, msg.smp_bufSize, msg.dots, _Buffer[_BufferNo])!=REPLY_OK && !_Abort)
+			if (data_load(&msg.id, path, fileType, msg.offsetWidth, msg.lengthPx, multiCopy, msg.gapPx, msg.blkNo, reply.blkCnt, msg.printMode, msg.variable, msg.virtualPasses , msg.virtualPass, msg.flags, msg.clearBlockUsed, same, msg.smp_bufSize, msg.dots, _Buffer[_BufferNo])!=REPLY_OK && !_Abort)
 				return Error(ERR_STOP, 0, "Could not load file >>%s<<", str_start_cut(msg.filename, PATH_RIPPED_DATA));
 		}
 

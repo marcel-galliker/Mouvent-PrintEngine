@@ -34,7 +34,7 @@
 #define X_INC_PER_REV           16000.0
 #define X_DIST_PER_REV          36000
 
-#define CABLE_CAP_POS           -687000     //	um LB702    old position -626000
+#define CABLE_CAP_POS           -688000     //	um LB702    old position -626000
 #define CABLE_WASH_POS_FRONT    -634000     //	um LB702    old position -573000
 #define CABLE_WASH_POS_BACK     -221000     //	um LB702    old position -160000
 #define CABLE_PURGE_POS_BACK    -311000     //  um LB702    old position -250000

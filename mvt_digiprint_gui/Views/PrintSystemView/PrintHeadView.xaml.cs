@@ -110,7 +110,6 @@ namespace RX_DigiPrint.Views.PrintSystemView
             //--- printer_test_slide_only ------------------------------------------------------------
             Visibility visible   = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide_only) ? Visibility.Visible   : Visibility.Collapsed;
             Visibility collapsed = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide_only) ? Visibility.Collapsed : Visibility.Visible;
-            Button_Print.Visibility = visible;
             Button_PurgeHard.Visibility = collapsed;
             Button_PurgeSoft.Visibility = collapsed;
             Button_PurgeMicro.Visibility = collapsed;
@@ -140,9 +139,9 @@ namespace RX_DigiPrint.Views.PrintSystemView
             HeadStat stat = DataContext as HeadStat;
             if (stat == null) return;
 
-            if (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide_only || RxGlobals.User.UserType==EUserType.usr_mouvent)
-                Button_Print.Visibility  = Button_Off.Visibility = Visibility.Visible;
-            else Button_Print.Visibility = Button_Off.Visibility = Visibility.Collapsed;
+            if (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide_only || RxGlobals.User.UserType>=EUserType.usr_service)
+                Button_Print.Visibility  = Button_Off.Visibility = CommandLine1.Visibility = Visibility.Visible;
+            else Button_Print.Visibility = Button_Off.Visibility = CommandLine1.Visibility = Visibility.Collapsed;
 
             CmdPopup.Open(CmdButton);
         }

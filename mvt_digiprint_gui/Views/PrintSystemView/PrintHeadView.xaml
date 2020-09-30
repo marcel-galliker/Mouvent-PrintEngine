@@ -3,8 +3,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:igWPF="http://schemas.infragistics.com/xaml/wpf"
-             xmlns:views="clr-namespace:RX_DigiPrint.Views.PrintSystemView"
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
              xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d"
@@ -62,10 +60,10 @@
             <Grid Background="White">
                 <GroupBox x:Name="CommandGrid" Width="150" Style="{StaticResource MvtGroupBox}" Header="^">
                     <StackPanel Margin="10,2">
-                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Content="OFF" Height="40"           Click="OFF_Clicked"         Padding="10" x:Name="Button_Off"/>
+                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Content="OFF"    Height="40"         Click="OFF_Clicked"         Padding="10" x:Name="Button_Off"/>
                         <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Content="Print"  Height="40"         Click="Print_Clicked"       Padding="10" x:Name="Button_Print"/>
-                        
-                        <Rectangle Fill="{StaticResource Mouvent.MainColorBrush}" HorizontalAlignment="Stretch" Height="1" Margin="-16, 8"/>
+
+                        <Rectangle Fill="{StaticResource Mouvent.MainColorBrush}" HorizontalAlignment="Stretch" Height="1" Margin="-16, 8" x:Name="CommandLine1"/>
 
                         <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Purge Micro"   Click="PurgeMicro_Clicked"  Padding="10" x:Name="Button_PurgeMicro"/>
                         <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Purge Soft"    Click="PurgeSoft_Clicked"   Padding="10" x:Name="Button_PurgeSoft"/>
