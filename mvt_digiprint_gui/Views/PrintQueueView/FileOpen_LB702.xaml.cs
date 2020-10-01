@@ -256,6 +256,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
             else if (item.FileType==DirItem.ENFileType.RunList)
             {
                 _load_runList(item);
+                Visibility = Visibility.Hidden;
             }
             else
             {
@@ -288,13 +289,14 @@ namespace RX_DigiPrint.Views.PrintQueueView
         //--- _load_runList -----------------------------------------------------
         private void _load_runList(DirItem item)
         {
-            XmlTextReader xml;
             string path=Dir.local_path(item.FileName);
+            string filename=Path.GetFileName(item.FileName);
             string dir =Path.GetDirectoryName(path) + "\\";
+            path =Dir.local_path(item.FileName) +  Path.DirectorySeparatorChar + filename + ".rlj";
             if (File.Exists(path))
             {
                 //--- defaults ---
-                xml = new XmlTextReader(path);
+                XmlTextReader xml = new XmlTextReader(path);
                 try
                 {
                     while(xml.Read())
@@ -312,22 +314,22 @@ namespace RX_DigiPrint.Views.PrintQueueView
                         {
                             PrintQueueItem pq = new PrintQueueItem();
 
+                            pq.FilePath = item.FileName;
+                            pq.read_image_properties(pq.FilePath);
+                            pq.LoadDefaults();
+                            pq.SinglePage=true;
+
                             for  (int i=0; i<xml.AttributeCount; i++)
                             {
                                 xml.MoveToAttribute(i);
-                                if (xml.Name.Equals("Filename"))
-                                {
-                                    pq.FilePath = dir +xml.Value;
-                                    pq.read_image_properties(pq.FilePath);
-                                    pq.LoadDefaults();
-                                }
+
                                 if (xml.Name.Equals("CopiesCount"))
                                 {
                                     pq.LengthUnit = EPQLengthUnit.copies;
                                     pq.Copies     = Rx.StrToInt32(xml.Value); 
                                 }
                                 if (xml.Name.Equals("PageStart")) pq.FirstPage = Rx.StrToInt32(xml.Value); 
-                                if (xml.Name.Equals("PageEnd"))   pq.LastPage  = Rx.StrToInt32(xml.Value); 
+                                if (xml.Name.Equals("PageEnd"))   pq.LastPage  = Rx.StrToInt32(xml.Value);
                             }
                             xml.MoveToElement();
                             pq.SendMsg(TcpIp.CMD_ADD_PRINT_QUEUE);

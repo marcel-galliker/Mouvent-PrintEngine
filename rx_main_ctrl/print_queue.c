@@ -86,6 +86,7 @@ static int setup_item(HANDLE file, int idx, SPrintQueueItem *item, EN_setup_Acti
 		setup_uint32	(file, "srcHeight",		action, &item->srcHeight,		0);
 		setup_uint32	(file, "firstPage",		action, &item->firstPage,		1);
 		setup_uint32	(file, "lastPage",		action, &item->lastPage,		1);
+		setup_uchar		(file, "singlePage",	action, &item->singlePage,		0);
 		setup_uint32	(file, "startPage",		action, &item->start.page,		item->firstPage);
 		setup_uint32	(file, "startCopy",		action, &item->start.copy,		1);
 		setup_uint32	(file, "startScan",		action, &item->start.scan,		0);

@@ -269,10 +269,10 @@ typedef struct SPrintQueueItem
 	UINT8	srcBitsPerPixel;
 	INT32	firstPage;
 	INT32	lastPage;
+	INT8	singlePage;
 	INT32	copies;
 	INT8	collate;
 	INT8	variable;	// variable data job
-
 	UINT8	state;
 			#define PQ_STATE_UNDEF		0
 			#define PQ_STATE_QUEUED		1

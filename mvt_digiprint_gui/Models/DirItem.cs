@@ -81,11 +81,9 @@ namespace RX_DigiPrint.Models
                     {
                         PrintQueueItem pq = new PrintQueueItem();
                         pq.read_image_properties(_FileName);
-                        if (pq.IsRunList) FileType = ENFileType.RunList;
                         _SrcWidth  = pq.SrcWidth;
                         _SrcHeight = pq.SrcHeight;
                         _Dots      = pq.Dots;
-                        _ScreenOnPrinter = pq.ScreenOnPrinter;
                         _SetDimension();
                     }
                     catch (Exception ex)
@@ -97,6 +95,7 @@ namespace RX_DigiPrint.Models
 
                 string preview = Dir.local_path(_FileName + "\\" + Path.GetFileName(_FileName) + ".bmp");
                 string labeldef = Dir.local_path(_FileName + "\\" + Path.GetFileName(_FileName) + ".rxd");
+                string runlist = Dir.local_path(_FileName + "\\" + Path.GetFileName(_FileName) + ".rlj");
                 if (!File.Exists(preview)) preview = Dir.local_path(_FileName + "\\" + Path.GetFileName(_FileName) + "_preview.bmp"); // wasatch rip
                 if (File.Exists(preview))
                 {                    
@@ -105,7 +104,7 @@ namespace RX_DigiPrint.Models
                         FileInfo info = new FileInfo(preview);
                         Date = info.LastWriteTime.ToString("d");//, CultureInfo.CreateSpecificCulture("en-US"));
                         Time = info.LastWriteTime.ToString("H:mm");
-                        FileType = ENFileType.DataFile;
+                        FileType = File.Exists(runlist)? ENFileType.RunList : ENFileType.DataFile;
                         string thumb_name = info.Directory +"\\"+ Path.GetFileNameWithoutExtension(info.FullName) + ".bmp";
                         thumb_name = Path.GetTempPath() + "rx_thumb_nails\\"+thumb_name.Remove(0, info.Directory.Root.ToString().Length);
                         try

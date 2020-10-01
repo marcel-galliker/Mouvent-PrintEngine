@@ -113,9 +113,11 @@ namespace RX_DigiPrint.Models
                     Ripped = Dir.isRipped(FilePath);
                     if (Ripped) 
                     {
-                        string tempPath=_TempPath+Path.GetFileName(_FilePath)+ ".bmp";
-                        string path=Dir.local_path(_FilePath + Path.DirectorySeparatorChar + Path.GetFileName(_FilePath) + ".bmp");
-                        if (!File.Exists(path)) path = Dir.local_path(_FilePath + Path.DirectorySeparatorChar + Path.GetFileName(_FilePath) + "_preview.bmp");
+                        string filename=Path.GetFileName(_FilePath);
+                        if (StartPage>1) filename+=string.Format("_P{0:000000}", StartPage);
+                        string tempPath=_TempPath+filename+".bmp";
+                        string path=Dir.local_path(_FilePath + Path.DirectorySeparatorChar + filename + ".bmp");
+                        if (!File.Exists(path)) path = Dir.local_path(_FilePath + Path.DirectorySeparatorChar + filename + "_preview.bmp");
                         if (File.Exists(path))
                         {
                             if (!File.Exists(tempPath)) File.Copy(path, tempPath);
@@ -172,9 +174,17 @@ namespace RX_DigiPrint.Models
                         Console.WriteLine("Variable={0}", value);
                 }
         }
-        
-        //--- SrcPages ----------------------------------------
-        private Int32  _SrcPages=1;
+
+		//--- Property SinglePage ---------------------------------------
+		private bool _SinglePage;
+		public bool SinglePage
+		{
+			get { return _SinglePage; }
+			set { SetProperty(ref _SinglePage,value); }
+		}
+
+		//--- SrcPages ----------------------------------------
+		private Int32  _SrcPages=1;
         public Int32 SrcPages
         {
             get { return _SrcPages; }
@@ -808,7 +818,6 @@ namespace RX_DigiPrint.Models
                 return;
             }
 
-
             //---bmp file -----------------------------
             if (_read_bmp_properties(filePath)) return;
 
@@ -1005,8 +1014,6 @@ namespace RX_DigiPrint.Models
 
             Variable        = msg.variable!=0;
 
-            FilePath        = msg.filepath;
-
             // PrintEnv        = msg.printEnv;
             RipState        = msg.ripState;
             SrcPages        = msg.srcPages;
@@ -1015,6 +1022,7 @@ namespace RX_DigiPrint.Models
             FirstPage       = msg.firstPage;
             LastPage        = msg.lastPage;
             StartPage       = msg.start.page;
+            SinglePage      = (msg.singlePage!=0);
             Copies          = msg.copies;
             //DropSizes       = msg.dropSizes;
             Wakeup          = msg.wakeup;
@@ -1040,6 +1048,9 @@ namespace RX_DigiPrint.Models
             PrintChecks     = (msg.checks!=0);
             PageNumber      = new PageNumber(msg.pageNumber);
             PageNumber.PropertyChanged += PageNumber_PropertyChanged;
+
+            FilePath        = msg.filepath;
+
             progress=0;
             if (msg.lengthUnit == EPQLengthUnit.copies)
             {
@@ -1143,6 +1154,7 @@ namespace RX_DigiPrint.Models
             msg.item.firstPage      = FirstPage;
             msg.item.lastPage       = LastPage;
             msg.item.start.page     = StartPage;
+            msg.item.singlePage     = Convert.ToByte(SinglePage);
             msg.item.lengthUnit     = LengthUnit;
             msg.item.copies         = Copies;
             msg.item.testMessage    = TestMessage;

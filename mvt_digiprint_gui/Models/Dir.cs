@@ -102,7 +102,6 @@ namespace RX_DigiPrint.Models
                             if (!dirname.EndsWith(_FilterDir))
                             {
                                 Console.WriteLine("File {0}", dirname);
-
                                 if (IsRipped)   _List.Add(new DirItem(){DataFileName=global_path(dirname)});
                                 else            _List.Add(new DirItem(){FileName=global_path(dirname)});
                             }

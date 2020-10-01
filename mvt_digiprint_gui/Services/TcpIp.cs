@@ -719,6 +719,7 @@ namespace RX_DigiPrint.Services
 
 	        public Int32	firstPage;
 	        public Int32	lastPage;
+	        public byte	    singlePage;
 	        public Int32    copies;
 	        public byte	    collate;
 	        public byte	    variable;
