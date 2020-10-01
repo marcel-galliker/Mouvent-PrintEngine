@@ -15,6 +15,39 @@ namespace RX_DigiPrint.Services
 {
 	public class RestService
     {
+        public abstract class Converter
+        {
+            public abstract string ToString(Object value);
+        }
+
+        public class ColorConverter : Converter
+        {
+            public override string ToString(Object value)
+            {
+                String str = "";
+                if (value.GetType() == typeof(System.Windows.Media.Color))
+                {
+                    System.Windows.Media.Color c = (System.Windows.Media.Color)value;
+                    str = String.Format("#{0:X02}{1:X02}{2:X02}", c.R, c.G, c.B);
+                }
+                return str;
+            }
+        }
+
+        public class VersionConverter : Converter
+        {
+            public override string ToString(Object value)
+            {
+                String str = "";
+                if (value.GetType() == typeof(System.Version))
+                {
+                    Version v = (System.Version)value;
+                    return string.Format("{0}.{1}.{2}.{3}", v.Major, v.Minor, v.Build, v.Revision);
+                }
+                return str;
+            }
+        }
+
         // to build the rest response
         public class Data
         {
@@ -33,6 +66,13 @@ namespace RX_DigiPrint.Services
             public object obj { get; set; } // C# obj where to retrieve the value
             [JsonIgnore]
             public String field { get; set; } // name of field of the object
+            [JsonIgnore]
+            public Converter converter { get; set; } // converter object for customized "ToString"
+            public override string ToString()
+            {
+                Object value = obj.GetType().GetProperty(field).GetValue(obj, null);
+                return (converter != null) ? converter.ToString(value) : value.ToString();
+            }
         }
 
         private static List<Data> restdata;
@@ -43,19 +83,22 @@ namespace RX_DigiPrint.Services
         {
             restdata = new List<Data>();
             dataBy = new Dictionary<string, Data>();
-            void addData(Object obj, String field, String id, String legend = null, String unit = null)
+            void addData(Object obj, String field, String id, String legend = null, String unit = null, Converter converter = null)
             {
                 Data d = new Data(legend, unit);
                 d.obj = obj;
                 d.id = id;
                 d.field = field;
                 d.handle = restdata.Count.ToString();
+                d.converter = converter;
                 restdata.Add(d);
                 dataBy["var=" + d.id.ToLower()] = d;
                 dataBy["handles=" + d.handle] = d;
             }
 
-            if (RxGlobals.RxInterface.GuiConnected && RxGlobals.InkSupply.List.Count > 1 && RxGlobals.ClusterStat.List.Count > 1)
+            addData(System.Reflection.Assembly.GetExecutingAssembly().GetName(), "Version", "Printer.Version", "Software version", "", new VersionConverter());
+
+            if (RxGlobals.RxInterface.GuiConnected && RxGlobals.InkSupply.List.Count > 0 && RxGlobals.ClusterStat.List.Count > 0)
             {
                 addData(RxGlobals.PrinterStatus, "CounterTotal", "Printer.Statistics.TotalMetersPrinted", "Total distance printed", "meter");
 
@@ -75,7 +118,7 @@ namespace RX_DigiPrint.Services
 
                             addData(ink, "CanisterLevel", id + ".Level", "Ink Level", "gram");
                             addData(ink.InkType, "Name", id + ".Name", "Ink name");
-                            addData(ink.InkType, "Color", id + ".Color", "Ink color to display", "#rgb");
+                            addData(ink.InkType, "Color", id + ".Color", "Ink color to display", "#rgb", new ColorConverter());
                         }
                     }
                 }
@@ -189,7 +232,7 @@ namespace RX_DigiPrint.Services
                                     if (dataBy.ContainsKey(key + "=" + i))
                                     {
                                         p = dataBy[key + "=" + i];
-                                        p.value = p.obj.GetType().GetProperty(p.field).GetValue(p.obj, null).ToString();
+                                        p.value = p.ToString();
                                         if (p.value == TcpIp.INVALID_VALUE.ToString())
                                         {
                                             p.value = "---";
