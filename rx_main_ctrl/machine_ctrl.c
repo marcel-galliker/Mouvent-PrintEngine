@@ -218,9 +218,8 @@ int		machine_abort_printing(void)
 	{
 	case mi_none:	return enc_abort_printing();
 	case mi_tt:		return tt_abort_printing();
-	case mi_tts:    return enc_abort_printing();//drive_abort_printing();
-	case mi_plc:	// if (!rx_def_is_scanning(RX_Config.printer.type)) step_handle_gui_msg(INVALID_SOCKET, CMD_LIFT_UP_POS, NULL, 0);
-					step_abort_printing();
+	case mi_tts:    return enc_abort_printing();
+	case mi_plc:	step_abort_printing();
 					return plc_abort_printing();
 	}
 	return REPLY_OK;

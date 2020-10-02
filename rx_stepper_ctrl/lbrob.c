@@ -34,19 +34,19 @@
 #define X_INC_PER_REV           16000.0
 #define X_DIST_PER_REV          36000
 
-#define CABLE_CAP_POS           -688000     //	um LB702    old position -626000
+#define CABLE_CAP_POS           -690000     //	um LB702    old position -626000
 #define CABLE_WASH_POS_FRONT    -634000     //	um LB702    old position -573000
 #define CABLE_WASH_POS_BACK     -221000     //	um LB702    old position -160000
 #define CABLE_PURGE_POS_BACK    -311000     //  um LB702    old position -250000
 #define CABLE_PURGE_POS_FRONT   -622000     //  um LB702    CABLE_PURGE_POS_BACK - (7 * HEAD_WIDTH) - 10000 -> HEAD_WIDTH = 43000  // old position -561000
-#define CABLE_SCREW_POS_FRONT   -512000     //  um LB702    old position -452000
-#define CABLE_SCREW_POS_BACK    -165208     //  um LB702    CABLE_SCREW_POS_BACK + (7 * HEAD_WIDTH) -> HEAD_WIDTH = 43349   // old position -105208
+#define CABLE_SCREW_POS_FRONT   -503000     //  um LB702    old position -452000
+#define CABLE_SCREW_POS_BACK    -156208     //  um LB702    CABLE_SCREW_POS_BACK + (7 * HEAD_WIDTH) -> HEAD_WIDTH = 43349   // old position -105208
 
 #define CURRENT_HOLD            200
 
 #define CAP_FILL_TIME           12000   // ms
 #define WASTE_PUMP_TIME         60000   // ms
-#define SCREW_SEARCHING_TIME    21000   // ms
+#define SCREW_SEARCHING_TIME    5000   // ms
 
 // Digital Inputs
 #define CABLE_PULL_REF          2
@@ -177,8 +177,7 @@ void lbrob_init(void)
     _ParCable_drive_slow.enc_bwd = TRUE;
     _ParCable_drive_slow.encCheck = chk_std;
 
-    _ParCable_drive_purge.speed = _micron_2_steps(
-        1000 * 10); // multiplied with 1000 to get from mm/s to um/s
+    _ParCable_drive_purge.speed = _micron_2_steps(1000 * 10); // multiplied with 1000 to get from mm/s to um/s
     _ParCable_drive_purge.accel = 4000;
     _ParCable_drive_purge.current_acc = 420.0;
     _ParCable_drive_purge.current_run = 420.0;
@@ -241,9 +240,6 @@ void lbrob_main(int ticks, int menu)
     }
 
     _check_pump();
-    
-    
-
 
     motor_main(ticks, menu);
     robi_main(ticks, menu);
@@ -581,22 +577,22 @@ void lbrob_display_status(void)
     term_printf("LB ROB ---------------------------------\n");
     if (RX_StepperStatus.robot_used)
     {
-        term_printf("moving:          %d		cmd: %08x\n", RX_StepperStatus.robinfo.moving, _CmdRunning);
-        term_printf("Screwing-Step    %d\n", _CmdScrewing);
-        term_printf("reference done:  %d\n", RX_StepperStatus.robinfo.ref_done);
-        term_printf("x in reference:  %d\n", RX_StepperStatus.info.x_in_ref);
-        term_printf("x in cap:        %d\n", RX_StepperStatus.info.x_in_cap);
-        term_printf("Cap ready        %d\n", RX_StepperStatus.robinfo.cap_ready);
-        term_printf("Purge ready      %d\n", RX_StepperStatus.robinfo.purge_ready);
-        term_printf("actPos Robi:     %dum\n", RX_StepperStatus.posY[0]);
-        term_printf("Wipe-Speed:      %d\n", RX_StepperCfg.wipe_speed);
-        term_printf("Vacuum done:     %d\n", RX_StepperStatus.robinfo.vacuum_done);
-        term_printf("Wash done:       %d\n", RX_StepperStatus.robinfo.wash_done);
-        term_printf("Wipe done:       %d\n", RX_StepperStatus.robinfo.wipe_done);
+        term_printf("moving: \t\t %d \t cmd: %08x\n", RX_StepperStatus.robinfo.moving, _CmdRunning);
+        term_printf("Screwing-Step \t\t %d\n", _CmdScrewing);
+        term_printf("reference done: \t %d\n", RX_StepperStatus.robinfo.ref_done);
+        term_printf("x in reference: \t %d\n", RX_StepperStatus.info.x_in_ref);
+        term_printf("x in cap: \t\t %d\n", RX_StepperStatus.info.x_in_cap);
+        term_printf("Cap ready \t\t %d\n", RX_StepperStatus.robinfo.cap_ready);
+        term_printf("Purge ready: \t\t %d\n", RX_StepperStatus.robinfo.purge_ready);
+        term_printf("actPos Robi: \t\t %dum\n", RX_StepperStatus.posY[0]);
+        term_printf("Wipe-Speed: \t\t %d\n", RX_StepperCfg.wipe_speed);
+        term_printf("Vacuum done: \t\t %d\n", RX_StepperStatus.robinfo.vacuum_done);
+        term_printf("Wash done: \t\t %d\n", RX_StepperStatus.robinfo.wash_done);
+        term_printf("Wipe done: \t\t %d\n", RX_StepperStatus.robinfo.wipe_done);
         if (_PumpWasteTime)
-            term_printf("Waste-Pump-Time: %d\n", (_PumpWasteTime - rx_get_ticks()) /1000);
+            term_printf("Waste-Pump-Time: \t %d\n", (_PumpWasteTime - rx_get_ticks()) /1000);
         else
-            term_printf("Waste-Pump-Time: 0\n");
+            term_printf("Waste-Pump-Time: \t 0\n");
         term_printf("\n");
     }
     else
@@ -1282,7 +1278,7 @@ static void _search_all_screws()
 {
     static int correction_value = 0;
     static int cmd_Time;
-    static int max_Wait_Time = 25000; // ms
+    static int max_Wait_Time = 30000; // ms
     int test;
     int pos_min;
     int pos;
@@ -1337,6 +1333,7 @@ static void _search_all_screws()
                 else
                     pos = _calculate_average_y_pos(_SearchScrewNr);
                 cmd_Time = rx_get_ticks() + max_Wait_Time;
+                Error(LOG, 0, "Robi moves to y-Pos %d", pos);
                 robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_Y, &pos);
                 _CmdSearchScrews++;
             }
@@ -1364,6 +1361,7 @@ static void _search_all_screws()
                     pos = RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwclusters[_SearchScrewNr / (SCREWS_PER_HEAD *HEADS_PER_COLOR)].posX + pos * y_dist / y_dist_old;
                 }
                 cmd_Time = rx_get_ticks() + max_Wait_Time;
+                Error(LOG, 0, "Robi moves to x-Pos %d", pos);
                 robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_X, &pos);
                 _CmdSearchScrews++;
             }

@@ -114,6 +114,7 @@ int	 steplb_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen
 			case CMD_LIFT_CAPPING_POS:
 			case CMD_LIFT_REFERENCE:
 			case CMD_ROB_REFERENCE:
+                        if (cmd == CMD_LIFT_UP_POS) Error(LOG, 0, "Send UP-Command");
 						sok_send_2(&_step_socket[no], cmd, 0, NULL);
 						break;
 		
@@ -299,7 +300,8 @@ void steplb_lift_to_up_pos(void)
 {
 	for (int no=0; no<SIZEOF(_step_socket); no++)
 	{
-		sok_send_2(&_step_socket[no], CMD_LIFT_UP_POS, 0, NULL);
+        Error(LOG, 0, "Send UP-Command");
+        sok_send_2(&_step_socket[no], CMD_LIFT_UP_POS, 0, NULL);
 	}
 	_AbortPrinting = FALSE;
 }
@@ -313,6 +315,7 @@ int	 steplb_lift_in_up_pos(void)
 //--- steplb_lift_to_up_pos_individually -------------------
 void steplb_lift_to_up_pos_individually(int no)
 {
+    Error(LOG, 0, "Send UP-Command");
 	sok_send_2(&_step_socket[no], CMD_LIFT_UP_POS, 0, NULL);
 }
 

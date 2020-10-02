@@ -516,9 +516,9 @@ void robi_display_status(void)
 	
 	term_printf("\n");
 	term_printf("Robi system status ---------------------------------\n");
-	term_printf("Connection: %d Updating: %d, CurrentVersion: %d, BoardVersion: %d, BootloaderStatus: %d\n", _isConnected, _isUpdating, _currentVersion, _robiStatus.version, _robiStatus.bootloaderStatus);
+	term_printf("Connection: %d, Updating: %d, CurrentVersion: %d, BoardVersion: %d, BootloaderStatus: %d\n", _isConnected, _isUpdating, _currentVersion, _robiStatus.version, _robiStatus.bootloaderStatus);
 	//term_printf("Sync: %d\n", _isSync);
-    term_printf("moving:         %d		cmd: %08x\n", RX_StepperStatus.screwerinfo.moving, _CmdRunning);
+    term_printf("moving: \t\t %d \t cmd: %08x\n", RX_StepperStatus.screwerinfo.moving, _CmdRunning);
 	//term_printf("Message id: %d\n", _msgId);
 	//term_printf("Message sent: %d\n", _msgSentCounter);
 	//term_printf("Message received: %d\n", _msgReceivedCounter);
@@ -556,20 +556,20 @@ void robi_display_status(void)
 		_robiStatus.motors[MOTOR_SCREW].motorPosition, 
 		_robiStatus.motors[MOTOR_SCREW].motorTargetPosition, 
 		_robiStatus.motors[MOTOR_SCREW].motorEncoderPosition);
-    term_printf("Screwer-Current:       %d\n", _robiStatus.screwCurrent);
-    term_printf("Screwer X-Pos: %d\n", RX_StepperStatus.screw_posX);
-    term_printf("Screwer Y-Pos: %d\n", RX_StepperStatus.screw_posY);
+    term_printf("Screwer-Current: \t %d\n", _robiStatus.screwCurrent);
+    term_printf("Screwer X-Pos: \t\t %d\n", RX_StepperStatus.screw_posX);
+    term_printf("Screwer Y-Pos: \t\t %d\n", RX_StepperStatus.screw_posY);
 
-    term_printf("MOTOR_XY_0 ref:\t\t%d\n", _robiStatus.motors[MOTOR_XY_0].isReferenced);
-	term_printf("MOTOR_XY_1 ref:\t\t%d\n", _robiStatus.motors[MOTOR_XY_1].isReferenced);
-	term_printf("MOTOR_SCREW ref:\t%d\n", _robiStatus.motors[MOTOR_SCREW].isReferenced);
-	term_printf("Z position:            %d\n", _robiStatus.zPos);
+    term_printf("MOTOR_XY_0 ref: \t %d\n", _robiStatus.motors[MOTOR_XY_0].isReferenced);
+	term_printf("MOTOR_XY_1 ref: \t %d\n", _robiStatus.motors[MOTOR_XY_1].isReferenced);
+	term_printf("MOTOR_SCREW ref: \t %d\n", _robiStatus.motors[MOTOR_SCREW].isReferenced);
+    term_printf("Z position: \\tt %d\n", _robiStatus.zPos);
 	term_printf("Robi position status -------------------------------\n");
-	term_printf("Garage:                %d\n", _robiStatus.isInGarage);
-	term_printf("Ref:                   %d\n", _robiStatus.isInRef);
-    term_printf("Robi disabled:         %d\n", _Robi_Disabled);
-    term_printf("Robi blocked left:     %d\n", RX_StepperStatus.screwerinfo.screwer_blocked_left);
-    term_printf("Robi blocked right:    %d\n", RX_StepperStatus.screwerinfo.screwer_blocked_right);
+    term_printf("Garage: \t\t %d\n", _robiStatus.isInGarage);
+    term_printf("Ref: \t\t\t %d\n", _robiStatus.isInRef);
+    term_printf("Robi disabled: \t\t %d\n", _Robi_Disabled);
+    term_printf("Robi blocked left: \t %d\n", RX_StepperStatus.screwerinfo.screwer_blocked_left);
+    term_printf("Robi blocked right: \t %d\n", RX_StepperStatus.screwerinfo.screwer_blocked_right);
 }
 
 static void robi_set_output(int num, int val)
@@ -711,7 +711,6 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             _CmdRunning = msgId;
             _Search_Screw_Time = rx_get_ticks() + TIME_BEFORE_TURN_SCREWER;
             send_command(MOTOR_MOVE_Z_UP, 0, NULL);
-            break;
         }
         break;
         
@@ -722,7 +721,6 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             _CmdRunning = msgId;
             _Loose_Screw_Time = rx_get_ticks() + TIME_BEFORE_TURN_SCREWER;
             send_command(MOTOR_MOVE_Z_DOWN, 0, NULL);
-            break;
         }
         break;
         

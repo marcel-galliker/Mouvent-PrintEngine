@@ -155,7 +155,8 @@ int pc_start_printing(void)
 			}
 			else if (RX_StepperStatus.info.z_in_cap)
 			{
-				TrPrintfL(TRUE, "pc_start_printing: CMD_LIFT_UP_POS");		
+				TrPrintfL(TRUE, "pc_start_printing: CMD_LIFT_UP_POS");
+                Error(LOG, 0, "Send UP-Command");
 				step_handle_gui_msg(INVALID_SOCKET, CMD_LIFT_UP_POS, NULL, 0);										
 			}
 		}

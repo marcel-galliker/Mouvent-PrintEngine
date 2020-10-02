@@ -413,20 +413,20 @@ void lb702_main(int ticks, int menu)
 static void _lb702_display_status(void)
 {
 	term_printf("LB 702 ---------------------------------\n");
-	term_printf("actpos0:         %06d  newpos0:      %06d\n",	_PrintPos_Act[MOTOR_Z_BACK], _PrintPos_New[MOTOR_Z_BACK]);
-	term_printf("actpos1:         %06d  newpos1:      %06d\n", _PrintPos_Act[MOTOR_Z_FRONT], _PrintPos_New[MOTOR_Z_FRONT]);
-    term_printf("actpos front:    %06d  actpos back:  %06d\n", RX_StepperStatus.posZ, RX_StepperStatus.posZ_back);
-	term_printf("Ref Height back(um):         %06d  Print Height:     %06d\n", RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_back,  _PrintHeight);
-	term_printf("Ref Height front(um):        %06d  Print Height:     %06d\n", RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_front, _PrintHeight);
-	term_printf("Head UP Sensor: BACK=%d  FRONT=%d\n",	fpga_input(HEAD_UP_IN_BACK), fpga_input(HEAD_UP_IN_FRONT));
-	term_printf("moving:         %d		cmd: %08x - %d\n",	RX_StepperStatus.info.moving, RX_StepperStatus.cmdRunning, _CmdStep);
-	term_printf("reference done: %d\n",	RX_StepperStatus.info.ref_done);
-	term_printf("printhead_en:   %d\n",	RX_StepperStatus.info.printhead_en);
-	term_printf("z in reference: %d\n",	RX_StepperStatus.info.z_in_ref);
-	term_printf("z in up:        %d\n",	RX_StepperStatus.info.z_in_up);
-	term_printf("z in print:     %d\n",	RX_StepperStatus.info.z_in_print);
-	term_printf("z in capping:   %d\n",	RX_StepperStatus.info.z_in_cap);
-    term_printf("z in washing:   %d\n", RX_StepperStatus.info.z_in_wash);
+	term_printf("actpos0: \t %06d  newpos0:      %06d\n",	_PrintPos_Act[MOTOR_Z_BACK], _PrintPos_New[MOTOR_Z_BACK]);
+	term_printf("actpos1: \t %06d  newpos1:      %06d\n", _PrintPos_Act[MOTOR_Z_FRONT], _PrintPos_New[MOTOR_Z_FRONT]);
+    term_printf("actpos front: \t %06d  actpos back:  %06d\n", RX_StepperStatus.posZ, RX_StepperStatus.posZ_back);
+    term_printf("Ref Height back(um): \t %06d  Print Height: \t %06d\n", RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_back,  _PrintHeight);
+    term_printf("Ref Height front(um): \t %06d  Print Height: \t %06d\n", RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_front, _PrintHeight);
+    term_printf("Head UP Sensor: BACK= \t %d \t FRONT= \t %d\n",	fpga_input(HEAD_UP_IN_BACK), fpga_input(HEAD_UP_IN_FRONT));
+    term_printf("moving: \t\t %d \t cmd: %08x - %d\n",	RX_StepperStatus.info.moving, RX_StepperStatus.cmdRunning, _CmdStep);
+    term_printf("reference done: \t %d\n",	RX_StepperStatus.info.ref_done);
+    term_printf("printhead_en: \t\t %d\n",	RX_StepperStatus.info.printhead_en);
+    term_printf("z in reference: \t %d\n",	RX_StepperStatus.info.z_in_ref);
+    term_printf("z in up: \t\t %d\n",	RX_StepperStatus.info.z_in_up);
+    term_printf("z in print: \t\t %d\n",	RX_StepperStatus.info.z_in_print);
+    term_printf("z in capping: \t\t %d\n",	RX_StepperStatus.info.z_in_cap);
+    term_printf("z in washing: \t\t %d\n", RX_StepperStatus.info.z_in_wash);
     term_printf("\n");
 }
 
@@ -641,8 +641,8 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                                     {
 										RX_StepperStatus.cmdRunning  = msgId;
 										if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].cap_height < MIN_CAP_HEIGHT) Error(WARN, 0, "Reference Height back should be > 6mm");
-										val0 = -1*_micron_2_steps(4400);
-										val1 = -1*_micron_2_steps(4400);
+										val0 = -1*_micron_2_steps(3000);
+										val1 = -1*_micron_2_steps(3000);
                                         if (RX_StepperStatus.info.ref_done) _lb702_move_to_pos(CMD_LIFT_SCREW, val0, val1);
                                     }
                                     break;
@@ -712,7 +712,7 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		
 	case CMD_LIFT_UP_POS:			TrPrintfL(TRUE, "CMD_LIFT_UP_POS");
 									strcpy(_CmdName, "CMD_LIFT_UP_POS");
-								//	Error(LOG, 0, "starting 0x%08x %s", msgId, _CmdName);
+									Error(LOG, 0, "starting 0x%08x %s from %d", msgId, _CmdName, socket);
 									if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_back < 10000) Error(ERR_ABORT, 0, "Reference Height back must be > 10mm");
 									else if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_front < 10000) Error(ERR_ABORT, 0, "Reference Height must be > 10mm");
 									else if (abs(RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_front - RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_back) > MAX_ALIGN) 

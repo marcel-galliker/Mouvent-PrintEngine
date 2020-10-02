@@ -1502,7 +1502,8 @@ static void _plc_state_ctrl()
 			} 
 			else if (_SendPause==1 && !RX_StepperStatus.info.moving)
 			{
-				step_handle_gui_msg(INVALID_SOCKET, CMD_LIFT_UP_POS, NULL, 0);				
+                Error(LOG, 0, "Send UP-Command");
+                step_handle_gui_msg(INVALID_SOCKET, CMD_LIFT_UP_POS, NULL, 0);				
 			}
 		}
 	}
@@ -1524,7 +1525,11 @@ static void _plc_state_ctrl()
 	{
 		_plc_set_command("CMD_SETUP", "CMD_WEBIN");
         if (RX_StepperStatus.info.z_in_print)
-			step_handle_gui_msg(INVALID_SOCKET, CMD_LIFT_UP_POS, NULL, 0);
+        {
+            Error(LOG, 0, "Send UP-Command");
+            step_handle_gui_msg(INVALID_SOCKET, CMD_LIFT_UP_POS, NULL, 0);
+        }
+        
 	}
 	if (_PlcState == plc_glue)
     {
