@@ -14,7 +14,7 @@ namespace RX_DigiPrint.Converters
                 DirItem item = value as DirItem;
                 if (item != null)
                 {
-                    if (item.Time.Equals("")) return Visibility.Visible;
+                    if (item.FileType != DirItem.ENFileType.Directory) return Visibility.Visible;
                 }
                 return Visibility.Collapsed;
             }

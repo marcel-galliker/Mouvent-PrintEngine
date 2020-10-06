@@ -64,6 +64,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
             RootButton      = Properties.Settings.Default.FileOpen_DataSource;
             _PreviewSize    = Properties.Settings.Default.FileOpen_Size;
 
+			RxGlobals.FileNameFilter.PropertyChanged += _FileNameFilter_PropertyChanged;
             DirGrid.StylusSystemGesture += RxXamGrid.RxStylusSystemGesture;
 
         //    SmallSize.IsChecked   = (_PreviewSize==0);
@@ -73,6 +74,31 @@ namespace RX_DigiPrint.Views.PrintQueueView
             MsgRefresh.Visibility   = Visibility.Hidden;
             View_Clicked(null, null);
         }
+
+		//--- _FileNameFilter_PropertyChanged -----------------------------------------------
+		private void _FileNameFilter_PropertyChanged(object sender,System.ComponentModel.PropertyChangedEventArgs e)
+		{
+			if (e.PropertyName.Equals("Filter")) _filter_files(RxGlobals.FileNameFilter.Filter);
+		}
+
+        //--- _filter_files --------------------------------------
+        private void _filter_files(string filter)
+		{
+            if (_dir!=null)
+			{
+                filter = filter.ToLowerInvariant();
+                ObservableCollection<DirItem> list = new ObservableCollection<DirItem>();
+                foreach(DirItem item in _dir)
+				{
+                    string[] str=item.FileName.Split('\\');
+                    if (item.FileType != DirItem.ENFileType.Directory &&
+                        str.Length>1 && str[str.Length-1].ToLowerInvariant().Contains(filter)) 
+                        list.Add(item);
+				}
+                DirGrid.ItemsSource=list;
+                _SetRowHeight(_row_height);
+            }
+		}
 
         //--- Property Selected ---------------------------------------
         private int _Selected;
@@ -137,7 +163,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
                     dir = Dir.global_path(dir);
                     ActDirCtrl.Text = dir;
                     DirGrid.ItemsSource = _dir = new Dir(dir, (bool)RippedData.IsChecked, dir.Equals(_root)).List;
-                    _SetRowHeight(_row_height);
+                    _filter_files(RxGlobals.FileNameFilter.Filter);
                     MsgRefresh.Visibility = Visibility.Hidden;
 
                     if (DirGrid.ColumnLayouts.Count>0)
@@ -252,7 +278,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
                 }
                 else dir = item.FileName;
                 DirTree.ActDir = dir;
-            }            
+            }
             else if (item.FileType==DirItem.ENFileType.RunList)
             {
                 _load_runList(item);

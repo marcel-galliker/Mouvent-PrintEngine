@@ -102,8 +102,7 @@ namespace RX_DigiPrint.Models
                     // --- the same with a local copy of the file
                     {                        
                         FileInfo info = new FileInfo(preview);
-                        Date = info.LastWriteTime.ToString("d");//, CultureInfo.CreateSpecificCulture("en-US"));
-                        Time = info.LastWriteTime.ToString("H:mm");
+                        _DateAndTime = info.LastWriteTime;
                         _FileType = ENFileType.DataFile;
                         string thumb_name = info.Directory +"\\"+ Path.GetFileNameWithoutExtension(info.FullName) + ".bmp";
                         thumb_name = Path.GetTempPath() + "rx_thumb_nails\\"+thumb_name.Remove(0, info.Directory.Root.ToString().Length);
@@ -154,8 +153,7 @@ namespace RX_DigiPrint.Models
                 {
                     if (_FileName.ToLower().EndsWith(".rlj")) FileType = ENFileType.RunList;
                     else                                      FileType = ENFileType.SourceFile;
-                    Date = info.LastWriteTime.ToString("d");//, CultureInfo.CreateSpecificCulture("en-US"));
-                    Time = info.LastWriteTime.ToString("H:mm");
+                    _DateAndTime = info.LastWriteTime;
                     Thread thread = new Thread(()=>_create_preview(info, this));
                     thread.Start();
                 }
@@ -278,20 +276,11 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _PreviewOrientation, value);}
         }
 
-        //--- Property Time ---------------------------------------
-        private string _Time;
-        public string Time
-        {
-            get { return _Time; }
-            set { _Time = value; }
-        }
-
         //--- Property Date ---------------------------------------
-        private string _Date;
+        private DateTime _DateAndTime;
         public string Date
         {
-            get { return _Date; }
-            set { _Date = value; }
+            get { return _DateAndTime.ToString(); }
         }
 
         //--- Property DirVisible ----------------------

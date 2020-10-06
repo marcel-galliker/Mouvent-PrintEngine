@@ -377,6 +377,7 @@
     <Compile Include="Models\ClusterStatList.cs" />
     <Compile Include="Models\Density.cs" />
     <Compile Include="Models\DisabledJets.cs" />
+    <Compile Include="Models\FileNameFilter.cs" />
     <Compile Include="Models\HeadAdjustmentHelp.cs" />
     <Compile Include="Models\JetCompensation.cs" />
     <Compile Include="Models\JetCompensationDensityViewModel.cs" />

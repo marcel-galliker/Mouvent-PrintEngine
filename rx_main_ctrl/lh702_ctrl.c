@@ -350,7 +350,7 @@ static int _lh702_handle_msg(RX_SOCKET socket, void *pmsg, int len, struct socka
 									pc_change_job();
 									break;
 		
-        case CMD_GET_STATE:			Error(LOG, 0, "DM5 -> CMD_GET_STATE");		
+        case CMD_GET_STATE:		//	Error(LOG, 0, "DM5 -> CMD_GET_STATE");		
 									_lh702_send_status();
 									break;
 
