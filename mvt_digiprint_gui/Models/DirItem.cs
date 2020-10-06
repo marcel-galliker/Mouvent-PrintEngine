@@ -96,6 +96,7 @@ namespace RX_DigiPrint.Models
 
                 string preview = Dir.local_path(_FileName + "\\" + Path.GetFileName(_FileName) + ".bmp");
                 string labeldef = Dir.local_path(_FileName + "\\" + Path.GetFileName(_FileName) + ".rxd");
+                string runlist = Dir.local_path(_FileName + "\\" + Path.GetFileName(_FileName) + ".rlj");
                 if (!File.Exists(preview)) preview = Dir.local_path(_FileName + "\\" + Path.GetFileName(_FileName) + "_preview.bmp"); // wasatch rip
                 if (File.Exists(preview))
                 {                    
@@ -104,6 +105,7 @@ namespace RX_DigiPrint.Models
                         FileInfo info = new FileInfo(preview);
                         _DateAndTime = info.LastWriteTime;
                         _FileType = ENFileType.DataFile;
+                        if (File.Exists(runlist)) _FileType = ENFileType.RunList;
                         string thumb_name = info.Directory +"\\"+ Path.GetFileNameWithoutExtension(info.FullName) + ".bmp";
                         thumb_name = Path.GetTempPath() + "rx_thumb_nails\\"+thumb_name.Remove(0, info.Directory.Root.ToString().Length);
                         try

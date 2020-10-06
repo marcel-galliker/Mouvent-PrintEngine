@@ -5,6 +5,7 @@ using RX_DigiPrint.Models;
 using RX_DigiPrint.Services;
 using RX_DigiPrint.Views.UserControls;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Threading;
@@ -228,7 +229,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
             _SetRowHeight(_large_icons);        
         }
 
-        //--- Small_Checked ------------------------------------------------
+        //--- Mid_Checked ------------------------------------------------
         private void Mid_Checked(object sender, RoutedEventArgs e)
         {
             MidSize.IsChecked = true;
@@ -239,6 +240,23 @@ namespace RX_DigiPrint.Views.PrintQueueView
         private void Small_Checked(object sender, RoutedEventArgs e)
         {
             _SetRowHeight(_small_icons);        
+        }
+
+        private void addJobToQueue(PrintQueueItem pq)
+        {
+            _ActPath = DirTree.ActDir;
+            _NewFile = true;
+
+            pq.SendMsg(TcpIp.CMD_ADD_PRINT_QUEUE);
+
+            //--- save actual position ----------------------
+            Properties.Settings.Default.FileOpen_DataSource = RootButton;
+            Properties.Settings.Default.FileOpen_ActDir = DirTree.ActDir;
+            if ((bool)MidSize.IsChecked) Properties.Settings.Default.FileOpen_Size = 1;
+            if ((bool)LargeSize.IsChecked) Properties.Settings.Default.FileOpen_Size = 2;
+            Properties.Settings.Default.Save();
+
+            Visibility = Visibility.Hidden;
         }
 
         //--- _item_clicked ------------------------------------------------------
@@ -263,85 +281,76 @@ namespace RX_DigiPrint.Views.PrintQueueView
             }
             else
             {
-                _ActPath = DirTree.ActDir;
-
-                _NewFile = true;
-                //--- add file --------------
-                {
-                    PrintQueueItem pq = new PrintQueueItem();
-                
-                    pq.FilePath = item.FileName;
-                    pq.read_image_properties(item.FileName);
-                    pq.LoadDefaults();
-
-                    pq.SendMsg(TcpIp.CMD_ADD_PRINT_QUEUE);
-                }
-
-                //--- save actual position ----------------------
-                Properties.Settings.Default.FileOpen_DataSource = RootButton;
-                Properties.Settings.Default.FileOpen_ActDir     = DirTree.ActDir;
-            //    if ((bool)SmallSize.IsChecked)  Properties.Settings.Default.FileOpen_Size=0;
-                if ((bool)MidSize.IsChecked)    Properties.Settings.Default.FileOpen_Size=1;
-                if ((bool)LargeSize.IsChecked)  Properties.Settings.Default.FileOpen_Size=2;
-                Properties.Settings.Default.Save();
-
-                Visibility = Visibility.Hidden;
+                PrintQueueItem pq = new PrintQueueItem();
+                pq.FilePath = item.FileName;
+                pq.read_image_properties(item.FileName);
+                pq.LoadDefaults();
+                addJobToQueue(pq);
             }
         }
-        //--- _load_runList -----------------------------------------------------
         private void _load_runList(DirItem item)
         {
             XmlTextReader xml;
-            string path=Dir.local_path(item.FileName);
-            string dir =Path.GetDirectoryName(path) + "\\";
-            if (File.Exists(path))
+            string listname = Path.GetFileName(item.FileName);
+            string dir = Path.GetDirectoryName(Dir.local_path(item.FileName)) + Path.DirectorySeparatorChar + listname;
+            string rjlpath = dir + Path.DirectorySeparatorChar + listname + ".rlj";
+            int itemId = 0;
+            if (File.Exists(rjlpath))
             {
-                //--- defaults ---
-                xml = new XmlTextReader(path);
+                SortedDictionary<int, Dictionary<string, string>> runListItems = new SortedDictionary<int, Dictionary<string, string>>();
+
+                // Load run list information
+                xml = new XmlTextReader(rjlpath);
                 try
                 {
-                    while(xml.Read())
+                    while (xml.Read())
                     {
-                        if (xml.NodeType==XmlNodeType.Element && xml.Name.Equals("RunListsJob"))
+                        if (xml.NodeType == XmlNodeType.Element && xml.Name.Equals("RunList"))
                         {
-                            for  (int i=0; i<xml.AttributeCount; i++)
+                            for (int i = 0; i < xml.AttributeCount; i++)
                             {
                                 xml.MoveToAttribute(i);
-                                var prop = GetType().GetProperty(xml.Name);
+                                if (xml.Name.Equals("no"))
+                                {
+                                    itemId = Rx.StrToInt32(xml.Value) + 1;
+                                }
                             }
                             xml.MoveToElement();
                         }
-                        if (xml.NodeType==XmlNodeType.Element && xml.Name.Equals("RunList"))
-                        {
-                            PrintQueueItem pq = new PrintQueueItem();
 
-                            for  (int i=0; i<xml.AttributeCount; i++)
+                        if (xml.NodeType == XmlNodeType.Element && xml.Name.Equals("Defaults"))
+                        {
+                            // Read all job attributes
+                            var attributes = new Dictionary<string, string>();
+                            for (int i = 0; i < xml.AttributeCount; i++)
                             {
                                 xml.MoveToAttribute(i);
-                                if (xml.Name.Equals("Filename"))
-                                {
-                                    pq.FilePath = dir +xml.Value;
-                                    pq.read_image_properties(pq.FilePath);
-                                    pq.LoadDefaults();
-                                }
-                                if (xml.Name.Equals("CopiesCount"))
-                                {
-                                    pq.LengthUnit = EPQLengthUnit.copies;
-                                    pq.Copies     = Rx.StrToInt32(xml.Value); 
-                                }
-                                if (xml.Name.Equals("PageStart")) pq.FirstPage = Rx.StrToInt32(xml.Value); 
-                                if (xml.Name.Equals("PageEnd"))   pq.LastPage  = Rx.StrToInt32(xml.Value); 
+                                attributes.Add(xml.Name, xml.Value);
                             }
-                            xml.MoveToElement();
-                            pq.SendMsg(TcpIp.CMD_ADD_PRINT_QUEUE);
+                            runListItems[itemId] = attributes;
                         }
-                    }            
+                    }
+
+                    // Loop through run list items
+                    foreach (var pair in runListItems)
+                    {
+                        // Add missing fields
+                        pair.Value["Copies"] = pair.Value["ScanLength"];
+                        pair.Value["PageWidth"] = pair.Value["SrcWidth"];
+                        pair.Value["PageHeight"] = pair.Value["SrcHeight"];
+
+                        // Create and add the new queue item
+                        PrintQueueItem pq = new PrintQueueItem();
+                        pq.FilePath = dir;
+                        pq.LoadDefaults(pair.Value);
+                        addJobToQueue(pq);
+                    }
                 }
 
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.Message);
-                }            
+                }
             }
         }
 

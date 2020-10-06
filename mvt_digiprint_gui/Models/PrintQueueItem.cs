@@ -10,6 +10,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Media;
 using System.Xml;
+using System.Collections.Generic;
 
 namespace RX_DigiPrint.Models
 {
@@ -887,9 +888,30 @@ namespace RX_DigiPrint.Models
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);                
+                Console.WriteLine(ex.Message);
             }
-            return false;     
+            return false;
+        }
+
+        public void LoadDefaults(Dictionary<string, string> values)
+        {
+            // Handle order sensitive fields first
+            string[] orderedFields = { "SrcPages", "FirstPage", "LastPage" };
+            foreach (var key in orderedFields)
+            {
+                if (values.ContainsKey(key))
+                {
+                    var prop = GetType().GetProperty(key);
+                    if (prop != null) prop.SetValue(this, TypeDescriptor.GetConverter(prop.PropertyType).ConvertFromString(values[key]));
+                    values.Remove(key);
+                }
+            }
+            // Handle all other settings
+            foreach (var pair in values)
+            {
+                var prop = GetType().GetProperty(pair.Key);
+                if (prop != null) prop.SetValue(this, TypeDescriptor.GetConverter(prop.PropertyType).ConvertFromString(pair.Value));
+            }
         }
 
         //--- LoadDefaults ----------------------------------------
@@ -904,6 +926,8 @@ namespace RX_DigiPrint.Models
                 xml = new XmlTextReader(path);
                 try
                 {
+                    var values = new Dictionary<string, string>();
+
                     while (xml.Read())
                     {
                         if (xml.NodeType == XmlNodeType.Element)
@@ -913,8 +937,7 @@ namespace RX_DigiPrint.Models
                                 for (int i = 0; i < xml.AttributeCount; i++)
                                 {
                                     xml.MoveToAttribute(i);
-                                    var prop = GetType().GetProperty(xml.Name);
-                                    if (prop != null) prop.SetValue(this, TypeDescriptor.GetConverter(prop.PropertyType).ConvertFromString(xml.Value));
+                                    values.Add(xml.Name, xml.Value);
                                 }
                             }
                             else if (xml.Name.Equals("PageNumber"))
@@ -924,8 +947,9 @@ namespace RX_DigiPrint.Models
                             xml.MoveToElement();
                         }
                     }
-                }
 
+                    LoadDefaults(values);
+                }
                 catch (Exception ex)
                 {
                     Console.WriteLine("Exception >>{0}<<", ex.Message);

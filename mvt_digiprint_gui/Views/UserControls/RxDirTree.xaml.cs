@@ -41,7 +41,7 @@ namespace RX_DigiPrint.Views.UserControls
             if (TreeWiew.Items.Count>0)
             {
                 TreeViewItem item = TreeWiew.Items[0] as TreeViewItem;
-                item.IsExpanded = true;
+                if (item != null) item.IsExpanded = true;
             }
             
           //  TreeWiew.Items.Add(_getDir(_source_data));
@@ -106,16 +106,17 @@ namespace RX_DigiPrint.Views.UserControls
                 TreeViewItem item = new TreeViewItem(){Header=path};
                 string[] split = path.Split(new char[] {'\\', '/'});
                 if (split.Count()>0)
-                {
+                { 
                     item = new TreeViewItem(){Header=split[split.Count()-1]};
                     item.Tag = path;
                     item.Selected += item_Selected;
-                    var dirs  = Directory.GetDirectories(path);
+
+                    var dirs = Directory.GetDirectories(path);
                     if (dirs.Count()==0)
-                    { 
-                    //    var files = Directory.GetFiles(path, "*.rxd");
-                    //    if (files.Count()>0) return item;
-                    //    else return null;
+                    {
+                        //    var files = Directory.GetFiles(path, "*.rxd");
+                        //    if (files.Count()>0) return item;
+                        //    else return null;
                         return null;
                     }
                     foreach (string subdir in dirs)
