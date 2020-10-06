@@ -70,6 +70,7 @@
                     <ColumnDefinition Width="auto"/>
                     <ColumnDefinition Width="auto"/>
                     <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="auto"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
@@ -87,6 +88,7 @@
                     </Grid>
                 </ScrollViewer>
                 <rx_uc:StepperView Grid.Column="2" Margin="5,0,0,0"/>
+                <rx_uc:UVLampView Grid.Column="3" Margin="5,0,0,0"/>
             </Grid>
 
             <!-- TAB: PLC Log ____________________________________________________________-->

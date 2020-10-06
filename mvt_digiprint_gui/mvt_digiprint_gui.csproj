@@ -903,6 +903,9 @@
     <Compile Include="Views\UserControls\UserAccount.xaml.cs">
       <DependentUpon>UserAccount.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\UserControls\UVLampView.xaml.cs">
+      <DependentUpon>UVLampView.xaml</DependentUpon>
+    </Compile>
     <Page Include="Comparers\Comparers.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -1577,6 +1580,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\UserControls\UserAccount.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UserControls\UVLampView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
