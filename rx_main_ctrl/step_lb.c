@@ -703,6 +703,7 @@ static void _check_screwer(void)
 {
     static int _old_Screwer_State[STEPPER_CNT] = {FALSE};
     SRobPosition ScrewPosition;
+    memset(&ScrewPosition, 0, sizeof(ScrewPosition));
     int i, j;
     for (i = 0; i < SIZEOF(_Status); i++)
     {

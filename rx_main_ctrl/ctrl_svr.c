@@ -1282,9 +1282,9 @@ int ctrl_current_screw_pos(SHeadAdjustmentMsg *robposition)
     if (robposition->headNo == -1)
         return RX_Config.stepper.robot->screwturns[robposition->printbarNo];
     else if (robposition->axis == AXE_ANGLE)
-		return RX_HBStatus[robposition->printbarNo].head[robposition->headNo].eeprom_mvt.rob_angle;
+		return RX_HBStatus[robposition->printbarNo].head[robposition->headNo%4].eeprom_mvt.rob_angle;
     else if (robposition->axis == AXE_DIST)
-        return RX_HBStatus[robposition->printbarNo].head[robposition->headNo].eeprom_mvt.rob_dist;
+        return RX_HBStatus[robposition->printbarNo].head[robposition->headNo%4].eeprom_mvt.rob_dist;
     else
         return -1;
 }

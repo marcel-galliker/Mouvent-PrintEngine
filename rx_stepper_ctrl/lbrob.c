@@ -813,8 +813,7 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         _CmdRunning = 0;
         _CmdSearchScrews = 0;
         _CmdScrewing = 0;
-        if (!robi_disabled())
-            robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_STOP, NULL);
+        robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_STOP, NULL);
         break;
 
     case CMD_ROB_REFERENCE:
@@ -836,7 +835,7 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             }
             break;
         }
-        else if (!RX_StepperStatus.screwerinfo.z_in_down && !robi_disabled())
+        else if (!RX_StepperStatus.screwerinfo.z_in_down)
         {
             _CmdRunning_Robi = CMD_ROBI_MOVE_Z_DOWN;
             _NewCmd = msgId;
@@ -943,7 +942,7 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
     {
         int pos;
         _RobFunction = fct;
-        if (!RX_StepperStatus.screwerinfo.z_in_down && !robi_disabled())
+        if (!RX_StepperStatus.screwerinfo.z_in_down)
         {
             _CmdRunning_Robi = CMD_ROBI_MOVE_Z_DOWN;
             _NewCmd = msgId;
@@ -1191,8 +1190,7 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
                 }
                 _CmdScrewing++;
             }
-            else if (_TimeSearchScrew &&
-                     rx_get_ticks() > _TimeSearchScrew + SCREW_SEARCHING_TIME)
+            else if (_TimeSearchScrew && rx_get_ticks() > _TimeSearchScrew + SCREW_SEARCHING_TIME)
             {
                 _TimeSearchScrew = 0;
                 if (abs(correction_value) >= 5000)
@@ -1278,12 +1276,11 @@ static void _search_all_screws()
 {
     static int correction_value = 0;
     static int cmd_Time;
-    static int max_Wait_Time = 30000; // ms
+    static int max_Wait_Time = 40000; // ms
     int test;
     int pos_min;
     int pos;
-    if (!RX_StepperStatus.info.moving && !RX_StepperStatus.robinfo.moving &&
-        !RX_StepperStatus.screwerinfo.moving)
+    if ((!RX_StepperStatus.info.moving && !RX_StepperStatus.robinfo.moving && !RX_StepperStatus.screwerinfo.moving))
     {
         if (_SearchScrewNr >= HEADS_PER_COLOR * COLORS_PER_STEPPER * SCREWS_PER_HEAD)
         {
@@ -1320,8 +1317,7 @@ static void _search_all_screws()
             cmd_Time = rx_get_ticks() + max_Wait_Time;
             break;
         case 1:
-            if (RX_StepperStatus.robinfo.ref_done &&
-                _HeadPos == head_nr + rob_fct_screw_head0)
+            if (RX_StepperStatus.robinfo.ref_done && _HeadPos == head_nr + rob_fct_screw_head0)
             {
                 if (_SearchScrewNr == 0)
                     pos = SCREW_Y_FRONT + correction_value;
@@ -1333,7 +1329,6 @@ static void _search_all_screws()
                 else
                     pos = _calculate_average_y_pos(_SearchScrewNr);
                 cmd_Time = rx_get_ticks() + max_Wait_Time;
-                Error(LOG, 0, "Robi moves to y-Pos %d", pos);
                 robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_Y, &pos);
                 _CmdSearchScrews++;
             }
@@ -1361,7 +1356,6 @@ static void _search_all_screws()
                     pos = RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwclusters[_SearchScrewNr / (SCREWS_PER_HEAD *HEADS_PER_COLOR)].posX + pos * y_dist / y_dist_old;
                 }
                 cmd_Time = rx_get_ticks() + max_Wait_Time;
-                Error(LOG, 0, "Robi moves to x-Pos %d", pos);
                 robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_X, &pos);
                 _CmdSearchScrews++;
             }

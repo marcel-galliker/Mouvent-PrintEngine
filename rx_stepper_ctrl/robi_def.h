@@ -128,7 +128,8 @@ typedef struct
 {
 	SGpioStatus gpio;
 	SMotorStatus motors[MOTOR_COUNT];
-	uint8_t screwCurrent;
+    uint8_t screwCurrent;
+    uint8_t screwSpeed;
 	uint8_t zPos;
 	uint8_t isInGarage;
 	uint8_t isInRef;

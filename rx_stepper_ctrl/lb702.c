@@ -184,35 +184,29 @@ void lb702_main(int ticks, int menu)
             {
             case 0:	//--- referenced on top ----------------- 
                 if (!RX_StepperStatus.info.headUpInput_0)
-                    Error(ERR_CONT, 0,
-                          "LB702: Command REFERENCE: End Sensor 1 NOT HIGH");
+                    Error(ERR_CONT, 0, "LB702: Command REFERENCE: End Sensor 1 NOT HIGH");
                 if (!RX_StepperStatus.info.headUpInput_1)
-                    Error(ERR_CONT, 0,
-                          "LB702: Command REFERENCE: End Sensor 2 NOT HIGH");
-                RX_StepperStatus.info.ref_done =
-                    RX_StepperStatus.info.headUpInput_0 &&
-                    RX_StepperStatus.info.headUpInput_1;
-					motors_reset(MOTOR_Z_BITS);
-                    if (RX_StepperStatus.info.ref_done)
-                    {                        
-                        _CmdStep++;
-                    motors_move_to_step(MOTOR_Z_BITS, &_ParZ_down,
-                                        -1 * _micron_2_steps(CAL_POS_1));
-                    }
-                    else 
-                    {
-                        Error(ERR_CONT, 0, "Calibation Error in step%d", _CmdStep);
-						RX_StepperStatus.cmdRunning = FALSE;
-					}
-                    break;
+                    Error(ERR_CONT, 0, "LB702: Command REFERENCE: End Sensor 2 NOT HIGH");
+				RX_StepperStatus.info.ref_done =
+                RX_StepperStatus.info.headUpInput_0 &&
+                RX_StepperStatus.info.headUpInput_1;
+				motors_reset(MOTOR_Z_BITS);
+                if (RX_StepperStatus.info.ref_done)
+                {                        
+                    _CmdStep++;
+					motors_move_to_step(MOTOR_Z_BITS, &_ParZ_down, -1 * _micron_2_steps(CAL_POS_1));
+                }
+                else 
+                {
+                    Error(ERR_CONT, 0, "Calibation Error in step%d", _CmdStep);
+					RX_StepperStatus.cmdRunning = FALSE;
+				}
+                break;
                    
-            case 1: //--- motor above tool
-                    //-----------------------------------------
+            case 1: //--- motor above tool //-----------------------------------------
 					if (motors_error(MOTOR_Z_BITS, &motor))
 					{
-                    Error(ERR_CONT, 0,
-                          "LIFT: Command %s: Motor %s blocked in step %d",
-                          _CmdName, _MotorName[motor], _CmdStep);
+						Error(ERR_CONT, 0, "LIFT: Command %s: Motor %s blocked in step %d", _CmdName, _MotorName[motor], _CmdStep);
 						RX_StepperStatus.info.ref_done = FALSE;
 						RX_StepperStatus.cmdRunning = FALSE;
 					}
@@ -360,7 +354,7 @@ void lb702_main(int ticks, int menu)
                 RX_StepperStatus.info.z_in_ref = (cmd == CMD_LIFT_REFERENCE && RX_StepperStatus.info.ref_done);
                 RX_StepperStatus.info.z_in_up = (cmd == CMD_LIFT_UP_POS && RX_StepperStatus.info.ref_done);
                 RX_StepperStatus.info.z_in_print = (cmd == CMD_LIFT_PRINT_POS && RX_StepperStatus.info.ref_done && !_CmdRunningRobi);
-                RX_StepperStatus.info.z_in_cap = (cmd == CMD_LIFT_CAPPING_POS && RX_StepperStatus.info.ref_done && (RX_StepperStatus.screwerinfo.y_in_ref || robi_disabled()));
+                RX_StepperStatus.info.z_in_cap = (cmd == CMD_LIFT_CAPPING_POS && RX_StepperStatus.info.ref_done && RX_StepperStatus.screwerinfo.y_in_ref);
                 RX_StepperStatus.info.z_in_wash = (cmd == CMD_LIFT_WASH_POS && RX_StepperStatus.info.ref_done);
                 RX_StepperStatus.info.z_in_screw = (cmd == CMD_LIFT_SCREW && RX_StepperStatus.info.ref_done);
             }
@@ -578,7 +572,7 @@ static void _lb702_move_to_pos(int cmd, int pos0, int pos1)
 	int adjust=0;
     RX_StepperStatus.cmdRunning = cmd;
 	
-    if (RX_StepperStatus.robot_used && !_CmdRunningRobi && !RX_StepperStatus.screwerinfo.y_in_ref && RX_StepperStatus.cmdRunning != CMD_LIFT_REFERENCE && RX_StepperStatus.cmdRunning != CMD_LIFT_SCREW && !robi_disabled())
+    if (RX_StepperStatus.robot_used && !_CmdRunningRobi && !RX_StepperStatus.screwerinfo.y_in_ref && RX_StepperStatus.cmdRunning != CMD_LIFT_REFERENCE && RX_StepperStatus.cmdRunning != CMD_LIFT_SCREW)
     {
         _CmdRunningRobi = CMD_ROBI_MOVE_TO_GARAGE;
         _NewCmd = cmd;
@@ -641,13 +635,13 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                                     {
 										RX_StepperStatus.cmdRunning  = msgId;
 										if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].cap_height < MIN_CAP_HEIGHT) Error(WARN, 0, "Reference Height back should be > 6mm");
-										val0 = -1*_micron_2_steps(3000);
-										val1 = -1*_micron_2_steps(3000);
+										val0 = -1*_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].cap_height -6000);
+										val1 = -1*_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].cap_height -6000);
                                         if (RX_StepperStatus.info.ref_done) _lb702_move_to_pos(CMD_LIFT_SCREW, val0, val1);
                                     }
                                     break;
 
-    case CMD_LIFT_PRINT_POS:			TrPrintfL(TRUE, "CMD_LIFT_PRINT_POS");
+    case CMD_LIFT_PRINT_POS:		TrPrintfL(TRUE, "CMD_LIFT_PRINT_POS");
 									strcpy(_CmdName, "CMD_LIFT_PRINT_POS");
 									if(!RX_StepperStatus.info.printhead_en) return ErrorFlag(ERR_ABORT, &_ErrorFlags, 0x00001, 0, "Allow Head Down signal not set!");
 									_PrintHeight   = (*((INT32*)pdata));
@@ -660,7 +654,7 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									{
 										val0 = -1*_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_back  - _PrintHeight);
 										val1 = -1*_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_front - _PrintHeight);
-                                        if (!RX_StepperStatus.screwerinfo.y_in_ref && !robi_disabled() && RX_StepperStatus.robot_used)
+                                        if (!RX_StepperStatus.screwerinfo.y_in_ref && RX_StepperStatus.robot_used)
                                         {
                                             if (!RX_StepperStatus.info.z_in_ref || RX_StepperStatus.cmdRunning==CMD_LIFT_REFERENCE)
                                             {

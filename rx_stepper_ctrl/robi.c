@@ -37,7 +37,7 @@
 #define ROBI_SERIAL_PORT	"/dev/ttyS0"
 
 #define TIME_BEFORE_TURN_SCREWER    2600            // us
-#define SCREW_MOVEMENT_CHECK_TIME   1100            // us
+#define SCREW_MOVEMENT_CHECK_TIME   2000            // us
 
 // define inputs
 #define SCREW_IN_DOWN 0
@@ -100,7 +100,6 @@ static int _CmdStarted = FALSE;
 static int _Search_Screw_Time = 0;
 static int _Loose_Screw_Time = 0;
 static int _Screwer_Moves_Time = 0;
-static int _Robi_Disabled = FALSE;
 
 static int _Screwer_Blocked_Time = 0;
 static int _TargetPosition = 0;
@@ -182,8 +181,8 @@ void robi_main(int ticks, int menu)
 		_tStatus = ROBI_STATUS_UPDATE_INTERVAL*(1 + ticks / ROBI_STATUS_UPDATE_INTERVAL); 
 	}
     
-    RX_StepperStatus.screwerinfo.z_in_down = _robiStatus.gpio.inputs & (1UL << SCREW_IN_DOWN) && !(_robiStatus.gpio.inputs & (1UL << SCREW_IN_UP));
-    RX_StepperStatus.screwerinfo.z_in_up    = _robiStatus.gpio.inputs & (1UL << SCREW_IN_UP) && !(_robiStatus.gpio.inputs & (1UL << SCREW_IN_DOWN));
+    RX_StepperStatus.screwerinfo.z_in_down = _robiStatus.zPos == POS_DOWN;
+    RX_StepperStatus.screwerinfo.z_in_up    = _robiStatus.zPos == POS_UP;
 
     if (_CmdRunning)	RX_StepperStatus.screwerinfo.moving = TRUE;
     else				RX_StepperStatus.screwerinfo.moving = FALSE;
@@ -423,7 +422,6 @@ void robi_menu(int help)
         term_printf("e<micron>: Move to x pos <micron>\n");
         term_printf("f<micron>: Move to y pos <micron>\n");
         term_printf("g: move to garage position\n");
-        term_printf("D: Disable Robi\n");
         term_flush();
 	}
 	else
@@ -493,9 +491,6 @@ void robi_handle_menu(char *str)
         
     case 'g':
         robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_GARAGE, NULL);
-        break;
-    case 'D':
-        _Robi_Disabled = !_Robi_Disabled;
         break;
     case 'c':
         current = atoi(&str[1]);
@@ -567,7 +562,6 @@ void robi_display_status(void)
 	term_printf("Robi position status -------------------------------\n");
     term_printf("Garage: \t\t %d\n", _robiStatus.isInGarage);
     term_printf("Ref: \t\t\t %d\n", _robiStatus.isInRef);
-    term_printf("Robi disabled: \t\t %d\n", _Robi_Disabled);
     term_printf("Robi blocked left: \t %d\n", RX_StepperStatus.screwerinfo.screwer_blocked_left);
     term_printf("Robi blocked right: \t %d\n", RX_StepperStatus.screwerinfo.screwer_blocked_right);
 }
@@ -633,7 +627,7 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                 robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_REFERENCE, NULL);
                 break;
             }
-            if (!(_robiStatus.gpio.inputs & (1UL << SCREW_IN_DOWN)))
+            if (!RX_StepperStatus.screwerinfo.z_in_down)
             {
                 _NewCmd = msgId;
                 _Value = *((INT32 *)pdata);
@@ -666,7 +660,7 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                 robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_REFERENCE, NULL);
                 break;
             }
-            if (!(_robiStatus.gpio.inputs & (1UL << SCREW_IN_DOWN)))
+            if (!RX_StepperStatus.screwerinfo.z_in_down)
             {
                 _NewCmd = msgId;
                 _Value = *((INT32 *)pdata);
@@ -693,7 +687,7 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                 robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_REFERENCE, NULL);
                 break;
             }
-            if (RX_StepperStatus.screw_posY - MIN_Y_POS < MAX_VARIANCE)
+            if (RX_StepperStatus.screw_posY - MIN_Y_POS + MAX_VARIANCE < 0)
             {
                 Error(ERR_CONT, 0, "Screwer to close to garage to move up");
                 break;
@@ -759,7 +753,7 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                 robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_REFERENCE, NULL);
                 break;
             }
-            else if (!(_robiStatus.gpio.inputs & (1UL << SCREW_IN_DOWN)))
+            else if (!RX_StepperStatus.screwerinfo.z_in_down)
             {
                 _NewCmd = msgId;
                 _Value = *((INT32 *)pdata);
@@ -785,7 +779,7 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         break;
 
     case CMD_ROBI_MOVE_TO_Y:
-        if (!_CmdRunning)
+        if (!_CmdRunning || (_CmdRunning == CMD_ROBI_MOVE_Z_UP && !RX_StepperStatus.screwerinfo.z_in_down))
         {
             if (!RX_StepperStatus.screwerinfo.ref_done)
             {
@@ -793,7 +787,7 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                 _Value = *((INT32 *)pdata);
                 robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_REFERENCE, NULL);
             }
-            else if (!(_robiStatus.gpio.inputs & (1UL << SCREW_IN_DOWN)))
+            else if (!RX_StepperStatus.screwerinfo.z_in_down)
             {
                 _NewCmd = msgId;
                 _Value = *((INT32 *)pdata);
@@ -822,7 +816,7 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         {
             if (!RX_StepperStatus.screwerinfo.ref_done)
                 robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_REFERENCE, NULL);
-            else if (!(_robiStatus.gpio.inputs & (1UL << SCREW_IN_DOWN)))
+            else if (!RX_StepperStatus.screwerinfo.z_in_down)
             {
                 _NewCmd = msgId;
                 robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_DOWN, NULL);
@@ -855,7 +849,7 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                 _Value = pos;
                 robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_REFERENCE, NULL);
             }
-            else if (!(_robiStatus.gpio.inputs & (1UL << SCREW_IN_DOWN)))
+            else if (!RX_StepperStatus.screwerinfo.z_in_down)
             {
                 _NewCmd = msgId;
                 _Value = pos;
@@ -891,7 +885,7 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                 _Value = pos;
                 robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_REFERENCE, NULL);
             }
-            else if (!(_robiStatus.gpio.inputs & (1UL << SCREW_IN_DOWN)))
+            else if (!RX_StepperStatus.screwerinfo.z_in_down)
             {
                 _NewCmd = msgId;
                 _Value = pos;
@@ -939,6 +933,7 @@ static void _check_Screwer_Movement()
         int _newScrewState = (_robiStatus.gpio.inputs & (1UL << SCREW_IN_REF));
         if (_Screwer_Moves_Time == 0 || _oldScrewState != _newScrewState)
         {
+            Error(LOG, 0, "NewState of Screwer = %d", _newScrewState);
             _Screwer_Moves_Time = rx_get_ticks() + SCREW_MOVEMENT_CHECK_TIME;
             _oldScrewState = _newScrewState;
         }
@@ -1187,7 +1182,7 @@ static void* receive_thread(void *par)
 {
 	int32_t count;
 	int32_t length;
-	uint8_t buffer[512];
+	uint8_t buffer[2048];
 	uint32_t bytesRead;
 	SUsbRxMsg rxMessage;
 	
@@ -1215,9 +1210,7 @@ static void* receive_thread(void *par)
 					
 						memcpy(&_robiStatus, &rxMessage.robi, sizeof(_robiStatus));
 
-                        if (_isUpdating == FALSE &&
-                            _updateFailed == FALSE &&
-                            _robiStatus.version < _currentVersion)
+                        if (_isUpdating == FALSE && _updateFailed == FALSE && _robiStatus.version < _currentVersion)
                         {
                             _isUpdating = TRUE;
                             rx_thread_start(update_thread, NULL, 0, "robi_update_thread");
@@ -1233,16 +1226,16 @@ static void* receive_thread(void *par)
                             {
                                 Error(ERR_CONT, 0, "Robi Error. Flag: %x", rxMessage.error);
                             }
-                            robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_STOP, NULL);
+                            //if (rxMessage.error != MOTOR_TIMEOUTED)
+                              //  robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_STOP, NULL);
                         }
+                    }
+                    else
+                    {
+                        Error(ERR_CONT, 0, "Received invalid message lenght from Robi-Board");
                     }
 				}
 			}
 		}
 	}
-}
-
-int robi_disabled(void)
-{
-    return _Robi_Disabled;
 }

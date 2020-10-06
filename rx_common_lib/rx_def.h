@@ -137,8 +137,8 @@ void rx_def_init();
 
 #define WAKEUP_BAR_LEN		128	// dots to wakeup lazy jets
 
-#define SCREW_X_LEFT		-13800 // um
-#define SCREW_X_RIGHT		80700 // um       // SCREW_X_LEFT + 94500
+#define SCREW_X_LEFT		-17600		// -13800	// um
+#define SCREW_X_RIGHT		75900		// 80700	// um       // SCREW_X_LEFT + 94500
 
 #define SCREW_Y_FRONT		55100 // um
 #define SCREW_Y_BACK		38700  // um       // SCREW_Y_BACK + 16400
