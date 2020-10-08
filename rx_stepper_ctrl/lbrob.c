@@ -210,8 +210,6 @@ static void _check_pump(void)
         Fpga.par->output |= RO_WASTE_VAC;
         Fpga.par->output |= RO_VACUUM_CLEANER;
     }
-    
-    
     else if (_PumpWasteTime)
     {
         _PumpWasteTime = 0;
@@ -864,8 +862,7 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 
             if (!RX_StepperStatus.robinfo.ref_done)
             {
-                Error(ERR_CONT, 0, "LBROB: Robot not refenenced, cmd=0x%08x",
-                      msgId);
+                Error(ERR_CONT, 0, "LBROB: Robot not refenenced, cmd=0x%08x", msgId);
                 break;
             }
             _CmdRunning = msgId;

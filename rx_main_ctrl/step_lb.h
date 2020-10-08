@@ -59,4 +59,4 @@ void steplb_rob_start_cap_all(void);
 void steplb_rob_wash_all(void);
 
 void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment);
-void steplb_cluster_Screw_Turned(void);
+void steplb_cluster_Screw_Turned(int stepperNo);

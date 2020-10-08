@@ -41,7 +41,7 @@ static RX_SOCKET		_step_socket[STEPPER_CNT]={0};
 
 static SStepperStat		_Status[STEPPER_CNT];
 static int				_AbortPrinting=FALSE;
-static int				_ClusterScrewTurned;
+static int              _ClusterScrewTurned[STEPPER_CNT] = {0};
 static int              _WashStarted;
 static UINT32			_Flushed = 0x00;		// For capping function which is same than flushing (need to purge after cap)
 
@@ -239,7 +239,7 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
     for (i = 0; i < STEPPER_CNT; i++)
     {
         if ((memcmp(&oldStatus[i].screwclusters, &_Status[i].screwclusters, sizeof(_Status[i].screwclusters)) ||
-            memcmp(&oldStatus[i].screwpositions, &_Status[i].screwpositions, sizeof(_Status[i].screwpositions)) || _ClusterScrewTurned == TRUE)
+            memcmp(&oldStatus[i].screwpositions, &_Status[i].screwpositions, sizeof(_Status[i].screwpositions)) || _ClusterScrewTurned[i] == TRUE)
 			&& _step_socket[i] != INVALID_SOCKET && RX_StepperStatus.robot_used)
         {
             SRxConfig cfg;
@@ -251,7 +251,7 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
             memcpy(cfg.stepper.robot[i].screwturns, RX_Config.stepper.robot[i].screwturns, sizeof(RX_Config.stepper.robot[i].screwturns));
             setup_screw_positions(PATH_USER FILENAME_SCREW_POS, &cfg, WRITE);
             sok_send_2(&_step_socket[i], CMD_CFG_SCREW_POS, sizeof(RX_Config.stepper.robot[i]), &RX_Config.stepper.robot[i]);
-            _ClusterScrewTurned = FALSE;
+            _ClusterScrewTurned[i] = FALSE;
         }
     }
 
@@ -671,9 +671,12 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
         stepperno = (headAdjustment->printbarNo+1) / 2;
 
     _HeadAdjustment[stepperno] = *headAdjustment;
-    headAdjustment->printbarNo %= 2;
+    
     if (!_Status[stepperno].info.moving && !_Status[stepperno].robinfo.moving && !_Status[stepperno].screwerinfo.moving)
+    {
+        headAdjustment->printbarNo %= 2;
         sok_send(&_step_socket[stepperno], headAdjustment);
+    }   
     else
     {
         int i;
@@ -703,6 +706,7 @@ static void _check_screwer(void)
 {
     static int _old_Screwer_State[STEPPER_CNT] = {FALSE};
     SRobPosition ScrewPosition;
+    SHeadAdjustmentMsg headAdjustment;
     memset(&ScrewPosition, 0, sizeof(ScrewPosition));
     int i, j;
     for (i = 0; i < SIZEOF(_Status); i++)
@@ -714,7 +718,7 @@ static void _check_screwer(void)
             if (_HeadAdjustment[i].axis == AXE_DIST)
                 ScrewPosition.dist = _HeadAdjustment[i].steps;
             else if (_HeadAdjustment[i].axis == AXE_ANGLE)
-                ScrewPosition.angle = _HeadAdjustment[i].steps;
+                ScrewPosition.angle = -_HeadAdjustment[i].steps;
 
             ctrl_set_rob_pos(ScrewPosition, FALSE, FALSE);
         }
@@ -743,25 +747,30 @@ static void _check_screwer(void)
     for (i = 0; i < SIZEOF(_HeadAdjustmentBuffer); i++)
     {
         for (j = 1; j < SIZEOF(_HeadAdjustmentBuffer[i]); j++)
-        if (_HeadAdjustmentBuffer[i][j-1].steps == 0 && _HeadAdjustmentBuffer[i][j].steps != 0)
         {
-            _HeadAdjustmentBuffer[i][j - 1] = _HeadAdjustmentBuffer[i][j];
-            _HeadAdjustmentBuffer[i][j].steps = 0;
+            if (_HeadAdjustmentBuffer[i][j-1].steps == 0 && _HeadAdjustmentBuffer[i][j].steps != 0)
+            {
+                _HeadAdjustmentBuffer[i][j - 1] = _HeadAdjustmentBuffer[i][j];
+                _HeadAdjustmentBuffer[i][j].steps = 0;
+            }
         }
+        
     }
 
     for (i = 0; i < SIZEOF(_HeadAdjustmentBuffer); i++)
     {
         if (!_Status[i].info.moving && !_Status[i].robinfo.moving && !_Status[i].screwerinfo.moving && 
-                _HeadAdjustmentBuffer[i][0].steps && RX_PrinterStatus.printState == ps_off && _RobotCtrlMode[i] == ctrl_off &&
-                _Status[i].info.z_in_screw && _Status[i].info.ref_done)
+                _HeadAdjustmentBuffer[i][0].steps && RX_PrinterStatus.printState == ps_ready_power && (_RobotCtrlMode[i] == ctrl_off || _RobotCtrlMode[i] == ctrl_undef) &&
+                _Status[i].info.z_in_screw && _Status[i].info.ref_done && _Status[i].screwerinfo.screwed)
         {
-            steplb_adjust_heads(INVALID_SOCKET, &_HeadAdjustmentBuffer[i][0]);
+            headAdjustment = _HeadAdjustmentBuffer[i][0];
+            _HeadAdjustmentBuffer[i][0].steps = 0;
+            steplb_adjust_heads(INVALID_SOCKET, &headAdjustment);
         }
     }
 }
 
-void steplb_cluster_Screw_Turned()
+void steplb_cluster_Screw_Turned(int stepperNo)
 {
-    _ClusterScrewTurned = TRUE;
+    _ClusterScrewTurned[stepperNo] = TRUE;
 }

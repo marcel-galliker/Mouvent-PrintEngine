@@ -1246,45 +1246,65 @@ void ctrl_set_rob_pos(SRobPosition robposition, int blocked, int blocked_Axis)
 {
 	if (rx_def_is_lb(RX_Config.printer.type))
 	{
-        int board;
-        board = robposition.printBar * ((RX_Config.headsPerColor+MAX_HEADS_BOARD-1)/MAX_HEADS_BOARD) + robposition.head/MAX_HEADS_BOARD;
+        //int board;
+        //board = robposition.printBar * ((RX_Config.headsPerColor+MAX_HEADS_BOARD-1)/MAX_HEADS_BOARD) + robposition.head/MAX_HEADS_BOARD;
+        int clusterNo = robposition.printBar * RX_Config.headsPerColor/MAX_HEADS_BOARD + (robposition.head/MAX_HEADS_BOARD);
+
+        int stepperNo;
+        if (RX_Config.inkSupplyCnt % 2 == 0)
+            stepperNo = robposition.printBar / 2;
+        else
+            stepperNo = (robposition.printBar + 1) / 2;
         robposition.head = robposition.head % MAX_HEADS_BOARD;
         if (!blocked && robposition.head >= 0)
         {
-			robposition.angle -= RX_HBStatus[board].head[robposition.head].eeprom_mvt.rob_angle;
-			robposition.dist += RX_HBStatus[board].head[robposition.head].eeprom_mvt.rob_dist;
-			sok_send_2(&_HeadCtrl[board].socket, CMD_SET_ROB_POS, sizeof(robposition), &robposition);
+            robposition.angle += RX_HBStatus[clusterNo].head[robposition.head%HEAD_CNT].eeprom_mvt.rob_angle;
+            robposition.dist += RX_HBStatus[clusterNo].head[robposition.head%HEAD_CNT].eeprom_mvt.rob_dist;
+            sok_send_2(&_HeadCtrl[clusterNo].socket, CMD_SET_ROB_POS, sizeof(robposition), &robposition);
         }
         else if (blocked && blocked_Axis == AXE_DIST && robposition.head >= 0)
         {
-            robposition.angle = RX_HBStatus[board].head[robposition.head].eeprom_mvt.rob_angle;
-			sok_send_2(&_HeadCtrl[board].socket, CMD_SET_ROB_POS, sizeof(robposition), &robposition);
+            robposition.angle = RX_HBStatus[clusterNo].head[robposition.head].eeprom_mvt.rob_angle;
+            sok_send_2(&_HeadCtrl[clusterNo].socket, CMD_SET_ROB_POS, sizeof(robposition), &robposition);
         }
         else if (blocked && blocked_Axis == AXE_ANGLE)
         {
-            robposition.dist = RX_HBStatus[board].head[robposition.head].eeprom_mvt.rob_dist;
-			sok_send_2(&_HeadCtrl[board].socket, CMD_SET_ROB_POS, sizeof(robposition), &robposition);
+            robposition.dist = RX_HBStatus[clusterNo].head[robposition.head].eeprom_mvt.rob_dist;
+            sok_send_2(&_HeadCtrl[clusterNo].socket, CMD_SET_ROB_POS, sizeof(robposition), &robposition);
         }
         else if (robposition.head == -1)
         {
-            if ((RX_Config.stepper.robot->screwturns[robposition.printBar] != robposition.dist && blocked) || !blocked)
-                steplb_cluster_Screw_Turned();
+            if ((RX_Config.stepper.robot[stepperNo].screwturns[robposition.printBar] != robposition.dist && blocked) || !blocked)
+                steplb_cluster_Screw_Turned(stepperNo);
             if (!blocked)
-				RX_Config.stepper.robot->screwturns[robposition.printBar] += robposition.dist;
+            {
+                if (RX_Config.inkSupplyCnt % 2 == 0)
+					RX_Config.stepper.robot[stepperNo].screwturns[robposition.printBar%2] += robposition.dist;
+                else
+                    RX_Config.stepper.robot[stepperNo].screwturns[(robposition.printBar+1)%2] += robposition.dist;
+            }  
             else
-                RX_Config.stepper.robot->screwturns[robposition.printBar] = robposition.dist;
+            {
+                if (RX_Config.inkSupplyCnt % 2 == 0)
+					RX_Config.stepper.robot[stepperNo].screwturns[robposition.printBar%2] = robposition.dist;
+                else
+                    RX_Config.stepper.robot[stepperNo].screwturns[(robposition.printBar+1) % 2] = robposition.dist;
+            }
+               
         }
 	}
 }
 
 int ctrl_current_screw_pos(SHeadAdjustmentMsg *robposition)
 {
+    int clusterNo = robposition->printbarNo * RX_Config.headsPerColor/MAX_HEADS_BOARD + (robposition->headNo/MAX_HEADS_BOARD);
+                    
     if (robposition->headNo == -1)
         return RX_Config.stepper.robot->screwturns[robposition->printbarNo];
     else if (robposition->axis == AXE_ANGLE)
-		return RX_HBStatus[robposition->printbarNo].head[robposition->headNo%4].eeprom_mvt.rob_angle;
+        return RX_HBStatus[clusterNo].head[robposition->headNo%HEAD_CNT].eeprom_mvt.rob_angle;
     else if (robposition->axis == AXE_DIST)
-        return RX_HBStatus[robposition->printbarNo].head[robposition->headNo%4].eeprom_mvt.rob_dist;
+        return RX_HBStatus[clusterNo].head[robposition->headNo%HEAD_CNT].eeprom_mvt.rob_dist;
     else
         return -1;
 }

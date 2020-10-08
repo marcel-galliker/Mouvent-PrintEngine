@@ -28,7 +28,7 @@
 #define ROBI_STATUS_UPDATE_INTERVAL 250
 
 #define STEPS_PER_REV				51200
-#define DISTANCE_UM_PER_REV			36000
+#define DISTANCE_UM_PER_REV			36000           // 36000
 
 #define ROBI_MIN_MSG_ID		1
 #define ROBI_MAX_MSG_ID		UINT32_MAX
@@ -37,7 +37,7 @@
 #define ROBI_SERIAL_PORT	"/dev/ttyS0"
 
 #define TIME_BEFORE_TURN_SCREWER    2600            // us
-#define SCREW_MOVEMENT_CHECK_TIME   2000            // us
+#define SCREW_MOVEMENT_CHECK_TIME   1100            // us
 
 // define inputs
 #define SCREW_IN_DOWN 0
@@ -222,7 +222,7 @@ void robi_main(int ticks, int menu)
     if (_Loose_Screw_Time && rx_get_ticks() > _Loose_Screw_Time)
     {
         int val = 0;
-        if (RX_StepperStatus.screwerinfo.screwer_blocked_right || (!RX_StepperStatus.screwerinfo.screwer_blocked_left && RX_StepperStatus.screw_posY >= (SCREW_Y_BACK + SCREW_Y_FRONT) / 2))
+        if (RX_StepperStatus.screwerinfo.screwer_blocked_right || (!RX_StepperStatus.screwerinfo.screwer_blocked_left && RX_StepperStatus.screw_posY <= (SCREW_Y_BACK + SCREW_Y_FRONT) / 2))
             val = -213333;
         else
             val = +213333;
@@ -933,7 +933,6 @@ static void _check_Screwer_Movement()
         int _newScrewState = (_robiStatus.gpio.inputs & (1UL << SCREW_IN_REF));
         if (_Screwer_Moves_Time == 0 || _oldScrewState != _newScrewState)
         {
-            Error(LOG, 0, "NewState of Screwer = %d", _newScrewState);
             _Screwer_Moves_Time = rx_get_ticks() + SCREW_MOVEMENT_CHECK_TIME;
             _oldScrewState = _newScrewState;
         }
