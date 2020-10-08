@@ -50,18 +50,18 @@
                         <ColumnDefinition Width="auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Row="0" Grid.Column="0" Margin="10">Axis</TextBlock>
-                    <TextBlock Grid.Row="2" Grid.Column="0" Margin="10">Steps</TextBlock>
-                    <TextBlock Grid.Row="4" Grid.Column="0" Margin="10">PrintbarNo</TextBlock>
-                    <TextBlock Grid.Row="6" Grid.Column="0" Margin="10">HeadNo</TextBlock>
-                    <common:MvtNumBox Grid.Row="0" Grid.Column="1" Margin="5" Text="{Binding Axis}"></common:MvtNumBox>
-                    <common:MvtNumBox  Grid.Row="2" Grid.Column="1" Margin="5" Text="{Binding Steps}"></common:MvtNumBox>
-                    <common:MvtNumBox Grid.Row="4" Grid.Column="1" Margin="5" Text="{Binding PrintbarNo}"></common:MvtNumBox>
-                    <common:MvtNumBox  Grid.Row="6" Grid.Column="1" Margin="5" Text="{Binding HeadNo}"></common:MvtNumBox>
+                    <TextBlock Grid.Row="0" Grid.Column="0" Margin="10">PrintbarNo</TextBlock>
+                    <TextBlock Grid.Row="2" Grid.Column="0" Margin="10">HeadNo</TextBlock>
+                    <TextBlock Grid.Row="4" Grid.Column="0" Margin="10">Axis</TextBlock>
+                    <TextBlock Grid.Row="6" Grid.Column="0" Margin="10">Steps</TextBlock>
+                    <common:MvtNumBox Grid.Row="0" Grid.Column="1" Margin="5" Text="{Binding PrintbarNo}"></common:MvtNumBox>
+                    <common:MvtNumBox  Grid.Row="2" Grid.Column="1" Margin="5" Text="{Binding HeadNo}"></common:MvtNumBox>
+                    <common:MvtNumBox Grid.Row="4" Grid.Column="1" Margin="5" Text="{Binding Axis}"></common:MvtNumBox>
+                    <common:MvtNumBox  Grid.Row="6" Grid.Column="1" Margin="5" Text="{Binding Steps}"></common:MvtNumBox>
                     <TextBlock Grid.Row="0" Grid.Column="2" Margin="10"></TextBlock>
-                    <TextBlock Grid.Row="2" Grid.Column="2" Margin="10">1/6 Turn</TextBlock>
+                    <TextBlock Grid.Row="2" Grid.Column="2" Margin="10"></TextBlock>
                     <TextBlock Grid.Row="4" Grid.Column="2" Margin="10"></TextBlock>
-                    <TextBlock Grid.Row="6" Grid.Column="2" Margin="10"></TextBlock>
+                    <TextBlock Grid.Row="6" Grid.Column="2" Margin="10">1/6 Turn</TextBlock>
                     <!--
                     <common:MvtButton Grid.Row="0" Grid.Column="3" Margin="5" Grid.RowSpan="2" VerticalAlignment="Top"
                           Click="AngleInfo_Clicked" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeS}">

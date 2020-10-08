@@ -1251,13 +1251,13 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
                         {
                             diference = (RX_StepperStatus.screw_posY - RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwpositions[headAdjustment.printbarNo][headAdjustment.headNo][AXE_DIST].posY);
                             RX_StepperStatus.screwpositions[headAdjustment.printbarNo][i][AXE_ANGLE].posY += diference;
-                            RX_StepperStatus.screwpositions[headAdjustment.printbarNo][i][AXE_DIST].posY += diference;
+                            if (i != (HEADS_PER_COLOR-1)) RX_StepperStatus.screwpositions[headAdjustment.printbarNo][i][AXE_DIST].posY += diference;
                         }
                     }
                 }
                 _CmdScrewing++;
-                robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_DOWN, NULL);
                 RX_StepperStatus.screwerinfo.screwed = TRUE;
+                robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_DOWN, NULL);
             }
             break;
 
@@ -1288,10 +1288,7 @@ static void _search_all_screws()
         }
 
         int front_screw = (_SearchScrewNr + 1) % SCREWS_PER_HEAD;
-        int head_nr =
-            (((_SearchScrewNr % (SCREWS_PER_HEAD * HEADS_PER_COLOR)) + 1) /
-             COLORS_PER_STEPPER) -
-            1;
+        int head_nr = (((_SearchScrewNr % (SCREWS_PER_HEAD * HEADS_PER_COLOR)) + 1) / COLORS_PER_STEPPER) - 1;
         int head_Dist =
             (abs(CABLE_SCREW_POS_FRONT) - abs(CABLE_SCREW_POS_BACK)) / 7;
         int screw_Dist = 16400; // um

@@ -99,9 +99,6 @@ static int _CmdStarted = FALSE;
 
 static int _Search_Screw_Time = 0;
 static int _Loose_Screw_Time = 0;
-static int _Screwer_Moves_Time = 0;
-
-static int _Screwer_Blocked_Time = 0;
 static int _TargetPosition = 0;
 static int _Position_Correction;
 static int _Buffer_Cmd[10] = {0};
@@ -449,8 +446,6 @@ void robi_handle_menu(char *str)
 	{
 	case 's': robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_STOP, NULL); break;
 	case 'o':
-        // num[0] = str[1];
-        // val[0] = str[2];
         num = str[1] - '0';
         val = str[2] - '0';
         robi_set_output(num, val);
@@ -608,7 +603,6 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         _CmdRunning = 0;
         _Search_Screw_Time = 0;
         _Loose_Screw_Time = 0;
-        _Screwer_Moves_Time = 0;
         lb702_reset_variables();
         send_command(MOTOR_ESTOP, 0, NULL);
         break;
@@ -928,41 +922,13 @@ static void _check_Screwer_Movement()
 {
     int ticks;
     static int _oldScrewState = 0;
-    if ((_CmdRunning == CMD_ROBI_SCREW_RIGHT || _CmdRunning == CMD_ROBI_SCREW_LEFT) && !RX_StepperStatus.screwerinfo.screwer_blocked_left && !RX_StepperStatus.screwerinfo.screwer_blocked_right)
+    
+    if ((RX_StepperStatus.screwerinfo.screwer_blocked_left || RX_StepperStatus.screwerinfo.screwer_blocked_right) && _motors_move_done())
     {
-        int _newScrewState = (_robiStatus.gpio.inputs & (1UL << SCREW_IN_REF));
-        if (_Screwer_Moves_Time == 0 || _oldScrewState != _newScrewState)
-        {
-            _Screwer_Moves_Time = rx_get_ticks() + SCREW_MOVEMENT_CHECK_TIME;
-            _oldScrewState = _newScrewState;
-        }
-        
-        if (rx_get_ticks() > _Screwer_Moves_Time)
-        {
-            if (_CmdRunning == CMD_ROBI_SCREW_LEFT)
-                _NewCmd = CMD_ROBI_SCREW_RIGHT;
-            else if (_CmdRunning == CMD_ROBI_SCREW_RIGHT)
-                _NewCmd = CMD_ROBI_SCREW_LEFT;
-            _Screwer_Blocked_Time = rx_get_ticks() + SCREW_MOVEMENT_CHECK_TIME;
-            Error(ERR_CONT, 0, "Screwer blocked");
-            RX_StepperStatus.screwerinfo.screwer_blocked_left = _CmdRunning == CMD_ROBI_SCREW_LEFT;
-            RX_StepperStatus.screwerinfo.screwer_blocked_right = _CmdRunning == CMD_ROBI_SCREW_RIGHT;
-            _Screwer_Moves_Time = 0;
-            robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_STOP, NULL);
-        }
-    }
-    else
-    {
-        if (_Screwer_Blocked_Time && _motors_move_done() && rx_get_ticks() >= _Screwer_Blocked_Time)
-        {
-            _Screwer_Blocked_Time = 0;
-            ticks = 3;
-            uint8_t current = TRUE;
-            send_command(MOTOR_SET_SCREW_CURRENT, sizeof(current), &current);
-            robi_handle_ctrl_msg(INVALID_SOCKET, _NewCmd, &ticks);
-                
-        }
-        _Screwer_Moves_Time = 0;
+        ticks = 3;
+        uint8_t current = TRUE;
+        send_command(MOTOR_SET_SCREW_CURRENT, sizeof(current), &current);
+        robi_handle_ctrl_msg(INVALID_SOCKET, _NewCmd, &ticks);
     }
 }
 
@@ -1219,6 +1185,15 @@ static void* receive_thread(void *par)
                         {
                             if (rxMessage.length)
                             {
+                                if (rxMessage.error == MOTOR_STALLED && _CmdRunning)
+                                {
+                                    RX_StepperStatus.screwerinfo.screwer_blocked_left = _CmdRunning == CMD_ROBI_SCREW_LEFT;
+                                    RX_StepperStatus.screwerinfo.screwer_blocked_right = _CmdRunning == CMD_ROBI_SCREW_RIGHT;
+                                    if (_CmdRunning == CMD_ROBI_SCREW_LEFT)
+                                        _NewCmd = CMD_ROBI_SCREW_RIGHT;
+                                    else if (_CmdRunning == CMD_ROBI_SCREW_RIGHT)
+                                        _NewCmd = CMD_ROBI_SCREW_LEFT;
+                                }
                                 Error(ERR_CONT, 0, "Robi Error. Flag: %x, Message %s", rxMessage.error, rxMessage.data);
                             }
                             else

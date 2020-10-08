@@ -41,9 +41,11 @@ static RX_SOCKET		_step_socket[STEPPER_CNT]={0};
 
 static SStepperStat		_Status[STEPPER_CNT];
 static int				_AbortPrinting=FALSE;
-static int              _ClusterScrewTurned[STEPPER_CNT] = {0};
+static int              _ClusterScrewTurned[STEPPER_CNT] = {FALSE};
+static int              _ScrewPositions_Written[STEPPER_CNT] = {FALSE};
 static int              _WashStarted;
 static UINT32			_Flushed = 0x00;		// For capping function which is same than flushing (need to purge after cap)
+
 
 static int				_StatReadCnt[STEPPER_CNT];
 
@@ -669,11 +671,10 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
         stepperno = headAdjustment->printbarNo / 2;
     else
         stepperno = (headAdjustment->printbarNo+1) / 2;
-
-    _HeadAdjustment[stepperno] = *headAdjustment;
     
     if (!_Status[stepperno].info.moving && !_Status[stepperno].robinfo.moving && !_Status[stepperno].screwerinfo.moving)
     {
+        _HeadAdjustment[stepperno] = *headAdjustment;
         headAdjustment->printbarNo %= 2;
         sok_send(&_step_socket[stepperno], headAdjustment);
     }   
@@ -711,6 +712,7 @@ static void _check_screwer(void)
     int i, j;
     for (i = 0; i < SIZEOF(_Status); i++)
     {
+        if (_ScrewPositions_Written[i] == TRUE && !_Status[i].screwerinfo.screwer_blocked_left && !_Status[i].screwerinfo.screwer_blocked_right) _ScrewPositions_Written[i] = FALSE;
         ScrewPosition.printBar = _HeadAdjustment[i].printbarNo;
         ScrewPosition.head = _HeadAdjustment[i].headNo;
         if (_Status[i].screwerinfo.screwed && !_old_Screwer_State[i] && _step_socket[i])
@@ -722,7 +724,7 @@ static void _check_screwer(void)
 
             ctrl_set_rob_pos(ScrewPosition, FALSE, FALSE);
         }
-        else if (_Status[i].screwerinfo.screwer_blocked_left)
+        else if (_Status[i].screwerinfo.screwer_blocked_left && !_ScrewPositions_Written[i])
         {
             if (_HeadAdjustment[i].axis == AXE_DIST)
                 ScrewPosition.dist = MAX_STEPS_DIST;
@@ -730,8 +732,9 @@ static void _check_screwer(void)
                 ScrewPosition.angle = 0;
 
             ctrl_set_rob_pos(ScrewPosition, TRUE, _HeadAdjustment[i].axis);
+            _ScrewPositions_Written[i] = TRUE;
         }
-        else if (_Status[i].screwerinfo.screwer_blocked_right)
+        else if (_Status[i].screwerinfo.screwer_blocked_right && !_ScrewPositions_Written[i])
         {
             if (_HeadAdjustment[i].axis == AXE_DIST)
                 ScrewPosition.dist = 0;
@@ -739,6 +742,7 @@ static void _check_screwer(void)
                 ScrewPosition.angle = MAX_STEPS_ANGLE;
 
             ctrl_set_rob_pos(ScrewPosition, TRUE, _HeadAdjustment[i].axis);
+            _ScrewPositions_Written[i] = TRUE;
         }
         _old_Screwer_State[i] = _Status[i].screwerinfo.screwed;
     }
@@ -765,6 +769,7 @@ static void _check_screwer(void)
         {
             headAdjustment = _HeadAdjustmentBuffer[i][0];
             _HeadAdjustmentBuffer[i][0].steps = 0;
+            Error(LOG, 0, "Send Command of Printbar %d, Head %d, Axis %d to move %d Steps", headAdjustment.printbarNo, headAdjustment.headNo, headAdjustment.axis, headAdjustment.steps);
             steplb_adjust_heads(INVALID_SOCKET, &headAdjustment);
         }
     }
