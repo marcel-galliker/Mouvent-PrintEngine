@@ -64,7 +64,7 @@ namespace RX_DigiPrint.Models
         public ENFileType FileType
         {
             get { return _FileType; }
-            set { _FileType=value; }
+            set { if (_FileType==ENFileType.Undef) _FileType=value; }
         }       
 
         //--- Property DataFileName ---------------------------------------
@@ -84,7 +84,6 @@ namespace RX_DigiPrint.Models
                         _SrcWidth  = pq.SrcWidth;
                         _SrcHeight = pq.SrcHeight;
                         _Dots      = pq.Dots;
-                        _ScreenOnPrinter = pq.ScreenOnPrinter;
                         _SetDimension();
                     }
                     catch (Exception ex)
@@ -96,6 +95,7 @@ namespace RX_DigiPrint.Models
 
                 string preview = Dir.local_path(_FileName + "\\" + Path.GetFileName(_FileName) + ".bmp");
                 string labeldef = Dir.local_path(_FileName + "\\" + Path.GetFileName(_FileName) + ".rxd");
+                string runlist = Dir.local_path(_FileName + "\\" + Path.GetFileName(_FileName) + ".rlj");
                 if (!File.Exists(preview)) preview = Dir.local_path(_FileName + "\\" + Path.GetFileName(_FileName) + "_preview.bmp"); // wasatch rip
                 if (File.Exists(preview))
                 {                    
@@ -104,7 +104,7 @@ namespace RX_DigiPrint.Models
                         FileInfo info = new FileInfo(preview);
                         Date = info.LastWriteTime.ToString("d");//, CultureInfo.CreateSpecificCulture("en-US"));
                         Time = info.LastWriteTime.ToString("H:mm");
-                        _FileType = ENFileType.DataFile;
+                        FileType = File.Exists(runlist)? ENFileType.RunList : ENFileType.DataFile;
                         string thumb_name = info.Directory +"\\"+ Path.GetFileNameWithoutExtension(info.FullName) + ".bmp";
                         thumb_name = Path.GetTempPath() + "rx_thumb_nails\\"+thumb_name.Remove(0, info.Directory.Root.ToString().Length);
                         try
@@ -126,12 +126,12 @@ namespace RX_DigiPrint.Models
                 }
                 else if (File.Exists(labeldef))
                 {
-                    _FileType = ENFileType.DataFile;
+                    FileType = ENFileType.DataFile;
                     Preview = new BitmapImage(new Uri("..\\..\\Resources\\Bitmaps\\BarcodeFile.ico", UriKind.RelativeOrAbsolute));
                 }
                 else 
                 {   
-                    _FileType = ENFileType.Directory;
+                    FileType = ENFileType.Directory;
                     Dimension = null;
                     IsDirectory=true;
                 }
@@ -190,6 +190,7 @@ namespace RX_DigiPrint.Models
             else
                 Dimension = string.Format(" {0}mm x {1}mm (dots {2})", Math.Round(_SrcWidth, 1), Math.Round(_SrcHeight, 1), _Dots);
         }
+
         //--- _create_preview ---------------------------------------------
         private void _create_preview(FileInfo info, DirItem obj)
         {
@@ -302,8 +303,8 @@ namespace RX_DigiPrint.Models
             set { _IsDirectory = value; }
         }
 
-        //--- Property Preview ----------------------
-        private ImageSource _Preview;
+		//--- Property Preview ----------------------
+		private ImageSource _Preview;
         public ImageSource Preview
         {
             get { return _Preview; }
@@ -318,12 +319,27 @@ namespace RX_DigiPrint.Models
             }
         }
 
-        //--- Property PrintButtonVisibility ---------------------------------------
-        private Visibility _PrintButtonVisibility = Visibility.Collapsed;
+		//--- Property FileTypeVisible ---------------------------------------
+		private Visibility _FileTypeVisible = Visibility.Visible;
+		public Visibility FileTypeVisible
+		{
+			get { return _FileTypeVisible; }
+			set { SetProperty(ref _FileTypeVisible,value); }
+		}
+
+		//--- Property PrintButtonVisibility ---------------------------------------
+		private Visibility _PrintButtonVisibility = Visibility.Collapsed;
         public Visibility PrintButtonVisibility
         {
             get { return _PrintButtonVisibility; }
-            set { SetProperty(ref _PrintButtonVisibility, value);}
+            set 
+            { 
+                if(SetProperty(ref _PrintButtonVisibility, value))
+				{
+                    if (_PrintButtonVisibility==Visibility.Visible) FileTypeVisible = Visibility.Collapsed;
+                    else FileTypeVisible = Visibility.Visible;
+				}
+            }
         }
 
         //--- Property PrintButtonVisibility ---------------------------------------

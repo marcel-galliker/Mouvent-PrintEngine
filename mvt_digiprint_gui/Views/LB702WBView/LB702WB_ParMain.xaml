@@ -10,8 +10,8 @@
              xmlns:local="clr-namespace:RX_DigiPrint.Views.LB701UVView"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              mc:Ignorable="d"            
-             d:DesignHeight="800"
-             d:DesignWidth="700"
+             d:DesignHeight="500"
+             d:DesignWidth="900"
              >
     <UserControl.Resources>
         <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">32</sys:Double>
@@ -200,7 +200,7 @@
 
                             <rx_uc:PlcParCtrl Grid.Row="5" ID="PAR_DRYER3_IR_LAMPS_ZONE1_SETPOINT"     Label="Zone 1"       Unit="°C" UnitWidth="50" Format="1" />
                             <rx_uc:PlcParCtrl Grid.Row="6" ID="PAR_DRYER3_IR_LAMPS_ZONE2_SETPOINT"     Label="Zone 2"       Unit="°C" UnitWidth="50" Format="1" />
-                            <rx_uc:PlcParCtrl Grid.Row="7" ID="PAR_DRYER3_IR_LAMPS_ZONE3_SETPOINT"     Label="Zone 3"       Unit="°C" UnitWidth="50" Format="1" Visibility="Hidden" />
+                            <rx_uc:PlcParCtrl Grid.Row="7" ID="PAR_DRYER3_IR_LAMPS_ZONE3_SETPOINT"     Label="Zone 3"       Unit="°C" UnitWidth="50" Format="1" />
                             <rx_uc:PlcParCtrl Grid.Row="8" ID="PAR_DRYER3_BUSES_UP_SETPOINT"           Label="Buses"     Unit="Pa" UnitWidth="50" Format="n" />
                             <rx_uc:PlcParCtrl Grid.Row="9" ID="PAR_DRYER3_EXHAUST_UP_SETPOINT"         Label="Exhaust"   Unit="Pa" UnitWidth="50" Format="n" />
                             <rx_uc:PlcParCtrl Grid.Row="10" ID="PAR_DRYER3_BUSES_DOWN_SETPOINT"         Label="Buses Down"   Unit="Pa" UnitWidth="50" Format="n" Visibility="Collapsed" />

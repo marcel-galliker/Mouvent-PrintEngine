@@ -75,7 +75,15 @@
         </ig:XamGrid.ExpansionIndicatorSettings>
         -->
             <ig:XamGrid.Columns>
-                <ig:ImageColumn    Key="FileType"    HeaderText=""        IsSortable="False" Width="auto"  ValueConverter="{StaticResource FileTypeImage_Converter}" ImageHeight="32"/>
+            <!--    <ig:ImageColumn    Key="FileType"    HeaderText=""        IsSortable="False" Width="auto"  ValueConverter="{StaticResource FileTypeImage_Converter}" ImageHeight="32"/> -->
+                <ig:TemplateColumn     Key="FileType"     HeaderText=" "    IsSortable="False" Width="auto" >
+                    <ig:TemplateColumn.ItemTemplate>
+                        <DataTemplate>
+                            <iconPacks:PackIconMaterial Kind="{Binding FileType, Converter={StaticResource FileTypeImage_Converter}}" Visibility="{Binding FileTypeVisible}" Height="30" Width="30"/>
+                        </DataTemplate>
+                    </ig:TemplateColumn.ItemTemplate>
+                </ig:TemplateColumn>
+                
                 <ig:TemplateColumn Key="FileName"    HeaderText="File"    IsSortable="True"  Width="auto"  ValueConverter="{StaticResource FileName_Converter}" SortComparer="{StaticResource FileName_Comparer}">
                     <ig:TemplateColumn.ItemTemplate>
                         <DataTemplate>
