@@ -46,6 +46,7 @@
             <rx_uc:MouventTopToolBar Grid.Row="0" HorizontalAlignment="Right"></rx_uc:MouventTopToolBar>
 
             <StackPanel Background="{StaticResource Mouvent.MainColorBrush}" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left">
+                <!--
                 <common:MvtButton  Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" x:Name="SearchButton" Click="Search_clicked" Margin="15, 5, 15, 5">
                     <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center"
                         Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20" Kind="Magnify"></iconPacks:PackIconMaterial>
@@ -60,7 +61,6 @@
                         <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center"
                         Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="10" Height="10" Kind="ArrowUp"></iconPacks:PackIconMaterial>
                     </StackPanel>
-
                 </common:MvtButton>
 
                 <common:MvtButton Margin="0, 0, 15, 0" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" x:Name="SearchDown" ToolTip="Go to oldest Message" Click="SearchDown_clicked" >
@@ -76,6 +76,7 @@
                     <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center"
                         Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Margin="3, 0, 0, 0" Width="20" Height="20" Kind="Export"></iconPacks:PackIconMaterial>
                 </common:MvtButton>
+                -->
 
                 <common:MvtButton Margin="0, 0, 15, 0" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" x:Name="MoveTop" ToolTip="Go to oldest Message" Click="Top_clicked" >
                     <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center"

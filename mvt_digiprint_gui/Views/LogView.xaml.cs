@@ -31,7 +31,7 @@ namespace RX_DigiPrint.Views
             Console.WriteLine("Product: {0} v ({1})", FVI.ProductName, FVI.ProductVersion);
             Console.WriteLine("File: {0} v ({1})", FVI.FileName, FVI.FileVersion);
 
-            Search_clicked(this, null);
+            //Search_clicked(this, null);
 
             RxGlobals.Log.List.CollectionChanged += Log_CollectionChanged;
             LogGrid_SizeChanged(this, null);
@@ -144,7 +144,7 @@ namespace RX_DigiPrint.Views
             
             RxGlobals.RxInterface.SendMsg(TcpIp.CMD_REQ_LOG, ref msg);
         }
-
+/*
         //--- Search_clicked ----------------------------------------------------------
         private void Search_clicked(object sender, System.Windows.RoutedEventArgs e)
         {
@@ -192,7 +192,7 @@ namespace RX_DigiPrint.Views
 
             RxGlobals.RxInterface.SendMsg(TcpIp.CMD_EXPORT_LOG, ref msg);
         }
-
+*/
         //--- Top_clicked ----------------------------------------------------------
         private void Top_clicked(object sender, System.Windows.RoutedEventArgs e)
         {
