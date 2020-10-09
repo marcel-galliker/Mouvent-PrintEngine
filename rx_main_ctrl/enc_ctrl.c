@@ -289,6 +289,7 @@ static void _enc_start_printing(int no, SPrintQueueItem *pitem, int restart)
 	msg.restart		= restart;
 	msg.simulation  = arg_simuEncoder;
 	msg.printerType = RX_Config.printer.type;
+	msg.encoderType = RX_Config.printer.encoderType;
 	// if (arg_testMachine) msg.printerType=printer_LB701;
 
 	if (pitem->printGoMode==PG_MODE_MARK) msg.printGoMode = PG_MODE_MARK_FILTER;

@@ -554,8 +554,8 @@ void fpga_enc_config(int inNo, SEncoderCfg *pCfg, int restart)
 		if(!tw8_present()) Error(ERR_CONT, 0, "No Communication to analog encoder board");
 	}
 		
-	tw8_config(0, pCfg->speed_mmin, pCfg->printerType);
-	tw8_config(1, pCfg->speed_mmin, pCfg->printerType);
+	tw8_config(0, pCfg->speed_mmin, pCfg->printerType, pCfg->encoderType);
+	tw8_config(1, pCfg->speed_mmin, pCfg->printerType, pCfg->encoderType);
 
 //	_SpeedCfg_hz = (int)(pCfg->speed_mmin / 60.0 * 1200 / 25.4);
 	

@@ -124,8 +124,8 @@ int tw8_init(void)
 	
 	rx_sleep(500); // Wait for Analog-Encoder-Board to be ready
 	
-	tw8_config(0, 60, printer_TX801);
-	tw8_config(1, 60, printer_TX801);
+	tw8_config(0, 60, printer_TX801, enc_Balluff);
+	tw8_config(1, 60, printer_TX801, enc_Balluff);
 	
 	return REPLY_OK;
 }
@@ -196,7 +196,7 @@ int tw8_menu_cmd(char *str)
 }
 
 //--- tw8_config ---------------------------------
-int	tw8_config(int chip, int speed_mminn, EPrinterType printerType)
+int	tw8_config(int chip, int speed_mminn, EPrinterType printerType, EEncoderType encoderType)
 {
 	STW8_CFG_Regs cfg;
 	memset(&cfg, 0, sizeof(cfg));
@@ -213,10 +213,14 @@ int	tw8_config(int chip, int speed_mminn, EPrinterType printerType)
 	
 	// cfg.MAIN_INTER
 	if(rx_def_is_scanning(printerType))	cfg.MAIN_INTER	= 2000; // 16bit // AB Output Resolution in Edges
-	else								cfg.MAIN_INTER	= 1000; // 16bit // AB Output Resolution in Edges
-	
-	// cfg.MAIN_HYST
-	cfg.MAIN_HYST			= 0x0f; // 9bit // hyst = MAIN_HYSTx360/8192 // max 1FF // 0x00;  // Signal Path Output Hysteresis
+	else if (encoderType == enc_Renishaw)
+        cfg.MAIN_INTER = 2042; // 16bit // AB Output Resolution in Edges
+    else
+        cfg.MAIN_INTER = 1000; // 16bit // AB Output Resolution in Edges
+
+        // cfg.MAIN_HYST
+        cfg.MAIN_HYST = 0x0f; // 9bit // hyst = MAIN_HYSTx360/8192 // max 1FF //
+                              // 0x00;  // Signal Path Output Hysteresis
 	
 	//cfg.MAIN_FLTR.reg		= 0x72;
 	cfg.MAIN_FLTR.fb		= 0x0; // 1bit // Output Filter Feedback Path Delay
@@ -233,9 +237,10 @@ int	tw8_config(int chip, int speed_mminn, EPrinterType printerType)
 	cfg.MAIN_CLOCK.freq		= 0x0; // 4bit // Internal Oscillator Frequency Tuning
 	cfg.MAIN_CLOCK.xforce	= 0x1; // 1bit // Clock Source on Low Power
 	// cfg.MAIN_ZPOS
-	cfg.MAIN_ZPOS			= 0x00; // 14bit //  0x00; //0x72; // Z Output Index Position
-	
-	//cfg.MAIN_Z.reg		= 0x00; 
+    if (encoderType == enc_Renishaw) cfg.MAIN_ZPOS = 0x800; // 14bit // Z Output Index Position
+    else							 cfg.MAIN_ZPOS = 0x00; // 14bit //  0x00; //0x72; // Z Output Index Position
+
+    //cfg.MAIN_Z.reg		= 0x00; 
 	cfg.MAIN_Z.th			= 0x00; // 5bit //
 	cfg.MAIN_Z.reset		= 0x0; // 1bit //
 	

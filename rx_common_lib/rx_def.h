@@ -470,6 +470,7 @@ int rx_printMode_is_test(int printMode);
 typedef struct SPrinterCfg
 {
 	EPrinterType	type;
+	EEncoderType	encoderType;
 
 	UINT16	inkSupplyCnt;
 
@@ -903,6 +904,7 @@ typedef struct SEncoderCfg
 	INT32	corrRotPar[4];					// parameters for CORR_ROTATIVE
 	INT32	ftc;							// Flight Time Compensation
 	EPrinterType	printerType;
+	EEncoderType	encoderType;
 } SEncoderCfg;
 	
 typedef struct SEncoderPgDist

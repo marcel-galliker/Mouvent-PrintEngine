@@ -4,14 +4,6 @@ Testing a LB701 job
 from util_gui import PrinterTests
 import time
 
-# hack to ensure we stop all thread if unexpected exception
-import sys
-hook = sys.excepthook
-def excepthook(type, value, traceback):
-    sys.excepthook = hook
-    LB.tearDownClass()
-    hook(type, value, traceback)
-sys.excepthook = excepthook
 
 class LB(PrinterTests):
     def bmp_name(self, color, id, copies, width):

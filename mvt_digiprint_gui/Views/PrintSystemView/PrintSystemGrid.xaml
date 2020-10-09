@@ -46,6 +46,17 @@
             <TextBlock   Grid.Row="3" Grid.Column="0" Text="Heads/Color" Margin="0, 0, 0, 5"/>
             <common:MvtNumBox Grid.Row="3" Grid.Column="1" Text="{Binding HeadsPerColor}" Margin="0, 0, 0, 5"/>
 
+            <TextBlock Grid.Row="4" Grid.Column="0" Text="Encoders Type" Margin="0, 0, 10, 5" x:Name="EncoderType"/>
+            <igWPF:XamComboEditor Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" Margin="0, 0, 0, 5" x:Name="EncoderChoice"
+                    HorizontalAlignment="Stretch"
+                    ItemsSource="{Binding EncoderTypeList}"
+                    Value="{Binding EncoderType}"
+                    DisplayMemberPath="Display"
+                    ValuePath="Value"
+                    DropDownResizeMode="None"
+                    >
+            </igWPF:XamComboEditor>
+
             <!--
         <TextBlock   Grid.Row="3" Grid.Column="0" Text="External Data"/>
         <common:MvtNumBox Grid.Row="3" Grid.Column="1" Text="{Binding ExternalData}"/>

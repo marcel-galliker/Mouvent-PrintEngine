@@ -10,7 +10,7 @@ from selenium.webdriver.support.wait import WebDriverWait, TimeoutException
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
-
+from selenium.common.exceptions import NoSuchElementException
 
 from PIL import Image
 Image.MAX_IMAGE_PIXELS = None
@@ -24,6 +24,7 @@ class PrinterTests(unittest.TestCase):
     head_ctrl = None
     main_ctrl = None
     spooler_ctrl = None
+    print_id = 0
     @classmethod
     def setUpClass(self):
         # save config
@@ -31,20 +32,32 @@ class PrinterTests(unittest.TestCase):
         if d.exists():
             shutil.copy2("D:/radex/user/config.cfg", "D:/radex/user/config.cfg.ori")
             shutil.copy2("D:/radex/user/user.config", "D:/radex/user/user.config.ori")
-            # remove queue to ensure nothing to print
-            if os.path.exists("D:/radex/user/print_queue.xml"):
-                os.replace("D:/radex/user/print_queue.xml", "D:/radex/user/print_queue.xml.ori")
             if os.path.exists("D:/radex/user/network.cfg"):
                 os.replace("D:/radex/user/network.cfg", "D:/radex/user/network.cfg.ori")
         else:
             d.mkdir(parents=True)
-        self.print_id = 0
         Path("D:/ripped-data").mkdir(exist_ok=True)
         #copy config
         shutil.copy2("test/conf/%s/config.cfg" % self.__name__, "D:/radex/user")
         shutil.copy2("test/conf/user.config", "D:/radex/user")
         shutil.copy2("test/conf/network.cfg", "D:/radex/user")
         shutil.copytree("test/conf/waveform", "D:/radex/waveform", dirs_exist_ok=True)
+        self.start()
+
+    @classmethod 
+    def start(self):
+        # hack to ensure we stop all thread if unexpected exception
+        import sys
+        def excepthook(type, value, traceback):
+            print(80*"*")
+            sys.excepthook = sys.__excepthook__
+            self.tearDownClass()
+            sys.__excepthook__(type, value, traceback)
+        sys.excepthook = excepthook
+
+        # remove queue to ensure nothing to print
+        if os.path.exists("D:/radex/user/print_queue.xml"):
+            os.replace("D:/radex/user/print_queue.xml", "D:/radex/user/print_queue.xml.ori")
 
         #set up appium and start GUI
         desired_caps = { "app" : os.path.join(os.getcwd(), r"bin\gui\RX_DigiPrint.exe"),
@@ -71,7 +84,6 @@ class PrinterTests(unittest.TestCase):
         self.head_ctrl = threading.Thread(target=head_ctrl.run)
         self.head_ctrl.start()
 
-
     @classmethod
     def read_configuration(self):
         # read printer configuration
@@ -79,6 +91,7 @@ class PrinterTests(unittest.TestCase):
         self.coloroffset = []
         self.head = int(root.attrib["HeadsPerColor"])
         self.colors = []
+        self.printer = root.find("Printer").attrib["type"]
         convcol = {"Black": "K", "Cyan": "C", "Magenta": "M", "Yellow": "Y"}
         for ink in root.iter('InkSupply'):
             if ink.attrib["InkName"]:
@@ -149,20 +162,32 @@ class PrinterTests(unittest.TestCase):
 
     def get_counters(self):
         "return the 2 counter (actual, total) as float"
-        actual = float(self.driver.find_element_by_xpath("//Text[@AutomationId='CounterUnit1']/following-sibling::Text").text.replace(",","."))
-        total = float(self.driver.find_element_by_xpath("//Text[@AutomationId='CounterUnit2']/following-sibling::Text").text.replace(",","."))
+        actual = float(self.driver.find_element_by_xpath("//Text[@AutomationId='CounterUnit1']/following-sibling::Text").text.replace(",",".").replace(" ",""))
+        total = float(self.driver.find_element_by_xpath("//Text[@AutomationId='CounterUnit2']/following-sibling::Text").text.replace(",",".").replace(" ",""))
         return (actual, total)
 
     def reset_counter(self):
         "reset actual counter"
-        cnt = WebDriverWait(self.driver, 5).until(expected_conditions.element_to_be_clickable(("accessibility id", "CounterUnit2")))
+        cnt = WebDriverWait(self.driver, 15).until(expected_conditions.element_to_be_clickable(("accessibility id", "CounterUnit2")))
         cnt.click()
         self.accept_all()
 
     def select_job(self, job):
         # click on the element does not work (pb with XAMGrid), so we got it with arrows
         g = WebDriverWait(self.driver, 5).until(expected_conditions.visibility_of_element_located(("name", "DirGrid")))
-        jobpane = g.find_element_by_xpath("//DataItem[@Name='"+job+"']/parent::*")
+        jobpane = None
+        previous = None
+        while jobpane is None: # to display all existing jobs
+            g.send_keys(Keys.PAGE_DOWN) 
+            try:
+                jobpane = g.find_element_by_xpath("//DataItem[@Name='"+job+"']/parent::*")
+            except NoSuchElementException:
+                first = g.find_element_by_class_name("CellsPanel").get_attribute("Name") 
+                if first == previous:
+                    raise
+                else:
+                    previous = first 
+
         g.send_keys(2 * Keys.HOME + int(jobpane.get_attribute("Name")) * Keys.ARROW_DOWN + Keys.ARROW_RIGHT + Keys.ARROW_LEFT)
         jobpane.find_element_by_class_name("Button").click()
     
@@ -177,7 +202,7 @@ class PrinterTests(unittest.TestCase):
         self.select_job(job)
         
         if length is not None:
-            box = self.driver.find_element_by_accessibility_id(self.lenbox)
+            box = WebDriverWait(self.driver, 5).until(expected_conditions.element_to_be_clickable(("accessibility id", self.lenbox)))
             self.enter_value(box, length)
             # ensure we are in copy mode
             f = self.driver.find_element_by_name("copies")
@@ -249,6 +274,9 @@ class PrinterTests(unittest.TestCase):
                     if  (not self.scan and bmp.newcopy):
                         end = ori.width
                         used = False
+                    if not os.path.exists(bmp.name):
+                        import time
+                        time.sleep(5) # wait for thread to finish
                     im = Image.open(bmp.name)
                     if im.size != (1, 1): 
                         used = True

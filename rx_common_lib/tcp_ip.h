@@ -624,6 +624,7 @@ typedef struct
 	SMsgHdr			hdr;
 	char			hostName[64];
 	EPrinterType	type;
+	EEncoderType	encoderType;
 	UINT32			overlap;
 	SOffsetCfg		offset;
 	INT32			externalData;

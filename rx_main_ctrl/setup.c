@@ -115,6 +115,8 @@ int setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action)
 	if (setup_chapter(file, "Printer", -1, action)==REPLY_OK) 
 	{
 		setup_int32(file, "type", action, (int*)&pcfg->printer.type, printer_undef);
+		setup_int32(file, "encoderType", action, (int*)&pcfg->printer.encoderType, enc_Balluff);
+
 		setup_uint32(file, "overlap", action, &pcfg->printer.overlap, TRUE);
 		if (pcfg->printer.type!=printer_TX801 && pcfg->printer.type!=printer_TX802 && pcfg->printer.type!=printer_test_table)	pcfg->printer.overlap = TRUE;
 		setup_uint32(file, "externalData", action, &pcfg->externalData, FALSE);
