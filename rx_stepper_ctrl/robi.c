@@ -559,6 +559,8 @@ void robi_display_status(void)
     term_printf("Ref: \t\t\t %d\n", _robiStatus.isInRef);
     term_printf("Robi blocked left: \t %d\n", RX_StepperStatus.screwerinfo.screwer_blocked_left);
     term_printf("Robi blocked right: \t %d\n", RX_StepperStatus.screwerinfo.screwer_blocked_right);
+    for (i = 0; i < SIZEOF(_robiStatus.motors); i++)
+        term_printf("Robi motor %d stalled: \t %d\n", i, _robiStatus.motors[i].isStalled);
 }
 
 static void robi_set_output(int num, int val)
@@ -923,7 +925,7 @@ static void _check_Screwer_Movement()
     int ticks;
     static int _oldScrewState = 0;
     
-    if ((RX_StepperStatus.screwerinfo.screwer_blocked_left || RX_StepperStatus.screwerinfo.screwer_blocked_right) && _motors_move_done())
+    if ((RX_StepperStatus.screwerinfo.screwer_blocked_left || RX_StepperStatus.screwerinfo.screwer_blocked_right) && _motors_move_done() && _NewCmd)
     {
         ticks = 3;
         uint8_t current = TRUE;
@@ -1064,16 +1066,14 @@ static void* update_thread(void *par)
 
             if (available_data > 64)
             {
-                if (REPLY_OK == send_command(BOOTLOADER_WRITE_DATA_CMD,
-                                             64, currentData))
+                if (REPLY_OK == send_command(BOOTLOADER_WRITE_DATA_CMD, 64, currentData))
                 {
                     currentData += 64;
                 }
             }
             else
             {
-                if (REPLY_OK == send_command(BOOTLOADER_WRITE_DATA_CMD,
-                                             available_data, currentData))
+                if (REPLY_OK == send_command(BOOTLOADER_WRITE_DATA_CMD, available_data, currentData))
                 {
                     currentData += available_data;
                 }
@@ -1195,13 +1195,12 @@ static void* receive_thread(void *par)
                                         _NewCmd = CMD_ROBI_SCREW_LEFT;
                                 }
                                 Error(ERR_CONT, 0, "Robi Error. Flag: %x, Message %s", rxMessage.error, rxMessage.data);
+                                memset(rxMessage.data, 0x00, sizeof(rxMessage.data));
                             }
                             else
                             {
                                 Error(ERR_CONT, 0, "Robi Error. Flag: %x", rxMessage.error);
                             }
-                            //if (rxMessage.error != MOTOR_TIMEOUTED)
-                              //  robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_STOP, NULL);
                         }
                     }
                     else

@@ -543,6 +543,11 @@ void lbrob_main(int ticks, int menu)
     else
         j = 0;
 
+    if (!_CmdSearchScrews && !_CmdScrewing && !RX_StepperStatus.info.moving && !RX_StepperStatus.robinfo.moving && !RX_StepperStatus.screwerinfo.moving)
+        RX_StepperStatus.screwerinfo.screwer_ready = TRUE;
+    else
+        RX_StepperStatus.screwerinfo.screwer_ready = FALSE;
+
     if (_CmdSearchScrews)
     {
         _CmdScrewing = 0;
@@ -555,6 +560,7 @@ void lbrob_main(int ticks, int menu)
         _turn_screw(_HeadAdjustment);
     else
         memset(&_HeadAdjustment, 0, sizeof(_HeadAdjustment));
+    
 }
 
 //---_micron_2_steps --------------------------------------------------------------
@@ -796,10 +802,6 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 {
     int val, pos;
     int screw_nr, screw_turn;
-    if (socket != -1 && msgId != CMD_CFG_SCREW_POS)
-    {
-        _CmdScrewing = 0;
-    }
 
     switch (msgId)
     {
@@ -1060,6 +1062,8 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
 static void _turn_screw(SHeadAdjustment headAdjustment)
 {
     int screwNr, screwSteps, pos, diference;
+    static int cmd_Time;
+    static int max_Wait_Time = 40000; // ms
     
     screwNr = headAdjustment.printbarNo * HEADS_PER_COLOR * SCREWS_PER_HEAD + headAdjustment.headNo * SCREWS_PER_HEAD + headAdjustment.axis + 1;
     screwSteps = headAdjustment.steps;
@@ -1088,9 +1092,18 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
             _CmdScrewing = 0;
             return;
         }
+        if (cmd_Time && rx_get_ticks() > cmd_Time)
+        {
+            Error(ERR_CONT, 0, "Robot stock in turning screw step %d at printbar %d, head %d, axis %d", _CmdScrewing, _HeadAdjustment.printbarNo, _HeadAdjustment.headNo, _HeadAdjustment.axis);
+            cmd_Time = 0;
+            _CmdScrewing = 0;
+            return;
+        }
         if (!_CmdScrewing && _check_in_screw_pos(headAdjustment))   _CmdScrewing = 4;
         if (_CmdScrewing == 0)                                      correction_value = 0;
         if (_CmdScrewing != 6)                                      wait_time = 0;
+        
+        
         
         switch (_CmdScrewing)
         {
@@ -1102,6 +1115,7 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
             if (_HeadPos != pos)
                 lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_MOVE_POS, &pos);
             _CmdScrewing++;
+            cmd_Time = rx_get_ticks() + max_Wait_Time;
             break;
 
         case 1:
@@ -1122,6 +1136,7 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
                     pos = SCREW_Y_BACK + correction_value;
                 robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_Y, &pos);
                 _CmdScrewing++;
+                cmd_Time = rx_get_ticks() + max_Wait_Time;
             }
             break;
         case 2:
@@ -1144,6 +1159,7 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
                     pos = SCREW_X_RIGHT;
                 robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_X, &pos);
                 _CmdScrewing++;
+                cmd_Time = rx_get_ticks() + max_Wait_Time;
             }
             break;
 
@@ -1152,6 +1168,7 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
             {
                 lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_SCREW, NULL);
                 _CmdScrewing++;
+                cmd_Time = rx_get_ticks() + max_Wait_Time;
             }
             break;
 
@@ -1161,6 +1178,7 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
                 robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_UP, NULL);
                 _CmdScrewing++;
                 _TimeSearchScrew = rx_get_ticks();
+                cmd_Time = rx_get_ticks() + max_Wait_Time;
             }
             break;
 
@@ -1186,6 +1204,7 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
                     RX_StepperStatus.screwerinfo.screw_loosed = TRUE;
                 }
                 _CmdScrewing++;
+                cmd_Time = rx_get_ticks() + max_Wait_Time;
             }
             else if (_TimeSearchScrew && rx_get_ticks() > _TimeSearchScrew + SCREW_SEARCHING_TIME)
             {
@@ -1201,6 +1220,7 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
                 else
                     correction_value *= (-1);
                 _CmdScrewing = 1;
+                cmd_Time = rx_get_ticks() + max_Wait_Time;
             }
             else if (!RX_StepperStatus.screwerinfo.moving)
             {
@@ -1222,6 +1242,7 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
                         robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_RIGHT, &screwSteps);
                     }
                     _CmdScrewing++;
+                    cmd_Time = rx_get_ticks() + max_Wait_Time;
                 }
             }
             break;
@@ -1258,12 +1279,16 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
                 _CmdScrewing++;
                 RX_StepperStatus.screwerinfo.screwed = TRUE;
                 robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_DOWN, NULL);
+                cmd_Time = rx_get_ticks() + max_Wait_Time;
             }
             break;
 
         case 8:
             if (RX_StepperStatus.screwerinfo.z_in_down)
+            {
                 _CmdScrewing = 0;
+                cmd_Time = 0;
+            }
             break;
         }
     }

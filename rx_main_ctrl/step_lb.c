@@ -45,6 +45,7 @@ static int              _ClusterScrewTurned[STEPPER_CNT] = {FALSE};
 static int              _ScrewPositions_Written[STEPPER_CNT] = {FALSE};
 static int              _WashStarted;
 static UINT32			_Flushed = 0x00;		// For capping function which is same than flushing (need to purge after cap)
+static int              _ScrewCommandSend[STEPPER_CNT] = {FALSE};
 
 
 static int				_StatReadCnt[STEPPER_CNT];
@@ -672,7 +673,7 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
     else
         stepperno = (headAdjustment->printbarNo+1) / 2;
     
-    if (!_Status[stepperno].info.moving && !_Status[stepperno].robinfo.moving && !_Status[stepperno].screwerinfo.moving)
+    if (_Status[stepperno].screwerinfo.screwer_ready && !(_HeadAdjustmentBuffer[stepperno][0].steps && _Status[stepperno].info.z_in_screw))
     {
         _HeadAdjustment[stepperno] = *headAdjustment;
         headAdjustment->printbarNo %= 2;
@@ -760,17 +761,20 @@ static void _check_screwer(void)
         }
         
     }
+    
 
     for (i = 0; i < SIZEOF(_HeadAdjustmentBuffer); i++)
     {
-        if (!_Status[i].info.moving && !_Status[i].robinfo.moving && !_Status[i].screwerinfo.moving && 
-                _HeadAdjustmentBuffer[i][0].steps && RX_PrinterStatus.printState == ps_ready_power && (_RobotCtrlMode[i] == ctrl_off || _RobotCtrlMode[i] == ctrl_undef) &&
-                _Status[i].info.z_in_screw && _Status[i].info.ref_done && _Status[i].screwerinfo.screwed)
+        if (_ScrewCommandSend[i] == TRUE && _Status[i].screwerinfo.screwer_ready == FALSE)
+            _ScrewCommandSend[i] = FALSE;
+        
+        if (_HeadAdjustmentBuffer[i][0].steps && RX_PrinterStatus.printState == ps_ready_power && (_RobotCtrlMode[i] == ctrl_off || _RobotCtrlMode[i] == ctrl_undef) &&
+                _Status[i].info.z_in_screw && _Status[i].info.ref_done && _Status[i].screwerinfo.screwer_ready && _ScrewCommandSend[i] == FALSE)
         {
             headAdjustment = _HeadAdjustmentBuffer[i][0];
             _HeadAdjustmentBuffer[i][0].steps = 0;
-            Error(LOG, 0, "Send Command of Printbar %d, Head %d, Axis %d to move %d Steps", headAdjustment.printbarNo, headAdjustment.headNo, headAdjustment.axis, headAdjustment.steps);
             steplb_adjust_heads(INVALID_SOCKET, &headAdjustment);
+            _ScrewCommandSend[i] = TRUE;
         }
     }
 }
