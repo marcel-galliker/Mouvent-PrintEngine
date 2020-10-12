@@ -17,6 +17,7 @@
 #include "rx_threads.h"
 #include "rx_mem.h"
 #include "errno.h"
+#include "assert.h"
 
 static HANDLE _Mutex = NULL;
 
@@ -30,6 +31,10 @@ static UINT64 _SizeAllocated=0;
 
 typedef struct
 {
+#ifdef DEBUG
+	#define MAGIC 0xdbdbdead
+	INT32 magic; // to check in debug that rx_mem is used on a right buffer
+#endif
 	INT32   count;
 	UINT64  size;
 	HANDLE	sem_IsFree;
@@ -74,6 +79,9 @@ BYTE* rx_mem_alloc(UINT64 size)
 		buf->count=0;
 		buf->sem_IsFree = rx_sem_create();
 		buf->size = size;
+#ifdef DEBUG
+        buf->magic = MAGIC;
+#endif 
 		return &buf->data[0];
 	}
 	return NULL;
@@ -87,7 +95,8 @@ int rx_mem_use(BYTE *ptr)
 	if (ptr)
 	{
 		SBuffer *buf = ((SBuffer*)ptr) - 1;
-		
+		assert(buf->magic == MAGIC);
+	
 		rx_mutex_lock(_Mutex);
 //		if (buf->count<0)
 //			printf("rx_mem_use %p, cnt=%d ERROR\n", ptr, buf->count);
@@ -106,6 +115,8 @@ int  rx_mem_unuse(BYTE **ptr)
 	if (*ptr)
 	{
 		SBuffer *buf = ((SBuffer*)*ptr) - 1;
+		assert(buf->magic == MAGIC);
+
 		rx_mutex_lock(_Mutex);
 		if (buf->count>0) buf->count--;
 		cnt = buf->count;

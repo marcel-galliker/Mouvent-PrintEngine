@@ -549,7 +549,7 @@ static void _scr_load(SBmpSplitInfo *pInfo, int threadNo)
 			*/
 		}
 		else ret=REPLY_OK;
-		rx_mem_unuse(pInfo->data);
+		rx_mem_unuse(pInfo->allocated_buff);
 
 		if (ret==REPLY_OK)
 		{

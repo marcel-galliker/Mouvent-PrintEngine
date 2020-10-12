@@ -39,7 +39,8 @@ typedef struct SBmpSplitInfo
 {
 	SPrintListItem	*pListItem;
 	BYTE **data;
-	int	used;
+	BYTE **allocated_buff; // to keep trace of initial allocated buffer (some test images could change "data" pointer above)
+	int used;
 	int	board;		// starting with 1
 	int head;		// head on board
 	int bitsPerPixel;

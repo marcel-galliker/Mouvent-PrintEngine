@@ -1293,7 +1293,9 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 				pInfo->clearBlockUsed	= clearBlockUsed;
 				pInfo->same				= same;
 				pInfo->same				= FALSE;
-				pInfo->data				= pBmpInfo->buffer[color];
+                pInfo->data				= pBmpInfo->buffer[color];
+                // as "data" pointer could be change to _TestBuf (see below) keep trace of allocated_buff
+                pInfo->allocated_buff	= pBmpInfo->buffer[color];
 			
 				if ((id->id==PQ_TEST_JETS || id->id==PQ_TEST_JET_NUMBERS || id->id==PQ_TEST_DENSITY) && pInfo->data)
 				{
@@ -1450,7 +1452,8 @@ static int _data_split_prod(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 					pInfo->clearBlockUsed = clearBlockUsed;
 					pInfo->same			  = same;
 					pInfo->data			  = pBmpInfo->buffer[color];
-					pInfo->pListItem	  = pItem;
+					pInfo->allocated_buff = pBmpInfo->buffer[color];
+					pInfo->pListItem = pItem;
 					pInfo->used			  = TRUE;
 					pInfo->board		  = head/RX_Spooler.headsPerBoard;
 					pInfo->head			  = head%RX_Spooler.headsPerBoard;
@@ -2300,7 +2303,8 @@ int data_sent(SBmpSplitInfo *psplit, int head)
 		psplit->pListItem->headsInUse--;
 
 //		TrPrintfL(TRUE, "data_sent: headsInUse=%d, data=0x%08x", psplit->pListItem->headsInUse, psplit->data);
-		if (psplit->data) rx_mem_unuse(psplit->data);
+		// unused the allocated buff mem (as test image could change the data pointer
+		if (psplit->data) rx_mem_unuse(psplit->allocated_buff);
 
 		if (FALSE)
 		{
