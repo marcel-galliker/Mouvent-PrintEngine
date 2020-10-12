@@ -613,7 +613,7 @@ static void _steptx_rob_control(void)
 				
 	case ctrl_cap_step2:		if (plc_in_fill_cap_pos() && step_rob_reference_done()) 
 								{
-									step_rob_to_wipe_pos(rob_fct_cap);
+									if (!_Status[1].robinfo.moving) step_rob_to_wipe_pos(rob_fct_cap);
                                     if (!step_rob_in_wipe_pos(rob_fct_cap))
                                     {
                                         _RobotCtrlMode = ctrl_cap_step3;
