@@ -51,6 +51,7 @@ static int				_PurgeAll=FALSE;
 static int				_PurgeFluidNo;
 static int				_Scanning;
 static int				_ScalesFluidNo=-1;
+static UINT32			_InitDone = 0x00;
 static int				_LeakTest = 0;
 static int				_LeakTestNo = 0;
 static int				_LeakTestTime = 0;
@@ -615,8 +616,13 @@ static void _control(int fluidNo)
 {
 	static int	_txrob;
     static int j = 0;
+    static UINT32 _flushedNeeded = 0x00;
 
 	int i;
+    for (i = 0; i < RX_Config.inkSupplyCnt; i++)
+    {
+        if (*RX_Config.inkSupply[i].inkFileName) _flushedNeeded |= (0x01 << i);
+    }
 	int no = fluidNo*INK_PER_BOARD;
 	SInkSupplyStat *pstat = &_FluidStatus[no];
 	int	lbrob = RX_StepperStatus.robot_used; //(RX_Config.printer.type==printer_LB702_UV ||RX_Config.printer.type == printer_LB702_WB);
@@ -688,8 +694,10 @@ static void _control(int fluidNo)
 											}
                                             if (_txrob && _PurgeFluidNo < 0 && state_RobotCtrlMode() != ctrl_wash_step1 && state_RobotCtrlMode() != ctrl_wash_step2)
                                             {
+                                                if (_InitDone == _flushedNeeded)
                                                steptx_rob_wash_start();
                                             }
+                                            else 
                                             _send_ctrlMode(_PurgeFluidNo, ctrl_purge_step1, TRUE);
 											break;
 				
@@ -757,7 +765,8 @@ static void _control(int fluidNo)
 
 				case ctrl_purge_step4:		if (_PurgeCtrlMode==ctrl_purge_hard || _PurgeCtrlMode==ctrl_purge_hard_wipe || _PurgeCtrlMode==ctrl_purge_hard_vacc || _PurgeCtrlMode == ctrl_purge_hard_wash)
 											{
-												_Flushed &= ~(0x01<<no);
+												if ( _all_fluids_in_fluidCtrlMode(ctrl_purge_step4))	_Flushed &= ~_flushedNeeded;
+												else													_Flushed &= ~(0x01<<no);
 												setup_fluid_system(PATH_USER FILENAME_FLUID_STATE, &_Flushed, WRITE);				
 											}
 
@@ -1138,7 +1147,11 @@ void fluid_send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 
     if (ctrlMode == ctrl_off) step_rob_stop(); 
     	
-	if (ctrlMode==ctrl_purge_hard || ctrlMode == ctrl_purge_hard_wipe || ctrlMode == ctrl_purge_hard_vacc || ctrlMode == ctrl_purge || ctrlMode == ctrl_purge_soft || ctrlMode == ctrl_purge_hard_wash) _PurgeFluidNo=no;
+	if (ctrlMode==ctrl_purge_hard || ctrlMode == ctrl_purge_hard_wipe || ctrlMode == ctrl_purge_hard_vacc || ctrlMode == ctrl_purge || ctrlMode == ctrl_purge_soft || ctrlMode == ctrl_purge_hard_wash) 
+	{
+		_PurgeFluidNo=no;
+		_InitDone = 0;
+	}
 
     _FluidCtrlMode = ctrlMode;
 	_RobotCtrlMode = ctrlMode;
@@ -1276,6 +1289,7 @@ static void _send_purge_par(int fluidNo, int time)
     }
 	par.time  = ctrl_send_purge_par(fluidNo, time);
 	sok_send_2(&_FluidThreadPar[fluidNo/INK_PER_BOARD].socket, CMD_SET_PURGE_PAR, sizeof(par), &par);
+    _InitDone |= 0x01 << fluidNo;
 }
 
 //--- fluid_send_pressure -------------------------------------------
