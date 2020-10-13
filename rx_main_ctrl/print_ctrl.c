@@ -325,6 +325,7 @@ static void _send_head_info(void)
 			}
 			len += sprintf(&str[len], "\n");
 			len += sprintf(&str[len], "Dots=%s / Men=%d.%d / Pump=%d.%d\n", RX_TestImage.dots, pstat->meniscus/10, abs(pstat->meniscus)%10, pstat->pumpFeedback/10, pstat->pumpFeedback%10);
+			len += sprintf(&str[len], "Temp=%d.%d°C / Waveform=%s\n", pstat->tempHead / 1000, (pstat->tempHead% 1000) / 100, RX_Config.inkSupply[color].ink.name);
 			if (RX_TestImage.testImage==PQ_TEST_DENSITY) 
 			{
 				len += sprintf(&str[len], "Density Correction: volt=%d%%\n", pstat->eeprom_mvt.voltage);

@@ -53,7 +53,6 @@ int  rip_test_data	(RX_Bitmap *pBmp, int testImage, char *text)
 		if (!line[len]) break;
 		if (line[len]=='\n')
 		{
-			bmp_clear(pBmp, X, y, 2048+128, LINE_DIST);
 
 			n++;
 			len++;
@@ -63,15 +62,17 @@ int  rip_test_data	(RX_Bitmap *pBmp, int testImage, char *text)
 			#else
 				char_to_wchar((const char*)line, (wchar_t*)wstr, len);
 			#endif
-			if (testImage==PQ_TEST_DENSITY && n>6)
+			if (n>5)
 			{
+				bmp_clear(pBmp, 0, y, pBmp->width, LINE_DIST_SMALL);
 				ft_text_out(pBmp, X, y, font, FONT_SIZE_SMALL, 0, wstr, len, 1);	// changed interface if wstr from wchar_t to UINT16
 				y += LINE_DIST_SMALL;
 			}
 			else 
 			{
-			ft_text_out(pBmp, X, y, font, FONT_SIZE, 0, wstr, len, 1);	// changed interface if wstr from wchar_t to UINT16
-			y += LINE_DIST;
+                bmp_clear(pBmp, 0, y, pBmp->width, LINE_DIST);
+				ft_text_out(pBmp, X, y, font, FONT_SIZE, 0, wstr, len, 1);	// changed interface if wstr from wchar_t to UINT16
+				y += LINE_DIST;
 			}
 			line += len;
 			len=0;
