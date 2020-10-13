@@ -1296,9 +1296,22 @@ void ctrl_set_rob_pos(SRobPosition robposition, int blocked, int blocked_Axis)
 int ctrl_current_screw_pos(SHeadAdjustmentMsg *robposition)
 {
     int clusterNo = robposition->printbarNo * RX_Config.headsPerColor/MAX_HEADS_BOARD + (robposition->headNo/MAX_HEADS_BOARD);
+
+    int stepperNo, printbarNo;
+    if (RX_Config.inkSupplyCnt % 2 == 0)
+    {
+        stepperNo = robposition->printbarNo / 2;
+        printbarNo = robposition->printbarNo % 2;
+    }
+    else
+    {
+        stepperNo = (robposition->printbarNo + 1) / 2;
+        printbarNo = (robposition->printbarNo + 1) % 2;
+    }
+    
                     
     if (robposition->headNo == -1)
-        return RX_Config.stepper.robot->screwturns[robposition->printbarNo];
+        return RX_Config.stepper.robot[stepperNo].screwturns[printbarNo];
     else if (robposition->axis == AXE_ANGLE)
         return RX_HBStatus[clusterNo].head[robposition->headNo%HEAD_CNT].eeprom_mvt.rob_angle;
     else if (robposition->axis == AXE_DIST)

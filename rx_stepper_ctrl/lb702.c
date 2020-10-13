@@ -35,21 +35,21 @@ static char		*_MotorName[2] = {"BACK", "FRONT"};
 
 #define CURRENT_HOLD	50
 
-#define MAX_ALIGN		10000	// microns
+#define MAX_ALIGN		10000		// microns
 
-#define ROBOT_USED_IN		10
-#define PRINTHEAD_EN		11	// Input from SPS // '1' Allows Head to go down
+#define ROBOT_USED_IN	10
+#define PRINTHEAD_EN	11			// Input from SPS // '1' Allows Head to go down
 
 #define STEPS_REV		(200*STEPS)	// steps per motor revolution * STEPS times oversampling
-#define DIST_REV		2000.0	// moving distance per revolution [�m]
+#define DIST_REV		2000.0		// moving distance per revolution [�m]
 
 #define CAL_POS_1		70000
 #define CAL_TOOL_HEIGHT	25000
-#define DIST_MECH_REF		500
+#define DIST_MECH_REF	500
 
-#define MIN_CAP_HEIGHT	6000 // um under Ref height
+#define MIN_CAP_HEIGHT	6000		// um under Ref height
 
-#define DIST_CAP_WASH  5300	//2000		// um -> higher than capping hight
+#define DIST_CAP_WASH	6300		// um -> higher than capping hight
 
 static SMovePar	_ParRef;
 static SMovePar	_ParZ_down;
@@ -86,8 +86,7 @@ void lb702_init(void)
 {
 	RX_StepperStatus.robot_used = fpga_input(ROBOT_USED_IN);
 		
-    motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L5918_STEPS_PER_METER,
-                  L5918_INC_PER_METER, STEPS);
+    motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER, STEPS);
 	memset(_CmdName, 0, sizeof(_CmdName));
 
 	//--- movment parameters ----------------
@@ -576,6 +575,7 @@ static void _lb702_move_to_pos(int cmd, int pos0, int pos1)
     {
         _CmdRunningRobi = CMD_ROBI_MOVE_TO_GARAGE;
         _NewCmd = cmd;
+        RX_StepperStatus.cmdRunning = 0;
         robi_handle_ctrl_msg(INVALID_SOCKET, _CmdRunningRobi, NULL);
         
     }

@@ -102,6 +102,7 @@ static int _Loose_Screw_Time = 0;
 static int _TargetPosition = 0;
 static int _Position_Correction;
 static int _Buffer_Cmd[10] = {0};
+static int _Buffer_Data[10] = {0};
 
 static uint32_t _currentVersion;
 
@@ -345,9 +346,11 @@ void robi_main(int ticks, int menu)
 
         case CMD_ROB_WIPE_LEFT:
             RX_StepperStatus.screwerinfo.wipe_left_up = TRUE;
+            _CmdRunning = 0;
             break;
         case CMD_ROB_WIPE_RIGHT:
             RX_StepperStatus.screwerinfo.wipe_right_up = TRUE;
+            _CmdRunning = 0;
             break;
 
         case CMD_ROBI_MOVE_Y:
@@ -490,6 +493,15 @@ void robi_handle_menu(char *str)
     case 'c':
         current = atoi(&str[1]);
         send_command(MOTOR_SET_SCREW_CURRENT, sizeof(current), &current);
+        break;
+    case 'a':
+        val = 1;
+        robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_WIPE_LEFT, &val);
+        break;
+    case 'b':
+        val = 1;
+        robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_WIPE_RIGHT, &val);
+        break;
     default:
         break;
 	}
@@ -683,7 +695,7 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                 robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_REFERENCE, NULL);
                 break;
             }
-            if (RX_StepperStatus.screw_posY - MIN_Y_POS + MAX_VARIANCE < 0)
+            if (RX_StepperStatus.screw_posY - MIN_Y_POS + MAX_VARIANCE < 0 && _NewCmd != CMD_ROB_WIPE_LEFT && _NewCmd != CMD_ROB_WIPE_RIGHT)
             {
                 Error(ERR_CONT, 0, "Screwer to close to garage to move up");
                 break;
@@ -740,7 +752,7 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         break;
 
     case CMD_ROBI_MOVE_TO_X:
-        if (!_CmdRunning)
+        if (!_CmdRunning || _CmdRunning == CMD_ROB_WIPE_LEFT || _CmdRunning == CMD_ROB_WIPE_RIGHT)
         {
             if (!RX_StepperStatus.screwerinfo.ref_done)
             {
@@ -756,7 +768,7 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                 robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_DOWN, NULL);
                 break;
             }
-            else if (RX_StepperStatus.screw_posY - MIN_Y_POS < MAX_VARIANCE && _NewCmd != CMD_ROB_WIPE_LEFT && _NewCmd != CMD_ROB_WIPE_RIGHT)
+            else if (RX_StepperStatus.screw_posY - MIN_Y_POS < MAX_VARIANCE && _CmdRunning != CMD_ROB_WIPE_LEFT && _CmdRunning != CMD_ROB_WIPE_RIGHT)
             {
                 Error(ERR_CONT, 0, "Screwer to close to garage to move in x axis");
                 break;
@@ -764,7 +776,7 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             else
             {
                 pos = *((INT32 *)pdata);
-                _CmdRunning = msgId;
+                if ( _CmdRunning != CMD_ROB_WIPE_LEFT && _CmdRunning != CMD_ROB_WIPE_RIGHT) _CmdRunning = msgId;
                 micron = pos - RX_StepperStatus.screw_posX;
                 steps = _micron_2_steps(micron);
                 _TargetPosition = pos;
@@ -851,7 +863,7 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                 _Value = pos;
                 robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_DOWN, NULL);
             }
-            else if (abs(RX_StepperStatus.screw_posY) > MAX_VARIANCE)
+            else if (abs(RX_StepperStatus.screw_posY) > 700)
             {
                 _NewCmd = msgId;
                 _Value = pos;
@@ -863,7 +875,8 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             }
             else
             {
-                if (pos) pos = 5500;
+                _CmdRunning = msgId;
+                if (pos) pos = 4800;
                 robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_X, &pos);
             }
             
@@ -887,7 +900,7 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                 _Value = pos;
                 robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_DOWN, NULL);
             }
-            else if (abs(RX_StepperStatus.screw_posY) > MAX_VARIANCE)
+            else if (abs(RX_StepperStatus.screw_posY) > 700)
             {
                 _NewCmd = msgId;
                 _Value = pos;
@@ -899,7 +912,8 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             }
             else
             {
-                if (pos) pos = -5500;
+                _CmdRunning = msgId;
+                if (pos) pos = -8100;
                 robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_X, &pos);
             }
             
@@ -985,8 +999,10 @@ static int32_t send_command(uint32_t commandCode, uint8_t len, void *data)
         for (i = SIZEOF(_Buffer_Cmd) -2; i >= 0; i--)
         {
             _Buffer_Cmd[i + 1] = _Buffer_Cmd[i];
+            _Buffer_Data[i + 1] = _Buffer_Data[i];
         }
         _Buffer_Cmd[0] = commandCode;
+        if (len == sizeof(_Buffer_Data[0])) _Buffer_Data[0] = *((int*)data);
     }
 
     int32_t nextFifoIndex = (_txFifoInIndex + 1) % ROBI_FIFO_SIZE;

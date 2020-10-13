@@ -44,7 +44,7 @@
 
 #define CURRENT_HOLD            200
 
-#define CAP_FILL_TIME           12000   // ms
+#define CAP_FILL_TIME           13000   // ms
 #define WASTE_PUMP_TIME         60000   // ms
 #define SCREW_SEARCHING_TIME    5000   // ms
 
@@ -527,8 +527,13 @@ void lbrob_main(int ticks, int menu)
     }
 
     static int j = 0;
+    
+    if (!_CmdSearchScrews && !_CmdScrewing && !RX_StepperStatus.info.moving && !RX_StepperStatus.robinfo.moving && !RX_StepperStatus.screwerinfo.moving)
+        RX_StepperStatus.screwerinfo.screwer_ready = TRUE;
+    else
+        RX_StepperStatus.screwerinfo.screwer_ready = FALSE;
 
-    if (memcmp(&oldSatus.robinfo, &RX_StepperStatus.robinfo, sizeof(RX_StepperStatus.robinfo)))
+    if (memcmp(&oldSatus.robinfo, &RX_StepperStatus.robinfo, sizeof(RX_StepperStatus.robinfo)) || memcmp(&oldSatus.screwerinfo, &RX_StepperStatus.screwerinfo, sizeof(RX_StepperStatus.screwerinfo)))
     {
         ctrl_send_2(REP_STEPPER_STAT, sizeof(RX_StepperStatus), &RX_StepperStatus);
     }
@@ -543,10 +548,7 @@ void lbrob_main(int ticks, int menu)
     else
         j = 0;
 
-    if (!_CmdSearchScrews && !_CmdScrewing && !RX_StepperStatus.info.moving && !RX_StepperStatus.robinfo.moving && !RX_StepperStatus.screwerinfo.moving)
-        RX_StepperStatus.screwerinfo.screwer_ready = TRUE;
-    else
-        RX_StepperStatus.screwerinfo.screwer_ready = FALSE;
+    
 
     if (_CmdSearchScrews)
     {
@@ -614,7 +616,7 @@ void lbrob_menu(int help)
         term_printf("o: toggle output <no>\n");
         term_printf("R: Reference\n");
         term_printf("r<n>: reset motor<n>\n");
-        term_printf("c: Cap the heads\n");
+        term_printf("c: Go to Cap-Pos\n");
         term_printf("w: Wash Heads\n");
         term_printf("v: Vacuum Heads\n");
         term_printf("g<n>: Go to purge position of head 1 -8 or for all (0)\n");
@@ -1314,8 +1316,7 @@ static void _search_all_screws()
 
         int front_screw = (_SearchScrewNr + 1) % SCREWS_PER_HEAD;
         int head_nr = (((_SearchScrewNr % (SCREWS_PER_HEAD * HEADS_PER_COLOR)) + 1) / COLORS_PER_STEPPER) - 1;
-        int head_Dist =
-            (abs(CABLE_SCREW_POS_FRONT) - abs(CABLE_SCREW_POS_BACK)) / 7;
+        int head_Dist = (abs(CABLE_SCREW_POS_FRONT) - abs(CABLE_SCREW_POS_BACK)) / 8;
         int screw_Dist = 16400; // um
 
         if (_CmdSearchScrews == 0) correction_value = 0;
@@ -1495,11 +1496,8 @@ static void _lbrob_motor_enc_reg_test(int steps)
 }
 
 //--- _check_in_screw_pos --------------------------------------
-// static int _check_in_screw_pos(int screwNr)
 static int _check_in_screw_pos(SHeadAdjustment headAdjustment)
 {
-    //if (!RX_StepperStatus.screwerinfo.z_in_up) return FALSE;
-
     if ((abs(RX_StepperStatus.screw_posX - SCREW_X_LEFT) > MAX_VAR_SCREW_POS &&
          abs(RX_StepperStatus.screw_posX - SCREW_X_RIGHT) > MAX_VAR_SCREW_POS) ||
         (abs(RX_StepperStatus.screw_posY - SCREW_Y_FRONT) > MAX_VAR_SCREW_POS &&
@@ -1527,7 +1525,7 @@ static int _check_in_screw_pos(SHeadAdjustment headAdjustment)
 
     for (headNr = 0; headNr < HEADS_PER_COLOR; headNr++)
     {
-        if (pos - (CABLE_SCREW_POS_BACK + (headNr * (CABLE_SCREW_POS_FRONT - CABLE_SCREW_POS_BACK)) / 7) < MAX_VAR_SCREW_POS)
+        if (pos - (CABLE_SCREW_POS_BACK + ((headNr+1) * (CABLE_SCREW_POS_FRONT - CABLE_SCREW_POS_BACK)) / 8) < MAX_VAR_SCREW_POS)
         {
             if (headNr == headAdjustment.headNo)
                 return TRUE;
