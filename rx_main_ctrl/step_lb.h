@@ -32,16 +32,19 @@ int	 steplb_lift_in_up_pos(void);
 void steplb_lift_to_up_pos_individually(int no);
 int	 steplb_lift_in_up_pos_individually(int fluidNo);
 
-void steplb_lift_to_wipe_pos(int no, ERobotFunctions rob_function); 
-int  steplb_lift_in_wipe_pos(int no, ERobotFunctions rob_function);
+void steplb_lift_to_fct_pos(int no, ERobotFunctions rob_function); 
+int  steplb_lift_in_fct_pos(int no, ERobotFunctions rob_function);
 
-void steplb_rob_to_wipe_pos(int no, ERobotFunctions rob_function);
-void steplb_rob_to_wipe_pos_all(ERobotFunctions rob_function);
-int	 steplb_rob_in_wipe_pos(int no, ERobotFunctions rob_function);
-int	 steplb_rob_in_wipe_pos_all(ERobotFunctions rob_function);
+void steplb_rob_to_fct_pos(int no, ERobotFunctions rob_function);
+void steplb_rob_to_fct_pos_all(ERobotFunctions rob_function);
+int	 steplb_rob_in_fct_pos(int no, ERobotFunctions rob_function);
+int	 steplb_rob_in_fct_pos_all(ERobotFunctions rob_function);
 
-void steplb_rob_wipe_start(int no, ERobotFunctions rob_function);
-int	 steplb_rob_wipe_done (int no, ERobotFunctions rob_function);
+void steplb_rob_fct_start(int no, ERobotFunctions rob_function);
+int	 steplb_rob_fct_done (int no, ERobotFunctions rob_function);
+
+void steplb_rob_wipe_start_all(void);
+void steplb_rob_wipe_start(int stepperNo, EWipeSide side);
 
 void steplb_rob_vacuum(int time_s);
 

@@ -392,7 +392,7 @@ void step_rob_to_wipe_pos(ERobotFunctions rob_function)
 	switch(_StepperType)
 	{
 	case STEPPER_TX:	steptx_rob_to_wipe_pos(rob_function); break;
-    case STEPPER_LB:	steplb_rob_to_wipe_pos_all(rob_function); break;
+    case STEPPER_LB:	steplb_rob_to_fct_pos_all(rob_function); break;
 	default:			break;
 	}	
 }
@@ -403,7 +403,7 @@ int step_rob_in_wipe_pos(ERobotFunctions rob_function)
 	switch(_StepperType)
 	{
 	case STEPPER_TX:	return steptx_rob_in_wipe_pos(rob_function);
-    case STEPPER_LB:	return steplb_rob_in_wipe_pos_all(rob_function);
+    case STEPPER_LB:	return steplb_rob_in_fct_pos_all(rob_function);
 	default:			break;
 	}
 	return FALSE;

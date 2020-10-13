@@ -136,6 +136,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
             Button_PurgeVacc.Visibility = (RxGlobals.PrintSystem.IsTx || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_WB) ? Visibility.Visible : Visibility.Collapsed;
             Button_PurgeWipe.Visibility = (RxGlobals.PrintSystem.IsTx || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_WB)? Visibility.Visible : Visibility.Collapsed;
             Button_PurgeWash.Visibility = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB702_WB && RxGlobals.StepperStatus[0].RobotUsed) ? Visibility.Visible : Visibility.Collapsed;
+            Button_Wipe.Visibility = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB702_WB && RxGlobals.StepperStatus[0].RobotUsed) ? Visibility.Visible : Visibility.Collapsed;
         }
 
         //--- OnInkSupplyPropertyChanged -------------------------
@@ -269,11 +270,33 @@ namespace RX_DigiPrint.Views.PrintSystemView
             }
         }
 
-        private void PurgeWipe_Clicked(object sender, RoutedEventArgs e) 
+        private void PurgeWipe_Clicked(object sender, RoutedEventArgs e)
         {
-            if (MvtMessageBox.YesNo("Purge + Wipe", "PURGE and WIPE all printheads?",  MessageBoxImage.Question, true))
+            if (RxGlobals.PrintSystem.IsTx)
             {
-                _command("Purge+Wipe",   EFluidCtrlMode.ctrl_purge_hard_wipe, true);
+                if (MvtMessageBox.YesNo("Purge + Wipe", "PURGE and WIPE all printheads?", MessageBoxImage.Question, true))
+                {
+                    _command("Purge+Wipe", EFluidCtrlMode.ctrl_purge_hard_wipe, true);
+                }
+            }
+            else
+            {
+                RX_Common.MvtMessageBox.EPurgeResult result =
+                MvtMessageBox.Purge("Purge", "Purge and Wipe " + _InkSupply.InkType.Name + " ?");
+                if (result == MvtMessageBox.EPurgeResult.PurgeResultYes || result == MvtMessageBox.EPurgeResult.PurgeResultAll)
+                {
+                    _command("Purge+Wipe", EFluidCtrlMode.ctrl_purge_hard_wipe, (result == MvtMessageBox.EPurgeResult.PurgeResultAll));
+                }
+            }
+        }
+
+        private void Wipe_Clicked(object sender, RoutedEventArgs e)
+        {
+            RX_Common.MvtMessageBox.EPurgeResult result =
+                MvtMessageBox.Purge("Wipe", "Wipe " + _InkSupply.InkType.Name + " ?");
+            if (result == MvtMessageBox.EPurgeResult.PurgeResultYes || result == MvtMessageBox.EPurgeResult.PurgeResultAll)
+            {
+                _command("Wipe", EFluidCtrlMode.ctrl_wipe, (result == MvtMessageBox.EPurgeResult.PurgeResultAll));
             }
         }
 

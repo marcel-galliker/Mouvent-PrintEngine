@@ -32,29 +32,31 @@
 #include "fluid_ctrl.h"
 #include "setup.h"
 
-#define STEPPER_CNT		4
+#define STEPPER_CNT		    4
 
-#define MAX_STEPS_DIST 30 * 6  // 30 turns with 6 steps each turn
-#define MAX_STEPS_ANGLE 18 * 6 // 18 turns with 6 steps each turn
+#define MAX_STEPS_DIST      30 * 6  // 30 turns with 6 steps each turn
+#define MAX_STEPS_ANGLE     18 * 6 // 18 turns with 6 steps each turn
 
-static RX_SOCKET		_step_socket[STEPPER_CNT]={0};
+static RX_SOCKET		    _step_socket[STEPPER_CNT]={0};
 
-static SStepperStat		_Status[STEPPER_CNT];
-static int				_AbortPrinting=FALSE;
-static int              _ClusterScrewTurned[STEPPER_CNT] = {FALSE};
-static int              _ScrewPositions_Written[STEPPER_CNT] = {FALSE};
-static int              _WashStarted;
-static UINT32			_Flushed = 0x00;		// For capping function which is same than flushing (need to purge after cap)
-static int              _ScrewCommandSend[STEPPER_CNT] = {FALSE};
+static SStepperStat		    _Status[STEPPER_CNT];
+static int				    _AbortPrinting=FALSE;
+static int                  _ClusterScrewTurned[STEPPER_CNT] = {FALSE};
+static int                  _ScrewPositions_Written[STEPPER_CNT] = {FALSE};
+static int                  _WashStarted;
+static UINT32			    _Flushed = 0x00;		// For capping function which is same than flushing (need to purge after cap)
+static int                  _ScrewCommandSend[STEPPER_CNT] = {FALSE};
 
 
-static int				_StatReadCnt[STEPPER_CNT];
+static int				    _StatReadCnt[STEPPER_CNT];
 
-static EnFluidCtrlMode	_RobotCtrlMode[STEPPER_CNT] = {ctrl_undef};
+static EnFluidCtrlMode	    _RobotCtrlMode[STEPPER_CNT] = {ctrl_undef};
 
-static SHeadAdjustmentMsg _HeadAdjustment[STEPPER_CNT] = {0};
+static SHeadAdjustmentMsg   _HeadAdjustment[STEPPER_CNT] = {0};
 
-static SHeadAdjustmentMsg _HeadAdjustmentBuffer[STEPPER_CNT][MAX_HEAD_DIST];
+static SHeadAdjustmentMsg   _HeadAdjustmentBuffer[STEPPER_CNT][MAX_HEAD_DIST];
+
+static EWipeSide            _WipeCommand[STEPPER_CNT];
 
 static void _steplb_rob_do_reference(int no);
 
@@ -330,14 +332,14 @@ int	 steplb_lift_in_up_pos_individually(int no)
 	return _Status[no].info.z_in_ref;
 }
 
-//--- steplb_rob_to_wipe_pos --------------------------
-void steplb_rob_to_wipe_pos(int no, ERobotFunctions rob_function)
+//--- steplb_rob_to_fct_pos --------------------------
+void steplb_rob_to_fct_pos(int no, ERobotFunctions rob_function)
 {
     if (_step_socket[no] == INVALID_SOCKET) return;
 	sok_send_2(&_step_socket[no], CMD_ROB_MOVE_POS, sizeof(rob_function), &rob_function);		
 }
 
-void steplb_rob_to_wipe_pos_all(ERobotFunctions rob_function)
+void steplb_rob_to_fct_pos_all(ERobotFunctions rob_function)
 {
     int i;
     for (i = 0; i < STEPPER_CNT; i++)
@@ -347,8 +349,8 @@ void steplb_rob_to_wipe_pos_all(ERobotFunctions rob_function)
     }
 }
 
-//--- steplb_rob_in_wipe_pos --------------------------
-int	 steplb_rob_in_wipe_pos(int no, ERobotFunctions rob_function)
+//--- steplb_rob_in_fct_pos --------------------------
+int	 steplb_rob_in_fct_pos(int no, ERobotFunctions rob_function)
 {
 	if (_step_socket[no]==INVALID_SOCKET) return TRUE;
 	
@@ -372,8 +374,8 @@ int	 steplb_rob_in_wipe_pos(int no, ERobotFunctions rob_function)
 	}
 }
 
-//--- steplb_rob_in_wipe_pos_all ------------------------
-int steplb_rob_in_wipe_pos_all(ERobotFunctions rob_function)
+//--- steplb_rob_in_fct_pos_all ------------------------
+int steplb_rob_in_fct_pos_all(ERobotFunctions rob_function)
 {
 	switch (rob_function)
 	{
@@ -383,15 +385,45 @@ int steplb_rob_in_wipe_pos_all(ERobotFunctions rob_function)
 	}
 }
 
-//--- steplb_rob_wipe_start -------------------------------------
-void steplb_rob_wipe_start(int no, ERobotFunctions rob_function)
+//--- steplb_rob_fct_start -------------------------------------
+void steplb_rob_fct_start(int no, ERobotFunctions rob_function)
 {
 	if (_step_socket[no]==INVALID_SOCKET) return;
 	sok_send_2(&_step_socket[no], CMD_ROB_FILL_CAP, sizeof(rob_function), &rob_function);
 }
 
-//--- steplb_rob_wipe_done --------------------------------------
-int	 steplb_rob_wipe_done(int no, ERobotFunctions rob_function)
+void steplb_rob_wipe_start_all(void)
+{
+    int i;
+    EWipeSide wipeside = wipe_all;
+    for (i = 0; i < STEPPER_CNT; i++)
+    {
+        if (_step_socket[i] != INVALID_SOCKET) steplb_rob_wipe_start(i, wipeside);
+    }
+}
+
+//--- steplb_rob_wipe_start ---------------------------------------
+void steplb_rob_wipe_start(int stepperNo, EWipeSide side)
+{
+    switch (side)
+    {
+    case wipe_none:     
+    case wipe_all:     _WipeCommand[stepperNo] = side; break;
+    case wipe_left:     if ( _WipeCommand[stepperNo] == wipe_right) _WipeCommand[stepperNo] = wipe_all;
+                        else                                        _WipeCommand[stepperNo] = side;
+                        break;
+    case wipe_right:    if ( _WipeCommand[stepperNo] == wipe_left)  _WipeCommand[stepperNo] = wipe_all;
+                        else                                        _WipeCommand[stepperNo] = side;
+                        break;
+    }
+    
+    if (_step_socket[stepperNo] != INVALID_SOCKET && (_RobotCtrlMode[stepperNo] == ctrl_off || _RobotCtrlMode[stepperNo] == ctrl_undef)) _RobotCtrlMode[stepperNo] = ctrl_wipe;
+    
+    _RobotCtrlMode[stepperNo] = ctrl_wipe;
+}
+
+//--- steplb_rob_fct_done --------------------------------------
+int	 steplb_rob_fct_done(int no, ERobotFunctions rob_function)
 {
 	if (_step_socket[no]==INVALID_SOCKET) return TRUE;
 	switch (rob_function)
@@ -447,8 +479,8 @@ int steplb_rob_reference_done(void)
 	return RX_StepperStatus.robinfo.ref_done;
 }
 
-//--- steplb_lift_to_wipe_pos ----------------------------
-void steplb_lift_to_wipe_pos(int no, ERobotFunctions rob_function)
+//--- steplb_lift_to_fct_pos ----------------------------
+void steplb_lift_to_fct_pos(int no, ERobotFunctions rob_function)
 {
 	switch (rob_function)
 	{
@@ -457,8 +489,8 @@ void steplb_lift_to_wipe_pos(int no, ERobotFunctions rob_function)
 	}
 }
 
-//--- steplb_lift_in_wipe_pos -------------------------------
-int  steplb_lift_in_wipe_pos(int no, ERobotFunctions rob_function)
+//--- steplb_lift_in_fct_pos -------------------------------
+int  steplb_lift_in_fct_pos(int no, ERobotFunctions rob_function)
 {
 	if (_step_socket[no] == INVALID_SOCKET) return TRUE;
 	switch (rob_function)
@@ -487,17 +519,6 @@ void steplb_rob_start_cap_all(void)
 	}
 }
 
-//--- steplb_rob_start_wipe --------------------------------------------
-void steplb_rob_start_wipe(EWipeSide pos, int stepperNo)
-{
-    int state = TRUE;
-    if (pos == wipe_left)
-        sok_send_2(&_step_socket[stepperNo], CMD_ROB_WIPE_LEFT, sizeof(state), &state);
-    if (pos == wipe_right)
-        sok_send_2(&_step_socket[stepperNo], CMD_ROB_WIPE_RIGHT, sizeof(state), &state);
-    _RobotCtrlMode[stepperNo] = ctrl_wipe;
-}
-
 //--- stepl_rob_wash_all -------------------------------------------------------------
 void steplb_rob_wash_all(void)
 {
@@ -523,21 +544,21 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
 		
 		case ctrl_cap_step1:		if (_Status[no].robinfo.ref_done)
 									{
-										steplb_rob_to_wipe_pos(no, rob_fct_cap);
+										steplb_rob_to_fct_pos(no, rob_fct_cap);
 										_RobotCtrlMode[no] = ctrl_cap_step2;
 									}
 									break;
 		
-		case ctrl_cap_step2:		if (steplb_rob_in_wipe_pos(no, rob_fct_cap))
+		case ctrl_cap_step2:		if (steplb_rob_in_fct_pos(no, rob_fct_cap))
 									{
-										steplb_rob_wipe_start(no, rob_fct_cap);
+										steplb_rob_fct_start(no, rob_fct_cap);
 										_RobotCtrlMode[no] = ctrl_cap_step3;
 									}
 									break;
 		
-		case ctrl_cap_step3:		if (steplb_rob_wipe_done(no, rob_fct_cap))
+		case ctrl_cap_step3:		if (steplb_rob_fct_done(no, rob_fct_cap))
 									{
-										steplb_lift_to_wipe_pos(no, rob_fct_cap);
+										steplb_lift_to_fct_pos(no, rob_fct_cap);
 										_RobotCtrlMode[no] = ctrl_cap_step4;
 									}
 									break;
@@ -585,22 +606,19 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
 									else			_RobotCtrlMode[no] = ctrl_off;
 									break;
                                     
-        case ctrl_wipe:             if (_Status[no].screwerinfo.wipe_left_up || _Status[no].screwerinfo.wipe_right_up)
-                                    {
-                                        function = rob_fct_wipe;
-                                        sok_send_2(&_step_socket[no], CMD_ROB_MOVE_POS, sizeof(function), & function);
-                                        _RobotCtrlMode[no] = ctrl_wipe_step1;
-                                    }
+        case ctrl_wipe:             function = rob_fct_wipe;
+                                    sok_send_2(&_step_socket[no], CMD_ROB_WIPE, sizeof(_WipeCommand[no]), &_WipeCommand[no]);
+                                    _WipeCommand[no] = wipe_none;
+                                    _RobotCtrlMode[no] = ctrl_wipe_step1;
                                     break;
                                     
         case ctrl_wipe_step1:       if (_Status[no].robinfo.wipe_done) _RobotCtrlMode[no] = ctrl_wipe_step2;
                                     _printing = RX_PrinterStatus.printState == ps_pause;
                                     break;
                                     
-        case ctrl_wipe_step2:       if (_printing)	_RobotCtrlMode[no] = ctrl_print;
+        case ctrl_wipe_step2:       sok_send_2(&_step_socket[no], CMD_LIFT_REFERENCE, 0, NULL);
+                                    if (_printing)	_RobotCtrlMode[no] = ctrl_print;
 									else			_RobotCtrlMode[no] = ctrl_off;
-                                    int pos = 0;
-                                    sok_send_2(&_step_socket[no], CMD_ROB_WIPE_LEFT, sizeof(pos), &pos);
 									break; 
 
         case ctrl_robi_out:			sok_send_2(&_step_socket[no], CMD_ROB_REFERENCE, 0, NULL);

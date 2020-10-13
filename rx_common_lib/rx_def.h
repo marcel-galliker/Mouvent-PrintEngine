@@ -199,8 +199,10 @@ typedef enum ERectoVerso
 
 typedef enum EWipeSide
 {
-    wipe_left,  // 0
-    wipe_right, // 1
+    wipe_none,	// 0
+    wipe_left,  // 1
+    wipe_right, // 2
+    wipe_all,	// 3
 } EWipeSide;
 
 typedef struct SLogItem

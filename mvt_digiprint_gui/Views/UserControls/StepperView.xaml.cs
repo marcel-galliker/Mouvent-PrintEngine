@@ -262,6 +262,16 @@ namespace RX_DigiPrint.Views.UserControls
             RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_CTRL_MODE, ref msg);
         }
 
+        //--- Wipe_clicked -------------------------------------------
+        private void Wipe_clicked(object sender, RoutedEventArgs e)
+        {
+            _button_active(sender as CheckBox);
+            TcpIp.SFluidCtrlCmd msg = new TcpIp.SFluidCtrlCmd();
+            msg.no = -1;
+            msg.ctrlMode = EFluidCtrlMode.ctrl_wipe;
+            RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_CTRL_MODE, ref msg);
+        }
+
         //--- CapUp_clicked -------------------------------------------
         private void CapRefRobot_clicked(object sender, RoutedEventArgs e)
         {

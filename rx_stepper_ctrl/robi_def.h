@@ -143,7 +143,7 @@ typedef struct
 {
 	uint32_t command;
 	uint32_t id;
-	uint8_t length;
+	uint16_t length;
 	uint8_t data[SIZE_OF_DATA];
 } SUsbTxMsg;
 
@@ -153,7 +153,7 @@ typedef struct
 	uint32_t id;
 	uint32_t error;
 	SRobiStatus robi;
-	uint8_t length;
+	uint16_t length;
 	uint8_t data[SIZE_OF_DATA];
 } SUsbRxMsg;
 

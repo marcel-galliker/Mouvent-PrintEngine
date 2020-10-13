@@ -307,8 +307,7 @@ void robi_main(int ticks, int menu)
             break;
 
         case CMD_ROBI_MOVE_TO_X:
-            if (abs(RX_StepperStatus.screw_posX - SCREW_X_LEFT) < MAX_VAR_SCREW_POS ||
-                abs(RX_StepperStatus.screw_posX - SCREW_X_RIGHT) <  MAX_VAR_SCREW_POS)
+            if (abs(RX_StepperStatus.screw_posX - SCREW_X_LEFT) < MAX_VAR_SCREW_POS || abs(RX_StepperStatus.screw_posX - SCREW_X_RIGHT) <  MAX_VAR_SCREW_POS)
                 RX_StepperStatus.screwerinfo.x_in_pos = TRUE;
             _CmdRunning = 0;
             break;
@@ -344,11 +343,11 @@ void robi_main(int ticks, int menu)
             send_command(MOTOR_SET_SCREW_CURRENT, sizeof(current), &current);
             break;
 
-        case CMD_ROB_WIPE_LEFT:
+        case CMD_ROBI_WIPE_LEFT:
             RX_StepperStatus.screwerinfo.wipe_left_up = TRUE;
             _CmdRunning = 0;
             break;
-        case CMD_ROB_WIPE_RIGHT:
+        case CMD_ROBI_WIPE_RIGHT:
             RX_StepperStatus.screwerinfo.wipe_right_up = TRUE;
             _CmdRunning = 0;
             break;
@@ -380,8 +379,8 @@ void robi_main(int ticks, int menu)
             case CMD_ROBI_MOVE_X:
             case CMD_ROBI_MOVE_TO_X:
             case CMD_ROBI_MOVE_TO_Y:
-            case CMD_ROB_WIPE_LEFT:
-            case CMD_ROB_WIPE_RIGHT:
+            case CMD_ROBI_WIPE_LEFT:
+            case CMD_ROBI_WIPE_RIGHT:
                 robi_handle_ctrl_msg(INVALID_SOCKET, loc_new_cmd, &loc_new_value);
                 break;
             case CMD_ROBI_MOVE_Z_DOWN:
@@ -496,11 +495,11 @@ void robi_handle_menu(char *str)
         break;
     case 'a':
         val = 1;
-        robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_WIPE_LEFT, &val);
+        robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_WIPE_LEFT, &val);
         break;
     case 'b':
         val = 1;
-        robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_WIPE_RIGHT, &val);
+        robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_WIPE_RIGHT, &val);
         break;
     default:
         break;
@@ -565,7 +564,7 @@ void robi_display_status(void)
     term_printf("MOTOR_XY_0 ref: \t %d\n", _robiStatus.motors[MOTOR_XY_0].isReferenced);
 	term_printf("MOTOR_XY_1 ref: \t %d\n", _robiStatus.motors[MOTOR_XY_1].isReferenced);
 	term_printf("MOTOR_SCREW ref: \t %d\n", _robiStatus.motors[MOTOR_SCREW].isReferenced);
-    term_printf("Z position: \\tt %d\n", _robiStatus.zPos);
+    term_printf("Z position: \t\t %d\n", _robiStatus.zPos);
 	term_printf("Robi position status -------------------------------\n");
     term_printf("Garage: \t\t %d\n", _robiStatus.isInGarage);
     term_printf("Ref: \t\t\t %d\n", _robiStatus.isInRef);
@@ -695,7 +694,7 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                 robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_REFERENCE, NULL);
                 break;
             }
-            if (RX_StepperStatus.screw_posY - MIN_Y_POS + MAX_VARIANCE < 0 && _NewCmd != CMD_ROB_WIPE_LEFT && _NewCmd != CMD_ROB_WIPE_RIGHT)
+            if (RX_StepperStatus.screw_posY - MIN_Y_POS + MAX_VARIANCE < 0 && _NewCmd != CMD_ROBI_WIPE_LEFT && _NewCmd != CMD_ROBI_WIPE_RIGHT)
             {
                 Error(ERR_CONT, 0, "Screwer to close to garage to move up");
                 break;
@@ -752,8 +751,9 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         break;
 
     case CMD_ROBI_MOVE_TO_X:
-        if (!_CmdRunning || _CmdRunning == CMD_ROB_WIPE_LEFT || _CmdRunning == CMD_ROB_WIPE_RIGHT)
+        if (!_CmdRunning || _CmdRunning == CMD_ROBI_WIPE_LEFT || _CmdRunning == CMD_ROBI_WIPE_RIGHT)
         {
+            pos = *((INT32 *)pdata);
             if (!RX_StepperStatus.screwerinfo.ref_done)
             {
                 _NewCmd = msgId;
@@ -768,15 +768,14 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                 robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_DOWN, NULL);
                 break;
             }
-            else if (RX_StepperStatus.screw_posY - MIN_Y_POS < MAX_VARIANCE && _CmdRunning != CMD_ROB_WIPE_LEFT && _CmdRunning != CMD_ROB_WIPE_RIGHT)
+            else if (RX_StepperStatus.screw_posY - MIN_Y_POS < MAX_VARIANCE && _CmdRunning != CMD_ROBI_WIPE_LEFT && _CmdRunning != CMD_ROBI_WIPE_RIGHT && pos != 0)
             {
                 Error(ERR_CONT, 0, "Screwer to close to garage to move in x axis");
                 break;
             }
             else
             {
-                pos = *((INT32 *)pdata);
-                if ( _CmdRunning != CMD_ROB_WIPE_LEFT && _CmdRunning != CMD_ROB_WIPE_RIGHT) _CmdRunning = msgId;
+                if ( _CmdRunning != CMD_ROBI_WIPE_LEFT && _CmdRunning != CMD_ROBI_WIPE_RIGHT) _CmdRunning = msgId;
                 micron = pos - RX_StepperStatus.screw_posX;
                 steps = _micron_2_steps(micron);
                 _TargetPosition = pos;
@@ -846,7 +845,7 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         }
         break;
 
-    case CMD_ROB_WIPE_LEFT:
+    case CMD_ROBI_WIPE_LEFT:
         pos = *((INT32 *)pdata);
         if (pos == 0 && !RX_StepperStatus.screwerinfo.wipe_left_up && !RX_StepperStatus.screwerinfo.wipe_right_up) break;
         if (!_CmdRunning)
@@ -876,14 +875,14 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             else
             {
                 _CmdRunning = msgId;
-                if (pos) pos = 4800;
+                if (pos) pos = -7600;
                 robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_X, &pos);
             }
             
         }
         break;
 
-    case CMD_ROB_WIPE_RIGHT:
+    case CMD_ROBI_WIPE_RIGHT:
         pos = *((INT32 *)pdata);
         if (pos == 0 && !RX_StepperStatus.screwerinfo.wipe_left_up && !RX_StepperStatus.screwerinfo.wipe_right_up) break;
         if (!_CmdRunning)
@@ -913,10 +912,9 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             else
             {
                 _CmdRunning = msgId;
-                if (pos) pos = -8100;
+                if (pos) pos = 4600;
                 robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_X, &pos);
-            }
-            
+            }        
         }
         break;
 
