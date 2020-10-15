@@ -640,15 +640,12 @@ static void _scr_fill_blk(SBmpSplitInfo *psplit, int dstLineLen, BYTE *dst)
 		width = srcWidthBt-start;
 
 		//--- copy the image data ----------------------------
-		while (len)
-		{
-			l = (len>width) ? width : len;
-			memcpy(dst, s, l);
-			len -=l;
-			dst+=l;
-			s=src;
-			width=srcWidthBt;
-		}
+		l = (len>width) ? width : len;
+		memcpy(dst, s, l);
+		len-=l;
+		dst+=l;
+        memset(dst, 0x00, len);
+        dst += len;
 		/*
 		if (mirror)	
 		{

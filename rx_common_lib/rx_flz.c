@@ -346,7 +346,7 @@ int flz_load(SPageId *id, const char *filedir, const char *filename, int printMo
 			{
 				BYTE* buf = buffer[c];
 				UINT64 offset;
-				offset=(UINT64)(pinfo->lengthPx+2*wul)*(UINT64)pinfo->lineLen;
+				offset=(UINT64)(pinfo->lengthPx+wul)*(UINT64)pinfo->lineLen;
 				memset(buf,        0x00, wul * pinfo->lineLen);
 				memset(buf+offset, 0x00, wul * pinfo->lineLen);
 				

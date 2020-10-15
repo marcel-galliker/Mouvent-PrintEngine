@@ -149,12 +149,15 @@ static int _gpu_malloc(SSLiceInfo *inplane, SSLiceInfo *outplane, int bitsPerPix
 	return ret;
 }
 
+// creates 2 bit/pixel
+// if limitL == 0: output = (s,m) else output = (s,m,l)
+// need 32 bits for compensating disabled jets
+// note that density correction is only used to decide if we jet
+// but not to set the drop size
+
 //--- _screen_fms_kernel ----------------------
 __global__ void _screen_fms_kernel(UINT8 *in, UINT8 *out, UINT16 *pta, UINT16 *densityFactor, UINT32 height, UINT32 inWidthPx, UINT32 inLineLen, UINT32 outLineLen, UINT32 sectorWidth, UINT32 limitM, UINT32 limitL)
 {
-	// creates 2 bit/pixel
-	// if limitL == 0: output = (s,m) else output = (s,m,l)
-
 	int y = (blockDim.x * blockIdx.x + threadIdx.x)*sectorWidth;
 	int x;
 	UINT8 *pSrc=&in[y];
@@ -163,7 +166,9 @@ __global__ void _screen_fms_kernel(UINT8 *in, UINT8 *out, UINT16 *pta, UINT16 *d
 	UINT8 *pDst=&out[y*outLineLen+x/4];
 	UINT16 *taLine=&pta[(y%TA_HEIGHT)*TA_WIDTH];
 	UINT8  dst=0;
-	INT8   levels = limitL? 3:2;
+	UINT32 limitML = (256 - limitL);
+	UINT32 limitSM = ((limitL ? limitL : 256) - limitM);
+
 	UINT32 src;	// need 32 bits for compensating disabled jets
 	UINT16  ta;
 
@@ -179,9 +184,12 @@ __global__ void _screen_fms_kernel(UINT8 *in, UINT8 *out, UINT16 *pta, UINT16 *d
 			dst <<= 2;
 			if (src > ta)
 			{
-				if (limitL && src>limitL) dst |= (src-limitL>=ta/3     )? 0x03:0x02;
-				else if (src>limitM)	  dst |= (src-limitM>=ta/levels)? 0x02:0x01;
-				else					  dst |= 0x01;
+				if (limitL && *pSrc > limitL)
+					dst |= (*pSrc - limitL >= limitML * ta / 65536) ? 0x03 : 0x02;
+				else if (*pSrc > limitM)
+					dst |= (*pSrc - limitM >= limitSM * ta / 65536) ? 0x02 : 0x01;
+				else
+					dst |= 0x01;
 			}
 
 			if (!(++x & 3)) *pDst++=dst;
@@ -192,9 +200,6 @@ __global__ void _screen_fms_kernel(UINT8 *in, UINT8 *out, UINT16 *pta, UINT16 *d
 //--- _screen_fms ----------------------
 static void _screen_fms(UINT32 y, UINT8 *in, UINT8 *out, UINT16 *pta, UINT16 *densityFactor, UINT32 height, UINT32 inWidthPx, UINT32 inLineLen, UINT32 outLineLen, UINT32 sectorWidth, UINT32 limitM, UINT32 limitL)
 {
-	// creates 2 bit/pixel
-	// if limitL == 0: output = (s,m) else output = (s,m,l)
-
 	UINT32 x;
 	UINT8 *pSrc=&in[y];
 	x = y%inLineLen;
@@ -202,7 +207,9 @@ static void _screen_fms(UINT32 y, UINT8 *in, UINT8 *out, UINT16 *pta, UINT16 *de
 	UINT8 *pDst=&out[y*outLineLen+x/4];
 	UINT16 *taLine=&pta[(y%TA_HEIGHT)*TA_WIDTH];
 	UINT8  dst=0;
-	INT8   levels = limitL? 3:2;
+	UINT32 limitML = (256 - limitL);
+	UINT32 limitSM = ((limitL ? limitL : 256) - limitM);
+
 	UINT32 src;	// need 32 bits for compensating disabled jets
 	UINT16 ta;
 
@@ -218,9 +225,12 @@ static void _screen_fms(UINT32 y, UINT8 *in, UINT8 *out, UINT16 *pta, UINT16 *de
 			dst <<= 2;
 			if (src > ta)
 			{
-				if (limitL && src>limitL) dst |= (src-limitL>=ta/3     )? 0x03:0x02;
-				else if (src>limitM)	  dst |= (src-limitM>=ta/levels)? 0x02:0x01;
-				else					  dst |= 0x01;
+				if (limitL && *pSrc > limitL)
+					dst |= (*pSrc - limitL >= limitML * ta / 65536) ? 0x03 : 0x02;
+				else if (*pSrc > limitM)
+					dst |= (*pSrc - limitM >= limitSM * ta / 65536) ? 0x02 : 0x01;
+				else
+					dst |= 0x01;
 			}
 
 			if (!(++x & 3)) *pDst++=dst;
@@ -231,9 +241,6 @@ static void _screen_fms(UINT32 y, UINT8 *in, UINT8 *out, UINT16 *pta, UINT16 *de
 //--- _screen_fms_600_kernel ----------------------
 __global__ void _screen_fms_600_kernel(UINT8 *in, UINT8 *out, UINT16 *pta, UINT16 *densityFactor, UINT32 height, UINT32 inWidthPx, UINT32 inLineLen, UINT32 outLineLen, UINT32 sectorWidth, UINT32 limitM, UINT32 limitL)
 {
-	// creates 2 bit/pixel
-	// if limitL == 0: output = (s,m) else output = (s,m,l)
-
 	int y = (blockDim.x * blockIdx.x + threadIdx.x)*sectorWidth;
 	int x;
 	x = 2*(y%inLineLen);
@@ -241,8 +248,10 @@ __global__ void _screen_fms_600_kernel(UINT8 *in, UINT8 *out, UINT16 *pta, UINT1
 	UINT8 *pSrc=&in[(y/2)*inLineLen+x/2];
 	UINT8 *pDst=&out[y*outLineLen+x/4];
 	UINT16* taLine=&pta[(y%TA_HEIGHT)*TA_WIDTH];
-	UINT8  dst;
-	INT8   levels = limitL? 3:2;
+	UINT8  dst = 0;
+	UINT32 limitML = (256 - limitL);
+	UINT32 limitSM = ((limitL ? limitL : 256) - limitM);
+
 	UINT32 src;	// need 32 bits for compensating disabled jets
 	UINT16  ta;
 
@@ -259,9 +268,12 @@ __global__ void _screen_fms_600_kernel(UINT8 *in, UINT8 *out, UINT16 *pta, UINT1
 			dst <<= 2;
 			if (src > ta)
 			{
-				if (limitL && src>limitL) dst |= (src-limitL>=ta/3     )? 0x03:0x02;
-				else if (src>limitM)	  dst |= (src-limitM>=ta/levels)? 0x02:0x01;
-				else					  dst |= 0x01;
+				if (limitL && *pSrc > limitL)
+					dst |= (*pSrc - limitL >= limitML * ta / 65536) ? 0x03 : 0x02;
+				else if (*pSrc > limitM)
+					dst |= (*pSrc - limitM >= limitSM * ta / 65536) ? 0x02 : 0x01;
+				else
+					dst |= 0x01;
 			}
 
 			if (!(++x & 3)) *pDst++=dst;
@@ -272,9 +284,6 @@ __global__ void _screen_fms_600_kernel(UINT8 *in, UINT8 *out, UINT16 *pta, UINT1
 //--- _screen_fms_600 ----------------------
 static void _screen_fms_600(UINT32 y, UINT8 *in, UINT8 *out, UINT16 *pta, UINT16 *densityFactor, UINT32 height, UINT32 inWidthPx, UINT32 inLineLen, UINT32 outLineLen, UINT32 sectorWidth, UINT32 limitM, UINT32 limitL)
 {
-	// creates 2 bit/pixel
-	// if limitL == 0: output = (s,m) else output = (s,m,l)
-
 	UINT32 x;
 	x = y%inLineLen;
 	y = y/inLineLen;
@@ -282,13 +291,14 @@ static void _screen_fms_600(UINT32 y, UINT8 *in, UINT8 *out, UINT16 *pta, UINT16
 	UINT8 *pDst=&out[y*outLineLen+x/4];
 	UINT16* taLine=&pta[(y%TA_HEIGHT)*TA_WIDTH];
 	UINT8  dst=0;
-	INT8   levels = limitL? 3:2;
+	UINT32 limitML = (256 - limitL);
+	UINT32 limitSM = ((limitL ? limitL : 256) - limitM);
+
 	UINT32 src;	// need 32 bits for compensating disabled jets
 	UINT16  ta;
 
-	sectorWidth+=x;
-	if (sectorWidth>inWidthPx) sectorWidth=inWidthPx;
-	sectorWidth *=2;
+	sectorWidth = 2 * sectorWidth + x;
+	if (sectorWidth > 2 * inWidthPx) sectorWidth = 2 * inWidthPx;
 
 	if (y<2*height)
 	{
@@ -300,9 +310,12 @@ static void _screen_fms_600(UINT32 y, UINT8 *in, UINT8 *out, UINT16 *pta, UINT16
 			dst <<= 2;
 			if (src > ta)
 			{
-				if (limitL && src>limitL) dst |= (src-limitL>=ta/3     )? 0x03:0x02;
-				else if (src>limitM)	  dst |= (src-limitM>=ta/levels)? 0x02:0x01;
-				else					  dst |= 0x01;
+				if (limitL && *pSrc > limitL)
+					dst |= (*pSrc - limitL >= limitML * ta / 65536) ? 0x03 : 0x02;
+				else if (*pSrc > limitM)
+					dst |= (*pSrc - limitM >= limitSM * ta / 65536) ? 0x02 : 0x01;
+				else
+					dst |= 0x01;
 			}
 
 			if (!(++x & 3)) *pDst++=dst;
@@ -313,9 +326,6 @@ static void _screen_fms_600(UINT32 y, UINT8 *in, UINT8 *out, UINT16 *pta, UINT16
 //--- _screen_fms_300_kernel ----------------------
 __global__ void _screen_fms_300_kernel(UINT8 *in, UINT8 *out, UINT16 *pta, UINT16 *densityFactor, UINT32 height, UINT32 inWidthPx, UINT32 inLineLen, UINT32 outLineLen, UINT32 sectorWidth, UINT32 limitM, UINT32 limitL)
 {
-	// creates 2 bit/pixel
-	// if limitL == 0: output = (s,m) else output = (s,m,l)
-
 	int y = (blockDim.x * blockIdx.x + threadIdx.x)*sectorWidth;
 	int x;
 	x = 4*(y%inLineLen);
@@ -323,8 +333,10 @@ __global__ void _screen_fms_300_kernel(UINT8 *in, UINT8 *out, UINT16 *pta, UINT1
 	UINT8 *pSrc=&in[(y/4)*inLineLen+x/4];
 	UINT8 *pDst=&out[y*outLineLen+x/4];
 	UINT16* taLine=&pta[(y%TA_HEIGHT)*TA_WIDTH];
-	UINT8  dst;
-	INT8   levels = limitL? 3:2;
+	UINT8  dst = 0;
+	UINT32 limitML = (256 - limitL);
+	UINT32 limitSM = ((limitL ? limitL : 256) - limitM);
+
 	UINT32 src;	// need 32 bits for compensating disabled jets
 	UINT16  ta;
 
@@ -340,9 +352,12 @@ __global__ void _screen_fms_300_kernel(UINT8 *in, UINT8 *out, UINT16 *pta, UINT1
 			dst <<= 2;
 			if (src > ta)
 			{
-				if (limitL && src>limitL) dst |= (src-limitL>=ta/3     )? 0x03:0x02;
-				else if (src>limitM)	  dst |= (src-limitM>=ta/levels)? 0x02:0x01;
-				else					  dst |= 0x01;
+				if (limitL && *pSrc > limitL)
+					dst |= (*pSrc - limitL >= limitML * ta / 65536) ? 0x03 : 0x02;
+				else if (*pSrc > limitM)
+					dst |= (*pSrc - limitM >= limitSM * ta / 65536) ? 0x02 : 0x01;
+				else
+					dst |= 0x01;
 			}
 
 			if (!(++x & 3)) 
@@ -358,9 +373,6 @@ __global__ void _screen_fms_300_kernel(UINT8 *in, UINT8 *out, UINT16 *pta, UINT1
 //		300 dpi
 static void _screen_fms_300(UINT32 y, UINT8 *in, UINT8 *out, UINT16 *pta, UINT16 *densityFactor, UINT32 height, UINT32 inWidthPx, UINT32 inLineLen, UINT32 outLineLen, UINT32 sectorWidth, UINT32 limitM, UINT32 limitL)
 {
-	// creates 2 bit/pixel
-	// if limitL == 0: output = (s,m) else output = (s,m,l)
-
 	UINT32 x;
 	x = 4*(y%inLineLen);
 	y = y/inLineLen;
@@ -368,7 +380,8 @@ static void _screen_fms_300(UINT32 y, UINT8 *in, UINT8 *out, UINT16 *pta, UINT16
 	UINT8 *pDst=&out[y*outLineLen+x/4];
 	UINT16* taLine=&pta[(y%TA_HEIGHT)*TA_WIDTH];
 	UINT8  dst=0;
-	INT8   levels = limitL? 3:2;
+	UINT32 limitML = (256 - limitL);
+	UINT32 limitSM = ((limitL ? limitL : 256) - limitM);
 	UINT32 src;	// need 32 bits for compensating disabled jets
 	UINT16  ta;
 
@@ -384,9 +397,12 @@ static void _screen_fms_300(UINT32 y, UINT8 *in, UINT8 *out, UINT16 *pta, UINT16
 			dst <<= 2;
 			if (src > ta)
 			{
-				if (limitL && src>limitL) dst |= (src-limitL>=ta/3     )? 0x03:0x02;
-				else if (src>limitM)	  dst |= (src-limitM>=ta/levels)? 0x02:0x01;
-				else					  dst |= 0x01;
+				if (limitL && *pSrc > limitL)
+					dst |= (*pSrc - limitL >= limitML * ta / 65536) ? 0x03 : 0x02;
+				else if (*pSrc > limitM)
+					dst |= (*pSrc - limitM >= limitSM * ta / 65536) ? 0x02 : 0x01;
+				else
+					dst |= 0x01;
 			}
 
 			if (!(++x & 3)) 
@@ -412,19 +428,8 @@ int gpu_screen_FMS_1x3g(SSLiceInfo *inplane, SSLiceInfo *outplane, void *epplane
 
 	SStreamPar	*pstream = &_GPU_Stream[threadNo];
 
-	if (strchr(dots, 'L'))
-	{
-		limitM = 0x10000 * 33 / 100;
-		limitL = 0x10000 * 66 / 100;
-	}
-	else
-	{
-		limitM = 0x10000 * 50 / 100;
-		limitL = 0;
-	}
-
-	if (pplaneScreenConfig->limit[0]) limitM = 65536 * pplaneScreenConfig->limit[0] / 100;
-	if (pplaneScreenConfig->limit[1]) limitL = 65536 * pplaneScreenConfig->limit[1] / 100;
+	limitM = 256 * pplaneScreenConfig->limit[0] / 100;
+	limitL = 256 * pplaneScreenConfig->limit[1] / 100;
 	
 	if (pplaneScreenConfig->TA->width!=TA_WIDTH || pplaneScreenConfig->TA->heigth!=TA_HEIGHT) return Error(ERR_ABORT, 0, "TA-ARRAY must be 256*256");
 

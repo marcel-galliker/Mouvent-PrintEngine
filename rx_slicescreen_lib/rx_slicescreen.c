@@ -158,7 +158,7 @@ int rx_planescreen_load(int planeNumber, const char * settingsPath, const char *
 	}
 	else {
 		pplaneScreenConfig->limit[0] = 50; //will be used if 12
-		pplaneScreenConfig->limit[1] = 50; // not used
+		pplaneScreenConfig->limit[1] = 0; // not used
 	}
 
 
