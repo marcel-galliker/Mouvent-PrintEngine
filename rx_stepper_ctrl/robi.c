@@ -946,6 +946,17 @@ static void _check_Screwer_Movement()
     }
 }
 
+int robi_error()
+{
+    int i;
+    for (i = 0; i < MOTOR_COUNT; i++)
+    {
+        if (_robiStatus.motors[i].isStalled || _robiStatus.motors[i].timeout)
+            return TRUE;
+    }
+    return FALSE;
+}
+
 static int32_t set_serial_attributs(int fd, int speed, int parity)
 {
 	struct termios tty;
@@ -1208,7 +1219,7 @@ static void* receive_thread(void *par)
                                     else if (_CmdRunning == CMD_ROBI_SCREW_RIGHT)
                                         _NewCmd = CMD_ROBI_SCREW_LEFT;
                                 }
-                                Error(ERR_CONT, 0, "Robi Error. Flag: %x, Message %s", rxMessage.error, rxMessage.data);
+                                Error(ERR_CONT, 0, "Robi Error. Flag: %x, Message: %s", rxMessage.error, rxMessage.data);
                                 memset(rxMessage.data, 0x00, sizeof(rxMessage.data));
                             }
                             else

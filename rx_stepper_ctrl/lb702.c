@@ -50,6 +50,7 @@ static char		*_MotorName[2] = {"BACK", "FRONT"};
 #define MIN_CAP_HEIGHT	6000		// um under Ref height
 
 #define DIST_CAP_WASH	5300		// um -> higher than capping hight
+#define DIST_CAP_SCREW	5600		// um -> higher than capping hight
 
 static SMovePar	_ParRef;
 static SMovePar	_ParZ_down;
@@ -635,8 +636,8 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                                     {
 										RX_StepperStatus.cmdRunning  = msgId;
 										if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].cap_height < MIN_CAP_HEIGHT) Error(WARN, 0, "Reference Height back should be > 6mm");
-										val0 = -1*_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].cap_height -6000);
-										val1 = -1*_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].cap_height -6000);
+										val0 = -1*_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].cap_height - DIST_CAP_SCREW);
+										val1 = -1*_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].cap_height - DIST_CAP_SCREW);
                                         if (RX_StepperStatus.info.ref_done) _lb702_move_to_pos(CMD_LIFT_SCREW, val0, val1);
                                     }
                                     break;
