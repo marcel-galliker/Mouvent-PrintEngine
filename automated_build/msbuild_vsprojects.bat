@@ -122,7 +122,7 @@ REM ----------------------------------------------------------------------------
 
 REM Build a special debug rx_main_ctrl for test (local IP)
 :LIB_TEST
-	set BUILD=64
+	set BUILD=TEST
 	set FLAGS=/m /property:Configuration=Debug /property:Platform=x64 /property:SolutionDir=%BATCH_PATH%..\
 	call :BUILD_PROJECT rx_common_lib, vcxproj
 	call :BUILD_PROJECT rx_tif_lib, vcxproj
@@ -132,7 +132,7 @@ REM Build a special debug rx_main_ctrl for test (local IP)
 	goto :EOF
 
 :BIN_TEST
-	set BUILD=64
+	set BUILD=TEST
 	set FLAGS=/m /p:DefineConstants="RX_CTRL_SUBNET=\"127.168.200.\"" /property:Configuration=Debug /property:Platform=x64 /property:SolutionDir=%BATCH_PATH%..\
 	call :BUILD_PROJECT rx_main_ctrl, vcxproj
 	goto :EOF
@@ -157,7 +157,6 @@ REM Build a special debug rx_main_ctrl for test (local IP)
 	set FLAGS=/m /property:Configuration=Release /property:Platform=x64 /property:SolutionDir=%BATCH_PATH%..\
 	call :BUILD_PROJECT rx_spooler_ctrl, vcxproj
 	call :BUILD_PROJECT rx_main_ctrl, vcxproj
-	call :BUILD_PROJECT rx_digiprint_gui, sln
 	call :BUILD_PROJECT mvt_digiprint_gui, sln
 	call :BUILD_PROJECT Win10-Install, vcxproj, Win10\
 	call :BUILD_PROJECT Win10-Startup, vcxproj, Win10\
