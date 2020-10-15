@@ -425,8 +425,22 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 		
 	same = (!strcmp(msg.filename, _LastFilename) &&  msg.id.page==_LastPage && msg.wakeup==_LastWakeup && msg.gapPx==_LastGap);
 //	if (rx_def_is_lb(RX_Spooler.printerType)) same &= msg.offsetWidth==_LastOffsetWidth;
-	if (rx_def_is_lb(RX_Spooler.printerType) && msg.printMode==PM_SINGLE_PASS) same = ((msg.flags&FLAG_SAME)!=0) && (msg.offsetWidth==_LastOffsetWidth);
+    if (rx_def_is_lb(RX_Spooler.printerType) && msg.printMode==PM_SINGLE_PASS) same = ((msg.flags&FLAG_SAME)!=0) && (msg.offsetWidth==_LastOffsetWidth);
 	if (msg.printMode==PM_SINGLE_PASS && jc_changed()) same=FALSE;
+
+    // check that Buffer is well allocated 
+    if (same)
+    {
+        for (int i = 0; i < MAX_COLORS; i++)
+        {
+            if (RX_Color[i].color.name[0] && RX_Color[i].lastLine > RX_Color[i].firstLine && _Buffer[i] == NULL)
+            {
+                same = FALSE;
+                break;
+            }
+        }
+    }
+
 	_LastPage   = msg.id.page;
 	_LastGap	= msg.gapPx;
 	_LastWakeup = msg.wakeup;
@@ -597,11 +611,10 @@ static int _do_print_abort(RX_SOCKET socket)
 
 	//--- memory management (large files on TX) -----------------------
 	{
-		// always start with _Buffer[0], free all other buffers!
-		_BufferNo = BUFFER_CNT-1;
-		for(int b=1; b<BUFFER_CNT; b++)
+		for(int b=0; b<BUFFER_CNT; b++)
 		{
-			data_free(&_BufferSize[b], _Buffer[b]);
+			if (b != _BufferNo)
+				data_free(&_BufferSize[b], _Buffer[b]);
 		}
 	}
 	

@@ -342,13 +342,9 @@ static int _rx_screen_write_ta(void * epplaneScreenConfig)
 }
 
 //--- scr_wait_ready ---------------------------------------------
-void scr_wait_ready(void)
+int scr_wait_ready(void)
 {	
-	TrPrintfL(TRUE, "Screening WAIT ready");
-	if (rx_sem_wait(_SemScreeningReady, 5000)!=REPLY_OK)
-		Error(ERR_ABORT, 0, "Screening timeout");
-
-	TrPrintfL(TRUE, "Screening is ready");
+	return rx_sem_wait(_SemScreeningReady, 500);
 }
 
 //--- scr_start --------------------------------------------------

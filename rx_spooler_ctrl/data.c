@@ -483,7 +483,7 @@ UINT64 data_memsize(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPix
 int  data_malloc(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPixel, SColorSplitCfg *psplit, int splitCnt, UINT64 *pBufSize, BYTE* buffer[MAX_COLORS])
 {	
 	UINT64	memsize;
-	int i, found, error;
+	int i, error;
 	int time;
 
 	memsize = data_memsize(printMode, width, height, bitsPerPixel);
@@ -501,13 +501,23 @@ int  data_malloc(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPixel,
 		{
 			if (psplit[i].color.name[0] && psplit[i].lastLine>psplit[i].firstLine)
 			{
-				TrPrintfL(1, "buffer[%d]: WAIT UNUSED %p, used=%d, abort=%d", i, buffer[i], rx_mem_cnt(buffer[i]), _Abort);
-				while (!_Abort && rx_mem_cnt(buffer[i]))
+				if (buffer[i])
 				{
-					rx_sleep(time);
+					TrPrintfL(1, "buffer[%d]: WAIT UNUSED %p, used=%d, abort=%d", i, buffer[i], rx_mem_cnt(buffer[i]), _Abort);
+					while (!_Abort && rx_mem_cnt(buffer[i]))
+					{
+						rx_sleep(time);
+					}
+					//	rx_mem_await_free(buffer[i], INFINITE);
+					TrPrintfL(1, "buffer[%d]: IS UNUSED", i);
 				}
-			//	rx_mem_await_free(buffer[i], INFINITE);
-				TrPrintfL(1, "buffer[%d]: IS UNUSED", i);
+                else
+                {
+                    // missing buffer for new color
+                    buffer[i] = rx_mem_alloc(*pBufSize);
+                    if (buffer[i] == NULL) error = TRUE;
+                    TrPrintfL(1, "data_malloc buffer [%d] %p, free=%d MB, size=%d MB done", i, buffer[i], rx_mem_get_freeMB(), memsize/1024/1024);
+                }
 			}
 		}
 		_AwaitFreeBuf = NULL;
@@ -520,7 +530,6 @@ int  data_malloc(int printMode, UINT32 width, UINT32 height, UINT8 bitsPerPixel,
 		{
 			if (psplit[i].color.name[0])
 			{
-				found = TRUE;
 				if (psplit[i].lastLine>psplit[i].firstLine)
 				{
 					TrPrintfL(1, "buffer[%d]: WAIT FREE %p, used=%d", i, buffer[i], rx_mem_cnt(buffer[i]));
@@ -776,13 +785,14 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 						if (ret) ret = tif_load(id, filepath, filename, printMode, gapPx, _WakeupLen, RX_Color, SIZEOF(RX_Color), buffer, &bmpInfo, ctrl_send_load_progress);
 						strcpy(_FileTimePath, tif_last_filepath());				
 					}
-				
-					{ // test ------------
+#ifdef DEBUG
+                    { // test ------------
 						int i;
 						for (i=0; i<RX_Spooler.colorCnt; i++)
 							TrPrintfL(TRUE, "ColorData[%d] Loaded to buffer %03d", i, ctrl_get_bufferNo(buffer[i]));
 					}
-				}
+#endif // DEBUG
+                }
 //				Error(LOG, 0, "Page %d: Tif Load Time=%d ms, _Abort=%d", id->page, rx_get_ticks()-time0, _Abort);
 				if (ret==REPLY_NOT_FOUND)
 				{
@@ -1242,7 +1252,10 @@ static int _data_split(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int length
 	{
 		pItem->splitInfo->screening=TRUE;
 	//	if (scr_check(pBmpInfo)) return Error(ERR_ABORT, 0, "%s: File format not supported", str_start_cut(pItem->filepath, PATH_RIPPED_DATA));
-		scr_wait_ready();
+		TrPrintfL(TRUE, "Screening WAIT ready");
+		while (scr_wait_ready())
+			if (_Abort) return REPLY_ERROR;
+		TrPrintfL(TRUE, "Screening is ready");
 	}
 
 	if (_Abort) 

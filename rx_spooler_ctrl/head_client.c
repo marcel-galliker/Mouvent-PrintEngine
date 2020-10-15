@@ -322,11 +322,7 @@ void hc_send_next()
 		}
 		if (pSplitInfo->screening)
 		{			
-			if (scr_wait(5000)) 
-			{
-				Error(ERR_STOP, 0, "Screening Timeout");
-				return;
-			}
+			scr_wait(1000);
 		}
 
 		for (i=0, pInfo=pSplitInfo; i<headCnt; i++, pInfo++)
