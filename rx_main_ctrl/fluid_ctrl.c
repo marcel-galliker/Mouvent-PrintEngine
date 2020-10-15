@@ -49,7 +49,9 @@ static int				_PurgeAll=FALSE;
 static int				_PurgeFluidNo;
 static int				_Scanning;
 static int				_ScalesFluidNo=-1;
-	
+static UINT32			_InitDone = 0x00;
+
+
 //--- prototypes -----------------------
 static void* _fluid_thread(void *par);
 
@@ -467,7 +469,7 @@ static void _do_fluid_stat(int fluidNo, SFluidBoardStat *pstat)
 		_FluidStatus[fluidNo*INK_PER_BOARD+i].info.cond_flowFactor_ok = flowFactor_ok;
 	}
 		
-	if      (_FluidCtrlMode>=ctrl_flush_night && _FluidCtrlMode<=ctrl_flush_done || _FluidCtrlMode == ctrl_cap_step3) _control_flush();
+	if      ((_FluidCtrlMode>=ctrl_flush_night && _FluidCtrlMode<=ctrl_flush_done) || _FluidCtrlMode == ctrl_cap_step3) _control_flush();
 //	else if (_RobotCtrlMode>=ctrl_wipe        && _RobotCtrlMode<ctrl_fill       && fluidNo==0) _control_robot();
 	else _control(fluidNo);
 
@@ -587,9 +589,14 @@ void undefine_PurgeCtrlMode(void)
 static void _control(int fluidNo)
 {
 	static int	_txrob;
+    static UINT32 _flushedNeeded = 0x00;
 
-	int i;
-	int no = fluidNo*INK_PER_BOARD;
+    int i;
+    for (i = 0; i < RX_Config.inkSupplyCnt; i++)
+    {
+        if (*RX_Config.inkSupply[i].inkFileName) _flushedNeeded |= (0x01 << i);
+    }
+    int no = fluidNo*INK_PER_BOARD;
 	SInkSupplyStat *pstat = &_FluidStatus[no];
 	int	lbrob = RX_StepperStatus.robot_used; //(RX_Config.printer.type==printer_LB702_UV ||RX_Config.printer.type == printer_LB702_WB);
 	
@@ -631,7 +638,7 @@ static void _control(int fluidNo)
 				case ctrl_purge_soft:
 				case ctrl_purge_hard:		if (lbrob) steplb_rob_to_wipe_pos(no / 2, rob_fct_purge_all);  //steplb_rob_to_wipe_pos(no / 2, HeadNo + rob_fct_purge_head0);
 											else	   step_lift_to_top_pos();
-				
+											
 											_PurgeCtrlMode = pstat->ctrlMode;
 											_txrob = rx_def_is_tx(RX_Config.printer.type) && step_active(1);
                                             int time = (RX_Config.printer.type==printer_TX802)? (2*TIME_HARD_PURGE) : TIME_HARD_PURGE;
@@ -646,14 +653,17 @@ static void _control(int fluidNo)
 											}
                                             if (_txrob && _PurgeFluidNo < 0 && state_RobotCtrlMode() != ctrl_wash_step1 && state_RobotCtrlMode() != ctrl_wash_step2)
                                             {
-                                               steptx_rob_wash_start();
+                                                if (_InitDone == _flushedNeeded)
+													steptx_rob_wash_start();
                                             }
-                                            _send_ctrlMode(_PurgeFluidNo, ctrl_purge_step1, TRUE);
+                                            else
+												_send_ctrlMode(no, ctrl_purge_step1, TRUE);
+                                            
 											break;
 				
 				case ctrl_wash_step6:		if (steptx_rob_wash_done())
-											{	
-												if (_PurgeCtrlMode == ctrl_undef)	fluid_send_ctrlMode(-1, ctrl_vacuum, TRUE);
+											{
+                                                if (_PurgeCtrlMode == ctrl_undef)	fluid_send_ctrlMode(-1, ctrl_vacuum, TRUE);
 												else								_send_ctrlMode(_PurgeFluidNo, ctrl_purge_step1, TRUE);
 												break;
 											}													
@@ -687,15 +697,16 @@ static void _control(int fluidNo)
 
 				case ctrl_purge_step4:		if (_PurgeCtrlMode==ctrl_purge_hard || _PurgeCtrlMode==ctrl_purge_hard_wipe || _PurgeCtrlMode==ctrl_purge_hard_vacc)
 											{
-												_Flushed &= ~(0x01<<no);
+                                                if ( _all_fluids_in_fluidCtrlMode(ctrl_purge_step4))	_Flushed &= ~_flushedNeeded;
+												else													_Flushed &= ~(0x01<<no);
 												setup_fluid_system(PATH_USER FILENAME_FLUID_STATE, &_Flushed, WRITE);				
 											}
 
 											if (_txrob && _PurgeFluidNo < 0) 
 											{
 												if (_PurgeCtrlMode!=ctrl_undef && _all_fluids_in_fluidCtrlMode(ctrl_purge_step4)) 
-												{													
-													if (_PurgeCtrlMode==ctrl_purge_hard_wipe)
+												{	
+                                                    if (_PurgeCtrlMode==ctrl_purge_hard_wipe)
 														fluid_send_ctrlMode(-1, ctrl_wipe, TRUE);
 													else if (_PurgeCtrlMode==ctrl_purge_hard_vacc)
 														fluid_send_ctrlMode(-1, ctrl_vacuum, TRUE);
@@ -943,8 +954,12 @@ void fluid_send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
             steptx_lift_to_print_pos();
     }
     
-	if (ctrlMode==ctrl_off) step_rob_stop();	
-	if (ctrlMode==ctrl_purge_hard || ctrlMode == ctrl_purge_hard_wipe || ctrlMode == ctrl_purge_hard_vacc || ctrlMode == ctrl_purge || ctrlMode == ctrl_purge_soft) _PurgeFluidNo=no;    
+	if (ctrlMode==ctrl_off) step_rob_stop();
+    if (ctrlMode == ctrl_purge_hard || ctrlMode == ctrl_purge_hard_wipe || ctrlMode == ctrl_purge_hard_vacc || ctrlMode == ctrl_purge || ctrlMode == ctrl_purge_soft)
+    {
+        _PurgeFluidNo = no;
+        _InitDone = 0;
+    }
 
     _FluidCtrlMode = ctrlMode;
 	_RobotCtrlMode = ctrlMode;
@@ -1022,9 +1037,8 @@ void _send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 				cmd.no			= i%INK_PER_BOARD;
 				if (!RX_Config.inkSupply[i].ink.fileName[0]) cmd.ctrlMode = ctrl_off;
 				else if (i==no) cmd.ctrlMode = ctrlMode;
-				else if (ctrlMode==ctrl_empty) cmd.ctrlMode = ctrl_off;	
-
-				sok_send(&_FluidThreadPar[i/INK_PER_BOARD].socket, &cmd);
+				else if (ctrlMode==ctrl_empty) cmd.ctrlMode = ctrl_off;
+                sok_send(&_FluidThreadPar[i/INK_PER_BOARD].socket, &cmd);
 				
 				//--- send mode to heads ---
 				if (sendToHeads)
@@ -1041,12 +1055,13 @@ void _send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 //--- _send_purge_par -------------------------------------------------
 static void _send_purge_par(int fluidNo, int time)
 {
-	SPurgePar par;
+    SPurgePar par;
 	par.no    =  fluidNo%INK_PER_BOARD;
     if (RX_StepperStatus.robot_used) par.delay = 3000;
 	else                             par.delay = 0;
 	par.time  = ctrl_send_purge_par(fluidNo, time);
 	sok_send_2(&_FluidThreadPar[fluidNo/INK_PER_BOARD].socket, CMD_SET_PURGE_PAR, sizeof(par), &par);
+    _InitDone |= 0x01 << fluidNo;
 }
 
 //--- fluid_send_pressure -------------------------------------------

@@ -308,8 +308,8 @@ static void _check_wrinkle_detection(void)
 //--- steptx_set_robCtrlMode -------------------------------------------------
 void steptx_set_robCtrlMode(EnFluidCtrlMode ctrlMode)
 {
-	_RobotCtrlMode = ctrlMode;
-	_steptx_rob_control();
+        _RobotCtrlMode = ctrlMode;
+        _steptx_rob_control();
 }
 
 EnFluidCtrlMode state_RobotCtrlMode(void)
@@ -562,7 +562,6 @@ static void _steptx_rob_control(void)
 				
 	case ctrl_vacuum_step14:	if ((_printing && step_lift_in_print_pos()) || (!_printing && step_lift_in_up_pos()))
 								{
-									Error(LOG, 0, "ctrl_vacuum_step10 printState=%d", RX_PrinterStatus.printState);
 									if (_printing) _RobotCtrlMode = ctrl_print;
 									else		   _RobotCtrlMode = ctrl_off;
 								}
@@ -583,7 +582,7 @@ static void _steptx_rob_control(void)
 				
 	case ctrl_cap_step2:		if (plc_in_fill_cap_pos() && step_rob_reference_done()) 
 								{
-									step_rob_to_wipe_pos(rob_fct_cap);
+									if (!_Status[1].robinfo.moving) step_rob_to_wipe_pos(rob_fct_cap);
                                     if (!step_rob_in_wipe_pos(rob_fct_cap))
                                     {
                                         _RobotCtrlMode = ctrl_cap_step3;
