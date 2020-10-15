@@ -34,8 +34,8 @@
 
 #define STEPPER_CNT		    4
 
-#define MAX_STEPS_DIST      30 * 6  // 30 turns with 6 steps each turn
-#define MAX_STEPS_ANGLE     18 * 6 // 18 turns with 6 steps each turn
+#define MAX_STEPS_DIST      27 * 6  // 30 turns with 6 steps each turn
+#define MAX_STEPS_ANGLE     15 * 6  // 15 turns with 6 steps each turn
 
 static RX_SOCKET		    _step_socket[STEPPER_CNT]={0};
 
@@ -660,7 +660,7 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
     {
         Error(ERR_CONT, 0, "Screw moves out of range; Printbar: %d, Head: %d, Axis: %d, Turn to reach %d.%d", 
 				headAdjustment->printbarNo, headAdjustment->headNo, headAdjustment->axis, 
-				(current_screwpos + headAdjustment->steps)/6, (current_screwpos + headAdjustment->steps)%6);
+				(current_screwpos + headAdjustment->steps)/6, abs((current_screwpos + headAdjustment->steps)%6));
         return;
     }
     else if (headAdjustment->axis == AXE_ANGLE && current_screwpos - headAdjustment->steps < 0)
@@ -724,17 +724,16 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
 //--- _check_screwer --------------------------------------------------
 static void _check_screwer(void)
 {
-    static int _old_Screwer_State[STEPPER_CNT] = {FALSE};
     SRobPosition ScrewPosition;
     SHeadAdjustmentMsg headAdjustment;
     memset(&ScrewPosition, 0, sizeof(ScrewPosition));
     int i, j;
     for (i = 0; i < SIZEOF(_Status); i++)
     {
-        if (_ScrewPositions_Written[i] == TRUE && !_Status[i].screwerinfo.screwer_blocked_left && !_Status[i].screwerinfo.screwer_blocked_right) _ScrewPositions_Written[i] = FALSE;
+        if (_ScrewPositions_Written[i] == TRUE && !_Status[i].screwerinfo.screwer_blocked_left && !_Status[i].screwerinfo.screwer_blocked_right && !_Status[i].screwerinfo.screwed) _ScrewPositions_Written[i] = FALSE;
         ScrewPosition.printBar = _HeadAdjustment[i].printbarNo;
         ScrewPosition.head = _HeadAdjustment[i].headNo;
-        if (_Status[i].screwerinfo.screwed && !_old_Screwer_State[i] && _step_socket[i])
+        if (_Status[i].screwerinfo.screwed && !_ScrewPositions_Written[i] && _step_socket[i])
         {
             if (_HeadAdjustment[i].axis == AXE_DIST)
                 ScrewPosition.dist = _HeadAdjustment[i].steps;
@@ -742,6 +741,7 @@ static void _check_screwer(void)
                 ScrewPosition.angle = -_HeadAdjustment[i].steps;
 
             ctrl_set_rob_pos(ScrewPosition, FALSE, FALSE);
+            _ScrewPositions_Written[i] = TRUE;
         }
         else if (_Status[i].screwerinfo.screwer_blocked_left && !_ScrewPositions_Written[i])
         {
@@ -763,7 +763,6 @@ static void _check_screwer(void)
             ctrl_set_rob_pos(ScrewPosition, TRUE, _HeadAdjustment[i].axis);
             _ScrewPositions_Written[i] = TRUE;
         }
-        _old_Screwer_State[i] = _Status[i].screwerinfo.screwed;
     }
 
     

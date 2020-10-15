@@ -978,8 +978,7 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
             robi_handle_ctrl_msg(INVALID_SOCKET, _CmdRunning_Robi, NULL);
             return;
         }
-        else if (!RX_StepperStatus.info.z_in_ref && !(_RobFunction == rob_fct_move && RX_StepperStatus.info.z_in_wash) &&
-                 !(RX_StepperStatus.info.z_in_screw && _RobFunction >= rob_fct_screw_head0 && _RobFunction <= rob_fct_screw_head7)) // Here this is for purging and not // for vacuum
+        else if (!RX_StepperStatus.info.z_in_ref && !(_RobFunction == rob_fct_move && RX_StepperStatus.info.z_in_wash))
         {
             if (!RX_StepperStatus.info.moving)
             {
@@ -1173,7 +1172,7 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
             _CmdScrewing = 0;
             return;
         }
-        if (!_CmdScrewing && _check_in_screw_pos(headAdjustment))   _CmdScrewing = 4;
+        
         if (_CmdScrewing == 0)                                      correction_value = 0;
         if (_CmdScrewing != 6)                                      wait_time = 0;
 
@@ -1183,11 +1182,17 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
             RX_StepperStatus.screwerinfo.screwer_blocked_left = FALSE;
             RX_StepperStatus.screwerinfo.screwer_blocked_right = FALSE;
             RX_StepperStatus.screwerinfo.screwed = FALSE;
-            pos = headAdjustment.headNo + rob_fct_screw_head0;
-            if (_HeadPos != pos)
-                lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_MOVE_POS, &pos);
-            _CmdScrewing++;
-            cmd_Time = rx_get_ticks() + max_Wait_Time;
+            if (_check_in_screw_pos(headAdjustment))
+                _CmdScrewing = 4;
+            else
+            {
+                pos = headAdjustment.headNo + rob_fct_screw_head0;
+                if (_HeadPos != pos)
+                    lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_MOVE_POS, &pos);
+                _CmdScrewing++;
+                cmd_Time = rx_get_ticks() + max_Wait_Time;
+            }
+           
             break;
 
         case 1:
@@ -1264,15 +1269,13 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
                     screwSteps -= 12;
                     screwSteps = abs(screwSteps);
                     _HeadAdjustment.steps = 12;
-                    robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_RIGHT,
-                                         &screwSteps);
+                    robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_RIGHT, &screwSteps);
                 }
                 else if (headAdjustment.axis == AXE_ANGLE == screwSteps > 0)
                 {
                     screwSteps += 12;
                     _HeadAdjustment.steps = -12;
-                    robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_LEFT,
-                                         &screwSteps);
+                    robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_LEFT, &screwSteps);
                 }
                 else
                 {

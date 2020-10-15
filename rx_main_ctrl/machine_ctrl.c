@@ -81,7 +81,7 @@ int		machine_end(void)
 //--- machine_tick -------------------------------
 int		machine_tick(void)
 {
-	if(rx_def_is_tx(RX_Config.printer.type))
+	if(rx_def_is_tx(RX_Config.printer.type) || RX_StepperStatus.robot_used)
 	{
 		if (RX_StepperStatus.info.z_in_cap) _CappingTimer = 0;  // reset timer if already in cap
 

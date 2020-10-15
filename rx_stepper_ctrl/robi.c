@@ -570,8 +570,7 @@ void robi_display_status(void)
     term_printf("Ref: \t\t\t %d\n", _robiStatus.isInRef);
     term_printf("Robi blocked left: \t %d\n", RX_StepperStatus.screwerinfo.screwer_blocked_left);
     term_printf("Robi blocked right: \t %d\n", RX_StepperStatus.screwerinfo.screwer_blocked_right);
-    for (i = 0; i < SIZEOF(_robiStatus.motors); i++)
-        term_printf("Robi motor %d stalled: \t %d\n", i, _robiStatus.motors[i].isStalled);
+    term_printf("Robi screwed: \t\t %d\n", RX_StepperStatus.screwerinfo.screwed);
 }
 
 static void robi_set_output(int num, int val)
@@ -939,7 +938,11 @@ static void _check_Screwer_Movement()
     
     if ((RX_StepperStatus.screwerinfo.screwer_blocked_left || RX_StepperStatus.screwerinfo.screwer_blocked_right) && _motors_move_done() && _NewCmd)
     {
-        ticks = 3;
+        if ((RX_StepperStatus.screwerinfo.screwer_blocked_right &&  RX_StepperStatus.screw_posY >= (SCREW_Y_BACK + SCREW_Y_FRONT) / 2) ||
+                (RX_StepperStatus.screwerinfo.screwer_blocked_left && RX_StepperStatus.screw_posY <= (SCREW_Y_BACK + SCREW_Y_FRONT) / 2))
+            ticks = 16;
+        else
+            ticks = 4;
         uint8_t current = TRUE;
         send_command(MOTOR_SET_SCREW_CURRENT, sizeof(current), &current);
         robi_handle_ctrl_msg(INVALID_SOCKET, _NewCmd, &ticks);
@@ -1210,7 +1213,7 @@ static void* receive_thread(void *par)
                         {
                             if (rxMessage.length)
                             {
-                                if (rxMessage.error == MOTOR_STALLED && _CmdRunning)
+                                if (rxMessage.error == MOTOR_STALLED && _CmdRunning && _robiStatus.screwCurrent == 0 && _Buffer_Cmd[1] == MOTOR_MOVE_Z_UP)
                                 {
                                     RX_StepperStatus.screwerinfo.screwer_blocked_left = _CmdRunning == CMD_ROBI_SCREW_LEFT;
                                     RX_StepperStatus.screwerinfo.screwer_blocked_right = _CmdRunning == CMD_ROBI_SCREW_RIGHT;
