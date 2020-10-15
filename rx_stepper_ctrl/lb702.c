@@ -277,6 +277,10 @@ void lb702_main(int ticks, int menu)
 				else RX_StepperStatus.cmdRunning = FALSE;
 			}
 		}
+        else if (RX_StepperStatus.cmdRunning == CMD_LIFT_CAPPING_POS)
+        {
+            RX_StepperStatus.cmdRunning = FALSE;
+        }
 		else if (motors_error(MOTOR_Z_BITS, &motor))
 		{
 			Error(ERR_CONT, 0, "LIFT: Command %s: Motor %s blocked", _CmdName, _MotorName[motor]);			
@@ -310,6 +314,7 @@ void lb702_main(int ticks, int menu)
 			{
 			case CMD_LIFT_PRINT_POS: lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_PRINT_POS, &RX_StepperCfg.print_height); break;
 			case CMD_LIFT_UP_POS:    lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_UP_POS, NULL); break;
+            case CMD_LIFT_CAPPING_POS:	lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_CAPPING_POS, NULL); break;
 			case CMD_LIFT_REFERENCE: break;
 			default: Error(ERR_CONT, 0, "LB702_MAIN: Command 0x%08x not implemented", loc_new_cmd); break;
 			}
@@ -470,7 +475,7 @@ static void _lb702_move_to_pos(int cmd, int pos0, int pos1)
 	int adjust=0;
 	RX_StepperStatus.cmdRunning  = cmd;
 	
-	if (RX_StepperStatus.robot_used && !_CmdRunningRobi && (!RX_StepperStatus.robinfo.ref_done || !RX_StepperStatus.info.x_in_ref) && RX_StepperStatus.cmdRunning != CMD_LIFT_REFERENCE) 
+	if (RX_StepperStatus.robot_used && !_CmdRunningRobi && (!RX_StepperStatus.robinfo.ref_done || !RX_StepperStatus.info.x_in_ref) && RX_StepperStatus.cmdRunning != CMD_LIFT_REFERENCE && RX_StepperStatus.cmdRunning != CMD_LIFT_CAPPING_POS) 
 	{
 		_CmdRunningRobi = CMD_ROB_REFERENCE;
 		lbrob_handle_ctrl_msg(INVALID_SOCKET, _CmdRunningRobi, NULL);

@@ -435,8 +435,18 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
 		
 		case ctrl_cap_step2:		if (steplb_rob_in_wipe_pos_all(rob_fct_cap))
 									{
-										steplb_rob_wipe_start(no, rob_fct_cap);
-										_RobotCtrlMode[no] = ctrl_cap_step3;
+										int i;
+										for (i = 0; i < STEPPER_CNT; i++)
+										{
+											if (_step_socket[i] != INVALID_SOCKET)
+											{
+												steplb_rob_wipe_start(i, rob_fct_cap);
+												_RobotCtrlMode[i] = ctrl_cap_step3;
+                                                fluid_send_ctrlMode(2 * i, _RobotCtrlMode[i], TRUE);
+												fluid_send_ctrlMode(2 * i + 1, _RobotCtrlMode[i], TRUE);
+											}
+										}
+										
 									}
 									break;
 		
@@ -449,10 +459,10 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
 		
 		case ctrl_cap_step4:		if (steplb_lift_in_wipe_pos(no, rob_fct_cap))
 									{
-										_Flushed |= (0x3 << (no*2));
-										Error(LOG, 0, "ctrl_cap_step4 OK, no=%d, _Flushed=%d",no,_Flushed);
-										setup_fluid_system(PATH_USER FILENAME_FLUID_STATE, &_Flushed, WRITE);
-										fluid_init_flushed();
+										//_Flushed |= (0x3 << (no*2));
+										//Error(LOG, 0, "ctrl_cap_step4 OK, no=%d, _Flushed=%d",no,_Flushed);
+										//setup_fluid_system(PATH_USER FILENAME_FLUID_STATE, &_Flushed, WRITE);
+										//fluid_init_flushed();
 										_RobotCtrlMode[no] = ctrl_off;
 									}										 
 									break;
@@ -469,7 +479,7 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
 		default: return;
 		
 		}
-		if (_RobotCtrlMode[no] != old)
+		if (_RobotCtrlMode[no] != old && _RobotCtrlMode[no] != ctrl_cap_step3)
 		{
 			fluid_send_ctrlMode(2 * no, _RobotCtrlMode[no], TRUE);
 			fluid_send_ctrlMode(2 * no + 1, _RobotCtrlMode[no], TRUE);

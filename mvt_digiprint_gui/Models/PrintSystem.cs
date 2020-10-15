@@ -278,27 +278,27 @@ namespace RX_DigiPrint.Models
                 _IsOrder_PrinterType = PrinterType;
                 IsOrder_ColorCnt = ColorCnt;
                 switch(_PrinterType)
-                {
-                    /*
-                    case EPrinterType.printer_DP803: IS_Order = new int[] { 0,1,2,3,4,5,6,7 }; break;
-
-                    case EPrinterType.printer_LB701: 
-                        if (RxGlobals.PrintSystem.ColorCnt<=4) IS_Order = new int[] { 0,1,2,3 };
-                        else IS_Order = new int[] { 0,1,2,3,4,5,6,7 };
-                        break;
-                    */
-
-                    case EPrinterType.printer_LH702:
+                {                                       
+                    case EPrinterType.printer_LB701:
                     case EPrinterType.printer_LB702_UV:
-                        switch(ColorCnt)
+                    case EPrinterType.printer_LH702:
+                        switch (ColorCnt)
                         {
                             case 5:
                                 IS_Order    = new int[] { 4, 0, 1, 2, 3 };
                                 Color_Order = new int[] { 4, 0, 1, 2, 3 };
                                 break;
+                            case 6:
+                                IS_Order    = new int[] { 4, 5, 0, 1, 2, 3 };
+                                Color_Order = new int[] { 4, 5, 0, 1, 2, 3 };
+                                break;
                             case 7:
                                 IS_Order    = new int[] { 4, 5, 6, 0, 1, 2, 3 };
                                 Color_Order = new int[] { 4, 5, 6, 0, 1, 2, 3 };
+                                break;
+                            case 8:
+                                IS_Order    = new int[] { 4, 5, 6, 7, 0, 1, 2, 3 };
+                                Color_Order = new int[] { 4, 5, 6, 7, 0, 1, 2, 3 };
                                 break;
                             default:
                                 IS_Order    = new int[] { 0, 1, 2, 3, 4, 5, 6, 7 };
@@ -308,8 +308,8 @@ namespace RX_DigiPrint.Models
                         break;
 
                     case EPrinterType.printer_LB702_WB:
-                        IS_Order    = new int[] { 0, 1, 2, 3, 4, 5 };
-                        Color_Order = new int[] { 4, 5, 6, 0, 1, 2, 3 };
+                        IS_Order    = new int[] { 0, 1, 2, 3, 4, 5, 6, 7 };
+                        Color_Order = new int[] { 0, 1, 2, 3, 4, 5, 6, 7 };
                         break;
 
                     case EPrinterType.printer_TX801:
