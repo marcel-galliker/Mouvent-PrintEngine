@@ -1398,9 +1398,19 @@ static void _plc_get_status()
 					logType=_plc_error_filter(&item, text);
 					if(logType)
 					{
-						if(logType==LOG_TYPE_ERROR_CONT)	{   Error(ERR_ABORT,	0, "PLC (%X): %s", item.errNo, text); _ErrorFilter = rx_get_ticks() + ERROR_FILTER_TIME; }
-						else if(logType==LOG_TYPE_WARN)			Error(WARN,		0, "PLC (%X): %s", item.errNo, text);
-						else                                    Error(LOG,		0, "PLC (%X): %s", item.errNo, text);
+						switch (logType) {
+							case LOG_TYPE_ERROR_CONT:
+								// On label machines, PLC errors must stop printing
+								Error(rx_def_is_lb(RX_Config.printer.type) ? ERR_ABORT : ERR_CONT, 0, "PLC (%X): %s", item.errNo, text); 
+								_ErrorFilter = rx_get_ticks() + ERROR_FILTER_TIME;
+								break;
+							case LOG_TYPE_WARN:
+								Error(WARN, 0, "PLC (%X): %s", item.errNo, text);
+								break;
+							default:
+								Error(LOG, 0, "PLC (%X): %s", item.errNo, text);
+								break;
+						}
 					}
 					else if(item.state == message) Error(LOG, 0, "PLC (%X): %s", item.errNo, item.text);					
 				}				
@@ -1650,7 +1660,7 @@ static void _plc_state_ctrl()
 		int ret = lc_get_value_by_name_UINT32(UnitID ".STA_PAUSE_REQUEST", &pause);
 		if (RX_PrinterStatus.printState==ps_printing && !_RequestPause && pause)
 		{
-			Error(ERR_CONT, 0, "PAUSE requested by finishing");
+			Error(ERR_CONT, 0, "PAUSE requested by PLC");
 			RX_PrinterStatus.printState=ps_pause; // suppress pause message
 			_RequestPause = TRUE;
 			pc_pause_printing(FALSE);
