@@ -430,7 +430,7 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
     {
         for (int i = 0; i < MAX_COLORS; i++)
         {
-            if (RX_Color[i].color.name[0] && RX_Color[i].lastLine > RX_Color[i].firstLine && _Buffer[i] == NULL)
+            if (RX_Color[i].color.name[0] && RX_Color[i].lastLine > RX_Color[i].firstLine && _Buffer[_BufferNo][i] == NULL)
             {
                 same = FALSE;
                 break;
@@ -607,11 +607,11 @@ static int _do_print_abort(RX_SOCKET socket)
 	sok_send_2(&socket, REP_PRINT_ABORT, 0, NULL);
 
 	//--- memory management (large files on TX) -----------------------
+	// free all the memory
 	{
 		for(int b=0; b<BUFFER_CNT; b++)
 		{
-			if (b != _BufferNo)
-				data_free(&_BufferSize[b], _Buffer[b]);
+			data_free(&_BufferSize[b], _Buffer[b]);
 		}
 	}
 	
