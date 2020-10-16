@@ -942,7 +942,6 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 
     case CMD_HEAD_ADJUST:
         _turn_screw(*(SHeadAdjustment *)pdata);
-
         break;
 
     case CMD_SEARCH_ALL_SCREWS:
@@ -1134,7 +1133,7 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
 {
     int screwNr, screwSteps, pos, difference;
     static int cmd_Time;
-    static int max_Wait_Time = 41000; // ms
+    static int max_Wait_Time = 46000; // ms
     static int max_Wait_Time_Screw = 180000;  // ms
 
     screwNr = headAdjustment.printbarNo * HEADS_PER_COLOR * SCREWS_PER_HEAD + headAdjustment.headNo * SCREWS_PER_HEAD + headAdjustment.axis + 1;
@@ -1165,7 +1164,7 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
             _CmdScrewing = 0;
             return;
         }
-        if (cmd_Time && rx_get_ticks() > cmd_Time)
+        if (cmd_Time && rx_get_ticks() > cmd_Time && _CmdScrewing)
         {
             Error(ERR_CONT, 0, "Robot stock in turning screw step %d at printbar %d, head %d, axis %d", _CmdScrewing, _HeadAdjustment.printbarNo, _HeadAdjustment.headNo, _HeadAdjustment.axis);
             cmd_Time = 0;
@@ -1182,6 +1181,7 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
             RX_StepperStatus.screwerinfo.screwer_blocked_left = FALSE;
             RX_StepperStatus.screwerinfo.screwer_blocked_right = FALSE;
             RX_StepperStatus.screwerinfo.screwed = FALSE;
+            cmd_Time = rx_get_ticks() + max_Wait_Time;
             if (_check_in_screw_pos(headAdjustment))
                 _CmdScrewing = 4;
             else
@@ -1190,14 +1190,12 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
                 if (_HeadPos != pos)
                     lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_MOVE_POS, &pos);
                 _CmdScrewing++;
-                cmd_Time = rx_get_ticks() + max_Wait_Time;
             }
            
             break;
 
         case 1:
-            if (RX_StepperStatus.robinfo.ref_done &&
-                _HeadPos == headAdjustment.headNo + rob_fct_screw_head0)
+            if (RX_StepperStatus.robinfo.ref_done && _HeadPos == headAdjustment.headNo + rob_fct_screw_head0)
             {
                 if (headAdjustment.headNo == -1)
                 {
@@ -1618,7 +1616,7 @@ static int _check_in_screw_pos(SHeadAdjustment headAdjustment)
 
     for (headNr = 0; headNr < HEADS_PER_COLOR; headNr++)
     {
-        if (pos - (CABLE_SCREW_POS_BACK + ((headNr + 1) * (CABLE_SCREW_POS_FRONT - CABLE_SCREW_POS_BACK)) / 8) < MAX_VAR_SCREW_POS)
+        if (abs(pos - (CABLE_SCREW_POS_BACK + ((headNr + 1) * (CABLE_SCREW_POS_FRONT - CABLE_SCREW_POS_BACK)) / 8)) < MAX_VAR_SCREW_POS)
         {
             if (headNr == headAdjustment.headNo)
                 return TRUE;

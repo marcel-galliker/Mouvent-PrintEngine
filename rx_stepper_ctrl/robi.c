@@ -216,7 +216,10 @@ void robi_main(int ticks, int menu)
         _Search_Screw_Time = rx_get_ticks() + TIME_BEFORE_TURN_SCREWER;
     }
 
-    if (RX_StepperStatus.screwerinfo.z_in_down) _Loose_Screw_Time = 0;
+    if (RX_StepperStatus.screwerinfo.z_in_down)
+    {
+        _Loose_Screw_Time = 0;
+    }
     if (_Loose_Screw_Time && rx_get_ticks() > _Loose_Screw_Time)
     {
         int val = 0;
@@ -226,7 +229,8 @@ void robi_main(int ticks, int menu)
             val = +213333;
             
         robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_STEPS, &val);
-        _Loose_Screw_Time = rx_get_ticks() + TIME_BEFORE_TURN_SCREWER;
+        _Loose_Screw_Time = 0;
+        //_Loose_Screw_Time = rx_get_ticks() + TIME_BEFORE_TURN_SCREWER;
     }
 
     _check_Screwer_Movement();
@@ -319,12 +323,11 @@ void robi_main(int ticks, int menu)
                 send_command(MOTOR_SET_SCREW_CURRENT, sizeof(current), &current);
                 _NewCmd = CMD_ROBI_MOVE_Z_DOWN;
             }
-            else if (abs(RX_StepperStatus.screw_posY - SCREW_Y_BACK) < MAX_VAR_SCREW_POS)
+            else if (RX_StepperStatus.screw_posY < (SCREW_Y_BACK + SCREW_Y_FRONT) / 2)
                 RX_StepperStatus.screwerinfo.screw_tight = TRUE;
-            else if (abs(RX_StepperStatus.screw_posY - SCREW_Y_FRONT) < MAX_VAR_SCREW_POS)
+            else if (RX_StepperStatus.screw_posY > (SCREW_Y_BACK + SCREW_Y_FRONT) / 2)
                 RX_StepperStatus.screwerinfo.screw_loosed = TRUE;
             _CmdRunning = 0;
-            
             break;
             
         case CMD_ROBI_SCREW_LEFT:
@@ -334,9 +337,9 @@ void robi_main(int ticks, int menu)
                 send_command(MOTOR_SET_SCREW_CURRENT, sizeof(current), &current);
                 _NewCmd = CMD_ROBI_MOVE_Z_DOWN;
             }
-            else if (abs(RX_StepperStatus.screw_posY - SCREW_Y_FRONT) < MAX_VAR_SCREW_POS)
+            else if (RX_StepperStatus.screw_posY > (SCREW_Y_BACK + SCREW_Y_FRONT) / 2)
                 RX_StepperStatus.screwerinfo.screw_tight = TRUE;
-            else if (abs(RX_StepperStatus.screw_posY - SCREW_Y_BACK) < MAX_VAR_SCREW_POS)
+            else if (RX_StepperStatus.screw_posY < (SCREW_Y_BACK + SCREW_Y_FRONT) / 2)
                 RX_StepperStatus.screwerinfo.screw_loosed = TRUE;
             _CmdRunning = 0;
             current = FALSE;
@@ -811,6 +814,8 @@ int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                 micron = pos - RX_StepperStatus.screw_posY;
                 steps = _micron_2_steps(micron);
                 _TargetPosition = pos;
+                if (steps >= 100000)
+                    Error(LOG, 0, "Send y-Axis moves %d steps, which is %d um", steps, _steps_2_micron(steps));
                 send_command(MOTOR_MOVE_Y_RELATIVE, sizeof(steps), &steps);
             }
         }
@@ -1213,7 +1218,7 @@ static void* receive_thread(void *par)
                         {
                             if (rxMessage.length)
                             {
-                                if (rxMessage.error == MOTOR_STALLED && _CmdRunning && _robiStatus.screwCurrent == 0 && _Buffer_Cmd[1] == MOTOR_MOVE_Z_UP)
+                                if (rxMessage.error == MOTOR_STALLED && (_CmdRunning == CMD_ROBI_SCREW_LEFT || _CmdRunning == CMD_ROBI_SCREW_RIGHT) && _robiStatus.screwCurrent == 0 && _Buffer_Cmd[1] == MOTOR_MOVE_Z_UP)
                                 {
                                     RX_StepperStatus.screwerinfo.screwer_blocked_left = _CmdRunning == CMD_ROBI_SCREW_LEFT;
                                     RX_StepperStatus.screwerinfo.screwer_blocked_right = _CmdRunning == CMD_ROBI_SCREW_RIGHT;
