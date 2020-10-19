@@ -352,22 +352,16 @@ int flz_load(SPageId *id, const char *filedir, const char *filename, int printMo
 				
 				if (wakeupOn)
 				{
+					// add wakeup line for the color at the begining
 					memset(buf+(c*wub)*pinfo->lineLen, 0xff, wub * pinfo->lineLen);
-					memset(buf+offset-((c+1)*wub)*pinfo->lineLen, 0xff, wub * pinfo->lineLen);															
+					// and at the end of the image
+					memset(buf+offset+(wul-(c+1)*wub)*pinfo->lineLen, 0xff, wub * pinfo->lineLen);															
 				}
 			}
 			pinfo->lengthPx += 2*wul;
 			pinfo->dataSize = pinfo->lengthPx * pinfo->lineLen; 
-			
-			/*
-			// Bug in FPGA: (when srcLineCnt==12300, gap=0 it sometimes prints an additional line of old data [instead of blank] between the labels)
-			if (rx_def_is_lb(RX_Spooler.printerType))		
-			{
-				memset(buffer[c]+pinfo->dataSize, 0x00, pinfo->lineLen);
-			}
-			*/
 
-		//  TrPrintfL(TRUE, "DECOMPRESSING >>%s<<, page %d, time=%d ms", filepath, id->page, rx_get_ticks()-time);
+            //  TrPrintfL(TRUE, "DECOMPRESSING >>%s<<, page %d, time=%d ms", filepath, id->page, rx_get_ticks()-time);
 		}
 	}
 	return REPLY_OK;
