@@ -636,13 +636,25 @@ static void _scr_fill_blk(SBmpSplitInfo *psplit, int dstLineLen, BYTE *dst)
 		width = srcWidthBt-start;
 
 		//--- copy the image data ----------------------------
-		l = (len>width) ? width : len;
-		memcpy(dst, s, l);
-		len-=l;
-		dst+=l;
-        memset(dst, 0x00, len);
-        dst += len;
-		/*
+        // and repeat it if needed (for textile image multiple copy)
+        while (len)
+        {
+            l = (len > width) ? width : len;
+            memcpy(dst, s, l);
+            len -= l;
+            dst += l;
+            // we need to repeat the image on TX (next copy) BUT not on LB
+			if (len && rx_def_is_lb(RX_Spooler.printerType)) 
+			{
+                // so if we are not at the end of the bitmap we put 0 
+				memset(dst, 0x00, len);
+                dst += len;
+				break;
+            }
+            s = src;
+            width = srcWidthBt;
+        }
+        /*
 		if (mirror)	
 		{
 			src	-= psplit->srcLineLen;

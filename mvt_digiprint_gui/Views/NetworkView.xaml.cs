@@ -30,10 +30,6 @@ namespace RX_DigiPrint.Views
             _InitPutty();
             RxGlobals.User.PropertyChanged += User_PropertyChanged;
             User_PropertyChanged(null, null);
-
-            #if !DEBUG
-                if (!RxGlobals.Screen.Surface) Keyboard.Visibility = Visibility.Collapsed;
-            #endif
         }        
        
         //--- _InitPutty ---------------------------------------------
