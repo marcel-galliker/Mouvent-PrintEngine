@@ -308,11 +308,11 @@ int flz_load(SPageId *id, const char *filedir, const char *filename, int printMo
 			
 			pFlzInfo = (SFlzInfo*)_FileBuf[_FileBufDecompIdx];
 			
-			int spaceBt = (spacePx*pinfo->bitsPerPixel)/8;
 			memcpy(&pinfo->resol, &pFlzInfo->resol, sizeof(pinfo->resol));
 			pinfo->printMode     = printMode;
 			pinfo->bitsPerPixel	 = pFlzInfo->bitsPerPixel;
-			pinfo->screening     = (pinfo->bitsPerPixel==8);
+            int spaceBt = (spacePx * pinfo->bitsPerPixel) / 8;
+            pinfo->screening = (pinfo->bitsPerPixel == 8);
 			pinfo->srcWidthPx    = pFlzInfo->widthPx+spacePx;
 			pinfo->lineLen		 = pFlzInfo->lineLen+spaceBt;
 			pinfo->lengthPx		 = pFlzInfo->lengthPx;
@@ -339,15 +339,16 @@ int flz_load(SPageId *id, const char *filedir, const char *filename, int printMo
 			{
 				if (progress!=NULL) progress(id, RX_ColorNameShort(pinfo->inkSupplyNo[c]), _DecompressPar.progress);					
 			}
-			if (progress!=NULL) progress(id, RX_ColorNameShort(pinfo->inkSupplyNo[c]), 100);					
+			if (progress!=NULL) progress(id, RX_ColorNameShort(pinfo->inkSupplyNo[c]), 100);
 
-			//--- add wakeup ----------------------
-			if (wul)
+            //--- add wakeup ----------------------
+
+            if (wul)
 			{
 				BYTE* buf = buffer[c];
 				UINT64 offset;
 				offset=(UINT64)(pinfo->lengthPx+wul)*(UINT64)pinfo->lineLen;
-				memset(buf,        0x00, wul * pinfo->lineLen);
+                memset(buf,        0x00, wul * pinfo->lineLen);
 				memset(buf+offset, 0x00, wul * pinfo->lineLen);
 				
 				if (wakeupOn)
