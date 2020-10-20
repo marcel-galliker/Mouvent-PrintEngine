@@ -22,7 +22,7 @@
 #include "lbrob.h"
 #include "lb702.h"
 #include "stepper_ctrl.h"
-#include "robi.h"
+#include "robi_lb702.h"
 
 #define MOTOR_Z_BACK	0
 #define MOTOR_Z_FRONT	1
@@ -50,7 +50,7 @@ static char		*_MotorName[2] = {"BACK", "FRONT"};
 #define MIN_CAP_HEIGHT	6000		// um under Ref height
 
 #define DIST_CAP_WASH	5300		// um -> higher than capping hight
-#define DIST_CAP_SCREW	4400		// um -> higher than capping hight
+#define DIST_CAP_SCREW	3900		// um -> higher than capping hight
 
 static SMovePar	_ParRef;
 static SMovePar	_ParZ_down;
@@ -460,7 +460,7 @@ int lb702_menu(void)
     if (RX_StepperStatus.robot_used)
     {
         lbrob_display_status();
-        robi_display_status();
+        robi_lb702_display_status();
     }
 
     if (_Menu == 1)
@@ -499,7 +499,7 @@ int lb702_menu(void)
     else if (_Menu == 2)
         lbrob_menu(_Help);
     else
-        robi_menu(_Help);
+        robi_lb702_menu(_Help);
 
 	term_printf(">");
 	term_flush();
@@ -520,7 +520,7 @@ int lb702_menu(void)
             else if (_Menu == 2)
                 lbrob_handle_menu(str);
             else
-                robi_handle_menu(str);
+                robi_lb702_handle_menu(str);
 			break;
 		}		
 	}
@@ -577,7 +577,7 @@ static void _lb702_move_to_pos(int cmd, int pos0, int pos1)
         _CmdRunningRobi = CMD_ROBI_MOVE_TO_GARAGE;
         _NewCmd = cmd;
         RX_StepperStatus.cmdRunning = 0;
-        robi_handle_ctrl_msg(INVALID_SOCKET, _CmdRunningRobi, NULL);
+        robi_lb702_handle_ctrl_msg(INVALID_SOCKET, _CmdRunningRobi, NULL);
         
     }
 	else if (RX_StepperStatus.robot_used && !_CmdRunningRobi && (!RX_StepperStatus.robinfo.ref_done || !RX_StepperStatus.info.x_in_ref) && RX_StepperStatus.cmdRunning != CMD_LIFT_REFERENCE && RX_StepperStatus.cmdRunning != CMD_LIFT_CAPPING_POS && RX_StepperStatus.cmdRunning != CMD_LIFT_WASH_POS && RX_StepperStatus.cmdRunning != CMD_LIFT_SCREW) 
@@ -668,7 +668,7 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                                             {
                                                 _CmdRunningRobi = CMD_ROBI_MOVE_TO_GARAGE;
                                                 _NewCmd = msgId;
-                                                robi_handle_ctrl_msg(INVALID_SOCKET, _CmdRunningRobi, NULL);
+                                                robi_lb702_handle_ctrl_msg(INVALID_SOCKET, _CmdRunningRobi, NULL);
                                                 
                                             }
                                         }

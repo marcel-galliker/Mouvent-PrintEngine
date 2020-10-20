@@ -1,11 +1,21 @@
-#pragma once
-#include "rx_def.h"
-#include "rx_error.h"
+#pragma
 
 void robi_init(void);
 void robi_main(int ticks, int menu);
-void robi_menu(int help);
-void robi_handle_menu(char *str);
-void robi_display_status(void);
-int robi_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata);
-int robi_error(void);
+int robi_connected(void);
+void robi_set_screw_current(uint8_t current);
+void robi_set_output(int num, int val);
+int robi_current_version(void);
+int robi_is_updating(void);
+int robi_is_init(void);
+void robi_stop(void);
+void robi_reference(void);
+void robi_move_x_relative_steps(INT32 steps);
+void robi_move_Y_relative_steps(INT32 steps);
+void robi_turn_screw_relative(INT32 steps);
+void robi_turn_screw_left(INT32 ticks);
+void robi_turn_screw_right(INT32 ticks);
+void robi_move_up(void);
+void robi_move_down(void);
+int robi_screwer_stalled(void);
+int robi_move_done(void);

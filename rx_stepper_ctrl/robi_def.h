@@ -95,6 +95,8 @@
 #define BOOTLOADER_CONFIRM_ERROR		(BOOTLOADER_MASK | 0x00000004)
 #define BOOTLOADER_RESET_ERROR			(BOOTLOADER_MASK | 0x00000005)
 
+
+
 // Data structures
 #pragma pack(1)
 
@@ -156,6 +158,8 @@ typedef struct
 	uint16_t length;
 	uint8_t data[SIZE_OF_DATA];
 } SUsbRxMsg;
+
+extern SRobiStatus _robiStatus;
 
 
 

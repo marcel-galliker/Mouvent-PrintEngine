@@ -34,7 +34,7 @@ error:
 	$(error Invalid configuration, please check your inputs)
 endif
 
-SOURCEFILES := args.c cleaf.c comm.c dp803.c fpga_stepper.c lb701.c lb702.c lbrob.c motor.c power_step.c robi.c rx_stepper_ctrl.c stepper_ctrl.c slide.c test.c test_table.c tx404.c tts_lift.c tts_ink.c tx801.c tx80x_wd.c txrob.c version.c
+SOURCEFILES := args.c cleaf.c comm.c dp803.c fpga_stepper.c lb701.c lb702.c lbrob.c motor.c power_step.c robi_lb702.c robi.c rx_stepper_ctrl.c stepper_ctrl.c slide.c test.c test_table.c tx404.c tts_lift.c tts_ink.c tx801.c tx80x_wd.c txrob.c version.c
 EXTERNAL_LIBS := ../rx_common_lib/$(BINARYDIR)/rx_common_lib.a
 EXTERNAL_LIBS_COPIED := $(foreach lib, $(EXTERNAL_LIBS),$(BINARYDIR)/$(notdir $(lib)))
 

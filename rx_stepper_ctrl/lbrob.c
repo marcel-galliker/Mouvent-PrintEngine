@@ -23,7 +23,7 @@
 #include "rx_def.h"
 //#include "robi_interface.h"
 #include "lb702.h"
-#include "robi.h"
+#include "robi_lb702.h"
 
 #define MOTOR_X_0               4
 
@@ -188,11 +188,10 @@ void lbrob_init(void)
 
     motor_config(MOTOR_X_0, CURRENT_HOLD, X_STEPS_PER_REV, X_INC_PER_REV, STEPS);
 
-    robi_init();
+    robi_lb702_init();
 }
 
-//--- _check_pump
-//---------------------------------------------------------------
+//--- _check_pump ---------------------------------------------------------------
 static void _check_pump(void)
 {
     if (!(Fpga.par->output & RO_FLUSH_TO_CAP_LEFT) && !(Fpga.par->output & RO_FLUSH_TO_CAP_RIGHT) && !(Fpga.par->output & RO_FLUSH_WIPE_LEFT) && !(Fpga.par->output & RO_FLUSH_WIPE_RIGHT))
@@ -233,7 +232,7 @@ void lbrob_main(int ticks, int menu)
     _check_pump();
 
     motor_main(ticks, menu);
-    robi_main(ticks, menu);
+    robi_lb702_main(ticks, menu);
 
     RX_StepperStatus.robinfo.moving = (_CmdRunning != 0);
     if (RX_StepperStatus.robinfo.moving)
@@ -838,7 +837,7 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         _CmdRunning = 0;
         _CmdSearchScrews = 0;
         _CmdScrewing = 0;
-        robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_STOP, NULL);
+        robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_STOP, NULL);
         break;
 
     case CMD_ROB_REFERENCE:
@@ -863,7 +862,7 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         {
             _CmdRunning_Robi = CMD_ROBI_MOVE_Z_DOWN;
             _NewCmd = msgId;
-            robi_handle_ctrl_msg(INVALID_SOCKET, _CmdRunning_Robi, NULL);
+            robi_lb702_handle_ctrl_msg(INVALID_SOCKET, _CmdRunning_Robi, NULL);
 
             break;
         }
@@ -975,7 +974,7 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
         {
             _CmdRunning_Robi = CMD_ROBI_MOVE_Z_DOWN;
             _NewCmd = msgId;
-            robi_handle_ctrl_msg(INVALID_SOCKET, _CmdRunning_Robi, NULL);
+            robi_lb702_handle_ctrl_msg(INVALID_SOCKET, _CmdRunning_Robi, NULL);
             return;
         }
         else if (!RX_StepperStatus.info.z_in_ref && !(_RobFunction == rob_fct_move && RX_StepperStatus.info.z_in_wash))
@@ -1050,7 +1049,7 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
                     _CmdRunning_Robi = CMD_ROBI_WIPE_RIGHT;
                     _NewCmd = msgId;
                     pos = 1;
-                    robi_handle_ctrl_msg(INVALID_SOCKET, _CmdRunning_Robi, &pos);
+                    robi_lb702_handle_ctrl_msg(INVALID_SOCKET, _CmdRunning_Robi, &pos);
                     break;
                 }
                 else if (_WipeSide == wipe_left)
@@ -1059,7 +1058,7 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
                     _CmdRunning_Robi = CMD_ROBI_WIPE_LEFT;
                     pos = 1;
                     _NewCmd = msgId;
-                    robi_handle_ctrl_msg(INVALID_SOCKET, _CmdRunning_Robi, &pos);
+                    robi_lb702_handle_ctrl_msg(INVALID_SOCKET, _CmdRunning_Robi, &pos);
                     break;
                 }
             }
@@ -1212,7 +1211,7 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
                 else
                     pos = SCREW_Y_BACK + correction_value;
                 Error(LOG, 0, "Send y-Axis move to %d pos", pos);
-                robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_Y, &pos);
+                robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_Y, &pos);
                 _CmdScrewing++;
                 cmd_Time = rx_get_ticks() + max_Wait_Time;
             }
@@ -1235,7 +1234,7 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
                     pos = SCREW_X_LEFT;
                 else
                     pos = SCREW_X_RIGHT;
-                robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_X, &pos);
+                robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_X, &pos);
                 _CmdScrewing++;
                 cmd_Time = rx_get_ticks() + max_Wait_Time;
             }
@@ -1253,7 +1252,7 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
         case 4:
             if (RX_StepperStatus.info.z_in_screw)
             {
-                robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_UP, NULL);
+                robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_UP, NULL);
                 _CmdScrewing++;
                 _TimeSearchScrew = rx_get_ticks();
                 cmd_Time = rx_get_ticks() + max_Wait_Time;
@@ -1269,13 +1268,13 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
                     screwSteps -= 12;
                     screwSteps = abs(screwSteps);
                     _HeadAdjustment.steps = 12;
-                    robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_RIGHT, &screwSteps);
+                    robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_RIGHT, &screwSteps);
                 }
                 else if (headAdjustment.axis == AXE_ANGLE == screwSteps > 0)
                 {
                     screwSteps += 12;
                     _HeadAdjustment.steps = -12;
-                    robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_LEFT, &screwSteps);
+                    robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_LEFT, &screwSteps);
                 }
                 else
                 {
@@ -1302,7 +1301,7 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
             }
             else if (!RX_StepperStatus.screwerinfo.moving)
             {
-                robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_UP, NULL);
+                robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_UP, NULL);
             }
             break;
 
@@ -1313,11 +1312,11 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
                 if (rx_get_ticks() > wait_time)
                 {
                     if (screwSteps >= 0)
-                        robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_LEFT, &screwSteps);
+                        robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_LEFT, &screwSteps);
                     else
                     {
                         screwSteps = abs(screwSteps);
-                        robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_RIGHT, &screwSteps);
+                        robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_RIGHT, &screwSteps);
                     }
                     _CmdScrewing++;
                     cmd_Time = rx_get_ticks() + max_Wait_Time_Screw;
@@ -1366,7 +1365,7 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
                 }
                 _CmdScrewing++;
                 RX_StepperStatus.screwerinfo.screwed = TRUE;
-                robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_DOWN, NULL);
+                robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_DOWN, NULL);
                 cmd_Time = rx_get_ticks() + max_Wait_Time;
             }
             break;
@@ -1445,7 +1444,7 @@ static void _search_all_screws()
                     pos = _calculate_average_y_pos(_SearchScrewNr);
                 cmd_Time = rx_get_ticks() + max_Wait_Time;
                 Error(LOG, 0, "Send y-Axis move to %d pos", pos);
-                robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_Y, &pos);
+                robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_Y, &pos);
                 _CmdSearchScrews++;
             }
             break;
@@ -1470,7 +1469,7 @@ static void _search_all_screws()
                     pos = RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwclusters[_SearchScrewNr / (SCREWS_PER_HEAD * HEADS_PER_COLOR)].posX + pos * y_dist / y_dist_old;
                 }
                 cmd_Time = rx_get_ticks() + max_Wait_Time;
-                robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_X, &pos);
+                robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_X, &pos);
                 _CmdSearchScrews++;
             }
             break;
@@ -1487,7 +1486,7 @@ static void _search_all_screws()
             if (RX_StepperStatus.info.z_in_screw)
             {
                 cmd_Time = rx_get_ticks() + max_Wait_Time;
-                robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_UP, NULL);
+                robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_UP, NULL);
                 _CmdSearchScrews++;
                 _TimeSearchScrew = rx_get_ticks();
             }
@@ -1531,7 +1530,7 @@ static void _search_all_screws()
                 {
                     _SearchScrewNr = 0;
                     RX_StepperStatus.screwerinfo.screws_found = TRUE;
-                    robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_DOWN, NULL);
+                    robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_DOWN, NULL);
                 }
             }
             else if (_TimeSearchScrew &&

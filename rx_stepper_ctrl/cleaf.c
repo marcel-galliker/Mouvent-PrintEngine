@@ -371,7 +371,7 @@ static void _cleaf_check_laser(void)
 	{
 		if(RX_StepperStatus.info.z_in_print)
 		{
-			if(RX_StepperStatus.posY[0] >= (RX_StepperCfg.material_thickness - LASER_VARIATION) && RX_StepperStatus.posY <= (RX_StepperCfg.material_thickness + LASER_VARIATION))
+			if(RX_StepperStatus.posY[0] >= (RX_StepperCfg.material_thickness - LASER_VARIATION) && RX_StepperStatus.posY[0] <= (RX_StepperCfg.material_thickness + LASER_VARIATION))
 			{
 				_LaserTimeThin  = 0;
 				_LaserTimeThick = 0;				
@@ -617,7 +617,7 @@ int  cleaf_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 			else if (!_AllowMoveDown)								Error(ERR_CONT, 0, "Stepper: Command 0x%08x: printhead_en signal not set", msgId);
 // #ifdef debug
 			else if (RX_StepperStatus.posY[0] < (RX_StepperCfg.material_thickness - LASER_VARIATION) 
-				||   RX_StepperStatus.posY[0] > (RX_StepperCfg.material_thickness + LASER_VARIATION)) Error(ERR_CONT, 0, "WEB: Laser detects material out of range. (measured %d, expected %d)", RX_StepperStatus.posY, RX_StepperCfg.material_thickness);
+				||   RX_StepperStatus.posY[0] > (RX_StepperCfg.material_thickness + LASER_VARIATION)) Error(ERR_CONT, 0, "WEB: Laser detects material out of range. (measured %d, expected %d)", RX_StepperStatus.posY[0], RX_StepperCfg.material_thickness);
 // #endif
 			else
 			{
