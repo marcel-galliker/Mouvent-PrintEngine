@@ -159,7 +159,7 @@ typedef struct
 	uint8_t data[SIZE_OF_DATA];
 } SUsbRxMsg;
 
-extern SRobiStatus _robiStatus;
+extern SRobiStatus RX_RobiStatus;
 
 
 

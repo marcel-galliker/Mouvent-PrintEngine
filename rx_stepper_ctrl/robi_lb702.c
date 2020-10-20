@@ -76,13 +76,13 @@ void robi_lb702_main(int ticks, int menu)
 
     robi_main(ticks, menu);
 
-    if (_robiStatus.motors[2].isStalled)
+    if (RX_RobiStatus.motors[2].isStalled)
     {
         Error(LOG, 0, "Screwer is stalled");
     }
 
-    RX_StepperStatus.screwerinfo.z_in_down = _robiStatus.zPos == POS_DOWN;
-    RX_StepperStatus.screwerinfo.z_in_up    = _robiStatus.zPos == POS_UP;
+    RX_StepperStatus.screwerinfo.z_in_down = RX_RobiStatus.zPos == POS_DOWN;
+    RX_StepperStatus.screwerinfo.z_in_up = RX_RobiStatus.zPos == POS_UP;
 
     if (_CmdRunning)	RX_StepperStatus.screwerinfo.moving = TRUE;
     else				RX_StepperStatus.screwerinfo.moving = FALSE;
@@ -99,10 +99,10 @@ void robi_lb702_main(int ticks, int menu)
         RX_StepperStatus.screwerinfo.wipe_right_up = FALSE;
     }
 
-    RX_StepperStatus.screwerinfo.ref_done = _robiStatus.motors[MOTOR_XY_0].isReferenced && _robiStatus.motors[MOTOR_XY_1].isReferenced && _robiStatus.motors[MOTOR_SCREW].isReferenced;
+    RX_StepperStatus.screwerinfo.ref_done = RX_RobiStatus.motors[MOTOR_XY_0].isReferenced && RX_RobiStatus.motors[MOTOR_XY_1].isReferenced && RX_RobiStatus.motors[MOTOR_SCREW].isReferenced;
     
-    RX_StepperStatus.screw_posX = (_steps_2_micron(_robiStatus.motors[MOTOR_XY_0].motorEncoderPosition + _robiStatus.motors[MOTOR_XY_1].motorEncoderPosition))/2;
-    RX_StepperStatus.screw_posY = (_steps_2_micron(_robiStatus.motors[MOTOR_XY_1].motorEncoderPosition - _robiStatus.motors[MOTOR_XY_0].motorEncoderPosition))/2;
+    RX_StepperStatus.screw_posX = (_steps_2_micron(RX_RobiStatus.motors[MOTOR_XY_0].motorEncoderPosition + RX_RobiStatus.motors[MOTOR_XY_1].motorEncoderPosition))/2;
+    RX_StepperStatus.screw_posY = (_steps_2_micron(RX_RobiStatus.motors[MOTOR_XY_1].motorEncoderPosition - RX_RobiStatus.motors[MOTOR_XY_0].motorEncoderPosition))/2;
 
     if (!RX_StepperStatus.screwerinfo.ref_done) _Search_Screw_Time = 0;
 
@@ -159,7 +159,7 @@ void robi_lb702_main(int ticks, int menu)
             if (RX_StepperStatus.screwerinfo.ref_done)
             {
                 _CmdRunning = 0;
-                if (!(_robiStatus.gpio.inputs & (1UL << Y_IN_REF)))
+                if (!(RX_RobiStatus.gpio.inputs & (1UL << Y_IN_REF)))
                 {
                     Error(ERR_CONT, 0, "Robi-Sensor in Garage not high");
                     RX_StepperStatus.screwerinfo.ref_done = FALSE;
@@ -172,7 +172,7 @@ void robi_lb702_main(int ticks, int menu)
             else
             {
                 if (!robi_connected()) Error(ERR_CONT, 0, "Connection lost during reference");
-                if (!(_robiStatus.gpio.inputs & (1UL << Y_IN_REF))) Error(ERR_CONT, 0, "Robi-Sensor in Garage not high");
+                if (!(RX_RobiStatus.gpio.inputs & (1UL << Y_IN_REF))) Error(ERR_CONT, 0, "Robi-Sensor in Garage not high");
                 _CmdRunning = 0;
                 _NewCmd = 0;
                 _Value = 0;
@@ -180,7 +180,7 @@ void robi_lb702_main(int ticks, int menu)
             break;
 
         case CMD_ROBI_MOVE_TO_GARAGE:
-            if (!(_robiStatus.gpio.inputs & (1UL << Y_IN_REF)))
+            if (!(RX_RobiStatus.gpio.inputs & (1UL << Y_IN_REF)))
             {
                 Error(ERR_CONT, 0, "Robi-Sensor in Garage not high");
                 RX_StepperStatus.screwerinfo.ref_done = FALSE;
@@ -220,7 +220,7 @@ void robi_lb702_main(int ticks, int menu)
             break;
 
         case CMD_ROBI_SCREW_RIGHT:
-            if (_robiStatus.screwCurrent == TRUE)
+            if (RX_RobiStatus.screwCurrent == TRUE)
             {
                 robi_set_screw_current(FALSE);
                 _NewCmd = CMD_ROBI_MOVE_Z_DOWN;
@@ -233,7 +233,7 @@ void robi_lb702_main(int ticks, int menu)
             break;
             
         case CMD_ROBI_SCREW_LEFT:
-            if (_robiStatus.screwCurrent == TRUE)
+            if (RX_RobiStatus.screwCurrent == TRUE)
             {
                 robi_set_screw_current(FALSE);
                 _NewCmd = CMD_ROBI_MOVE_Z_DOWN;
@@ -420,13 +420,13 @@ void robi_lb702_display_status(void)
 	
 	term_printf("\n");
 	term_printf("Robi system status ---------------------------------\n");
-	term_printf("Connection: %d, Updating: %d, CurrentVersion: %d, BoardVersion: %d, BootloaderStatus: %d\n", robi_connected(), robi_is_updating(), robi_current_version(), _robiStatus.version, _robiStatus.bootloaderStatus);
+	term_printf("Connection: %d, Updating: %d, CurrentVersion: %d, BoardVersion: %d, BootloaderStatus: %d\n", robi_connected(), robi_is_updating(), robi_current_version(), RX_RobiStatus.version, RX_RobiStatus.bootloaderStatus);
     term_printf("moving: \t\t %d \t cmd: %08x\n", RX_StepperStatus.screwerinfo.moving, _CmdRunning);
 	term_printf("Robi gpio status -----------------------------------\n");
 	term_printf("Robi Inputs: ");
 	for (i = 0; i < INPUT_COUNT; i++)
 	{
-		if (_robiStatus.gpio.inputs & (1UL << i))	term_printf("*");
+        if (RX_RobiStatus.gpio.inputs & (1UL << i))	term_printf("*");
 		else										term_printf("_");
 		if (i % 4 == 3)			   					term_printf("   ");
 	}
@@ -434,35 +434,35 @@ void robi_lb702_display_status(void)
 	term_printf("Robi Outputs: ");
 	for (i = 0; i < OUTPUT_COUNT; i++)
 	{
-		if (_robiStatus.gpio.outputs & (1UL << i))	term_printf("*");
+        if (RX_RobiStatus.gpio.outputs & (1UL << i))	term_printf("*");
 		else										term_printf("_");
 		if (i % 4 == 3)			   					term_printf("   ");
 	}
 	term_printf("\n");
 	term_printf("Robi motor status ----------------------------------\n");
 	term_printf("MOTOR_XY_0:\tMotor pos.: %10d Motor target pos.: %10d Encoder pos.: %10d\n", 
-		_steps_2_micron(_robiStatus.motors[MOTOR_XY_0].motorPosition) , 
-		_steps_2_micron(_robiStatus.motors[MOTOR_XY_0].motorTargetPosition), 
-		_steps_2_micron(_robiStatus.motors[MOTOR_XY_0].motorEncoderPosition));
+		_steps_2_micron(RX_RobiStatus.motors[MOTOR_XY_0].motorPosition) , 
+		_steps_2_micron(RX_RobiStatus.motors[MOTOR_XY_0].motorTargetPosition), 
+		_steps_2_micron(RX_RobiStatus.motors[MOTOR_XY_0].motorEncoderPosition));
 	term_printf("MOTOR_XY_1:\tMotor pos.: %10d Motor target pos.: %10d Encoder pos.: %10d\n", 
-		_steps_2_micron(_robiStatus.motors[MOTOR_XY_1].motorPosition), 
-		_steps_2_micron(_robiStatus.motors[MOTOR_XY_1].motorTargetPosition), 
-		_steps_2_micron(_robiStatus.motors[MOTOR_XY_1].motorEncoderPosition));
+		_steps_2_micron(RX_RobiStatus.motors[MOTOR_XY_1].motorPosition), 
+		_steps_2_micron(RX_RobiStatus.motors[MOTOR_XY_1].motorTargetPosition), 
+		_steps_2_micron(RX_RobiStatus.motors[MOTOR_XY_1].motorEncoderPosition));
 	term_printf("MOTOR_SCREW:\tMotor pos.: %10d Motor target pos.: %10d Encoder pos.: %10d\n", 
-		_robiStatus.motors[MOTOR_SCREW].motorPosition, 
-		_robiStatus.motors[MOTOR_SCREW].motorTargetPosition, 
-		_robiStatus.motors[MOTOR_SCREW].motorEncoderPosition);
-    term_printf("Screwer-Current: \t %d\n", _robiStatus.screwCurrent);
+		RX_RobiStatus.motors[MOTOR_SCREW].motorPosition, 
+		RX_RobiStatus.motors[MOTOR_SCREW].motorTargetPosition, 
+		RX_RobiStatus.motors[MOTOR_SCREW].motorEncoderPosition);
+    term_printf("Screwer-Current: \t %d\n", RX_RobiStatus.screwCurrent);
     term_printf("Screwer X-Pos: \t\t %d\n", RX_StepperStatus.screw_posX);
     term_printf("Screwer Y-Pos: \t\t %d\n", RX_StepperStatus.screw_posY);
 
-    term_printf("MOTOR_XY_0 ref: \t %d\n", _robiStatus.motors[MOTOR_XY_0].isReferenced);
-	term_printf("MOTOR_XY_1 ref: \t %d\n", _robiStatus.motors[MOTOR_XY_1].isReferenced);
-	term_printf("MOTOR_SCREW ref: \t %d\n", _robiStatus.motors[MOTOR_SCREW].isReferenced);
-    term_printf("Z position: \t\t %d\n", _robiStatus.zPos);
+    term_printf("MOTOR_XY_0 ref: \t %d\n", RX_RobiStatus.motors[MOTOR_XY_0].isReferenced);
+	term_printf("MOTOR_XY_1 ref: \t %d\n", RX_RobiStatus.motors[MOTOR_XY_1].isReferenced);
+	term_printf("MOTOR_SCREW ref: \t %d\n", RX_RobiStatus.motors[MOTOR_SCREW].isReferenced);
+    term_printf("Z position: \t\t %d\n", RX_RobiStatus.zPos);
 	term_printf("Robi position status -------------------------------\n");
-    term_printf("Garage: \t\t %d\n", _robiStatus.isInGarage);
-    term_printf("Ref: \t\t\t %d\n", _robiStatus.isInRef);
+    term_printf("Garage: \t\t %d\n", RX_RobiStatus.isInGarage);
+    term_printf("Ref: \t\t\t %d\n", RX_RobiStatus.isInRef);
     term_printf("Robi blocked left: \t %d\n", RX_StepperStatus.screwerinfo.screwer_blocked_left);
     term_printf("Robi blocked right: \t %d\n", RX_StepperStatus.screwerinfo.screwer_blocked_right);
     term_printf("Robi screwed: \t\t %d\n", RX_StepperStatus.screwerinfo.screwed);
@@ -830,7 +830,7 @@ static void _check_Screwer_Movement()
 
 static void _check_robi_stalled(void)
 {
-    if ((_CmdRunning == CMD_ROBI_SCREW_LEFT || _CmdRunning == CMD_ROBI_SCREW_RIGHT) && _robiStatus.screwCurrent == 0 && robi_screwer_stalled())
+    if ((_CmdRunning == CMD_ROBI_SCREW_LEFT || _CmdRunning == CMD_ROBI_SCREW_RIGHT) && RX_RobiStatus.screwCurrent == 0 && robi_screwer_stalled())
     {
         RX_StepperStatus.screwerinfo.screwer_blocked_left = _CmdRunning == CMD_ROBI_SCREW_LEFT;
         RX_StepperStatus.screwerinfo.screwer_blocked_right = _CmdRunning == CMD_ROBI_SCREW_RIGHT;

@@ -76,7 +76,7 @@ void robi_init(void)
     _txFifoInIndex = 0;
     _txFifoOutIndex = 0;
 
-    memset(&_robiStatus, 0, sizeof(_robiStatus));
+    memset(&RX_RobiStatus, 0, sizeof(RX_RobiStatus));
 
     if (access(ROBI_SOFTWARE_FILENAME, R_OK) == 0)
     {
@@ -210,8 +210,7 @@ int robi_screwer_stalled(void)
 
 int robi_move_done(void)
 {
-    if (_robiStatus.commandRunning[COMMAND0] ||
-        _robiStatus.commandRunning[COMMAND1])
+    if (RX_RobiStatus.commandRunning[COMMAND0] || RX_RobiStatus.commandRunning[COMMAND1])
         return FALSE;
     else
         return TRUE;
@@ -278,10 +277,10 @@ static void* receive_thread(void *par)
 					
 						if (_syncMessageId == rxMessage.id)
 							_isSync = TRUE;
-					
-						memcpy(&_robiStatus, &rxMessage.robi, sizeof(_robiStatus));
 
-                        if (_isUpdating == FALSE && _updateFailed == FALSE && _robiStatus.version < _currentVersion)
+                        memcpy(&RX_RobiStatus, &rxMessage.robi, sizeof(RX_RobiStatus));
+
+                        if (_isUpdating == FALSE && _updateFailed == FALSE && RX_RobiStatus.version < _currentVersion)
                         {
                             _isUpdating = TRUE;
                             rx_thread_start(update_thread, NULL, 0, "robi_update_thread");
@@ -291,7 +290,7 @@ static void* receive_thread(void *par)
                         {
                             if (rxMessage.length)
                             {
-                                if (rxMessage.error == MOTOR_STALLED && !_robiStatus.motors[MOTOR_XY_0].isStalled && !_robiStatus.motors[MOTOR_XY_1].isStalled)
+                                if (rxMessage.error == MOTOR_STALLED && !RX_RobiStatus.motors[MOTOR_XY_0].isStalled && !RX_RobiStatus.motors[MOTOR_XY_1].isStalled)
                                         _ScrewerStalled = TRUE;
                                 
                                 Error(ERR_CONT, 0, "Robi Error. Flag: %x, Message: %s", rxMessage.error, rxMessage.data);
@@ -404,7 +403,7 @@ static void* update_thread(void *par)
 
         send_command(BOOTLOADER_INIT_CMD, sizeof(size_read), &size_read);
 
-        while (_robiStatus.bootloaderStatus != WAITING_FOR_DATA)
+        while (RX_RobiStatus.bootloaderStatus != WAITING_FOR_DATA)
         {
             rx_sleep(100);
         }
@@ -435,15 +434,15 @@ static void* update_thread(void *par)
                 }
             }
 
-            if (_robiStatus.bootloaderStatus != WAITING_FOR_DATA)
+            if (RX_RobiStatus.bootloaderStatus != WAITING_FOR_DATA)
             {
                 update_failed(fd);
             }
         }
-        
-        while (_robiStatus.bootloaderStatus != WAITING_FOR_CONFIRM)
+
+        while (RX_RobiStatus.bootloaderStatus != WAITING_FOR_CONFIRM)
         {
-            if (_robiStatus.bootloaderStatus == UNINITIALIZED)
+            if (RX_RobiStatus.bootloaderStatus == UNINITIALIZED)
             {
                 update_failed(fd);
             }
@@ -456,8 +455,8 @@ static void* update_thread(void *par)
 
 
         send_command(BOOTLOADER_CONFIRM_CMD, 0, 0);
-        
-        while (_robiStatus.bootloaderStatus != UNINITIALIZED)
+
+        while (RX_RobiStatus.bootloaderStatus != UNINITIALIZED)
         {
             rx_sleep(100);
         }
@@ -482,7 +481,7 @@ int robi_error()
     int i;
     for (i = 0; i < MOTOR_COUNT; i++)
     {
-        if (_robiStatus.motors[i].isStalled || _robiStatus.motors[i].timeout)
+        if (RX_RobiStatus.motors[i].isStalled || RX_RobiStatus.motors[i].timeout)
             return TRUE;
     }
     return FALSE;

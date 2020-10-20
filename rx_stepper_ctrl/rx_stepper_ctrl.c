@@ -50,7 +50,7 @@
 //--- globals ------------------------------------------------------------
 SStepperStat	RX_StepperStatus;
 SStepperCfg		RX_StepperCfg;
-SRobiStatus		_robiStatus;
+SRobiStatus		RX_RobiStatus;
 
 
 static int		_AppRunning;
