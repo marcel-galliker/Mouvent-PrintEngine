@@ -1400,8 +1400,9 @@ static void _plc_get_status()
 						switch (logType) {
 							case LOG_TYPE_ERROR_CONT:
 								// On label machines, PLC errors must stop printing
-								Error(rx_def_is_lb(RX_Config.printer.type) ? ERR_ABORT : ERR_CONT, 0, "PLC (%X): %s", item.errNo, text); 
-								_ErrorFilter = rx_get_ticks() + ERROR_FILTER_TIME;
+                                if (rx_def_is_lb(RX_Config.printer.type)) Error(ERR_ABORT, 0, "PLC (%X): %s", item.errNo, text);
+                                else Error(ERR_CONT, 0, "PLC (%X): %s", item.errNo, text); 
+                                _ErrorFilter = rx_get_ticks() + ERROR_FILTER_TIME;
 								break;
 							case LOG_TYPE_WARN:
 								Error(WARN, 0, "PLC (%X): %s", item.errNo, text);
