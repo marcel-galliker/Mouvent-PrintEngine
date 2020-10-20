@@ -402,10 +402,6 @@ int  data_get_size	(const char *path, UINT32 page, EFileType *pFileType, UINT32 
 		bmp_color_path(path, RX_ColorNameShort(0), filepath);
 		if (bmp_get_size(filepath, pwidth, plength, pbitsPerPixel, &memsize)==REPLY_OK) *pFileType = ft_bmp;
 	}
-
-	// Bug in FPGA: (when srcLineCnt==12300, gap=0 it sometimes prints an additional line of old data [instead of blank] between the labels)
-//	if (rx_def_is_lb(RX_Spooler.printerType)) 
-//		(*plength)++;
 	
 	*multiCopy = 1;
 	if (*pFileType!=ft_undef && rx_def_is_tx(RX_Spooler.printerType))
@@ -1513,8 +1509,6 @@ static int _data_split_prod(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 					pInfo->srcWidthBt	= (pBmpInfo->srcWidthPx*pBmpInfo->bitsPerPixel)/8;
 					pInfo->srcLineLen	= pBmpInfo->lineLen;
 					pInfo->srcLineCnt	= pBmpInfo->lengthPx;
-//					if (rx_def_is_lb(RX_Spooler.printerType) && pInfo->srcLineCnt>1)
-//						pInfo->srcLineCnt++;	// Bug in FPGA: (when srcLineCnt==12300, gap=0 it sometimes prints an additional line of old data [instead of blank] between the labels)
 					pInfo->resol.x		= pBmpInfo->resol.x;
 					pInfo->resol.y		= pBmpInfo->resol.y;
 					if (pInfo->bitsPerPixel==8)

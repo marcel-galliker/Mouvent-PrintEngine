@@ -528,14 +528,6 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 		{
 		case PG_MODE_LENGTH: _PrintGo_Dist = pitem->printGoDist; break;
 		case PG_MODE_GAP:	 _PrintGo_Dist = pitem->pageHeight+pitem->printGoDist;
-				 			 // Bug in FPGA: (when srcLineCnt==12300, gap=0 it sometimes prints an additional line of old data [instead of blank] between the labels)
-							 if (FALSE && pitem->printGoDist<22)
-							 {
-								static int _first=TRUE;
-								if (_first) Error(LOG, 0, "Bugfix Error in FPGA");
-								_first=FALSE;
-								_PrintGo_Dist = pitem->pageHeight+22;
-							 }
 
 							 /*
  							 {
