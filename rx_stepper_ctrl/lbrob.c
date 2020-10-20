@@ -814,6 +814,7 @@ static void _lbrob_do_reference()
     if (!RX_StepperStatus.robinfo.ref_done)
     {
         motor_reset(MOTOR_X_0);
+        motor_config(MOTOR_X_0, CURRENT_HOLD, X_STEPS_PER_REV, X_INC_PER_REV, STEPS);
         RX_StepperStatus.robinfo.ref_done = FALSE;
         motors_move_by_step(1 << MOTOR_X_0, &_ParCable_ref, 1000000, TRUE);
     }
@@ -1210,6 +1211,7 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
                     pos = SCREW_Y_FRONT + correction_value;
                 else
                     pos = SCREW_Y_BACK + correction_value;
+                Error(LOG, 0, "Send y-Axis move to %d pos", pos);
                 robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_Y, &pos);
                 _CmdScrewing++;
                 cmd_Time = rx_get_ticks() + max_Wait_Time;
@@ -1442,6 +1444,7 @@ static void _search_all_screws()
                 else
                     pos = _calculate_average_y_pos(_SearchScrewNr);
                 cmd_Time = rx_get_ticks() + max_Wait_Time;
+                Error(LOG, 0, "Send y-Axis move to %d pos", pos);
                 robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_Y, &pos);
                 _CmdSearchScrews++;
             }

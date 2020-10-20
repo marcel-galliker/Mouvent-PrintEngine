@@ -260,7 +260,7 @@ void robi_main(int ticks, int menu)
                 if (!(_robiStatus.gpio.inputs & (1UL << Y_IN_REF)))
                 {
                     Error(ERR_CONT, 0, "Robi-Sensor in Garage not high");
-                    RX_StepperStatus.screwerinfo.ref_done = 0;
+                    RX_StepperStatus.screwerinfo.ref_done = FALSE;
                 }
                 else
                 {
@@ -281,7 +281,7 @@ void robi_main(int ticks, int menu)
             if (!(_robiStatus.gpio.inputs & (1UL << Y_IN_REF)))
             {
                 Error(ERR_CONT, 0, "Robi-Sensor in Garage not high");
-                RX_StepperStatus.screwerinfo.ref_done = 0;
+                RX_StepperStatus.screwerinfo.ref_done = FALSE;
             }
             else
             {
@@ -295,6 +295,7 @@ void robi_main(int ticks, int menu)
             if (abs(RX_StepperStatus.screw_posY - _TargetPosition) > 1000 && !_Position_Correction)
             {
                 _Position_Correction = TRUE;
+                Error(LOG, 0, "Send y-Axis move to %d pos", _TargetPosition);
                 robi_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_Y, &_TargetPosition);
             }
             else if (abs(RX_StepperStatus.screw_posY - _TargetPosition) > 1000 && _Position_Correction)
@@ -1183,8 +1184,8 @@ static void* receive_thread(void *par)
 	uint8_t buffer[2048];
 	uint32_t bytesRead;
 	SUsbRxMsg rxMessage;
-	
-	while (_isInit)
+
+    while (_isInit)
 	{
 		bytesRead = read(_usbPort, buffer, sizeof(buffer));
 		
