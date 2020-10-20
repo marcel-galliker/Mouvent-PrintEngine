@@ -2041,7 +2041,7 @@ GOTO :END
 :END</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>IF $(ConfigurationName)==Release call $(ProjectDir)VersionUpdate.bat $(ProjectDir)Properties\AssemblyInfo.cs.template  $(ProjectDir)Properties\AssemblyInfo.cs
+    <PreBuildEvent>IF $(ConfigurationName)==Release echo call $(ProjectDir)VersionUpdate.bat $(ProjectDir)Properties\AssemblyInfo.cs.template  $(ProjectDir)Properties\AssemblyInfo.cs
 call $(ProjectDir)Resources\Language\Compile.bat $(ProjectDir)Resources\Language</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

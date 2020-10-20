@@ -78,6 +78,7 @@ static int				 _LogCnt=0;
 static int				 _NiosAlive;
 static int				 _NiosAliveTime;
 static int				 _HeaterUsed;
+static int				 _MaxTemp;
 
 static SSimuData _SimuData[NIOS_INK_SUPPLY_CNT];
 
@@ -346,6 +347,7 @@ void nios_load(const char *exepath)
 void nois_set_is_cfg(SInkSupplyCfg *pcfg)
 {
     int no=pcfg->no;
+	if (no==0) _MaxTemp=0;
     if (no>=0 && no<SIZEOF(_Cfg->ink_supply))
     {
 		memcpy(&RX_InkSupplyCfg[no], pcfg, sizeof(SInkSupplyCfg));
@@ -356,7 +358,7 @@ void nois_set_is_cfg(SInkSupplyCfg *pcfg)
 		_Cfg->ink_supply[no].heaterTemp	    = pcfg->ink.temp*1000;
 		_Cfg->ink_supply[no].heaterTempMax	= pcfg->ink.tempMax*1000;
         memcpy(_Cfg->ink_supply[no].flushTime, pcfg->ink.flushTime, sizeof(_Cfg->ink_supply[no].flushTime));
-		if (pcfg->ink.tempMax>36) _HeaterUsed = TRUE;
+		if (pcfg->ink.tempMax>_MaxTemp) _MaxTemp=pcfg->ink.tempMax;
 	//	_Cfg->ink_supply[i].condPresOutSet	= pcfg->condPresOutSet[i];
 	//	_Cfg->ink_supply[i].fluid_P			= pcfg->fluid_P[i];
 	}
@@ -375,6 +377,7 @@ void nios_set_cfg(SFluidBoardCfg *pcfg)
 	case printer_LB701:		_HeaterUsed=TRUE; break;
 	case printer_LB702_UV:	_HeaterUsed=TRUE; break;
 	case printer_LH702:		_HeaterUsed=TRUE; break;
+    case printer_test_table:_HeaterUsed = (_MaxTemp>36); break;
 	case printer_cleaf:		_HeaterUsed=TRUE;
 							if (printerType!=printer_cleaf)
 							{
@@ -719,7 +722,8 @@ static void _display_status(void)
 		term_printf("Pump - Air ON    "); for (i = 0; i < NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str(_Stat->ink_supply[i].TestBleedLine_Pump_Phase2)); term_printf("\n");
 		term_printf("Pump - Bleed ON  "); for (i = 0; i < NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str(_Stat->ink_supply[i].TestBleedLine_Pump_Phase3)); term_printf("\n");
 		
-    	if (nios_is_heater_connected()) 
+		if (!_HeaterUsed) term_printf(">>> Heater PCB not used\n");
+    	else if (nios_is_heater_connected()) 
 		{
 			term_printf("\n");
 			term_printf("--- HEATER ------------------------------------------------------\n");
