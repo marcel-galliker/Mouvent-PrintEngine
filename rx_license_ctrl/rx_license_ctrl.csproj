@@ -123,8 +123,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>copy $(ProjectDir)..\rx_digiprint_gui\Services\RxBtDef.cs $(ProjectDir)Services
-copy $(ProjectDir)..\rx_digiprint_gui\Services\RxCrypto.cs $(ProjectDir)Services</PreBuildEvent>
+    <PreBuildEvent>copy $(ProjectDir)..\mvt_digiprint_gui\Services\RxBtDef.cs $(ProjectDir)Services
+copy $(ProjectDir)..\mvt_digiprint_gui\Services\RxCrypto.cs $(ProjectDir)Services</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
