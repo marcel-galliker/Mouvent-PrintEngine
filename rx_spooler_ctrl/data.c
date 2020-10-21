@@ -406,7 +406,7 @@ int  data_get_size	(const char *path, UINT32 page, UINT32 *pspacePx, UINT32 *pwi
 //		(*plength)++;
 	
 	*multiCopy = 1;
-	if (ret==REPLY_OK && (RX_Spooler.printerType==printer_TX801 || RX_Spooler.printerType==printer_TX802))
+	if (ret == REPLY_OK && rx_def_is_tx(RX_Spooler.printerType))
 	{
 		*plength += 2*abs(_WakeupLen);
 
