@@ -92,7 +92,6 @@ namespace RX_DigiPrint.Views.LB702WBView
                 {
                     MaterialName.Visibility = Visibility.Visible;
                     RxTextPad pad = new RxTextPad(MaterialName);
-                    pad.Show();
 
                     bool? result = pad.ShowDialog();
                     MaterialName.Visibility = Visibility.Collapsed;
