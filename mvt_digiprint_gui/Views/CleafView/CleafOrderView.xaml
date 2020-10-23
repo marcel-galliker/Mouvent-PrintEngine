@@ -19,16 +19,17 @@
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="auto"/>
+            <!--- values measured in "..\..\Resources\Bitmaps\Cleaf\Cleaf.png" -->
+            <ColumnDefinition Width="1435*"/>
+            <ColumnDefinition Width="4530*"/>
+            <ColumnDefinition Width="2935*"/>
         </Grid.ColumnDefinitions>
         
         <!-- Rolls ________________________________________________________________________________________-->
         <cleaf:CleafRolls Grid.Column="0" x:Name="Rolls"/>
         <!--ok-->
 
-        <!-- Swttings-->
+        <!-- Settings-->
         <Grid Grid.Column="1" Margin="10,0,0,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto"/>
@@ -44,12 +45,13 @@
                         <RowDefinition Height="auto"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="100"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
+                        <!--- values measured in "..\..\Resources\Bitmaps\Cleaf\Cleaf.png" -->
+                        <ColumnDefinition Width="720*"/>
+                        <ColumnDefinition Width="724*"/>
+                        <ColumnDefinition Width="724*"/>
+                        <ColumnDefinition Width="920*"/>
+                        <ColumnDefinition Width="724*"/>
+                        <ColumnDefinition Width="724*"/>
                     </Grid.ColumnDefinitions>
 
                     <TextBlock Grid.Column="0" Grid.Row="1"  Text="Fondo"   FontSize="{StaticResource MvtFontSize}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0"/>
@@ -61,8 +63,16 @@
 
                     <TextBlock Grid.Row="0" Grid.Column="2" Text="Flexo 3"  FontWeight="Bold"/>
                     <cleaf:CleafFlexoView Grid.Column="2" Grid.Row="1" Grid.RowSpan="3" x:Name="Flexo3"/>
-
                     <TextBlock Grid.Row="0"  Grid.Column="3" Text="Printer" FontWeight="Bold"/>
+                    <StackPanel Grid.Column="3" Grid.Row="1" Orientation="Horizontal">
+                        <TextBlock Text="&lt; " FontFamily="Wingdings" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding PrintFile}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="3" Grid.Row="2" Orientation="Horizontal">
+                        <TextBlock Text="ñ " FontFamily="Wingdings" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding PrintHeight}"/>
+                        <TextBlock Text=" mm"/>
+                    </StackPanel>
 
                     <TextBlock Grid.Row="0" Grid.Column="4" Text="Flexo 2" FontWeight="Bold"/>
                     <cleaf:CleafFlexoView Grid.Column="4" Grid.Row="1" Grid.RowSpan="3" x:Name="Flexo2"/>

@@ -18,7 +18,6 @@
         <!--    <sys:Double x:Key="{x:Static SystemParameters.HorizontalScrollBarHeightKey}">50</sys:Double> -->
     </UserControl.Resources>
 
-
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="{Binding Source={StaticResource Mouvent.Layout.TopToolBarHeight}}"/>
@@ -42,10 +41,9 @@
                 <rx_uc:Splicing VerticalAlignment="Center" HorizontalAlignment="Center"></rx_uc:Splicing>
                 <StackPanel  Margin="30,0,0,0" VerticalAlignment="Center" x:Name="CleafOrder" Orientation="Horizontal">
                     <TextBlock Text="Order " Foreground="White" FontSize="16" FontWeight="SemiBold"/>
-                    <TextBlock Text="{Binding Id}" FontSize="16" FontWeight="SemiBold" Margin="5,0,0,0"/>
+                    <TextBlock Text="{Binding Id}" Foreground="LightGray"  FontSize="16" FontWeight="SemiBold" Margin="5,0,0,0"/>
                 </StackPanel>
             </StackPanel>
-
 
             <rx_uc:MouventTopToolBar Grid.Row="0" HorizontalAlignment="Right"></rx_uc:MouventTopToolBar>
         </Grid>
@@ -69,35 +67,52 @@
             </Grid.ColumnDefinitions>
            
             <cleaf:CleafSettings Grid.Column="0" Width="450"/>
- 
+
             <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="10,0,0,0">
-                
-            <Grid Margin="0,0,10,0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                </Grid.RowDefinitions>
+
+                <Grid Margin="0,0,10,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                    </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="auto"></ColumnDefinition>
                         <ColumnDefinition Width="auto"></ColumnDefinition>
                         <ColumnDefinition Width="auto"></ColumnDefinition>
                         <ColumnDefinition Width="auto"></ColumnDefinition>
                     </Grid.ColumnDefinitions>
-                
-                <cleaf:CleafStatus Grid.Row="0" Grid.Column="0"/>
-                <GroupBox Grid.Row="1" Grid.Column="0" Margin="0,10,0,0" Style="{StaticResource MvtGroupBox}" Header="Consumables">
-                    <rx_uc:ConsumablesView />
-                </GroupBox>
+
+                    <cleaf:CleafStatus Grid.Row="0" Grid.Column="0"/>
+                    <GroupBox Grid.Row="1" Grid.Column="0" Margin="0,10,0,0" Style="{StaticResource MvtGroupBox}" Header="Consumables">
+                        <rx_uc:ConsumablesView />
+                    </GroupBox>
                     <cleaf:CleafCommands Grid.Column="1" Grid.Row="0" Grid.RowSpan="2" MinWidth="150" Margin="10,0,0,0"/>
                     <cleaf:CleafServiceCommands Grid.Row="0" Grid.RowSpan="2" Grid.Column="2" x:Name="ServiveCmmands" Margin="10,0,0,0"/>
                     <rx_uc:StepperView Grid.Column="3" Grid.Row="0" Grid.RowSpan="2" Width="300" Margin="10,0,0,0"/>
                 </Grid>
 
             </ScrollViewer>
-           
         </Grid>
+        
+        <!--- Order ___________________________________________________________-->
+        <cleaf:CleafOrderView Grid.Row="3" 
+                      HorizontalAlignment="Stretch"
+                      VerticalAlignment="Stretch"
+                      Visibility="{Binding ElementName=RB_Order, Path=IsChecked, Converter={StaticResource IntToVisible_Converter}}"
+                      />
 
+        <!-- TAB: PLC Log ____________________________________________________________-->
+        <rx_uc:PlcLog Grid.Row="3" 
+                      HorizontalAlignment="Left"
+                      VerticalAlignment="Stretch"
+                      Visibility="{Binding ElementName=RB_Log, Path=IsChecked, Converter={StaticResource IntToVisible_Converter}}"
+                      />
 
-   
+        <!-- Configuration ____________________________________________________________-->
+        <cleaf:CleafConfig Grid.Row="3" Visibility="{Binding ElementName=RB_Cfg, Path=IsChecked, Converter={StaticResource IntToVisible_Converter}}" HorizontalAlignment="Left"/>
+        
+        <!--- PLC Info ___________________________________________________________-->
+        <rx_uc:PlcStatus Grid.Row="3" HorizontalAlignment="Left" Visibility="{Binding ElementName=RB_PlcInfo, Path=IsChecked, Converter={StaticResource IntToVisible_Converter}}"/>
+
     </Grid>
 </UserControl>
