@@ -27,7 +27,7 @@ namespace RX_DigiPrint.Models.Enums
 
                 if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX404 || RxGlobals.PrinterProperties.Host_Name!=null && RxGlobals.PrinterProperties.Host_Name.Equals("DropWatcher")) 
                 {
-                    for (speed=1; speed<=_MaxSpeed; speed++)
+                    for (speed=1; speed<=150; speed++)
                     {
                         _List.Add(new RxEnum<int>(speed,  string.Format("{0}", speed)));
                     }

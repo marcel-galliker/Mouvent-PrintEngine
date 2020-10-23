@@ -32,6 +32,7 @@ namespace RX_DigiPrint.Helpers
             PreviewMouseDown        += RxComboBox_PreviewMouseDown;
             PreviewStylusButtonDown += RxComboBox_PreviewStylusButtonDown;
             IsVisibleChanged += RxComboBox_IsVisibleChanged;
+            _set_template(FontSize);
         }
 
         void RxComboBox_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)

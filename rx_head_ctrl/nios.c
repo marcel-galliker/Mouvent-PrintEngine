@@ -635,7 +635,7 @@ void nios_check_errors(int ticks)
 			else
 				ErrorFlag(ERR(abort), (UINT32*)&RX_HBStatus[0].err, err_36volt, 0, "-36Volt Power Supply Error");				
 		}
-		if (_NiosStat->error.amc7891)				ErrorFlag(ERR(abort), (UINT32*)&RX_HBStatus[0].err, err_amc7891, 0, "AMC7891 could not be initialized");
+		if (_NiosStat->error.amc7891)				ErrorFlag(ERR(abort), (UINT32*)&RX_HBStatus[0].err, err_amc7891, 0, "AMC7891 could not be initialized. Hardware or Power Supply Error.");
 		if (_NiosStat->error.power_all_off_timeout)	ErrorFlag(ERR(abort), (UINT32*)&RX_HBStatus[0].err, err_pwr_all_off, 0, "power_all_off_timeout");
 		if (_NiosStat->error.power_amp_on_timeout)	ErrorFlag(ERR(abort), (UINT32*)&RX_HBStatus[0].err, err_amp_all_on, 0, "power_amp_on_timeout");
 		if (_NiosStat->error.power_all_on_timeout)	ErrorFlag(ERR(abort), (UINT32*)&RX_HBStatus[0].err, err_pwr_all_on, 0, "power_all_on_timeout");

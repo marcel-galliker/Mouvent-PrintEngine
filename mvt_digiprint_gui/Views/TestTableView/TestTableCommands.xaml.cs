@@ -26,10 +26,26 @@ namespace RX_DigiPrint.Views.TestTableView
         {
             InitializeComponent();
             DataContext = RxGlobals.StepperStatus;
+
+			RxGlobals.StepperStatus[0].PropertyChanged +=TestTableCommands_PropertyChanged;
         }
 
-        //--- Stop_Clicked -------------------------------------------------
-        private void Stop_Clicked(object sender, RoutedEventArgs e)
+		private void TestTableCommands_PropertyChanged(object sender,System.ComponentModel.PropertyChangedEventArgs e)
+		{
+			if (e.PropertyName.Equals("CmdRunning"))
+		    { 
+                if (RxGlobals.StepperStatus[0].CmdRunning==0)
+                {
+                    Button_Stop.IsChecked=false;
+                    Button_Reference.IsChecked=false;
+                    Button_ScanRight.IsChecked=false;
+                    Button_ScanLeft.IsChecked=false;
+                }
+			}
+		}
+
+		//--- Stop_Clicked -------------------------------------------------
+		private void Stop_Clicked(object sender, RoutedEventArgs e)
         {
             RxGlobals.RxInterface.SendCommand(TcpIp.CMD_TT_STOP);
         }
@@ -40,7 +56,7 @@ namespace RX_DigiPrint.Views.TestTableView
             RxGlobals.RxInterface.SendCommand(TcpIp.CMD_TT_START_REF);  
         }
 
-                //--- ScanRight_Clicked -------------------------------------------------
+        //--- ScanRight_Clicked -------------------------------------------------
         private void ScanRight_Clicked(object sender, RoutedEventArgs e)
         {
             RxGlobals.RxInterface.SendCommand(TcpIp.CMD_TT_SCAN_RIGHT);  

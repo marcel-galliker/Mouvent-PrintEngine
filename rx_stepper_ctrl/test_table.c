@@ -28,7 +28,8 @@
 #define POSY_LOAD		  1000
 #define POSY_PRINT		250000
 #define POSY_TABLE		145000
-#define POSY_CAP		145000
+//#define POSY_CAP		145000
+#define POSY_CAP		149000
 #define POSZ_CAP		100000 // Maximal position
 #define POSY_PURGE		190000
 #define POSY_ADJUST		260000

@@ -13,7 +13,7 @@
         <!--    <sys:Double x:Key="{x:Static SystemParameters.HorizontalScrollBarHeightKey}">50</sys:Double> -->
     </UserControl.Resources>
 
-    <GroupBox Style="{StaticResource MvtGroupBox}" Grid.RowSpan="10" Grid.ColumnSpan="2" Header="Rolls produced">
+    <GroupBox Style="{StaticResource MvtGroupBox}" Grid.RowSpan="10" Grid.ColumnSpan="2" Header="Rolls Produced">
         <ig:XamGrid 
             x:Name="Rolls"
 			AutoGenerateColumns="False"  

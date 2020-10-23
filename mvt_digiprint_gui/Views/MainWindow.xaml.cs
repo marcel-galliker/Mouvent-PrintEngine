@@ -185,7 +185,8 @@ namespace RX_DigiPrint.Views
                 ||    RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB702_UV
                 ||    RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB702_WB
                 ||    RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LH702
-                ||    RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_DP803;
+                ||    RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_DP803
+                ||    RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_cleaf;
            
             bool pq = (lb||tx); // &&  RxGlobals.PrintSystem.PrinterType!=EPrinterType.printer_LH702;
 

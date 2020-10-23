@@ -12,13 +12,13 @@
                     <TextBlock Text="Running"/>
                     <TextBlock Text="{Binding CmdRunning, Converter={StaticResource ToString_Converter}, ConverterParameter=X}" HorizontalAlignment="Right" Margin="20,0"/>
                 </StackPanel>
-                <CheckBox Content="STOP" Click="Stop_Clicked" Style="{DynamicResource RxCommandButton}"/>
+                <CheckBox Content="STOP" Click="Stop_Clicked" Style="{DynamicResource RxCommandButton}" x:Name="Button_Stop"/>
                 <TextBlock/>
-                <CheckBox Content="Reference"         Click="StartRef_Clicked"   Style="{DynamicResource RxCommandButton}"/>
+                <CheckBox Content="Reference"         Click="StartRef_Clicked"   Style="{DynamicResource RxCommandButton}" x:Name="Button_Reference"/>
                 <TextBlock/>
-                <CheckBox Content="Slide To Right"    Click="ScanRight_Clicked"  Style="{DynamicResource RxCommandButton}"/>
+                <CheckBox Content="Slide To Right"    Click="ScanRight_Clicked"  Style="{DynamicResource RxCommandButton}" x:Name="Button_ScanRight"/>
                 <TextBlock/>
-                <CheckBox Content="Slide To Left"     Click="ScanLeft_Clicked"   Style="{DynamicResource RxCommandButton}"/>
+                <CheckBox Content="Slide To Left"     Click="ScanLeft_Clicked"   Style="{DynamicResource RxCommandButton}" x:Name="Button_ScanLeft"/>
             </StackPanel>
 
         </GroupBox>

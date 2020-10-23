@@ -399,7 +399,7 @@ static void _tx80x_wd_motor_z_test(int steps)
         par.stop_mux = 0;
         par.dis_mux_in = 0;
     //  par.encCheck = chk_std;
-        par.encCheck = chk_std;
+        par.encCheck = chk_off;
         motors_config(motors, CURRENT_HOLD_WD, L3518_STEPS_PER_METER, L3518_INC_PER_METER, STEPS);
         motors_move_by_step(motors, &par, steps, FALSE);
         return TRUE;
