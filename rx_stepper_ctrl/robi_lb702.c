@@ -35,7 +35,7 @@
 #define X_IN_REF 3
 #define Y_IN_REF 4
 
-#define MIN_Y_POS 35000
+#define MIN_Y_POS 34000
 
 #define MAX_VARIANCE 100 // um
 

@@ -16,6 +16,7 @@
 #include "rx_setup_ink.h"
 #include "setup.h"
 #include "network.h"
+#include "rx_error.h"
 
 //--- prototypes --------------------------------------------------------------
 
@@ -331,5 +332,23 @@ int setup_screw_positions (const char *filepath, SRxConfig *pcfg, EN_setup_Actio
     if (action == WRITE) setup_save(file, filepath);
     setup_destroy(file);
     
+    return REPLY_OK;
+}
+
+int setup_vacuum_cleaner(const char* filepath, INT32 *time, EN_setup_Action action)
+{
+	HANDLE file = setup_create();
+    setup_load(file, filepath);
+    
+    if (setup_chapter(file, "Vacuum_Cleaner_Time", -1, action) == REPLY_OK)
+	{
+        setup_int32(file, "Vacuum_Time_Sec", action, time, 0);
+		setup_chapter(file, "..", -1, action);
+	}
+	else
+		return REPLY_ERROR;
+
+    if (action == WRITE) setup_save(file, filepath);
+    setup_destroy(file);
     return REPLY_OK;
 }

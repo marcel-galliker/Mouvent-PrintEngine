@@ -90,6 +90,7 @@ void rx_def_init();
 #define FILENAME_PQ				"print_queue.xml"
 #define FILENAME_CFG			"config.cfg"
 #define FILENAME_SCREW_POS		"screwpos.xml"
+#define FILENAME_VACUUM_TIME	"vacuumTime.xml"
 #define FILENAME_FLUID_STATE	"fluid.xml"
 #define FILENAME_HEADS_FLUSHED	"heads_flushed.xml"
 #define FILENAME_PLC_CFG		"plc.cfg"
@@ -1486,7 +1487,7 @@ typedef struct ERobotInfo
 	UINT32 wd_back_up		: 1;	//  0x10000000
 	UINT32 wrinkle_detected	: 1;	//	0x20000000
 	UINT32 wd_in_up			: 1;	//	0x40000000
-	UINT32 r_info_31		: 1;	//	0x80000000
+	UINT32 vacuum_running	: 1;	//	0x80000000
 } ERobotInfo;
 
 typedef struct EScrewerInfo

@@ -34,13 +34,13 @@
 #define X_INC_PER_REV           16000.0
 #define X_DIST_PER_REV          36000
 
-#define CABLE_CAP_POS           -690000     //	um LB702    old position -626000
-#define CABLE_WASH_POS_FRONT    -634000     //	um LB702    old position -573000
-#define CABLE_WASH_POS_BACK     -221000     //	um LB702    old position -160000
-#define CABLE_PURGE_POS_BACK    -311000     //  um LB702    old position -250000
-#define CABLE_PURGE_POS_FRONT   -622000     //  um LB702    CABLE_PURGE_POS_BACK - (7 * HEAD_WIDTH) - 10000 ->  HEAD_WIDTH = 43000  // old position -561000
-#define CABLE_SCREW_POS_FRONT   -503000     //  um LB702    old position -452000
-#define CABLE_SCREW_POS_BACK    -156208     //  um LB702    CABLE_SCREW_POS_BACK + (7 * HEAD_WIDTH) ->  HEAD_WIDTH = 43349   // old position -105208
+#define CABLE_CAP_POS           -690000     //	um LB702
+#define CABLE_WASH_POS_FRONT    -634000     //	um LB702
+#define CABLE_WASH_POS_BACK     -221000     //	um LB702
+#define CABLE_PURGE_POS_BACK    -311000     //  um LB702
+#define CABLE_PURGE_POS_FRONT   -622000     //  um LB702    CABLE_PURGE_POS_BACK - (7 * HEAD_WIDTH) - 10000 ->  HEAD_WIDTH = 43000
+#define CABLE_SCREW_POS_FRONT   -503000     //  um LB702    
+#define CABLE_SCREW_POS_BACK    -156208     //  um LB702    CABLE_SCREW_POS_BACK + (8 * HEAD_WIDTH) ->  HEAD_WIDTH = 43349
 
 #define CURRENT_HOLD            200
 
@@ -225,9 +225,7 @@ void lbrob_main(int ticks, int menu)
     SStepperStat oldSatus;
     memcpy(&oldSatus, &RX_StepperStatus, sizeof(RX_StepperStatus));
 
-    if (sizeof(_Old_RobFunction) == 0)
-    {
-    }
+    RX_StepperStatus.robinfo.vacuum_running = (Fpga.par->output & RO_VACUUM_CLEANER) >> 4;
 
     _check_pump();
 
@@ -1222,7 +1220,7 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
                 if (headAdjustment.headNo == -1)
                 {
                     if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwclusters[headAdjustment.printbarNo].posX)
-                        pos = RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwclusters[headAdjustment.printbarNo].posX + correction_value;
+                        pos = RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwclusters[headAdjustment.printbarNo].posX;
                     else if (headAdjustment.printbarNo == LEFT)
                         pos = SCREW_X_LEFT;
                     else
@@ -1389,11 +1387,9 @@ static void _search_all_screws()
     int test;
     int pos_min;
     int pos;
-    if ((!RX_StepperStatus.info.moving && !RX_StepperStatus.robinfo.moving &&
-         !RX_StepperStatus.screwerinfo.moving))
+    if ((!RX_StepperStatus.info.moving && !RX_StepperStatus.robinfo.moving && !RX_StepperStatus.screwerinfo.moving))
     {
-        if (_SearchScrewNr >=
-            HEADS_PER_COLOR * COLORS_PER_STEPPER * SCREWS_PER_HEAD)
+        if (_SearchScrewNr >= HEADS_PER_COLOR * COLORS_PER_STEPPER * SCREWS_PER_HEAD)
         {
             Error(ERR_CONT, 0, "Screw %d does not exist", _SearchScrewNr - 1);
             _CmdSearchScrews = 0;
@@ -1402,20 +1398,14 @@ static void _search_all_screws()
         }
 
         int front_screw = (_SearchScrewNr + 1) % SCREWS_PER_HEAD;
-        int head_nr =
-            (((_SearchScrewNr % (SCREWS_PER_HEAD * HEADS_PER_COLOR)) + 1) /
-             COLORS_PER_STEPPER) -
-            1;
-        int head_Dist =
-            (abs(CABLE_SCREW_POS_FRONT) - abs(CABLE_SCREW_POS_BACK)) / 8;
+        int head_nr = (((_SearchScrewNr % (SCREWS_PER_HEAD * HEADS_PER_COLOR)) + 1) / COLORS_PER_STEPPER) - 1;
+        int head_Dist = (abs(CABLE_SCREW_POS_FRONT) - abs(CABLE_SCREW_POS_BACK)) / 8;
         int screw_Dist = 16400; // um
 
         if (_CmdSearchScrews == 0) correction_value = 0;
         if (cmd_Time && rx_get_ticks() > cmd_Time)
         {
-            Error(ERR_CONT, 0,
-                  "Robot stock in searching screw step %d at screw %d",
-                  _CmdSearchScrews, _SearchScrewNr);
+            Error(ERR_CONT, 0, "Robot stock in searching screw step %d at screw %d", _CmdSearchScrews, _SearchScrewNr);
             cmd_Time = 0;
             _CmdSearchScrews = 0;
             return;
@@ -1431,8 +1421,7 @@ static void _search_all_screws()
             cmd_Time = rx_get_ticks() + max_Wait_Time;
             break;
         case 1:
-            if (RX_StepperStatus.robinfo.ref_done &&
-                _HeadPos == head_nr + rob_fct_screw_head0)
+            if (RX_StepperStatus.robinfo.ref_done && _HeadPos == head_nr + rob_fct_screw_head0)
             {
                 if (_SearchScrewNr == 0)
                     pos = SCREW_Y_FRONT + correction_value;
@@ -1441,9 +1430,9 @@ static void _search_all_screws()
                 else if (_SearchScrewNr == 1 || _SearchScrewNr == SCREWS_PER_HEAD * HEADS_PER_COLOR + 1)
                     pos = RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwclusters[_SearchScrewNr / (SCREWS_PER_HEAD * HEADS_PER_COLOR)].posY + SCREW_Y_BACK - SCREW_Y_FRONT + correction_value;
                 else
-                    pos = _calculate_average_y_pos(_SearchScrewNr);
+                    pos = _calculate_average_y_pos(_SearchScrewNr) + correction_value;
                 cmd_Time = rx_get_ticks() + max_Wait_Time;
-                Error(LOG, 0, "Send y-Axis move to %d pos", pos);
+                Error(LOG, 0, "Move y-Pos to pos : %d", pos);
                 robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_Y, &pos);
                 _CmdSearchScrews++;
             }
@@ -1533,8 +1522,7 @@ static void _search_all_screws()
                     robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_DOWN, NULL);
                 }
             }
-            else if (_TimeSearchScrew &&
-                     rx_get_ticks() > _TimeSearchScrew + SCREW_SEARCHING_TIME)
+            else if (_TimeSearchScrew && rx_get_ticks() > _TimeSearchScrew + SCREW_SEARCHING_TIME)
             {
                 cmd_Time = 0;
                 _TimeSearchScrew = 0;

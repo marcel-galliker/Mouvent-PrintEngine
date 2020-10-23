@@ -50,7 +50,7 @@ static char		*_MotorName[2] = {"BACK", "FRONT"};
 #define MIN_CAP_HEIGHT	6000		// um under Ref height
 
 #define DIST_CAP_WASH	5300		// um -> higher than capping hight
-#define DIST_CAP_SCREW	3900		// um -> higher than capping hight
+#define DIST_CAP_SCREW	4400		// um -> higher than capping hight
 
 static SMovePar	_ParRef;
 static SMovePar	_ParZ_down;
@@ -213,10 +213,8 @@ void lb702_main(int ticks, int menu)
                     else
                     {
                         _CmdStep++;
-                    Error(ERR_CONT, 0, "Calibation continue in step%d",
-                          _CmdStep);
-                    motors_move_by_step(MOTOR_Z_BITS, &_ParZ_calibrate, -100000,
-                                        TRUE);
+						Error(ERR_CONT, 0, "Calibation continue in step%d", _CmdStep);
+						motors_move_by_step(MOTOR_Z_BITS, &_ParZ_calibrate, -100000, TRUE);
                     }
                     break;
                     

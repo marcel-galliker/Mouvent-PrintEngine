@@ -46,6 +46,8 @@ static int                  _ScrewPositions_Written[STEPPER_CNT] = {FALSE};
 static int                  _WashStarted;
 static UINT32			    _Flushed = 0x00;		// For capping function which is same than flushing (need to purge after cap)
 static int                  _ScrewCommandSend[STEPPER_CNT] = {FALSE};
+static int                  _OldVacuum_Cleaner_State = FALSE;
+static INT32                _Vacuum_Cleaner_Time = 0;
 
 
 static int				    _StatReadCnt[STEPPER_CNT];
@@ -234,8 +236,7 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
         steplb_lift_to_up_pos();
 
     memcpy(&RX_StepperStatus.info, &info, sizeof(RX_StepperStatus.info));
-    memcpy(&RX_StepperStatus.robinfo, &robinfo,
-           sizeof(RX_StepperStatus.robinfo));
+    memcpy(&RX_StepperStatus.robinfo, &robinfo, sizeof(RX_StepperStatus.robinfo));
     RX_StepperStatus.robinfo.rob_in_cap = robinfo.rob_in_cap;
 
     if (_step_socket[no] && _step_socket[no] != INVALID_SOCKET)
@@ -258,6 +259,23 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
             sok_send_2(&_step_socket[i], CMD_CFG_SCREW_POS, sizeof(RX_Config.stepper.robot[i]), &RX_Config.stepper.robot[i]);
             _ClusterScrewTurned[i] = FALSE;
         }
+
+        // Vacuum Cleaner Timer Start -------------------------------------------------------------------------------
+        // Just needed for testing phase -> Need to be taken out before it goes to customers
+        if (_OldVacuum_Cleaner_State == FALSE && _Status[i].robinfo.vacuum_running && i == 1)
+        {
+            _Vacuum_Cleaner_Time = rx_get_ticks()/1000;
+        }
+        else if (_OldVacuum_Cleaner_State == TRUE && !_Status[i].robinfo.vacuum_running && i == 1)
+        {
+            INT32 _OldVacuum_Cleaner_Time = 0;
+            setup_vacuum_cleaner(PATH_USER FILENAME_VACUUM_TIME, &_OldVacuum_Cleaner_Time, READ);
+            _OldVacuum_Cleaner_Time = _OldVacuum_Cleaner_Time + rx_get_ticks()/1000 - _Vacuum_Cleaner_Time;
+            setup_vacuum_cleaner(PATH_USER FILENAME_VACUUM_TIME, &_OldVacuum_Cleaner_Time, WRITE);
+        }
+        if (i == 1) _OldVacuum_Cleaner_State = _Status[i].robinfo.vacuum_running;
+        
+        // Vacuum Cleaner Timer End ---------------------------------------------------------------------------------
     }
 
     _check_screwer();
