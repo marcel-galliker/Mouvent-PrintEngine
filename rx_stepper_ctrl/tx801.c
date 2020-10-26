@@ -318,7 +318,7 @@ int tx801_menu(void)
 		case 'r': motor_reset(atoi(&str[1]));												break;
 		//case 'c': tx801_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_CAPPING_POS,	NULL);		break;
 		case 'p': tx801_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_PRINT_POS,		&pos);		break;
-	case 'u': tx801_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_UP_POS,			NULL);		break;
+		case 'u': tx801_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_UP_POS,		NULL);		break;
 		case 'z': _tx801_motor_z_test(atoi(&str[1]));										break;
 		case 'm': _tx801_motor_test(str[1]-'0', atoi(&str[2]));								break;			
 		case 'v': _VentCtrl = (atoi(&str[1])==0);
@@ -427,7 +427,7 @@ int  tx801_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									_tx801_do_reference();
 									break;
 
-	case CMD_LIFT_PRINT_POS:			pos   = (*((INT32*)pdata));
+	case CMD_LIFT_PRINT_POS:		pos   = (*((INT32*)pdata));
 									if (pos<TX_PRINT_POS_MIN) 
 									{
 										pos=TX_PRINT_POS_MIN;

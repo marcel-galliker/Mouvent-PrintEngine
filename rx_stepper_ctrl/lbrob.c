@@ -251,8 +251,7 @@ void lbrob_main(int ticks, int menu)
         RX_StepperStatus.robinfo.cap_ready = FALSE;
     }
 
-    if (RX_StepperStatus.screwerinfo.screwer_blocked_left ||
-        RX_StepperStatus.screwerinfo.screwer_blocked_right)
+    if (RX_StepperStatus.screwerinfo.screwer_blocked_left || RX_StepperStatus.screwerinfo.screwer_blocked_right)
     {
         _CmdScrewing = 0;
     }
@@ -534,7 +533,8 @@ void lbrob_main(int ticks, int menu)
 
     static int j = 0;
 
-    if (!_CmdSearchScrews && !_CmdScrewing && !RX_StepperStatus.info.moving && !RX_StepperStatus.robinfo.moving && !RX_StepperStatus.screwerinfo.moving)
+    if (!_CmdSearchScrews && !_CmdScrewing && !RX_StepperStatus.info.moving && !RX_StepperStatus.robinfo.moving && !RX_StepperStatus.screwerinfo.moving && 
+            !RX_StepperStatus.screwerinfo.screwer_blocked_left && !RX_StepperStatus.screwerinfo.screwer_blocked_right)
         RX_StepperStatus.screwerinfo.screwer_ready = TRUE;
     else
         RX_StepperStatus.screwerinfo.screwer_ready = FALSE;
@@ -846,7 +846,7 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             _NewCmd = CMD_ROB_REFERENCE;
             break;
         }
-        if (!RX_StepperStatus.info.z_in_ref && !RX_StepperStatus.info.z_in_screw)
+        if (!RX_StepperStatus.info.z_in_ref)
         {
             if (!RX_StepperStatus.info.moving)
             {
@@ -1208,7 +1208,6 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
                     pos = SCREW_Y_FRONT + correction_value;
                 else
                     pos = SCREW_Y_BACK + correction_value;
-                Error(LOG, 0, "Send y-Axis move to %d pos", pos);
                 robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_Y, &pos);
                 _CmdScrewing++;
                 cmd_Time = rx_get_ticks() + max_Wait_Time;
@@ -1329,7 +1328,7 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
                 {
                     RX_StepperStatus.screwclusters[headAdjustment.printbarNo].posX = RX_StepperStatus.screw_posX;
                     RX_StepperStatus.screwclusters[headAdjustment.printbarNo].posY = RX_StepperStatus.screw_posY;
-                    for (i = headAdjustment.headNo + 1; i < HEADS_PER_COLOR; i++)
+                    /*for (i = headAdjustment.headNo + 1; i < HEADS_PER_COLOR; i++)
                     {
                         if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwclusters[headAdjustment.printbarNo].posY)
                             difference = (RX_StepperStatus.screw_posY - RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwclusters[headAdjustment.printbarNo].posY);
@@ -1339,14 +1338,14 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
                             RX_StepperStatus.screwpositions[headAdjustment.printbarNo][i][AXE_ANGLE].posY += difference;
                         if (RX_StepperStatus.screwpositions[headAdjustment.printbarNo][i][AXE_DIST].posY)
                             RX_StepperStatus.screwpositions[headAdjustment.printbarNo][i][AXE_DIST].posY += difference;
-                    }
+                    }*/
                 }
                 else
                 {
                     RX_StepperStatus.screwpositions[headAdjustment.printbarNo][headAdjustment.headNo][headAdjustment.axis].posX = RX_StepperStatus.screw_posX;
                     RX_StepperStatus.screwpositions[headAdjustment.printbarNo][headAdjustment.headNo][headAdjustment.axis].posY = RX_StepperStatus.screw_posY;
 
-                    if (headAdjustment.axis == AXE_DIST)
+                    /*if (headAdjustment.axis == AXE_DIST)
                     {
                         for (i = headAdjustment.headNo + 1; i < HEADS_PER_COLOR; i++)
                         {
@@ -1359,7 +1358,7 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
                             if (i != (HEADS_PER_COLOR - 1) && RX_StepperStatus.screwpositions[headAdjustment.printbarNo][i][AXE_DIST].posY)
                                 RX_StepperStatus.screwpositions[headAdjustment.printbarNo][i][AXE_DIST].posY += difference;
                         }
-                    }
+                    }*/
                 }
                 _CmdScrewing++;
                 RX_StepperStatus.screwerinfo.screwed = TRUE;

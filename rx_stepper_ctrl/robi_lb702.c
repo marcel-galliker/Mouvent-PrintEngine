@@ -134,8 +134,9 @@ void robi_lb702_main(int ticks, int menu)
         _Loose_Screw_Time = 0;
     }
 
-    _check_Screwer_Movement();
     _check_robi_stalled();
+    _check_Screwer_Movement();
+    
 
     if (!robi_move_done())
         _CmdStarted = TRUE;
@@ -197,7 +198,6 @@ void robi_lb702_main(int ticks, int menu)
             if (abs(RX_StepperStatus.screw_posY - _TargetPosition) > 1000 && !_Position_Correction)
             {
                 _Position_Correction = TRUE;
-                Error(LOG, 0, "Send y-Axis move to %d pos", _TargetPosition);
                 robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_Y, &_TargetPosition);
             }
             else if (abs(RX_StepperStatus.screw_posY - _TargetPosition) > 1000 && _Position_Correction)
@@ -224,6 +224,7 @@ void robi_lb702_main(int ticks, int menu)
             {
                 robi_set_screw_current(FALSE);
                 _NewCmd = CMD_ROBI_MOVE_Z_DOWN;
+                RX_StepperStatus.screwerinfo.screwer_blocked_left = FALSE;
             }
             else if (RX_StepperStatus.screw_posY < (SCREW_Y_BACK + SCREW_Y_FRONT) / 2)
                 RX_StepperStatus.screwerinfo.screw_tight = TRUE;
@@ -237,13 +238,13 @@ void robi_lb702_main(int ticks, int menu)
             {
                 robi_set_screw_current(FALSE);
                 _NewCmd = CMD_ROBI_MOVE_Z_DOWN;
+                RX_StepperStatus.screwerinfo.screwer_blocked_right = FALSE;
             }
             else if (RX_StepperStatus.screw_posY > (SCREW_Y_BACK + SCREW_Y_FRONT) / 2)
                 RX_StepperStatus.screwerinfo.screw_tight = TRUE;
             else if (RX_StepperStatus.screw_posY < (SCREW_Y_BACK + SCREW_Y_FRONT) / 2)
                 RX_StepperStatus.screwerinfo.screw_loosed = TRUE;
             _CmdRunning = 0;
-            robi_set_screw_current(FALSE);
             break;
 
         case CMD_ROBI_WIPE_LEFT:
@@ -698,6 +699,10 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                 _CmdRunning = msgId;
                 micron = pos - RX_StepperStatus.screw_posY;
                 steps = _micron_2_steps(micron);
+                if (steps >= 100000)
+                {
+                    Error(LOG, 0, "More steps than possible: %d", steps);
+                }
                 _TargetPosition = pos;
                 robi_move_Y_relative_steps(steps);
             }

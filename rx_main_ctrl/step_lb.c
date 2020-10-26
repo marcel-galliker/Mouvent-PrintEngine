@@ -307,7 +307,8 @@ void steplb_lift_to_top_pos(void)
 {
 	for (int no=0; no<SIZEOF(_step_socket); no++)
 	{
-		sok_send_2(&_step_socket[no], CMD_LIFT_REFERENCE, 0, NULL);
+        if (!_Status[no].info.z_in_screw || _Status[no].screwerinfo.screwer_ready || !RX_StepperStatus.robot_used)
+		    sok_send_2(&_step_socket[no], CMD_LIFT_REFERENCE, 0, NULL);
 	}
 	_AbortPrinting = FALSE;
 }
@@ -807,7 +808,7 @@ static void _check_screwer(void)
         {
             headAdjustment = _HeadAdjustmentBuffer[i][0];
             _HeadAdjustmentBuffer[i][0].steps = 0;
-            steplb_adjust_heads(INVALID_SOCKET, &headAdjustment);
+             steplb_adjust_heads(INVALID_SOCKET, &headAdjustment);
             _ScrewCommandSend[i] = TRUE;
         }
     }
