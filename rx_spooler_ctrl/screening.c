@@ -483,7 +483,7 @@ static void _scr_load(SBmpSplitInfo *pInfo, int threadNo)
 			_ScrMem[b][h].screenedIdx = (_ScrMem[b][h].screenedIdx+1) % SCR_BUF_SIZE;
 
 		linplane.planeNumber	= pInfo->inkSupplyNo;	// plane number
-		linplane.Xoffset		= 0;					// X offset of the slice
+		linplane.Xoffset		= pInfo->pListItem->offsetWidth; // X offset 
 		linplane.widthPx		= pInfo->widthPx*pInfo->resol.x/DPI_X;
 		linplane.lengthPx		= pInfo->srcLineCnt;
 		linplane.bitsPerPixel	= pInfo->bitsPerPixel;
