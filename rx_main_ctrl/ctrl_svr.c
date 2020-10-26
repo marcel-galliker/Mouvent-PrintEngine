@@ -1272,8 +1272,8 @@ void ctrl_set_rob_pos(SRobPosition robposition, int blocked, int blocked_Axis)
         }
         else if (robposition.head == -1)
         {
-            if ((RX_Config.stepper.robot[stepperNo].screwturns[robposition.printBar] != robposition.dist && blocked) || !blocked)
-                steplb_cluster_Screw_Turned(stepperNo);
+            //if ((RX_Config.stepper.robot[stepperNo].screwturns[robposition.printBar] != robposition.dist && blocked) || !blocked)
+            steplb_cluster_Screw_Turned(stepperNo);
             if (!blocked)
             {
                 if (RX_Config.inkSupplyCnt % 2 == 0)
@@ -1283,6 +1283,7 @@ void ctrl_set_rob_pos(SRobPosition robposition, int blocked, int blocked_Axis)
             }  
             else
             {
+                Error(LOG, 0, "Write value %d", robposition.dist);
                 if (RX_Config.inkSupplyCnt % 2 == 0)
 					RX_Config.stepper.robot[stepperNo].screwturns[robposition.printBar%2] = robposition.dist;
                 else

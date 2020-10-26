@@ -721,8 +721,7 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
         
         for (i = 0; i < SIZEOF(_HeadAdjustmentBuffer[stepperno]); i++)
         {
-            if (_HeadAdjustmentBuffer[stepperno][i].steps == 0 || 
-                    (_HeadAdjustmentBuffer[stepperno][i].axis == headAdjustment->axis && _HeadAdjustmentBuffer[stepperno][i].headNo == headAdjustment->headNo &&
+            if (_HeadAdjustmentBuffer[stepperno][i].steps == 0 || (_HeadAdjustmentBuffer[stepperno][i].axis == headAdjustment->axis && _HeadAdjustmentBuffer[stepperno][i].headNo == headAdjustment->headNo &&
                      _HeadAdjustmentBuffer[stepperno][i].printbarNo == headAdjustment->printbarNo))
             {
                 if (_HeadAdjustmentBuffer[stepperno][i].steps != 0)
