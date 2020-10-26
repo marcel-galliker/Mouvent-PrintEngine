@@ -30,6 +30,8 @@ int	 steptx_lift_in_print_pos(void);
 void steptx_lift_to_up_pos(void);
 int	 steptx_lift_in_up_pos(void);
 
+void steptx_wd_to_up_pos(void);
+
 void steptx_lift_stop(void);
 
 void steptx_rob_do_reference(void);

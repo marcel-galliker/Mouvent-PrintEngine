@@ -37,7 +37,7 @@
 
 #define CURRENT_HOLD_WD     50.0            // 50 -> 0.5A
 
-#define TX_REF_HEIGHT_WD    10200           // in um
+#define TX_REF_HEIGHT_WD    10000           // in um
 
 #define WD_UNDER_PRINT_HIGH 600             // in um
 
@@ -143,14 +143,11 @@ void tx80x_wd_main(void)
         }
         else
         {
-            for (motor = MOTOR_WD_FRONT, ok = TRUE;
-                 motor < MOTOR_WD_CNT; motor++)
+            for (motor = MOTOR_WD_FRONT, ok = TRUE; motor < MOTOR_WD_CNT; motor++)
             {
                 if (motor_error(motor))
                 {
-                    Error(ERR_ABORT, 0,
-                          "WRINKLE DETECTION: %s: motor %s blocked", _CmdName,
-                          motor + 1);
+                    Error(ERR_ABORT, 0, "WRINKLE DETECTION: %s: motor %s blocked", _CmdName, motor + 1);
                     ok = FALSE;
                 }
             }
@@ -158,6 +155,7 @@ void tx80x_wd_main(void)
         }
 
         RX_StepperStatus.robinfo.z_in_print = (_CmdRunning == CMD_LIFT_PRINT_POS && RX_StepperStatus.robinfo.ref_done_wd);
+        RX_StepperStatus.robinfo.wd_in_up = (_CmdRunning == CMD_LIFT_UP_POS && RX_StepperStatus.robinfo.ref_done_wd);
 
         if (_CmdRunning == CMD_LIFT_REFERENCE && _PrintPos_New)
         {
@@ -399,8 +397,7 @@ static void _tx80x_wd_motor_z_test(int steps)
         par.current_run = 300.0;
         par.stop_mux = 0;
         par.dis_mux_in = 0;
-    //  par.encCheck = chk_std;
-        par.encCheck = chk_std;
+        par.encCheck = chk_off;
         motors_config(motors, CURRENT_HOLD_WD, L3518_STEPS_PER_METER, L3518_INC_PER_METER, STEPS);
         motors_move_by_step(motors, &par, steps, FALSE);
         return TRUE;

@@ -378,9 +378,7 @@ static void _tx801_move_to_pos(int cmd, int pos)
 
 //--- _tx801_set_ventilators ---------------------------------------------------------
 static void _tx801_set_ventilators(int value)
-{
-//	Error(LOG, 0, "Set Ventilators to %d%%", value);
-	
+{	
 	if(_VentCtrl)
 	{	
 		if (!_VentSpeed)
