@@ -354,7 +354,7 @@ static void _load_test(void)
 		RX_TestImage.pageHeight = RX_TestImage.srcHeight = (UINT32)(height/1200.0*25400.0);
 		RX_TestImage.pageWidth  = RX_TestImage.srcWidth  = (UINT32)(width/1200.0*25400.0);
 		RX_TestImage.printGoMode = PG_MODE_LENGTH;
-		RX_TestImage.printGoDist = (UINT32)(height/1200.0*25400.0);
+		RX_TestImage.printGoDist = (UINT32)(height/1200.0*25400.0)+1000;
 		if (RX_TestImage.testImage==PQ_TEST_ANGLE_SEPARATED)
 		{
 			if (rx_def_is_tx(RX_Config.printer.type)) RX_TestImage.printGoDist=50000;
