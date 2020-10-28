@@ -235,6 +235,7 @@ typedef struct SConditionerStat_mcu
 	INT32			pressure_in;
 	INT32			pressure_in_max;
 	INT32			pressure_in_diff;
+	INT32			pressure_in1;
 	INT32			pressure_in2;
 	INT32			pressure_out;		
 	INT32			pressure_out_diff;

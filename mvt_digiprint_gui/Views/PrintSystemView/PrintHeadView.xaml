@@ -128,7 +128,7 @@
             <StackPanel  Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
                 <TextBlock Text="{Binding Meniscus,  Converter={StaticResource HeadVal_Converter10}}"/>
                 <TextBlock Text=" (~" VerticalAlignment="Center"/>
-                <TextBlock Text="{Binding Meniscus_setpoint, Converter={StaticResource HeadVal_Converter10}}" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding Meniscus_diff, Converter={StaticResource HeadVal_Converter10}}" VerticalAlignment="Center"/>
                 <TextBlock  Margin="0,0,2,0" Text=")" VerticalAlignment="Center"/>
             </StackPanel>
           

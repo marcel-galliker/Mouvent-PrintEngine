@@ -644,6 +644,16 @@ void putty_display_cond_status(int status)
 			}
 			term_printf("\n");
     	}
+		term_printf("Pressure in1:     "); 
+    	{
+			int i, l;
+			for (i=0; i<MAX_HEADS_BOARD; i++)
+			{
+				l   = sprintf(str, "%4s ", value_str1(_NiosMem->stat.cond[no[i]].pressure_in1));
+				term_printf("%15s ", str);
+			}
+			term_printf("\n");
+    	}
 		term_printf("Pressure in2:     "); 
     	{
 			int i, l;

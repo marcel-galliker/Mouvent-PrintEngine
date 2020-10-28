@@ -22,7 +22,7 @@
 #define ADDR_SENSOR_2_5_BAR		0x35
 #define ADDR_SENSOR_0_1_BAR		0x1A
 
-#define PRES_IN		0		// ORDER of sensors is important! (timing on I2C bus!)
+#define PRES_IN1	0		// ORDER of sensors is important! (timing on I2C bus!)
 #define PRES_OUT	1
 #define PRES_IN2	2
 #define SENSOR_CNT	3
@@ -73,8 +73,8 @@ void pres_init(void)
 	_Sensor[PRES_OUT].pPressure 	= &RX_Status.pressure_out;
 	eeprom_read_setting16(EE_ADDR_POUT_FACTORY_OFFSET, &_Sensor[PRES_OUT].offset);
 
-	_Sensor[PRES_IN].pPressure 		= &RX_Status.pressure_in;
-	eeprom_read_setting16(EE_ADDR_PIN_FACTORY_OFFSET, &_Sensor[PRES_IN].offset);
+	_Sensor[PRES_IN1].pPressure 	= &RX_Status.pressure_in1;
+	eeprom_read_setting16(EE_ADDR_PIN_FACTORY_OFFSET, &_Sensor[PRES_IN1].offset);
 	
 	_Sensor[PRES_IN2].pPressure 	= &RX_Status.pressure_in2;
 	eeprom_read_setting16(EE_ADDR_PIN2_FACTORY_OFFSET, &_Sensor[PRES_IN2].offset);
@@ -86,10 +86,10 @@ void pres_init(void)
 		_Sensor[PRES_OUT].addr		= ADDR_SENSOR_0_1_BAR;
 		_Sensor[PRES_OUT].set_power	= _PresAll_power;
 		
-		_Sensor[PRES_IN].pi2c 	  	= (stc_mfsn_t*)FM4_MFS2_BASE;
-		_Sensor[PRES_IN].addr		= ADDR_SENSOR_0_1_BAR;
-		_Sensor[PRES_IN].set_power	= _PresAll_power;
-		_Sensor[PRES_IN].valFactor	= 1;
+		_Sensor[PRES_IN1].pi2c 	  	= (stc_mfsn_t*)FM4_MFS2_BASE;
+		_Sensor[PRES_IN1].addr		= ADDR_SENSOR_0_1_BAR;
+		_Sensor[PRES_IN1].set_power	= _PresAll_power;
+		_Sensor[PRES_IN1].valFactor	= 1;
 		
 		_Sensor[PRES_IN2].pi2c 	   	= (stc_mfsn_t*)FM4_MFS2_BASE;
 		_Sensor[PRES_IN2].addr		= ADDR_SENSOR_2_5_BAR;
@@ -101,10 +101,10 @@ void pres_init(void)
 		_Sensor[PRES_OUT].addr 		= ADDR_SENSOR_1_0_BAR;
 		_Sensor[PRES_OUT].set_power = _PresOut_power;
 		
-		_Sensor[PRES_IN].pi2c 	   	= (stc_mfsn_t*)FM4_MFS3_BASE;
-		_Sensor[PRES_IN].addr  		= ADDR_SENSOR_1_0_BAR;
-		_Sensor[PRES_IN].set_power 	= _PresIn_power;
-		_Sensor[PRES_IN].valFactor 	= 10;
+		_Sensor[PRES_IN1].pi2c 	   	= (stc_mfsn_t*)FM4_MFS3_BASE;
+		_Sensor[PRES_IN1].addr  	= ADDR_SENSOR_1_0_BAR;
+		_Sensor[PRES_IN1].set_power = _PresIn_power;
+		_Sensor[PRES_IN1].valFactor = 10;
 	}
 	
 	int i;
@@ -271,8 +271,10 @@ void pres_tick_10ms(void)
 	{
 		for(i=0; i<SENSOR_CNT; i++) _sensor_reset(&_Sensor[i]);
 	}
-    
-	if (_Sensor[PRES_IN].error)  RX_Status.error |= COND_ERR_pres_in_hw;
+	if (RX_Status.pressure_in1==VAL_OVERFLOW) RX_Status.pressure_in = RX_Status.pressure_in2;
+	else									  RX_Status.pressure_in = RX_Status.pressure_in1;
+	
+	if (_Sensor[PRES_IN1].error) RX_Status.error |= COND_ERR_pres_in_hw;
 	if (_Sensor[PRES_IN2].error) RX_Status.error |= COND_ERR_pres_in_hw;
 	if (_Sensor[PRES_OUT].error) RX_Status.error |= COND_ERR_pres_out_hw;
 	
