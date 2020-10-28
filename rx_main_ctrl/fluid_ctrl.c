@@ -673,7 +673,10 @@ static void _control(int fluidNo)
 				case ctrl_purge_hard_vacc:
                 case ctrl_purge_hard_wash:
 				case ctrl_purge_soft:
-				case ctrl_purge_hard:		if (lbrob && even_number_of_colors) steplb_rob_to_fct_pos(no / 2, HeadNo + rob_fct_purge_head0);
+				case ctrl_purge_hard:		
+                case ctrl_purge4ever:		if (lbrob && even_number_of_colors && pstat->ctrlMode == ctrl_purge4ever) steplb_rob_to_fct_pos(no / 2, rob_fct_cap);
+											if (lbrob && !even_number_of_colors && pstat->ctrlMode == ctrl_purge4ever) steplb_rob_to_fct_pos((no + 1) / 2, rob_fct_cap);
+											if (lbrob && even_number_of_colors) steplb_rob_to_fct_pos(no / 2, HeadNo + rob_fct_purge_head0);
 											else if (lbrob && !even_number_of_colors) steplb_rob_to_fct_pos((no+1) / 2, HeadNo + rob_fct_purge_head0);
 											else	   step_lift_to_top_pos();
 				
@@ -691,6 +694,7 @@ static void _control(int fluidNo)
 											case ctrl_purge_hard_vacc:	_send_purge_par(no, time); break;
                                             case ctrl_purge_hard_wash:	_send_purge_par(no, time); break;
 											case ctrl_purge_hard:		_send_purge_par(no, time); _txrob=FALSE; break;
+                                            case ctrl_purge4ever:		_send_purge_par(no, 0); break;
 											}
                                             if (_txrob && _PurgeFluidNo < 0 && state_RobotCtrlMode() != ctrl_wash_step1 && state_RobotCtrlMode() != ctrl_wash_step2)
                                             {
@@ -709,13 +713,19 @@ static void _control(int fluidNo)
 											}													
 											break;
 											
-				case ctrl_purge_step1:		if ((!lbrob && step_lift_in_top_pos()) 
-												|| (lbrob && even_number_of_colors && steplb_rob_in_fct_pos(no / 2, rob_fct_purge_all))
-                                                || (lbrob && !even_number_of_colors && steplb_rob_in_fct_pos((no+1)/2, rob_fct_purge_all)))
+				case ctrl_purge_step1:		if ((!lbrob && step_lift_in_top_pos()) || (lbrob && even_number_of_colors && steplb_rob_in_fct_pos(no / 2, rob_fct_purge_all))
+                                                || (lbrob && !even_number_of_colors && steplb_rob_in_fct_pos((no+1)/2, rob_fct_purge_all)) 
+												|| (lbrob && even_number_of_colors && steplb_rob_in_fct_pos(no / 2, rob_fct_cap) && _PurgeCtrlMode == ctrl_purge4ever)
+												|| (lbrob && !even_number_of_colors && steplb_rob_in_fct_pos((no+1) / 2, rob_fct_cap) && _PurgeCtrlMode == ctrl_purge4ever))
 											{
 												if (_txrob && _PurgeFluidNo < 0 && !steptx_rob_wash_done()) break;
-												
-												if (lbrob && even_number_of_colors && !steplb_rob_in_fct_pos(no/2, HeadNo + rob_fct_purge_head0))
+                                                
+                                                if (lbrob && _PurgeCtrlMode == ctrl_purge4ever)
+                                                {
+                                                    if (even_number_of_colors)	steplb_lift_to_fct_pos(no/2, rob_fct_cap);
+                                                    else						steplb_lift_to_fct_pos((no+1)/2, rob_fct_cap);
+                                                }
+												else if (lbrob && even_number_of_colors && !steplb_rob_in_fct_pos(no/2, HeadNo + rob_fct_purge_head0))
 												{
 													if (!RX_StepperStatus.robinfo.moving && !RX_StepperStatus.info.moving)	steplb_rob_to_fct_pos(no/2, HeadNo + rob_fct_purge_head0);
 													break;

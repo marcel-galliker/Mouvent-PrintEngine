@@ -590,20 +590,16 @@ void lbrob_display_status(void)
     term_printf("LB ROB ---------------------------------\n");
     if (RX_StepperStatus.robot_used)
     {
-        term_printf("moving: \t\t %d \t cmd: %08x\n",
-                    RX_StepperStatus.robinfo.moving, _CmdRunning);
+        term_printf("moving: \t\t %d \t cmd: %08x\n", RX_StepperStatus.robinfo.moving, _CmdRunning);
         term_printf("Screwing-Step \t\t %d\n", _CmdScrewing);
-        term_printf("reference done: \t %d\n",
-                    RX_StepperStatus.robinfo.ref_done);
+        term_printf("reference done: \t %d\n", RX_StepperStatus.robinfo.ref_done);
         term_printf("x in reference: \t %d\n", RX_StepperStatus.info.x_in_ref);
         term_printf("x in cap: \t\t %d\n", RX_StepperStatus.info.x_in_cap);
         term_printf("Cap ready \t\t %d\n", RX_StepperStatus.robinfo.cap_ready);
-        term_printf("Purge ready: \t\t %d\n",
-                    RX_StepperStatus.robinfo.purge_ready);
+        term_printf("Purge ready: \t\t %d\n", RX_StepperStatus.robinfo.purge_ready);
         term_printf("actPos Robi: \t\t %dum\n", RX_StepperStatus.posY[0]);
         term_printf("Wipe-Speed: \t\t %d\n", RX_StepperCfg.wipe_speed);
-        term_printf("Vacuum done: \t\t %d\n",
-                    RX_StepperStatus.robinfo.vacuum_done);
+        term_printf("Vacuum done: \t\t %d\n", RX_StepperStatus.robinfo.vacuum_done);
         term_printf("Wash done: \t\t %d\n", RX_StepperStatus.robinfo.wash_done);
         term_printf("Wipe done: \t\t %d\n", RX_StepperStatus.robinfo.wipe_done);
         if (_PumpWasteTime)
@@ -835,6 +831,7 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         _CmdRunning = 0;
         _CmdSearchScrews = 0;
         _CmdScrewing = 0;
+        RX_StepperStatus.robinfo.ref_done = FALSE;
         robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_STOP, NULL);
         break;
 

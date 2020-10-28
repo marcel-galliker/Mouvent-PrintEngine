@@ -217,10 +217,8 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
 
         private void Purge_Clicked(object sender, RoutedEventArgs e)
         {
-            RX_Common.MvtMessageBox.EPurgeResult result =
-                MvtMessageBox.Purge("Purge", "Purge " + _InkSupply.InkType.Name + " ?");
-            if (result == MvtMessageBox.EPurgeResult.PurgeResultYes
-                || result == MvtMessageBox.EPurgeResult.PurgeResultAll)
+            RX_Common.MvtMessageBox.EPurgeResult result = MvtMessageBox.Purge("Purge", "Purge " + _InkSupply.InkType.Name + " ?");
+            if (result == MvtMessageBox.EPurgeResult.PurgeResultYes || result == MvtMessageBox.EPurgeResult.PurgeResultAll)
             {
                 _command("Purge", EFluidCtrlMode.ctrl_purge_hard, (result == MvtMessageBox.EPurgeResult.PurgeResultAll));
             }
@@ -228,10 +226,8 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
 
         private void PurgeVacc_Clicked(object sender, RoutedEventArgs e)
         {
-            RX_Common.MvtMessageBox.EPurgeResult result =
-               MvtMessageBox.Purge("Purge", "Purge and Vacuum " + _InkSupply.InkType.Name + " ?");
-            if (result == MvtMessageBox.EPurgeResult.PurgeResultYes
-                || result == MvtMessageBox.EPurgeResult.PurgeResultAll)
+            RX_Common.MvtMessageBox.EPurgeResult result = MvtMessageBox.Purge("Purge", "Purge and Vacuum " + _InkSupply.InkType.Name + " ?");
+            if (result == MvtMessageBox.EPurgeResult.PurgeResultYes || result == MvtMessageBox.EPurgeResult.PurgeResultAll)
             {
                 _command("Purge+Vacc", EFluidCtrlMode.ctrl_purge_hard_vacc, (result == MvtMessageBox.EPurgeResult.PurgeResultAll));
             }
@@ -246,6 +242,14 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
         }
 
         private void PurgeWash_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (MvtMessageBox.YesNo("Purge + Wash", "PURGE and WASH all printheads?", MessageBoxImage.Question, true))
+            {
+                _command("Purge+Wash", EFluidCtrlMode.ctrl_purge_hard_wash, true);
+            }
+        }
+
+        private void Purge4Ever_Clicked(object sender, RoutedEventArgs e)
         {
             if (MvtMessageBox.YesNo("Purge + Wash", "PURGE and WASH all printheads?", MessageBoxImage.Question, true))
             {

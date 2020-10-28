@@ -682,6 +682,7 @@ void pump_tick_10ms(void)
 		case ctrl_purge_hard_wipe:
 		case ctrl_purge_hard_vacc:
 		case ctrl_purge_hard_wash:
+		case ctrl_purge4ever:
 						temp_ctrl_on(FALSE);
 						turn_off_pump();
 						RX_Status.pressure_in_max=INVALID_VALUE;
@@ -699,7 +700,7 @@ void pump_tick_10ms(void)
 						max_pressure = MBAR_500;
 						_PurgeDelay = 0;
 						_PurgeTime  = 0;
-                        RX_Status.mode = RX_Config.mode;
+            RX_Status.mode = RX_Config.mode;
 						break;
 		
 		case ctrl_purge_step4:

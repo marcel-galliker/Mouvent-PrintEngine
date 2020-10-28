@@ -193,6 +193,7 @@ typedef enum EnFluidCtrlMode
 	ctrl_purge_hard_wipe,	  // 0x103:
 	ctrl_purge_hard_vacc,	  // 0x104:
     ctrl_purge_hard_wash,	  // 0x105:
+    ctrl_purge4ever,		  // 0x106:
     ctrl_purge_step1 = 0x111, // 0x111:
     ctrl_purge_step2,         // 0x112:
     ctrl_purge_step3,         // 0x113:

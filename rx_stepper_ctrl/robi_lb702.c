@@ -99,6 +99,11 @@ void robi_lb702_main(int ticks, int menu)
         RX_StepperStatus.screwerinfo.wipe_right_up = FALSE;
     }
 
+    if (!(RX_RobiStatus.gpio.inputs & (1UL << Y_IN_REF)))
+    {
+        RX_StepperStatus.screwerinfo.y_in_ref = FALSE;
+    }
+
     RX_StepperStatus.screwerinfo.ref_done = RX_RobiStatus.motors[MOTOR_XY_0].isReferenced && RX_RobiStatus.motors[MOTOR_XY_1].isReferenced && RX_RobiStatus.motors[MOTOR_SCREW].isReferenced;
     
     RX_StepperStatus.screw_posX = (_steps_2_micron(RX_RobiStatus.motors[MOTOR_XY_0].motorEncoderPosition + RX_RobiStatus.motors[MOTOR_XY_1].motorEncoderPosition))/2;

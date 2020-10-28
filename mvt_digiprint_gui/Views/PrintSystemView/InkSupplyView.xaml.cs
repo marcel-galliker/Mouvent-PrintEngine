@@ -250,10 +250,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
 
         private void Purge_Clicked(object sender, RoutedEventArgs e)
         {
-            RX_Common.MvtMessageBox.EPurgeResult result =
-                MvtMessageBox.Purge("Purge", "Purge " + _InkSupply.InkType.Name + " ?");
-            if (result == MvtMessageBox.EPurgeResult.PurgeResultYes 
-                || result == MvtMessageBox.EPurgeResult.PurgeResultAll)
+            RX_Common.MvtMessageBox.EPurgeResult result = MvtMessageBox.Purge("Purge", "Purge " + _InkSupply.InkType.Name + " ?");
+            if (result == MvtMessageBox.EPurgeResult.PurgeResultYes || result == MvtMessageBox.EPurgeResult.PurgeResultAll)
             {
                 _command("Purge", EFluidCtrlMode.ctrl_purge_hard, (result == MvtMessageBox.EPurgeResult.PurgeResultAll)); 
             }
@@ -261,10 +259,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
 
         private void PurgeVacc_Clicked(object sender, RoutedEventArgs e)
         {
-            RX_Common.MvtMessageBox.EPurgeResult result =
-               MvtMessageBox.Purge("Purge", "Purge and Vacuum " + _InkSupply.InkType.Name + " ?");
-            if (result == MvtMessageBox.EPurgeResult.PurgeResultYes
-                || result == MvtMessageBox.EPurgeResult.PurgeResultAll)
+            RX_Common.MvtMessageBox.EPurgeResult result = MvtMessageBox.Purge("Purge", "Purge and Vacuum " + _InkSupply.InkType.Name + " ?");
+            if (result == MvtMessageBox.EPurgeResult.PurgeResultYes || result == MvtMessageBox.EPurgeResult.PurgeResultAll)
             {
                 _command("Purge+Vacc", EFluidCtrlMode.ctrl_purge_hard_vacc, (result == MvtMessageBox.EPurgeResult.PurgeResultAll));
             }
@@ -290,10 +286,18 @@ namespace RX_DigiPrint.Views.PrintSystemView
             }
         }
 
+        private void Purge4Ever_Clicked(object sender, RoutedEventArgs e)
+        {
+            RX_Common.MvtMessageBox.EPurgeResult result = MvtMessageBox.Purge("Purge", "Purge for ever " + _InkSupply.InkType.Name + " ?");
+            if (result == MvtMessageBox.EPurgeResult.PurgeResultYes || result == MvtMessageBox.EPurgeResult.PurgeResultAll)
+            {
+                _command("Purge4Ever", EFluidCtrlMode.ctrl_purge4ever, (result == MvtMessageBox.EPurgeResult.PurgeResultAll));
+            }
+        }
+
         private void Wipe_Clicked(object sender, RoutedEventArgs e)
         {
-            RX_Common.MvtMessageBox.EPurgeResult result =
-                MvtMessageBox.Purge("Wipe", "Wipe " + _InkSupply.InkType.Name + " ?");
+            RX_Common.MvtMessageBox.EPurgeResult result = MvtMessageBox.Purge("Wipe", "Wipe " + _InkSupply.InkType.Name + " ?");
             if (result == MvtMessageBox.EPurgeResult.PurgeResultYes || result == MvtMessageBox.EPurgeResult.PurgeResultAll)
             {
                 _command("Wipe", EFluidCtrlMode.ctrl_wipe, (result == MvtMessageBox.EPurgeResult.PurgeResultAll));

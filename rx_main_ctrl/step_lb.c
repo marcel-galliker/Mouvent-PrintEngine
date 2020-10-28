@@ -78,6 +78,7 @@ void steplb_init(int no, RX_SOCKET psocket)
 	memset(_Status, 0, sizeof(_Status));
 	// All steppers board variables reset
 	for (i = 0; i < STEPPER_CNT; i++) _StatReadCnt[i] = 0;
+    RX_StepperStatus.robinfo.auto_cap = TRUE;
 }
 
 //--- steplb_handle_gui_msg------------------------------------------------------------------
@@ -208,6 +209,7 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
             }
         }
     };
+    robinfo.auto_cap = _Status[0].robinfo.auto_cap;
     if (RX_Config.printer.type == printer_LB701)
     {
         info.headUpInput_0 = _Status[0].info.headUpInput_0;
@@ -324,7 +326,6 @@ void steplb_lift_to_up_pos(void)
 {
 	for (int no=0; no<SIZEOF(_step_socket); no++)
 	{
-        Error(LOG, 0, "Send UP-Command");
         sok_send_2(&_step_socket[no], CMD_LIFT_UP_POS, 0, NULL);
 	}
 	_AbortPrinting = FALSE;
@@ -339,7 +340,6 @@ int	 steplb_lift_in_up_pos(void)
 //--- steplb_lift_to_up_pos_individually -------------------
 void steplb_lift_to_up_pos_individually(int no)
 {
-    Error(LOG, 0, "Send UP-Command");
 	sok_send_2(&_step_socket[no], CMD_LIFT_UP_POS, 0, NULL);
 }
 

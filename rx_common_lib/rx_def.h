@@ -1476,7 +1476,7 @@ typedef struct ERobotInfo
 	UINT32 wash_done		: 1;	//	0x00020000
 	UINT32 purge_done		: 1;	//	0x00040000
 	UINT32 vacuum_in_change	: 1;	//	0x00080000
-	UINT32 r_info_20		: 1;	//	0x00100000
+	UINT32 auto_cap			: 1;	//	0x00100000
 	UINT32 rob_in_wipe		: 1;	//	0x00200000
 	UINT32 rob_in_vac		: 1;	//	0x00400000
 	UINT32 rob_in_wash		: 1;	//	0x00800000

@@ -67,7 +67,7 @@ int		machine_init(void)
     drive_init();
 	lh702_init();
 	set_interface();
-	return REPLY_OK;
+    return REPLY_OK;
 }
 
 //--- machine_end --------------------------------
@@ -83,7 +83,7 @@ int		machine_tick(void)
 {
 	if(rx_def_is_tx(RX_Config.printer.type) || RX_StepperStatus.robot_used)
 	{
-		if (RX_StepperStatus.info.z_in_cap) _CappingTimer = 0;  // reset timer if already in cap
+		if (RX_StepperStatus.info.z_in_cap || !RX_StepperStatus.robinfo.auto_cap) _CappingTimer = 0;  // reset timer if already in cap
 
 		if (_CappingTimer>0 && _CappingTimer<rx_get_ticks() && !RX_PrinterStatus.door_open)
 		{
@@ -94,6 +94,8 @@ int		machine_tick(void)
 	}
 	return REPLY_OK;
 }
+
+
 
 //--- machine_reset --------------------------------
 void machine_reset(void)

@@ -105,7 +105,7 @@ namespace RX_DigiPrint.Views.UserControls
                     _LedCap  [stat.No].Source = (stat.Z_in_cap)  ? _GreenLedImg : null;
 
                     bool refDone=RxGlobals.StepperStatus[0].RefDone;
-                    Visibility visible = (RxGlobals.StepperStatus[0].RobotUsed)? Visibility.Visible : Visibility.Collapsed;
+                    Visibility visible = (RxGlobals.StepperStatus[0].RobotUsed && RxGlobals.User.UserType == EUserType.usr_mouvent)? Visibility.Visible : Visibility.Collapsed;
                     for (int i=0; i<RxGlobals.StepperStatus.Length; i++)
                     {
                         if (RxGlobals.StepperStatus[i].CmdRunning==0 && RxGlobals.StepperStatus[i].RefDone) refDone=true;
@@ -115,6 +115,7 @@ namespace RX_DigiPrint.Views.UserControls
                     Button_Print.IsEnabled  = refDone;
                     Button_Wash.Visibility = visible;
                     Button_Vacuum.Visibility = visible;
+                    Button_Wipe.Visibility = visible;
                     Button_RefRobot.Visibility = visible;
                 }
                 else

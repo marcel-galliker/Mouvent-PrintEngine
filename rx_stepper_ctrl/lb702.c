@@ -136,7 +136,8 @@ void lb702_init(void)
 	memcpy(&RX_StepperStatus.screwclusters, &RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwclusters, sizeof(RX_StepperStatus.screwclusters));
     
     memcpy(&RX_StepperStatus.screwpositions, &RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwpositions, sizeof(RX_StepperStatus.screwpositions));
-    
+
+    RX_StepperStatus.robinfo.auto_cap = TRUE;
 }
 
 //--- lb702_main ------------------------------------------------------------------
@@ -305,7 +306,7 @@ void lb702_main(int ticks, int menu)
 				RX_StepperStatus.cmdRunning = FALSE;
                 _NewCmd = FALSE;
             }
-			
+			else
 			{
 				// check position offset and correct it!
 				int	offset[2];
@@ -419,6 +420,8 @@ static void _lb702_display_status(void)
     term_printf("z in print: \t\t %d\n",	RX_StepperStatus.info.z_in_print);
     term_printf("z in capping: \t\t %d\n",	RX_StepperStatus.info.z_in_cap);
     term_printf("z in washing: \t\t %d\n", RX_StepperStatus.info.z_in_wash);
+    if (RX_StepperCfg.boardNo == 0)
+        term_printf("Auto Cap State: \t %d\n", RX_StepperStatus.robinfo.auto_cap);
     term_printf("\n");
 }
 
@@ -442,6 +445,7 @@ static void _lb702_handle_menu(char *str)
 		case 'u': lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_UP_POS,		NULL); break;
         case 'S': lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_SCREW, NULL); break;
 		case 'z': _lb702_motor_z_test(atoi(&str[1]));break;
+        case 'a': RX_StepperStatus.robinfo.auto_cap = !RX_StepperStatus.robinfo.auto_cap;
 		case 'm': _lb702_motor_test(str[1]-'0', atoi(&str[2]));break;
 		}
 	}			
@@ -483,8 +487,10 @@ int lb702_menu(void)
 			term_printf("p: move to print\n");
             term_printf("e: move to exchange cluster position\n");
 			term_printf("z: move by <steps>\n");
-			term_printf("m<n><steps>: move Motor<n> by <steps>\n");	
-			term_printf("x: exit\n");	
+			term_printf("m<n><steps>: move Motor<n> by <steps>\n");
+            if (RX_StepperCfg.boardNo == 0)
+                term_printf("a: Change Cap Auto State\n");
+            term_printf("x: exit\n");	
             
 		}
 		else
@@ -705,7 +711,6 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		
 	case CMD_LIFT_UP_POS:			TrPrintfL(TRUE, "CMD_LIFT_UP_POS");
 									strcpy(_CmdName, "CMD_LIFT_UP_POS");
-									Error(LOG, 0, "starting 0x%08x %s from %d", msgId, _CmdName, socket);
 									if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_back < 10000) Error(ERR_ABORT, 0, "Reference Height back must be > 10mm");
 									else if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_front < 10000) Error(ERR_ABORT, 0, "Reference Height must be > 10mm");
 									else if (abs(RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_front - RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_back) > MAX_ALIGN) 
