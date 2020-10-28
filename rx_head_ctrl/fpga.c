@@ -657,7 +657,14 @@ void fpga_set_pg_offsets(INT32 backwards)
 //--- fpga_enc_config ---------------------------------------------------
 void fpga_enc_config(int khz)
 {
+	if (!FpgaCfg.encoder->synth.enable && khz)
+	{
+		nios_set_firepulse_on(TRUE);
+		rx_sleep(200);		
+		SET_FLAG(FpgaCfg.cfg->cmd, CMD_MASTER_ENABLE, TRUE);
+	}
 	_fpga_enc_config(khz);
+	if (!khz) nios_set_firepulse_on(FALSE);
 }
 
 //--- fpga_enc_enable --------------------------
@@ -680,28 +687,6 @@ static void _fpga_enc_config(int khz)
 
 	if (khz>1)
 	{
-		FpgaCfg.encoder->synth.value = 0;
-		FpgaCfg.encoder->synth.enable= FALSE;
-
-		/*
-		// first disable FPGA, then start power up, and finally enable fpga
-		enable = (FpgaCfg.cfg->cmd & CMD_MASTER_ENABLE)!=0;
-		
-		SET_FLAG(FpgaCfg.cfg->cmd, CMD_MASTER_ENABLE, FALSE);
-		nios_set_firepulse_on(TRUE);
-		
-		for (i=0; !nios_is_firepulse_on(); i += 10)
-		{
-			if (i > 50) 
-			{
-				Error(LOG, 0, "Firepulse On TimeOut");
-				break;					
-			}
-			rx_sleep(10);				
-		}
-		SET_FLAG(FpgaCfg.cfg->cmd, CMD_MASTER_ENABLE, enable);
-		*/
-		
 		FpgaCfg.encoder->synth.value = FPGA_FREQ/(khz*1000);
 		FpgaCfg.encoder->synth.enable= TRUE;		
 	}
@@ -709,10 +694,7 @@ static void _fpga_enc_config(int khz)
 	{
 		FpgaCfg.encoder->synth.value = 0;
 		FpgaCfg.encoder->synth.enable= FALSE;
-	//	SET_FLAG(FpgaCfg.cfg->cmd, CMD_MASTER_ENABLE, FALSE);
-	//	nios_set_firepulse_on(FALSE);
 	}
-
 	SET_FLAG(FpgaCfg.encoder->cmd, ENC_SIGNAL_MODE, 0);  // 0: Telegram, 1:no telegram
 
 	SET_FLAG(FpgaCfg.encoder->cmd, ENC_HEAD0_ENABLE, FALSE);
