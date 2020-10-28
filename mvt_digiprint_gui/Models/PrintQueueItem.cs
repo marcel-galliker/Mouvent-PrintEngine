@@ -666,7 +666,9 @@ namespace RX_DigiPrint.Models
         public Double PrintGoDist
         {
             get { return _PrintGoDist; }
-            set { if (SetProperty(ref _PrintGoDist, Rx.DoubleRange(value, 0, 10000))) do_checks(); }
+        //  test cutting image
+        //  set { if (SetProperty(ref _PrintGoDist, Rx.DoubleRange(value, 0, 10000))) do_checks(); }
+            set { if (SetProperty(ref _PrintGoDist, Rx.DoubleRange(value, -5000, 10000))) do_checks(); }
         }
 
         //--- Property PageNumber ---------------------------------------

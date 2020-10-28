@@ -580,6 +580,8 @@ B4;407;B42A;46'122;11;4;42;2D0A8;184'488;c_data_print_ctrl_error23_addr;;31:0;;0
 B4;408;B42B;46'123;11;4;43;2D0AC;184'492;c_data_print_ctrl_error24_addr;;31:0;;0;r;h3/h2/h1/h3;;error4: missing a img-line in FIFO (not 1st img-line);h3 wr img line err4;;h2 wr img line err4;;h1 wr img line err4;;h0 wr img line err4;;;;;;
 ;408;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 B4;409;B42C;46'124;11;4;44;2D0B0;184'496;c_area_clr_err_cnt_addr;;31:0;;0;r;area clear errors;;;;;;;;;;;;;;;
+B4;409;B42D;46'125;11;4;45;2D0B4;184'500;c_skip_img_start_err_cnt_addr;;31:0;;0;r;skip img start errors;;;;;;;;;;;;;
+B4;409;B42E;46'126;11;4;46;2D0B8;184'504;c_clear_img_udp_area_err_cnt_addr;;31:0;;0;r;clear img udp area errors;;;;;;;;;;;;;
 ;409;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;409;;;;;;;;Data Info Register;SFpgaDataStat Fpga.data;;;;;;;;31:24;;23:16;;15:8;;7:0;;;;;;
 B8;410;B800;47'104;11;8;0;2E000;188'416;c_pr_data_h0_imglist_out_idx_addr;.imgOutIdx[0];15:0;;;r;head0;;img list out idx1: current ddr3 read udp-block no;;;;;img list out idx1;;img list out idx2;;;0..127;;;
