@@ -263,7 +263,7 @@ static void _sample_wf(int head, SInkDefinition *pink, char *dots, int fpVoltage
 	int subPulsCnt;
 	int voltageCnt;
 	int dropletNo;
-	int trace=FALSE;
+	int trace=TRUE;
 	int load;
 	int ret;
 	int levels;
@@ -526,7 +526,7 @@ void nios_fixed_grey_levels(int fixedDropSize, int maxDropSize)
 		}
 		else
 		{
-			Error(WARN, 0, "TEST Fix Greylevel");		
+			Error(WARN, 0, "TEST Fix Greylevel _GreyLevel[%d][%d]=%d", head, fixedDropSize, _GreyLevel[head][fixedDropSize]);		
 			cfg->gl_2_pulse[0] = _GreyLevel[head][fixedDropSize];			
 		}
 	}

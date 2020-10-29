@@ -80,9 +80,7 @@
             </Grid>
         </rx:RxPopup>
 
-        <Rectangle  Name="Temp_Head_Rec" Margin="2,0,2,0" Grid.Row="3" Fill="{StaticResource RX.Warn}" Visibility="{Binding TempReady, Converter={StaticResource BoolToInVisible_Converter}}"/>
-
-        <StackPanel  Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Name="Temp_Head">
+        <StackPanel  Grid.Row="3" Margin="2,0,2,0" Orientation="Horizontal" HorizontalAlignment="Right" Background="{Binding TempReady_Brush}" Name="Temp_Head" >
             <TextBlock Text="{Binding TempHead,  Converter={StaticResource HeadVal_ConverterTemp}}"/>
             <TextBlock Text=" (" VerticalAlignment="Center"/>
             <TextBlock Text="{Binding TempSetpoint, Converter={StaticResource HeadVal_ConverterTemp}}" VerticalAlignment="Center"/>
@@ -128,7 +126,7 @@
             <StackPanel  Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
                 <TextBlock Text="{Binding Meniscus,  Converter={StaticResource HeadVal_Converter10}}"/>
                 <TextBlock Text=" (~" VerticalAlignment="Center"/>
-                <TextBlock Text="{Binding Meniscus_setpoint, Converter={StaticResource HeadVal_Converter10}}" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding Meniscus_diff, Converter={StaticResource HeadVal_Converter10}}" VerticalAlignment="Center"/>
                 <TextBlock  Margin="0,0,2,0" Text=")" VerticalAlignment="Center"/>
             </StackPanel>
           

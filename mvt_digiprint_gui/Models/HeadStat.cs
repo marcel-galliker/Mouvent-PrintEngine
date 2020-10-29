@@ -199,11 +199,24 @@ namespace RX_DigiPrint.Models
         public bool TempReady
         {
             get { return _TempReady; }
-            set {   SetProperty(ref _TempReady, value);}
+            set 
+            { 
+                if(SetProperty(ref _TempReady, value))
+                    TempReady_Brush = _TempReady? Brushes.Transparent : Rx.BrushWarn;
+            }
         }
 
-        //--- Property Property -------------------------------------------
-        /*
+		//--- Property TempReady_Brush ---------------------------------------
+		private Brush _TempReady_Brush;
+		public Brush TempReady_Brush
+		{
+			get { return _TempReady_Brush; }
+			set { SetProperty(ref _TempReady_Brush,value); }
+		}
+
+
+		//--- Property Property -------------------------------------------
+		/*
         private UInt32 _TempFpga;
         public UInt32 TempFpga
         {
@@ -211,8 +224,8 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _TempFpga, value); }
         }
         */
-        //--- Property Flow ---------------------------------------
-        private Int32 _Flow;
+		//--- Property Flow ---------------------------------------
+		private Int32 _Flow;
         public Int32 Flow
         {
             get { return _Flow; }

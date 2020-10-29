@@ -644,6 +644,16 @@ void putty_display_cond_status(int status)
 			}
 			term_printf("\n");
     	}
+		term_printf("Pressure in1:     "); 
+    	{
+			int i, l;
+			for (i=0; i<MAX_HEADS_BOARD; i++)
+			{
+				l   = sprintf(str, "%4s ", value_str1(_NiosMem->stat.cond[no[i]].pressure_in1));
+				term_printf("%15s ", str);
+			}
+			term_printf("\n");
+    	}
 		term_printf("Pressure in2:     "); 
     	{
 			int i, l;
@@ -718,7 +728,7 @@ void putty_display_cond_status(int status)
 
 		for (i = 0; i < MAX_HEADS_BOARD; i++) if (RX_NiosStat.cond[no[i]].error&COND_ERR_temp_head_overheat) str[i]='E'; else str[i]=' ';
 		term_printf("Temp Head [C]:    "); PRINTF(MAX_HEADS_BOARD)("   %s(%02d<%02d)%c ", value_str_temp(_NiosCfg->cond[no[i]].tempHead), _NiosCfg->cond[no[i]].temp / 1000, _NiosCfg->cond[no[i]].tempMax / 1000, str[no[i]]); term_printf("\n"); 
-		term_printf("Temp Ready:       "); PRINTF(MAX_HEADS_BOARD)("           %d %d ", RX_HBStatus->head[no[i]].info.temp_ready, RX_HBStatus->head[no[i]].info.flowFactor_ok); term_printf("\n"); 		
+		term_printf("Temp-Rdy/Flow-Ok: "); PRINTF(MAX_HEADS_BOARD)("           %d %d ", RX_HBStatus->head[no[i]].info.temp_ready, RX_HBStatus->head[no[i]].info.flowFactor_ok); term_printf("\n"); 		
 		term_printf("Temp Inlet [C]:   "); PRINTF(MAX_HEADS_BOARD)("%14s  ",  value_str_temp(RX_NiosStat.cond[no[i]].tempIn)); term_printf("\n");
 		term_printf("Temp Heater [C]:  "); PRINTF(MAX_HEADS_BOARD)("%14s  ", value_str_temp(RX_NiosStat.cond[no[i]].tempHeater)); term_printf("\n");
 		term_printf("Heater:           "); PRINTF(MAX_HEADS_BOARD)("          %3d%%  ", RX_NiosStat.cond[no[i]].heater_percent); term_printf("\n");
