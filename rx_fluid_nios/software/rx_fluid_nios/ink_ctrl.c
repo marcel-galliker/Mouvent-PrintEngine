@@ -122,6 +122,8 @@ static int _OldPumpSpeed[NIOS_INK_SUPPLY_CNT] = {0};
 static int _FillPressure=0;
 static int _LeakTest = 0;
 
+static int _Purge4Ever[NIOS_INK_SUPPLY_CNT] = {FALSE};
+
 INT32 _PumpBeforeOFF;
 INT32 _PumpOFFTime;
 
@@ -307,6 +309,10 @@ void ink_tick_10ms(void)
 
 	for(isNo = 0 ; isNo < NIOS_INK_SUPPLY_CNT ; isNo++)
 	{
+		if (pRX_Config->ink_supply[isNo].ctrl_mode == ctrl_purge4ever)
+			_Purge4Ever[isNo] = TRUE;
+		else if (pRX_Config->ink_supply[isNo].ctrl_mode < ctrl_purge_step1 || pRX_Config->ink_supply[isNo].ctrl_mode > ctrl_purge_step4)
+			_Purge4Ever[isNo] = FALSE;
 		switch(pRX_Config->ink_supply[isNo].ctrl_mode)
 		{
 			case ctrl_shutdown:
@@ -1208,7 +1214,7 @@ void ink_tick_10ms(void)
 					_pump_ctrl(isNo, _InkSupply[isNo].purgePressure, PUMP_CTRL_MODE_DEFAULT);
 					_set_bleed_valve(isNo, FALSE);
 				}
-				else if (_InkSupply[isNo].purgeTime<pRX_Config->ink_supply[isNo].purgeTime)
+				else if (_InkSupply[isNo].purgeTime<pRX_Config->ink_supply[isNo].purgeTime || _Purge4Ever[isNo])
 				{
 					_pump_ctrl(isNo, _InkSupply[isNo].purgePressure, PUMP_CTRL_MODE_DEFAULT);
 					_set_bleed_valve(isNo, FALSE);
@@ -1509,7 +1515,7 @@ static void _init_purge(int isNo, int pressure)
 		    if(_MaxPrintPressure[isNo] > 0)
 		    {
 			    _InkSupply[isNo].purgePressure = _MaxPrintPressure[isNo] + pressure;
-			    if(_InkSupply[isNo].purgePressure > 800) _InkSupply[isNo].purgePressure = 800;
+			    if(_InkSupply[isNo].purgePressure > 1100) _InkSupply[isNo].purgePressure = 1100;
 		    }
 		    else
 		    {

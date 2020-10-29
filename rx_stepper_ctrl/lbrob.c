@@ -63,6 +63,9 @@
 #define RO_VACUUM_CLEANER       0x010       // o4
 #define RO_FLUSH_PUMP           0x020       // o5
 #define RO_WASTE_VAC            0x040       // o6
+#define RO_INK_PUMP_LEFT        0x080       // o7
+#define RO_INK_PUMP_RIGHT       0x100       // o8
+#define RO_INK_PUMP_BOTH        0x180       // o7 + o8
 
 #define MAX_POS_DIFFERENT       4000        // steps
 
@@ -875,6 +878,26 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         _rob_wipe(msgId, *(EWipeSide *)pdata);
         break;
 
+    case CMD_ROB_EMPTY_WASTE:
+        strcpy(_CmdName, "CMD_ROB_EMPTY_WASTE");
+        val = (*(INT32 *)pdata);
+        if (val == 0)
+            Fpga.par->output &= ~RO_INK_PUMP_BOTH;
+        else if (val == 1)
+        {
+            Fpga.par->output |= RO_INK_PUMP_LEFT;
+            _PumpWasteTime = rx_get_ticks();
+        }
+        else if (val == 2)
+            Fpga.par->output &= ~RO_INK_PUMP_LEFT;
+        else if (val == 3)
+        {
+            Fpga.par->output |= RO_INK_PUMP_RIGHT;
+            _PumpWasteTime = rx_get_ticks();
+        }
+        else if (val == 4)
+            Fpga.par->output &= ~RO_INK_PUMP_RIGHT;
+        break;
 
     case CMD_ROB_VACUUM:
         val = (*(INT32 *)pdata);
@@ -982,17 +1005,17 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
             }
             return;
         }
-        else if (!RX_StepperStatus.robinfo.ref_done)
+        else if (!RX_StepperStatus.robinfo.ref_done || (_RobFunction == rob_fct_cap && RX_StepperStatus.info.x_in_cap))
         {
             _lbrob_do_reference();
             _CmdRunning_old = msgId;
             return;
         }
-        if (_RobFunction == rob_fct_cap && RX_StepperStatus.info.x_in_cap)
+        /*if (_RobFunction == rob_fct_cap && RX_StepperStatus.info.x_in_cap)
         {
             RX_StepperStatus.robinfo.rob_in_cap = TRUE;
             return;
-        }
+        }*/
 
         RX_StepperStatus.robinfo.moving = TRUE;
         _CmdRunning = msgId;

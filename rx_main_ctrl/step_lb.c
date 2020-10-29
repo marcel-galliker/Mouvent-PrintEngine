@@ -122,7 +122,6 @@ int	 steplb_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen
 			case CMD_LIFT_CAPPING_POS:
 			case CMD_LIFT_REFERENCE:
 			case CMD_ROB_REFERENCE:
-                        if (cmd == CMD_LIFT_UP_POS) Error(LOG, 0, "Send UP-Command");
 						sok_send_2(&_step_socket[no], cmd, 0, NULL);
 						break;
 		
@@ -547,10 +546,44 @@ void steplb_rob_wash_all(void)
     }
 }
 
+void steplb_pump_back_fluid(int fluidNo, int state)
+{
+    int even_number_of_colors = RX_Config.inkSupplyCnt % 2 == 0;
+    int val = 0;
+    if (even_number_of_colors)
+    {
+        if (state == FALSE)
+            val = ((fluidNo % 2) + 1) * 2;
+        else
+            val = ((fluidNo % 2) + 1) * 2 - 1;
+        sok_send_2(&_step_socket[fluidNo/2], CMD_ROB_EMPTY_WASTE, sizeof(val), &val);
+    }
+    else
+    {
+        if (state == FALSE)
+        {
+            if (fluidNo % 2 == 0)
+                val = 4;
+            else
+                val = 2;
+        }
+        else
+        {
+            if (fluidNo % 2 == 0)
+                val = 3;
+            else
+                val = 1;
+        }
+        sok_send_2(&_step_socket[(fluidNo+1)/2], CMD_ROB_EMPTY_WASTE, sizeof(val), &val);
+    }
+    
+}
+
 //--- steplb_rob_control ------------------------------
 void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
 {		
     static int _printing;
+    static int _risingEdge[STEPPER_CNT] = {0};
     ERobotFunctions function;
 	if (_Status[no].robot_used)
 	{
@@ -566,13 +599,15 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
 										steplb_rob_to_fct_pos(no, rob_fct_cap);
 										_RobotCtrlMode[no] = ctrl_cap_step2;
 									}
-									break;
+                                    _risingEdge[no] = FALSE;
+                                    break;
 		
-		case ctrl_cap_step2:		if (steplb_rob_in_fct_pos(no, rob_fct_cap))
+		case ctrl_cap_step2:		if (steplb_rob_in_fct_pos(no, rob_fct_cap) && _risingEdge[no])
 									{
 										steplb_rob_fct_start(no, rob_fct_cap);
 										_RobotCtrlMode[no] = ctrl_cap_step3;
-									}
+									}else if (!steplb_rob_in_fct_pos(no, rob_fct_cap))
+                                        _risingEdge[no] = TRUE;
 									break;
 		
 		case ctrl_cap_step3:		if (steplb_rob_fct_done(no, rob_fct_cap))

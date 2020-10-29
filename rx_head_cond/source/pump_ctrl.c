@@ -81,6 +81,8 @@ static INT32	_PurgeDelay;
 static INT32	_PurgeTime;
 static INT32	_SetpointShutdown;
 
+static INT32	_Purge4Ever;
+
 // ---- NEW : flow resistance  -----
 // static INT32	_TimeFlowResistancestablePRINT;
 // static int	_NbAverageFlowResistancePRINT;
@@ -689,6 +691,7 @@ void pump_tick_10ms(void)
 						max_pressure = MBAR_500;
 						pid_reset(&_PumpPID);
 						RX_Status.mode = RX_Config.mode;
+						_Purge4Ever = ctrl_purge4ever == RX_Config.mode;
 						break;
 		
 		case ctrl_purge_step1:
@@ -705,7 +708,7 @@ void pump_tick_10ms(void)
 		
 		case ctrl_purge_step4:
 						_presure_in_max();
-						if (RX_Config.purge_pos_y<(RX_Config.purgeDelayPos_y - MAX_POS_VARIANCE) || _PurgeTime>RX_Config.purgeTime || (RX_Config.purgeDelayPos_y == 0 && _PurgeDelay < RX_Config.purgeDelayTime))
+						if (RX_Config.purge_pos_y<(RX_Config.purgeDelayPos_y - MAX_POS_VARIANCE) || (_PurgeTime>RX_Config.purgeTime && !_Purge4Ever) || (RX_Config.purgeDelayPos_y == 0 && _PurgeDelay < RX_Config.purgeDelayTime))
 						{
 							if (RX_Config.purgeDelayPos_y == 0)_PurgeDelay += cycle_time;
 							temp_ctrl_on(FALSE);

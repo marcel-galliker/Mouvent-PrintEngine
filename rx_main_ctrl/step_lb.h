@@ -63,3 +63,5 @@ void steplb_rob_wash_all(void);
 
 void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment);
 void steplb_cluster_Screw_Turned(int stepperNo);
+
+void steplb_pump_back_fluid(int fluidNo, int state);
