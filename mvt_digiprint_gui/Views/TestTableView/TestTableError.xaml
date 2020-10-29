@@ -6,7 +6,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
-        <GroupBox Header="Erors" Style="{StaticResource MvtGroupBox}">
+        <GroupBox Header="Errors" Style="{StaticResource MvtGroupBox}">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="120"/>
