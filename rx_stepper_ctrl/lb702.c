@@ -269,10 +269,12 @@ void lb702_main(int ticks, int menu)
 				}
 				else 
 				{
+                    
                     if (!RX_StepperStatus.info.headUpInput_0)
                         Error(ERR_CONT, 0, "LB702: Command REFERENCE: End Sensor BACK NOT HIGH");
                     if (!RX_StepperStatus.info.headUpInput_1)
                         Error(ERR_CONT, 0, "LB702: Command REFERENCE: End Sensor FRONT NOT HIGH");
+                    _Cmd_New = FALSE;
 					RX_StepperStatus.cmdRunning=FALSE;
 				}
 			}			
@@ -280,9 +282,7 @@ void lb702_main(int ticks, int menu)
 			{
 				if (motors_error(MOTOR_Z_BITS, &motor))
 				{				
-                    Error(ERR_CONT, 0,
-                          "LIFT: Command %s - 1000 steps: Motor %s blocked",
-                          _CmdName, _MotorName[motor]);
+                    Error(ERR_CONT, 0, "LIFT: Command %s - 1000 steps: Motor %s blocked", _CmdName, _MotorName[motor]);
 					RX_StepperStatus.info.ref_done = FALSE;
 				}
                 else if (_Cmd_New)
@@ -309,7 +309,7 @@ void lb702_main(int ticks, int menu)
 			else
 			{
 				// check position offset and correct it!
-				int	offset[2];
+				/*int	offset[2];
 				int	adjustMotors=0;
 
 				for (motor=MOTOR_Z_BACK; motor<=MOTOR_Z_FRONT; motor++)
@@ -325,7 +325,7 @@ void lb702_main(int ticks, int menu)
 
                 if (adjustMotors)
                     motors_start(adjustMotors, TRUE);
-                else
+                else*/
                     RX_StepperStatus.cmdRunning = FALSE;
             }
         }
@@ -333,11 +333,10 @@ void lb702_main(int ticks, int menu)
         {
             if (motors_error(MOTOR_Z_BITS, &motor))
             {
-                Error(ERR_CONT, 0, "LIFT: Command %s: Motor %s blocked",
-                      _CmdName, _MotorName[motor]);
+                Error(ERR_CONT, 0, "LIFT: Command %s: Motor %s blocked", _CmdName, _MotorName[motor]);
                 RX_StepperStatus.info.ref_done = FALSE;
 			}
-                RX_StepperStatus.cmdRunning = FALSE;
+            RX_StepperStatus.cmdRunning = FALSE;
 
 		}
 		else if (motors_error(MOTOR_Z_BITS, &motor))
@@ -720,7 +719,7 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 										val0 = -1*_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_back - 20000);
 										val1 = -1*_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_front - 20000);
 										if (RX_StepperStatus.info.ref_done) _lb702_move_to_pos(CMD_LIFT_UP_POS, val0, val1);
-                                        else if (RX_StepperStatus.cmdRunning != CMD_LIFT_REFERENCE)								
+                                        else/* if (RX_StepperStatus.cmdRunning != CMD_LIFT_REFERENCE)	*/							
                                         {
                                             _Cmd_New = msgId;
                                             _lb702_do_reference();

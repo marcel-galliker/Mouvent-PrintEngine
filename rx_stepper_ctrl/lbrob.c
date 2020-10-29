@@ -1428,7 +1428,6 @@ static void _search_all_screws()
                 else
                     pos = _calculate_average_y_pos(_SearchScrewNr) + correction_value;
                 cmd_Time = rx_get_ticks() + max_Wait_Time;
-                Error(LOG, 0, "Move y-Pos to pos : %d", pos);
                 robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_Y, &pos);
                 _CmdSearchScrews++;
             }
