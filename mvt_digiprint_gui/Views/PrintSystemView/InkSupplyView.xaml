@@ -221,6 +221,7 @@
                 <TextBlock Margin="0,0,2,0" Text=")" VerticalAlignment="Center"/>
             </StackPanel>
 
+            <!--
             <Rectangle Margin="2,0,2,0" Grid.Row="6" Fill="{StaticResource RX.Warn}" Visibility="{Binding CondTempReady, Converter={StaticResource BoolToInVisible_Converter}}"/>
             <StackPanel  Margin="2,0,2,0" Grid.Row="6" Orientation="Horizontal" HorizontalAlignment="Right">
                 <TextBlock Text="{Binding CondTemp,      Converter={StaticResource HeadVal_ConverterTemp}}" />
@@ -228,7 +229,8 @@
                 <TextBlock Text="{Binding TempSetpoint, Converter={StaticResource HeadVal_ConverterTemp}}" VerticalAlignment="Center"/>
                 <TextBlock Margin="0,0,2,0" Text=")" VerticalAlignment="Center"/>
             </StackPanel>
-
+            -->
+            
             <Grid x:Name="ServiceGrid" Grid.Row="7"  Margin="2,0,2,0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="0"/>

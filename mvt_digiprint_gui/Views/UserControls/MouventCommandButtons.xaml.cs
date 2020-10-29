@@ -213,8 +213,24 @@ namespace RX_DigiPrint.Views.UserControls
             }
             else // Switch Power Off
             {
-                FlushWindow wnd = new FlushWindow();
-                wnd.Show();
+                bool canFlush=false;
+                foreach(InkSupply inkSupply in RxGlobals.InkSupply.List)
+                    if (inkSupply.InkType!=null) canFlush |= inkSupply.InkType.CanFlush;
+                canFlush=false;
+                if (canFlush)
+				{
+                    FlushWindow wnd = new FlushWindow();
+                    wnd.Show();
+				}
+                else
+				{
+                    if (MvtMessageBox.YesNo("Print System", "Switch OFF.",  MessageBoxImage.Question, true))
+					{
+                        TcpIp.SFluidCtrlCmd msg = new TcpIp.SFluidCtrlCmd(){no=-1, ctrlMode = EFluidCtrlMode.ctrl_shutdown};
+                        RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_CTRL_MODE, ref msg);
+                        RxGlobals.RxInterface.SendCommand(TcpIp.CMD_ENCODER_UV_OFF);
+					}
+				}
             }
         }
 
