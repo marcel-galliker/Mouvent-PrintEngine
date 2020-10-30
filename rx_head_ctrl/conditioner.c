@@ -14,6 +14,8 @@
 #ifdef soc
 	#include <sys/mman.h>
 	#include <stdio.h>
+	#include <string.h>
+
 #endif
 #ifdef linux
 	#include <termios.h>
@@ -47,7 +49,12 @@ SFpgaHeadBoardCfg	FpgaCfg;
 SVersion			_FileVersion;
 static int			_UpdateClusterTimer;
 static int			_ErrorDelay=0;
-static ELogItemType	_ErrLevel = LOG_TYPE_UNDEF;
+
+static int _JetSequenceFrequency[128] = {0};
+static int _JetSequenceDropSize[128] = {0};
+static int _JetSequencePressure[128] = {0};
+static int _JetSequenceTime[128] = {0};
+static ELogItemType _ErrLevel = LOG_TYPE_UNDEF;
 
 #define ERROR_DELAY	200	// ms after reset until errors are checked
 
@@ -57,6 +64,7 @@ static void _write_log(void);
 static void _cond_copy_status(void);
 static void _cond_preslog(int ticks);
 static void	_update_clusterNo(void);
+static void _read_jet_sequence(void);
 
 //#define LOG_FLUID
 
@@ -119,8 +127,9 @@ int cond_init(void)
 	*/
 	
 	_reload=TRUE;
-			
-	return REPLY_OK;
+    _read_jet_sequence();
+
+    return REPLY_OK;
 }
 
 //--- cond_end --------------------------------
@@ -956,4 +965,48 @@ static void _write_log(void)
 			fflush(_LogFile);
 		}
 	}
+}
+
+static void _read_jet_sequence(void)
+{
+    char *path;
+    char line[50];
+    char frequency[10];
+    char dropSize[10];
+    char pressure[10];
+    char time[10];
+    int i = 0;
+    int j = 0;
+    int test;
+    char *tmp;
+
+    path = PATH_BIN_HEAD "Jet_Sequence.csv";
+    FILE *csv = fopen(path, "r");
+
+    if (csv == NULL)
+        return;
+    else
+    {
+        while (fgets(line, 1024, csv))
+        {
+            tmp = strtok(line, ";");
+            if (i == 0) i++;		// jump over the first line, because these are just headlines
+            else
+            {
+                strcpy(frequency, tmp);
+                strcpy(dropSize, strtok(NULL, ";"));
+                strcpy(pressure, strtok(NULL, ";"));
+                strcpy(time, strtok(NULL, ";"));
+
+				_JetSequenceFrequency[i-1] = atoi(frequency);
+                _JetSequenceDropSize[i-1] = atoi(dropSize);
+                _JetSequencePressure[i-1] = atoi(pressure);
+                _JetSequenceTime[i-1] = atoi(time);
+                
+                i++;
+            }
+        }
+        fclose(csv);
+        return;
+    }
 }
