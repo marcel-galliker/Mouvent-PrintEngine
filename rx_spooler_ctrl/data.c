@@ -782,8 +782,13 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 						flz_loaded = NULL;
 						ret=_data_loaded(filepath, id->page, &bmpInfo, buffer);
 						if (ret) ret = flz_load(id, filepath, filename, printMode, gapPx, _WakeupLen, RX_Color, SIZEOF(RX_Color), buffer, &bmpInfo, ctrl_send_load_progress, NULL);
-						if (ret) ret = tif_load(id, filepath, filename, printMode, gapPx, _WakeupLen, RX_Color, SIZEOF(RX_Color), buffer, &bmpInfo, ctrl_send_load_progress);
-						strcpy(_FileTimePath, tif_last_filepath());				
+						if (ret == REPLY_OK)
+							strcpy(_FileTimePath, flz_last_filepath());
+						else
+						{
+							ret = tif_load(id, filepath, filename, printMode, gapPx, _WakeupLen, RX_Color, SIZEOF(RX_Color), buffer, &bmpInfo, ctrl_send_load_progress);
+							strcpy(_FileTimePath, tif_last_filepath());		
+						}
 					}
 #ifdef DEBUG
                     { // test ------------
