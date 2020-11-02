@@ -37,6 +37,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
             visibility = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_table_seon && RxGlobals.User.UserType >= EUserType.usr_mouvent) ? Visibility.Visible : Visibility.Collapsed;
             FluidCommands.Visibility = visibility;
             FluidSettings.Visibility = visibility;
+            FlushCommands.Visibility = visibility;
         }
 
         //--- _PrintSystem_PropertyChanged -----------------------------------------------

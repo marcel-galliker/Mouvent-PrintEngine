@@ -6,18 +6,18 @@
              xmlns:local="clr-namespace:RX_DigiPrint.Views.PrintSystemView"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-        <StackPanel>
-            <CheckBox Content="Flush 75%" Click="Flush_Clicked" Style="{DynamicResource RxCommandButton}" x:Name="Button_Flush"/>
-            <TextBlock/>
-            <CheckBox Content="Leak Test C1" Click="LeakTest_C1_Clicked"   Style="{DynamicResource RxCommandButton}" x:Name="Button_Leak_C1"/>
-            <TextBlock/>
-            <CheckBox Content="Leak Test C2" Click="LeakTest_C2_Clicked"  Style="{DynamicResource RxCommandButton}" x:Name="Button_Leak_C2"/>
-            <TextBlock/>
-            <CheckBox Content="Leak Test C3" Click="LeakTest_C3_Clicked"   Style="{DynamicResource RxCommandButton}" x:Name="Button_Leak_C3"/>
-            <TextBlock/>
-            <CheckBox Content="Leak Test C4" Click="LeakTest_C4_Clicked"   Style="{DynamicResource RxCommandButton}" x:Name="Button_Leak_C4"/>
-        </StackPanel>
-      
-    </Grid>
+    <GroupBox Grid.Column="0" Header="Leak Test" Style="{StaticResource RxGroupBox}">
+        <Grid>
+            <StackPanel>
+                <CheckBox Content="Leak Test C1" Click="LeakTest_C1_Clicked"   Style="{DynamicResource RxCommandButton}" x:Name="Button_Leak_C1"/>
+                <TextBlock/>
+                <CheckBox Content="Leak Test C2" Click="LeakTest_C2_Clicked"  Style="{DynamicResource RxCommandButton}" x:Name="Button_Leak_C2"/>
+                <TextBlock/>
+                <CheckBox Content="Leak Test C3" Click="LeakTest_C3_Clicked"   Style="{DynamicResource RxCommandButton}" x:Name="Button_Leak_C3"/>
+                <TextBlock/>
+                <CheckBox Content="Leak Test C4" Click="LeakTest_C4_Clicked"   Style="{DynamicResource RxCommandButton}" x:Name="Button_Leak_C4"/>
+            </StackPanel>
+
+        </Grid>
+    </GroupBox>
 </UserControl>

@@ -18,26 +18,30 @@
 #include "tts_ink.h"
 #include "rx_error.h"
 
-#define RO_XL_C1_INPUT 0x00000010;
-#define RO_IPA_C1_INPUT 0x00000020;
-#define RO_IPA_C1_OUTPUT 0x00000040;
-#define RO_XL_C1_OUTPUT 0x00000080;
-#define RO_XL_C2_INPUT 0x00000100;
-#define RO_IPA_C2_INPUT 0x00000200;
-#define RO_IPA_C2_OUTPUT 0x00000400;
-#define RO_XL_C2_OUTPUT 0x00000800;
+#define RO_FLUSH_C1         0x00000001;
+#define RO_FLUSH_C2         0x00000002;
+#define RO_XL_C1_INPUT      0x00000010;
+#define RO_IPA_C1_INPUT     0x00000020;
+#define RO_IPA_C1_OUTPUT    0x00000040;
+#define RO_XL_C1_OUTPUT     0x00000080;
+#define RO_XL_C2_INPUT      0x00000100;
+#define RO_IPA_C2_INPUT     0x00000200;
+#define RO_IPA_C2_OUTPUT    0x00000400;
+#define RO_XL_C2_OUTPUT     0x00000800;
 
-#define RO_C1_ALL 0x0f0;
-#define RO_C2_ALL 0xf00;
+#define RO_C1_ALL 0x0f1;
+#define RO_C2_ALL 0xf02;
 
-static int _RO_XL_C1_IN = RO_XL_C1_INPUT;
-static int _RO_IPA_C1_IN = RO_IPA_C1_INPUT;
-static int _RO_XL_C1_OUT = RO_XL_C1_OUTPUT;
-static int _RO_IPA_C1_OUT = RO_IPA_C1_OUTPUT;
-static int _RO_XL_C2_IN = RO_XL_C2_INPUT;
-static int _RO_IPA_C2_IN = RO_IPA_C2_INPUT;
-static int _RO_XL_C2_OUT = RO_XL_C2_OUTPUT;
-static int _RO_IPA_C2_OUT = RO_IPA_C2_OUTPUT;
+static int _RO_FLUSH_C1     = RO_FLUSH_C1;
+static int _RO_FLUSH_C2     = RO_FLUSH_C2;
+static int _RO_XL_C1_IN     = RO_XL_C1_INPUT;
+static int _RO_IPA_C1_IN    = RO_IPA_C1_INPUT;
+static int _RO_XL_C1_OUT    = RO_XL_C1_OUTPUT;
+static int _RO_IPA_C1_OUT   = RO_IPA_C1_OUTPUT;
+static int _RO_XL_C2_IN     = RO_XL_C2_INPUT;
+static int _RO_IPA_C2_IN    = RO_IPA_C2_INPUT;
+static int _RO_XL_C2_OUT    = RO_XL_C2_OUTPUT;
+static int _RO_IPA_C2_OUT   = RO_IPA_C2_OUTPUT;
 
 static int _Cluster1_Valve_Input;
 static int _Cluster2_Valve_Input;
@@ -70,7 +74,10 @@ void tts_ink_main(int ticks, int menu)
             RX_StepperStatus.inkinfo.xl_valve_0 = TRUE;
         if (Fpga.par->output & _RO_XL_C2_IN)
             RX_StepperStatus.inkinfo.xl_valve_1 = TRUE;
-        
+        if (Fpga.par->output & _RO_FLUSH_C1)
+            RX_StepperStatus.inkinfo.flush_valve_0 = TRUE;
+        if (Fpga.par->output & _RO_FLUSH_C2)
+            RX_StepperStatus.inkinfo.flush_valve_0 = TRUE;
     }
     else if (RX_StepperCfg.boardNo == 2)
     {
@@ -86,6 +93,11 @@ void tts_ink_main(int ticks, int menu)
             RX_StepperStatus.inkinfo.xl_valve_2 = TRUE;
         if (Fpga.par->output & _RO_XL_C2_IN)
             RX_StepperStatus.inkinfo.xl_valve_3 = TRUE;
+        if (Fpga.par->output & _RO_FLUSH_C1)
+            RX_StepperStatus.inkinfo.flush_valve_2 = TRUE;
+        if (Fpga.par->output & _RO_FLUSH_C2)
+            RX_StepperStatus.inkinfo.flush_valve_3 = TRUE;
+        
     }
     
     if (memcmp(&oldSatus.inkinfo, &RX_StepperStatus.inkinfo, sizeof(RX_StepperStatus.inkinfo)))
@@ -255,7 +267,41 @@ int tts_ink_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                 Error(ERR_CONT, 0, "Unknown number %d for Fluid System", value.no);
         }
         break;
-   
+        
+    case CMD_FLUID_FLUSH:
+        value = *((SValue *)pdata);
+        switch (value.value)
+        {
+        case 0:
+            Fpga.par->output &= ~RO_FLUSH_C1;
+            Fpga.par->output &= ~RO_FLUSH_C2;
+            break;
+        case 1:
+        case 3:
+            if (!(Fpga.par->output & _RO_FLUSH_C1) && ((value.value == 1 && RX_StepperCfg.boardNo == 1) || (value.value == 3 && RX_StepperCfg.boardNo == 2)))
+            {
+                Fpga.par->output |= RO_FLUSH_C1;
+            }
+            else
+            {
+                Fpga.par->output &= ~RO_FLUSH_C1;
+            }
+            
+            break;
+            
+        case 2:
+        case 4:
+            if (!(Fpga.par->output & _RO_FLUSH_C2) && ((value.value == 2 && RX_StepperCfg.boardNo == 1) || (value.value == 4 && RX_StepperCfg.boardNo == 2)))
+            {
+                Fpga.par->output |= RO_FLUSH_C2;
+            }
+            else
+            {
+                Fpga.par->output &= ~RO_FLUSH_C2;
+            }
+            break;
+        }
+        break;
     }
     return REPLY_OK;
 }

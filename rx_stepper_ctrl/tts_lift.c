@@ -83,6 +83,7 @@ static int  _micron_2_steps(int micron);
 static char *_motor_name(int no);
 static void _tts_lift_move_to_pos(int cmd, int pos);
 static void _tts_lift_do_reference(void);
+static void _tts_lift_motor_z_test(int steps);
 
 //--- tts_lift_init --------------------------------------
 void tts_lift_init(void)
@@ -279,6 +280,7 @@ int tts_lift_menu(void)
     term_printf("p<n>: move to print Height <n>um\n");
     term_printf("m<n><steps>: move Motor<n> by <steps>\n");
     term_printf("j: move to jet tray hight\n");
+    term_printf("z: move by <steps>\n");
     term_printf("x: exit\n");
     term_printf(">");
     term_flush();
@@ -314,6 +316,9 @@ int tts_lift_menu(void)
             break;
         case'j':
             tts_lift_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_JET_TRAY, NULL);
+            break;
+        case 'z':
+            _tts_lift_motor_z_test(atoi(&str[1]));
             break;
         case 'x':
             return FALSE;
@@ -487,12 +492,25 @@ static void _tts_lift_motor_test(int motorNo, int steps)
     par.stop_mux = 0;
     par.dis_mux_in = 0;
     par.encCheck = chk_off;
+    par.enc_bwd = TRUE;
     RX_StepperStatus.info.moving = TRUE;
 
-    //	motors_config(motors,  CURRENT_HOLD, 0.0, 0.0);
-    motors_config(MOTOR_Z_BITS, CURRENT_HOLD, STEPS_REV, INCS_REV, STEPS);
+    if (motorNo == 0 || motorNo == 1)
+        motors_config(MOTOR_Z_BITS, CURRENT_HOLD, STEPS_REV, INCS_REV, STEPS);
+    else if (motorNo == 2)
+        motors_config(motors, CURRENT_HOLD, 3200, 16000, STEPS);
+    else
+        motors_config(motors, CURRENT_HOLD, 0, 0, STEPS);
     motors_move_by_step(motors, &par, steps, FALSE);
     
+}
+
+//--- _tts_lift_motor_z_test ----------------------------------------------------------------------
+static void _tts_lift_motor_z_test(int steps)
+{	
+	RX_StepperStatus.cmdRunning = 1; // TEST
+	RX_StepperStatus.info.moving = TRUE;
+	motors_move_by_step(MOTOR_Z_BITS, &_ParZ_down, steps, TRUE);
 }
 
 static int _steps_2_micron(int steps)

@@ -42,5 +42,5 @@ INT32 fluid_get_pumpFeedback   (int no);
 INT32 fluid_get_error          (int no);
 
 void undefine_PurgeCtrlMode(void);
-void do_fluid_flush_pump(RX_SOCKET socket);
+void do_fluid_flush_pump(RX_SOCKET socket, SValue *pmsg);
 void do_fluid_leak_test(RX_SOCKET socket, SValue *pmsg);
