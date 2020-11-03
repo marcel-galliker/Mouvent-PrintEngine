@@ -130,6 +130,7 @@ int handle_gui_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sende
 	else if (phdr->msgId >= CMD_TT_0   && phdr->msgId < CMD_TT_END)		step_handle_gui_msg(socket, phdr->msgId, &phdr[1], phdr->msgLen - sizeof(SMsgHdr));
 	else if (phdr->msgId >= CMD_LIFT_0 && phdr->msgId < CMD_LIFT_END)	step_handle_gui_msg(socket, phdr->msgId, &phdr[1], phdr->msgLen - sizeof(SMsgHdr));
 	else if (phdr->msgId >= CMD_ROB_0  && phdr->msgId < CMD_ROB_END)	step_handle_gui_msg(socket, phdr->msgId, &phdr[1], phdr->msgLen - sizeof(SMsgHdr));
+	else if (phdr->msgId >= CMD_SETUP_ASSIST_STAT  && phdr->msgId < CMD_SETUP_ASSIST_STAT+0x10)	sa_handle_gui_msg(socket, pmsg);
 	else
 	{
 		switch (phdr->msgId)

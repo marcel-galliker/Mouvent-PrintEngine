@@ -438,6 +438,12 @@ namespace RX_DigiPrint.Services
 
         public const UInt32 CMD_CHANGE_CLUSTER_NO   = 0x01000161;
 
+        public const UInt32 CMD_SETUP_ASSIST_STAT	= 0x01000170;
+        public const UInt32 REP_SETUP_ASSIST_STAT	= 0x02000170;
+        public const UInt32 CMD_SA_REFERENCE	    = 0x01000171;
+        public const UInt32 CMD_SA_MOVE	            = 0x01000172;
+        public const UInt32 CMD_SA_TRIGGER_DENSIO	= 0x01000173;
+
         public const UInt32 CMD_START_PRINTING		= 0x01000201;
         public const UInt32 REP_START_PRINTING		= 0x02000201;
         
@@ -1295,6 +1301,31 @@ namespace RX_DigiPrint.Services
             public SScrewPositions[] screwclusters;
 
             //          public Int32		set_io_cnt;
+        };
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct SSetupAssistStatMsg
+        {
+            public SMsgHdr          hdr;
+            
+            public UInt32	powerStepStatus;	
+	        public Int32	motorPosition;
+	        public UInt32	motorVoltage;
+	        public UInt32	motorMoveCurrent;
+	        public UInt32	motorHoldCurrent;
+	        public byte	    refDone;
+	        public byte	    moving;	
+	        public byte	    inputs;
+        }
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct SetupAssist_MoveCmd
+        {
+	        SMsgHdr         header;
+	        public Int32    steps;
+	        public UInt32   speed;
+	        public UInt32   acc;
+	        public UInt32   current;
         };
 
         //--- CLEAF Orders ------------------------------------------------------

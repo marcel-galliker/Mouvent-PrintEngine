@@ -218,8 +218,8 @@ static void _screen_fms(UINT32 y, UINT8 *in, UINT8 *out, UINT16 *pta, UINT16 *de
 			dst <<= 2;
 			if (src > ta)
 			{
-				if (limitL && src>limitL) dst |= (src-limitL>=ta/3     )? 0x03:0x02;
-				else if (src>limitM)	  dst |= (src-limitM>=ta/levels)? 0x02:0x01;
+				if (limitL && src>limitL) dst |= ((UINT16)(src-limitL)>=ta/3     )? 0x03:0x02;
+				else if (src>limitM)	  dst |= ((UINT16)(src-limitM)>=ta/levels)? 0x02:0x01;
 				else					  dst |= 0x01;
 			}
 
@@ -300,8 +300,8 @@ static void _screen_fms_600(UINT32 y, UINT8 *in, UINT8 *out, UINT16 *pta, UINT16
 			dst <<= 2;
 			if (src > ta)
 			{
-				if (limitL && src>limitL) dst |= (src-limitL>=ta/3     )? 0x03:0x02;
-				else if (src>limitM)	  dst |= (src-limitM>=ta/levels)? 0x02:0x01;
+				if (limitL && src>limitL) dst |= ((UINT16)(src-limitL)>=ta/3     )? 0x03:0x02;
+				else if (src>limitM)	  dst |= ((UINT16)(src-limitM)>=ta/levels)? 0x02:0x01;
 				else					  dst |= 0x01;
 			}
 
@@ -384,8 +384,8 @@ static void _screen_fms_300(UINT32 y, UINT8 *in, UINT8 *out, UINT16 *pta, UINT16
 			dst <<= 2;
 			if (src > ta)
 			{
-				if (limitL && src>limitL) dst |= (src-limitL>=ta/3     )? 0x03:0x02;
-				else if (src>limitM)	  dst |= (src-limitM>=ta/levels)? 0x02:0x01;
+				if (limitL && src>limitL) dst |= ((UINT16)(src-limitL)>=ta/3     )? 0x03:0x02;
+				else if (src>limitM)	  dst |= ((UINT16)(src-limitM)>=ta/levels)? 0x02:0x01;
 				else					  dst |= 0x01;
 			}
 

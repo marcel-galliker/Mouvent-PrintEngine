@@ -1013,7 +1013,8 @@ int pc_print_done(int headNo, SPrintDoneMsg *pmsg)
 			//	Error(LOG, 0, "pc_print_done: sent=%d, printed=%d, scan=%d, scans=%d: STOP", RX_PrinterStatus.sentCnt, RX_PrinterStatus.printedCnt, _Item.id.scan, _Item.scans);
 				enc_stop_pg("pc_print_done");
 				enc_stop_printing();
-				pc_stop_printing(FALSE);
+				if (RX_PrinterStatus.testMode) pc_pause_printing(FALSE);
+				else pc_stop_printing(FALSE);
 
 				/*
 				SPrintQueueItem item;

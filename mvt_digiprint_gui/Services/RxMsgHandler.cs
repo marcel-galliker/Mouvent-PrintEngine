@@ -67,6 +67,7 @@ namespace RX_DigiPrint.Services
                     case TcpIp.REP_CHILLER_STAT:    handle_chiller_stat(msg);    break;
                     case TcpIp.REP_ENCODER_STAT:    handle_encoder_stat(msg);    break;
                     case TcpIp.REP_HEAD_STAT:       handle_head_stat(msg);       break;
+                    case TcpIp.REP_SETUP_ASSIST_STAT:handle_setup_assist_stat(msg);       break;
                     
                     case TcpIp.REP_PLC_GET_VAR:     handle_plc_var(msg);         break;
                     case TcpIp.REP_PLC_LOAD_PAR:    handle_plc_load_par(msg);    break;
@@ -307,6 +308,21 @@ namespace RX_DigiPrint.Services
             }
             else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length SHeadBoardStatMsg"));
         }
+
+        private void handle_setup_assist_stat(Byte[] buf)
+        {
+            TcpIp.SSetupAssistStatMsg msg;
+
+            int len=RxStructConvert.ToStruct(out msg, buf);
+
+            if (len==msg.hdr.msgLen) 
+            {
+                RxGlobals.SetupAssist.Update(msg);
+            }
+            else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length SSetupAssistStatMsg"));
+        }
+
+
 
         //--- handle_disabled_jets -----------------------------------------
         private void handle_disabled_jets(Byte[] buf)

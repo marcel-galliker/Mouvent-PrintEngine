@@ -46,6 +46,7 @@
 #include "es_rip.h"
 #include "enc_ctrl.h"
 #include "errno.h"
+#include "setup_assist.h"
 #include "cleaf_orders.h"
 
 
@@ -234,6 +235,7 @@ int main(int argc, char* argv[])
 	ctr_init();
 	dl_init();
 	pl_init();
+	sa_init();
 	
 	spool_auto(TRUE);
 	
@@ -286,6 +288,7 @@ int main(int argc, char* argv[])
 	}
 
 	//--- end libraries ----------------------------
+	sa_end();
 	machine_end();
 	pem_end();
 	chiller_end();

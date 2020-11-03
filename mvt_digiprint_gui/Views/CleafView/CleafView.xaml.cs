@@ -51,5 +51,6 @@ namespace RX_DigiPrint.Views.CleafView
             if (MvtMessageBox.YesNo("Ready to Print", "Is the machine ready to print?\nNo Splices in the machine?", MessageBoxImage.Question, false))
                 RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_SET_CMD, "CMD_PRINT_RELEASE");
         }
-    }
+
+	}
 }

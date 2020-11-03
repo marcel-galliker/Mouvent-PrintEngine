@@ -39,20 +39,20 @@ namespace RX_DigiPrint.Models
         public static Plc               Plc               = new Plc();
         
         public static Encoder[] Encoder = new Encoder[2] { new Encoder(0), new Encoder(1) };
-        public static NetworkList       Network           = new NetworkList();
-        public static RxScreen          Screen            = new RxScreen();
-        public static PreviewCash       PreviewCash       = new PreviewCash();
-        public static HeadAdjustment    HeadAdjustment    = new HeadAdjustment();
-        public static MaterialList      MaterialList      = new MaterialList();
-        public static MaterialXml       MaterialXML       = new MaterialXml();
-        public static MvtTextPad        Keyboard          = new MvtTextPad(null);
-        public static RxTaskSwitch      TaskSwitch        = new RxTaskSwitch();
-        public static RxPopup           Popup;
-        public static UvLamp            UvLamp            = new UvLamp();
-        public static Window            MainWindow;
-        public static Window            BluetoothLoginWnd;
-        public static License           License           = new License();
-        public static CleafOrder        CleafOrder        = new CleafOrder();
+        public static NetworkList           Network           = new NetworkList();
+        public static RxScreen              Screen            = new RxScreen();
+        public static PreviewCash           PreviewCash       = new PreviewCash();
+        public static HeadAdjustment        HeadAdjustment    = new HeadAdjustment();
+        public static MaterialList          MaterialList      = new MaterialList();
+        public static MaterialXml           MaterialXML       = new MaterialXml();
+        public static MvtTextPad            Keyboard          = new MvtTextPad(null);
+        public static RxTaskSwitch          TaskSwitch        = new RxTaskSwitch();
+        public static RxPopup               Popup;
+        public static UvLamp                UvLamp            = new UvLamp();
+        public static Window                MainWindow;
+        public static Window                BluetoothLoginWnd;
+        public static License               License           = new License();
+        public static CleafOrder            CleafOrder        = new CleafOrder();
         public static Alignment             Alignment = new Alignment();
         public static AlignmentResources    AlignmentResources = new AlignmentResources();
         public static LB702WB_Machine       LB702WB_Machine;
@@ -61,6 +61,7 @@ namespace RX_DigiPrint.Models
         public static DisabledJets          DisabledJets = new DisabledJets();
         public static Density               Density = new Density();
         public static ClusterNo             ClusterNo = new ClusterNo();
-        public static FileNameFilter          FileNameFilter = new FileNameFilter();
+        public static FileNameFilter        FileNameFilter = new FileNameFilter();
+        public static SetupAssist           SetupAssist = new SetupAssist();
     }
 }

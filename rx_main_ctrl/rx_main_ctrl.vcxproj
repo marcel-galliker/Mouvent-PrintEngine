@@ -52,6 +52,8 @@
     <ClInclude Include="prod_log.h" />
     <ClInclude Include="lh702_ctrl.h" />
     <ClInclude Include="rx_main_ctrl.h" />
+    <ClInclude Include="sa_tcp_ip.h" />
+    <ClInclude Include="setup_assist.h" />
     <ClInclude Include="step_dp.h" />
     <ClInclude Include="step_lb.h" />
     <ClInclude Include="args.h" />
@@ -97,6 +99,7 @@
     <ClCompile Include="pe_main.c" />
     <ClCompile Include="prod_log.c" />
     <ClCompile Include="lh702_ctrl.c" />
+    <ClCompile Include="setup_assist.c" />
     <ClCompile Include="step_dp.c" />
     <ClCompile Include="step_lb.c" />
     <ClCompile Include="args.c" />
@@ -162,7 +165,8 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <DefineConstants></DefineConstants>
+    <DefineConstants>
+    </DefineConstants>
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>

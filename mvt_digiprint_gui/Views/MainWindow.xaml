@@ -8,6 +8,7 @@
         xmlns:views_pq="clr-namespace:RX_DigiPrint.Views.PrintQueueView"
         xmlns:views_ps="clr-namespace:RX_DigiPrint.Views.PrintSystemView"
         xmlns:views_al="clr-namespace:RX_DigiPrint.Views.Alignment"
+        xmlns:views_sa="clr-namespace:RX_DigiPrint.Views.SetupAssistView"
         xmlns:view_lh702="clr-namespace:RX_DigiPrint.Views.LH702View"
         xmlns:views_psex="clr-namespace:RX_DigiPrint.Views.PrintSystemExtendedView"
         xmlns:dragablz="clr-namespace:Dragablz;assembly=Dragablz"
@@ -153,6 +154,17 @@
                 </TabItem.Header>
                 <Grid>
                     <views_al:AlignmentView x:Name="AlignmentView"/>
+                </Grid>
+            </TabItem>
+
+            <TabItem x:Name="TabSetupAssist">
+                <TabItem.Header>
+                    <Grid Width="200" Height="50" Background="{Binding SelectedTabName, Converter={StaticResource SelectedTabConverter}, ConverterParameter=TabSetupAssist}">
+                        <TextBlock Style="{StaticResource TabItemStyle}" Text="Setup Assist"/>
+                    </Grid>
+                </TabItem.Header>
+                <Grid>
+                    <views_sa:SetupAssistView x:Name="SetupAssistView"/>
                 </Grid>
             </TabItem>
 

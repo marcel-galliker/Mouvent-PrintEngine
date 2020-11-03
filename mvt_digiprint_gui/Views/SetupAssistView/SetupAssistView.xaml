@@ -1,0 +1,101 @@
+﻿<UserControl x:Class="RX_DigiPrint.Views.SetupAssistView.SetupAssistView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:local="clr-namespace:RX_DigiPrint.Views.SetupAssistView"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="{Binding Source={StaticResource Mouvent.Layout.TopToolBarHeight}}"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel Grid.Row="0" Grid.ColumnSpan="2" Background="{StaticResource Mouvent.MainColorBrush}" Orientation="Horizontal" >
+            
+            <common:MvtButton HorizontalAlignment="Left" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" Click="Trigger_Clicked" Margin="15, 5, 15, 5" >
+                <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20" Kind="CameraOutline"></iconPacks:PackIconMaterial>
+            </common:MvtButton>
+            <common:MvtButton HorizontalAlignment="Left" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" Click="Reference_Clicked" Margin="15, 5, 15, 5" >
+                <TextBlock Text="Ref" Foreground="White"/>
+            </common:MvtButton>
+        </StackPanel>
+
+        <GroupBox Grid.Row="2" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Top" Width="auto" Header="Status" Style="{StaticResource MvtGroupBox}">
+            <Grid  >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="50"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock  Grid.Row="0" Grid.Column="0" Text="Position"/>
+                <TextBox    Grid.Row="0" Grid.Column="1" Text="{Binding motorPosition}" IsEnabled="False"/>
+
+                <TextBlock  Grid.Row="1" Grid.Column="0" Text="Voltage"/>
+                <TextBox    Grid.Row="1" Grid.Column="1" Text="{Binding motorVoltage}" IsEnabled="False"/>
+
+                <TextBlock  Grid.Row="2" Grid.Column="0" Text="Move Current"/>
+                <TextBox    Grid.Row="2" Grid.Column="1" Text="{Binding motorMoveCurrent}" IsEnabled="False"/>
+
+                <TextBlock  Grid.Row="3" Grid.Column="0" Text="Hold Current"/>
+                <TextBox    Grid.Row="3" Grid.Column="1" Text="{Binding motorHoldCurrent}" IsEnabled="False"/>
+
+                <TextBlock  Grid.Row="4" Grid.Column="0" Text="Reference Done"/>
+                <TextBox    Grid.Row="4" Grid.Column="1" Text="{Binding refDone}" IsEnabled="False"/>
+
+                <TextBlock  Grid.Row="5" Grid.Column="0" Text="moving"/>
+                <TextBox    Grid.Row="5" Grid.Column="1" Text="{Binding moving}" IsEnabled="False"/>
+
+            </Grid>
+        </GroupBox>
+        <GroupBox Grid.Row="2" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Top" Width="auto" Header="Move" Style="{StaticResource MvtGroupBox}">
+            <Grid >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="50"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock  Grid.Row="0" Grid.Column="0" Text="Speps"/>
+                <common:MvtNumBox    Grid.Row="0" Grid.Column="1" Text="{Binding steps}"/>
+
+                <TextBlock  Grid.Row="1" Grid.Column="0" Text="Speed"/>
+                <common:MvtNumBox    Grid.Row="1" Grid.Column="1" Text="{Binding speed}"/>
+
+                <TextBlock  Grid.Row="2" Grid.Column="0" Text="Acceleration"/>
+                <common:MvtNumBox    Grid.Row="2" Grid.Column="1" Text="{Binding acc}"/>
+
+                <TextBlock  Grid.Row="3" Grid.Column="0" Text="Current"/>
+                <common:MvtNumBox    Grid.Row="3" Grid.Column="1" Text="{Binding current}"/>
+
+                <common:MvtButton Grid.Row="4" Grid.ColumnSpan="2" HorizontalAlignment="Center" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}" Click="Move_Clicked" Margin="15, 5, 15, 5" >
+                    <TextBlock Text="Move"/>
+                </common:MvtButton>
+
+            </Grid>
+        </GroupBox>
+    </Grid>
+</UserControl>

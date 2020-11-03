@@ -384,6 +384,7 @@
     <Compile Include="Models\HeadAdjustmentHelp.cs" />
     <Compile Include="Models\JetCompensation.cs" />
     <Compile Include="Models\JetCompensationDensityViewModel.cs" />
+    <Compile Include="Models\SetupAssist.cs" />
     <Compile Include="Models\SoftwareValueCorrection.cs" />
     <Compile Include="Models\StepperStatus.cs" />
     <Compile Include="Services\RestService.cs" />
@@ -715,6 +716,9 @@
     </Compile>
     <Compile Include="Views\Settings\WlanSettings.xaml.cs">
       <DependentUpon>WlanSettings.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SetupAssistView\SetupAssistView.xaml.cs">
+      <DependentUpon>SetupAssistView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\TestTableSeonView\TestTableSeonCommands.xaml.cs" />
     <Compile Include="Views\TestTableSeonView\TestTableSeonStepperSettings.xaml.cs" />
@@ -1351,6 +1355,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Settings\WlanSettings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\SetupAssistView\SetupAssistView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

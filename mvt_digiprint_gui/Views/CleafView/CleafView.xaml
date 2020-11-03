@@ -45,7 +45,7 @@
                 </StackPanel>
             </StackPanel>
 
-            <rx_uc:MouventTopToolBar Grid.Row="0" HorizontalAlignment="Right"></rx_uc:MouventTopToolBar>
+            <rx_uc:MouventTopToolBar Grid.Row="0" HorizontalAlignment="Right" Loaded="MouventTopToolBar_Loaded"></rx_uc:MouventTopToolBar>
         </Grid>
 
         <!-- MAIN Window _________________________________________________________________________-->

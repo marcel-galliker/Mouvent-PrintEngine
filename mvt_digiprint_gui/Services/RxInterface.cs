@@ -100,9 +100,14 @@ namespace RX_DigiPrint.Services
             }
         }
 
-        //--- Property Address ----------------------------------------
+		internal void SendCommand(object cMD_SA_TRIGGER_DENSIO)
+		{
+			throw new NotImplementedException();
+		}
 
-        private string _Address;
+		//--- Property Address ----------------------------------------
+
+		private string _Address;
         public string Address
         {
             get { return _Address; }
