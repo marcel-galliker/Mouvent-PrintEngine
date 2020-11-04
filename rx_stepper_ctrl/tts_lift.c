@@ -34,15 +34,15 @@
 #define SCANNER_REF     4
 
 // digital Outputs
-#define RO_VACUUM_MOTOR         0x001;       // output 0
-#define RO_PURGE_TUBE_EMPTY      0x010;       // output 4
-#define RO_JET_TRAY_EMPTY        0x020;       // output 5
-#define RO_JET_TRAY_VALVE        0x040;       // output 6
-#define RO_BREAK_FRONT          0x080;       // output 7
-#define RO_BREAK_BACK           0x100;       // output 8
-#define RO_SCANNER_END_FRONT    0x200;       // output 9
-//#define RO_SCANNER_END_RIGHT    0x400;       // output 10
-#define RO_CLEAR_ERROR          0x400;       // output 10
+#define RO_VACUUM_MOTOR             0x001;       // output 0
+#define RO_PURGE_TUBE_EMPTY         0x010;       // output 4
+#define RO_JET_TRAY_EMPTY           0x020;       // output 5
+#define RO_JET_TRAY_VALVE           0x040;       // output 6
+#define RO_BREAK_FRONT              0x080;       // output 7
+#define RO_BREAK_BACK               0x100;       // output 8
+#define RO_SCANNER_END_FRONT        0x200;       // output 9
+//#define RO_SCANNER_END_RIGHT      0x400;       // output 10
+#define RO_CLEAR_ERROR              0x400;       // output 10
 
 #define TTS_REF_HEIGHT  12800            // um
 

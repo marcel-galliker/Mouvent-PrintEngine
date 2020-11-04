@@ -388,6 +388,7 @@ int	 steplb_rob_in_fct_pos(int no, ERobotFunctions rob_function)
 	case rob_fct_purge_head5:
 	case rob_fct_purge_head6:
 	case rob_fct_purge_head7:	return _Status[no].robinfo.purge_ready		&& _Status[no].robinfo.moving == FALSE; break;
+    case rob_fct_purge4ever:    return _Status[no].info.x_in_purge4ever     && _Status[no].robinfo.moving == FALSE; break;
 	default: return FALSE; break;
 	}
 }

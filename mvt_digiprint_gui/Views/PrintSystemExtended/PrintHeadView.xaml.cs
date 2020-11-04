@@ -52,6 +52,8 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
             Button_PurgeHard.Visibility = collapsed;
             Button_PurgeSoft.Visibility = collapsed;
             Button_PurgeMicro.Visibility = collapsed;
+            visible = (RxGlobals.StepperStatus[0].RobotUsed) ? Visibility.Visible : Visibility.Collapsed;
+            Button_Purge4Ever.Visibility = visible;
         }
 
         private void User_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -144,6 +146,7 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
                 _command("Purge", EFluidCtrlMode.ctrl_purge);
         }
         private void PurgeHard_Clicked(object sender, RoutedEventArgs e) { _command("Purge", EFluidCtrlMode.ctrl_purge_hard); }
+        private void Purge4Ever_Clicked(object sender, RoutedEventArgs e) { _command("Purge", EFluidCtrlMode.ctrl_purge4ever); }
         private void Flush_Clicked(object sender, RoutedEventArgs e) { _command("Flush", EFluidCtrlMode.ctrl_flush_night); }
         private void Wipe_Clicked(object sender, RoutedEventArgs e) { _command(null, EFluidCtrlMode.ctrl_wipe); }
 

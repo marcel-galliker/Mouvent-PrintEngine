@@ -87,6 +87,7 @@ static void _ping_test(int cnt);
 static void _send_head_cfg(int headNo);
 static void _send_ink_def(int headNo, char *drops, int screenOnPrinter);
 static int _ctrl_check_stepper_in_purgeMode(int fluidNo);
+static int _ctrl_stepper_in_purge4ever_pos(int headNo);
 
 //static void Data_Test_TCP();
 //static void Data_Test_UDP();
@@ -622,14 +623,10 @@ void ctrl_tick(void)
     
     if (RX_StepperStatus.robot_used)
     {
-        if (_BufferFluidCmd[0].used &&
-            !_ctrl_check_stepper_in_purgeMode(_BufferFluidCmd[0].headNo) &&
-            rx_get_ticks() >= _PurgeTime + TIMEOUT)
+        if (_BufferFluidCmd[0].used && rx_get_ticks() >= _PurgeTime + TIMEOUT && (!_ctrl_check_stepper_in_purgeMode(_BufferFluidCmd[0].headNo) || (_ctrl_stepper_in_purge4ever_pos(_BufferFluidCmd[0].headNo) && _BufferFluidCmd[0].ctrlMode == ctrl_purge4ever)))
         {
             _BufferFluidCmd[0].used = 0;
-            ctrl_send_head_fluidCtrlMode(
-                _BufferFluidCmd[0].headNo, _BufferFluidCmd[0].ctrlMode,
-                _BufferFluidCmd[0].sendToFluid, _BufferFluidCmd[0].fromGui);
+            ctrl_send_head_fluidCtrlMode(_BufferFluidCmd[0].headNo, _BufferFluidCmd[0].ctrlMode, _BufferFluidCmd[0].sendToFluid, _BufferFluidCmd[0].fromGui);
             _PurgeTime = rx_get_ticks();
             for (i = 1; i < SIZEOF(_BufferFluidCmd); i++)
             {
@@ -747,8 +744,7 @@ void ctrl_empty_PurgeBuffer(int fluidNo)
     {
         for (j = 0; j < SIZEOF(_BufferFluidCmd); j++)
         {
-            if (_BufferFluidCmd[j].headNo ==
-                fluidNo * RX_Config.headsPerColor + i)
+            if (_BufferFluidCmd[j].headNo == fluidNo * RX_Config.headsPerColor + i)
             {
                 _BufferFluidCmd[j].used = 0;
                 SFluidCtrlCmd cmd;
@@ -768,7 +764,7 @@ void ctrl_empty_PurgeBuffer(int fluidNo)
 //--- ctrl_send_head_fluidCtrlMode --------------------------------------------------------------
 void ctrl_send_head_fluidCtrlMode(int headNo, EnFluidCtrlMode ctrlMode, int sendToFluid, int fromGui)
 {
-    if (ctrlMode >= ctrl_purge_soft && ctrlMode <= ctrl_purge_step6 && _ctrl_check_stepper_in_purgeMode(headNo) && RX_StepperStatus.robot_used && fromGui)
+    if ((ctrlMode >= ctrl_purge_soft && ctrlMode <= ctrl_purge_step6 && ctrlMode != ctrl_purge4ever && _ctrl_check_stepper_in_purgeMode(headNo) && RX_StepperStatus.robot_used && fromGui) || (!_ctrl_stepper_in_purge4ever_pos(headNo) && ctrlMode == ctrl_purge4ever  && _ctrl_check_stepper_in_purgeMode(headNo)))
     {
         int i;
         for (i = 0; i < SIZEOF(_BufferFluidCmd); i++)
@@ -849,7 +845,7 @@ void ctrl_send_head_fluidCtrlMode(int headNo, EnFluidCtrlMode ctrlMode, int send
 			sok_send(&_HeadCtrl[headNo/HEAD_CNT].socket, &cmd);
             // If Purgeg just one head, set all the Printheads of the same fluid system into off, which
             // are in print, because otherwise it will drop on the paper on the heads which are in print mode
-            if (ctrlMode >= ctrl_purge_soft && ctrlMode <= ctrl_purge_hard)
+            if ((ctrlMode >= ctrl_purge_soft && ctrlMode <= ctrl_purge_hard) || ctrlMode == ctrl_purge4ever)
             {
                 int i;
 				for (i = 0; i < HEAD_BOARD_CNT; i++)
@@ -900,16 +896,57 @@ static int _ctrl_check_stepper_in_purgeMode(int headNo)
         {
             for (j = 0; j < HEAD_CNT; j++)
             {
-                if ((fluidNo *2 +i)*HEAD_CNT+j)
-                if ((RX_HBStatus[fluidNo * 2 + i].head[j].ctrlMode >= ctrl_purge_soft && 
-                    RX_HBStatus[fluidNo*2 + i].head[j].ctrlMode <= ctrl_purge_step6)
-                            && (fluidNo * 2 +i)*HEAD_CNT+j != headNo)
+                //if ((fluidNo *2 +i)*HEAD_CNT+j)
+				if ((RX_HBStatus[fluidNo * 2 + i].head[j].ctrlMode >= ctrl_purge_soft && RX_HBStatus[fluidNo*2 + i].head[j].ctrlMode <= ctrl_purge_step6) && (fluidNo * 2 +i)*HEAD_CNT+j != headNo)
                 return TRUE;
             }
             
         }
     }
+    else
+    {
+        if (fluidNo != 0 && fluidNo % 2 == 0) fluidNo--;
+        if (fluidNo == 0) Cluster_Per_Stepper /= 2;
+        for (i = 0; i < Cluster_Per_Stepper; i++)
+        {
+            for (j = 0; j < HEAD_CNT; j++)
+            {
+                //if ((fluidNo *2 +i)*HEAD_CNT+j)
+				if ((RX_HBStatus[fluidNo * 2 + i].head[j].ctrlMode >= ctrl_purge_soft && RX_HBStatus[fluidNo*2 + i].head[j].ctrlMode <= ctrl_purge_step6) && (fluidNo * 2 +i)*HEAD_CNT+j != headNo)
+					return TRUE;
+            }
+        }
+    }
     return FALSE;
+}
+
+static int _ctrl_stepper_in_purge4ever_pos(int headNo)
+{
+    int fluidNo = headNo / RX_Config.headsPerColor;
+    int even_number_of_Colors = RX_Config.inkSupplyCnt % 2 == 0;
+    int stepperNo = 0;
+    int head, mode;
+    SHeadCfg *pcfg;
+    if (even_number_of_Colors)	stepperNo = fluidNo / 2;
+    else						stepperNo = (fluidNo+1)/2;
+
+    if (rx_def_is_lb(RX_Config.printer.type) && steplb_rob_in_fct_pos(stepperNo, rob_fct_purge4ever))
+    {
+        for (head = 0; head < SIZEOF(RX_Config.headBoard)*MAX_HEADS_BOARD; head++)
+        {
+            pcfg = &RX_Config.headBoard[head/MAX_HEADS_BOARD].head[head%MAX_HEADS_BOARD];
+            if (pcfg->enabled && pcfg->inkSupply == fluidNo)
+            {
+                mode = RX_HBStatus[head/MAX_HEADS_BOARD].head[head%MAX_HEADS_BOARD].ctrlMode;
+                if (mode >= ctrl_purge_step1 && mode <= ctrl_purge_step3)
+                    return FALSE;
+            }
+        }
+        return TRUE;
+    }
+    else
+		return FALSE;
+    
 }
 
 //--- ctrl_send_all_heads_fluidCtrlMode ------------------------------------
@@ -986,7 +1023,8 @@ int  ctrl_check_all_heads_in_fluidCtrlMode(int fluidNo, EnFluidCtrlMode ctrlMode
 		{
 			mode = RX_HBStatus[head/MAX_HEADS_BOARD].head[head%MAX_HEADS_BOARD].ctrlMode;
 			if ((_SingleHead<0)  && (mode!=ctrlMode)) return FALSE;
-			if ((_SingleHead>=0) && (mode==ctrlMode)) return TRUE;
+            if ((_SingleHead == head) && mode != ctrlMode) return FALSE;
+            if ((_SingleHead>=0) && (mode==ctrlMode)) return TRUE;
 		}
 	}
 	return TRUE;
@@ -1318,3 +1356,4 @@ int ctrl_current_screw_pos(SHeadAdjustmentMsg *robposition)
     else
         return -1;
 }
+

@@ -69,6 +69,7 @@
                         <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Purge Soft"    Click="PurgeSoft_Clicked"   Padding="10" x:Name="Button_PurgeSoft"/>
                         <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Purge"         Click="Purge_Clicked"       Padding="10"/>
                         <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Purge Hard"    Click="PurgeHard_Clicked"   Padding="10" x:Name="Button_PurgeHard"/>
+                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Purge4Ever"    Click="Purge4Ever_Clicked"  Padding="10" x:Name="Button_Purge4Ever"/>
                         <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Toggle Meniscus" Click="ToggleMeniscus_Clicked" Padding="10" x:Name="Button_ToggleMeniscus"/>
                         <!-- <Button Content="Flush"         Click="Flush_Clicked"/>     - -->
 

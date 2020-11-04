@@ -674,8 +674,16 @@ static void _control(int fluidNo)
                 case ctrl_purge_hard_wash:
 				case ctrl_purge_soft:
 				case ctrl_purge_hard:		
-                case ctrl_purge4ever:		if (lbrob && even_number_of_colors && pstat->ctrlMode == ctrl_purge4ever) steplb_rob_to_fct_pos(no / 2, rob_fct_cap);
-											else if (lbrob && !even_number_of_colors && pstat->ctrlMode == ctrl_purge4ever) steplb_rob_to_fct_pos((no + 1) / 2, rob_fct_cap);
+                case ctrl_purge4ever:		if (lbrob && even_number_of_colors && pstat->ctrlMode == ctrl_purge4ever)		
+											{
+                                                if (!steplb_rob_in_fct_pos(no / 2, rob_fct_purge4ever))
+													steplb_rob_to_fct_pos(no / 2, rob_fct_purge4ever);
+											}
+											else if (lbrob && !even_number_of_colors && pstat->ctrlMode == ctrl_purge4ever) 
+                                            {
+                                                if (!steplb_rob_in_fct_pos((no +1) / 2, rob_fct_purge4ever))
+													steplb_rob_to_fct_pos((no + 1) / 2, rob_fct_purge4ever);
+                                            }
 											else if (lbrob && even_number_of_colors) steplb_rob_to_fct_pos(no / 2, HeadNo + rob_fct_purge_head0);
 											else if (lbrob && !even_number_of_colors) steplb_rob_to_fct_pos((no+1) / 2, HeadNo + rob_fct_purge_head0);
 											else	   step_lift_to_top_pos();
@@ -715,8 +723,8 @@ static void _control(int fluidNo)
 											
 				case ctrl_purge_step1:		if ((!lbrob && step_lift_in_top_pos()) || (lbrob && even_number_of_colors && steplb_rob_in_fct_pos(no / 2, rob_fct_purge_all))
                                                 || (lbrob && !even_number_of_colors && steplb_rob_in_fct_pos((no+1)/2, rob_fct_purge_all)) 
-												|| (lbrob && even_number_of_colors && steplb_rob_in_fct_pos(no / 2, rob_fct_cap) && _PurgeCtrlMode == ctrl_purge4ever)
-												|| (lbrob && !even_number_of_colors && steplb_rob_in_fct_pos((no+1) / 2, rob_fct_cap) && _PurgeCtrlMode == ctrl_purge4ever))
+												|| (lbrob && even_number_of_colors && steplb_rob_in_fct_pos(no / 2, rob_fct_purge4ever) && _PurgeCtrlMode == ctrl_purge4ever)
+												|| (lbrob && !even_number_of_colors && steplb_rob_in_fct_pos((no+1) / 2, rob_fct_purge4ever) && _PurgeCtrlMode == ctrl_purge4ever))
 											{
 												if (_txrob && _PurgeFluidNo < 0 && !steptx_rob_wash_done()) break;
                                                 

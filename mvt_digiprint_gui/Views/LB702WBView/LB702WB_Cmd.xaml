@@ -26,10 +26,10 @@
                 <rx_uc:PlcCommand ID="CMD_SETUP/CMD_REFERENCE/CMD_CALIBRATE_DIAMETER_SENSOR_WINDER_1"     Label="Unwinder" IsEnabled="{Binding InReferencing}"/>
                 <rx_uc:PlcCommand ID="CMD_SETUP/CMD_REFERENCE/CMD_CALIBRATE_DIAMETER_SENSOR_WINDER_2"     Label="Rewinder" IsEnabled="{Binding InReferencing}"/>
                 -->
-            
+            <!--
                 <rx_uc:PlcTitle Header="Test"/>
                 <rx_uc:PlcCommand ID="CMD_RUN"              Label="RUN"     x:Name="Button_Run"/>
-            <!--
+            
                 <rx_uc:PlcCommand ID="CMD_PAUSE"            Label="PAUSE"   IsEnabled="{Binding Z_in_print}" x:Name="Button_Pause"/>
                 <rx_uc:PlcCommand ID="CMD_STOP"             Label="STOP"/>
                 -->
