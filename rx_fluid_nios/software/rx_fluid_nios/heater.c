@@ -46,6 +46,7 @@ static int 	_Temp_Inc[NIOS_INK_SUPPLY_CNT];
 static int 	_Temp_Pre[NIOS_INK_SUPPLY_CNT];
 static int 	_Heater_Pre[NIOS_INK_SUPPLY_CNT];
 static int 	_TimeTempFrozen[NIOS_INK_SUPPLY_CNT];
+static int	_HeaterCheckTimeout=0;
 
 static int _PS3V_Sum;
 static int _PS5V_Sum;
@@ -107,6 +108,12 @@ void heater_tick_10ms(void)
 	if (pRX_Status->info.is_shutdown)
 	{
 		for(i=0 ; i<NIOS_INK_SUPPLY_CNT ; i++) _set_heater_out(i, FALSE);
+		return;
+	}
+
+	if (_HeaterCheckTimeout)
+	{
+		_HeaterCheckTimeout--;
 		return;
 	}
 
@@ -235,6 +242,7 @@ static void _set_heater_out(int heaterNo, int newState)
 
 //	if (newState!=pRX_Status->ink_supply[heaterNo].heaterOn)
 	{
+		if (!pRX_Status->ink_supply[heaterNo].heaterOn && newState) _HeaterCheckTimeout = 5;
 		pRX_Status->ink_supply[heaterNo].heaterOn = newState;
 		readin=IORD_16DIRECT(AVALON_SPI_AMC7891_1_BASE,AMC7891_GPIO_OUT) & 0xfff;
 		readin=IORD_16DIRECT(AVALON_SPI_AMC7891_1_BASE,AMC7891_GPIO_OUT) & 0xfff;

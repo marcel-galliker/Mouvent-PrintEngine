@@ -125,7 +125,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
             Cooler_Pres.Visibility = visible;
             Cooler_Temp.Visibility = visible;
             ClusterNo.Visibility = visible;
-            Temp_Head.Visibility = collapsed;
+            Temp_Head.Visibility = Temp_Head_Warn.Visibility = collapsed;
         }
         
         //--- FpVoltage_TextChanged -----------------------------------------

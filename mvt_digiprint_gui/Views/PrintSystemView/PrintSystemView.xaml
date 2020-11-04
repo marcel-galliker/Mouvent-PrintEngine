@@ -112,14 +112,16 @@
                                 <ColumnDefinition Width="auto"/>
                                 <ColumnDefinition Width="auto"/>
                                 <ColumnDefinition Width="auto"/>
+                                <ColumnDefinition Width="auto"/>
                                 <ColumnDefinition Width="100"/>
                             </Grid.ColumnDefinitions>
 
                             <rxView:InkSupplyGrid x:Name="InkSupplyGrid"/>
                             <TextBlock x:Name="ChillerError" Text="Chiller not running" Visibility="{Binding Running, Converter={StaticResource BoolToInVisible_Converter}}"
                                        Foreground="{StaticResource RX.Error}" FontWeight="Bold" FontSize="40" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            <rxView:FluidCommands x:Name="FluidCommands" Grid.Column="1"/>
+                            <rxView:FlushCommands x:Name="FlushCommands" Grid.Column="1"/>
                             <rxView:FluidSettings x:Name="FluidSettings" Grid.Column="2"/>
+                            <rxView:FluidCommands x:Name="FluidCommands" Grid.Column="3"/>
                         </Grid>
                     </GroupBox>
                 </ScrollViewer>

@@ -81,7 +81,9 @@
             </Grid>
         </rx:RxPopup>
 
-        <StackPanel  Grid.Row="3" Margin="2,0,2,0" Orientation="Horizontal" HorizontalAlignment="Right" Background="{Binding TempReady_Brush}" Name="Temp_Head" >
+        <Rectangle  Grid.Row="3" Margin="2,0,2,0" Fill="{Binding TempReady_Brush}" Name="Temp_Head_Warn"/>
+
+        <StackPanel  Grid.Row="3" Margin="2,0,2,0" Orientation="Horizontal" HorizontalAlignment="Right" Name="Temp_Head" >
             <TextBlock Text="{Binding TempHead,  Converter={StaticResource HeadVal_ConverterTemp}}"/>
             <TextBlock Text=" (" VerticalAlignment="Center"/>
             <TextBlock Text="{Binding TempSetpoint, Converter={StaticResource HeadVal_ConverterTemp}}" VerticalAlignment="Center"/>
@@ -123,7 +125,7 @@
                 <TextBlock  Margin="0,0,2,0" Text=")" VerticalAlignment="Center"/>
             </StackPanel>
 
-            <Rectangle  Grid.Row="4" Margin="2,0,2,0"  Fill="{StaticResource RX.Warn}" Visibility="{Binding Meniscus_Disabled, Converter={StaticResource BoolToVisible_Converter}}"/>
+            <Rectangle  Grid.Row="4" Fill="{StaticResource RX.Warn}" Visibility="{Binding Meniscus_Disabled, Converter={StaticResource BoolToVisible_Converter}}"/>
             <StackPanel  Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
                 <TextBlock Text="{Binding Meniscus,  Converter={StaticResource HeadVal_Converter10}}"/>
                 <TextBlock Text=" (~" VerticalAlignment="Center"/>
@@ -138,7 +140,7 @@
                 <TextBlock  Margin="0,0,2,0" Text="%)"/>
             </StackPanel>
 
-            <Rectangle  Grid.Row="6" Margin="2,0,2,0"  Fill="{StaticResource RX.Warn}" Visibility="{Binding FlowFactorWarning, Converter={StaticResource BoolToVisible_Converter}}"/>
+            <Rectangle  Grid.Row="6" Fill="{StaticResource RX.Warn}" Visibility="{Binding FlowFactorWarning, Converter={StaticResource BoolToVisible_Converter}}"/>
             <TextBlock  Grid.Row="6" Margin="0,0,2,0"  HorizontalAlignment="Right"  Text="{Binding FlowFactor, Converter={StaticResource HeadVal_Converter}}" />
             <TextBlock  Grid.Row="7" Margin="0,0,2,0"  HorizontalAlignment="Right"  Text="{Binding Valve, Converter={StaticResource HeadValve_Converter}}" />
             <TextBlock  Grid.Row="8" Margin="0,0,2,0"  HorizontalAlignment="Right"  Text="{Binding PrintingTime}" />

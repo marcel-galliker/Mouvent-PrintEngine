@@ -1433,10 +1433,10 @@ typedef struct EInkPumpInfo
     UINT32 xl_valve_1 : 1;           //	0x00000200
     UINT32 xl_valve_2 : 1;           //	0x00000400
     UINT32 xl_valve_3 : 1;           //	0x00000800
-    UINT32 info_12 : 1;              //	0x00001000
-    UINT32 info_13 : 1;              //	0x00002000
-    UINT32 info_14 : 1;              //	0x00004000
-    UINT32 info_15 : 1;              //	0x00008000
+    UINT32 flush_valve_0 : 1;        //	0x00001000
+    UINT32 flush_valve_1 : 1;        //	0x00002000
+    UINT32 flush_valve_2 : 1;        //	0x00004000
+    UINT32 flush_valve_3 : 1;        //	0x00008000
     UINT32 info_16 : 1;              //	0x00010000
     UINT32 info_17 : 1;              //	0x00020000
     UINT32 info_18 : 1;				 //	0x00040000

@@ -28,13 +28,6 @@ namespace RX_DigiPrint.Views.PrintSystemView
 			InitializeComponent();
 		}
 
-		//--- Stop_Clicked -------------------------------------------------
-		private void Flush_Clicked(object sender, RoutedEventArgs e)
-		{
-			Button_Flush.IsChecked = false;
-			RxGlobals.RxInterface.SendCommand(TcpIp.CMD_FLUID_FLUSH);
-		}
-
 		//--- LeakTest_C1_Clicked
 		private void LeakTest_C1_Clicked(object sender, RoutedEventArgs e)
 		{

@@ -36,9 +36,11 @@
         <TextBlock Grid.Row="5" Grid.Column="0" Text="Temperature InkSupply"/>
         <TextBlock Grid.Row="5" Grid.Column="1" Text="°C"/>
         
+        <!--
         <TextBlock Grid.Row="6" Grid.Column="0" Text="Temperature Head"/>
         <TextBlock Grid.Row="6" Grid.Column="1" Text="°C"/>
-
+        -->
+        
         <Grid Grid.Row="7" Grid.ColumnSpan="3" x:Name="ServiceGrid">
 
             <Grid.RowDefinitions>              
