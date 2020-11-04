@@ -351,7 +351,7 @@ static int error(EDevice device, int no, ELogItemType type, const char *file, in
 	start = (char*)file;
 	for (f=(char*)file; *f; f++)
 	{
-		if (*f=='\\') start=f+1;
+		if (*f=='\\' || *f=='/') start=f+1;
 	}
 	strncpy(log.file, start, sizeof(log.file));
 	strncpy(log.formatStr, format,sizeof(log.formatStr));

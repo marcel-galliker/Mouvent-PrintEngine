@@ -391,19 +391,22 @@ void scr_start(SBmpSplitInfo *pInfo)
 //--- scr_wait -----------------------------------------------------
 int scr_wait(int timeout)
 {
-//	if (_ScrFifoDoneIdx!=_ScrFifoInIdx)
+	if (_ScrFifoDoneIdx!=_ScrFifoInIdx)
 	{
+		// pause the printing while waiting to ensure there is always image info 
+		if (rx_def_is_tx(RX_Spooler.printerType)) ctrl_pause_printing();
 		TrPrintfL(TRUE, "Screening WAIT");
 		while (_ScrFifoDoneIdx!=_ScrFifoInIdx)
 		{
 			rx_sem_wait(_SemScreeningDone, timeout);
 		}
-		_TimeEnd=rx_get_ticks();
-		TrPrintfL(TRUE, "Screening WAIT END time=%d ms (%d threads)", _TimeEnd-_TimeStart, _ScrThreadCnt);
-	//	Error(LOG, 0, "Screening (id=%d, page=%d, copy=%d, scan=%d) time=%d ms (%d threads, GPU=%d)", _Id.id, _Id.page, _Id.copy, _Id.scan, _TimeEnd-_TimeStart, _ScrThreadCnt, gpu_is_board_present());
-		_TimeStart=0;
-		rx_sem_post(_SemScreeningReady);
+		if (rx_def_is_tx(RX_Spooler.printerType)) ctrl_start_printing();
 	}
+	_TimeEnd = rx_get_ticks();
+	TrPrintfL(TRUE, "Screening WAIT END time=%d ms (%d threads)", _TimeEnd-_TimeStart, _ScrThreadCnt);
+	//	Error(LOG, 0, "Screening (id=%d, page=%d, copy=%d, scan=%d) time=%d ms (%d threads, GPU=%d)", _Id.id, _Id.page, _Id.copy, _Id.scan, _TimeEnd-_TimeStart, _ScrThreadCnt, gpu_is_board_present());
+	_TimeStart=0;
+	rx_sem_post(_SemScreeningReady);
 	return REPLY_OK;
 }
 
