@@ -164,8 +164,6 @@ static int				_ErrorFilter=0;
 static int				_ErrorFilterBuf[100];
 #define ERROR_FILTER_TIME	500
 static double			_StepDist;
-static int				_FirstStep;
-static int				_BeltOn;
 static int				_UnwinderLenMin;
 static UINT32			_ActSpeed;
 static double			_StartPos;
@@ -360,8 +358,6 @@ static void _plc_set_par(SPrintQueueItem *pItem, SPlcPar *pPlcPar)
 	
 	_plc_set_par_default();
 
-    if (rx_def_is_tx(RX_Config.printer.type)) lc_get_value_by_name_UINT32(UnitID ".PAR_BELT_ON", &_BeltOn);
-
 	switch(RX_Config.printer.type)
 	{
 		case printer_LB701:		_UnwinderLenMin = 10; break;	
@@ -384,7 +380,6 @@ static void _plc_set_par(SPrintQueueItem *pItem, SPlcPar *pPlcPar)
 			Error(WARN, 0, "Set Speed to %d because flexo used", pPlcPar->speed);
 		}
 	}
-    _FirstStep = TRUE;
 	_StepDist = 43.328 * RX_Config.headsPerColor;
 	
 	if (!RX_Config.printer.overlap)
@@ -571,29 +566,6 @@ int  plc_abort_printing(void)
 {
 	return plc_stop_printing();
 }
-
-//--- plc_print_go ----------------------------------
-int	 plc_print_go(int printGo)
-{
-    if (!_SimuPLC && _BeltOn)
-	{
-        float val;
-        int beltPos, step;
-        static int _oldPos;
-		lc_get_value_by_name_FLOAT(UnitID ".STA_BELT_POSITION", &val);
-        beltPos = (int)(val+0.5);
-        if (!_FirstStep)
-        {
-            step = (2000+beltPos-_oldPos) % 2000;
-		//	Error(LOG, 0, "BeltStep=%dmm (soll=%d)", step, (int)(_StepDist+0.5));
-            if (abs(step-(int)_StepDist) > 2) Error(ERR_ABORT, 0, "BeltStep=%dmm out of tolerance (soll=%d)", step, (int)(_StepDist+0.5));
-		}
-        _FirstStep = FALSE;
-        _oldPos = beltPos;
-    }
-    return REPLY_OK;
-}
-
 
 //--- plc_clean ---------------------------------------------------------
 int  plc_clean(void)

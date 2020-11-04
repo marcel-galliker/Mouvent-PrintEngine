@@ -29,7 +29,6 @@ int  plc_start_printing(void);
 int  plc_pause_printing(int fromGui);
 int  plc_stop_printing(void);
 int  plc_abort_printing(void);
-int	 plc_print_go(int printGo);
 int  plc_clean(void);
 
 void	plc_load_material(char *name);
