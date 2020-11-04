@@ -442,7 +442,10 @@ namespace RX_DigiPrint.Services
         public const UInt32 REP_SETUP_ASSIST_STAT	= 0x02000170;
         public const UInt32 CMD_SA_REFERENCE	    = 0x01000171;
         public const UInt32 CMD_SA_MOVE	            = 0x01000172;
-        public const UInt32 CMD_SA_TRIGGER_DENSIO	= 0x01000173;
+        public const UInt32 CMD_SA_STOP	            = 0x01000173;
+        public const UInt32 CMD_SA_OUT_TRIGGER	    = 0x01000174;
+        public const UInt32 CMD_SA_WEB_MOVE	        = 0x01000175;
+        public const UInt32 CMD_SA_WEB_STOP	        = 0x01000176;
 
         public const UInt32 CMD_START_PRINTING		= 0x01000201;
         public const UInt32 REP_START_PRINTING		= 0x02000201;

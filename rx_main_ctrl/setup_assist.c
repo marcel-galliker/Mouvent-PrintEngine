@@ -17,6 +17,7 @@
 #include "gui_svr.h"
 #include "tcp_ip.h"
 #include "sa_tcp_ip.h"
+#include "plc_ctrl.h"
 #include "setup_assist.h"
 
 
@@ -137,12 +138,35 @@ void sa_handle_gui_msg(RX_SOCKET socket, void *pmsg)
     case CMD_SA_REFERENCE:		Error(LOG, 0, "Send CMD_MOTOR_REFERENCE");
 								sok_send_2(&_SaSocket, CMD_MOTOR_REFERENCE,    0, NULL); 
 								break;
-    case CMD_SA_TRIGGER_DENSIO:	Error(LOG, 0, "Send CMD_SET_DENSIO_TRIGGER");
-								sok_send_2(&_SaSocket, CMD_SET_DENSIO_TRIGGER, 0, NULL); 
+
+    case CMD_SA_STOP:			Error(LOG, 0, "Send CMD_SA_STOP");
+								sok_send_2(&_SaSocket, CMD_SA_STOP,    0, NULL); 
 								break;
+
     case CMD_SA_MOVE:			Error(LOG, 0, "Send CMD_MOTOR_MOVE");								
-								sok_send_2(&_SaSocket, CMD_MOTOR_MOVE,		   &phdr[1], phdr->msgLen-sizeof(SMsgHdr)); 
+								sok_send_2(&_SaSocket, CMD_MOTOR_MOVE, phdr->msgLen-sizeof(SMsgHdr), &phdr[1]);
 								break;
+
+    case CMD_SA_OUT_TRIGGER:	Error(LOG, 0, "Send CMD_SET_DENSIO_TRIGGER");
+								{
+									SetupAssist_OutTriggerCmd cmd;
+									cmd.header.msgLen = sizeof(cmd);
+									cmd.header.msgId  = CMD_OUT_TRIGGER;
+									cmd.out			  = 0;
+									cmd.time_ms		  = 100;
+									sok_send(&_SaSocket, &cmd);
+								}
+								break;
+
+    case CMD_SA_WEB_MOVE:		Error(LOG, 0, "Send CMD_SA_WEB_MOVE");
+								SetupAssist_MoveCmd *pcmd = (SetupAssist_MoveCmd*)pmsg;
+								plc_move_web(pcmd->steps);
+								break;
+
+    case CMD_SA_WEB_STOP:		Error(LOG, 0, "Send CMD_SA_WEB_STOP");
+								plc_pause_printing(FALSE);
+								break;
+
     default: Error(WARN, 0, "Unknown Command 0x%08x", phdr->msgId);
 	}
 }

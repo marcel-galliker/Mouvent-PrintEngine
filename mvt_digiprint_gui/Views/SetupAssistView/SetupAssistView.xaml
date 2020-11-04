@@ -17,8 +17,9 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <StackPanel Grid.Row="0" Grid.ColumnSpan="2" Background="{StaticResource Mouvent.MainColorBrush}" Orientation="Horizontal" >
+        <StackPanel Grid.Row="0" Grid.ColumnSpan="3" Background="{StaticResource Mouvent.MainColorBrush}" Orientation="Horizontal" >
             
             <common:MvtButton HorizontalAlignment="Left" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" Click="Trigger_Clicked" Margin="15, 5, 15, 5" >
                 <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20" Kind="CameraOutline"></iconPacks:PackIconMaterial>
@@ -64,6 +65,7 @@
 
             </Grid>
         </GroupBox>
+
         <GroupBox Grid.Row="2" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Top" Width="auto" Header="Move" Style="{StaticResource MvtGroupBox}">
             <Grid >
                 <Grid.ColumnDefinitions>
@@ -91,9 +93,50 @@
                 <TextBlock  Grid.Row="3" Grid.Column="0" Text="Current"/>
                 <common:MvtNumBox    Grid.Row="3" Grid.Column="1" Text="{Binding current}"/>
 
-                <common:MvtButton Grid.Row="4" Grid.ColumnSpan="2" HorizontalAlignment="Center" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}" Click="Move_Clicked" Margin="15, 5, 15, 5" >
-                    <TextBlock Text="Move"/>
-                </common:MvtButton>
+                <Grid Grid.Row="4" Grid.ColumnSpan="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <common:MvtButton Grid.Column="0" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}" Click="Move_Clicked" Margin="15, 5" >
+                        <TextBlock Text="Move"/>
+                    </common:MvtButton>
+                    <common:MvtButton Grid.Column="1" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}" Click="Stop_Clicked" Margin="15, 5" >
+                        <TextBlock Text="Stop"/>
+                    </common:MvtButton>
+
+                </Grid>
+
+            </Grid>
+        </GroupBox>
+        
+        <GroupBox Grid.Row="2" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Top" Width="auto" Header="Web" Style="{StaticResource MvtGroupBox}">
+            <Grid >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="50"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock  Grid.Row="0" Grid.Column="0" Text="Dist"/>
+                <common:MvtNumBox    Grid.Row="0" Grid.Column="1" Text="{Binding WebDist}"/>
+
+                <Grid Grid.Row="2" Grid.ColumnSpan="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <common:MvtButton Grid.Column="0" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}" Click="WebMove_Clicked" Margin="15, 5" >
+                        <TextBlock Text="Move"/>
+                    </common:MvtButton>
+                    <common:MvtButton Grid.Column="1" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}" Click="WebStop_Clicked" Margin="15, 5" >
+                        <TextBlock Text="Stop"/>
+                    </common:MvtButton>
+
+                </Grid>
 
             </Grid>
         </GroupBox>

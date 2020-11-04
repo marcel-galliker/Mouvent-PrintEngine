@@ -142,5 +142,20 @@ namespace RX_DigiPrint.Models
 			RxGlobals.RxInterface.SendMsg(TcpIp.CMD_SA_MOVE, ref cmd);
 		}
 
+		//--- Property Dist ---------------------------------------
+		private double _WebDist;
+		public double WebDist
+		{
+			get { return _WebDist; }
+			set { SetProperty(ref _WebDist,value); }
+		}
+
+		//--- WebMove ----------------------------------
+		public void WebMove()
+		{
+			TcpIp.SetupAssist_MoveCmd cmd = new TcpIp.SetupAssist_MoveCmd();
+			cmd.steps	= (Int32)(1000*WebDist);
+			RxGlobals.RxInterface.SendMsg(TcpIp.CMD_SA_WEB_MOVE, ref cmd);
+		}
 	}
 }

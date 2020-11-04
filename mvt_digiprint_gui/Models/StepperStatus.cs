@@ -76,7 +76,7 @@ namespace RX_DigiPrint.Models
         }
 
         //--- Property PosY ---------------------------------------
-        private Int32[] _PosY;
+        private Int32[] _PosY=new Int32[4];
         public Int32[] PosY
         {
             get { return _PosY; }

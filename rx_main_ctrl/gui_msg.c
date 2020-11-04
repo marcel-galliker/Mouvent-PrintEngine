@@ -41,6 +41,7 @@
 #include "datalogic.h"
 #include "cleaf_orders.h"
 #include "step_tts.h"
+#include "setup_assist.h"
 #include "gui_msg.h"
 
 //--- prototypes ---------------------------------------------------

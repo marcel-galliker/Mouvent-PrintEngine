@@ -32,7 +32,7 @@ namespace RX_DigiPrint.Views.SetupAssistView
 		//--- Trigger_Clicked -------------------------------------------
 		private void Trigger_Clicked(object sender,RoutedEventArgs e)
 		{
-			RxGlobals.RxInterface.SendCommand(TcpIp.CMD_SA_TRIGGER_DENSIO);
+			RxGlobals.RxInterface.SendCommand(TcpIp.CMD_SA_OUT_TRIGGER);
 		}
 
 		//--- Reference_Clicked -------------------------------------------
@@ -46,6 +46,21 @@ namespace RX_DigiPrint.Views.SetupAssistView
 		{
 			RxGlobals.SetupAssist.Move();
 		}
+		//--- Stop_Clicked -------------------------------------------
+		private void Stop_Clicked(object sender,RoutedEventArgs e)
+		{
+			RxGlobals.RxInterface.SendCommand(TcpIp.CMD_SA_STOP);
+		}
 
+		//--- Move_Clicked -------------------------------------------
+		private void WebMove_Clicked(object sender,RoutedEventArgs e)
+		{
+			RxGlobals.SetupAssist.WebMove();
+		}
+		//--- Stop_Clicked -------------------------------------------
+		private void WebStop_Clicked(object sender,RoutedEventArgs e)
+		{
+			RxGlobals.RxInterface.SendCommand(TcpIp.CMD_SA_WEB_STOP);
+		}
 	}
 }
