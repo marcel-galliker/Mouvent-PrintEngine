@@ -896,6 +896,7 @@ void fluid_reply_stat(RX_SOCKET socket)	// to GUI
 				if (i==INK_SUPPLY_CNT) Error(ERR_CONT, 0, "Flush Canister EMPTY!");
 				else Error(ERR_CONT, 0, "Ink Canister %s EMPTY = %dg (<%dg)", RX_ColorNameLong(RX_Config.inkSupply[i].ink.colorCode), _FluidStatus[i].canisterLevel, canisterEmpty);
 				_ScalesErr[i] = LOG_TYPE_ERROR_CONT;
+				pc_pause_printing(FALSE);
 			}
 			else if(_FluidStatus[i].canisterLevel <= canisterLow && _ScalesErr[i] < LOG_TYPE_WARN)
 			{
@@ -903,7 +904,7 @@ void fluid_reply_stat(RX_SOCKET socket)	// to GUI
 				else Error(WARN, 0, "Ink Canister %s LOW = %dg (<%dg)", RX_ColorNameLong(RX_Config.inkSupply[i].ink.colorCode),_FluidStatus[i].canisterLevel,canisterLow);
 				_ScalesErr[i] = LOG_TYPE_WARN;
 			}
-			_FluidStatus[i].canisterErr = _ScalesErr[i];		
+			_FluidStatus[i].canisterErr = _ScalesErr[i];
 		}
 		else if (_FluidStatus[i].canisterLevel>0 && _FluidStatus[i].canisterLevel<50000)
 		{
@@ -933,7 +934,7 @@ void fluid_reply_stat(RX_SOCKET socket)	// to GUI
 				Error(WARN, 0, "Waste Canister HIGH = %dg (> %dg)", _FluidStatus[INK_SUPPLY_CNT + 1].canisterLevel, wasteHigh);
 				_ScalesErr[INK_SUPPLY_CNT + 1] = LOG_TYPE_WARN;
 			}	
-		}					
+		}
 		
 		_FluidStatus[INK_SUPPLY_CNT + 1].canisterErr = _ScalesErr[INK_SUPPLY_CNT + 1];
 	}
