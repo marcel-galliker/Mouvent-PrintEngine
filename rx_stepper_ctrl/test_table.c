@@ -113,9 +113,10 @@ void tt_init(void)
 	_ParZ_down.encCheck		= chk_std;
 
 	_ParZ_up.speed			= 5000;
-	_ParZ_up.accel			= 2000;
-	_ParZ_up.current_acc	= 50.0;
+	_ParZ_up.accel			= 32000;
+	_ParZ_up.current_acc	= 200.0;
 	_ParZ_up.current_run	= 50.0;
+
 	_ParZ_up.encCheck		= chk_lbrob;
 }
 
@@ -247,7 +248,6 @@ void tt_main(int ticks, int menu)
 		term_printf("\n");
 	}
 	
-	switch(RX_StepperStatus.cmdRunning)
 	switch(RX_StepperStatus.cmdRunning)
 	{
 	case CMD_TT_START_REF:	if (motor_move_done(MOTOR_Z))
