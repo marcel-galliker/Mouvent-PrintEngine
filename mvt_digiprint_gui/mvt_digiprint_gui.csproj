@@ -282,6 +282,7 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="netstandard, Version=2.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51" />
@@ -716,6 +717,9 @@
     </Compile>
     <Compile Include="Views\Settings\WlanSettings.xaml.cs">
       <DependentUpon>WlanSettings.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SetupAssistView\SA_Settings.xaml.cs">
+      <DependentUpon>SA_Settings.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\SetupAssistView\SetupAssistView.xaml.cs">
       <DependentUpon>SetupAssistView.xaml</DependentUpon>
@@ -1358,6 +1362,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\SetupAssistView\SA_Settings.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Views\SetupAssistView\SetupAssistView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -1989,6 +1997,10 @@
     <ProjectReference Include="..\ScanCheckParser\ScanCheckParser\ScanCheckImport.csproj">
       <Project>{16a35183-8406-462e-88b9-56ebc80cff05}</Project>
       <Name>ScanCheckImport</Name>
+    </ProjectReference>
+    <ProjectReference Include="rx_CamLib\rx_CamLib.csproj">
+      <Project>{33B52D28-FB27-4D38-BFF7-E078359E677E}</Project>
+      <Name>rx_CamLib</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

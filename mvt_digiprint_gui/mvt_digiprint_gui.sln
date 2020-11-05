@@ -28,6 +28,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "rx_CamLib", "rx_CamLib\rx_CamLib.csproj", "{33B52D28-FB27-4D38-BFF7-E078359E677E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -251,6 +253,36 @@ Global
 		{16A35183-8406-462E-88B9-56EBC80CFF05}.Release|x64.Build.0 = Release|x64
 		{16A35183-8406-462E-88B9-56EBC80CFF05}.Release|x86.ActiveCfg = Release|Any CPU
 		{16A35183-8406-462E-88B9-56EBC80CFF05}.Release|x86.Build.0 = Release|Any CPU
+		{33B52D28-FB27-4D38-BFF7-E078359E677E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{33B52D28-FB27-4D38-BFF7-E078359E677E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{33B52D28-FB27-4D38-BFF7-E078359E677E}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{33B52D28-FB27-4D38-BFF7-E078359E677E}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{33B52D28-FB27-4D38-BFF7-E078359E677E}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{33B52D28-FB27-4D38-BFF7-E078359E677E}.Debug|Win32.Build.0 = Debug|Any CPU
+		{33B52D28-FB27-4D38-BFF7-E078359E677E}.Debug|x64.ActiveCfg = Debug|x64
+		{33B52D28-FB27-4D38-BFF7-E078359E677E}.Debug|x64.Build.0 = Debug|x64
+		{33B52D28-FB27-4D38-BFF7-E078359E677E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{33B52D28-FB27-4D38-BFF7-E078359E677E}.Debug|x86.Build.0 = Debug|Any CPU
+		{33B52D28-FB27-4D38-BFF7-E078359E677E}.Debug-Remote|Any CPU.ActiveCfg = Debug|Any CPU
+		{33B52D28-FB27-4D38-BFF7-E078359E677E}.Debug-Remote|Any CPU.Build.0 = Debug|Any CPU
+		{33B52D28-FB27-4D38-BFF7-E078359E677E}.Debug-Remote|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{33B52D28-FB27-4D38-BFF7-E078359E677E}.Debug-Remote|Mixed Platforms.Build.0 = Debug|Any CPU
+		{33B52D28-FB27-4D38-BFF7-E078359E677E}.Debug-Remote|Win32.ActiveCfg = Debug|Any CPU
+		{33B52D28-FB27-4D38-BFF7-E078359E677E}.Debug-Remote|Win32.Build.0 = Debug|Any CPU
+		{33B52D28-FB27-4D38-BFF7-E078359E677E}.Debug-Remote|x64.ActiveCfg = Debug|x64
+		{33B52D28-FB27-4D38-BFF7-E078359E677E}.Debug-Remote|x64.Build.0 = Debug|x64
+		{33B52D28-FB27-4D38-BFF7-E078359E677E}.Debug-Remote|x86.ActiveCfg = Debug|Any CPU
+		{33B52D28-FB27-4D38-BFF7-E078359E677E}.Debug-Remote|x86.Build.0 = Debug|Any CPU
+		{33B52D28-FB27-4D38-BFF7-E078359E677E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{33B52D28-FB27-4D38-BFF7-E078359E677E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{33B52D28-FB27-4D38-BFF7-E078359E677E}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{33B52D28-FB27-4D38-BFF7-E078359E677E}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{33B52D28-FB27-4D38-BFF7-E078359E677E}.Release|Win32.ActiveCfg = Release|Any CPU
+		{33B52D28-FB27-4D38-BFF7-E078359E677E}.Release|Win32.Build.0 = Release|Any CPU
+		{33B52D28-FB27-4D38-BFF7-E078359E677E}.Release|x64.ActiveCfg = Release|x64
+		{33B52D28-FB27-4D38-BFF7-E078359E677E}.Release|x64.Build.0 = Release|x64
+		{33B52D28-FB27-4D38-BFF7-E078359E677E}.Release|x86.ActiveCfg = Release|Any CPU
+		{33B52D28-FB27-4D38-BFF7-E078359E677E}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

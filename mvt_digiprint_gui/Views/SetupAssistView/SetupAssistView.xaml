@@ -5,13 +5,15 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
-             xmlns:local="clr-namespace:RX_DigiPrint.Views.SetupAssistView"
-             mc:Ignorable="d" 
+             xmlns:wf="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
+             xmlns:local="clr-namespace:RX_DigiPrint.Views.SetupAssistView" xmlns:forms="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
+             mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="{Binding Source={StaticResource Mouvent.Layout.TopToolBarHeight}}"/>
             <RowDefinition Height="50"/>
+            <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -20,7 +22,11 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <StackPanel Grid.Row="0" Grid.ColumnSpan="3" Background="{StaticResource Mouvent.MainColorBrush}" Orientation="Horizontal" >
-            
+
+            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" ToolTip="Settings" x:Name="Button_Settings" Click="Settings_Clicked" Margin="15, 5, 15, 5" >
+                <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20" Kind="CogOutline"></iconPacks:PackIconMaterial>
+            </common:MvtButton>
+
             <common:MvtButton HorizontalAlignment="Left" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" Click="Trigger_Clicked" Margin="15, 5, 15, 5" >
                 <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20" Kind="CameraOutline"></iconPacks:PackIconMaterial>
             </common:MvtButton>
@@ -139,6 +145,13 @@
                 </Grid>
 
             </Grid>
+        </GroupBox>
+        
+        <!--- camara capture _______________________________________________________________-->
+        <GroupBox Grid.Row="3" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Width="auto" Header="Camera Capture" Style="{StaticResource MvtGroupBox}" IsVisibleChanged="UserControl_IsVisibleChanged">
+            <WindowsFormsHost >
+                <wf:PictureBox x:Name="CameraCapture"/>
+            </WindowsFormsHost>
         </GroupBox>
     </Grid>
 </UserControl>

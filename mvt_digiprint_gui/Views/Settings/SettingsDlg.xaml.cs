@@ -146,9 +146,7 @@ namespace RX_DigiPrint.Views.Settings
             _Settings.SetNetworkSettings();
             RxGlobals.PrinterProperties = _Settings.RxClone();
             RxGlobals.PrinterProperties.Save();
-        }
-
-        
+        }        
 
         //--- About_Clicked ---------------------------------------------------
         private void About_Clicked(object sender, RoutedEventArgs e)
