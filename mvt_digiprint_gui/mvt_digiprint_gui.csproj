@@ -673,6 +673,9 @@
     <Compile Include="Views\PrintSystemView\FluidSettings.xaml.cs">
       <DependentUpon>FluidSettings.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\PrintSystemView\FlushCommands.xaml.cs">
+      <DependentUpon>FlushCommands.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\PrintSystemView\StepperGridCleaf.xaml.cs">
       <DependentUpon>StepperGridCleaf.xaml</DependentUpon>
     </Compile>
@@ -1299,6 +1302,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\PrintSystemView\FluidSettings.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\PrintSystemView\FlushCommands.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
