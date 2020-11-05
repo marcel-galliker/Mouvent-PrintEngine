@@ -175,7 +175,8 @@ int rx_planescreen_load(int planeNumber, const char * settingsPath, const char *
 		if (first < 1) first = 1;
 		if (first > 98) first = 98;
 		setup_uint32(file, "Second", READ, &second, pplaneScreenConfig->limit[1]);
-		if (second < first + 1) second = first + 1;
+		// when limit is zero, it is not used (drop SM)
+		if (second < first + 1 && second != 0) second = first + 1;
 		if (second > 99) second = 99;
 		if ((lplanenumber < 0) || (lplanenumber== pplaneScreenConfig->planeNumber)) {
 			pplaneScreenConfig->limit[0] = first;
