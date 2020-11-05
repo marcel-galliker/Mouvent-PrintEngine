@@ -502,16 +502,26 @@ static int _print_next(void)
 				case PQ_TEST_JETS:			 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "fuji.tif");
 											 if (RX_Config.printer.type==printer_TX801 
 											 ||  RX_Config.printer.type==printer_TX802
-											 ||  RX_Config.printer.type==printer_TX404
-											 ||  RX_Config.printer.type==printer_test_table) 
+											 ||  RX_Config.printer.type==printer_TX404)
+											 {
 												 RX_TestImage.scansTotal = RX_TestImage.copies;
+											 }
+											 else if (RX_Config.printer.type==printer_test_table)
+											 {
+												RX_TestImage.scansTotal = RX_TestImage.copies*RX_TestImage.scans;
+											 }
 											 break;
 				case PQ_TEST_JET_NUMBERS:	 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "jet_numbers.tif");
 											 if (RX_Config.printer.type==printer_TX801 
 											 ||  RX_Config.printer.type==printer_TX802 
-											 ||  RX_Config.printer.type==printer_TX404
-											 ||  RX_Config.printer.type==printer_test_table) 
+											 ||  RX_Config.printer.type==printer_TX404) 
+											 {
 												 RX_TestImage.scansTotal = RX_TestImage.copies;	
+											 }
+											 else if (RX_Config.printer.type==printer_test_table)
+											 {
+												RX_TestImage.scansTotal = RX_TestImage.copies*RX_TestImage.scans;
+											 }
 											 break;
 				case PQ_TEST_GRID:			 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "grid.tif");	
 											 RX_TestImage.scansTotal = RX_TestImage.copies;
@@ -534,7 +544,11 @@ static int _print_next(void)
 											 // 5. Rip it in Mouvent DFE
 											 // 6. Copy the black image to the binary
 											 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "density.flz");
-											 RX_TestImage.scansTotal = RX_TestImage.copies;
+											 if (RX_Config.printer.type==printer_test_table)
+											 {
+												RX_TestImage.scansTotal = RX_TestImage.copies*RX_TestImage.scans;
+											 }
+											 else RX_TestImage.scansTotal = RX_TestImage.copies;
 											 break;
 				default:					 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "fuji.tif");	break;
 			}
