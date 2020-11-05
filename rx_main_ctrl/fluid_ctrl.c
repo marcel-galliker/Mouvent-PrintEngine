@@ -1325,18 +1325,27 @@ INT32 fluid_get_error(int no)
 }
 
 //--- do_fluid_flush_pump ------------------------------------------------
-void do_fluid_flush_pump(RX_SOCKET socket)
+void do_fluid_flush_pump(RX_SOCKET socket, SValue *pmsg)
 {
     int i;
     int power; // %
+	SValue value = *pmsg;
+	
     for (i = 0; i < FLUID_BOARD_CNT; i++)
     {
         if (_FluidThreadPar[i].socket != INVALID_SOCKET)
         {
-            if (_FluidStatus[i].flush_pump_val)
-                power = 0;
-            else
-                power = 75;
+			if (_FluidStatus[i].flush_pump_val || RX_StepperStatus.inkinfo.flush_valve_0 || RX_StepperStatus.inkinfo.flush_valve_1 || RX_StepperStatus.inkinfo.flush_valve_2 || RX_StepperStatus.inkinfo.flush_valve_3)
+			{
+				power = 0;
+				value.value = 0;
+				steptts_handle_gui_msg(INVALID_SOCKET, CMD_FLUID_FLUSH, &value, sizeof(value));
+			}
+			else
+			{
+				power = 75;
+				steptts_handle_gui_msg(INVALID_SOCKET, CMD_FLUID_FLUSH, &value, sizeof(value));
+			}
             sok_send_2(&_FluidThreadPar[i].socket, CMD_FLUID_FLUSH, sizeof(power), &power);
         }
     }

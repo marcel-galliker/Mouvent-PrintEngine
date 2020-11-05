@@ -52,6 +52,11 @@ int steptts_handle_status(int no, SStepperStat* pStatus)
     inkinfo.xl_valve_1 = _status[1].inkinfo.xl_valve_1;
     inkinfo.xl_valve_2 = _status[2].inkinfo.xl_valve_2;
     inkinfo.xl_valve_3 = _status[2].inkinfo.xl_valve_3;
+    inkinfo.flush_valve_0 = _status[1].inkinfo.flush_valve_0;
+    inkinfo.flush_valve_1 = _status[1].inkinfo.flush_valve_1;
+    inkinfo.flush_valve_2 = _status[2].inkinfo.flush_valve_2;
+    inkinfo.flush_valve_3 = _status[2].inkinfo.flush_valve_3;
+
 
     memset(&info, 0, sizeof(info));
     info.ref_done   = TRUE;
@@ -80,6 +85,7 @@ int steptts_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen
 {
     int no;
     int pos;
+    SValue value;
     for (no = 0; no < SIZEOF(_step_socket); no++)
     {
         if (_step_socket[no] != INVALID_SOCKET)
@@ -119,6 +125,12 @@ int steptts_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen
                 sok_send_2(&_step_socket[0], cmd, sizeof(pos), &pos);
                 break;
             case CMD_FLUID_TTS:			_do_fluid_tts(socket, (SValue*)data);						break;
+            case CMD_FLUID_FLUSH:
+                value = *((SValue *)data);
+                if (no == 1 || no == 2)
+                     sok_send_2(&_step_socket[no], cmd, sizeof(value), &value);
+                break;
+
 
             case CMD_TTS_JOG_FWD:
             case CMD_TTS_JOG_BWD:
