@@ -28,7 +28,7 @@
 #define POSY_PRINT		250000
 #define POSY_TABLE		145000
 //#define POSY_CAP		145000
-#define POSY_CAP		149000
+#define POSY_CAP		148000
 #define POSZ_CAP		100000 // Maximal position
 #define POSY_PURGE		190000
 #define POSY_ADJUST		260000
@@ -248,6 +248,7 @@ void tt_main(int ticks, int menu)
 	}
 	
 	switch(RX_StepperStatus.cmdRunning)
+	switch(RX_StepperStatus.cmdRunning)
 	{
 	case CMD_TT_START_REF:	if (motor_move_done(MOTOR_Z))
 							{
@@ -280,6 +281,7 @@ void tt_main(int ticks, int menu)
 								RX_StepperStatus.cmdRunning = 0;
 								motor_reset(MOTOR_Y_LEFT);
 								motor_reset(MOTOR_Y_RIGHT);
+								rx_sleep(200);
 								if (_CmdWaiting)
 								{
 									tt_start_cmd(_CmdWaiting);
@@ -592,8 +594,7 @@ static void _move_adjust(int head)
 static void _vacuum(void)
 {	
 	if (Fpga.par->output&TT_VACUUM_OUT) Fpga.par->output &= ~TT_VACUUM_OUT;
-	else                                Fpga.par->output |=  TT_VACUUM_OUT;
-}
+	else                                Fpga.par->output |=  TT_VACUUM_OUT;}
 
 //--- tt_set_scan_par -----------------------------------
 void tt_set_scan_par(STestTableScanPar *par)
@@ -682,7 +683,6 @@ static void _scan_state_machine(int menu)
 			{
 				slide_scan_left();
 				motors_move_to_step(MOTOR_Y_BITS,  &_ParY_print, POSY_LOAD);
-				Fpga.par->output &= ~TT_VACUUM_OUT;
 				_ScanStep = 100;				
 				_ScanStop = FALSE;
 			}
@@ -728,10 +728,10 @@ static void _scan_state_machine(int menu)
 					break;
 
 		case 100: 	//--- done ------------------
+					Fpga.par->output &= ~TT_VACUUM_OUT;
 					RX_StepperStatus.cmdRunning = 0;
 					RX_StepperStatus.info.printing = FALSE;
 					RX_StepperStatus.info.curing   = FALSE;	
-
 					RX_StepperStatus.info.moving = FALSE;
 					ctrl_send_2(CMD_PRINT_ABORT, 0, NULL);
 					break;
