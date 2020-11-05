@@ -43,7 +43,7 @@ int		plc_in_cap_pos(void);
 int		plc_in_purge_pos(void);
 int		plc_in_wipe_pos(void);
 int		plc_is_splicing(void);
-int  plc_move_web(INT32 dist);
+int		plc_move_web(int dist);
 double	plc_get_step_dist_mm(void);
 
 int plc_handle_gui_msg(RX_SOCKET socket, void *pmsg, int len);

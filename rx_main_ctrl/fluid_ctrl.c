@@ -674,8 +674,16 @@ static void _control(int fluidNo)
                 case ctrl_purge_hard_wash:
 				case ctrl_purge_soft:
 				case ctrl_purge_hard:		
-                case ctrl_purge4ever:		if (lbrob && even_number_of_colors && pstat->ctrlMode == ctrl_purge4ever) steplb_rob_to_fct_pos(no / 2, rob_fct_cap);
-											else if (lbrob && !even_number_of_colors && pstat->ctrlMode == ctrl_purge4ever) steplb_rob_to_fct_pos((no + 1) / 2, rob_fct_cap);
+                case ctrl_purge4ever:		if (lbrob && even_number_of_colors && pstat->ctrlMode == ctrl_purge4ever)		
+											{
+                                                if (!steplb_rob_in_fct_pos(no / 2, rob_fct_purge4ever))
+													steplb_rob_to_fct_pos(no / 2, rob_fct_purge4ever);
+											}
+											else if (lbrob && !even_number_of_colors && pstat->ctrlMode == ctrl_purge4ever) 
+                                            {
+                                                if (!steplb_rob_in_fct_pos((no +1) / 2, rob_fct_purge4ever))
+													steplb_rob_to_fct_pos((no + 1) / 2, rob_fct_purge4ever);
+                                            }
 											else if (lbrob && even_number_of_colors) steplb_rob_to_fct_pos(no / 2, HeadNo + rob_fct_purge_head0);
 											else if (lbrob && !even_number_of_colors) steplb_rob_to_fct_pos((no+1) / 2, HeadNo + rob_fct_purge_head0);
 											else	   step_lift_to_top_pos();
@@ -715,8 +723,8 @@ static void _control(int fluidNo)
 											
 				case ctrl_purge_step1:		if ((!lbrob && step_lift_in_top_pos()) || (lbrob && even_number_of_colors && steplb_rob_in_fct_pos(no / 2, rob_fct_purge_all))
                                                 || (lbrob && !even_number_of_colors && steplb_rob_in_fct_pos((no+1)/2, rob_fct_purge_all)) 
-												|| (lbrob && even_number_of_colors && steplb_rob_in_fct_pos(no / 2, rob_fct_cap) && _PurgeCtrlMode == ctrl_purge4ever)
-												|| (lbrob && !even_number_of_colors && steplb_rob_in_fct_pos((no+1) / 2, rob_fct_cap) && _PurgeCtrlMode == ctrl_purge4ever))
+												|| (lbrob && even_number_of_colors && steplb_rob_in_fct_pos(no / 2, rob_fct_purge4ever) && _PurgeCtrlMode == ctrl_purge4ever)
+												|| (lbrob && !even_number_of_colors && steplb_rob_in_fct_pos((no+1) / 2, rob_fct_purge4ever) && _PurgeCtrlMode == ctrl_purge4ever))
 											{
 												if (_txrob && _PurgeFluidNo < 0 && !steptx_rob_wash_done()) break;
                                                 
@@ -1492,18 +1500,27 @@ INT32 fluid_get_error(int no)
 }
 
 //--- do_fluid_flush_pump ------------------------------------------------
-void do_fluid_flush_pump(RX_SOCKET socket)
+void do_fluid_flush_pump(RX_SOCKET socket, SValue *pmsg)
 {
     int i;
     int power; // %
+	SValue value = *pmsg;
+	
     for (i = 0; i < FLUID_BOARD_CNT; i++)
     {
         if (_FluidThreadPar[i].socket != INVALID_SOCKET)
         {
-            if (_FluidStatus[i].flush_pump_val)
-                power = 0;
-            else
-                power = 75;
+			if (_FluidStatus[i].flush_pump_val || RX_StepperStatus.inkinfo.flush_valve_0 || RX_StepperStatus.inkinfo.flush_valve_1 || RX_StepperStatus.inkinfo.flush_valve_2 || RX_StepperStatus.inkinfo.flush_valve_3)
+			{
+				power = 0;
+				value.value = 0;
+				steptts_handle_gui_msg(INVALID_SOCKET, CMD_FLUID_FLUSH, &value, sizeof(value));
+			}
+			else
+			{
+				power = 75;
+				steptts_handle_gui_msg(INVALID_SOCKET, CMD_FLUID_FLUSH, &value, sizeof(value));
+			}
             sok_send_2(&_FluidThreadPar[i].socket, CMD_FLUID_FLUSH, sizeof(power), &power);
         }
     }

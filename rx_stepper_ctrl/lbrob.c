@@ -246,6 +246,7 @@ void lbrob_main(int ticks, int menu)
         RX_StepperStatus.robinfo.wash_done = FALSE;
         RX_StepperStatus.robinfo.vacuum_done = FALSE;
         RX_StepperStatus.robinfo.wipe_done = FALSE;
+        RX_StepperStatus.info.x_in_purge4ever = FALSE;
         _HeadPos = FALSE;
     }
 
@@ -359,7 +360,8 @@ void lbrob_main(int ticks, int menu)
             case rob_fct_purge_head6:
             case rob_fct_purge_head7:
                 _CmdRunning = FALSE;
-                _PumpWasteTime = rx_get_ticks() + WASTE_PUMP_TIME;
+                int time_ms = WASTE_PUMP_TIME;
+                lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &time_ms);
                 break;
 
             default:
@@ -382,6 +384,16 @@ void lbrob_main(int ticks, int menu)
                 _CmdRunning = FALSE;
                 break;
 
+            case rob_fct_purge4ever:
+                RX_StepperStatus.info.x_in_purge4ever = fpga_input(CAPPING_ENDSTOP);
+                if (!RX_StepperStatus.info.x_in_purge4ever && _NewCmd != CMD_ROB_MOVE_POS)
+                {
+                    Error(ERR_CONT, 0, "LBROB: Command %s: End Sensor Capping NOT HIGH", _CmdName);
+                    RX_StepperStatus.robinfo.ref_done = FALSE;
+                }
+                _CmdRunning = FALSE;
+                break;
+
             case rob_fct_purge_all:
                 pos = abs(motor_get_step(MOTOR_X_0));
                 RX_StepperStatus.robinfo.purge_ready = (abs(motor_get_step(MOTOR_X_0) - _micron_2_steps(CABLE_PURGE_POS_BACK)) <= MAX_POS_DIFFERENT);
@@ -393,7 +405,6 @@ void lbrob_main(int ticks, int menu)
                 _CmdRunning = FALSE;
                 break;
 
-                break;
             case rob_fct_purge_head0:
                 RX_StepperStatus.robinfo.purge_ready = (abs(motor_get_step(MOTOR_X_0) - motor_get_end_step(MOTOR_X_0)) <= MAX_POS_DIFFERENT);
                 if (!RX_StepperStatus.robinfo.purge_ready && _NewCmd != CMD_ROB_MOVE_POS)
@@ -459,7 +470,8 @@ void lbrob_main(int ticks, int menu)
                         else                                            _WipeSide = wipe_left;
                         _NewCmd = CMD_ROB_WIPE;
                     }
-                    _PumpWasteTime = rx_get_ticks() + WASTE_PUMP_TIME;
+                    int time_ms = WASTE_PUMP_TIME;
+                    lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &time_ms);
                     break;
                 default:
                     break;
@@ -628,6 +640,7 @@ void lbrob_menu(int help)
         term_printf("r<n>: reset motor<n>\n");
         term_printf("c: Go to Cap-Pos\n");
         term_printf("w: Wash Heads\n");
+        term_printf("q: Start Vacuum Pump \n");
         term_printf("v: Vacuum Heads\n");
         term_printf("g<n>: Go to purge position of head 1 -8 or for all (0)\n");
         term_printf("p: Move the Robi for Purging all Heads\n");
@@ -652,6 +665,7 @@ void lbrob_menu(int help)
 void lbrob_handle_menu(char *str)
 {
     int pos = 10000;
+    int time_ms;
     SHeadAdjustment screw_head;
     EWipeSide wipeside;
     switch (str[0])
@@ -677,7 +691,8 @@ void lbrob_handle_menu(char *str)
         lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_MOVE_POS, &pos);
         break;
     case 'q':
-        _PumpWasteTime = rx_get_ticks() + WASTE_PUMP_TIME;
+        time_ms = WASTE_PUMP_TIME;
+        lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &time_ms);
         break;
     case 'v':
         pos = rob_fct_vacuum;
@@ -802,7 +817,8 @@ static void _lbrob_move_to_pos(int cmd, int pos)
 
 static void _lbrob_do_reference()
 {
-    _PumpWasteTime = rx_get_ticks() + WASTE_PUMP_TIME;
+    int time_ms = WASTE_PUMP_TIME;
+    lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &time_ms);
     Fpga.par->output &= ~RO_ALL_OUTPUTS;
     _NewCmd = 0;
     RX_StepperStatus.robinfo.moving = TRUE;
@@ -901,6 +917,7 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 
     case CMD_ROB_VACUUM:
         val = (*(INT32 *)pdata);
+        if (rx_get_ticks() + val > _PumpWasteTime)
         _PumpWasteTime = rx_get_ticks() + val;
         break;
 
@@ -948,7 +965,8 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                     _ParCable_drive_purge.speed = _micron_2_steps(1000 * RX_StepperCfg.wipe_speed); // multiplied with 1000 to get from mm/s to um/s
                 else
                     _ParCable_drive_purge.speed = _micron_2_steps(1000 * 10); // multiplied with 1000 to get from mm/s to um/s
-                _PumpWasteTime = rx_get_ticks() + WASTE_PUMP_TIME;
+                int time_ms = WASTE_PUMP_TIME;
+                lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &time_ms);
                 motors_move_to_step(MOTOR_X_BITS, &_ParCable_drive_purge, _micron_2_steps(CABLE_PURGE_POS_FRONT));
                 break;
 
@@ -1005,7 +1023,7 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
             }
             return;
         }
-        else if (!RX_StepperStatus.robinfo.ref_done || (_RobFunction == rob_fct_cap && RX_StepperStatus.info.x_in_cap))
+        else if (!RX_StepperStatus.robinfo.ref_done || (_RobFunction == rob_fct_cap && RX_StepperStatus.info.x_in_cap) || RX_StepperStatus.robinfo.purge_ready || (_RobFunction == rob_fct_purge4ever && RX_StepperStatus.info.x_in_cap && !RX_StepperStatus.info.x_in_purge4ever))
         {
             _lbrob_do_reference();
             _CmdRunning_old = msgId;
@@ -1021,13 +1039,15 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
         _CmdRunning = msgId;
         switch (_RobFunction)
         {
+        case rob_fct_purge4ever:
         case rob_fct_cap:
             _lbrob_move_to_pos(_CmdRunning, _micron_2_steps(CABLE_CAP_POS));
             break;
 
         case rob_fct_purge_all:
             _lbrob_move_to_pos(_CmdRunning, _micron_2_steps(CABLE_PURGE_POS_BACK));
-            _PumpWasteTime = rx_get_ticks() + WASTE_PUMP_TIME;
+            int time_ms = WASTE_PUMP_TIME;
+            lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &time_ms);
             break;
 
         case rob_fct_purge_head0:
@@ -1103,7 +1123,11 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
                 break;
             }
             if (_Old_RobFunction != rob_fct_wipe)
-                _PumpWasteTime = rx_get_ticks() + WASTE_PUMP_TIME;
+            {
+                int time_ms = WASTE_PUMP_TIME;
+                lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &time_ms);
+            }
+            
             else
                 _PumpWasteTime = 0;
             break;

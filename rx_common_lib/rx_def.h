@@ -1300,16 +1300,17 @@ typedef enum ERobotFunctions
 	rob_fct_purge_head5,	// 13: Purge head 5
 	rob_fct_purge_head6,	// 14: Purge head 6
 	rob_fct_purge_head7,	// 15: Purge head 7
-    rob_fct_move,			// 16: Wash heads
-    rob_fct_screw_cluster,	// 17: Screw Pos cluster
-    rob_fct_screw_head0,	// 18: Screw Pos head 0
-    rob_fct_screw_head1,	// 19: Screw Pos head 1
-    rob_fct_screw_head2,	// 20: Screw Pos head 2
-    rob_fct_screw_head3,	// 21: Screw Pos head 3
-    rob_fct_screw_head4,	// 22: Screw Pos head 4
-    rob_fct_screw_head5,	// 23: Screw Pos head 5
-    rob_fct_screw_head6,	// 24: Screw Pos head 6
-    rob_fct_screw_head7,	// 25: Screw Pos head 7
+    rob_fct_purge4ever,		// 16: Purge Capping
+    rob_fct_move,			// 17: Wash heads
+    rob_fct_screw_cluster,	// 18: Screw Pos cluster
+    rob_fct_screw_head0,	// 19: Screw Pos head 0
+    rob_fct_screw_head1,	// 20: Screw Pos head 1
+    rob_fct_screw_head2,	// 21: Screw Pos head 2
+    rob_fct_screw_head3,	// 22: Screw Pos head 3
+    rob_fct_screw_head4,	// 23: Screw Pos head 4
+    rob_fct_screw_head5,	// 24: Screw Pos head 5
+    rob_fct_screw_head6,	// 25: Screw Pos head 6
+    rob_fct_screw_head7,	// 26: Screw Pos head 7
 } ERobotFunctions;
 	
 
@@ -1399,7 +1400,7 @@ typedef struct ETestTableInfo
 	UINT32 curing			: 1;	//	0x00001000
 	UINT32 z_in_screw		: 1;	//	0x00002000
 	UINT32 z_in_jet			: 1;	//	0x00004000
-	UINT32 info_15			: 1;	//	0x00008000
+	UINT32 x_in_purge4ever	: 1;	//	0x00008000
 	UINT32 info_16			: 1;	//	0x00010000
 	UINT32 info_17			: 1;	//	0x00020000
 	UINT32 headUpInput_0	: 1;	//	0x00040000
@@ -1432,10 +1433,10 @@ typedef struct EInkPumpInfo
     UINT32 xl_valve_1 : 1;           //	0x00000200
     UINT32 xl_valve_2 : 1;           //	0x00000400
     UINT32 xl_valve_3 : 1;           //	0x00000800
-    UINT32 info_12 : 1;              //	0x00001000
-    UINT32 info_13 : 1;              //	0x00002000
-    UINT32 info_14 : 1;              //	0x00004000
-    UINT32 info_15 : 1;              //	0x00008000
+    UINT32 flush_valve_0 : 1;        //	0x00001000
+    UINT32 flush_valve_1 : 1;        //	0x00002000
+    UINT32 flush_valve_2 : 1;        //	0x00004000
+    UINT32 flush_valve_3 : 1;        //	0x00008000
     UINT32 info_16 : 1;              //	0x00010000
     UINT32 info_17 : 1;              //	0x00020000
     UINT32 info_18 : 1;				 //	0x00040000

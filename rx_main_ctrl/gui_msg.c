@@ -187,9 +187,9 @@ int handle_gui_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sende
 
 		case CMD_HEAD_FLUID_CTRL_MODE: _do_head_fluidCtrlMode(socket, (SFluidCtrlCmd*) pmsg);			break;
 		case CMD_FLUID_CTRL_MODE:	   _do_fluidCtrlMode(socket, (SFluidCtrlCmd*) pmsg);				break;
-		case CMD_FLUID_PRESSURE:	   _do_fluid_pressure(socket, (SValue*)pdata);					break;
-        case CMD_FLUID_FLUSH:			do_fluid_flush_pump(socket);								break;
-        case CMD_FLUID_LEAK_TEST:	do_fluid_leak_test(socket, (SValue*)pdata);							break;
+		case CMD_FLUID_PRESSURE:	   _do_fluid_pressure(socket, (SValue*)pdata);						break;
+        case CMD_FLUID_FLUSH:			do_fluid_flush_pump(socket, (SValue*)pdata);					break;
+        case CMD_FLUID_LEAK_TEST:		do_fluid_leak_test(socket, (SValue*)pdata);						break;
 
         case CMD_SCALES_TARA:		_do_scales_tara(socket, (SValue*)pdata);						break;				
 		case CMD_SCALES_CALIBRATE:	_do_scales_calib(socket, (SValue*)pdata);						break;				

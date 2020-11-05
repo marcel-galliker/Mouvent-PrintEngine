@@ -607,7 +607,7 @@ void temp_tick_10ms (void)
 
 	int tempHeaterOK = TRUE;
 	int ml_min=RX_Status.pump_measured * 60 / 1000;
-	if (ml_min<10 || ml_min>80) tempHeaterOK = FALSE;
+	if (ml_min<4 || ml_min>80) tempHeaterOK = FALSE;
 	else if ((RX_Status.pcb_rev<'n') && (RX_Status.tempHeater > TEMP_MAX_HIGH_PUMP)) tempHeaterOK = FALSE;
 	
 	if (_heater_running 
