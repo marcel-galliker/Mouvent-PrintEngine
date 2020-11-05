@@ -87,26 +87,15 @@ namespace rx_CamLib
             return DeviceList.Length;
         }
 
-        public int GetCameraList(out List<string> CameraList)
+        public List<string> GetCameraList()
         {
-            CameraList = null;
-            //Find connected cameras
+            List<string> list = new List<string>();
             DeviceList = DsDevice.GetDevicesOfCat(FilterCategory.VideoInputDevice);
-            if (DeviceList.Length < 1)
-            {
-                //No camera found
-                CameraList = null;
-                SelectedCamera = -1;
-                return 0;
-            }
-
-            //one or more cameras detected
-            CameraList = new List<string>();
             for (int i = 0; i < DeviceList.Length; i++)
             {
-                CameraList.Add(DeviceList[i].Name);
+                list.Add(DeviceList[i].Name);
             }
-            return DeviceList.Length;
+            return list;
         }
         /// <summary>
         /// Select the camera to use

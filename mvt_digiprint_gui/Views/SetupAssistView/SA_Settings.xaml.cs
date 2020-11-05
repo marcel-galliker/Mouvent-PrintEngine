@@ -54,9 +54,7 @@ namespace RX_DigiPrint.Views.SetupAssistView
         //--- Init --------------------------------
         private void Init()
 		{
-            List<string> list;
-            _Camera.GetCameraList(out list);
-            CB_Camera.ItemsSource = list;
+            CB_Camera.ItemsSource = _Camera.GetCameraList();
             CB_Camera.SelectedItem = RxGlobals.Settings.SetupAssistCam;
 		}
 
