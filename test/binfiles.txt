@@ -10,6 +10,7 @@ bin\gui
 bin\gui\rx_rip_lib.dll
 bin\gui\BitMiracle.LibTiff.NET.dll
 bin\gui\ControlzEx.dll
+bin\gui\DirectShowLib-2005.dll
 bin\gui\Dragablz.dll
 bin\gui\id_rsa.ppk
 bin\gui\InfragisticsWPF4.Controls.Editors.XamComboEditor.v17.2.dll
@@ -49,6 +50,7 @@ bin\gui\MaterialDesignColors.dll
 bin\gui\MaterialDesignThemes.Wpf.dll
 bin\gui\Microsoft.Xaml.Behaviors.dll
 bin\gui\QRCoder.dll
+bin\gui\rx_CamLib.dll
 bin\gui\rx_common_lib_cs.dll
 bin\gui\RX_DigiPrint.exe
 bin\gui\ScanCheck.xsd
