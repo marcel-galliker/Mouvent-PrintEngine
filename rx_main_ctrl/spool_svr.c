@@ -120,7 +120,7 @@ void spool_tick(void)
 	{
 		_DelayPauseTimer = 0;
 		Error(LOG, 0, "PAUSE to load file");
-		plc_pause_printing(FALSE);
+		plc_spooler_pause_printing();
 		pc_print_next();
 	}
 }
@@ -235,14 +235,17 @@ static int _do_spool_cfg_rep(RX_SOCKET socket)
 //--- _do_pause_printing -------------------------------------------------------------------
 static int _do_pause_printing	(RX_SOCKET socket)
 {
-	if (arg_simuPLC)
-	{
-		Error(LOG, 0, "PAUSE to load file");
-		plc_pause_printing(FALSE);
-		pc_print_next();			
-	}
-	else _DelayPauseTimer = rx_get_ticks()+1000;
-	return REPLY_OK;
+    if (RX_PrinterStatus.printState == ps_printing)
+    {
+		if (arg_simuPLC)
+		{
+			Error(LOG, 0, "PAUSE to load file");
+			plc_spooler_pause_printing();
+			pc_print_next();			
+		}
+		else _DelayPauseTimer = rx_get_ticks()+1000;
+    }
+    return REPLY_OK;
 }
 
 //--- _do_start_printing ------------------------------------------------------------------
@@ -251,7 +254,7 @@ static int _do_start_printing	(RX_SOCKET socket)
 	_DelayPauseTimer = 0;
 	TrPrintfL(TRUE, "CONTINUE after file loaded");
 	Error(LOG, 0, "CONTINUE after file loaded");
-	plc_start_printing();
+	plc_spooler_start_printing();
 	pc_print_next();
 	return REPLY_OK;
 }

@@ -142,9 +142,11 @@ static void _plc_set_command(char *mode, char *cmd);
 static void _plc_set_par_default(void);
 static void _plc_set_par(SPrintQueueItem *pItem, SPlcPar *pPlcPar);
 static void _plc_send_par(SPlcPar *pPlcPar);
+static int  _plc_pause_printing(int fromGui);
 
 
 //--- statics -----------------------------------------------------------------
+static BOOL				_SpoolerPause=FALSE;
 static int				_PlcAppInitialized=FALSE;
 static int				_PlcThreadRunning;
 static int				_RunTime=0;
@@ -503,6 +505,7 @@ int  plc_set_printpar(SPrintQueueItem *pItem)
 //--- plc_start_printing -----------------------------------------------
 int  plc_start_printing(void)
 {
+    _SpoolerPause = FALSE;
 
 	if (RX_Config.printer.type==printer_LH702 && !_SimuPLC) Error(WARN, 0, "Simulate LH702 by LB702");
 
@@ -537,6 +540,7 @@ int  plc_stop_printing(void)
 	_RequestPause  = FALSE;
 	_head_was_up   = FALSE;
 	_heads_to_print= FALSE;
+    _SpoolerPause  = FALSE;
 	step_set_vent(FALSE);
 	if (_SimuPLC)
 	{
@@ -629,7 +633,25 @@ int	plc_to_cap_pos(void)
 }
 
 //--- plc_pause_printing ---------------------------------------
-int  plc_pause_printing(int fromGui)
+int plc_pause_printing(int fromGui)
+{
+    _SpoolerPause = FALSE;
+    return _plc_pause_printing(fromGui);
+}
+
+void plc_spooler_pause_printing()
+{
+    _SpoolerPause = TRUE;
+    _plc_pause_printing(FALSE);
+}
+
+void plc_spooler_start_printing()
+{
+    if (_SpoolerPause) plc_start_printing();
+    _SpoolerPause = FALSE;
+}
+
+static int _plc_pause_printing(int fromGui)
 {
 	TrPrintfL(TRUE, "plc_pause_printing(fromGui=%d)", fromGui);
 	if (rx_def_is_tx(RX_Config.printer.type))
