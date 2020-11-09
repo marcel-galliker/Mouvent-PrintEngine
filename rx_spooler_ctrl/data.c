@@ -725,10 +725,19 @@ int data_load(SPageId *id, const char *filepath, EFileType fileType, int offsetP
 					{
 						if (buffer[color])
 						{
-							if (strstr(filepath, ".flz"))		ret=flz_load_simple(filepath, &buffer[color], 100000, &bmpInfo); 
-							else if (strstr(filepath, ".tif"))	ret=tif_load_simple(filepath, &buffer[color], 100000, &bmpInfo); 
-							else								ret=bmp_load(filepath, &buffer[color], 100000, &bmpInfo);
-						
+							static SBmpInfo _bmpInfo;
+							if (id->scan==1)
+							{
+								if (strstr(filepath, ".flz"))		ret=flz_load_simple(filepath, &buffer[color], 100000, &bmpInfo); 
+								else if (strstr(filepath, ".tif"))	ret=tif_load_simple(filepath, &buffer[color], 100000, &bmpInfo); 
+								else								ret=bmp_load(filepath, &buffer[color], 100000, &bmpInfo);
+								memcpy(&_bmpInfo, &bmpInfo, sizeof(_bmpInfo));
+							}
+							else 
+							{	
+								ret=REPLY_OK;
+								memcpy(&bmpInfo, &_bmpInfo, sizeof(_bmpInfo));
+							}
 							if (ret==REPLY_OK) strcpy(_FileTimePath, filepath);
 							#ifdef DEBUG
 							if (FALSE)
@@ -768,7 +777,7 @@ int data_load(SPageId *id, const char *filepath, EFileType fileType, int offsetP
 							switch(fileType)
 							{							
                             case ft_flz: ret = flz_load(id, filepath, filename, printMode, gapPx, 0, RX_Color, SIZEOF(RX_Color), buffer, &bmpInfo, NULL, (void*)&_PrintList[_InIdx]);
-						if (ret==REPLY_OK) strcpy(_FileTimePath, flz_last_filepath());
+										if (ret==REPLY_OK) strcpy(_FileTimePath, flz_last_filepath());
 										 break;
                             case ft_tif: ret = tif_load_mt(id, filepath, filename, printMode, gapPx, RX_Color, SIZEOF(RX_Color), buffer, &bmpInfo, NULL);
 							strcpy(_FileTimePath, tif_last_filepath());
@@ -849,11 +858,16 @@ int data_load(SPageId *id, const char *filepath, EFileType fileType, int offsetP
 		}
 		_data_split(id, &bmpInfo, offsetPx, lengthPx, blkNo, blkCnt, flags, clearBlockUsed, same, &_PrintList[_InIdx]);
 		
-		if (loaded || rx_printMode_is_test(printMode))
+		//--- jet correction ---------------------------------------------
+		if (rx_printMode_is_test(printMode))
 		{
-			if      (printMode==PM_TEST_JETS && id->id==PQ_TEST_JET_NUMBERS) jc_correction(&bmpInfo, &_PrintList[_InIdx], 4224);
-			else if (printMode!=PM_TEST && printMode!=PM_TEST_SINGLE_COLOR)  jc_correction(&bmpInfo, &_PrintList[_InIdx], 0);
+			if (id->id==PQ_TEST_JET_NUMBERS) jc_correction(&bmpInfo, &_PrintList[_InIdx], 4224);
 		}
+		else if (loaded)
+		{
+			jc_correction(&bmpInfo, &_PrintList[_InIdx], 0);
+		}
+
 		#ifdef DEBUG
 		if (FALSE)
 //		if (loaded)
@@ -1314,8 +1328,7 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 				if ((id->id==PQ_TEST_JETS || id->id==PQ_TEST_JET_NUMBERS || id->id==PQ_TEST_DENSITY) && pInfo->data)
 				{
 					_TestBuf[color][n] = (*pBmpInfo->buffer[color])+n*pBmpInfo->dataSize;
-					if ((id->copy|id->scan)==1 && n) memcpy(_TestBuf[color][n], *pBmpInfo->buffer[color], pBmpInfo->dataSize);
-					pInfo->data	= &_TestBuf[color][n];
+					if ((id->copy|id->scan)==1 && (n!=0)) memcpy(_TestBuf[color][n], *pBmpInfo->buffer[color], pBmpInfo->dataSize);					pInfo->data	= &_TestBuf[color][n];
 				}
 			
 				pInfo->used			= TRUE;

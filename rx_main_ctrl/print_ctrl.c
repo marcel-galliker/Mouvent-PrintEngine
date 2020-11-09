@@ -155,8 +155,7 @@ int pc_start_printing(void)
 			}
 			else if (RX_StepperStatus.info.z_in_cap)
 			{
-				TrPrintfL(TRUE, "pc_start_printing: CMD_LIFT_UP_POS");
-                Error(LOG, 0, "Send UP-Command");
+				TrPrintfL(TRUE, "pc_start_printing: CMD_LIFT_UP_POS");		
 				step_handle_gui_msg(INVALID_SOCKET, CMD_LIFT_UP_POS, NULL, 0);										
 			}
 		}
@@ -502,17 +501,27 @@ static int _print_next(void)
 											 break;
 				case PQ_TEST_JETS:			 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "fuji.tif");
 											 if (RX_Config.printer.type==printer_TX801 
-											 ||  RX_Config.printer.type==printer_TX802 
-											 ||  RX_Config.printer.type==printer_TX404
-											 ||  RX_Config.printer.type==printer_test_table) 
+											 ||  RX_Config.printer.type==printer_TX802
+											 ||  RX_Config.printer.type==printer_TX404)
+											 {
 												 RX_TestImage.scansTotal = RX_TestImage.copies;
+											 }
+											 else if (RX_Config.printer.type==printer_test_table)
+											 {
+												RX_TestImage.scansTotal = RX_TestImage.copies*RX_TestImage.scans;
+											 }
 											 break;
 				case PQ_TEST_JET_NUMBERS:	 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "jet_numbers.tif");
 											 if (RX_Config.printer.type==printer_TX801 
 											 ||  RX_Config.printer.type==printer_TX802 
-											 ||  RX_Config.printer.type==printer_TX404
-											 ||  RX_Config.printer.type==printer_test_table) 
+											 ||  RX_Config.printer.type==printer_TX404) 
+											 {
 												 RX_TestImage.scansTotal = RX_TestImage.copies;	
+											 }
+											 else if (RX_Config.printer.type==printer_test_table)
+											 {
+												RX_TestImage.scansTotal = RX_TestImage.copies*RX_TestImage.scans;
+											 }
 											 break;
 				case PQ_TEST_GRID:			 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "grid.tif");	
 											 RX_TestImage.scansTotal = RX_TestImage.copies;
@@ -535,7 +544,11 @@ static int _print_next(void)
 											 // 5. Rip it in Mouvent DFE
 											 // 6. Copy the black image to the binary
 											 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "density.flz");
-											 RX_TestImage.scansTotal = RX_TestImage.copies;
+											 if (RX_Config.printer.type==printer_test_table)
+											 {
+												RX_TestImage.scansTotal = RX_TestImage.copies*RX_TestImage.scans;
+											 }
+											 else RX_TestImage.scansTotal = RX_TestImage.copies;
 											 break;
 				default:					 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "fuji.tif");	break;
 			}
@@ -1013,8 +1026,7 @@ int pc_print_done(int headNo, SPrintDoneMsg *pmsg)
 			//	Error(LOG, 0, "pc_print_done: sent=%d, printed=%d, scan=%d, scans=%d: STOP", RX_PrinterStatus.sentCnt, RX_PrinterStatus.printedCnt, _Item.id.scan, _Item.scans);
 				enc_stop_pg("pc_print_done");
 				enc_stop_printing();
-				if (RX_PrinterStatus.testMode) pc_pause_printing(FALSE);
-				else pc_stop_printing(FALSE);
+				pc_stop_printing(FALSE);
 
 				/*
 				SPrintQueueItem item;

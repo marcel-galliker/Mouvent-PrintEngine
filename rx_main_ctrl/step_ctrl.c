@@ -590,7 +590,7 @@ int  tt_start_printing(void)
 	if (RX_PrinterStatus.testMode)
 	{
 		par.scanCnt = _PQItem.scans*_PQItem.copies;
-		if (RX_TestImage.testImage==PQ_TEST_JETS || RX_TestImage.testImage==PQ_TEST_ENCODER) par.yStep  += 2500;
+		if (RX_TestImage.testImage==PQ_TEST_JETS || RX_TestImage.testImage==PQ_TEST_DENSITY || RX_TestImage.testImage==PQ_TEST_ENCODER) par.yStep  += 2500;
 	}
 	
 	sok_send_2(&_step_Socket[0], CMD_TT_SCAN, sizeof(par), &par);

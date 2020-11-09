@@ -477,7 +477,7 @@ static void _scr_load(SBmpSplitInfo *pInfo, int threadNo)
 		if (strcmp(pInfo->pListItem->filepath, _PlaneFilePath[no]))
 		{	
 			if (_PlaneScreenConfig[no].fctclose) rx_planescreen_close(&_PlaneScreenConfig[no]);
-			if (pInfo->printMode==PM_TEST) sprintf(settingsPath,	"%s/prEnvSettings.xml", PATH_BIN_SPOOLER);
+			if (rx_printMode_is_test(pInfo->printMode)) sprintf(settingsPath,	"%s/prEnvSettings.xml", PATH_BIN_SPOOLER);
 			else						   sprintf(settingsPath,	"%s/prEnvSettings.xml", pInfo->pListItem->filepath);
 			ret = rx_planescreen_init(pInfo->inkSupplyNo, settingsPath, PATH_BIN_SPOOLER, _ScrMem[b][h].fact, &_PlaneScreenConfig[no]);
 			strcpy(_PlaneFilePath[no], pInfo->pListItem->filepath);
