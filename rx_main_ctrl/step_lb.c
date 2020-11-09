@@ -48,6 +48,9 @@ static UINT32			    _Flushed = 0x00;		// For capping function which is same than
 static int                  _ScrewCommandSend[STEPPER_CNT] = {FALSE};
 static int                  _OldVacuum_Cleaner_State = FALSE;
 static INT32                _Vacuum_Cleaner_Time = 0;
+static int                  _AutoCapMode;
+
+static int                  _AutoCapTimer = 0;
 
 
 static int				    _StatReadCnt[STEPPER_CNT];
@@ -278,6 +281,12 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
         
         // Vacuum Cleaner Timer End ---------------------------------------------------------------------------------
     }
+    
+    if (rx_get_ticks() >= _AutoCapTimer && _AutoCapTimer)
+    {
+        _AutoCapTimer = 0;
+        _AutoCapMode = FALSE;
+    }
 
     _check_screwer();
 
@@ -306,12 +315,19 @@ void  steplb_abort_printing(void)
 //--- steplb_lift_to_top_pos ---------------------------
 void steplb_lift_to_top_pos(void)
 {
-	for (int no=0; no<SIZEOF(_step_socket); no++)
-	{
-        if (!_Status[no].info.z_in_screw || _Status[no].screwerinfo.screwer_ready || !RX_StepperStatus.robot_used)
-		    sok_send_2(&_step_socket[no], CMD_LIFT_REFERENCE, 0, NULL);
-	}
-	_AbortPrinting = FALSE;
+    if (_AutoCapTimer == 0 && RX_StepperStatus.info.z_in_cap && _AutoCapMode)
+    {
+        _AutoCapTimer = rx_get_ticks() + 5000;
+    }
+    else if (!(_AutoCapMode && RX_StepperStatus.info.z_in_cap))
+    {
+        for (int no = 0; no < SIZEOF(_step_socket); no++)
+        {
+            if (!_Status[no].info.z_in_screw || _Status[no].screwerinfo.screwer_ready || !RX_StepperStatus.robot_used)
+                sok_send_2(&_step_socket[no], CMD_LIFT_REFERENCE, 0, NULL);
+        }
+        _AbortPrinting = FALSE;
+    }
 }
 
 //--- steplb_lift_in_top_pos --------------
@@ -598,7 +614,8 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
 		case ctrl_cap_step1:		if (_Status[no].robinfo.ref_done)
 									{
 										steplb_rob_to_fct_pos(no, rob_fct_cap);
-										_RobotCtrlMode[no] = ctrl_cap_step2;
+                                        if (_AutoCapMode)   _RobotCtrlMode[no] = ctrl_cap_step3;
+                                        else                _RobotCtrlMode[no] = ctrl_cap_step2;
 									}
                                     _risingEdge[no] = FALSE;
                                     break;
@@ -611,11 +628,12 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
                                         _risingEdge[no] = TRUE;
 									break;
 		
-		case ctrl_cap_step3:		if (steplb_rob_fct_done(no, rob_fct_cap))
+		case ctrl_cap_step3:		if (steplb_rob_fct_done(no, rob_fct_cap) || (steplb_rob_in_fct_pos(no, rob_fct_cap) && _risingEdge[no] && _AutoCapMode))
 									{
 										steplb_lift_to_fct_pos(no, rob_fct_cap);
 										_RobotCtrlMode[no] = ctrl_cap_step4;
-									}
+									}else if (!steplb_rob_in_fct_pos(no, rob_fct_cap))
+                                        _risingEdge[no] = TRUE;
 									break;
 		
 		case ctrl_cap_step4:		if (RX_StepperStatus.info.z_in_cap)
@@ -627,8 +645,12 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
                                             setup_fluid_system(PATH_USER FILENAME_FLUID_STATE, &_Flushed, WRITE);
 											fluid_init_flushed();
                                         }
-										_RobotCtrlMode[no] = ctrl_off;
-									}										 
+                                        if (_AutoCapMode)
+                                        {
+                                            _RobotCtrlMode[no] = ctrl_print;
+                                        }
+                                        else                    _RobotCtrlMode[no] = ctrl_off;
+                                    }										 
 									break;
 		
         case ctrl_wash:				function = rob_fct_wash;
@@ -639,11 +661,17 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
                                     break;
                                     
         case ctrl_wash_step1:		if (_Status[no].robinfo.moving && !_Status[no].robinfo.wash_done) _WashStarted = TRUE;
-                                    if (_Status[no].robinfo.wash_done && _printing && _WashStarted) _RobotCtrlMode[no] = ctrl_wash_step2;
-									else if (_Status[no].robinfo.wash_done && _WashStarted) _RobotCtrlMode[no] = ctrl_off;	
+                                    if (_Status[no].robinfo.wash_done && _WashStarted) 
+                                    {
+                                        _RobotCtrlMode[no] = ctrl_wash_step2;
+                                        _steplb_rob_do_reference(no);
+                                    }
 									break;
+
+        case ctrl_wash_step2:       if (_Status[no].info.x_in_ref) _RobotCtrlMode[no] = ctrl_wash_step3;
+                                    break;
                                     
-        case ctrl_wash_step2:		if (_printing)	_RobotCtrlMode[no] = ctrl_print;
+        case ctrl_wash_step3:		if (_printing)	_RobotCtrlMode[no] = ctrl_print;
 									else			_RobotCtrlMode[no] = ctrl_off;
                                     _WashStarted = FALSE;
 									break;
@@ -853,4 +881,9 @@ static void _check_screwer(void)
 void steplb_cluster_Screw_Turned(int stepperNo)
 {
     _ClusterScrewTurned[stepperNo] = TRUE;
+}
+
+void steplb_set_autocapMode(int state)
+{
+        _AutoCapMode = state;
 }

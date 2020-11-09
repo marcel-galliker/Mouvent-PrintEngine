@@ -65,3 +65,4 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment);
 void steplb_cluster_Screw_Turned(int stepperNo);
 
 void steplb_pump_back_fluid(int fluidNo, int state);
+void steplb_set_autocapMode(int state);

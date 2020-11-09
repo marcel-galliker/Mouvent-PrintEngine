@@ -22,7 +22,9 @@
 #include "lbrob.h"
 #include "lb702.h"
 #include "stepper_ctrl.h"
+#include "robi_def.h"
 #include "robi_lb702.h"
+
 
 #define MOTOR_Z_BACK	0
 #define MOTOR_Z_FRONT	1
@@ -352,7 +354,7 @@ void lb702_main(int ticks, int menu)
                 RX_StepperStatus.info.z_in_ref = (cmd == CMD_LIFT_REFERENCE && RX_StepperStatus.info.ref_done);
                 RX_StepperStatus.info.z_in_up = (cmd == CMD_LIFT_UP_POS && RX_StepperStatus.info.ref_done);
                 RX_StepperStatus.info.z_in_print = (cmd == CMD_LIFT_PRINT_POS && RX_StepperStatus.info.ref_done && !_CmdRunningRobi);
-                RX_StepperStatus.info.z_in_cap = (cmd == CMD_LIFT_CAPPING_POS && RX_StepperStatus.info.ref_done && RX_StepperStatus.screwerinfo.y_in_ref);
+                RX_StepperStatus.info.z_in_cap = (cmd == CMD_LIFT_CAPPING_POS && RX_StepperStatus.info.ref_done && RX_StepperStatus.screwerinfo.y_in_ref && RX_RobiStatus.isInGarage);
                 RX_StepperStatus.info.z_in_wash = (cmd == CMD_LIFT_WASH_POS && RX_StepperStatus.info.ref_done);
                 RX_StepperStatus.info.z_in_screw = (cmd == CMD_LIFT_SCREW && RX_StepperStatus.info.ref_done);
             }
@@ -575,7 +577,7 @@ static void _lb702_move_to_pos(int cmd, int pos0, int pos1)
 	int adjust=0;
     RX_StepperStatus.cmdRunning = cmd;
 	
-    if (RX_StepperStatus.robot_used && !_CmdRunningRobi && !RX_StepperStatus.screwerinfo.y_in_ref && RX_StepperStatus.cmdRunning != CMD_LIFT_REFERENCE && RX_StepperStatus.cmdRunning != CMD_LIFT_SCREW)
+    if (RX_StepperStatus.robot_used && !_CmdRunningRobi && (!RX_StepperStatus.screwerinfo.y_in_ref || !RX_RobiStatus.isInGarage) && RX_StepperStatus.cmdRunning != CMD_LIFT_REFERENCE && RX_StepperStatus.cmdRunning != CMD_LIFT_SCREW)
     {
         _CmdRunningRobi = CMD_ROBI_MOVE_TO_GARAGE;
         _NewCmd = cmd;
@@ -658,7 +660,7 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									{
 										val0 = -1*_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_back  - _PrintHeight);
 										val1 = -1*_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_front - _PrintHeight);
-                                        if (!RX_StepperStatus.screwerinfo.y_in_ref && RX_StepperStatus.robot_used)
+                                        if (!(RX_StepperStatus.screwerinfo.y_in_ref || !RX_RobiStatus.isInGarage) && RX_StepperStatus.robot_used)
                                         {
                                             if (!RX_StepperStatus.info.z_in_ref || RX_StepperStatus.cmdRunning==CMD_LIFT_REFERENCE)
                                             {

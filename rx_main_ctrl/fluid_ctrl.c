@@ -960,7 +960,6 @@ static void _control_flush(void)
     int _txrob = rx_def_is_tx(RX_Config.printer.type) && step_active(1);
 	int _lbrob = rx_def_is_lb(RX_Config.printer.type) && RX_StepperStatus.robot_used;
     static int _start_ctrlMode;
-    static int _Vacuum_Time;
     if (_all_fluids_in_fluidCtrlMode(_FluidCtrlMode))
 	{
 	//	TrPrintfL(TRUE, "All Fluids in mode %d", _FluidCtrlMode);
@@ -971,7 +970,6 @@ static void _control_flush(void)
 		case ctrl_flush_weekend:		
 		case ctrl_flush_week:	step_lift_to_top_pos();
 								_start_ctrlMode = _FluidCtrlMode;
-                                _Vacuum_Time = 0;
                                 if (_txrob)
                                 {
                                     steptx_rob_cap_for_flush();
@@ -1001,7 +999,6 @@ static void _control_flush(void)
 		case ctrl_flush_step2:	if ((plc_in_purge_pos() && _txrob) || (step_rob_in_wipe_pos(rob_fct_purge_head7) && _lbrob) || (!_lbrob && !_txrob))
 								{
 									_FluidCtrlMode=ctrl_flush_step3;
-                                    if (_lbrob) steplb_rob_vacuum(_fluid_get_flush_time(_start_ctrlMode - ctrl_flush_night) + 20);
 								}
 								break;
 
@@ -1012,24 +1009,15 @@ static void _control_flush(void)
 								break;
 		
 		case ctrl_flush_done:	ErrorEx(dev_fluid, -1, LOG, 0, "Flush complete");
-								if (!_Vacuum_Time && _lbrob)
-                                {
-                                    _Vacuum_Time = rx_get_ticks() + 20000;
-                                    steplb_rob_vacuum(20);
-                                }
 								if (_txrob)
 								{
 									fluid_send_ctrlMode(-1, ctrl_cap_step4, TRUE);
 									_FluidCtrlMode = ctrl_cap_step4;
 								}
-                                else if (_lbrob && rx_get_ticks() >= _Vacuum_Time)
+                                else if (_lbrob)
                                 {
                                     fluid_send_ctrlMode(-1, ctrl_cap, TRUE);
                                 }
-								else if (!_Vacuum_Time)
-								{
-									_FluidCtrlMode=ctrl_off; 
-								}
 								break; // send to all
 		default: break;		
 		}
