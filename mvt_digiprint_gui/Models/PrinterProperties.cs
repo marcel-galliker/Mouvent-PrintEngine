@@ -230,6 +230,5 @@ namespace RX_DigiPrint.Models
             get { return _Host_Mask; }
             set { SetProperty(ref _Host_Mask, value); }
         }
-
-    }
+	}
 }

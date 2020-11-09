@@ -49,6 +49,13 @@ namespace RX_DigiPrint.Models
             get { return _Units; }
             set { SetProperty(ref _Units, value); }
         }
-        
+
+        //--- Property SetupAssistCam ---------------------------------------
+		private string _SetupAssistCam;
+		public string SetupAssistCam
+		{
+			get { return _SetupAssistCam; }
+			set { SetProperty(ref _SetupAssistCam,value); }
+		}  
     }
 }
