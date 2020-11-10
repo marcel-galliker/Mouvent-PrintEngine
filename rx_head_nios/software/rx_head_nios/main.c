@@ -100,7 +100,11 @@ void main_tick_1000ms(void) {
 	int condNo;
 
 	if (!bootloader_running()) {
-		for (condNo = 0; condNo < MAX_HEADS_BOARD; condNo++) {
+		for (condNo = 0; condNo < MAX_HEADS_BOARD; condNo++)
+		{
+			if (!*pRX_Status->head_eeprom[condNo]) head_eeprom_read(condNo, pRX_Status->head_eeprom[condNo], sizeof(pRX_Status->user_eeprom[condNo]));
+			if (!*pRX_Status->user_eeprom[condNo]) head_eeprom_read_user_data(condNo, pRX_Status->user_eeprom[condNo], sizeof(pRX_Status->user_eeprom[condNo]), 0x00);
+
 			if (pRX_Status->cond[condNo].info.connected) {
 				if (--_Cond[condNo].timer < 0) {
 					pRX_Status->cond[condNo].info.connected = FALSE;
@@ -224,24 +228,12 @@ int main() {
 
 	trprintf("MAIN STARTED\n");
 
-	if (head_eeprom_read())
-	{
-		pRX_Status->error.head_eeprom_read = TRUE;
-		//init_I2C(I2C_MASTER_0_BASE);	// reinitialize I2C, as there is no head Connected
-	};
-
 	{
 		int head;
 		for (head = 0; head < MAX_HEADS_BOARD; head++)
 		{
+			head_eeprom_read(head, pRX_Status->head_eeprom[head], sizeof(pRX_Status->user_eeprom[head]));
 			head_eeprom_read_user_data(head, pRX_Status->user_eeprom[head], sizeof(pRX_Status->user_eeprom[head]), 0x00);
-			/*
-			char test[128];
-			memset(test, 0, sizeof(test));
-			sprintf(test, "Head[%d]", head);
-			head_eeprom_change_user_data(head, pRX_Status->user_eeprom[head], (alt_u8*)test, sizeof(pRX_Status->user_eeprom[head]), 0x00);
-			head_eeprom_read_user_data(head, pRX_Status->user_eeprom[head], sizeof(pRX_Status->user_eeprom[head]), 0x00);
-			*/
 		}
 	}
 //	_eeprom_test();
@@ -256,7 +248,8 @@ int main() {
 
 		timer_main();
 		UCHAR data;
-		for (condNo = 0; condNo < MAX_HEADS_BOARD; condNo++){
+		for (condNo = 0; condNo < MAX_HEADS_BOARD; condNo++)
+		{
 			if (uart_read(condNo, &data)) {
 				if (comm_received(condNo, data)) {
 					int length;
