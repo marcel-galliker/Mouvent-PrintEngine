@@ -69,6 +69,7 @@ void main_error_reset(void)
 	pRX_Status->error = _StaticErrors;
 
 	ink_error_reset();
+	heater_error_reset();
 
 	// re-initialize SPI after error to be able to read temperature
 	init_AMC7891(AVALON_SPI_AMC7891_1_BASE);
