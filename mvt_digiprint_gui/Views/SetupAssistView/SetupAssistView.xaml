@@ -49,6 +49,8 @@
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
                 </Grid.RowDefinitions>
 
                 <TextBlock  Grid.Row="0" Grid.Column="0" Text="Position"/>
@@ -69,6 +71,22 @@
                 <TextBlock  Grid.Row="5" Grid.Column="0" Text="moving"/>
                 <TextBox    Grid.Row="5" Grid.Column="1" Text="{Binding moving}" IsEnabled="False"/>
 
+                <TextBlock  Grid.Row="6" Grid.Column="0" Text="Stop Left"/>
+                <Image Grid.Row="6" Grid.Column="1" Source="../../Resources/Bitmaps/LED_GREEN.ico" Visibility="{Binding InLeft,   Converter={StaticResource BoolToVisible_Converter}}" Width="16"/>
+                <Image Grid.Row="6" Grid.Column="1" Source="../../Resources/Bitmaps/LED_GREY.ico"  Visibility="{Binding InLeft,   Converter={StaticResource BoolToInVisible_Converter}}" Width="16"/>
+
+                <TextBlock  Grid.Row="7" Grid.Column="0" Text="Stop Right"/>
+                <Image Grid.Row="7" Grid.Column="1" Source="../../Resources/Bitmaps/LED_GREEN.ico" Visibility="{Binding InRight,   Converter={StaticResource BoolToVisible_Converter}}" Width="16"/>
+                <Image Grid.Row="7" Grid.Column="1" Source="../../Resources/Bitmaps/LED_GREY.ico"  Visibility="{Binding InRight,   Converter={StaticResource BoolToInVisible_Converter}}" Width="16"/>
+
+                <TextBlock Grid.RowSpan="10" Grid.ColumnSpan="10" Text="NOT CONNECTED" Foreground="Red" FontSize="20" RenderTransformOrigin="0.5,0.5" 
+                           HorizontalAlignment="Center" 
+                           VerticalAlignment="Center" FontWeight="Bold"
+                           Visibility="{Binding Connected, Converter={StaticResource BoolToInVisible_Converter}}">
+                    <TextBlock.RenderTransform>
+                        <RotateTransform Angle="-45"/>
+                    </TextBlock.RenderTransform>
+                </TextBlock>
             </Grid>
         </GroupBox>
 
@@ -87,27 +105,19 @@
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="auto"/>
                 </Grid.RowDefinitions>
-                <TextBlock  Grid.Row="0" Grid.Column="0" Text="Speps"/>
-                <common:MvtNumBox    Grid.Row="0" Grid.Column="1" Text="{Binding steps}"/>
-
-                <TextBlock  Grid.Row="1" Grid.Column="0" Text="Speed"/>
-                <common:MvtNumBox    Grid.Row="1" Grid.Column="1" Text="{Binding speed}"/>
-
-                <TextBlock  Grid.Row="2" Grid.Column="0" Text="Acceleration"/>
-                <common:MvtNumBox    Grid.Row="2" Grid.Column="1" Text="{Binding acc}"/>
-
-                <TextBlock  Grid.Row="3" Grid.Column="0" Text="Current"/>
-                <common:MvtNumBox    Grid.Row="3" Grid.Column="1" Text="{Binding current}"/>
+                <TextBlock  Grid.Row="0" Grid.Column="0" Text="Disnatnce [mm]"/>
+                <common:MvtNumBox    Grid.Row="0" Grid.Column="1" x:Name="MoveDist"/>
 
                 <Grid Grid.Row="4" Grid.ColumnSpan="2">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="3*"/>
+                        <ColumnDefinition Width="7*"/>
+                        <ColumnDefinition Width="10*"/>
                     </Grid.ColumnDefinitions>
-                    <common:MvtButton Grid.Column="0" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}" Click="Move_Clicked" Margin="15, 5" >
+                    <common:MvtButton Grid.Column="0" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}" Click="Move_Clicked" Margin="15, 5" Grid.ColumnSpan="2" >
                         <TextBlock Text="Move"/>
                     </common:MvtButton>
-                    <common:MvtButton Grid.Column="1" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}" Click="Stop_Clicked" Margin="15, 5" >
+                    <common:MvtButton Grid.Column="2" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}" Click="Stop_Clicked" Margin="15, 5" >
                         <TextBlock Text="Stop"/>
                     </common:MvtButton>
 
@@ -115,7 +125,7 @@
 
             </Grid>
         </GroupBox>
-        
+
         <GroupBox Grid.Row="2" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Top" Width="auto" Header="Web" Style="{StaticResource MvtGroupBox}">
             <Grid >
                 <Grid.ColumnDefinitions>
@@ -146,7 +156,7 @@
 
             </Grid>
         </GroupBox>
-        
+
         <!--- camara capture _______________________________________________________________-->
         <GroupBox Grid.Row="3" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Width="auto" Header="Camera Capture" Style="{StaticResource MvtGroupBox}" IsVisibleChanged="UserControl_IsVisibleChanged">
             <WindowsFormsHost >

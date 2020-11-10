@@ -42,7 +42,11 @@ namespace RX_DigiPrint.Views.SetupAssistView
 		private void Settings_Clicked(object sender,RoutedEventArgs e)
 		{
 			SA_Settings settings = new SA_Settings(_Camera);
-            if((bool)settings.ShowDialog()) _CamStart();
+            if((bool)settings.ShowDialog()) 
+			{
+				_CamStop();
+				_CamStart();
+			}
 		}
 
 		//--- Trigger_Clicked -------------------------------------------
@@ -60,8 +64,9 @@ namespace RX_DigiPrint.Views.SetupAssistView
 		//--- Move_Clicked -------------------------------------------
 		private void Move_Clicked(object sender,RoutedEventArgs e)
 		{
-			RxGlobals.SetupAssist.Move();
+			RxGlobals.SetupAssist.Move(Rx.StrToDouble(MoveDist.Text));
 		}
+
 		//--- Stop_Clicked -------------------------------------------
 		private void Stop_Clicked(object sender,RoutedEventArgs e)
 		{

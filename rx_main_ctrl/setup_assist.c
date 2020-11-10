@@ -24,6 +24,7 @@
 //--- statics ---------------------------------------------
 static int			_SaThreadRunning = TRUE;
 static RX_SOCKET	_SaSocket = INVALID_SOCKET;
+static const double	_microns2steps = 30.000;
 
 //--- prorotypes -----------------------------------------
 static void *_sa_thread(void *lpParameter);
@@ -56,22 +57,16 @@ int	sa_connected(void)
 //--- _sa_thread ----------------------------------------
 static void *_sa_thread(void *lpParameter)
 {
-	char buf[256];
-	int i, ret;
+	int ret;
 	int err=FALSE;
-	INT16 registers[8];
 	
 	while (_SaThreadRunning)
 	{
 		if (_SaSocket==INVALID_SOCKET)
 		{
-			ret = sok_open_client(&_SaSocket, SETUP_ASSIST_IP_ADDR, SETUP_ASSIST_PORT, SOCK_STREAM);
-			if (ret==REPLY_OK)
+			if (sok_open_client(&_SaSocket, SETUP_ASSIST_IP_ADDR, SETUP_ASSIST_PORT, SOCK_STREAM)==REPLY_OK)
 			{
-				char myaddr[32];
-				TrPrintfL(1,"Setup Assist: Connected: myport=>>%s<<", sok_get_socket_name(_SaSocket,myaddr,NULL,NULL));
 				sok_receiver(NULL, &_SaSocket, _sa_handle_msg, NULL);
-				TrPrintfL(1,"Setup Assist: Connected: myport=>>%s<<", sok_get_socket_name(_SaSocket,myaddr,NULL,NULL));
 			}
 		}
 		
@@ -85,22 +80,8 @@ static void* _sa_tick_thread(void *lpParameter)
 {
 	while (_SaThreadRunning)
 	{
-		sok_send_2(&_SaSocket, CMD_STATUS_GET, 0, NULL);
-		{
-			SSetupAssist_StatusMsg msg;
-			msg.header.msgLen = sizeof(msg);
-			msg.header.msgId  = CMD_STATUS_GET;
-			msg.inputs = 1;
-			msg.motorHoldCurrent = 100;
-			msg.motorMoveCurrent = 500;
-			msg.powerStepStatus	 = 0x1234;
-			msg.motorPosition	 = 1234;
-			msg.motorVoltage	 = 234;
-			msg.moving			 = FALSE;
-			msg.refDone			 = FALSE;
-
-			_sa_handle_msg(INVALID_SOCKET, &msg, msg.header.msgLen, NULL, NULL);
-		}
+		int ret=sok_send_2(&_SaSocket, CMD_STATUS_GET, 0, NULL);
+		TrPrintfL(TRUE,"SetupAssist(Socket=%d): CMD_STATUS_GET, ret=%d", _SaSocket, ret);
 		rx_sleep(1000);
 	}
 	return NULL;
@@ -124,16 +105,18 @@ static int _sa_handle_msg(RX_SOCKET socket, void *msg, int len, struct sockaddr 
 //--- _do_sa_stat ---------------------------------------------------------------
 static int _do_sa_stat(RX_SOCKET socket, SSetupAssist_StatusMsg	*pstat)
 {
+	TrPrintfL(TRUE, "SetupAssist: Got Status");
 	pstat->header.msgId = REP_SETUP_ASSIST_STAT;
-	gui_send_msg(socket, pstat);
+	pstat->motorPosition *= _microns2steps;
+	gui_send_msg(INVALID_SOCKET, pstat);
 	return REPLY_OK;
 }
 
 //--- sa_handle_gui_msg -------------------------------------------------------
-void sa_handle_gui_msg(RX_SOCKET socket, void *pmsg)
+void sa_handle_gui_msg(RX_SOCKET socket, void *pmsg_)
 {
-	SMsgHdr *phdr = (SMsgHdr*)pmsg;
-	switch (phdr->msgId)
+	SetupAssist_MoveCmd *pmsg = (SetupAssist_MoveCmd*)pmsg_;
+	switch (pmsg->header.msgId)
 	{
     case CMD_SA_REFERENCE:		Error(LOG, 0, "Send CMD_MOTOR_REFERENCE");
 								sok_send_2(&_SaSocket, CMD_MOTOR_REFERENCE,    0, NULL); 
@@ -143,8 +126,17 @@ void sa_handle_gui_msg(RX_SOCKET socket, void *pmsg)
 								sok_send_2(&_SaSocket, CMD_SA_STOP,    0, NULL); 
 								break;
 
-    case CMD_SA_MOVE:			Error(LOG, 0, "Send CMD_MOTOR_MOVE");								
-								sok_send_2(&_SaSocket, CMD_MOTOR_MOVE, phdr->msgLen-sizeof(SMsgHdr), &phdr[1]);
+    case CMD_SA_MOVE:			Error(LOG, 0, "Send CMD_MOTOR_MOVE");
+								{
+									SetupAssist_MoveCmd cmd;
+									cmd.header.msgLen = sizeof(cmd);
+									cmd.header.msgId  = CMD_MOTOR_MOVE;
+									cmd.steps		  = (INT32)((double)pmsg->steps/_microns2steps);
+									cmd.speed		  = 200;
+									cmd.acc			  = 100;
+									cmd.current		  = 300;
+									sok_send(&_SaSocket, &cmd);
+								}
 								break;
 
     case CMD_SA_OUT_TRIGGER:	Error(LOG, 0, "Send CMD_SET_DENSIO_TRIGGER");
@@ -167,6 +159,6 @@ void sa_handle_gui_msg(RX_SOCKET socket, void *pmsg)
 								plc_pause_printing(FALSE);
 								break;
 
-    default: Error(WARN, 0, "Unknown Command 0x%08x", phdr->msgId);
+    default: Error(WARN, 0, "Unknown Command 0x%08x", pmsg->header.msgId);
 	}
 }

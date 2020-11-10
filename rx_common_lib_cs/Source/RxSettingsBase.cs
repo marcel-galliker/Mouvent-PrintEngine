@@ -11,6 +11,8 @@ namespace RX_Common
     {
       //  private static string _AppName = System.Windows.Forms.Application.ProductName;
 
+        private string _MyPath;
+
         //--- Constructor ------------------------------
         public RxSettingsBase()
         {
@@ -41,6 +43,7 @@ namespace RX_Common
         public void Save(string path)
         {
           //  string path =  Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)+"\\"+_AppName;
+            if (path==null) path = _MyPath;
             if (path==null) path =  Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)+"\\"+System.Windows.Forms.Application.ProductName;
 
             if (!Directory.Exists(path))
@@ -70,6 +73,8 @@ namespace RX_Common
         {
             if (path==null) path =  Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)+"\\"+System.Windows.Forms.Application.ProductName;
             if (!Directory.Exists(path)) return;
+
+            _MyPath = path;
 
             XmlTextReader xml = new XmlTextReader(path+"\\user.config");
             try

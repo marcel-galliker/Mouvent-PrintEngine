@@ -12,7 +12,7 @@ namespace RX_DigiPrint.Models
 	{
 		public SetupAssist()
 		{
-
+			RxGlobals.Timer.TimerFct += _Tick;
 		}
 
 		//--- Property powerStepStatus ---------------------------------------
@@ -24,11 +24,11 @@ namespace RX_DigiPrint.Models
 		}
 
 		//--- Property motorPosition ---------------------------------------
-		private int _motorPosition;
-		public int motorPosition
+		private double _motorPosition;
+		public double motorPosition
 		{
 			get { return _motorPosition; }
-			set { SetProperty(ref _motorPosition,value); }
+			set { SetProperty(ref _motorPosition, value); }
 		}
 
 		//--- Property motorVoltage ---------------------------------------
@@ -85,11 +85,27 @@ namespace RX_DigiPrint.Models
 			set { SetProperty(ref _InRight,value); }
 		}
 
+		//--- Property Connected ---------------------------------------
+		private int _ConnectedTimer;
+		private bool _Connected=false;
+		public bool Connected
+		{
+			get { return _Connected; }
+			set { 
+					SetProperty(ref _Connected, value); 
+					if (_Connected) _ConnectedTimer=5;
+				}
+		}
+		private void _Tick(int no)
+		{
+			if (_ConnectedTimer>0 && --_ConnectedTimer==0) Connected=false;
+		}
+
 		//--- Update ------------------------------------------------
 		public void Update(TcpIp.SSetupAssistStatMsg msg)
 		{
 			powerStepStatus = msg.powerStepStatus;
-			motorPosition	= msg.motorPosition;
+			motorPosition	= Math.Round(msg.motorPosition/1000.0, 1);
 			motorVoltage	= msg.motorVoltage;
 			motorMoveCurrent= msg.motorMoveCurrent;
 			motorHoldCurrent= msg.motorHoldCurrent;
@@ -97,48 +113,14 @@ namespace RX_DigiPrint.Models
 			moving			= msg.moving!=0;
 			InLeft			= (msg.inputs&(1<<0))!=0;
 			InRight			= (msg.inputs&(1<<1))!=0;
-		}
-
-		//--- Property steps ---------------------------------------
-		private int _steps;
-		public int steps
-		{
-			get { return _steps; }
-			set { SetProperty(ref _steps,value); }
-		}
-
-		//--- Property speed ---------------------------------------
-		private UInt32 _speed;
-		public UInt32 speed
-		{
-			get { return _speed; }
-			set { SetProperty(ref _speed,value); }
-		}
-
-		//--- Property acc ---------------------------------------
-		private UInt32 _acc;
-		public UInt32 acc
-		{
-			get { return _acc; }
-			set { SetProperty(ref _acc,value); }
-		}
-
-		//--- Property current ---------------------------------------
-		private UInt32 _current;
-		public UInt32 current
-		{
-			get { return _current; }
-			set { SetProperty(ref _current,value); }
+			Connected		= true;
 		}
 		
 		//--- Move --------------------------------------------
-		public void Move()
+		public void Move(double dist)
 		{
 			TcpIp.SetupAssist_MoveCmd cmd = new TcpIp.SetupAssist_MoveCmd();
-			cmd.steps	= steps;
-			cmd.speed	= speed;
-			cmd.acc		= acc;
-			cmd.current = current;
+			cmd.steps	= (Int32)(dist*1000.0);
 			RxGlobals.RxInterface.SendMsg(TcpIp.CMD_SA_MOVE, ref cmd);
 		}
 

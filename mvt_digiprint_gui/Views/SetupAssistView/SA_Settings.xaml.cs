@@ -61,9 +61,18 @@ namespace RX_DigiPrint.Views.SetupAssistView
         //--- Save_Clicked ------------------------------------
         private void Save_Clicked(object sender, RoutedEventArgs e)
         {
-            if (CB_Camera.SelectedItem!=null) RxGlobals.Settings.SetupAssistCam =  CB_Camera.SelectedItem as string;
-            RxGlobals.Settings.Save(null);
-            DialogResult = true;
+            if (CB_Camera.SelectedItem!=null)
+			{
+                string newCam = CB_Camera.SelectedItem as string;
+                if (newCam!=RxGlobals.Settings.SetupAssistCam)
+				{
+                    RxGlobals.Settings.SetupAssistCam = newCam;
+                    RxGlobals.Settings.Save(null);
+                    DialogResult = true;
+                    return;
+				}
+			}
+            DialogResult = false;
         }
 
         //--- Cancel_Clicked --------------------------------
