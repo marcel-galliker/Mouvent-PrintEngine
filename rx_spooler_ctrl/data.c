@@ -726,7 +726,7 @@ int data_load(SPageId *id, const char *filepath, EFileType fileType, int offsetP
 						if (buffer[color])
 						{
 							static SBmpInfo _bmpInfo;
-							if (id->scan==1)
+							if (same==FALSE)
 							{
 								if (strstr(filepath, ".flz"))		ret=flz_load_simple(filepath, &buffer[color], 100000, &bmpInfo); 
 								else if (strstr(filepath, ".tif"))	ret=tif_load_simple(filepath, &buffer[color], 100000, &bmpInfo); 
@@ -739,14 +739,11 @@ int data_load(SPageId *id, const char *filepath, EFileType fileType, int offsetP
 								memcpy(&bmpInfo, &_bmpInfo, sizeof(_bmpInfo));
 							}
 							if (ret==REPLY_OK) strcpy(_FileTimePath, filepath);
+
 							#ifdef DEBUG
-							if (FALSE)
-							{
-								char str[MAX_PATH];
-								sprintf(str, "%sTEST.bmp", PATH_TEMP);
-								bmp_write(str, buffer[0], bmpInfo.bitsPerPixel, bmpInfo.srcWidthPx, bmpInfo.lengthPx, bmpInfo.lineLen, FALSE);
-							}
+							//	bmp_write(PATH_TEMP "TEST.bmp" , buffer[0], bmpInfo.bitsPerPixel, bmpInfo.srcWidthPx, bmpInfo.lengthPx, bmpInfo.lineLen, FALSE);
 							#endif
+
 							bmpInfo.buffer[color] = &buffer[color];
 							bmpInfo.inkSupplyNo[color]=0;
 							bmpInfo.colorCode[color]=0;

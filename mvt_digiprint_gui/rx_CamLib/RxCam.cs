@@ -27,6 +27,8 @@ namespace rx_CamLib
         private IBaseFilter VMR9;
         private IVMRWindowlessControl9 WindowlessCtrl9 = null;
 
+        private RxCamSettings   _Settings;
+
         //Property Display
         [DllImport("oleaut32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
         static extern int OleCreatePropertyFrame
@@ -60,12 +62,19 @@ namespace rx_CamLib
             return typeof(RxCam).Assembly.GetName().Version.ToString();
         }
 
-        /// <summary>
-        /// Searches for all connected cameras
-        /// </summary>
-        /// <param name="CameraList">string[] that will receive all detected camera names</param>
-        /// <returns>Number of detected cameras</returns>
-        public int GetCameraList(out string[] CameraList)
+		//--- Property Settings ---------------------------------------
+		public RxCamSettings Settings
+		{
+			get { return _Settings; }
+			set { _Settings=value; }
+		}
+
+		/// <summary>
+		/// Searches for all connected cameras
+		/// </summary>
+		/// <param name="CameraList">string[] that will receive all detected camera names</param>
+		/// <returns>Number of detected cameras</returns>
+		public int GetCameraList(out string[] CameraList)
         {
             CameraList = null;
             //Find connected cameras
