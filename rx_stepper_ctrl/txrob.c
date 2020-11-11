@@ -891,22 +891,22 @@ int txrob_menu(void)
     {
         if (_Help)
         {
-	term_printf("s: STOP\n");
+			term_printf("s: STOP\n");
             term_printf("r<n>: reset motor<n>\n");
             term_printf("o: toggle output <no>\n");
-	term_printf("R: Reference\n");
-	term_printf("c: move to capping\n");
+			term_printf("R: Reference\n");
+			term_printf("c: move to capping\n");
             term_printf("e: move to wash\n");
-	term_printf("a: move to vacuum\n");
-	term_printf("w: move to wipe\n");
-	term_printf("b: shift back\n");
-	term_printf("d<steps>: set Rotation RefOffset <steps>\n");
-	term_printf("t<steps>: set Tilt for Cap <steps>\n");
-	term_printf("p<sec>: set Time Waste Vac <sec>\n");
-	term_printf("f<sec>: set Time fill Cap <sec>\n");
+			term_printf("a: move to vacuum\n");
+			term_printf("w: move to wipe\n");
+			term_printf("b: shift back\n");
+			term_printf("d<steps>: set Rotation RefOffset <steps>\n");
+			term_printf("t<steps>: set Tilt for Cap <steps>\n");
+			term_printf("p<sec>: set Time Waste Vac <sec>\n");
+			term_printf("f<sec>: set Time fill Cap <sec>\n");
             term_printf("v<mm/s>: set Speed Shift for wash <mm/s>\n");
             term_printf("m<n><steps>: move Motor<n> by <steps>\n");
-	term_printf("x: exit\n");
+			term_printf("x: exit\n");
             
         }
         else

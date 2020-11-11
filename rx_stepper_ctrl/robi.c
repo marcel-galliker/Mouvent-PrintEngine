@@ -55,7 +55,7 @@ static uint32_t _currentVersion;
 
 static HANDLE _sendLock;
 
-
+//--- robi_init ----------------------------------------------------------------
 void robi_init(void)
 {
     if (_isInit) return;
@@ -110,6 +110,7 @@ void robi_init(void)
     return;
 }
 
+//--- robi_main -------------------------------------------------------------------------
 void robi_main(int ticks, int menu)
 {
     if (_isInit == FALSE) return;
@@ -124,76 +125,90 @@ void robi_main(int ticks, int menu)
         _isConnected = FALSE;
 }
 
+//--- robi_connected ------------------------------------------------------------------
 int robi_connected(void)
 {
     return _isConnected;
 }
 
+//--- robi_current_version ----------------------------------------------------------------
 int robi_current_version(void)
 {
     return _currentVersion;
 }
 
+//--- robi_is_updating -------------------------------------------------------------------------
 int robi_is_updating(void)
 {
     return _isUpdating;
 }
 
+//--- robi_is_init ------------------------------------------------------------------------
 int robi_is_init(void)
 {
     return _isInit;
 }
 
+//--- robi_stop ------------------------------------------------------------------------
 void robi_stop(void)
 {
     send_command(MOTOR_ESTOP, 0, NULL);
 }
 
+//--- robi_reference ----------------------------------------------------------------------
 void robi_reference(void)
 {
     send_command(MOTORS_DO_REFERENCE, 0, NULL);
 }
 
+//--- robi_move_x_relative_steps ---------------------------------------------------------
 void robi_move_x_relative_steps(INT32 steps)
 {
     send_command(MOTOR_MOVE_X_RELATIVE, sizeof(steps), &steps);
 }
-
+//--- robi_move_Y_relative_steps ----------------------------------------------------
 void robi_move_Y_relative_steps(INT32 steps)
 {
     send_command(MOTOR_MOVE_Y_RELATIVE, sizeof(steps), &steps);
 }
 
+//--- robi_move_up -----------------------------------------------------------------------
 void robi_move_up(void)
 {
     send_command(MOTOR_MOVE_Z_UP, 0, NULL);
 }
 
+//--- robi_move_down ----------------------------------------------------
 void robi_move_down(void)
 {
     send_command(MOTOR_MOVE_Z_DOWN, 0, NULL);
 }
 
+//--- robi_turn_screw_relative ------------------------------------------------
 void robi_turn_screw_relative(INT32 steps)
 {
     send_command(MOTOR_TURN_SCREW_RELATIVE, sizeof(steps), &steps);
 }
 
+//--- robi_turn_screw_left ---------------------------------------------------------
 void robi_turn_screw_left(INT32 ticks)
 {
     send_command(MOTOR_TURN_SCREW_LEFT, sizeof(ticks), &ticks);
 }
 
+//--- robi_turn_screw_right ---------------------------------------------------------
 void robi_turn_screw_right(INT32 ticks)
 {
     send_command(MOTOR_TURN_SCREW_RIGHT, sizeof(ticks), &ticks);
 }
 
+//--- robi_set_screw_current --------------------------------------------------------
 void robi_set_screw_current(uint8_t current)
 {
     send_command(MOTOR_SET_SCREW_CURRENT, sizeof(current), &current);
 }
 
+//--- robi_set_output ---------------------------------------------------------------
 void robi_set_output(int num, int val)
 {
     uint8_t gpioData[] = {num, val};
@@ -201,6 +216,7 @@ void robi_set_output(int num, int val)
     send_command(GPIO_SET_OUTPUT, sizeof(gpioData), &gpioData);
 }
 
+//--- robi_screwer_stalled ---------------------------------------------------------------
 int robi_screwer_stalled(void)
 {
     int tmp = _ScrewerStalled;
@@ -208,6 +224,7 @@ int robi_screwer_stalled(void)
     return tmp;
 }
 
+//--- robi_move_done ----------------------------------------------------------------------
 int robi_move_done(void)
 {
     if (RX_RobiStatus.commandRunning[COMMAND0] || RX_RobiStatus.commandRunning[COMMAND1])
@@ -216,6 +233,7 @@ int robi_move_done(void)
         return TRUE;
 }
 
+//--- send_command ------------------------------------------------------
 static int32_t send_command(uint32_t commandCode, uint8_t len, void *data)
 {
     SUsbTxMsg *pTxMessage;
@@ -248,6 +266,7 @@ static int32_t send_command(uint32_t commandCode, uint8_t len, void *data)
     return REPLY_OK;
 }
 
+//--- receive_thread ------------------------------------------------
 static void* receive_thread(void *par)
 {
 	int32_t count;
@@ -290,7 +309,7 @@ static void* receive_thread(void *par)
                         {
                             if (rxMessage.length)
                             {
-                                if (rxMessage.error == MOTOR_STALLED && !RX_RobiStatus.motors[MOTOR_XY_0].isStalled && !RX_RobiStatus.motors[MOTOR_XY_1].isStalled)
+                                if (rxMessage.error == MOTOR_STALLED && RX_RobiStatus.motors[MOTOR_SCREW].isStalled)
                                         _ScrewerStalled = TRUE;
                                 
                                 Error(ERR_CONT, 0, "Robi Error. Flag: %x, Message: %s", rxMessage.error, rxMessage.data);
@@ -312,6 +331,7 @@ static void* receive_thread(void *par)
 	}
 }
 
+//--- send_thread -----------------------------------------------------
 static void *send_thread(void *par)
 {
     int32_t length;
@@ -343,6 +363,7 @@ static void *send_thread(void *par)
     }
 }
 
+//--- set_serial_attributs -------------------------------------------------
 static int32_t set_serial_attributs(int fd, int speed, int parity)
 {
     struct termios tty;
@@ -369,17 +390,18 @@ static int32_t set_serial_attributs(int fd, int speed, int parity)
     return REPLY_OK;
 }
 
+//--- get_output_fifo_capacity ---------------------------------------------------
 static int32_t get_output_fifo_capacity(void)
 {
     if (_txFifoOutIndex > _txFifoInIndex)
     {
-        return ROBI_FIFO_SIZE -
-               (ROBI_FIFO_SIZE - _txFifoOutIndex + _txFifoInIndex);
+        return ROBI_FIFO_SIZE - (ROBI_FIFO_SIZE - _txFifoOutIndex + _txFifoInIndex);
     }
 
     return ROBI_FIFO_SIZE - (_txFifoInIndex - _txFifoOutIndex);
 }
 
+//--- update_thread ------------------------------------------------------------
 static void* update_thread(void *par)
 {
     int fd = open(ROBI_SOFTWARE_FILENAME, O_RDONLY);
@@ -466,6 +488,7 @@ static void* update_thread(void *par)
     }
 }
 
+//--- update_failed ------------------------------------------------------
 static void update_failed(int fd)
 {
     rx_sleep(100);
@@ -476,6 +499,7 @@ static void update_failed(int fd)
     close(fd);
 }
 
+//--- robi_error -----------------------------------------------------------
 int robi_error()
 {
     int i;

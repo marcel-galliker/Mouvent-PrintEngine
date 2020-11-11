@@ -525,7 +525,6 @@ UINT32 drive_get_scanner_pos(void)
 //--- drive_start_printing ------------------------------------------
 int drive_start_printing(void)
 {
-    //_if (_MoveCmd == )
     return TRUE;
 }
 
@@ -546,8 +545,7 @@ void drive_abort_printing(void)
 
 void drive_move_start(void)
 {
-    if (RX_StepperStatus.info.z_in_ref || RX_StepperStatus.info.z_in_up ||
-        RX_StepperStatus.info.z_in_print)
+    if (RX_StepperStatus.info.z_in_ref || RX_StepperStatus.info.z_in_up || RX_StepperStatus.info.z_in_print)
     {
         if (_MoveCmd == move_standstill || _MoveCmd == move_wait)
             _MoveCmd = move_start;

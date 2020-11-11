@@ -178,10 +178,7 @@ int		machine_start_printing(void)
 	{
 	case mi_none:	return REPLY_OK;
 	case mi_tt:		return tt_start_printing();
-	case mi_tts:
-        return drive_start_printing();
-        //return REPLY_OK;
-        //drive_start_printing();
+	case mi_tts:	return drive_start_printing();
 	case mi_plc:	return plc_start_printing();
 	}
 	return REPLY_OK;

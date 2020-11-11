@@ -12,7 +12,6 @@
 #include <string.h>
 #include <fcntl.h>
 #include <unistd.h>
-//#include <termios.h>
 #include <pthread.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -58,9 +57,8 @@ static int _CmdStarted = FALSE;
 
 static int _Search_Screw_Time = 0;
 static int _Loose_Screw_Time = 0;
-static int _TargetPosition = 0;
-static int _Position_Correction;
 
+//--- robi_lb702_init -----------------------------------------------------
 void robi_lb702_init(void)
 {
     RX_StepperStatus.screwerinfo.moving = FALSE;
@@ -71,15 +69,11 @@ void robi_lb702_init(void)
     return;
 }
 
+//--- robi_lb702_main -----------------------------------------------------------
 void robi_lb702_main(int ticks, int menu)
 {
 
     robi_main(ticks, menu);
-
-    if (RX_RobiStatus.motors[2].isStalled)
-    {
-        Error(LOG, 0, "Screwer is stalled");
-    }
 
     RX_StepperStatus.screwerinfo.z_in_down = RX_RobiStatus.zPos == POS_DOWN;
     RX_StepperStatus.screwerinfo.z_in_up = RX_RobiStatus.zPos == POS_UP;
@@ -97,11 +91,6 @@ void robi_lb702_main(int ticks, int menu)
         RX_StepperStatus.screwerinfo.screw_tight = FALSE;
         RX_StepperStatus.screwerinfo.wipe_left_up = FALSE;
         RX_StepperStatus.screwerinfo.wipe_right_up = FALSE;
-    }
-
-    if (!(RX_RobiStatus.gpio.inputs & (1UL << Y_IN_REF)))
-    {
-        RX_StepperStatus.screwerinfo.y_in_ref = FALSE;
     }
 
     RX_StepperStatus.screwerinfo.ref_done = RX_RobiStatus.motors[MOTOR_XY_0].isReferenced && RX_RobiStatus.motors[MOTOR_XY_1].isReferenced && RX_RobiStatus.motors[MOTOR_SCREW].isReferenced;
@@ -199,23 +188,10 @@ void robi_lb702_main(int ticks, int menu)
             break;
 
         case CMD_ROBI_MOVE_TO_Y:
-            _CmdRunning = 0;
-            if (abs(RX_StepperStatus.screw_posY - _TargetPosition) > 1000 && !_Position_Correction)
-            {
-                _Position_Correction = TRUE;
-                robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_Y, &_TargetPosition);
-            }
-            else if (abs(RX_StepperStatus.screw_posY - _TargetPosition) > 1000 && _Position_Correction)
-            {
-                _Position_Correction = FALSE;
-                Error(ERR_CONT, 0, "Robi movement blocked in y-Axis");
-                RX_StepperStatus.screwerinfo.ref_done = FALSE;
-            }
-            else if (abs(RX_StepperStatus.screw_posY - SCREW_Y_BACK) < MAX_VAR_SCREW_POS || abs(RX_StepperStatus.screw_posY - SCREW_Y_FRONT) < MAX_VAR_SCREW_POS)
-            {
-                _Position_Correction = FALSE;
+            if (abs(RX_StepperStatus.screw_posY - SCREW_Y_BACK) < MAX_VAR_SCREW_POS || abs(RX_StepperStatus.screw_posY - SCREW_Y_FRONT) < MAX_VAR_SCREW_POS)
                 RX_StepperStatus.screwerinfo.y_in_pos = TRUE;
-            }
+            _CmdRunning = 0;
+            
             break;
 
         case CMD_ROBI_MOVE_TO_X:
@@ -308,7 +284,7 @@ void robi_lb702_main(int ticks, int menu)
 }
 
 
-
+//--- robi_lb702_menu -------------------------------------------------------------
 void robi_lb702_menu(int help)
 {
 	if (robi_is_init() == FALSE)
@@ -342,6 +318,7 @@ void robi_lb702_menu(int help)
 	return;
 }
 
+//--- robi_lb702_handle_menu ---------------------------------------------------------
 void robi_lb702_handle_menu(char *str)
 {
     int num = 0;
@@ -383,7 +360,6 @@ void robi_lb702_handle_menu(char *str)
         break;
 	case 'u':
         robi_move_up(); break;
-        //robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_UP, NULL); break;
 	case 'd': 
         robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_DOWN, NULL); break;
     case 'e':
@@ -418,6 +394,7 @@ void robi_lb702_handle_menu(char *str)
     return;
 }
 
+//--- robi_lb702_display_status -----------------------------------------------------------
 void robi_lb702_display_status(void)
 {
 	uint32_t i;
@@ -442,8 +419,8 @@ void robi_lb702_display_status(void)
 	for (i = 0; i < OUTPUT_COUNT; i++)
 	{
         if (RX_RobiStatus.gpio.outputs & (1UL << i))	term_printf("*");
-		else										term_printf("_");
-		if (i % 4 == 3)			   					term_printf("   ");
+		else										    term_printf("_");
+		if (i % 4 == 3)			   					    term_printf("   ");
 	}
 	term_printf("\n");
 	term_printf("Robi motor status ----------------------------------\n");
@@ -475,6 +452,7 @@ void robi_lb702_display_status(void)
     term_printf("Robi screwed: \t\t %d\n", RX_StepperStatus.screwerinfo.screwed);
 }
 
+//--- _steps_2_micron ----------------------------------------------------------------
 static int _steps_2_micron(int steps)
 {
     int micron;
@@ -483,6 +461,7 @@ static int _steps_2_micron(int steps)
 
 }
 
+//--- _micron_2_steps --------------------------------------------------------------
 static int _micron_2_steps(int micron)
 {
     int steps;
@@ -490,7 +469,7 @@ static int _micron_2_steps(int micron)
     return steps;
 }
 
-//--- robi_handle_ctrl_msg ----------------------------------------------
+//--- robi_lb702_handle_ctrl_msg ----------------------------------------------
 int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 {
     if (robi_is_init() == FALSE || robi_connected() == FALSE)
@@ -671,7 +650,6 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                 if ( _CmdRunning != CMD_ROBI_WIPE_LEFT && _CmdRunning != CMD_ROBI_WIPE_RIGHT) _CmdRunning = msgId;
                 micron = pos - RX_StepperStatus.screw_posX;
                 steps = _micron_2_steps(micron);
-                _TargetPosition = pos;
                 robi_move_x_relative_steps(steps);
             }
             break;
@@ -704,11 +682,6 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                 _CmdRunning = msgId;
                 micron = pos - RX_StepperStatus.screw_posY;
                 steps = _micron_2_steps(micron);
-                if (steps >= 100000)
-                {
-                    Error(LOG, 0, "More steps than possible: %d", steps);
-                }
-                _TargetPosition = pos;
                 robi_move_Y_relative_steps(steps);
             }
         }
@@ -821,7 +794,7 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 }
 
 
-
+//--- _check_Screwer_Movement -----------------------------------------------------------
 static void _check_Screwer_Movement()
 {
     int ticks;
@@ -839,6 +812,7 @@ static void _check_Screwer_Movement()
     }
 }
 
+//--- _check_robi_stalled -----------------------------------------------------------
 static void _check_robi_stalled(void)
 {
     if ((_CmdRunning == CMD_ROBI_SCREW_LEFT || _CmdRunning == CMD_ROBI_SCREW_RIGHT) && RX_RobiStatus.screwCurrent == 0 && robi_screwer_stalled())

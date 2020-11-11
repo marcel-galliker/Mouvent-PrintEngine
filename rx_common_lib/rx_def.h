@@ -1400,7 +1400,7 @@ typedef struct ETestTableInfo
 	UINT32 curing			: 1;	//	0x00001000
 	UINT32 z_in_screw		: 1;	//	0x00002000
 	UINT32 z_in_jet			: 1;	//	0x00004000
-	UINT32 x_in_purge4ever	: 1;	//	0x00008000
+    UINT32 vacuum_running	: 1;	//	0x00008000
 	UINT32 info_16			: 1;	//	0x00010000
 	UINT32 info_17			: 1;	//	0x00020000
 	UINT32 headUpInput_0	: 1;	//	0x00040000
@@ -1488,7 +1488,7 @@ typedef struct ERobotInfo
 	UINT32 wd_back_up		: 1;	//  0x10000000
 	UINT32 wrinkle_detected	: 1;	//	0x20000000
 	UINT32 wd_in_up			: 1;	//	0x40000000
-	UINT32 vacuum_running	: 1;	//	0x80000000
+    UINT32 x_in_purge4ever	: 1;	//	0x80000000
 } ERobotInfo;
 
 typedef struct EScrewerInfo

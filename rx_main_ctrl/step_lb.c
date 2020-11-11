@@ -12,7 +12,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-
 #include "rx_error.h"
 #include "rx_def.h"
 #include "rx_error.h"
@@ -139,8 +138,7 @@ int	 steplb_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen
 	return REPLY_OK;
 }
 
-//--- steplb_handle_Status
-//----------------------------------------------------------------------
+//--- steplb_handle_status ----------------------------------------------------------------------
 int steplb_handle_status(int no, SStepperStat *pStatus)
 {
     int i;
@@ -266,18 +264,18 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
 
         // Vacuum Cleaner Timer Start -------------------------------------------------------------------------------
         // Just needed for testing phase -> Need to be taken out before it goes to customers
-        if (_OldVacuum_Cleaner_State == FALSE && _Status[i].robinfo.vacuum_running && i == 1)
+        if (_OldVacuum_Cleaner_State == FALSE && _Status[i].info.vacuum_running && i == 1)
         {
             _Vacuum_Cleaner_Time = rx_get_ticks()/1000;
         }
-        else if (_OldVacuum_Cleaner_State == TRUE && !_Status[i].robinfo.vacuum_running && i == 1)
+        else if (_OldVacuum_Cleaner_State == TRUE && !_Status[i].info.vacuum_running && i == 1)
         {
             INT32 _OldVacuum_Cleaner_Time = 0;
             setup_vacuum_cleaner(PATH_USER FILENAME_VACUUM_TIME, &_OldVacuum_Cleaner_Time, READ);
             _OldVacuum_Cleaner_Time = _OldVacuum_Cleaner_Time + rx_get_ticks()/1000 - _Vacuum_Cleaner_Time;
             setup_vacuum_cleaner(PATH_USER FILENAME_VACUUM_TIME, &_OldVacuum_Cleaner_Time, WRITE);
         }
-        if (i == 1) _OldVacuum_Cleaner_State = _Status[i].robinfo.vacuum_running;
+        if (i == 1) _OldVacuum_Cleaner_State = _Status[i].info.vacuum_running;
         
         // Vacuum Cleaner Timer End ---------------------------------------------------------------------------------
     }
@@ -373,6 +371,7 @@ void steplb_rob_to_fct_pos(int no, ERobotFunctions rob_function)
 	sok_send_2(&_step_socket[no], CMD_ROB_MOVE_POS, sizeof(rob_function), &rob_function);		
 }
 
+//--- steplb_rob_to_fct_pos_all ----------------------------------------------
 void steplb_rob_to_fct_pos_all(ERobotFunctions rob_function)
 {
     int i;
@@ -404,7 +403,7 @@ int	 steplb_rob_in_fct_pos(int no, ERobotFunctions rob_function)
 	case rob_fct_purge_head5:
 	case rob_fct_purge_head6:
 	case rob_fct_purge_head7:	return _Status[no].robinfo.purge_ready		&& _Status[no].robinfo.moving == FALSE; break;
-    case rob_fct_purge4ever:    return _Status[no].info.x_in_purge4ever     && _Status[no].robinfo.moving == FALSE; break;
+    case rob_fct_purge4ever:    return _Status[no].robinfo.x_in_purge4ever     && _Status[no].robinfo.moving == FALSE; break;
 	default: return FALSE; break;
 	}
 }
@@ -427,6 +426,7 @@ void steplb_rob_fct_start(int no, ERobotFunctions rob_function)
 	sok_send_2(&_step_socket[no], CMD_ROB_FILL_CAP, sizeof(rob_function), &rob_function);
 }
 
+//--- steplb_rob_wipe_start_all ---------------------------------------------------------------
 void steplb_rob_wipe_start_all(void)
 {
     int i;
@@ -471,6 +471,7 @@ int	 steplb_rob_fct_done(int no, ERobotFunctions rob_function)
 	}	
 }
 
+//--- steplb_rob_vacuum ---------------------------------------------
 void steplb_rob_vacuum(int time_s)
 {
     int no;
@@ -503,6 +504,7 @@ void steplb_rob_do_reference(void)
 	}
 }
 
+//--- _steplb_rob_do_reference ---------------------------------------------------
 static void _steplb_rob_do_reference(int no)
 {
     sok_send_2(&_step_socket[no], CMD_ROB_REFERENCE, 0, NULL);
@@ -563,6 +565,7 @@ void steplb_rob_wash_all(void)
     }
 }
 
+//--- steplb_pump_back_fluid ----------------------------------
 void steplb_pump_back_fluid(int fluidNo, int state)
 {
     int even_number_of_colors = RX_Config.inkSupplyCnt % 2 == 0;
@@ -861,7 +864,6 @@ static void _check_screwer(void)
         
     }
     
-
     for (i = 0; i < SIZEOF(_HeadAdjustmentBuffer); i++)
     {
         if (_ScrewCommandSend[i] == TRUE && _Status[i].screwerinfo.screwer_ready == FALSE)
@@ -878,11 +880,13 @@ static void _check_screwer(void)
     }
 }
 
+//--- steplb_cluster_Screw_Turned ----------------------------------------------------
 void steplb_cluster_Screw_Turned(int stepperNo)
 {
     _ClusterScrewTurned[stepperNo] = TRUE;
 }
 
+//--- steplb_set_autocapMode --------------------------------------------------------
 void steplb_set_autocapMode(int state)
 {
         _AutoCapMode = state;
