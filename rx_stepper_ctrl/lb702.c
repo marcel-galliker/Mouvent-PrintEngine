@@ -502,7 +502,8 @@ static void _lb702_move_to_pos(int cmd, int pos0, int pos1)
 		lbrob_handle_ctrl_msg(INVALID_SOCKET, _CmdRunningRobi, NULL);
 		_NewCmd = cmd;
 	}
-	else if((cmd == CMD_LIFT_PRINT_POS)||(cmd == CMD_LIFT_UP_POS)||(cmd == CMD_LIFT_REFERENCE)||(cmd == CMD_LIFT_CAPPING_POS) || cmd == CMD_LIFT_WASH_POS || cmd == CMD_LIFT_CLUSTER_CHANGE || cmd == CMD_LIFT_SCREW)
+    else if (((cmd == CMD_LIFT_PRINT_POS || cmd == CMD_LIFT_UP_POS || cmd == CMD_LIFT_CLUSTER_CHANGE || cmd == CMD_LIFT_CAPPING_POS) && RX_RobiStatus.isInGarage && RX_StepperStatus.screwerinfo.y_in_ref) || 
+                 cmd == CMD_LIFT_WASH_POS || cmd == CMD_LIFT_SCREW || cmd == CMD_LIFT_REFERENCE)
 	{
 		RX_StepperStatus.info.moving = TRUE;
 		_PrintPos_New[MOTOR_Z_BACK]  = pos0;
@@ -512,7 +513,11 @@ static void _lb702_move_to_pos(int cmd, int pos0, int pos1)
 
 		motors_start(MOTOR_Z_BITS, TRUE);	
 	} 
-	else RX_StepperStatus.cmdRunning = 0;
+	else 
+    {
+       RX_StepperStatus.cmdRunning = 0;
+       _NewCmd = cmd;
+    }
 }
 
 //--- lb702_handle_ctrl_msg -----------------------------------
