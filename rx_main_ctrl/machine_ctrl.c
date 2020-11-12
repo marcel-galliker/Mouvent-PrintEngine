@@ -89,6 +89,7 @@ int		machine_tick(void)
 		{
 			_CappingTimer=0;
 			Error(LOG, 0, "Setting printhead to capping position. CtrlMode=%d %d", fluid_get_ctrlMode(0),fluid_get_ctrlMode(1));
+			step_set_autocapMode(TRUE);
 			fluid_send_ctrlMode(-1, ctrl_cap, TRUE);
 		}
 	}

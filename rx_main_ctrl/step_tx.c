@@ -34,6 +34,7 @@ static EnFluidCtrlMode		_RobotCtrlMode = ctrl_undef;
 static int					_WashDone		= FALSE;
 static int					_FlushPrepared	= FALSE;
 static int					_PrepareFlush	= FALSE;
+static int					_AutoCapMode	= FALSE;
 
 static void _check_wrinkle_detection(void);
 static void _steptx_rob_control(void);
@@ -131,7 +132,8 @@ int steptx_lift_in_wipe_pos(EnFluidCtrlMode mode)
 //--- steptx_lift_to_print_pos --------------------------------
 void steptx_lift_to_print_pos(void)
 {
-	if (RX_Config.printer.type==printer_test_table) sok_send_2(&_step_socket[0], CMD_LIFT_PRINT_POS, sizeof(UINT32), &RX_Config.stepper.cap_height);
+	if (RX_Config.printer.type == printer_test_table)			sok_send_2(&_step_socket[0], CMD_LIFT_PRINT_POS, sizeof(UINT32), &RX_Config.stepper.cap_height);
+	else if (_AutoCapMode && RX_StepperStatus.info.z_in_cap)	steptx_set_autocapMode(FALSE);
 	else // TX801/TX802
 	{
 		INT32 height = RX_Config.stepper.print_height + RX_Config.stepper.material_thickness;
@@ -232,6 +234,7 @@ int  steptx_rob_in_wipe_pos(ERobotFunctions rob_function)
 	case rob_fct_vacuum: 		return _Status[1].robinfo.vacuum_ready		&& _Status[1].robinfo.moving == FALSE; break;
 	case rob_fct_wipe: 			return _Status[1].robinfo.wipe_ready		&& _Status[1].robinfo.moving == FALSE; break;
 	case rob_fct_vacuum_change: return _Status[1].robinfo.vacuum_in_change	&& _Status[1].robinfo.moving == FALSE; break;
+	case rob_fct_cap_empty:		return _Status[1].robinfo.rob_in_cap		&& _Status[1].robinfo.moving == FALSE	&& _Status[1].robinfo.ref_done; break;
 	default: return FALSE; break;
 	}
 }
@@ -325,6 +328,12 @@ void steptx_set_robCtrlMode(EnFluidCtrlMode ctrlMode)
 	_steptx_rob_control();
 }
 
+//--- steptx_set_autocapMode ------------------------------------------------------
+void steptx_set_autocapMode(int state)
+{
+	_AutoCapMode = state;
+}
+
 EnFluidCtrlMode state_RobotCtrlMode(void)
 {
     return _RobotCtrlMode;
@@ -366,6 +375,9 @@ static void _steptx_rob_control(void)
 	EnFluidCtrlMode	old =  _RobotCtrlMode;
 	static int _RisingEdge = FALSE;
 
+	if ((_RobotCtrlMode < ctrl_cap || _RobotCtrlMode > ctrl_cap_step6) && _AutoCapMode)
+		steptx_set_autocapMode(FALSE);
+
     switch(_RobotCtrlMode)
 	{		
 	//--- ctrl_wash --------------------------------------------------------------------------------------
@@ -373,7 +385,7 @@ static void _steptx_rob_control(void)
 								if (!step_lift_in_up_pos() || !_steptx_lift_in_clean_wait_pos())	_steptx_lift_to_clean_wait_pos();
 								break;
 				
-	case ctrl_wash_step1:		if (_steptx_lift_in_clean_wait_pos() || step_lift_in_up_pos())
+	case ctrl_wash_step1:		if ((_steptx_lift_in_clean_wait_pos() || step_lift_in_up_pos()) && !RX_PrinterStatus.door_open)
 								{
 									_RobotCtrlMode = ctrl_wash_step2;
 									if (!step_rob_reference_done()) step_rob_do_reference();
@@ -420,7 +432,7 @@ static void _steptx_rob_control(void)
 								if (!_steptx_lift_in_clean_wait_pos() && !step_lift_in_up_pos())	_steptx_lift_to_clean_wait_pos();
 								break;
 				
-	case ctrl_wipe_step1:		if (_steptx_lift_in_clean_wait_pos() || step_lift_in_up_pos())
+	case ctrl_wipe_step1:		if ((_steptx_lift_in_clean_wait_pos() || step_lift_in_up_pos()) && !RX_PrinterStatus.door_open)
 								{
 									_RobotCtrlMode=ctrl_wipe_step2;
 									if (!step_rob_reference_done()) step_rob_do_reference();
@@ -467,7 +479,7 @@ static void _steptx_rob_control(void)
 								_RobotCtrlMode = ctrl_vacuum_step1;
 								break;
 				
-	case ctrl_vacuum_step1:		if (step_lift_in_up_pos() || _steptx_lift_in_clean_wait_pos())
+	case ctrl_vacuum_step1:		if ((step_lift_in_up_pos() || _steptx_lift_in_clean_wait_pos()) && !RX_PrinterStatus.door_open)
 								{
 									_RobotCtrlMode=ctrl_vacuum_step2;
 									if (!step_rob_reference_done())
@@ -603,11 +615,20 @@ static void _steptx_rob_control(void)
 								step_lift_to_up_pos();
 								break;
 				
-	case ctrl_cap_step1:		if (step_lift_in_up_pos())
+	case ctrl_cap_step1:		if (step_lift_in_up_pos() && !RX_PrinterStatus.door_open)
 								{
-									_RobotCtrlMode=ctrl_cap_step2;
 									if (!step_rob_reference_done()) step_rob_do_reference();
-									plc_to_fill_cap_pos();
+									if (!_AutoCapMode)
+									{
+										_RobotCtrlMode = ctrl_cap_step2;
+										plc_to_fill_cap_pos();
+									}
+									else
+									{
+										_RobotCtrlMode = ctrl_cap_step3;
+										plc_to_wipe_pos();
+										step_rob_to_wipe_pos(rob_fct_cap_empty);
+									}
 								}
 								break;	 
 				
@@ -620,20 +641,25 @@ static void _steptx_rob_control(void)
                                     }
                                 }
 								break;
-    case ctrl_cap_step3:		if (step_rob_in_wipe_pos(rob_fct_cap))
+    case ctrl_cap_step3:		if ((step_rob_in_wipe_pos(rob_fct_cap) && !_AutoCapMode) || (step_rob_in_wipe_pos(rob_fct_cap_empty) && _AutoCapMode))
 								{
-                                    if (!_PrepareFlush)
+                                    if (!_PrepareFlush && !_AutoCapMode)
                                         _RobotCtrlMode = ctrl_cap_step4;
+                                    else if (!_PrepareFlush && _AutoCapMode)
+                                        _RobotCtrlMode = ctrl_cap_step5;
                                     else
                                         _FlushPrepared = TRUE;
                                 }
                                 break;
 
-    case ctrl_cap_step4:		_RobotCtrlMode=ctrl_cap_step5;
-								plc_to_wipe_pos();
-								break;		
-			
-	case ctrl_cap_step5:		if (plc_in_wipe_pos())
+    case ctrl_cap_step4:		if (!RX_PrinterStatus.door_open)
+								{
+                                    _RobotCtrlMode = ctrl_cap_step5;
+                                    plc_to_wipe_pos();
+                                }
+                                break;
+
+    case ctrl_cap_step5:		if (plc_in_wipe_pos())
 								{
 									_RobotCtrlMode=ctrl_cap_step6;
 									step_lift_to_wipe_pos(ctrl_cap);
@@ -642,13 +668,13 @@ static void _steptx_rob_control(void)
 			
 	case ctrl_cap_step6:		if (step_lift_in_wipe_pos(ctrl_cap))
 								{
-                                    _RobotCtrlMode = ctrl_off;
+                                    if (_AutoCapMode)	_RobotCtrlMode = ctrl_print;
+                                    else				_RobotCtrlMode = ctrl_off;
                                 }
 								break;
 		
 	case ctrl_off:				_RobotCtrlMode = ctrl_off;
 								undefine_PurgeCtrlMode();
-                                //Error(LOG, 0, "Program goes though ctrl_off");
 								break;
 	default: return;
 	}

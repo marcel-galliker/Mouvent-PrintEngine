@@ -547,6 +547,15 @@ int step_set_config(void)
 	return REPLY_OK;
 }
 
+//--- step_set_autocapMode ----------------------------------------------
+void step_set_autocapMode(int state)
+{
+	switch (_StepperType)
+	{
+	case STEPPER_TX:	steptx_set_autocapMode(state); break;
+	}
+}
+
 //--- tt_get_scanner_pos ----------------------------------------
 UINT32 tt_get_scanner_pos(void)
 {
