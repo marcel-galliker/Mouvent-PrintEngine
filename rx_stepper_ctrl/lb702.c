@@ -505,7 +505,8 @@ static void _lb702_move_to_pos(int cmd, int pos0, int pos1)
     else if (((cmd == CMD_LIFT_PRINT_POS || cmd == CMD_LIFT_UP_POS || cmd == CMD_LIFT_CLUSTER_CHANGE || cmd == CMD_LIFT_CAPPING_POS) && RX_RobiStatus.isInGarage && RX_StepperStatus.screwerinfo.y_in_ref) || 
                  cmd == CMD_LIFT_WASH_POS || cmd == CMD_LIFT_SCREW || cmd == CMD_LIFT_REFERENCE)
 	{
-		RX_StepperStatus.info.moving = TRUE;
+        Error(LOG, 0, "Move Command %08x", cmd);
+        RX_StepperStatus.info.moving = TRUE;
 		_PrintPos_New[MOTOR_Z_BACK]  = pos0;
 		_PrintPos_New[MOTOR_Z_FRONT] = pos1;
 		motor_move_to_step(MOTOR_Z_BACK, &_ParZ_down,  pos0+adjust);
@@ -657,8 +658,7 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									}
 									break;
 				
-    case CMD_LIFT_WASH_POS:
-                                    TrPrintfL(TRUE, "CMD_LIFT_WASH_POS");
+    case CMD_LIFT_WASH_POS:			TrPrintfL(TRUE, "CMD_LIFT_WASH_POS");
                                     strcpy(_CmdName, "CMD_LIFT_WASH_POS");
                                     if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_back < 10000) Error(ERR_ABORT, 0, "Reference Height back must be > 10mm");
                                     else if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_front < 10000) Error(ERR_ABORT, 0, "Reference Height front must be > 10mm");
