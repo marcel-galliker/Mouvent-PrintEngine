@@ -74,6 +74,11 @@ namespace RX_DigiPrint.Views.PrintSystemView
                                                     StepperGrid.Margin = new Thickness(10, 0, 0, 0);
                                                     break;
 
+                case EPrinterType.printer_LB701:
+                                                    StepperGrid.Children.Clear();
+                                                    StepperGrid.Children.Add(new StepperGridLB701());
+                                                    break;
+
                 case EPrinterType.printer_LB702_UV:
                 case EPrinterType.printer_LB702_WB:
                 case EPrinterType.printer_LH702:    var stepperGridLB702 = new StepperGridLB702();
