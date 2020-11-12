@@ -516,8 +516,9 @@ static void _lb702_move_to_pos(int cmd, int pos0, int pos1)
 	} 
 	else 
     {
-       RX_StepperStatus.cmdRunning = 0;
-       _NewCmd = cmd;
+        Error(WARN, 0, "Command needs to wait");
+        RX_StepperStatus.cmdRunning = 0;
+        _NewCmd = cmd;
     }
 }
 
@@ -539,7 +540,15 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 
 	case CMD_LIFT_REFERENCE:		TrPrintfL(TRUE, "CMD_LIFT_REFERENCE");
 									strcpy(_CmdName, "CMD_LIFT_REFERENCE");
-									_lb702_do_reference();
+                                    if (RX_StepperStatus.cmdRunning)
+                                    {
+                                        motors_stop(MOTOR_Z_BITS);
+                                        RX_StepperStatus.cmdRunning = 0;
+                                        RX_StepperStatus.info.ref_done = 0;
+                                        _NewCmd = 0;
+                                        _Cmd_New = FALSE;
+                                    }
+                                    _lb702_do_reference();
 									break;
                                        
     case CMD_LIFT_SCREW:            TrPrintfL(TRUE, "CMD_LIFT_SCREW");
@@ -611,12 +620,15 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 											if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_front < 90000) Error(WARN, 0, "Reference Height front small");
 											if ((!RX_StepperStatus.cmdRunning || RX_StepperStatus.cmdRunning == CMD_LIFT_REFERENCE) && (!RX_StepperStatus.info.ref_done || !RX_StepperStatus.info.z_in_print || val0 != _PrintPos_Act[MOTOR_Z_BACK] || val1 != _PrintPos_Act[MOTOR_Z_FRONT]))
 											{
-												_Cmd_New      = msgId;
 												TrPrintf(TRUE, "Start REF, _Cmd_New=0x%08x", _Cmd_New);
 												_PrintPos_New[MOTOR_Z_BACK]  = val0;
 												_PrintPos_New[MOTOR_Z_FRONT] = val1;
 												if (RX_StepperStatus.info.ref_done) _lb702_move_to_pos(CMD_LIFT_PRINT_POS, _PrintPos_New[MOTOR_Z_BACK], _PrintPos_New[MOTOR_Z_FRONT]);
-												else if (RX_StepperStatus.cmdRunning != CMD_LIFT_REFERENCE) _lb702_do_reference();
+												else if (RX_StepperStatus.cmdRunning != CMD_LIFT_REFERENCE) 
+                                                {
+                                                    _Cmd_New = msgId;
+                                                    _lb702_do_reference();
+                                                }
 											}
 										}
 									}
