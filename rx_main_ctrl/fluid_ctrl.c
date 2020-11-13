@@ -713,6 +713,7 @@ static void _control(int fluidNo)
 												else													_Flushed &= ~(0x01<<no);
 												setup_fluid_system(PATH_USER FILENAME_FLUID_STATE, &_Flushed, WRITE);				
 											}
+                                            if (!RX_StepperStatus.robinfo.moving && rx_def_is_tx(RX_Config.printer.type) && step_active(1)) step_empty_waste();
 
 											if (_txrob && _PurgeFluidNo < 0) 
 											{
@@ -826,7 +827,7 @@ static void _control_flush(void)
 								break;
 		
 		case ctrl_flush_done:	ErrorEx(dev_fluid, -1, LOG, 0, "Flush complete");
-								
+								if (!RX_StepperStatus.robinfo.moving && rx_def_is_tx(RX_Config.printer.type) && step_active(1)) step_empty_waste();
 								if (_txrob)
 								{
 									fluid_send_ctrlMode(-1, ctrl_cap_step4, TRUE);

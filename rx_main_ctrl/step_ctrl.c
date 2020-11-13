@@ -428,6 +428,16 @@ void step_rob_stop(void)
 	}
 }
 
+//--- step_empty_waste ----------------------------------------
+void step_empty_waste(void)
+{
+    switch (_StepperType)
+    {
+    case STEPPER_TX:	steptx_rob_empty_waste(); break;
+    default: break;
+    }
+}
+
 //--- tt_cap_to_print_pos --------------------------------
 int	 tt_cap_to_print_pos(void)
 {
@@ -523,6 +533,15 @@ int step_set_config(void)
 	for(int i=0; i<SIZEOF(_step_Socket); i++)
 		if (_step_Socket[i]!=INVALID_SOCKET) _step_set_config(i);
 	return REPLY_OK;
+}
+
+//--- step_set_autocapMode ----------------------------------------------
+void step_set_autocapMode(int state)
+{
+	switch (_StepperType)
+	{
+	case STEPPER_TX:	steptx_set_autocapMode(state); break;
+	}
 }
 
 //--- tt_get_scanner_pos ----------------------------------------

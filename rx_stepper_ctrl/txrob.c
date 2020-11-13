@@ -84,6 +84,7 @@
 #define POS_SHIFT_REF			(SHIFT_STEPS_PER_METER*0)
 #define POS_SHIFT_CENTER_801	(SHIFT_STEPS_PER_METER*(0.024-0.002))
 #define POS_SHIFT_START			(SHIFT_STEPS_PER_METER*(0.024-0.024))
+#define POS_SHIFT_START_404		(SHIFT_STEPS_PER_METER*(0.024-0.012))
 #define POS_SHIFT_END_801		(SHIFT_STEPS_PER_METER*(0.024+0.023))
 #define POS_SHIFT_CENTER_802	(SHIFT_STEPS_PER_METER*(0.024+0.020))
 #define POS_SHIFT_END_802		(SHIFT_STEPS_PER_METER*(0.024+0.067))
@@ -91,6 +92,12 @@
 #define POS_SHIFT_END_404		(SHIFT_STEPS_PER_METER*(0.024+0.170))
 #define POS_SHIFT_MAX_TURN		(SHIFT_STEPS_PER_METER*(0.024+0.055))
 #define POS_SHIFT_MAX_TURN_404	(SHIFT_STEPS_PER_METER*(0.024+0.085))
+
+#define SHIFT_POS_REF		0
+#define SHIFT_POS_CENTER	1
+#define SHIFT_POS_START		2
+#define SHIFT_POS_END		3
+#define SHIFT_POS_MAX_TURN	4
 
 #define POS_SHIFT_CENTER	 POS_SHIFT_CENTER_801
 
@@ -184,7 +191,7 @@ static UINT32	_txrob_Error[5];
 
 
 // Times and Parameters
-static int	_TimeWastePump = 10000; //20; // in ms
+static int	_TimeWastePump = 30000; //20; // in ms
 static int	_TimeFillCap = 14; // in s
 static int	_TimeFillCap801 = 14;	// in s
 static int	_TimeFillCap802 = 25;	// in s
@@ -309,22 +316,23 @@ void txrob_init(void)
 	if (RX_StepperCfg.printerType == printer_TX801)
 	{
 		int temp;
-		POS_SHIFT[1] = POS_SHIFT_CENTER_801;
-		POS_SHIFT[3] = POS_SHIFT_END_801;
+		POS_SHIFT[SHIFT_POS_CENTER] = POS_SHIFT_CENTER_801;
+		POS_SHIFT[SHIFT_POS_END] = POS_SHIFT_END_801;
 		_TimeFillCap = 14;		// seconds
 
 	}
 	else if (RX_StepperCfg.printerType == printer_TX802)
 	{
-		POS_SHIFT[1] = POS_SHIFT_CENTER_802;
-		POS_SHIFT[3] = POS_SHIFT_END_802;
+        POS_SHIFT[SHIFT_POS_CENTER] = POS_SHIFT_CENTER_802;
+        POS_SHIFT[SHIFT_POS_END] = POS_SHIFT_END_802;
 		_TimeFillCap = 25;		// seconds
 	}
     else if (RX_StepperCfg.printerType == printer_TX404)
     {
-        POS_SHIFT[1] = POS_SHIFT_CENTER_404;
-        POS_SHIFT[3] = POS_SHIFT_END_404;
-        POS_SHIFT[6] = POS_SHIFT_MAX_TURN_404;
+        POS_SHIFT[SHIFT_POS_START] = POS_SHIFT_START_404;
+        POS_SHIFT[SHIFT_POS_CENTER] = POS_SHIFT_CENTER_404;
+        POS_SHIFT[SHIFT_POS_END] = POS_SHIFT_END_404;
+        POS_SHIFT[SHIFT_POS_MAX_TURN] = POS_SHIFT_MAX_TURN_404;
         _TimeFillCap = 25; // seconds
     }
 }
@@ -603,6 +611,7 @@ void txrob_main(int ticks, int menu)
 		{
 			switch (_RobFunction)
 			{
+            case rob_fct_cap_empty:
 			case rob_fct_cap:	// Cap
 				TrPrintfL(TRUE, "ROB_FUNCTION_CAP done");
 				loc_new_cmd = CMD_ROB_SHIFT_MOV; 
@@ -675,12 +684,14 @@ void txrob_main(int ticks, int menu)
 				break;
 
 			case 1:	// Center
-				loc_new_cmd = CMD_ROB_FILL_CAP; 
+                if (_RobFunction != rob_fct_cap_empty)
+					loc_new_cmd = CMD_ROB_FILL_CAP;
 				break;
 	
 			case 2:	// Start
 				switch (_RobFunction)
 				{
+                case rob_fct_cap_empty:
 				case rob_fct_cap:	// Cap
 					break;
 
@@ -702,6 +713,7 @@ void txrob_main(int ticks, int menu)
 			case 3: // End
 				switch (_RobFunction)
 				{
+                case rob_fct_cap_empty:
 				case rob_fct_cap:	// Cap
 					break;
 
@@ -891,22 +903,22 @@ int txrob_menu(void)
     {
         if (_Help)
         {
-	term_printf("s: STOP\n");
+			term_printf("s: STOP\n");
             term_printf("r<n>: reset motor<n>\n");
             term_printf("o: toggle output <no>\n");
-	term_printf("R: Reference\n");
-	term_printf("c: move to capping\n");
+			term_printf("R: Reference\n");
+			term_printf("c: move to capping\n");
             term_printf("e: move to wash\n");
-	term_printf("a: move to vacuum\n");
-	term_printf("w: move to wipe\n");
-	term_printf("b: shift back\n");
-	term_printf("d<steps>: set Rotation RefOffset <steps>\n");
-	term_printf("t<steps>: set Tilt for Cap <steps>\n");
-	term_printf("p<sec>: set Time Waste Vac <sec>\n");
-	term_printf("f<sec>: set Time fill Cap <sec>\n");
+			term_printf("a: move to vacuum\n");
+			term_printf("w: move to wipe\n");
+			term_printf("b: shift back\n");
+			term_printf("d<steps>: set Rotation RefOffset <steps>\n");
+			term_printf("t<steps>: set Tilt for Cap <steps>\n");
+			term_printf("p<sec>: set Time Waste Vac <sec>\n");
+			term_printf("f<sec>: set Time fill Cap <sec>\n");
             term_printf("v<mm/s>: set Speed Shift for wash <mm/s>\n");
             term_printf("m<n><steps>: move Motor<n> by <steps>\n");
-	term_printf("x: exit\n");
+			term_printf("x: exit\n");
             
         }
         else
@@ -1093,18 +1105,18 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 				RX_StepperStatus.robinfo.moving = TRUE;
 				_RobFunction = pos;
 				
-				if (pos == rob_fct_vacuum_change && (_VacuumState == rob_vacuum_1_to_4 || _VacuumState == rob_vacuum_all))		pos = POS_ROT[CAP_POS];
-				else if (pos == rob_fct_vacuum_change && _VacuumState == rob_vacuum_5_to_8)										pos = POS_ROT[WIPE_POS];
-				else if (pos == rob_fct_tilt)																					pos = POS_ROT[CAP_POS];
+				if ((pos == rob_fct_vacuum_change && (_VacuumState == rob_vacuum_1_to_4 || _VacuumState == rob_vacuum_all)) || pos == rob_fct_cap_empty)	pos = POS_ROT[CAP_POS];
+				else if (pos == rob_fct_vacuum_change && _VacuumState == rob_vacuum_5_to_8)																	pos = POS_ROT[WIPE_POS];
+				else if (pos == rob_fct_tilt)																												pos = POS_ROT[CAP_POS];
 				else if (pos == rob_fct_vacuum_all)
 				{
                     if (RX_StepperCfg.printerType == printer_TX404)
                         _VacuumState = rob_vacuum_all;
-                    if (_VacuumState == rob_vacuum_all)																			pos = POS_ROT[VAC_POS];
-					else if (_VacuumState == rob_vacuum_1_to_4)																	pos = POS_ROT[VAC_POS_1_TO_4_TO_ALL];
-					else if (_VacuumState == rob_vacuum_5_to_8)																	pos = POS_ROT[VAC_POS_5_TO_8_TO_ALL];
+                    if (_VacuumState == rob_vacuum_all)																										pos = POS_ROT[VAC_POS];
+					else if (_VacuumState == rob_vacuum_1_to_4)																								pos = POS_ROT[VAC_POS_1_TO_4_TO_ALL];
+					else if (_VacuumState == rob_vacuum_5_to_8)																								pos = POS_ROT[VAC_POS_5_TO_8_TO_ALL];
 				}
-				else																											pos = POS_ROT[pos];
+				else																																		pos = POS_ROT[pos];
 				
 				_MoveLeftPos = 0;
 				
@@ -1113,7 +1125,6 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 				motors_move_to_step(MOTOR_ROT_BITS, &_ParRotDrive, pos);
 			}		
 		}
-		// else Error(WARN, 0, "Command refused (cmdRunning=0x%08x)", RX_StepperStatus.cmdRunning);
 		break;
 		
 	case CMD_ROB_SHIFT_MOV:		strcpy(_CmdName, "CMD_ROB_SHIFT_MOV");
@@ -1128,7 +1139,7 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 			pos = *((INT32*)pdata);
 			if (pos < 0) {Error(LOG, 0, "CLN: Command %s: negative position not allowed", _CmdName); break;}
 			if (pos >= POS_SHIFT_CNT) {Error(LOG, 0, "CLN: Command %s: too high pos", _CmdName); break;}
-			if (_RobFunction == rob_fct_cap && pos != 1) {Error(LOG, 0, "CLN: Command %s: cancle shift, robot in capping", _CmdName); break;}
+			if ((_RobFunction == rob_fct_cap || _RobFunction == rob_fct_cap_empty) && pos != 1) {Error(LOG, 0, "CLN: Command %s: cancle shift, robot in capping", _CmdName); break;}
 			RX_StepperStatus.cmdRunning = msgId;
 			RX_StepperStatus.robinfo.moving = TRUE;
 			_LastRobPosCmd = pos;
@@ -1145,8 +1156,10 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                 if (RX_StepperStatus.robinfo.rob_in_vac) Fpga.par->output |= VAC_ON;
 				if (_RobFunction == rob_fct_vacuum || _RobFunction == rob_fct_vacuum_all)
 				{
-					if (abs(POS_SHIFT[3] - motor_get_step(MOTOR_SHIFT) <= MOTOR_SHIFT_VAR) || abs(POS_SHIFT[6] - motor_get_step(MOTOR_SHIFT) <= MOTOR_SHIFT_VAR))	pos = POS_SHIFT[4];
-					else if (abs(POS_SHIFT[4] - motor_get_step(MOTOR_SHIFT) <= MOTOR_SHIFT_VAR))																	pos = POS_SHIFT[3];
+					if (abs(POS_SHIFT[SHIFT_POS_END] - motor_get_step(MOTOR_SHIFT) <= MOTOR_SHIFT_VAR) || abs(POS_SHIFT[SHIFT_POS_MAX_TURN] - motor_get_step(MOTOR_SHIFT) <= MOTOR_SHIFT_VAR))	
+                        pos = POS_SHIFT[SHIFT_POS_START];
+                    else if (abs(POS_SHIFT[SHIFT_POS_START] - motor_get_step(MOTOR_SHIFT) <= MOTOR_SHIFT_VAR))																	
+                        pos = POS_SHIFT[SHIFT_POS_END];
 					else																																			pos = POS_SHIFT[pos];
 	
 				}
@@ -1164,12 +1177,18 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 			{
 				if (_RobFunction == rob_fct_vacuum || _RobFunction == rob_fct_vacuum_all)
 				{
-					if (abs(POS_SHIFT[3] - motor_get_step(MOTOR_SHIFT) <= MOTOR_SHIFT_VAR)	|| abs(POS_SHIFT[6] - motor_get_step(MOTOR_SHIFT) <= MOTOR_SHIFT_VAR))	pos = POS_SHIFT[3];
-					else if (abs(POS_SHIFT[4] - motor_get_step(MOTOR_SHIFT) <= MOTOR_SHIFT_VAR))																	pos = POS_SHIFT[4];
-					else																																			pos = POS_SHIFT[pos];
+					if (abs(POS_SHIFT[SHIFT_POS_END] - motor_get_step(MOTOR_SHIFT)) <= MOTOR_SHIFT_VAR	|| 
+                            (abs(POS_SHIFT[SHIFT_POS_MAX_TURN] - motor_get_step(MOTOR_SHIFT)) <= MOTOR_SHIFT_VAR && RX_StepperCfg.printerType != printer_TX404))	
+                        pos = POS_SHIFT[SHIFT_POS_END];
+					else if (abs(POS_SHIFT[SHIFT_POS_START] - motor_get_step(MOTOR_SHIFT)) <= MOTOR_SHIFT_VAR || 
+                            (abs(POS_SHIFT[SHIFT_POS_MAX_TURN] - motor_get_step(MOTOR_SHIFT)) <= MOTOR_SHIFT_VAR && RX_StepperCfg.printerType == printer_TX404))		
+                        pos = POS_SHIFT[SHIFT_POS_START];
+					else																																			
+                        pos = POS_SHIFT[pos];
 	
 				}
-				else																																				pos = POS_SHIFT[pos];
+				else																																				
+                    pos = POS_SHIFT[pos];
                 if (abs(pos - motor_get_step(MOTOR_SHIFT)) > MOTOR_SHIFT_VAR)	motors_move_to_step(MOTOR_SHIFT_BITS, &_ParShiftDrive, pos);
 			}
 		}
@@ -1232,6 +1251,10 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		}
 		
 		break;
+
+    case CMD_ROB_EMPTY_WASTE:
+        _TimeWastePumpStart = rx_get_ticks();
+        break;
 
 	case CMD_ERROR_RESET:		
 		TrPrintfL(TRUE, "SOCKET[%d]: %s", socket, _CmdName);
