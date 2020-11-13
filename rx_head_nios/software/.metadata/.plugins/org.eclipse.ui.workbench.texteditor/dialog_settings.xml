@@ -10,12 +10,14 @@
 		<list key="findhistory">
 			<item value="ctrl_purge_hard"/>
 			<item value="ctrl_purge"/>
+			<item value="head_eeprom"/>
 			<item value="average"/>
 			<item value="_do_250ms_timer"/>
 			<item value="WRITE_USER_EEPROM"/>
 			<item value="_stop_fpga"/>
 			<item value="PIO_ALL_ON_EN_BASE"/>
 			<item value="PIO_FPGA_SHUTDOWN_BASE"/>
+			<item value="pressure"/>
 		</list>
 		<list key="replacehistory">
 		</list>

@@ -22,7 +22,6 @@
 #include "step_cleaf.h"
 #include "fluid_ctrl.h"
 #include "step_tts.h"
-#include "step_lb.h"
 #include "drive_ctrl.h"
 
 
@@ -90,7 +89,7 @@ int		machine_tick(void)
 		{
 			_CappingTimer=0;
 			Error(LOG, 0, "Setting printhead to capping position. CtrlMode=%d %d", fluid_get_ctrlMode(0),fluid_get_ctrlMode(1));
-            if (RX_StepperStatus.robot_used) steplb_set_autocapMode(TRUE);
+			step_set_autocapMode(TRUE);
             fluid_send_ctrlMode(-1, ctrl_cap, TRUE);
 		}
 	}

@@ -1288,29 +1288,30 @@ typedef enum ERobotFunctions
 	rob_fct_wash,			//  1: Wash
 	rob_fct_vacuum,			//  2: Vacuum
 	rob_fct_wipe,			//  3: Wiping
-	rob_fct_vacuum_change,	//  4: Vaccum change
-	rob_fct_tilt,			//  5: Tilt for Capping
-	rob_fct_vacuum_all,		//  6: Vacuum all heads
-	rob_fct_purge_all,		//  7: Purge all heads
-	rob_fct_purge_head0,	//  8: Purge head 0
-	rob_fct_purge_head1,	//  9: Purge head 1
-	rob_fct_purge_head2,	// 10: Purge head 2
-	rob_fct_purge_head3,	// 11: Purge head 3
-	rob_fct_purge_head4,	// 12: Purge head 4
-	rob_fct_purge_head5,	// 13: Purge head 5
-	rob_fct_purge_head6,	// 14: Purge head 6
-	rob_fct_purge_head7,	// 15: Purge head 7
-    rob_fct_purge4ever,		// 16: Purge Capping
-    rob_fct_move,			// 17: Wash heads
-    rob_fct_screw_cluster,	// 18: Screw Pos cluster
-    rob_fct_screw_head0,	// 19: Screw Pos head 0
-    rob_fct_screw_head1,	// 20: Screw Pos head 1
-    rob_fct_screw_head2,	// 21: Screw Pos head 2
-    rob_fct_screw_head3,	// 22: Screw Pos head 3
-    rob_fct_screw_head4,	// 23: Screw Pos head 4
-    rob_fct_screw_head5,	// 24: Screw Pos head 5
-    rob_fct_screw_head6,	// 25: Screw Pos head 6
-    rob_fct_screw_head7,	// 26: Screw Pos head 7
+	rob_fct_cap_empty,		//  4: Capping without Flush in Capping station
+	rob_fct_vacuum_change,	//  5: Vaccum change
+	rob_fct_tilt,			//  6: Tilt for Capping
+	rob_fct_vacuum_all,		//  7: Vacuum all heads
+	rob_fct_purge_all,		//  8: Purge all heads
+	rob_fct_purge_head0,	//  9: Purge head 0
+	rob_fct_purge_head1,	// 10: Purge head 1
+	rob_fct_purge_head2,	// 11: Purge head 2
+	rob_fct_purge_head3,	// 12: Purge head 3
+	rob_fct_purge_head4,	// 13: Purge head 4
+	rob_fct_purge_head5,	// 14: Purge head 5
+	rob_fct_purge_head6,	// 15: Purge head 6
+	rob_fct_purge_head7,	// 16: Purge head 7
+    rob_fct_purge4ever,		// 17: Purge Capping
+    rob_fct_move,			// 18: Wash heads
+    rob_fct_screw_cluster,	// 19: Screw Pos cluster
+    rob_fct_screw_head0,	// 20: Screw Pos head 0
+    rob_fct_screw_head1,	// 21: Screw Pos head 1
+    rob_fct_screw_head2,	// 22: Screw Pos head 2
+    rob_fct_screw_head3,	// 23: Screw Pos head 3
+    rob_fct_screw_head4,	// 24: Screw Pos head 4
+    rob_fct_screw_head5,	// 25: Screw Pos head 5
+    rob_fct_screw_head6,	// 26: Screw Pos head 6
+    rob_fct_screw_head7,	// 27: Screw Pos head 7
 } ERobotFunctions;
 	
 

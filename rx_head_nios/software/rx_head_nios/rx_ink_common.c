@@ -108,8 +108,6 @@ char *FluidCtrlModeStr(EnFluidCtrlMode mode)
 	case ctrl_wash_step5:			return "WASH/5";  	// 0x165:
 	case ctrl_wash_step6:			return "WASH/6";  	// 0x166:
 		
-	case ctrl_robi_out:				return "ROBi OUT";	// 0x170:
-		
 	case ctrl_fill:					return "FILL";		//	0x200:
 	case ctrl_fill_step1:			return "FILL/1";	//	0x201:
 	case ctrl_fill_step2:			return "FILL/2";	//	0x202:

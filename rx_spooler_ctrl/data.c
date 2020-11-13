@@ -390,7 +390,6 @@ static int _copy_file(SPageId *pid, char *srcDir, char *fileName, char *dstDir)
 //--- data_get_size ---------------------------------------------------------------
 int  data_get_size	(const char *path, UINT32 page, EFileType *pFileType, UINT32 *pspacePx, UINT32 *pwidth, UINT32 *plength, UINT8 *pbitsPerPixel, UINT8 *multiCopy)
 {
-	int ret;
 	UINT32 memsize;
 	*pFileType = ft_undef;
 

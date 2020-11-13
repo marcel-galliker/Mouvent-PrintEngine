@@ -241,9 +241,6 @@ typedef enum EnFluidCtrlMode
 	ctrl_wash_step4		= 0x164,  	// 0x164:
 	ctrl_wash_step5		= 0x165,  	// 0x165:
 	ctrl_wash_step6		= 0x166,  	// 0x166:
-									   
-	ctrl_robi_out		= 0x170,	// 0x170:
-	ctrl_robi_out_step1	= 0x171,	// 0x171:
 
     ctrl_fill = 0x200,	//	0x200:
     ctrl_fill_step1,	//	0x201:

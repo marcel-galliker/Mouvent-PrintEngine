@@ -21,6 +21,7 @@
 #include "stepper_ctrl.h"
 #include "lbrob.h"
 #include "rx_def.h"
+#include "robi_def.h"
 #include "lb702.h"
 #include "robi_lb702.h"
 
@@ -37,6 +38,7 @@
 #define CABLE_WASH_POS_FRONT    -634000     //	um LB702
 #define CABLE_WASH_POS_BACK     -221000     //	um LB702
 #define CABLE_PURGE_POS_BACK    -311000     //  um LB702
+#define VACUUM_POS              -400000     //  um LB702
 #define CABLE_PURGE_POS_FRONT   -622000     //  um LB702    CABLE_PURGE_POS_BACK - (7 * HEAD_WIDTH) - 10000 ->  HEAD_WIDTH = 43000
 #define CABLE_SCREW_POS_FRONT   -503000     //  um LB702    
 #define CABLE_SCREW_POS_BACK    -156208     //  um LB702    CABLE_SCREW_POS_BACK + (8 * HEAD_WIDTH) ->  HEAD_WIDTH = 43349
@@ -45,13 +47,14 @@
 
 #define CAP_FILL_TIME           16000       // ms
 #define SCREW_SEARCHING_TIME    5000        // ms
+#define WASTE_PUMP_TIME         30000       // ms
 
 // Digital Inputs
 #define CABLE_PULL_REF 2
 #define CAPPING_ENDSTOP 3
 
 // Digital Outputs
-#define RO_ALL_OUTPUTS          0x06F       // All used outputs -> o0, o1, o2, o3, o5, o6
+#define RO_ALL_OUTPUTS          0x02F       // All used outputs -> o0, o1, o2, o3, o5
 #define RO_FLUSH_WIPE_RIGHT     0x001       // o0
 #define RO_FLUSH_WIPE_LEFT      0x002       // o1
 #define RO_FLUSH_WIPE           0x003       // o0 + o1
@@ -93,8 +96,6 @@ static int      _CmdRunning = 0;
 static int      _NewCmd = 0;
 static EWipeSide _WipeSide = wipe_none;
 
-static int      _CapFillTime = 0;
-
 static ERobotFunctions _RobFunction = 0;
 static ERobotFunctions _Old_RobFunction = 0;
 static SHeadAdjustment _HeadAdjustment = {0, 0, 0, 0};
@@ -102,12 +103,17 @@ static int      _CmdScrewing = 0;
 static int      _CmdSearchScrews = 0;
 static int _SearchScrewNr = 0;
 static int _Turns = 0;
-static int _TimeSearchScrew = 0;
+
 static int _HeadPos = 0;
 
 static int _OldEncoderPos = 0;
 static int _NewEncoderPos = 0;
 static int _CmdRunning_old = 0;
+
+// Timers
+static int _CapFillTime = 0;
+static int _TimeSearchScrew = 0;
+static int _WastePumpTimer = 0;
 
 
 //--- prototypes --------------------------------------------
@@ -115,7 +121,6 @@ static void _lbrob_motor_z_test(int steps);
 static void _lbrob_motor_test(int motor, int steps);
 static void _lbrob_do_reference(void);
 static void _lbrob_move_to_pos(int cmd, int pos);
-static void _lbrob_motor_enc_reg_test(int steps);
 static int  _micron_2_steps(int micron);
 static int  _steps_2_micron(int steps);
 static void _cln_move_to(int msgId, ERobotFunctions fct);
@@ -138,8 +143,8 @@ void lbrob_init(void)
     // config for referencing cable pull motor (motor 4)
     _ParCable_ref.speed = 2000;
     _ParCable_ref.accel = 4000;
-    _ParCable_ref.current_acc = 250.0;
-    _ParCable_ref.current_run = 250.0;
+    _ParCable_ref.current_acc = 260.0;
+    _ParCable_ref.current_run = 260.0;
     _ParCable_ref.stop_mux = 0;
     _ParCable_ref.dis_mux_in = 0;
     _ParCable_ref.estop_level = TRUE;
@@ -152,8 +157,8 @@ void lbrob_init(void)
     // special encoder mode
     _ParCable_drive.speed = 5000;
     _ParCable_drive.accel = 8000;
-    _ParCable_drive.current_acc = 420.0;
-    _ParCable_drive.current_run = 420.0;
+    _ParCable_drive.current_acc = 410.0;        // max 420
+    _ParCable_drive.current_run = 410.0;        // max 420
     _ParCable_drive.stop_mux = 0;
     _ParCable_drive.dis_mux_in = 0;
     _ParCable_drive.estop_level = 0;
@@ -162,8 +167,8 @@ void lbrob_init(void)
 
     _ParCable_drive_slow.speed = 1000;
     _ParCable_drive_slow.accel = 8000;
-    _ParCable_drive_slow.current_acc = 420.0;
-    _ParCable_drive_slow.current_run = 420.0;
+    _ParCable_drive_slow.current_acc = 410.0;   // max 420
+    _ParCable_drive_slow.current_run = 410.0;   // max 420
     _ParCable_drive_slow.stop_mux = 0;
     _ParCable_drive_slow.dis_mux_in = 0;
     _ParCable_drive_slow.estop_level = 0;
@@ -172,8 +177,8 @@ void lbrob_init(void)
 
     _ParCable_drive_purge.speed = _micron_2_steps(1000 * 10); // multiplied with 1000 to get from mm/s to um/s
     _ParCable_drive_purge.accel = 4000;
-    _ParCable_drive_purge.current_acc = 420.0;
-    _ParCable_drive_purge.current_run = 420.0;
+    _ParCable_drive_purge.current_acc = 410.0; // max 420
+    _ParCable_drive_purge.current_run = 410.0; // max 420
     _ParCable_drive_purge.stop_mux = 0;
     _ParCable_drive_purge.dis_mux_in = 0;
     _ParCable_drive_purge.estop_level = 0;
@@ -200,7 +205,9 @@ void lbrob_main(int ticks, int menu)
     RX_StepperStatus.info.vacuum_running = (Fpga.par->output & RO_VACUUM_CLEANER) >> 4;
     
     _NewEncoderPos = motor_get_step(MOTOR_X_0);
-    if (_NewEncoderPos >= _OldEncoderPos+50 && _NewEncoderPos >= CABLE_PURGE_POS_BACK && !RX_StepperStatus.info.vacuum_running && _OldEncoderPos)
+    if ((_NewEncoderPos >= _OldEncoderPos+50 && _NewEncoderPos >= VACUUM_POS && !RX_StepperStatus.info.vacuum_running && 
+            _OldEncoderPos && !RX_StepperStatus.screwerinfo.wipe_left_up && !RX_StepperStatus.screwerinfo.wipe_right_up) ||
+            Fpga.par->output & RO_INK_PUMP_LEFT || Fpga.par->output & RO_INK_PUMP_RIGHT)
     {
         val = TRUE;
         lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &val);
@@ -209,6 +216,7 @@ void lbrob_main(int ticks, int menu)
 
     motor_main(ticks, menu);
     robi_lb702_main(ticks, menu);
+    
 
     RX_StepperStatus.robinfo.moving = (_CmdRunning != 0);
     if (RX_StepperStatus.robinfo.moving)
@@ -224,10 +232,11 @@ void lbrob_main(int ticks, int menu)
         RX_StepperStatus.robinfo.x_in_purge4ever = FALSE;
         _HeadPos = FALSE;
     }
-    else
+    
+    if (rx_get_ticks() >= _WastePumpTimer && _WastePumpTimer && !(Fpga.par->output & RO_VACUUM_CLEANER))
     {
-        val = FALSE;
-        lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &val);
+        Fpga.par->output &= ~RO_WASTE_VAC;
+        _WastePumpTimer = 0;
     }
 
     if (RX_StepperStatus.info.moving)
@@ -245,6 +254,9 @@ void lbrob_main(int ticks, int menu)
 
     if (_CmdRunning && motors_move_done(MOTOR_X_BITS))
     {
+
+        val = FALSE;
+        lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &val);
         RX_StepperStatus.robinfo.moving = FALSE;
 
 
@@ -421,7 +433,14 @@ void lbrob_main(int ticks, int menu)
                 _Old_RobFunction = _RobFunction;
                 _CmdRunning = FALSE;
                 _CmdRunning_old = FALSE;
-                lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_MOVE_POS, &new_RobFunction);
+                if (!RX_StepperStatus.screwerinfo.y_in_ref || !RX_RobiStatus.isInGarage)
+                {
+                    _CmdRunning_Robi = CMD_ROBI_MOVE_TO_GARAGE;
+                    _NewCmd = CMD_ROB_MOVE_POS;
+                    robi_lb702_handle_ctrl_msg(INVALID_SOCKET, _CmdRunning_Robi, NULL);
+                }
+                else
+                    lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_MOVE_POS, &new_RobFunction);
                 break;
 
             case rob_fct_move:
@@ -446,7 +465,7 @@ void lbrob_main(int ticks, int menu)
                     {
                         if (RX_StepperStatus.screwerinfo.wipe_left_up)  _WipeSide = wipe_right;
                         else                                            _WipeSide = wipe_left;
-                        _NewCmd = CMD_ROB_WIPE;
+                        lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_WIPE, &_WipeSide);
                     }
                     break;
                 default:
@@ -500,6 +519,7 @@ void lbrob_main(int ticks, int menu)
             loc_new_cmd = _NewCmd;
             _NewCmd = FALSE;
             _CmdRunning_Lift = FALSE;
+            _CmdRunning_Robi = FALSE;
         }
         if (loc_new_cmd)
         {
@@ -608,17 +628,16 @@ void lbrob_menu(int help)
         term_printf("r<n>: reset motor<n>\n");
         term_printf("c: Go to Cap-Pos\n");
         term_printf("w: Wash Heads\n");
-        term_printf("q: Start Vacuum Pump \n");
+        term_printf("q<n>: Stop(n=0)/Start(n=1) Vacuum Pump \n");
         term_printf("v: Vacuum Heads\n");
         term_printf("g<n>: Go to purge position of head 1 -8 or for all (0)\n");
         term_printf("p: Move the Robi for Purging all Heads\n");
         term_printf("m<n><steps>: move Motor<n> by <steps>\n");
-        term_printf("e<steps>: move Cablepull with encoder regulator by <steps>\n");
-        term_printf("S<speed>: Set Speed for Wash and Vacuum in <speed>mm/s\n");
         term_printf("f: Find all the screws\n");
         term_printf("a<n>: Go to adjustment position of head 0 - 7\n");
         term_printf("t<screw_nr>: Turn <screw_nr> n/6 Turn (n can be choosen by command \"T\")\n");
         term_printf("T<n>: Make <n>/6 turns with the command t\n");
+        term_printf("d<n>: Wipe all (n = l: left; n = r : right; n = b: both");
         term_flush();
     }
     else
@@ -659,7 +678,7 @@ void lbrob_handle_menu(char *str)
         lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_MOVE_POS, &pos);
         break;
     case 'q':
-        val = TRUE;
+        val = atoi(&str[1]);
         lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &val);
         break;
     case 'v':
@@ -706,14 +725,6 @@ void lbrob_handle_menu(char *str)
     case 'm':
         _lbrob_motor_test(str[1] - '0', atoi(&str[2]));
         break;
-    case 'e':
-        _lbrob_motor_enc_reg_test(atoi(&str[1]));
-        break;
-    case 'S':
-        pos = atoi(&str[1]);
-        if (pos <= 8) pos = 8;
-        _ParCable_drive_slow.speed = _micron_2_steps(1000 * pos);
-        break;
     case 'f':
         lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_SEARCH_ALL_SCREWS, NULL);
         break;
@@ -757,6 +768,9 @@ void lbrob_handle_menu(char *str)
         screw_head.steps = _Turns;
         lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_HEAD_ADJUST, &screw_head);
         break;
+    case 'T':
+        _Turns = atoi(&str[1]);
+        break;
     case 'd':
         if (str[1] == 'l')
             wipeside = wipe_left;
@@ -764,11 +778,7 @@ void lbrob_handle_menu(char *str)
             wipeside = wipe_right;
         else if (str[1] == 'b')
             wipeside = wipe_all;
-
         lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_WIPE, &wipeside);
-        break;
-    case 'T':
-        _Turns = atoi(&str[1]);
         break;
     }
 }
@@ -863,20 +873,31 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
     case CMD_ROB_EMPTY_WASTE:
         strcpy(_CmdName, "CMD_ROB_EMPTY_WASTE");
         val = (*(INT32 *)pdata);
+        int state = FALSE;
         if (val == 0)
+        {
             Fpga.par->output &= ~RO_INK_PUMP_BOTH;
+            lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &state);
+        }
         else if (val == 1)
         {
             Fpga.par->output |= RO_INK_PUMP_LEFT;
         }
         else if (val == 2)
+        {
             Fpga.par->output &= ~RO_INK_PUMP_LEFT;
+            lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &state);
+        }
         else if (val == 3)
         {
             Fpga.par->output |= RO_INK_PUMP_RIGHT;
         }
         else if (val == 4)
+        {
             Fpga.par->output &= ~RO_INK_PUMP_RIGHT;
+            lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &state);
+        }
+        
         break;
 
     case CMD_ROB_VACUUM:
@@ -888,10 +909,9 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         }
         else
         {
-            Fpga.par->output &= ~RO_WASTE_VAC;
+            _WastePumpTimer = rx_get_ticks() + WASTE_PUMP_TIME;
             Fpga.par->output &= ~RO_VACUUM_CLEANER;
         }
-
         break;
 
     case CMD_ROB_FILL_CAP:
@@ -931,6 +951,8 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                         break;
                     }
                 }
+                val = TRUE;
+                lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &val);
                 RX_StepperStatus.robinfo.moving = TRUE;
                 _CmdRunning = msgId;
                 if (RX_StepperCfg.wipe_speed)
@@ -996,7 +1018,7 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
             return;
         }
         else if (!RX_StepperStatus.robinfo.ref_done || (_RobFunction == rob_fct_cap && RX_StepperStatus.info.x_in_cap) || 
-                     (RX_StepperStatus.robinfo.purge_ready && _RobFunction != rob_fct_wash) || 
+                     (RX_StepperStatus.robinfo.purge_ready && _RobFunction != rob_fct_wash && _RobFunction != rob_fct_vacuum && _RobFunction != rob_fct_wipe) ||
                      (_RobFunction == rob_fct_purge4ever && RX_StepperStatus.info.x_in_cap && !RX_StepperStatus.robinfo.x_in_purge4ever))
         {
             _lbrob_do_reference();
@@ -1017,6 +1039,8 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
 
         case rob_fct_purge_all:
             _lbrob_move_to_pos(_CmdRunning, _micron_2_steps(CABLE_PURGE_POS_BACK));
+            val = TRUE;
+            lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &val);
             break;
 
         case rob_fct_purge_head0:
@@ -1027,6 +1051,8 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
         case rob_fct_purge_head5:
         case rob_fct_purge_head6:
         case rob_fct_purge_head7:
+            val = TRUE;
+            lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &val);
             pos = (CABLE_PURGE_POS_BACK + (((int)_RobFunction - (int)rob_fct_purge_head0) * (CABLE_PURGE_POS_FRONT - CABLE_PURGE_POS_BACK)) / 7);
             _lbrob_move_to_pos(_CmdRunning, _micron_2_steps(pos));
             break;
@@ -1039,9 +1065,10 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
         case rob_fct_move:
             if (!RX_StepperStatus.info.z_in_wash)
             {
-                if (!RX_StepperStatus.info.moving)
+                if (!RX_StepperStatus.info.moving && !RX_StepperStatus.screwerinfo.moving)
                 {
                     _CmdRunning = FALSE;
+                    RX_StepperStatus.robinfo.moving = FALSE;
                     _CmdRunning_Lift = CMD_LIFT_WASH_POS;
                     _NewCmd = msgId;
                     lb702_handle_ctrl_msg(INVALID_SOCKET, _CmdRunning_Lift, NULL);
@@ -1541,15 +1568,6 @@ static void _lbrob_motor_test(int motorNo, int steps)
 
     motors_config(motors, CURRENT_HOLD, X_STEPS_PER_REV, X_INC_PER_REV, STEPS);
     motors_move_by_step(motors, &par, steps, FALSE);
-}
-
-//--- _lbrob_motor_enc_reg_test -----------------------------------------------
-static void _lbrob_motor_enc_reg_test(int steps)
-{
-    RX_StepperStatus.robinfo.moving = TRUE;
-    _CmdRunning = 1;
-
-    motors_move_by_step(MOTOR_X_0, &_ParCable_drive, -steps, FALSE);
 }
 
 //--- _check_in_screw_pos --------------------------------------

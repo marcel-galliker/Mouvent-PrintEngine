@@ -472,16 +472,10 @@ int	 steplb_rob_fct_done(int no, ERobotFunctions rob_function)
 }
 
 //--- steplb_rob_vacuum ---------------------------------------------
-void steplb_rob_vacuum(int time_s)
+void steplb_rob_vacuum(int no, int state)
 {
-    int no;
-    int time_ms = time_s * 1000;
-    for (no = 0; no < STEPPER_CNT; no++)
-    {
-        if (_step_socket[no] != INVALID_SOCKET)
-            sok_send_2(&_step_socket[no], CMD_ROB_VACUUM, sizeof(time_ms), &time_ms);
-    }
-    
+    if (_step_socket[no] != INVALID_SOCKET)
+        sok_send_2(&_step_socket[no], CMD_ROB_VACUUM, sizeof(state), &state);
 }
 
 //--- steplb_rob_stop ------------------------------
@@ -684,11 +678,18 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
                                     _RobotCtrlMode[no] = ctrl_vacuum_step1;
                                     break;
                                     
-        case ctrl_vacuum_step1:		if (_Status[no].robinfo.vacuum_done) _RobotCtrlMode[no] = ctrl_vacuum_step2;
+        case ctrl_vacuum_step1:     if (_Status[no].robinfo.vacuum_done)
+                                    {
+                                        _RobotCtrlMode[no] = ctrl_vacuum_step2;
+                                        _steplb_rob_do_reference(no);
+                                    }
+                                    break;
+                                    
+        case ctrl_vacuum_step2:		if (_Status[no].info.x_in_ref) _RobotCtrlMode[no] = ctrl_vacuum_step3;
 									_printing = RX_PrinterStatus.printState == ps_pause;
 									break;
                                     
-        case ctrl_vacuum_step2:		if (_printing)	_RobotCtrlMode[no] = ctrl_print;
+        case ctrl_vacuum_step3:		if (_printing)	_RobotCtrlMode[no] = ctrl_print;
 									else			_RobotCtrlMode[no] = ctrl_off;
 									break;
                                     
@@ -698,21 +699,20 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
                                     _RobotCtrlMode[no] = ctrl_wipe_step1;
                                     break;
                                     
-        case ctrl_wipe_step1:       if (_Status[no].robinfo.wipe_done) _RobotCtrlMode[no] = ctrl_wipe_step2;
+        case ctrl_wipe_step1:       if (_Status[no].robinfo.wipe_done) 
+                                    {
+                                        _RobotCtrlMode[no] = ctrl_wipe_step2;
+                                        _steplb_rob_do_reference(no);
+                                    }
                                     _printing = RX_PrinterStatus.printState == ps_pause;
                                     break;
                                     
-        case ctrl_wipe_step2:       sok_send_2(&_step_socket[no], CMD_LIFT_REFERENCE, 0, NULL);
-                                    if (_printing)	_RobotCtrlMode[no] = ctrl_print;
-									else			_RobotCtrlMode[no] = ctrl_off;
-									break; 
-
-        case ctrl_robi_out:			sok_send_2(&_step_socket[no], CMD_ROB_REFERENCE, 0, NULL);
-									_RobotCtrlMode[no] = ctrl_robi_out_step1;
-									break;
-	
-		case ctrl_robi_out_step1:	if (RX_StepperStatus.info.x_in_ref && !RX_StepperStatus.info.moving && !RX_StepperStatus.robinfo.moving)	_RobotCtrlMode[no] = ctrl_off;
-									break;
+        case ctrl_wipe_step2:       if (_Status[no].info.x_in_ref)
+                                    {
+                                        if (_printing)	_RobotCtrlMode[no] = ctrl_print;
+									    else			_RobotCtrlMode[no] = ctrl_off;
+                                    }
+                                    break;
 
 		case ctrl_off:				_RobotCtrlMode[no] = ctrl_off;
 									break;

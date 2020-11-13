@@ -770,14 +770,15 @@ static void _control(int fluidNo)
                                             }
 											else if (lbrob && _PurgeCtrlMode != ctrl_purge4ever)
 											{
-											    if (!RX_StepperStatus.robinfo.moving) steplb_rob_fct_start(no / 2, HeadNo + rob_fct_purge_head0);
+											    if (!RX_StepperStatus.robinfo.moving && even_number_of_colors)			steplb_rob_fct_start(no / 2, HeadNo + rob_fct_purge_head0);
+                                                else if (!RX_StepperStatus.robinfo.moving && !even_number_of_colors)	steplb_rob_fct_start((no+1) / 2, HeadNo + rob_fct_purge_head0);
                                                 if (-1 * RX_StepperStatus.posY[no/2] > j * 43000)
                                                 {
                                                     j++;
                                                     ctrl_tick();
                                                     fluid_tick();
                                                 }
-                                                
+                                                step_empty_waste();
                                             }
                     
 											break;
@@ -788,6 +789,7 @@ static void _control(int fluidNo)
 												else													_Flushed &= ~(0x01<<no);
 												setup_fluid_system(PATH_USER FILENAME_FLUID_STATE, &_Flushed, WRITE);				
 											}
+                                            if (!RX_StepperStatus.robinfo.moving && rx_def_is_tx(RX_Config.printer.type) && step_active(1)) step_empty_waste();
 
                                             if (lbrob)
                                             {
@@ -1009,6 +1011,9 @@ static void _control_flush(void)
 								break;
 		
 		case ctrl_flush_done:	ErrorEx(dev_fluid, -1, LOG, 0, "Flush complete");
+								
+								if (!RX_StepperStatus.robinfo.moving && rx_def_is_tx(RX_Config.printer.type) && step_active(1)) step_empty_waste();
+
 								if (_txrob)
 								{
 									fluid_send_ctrlMode(-1, ctrl_cap_step4, TRUE);

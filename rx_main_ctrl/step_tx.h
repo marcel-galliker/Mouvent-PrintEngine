@@ -55,6 +55,7 @@ int steptx_rob_cap_flush_prepared(void);
 
 void steptx_rob_stop(void);
 void steptx_rob_empty_waste(void);
+void steptx_set_autocapMode(int state);
 
 void steptx_set_robCtrlMode(EnFluidCtrlMode ctrlMode);
 

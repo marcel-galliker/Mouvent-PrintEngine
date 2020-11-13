@@ -23,22 +23,25 @@
 #include "robi_def.h"
 
 #define STEPS_PER_REV				51200
-#define DISTANCE_UM_PER_REV			36000           // 36000
-#define TIME_BEFORE_TURN_SCREWER    2600            // us
-#define SCREW_MOVEMENT_CHECK_TIME   1100            // us
+#define DISTANCE_UM_PER_REV			36000   // 36000
+#define TIME_BEFORE_TURN_SCREWER    2600    // us
+#define SCREW_MOVEMENT_CHECK_TIME   1100    // us
 
 // define inputs
-#define SCREW_IN_DOWN 0
-#define SCREW_IN_UP 1
-#define SCREW_IN_REF 2
-#define X_IN_REF 3
-#define Y_IN_REF 4
+#define SCREW_IN_DOWN               0
+#define SCREW_IN_UP                 1
+#define SCREW_IN_REF                2
+#define X_IN_REF                    3
+#define Y_IN_REF                    4
 
-#define MIN_Y_POS 34000
+#define MIN_Y_POS                   34000
 
-#define MAX_VARIANCE 100 // um
+#define MAX_VARIANCE                100     // um
 
-#define MAX_VAR_SCREW_POS 6000 // um
+#define MAX_VAR_SCREW_POS           6000    // um
+
+#define WIPE_POS_LEFT               -7600   // um
+#define WIPE_POS_RIGHT              4500    // um
 
 static int _steps_2_micron(int steps);
 static int _micron_2_steps(int micron);
@@ -488,11 +491,13 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         _CmdRunning = 0;
         _Search_Screw_Time = 0;
         _Loose_Screw_Time = 0;
+        RX_StepperStatus.screwerinfo.y_in_ref = FALSE;
         lb702_reset_variables();
         robi_stop();
         break;
     case CMD_ROBI_REFERENCE:
             _CmdRunning = msgId;
+            RX_StepperStatus.screwerinfo.moving = TRUE;
             robi_reference();
             break;
         break;
@@ -745,7 +750,7 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             else
             {
                 _CmdRunning = msgId;
-                if (pos) pos = -7600;
+                if (pos) pos = WIPE_POS_LEFT;
                 robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_X, &pos);
             }
             
@@ -782,7 +787,7 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             else
             {
                 _CmdRunning = msgId;
-                if (pos) pos = 4600;
+                if (pos) pos = WIPE_POS_RIGHT;
                 robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_X, &pos);
             }        
         }

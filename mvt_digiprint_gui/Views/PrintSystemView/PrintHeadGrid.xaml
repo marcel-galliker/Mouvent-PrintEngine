@@ -87,9 +87,6 @@
             <TextBlock Grid.Row="11" Grid.Column="1" Text="°C" Name="Cooler_Temp_Text"/>
 
             <TextBlock Grid.Row="12" Grid.Column="0" Text="Cluster No" Name="ClusterNo"/>
-            
-            <TextBlock Grid.Row="13" Grid.Column="0" Text="Drive Voltage" Name="Drive_Voltage"/>
-            <TextBlock Grid.Row="13" Grid.Column="1" Text="%" Name="Drive_Voltage_Text"/>
 
 
         </Grid>

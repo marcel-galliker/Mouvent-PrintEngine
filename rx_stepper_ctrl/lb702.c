@@ -294,6 +294,10 @@ void lb702_main(int ticks, int menu)
 			_NewCmd = FALSE;
 			_CmdRunningRobi = FALSE;
 		}
+        if (loc_new_cmd == CMD_LIFT_WASH_POS)
+        {
+            Error(WARN, 0, "CMD_LIFT_WASH_POS is called");
+        }
         if (loc_new_cmd)
 		{
 			switch (loc_new_cmd)
@@ -308,7 +312,7 @@ void lb702_main(int ticks, int menu)
 			default: Error(ERR_CONT, 0, "LB702_MAIN: Command 0x%08x not implemented", loc_new_cmd); break;
 			}
 		}
-		loc_new_cmd = FALSE;	
+		loc_new_cmd = FALSE;
 	}
 	
     if (memcmp(&oldSatus.info, &RX_StepperStatus.info, sizeof(RX_StepperStatus.info)))
@@ -487,7 +491,7 @@ static void _lb702_move_to_pos(int cmd, int pos0, int pos1)
 {
 	int adjust=0;
     RX_StepperStatus.cmdRunning = cmd;
-	
+    if (cmd == _NewCmd) _NewCmd = 0;
     if (RX_StepperStatus.robot_used && !_CmdRunningRobi && (!RX_StepperStatus.screwerinfo.y_in_ref || !RX_RobiStatus.isInGarage) && RX_StepperStatus.cmdRunning != CMD_LIFT_REFERENCE && RX_StepperStatus.cmdRunning != CMD_LIFT_SCREW)
     {
         _CmdRunningRobi = CMD_ROBI_MOVE_TO_GARAGE;
@@ -502,8 +506,8 @@ static void _lb702_move_to_pos(int cmd, int pos0, int pos1)
 		lbrob_handle_ctrl_msg(INVALID_SOCKET, _CmdRunningRobi, NULL);
 		_NewCmd = cmd;
 	}
-    else if (((cmd == CMD_LIFT_PRINT_POS || cmd == CMD_LIFT_UP_POS || cmd == CMD_LIFT_CLUSTER_CHANGE || cmd == CMD_LIFT_CAPPING_POS) && RX_RobiStatus.isInGarage && RX_StepperStatus.screwerinfo.y_in_ref) || 
-                 cmd == CMD_LIFT_WASH_POS || cmd == CMD_LIFT_SCREW || cmd == CMD_LIFT_REFERENCE)
+    else if (((cmd == CMD_LIFT_PRINT_POS || cmd == CMD_LIFT_UP_POS || cmd == CMD_LIFT_CLUSTER_CHANGE || cmd == CMD_LIFT_CAPPING_POS || cmd == CMD_LIFT_WASH_POS) && RX_RobiStatus.isInGarage && RX_StepperStatus.screwerinfo.y_in_ref) || 
+                  cmd == CMD_LIFT_SCREW || cmd == CMD_LIFT_REFERENCE)
 	{
         Error(LOG, 0, "Move Command %08x", cmd);
         RX_StepperStatus.info.moving = TRUE;
@@ -516,7 +520,7 @@ static void _lb702_move_to_pos(int cmd, int pos0, int pos1)
 	} 
 	else 
     {
-        Error(WARN, 0, "Command needs to wait");
+        Error(WARN, 0, "Command %08x needs to wait", cmd);
         RX_StepperStatus.cmdRunning = 0;
         _NewCmd = cmd;
     }

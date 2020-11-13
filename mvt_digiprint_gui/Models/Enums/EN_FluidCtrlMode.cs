@@ -98,9 +98,6 @@ namespace RX_DigiPrint.Models.Enums
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_vacuum_step13,"Vac /13"        ));
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_vacuum_step14,"Vac /14"        ));
 
-                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_robi_out,       "Robi Out"     ));
-                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_robi_out_step1, "Robi Out /1"  ));
-
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_fill,          "Fill"          ));
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_fill_step1,    "Fill /1"       ));
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_fill_step2,    "Fill /2"       ));

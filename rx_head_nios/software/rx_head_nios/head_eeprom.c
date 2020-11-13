@@ -21,19 +21,17 @@ static int _seq_write_eeprom(alt_u8 * eeprom_data, alt_u32 number_of_byte_to_wri
 
 //--- head_eeprom_read --------------------------------------
 // Fuji data, read byte by byte with one single I2C read command => fast
-int head_eeprom_read(void)
+int head_eeprom_read(alt_u32 head, alt_u8 * eeprom_data, alt_u32 number_of_byte_to_read)
 {
-	alt_u32 	head=0;
 	// Read Data from Head eeprom
 	//0x50, 0x52, 0x54, 0x56 for head 0-4
 
-	for(head=0;head<MAX_HEADS_BOARD;head++)
+	//_seq_read_eeprom(alt_u8 * eeprom_data, alt_u32 number_of_byte_to_read, char chip_adr, char eeprom_adr0, char eeprom_adr1)
+	if(_seq_read_eeprom(eeprom_data, EEPROM_DATA_SIZE, 0x50+(head*2), 0x00)!=0)
 	{
-		//_seq_read_eeprom(alt_u8 * eeprom_data, alt_u32 number_of_byte_to_read, char chip_adr, char eeprom_adr0, char eeprom_adr1)
-		if(_seq_read_eeprom(pRX_Status->head_eeprom[head], EEPROM_DATA_SIZE, 0x50+(head*2), 0x00)!=0)
-			return(-1);
+		memset(pRX_Status->head_eeprom[head], 0x00, EEPROM_DATA_SIZE);
+		return(-1);
 	}
-	return (0);
 }
 
 //--- _seq_read_eeprom --------------------------------------

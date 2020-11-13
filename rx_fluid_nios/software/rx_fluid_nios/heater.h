@@ -21,6 +21,7 @@
 
 //--- prototypes ------------------------
 void heater_init(void);
+void heater_error_reset(void);
 void heater_tick_10ms(void);
 void heater_tick_1000ms(void);
 
