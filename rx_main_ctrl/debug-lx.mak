@@ -13,9 +13,9 @@ OBJCOPY := objcopy
 
 #Additional flags
 PREPROCESSOR_MACROS := DEBUG linux
-INCLUDE_DIRS := ../rx_ink_lib ../rx_common_lib ../Externals/TinyXML ./rx_rexroth_lib ../rx_rip_lib ../rx_tif_lib ../rx_pecore_lib ../Externals/mlpi/include ../Externals/matrix/linux/include ../Externals/libtiff ../Externals/libxl/include_c
-LIBRARY_DIRS := /usr/lib ../Externals/libxl/lib64
-LIBRARY_NAMES := mlpi xl
+INCLUDE_DIRS := ../rx_ink_lib ../rx_common_lib ../Externals/TinyXML ./rx_rexroth_lib ../rx_rip_lib ../rx_tif_lib ../rx_pecore_lib ../Externals/mlpi/include ../Externals/matrix/linux/include ../Externals/libtiff ../Externals/libxl/include_c  ../Externals/iQ500
+LIBRARY_DIRS := /usr/lib ../Externals/libxl/lib64  ../Externals/iQ500
+LIBRARY_NAMES := mlpi xl IQCoreRemote
 ADDITIONAL_LINKER_INPUTS := 
 MACOS_FRAMEWORKS := 
 

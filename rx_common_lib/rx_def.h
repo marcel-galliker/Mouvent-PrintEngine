@@ -147,18 +147,19 @@ typedef struct SValue
 //--- devices -----------------------------------------------------------------
 typedef enum EDevice
 {
-	dev_undef,	// 00
-	dev_main,	// 01
-	dev_gui,	// 02
-	dev_plc,	// 03
-	dev_enc,	// 04	
-	dev_fluid,	// 05
-	dev_6,		// 06
-	dev_enc32,	// 07
-	dev_8,		// 08
-	dev_stepper,// 09
-	dev_head,	// 10
-	dev_spooler,// 11
+    dev_undef,   // 00
+    dev_main,    // 01
+    dev_gui,     // 02
+    dev_plc,     // 03
+    dev_enc,     // 04
+    dev_fluid,   // 05
+    dev_6,       // 06
+    dev_enc32,   // 07
+    dev_8,       // 08
+    dev_stepper, // 09
+    dev_head,    // 10
+    dev_spooler, // 11
+    dev_iq500,   // 12
 	dev_end		// 13
 } EDevice;
 extern char *DeviceStr[];
@@ -1559,6 +1560,14 @@ typedef struct SColorSplitCfg
 	SSplitCfg		split[MAX_HEADS_COLOR];
 } SColorSplitCfg;
 
+typedef struct SiQ500Cfg
+{
+    UINT32 hasInspectionCamera; // 0=no inspection camera, 1 = has inspection
+                                // camera
+    UINT32 distanceToCamera;    // in mm
+    UINT32 minNumberOfCopies;   // minimum number of copies of a job to start
+                                // procedure
+} SiQ500Cfg;
 //--- print system -------------------------------
 
 typedef struct SRxConfig
@@ -1588,6 +1597,7 @@ typedef struct SRxConfig
 		INT32			calib[MAX_SCALES];			
 	} scales;
 //	INT16			headDisabledJets[MAX_HEAD_DIST][MAX_DISABLED_JETS];
+    SiQ500Cfg iQ500Cfg;
 } SRxConfig;
 
 /*

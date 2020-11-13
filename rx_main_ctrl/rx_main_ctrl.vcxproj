@@ -47,6 +47,7 @@
     <ClInclude Include="chiller.h" />
     <ClInclude Include="cleaf_orders.h" />
     <ClInclude Include="ctr.h" />
+    <ClInclude Include="iQ500.h" />
     <ClInclude Include="pe_main.h" />
     <ClInclude Include="prod_log.h" />
     <ClInclude Include="lh702_ctrl.h" />
@@ -91,6 +92,7 @@
     <ClCompile Include="chiller.c" />
     <ClCompile Include="cleaf_orders.c" />
     <ClCompile Include="ctr.c" />
+    <ClCompile Include="iQ500.c" />
     <ClCompile Include="pe_main.c" />
     <ClCompile Include="prod_log.c" />
     <ClCompile Include="lh702_ctrl.c" />

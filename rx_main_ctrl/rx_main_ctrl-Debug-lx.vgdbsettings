@@ -212,6 +212,38 @@
         <WorkingDirectory>$(ProjectDir)</WorkingDirectory>
         <BackgroundMode>false</BackgroundMode>
       </CustomActionBase>
+      <CustomActionBase xsi:type="SourceTransferAction">
+        <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
+        <RemoteHost>
+          <HostName>BuildMachine</HostName>
+          <Transport>BuiltinShortcut</Transport>
+        </RemoteHost>
+        <LocalDirectory>$(ProjectDir)/../Externals/iQ500</LocalDirectory>
+        <RemoteDirectory>/tmp/VisualGDB/$(ProjectDirUnixStyle)/../Externals/iQ500</RemoteDirectory>
+        <FileMasks>
+          <string>*.*</string>
+        </FileMasks>
+        <TransferNewFilesOnly>true</TransferNewFilesOnly>
+        <IncludeSubdirectories>true</IncludeSubdirectories>
+        <SelectedDirectories />
+        <DeleteDisappearedFiles>true</DeleteDisappearedFiles>
+        <ApplyGlobalExclusionList>true</ApplyGlobalExclusionList>
+        <Extension>
+          <Direction>Outgoing</Direction>
+          <SkipMountPoints>false</SkipMountPoints>
+          <OverwriteTrigger>LocalCache</OverwriteTrigger>
+        </Extension>
+      </CustomActionBase>
+      <CustomActionBase xsi:type="FileTransferAction">
+        <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
+        <DestinationHost>
+          <HostName>DeploymentMachine</HostName>
+          <Transport>BuiltinShortcut</Transport>
+        </DestinationHost>
+        <SourceFilePath>$(ProjectDir)\..\Externals\iQ500\libIQCoreRemote.so</SourceFilePath>
+        <DestinationFilePath>$(DeployDir)/libIQCoreRemote.so</DestinationFilePath>
+        <OverwriteTrigger>Always</OverwriteTrigger>
+      </CustomActionBase>
     </PreBuildActions>
     <PostBuildActions>
       <CustomActionBase xsi:type="SourceTransferAction">
@@ -275,6 +307,12 @@
         </DestinationHost>
         <SourceFilePath>$(ProjectDir)\..\Externals\libxl\lib64\libxl.so</SourceFilePath>
         <DestinationFilePath>$(TargetDir)\libxl.so</DestinationFilePath>
+        <OverwriteTrigger>Always</OverwriteTrigger>
+      </CustomActionBase>
+      <CustomActionBase xsi:type="FileTransferAction">
+        <SkipWhenRunningCommandList>true</SkipWhenRunningCommandList>
+        <SourceFilePath>$(ProjectDir)\..\Externals\iQ500\libIQCoreRemote.so</SourceFilePath>
+        <DestinationFilePath>$(TargetDir)\libIQCoreRemote.so</DestinationFilePath>
         <OverwriteTrigger>Always</OverwriteTrigger>
       </CustomActionBase>
     </PostBuildActions>

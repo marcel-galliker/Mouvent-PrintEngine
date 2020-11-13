@@ -77,6 +77,7 @@ bin\head\rx_head_rbf
 bin\head\test.wfd
 bin\main
 bin\main\head_presout.xml
+bin\main\libIQCoreRemote.so
 bin\main\libmlpi.so.1
 bin\main\libxl.so
 bin\main\rx_dhcp_server

@@ -411,7 +411,9 @@ int net_device_to_ipaddr(EDevice dev, int no, char *ipAddr, int size)
 					if (no<=0 || no>=255)	sprintf(ipAddr, "%s%d", RX_CTRL_SUBNET, 200); 
 					else					sprintf(ipAddr, "%s%d", RX_CTRL_SUBNET, 200+no); 
 					break;
-
+    case dev_iq500:
+        sprintf(ipAddr, "%s", RX_CTRL_IQ500);
+					break;
 	default:		return REPLY_ERROR;
 	}
 	return REPLY_OK;

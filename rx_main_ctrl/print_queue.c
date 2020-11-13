@@ -27,6 +27,7 @@
 #include "ctr.h"
 #include "spool_svr.h"
 #include "print_queue.h"
+#include "iQ500.h"
 
 //--- statics -----------------------------------------------------------------
 
@@ -318,6 +319,7 @@ int pq_abort(void)
 		}
 	}
 	pq_stop();
+    iq500_abort();
 	return REPLY_OK;
 }
 
@@ -533,6 +535,9 @@ int pq_loading(int spoolerNo, SPageId *pid, char *txt)
 			{
 				_Loading[i] |= 1<<spoolerNo;
 				_List[i].state=PQ_STATE_LOADING;
+
+                iq500_new_job(_List[i]);
+                
 				// _List[i].scansSent = 0;
 			}
 			strncpy(_ListText[i][spoolerNo], txt, sizeof(_ListText[i][spoolerNo])-1);
@@ -891,9 +896,15 @@ int pq_printed(int headNo, SPageId *pid, int *pageDone, int *jobDone, SPrintQueu
 						enc_change();
 					}
 				}
+				pitem->state = PQ_STATE_PRINTED;
+                iq500_job_done();
 			}
-			else pitem->state   = PQ_STATE_PRINTING;
-		}
+			else
+            {
+               pitem->state   = PQ_STATE_PRINTING;
+				iq500_print_done(pitem);
+			}
+        }
 		else 
 		{
 			TrPrintfL(TRUE, "PQ_STATE_STOPPING (id=%d, page=%d, copy=%d, scan=%d)", pid->id, pid->page, pid->copy, pid->scan);

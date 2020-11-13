@@ -39,6 +39,7 @@
 #include "cleaf_orders.h"
 #include "bmp.h"
 #include "label.h"
+#include "iQ500.h"
 
 //--- prototypes -----------------------
 static void _on_error(ELogItemType type, char *deviceStr, int no, char *msg);
@@ -194,6 +195,9 @@ int pc_start_printing(void)
 		RX_PrinterStatus.printState=ps_printing;
 		gui_send_printer_status(&RX_PrinterStatus);
 	}
+
+    iq500_start_printing();
+    
 	return REPLY_OK;
 }
 
@@ -222,6 +226,9 @@ int pc_stop_printing(int userStop)
 			enc_stop_pg("pc_stop_printing");
 		gui_send_printer_status(&RX_PrinterStatus);
 	}
+
+    iq500_stop_printing();
+    
 	return REPLY_OK;
 }
 

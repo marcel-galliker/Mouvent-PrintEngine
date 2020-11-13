@@ -47,6 +47,7 @@
 #include "enc_ctrl.h"
 #include "errno.h"
 #include "cleaf_orders.h"
+#include "iQ500.h"
 
 
 //--- global variables -----------------------------
@@ -233,6 +234,7 @@ int main(int argc, char* argv[])
 	ctr_init();
 	dl_init();
 	pl_init();
+    iq500_init();
 	
 	spool_auto(TRUE);
 	
@@ -293,6 +295,7 @@ int main(int argc, char* argv[])
 	enc_end();
 	pc_end();
 	pq_end();
+    iq500_end();
 	rx_end();
 	return 0;
 }

@@ -236,6 +236,16 @@ int setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action)
 		}
 	}
 
+    // iQ500 config --------------------------------- //
+	if (setup_chapter(file, "iQ500", -1, action) == REPLY_OK) 
+	{
+		setup_int32(file, "HasInspectionCamera", action, &pcfg->iQ500Cfg.hasInspectionCamera, 0);
+		setup_int32(file, "DistanceToCameraInMM", action, &pcfg->iQ500Cfg.distanceToCamera, 0);
+        setup_int32(file, "MinNumberOfCopies", action, &pcfg->iQ500Cfg.minNumberOfCopies, 50);
+
+        setup_chapter(file, "..", -1, action);
+	}
+    
 	if (action==WRITE) setup_save(file, filepath);
 	setup_destroy(file);
 
