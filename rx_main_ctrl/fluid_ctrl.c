@@ -708,6 +708,10 @@ static void _control(int fluidNo)
 				case ctrl_purge_step2:		if ((plc_in_purge_pos() && RX_Config.printer.type != printer_test_table_seon) || (RX_Config.printer.type == printer_test_table_seon && drive_in_waste()))
 											{
                                                 if (RX_Config.printer.type == printer_test_table_seon)	steptts_to_print_pos();
+												if (_txrob && _PurgeCtrlMode == ctrl_purge_hard_wipe)
+													step_rob_to_wipe_pos(rob_fct_wipe);
+												else if (_txrob && _PurgeCtrlMode == ctrl_purge_hard_vacc)
+													step_rob_to_wipe_pos(rob_fct_vacuum_all);
 												_send_ctrlMode(no, ctrl_purge_step3, TRUE);												
 											}
 											break;
