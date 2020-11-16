@@ -105,7 +105,7 @@
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="auto"/>
                 </Grid.RowDefinitions>
-                <TextBlock  Grid.Row="0" Grid.Column="0" Text="Disnatnce [mm]"/>
+                <TextBlock  Grid.Row="0" Grid.Column="0" Text="Distance [mm]"/>
                 <common:MvtNumBox    Grid.Row="0" Grid.Column="1" x:Name="MoveDist"/>
 
                 <Grid Grid.Row="4" Grid.ColumnSpan="2">

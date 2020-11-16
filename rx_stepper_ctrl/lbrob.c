@@ -826,6 +826,8 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         _CmdSearchScrews = 0;
         _CmdScrewing = 0;
         RX_StepperStatus.robinfo.ref_done = FALSE;
+        int val = FALSE;
+        lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &val);
         robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_STOP, NULL);
         break;
 

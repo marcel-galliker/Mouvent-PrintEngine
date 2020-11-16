@@ -903,8 +903,9 @@ static void _control(int fluidNo)
 											break;
                                             
                 case ctrl_empty_step3:		_send_ctrlMode(no, ctrl_empty_step4, TRUE);		break;
-                case ctrl_empty_step4:		_send_ctrlMode(no, ctrl_empty_step5, TRUE);		break;   
-				case ctrl_empty_step5:		_send_ctrlMode(no, ctrl_off, TRUE);				break;
+                case ctrl_empty_step4:		_send_ctrlMode(no, ctrl_empty_step5, TRUE);		break;
+                case ctrl_empty_step5:		_send_ctrlMode(no, ctrl_empty_step6, TRUE);		break;    
+				case ctrl_empty_step6:		_send_ctrlMode(no, ctrl_off, TRUE);				break;
 				
 				case ctrl_cal_start:		_send_ctrlMode(no, ctrl_cal_step1,	 TRUE);		break;				
 				case ctrl_cal_step1:		_send_ctrlMode(no, ctrl_cal_step2,   TRUE);		break;

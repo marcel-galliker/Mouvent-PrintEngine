@@ -836,10 +836,7 @@ void ctrl_send_head_fluidCtrlMode(int headNo, EnFluidCtrlMode ctrlMode, int send
 		cmd.hdr.msgLen	= sizeof(cmd);
 		cmd.no			= headNo%HEAD_CNT;
 		cmd.ctrlMode	= ctrlMode;
-        if (ctrlMode == ctrl_off)
-        {
-            int i = 0;
-        }
+        
         if (!(ctrlMode == ctrl_off && mode == ctrl_wait))
         {
 			sok_send(&_HeadCtrl[headNo/HEAD_CNT].socket, &cmd);

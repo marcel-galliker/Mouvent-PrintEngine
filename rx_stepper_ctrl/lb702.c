@@ -503,11 +503,12 @@ static void _lb702_move_to_pos(int cmd, int pos0, int pos1)
 	else if (RX_StepperStatus.robot_used && !_CmdRunningRobi && (!RX_StepperStatus.robinfo.ref_done || !RX_StepperStatus.info.x_in_ref) && RX_StepperStatus.cmdRunning != CMD_LIFT_REFERENCE && RX_StepperStatus.cmdRunning != CMD_LIFT_CAPPING_POS && RX_StepperStatus.cmdRunning != CMD_LIFT_WASH_POS && RX_StepperStatus.cmdRunning != CMD_LIFT_SCREW) 
 	{
 		_CmdRunningRobi = CMD_ROB_REFERENCE;
-		lbrob_handle_ctrl_msg(INVALID_SOCKET, _CmdRunningRobi, NULL);
+        RX_StepperStatus.cmdRunning = 0;
+        lbrob_handle_ctrl_msg(INVALID_SOCKET, _CmdRunningRobi, NULL);
 		_NewCmd = cmd;
 	}
-    else if (((cmd == CMD_LIFT_PRINT_POS || cmd == CMD_LIFT_UP_POS || cmd == CMD_LIFT_CLUSTER_CHANGE || cmd == CMD_LIFT_CAPPING_POS || cmd == CMD_LIFT_WASH_POS) && RX_RobiStatus.isInGarage && RX_StepperStatus.screwerinfo.y_in_ref) || 
-                  cmd == CMD_LIFT_SCREW || cmd == CMD_LIFT_REFERENCE)
+    else if (((cmd == CMD_LIFT_PRINT_POS || cmd == CMD_LIFT_UP_POS || cmd == CMD_LIFT_CLUSTER_CHANGE) && RX_RobiStatus.isInGarage && RX_StepperStatus.screwerinfo.y_in_ref && RX_StepperStatus.info.x_in_ref) ||
+                 ((cmd == CMD_LIFT_CAPPING_POS || cmd == CMD_LIFT_WASH_POS) && RX_RobiStatus.isInGarage && RX_StepperStatus.screwerinfo.y_in_ref) || cmd == CMD_LIFT_SCREW || cmd == CMD_LIFT_REFERENCE)
 	{
         Error(LOG, 0, "Move Command %08x", cmd);
         RX_StepperStatus.info.moving = TRUE;
