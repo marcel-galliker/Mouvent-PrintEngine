@@ -205,9 +205,8 @@ void lbrob_main(int ticks, int menu)
     RX_StepperStatus.info.vacuum_running = (Fpga.par->output & RO_VACUUM_CLEANER) >> 4;
     
     _NewEncoderPos = motor_get_step(MOTOR_X_0);
-    if ((_NewEncoderPos >= _OldEncoderPos+50 && _NewEncoderPos >= VACUUM_POS && !RX_StepperStatus.info.vacuum_running && 
-            _OldEncoderPos && !RX_StepperStatus.screwerinfo.wipe_left_up && !RX_StepperStatus.screwerinfo.wipe_right_up) ||
-            Fpga.par->output & RO_INK_PUMP_LEFT || Fpga.par->output & RO_INK_PUMP_RIGHT)
+    if (_NewEncoderPos >= _OldEncoderPos+50 && _NewEncoderPos >= VACUUM_POS && !RX_StepperStatus.info.vacuum_running && 
+            _OldEncoderPos && !RX_StepperStatus.screwerinfo.wipe_left_up && !RX_StepperStatus.screwerinfo.wipe_right_up)
     {
         val = TRUE;
         lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &val);
