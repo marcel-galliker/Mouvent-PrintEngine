@@ -699,7 +699,11 @@ static void _control(int fluidNo)
 								
 				case ctrl_purge_step2:		if (plc_in_purge_pos())
 											{
-												_send_ctrlMode(no, ctrl_purge_step3, TRUE);												
+												_send_ctrlMode(no, ctrl_purge_step3, TRUE);
+												if (_txrob && _PurgeCtrlMode == ctrl_purge_hard_wipe)
+													step_rob_to_wipe_pos(rob_fct_wipe);
+												else if (_txrob && _PurgeCtrlMode == ctrl_purge_hard_vacc)
+													step_rob_to_wipe_pos(rob_fct_vacuum_all);
 											}
 											break;
 
