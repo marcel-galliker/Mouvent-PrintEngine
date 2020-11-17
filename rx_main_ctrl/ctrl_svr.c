@@ -1030,7 +1030,7 @@ void ctrl_reply_stat(RX_SOCKET socket)
 
 void ctrl_set_cluster_no(SValue* pdata)
 {
-    if (_HeadCtrl[pdata->no].socket != INVALID_SOCKET)
-		sok_send_2(&_HeadCtrl[pdata->no].socket, CMD_CHANGE_CLUSTER_NO, sizeof(&pdata), pdata);
+    if (_HeadCtrl[pdata->no - 1].socket != INVALID_SOCKET)
+		sok_send_2(&_HeadCtrl[pdata->no - 1].socket, CMD_CHANGE_CLUSTER_NO, sizeof(&pdata), pdata);
 }
 

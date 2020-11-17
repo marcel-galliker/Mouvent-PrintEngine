@@ -152,7 +152,6 @@
             <TextBlock  Grid.Row="10" Margin="0,0,2,0"  HorizontalAlignment="Right"  Text="{Binding Cooler_Pressure}" Name="Cooler_Pres"/>
             <TextBlock  Grid.Row="11" Margin="0,0,2,0"  HorizontalAlignment="Right"  Text="{Binding Cooler_Temp, Converter={StaticResource HeadVal_ConverterTemp}}" Name="Cooler_Temp"/>
             <TextBlock  Grid.Row="12" Margin="0,0,2,0"  HorizontalAlignment="Right"  Text="{Binding ClusterNo}" Name="ClusterNo"/>
-            <TextBlock  Grid.Row="13" Margin="0,0,2,0"  HorizontalAlignment="Right"  Text="{Binding Drive_Voltage}" Name="Voltage"/>
         </Grid>
 
         <!-- NO Connection _______________________________________________________________________-->
