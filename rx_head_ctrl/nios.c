@@ -63,6 +63,7 @@ int						NIOS_Droplets=0;
 static int				_NiosReady=FALSE;
 static int				_MaxSpeed;
 static int				_EEpromTimeout=0;
+static int				_EEpromLoaded=FALSE;
 
 //--- prototypes -----------------------------------
 
@@ -168,6 +169,7 @@ int nios_end(void)
 		#endif
 		_NiosMem = NULL;
 		_NiosLoaded = FALSE;			
+		_EEpromLoaded=FALSE;
 	}
 	return REPLY_OK;
 }
@@ -263,7 +265,7 @@ static void _sample_wf(int head, SInkDefinition *pink, char *dots, int fpVoltage
 	int subPulsCnt;
 	int voltageCnt;
 	int dropletNo;
-	int trace=TRUE;
+	int trace=FALSE;
 	int load;
 	int ret;
 	int levels;
@@ -566,10 +568,10 @@ int  nios_is_firepulse_on(void)
 //--- nios_set_user_eeprom ------------------------------------
 static void _nios_set_user_eeprom(int no)
 {
+	if (_NiosStat==NULL || !_EEpromLoaded) return;
+
 	if (sizeof(RX_HBStatus[0].head[no].eeprom_mvt)!=128) Error(ERR_ABORT, 0, "SIZE MISMATCH");
 	if (sizeof(_NiosStat->user_eeprom[no])!=128) Error(ERR_ABORT, 0, "SIZE MISMATCH");
-
-	if (_NiosStat==NULL) return;
 
 	//--- initialize status memory -----------------------
 	if (memempty(&RX_HBStatus[0].head[no].eeprom_mvt, sizeof(SHeadEEpromMvt)) && !memempty(&_NiosStat->user_eeprom[no], sizeof(_NiosStat->user_eeprom[no])))
@@ -592,7 +594,7 @@ int  nios_main(int ticks, int menu)
 	
 	if (_NiosLoaded)
 	{
-		if (_NiosMem) cond_main(ticks, menu);
+		if (_NiosMem && _EEpromLoaded) cond_main(ticks, menu);
 
 		tse_check_errors(ticks, menu);
 		if (menu)
@@ -603,7 +605,8 @@ int  nios_main(int ticks, int menu)
 			for(int head=0; head<SIZEOF(FpgaCfg.head); head++)
 			{
 				_nios_set_user_eeprom(head);
-			}		
+			}
+			_EEpromLoaded = TRUE;
 		}
 	}
 	return REPLY_OK;
