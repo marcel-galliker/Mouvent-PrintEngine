@@ -453,8 +453,6 @@ void steplb_rob_wipe_start(int stepperNo, EWipeSide side)
     }
     
     if (_step_socket[stepperNo] != INVALID_SOCKET && (_RobotCtrlMode[stepperNo] == ctrl_off || _RobotCtrlMode[stepperNo] == ctrl_undef)) _RobotCtrlMode[stepperNo] = ctrl_wipe;
-    
-    _RobotCtrlMode[stepperNo] = ctrl_wipe;
 }
 
 //--- steplb_rob_fct_done --------------------------------------
@@ -564,7 +562,20 @@ void steplb_pump_back_fluid(int fluidNo, int state)
 {
     int even_number_of_colors = RX_Config.inkSupplyCnt % 2 == 0;
     int val = 0;
-    if (even_number_of_colors)
+    if (fluidNo == -1)
+    {
+        for (int no = 0; no < SIZEOF(_step_socket); no++)
+        {
+            if (_step_socket[no] != INVALID_SOCKET && state == FALSE) 
+                sok_send_2(&_step_socket[no], CMD_ROB_EMPTY_WASTE, sizeof(val), &val);
+            else if (_step_socket[no] != INVALID_SOCKET && state == TRUE)
+            {
+                val = 5;
+                sok_send_2(&_step_socket[no], CMD_ROB_EMPTY_WASTE, sizeof(val), &val);
+            }
+        }  
+    }
+    else if (even_number_of_colors)
     {
         if (state == FALSE)
             val = ((fluidNo % 2) + 1) * 2;
@@ -590,7 +601,6 @@ void steplb_pump_back_fluid(int fluidNo, int state)
         }
         sok_send_2(&_step_socket[(fluidNo+1)/2], CMD_ROB_EMPTY_WASTE, sizeof(val), &val);
     }
-    
 }
 
 //--- steplb_rob_control ------------------------------

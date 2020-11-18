@@ -1301,6 +1301,7 @@ static void _send_purge_par(int fluidNo, int time)
 {
 #define HEAD_WIDTH 43000
 	SPurgePar par;
+	memset(&par, 0, sizeof(par));
 	par.no    =  fluidNo%INK_PER_BOARD;
     if (RX_StepperStatus.robot_used)
     {
