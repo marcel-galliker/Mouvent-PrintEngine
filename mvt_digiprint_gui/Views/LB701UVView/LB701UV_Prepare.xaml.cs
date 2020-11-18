@@ -1,5 +1,6 @@
 ﻿using RX_Common;
 using RX_DigiPrint.Models;
+using RX_DigiPrint.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -57,17 +58,14 @@ namespace RX_DigiPrint.Views.LB701UVView
         //--- Update ----------------------------------------------
         public void Update()
         {
-            string str;
             int value, n;
-            str = RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_MACHINE_STATE");
+            EnPlcState state=(EnPlcState) Rx.StrToInt32(RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_MACHINE_STATE"));
             try
             {
                 // visible when state="PREPARE"(4)
-                value=Rx.StrToInt32(str);
-                this.Visibility = (value==4 || value==5) ?  Visibility.Visible:Visibility.Collapsed;                        
+                this.Visibility = (state==EnPlcState.plc_prepare || state==EnPlcState.plc_pause) ?  Visibility.Visible:Visibility.Collapsed;                        
 
-                str = RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_PREPARE_ACTIVE");
-                value=Rx.StrToInt32(str);
+                value=Rx.StrToInt32(RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_PREPARE_ACTIVE"));
                 for (n=0; n<_Image.Count; n++)
                 {
                     _Image[n].Visibility = ((value & (1<<Convert.ToInt32(_Image[n].Tag)))==0)? Visibility.Collapsed : Visibility.Visible;

@@ -24,28 +24,14 @@ namespace RX_DigiPrint.Views.SetupAssistView
 			_Camera.CamCallBack += new RxCam.CameraCallBack(CallBackfromCam);
 		}
 
-		//--- UserControl_IsVisibleChanged -------------------------------------
-		private void UserControl_IsVisibleChanged(object sender,DependencyPropertyChangedEventArgs e)
-		{
-			if((bool)e.NewValue) 
-			{
-				new Task(() =>
-				{
-					Task.Delay(500);
-					RxBindable.Invoke(()=>_CamStart());
-				}).Start();
-			}
-			else  _CamStop();
-		}
-
 		//--- Settings_Clicked -------------------------------------------
 		private void Settings_Clicked(object sender,RoutedEventArgs e)
 		{
 			SA_Settings settings = new SA_Settings(_Camera);
             if((bool)settings.ShowDialog()) 
 			{
-				_CamStop();
-				_CamStart();
+				CamCapture.Stop();
+				CamCapture.Start(_Camera);
 			}
 		}
 
@@ -61,10 +47,20 @@ namespace RX_DigiPrint.Views.SetupAssistView
 			RxGlobals.RxInterface.SendCommand(TcpIp.CMD_SA_REFERENCE);
 		}
 
+		//--- Start_Clicked -------------------------------------------
+		private void Start_Clicked(object sender,RoutedEventArgs e)
+		{
+			SetupActions.InitActions(_Camera);
+		}
+		private void Done_Clicked(object sender,RoutedEventArgs e)
+		{
+			SetupActions.ActionDone();
+		}
+
 		//--- Move_Clicked -------------------------------------------
 		private void Move_Clicked(object sender,RoutedEventArgs e)
 		{
-			RxGlobals.SetupAssist.Move(Rx.StrToDouble(MoveDist.Text));
+			RxGlobals.SetupAssist.ScanMoveBy(Rx.StrToDouble(MoveDist.Text));
 		}
 
 		//--- Stop_Clicked -------------------------------------------
@@ -90,15 +86,18 @@ namespace RX_DigiPrint.Views.SetupAssistView
           //  RX_Common.MvtMessageBox.Information("Camera", string.Format("Callback from Camera:\n{0}", CallbackData));
         }
 
-		private void _CamStart()
+		//--- CamCapture_IsVisibleChanged ----------------------------------
+		private void CamCapture_IsVisibleChanged(object sender,DependencyPropertyChangedEventArgs e)
 		{
-			_Camera.SelectCamera(RxGlobals.Settings.SetupAssistCam);
-			_Camera.StartCamera(CameraCapture.Handle, false);
-			_Camera.SetVideoRectangle(CameraCapture.ClientRectangle);
-		}
-		private void _CamStop()
-		{
-			_Camera.StopCamera();
+			if((bool)e.NewValue) 
+			{
+				new Task(() =>
+				{
+					Task.Delay(100);
+					RxBindable.Invoke(()=>CamCapture.Start(_Camera));
+				}).Start();
+			}
+			else  CamCapture.Stop();
 		}
 	}
 }

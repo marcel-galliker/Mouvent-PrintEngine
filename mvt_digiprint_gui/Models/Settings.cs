@@ -1,4 +1,5 @@
-﻿using RX_Common;
+﻿using rx_CamLib.Models;
+using RX_Common;
 using RX_Common.Source;
 using RX_DigiPrint.Models.Enums;
 
@@ -51,8 +52,8 @@ namespace RX_DigiPrint.Models
         }
 
         //--- Property SetupAssistCam ---------------------------------------
-		private string _SetupAssistCam;
-		public string SetupAssistCam
+		private CamSettings _SetupAssistCam= new CamSettings();
+		public CamSettings SetupAssistCam
 		{
 			get { return _SetupAssistCam; }
 			set { SetProperty(ref _SetupAssistCam,value); }

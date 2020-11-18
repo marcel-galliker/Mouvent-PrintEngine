@@ -180,6 +180,7 @@ namespace RX_DigiPrint.Views.UserControls
         private void Stop_Clicked(object sender, RoutedEventArgs e)
         {
             RxGlobals.RxInterface.SendCommand(TcpIp.CMD_STOP_PRINTING);
+            RxGlobals.SetupAssist.ActionRunning=false;
         }
 
         //--- Abort_Clicked -------------------------------------------------

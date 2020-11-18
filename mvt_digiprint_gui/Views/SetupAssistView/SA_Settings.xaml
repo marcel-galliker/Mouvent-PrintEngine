@@ -2,7 +2,6 @@
         xmlns:helpers="clr-namespace:RX_DigiPrint.Helpers"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
         xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         Title="Camera Settings" 
@@ -10,7 +9,15 @@
         Loaded="Window_Loaded"
         SizeToContent="Height"
         Width="400">
-
+    
+    <helpers:CustomWindow.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../../Converters/CamLib/CamLibConverters.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </helpers:CustomWindow.Resources>
+    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
@@ -24,18 +31,36 @@
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="auto"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                
-                <TextBlock Grid.Row="0" Grid.Column="0">Camera</TextBlock>
 
-                <ComboBox Grid.Row="0" Grid.Column="1" x:Name="CB_Camera"/>
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Camera" VerticalAlignment="Center"/>
+                <ComboBox Grid.Row="0" Grid.Column="1" x:Name="CB_Camera" Margin="10,5"/>
 
-                <TextBlock Grid.Row="1" Grid.Column="0">Row 1</TextBlock>
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Stream Caps" VerticalAlignment="Center"/>
+                <ComboBox  Grid.Row="1" Grid.Column="1" x:Name="CB_StreamCaps" Margin="10,5">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding FrameRate}" Width="25"/>
+                                <TextBlock Text="{Binding Resolution, Converter={StaticResource CamCapsResolution_Converter}}" Width="80"/>
+                                <TextBlock Text="{Binding Mediasubtype, Converter={StaticResource CamCapsMediatype_Converter}}"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
 
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="Camera Caps" VerticalAlignment="Center" />
+                <ComboBox  Grid.Row="2" Grid.Column="1" x:Name="CB_CameraCaps" Margin="10,5"/>
+
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="Video Caps" VerticalAlignment="Center" />
+                <ComboBox  Grid.Row="3" Grid.Column="2" x:Name="CB_VideoCaps" Margin="10,5"/>
             </Grid>
         </GroupBox>
 

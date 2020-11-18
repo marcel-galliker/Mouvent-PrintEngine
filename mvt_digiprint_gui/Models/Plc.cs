@@ -142,6 +142,8 @@ namespace RX_DigiPrint.Models
         }
 
         //--- _updateVar --------------------------------------------------------
+        internal EnPlcState _oldState = EnPlcState.plc_undef;
+
         private void _updateVar(List<List<string>>buffer, string[] list)
         {
             int i;
@@ -170,11 +172,18 @@ namespace RX_DigiPrint.Models
                     string[] val = list[n].Split('=');
                     if (val[0].Equals("STA_MACHINE_STATE"))
                     {
-                        int state=Rx.StrToInt32(val[1]);
-                        InReferencing = (state==13);
-                        InWebIn       = (state==9);
-                     //   WebInEnabled  = (state!=4 && state!=6);
-                        WebInEnabled  = (state!=5 && state!=6);
+                        EnPlcState state=(EnPlcState)Rx.StrToInt32(val[1]);
+                        InReferencing = (state==EnPlcState.plc_referencing);
+                        InWebIn       = (state==EnPlcState.plc_webin);
+                     // WebInEnabled  = (state!=EnPlcState.plc_prepare && state!=EnPlcState.plc_run);
+                        WebInEnabled  = (state!=EnPlcState.plc_pause && state!=EnPlcState.plc_run);
+                        /*
+                        if (RxGlobals.SetupAssist.WebMoveDone!=null && _oldState==EnPlcState.plc_run 
+                            && (state==EnPlcState.plc_stop || state==EnPlcState.plc_pause))
+						{
+                            RxGlobals.SetupAssist.WebMoveDone();
+						}
+                        */
                     }
                     if (val[0].Equals("STA_REFERENCE_ENABLE")) ReferenceEnabled = (val[1].Equals("TRUE"));
 

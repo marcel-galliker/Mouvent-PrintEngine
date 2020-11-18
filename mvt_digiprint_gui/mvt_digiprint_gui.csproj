@@ -295,6 +295,8 @@
     <Compile Include="Comparers\Date_Comparer.cs" />
     <Compile Include="Comparers\FileName_Comparer.cs" />
     <Compile Include="Converters\BooleanConverters.cs" />
+    <Compile Include="Converters\CamLib\CamCapsMediatype_Converter.cs" />
+    <Compile Include="Converters\CamLib\CamCapsResolution_Converter.cs" />
     <Compile Include="Converters\IconConverter.cs" />
     <Compile Include="Converters\IconPacks_ModernKind.cs" />
     <Compile Include="Converters\JetCompensationConverters.cs" />
@@ -385,6 +387,7 @@
     <Compile Include="Models\HeadAdjustmentHelp.cs" />
     <Compile Include="Models\JetCompensation.cs" />
     <Compile Include="Models\JetCompensationDensityViewModel.cs" />
+    <Compile Include="Models\SA_CamAction.cs" />
     <Compile Include="Models\SetupAssist.cs" />
     <Compile Include="Models\SoftwareValueCorrection.cs" />
     <Compile Include="Models\StepperStatus.cs" />
@@ -721,6 +724,12 @@
     <Compile Include="Views\Settings\WlanSettings.xaml.cs">
       <DependentUpon>WlanSettings.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\SetupAssistView\SA_Actions.xaml.cs">
+      <DependentUpon>SA_Actions.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SetupAssistView\SA_CamCapture.xaml.cs">
+      <DependentUpon>SA_CamCapture.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\SetupAssistView\SA_Settings.xaml.cs">
       <DependentUpon>SA_Settings.xaml</DependentUpon>
     </Compile>
@@ -932,6 +941,10 @@
     <Page Include="Comparers\Comparers.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Converters\CamLib\CamLibConverters.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Converters\Converters.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -1366,6 +1379,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Settings\WlanSettings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\SetupAssistView\SA_Actions.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\SetupAssistView\SA_CamCapture.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

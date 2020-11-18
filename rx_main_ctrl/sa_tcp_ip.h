@@ -1,8 +1,6 @@
 
 #pragma once
 
-//	#include "type_defs.h"	extern includen!
-
 //--- ICP/IP Addresses -----------------------------------------
 #define SETUP_ASSIST_IP_ADDR	"192.168.200.99"
 #define SETUP_ASSIST_PORT		1337
@@ -29,34 +27,39 @@
 
 #pragma pack(1)
 
-//--- SMsgHdr ------------------------------------
+//--- SSAMsgHdr ------------------------------------
 typedef struct SSAMsgHdr
 {
 	INT32  msgLen;
 	UINT32 msgId;
 } SSAMsgHdr;
 
+typedef struct
+{
+	UINT32 powerStepStatus;
+	INT32 position;
+	UINT32 voltage;
+	UINT32 moveCurrent;
+	UINT32 holdCurrent;
+	UINT8 moveCnt; // will wrap around!
+	UINT8 refDone;
+	UINT8 moving;
+} SMotorStatus;
+
 //--- SSetupAssist_StatusMsg ---------------------------------------
 typedef struct
 {
-	SSAMsgHdr header;
-	UINT32	powerStepStatus;	
-	INT32	motorPosition;
-	UINT32	motorVoltage;
-	UINT32	motorMoveCurrent;
-	UINT32	motorHoldCurrent;	// woher kommt der Wert? Ist er fix in derf SW, oder sollte er über TCP/IP gesetzt werden?
-	UINT8 moveCnt; // will wrap around!
-	UINT8	refDone;
-	UINT8	moving;	
+	SSAMsgHdr	 hdr;
+	SMotorStatus motor;
 	UINT8	inputs;
 		#define IN_STOP_LEFT	(1<<0)
 		#define IN_STOP_RIGHT	(1<<1)
 } SSetupAssist_StatusMsg;
 
-//--- SMotorMoveCommand ------------------------
+//--- SetupAssist_MoveCmd ------------------------
 typedef struct
 {
-	SSAMsgHdr header;
+	SSAMsgHdr hdr;
 	INT32 steps;
 	UINT32 speed;
 	UINT32 acc;
@@ -66,16 +69,14 @@ typedef struct
 //--- SetupAssist_OutSetCmd ------------------------
 typedef struct
 {
-	SSAMsgHdr header;
-	UINT8	out;	// needed??
+	SSAMsgHdr hdr;
 	UINT8	state;	
 } SetupAssist_OutSetCmd;
 
 //--- SetupAssist_OutTriggerCmd ------------------------
 typedef struct
 {
-	SSAMsgHdr header;
-	UINT8	out;		// needed??
+	SSAMsgHdr hdr;
 	UINT32	time_ms;	
 } SetupAssist_OutTriggerCmd;
 

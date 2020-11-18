@@ -7,15 +7,32 @@
     <Company>Bieler Elektronik</Company>
     <AssemblyVersion>1.0.0.*</AssemblyVersion>
     <Deterministic>false</Deterministic>
+    <ApplicationManifest>RxCam.manifest</ApplicationManifest>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
+    <OutputPath>$(SolutionDir)$(Platform)\$(Configuration)\</OutputPath>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutputPath>$(SolutionDir)$(Platform)\$(Configuration)\</OutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Class1.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\rx_common_lib_cs\rx_common_lib_cs.csproj" />
+  </ItemGroup>
 
   <ItemGroup>
     <Reference Include="DirectShowLib-2005">
       <HintPath>DirectShowLib-2005.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationFramework">
+      <HintPath>..\..\..\..\..\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5\PresentationFramework.dll</HintPath>
     </Reference>
     <Reference Include="System.Windows.Forms">
       <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\System.Windows.Forms.dll</HintPath>

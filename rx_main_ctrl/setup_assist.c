@@ -110,9 +110,9 @@ static int _do_sa_stat(RX_SOCKET socket, SSetupAssist_StatusMsg	*pstat)
 {
 	TrPrintfL(TRUE, "SetupAssist: Got Status");
 	memcpy(&_Status, pstat, sizeof(_Status));
-	_Status.header.msgId = REP_SETUP_ASSIST_STAT;
-	_Status.motorPosition = (INT32)(pstat->motorPosition*_microns2steps);
-	if (!_Status.moving && _Timeout<MOVE_TIEMOUT) _Timeout=0;
+	_Status.hdr.msgId = REP_SETUP_ASSIST_STAT;
+	_Status.motor.position = (INT32)(pstat->motor.position*_microns2steps);
+	if (!_Status.motor.moving && _Timeout<MOVE_TIEMOUT) _Timeout=0;
 	gui_send_msg(INVALID_SOCKET, &_Status);
 	return REPLY_OK;
 }
@@ -138,7 +138,7 @@ int sa_in_print_pos(void)
 void sa_handle_gui_msg(RX_SOCKET socket, void *pmsg_)
 {
 	SetupAssist_MoveCmd *pmsg = (SetupAssist_MoveCmd*)pmsg_;
-	switch (pmsg->header.msgId)
+	switch (pmsg->hdr.msgId)
 	{
     case CMD_SA_REFERENCE:		Error(LOG, 0, "Send CMD_MOTOR_REFERENCE");
 								sok_send_2(&_SaSocket, CMD_MOTOR_REFERENCE,    0, NULL); 
@@ -151,12 +151,12 @@ void sa_handle_gui_msg(RX_SOCKET socket, void *pmsg_)
     case CMD_SA_MOVE:			Error(LOG, 0, "Send CMD_MOTOR_MOVE");
 								{
 									SetupAssist_MoveCmd cmd;
-									cmd.header.msgLen = sizeof(cmd);
-									cmd.header.msgId  = CMD_MOTOR_MOVE;
-									cmd.steps		  = (INT32)((double)pmsg->steps/_microns2steps);
-									cmd.speed		  = 200;
-									cmd.acc			  = 100;
-									cmd.current		  = 300;
+									cmd.hdr.msgLen = sizeof(cmd);
+									cmd.hdr.msgId  = CMD_MOTOR_MOVE;
+									cmd.steps	   = (INT32)((double)pmsg->steps/_microns2steps);
+									cmd.speed	   = 200;
+									cmd.acc		   = 100;
+									cmd.current	   = 300;
 									sok_send(&_SaSocket, &cmd);
 								}
 								break;
@@ -164,9 +164,8 @@ void sa_handle_gui_msg(RX_SOCKET socket, void *pmsg_)
     case CMD_SA_OUT_TRIGGER:	Error(LOG, 0, "Send CMD_SET_DENSIO_TRIGGER");
 								{
 									SetupAssist_OutTriggerCmd cmd;
-									cmd.header.msgLen = sizeof(cmd);
-									cmd.header.msgId  = CMD_OUT_TRIGGER;
-									cmd.out			  = 0;
+									cmd.hdr.msgLen = sizeof(cmd);
+									cmd.hdr.msgId  = CMD_OUT_TRIGGER;
 									cmd.time_ms		  = 100;
 									sok_send(&_SaSocket, &cmd);
 								}
@@ -181,6 +180,6 @@ void sa_handle_gui_msg(RX_SOCKET socket, void *pmsg_)
 								plc_pause_printing(FALSE);
 								break;
 
-    default: Error(WARN, 0, "Unknown Command 0x%08x", pmsg->header.msgId);
+    default: Error(WARN, 0, "Unknown Command 0x%08x", pmsg->hdr.msgId);
 	}
 }

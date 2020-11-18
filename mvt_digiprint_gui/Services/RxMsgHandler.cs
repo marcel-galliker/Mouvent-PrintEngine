@@ -358,9 +358,7 @@ namespace RX_DigiPrint.Services
                 RxGlobals.StepperStatus[msg.no].Update(msg);
             }
             else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length SStepperStat"));
-        }
-
-        
+        }        
 
         //--- handle_printer_cfg -----------------------------------------
         private void handle_printer_cfg(Byte[] buf)

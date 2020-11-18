@@ -161,7 +161,7 @@
                                                 Kind="Help"></iconPacks:PackIconMaterial>
             </common:MvtButton>
             <common:MvtButton x:Name="Button_Save" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}" Margin="15" Click="Confirm_Click">
-                <iconPacks:PackIconMaterial Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Center" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 
+                <iconPacks:PackIconMaterial Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 
                                                 Kind="Check"></iconPacks:PackIconMaterial>
             </common:MvtButton>
             <!--

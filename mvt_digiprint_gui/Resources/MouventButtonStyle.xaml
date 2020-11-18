@@ -77,7 +77,73 @@
             </Setter.Value>
         </Setter>
     </Style>
-    
+
+    <Style x:Key="Mouvent.RoundIconButtonStyle.DarkBackgroundButton" TargetType="{x:Type common:MvtButton}">
+        <Setter Property ="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType ="{x:Type common:MvtButton}">
+                    <Grid>
+                        <Ellipse HorizontalAlignment="Center" VerticalAlignment="Center"
+                                 Name ="Ring" Width ="{TemplateBinding Width}" Height ="{TemplateBinding Width}" Fill ="Transparent"
+                                 Stroke="White" StrokeThickness="2"/>
+                        <Ellipse x:Name="BusyEllipse"
+                                 HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Width ="{TemplateBinding Width}" Height ="{TemplateBinding Width}"
+                                 Fill="Transparent" Visibility="Hidden" RenderTransformOrigin="0.5,0.5"
+                                 StrokeThickness="3" 
+                                 >
+                            <Ellipse.Stroke>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="White" Offset="0.8"/>
+                                    <GradientStop Color="Orange" Offset="0.4"/>
+                                </LinearGradientBrush>
+                            </Ellipse.Stroke>
+                            <Ellipse.RenderTransform>
+                                <RotateTransform Angle="0"/>
+                            </Ellipse.RenderTransform>
+                        </Ellipse>
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="common:MvtButton.IsChecked" Value="True">
+                            <Setter TargetName="Ring" Property ="Stroke" Value="Orange"></Setter>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Ring" Property ="Stroke" Value="{StaticResource Mouvent.WhiteTransparentBrush}"></Setter>
+                        </Trigger>
+                        <Trigger Property ="IsMouseOver" Value ="True">
+                            <Setter TargetName ="Ring" Property ="StrokeThickness" Value="3"/>
+                        </Trigger>
+                        <Trigger Property ="IsPressed" Value ="True">
+                            <Setter TargetName ="Ring" Property ="Fill" Value="Orange"/>
+                        </Trigger>
+                        <Trigger Property="common:MvtButton.IsBusy" Value="True">
+                            <Setter TargetName="BusyEllipse" Property="Visibility" Value="Visible"/>
+                            <Setter TargetName="Ring" Property="Visibility" Value="Hidden"/>
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="BusyEllipse"
+                                            Storyboard.TargetProperty="RenderTransform.Angle"
+                                            From="0"
+                                            To="360"
+                                            Duration="0:0:2"
+                                            RepeatBehavior="Forever" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                        </Trigger>
+                        <Trigger Property="common:MvtButton.IsBusy" Value="False">
+                            <Setter TargetName="BusyEllipse" Property="Visibility" Value="Hidden"/>
+                            <Setter TargetName="Ring" Property="Visibility" Value="Visible"/>
+
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style x:Key="Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL" TargetType="{x:Type common:MvtButton}">
         <Setter Property ="Template">
             <Setter.Value>

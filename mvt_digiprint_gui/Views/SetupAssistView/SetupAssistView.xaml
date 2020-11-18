@@ -5,22 +5,18 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
-             xmlns:wf="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
-             xmlns:local="clr-namespace:RX_DigiPrint.Views.SetupAssistView" xmlns:forms="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
+             xmlns:local="clr-namespace:RX_DigiPrint.Views.SetupAssistView" 
+             xmlns:forms="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="{Binding Source={StaticResource Mouvent.Layout.TopToolBarHeight}}"/>
-            <RowDefinition Height="50"/>
+            <RowDefinition Height="10"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
+
         <StackPanel Grid.Row="0" Grid.ColumnSpan="3" Background="{StaticResource Mouvent.MainColorBrush}" Orientation="Horizontal" >
 
             <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" ToolTip="Settings" x:Name="Button_Settings" Click="Settings_Clicked" Margin="15, 5, 15, 5" >
@@ -33,135 +29,162 @@
             <common:MvtButton HorizontalAlignment="Left" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" Click="Reference_Clicked" Margin="15, 5, 15, 5" >
                 <TextBlock Text="Ref" Foreground="White"/>
             </common:MvtButton>
+
+            <common:MvtButton HorizontalAlignment="Left" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" Click="Start_Clicked" Margin="15, 5, 15, 5" >
+                <TextBlock Text="Start" Foreground="White"/>
+            </common:MvtButton>
+
+            <common:MvtButton HorizontalAlignment="Left" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" Click="Done_Clicked" Margin="15, 5, 15, 5" >
+                <TextBlock Text="Done" Foreground="White"/>
+            </common:MvtButton>
         </StackPanel>
 
-        <GroupBox Grid.Row="2" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Top" Width="auto" Header="Status" Style="{StaticResource MvtGroupBox}">
-            <Grid  >
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="150"/>
-                    <ColumnDefinition Width="50"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                </Grid.RowDefinitions>
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+            </Grid.ColumnDefinitions>
+            
+            <GroupBox Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Top" Width="auto" Header="Status" Style="{StaticResource MvtGroupBox}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="50"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                    </Grid.RowDefinitions>
 
-                <TextBlock  Grid.Row="0" Grid.Column="0" Text="Position"/>
-                <TextBox    Grid.Row="0" Grid.Column="1" Text="{Binding motorPosition}" IsEnabled="False"/>
+                    <TextBlock  Grid.Row="0" Grid.Column="0" Text="Position"/>
+                    <TextBox    Grid.Row="0" Grid.Column="1" Text="{Binding motorPosition}" IsEnabled="False"/>
+                
+                    <!--
+                    <TextBlock  Grid.Row="1" Grid.Column="0" Text="Voltage"/>
+                    <TextBox    Grid.Row="1" Grid.Column="1" Text="{Binding motorVoltage}" IsEnabled="False"/>
 
-                <TextBlock  Grid.Row="1" Grid.Column="0" Text="Voltage"/>
-                <TextBox    Grid.Row="1" Grid.Column="1" Text="{Binding motorVoltage}" IsEnabled="False"/>
+                    <TextBlock  Grid.Row="2" Grid.Column="0" Text="Move Current"/>
+                    <TextBox    Grid.Row="2" Grid.Column="1" Text="{Binding motorMoveCurrent}" IsEnabled="False"/>
 
-                <TextBlock  Grid.Row="2" Grid.Column="0" Text="Move Current"/>
-                <TextBox    Grid.Row="2" Grid.Column="1" Text="{Binding motorMoveCurrent}" IsEnabled="False"/>
+                    <TextBlock  Grid.Row="3" Grid.Column="0" Text="Hold Current"/>
+                    <TextBox    Grid.Row="3" Grid.Column="1" Text="{Binding motorHoldCurrent}" IsEnabled="False"/>
+                    -->
+                    
+                    <TextBlock  Grid.Row="4" Grid.Column="0" Text="Reference Done"/>
+                    <CheckBox   Grid.Row="4" Grid.Column="1" IsChecked="{Binding refDone}" IsEnabled="False" HorizontalAlignment="Center"/>
 
-                <TextBlock  Grid.Row="3" Grid.Column="0" Text="Hold Current"/>
-                <TextBox    Grid.Row="3" Grid.Column="1" Text="{Binding motorHoldCurrent}" IsEnabled="False"/>
+                    <TextBlock  Grid.Row="5" Grid.Column="0" Text="moving"/>
+                    <CheckBox   Grid.Row="5" Grid.Column="1" IsChecked="{Binding moving}" IsEnabled="False" HorizontalAlignment="Center"/>
 
-                <TextBlock  Grid.Row="4" Grid.Column="0" Text="Reference Done"/>
-                <TextBox    Grid.Row="4" Grid.Column="1" Text="{Binding refDone}" IsEnabled="False"/>
+                    <TextBlock  Grid.Row="6" Grid.Column="0" Text="Stop Left"/>
+                    <Image Grid.Row="6" Grid.Column="1" Source="../../Resources/Bitmaps/LED_GREEN.ico" Visibility="{Binding InLeft,   Converter={StaticResource BoolToVisible_Converter}}" Width="16"/>
+                    <Image Grid.Row="6" Grid.Column="1" Source="../../Resources/Bitmaps/LED_GREY.ico"  Visibility="{Binding InLeft,   Converter={StaticResource BoolToInVisible_Converter}}" Width="16"/>
 
-                <TextBlock  Grid.Row="5" Grid.Column="0" Text="moving"/>
-                <TextBox    Grid.Row="5" Grid.Column="1" Text="{Binding moving}" IsEnabled="False"/>
+                    <TextBlock  Grid.Row="7" Grid.Column="0" Text="Stop Right"/>
+                    <Image Grid.Row="7" Grid.Column="1" Source="../../Resources/Bitmaps/LED_GREEN.ico" Visibility="{Binding InRight,   Converter={StaticResource BoolToVisible_Converter}}" Width="16"/>
+                    <Image Grid.Row="7" Grid.Column="1" Source="../../Resources/Bitmaps/LED_GREY.ico"  Visibility="{Binding InRight,   Converter={StaticResource BoolToInVisible_Converter}}" Width="16"/>
 
-                <TextBlock  Grid.Row="6" Grid.Column="0" Text="Stop Left"/>
-                <Image Grid.Row="6" Grid.Column="1" Source="../../Resources/Bitmaps/LED_GREEN.ico" Visibility="{Binding InLeft,   Converter={StaticResource BoolToVisible_Converter}}" Width="16"/>
-                <Image Grid.Row="6" Grid.Column="1" Source="../../Resources/Bitmaps/LED_GREY.ico"  Visibility="{Binding InLeft,   Converter={StaticResource BoolToInVisible_Converter}}" Width="16"/>
-
-                <TextBlock  Grid.Row="7" Grid.Column="0" Text="Stop Right"/>
-                <Image Grid.Row="7" Grid.Column="1" Source="../../Resources/Bitmaps/LED_GREEN.ico" Visibility="{Binding InRight,   Converter={StaticResource BoolToVisible_Converter}}" Width="16"/>
-                <Image Grid.Row="7" Grid.Column="1" Source="../../Resources/Bitmaps/LED_GREY.ico"  Visibility="{Binding InRight,   Converter={StaticResource BoolToInVisible_Converter}}" Width="16"/>
-
-                <TextBlock Grid.RowSpan="10" Grid.ColumnSpan="10" Text="NOT CONNECTED" Foreground="Red" FontSize="20" RenderTransformOrigin="0.5,0.5" 
+                    <TextBlock Grid.RowSpan="10" Grid.ColumnSpan="10" Text="NOT CONNECTED" Foreground="Red" FontSize="20" RenderTransformOrigin="0.5,0.5" 
                            HorizontalAlignment="Center" 
                            VerticalAlignment="Center" FontWeight="Bold"
                            Visibility="{Binding Connected, Converter={StaticResource BoolToInVisible_Converter}}">
-                    <TextBlock.RenderTransform>
-                        <RotateTransform Angle="-45"/>
-                    </TextBlock.RenderTransform>
-                </TextBlock>
-            </Grid>
-        </GroupBox>
-
-        <GroupBox Grid.Row="2" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Top" Width="auto" Header="Move" Style="{StaticResource MvtGroupBox}">
-            <Grid >
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="150"/>
-                    <ColumnDefinition Width="50"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                </Grid.RowDefinitions>
-                <TextBlock  Grid.Row="0" Grid.Column="0" Text="Distance [mm]"/>
-                <common:MvtNumBox    Grid.Row="0" Grid.Column="1" x:Name="MoveDist"/>
-
-                <Grid Grid.Row="4" Grid.ColumnSpan="2">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="3*"/>
-                        <ColumnDefinition Width="7*"/>
-                        <ColumnDefinition Width="10*"/>
-                    </Grid.ColumnDefinitions>
-                    <common:MvtButton Grid.Column="0" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}" Click="Move_Clicked" Margin="15, 5" Grid.ColumnSpan="2" >
-                        <TextBlock Text="Move"/>
-                    </common:MvtButton>
-                    <common:MvtButton Grid.Column="2" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}" Click="Stop_Clicked" Margin="15, 5" >
-                        <TextBlock Text="Stop"/>
-                    </common:MvtButton>
-
+                        <TextBlock.RenderTransform>
+                            <RotateTransform Angle="-45"/>
+                        </TextBlock.RenderTransform>
+                    </TextBlock>
                 </Grid>
+            </GroupBox>
 
-            </Grid>
-        </GroupBox>
-
-        <GroupBox Grid.Row="2" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Top" Width="auto" Header="Web" Style="{StaticResource MvtGroupBox}">
-            <Grid >
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="150"/>
-                    <ColumnDefinition Width="50"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                </Grid.RowDefinitions>
-                <TextBlock  Grid.Row="0" Grid.Column="0" Text="Dist"/>
-                <common:MvtNumBox    Grid.Row="0" Grid.Column="1" Text="{Binding WebDist}"/>
-
-                <Grid Grid.Row="2" Grid.ColumnSpan="2">
+            <GroupBox Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Top" Width="auto" Header="Move" Style="{StaticResource MvtGroupBox}" Margin="5,0">
+                <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="50"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <common:MvtButton Grid.Column="0" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}" Click="WebMove_Clicked" Margin="15, 5" >
-                        <TextBlock Text="Move"/>
-                    </common:MvtButton>
-                    <common:MvtButton Grid.Column="1" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}" Click="WebStop_Clicked" Margin="15, 5" >
-                        <TextBlock Text="Stop"/>
-                    </common:MvtButton>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock  Grid.Row="0" Grid.Column="0" Text="Distance [mm]"/>
+                    <common:MvtNumBox    Grid.Row="0" Grid.Column="1" x:Name="MoveDist"/>
+
+                    <Grid Grid.Row="4" Grid.ColumnSpan="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="3*"/>
+                            <ColumnDefinition Width="7*"/>
+                            <ColumnDefinition Width="10*"/>
+                        </Grid.ColumnDefinitions>
+                        <common:MvtButton Grid.Column="0" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}" Click="Move_Clicked" Margin="15, 5" Grid.ColumnSpan="2" >
+                            <TextBlock Text="Move"/>
+                        </common:MvtButton>
+                        <common:MvtButton Grid.Column="2" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}" Click="Stop_Clicked" Margin="15, 5" >
+                            <TextBlock Text="Stop"/>
+                        </common:MvtButton>
+
+                    </Grid>
 
                 </Grid>
+            </GroupBox>
 
-            </Grid>
-        </GroupBox>
+            <GroupBox Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Top" Width="auto" Header="Web" Style="{StaticResource MvtGroupBox}">
+                <Grid >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="50"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                    </Grid.RowDefinitions>
+                    
+                    <TextBlock  Grid.Row="0" Grid.Column="0" Text="Dist"/>
+                    <common:MvtNumBox    Grid.Row="0" Grid.Column="1" Text="{Binding WebDist}"/>
 
-        <!--- camara capture _______________________________________________________________-->
-        <GroupBox Grid.Row="3" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Width="auto" Header="Camera Capture" Style="{StaticResource MvtGroupBox}" IsVisibleChanged="UserControl_IsVisibleChanged">
-            <WindowsFormsHost >
-                <wf:PictureBox x:Name="CameraCapture"/>
-            </WindowsFormsHost>
-        </GroupBox>
+                    <Grid Grid.Row="2" Grid.ColumnSpan="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <common:MvtButton Grid.Column="0" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}" Click="WebMove_Clicked" Margin="15, 5" >
+                            <TextBlock Text="Move"/>
+                        </common:MvtButton>
+                        <common:MvtButton Grid.Column="1" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}" Click="WebStop_Clicked" Margin="15, 5" >
+                            <TextBlock Text="Stop"/>
+                        </common:MvtButton>
+
+                    </Grid>
+
+                </Grid>
+            </GroupBox>
+
+        </Grid>
+
+        <!--- GRID:ROW 3 ___________________________________________________________________________________________________________________-->
+        <Grid Grid.Row="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!--- camara capture _______________________________________________________________-->
+            <GroupBox  Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Stretch" Width="700" Header="Camera Capture" Style="{StaticResource MvtGroupBox}" >
+                <local:SA_CamCapture x:Name="CamCapture" IsVisibleChanged="CamCapture_IsVisibleChanged"/>
+            </GroupBox>
+            <local:SA_Actions x:Name="SetupActions" Grid.Column="1" Margin="5,0"/>
+        </Grid>
     </Grid>
 </UserControl>

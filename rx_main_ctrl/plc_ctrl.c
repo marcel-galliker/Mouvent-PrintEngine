@@ -170,6 +170,7 @@ static int				_BeltOn;
 static int				_UnwinderLenMin;
 static UINT32			_ActSpeed;
 static double			_StartPos;
+static int				_TestPrint=FALSE;
 
 static int				_MpliStarting;
 static int				_Speed;
@@ -499,6 +500,7 @@ int  plc_set_printpar(SPrintQueueItem *pItem)
 	TrPrintfL(TRUE, "_plc_send_par");
 	_plc_send_par(&par);
 	memcpy(&_StartEncoderItem, pItem, sizeof(_StartEncoderItem));
+	_TestPrint = (_StartEncoderItem.testImage!=0);
 	_Speed = _StartEncoderItem.speed;
 	step_set_vent(_Speed);
 //	_SendPause = 1;
@@ -545,6 +547,7 @@ int  plc_stop_printing(void)
 	_RequestPause  = FALSE;
 	_head_was_up   = FALSE;
 	_heads_to_print= FALSE;
+	_CanRun		   = FALSE;
 	step_set_vent(FALSE);
 	if (_SimuPLC)
 	{
@@ -555,8 +558,9 @@ int  plc_stop_printing(void)
 	else
 	{
 		// Error(LOG, 0, "plc_stop_printing: send CMD_STOP");
-		_plc_set_command("CMD_PRODUCTION", "CMD_STOP");
-
+		if (_TestPrint)	_plc_set_command("CMD_PRODUCTION", "CMD_PAUSE");
+		else			_plc_set_command("CMD_PRODUCTION", "CMD_STOP");
+		_TestPrint = FALSE;
 		/*
 		if (RX_Config.printer.type==printer_TX801 || RX_Config.printer.type==printer_TX802)
 		{

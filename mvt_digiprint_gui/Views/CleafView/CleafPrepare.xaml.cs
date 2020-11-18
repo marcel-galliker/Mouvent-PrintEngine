@@ -1,5 +1,6 @@
 ﻿using RX_Common;
 using RX_DigiPrint.Models;
+using RX_DigiPrint.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -46,18 +47,14 @@ namespace RX_DigiPrint.Views.CleafView
         //--- Update ----------------------------------------------
         public void Update()
         {
-            string str;
             int i, n;
-            str = RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_MACHINE_STATE");
+            EnPlcState state = (EnPlcState)Rx.StrToInt32(RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_MACHINE_STATE"));
             try
             {
-                // visible when state="PREPARE(4)"
-                i=Rx.StrToInt32(str);
-                if (i==4) this.Visibility = Visibility.Visible;
-                else      this.Visibility = Visibility.Collapsed;
+                if (state==EnPlcState.plc_prepare) this.Visibility = Visibility.Visible;
+                else                               this.Visibility = Visibility.Collapsed;
 
-                str = RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_PREPARE_ACTIVE");
-                i=Rx.StrToInt32(str);
+                i=Rx.StrToInt32(RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_PREPARE_ACTIVE"));
                 for (n=0; n<_Image.Count; n++)
                 {
                     _Image[n].Visibility = ((i & (1<<n))==0)? Visibility.Collapsed : Visibility.Visible;

@@ -49,25 +49,19 @@ namespace RX_DigiPrint.Views.TexView
         public void Update()
         {
             string str;
-            int value=0;
-            bool on=false;
-            str = RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_MACHINE_STATE");
+            int value;
+            bool on;
+            EnPlcState state = (EnPlcState)Rx.StrToInt32(RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_MACHINE_STATE")); 
             try
             {
-                // visible when state="PREPARE"(4)
-                if (str!=null) 
-                {
-                    value=Rx.StrToInt32(str);
-                    on = (value==4 || value==5);
-                }
+                on = (state==EnPlcState.plc_prepare || state==EnPlcState.plc_pause);
 
                 if (_off_timer>0) _off_timer--;     
                 if (on || _off_timer>0)
                 {
                     int n;
                     this.Visibility=Visibility.Visible;
-                    str = RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_PREPARE_ACTIVE");                
-                    value=Rx.StrToInt32(str);
+                    value=Rx.StrToInt32(RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_PREPARE_ACTIVE"));
                     str=RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_HEAD_IS_UP");
                     if (str!=null && str.Equals("TRUE")) value |= 1<<7;
                     if (RxGlobals.PrinterStatus.DataReady) value |= 1<<8;
