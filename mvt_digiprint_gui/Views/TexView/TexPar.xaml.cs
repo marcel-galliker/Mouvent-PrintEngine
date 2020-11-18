@@ -143,8 +143,11 @@ namespace RX_DigiPrint.Views.TexView
         //--- Timer ---------------------------------------------
         private int _rewinderType = -1;
         private void Timer(int no)
-        {
-            string str = RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "CFG_REWINDER_TYPE");
+        {                        
+            string str = "Application.GUI_00_001_Main"+"\n" + "CFG_REWINDER_TYPE"+"\n";
+            RxGlobals.Plc.RequestVar(str);
+
+            str = RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "CFG_REWINDER_TYPE");
 
             if (str==null || str.Equals("ERROR")) 
             {
