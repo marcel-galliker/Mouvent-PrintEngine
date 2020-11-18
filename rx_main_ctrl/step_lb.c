@@ -145,7 +145,7 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
     int robot_used = FALSE;
     ETestTableInfo info;
     ERobotInfo robinfo;
-    EScrewerInfo screwerinfo;
+//    EScrewerInfo screwerinfo;
 
     SStepperStat oldStatus[STEPPER_CNT];
 
@@ -734,7 +734,7 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
 //--- steplb_adjust_heads ------------------------------------------------
 void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
 {
-    SHeadAdjustment msg;
+//    SHeadAdjustment msg;
     int stepperno;
     int current_screwpos = ctrl_current_screw_pos(headAdjustment);
     if (current_screwpos == -1)

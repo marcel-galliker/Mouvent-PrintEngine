@@ -284,7 +284,7 @@ int setup_fluid_system	(const char *filepath,	UINT32	*pflushed,	EN_setup_Action 
 int setup_screw_positions (const char *filepath, SRxConfig *pcfg, EN_setup_Action action)
 {
     int i, j, k, l;
-    char path[MAX_PATH];
+//  char path[MAX_PATH];
     HANDLE file = setup_create();
 
     setup_load(file, filepath);

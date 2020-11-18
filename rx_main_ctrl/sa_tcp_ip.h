@@ -45,6 +45,7 @@ typedef struct
 	UINT32	motorVoltage;
 	UINT32	motorMoveCurrent;
 	UINT32	motorHoldCurrent;	// woher kommt der Wert? Ist er fix in derf SW, oder sollte er über TCP/IP gesetzt werden?
+	UINT8 moveCnt; // will wrap around!
 	UINT8	refDone;
 	UINT8	moving;	
 	UINT8	inputs;

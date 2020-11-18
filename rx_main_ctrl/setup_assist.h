@@ -16,4 +16,6 @@ int	 sa_init(void);
 int  sa_end(void);
 
 int	sa_connected(void);
+void sa_to_print_pos(void);
+int sa_in_print_pos(void);
 void sa_handle_gui_msg(RX_SOCKET socket, void *pmsg);

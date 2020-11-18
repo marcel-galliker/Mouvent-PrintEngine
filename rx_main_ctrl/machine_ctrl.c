@@ -19,6 +19,7 @@
 #include "chiller.h"
 #include "step_ctrl.h"
 #include "ctrl_svr.h"
+#include "setup_assist.h"
 #include "step_cleaf.h"
 #include "fluid_ctrl.h"
 #include "step_tts.h"
@@ -178,7 +179,8 @@ int		machine_start_printing(void)
 	case mi_none:	return REPLY_OK;
 	case mi_tt:		return tt_start_printing();
 	case mi_tts:	return drive_start_printing();
-	case mi_plc:	return plc_start_printing();
+	case mi_plc:	sa_to_print_pos();
+					return plc_start_printing();
 	}
 	return REPLY_OK;
 }

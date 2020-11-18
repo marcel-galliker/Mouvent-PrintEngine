@@ -24,6 +24,7 @@
 #include "rx_setup_file.h"
 #include "network.h"
 #include "rx_rexroth.h"
+#include "setup_assist.h"
 #include "enc_ctrl.h"
 #include "step_ctrl.h"
 #include "step_lb.h"
@@ -1554,7 +1555,7 @@ static void _plc_state_ctrl()
 			_SendPause = 0;
 			_GUIPause = FALSE;
 		}
-		if(_SendRun && (RX_StepperStatus.info.z_in_print || _SimuPLC))
+		if(_SendRun && (RX_StepperStatus.info.z_in_print && sa_in_print_pos() || _SimuPLC))
 		{
 			_SendRun = FALSE;
 			_plc_set_command("CMD_PRODUCTION", "CMD_RUN");

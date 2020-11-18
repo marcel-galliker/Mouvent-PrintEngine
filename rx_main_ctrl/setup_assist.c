@@ -20,11 +20,15 @@
 #include "plc_ctrl.h"
 #include "setup_assist.h"
 
+#define MOVE_TIEMOUT	10
 
 //--- statics ---------------------------------------------
 static int			_SaThreadRunning = TRUE;
 static RX_SOCKET	_SaSocket = INVALID_SOCKET;
+static int			_Timeout=0;
 static const double	_microns2steps = 30.000;
+
+static SSetupAssist_StatusMsg	_Status;
 
 //--- prorotypes -----------------------------------------
 static void *_sa_thread(void *lpParameter);
@@ -57,7 +61,6 @@ int	sa_connected(void)
 //--- _sa_thread ----------------------------------------
 static void *_sa_thread(void *lpParameter)
 {
-	int ret;
 	int err=FALSE;
 	
 	while (_SaThreadRunning)
@@ -82,11 +85,11 @@ static void* _sa_tick_thread(void *lpParameter)
 	{
 		int ret=sok_send_2(&_SaSocket, CMD_STATUS_GET, 0, NULL);
 		TrPrintfL(TRUE,"SetupAssist(Socket=%d): CMD_STATUS_GET, ret=%d", _SaSocket, ret);
+		if (_Timeout>0 && --_Timeout==0) Error(ERR_CONT, 0, "Setup Assistant Scanner timeout");
 		rx_sleep(1000);
 	}
 	return NULL;
 }
-
 
 //--- _sa_handle_msg -------------------------------------
 static int _sa_handle_msg(RX_SOCKET socket, void *msg, int len, struct sockaddr *sender, void *par)
@@ -106,10 +109,29 @@ static int _sa_handle_msg(RX_SOCKET socket, void *msg, int len, struct sockaddr 
 static int _do_sa_stat(RX_SOCKET socket, SSetupAssist_StatusMsg	*pstat)
 {
 	TrPrintfL(TRUE, "SetupAssist: Got Status");
-	pstat->header.msgId = REP_SETUP_ASSIST_STAT;
-	pstat->motorPosition *= _microns2steps;
-	gui_send_msg(INVALID_SOCKET, pstat);
+	memcpy(&_Status, pstat, sizeof(_Status));
+	_Status.header.msgId = REP_SETUP_ASSIST_STAT;
+	_Status.motorPosition = (INT32)(pstat->motorPosition*_microns2steps);
+	if (!_Status.moving && _Timeout<MOVE_TIEMOUT) _Timeout=0;
+	gui_send_msg(INVALID_SOCKET, &_Status);
 	return REPLY_OK;
+}
+
+//--- sa_to_print_pos -------------------------------------------
+void sa_to_print_pos(void)
+{
+	if (sa_connected()) 
+	{
+		sok_send_2(&_SaSocket, CMD_MOTOR_REFERENCE,    0, NULL);
+		_Timeout = MOVE_TIEMOUT;
+	}
+}
+
+//--- sa_in_print_pos ----
+int sa_in_print_pos(void)
+{
+	if (!sa_connected()) return TRUE;
+	return _Status.inputs & 0x01;
 }
 
 //--- sa_handle_gui_msg -------------------------------------------------------
