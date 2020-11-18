@@ -1,0 +1,73 @@
+
+
+<#@ template debug="true" hostspecific="true" language="C#" #>
+<#@ output extension=".h" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Text.RegularExpressions" #>
+<#
+
+		Int32 major = 0;
+		Int32 minor = 0;
+		Int32 revision = 0;
+		Int32 build = 0;
+		
+    string output = File.ReadAllText(this.Host.ResolvePath("Version.h"));
+    Regex pattern_MJ = new Regex("#define VERSION_MAJOR\\s+(?<major>\\d+)");
+    Regex pattern_MI = new Regex("#define VERSION_MINOR\\s+(?<minor>\\d+)");
+    Regex pattern_RV = new Regex("#define VERSION_REVISION\\s+(?<revision>\\d+)");
+    Regex pattern_BD = new Regex("#define VERSION_BUILD\\s+(?<build>\\d+)");
+    
+    MatchCollection matches_MJ = pattern_MJ.Matches(output);
+    MatchCollection matches_MI = pattern_MI.Matches(output);
+    MatchCollection matches_RV = pattern_RV.Matches(output);
+    MatchCollection matches_BD = pattern_BD.Matches(output);
+    if( (matches_MJ.Count == 1) & (matches_MI.Count == 1) & (matches_RV.Count == 1) & (matches_BD.Count == 1) )
+    {
+        major = Convert.ToInt32(matches_MJ[0].Groups["major"].Value);
+        minor = Convert.ToInt32(matches_MI[0].Groups["minor"].Value);
+        revision = Convert.ToInt32(matches_RV[0].Groups["revision"].Value);
+        
+        build = Convert.ToInt32(matches_BD[0].Groups["build"].Value);
+        build++;
+        
+        //if( this.Host.ResolveParameterValue("-","-","BuildConfiguration") == "Release" ) revision++;
+   }
+#>
+
+#pragma once
+
+#define STRINGIZE2(s) #s
+#define STRINGIZE(s) STRINGIZE2(s)
+
+#define VERSION_MAJOR               <#= major #>
+#define VERSION_MINOR               <#= minor #>
+#define VERSION_REVISION            <#= revision #>
+#define VERSION_BUILD               <#= build #>
+
+#define VER_FILE_DESCRIPTION_STR    "DirectShow Full-Alignment Filter"
+#define VER_FILE_VERSION            VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION, VERSION_BUILD
+#define VER_FILE_VERSION_STR        STRINGIZE(VERSION_MAJOR)        \
+                                    "." STRINGIZE(VERSION_MINOR)    \
+                                    "." STRINGIZE(VERSION_REVISION) \
+                                    "." STRINGIZE(VERSION_BUILD)    \
+
+#define VER_COMPANYNAME_STR         "Bieler Elektronik"
+#define VER_PRODUCTNAME_STR         "rx_AlignFilter"
+#define VER_PRODUCT_VERSION         VER_FILE_VERSION
+#define VER_PRODUCT_VERSION_STR     VER_FILE_VERSION_STR
+#define VER_ORIGINAL_FILENAME_STR   VER_PRODUCTNAME_STR ".exe"
+#define VER_INTERNAL_NAME_STR       "rx_AlignFilter.dll"
+#define VER_COPYRIGHT_STR           "Copyright (C) 2019 Bieler Elektronik"
+
+#ifdef _DEBUG
+#define VER_VER_DEBUG             VS_FF_DEBUG
+#else
+#define VER_VER_DEBUG             0
+#endif
+
+#define VER_FILEOS                  VOS_NT_WINDOWS32
+#define VER_FILEFLAGS               VER_VER_DEBUG
+#define VER_FILETYPE                VFT_APP
+
+
+

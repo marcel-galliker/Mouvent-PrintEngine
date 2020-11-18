@@ -1,0 +1,10 @@
+
+LIBRARY     rx_AlignFilter.dll
+
+EXPORTS
+            DllMain                 PRIVATE
+            DllGetClassObject       PRIVATE
+            DllCanUnloadNow         PRIVATE
+            DllRegisterServer       PRIVATE
+            DllUnregisterServer     PRIVATE
+
