@@ -1,0 +1,8 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:converters="clr-namespace:RX_DigiPrint.Converters.CamLib" 
+                    >
+    <converters:CamCapsResolution_Converter     x:Key="CamCapsResolution_Converter" />
+    <converters:CamCapsMediatype_Converter      x:Key="CamCapsMediatype_Converter" />
+    
+</ResourceDictionary>
