@@ -54,6 +54,7 @@ typedef struct
 	double	stepDist;
 	double	startPos;
 	double	endPos;
+	double  distToStop;
 } SPlcPar;
 
 typedef enum
@@ -187,6 +188,7 @@ static int				_PAR_WINDER_2_ON=TRUE;
 
 static int				_heads_to_print=FALSE;
 static int				_head_was_up=FALSE;
+static int				_DistToStop=0;
 
 //--- GUI msg fifo -------------
 #define FIFO_SIZE	64
@@ -377,8 +379,15 @@ static void _plc_set_par(SPrintQueueItem *pItem, SPlcPar *pPlcPar)
 	}
 		
 	memcpy(&pPlcPar->dots, pItem->dots, sizeof(pPlcPar->dots));
-	pPlcPar->bidir	= (pItem->scanMode==PQ_SCAN_BIDIR);
-	pPlcPar->speed	= pItem->speed;
+	pPlcPar->bidir		= (pItem->scanMode==PQ_SCAN_BIDIR);
+	pPlcPar->speed		= pItem->speed;
+	if (pItem->distToStop==0)	// default value
+	{
+		char value[32];
+		lc_get_value_by_name(UnitID ".XML_DISTANCE_TO_STOP", value);
+		pPlcPar->distToStop = atof(value);
+	}
+	else pPlcPar->distToStop = pItem->distToStop;
 	if (RX_Config.printer.type==printer_cleaf)
 	{
 		int flexo = lc_get_value_by_name_UINT32(UnitID ".PAR_FLEXO_CONFIGURATION", &flexo);
@@ -455,6 +464,8 @@ static void _plc_send_par(SPlcPar *pPlcPar)
 	}
 
 	lc_set_value_by_name_UINT32(UnitID ".PAR_PRINTING_SPEED",		pPlcPar->speed);
+	lc_set_value_by_name_UINT32(UnitID ".PAR_DISTANCE_TO_STOP",		pPlcPar->distToStop);
+
 	if(rx_def_is_scanning(RX_Config.printer.type))
 	{
 		lc_set_value_by_name_UINT32(UnitID ".PAR_BIDIRECTIONAL", pPlcPar->bidir);
@@ -698,7 +709,7 @@ int  plc_pause_printing(int fromGui)
 	//		Error(LOG, 0, "send PAUSE");
 			_SendPause = 1;
 			_plc_state_ctrl();
-		}		
+		}
 	}
 	return REPLY_OK;
 }

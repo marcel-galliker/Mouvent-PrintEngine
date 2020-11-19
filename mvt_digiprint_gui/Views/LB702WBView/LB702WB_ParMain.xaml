@@ -93,8 +93,7 @@
                             <rx_uc:PlcParCtrl Grid.Row="2" ID="XML_HEAD_HEIGHT"                      Label="Print Height" Unit="mm"      UnitWidth="50" Format="1"/>
                             <rx_uc:PlcParCtrl Grid.Row="3" ID="XML_ENC_OFFSET"                      Label="Encoder Adj"  Unit="inc"     UnitWidth="50" Format="n"/>
                             <rx_uc:PlcParCtrl Grid.Row="4" ID="PAR_WEB_WIDTH"                       Label="Web Width"    Unit="mm"      UnitWidth="50" Format="1"/>
-                            <rx_uc:PlcParCtrl Grid.Row="5" ID="PAR_DISTANCE_TO_STOP"                Label="Stop Dist"    Unit="m"       UnitWidth="50" Format="f"/>
-
+                            <rx_uc:PlcParCtrl Grid.Row="5" ID="XML_DISTANCE_TO_STOP"                Label="Stop Dist"    Unit="m"       UnitWidth="50" Format="f"/>
 
                             <rx_uc:PlcTitle Grid.Row="7" Grid.Column="0" Header="Web tensions"/>
                             <Grid Grid.Row="8">

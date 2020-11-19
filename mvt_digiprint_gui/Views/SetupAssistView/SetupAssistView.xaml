@@ -6,9 +6,8 @@
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:local="clr-namespace:RX_DigiPrint.Views.SetupAssistView" 
-             xmlns:forms="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
              mc:Ignorable="d"
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="450" d:DesignWidth="1000">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="{Binding Source={StaticResource Mouvent.Layout.TopToolBarHeight}}"/>
@@ -184,7 +183,7 @@
             <GroupBox  Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Stretch" Width="700" Header="Camera Capture" Style="{StaticResource MvtGroupBox}" >
                 <local:SA_CamCapture x:Name="CamCapture" IsVisibleChanged="CamCapture_IsVisibleChanged"/>
             </GroupBox>
-            <local:SA_Actions x:Name="SetupActions" Grid.Column="1" Margin="5,0"/>
+            <local:SA_ActionsView x:Name="SetupActions" Grid.Column="1" Margin="5,0"/>
         </Grid>
     </Grid>
 </UserControl>

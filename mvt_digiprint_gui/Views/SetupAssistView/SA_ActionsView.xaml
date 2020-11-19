@@ -1,0 +1,76 @@
+﻿<UserControl x:Class="RX_DigiPrint.Views.SetupAssistView.SA_ActionsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:RX_DigiPrint.Views.SetupAssistView"
+             xmlns:ig="http://schemas.infragistics.com/xaml"
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <local:StateBusy_Converter  x:Key="StateBusy_Converter"/>
+        <local:StateImage_Converter x:Key="StateImage_Converter"/>
+        <local:Visible_Converter    x:Key="Visible_Converter"/>
+    </UserControl.Resources>
+    <Grid>
+        <GroupBox Header="Actions" Style="{StaticResource MvtGroupBox}" >
+            <Grid>
+                <ig:XamGrid x:Name="Actions"
+                    AutoGenerateColumns="False"
+                    HeaderStyle="{DynamicResource XamGridHeaderStyle}"
+                    CellStyle="{DynamicResource XamGridCellControlStyle}"
+                    Style="{DynamicResource XamGrid-WideScroll-Style}"
+                    >
+                    <ig:XamGrid.Columns>
+                        <!-- STATE _____________________________________________________________________________-->
+                        <ig:TemplateColumn HeaderText=" " Key="State" Width="40">
+                            <ig:TemplateColumn.ItemTemplate>
+                                <DataTemplate>
+                                    <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton}" 
+                                        IsBusy="{Binding State, Converter={StaticResource StateBusy_Converter}}">
+                                        <iconPacks:PackIconMaterial 
+                                            Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}"
+                                            Foreground="Black"
+                                            Margin="5"
+                                            Width="20" 
+                                            Height="20" 
+                                            Kind="{Binding State, Converter={StaticResource StateImage_Converter}}"/>
+                                    </common:MvtButton>
+                                </DataTemplate>
+                            </ig:TemplateColumn.ItemTemplate>
+                        </ig:TemplateColumn>
+
+                        <!-- Action _____________________________________________________________________________-->
+                        <ig:TextColumn HeaderText="Action" Key="Name" Width="200"/>
+                        
+                        <!-- Result _____________________________________________________________________________-->
+                        <ig:TemplateColumn HeaderText="Result" Key="Measured" Width="200">
+                            <ig:TemplateColumn.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Visibility="{Binding Measured, Converter={StaticResource Visible_Converter}}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="20"/>
+                                            <ColumnDefinition Width="50"/>
+                                            <ColumnDefinition Width="20"/>
+                                            <ColumnDefinition Width="50"/>
+                                            <ColumnDefinition Width="20"/>
+                                            <ColumnDefinition Width="50"/>
+                                        </Grid.ColumnDefinitions>
+                                        <iconPacks:PackIconMaterial Grid.Column="0" Kind="MathCompass" Foreground="Gray"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding Measured.Angle}"/>
+                                        <iconPacks:PackIconMaterial Grid.Column="2" Kind="ArrowCollapseVertical" Foreground="Gray"/>
+                                        <TextBlock Grid.Column="3" Text="{Binding Measured.Stitch}"/>
+                                        <iconPacks:PackIconMaterial Grid.Column="4" Kind="ArrowCollapseRight" Foreground="Gray"/>
+                                        <TextBlock Grid.Column="5" Text="{Binding Measured.Distance}"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ig:TemplateColumn.ItemTemplate>
+                        </ig:TemplateColumn>
+                    </ig:XamGrid.Columns>
+                </ig:XamGrid>
+            </Grid>
+        </GroupBox>
+    </Grid>
+</UserControl>

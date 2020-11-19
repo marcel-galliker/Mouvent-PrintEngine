@@ -53,20 +53,39 @@ namespace RX_Common
             xml.WriteStartDocument();
             xml.WriteStartElement("Settings");
 
-            foreach(var prop in GetType().GetProperties())
-            {
-                var val = prop.GetValue(this, null);
-                if (val!=null)
-                {
-                    xml.WriteStartAttribute(prop.Name);    
-                    xml.WriteValue(val.ToString());
-                    xml.WriteEndAttribute();
-                }
-            }
+            _SaveObject(ref xml, this);
+
             xml.WriteEndElement();
             xml.WriteEndDocument(); 
             xml.Close();
         }
+
+        private void _SaveObject(ref XmlTextWriter xml, object obj)
+		{
+            foreach(var prop in obj.GetType().GetProperties())
+            {
+                var val = prop.GetValue(obj, null);
+                if (val!=null)
+                {
+                    var type = val.GetType();
+                    if (type.Namespace.EndsWith("Models"))
+					{
+                        Console.WriteLine("<{0}", prop.Name);
+                        xml.WriteStartElement(prop.Name);
+                        _SaveObject(ref xml, val);
+                        xml.WriteEndElement();
+                        Console.WriteLine("/{0}>", prop.Name);
+					}
+                    else
+					{
+                        xml.WriteStartAttribute(prop.Name);    
+                        xml.WriteValue(val.ToString());
+                        xml.WriteEndAttribute();
+                        Console.WriteLine("{0}=\"{1}\"", prop.Name, val.ToString());
+					}
+                }
+            }
+		}
 
         //--- Load -------------------------------
         public void Load(string path)
@@ -81,27 +100,11 @@ namespace RX_Common
             {
                 while (xml.Read())
                 {
-                    if (xml.NodeType==XmlNodeType.Element && xml.Name.Equals("Settings"))
-                    {
-                        foreach(var prop in GetType().GetProperties())
-                        {
-                            var attr=xml.GetAttribute(prop.Name);
-                        
-                            if (attr!=null)
-                            { 
-                                try
-                                {
-                                    prop.SetValue(this, TypeDescriptor.GetConverter(prop.PropertyType).ConvertFromString(attr));
-                                }
-                                catch(Exception)
-                                { 
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                    }
+                //  Console.WriteLine("{0}: {1}=>>{2}<<", xml.NodeType.ToString(), xml.Name, xml.Value);
+                    if (xml.NodeType==XmlNodeType.Element && xml.Name.Equals(this.GetType().Name))
+                    { 
+                        _LoadObject(ref xml, this);
+					}
                 }
 
                 xml.Close();
@@ -111,5 +114,54 @@ namespace RX_Common
                  Console.WriteLine(e.Message);
              }
         }
-    }
+
+        //--- _LoadObject ------------------------------------------------
+        private void _LoadObject(ref XmlTextReader xml, Object obj)
+		{
+            var objType = obj.GetType();
+            foreach(var prop in objType.GetProperties())
+            {
+                var attr=xml.GetAttribute(prop.Name);
+                if (attr!=null)
+                { 
+                    try
+                    {
+                        if (prop.PropertyType.Equals(typeof(System.Drawing.Point)))
+						{
+                            prop.SetValue(obj, _LoadPoint(attr));
+						}
+                        else prop.SetValue(obj, TypeDescriptor.GetConverter(prop.PropertyType).ConvertFromString(attr));
+                    }
+                    catch(Exception e)
+                    { 
+                        Console.WriteLine("Excapetion {0}", e.Message);
+                    }
+                }
+            }
+            while (xml.Read())
+			{
+                //  Console.WriteLine("{0}: {1}=>>{2}<<", xml.NodeType.ToString(), xml.Name, xml.Value);
+                switch(xml.NodeType)
+				{
+                case XmlNodeType.Element:  
+                            var prop = obj.GetType().GetProperty(xml.Name);
+                            var element = prop.GetValue(obj);
+                            _LoadObject(ref xml, element);
+                            break;
+
+                case XmlNodeType.EndElement: return;
+                default: 
+                        break;
+				}
+			}
+        }
+
+		private System.Drawing.Point _LoadPoint(string attr)
+		{
+            System.Drawing.Point p = new System.Drawing.Point();
+            p.X=Rx.StrToInt32(attr.Substring(attr.IndexOf("X=")));
+            p.Y=Rx.StrToInt32(attr.Substring(attr.IndexOf("Y=")));
+            return p;
+		}
+	}
 }

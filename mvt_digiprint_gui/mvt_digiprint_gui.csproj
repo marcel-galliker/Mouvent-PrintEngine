@@ -387,8 +387,9 @@
     <Compile Include="Models\HeadAdjustmentHelp.cs" />
     <Compile Include="Models\JetCompensation.cs" />
     <Compile Include="Models\JetCompensationDensityViewModel.cs" />
+    <Compile Include="Models\SA_StateMachine.cs" />
     <Compile Include="Models\SA_CamAction.cs" />
-    <Compile Include="Models\SetupAssist.cs" />
+    <Compile Include="Models\SA_Base.cs" />
     <Compile Include="Models\SoftwareValueCorrection.cs" />
     <Compile Include="Models\StepperStatus.cs" />
     <Compile Include="Services\RestService.cs" />
@@ -724,8 +725,8 @@
     <Compile Include="Views\Settings\WlanSettings.xaml.cs">
       <DependentUpon>WlanSettings.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\SetupAssistView\SA_Actions.xaml.cs">
-      <DependentUpon>SA_Actions.xaml</DependentUpon>
+    <Compile Include="Views\SetupAssistView\SA_ActionsView.xaml.cs">
+      <DependentUpon>SA_ActionsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\SetupAssistView\SA_CamCapture.xaml.cs">
       <DependentUpon>SA_CamCapture.xaml</DependentUpon>
@@ -1382,7 +1383,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\SetupAssistView\SA_Actions.xaml">
+    <Page Include="Views\SetupAssistView\SA_ActionsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

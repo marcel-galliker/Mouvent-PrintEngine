@@ -59,7 +59,7 @@
                         <rx_uc:PlcParCtrl ID="PAR_WINDER_TENSION_2"         Label="Tension RW"      Unit="N"    UnitWidth="50" Format="n"/>
                         <rx_uc:PlcParCtrl ID="PAR_NIP_TENSION_1"            Label="Tension NIP"     Unit="N"    UnitWidth="50" Format="n"/>
 
-                        <rx_uc:PlcParCtrl ID="PAR_DISTANCE_TO_STOP"         Label="Dist to Stop"    Unit="m"    UnitWidth="50" Format="f"/>
+                        <rx_uc:PlcParCtrl ID="XML_DISTANCE_TO_STOP"         Label="Dist to Stop"    Unit="m"    UnitWidth="50" Format="f"/>
                         <rx_uc:PlcParCtrl ID="PAR_WINDER_REDUCTION_CONFIG"  Label="Winder Red."     Type="Combo" x:Name="CB_WinderReduction"/>
 
                         <rx_uc:PlcParCtrl ID="PAR_FLEXO_CONFIGURATION"          Label="Flexo"        Type="CheckBox" x:Name="CB_Flexo"/>

@@ -29,7 +29,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>+simuplc -simuchiller -simudrive</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>-simuplc +simuchiller +simudrive</LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-lx|Win32'">
     <LocalDebuggerDebuggerType>Auto</LocalDebuggerDebuggerType>

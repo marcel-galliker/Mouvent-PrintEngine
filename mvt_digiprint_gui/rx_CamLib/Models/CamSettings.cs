@@ -23,6 +23,14 @@ namespace rx_CamLib.Models
 			set { SetProperty(ref _Threshold,value); }
 		}
 
+		//--- Property DistToStop ---------------------------------------
+		private double _DistToStop;
+		public double DistToStop
+		{
+			get { return _DistToStop; }
+			set { SetProperty(ref _DistToStop,value); }
+		}
+
 		//--- Property StreamCaps ---------------------------------------
 		private StreamCaps _StreamCaps = new StreamCaps();
 		public StreamCaps StreamCaps

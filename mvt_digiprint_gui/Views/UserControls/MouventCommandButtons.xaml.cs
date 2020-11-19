@@ -154,19 +154,7 @@ namespace RX_DigiPrint.Views.UserControls
                 return;
             }
 
-            if (InkSupply.AnyFlushed()) return;
-
-            if (!RxGlobals.PrinterStatus.AllInkSupliesOn)
-            {
-                    if (MvtMessageBox.YesNo("Print System", "Some ink supplies are OFF. Switch them ON.",  MessageBoxImage.Question, true))
-                    Power_Clicked(null, null);
-            }
-
-            if (RxGlobals.UvLamp.Visible==Visibility.Visible && !RxGlobals.UvLamp.Ready)
-            {
-                if (!MvtMessageBox.YesNo("UV Lamp", "The UV Lamp is NOT READY.\n\nStart Printing?",  MessageBoxImage.Question, false))
-                    return;
-            }
+            if (!RxGlobals.PrintSystem.ReadyToPrint()) return;
          
             RxGlobals.PrintQueueView?.SaveAll(); 
 
@@ -180,7 +168,7 @@ namespace RX_DigiPrint.Views.UserControls
         private void Stop_Clicked(object sender, RoutedEventArgs e)
         {
             RxGlobals.RxInterface.SendCommand(TcpIp.CMD_STOP_PRINTING);
-            RxGlobals.SetupAssist.ActionRunning=false;
+            RxGlobals.SA_StateMachine.Abort();
         }
 
         //--- Abort_Clicked -------------------------------------------------

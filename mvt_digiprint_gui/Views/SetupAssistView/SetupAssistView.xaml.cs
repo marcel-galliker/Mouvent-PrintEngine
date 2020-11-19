@@ -50,7 +50,7 @@ namespace RX_DigiPrint.Views.SetupAssistView
 		//--- Start_Clicked -------------------------------------------
 		private void Start_Clicked(object sender,RoutedEventArgs e)
 		{
-			SetupActions.InitActions(_Camera);
+			SetupActions.Start(_Camera);
 		}
 		private void Done_Clicked(object sender,RoutedEventArgs e)
 		{
@@ -66,7 +66,7 @@ namespace RX_DigiPrint.Views.SetupAssistView
 		//--- Stop_Clicked -------------------------------------------
 		private void Stop_Clicked(object sender,RoutedEventArgs e)
 		{
-			RxGlobals.RxInterface.SendCommand(TcpIp.CMD_SA_STOP);
+			RxGlobals.SetupAssist.ScanStop();
 		}
 
 		//--- Move_Clicked -------------------------------------------
@@ -77,7 +77,7 @@ namespace RX_DigiPrint.Views.SetupAssistView
 		//--- Stop_Clicked -------------------------------------------
 		private void WebStop_Clicked(object sender,RoutedEventArgs e)
 		{
-			RxGlobals.RxInterface.SendCommand(TcpIp.CMD_SA_WEB_STOP);
+			RxGlobals.SetupAssist.WebStop();
 		}
 
 		//--- CallBackfromCam ----------------------------------------

@@ -62,6 +62,7 @@ namespace RX_DigiPrint.Models
         public static Density               Density = new Density();
         public static ClusterNo             ClusterNo = new ClusterNo();
         public static FileNameFilter        FileNameFilter = new FileNameFilter();
-        public static SetupAssist           SetupAssist = new SetupAssist();
+        public static SA_Base               SetupAssist = new SA_Base();
+        public static SA_StateMachine       SA_StateMachine = new SA_StateMachine();
     }
 }

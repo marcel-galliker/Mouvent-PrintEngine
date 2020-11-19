@@ -346,6 +346,7 @@ typedef struct SPrintQueueItem
 	INT8	curingPasses;
 	INT32	scans;
 	INT32	speed;
+	double	distToStop; 
 	INT32	copiesTotal;
 	INT32	copiesPrinted;
 	INT32	scansSent;

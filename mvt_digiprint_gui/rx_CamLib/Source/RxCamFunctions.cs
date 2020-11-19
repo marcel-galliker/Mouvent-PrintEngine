@@ -11,7 +11,8 @@ namespace rx_CamLib
 		undef,
 		running,
 		done,
-		aborted
+		aborted,
+		error
 	};
 
 	public enum ECamFunctions
