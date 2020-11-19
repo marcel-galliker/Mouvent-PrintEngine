@@ -54,7 +54,7 @@ namespace RX_DigiPrint.Views.SetupAssistView
             _StreamCapsList = _Camera.Settings.StreamCapsList;
             CB_StreamCaps.ItemsSource = _StreamCapsList;
             StreamCaps caps=RxGlobals.Settings.SetupAssistCam.StreamCaps;
-            if (_StreamCapsList==null) return;
+            if (_StreamCapsList==null || caps==null) return;
             foreach (StreamCaps item in _StreamCapsList)
 			{
                 if (!item.Mediasubtype.Equals(caps.Mediasubtype))   continue;

@@ -522,9 +522,9 @@ int  plc_start_printing(void)
 		_StartPrinting		= TRUE;
 		_RequestPause		= FALSE;
 	}
+	if (_PlcState==plc_error) plc_error_reset();
 	if (_CanRun && !_SimuPLC)
 	{		
-		plc_error_reset();
 		if (rx_def_is_lb(RX_Config.printer.type) && RX_Config.printer.type!=printer_cleaf) enc_restart_pg();
 		_SendRun		= TRUE;
 	}

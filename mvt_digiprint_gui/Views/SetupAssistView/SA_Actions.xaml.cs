@@ -248,7 +248,7 @@ namespace RX_DigiPrint.Views.SetupAssistView
 			if (_ActionIdx==1) 
 			{
 				_CamFunctions.FindMark(_Camera_CamMarkFound);
-				RxGlobals.SetupAssist.WebMove(100*1000, _Camera_CamMarkNotFound);
+				RxGlobals.SetupAssist.WebMove(100.0, _Camera_CamMarkNotFound);
 			}
 			else _StartCamFunction();
 		}

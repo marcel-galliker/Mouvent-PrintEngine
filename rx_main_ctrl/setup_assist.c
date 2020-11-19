@@ -84,7 +84,6 @@ static void* _sa_tick_thread(void *lpParameter)
 	while (_SaThreadRunning)
 	{
 		int ret=sok_send_2(&_SaSocket, CMD_STATUS_GET, 0, NULL);
-		TrPrintfL(TRUE,"SetupAssist(Socket=%d): CMD_STATUS_GET, ret=%d", _SaSocket, ret);
 		if (_Timeout>0 && --_Timeout==0) Error(ERR_CONT, 0, "Setup Assistant Scanner timeout");
 		rx_sleep(1000);
 	}

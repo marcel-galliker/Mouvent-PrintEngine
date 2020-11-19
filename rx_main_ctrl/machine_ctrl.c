@@ -97,8 +97,6 @@ int		machine_tick(void)
 	return REPLY_OK;
 }
 
-
-
 //--- machine_reset --------------------------------
 void machine_reset(void)
 {

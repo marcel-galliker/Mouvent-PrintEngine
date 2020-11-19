@@ -192,13 +192,21 @@ namespace RX_DigiPrint.Models
 		}
 
 		//--- WebMove ----------------------------------
-		public void WebMove(double? dist=null, Action done=null)
+		public void WebMove(double? dist=null, Action onDone=null)
 		{
 			TcpIp.SetupAssist_MoveCmd cmd = new TcpIp.SetupAssist_MoveCmd();
 			if (dist==null) cmd.steps	= (Int32)(1000*WebDist);
-			else            cmd.steps	= (Int32)dist;
-			OnWebMoveDone = done;
-			RxGlobals.RxInterface.SendMsg(TcpIp.CMD_SA_WEB_MOVE, ref cmd);
+			else            cmd.steps	= (Int32)(1000*dist);
+			Console.WriteLine("CMD_SA_WEB_MOVE dist={0}", cmd.steps);
+			if (cmd.steps==0)
+			{
+				if (onDone!=null) onDone();
+			}
+			else
+			{
+				OnWebMoveDone = onDone;
+				RxGlobals.RxInterface.SendMsg(TcpIp.CMD_SA_WEB_MOVE, ref cmd);
+			}
 		}
 
 		//--- Property ActionRunning ---------------------------------------
