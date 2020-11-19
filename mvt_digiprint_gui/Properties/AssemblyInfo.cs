@@ -46,8 +46,8 @@ using System.Windows;
 //      Build Number
 //      Revision
 
-[assembly: AssemblyVersion("1.4.4210")]
-[assembly: AssemblyFileVersion("1.4.4210")]
+[assembly: AssemblyVersion("1.4.4220")]
+[assembly: AssemblyFileVersion("1.4.4220")]
 
 //  http://www.radex-net.com/Downloads/RX-Gui/publish.htm
 //  G1EhZ$ETMf
