@@ -528,7 +528,7 @@ void nios_fixed_grey_levels(int fixedDropSize, int maxDropSize)
 		}
 		else
 		{
-			Error(WARN, 0, "TEST Fix Greylevel _GreyLevel[%d][%d]=%d", head, fixedDropSize, _GreyLevel[head][fixedDropSize]);		
+			Error(WARN, 0, "TEST Fix Greylevel");		
 			cfg->gl_2_pulse[0] = _GreyLevel[head][fixedDropSize];			
 		}
 	}
