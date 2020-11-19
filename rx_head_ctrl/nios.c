@@ -62,7 +62,6 @@ int						NIOS_FixedDropSize=0;
 int						NIOS_Droplets=0;
 static int				_NiosReady=FALSE;
 static int				_MaxSpeed;
-static int				_EEpromTimeout=0;
 static int				_EEpromLoaded=FALSE;
 
 //--- prototypes -----------------------------------
