@@ -97,31 +97,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
         //--- Print_Clicked --------------------------------------------------------------------
         private void Print_Clicked(object sender, RoutedEventArgs e)
         {
-            if (InkSupply.AnyFlushed()) return;
-
-            if (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_cleaf && !(RxGlobals.StepperStatus[0].DripPans_InfeedDOWN && RxGlobals.StepperStatus[0].DripPans_OutfeedDOWN))
-            {
-                MvtMessageBox.YesNo("Print System", "Drip Pans below the clusters. Move it out before printing", MessageBoxImage.Question, true);
-                return;
-            }
-
-            if (!RxGlobals.PrinterStatus.AllInkSupliesOn)
-            {
-                if (MvtMessageBox.YesNo("Print System", "Some ink supplies are OFF. Switch them ON.", MessageBoxImage.Question, true))
-                {
-                    TcpIp.SFluidCtrlCmd msg = new TcpIp.SFluidCtrlCmd();
-                    msg.no = -1;
-                    msg.ctrlMode = EFluidCtrlMode.ctrl_print;
-
-                    RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_CTRL_MODE, ref msg);
-                }
-            }
-
-            if (RxGlobals.UvLamp.Visible == Visibility.Visible && !RxGlobals.UvLamp.Ready)
-            {
-                if (!MvtMessageBox.YesNo("UV Lamp", "The UV Lamp is NOT READY.\n\nStart Printing?", MessageBoxImage.Question, false))
-                    return;
-            }
+            if (!RxGlobals.PrintSystem.ReadyToPrint()) return;
 
             _Item.ScanLength = _Item.Copies;
             switch (_Item.TestDotSize)

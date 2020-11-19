@@ -4,6 +4,7 @@ using RX_DigiPrint.Services;
 using System;
 using System.Linq;
 using System.Text;
+using System.Windows;
 using System.Windows.Media;
 
 namespace RX_DigiPrint.Models
@@ -502,6 +503,38 @@ namespace RX_DigiPrint.Models
                 if (inkSupply.StateBrush==Rx.BrushWarn) brush=inkSupply.StateBrush;
 			}
             StateBrush = brush;
+		}
+
+        //--- ReadyToPrint ------------------------------------------------
+		public bool ReadyToPrint()
+		{
+			if (InkSupply.AnyFlushed()) return false;
+
+			if (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_cleaf && !(RxGlobals.StepperStatus[0].DripPans_InfeedDOWN && RxGlobals.StepperStatus[0].DripPans_OutfeedDOWN))
+			{
+				MvtMessageBox.YesNo("Print System", "Drip Pans below the clusters. Move it out before printing", MessageBoxImage.Question, true);
+				return false;
+			}
+
+			if (!RxGlobals.PrinterStatus.AllInkSupliesOn)
+			{
+				if (MvtMessageBox.YesNo("Print System", "Some ink supplies are OFF. Switch them ON.", MessageBoxImage.Question, true))
+				{
+					TcpIp.SFluidCtrlCmd msg = new TcpIp.SFluidCtrlCmd();
+					msg.no = -1;
+					msg.ctrlMode = EFluidCtrlMode.ctrl_print;
+
+					RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_CTRL_MODE, ref msg);
+				}
+			}
+
+			if (RxGlobals.UvLamp.Visible == Visibility.Visible && !RxGlobals.UvLamp.Ready)
+			{
+				if (!MvtMessageBox.YesNo("UV Lamp", "The UV Lamp is NOT READY.\n\nStart Printing?", MessageBoxImage.Question, false))
+					return false;
+			}
+
+			return true;
 		}
 
         //--- SetPrintCfg ----------------------------------------

@@ -8,13 +8,13 @@ using System.Threading.Tasks;
 
 namespace RX_DigiPrint.Models
 {
-	public class SetupAssist : RxBindable
+	public class SA_Base : RxBindable
 	{
 		private Action _ScanMoveDone   = null;
 		private Action _OnWebMoveDone  = null;
 		private bool   _WebRunning     = false;
 
-		public SetupAssist()
+		public SA_Base()
 		{
 			RxGlobals.Timer.TimerFct += _Tick;
 		}
@@ -164,6 +164,12 @@ namespace RX_DigiPrint.Models
 			}
 		}
 
+		//--- ScanReference ------------------------------------------
+		public void ScanReference()
+		{
+			RxGlobals.RxInterface.SendCommand(TcpIp.CMD_SA_REFERENCE);
+		}
+
 		//--- ScanMoveBy --------------------------------------------
 		public void ScanMoveBy(double dist, Action done=null)
 		{
@@ -181,6 +187,12 @@ namespace RX_DigiPrint.Models
 			cmd.steps	= (Int32)(dist*1000.0);
 			_ScanMoveDone = done;
 			RxGlobals.RxInterface.SendMsg(TcpIp.CMD_SA_MOVE, ref cmd);
+		}
+
+		//--- ScanStop ------------------------------
+		public void ScanStop()
+		{
+			RxGlobals.RxInterface.SendCommand(TcpIp.CMD_SA_STOP);
 		}
 
 		//--- Property Dist ---------------------------------------
@@ -209,13 +221,10 @@ namespace RX_DigiPrint.Models
 			}
 		}
 
-		//--- Property ActionRunning ---------------------------------------
-		private bool _ActionRunning=false;
-		public bool ActionRunning
+		//--- WebStop ----------------------------------
+		public void WebStop()
 		{
-			get { return _ActionRunning; }
-			set { SetProperty(ref _ActionRunning,value); }
+			RxGlobals.RxInterface.SendCommand(TcpIp.CMD_SA_WEB_STOP);
 		}
-
 	}
 }
