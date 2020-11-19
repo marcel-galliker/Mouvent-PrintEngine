@@ -4,6 +4,7 @@ using RX_Common;
 using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Models;
 using RX_DigiPrint.Models.Enums;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -43,8 +44,9 @@ namespace RX_DigiPrint.Views.SetupAssistView
         //--- _InitCamera ----------------------------
         private void _InitCamera()
 		{
-            CB_Camera.ItemsSource = _Camera.GetCameraList();
+            CB_Camera.ItemsSource  = _Camera.GetCameraList();
             CB_Camera.SelectedItem = RxGlobals.Settings.SetupAssistCam.Name;
+            NB_DistToStops.Text    = Math.Round(RxGlobals.Settings.SetupAssistCam.DistToStop, 3).ToString();
 		}
 
         //--- _InitStreamCaps -------------------------------
@@ -76,6 +78,7 @@ namespace RX_DigiPrint.Views.SetupAssistView
                 bool save=true;
                 RxGlobals.Settings.SetupAssistCam.Name       = CB_Camera.SelectedItem as string;
                 RxGlobals.Settings.SetupAssistCam.StreamCaps = CB_StreamCaps.SelectedItem as StreamCaps;
+                RxGlobals.Settings.SetupAssistCam.DistToStop = NB_DistToStops.Value;
 
                 if (save)
                 {

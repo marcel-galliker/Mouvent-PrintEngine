@@ -451,9 +451,17 @@ namespace RX_DigiPrint.Models
                 else          Changed |= SetProperty(ref _Speed, value);
             }
         }
-        
-        //--- Property ScanMode ---------------------------------------
-        private EScanMode _ScanMode;
+
+		//--- Property DistToStop ---------------------------------------
+		private double _DistToStop;
+		public double DistToStop
+		{
+			get { return _DistToStop; }
+			set { SetProperty(ref _DistToStop,value); }
+		}
+
+		//--- Property ScanMode ---------------------------------------
+		private EScanMode _ScanMode;
         public EScanMode ScanMode
         {
             get { return _ScanMode; }
@@ -1035,6 +1043,7 @@ namespace RX_DigiPrint.Models
             PenetrationPasses = msg.penetrationPasses;
             CuringPasses    = msg.curingPasses;
             Speed           = msg.speed;
+            DistToStop      = msg.distToStop;
             Collate         = msg.collate;
             State           = msg.state;
             Orientation     = msg.orientation;
@@ -1205,6 +1214,7 @@ namespace RX_DigiPrint.Models
                 msg.item.penetrationPasses = 0;
             }
             msg.item.speed          = Speed;
+            msg.item.distToStop     = DistToStop;
             msg.item.collate        = (Byte)Collate;
             msg.item.lengthUnit     = LengthUnit;
             msg.item.variable       = Convert.ToByte(Variable);

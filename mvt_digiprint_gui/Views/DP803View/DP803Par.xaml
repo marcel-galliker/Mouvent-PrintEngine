@@ -62,7 +62,7 @@
                                 <rx_uc:PlcParCtrl                      ID="PAR_PRINTING_SPEED"                  Label="Print Speed"  Unit="m/min" UnitWidth="50" Format="n"/>
                                 <rx_uc:PlcParCtrl                      ID="XML_HEAD_HEIGHT"                     Label="Print Height" Unit="mm" UnitWidth="50" Format="1"/>
                                 <rx_uc:PlcParCtrl                      ID="PAR_WEB_WIDTH"                       Label="Web Width"    Unit="mm" UnitWidth="50" Format="1"/>
-                                <rx_uc:PlcParCtrl                      ID="PAR_DISTANCE_TO_STOP"                Label="Stop Dist"    Unit="m"  UnitWidth="50" Format="f"/>
+                                <rx_uc:PlcParCtrl                      ID="XML_DISTANCE_TO_STOP"                Label="Stop Dist"    Unit="m"  UnitWidth="50" Format="f"/>
 
                                 <rx_uc:PlcTitle Header="Unwinder"/>
                                 <rx_uc:PlcParCtrl x:Name="CB_RotUW"    ID="PAR_WIND_DIRECTION_WINDER1"          Label="Rotation"    Unit="" UnitWidth="50" Type="ImgCombo" />

@@ -118,6 +118,7 @@ namespace RX_DigiPrint.Models
 			item.TestImage	= ETestImage.fullAlignment;
 			item.Dots		= "L";
 			item.Speed		= 50;
+			item.DistToStop = RxGlobals.Settings.SetupAssistCam.DistToStop;
 			item.ScanMode	= EScanMode.scan_std;
 			item.PageMargin = 0;
             item.ScanLength = item.Copies = 1;

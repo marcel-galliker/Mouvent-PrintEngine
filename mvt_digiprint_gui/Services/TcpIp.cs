@@ -769,6 +769,7 @@ namespace RX_DigiPrint.Services
 	        public byte	        curingPasses;
 	        public Int32	    scans;
             public Int32        speed;
+            public double       distToStop;
 
             public Int32   copiesTotal;
             public Int32   copiesPrinted;
