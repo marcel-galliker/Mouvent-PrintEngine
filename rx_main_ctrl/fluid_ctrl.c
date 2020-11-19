@@ -681,7 +681,7 @@ static void _control(int fluidNo)
 													steptx_rob_wash_start();
                                             }
                                             else 
-                                                _send_ctrlMode(_PurgeFluidNo, ctrl_purge_step1, TRUE);
+                                                _send_ctrlMode(no, ctrl_purge_step1, TRUE);
 											break;
 				
 				case ctrl_wash_step6:		if (steptx_rob_wash_done())
