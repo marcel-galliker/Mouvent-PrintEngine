@@ -360,7 +360,7 @@ int flz_load(SPageId *id, const char *filedir, const char *filename, int printMo
 				}
 			}
 			pinfo->lengthPx += 2*wul;
-			pinfo->dataSize = pinfo->lengthPx * pinfo->lineLen; 
+            pinfo->dataSize = (UINT64)pinfo->lengthPx * pinfo->lineLen; 
 
             //  TrPrintfL(TRUE, "DECOMPRESSING >>%s<<, page %d, time=%d ms", filepath, id->page, rx_get_ticks()-time);
 		}

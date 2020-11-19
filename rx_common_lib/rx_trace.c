@@ -120,7 +120,7 @@ static void _TraceFileOpen(const char *path, const char *appName)
 		
 		split_path(appName, NULL, name, ext);
 		
-		#ifdef linux			
+		#if defined(linux) || defined(WIN32)
 			//--- delete old files
 			char	str1[MAX_PATH];
 			no = TRACE_FILE_CNT;

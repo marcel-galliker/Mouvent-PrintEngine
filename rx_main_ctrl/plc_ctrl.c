@@ -869,13 +869,14 @@ static void _plc_get_var(RX_SOCKET socket, char *varList)
 	static int test=1;
 	char name[128];
 	char value[128];
-	char *answer = (char*)malloc(MAX_MESSAGE_SIZE);
+	char answer[MAX_MESSAGE_SIZE];
 	char *str=varList;
 	char *end;
 	char *var=name;
 	int len=0;
 	name[0]=0;
-	while ((end=strchr(str, '\n')))
+    answer[0]=0;
+    while ((end = strchr(str, '\n')))
 	{
 		*end++=0; 
 		len += sprintf(&answer[len], "%s", str);
@@ -901,7 +902,6 @@ static void _plc_get_var(RX_SOCKET socket, char *varList)
 
 //	printf("answer:len=%d\n%s\n", len, answer);
 	sok_send_2(&socket, REP_PLC_GET_VAR, (int)strlen(answer), answer);
-	free(answer);
 }
 
 //--- _plc_set_var ------------------------------------------------

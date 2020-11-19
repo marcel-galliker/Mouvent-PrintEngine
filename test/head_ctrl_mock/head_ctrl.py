@@ -144,7 +144,9 @@ class TCPProtocol:
             self.board.reset()
         # active heads are "dev_on" (2)
         self.board.activate = [x['enabled']==2 for x in msg.head]
+        # save blocks position for the board
         self.board.blk_end = [x["blkNo0"]+x["blkCnt"] for x in msg.head]
+        self.board.blkNo0 = [x["blkNo0"] for x in msg.head]
         # send back the ResetCnt
         msg.msgtype = "REP_HEAD_BOARD_CFG"
         self.transport.write(msg.pack())
@@ -159,6 +161,8 @@ class TCPProtocol:
                 msg.head[i]["ctrlMode"] = 0x006 # ctrl_readyToPrint
                 msg.head[i]["clusterNo"] = self.board.no
                 msg.head[i]["disabledJets"] = 32 * (-1, )
+                #msg.head[i]["densityValue"] = 12 * [1000,]
+                #msg.head[i]["densityValue"][3*i] = 10 
         self.transport.write(msg.pack())
 
     def mgt_CMD_GET_BLOCK_USED(self, msg):
@@ -167,11 +171,11 @@ class TCPProtocol:
         msg.blockOutIdx = self.board.blk_end[msg.headNo]
         msg.blkCnt = ((msg.blkCnt + 31) // 32) * 32
         logging.debug(f"{self.board.used.count} blocks used {msg.blkNo} for {msg.blkCnt} blocks on board {self.board.no} head {msg.headNo}")
-        msg.used = self.board.used.flags(msg.blkNo, msg.blkCnt) 
+        msg.used = self.board.used.flags(msg.blkNo, msg.blkCnt, self.board.blk_end[msg.headNo], self.board.blkNo0[msg.headNo]) 
         self.transport.write(msg.pack())
 
     def mgt_CMD_FPGA_IMAGE(self, msg):
-        logging.info(f"FPGA image on board {self.board.no} head {msg.head} Blk0 {msg.blkNo} BlkCnt {msg.blkCnt}")
+        logging.info(f"FPGA image on board {self.board.no} head {msg.head} Blk0 {msg.blkNo} BlkCnt {msg.blkCnt} (id:{msg.id} copy:{msg.copy} page:{msg.page} scan:{msg.scan})")
         self.transport.write(Message("REP_FPGA_IMAGE").pack())
         self.board.image(msg)
 
@@ -192,9 +196,14 @@ class UsedFlags(list):
         missing = no // 32 - len(self._flags) + 1
         if missing > 0:
             self._flags.extend(missing * [0])
-    def free(self, blkNo, blkCnt):
+    def free(self, blkNo, blkCnt,  end, blk0):
         "free one blocks"
-        self._flags[blkNo//32:blkNo//32+blkCnt//32] = blkCnt//32 * (0,)
+        if blkNo + blkCnt < end:
+            self._flags[blkNo//32:blkNo//32+blkCnt//32] = blkCnt//32 * (0,)
+        else:
+            self._flags[blkNo//32:end//32] = (end//32 - blkNo//32) * (0,)
+            self._flags[blk0//32:(blkNo + blkCnt - end)//32] = (blkNo//32 + blkCnt//32 - end//32)  * (0,)
+
     def use(self, no):
         "set a block as used"
         self._spare(no)
@@ -203,21 +212,30 @@ class UsedFlags(list):
         "check if a block is used"
         self._spare(no)
         return self._flags[no // 32] & (1 << (no % 32))
-    def flags(self, blkNo, blkCnt):
+    def flags(self, blkNo, blkCnt, end, blk0):
         "return the table of bits according to blocks"
-        self._spare(blkNo + blkCnt)
-        return self._flags[blkNo//32:blkNo//32+blkCnt//32]
+        if blkNo + blkCnt < end:
+            self._spare(blkNo + blkCnt)
+            return self._flags[blkNo//32:blkNo//32+blkCnt//32]
+        else:
+            self._spare(end)
+            return self._flags[blkNo//32:end//32]+self._flags[blk0//32:(blkNo + blkCnt - end)//32]
 
 
-def save_image(no, blocks, fpga_images):
+def save_image(no, blocks, fpga_images, blk_end, blk_No0):
     "save all images printed by a board"
     for fpga in fpga_images:
         filename = f"printed/fake id{fpga.id} c{fpga.copy} p{fpga.page} s{fpga.scan} h{fpga.head} b{no}.bmp"
         logging.info(f"Creating '{filename}' ({fpga.widthPx}x{fpga.lengthPx})...")
         try:
             img = bytearray()
+            end = blk_end[fpga.head]
+            b0 = blk_No0[fpga.head]
             for i in range(fpga.blkNo,fpga.blkNo+fpga.blkCnt):
-                img.extend(blocks[i])
+                if i < end: 
+                    img.extend(blocks[i])
+                else:
+                    img.extend(blocks[b0+i-end])
             from PIL import Image
             # the width is align to 256 bits
             align = 256 // fpga.bitPerPixel # so it depends on the bit per pixel
@@ -268,7 +286,7 @@ class Board:
         "finish the print by clearing blocks and sending EVT_PRINT_DONE"
         for head in self.fpga_images[(msg.id, msg.page, msg.copy, msg.scan)]:
             if head.clearBlockUsed:
-                self.used.free(head.blkNo, head.blkCnt)
+                self.used.free(head.blkNo, head.blkCnt, self.blk_end[head.head], self.blkNo0[head.head])
         # reuse the same data from the message
         self.pd += 1
         msg.pd = self.pd
@@ -342,7 +360,7 @@ async def main():
                 for img in list(board.fpga_images.values()):
                     if len(img) == len([x for x in board.activate if x]) and not board.abort:
                         # if done, save bmp in another thread as it could be a long process
-                        fn = functools.partial(save_image, *(board.no, board.blocks, img))
+                        fn = functools.partial(save_image, *(board.no, board.blocks, img, board.blk_end, board.blkNo0))
                         loop.run_in_executor(None, fn)                            
                         board.print_done(img[0])
     

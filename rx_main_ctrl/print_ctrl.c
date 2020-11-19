@@ -138,6 +138,7 @@ int pc_start_printing(void)
 	ERR_z_in_print = FALSE;
 	if (RX_PrinterStatus.printState==ps_ready_power || RX_PrinterStatus.printState==ps_webin)
 	{
+        spool_start_printing();
 		step_set_config();
 		if (!RX_StepperStatus.info.z_in_print 
 		&& (rx_def_is_tx(RX_Config.printer.type) || (RX_Config.printer.type==printer_LH702 && plc_in_simu())))
@@ -183,7 +184,6 @@ int pc_start_printing(void)
 		_PrintDoneFlags = spool_head_board_used_flags();
 		_SetPrintPar   = TRUE;
 //		fluid_start_printing();
-		spool_start_printing();
 		pq_start();
 		pc_print_next();
 		gui_send_printer_status(&RX_PrinterStatus);

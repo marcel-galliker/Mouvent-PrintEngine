@@ -386,13 +386,13 @@ static void _start_spooler_ctrl(int no)
 {
 	if (no==0)
 	{
+		Error(WARN, 0, "rx_spooler_ctrl[%d] restarting...", no);
 		#ifdef WIN32
 			rx_process_start(PATH_BIN_WIN FILENAME_SPOOLER_CTRL".exe", NULL);
 		#else
 			rx_process_start(PATH_BIN_SPOOLER FILENAME_SPOOLER_CTRL, NULL);
 		#endif
-//		rx_sleep(500);
-		Error(WARN, 0, "rx_spooler_ctrl[%d] restarted", no);
+		rx_sleep(1000);
 	}
 	else Error(ERR_ABORT, 0, "Starting spooler no!=0 not implemented");
 }
@@ -411,15 +411,6 @@ void spool_start_printing(void)
 	if (rx_process_running_cnt(FILENAME_SPOOLER_CTRL, NULL)==0)
 	{
 		_start_spooler_ctrl(0);
-		/*
-		#ifdef WIN32
-			rx_process_start(PATH_BIN_WIN FILENAME_SPOOLER_CTRL".exe", NULL);
-		#else
-			rx_process_start(PATH_BIN_SPOOLER FILENAME_SPOOLER_CTRL, NULL);
-		#endif
-		rx_sleep(500);
-		Error(WARN, 0, "rx_spooler_ctrl restarted");
-		*/
 	}
 //	#endif
 	memset(_LoadedFiles, 0, sizeof(_LoadedFiles));
