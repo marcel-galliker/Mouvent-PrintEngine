@@ -108,7 +108,7 @@
       <SDLCheck>
       </SDLCheck>
       <PreprocessorDefinitions>_DEBUG;RXALIGNFILTER_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\External\OpenCL SDK\7.0\include;..\External\baseclasses;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>"..\External\OpenCL SDK\7.0\include";..\External\baseclasses;..\External\OpenCv_4.20\opencv\build\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <CallingConvention>StdCall</CallingConvention>
       <SupportJustMyCode>false</SupportJustMyCode>
