@@ -360,7 +360,7 @@ int flz_load(SPageId *id, const char *filedir, const char *filename, int printMo
 				    }
 			    }
 			    pinfo->lengthPx += 2*wul;
-			    pinfo->dataSize = pinfo->lengthPx * pinfo->lineLen; 
+			    pinfo->dataSize = (UINT64)pinfo->lengthPx * pinfo->lineLen; 
 			    
 			    /*
 				// Tests: Mark end of label
