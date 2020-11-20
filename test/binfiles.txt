@@ -49,10 +49,15 @@ bin\gui\MahApps.Metro.IconPacks.Zondicons.dll
 bin\gui\MaterialDesignColors.dll
 bin\gui\MaterialDesignThemes.Wpf.dll
 bin\gui\Microsoft.Xaml.Behaviors.dll
+bin\gui\opencv_world420.dll
 bin\gui\QRCoder.dll
+bin\gui\RegisterFilter.bat
+bin\gui\rx_AlignFilter.dll
 bin\gui\rx_CamLib.dll
 bin\gui\rx_common_lib_cs.dll
 bin\gui\RX_DigiPrint.exe
+bin\gui\rx_rip_lib.dll
+bin\gui\rx_rip_lib_x64.dll
 bin\gui\ScanCheck.xsd
 bin\gui\ScanCheckImport.dll
 bin\gui\System.Drawing.Common.dll
@@ -69,6 +74,7 @@ bin\gui\System.Text.Encodings.Web.dll
 bin\gui\System.Text.Json.dll
 bin\gui\System.Threading.Tasks.Extensions.dll
 bin\gui\System.ValueTuple.dll
+bin\gui\UnRegisterFilter.bat
 bin\head
 bin\head\fpga_config_regs_unrolled.csv
 bin\head\rx_headtemp_rbf
@@ -102,6 +108,7 @@ bin\spooler\grid.tif
 bin\spooler\jet_numbers.tif
 bin\spooler\libtbarcode11.so.0
 bin\spooler\rx_spooler_ctrl
+bin\spooler\SA_Alignment.tif
 bin\spooler\scanning_1.tif
 bin\spooler\scanning_2.tif
 bin\spooler\scanning_3.tif
@@ -118,6 +125,7 @@ bin\stepper\rx_stepper_rbf
 bin\win
 bin\win\rx_main_ctrl.exe
 bin\win\rx_rip_lib.dll
+bin\win\rx_rip_lib_x64.dll
 bin\win\rx_spooler_ctrl.exe
 bin\win\TBarCode11_x64.dll
 bin\win\cudart64_102.dll
