@@ -1799,13 +1799,6 @@ static int _check_print_done(void)
                 int i   = RX_HBStatus[0].head[head].printGoCnt%MAX_PAGES;
                 RX_HBStatus[0].head[head].printGoCnt++;
 
-				#ifdef DEBUG
-				{ // fpga V 1821
-					char str[64];
-					sprintf(str, "PrintGo_h%d_#%d", head, RX_HBStatus[0].head[head].printGoCnt);
-					fpga_trace_registers(str, TRUE);
-				}
-				#endif
 				_PrintDonePos[head][i] = RX_FpgaStat.pg_in_position[head] + _Img[head][i].lengthPx;
 
 				TrPrintfL(TRUE, "Head[%d].PrintGo=%d, pos=%d", head, RX_HBStatus[0].head[head].printGoCnt, RX_FpgaStat.pg_in_position[head]);

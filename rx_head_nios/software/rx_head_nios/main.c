@@ -96,17 +96,21 @@ void main_rebooting_cond(void) {
 }
 
 //--- main_tick_1000ms ------------------------------
-void main_tick_1000ms(void) {
+void main_tick_1000ms(void)
+{
 	int condNo;
 
-	if (!bootloader_running()) {
+	if (!bootloader_running())
+	{
 		for (condNo = 0; condNo < MAX_HEADS_BOARD; condNo++)
 		{
 			if (!*pRX_Status->head_eeprom[condNo]) head_eeprom_read(condNo, pRX_Status->head_eeprom[condNo], sizeof(pRX_Status->user_eeprom[condNo]));
 			if (!*pRX_Status->user_eeprom[condNo]) head_eeprom_read_user_data(condNo, pRX_Status->user_eeprom[condNo], sizeof(pRX_Status->user_eeprom[condNo]), 0x00);
 
-			if (pRX_Status->cond[condNo].info.connected) {
-				if (--_Cond[condNo].timer < 0) {
+			if (pRX_Status->cond[condNo].info.connected)
+			{
+				if (--_Cond[condNo].timer < 0)
+				{
 					pRX_Status->cond[condNo].info.connected = FALSE;
 					pRX_Status->cond[condNo].error |= COND_ERR_connection_lost;
 				}
@@ -126,12 +130,11 @@ alt_32 alt_avalon_sysid_qsys_test(void) {
 	alt_u32 hardware_id = IORD_ALTERA_AVALON_SYSID_QSYS_ID(SYSID_QSYS_BASE);
 
 	/* Read the time-of-generation, aka value1, from the hardware register. */
-	alt_u32 hardware_timestamp = IORD_ALTERA_AVALON_SYSID_QSYS_TIMESTAMP(
-			SYSID_QSYS_BASE);
+	alt_u32 hardware_timestamp = IORD_ALTERA_AVALON_SYSID_QSYS_TIMESTAMP(SYSID_QSYS_BASE);
 
 	/* Return 0 if the hardware and software appear to be in sync. */
-	if ((SYSID_QSYS_TIMESTAMP == hardware_timestamp)
-			&& (SYSID_QSYS_ID == hardware_id)) {
+	if ((SYSID_QSYS_TIMESTAMP == hardware_timestamp)&& (SYSID_QSYS_ID == hardware_id))
+	{
 		return 0;
 	}
 
@@ -147,7 +150,8 @@ alt_32 alt_avalon_sysid_qsys_test(void) {
 }
 
 //--- main_error_reset ------------------------------
-void main_error_reset(void) {
+void main_error_reset(void)
+{
 	pRX_Status->error.err = _StaticErrors;
 }
 
@@ -168,7 +172,8 @@ void get_version(SVersion *pversion)
 };
 
 //--- main ----------------------------------------------------
-int main() {
+int main()
+{
 	// _DEBUG must only be enabled when downloading through hardware debugger.
 	// Otherwise modes (PRINT, OFF, ..) do not work correctly
 //	tr_debug();

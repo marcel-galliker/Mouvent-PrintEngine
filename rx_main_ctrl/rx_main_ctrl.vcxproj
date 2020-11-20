@@ -515,8 +515,7 @@ Exit 0</Command>
     <PostBuildEvent>
       <Command>mkdir "$(ProjectDir)..\bin\win"
 copy "$(OutDir)$(TargetName)$(TargetExt)" "$(ProjectDir)..\bin\win"
-rem copy ..\Externals\matrix\win\lib\matrix32.dll $(OutDir)
-rem copy ..\Externals\matrix\win\lib\matrix32.dll d:\radex\bin\main\win
+copy ..\Externals\Tec-it\win\TBarCode11\Bin\TBarCode11.dll "$(ProjectDir)..\bin\win"
 
 </Command>
     </PostBuildEvent>
