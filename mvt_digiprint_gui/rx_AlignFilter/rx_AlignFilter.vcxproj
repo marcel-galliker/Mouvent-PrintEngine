@@ -116,11 +116,13 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <CompileAsManaged>false</CompileAsManaged>
       <WholeProgramOptimization>false</WholeProgramOptimization>
+      <AdditionalOptions>/Qpar-report:0 %(AdditionalOptions)</AdditionalOptions>
+      <DisableSpecificWarnings>4129;4477;4996;5012</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>..\OpenCL SDK\7.0\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\External\OpenCL SDK\7.0\lib\x64;..\External\OpenCv_4.20\opencv\build\x64\vc14\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>OpenCL.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;strmbasd.lib;opencv_world420d.lib;winmm.lib;dbghelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>rx_AlignFilter.def</ModuleDefinitionFile>
       <EmbedManagedResourceFile>%(EmbedManagedResourceFile)</EmbedManagedResourceFile>
@@ -133,7 +135,7 @@
       <Command>rem "%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Community\Common7\IDE\TextTransform.exe" -a !!BuildConfiguration!$(Configuration) "$(ProjectDir)\Version.tt"</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>xcopy /y /d  "$(ProjectDir)..\OpenCv_4.20\opencv\build\x64\vc15\bin\opencv_world420.dll" "$(OutDir)"</Command>
+      <Command>xcopy /y /d  "$(ProjectDir)..\External\OpenCv_4.20\opencv\build\x64\vc15\bin\opencv_world420.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
