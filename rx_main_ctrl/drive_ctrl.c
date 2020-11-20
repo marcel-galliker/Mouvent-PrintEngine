@@ -1,6 +1,6 @@
 // ****************************************************************************
 //
-//	plc_ctrl.cpp
+//	drive_ctrl.cpp
 //
 // ****************************************************************************
 //
@@ -160,7 +160,6 @@ static int _Move_Back_TargetPosition = 750;          // mm
 //--- drive_init ------------------------------------------------
 int drive_init(void)
 {
-    
     drive_error_reset();
     _drive_load_material(RX_Config.material);
     _Socket = INVALID_SOCKET;
@@ -425,8 +424,7 @@ static void *_drive_thread(void *lpParameter)
                                 _set_setting(CTRL, CONTROL_WORD, STOP);
                                 _set_setting(CTRL, CONTROL_WORD, START_START);
                             } 
-                        }
-                        
+                        }                       
                         break;
                     case move_waste:
                         _set_setting(CTRL, CONTROL_WORD, STOP);
@@ -494,10 +492,11 @@ static void *_drive_thread(void *lpParameter)
                         break;
                     }
                 }
-                rx_sleep(1000);
             }
         }
+        rx_sleep(1000);
     }
+    return NULL;
 }
 #endif // linux
 
@@ -525,6 +524,7 @@ UINT32 drive_get_scanner_pos(void)
 //--- drive_start_printing ------------------------------------------
 int drive_start_printing(void)
 {
+    //_if (_MoveCmd == )
     return TRUE;
 }
 
@@ -545,7 +545,8 @@ void drive_abort_printing(void)
 
 void drive_move_start(void)
 {
-    if (RX_StepperStatus.info.z_in_ref || RX_StepperStatus.info.z_in_up || RX_StepperStatus.info.z_in_print)
+    if (RX_StepperStatus.info.z_in_ref || RX_StepperStatus.info.z_in_up ||
+        RX_StepperStatus.info.z_in_print)
     {
         if (_MoveCmd == move_standstill || _MoveCmd == move_wait)
             _MoveCmd = move_start;
