@@ -34,15 +34,17 @@ namespace RX_DigiPrint.Views.UserControls
         {
             if (RxGlobals.PrintSystem.PrinterType!=_PrinterType)
             {
-                int offset=0;
                 MainGrid.Children.Clear();
 
-                if (RxGlobals.PrintSystem.IsTx)
+                // Add more ink levels when needed
+                int additionalInkLevels = 0;
+                if (RxGlobals.PrintSystem.IsTx) additionalInkLevels = 1;    // Flush
+                if (RxGlobals.PrintSystem.IsLb) additionalInkLevels = 2;    // Flush + waste
+                for (int i=0; i<additionalInkLevels; i++)
                 {
-                    InkLevel flush = new InkLevel(){DataContext = RxGlobals.InkSupply.List[TcpIp.InkSupplyCnt]};
-                    Grid.SetColumn(flush, 0);
-                    MainGrid.Children.Add(flush);
-                    offset=1;
+                    InkLevel additionalLevel = new InkLevel(){DataContext = RxGlobals.InkSupply.List[TcpIp.InkSupplyCnt+i]};
+                    Grid.SetColumn(additionalLevel, i);
+                    MainGrid.Children.Add(additionalLevel);
                 }
 
                 for (int i=0; i<RxGlobals.PrintSystem.ColorCnt; i++)
@@ -60,17 +62,11 @@ namespace RX_DigiPrint.Views.UserControls
                             // configuration missmatch!!
                             ctrl = new InkLevel();
                         }
-                        Grid.SetColumn(ctrl, offset+i);
+                        Grid.SetColumn(ctrl, additionalInkLevels + i);
                         MainGrid.Children.Add(ctrl);
                     }
                 }
                 
-                /*
-                InkLevel waste = new InkLevel(){DataContext = RxGlobals.InkSupply.List[TcpIp.InkSupplyCnt+1]};
-                Grid.SetColumn(waste, TcpIp.InkSupplyCnt+1);
-                MainGrid.Children.Add(waste);
-                */
-
                 _PrinterType = RxGlobals.PrintSystem.PrinterType;
             }
         }
