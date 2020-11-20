@@ -127,7 +127,7 @@ void tx80x_wd_main(void)
         RX_StepperStatus.robinfo.moving_wd = FALSE;
         if (_CmdRunning == CMD_LIFT_REFERENCE)
         {
-            for (motor = MOTOR_WD_FRONT, ok = TRUE; motor < MOTOR_WD_CNT; motor++)
+            for (motor = MOTOR_WD_FRONT, ok = TRUE; motor < MOTOR_WD_FRONT + MOTOR_WD_CNT; motor++)
             {
                 if ((Fpga.stat->statMot[motor].err_estop & ENC_ESTOP_ENC))
                 {
@@ -143,8 +143,7 @@ void tx80x_wd_main(void)
         }
         else
         {
-            for (motor = MOTOR_WD_FRONT, ok = TRUE;
-                 motor < MOTOR_WD_FRONT + MOTOR_WD_CNT; motor++)
+            for (motor = MOTOR_WD_FRONT, ok = TRUE; motor < MOTOR_WD_FRONT + MOTOR_WD_CNT; motor++)
             {
                 if (motor_error(motor))
                 {
@@ -266,7 +265,7 @@ int tx80x_wd_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
     case CMD_LIFT_PRINT_POS:
         strcpy(_CmdName, "CMD_LIFT_PRINT_POS");
         TrPrintfL(TRUE, "SOCKET[%d]: %s", socket, _CmdName);
-        pos = *((INT32 *)pdata);
+        pos = (*((INT32 *)pdata));
         if (pos < TX_PRINT_POS_MIN)
         {
             pos = TX_PRINT_POS_MIN;
@@ -279,7 +278,8 @@ int tx80x_wd_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         }
         if (!_CmdRunning && (!RX_StepperStatus.robinfo.z_in_print || (steps != _PrintPos_Act)))
         {
-            _PrintPos_New = _micron_2_steps(TX_REF_HEIGHT_WD + WD_UNDER_PRINT_HIGH - pos);
+            _PrintPos_New =
+                _micron_2_steps(TX_REF_HEIGHT_WD + WD_UNDER_PRINT_HIGH - pos);
             if (RX_StepperStatus.robinfo.ref_done_wd)
                 _tx80x_wd_move_to_pos(CMD_LIFT_PRINT_POS, _PrintPos_New);
             else
