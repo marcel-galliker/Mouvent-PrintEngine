@@ -130,6 +130,7 @@ namespace RX_DigiPrint.Services
         scanning,               // 07
         fullAlignment,          // 08
         density,                // 09
+        SA_Alignment,           // 10
     };
 
     public enum EFluidCtrlMode : int

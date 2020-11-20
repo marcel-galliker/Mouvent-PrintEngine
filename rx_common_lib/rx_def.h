@@ -326,6 +326,7 @@ typedef struct SPrintQueueItem
 			#define PQ_TEST_SCANNING		7
 			#define PQ_TEST_FULL_ALIGNMENT	8
 			#define PQ_TEST_DENSITY			9
+			#define PQ_TEST_SA_ALIGNMENT	10
 
 	INT32	pageWidth;	// µm
 	INT32	pageHeight;	// µm

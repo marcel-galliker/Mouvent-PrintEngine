@@ -500,9 +500,17 @@ static int _print_next(void)
 											 RX_TestImage.scansTotal = RX_TestImage.copies;
 											 break;
 				case PQ_TEST_JETS:			 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "fuji.tif");
-											 if (RX_Config.printer.type==printer_TX801 
-											 ||  RX_Config.printer.type==printer_TX802
-											 ||  RX_Config.printer.type==printer_TX404)
+											 if (rx_def_is_tx(RX_Config.printer.type))
+											 {
+												 RX_TestImage.scansTotal = RX_TestImage.copies;
+											 }
+											 else if (RX_Config.printer.type==printer_test_table)
+											 {
+												RX_TestImage.scansTotal = RX_TestImage.copies*RX_TestImage.scans;
+											 }
+											 break;
+				case PQ_TEST_SA_ALIGNMENT:	 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "SA_Alignment.tif");
+											 if (rx_def_is_tx(RX_Config.printer.type))
 											 {
 												 RX_TestImage.scansTotal = RX_TestImage.copies;
 											 }
@@ -512,9 +520,7 @@ static int _print_next(void)
 											 }
 											 break;
 				case PQ_TEST_JET_NUMBERS:	 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "jet_numbers.tif");
-											 if (RX_Config.printer.type==printer_TX801 
-											 ||  RX_Config.printer.type==printer_TX802 
-											 ||  RX_Config.printer.type==printer_TX404) 
+											 if (rx_def_is_tx(RX_Config.printer.type)) 
 											 {
 												 RX_TestImage.scansTotal = RX_TestImage.copies;	
 											 }

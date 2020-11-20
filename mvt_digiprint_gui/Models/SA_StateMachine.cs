@@ -115,7 +115,7 @@ namespace RX_DigiPrint.Models
 
             if (InkSupply.AnyFlushed()) return;
 
-			item.TestImage	= ETestImage.fullAlignment;
+			item.TestImage	= ETestImage.SA_Alignment;
 			item.Dots		= "L";
 			item.Speed		= 50;
 			item.DistToStop = RxGlobals.Settings.SetupAssistCam.DistToStop;
