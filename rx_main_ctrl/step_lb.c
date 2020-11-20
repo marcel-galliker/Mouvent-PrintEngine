@@ -209,7 +209,11 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
             }
         }
     };
-    robinfo.auto_cap = _Status[0].robinfo.auto_cap;
+    if (_step_socket[0] == INVALID_SOCKET)
+        robinfo.auto_cap = TRUE;
+    else
+        robinfo.auto_cap = _Status[0].robinfo.auto_cap;
+    
     if (RX_Config.printer.type == printer_LB701)
     {
         info.headUpInput_0 = _Status[0].info.headUpInput_0;

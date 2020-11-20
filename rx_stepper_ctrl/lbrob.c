@@ -47,7 +47,7 @@
 
 #define CAP_FILL_TIME           16000       // ms
 #define SCREW_SEARCHING_TIME    5000        // ms
-#define VACUUM_PUMP_TIME        3000        // ms
+#define VACUUM_PUMP_TIME        15000       // ms
 #define WASTE_PUMP_TIME         30000       // ms
 
 // Digital Inputs
@@ -878,7 +878,6 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         if (val == 0)
         {
             Fpga.par->output &= ~RO_INK_PUMP_BOTH;
-            Fpga.par->output &= ~RO_VACUUM_CLEANER;
             lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &state);
         }
         else if (val == 1)
@@ -888,7 +887,6 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         else if (val == 2)
         {
             Fpga.par->output &= ~RO_INK_PUMP_LEFT;
-            Fpga.par->output &= ~RO_VACUUM_CLEANER;
             lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &state);
         }
         else if (val == 3)
@@ -898,7 +896,6 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         else if (val == 4)
         {
             Fpga.par->output &= ~RO_INK_PUMP_RIGHT;
-            Fpga.par->output &= ~RO_VACUUM_CLEANER;
             lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &state);
         }
         else if (val == 5)
