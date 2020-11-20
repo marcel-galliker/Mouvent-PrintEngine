@@ -1,6 +1,6 @@
 // ****************************************************************************
 //
-//	plc_ctrl.cpp
+//	drive_ctrl.cpp
 //
 // ****************************************************************************
 //
@@ -160,7 +160,6 @@ static int _Move_Back_TargetPosition = 750;          // mm
 //--- drive_init ------------------------------------------------
 int drive_init(void)
 {
-    
     drive_error_reset();
     _drive_load_material(RX_Config.material);
     _Socket = INVALID_SOCKET;
@@ -425,8 +424,7 @@ static void *_drive_thread(void *lpParameter)
                                 _set_setting(CTRL, CONTROL_WORD, STOP);
                                 _set_setting(CTRL, CONTROL_WORD, START_START);
                             } 
-                        }
-                        
+                        }                       
                         break;
                     case move_waste:
                         _set_setting(CTRL, CONTROL_WORD, STOP);
@@ -494,10 +492,11 @@ static void *_drive_thread(void *lpParameter)
                         break;
                     }
                 }
-                rx_sleep(1000);
             }
         }
+        rx_sleep(1000);
     }
+    return NULL;
 }
 #endif // linux
 
