@@ -127,7 +127,7 @@ void tx80x_wd_main(void)
         RX_StepperStatus.robinfo.moving_wd = FALSE;
         if (_CmdRunning == CMD_LIFT_REFERENCE)
         {
-            for (motor = MOTOR_WD_FRONT, ok = TRUE; motor < MOTOR_WD_CNT; motor++)
+            for (motor = MOTOR_WD_FRONT, ok = TRUE; motor < MOTOR_WD_FRONT + MOTOR_WD_CNT; motor++)
             {
                 if ((Fpga.stat->statMot[motor].err_estop & ENC_ESTOP_ENC))
                 {
@@ -143,8 +143,7 @@ void tx80x_wd_main(void)
         }
         else
         {
-            for (motor = MOTOR_WD_FRONT, ok = TRUE;
-                 motor < MOTOR_WD_CNT; motor++)
+            for (motor = MOTOR_WD_FRONT, ok = TRUE; motor < MOTOR_WD_FRONT + MOTOR_WD_CNT; motor++)
             {
                 if (motor_error(motor))
                 {
