@@ -50,7 +50,7 @@ static char		*_MotorName[2] = {"BACK", "FRONT"};
 #define MIN_CAP_HEIGHT			7600		// um under Ref height
 
 #define DIST_CAP_WASH			7600		// um -> higher than capping hight
-#define DIST_CAP_SCREW			7600		// um -> higher than capping hight
+#define DIST_CAP_SCREW			7500		// um -> higher than capping hight
 
 #define CLUSTER_CHANGE_HEIGHT	60000	//um
 
@@ -186,7 +186,6 @@ void lb702_main(int ticks, int menu)
 				
 				if (RX_StepperStatus.info.ref_done)
 				{
-                    
                     motors_reset(MOTOR_Z_BITS);
                     TrPrintfL(TRUE, "CMD_LIFT_REFERENCE done, _Cmd_New=0x%08x", _Cmd_New);
 					if (_Cmd_New)
@@ -489,7 +488,6 @@ static int  _incs_2_micron(int incs)
 //--- _lb702_move_to_pos ---------------------------------------------------------------
 static void _lb702_move_to_pos(int cmd, int pos0, int pos1)
 {
-	int adjust=0;
     RX_StepperStatus.cmdRunning = cmd;
     if (cmd == _NewCmd) _NewCmd = 0;
     if (RX_StepperStatus.robot_used && !_CmdRunningRobi && (!RX_StepperStatus.screwerinfo.y_in_ref || !RX_RobiStatus.isInGarage) && RX_StepperStatus.cmdRunning != CMD_LIFT_REFERENCE && RX_StepperStatus.cmdRunning != CMD_LIFT_SCREW)
@@ -510,12 +508,12 @@ static void _lb702_move_to_pos(int cmd, int pos0, int pos1)
     else if (((cmd == CMD_LIFT_PRINT_POS || cmd == CMD_LIFT_UP_POS || cmd == CMD_LIFT_CLUSTER_CHANGE) && RX_RobiStatus.isInGarage && RX_StepperStatus.screwerinfo.y_in_ref && RX_StepperStatus.info.x_in_ref) ||
                  ((cmd == CMD_LIFT_CAPPING_POS || cmd == CMD_LIFT_WASH_POS) && RX_RobiStatus.isInGarage && RX_StepperStatus.screwerinfo.y_in_ref) || cmd == CMD_LIFT_SCREW || cmd == CMD_LIFT_REFERENCE)
 	{
-        Error(LOG, 0, "Move Command %08x", cmd);
+		Error(LOG, 0, "Move Command %08x", cmd);
         RX_StepperStatus.info.moving = TRUE;
 		_PrintPos_New[MOTOR_Z_BACK]  = pos0;
 		_PrintPos_New[MOTOR_Z_FRONT] = pos1;
-		motor_move_to_step(MOTOR_Z_BACK, &_ParZ_down,  pos0+adjust);
-		motor_move_to_step(MOTOR_Z_FRONT, &_ParZ_down, pos1+adjust);
+		motor_move_to_step(MOTOR_Z_BACK, &_ParZ_down,  pos0);
+		motor_move_to_step(MOTOR_Z_FRONT, &_ParZ_down, pos1);
 
 		motors_start(MOTOR_Z_BITS, TRUE);	
 	} 
