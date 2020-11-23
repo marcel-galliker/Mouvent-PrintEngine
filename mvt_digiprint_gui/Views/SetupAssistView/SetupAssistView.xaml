@@ -183,7 +183,13 @@
             <GroupBox  Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Stretch" Width="700" Header="Camera Capture" Style="{StaticResource MvtGroupBox}" >
                 <local:SA_CamCapture x:Name="CamCapture" IsVisibleChanged="CamCapture_IsVisibleChanged"/>
             </GroupBox>
+
+            <common:MvtButton HorizontalAlignment="Right" VerticalAlignment="top" Grid.Row="0" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeS}" Click="CamSettings_Clicked" x:Name="BTN_CamSettings">
+                <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Kind="CogOutline" Foreground="DarkGray"/>
+            </common:MvtButton>
+
             <local:SA_ActionsView x:Name="SetupActions" Grid.Column="1" Margin="5,0"/>
+            <local:SA_CamSettings x:Name="CamSettings" Grid.Column="1" Margin="5,0"/>
         </Grid>
     </Grid>
 </UserControl>

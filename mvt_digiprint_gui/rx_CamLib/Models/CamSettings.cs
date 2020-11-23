@@ -5,6 +5,15 @@ using System.Text;
 
 namespace rx_CamLib.Models
 {
+
+	[Flags]
+	public enum AutoFlag
+	{
+		None = 0,
+		Auto = 1,
+		Manual = 2,
+	}
+
 	public class CamSettings : RxBindable
 	{
 		//--- Property Name ---------------------------------------
@@ -13,14 +22,6 @@ namespace rx_CamLib.Models
 		{
 			get { return _Name; }
 			set { SetProperty(ref _Name,value); }
-		}
-
-		//--- Property Threshold ---------------------------------------
-		private int _Threshold;
-		public int Threshold
-		{
-			get { return _Threshold; }
-			set { SetProperty(ref _Threshold,value); }
 		}
 
 		//--- Property DistToStop ---------------------------------------

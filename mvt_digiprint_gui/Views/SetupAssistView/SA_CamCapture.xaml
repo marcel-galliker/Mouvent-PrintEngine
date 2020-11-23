@@ -22,13 +22,27 @@
             <TextBlock Text="View " VerticalAlignment="Center"/>
             <rx:RxComboBox  Grid.Row="0" Grid.Column="1" Width="150" x:Name="CB_View" SelectionChanged="CB_View_SelectionChanged" VerticalAlignment="Center"/>
         </StackPanel>
+        <!--
         <common:MvtButton HorizontalAlignment="Right" Grid.Row="0" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeS}" Click="Setup_Clicked">
             <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Kind="CogOutline" Foreground="DarkGray"/>
         </common:MvtButton>
+        -->
 
-        <WindowsFormsHost Grid.Row="1" Grid.Column="0" MinHeight="100">
+        <WindowsFormsHost Grid.Row="1" Grid.Column="0" MinHeight="100" x:Name="FormHost" >
             <wf:PictureBox x:Name="CameraCapture" />
         </WindowsFormsHost>
+
+        <GroupBox Grid.Row="1" Grid.Column="0" Background="#FFFFF2F0" Style="{StaticResource MvtGroupBox}" Header="Error" Width="500">
+            <StackPanel>
+                <TextBlock Text="Align Filter not registered" FontWeight="Bold" Foreground="{StaticResource RX.Error}" FontSize="{StaticResource FontSizeLarge}" HorizontalAlignment="Center" Margin="0,10"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <TextBlock Text="Run "/>
+                    <TextBlock Text="rx_AlignFilter_Register.bat" FontWeight="Bold" />
+                    <TextBlock Text=" as administrator!"/>
+
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
 
         <Grid Grid.Row="2" x:Name="ThresholdGrid">
             <Grid.RowDefinitions>

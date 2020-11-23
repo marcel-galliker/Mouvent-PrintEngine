@@ -103,7 +103,7 @@
   <PropertyGroup />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <DebugSymbols>true</DebugSymbols>
-    <OutputPath>_out\Debug_x64\</OutputPath>
+    <OutputPath>..\_out\Debug_x64\</OutputPath>
     <DefineConstants>TRACE;DEBUG;RX_DigiPrint;X64</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>x64</PlatformTarget>
@@ -733,6 +733,9 @@
     </Compile>
     <Compile Include="Views\SetupAssistView\SA_Settings.xaml.cs">
       <DependentUpon>SA_Settings.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SetupAssistView\SA_CamSettings.xaml.cs">
+      <DependentUpon>SA_CamSettings.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\SetupAssistView\SetupAssistView.xaml.cs">
       <DependentUpon>SetupAssistView.xaml</DependentUpon>
@@ -1394,6 +1397,10 @@
     <Page Include="Views\SetupAssistView\SA_Settings.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\SetupAssistView\SA_CamSettings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\SetupAssistView\SetupAssistView.xaml">
       <SubType>Designer</SubType>

@@ -4,6 +4,7 @@ using RX_DigiPrint.Models;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
+using static rx_CamLib.RxCam;
 
 namespace RX_DigiPrint.Views.SetupAssistView
 {
@@ -23,19 +24,28 @@ namespace RX_DigiPrint.Views.SetupAssistView
 		{
 			_Camera = camera;
 			_Camera.SelectCamera(RxGlobals.Settings.SetupAssistCam.Name);
-			_Camera.StartCamera(CameraCapture.Handle, false);
-			//--- adjust size of preview ---
+			ENCamResult ret=_Camera.StartCamera(CameraCapture.Handle, false);
+			if (ret==ENCamResult.OK)
 			{
-				System.Drawing.Point res=_Camera.Settings.StreamCaps.Resolution;
-				int width = (int)CameraCapture_Grid.ActualWidth;
-				int height = width*res.Y/res.X;
-				CameraCapture_Height.Height = new GridLength(height);
-				CameraCapture_Grid.Width    = width;
-				CameraCapture.Height		= height;
-				CameraCapture.Width			= width;
+				FormHost.Visibility = Visibility.Visible;
+				{
+					System.Drawing.Point res=_Camera.GetCamStreamCaps().Resolution;
+					int width = (int)CameraCapture_Grid.ActualWidth;
+					int height = width*res.Y/res.X;
+					CameraCapture_Height.Height = new GridLength(height);
+					CameraCapture_Grid.Width    = width;
+					CameraCapture.Height		= height;
+					CameraCapture.Width			= width;
+				}
+				_Camera.SetVideoRectangle(CameraCapture.ClientRectangle);
+				CameraCapture_Grid.DataContext = _Camera.Settings;
 			}
-			_Camera.SetVideoRectangle(CameraCapture.ClientRectangle);
-			CameraCapture_Grid.DataContext = _Camera.Settings;
+			else
+			{
+				FormHost.Visibility = Visibility.Collapsed;
+				_Camera.SetVideoRectangle(new System.Drawing.Rectangle());
+				MvtMessageBox.Information("Setup Assist", "Align Filter not registered\n" + "Run >>rx_AlignFilter_Register.bat<< as administrator!", MessageBoxImage.Error);
+			}
 		}
 
 		//--- Stop ------------------------
@@ -70,24 +80,10 @@ namespace RX_DigiPrint.Views.SetupAssistView
 			if (item==null) return;
 			_Camera.Settings.ShowProcessImage = (item.Value==1);
 			_Camera.Settings.Inverse		  = (item.Value==2);
-			if (item.Value>10 && item.Value<=13) 
-			{ 
-				_Camera.Settings.BinarizeMode=(uint)item.Value-10;
-				_Camera.Settings.ShowHistogram = true;
-			}
-			else 
-			{
-				_Camera.Settings.BinarizeMode=0;
-				_Camera.Settings.ShowHistogram = false;
-			}
+			if (item.Value>10 && item.Value<=13) _Camera.Settings.BinarizeMode=(uint)item.Value-10;
+			else								 _Camera.Settings.BinarizeMode=0;
 			if (_Camera.Settings.BinarizeMode==1) ThresholdGrid.Visibility = Visibility.Visible;
 			else ThresholdGrid.Visibility = Visibility.Collapsed;
-		}
-
-		//--- Setup_Clicked ------------------------------------
-		private void Setup_Clicked(object sender,RoutedEventArgs e)
-		{
-			 int hResult = _Camera.ShowCameraSetup();
 		}
 	}
 }

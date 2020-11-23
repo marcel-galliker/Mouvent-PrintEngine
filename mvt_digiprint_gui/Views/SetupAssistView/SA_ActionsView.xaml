@@ -14,6 +14,7 @@
         <local:StateImage_Converter x:Key="StateImage_Converter"/>
         <local:Visible_Converter    x:Key="Visible_Converter"/>
     </UserControl.Resources>
+    
     <Grid>
         <GroupBox Header="Actions" Style="{StaticResource MvtGroupBox}" >
             <Grid>

@@ -183,7 +183,8 @@
                 Foreground="Red" 
                 FontWeight="Bold"
                 Visibility="{Binding GuiConnected, Converter={StaticResource IntToInVisible_Converter}}"
-                RenderTransformOrigin="0.5,0.5" >
+                RenderTransformOrigin="0.5,0.5" 
+                >
             <TextBlock.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform/>
