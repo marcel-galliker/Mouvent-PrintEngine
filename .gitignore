@@ -86,6 +86,7 @@ version.c
 *.suo
 /RX-LabelComposer/Properties/AssemblyInfo.cs
 /RX-LabelComposer/rx_rip_lib_x64.dll
+/x64/
 /bin/gui/*.dll
 /bin/gui/*.ppk
 /printed/*.bmp
