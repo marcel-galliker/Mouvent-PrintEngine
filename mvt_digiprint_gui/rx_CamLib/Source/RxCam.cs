@@ -42,9 +42,7 @@ namespace rx_CamLib
 
         private DsDevice Camera = null;
         private IFilterGraph2 FilterGraph2 = null;
-        private IBaseFilter AlignFilter = null;
-        private bool AlignFilterConnected = false;
-        private IFrx_AlignFilter AlignFilterIF = null;
+        private IFrx_AlignFilter _RxAlignFilter = null;
         private IMediaControl MediaControl = null;
         private ICaptureGraphBuilder2 CaptureGraph = null;
         private IBaseFilter SourceFilter = null;
@@ -85,10 +83,7 @@ namespace rx_CamLib
         public delegate void CameraCallBack(string CallbackData);
         public event CameraCallBack CamCallBack = null;
 
-        public event Action CamMarkFound = null;
-
         public delegate void PositionMeasuredCallback(int angle, int stich, int encoder);
-        public event PositionMeasuredCallback CamPositionMeasured = null;
 
         /// <summary>
         /// Get version of library
@@ -160,13 +155,12 @@ namespace rx_CamLib
         /// Starts camera caption, call SetVideoRectangle directly afterwards and if size changed
         /// </summary>
         /// <param name="hwnd">Window handle of displaying element</param>
-        /// <param name="PropDialog">Show camera property dialog</param>
         /// <returns>
         /// <list type="table">
         /// <item><description> 0: for success or error code:</description></item>
         /// </list>
         /// </returns>
-        public ENCamResult StartCamera(IntPtr hwnd, bool PropDialog = false)
+        public ENCamResult StartCamera(IntPtr hwnd)
         {
             ENCamResult result;
 
@@ -180,7 +174,7 @@ namespace rx_CamLib
                 LastDsErrorMsg = "No camera selected";
                 return LastDsErrorNum = ENCamResult.Cam_notSelected;
             }
-            result=BuildGraph(hwnd, PropDialog);
+            result=BuildGraph(hwnd);
             if (result!=ENCamResult.OK)
             {
                 GraphStarting = false;
@@ -188,7 +182,6 @@ namespace rx_CamLib
             }
 
             CameraRunning = true;
-            _CamSettings._CameraRunning = CameraRunning;
             CamCallBack?.Invoke("Camera started");
             return ENCamResult.OK;
         }
@@ -242,7 +235,7 @@ namespace rx_CamLib
 
         #region Internal
 
-        private ENCamResult BuildGraph(IntPtr hwnd, bool propDialog)
+        private ENCamResult BuildGraph(IntPtr hwnd)
         {
             int hResult;
             GraphStarting = true;
@@ -294,33 +287,26 @@ namespace rx_CamLib
             comType = Type.GetTypeFromCLSID(AlignGuid);
 			try 
             { 
-                AlignFilter = (IBaseFilter)Activator.CreateInstance(comType);
-                Settings.SetAlignFilter(AlignFilter);
+                _RxAlignFilter = (IFrx_AlignFilter)Activator.CreateInstance(comType);
+                Settings.SetAlignFilter(_RxAlignFilter);
             }
             catch(Exception e)
 			{
                 return LastDsErrorNum = ENCamResult.Filter_NotRegistered;
 			}
-            hResult = FilterGraph2.AddFilter((IBaseFilter)AlignFilter, "Alignment");
+            hResult = FilterGraph2.AddFilter(_RxAlignFilter, "Alignment");
             if (hResultError(hResult)) return LastDsErrorNum = ENCamResult.Error;
-
-            AlignFilterIF = AlignFilter as IFrx_AlignFilter;
-            AlignFilterConnected = true;
-            if (AlignFilterIF == null)
-            {
-                AlignFilterConnected = false;
-            }
 
             //Connect Camera to Align
             IPin AlignInPin = null;
-            hResult = DsFindPin((IBaseFilter)AlignFilter, ref AlignInPin, "Input");
+            hResult = DsFindPin(_RxAlignFilter, ref AlignInPin, "Input");
             if (hResultError(hResult)) return LastDsErrorNum = ENCamResult.Error;
             hResult = FilterGraph2.Connect(SrcCapPin, AlignInPin);
             if (hResultError(hResult)) return LastDsErrorNum = ENCamResult.Error;
 
             //Render Align Output Pin
             IPin AlignOutPin = null;
-            hResult = DsFindPin((IBaseFilter)AlignFilter, ref AlignOutPin, "Output");
+            hResult = DsFindPin(_RxAlignFilter, ref AlignOutPin, "Output");
             if (hResultError(hResult)) return LastDsErrorNum = ENCamResult.Error;
             hResult = FilterGraph2.Render(AlignOutPin);
             if (hResultError(hResult)) return LastDsErrorNum = ENCamResult.Error;
@@ -362,15 +348,15 @@ namespace rx_CamLib
         {
             int hResult;
 
-            AlignFilterIF.SetFrameTiming(false);
-            AlignFilterIF.SetDebug(false);
-            AlignFilterIF.SetHostPointer(IntPtr.Zero);
-            AlignFilterIF.ShowHistogram(false);
-            AlignFilterIF.SetOverlayTxt("", 0);
-            AlignFilterIF.SetShowOriginalImage(true);
-            AlignFilterIF.SetDisplayMode(0);
-            AlignFilterIF.SetMeasureMode(0);
-            AlignFilterIF.SetBinarizeMode(0);
+            _RxAlignFilter.SetFrameTiming(false);
+            _RxAlignFilter.SetDebug(false);
+            _RxAlignFilter.SetHostPointer(IntPtr.Zero);
+            _RxAlignFilter.ShowHistogram(false);
+            _RxAlignFilter.SetOverlayTxt("", 0);
+            _RxAlignFilter.SetShowOriginalImage(true);
+            _RxAlignFilter.SetDisplayMode(0);
+            _RxAlignFilter.SetMeasureMode(0);
+            _RxAlignFilter.SetBinarizeMode(0);
 
             //Stop Media Control
             FilterState pFState = FilterState.Running;
@@ -436,12 +422,11 @@ namespace rx_CamLib
             if (VMR9 != null) Marshal.ReleaseComObject(VMR9);
             VMR9 = null;
 
-            if (AlignFilter != null)
+            if (_RxAlignFilter != null)
             {
-                hResult = FilterGraph2.RemoveFilter(AlignFilter);
+                hResult = FilterGraph2.RemoveFilter(_RxAlignFilter);
                 hResultError(hResult);
             }
-            AlignFilterConnected = false;
 
             if (SourceFilter != null) Marshal.ReleaseComObject(SourceFilter);
             SourceFilter = null;
@@ -455,9 +440,6 @@ namespace rx_CamLib
             FilterGraph2 = null;
 
             CameraRunning = false;
-            _CamSettings._CameraRunning = CameraRunning;
-
-
             return true;
         }
 
@@ -502,6 +484,7 @@ namespace rx_CamLib
                 hResult = CaptureGraph.FindPin(Filter, PinDirection.Output, PinCategory.Capture, MediaType.Video, false, 0, out Pin);
             return hResult;  //Pin found or not
         }
+
         private int DsFindPin(IBaseFilter Filter, ref IPin Pin, string PinName)
         {
             //Find specified Pin of a Filter
@@ -611,9 +594,9 @@ namespace rx_CamLib
         private LOGFONT GetFilterValuesFont()
         {
             UInt32 LogFontSize = 0;
-            AlignFilterIF.GetBlobFont(IntPtr.Zero, out LogFontSize);
+            _RxAlignFilter.GetBlobFont(IntPtr.Zero, out LogFontSize);
             IntPtr unmanaged_pInFont = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(LOGFONT)) * (int)LogFontSize);
-            AlignFilterIF.GetBlobFont(unmanaged_pInFont, out LogFontSize);
+            _RxAlignFilter.GetBlobFont(unmanaged_pInFont, out LogFontSize);
             LOGFONT ValuesFont = new LOGFONT();
             ValuesFont = (LOGFONT)Marshal.PtrToStructure(unmanaged_pInFont, typeof(LOGFONT));
             Marshal.DestroyStructure(unmanaged_pInFont, typeof(LOGFONT));
@@ -626,11 +609,11 @@ namespace rx_CamLib
             //Filter Version
             UInt32 StrLength = 0;
             string FilterVersion;
-            if (AlignFilterIF != null)
+            if (_RxAlignFilter != null)
             {
-                AlignFilterIF.GetVersion(IntPtr.Zero, out StrLength);
+                _RxAlignFilter.GetVersion(IntPtr.Zero, out StrLength);
                 IntPtr unmanaged_pIn = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(char)) * 256);
-                AlignFilterIF.GetVersion(unmanaged_pIn, out StrLength);
+                _RxAlignFilter.GetVersion(unmanaged_pIn, out StrLength);
                 FilterVersion = Marshal.PtrToStringAuto(unmanaged_pIn);
                 Marshal.FreeHGlobal(unmanaged_pIn);
             }
@@ -639,14 +622,11 @@ namespace rx_CamLib
                 Guid AlignGuid = new Guid("148BC1EB-2C83-418E-B9CD-E1F5BC9D1E38");  //rx_AlignFilter
                 Type comType = null;
                 comType = Type.GetTypeFromCLSID(AlignGuid);
-                AlignFilter = (IBaseFilter)Activator.CreateInstance(comType);
-                AlignFilterIF = AlignFilter as IFrx_AlignFilter;
                 IntPtr unmanaged_pIn = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(char)) * 256);
-                AlignFilterIF.GetVersion(unmanaged_pIn, out StrLength);
+                _RxAlignFilter.GetVersion(unmanaged_pIn, out StrLength);
                 FilterVersion = Marshal.PtrToStringAuto(unmanaged_pIn);
                 Marshal.FreeHGlobal(unmanaged_pIn);
-                AlignFilterIF = null;
-                AlignFilter = null;
+                _RxAlignFilter = null;
             }
             return FilterVersion;
         }
@@ -655,7 +635,7 @@ namespace rx_CamLib
         {
             //Graphics Device Name
             IntPtr unmanaged_pIn = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(char)) * 256);
-            AlignFilterIF.GetDeviceName(unmanaged_pIn);
+            _RxAlignFilter.GetDeviceName(unmanaged_pIn);
             string DeviceName = Marshal.PtrToStringAuto(unmanaged_pIn);
             Marshal.FreeHGlobal(unmanaged_pIn);
             return DeviceName;
@@ -665,12 +645,6 @@ namespace rx_CamLib
         public List<CamDeviceSettings> GetDeviceProperties()
         {
             List<CamDeviceSettings> list = new List<CamDeviceSettings>();
-            /*
-            CamDeviceSettings prop=new CamDeviceSettings(new VideoProcAmpProperty());
-            prop.Name = "Camera";
-            prop.Available = true;
-            list.Add(prop);
-            */
             foreach (VideoProcAmpProperty property in Enum.GetValues(typeof(VideoProcAmpProperty)))
             {
                 CamDeviceSettings prop=new CamDeviceSettings(property);

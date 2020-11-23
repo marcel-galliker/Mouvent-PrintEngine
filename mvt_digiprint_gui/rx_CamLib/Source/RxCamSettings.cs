@@ -16,9 +16,9 @@ namespace rx_CamLib
     {
 		private IFrx_AlignFilter _AlignFilter;
 
-		public void SetAlignFilter(IBaseFilter alignFilter)
+		public void SetAlignFilter(IFrx_AlignFilter alignFilter)
 		{
-			_AlignFilter = alignFilter as IFrx_AlignFilter;
+			_AlignFilter = alignFilter;
 		}
 
 		//--- Property CamSettings ---------------------------------------
@@ -41,13 +41,6 @@ namespace rx_CamLib
                 _DeviceName = value;
                 OnPropertyChanged();
             }
-        }
-
-		//--- CameraRunning -----------------
-        internal bool _CameraRunning;
-        public bool CameraRunning
-        {
-            get { return _CameraRunning; }
         }
 
 		//--- Property ShowProcessImage ---------------------------------------

@@ -24,7 +24,7 @@ namespace RX_DigiPrint.Views.SetupAssistView
 		{
 			_Camera = camera;
 			_Camera.SelectCamera(RxGlobals.Settings.SetupAssistCam.Name);
-			ENCamResult ret=_Camera.StartCamera(CameraCapture.Handle, false);
+			ENCamResult ret=_Camera.StartCamera(CameraCapture.Handle);
 			if (ret==ENCamResult.OK)
 			{
 				FormHost.Visibility = Visibility.Visible;

@@ -325,7 +325,7 @@ namespace RX_DigiPrint.Views
             {
                 var selectedTab = TabCtrl.SelectedItem as TabItem;
                 if (selectedTab!=null) SelectedTabName = selectedTab.Name;
-                if (selectedTab.Name.Equals("TabSetupAssist")) Panel.SetZIndex(MainNotConnected, -100);
+                if (selectedTab!=null && selectedTab.Name.Equals("TabSetupAssist")) Panel.SetZIndex(MainNotConnected, -100);
                 else Panel.SetZIndex(MainNotConnected, 0);
             }
             catch(Exception ex)

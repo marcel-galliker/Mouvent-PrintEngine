@@ -58,6 +58,8 @@ namespace RX_DigiPrint.Views.SetupAssistView
 		//--- Start_Clicked -------------------------------------------
 		private void Start_Clicked(object sender,RoutedEventArgs e)
 		{
+			BTN_CamSettings.IsChecked = false;
+			CamSettings.Hide();
 			SetupActions.Start(_Camera);
 		}
 		private void Done_Clicked(object sender,RoutedEventArgs e)
