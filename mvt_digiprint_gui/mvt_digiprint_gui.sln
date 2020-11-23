@@ -18,6 +18,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TinyXML", "..\Externals\TinyXML\TinyXML.vcxproj", "{531D50FB-5C99-4DF6-B152-8A0CFB84D4C7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mvt_digiprint_gui", "mvt_digiprint_gui.csproj", "{3B93426E-9F26-4CFD-875A-49C707605ACD}"
+	ProjectSection(ProjectDependencies) = postProject
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D} = {DF0DFCB4-2D19-450C-81C4-74493DD4009D}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rx_common_lib", "..\rx_common_lib\rx_common_lib.vcxproj", "{23DE4F53-96A4-44A2-9A16-FFC6CCB25311}"
 EndProject
