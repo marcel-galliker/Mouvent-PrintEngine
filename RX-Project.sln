@@ -85,6 +85,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rx_pecore_lib", "rx_pecore_lib\rx_pecore_lib.vcxproj", "{91897CF4-70AC-4E05-B75E-E05CBC3EDCF9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mvt_digiprint_gui", "mvt_digiprint_gui\mvt_digiprint_gui.csproj", "{3B93426E-9F26-4CFD-875A-49C707605ACD}"
+	ProjectSection(ProjectDependencies) = postProject
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D} = {DF0DFCB4-2D19-450C-81C4-74493DD4009D}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rx_slicescreen_lib", "rx_slicescreen_lib\rx_slicescreen_lib.vcxproj", "{A67BF36A-2EF9-40E6-B602-BD2CAF4B2F22}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -94,6 +97,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScanCheckImport", "ScanCheckParser\ScanCheckParser\ScanCheckImport.csproj", "{3E5FA8C9-A6E2-467E-B3F8-DEF8C5D19196}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "rx_CamLib", "mvt_digiprint_gui\rx_CamLib\rx_CamLib.csproj", "{3B82DD72-8AC1-4B09-BD41-A69B15305DA2}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rx_AlignFilter", "mvt_digiprint_gui\rx_AlignFilter\rx_AlignFilter.vcxproj", "{DF0DFCB4-2D19-450C-81C4-74493DD4009D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -1252,6 +1257,60 @@ Global
 		{3B82DD72-8AC1-4B09-BD41-A69B15305DA2}.Release-soc|x64.Build.0 = Release|x64
 		{3B82DD72-8AC1-4B09-BD41-A69B15305DA2}.Release-soc|x86.ActiveCfg = Release|Any CPU
 		{3B82DD72-8AC1-4B09-BD41-A69B15305DA2}.Release-soc|x86.Build.0 = Release|Any CPU
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug|Win32.Build.0 = Debug|Win32
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug|x64.ActiveCfg = Debug|x64
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug|x64.Build.0 = Debug|x64
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug|x86.ActiveCfg = Debug|Win32
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug|x86.Build.0 = Debug|Win32
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug-lx|Any CPU.ActiveCfg = Release|x64
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug-lx|Any CPU.Build.0 = Release|x64
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug-lx|Win32.ActiveCfg = Debug|Win32
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug-lx|Win32.Build.0 = Debug|Win32
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug-lx|x64.ActiveCfg = Debug|x64
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug-lx|x64.Build.0 = Debug|x64
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug-lx|x86.ActiveCfg = Debug|Win32
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug-lx|x86.Build.0 = Debug|Win32
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug-Remote|Any CPU.ActiveCfg = Release|x64
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug-Remote|Any CPU.Build.0 = Release|x64
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug-Remote|Win32.ActiveCfg = Debug|Win32
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug-Remote|Win32.Build.0 = Debug|Win32
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug-Remote|x64.ActiveCfg = Debug|x64
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug-Remote|x64.Build.0 = Debug|x64
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug-Remote|x86.ActiveCfg = Debug|Win32
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug-Remote|x86.Build.0 = Debug|Win32
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug-soc|Any CPU.ActiveCfg = Release|x64
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug-soc|Any CPU.Build.0 = Release|x64
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug-soc|Win32.ActiveCfg = Debug|Win32
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug-soc|Win32.Build.0 = Debug|Win32
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug-soc|x64.ActiveCfg = Debug|x64
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug-soc|x64.Build.0 = Debug|x64
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug-soc|x86.ActiveCfg = Debug|Win32
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug-soc|x86.Build.0 = Debug|Win32
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Release|Any CPU.ActiveCfg = Release|Win32
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Release|Win32.ActiveCfg = Release|Win32
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Release|Win32.Build.0 = Release|Win32
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Release|x64.ActiveCfg = Release|x64
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Release|x64.Build.0 = Release|x64
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Release|x86.ActiveCfg = Release|Win32
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Release|x86.Build.0 = Release|Win32
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Release-lx|Any CPU.ActiveCfg = Release|x64
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Release-lx|Any CPU.Build.0 = Release|x64
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Release-lx|Win32.ActiveCfg = Release|Win32
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Release-lx|Win32.Build.0 = Release|Win32
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Release-lx|x64.ActiveCfg = Release|x64
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Release-lx|x64.Build.0 = Release|x64
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Release-lx|x86.ActiveCfg = Release|Win32
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Release-lx|x86.Build.0 = Release|Win32
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Release-soc|Any CPU.ActiveCfg = Release|x64
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Release-soc|Any CPU.Build.0 = Release|x64
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Release-soc|Win32.ActiveCfg = Release|Win32
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Release-soc|Win32.Build.0 = Release|Win32
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Release-soc|x64.ActiveCfg = Release|x64
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Release-soc|x64.Build.0 = Release|x64
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Release-soc|x86.ActiveCfg = Release|Win32
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Release-soc|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
