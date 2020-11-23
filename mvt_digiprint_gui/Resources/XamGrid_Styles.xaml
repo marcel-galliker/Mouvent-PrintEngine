@@ -57,9 +57,9 @@
         <Setter Property="FontSize"     Value="{DynamicResource MvtFontSize}"/>
         <Setter Property="Background"   Value="WhiteSmoke"/>
         <Setter Property="IsEnabled"    Value="False"/>
-        <Setter Property="BorderBrush" Value="WhiteSmoke"/>
-        <Setter Property="Height" Value="40"></Setter>
-        <Setter Property="FontWeight" Value="SemiBold"></Setter>
+        <Setter Property="BorderBrush"  Value="WhiteSmoke"/>
+        <Setter Property="Height"       Value="40"/>
+        <Setter Property="FontWeight"   Value="SemiBold"/>
         <Setter Property="FontSize"     Value="{DynamicResource MvtFontSize}" />
     </Style>
 
@@ -436,7 +436,7 @@
             </Setter.Value>
         </Setter>
     </Style>
-    
+
     <!-- XamGrid CellControlStyle -->
     <Style x:Key="XamGridCellControlStyle-PrintQueue" TargetType="{x:Type ig:CellControl}" BasedOn="{StaticResource XamGridCellStyle}" >
         <Setter Property="VerticalContentAlignment" Value="Center"/>

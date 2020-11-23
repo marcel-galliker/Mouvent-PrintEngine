@@ -8,6 +8,8 @@ using System.Windows.Forms;
 using System.Text;
 using DirectShowLib;
 using rx_CamLib.Models;
+using RX_Common;
+using static rx_CamLib.RxCamSettings;
 
 namespace rx_CamLib
 {
@@ -15,20 +17,32 @@ namespace rx_CamLib
     {
         #region Definitions
 
-        private RxCamSettings _CamSettings;
+        public enum ENCamResult
+		{
+            OK                      =  0,
+            Error                   = -1,
+        
+            Cam_notDetected         = -2,
+            Cam_notFound            = -3,
+            Cam_alreadyRunning      = -4,
+            Cam_notSelected         = -5,
+            Cam_notRunning,
+
+            Filter_NotRegistered    = -6,
+
+            Filter_AlreadyUsed      = -2147467259,
+		};
 
         private DsDevice[] DeviceList = null;
         private bool CameraRunning = false;
         private bool GraphStarting = false;
 
         private string LastDsErrorMsg = "";
-        private int LastDsErrorNum = 0;
+        private ENCamResult LastDsErrorNum = 0;
 
         private DsDevice Camera = null;
         private IFilterGraph2 FilterGraph2 = null;
-        private IBaseFilter AlignFilter = null;
-        private bool AlignFilterConnected = false;
-        private IFrx_AlignFilter AlignFilterIF = null;
+        private IFrx_AlignFilter _RxAlignFilter = null;
         private IMediaControl MediaControl = null;
         private ICaptureGraphBuilder2 CaptureGraph = null;
         private IBaseFilter SourceFilter = null;
@@ -54,206 +68,8 @@ namespace rx_CamLib
 
         #endregion
 
-        #region Interface to rx_AlignFilter
-
-        //Keep in order as defined in dll !!!
-
-        //Expose Interface of Align Filter
-        [ComImport,
-        System.Security.SuppressUnmanagedCodeSecurity,
-        Guid("C915723A-FE83-4914-AAFA-C7C486A41AAC"),           //Filter Interface IFrx_AlignFilter
-        InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-        public interface IFrx_AlignFilter
-        {
-            #region General
-
-            //Version Info
-            [PreserveSig]
-            void GetVersion(IntPtr VersionInfo, out UInt32 VersionInfoSize);
-            //C++ Version Info
-            [PreserveSig]
-            UInt32 GetCppVersion();
-            //WindowHandle of Hoste
-            [PreserveSig]
-            void SetHostPointer(IntPtr HostHwnd);
-            //Graphics Device Name
-            [PreserveSig]
-            void GetDeviceName(IntPtr DeviceName);
-            //Debug On
-            [PreserveSig]
-            void SetDebug(bool DebugOn);
-            //Display Frame Timing
-            [PreserveSig]
-            void SetFrameTiming(bool DspFrameTime);
-            //Take SnapShot and Save to
-            [PreserveSig]
-            bool TakeSnapShot(string SnapDirectory, string SnapFileName);
-
-            //ShowOriginalImage
-            [PreserveSig]
-            void SetShowOriginalImage(bool ShowOriginalImage);
-            [PreserveSig]
-            bool GetShowOriginalImage();
-
-            //Overlay-Text
-            [PreserveSig]
-            bool SetOverlayTxt(string OverlayTxt, UInt32 OverlayTxtColor);
-
-            #endregion
-
-            #region Binarization
-
-            //Binarization
-            [PreserveSig]
-            void SetBinarizeMode(UInt32 BinarizeMode);			// //0: off, 1: Auto, 2:Adaptive
-            [PreserveSig]
-            UInt32 GetBinarizeMode();
-
-            //Threshold
-            [PreserveSig]
-            void SetThreshold(UInt32 Threshold);
-            [PreserveSig]
-            UInt32 GetThreshold();
-
-            //Show Histogram
-            [PreserveSig]
-            void ShowHistogram(bool ShowHistogram);         // Switch ShowHistogram On/Off
-
-            #endregion
-
-            #region Dilate-Erode
-
-            //Num Dilate-Erodes
-            [PreserveSig]
-            void SetNumDilateErodes(UInt32 DilateErodes);
-            [PreserveSig]
-            UInt32 GetNumDilateErodes();
-
-            //Num Extra-Erodes
-            [PreserveSig]
-            void SetNumExtraErodes(UInt32 ExtraErodes);
-            [PreserveSig]
-            UInt32 GetNumExtraErodes();
-
-            //Erode Seed
-            [PreserveSig]
-            void SetErodeSeedX(UInt32 ErodeSeedX);
-            [PreserveSig]
-            void SetErodeSeedY(UInt32 ErodeSeedY);
-            [PreserveSig]
-            UInt32 GetErodeSeedX();
-            [PreserveSig]
-            UInt32 GetErodeSeedY();
-
-            #endregion
-
-            #region Blob
-
-            //Cross Color
-            [PreserveSig]
-            void SetCrossColor(UInt32 CrossColor);
-            [PreserveSig]
-            UInt32 GetCrossColor();
-
-            //BlobOutlineColor
-            [PreserveSig]
-            void SetBlobOutlineColor(UInt32 BlobOutlineColor);
-            [PreserveSig]
-            UInt32 GetBlobOutlineColor();
-            //BlobCrossColor
-            [PreserveSig]
-            void SetBlobCrossColor(UInt32 BlobCrossColor);
-            [PreserveSig]
-            UInt32 GetBlobCrossColor();
-            //BlobTextColor
-            [PreserveSig]
-            void SetBlobTextColor(UInt32 BlobTextColor);
-            [PreserveSig]
-            UInt32 GetBlobTextColor();
-
-            //BlobAspectLimit
-            [PreserveSig]
-            void SetBlobAspectLimit(UInt32 BlobAspectLimit);
-            [PreserveSig]
-            UInt32 GetBlobAspectLimit();
-            //BlobAreaDivisor
-            [PreserveSig]
-            void SetBlobAreaDivisor(UInt32 BlobAreaDivisor);
-            [PreserveSig]
-            UInt32 GetBlobAreaDivisor();
-
-            //ShowBlobOutlines
-            [PreserveSig]
-            void SetShowBlobOutlines(bool ShowBlobOutlines);
-            [PreserveSig]
-            bool GetShowBlobOutlines();
-            //ShowBlobCenters
-            [PreserveSig]
-            void SetShowBlobCenters(bool ShowBlobCenters);
-            [PreserveSig]
-            bool GetShowBlobCenters();
-            //ShowBlobValues
-            [PreserveSig]
-            void SetShowBlobValues(bool ShowBlobValues);
-            [PreserveSig]
-            bool GetShowBlobValues();
-
-            //Font for Blob Values
-            [PreserveSig]
-            void SetBlobFont(IntPtr pLogFontStruct);
-            [PreserveSig]
-            void GetBlobFont(IntPtr pLogFontStruct, out UInt32 LogFontSize);
-
-            #endregion
-
-            #region Measurement
-
-            //Measure in Pixels
-            [PreserveSig]
-            void SetMeasurePixels(bool MeasurePixels);
-            [PreserveSig]
-            bool GetMeasurePixels();
-
-            //Inverse Image for White
-            [PreserveSig]
-            void SetInverse(bool Inverse);
-            [PreserveSig]
-            bool GetInverse();
-
-            //MeasureMode
-            [PreserveSig]
-            void SetMeasureMode(UInt32 MeasureMode);
-            [PreserveSig]
-            UInt32 GetMeasureMode();
-
-            //DisplayMode
-            [PreserveSig]
-            void SetDisplayMode(UInt32 DisplayMode);
-            [PreserveSig]
-            UInt32 GetDisplayMode();
-
-            #endregion
-
-            #region Line-Direction
-
-            //Line Direction
-            [PreserveSig]
-            void SetLinesHorizontal(bool Horizontal);
-            [PreserveSig]
-            bool GetLinesHorizontal();
-
-            #endregion
-
-        }
-
-        #endregion
-
-
         public RxCam()
         {
-            _CamSettings = new RxCamSettings();
-            _CamSettings.PropertyChanged += new System.ComponentModel.PropertyChangedEventHandler(PropertyChange);
-            _CamSettings.PropertyReading += new System.ComponentModel.PropertyChangedEventHandler(PropertyRead);
         }
 
         ~RxCam()
@@ -267,10 +83,7 @@ namespace rx_CamLib
         public delegate void CameraCallBack(string CallbackData);
         public event CameraCallBack CamCallBack = null;
 
-        public event Action CamMarkFound = null;
-
         public delegate void PositionMeasuredCallback(int angle, int stich, int encoder);
-        public event PositionMeasuredCallback CamPositionMeasured = null;
 
         /// <summary>
         /// Get version of library
@@ -281,6 +94,7 @@ namespace rx_CamLib
             return typeof(RxCam).Assembly.GetName().Version.ToString();
         }
 
+        private RxCamSettings _CamSettings = new RxCamSettings();
         public RxCamSettings Settings
         {
             get { return _CamSettings; }
@@ -308,19 +122,14 @@ namespace rx_CamLib
         /// <param name="name">Camera name as found with GetCameraList()</param>
         /// <returns>
         /// <list type="table">
-        /// <item><description> 0: for success or error code:</description></item>
-        /// <item><description>-1: Camera already running</description></item>
-        /// <item><description>-2: No cameras detected (yet)</description></item>
-        /// <item><description>-3: Camera name not available</description></item></list>
         /// </returns>
-        public int SelectCamera(string name)
+        public ENCamResult SelectCamera(string name)
         {
             if (DeviceList == null) DeviceList = DsDevice.GetDevicesOfCat(FilterCategory.VideoInputDevice);
             if (DeviceList == null || DeviceList.Length == 0)
             {
                 LastDsErrorMsg = "No cameras detected";
-                LastDsErrorNum = -2;
-                return -2;
+                return LastDsErrorNum = ENCamResult.Cam_notDetected;
             }
             for (int i = 0; i < DeviceList.Length; i++)
             {
@@ -329,59 +138,52 @@ namespace rx_CamLib
                     if (CameraRunning)
                     {
                         LastDsErrorMsg = "Camera already running";
-                        LastDsErrorNum = -1;
-                        return -1;
+                        return LastDsErrorNum = ENCamResult.Cam_alreadyRunning;
                     }
 
                     Camera = DeviceList[i];
                     _CamSettings._DeviceName = Camera.Name;
-                    return 0;
+                    return ENCamResult.OK;
                 }
             }
 
             LastDsErrorMsg = "Selected Camera not found";
-            LastDsErrorNum = -3;
-            return -3;
+            return LastDsErrorNum = ENCamResult.Cam_notFound;
         }
 
         /// <summary>
         /// Starts camera caption, call SetVideoRectangle directly afterwards and if size changed
         /// </summary>
         /// <param name="hwnd">Window handle of displaying element</param>
-        /// <param name="PropDialog">Show camera property dialog</param>
         /// <returns>
         /// <list type="table">
         /// <item><description> 0: for success or error code:</description></item>
-        /// <item><description>-1: Camera already running</description></item>
-        /// <item><description>-2: No camera selected</description></item>
-        /// <item><description>-3: Could not start camera, check GetLastDsError</description></item>
         /// </list>
         /// </returns>
-        public int StartCamera(IntPtr hwnd, bool PropDialog = false)
+        public ENCamResult StartCamera(IntPtr hwnd)
         {
+            ENCamResult result;
+
             if (CameraRunning)
             {
                 LastDsErrorMsg = "Camera already running";
-                LastDsErrorNum = -1;
-                return -1;
+                return LastDsErrorNum = ENCamResult.Cam_alreadyRunning;
             }
             if (Camera == null)
             {
                 LastDsErrorMsg = "No camera selected";
-                LastDsErrorNum = -2;
-                return -2;
+                return LastDsErrorNum = ENCamResult.Cam_notSelected;
             }
-
-            if (!BuildGraph(hwnd, PropDialog))
+            result=BuildGraph(hwnd);
+            if (result!=ENCamResult.OK)
             {
                 GraphStarting = false;
-                return -3;
+                return result;
             }
 
             CameraRunning = true;
-            _CamSettings._CameraRunning = CameraRunning;
             CamCallBack?.Invoke("Camera started");
-            return 0;
+            return ENCamResult.OK;
         }
 
         /// <summary>
@@ -389,11 +191,11 @@ namespace rx_CamLib
         /// </summary>
         /// <param name="PicRectangle">ClientRectangle of displaying device</param>
         /// <returns>0: for success or error code</returns>
-        public int SetVideoRectangle(System.Drawing.Rectangle PicRectangle)
+        public ENCamResult SetVideoRectangle(System.Drawing.Rectangle PicRectangle)
         {
-            if (WindowlessCtrl9 == null) return -1;
+            if (WindowlessCtrl9 == null) return ENCamResult.Error;
             int hResult = WindowlessCtrl9.SetVideoPosition(null, DsRect.FromRectangle(PicRectangle));
-            if (hResultError(hResult)) return -1;
+            if (hResultError(hResult)) return ENCamResult.Error;
             return 0;
         }
 
@@ -401,20 +203,18 @@ namespace rx_CamLib
         /// Stops camera caption
         /// </summary>
         /// <returns>0: for success or error code</returns>
-        public int StopCamera()
+        public ENCamResult StopCamera()
         {
             if (!CameraRunning)
             {
                 LastDsErrorMsg = "Camera not running";
-                LastDsErrorNum = -1;
-                return -1;
+                return LastDsErrorNum = ENCamResult.Cam_notRunning;
             }
-            if (!StopGraph()) return -2;
-
-            LastDsErrorMsg = "";
-            LastDsErrorNum = 0;
+            if (!StopGraph()) return LastDsErrorNum=ENCamResult.Error;
+            
             CamCallBack?.Invoke("Camera stopped");
-            return 0;
+            LastDsErrorMsg = "";
+            return LastDsErrorNum = ENCamResult.OK;
         }
 
         /// <summary>
@@ -422,58 +222,12 @@ namespace rx_CamLib
         /// </summary>
         /// <param name="Message">Error Message</param>
         /// <returns>Error Number</returns>
-        public int GetLastDsError(out string Message)
+        public ENCamResult GetLastDsError(out string Message)
         {
             Message = LastDsErrorMsg;
-            if (LastDsErrorNum == -2147467259)
+            if (LastDsErrorNum == ENCamResult.Filter_AlreadyUsed)
                 Message = "Resource used by this filter may already be in use";
             return LastDsErrorNum;
-        }
-
-        /// <summary>
-        /// Opens camera setup dialog
-        /// </summary>
-        /// <returns>0: for success or error code</returns>
-        public int ShowCameraSetup()
-        {
-            if (!CameraRunning)
-            {
-                LastDsErrorMsg = "Camera not running";
-                LastDsErrorNum = -1;
-                return -1;
-            }
-            int hResult = DisplayPropertyPages(SourceFilter, Camera.Name);
-            if (hResultError(hResult))
-            {
-                return -1;
-            }
-            return 0;
-        }
-
-        public struct CamCapStruct
-        {
-            public string Name;
-            public bool Available;
-            public int Minimum;
-            public int Maximum;
-            public int Step;
-            public int Default;
-            public int Value;
-            public CameraControlFlags Flags;
-            public CameraControlFlags Flag;
-        }
-
-        public struct CamVideoProcStruct
-        {
-            public string Name;
-            public bool Available;
-            public int Minimum;
-            public int Maximum;
-            public int Step;
-            public int Default;
-            public int Value;
-            public VideoProcAmpFlags Flags;
-            public VideoProcAmpFlags Flag;
         }
 
         #endregion
@@ -481,7 +235,7 @@ namespace rx_CamLib
 
         #region Internal
 
-        private bool BuildGraph(IntPtr hwnd, bool propDialog)
+        private ENCamResult BuildGraph(IntPtr hwnd)
         {
             int hResult;
             GraphStarting = true;
@@ -494,11 +248,11 @@ namespace rx_CamLib
             MediaControl = (IMediaControl)FilterGraph2 as IMediaControl;
             CaptureGraph = (ICaptureGraphBuilder2)new CaptureGraphBuilder2();
             hResult = CaptureGraph.SetFiltergraph(FilterGraph2);
-            if (hResultError(hResult)) return false;
+            if (hResultError(hResult)) return ENCamResult.Error;
             VMR9 = (IBaseFilter)new VideoMixingRenderer9();
-            if (!ConfigVMR9(hwnd)) return false;
+            if (!ConfigVMR9(hwnd)) return ENCamResult.Error;
             hResult = FilterGraph2.AddFilter(VMR9, "VMR 9");
-            if (hResultError(hResult)) return false;
+            if (hResultError(hResult)) return ENCamResult.Error;
             //Insert Camera
             object source;
             Guid SourceGuid = typeof(IBaseFilter).GUID;
@@ -506,69 +260,61 @@ namespace rx_CamLib
             {
                 Camera.Mon.BindToObject(null, null, ref SourceGuid, out source);
                 SourceFilter = (IBaseFilter)source;
+                CamDeviceSettings.SetDevice(SourceFilter);
             }
             catch (Exception excep)
             {
                 LastDsErrorMsg = excep.Message;
-                LastDsErrorNum = -1;
-                return false;
+                return LastDsErrorNum = ENCamResult.Error;
             }
             hResult = FilterGraph2.AddFilter(SourceFilter, Camera.Name);
-            if (hResultError(hResult)) return false;
+            if (hResultError(hResult)) return LastDsErrorNum = ENCamResult.Error;
 
             hResult = DsFindPin(SourceFilter, ref SrcCapPin, PinCategory.Capture);
-            if (hResultError(hResult)) return false;
+            if (hResultError(hResult)) return LastDsErrorNum = ENCamResult.Error;
 
-            //Stream settings
-            if (propDialog)
-            {
-                hResult = DisplayPropertyPages(SrcCapPin, "Capture");
-                if (hResultError(hResult)) return false;
-            }
-            else
-            {
-                SetCamStreamCaps(_CamSettings._StreamCaps);
-            }
+            //    SetCamStreamCaps(_CamSettings._StreamCaps);
 
             //Read current Camera settings
-            GetCamStreamCapsList(out _CamSettings._StreamCapsList);
-            GetCamCapSettingsList(out _CamSettings._CamCapsList);
-            GetCamVideoProcSettingsList(out _CamSettings._CamVideoProcList);
+//            GetCamStreamCapsList(out _CamSettings._StreamCapsList);
+//            GetCamCapSettingsList(out _CamSettings._CamCapsList);
+//            GetCamVideoProcSettingsList(out _CamSettings._CamVideoProcList);
 
             //Insert Align Filter
             Guid AlignGuid = new Guid("148BC1EB-2C83-418E-B9CD-E1F5BC9D1E38");  //rx_AlignFilter
             //Guid AlignGuid = new Guid("3C84E851-7D06-434F-81E1-5E68F0306E8B"); //Bieler_dsAlign
             Type comType = null;
             comType = Type.GetTypeFromCLSID(AlignGuid);
-            AlignFilter = (IBaseFilter)Activator.CreateInstance(comType);
-            hResult = FilterGraph2.AddFilter((IBaseFilter)AlignFilter, "Alignment");
-            if (hResultError(hResult)) return false;
-
-            AlignFilterIF = AlignFilter as IFrx_AlignFilter;
-            AlignFilterConnected = true;
-            if (AlignFilterIF == null)
-            {
-                AlignFilterConnected = false;
+			try 
+            { 
+                _RxAlignFilter = (IFrx_AlignFilter)Activator.CreateInstance(comType);
+                Settings.SetAlignFilter(_RxAlignFilter);
             }
+            catch(Exception e)
+			{
+                return LastDsErrorNum = ENCamResult.Filter_NotRegistered;
+			}
+            hResult = FilterGraph2.AddFilter(_RxAlignFilter, "Alignment");
+            if (hResultError(hResult)) return LastDsErrorNum = ENCamResult.Error;
 
             //Connect Camera to Align
             IPin AlignInPin = null;
-            hResult = DsFindPin((IBaseFilter)AlignFilter, ref AlignInPin, "Input");
-            if (hResultError(hResult)) return false;
+            hResult = DsFindPin(_RxAlignFilter, ref AlignInPin, "Input");
+            if (hResultError(hResult)) return LastDsErrorNum = ENCamResult.Error;
             hResult = FilterGraph2.Connect(SrcCapPin, AlignInPin);
-            if (hResultError(hResult)) return false;
+            if (hResultError(hResult)) return LastDsErrorNum = ENCamResult.Error;
 
             //Render Align Output Pin
             IPin AlignOutPin = null;
-            hResult = DsFindPin((IBaseFilter)AlignFilter, ref AlignOutPin, "Output");
-            if (hResultError(hResult)) return false;
+            hResult = DsFindPin(_RxAlignFilter, ref AlignOutPin, "Output");
+            if (hResultError(hResult)) return LastDsErrorNum = ENCamResult.Error;
             hResult = FilterGraph2.Render(AlignOutPin);
-            if (hResultError(hResult)) return false;
+            if (hResultError(hResult)) return LastDsErrorNum = ENCamResult.Error;
 
             //Start Display
             FilterState pFState = FilterState.Stopped;
             hResult = MediaControl.Run();
-            if (hResultError(hResult)) return false;
+            if (hResultError(hResult)) return LastDsErrorNum = ENCamResult.Error;
             try
             {
                 while (pFState != FilterState.Running)
@@ -580,36 +326,37 @@ namespace rx_CamLib
             catch (Exception exep)
             {
                 MessageBox.Show("Could not start Media Control:\n" + exep.Message, "Build Graph", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
+                return LastDsErrorNum = ENCamResult.Error;
             }
 
 
             //Read current stream settings
-            hResult = GetCamStreamCaps(out _CamSettings._StreamCaps);
+//            hResult = GetCamStreamCaps(out _CamSettings._StreamCaps);
 
             //Set Camera settings
-            SetCamCapSettingsList(_CamSettings._CamCapsList);
-            SetCamVideoProcSettingsList(_CamSettings._CamVideoProcList);
+//            SetCamCapSettingsList(_CamSettings._CamCapsList);
+//            SetCamVideoProcSettingsList(_CamSettings._CamVideoProcList);
+
 
             GetAllFilterSettings();
 
             GraphStarting = false;
-            return true;
+            return LastDsErrorNum = ENCamResult.OK;
         }
 
         private bool StopGraph()
         {
             int hResult;
 
-            AlignFilterIF.SetFrameTiming(false);
-            AlignFilterIF.SetDebug(false);
-            AlignFilterIF.SetHostPointer(IntPtr.Zero);
-            AlignFilterIF.ShowHistogram(false);
-            AlignFilterIF.SetOverlayTxt("", 0);
-            AlignFilterIF.SetShowOriginalImage(true);
-            AlignFilterIF.SetDisplayMode(0);
-            AlignFilterIF.SetMeasureMode(0);
-            AlignFilterIF.SetBinarizeMode(0);
+            _RxAlignFilter.SetFrameTiming(false);
+            _RxAlignFilter.SetDebug(false);
+            _RxAlignFilter.SetHostPointer(IntPtr.Zero);
+            _RxAlignFilter.ShowHistogram(false);
+            _RxAlignFilter.SetOverlayTxt("", 0);
+            _RxAlignFilter.SetShowOriginalImage(true);
+            _RxAlignFilter.SetDisplayMode(0);
+            _RxAlignFilter.SetMeasureMode(0);
+            _RxAlignFilter.SetBinarizeMode(0);
 
             //Stop Media Control
             FilterState pFState = FilterState.Running;
@@ -675,12 +422,11 @@ namespace rx_CamLib
             if (VMR9 != null) Marshal.ReleaseComObject(VMR9);
             VMR9 = null;
 
-            if (AlignFilter != null)
+            if (_RxAlignFilter != null)
             {
-                hResult = FilterGraph2.RemoveFilter(AlignFilter);
+                hResult = FilterGraph2.RemoveFilter(_RxAlignFilter);
                 hResultError(hResult);
             }
-            AlignFilterConnected = false;
 
             if (SourceFilter != null) Marshal.ReleaseComObject(SourceFilter);
             SourceFilter = null;
@@ -694,9 +440,6 @@ namespace rx_CamLib
             FilterGraph2 = null;
 
             CameraRunning = false;
-            _CamSettings._CameraRunning = CameraRunning;
-
-
             return true;
         }
 
@@ -741,6 +484,7 @@ namespace rx_CamLib
                 hResult = CaptureGraph.FindPin(Filter, PinDirection.Output, PinCategory.Capture, MediaType.Video, false, 0, out Pin);
             return hResult;  //Pin found or not
         }
+
         private int DsFindPin(IBaseFilter Filter, ref IPin Pin, string PinName)
         {
             //Find specified Pin of a Filter
@@ -780,41 +524,10 @@ namespace rx_CamLib
             return -1;  //Pin not found
         }
 
-        private int DisplayPropertyPages(object FilterElement, string ElementName)
-        {
-            //Display PropertyPage of Filter
-
-            int hRes = 0;
-
-            //Properties for Filter element
-            ISpecifyPropertyPages pProp = FilterElement as ISpecifyPropertyPages;
-            if (pProp != null)
-            {
-                // get the propertypages from the property bag
-                DsCAUUID caGUID;
-                hRes = pProp.GetPages(out caGUID);
-                DsError.ThrowExceptionForHR(hRes);
-
-                // create and display the OlePropertyFrame
-                object[] oDevice = new[] { (object)FilterElement };
-                hRes = OleCreatePropertyFrame(IntPtr.Zero, 0, 0,
-                                                ElementName, 1, oDevice,
-                                                caGUID.cElems, caGUID.ToGuidArray(),
-                                                0, 0, 0);
-                DsError.ThrowExceptionForHR(hRes);
-
-                // release COM objects
-                Marshal.FreeCoTaskMem(caGUID.pElems);
-                pProp = null;
-            }
-            return hRes;
-        }
-
-
         private bool hResultError(int hResult)
         {
             LastDsErrorMsg = DsError.GetErrorText(hResult);
-            LastDsErrorNum = hResult;
+            LastDsErrorNum = (ENCamResult)hResult;
 
             if (hResult < 0)
             {
@@ -829,18 +542,8 @@ namespace rx_CamLib
             return false;
         }
 
-
         private void GetAllFilterSettings()
         {
-            _CamSettings._GraphicDevice = GetFilterGraphDeviceName();
-            _CamSettings._FilterVersion = GetFilterVersion();
-            _CamSettings._BinarizeMode = AlignFilterIF.GetBinarizeMode();
-            _CamSettings._Inverse = AlignFilterIF.GetInverse();
-            _CamSettings._Threshold = AlignFilterIF.GetThreshold();
-            _CamSettings._ShowProcessImage = !AlignFilterIF.GetShowOriginalImage();
-            _CamSettings._ValuesFont = GetFilterValuesFont();
-            _CamSettings._TextColor = AlignFilterIF.GetBlobTextColor();
-
             //and many more to come:
             //GetCppVersion();
             //SetHostPointer(IntPtr HostHwnd);
@@ -891,9 +594,9 @@ namespace rx_CamLib
         private LOGFONT GetFilterValuesFont()
         {
             UInt32 LogFontSize = 0;
-            AlignFilterIF.GetBlobFont(IntPtr.Zero, out LogFontSize);
+            _RxAlignFilter.GetBlobFont(IntPtr.Zero, out LogFontSize);
             IntPtr unmanaged_pInFont = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(LOGFONT)) * (int)LogFontSize);
-            AlignFilterIF.GetBlobFont(unmanaged_pInFont, out LogFontSize);
+            _RxAlignFilter.GetBlobFont(unmanaged_pInFont, out LogFontSize);
             LOGFONT ValuesFont = new LOGFONT();
             ValuesFont = (LOGFONT)Marshal.PtrToStructure(unmanaged_pInFont, typeof(LOGFONT));
             Marshal.DestroyStructure(unmanaged_pInFont, typeof(LOGFONT));
@@ -906,11 +609,11 @@ namespace rx_CamLib
             //Filter Version
             UInt32 StrLength = 0;
             string FilterVersion;
-            if (AlignFilterIF != null)
+            if (_RxAlignFilter != null)
             {
-                AlignFilterIF.GetVersion(IntPtr.Zero, out StrLength);
+                _RxAlignFilter.GetVersion(IntPtr.Zero, out StrLength);
                 IntPtr unmanaged_pIn = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(char)) * 256);
-                AlignFilterIF.GetVersion(unmanaged_pIn, out StrLength);
+                _RxAlignFilter.GetVersion(unmanaged_pIn, out StrLength);
                 FilterVersion = Marshal.PtrToStringAuto(unmanaged_pIn);
                 Marshal.FreeHGlobal(unmanaged_pIn);
             }
@@ -919,14 +622,11 @@ namespace rx_CamLib
                 Guid AlignGuid = new Guid("148BC1EB-2C83-418E-B9CD-E1F5BC9D1E38");  //rx_AlignFilter
                 Type comType = null;
                 comType = Type.GetTypeFromCLSID(AlignGuid);
-                AlignFilter = (IBaseFilter)Activator.CreateInstance(comType);
-                AlignFilterIF = AlignFilter as IFrx_AlignFilter;
                 IntPtr unmanaged_pIn = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(char)) * 256);
-                AlignFilterIF.GetVersion(unmanaged_pIn, out StrLength);
+                _RxAlignFilter.GetVersion(unmanaged_pIn, out StrLength);
                 FilterVersion = Marshal.PtrToStringAuto(unmanaged_pIn);
                 Marshal.FreeHGlobal(unmanaged_pIn);
-                AlignFilterIF = null;
-                AlignFilter = null;
+                _RxAlignFilter = null;
             }
             return FilterVersion;
         }
@@ -935,49 +635,35 @@ namespace rx_CamLib
         {
             //Graphics Device Name
             IntPtr unmanaged_pIn = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(char)) * 256);
-            AlignFilterIF.GetDeviceName(unmanaged_pIn);
+            _RxAlignFilter.GetDeviceName(unmanaged_pIn);
             string DeviceName = Marshal.PtrToStringAuto(unmanaged_pIn);
             Marshal.FreeHGlobal(unmanaged_pIn);
             return DeviceName;
         }
 
+        //--- GetDeviceProperties ---------------------------------
+        public List<CamDeviceSettings> GetDeviceProperties()
+        {
+            List<CamDeviceSettings> list = new List<CamDeviceSettings>();
+            foreach (VideoProcAmpProperty property in Enum.GetValues(typeof(VideoProcAmpProperty)))
+            {
+                CamDeviceSettings prop=new CamDeviceSettings(property);
+                if (prop.Available) list.Add(prop);
+            }
+            return list;
+        }
 
-
-        private int GetCamStreamCapsList(out List<StreamCaps> StreamCapsList)
+        //--- GetCamStreamCapsList ------------------------------------
+        public List<StreamCaps> GetCamStreamCapsList()
         {
             int hRes = 0;
             IPin SrcCapPin = null;
-            StreamCapsList = new List<StreamCaps>();
-            bool TempFilter = false;
+            List<StreamCaps> list = new List<StreamCaps>();
 
-            if(SourceFilter == null)
-            {
-                FilterGraph2 = (IFilterGraph2)new FilterGraph();
-                CaptureGraph = (ICaptureGraphBuilder2)new CaptureGraphBuilder2();
-                hRes = CaptureGraph.SetFiltergraph(FilterGraph2);
-                if (hResultError(hRes)) return hRes;
-
-                object source;
-                Guid SourceGuid = typeof(IBaseFilter).GUID;
-                try
-                {
-                    Camera.Mon.BindToObject(null, null, ref SourceGuid, out source);
-                    SourceFilter = (IBaseFilter)source;
-                }
-                catch (Exception excep)
-                {
-                    LastDsErrorMsg = excep.Message;
-                    LastDsErrorNum = -1;
-                    return -1;
-                }
-                hRes = FilterGraph2.AddFilter(SourceFilter, Camera.Name);
-                if (hResultError(hRes)) return hRes;
-
-                TempFilter = true;
-            }
+            if(SourceFilter == null) return null;
 
             hRes = DsFindPin(SourceFilter, ref SrcCapPin, PinCategory.Capture);
-            if (hResultError(hRes)) return hRes;
+            if (hResultError(hRes)) return null;
 
             IAMStreamConfig videoConfig = SrcCapPin as IAMStreamConfig;
             int capsCount, capSize;
@@ -1001,72 +687,31 @@ namespace rx_CamLib
                     Marshal.PtrToStructure(mt.formatPtr, VIHeader);
                     Resolution.FrameRate = (int)((float)10000000 / VIHeader.AvgTimePerFrame);
                     Resolution.Resolution = new System.Drawing.Point(VIHeader.BmiHeader.Width, VIHeader.BmiHeader.Height);
-                    StreamCapsList.Add(Resolution);
+                    list.Add(Resolution);
                 }
             }
 
             Marshal.FreeCoTaskMem(mt.formatPtr);
             Marshal.FreeHGlobal(pSC);
 
-            if(TempFilter)
-            {
-                FilterGraph2.Abort();
-                FilterGraph2.RemoveFilter(SourceFilter);
-                Marshal.ReleaseComObject(SourceFilter);
-                SourceFilter = null;
-                Marshal.ReleaseComObject(CaptureGraph);
-                CaptureGraph = null;
-                Marshal.ReleaseComObject(FilterGraph2);
-                FilterGraph2 = null;
-            }
-
-            return StreamCapsList.Count;
+            return list;
         }
 
-        private int GetCamStreamCaps(out StreamCaps StreamCaps)
+        public StreamCaps GetCamStreamCaps()
         {
             int hRes = 0;
             IPin SrcCapPin = null;
-            StreamCaps = new StreamCaps();
-            bool TempFilter = false;
+            StreamCaps StreamCaps = new StreamCaps();
 
-            if (SourceFilter == null)
-            {
-                FilterGraph2 = (IFilterGraph2)new FilterGraph();
-                CaptureGraph = (ICaptureGraphBuilder2)new CaptureGraphBuilder2();
-                hRes = CaptureGraph.SetFiltergraph(FilterGraph2);
-                if (hResultError(hRes)) return hRes;
-
-                object source;
-                Guid SourceGuid = typeof(IBaseFilter).GUID;
-                if (Camera!=null)
-				{
-                    try
-                    {
-                        Camera.Mon.BindToObject(null, null, ref SourceGuid, out source);
-                        SourceFilter = (IBaseFilter)source;
-                    }
-                    catch (Exception excep)
-                    {
-                        LastDsErrorMsg = excep.Message;
-                        LastDsErrorNum = -1;
-                        return -1;
-                    }
-                    hRes = FilterGraph2.AddFilter(SourceFilter, Camera.Name);
-                    if (hResultError(hRes)) return hRes;
-				}
-
-                TempFilter = true;
-            }
-
+            if (SourceFilter == null) return null;
 
             hRes = DsFindPin(SourceFilter, ref SrcCapPin, PinCategory.Capture);
-            if (hResultError(hRes)) return hRes;
+            if (hResultError(hRes)) return null;
             IAMStreamConfig StreamConfig1 = (IAMStreamConfig)SrcCapPin;
             VideoInfoHeader VIHeader = new VideoInfoHeader();
             AMMediaType mt = null;
             hRes = StreamConfig1.GetFormat(out mt);
-            if (hResultError(hRes)) return hRes;
+            if (hResultError(hRes)) return null;
             Marshal.PtrToStructure(mt.formatPtr, VIHeader);
             StreamCaps.Mediasubtype = mt.subType;
             StreamCaps.FrameRate = (int)((float)10000000 / VIHeader.AvgTimePerFrame);
@@ -1074,61 +719,24 @@ namespace rx_CamLib
 
             Marshal.FreeCoTaskMem(mt.formatPtr);
 
-            if (TempFilter)
-            {
-                FilterGraph2.Abort();
-                FilterGraph2.RemoveFilter(SourceFilter);
-                Marshal.ReleaseComObject(SourceFilter);
-                SourceFilter = null;
-                Marshal.ReleaseComObject(CaptureGraph);
-                CaptureGraph = null;
-                Marshal.ReleaseComObject(FilterGraph2);
-                FilterGraph2 = null;
-            }
-
-            return 0;
+            return StreamCaps;
         }
 
-        private int SetCamStreamCaps(StreamCaps StreamCaps)
+        /*
+        private ENCamResult SetCamStreamCaps(StreamCaps StreamCaps)
         {
             int hRes = 0;
 
-            bool TempFilter = false;
-
-            if (SourceFilter == null)
-            {
-                FilterGraph2 = (IFilterGraph2)new FilterGraph();
-                CaptureGraph = (ICaptureGraphBuilder2)new CaptureGraphBuilder2();
-                hRes = CaptureGraph.SetFiltergraph(FilterGraph2);
-                if (hResultError(hRes)) return hRes;
-
-                object source;
-                Guid SourceGuid = typeof(IBaseFilter).GUID;
-                try
-                {
-                    Camera.Mon.BindToObject(null, null, ref SourceGuid, out source);
-                    SourceFilter = (IBaseFilter)source;
-                }
-                catch (Exception excep)
-                {
-                    LastDsErrorMsg = excep.Message;
-                    LastDsErrorNum = -1;
-                    return -1;
-                }
-                hRes = FilterGraph2.AddFilter(SourceFilter, Camera.Name);
-                if (hResultError(hRes)) return hRes;
-
-                TempFilter = true;
-            }
+            if (SourceFilter == null) return null;
 
             IPin SrcCapPin = null;
             hRes = DsFindPin(SourceFilter, ref SrcCapPin, PinCategory.Capture);
-            if (hResultError(hRes)) return hRes;
+            if (hResultError(hRes)) return LastDsErrorNum = ENCamResult.Error;
             IAMStreamConfig StreamConfig1 = (IAMStreamConfig)SrcCapPin;
             VideoInfoHeader VIHeader = new VideoInfoHeader();
             AMMediaType mt = null;
             hRes = StreamConfig1.GetFormat(out mt);
-            if (hResultError(hRes)) return hRes;
+            if (hResultError(hRes)) return LastDsErrorNum = ENCamResult.Error;
 
             if (StreamCaps!=null)
 			{
@@ -1138,109 +746,22 @@ namespace rx_CamLib
                 Marshal.StructureToPtr(VIHeader, mt.formatPtr, true);
                 mt.subType = StreamCaps.Mediasubtype;
                 hRes = StreamConfig1.SetFormat(mt);
-                if (hResultError(hRes)) return hRes;
+                if (hResultError(hRes)) return LastDsErrorNum = ENCamResult.Error;
                 Marshal.FreeCoTaskMem(mt.formatPtr);
 			}
 
-            if (TempFilter)
-            {
-                FilterGraph2.Abort();
-                FilterGraph2.RemoveFilter(SourceFilter);
-                Marshal.ReleaseComObject(SourceFilter);
-                SourceFilter = null;
-                Marshal.ReleaseComObject(CaptureGraph);
-                CaptureGraph = null;
-                Marshal.ReleaseComObject(FilterGraph2);
-                FilterGraph2 = null;
-            }
-
             return 0;
         }
+        */
 
-        private int GetCamCapSettingsList(out List<RxCamSettings.CamCapStruct> CamCapsList)
-        {
-            CamCapsList = new List<RxCamSettings.CamCapStruct>();
-            int hRes = 0;
-            IPin SrcCapPin = null;
-            bool TempFilter = false;
-
-            if (SourceFilter == null)
-            {
-                FilterGraph2 = (IFilterGraph2)new FilterGraph();
-                CaptureGraph = (ICaptureGraphBuilder2)new CaptureGraphBuilder2();
-                hRes = CaptureGraph.SetFiltergraph(FilterGraph2);
-                if (hResultError(hRes)) return hRes;
-
-                object source;
-                Guid SourceGuid = typeof(IBaseFilter).GUID;
-                try
-                {
-                    Camera.Mon.BindToObject(null, null, ref SourceGuid, out source);
-                    SourceFilter = (IBaseFilter)source;
-                }
-                catch (Exception excep)
-                {
-                    LastDsErrorMsg = excep.Message;
-                    LastDsErrorNum = -1;
-                    return -1;
-                }
-                hRes = FilterGraph2.AddFilter(SourceFilter, Camera.Name);
-                if (hResultError(hRes)) return hRes;
-
-                TempFilter = true;
-            }
-
-            IAMCameraControl CamCtrl = SourceFilter as IAMCameraControl;
-            foreach (CameraControlProperty Property in Enum.GetValues(typeof(CameraControlProperty)))
-            {
-                RxCamSettings.CamCapStruct CamCap = new RxCamSettings.CamCapStruct();
-                CamCap.Name = Property.ToString();
-                CamCap.Available = false;
-                CameraControlFlags ccf;
-                if (CamCtrl.GetRange(Property, out CamCap.Minimum, out CamCap.Maximum, out CamCap.Step, out CamCap.Default, out ccf) == 0)
-                {
-                    CamCap.Flags = ccf.ToString();
-                    if (CamCtrl.Get(Property, out CamCap.Value, out ccf) != 0)
-                        CamCap.Value = CamCap.Default;
-                    CamCap.Flag = ccf.ToString();
-                    CamCap.Available = true;
-                    CamCapsList.Add(CamCap);
-                }
-            }
-
-            if (TempFilter)
-            {
-                FilterGraph2.Abort();
-                FilterGraph2.RemoveFilter(SourceFilter);
-                Marshal.ReleaseComObject(SourceFilter);
-                SourceFilter = null;
-                Marshal.ReleaseComObject(CaptureGraph);
-                CaptureGraph = null;
-                Marshal.ReleaseComObject(FilterGraph2);
-                FilterGraph2 = null;
-            }
-
-            return CamCapsList.Count;
-        }
-
-        private int SetCamCapSettingsList(List<RxCamSettings.CamCapStruct> CamCapsList)
-        {
-            for (int i = 0; i < CamCapsList.Count; i++)
-            {
-                int RetVal = SetCamCapSetting(CamCapsList[i]);
-                if (RetVal != 0) return RetVal;
-            }
-
-            return 0;
-        }
-
-        private int SetCamCapSetting(RxCamSettings.CamCapStruct CamCap)
+        /*
+        private int SetCamCapSetting(CamDeviceSettings CamCap)
         {
             IAMCameraControl CamCtrl = SourceFilter as IAMCameraControl;
             CameraControlProperty Property = (CameraControlProperty)Enum.Parse(typeof(CameraControlProperty), CamCap.Name, true);
             if (Enum.IsDefined(typeof(CameraControlProperty), Property))
             {
-                CameraControlFlags Flag = (CameraControlFlags)Enum.Parse(typeof(CameraControlFlags), CamCap.Flag, true);
+                CameraControlFlags Flag = (CameraControlFlags)CamCap.Flag;
                 if (Enum.IsDefined(typeof(CameraControlFlags), Flag))
                 {
                     int hRes = CamCtrl.Set(Property, CamCap.Value, Flag);
@@ -1250,12 +771,13 @@ namespace rx_CamLib
             }
             return -1;
         }
+        */
 
-        private int GetCamVideoProcSettingsList(out List<RxCamSettings.CamVideoProcStruct> CamVideoProcList)
+        /*
+        private int GetCamVideoProcSettingsList(out List<CamDeviceSettings> CamVideoProcList)
         {
-            CamVideoProcList = new List<RxCamSettings.CamVideoProcStruct>();
+            CamVideoProcList = new List<CamDeviceSettings>();
             int hRes = 0;
-            IPin SrcCapPin = null;
             bool TempFilter = false;
 
             if (SourceFilter == null)
@@ -1275,8 +797,7 @@ namespace rx_CamLib
                 catch (Exception excep)
                 {
                     LastDsErrorMsg = excep.Message;
-                    LastDsErrorNum = -1;
-                    return -1;
+                    return (int)(LastDsErrorNum = ENCamResult.Error);
                 }
                 hRes = FilterGraph2.AddFilter(SourceFilter, Camera.Name);
                 if (hResultError(hRes)) return hRes;
@@ -1287,16 +808,22 @@ namespace rx_CamLib
             IAMVideoProcAmp Vproc = SourceFilter as IAMVideoProcAmp;
             foreach (VideoProcAmpProperty Property in Enum.GetValues(typeof(VideoProcAmpProperty)))
             {
-                RxCamSettings.CamVideoProcStruct CamVideoProc = new RxCamSettings.CamVideoProcStruct();
-                CamVideoProc.Name = Property.ToString();
+                CamDeviceSettings CamVideoProc = new CamDeviceSettings(Property);
                 CamVideoProc.Available = false;
                 VideoProcAmpFlags vpaf;
-                if (Vproc.GetRange(Property, out CamVideoProc.Minimum, out CamVideoProc.Maximum, out CamVideoProc.Step, out CamVideoProc.Default, out vpaf) == 0)
+                if (Vproc.GetRange(Property, out int min, out int max, out int step, out int def, out vpaf) == 0)
                 {
-                    CamVideoProc.Flags = vpaf.ToString();
-                    if (Vproc.Get(Property, out CamVideoProc.Value, out vpaf) != 0)
-                        CamVideoProc.Value = CamVideoProc.Default;
-                    CamVideoProc.Flag = vpaf.ToString();
+                    CamVideoProc.Minimum = min;
+                    CamVideoProc.Maximum = max;
+                    CamVideoProc.Step    = step;
+                    CamVideoProc.Default = def;
+
+                    CamVideoProc.Flags = (AutoFlag)vpaf;
+                    if (Vproc.Get(Property, out int value, out vpaf) != 0)
+                        CamVideoProc.Value = def;
+                    else CamVideoProc.Value = value;
+
+                    CamVideoProc.Flag = (AutoFlag)vpaf;
                     CamVideoProc.Available = true;
                     CamVideoProcList.Add(CamVideoProc);
                 }
@@ -1316,8 +843,9 @@ namespace rx_CamLib
 
             return CamVideoProcList.Count;
         }
-
-        private int SetCamVideoProcSettingsList(List<RxCamSettings.CamVideoProcStruct> CamVideoProcList)
+        */
+        /*
+        private int SetCamVideoProcSettingsList(List<CamDeviceSettings> CamVideoProcList)
         {
             for (int i = 0; i < CamVideoProcList.Count; i++)
             {
@@ -1327,15 +855,16 @@ namespace rx_CamLib
 
             return 0;
         }
-
-        private int SetCamVideoProc(RxCamSettings.CamVideoProcStruct CamVideoProc)
+        */
+        /*
+        private int SetCamVideoProc(CamDeviceSettings CamVideoProc)
         {
             IAMVideoProcAmp Vproc = SourceFilter as IAMVideoProcAmp;
 
             VideoProcAmpProperty Property = (VideoProcAmpProperty)Enum.Parse(typeof(VideoProcAmpProperty), CamVideoProc.Name, true);
             if (Enum.IsDefined(typeof(VideoProcAmpProperty), Property))
             {
-                VideoProcAmpFlags Flag = (VideoProcAmpFlags)Enum.Parse(typeof(VideoProcAmpFlags), CamVideoProc.Flag, true);
+                VideoProcAmpFlags Flag = (VideoProcAmpFlags)CamVideoProc.Flag;
                 if (Enum.IsDefined(typeof(VideoProcAmpFlags), Flag))
                 {
                     int hRes = Vproc.Set(Property, CamVideoProc.Value, Flag);
@@ -1345,184 +874,7 @@ namespace rx_CamLib
             }
             return 0;
         }
-
-
-
-        private void PropertyChange(object sender, PropertyChangedEventArgs e)
-        {
-            switch (e.PropertyName)
-            {
-                case "DeviceName":
-                    if (!CameraRunning)
-                        SelectCamera(_CamSettings._DeviceName);
-                    break;
-
-                case "StreamCaps":
-                    SetCamStreamCaps(_CamSettings._StreamCaps);
-                    break;
-
-                case "CamCapsList":
-                    if (CameraRunning)
-                    {
-                        SetCamCapSettingsList(_CamSettings._CamCapsList);
-                        GetCamCapSettingsList(out _CamSettings._CamCapsList);
-                    }
-                    break;
-
-                case "CamCaps":
-                    if (CameraRunning)
-                    {
-                        SetCamCapSetting(_CamSettings._CamCaps);
-                        GetCamCapSettingsList(out _CamSettings._CamCapsList);
-                    }
-                    break;
-
-                case "CamVideoProcList":
-                    if (CameraRunning)
-                    {
-                        SetCamVideoProcSettingsList(_CamSettings._CamVideoProcList);
-                        GetCamVideoProcSettingsList(out _CamSettings._CamVideoProcList);
-                    }
-                    break;
-
-                case "CamVideoProc":
-                    if (CameraRunning)
-                    {
-                        SetCamVideoProc(_CamSettings._CamVideoProc);
-                        GetCamVideoProcSettingsList(out _CamSettings._CamVideoProcList);
-                    }
-                    break;
-
-                case "ShowProcessImage":
-                    if (CameraRunning && AlignFilter != null && AlignFilterConnected)
-                    {
-                        AlignFilterIF.SetShowOriginalImage(!_CamSettings._ShowProcessImage);
-                    }
-                    break;
-
-                case "OverlayText":
-                    if (CameraRunning && AlignFilter != null && AlignFilterConnected)
-                    {
-                        AlignFilterIF.SetOverlayTxt(_CamSettings._OverlayText, 0xFFFFFF);
-                    }
-                    break;
-
-                case "BinarizeMode":
-                    if (CameraRunning && AlignFilter != null && AlignFilterConnected)
-                    {
-                        AlignFilterIF.SetBinarizeMode(_CamSettings._BinarizeMode);
-                    }
-                    break;
-
-                case "Inverse":
-                    if (CameraRunning && AlignFilter != null && AlignFilterConnected)
-                    {
-                        AlignFilterIF.SetInverse(_CamSettings._Inverse);
-                    }
-                    break;
-
-                case "ShowHistogram":
-                    if (CameraRunning && AlignFilter != null && AlignFilterConnected)
-                    {
-                        AlignFilterIF.ShowHistogram(_CamSettings._ShowHistogram);
-                    }
-                    break;
-
-                case "Threshold":
-                    if (CameraRunning && AlignFilter != null && AlignFilterConnected)
-                    {
-                        AlignFilterIF.SetThreshold(_CamSettings._Threshold);
-                    }
-                    break;
-
-                case "TextColor":
-                    if (CameraRunning && AlignFilter != null && AlignFilterConnected)
-                    {
-                        AlignFilterIF.SetBlobTextColor(_CamSettings._TextColor);
-                    }
-                    break;
-
-                case "ValuesFont":
-                    if (CameraRunning && AlignFilter != null && AlignFilterConnected)
-                    {
-                        IntPtr unmanaged_pOutFont = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(LOGFONT)));
-                        Marshal.StructureToPtr(_CamSettings._ValuesFont, unmanaged_pOutFont, false);
-                        AlignFilterIF.SetBlobFont(unmanaged_pOutFont);
-                        Marshal.DestroyStructure(unmanaged_pOutFont, typeof(LOGFONT));
-                        Marshal.FreeHGlobal(unmanaged_pOutFont);
-                    }
-                    break;
-
-                case "Horizontal":
-                    if (CameraRunning && AlignFilter != null && AlignFilterConnected)
-                    {
-                        AlignFilterIF.SetLinesHorizontal(_CamSettings._Horizontal);
-                    }
-                    break;
-
-                case "DebugMode":
-                    if (CameraRunning && AlignFilter != null && AlignFilterConnected)
-                    {
-                        AlignFilterIF.SetDebug(_CamSettings._DebugMode);
-                    }
-                    break;
-
-                case "DspFrameTime":
-                    if (CameraRunning && AlignFilter != null && AlignFilterConnected)
-                    {
-                        AlignFilterIF.SetFrameTiming(_CamSettings._DspFrameTime);
-                    }
-                    break;
-
-                case "Measuremode":
-                    AlignFilterIF.SetMeasureMode(_CamSettings._Measuremode);
-                    break;
-
-                case "Displaymode":
-                    AlignFilterIF.SetDisplayMode(_CamSettings._Displaymode);
-                    break;
-
-            }
-        }
-
-        private void PropertyRead(object sender, PropertyChangedEventArgs e)
-        {
-            switch (e.PropertyName)
-            {
-                case "FilterVersion":
-                {
-                    _CamSettings._FilterVersion = GetFilterVersion();
-                }
-                break;
-
-                case "StreamCapsList":
-                {
-                    GetCamStreamCapsList(out _CamSettings._StreamCapsList);
-                }
-                break;
-
-                case "StreamCaps":
-                {
-                    GetCamStreamCaps(out _CamSettings._StreamCaps);
-                }
-                break;
-
-                case "CamCapsList":
-                {
-                    GetCamCapSettingsList(out _CamSettings._CamCapsList);
-                }
-                break;
-
-                case "CamVideoProcList":
-                {
-                    GetCamVideoProcSettingsList(out _CamSettings._CamVideoProcList);
-                }
-                break;
-
-
-            }
-
-        }
+        */
 
         #endregion
     }

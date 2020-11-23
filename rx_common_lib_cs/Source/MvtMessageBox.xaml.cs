@@ -55,9 +55,9 @@ namespace RX_Common
         }
 
         //--- Information ------------------------------------------------
-        static public bool Information(string title, string text)
+        static public bool Information(string title, string text, MessageBoxImage image=MessageBoxImage.Information)
         {
-            MvtMessageBox box = new MvtMessageBox(title, text, MessageBoxImage.Information, true);
+            MvtMessageBox box = new MvtMessageBox(title, text, image, true);
             box.Button_Question.Visibility = Visibility.Collapsed;
             box.Button_No.Visibility = Visibility.Collapsed;
             box.Button_PurgeAll.Visibility = Visibility.Collapsed;

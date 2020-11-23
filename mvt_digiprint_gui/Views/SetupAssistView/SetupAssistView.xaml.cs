@@ -35,6 +35,14 @@ namespace RX_DigiPrint.Views.SetupAssistView
 			}
 		}
 
+		//--- CamSettings_Clicked ------------------------------------
+		private void CamSettings_Clicked(object sender,RoutedEventArgs e)
+		{
+			if (BTN_CamSettings.IsChecked) CamSettings.Hide();
+			else						   CamSettings.Show(_Camera);
+			BTN_CamSettings.IsChecked = ! BTN_CamSettings.IsChecked;
+		}
+
 		//--- Trigger_Clicked -------------------------------------------
 		private void Trigger_Clicked(object sender,RoutedEventArgs e)
 		{
@@ -50,6 +58,8 @@ namespace RX_DigiPrint.Views.SetupAssistView
 		//--- Start_Clicked -------------------------------------------
 		private void Start_Clicked(object sender,RoutedEventArgs e)
 		{
+			BTN_CamSettings.IsChecked = false;
+			CamSettings.Hide();
 			SetupActions.Start(_Camera);
 		}
 		private void Done_Clicked(object sender,RoutedEventArgs e)

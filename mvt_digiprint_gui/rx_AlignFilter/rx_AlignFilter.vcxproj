@@ -80,6 +80,8 @@
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>..\OpenCV_4.20\opencv\build\include;$(IncludePath)</IncludePath>
     <LibraryPath>..\OpenCV_4.20\opencv\build\x64\vc15\lib;$(LibraryPath)</LibraryPath>
+    <OutDir>$(ProjectDir)..\..\_out\$(Configuration)_$(Platform)\</OutDir>
+    <IntDir>$(ProjectDir)..\..\_temp\$(MSBuildProjectName)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>false</LinkIncremental>

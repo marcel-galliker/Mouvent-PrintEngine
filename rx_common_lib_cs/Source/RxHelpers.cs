@@ -88,23 +88,31 @@ namespace RX_Common
         //--- StrToUInt32 ------------------------------
         public static UInt32 StrToUInt32(string str)
         {
-            try
-            { 
-                double val = Rx.StrToDouble(str);
-                return System.Convert.ToUInt32(val);
-            }
-            catch (Exception) { return 0;}
+            UInt32 val=0;
+
+            if (str==null) return 0;
+            foreach(char c in str)
+            {
+                if (c=='.' || c==',') return val;
+                if (c>='0' && c<='9') val=10*val+c-'0';
+            }                
+            return val; 
         }
 
         //--- StrToInt32 ------------------------------
         public static Int32 StrToInt32(string str)
         {
-            try
-            { 
-                double val = Rx.StrToDouble(str);
-                return System.Convert.ToInt32(val);
-            }
-            catch (Exception) { return 0;}
+            Int32 val=0;
+            Int32 sign=1;
+
+            if (str==null) return 0;
+            foreach(char c in str)
+            {
+                if (c=='-') sign=-1;
+                if (c=='.' || c==',') return val*sign;
+                if (c>='0' && c<='9') val=10*val+c-'0';
+            }                
+            return val*sign; 
         }
 
         //--- DoubleRange ------------------------------

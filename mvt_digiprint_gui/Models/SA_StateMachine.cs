@@ -12,7 +12,7 @@ namespace RX_DigiPrint.Models
 {
 	public class SA_StateMachine : RxBindable
 	{
-		private const bool		 _SimuMachine = false;
+		private const bool		 _SimuMachine = true;
 		private const bool		 _SimuCamera  = true;
 
 		private RxCamFunctions	 _CamFunctions;
@@ -204,6 +204,7 @@ namespace RX_DigiPrint.Models
 		//--- _OnPositionMeasured -------------------------------------
 		private void _OnPositionMeasured(SPosition pos)
 		{
+			if (_Action==null) return;
 			_Action.Measured = pos;
 			ActionDone();
 		}

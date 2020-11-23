@@ -20,7 +20,7 @@ namespace RX_DigiPrint.Views.SetupAssistView
     public partial class SA_Settings : CustomWindow
     {
         private RxCam _Camera;
-        private StreamCaps _StreamCaps;
+//      private StreamCaps _StreamCaps;
         private List<StreamCaps> _StreamCapsList;
      // private List<RxCamSettings.CamCapStruct> _CamCapsList;
      // private List<RxCamSettings.CamVideoProcStruct> _CamVideoProcList;
@@ -52,8 +52,7 @@ namespace RX_DigiPrint.Views.SetupAssistView
         //--- _InitStreamCaps -------------------------------
         private void _InitStreamCaps()
 		{
-            _StreamCaps     = _Camera.Settings.StreamCaps;
-            _StreamCapsList = _Camera.Settings.StreamCapsList;
+            _StreamCapsList           = _Camera.GetCamStreamCapsList();
             CB_StreamCaps.ItemsSource = _StreamCapsList;
             StreamCaps caps=RxGlobals.Settings.SetupAssistCam.StreamCaps;
             if (_StreamCapsList==null || caps==null) return;
