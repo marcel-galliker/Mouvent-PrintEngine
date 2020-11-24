@@ -75,8 +75,8 @@ namespace RX_DigiPrint.Models
 		}
 
 		//--- Property Measured ---------------------------------------
-		private SPosition _Measured;
-		public SPosition Measured
+		private SHeadPosition _Measured;
+		public SHeadPosition Measured
 		{
 			get { return _Measured; }
 			set { SetProperty(ref _Measured,value); }

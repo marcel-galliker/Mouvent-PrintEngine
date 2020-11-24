@@ -1,22 +1,11 @@
-﻿using Infragistics.Controls.Grids;
-using MahApps.Metro.IconPacks;
+﻿using MahApps.Metro.IconPacks;
 using rx_CamLib;
 using rx_CamLib.Models;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using static rx_CamLib.RxCamSettings;
 
 namespace RX_DigiPrint.Views.SetupAssistView
 {
@@ -39,7 +28,7 @@ namespace RX_DigiPrint.Views.SetupAssistView
 		public void Show(RxCam cam)
 		{
 			_Camera				 = cam;
-			Settings.ItemsSource = _Camera.GetDeviceProperties();
+			Settings.ItemsSource = CamGlobals.CamDevice.GetProperties();
 			this.Visibility		 = Visibility.Visible;
 		}
 
@@ -52,7 +41,7 @@ namespace RX_DigiPrint.Views.SetupAssistView
 		//--- Default_Clicked ---------------------------------------------
 		private void Default_Clicked(object sender,RoutedEventArgs e)
 		{
-			CamDeviceSettings item = Settings.ActiveItem as CamDeviceSettings;
+			CamDeviceProperty item = Settings.ActiveItem as CamDeviceProperty;
 			item.Value = item.Default;
 			e.Handled = true;
 		}
@@ -60,7 +49,7 @@ namespace RX_DigiPrint.Views.SetupAssistView
 		//--- Auto_Clicked ---------------------------------------------
 		private void Auto_Clicked(object sender,RoutedEventArgs e)
 		{
-			CamDeviceSettings item = Settings.ActiveItem as CamDeviceSettings;
+			CamDeviceProperty item = Settings.ActiveItem as CamDeviceProperty;
 			item.Auto = !item.Auto;
 		}
 	}

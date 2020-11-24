@@ -9,7 +9,7 @@ using System.Text;
 using DirectShowLib;
 using rx_CamLib.Models;
 using RX_Common;
-using static rx_CamLib.RxCamSettings;
+using static rx_CamLib.RxAlignFilter;
 
 namespace rx_CamLib
 {
@@ -42,7 +42,6 @@ namespace rx_CamLib
 
         private DsDevice Camera = null;
         private IFilterGraph2 FilterGraph2 = null;
-        private IFrx_AlignFilter _RxAlignFilter = null;
         private IMediaControl MediaControl = null;
         private ICaptureGraphBuilder2 CaptureGraph = null;
         private IBaseFilter SourceFilter = null;
@@ -94,13 +93,6 @@ namespace rx_CamLib
             return typeof(RxCam).Assembly.GetName().Version.ToString();
         }
 
-        private RxCamSettings _CamSettings = new RxCamSettings();
-        public RxCamSettings Settings
-        {
-            get { return _CamSettings; }
-            set { _CamSettings = value; }
-        }
-
         /// <summary>
         /// Searches for all connected cameras
         /// </summary>
@@ -142,7 +134,6 @@ namespace rx_CamLib
                     }
 
                     Camera = DeviceList[i];
-                    _CamSettings._DeviceName = Camera.Name;
                     return ENCamResult.OK;
                 }
             }
@@ -205,29 +196,8 @@ namespace rx_CamLib
         /// <returns>0: for success or error code</returns>
         public ENCamResult StopCamera()
         {
-            if (!CameraRunning)
-            {
-                LastDsErrorMsg = "Camera not running";
-                return LastDsErrorNum = ENCamResult.Cam_notRunning;
-            }
-            if (!StopGraph()) return LastDsErrorNum=ENCamResult.Error;
-            
-            CamCallBack?.Invoke("Camera stopped");
-            LastDsErrorMsg = "";
-            return LastDsErrorNum = ENCamResult.OK;
-        }
-
-        /// <summary>
-        /// Get Last DirectShow Error
-        /// </summary>
-        /// <param name="Message">Error Message</param>
-        /// <returns>Error Number</returns>
-        public ENCamResult GetLastDsError(out string Message)
-        {
-            Message = LastDsErrorMsg;
-            if (LastDsErrorNum == ENCamResult.Filter_AlreadyUsed)
-                Message = "Resource used by this filter may already be in use";
-            return LastDsErrorNum;
+            if (CameraRunning) return StopGraph(); 
+            return ENCamResult.OK;
         }
 
         #endregion
@@ -253,14 +223,15 @@ namespace rx_CamLib
             if (!ConfigVMR9(hwnd)) return ENCamResult.Error;
             hResult = FilterGraph2.AddFilter(VMR9, "VMR 9");
             if (hResultError(hResult)) return ENCamResult.Error;
+
             //Insert Camera
-            object source;
-            Guid SourceGuid = typeof(IBaseFilter).GUID;
             try
             {
+                object source;
+                Guid SourceGuid = typeof(IBaseFilter).GUID;
                 Camera.Mon.BindToObject(null, null, ref SourceGuid, out source);
                 SourceFilter = (IBaseFilter)source;
-                CamDeviceSettings.SetDevice(SourceFilter);
+                CamGlobals.CamDevice = new CamDevice(SourceFilter);
             }
             catch (Exception excep)
             {
@@ -287,26 +258,28 @@ namespace rx_CamLib
             comType = Type.GetTypeFromCLSID(AlignGuid);
 			try 
             { 
-                _RxAlignFilter = (IFrx_AlignFilter)Activator.CreateInstance(comType);
-                Settings.SetAlignFilter(_RxAlignFilter);
+                CamGlobals.AlignFilter = new RxAlignFilter(Activator.CreateInstance(comType));
             }
             catch(Exception e)
 			{
                 return LastDsErrorNum = ENCamResult.Filter_NotRegistered;
 			}
-            hResult = FilterGraph2.AddFilter(_RxAlignFilter, "Alignment");
+
+            IFrx_AlignFilter halignFilter = CamGlobals.AlignFilter.Handle;
+
+            hResult = FilterGraph2.AddFilter(halignFilter, "Alignment");
             if (hResultError(hResult)) return LastDsErrorNum = ENCamResult.Error;
 
             //Connect Camera to Align
             IPin AlignInPin = null;
-            hResult = DsFindPin(_RxAlignFilter, ref AlignInPin, "Input");
+            hResult = DsFindPin(halignFilter, ref AlignInPin, "Input");
             if (hResultError(hResult)) return LastDsErrorNum = ENCamResult.Error;
             hResult = FilterGraph2.Connect(SrcCapPin, AlignInPin);
             if (hResultError(hResult)) return LastDsErrorNum = ENCamResult.Error;
 
             //Render Align Output Pin
             IPin AlignOutPin = null;
-            hResult = DsFindPin(_RxAlignFilter, ref AlignOutPin, "Output");
+            hResult = DsFindPin(halignFilter, ref AlignOutPin, "Output");
             if (hResultError(hResult)) return LastDsErrorNum = ENCamResult.Error;
             hResult = FilterGraph2.Render(AlignOutPin);
             if (hResultError(hResult)) return LastDsErrorNum = ENCamResult.Error;
@@ -344,19 +317,20 @@ namespace rx_CamLib
             return LastDsErrorNum = ENCamResult.OK;
         }
 
-        private bool StopGraph()
+        private ENCamResult StopGraph()
         {
             int hResult;
+            IFrx_AlignFilter halignFilter = CamGlobals.AlignFilter.Handle;
 
-            _RxAlignFilter.SetFrameTiming(false);
-            _RxAlignFilter.SetDebug(false);
-            _RxAlignFilter.SetHostPointer(IntPtr.Zero);
-            _RxAlignFilter.ShowHistogram(false);
-            _RxAlignFilter.SetOverlayTxt("", 0);
-            _RxAlignFilter.SetShowOriginalImage(true);
-            _RxAlignFilter.SetDisplayMode(0);
-            _RxAlignFilter.SetMeasureMode(0);
-            _RxAlignFilter.SetBinarizeMode(0);
+            halignFilter.SetFrameTiming(false);
+            halignFilter.SetDebug(false);
+            halignFilter.SetHostPointer(IntPtr.Zero);
+            halignFilter.ShowHistogram(false);
+            halignFilter.SetOverlayTxt("", 0);
+            halignFilter.SetShowOriginalImage(true);
+            halignFilter.SetDisplayMode(0);
+            halignFilter.SetMeasureMode(0);
+            halignFilter.SetBinarizeMode(0);
 
             //Stop Media Control
             FilterState pFState = FilterState.Running;
@@ -422,9 +396,9 @@ namespace rx_CamLib
             if (VMR9 != null) Marshal.ReleaseComObject(VMR9);
             VMR9 = null;
 
-            if (_RxAlignFilter != null)
+            if (halignFilter != null)
             {
-                hResult = FilterGraph2.RemoveFilter(_RxAlignFilter);
+                hResult = FilterGraph2.RemoveFilter(halignFilter);
                 hResultError(hResult);
             }
 
@@ -440,7 +414,7 @@ namespace rx_CamLib
             FilterGraph2 = null;
 
             CameraRunning = false;
-            return true;
+            return ENCamResult.OK;
         }
 
         private bool ConfigVMR9(IntPtr hwnd)
@@ -591,68 +565,6 @@ namespace rx_CamLib
 
         }
 
-        private LOGFONT GetFilterValuesFont()
-        {
-            UInt32 LogFontSize = 0;
-            _RxAlignFilter.GetBlobFont(IntPtr.Zero, out LogFontSize);
-            IntPtr unmanaged_pInFont = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(LOGFONT)) * (int)LogFontSize);
-            _RxAlignFilter.GetBlobFont(unmanaged_pInFont, out LogFontSize);
-            LOGFONT ValuesFont = new LOGFONT();
-            ValuesFont = (LOGFONT)Marshal.PtrToStructure(unmanaged_pInFont, typeof(LOGFONT));
-            Marshal.DestroyStructure(unmanaged_pInFont, typeof(LOGFONT));
-            Marshal.FreeHGlobal(unmanaged_pInFont);
-            return ValuesFont;
-        }
-
-        private string GetFilterVersion()
-        {
-            //Filter Version
-            UInt32 StrLength = 0;
-            string FilterVersion;
-            if (_RxAlignFilter != null)
-            {
-                _RxAlignFilter.GetVersion(IntPtr.Zero, out StrLength);
-                IntPtr unmanaged_pIn = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(char)) * 256);
-                _RxAlignFilter.GetVersion(unmanaged_pIn, out StrLength);
-                FilterVersion = Marshal.PtrToStringAuto(unmanaged_pIn);
-                Marshal.FreeHGlobal(unmanaged_pIn);
-            }
-            else
-            {
-                Guid AlignGuid = new Guid("148BC1EB-2C83-418E-B9CD-E1F5BC9D1E38");  //rx_AlignFilter
-                Type comType = null;
-                comType = Type.GetTypeFromCLSID(AlignGuid);
-                IntPtr unmanaged_pIn = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(char)) * 256);
-                _RxAlignFilter.GetVersion(unmanaged_pIn, out StrLength);
-                FilterVersion = Marshal.PtrToStringAuto(unmanaged_pIn);
-                Marshal.FreeHGlobal(unmanaged_pIn);
-                _RxAlignFilter = null;
-            }
-            return FilterVersion;
-        }
-
-        private string GetFilterGraphDeviceName()
-        {
-            //Graphics Device Name
-            IntPtr unmanaged_pIn = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(char)) * 256);
-            _RxAlignFilter.GetDeviceName(unmanaged_pIn);
-            string DeviceName = Marshal.PtrToStringAuto(unmanaged_pIn);
-            Marshal.FreeHGlobal(unmanaged_pIn);
-            return DeviceName;
-        }
-
-        //--- GetDeviceProperties ---------------------------------
-        public List<CamDeviceSettings> GetDeviceProperties()
-        {
-            List<CamDeviceSettings> list = new List<CamDeviceSettings>();
-            foreach (VideoProcAmpProperty property in Enum.GetValues(typeof(VideoProcAmpProperty)))
-            {
-                CamDeviceSettings prop=new CamDeviceSettings(property);
-                if (prop.Available) list.Add(prop);
-            }
-            return list;
-        }
-
         //--- GetCamStreamCapsList ------------------------------------
         public List<StreamCaps> GetCamStreamCapsList()
         {
@@ -722,12 +634,11 @@ namespace rx_CamLib
             return StreamCaps;
         }
 
-        /*
         private ENCamResult SetCamStreamCaps(StreamCaps StreamCaps)
         {
             int hRes = 0;
 
-            if (SourceFilter == null) return null;
+            if (SourceFilter == null) return ENCamResult.Error;
 
             IPin SrcCapPin = null;
             hRes = DsFindPin(SourceFilter, ref SrcCapPin, PinCategory.Capture);
@@ -750,9 +661,8 @@ namespace rx_CamLib
                 Marshal.FreeCoTaskMem(mt.formatPtr);
 			}
 
-            return 0;
+            return ENCamResult.OK;
         }
-        */
 
         /*
         private int SetCamCapSetting(CamDeviceSettings CamCap)
@@ -773,244 +683,6 @@ namespace rx_CamLib
         }
         */
 
-        /*
-        private int GetCamVideoProcSettingsList(out List<CamDeviceSettings> CamVideoProcList)
-        {
-            CamVideoProcList = new List<CamDeviceSettings>();
-            int hRes = 0;
-            bool TempFilter = false;
-
-            if (SourceFilter == null)
-            {
-                FilterGraph2 = (IFilterGraph2)new FilterGraph();
-                CaptureGraph = (ICaptureGraphBuilder2)new CaptureGraphBuilder2();
-                hRes = CaptureGraph.SetFiltergraph(FilterGraph2);
-                if (hResultError(hRes)) return hRes;
-
-                object source;
-                Guid SourceGuid = typeof(IBaseFilter).GUID;
-                try
-                {
-                    Camera.Mon.BindToObject(null, null, ref SourceGuid, out source);
-                    SourceFilter = (IBaseFilter)source;
-                }
-                catch (Exception excep)
-                {
-                    LastDsErrorMsg = excep.Message;
-                    return (int)(LastDsErrorNum = ENCamResult.Error);
-                }
-                hRes = FilterGraph2.AddFilter(SourceFilter, Camera.Name);
-                if (hResultError(hRes)) return hRes;
-
-                TempFilter = true;
-            }
-
-            IAMVideoProcAmp Vproc = SourceFilter as IAMVideoProcAmp;
-            foreach (VideoProcAmpProperty Property in Enum.GetValues(typeof(VideoProcAmpProperty)))
-            {
-                CamDeviceSettings CamVideoProc = new CamDeviceSettings(Property);
-                CamVideoProc.Available = false;
-                VideoProcAmpFlags vpaf;
-                if (Vproc.GetRange(Property, out int min, out int max, out int step, out int def, out vpaf) == 0)
-                {
-                    CamVideoProc.Minimum = min;
-                    CamVideoProc.Maximum = max;
-                    CamVideoProc.Step    = step;
-                    CamVideoProc.Default = def;
-
-                    CamVideoProc.Flags = (AutoFlag)vpaf;
-                    if (Vproc.Get(Property, out int value, out vpaf) != 0)
-                        CamVideoProc.Value = def;
-                    else CamVideoProc.Value = value;
-
-                    CamVideoProc.Flag = (AutoFlag)vpaf;
-                    CamVideoProc.Available = true;
-                    CamVideoProcList.Add(CamVideoProc);
-                }
-            }
-
-            if (TempFilter)
-            {
-                FilterGraph2.Abort();
-                FilterGraph2.RemoveFilter(SourceFilter);
-                Marshal.ReleaseComObject(SourceFilter);
-                SourceFilter = null;
-                Marshal.ReleaseComObject(CaptureGraph);
-                CaptureGraph = null;
-                Marshal.ReleaseComObject(FilterGraph2);
-                FilterGraph2 = null;
-            }
-
-            return CamVideoProcList.Count;
-        }
-        */
-        /*
-        private int SetCamVideoProcSettingsList(List<CamDeviceSettings> CamVideoProcList)
-        {
-            for (int i = 0; i < CamVideoProcList.Count; i++)
-            {
-                int RetVal = SetCamVideoProc(CamVideoProcList[i]);
-                if (RetVal != 0) return RetVal;
-            }
-
-            return 0;
-        }
-        */
-        /*
-        private int SetCamVideoProc(CamDeviceSettings CamVideoProc)
-        {
-            IAMVideoProcAmp Vproc = SourceFilter as IAMVideoProcAmp;
-
-            VideoProcAmpProperty Property = (VideoProcAmpProperty)Enum.Parse(typeof(VideoProcAmpProperty), CamVideoProc.Name, true);
-            if (Enum.IsDefined(typeof(VideoProcAmpProperty), Property))
-            {
-                VideoProcAmpFlags Flag = (VideoProcAmpFlags)CamVideoProc.Flag;
-                if (Enum.IsDefined(typeof(VideoProcAmpFlags), Flag))
-                {
-                    int hRes = Vproc.Set(Property, CamVideoProc.Value, Flag);
-                    if (hResultError(hRes)) return hRes;
-                    return hRes;
-                }
-            }
-            return 0;
-        }
-        */
-
         #endregion
     }
-
-    #region LogFont Class and Structures
-
-    public enum FontWeight : int
-        {
-            FW_DONTCARE = 0,
-            FW_THIN = 100,
-            FW_EXTRALIGHT = 200,
-            FW_LIGHT = 300,
-            FW_NORMAL = 400,
-            FW_MEDIUM = 500,
-            FW_SEMIBOLD = 600,
-            FW_BOLD = 700,
-            FW_EXTRABOLD = 800,
-            FW_HEAVY = 900,
-        }
-    public enum FontCharSet : byte
-    {
-        ANSI_CHARSET = 0,
-        DEFAULT_CHARSET = 1,
-        SYMBOL_CHARSET = 2,
-        SHIFTJIS_CHARSET = 128,
-        HANGEUL_CHARSET = 129,
-        HANGUL_CHARSET = 129,
-        GB2312_CHARSET = 134,
-        CHINESEBIG5_CHARSET = 136,
-        OEM_CHARSET = 255,
-        JOHAB_CHARSET = 130,
-        HEBREW_CHARSET = 177,
-        ARABIC_CHARSET = 178,
-        GREEK_CHARSET = 161,
-        TURKISH_CHARSET = 162,
-        VIETNAMESE_CHARSET = 163,
-        THAI_CHARSET = 222,
-        EASTEUROPE_CHARSET = 238,
-        RUSSIAN_CHARSET = 204,
-        MAC_CHARSET = 77,
-        BALTIC_CHARSET = 186,
-    }
-    public enum FontPrecision : byte
-    {
-        OUT_DEFAULT_PRECIS = 0,
-        OUT_STRING_PRECIS = 1,
-        OUT_CHARACTER_PRECIS = 2,
-        OUT_STROKE_PRECIS = 3,
-        OUT_TT_PRECIS = 4,
-        OUT_DEVICE_PRECIS = 5,
-        OUT_RASTER_PRECIS = 6,
-        OUT_TT_ONLY_PRECIS = 7,
-        OUT_OUTLINE_PRECIS = 8,
-        OUT_SCREEN_OUTLINE_PRECIS = 9,
-        OUT_PS_ONLY_PRECIS = 10,
-    }
-    public enum FontClipPrecision : byte
-    {
-        CLIP_DEFAULT_PRECIS = 0,
-        CLIP_CHARACTER_PRECIS = 1,
-        CLIP_STROKE_PRECIS = 2,
-        CLIP_MASK = 0xf,
-        CLIP_LH_ANGLES = (1 << 4),
-        CLIP_TT_ALWAYS = (2 << 4),
-        CLIP_DFA_DISABLE = (4 << 4),
-        CLIP_EMBEDDED = (8 << 4),
-    }
-    public enum FontQuality : byte
-    {
-        DEFAULT_QUALITY = 0,
-        DRAFT_QUALITY = 1,
-        PROOF_QUALITY = 2,
-        NONANTIALIASED_QUALITY = 3,
-        ANTIALIASED_QUALITY = 4,
-        CLEARTYPE_QUALITY = 5,
-        CLEARTYPE_NATURAL_QUALITY = 6,
-    }
-    [Flags]
-    public enum FontPitchAndFamily : byte
-    {
-        DEFAULT_PITCH = 0,
-        FIXED_PITCH = 1,
-        VARIABLE_PITCH = 2,
-        FF_DONTCARE = (0 << 4),
-        FF_ROMAN = (1 << 4),
-        FF_SWISS = (2 << 4),
-        FF_MODERN = (3 << 4),
-        FF_SCRIPT = (4 << 4),
-        FF_DECORATIVE = (5 << 4),
-    }
-
-    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
-    public class LOGFONT
-    {
-        public uint lfHeight;
-        public uint lfWidth;
-        public uint lfEscapement;
-        public uint lfOrientation;
-        public FontWeight lfWeight;
-        [MarshalAs(UnmanagedType.U1)]
-        public bool lfItalic;
-        [MarshalAs(UnmanagedType.U1)]
-        public bool lfUnderline;
-        [MarshalAs(UnmanagedType.U1)]
-        public bool lfStrikeOut;
-        public FontCharSet lfCharSet;
-        public FontPrecision lfOutPrecision;
-        public FontClipPrecision lfClipPrecision;
-        public FontQuality lfQuality;
-        public FontPitchAndFamily lfPitchAndFamily;
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
-        public string lfFaceName;
-
-        public override string ToString()
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.Append("LOGFONT\n");
-            sb.AppendFormat("   lfHeight: {0}\n", lfHeight);
-            sb.AppendFormat("   lfWidth: {0}\n", lfWidth);
-            sb.AppendFormat("   lfEscapement: {0}\n", lfEscapement);
-            sb.AppendFormat("   lfOrientation: {0}\n", lfOrientation);
-            sb.AppendFormat("   lfWeight: {0}\n", lfWeight);
-            sb.AppendFormat("   lfItalic: {0}\n", lfItalic);
-            sb.AppendFormat("   lfUnderline: {0}\n", lfUnderline);
-            sb.AppendFormat("   lfStrikeOut: {0}\n", lfStrikeOut);
-            sb.AppendFormat("   lfCharSet: {0}\n", lfCharSet);
-            sb.AppendFormat("   lfOutPrecision: {0}\n", lfOutPrecision);
-            sb.AppendFormat("   lfClipPrecision: {0}\n", lfClipPrecision);
-            sb.AppendFormat("   lfQuality: {0}\n", lfQuality);
-            sb.AppendFormat("   lfPitchAndFamily: {0}\n", lfPitchAndFamily);
-            sb.AppendFormat("   lfFaceName: {0}\n", lfFaceName);
-
-            return sb.ToString();
-        }
-    }
-
-    #endregion
-
 }

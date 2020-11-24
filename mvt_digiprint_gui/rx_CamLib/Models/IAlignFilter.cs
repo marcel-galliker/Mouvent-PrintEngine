@@ -195,7 +195,6 @@ namespace rx_CamLib.Models
             bool GetLinesHorizontal();
 
             #endregion
-
         }
 
         #endregion

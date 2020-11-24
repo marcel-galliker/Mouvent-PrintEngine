@@ -1,4 +1,5 @@
 ﻿using rx_CamLib;
+using rx_CamLib.Models;
 using RX_Common;
 using RX_DigiPrint.Models;
 using System.Collections.Generic;
@@ -38,7 +39,7 @@ namespace RX_DigiPrint.Views.SetupAssistView
 					CameraCapture.Width			= width;
 				}
 				_Camera.SetVideoRectangle(CameraCapture.ClientRectangle);
-				CameraCapture_Grid.DataContext = _Camera.Settings;
+				CameraCapture_Grid.DataContext = CamGlobals.AlignFilter;
 			}
 			else
 			{
@@ -78,11 +79,11 @@ namespace RX_DigiPrint.Views.SetupAssistView
 
 			RxEnum<int> item=CB_View.SelectedItem as RxEnum<int>;
 			if (item==null) return;
-			_Camera.Settings.ShowProcessImage = (item.Value==1);
-			_Camera.Settings.Inverse		  = (item.Value==2);
-			if (item.Value>10 && item.Value<=13) _Camera.Settings.BinarizeMode=(uint)item.Value-10;
-			else								 _Camera.Settings.BinarizeMode=0;
-			if (_Camera.Settings.BinarizeMode==1) ThresholdGrid.Visibility = Visibility.Visible;
+			CamGlobals.AlignFilter.ShowProcessImage = (item.Value==1);
+			CamGlobals.AlignFilter.Inverse		  = (item.Value==2);
+			if (item.Value>10 && item.Value<=13) CamGlobals.AlignFilter.BinarizeMode=(uint)item.Value-10;
+			else								 CamGlobals.AlignFilter.BinarizeMode=0;
+			if (CamGlobals.AlignFilter.BinarizeMode==1) ThresholdGrid.Visibility = Visibility.Visible;
 			else ThresholdGrid.Visibility = Visibility.Collapsed;
 		}
 	}

@@ -6,38 +6,29 @@ using System.Text;
 
 namespace rx_CamLib.Models
 {
-    public class CamDeviceSettings : RxBindable
+    public class CamDeviceProperty : RxBindable
     {
-		private static IAMVideoProcAmp	_Device = null;
 		private VideoProcAmpProperty	_Property;
 
-		public static void SetDevice(IBaseFilter device)
-		{
-			_Device = device as IAMVideoProcAmp;
-		}
-
 		//--- Constructor ---------------------------------
-		public CamDeviceSettings(VideoProcAmpProperty property)
+		public CamDeviceProperty(VideoProcAmpProperty property)
 		{
-			if (_Device!=null)
+			_Name		= property.ToString();
+			_Property	= property;
+			_Available	= false;
+			VideoProcAmpFlags flag;
+			if (CamGlobals.CamDevice.GetRange(property, out int min, out int max, out int step, out int def, out flag) == 0)
 			{
-				_Name		= property.ToString();
-				_Property	= property;
-				_Available	= false;
-				VideoProcAmpFlags flag;
-				if (_Device.GetRange(property, out int min, out int max, out int step, out int def, out flag) == 0)
-				{
-					_Minimum = min;
-					_Maximum = max;
-					_Step    = step;
-					_Default = def;
-					_AutoAvailable = (((VideoProcAmpFlags)flag & VideoProcAmpFlags.Auto)!=0);
-					_Device.Get(property, out int value, out flag);
-					_Value	   = value;
-					_Auto	   = _AutoAvailable && (((VideoProcAmpFlags)flag & VideoProcAmpFlags.Auto)!=0);
-					_Available = true;
-					IsDefault = (_Value==_Default);
-				}
+				_Minimum = min;
+				_Maximum = max;
+				_Step    = step;
+				_Default = def;
+				_AutoAvailable = (((VideoProcAmpFlags)flag & VideoProcAmpFlags.Auto)!=0);
+				CamGlobals.CamDevice.GetProperty(property, out int value, out flag);
+				_Value	   = value;
+				_Auto	   = _AutoAvailable && (((VideoProcAmpFlags)flag & VideoProcAmpFlags.Auto)!=0);
+				_Available = true;
+				IsDefault = (_Value==_Default);
 			}
 		}
 
@@ -106,7 +97,7 @@ namespace rx_CamLib.Models
             { 
                 if (SetProperty(ref _Value,value))
 				{
-					_Device.Set(_Property, _Value, Flag());
+					CamGlobals.CamDevice.SetProperty(_Property, _Value, Flag());
 					IsDefault = (_Value==_Default);
 				};
             }
@@ -137,7 +128,7 @@ namespace rx_CamLib.Models
 			{ 
 				if (SetProperty(ref _Auto,value))
 				{
-					_Device.Set(_Property, _Value, Flag());
+					CamGlobals.CamDevice.SetProperty(_Property, _Value, Flag());
 				};
 			}
 		}

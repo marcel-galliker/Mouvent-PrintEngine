@@ -1,6 +1,7 @@
 ﻿using RX_Common;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -21,8 +22,26 @@ namespace rx_CamLib
 		CamMeasurePosition
 	};
 
+	public class SMarkPosition : RxBindable
+	{
+		//--- Property Web ---------------------------------------
+		private int _Web;
+		public int Web
+		{
+			get { return _Web; }
+			set { SetProperty(ref _Web,value); }
+		}
 
-	public class SPosition : RxBindable
+		//--- Property Scanner ---------------------------------------
+		private int _Scanner;
+		public int Scanner
+		{
+			get { return _Scanner; }
+			set { SetProperty(ref _Scanner,value); }
+		}
+	};
+
+	public class SHeadPosition : RxBindable
 	{
 		//--- Property angle ---------------------------------------
 		private int _Angle;
@@ -78,16 +97,8 @@ namespace rx_CamLib
 			}
 		}
 
-		//--- Property Measurment ---------------------------------------
-		private SPosition _Measurment;
-		public SPosition Measurment
-		{
-			get { return _Measurment; }
-			set { SetProperty(ref _Measurment,value); }
-		}
-
-		//--- MeasurePosition --------------------------------
-		public void MeasurePosition(Action<SPosition> measured)
+		//--- MeasureMark --------------------------------
+		public void MeasureMark(Action<SMarkPosition> measured)
 		{
 			if (_Simulation)
 			{
@@ -96,7 +107,24 @@ namespace rx_CamLib
 					Task.Delay(1000).Wait();
 					RxBindable.Invoke(()=>
 					{
-						SPosition pos = new SPosition();
+						SMarkPosition pos = new SMarkPosition() {Web=100, Scanner=200 };
+						measured(pos);
+					});
+				}).Start();
+			}
+		}
+
+		//--- MeasurePosition --------------------------------
+		public void MeasurePosition(Action<SHeadPosition> measured)
+		{
+			if (_Simulation)
+			{
+				new Task(() =>
+				{
+					Task.Delay(1000).Wait();
+					RxBindable.Invoke(()=>
+					{
+						SHeadPosition pos = new SHeadPosition();
 						pos.Angle=100;
 						pos.Stitch=200;
 						pos.Distance=300;

@@ -40,7 +40,5 @@ namespace rx_CamLib.Models
 			if (item.Resolution.Y != Resolution.Y) return false;
 			return true;
 		}
-
-
 	}
 }

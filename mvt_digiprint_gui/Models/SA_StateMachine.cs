@@ -202,7 +202,7 @@ namespace RX_DigiPrint.Models
 		}
 
 		//--- _OnPositionMeasured -------------------------------------
-		private void _OnPositionMeasured(SPosition pos)
+		private void _OnPositionMeasured(SHeadPosition pos)
 		{
 			if (_Action==null) return;
 			_Action.Measured = pos;
