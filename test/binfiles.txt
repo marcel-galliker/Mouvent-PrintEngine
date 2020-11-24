@@ -11,6 +11,7 @@ bin\gui\BitMiracle.LibTiff.NET.dll
 bin\gui\ControlzEx.dll
 bin\gui\DirectShowLib-2005.dll
 bin\gui\Dragablz.dll
+bin\gui\F.dll
 bin\gui\id_rsa.ppk
 bin\gui\InfragisticsWPF4.Controls.Editors.XamComboEditor.v17.2.dll
 bin\gui\InfragisticsWPF4.Controls.Grids.XamGrid.v17.2.dll
@@ -50,14 +51,14 @@ bin\gui\MaterialDesignThemes.Wpf.dll
 bin\gui\Microsoft.Xaml.Behaviors.dll
 bin\gui\opencv_world420.dll
 bin\gui\QRCoder.dll
-bin\gui\RegisterFilter.bat
 bin\gui\rx_AlignFilter.dll
+bin\gui\rx_AlignFilter-UnRegister.bat
+bin\gui\rx_AlignFilter_Register.bat
 bin\gui\rx_CamLib.dll
 bin\gui\rx_common_lib_cs.dll
 bin\gui\RX_DigiPrint.exe
 bin\gui\rx_rip_lib_x64.dll
 bin\gui\ScanCheck.xsd
-bin\gui\ScanCheckImport.dll
 bin\gui\System.Drawing.Common.dll
 bin\gui\System.Windows.Interactivity.dll
 bin\gui\TBarCode11_x64.dll
@@ -72,7 +73,6 @@ bin\gui\System.Text.Encodings.Web.dll
 bin\gui\System.Text.Json.dll
 bin\gui\System.Threading.Tasks.Extensions.dll
 bin\gui\System.ValueTuple.dll
-bin\gui\UnRegisterFilter.bat
 bin\head
 bin\head\fpga_config_regs_unrolled.csv
 bin\head\rx_headtemp_rbf
