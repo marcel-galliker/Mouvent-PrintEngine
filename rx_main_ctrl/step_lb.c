@@ -193,6 +193,7 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
             info.z_in_ref &= _Status[i].info.z_in_ref;
             info.z_in_print &= _Status[i].info.z_in_print;
             info.z_in_cap &= _Status[i].info.z_in_cap;
+            info.z_in_screw |= _Status[i].info.z_in_screw;
             info.x_in_cap &= _Status[i].info.x_in_cap;
             info.x_in_ref &= _Status[i].info.x_in_ref;
             robot_used |= _Status[i].robot_used;
@@ -756,18 +757,24 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
         Error(ERR_CONT, 0, "Invalid current screwposition value");
         return;
     }
+    if (headAdjustment->steps == 0)
+    {
+        Error(LOG, 0, "Screw of Printbar %d, Head %d and Axis %d moves only %d Steps, which will not be made", 
+              headAdjustment->printbarNo, headAdjustment->headNo, headAdjustment->axis, headAdjustment->steps);
+        return;
+    }
     if (headAdjustment->axis == AXE_ANGLE && current_screwpos - headAdjustment->steps > MAX_STEPS_ANGLE)
     {
         Error(ERR_CONT, 0, "Screw moves out of range; Printbar: %d, Head: %d, Axis: %d, Turn to reach %d.%d", 
 				headAdjustment->printbarNo, headAdjustment->headNo, headAdjustment->axis, 
-				(current_screwpos + headAdjustment->steps)/6, abs((current_screwpos + headAdjustment->steps)%6));
+				(current_screwpos + headAdjustment->steps)/6, abs((current_screwpos - headAdjustment->steps)%6));
         return;
     }
     else if (headAdjustment->axis == AXE_ANGLE && current_screwpos - headAdjustment->steps < 0)
     {
         Error(ERR_CONT, 0, "Screw moves out of range; Printbar: %d, Head: %d, Axis: %d, Turn to reach -%d.%d", 
 				headAdjustment->printbarNo, headAdjustment->headNo, headAdjustment->axis, 
-				abs((int)(current_screwpos + headAdjustment->steps))/6, abs((int)(current_screwpos + headAdjustment->steps))%6);
+				abs((int)(current_screwpos + headAdjustment->steps))/6, abs((int)(current_screwpos - headAdjustment->steps))%6);
         return;
     }
     

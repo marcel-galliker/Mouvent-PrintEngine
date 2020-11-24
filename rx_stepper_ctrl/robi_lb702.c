@@ -525,6 +525,7 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             else
             {
                 _CmdRunning = msgId;
+                RX_StepperStatus.screwerinfo.moving = TRUE;
                 micron = *((INT32 *)pdata);
                 steps = _micron_2_steps(micron);
                 robi_move_x_relative_steps(steps);
@@ -554,6 +555,7 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             else
             {
                 _CmdRunning = msgId;
+                RX_StepperStatus.screwerinfo.moving = TRUE;
                 micron = *((INT32 *)pdata);
                 steps = _micron_2_steps(micron);
                 robi_move_Y_relative_steps(steps);
@@ -587,6 +589,7 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                 break;
             }
             _CmdRunning = msgId;
+            RX_StepperStatus.screwerinfo.moving = TRUE;
             _Search_Screw_Time = rx_get_ticks() + TIME_BEFORE_TURN_SCREWER;
             robi_move_up();
         }
@@ -597,6 +600,7 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         {
             if (RX_StepperStatus.screwerinfo.z_in_down) {Error(ERR_CONT, 0, "Screwer is already down"); break;}
             _CmdRunning = msgId;
+            RX_StepperStatus.screwerinfo.moving = TRUE;
             _Loose_Screw_Time = rx_get_ticks() + TIME_BEFORE_TURN_SCREWER;
             robi_move_down();
         }
@@ -610,6 +614,7 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
     case CMD_ROBI_SCREW_LEFT:
         if (!_CmdRunning)
         {
+            RX_StepperStatus.screwerinfo.moving = TRUE;
             _CmdRunning = msgId;
             ticks = *((INT32 *)pdata);
             robi_turn_screw_left(ticks);
@@ -620,6 +625,7 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
     case CMD_ROBI_SCREW_RIGHT:
         if (!_CmdRunning)
         {
+            RX_StepperStatus.screwerinfo.moving = TRUE;
             _CmdRunning = msgId;
             ticks = *((INT32 *)pdata);
             robi_turn_screw_right(ticks);
@@ -653,6 +659,7 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             else
             {
                 if ( _CmdRunning != CMD_ROBI_WIPE_LEFT && _CmdRunning != CMD_ROBI_WIPE_RIGHT) _CmdRunning = msgId;
+                RX_StepperStatus.screwerinfo.moving = TRUE;
                 micron = pos - RX_StepperStatus.screw_posX;
                 steps = _micron_2_steps(micron);
                 robi_move_x_relative_steps(steps);
@@ -685,6 +692,7 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                     break;
                 }
                 _CmdRunning = msgId;
+                RX_StepperStatus.screwerinfo.moving = TRUE;
                 micron = pos - RX_StepperStatus.screw_posY;
                 steps = _micron_2_steps(micron);
                 robi_move_Y_relative_steps(steps);
@@ -712,6 +720,7 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             else
             {
                 _CmdRunning = msgId;
+                RX_StepperStatus.screwerinfo.moving = TRUE;
                 pos = 0;
                 micron = pos - RX_StepperStatus.screw_posY;
                 steps = _micron_2_steps(micron);
@@ -750,6 +759,7 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             else
             {
                 _CmdRunning = msgId;
+                RX_StepperStatus.screwerinfo.moving = TRUE;
                 if (pos) pos = WIPE_POS_LEFT;
                 robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_X, &pos);
             }
@@ -787,6 +797,7 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             else
             {
                 _CmdRunning = msgId;
+                RX_StepperStatus.screwerinfo.moving = TRUE;
                 if (pos) pos = WIPE_POS_RIGHT;
                 robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_X, &pos);
             }        
