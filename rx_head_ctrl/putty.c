@@ -419,21 +419,7 @@ void putty_display_nios_status(int nios, int status)
 		for (i = 0; i < MAX_HEADS_BOARD; i++)
 		{
 			RX_HBStatus->head[i].tempHead = RX_NiosStat.head_temp[i];
-
-			if (*RX_NiosStat.head_eeprom[i])
-			{
-				eeprom_init_data(i, RX_NiosStat.head_eeprom[i], &RX_HBStatus->head[i].eeprom);
-				/*
-				//--- test user eeprom -----------------------------------------------
-				{
-					static int test=0;
-					//            1234567890123456789012345678901 345678901234567890
-					sprintf(str, "TEST 0 1 2 3 4 5 6 7 8 9 ABCDE-%d%d%d%d-FGHIJKLMNOPQRSTUVWXYZ", test, test, test, test);
-					nios_set_user_eeprom(i, str);
-					test=(test+1)%10;
-				}
-				*/
-			}
+			eeprom_init_data(i, RX_NiosStat.head_eeprom[i], &RX_HBStatus->head[i].eeprom);
 		}
 
 		term_printf("\n--- NIOS Status ----------------- FPGA-QSYS: id=%d time=%d\n", fpga_qsys_id(), fpga_qsys_timestamp());

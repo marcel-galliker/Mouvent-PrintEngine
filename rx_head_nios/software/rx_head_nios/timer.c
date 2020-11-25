@@ -150,8 +150,8 @@ static void _do_250ms_timer(void)
 		{
 			if (pRX_Config->cmd.cmd & (WRITE_USER_EEPROM<<head))
 			{
-				head_eeprom_change_user_data(head, pRX_Status->user_eeprom[head], pRX_Config->user_eeprom[head], sizeof(pRX_Config->user_eeprom[head]), 0);
 				pRX_Config->cmd.cmd &= ~(WRITE_USER_EEPROM<<head);
+				head_eeprom_change_user_data(head, pRX_Status->user_eeprom[head], pRX_Config->user_eeprom[head], sizeof(pRX_Config->user_eeprom[head]), 0);
 			}
 		}
 	}

@@ -21,19 +21,22 @@ static int _seq_write_eeprom(alt_u8 * eeprom_data, alt_u32 number_of_byte_to_wri
 
 //--- head_eeprom_read --------------------------------------
 // Fuji data, read byte by byte with one single I2C read command => fast
-int head_eeprom_read(void)
+int head_eeprom_read(alt_u32 head, alt_u8 * eeprom_data, alt_u32 number_of_byte_to_read)
 {
-	alt_u32 	head=0;
 	// Read Data from Head eeprom
 	//0x50, 0x52, 0x54, 0x56 for head 0-4
 
-	for(head=0;head<MAX_HEADS_BOARD;head++)
+	//_seq_read_eeprom(alt_u8 * eeprom_data, alt_u32 number_of_byte_to_read, char chip_adr, char eeprom_adr0, char eeprom_adr1)
+	if(_seq_read_eeprom(eeprom_data, number_of_byte_to_read, 0x50+(head*2), 0x00)!=0)
 	{
-		//_seq_read_eeprom(alt_u8 * eeprom_data, alt_u32 number_of_byte_to_read, char chip_adr, char eeprom_adr0, char eeprom_adr1)
-		if(_seq_read_eeprom(pRX_Status->head_eeprom[head], EEPROM_DATA_SIZE, 0x50+(head*2), 0x00)!=0)
-			return(-1);
+		memset(eeprom_data, 0x00, number_of_byte_to_read);
+		return(-1);
 	}
-	return (0);
+	// check we read data
+	int i;
+	for (i = 0; i < number_of_byte_to_read; i++)
+		if (eeprom_data[i]) return (0); 
+	return(-1);
 }
 
 //--- _seq_read_eeprom --------------------------------------
@@ -85,12 +88,22 @@ int head_eeprom_read_user_data(alt_u32 head, alt_u8 * eeprom_data, alt_u32 numbe
 		return(-1);		// number_of_byte_to_read extend EEPROM Size
 	}
 
-	if(_seq_read_eeprom(eeprom_data, number_of_byte_to_read, 0x50+(head*2), EEPROM_USER_DATA_START+addr)==0)
-	{
-		return (0);
-	}
+	int i;
+	// set up data for check
+	for (i = 0; i < number_of_byte_to_read; i++)
+		eeprom_data[i] = i; 
 
-	return(-1);
+	if(_seq_read_eeprom(eeprom_data, number_of_byte_to_read, 0x50+(head*2), EEPROM_USER_DATA_START+addr)!=0)
+	{
+		memset(eeprom_data, 0x00, number_of_byte_to_read);
+		return (-1);
+	}
+	// check we read data
+	for (i = 0; i < number_of_byte_to_read; i++)
+		if (eeprom_data[i]!=i) return (0); 
+
+	memset(eeprom_data, 0x00, number_of_byte_to_read);
+	return (-1);
 }
 
 //--- head_eeprom_write_user_data --------------------------------------

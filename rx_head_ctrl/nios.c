@@ -62,7 +62,6 @@ int						NIOS_FixedDropSize=0;
 int						NIOS_Droplets=0;
 static int				_NiosReady=FALSE;
 static int				_MaxSpeed;
-static int				_EEpromTimeout=0;
 static int				_NiosEeprom = FALSE;
 
 //--- prototypes -----------------------------------
@@ -129,7 +128,7 @@ int nios_init(void)
 	//--- wait until nios ready ----------------------
 	for (tio=0; !_NiosMem->stat.info.nios_ready && tio<10; tio++) 
 	{
-		rx_sleep(100);
+		rx_sleep(200);
 	}
 	if (!_NiosMem->stat.info.nios_ready)
 	{
@@ -168,7 +167,8 @@ int nios_end(void)
 			munmap(_NiosMem, NIOS_MEM_SIZE); 
 		#endif
 		_NiosMem = NULL;
-		_NiosLoaded = FALSE;			
+		_NiosLoaded = FALSE;
+		_NiosEeprom = FALSE;
 	}
 	return REPLY_OK;
 }
@@ -567,7 +567,7 @@ int  nios_is_firepulse_on(void)
 //--- nios_set_user_eeprom ------------------------------------
 static void _nios_set_user_eeprom(int no)
 {
-    if (_NiosStat == NULL) return;
+    if (_NiosStat == NULL || _NiosStat->error.head_eeprom_read) return;
 
     if (sizeof(RX_HBStatus[0].head[no].eeprom_mvt)!=128) Error(ERR_ABORT, 0, "SIZE MISMATCH");
 	if (sizeof(_NiosStat->user_eeprom[no])!=128) Error(ERR_ABORT, 0, "SIZE MISMATCH");
@@ -605,7 +605,7 @@ int  nios_main(int ticks, int menu)
 			{
 				_nios_set_user_eeprom(head);
 			}
-            _NiosEeprom = TRUE;
+			if (_NiosStat && !_NiosStat->error.head_eeprom_read) _NiosEeprom = TRUE;
 		}
 	}
 	return REPLY_OK;

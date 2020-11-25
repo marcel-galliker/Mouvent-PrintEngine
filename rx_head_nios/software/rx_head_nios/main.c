@@ -46,6 +46,7 @@ typedef struct {
 } _SConditioner;
 
 static _SConditioner _Cond[MAX_HEADS_BOARD];
+static int _EepromHead[MAX_HEADS_BOARD];
 
 //--- main_handle_cond_msg ---------------------------
 static void _handle_cond_msg(int condNo) {
@@ -59,33 +60,6 @@ static void _handle_cond_msg(int condNo) {
 		_Cond[condNo].alive = pRX_Status->cond[condNo].alive;
 	}
 
-	/*
-	 if (condNo==3 && pRX_Status->cond[condNo].logCnt)
-	 {
-	 int i;
-	 for (i=0; i<pRX_Status->cond[condNo].logCnt; i++)
-	 {
-	 trprintf("%03d: %03d %03d\n", pRX_Status->cond[condNo].log[i].no, pRX_Status->cond[condNo].log[i].pressure, pRX_Status->cond[condNo].log[i].pump);
-	 }
-
-	 }
-	 */
-
-	/*
-	 trprintf("Cond[%d]: Version: %d.%d.%d.%d, ",
-	 condNo,
-	 (int)arm_ptr->stat.cond[condNo].version.major,
-	 (int)arm_ptr->stat.cond[condNo].version.minor,
-	 (int)arm_ptr->stat.cond[condNo].version.revision,
-	 (int)arm_ptr->stat.cond[condNo].version.build);
-	 trprintf("alive=%d, temp=%d, presin=%d, presout=%d, pump=%d, valve=%d\n",
-	 (int)pRX_Status->cond[condNo].alive,
-	 (int)pRX_Status->cond[condNo].temp,
-	 (int)pRX_Status->cond[condNo].pressure_in,
-	 (int)pRX_Status->cond[condNo].pressure_out,
-	 (int)pRX_Status->cond[condNo].pump,
-	 (int)pRX_Status->cond[condNo].info.valve);
-	 */
 }
 
 //--- main_rebooting_cond ------------------------------
@@ -100,7 +74,18 @@ void main_tick_1000ms(void) {
 	int condNo;
 
 	if (!bootloader_running()) {
-		for (condNo = 0; condNo < MAX_HEADS_BOARD; condNo++) {
+		int error_eeprom_read = FALSE;
+		for (condNo = 0; condNo < MAX_HEADS_BOARD; condNo++)
+		{
+			if (!_EepromHead[condNo])
+			{
+ 				if (head_eeprom_read(condNo, pRX_Status->head_eeprom[condNo], sizeof(pRX_Status->head_eeprom[condNo])) != 0 ||
+					head_eeprom_read_user_data(condNo, pRX_Status->user_eeprom[condNo], sizeof(pRX_Status->user_eeprom[condNo]), 0x00) != 0)
+					error_eeprom_read = TRUE;
+				else
+					_EepromHead[condNo] = TRUE;
+			}
+
 			if (pRX_Status->cond[condNo].info.connected) {
 				if (--_Cond[condNo].timer < 0) {
 					pRX_Status->cond[condNo].info.connected = FALSE;
@@ -113,6 +98,8 @@ void main_tick_1000ms(void) {
 				_Cond[condNo].arm_alive = pRX_Config->cond[condNo].alive;
 			}
 		}
+		pRX_Status->error.head_eeprom_read = error_eeprom_read;
+
 	}
 }
 
@@ -224,24 +211,18 @@ int main() {
 
 	trprintf("MAIN STARTED\n");
 
-	if (head_eeprom_read())
-	{
-		pRX_Status->error.head_eeprom_read = TRUE;
-		//init_I2C(I2C_MASTER_0_BASE);	// reinitialize I2C, as there is no head Connected
-	};
-
 	{
 		int head;
 		for (head = 0; head < MAX_HEADS_BOARD; head++)
 		{
-			head_eeprom_read_user_data(head, pRX_Status->user_eeprom[head], sizeof(pRX_Status->user_eeprom[head]), 0x00);
-			/*
-			char test[128];
-			memset(test, 0, sizeof(test));
-			sprintf(test, "Head[%d]", head);
-			head_eeprom_change_user_data(head, pRX_Status->user_eeprom[head], (alt_u8*)test, sizeof(pRX_Status->user_eeprom[head]), 0x00);
-			head_eeprom_read_user_data(head, pRX_Status->user_eeprom[head], sizeof(pRX_Status->user_eeprom[head]), 0x00);
-			*/
+			if (head_eeprom_read(head, pRX_Status->head_eeprom[head], sizeof(pRX_Status->head_eeprom[head])) != 0 ||
+				head_eeprom_read_user_data(head, pRX_Status->user_eeprom[head], sizeof(pRX_Status->user_eeprom[head]), 0x00) != 0)
+            {
+                pRX_Status->error.head_eeprom_read = TRUE;
+                _EepromHead[head] = FALSE;
+            }
+            else
+                _EepromHead[head] = TRUE;
 		}
 	}
 //	_eeprom_test();
@@ -256,7 +237,8 @@ int main() {
 
 		timer_main();
 		UCHAR data;
-		for (condNo = 0; condNo < MAX_HEADS_BOARD; condNo++){
+		for (condNo = 0; condNo < MAX_HEADS_BOARD; condNo++)
+		{
 			if (uart_read(condNo, &data)) {
 				if (comm_received(condNo, data)) {
 					int length;
