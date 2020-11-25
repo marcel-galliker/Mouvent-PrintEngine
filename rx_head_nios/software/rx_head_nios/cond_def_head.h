@@ -67,7 +67,7 @@ typedef union SCondInfo
 			UINT32	valve_ink   : 1;	//  01:
 			UINT32	valve_flush : 1;	// thermistor_test_done : 1;		// 	02:
 			UINT32	meniscus_warn : 1;	// 	03:
-            UINT32	info_04		: 1;	 // 04:
+            UINT32	eeprom_read	: 1;	 // 04:
 			UINT32	temp_ready : 1;     //  05:
 			UINT32	flowFactor_ok : 1;  // 	06:
 			UINT32	info_07 : 1;		// 	07:
@@ -195,8 +195,8 @@ typedef struct SConditionerCfg_mcu
 
 	INT32	headsPerColor;			// FOR CALCULATION OF P PARAMETER during start-up phase (OFF->PRINT)
     INT32 	meniscus_setpoint;		// DESIRED MENISCUS PRESSURE (1/10 mbar)
-	UINT32 	temp; 					// desired temperature (1/1000 °C)
-	UINT32 	tempMax; 				// desired temperature (1/1000 °C)
+	UINT32 	temp; 					// desired temperature (1/1000 ï¿½C)
+	UINT32 	tempMax; 				// desired temperature (1/1000 ï¿½C)
 	UINT32	tempHead;				// measured head temperature
 	UINT32	mode;					// EnFluidCtrlMode
 	UINT32	volume_printed;			// [ml/min]
@@ -250,8 +250,8 @@ typedef struct SConditionerStat_mcu
 	
 	UINT32			pump;				// rpm (calculated based on actual/desired output pressure)
 	UINT32			pump_measured;		// measured ml/min
-	UINT32			tempIn;				// actual Temp (1/1000 °C)
-    UINT32			tempHeater;		    // Temperature measured directly on heater cartridge (>= Revision #h) (1/1000 °C)
+	UINT32			tempIn;				// actual Temp (1/1000 ï¿½C)
+    UINT32			tempHeater;		    // Temperature measured directly on heater cartridge (>= Revision #h) (1/1000 ï¿½C)
 	UINT32			heater_percent;		// heater on time (between 0% and 80%)
 	INT32			unused_tempReady;	// temp ink = setpoint +/- 1?C
 	UINT32			mode;				// EnFluidCtrlMode

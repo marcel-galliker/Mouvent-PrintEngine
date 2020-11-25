@@ -140,11 +140,11 @@ int	ctrl_printing(void)
 static int _save_ctrl_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sender, void *par)
 {
 	SMsgHdr *phdr = (SMsgHdr*)pmsg;
-	static int time[MSG_BUF_SIZE];	
+	static int time[MSG_BUF_SIZE];
     void *pdata = &phdr[1];
     SValue *data;
 
-	
+
 	// these functions mustn't use any FPGA Register !!!!
 	switch (phdr->msgId)
 	{
@@ -420,7 +420,10 @@ static int _do_inkdef(RX_SOCKET socket, SInkDefMsg  *pmsg)
 //--- _do_set_FluidCtrlMode -------------------------
 static int _do_set_FluidCtrlMode(RX_SOCKET socket, SFluidCtrlCmd *pmsg)
 {
-	cond_ctrlMode(pmsg->no, pmsg->ctrlMode);
+    if (pmsg->ctrlMode == ctrl_toggle_meniscus)
+        cond_toggle_meniscus_check();
+    else
+	    cond_ctrlMode(pmsg->no, pmsg->ctrlMode);
 	return REPLY_OK;
 }
 

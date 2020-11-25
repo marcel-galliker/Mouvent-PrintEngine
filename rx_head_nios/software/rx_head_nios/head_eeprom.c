@@ -29,9 +29,10 @@ int head_eeprom_read(alt_u32 head, alt_u8 * eeprom_data, alt_u32 number_of_byte_
 	//_seq_read_eeprom(alt_u8 * eeprom_data, alt_u32 number_of_byte_to_read, char chip_adr, char eeprom_adr0, char eeprom_adr1)
 	if(_seq_read_eeprom(eeprom_data, EEPROM_DATA_SIZE, 0x50+(head*2), 0x00)!=0)
 	{
-		memset(pRX_Status->head_eeprom[head], 0x00, EEPROM_DATA_SIZE);
-		return(-1);
+		memset(eeprom_data, 0x00, EEPROM_DATA_SIZE);
+		return FALSE;
 	}
+	return TRUE;
 }
 
 //--- _seq_read_eeprom --------------------------------------
@@ -80,15 +81,16 @@ int head_eeprom_read_user_data(alt_u32 head, alt_u8 * eeprom_data, alt_u32 numbe
 
 	if((EEPROM_USER_DATA_START+addr+number_of_byte_to_read)>EEPROM_MAX_ADR)
 	{
-		return(-1);		// number_of_byte_to_read extend EEPROM Size
+		memset(eeprom_data, 0x00, number_of_byte_to_read);
+		return FALSE;		// number_of_byte_to_read extend EEPROM Size
 	}
 
 	if(_seq_read_eeprom(eeprom_data, number_of_byte_to_read, 0x50+(head*2), EEPROM_USER_DATA_START+addr)==0)
 	{
-		return (0);
+		return TRUE;
 	}
-
-	return(-1);
+	memset(eeprom_data, 0x00, number_of_byte_to_read);
+	return FALSE;
 }
 
 //--- head_eeprom_write_user_data --------------------------------------

@@ -29,6 +29,7 @@
 #include "fpga.h"
 #include "nios.h"
 #include "tse.h"
+#include "EEprom.h"
 #include "crc_calc.h"
 #include "rx_threads.h"
 #include "rx_head_ctrl.h"
@@ -62,7 +63,6 @@ int						NIOS_FixedDropSize=0;
 int						NIOS_Droplets=0;
 static int				_NiosReady=FALSE;
 static int				_MaxSpeed;
-static int				_EEpromLoaded=FALSE;
 
 //--- prototypes -----------------------------------
 
@@ -168,7 +168,6 @@ int nios_end(void)
 		#endif
 		_NiosMem = NULL;
 		_NiosLoaded = FALSE;			
-		_EEpromLoaded=FALSE;
 	}
 	return REPLY_OK;
 }
@@ -567,20 +566,23 @@ int  nios_is_firepulse_on(void)
 //--- nios_set_user_eeprom ------------------------------------
 static void _nios_set_user_eeprom(int no)
 {
-	if (_NiosStat==NULL || !_EEpromLoaded) return;
+	if (_NiosStat==NULL) return;
 
-	if (sizeof(RX_HBStatus[0].head[no].eeprom_mvt)!=128) Error(ERR_ABORT, 0, "SIZE MISMATCH");
-	if (sizeof(_NiosStat->user_eeprom[no])!=128) Error(ERR_ABORT, 0, "SIZE MISMATCH");
+	if (sizeof(RX_HBStatus[0].head[no].eeprom_mvt)!=EEPROM_DATA_SIZE) Error(ERR_ABORT, 0, "SIZE MISMATCH");
+	if (sizeof(_NiosStat->user_eeprom[no])!=EEPROM_DATA_SIZE) Error(ERR_ABORT, 0, "SIZE MISMATCH");
 
 	//--- initialize status memory -----------------------
-	if (memempty(&RX_HBStatus[0].head[no].eeprom_mvt, sizeof(SHeadEEpromMvt)) && !memempty(&_NiosStat->user_eeprom[no], sizeof(_NiosStat->user_eeprom[no])))
-		memcpy(&RX_HBStatus[0].head[no].eeprom_mvt, _NiosStat->user_eeprom[no], sizeof(SHeadEEpromMvt));
-
-	//--- save if changed and not NULL ------------------
-	if (!memempty(&RX_HBStatus[0].head[no].eeprom_mvt, sizeof(SHeadEEpromMvt)) && memcmp(_NiosStat->user_eeprom[no], &RX_HBStatus[0].head[no].eeprom_mvt, sizeof(SHeadEEpromMvt)))
+	if (_NiosStat->cond[no].info.eeprom_read)
 	{
-		memcpy(_NiosMem->cfg.user_eeprom[no], &RX_HBStatus[0].head[no].eeprom_mvt, sizeof(SHeadEEpromMvt));
-		_NiosMem->cfg.cmd.cmd |= (WRITE_USER_EEPROM<<no);
+	    if (memempty(&RX_HBStatus[0].head[no].eeprom_mvt, sizeof(SHeadEEpromMvt)) && !memempty(&_NiosStat->user_eeprom[no], sizeof(_NiosStat->user_eeprom[no])))
+		    memcpy(&RX_HBStatus[0].head[no].eeprom_mvt, _NiosStat->user_eeprom[no], sizeof(SHeadEEpromMvt));
+
+	    //--- save if changed and not NULL ------------------
+	    if (!memempty(&RX_HBStatus[0].head[no].eeprom_mvt, sizeof(SHeadEEpromMvt)) && memcmp(_NiosStat->user_eeprom[no], &RX_HBStatus[0].head[no].eeprom_mvt, sizeof(SHeadEEpromMvt)))
+	    {
+		    memcpy(_NiosMem->cfg.user_eeprom[no], &RX_HBStatus[0].head[no].eeprom_mvt, sizeof(SHeadEEpromMvt));
+		    _NiosMem->cfg.cmd.cmd |= (WRITE_USER_EEPROM<<no);
+	    }
 	}
 }
 
@@ -593,7 +595,7 @@ int  nios_main(int ticks, int menu)
 	
 	if (_NiosLoaded)
 	{
-		if (_NiosMem && _EEpromLoaded) cond_main(ticks, menu);
+		if (_NiosMem && _NiosStat) cond_main(ticks, menu);
 
 		tse_check_errors(ticks, menu);
 		if (menu)
@@ -605,7 +607,6 @@ int  nios_main(int ticks, int menu)
 			{
 				_nios_set_user_eeprom(head);
 			}
-			_EEpromLoaded = TRUE;
 		}
 	}
 	return REPLY_OK;
@@ -614,7 +615,13 @@ int  nios_main(int ticks, int menu)
 //--- _nios_copy_status -----------------------------------
 static void _nios_copy_status(void)
 {
-	memcpy(&RX_NiosStat, _NiosStat, sizeof(RX_NiosStat));		
+	memcpy(&RX_NiosStat, _NiosStat, sizeof(RX_NiosStat));
+	RX_HBStatus->flow = RX_NiosStat.cooler_pressure;
+	for (int cond=0; cond < MAX_HEADS_BOARD; cond++)
+	{
+		RX_HBStatus->head[cond].tempHead = RX_NiosStat.head_temp[cond];
+		if (_NiosStat->cond [cond].info.eeprom_read) eeprom_init_data(cond, RX_NiosStat.head_eeprom[cond], &RX_HBStatus->head[cond].eeprom);
+	}
 }
 
 //--- nios_check_errors ---------------------------
