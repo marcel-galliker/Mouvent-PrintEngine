@@ -375,7 +375,6 @@ static int _do_head_stat(RX_SOCKET socket, SFluidStateLight *pmsg)
 	_StatusReqTime = rx_get_ticks();
 
 	memcpy(RX_FluidStat, pmsg, sizeof(RX_FluidStat));
-    int i;
     RX_HBStatus[0].cooler_temp = RX_NiosStat.cooler_temp;
     /*
 	int head;
