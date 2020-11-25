@@ -90,9 +90,12 @@ static void _handle_cond_msg(int condNo) {
 
 //--- main_rebooting_cond ------------------------------
 void main_rebooting_cond(void) {
-	int i;
-	for (i = 0; i < MAX_HEADS_BOARD; i++)
-		_Cond[i].alive = 0xFFFFFFFF;
+	int cond;
+	for (cond = 0; cond < MAX_HEADS_BOARD; cond++)
+	{
+		_Cond[cond].alive = 0xFFFFFFFF;
+		pRX_Status->cond[cond].info.eeprom_read = FALSE;
+	}
 }
 
 //--- main_tick_1000ms ------------------------------
@@ -104,8 +107,12 @@ void main_tick_1000ms(void)
 	{
 		for (condNo = 0; condNo < MAX_HEADS_BOARD; condNo++)
 		{
-			if (!*pRX_Status->head_eeprom[condNo]) head_eeprom_read(condNo, pRX_Status->head_eeprom[condNo], sizeof(pRX_Status->user_eeprom[condNo]));
-			if (!*pRX_Status->user_eeprom[condNo]) head_eeprom_read_user_data(condNo, pRX_Status->user_eeprom[condNo], sizeof(pRX_Status->user_eeprom[condNo]), 0x00);
+			if (!pRX_Status->cond[condNo].info.eeprom_read)
+			{
+				pRX_Status->cond[condNo].info.eeprom_read =
+					head_eeprom_read(condNo, pRX_Status->head_eeprom[condNo], sizeof(pRX_Status->user_eeprom[condNo]))
+				&&	head_eeprom_read_user_data(condNo, pRX_Status->user_eeprom[condNo], sizeof(pRX_Status->user_eeprom[condNo]), 0x00);
+			}
 
 			if (pRX_Status->cond[condNo].info.connected)
 			{
