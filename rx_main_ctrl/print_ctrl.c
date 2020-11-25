@@ -318,6 +318,9 @@ static void _send_head_info(void)
 			}
 			len += sprintf(&str[len], "\n");
 			len += sprintf(&str[len], "Dots=%s / Men=%d.%d / Pump=%d.%d\n", RX_TestImage.dots, pstat->meniscus/10, abs(pstat->meniscus)%10, pstat->pumpFeedback/10, pstat->pumpFeedback%10);
+			len += sprintf(&str[len], "Angle=%s ", value_str_screw(pstat->eeprom_mvt.rob_angle));
+			len += sprintf(&str[len], "Stitch=%s", value_str_screw(pstat->eeprom_mvt.rob_dist));
+			len += sprintf(&str[len], "\n");
 			if (RX_TestImage.testImage==PQ_TEST_DENSITY) 
 			{
 				len += sprintf(&str[len], "Density Correction: volt=%d%%\n", pstat->eeprom_mvt.voltage);
@@ -325,7 +328,7 @@ static void _send_head_info(void)
 				{
 					len += sprintf(&str[len], "%d  ", pstat->eeprom_mvt.densityValue[i]);			
 				}
-			len += sprintf(&str[len], "\n");
+				len += sprintf(&str[len], "\n");
 			}
 //			printf("TestData[%d]: >>%s<<\n", n, str);
 			spool_send_test_data(headNo, str);
