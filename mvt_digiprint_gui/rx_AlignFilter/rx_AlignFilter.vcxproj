@@ -78,27 +78,27 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>..\OpenCV_4.20\opencv\build\include;$(IncludePath)</IncludePath>
-    <LibraryPath>..\OpenCV_4.20\opencv\build\x64\vc15\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>..\External\OpenCV_4.20\opencv\build\include;$(IncludePath)</IncludePath>
+    <LibraryPath>..\External\OpenCV_4.20\opencv\build\x64\vc15\lib;$(LibraryPath)</LibraryPath>
     <OutDir>$(ProjectDir)..\..\_out\$(Configuration)_$(Platform)\</OutDir>
     <IntDir>$(ProjectDir)..\..\_temp\$(MSBuildProjectName)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>..\OpenCV_4.20\opencv\build\include;$(IncludePath)</IncludePath>
-    <LibraryPath>..\OpenCV_4.20\opencv\build\x64\vc15\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>..\External\OpenCV_4.20\opencv\build\include;$(IncludePath)</IncludePath>
+    <LibraryPath>..\External\OpenCV_4.20\opencv\build\x64\vc15\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>..\OpenCV_4.20\opencv\build\include;$(IncludePath)</IncludePath>
-    <LibraryPath>..\OpenCV_4.20\opencv\build\x64\vc15\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>..\External\OpenCV_4.20\opencv\build\include;$(IncludePath)</IncludePath>
+    <LibraryPath>..\External\OpenCV_4.20\opencv\build\x64\vc15\lib;$(LibraryPath)</LibraryPath>
     <OutDir>$(ProjectDir)..\..\_out\$(Configuration)_$(Platform)\</OutDir>
     <IntDir>$(ProjectDir)..\..\_temp\$(MSBuildProjectName)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>..\OpenCV_4.20\opencv\build\include;$(IncludePath)</IncludePath>
-    <LibraryPath>..\OpenCV_4.20\opencv\build\x64\vc15\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>..\External\OpenCV_4.20\opencv\build\include;$(IncludePath)</IncludePath>
+    <LibraryPath>..\External\OpenCV_4.20\opencv\build\x64\vc15\lib;$(LibraryPath)</LibraryPath>
     <OutDir>$(ProjectDir)..\_out\$(Configuration)_$(Platform)\</OutDir>
     <IntDir>$(ProjectDir)..\_temp\$(MSBuildProjectName)\$(Configuration)\</IntDir>
   </PropertyGroup>
@@ -110,7 +110,7 @@
       <SDLCheck>
       </SDLCheck>
       <PreprocessorDefinitions>_DEBUG;RXALIGNFILTER_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>"..\External\OpenCL SDK\7.0\include";..\External\baseclasses;..\External\OpenCv_4.20\opencv\build\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\External\OpenCL SDK\7.0\include;..\External\baseclasses;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <CallingConvention>StdCall</CallingConvention>
       <SupportJustMyCode>false</SupportJustMyCode>
@@ -124,7 +124,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>..\External\OpenCL SDK\7.0\lib\x64;..\External\OpenCv_4.20\opencv\build\x64\vc14\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\External\OpenCL SDK\7.0\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>OpenCL.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;strmbasd.lib;opencv_world420d.lib;winmm.lib;dbghelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>rx_AlignFilter.def</ModuleDefinitionFile>
       <EmbedManagedResourceFile>%(EmbedManagedResourceFile)</EmbedManagedResourceFile>
@@ -160,7 +160,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>..\External\OpenCL SDK\7.0\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\External\OpenCL SDK\7.0\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>OpenCL.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;strmbasd.lib;opencv_world420d.lib;winmm.lib;dbghelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>rx_AlignFilter.def</ModuleDefinitionFile>
       <EmbedManagedResourceFile>%(EmbedManagedResourceFile)</EmbedManagedResourceFile>
@@ -188,7 +188,7 @@
       </SDLCheck>
       <PreprocessorDefinitions>NDEBUG;RXALIGNFILTER_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>"..\External\OpenCL SDK\7.0\include";..\External\baseclasses;..\External\OpenCv_4.20\opencv\build\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\External\OpenCL SDK\7.0\include;..\External\baseclasses;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>None</DebugInformationFormat>
       <SupportJustMyCode>true</SupportJustMyCode>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -199,7 +199,7 @@
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <CompileAsManaged>false</CompileAsManaged>
       <ExceptionHandling>Sync</ExceptionHandling>
-      <AdditionalOptions>/Qpar-report:0 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Qpar-report:2 %(AdditionalOptions)</AdditionalOptions>
       <DisableSpecificWarnings>4129;4477;4996;5012</DisableSpecificWarnings>
     </ClCompile>
     <Link>
@@ -209,7 +209,7 @@
       <OptimizeReferences>
       </OptimizeReferences>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>..\External\OpenCL SDK\7.0\lib\x64;..\External\OpenCv_4.20\opencv\build\x64\vc14\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\External\OpenCL SDK\7.0\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>OpenCL.lib;Strmbase.lib;Msvcrt.lib;Winmm.lib;opencv_world420.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>rx_AlignFilter.def</ModuleDefinitionFile>
       <EmbedManagedResourceFile>%(EmbedManagedResourceFile)</EmbedManagedResourceFile>
@@ -237,7 +237,7 @@ xcopy /y /d  "$(ProjectDir)..\External\OpenCv_4.20\opencv\build\x64\vc15\bin\ope
       </SDLCheck>
       <PreprocessorDefinitions>NDEBUG;RXALIGNFILTER_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>..\OpenCL SDK\7.0\include;..\baseclasses;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\External\OpenCL SDK\7.0\include;..\External\baseclasses;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>None</DebugInformationFormat>
       <SupportJustMyCode>true</SupportJustMyCode>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -257,7 +257,7 @@ xcopy /y /d  "$(ProjectDir)..\External\OpenCv_4.20\opencv\build\x64\vc15\bin\ope
       <OptimizeReferences>
       </OptimizeReferences>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>..\OpenCL SDK\7.0\lib\x64;..\packages\opencv3.1.1.0\build\native\lib\x64\v140\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\External\OpenCL SDK\7.0\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>OpenCL.lib;Strmbase.lib;Msvcrt.lib;Winmm.lib;opencv_world420.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>rx_AlignFilter.def</ModuleDefinitionFile>
       <EmbedManagedResourceFile>%(EmbedManagedResourceFile)</EmbedManagedResourceFile>
