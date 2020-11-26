@@ -93,8 +93,13 @@ namespace RX_DigiPrint.Views.UserControls
         private void Stepper_PropertyChanged(object sender,System.ComponentModel.PropertyChangedEventArgs e)
         {
             StepperStatus stat = sender as StepperStatus;
+            bool RobotUsed = RxGlobals.StepperStatus[0].RobotUsed;
+            for (int i = 0; i < RxGlobals.StepperStatus.Length; i++)
+            {
+                if (RxGlobals.StepperStatus[i].RobotUsed) RobotUsed = true;
+            }
 
-            if(e.PropertyName.Equals("CmdRunning")) 
+            if (e.PropertyName.Equals("CmdRunning")) 
             {
                 if(stat.CmdRunning==0)
                 {
@@ -109,8 +114,8 @@ namespace RX_DigiPrint.Views.UserControls
                     for (int i=0; i<RxGlobals.StepperStatus.Length; i++)
                     {
                         if (RxGlobals.StepperStatus[i].CmdRunning==0 && RxGlobals.StepperStatus[i].RefDone) refDone=true;
-                        if (RxGlobals.StepperStatus[i].RobotUsed) visible = Visibility.Visible;
                     }
+                    if (RobotUsed) visible = Visibility.Visible;
                     Button_Up.IsEnabled     = refDone;
                     Button_Print.IsEnabled  = refDone;
                     Button_Wash.Visibility = visible;

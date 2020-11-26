@@ -9,7 +9,7 @@ using System.Text;
 using DirectShowLib;
 using rx_CamLib.Models;
 using RX_Common;
-using static rx_CamLib.RxAlignFilter;
+using rx_CamLib;
 
 namespace rx_CamLib
 {

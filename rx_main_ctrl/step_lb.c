@@ -767,14 +767,14 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
     {
         Error(ERR_CONT, 0, "Screw moves out of range; Printbar: %d, Head: %d, Axis: %d, Turn to reach %d.%d", 
 				headAdjustment->printbarNo, headAdjustment->headNo, headAdjustment->axis, 
-				(current_screwpos + headAdjustment->steps)/6, abs((current_screwpos - headAdjustment->steps)%6));
+				(current_screwpos - headAdjustment->steps)/6, abs((current_screwpos - headAdjustment->steps)%6));
         return;
     }
     else if (headAdjustment->axis == AXE_ANGLE && current_screwpos - headAdjustment->steps < 0)
     {
         Error(ERR_CONT, 0, "Screw moves out of range; Printbar: %d, Head: %d, Axis: %d, Turn to reach -%d.%d", 
 				headAdjustment->printbarNo, headAdjustment->headNo, headAdjustment->axis, 
-				abs((int)(current_screwpos + headAdjustment->steps))/6, abs((int)(current_screwpos - headAdjustment->steps))%6);
+				abs((int)(current_screwpos - headAdjustment->steps))/6, abs((int)(current_screwpos - headAdjustment->steps))%6);
         return;
     }
     

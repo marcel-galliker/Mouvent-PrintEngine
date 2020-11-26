@@ -820,9 +820,9 @@ static void _check_Screwer_Movement()
     {
         if ((RX_StepperStatus.screwerinfo.screwer_blocked_right &&  RX_StepperStatus.screw_posY >= (SCREW_Y_BACK + SCREW_Y_FRONT) / 2) ||
                 (RX_StepperStatus.screwerinfo.screwer_blocked_left && RX_StepperStatus.screw_posY <= (SCREW_Y_BACK + SCREW_Y_FRONT) / 2))
-            ticks = 16;
+            ticks = 17;
         else
-            ticks = 4;
+            ticks = 5;
         robi_set_screw_current(TRUE);
         robi_lb702_handle_ctrl_msg(INVALID_SOCKET, _NewCmd, &ticks);
     }

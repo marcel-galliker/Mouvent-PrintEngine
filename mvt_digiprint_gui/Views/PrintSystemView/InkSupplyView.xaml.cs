@@ -113,10 +113,15 @@ namespace RX_DigiPrint.Views.PrintSystemView
         //--- _printertype_changed -----------------------------------------
         private void _printertype_changed()
         {
-            int i = 0;
+            int i;
+            bool RobotUsed = false;
             CB_RectoVerso.Visibility = RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_DP803 ? Visibility.Visible : Visibility.Collapsed;
             HasSideSelection = RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_DP803;
-            
+            for (i = 0; i < RxGlobals.StepperStatus.Length; i++)
+            {
+                if (RxGlobals.StepperStatus[i].RobotUsed) RobotUsed = true;
+            }
+
             SettingsGrid.RowDefinitions[3].Height = new GridLength(25/RxGlobals.Screen.Scale);
             
             switch (RxGlobals.PrintSystem.PrinterType)
@@ -135,8 +140,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
 
             Button_PurgeVacc.Visibility = (RxGlobals.PrintSystem.IsTx || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_WB) ? Visibility.Visible : Visibility.Collapsed;
             Button_PurgeWipe.Visibility = (RxGlobals.PrintSystem.IsTx || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_WB)? Visibility.Visible : Visibility.Collapsed;
-            Button_PurgeWash.Visibility = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB702_WB && RxGlobals.StepperStatus[0].RobotUsed) ? Visibility.Visible : Visibility.Collapsed;
-            Button_Wipe.Visibility = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB702_WB && RxGlobals.StepperStatus[0].RobotUsed) ? Visibility.Visible : Visibility.Collapsed;
+            Button_PurgeWash.Visibility = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB702_WB && RobotUsed) ? Visibility.Visible : Visibility.Collapsed;
+            Button_Wipe.Visibility = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB702_WB && RobotUsed) ? Visibility.Visible : Visibility.Collapsed;
         }
 
         //--- OnInkSupplyPropertyChanged -------------------------
