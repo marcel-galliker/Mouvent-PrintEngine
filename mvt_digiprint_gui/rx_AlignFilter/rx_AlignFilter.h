@@ -558,6 +558,9 @@ private:
 	BOOL m_DebugOn = false;
 	BOOL m_ConsoleAllocated = false;
 	UINT m_DebugCounter = 0;
+    FILE *pStdIn;
+    FILE *pStdOut;
+    FILE *pStdErr;
 
 	bool m_InverseImage = false;
 

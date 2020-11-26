@@ -159,27 +159,27 @@ C_rx_AlignFilter::C_rx_AlignFilter(TCHAR *pName, LPUNKNOWN pUnk, HRESULT *phr) :
 		{
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\tInitializeCritical MeasureLock failed\n", (float)m_TimeStamp / 1000000.0f);
+			printf("%6.66f\tInitializeCritical MeasureLock failed\n", (float)m_TimeStamp / 1000000.0f);
 			return;
 		}
 	}
-	if(!InitializeCriticalSectionAndSpinCount(&m_OvTextLock, 0x00400000))
+	if (!InitializeCriticalSectionAndSpinCount(&m_OvTextLock, 0x00400000))
 	{
 		if (m_DebugOn)
 		{
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\tInitializeCritical OvTextLock failed\n", (float)m_TimeStamp / 1000000.0f);
+			printf("%6.66f\tInitializeCritical OvTextLock failed\n", (float)m_TimeStamp / 1000000.0f);
 			return;
 		}
 	}
-	if(!InitializeCriticalSectionAndSpinCount(&m_SnapShotLock, 0x00400000))
+	if (!InitializeCriticalSectionAndSpinCount(&m_SnapShotLock, 0x00400000))
 	{
 		if (m_DebugOn)
 		{
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\tInitializeCritical SnapShotLock failed\n", (float)m_TimeStamp / 1000000.0f);
+			printf("%6.66f\tInitializeCritical SnapShotLock failed\n", (float)m_TimeStamp / 1000000.0f);
 			return;
 		}
 	}
@@ -188,12 +188,21 @@ C_rx_AlignFilter::C_rx_AlignFilter(TCHAR *pName, LPUNKNOWN pUnk, HRESULT *phr) :
 // Destructor
 C_rx_AlignFilter::~C_rx_AlignFilter()
 {
-	if (OverlayBitmapReady)
+	if (m_DebugOn)
+	{
+		m_MeasureTime = std::chrono::steady_clock::now();
+		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+		printf("%6.66f\tClosing DLL\n", (float)m_TimeStamp / 1000000.0f);
+
+		SetDebug(FALSE);
+	}
+
+    if (OverlayBitmapReady)
 	{
 		DeleteObject(TextBitmap);
 		DeleteDC(MemDC);
 	}
-	if (Histogram != NULL) free(Histogram);
+
 	//Cleanup OpenCl
 	if (ClBlockHistogramKernel != NULL) clReleaseKernel(ClBlockHistogramKernel);
 	if (ClRowHistogramKernel != NULL) clReleaseKernel(ClRowHistogramKernel);
@@ -202,13 +211,21 @@ C_rx_AlignFilter::~C_rx_AlignFilter()
 	if (ClShowHistogramKernel != NULL) clReleaseKernel(ClShowHistogramKernel);
 	if (ClBinarizeKernel != NULL) clReleaseKernel(ClBinarizeKernel);
 
-	if (m_DebugOn)
-	{
-		m_MeasureTime = std::chrono::steady_clock::now();
-		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-		printf("%6.6f\tClosing DLL\n", (float)m_TimeStamp / 1000000.0f);
-	}
-	SetDebug(FALSE);
+	if (ThresholdArray != NULL)
+    {
+		delete[] ThresholdArray;
+		ThresholdArray = NULL;
+    }
+    if (HistogramArray != NULL)
+    {
+        delete[] HistogramArray;
+        HistogramArray = NULL;
+    }
+    if (ThresholdLine != NULL)
+    {
+        delete[] ThresholdLine;
+        ThresholdLine = NULL;
+    }
 
 	DeleteCriticalSection(&m_MeasureLock);
 	DeleteCriticalSection(&m_OvTextLock);
@@ -243,17 +260,37 @@ STDMETHODIMP C_rx_AlignFilter::Stop()
 	{
 		m_MeasureTime = std::chrono::steady_clock::now();
 		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-		printf("%6.6f\tStop Filter\n", (float)m_TimeStamp / 1000000.0f);
+		printf("%6.66f\tStop Filter\n", (float)m_TimeStamp / 1000000.0f);
 	}
 
 	CAutoLock cObjectLock(m_pLock);
 
 	CBaseFilter::Stop();
-	m_State = FILTER_STATE::State_Stopped;
 
-	delete[] ThresholdArray;
-	delete[] HistogramArray;
-	delete[] ThresholdLine;
+    if (ThresholdArray != NULL)
+    {
+        delete[] ThresholdArray;
+        ThresholdArray = NULL;
+    }
+    if (HistogramArray != NULL)
+    {
+        delete[] HistogramArray;
+        HistogramArray = NULL;
+    }
+    if (ThresholdLine != NULL)
+    {
+        delete[] ThresholdLine;
+        ThresholdLine = NULL;
+    }
+
+    if (m_DebugOn)
+    {
+        m_MeasureTime = std::chrono::steady_clock::now();
+        m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+        printf("%6.66f\tCBaseFilter::IsStopped: %d\n",(float)m_TimeStamp / 1000000.0f, CBaseFilter::IsStopped());
+    }
+
+    m_State = FILTER_STATE::State_Stopped;
 
 	return NOERROR;
 }
@@ -261,13 +298,13 @@ STDMETHODIMP C_rx_AlignFilter::Stop()
 // Pause, Overriden to handle no input connections
 STDMETHODIMP C_rx_AlignFilter::Pause()
 {
+	CAutoLock cObjectLock(m_pLock);
 	if (m_DebugOn)
 	{
 		m_MeasureTime = std::chrono::steady_clock::now();
 		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-		printf("%6.6f\tPause Filter\n", (float)m_TimeStamp / 1000000.0f);
+		printf("%6.66f\tPause Filter\n", (float)m_TimeStamp / 1000000.0f);
 	}
-	CAutoLock cObjectLock(m_pLock);
 
 	HRESULT hr = CBaseFilter::Pause();
 
@@ -289,7 +326,7 @@ STDMETHODIMP C_rx_AlignFilter::Run(REFERENCE_TIME tStart)
 	{
 		m_MeasureTime = std::chrono::steady_clock::now();
 		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-		printf("%6.6f\tRun Filter\n", (float)m_TimeStamp / 1000000.0f);
+		printf("%6.66f\tRun Filter\n", (float)m_TimeStamp / 1000000.0f);
 	}
 
 	//Prepare Dilate/Erode Seed
@@ -310,7 +347,7 @@ STDMETHODIMP C_rx_AlignFilter::Run(REFERENCE_TIME tStart)
 		{
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\tCould not find a parallel processing device\n", (float)m_TimeStamp / 1000000.0f);
+			printf("%6.66f\tCould not find a parallel processing device\n", (float)m_TimeStamp / 1000000.0f);
 		}
 		exit(-1);
 	}
@@ -333,11 +370,27 @@ STDMETHODIMP C_rx_AlignFilter::Run(REFERENCE_TIME tStart)
 
 
 	HRESULT hr = CBaseFilter::Run(tStart);
+    if (m_DebugOn)
+    {
+        DWORD dwTime;
+        FILTER_STATE fState;
+        CBaseFilter::GetState(dwTime, &fState);
+
+        m_MeasureTime = std::chrono::steady_clock::now();
+        m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+        printf("%6.66f\tCBaseFilter::Run: %d\n", (float)m_TimeStamp / 1000000.0f, fState);
+    }
 
 	if (m_Input.IsConnected() == FALSE)
 	{
 		m_Input.EndOfStream();
-	}
+        if (m_DebugOn)
+        {
+            m_MeasureTime = std::chrono::steady_clock::now();
+            m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+            printf("%6.66f\tm_Input.IsConnected() == FALSE\n",(float)m_TimeStamp / 1000000.0f);
+        }
+    }
 
 	//Bitmapinfo
 	VIDEOINFOHEADER* pVih = (VIDEOINFOHEADER*)m_mt1.Format();
@@ -365,7 +418,7 @@ STDMETHODIMP C_rx_AlignFilter::Run(REFERENCE_TIME tStart)
 	{
 		m_MeasureTime = std::chrono::steady_clock::now();
 		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-		printf("%6.6f\tRun Filter Done\n", (float)m_TimeStamp / 1000000.0f);
+		printf("%6.66f\tRun Filter Done\n", (float)m_TimeStamp / 1000000.0f);
 	}
 	return hr;
 }
@@ -429,7 +482,7 @@ HRESULT C_rx_AlignFilter::GetHistogram(IMediaSample* pSampleIn, UINT* Histogram,
 			_itow_s(hr, MsgMsg, 10, 16);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\tGetHistogram: Get Pointer InBuffer Error: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.66f\tGetHistogram: Get Pointer InBuffer Error: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		return E_POINTER;
 	}
@@ -445,7 +498,7 @@ HRESULT C_rx_AlignFilter::GetHistogram(IMediaSample* pSampleIn, UINT* Histogram,
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\tGetHistogram: Could not create OpenCL Input Image Buffer: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.66f\tGetHistogram: Could not create OpenCL Input Image Buffer: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -460,7 +513,7 @@ HRESULT C_rx_AlignFilter::GetHistogram(IMediaSample* pSampleIn, UINT* Histogram,
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\tGetHistogram: Could not create  OpenCL Histogram Buffer: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.66f\tGetHistogram: Could not create  OpenCL Histogram Buffer: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -476,7 +529,7 @@ HRESULT C_rx_AlignFilter::GetHistogram(IMediaSample* pSampleIn, UINT* Histogram,
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\tGetHistogram: Could not allocate Histogram Buffer\n", (float)m_TimeStamp / 1000000.0f);
+			printf("%6.66f\tGetHistogram: Could not allocate Histogram Buffer\n", (float)m_TimeStamp / 1000000.0f);
 		}
 		exit(-1);
 	}
@@ -490,7 +543,7 @@ HRESULT C_rx_AlignFilter::GetHistogram(IMediaSample* pSampleIn, UINT* Histogram,
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\tGetHistogram: Could not create OpenCL Raw-Histogram Buffer: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.66f\tGetHistogram: Could not create OpenCL Raw-Histogram Buffer: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -506,7 +559,7 @@ HRESULT C_rx_AlignFilter::GetHistogram(IMediaSample* pSampleIn, UINT* Histogram,
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\tGetHistogram: Could not allocate Histogram Buffer\n", (float)m_TimeStamp / 1000000.0f);
+			printf("%6.66f\tGetHistogram: Could not allocate Histogram Buffer\n", (float)m_TimeStamp / 1000000.0f);
 		}
 		exit(-1);
 	}
@@ -520,7 +573,7 @@ HRESULT C_rx_AlignFilter::GetHistogram(IMediaSample* pSampleIn, UINT* Histogram,
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\tGetHistogram: Could not create OpenCL Row-Histogram Buffer: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.66f\tGetHistogram: Could not create OpenCL Row-Histogram Buffer: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -539,7 +592,7 @@ HRESULT C_rx_AlignFilter::GetHistogram(IMediaSample* pSampleIn, UINT* Histogram,
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\tGetHistogram: Could not set Argument 0 of OpenCL Kernel HistogramBlock: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.66f\tGetHistogram: Could not set Argument 0 of OpenCL Kernel HistogramBlock: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -552,7 +605,7 @@ HRESULT C_rx_AlignFilter::GetHistogram(IMediaSample* pSampleIn, UINT* Histogram,
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\tGetHistogram: Could not set Argument 1 of OpenCL Kernel HistogramBlock: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.66f\tGetHistogram: Could not set Argument 1 of OpenCL Kernel HistogramBlock: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -565,7 +618,7 @@ HRESULT C_rx_AlignFilter::GetHistogram(IMediaSample* pSampleIn, UINT* Histogram,
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\tGetHistogram: Could not set Argument 2 of OpenCL Kernel HistogramBlock: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.66f\tGetHistogram: Could not set Argument 2 of OpenCL Kernel HistogramBlock: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -581,7 +634,7 @@ HRESULT C_rx_AlignFilter::GetHistogram(IMediaSample* pSampleIn, UINT* Histogram,
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\tGetHistogram: Could not run OpenCL Kernel HistogramBlock: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.66f\tGetHistogram: Could not run OpenCL Kernel HistogramBlock: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -594,7 +647,7 @@ HRESULT C_rx_AlignFilter::GetHistogram(IMediaSample* pSampleIn, UINT* Histogram,
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\tGetHistogram: Could not finish OpenCL Kernel HistogramBlock: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.66f\tGetHistogram: Could not finish OpenCL Kernel HistogramBlock: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -613,7 +666,7 @@ HRESULT C_rx_AlignFilter::GetHistogram(IMediaSample* pSampleIn, UINT* Histogram,
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\tGetHistogram: Could not set Argument 0 of OpenCL Kernel JoinHistogram: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.66f\tGetHistogram: Could not set Argument 0 of OpenCL Kernel JoinHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -626,7 +679,7 @@ HRESULT C_rx_AlignFilter::GetHistogram(IMediaSample* pSampleIn, UINT* Histogram,
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\tGetHistogram: Could not set Argument 1 of OpenCL Kernel JoinHistogram: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.66f\tGetHistogram: Could not set Argument 1 of OpenCL Kernel JoinHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -639,7 +692,7 @@ HRESULT C_rx_AlignFilter::GetHistogram(IMediaSample* pSampleIn, UINT* Histogram,
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\tGetHistogram: Could not set Argument 2 of OpenCL Kernel JoinHistogram: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.66f\tGetHistogram: Could not set Argument 2 of OpenCL Kernel JoinHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -655,7 +708,7 @@ HRESULT C_rx_AlignFilter::GetHistogram(IMediaSample* pSampleIn, UINT* Histogram,
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\tGetHistogram: Could not run OpenCL Kernel JoinHistogram: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.66f\tGetHistogram: Could not run OpenCL Kernel JoinHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -668,7 +721,7 @@ HRESULT C_rx_AlignFilter::GetHistogram(IMediaSample* pSampleIn, UINT* Histogram,
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\tGetHistogram: Could not finish OpenCL Kernel JoinHistogram: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.66f\tGetHistogram: Could not finish OpenCL Kernel JoinHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -689,7 +742,7 @@ HRESULT C_rx_AlignFilter::GetHistogram(IMediaSample* pSampleIn, UINT* Histogram,
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\tGetHistogram: Could not set Argument 0 of OpenCL Kernel SmoothenHistogram: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.66f\tGetHistogram: Could not set Argument 0 of OpenCL Kernel SmoothenHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -702,7 +755,7 @@ HRESULT C_rx_AlignFilter::GetHistogram(IMediaSample* pSampleIn, UINT* Histogram,
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\tGetHistogram: Could not set Argument 1 of OpenCL Kernel SmoothenHistogram: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.66f\tGetHistogram: Could not set Argument 1 of OpenCL Kernel SmoothenHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -715,7 +768,7 @@ HRESULT C_rx_AlignFilter::GetHistogram(IMediaSample* pSampleIn, UINT* Histogram,
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\tGetHistogram: Could not set Argument 2 of OpenCL Kernel SmoothenHistogram: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.66f\tGetHistogram: Could not set Argument 2 of OpenCL Kernel SmoothenHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -731,7 +784,7 @@ HRESULT C_rx_AlignFilter::GetHistogram(IMediaSample* pSampleIn, UINT* Histogram,
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\tGetHistogram: Could not run OpenCL Kernel SmoothenHistogram: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.66f\tGetHistogram: Could not run OpenCL Kernel SmoothenHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -744,7 +797,7 @@ HRESULT C_rx_AlignFilter::GetHistogram(IMediaSample* pSampleIn, UINT* Histogram,
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\tGetHistogram: Could not finish OpenCL Kernel SmoothenHistogram: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.66f\tGetHistogram: Could not finish OpenCL Kernel SmoothenHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -763,7 +816,7 @@ HRESULT C_rx_AlignFilter::GetHistogram(IMediaSample* pSampleIn, UINT* Histogram,
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\tGetHistogram: Could not read OpenCL Histogram Buffer: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.66f\tGetHistogram: Could not read OpenCL Histogram Buffer: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -824,7 +877,7 @@ HRESULT C_rx_AlignFilter::ShowHistogram(IMediaSample* pSampleIn, UINT* Histogram
 			_itow_s(hr, MsgMsg, 10, 16);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\ShowHistogram: Get Pointer InBuffer Error: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tShowHistogram: Get Pointer InBuffer Error: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		return E_POINTER;
 	}
@@ -838,7 +891,7 @@ HRESULT C_rx_AlignFilter::ShowHistogram(IMediaSample* pSampleIn, UINT* Histogram
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\ShowHistogram: Could not create OpenCL Input Image Buffer: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tShowHistogram: Could not create OpenCL Input Image Buffer: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -853,7 +906,7 @@ HRESULT C_rx_AlignFilter::ShowHistogram(IMediaSample* pSampleIn, UINT* Histogram
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\ShowHistogram: Could not create OpenCL Histogram Buffer: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tShowHistogram: Could not create OpenCL Histogram Buffer: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -875,7 +928,7 @@ HRESULT C_rx_AlignFilter::ShowHistogram(IMediaSample* pSampleIn, UINT* Histogram
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\ShowHistogram: Could not set Argument 0 of OpenCL Kernel ShowHistogram: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tShowHistogram: Could not set Argument 0 of OpenCL Kernel ShowHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -888,7 +941,7 @@ HRESULT C_rx_AlignFilter::ShowHistogram(IMediaSample* pSampleIn, UINT* Histogram
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\ShowHistogram: Could not set Argument 1 of OpenCL Kernel ShowHistogram: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tShowHistogram: Could not set Argument 1 of OpenCL Kernel ShowHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -901,7 +954,7 @@ HRESULT C_rx_AlignFilter::ShowHistogram(IMediaSample* pSampleIn, UINT* Histogram
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\ShowHistogram: Could not set Argument 2 of OpenCL Kernel ShowHistogram: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tShowHistogram: Could not set Argument 2 of OpenCL Kernel ShowHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -914,7 +967,7 @@ HRESULT C_rx_AlignFilter::ShowHistogram(IMediaSample* pSampleIn, UINT* Histogram
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\ShowHistogram: Could not set Argument 3 of OpenCL Kernel ShowHistogram: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tShowHistogram: Could not set Argument 3 of OpenCL Kernel ShowHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -927,7 +980,7 @@ HRESULT C_rx_AlignFilter::ShowHistogram(IMediaSample* pSampleIn, UINT* Histogram
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\ShowHistogram: Could not set Argument 4 of OpenCL Kernel ShowHistogram: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tShowHistogram: Could not set Argument 4 of OpenCL Kernel ShowHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -940,7 +993,7 @@ HRESULT C_rx_AlignFilter::ShowHistogram(IMediaSample* pSampleIn, UINT* Histogram
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\ShowHistogram: Could not set Argument 5 of OpenCL Kernel ShowHistogram: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tShowHistogram: Could not set Argument 5 of OpenCL Kernel ShowHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -953,7 +1006,7 @@ HRESULT C_rx_AlignFilter::ShowHistogram(IMediaSample* pSampleIn, UINT* Histogram
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\ShowHistogram: Could not set Argument 6 of OpenCL Kernel ShowHistogram: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tShowHistogram: Could not set Argument 6 of OpenCL Kernel ShowHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -966,7 +1019,7 @@ HRESULT C_rx_AlignFilter::ShowHistogram(IMediaSample* pSampleIn, UINT* Histogram
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\ShowHistogram: Could not set Argument 7 of OpenCL Kernel ShowHistogram: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tShowHistogram: Could not set Argument 7 of OpenCL Kernel ShowHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -979,7 +1032,7 @@ HRESULT C_rx_AlignFilter::ShowHistogram(IMediaSample* pSampleIn, UINT* Histogram
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\ShowHistogram: Could not set Argument 8 of OpenCL Kernel ShowHistogram: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tShowHistogram: Could not set Argument 8 of OpenCL Kernel ShowHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -992,7 +1045,7 @@ HRESULT C_rx_AlignFilter::ShowHistogram(IMediaSample* pSampleIn, UINT* Histogram
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\ShowHistogram: Could not set Argument 9 of OpenCL Kernel ShowHistogram: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tShowHistogram: Could not set Argument 9 of OpenCL Kernel ShowHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1009,7 +1062,7 @@ HRESULT C_rx_AlignFilter::ShowHistogram(IMediaSample* pSampleIn, UINT* Histogram
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\ShowHistogram: Could not run OpenCL Kernel ShowHistogram: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tShowHistogram: Could not run OpenCL Kernel ShowHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1022,7 +1075,7 @@ HRESULT C_rx_AlignFilter::ShowHistogram(IMediaSample* pSampleIn, UINT* Histogram
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\ShowHistogram: Could not finish OpenCL Kernel ShowHistogram: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tShowHistogram: Could not finish OpenCL Kernel ShowHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1041,7 +1094,7 @@ HRESULT C_rx_AlignFilter::ShowHistogram(IMediaSample* pSampleIn, UINT* Histogram
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\ShowHistogram: Could not read OpenCL Histogram overlay Buffer: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tShowHistogram: Could not read OpenCL Histogram overlay Buffer: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1090,7 +1143,7 @@ HRESULT C_rx_AlignFilter::Binarize(IMediaSample* pSampleIn, IMediaSample* pSampl
 			_itow_s(hr, MsgMsg, 10, 16);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\Binarize: Get Pointer InBuffer Error: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tBinarize: Get Pointer InBuffer Error: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		return E_POINTER;
 	}
@@ -1104,7 +1157,7 @@ HRESULT C_rx_AlignFilter::Binarize(IMediaSample* pSampleIn, IMediaSample* pSampl
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\Binarize: Could not create OpenCL Input Image Buffer: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tBinarize: Could not create OpenCL Input Image Buffer: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1120,7 +1173,7 @@ HRESULT C_rx_AlignFilter::Binarize(IMediaSample* pSampleIn, IMediaSample* pSampl
 			_itow_s(hr, MsgMsg, 10, 16);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\Binarize: Get Pointer OutBuffer Error: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tBinarize: Get Pointer OutBuffer Error: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		return E_POINTER;
 	}
@@ -1134,7 +1187,7 @@ HRESULT C_rx_AlignFilter::Binarize(IMediaSample* pSampleIn, IMediaSample* pSampl
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\Binarize: Could not create OpenCL Output Image Buffer: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tBinarize: Could not create OpenCL Output Image Buffer: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1155,7 +1208,7 @@ HRESULT C_rx_AlignFilter::Binarize(IMediaSample* pSampleIn, IMediaSample* pSampl
 				_itow_s((int)cl_Error, MsgMsg, 10, 10);
 				m_MeasureTime = std::chrono::steady_clock::now();
 				m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-				printf("%6.6f\Binarize: Could not set Argument 0 of OpenCL Kernel Binarize: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+				printf("%6.6f\tBinarize: Could not set Argument 0 of OpenCL Kernel Binarize: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 			}
 			exit(-1);
 		}
@@ -1168,7 +1221,7 @@ HRESULT C_rx_AlignFilter::Binarize(IMediaSample* pSampleIn, IMediaSample* pSampl
 				_itow_s((int)cl_Error, MsgMsg, 10, 10);
 				m_MeasureTime = std::chrono::steady_clock::now();
 				m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-				printf("%6.6f\Binarize: Could not set Argument 1 of OpenCL Kernel Binarize: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+				printf("%6.6f\tBinarize: Could not set Argument 1 of OpenCL Kernel Binarize: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 			}
 			exit(-1);
 		}
@@ -1181,7 +1234,7 @@ HRESULT C_rx_AlignFilter::Binarize(IMediaSample* pSampleIn, IMediaSample* pSampl
 				_itow_s((int)cl_Error, MsgMsg, 10, 10);
 				m_MeasureTime = std::chrono::steady_clock::now();
 				m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-				printf("%6.6f\Binarize: Could not set Argument 2 of OpenCL Kernel Binarize: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+				printf("%6.6f\tBinarize: Could not set Argument 2 of OpenCL Kernel Binarize: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 			}
 			exit(-1);
 		}
@@ -1200,7 +1253,7 @@ HRESULT C_rx_AlignFilter::Binarize(IMediaSample* pSampleIn, IMediaSample* pSampl
 				_itow_s((int)cl_Error, MsgMsg, 10, 10);
 				m_MeasureTime = std::chrono::steady_clock::now();
 				m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-				printf("%6.6f\Binarize: Could not set Argument 3 of OpenCL Kernel Binarize: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+				printf("%6.6f\tBinarize: Could not set Argument 3 of OpenCL Kernel Binarize: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 			}
 			exit(-1);
 		}
@@ -1217,7 +1270,7 @@ HRESULT C_rx_AlignFilter::Binarize(IMediaSample* pSampleIn, IMediaSample* pSampl
 				_itow_s((int)cl_Error, MsgMsg, 10, 10);
 				m_MeasureTime = std::chrono::steady_clock::now();
 				m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-				printf("%6.6f\Binarize: Could not run OpenCL Kernel Binarize: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+				printf("%6.6f\tBinarize: Could not run OpenCL Kernel Binarize: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 			}
 			exit(-1);
 		}
@@ -1230,7 +1283,7 @@ HRESULT C_rx_AlignFilter::Binarize(IMediaSample* pSampleIn, IMediaSample* pSampl
 				_itow_s((int)cl_Error, MsgMsg, 10, 10);
 				m_MeasureTime = std::chrono::steady_clock::now();
 				m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-				printf("%6.6f\Binarize: Could not finish OpenCL Kernel Binarize: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+				printf("%6.6f\tBinarize: Could not finish OpenCL Kernel Binarize: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 			}
 			exit(-1);
 		}
@@ -1248,7 +1301,7 @@ HRESULT C_rx_AlignFilter::Binarize(IMediaSample* pSampleIn, IMediaSample* pSampl
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\Binarize: Could not read OpenCL Binarized Buffer: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tBinarize: Could not read OpenCL Binarized Buffer: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1294,7 +1347,7 @@ HRESULT C_rx_AlignFilter::GetColorHistogram(IMediaSample* pSampleIn, BOOL Vertic
 			_itow_s(hr, MsgMsg, 10, 16);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\GetColorHistogram: Get Pointer InBuffer Error: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tGetColorHistogram: Get Pointer InBuffer Error: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		return E_POINTER;
 	}
@@ -1309,7 +1362,7 @@ HRESULT C_rx_AlignFilter::GetColorHistogram(IMediaSample* pSampleIn, BOOL Vertic
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\GetColorHistogram: Could not create OpenCL Input Image Buffer: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tGetColorHistogram: Could not create OpenCL Input Image Buffer: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1325,7 +1378,7 @@ HRESULT C_rx_AlignFilter::GetColorHistogram(IMediaSample* pSampleIn, BOOL Vertic
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\GetColorHistogram: Could not create OpenCL Color-Histogram Buffer: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tGetColorHistogram: Could not create OpenCL Color-Histogram Buffer: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1344,7 +1397,7 @@ HRESULT C_rx_AlignFilter::GetColorHistogram(IMediaSample* pSampleIn, BOOL Vertic
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\GetColorHistogram: Could not set Argument 0 of OpenCL Kernel Color-Histogram: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tGetColorHistogram: Could not set Argument 0 of OpenCL Kernel Color-Histogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1357,7 +1410,7 @@ HRESULT C_rx_AlignFilter::GetColorHistogram(IMediaSample* pSampleIn, BOOL Vertic
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\GetColorHistogram: Could not set Argument 1 of OpenCL Kernel Color-Histogram: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tGetColorHistogram: Could not set Argument 1 of OpenCL Kernel Color-Histogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1370,7 +1423,7 @@ HRESULT C_rx_AlignFilter::GetColorHistogram(IMediaSample* pSampleIn, BOOL Vertic
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\GetColorHistogram: Could not set Argument 2 of OpenCL Kernel Color-Histogram: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tGetColorHistogram: Could not set Argument 2 of OpenCL Kernel Color-Histogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1383,7 +1436,7 @@ HRESULT C_rx_AlignFilter::GetColorHistogram(IMediaSample* pSampleIn, BOOL Vertic
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\GetColorHistogram: Could not set Argument 3 of OpenCL Kernel Color-Histogram: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tGetColorHistogram: Could not set Argument 3 of OpenCL Kernel Color-Histogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1398,7 +1451,7 @@ HRESULT C_rx_AlignFilter::GetColorHistogram(IMediaSample* pSampleIn, BOOL Vertic
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\GetColorHistogram: Could not set Argument 4 of OpenCL Kernel Color-Histogram: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tGetColorHistogram: Could not set Argument 4 of OpenCL Kernel Color-Histogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1415,7 +1468,7 @@ HRESULT C_rx_AlignFilter::GetColorHistogram(IMediaSample* pSampleIn, BOOL Vertic
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\GetColorHistogram: Could not run OpenCL Kernel Color-Histogram: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tGetColorHistogram: Could not run OpenCL Kernel Color-Histogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1428,7 +1481,7 @@ HRESULT C_rx_AlignFilter::GetColorHistogram(IMediaSample* pSampleIn, BOOL Vertic
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\GetColorHistogram: Could not finish OpenCL Kernel Color-Histogram: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tGetColorHistogram: Could not finish OpenCL Kernel Color-Histogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1449,7 +1502,7 @@ HRESULT C_rx_AlignFilter::GetColorHistogram(IMediaSample* pSampleIn, BOOL Vertic
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\GetColorHistogram: Could not create OpenCL Color-ThresholdLine Buffer: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tGetColorHistogram: Could not create OpenCL Color-ThresholdLine Buffer: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1468,7 +1521,7 @@ HRESULT C_rx_AlignFilter::GetColorHistogram(IMediaSample* pSampleIn, BOOL Vertic
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\GetColorHistogram: Could not set Argument 0 of OpenCL Kernel ColorThresholdLines: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tGetColorHistogram: Could not set Argument 0 of OpenCL Kernel ColorThresholdLines: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1481,7 +1534,7 @@ HRESULT C_rx_AlignFilter::GetColorHistogram(IMediaSample* pSampleIn, BOOL Vertic
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\GetColorHistogram: Could not set Argument 1 of OpenCL Kernel ColorThresholdLines: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tGetColorHistogram: Could not set Argument 1 of OpenCL Kernel ColorThresholdLines: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1494,7 +1547,7 @@ HRESULT C_rx_AlignFilter::GetColorHistogram(IMediaSample* pSampleIn, BOOL Vertic
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\GetColorHistogram: Could not set Argument 2 of OpenCL Kernel ColorThresholdLines: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tGetColorHistogram: Could not set Argument 2 of OpenCL Kernel ColorThresholdLines: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1511,7 +1564,7 @@ HRESULT C_rx_AlignFilter::GetColorHistogram(IMediaSample* pSampleIn, BOOL Vertic
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\GetColorHistogram: Could not run OpenCL Kernel ColorThresholdLines: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tGetColorHistogram: Could not run OpenCL Kernel ColorThresholdLines: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1524,7 +1577,7 @@ HRESULT C_rx_AlignFilter::GetColorHistogram(IMediaSample* pSampleIn, BOOL Vertic
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\GetColorHistogram: Could not finish OpenCL Kernel ColorThresholdLines: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tGetColorHistogram: Could not finish OpenCL Kernel ColorThresholdLines: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1547,7 +1600,7 @@ HRESULT C_rx_AlignFilter::GetColorHistogram(IMediaSample* pSampleIn, BOOL Vertic
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\GetColorHistogram: Could not create OpenCL Threshold Array Buffer: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tGetColorHistogram: Could not create OpenCL Threshold Array Buffer: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1566,7 +1619,7 @@ HRESULT C_rx_AlignFilter::GetColorHistogram(IMediaSample* pSampleIn, BOOL Vertic
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\GetColorHistogram: Could not set Argument 0 of OpenCL Kernel Color-ThresholdAverage: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tGetColorHistogram: Could not set Argument 0 of OpenCL Kernel Color-ThresholdAverage: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1579,7 +1632,7 @@ HRESULT C_rx_AlignFilter::GetColorHistogram(IMediaSample* pSampleIn, BOOL Vertic
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\GetColorHistogram: Could not set Argument 1 of OpenCL Kernel Color-ThresholdAverage: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tGetColorHistogram: Could not set Argument 1 of OpenCL Kernel Color-ThresholdAverage: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1592,7 +1645,7 @@ HRESULT C_rx_AlignFilter::GetColorHistogram(IMediaSample* pSampleIn, BOOL Vertic
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\GetColorHistogram: Could not set Argument 2 of OpenCL Kernel Color-ThresholdAverage: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tGetColorHistogram: Could not set Argument 2 of OpenCL Kernel Color-ThresholdAverage: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1605,7 +1658,7 @@ HRESULT C_rx_AlignFilter::GetColorHistogram(IMediaSample* pSampleIn, BOOL Vertic
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\GetColorHistogram: Could not set Argument 3 of OpenCL Kernel Color-ThresholdAverage: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tGetColorHistogram: Could not set Argument 3 of OpenCL Kernel Color-ThresholdAverage: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1620,7 +1673,7 @@ HRESULT C_rx_AlignFilter::GetColorHistogram(IMediaSample* pSampleIn, BOOL Vertic
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\GetColorHistogram: Could not set Argument 4 of OpenCL Kernel Color-ThresholdAverage: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tGetColorHistogram: Could not set Argument 4 of OpenCL Kernel Color-ThresholdAverage: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1635,7 +1688,7 @@ HRESULT C_rx_AlignFilter::GetColorHistogram(IMediaSample* pSampleIn, BOOL Vertic
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\GetColorHistogram: Could not set Argument 5 of OpenCL Kernel Color-ThresholdAverage: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tGetColorHistogram: Could not set Argument 5 of OpenCL Kernel Color-ThresholdAverage: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1651,7 +1704,7 @@ HRESULT C_rx_AlignFilter::GetColorHistogram(IMediaSample* pSampleIn, BOOL Vertic
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\GetColorHistogram: Could not run OpenCL Kernel Color-ThresholdAverage: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tGetColorHistogram: Could not run OpenCL Kernel Color-ThresholdAverage: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1664,7 +1717,7 @@ HRESULT C_rx_AlignFilter::GetColorHistogram(IMediaSample* pSampleIn, BOOL Vertic
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\GetColorHistogram: Could not finish OpenCL Kernel Color-ThresholdAverage: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tGetColorHistogram: Could not finish OpenCL Kernel Color-ThresholdAverage: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1683,7 +1736,7 @@ HRESULT C_rx_AlignFilter::GetColorHistogram(IMediaSample* pSampleIn, BOOL Vertic
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\GetColorHistogram: Could not read OpenCL Histogram Array Buffer: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tGetColorHistogram: Could not read OpenCL Histogram Array Buffer: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1697,7 +1750,7 @@ HRESULT C_rx_AlignFilter::GetColorHistogram(IMediaSample* pSampleIn, BOOL Vertic
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\GetColorHistogram: Could not read OpenCL Threshold Line Buffer: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tGetColorHistogram: Could not read OpenCL Threshold Line Buffer: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1711,7 +1764,7 @@ HRESULT C_rx_AlignFilter::GetColorHistogram(IMediaSample* pSampleIn, BOOL Vertic
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\GetColorHistogram: Could not read OpenCL Threshold Array Buffer: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tGetColorHistogram: Could not read OpenCL Threshold Array Buffer: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1754,7 +1807,7 @@ HRESULT C_rx_AlignFilter::ShowColorHistogram(IMediaSample* pSampleIn, UINT* Hist
 			_itow_s(hr, MsgMsg, 10, 16);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\ShowColorHistogram: Get Pointer InBuffer Error: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tShowColorHistogram: Get Pointer InBuffer Error: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		return E_POINTER;
 	}
@@ -1768,7 +1821,7 @@ HRESULT C_rx_AlignFilter::ShowColorHistogram(IMediaSample* pSampleIn, UINT* Hist
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\ShowColorHistogram: Could not create OpenCL Input Image Buffer: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tShowColorHistogram: Could not create OpenCL Input Image Buffer: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1783,7 +1836,7 @@ HRESULT C_rx_AlignFilter::ShowColorHistogram(IMediaSample* pSampleIn, UINT* Hist
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\ShowColorHistogram: Could not create OpenCL Color-ThresholdLine Buffer: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tShowColorHistogram: Could not create OpenCL Color-ThresholdLine Buffer: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1798,7 +1851,7 @@ HRESULT C_rx_AlignFilter::ShowColorHistogram(IMediaSample* pSampleIn, UINT* Hist
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\ShowColorHistogram: Could not create OpenCL Threshold Array Buffer: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tShowColorHistogram: Could not create OpenCL Threshold Array Buffer: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1817,7 +1870,7 @@ HRESULT C_rx_AlignFilter::ShowColorHistogram(IMediaSample* pSampleIn, UINT* Hist
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\ShowColorHistogram: Could not set Argument 0 of OpenCL Kernel ShowColorHistogram: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tShowColorHistogram: Could not set Argument 0 of OpenCL Kernel ShowColorHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1830,7 +1883,7 @@ HRESULT C_rx_AlignFilter::ShowColorHistogram(IMediaSample* pSampleIn, UINT* Hist
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\ShowColorHistogram: Could not set Argument 1 of OpenCL Kernel ShowColorHistogram: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tShowColorHistogram: Could not set Argument 1 of OpenCL Kernel ShowColorHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1843,7 +1896,7 @@ HRESULT C_rx_AlignFilter::ShowColorHistogram(IMediaSample* pSampleIn, UINT* Hist
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\ShowColorHistogram: Could not set Argument 2 of OpenCL Kernel ShowColorHistogram: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tShowColorHistogram: Could not set Argument 2 of OpenCL Kernel ShowColorHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1856,7 +1909,7 @@ HRESULT C_rx_AlignFilter::ShowColorHistogram(IMediaSample* pSampleIn, UINT* Hist
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\ShowColorHistogram: Could not set Argument 3 of OpenCL Kernel ShowColorHistogram: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tShowColorHistogram: Could not set Argument 3 of OpenCL Kernel ShowColorHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1869,7 +1922,7 @@ HRESULT C_rx_AlignFilter::ShowColorHistogram(IMediaSample* pSampleIn, UINT* Hist
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\ShowColorHistogram: Could not set Argument 4 of OpenCL Kernel ShowColorHistogram: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tShowColorHistogram: Could not set Argument 4 of OpenCL Kernel ShowColorHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1882,7 +1935,7 @@ HRESULT C_rx_AlignFilter::ShowColorHistogram(IMediaSample* pSampleIn, UINT* Hist
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\ShowColorHistogram: Could not set Argument 5 of OpenCL Kernel ShowColorHistogram: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tShowColorHistogram: Could not set Argument 5 of OpenCL Kernel ShowColorHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1898,7 +1951,7 @@ HRESULT C_rx_AlignFilter::ShowColorHistogram(IMediaSample* pSampleIn, UINT* Hist
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\ShowColorHistogram: Could not run OpenCL Kernel ShowColorHistogram: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tShowColorHistogram: Could not run OpenCL Kernel ShowColorHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1911,7 +1964,7 @@ HRESULT C_rx_AlignFilter::ShowColorHistogram(IMediaSample* pSampleIn, UINT* Hist
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\ShowColorHistogram: Could not finish OpenCL Kernel ShowColorHistogram: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tShowColorHistogram: Could not finish OpenCL Kernel ShowColorHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1930,7 +1983,7 @@ HRESULT C_rx_AlignFilter::ShowColorHistogram(IMediaSample* pSampleIn, UINT* Hist
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\ShowColorHistogram: Could not read OpenCL Image Buffer: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tShowColorHistogram: Could not read OpenCL Image Buffer: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -1973,7 +2026,7 @@ HRESULT C_rx_AlignFilter::BinarizeMultiColor(IMediaSample* pSampleIn, IMediaSamp
 			_itow_s(hr, MsgMsg, 10, 16);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\BinarizeMultiColor: Get Pointer InBuffer Error: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tBinarizeMultiColor: Get Pointer InBuffer Error: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		return E_POINTER;
 	}
@@ -1988,7 +2041,7 @@ HRESULT C_rx_AlignFilter::BinarizeMultiColor(IMediaSample* pSampleIn, IMediaSamp
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\BinarizeMultiColor: Could not create OpenCL Input Image Buffer: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tBinarizeMultiColor: Could not create OpenCL Input Image Buffer: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -2004,7 +2057,7 @@ HRESULT C_rx_AlignFilter::BinarizeMultiColor(IMediaSample* pSampleIn, IMediaSamp
 			_itow_s(hr, MsgMsg, 10, 16);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\BinarizeMultiColor: Get Pointer OutBuffer Error: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tBinarizeMultiColor: Get Pointer OutBuffer Error: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		return E_POINTER;
 	}
@@ -2019,7 +2072,7 @@ HRESULT C_rx_AlignFilter::BinarizeMultiColor(IMediaSample* pSampleIn, IMediaSamp
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\BinarizeMultiColor: Could not create OpenCL Output Image Buffer: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tBinarizeMultiColor: Could not create OpenCL Output Image Buffer: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -2034,7 +2087,7 @@ HRESULT C_rx_AlignFilter::BinarizeMultiColor(IMediaSample* pSampleIn, IMediaSamp
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\BinarizeMultiColor: Could not create OpenCL Threshold Array Buffer: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tBinarizeMultiColor: Could not create OpenCL Threshold Array Buffer: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -2053,7 +2106,7 @@ HRESULT C_rx_AlignFilter::BinarizeMultiColor(IMediaSample* pSampleIn, IMediaSamp
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\BinarizeMultiColor: Could not set Argument 0 of OpenCL Kernel Color-Binarize: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tBinarizeMultiColor: Could not set Argument 0 of OpenCL Kernel Color-Binarize: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -2066,7 +2119,7 @@ HRESULT C_rx_AlignFilter::BinarizeMultiColor(IMediaSample* pSampleIn, IMediaSamp
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\BinarizeMultiColor: Could not set Argument 1 of OpenCL Kernel Color-Binarize: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tBinarizeMultiColor: Could not set Argument 1 of OpenCL Kernel Color-Binarize: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -2079,7 +2132,7 @@ HRESULT C_rx_AlignFilter::BinarizeMultiColor(IMediaSample* pSampleIn, IMediaSamp
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\BinarizeMultiColor: Could not set Argument 2 of OpenCL Kernel Color-Binarize: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tBinarizeMultiColor: Could not set Argument 2 of OpenCL Kernel Color-Binarize: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -2092,7 +2145,7 @@ HRESULT C_rx_AlignFilter::BinarizeMultiColor(IMediaSample* pSampleIn, IMediaSamp
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\BinarizeMultiColor: Could not set Argument 3 of OpenCL Kernel Color-Binarize: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tBinarizeMultiColor: Could not set Argument 3 of OpenCL Kernel Color-Binarize: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -2108,7 +2161,7 @@ HRESULT C_rx_AlignFilter::BinarizeMultiColor(IMediaSample* pSampleIn, IMediaSamp
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\BinarizeMultiColor: Could not run OpenCL Kernel Color-Binarize: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tBinarizeMultiColor: Could not run OpenCL Kernel Color-Binarize: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -2121,7 +2174,7 @@ HRESULT C_rx_AlignFilter::BinarizeMultiColor(IMediaSample* pSampleIn, IMediaSamp
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\BinarizeMultiColor: Could not finish OpenCL Kernel Color-Binarize: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tBinarizeMultiColor: Could not finish OpenCL Kernel Color-Binarize: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -2140,7 +2193,7 @@ HRESULT C_rx_AlignFilter::BinarizeMultiColor(IMediaSample* pSampleIn, IMediaSamp
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\BinarizeMultiColor: Could not read OpenCL Image Buffer: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tBinarizeMultiColor: Could not read OpenCL Image Buffer: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -2198,7 +2251,7 @@ HRESULT C_rx_AlignFilter::Erode(IMediaSample* pSampleIn, BOOL Vertical)
 			_itow_s(hr, MsgMsg, 10, 16);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\Erode: Get Pointer Error: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tErode: Get Pointer Error: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		return E_POINTER;
 	}
@@ -2258,7 +2311,7 @@ HRESULT C_rx_AlignFilter::Blob(IMediaSample* pSampleIn)
 			_itow_s(hr, MsgMsg, 10, 16);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\Blob: Get Pointer Error: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tBlob: Get Pointer Error: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		return E_POINTER;
 	}
@@ -2364,7 +2417,7 @@ HRESULT C_rx_AlignFilter::BlobQualifyer(IMediaSample* pSampleIn, BOOL Vertical, 
 			_itow_s(hr, MsgMsg, 10, 16);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\BlobQualifyer: Get Pointer Error: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tBlobQualifyer: Get Pointer Error: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		return E_POINTER;
 	}
@@ -2546,7 +2599,7 @@ HRESULT C_rx_AlignFilter::CalculateDistances(BOOL Vertical, Mat SourceMat)
 	//{
 	//	m_MeasureTime = std::chrono::steady_clock::now();
 	//	m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-	//	printf("%6.6f\tswitch (m_MeasureMode)\n", (float)m_TimeStamp / 1000000.0f);
+	//	printf("%6.66f\tswitch (m_MeasureMode)\n", (float)m_TimeStamp / 1000000.0f);
 	//}
 
 	//Select Lines to display Values
@@ -2603,7 +2656,7 @@ HRESULT C_rx_AlignFilter::OverlayBlobs(IMediaSample* pSampleIn)
 			_itow_s(hr, MsgMsg, 10, 16);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\OverlayBlobs: Get Pointer Error: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tOverlayBlobs: Get Pointer Error: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		return E_POINTER;
 	}
@@ -2654,7 +2707,7 @@ HRESULT C_rx_AlignFilter::OverlayCenters(IMediaSample* pSampleIn, BOOL Vertical)
 			_itow_s(hr, MsgMsg, 10, 16);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\OverlayCenters: Get Pointer Error: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tOverlayCenters: Get Pointer Error: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		return E_POINTER;
 	}
@@ -2694,7 +2747,7 @@ HRESULT C_rx_AlignFilter::OverlayValues(IMediaSample* pSampleIn, BOOL Vertical)
 			_itow_s(hr, MsgMsg, 10, 16);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\OverlayValues: Get Pointer Error: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tOverlayValues: Get Pointer Error: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		return E_POINTER;
 	}
@@ -2740,7 +2793,7 @@ HRESULT C_rx_AlignFilter::OverlayValues(IMediaSample* pSampleIn, BOOL Vertical)
 			{
 				m_MeasureTime = std::chrono::steady_clock::now();
 				m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-				printf("%6.6f\OverlayValues: Could not create TextBitmap\n", (float)m_TimeStamp / 1000000.0f);
+				printf("%6.6f\tOverlayValues: Could not create TextBitmap\n", (float)m_TimeStamp / 1000000.0f);
 			}
 			exit(-1);
 		}
@@ -2759,7 +2812,7 @@ HRESULT C_rx_AlignFilter::OverlayValues(IMediaSample* pSampleIn, BOOL Vertical)
 
 	//Insert selected Values
 
-	if(m_DisplayMode == Display_AllLines && m_MeasureMode == !MeasureMode_Off)
+	if(m_DisplayMode == Display_AllLines && m_MeasureMode != MeasureMode_Off)
 	{
 		for (int BlobNo = 0; BlobNo < (int)m_vQualifyList.size(); BlobNo++)
 		{
@@ -2843,7 +2896,7 @@ HRESULT C_rx_AlignFilter::OverlayDistanceLines(IMediaSample* pSampleIn, BOOL Ver
 			_itow_s(hr, MsgMsg, 10, 16);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\OverlayDistanceLines: Get Pointer Error: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tOverlayDistanceLines: Get Pointer Error: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		return E_POINTER;
 	}
@@ -2932,7 +2985,7 @@ HRESULT C_rx_AlignFilter::TakeSnapShot(IMediaSample* pSampleIn)
 			_itow_s(hr, MsgMsg, 10, 16);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\TakeSnapShot: Get Pointer InBuffer Error: %s\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.66f\takeSnapShot: Get Pointer InBuffer Error: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		return E_POINTER;
 	}
@@ -2953,7 +3006,7 @@ HRESULT C_rx_AlignFilter::TakeSnapShot(IMediaSample* pSampleIn)
 		{
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\TakeSnapShot: Image could not be saved\n", (float)m_TimeStamp / 1000000.0f);
+			printf("%6.66f\takeSnapShot: Image could not be saved\n", (float)m_TimeStamp / 1000000.0f);
 		}
 	}
 
@@ -3012,7 +3065,7 @@ HRESULT C_rx_AlignFilter_InputPin::CheckMediaType(const CMediaType *pmt)
 	{
 		m_prx_AlignFilter->m_MeasureTime = std::chrono::steady_clock::now();
 		m_prx_AlignFilter->m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_prx_AlignFilter->m_MeasureTime - m_prx_AlignFilter->m_DebugStartTime).count();
-		printf("%6.6f\tCheck Media Type\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f);
+		printf("%6.66f\tCheck Media Type\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f);
 	}
 
 	if (m_bInsideCheckMediaType) return NOERROR;
@@ -3033,7 +3086,7 @@ HRESULT C_rx_AlignFilter_InputPin::CheckMediaType(const CMediaType *pmt)
 	{
 		m_prx_AlignFilter->m_MeasureTime = std::chrono::steady_clock::now();
 		m_prx_AlignFilter->m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_prx_AlignFilter->m_MeasureTime - m_prx_AlignFilter->m_DebugStartTime).count();
-		printf("%6.6f\InputPin: CheckMediaType Input Unknown Pin:\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f);
+		printf("%6.6f\tInputPin: CheckMediaType Input Unknown MediaSubtype\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f);
 	}
 	m_bInsideCheckMediaType = false;
 	return E_FAIL;
@@ -3050,7 +3103,7 @@ HRESULT C_rx_AlignFilter_InputPin::SetMediaType(const CMediaType *pmt)
 	{
 		m_prx_AlignFilter->m_MeasureTime = std::chrono::steady_clock::now();
 		m_prx_AlignFilter->m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_prx_AlignFilter->m_MeasureTime - m_prx_AlignFilter->m_DebugStartTime).count();
-		printf("%6.6f\tSet Media Type\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f);
+		printf("%6.66f\tSet Media Type\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f);
 	}
 
 	// Make sure that the base class likes it
@@ -3071,7 +3124,7 @@ HRESULT C_rx_AlignFilter_InputPin::BreakConnect()
 	{
 		m_prx_AlignFilter->m_MeasureTime = std::chrono::steady_clock::now();
 		m_prx_AlignFilter->m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_prx_AlignFilter->m_MeasureTime - m_prx_AlignFilter->m_DebugStartTime).count();
-		printf("%6.6f\tBreak Connect\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f);
+		printf("%6.66f\tBreak Connect\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f);
 	}
 
 	// Release any allocator that we are holding
@@ -3079,7 +3132,14 @@ HRESULT C_rx_AlignFilter_InputPin::BreakConnect()
 	{
 		m_prx_AlignFilter->m_pAllocator->Release();
 		m_prx_AlignFilter->m_pAllocator = NULL;
-	}
+
+        if (m_prx_AlignFilter->m_DebugOn)
+        {
+            m_prx_AlignFilter->m_MeasureTime = std::chrono::steady_clock::now();
+            m_prx_AlignFilter->m_TimeStamp =std::chrono::duration_cast<std::chrono::microseconds>(m_prx_AlignFilter->m_MeasureTime - m_prx_AlignFilter->m_DebugStartTime).count();
+            printf("%6.66f\tAllocator Released\n",(float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f);
+        }
+    }
 
 	return NOERROR;
 
@@ -3088,18 +3148,24 @@ HRESULT C_rx_AlignFilter_InputPin::BreakConnect()
 // NotifyAllocator
 STDMETHODIMP C_rx_AlignFilter_InputPin::NotifyAllocator(IMemAllocator *pAllocator, BOOL bReadOnly)
 {
-	CheckPointer(pAllocator, E_FAIL);
-	CAutoLock lock_it(m_pLock);
+    CheckPointer(pAllocator, E_FAIL);
+    CAutoLock lock_it(m_pLock);
 
-	// Free the old allocator if any
-	if (m_prx_AlignFilter->m_pAllocator) m_prx_AlignFilter->m_pAllocator->Release();
+    // Free the old allocator if any
+    if (m_prx_AlignFilter->m_pAllocator) m_prx_AlignFilter->m_pAllocator->Release();
 
-	// Store away the new allocator
-	pAllocator->AddRef();
-	m_prx_AlignFilter->m_pAllocator = pAllocator;
+    // Store away the new allocator
+    pAllocator->AddRef();
+    m_prx_AlignFilter->m_pAllocator = pAllocator;
 
-	// Notify the base class about the allocator
-	return C_rx_AlignFilter_InputPin::CBaseInputPin::NotifyAllocator(pAllocator, bReadOnly);
+    if (m_prx_AlignFilter->m_DebugOn)
+    {
+        m_prx_AlignFilter->m_MeasureTime = std::chrono::steady_clock::now();
+        m_prx_AlignFilter->m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>( m_prx_AlignFilter->m_MeasureTime - m_prx_AlignFilter->m_DebugStartTime).count();
+        printf("%6.66f\tInputPin: NotifyAllocator\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f);
+    }
+    // Notify the base class about the allocator
+    return C_rx_AlignFilter_InputPin::CBaseInputPin::NotifyAllocator(pAllocator, bReadOnly);
 
 } // NotifyAllocator
 
@@ -3113,7 +3179,7 @@ HRESULT C_rx_AlignFilter_InputPin::EndOfStream()
 	{
 		m_prx_AlignFilter->m_MeasureTime = std::chrono::steady_clock::now();
 		m_prx_AlignFilter->m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_prx_AlignFilter->m_MeasureTime - m_prx_AlignFilter->m_DebugStartTime).count();
-		printf("%6.6f\tEnd of Stream\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f);
+		printf("%6.66f\tEnd of Stream\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f);
 	}
 
 	hr = m_prx_AlignFilter->m_Output.DeliverEndOfStream();
@@ -3133,7 +3199,7 @@ HRESULT C_rx_AlignFilter_InputPin::BeginFlush()
 	{
 		m_prx_AlignFilter->m_MeasureTime = std::chrono::steady_clock::now();
 		m_prx_AlignFilter->m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_prx_AlignFilter->m_MeasureTime - m_prx_AlignFilter->m_DebugStartTime).count();
-		printf("%6.6f\tBegin Flush\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f);
+		printf("%6.66f\tBegin Flush\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f);
 	}
 
 	hr = m_prx_AlignFilter->m_Output.DeliverBeginFlush();
@@ -3153,7 +3219,7 @@ HRESULT C_rx_AlignFilter_InputPin::EndFlush()
 	{
 		m_prx_AlignFilter->m_MeasureTime = std::chrono::steady_clock::now();
 		m_prx_AlignFilter->m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_prx_AlignFilter->m_MeasureTime - m_prx_AlignFilter->m_DebugStartTime).count();
-		printf("%6.6f\tEnd Flush\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f);
+		printf("%6.66f\tEnd Flush\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f);
 	}
 
 	hr = m_prx_AlignFilter->m_Output.DeliverEndFlush();
@@ -3173,7 +3239,7 @@ HRESULT C_rx_AlignFilter_InputPin::NewSegment(REFERENCE_TIME tStart, REFERENCE_T
 	{
 		m_prx_AlignFilter->m_MeasureTime = std::chrono::steady_clock::now();
 		m_prx_AlignFilter->m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_prx_AlignFilter->m_MeasureTime - m_prx_AlignFilter->m_DebugStartTime).count();
-		printf("%6.6f\tNewSegment\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f);
+		printf("%6.66f\tNewSegment\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f);
 	}
 
 	hr = m_prx_AlignFilter->m_Output.DeliverNewSegment(tStart, tStop, dRate);
@@ -3198,7 +3264,7 @@ HRESULT C_rx_AlignFilter_InputPin::Receive(IMediaSample *pSampleIn)
 		{
 			m_prx_AlignFilter->m_MeasureTime = std::chrono::steady_clock::now();
 			m_prx_AlignFilter->m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_prx_AlignFilter->m_MeasureTime - m_prx_AlignFilter->m_DebugStartTime).count();
-			printf("%6.6f\tCBaseInputPin::Receive Error (%d)\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f, hr);
+			printf("%6.66f\tCBaseInputPin::Receive Error (%d)\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f, hr);
 		}
 		pSampleIn->Release();
 		return hr;
@@ -3260,7 +3326,7 @@ HRESULT C_rx_AlignFilter_InputPin::Receive(IMediaSample *pSampleIn)
 					{
 						m_prx_AlignFilter->m_MeasureTime = std::chrono::steady_clock::now();
 						m_prx_AlignFilter->m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_prx_AlignFilter->m_MeasureTime - m_prx_AlignFilter->m_DebugStartTime).count();
-						printf("%6.6f\tDeliver Original Image with Histogram Failed (%d)\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f, hr);
+						printf("%6.66f\tDeliver Original Image with Histogram Failed (%d)\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f, hr);
 					}
 				}
 				return NOERROR;
@@ -3302,7 +3368,7 @@ HRESULT C_rx_AlignFilter_InputPin::Receive(IMediaSample *pSampleIn)
 		{
 			m_prx_AlignFilter->m_MeasureTime = std::chrono::steady_clock::now();
 			m_prx_AlignFilter->m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_prx_AlignFilter->m_MeasureTime - m_prx_AlignFilter->m_DebugStartTime).count();
-			printf("%6.6f\tCopy Out-Sample SetActualDataLength failed\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f);
+			printf("%6.66f\tCopy Out-Sample SetActualDataLength failed\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f);
 		}
 	}
 
@@ -3312,7 +3378,7 @@ HRESULT C_rx_AlignFilter_InputPin::Receive(IMediaSample *pSampleIn)
 		{
 			m_prx_AlignFilter->m_MeasureTime = std::chrono::steady_clock::now();
 			m_prx_AlignFilter->m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_prx_AlignFilter->m_MeasureTime - m_prx_AlignFilter->m_DebugStartTime).count();
-			printf("%6.6f\tCopy Out-Sample GetPointer pData1 failed\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f);
+			printf("%6.66f\tCopy Out-Sample GetPointer pData1 failed\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f);
 		}
 	}
 	if (S_OK != pOutSample->GetPointer(&pData2))
@@ -3321,7 +3387,7 @@ HRESULT C_rx_AlignFilter_InputPin::Receive(IMediaSample *pSampleIn)
 		{
 			m_prx_AlignFilter->m_MeasureTime = std::chrono::steady_clock::now();
 			m_prx_AlignFilter->m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_prx_AlignFilter->m_MeasureTime - m_prx_AlignFilter->m_DebugStartTime).count();
-			printf("%6.6f\tCopy Out-Sample GetPointer pData2 failed\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f);
+			printf("%6.66f\tCopy Out-Sample GetPointer pData2 failed\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f);
 		}
 	}
 
@@ -3340,7 +3406,7 @@ HRESULT C_rx_AlignFilter_InputPin::Receive(IMediaSample *pSampleIn)
 		{
 			m_prx_AlignFilter->m_MeasureTime = std::chrono::steady_clock::now();
 			m_prx_AlignFilter->m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_prx_AlignFilter->m_MeasureTime - m_prx_AlignFilter->m_DebugStartTime).count();
-			printf("%6.6f\tCopy Out-Sample SetTime failed\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f);
+			printf("%6.66f\tCopy Out-Sample SetTime failed\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f);
 		}
 		break;
 	}
@@ -3355,7 +3421,7 @@ HRESULT C_rx_AlignFilter_InputPin::Receive(IMediaSample *pSampleIn)
 		{
 			m_prx_AlignFilter->m_MeasureTime = std::chrono::steady_clock::now();
 			m_prx_AlignFilter->m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_prx_AlignFilter->m_MeasureTime - m_prx_AlignFilter->m_DebugStartTime).count();
-			printf("%6.6f\tCopy Out-Sample SetMediaTime failed\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f);
+			printf("%6.66f\tCopy Out-Sample SetMediaTime failed\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f);
 		}
 		break;
 	}
@@ -3422,7 +3488,7 @@ HRESULT C_rx_AlignFilter_InputPin::Receive(IMediaSample *pSampleIn)
 			{
 				m_prx_AlignFilter->m_MeasureTime = std::chrono::steady_clock::now();
 				m_prx_AlignFilter->m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_prx_AlignFilter->m_MeasureTime - m_prx_AlignFilter->m_DebugStartTime).count();
-				printf("%6.6f\tFrame Delivey Failed\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f);
+				printf("%6.66f\tFrame Delivey Failed\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f);
 			}
 			//Cleanup
 			pOutSample->Release();
@@ -3447,7 +3513,7 @@ HRESULT C_rx_AlignFilter_InputPin::Receive(IMediaSample *pSampleIn)
 			{
 				m_prx_AlignFilter->m_MeasureTime = std::chrono::steady_clock::now();
 				m_prx_AlignFilter->m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_prx_AlignFilter->m_MeasureTime - m_prx_AlignFilter->m_DebugStartTime).count();
-				printf("%6.6f\tDeliver Blob-View Failed\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f);
+				printf("%6.66f\tDeliver Blob-View Failed\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f);
 			}
 			//Cleanup
 			pOutSample->Release();
@@ -3477,7 +3543,7 @@ HRESULT C_rx_AlignFilter_InputPin::Receive(IMediaSample *pSampleIn)
 
 			m_prx_AlignFilter->m_MeasureTime = std::chrono::steady_clock::now();
 			m_prx_AlignFilter->m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_prx_AlignFilter->m_MeasureTime - m_prx_AlignFilter->m_DebugStartTime).count();
-			printf("%6.6f\tFrame Time: %3.3fms\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f, (float)m_prx_AlignFilter->m_AvgFrameTime / 1000);
+			printf("%6.66f\tFrame Time: %3.3fms\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f, (float)m_prx_AlignFilter->m_AvgFrameTime / 1000);
 
 			m_prx_AlignFilter->m_AvgFrameTime = 0;
 			m_prx_AlignFilter->NumFrames = 0;
@@ -3534,22 +3600,29 @@ HRESULT C_rx_AlignFilter_OutputPin::DecideBufferSize(IMemAllocator *pMemAllocato
 // DecideAllocator
 HRESULT C_rx_AlignFilter_OutputPin::DecideAllocator(IMemInputPin *pPin, IMemAllocator **ppAlloc)
 {
-	CheckPointer(pPin, E_POINTER);
-	CheckPointer(ppAlloc, E_POINTER);
-	ASSERT(m_prx_AlignFilter->m_pAllocator != NULL);
+    CheckPointer(pPin, E_POINTER);
+    CheckPointer(ppAlloc, E_POINTER);
+    ASSERT(m_prx_AlignFilter->m_pAllocator != NULL);
 
-	*ppAlloc = NULL;
+    *ppAlloc = NULL;
 
-	// Tell the pin about our allocator, set by the input pin.
-	HRESULT hr = NOERROR;
-	hr = pPin->NotifyAllocator(m_prx_AlignFilter->m_pAllocator, TRUE);
-	if (FAILED(hr))
-		return hr;
+    // Tell the pin about our allocator, set by the input pin.
+    HRESULT hr = NOERROR;
+    hr = pPin->NotifyAllocator(m_prx_AlignFilter->m_pAllocator, TRUE);
+    if (FAILED(hr)) return hr;
 
-	// Return the allocator
-	*ppAlloc = m_prx_AlignFilter->m_pAllocator;
-	m_prx_AlignFilter->m_pAllocator->AddRef();
-	return NOERROR;
+    // Return the allocator
+    *ppAlloc = m_prx_AlignFilter->m_pAllocator;
+    m_prx_AlignFilter->m_pAllocator->AddRef();
+
+    if (m_prx_AlignFilter->m_DebugOn)
+    {
+        m_prx_AlignFilter->m_MeasureTime = std::chrono::steady_clock::now();
+        m_prx_AlignFilter->m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>( m_prx_AlignFilter->m_MeasureTime - m_prx_AlignFilter->m_DebugStartTime).count();
+        printf("%6.66f\tOutputPin: DecideAllocator\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f);
+    }
+
+    return NOERROR;
 
 } // DecideAllocator
 
@@ -3578,7 +3651,7 @@ HRESULT C_rx_AlignFilter_OutputPin::CheckMediaType(const CMediaType *pmt)
 	{
 		m_prx_AlignFilter->m_MeasureTime = std::chrono::steady_clock::now();
 		m_prx_AlignFilter->m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_prx_AlignFilter->m_MeasureTime - m_prx_AlignFilter->m_DebugStartTime).count();
-		printf("%6.6f\OutputPin: CheckMediaType Input Unknown Pin:\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f);
+		printf("%6.6f\tOutputPin: CheckMediaType Input Unknown MediaSubtype\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f);
 	}
 	m_bInsideCheckMediaType = false;
 	return E_FAIL;
@@ -3640,7 +3713,7 @@ HRESULT C_rx_AlignFilter_OutputPin::CompleteConnect(IPin *pReceivePin)
 				_itow_s(hr, MsgMsg, 10, 16);
 				m_prx_AlignFilter->m_MeasureTime = std::chrono::steady_clock::now();
 				m_prx_AlignFilter->m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_prx_AlignFilter->m_MeasureTime - m_prx_AlignFilter->m_DebugStartTime).count();
-				printf("%6.6f\OutputPin: Complete Connect Set MediaType failed %s\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f, MsgMsg);
+				printf("%6.6f\tOutputPin: Complete Connect Set MediaType failed %ls\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f, MsgMsg);
 			}
 			return hr;
 		}
@@ -3651,17 +3724,20 @@ HRESULT C_rx_AlignFilter_OutputPin::CompleteConnect(IPin *pReceivePin)
 
 } // CompleteConnect
 
-//
 // Active
-//
-// This is called when we start running or go paused. We create the
-// output queue object to send data to our associated peer pin
 HRESULT C_rx_AlignFilter_OutputPin::Active()
 {
 	CAutoLock lock_it(m_pLock);
 	HRESULT hr = NOERROR;
 
-	// Make sure that the pin is connected
+	if (m_prx_AlignFilter->m_DebugOn)
+    {
+        m_prx_AlignFilter->m_MeasureTime = std::chrono::steady_clock::now();
+        m_prx_AlignFilter->m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>( m_prx_AlignFilter->m_MeasureTime - m_prx_AlignFilter->m_DebugStartTime).count();
+        printf("%6.66f\tOutputPin::Active\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f);
+    }
+
+    // Make sure that the pin is connected
 	if (m_Connected == NULL) return NOERROR;
 
 	// Create the output queue if we have to
@@ -3689,11 +3765,7 @@ HRESULT C_rx_AlignFilter_OutputPin::Active()
 
 } // Active
 
-//
 // Inactive
-//
-// This is called when we stop streaming
-// We delete the output queue at this time
 HRESULT C_rx_AlignFilter_OutputPin::Inactive()
 {
 	CAutoLock lock_it(m_pLock);
@@ -3729,7 +3801,14 @@ HRESULT C_rx_AlignFilter_OutputPin::Deliver(IMediaSample *pMediaSample)
 // DeliverEndOfStream
 HRESULT C_rx_AlignFilter_OutputPin::DeliverEndOfStream()
 {
-	// Make sure that we have an output queue
+    if (m_prx_AlignFilter->m_DebugOn)
+    {
+        m_prx_AlignFilter->m_MeasureTime = std::chrono::steady_clock::now();
+        m_prx_AlignFilter->m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>( m_prx_AlignFilter->m_MeasureTime - m_prx_AlignFilter->m_DebugStartTime).count();
+        printf("%6.66f\tOutputPin::DeliverEndOfStream\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f);
+    }
+
+    // Make sure that we have an output queue
 	if (m_pOutputQueue == NULL) return NOERROR;
 
 	m_pOutputQueue->EOS();
@@ -3833,53 +3912,52 @@ STDMETHODIMP C_rx_AlignFilter::GetDeviceName(LPCWSTR DeviceName)
 //Debug On
 STDMETHODIMP C_rx_AlignFilter::SetDebug(BOOL DebugOn)
 {
-	CAutoLock cAutolock(m_pLock);
+    CAutoLock cAutolock(m_pLock);
 
-	m_DebugPrepare = DebugOn;
+    m_DebugPrepare = DebugOn;
 
-	if (m_DebugPrepare)
-	{
-		if (!m_ConsoleAllocated)
-		{
-			if (AllocConsole())
-			{
-				freopen("CONIN$", "r", stdin);
-				freopen("CONOUT$", "w", stdout);
-				freopen("CONOUT$", "w", stderr);
-				printf("rx_AlignFilter Debug-Mode\n");
-				m_ConsoleAllocated = TRUE;
-				m_DebugOn = true;
-			}
-			else
-			{
-				MessageBox(NULL, L"Could not allocate Console", L"Console", MB_OK);
-			}
-		}
-	}
-	else
-	{
-		m_DebugOn = false;
-		if (m_ConsoleAllocated)
-		{
-			printf("rx_AlignFilter closing Debug-Mode\n");
-			if (!FreeConsole())
-			{
-				if (m_DebugOn)
-				{
-					m_MeasureTime = std::chrono::steady_clock::now();
-					m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-					printf("%6.6f\SetDebugOn: Could not free console\n", (float)m_TimeStamp / 1000000.0f);
-				}
-			}
-			else
-			{
-				m_ConsoleAllocated = FALSE;
-			}
-		}
-	}
+    if (m_DebugPrepare)
+    {
+        if (!m_ConsoleAllocated)
+        {
+            if (AllocConsole())
+            {
+                pStdIn = freopen("CONIN$", "r", stdin);
+                pStdOut = freopen("CONOUT$", "w", stdout);
+                pStdErr = freopen("CONOUT$", "w", stderr);
+                printf("rx_AlignFilter Debug-Mode\n");
+                m_ConsoleAllocated = TRUE;
+                m_DebugOn = true;
+            }
+            else
+            {
+                // MessageBox(NULL, L"Could not allocate Console", L"Console", MB_OK);
+            }
+        }
+    }
+    else
+    {
+        m_DebugOn = false;
+        if (m_ConsoleAllocated)
+        {
+            printf("rx_AlignFilter closing Debug-Mode\n");
 
-	SetDirty(TRUE);
-	return NOERROR;
+            if (!FreeConsole())
+            {
+                m_MeasureTime = std::chrono::steady_clock::now();
+                m_TimeStamp =
+                    std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+                printf("%6.6f\tSetDebugOn: Could not free console\n", (float)m_TimeStamp / 1000000.0f);
+            }
+            else
+            {
+                m_ConsoleAllocated = FALSE;
+            }
+        }
+    }
+
+    SetDirty(TRUE);
+    return NOERROR;
 }
 
 //Display Frame Timimg
@@ -3893,7 +3971,7 @@ STDMETHODIMP C_rx_AlignFilter::SetFrameTiming(BOOL DspFrameTime)
 	{
 		m_MeasureTime = std::chrono::steady_clock::now();
 		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-		printf("%6.6f\tDisplay Frame Timing: %d\n", (float)m_TimeStamp / 1000000.0f, m_DspTiming);
+		printf("%6.66f\tDisplay Frame Timing: %d\n", (float)m_TimeStamp / 1000000.0f, m_DspTiming);
 	}
 
 	SetDirty(TRUE);
@@ -3961,7 +4039,7 @@ STDMETHODIMP_ (BOOL) C_rx_AlignFilter::TakeSnapShot(const wchar_t* SnapDirectory
 		{
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\tTake SnapShot\n", (float)m_TimeStamp / 1000000.0f);
+			printf("%6.66f\tTake SnapShot\n", (float)m_TimeStamp / 1000000.0f);
 		}
 
 		m_TakeSnapShot = TRUE;
@@ -3982,7 +4060,7 @@ STDMETHODIMP C_rx_AlignFilter::SetShowOriginalImage(BOOL ShowOriginalImage)
 	{
 		m_MeasureTime = std::chrono::steady_clock::now();
 		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-		printf("%6.6f\tShow Original Image: %d\n", (float)m_TimeStamp / 1000000.0f, m_ShowOriginal);
+		printf("%6.66f\tShow Original Image: %d\n", (float)m_TimeStamp / 1000000.0f, m_ShowOriginal);
 	}
 
 	SetDirty(TRUE);
@@ -4032,7 +4110,7 @@ STDMETHODIMP C_rx_AlignFilter::SetBinarizeMode(UINT BinarizeMode)
 	{
 		m_MeasureTime = std::chrono::steady_clock::now();
 		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-		printf("%6.6f\tSet Binarite: %d\n", (float)m_TimeStamp / 1000000.0f, m_BinarizeMode);
+		printf("%6.66f\tSet Binarite: %d\n", (float)m_TimeStamp / 1000000.0f, m_BinarizeMode);
 	}
 
 	return NOERROR;
@@ -4054,7 +4132,7 @@ STDMETHODIMP C_rx_AlignFilter::SetThreshold(UINT Threshold)
 	{
 		m_MeasureTime = std::chrono::steady_clock::now();
 		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-		printf("%6.6f\tSet Threshold: %d\n", (float)m_TimeStamp / 1000000.0f, m_Threshold);
+		printf("%6.66f\tSet Threshold: %d\n", (float)m_TimeStamp / 1000000.0f, m_Threshold);
 	}
 
 	return NOERROR;
@@ -4091,7 +4169,7 @@ STDMETHODIMP C_rx_AlignFilter::SetNumDilateErodes(UINT DilateErodes)
 	{
 		m_MeasureTime = std::chrono::steady_clock::now();
 		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-		printf("%6.6f\tSet Num Dilate-Erodes: %d\n", (float)m_TimeStamp / 1000000.0f, m_DilateErodes);
+		printf("%6.66f\tSet Num Dilate-Erodes: %d\n", (float)m_TimeStamp / 1000000.0f, m_DilateErodes);
 	}
 
 	return NOERROR;
@@ -4113,7 +4191,7 @@ STDMETHODIMP C_rx_AlignFilter::SetNumExtraErodes(UINT ExtraErodes)
 	{
 		m_MeasureTime = std::chrono::steady_clock::now();
 		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-		printf("%6.6f\tSet Num Extra Erodes: %d\n", (float)m_TimeStamp / 1000000.0f, m_ExtraErodes);
+		printf("%6.66f\tSet Num Extra Erodes: %d\n", (float)m_TimeStamp / 1000000.0f, m_ExtraErodes);
 	}
 
 	return NOERROR;
@@ -4136,7 +4214,7 @@ STDMETHODIMP C_rx_AlignFilter::SetErodeSeedX(UINT ErodeSeedX)
 	{
 		m_MeasureTime = std::chrono::steady_clock::now();
 		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-		printf("%6.6f\tSet Erode Seed X: %d\n", (float)m_TimeStamp / 1000000.0f, m_ErodeSeedX);
+		printf("%6.66f\tSet Erode Seed X: %d\n", (float)m_TimeStamp / 1000000.0f, m_ErodeSeedX);
 	}
 
 	return NOERROR;
@@ -4153,7 +4231,7 @@ STDMETHODIMP C_rx_AlignFilter::SetErodeSeedY(UINT ErodeSeedY)
 	{
 		m_MeasureTime = std::chrono::steady_clock::now();
 		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-		printf("%6.6f\tSet Erode Seed Y: %d\n", (float)m_TimeStamp / 1000000.0f, m_ErodeSeedY);
+		printf("%6.66f\tSet Erode Seed Y: %d\n", (float)m_TimeStamp / 1000000.0f, m_ErodeSeedY);
 	}
 
 	return NOERROR;
@@ -4322,13 +4400,13 @@ STDMETHODIMP C_rx_AlignFilter::SetBlobFont(void* pLogFontStruct)
 	{
 		m_MeasureTime = std::chrono::steady_clock::now();
 		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-		printf("%6.6f\tSetFont:\n", (float)m_TimeStamp / 1000000.0f);
+		printf("%6.66f\tSetFont:\n", (float)m_TimeStamp / 1000000.0f);
 		printf("\t\tHeight: %d\n", lf.lfHeight);
-		printf("\t\t\FaceName: %ls\n", lf.lfFaceName);
-		printf("\t\t\CharSet: %d\n", lf.lfCharSet);
-		printf("\t\t\Italic: %d\n", lf.lfItalic);
-		printf("\t\t\Weight: %d\n", lf.lfWeight);
-		printf("\t\t\Orientation: %d\n", lf.lfOrientation);
+		printf("\t\tFaceName: %ls\n", lf.lfFaceName);
+		printf("\t\tCharSet: %d\n", lf.lfCharSet);
+		printf("\t\t\talic: %d\n", lf.lfItalic);
+		printf("\t\tWeight: %d\n", lf.lfWeight);
+		printf("\t\tOrientation: %d\n", lf.lfOrientation);
 	}
 
 	m_TextFont = CreateFontIndirect(&lf);
@@ -4373,7 +4451,7 @@ STDMETHODIMP C_rx_AlignFilter::SetMeasurePixels(BOOL MeasurePixels)
 	{
 		m_MeasureTime = std::chrono::steady_clock::now();
 		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-		printf("%6.6f\tSet MeasurePixels: %d\n", (float)m_TimeStamp / 1000000.0f, m_MeasurePixels);
+		printf("%6.66f\tSet MeasurePixels: %d\n", (float)m_TimeStamp / 1000000.0f, m_MeasurePixels);
 	}
 
 	SetDirty(TRUE);
@@ -4396,7 +4474,7 @@ STDMETHODIMP C_rx_AlignFilter::SetInverse(BOOL InverseImage)
 	{
 		m_MeasureTime = std::chrono::steady_clock::now();
 		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-		printf("%6.6f\tInverse Image: %d\n", (float)m_TimeStamp / 1000000.0f, m_InverseImage);
+		printf("%6.66f\tInverse Image: %d\n", (float)m_TimeStamp / 1000000.0f, m_InverseImage);
 	}
 
 	SetDirty(TRUE);
@@ -4418,7 +4496,7 @@ STDMETHODIMP C_rx_AlignFilter::SetMeasureMode(C_rx_AlignFilter::MeasureModeEnum 
 	{
 		m_MeasureTime = std::chrono::steady_clock::now();
 		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-		printf("%6.6f\tSet Measure Mode: %d\n", (float)m_TimeStamp / 1000000.0f, m_MeasureMode);
+		printf("%6.66f\tSet Measure Mode: %d\n", (float)m_TimeStamp / 1000000.0f, m_MeasureMode);
 	}
 
 	SetDirty(TRUE);
@@ -4441,7 +4519,7 @@ STDMETHODIMP C_rx_AlignFilter::SetDisplayMode(C_rx_AlignFilter::DisplayModeEnum 
 	{
 		m_MeasureTime = std::chrono::steady_clock::now();
 		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-		printf("%6.6f\tSet Display Mode: %d\n", (float)m_TimeStamp / 1000000.0f, m_DisplayMode);
+		printf("%6.66f\tSet Display Mode: %d\n", (float)m_TimeStamp / 1000000.0f, m_DisplayMode);
 	}
 
 	SetDirty(TRUE);
@@ -4468,7 +4546,7 @@ STDMETHODIMP C_rx_AlignFilter::SetLinesHorizontal(BOOL LinesHorizontal)
 	{
 		m_MeasureTime = std::chrono::steady_clock::now();
 		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-		printf("%6.6f\tSet Lines Horizontal: %d\n", (float)m_TimeStamp / 1000000.0f, m_LinesHorizontal);
+		printf("%6.66f\tSet Lines Horizontal: %d\n", (float)m_TimeStamp / 1000000.0f, m_LinesHorizontal);
 	}
 
 	SetDirty(TRUE);
