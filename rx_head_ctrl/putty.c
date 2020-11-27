@@ -18,7 +18,6 @@
 #include "fpga.h"
 #include "nios.h"
 #include "tse.h"
-#include "EEprom.h"
 #include "rx_head_ctrl.h"
 #include "conditioner.h"
 #include "version.h"
@@ -415,13 +414,6 @@ void putty_display_nios_status(int nios, int status)
 				
 	if (nios_loaded())
 	{
-		RX_HBStatus->flow = RX_NiosStat.cooler_pressure;
-		for (i = 0; i < MAX_HEADS_BOARD; i++)
-		{
-			RX_HBStatus->head[i].tempHead = RX_NiosStat.head_temp[i];
-			eeprom_init_data(i, RX_NiosStat.head_eeprom[i], &RX_HBStatus->head[i].eeprom);
-		}
-
 		term_printf("\n--- NIOS Status ----------------- FPGA-QSYS: id=%d time=%d\n", fpga_qsys_id(), fpga_qsys_timestamp());
 		if (!nios) return;
 		

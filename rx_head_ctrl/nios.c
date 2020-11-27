@@ -574,15 +574,15 @@ static void _nios_set_user_eeprom(int no)
 	//--- initialize status memory -----------------------
 	if (_NiosStat->cond[no].info.eeprom_read)
 	{
-	    if (memempty(&RX_HBStatus[0].head[no].eeprom_mvt, sizeof(SHeadEEpromMvt)) && !memempty(&_NiosStat->user_eeprom[no], sizeof(_NiosStat->user_eeprom[no])))
-		    memcpy(&RX_HBStatus[0].head[no].eeprom_mvt, _NiosStat->user_eeprom[no], sizeof(SHeadEEpromMvt));
+		if (memempty(&RX_HBStatus[0].head[no].eeprom_mvt, sizeof(SHeadEEpromMvt)) && !memempty(&_NiosStat->user_eeprom[no], sizeof(_NiosStat->user_eeprom[no])))
+			memcpy(&RX_HBStatus[0].head[no].eeprom_mvt, _NiosStat->user_eeprom[no], sizeof(SHeadEEpromMvt));
 
-	    //--- save if changed and not NULL ------------------
-	    if (!memempty(&RX_HBStatus[0].head[no].eeprom_mvt, sizeof(SHeadEEpromMvt)) && memcmp(_NiosStat->user_eeprom[no], &RX_HBStatus[0].head[no].eeprom_mvt, sizeof(SHeadEEpromMvt)))
-	    {
-		    memcpy(_NiosMem->cfg.user_eeprom[no], &RX_HBStatus[0].head[no].eeprom_mvt, sizeof(SHeadEEpromMvt));
-		    _NiosMem->cfg.cmd.cmd |= (WRITE_USER_EEPROM<<no);
-	    }
+		//--- save if changed and not NULL ------------------
+		if (!memempty(&RX_HBStatus[0].head[no].eeprom_mvt, sizeof(SHeadEEpromMvt)) && memcmp(_NiosStat->user_eeprom[no], &RX_HBStatus[0].head[no].eeprom_mvt, sizeof(SHeadEEpromMvt)))
+		{
+			memcpy(_NiosMem->cfg.user_eeprom[no], &RX_HBStatus[0].head[no].eeprom_mvt, sizeof(SHeadEEpromMvt));
+			_NiosMem->cfg.cmd.cmd |= (WRITE_USER_EEPROM<<no);
+		}
 	}
 }
 

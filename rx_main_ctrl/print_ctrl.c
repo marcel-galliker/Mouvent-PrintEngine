@@ -328,7 +328,7 @@ static void _send_head_info(void)
 				{
 					len += sprintf(&str[len], "%d  ", pstat->eeprom_mvt.densityValue[i]);			
 				}
-			len += sprintf(&str[len], "\n");
+				len += sprintf(&str[len], "\n");
 			}
 //			printf("TestData[%d]: >>%s<<\n", n, str);
 			spool_send_test_data(headNo, str);
