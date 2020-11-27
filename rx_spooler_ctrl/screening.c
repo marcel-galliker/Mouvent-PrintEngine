@@ -605,6 +605,9 @@ static void _scr_fill_blk(SBmpSplitInfo *psplit, int dstLineLen, BYTE *dst)
 	BYTE	*src    = *ptr;
 	BYTE	*s;
 
+	if (src == NULL) // Abort
+		return;
+
 	if (psplit->resol.x!=1200)
 	{
 		startBt    = startBt*psplit->resol.x/1200;
@@ -657,17 +660,9 @@ static void _scr_fill_blk(SBmpSplitInfo *psplit, int dstLineLen, BYTE *dst)
             s = src;
             width = srcWidthBt;
         }
-        /*
-		if (mirror)	
-		{
-			src	-= psplit->srcLineLen;
-			line--;
-		}
-		else
-		*/
-		{
-			src	+= psplit->srcLineLen;
-			line++;
-		}
+
+		if (psplit->srcLineLen == 0) return; // Abort
+		src	+= psplit->srcLineLen;
+		line++;
 	}
 }

@@ -57,8 +57,7 @@ static HANDLE			_PrintFile_Sem;
 static RX_SOCKET		_PrintFile_Socket;
 static SPrintFileCmd	_PrintFile_Msg;
 
-static int				_Running;
-static int				_Abort;
+static int				_Abort = TRUE;
 static int				_data_malloc_reply;
 static int				_ResetCnt;
 static int				_StartCnt;
@@ -106,7 +105,6 @@ static int load_bitmaps	(const char *filepath, SBmpInfo *info);
 int ctrl_start(const char *ipAddrMain)
 {
 	_ThreadRunning  = TRUE;
-	_Running		= FALSE;
 	_BufferNo       = BUFFER_CNT-1;
 	memset(_BufferSize, 0, sizeof(_BufferSize));
 	memset(_Buffer, 0, sizeof(_Buffer));
@@ -309,16 +307,22 @@ static int _do_print_test_data(RX_SOCKET socket, SPrintTestDataMsg *msg)
 static int _do_spool_cfg(RX_SOCKET socket, SSpoolerCfg *pmsg)
 {	
 	TrPrintfL(TRUE, "got REP_GET_SPOOL_CFG");
+	// ensure we abort all running processes
+	if (!_Abort) return Error(ERR_ABORT, 0, "Spooler still running... abort");
+
 	memcpy(&RX_Spooler, pmsg, sizeof(RX_Spooler));
 	sr_mnt_drive(RX_Spooler.dataRoot);
 	jc_init();
 	data_init(socket, RX_Spooler.colorCnt*RX_Spooler.headsPerColor);
 	{
+		// clear memory for big TX image
 		int i;
 		for (i=0; i<SIZEOF(_Buffer); i++)
-			data_clear(_Buffer[i]);		
+		{
+			data_clear(_Buffer[i]);
+			data_free(&_BufferSize[i], _Buffer[i]);
+		}
 	}
-	_Running	 = FALSE;
 	_Abort		 = FALSE;
 	_data_malloc_reply = REPLY_OK;
 	_ResetCnt	 = 0;
@@ -417,7 +421,6 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 	_MsgGot++;
 	memcpy(&msg, pdata, sizeof(msg)); // local copy as original can be overwritten by the communication task!
 
-	_Running = TRUE;
 	hc_start_printing();
 		
 	same = (!strcmp(msg.filename, _LastFilename) &&  msg.id.page==_LastPage && msg.wakeup==_LastWakeup && msg.gapPx==_LastGap);

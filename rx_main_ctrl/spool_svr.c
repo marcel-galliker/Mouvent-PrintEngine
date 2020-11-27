@@ -193,7 +193,6 @@ static int _handle_spool_connected(RX_SOCKET socket, const char *peerName)
 		_Spooler[no].err	= FALSE;
 		_Spooler[no].socket = socket;
 	}
-	spool_set_config(socket, ctrl_headResetCnt());
 	return REPLY_OK;
 }
 
@@ -735,6 +734,12 @@ static int _do_print_file_rep(RX_SOCKET socket, int spoolerNo, SPrintFileRep *ms
 static int _do_print_file_evt	(RX_SOCKET socket, SPrintFileMsg	*msg)
 {
 //	TrPrintfL(TRUE, "Documment (id=%d, page=%d, scan=%d, copy=%d): EVENT %d",	msg->id.id, msg->id.page, msg->id.copy, msg->id.scan, msg->evt);
+	// check we are in printing mode or it is an old message to ignore
+	if (RX_PrinterStatus.printState < ps_printing)
+	{
+		spool_send_msg_2(CMD_PRINT_ABORT, 0, NULL, FALSE); // ensure we stop the spooler
+		return REPLY_ERROR;
+	}
 	SPrintQueueItem *pitem;
 	switch (msg->evt)
 	{

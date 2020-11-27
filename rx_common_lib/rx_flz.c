@@ -298,7 +298,7 @@ int flz_load(SPageId *id, const char *filedir, const char *filename, int printMo
 				Error(ERR_ABORT, 0, "Streaming not implemented yet");
 			}
 			
-			if (_Abort) return REPLY_OK;
+			if (_Abort) return REPLY_ERROR;
 
 			//--- wait last decompressing finished ---------------------------------
 
@@ -340,6 +340,8 @@ int flz_load(SPageId *id, const char *filedir, const char *filename, int printMo
 				if (progress!=NULL) progress(id, RX_ColorNameShort(pinfo->inkSupplyNo[c]), _DecompressPar.progress);					
 			}
 			if (progress!=NULL) progress(id, RX_ColorNameShort(pinfo->inkSupplyNo[c]), 100);
+
+			if (_Abort) return REPLY_ERROR;
 
             //--- add wakeup ----------------------
 

@@ -168,10 +168,10 @@ class TCPProtocol:
     def mgt_CMD_GET_BLOCK_USED(self, msg):
         # send response
         msg.msgtype = "REP_GET_BLOCK_USED"
-        msg.blockOutIdx = self.board.blk_end[msg.headNo]
-        msg.blkCnt = ((msg.blkCnt + 31) // 32) * 32
-        logging.debug(f"{self.board.used.count} blocks used {msg.blkNo} for {msg.blkCnt} blocks on board {self.board.no} head {msg.headNo}")
+        msg.blockOutIdx = self.board.blk_end[msg.headNo] + 32 # bigger than block size to avoid mgt of the blockOutIdx        
         msg.used = self.board.used.flags(msg.blkNo, msg.blkCnt, self.board.blk_end[msg.headNo], self.board.blkNo0[msg.headNo]) 
+        msg.blkCnt = len(msg.used) * 32
+        logging.debug(f"{self.board.used.count} blocks used {msg.blkNo} for {msg.blkCnt} blocks on board {self.board.no} head {msg.headNo}")
         self.transport.write(msg.pack())
 
     def mgt_CMD_FPGA_IMAGE(self, msg):
@@ -215,11 +215,11 @@ class UsedFlags(list):
     def flags(self, blkNo, blkCnt, end, blk0):
         "return the table of bits according to blocks"
         if blkNo + blkCnt < end:
-            self._spare(blkNo + blkCnt)
-            return self._flags[blkNo//32:blkNo//32+blkCnt//32]
+            self._spare(blkNo + blkCnt + 31)
+            return self._flags[blkNo//32:(blkNo+blkCnt+31)//32]
         else:
-            self._spare(end)
-            return self._flags[blkNo//32:end//32]+self._flags[blk0//32:(blkNo + blkCnt - end)//32]
+            self._spare(end + 31)
+            return self._flags[blkNo//32:(end+31)//32]+self._flags[blk0//32:(blkNo + blkCnt - end)//32]
 
 
 def save_image(no, blocks, fpga_images, blk_end, blk_No0):
@@ -361,7 +361,7 @@ async def main():
                     if len(img) == len([x for x in board.activate if x]) and not board.abort:
                         # if done, save bmp in another thread as it could be a long process
                         fn = functools.partial(save_image, *(board.no, board.blocks, img, board.blk_end, board.blkNo0))
-                        loop.run_in_executor(None, fn)                            
+                        await loop.run_in_executor(None, fn)                            
                         board.print_done(img[0])
     
 
