@@ -94,7 +94,8 @@ void main_rebooting_cond(void) {
 	for (cond = 0; cond < MAX_HEADS_BOARD; cond++)
 	{
 		_Cond[cond].alive = 0xFFFFFFFF;
-		pRX_Status->cond[cond].info.eeprom_read = FALSE;
+
+	//	pRX_Status->cond[cond].info.eeprom_read = FALSE; // EEPROM has nothing to do with conditioner!
 	}
 }
 

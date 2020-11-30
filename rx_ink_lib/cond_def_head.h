@@ -67,7 +67,7 @@ typedef union SCondInfo
 			UINT32	valve_ink   : 1;	//  01:
 			UINT32	valve_flush : 1;	// thermistor_test_done : 1;		// 	02:
 			UINT32	meniscus_warn : 1;	// 	03:
-            UINT32	eeprom_read	: 1;	 // 04:
+            UINT32	eeprom_read	: 1;	 // 04: EEprom has nothing to do with conditioner, but it is easier to program here! 
 			UINT32	temp_ready : 1;     //  05:
 			UINT32	flowFactor_ok : 1;  // 	06:
 			UINT32	info_07 : 1;		// 	07:

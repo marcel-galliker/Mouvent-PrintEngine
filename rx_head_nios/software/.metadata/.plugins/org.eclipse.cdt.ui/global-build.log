@@ -1,5 +1,7 @@
-09:37:48 **** Build of configuration Nios II for project rx_head_nios ****
+07:26:59 **** Build of configuration Nios II for project rx_head_nios ****
 make mem_init_generate 
+Info: Compiling main.c to obj/default/main.o
+nios2-elf-gcc -xc -MP -MMD -c -I../rx_head_nios_bsp/HAL/inc -I../rx_head_nios_bsp -I../rx_head_nios_bsp/drivers/inc -I../../../rx_ink_lib  -pipe -D__hal__ -DALT_NO_C_PLUS_PLUS -DALT_NO_CLEAN_EXIT -D'exit(a)=_exit(a)' -DALT_NO_EXIT -DALT_NO_INSTRUCTION_EMULATION -DALT_STACK_CHECK -fstack-limit-register=et -DSMALL_C_LIB -DALT_SINGLE_THREADED -DALTERA_AVALON_JTAG_UART_SMALL -DALTERA_AVALON_UART_SMALL  -DNIOS  -O0 -g -Wall   -mno-hw-div -mhw-mul -mno-hw-mulx  -o obj/default/main.o main.c
 Info: Compiling version.c to obj/default/version.o
 nios2-elf-gcc -xc -MP -MMD -c -I../rx_head_nios_bsp/HAL/inc -I../rx_head_nios_bsp -I../rx_head_nios_bsp/drivers/inc -I../../../rx_ink_lib  -pipe -D__hal__ -DALT_NO_C_PLUS_PLUS -DALT_NO_CLEAN_EXIT -D'exit(a)=_exit(a)' -DALT_NO_EXIT -DALT_NO_INSTRUCTION_EMULATION -DALT_STACK_CHECK -fstack-limit-register=et -DSMALL_C_LIB -DALT_SINGLE_THREADED -DALTERA_AVALON_JTAG_UART_SMALL -DALTERA_AVALON_UART_SMALL  -DNIOS  -O0 -g -Wall   -mno-hw-div -mhw-mul -mno-hw-mulx  -o obj/default/version.o version.c
 Info: Building ../rx_head_nios_bsp
