@@ -51,6 +51,7 @@ static void _tx80x_wd_move_to_pos(int cmd, int pos);
 static int  _steps_2_micron(int steps);
 static int  _micron_2_steps(int micron);
 static void _tx80x_wd_motor_z_test(int steps);
+static char *_motor_name(int no);
 
 // global Variables
 static int  _CmdRunning = 0;
@@ -131,9 +132,9 @@ void tx80x_wd_main(void)
             {
                 if ((Fpga.stat->statMot[motor].err_estop & ENC_ESTOP_ENC))
                 {
-                    if (!fpga_input(motor))
+                    if (!fpga_input(motor - MOTOR_WD_FRONT + WD_FRONT_STORED_IN))
                     {
-                        Error(ERR_ABORT, 0, "WRINKLE DETECTION: %s: motor %s blocked", _CmdName, motor + 1);
+                        Error(ERR_ABORT, 0, "WRINKLE DETECTION: %s: motor %s blocked", _CmdName, _motor_name(motor));
                         ok = FALSE;
                     }
                 }
@@ -147,7 +148,7 @@ void tx80x_wd_main(void)
             {
                 if (motor_error(motor))
                 {
-                    Error(ERR_ABORT, 0, "WRINKLE DETECTION: %s: motor %s blocked", _CmdName, motor + 1);
+                    Error(ERR_ABORT, 0, "WRINKLE DETECTION: %s: motor %s blocked", _CmdName, _motor_name(motor));
                     ok = FALSE;
                 }
             }
@@ -405,4 +406,22 @@ static void _tx80x_wd_motor_z_test(int steps)
         return TRUE;
     }
     return FALSE;
+}
+
+//--- _motor_name ------------------------------
+static char *_motor_name(int no)
+{
+    switch (no)
+    {
+    case 0:
+        return "Robot Rotation";
+    case 1:
+        return "Robot Shift";
+    case 2:
+        return "WD Front";
+    case 3:
+        return "WD Back";
+    default:
+        return "";
+    }
 }
