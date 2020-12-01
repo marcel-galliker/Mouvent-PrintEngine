@@ -1162,14 +1162,13 @@ void fluid_send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
             steptx_lift_to_print_pos();
     }
 
-    if (ctrlMode == ctrl_off)
+    if (ctrlMode == ctrl_off || ctrlMode == ctrl_print)
     {
         step_rob_stop();
         if (rx_def_is_lb(RX_Config.printer.type) && RX_StepperStatus.robot_used)
         {
             steplb_pump_back_fluid(no, FALSE);
         }
-        
     }
 
     if (ctrlMode==ctrl_purge_hard || ctrlMode == ctrl_purge_hard_wipe || ctrlMode == ctrl_purge_hard_vacc || ctrlMode == ctrl_purge || ctrlMode == ctrl_purge_soft || ctrlMode == ctrl_purge_hard_wash) 

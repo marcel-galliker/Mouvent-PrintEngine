@@ -23,6 +23,14 @@
 
 #define UPDATE_FIFO_THRESHOLD       4
 
+// define inputs
+#define SCREW_IN_REF                0
+#define SCREW_IN_DOWN               1
+#define SCREW_IN_UP                 2
+#define Y_IN_FRONT                  3
+#define Y_IN_REF                    4
+#define X_IN_REF                    5
+
 static int32_t send_command(uint32_t commandCode, uint8_t len, void *data);
 static void *receive_thread(void *par);
 static void *send_thread(void *par);
@@ -147,6 +155,11 @@ int robi_is_updating(void)
 int robi_is_init(void)
 {
     return _isInit;
+}
+
+int robi_in_ref(void)
+{
+    return RX_RobiStatus.gpio.inputs & (1UL << Y_IN_REF);
 }
 
 //--- robi_stop ------------------------------------------------------------------------

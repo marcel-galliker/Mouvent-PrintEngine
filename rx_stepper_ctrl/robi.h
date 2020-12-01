@@ -8,6 +8,7 @@ void robi_set_output(int num, int val);
 int robi_current_version(void);
 int robi_is_updating(void);
 int robi_is_init(void);
+int robi_in_ref(void);
 void robi_stop(void);
 void robi_reference(void);
 void robi_move_x_relative_steps(INT32 steps);

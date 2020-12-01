@@ -27,13 +27,6 @@
 #define TIME_BEFORE_TURN_SCREWER    2600    // us
 #define SCREW_MOVEMENT_CHECK_TIME   1100    // us
 
-// define inputs
-#define SCREW_IN_DOWN               0
-#define SCREW_IN_UP                 1
-#define SCREW_IN_REF                2
-#define X_IN_REF                    3
-#define Y_IN_REF                    4
-
 #define MIN_Y_POS                   34000
 
 #define MAX_VARIANCE                100     // um
@@ -157,7 +150,7 @@ void robi_lb702_main(int ticks, int menu)
             if (RX_StepperStatus.screwerinfo.ref_done)
             {
                 _CmdRunning = 0;
-                if (!(RX_RobiStatus.gpio.inputs & (1UL << Y_IN_REF)))
+                if (!robi_in_ref())
                 {
                     Error(ERR_CONT, 0, "Robi-Sensor in Garage not high");
                     RX_StepperStatus.screwerinfo.ref_done = FALSE;
@@ -170,7 +163,7 @@ void robi_lb702_main(int ticks, int menu)
             else
             {
                 if (!robi_connected()) Error(ERR_CONT, 0, "Connection lost during reference");
-                if (!(RX_RobiStatus.gpio.inputs & (1UL << Y_IN_REF))) Error(ERR_CONT, 0, "Robi-Sensor in Garage not high");
+                if (!robi_in_ref()) Error(ERR_CONT, 0, "Robi-Sensor in Garage not high");
                 _CmdRunning = 0;
                 _NewCmd = 0;
                 _Value = 0;
@@ -178,7 +171,7 @@ void robi_lb702_main(int ticks, int menu)
             break;
 
         case CMD_ROBI_MOVE_TO_GARAGE:
-            if (!(RX_RobiStatus.gpio.inputs & (1UL << Y_IN_REF)))
+            if (!robi_in_ref())
             {
                 Error(ERR_CONT, 0, "Robi-Sensor in Garage not high");
                 RX_StepperStatus.screwerinfo.ref_done = FALSE;
@@ -435,10 +428,12 @@ void robi_lb702_display_status(void)
 		_steps_2_micron(RX_RobiStatus.motors[MOTOR_XY_1].motorPosition), 
 		_steps_2_micron(RX_RobiStatus.motors[MOTOR_XY_1].motorTargetPosition), 
 		_steps_2_micron(RX_RobiStatus.motors[MOTOR_XY_1].motorEncoderPosition));
-	term_printf("MOTOR_SCREW:\tMotor pos.: %10d Motor target pos.: %10d Encoder pos.: %10d\n", 
+	term_printf("MOTOR_SCREW:\tMotor pos.: %10d Motor target pos.: %10d\n", 
 		RX_RobiStatus.motors[MOTOR_SCREW].motorPosition, 
-		RX_RobiStatus.motors[MOTOR_SCREW].motorTargetPosition, 
-		RX_RobiStatus.motors[MOTOR_SCREW].motorEncoderPosition);
+		RX_RobiStatus.motors[MOTOR_SCREW].motorTargetPosition);
+    term_printf("MOTOR_Z:\tMotor pos.: %10d Motor target pos.: %10d\n",
+                RX_RobiStatus.motors[MOTOR_Z].motorPosition,
+                RX_RobiStatus.motors[MOTOR_Z].motorTargetPosition);
     term_printf("Screwer-Current: \t %d\n", RX_RobiStatus.screwCurrent);
     term_printf("Screwer X-Pos: \t\t %d\n", RX_StepperStatus.screw_posX);
     term_printf("Screwer Y-Pos: \t\t %d\n", RX_StepperStatus.screw_posY);
@@ -517,7 +512,7 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                 _Value = *((INT32 *)pdata);
                 robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_DOWN, NULL);
             }
-            else if (RX_StepperStatus.screw_posY - MIN_Y_POS > MAX_VARIANCE)
+            else if (RX_StepperStatus.screw_posY < MIN_Y_POS)
             {
                 Error(ERR_CONT, 0, "Screwer to close to garage to move in x axis");
                 break;
@@ -820,9 +815,9 @@ static void _check_Screwer_Movement()
     {
         if ((RX_StepperStatus.screwerinfo.screwer_blocked_right &&  RX_StepperStatus.screw_posY >= (SCREW_Y_BACK + SCREW_Y_FRONT) / 2) ||
                 (RX_StepperStatus.screwerinfo.screwer_blocked_left && RX_StepperStatus.screw_posY <= (SCREW_Y_BACK + SCREW_Y_FRONT) / 2))
-            ticks = 17;
+            ticks = 15;
         else
-            ticks = 5;
+            ticks = 3;
         robi_set_screw_current(TRUE);
         robi_lb702_handle_ctrl_msg(INVALID_SOCKET, _NewCmd, &ticks);
     }

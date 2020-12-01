@@ -1,10 +1,11 @@
 #pragma once
 #include "stdint.h"
 
-#define MOTOR_COUNT				3
-#define MOTOR_XY_0				0
-#define MOTOR_XY_1				1
+#define MOTOR_COUNT				4
+#define MOTOR_XY_1				0
+#define MOTOR_XY_0				1
 #define MOTOR_SCREW				2
+#define MOTOR_Z					3
 
 #define POS_UNKNOWN	0
 #define POS_UP		1
