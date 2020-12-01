@@ -572,7 +572,7 @@ static void _nios_set_user_eeprom(int no)
 	if (sizeof(_NiosStat->user_eeprom[no])!=EEPROM_DATA_SIZE) Error(ERR_ABORT, 0, "SIZE MISMATCH");
 
 	//--- initialize status memory -----------------------
-	if (_NiosStat->cond[no].info.eeprom_read)
+	if (_NiosStat->eeprom_valid & (1<<no))
 	{
 		if (memempty(&RX_HBStatus[0].head[no].eeprom_mvt, sizeof(SHeadEEpromMvt)) && !memempty(&_NiosStat->user_eeprom[no], sizeof(_NiosStat->user_eeprom[no])))
 			memcpy(&RX_HBStatus[0].head[no].eeprom_mvt, _NiosStat->user_eeprom[no], sizeof(SHeadEEpromMvt));
@@ -620,7 +620,7 @@ static void _nios_copy_status(void)
 	for (int cond=0; cond < MAX_HEADS_BOARD; cond++)
 	{
 		RX_HBStatus->head[cond].tempHead = RX_NiosStat.head_temp[cond];
-		if (_NiosStat->cond [cond].info.eeprom_read) eeprom_init_data(cond, RX_NiosStat.head_eeprom[cond], &RX_HBStatus->head[cond].eeprom);
+		if (_NiosStat->eeprom_valid & (1<<cond)) eeprom_init_data(cond, RX_NiosStat.head_eeprom[cond], &RX_HBStatus->head[cond].eeprom);
 	}
 }
 

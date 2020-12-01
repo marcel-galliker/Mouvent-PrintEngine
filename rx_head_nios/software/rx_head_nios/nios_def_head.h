@@ -200,6 +200,7 @@ typedef struct SNiosStat
 	INT32			QSYS_timestamp;
 	BYTE			head_eeprom[MAX_HEADS_BOARD][EEPROM_DATA_SIZE];
 	BYTE			user_eeprom[MAX_HEADS_BOARD][EEPROM_DATA_SIZE];
+	BYTE			eeprom_valid;
 	
 	//--- other status --------------------
 	UINT32			alive;

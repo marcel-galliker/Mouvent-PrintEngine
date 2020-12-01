@@ -15,6 +15,7 @@
 #include "rx_term.h"
 #include "rx_threads.h"
 #include "rx_trace.h"
+#include "EEprom.h"
 #include "fpga.h"
 #include "nios.h"
 #include "tse.h"
