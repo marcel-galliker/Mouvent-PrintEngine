@@ -1509,9 +1509,8 @@ static int _data_split_prod(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 
 					if (startPx%pixelPerByte)
 					{		
-						if (startPx<0) 	pInfo->jetPx0  = pixelPerByte-(startPx+RX_Spooler.headWidthPx+pixelPerByte)%pixelPerByte;
-						else		    pInfo->jetPx0  = pixelPerByte-(startPx+pixelPerByte)%pixelPerByte;
-						pInfo->widthPx += abs(startPx % pixelPerByte);
+						pInfo->jetPx0 = (startPx<0?pixelPerByte+startPx%pixelPerByte:startPx%pixelPerByte); // modulo gives negatif result for negatif number
+						pInfo->widthPx += pInfo->jetPx0;
 					}
 					else pInfo->jetPx0	= 0;
 					pInfo->widthBt = (pInfo->widthPx + pixelPerByte - 1) / pixelPerByte;

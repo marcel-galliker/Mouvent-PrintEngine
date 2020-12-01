@@ -252,7 +252,7 @@ def save_image(no, blocks, fpga_images, blk_end, blk_No0):
                 start = 0
                 if fpga.jetPx0:
                     logging.info(f"'{filename}' has jetPx0={fpga.jetPx0}")
-                    start = 8 // fpga.bitPerPixel - fpga.jetPx0
+                    start = fpga.jetPx0
                 bmp = bmp.crop((start, 0, fpga.widthPx , fpga.lengthPx))
             bmp.save(filename)
         except Exception as e:
