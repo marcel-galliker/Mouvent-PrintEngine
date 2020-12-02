@@ -299,7 +299,6 @@
     <Compile Include="Converters\JetCompensationConverters.cs" />
     <Compile Include="Converters\MainWindowConverters.cs" />
     <Compile Include="Converters\PrintSystemMonitoringConverters.cs" />
-    <Compile Include="Converters\RowHeightConverter.cs" />
     <Compile Include="Converters\AlignmentConverters.cs" />
     <Compile Include="Converters\BluetoothImg_Converter.cs" />
     <Compile Include="Converters\BoolImg_Converter.cs" />

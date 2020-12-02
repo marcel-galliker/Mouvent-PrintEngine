@@ -21,27 +21,10 @@ namespace RX_DigiPrint.Views.PrintSystemView
     /// <summary>
     /// Interaction logic for InkSupplyGrid.xaml
     /// </summary>
-    public partial class InkSupplyGrid : UserControl, INotifyPropertyChanged
+    public partial class InkSupplyGrid : UserControl
     {
         private InkSupplyList               _InkSupply     = RxGlobals.InkSupply;
         private List<InkSupplyView>         _InkSupplyView = new List<InkSupplyView>();
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        private void OnPropertyChanged(string name)
-        {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged.Invoke(this, new PropertyChangedEventArgs(name));
-            }
-        }
-
-        private bool _HasSideSelection;
-        public bool HasSideSelection
-        {
-            get { return _HasSideSelection; }
-            set { _HasSideSelection = value; OnPropertyChanged("HasSideSelection"); }
-        }
-
        
         //--- Constructor -------------------------------
         public InkSupplyGrid()
@@ -80,7 +63,6 @@ namespace RX_DigiPrint.Views.PrintSystemView
         {
             int i = 0;
             TX_Side.Visibility = RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_DP803? Visibility.Visible : Visibility.Collapsed;
-            HasSideSelection = RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_DP803;
 
             InkSuplyGrid.RowDefinitions[3].Height = new GridLength(25/RxGlobals.Screen.Scale);
 
@@ -94,12 +76,9 @@ namespace RX_DigiPrint.Views.PrintSystemView
                     for (i = 5; i < InkSuplyGrid.RowDefinitions.Count; i++) InkSuplyGrid.RowDefinitions[i].Height = new GridLength(1, GridUnitType.Auto);
                     break;
             }
-
-
-            // InkSuplyGrid.RowDefinitions[5].Height = new GridLength(0); // Canister Level
             
-            if (RxGlobals.PrintSystem.HasHeater)  InkSuplyGrid.RowDefinitions[5].Height =  new GridLength(1, GridUnitType.Auto);
-            else                                  InkSuplyGrid.RowDefinitions[5].Height =  new GridLength(0);
+            RowHeight_Side.  Height = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_DP803)? GridLength.Auto : new GridLength(0);
+            RowHeight_Heater.Height =  RxGlobals.PrintSystem.HasHeater?                                  GridLength.Auto : new GridLength(0);
             _assign_inksupply(RxGlobals.PrintSystem.ColorCnt * RxGlobals.PrintSystem.InkCylindersPerColor);
         }
 

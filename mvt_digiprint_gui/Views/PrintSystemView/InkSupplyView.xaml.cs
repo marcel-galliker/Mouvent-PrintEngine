@@ -14,25 +14,8 @@ using System.Windows.Media;
 
 namespace RX_DigiPrint.Views.PrintSystemView
 {
-    public partial class InkSupplyView : UserControl, INotifyPropertyChanged
+    public partial class InkSupplyView : UserControl
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-        private void OnPropertyChanged(string name)
-        {
-            if(PropertyChanged != null)
-            {
-                PropertyChanged.Invoke(this, new PropertyChangedEventArgs(name));
-            }
-        }
-
-        private bool _HasSideSelection;
-        public bool HasSideSelection
-        {
-            get { return _HasSideSelection; }
-            set { _HasSideSelection = value; OnPropertyChanged("HasSideSelection"); }
-        }
-
-
         private InkSupply   _InkSupply;
         private static int  _ActiveItem=0;
 
@@ -115,7 +98,6 @@ namespace RX_DigiPrint.Views.PrintSystemView
         {
             int i = 0;
             CB_RectoVerso.Visibility = RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_DP803 ? Visibility.Visible : Visibility.Collapsed;
-            HasSideSelection = RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_DP803;
             
             SettingsGrid.RowDefinitions[3].Height = new GridLength(25/RxGlobals.Screen.Scale);
             
@@ -130,12 +112,11 @@ namespace RX_DigiPrint.Views.PrintSystemView
                     NotConnected.Foreground = Brushes.Red;
                     break;
             }
-            if (RxGlobals.PrintSystem.HasHeater) SettingsGrid.RowDefinitions[6].Height = new GridLength(1, GridUnitType.Auto);
-            else                                 SettingsGrid.RowDefinitions[6].Height = new GridLength(0);
+            RowHeight_Side.  Height = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_DP803)? GridLength.Auto : new GridLength(0);
+            RowHeight_Heater.Height =  RxGlobals.PrintSystem.HasHeater?                                  GridLength.Auto : new GridLength(0);
 
             Button_PurgeVacc.Visibility = (RxGlobals.PrintSystem.IsTx) ? Visibility.Visible : Visibility.Collapsed;
             Button_PurgeWipe.Visibility = (RxGlobals.PrintSystem.IsTx) ? Visibility.Visible : Visibility.Collapsed;
-
         }
 
         //--- OnInkSupplyPropertyChanged -------------------------
