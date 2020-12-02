@@ -758,7 +758,7 @@ static void _lb702_motor_test(int motorNo, int steps)
         RX_StepperStatus.info.moving = TRUE;
 
         motors_config(motors, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER, STEPS);
-        motors_move_by_step(motors, &_ParZ_down, steps, FALSE);
+        motors_move_by_step(motors, &par, steps, FALSE);
     }
 }
 
