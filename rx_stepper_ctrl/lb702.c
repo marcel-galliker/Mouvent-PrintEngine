@@ -49,8 +49,8 @@ static char		*_MotorName[2] = {"BACK", "FRONT"};
 
 #define MIN_CAP_HEIGHT			7600		// um under Ref height
 
-#define DIST_CAP_WASH			7600		// um -> higher than capping hight
-#define DIST_CAP_SCREW			7100		// um -> higher than capping hight
+#define DIST_CAP_WASH			7500		// um -> higher than capping hight
+#define DIST_CAP_SCREW			6800		// um -> higher than capping hight
 
 #define CLUSTER_CHANGE_HEIGHT	60000	//um
 

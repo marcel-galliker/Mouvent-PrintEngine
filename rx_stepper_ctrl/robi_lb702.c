@@ -24,7 +24,7 @@
 
 #define STEPS_PER_REV				51200
 #define DISTANCE_UM_PER_REV			36000   // 36000
-#define TIME_BEFORE_TURN_SCREWER    2600    // us
+#define TIME_BEFORE_TURN_SCREWER    3000 //2600    // us
 #define SCREW_MOVEMENT_CHECK_TIME   1100    // us
 
 #define MIN_Y_POS                   34000
@@ -253,6 +253,7 @@ void robi_lb702_main(int ticks, int menu)
             loc_new_cmd = _NewCmd;
             loc_new_value = _Value;
             _NewCmd = 0;
+            
             _Value = 0;
             switch (loc_new_cmd)
             {
@@ -448,6 +449,7 @@ void robi_lb702_display_status(void)
     term_printf("Robi blocked left: \t %d\n", RX_StepperStatus.screwerinfo.screwer_blocked_left);
     term_printf("Robi blocked right: \t %d\n", RX_StepperStatus.screwerinfo.screwer_blocked_right);
     term_printf("Robi screwed: \t\t %d\n", RX_StepperStatus.screwerinfo.screwed);
+    term_printf("Screwer ready: \t\t %d\n", RX_StepperStatus.screwerinfo.screwer_ready);
 }
 
 //--- _steps_2_micron ----------------------------------------------------------------
@@ -811,7 +813,7 @@ static void _check_Screwer_Movement()
     int ticks;
     static int _oldScrewState = 0;
     
-    if ((RX_StepperStatus.screwerinfo.screwer_blocked_left || RX_StepperStatus.screwerinfo.screwer_blocked_right) && robi_move_done() && _NewCmd)
+    if ((RX_StepperStatus.screwerinfo.screwer_blocked_left || RX_StepperStatus.screwerinfo.screwer_blocked_right) && robi_move_done() && _NewCmd && !_CmdRunning)
     {
         if ((RX_StepperStatus.screwerinfo.screwer_blocked_right &&  RX_StepperStatus.screw_posY >= (SCREW_Y_BACK + SCREW_Y_FRONT) / 2) ||
                 (RX_StepperStatus.screwerinfo.screwer_blocked_left && RX_StepperStatus.screw_posY <= (SCREW_Y_BACK + SCREW_Y_FRONT) / 2))
@@ -833,6 +835,6 @@ static void _check_robi_stalled(void)
         if (_CmdRunning == CMD_ROBI_SCREW_LEFT)
             _NewCmd = CMD_ROBI_SCREW_RIGHT;
         else if (_CmdRunning == CMD_ROBI_SCREW_RIGHT)
-            _NewCmd = CMD_ROBI_SCREW_LEFT;  
+            _NewCmd = CMD_ROBI_SCREW_LEFT;
     }
 }

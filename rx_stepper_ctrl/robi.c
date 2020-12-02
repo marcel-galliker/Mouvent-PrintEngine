@@ -287,6 +287,7 @@ static void* receive_thread(void *par)
 	uint8_t buffer[2048];
 	uint32_t bytesRead;
 	SUsbRxMsg rxMessage;
+    char *msg = "Motor driver overheated";
 
     while (_isInit)
 	{
@@ -322,7 +323,7 @@ static void* receive_thread(void *par)
                         {
                             if (rxMessage.length)
                             {
-                                if (rxMessage.error == MOTOR_STALLED && RX_RobiStatus.motors[MOTOR_SCREW].isStalled)
+                                if (rxMessage.error == MOTOR_STALLED && RX_RobiStatus.motors[MOTOR_SCREW].isStalled && strcmp(msg, rxMessage.data))
                                         _ScrewerStalled = TRUE;
                                 
                                 Error(ERR_CONT, 0, "Robi Error. Flag: %x, Message: %s", rxMessage.error, rxMessage.data);
