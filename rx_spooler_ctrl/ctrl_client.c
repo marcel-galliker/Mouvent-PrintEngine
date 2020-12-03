@@ -497,7 +497,7 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 		reply.hdr.msgId  = REP_PRINT_FILE;
 		reply.hdr.msgLen = sizeof(reply);
 		reply.same   = same;
-		linelenBt = ((HEAD_WIDTH_SAMBA+HEAD_OVERLAP_SAMBA)*bitsPerPixel+8)/8;	// 7=max pixel shifting
+		linelenBt = ((HEAD_WIDTH_SAMBA+HEAD_OVERLAP_SAMBA)*(bitsPerPixel==8?2:bitsPerPixel)+8)/8;	// if bitsPerPixel is 8, screening will change it to 2!
 		linelenBt = (linelenBt+31) & ~31;// align to 256 Bits (32 Bytes)
 		reply.blkCnt = (linelenBt *lengthPx +RX_Spooler.dataBlkSize-1) / RX_Spooler.dataBlkSize;
 		memcpy(&reply.id, &msg.id, sizeof(reply.id));

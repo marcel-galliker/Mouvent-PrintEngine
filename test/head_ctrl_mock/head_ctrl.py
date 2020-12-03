@@ -17,6 +17,7 @@ def mac_addr(s):
     "transform a mac address string to an corresponding int"
     return int("".join(reversed(s.split("-"))), 16)
 
+rec_blocks = True
 # all connections to close properly at the end
 _transports = []
 
@@ -160,7 +161,8 @@ class TCPProtocol:
         for i in range(4):
                 msg.head[i]["ctrlMode"] = 0x006 # ctrl_readyToPrint
                 msg.head[i]["clusterNo"] = self.board.no
-                msg.head[i]["disabledJets"] = 32 * (-1, )
+                msg.head[i]["disabledJets"] = 32 *[-1, ]
+                #msg.head[i]["disabledJets"][0] = 52
                 #msg.head[i]["densityValue"] = 12 * [1000,]
                 #msg.head[i]["densityValue"][3*i] = 10 
         self.transport.write(msg.pack())
@@ -168,8 +170,11 @@ class TCPProtocol:
     def mgt_CMD_GET_BLOCK_USED(self, msg):
         # send response
         msg.msgtype = "REP_GET_BLOCK_USED"
-        msg.blockOutIdx = self.board.blk_end[msg.headNo] + 32 # bigger than block size to avoid mgt of the blockOutIdx        
-        msg.used = self.board.used.flags(msg.blkNo, msg.blkCnt, self.board.blk_end[msg.headNo], self.board.blkNo0[msg.headNo]) 
+        msg.blockOutIdx = self.board.blk_end[msg.headNo] + 32 # bigger than block size to avoid mgt of the blockOutIdx
+        if rec_blocks:        
+            msg.used = self.board.used.flags(msg.blkNo, msg.blkCnt, self.board.blk_end[msg.headNo], self.board.blkNo0[msg.headNo]) 
+        else:
+            msg.used = (msg.blkCnt+31)//32 * (0xffffffff, )
         msg.blkCnt = len(msg.used) * 32
         logging.debug(f"{self.board.used.count} blocks used {msg.blkNo} for {msg.blkCnt} blocks on board {self.board.no} head {msg.headNo}")
         self.transport.write(msg.pack())
@@ -308,7 +313,7 @@ class Board:
 
 # to end the infinite loop
 simulate = True
-async def main():
+async def main(bmp=True):
     "main program that listen to all UDP/TCP sockets according to network.cfg"
     os.makedirs("printed", exist_ok=True)
     loop = asyncio.get_running_loop()
@@ -354,25 +359,27 @@ async def main():
                 local_addr=(udp_ip, udp_port))
 
         while simulate:
-            await asyncio.sleep(3)
+            await asyncio.sleep(0.5) # simulate time to print each copy
             # check the end of the printing
             for board in boards:
-                for img in list(board.fpga_images.values()):
+                if board.fpga_images:
+                    img=board.fpga_images[sorted(board.fpga_images.keys())[0]]
                     if len(img) == len([x for x in board.activate if x]) and not board.abort:
                         # if done, save bmp in another thread as it could be a long process
-                        fn = functools.partial(save_image, *(board.no, board.blocks, img, board.blk_end, board.blkNo0))
-                        await loop.run_in_executor(None, fn)                            
+                        if bmp:
+                            fn = functools.partial(save_image, *(board.no, board.blocks, img, board.blk_end, board.blkNo0))
+                            await loop.run_in_executor(None, fn)
                         board.print_done(img[0])
     
 
-def run():
+def run(bmp=True):
     "run a head ctrl asynchronously by calling main in asyncio loop"
     global _transports, simulate
     simulate = True
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     try:
-        loop.run_until_complete(main())
+        loop.run_until_complete(main(bmp))
     finally:
         for transport in _transports:
             transport.close()
@@ -386,6 +393,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--log", help='log level (default INFO)', default="INFO", choices=['DEBUG', 'INFO', 'WARN', 'ERROR'])
     parser.add_argument("--src", help='root source folder where to find header')
+    parser.add_argument("--nobmp", help='do not save bmp in printed folder', action="store_false")
     args = parser.parse_args()
     numeric_level = getattr(logging, args.log.upper(), None)
 
@@ -397,8 +405,9 @@ if __name__ == "__main__":
     logging.basicConfig(format='%(asctime)s %(levelname)s:%(message)s',
                         level=numeric_level)
 
+    rec_blocks = args.nobmp
     try:
-        run()
+        run(args.nobmp)
     except KeyboardInterrupt:
         # ignore Ctrl+C silently
         pass

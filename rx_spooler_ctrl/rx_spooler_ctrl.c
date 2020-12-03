@@ -21,6 +21,7 @@
 #include "data_client.h"
 #include "head_client.h"	
 #include "rs_tec-it.h"
+#include "version.h"
 
 //--- global variables -----------------------------
 
@@ -163,6 +164,8 @@ int main(int argc, char* argv[])
 	ctrl_start(_IpAddrMain);
 	
 	printf("press \"X\" to stop\n");
+
+	TrPrintfL(TRUE, "%s V %s (%s / %s)", argv[0], version, __DATE__, __TIME__);
 	while (TRUE)
 	{
 		rx_sleep(1000);
