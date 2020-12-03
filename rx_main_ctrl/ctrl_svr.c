@@ -571,12 +571,7 @@ void ctrl_tick(void)
 		{
 			if (_HeadCtrl[i].aliveTime && _HeadCtrl[i].aliveTime + TIMEOUT < time && _HeadCtrl[i].socket != INVALID_SOCKET)	
 			{
-				#ifdef DEBUG
-					// Error(WARN, 0, "Head[%d]: Status Response TIMEOUT: time=%d", i, time - _HeadCtrl[i].aliveTime);
-				#else
-					ErrorEx(dev_head, i, ERR_ABORT, 0, "Status Response TIMEOUT: time=%d", time - _HeadCtrl[i].aliveTime);
-					sok_close(&_HeadCtrl[i].socket);
-				#endif
+				Error(WARN, 0, "Head[%d]: Status Response TIMEOUT: time=%d", i, time - _HeadCtrl[i].aliveTime);
 			}
 			else
 			{
