@@ -655,17 +655,18 @@ void fpga_set_pg_offsets(INT32 backwards)
 }
 
 //--- fpga_enc_config ---------------------------------------------------
-void fpga_enc_config(int khz)
+void fpga_enc_config(int hz)
 {
-	if (!FpgaCfg.encoder->synth.enable && khz)
-	{
-		nios_set_firepulse_on(TRUE);
-		rx_sleep(200);		
-		SET_FLAG(FpgaCfg.cfg->cmd, CMD_MASTER_ENABLE, TRUE);
-	}
-	_fpga_enc_config(khz);
-	if (!khz) nios_set_firepulse_on(FALSE);
+    if (!FpgaCfg.encoder->synth.enable && hz)
+    {
+        nios_set_firepulse_on(TRUE);
+        rx_sleep(200);
+        SET_FLAG(FpgaCfg.cfg->cmd, CMD_MASTER_ENABLE, TRUE);
+    }
+    _fpga_enc_config(hz);
+    if (!hz) nios_set_firepulse_on(FALSE);
 }
+
 
 //--- fpga_enc_enable --------------------------
 void fpga_enc_enable(int enable)
@@ -674,7 +675,7 @@ void fpga_enc_enable(int enable)
 	else SET_FLAG(FpgaCfg.encoder->cmd, ENC_ENABLE, FALSE);				
 }
 
-static void _fpga_enc_config(int khz)
+static void _fpga_enc_config(int hz)
 {
 	int i;
 	int enable;
@@ -685,16 +686,41 @@ static void _fpga_enc_config(int khz)
 	FpgaCfg.encoder->dist_pm			=  1951000; // 1 �m
 	FpgaCfg.encoder->shake_interval		= 0;
 
-	if (khz>1)
+	if (hz>99)
 	{
-		FpgaCfg.encoder->synth.value = FPGA_FREQ/(khz*1000);
+		FpgaCfg.encoder->synth.value = 0;
+		FpgaCfg.encoder->synth.enable= FALSE;
+
+		/*
+		// first disable FPGA, then start power up, and finally enable fpga
+		enable = (FpgaCfg.cfg->cmd & CMD_MASTER_ENABLE)!=0;
+		
+		SET_FLAG(FpgaCfg.cfg->cmd, CMD_MASTER_ENABLE, FALSE);
+		nios_set_firepulse_on(TRUE);
+		
+		for (i=0; !nios_is_firepulse_on(); i += 10)
+		{
+			if (i > 50) 
+			{
+				Error(LOG, 0, "Firepulse On TimeOut");
+				break;					
+			}
+			rx_sleep(10);				
+		}
+		SET_FLAG(FpgaCfg.cfg->cmd, CMD_MASTER_ENABLE, enable);
+		*/
+		
+		FpgaCfg.encoder->synth.value = FPGA_FREQ/(hz);
 		FpgaCfg.encoder->synth.enable= TRUE;		
 	}
 	else 	
 	{
 		FpgaCfg.encoder->synth.value = 0;
 		FpgaCfg.encoder->synth.enable= FALSE;
+	//	SET_FLAG(FpgaCfg.cfg->cmd, CMD_MASTER_ENABLE, FALSE);
+	//	nios_set_firepulse_on(FALSE);
 	}
+
 	SET_FLAG(FpgaCfg.encoder->cmd, ENC_SIGNAL_MODE, 0);  // 0: Telegram, 1:no telegram
 
 	SET_FLAG(FpgaCfg.encoder->cmd, ENC_HEAD0_ENABLE, FALSE);
@@ -715,7 +741,7 @@ static void _fpga_enc_config(int khz)
 		_Enc_Pos[i]		=0;
 	}				
 	
-	SET_FLAG(FpgaCfg.encoder->cmd, ENC_ENABLE, khz<=0);
+	SET_FLAG(FpgaCfg.encoder->cmd, ENC_ENABLE, hz<=0);
 	 
 	RX_FpgaEncCfg.cmd          = FpgaCfg.encoder->cmd;
 	RX_FpgaEncCfg.synth.enable = FpgaCfg.encoder->synth.enable;
@@ -1798,7 +1824,6 @@ static int _check_print_done(void)
 			{
                 int i   = RX_HBStatus[0].head[head].printGoCnt%MAX_PAGES;
                 RX_HBStatus[0].head[head].printGoCnt++;
-
 				_PrintDonePos[head][i] = RX_FpgaStat.pg_in_position[head] + _Img[head][i].lengthPx;
 
 				TrPrintfL(TRUE, "Head[%d].PrintGo=%d, pos=%d", head, RX_HBStatus[0].head[head].printGoCnt, RX_FpgaStat.pg_in_position[head]);
