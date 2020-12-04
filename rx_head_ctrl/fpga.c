@@ -686,31 +686,12 @@ static void _fpga_enc_config(int hz)
 	FpgaCfg.encoder->dist_pm			=  1951000; // 1 �m
 	FpgaCfg.encoder->shake_interval		= 0;
 
-	if (hz>99)
+	if (hz>=200)
 	{
 		FpgaCfg.encoder->synth.value = 0;
 		FpgaCfg.encoder->synth.enable= FALSE;
-
-		/*
-		// first disable FPGA, then start power up, and finally enable fpga
-		enable = (FpgaCfg.cfg->cmd & CMD_MASTER_ENABLE)!=0;
 		
-		SET_FLAG(FpgaCfg.cfg->cmd, CMD_MASTER_ENABLE, FALSE);
-		nios_set_firepulse_on(TRUE);
-		
-		for (i=0; !nios_is_firepulse_on(); i += 10)
-		{
-			if (i > 50) 
-			{
-				Error(LOG, 0, "Firepulse On TimeOut");
-				break;					
-			}
-			rx_sleep(10);				
-		}
-		SET_FLAG(FpgaCfg.cfg->cmd, CMD_MASTER_ENABLE, enable);
-		*/
-		
-		FpgaCfg.encoder->synth.value = FPGA_FREQ/(hz);
+		FpgaCfg.encoder->synth.value = FPGA_FREQ/hz;
 		FpgaCfg.encoder->synth.enable= TRUE;		
 	}
 	else 	
