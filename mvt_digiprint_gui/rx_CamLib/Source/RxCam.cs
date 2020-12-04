@@ -9,7 +9,7 @@ using System.Text;
 using DirectShowLib;
 using rx_CamLib.Models;
 using RX_Common;
-using rx_CamLib;
+using static rx_CamLib.RxAlignFilter;
 
 namespace rx_CamLib
 {
@@ -33,9 +33,41 @@ namespace rx_CamLib
             Filter_AlreadyUsed      = -2147467259,
 		};
 
+        public enum ENCamCallBackInfo
+        {
+            StartLinesDetected          =  3,
+            CameraStopped               =  2,
+            CameraStarted               =  1,
+            undefined                   =  0,
+            USB_CameraDisconnected      = -1,
+            DS_CaptureDeviceLost        = -2,
+            DS_ErrorAbotedDisplay       = -3,
+            VMR_ReconnectionFailed      = -4,
+            CouldNotBuildGraph          = -5,
+            GraphNotStoppedCorrectly    = -6
+
+        }
+
+        public enum ENMeasureMode
+        {
+            MeasureMode_Off = 0,
+            MeasureMode_AllLines = 1,
+            MeasureMode_StartLines = 2,
+            MeasureMode_Angle = 3,
+            MeasureMode_Stitch = 4,
+            MeasureMode_Register = 5,
+        }
+
+        public enum ENBinarizeMode
+        {
+            BinarizeMode_Off            = 0,
+            BinarizeMode_Manual         = 1,
+            BinarizeMode_Auto           = 2,
+            BinarizeMode_ColorAdaptive  = 3
+        }
+
         private DsDevice[] DeviceList = null;
         private bool CameraRunning = false;
-        private bool GraphStarting = false;
 
         private string LastDsErrorMsg = "";
         private ENCamResult LastDsErrorNum = 0;
@@ -43,10 +75,23 @@ namespace rx_CamLib
         private DsDevice Camera = null;
         private IFilterGraph2 FilterGraph2 = null;
         private IMediaControl MediaControl = null;
+        private IMediaEventEx MediaEventEx = null;
         private ICaptureGraphBuilder2 CaptureGraph = null;
         private IBaseFilter SourceFilter = null;
         private IBaseFilter VMR9;
         private IVMRWindowlessControl9 WindowlessCtrl9 = null;
+        private MessageWindow MsgWindow;
+        private IntPtr pMsgWindow = IntPtr.Zero;
+        private IFrx_AlignFilter halignFilter = null;
+
+        //Callback from Filters
+        private const int WM_APP = 0x8000;                  //Definitions from Windows.h
+        private const int WM_APP_MEDIAEV = WM_APP + 2020;   //Callback from MediaEventEx
+        private const int WM_APP_ALIGNEV = WM_APP + 2025;   //Callback from Bieler_ds_Align
+        private const int WM_DEVICECHANGE = 0x0219;
+        private const int DBT_DEVICEREMOVECOMPLETE = 0x8004;
+        private const int DBT_DEVTYP_DEVICEINTERFACE = 0x0005;
+        private const int WP_StartLines = 100;
 
         //Property Display
         [DllImport("oleaut32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
@@ -69,17 +114,24 @@ namespace rx_CamLib
 
         public RxCam()
         {
+            MsgWindow = new MessageWindow("MessageWindow");
+            MsgWindow.CreateWindow();
+            pMsgWindow = MsgWindow.Handle;
+            UsbNotification.RegisterUsbDeviceNotification(pMsgWindow);
+            MsgWindow.MsgCallBack += new MessageWindow.MessageCallBack(GetWinMessage);
         }
 
         ~RxCam()
         {
             if (CameraRunning) StopGraph();
+            UsbNotification.UnregisterUsbDeviceNotification();
+            MsgWindow.DestroyWindow();
         }
 
 
         #region Public Interface
 
-        public delegate void CameraCallBack(string CallbackData);
+        public delegate void CameraCallBack(ENCamCallBackInfo CallBackInfo, string ExtraInfo = "");
         public event CameraCallBack CamCallBack = null;
 
         public delegate void PositionMeasuredCallback(int angle, int stich, int encoder);
@@ -168,12 +220,11 @@ namespace rx_CamLib
             result=BuildGraph(hwnd);
             if (result!=ENCamResult.OK)
             {
-                GraphStarting = false;
                 return result;
             }
 
             CameraRunning = true;
-            CamCallBack?.Invoke("Camera started");
+            CamCallBack?.Invoke(ENCamCallBackInfo.CameraStarted);
             return ENCamResult.OK;
         }
 
@@ -200,127 +251,213 @@ namespace rx_CamLib
             return ENCamResult.OK;
         }
 
+        public ENCamResult SetMeasureMode(ENMeasureMode MeasureMode)
+        {
+            if (!CameraRunning) return ENCamResult.Cam_notRunning;
+            halignFilter.SetMeasureMode((UInt32)MeasureMode);
+            return ENCamResult.OK;
+        }
+
+        public ENCamResult SetBinarizationMode(ENBinarizeMode BinarizeMode)
+        {
+            CamGlobals.AlignFilter.BinarizeMode=(uint)BinarizeMode;
+            return ENCamResult.OK;
+        }
+
         #endregion
 
 
         #region Internal
 
+        private void GetWinMessage(ref Message Msg)
+        {
+            Int64 WParam = Msg.WParam.ToInt64();
+            Int64 LParam = Msg.LParam.ToInt64();
+
+            switch (Msg.Msg)
+            {
+                //USB Device change
+                case WM_DEVICECHANGE:
+                {
+                    switch (WParam)
+                    {
+                        case DBT_DEVICEREMOVECOMPLETE:
+                        {
+                            if (CameraRunning)
+                            {
+                                if (Marshal.ReadInt32(Msg.LParam, 4) == DBT_DEVTYP_DEVICEINTERFACE)
+                                {
+                                    bool CamStillHere = false;
+                                    DsDevice[] NewDeviceList = DsDevice.GetDevicesOfCat(FilterCategory.VideoInputDevice);
+                                    for (int i = 0; i < NewDeviceList.Length; i++)
+                                    {
+                                        if (NewDeviceList[i].Name == Camera.Name)
+                                        {
+                                            CamStillHere = true;
+                                            break;
+                                        }
+                                    }
+                                    if (!CamStillHere)
+                                    {
+                                        CamCallBack?.Invoke(ENCamCallBackInfo.USB_CameraDisconnected);
+                                        StopCamera();
+                                    }
+                                }
+                            }
+                            break;
+                        }
+                    }
+                    break;
+                }
+
+                //DirectShow Messages
+                case WM_APP_MEDIAEV:
+                {
+                    EventCode EvCode;
+                    IntPtr lParam1, lParam2;
+                    int hr = 0;
+                    if (CameraRunning)
+                    {
+                        hr = MediaEventEx.GetEvent(out EvCode, out lParam1, out lParam2, 0);
+                        switch (EvCode)
+                        {
+                            case EventCode.DeviceLost:
+                            {
+                                if (CameraRunning)
+                                {
+                                    CamCallBack?.Invoke(ENCamCallBackInfo.DS_CaptureDeviceLost);
+                                    StopCamera();
+                                }
+                                break;
+                            }
+                            case EventCode.ErrorAbort:
+                            {
+                                if (CameraRunning)
+                                {
+                                    CamCallBack?.Invoke(ENCamCallBackInfo.DS_ErrorAbotedDisplay);
+                                    StopCamera();
+                                }
+                                break;
+                            }
+                            case EventCode.ErrorAbortEx:
+                            {
+                                if (CameraRunning)
+                                {
+                                    CamCallBack?.Invoke(ENCamCallBackInfo.DS_ErrorAbotedDisplay);
+                                    StopCamera();
+                                }
+                                break;
+                            }
+                            case EventCode.StErrStopped:
+                            {
+                                if (CameraRunning)
+                                {
+                                    CamCallBack?.Invoke(ENCamCallBackInfo.DS_ErrorAbotedDisplay);
+                                    StopCamera();
+                                }
+                                break;
+                            }
+                            case EventCode.VMRReconnectionFailed:
+                            {
+                                if (CameraRunning)
+                                {
+                                    CamCallBack?.Invoke(ENCamCallBackInfo.VMR_ReconnectionFailed);
+                                    StopCamera();
+                                }
+                                break;
+                            }
+                            case EventCode.ClockUnset:
+                            {
+                                if (CameraRunning)
+                                {
+                                    CamCallBack?.Invoke(ENCamCallBackInfo.DS_CaptureDeviceLost);
+                                    StopCamera();
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    break;
+                }
+
+                //rx_AlignFilter Messages
+                case WM_APP_ALIGNEV:
+                {
+                    switch (WParam)
+                    {
+                        case WP_StartLines:
+                            CamCallBack?.Invoke(ENCamCallBackInfo.StartLinesDetected, Msg.LParam.ToInt64().ToString());
+                            break;
+                    }
+                    break;
+                }
+            }
+        }
+
         private ENCamResult BuildGraph(IntPtr hwnd)
         {
-            int hResult;
-            GraphStarting = true;
-
-            //Capture Pin for Properties
-            IPin SrcCapPin = null;
-
-            //Standard Filter Chain
-            FilterGraph2 = (IFilterGraph2)new FilterGraph();
-            MediaControl = (IMediaControl)FilterGraph2 as IMediaControl;
-            CaptureGraph = (ICaptureGraphBuilder2)new CaptureGraphBuilder2();
-            hResult = CaptureGraph.SetFiltergraph(FilterGraph2);
-            if (hResultError(hResult)) return ENCamResult.Error;
-            VMR9 = (IBaseFilter)new VideoMixingRenderer9();
-            if (!ConfigVMR9(hwnd)) return ENCamResult.Error;
-            hResult = FilterGraph2.AddFilter(VMR9, "VMR 9");
-            if (hResultError(hResult)) return ENCamResult.Error;
-
-            //Insert Camera
             try
             {
-                object source;
-                Guid SourceGuid = typeof(IBaseFilter).GUID;
-                Camera.Mon.BindToObject(null, null, ref SourceGuid, out source);
-                SourceFilter = (IBaseFilter)source;
-                CamGlobals.CamDevice = new CamDevice(SourceFilter);
+                int hResult;
+                //Capture Pin for Properties
+                IPin SrcCapPin = null;
+
+                //Standard Filter Chain
+                if (MediaControl != null)
+                {
+                    hResult = Marshal.ReleaseComObject(MediaControl);
+                    if (hResultError(hResult)) return ENCamResult.Error;
+                    MediaControl = null;
+                }
+                if (FilterGraph2 != null)
+                {
+                    FilterGraph2 = null;
+                }
+                if (CaptureGraph != null)
+                {
+                    hResult = Marshal.ReleaseComObject(CaptureGraph);
+                    if (hResultError(hResult)) return ENCamResult.Error;
+                    CaptureGraph = null;
+                }
+
+                FilterGraph2 = (IFilterGraph2)new FilterGraph();
+                MediaControl = (IMediaControl)FilterGraph2 as IMediaControl;
+                CaptureGraph = (ICaptureGraphBuilder2)new CaptureGraphBuilder2();
+
+                hResult = CaptureGraph.SetFiltergraph(FilterGraph2);
+                if (hResultError(hResult)) return ENCamResult.Error;
+
+                if (!InsertVMR(hwnd)) return ENCamResult.Error;
+                if (!InsertCamera(out SrcCapPin)) return ENCamResult.Error;
+                if (InsertAlignFilter() != ENCamResult.OK) return ENCamResult.Error;
+
+                if (!ConnectCamToAlign(SrcCapPin)) return ENCamResult.Error;
+                if (!RenderAlignOut()) return ENCamResult.Error;
+
+                //Set Media Event Callback
+                MediaEventEx = (IMediaEventEx)FilterGraph2 as IMediaEventEx;
+                MediaEventEx.SetNotifyWindow(pMsgWindow, WM_APP_MEDIAEV, IntPtr.Zero);
+
+                if (!StartDisplay()) return ENCamResult.Error;
+
+                hResult = Marshal.ReleaseComObject(SrcCapPin);
+                if (hResultError(hResult)) return ENCamResult.Error;
+
+                GetAllFilterSettings();
             }
             catch (Exception excep)
             {
-                LastDsErrorMsg = excep.Message;
-                return LastDsErrorNum = ENCamResult.Error;
-            }
-            hResult = FilterGraph2.AddFilter(SourceFilter, Camera.Name);
-            if (hResultError(hResult)) return LastDsErrorNum = ENCamResult.Error;
-
-            hResult = DsFindPin(SourceFilter, ref SrcCapPin, PinCategory.Capture);
-            if (hResultError(hResult)) return LastDsErrorNum = ENCamResult.Error;
-
-            //    SetCamStreamCaps(_CamSettings._StreamCaps);
-
-            //Read current Camera settings
-//            GetCamStreamCapsList(out _CamSettings._StreamCapsList);
-//            GetCamCapSettingsList(out _CamSettings._CamCapsList);
-//            GetCamVideoProcSettingsList(out _CamSettings._CamVideoProcList);
-
-            //Insert Align Filter
-            Guid AlignGuid = new Guid("148BC1EB-2C83-418E-B9CD-E1F5BC9D1E38");  //rx_AlignFilter
-            //Guid AlignGuid = new Guid("3C84E851-7D06-434F-81E1-5E68F0306E8B"); //Bieler_dsAlign
-            Type comType = null;
-            comType = Type.GetTypeFromCLSID(AlignGuid);
-			try 
-            { 
-                CamGlobals.AlignFilter = new RxAlignFilter(Activator.CreateInstance(comType));
-            }
-            catch(Exception e)
-			{
-                return LastDsErrorNum = ENCamResult.Filter_NotRegistered;
-			}
-
-            IFrx_AlignFilter halignFilter = CamGlobals.AlignFilter.Handle;
-
-            hResult = FilterGraph2.AddFilter(halignFilter, "Alignment");
-            if (hResultError(hResult)) return LastDsErrorNum = ENCamResult.Error;
-
-            //Connect Camera to Align
-            IPin AlignInPin = null;
-            hResult = DsFindPin(halignFilter, ref AlignInPin, "Input");
-            if (hResultError(hResult)) return LastDsErrorNum = ENCamResult.Error;
-            hResult = FilterGraph2.Connect(SrcCapPin, AlignInPin);
-            if (hResultError(hResult)) return LastDsErrorNum = ENCamResult.Error;
-
-            //Render Align Output Pin
-            IPin AlignOutPin = null;
-            hResult = DsFindPin(halignFilter, ref AlignOutPin, "Output");
-            if (hResultError(hResult)) return LastDsErrorNum = ENCamResult.Error;
-            hResult = FilterGraph2.Render(AlignOutPin);
-            if (hResultError(hResult)) return LastDsErrorNum = ENCamResult.Error;
-
-            //Start Display
-            FilterState pFState = FilterState.Stopped;
-            hResult = MediaControl.Run();
-            if (hResultError(hResult)) return LastDsErrorNum = ENCamResult.Error;
-            try
-            {
-                while (pFState != FilterState.Running)
-                {
-                    Application.DoEvents();
-                    hResult = MediaControl.GetState(10, out pFState);
-                }
-            }
-            catch (Exception exep)
-            {
-                MessageBox.Show("Could not start Media Control:\n" + exep.Message, "Build Graph", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return LastDsErrorNum = ENCamResult.Error;
+                CamCallBack?.Invoke(ENCamCallBackInfo.CouldNotBuildGraph, excep.Message);
+                return ENCamResult.Error;
             }
 
-
-            //Read current stream settings
-//            hResult = GetCamStreamCaps(out _CamSettings._StreamCaps);
-
-            //Set Camera settings
-//            SetCamCapSettingsList(_CamSettings._CamCapsList);
-//            SetCamVideoProcSettingsList(_CamSettings._CamVideoProcList);
-
-
-            GetAllFilterSettings();
-
-            GraphStarting = false;
             return LastDsErrorNum = ENCamResult.OK;
         }
 
         private ENCamResult StopGraph()
         {
             int hResult;
-            IFrx_AlignFilter halignFilter = CamGlobals.AlignFilter.Handle;
+//            IFrx_AlignFilter halignFilter = CamGlobals.AlignFilter.Handle;
 
             halignFilter.SetFrameTiming(false);
             halignFilter.SetDebug(false);
@@ -332,89 +469,69 @@ namespace rx_CamLib
             halignFilter.SetMeasureMode(0);
             halignFilter.SetBinarizeMode(0);
 
-            //Stop Media Control
-            FilterState pFState = FilterState.Running;
-            if (MediaControl != null)
+            try
             {
-                hResult = MediaControl.GetState(10, out pFState);
-                if (pFState == FilterState.Running)
+                //Stop Media Control
+                if (MediaControl != null)
                 {
-                    try
-                    {
-                        hResult = MediaControl.Pause();
-                        hResultError(hResult);
-                        while (pFState != FilterState.Paused)
-                        {
-                            Application.DoEvents();
-                            hResult = MediaControl.GetState(10, out pFState);
-                        }
-                    }
-                    catch (Exception exep)
-                    {
-                        MessageBox.Show("Could not pause Media Control:\n" + exep.Message, "Pause Graph", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
+                    hResult = ChFilterState(ref SourceFilter, "Pause");
+                    if (hResultError(hResult)) return ENCamResult.Error;
+                    hResult = ChMediaState(ref MediaControl, "Stop");
+                    if (hResultError(hResult)) return ENCamResult.Error;
+                    MediaControl = null;
                 }
 
-                if (pFState != FilterState.Stopped)
-                {
-                    try
-                    {
-                        hResult = MediaControl.Stop();
-                        hResultError(hResult);
-                        while (pFState != FilterState.Stopped)
-                        {
-                            Application.DoEvents();
-                            hResult = MediaControl.GetState(10, out pFState);
-                        }
-                    }
-                    catch (Exception exep)
-                    {
-                        MessageBox.Show("Could not stop Media Control:\n" + exep.Message, "Stop Graph", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                }
-            }
+                hResult = Marshal.ReleaseComObject(halignFilter);
+                if (hResultError(hResult)) return ENCamResult.Error;
+                halignFilter = null;
 
-            //Remove all Filters
-            if (FilterGraph2 != null)
-            {
+                //Remove all filters
+                IEnumFilters pFilterEnum;
+                hResult = FilterGraph2.EnumFilters(out pFilterEnum);
+                if (hResultError(hResult)) return ENCamResult.Error;
+                IBaseFilter[] filters = new IBaseFilter[1];
+                IntPtr pfetched = Marshal.AllocCoTaskMem(4);
+
+                while (pFilterEnum.Next(1, filters, pfetched) == 0)
+                {
+                    hResult = FilterGraph2.RemoveFilter(filters[0]);
+                    if (hResultError(hResult)) return ENCamResult.Error;
+                    hResult = pFilterEnum.Reset();
+                    if (hResultError(hResult)) return ENCamResult.Error;
+                    hResult = Marshal.ReleaseComObject(filters[0]);
+                    if (hResultError(hResult)) return ENCamResult.Error;
+                    filters[0] = null;
+                }
+                hResult = Marshal.ReleaseComObject(pFilterEnum);
+                if (hResultError(hResult)) return ENCamResult.Error;
+                Marshal.FreeCoTaskMem(pfetched);
+                pfetched = IntPtr.Zero;
                 hResult = FilterGraph2.Abort();
-                hResultError(hResult);
+                if (hResultError(hResult)) return ENCamResult.Error;
+                hResult = Marshal.ReleaseComObject(FilterGraph2);
+                if (hResultError(hResult)) return ENCamResult.Error;
+                FilterGraph2 = null;
             }
-
-            if (SourceFilter != null)
+            catch (Exception excep)
             {
-                hResult = FilterGraph2.RemoveFilter(SourceFilter);
-                hResultError(hResult);
+                CamCallBack?.Invoke(ENCamCallBackInfo.GraphNotStoppedCorrectly, excep.Message);
+                return ENCamResult.Error;
             }
-
-            if (VMR9 != null)
-            {
-                hResult = FilterGraph2.RemoveFilter(VMR9);
-                hResultError(hResult);
-            }
-            WindowlessCtrl9 = null;
-            if (VMR9 != null) Marshal.ReleaseComObject(VMR9);
-            VMR9 = null;
-
-            if (halignFilter != null)
-            {
-                hResult = FilterGraph2.RemoveFilter(halignFilter);
-                hResultError(hResult);
-            }
-
-            if (SourceFilter != null) Marshal.ReleaseComObject(SourceFilter);
-            SourceFilter = null;
-
-            if (CaptureGraph != null) Marshal.ReleaseComObject(CaptureGraph);
-            CaptureGraph = null;
-            if (MediaControl != null) Marshal.ReleaseComObject(MediaControl);
-            MediaControl = null;
-
-            if (FilterGraph2 != null) Marshal.ReleaseComObject(FilterGraph2);
-            FilterGraph2 = null;
 
             CameraRunning = false;
             return ENCamResult.OK;
+        }
+
+        private bool InsertVMR(IntPtr hwnd)
+        {
+            int hResult;
+
+            VMR9 = (IBaseFilter)new VideoMixingRenderer9();
+            if (!ConfigVMR9(hwnd)) return false;
+            hResult = FilterGraph2.AddFilter(VMR9, "VMR 9");
+            if (hResultError(hResult)) return false;
+
+            return true;
         }
 
         private bool ConfigVMR9(IntPtr hwnd)
@@ -446,13 +563,191 @@ namespace rx_CamLib
             return true;
         }
 
+        private bool InsertCamera(out IPin SrcCapPin)
+        {
+            int hResult;
+            //Capture Pin for Properties
+            SrcCapPin = null;
+
+            //Insert Camera
+            object source;
+            Guid SourceGuid = typeof(IBaseFilter).GUID;
+            try
+            {
+                Camera.Mon.BindToObject(null, null, ref SourceGuid, out source);
+                SourceFilter = (IBaseFilter)source;
+                CamGlobals.CamDevice = new CamDevice(SourceFilter);
+            }
+            catch (Exception excep)
+            {
+                LastDsErrorMsg = excep.Message;
+                LastDsErrorNum = ENCamResult.Error;
+                return false;
+            }
+            hResult = FilterGraph2.AddFilter(SourceFilter, Camera.Name);
+            if (hResultError(hResult)) return false;
+
+            hResult = DsFindPin(SourceFilter, ref SrcCapPin, PinCategory.Capture);
+            if (hResultError(hResult)) return false;
+
+            return true;
+        }
+
+        private ENCamResult InsertAlignFilter()
+        {
+            int hResult;
+
+            //Insert Align Filter
+            Guid AlignGuid = new Guid("148BC1EB-2C83-418E-B9CD-E1F5BC9D1E38");  //rx_AlignFilter
+            Type comType = null;
+            comType = Type.GetTypeFromCLSID(AlignGuid);
+
+            try
+            {
+                CamGlobals.AlignFilter = new RxAlignFilter(Activator.CreateInstance(comType));
+            }
+            catch (Exception e)
+            {
+                if ((uint)e.HResult == 0x80040154) return LastDsErrorNum = ENCamResult.Filter_NotRegistered;
+                return LastDsErrorNum = ENCamResult.Error;
+            }
+            halignFilter = CamGlobals.AlignFilter.Handle;
+
+            hResult = FilterGraph2.AddFilter(halignFilter, "Alignment");
+            if (hResultError(hResult)) return ENCamResult.Error;
+
+            //Set Callback
+            if (pMsgWindow != IntPtr.Zero) halignFilter.SetHostPointer(pMsgWindow);
+
+            return ENCamResult.OK;
+        }
+
+        private bool ConnectCamToAlign(IPin SrcCapPin)
+        {
+            int hResult;
+
+            //Connect Camera to Align
+            IFrx_AlignFilter halignFilter = CamGlobals.AlignFilter.Handle;
+            IPin AlignInPin = null;
+            hResult = DsFindPin(halignFilter, ref AlignInPin, "Input");
+            if (hResultError(hResult)) return false;
+            hResult = FilterGraph2.Connect(SrcCapPin, AlignInPin);
+            if (hResultError(hResult)) return false;
+
+            hResult = Marshal.ReleaseComObject(AlignInPin);
+            if (hResultError(hResult)) return false;
+
+            return true;
+        }
+
+        private bool RenderAlignOut()
+        {
+            int hResult;
+
+            //Render Align Output Pin
+            IFrx_AlignFilter halignFilter = CamGlobals.AlignFilter.Handle;
+            IPin AlignOutPin = null;
+            hResult = DsFindPin(halignFilter, ref AlignOutPin, "Output");
+            if (hResultError(hResult)) return false;
+            hResult = FilterGraph2.Render(AlignOutPin);
+            if (hResultError(hResult)) return false;
+
+            return true;
+        }
+
+        private bool StartDisplay()
+        {
+            int hResult;
+
+            hResult = ChMediaState(ref MediaControl, "Run");
+            if (hResultError(hResult)) return false;
+
+            return true;
+        }
+
+        private int ChMediaState(ref IMediaControl MediaControl, string Action)
+        {
+            int hResult = 0;
+            FilterState TargetState = FilterState.Stopped;
+            FilterState pFState = FilterState.Running;
+            hResult = MediaControl.GetState(100, out pFState);
+            if (hResultError(hResult)) return hResult;
+
+            switch (Action)
+            {
+                case "Pause":
+                    TargetState = FilterState.Paused;
+                    if (pFState != TargetState)
+                        hResult = MediaControl.Pause();
+                    break;
+                case "Run":
+                    TargetState = FilterState.Running;
+                    if (pFState != TargetState)
+                        hResult = MediaControl.Run();
+                    break;
+                case "Stop":
+                    TargetState = FilterState.Stopped;
+                    if (pFState != TargetState)
+                        hResult = MediaControl.Stop();
+                    break;
+            }
+            if (hResultError(hResult)) return hResult;
+
+            while (pFState != TargetState)
+            {
+                Application.DoEvents();
+                hResult = MediaControl.GetState(100, out pFState);
+                if (hResultError(hResult)) return hResult;
+            }
+
+            return hResult;
+        }
+
+        private int ChFilterState(ref IBaseFilter Filter, string Action)
+        {
+            int hResult = 0;
+            FilterState TargetState = FilterState.Stopped;
+            FilterState pFState;
+            hResult = Filter.GetState(100, out pFState);
+            if (hResultError(hResult)) return hResult;
+
+            switch (Action)
+            {
+                case "Pause":
+                    TargetState = FilterState.Paused;
+                    if (pFState != TargetState)
+                        hResult = Filter.Pause();
+                    break;
+                case "Run":
+                    TargetState = FilterState.Running;
+                    if (pFState != TargetState)
+                        hResult = Filter.Run(0);
+                    break;
+                case "Stop":
+                    TargetState = FilterState.Stopped;
+                    if (pFState != TargetState)
+                        hResult = Filter.Stop();
+                    break;
+            }
+            if (hResultError(hResult)) return hResult;
+
+            while (pFState != TargetState)
+            {
+                Application.DoEvents();
+                hResult = Filter.GetState(100, out pFState);
+                if (hResultError(hResult)) return hResult;
+            }
+
+            return hResult;
+        }
+
         private int DsFindPin(IBaseFilter Filter, ref IPin Pin, Guid Category)
         {
 
             //Find specified Pin of a Filter
 
             int hResult = 0;
-            if(!CameraRunning && !GraphStarting)
+            if (FilterGraph2 == null)
                 hResult = CaptureGraph.FindPin(Filter, PinDirection.Output, PinCategory.Capture, MediaType.Video, true, 0, out Pin);
             else
                 hResult = CaptureGraph.FindPin(Filter, PinDirection.Output, PinCategory.Capture, MediaType.Video, false, 0, out Pin);
@@ -490,9 +785,11 @@ namespace rx_CamLib
                 }
                 DsUtils.FreePinInfo(pinfo);
             }
+            Marshal.ReleaseComObject(pins);
+            pins = null;
             Marshal.FreeCoTaskMem(pcFetched);
             pcFetched = IntPtr.Zero;
-            pins = null;
+            Marshal.ReleaseComObject(ppEnum);
             ppEnum = null;
 
             return -1;  //Pin not found
@@ -564,6 +861,7 @@ namespace rx_CamLib
             //bool GetLinesHorizontal();
 
         }
+
 
         //--- GetCamStreamCapsList ------------------------------------
         public List<StreamCaps> GetCamStreamCapsList()

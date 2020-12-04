@@ -2394,6 +2394,7 @@ HRESULT C_rx_AlignFilter::Blob(IMediaSample* pSampleIn)
 
 
 //Measurement
+
 HRESULT C_rx_AlignFilter::BlobQualifyer(IMediaSample* pSampleIn, BOOL Vertical, IMediaSample* pProcessSample)
 {
 	CheckPointer(pSampleIn, E_POINTER);
@@ -2631,7 +2632,99 @@ HRESULT C_rx_AlignFilter::CalculateDistances(BOOL Vertical, Mat SourceMat)
 	return NOERROR;
 }
 
-HRESULT C_rx_AlignFilter::OverlayBlobs(IMediaSample* pSampleIn)
+HRESULT C_rx_AlignFilter::FindStartLines(BOOL Vertical)
+{
+    // Check for first occurence of parallel lines
+
+    // Bitmapinfo
+    VIDEOINFOHEADER *pVih = (VIDEOINFOHEADER *)m_mt1.Format();
+    ASSERT(pVih);
+    // Bitmaps Size
+    int Width = pVih->bmiHeader.biWidth;   // Width
+    int Height = pVih->bmiHeader.biHeight; // Height
+
+    // Check minimum number of valid lines
+    int NumBlobsvalid = 0;
+    float AvgLength = 0;
+    float AvgCenter = 0;
+    float AvgDist = 0;
+    for (int BlobNo = 0; BlobNo < (int)m_vQualifyList.size(); BlobNo++)
+    {
+        if (m_vQualifyList[BlobNo].Valid == 1)
+        {
+            // Position in Window
+            AvgCenter += Vertical ? m_vQualifyList[BlobNo].PosY
+                                  : m_vQualifyList[BlobNo].PosX;
+            AvgLength += Vertical ? m_vQualifyList[BlobNo].Height
+                                  : m_vQualifyList[BlobNo].Width;
+            if (NumBlobsvalid > 0) AvgDist += m_vQualifyList[BlobNo].DistToLast;
+
+            NumBlobsvalid++;
+        }
+    }
+    if (NumBlobsvalid < m_MinNumStartLines) return NOERROR;
+
+    AvgDist /= (float)NumBlobsvalid - 1;
+    AvgCenter /= (float)NumBlobsvalid;
+    AvgLength /= (float)NumBlobsvalid;
+
+	// LParam = 
+	// Top/Right:	0x10000000, Covering: 0x20000000, Bottom/Left: 0x30000000
+	// NumLines:	0x0n000000 (0x0 - 0xf)
+	// Position:	0x00nnnnnn (0x000000 - 0xffffff) = (StartPos[px] / AvgDist[px]) * 1000 (from Bottom/Left)
+	
+    long lpara = 0;
+    float StartPos = 0;
+
+    if (AvgLength > (Vertical ? ((float)Height * 0.95) : ((float)Width * 0.95)))
+    {
+        // Covering whole image
+        lpara = 0x20000000;
+    }
+    else if (AvgCenter <
+             (Vertical ? ((float)Height * 0.5) : ((float)Width * 0.5)))
+    {
+        // Entering from bottom
+        StartPos = AvgCenter + (AvgLength / 2);
+        lpara = 0x30000000;
+    }
+    else
+    {
+        // Entering from top
+        StartPos = AvgCenter - (AvgLength / 2);
+        lpara = 0x10000000;
+    }
+
+    lpara += NumBlobsvalid * 0x1000000;
+    lpara += (StartPos == 0 ? 0 : (int)((StartPos / AvgDist) * 1000));
+
+    m_MeasureMode = MeasureModeEnum::MeasureMode_Off;
+    if (m_HostHwnd != NULL)
+        SendMessage(m_HostHwnd, WM_APP_ALIGNEV, (WPARAM)WP_StartLines,
+                    (LPARAM)lpara);
+
+    return NOERROR;
+}
+
+HRESULT C_rx_AlignFilter::MeasureAngle(BOOL Vertical)
+{
+    return NOERROR;
+}
+
+HRESULT C_rx_AlignFilter::MeasureStitch(BOOL Vertical)
+{
+    return NOERROR;
+}
+
+HRESULT C_rx_AlignFilter::MeasureRegister(BOOL Vertical)
+{
+    return NOERROR;
+}
+
+
+// Display
+
+HRESULT C_rx_AlignFilter::OverlayBlobs(IMediaSample *pSampleIn)
 {
 	//OverlayBlobs
 
@@ -2962,6 +3055,7 @@ HRESULT C_rx_AlignFilter::OverlayDistanceLines(IMediaSample* pSampleIn, BOOL Ver
 
 
 //SnapShot
+
 HRESULT C_rx_AlignFilter::TakeSnapShot(IMediaSample* pSampleIn)
 {
 	CheckPointer(pSampleIn, E_POINTER);
@@ -3446,11 +3540,33 @@ HRESULT C_rx_AlignFilter_InputPin::Receive(IMediaSample *pSampleIn)
 
 	//FindBlobs
 	m_prx_AlignFilter->Blob(pOutSample);
-
-
 	m_prx_AlignFilter->BlobQualifyer(pSampleIn, Vertical, pOutSample);
 
-	//Overlay information
+	// Measurement
+    switch (m_prx_AlignFilter->m_MeasureMode)
+    {
+    case IFrx_AlignFilter::MeasureModeEnum::MeasureMode_AllLines:
+
+        break;
+
+    case IFrx_AlignFilter::MeasureModeEnum::MeasureMode_StartLines:
+        m_prx_AlignFilter->FindStartLines(Vertical);
+        break;
+
+	case IFrx_AlignFilter::MeasureModeEnum::MeasureMode_Angle:
+        m_prx_AlignFilter->MeasureAngle(Vertical);
+        break;
+
+	case IFrx_AlignFilter::MeasureModeEnum::MeasureMode_Stitch:
+        m_prx_AlignFilter->MeasureStitch(Vertical);
+        break;
+
+	case IFrx_AlignFilter::MeasureModeEnum::MeasureMode_Register:
+        m_prx_AlignFilter->MeasureRegister(Vertical);
+        break;
+    }
+
+    // Overlay information
 	if (m_prx_AlignFilter->m_OverlayBlobs)
 	{
 		m_prx_AlignFilter->OverlayBlobs(pSampleIn);
@@ -3458,17 +3574,12 @@ HRESULT C_rx_AlignFilter_InputPin::Receive(IMediaSample *pSampleIn)
 	if (m_prx_AlignFilter->m_OverlayCenters)
 	{
 		m_prx_AlignFilter->OverlayCenters(pSampleIn, Vertical);
+		m_prx_AlignFilter->OverlayDistanceLines(pSampleIn, Vertical);
 	}
 	if (m_prx_AlignFilter->m_OverlayValues)
 	{
 		m_prx_AlignFilter->OverlayValues(pSampleIn, Vertical);
 	}
-	if (m_prx_AlignFilter->m_OverlayCenters)
-	{
-		m_prx_AlignFilter->OverlayDistanceLines(pSampleIn, Vertical);
-	}
-
-
 
 
 	if (m_prx_AlignFilter->m_ShowOriginal)
@@ -3523,7 +3634,24 @@ HRESULT C_rx_AlignFilter_InputPin::Receive(IMediaSample *pSampleIn)
 
 	}
 
-	//Cleanup
+	// Prepare Measurement for Host
+    if (TryEnterCriticalSection(&m_prx_AlignFilter->m_MeasureLock))
+    {
+        if (m_prx_AlignFilter->m_PrepareQualifyListForHost)
+        {
+            m_prx_AlignFilter->m_QualifyListSize = 0;
+            m_prx_AlignFilter->m_vQualifyListToHost =
+                m_prx_AlignFilter->m_vQualifyList;
+            m_prx_AlignFilter->m_QualifyListSize =
+                m_prx_AlignFilter->m_vQualifyListToHost.size();
+            m_prx_AlignFilter->m_PrepareQualifyListForHost = false;
+            m_prx_AlignFilter->m_QualifyListForHostReady = true;
+        }
+
+        LeaveCriticalSection(&m_prx_AlignFilter->m_MeasureLock);
+    }
+
+    // Cleanup
 	pOutSample->Release();
 	pSampleIn->Release();
 
@@ -4529,6 +4657,27 @@ STDMETHODIMP_(C_rx_AlignFilter::DisplayModeEnum) C_rx_AlignFilter::GetDisplayMod
 {
 //	CAutoLock cAutolock(m_pLock);
 	return m_DisplayMode;
+}
+
+// Minimum number of StartLines
+STDMETHODIMP C_rx_AlignFilter::SetMinNumStartLines(UINT32 MinNumStartLines)
+{
+    CAutoLock cAutolock(m_pLock);
+
+    m_MinNumStartLines = MinNumStartLines;
+
+    if (m_DebugOn)
+    {
+        m_MeasureTime = std::chrono::steady_clock::now();
+        m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(
+                          m_MeasureTime - m_DebugStartTime)
+                          .count();
+        printf("%6.6f\tSet MinNumStartLines: %d\n",
+               (float)m_TimeStamp / 1000000.0f, m_MinNumStartLines);
+    }
+
+    SetDirty(TRUE);
+    return NOERROR;
 }
 
 #pragma endregion

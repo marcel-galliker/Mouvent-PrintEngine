@@ -19,6 +19,7 @@ namespace rx_CamLib
 
 		public RxAlignFilter(object filter)
 		{
+			Console.WriteLine("Set RxAlignFilter");
 			_AlignFilter = (IFrx_AlignFilter)filter;
 		}
 
@@ -61,8 +62,11 @@ namespace rx_CamLib
 				SetProperty(ref _BinarizeMode,value); 
 				if (_AlignFilter!=null) 
 				{ 
+					Console.WriteLine("SetBinarizeMode({0})", _BinarizeMode);
 					_AlignFilter.SetBinarizeMode(_BinarizeMode);
-					_AlignFilter.ShowHistogram(_BinarizeMode>0);
+				//	Console.WriteLine("ShowHistogram({0})", _BinarizeMode>0);
+				//	_AlignFilter.ShowHistogram(_BinarizeMode>0);
+					Console.WriteLine("SetBinarizeMode OK");
 				}
 			}
 		}
@@ -120,8 +124,6 @@ namespace rx_CamLib
             Marshal.FreeHGlobal(unmanaged_pIn);
             return DeviceName;
         }
-
-
 
 	}
 }

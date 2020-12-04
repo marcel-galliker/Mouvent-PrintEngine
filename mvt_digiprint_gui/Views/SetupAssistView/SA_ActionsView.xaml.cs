@@ -22,11 +22,11 @@ namespace RX_DigiPrint.Views.SetupAssistView
 		}
 
 		//--- Start -------------------------------------------------
-		public void Start(RxCam camera)
+		public void Start()
 		{
 			if (!RxGlobals.SA_StateMachine.Running && RxGlobals.PrintSystem.ReadyToPrint())
 			{
-				Actions.ItemsSource = RxGlobals.SA_StateMachine.Start(camera);
+				Actions.ItemsSource = RxGlobals.SA_StateMachine.Start();
 			}
 		}
 
@@ -34,6 +34,11 @@ namespace RX_DigiPrint.Views.SetupAssistView
 		public void ActionDone()
 		{
 			RxGlobals.SA_StateMachine.ActionDone();
+		}
+
+		public void Test()
+		{
+			RxGlobals.SA_StateMachine.Test();
 		}
 	}
 

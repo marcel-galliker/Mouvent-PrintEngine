@@ -511,7 +511,7 @@ int  plc_set_printpar(SPrintQueueItem *pItem)
 	TrPrintfL(TRUE, "_plc_send_par");
 	_plc_send_par(&par);
 	memcpy(&_StartEncoderItem, pItem, sizeof(_StartEncoderItem));
-	_TestPrint = (_StartEncoderItem.testImage!=0);
+	_TestPrint = (_StartEncoderItem.testImage==PQ_TEST_SA_ALIGNMENT);
 	_Speed = _StartEncoderItem.speed;
 	step_set_vent(_Speed);
 //	_SendPause = 1;
@@ -678,6 +678,8 @@ int	plc_to_cap_pos(void)
 int plc_move_web(int dist)
 {
 	lc_set_value_by_name_FLOAT(UnitID ".PAR_RELATIVE_POS", (float)dist/1000.0);
+	lc_set_value_by_name_UINT32(UnitID ".PAR_PRINTING_SPEED",		 10);
+	_plc_set_command("", "CMD_SET_PARAMETER");
     rx_sleep(200);
     _plc_set_command("CMD_PRODUCTION", "CMD_RUN");
 	return REPLY_OK;

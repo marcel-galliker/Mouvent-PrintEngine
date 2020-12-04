@@ -41,11 +41,17 @@ namespace RX_DigiPrint.Views.SetupAssistView
 				_Camera.SetVideoRectangle(CameraCapture.ClientRectangle);
 				CameraCapture_Grid.DataContext = CamGlobals.AlignFilter;
 			}
-			else
+			else if(ret == ENCamResult.Filter_NotRegistered)
 			{
 				FormHost.Visibility = Visibility.Collapsed;
 				_Camera.SetVideoRectangle(new System.Drawing.Rectangle());
 				MvtMessageBox.Information("Setup Assist", "Align Filter not registered\n" + "Run >>rx_AlignFilter_Register.bat<< as administrator!", MessageBoxImage.Error);
+			}
+            else
+            {
+				FormHost.Visibility = Visibility.Collapsed;
+				_Camera.SetVideoRectangle(new System.Drawing.Rectangle());
+				MvtMessageBox.Information("Setup Assist", ret.ToString(), MessageBoxImage.Error);
 			}
 		}
 

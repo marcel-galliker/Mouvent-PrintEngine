@@ -156,6 +156,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <CompileAsManaged>false</CompileAsManaged>
       <WholeProgramOptimization>false</WholeProgramOptimization>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

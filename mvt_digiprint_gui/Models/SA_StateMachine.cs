@@ -12,8 +12,8 @@ namespace RX_DigiPrint.Models
 {
 	public class SA_StateMachine : RxBindable
 	{
-		private const bool		 _SimuMachine = true;
-		private const bool		 _SimuCamera  = true;
+		private const bool		 _SimuMachine = false;
+		private const bool		 _SimuCamera  = false;
 
 		private RxCamFunctions	 _CamFunctions;
 		private List<SA_Action>  _Actions;
@@ -21,17 +21,20 @@ namespace RX_DigiPrint.Models
 		private SA_Action		 _Action;
 
 		//--- _InitActions -----------------------------
-		public List<SA_Action> Start(RxCam cam)
+		public List<SA_Action> Start()
 		{
 			int color, n;
-			_CamFunctions = new RxCamFunctions(cam);
+			_CamFunctions = new RxCamFunctions(RxGlobals.Camera);
 			_CamFunctions.Simulation = _SimuCamera;
+			RxGlobals.Camera.CamCallBack += new RxCam.CameraCallBack(CallBackfromCam);
+
 			_Actions = new List<SA_Action>();
 			_Actions.Add(new SA_Action(){Name="Print Image" });
 			_Actions.Add(new SA_Action()
 			{
+				Function = ECamFunction.CamFindMark,
 				Name="Find Mark",
-				ScanPos	= 10.0,
+				ScanPos	= 50.0,
 			});
 
 			//--- measurmentfunctions -----------------------------
@@ -50,9 +53,12 @@ namespace RX_DigiPrint.Models
 						{
 							PrintbarNo	= color,
 							HeadNo		= n,
+							Function	= ECamFunction.CamMeasurePosition,
 							Name		= String.Format("Measure {0}-{1}..{2}",  colorName, n+1, n+2),
-							WebMoveDist = (n==0)? 20.0 : 0,
-							ScanPos	    = pos0+n*headdist,
+						//	WebMoveDist = (n==0)? 20.0 : 0,
+						//	ScanPos	    = pos0+n*headdist,
+							WebMoveDist = (n==0)? -150.0 : 0,
+							ScanPos		= 50,
 						};
 						
 						_Actions.Add(action);
@@ -64,6 +70,28 @@ namespace RX_DigiPrint.Models
 			_StartAction();
 			return _Actions;
 		}
+
+		//--- CallBackfromCam ----------------------------------------
+		private void CallBackfromCam(RxCam.ENCamCallBackInfo CallBackInfo, string ExtraInfo = "")
+        {
+			if(CallBackInfo <= 0)
+            {
+				// Errors
+				RX_Common.MvtMessageBox.Information("Camera", string.Format("Callback from Camera:\n{0}", CallBackInfo.ToString() + " " + ExtraInfo));
+			}
+            else
+            {
+				// Messages
+				switch(CallBackInfo)
+                {
+					//Start-Lines detected
+					case RxCam.ENCamCallBackInfo.StartLinesDetected:
+						if (_Action?.Function==ECamFunction.CamFindMark) _OnMarkFound();
+					//	RX_Common.MvtMessageBox.Information("Camera", string.Format("{0} Start-Lines detected", ExtraInfo));
+						break;
+                }
+            }
+        }
 
 		//--- Abort ---------------------------------------
 		public void Abort()
@@ -90,9 +118,12 @@ namespace RX_DigiPrint.Models
 			}
 			_Action			=_Actions[_ActionIdx];
 			_Action.State	= ECamFunctionState.running;
-			if (_ActionIdx==0)		_StartTestPrint();
-			else if (_ActionIdx==1)	_FindMark();
-			else					_Measure();
+			switch(_Action.Function)
+			{
+				case ECamFunction.CamNoFunction:		_StartTestPrint();	break;
+				case ECamFunction.CamFindMark:			_FindMark();		break;
+				case ECamFunction.CamMeasurePosition:	_Measure();			break;
+			}
 		}
 
 		//--- ActionDone --------------------------------------------
@@ -108,12 +139,20 @@ namespace RX_DigiPrint.Models
 			}
 		}
 		
+		public void Test()
+		{
+			RxCamFunctions fct = new RxCamFunctions(RxGlobals.Camera);
+			fct.FindMark(_OnMarkFound);
+		}
+
 		//--- _StartTestPrint --------------------------------------
 		private void _StartTestPrint()
         {
 			PrintQueueItem item = new PrintQueueItem();
 
             if (InkSupply.AnyFlushed()) return;
+
+			Console.WriteLine("{0}: _StartTestPrint", RxGlobals.Timer.Ticks());
 
 			item.TestImage	= ETestImage.SA_Alignment;
 			item.Dots		= "L";
@@ -137,14 +176,16 @@ namespace RX_DigiPrint.Models
 		//--- _Camera_CamMarkFound ---------------------------------------
 		private void _OnMarkFound()
 		{
+			Console.WriteLine("{0}: Mark Found", RxGlobals.Timer.Ticks());
 			RxGlobals.SetupAssist.WebStop();
-			ActionDone();
 		}
 
 		//--- _Camera_CamMarkNotFound -------------------------------------------
 		private void _OnMarkNotFound()
 		{
-			if (_ActionIdx==1) 
+			Console.WriteLine("{0}: Mark NOT Found", RxGlobals.Timer.Ticks());
+			if (_Action==null) return;
+			if (_Action.Function==ECamFunction.CamFindMark) 
 			{ 
 				_Action.State=ECamFunctionState.error;
 				Abort();
@@ -160,7 +201,7 @@ namespace RX_DigiPrint.Models
 			}
 			else
 			{
-				Console.WriteLine("Action[{0}]: ScanPos={1}, WebMoveDist={2}", _ActionIdx, _Action.ScanPos, _Action.WebMoveDist);
+				Console.WriteLine("{0}: Action[{1}]: ScanPos={2}, WebMoveDist={3}", RxGlobals.Timer.Ticks(), _ActionIdx, _Action.ScanPos, _Action.WebMoveDist);
 				RxGlobals.SetupAssist.ScanMoveTo(_Action.ScanPos,  _ScanMoveDone);
 				RxGlobals.SetupAssist.WebMove(_Action.WebMoveDist, _WebMoveDone);
 			}
@@ -169,20 +210,15 @@ namespace RX_DigiPrint.Models
 		//--- _ScanMoveDone -------------------------------
 		private void _ScanMoveDone()
 		{
-			Console.WriteLine("Action[{0}]: _ScanMoveDone", _ActionIdx);
-			_Action.ScanMoveDone=true;
-			if (_ActionIdx==1) 
-			{
-				_CamFunctions.FindMark(_OnMarkFound);
-				RxGlobals.SetupAssist.WebMove(100.0, _OnMarkNotFound);
-			}
-			else _StartCamFunction();
+			Console.WriteLine("{1}: Action[{1}]: _ScanMoveDone", RxGlobals.Timer.Ticks(), _ActionIdx);
+			if (_Action!=null) _Action.ScanMoveDone=true;
+			_StartCamFunction();
 		}
 
 		//--- _WebMoveDone ---------------------------------
 		private void _WebMoveDone()
 		{
-			Console.WriteLine("Action[{0}]: _WebMoveDone", _ActionIdx);
+			Console.WriteLine("{0}: Action[{1}]: _WebMoveDone", RxGlobals.Timer.Ticks(), _ActionIdx);
 			if (_Action!=null)
 			{
 				_Action.WebMoveDone=true;
@@ -193,11 +229,33 @@ namespace RX_DigiPrint.Models
 		//--- _StartCamFunction ----------------------------------------------
 		private void _StartCamFunction()
 		{
+			if (_Action==null) 
+				return;
 			Console.WriteLine("Action[{0}]: _StartCamFunction ScanMoveDone={1} WebMoveDist={2} WebMoveDone={3}", _ActionIdx, _Action.ScanMoveDone, _Action.WebMoveDist, _Action.WebMoveDone);
 
 			if (_Action.ScanMoveDone && (_Action.WebMoveDist==0 || _Action.WebMoveDone)) 
 			{
-				if (_ActionIdx>1)  _CamFunctions.MeasurePosition(_OnPositionMeasured);
+				RxBindable.Invoke(()=>
+				{ 
+					switch(_Action.Function)
+					{
+						case ECamFunction.CamNoFunction: 
+							break;
+
+						case ECamFunction.CamFindMark: 
+							_CamFunctions.FindMark(_OnMarkFound);
+							RxGlobals.SetupAssist.WebMove(1000.0, _OnMarkNotFound);
+							break;
+
+						case ECamFunction.CamMeasurePosition:
+							_CamFunctions.MeasurePosition(_OnPositionMeasured);
+							break;
+
+						default: 
+							RxGlobals.Events.AddItem(new LogItem("Unknown Camera function")); 
+							break;
+					}
+				});
 			}
 		}
 

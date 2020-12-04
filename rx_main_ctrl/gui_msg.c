@@ -1176,7 +1176,7 @@ static void _do_test_start	(RX_SOCKET socket, SPrintQueueEvt* pmsg)
 	||  RX_TestImage.testImage==PQ_TEST_SA_ALIGNMENT))
 	{
 		RX_TestImage.copies = 1;
-		RX_TestImage.scans=RX_Config.inkSupplyCnt;
+		RX_TestImage.scans  = RX_Config.inkSupplyCnt;
 	}
 	if (rx_def_is_lb(RX_Config.printer.type))
     { 

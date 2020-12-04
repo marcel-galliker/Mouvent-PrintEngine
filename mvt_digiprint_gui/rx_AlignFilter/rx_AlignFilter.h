@@ -45,10 +45,14 @@ interface IFrx_AlignFilter : public IUnknown
 public:
 	#pragma region Enums & Structs
 
-	enum MeasureModeEnum
+	enum MeasureModeEnum	//0: Off, 1: All Lines, 2: StartLines, 3:Angle, 4: Stitch, 5: Register
 	{
 		MeasureMode_Off = 0,
-		MeasureMode_AllLines = 1
+		MeasureMode_AllLines = 1,
+		MeasureMode_StartLines = 2,
+		MeasureMode_Angle = 3,
+		MeasureMode_Stitch = 4,
+		MeasureMode_Register = 5
 	};
 
 	enum DisplayModeEnum
@@ -175,7 +179,10 @@ public:
 	STDMETHOD(SetDisplayMode)(THIS_ DisplayModeEnum DisplayMode) PURE;
 	STDMETHOD_(DisplayModeEnum, GetDisplayMode)(THIS) PURE;
 
-	#pragma endregion
+	//Minimum number of StartLines
+    STDMETHOD(SetMinNumStartLines)(THIS_ UINT32 MinNumStartLines) PURE;
+
+#pragma endregion
 
 	#pragma region Line-Direction
 
@@ -456,6 +463,9 @@ public:
 	STDMETHODIMP SetDisplayMode(DisplayModeEnum DisplayMode);
 	STDMETHODIMP_(DisplayModeEnum) GetDisplayMode();
 
+	//Minimum number of StartLines
+    STDMETHODIMP SetMinNumStartLines(UINT32 MinNumStartLines);
+
 	#pragma endregion
 
 	#pragma region Line Direction
@@ -539,7 +549,7 @@ private:
 	COLORREF m_TextColor = RGB(0, 255, 0);
 	HFONT m_TextFont = NULL;
 	long m_FontHeight = 0;
-	MeasureModeEnum m_MeasureMode = MeasureModeEnum::MeasureMode_Off;		//0: Off, 1: All Lines
+	MeasureModeEnum m_MeasureMode = MeasureModeEnum::MeasureMode_Off;	//0: Off, 1: All Lines, 2: StartLines, 3:Angle, 4: Stitch, 5: Register
 	BOOL m_ValidMeasure = false;
 	UINT m_QualifyListSize = 0;
 	vector<QualifyStruct> m_vQualifyList;
@@ -549,6 +559,9 @@ private:
 	const int m_MaxBlobAngle = 20;
 	const int m_MaxNumBlobs = 50;
 	DisplayModeEnum m_DisplayMode = DisplayModeEnum::Display_Off;	//0: Off, 1: All Lines
+    UINT m_MinNumStartLines = 3;
+	#define WM_APP_ALIGNEV WM_APP + 2025
+	#define WP_StartLines 100
 
 	//Line Direction
 	bool m_LinesHorizontal = false;
@@ -640,7 +653,13 @@ private:
 	//Measurement
 	HRESULT BlobQualifyer(IMediaSample* pSampleIn, BOOL Vertical, IMediaSample* pProcessSample);
 	HRESULT CalculateDistances(BOOL Vertical, Mat SourceMat);
-	HRESULT OverlayBlobs(IMediaSample* pSampleIn);
+    HRESULT FindStartLines(BOOL Vertical);
+    HRESULT MeasureAngle(BOOL Vertical);
+    HRESULT MeasureStitch(BOOL Vertical);
+    HRESULT MeasureRegister(BOOL Vertical);
+
+    // Display
+    HRESULT OverlayBlobs(IMediaSample *pSampleIn);
 	HRESULT OverlayCenters(IMediaSample* pSampleIn, BOOL Vertical);
 	HRESULT OverlayValues(IMediaSample* pSampleIn, BOOL Vertical);
 	HRESULT OverlayDistanceLines(IMediaSample* pSampleIn, BOOL Vertical);

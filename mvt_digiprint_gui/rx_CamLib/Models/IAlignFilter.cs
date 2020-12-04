@@ -57,7 +57,7 @@ namespace rx_CamLib.Models
 
             //Binarization
             [PreserveSig]
-            void SetBinarizeMode(UInt32 BinarizeMode);			// //0: off, 1: Auto, 2:Adaptive
+            void SetBinarizeMode(UInt32 BinarizeMode);			// //0: off, 1: Manual, 2: Auto, 3: ColorAdaptive
             [PreserveSig]
             UInt32 GetBinarizeMode();
 
@@ -184,7 +184,11 @@ namespace rx_CamLib.Models
             [PreserveSig]
             UInt32 GetDisplayMode();
 
-            #endregion
+            //Minimum number of StartLines
+            [PreserveSig]
+            void SetMinNumStartLines(UInt32 MinNumStartLines);
+
+        #endregion
 
             #region Line-Direction
 

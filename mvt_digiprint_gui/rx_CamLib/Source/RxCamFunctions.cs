@@ -16,8 +16,9 @@ namespace rx_CamLib
 		error
 	};
 
-	public enum ECamFunctions
+	public enum ECamFunction
 	{
+		CamNoFunction,
 		CamFindMark,			
 		CamMeasurePosition
 	};
@@ -74,6 +75,8 @@ namespace rx_CamLib
 		public RxCamFunctions(RxCam cam)
 		{
 			_Camera = cam;
+			Console.WriteLine ("create RxCamFunctions");
+			_Camera.SetBinarizationMode(RxCam.ENBinarizeMode.BinarizeMode_Auto);
 		}
 
 		//--- Property Simulation ---------------------------------------
@@ -87,15 +90,18 @@ namespace rx_CamLib
 		//--- FindMark --------------------------------------------------
 		public void FindMark(Action markFound)
 		{
-			if (_Simulation)
-			{
-				new Task(() =>
-				{
-					Task.Delay(5000).Wait();
-					RxBindable.Invoke(()=>markFound());
-				}).Start();
-			}
-		}
+			Console.WriteLine("FindMark 1");
+			_Camera.SetBinarizationMode(RxCam.ENBinarizeMode.BinarizeMode_Auto);
+			_Camera.SetMeasureMode(RxCam.ENMeasureMode.MeasureMode_StartLines);
+            if (_Simulation)
+            {
+                new Task(() =>
+                {
+                    Task.Delay(5000).Wait();
+                    RxBindable.Invoke(() => markFound());
+                }).Start();
+            }
+        }
 
 		//--- MeasureMark --------------------------------
 		public void MeasureMark(Action<SMarkPosition> measured)

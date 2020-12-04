@@ -13,25 +13,21 @@ namespace RX_DigiPrint.Views.SetupAssistView
 	/// </summary>
 	public partial class SetupAssistView :UserControl
 	{
-		private RxCam _Camera;
-
 		public SetupAssistView()
 		{
 			InitializeComponent();
 
 			DataContext = RxGlobals.SetupAssist;
-			_Camera = new RxCam();
-			_Camera.CamCallBack += new RxCam.CameraCallBack(CallBackfromCam);
 		}
 
 		//--- Settings_Clicked -------------------------------------------
 		private void Settings_Clicked(object sender,RoutedEventArgs e)
 		{
-			SA_Settings settings = new SA_Settings(_Camera);
+			SA_Settings settings = new SA_Settings(RxGlobals.Camera);
             if((bool)settings.ShowDialog()) 
 			{
 				CamCapture.Stop();
-				CamCapture.Start(_Camera);
+				CamCapture.Start(RxGlobals.Camera);
 			}
 		}
 
@@ -39,14 +35,15 @@ namespace RX_DigiPrint.Views.SetupAssistView
 		private void CamSettings_Clicked(object sender,RoutedEventArgs e)
 		{
 			if (BTN_CamSettings.IsChecked) CamSettings.Hide();
-			else						   CamSettings.Show(_Camera);
+			else						   CamSettings.Show(RxGlobals.Camera);
 			BTN_CamSettings.IsChecked = ! BTN_CamSettings.IsChecked;
 		}
 
 		//--- Trigger_Clicked -------------------------------------------
 		private void Trigger_Clicked(object sender,RoutedEventArgs e)
 		{
-			RxGlobals.RxInterface.SendCommand(TcpIp.CMD_SA_OUT_TRIGGER);
+			// RxGlobals.RxInterface.SendCommand(TcpIp.CMD_SA_OUT_TRIGGER);
+			SetupActions.Test();
 		}
 
 		//--- Reference_Clicked -------------------------------------------
@@ -60,8 +57,9 @@ namespace RX_DigiPrint.Views.SetupAssistView
 		{
 			BTN_CamSettings.IsChecked = false;
 			CamSettings.Hide();
-			SetupActions.Start(_Camera);
+			SetupActions.Start();
 		}
+
 		private void Done_Clicked(object sender,RoutedEventArgs e)
 		{
 			SetupActions.ActionDone();
@@ -90,12 +88,6 @@ namespace RX_DigiPrint.Views.SetupAssistView
 			RxGlobals.SetupAssist.WebStop();
 		}
 
-		//--- CallBackfromCam ----------------------------------------
-		private void CallBackfromCam(string CallbackData)
-        {
-          //  RX_Common.MvtMessageBox.Information("Camera", string.Format("Callback from Camera:\n{0}", CallbackData));
-        }
-
 		//--- CamCapture_IsVisibleChanged ----------------------------------
 		private void CamCapture_IsVisibleChanged(object sender,DependencyPropertyChangedEventArgs e)
 		{
@@ -104,7 +96,7 @@ namespace RX_DigiPrint.Views.SetupAssistView
 				new Task(() =>
 				{
 					Task.Delay(100);
-					RxBindable.Invoke(()=>CamCapture.Start(_Camera));
+					RxBindable.Invoke(()=>CamCapture.Start(RxGlobals.Camera));
 				}).Start();
 			}
 			else  CamCapture.Stop();

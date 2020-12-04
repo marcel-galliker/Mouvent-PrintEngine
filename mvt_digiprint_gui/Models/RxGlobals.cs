@@ -1,4 +1,5 @@
-﻿using RX_Common;
+﻿using rx_CamLib;
+using RX_Common;
 using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Services;
 using RX_DigiPrint.Views.LB702WBView;
@@ -53,16 +54,17 @@ namespace RX_DigiPrint.Models
         public static Window                BluetoothLoginWnd;
         public static License               License           = new License();
         public static CleafOrder            CleafOrder        = new CleafOrder();
-        public static Alignment             Alignment = new Alignment();
+        public static Alignment             Alignment          = new Alignment();
         public static AlignmentResources    AlignmentResources = new AlignmentResources();
         public static LB702WB_Machine       LB702WB_Machine;
         public static LH702_View            LH702_View;
         public static LH702_Preview         LH702_Preview;
-        public static DisabledJets          DisabledJets = new DisabledJets();
-        public static Density               Density = new Density();
-        public static ClusterNo             ClusterNo = new ClusterNo();
-        public static FileNameFilter        FileNameFilter = new FileNameFilter();
-        public static SA_Base               SetupAssist = new SA_Base();
+        public static DisabledJets          DisabledJets    = new DisabledJets();
+        public static Density               Density         = new Density();
+        public static ClusterNo             ClusterNo       = new ClusterNo();
+        public static FileNameFilter        FileNameFilter  = new FileNameFilter();
+        public static RxCam                 Camera          = new RxCam();
+        public static SA_Base               SetupAssist     = new SA_Base();
         public static SA_StateMachine       SA_StateMachine = new SA_StateMachine();
     }
 }

@@ -9,8 +9,9 @@ namespace RX_Common
         public delegate void TickDelegate(int no);
         public TickDelegate TimerFct = null;
         
-        private Timer _Timer;
-        private int _TickNo = 0;
+        private Timer   _Timer;
+        private int     _TickNo = 0;
+        static private long    _Ticks0 = DateTime.Now.Ticks;
 
         //--- Constructor ---------------------------------------
         public RxTimer(int interval)
@@ -28,6 +29,12 @@ namespace RX_Common
              if (TimerFct!=null) RxBindable.Invoke(()=>TimerFct(_TickNo));
              _TickNo++;
         }
+
+        public string Ticks()
+		{
+            long ticks=(DateTime.Now.Ticks-_Ticks0) / 10000;
+            return string.Format("{0:N0}", ticks);
+		}
 
     }
 }

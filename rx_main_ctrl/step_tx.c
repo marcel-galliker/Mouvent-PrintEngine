@@ -112,8 +112,6 @@ void steptx_lift_to_wipe_pos(EnFluidCtrlMode mode)
     case ctrl_vacuum_high:	sok_send_2(&_step_socket[0], CMD_LIFT_VACUUM_HIGH_POS, 0, NULL); break;
     default: break;
     }
-    
-		
 }
 
 //--- steptx_lift_in_wipe_pos----------------------------------

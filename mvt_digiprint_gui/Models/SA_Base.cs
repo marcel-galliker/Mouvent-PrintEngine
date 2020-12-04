@@ -10,7 +10,7 @@ namespace RX_DigiPrint.Models
 {
 	public class SA_Base : RxBindable
 	{
-		private Action _ScanMoveDone   = null;
+		private Action _OnScanMoveDone = null;
 		private Action _OnWebMoveDone  = null;
 		private bool   _WebRunning     = false;
 
@@ -29,6 +29,7 @@ namespace RX_DigiPrint.Models
 
 		//--- Property motorPosition ---------------------------------------
 		private double _motorPosition;
+		private double _motorPositionSet;
 		public double motorPosition
 		{
 			get { return _motorPosition; }
@@ -80,10 +81,15 @@ namespace RX_DigiPrint.Models
 			get { return _MoveCnt; }
 			set 
 			{ 
-				if (SetProperty(ref _MoveCnt,value) && _ScanMoveDone!=null)
+				if (SetProperty(ref _MoveCnt,value) && _OnScanMoveDone!=null)
 				{
-					_ScanMoveDone();
-					_ScanMoveDone=null;
+					Console.WriteLine("{0} ScanMoveDone {1} motorPosition={2}", RxGlobals.Timer.Ticks(), _MoveCnt, motorPosition);
+					if (motorPosition==_motorPositionSet)
+					{
+						_OnScanMoveDone();
+						_OnScanMoveDone=null;
+					}
+					else ScanMoveTo(_motorPositionSet, _OnScanMoveDone);
 				}
 			}
 		}
@@ -150,18 +156,16 @@ namespace RX_DigiPrint.Models
 		//--- _checkWebMoveDone -----------------------------------------------
 		private void _checkWebMoveDone()
 		{
-			if (_OnWebMoveDone!=null)
+			EnPlcState state = (EnPlcState)Rx.StrToInt32(RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_MACHINE_STATE"));
+			Console.WriteLine("{0}: _checkWebMoveDone _WebRunning={1} state={2}", RxGlobals.Timer.Ticks(), _WebRunning, state);
+			if (_WebRunning && (state==EnPlcState.plc_pause || state==EnPlcState.plc_stop))
 			{
-				EnPlcState state = (EnPlcState)Rx.StrToInt32(RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_MACHINE_STATE"));
-		//		Console.WriteLine("_checkWebMoveDone old={0}, new={1}", _PlcState, state);
-				if (_WebRunning && (state==EnPlcState.plc_pause || state==EnPlcState.plc_stop))
-				{
-					_OnWebMoveDone();
-					_OnWebMoveDone = null;
-					_WebRunning	   = false;
-				}
-				if (state==EnPlcState.plc_run) _WebRunning=true;
+				Console.WriteLine("{0}: WEB MOVE DONE ", RxGlobals.Timer.Ticks());
+				if (_OnWebMoveDone!=null) _OnWebMoveDone();
+				_OnWebMoveDone = null;
+				_WebRunning	   = false;
 			}
+			if (state==EnPlcState.plc_run) _WebRunning=true;
 		}
 
 		//--- ScanReference ------------------------------------------
@@ -174,18 +178,21 @@ namespace RX_DigiPrint.Models
 		public void ScanMoveBy(double dist, Action done=null)
 		{
 			TcpIp.SetupAssist_MoveCmd cmd = new TcpIp.SetupAssist_MoveCmd();
+			_motorPositionSet += dist;
 			cmd.steps	= (Int32)(dist*1000.0);
-			_ScanMoveDone = done;
+			_OnScanMoveDone = done;
 			RxGlobals.RxInterface.SendMsg(TcpIp.CMD_SA_MOVE, ref cmd);
 		}
 
 		//--- ScanMoveTo --------------------------------------------
-		public void ScanMoveTo(double pos, Action done=null)
+		public void ScanMoveTo(double pos, Action onDone=null)
 		{
 			TcpIp.SetupAssist_MoveCmd cmd = new TcpIp.SetupAssist_MoveCmd();
 			double dist = pos-motorPosition; 
+			_motorPositionSet = pos;
 			cmd.steps	= (Int32)(dist*1000.0);
-			_ScanMoveDone = done;
+			_OnScanMoveDone = onDone;
+			Console.WriteLine("{0} ScanMove {1} from {2:N3} to {3:N3} dist {4:N3}", RxGlobals.Timer.Ticks(), _MoveCnt, motorPosition, pos, dist);
 			RxGlobals.RxInterface.SendMsg(TcpIp.CMD_SA_MOVE, ref cmd);
 		}
 
@@ -206,6 +213,9 @@ namespace RX_DigiPrint.Models
 		//--- WebMove ----------------------------------
 		public void WebMove(double? dist=null, Action onDone=null)
 		{
+			Console.WriteLine("{0}: WebMove", RxGlobals.Timer.Ticks());			
+			_checkWebMoveDone();
+
 			TcpIp.SetupAssist_MoveCmd cmd = new TcpIp.SetupAssist_MoveCmd();
 			if (dist==null) cmd.steps	= (Int32)(1000*WebDist);
 			else            cmd.steps	= (Int32)(1000*dist);
@@ -224,6 +234,7 @@ namespace RX_DigiPrint.Models
 		//--- WebStop ----------------------------------
 		public void WebStop()
 		{
+			Console.WriteLine("{0}: WebStop", RxGlobals.Timer.Ticks());
 			RxGlobals.RxInterface.SendCommand(TcpIp.CMD_SA_WEB_STOP);
 		}
 	}
