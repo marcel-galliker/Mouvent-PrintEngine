@@ -654,8 +654,7 @@ static void _control(int fluidNo)
                                         break;
                                         
 				case ctrl_check_step1:	if ((steplb_rob_in_fct_pos(no/2, rob_fct_cap) && even_number_of_colors)
-											|| (steplb_rob_in_fct_pos((no+1)/2, rob_fct_cap) && !even_number_of_colors) 
-											|| !lbrob)
+											|| (steplb_rob_in_fct_pos((no+1)/2, rob_fct_cap) && !even_number_of_colors) || !lbrob)
 										    _send_ctrlMode(no, ctrl_check_step2, TRUE);
 										break;
                                         
@@ -1164,7 +1163,7 @@ void fluid_send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 
     if (ctrlMode == ctrl_off || ctrlMode == ctrl_print)
     {
-        step_rob_stop();
+        if (ctrlMode == ctrl_off) step_rob_stop();
         if (rx_def_is_lb(RX_Config.printer.type) && RX_StepperStatus.robot_used)
         {
             steplb_pump_back_fluid(no, FALSE);

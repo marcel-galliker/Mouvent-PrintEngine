@@ -25,6 +25,8 @@
 #include "lb702.h"
 #include "robi_lb702.h"
 
+#define MOTOR_WASTE_PUMP_LEFT   2
+#define MOTOR_WASTE_PUMP_RIGHT  3
 #define MOTOR_X_0               4
 
 #define MOTOR_X_BITS            0x10
@@ -91,6 +93,8 @@ static SMovePar _ParCable_drive;
 static SMovePar _ParCable_drive_slow;
 static SMovePar _ParCable_drive_purge;
 
+static SMovePar _Par_WastePump;
+
 static char     *_MotorName[5] = {"BACK", "FRONT", "NONE", "NON", "SLEDGE"};
 static char     _CmdName[32];
 static int      _CmdRunning = 0;
@@ -129,6 +133,7 @@ static int  _check_in_screw_pos(SHeadAdjustment headAdjustment);
 static void _search_all_screws();
 static int  _calculate_average_y_pos(int screwNr);
 static void _set_Screwer_Cfg(SRobotOffsets screw_Cfg);
+static void _handle_waste_pump(void);
 
 
 //--- lbrob_init --------------------------------------
@@ -186,6 +191,15 @@ void lbrob_init(void)
 
     motor_config(MOTOR_X_0, CURRENT_HOLD, X_STEPS_PER_REV, X_INC_PER_REV, STEPS);
 
+    _Par_WastePump.speed = 6000;
+    _Par_WastePump.accel = 10000;
+    _Par_WastePump.current_acc = 280;
+    _Par_WastePump.current_run = 280;
+    _Par_WastePump.encCheck = chk_off;
+    
+    motor_config(MOTOR_WASTE_PUMP_LEFT, CURRENT_HOLD, 0, 0, STEPS);
+    motor_config(MOTOR_WASTE_PUMP_RIGHT, CURRENT_HOLD, 0, 0, STEPS);
+
     robi_lb702_init();
 }
 
@@ -206,6 +220,7 @@ void lbrob_main(int ticks, int menu)
     motor_main(ticks, menu);
     robi_lb702_main(ticks, menu);
     
+    _handle_waste_pump();    
 
     RX_StepperStatus.robinfo.moving = (_CmdRunning != 0);
     if (RX_StepperStatus.robinfo.moving)
@@ -220,12 +235,6 @@ void lbrob_main(int ticks, int menu)
         RX_StepperStatus.robinfo.wipe_done = FALSE;
         RX_StepperStatus.robinfo.x_in_purge4ever = FALSE;
         _HeadPos = FALSE;
-    }
-    
-    if ((RX_StepperStatus.robinfo.moving) && (Fpga.par->output & RO_INK_PUMP_LEFT || Fpga.par->output & RO_INK_PUMP_RIGHT))
-    {
-        val = 0;
-        lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_EMPTY_WASTE, &val);
     }
     
     if (rx_get_ticks() >= _WastePumpTimer && _WastePumpTimer && RX_StepperStatus.info.vacuum_running)
@@ -1555,25 +1564,40 @@ static void _search_all_screws()
 //--- _lbrob_motor_test ---------------------------------
 static void _lbrob_motor_test(int motorNo, int steps)
 {
-    motorNo = 4;
+    if (motorNo <= 1) return;
+    
     int motors = 1 << motorNo;
     SMovePar par;
-    int i;
 
     memset(&par, 0, sizeof(SMovePar));
 
-    par.speed = 2000;
-    par.accel = 4000;
-    par.current_acc = 420.0;
-    par.current_run = 420.0;
-    par.enc_bwd = TRUE;
-    par.encCheck = chk_off;
+    if (motorNo == 4)
+    {
+        par.speed = 2000;
+        par.accel = 4000;
+        par.current_acc = 420.0;
+        par.current_run = 420.0;
+        par.enc_bwd = TRUE;
+        par.encCheck = chk_off;
 
-    _CmdRunning = 1; // TEST
-    RX_StepperStatus.info.moving = TRUE;
+        _CmdRunning = 1; // TEST
+        RX_StepperStatus.info.moving = TRUE;
 
-    motors_config(motors, CURRENT_HOLD, X_STEPS_PER_REV, X_INC_PER_REV, STEPS);
-    motors_move_by_step(motors, &par, steps, FALSE);
+        motors_config(motors, CURRENT_HOLD, X_STEPS_PER_REV, X_INC_PER_REV, STEPS);
+        motors_move_by_step(motors, &par, steps, FALSE);
+    }
+    else if (motorNo >= 2 && motorNo <= 3)
+    {
+        par.speed = 6000;
+        par.accel = 10000;
+        par.current_acc = 280.0;
+        par.current_run = 280.0;
+        par.encCheck = chk_off;
+
+        motors_config(motors, CURRENT_HOLD, 0, 0, STEPS);
+        motors_move_by_step(motors, &par, steps, FALSE);
+    }
+    
 }
 
 //--- _check_in_screw_pos --------------------------------------
@@ -1652,10 +1676,44 @@ static int _calculate_average_y_pos(int screwNr)
     return y_combined / ((screwNr % (SCREWS_PER_HEAD * HEADS_PER_COLOR)) / SCREWS_PER_HEAD);
 }
 
+//--- _set_Screwer_Cfg ---------------------------------------
 static void _set_Screwer_Cfg(SRobotOffsets screw_Cfg)
 {
     memcpy(&RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwclusters, screw_Cfg.screwclusters, sizeof(screw_Cfg.screwclusters));
     memcpy(&RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwpositions, screw_Cfg.screwpositions, sizeof(screw_Cfg.screwpositions));
+}
+
+//--- _handle_waste_pump -----------------------------------------
+static void _handle_waste_pump(void)
+{
+    int val;
+    
+    if ((RX_StepperStatus.robinfo.moving) && (Fpga.par->output & RO_INK_PUMP_LEFT || Fpga.par->output & RO_INK_PUMP_RIGHT))
+    {
+        val = 0;
+        lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_EMPTY_WASTE, &val);
+    }
+    
+    
+    if (Fpga.par->output & RO_INK_PUMP_LEFT && motor_move_done(MOTOR_WASTE_PUMP_LEFT))
+    {
+        motor_move_by_step(MOTOR_WASTE_PUMP_LEFT, &_Par_WastePump, 60000);
+        motors_start(1 << MOTOR_WASTE_PUMP_LEFT, FALSE);
+    }
+    else if (!(Fpga.par->output & RO_INK_PUMP_LEFT))
+    {
+        //motors_stop(1 << MOTOR_WASTE_PUMP_LEFT);
+    }
+    
+    if (Fpga.par->output & RO_INK_PUMP_RIGHT && motor_move_done(MOTOR_WASTE_PUMP_RIGHT))
+    {
+        motor_move_by_step(MOTOR_WASTE_PUMP_RIGHT, &_Par_WastePump, 600000);
+        motors_start(1 << MOTOR_WASTE_PUMP_RIGHT, FALSE);
+    }
+    else if (!(Fpga.par->output & RO_INK_PUMP_RIGHT))
+    {
+        //motors_stop(1 << MOTOR_WASTE_PUMP_RIGHT);
+    }
 }
 
 void lbrob_reset_variables(void)
