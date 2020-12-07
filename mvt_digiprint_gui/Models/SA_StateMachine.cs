@@ -87,10 +87,22 @@ namespace RX_DigiPrint.Models
 					//Start-Lines detected
 					case RxCam.ENCamCallBackInfo.StartLinesDetected:
 						if (_Action?.Function==ECamFunction.CamFindMark) _OnMarkFound();
-					//	RX_Common.MvtMessageBox.Information("Camera", string.Format("{0} Start-Lines detected", ExtraInfo));
+						//	RX_Common.MvtMessageBox.Information("Camera", string.Format("{0} Start-Lines detected", ExtraInfo));
 						break;
-                }
-            }
+					//Angle Correction
+					case RxCam.ENCamCallBackInfo.AngleCorr:
+						RX_Common.MvtMessageBox.Information("Camera", string.Format("Angle Correction {0}", ExtraInfo));
+						break;
+					//Stitch Correction
+					case RxCam.ENCamCallBackInfo.StitchCorr:
+						RX_Common.MvtMessageBox.Information("Camera", string.Format("Stitch Correction {0}", ExtraInfo));
+						break;
+					//Stitch Correction
+					case RxCam.ENCamCallBackInfo.RegisterCorr:
+						RX_Common.MvtMessageBox.Information("Camera", string.Format("Register Correction {0}", ExtraInfo));
+						break;
+				}
+			}
         }
 
 		//--- Abort ---------------------------------------

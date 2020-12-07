@@ -92,6 +92,8 @@ namespace rx_CamLib
 		{
 			Console.WriteLine("FindMark 1");
 			_Camera.SetBinarizationMode(RxCam.ENBinarizeMode.BinarizeMode_Auto);
+			//set very small LineAspectLimit for StartLines
+			_Camera.SetLineAspectLimit(1);
 			_Camera.SetMeasureMode(RxCam.ENMeasureMode.MeasureMode_StartLines);
             if (_Simulation)
             {
