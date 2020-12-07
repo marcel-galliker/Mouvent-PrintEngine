@@ -10,6 +10,7 @@ using DirectShowLib;
 using rx_CamLib.Models;
 using RX_Common;
 using static rx_CamLib.RxAlignFilter;
+using System.Threading;
 
 namespace rx_CamLib
 {
@@ -19,22 +20,29 @@ namespace rx_CamLib
 
         public enum ENCamResult
 		{
-            OK                      =  0,
-            Error                   = -1,
+            OK                          =  0,
+            Error                       = -1,
         
-            Cam_notDetected         = -2,
-            Cam_notFound            = -3,
-            Cam_alreadyRunning      = -4,
-            Cam_notSelected         = -5,
+            Cam_notDetected             = -2,
+            Cam_notFound                = -3,
+            Cam_alreadyRunning          = -4,
+            Cam_notSelected             = -5,
             Cam_notRunning,
 
-            Filter_NotRegistered    = -6,
+            Filter_NotRegistered        = -6,
 
-            Filter_AlreadyUsed      = -2147467259,
-		};
+            Filter_AlreadyUsed          = -2147467259,
+
+            Filter_DataTimeout          = -7,
+            Filter_NoData               = -8,
+            Filter_NoMeasurePossible    = -9
+        };
 
         public enum ENCamCallBackInfo
         {
+            RegisterCorr                =  6,
+            StitchCorr                  =  5,
+            AngleCorr                   =  4,
             StartLinesDetected          =  3,
             CameraStopped               =  2,
             CameraStarted               =  1,
@@ -44,18 +52,25 @@ namespace rx_CamLib
             DS_ErrorAbotedDisplay       = -3,
             VMR_ReconnectionFailed      = -4,
             CouldNotBuildGraph          = -5,
-            GraphNotStoppedCorrectly    = -6
-
+            GraphNotStoppedCorrectly    = -6,
+            NoDataFromFilter            = -7
         }
 
         public enum ENMeasureMode
         {
-            MeasureMode_Off = 0,
-            MeasureMode_AllLines = 1,
-            MeasureMode_StartLines = 2,
-            MeasureMode_Angle = 3,
-            MeasureMode_Stitch = 4,
-            MeasureMode_Register = 5,
+            MeasureMode_Off         = 0,
+            MeasureMode_AllLines    = 1,
+            MeasureMode_StartLines  = 2,
+            MeasureMode_Angle       = 3,
+            MeasureMode_Stitch      = 4,
+            MeasureMode_Register    = 5
+        }
+
+        public enum ENDisplayMode
+        {
+            Display_Off         = 0,
+            Display_AllLines    = 1,
+            Display_Correction  = 2
         }
 
         public enum ENBinarizeMode
@@ -65,6 +80,13 @@ namespace rx_CamLib
             BinarizeMode_Auto           = 2,
             BinarizeMode_ColorAdaptive  = 3
         }
+
+        public struct MeasureDataStruct
+        {
+            public float DPosX;         //Center of pattern offset X to center of camera
+            public float DPosY;         //Center of pattern offset Y to center of camera
+            public float Correction;    //Needed correction in Revolutions (Angle, Stitch) or μm (Register)
+        };
 
         private DsDevice[] DeviceList = null;
         private bool CameraRunning = false;
@@ -92,6 +114,9 @@ namespace rx_CamLib
         private const int DBT_DEVICEREMOVECOMPLETE = 0x8004;
         private const int DBT_DEVTYP_DEVICEINTERFACE = 0x0005;
         private const int WP_StartLines = 100;
+        private const int WP_Angle = 101;
+        private const int WP_Stitch = 102;
+        private const int WP_Register = 103;
 
         //Property Display
         [DllImport("oleaut32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
@@ -251,6 +276,11 @@ namespace rx_CamLib
             return ENCamResult.OK;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="MeasureMode"></param>
+        /// <returns>0: for success or error code</returns>
         public ENCamResult SetMeasureMode(ENMeasureMode MeasureMode)
         {
             if (!CameraRunning) return ENCamResult.Cam_notRunning;
@@ -258,9 +288,78 @@ namespace rx_CamLib
             return ENCamResult.OK;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="DisplayMode"></param>
+        /// <returns>0: for success or error code</returns>
+        public ENCamResult SetDisplayMode(ENDisplayMode DisplayMode)
+        {
+            if (!CameraRunning) return ENCamResult.Cam_notRunning;
+            halignFilter.SetDisplayMode((UInt32)DisplayMode);
+            return ENCamResult.OK;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="BinarizeMode"></param>
+        /// <returns>0: for success or error code</returns>
         public ENCamResult SetBinarizationMode(ENBinarizeMode BinarizeMode)
         {
-            CamGlobals.AlignFilter.BinarizeMode=(uint)BinarizeMode;
+            if (!CameraRunning) return ENCamResult.Cam_notRunning;
+            halignFilter.SetBinarizeMode((UInt32)BinarizeMode);
+            return ENCamResult.OK;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="AspectLimit"></param>
+        /// <returns>0: for success or error code</returns>
+        public ENCamResult SetLineAspectLimit(UInt32 AspectLimit)
+        {
+            if (!CameraRunning) return ENCamResult.Cam_notRunning;
+            halignFilter.SetBlobAspectLimit(AspectLimit);
+            return ENCamResult.OK;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="NumMeasures"></param>
+        /// <returns>0: for success or error code</returns>
+        public ENCamResult DoMeasures(UInt32 NumMeasures)
+        {
+            if (!CameraRunning) return ENCamResult.Cam_notRunning;
+            ENMeasureMode CurrentMode = (ENMeasureMode)halignFilter.GetMeasureMode();
+            if (CurrentMode == ENMeasureMode.MeasureMode_Off || 
+                CurrentMode == ENMeasureMode.MeasureMode_StartLines) return ENCamResult.Filter_NoMeasurePossible;
+            if (halignFilter.DoMeasures(NumMeasures)) return ENCamResult.OK;
+            else return ENCamResult.Filter_NoMeasurePossible;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="UpsideDown"></param>
+        /// <returns>0: for success or error code</returns>
+        public ENCamResult SetCameraUpsideDown(bool UpsideDown)
+        {
+            if (!CameraRunning) return ENCamResult.Cam_notRunning;
+            halignFilter.SetUpsideDown(UpsideDown);
+            return ENCamResult.OK;
+        }
+
+        /// <summary>
+        /// Searches for horizontal lines, default = false (vertical)
+        /// </summary>
+        /// <param name="Horizontal"></param>
+        /// <returns>0: for success or error code</returns>
+        public ENCamResult SetLinesHorizontal(bool Horizontal)
+        {
+            if (!CameraRunning) return ENCamResult.Cam_notRunning;
+            halignFilter.SetLinesHorizontal(Horizontal);
             return ENCamResult.OK;
         }
 
@@ -383,10 +482,34 @@ namespace rx_CamLib
                 //rx_AlignFilter Messages
                 case WM_APP_ALIGNEV:
                 {
+                    MeasureDataStruct CorrectionData;
+                    ENCamResult Result;
+
                     switch (WParam)
                     {
                         case WP_StartLines:
                             CamCallBack?.Invoke(ENCamCallBackInfo.StartLinesDetected, Msg.LParam.ToInt64().ToString());
+                            break;
+                        case WP_Angle:
+                            Result = GetMeasureData(out CorrectionData);
+                            if(Result == ENCamResult.OK)
+                                CamCallBack?.Invoke(ENCamCallBackInfo.AngleCorr, CorrectionData.Correction.ToString() + ";" +
+                                    CorrectionData.DPosX.ToString() + ";" + CorrectionData.DPosY.ToString());
+                            else CamCallBack?.Invoke(ENCamCallBackInfo.NoDataFromFilter, Result.ToString());
+                            break;
+                        case WP_Stitch:
+                            Result = GetMeasureData(out CorrectionData);
+                            if (Result == ENCamResult.OK)
+                                CamCallBack?.Invoke(ENCamCallBackInfo.StitchCorr, CorrectionData.Correction.ToString() + ";" +
+                                    CorrectionData.DPosX.ToString() + ";" + CorrectionData.DPosY.ToString());
+                            else CamCallBack?.Invoke(ENCamCallBackInfo.NoDataFromFilter, Result.ToString());
+                            break;
+                        case WP_Register:
+                            Result = GetMeasureData(out CorrectionData);
+                            if (Result == ENCamResult.OK)
+                                CamCallBack?.Invoke(ENCamCallBackInfo.RegisterCorr, CorrectionData.Correction.ToString() + ";" +
+                                    CorrectionData.DPosX.ToString() + ";" + CorrectionData.DPosY.ToString());
+                            else CamCallBack?.Invoke(ENCamCallBackInfo.NoDataFromFilter, Result.ToString());
                             break;
                     }
                     break;
@@ -860,6 +983,136 @@ namespace rx_CamLib
             //void SetLinesHorizontal(bool Horizontal);
             //bool GetLinesHorizontal();
 
+        }
+
+        private ENCamResult GetMeasureData(out MeasureDataStruct MeasureData)
+        {
+            MeasureData = new MeasureDataStruct();
+
+            //Raw data list
+            List<MeasureDataStruct> CorrectionList;
+            ENCamResult DataResult = GetMeasureDataList(out CorrectionList);
+            if (DataResult != ENCamResult.OK) return DataResult;
+
+            //Average within 1 sigma
+            AverageData(CorrectionList, ref MeasureData);
+
+            return ENCamResult.OK;
+        }
+
+        private ENCamResult GetMeasureDataList(out List<MeasureDataStruct> MeasureDataList)
+        {
+            MeasureDataList = new List<MeasureDataStruct>();
+            UInt32 DataListSize32 = 0;
+            System.Timers.Timer tmr_Timeout = new System.Timers.Timer();
+            tmr_Timeout.Elapsed += new System.Timers.ElapsedEventHandler(TimerElapsed);
+            tmr_Timeout.Interval = 500;
+            tmr_Timeout.Enabled = true;
+
+            //Wait for List to be ready
+            while (DataListSize32 == 0)
+            {
+                //Get Size
+                halignFilter.GetMeasureResults(IntPtr.Zero, out DataListSize32);
+                if (DataListSize32 != 0) break;
+                Thread.Sleep(30);   //Wait app. 1 frame
+                Application.DoEvents();
+                if (tmr_Timeout.Enabled == false)
+                {
+                    tmr_Timeout.Elapsed -= TimerElapsed;
+                    return ENCamResult.Filter_DataTimeout;
+                }
+            }
+            tmr_Timeout.Enabled = false;
+            tmr_Timeout.Elapsed -= TimerElapsed;
+
+            //Allocate memory
+            IntPtr unmanaged_pInList = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(MeasureDataStruct)) * (int)DataListSize32);
+            //Get Data from Filter
+            int DataListSize = (int)DataListSize32;
+            if (!halignFilter.GetMeasureResults(unmanaged_pInList, out DataListSize32)) return ENCamResult.Filter_NoData;
+            if (DataListSize32 != DataListSize || DataListSize32 == 0)
+            {
+                Marshal.FreeHGlobal(unmanaged_pInList);
+                return ENCamResult.Filter_NoData;
+            }
+
+            //Fill Data to InList
+            IntPtr current = unmanaged_pInList;
+            for (int i = 0; i < DataListSize32; i++)
+            {
+                MeasureDataList.Add((MeasureDataStruct)Marshal.PtrToStructure(current, typeof(MeasureDataStruct)));
+                Marshal.DestroyStructure(current, typeof(MeasureDataStruct));
+                current = (IntPtr)((long)current + Marshal.SizeOf(typeof(MeasureDataStruct)));
+            }
+            Marshal.FreeHGlobal(unmanaged_pInList);
+
+            return ENCamResult.OK;
+        }
+
+        private void AverageData(List<MeasureDataStruct> CorrectionList, ref MeasureDataStruct MeasureData)
+        {
+            //Average Data within 1 sigma
+
+            //Mean
+            float MeanCorr = 0;
+            float MeanDX = 0;
+            float MeanDY = 0;
+            for (int i = 0; i < CorrectionList.Count; i++)
+            {
+                MeanCorr += CorrectionList[i].Correction;
+                MeanDX += CorrectionList[i].DPosX;
+                MeanDY += CorrectionList[i].DPosY;
+            }
+            MeanCorr /= CorrectionList.Count;
+            MeanDX /= CorrectionList.Count;
+            MeanDY /= CorrectionList.Count;
+
+            //Variance
+            double VarCorr = 0;
+            double VarDX = 0;
+            double VarDY = 0;
+            for (int i = 0; i < CorrectionList.Count; i++)
+            {
+                VarCorr += Math.Pow(CorrectionList[i].Correction - MeanCorr, 2);
+                VarDX += Math.Pow(CorrectionList[i].DPosX - MeanDX, 2);
+                VarDY += Math.Pow(CorrectionList[i].DPosY - MeanDY, 2);
+            }
+            VarCorr /= CorrectionList.Count;
+            VarDX /= CorrectionList.Count;
+            VarDY /= CorrectionList.Count;
+
+            //StdDev
+            VarCorr = Math.Sqrt(VarCorr);
+            VarDX = Math.Sqrt(VarDX);
+            VarDY = Math.Sqrt(VarDY);
+
+            //Average within 1 sigma
+            int Counter = 0;
+            for (int i = 0; i < CorrectionList.Count; i++)
+            {
+                if (CorrectionList[i].Correction <= MeanCorr + VarCorr &&
+                   CorrectionList[i].Correction >= MeanCorr - VarCorr &&
+                   CorrectionList[i].DPosX <= MeanDX + VarDX &&
+                   CorrectionList[i].DPosX >= MeanDX - VarDX &&
+                   CorrectionList[i].DPosY <= MeanDY + VarDY &&
+                   CorrectionList[i].DPosY >= MeanDY - VarDY)
+                {
+                    Counter++;
+                    MeasureData.Correction += CorrectionList[i].Correction;
+                    MeasureData.DPosX += CorrectionList[i].DPosX;
+                    MeasureData.DPosY += CorrectionList[i].DPosY;
+                }
+            }
+            MeasureData.Correction /= Counter;
+            MeasureData.DPosX /= Counter;
+            MeasureData.DPosY /= Counter;
+        }
+
+        private void TimerElapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            System.Timers.Timer tmr = (System.Timers.Timer)sender;
+            tmr.Enabled = false;
         }
 
 

@@ -58,10 +58,18 @@ public:
 	enum DisplayModeEnum
 	{
 		Display_Off = 0,
-		Display_AllLines = 1
+		Display_AllLines = 1,
+		Display_Correction = 2
 	};
 
-	#pragma endregion
+	struct MeasureDataStruct
+	{
+		float DPosX;
+		float DPosY;
+		float Correction;
+	};
+
+#pragma endregion
 
 	#pragma region General
 
@@ -182,6 +190,12 @@ public:
 	//Minimum number of StartLines
     STDMETHOD(SetMinNumStartLines)(THIS_ UINT32 MinNumStartLines) PURE;
 
+	//Execute Measures
+	STDMETHOD_(BOOL, DoMeasures)(THIS_ UINT32 NumMeasures) PURE;
+
+	//GetMeasure Results
+	STDMETHOD_(BOOL, GetMeasureResults)(THIS_ void* pMeasureDataStructArray, UINT32* ListSize) PURE;
+
 #pragma endregion
 
 	#pragma region Line-Direction
@@ -190,7 +204,11 @@ public:
 	STDMETHOD(SetLinesHorizontal)(THIS_ BOOL Horizontal) PURE;
 	STDMETHOD_(BOOL, GetLinesHorizontal)(THIS) PURE;
 
-	#pragma endregion
+	//Line Direction
+	STDMETHOD(SetUpsideDown)(THIS_ BOOL UpsideDown) PURE;
+	STDMETHOD_(BOOL, GetUpsideDown)(THIS)PURE;
+
+#pragma endregion
 
 };
 
@@ -466,7 +484,13 @@ public:
 	//Minimum number of StartLines
     STDMETHODIMP SetMinNumStartLines(UINT32 MinNumStartLines);
 
-	#pragma endregion
+	//Execute Measures
+	STDMETHODIMP_(BOOL) DoMeasures(UINT32 NumMeasures);
+
+	//GetMeasure Results
+	STDMETHODIMP_(BOOL) GetMeasureResults(void* pMeasureDataStructArray, UINT32* ListSize);
+
+#pragma endregion
 
 	#pragma region Line Direction
 
@@ -474,7 +498,11 @@ public:
 	STDMETHODIMP SetLinesHorizontal(BOOL LinesHorizontal);
 	STDMETHODIMP_(BOOL) GetLinesHorizontal();
 
-	#pragma endregion
+	//Line Direction
+	STDMETHODIMP SetUpsideDown(BOOL UpsideDown);
+	STDMETHODIMP_(BOOL) GetUpsideDown();
+
+#pragma endregion
 
 	#pragma endregion
 
@@ -498,9 +526,12 @@ private:
 
 	//Binarize
 	UINT m_BinarizeMode = 0;	//0: off, 1: manual, 2: Auto, 3:Adaptive
+	UINT m_PresetBinarizeMode = 0;
 	UINT Histogram[256];
 	UINT m_Threshold = 127;
+	UINT m_PresetThreshold = 127;
 	BOOL m_ShowHistogram = false;
+	BOOL m_PresetShowHistogram = false;
 	LPCWSTR m_DeviceName = L"none";
 	UINT m_Peak_1_Val = 0;
 	UINT m_Peak_2_Val = 0;
@@ -515,10 +546,14 @@ private:
 	uchar* ThresholdLine = NULL;
 
 	//Dilate/Erode
-	UINT m_DilateErodes = 2;			//Dilate-Erode Iterations
-	UINT m_ExtraErodes = 1;				//Additional Erodes
-	UINT m_ErodeSeedX = 10;				//Erode Seed size		
+	UINT m_DilateErodes = 3;			//Dilate-Erode Iterations
+	UINT m_PresetDilateErodes = 3;
+	UINT m_ExtraErodes = 2;				//Additional Erodes
+	UINT m_PresetExtraErodes = 2;
+	UINT m_ErodeSeedX = 13;				//Erode Seed size
+	UINT m_PresetErodeSeedX = 13;
 	UINT m_ErodeSeedY = 1;
+	UINT m_PresetErodeSeedY = 1;
 
 	Mat m_ElementE_Hori;
 	Mat m_ElementE_Verti;
@@ -538,44 +573,79 @@ private:
 
 	//Measurement
 	BOOL m_ShowOriginal = true;
+	BOOL m_PresetShowOriginal = true;
 	BOOL m_OverlayBlobs = true;
 	BOOL m_OverlayCenters = true;
 	BOOL m_OverlayValues = true;
 	BOOL m_MeasurePixels = true;
 	UINT m_BlobAreaDivisor = 70;
-	UINT m_BlobAspectLimit = 5;
+	UINT m_PresetBlobAreaDivisor = 70;
+	UINT m_BlobAspectLimit = 10;
+	UINT m_PresetBlobAspectLimit = 10;
 	COLORREF m_BlobColor = RGB(127, 127, 127);
 	COLORREF m_CrossColor = RGB(255, 255, 255);
 	COLORREF m_TextColor = RGB(0, 255, 0);
 	HFONT m_TextFont = NULL;
 	long m_FontHeight = 0;
-	MeasureModeEnum m_MeasureMode = MeasureModeEnum::MeasureMode_Off;	//0: Off, 1: All Lines, 2: StartLines, 3:Angle, 4: Stitch, 5: Register
+	MeasureModeEnum m_MeasureMode = IFrx_AlignFilter::MeasureModeEnum::MeasureMode_Off;	//0: Off, 1: All Lines, 2: StartLines, 3:Angle, 4: Stitch, 5: Register
+	MeasureModeEnum m_PresetMeasureMode = IFrx_AlignFilter::MeasureModeEnum::MeasureMode_Off;
 	BOOL m_ValidMeasure = false;
-	UINT m_QualifyListSize = 0;
 	vector<QualifyStruct> m_vQualifyList;
-	vector<QualifyStruct> m_vQualifyListToHost;
-	BOOL m_PrepareQualifyListForHost = false;
-	BOOL m_QualifyListForHostReady = false;
+
+	BOOL m_StartMeasure = false;
+	BOOL m_MeasureRunning = false;
+	BOOL m_NumMeasures = 0;
+	MeasureDataStruct CorrectionForHost;
+	vector<MeasureDataStruct> m_vMeasureDataList;
+	UINT32 m_DataListSize = 0;
+	BOOL m_DataListforHostReady = false;
+	BOOL m_measureDone = false;
+
+
+
 	const int m_MaxBlobAngle = 20;
 	const int m_MaxNumBlobs = 50;
-	DisplayModeEnum m_DisplayMode = DisplayModeEnum::Display_Off;	//0: Off, 1: All Lines
-    UINT m_MinNumStartLines = 3;
+	DisplayModeEnum m_DisplayMode = IFrx_AlignFilter::DisplayModeEnum::Display_Off;	//0: Off, 1: All Lines, 2: Correction Values
+	DisplayModeEnum m_PresetDisplayMode = IFrx_AlignFilter::DisplayModeEnum::Display_Off;
+	UINT m_MinNumStartLines = 3;
 	#define WM_APP_ALIGNEV WM_APP + 2025
 	#define WP_StartLines 100
+	#define WP_Angle 101
+	#define WP_Stitch 102
+	#define WP_Register 103
 
 	//Line Direction
-	bool m_LinesHorizontal = false;
+	BOOL m_LinesHorizontal = false;
+	BOOL m_UpsideDown = false;
 
 	//Debug On
 	BOOL m_DebugPrepare = false;
 	BOOL m_DebugOn = false;
 	BOOL m_ConsoleAllocated = false;
 	UINT m_DebugCounter = 0;
-    FILE *pStdIn;
-    FILE *pStdOut;
-    FILE *pStdErr;
+	FILE* pStdIn;
+	FILE* pStdOut;
+	FILE* pStdErr;
 
 	bool m_InverseImage = false;
+
+	//Pattern parameters
+	//Angle
+	double m_AngleSideA = 541.00739366481859570264341545511;
+	double m_AngleSideB = 64.031242374328486864882176746218;
+	double m_AngleSideC = 542.88580751388224147838611840257;
+	double m_AngleAlpha = 1.4824231678730821214311580232518;
+	double m_AngleBeta1 = 0.05713332549154622154645192349483;
+	double m_AngleBeta2 = 0.06103520658968898926969889927577;
+	double m_AngleDegreesPerRev = -0.000970835240444;
+	double m_AngleOuterDistance = 1354.6666666666667;
+	//Stitch
+	float m_StitchOuterDistance = 1143;
+	float m_StitchTargetDistance = 571.5;
+	float m_StitchMicronsPerRev = 11.347;
+	//Register
+	float m_RegisterOuterDistance = 1143;
+	float m_RegisterTargetDistance = 571.5;
 
 	//TextBitmap
 	bool OverlayBitmapReady = FALSE;
@@ -590,6 +660,7 @@ private:
 
 	//Timing Display
 	BOOL m_DspTiming = false;
+	BOOL m_PresetDspTiming = false;
 	UINT NumFrames = 0;
 	std::chrono::steady_clock::time_point m_FrameStartTime;
 	std::chrono::steady_clock::time_point m_FrameEndTime;
@@ -631,6 +702,9 @@ private:
 	cl_kernel ClShowColorHistogramKernel = NULL;
 
 
+	//Change Settings and Modes
+	HRESULT ChangeModes();
+
 	//Binarize
 	HRESULT GetHistogram(IMediaSample* pSampleIn, UINT* Histogram, UINT BinarizationMode);
 	HRESULT ShowHistogram(IMediaSample* pSampleIn, UINT* Histogram);
@@ -653,13 +727,13 @@ private:
 	//Measurement
 	HRESULT BlobQualifyer(IMediaSample* pSampleIn, BOOL Vertical, IMediaSample* pProcessSample);
 	HRESULT CalculateDistances(BOOL Vertical, Mat SourceMat);
-    HRESULT FindStartLines(BOOL Vertical);
-    HRESULT MeasureAngle(BOOL Vertical);
-    HRESULT MeasureStitch(BOOL Vertical);
-    HRESULT MeasureRegister(BOOL Vertical);
+	HRESULT FindStartLines(BOOL Vertical, BOOL UpsideDown);
+	HRESULT MeasureAngle(BOOL Vertical, BOOL UpsideDown);
+	HRESULT MeasureStitch(BOOL Vertical, BOOL UpsideDown);
+	HRESULT MeasureRegister(BOOL Vertical, BOOL UpsideDown);
 
-    // Display
-    HRESULT OverlayBlobs(IMediaSample *pSampleIn);
+	//Display
+	HRESULT OverlayBlobs(IMediaSample* pSampleIn);
 	HRESULT OverlayCenters(IMediaSample* pSampleIn, BOOL Vertical);
 	HRESULT OverlayValues(IMediaSample* pSampleIn, BOOL Vertical);
 	HRESULT OverlayDistanceLines(IMediaSample* pSampleIn, BOOL Vertical);

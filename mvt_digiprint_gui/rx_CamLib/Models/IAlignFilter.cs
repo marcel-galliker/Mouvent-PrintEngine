@@ -188,6 +188,14 @@ namespace rx_CamLib.Models
             [PreserveSig]
             void SetMinNumStartLines(UInt32 MinNumStartLines);
 
+            //Execute Measures
+            [PreserveSig]
+            bool DoMeasures(UInt32 NumMeasures);
+
+            //Read Correction List
+            [PreserveSig]
+            bool GetMeasureResults(IntPtr pMeasureDataStructArray, out UInt32 ListSize);
+
         #endregion
 
             #region Line-Direction
@@ -198,8 +206,14 @@ namespace rx_CamLib.Models
             [PreserveSig]
             bool GetLinesHorizontal();
 
-            #endregion
-        }
+            //Camera Direction
+            [PreserveSig]
+            void SetUpsideDown(bool UpsideDown);
+            [PreserveSig]
+            bool GetUpsideDown();
 
-        #endregion
+            #endregion
+    }
+
+    #endregion
 }
