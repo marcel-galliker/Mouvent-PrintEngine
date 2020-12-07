@@ -255,7 +255,7 @@ static int _local_path(const char *filepath, char *localPath)
 		//--- convert to linux path ---
 		if (filepath[1]==':')
 		{
-			Error(WARN, 0, "CODE NOT TESTED");
+//			Error(WARN, 0, "CODE NOT TESTED");
 			len = sprintf(localPath, "%s", PATH_RIPPED_DATA);
 			strcpy(&localPath[len], &filepath[3]);
 			for (ch=localPath; *ch; ch++)
@@ -683,9 +683,8 @@ int data_load(SPageId *id, const char *filepath, int offsetPx, int lengthPx, UIN
 	
 	TrPrintfL(TRUE, "data_load id=%d, page=%d, copy=%d, scan=%d, offsetPx=%d, data_load >>%s<<", id->id, id->page, id->copy, id->scan, offsetPx, filepath);
 	TrPrintfL(TRUE, "FirstPage=%d, LastPage=%d", flags & FLAG_SMP_FIRST_PAGE, flags & FLAG_SMP_LAST_PAGE);
-	
-	if (flags & FLAG_SMP_LAST_PAGE) 
-		Error(LOG, 0, "data_load id=%d, page=%d, copy=%d, scan=%d, data_load >>%s<< LAST PAGE", id->id, id->page, id->copy, id->scan, filepath);
+
+	if (flags & FLAG_SMP_LAST_PAGE) TrPrintfL(TRUE, "data_load id=%d, page=%d, copy=%d, scan=%d, data_load >>%s<< LAST PAGE", id->id, id->page, id->copy, id->scan, filepath);
 		
  	nextIdx = (_InIdx+1) % PRINT_LIST_SIZE;
 	if (nextIdx == _OutIdx) 
@@ -1109,7 +1108,7 @@ static void _data_multi_copy_64(SPageId *id, SBmpInfo *pBmpInfo, UINT8 multiCopy
 						}
 					}
 				}
-				Error(LOG, 0, "MultiCopy[%d] done", buf);
+				TrPrintfL(TRUE, "MultiCopy[%d] done", buf);
 			}
 		}
 		pBmpInfo->srcWidthPx *= multiCopy;

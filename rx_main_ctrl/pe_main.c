@@ -183,8 +183,8 @@ int pem_set_config(void)
 				
 		memcpy(&_ActCfg, &cfg, sizeof(_ActCfg));
 		memcpy(&_ActPar, &par, sizeof(_ActPar));
-		
-		Error(LOG, 0, "PEM: rx_pemain_start");
+
+		TrPrintfL(TRUE, "PEM: rx_pemain_start");
 		rx_pemain_start(&_ActPar, &_Api);
 
 		pem_send_printer_status();
@@ -195,7 +195,7 @@ int pem_set_config(void)
 //--- pem_end -----------------------------------------------------------------
 int pem_end(void)
 {
-	Error(LOG, 0, "PEM: rx_pemain_stop");
+	TrPrintfL(TRUE, "PEM: rx_pemain_stop");
 	rx_pemain_stop();
 	ReleasePtr(_ActCfg.colors);
 	ReleasePtr(_ActCfg.bitmaps);
@@ -224,8 +224,8 @@ static int _printsynchro(Smvt_prt_synchro *cmd)
 {
 	memcpy(&_Synchro, cmd, sizeof(_Synchro));
 
-	Error(LOG, 0, "PEM: _printsynchro Recto: PrintGo Mode=%d, dist=%d, gap=%d", cmd->rectoSync.printGoMode, cmd->rectoSync.printGoDistance, cmd->rectoSync.printGoGap);
-	Error(LOG, 0, "PEM: _printsynchro Verso: PrintGo Mode=%d, dist=%d, gap=%d", cmd->versoSync.printGoMode, cmd->versoSync.printGoDistance, cmd->versoSync.printGoGap);
+	TrPrintfL(TRUE, "PEM: _printsynchro Recto: PrintGo Mode=%d, dist=%d, gap=%d", cmd->rectoSync.printGoMode, cmd->rectoSync.printGoDistance, cmd->rectoSync.printGoGap);
+	TrPrintfL(TRUE, "PEM: _printsynchro Verso: PrintGo Mode=%d, dist=%d, gap=%d", cmd->versoSync.printGoMode, cmd->versoSync.printGoDistance, cmd->versoSync.printGoGap);
 
 	_init_pq_item(&_Item, &_Synchro.rectoSync);
 	return REPLY_OK;
@@ -234,7 +234,7 @@ static int _printsynchro(Smvt_prt_synchro *cmd)
 //--- _printadjust ----------------------------------------
 static int _printadjust(Smvt_prt_adjust *cmd)
 {
-	Error(LOG, 0, "Print Adjust: recto:(%d, %d) verso:(%d, %d)", cmd->RectoX, cmd->RectoY, cmd->VersoX, cmd->VersoY);
+	TrPrintfL(TRUE, "Print Adjust: recto:(%d, %d) verso:(%d, %d)", cmd->RectoX, cmd->RectoY, cmd->VersoX, cmd->VersoY);
 	return REPLY_OK;
 }
 

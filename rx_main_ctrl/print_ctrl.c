@@ -645,7 +645,7 @@ static int _print_next(void)
 					{
 						_Item.srcWidth = width*25400/1200;
 						_Item.srcHeight = height*25400/1200;
-						Error(LOG, 0, "Changed size to %dx%d", width, height);
+						TrPrintfL(TRUE, "Changed size to %dx%d", width, height);
 					}
 				}
 
@@ -813,7 +813,6 @@ static int _print_next(void)
 							l			  = l - 1000*_Item.start.scan;
 							_ScanLengthPx = (UINT32)(l * 1200 / 25.4+0.5);
 							_Item.id.copy = 1;
-							if (_Item.copies!=1) Error(WARN, 0, "Here was the bug: _Item.copies=%d", _Item.copies);
 							_Item.copies  = 1;
 						}
 

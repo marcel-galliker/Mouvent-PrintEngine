@@ -353,7 +353,7 @@ void scr_start(SBmpSplitInfo *pInfo)
 	int idx = (_ScrFifoInIdx+1)%SCR_FIFO_SIZE;
 	if (idx==_ScrFifoOutIdx) 
 	{
-		Error(ERR_ABORT, 0, "ScrFifo Overvlow");
+		Error(ERR_ABORT, 0, "Screen Fifo Overflow");
 		return;
 	}
 	

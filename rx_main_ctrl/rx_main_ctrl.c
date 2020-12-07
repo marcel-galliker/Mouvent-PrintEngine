@@ -242,47 +242,32 @@ int main(int argc, char* argv[])
 	{
 		rx_sleep(1000);
 		int t0=rx_get_ticks();
-	//	TrPrintfL(TRUE, "ctrl_tick");
 		ctrl_tick();
 		int t1=rx_get_ticks()-t0;
-	//	TrPrintfL(TRUE, "enc_tick");
 		enc_tick();
 		int t2=rx_get_ticks()-t1;
-	//	TrPrintfL(TRUE, "pq_tick");
 		pq_tick();
 		int t3=rx_get_ticks()-t2;
-	//	TrPrintfL(TRUE, "fluid_tick");
 		fluid_tick();
 		int t4=rx_get_ticks()-t3;
-	//	TrPrintfL(TRUE, "step_tick");
 		step_tick();
 		int t5=rx_get_ticks()-t4;
-	//	TrPrintfL(TRUE, "machine_tick");
 		machine_tick();
 		int t6=rx_get_ticks()-t5;
-	//	TrPrintfL(TRUE, "spool_tick");
 		spool_tick();
 		int t7=rx_get_ticks()-t6;
-	//	TrPrintfL(TRUE, "net_tick");
 		net_tick();
 		int t8=rx_get_ticks()-t7;
-	//	TrPrintfL(TRUE, "chiller_tick");
 		chiller_tick();
-	//	co_tick();	// can hang sometimes!!!
 		int t9=rx_get_ticks()-t8;
-	//	TrPrintfL(TRUE, "ctr_tick");
 		ctr_tick();
-	//	TrPrintfL(TRUE, "gui_tick");
 		_menu();
 		gui_tick();
 		int t10=rx_get_ticks()-t9;
-	//	TrPrintfL(TRUE, "_menu");
 		int t11=rx_get_ticks()-t10;
 		if (rx_get_ticks()-t0>1000) 
 		{
-			char str[100];
-			sprintf(str, "MAIN LOOP: t1=%d t2=%d t3=%d t4=%d t5=%d t6=%d t7=%d t8=%d t9=%d t10=%d t11=%d", t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11);
-			Error(WARN, 0, str);
+			TrPrintfL(TRUE, "WARNING MAIN LOOP slow: t1=%d t2=%d t3=%d t4=%d t5=%d t6=%d t7=%d t8=%d t9=%d t10=%d t11=%d", t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11);
 		}
 	}
 

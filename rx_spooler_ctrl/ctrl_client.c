@@ -449,7 +449,7 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 //	Error(LOG, 0, "_do_print_file (id=%d, page=%d, copy=%d) FLAG_SAME=%d, same=%d", msg.id.id, msg.id.page, msg.id.copy, msg.flags&FLAG_SAME, same);
 
 	if (msg.virtualPass>msg.virtualPasses)
-		Error(ERR_ABORT, 0, "programming Error");
+		Error(ERR_ABORT, 0, "Virtual Passes Error");
 	
 //	if (rx_def_is_lb(RX_Spooler.printerType))
 //		msg.gapPx += 1;	// Bug in FPGA: (when srcLineCnt==12300, gap=0 it sometimes prints an additional line of old data [instead of blank] between the labels)
@@ -515,7 +515,7 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 			_BufferNo = (_BufferNo+1)%BUFFER_CNT;
 			if (msg.smp_bufSize) 
 			{
-				Error(LOG, 0, "data_clear");				
+				TrPrintfL(TRUE, "data_clear");
 				data_clear(_Buffer[_BufferNo]);
 			}
 			TrPrintfL(TRUE, "data_malloc (id=%d, page=%d, copy=%d, scan=%d) _BufferNo=%d", msg.id.id, msg.id.page, msg.id.copy, msg.id.scan, _BufferNo);

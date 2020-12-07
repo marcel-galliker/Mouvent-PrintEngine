@@ -176,7 +176,7 @@ int hc_head_board_cfg(RX_SOCKET socket, SHeadBoardCfg* cfg)
 	_BufSize  = 0;
 	if (cfg->no>=SIZEOF(_HBPar)) 
 	{
-		Error(ERR_CONT, 0, "HeadBard No=%d, too large", cfg->no);
+		Error(ERR_CONT, 0, "HeadBoard No=%d, too large", cfg->no);
 		return REPLY_ERROR;
 	}
 

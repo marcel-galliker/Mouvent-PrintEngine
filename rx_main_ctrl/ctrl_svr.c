@@ -846,14 +846,12 @@ void ctrl_send_head_cfg(void)
 //--- ctrl_set_density_values ------------------------------------------
 void ctrl_set_density_values(SDensityValuesMsg *pmsg)
 {
-	Error(LOG, 0, "ctrl_set_density_values head=%d", pmsg->head);
 	sok_send(&_HeadCtrl[pmsg->head/MAX_HEADS_BOARD].socket, pmsg);
 }
 
 //--- ctrl_set_disalbled_jets ------------------------------------------
 void ctrl_set_disalbled_jets(SDisabledJetsMsg *pmsg)
 {
-	Error(LOG, 0, "SDisabledJetsMsg head=%d", pmsg->head);
 	sok_send(&_HeadCtrl[pmsg->head/MAX_HEADS_BOARD].socket, pmsg);
 }
 

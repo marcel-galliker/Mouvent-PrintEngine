@@ -199,7 +199,7 @@ static void* _rfs_update_thread(void* lpParameter)
  
 			if (time>100)
 			{
-				Error(ERR_CONT, 0, "Cound not connect to >>%s:(Remote File Server)<< Error %d", par->ipAddr, ret);
+				Error(ERR_CONT, 0, "Could not connect to >>%s:(Remote File Server)<< Error %d", par->ipAddr, ret);
 				memset(lpParameter, 0, sizeof(SUpdateThreadPar));
 				return NULL;
 			}

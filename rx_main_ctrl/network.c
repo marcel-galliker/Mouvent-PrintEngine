@@ -195,7 +195,7 @@ int net_register(SNetworkItem *item)	// register and calculate IP-Address
 		}
 	}
 
-	Error(LOG, 0, "net_register: Device >>%s %d (serial=%s)<<", item->deviceTypeStr, item->deviceNo+1, item->serialNo);
+	TrPrintfL(TRUE, "net_register: Device >>%s %d (serial=%s)<<", item->deviceTypeStr, item->deviceNo+1, item->serialNo);
 
 	//--- search first gap ---
 	for (i = 0; i < SIZEOF(_Network.item); i++)
@@ -209,7 +209,7 @@ int net_register(SNetworkItem *item)	// register and calculate IP-Address
 			net_device_to_ipaddr(item->deviceType, item->deviceNo, item->ipAddr, sizeof(item->ipAddr));
 			memcpy	(&_Network.item[i], item, sizeof(_Network.item[0]));
 			_send_item(NO_SOCKET, i);
-			Error(LOG, 0, "Device >>%s %d (serial=%s)<<: connected", _Network.item[i].deviceTypeStr, _Network.item[i].deviceNo+1, _Network.item[i].serialNo);
+			TrPrintfL(TRUE, "Device >>%s %d (serial=%s)<<: connected", _Network.item[i].deviceTypeStr, _Network.item[i].deviceNo+1, _Network.item[i].serialNo);
 			return time;
 		}
 	}

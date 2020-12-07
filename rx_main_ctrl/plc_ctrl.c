@@ -426,7 +426,7 @@ static void _plc_send_par(SPlcPar *pPlcPar)
 	
 	if (_PlcState==plc_webin)
 	{
-		Error(LOG, 0, "_plc_send_par in webin: send CMD_STOP");
+		TrPrintfL(TRUE, "_plc_send_par in webin: send CMD_STOP");
 		_plc_set_command("CMD_PRODUCTION", "CMD_STOP");
 		rx_sleep(200);
 	}
@@ -576,7 +576,7 @@ int  plc_clean(void)
 {
 	if(rx_def_is_tx(RX_Config.printer.type))
 	{
-		Error(LOG, 0, "plc_clean: send CMD_STOP");
+		TrPrintfL(TRUE, "plc_clean: send CMD_STOP");
 		_plc_set_command("CMD_PRODUCTION", "CMD_STOP");
 		step_set_vent(FALSE);
 	}
@@ -781,8 +781,7 @@ static void _plc_load_par(void)
 	if (lc_get_value_by_name(UnitID ".XML_ENC_OFFSET", value)==REPLY_OK)			
 		RX_Config.printer.offset.incPerMeter[0] = atoi(value);
 
-	if (lc_get_value_by_name(UnitID ".PAR_ENC_OFFSET", value)==REPLY_OK)			
-		Error(LOG, 0, "Encoder Offset=%d", atoi(value));
+	if (lc_get_value_by_name(UnitID ".PAR_ENC_OFFSET", value) == REPLY_OK) TrPrintfL(TRUE, "Encoder Offset=%d", atoi(value));
 
 	/*
 	if (rx_def_is_scanning(RX_Config.printer.type))
