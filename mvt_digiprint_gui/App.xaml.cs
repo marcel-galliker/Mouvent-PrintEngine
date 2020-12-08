@@ -6,6 +6,7 @@ using System.Threading;
 using System.Windows.Input;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Globalization;
 
 namespace RX_DigiPrint
 {
@@ -36,7 +37,8 @@ namespace RX_DigiPrint
          //--- App -----------------------------
         public App()
         {
-            
+                // set localization to en-US to ensure a good conversion of floating number...
+                CultureInfo.CurrentCulture = new CultureInfo("en-US", false);
                 string name = Path.GetFileNameWithoutExtension(System.Windows.Forms.Application.ExecutablePath);
                 if (Process.GetProcessesByName(name).Length > 1)
                 {
