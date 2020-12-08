@@ -98,7 +98,6 @@
 
     <converters:WlanQuality_Converter       x:Key="WlanQuality_Converter"/>
 
-    <converters:BooleanToSideSelectionHeightConverter x:Key="BooleanToSideSelectionHeightConverter"/>
     <converters:StartPauseIconConverter x:Key="StartPauseIconConverter"/>
     <converters:StartPauseToolTipConverter x:Key="StartPauseToolTipConverter"/>
     

@@ -15,10 +15,10 @@
 #include "rx_term.h"
 #include "rx_threads.h"
 #include "rx_trace.h"
-#include "EEprom.h"
 #include "fpga.h"
 #include "nios.h"
 #include "tse.h"
+#include "EEprom.h"
 #include "rx_head_ctrl.h"
 #include "conditioner.h"
 #include "version.h"
@@ -98,7 +98,7 @@ static void _main_menu(void)
 	term_printf("R: trace registers\n");
 	term_printf("t: TCP/IP Stress Test\n");
 	term_printf("E: Reset pending errors\n");
-	term_printf("h<xxx>: Frequency in KHz\n");
+	term_printf("h<xxx>: Frequency in Hz\n");
 	term_printf("d<x>:   Drop size fixed 0..3\n");
 	if (_status)
 	{
@@ -199,7 +199,8 @@ void putty_display_fpga_status(void)
 	term_printf("--- FPGA Status -----------------------------------\n");
 	term_printf("Version: %d.%d.%d.%d                Linux: V%d\n",			RX_FpgaStat.version.major, RX_FpgaStat.version.minor, RX_FpgaStat.version.revision, RX_FpgaStat.version.build, RX_LinuxDeployment);
 	term_printf("Temp:    %d  Overheat.Error: %d  FPGA.cmd=0x%04x\n",		RX_FpgaStat.temp-128, RX_FpgaError.overheat_error, RX_FpgaCmd);
-	term_printf("Encoder:  linkEnable=%d, telCnt=%u, synthEnable=%d, synthKHz=%d\n", (RX_FpgaEncCfg.cmd & ENC_ENABLE)!=0, fpga_get_encTelFreq(), RX_FpgaEncCfg.synth.enable, _speed_160(RX_FpgaEncCfg.synth.value*1000));
+	freq=_speed_160(RX_FpgaEncCfg.synth.value);
+	term_printf("Encoder:  linkEnable=%d, telCnt=%u, synthEnable=%d, synthHz=%d.%03d\n", (RX_FpgaEncCfg.cmd & ENC_ENABLE)!=0, fpga_get_encTelFreq(), RX_FpgaEncCfg.synth.enable, freq/1000, freq%1000);
 //		term_printf("info:  0x%08x\n", RX_FpgaStat.info);
 	
 	term_printf("Speed [Hz]:   ");
@@ -415,6 +416,27 @@ void putty_display_nios_status(int nios, int status)
 				
 	if (nios_loaded())
 	{
+		RX_HBStatus->flow = RX_NiosStat.cooler_pressure;
+		for (i = 0; i < MAX_HEADS_BOARD; i++)
+		{
+			RX_HBStatus->head[i].tempHead = RX_NiosStat.head_temp[i];
+
+			if (*RX_NiosStat.head_eeprom[i])
+			{
+				eeprom_init_data(i, RX_NiosStat.head_eeprom[i], &RX_HBStatus->head[i].eeprom);
+				/*
+				//--- test user eeprom -----------------------------------------------
+				{
+					static int test=0;
+					//            1234567890123456789012345678901 345678901234567890
+					sprintf(str, "TEST 0 1 2 3 4 5 6 7 8 9 ABCDE-%d%d%d%d-FGHIJKLMNOPQRSTUVWXYZ", test, test, test, test);
+					nios_set_user_eeprom(i, str);
+					test=(test+1)%10;
+				}
+				*/
+			}
+		}
+
 		term_printf("\n--- NIOS Status ----------------- FPGA-QSYS: id=%d time=%d\n", fpga_qsys_id(), fpga_qsys_timestamp());
 		if (!nios) return;
 		
@@ -623,16 +645,6 @@ void putty_display_cond_status(int status)
 			}
 			term_printf("\n");
     	}
-		term_printf("Pressure in1:     "); 
-    	{
-			int i, l;
-			for (i=0; i<MAX_HEADS_BOARD; i++)
-			{
-				l   = sprintf(str, "%4s ", value_str1(_NiosMem->stat.cond[no[i]].pressure_in1));
-				term_printf("%15s ", str);
-			}
-			term_printf("\n");
-    	}
 		term_printf("Pressure in2:     "); 
     	{
 			int i, l;
@@ -707,7 +719,7 @@ void putty_display_cond_status(int status)
 
 		for (i = 0; i < MAX_HEADS_BOARD; i++) if (RX_NiosStat.cond[no[i]].error&COND_ERR_temp_head_overheat) str[i]='E'; else str[i]=' ';
 		term_printf("Temp Head [C]:    "); PRINTF(MAX_HEADS_BOARD)("   %s(%02d<%02d)%c ", value_str_temp(_NiosCfg->cond[no[i]].tempHead), _NiosCfg->cond[no[i]].temp / 1000, _NiosCfg->cond[no[i]].tempMax / 1000, str[no[i]]); term_printf("\n"); 
-		term_printf("Temp-Rdy/Flow-Ok: "); PRINTF(MAX_HEADS_BOARD)("           %d %d ", RX_HBStatus->head[no[i]].info.temp_ready, RX_HBStatus->head[no[i]].info.flowFactor_ok); term_printf("\n"); 		
+		term_printf("Temp Ready:       "); PRINTF(MAX_HEADS_BOARD)("           %d %d ", RX_HBStatus->head[no[i]].info.temp_ready, RX_HBStatus->head[no[i]].info.flowFactor_ok); term_printf("\n"); 		
 		term_printf("Temp Inlet [C]:   "); PRINTF(MAX_HEADS_BOARD)("%14s  ",  value_str_temp(RX_NiosStat.cond[no[i]].tempIn)); term_printf("\n");
 		term_printf("Temp Heater [C]:  "); PRINTF(MAX_HEADS_BOARD)("%14s  ", value_str_temp(RX_NiosStat.cond[no[i]].tempHeater)); term_printf("\n");
 		term_printf("Heater:           "); PRINTF(MAX_HEADS_BOARD)("          %3d%%  ", RX_NiosStat.cond[no[i]].heater_percent); term_printf("\n");

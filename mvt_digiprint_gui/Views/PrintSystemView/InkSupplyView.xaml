@@ -116,11 +116,11 @@
         <Grid x:Name="SettingsGrid" Width="100"  Margin="0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="26"/>
-                <RowDefinition Height="{Binding HasSideSelection, Converter={StaticResource BooleanToSideSelectionHeightConverter}}"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto" x:Name="RowHeight_Side"/>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto" x:Name="RowHeight_Heater"/>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
