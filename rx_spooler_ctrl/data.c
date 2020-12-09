@@ -1344,9 +1344,8 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 				pInfo->widthBt		= pBmpInfo->lineLen;
 				pInfo->srcLineLen	= pBmpInfo->lineLen;
 				pInfo->srcLineCnt	= pBmpInfo->lengthPx;
-				pInfo->dstLineLen	= (pBmpInfo->lineLen+31) & ~31; // align to 256 Bits (32 Bytes)
-				pInfo->blkCnt		= (pInfo->dstLineLen*pInfo->srcLineCnt +RX_Spooler.dataBlkSize-1) / RX_Spooler.dataBlkSize;
-				if (pInfo->blkCnt>blkCnt) Error(ERR_ABORT, 0, "Data: blkCnt=%d, max=%d", pInfo->blkCnt, blkCnt);
+
+				
 
 				empty = FALSE;
 				if (pBmpInfo->printMode==PM_TEST_SINGLE_COLOR && (color+1)!=id->scan)
@@ -1381,25 +1380,35 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 					pInfo->dstLineLen	= 32; // align to 256 Bits (32 Bytes)				
 					pInfo->blk0		    = blk0;
 					pInfo->blkCnt		= 1;
-				}
+				} 
+				else
+				{
+					//--- rip the test data -----------------------------------------
+					if (pInfo->data && (id->id==PQ_TEST_JETS || id->id==PQ_TEST_JET_NUMBERS || id->id==PQ_TEST_DENSITY)) 
+					{
+						RX_Bitmap bmp;
+						bmp.bppx		= pInfo->bitsPerPixel;
+						bmp.width		= pInfo->widthPx;
+						bmp.height		= pInfo->srcLineCnt;					
+						bmp.lineLen		= pInfo->srcLineLen;
+						bmp.sizeUsed	= 0;
+						bmp.sizeAlloc	= 0;
+						bmp.buffer		=  *pInfo->data;
+						rip_test_data(&bmp, id->id, RX_TestData[head]);
+					}
 
-				//--- rip the test data -----------------------------------------
-				if (pInfo->data && (id->id==PQ_TEST_JETS || id->id==PQ_TEST_JET_NUMBERS || id->id==PQ_TEST_DENSITY)) 
-				{
-					RX_Bitmap bmp;
-					bmp.bppx		= pInfo->bitsPerPixel;
-					bmp.width		= pInfo->widthPx;
-					bmp.height		= pInfo->srcLineCnt;					
-					bmp.lineLen		= pInfo->srcLineLen;
-					bmp.sizeUsed	= 0;
-					bmp.sizeAlloc	= 0;
-					bmp.buffer		=  *pInfo->data;
-					rip_test_data(&bmp, id->id, RX_TestData[head]);
-				}
-				if (pInfo->bitsPerPixel==8)
-				{
-					scr_start(pInfo);
-					screeningCnt++;
+					if (pInfo->bitsPerPixel == 8)
+					{
+						scr_start(pInfo);
+						screeningCnt++;
+					}
+					else
+					{
+						pInfo->dstLineLen	= (pBmpInfo->lineLen+31) & ~31; // align to 256 Bits (32 Bytes)
+						pInfo->blkCnt = (pInfo->dstLineLen*pInfo->srcLineCnt +RX_Spooler.dataBlkSize-1) / RX_Spooler.dataBlkSize;
+					}
+					if (pInfo->blkCnt>blkCnt) return Error(ERR_ABORT, 0, "Data: blkCnt=%d, max=%d", pInfo->blkCnt, blkCnt);
+
 				}
 
 				if (clearBlockUsed) _BlkNo[pInfo->board][pInfo->head] += pInfo->blkCnt; // (_BlkNo[pInfo->board][pInfo->head]+pInfo->blkCnt)%(RX_Spooler.dataBlkCntHead);
@@ -1530,7 +1539,7 @@ static int _data_split_prod(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 						pInfo->dstLineLen	= (pInfo->widthBt+31) & ~31; // align to 256 Bits (32 Bytes)
 						pInfo->blkCnt		= (pInfo->dstLineLen * pBmpInfo->lengthPx + RX_Spooler.dataBlkSize-1) / RX_Spooler.dataBlkSize;
 					}
-					if (pInfo->blkCnt>blkCnt) Error(ERR_ABORT, 0, "Data: blkCnt=%d, max=%d", pInfo->blkCnt, blkCnt);
+					if (pInfo->blkCnt>blkCnt) return Error(ERR_ABORT, 0, "Data: blkCnt=%d, max=%d", pInfo->blkCnt, blkCnt);
 					if (clearBlockUsed) _BlkNo[pInfo->board][pInfo->head] = (_BlkNo[pInfo->board][pInfo->head]+pInfo->blkCnt)%(RX_Spooler.dataBlkCntHead);
 				//	TrPrintfL(TRUE, "Split[%d.%d]: startPx=%d, widthPx=%d, FillBt=%d, buffer=%03d, blk0=%d, blkCnt=%d", pInfo->board,  pInfo->head, startPx, pInfo->widthPx, pInfo->fillBt, ctrl_get_bufferNo(*pInfo->data), pInfo->blk0, pInfo->blkCnt);
 				}
