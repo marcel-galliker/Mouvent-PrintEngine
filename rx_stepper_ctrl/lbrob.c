@@ -1702,7 +1702,7 @@ static void _handle_waste_pump(void)
     }
     else if (!(Fpga.par->output & RO_INK_PUMP_LEFT))
     {
-        //motors_stop(1 << MOTOR_WASTE_PUMP_LEFT);
+        motors_stop(1 << MOTOR_WASTE_PUMP_LEFT);
     }
     
     if (Fpga.par->output & RO_INK_PUMP_RIGHT && motor_move_done(MOTOR_WASTE_PUMP_RIGHT))
@@ -1712,7 +1712,7 @@ static void _handle_waste_pump(void)
     }
     else if (!(Fpga.par->output & RO_INK_PUMP_RIGHT))
     {
-        //motors_stop(1 << MOTOR_WASTE_PUMP_RIGHT);
+        motors_stop(1 << MOTOR_WASTE_PUMP_RIGHT);
     }
 }
 

@@ -22,6 +22,7 @@ namespace RX_DigiPrint.Views.UserControls
         private Image[] _LedUp    = new Image[STEPPER_CNT];
         private Image[] _LedPrint = new Image[STEPPER_CNT];
         private Image[] _LedCap   = new Image[STEPPER_CNT];
+        private Image[] _LedRobRef = new Image[STEPPER_CNT];
 
         private static ImageSource _GreenLedImg;
         private static ImageSource _GreyLedImg;
@@ -72,6 +73,11 @@ namespace RX_DigiPrint.Views.UserControls
                     Grid.SetColumn(_LedCap[i], 1+i);
                     StepperGrid.Children.Add(_LedCap[i]);
 
+                    _LedRobRef[i] = new Image();
+                    Grid.SetRow(_LedRobRef[i], 10);
+                    Grid.SetColumn(_LedRobRef[i], 1+i);
+                    StepperGrid.Children.Add(_LedRobRef[i]);
+
                     RxGlobals.StepperStatus[i].PropertyChanged += Stepper_PropertyChanged;
                 }
             }
@@ -94,6 +100,8 @@ namespace RX_DigiPrint.Views.UserControls
         {
             StepperStatus stat = sender as StepperStatus;
 
+            _LedRobRef[stat.No].Source = (stat.X_in_ref && RxGlobals.StepperStatus[1].RobotUsed && RxGlobals.User.UserType == EUserType.usr_mouvent) ? _GreenLedImg : null;
+
             if(e.PropertyName.Equals("CmdRunning")) 
             {
                 if(stat.CmdRunning==0)
@@ -103,13 +111,14 @@ namespace RX_DigiPrint.Views.UserControls
                     _LedUp   [stat.No].Source = (stat.Z_in_up)   ? _GreenLedImg : null;
                     _LedPrint[stat.No].Source = (stat.Z_in_print)? _GreenLedImg : null;
                     _LedCap  [stat.No].Source = (stat.Z_in_cap)  ? _GreenLedImg : null;
+                    
 
                     bool refDone=RxGlobals.StepperStatus[0].RefDone;
                     Visibility visible = (RxGlobals.StepperStatus[0].RobotUsed && RxGlobals.User.UserType == EUserType.usr_mouvent)? Visibility.Visible : Visibility.Collapsed;
                     for (int i=0; i<RxGlobals.StepperStatus.Length; i++)
                     {
                         if (RxGlobals.StepperStatus[i].CmdRunning==0 && RxGlobals.StepperStatus[i].RefDone) refDone=true;
-                        if (RxGlobals.StepperStatus[i].RobotUsed) visible = Visibility.Visible;
+                        if (RxGlobals.StepperStatus[i].RobotUsed && RxGlobals.User.UserType == EUserType.usr_mouvent) visible = Visibility.Visible;
                     }
                     Button_Up.IsEnabled     = refDone;
                     Button_Print.IsEnabled  = refDone;

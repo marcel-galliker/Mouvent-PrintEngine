@@ -464,7 +464,7 @@ static void _plc_send_par(SPlcPar *pPlcPar)
 	}
 
 	lc_set_value_by_name_UINT32(UnitID ".PAR_PRINTING_SPEED",		pPlcPar->speed);
-	lc_set_value_by_name_UINT32(UnitID ".PAR_DISTANCE_TO_STOP",		pPlcPar->distToStop);
+	lc_set_value_by_name_FLOAT(UnitID ".PAR_DISTANCE_TO_STOP",		(float)pPlcPar->distToStop);
 
 	if(rx_def_is_scanning(RX_Config.printer.type))
 	{

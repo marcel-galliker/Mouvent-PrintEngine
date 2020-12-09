@@ -163,6 +163,14 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _Z_in_ref, value); }
         }
 
+        //--- Property Z_in_wash ---------------------------------------
+        private bool _Z_in_wash;
+        public bool Z_in_wash
+        {
+            get { return _Z_in_wash; }
+            set { SetProperty(ref _Z_in_wash, value); }
+        }
+
         //--- Property Z_in_up ---------------------------------------
         private bool _Z_in_up;
         public bool Z_in_up
@@ -458,9 +466,10 @@ namespace RX_DigiPrint.Models
             Z_in_ref  = (msg.info & 0x00000010)!=0;
             Z_in_print= (msg.info & 0x00000020)!=0;
             Z_in_cap  = (msg.info & 0x00000040)!=0;
-            Z_in_up   = (msg.info & 0x00000080)!=0;
-            X_in_cap  = (msg.info & 0x00000100)!=0 || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB701;
-            X_in_ref  = (msg.info & 0x00000200)!= 0;
+            Z_in_wash = (msg.info & 0x00000080)!=0;
+            Z_in_up   = (msg.info & 0x00000100)!=0;
+            X_in_cap  = (msg.info & 0x00000200)!=0 || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB701;
+            X_in_ref  = (msg.info & 0x00000400)!= 0;
             CoverOpen = (msg.info & 0x00001000)!=0;
             
             HeadUpInput_0 = (msg.info & 0x00040000)!=0;
