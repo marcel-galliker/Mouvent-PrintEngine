@@ -68,7 +68,7 @@ namespace RX_DigiPrint.Views.SetupAssistView
 		//--- Move_Clicked -------------------------------------------
 		private void Move_Clicked(object sender,RoutedEventArgs e)
 		{
-			RxGlobals.SetupAssist.ScanMoveBy(Rx.StrToDouble(MoveDist.Text));
+			RxGlobals.SetupAssist.ScanMoveTo(Rx.StrToDouble(MoveDist.Text));
 		}
 
 		//--- Stop_Clicked -------------------------------------------

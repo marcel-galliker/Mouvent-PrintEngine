@@ -35,6 +35,7 @@ static void *_sa_thread(void *lpParameter);
 static void *_sa_tick_thread(void *lpParameter);
 static int _sa_handle_msg(RX_SOCKET socket, void *msg, int len, struct sockaddr *sender, void *par);
 static int _do_sa_stat(RX_SOCKET socket, SSetupAssist_StatusMsg	*pstat);
+static int _do_sa_trace(RX_SOCKET socket, SSetupAssist_TraceMsg	*ptrace);
 
 //--- sa_init -----------------------------------------
 int	 sa_init(void)
@@ -83,8 +84,12 @@ static void* _sa_tick_thread(void *lpParameter)
 {
 	while (_SaThreadRunning)
 	{
-		int ret=sok_send_2(&_SaSocket, CMD_STATUS_GET, 0, NULL);
-		if (_Timeout>0 && --_Timeout==0) Error(ERR_CONT, 0, "Setup Assistant Scanner timeout");
+		if (_SaSocket!=INVALID_SOCKET) 
+		{
+			int ret=sok_send_2(&_SaSocket, CMD_STATUS_GET, 0, NULL);
+			TrPrintfL(TRUE, "SetupAssist: CMD_STATUS_GET socket=%d, ret=%d", _SaSocket, ret);
+			if (_Timeout>0 && --_Timeout==0) Error(ERR_CONT, 0, "Setup Assistant Scanner timeout");
+		}
 		rx_sleep(1000);
 	}
 	return NULL;
@@ -98,6 +103,7 @@ static int _sa_handle_msg(RX_SOCKET socket, void *msg, int len, struct sockaddr 
 	switch(phdr->msgId)
 	{
 		case CMD_STATUS_GET: _do_sa_stat(socket, (SSetupAssist_StatusMsg*) msg); break;
+        case CMD_TRACE_GET:	 _do_sa_trace(socket, (SSetupAssist_TraceMsg*) msg); break;
 		default:
 		Error(ERR_CONT, 0, "Unknown Command 0x%04x, sent by Setup-Assist >>%s<<", phdr->msgId);
 	}
@@ -113,6 +119,13 @@ static int _do_sa_stat(RX_SOCKET socket, SSetupAssist_StatusMsg	*pstat)
 	_Status.motor.position = (INT32)(pstat->motor.position*_microns2steps);
 	if (!_Status.motor.moving && _Timeout<MOVE_TIEMOUT) _Timeout=0;
 	gui_send_msg(INVALID_SOCKET, &_Status);
+	return REPLY_OK;
+}
+
+//--- _do_sa_trace ---------------------------------------------------------------
+static int _do_sa_trace(RX_SOCKET socket, SSetupAssist_TraceMsg	*ptrace)
+{
+	TrPrintfL(TRUE, "SetupAssist: trace >>%s<<", ptrace->message);
 	return REPLY_OK;
 }
 
@@ -175,7 +188,8 @@ void sa_handle_gui_msg(RX_SOCKET socket, void *pmsg_)
 								plc_move_web(pcmd->steps);
 								break;
 
-    case CMD_SA_WEB_STOP:		Error(LOG, 0, "Send CMD_SA_WEB_STOP");
+    case CMD_SA_WEB_STOP:		gui_send_cmd(CMD_SA_WEB_STOP);
+								Error(LOG, 0, "Send CMD_SA_WEB_STOP");
 								plc_pause_printing(FALSE);
 								break;
 

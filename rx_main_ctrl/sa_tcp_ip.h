@@ -14,6 +14,7 @@
 
 // Status commands
 #define CMD_STATUS_GET			(STATUS_COMMAND_MASK | 0x00000001)
+#define CMD_TRACE_GET			(STATUS_COMMAND_MASK | 0x00000002)
 
 // Motor commands
 #define CMD_MOTOR_REFERENCE		(MOTOR_COMMAND_MASK | 0x00000001)
@@ -55,6 +56,14 @@ typedef struct
 		#define IN_STOP_LEFT	(1<<0)
 		#define IN_STOP_RIGHT	(1<<1)
 } SSetupAssist_StatusMsg;
+
+//--- SSetupAssist_TraceMsg ---------------------------------------
+#define TRACE_STR_LEN	128
+typedef struct
+{
+	SSAMsgHdr	 hdr;
+	char message[TRACE_STR_LEN];
+} SSetupAssist_TraceMsg;
 
 //--- SetupAssist_MoveCmd ------------------------
 typedef struct

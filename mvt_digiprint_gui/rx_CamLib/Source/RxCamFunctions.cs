@@ -90,7 +90,6 @@ namespace rx_CamLib
 		//--- FindMark --------------------------------------------------
 		public void FindMark(Action markFound)
 		{
-			Console.WriteLine("FindMark 1");
 			_Camera.SetBinarizationMode(RxCam.ENBinarizeMode.BinarizeMode_Auto);
 			//set very small LineAspectLimit for StartLines
 			_Camera.SetLineAspectLimit(1);

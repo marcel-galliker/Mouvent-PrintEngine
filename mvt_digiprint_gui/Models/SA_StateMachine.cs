@@ -179,8 +179,11 @@ namespace RX_DigiPrint.Models
         }
 
 		//--- _FindMark ------------------------------------
+		private bool _MarkFound=false;
 		private void _FindMark()
 		{
+			RxGlobals.Events.AddItem(new LogItem("Camera: Finding Mark"));
+			_MarkFound = false;
 			if (!_SimuMachine) RxGlobals.SetupAssist.ScanMoveTo(_Action.ScanPos, _ScanMoveDone);
 			else _ScanMoveDone();
 		}
@@ -188,19 +191,29 @@ namespace RX_DigiPrint.Models
 		//--- _Camera_CamMarkFound ---------------------------------------
 		private void _OnMarkFound()
 		{
-			Console.WriteLine("{0}: Mark Found", RxGlobals.Timer.Ticks());
-			RxGlobals.SetupAssist.WebStop();
+			if (!_MarkFound)
+			{
+				RxGlobals.Events.AddItem(new LogItem("Camera: Mark Found"));
+				Console.WriteLine("{0}: Mark Found", RxGlobals.Timer.Ticks());
+				RxGlobals.SetupAssist.WebStop();
+				RxGlobals.Events.AddItem(new LogItem("Camera: WebStop"));
+				_MarkFound=true;
+			}
 		}
 
 		//--- _Camera_CamMarkNotFound -------------------------------------------
 		private void _OnMarkNotFound()
 		{
-			Console.WriteLine("{0}: Mark NOT Found", RxGlobals.Timer.Ticks());
-			if (_Action==null) return;
-			if (_Action.Function==ECamFunction.CamFindMark) 
-			{ 
-				_Action.State=ECamFunctionState.error;
-				Abort();
+			if (!_MarkFound)
+			{
+				RxGlobals.Events.AddItem(new LogItem("Camera: Mark NOT Found"));
+				Console.WriteLine("{0}: Mark NOT Found", RxGlobals.Timer.Ticks());
+				if (_Action==null) return;
+				if (_Action.Function==ECamFunction.CamFindMark) 
+				{ 
+					_Action.State=ECamFunctionState.error;
+					Abort();
+				}
 			}
 		}
 
