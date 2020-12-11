@@ -191,7 +191,7 @@ void lbrob_init(void)
 
     motor_config(MOTOR_X_0, CURRENT_HOLD, X_STEPS_PER_REV, X_INC_PER_REV, STEPS);
 
-    _Par_WastePump.speed = 6000;
+    _Par_WastePump.speed = 16000;
     _Par_WastePump.accel = 10000;
     _Par_WastePump.current_acc = 280;
     _Par_WastePump.current_run = 280;
@@ -1697,7 +1697,8 @@ static void _handle_waste_pump(void)
     
     if (Fpga.par->output & RO_INK_PUMP_LEFT && motor_move_done(MOTOR_WASTE_PUMP_LEFT))
     {
-        motor_move_by_step(MOTOR_WASTE_PUMP_LEFT, &_Par_WastePump, 60000);
+        motor_reset(MOTOR_WASTE_PUMP_LEFT);
+        motor_move_by_step(MOTOR_WASTE_PUMP_LEFT, &_Par_WastePump, 600000000);
         motors_start(1 << MOTOR_WASTE_PUMP_LEFT, FALSE);
     }
     else if (!(Fpga.par->output & RO_INK_PUMP_LEFT))
@@ -1707,7 +1708,8 @@ static void _handle_waste_pump(void)
     
     if (Fpga.par->output & RO_INK_PUMP_RIGHT && motor_move_done(MOTOR_WASTE_PUMP_RIGHT))
     {
-        motor_move_by_step(MOTOR_WASTE_PUMP_RIGHT, &_Par_WastePump, 600000);
+        motor_reset(MOTOR_WASTE_PUMP_RIGHT);
+        motor_move_by_step(MOTOR_WASTE_PUMP_RIGHT, &_Par_WastePump, 600000000);
         motors_start(1 << MOTOR_WASTE_PUMP_RIGHT, FALSE);
     }
     else if (!(Fpga.par->output & RO_INK_PUMP_RIGHT))

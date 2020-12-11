@@ -37,6 +37,9 @@ namespace RX_DigiPrint.Views.UserControls
             DataContext = RxGlobals.StepperStatus;
             RxGlobals.PrintSystem.PropertyChanged    += PrintSystem_PropertyChanged;
             RxGlobals.Network.List.CollectionChanged += Network_CollectionChanged;
+            RxGlobals.User.PropertyChanged += User_PropertyChanged;
+
+            User_PropertyChanged(null, null);
 
             {
                 _GreenLedImg  = new BitmapImage(new Uri("..\\..\\Resources\\Bitmaps\\LED_GREEN.ico", UriKind.RelativeOrAbsolute));
@@ -126,6 +129,7 @@ namespace RX_DigiPrint.Views.UserControls
                     Button_Vacuum.Visibility = visible;
                     Button_Wipe.Visibility = visible;
                     Button_RefRobot.Visibility = visible;
+
                 }
                 else
                 {
@@ -135,6 +139,20 @@ namespace RX_DigiPrint.Views.UserControls
                     _LedCap  [stat.No].Source = (stat.CmdRunning==TcpIp.CMD_LIFT_CAPPING_POS)? _GreyLedImg : null;
                 }
             }
+        }
+
+        //--- User_PropertyChanged --------------------------------------
+        private void User_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            Visibility visible = (RxGlobals.StepperStatus[0].RobotUsed && RxGlobals.User.UserType == EUserType.usr_mouvent) ? Visibility.Visible : Visibility.Collapsed;
+            for (int i = 0; i < RxGlobals.StepperStatus.Length; i++)
+            {
+                if (RxGlobals.StepperStatus[i].RobotUsed && RxGlobals.User.UserType == EUserType.usr_mouvent) visible = Visibility.Visible;
+            }
+            Button_Wash.Visibility = visible;
+            Button_Vacuum.Visibility = visible;
+            Button_Wipe.Visibility = visible;
+            Button_RefRobot.Visibility = visible;
         }
 
         //--- _button_active -----------------------------

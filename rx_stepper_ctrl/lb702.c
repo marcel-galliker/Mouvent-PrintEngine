@@ -203,7 +203,13 @@ void lb702_main(int ticks, int menu)
                         RX_StepperStatus.cmdRunning = FALSE;
 					}
 				}
-				else 
+				else if (ps_get_power() < 20000)
+                {
+                    Error(ERR_CONT, 0, "Voltage on Motor power supply too low (%dV)", ps_get_power()/1000);
+                    _Cmd_New = FALSE;
+                    RX_StepperStatus.cmdRunning = FALSE;
+                }
+                else
 				{
                     
                     if (!RX_StepperStatus.info.headUpInput_0)
