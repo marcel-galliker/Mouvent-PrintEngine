@@ -1453,6 +1453,10 @@ static void _plc_state_ctrl()
         UINT32 door_open;
         lc_get_value_by_name_UINT32(UnitID ".STA_DOOR_OPEN", &door_open);
         RX_PrinterStatus.door_open = door_open;
+
+        UINT32 scanner_off;
+        lc_get_value_by_name_UINT32(UnitID ".STA_SCANNER_POWERLESS", &scanner_off);
+        RX_PrinterStatus.scanner_off = scanner_off;
         
         if (_GUIPause)
 		{
@@ -1481,7 +1485,11 @@ static void _plc_state_ctrl()
 		
 		if (RX_Config.stepper.ref_height!=0 || RX_Config.stepper.print_height!=0)
 		{
-			lc_set_value_by_name_UINT32(UnitID ".STA_HEAD_IS_UP", RX_StepperStatus.info.scannerEnable);	
+			lc_set_value_by_name_UINT32(UnitID ".STA_HEAD_IS_UP", RX_StepperStatus.info.scannerEnable);
+            
+            if (rx_def_is_tx(RX_Config.printer.type))
+                lc_set_value_by_name_UINT32(UnitID ".STA_ROBOT_DONE", steptx_get_robot_done());
+            
 			if(rx_def_is_lb(RX_Config.printer.type) || RX_StepperStatus.info.scannerEnable)
 			{
 				if(_SendPause == 1)

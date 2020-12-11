@@ -69,6 +69,7 @@ static void _control_flush();
 static void _fluid_send_flush_time(int no, INT32 time);
 static int  _all_fluids_in_fluidCtrlMode(EnFluidCtrlMode ctrlMode);
 static int  _all_fluids_in_3fluidCtrlModes(EnFluidCtrlMode ctrlMode1, EnFluidCtrlMode ctrlMode2, EnFluidCtrlMode ctrlMode3);
+static int _fluid_get_flush_time(int flush_cycle);
 
 //--- statics -----------------------------------------------------------------
 
@@ -717,7 +718,7 @@ static void _control(int fluidNo)
 												else													_Flushed &= ~(0x01<<no);
 												setup_fluid_system(PATH_USER FILENAME_FLUID_STATE, &_Flushed, WRITE);				
 											}
-                                            if (!RX_StepperStatus.robinfo.moving && rx_def_is_tx(RX_Config.printer.type) && step_active(1)) step_empty_waste();
+                                            if (!RX_StepperStatus.robinfo.moving && rx_def_is_tx(RX_Config.printer.type) && step_active(1)) step_empty_waste(0);
 
 											if (_txrob && _PurgeFluidNo < 0) 
 											{
@@ -788,7 +789,8 @@ static void _control(int fluidNo)
 static void _control_flush(void)
 {
     static int _txrob;
-	if (_all_fluids_in_fluidCtrlMode(_FluidCtrlMode))
+    static int _startCtrlMode;
+    if (_all_fluids_in_fluidCtrlMode(_FluidCtrlMode))
 	{
 	//	TrPrintfL(TRUE, "All Fluids in mode %d", _FluidCtrlMode);
 	
@@ -799,6 +801,7 @@ static void _control_flush(void)
 		case ctrl_flush_week:
 								_txrob = rx_def_is_tx(RX_Config.printer.type) && step_active(1);
 								step_lift_to_top_pos();
+                                _startCtrlMode = _FluidCtrlMode;
                                 if (_txrob)
                                 {
                                     steptx_rob_cap_for_flush();
@@ -828,10 +831,11 @@ static void _control_flush(void)
 								break;
 		
 		case ctrl_flush_step4:	_FluidCtrlMode=ctrl_flush_done;
+								if (!RX_StepperStatus.robinfo.moving && rx_def_is_tx(RX_Config.printer.type) && step_active(1)) step_empty_waste(_fluid_get_flush_time(_startCtrlMode - ctrl_flush_night));
 								break;
 		
 		case ctrl_flush_done:	ErrorEx(dev_fluid, -1, LOG, 0, "Flush complete");
-								if (!RX_StepperStatus.robinfo.moving && rx_def_is_tx(RX_Config.printer.type) && step_active(1)) step_empty_waste();
+								if (!RX_StepperStatus.robinfo.moving && rx_def_is_tx(RX_Config.printer.type) && step_active(1)) step_empty_waste(0);
 								if (_txrob)
 								{
 									fluid_send_ctrlMode(-1, ctrl_cap_step4, TRUE);
@@ -1261,4 +1265,18 @@ INT32 fluid_get_error(int no)
         return _FluidStatus[no].err;
     }
     return INVALID_VALUE;
+}
+
+//--- _Fluid_get_flush_time ----------------------------------------------
+static int _fluid_get_flush_time(int flush_cycle)
+{
+	if (flush_cycle >= SIZEOF(RX_Config.inkSupply[0].ink.flushTime) || flush_cycle < 0) return 0;
+    
+    int time_s = 0;
+    for (int i = 0; i < RX_Config.inkSupplyCnt; i++)
+    {
+        if (*RX_Config.inkSupply[i].ink.fileName && RX_Config.inkSupply[i].ink.flushTime[flush_cycle] > time_s)
+            time_s = RX_Config.inkSupply[i].ink.flushTime[flush_cycle];
+    }
+    return time_s;
 }

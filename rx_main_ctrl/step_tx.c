@@ -35,6 +35,7 @@ static int					_WashDone		= FALSE;
 static int					_FlushPrepared	= FALSE;
 static int					_PrepareFlush	= FALSE;
 static int					_AutoCapMode	= FALSE;
+static int					_RobotDone		= TRUE;
 
 static void _check_wrinkle_detection(void);
 static void _steptx_rob_control(void);
@@ -274,10 +275,16 @@ void steptx_rob_stop(void)
 }
 
 //--- steptx_rob_empty_waste ---------------------------------------
-void steptx_rob_empty_waste(void)
+/* 
+ * If time <= 0, then a defined time on the Stepperboard will used for the pump time. 
+ * The pump time can't be decreased , if it gets set a time here and it has already
+ * a time left running, it will take the longer time.
+ * 
+ * */
+void steptx_rob_empty_waste(int time)
 {
     if (_step_socket[1] != INVALID_SOCKET)
-        sok_send_2(&_step_socket[1], CMD_ROB_EMPTY_WASTE, 0, NULL);
+        sok_send_2(&_step_socket[1], CMD_ROB_EMPTY_WASTE, sizeof(time), &time);
 }
 
 //--- void _steptx_rob_vacuum_start ------------------------
@@ -325,8 +332,8 @@ static void _check_wrinkle_detection(void)
 //--- steptx_set_robCtrlMode -------------------------------------------------
 void steptx_set_robCtrlMode(EnFluidCtrlMode ctrlMode)
 {
-        _RobotCtrlMode = ctrlMode;
-        _steptx_rob_control();
+    _RobotCtrlMode = ctrlMode;
+    _steptx_rob_control();
 }
 
 void steptx_set_autocapMode(int state)
@@ -368,6 +375,12 @@ static void _empty_cap(void)
     }
 }
 
+//--- steptx_get_robot_done ---------------------------------------------
+int steptx_get_robot_done(void)
+{
+    return _RobotDone;
+}
+
 //--- _steptx_rob_control -------------------------------------------------
 static void _steptx_rob_control(void)
 {
@@ -382,10 +395,11 @@ static void _steptx_rob_control(void)
 	{		
 	//--- ctrl_wash --------------------------------------------------------------------------------------
 	case ctrl_wash:				_RobotCtrlMode = ctrl_wash_step1;
+								_RobotDone = FALSE;
 								if (!step_lift_in_up_pos() || !_steptx_lift_in_clean_wait_pos())	_steptx_lift_to_clean_wait_pos();
-								break;
+                                break;
 				
-	case ctrl_wash_step1:		if ((_steptx_lift_in_clean_wait_pos() || step_lift_in_up_pos()) && !RX_PrinterStatus.door_open)
+	case ctrl_wash_step1:		if ((_steptx_lift_in_clean_wait_pos() || step_lift_in_up_pos()) && !RX_PrinterStatus.scanner_off)
 								{
 									_RobotCtrlMode = ctrl_wash_step2;
 									if (!step_rob_reference_done()) step_rob_do_reference();
@@ -429,10 +443,11 @@ static void _steptx_rob_control(void)
 				
 	//--- ctrl_wipe -------------------------------------------------------------------------------------
 	case ctrl_wipe:				_RobotCtrlMode = ctrl_wipe_step1;
+								_RobotDone = FALSE;
 								if (!_steptx_lift_in_clean_wait_pos() && !step_lift_in_up_pos())	_steptx_lift_to_clean_wait_pos();
 								break;
 				
-	case ctrl_wipe_step1:		if ((_steptx_lift_in_clean_wait_pos() || step_lift_in_up_pos()) && !RX_PrinterStatus.door_open)
+	case ctrl_wipe_step1:		if ((_steptx_lift_in_clean_wait_pos() || step_lift_in_up_pos()) && !RX_PrinterStatus.scanner_off)
 								{
 									_RobotCtrlMode=ctrl_wipe_step2;
 									if (!step_rob_reference_done()) step_rob_do_reference();
@@ -475,11 +490,12 @@ static void _steptx_rob_control(void)
 								break;
 				
 	//--- ctrl_vacuum ----------------------------------------------------
-	case ctrl_vacuum:			if (!step_lift_in_up_pos())	_steptx_lift_to_clean_wait_pos();
-								_RobotCtrlMode = ctrl_vacuum_step1;
+	case ctrl_vacuum:			_RobotCtrlMode = ctrl_vacuum_step1;
+								_RobotDone = FALSE;
+								if (!step_lift_in_up_pos())	_steptx_lift_to_clean_wait_pos();
 								break;
 				
-	case ctrl_vacuum_step1:		if ((step_lift_in_up_pos() || _steptx_lift_in_clean_wait_pos()) && !RX_PrinterStatus.door_open)
+	case ctrl_vacuum_step1:		if ((step_lift_in_up_pos() || _steptx_lift_in_clean_wait_pos()) && !RX_PrinterStatus.scanner_off)
 								{
 									_RobotCtrlMode=ctrl_vacuum_step2;
 									if (!step_rob_reference_done())
@@ -606,15 +622,17 @@ static void _steptx_rob_control(void)
 								{
 									if (_printing) _RobotCtrlMode = ctrl_print;
 									else		   _RobotCtrlMode = ctrl_off;
-								}
+                                    _RobotDone = TRUE;
+                                }
 								break;
 				
 	//--- ctrl_cap -----------------------------------------------------------------------------
 	case ctrl_cap:				_RobotCtrlMode=ctrl_cap_step1;
+								_RobotDone = FALSE;
 								step_lift_to_up_pos();
 								break;
 				
-	case ctrl_cap_step1:		if (step_lift_in_up_pos() && !RX_PrinterStatus.door_open)
+	case ctrl_cap_step1:		if (step_lift_in_up_pos() && !RX_PrinterStatus.scanner_off)
 								{
                                     if (!step_rob_reference_done()) step_rob_do_reference();
 
@@ -652,7 +670,7 @@ static void _steptx_rob_control(void)
                                 }
                                 break;
 
-    case ctrl_cap_step4:		if (!RX_PrinterStatus.door_open)
+    case ctrl_cap_step4:		if (!RX_PrinterStatus.scanner_off)
 								{
                                     _RobotCtrlMode = ctrl_cap_step5;
                                     plc_to_wipe_pos();
@@ -670,12 +688,16 @@ static void _steptx_rob_control(void)
 								{
                                     if (_AutoCapMode)	_RobotCtrlMode = ctrl_print;
                                     else				_RobotCtrlMode = ctrl_off;
+                                    _RobotDone = TRUE;
                                 }
 								break;
 		
 	case ctrl_off:				_RobotCtrlMode = ctrl_off;
+								_RobotDone = TRUE;
 								undefine_PurgeCtrlMode();
-                                    
+								break;
+                                
+    case ctrl_print:			_RobotDone = TRUE;
 								break;
 	default: return;
 	}

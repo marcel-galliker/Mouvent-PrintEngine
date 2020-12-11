@@ -527,6 +527,7 @@ typedef struct SPrinterStatus
 		UINT32			lbRobot : 1;		// 0x0200
         UINT32			NeedDegasser : 1;   // 0x0400
         UINT32			door_open : 1;		// 0x0800
+        UINT32			scanner_off : 1;	// 0x1000
         };
 		UINT32 flags;		
 	};
