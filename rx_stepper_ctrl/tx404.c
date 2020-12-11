@@ -347,6 +347,7 @@ static void _tx404_do_reference(void)
 	motors_stop	(MOTOR_Z_BITS);
 	motors_config(MOTOR_Z_BITS, CURRENT_HOLD, LA421_STEPS_PER_METER, LA421_INC_PER_METER, STEPS);
 
+    RX_StepperStatus.info.ref_done = FALSE;
 	RX_StepperStatus.cmdRunning  = CMD_LIFT_REFERENCE;
 	RX_StepperStatus.info.moving = TRUE;
 	motors_move_by_step	(MOTOR_Z_BITS,  &_ParRef, -100000, TRUE);

@@ -126,6 +126,9 @@
 #define VAC_POS_5_TO_8_TO_ALL	5
 #define POS_SHIFT_MAX_TURN_POS	6
 
+// Times
+#define WASTE_PUMP_TIME 30000
+
 static int	POS_ROT[POS_ROT_CNT] = {
 	POS_ROT_CAP,	
 	POS_ROT_WASH,
@@ -191,7 +194,6 @@ static UINT32	_txrob_Error[5];
 
 
 // Times and Parameters
-static int	_TimeWastePump = 30000; //20; // in ms
 static int	_TimeFillCap = 14; // in s
 static int	_TimeFillCap801 = 14;	// in s
 static int	_TimeFillCap802 = 25;	// in s
@@ -484,7 +486,6 @@ void txrob_main(int ticks, int menu)
 		RX_StepperStatus.robinfo.vacuum_in_change = FALSE;
 		RX_StepperStatus.robinfo.wash_ready = FALSE;
 		RX_StepperStatus.robinfo.wash_done = FALSE;
-        _TimeWastePumpStart = 0;
 	}
 	else
 	{
@@ -496,16 +497,22 @@ void txrob_main(int ticks, int menu)
 		RX_StepperStatus.robinfo.wash_ready = _step_rob_in_wash();
 		RX_StepperStatus.robinfo.wash_done = _wash_done();
         _ParRotSensRef.encCheck = chk_txrob_ref;
-        if (!_TimeWastePumpStart) _TimeWastePumpStart = rx_get_ticks();
     }
 
-    if (_TimeWastePumpStart && _TimeWastePumpStart > rx_get_ticks() - _TimeWastePump)
+    if ((Fpga.par->output & PUMP_FLUSH_CAP || Fpga.par->output & PUMP_FLUSH_WET) && !_TimeWastePumpStart)
+    {
+        int time_s = 0;
+        txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_EMPTY_WASTE, &time_s);
+    }   
+
+    if (_TimeWastePumpStart && _TimeWastePumpStart >= rx_get_ticks())
     {
         Fpga.par->output |= PUMP_WASTE_BASE;
         Fpga.par->output |= PUMP_WASTE_VAC;
     }
-    else
+    else if (_TimeWastePumpStart)
     {
+        _TimeWastePumpStart = 0;
         Fpga.par->output &= ~PUMP_WASTE_BASE;
         Fpga.par->output &= ~PUMP_WASTE_VAC;
 	}
@@ -808,21 +815,16 @@ static void _txrob_display_status(void)
 	term_printf("Ref done:            %d\n", RX_StepperStatus.robinfo.ref_done);
 	term_printf("Rotation in rev:     %06d\n", RX_StepperStatus.posZ);
 	term_printf("Shift in um:         %06d\n", RX_StepperStatus.posX);
-	term_printf("Tilt for Cap:        %06d\n", _TiltSteps);
-	term_printf("Time Waste Vac [s]:  %06d\n", _TimeWastePump);
-	term_printf("Time fill Cap [s]:   %06d\n", _TimeFillCap);
 	term_printf("Speed Shift [mm/s]:  %06d\n", _SpeedShift * 2 / 200 / 16);
-	term_printf("Timer Count:         %06d\n", _TimeCnt);
 	term_printf("\n");
-	term_printf("Vacuum State:         %d\n", _VacuumState);
     term_printf("Vacuum Done:          %d\n", RX_StepperStatus.robinfo.vacuum_done);
 	term_printf("Vacuum Ready:         %d\n", RX_StepperStatus.robinfo.vacuum_ready);
 	term_printf("Roboter in Wipe:      %d\n", RX_StepperStatus.robinfo.rob_in_wipe);
 	term_printf("Roboter in Vac:       %d\n", RX_StepperStatus.robinfo.rob_in_vac);
 	term_printf("Roboter in Wash:      %d\n", RX_StepperStatus.robinfo.rob_in_wash);
 	term_printf("Roboter in Cap:       %d\n", RX_StepperStatus.robinfo.rob_in_cap);
-    if ((_TimeWastePumpStart + _TimeWastePump - rx_get_ticks()) / 1000 > 0)
-        term_printf("Time for waste pumps  %d\n", _TimeWastePumpStart / 1000 + _TimeWastePump / 1000 - rx_get_ticks() / 1000);
+    if (_TimeWastePumpStart)
+        term_printf("Time for waste pumps  %d\n", _TimeWastePumpStart / 1000 - rx_get_ticks() / 1000);
     else
         term_printf("Time for waste pumps  %d\n", 0);
     term_printf("\n");
@@ -857,30 +859,8 @@ static void _txrob_handle_menu(char *str)
         case 'b':	pos = 3;
 					txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_SHIFT_MOV, &pos);
 					break;
-        case 'd':	pos = atoi(&str[1]);
-					if (pos < 0) pos = 0;
-					if (pos > 800) pos = 800;
-					_RotRefOffset = pos;
-					break;
-        case 't':	pos = atoi(&str[1]);
-					if (pos < 0) pos = 0;
-					if (pos > 1000) pos = 1000;
-					_TiltSteps = pos;
-					break;
         case 'p':	pos = atoi(&str[1]);
-					if (pos < 0) pos = 0;
-					if (pos > 300) pos = 300;
-					_TimeWastePump = pos;
-					break;
-        case 'f':	pos = atoi(&str[1]);
-					if (pos < 0) pos = 0;
-					if (pos > 300) pos = 300;
-					_TimeFillCap = pos;
-					break;
-        case 'v':	pos = (atoi(&str[1])) * 200 * 16 / 2;
-					if (pos < 500) pos = 500;
-					if (pos > 21333) pos = 21333;
-					_SpeedShift = pos;
+					txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_EMPTY_WASTE, &pos);
 					break;
         case 'm':	txrob_motor_test(str[1] - '0', atoi(&str[2])); break;
         }
@@ -903,22 +883,18 @@ int txrob_menu(void)
     {
         if (_Help)
         {
-	term_printf("s: STOP\n");
-            term_printf("r<n>: reset motor<n>\n");
-            term_printf("o: toggle output <no>\n");
-	term_printf("R: Reference\n");
-	term_printf("c: move to capping\n");
-            term_printf("e: move to wash\n");
-	term_printf("a: move to vacuum\n");
-	term_printf("w: move to wipe\n");
-	term_printf("b: shift back\n");
-	term_printf("d<steps>: set Rotation RefOffset <steps>\n");
-	term_printf("t<steps>: set Tilt for Cap <steps>\n");
-	term_printf("p<sec>: set Time Waste Vac <sec>\n");
-	term_printf("f<sec>: set Time fill Cap <sec>\n");
-            term_printf("v<mm/s>: set Speed Shift for wash <mm/s>\n");
-            term_printf("m<n><steps>: move Motor<n> by <steps>\n");
-	term_printf("x: exit\n");
+			term_printf("s: STOP\n");
+			term_printf("r<n>: reset motor<n>\n");
+			term_printf("o: toggle output <no>\n");
+			term_printf("R: Reference\n");
+			term_printf("c: move to capping\n");
+			term_printf("e: move to wash\n");
+			term_printf("a: move to vacuum\n");
+			term_printf("w: move to wipe\n");
+			term_printf("b: shift back\n");
+			term_printf("p<sec>: Pump Waste pump for <sec>\n");
+			term_printf("m<n><steps>: move Motor<n> by <steps>\n");
+			term_printf("x: exit\n");
             
         }
         else
@@ -1253,7 +1229,11 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		break;
 		
 	case CMD_ROB_EMPTY_WASTE:
-        _TimeWastePumpStart = rx_get_ticks();
+        pos = *((INT32 *)pdata);
+        if (pos <= 0)
+            _TimeWastePumpStart = rx_get_ticks() + WASTE_PUMP_TIME;
+        else if (rx_get_ticks() + (pos * 1000) >= _TimeWastePumpStart)
+            _TimeWastePumpStart = rx_get_ticks() + pos * 1000;
         break;
 
 	case CMD_ERROR_RESET:		
@@ -1428,7 +1408,3 @@ static int _robot_left(void)
 	if (RX_StepperStatus.posX <= position + 10) return TRUE;
 	else return FALSE;
 }
-
-
-
-
