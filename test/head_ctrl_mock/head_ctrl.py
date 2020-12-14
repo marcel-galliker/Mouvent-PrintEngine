@@ -10,6 +10,23 @@ import xml.etree.ElementTree as ET
 
 from message_mgr import Message
 
+def crc8(data, lenght = 2):
+    "crc on array of short int as in rx_crc.c" 
+    crc = 0xFF
+    for v in data:
+        if v<0:
+            v = v + 2**(lenght*8)
+        for b in reversed(v.to_bytes(lenght, "big")):
+            crc ^= b
+            for _ in range(8): 
+                if (crc & 0x80)!=0:
+                    crc <<= 1
+                    crc ^= 0x1D
+                else:
+                    crc <<= 1
+    return (~crc)&0xFF
+
+
 # only work with hack on IP: -localsubnet
 SUBNET = "127.168.200."
 
@@ -153,6 +170,17 @@ class TCPProtocol:
         self.transport.write(msg.pack())
         logging.info(f"Reset counter {msg.resetCnt} for board {self.board.no}")
 
+    def mgt_CMD_SET_DENSITY_VAL(self, msg):
+        logging.info(f"set density on board {self.board.no} head {msg.head % 4}")
+        self.board.density[msg.head % 4] = msg.value
+        self.board.voltage[msg.head % 4] = msg.voltage
+        logging.info(f"{msg.voltage}V {msg.value}")
+
+    def mgt_CMD_SET_DISABLED_JETS(self, msg):
+        logging.info(f"set disabled jets on board {self.board.no} head {msg.head % 4}")
+        self.board.disabled_jets[msg.head % 4] = msg.disabledJets
+        logging.info(f"{msg.disabledJets}")
+
     def mgt_CMD_HEAD_STAT(self, msg):
         msg = Message("REP_HEAD_STAT")
         msg.boardNo = self.board.no
@@ -160,11 +188,15 @@ class TCPProtocol:
         msg.head = ({}, {}, {}, {})
         for i in range(4):
                 msg.head[i]["ctrlMode"] = 0x006 # ctrl_readyToPrint
-                msg.head[i]["clusterNo"] = self.board.no
-                msg.head[i]["disabledJets"] = 32 *[-1, ]
-                #msg.head[i]["disabledJets"][0] = 52
-                #msg.head[i]["densityValue"] = 12 * [1000,]
-                #msg.head[i]["densityValue"][3*i] = 10 
+                msg.head[i]["clusterNo"] = self.board.no + i + 1
+                if self.board.disabled_jets[i] is not None:
+                    msg.head[i]["disabledJets"] = self.board.disabled_jets[i]
+                    msg.head[i]["disabledJetsCRC"] = crc8(self.board.disabled_jets[i])
+                if self.board.voltage[i] is not None:
+                    msg.head[i]["densityValue"] = self.board.density[i]
+                    msg.head[i]["densityValueCRC"] = crc8(self.board.density[i])
+                    msg.head[i]["voltage"] = self.board.voltage[i]
+                    msg.head[i]["voltageCRC"] = crc8((self.board.voltage[i],),1) # unsigned char
         self.transport.write(msg.pack())
 
     def mgt_CMD_GET_BLOCK_USED(self, msg):
@@ -270,6 +302,10 @@ class Board:
         self.no = no
         self.activate = 4 * [False]
         self.reset()
+        self.disabled_jets = 4 * [None]
+        self.density = 4 * [None]
+        self.voltage =  4 * [None]
+
 
     def add_block(self, no, block):
         "add a received block to the board"

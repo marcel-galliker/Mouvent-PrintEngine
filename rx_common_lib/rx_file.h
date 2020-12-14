@@ -45,7 +45,10 @@ int				rx_fnmatch(const char * match, const char *str);
 int		rx_mkdir(const char *dirname);
 void	rx_mkdir_path(const char *dirname);
 int		rx_rmdir(const char *dirname);
-FILE *  rx_fopen(const char * path, const char * mode, int sharemode);
+
+BOOL rx_file_copy(const char *src, const char *dst);
+
+FILE *rx_fopen(const char * path, const char * mode, int sharemode);
 
 int rx_remove_old_files(const char *searchStr, int days);
 

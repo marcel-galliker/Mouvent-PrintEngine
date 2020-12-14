@@ -1006,12 +1006,7 @@ static void _plc_save_material	(RX_SOCKET socket, char *filename, int cmd, char 
 	setup_destroy(file);
 
 	//--- save in config --------------------------
-	{
-		SRxConfig cfg;
-		setup_config(PATH_USER FILENAME_CFG, &cfg, READ);
-		strncpy(cfg.material, RX_Config.material, sizeof(cfg.material));
-		setup_config(PATH_USER FILENAME_CFG, &cfg, WRITE);
-	}
+	setup_save_config();
 }
 
 //--- _plc_material_list -------------------------------------
@@ -1148,10 +1143,7 @@ void plc_load_material(char *material)
 		//--- save in config --------------------------
 		if (load)
 		{
-			SRxConfig cfg;
-			setup_config(PATH_USER FILENAME_CFG, &cfg, READ);
-			strncpy(cfg.material, RX_Config.material, sizeof(cfg.material));
-			setup_config(PATH_USER FILENAME_CFG, &cfg, WRITE);
+			setup_save_config();
 		}
 	}				
 }

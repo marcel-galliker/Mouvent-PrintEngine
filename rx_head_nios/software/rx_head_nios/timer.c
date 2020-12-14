@@ -143,18 +143,6 @@ static void _do_250ms_timer(void)
 		bootloader_start();
 	}
 
-	//--- user eeprom ----------------------------------------
-	{
-		int head;
-		for (head=0; head<SIZEOF(pRX_Config->user_eeprom); head++)
-		{
-			if (pRX_Config->cmd.cmd & (WRITE_USER_EEPROM<<head))
-			{
-				pRX_Config->cmd.cmd &= ~(WRITE_USER_EEPROM<<head);
-				head_eeprom_change_user_data(head, pRX_Status->user_eeprom[head], pRX_Config->user_eeprom[head], sizeof(pRX_Config->user_eeprom[head]), 0);
-			}
-		}
-	}
 }
 
 //--- _temp_savety_100ms ---------------
@@ -181,6 +169,20 @@ static void _do_1000ms_timer(void)
 	{
 		main_error_reset();
 		pRX_Config->cmd.error_reset = FALSE;
+	}
+
+	//--- user eeprom ----------------------------------------
+	{
+		int head;
+		for (head=0; head<SIZEOF(pRX_Config->user_eeprom); head++)
+		{
+			if (pRX_Config->cmd.cmd & (WRITE_USER_EEPROM<<head))
+			{
+				pRX_Config->cmd.cmd &= ~(WRITE_USER_EEPROM<<head);
+				if (!head_eeprom_change_user_data(head, pRX_Status->user_eeprom[head], pRX_Config->user_eeprom[head], sizeof(pRX_Config->user_eeprom[head]), 0))
+					pRX_Status->info.eeprom_read = FALSE;
+			}
+		}
 	}
 }
 

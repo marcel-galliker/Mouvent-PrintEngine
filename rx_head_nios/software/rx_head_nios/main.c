@@ -45,8 +45,8 @@ typedef struct {
 	UINT32 arm_alive;
 } _SConditioner;
 
+static int _eeprom_read[MAX_HEADS_BOARD];
 static _SConditioner _Cond[MAX_HEADS_BOARD];
-static int _EepromHead[MAX_HEADS_BOARD];
 
 //--- main_handle_cond_msg ---------------------------
 static void _handle_cond_msg(int condNo) {
@@ -64,9 +64,13 @@ static void _handle_cond_msg(int condNo) {
 
 //--- main_rebooting_cond ------------------------------
 void main_rebooting_cond(void) {
-	int i;
-	for (i = 0; i < MAX_HEADS_BOARD; i++)
-		_Cond[i].alive = 0xFFFFFFFF;
+	int cond;
+	for (cond = 0; cond < MAX_HEADS_BOARD; cond++)
+	{
+		_Cond[cond].alive = 0xFFFFFFFF;
+		_eeprom_read[cond] = FALSE;
+		pRX_Status->info.eeprom_read = FALSE;
+	}
 }
 
 //--- main_tick_1000ms ------------------------------
@@ -77,13 +81,13 @@ void main_tick_1000ms(void) {
 		int error_eeprom_read = FALSE;
 		for (condNo = 0; condNo < MAX_HEADS_BOARD; condNo++)
 		{
-			if (!_EepromHead[condNo])
+			if (!_eeprom_read[condNo])
 			{
- 				if (head_eeprom_read(condNo, pRX_Status->head_eeprom[condNo], sizeof(pRX_Status->head_eeprom[condNo])) != 0 ||
-					head_eeprom_read_user_data(condNo, pRX_Status->user_eeprom[condNo], sizeof(pRX_Status->user_eeprom[condNo]), 0x00) != 0)
-					error_eeprom_read = TRUE;
+ 				if (head_eeprom_read(condNo, pRX_Status->head_eeprom[condNo], sizeof(pRX_Status->head_eeprom[condNo])) &&
+					head_eeprom_read_user_data(condNo, pRX_Status->user_eeprom[condNo], sizeof(pRX_Status->user_eeprom[condNo]), 0x00))
+					_eeprom_read[condNo] = TRUE;
 				else
-					_EepromHead[condNo] = TRUE;
+					error_eeprom_read = TRUE;
 			}
 
 			if (pRX_Status->cond[condNo].info.connected) {
@@ -98,7 +102,7 @@ void main_tick_1000ms(void) {
 				_Cond[condNo].arm_alive = pRX_Config->cond[condNo].alive;
 			}
 		}
-		pRX_Status->error.head_eeprom_read = error_eeprom_read;
+		pRX_Status->info.eeprom_read = !error_eeprom_read;
 
 	}
 }
@@ -213,17 +217,14 @@ int main() {
 
 	{
 		int head;
+		int eeprom_read = TRUE;
 		for (head = 0; head < MAX_HEADS_BOARD; head++)
 		{
-			if (head_eeprom_read(head, pRX_Status->head_eeprom[head], sizeof(pRX_Status->head_eeprom[head])) != 0 ||
-				head_eeprom_read_user_data(head, pRX_Status->user_eeprom[head], sizeof(pRX_Status->user_eeprom[head]), 0x00) != 0)
-            {
-                pRX_Status->error.head_eeprom_read = TRUE;
-                _EepromHead[head] = FALSE;
-            }
-            else
-                _EepromHead[head] = TRUE;
+			_eeprom_read[head] = (head_eeprom_read(head, pRX_Status->head_eeprom[head], sizeof(pRX_Status->head_eeprom[head])) &&
+				head_eeprom_read_user_data(head, pRX_Status->user_eeprom[head], sizeof(pRX_Status->user_eeprom[head]), 0x00));
+			eeprom_read &= _eeprom_read[head];
 		}
+		pRX_Status->info.eeprom_read = eeprom_read;
 	}
 //	_eeprom_test();
 

@@ -17,8 +17,12 @@
 
 void setup_test();
 
+void setup_save_config();
+void setup_read_config();
+
+BOOL setup_write_config();
+
 int setup_network	 (HANDLE file, SRxNetwork *pnet,				EN_setup_Action action);
 int setup_print_queue(HANDLE file, SPrintQueueItem *item, int *cnt, EN_setup_Action action);
 
-int setup_config		(const char *filepath, SRxConfig			*pcfg,			  EN_setup_Action  action);
 int setup_fluid_system	(const char *filepath,	UINT32				*pflushed,		  EN_setup_Action  action);

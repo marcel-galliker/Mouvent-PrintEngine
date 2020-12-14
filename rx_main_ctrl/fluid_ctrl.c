@@ -554,11 +554,7 @@ static void _do_scales_get_cfg(SScalesCfgMsg *pmsg)
 {
 	memcpy(RX_Config.scales.tara,  pmsg->tara,  sizeof(RX_Config.scales.tara));
 	memcpy(RX_Config.scales.calib, pmsg->calib, sizeof(RX_Config.scales.calib));
-	SRxConfig cfg;
-	setup_config(PATH_USER FILENAME_CFG, &cfg, READ);
-	memcpy(cfg.scales.tara,  pmsg->tara,  sizeof(cfg.scales.tara));
-	memcpy(cfg.scales.calib, pmsg->calib, sizeof(cfg.scales.calib));
-	setup_config(PATH_USER FILENAME_CFG, &cfg, WRITE);
+	setup_save_config();
 }
 
 //--- static int _all_fluids_in_fluidCtrlMode ---------------------------

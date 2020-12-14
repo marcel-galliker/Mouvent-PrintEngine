@@ -106,8 +106,8 @@ int cond_init(void)
 		}
 	}
 	
-	_UpdateClusterTimer = 5;
-//	_update_clusterNo();
+	_UpdateClusterTimer = 15; // timeout in second before calling _update_clusterNo
+
 
 	
 	/*
@@ -353,37 +353,35 @@ static void _update_clusterNo(void)
 	if (sizeof(SHeadEEpromMvt)!=EEPROM_DATA_SIZE) Error(ERR_CONT, 0, "Head User EEPROM size mismatch (size=0x%x, expected=0x%x)", sizeof(SHeadEEpromMvt), EEPROM_DATA_SIZE);
 
 	memset(_cntr, 0, sizeof(_cntr));
+	if (!_NiosStat->info.eeprom_read) Error(ERR_CONT, 0, "EEPROM MVT not read");
+
 	for (condNo=0; condNo<MAX_HEADS_BOARD;  condNo++)
 	{
 		mvt = &RX_HBStatus[0].head[condNo].eeprom_mvt;
 
 		_count(mvt->clusterNo);
-				
+
+		if (memempty(mvt, sizeof(SHeadEEpromMvt))) // do not overwrite unread eeprom
+		{
+			Error(ERR_CONT, 0, "EEPROM MVT empty for head %d", condNo);
+			continue;
+		}
 		if (mvt->dropletsPrintedCRC!=rx_crc8(&mvt->dropletsPrinted, sizeof(mvt->dropletsPrinted)))
 		{
+			TrPrintf(TRUE, "EEPROM MVT: Droplet not valid for head %d, previous values: %d", condNo, mvt->dropletsPrinted);
 			mvt->dropletsPrinted = 0;
 			mvt->dropletsPrintedCRC = rx_crc8(&mvt->dropletsPrinted, sizeof(mvt->dropletsPrinted));
 		}
-		RX_HBStatus->head[condNo].printedDroplets = mvt->dropletsPrinted; 
+		RX_HBStatus->head[condNo].printedDroplets = mvt->dropletsPrinted;
 		RX_HBStatus[0].head[condNo].dropVolume = 0.0000000000024;
-		
-		if (RX_HBStatus[0].head[condNo].eeprom_mvt.densityValueCRC!=rx_crc8(RX_HBStatus[0].head[condNo].eeprom_mvt.densityValue, sizeof(RX_HBStatus[0].head[condNo].eeprom_mvt.densityValue)))
+
+		if (mvt->rob_CRC != rx_crc8(&mvt->rob_angle, 2 * sizeof(UINT16))) // not used ?
 		{
-			cond_set_densityValues(condNo, NULL);	
+			mvt->rob_angle = 0;
+			mvt->rob_dist = 0;
+			mvt->rob_CRC = rx_crc8(&mvt->rob_angle, 2 * sizeof(UINT16));
 		}
-		if (RX_HBStatus[0].head[condNo].eeprom_mvt.voltageCRC!=rx_crc8(&RX_HBStatus[0].head[condNo].eeprom_mvt.voltage, sizeof(RX_HBStatus[0].head[condNo].eeprom_mvt.voltage)))
-		{
-			cond_set_voltage(condNo, 0);	
-		}
-		if (RX_HBStatus[0].head[condNo].eeprom_mvt.disabledJetsCRC!=rx_crc8(RX_HBStatus[0].head[condNo].eeprom_mvt.disabledJets, sizeof(RX_HBStatus[0].head[condNo].eeprom_mvt.disabledJets)))
-		{
-			cond_set_disabledJets(condNo, NULL);		
-		}
-		if (RX_HBStatus[0].head[condNo].eeprom_mvt.rob_CRC!=rx_crc8(&RX_HBStatus[0].head[condNo].eeprom_mvt.rob_angle, 2*sizeof(UINT16)))
-		{
-			RX_HBStatus[0].head[condNo].eeprom_mvt.rob_angle = 0;
-			RX_HBStatus[0].head[condNo].eeprom_mvt.rob_dist = 0;
-		}
+
 	}
 
 	int cnt=0, idx=0;
@@ -428,9 +426,10 @@ void cond_main(int ticks, int menu)
 
 	if (ticks-_ticks>1000)
 	{
-		if (_UpdateClusterTimer>0 && --_UpdateClusterTimer<=0)
+		if (_UpdateClusterTimer>0 && (_NiosStat->info.eeprom_read || --_UpdateClusterTimer<=0))
 		{
-			_update_clusterNo();			
+			_update_clusterNo();
+			_UpdateClusterTimer = 0;
 		}
 		_update_counters();
 		_ticks=ticks;

@@ -349,7 +349,7 @@ void setup_int16_arr(HANDLE hsetup, const char *name, EN_setup_Action action, IN
 			if (!str[pos]) break;
 			val[i] = atoi(&str[pos]);
 			while (str[pos] && str[pos]!=' ') pos++;
-			pos++;
+			if (str[pos]) pos++;
 		}
 	}
 }
@@ -391,7 +391,7 @@ void setup_int32_arr(HANDLE hsetup, const char *name, EN_setup_Action action, IN
 			if (!str[pos]) break;
 			val[i] = atoi(&str[pos]);
 			while (str[pos] && str[pos]!=' ') pos++;
-			pos++;
+			if (str[pos]) pos++;
 		}
 	}
 }

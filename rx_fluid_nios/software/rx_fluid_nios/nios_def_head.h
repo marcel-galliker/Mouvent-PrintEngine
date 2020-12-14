@@ -101,7 +101,7 @@ typedef struct SNiosHeadInfo
 	UINT32	watchdog_catch_fp_err:1;		// 	04: if the correct AMC IS is read out
 	UINT32	cooler_pcb_present:1;		// 	05: 
 	UINT32	u_firepulse_48V:1;		// 	06:
-	UINT32	info_07:1;		// 	07:
+	UINT32 eeprom_read : 1;			// 	07:
 	UINT32	info_08:1;		// 	08:
 	UINT32	info_09:1;		// 	09:
 	UINT32	info_10:1;		// 	10:

@@ -67,7 +67,7 @@ typedef union SCondInfo
 			UINT32	valve   : 1;		//  01:
 			UINT32	info_02 : 1;		// thermistor_test_done : 1;		// 	02:
 			UINT32	meniscus_warn : 1;	// 	03:
-            UINT32	zero_offset_calibrated : 1;	 // 04:
+			UINT32 info_04 : 1;	 // 04:
 			UINT32	temp_ready : 1;     //  05:
 			UINT32	flowFactor_ok : 1;  // 	06:
 			UINT32	info_07 : 1;		// 	07:

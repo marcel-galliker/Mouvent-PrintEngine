@@ -30,13 +30,9 @@ int head_eeprom_read(alt_u32 head, alt_u8 * eeprom_data, alt_u32 number_of_byte_
 	if(_seq_read_eeprom(eeprom_data, number_of_byte_to_read, 0x50+(head*2), 0x00)!=0)
 	{
 		memset(eeprom_data, 0x00, number_of_byte_to_read);
-		return(-1);
+		return FALSE;
 	}
-	// check we read data
-	int i;
-	for (i = 0; i < number_of_byte_to_read; i++)
-		if (eeprom_data[i]) return (0); 
-	return(-1);
+	return TRUE;
 }
 
 //--- _seq_read_eeprom --------------------------------------
@@ -85,25 +81,16 @@ int head_eeprom_read_user_data(alt_u32 head, alt_u8 * eeprom_data, alt_u32 numbe
 
 	if((EEPROM_USER_DATA_START+addr+number_of_byte_to_read)>EEPROM_MAX_ADR)
 	{
-		return(-1);		// number_of_byte_to_read extend EEPROM Size
+		memset(eeprom_data, 0x00, number_of_byte_to_read);
+		return FALSE;		// number_of_byte_to_read extend EEPROM Size
 	}
-
-	int i;
-	// set up data for check
-	for (i = 0; i < number_of_byte_to_read; i++)
-		eeprom_data[i] = i; 
 
 	if(_seq_read_eeprom(eeprom_data, number_of_byte_to_read, 0x50+(head*2), EEPROM_USER_DATA_START+addr)!=0)
 	{
 		memset(eeprom_data, 0x00, number_of_byte_to_read);
-		return (-1);
+		return FALSE;
 	}
-	// check we read data
-	for (i = 0; i < number_of_byte_to_read; i++)
-		if (eeprom_data[i]!=i) return (0); 
-
-	memset(eeprom_data, 0x00, number_of_byte_to_read);
-	return (-1);
+	return TRUE;
 }
 
 //--- head_eeprom_write_user_data --------------------------------------
@@ -150,7 +137,8 @@ int head_eeprom_change_user_data(alt_u32 head, alt_u8 *act_data, alt_u8 * new_da
 		}
 	}
 	if (change)
-		_seq_read_eeprom(act_data, cnt, 0x50+(head*2), EEPROM_USER_DATA_START+addr);
+		memcpy(act_data, new_data, cnt);
+	//	_seq_read_eeprom(act_data, cnt, 0x50+(head*2), EEPROM_USER_DATA_START+addr);
 	return ret;
 }
 

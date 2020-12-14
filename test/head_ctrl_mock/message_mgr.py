@@ -63,6 +63,8 @@ msgtypes = {
     "REP_BOOT_PING": "", # will be overwritten by REP_BOOT_INFO
     "CMD_BOOT_ADDR_SET":"SBootAddrSetCmd",
     "REP_HEAD_STAT":"SHeadBoardStat",
+    "CMD_SET_DENSITY_VAL": "SDensityValuesMsg",
+    "CMD_SET_DISABLED_JETS": "SDisabledJetsMsg",
     "CMD_PING": "",
     "REP_PING": "",
     "CMD_FPGA_IMAGE": "SFpgaImageCmd",
@@ -163,7 +165,7 @@ def struct_format(msgtype):
     names = []
     exformat = ""
     # correpondance between C and python struct 
-    cor = {"FLOAT": "f" ,"CHAR": "b", "INT8": "b", "INT16": "h", "INT32": "i", "INT64": "q", "char": "s"}
+    cor = {"FLOAT": "f" ,"CHAR": "b", "INT8": "b", "INT16": "h", "INT32": "i", "INT64": "q", "char": "s", "int": "i"}
     # read the C struct representation to make a struct format
     for line in msgtypes[msgtype].split("\n"):
         # if it is a line that defines a member

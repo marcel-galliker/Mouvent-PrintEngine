@@ -567,10 +567,10 @@ int  nios_is_firepulse_on(void)
 //--- nios_set_user_eeprom ------------------------------------
 static void _nios_set_user_eeprom(int no)
 {
-    if (_NiosStat == NULL || _NiosStat->error.head_eeprom_read) return;
+	if (_NiosStat == NULL || !_NiosStat->info.eeprom_read) return;
 
-    if (sizeof(RX_HBStatus[0].head[no].eeprom_mvt)!=128) Error(ERR_ABORT, 0, "SIZE MISMATCH");
-	if (sizeof(_NiosStat->user_eeprom[no])!=128) Error(ERR_ABORT, 0, "SIZE MISMATCH");
+	if (sizeof(RX_HBStatus[0].head[no].eeprom_mvt) != EEPROM_DATA_SIZE) Error(ERR_ABORT, 0, "SIZE MISMATCH");
+	if (sizeof(_NiosStat->user_eeprom[no]) != EEPROM_DATA_SIZE) Error(ERR_ABORT, 0, "SIZE MISMATCH");
 
 	//--- initialize status memory -----------------------
 	if (memempty(&RX_HBStatus[0].head[no].eeprom_mvt, sizeof(SHeadEEpromMvt)) && !memempty(&_NiosStat->user_eeprom[no], sizeof(_NiosStat->user_eeprom[no])))
@@ -593,21 +593,20 @@ int  nios_main(int ticks, int menu)
 	
 	if (_NiosLoaded)
 	{
-        if (_NiosMem && _NiosEeprom) cond_main(ticks, menu);
-
 		tse_check_errors(ticks, menu);
 		if (menu)
 		{
 			_nios_copy_status();			
-			nios_check_errors(ticks);		
-
-			for(int head=0; head<SIZEOF(FpgaCfg.head); head++)
-			{
-				_nios_set_user_eeprom(head);
-			}
-			if (_NiosStat && !_NiosStat->error.head_eeprom_read) _NiosEeprom = TRUE;
+			nios_check_errors(ticks);
+			if (_NiosStat->info.eeprom_read)
+				for(int head=0; head<SIZEOF(FpgaCfg.head); head++)
+				{
+					_nios_set_user_eeprom(head);
+				}
 		}
+		if (_NiosMem) cond_main(ticks, menu);
 	}
+
 	return REPLY_OK;
 }
 

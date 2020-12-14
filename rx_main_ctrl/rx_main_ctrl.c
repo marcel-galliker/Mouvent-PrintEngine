@@ -204,7 +204,7 @@ int main(int argc, char* argv[])
 		#endif
 	}
 	//--- main procedure ---------------------------
-	setup_config(PATH_USER FILENAME_CFG, &RX_Config, READ);
+	setup_read_config();
 	
 	ctrl_update_hostname();
 	
@@ -241,7 +241,8 @@ int main(int argc, char* argv[])
 	while (running)
 	{
 		rx_sleep(1000);
-		int t0=rx_get_ticks();
+		setup_write_config();
+		int t0 = rx_get_ticks();
 		ctrl_tick();
 		int t1=rx_get_ticks()-t0;
 		enc_tick();

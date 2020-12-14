@@ -12,6 +12,7 @@
 #include "rx_common.h"
 #include "rx_file.h"
 #include "rx_hash.h"
+#include "rx_error.h"
 #include "rx_setup_file.h"
 #include "rx_setup_ink.h"
 #include "setup.h"
@@ -19,7 +20,11 @@
 
 //--- prototypes --------------------------------------------------------------
 
-static void _head_pressure_out_override(SRxConfig *pcfg);
+static void _head_pressure_out_override(SRxConfig *pcfg, EN_setup_Action action);
+static int _setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action action);
+
+static BOOL _SaveConfig;
+
 
 //--- setup_test --------------------------------------------------------------
 void setup_test()
@@ -97,8 +102,39 @@ int setup_network(HANDLE file, SRxNetwork *pnet, EN_setup_Action  action)
 	return REPLY_OK;
 }
 
+void setup_save_config()
+{
+	_SaveConfig = TRUE;
+}
+
+BOOL setup_write_config()
+{
+	if (_SaveConfig) 
+	{
+		// copy the original configuration 
+		rx_file_copy(PATH_USER FILENAME_CFG, PATH_USER FILENAME_CFG ".save");
+		_SaveConfig = FALSE;
+		_setup_config(PATH_USER FILENAME_CFG, &RX_Config, WRITE);
+		Error(WARN, 0, "Save new configuration");
+		return TRUE;
+	}
+	return FALSE;
+}
+
+void setup_read_config()
+{
+	_setup_config(PATH_USER FILENAME_CFG, &RX_Config, READ);
+	if (RX_Config.printer.type == printer_undef)
+	{
+		// try to retreive the saved config
+		_setup_config(PATH_USER FILENAME_CFG ".save", &RX_Config, READ);
+		Error(WARN, 0, "Retreive configuration from backup");
+	}
+	
+}
+
 //--- setup_config ----------------------------------------------------------------------------
-int setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action)
+int _setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action)
 {
 	int i, h;
 	char path[MAX_PATH];
@@ -208,32 +244,26 @@ int setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action)
 		}
 	}
 
-	if (action==WRITE)
+	if (setup_chapter(file, "Density", -1, action)==REPLY_OK)
 	{
-		if (setup_chapter(file, "Density", -1, action)==REPLY_OK)
+		for (i=0; i<pcfg->colorCnt; i++)
 		{
-			for (i=0; i<pcfg->colorCnt; i++)
+			if (setup_chapter(file, "Color", i, action)==REPLY_OK) 
 			{
-				if (setup_chapter(file, "Color", i, action)==REPLY_OK) 
+				for (h=0; h<pcfg->headsPerColor; h++)
 				{
-					for (h=0; h<pcfg->headsPerColor; h++)
-					{
-						int n=i*RX_Config.headsPerColor+h;
-						int board = n/MAX_HEADS_BOARD;
-						int head  = n%MAX_HEADS_BOARD;
-						UCHAR	voltage;
-						setup_chapter(file, "Head", h, action);
-						if (RX_HBStatus[board].head[head].eeprom_mvt.voltage) voltage=RX_HBStatus[board].head[head].eeprom_mvt.voltage;
-						else voltage=(UCHAR)RX_HBStatus[board].head[head].eeprom.voltage;
-                        setup_uchar(file, "voltage", action, &voltage, 0);
-						setup_int16_arr(file, "density",  action, RX_HBStatus[board].head[head].eeprom_mvt.densityValue, MAX_DENSITY_VALUES, 0);
-						setup_chapter(file, "..", -1, action);
-					}
+					int n=i*RX_Config.headsPerColor+h;
+					int board = n/MAX_HEADS_BOARD;
+					int head  = n%MAX_HEADS_BOARD;
+					setup_chapter(file, "Head", h, action);
+					setup_uchar(file, "voltage", action, &pcfg->voltage[board][head], 0);
+					setup_int16_arr(file, "density", action, pcfg->densityValue[board][head], MAX_DENSITY_VALUES, 0);
 					setup_chapter(file, "..", -1, action);
 				}
+				setup_chapter(file, "..", -1, action);
 			}
-			setup_chapter(file, "..", -1, action);
 		}
+		setup_chapter(file, "..", -1, action);
 	}
 
     // iQ500 config --------------------------------- //
@@ -249,29 +279,33 @@ int setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action)
 	if (action==WRITE) setup_save(file, filepath);
 	setup_destroy(file);
 
-	if (action==READ) _head_pressure_out_override(pcfg);
+	_head_pressure_out_override(pcfg, action);
 	return REPLY_OK;
 }
 
 //--- _head_pressure_out_override ----------------------------------------------
-static void _head_pressure_out_override(SRxConfig *pcfg)
+static void _head_pressure_out_override(SRxConfig *pcfg, EN_setup_Action action)
 {
-	int i;
+	int b, h;
 	HANDLE file = setup_create();
-	if (setup_load(file, PATH_USER FILENAME_HEAD_PRESOUT)==REPLY_OK)
+	setup_load(file, PATH_USER FILENAME_HEAD_PRESOUT);
+	if (action == READ) memset(pcfg->headDisabledJets, -1, sizeof(pcfg->headDisabledJets)); // init jet to -1 (0xffff)
+	if (setup_chapter(file, "pressure", -1, action) == REPLY_OK) 
 	{
-		if (setup_chapter(file, "pressure", -1, READ)==REPLY_OK) 
-		{		
-			for (i=0; i<SIZEOF(pcfg->cond); i++)
+		for (b = 0; b < pcfg->colorCnt; b++)
+		{
+			for (h = 0; h < pcfg->headsPerColor; h++)
 			{
-				if (setup_chapter(file, "head", i+1, READ)==REPLY_OK) 
-				{    									
-				//	setup_int16_arr(file, "disabledJets",  READ, pcfg->headDisabledJets[i],	sizeof(pcfg->headDisabledJets[i]),	0);					
-					setup_chapter(file, "..", -1, READ);
-				}	
-   			}
-   		}
+				int n = b * RX_Config.headsPerColor + h;
+				if (setup_chapter(file, "head", n + 1, action) == REPLY_OK)
+				{
+					setup_int16_arr(file, "disabledJets", action, pcfg->headDisabledJets[n], MAX_DISABLED_JETS, -1);
+					setup_chapter(file, "..", -1, action);
+				}
+			}	
+		}
 	}
+	if (action == WRITE) setup_save(file, PATH_USER FILENAME_HEAD_PRESOUT);
 	setup_destroy(file);	
 }
 

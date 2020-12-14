@@ -181,12 +181,7 @@ static void *_dl_thread(void *lpParameter)
 							{
 								ErrorEx(dev_fluid, _Identify, LOG, 0, "Identified Barcode Scanner >>%s<<", _Scanner[no].scannerSN);
 								strcpy(RX_Config.inkSupply[_Identify].scannerSN, _Scanner[no].scannerSN);
-								{
-									SRxConfig cfg;
-									setup_config(PATH_USER FILENAME_CFG, &cfg, READ);
-									strcpy(cfg.inkSupply[_Identify].scannerSN, _Scanner[no].scannerSN);
-									setup_config(PATH_USER FILENAME_CFG, &RX_Config, WRITE);
-								}								
+								setup_save_config();
 								_Identify = -1;
 								_dl_configure(_Scanner[no].handle);
 								for (i=0; i<SIZEOF(_Scanner); i++)

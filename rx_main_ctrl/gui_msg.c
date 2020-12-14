@@ -77,7 +77,6 @@ static void _do_del_file		(RX_SOCKET socket, SPrintQueueEvt *pmsg);
 static void _do_get_print_env	(RX_SOCKET socket);
 static void _do_get_ink_def		(RX_SOCKET socket);
 static void _do_get_density_val	  (RX_SOCKET socket, SDensityValuesMsg *pmsg);
-static void _do_set_density_val	  (RX_SOCKET socket, SDensityValuesMsg *pmsg);
 static void _do_get_disalbled_jets(RX_SOCKET socket, SDisabledJetsMsg *pmsg);
 static void _do_head_fluidCtrlMode(RX_SOCKET socket, SFluidCtrlCmd* pmsg);
 static void _do_fluidCtrlMode	  (RX_SOCKET socket, SFluidCtrlCmd* pmsg);
@@ -167,7 +166,7 @@ int handle_gui_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sende
 		case CMD_GET_INK_DEF:		_do_get_ink_def(socket);										break;
 
         case CMD_GET_DENSITY_VAL:	_do_get_density_val(socket, (SDensityValuesMsg*)pmsg);			break;
-		case CMD_SET_DENSITY_VAL:	_do_set_density_val(socket, (SDensityValuesMsg*)pmsg);			break;
+		case CMD_SET_DENSITY_VAL:	ctrl_set_density_values((SDensityValuesMsg*)pmsg);			break;
         case CMD_GET_DISABLED_JETS:	_do_get_disalbled_jets(socket, (SDisabledJetsMsg*)pmsg);		break;
         case CMD_SET_DISABLED_JETS:	ctrl_set_disalbled_jets((SDisabledJetsMsg*)pmsg);				break;
 
@@ -886,15 +885,6 @@ static void _do_get_density_val	  (RX_SOCKET socket, SDensityValuesMsg *pmsg)
 	sok_send(&socket, &reply);
 }
 
-//--- _do_set_density_val -------------------------------------------------
-static void _do_set_density_val	  (RX_SOCKET socket, SDensityValuesMsg *pmsg)
-{
-	SRxConfig cfg;
-	setup_config(PATH_USER FILENAME_CFG, &cfg, READ);
-	memcpy(&RX_HBStatus[pmsg->head/MAX_HEADS_BOARD].head[pmsg->head%MAX_HEADS_BOARD].eeprom_mvt.densityValue, pmsg->value, sizeof(pmsg->value));
-	setup_config(PATH_USER FILENAME_CFG, &cfg, WRITE);
-	ctrl_set_density_values((SDensityValuesMsg*)pmsg);	
-}
 
 //--- _do_get_disalbled_jets -------------------------------------------------
 static void _do_get_disalbled_jets(RX_SOCKET socket, SDisabledJetsMsg *pmsg)
@@ -1076,7 +1066,8 @@ static void _do_set_printer_cfg(RX_SOCKET socket, SPrinterCfgMsg* pmsg)
 	}
 	RX_Config.externalData = pmsg->externalData;
 	memcpy(&RX_Config.printer.offset,		&pmsg->offset,				sizeof(RX_Config.printer.offset));
-	setup_config(PATH_USER FILENAME_CFG, &RX_Config, WRITE);
+
+	setup_save_config();
 
 	gui_send_msg_2(socket, REP_SET_PRINTER_CFG, 0, NULL);	 
 
@@ -1089,7 +1080,7 @@ void gui_set_stepper_offsets(int no, SRobotOffsets *poffsets)
     if (no >= 0 && no < SIZEOF(RX_Config.stepper.robot))
     {
 		memcpy(&RX_Config.stepper.robot[no], poffsets, sizeof(RX_Config.stepper.robot[no]));
-		setup_config(PATH_USER FILENAME_CFG, &RX_Config, WRITE);
+		setup_save_config();
 		gui_send_msg_2(INVALID_SOCKET, REP_GET_STEPPER_CFG, sizeof(RX_Config.stepper), &RX_Config.stepper);        
     }
 }

@@ -774,11 +774,9 @@ void enc_reply_stat(RX_SOCKET socket)
 //--- enc_save_par ---------------------------------------------------
 void enc_save_par(int no)
 {
-	SRxConfig cfg;
-	setup_config(PATH_USER FILENAME_CFG, &cfg, READ);
-	memcpy(cfg.encoder[no].corrRotPar, _EncoderStatus[no].corrRotPar, sizeof(cfg.encoder[no].corrRotPar));
-	memcpy(RX_Config.encoder[no].corrRotPar, _EncoderStatus[no].corrRotPar, sizeof(cfg.encoder[no].corrRotPar));
-	setup_config(PATH_USER FILENAME_CFG, &cfg, WRITE);
+	memcpy(RX_Config.encoder[no].corrRotPar, _EncoderStatus[no].corrRotPar, sizeof(RX_Config.encoder[no].corrRotPar));
+	memcpy(RX_Config.encoder[no].corrRotPar, _EncoderStatus[no].corrRotPar, sizeof(RX_Config.encoder[no].corrRotPar));
+	setup_save_config();
 }
 
 //--- _handle_config_reply --------------------------------

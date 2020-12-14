@@ -14,3 +14,5 @@ MaxEmptyLinesToKeep: 2
 PointerAlignment: Right
 TabWidth: 4
 IndentWidth: 4
+UseTab: Always
+ColumnLimit: 500

@@ -393,6 +393,23 @@ int		rx_rmdir(const char *dirname)
 	#endif
 }
 
+//--- rx_file_copy  --------------------------------------------------------------
+BOOL rx_file_copy(const char *src, const char *dst)
+{
+	FILE *source, *target;
+	char ch;
+
+	source = fopen(src, "r");
+	if (source == NULL) return FALSE;
+	target = fopen(dst, "w");
+	if (target == NULL) return FALSE;
+
+	while ((ch = fgetc(source)) != EOF) fputc(ch, target);
+	fclose(source);
+	fclose(target);
+	return TRUE;
+}
+
 //--- rx_fopen --------------------------------------------------------------
 FILE * rx_fopen(const char * path, const char * mode, int sharemode)
 {

@@ -572,6 +572,8 @@ void putty_display_cond_status(int status)
 		term_printf("%s\n", line);		
 		term_printf("alive:           "); PRINTF(MAX_HEADS_BOARD)("         %06d ", RX_NiosStat.cond[no[i]].alive); term_printf("\n");
 
+		term_printf("info:             "); PRINTF(MAX_HEADS_BOARD)("    0x%08x  ", RX_NiosStat.cond[no[i]].info); term_printf("\n");
+
 		term_printf("error:            ");
 		for (i=0; i<MAX_HEADS_BOARD; i++)
 		{

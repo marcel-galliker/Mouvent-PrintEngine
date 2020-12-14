@@ -1599,8 +1599,10 @@ typedef struct SRxConfig
 		INT32			tara[MAX_SCALES];
 		INT32			calib[MAX_SCALES];			
 	} scales;
-//	INT16			headDisabledJets[MAX_HEAD_DIST][MAX_DISABLED_JETS];
-    SiQ500Cfg iQ500Cfg;
+	INT16			headDisabledJets[MAX_HEAD_DIST][MAX_DISABLED_JETS];
+	INT16 densityValue[HEAD_BOARD_CNT][HEAD_CNT][MAX_DENSITY_VALUES];
+	UCHAR voltage[HEAD_BOARD_CNT][HEAD_CNT];
+	SiQ500Cfg iQ500Cfg;
 } SRxConfig;
 
 /*

@@ -125,7 +125,7 @@ int setup_ink(const char *filepath, SInkDefinition *pink, EN_setup_Action  actio
 static void	_calc_maxFreq(SInkDefinition *pink)
 {
 	int trace=FALSE;
-	int i, droplet, end;
+	int i, droplet, end = 0;
 	int start[MAX_GREY_LEVELS];
 	double clock=2000/140.0; //12.5; // ns
 	double time;
