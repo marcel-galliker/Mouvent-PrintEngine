@@ -9,7 +9,7 @@
              d:DesignHeight="200" 
              d:DesignWidth="700">
 
-    <GroupBox Header="Stepper" Style="{StaticResource RxGroupBox}">
+    <GroupBox Header="Stepper" Style="{StaticResource MvtGroupBox}">
         <Grid x:Name="MainGrid">
             <Grid.RowDefinitions>
                 <RowDefinition Height="2"/>
