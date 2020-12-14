@@ -353,6 +353,7 @@ static void _plc_set_command(char *mode, char *cmd)
 	{
 		if (!_StartPrinting) _SendPause = 2;
 	}
+
 	Error(LOG, 0, "PLC_COMMAND >>%s<<", cmd);
 	TrPrintfL(TRUE, "PLC_COMMAND >>%s<<", cmd);
 	sprintf(str, UnitID ".%s", cmd);

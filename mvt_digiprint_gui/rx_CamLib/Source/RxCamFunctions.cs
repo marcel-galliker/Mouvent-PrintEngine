@@ -19,7 +19,8 @@ namespace rx_CamLib
 	public enum ECamFunction
 	{
 		CamNoFunction,
-		CamFindMark,			
+		CamFindMark_1,	// vertical lines	
+		CamFindMark_2,	// horizontal lines	
 		CamMeasurePosition
 	};
 
@@ -87,11 +88,18 @@ namespace rx_CamLib
 			set { SetProperty(ref _Simulation,value); }
 		}
 
+		//--- Off ------------------------------------
+		public void Off()
+		{
+			_Camera.SetMeasureMode(RxCam.ENMeasureMode.MeasureMode_Off);
+		}
+
 		//--- FindMark --------------------------------------------------
-		public void FindMark(Action markFound)
+		public void FindMark(Action markFound, bool horizontal)
 		{
 			_Camera.SetBinarizationMode(RxCam.ENBinarizeMode.BinarizeMode_Auto);
 			//set very small LineAspectLimit for StartLines
+			_Camera.SetLinesHorizontal(horizontal);
 			_Camera.SetLineAspectLimit(1);
 			_Camera.SetMeasureMode(RxCam.ENMeasureMode.MeasureMode_StartLines);
             if (_Simulation)

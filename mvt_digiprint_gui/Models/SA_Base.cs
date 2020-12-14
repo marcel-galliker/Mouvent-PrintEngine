@@ -152,13 +152,14 @@ namespace RX_DigiPrint.Models
 		private void _checkWebMoveDone()
 		{
 			EnPlcState state = (EnPlcState)Rx.StrToInt32(RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_MACHINE_STATE"));
-		//	Console.WriteLine("{0}: _checkWebMoveDone _WebRunning={1} state={2}", RxGlobals.Timer.Ticks(), _WebRunning, state);
+			Console.WriteLine("{0}: _checkWebMoveDone _WebRunning={1} state={2} ondone={3}", RxGlobals.Timer.Ticks(), _WebRunning, state, _OnWebMoveDone!=null);
 			if (_WebRunning && (state==EnPlcState.plc_pause || state==EnPlcState.plc_stop))
 			{
-				Console.WriteLine("{0}: WEB MOVE DONE ", RxGlobals.Timer.Ticks());
-				if (_OnWebMoveDone!=null) _OnWebMoveDone();
+				Console.WriteLine("{0}: WEB MOVE DONE, _OnWebMoveDone={1}", RxGlobals.Timer.Ticks(), _OnWebMoveDone!=null);
+				Action onDone=_OnWebMoveDone;
 				_OnWebMoveDone = null;
 				_WebRunning	   = false;
+				if (onDone!=null) onDone();
 			}
 			if (state==EnPlcState.plc_run) _WebRunning=true;
 		}
@@ -223,6 +224,7 @@ namespace RX_DigiPrint.Models
 			{
 				OnWebMoveDone = onDone;
 				RxGlobals.RxInterface.SendMsg(TcpIp.CMD_SA_WEB_MOVE, ref cmd);
+				Console.WriteLine("{0}: WebMove, _OnWebMoveDone={1}", RxGlobals.Timer.Ticks(), _OnWebMoveDone!=null);			
 			}
 		}
 

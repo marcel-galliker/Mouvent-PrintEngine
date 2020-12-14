@@ -157,7 +157,7 @@ void sa_handle_gui_msg(RX_SOCKET socket, void *pmsg_)
 								break;
 
     case CMD_SA_STOP:			Error(LOG, 0, "Send CMD_SA_STOP");
-								sok_send_2(&_SaSocket, CMD_SA_STOP,    0, NULL); 
+								sok_send_2(&_SaSocket, CMD_MOTOR_STOP,    0, NULL); 
 								break;
 
     case CMD_SA_MOVE:			Error(LOG, 0, "Send CMD_MOTOR_MOVE");
