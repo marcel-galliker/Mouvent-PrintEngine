@@ -33,6 +33,8 @@ namespace RX_DigiPrint.Views.PrintQueueView
 
             if (init) _Item = new PrintQueueItem() { TestImage = ETestImage.jets, Copies = 1, LengthUnit = EPQLengthUnit.copies, Dots = "S", DropSizes = 1 };
             this.DataContext = _Item;
+            _Item.TestMessage = "";
+
             CB_TestImage.ItemsSource = new EN_TestImageList();
             CB_ScanMode.ItemsSource = new EN_ScanModeList();
             CB_DropSize.ItemsSource = new EN_DropSize();
@@ -66,10 +68,10 @@ namespace RX_DigiPrint.Views.PrintQueueView
             else if (!RxGlobals.PrintSystem.IsScanning)
             {
                 CB_Speed.ItemsSource = RxGlobals.PrintSystem.SpeedList(1, 2000);
+                MarginRow.Height = new GridLength(0);
+                MarginIsShown = false;
                 if (init)
                 {
-                    MarginRow.Height = new GridLength(0);
-                    MarginIsShown = false;
                     _Item.Speed = EN_SpeedList.DefaultValue;
                     _Item.PageMargin = 0;
                 }
@@ -83,6 +85,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
                     _Item.PageMargin = 200;
                 }
             }
+            MessageCheckBox.IsChecked = true;
         }
 
         //--- Print_Clicked --------------------------------------------------------------------
@@ -141,10 +144,12 @@ namespace RX_DigiPrint.Views.PrintQueueView
                 if ((bool)isChecked)
                 {
                     SetTestMessage();
+                    Message.IsEnabled = false;
                 }
                 else
                 {
                     _Item.TestMessage = "";
+                    Message.IsEnabled = true;
                 }
             }
         }
@@ -154,11 +159,10 @@ namespace RX_DigiPrint.Views.PrintQueueView
             string testMessage = "";
             if(_Item != null)
             {
-                testMessage += "TestImg: " + TestImageToString(_Item.TestImage);
-                testMessage += " | DropSize: " + TestDotSizeToString(_Item.TestDotSize);
-                if (SpeedIsShown) testMessage += " | Speed: " + _Item.Speed.ToString() + SpeedUnit.Text;
-                if(ScanModeIsShown) testMessage += " | Scan Mode: " + ScanModeToString(_Item.ScanMode);
-                if(MarginIsShown) testMessage += " | Page Margin: " + _Item.PageMargin.ToString("N2") + MarginUnit.Text;
+                testMessage += RxGlobals.PrinterProperties.Host_Name;
+                if (SpeedIsShown) testMessage += " " + _Item.Speed.ToString() + SpeedUnit.Text;
+                if(ScanModeIsShown) testMessage += " " + ScanModeToString(_Item.ScanMode);
+                if(MarginIsShown) testMessage += " " + _Item.PageMargin.ToString("N0") + MarginUnit.Text;
                 
                 _Item.TestMessage = testMessage;
             }
@@ -170,13 +174,13 @@ namespace RX_DigiPrint.Views.PrintQueueView
             switch (mode)
             {
                 case EScanMode.scan_std:
-                    scanModeString = "--->";
+                    scanModeString = "-->";
                     break;
                 case EScanMode.scan_rtl:
-                    scanModeString = "<---";
+                    scanModeString = "<--";
                     break;
                 case EScanMode.scan_bidir:
-                    scanModeString = "<-->";
+                    scanModeString = "<->";
                     break;
                 default:
                     scanModeString = "?";
