@@ -78,13 +78,20 @@
                         <local:LB701UV_Cmd/>
                     </StackPanel>
 
-                    <rx_uc:StepperView Margin="10,0,0,0" Grid.Row="2" Grid.Column="2"/>
-                    <rx_uc:UVLampView Grid.Column="3" Margin="5,0,0,0"/>
+                    <ScrollViewer Grid.Column="2" Margin="5,0,0,0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="auto"></RowDefinition>
+                                <RowDefinition Height="*"></RowDefinition>
+                            </Grid.RowDefinitions>
+
+                            <rx_uc:StepperView Grid.Row="0"/>
+                            <rx_uc:UVLampView Grid.Row="1" Margin="0,10,0,0" />
+                        </Grid>
+                    </ScrollViewer>
                 </Grid>
 
-               
-                
-               <!-- TAB: PLC Log ____________________________________________________________-->
+                <!-- TAB: PLC Log ____________________________________________________________-->
                 <rx_uc:PlcLog Grid.Row="1" Margin="10"
                       HorizontalAlignment="Left"
                       VerticalAlignment="Stretch"

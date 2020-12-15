@@ -11,7 +11,7 @@
         <ScrollViewer ScrollViewer.VerticalScrollBarVisibility="Auto">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="180"/>
+                    <ColumnDefinition Width="auto"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
@@ -21,17 +21,17 @@
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="auto"/>
                 </Grid.RowDefinitions>
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="Software version"/>
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="SW Version"/>
                 <TextBlock Grid.Row="0" Grid.Column="1" Text="{ Binding Path=SoftVers, Mode=OneWay }"/>
 
-                <TextBlock Grid.Row="1" Grid.Column="0" Text="System operation time [h]"/>
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Sys. time"/>
                 <TextBlock Grid.Row="1" Grid.Column="1" Text="{ Binding Path=SystemOpTime, Mode=OneWay }"/>
 
                 <Rectangle Grid.Row="2" Grid.ColumnSpan="2" Fill="{StaticResource RX.Warn}" Visibility="{Binding Path=LampOK, Converter={StaticResource BoolToInVisible_Converter}}"/>
-                <TextBlock Grid.Row="2" Grid.Column="0" Text="Lamp operation time [h]"/>
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="Lamp time"/>
                 <TextBlock Grid.Row="2" Grid.Column="1" Text="{ Binding Path=LampOpTime, Mode=OneWay }"/>
 
-                <CheckBox x:Name="ResetLampBtn" Click="ResetLampBtn_Click" Grid.Row="4" Grid.Column="1" Content="Reset" Height="30" Style="{DynamicResource RxCommandButton}" />
+                <CheckBox x:Name="ResetLampBtn" Click="ResetLampBtn_Click" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Content="Reset" Height="30" Style="{DynamicResource RxCommandButton}" />
             </Grid>
         </ScrollViewer>
     </GroupBox>

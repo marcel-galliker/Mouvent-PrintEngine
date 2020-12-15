@@ -697,7 +697,7 @@
     <Compile Include="Views\PrintSystemView\StepperGridDP803.xaml.cs">
       <DependentUpon>StepperGridDP803.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\PrintSystemView\StepperGridLB701.xaml.cs" >
+    <Compile Include="Views\PrintSystemView\StepperGridLB701.xaml.cs">
       <DependentUpon>StepperGridLB701.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\PrintSystemView\StepperGridLB702.xaml.cs">
@@ -1956,8 +1956,8 @@ GOTO :END
 :END</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>call $(ProjectDir)VersionUpdate.bat $(ProjectDir)Properties\AssemblyInfo.cs.template  $(ProjectDir)Properties\AssemblyInfo.cs
-call $(ProjectDir)Resources\Language\Compile.bat $(ProjectDir)Resources\Language</PreBuildEvent>
+    <PreBuildEvent>call $(ProjectDir)VersionUpdate $(ProjectDir)Properties\AssemblyInfo.cs.template  $(ProjectDir)Properties\AssemblyInfo.cs
+REM call $(ProjectDir)Resources\Language\Compile.bat $(ProjectDir)Resources\Language</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
