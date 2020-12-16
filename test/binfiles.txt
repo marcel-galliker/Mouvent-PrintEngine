@@ -106,7 +106,6 @@ bin\spooler\grid.tif
 bin\spooler\jet_numbers.tif
 bin\spooler\libtbarcode11.so.0
 bin\spooler\rx_spooler_ctrl
-bin\spooler\SA_Alignment.tif
 bin\spooler\scanning_1.tif
 bin\spooler\scanning_2.tif
 bin\spooler\scanning_3.tif
