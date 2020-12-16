@@ -29,7 +29,6 @@ namespace RX_DigiPrint.Models
 
 		//--- Property motorPosition ---------------------------------------
 		private double _motorPosition;
-		private double _motorPositionSet;
 		public double motorPosition
 		{
 			get { return _motorPosition; }
@@ -84,12 +83,8 @@ namespace RX_DigiPrint.Models
 				if (SetProperty(ref _MoveCnt,value) && _OnScanMoveDone!=null)
 				{
 					Console.WriteLine("{0} ScanMoveDone {1} motorPosition={2}", RxGlobals.Timer.Ticks(), _MoveCnt, motorPosition);
-					if (motorPosition==_motorPositionSet)
-					{
-						_OnScanMoveDone();
-						_OnScanMoveDone=null;
-					}
-					else ScanMoveTo(_motorPositionSet, _OnScanMoveDone);
+					_OnScanMoveDone();
+					_OnScanMoveDone=null;
 				}
 			}
 		}
@@ -157,13 +152,14 @@ namespace RX_DigiPrint.Models
 		private void _checkWebMoveDone()
 		{
 			EnPlcState state = (EnPlcState)Rx.StrToInt32(RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_MACHINE_STATE"));
-			Console.WriteLine("{0}: _checkWebMoveDone _WebRunning={1} state={2}", RxGlobals.Timer.Ticks(), _WebRunning, state);
+			Console.WriteLine("{0}: _checkWebMoveDone _WebRunning={1} state={2} ondone={3}", RxGlobals.Timer.Ticks(), _WebRunning, state, _OnWebMoveDone!=null);
 			if (_WebRunning && (state==EnPlcState.plc_pause || state==EnPlcState.plc_stop))
 			{
-				Console.WriteLine("{0}: WEB MOVE DONE ", RxGlobals.Timer.Ticks());
-				if (_OnWebMoveDone!=null) _OnWebMoveDone();
+				Console.WriteLine("{0}: WEB MOVE DONE, _OnWebMoveDone={1}", RxGlobals.Timer.Ticks(), _OnWebMoveDone!=null);
+				Action onDone=_OnWebMoveDone;
 				_OnWebMoveDone = null;
 				_WebRunning	   = false;
+				if (onDone!=null) onDone();
 			}
 			if (state==EnPlcState.plc_run) _WebRunning=true;
 		}
@@ -174,6 +170,7 @@ namespace RX_DigiPrint.Models
 			RxGlobals.RxInterface.SendCommand(TcpIp.CMD_SA_REFERENCE);
 		}
 
+		/*
 		//--- ScanMoveBy --------------------------------------------
 		public void ScanMoveBy(double dist, Action done=null)
 		{
@@ -183,16 +180,15 @@ namespace RX_DigiPrint.Models
 			_OnScanMoveDone = done;
 			RxGlobals.RxInterface.SendMsg(TcpIp.CMD_SA_MOVE, ref cmd);
 		}
+		*/
 
 		//--- ScanMoveTo --------------------------------------------
 		public void ScanMoveTo(double pos, Action onDone=null)
 		{
 			TcpIp.SetupAssist_MoveCmd cmd = new TcpIp.SetupAssist_MoveCmd();
-			double dist = pos-motorPosition; 
-			_motorPositionSet = pos;
-			cmd.steps	= (Int32)(dist*1000.0);
+			cmd.steps	= (Int32)(pos*1000.0);
 			_OnScanMoveDone = onDone;
-			Console.WriteLine("{0} ScanMove {1} from {2:N3} to {3:N3} dist {4:N3}", RxGlobals.Timer.Ticks(), _MoveCnt, motorPosition, pos, dist);
+			Console.WriteLine("{0} ScanMove {1} from {2:N3} to {3:N3}", RxGlobals.Timer.Ticks(), _MoveCnt, motorPosition, pos);
 			RxGlobals.RxInterface.SendMsg(TcpIp.CMD_SA_MOVE, ref cmd);
 		}
 
@@ -228,6 +224,7 @@ namespace RX_DigiPrint.Models
 			{
 				OnWebMoveDone = onDone;
 				RxGlobals.RxInterface.SendMsg(TcpIp.CMD_SA_WEB_MOVE, ref cmd);
+				Console.WriteLine("{0}: WebMove, _OnWebMoveDone={1}", RxGlobals.Timer.Ticks(), _OnWebMoveDone!=null);			
 			}
 		}
 

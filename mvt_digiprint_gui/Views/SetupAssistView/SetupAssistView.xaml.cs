@@ -2,6 +2,8 @@
 using RX_Common;
 using RX_DigiPrint.Models;
 using RX_DigiPrint.Services;
+using System;
+using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -18,6 +20,13 @@ namespace RX_DigiPrint.Views.SetupAssistView
 			InitializeComponent();
 
 			DataContext = RxGlobals.SetupAssist;
+			RxGlobals.PrinterStatus.PropertyChanged += PrinterStatusChanged;
+			PrinterStatusChanged(this, null);
+		}
+
+		private void PrinterStatusChanged(object sender,PropertyChangedEventArgs e)
+		{
+			StartButton.IsEnabled = (RxGlobals.PrinterStatus.PrintState==EPrintState.ps_off || RxGlobals.PrinterStatus.PrintState==EPrintState.ps_ready_power);
 		}
 
 		//--- Settings_Clicked -------------------------------------------
@@ -68,7 +77,7 @@ namespace RX_DigiPrint.Views.SetupAssistView
 		//--- Move_Clicked -------------------------------------------
 		private void Move_Clicked(object sender,RoutedEventArgs e)
 		{
-			RxGlobals.SetupAssist.ScanMoveBy(Rx.StrToDouble(MoveDist.Text));
+			RxGlobals.SetupAssist.ScanMoveTo(Rx.StrToDouble(MoveDist.Text));
 		}
 
 		//--- Stop_Clicked -------------------------------------------

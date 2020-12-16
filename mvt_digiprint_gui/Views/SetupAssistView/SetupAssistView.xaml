@@ -29,13 +29,16 @@
                 <TextBlock Text="Ref" Foreground="White"/>
             </common:MvtButton>
 
-            <common:MvtButton HorizontalAlignment="Left" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" Click="Start_Clicked" Margin="15, 5, 15, 5" >
+            <common:MvtButton x:Name="StartButton" HorizontalAlignment="Left" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" Click="Start_Clicked" Margin="15, 5, 15, 5" >
                 <TextBlock Text="Start" Foreground="White"/>
             </common:MvtButton>
 
+            <!--
             <common:MvtButton HorizontalAlignment="Left" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" Click="Done_Clicked" Margin="15, 5, 15, 5" >
                 <TextBlock Text="Done" Foreground="White"/>
             </common:MvtButton>
+            
+            -->
         </StackPanel>
 
         <Grid Grid.Row="2">
@@ -117,7 +120,7 @@
                         <RowDefinition Height="auto"/>
                         <RowDefinition Height="auto"/>
                     </Grid.RowDefinitions>
-                    <TextBlock  Grid.Row="0" Grid.Column="0" Text="Distance [mm]"/>
+                    <TextBlock  Grid.Row="0" Grid.Column="0" Text="Position [mm]"/>
                     <common:MvtNumBox    Grid.Row="0" Grid.Column="1" x:Name="MoveDist"/>
 
                     <Grid Grid.Row="4" Grid.ColumnSpan="2">
@@ -150,7 +153,7 @@
                         <RowDefinition Height="auto"/>
                     </Grid.RowDefinitions>
                     
-                    <TextBlock  Grid.Row="0" Grid.Column="0" Text="Dist"/>
+                    <TextBlock  Grid.Row="0" Grid.Column="0" Text="Dist [mm]"/>
                     <common:MvtNumBox    Grid.Row="0" Grid.Column="1" Text="{Binding WebDist}"/>
 
                     <Grid Grid.Row="2" Grid.ColumnSpan="2">
