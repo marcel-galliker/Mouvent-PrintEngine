@@ -734,12 +734,12 @@ static void _control(int fluidNo)
                                                 }
 												else if (lbrob && even_number_of_colors && !steplb_rob_in_fct_pos(no/2, HeadNo + rob_fct_purge_head0))
 												{
-													if (!RX_StepperStatus.robinfo.moving && !RX_StepperStatus.info.moving)	steplb_rob_to_fct_pos(no/2, HeadNo + rob_fct_purge_head0);
+													steplb_rob_to_fct_pos(no/2, HeadNo + rob_fct_purge_head0);
 													break;
 												}
                                                 else if(lbrob && !even_number_of_colors && !steplb_rob_in_fct_pos((no+1)/2, HeadNo + rob_fct_purge_head0))
                                                 {
-                                                    if (!RX_StepperStatus.robinfo.moving && !RX_StepperStatus.info.moving)	steplb_rob_to_fct_pos((no+1)/2, HeadNo + rob_fct_purge_head0);
+                                                    steplb_rob_to_fct_pos((no+1)/2, HeadNo + rob_fct_purge_head0);
 													break;
                                                 }
                                                 
@@ -773,8 +773,8 @@ static void _control(int fluidNo)
                                             }
 											else if (lbrob && _PurgeCtrlMode != ctrl_purge4ever)
 											{
-											    if (!RX_StepperStatus.robinfo.moving && even_number_of_colors)			steplb_rob_fct_start(no / 2, HeadNo + rob_fct_purge_head0);
-                                                else if (!RX_StepperStatus.robinfo.moving && !even_number_of_colors)	steplb_rob_fct_start((no+1) / 2, HeadNo + rob_fct_purge_head0);
+											    if (even_number_of_colors)			steplb_rob_fct_start(no / 2, HeadNo + rob_fct_purge_head0);
+                                                else if (!even_number_of_colors)	steplb_rob_fct_start((no+1) / 2, HeadNo + rob_fct_purge_head0);
                                                 if (-1 * RX_StepperStatus.posY[no/2] > j * 43000)
                                                 {
                                                     j++;
@@ -1242,7 +1242,7 @@ void _send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 				if (!rx_def_is_scanning(RX_Config.printer.type))
 				{
 					if (i==no) cmd.ctrlMode = ctrlMode;
-					else	   cmd.ctrlMode = ctrl_off;
+					//else	   cmd.ctrlMode = ctrl_off;
 				}
 				_Flushed |= (0x1<<i);
 				sok_send(&_FluidThreadPar[i/INK_PER_BOARD].socket, &cmd);

@@ -34,7 +34,7 @@
 #define MAX_CONNECTIONS	5
 
 //--- buffer ---------------------------------------------------------
-#define MSG_BUF_SIZE	256
+#define MSG_BUF_SIZE	512
 #define MSG_MSG_SIZE	1024
 typedef struct
 {

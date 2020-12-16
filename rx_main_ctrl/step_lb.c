@@ -47,7 +47,7 @@ static UINT32			    _Flushed = 0x00;		// For capping function which is same than
 static int                  _ScrewCommandSend[STEPPER_CNT] = {FALSE};
 static int                  _OldVacuum_Cleaner_State = FALSE;
 static double                _Vacuum_Cleaner_Time = 0;
-static int                  _AutoCapMode;
+static int                  _AutoCapMode = FALSE;
 
 static int                  _AutoCapTimer = 0;
 
@@ -623,7 +623,7 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
 									_RobotCtrlMode[no] = ctrl_cap_step1;
 									break;
 		
-		case ctrl_cap_step1:		if (_Status[no].robinfo.ref_done)
+		case ctrl_cap_step1:		if (_Status[no].robinfo.ref_done && !_Status[no].robinfo.moving)
 									{
 										steplb_rob_to_fct_pos(no, rob_fct_cap);
                                         if (_AutoCapMode)   _RobotCtrlMode[no] = ctrl_cap_step3;
@@ -665,11 +665,16 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
                                     }										 
 									break;
 		
-        case ctrl_wash:				function = rob_fct_wash;
-									sok_send_2(&_step_socket[no], CMD_ROB_MOVE_POS, sizeof(function), &function);
-                                    _RobotCtrlMode[no] = ctrl_wash_step1;
-                                    _printing = RX_PrinterStatus.printState == ps_pause;
-                                    _WashStarted = FALSE;
+        case ctrl_wash:				if (!_Status[no].robinfo.moving)
+                                    {
+                                        function = rob_fct_wash;
+									    sok_send_2(&_step_socket[no], CMD_ROB_MOVE_POS, sizeof(function), &function);
+                                        _RobotCtrlMode[no] = ctrl_wash_step1;
+                                        _printing = RX_PrinterStatus.printState == ps_pause;
+                                        _WashStarted = FALSE;
+                                    }
+                                    else _RobotCtrlMode[no] = ctrl_wash;
+                                    
                                     break;
                                     
         case ctrl_wash_step1:		if (_Status[no].robinfo.moving && !_Status[no].robinfo.wash_done) _WashStarted = TRUE;
@@ -688,9 +693,13 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
                                     _WashStarted = FALSE;
 									break;
 
-        case ctrl_vacuum:			function = rob_fct_vacuum;
-									if (ctrl_vacuum_step1 != _RobotCtrlMode[no]) sok_send_2(&_step_socket[no], CMD_ROB_MOVE_POS, sizeof(function), &function);
-                                    _RobotCtrlMode[no] = ctrl_vacuum_step1;
+        case ctrl_vacuum:			if (!_Status[no].robinfo.moving)
+                                    {
+                                        function = rob_fct_vacuum;
+									    if (ctrl_vacuum_step1 != _RobotCtrlMode[no]) sok_send_2(&_step_socket[no], CMD_ROB_MOVE_POS, sizeof(function), &function);
+                                        _RobotCtrlMode[no] = ctrl_vacuum_step1;
+                                    }
+                                    else _RobotCtrlMode[no] = ctrl_vacuum;
                                     break;
                                     
         case ctrl_vacuum_step1:     if (_Status[no].robinfo.vacuum_done)
@@ -708,10 +717,14 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
 									else			_RobotCtrlMode[no] = ctrl_off;
 									break;
                                     
-        case ctrl_wipe:             function = rob_fct_wipe;
-                                    sok_send_2(&_step_socket[no], CMD_ROB_WIPE, sizeof(_WipeCommand[no]), &_WipeCommand[no]);
-                                    _WipeCommand[no] = wipe_none;
-                                    _RobotCtrlMode[no] = ctrl_wipe_step1;
+        case ctrl_wipe:             if (!_Status[no].robinfo.moving)
+				                    {
+                                        function = rob_fct_wipe;
+                                        sok_send_2(&_step_socket[no], CMD_ROB_WIPE, sizeof(_WipeCommand[no]), &_WipeCommand[no]);
+                                        _WipeCommand[no] = wipe_none;
+                                        _RobotCtrlMode[no] = ctrl_wipe_step1;
+                                    }
+                                    else _RobotCtrlMode[no] = ctrl_wipe;
                                     break;
                                     
         case ctrl_wipe_step1:       if (_Status[no].robinfo.wipe_done) 

@@ -49,7 +49,7 @@
 
 #define CAP_FILL_TIME           16000       // ms
 #define SCREW_SEARCHING_TIME    5000        // ms
-#define VACUUM_PUMP_TIME        15000       // ms
+#define VACUUM_PUMP_TIME        25000       // ms
 #define WASTE_PUMP_TIME         30000       // ms
 
 // Digital Inputs
@@ -145,7 +145,7 @@ void lbrob_init(void)
     memset(&_ParCable_drive_purge, 0, sizeof(SMovePar));
 
     // config for referencing cable pull motor (motor 4)
-    _ParCable_ref.speed = 2000;
+    _ParCable_ref.speed = 1000;
     _ParCable_ref.accel = 4000;
     _ParCable_ref.current_acc = 260.0;
     _ParCable_ref.current_run = 260.0;
@@ -159,10 +159,10 @@ void lbrob_init(void)
     // config for moving normal with cable pull motor (motor 4)
     // This commands that use this config need to start the motor with the
     // special encoder mode
-    _ParCable_drive.speed = 5000;
+    _ParCable_drive.speed = 1000;
     _ParCable_drive.accel = 8000;
-    _ParCable_drive.current_acc = 410.0;        // max 420
-    _ParCable_drive.current_run = 410.0;        // max 420
+    _ParCable_drive.current_acc = 400.0;        // max 420
+    _ParCable_drive.current_run = 400.0;        // max 420
     _ParCable_drive.stop_mux = 0;
     _ParCable_drive.dis_mux_in = 0;
     _ParCable_drive.estop_level = 0;
@@ -171,8 +171,8 @@ void lbrob_init(void)
 
     _ParCable_drive_slow.speed = 1000;
     _ParCable_drive_slow.accel = 8000;
-    _ParCable_drive_slow.current_acc = 410.0;   // max 420
-    _ParCable_drive_slow.current_run = 410.0;   // max 420
+    _ParCable_drive_slow.current_acc = 400.0;   // max 420
+    _ParCable_drive_slow.current_run = 400.0;   // max 420
     _ParCable_drive_slow.stop_mux = 0;
     _ParCable_drive_slow.dis_mux_in = 0;
     _ParCable_drive_slow.estop_level = 0;
@@ -181,8 +181,8 @@ void lbrob_init(void)
 
     _ParCable_drive_purge.speed = _micron_2_steps(1000 * 10); // multiplied with 1000 to get from mm/s to um/s
     _ParCable_drive_purge.accel = 4000;
-    _ParCable_drive_purge.current_acc = 410.0; // max 420
-    _ParCable_drive_purge.current_run = 410.0; // max 420
+    _ParCable_drive_purge.current_acc = 400.0; // max 420
+    _ParCable_drive_purge.current_run = 400.0; // max 420
     _ParCable_drive_purge.stop_mux = 0;
     _ParCable_drive_purge.dis_mux_in = 0;
     _ParCable_drive_purge.estop_level = 0;
@@ -191,7 +191,7 @@ void lbrob_init(void)
 
     motor_config(MOTOR_X_0, CURRENT_HOLD, X_STEPS_PER_REV, X_INC_PER_REV, STEPS);
 
-    _Par_WastePump.speed = 16000;
+    _Par_WastePump.speed = 10000;
     _Par_WastePump.accel = 10000;
     _Par_WastePump.current_acc = 280;
     _Par_WastePump.current_run = 280;
