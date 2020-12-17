@@ -676,6 +676,11 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 										val0 = -1*_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].cap_height);
 										val1 = -1*_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].cap_height);
 										if (RX_StepperStatus.info.ref_done) _lb702_move_to_pos(CMD_LIFT_CAPPING_POS, val0, val1);
+                                        else
+                                        {
+                                            _Cmd_New = msgId;
+                                            _lb702_do_reference();
+                                        }
 									}
 									break;
 				
@@ -694,8 +699,12 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                                             Error(WARN, 0, "Capping Height should be >= %d.%dmm", MIN_CAP_HEIGHT/1000, (MIN_CAP_HEIGHT%1000)/100);
                                         val0 = -1 * (_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].cap_height - DIST_CAP_WASH));
                                         val1 = -1 * (_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].cap_height - DIST_CAP_WASH));
-                                        if (RX_StepperStatus.info.ref_done)
-                                            _lb702_move_to_pos(CMD_LIFT_WASH_POS, val0, val1);
+                                        if (RX_StepperStatus.info.ref_done) _lb702_move_to_pos(CMD_LIFT_WASH_POS, val0, val1);
+                                        else
+                                        {
+                                            _Cmd_New = msgId;
+                                            _lb702_do_reference();
+                                        }
                                     }
                                     break;
 

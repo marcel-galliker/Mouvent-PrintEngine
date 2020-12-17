@@ -22,6 +22,9 @@ namespace RX_DigiPrint.Views.AlignmentView
             _HeadAdjustment.Steps = recommendedValueStitch;
             _HeadAdjustment.ShowHelp = false;
             
+            
+            ColorCnt.DataContext = RxGlobals.PrintSystem;
+            HeadsPerColor.DataContext = RxGlobals.PrintSystem;
             DataContext = RxGlobals.HeadAdjustment;
         }
 

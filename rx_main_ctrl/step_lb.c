@@ -65,6 +65,7 @@ static EWipeSide            _WipeCommand[STEPPER_CNT];
 static void _steplb_rob_do_reference(int no);
 
 static void _check_screwer(void);
+static void _send_ctrlMode(EnFluidCtrlMode ctrlMode, int no);
 
 //--- steplb_init ---------------------------------------------------
 void steplb_init(int no, RX_SOCKET psocket)
@@ -132,7 +133,7 @@ int	 steplb_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen
 						int height=RX_Config.stepper.print_height+RX_Config.stepper.material_thickness;
 						sok_send_2(&_step_socket[no], CMD_LIFT_PRINT_POS, sizeof(height), &height);
 						break;
-			}
+            }
 		}
 	}
 	return REPLY_OK;
@@ -481,14 +482,22 @@ void steplb_rob_vacuum(int no, int state)
         sok_send_2(&_step_socket[no], CMD_ROB_VACUUM, sizeof(state), &state);
 }
 
-//--- steplb_rob_stop ------------------------------
-void steplb_rob_stop(void)
+//--- steplb_rob_stop_all ------------------------------
+void steplb_rob_stop_all(void)
 {
 	for (int no = 0; no<SIZEOF(_step_socket); no++)
 	{
 		if (_Status[no].robot_used) sok_send_2(&_step_socket[no], CMD_ROB_STOP, 0, NULL);
 		sok_send_2(&_step_socket[no], CMD_LIFT_STOP, 0, NULL);
 	}	
+}
+
+//--- steplb_rob_stop -------------------------------------------------
+void steplb_rob_stop(int no)
+{
+    if (_step_socket[no] == INVALID_SOCKET) return;
+    if (_Status[no].robot_used) sok_send_2(&_step_socket[no], CMD_ROB_STOP, 0, NULL);
+	sok_send_2(&_step_socket[no], CMD_LIFT_STOP, 0, NULL);
 }
 
 //--- steplb_rob_do_reference -----------------------
@@ -611,7 +620,6 @@ void steplb_pump_back_fluid(int fluidNo, int state)
 //--- steplb_rob_control ------------------------------
 void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
 {		
-    static int _printing;
     static int _risingEdge[STEPPER_CNT] = {0};
     ERobotFunctions function;
 	if (_Status[no].robot_used)
@@ -661,7 +669,11 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
                                         {
                                             _RobotCtrlMode[no] = ctrl_print;
                                         }
-                                        else                    _RobotCtrlMode[no] = ctrl_off;
+                                        else			
+                                        {
+                                            _RobotCtrlMode[no] = ctrl_off;
+                                            _send_ctrlMode(_RobotCtrlMode[no], no);
+                                        }
                                     }										 
 									break;
 		
@@ -670,7 +682,6 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
                                         function = rob_fct_wash;
 									    sok_send_2(&_step_socket[no], CMD_ROB_MOVE_POS, sizeof(function), &function);
                                         _RobotCtrlMode[no] = ctrl_wash_step1;
-                                        _printing = RX_PrinterStatus.printState == ps_pause;
                                         _WashStarted = FALSE;
                                     }
                                     else _RobotCtrlMode[no] = ctrl_wash;
@@ -688,8 +699,7 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
         case ctrl_wash_step2:       if (_Status[no].info.x_in_ref) _RobotCtrlMode[no] = ctrl_wash_step3;
                                     break;
                                     
-        case ctrl_wash_step3:		if (_printing)	_RobotCtrlMode[no] = ctrl_print;
-									else			_RobotCtrlMode[no] = ctrl_off;
+        case ctrl_wash_step3:		_RobotCtrlMode[no] = ctrl_off;
                                     _WashStarted = FALSE;
 									break;
 
@@ -710,11 +720,9 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
                                     break;
                                     
         case ctrl_vacuum_step2:		if (_Status[no].info.x_in_ref) _RobotCtrlMode[no] = ctrl_vacuum_step3;
-									_printing = RX_PrinterStatus.printState == ps_pause;
 									break;
                                     
-        case ctrl_vacuum_step3:		if (_printing)	_RobotCtrlMode[no] = ctrl_print;
-									else			_RobotCtrlMode[no] = ctrl_off;
+        case ctrl_vacuum_step3:		 _RobotCtrlMode[no] = ctrl_off;
 									break;
                                     
         case ctrl_wipe:             if (!_Status[no].robinfo.moving)
@@ -732,31 +740,36 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
                                         _RobotCtrlMode[no] = ctrl_wipe_step2;
                                         _steplb_rob_do_reference(no);
                                     }
-                                    _printing = RX_PrinterStatus.printState == ps_pause;
                                     break;
                                     
-        case ctrl_wipe_step2:       if (_Status[no].info.x_in_ref)
-                                    {
-                                        if (_printing)	_RobotCtrlMode[no] = ctrl_print;
-									    else			_RobotCtrlMode[no] = ctrl_off;
-                                    }
+        case ctrl_wipe_step2:       if (_Status[no].info.x_in_ref) _RobotCtrlMode[no] = ctrl_wipe_step3;
+                                    break;
+                                    
+        case ctrl_wipe_step3:       _RobotCtrlMode[no] = ctrl_off;
                                     break;
 
-		case ctrl_off:				_RobotCtrlMode[no] = ctrl_off;
-									break;
+		case ctrl_off:
+                                    _RobotCtrlMode[no] = ctrl_off;
+                                    break;
 		default: return;
 		
 		}
-		if (_RobotCtrlMode[no] != old)
+		if (_RobotCtrlMode[no] != old && _RobotCtrlMode[no] != ctrl_off)
 		{
-            fluid_send_ctrlMode(2 * no, _RobotCtrlMode[no], TRUE);
-            
-            if (RX_Config.inkSupplyCnt % 2 == 0)
-                fluid_send_ctrlMode(2 * no + 1, _RobotCtrlMode[no], TRUE);
-            else if (no != 0)
-                fluid_send_ctrlMode(2 * no - 1, _RobotCtrlMode[no], TRUE);
+            _send_ctrlMode(_RobotCtrlMode[no], no);
         }		
 	}
+}
+
+//--- _send_ctrlMode ---------------------------------------------
+static void _send_ctrlMode(EnFluidCtrlMode ctrlMode, int no)
+{
+    fluid_send_ctrlMode(2 * no, _RobotCtrlMode[no], TRUE);
+
+    if (RX_Config.inkSupplyCnt % 2 == 0)
+        fluid_send_ctrlMode(2 * no + 1, _RobotCtrlMode[no], TRUE);
+    else if (no != 0)
+        fluid_send_ctrlMode(2 * no - 1, _RobotCtrlMode[no], TRUE);
 }
 
 //--- steplb_adjust_heads ------------------------------------------------
@@ -924,4 +937,20 @@ void steplb_cluster_Screw_Turned(int stepperNo)
 void steplb_set_autocapMode(int state)
 {
         _AutoCapMode = state;
+}
+
+void steplb_set_fluid_off(int no)
+{
+    if (RX_Config.inkSupplyCnt % 2 == 0 && ((no %2 == 0 && (fluid_get_ctrlMode(no+1) < ctrl_wipe || fluid_get_ctrlMode(no+1) > ctrl_wash_step6)) || 
+                                        (no %2 == 1 && (fluid_get_ctrlMode(no-1) < ctrl_wipe || fluid_get_ctrlMode(no-1) > ctrl_wash_step6))))
+    {
+		steplb_rob_control(ctrl_off, no / 2);
+        steplb_rob_stop(no / 2);
+    }
+	else if (RX_Config.inkSupplyCnt % 2 == 1 && (no == 0 || (no %2 == 0 && (fluid_get_ctrlMode(no-1) < ctrl_wipe || fluid_get_ctrlMode(no-1) > ctrl_wash_step6)) || 
+            (no %2 == 1 && (fluid_get_ctrlMode(no+1) < ctrl_wipe || fluid_get_ctrlMode(no+1) > ctrl_wash_step6))))
+    {
+        steplb_rob_control(ctrl_off, (no + 1) / 2);
+        steplb_rob_stop((no + 1) / 2);
+    }
 }

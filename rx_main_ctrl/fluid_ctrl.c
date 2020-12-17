@@ -55,7 +55,9 @@ static UINT32			_InitDone = 0x00;
 static int				_LeakTest = 0;
 static int				_LeakTestNo = 0;
 static int				_LeakTestTime = 0;
-	
+
+static EnFluidCtrlMode	_EndCtrlMode[INK_SUPPLY_CNT] = {ctrl_undef};	
+
 //--- prototypes -----------------------
 static void* _fluid_thread(void *par);
 
@@ -673,7 +675,7 @@ static void _control(int fluidNo)
                 case ctrl_purge_hard_wash:
 				case ctrl_purge_soft:
 				case ctrl_purge_hard:		
-                case ctrl_purge4ever:		if (lbrob && even_number_of_colors && pstat->ctrlMode == ctrl_purge4ever)		
+                case ctrl_purge4ever:		if (lbrob && even_number_of_colors && pstat->ctrlMode == ctrl_purge4ever)
 											{
                                                 if (!steplb_rob_in_fct_pos(no / 2, rob_fct_purge4ever))
 													steplb_rob_to_fct_pos(no / 2, rob_fct_purge4ever);
@@ -938,10 +940,32 @@ static void _control(int fluidNo)
                                                 _LeakTestTime = 0;
                                                 _send_ctrlMode(-1, ctrl_off, TRUE);    
                                             }
-                    
-                    break;
+											break;
 
-				//--- ctrl_off ---------------------------------------------------------------------
+                case ctrl_wash_step3:		if (RX_StepperStatus.robot_used)
+											{
+											    //if (RX_PrinterStatus.printState == ps_pause) _send_ctrlMode(no, ctrl_print, TRUE);
+                                                if (_EndCtrlMode[no] == ctrl_print)			_send_ctrlMode(no, ctrl_print, TRUE);
+                                                else										_send_ctrlMode(no, ctrl_off, TRUE);
+                                                _EndCtrlMode[no] = ctrl_off;
+                                            }
+                                            break;
+                                            
+               case ctrl_vacuum_step3:		if (RX_StepperStatus.robot_used)
+											{
+											    if (RX_PrinterStatus.printState == ps_pause) _send_ctrlMode(no, ctrl_print, TRUE);
+                                                else										 _send_ctrlMode(no, ctrl_off, TRUE);
+											}
+                                            break;
+                                            
+               case ctrl_wipe_step3:		if (RX_StepperStatus.robot_used)
+											{
+											    if (RX_PrinterStatus.printState == ps_pause) _send_ctrlMode(no, ctrl_print, TRUE);
+                                                else										 _send_ctrlMode(no, ctrl_off, TRUE);
+											}
+                                            break;                             
+
+                //--- ctrl_off ---------------------------------------------------------------------
 				case ctrl_off:				_PurgeAll=FALSE;
 											if (_LeakTest == 1) 
                                             {
@@ -1148,10 +1172,34 @@ void fluid_reply_stat(RX_SOCKET socket)	// to GUI
 //--- fluid_send_ctrlMode -------------------------------
 void fluid_send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 {
-	if (ctrlMode==ctrl_off && _FluidCtrlMode>=ctrl_flush_step1 && _FluidCtrlMode<=ctrl_flush_done)
+    int flushed = 0;
+    if (ctrlMode==ctrl_off && _FluidCtrlMode>=ctrl_flush_step1 && _FluidCtrlMode<=ctrl_flush_done)
 	{
 		for (int i=0; i<RX_Config.inkSupplyCnt; i++) _send_ctrlMode(i, ctrlMode, sendToHeads);	
 	}
+    if (rx_def_is_lb(RX_Config.printer.type) && RX_StepperStatus.robot_used)
+    {
+        if (no == -1)
+		{
+		    for (int i = 0; i < RX_Config.inkSupplyCnt; i++)
+		        flushed |= _Flushed & (0x1 << i);
+		}
+		else flushed = _Flushed & (0x1 << no);
+
+		if (ctrlMode == ctrl_print && flushed)
+		{
+		    ctrlMode = ctrl_purge_hard_wash;
+		    if (no == -1)
+		    {
+		        for (int i = 0; i < SIZEOF(_EndCtrlMode); i++)
+		            _EndCtrlMode[i] = ctrl_print;
+		    }
+		    else _EndCtrlMode[no] = ctrl_print;
+		}
+    }
+    
+
+
     if ((RX_StepperStatus.info.z_in_cap || !RX_StepperStatus.info.ref_done) &&
         ctrlMode == ctrl_print && (rx_def_is_scanning(RX_Config.printer.type) || (rx_def_is_lb(RX_Config.printer.type) && RX_StepperStatus.robot_used)))
     {
@@ -1203,6 +1251,10 @@ void fluid_send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
                                     steplb_rob_wipe_start(no / 2, side);
                                 else
                                     steplb_rob_wipe_start((no + 1) / 2, side);
+                            }
+                            else if (ctrlMode == ctrl_off && no != -1)
+                            {
+                                steplb_set_fluid_off(no);
                             }
                             else 
                             {

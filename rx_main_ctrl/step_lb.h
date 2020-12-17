@@ -54,7 +54,8 @@ void steplb_rob_do_reference_if_necessary(void);
 void steplb_rob_do_reference(void);
 int  steplb_rob_reference_done(void);
 
-void steplb_rob_stop(void);
+void steplb_rob_stop_all(void);
+void steplb_rob_stop(int no);
 
 void steplb_rob_control_all(EnFluidCtrlMode ctrlMode);
 void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no);
@@ -66,3 +67,5 @@ void steplb_cluster_Screw_Turned(int stepperNo);
 
 void steplb_pump_back_fluid(int fluidNo, int state);
 void steplb_set_autocapMode(int state);
+
+void steplb_set_fluid_off(int no);
