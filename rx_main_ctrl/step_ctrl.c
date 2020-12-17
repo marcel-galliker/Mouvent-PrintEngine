@@ -434,7 +434,6 @@ void step_rob_stop()
 	switch (_StepperType)
 	{
 	case STEPPER_TX:	steptx_rob_stop();	break;
-	//case STEPPER_LB:	steplb_rob_stop();	break;
     case STEPPER_TTS:	steptts_rob_stop();	break;
 	default: break;
 	}

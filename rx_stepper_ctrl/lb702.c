@@ -47,9 +47,9 @@ static char		*_MotorName[2] = {"BACK", "FRONT"};
 
 #define DIST_MECH_REF			500
 
-#define MIN_CAP_HEIGHT			7600		// um under Ref height
+#define MIN_CAP_HEIGHT			7500		// um under Ref height
 
-#define DIST_CAP_WASH			7500		// um -> higher than capping hight
+#define DIST_CAP_WASH			6500		// um -> higher than capping hight
 #define DIST_CAP_SCREW			6800		// um -> higher than capping hight
 
 #define CLUSTER_CHANGE_HEIGHT	60000	//um
@@ -676,6 +676,11 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 										val0 = -1*_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].cap_height);
 										val1 = -1*_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].cap_height);
 										if (RX_StepperStatus.info.ref_done) _lb702_move_to_pos(CMD_LIFT_CAPPING_POS, val0, val1);
+                                        else
+                                        {
+                                            _Cmd_New = msgId;
+                                            _lb702_do_reference();
+                                        }
 									}
 									break;
 				
@@ -692,10 +697,14 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                                         RX_StepperStatus.cmdRunning = msgId;
                                         if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].cap_height < MIN_CAP_HEIGHT)
                                             Error(WARN, 0, "Capping Height should be >= %d.%dmm", MIN_CAP_HEIGHT/1000, (MIN_CAP_HEIGHT%1000)/100);
-                                        val0 = -1 * (_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].cap_height) - DIST_CAP_WASH);
-                                        val1 = -1 * (_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].cap_height) - DIST_CAP_WASH);
-                                        if (RX_StepperStatus.info.ref_done)
-                                            _lb702_move_to_pos(CMD_LIFT_WASH_POS, val0, val1);
+                                        val0 = -1 * (_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].cap_height - DIST_CAP_WASH));
+                                        val1 = -1 * (_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].cap_height - DIST_CAP_WASH));
+                                        if (RX_StepperStatus.info.ref_done) _lb702_move_to_pos(CMD_LIFT_WASH_POS, val0, val1);
+                                        else
+                                        {
+                                            _Cmd_New = msgId;
+                                            _lb702_do_reference();
+                                        }
                                     }
                                     break;
 

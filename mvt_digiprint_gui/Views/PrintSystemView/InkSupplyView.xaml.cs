@@ -114,6 +114,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
         private void _printertype_changed()
         {
             int i = 0;
+            Visibility visible;
             CB_RectoVerso.Visibility = RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_DP803 ? Visibility.Visible : Visibility.Collapsed;
             HasSideSelection = RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_DP803;
             
@@ -135,8 +136,13 @@ namespace RX_DigiPrint.Views.PrintSystemView
 
             Button_PurgeVacc.Visibility = (RxGlobals.PrintSystem.IsTx || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_WB) ? Visibility.Visible : Visibility.Collapsed;
             Button_PurgeWipe.Visibility = (RxGlobals.PrintSystem.IsTx || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_WB)? Visibility.Visible : Visibility.Collapsed;
-            Button_PurgeWash.Visibility = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB702_WB && RxGlobals.StepperStatus[0].RobotUsed) ? Visibility.Visible : Visibility.Collapsed;
-            Button_Wipe.Visibility = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB702_WB && RxGlobals.StepperStatus[0].RobotUsed) ? Visibility.Visible : Visibility.Collapsed;
+            visible = RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB702_WB && RxGlobals.StepperStatus[0].RobotUsed ? Visibility.Visible : Visibility.Collapsed;
+            for (i = 0; i < RxGlobals.StepperStatus.Length; i++)
+            {
+                if (RxGlobals.StepperStatus[i].RobotUsed && RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB702_WB) visible = Visibility.Visible;
+            }
+            Button_PurgeWash.Visibility = visible;
+            Button_Wipe.Visibility = visible;
         }
 
         //--- OnInkSupplyPropertyChanged -------------------------

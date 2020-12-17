@@ -105,7 +105,7 @@ namespace RX_DigiPrint.Views.UserControls
 
             _LedRobRef[stat.No].Source = (stat.X_in_ref && RxGlobals.StepperStatus[1].RobotUsed && RxGlobals.User.UserType == EUserType.usr_mouvent) ? _GreenLedImg : null;
 
-            if(e.PropertyName.Equals("CmdRunning")) 
+            if(e.PropertyName.Equals("CmdRunning") || e.PropertyName.Equals("X_in_ref")) 
             {
                 if(stat.CmdRunning==0)
                 {

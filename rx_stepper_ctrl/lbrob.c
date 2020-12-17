@@ -49,7 +49,7 @@
 
 #define CAP_FILL_TIME           16000       // ms
 #define SCREW_SEARCHING_TIME    5000        // ms
-#define VACUUM_PUMP_TIME        15000       // ms
+#define VACUUM_PUMP_TIME        25000       // ms
 #define WASTE_PUMP_TIME         30000       // ms
 
 // Digital Inputs
@@ -123,6 +123,7 @@ static int _WastePumpTimer = 0;
 static void _lbrob_motor_z_test(int steps);
 static void _lbrob_motor_test(int motor, int steps);
 static void _lbrob_do_reference(void);
+static void _lbrob_move_to_pos_slow(int cmd, int pos);
 static void _lbrob_move_to_pos(int cmd, int pos);
 static int  _micron_2_steps(int micron);
 static int  _steps_2_micron(int steps);
@@ -145,7 +146,7 @@ void lbrob_init(void)
     memset(&_ParCable_drive_purge, 0, sizeof(SMovePar));
 
     // config for referencing cable pull motor (motor 4)
-    _ParCable_ref.speed = 2000;
+    _ParCable_ref.speed = 1000;
     _ParCable_ref.accel = 4000;
     _ParCable_ref.current_acc = 260.0;
     _ParCable_ref.current_run = 260.0;
@@ -161,8 +162,8 @@ void lbrob_init(void)
     // special encoder mode
     _ParCable_drive.speed = 5000;
     _ParCable_drive.accel = 8000;
-    _ParCable_drive.current_acc = 410.0;        // max 420
-    _ParCable_drive.current_run = 410.0;        // max 420
+    _ParCable_drive.current_acc = 400.0;        // max 420
+    _ParCable_drive.current_run = 400.0;        // max 420
     _ParCable_drive.stop_mux = 0;
     _ParCable_drive.dis_mux_in = 0;
     _ParCable_drive.estop_level = 0;
@@ -171,8 +172,8 @@ void lbrob_init(void)
 
     _ParCable_drive_slow.speed = 1000;
     _ParCable_drive_slow.accel = 8000;
-    _ParCable_drive_slow.current_acc = 410.0;   // max 420
-    _ParCable_drive_slow.current_run = 410.0;   // max 420
+    _ParCable_drive_slow.current_acc = 400.0;   // max 420
+    _ParCable_drive_slow.current_run = 400.0;   // max 420
     _ParCable_drive_slow.stop_mux = 0;
     _ParCable_drive_slow.dis_mux_in = 0;
     _ParCable_drive_slow.estop_level = 0;
@@ -181,8 +182,8 @@ void lbrob_init(void)
 
     _ParCable_drive_purge.speed = _micron_2_steps(1000 * 10); // multiplied with 1000 to get from mm/s to um/s
     _ParCable_drive_purge.accel = 4000;
-    _ParCable_drive_purge.current_acc = 410.0; // max 420
-    _ParCable_drive_purge.current_run = 410.0; // max 420
+    _ParCable_drive_purge.current_acc = 400.0; // max 420
+    _ParCable_drive_purge.current_run = 400.0; // max 420
     _ParCable_drive_purge.stop_mux = 0;
     _ParCable_drive_purge.dis_mux_in = 0;
     _ParCable_drive_purge.estop_level = 0;
@@ -191,7 +192,7 @@ void lbrob_init(void)
 
     motor_config(MOTOR_X_0, CURRENT_HOLD, X_STEPS_PER_REV, X_INC_PER_REV, STEPS);
 
-    _Par_WastePump.speed = 16000;
+    _Par_WastePump.speed = 10000;
     _Par_WastePump.accel = 10000;
     _Par_WastePump.current_acc = 280;
     _Par_WastePump.current_run = 280;
@@ -791,6 +792,14 @@ void lbrob_handle_menu(char *str)
     }
 }
 
+//--- _lbrob_move_to_pos_slow ---------------------------------------------------------------
+static void _lbrob_move_to_pos_slow(int cmd, int pos)
+{
+    _CmdRunning = cmd;
+    RX_StepperStatus.robinfo.moving = TRUE;
+    motors_move_to_step(MOTOR_X_BITS, &_ParCable_drive_slow, pos);
+}
+
 //--- _lbrob_move_to_pos ---------------------------------------------------------------
 static void _lbrob_move_to_pos(int cmd, int pos)
 {
@@ -816,7 +825,7 @@ static void _lbrob_do_reference()
         motors_move_by_step(1 << MOTOR_X_0, &_ParCable_ref, 1000000, TRUE);
     }
     else
-        motors_move_to_step(MOTOR_X_BITS, &_ParCable_drive, _micron_2_steps(3000));
+        motors_move_to_step(MOTOR_X_BITS, &_ParCable_drive_slow, _micron_2_steps(3000));
 }
 
 //--- lbrob_handle_ctrl_msg -----------------------------------
@@ -1048,11 +1057,11 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
         case rob_fct_cap:
             val = TRUE;
             lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &val);
-            _lbrob_move_to_pos(_CmdRunning, _micron_2_steps(CABLE_CAP_POS));
+            _lbrob_move_to_pos_slow(_CmdRunning, _micron_2_steps(CABLE_CAP_POS));
             break;
 
         case rob_fct_purge_all:
-            _lbrob_move_to_pos(_CmdRunning, _micron_2_steps(CABLE_PURGE_POS_BACK));
+            _lbrob_move_to_pos_slow(_CmdRunning, _micron_2_steps(CABLE_PURGE_POS_BACK));
             val = TRUE;
             lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &val);
             break;
@@ -1068,12 +1077,12 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
             val = TRUE;
             lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &val);
             pos = (CABLE_PURGE_POS_BACK + (((int)_RobFunction - (int)rob_fct_purge_head0) * (CABLE_PURGE_POS_FRONT - CABLE_PURGE_POS_BACK)) / 7);
-            _lbrob_move_to_pos(_CmdRunning, _micron_2_steps(pos));
+            _lbrob_move_to_pos_slow(_CmdRunning, _micron_2_steps(pos));
             break;
         case rob_fct_vacuum:
         case rob_fct_wash:
         case rob_fct_wipe:
-            _lbrob_move_to_pos(_CmdRunning, _micron_2_steps(CABLE_PURGE_POS_FRONT));
+            _lbrob_move_to_pos_slow(_CmdRunning, _micron_2_steps(CABLE_PURGE_POS_FRONT));
             break;
 
         case rob_fct_move:
