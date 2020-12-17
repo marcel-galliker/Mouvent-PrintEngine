@@ -113,7 +113,7 @@ void lb701_main(int ticks, int menu)
 				
 				if ((RX_StepperStatus.info.ref_done) && (!_PrintPos_New))
 				{
-					int val = -1 * _micron_2_steps(DIST_MECH_REF);
+					int val = _micron_2_steps(DIST_MECH_REF);
 					_lb701_move_to_pos(CMD_LIFT_REFERENCE, val);
 				}
 			}
@@ -218,7 +218,7 @@ static void _lb701_do_reference(void)
 	if (RX_StepperStatus.info.ref_done)
 	{
 		motors_stop(MOTOR_Z_BITS);
-		val = -1 * _micron_2_steps(DIST_MECH_REF);
+		val = _micron_2_steps(DIST_MECH_REF);
 		_lb701_move_to_pos(CMD_LIFT_REFERENCE, val);
 	}
 	else
