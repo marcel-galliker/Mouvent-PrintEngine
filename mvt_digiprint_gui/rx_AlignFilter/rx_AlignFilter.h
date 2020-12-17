@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 using namespace std;
 
@@ -52,7 +52,8 @@ public:
 		MeasureMode_StartLines = 2,
 		MeasureMode_Angle = 3,
 		MeasureMode_Stitch = 4,
-		MeasureMode_Register = 5
+		MeasureMode_Register = 5,
+		MeasureMode_StartLinesCont = 6,
 	};
 
 	enum DisplayModeEnum
@@ -64,9 +65,11 @@ public:
 
 	struct MeasureDataStruct
 	{
-		float DPosX;
-		float DPosY;
-		float Correction;
+		int ErrorCode;
+		float DPosX;		//Center of pattern offset X to center of camera
+		float DPosY;		//Center of pattern offset Y to center of camera
+		float Value_1;       //Angle, Stitch, Register: Correction Value in Rev or μm (Register), StartLines: number of lines
+		float Value_2;       //Angle, Stitch, Register: 0, StartLines: Lines layout (Top/Right: 1, Covering: 2, Bottom/Left: 3)  
 	};
 
 #pragma endregion
@@ -516,7 +519,7 @@ private:
 	UINT m_ImageWidth = 0;
 	UINT m_ImageHeight = 0;
 
-	//Host and Property Communication
+	//Host Communication
 	HWND m_HostHwnd = NULL;
 
 	//OpenCl
@@ -525,9 +528,10 @@ private:
 	cl_program Program = NULL;
 
 	//Binarize
-	UINT m_BinarizeMode = 0;	//0: off, 1: manual, 2: Auto, 3:Adaptive
+	UINT m_BinarizeMode = 0;	//0: off, 1: manual, 2: Auto, 3: Adaptive, 4: RGB
 	UINT m_PresetBinarizeMode = 0;
 	UINT Histogram[256];
+	UINT RGBHistogram[3 * 256];
 	UINT m_Threshold = 127;
 	UINT m_PresetThreshold = 127;
 	BOOL m_ShowHistogram = false;
@@ -570,24 +574,33 @@ private:
 	vector<Moments> m_vMoments;
 	vector<Rect> m_vBoundRect;
 	COLORREF m_CrossColorBlob = RGB(255, 255, 255);
+	COLORREF m_PresetCrossColorBlob = RGB(255, 255, 255);
 
 	//Measurement
 	BOOL m_ShowOriginal = true;
 	BOOL m_PresetShowOriginal = true;
 	BOOL m_OverlayBlobs = true;
+	BOOL m_PresetOverlayBlobs = true;
 	BOOL m_OverlayCenters = true;
+	BOOL m_PresetOverlayCenters = true;
 	BOOL m_OverlayValues = true;
+	BOOL m_PresetOverlayValues = true;
 	BOOL m_MeasurePixels = true;
 	UINT m_BlobAreaDivisor = 70;
 	UINT m_PresetBlobAreaDivisor = 70;
-	UINT m_BlobAspectLimit = 10;
-	UINT m_PresetBlobAspectLimit = 10;
+	UINT m_BlobAspectLimit = 5;
+	UINT m_PresetBlobAspectLimit = 5;
 	COLORREF m_BlobColor = RGB(127, 127, 127);
+	COLORREF m_PresetBlobColor = RGB(127, 127, 127);
 	COLORREF m_CrossColor = RGB(255, 255, 255);
+	COLORREF m_PresetCrossColor = RGB(255, 255, 255);
 	COLORREF m_TextColor = RGB(0, 255, 0);
+	COLORREF m_PresetTextColor = RGB(0, 255, 0);
+
 	HFONT m_TextFont = NULL;
 	long m_FontHeight = 0;
-	MeasureModeEnum m_MeasureMode = IFrx_AlignFilter::MeasureModeEnum::MeasureMode_Off;	//0: Off, 1: All Lines, 2: StartLines, 3:Angle, 4: Stitch, 5: Register
+
+	MeasureModeEnum m_MeasureMode = IFrx_AlignFilter::MeasureModeEnum::MeasureMode_Off;	//0: Off, 1: All Lines, 2: StartLines, 3:Angle, 4: Stitch, 5: Register, 6: StartLinesCont
 	MeasureModeEnum m_PresetMeasureMode = IFrx_AlignFilter::MeasureModeEnum::MeasureMode_Off;
 	BOOL m_ValidMeasure = false;
 	vector<QualifyStruct> m_vQualifyList;
@@ -608,15 +621,19 @@ private:
 	DisplayModeEnum m_DisplayMode = IFrx_AlignFilter::DisplayModeEnum::Display_Off;	//0: Off, 1: All Lines, 2: Correction Values
 	DisplayModeEnum m_PresetDisplayMode = IFrx_AlignFilter::DisplayModeEnum::Display_Off;
 	UINT m_MinNumStartLines = 3;
+	UINT m_PresetMinNumStartLines = 3;
 	#define WM_APP_ALIGNEV WM_APP + 2025
 	#define WP_StartLines 100
 	#define WP_Angle 101
 	#define WP_Stitch 102
 	#define WP_Register 103
+	#define WP_StartLinesCont 104
 
 	//Line Direction
 	BOOL m_LinesHorizontal = false;
+	BOOL m_PresetLinesHorizontal = false;
 	BOOL m_UpsideDown = false;
+	BOOL m_PresetUpsideDown = false;
 
 	//Debug On
 	BOOL m_DebugPrepare = false;
@@ -628,6 +645,7 @@ private:
 	FILE* pStdErr;
 
 	bool m_InverseImage = false;
+	bool m_PresetInverseImage = false;
 
 	//Pattern parameters
 	//Angle
@@ -642,7 +660,7 @@ private:
 	//Stitch
 	float m_StitchOuterDistance = 1143;
 	float m_StitchTargetDistance = 571.5;
-	float m_StitchMicronsPerRev = 11.347;
+	float m_StitchMicronsPerRev = 11.347f;
 	//Register
 	float m_RegisterOuterDistance = 1143;
 	float m_RegisterTargetDistance = 571.5;
@@ -700,7 +718,10 @@ private:
 	cl_kernel ClColorThresholdLinesKernel = NULL;
 	cl_kernel ClColorThresholdAverageKernel = NULL;
 	cl_kernel ClShowColorHistogramKernel = NULL;
-
+	cl_kernel ClRGBBlockHistogramKernel = NULL;
+	cl_kernel ClShowRGBHistogramKernel = NULL;
+	cl_kernel ClJoinRGBHistogramKernel = NULL;
+	cl_kernel ClSmoothenRGBHistogramKernel = NULL;
 
 	//Change Settings and Modes
 	HRESULT ChangeModes();
@@ -714,8 +735,11 @@ private:
 	//Multi Color Histogram
 	HRESULT GetColorHistogram(IMediaSample* pSampleIn, BOOL Vertical);
 	HRESULT ShowColorHistogram(IMediaSample* pSampleIn, UINT* Histogram, BOOL Vertical);
-	HRESULT C_rx_AlignFilter::BinarizeMultiColor(IMediaSample* pSampleIn, IMediaSample* pSampleOut, UINT BinarizationMode);
+	HRESULT C_rx_AlignFilter::BinarizeMultiColor(IMediaSample* pSampleIn, IMediaSample* pSampleOut);
 
+	//RGB Histogram
+	HRESULT GetRGBHistogram(IMediaSample* pSampleIn, UINT* RGBHistogram);
+	HRESULT ShowRGBHistogram(IMediaSample* pSampleIn, UINT* RGBHistogram);
 
 	//Dilate/Erode
 	HRESULT Erode(IMediaSample* pSampleIn, BOOL Vertical);
@@ -727,7 +751,7 @@ private:
 	//Measurement
 	HRESULT BlobQualifyer(IMediaSample* pSampleIn, BOOL Vertical, IMediaSample* pProcessSample);
 	HRESULT CalculateDistances(BOOL Vertical, Mat SourceMat);
-	HRESULT FindStartLines(BOOL Vertical, BOOL UpsideDown);
+	HRESULT FindStartLines(BOOL Vertical, BOOL UpsideDown, BOOL Continuous = false);
 	HRESULT MeasureAngle(BOOL Vertical, BOOL UpsideDown);
 	HRESULT MeasureStitch(BOOL Vertical, BOOL UpsideDown);
 	HRESULT MeasureRegister(BOOL Vertical, BOOL UpsideDown);

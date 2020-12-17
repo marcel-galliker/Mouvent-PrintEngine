@@ -320,8 +320,6 @@ __kernel void Binarize ( __global uchar4 imagein[],  __global uchar4 imageout[],
 //**************************************************************************************************************************************************************************************
 //**************************************************************************************************************************************************************************************
 
-
-
 __kernel void ColorHistogram ( __global uchar4 imagein[], __global uint HistogramArrayBuffer[], uint Height, uint Width, uint Horizontal)
 {
 	//Should be run for every Column if Lines are vertical, every Row if Lines are horizontal
@@ -687,7 +685,7 @@ __kernel void ColorShowHistogram ( __global uchar4 imagein[],
 //**************************************************************************************************************************************************************************************
 //**************************************************************************************************************************************************************************************
 
-__kernel void ColorBinarize ( __global uchar4 imagein[],  __global uchar4 imageout[], __global uchar ThresholdArrayBuffer[], uint FixedThreshold)
+__kernel void ColorBinarize ( __global uchar4 imagein[],  __global uchar4 imageout[], __global uchar ThresholdArrayBuffer[])
 {
 	//Should be run for every Pixel
 
@@ -697,7 +695,7 @@ __kernel void ColorBinarize ( __global uchar4 imagein[],  __global uchar4 imageo
 	//Get Pixel at Position
 	const int Pos = get_global_id(0);
 	const uchar4 Pixel = imagein[Pos];
-	const uchar Threshold = (FixedThreshold == 0) ? ThresholdArrayBuffer[Pos] : FixedThreshold;
+	const uchar Threshold = ThresholdArrayBuffer[Pos];
 
 	//Grayscale Value
 	const uchar Grey = (uchar)(((uint)Pixel.s0 + (uint)Pixel.s1 + (uint)Pixel.s2) / 3);
@@ -716,5 +714,214 @@ __kernel void ColorBinarize ( __global uchar4 imagein[],  __global uchar4 imageo
 //**************************************************************************************************************************************************************************************
 //**************************************************************************************************************************************************************************************
 
+__kernel void RGBBlockHistogram ( __global uchar4 imagein[], __global uint HistoRowList[], uint Width)
+{
+	//Should be run for every 8th Row
+	//HistoRowList contains 256 * 3 * Width bins
+	//get_global_id(0) => vertical position of this instance
+
+	// getting these 8 values out of a 8x8 matrix
+	// - - - - - - - X 
+	// - - - - - - X -
+	// - - - - - X - -
+	// - - - - X - - -
+	// - - - X - - - -
+	// - - X - - - - -
+	// - X - - - - - -
+	// X - - - - - - -
 
 
+	//Line Start Position
+	const uint LineStart = get_global_id(0) * Width * 8;		//the row this instance is checking starts here in the image
+
+	//HistoList Start Position
+	const uint HistoPos = get_global_id(0) * 256 * 3;			//this instances 3 * 256 Histogram bins start here in HistoRowList
+
+	__private uint4 Pixel;
+
+	//Checking every 8th Pixel in this Row (horizontally)
+	for(__private uint i = 0; i < Width; i += 8)
+	{
+		//Read Pixel
+		Pixel.s0 = (uint)imagein[LineStart + i].s0 + 
+			(uint)imagein[LineStart + i + 1 + (1 * Width)].s0 + 
+			(uint)imagein[LineStart + i + 2 + (2 * Width)].s0 + 
+			(uint)imagein[LineStart + i + 3 + (3 * Width)].s0 + 
+			(uint)imagein[LineStart + i + 4 + (4 * Width)].s0 + 
+			(uint)imagein[LineStart + i + 5 + (5 * Width)].s0 + 
+			(uint)imagein[LineStart + i + 6 + (6 * Width)].s0 +
+			(uint)imagein[LineStart + i + 7 + (7 * Width)].s0; 
+		Pixel.s1 = (uint)imagein[LineStart + i].s1 + 
+			(uint)imagein[LineStart + i + 1 + (1 * Width)].s1 + 
+			(uint)imagein[LineStart + i + 2 + (2 * Width)].s1 + 
+			(uint)imagein[LineStart + i + 3 + (3 * Width)].s1 + 
+			(uint)imagein[LineStart + i + 4 + (4 * Width)].s1 + 
+			(uint)imagein[LineStart + i + 5 + (5 * Width)].s1 + 
+			(uint)imagein[LineStart + i + 6 + (6 * Width)].s1 +
+			(uint)imagein[LineStart + i + 7 + (7 * Width)].s1; 
+		Pixel.s2 = (uint)imagein[LineStart + i].s2 + 
+			(uint)imagein[LineStart + i + 1 + (1 * Width)].s2 + 
+			(uint)imagein[LineStart + i + 2 + (2 * Width)].s2 + 
+			(uint)imagein[LineStart + i + 3 + (3 * Width)].s2 + 
+			(uint)imagein[LineStart + i + 4 + (4 * Width)].s2 + 
+			(uint)imagein[LineStart + i + 5 + (5 * Width)].s2 + 
+			(uint)imagein[LineStart + i + 6 + (6 * Width)].s2 +
+			(uint)imagein[LineStart + i + 7 + (7 * Width)].s2; 
+
+		Pixel.s0 /= 8;
+		Pixel.s1 /= 8;
+		Pixel.s2 /= 8;
+
+		//Increment this bins
+		HistoRowList[HistoPos + (uint)Pixel.s0]++;
+		HistoRowList[HistoPos + 256 + (uint)Pixel.s1]++;
+		HistoRowList[HistoPos + 512 + (uint)Pixel.s2]++;
+	}
+}
+
+//**************************************************************************************************************************************************************************************
+//**************************************************************************************************************************************************************************************
+
+__kernel void JoinRGBHistogram ( __global uint HistoRowList[], __global uint HistoList[], int Height)
+{
+	//Should be run for each of the 256 RGB-bins in HistoRowList
+	//HistoRowList contains 256 * 3 * Height bins
+	//HistoList contains 256 * 3 bins
+	//get_global_id(0) => bin of this instance
+
+	//The bin this instance processes
+	const uint BinPos = get_global_id(0);
+
+	__private uint SumB = 0;
+	__private uint SumG = 0;
+	__private uint SumR = 0;
+
+	//summing bins for every position
+	for(__private uint i = 0; i < Height; i++)
+	{
+		//Read Row Value
+		__private uint ValueB = HistoRowList[(i * 256 * 3) + BinPos];
+		SumB += ValueB;
+		__private uint ValueG = HistoRowList[(i * 256 * 3) + 256 + BinPos];
+		SumG += ValueG;
+		__private uint ValueR = HistoRowList[(i * 256 * 3) + 512 + BinPos];
+		SumR += ValueR;
+	}
+
+	HistoList[BinPos] = SumB;
+	HistoList[BinPos + 256] = SumG;
+	HistoList[BinPos + 512] = SumR;
+}
+
+//**************************************************************************************************************************************************************************************
+//**************************************************************************************************************************************************************************************
+
+__kernel void SmoothenRGBHistogram ( __global uint HistoIn[], __global uint HistoOut[], int Width)
+{
+	//Should be run for each of the 256 RGB-bins of Histogram
+	//HistoIn and HistoOut contain 256 * 3 bins
+
+	//bin this instance is processing
+	const int Pos = get_global_id(0);
+	//how many bins are we integrating
+	const int x = Width;
+
+	//Average +/- Values
+	__private uint ValueB = 0;
+	__private uint ValueG = 0;
+	__private uint ValueR = 0;
+
+	//bins to average not leaving the list
+	const uint Istart = (uint)(max(0, (Pos - x)));
+	const uint Iend = (uint)(min(255, (Pos + x)));
+
+	//Numbers of bins averaged
+	const uint NumBins = Iend - Istart;
+
+	for(__private uint i = Istart; i < Iend; i++)
+	{
+		ValueB += HistoIn[i];
+		ValueG += HistoIn[256 + i];
+		ValueR += HistoIn[512 + i];
+	}
+
+	HistoOut[Pos] = ValueB / NumBins;
+	HistoOut[256 + Pos] = ValueG / NumBins;
+	HistoOut[512 + Pos] = ValueR / NumBins;
+}
+
+//**************************************************************************************************************************************************************************************
+//**************************************************************************************************************************************************************************************
+
+
+__kernel void ShowRGBHistogram ( __global uchar4 ImageIn[], __global uint HistoList[],
+								uint MaxVal,
+								int Peak_1_Val, int Peak_1_Pos, int Peak_2_Val, int Peak_2_Pos,
+								int Threshold, int Width, int Height, 
+								uint LineHeight, uint LineWidth)
+{
+	//Should be run for each of the 256 bins of Histogram
+
+	//Active Histogram bin
+	const int Pos = get_global_id(0);
+
+	//X-Factor for ImageWidth (so many columns display one Histogram Value)
+	const float XFactor = Width / 256;
+	//X-Start Position in Image to overlay vertical line
+	const uint HistoXPos = convert_uint_sat(XFactor * convert_float(Pos));
+
+	//Y-Factor for ImageHeight (maximum Histogram Value => top of Image)
+	__private const float MaxFloat = convert_float(MaxVal);
+	__private const float HeightFloat = convert_float_rtp(Height);
+	const float YFactor = HeightFloat / MaxFloat;
+
+	//Histogram Values RGB of this position
+	uint HistoYValueB = convert_uint_sat(YFactor * convert_float_rtp(HistoList[Pos]));
+	if(HistoYValueB >= Height) HistoYValueB = Height - 1;
+	uint HistoYValueG = convert_uint_sat(YFactor * convert_float_rtp(HistoList[Pos + 256]));
+	if(HistoYValueG >= Height) HistoYValueG = Height - 1;
+	uint HistoYValueR = convert_uint_sat(YFactor * convert_float_rtp(HistoList[Pos + 512]));
+	if(HistoYValueR >= Height) HistoYValueR = Height - 1;
+
+	//Pixels and overlay Values
+	__private uchar4 PixelB = (uchar4)(0, 0, 0, 0);
+	__private uchar4 NewPixelB = (uchar4)(0, 0, 0, 0);
+	__private uchar4 OverlayPixelB = (uchar4)(127, 0, 0, 0);
+	__private uchar4 PixelG = (uchar4)(0, 0, 0, 0);
+	__private uchar4 NewPixelG = (uchar4)(0, 0, 0, 0);
+	__private uchar4 OverlayPixelG = (uchar4)(0, 127, 0, 0);
+	__private uchar4 PixelR = (uchar4)(0, 0, 0, 0);
+	__private uchar4 NewPixelR = (uchar4)(0, 0, 0, 0);
+	__private uchar4 OverlayPixelR = (uchar4)(0, 0, 127, 0);
+
+	//Marker for Positions with Threshold and Peak lines
+	__private int DrawLine = 0;
+
+	//Draw Pixels
+	for(__private uint i = 0; i < XFactor; i++)
+	{
+		for(__private uint j = 0; j < LineHeight; j++)
+		{
+			for(__private uint k = 0; k < LineWidth; k++)
+			{
+				int PixelPos = HistoXPos + ((HistoYValueB + j) * Width) + k;
+				PixelB = ImageIn[PixelPos];
+				NewPixelB = (PixelB / (uchar4)(2,2,2,1)) + OverlayPixelB;
+				ImageIn[PixelPos] = NewPixelB;
+
+				PixelPos = HistoXPos + ((HistoYValueG + j) * Width) + k;
+				PixelG = ImageIn[PixelPos];
+				NewPixelG = (PixelG / (uchar4)(2,2,2,1)) + OverlayPixelG;
+				ImageIn[PixelPos] = NewPixelG;
+
+				PixelPos = HistoXPos + ((HistoYValueR + j) * Width) + k;
+				PixelR = ImageIn[PixelPos];
+				NewPixelR = (PixelR / (uchar4)(2,2,2,1)) + OverlayPixelR;
+				ImageIn[PixelPos] = NewPixelR;
+			}
+		}
+	}
+}
+
+//**************************************************************************************************************************************************************************************
+//**************************************************************************************************************************************************************************************

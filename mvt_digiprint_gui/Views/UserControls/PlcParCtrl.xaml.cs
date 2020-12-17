@@ -463,6 +463,7 @@ namespace RX_DigiPrint.Views.UserControls
                                         else if (_UpdateValue) factor = _Unit.Factor;
                                         if (factor != 1.0) digits = 3;
                                     }
+
                                     switch (_Format)
                                     {
                                         case 'b':

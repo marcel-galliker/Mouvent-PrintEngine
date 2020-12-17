@@ -33,7 +33,7 @@ namespace RX_DigiPrint.Views.SetupAssistView
 		//--- ActionDone --------------------------------------------------------------
 		public void ActionDone()
 		{
-			RxGlobals.SA_StateMachine.ActionDone();
+			RxGlobals.SA_StateMachine.Continue();
 		}
 
 		public void Test()

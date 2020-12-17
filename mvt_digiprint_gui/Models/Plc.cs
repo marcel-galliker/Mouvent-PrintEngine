@@ -44,7 +44,7 @@ namespace RX_DigiPrint.Models
         //--- AddLogItem ----------------------------------------------------
         public void AddLogItem(CPlcLogItem item)
         {
-            Console.WriteLine("Plc.AddLogItem(no={0}, test={1})", item.No, item.No<0);
+          //  Console.WriteLine("Plc.AddLogItem(no={0}, test={1})", item.No, item.No<0);
             while (Log.Count>=_MaxLogItems) Log.RemoveAt(Log.Count-1);
             if (item.No<=0) Log.Insert(0, item);
             else            Log.Add(item);

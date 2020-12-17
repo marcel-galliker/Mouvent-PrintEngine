@@ -39,6 +39,7 @@ typedef struct
 {
 	UINT32 powerStepStatus;
 	INT32 position;
+	INT32 stopPos;
 	UINT32 voltage;
 	UINT32 moveCurrent;
 	UINT32 holdCurrent;

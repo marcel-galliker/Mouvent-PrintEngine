@@ -147,6 +147,8 @@ C_rx_AlignFilter::C_rx_AlignFilter(TCHAR *pName, LPUNKNOWN pUnk, HRESULT *phr) :
 	m_OverlayTxt(L"")
 {
 
+	//SetDebug(true);
+
 	if (m_DebugOn)
 	{
 		m_DebugStartTime = std::chrono::steady_clock::now();
@@ -183,6 +185,17 @@ C_rx_AlignFilter::C_rx_AlignFilter(TCHAR *pName, LPUNKNOWN pUnk, HRESULT *phr) :
 			return;
 		}
 	}
+
+	//Create initial Font
+	LOGFONT lf;
+	memset(&lf, 0, sizeof(LOGFONT));
+	lf.lfHeight = -50;
+	_tcsncpy_s(lf.lfFaceName, LF_FACESIZE, _T("Lucida Console"), 15);
+	lf.lfPitchAndFamily = 0x31;
+	lf.lfWeight = 0x190;
+	m_TextFont = CreateFontIndirect(&lf);
+	m_FontHeight = lf.lfHeight;
+
 }
 
 // Destructor
@@ -368,11 +381,10 @@ STDMETHODIMP C_rx_AlignFilter::Run(REFERENCE_TIME tStart)
 		exit(-1);
 	}
 
-
 	HRESULT hr = CBaseFilter::Run(tStart);
     if (m_DebugOn)
     {
-        DWORD dwTime;
+		DWORD dwTime = 0;
         FILTER_STATE fState;
         CBaseFilter::GetState(dwTime, &fState);
 
@@ -380,7 +392,6 @@ STDMETHODIMP C_rx_AlignFilter::Run(REFERENCE_TIME tStart)
         m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
         printf("%6.6f\tCBaseFilter::Run: %d\n", (float)m_TimeStamp / 1000000.0f, fState);
     }
-
 
 	if (m_Input.IsConnected() == FALSE)
 	{
@@ -419,7 +430,7 @@ STDMETHODIMP C_rx_AlignFilter::Run(REFERENCE_TIME tStart)
 	{
 		m_MeasureTime = std::chrono::steady_clock::now();
 		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-		printf("%6.6f\tRun Filter Done\n", (float)m_TimeStamp / 1000000.0f);
+		printf("%6.6f\tRun Filter Done, %dx%d\n", (float)m_TimeStamp / 1000000.0f, m_ImageWidth, m_ImageHeight);
 	}
 
 	return hr;
@@ -463,9 +474,10 @@ HRESULT C_rx_AlignFilter::ChangeModes()
 	}
 	m_DisplayMode = m_PresetDisplayMode;
 
-	m_ShowOriginal = m_PresetShowOriginal;
 	m_BinarizeMode = m_PresetBinarizeMode;
-	m_Threshold = m_PresetThreshold;
+	if (m_BinarizeMode == 1) m_Threshold = m_PresetThreshold;
+
+	m_ShowOriginal = m_PresetShowOriginal;
 	m_ShowHistogram = m_PresetShowHistogram;
 	m_DilateErodes = m_PresetDilateErodes;
 	m_ExtraErodes = m_PresetExtraErodes;
@@ -480,6 +492,20 @@ HRESULT C_rx_AlignFilter::ChangeModes()
 	m_BlobAspectLimit = m_PresetBlobAspectLimit;
 	m_BlobAreaDivisor = m_PresetBlobAreaDivisor;
 
+	m_InverseImage = m_PresetInverseImage;
+	m_LinesHorizontal = m_PresetLinesHorizontal;
+	m_UpsideDown = m_PresetUpsideDown;
+
+	m_MinNumStartLines = m_PresetMinNumStartLines;
+
+	m_CrossColorBlob = m_PresetCrossColorBlob;
+	m_BlobColor = m_PresetBlobColor;
+	m_CrossColor = m_PresetCrossColor;
+	m_TextColor = m_PresetTextColor;
+	m_OverlayBlobs = m_PresetOverlayBlobs;
+	m_OverlayCenters = m_PresetOverlayCenters;
+	m_OverlayValues = m_PresetOverlayValues;
+
 	//Start Measure
 	if (m_StartMeasure)
 	{
@@ -487,7 +513,6 @@ HRESULT C_rx_AlignFilter::ChangeModes()
 	}
 	m_StartMeasure = false;
 
-	SetDirty(TRUE);
 	return NOERROR;
 }
 
@@ -2022,7 +2047,7 @@ HRESULT C_rx_AlignFilter::ShowColorHistogram(IMediaSample* pSampleIn, UINT* Hist
 	return NOERROR;
 }
 
-HRESULT C_rx_AlignFilter::BinarizeMultiColor(IMediaSample* pSampleIn, IMediaSample* pSampleOut, UINT BinarizationMode)
+HRESULT C_rx_AlignFilter::BinarizeMultiColor(IMediaSample* pSampleIn, IMediaSample* pSampleOut)
 {
 	//Binarize each Pixel with its own Threshold
 
@@ -2156,19 +2181,6 @@ HRESULT C_rx_AlignFilter::BinarizeMultiColor(IMediaSample* pSampleIn, IMediaSamp
 		}
 		exit(-1);
 	}
-	cl_Error = clSetKernelArg(ClColorBinarizeKernel, 3, sizeof(cl_uint), (cl_uint*)(BinarizationMode ? (new UINT { 0 }) : &m_Threshold));
-	if (cl_Error != CL_SUCCESS)
-	{
-		if (m_DebugOn)
-		{
-			TCHAR MsgMsg[10];
-			_itow_s((int)cl_Error, MsgMsg, 10, 10);
-			m_MeasureTime = std::chrono::steady_clock::now();
-			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\tBinarizeMultiColor: Could not set Argument 3 of OpenCL Kernel Color-Binarize: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
-		}
-		exit(-1);
-	}
 
 	//Run the Kernel
 	size_t GlobalWorkSize1[] = { (size_t)((size_t)m_ImageWidth * (size_t)m_ImageHeight)};
@@ -2232,6 +2244,676 @@ HRESULT C_rx_AlignFilter::BinarizeMultiColor(IMediaSample* pSampleIn, IMediaSamp
 
 	return NOERROR;
 }
+
+//Binarize RGB
+
+HRESULT C_rx_AlignFilter::GetRGBHistogram(IMediaSample* pSampleIn, UINT* RGBHistogram)
+{
+	//RGB-Adaptive binarization Get Histogram
+
+	CheckPointer(pSampleIn, E_POINTER);
+	HRESULT hr = NOERROR;
+
+	//OpenCl Return Value
+	cl_int cl_Error = CL_SUCCESS;
+
+#pragma region create CL Buffers
+
+	//Input Image Pointer for OpenCL
+	BYTE* pInBuffer;
+	hr = pSampleIn->GetPointer(&pInBuffer);
+	if (FAILED(hr))
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s(hr, MsgMsg, 10, 16);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tGetHistogram: Get Pointer InBuffer Error: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		return E_POINTER;
+	}
+	cl_uchar4* pClSourceImage = (cl_uchar4*)pInBuffer;
+
+	//Input Image Buffer for OpenCL
+	cl_mem ClSourceImageBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, pSampleIn->GetActualDataLength(), (void*)pInBuffer, &cl_Error);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tGetHistogram: Could not create OpenCL Input Image Buffer: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+
+	//Histogram Buffer
+	cl_mem ClHistogramBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(cl_uint) * 256 * 3, (void*)RGBHistogram, &cl_Error);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tGetHistogram: Could not create  OpenCL Histogram Buffer: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+
+	//Histogram Row Buffer
+	UINT* RowHistogram;
+	RowHistogram = (UINT*)malloc((sizeof UINT) * 256 * 3 * m_ImageWidth);
+	if (RowHistogram == NULL)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tGetHistogram: Could not allocate Histogram Buffer\n", (float)m_TimeStamp / 1000000.0f);
+		}
+		exit(-1);
+	}
+	memset(RowHistogram, 0, (sizeof UINT) * 256 * 3 * m_ImageWidth);
+	cl_mem ClRowHistogramBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(cl_uint) * 256 * 3 * m_ImageWidth, (void*)RowHistogram, &cl_Error);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tGetHistogram: Could not create OpenCL Raw-Histogram Buffer: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+
+	//Raw Histogram Buffer
+	UINT* RawHistogram;
+	RawHistogram = (UINT*)malloc((sizeof UINT) * 256 * 3);
+	if (RawHistogram == NULL)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tGetHistogram: Could not allocate Histogram Buffer\n", (float)m_TimeStamp / 1000000.0f);
+		}
+		exit(-1);
+	}
+	memset(RawHistogram, 0, (sizeof UINT) * 256 * 3);
+	cl_mem ClRawHistogramBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(cl_uint) * 256 * 3, (void*)RawHistogram, &cl_Error);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tGetHistogram: Could not create OpenCL Row-Histogram Buffer: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+
+#pragma endregion
+
+#pragma region Block Histogram
+
+	//Set Arguments for ClBlockHistogramKernel
+	cl_Error = clSetKernelArg(ClRGBBlockHistogramKernel, 0, sizeof(cl_mem), &ClSourceImageBuffer);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tGetHistogram: Could not set Argument 0 of OpenCL Kernel HistogramBlock: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+	cl_Error = clSetKernelArg(ClRGBBlockHistogramKernel, 1, sizeof(cl_mem), &ClRowHistogramBuffer);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tGetHistogram: Could not set Argument 1 of OpenCL Kernel HistogramBlock: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+	cl_Error = clSetKernelArg(ClRGBBlockHistogramKernel, 2, sizeof(cl_uint), &m_ImageWidth);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tGetHistogram: Could not set Argument 2 of OpenCL Kernel HistogramBlock: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+
+	//Run ClBlockHistogramKernel
+	size_t GlobalWorkSize1[] = { (size_t)(m_ImageHeight / 8), (size_t)1 };
+	cl_Error = clEnqueueNDRangeKernel(queue, ClRGBBlockHistogramKernel, 1, NULL, GlobalWorkSize1, NULL, 0, NULL, NULL);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tGetHistogram: Could not run OpenCL Kernel HistogramBlock: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+	cl_Error = clFinish(queue);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tGetHistogram: Could not finish OpenCL Kernel HistogramBlock: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+
+#pragma endregion
+
+#pragma region Join Histogram
+
+	//Set Arguments for ClJoinHistogramKernel
+	cl_Error = clSetKernelArg(ClJoinRGBHistogramKernel, 0, sizeof(cl_mem), &ClRowHistogramBuffer);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tGetHistogram: Could not set Argument 0 of OpenCL Kernel JoinHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+	cl_Error = clSetKernelArg(ClJoinRGBHistogramKernel, 1, sizeof(cl_mem), &ClRawHistogramBuffer);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tGetHistogram: Could not set Argument 1 of OpenCL Kernel JoinHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+	cl_Error = clSetKernelArg(ClJoinRGBHistogramKernel, 2, sizeof(cl_uint), &m_ImageHeight);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tGetHistogram: Could not set Argument 2 of OpenCL Kernel JoinHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+
+	//Run ClJoinHistogramKernel
+	size_t GlobalWorkSize2[] = { (size_t)(256), (size_t)1 };
+	cl_Error = clEnqueueNDRangeKernel(queue, ClJoinRGBHistogramKernel, 1, NULL, GlobalWorkSize2, NULL, 0, NULL, NULL);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tGetHistogram: Could not run OpenCL Kernel JoinRGBHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+	cl_Error = clFinish(queue);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tGetHistogram: Could not finish OpenCL Kernel JoinRGBHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+
+#pragma endregion
+
+#pragma region Smoothen Histogram
+
+	UINT SmoothenWidth = 15;
+
+	//Set Arguments for ClJoinHistogramKernel
+	cl_Error = clSetKernelArg(ClSmoothenRGBHistogramKernel, 0, sizeof(cl_mem), &ClRawHistogramBuffer);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tGetHistogram: Could not set Argument 0 of OpenCL Kernel SmoothenHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+	cl_Error = clSetKernelArg(ClSmoothenRGBHistogramKernel, 1, sizeof(cl_mem), &ClHistogramBuffer);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tGetHistogram: Could not set Argument 1 of OpenCL Kernel SmoothenHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+	cl_Error = clSetKernelArg(ClSmoothenRGBHistogramKernel, 2, sizeof(cl_uint), &SmoothenWidth);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tGetHistogram: Could not set Argument 2 of OpenCL Kernel SmoothenHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+
+	//Run ClSmoothenHistogramKernel
+	size_t GlobalWorkSize3[] = { (size_t)(256), (size_t)1 };
+	cl_Error = clEnqueueNDRangeKernel(queue, ClSmoothenRGBHistogramKernel, 1, NULL, GlobalWorkSize3, NULL, 0, NULL, NULL);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tGetHistogram: Could not run OpenCL Kernel SmoothenHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+	cl_Error = clFinish(queue);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tGetHistogram: Could not finish OpenCL Kernel SmoothenHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+
+#pragma endregion
+
+#pragma region Retrieve Buffers
+
+	//Retrieve Buffers
+	cl_Error = clEnqueueReadBuffer(queue, ClHistogramBuffer, CL_TRUE, 0, sizeof(cl_uint) * 256 * 3, (void*)RGBHistogram, 0, NULL, NULL);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tGetHistogram: Could not read OpenCL Histogram Buffer: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+
+#pragma endregion
+
+#pragma region Cleanup CL
+
+	//Cleanup
+	cl_Error = clReleaseMemObject(ClSourceImageBuffer);
+	cl_Error = clReleaseMemObject(ClHistogramBuffer);
+	cl_Error = clReleaseMemObject(ClRowHistogramBuffer);
+	cl_Error = clReleaseMemObject(ClRawHistogramBuffer);
+	free(RowHistogram);
+	free(RawHistogram);
+
+#pragma endregion
+
+	return NOERROR;
+}
+
+HRESULT C_rx_AlignFilter::ShowRGBHistogram(IMediaSample* pSampleIn, UINT* RGBHistogram)
+{
+	//RGB binarization Show Histogram
+
+	CheckPointer(pSampleIn, E_POINTER);
+	HRESULT hr = NOERROR;
+
+	//OpenCl Return Value
+	cl_int cl_Error;
+
+#pragma region create CL Buffers
+
+	//Input Image Pointer for OpenCL
+	BYTE* pInBuffer;
+	hr = pSampleIn->GetPointer(&pInBuffer);
+	if (FAILED(hr))
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s(hr, MsgMsg, 10, 16);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tShowHistogram: Get Pointer InBuffer Error: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		return E_POINTER;
+	}
+	//Input Image Buffer for OpenCL
+	cl_mem ClSourceImageBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, pSampleIn->GetActualDataLength(), (void*)pInBuffer, &cl_Error);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tShowHistogram: Could not create OpenCL Input Image Buffer: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+
+	//Histogram Buffer
+	cl_mem ClHistogramBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(cl_uint) * 256 * 3, (void*)RGBHistogram, &cl_Error);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tShowHistogram: Could not create OpenCL Histogram Buffer: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+
+#pragma endregion
+
+	//Max Peak in Histogram
+	UINT MaxHistoVal = *max_element(&RGBHistogram[0], &RGBHistogram[256 * 3]);
+
+	//Line Thickness 1280x960 => 8x8 => 160/120
+	UINT LineHeight = m_ImageHeight / 150;
+	UINT LineWidth = m_ImageWidth / 150;
+
+#pragma region run kernel
+
+	//Set Arguments
+	cl_Error = clSetKernelArg(ClShowRGBHistogramKernel, 0, sizeof(cl_mem), &ClSourceImageBuffer);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tShowHistogram: Could not set Argument 0 of OpenCL Kernel ShowHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+	cl_Error = clSetKernelArg(ClShowRGBHistogramKernel, 1, sizeof(cl_mem), &ClHistogramBuffer);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tShowHistogram: Could not set Argument 1 of OpenCL Kernel ShowHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+	cl_Error = clSetKernelArg(ClShowRGBHistogramKernel, 2, sizeof(cl_uint), (cl_uint*)&MaxHistoVal);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tShowHistogram: Could not set Argument 2 of OpenCL Kernel ShowHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+	cl_Error = clSetKernelArg(ClShowRGBHistogramKernel, 3, sizeof(cl_uint), (cl_uint*)&m_Peak_1_Val);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tShowHistogram: Could not set Argument 3 of OpenCL Kernel ShowHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+	cl_Error = clSetKernelArg(ClShowRGBHistogramKernel, 4, sizeof(cl_uint), (cl_uint*)&m_Peak_1_Pos);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tShowHistogram: Could not set Argument 4 of OpenCL Kernel ShowHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+	cl_Error = clSetKernelArg(ClShowRGBHistogramKernel, 5, sizeof(cl_uint), (cl_uint*)&m_Peak_2_Val);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tShowHistogram: Could not set Argument 5 of OpenCL Kernel ShowHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+	cl_Error = clSetKernelArg(ClShowRGBHistogramKernel, 6, sizeof(cl_uint), (cl_uint*)&m_Peak_2_Pos);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tShowHistogram: Could not set Argument 6 of OpenCL Kernel ShowHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+	cl_Error = clSetKernelArg(ClShowRGBHistogramKernel, 7, sizeof(cl_uint), (cl_uint*)&m_Threshold);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tShowHistogram: Could not set Argument 7 of OpenCL Kernel ShowHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+	cl_Error = clSetKernelArg(ClShowRGBHistogramKernel, 8, sizeof(cl_uint), (cl_uint*)&m_ImageWidth);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tShowHistogram: Could not set Argument 8 of OpenCL Kernel ShowHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+	cl_Error = clSetKernelArg(ClShowRGBHistogramKernel, 9, sizeof(cl_uint), (cl_uint*)&m_ImageHeight);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tShowHistogram: Could not set Argument 9 of OpenCL Kernel ShowHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+	cl_Error = clSetKernelArg(ClShowRGBHistogramKernel, 10, sizeof(cl_uint), (cl_uint*)&LineHeight);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tShowHistogram: Could not set Argument 10 of OpenCL Kernel ShowHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+	cl_Error = clSetKernelArg(ClShowRGBHistogramKernel, 11, sizeof(cl_uint), (cl_uint*)&LineWidth);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tShowHistogram: Could not set Argument 11 of OpenCL Kernel ShowHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+
+
+	//Run ClShowHistogramKernel
+	size_t GlobalWorkSize1[] = { (size_t)256, (size_t)1 };
+	cl_Error = clEnqueueNDRangeKernel(queue, ClShowRGBHistogramKernel, 1, NULL, GlobalWorkSize1, NULL, 0, NULL, NULL);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tShowHistogram: Could not run OpenCL Kernel ShowHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+	cl_Error = clFinish(queue);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tShowHistogram: Could not finish OpenCL Kernel ShowHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+
+#pragma endregion
+
+#pragma region Retrieve Buffers
+
+	//Retrieve Buffers
+	cl_Error = clEnqueueReadBuffer(queue, ClSourceImageBuffer, CL_TRUE, 0, pSampleIn->GetActualDataLength(), (void*)pInBuffer, 0, NULL, NULL);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tShowHistogram: Could not read OpenCL Histogram overlay Buffer: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+
+#pragma endregion
+
+#pragma region Cleanup CL
+
+	//Cleanup
+	cl_Error = clReleaseMemObject(ClSourceImageBuffer);
+	cl_Error = clReleaseMemObject(ClHistogramBuffer);
+
+#pragma endregion
+
+	return NOERROR;
+}
+
 
 
 //Dilate/Erode
@@ -2619,70 +3301,112 @@ HRESULT C_rx_AlignFilter::CalculateDistances(BOOL Vertical, Mat SourceMat)
 	return NOERROR;
 }
 
-HRESULT C_rx_AlignFilter::FindStartLines(BOOL Vertical, BOOL UpsideDown)
+HRESULT C_rx_AlignFilter::FindStartLines(BOOL Vertical, BOOL UpsideDown, BOOL Continuous)
 {
     //Check for first occurence of parallel lines
 
-    //Check minimum number of valid lines
+	//Wait for host to pick data
+	if(m_DataListforHostReady) return NOERROR;
+
+    //Average/Center of detected Lines
     int NumBlobsvalid = 0;
-    float AvgLength = 0;
-    float AvgCenter = 0;
-    float AvgDist = 0;
+    float AvgLengthX = 0;
+	float AvgLengthY = 0;
+	float AvgCenterX = 0;
+	float AvgCenterY = 0;
+	float AvgDist = 0;		//Distance between multiple lines
+
     for (int BlobNo = 0; BlobNo < (int)m_vQualifyList.size(); BlobNo++)
     {
         if (m_vQualifyList[BlobNo].Valid == 1)
         {
 			//Position in Window
-			float Center = Vertical ? m_vQualifyList[BlobNo].PosY : m_vQualifyList[BlobNo].PosX;
-			AvgLength += Vertical ? m_vQualifyList[BlobNo].Height : m_vQualifyList[BlobNo].Width;
-			if (UpsideDown)
-			{
-				AvgCenter += Vertical ? (m_ImageHeight - Center) : (m_ImageWidth - Center);
-			}
-			else
-			{
-				AvgCenter += Center;
-			}
+			AvgCenterX += m_vQualifyList[BlobNo].PosX;
+			AvgCenterY += m_vQualifyList[BlobNo].PosY;
+			//Line Sizes
+			AvgLengthX += m_vQualifyList[BlobNo].Width;
+			AvgLengthY += m_vQualifyList[BlobNo].Height;
+			//Distance between lines
 			if(NumBlobsvalid > 0) AvgDist += m_vQualifyList[BlobNo].DistToLast;
 
 			NumBlobsvalid++;
 		}
     }
-    if(NumBlobsvalid < m_MinNumStartLines) return NOERROR;
+	//Check for minimum number of valid lines
+    if(NumBlobsvalid < (int)m_MinNumStartLines) return NOERROR;
 
-    AvgDist /= (float)NumBlobsvalid - 1;
-    AvgCenter /= (float)NumBlobsvalid;
-    AvgLength /= (float)NumBlobsvalid;
+	if (NumBlobsvalid > 1) AvgDist /= (float)NumBlobsvalid - 1;
+	AvgCenterX /= (float)NumBlobsvalid;
+	AvgCenterY /= (float)NumBlobsvalid;
+	AvgLengthX /= (float)NumBlobsvalid;
+	AvgLengthY /= (float)NumBlobsvalid;
 
-	//LParam =	Top/Right: 0x10000000, Covering: 0x20000000, Bottom/Left: 0x30000000
-	//			NumLines: 0x0n000000 (0x0 - 0xf)
-	//			Position: 0x00nnnnnn (0x000000 - 0xffffff) = (StartPos[px] / AvgDist[px]) * 1000 (from Bottom/left)
-	long lpara = 0;
-    float StartPos = 0;
+	MeasureDataStruct MeasureData;
 
-	if (AvgLength > (Vertical ? ((float)m_ImageHeight * 0.95) : ((float)m_ImageWidth * 0.95)))
+	//Line Layout and Position inside Window
+	if (Vertical)
 	{
-		//Covering whole image
-		lpara = 0x20000000;
+		MeasureData.DPosX = AvgCenterX - (m_ImageWidth / 2);
+		if (AvgLengthY > (float)m_ImageHeight * 0.95)
+		{
+			//Covering whole image
+			MeasureData.Value_2 = 2;
+			MeasureData.DPosY = 0;
+		}
+		else
+		{
+			if (AvgCenterY < (float)m_ImageHeight * 0.5)
+			{
+				//Entering from bottom
+				MeasureData.DPosY = (AvgCenterY + (AvgLengthY / 2)) - ((float)m_ImageHeight / 2);
+				MeasureData.Value_2 = UpsideDown ? 1 : 3;
+			}
+			else
+			{
+				//Entering from top
+				MeasureData.DPosY = (AvgCenterY - (AvgLengthY / 2)) - ((float)m_ImageHeight / 2);
+				MeasureData.Value_2 = UpsideDown ? 3 : 1;
+			}
+		}
 	}
-	else if (AvgCenter < (Vertical ? ((float)m_ImageHeight * 0.5) : ((float)m_ImageWidth * 0.5)))
+	else	//Horizontal
 	{
-		//Entering from bottom
-		StartPos = AvgCenter + (AvgLength / 2);
-		lpara = 0x30000000;
+		MeasureData.DPosY = AvgCenterY - (m_ImageHeight / 2);
+		if (AvgLengthX > (float)m_ImageWidth * 0.95)
+		{
+			//Covering whole image
+			MeasureData.Value_2 = 2;
+			MeasureData.DPosX = 0;
+		}
+		else
+		{
+			if (AvgCenterX < (float)m_ImageWidth * 0.5)
+			{
+				//Entering from left
+				MeasureData.DPosX =  (AvgCenterX + (AvgLengthX / 2)) - ((float)m_ImageWidth / 2);
+				MeasureData.Value_2 = UpsideDown ? 1 : 3;
+			}
+			else
+			{
+				//Entering from right
+				MeasureData.DPosX = (AvgCenterX - (AvgLengthX / 2)) - ((float)m_ImageWidth / 2);
+				MeasureData.Value_2 = UpsideDown ? 3 : 1;
+			}
+		}
 	}
-	else
+	if (UpsideDown)
 	{
-		//Entering from top
-		StartPos = AvgCenter - (AvgLength / 2);
-		lpara = 0x10000000;
+		MeasureData.DPosX *= -1;
+		MeasureData.DPosY *= -1;
 	}
 
-    lpara += NumBlobsvalid * 0x1000000;
-    lpara += (StartPos == 0 ? 0 : (int)((StartPos / AvgDist) * 1000));
-
-	m_PresetMeasureMode = MeasureModeEnum::MeasureMode_Off;
-	if (m_HostHwnd != NULL) SendMessage(m_HostHwnd, WM_APP_ALIGNEV, (WPARAM)WP_StartLines, (LPARAM)lpara);
+	MeasureData.Value_1 = NumBlobsvalid;
+	MeasureData.ErrorCode = 0;
+	m_vMeasureDataList.clear();
+	m_vMeasureDataList.push_back(MeasureData);
+	m_MeasureRunning = false;
+	m_measureDone = true;
+	if(!Continuous) m_PresetMeasureMode = MeasureModeEnum::MeasureMode_Off;
 
     return NOERROR;
 }
@@ -2722,8 +3446,13 @@ HRESULT C_rx_AlignFilter::MeasureAngle(BOOL Vertical, BOOL UpsideDown)
 	//Distance between outer lines / measured camera-pixels = μm per camera-pixel
 	float umPpx = (float)m_AngleOuterDistance / (m_vQualifyList[BlobNums[0]].DistToNext + m_vQualifyList[BlobNums[1]].DistToNext);
 	//Pattern-position vs Image-center
-	float DPosX = ((m_vQualifyList[BlobNums[0]].PosX + m_vQualifyList[BlobNums[2]].PosX) / 2) - (m_ImageWidth / 2);
-	float DPosY = ((m_vQualifyList[BlobNums[0]].PosY + m_vQualifyList[BlobNums[2]].PosY) / 2) - (m_ImageHeight / 2);
+	float DPosX = (((m_vQualifyList[BlobNums[0]].PosX + m_vQualifyList[BlobNums[2]].PosX) / 2) - (m_ImageWidth / 2)) * umPpx;
+	float DPosY = (((m_vQualifyList[BlobNums[0]].PosY + m_vQualifyList[BlobNums[2]].PosY) / 2) - (m_ImageHeight / 2)) * umPpx;
+	if (UpsideDown)
+	{
+		DPosX *= -1;
+		DPosY *= -1;
+	}
 
 	//Calculate angular deviation
 	double MeasuredRatio = 0;
@@ -2743,14 +3472,16 @@ HRESULT C_rx_AlignFilter::MeasureAngle(BOOL Vertical, BOOL UpsideDown)
 	double DeltaBeta1 = m_AngleBeta1 - Beta1;
 	double DeltaBeta2 = Beta2 - m_AngleBeta2;
 	double DeltaAngle = (DeltaBeta1 + DeltaBeta2) / 2;
-	m_vQualifyList[BlobNums[0]].AngleCorrection = DeltaAngle / m_AngleDegreesPerRev;
+	m_vQualifyList[BlobNums[0]].AngleCorrection = (float)(DeltaAngle / m_AngleDegreesPerRev);
 
 	if (m_MeasureRunning)
 	{
 		MeasureDataStruct MeasureData;
-		MeasureData.Correction = m_vQualifyList[BlobNums[0]].AngleCorrection;
+		MeasureData.Value_1 = m_vQualifyList[BlobNums[0]].AngleCorrection;
+		MeasureData.Value_2 = 0;
 		MeasureData.DPosX = DPosX;
 		MeasureData.DPosY = DPosY;
+		MeasureData.ErrorCode = 0;
 		m_vMeasureDataList.push_back(MeasureData);
 
 		if (m_DebugOn)
@@ -2805,8 +3536,13 @@ HRESULT C_rx_AlignFilter::MeasureStitch(BOOL Vertical, BOOL UpsideDown)
 	//Distance between outer lines / measured camera-pixels = μm per camera-pixel
 	float umPpx = m_StitchOuterDistance / (m_vQualifyList[BlobNums[0]].DistToNext + m_vQualifyList[BlobNums[1]].DistToNext);
 	//Pattern-position vs Image-center
-	float DPosX = ((m_vQualifyList[BlobNums[0]].PosX + m_vQualifyList[BlobNums[2]].PosX) / 2) - (m_ImageWidth / 2);
-	float DPosY = ((m_vQualifyList[BlobNums[0]].PosY + m_vQualifyList[BlobNums[2]].PosY) / 2) - (m_ImageHeight / 2);
+	float DPosX = (((m_vQualifyList[BlobNums[0]].PosX + m_vQualifyList[BlobNums[2]].PosX) / 2) - (m_ImageWidth / 2)) * umPpx;
+	float DPosY = (((m_vQualifyList[BlobNums[0]].PosY + m_vQualifyList[BlobNums[2]].PosY) / 2) - (m_ImageHeight / 2)) * umPpx;
+	if (UpsideDown)
+	{
+		DPosX *= -1;
+		DPosY *= -1;
+	}
 
 	//Deviation of middle line
 	float StitchDeviationBot = m_StitchOuterDistance - m_StitchTargetDistance - (umPpx * m_vQualifyList[BlobNums[0]].DistToNext);
@@ -2825,9 +3561,11 @@ HRESULT C_rx_AlignFilter::MeasureStitch(BOOL Vertical, BOOL UpsideDown)
 	if (m_MeasureRunning)
 	{
 		MeasureDataStruct MeasureData;
-		MeasureData.Correction = m_vQualifyList[BlobNums[0]].StitchCorr;
+		MeasureData.Value_1 = m_vQualifyList[BlobNums[0]].StitchCorr;
+		MeasureData.Value_2 = 0;
 		MeasureData.DPosX = DPosX;
 		MeasureData.DPosY = DPosY;
+		MeasureData.ErrorCode = 0;
 		m_vMeasureDataList.push_back(MeasureData);
 
 		if (m_DebugOn)
@@ -2881,8 +3619,13 @@ HRESULT C_rx_AlignFilter::MeasureRegister(BOOL Vertical, BOOL UpsideDown)
 	//Distance between outer lines / measured camera-pixels = μm per camera-pixel
 	float umPpx = m_RegisterOuterDistance / (m_vQualifyList[BlobNums[0]].DistToNext + m_vQualifyList[BlobNums[1]].DistToNext);
 	//Pattern-position vs Image-center
-	float DPosX = ((m_vQualifyList[BlobNums[0]].PosX + m_vQualifyList[BlobNums[2]].PosX) / 2) - (m_ImageWidth / 2);
-	float DPosY = ((m_vQualifyList[BlobNums[0]].PosY + m_vQualifyList[BlobNums[2]].PosY) / 2) - (m_ImageHeight / 2);
+	float DPosX = (((m_vQualifyList[BlobNums[0]].PosX + m_vQualifyList[BlobNums[2]].PosX) / 2) - (m_ImageWidth / 2)) * umPpx;
+	float DPosY = (((m_vQualifyList[BlobNums[0]].PosY + m_vQualifyList[BlobNums[2]].PosY) / 2) - (m_ImageHeight / 2)) * umPpx;
+	if (UpsideDown)
+	{
+		DPosX *= -1;
+		DPosY *= -1;
+	}
 
 	//Deviation of middle line
 	float RegisterDeviationBot = m_RegisterOuterDistance - m_RegisterTargetDistance - (umPpx * m_vQualifyList[BlobNums[0]].DistToNext);
@@ -2903,9 +3646,11 @@ HRESULT C_rx_AlignFilter::MeasureRegister(BOOL Vertical, BOOL UpsideDown)
 	if (m_MeasureRunning)
 	{
 		MeasureDataStruct MeasureData;
-		MeasureData.Correction = m_vQualifyList[BlobNums[0]].RegisterCorr;
+		MeasureData.Value_1 = m_vQualifyList[BlobNums[0]].RegisterCorr;
+		MeasureData.Value_2 = 0;
 		MeasureData.DPosX = DPosX;
 		MeasureData.DPosY = DPosY;
+		MeasureData.ErrorCode = 0;
 		m_vMeasureDataList.push_back(MeasureData);
 
 		if (m_DebugOn)
@@ -3600,54 +4345,22 @@ HRESULT C_rx_AlignFilter_InputPin::Receive(IMediaSample *pSampleIn)
 	//Histogram
 	if (m_prx_AlignFilter->m_BinarizeMode != 0 || m_prx_AlignFilter->m_ShowHistogram)
 	{
-		if ((m_prx_AlignFilter->ImageCounter++ >= m_prx_AlignFilter->HistoRepeat))
+		if (m_prx_AlignFilter->ImageCounter++ >= m_prx_AlignFilter->HistoRepeat || m_prx_AlignFilter->m_MeasureMode == 2)
 		{
+			//To speed up Start-Line recognition, every frame calculates a new threshold in MeasureMode 2
 			m_prx_AlignFilter->ImageCounter = 0;
-			switch (m_prx_AlignFilter->m_BinarizeMode) //0: off, 1: Auto, 2:Adaptive
+			switch (m_prx_AlignFilter->m_BinarizeMode) //0: off, 1: manual, 2: Auto, 3:Adaptive
 			{
-			case 1:
-			case 2:
-			{
-				//Regular Histogram
+			case 1:	//manual
+			case 2:	//auto
 				m_prx_AlignFilter->GetHistogram(pSampleIn, m_prx_AlignFilter->Histogram, m_prx_AlignFilter->m_BinarizeMode);
-				if (m_prx_AlignFilter->m_ShowHistogram)
-					m_prx_AlignFilter->ShowHistogram(pSampleIn, m_prx_AlignFilter->Histogram);
-			}
-			break;
-			case 3:
-			{
-				//Multi Color  Histogram
+				break;
+			case 3:	//adaptive
 				m_prx_AlignFilter->GetColorHistogram(pSampleIn, Vertical);
-				if (m_prx_AlignFilter->m_ShowHistogram)
-					m_prx_AlignFilter->ShowColorHistogram(pSampleIn, m_prx_AlignFilter->HistogramArray, Vertical);
-			}
-			break;
-			}
-			//SnapShot if needed
-			if (TryEnterCriticalSection(&m_prx_AlignFilter->m_SnapShotLock))
-			{
-				if (m_prx_AlignFilter->m_TakeSnapShot)
-					m_prx_AlignFilter->TakeSnapShot(pSampleIn);
-				LeaveCriticalSection(&m_prx_AlignFilter->m_SnapShotLock);
-			}
-
-			if (m_prx_AlignFilter->m_ShowHistogram)
-			{
-				//Deliver Original Image with Histogram
-				hr = m_prx_AlignFilter->m_Output.Deliver(pSampleIn);
-
-				pSampleIn->Release();
-
-				if (FAILED(hr))
-				{
-					if (m_prx_AlignFilter->m_DebugOn)
-					{
-						m_prx_AlignFilter->m_MeasureTime = std::chrono::steady_clock::now();
-						m_prx_AlignFilter->m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_prx_AlignFilter->m_MeasureTime - m_prx_AlignFilter->m_DebugStartTime).count();
-						printf("%6.6f\tDeliver Original Image with Histogram Failed (%d)\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f, hr);
-					}
-				}
-				return NOERROR;
+				break;
+			case 4:	//RGB
+				m_prx_AlignFilter->GetRGBHistogram(pSampleIn, m_prx_AlignFilter->RGBHistogram);
+				break;
 			}
 		}
 	}
@@ -3750,12 +4463,15 @@ HRESULT C_rx_AlignFilter_InputPin::Receive(IMediaSample *pSampleIn)
 
 	switch (m_prx_AlignFilter->m_BinarizeMode)
 	{
-	case 1:
-	case 2:
+	case 1:	//Manual
+	case 2:	//Auto
 		m_prx_AlignFilter->Binarize(pSampleIn, pOutSample);
 		break;
-	case 3:
-		m_prx_AlignFilter->BinarizeMultiColor(pSampleIn, pOutSample, m_prx_AlignFilter->m_BinarizeMode);
+	case 3:	//Adaptive
+		m_prx_AlignFilter->BinarizeMultiColor(pSampleIn, pOutSample);
+		break;
+	case 4:	//RGB
+
 		break;
 	}
 
@@ -3775,6 +4491,10 @@ HRESULT C_rx_AlignFilter_InputPin::Receive(IMediaSample *pSampleIn)
 
 	case IFrx_AlignFilter::MeasureModeEnum::MeasureMode_StartLines:
 		m_prx_AlignFilter->FindStartLines(Vertical, m_prx_AlignFilter->m_UpsideDown);
+		break;
+
+	case IFrx_AlignFilter::MeasureModeEnum::MeasureMode_StartLinesCont:
+		m_prx_AlignFilter->FindStartLines(Vertical, m_prx_AlignFilter->m_UpsideDown, true);
 		break;
 
 	case IFrx_AlignFilter::MeasureModeEnum::MeasureMode_Angle:
@@ -3805,7 +4525,25 @@ HRESULT C_rx_AlignFilter_InputPin::Receive(IMediaSample *pSampleIn)
 		m_prx_AlignFilter->OverlayValues(pSampleIn, Vertical);
 	}
 
+	//Overlay Histogram
+	if (m_prx_AlignFilter->m_ShowHistogram)
+	{
+		switch (m_prx_AlignFilter->m_BinarizeMode)
+		{
+		case 1:
+		case 2:
+			m_prx_AlignFilter->ShowHistogram(pSampleIn, m_prx_AlignFilter->Histogram);
+			break;
+		case 3:
+			m_prx_AlignFilter->ShowColorHistogram(pSampleIn, m_prx_AlignFilter->HistogramArray, Vertical);
+			break;
+		case 4:
+			m_prx_AlignFilter->ShowRGBHistogram(pSampleIn, m_prx_AlignFilter->RGBHistogram);
+			break;
+		}
+	}
 
+	//Original or Process Image
 	if (m_prx_AlignFilter->m_ShowOriginal)
 	{
 		//Snapshot of current displayable Image
@@ -3877,13 +4615,19 @@ HRESULT C_rx_AlignFilter_InputPin::Receive(IMediaSample *pSampleIn)
 			switch (m_prx_AlignFilter->m_MeasureMode)
 			{
 			case IFrx_AlignFilter::MeasureModeEnum::MeasureMode_Angle:
-				if (m_prx_AlignFilter->m_HostHwnd != NULL) SendMessage(m_prx_AlignFilter->m_HostHwnd, WM_APP_ALIGNEV, (WPARAM)WP_Angle, (LPARAM)0);
+				if (m_prx_AlignFilter->m_HostHwnd != NULL) SendNotifyMessage(m_prx_AlignFilter->m_HostHwnd, WM_APP_ALIGNEV, (WPARAM)WP_Angle, (LPARAM)0);
 				break;
 			case IFrx_AlignFilter::MeasureModeEnum::MeasureMode_Stitch:
-				if (m_prx_AlignFilter->m_HostHwnd != NULL) SendMessage(m_prx_AlignFilter->m_HostHwnd, WM_APP_ALIGNEV, (WPARAM)WP_Stitch, (LPARAM)0);
+				if (m_prx_AlignFilter->m_HostHwnd != NULL) SendNotifyMessage(m_prx_AlignFilter->m_HostHwnd, WM_APP_ALIGNEV, (WPARAM)WP_Stitch, (LPARAM)0);
 				break;
 			case IFrx_AlignFilter::MeasureModeEnum::MeasureMode_Register:
-				if (m_prx_AlignFilter->m_HostHwnd != NULL) SendMessage(m_prx_AlignFilter->m_HostHwnd, WM_APP_ALIGNEV, (WPARAM)WP_Register, (LPARAM)0);
+				if (m_prx_AlignFilter->m_HostHwnd != NULL) SendNotifyMessage(m_prx_AlignFilter->m_HostHwnd, WM_APP_ALIGNEV, (WPARAM)WP_Register, (LPARAM)0);
+				break;
+			case IFrx_AlignFilter::MeasureModeEnum::MeasureMode_StartLines:
+				if (m_prx_AlignFilter->m_HostHwnd != NULL) SendNotifyMessage(m_prx_AlignFilter->m_HostHwnd, WM_APP_ALIGNEV, (WPARAM)WP_StartLines, (LPARAM)0);
+				break;
+			case IFrx_AlignFilter::MeasureModeEnum::MeasureMode_StartLinesCont:
+				if (m_prx_AlignFilter->m_HostHwnd != NULL) SendNotifyMessage(m_prx_AlignFilter->m_HostHwnd, WM_APP_ALIGNEV, (WPARAM)WP_StartLinesCont, (LPARAM)0);
 				break;
 			}
 		}
@@ -4342,7 +5086,7 @@ STDMETHODIMP C_rx_AlignFilter::SetFrameTiming(BOOL DspFrameTime)
 	{
 		m_MeasureTime = std::chrono::steady_clock::now();
 		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-		printf("%6.6f\tDisplay Frame Timing: %d\n", (float)m_TimeStamp / 1000000.0f, m_DspTiming);
+		printf("%6.6f\tDisplay Frame Timing: %d\n", (float)m_TimeStamp / 1000000.0f, m_PresetDspTiming);
 	}
 
 	return NOERROR;
@@ -4428,14 +5172,13 @@ STDMETHODIMP C_rx_AlignFilter::SetShowOriginalImage(BOOL ShowOriginalImage)
 	{
 		m_MeasureTime = std::chrono::steady_clock::now();
 		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-		printf("%6.6f\tShow Original Image: %d\n", (float)m_TimeStamp / 1000000.0f, m_ShowOriginal);
+		printf("%6.6f\tShow Original Image: %d\n", (float)m_TimeStamp / 1000000.0f, m_PresetShowOriginal);
 	}
 
 	return NOERROR;
 }
 STDMETHODIMP_(BOOL) C_rx_AlignFilter::GetShowOriginalImage()
 {
-	//	CAutoLock cAutolock(m_pLock);
 	return m_ShowOriginal;
 }
 
@@ -4495,7 +5238,7 @@ STDMETHODIMP C_rx_AlignFilter::SetBinarizeMode(UINT BinarizeMode)
 	{
 		m_MeasureTime = std::chrono::steady_clock::now();
 		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-		printf("%6.6f\tSet Binarite: %d\n", (float)m_TimeStamp / 1000000.0f, m_BinarizeMode);
+		printf("%6.6f\tSet Binarize: %d\n", (float)m_TimeStamp / 1000000.0f, m_PresetBinarizeMode);
 	}
 
 	return NOERROR;
@@ -4514,7 +5257,7 @@ STDMETHODIMP C_rx_AlignFilter::SetThreshold(UINT Threshold)
 	{
 		m_MeasureTime = std::chrono::steady_clock::now();
 		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-		printf("%6.6f\tSet Threshold: %d\n", (float)m_TimeStamp / 1000000.0f, m_Threshold);
+		printf("%6.6f\tSet Threshold: %d\n", (float)m_TimeStamp / 1000000.0f, m_PresetThreshold);
 	}
 
 	return NOERROR;
@@ -4545,14 +5288,13 @@ STDMETHODIMP C_rx_AlignFilter::SetNumDilateErodes(UINT DilateErodes)
 	{
 		m_MeasureTime = std::chrono::steady_clock::now();
 		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-		printf("%6.6f\tSet Num Dilate-Erodes: %d\n", (float)m_TimeStamp / 1000000.0f, m_DilateErodes);
+		printf("%6.6f\tSet Num Dilate-Erodes: %d\n", (float)m_TimeStamp / 1000000.0f, m_PresetDilateErodes);
 	}
 
 	return NOERROR;
 }
 STDMETHODIMP_(UINT) C_rx_AlignFilter::GetNumDilateErodes()
 {
-//	CAutoLock cAutolock(m_pLock);
 	return m_DilateErodes;
 }
 //Num Extra-Erodes
@@ -4564,14 +5306,13 @@ STDMETHODIMP C_rx_AlignFilter::SetNumExtraErodes(UINT ExtraErodes)
 	{
 		m_MeasureTime = std::chrono::steady_clock::now();
 		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-		printf("%6.6f\tSet Num Extra Erodes: %d\n", (float)m_TimeStamp / 1000000.0f, m_ExtraErodes);
+		printf("%6.6f\tSet Num Extra Erodes: %d\n", (float)m_TimeStamp / 1000000.0f, m_PresetExtraErodes);
 	}
 
 	return NOERROR;
 }
 STDMETHODIMP_(UINT) C_rx_AlignFilter::GetNumExtraErodes()
 {
-//	CAutoLock cAutolock(m_pLock);
 	return m_ExtraErodes;
 }
 //Erode Seed
@@ -4583,7 +5324,7 @@ STDMETHODIMP C_rx_AlignFilter::SetErodeSeedX(UINT ErodeSeedX)
 	{
 		m_MeasureTime = std::chrono::steady_clock::now();
 		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-		printf("%6.6f\tSet Erode Seed X: %d\n", (float)m_TimeStamp / 1000000.0f, m_ErodeSeedX);
+		printf("%6.6f\tSet Erode Seed X: %d\n", (float)m_TimeStamp / 1000000.0f, m_PresetErodeSeedX);
 	}
 
 	return NOERROR;
@@ -4596,19 +5337,17 @@ STDMETHODIMP C_rx_AlignFilter::SetErodeSeedY(UINT ErodeSeedY)
 	{
 		m_MeasureTime = std::chrono::steady_clock::now();
 		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-		printf("%6.6f\tSet Erode Seed Y: %d\n", (float)m_TimeStamp / 1000000.0f, m_ErodeSeedY);
+		printf("%6.6f\tSet Erode Seed Y: %d\n", (float)m_TimeStamp / 1000000.0f, m_PresetErodeSeedY);
 	}
 
 	return NOERROR;
 }
 STDMETHODIMP_(UINT) C_rx_AlignFilter::GetErodeSeedX()
 {
-//	CAutoLock cAutolock(m_pLock);
 	return m_ErodeSeedX;
 }
 STDMETHODIMP_(UINT) C_rx_AlignFilter::GetErodeSeedY()
 {
-//	CAutoLock cAutolock(m_pLock);
 	return m_ErodeSeedY;
 }
 
@@ -4618,62 +5357,46 @@ STDMETHODIMP_(UINT) C_rx_AlignFilter::GetErodeSeedY()
 
 STDMETHODIMP C_rx_AlignFilter::SetCrossColor(COLORREF CrossColorBlob)
 {
-	CAutoLock cAutolock(m_pLock);
-
-	m_CrossColorBlob = CrossColorBlob;
-	SetDirty(TRUE);
+	m_PresetCrossColorBlob = CrossColorBlob;
 
 	return NOERROR;
 }
 STDMETHODIMP_(COLORREF) C_rx_AlignFilter::GetCrossColor()
 {
-//	CAutoLock cAutolock(m_pLock);
 	return m_CrossColorBlob;
 }
 
 //BlobOutlineColor
 STDMETHODIMP C_rx_AlignFilter::SetBlobOutlineColor(UINT32 BlobOutlineColor)
 {
-	CAutoLock cAutolock(m_pLock);
+	m_PresetBlobColor = BlobOutlineColor;
 
-	m_BlobColor = BlobOutlineColor;
-
-	SetDirty(TRUE);
 	return NOERROR;
 }
 STDMETHODIMP_(UINT32) C_rx_AlignFilter::GetBlobOutlineColor()
 {
-//	CAutoLock cAutolock(m_pLock);
 	return m_BlobColor;
 }
 //BlobCrossColor
 STDMETHODIMP C_rx_AlignFilter::SetBlobCrossColor(UINT32 BlobCrossColor)
 {
-	CAutoLock cAutolock(m_pLock);
+	m_PresetCrossColor = BlobCrossColor;
 
-	m_CrossColor = BlobCrossColor;
-
-	SetDirty(TRUE);
 	return NOERROR;
 }
 STDMETHODIMP_(UINT32) C_rx_AlignFilter::GetBlobCrossColor()
 {
-//	CAutoLock cAutolock(m_pLock);
 	return m_CrossColor;
 }
 //BlobTextColor
 STDMETHODIMP C_rx_AlignFilter::SetBlobTextColor(UINT32 BlobTextColor)
 {
-	CAutoLock cAutolock(m_pLock);
+	m_PresetTextColor = BlobTextColor;
 
-	m_TextColor = BlobTextColor;
-
-	SetDirty(TRUE);
 	return NOERROR;
 }
 STDMETHODIMP_(UINT32) C_rx_AlignFilter::GetBlobTextColor()
 {
-//	CAutoLock cAutolock(m_pLock);
 	return m_TextColor;
 }
 
@@ -4686,7 +5409,6 @@ STDMETHODIMP C_rx_AlignFilter::SetBlobAspectLimit(UINT32 BlobAspectLimit)
 }
 STDMETHODIMP_(UINT32) C_rx_AlignFilter::GetBlobAspectLimit()
 {
-//	CAutoLock cAutolock(m_pLock);
 	return m_BlobAspectLimit;
 }
 //BlobAreaDivisor
@@ -4698,53 +5420,40 @@ STDMETHODIMP C_rx_AlignFilter::SetBlobAreaDivisor(UINT32 BlobAreaDivisor)
 }
 STDMETHODIMP_(UINT32) C_rx_AlignFilter::GetBlobAreaDivisor()
 {
-//	CAutoLock cAutolock(m_pLock);
 	return m_BlobAreaDivisor;
 }
 
 //ShowBlobOutlines
 STDMETHODIMP C_rx_AlignFilter::SetShowBlobOutlines(BOOL ShowBlobOutlines)
 {
-	CAutoLock cAutolock(m_pLock);
+	m_PresetOverlayBlobs = ShowBlobOutlines;
 
-	m_OverlayBlobs = ShowBlobOutlines;
-
-	SetDirty(TRUE);
 	return NOERROR;
 }
 STDMETHODIMP_(BOOL) C_rx_AlignFilter::GetShowBlobOutlines()
 {
-//	CAutoLock cAutolock(m_pLock);
 	return m_OverlayBlobs;
 }
 //ShowBlobCenters
 STDMETHODIMP C_rx_AlignFilter::SetShowBlobCenters(BOOL ShowBlobCenters)
 {
-	CAutoLock cAutolock(m_pLock);
+	m_PresetOverlayCenters = ShowBlobCenters;
 
-	m_OverlayCenters = ShowBlobCenters;
-
-	SetDirty(TRUE);
 	return NOERROR;
 }
 STDMETHODIMP_(BOOL) C_rx_AlignFilter::GetShowBlobCenters()
 {
-//	CAutoLock cAutolock(m_pLock);
 	return m_OverlayCenters;
 }
 //ShowBlobValues
 STDMETHODIMP C_rx_AlignFilter::SetShowBlobValues(BOOL ShowBlobValues)
 {
-	CAutoLock cAutolock(m_pLock);
+	m_PresetOverlayValues = ShowBlobValues;
 
-	m_OverlayValues = ShowBlobValues;
-
-	SetDirty(TRUE);
 	return NOERROR;
 }
 STDMETHODIMP_(BOOL) C_rx_AlignFilter::GetShowBlobValues()
 {
-//	CAutoLock cAutolock(m_pLock);
 	return m_OverlayValues;
 }
 //Font for Blob Values
@@ -4818,25 +5527,21 @@ STDMETHODIMP C_rx_AlignFilter::SetMeasurePixels(BOOL MeasurePixels)
 }
 STDMETHODIMP_(BOOL) C_rx_AlignFilter::GetMeasurePixels()
 {
-//	CAutoLock cAutolock(m_pLock);
 	return m_MeasurePixels;
 }
 
 //Inverse Image for White
 STDMETHODIMP C_rx_AlignFilter::SetInverse(BOOL InverseImage)
 {
-	CAutoLock cAutolock(m_pLock);
-
-	m_InverseImage = InverseImage;
+	m_PresetInverseImage = InverseImage;
 
 	if (m_DebugOn)
 	{
 		m_MeasureTime = std::chrono::steady_clock::now();
 		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-		printf("%6.6f\tInverse Image: %d\n", (float)m_TimeStamp / 1000000.0f, m_InverseImage);
+		printf("%6.6f\tInverse Image: %d\n", (float)m_TimeStamp / 1000000.0f, m_PresetInverseImage);
 	}
 
-	SetDirty(TRUE);
 	return NOERROR;
 }
 STDMETHODIMP_(BOOL) C_rx_AlignFilter::GetInverse()
@@ -4853,14 +5558,13 @@ STDMETHODIMP C_rx_AlignFilter::SetMeasureMode(C_rx_AlignFilter::MeasureModeEnum 
 	{
 		m_MeasureTime = std::chrono::steady_clock::now();
 		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-		printf("%6.6f\tSet Measure Mode: %d\n", (float)m_TimeStamp / 1000000.0f, m_MeasureMode);
+		printf("%6.6f\tSet Measure Mode: %d\n", (float)m_TimeStamp / 1000000.0f, m_PresetMeasureMode);
 	}
 
 	return NOERROR;
 }
 STDMETHODIMP_(C_rx_AlignFilter::MeasureModeEnum) C_rx_AlignFilter::GetMeasureMode()
 {
-//	CAutoLock cAutolock(m_pLock);
 	return m_MeasureMode;
 }
 
@@ -4873,32 +5577,28 @@ STDMETHODIMP C_rx_AlignFilter::SetDisplayMode(C_rx_AlignFilter::DisplayModeEnum 
 	{
 		m_MeasureTime = std::chrono::steady_clock::now();
 		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-		printf("%6.6f\tSet Display Mode: %d\n", (float)m_TimeStamp / 1000000.0f, m_DisplayMode);
+		printf("%6.6f\tSet Display Mode: %d\n", (float)m_TimeStamp / 1000000.0f, m_PresetDisplayMode);
 	}
 
 	return NOERROR;
 }
 STDMETHODIMP_(C_rx_AlignFilter::DisplayModeEnum) C_rx_AlignFilter::GetDisplayMode()
 {
-//	CAutoLock cAutolock(m_pLock);
 	return m_DisplayMode;
 }
 
 //Minimum number of StartLines
 STDMETHODIMP C_rx_AlignFilter::SetMinNumStartLines(UINT32 MinNumStartLines)
 {
-    CAutoLock cAutolock(m_pLock);
-
-    m_MinNumStartLines = MinNumStartLines;
+    m_PresetMinNumStartLines = MinNumStartLines;
 
     if (m_DebugOn)
     {
         m_MeasureTime = std::chrono::steady_clock::now();
 		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-		printf("%6.6f\tSet MinNumStartLines: %d\n", (float)m_TimeStamp / 1000000.0f, m_MinNumStartLines);
+		printf("%6.6f\tSet MinNumStartLines: %d\n", (float)m_TimeStamp / 1000000.0f, m_PresetMinNumStartLines);
 	}
 
-    SetDirty(TRUE);
     return NOERROR;
 }
 
@@ -4942,16 +5642,13 @@ STDMETHODIMP_(BOOL) C_rx_AlignFilter::DoMeasures(UINT32 NumMeasures)
 STDMETHODIMP_(BOOL) C_rx_AlignFilter::GetMeasureResults(void* pMeasureDataStructArray, UINT32* ListSize)
 {
 	//Measuremode selected and data ready
-	if (m_MeasureMode == MeasureModeEnum::MeasureMode_Off ||
-		m_MeasureMode == MeasureModeEnum::MeasureMode_AllLines ||
-		m_MeasureMode == MeasureModeEnum::MeasureMode_StartLines ||
-		m_MeasureRunning || !m_DataListforHostReady)
+	if (m_MeasureRunning || !m_DataListforHostReady)
 	{
 		if (m_DebugOn)
 		{
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\tGetMeasureResults but MeasureMode: %d, MeasureRunning: %d, DataListReady: %d\n", (float)m_TimeStamp / 1000000.0f, m_MeasureMode, m_MeasureRunning, m_DataListforHostReady);
+			printf("%6.6f\tGetMeasureResults but MeasureRunning: %d, DataListReady: %d\n", (float)m_TimeStamp / 1000000.0f, m_MeasureRunning, m_DataListforHostReady);
 		}
 		*ListSize = 0;
 		return false;
@@ -5011,46 +5708,38 @@ STDMETHODIMP_(BOOL) C_rx_AlignFilter::GetMeasureResults(void* pMeasureDataStruct
 //Lines Horizontal
 STDMETHODIMP C_rx_AlignFilter::SetLinesHorizontal(BOOL LinesHorizontal)
 {
-	CAutoLock cAutolock(m_pLock);
-
-	m_LinesHorizontal = LinesHorizontal;
+	m_PresetLinesHorizontal = LinesHorizontal;
 
 	if (m_DebugOn)
 	{
 		m_MeasureTime = std::chrono::steady_clock::now();
 		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-		printf("%6.6f\tSet Lines Horizontal: %d\n", (float)m_TimeStamp / 1000000.0f, m_LinesHorizontal);
+		printf("%6.6f\tSet Lines Horizontal: %d\n", (float)m_TimeStamp / 1000000.0f, m_PresetLinesHorizontal);
 	}
 
-	SetDirty(TRUE);
 	return NOERROR;
 }
 STDMETHODIMP_(BOOL) C_rx_AlignFilter::GetLinesHorizontal()
 {
-//	CAutoLock cAutolock(m_pLock);
 	return m_LinesHorizontal;
 }
 
 //Line Direction
 STDMETHODIMP C_rx_AlignFilter::SetUpsideDown(BOOL UpsideDown)
 {
-	CAutoLock cAutolock(m_pLock);
-
-	m_UpsideDown = UpsideDown;
+	m_PresetUpsideDown = UpsideDown;
 
 	if (m_DebugOn)
 	{
 		m_MeasureTime = std::chrono::steady_clock::now();
 		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-		printf("%6.6f\tSet Lines UpsideDown: %d\n", (float)m_TimeStamp / 1000000.0f, m_UpsideDown);
+		printf("%6.6f\tSet Lines UpsideDown: %d\n", (float)m_TimeStamp / 1000000.0f, m_PresetUpsideDown);
 	}
 
-	SetDirty(TRUE);
 	return NOERROR;
 }
 STDMETHODIMP_(BOOL) C_rx_AlignFilter::GetUpsideDown()
 {
-	//	CAutoLock cAutolock(m_pLock);
 	return m_UpsideDown;
 }
 

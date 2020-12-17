@@ -200,8 +200,8 @@
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <CompileAsManaged>false</CompileAsManaged>
       <ExceptionHandling>Sync</ExceptionHandling>
-      <AdditionalOptions>/Qpar-report:2 %(AdditionalOptions)</AdditionalOptions>
-      <DisableSpecificWarnings>4129;4477;4996;5012</DisableSpecificWarnings>
+      <AdditionalOptions>/Qpar-report:1 %(AdditionalOptions)</AdditionalOptions>
+      <DisableSpecificWarnings>4129;4477;4996;5012;</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
