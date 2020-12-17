@@ -901,7 +901,7 @@ void fluid_reply_stat(RX_SOCKET socket)	// to GUI
 				if (i==INK_SUPPLY_CNT) Error(ERR_CONT, 0, "Flush Canister EMPTY!");
 				else Error(ERR_CONT, 0, "Ink Canister %s EMPTY = %dg (<%dg)", RX_ColorNameLong(RX_Config.inkSupply[i].ink.colorCode), _FluidStatus[i].canisterLevel, canisterEmpty);
 				_ScalesErr[i] = LOG_TYPE_ERROR_CONT;
-				pc_pause_printing(FALSE);
+				if (RX_PrinterStatus.printState == ps_printing) pc_pause_printing(FALSE);
 			}
 			else if(_FluidStatus[i].canisterLevel <= canisterLow && _ScalesErr[i] < LOG_TYPE_WARN)
 			{
