@@ -101,14 +101,8 @@ namespace RX_DigiPrint.Views.PrintQueueView
 
             if (!RxGlobals.PrinterStatus.AllInkSupliesOn)
             {
-                if (MvtMessageBox.YesNo("Print System", "Some ink supplies are OFF. Switch them ON.", MessageBoxImage.Question, true))
-                {
-                    TcpIp.SFluidCtrlCmd msg = new TcpIp.SFluidCtrlCmd();
-                    msg.no = -1;
-                    msg.ctrlMode = EFluidCtrlMode.ctrl_print;
-
-                    RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_CTRL_MODE, ref msg);
-                }
+                if (!MvtMessageBox.YesNo("Print System", "Some ink supplies are OFF. Print anyway?", MessageBoxImage.Question, false))
+                    return;
             }
 
             if (RxGlobals.UvLamp.Visible == Visibility.Visible && !RxGlobals.UvLamp.Ready)

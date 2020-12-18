@@ -158,8 +158,8 @@ namespace RX_DigiPrint.Views.UserControls
 
             if (!RxGlobals.PrinterStatus.AllInkSupliesOn)
             {
-                    if (MvtMessageBox.YesNo("Print System", "Some ink supplies are OFF. Switch them ON.",  MessageBoxImage.Question, true))
-                    Power_Clicked(null, null);
+                if (!MvtMessageBox.YesNo("Print System", "Some ink supplies are OFF. Print anyway?", MessageBoxImage.Question, false))
+                    return;
             }
 
             if (RxGlobals.UvLamp.Visible==Visibility.Visible && !RxGlobals.UvLamp.Ready)
