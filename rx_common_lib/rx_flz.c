@@ -126,7 +126,6 @@ int flz_get_info(const char *path, UINT32 page, SFlzInfo *pflzinfo)
 	FILE* file;
 	char filepath[MAX_PATH];
 
-
 	// check and init
 	if (!pflzinfo) return Error(ERR_CONT, 0, "flz_get_size parameter error", path);
 
@@ -277,20 +276,23 @@ int flz_load(SPageId *id, const char *filedir, const char *filename, int printMo
 						Error(LOG, 0, "ALLOC MEMORY [%d] %d MB", _FileBufLoadIdx, _FileBufSize[_FileBufLoadIdx]/0x100000);
 					}
 					
-					INT64 len;
-					INT64 blksize=0x10000;
-					FILE *file = fopen(filepath, "rb");			
-					if (file==NULL) return REPLY_NOT_FOUND;
-					for (dst=_FileBuf[_FileBufLoadIdx], len=fileSize; len>=blksize && !_Abort; len-=blksize)
+					if (fileSize>0)
 					{
-						dst += fread(dst, 1, (int)blksize, file);
+						INT64 len;
+						INT64 blksize=0x10000;
+						FILE *file = fopen(filepath, "rb");
+						if (file==NULL) return REPLY_NOT_FOUND;
+						for (dst=_FileBuf[_FileBufLoadIdx], len=fileSize; len>=blksize && !_Abort; len-=blksize)
+						{
+							dst += fread(dst, 1, (int)blksize, file);
+						}
+						dst+=fread(dst, (int)len, 1, file);
+						fclose(file);
+						strcpy(_LastFilePath, filepath); 
+						_FileBufLoadIdx = (_FileBufLoadIdx+1) & 1;
 					}
-					dst+=fread(dst, (int)len, 1, file);					
-					fclose(file);
-					strcpy(_LastFilePath, filepath); 
-
-					_FileBufLoadIdx = (_FileBufLoadIdx+1) & 1;
-				}				
+					else Error(LOG, 0, "%d: %s color %s not found", id->id, filename, RX_ColorNameShort(pinfo->inkSupplyNo[c]));
+				}
 				//	TrPrintfL(TRUE, "LOADING >>%s<<, page %d, time=%d ms", filepath, id->page, rx_get_ticks()-time);
 			}
 			else 
@@ -305,66 +307,72 @@ int flz_load(SPageId *id, const char *filedir, const char *filename, int printMo
 //			rx_sem_wait(_sem_decompress_done, 0);
 			
 			//--- start decompressing ----------------------------------------------
-			
-			pFlzInfo = (SFlzInfo*)_FileBuf[_FileBufDecompIdx];
-			
-			memcpy(&pinfo->resol, &pFlzInfo->resol, sizeof(pinfo->resol));
-			pinfo->printMode     = printMode;
-			pinfo->bitsPerPixel	 = pFlzInfo->bitsPerPixel;
-            int spaceBt = (spacePx * pinfo->bitsPerPixel) / 8;
-            pinfo->screening = (pinfo->bitsPerPixel == 8);
-			pinfo->srcWidthPx    = pFlzInfo->widthPx+spacePx;
-			pinfo->lineLen		 = pFlzInfo->lineLen+spaceBt;
-			pinfo->lengthPx		 = pFlzInfo->lengthPx;
-			pinfo->dataSize		 = pFlzInfo->dataSize;
-			pinfo->buffer[c]	 = &buffer[c];
 			pinfo->colorCnt++;
-
-            int wul= pFlzInfo->resol.y ? wakeupLen*pFlzInfo->resol.y/DPI_Y : wakeupLen;
-            int wub= pFlzInfo->resol.y ? WAKEUP_BAR_LEN*pFlzInfo->resol.y/DPI_Y : WAKEUP_BAR_LEN;
-
-			_DecompressPar.color	  = psplit[c].color.colorCode;
-			_DecompressPar.loaded_arg = loaded_arg;
-			_DecompressPar.fileSize	  = fileSize;
-			_DecompressPar.buffer     = buffer[c]+wul*pinfo->lineLen;
-			_DecompressPar.height     = pFlzInfo->lengthPx;
-			_DecompressPar.spaceBt	  = spaceBt;
-			_DecompressPar.progress   = 0;
-			if (psplit[c].lastLine<_DecompressPar.height) _DecompressPar.height=psplit[c].lastLine;			
-				
-			time = rx_get_ticks();
-			rx_sem_post(_sem_decompress_start);
-			if (progress!=NULL) progress(id, RX_ColorNameShort(pinfo->inkSupplyNo[c]), 0);					
-			while (rx_sem_wait(_sem_decompress_done, 500)!=REPLY_OK)
+			if (fileSize)
 			{
-				if (progress!=NULL) progress(id, RX_ColorNameShort(pinfo->inkSupplyNo[c]), _DecompressPar.progress);					
-			}
-			if (progress!=NULL) progress(id, RX_ColorNameShort(pinfo->inkSupplyNo[c]), 100);
+				pFlzInfo = (SFlzInfo*)_FileBuf[_FileBufDecompIdx];
+			
+				memcpy(&pinfo->resol, &pFlzInfo->resol, sizeof(pinfo->resol));
+				pinfo->printMode     = printMode;
+				pinfo->bitsPerPixel	 = pFlzInfo->bitsPerPixel;
+	            int spaceBt = (spacePx * pinfo->bitsPerPixel) / 8;
+	            pinfo->screening = (pinfo->bitsPerPixel == 8);
+				pinfo->srcWidthPx    = pFlzInfo->widthPx+spacePx;
+				pinfo->lineLen		 = pFlzInfo->lineLen+spaceBt;
+				pinfo->lengthPx		 = pFlzInfo->lengthPx;
+				pinfo->dataSize		 = pFlzInfo->dataSize;
+				pinfo->buffer[c]	 = &buffer[c];
 
-			if (_Abort) return REPLY_ERROR;
+	            int wul= pFlzInfo->resol.y ? wakeupLen*pFlzInfo->resol.y/DPI_Y : wakeupLen;
+	            int wub= pFlzInfo->resol.y ? WAKEUP_BAR_LEN*pFlzInfo->resol.y/DPI_Y : WAKEUP_BAR_LEN;
 
-            //--- add wakeup ----------------------
+				_DecompressPar.color	  = psplit[c].color.colorCode;
+				_DecompressPar.loaded_arg = loaded_arg;
+				_DecompressPar.fileSize	  = fileSize;
+				_DecompressPar.buffer     = buffer[c]+wul*pinfo->lineLen;
+				_DecompressPar.height     = pFlzInfo->lengthPx;
+				_DecompressPar.spaceBt	  = spaceBt;
+				_DecompressPar.progress   = 0;
 
-            if (wul)
-			{
-				BYTE* buf = buffer[c];
-				UINT64 offset;
-				offset=(UINT64)(pinfo->lengthPx+wul)*(UINT64)pinfo->lineLen;
-                memset(buf,        0x00, wul * pinfo->lineLen);
-				memset(buf+offset, 0x00, wul * pinfo->lineLen);
+				if (psplit[c].lastLine<_DecompressPar.height) _DecompressPar.height=psplit[c].lastLine;
 				
-				if (wakeupOn)
+				time = rx_get_ticks();
+				rx_sem_post(_sem_decompress_start);
+				if (progress!=NULL) progress(id, RX_ColorNameShort(pinfo->inkSupplyNo[c]), 0);
+				while (rx_sem_wait(_sem_decompress_done, 500)!=REPLY_OK)
 				{
-					// add wakeup line for the color at the begining
-					memset(buf+(c*wub)*pinfo->lineLen, 0xff, wub * pinfo->lineLen);
-					// and at the end of the image
-					memset(buf+offset+(wul-(c+1)*wub)*pinfo->lineLen, 0xff, wub * pinfo->lineLen);															
+					if (progress!=NULL) progress(id, RX_ColorNameShort(pinfo->inkSupplyNo[c]), _DecompressPar.progress);
 				}
-			}
-			pinfo->lengthPx += 2*wul;
-            pinfo->dataSize = (UINT64)pinfo->lengthPx * pinfo->lineLen; 
+				if (progress!=NULL) progress(id, RX_ColorNameShort(pinfo->inkSupplyNo[c]), 100);
 
-            //  TrPrintfL(TRUE, "DECOMPRESSING >>%s<<, page %d, time=%d ms", filepath, id->page, rx_get_ticks()-time);
+				if (_Abort) return REPLY_ERROR;
+
+				//--- add wakeup ----------------------
+				if (wul)
+				{
+					BYTE* buf = buffer[c];
+					UINT64 offset;
+					offset=(UINT64)(pinfo->lengthPx+wul)*(UINT64)pinfo->lineLen;
+					memset(buf,        0x00, wul * pinfo->lineLen);
+					memset(buf+offset, 0x00, wul * pinfo->lineLen);
+				
+					if (wakeupOn)
+					{
+						// add wakeup line for the color at the begining
+						memset(buf+(c*wub)*pinfo->lineLen, 0xff, wub * pinfo->lineLen);
+						// and at the end of the image
+						memset(buf+offset+(wul-(c+1)*wub)*pinfo->lineLen, 0xff, wub * pinfo->lineLen);
+					}
+				}
+				pinfo->lengthPx += 2*wul;
+				pinfo->dataSize = pinfo->lengthPx * pinfo->lineLen; 
+			}
+			else 
+			{
+				pinfo->buffer[c] = NULL;
+			}
+
+			//  TrPrintfL(TRUE, "DECOMPRESSING >>%s<<, page %d, time=%d ms", filepath, id->page, rx_get_ticks()-time);
 		}
 	}
 	return REPLY_OK;

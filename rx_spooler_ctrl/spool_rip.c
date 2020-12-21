@@ -287,6 +287,8 @@ static void _load_buffer(const char *filedir, const char *filename, SBmpInfo *pi
 {
 	int ret;
 	int i;
+	EFileType fileType;
+	UINT32 gapPx;
 	int width, length;
 	UINT8 multiCopy;
 
@@ -298,7 +300,7 @@ static void _load_buffer(const char *filedir, const char *filename, SBmpInfo *pi
 //	sr_mnt_path(filepath, path);
 	data_cache(&id, filedir, path, RX_Color, SIZEOF(RX_Color));
 
-	if (data_get_size(path, 0, 0, &width, &length, (UCHAR*)&pinfo->bitsPerPixel, &multiCopy))
+	if (data_get_size(path, 0, &fileType, &gapPx, &width, &length, (UCHAR *)&pinfo->bitsPerPixel, &multiCopy))
 	{
 		memset(buffer, 0, MAX_COLORS*sizeof(BYTE*));
 		return;
