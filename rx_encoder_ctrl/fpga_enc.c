@@ -548,6 +548,7 @@ void fpga_enc_config(int inNo, SEncoderCfg *pCfg, int restart)
 	if (pCfg->printerType==printer_TX801 || pCfg->printerType==printer_TX802 
 	||  pCfg->printerType==printer_TX404 ||  pCfg->printerType==printer_LB701 
 	||  pCfg->printerType==printer_LB702_UV || pCfg->printerType==printer_LB702_WB
+	||  pCfg->printerType==printer_LB703_UV
 	||  pCfg->printerType==printer_LH702
 	||  pCfg->printerType==printer_DP803	) 
 	{

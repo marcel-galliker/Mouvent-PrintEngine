@@ -522,6 +522,7 @@ int step_set_config(void)
 	case printer_LB701:			_StepperType = STEPPER_LB;		break;		
 	case printer_LB702_UV:		_StepperType = STEPPER_LB;		break;		
 	case printer_LB702_WB:		_StepperType = STEPPER_LB;		break;		
+	case printer_LB703_UV:		_StepperType = STEPPER_LB;		break;
 	case printer_LH702:			_StepperType = STEPPER_LB;		break;		
 	case printer_DP803:			_StepperType = STEPPER_DP;		break;		
 	case printer_TX801:			_StepperType = STEPPER_TX;		break;		

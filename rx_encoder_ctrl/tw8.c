@@ -215,7 +215,7 @@ int	tw8_config(int chip, int speed_mminn, EPrinterType printerType, EEncoderType
 	if (printerType==printer_TX404)				cfg.MAIN_INTER	=   40; // 16bit // AB Output Resolution in Edges
 	else if(rx_def_is_scanning(printerType))	cfg.MAIN_INTER	= 2000; // 16bit // AB Output Resolution in Edges
 	else if (encoderType == enc_Renishaw)
-        cfg.MAIN_INTER = 2042; // 16bit // AB Output Resolution in Edges
+        cfg.MAIN_INTER = 1983; // 16bit // AB Output Resolution in Edges
     else
         cfg.MAIN_INTER = 1000; // 16bit // AB Output Resolution in Edges
 
@@ -238,8 +238,9 @@ int	tw8_config(int chip, int speed_mminn, EPrinterType printerType, EEncoderType
 	cfg.MAIN_CLOCK.freq		= 0x0; // 4bit // Internal Oscillator Frequency Tuning
 	cfg.MAIN_CLOCK.xforce	= 0x1; // 1bit // Clock Source on Low Power
 	// cfg.MAIN_ZPOS
-    if (encoderType == enc_Renishaw) cfg.MAIN_ZPOS = 0x800; // 14bit // Z Output Index Position
-    else							 cfg.MAIN_ZPOS = 0x00; // 14bit //  0x00; //0x72; // Z Output Index Position
+    if(rx_def_is_scanning(printerType)) cfg.MAIN_ZPOS = 0x00; // 14bit // Z Output Index Position
+	else if (encoderType == enc_Renishaw) cfg.MAIN_ZPOS = 0x800; // 14bit // Z Output Index Position
+    else							 cfg.MAIN_ZPOS = 0x1800; // 14bit //  0x00; //0x72; // Z Output Index Position
 
     //cfg.MAIN_Z.reg		= 0x00; 
 	cfg.MAIN_Z.th			= 0x00; // 5bit //

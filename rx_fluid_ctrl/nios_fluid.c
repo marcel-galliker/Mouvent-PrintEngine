@@ -374,6 +374,7 @@ void nios_set_cfg(SFluidBoardCfg *pcfg)
 	{
 	case printer_LB701:		_HeaterUsed=TRUE; break;
 	case printer_LB702_UV:	_HeaterUsed=TRUE; break;
+	case printer_LB703_UV:	_HeaterUsed=TRUE; break;
 	case printer_LH702:		_HeaterUsed=TRUE; break;
 	case printer_cleaf:		_HeaterUsed=TRUE;
 							if (printerType!=printer_cleaf)

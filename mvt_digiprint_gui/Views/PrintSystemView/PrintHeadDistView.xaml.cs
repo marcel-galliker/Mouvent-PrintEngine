@@ -72,6 +72,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
             case EPrinterType.printer_LB701:    _AdjustmentSupported = true;  break;
             case EPrinterType.printer_LB702_UV: _AdjustmentSupported = true;  break;
             case EPrinterType.printer_LB702_WB: _AdjustmentSupported = true;  break;
+			case EPrinterType.printer_LB703_UV: _AdjustmentSupported = true;  break;
             case EPrinterType.printer_LH702:    _AdjustmentSupported = true;  break;
             case EPrinterType.printer_DP803:    _AdjustmentSupported = true;  break;
             case EPrinterType.printer_TX801:    _AdjustmentSupported = true;  _Reverse=true; break;

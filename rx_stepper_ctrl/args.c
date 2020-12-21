@@ -38,6 +38,7 @@ void args_init(int argc, char** argv)
 		else if	(!strcmp(argv[i], "-lb701_ro"))	{ RX_StepperCfg.boardNo=1; RX_StepperCfg.printerType=printer_LB701;}
 		else if	(!strcmp(argv[i], "-web"))		{ RX_StepperCfg.boardNo=1; RX_StepperCfg.printerType=printer_LB701;}
 		else if	(!strcmp(argv[i], "-lb702"))	{ RX_StepperCfg.boardNo=0; RX_StepperCfg.printerType=printer_LB702_UV;}
+		else if	(!strcmp(argv[i], "-lb703"))	{ RX_StepperCfg.boardNo=0; RX_StepperCfg.printerType=printer_LB703_UV;}
 		else if	(!strcmp(argv[i], "-lh702"))	{ RX_StepperCfg.boardNo=0; RX_StepperCfg.printerType=printer_LH702;}
 		else if	(!strcmp(argv[i], "-test"))		{ RX_StepperCfg.boardNo=0; RX_StepperCfg.printerType=printer_undef;}
         else if (!strcmp(argv[i], "-tx404"))	{ RX_StepperCfg.boardNo=0; RX_StepperCfg.printerType=printer_TX404;}

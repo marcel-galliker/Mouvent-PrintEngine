@@ -80,6 +80,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                                                     break;
 
                 case EPrinterType.printer_LB702_UV:
+				case EPrinterType.printer_LB703_UV:
                 case EPrinterType.printer_LB702_WB:
                 case EPrinterType.printer_LH702:    var stepperGridLB702 = new StepperGridLB702();
                                                     stepperGridLB702.SetDataContext();

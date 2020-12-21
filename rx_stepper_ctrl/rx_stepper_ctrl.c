@@ -106,7 +106,8 @@ static void _main_loop()
 		case printer_cleaf:			cleaf_main(ticks, menu);	break;			
 		case printer_LB701: 		lb701_main(ticks, menu);	break;			
 		case printer_LB702_UV: 		
-		case printer_LB702_WB:		
+		case printer_LB702_WB:
+		case printer_LB703_UV:		
 		case printer_LH702:			lb702_main(ticks, menu); break;
 //		case printer_LBROB:			lbrob_main(ticks, menu); break;
 		case printer_DP803: 		dp803_main(ticks, menu); break;
@@ -132,7 +133,8 @@ static void _main_loop()
 			case printer_LB701: 		_AppRunning = lb701_menu();	break;
 
 			case printer_LB702_UV:
-			case printer_LB702_WB:		
+			case printer_LB702_WB:
+			case printer_LB703_UV:		
 			case printer_LH702:			_AppRunning = lb702_menu(); break;
 
 			case printer_DP803: 		_AppRunning = dp803_menu();	break;
@@ -196,7 +198,8 @@ int main(int argc, char** argv)
 	case printer_LB701: 		lb701_init(); break;
 		
 	case printer_LB702_UV: 		
-	case printer_LB702_WB: 		
+	case printer_LB702_WB: 
+	case printer_LB703_UV:		
 	case printer_LH702:			lb702_init();	break;
 //	case printer_LBROB:			lbrob_init();	break;
 		

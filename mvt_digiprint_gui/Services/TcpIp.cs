@@ -109,6 +109,7 @@ namespace RX_DigiPrint.Services
         printer_LB702_UV,	        // 1001: 
         printer_LB702_WB,	        // 1002: 
         printer_LH702,              // 1003:
+		printer_LB703_UV,			// 1004
 
         printer_DP803    =1100,     // 1100:
 	 

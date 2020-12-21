@@ -63,7 +63,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 // printer_LB702_UV, printer_LB702_WB, printer_LH702, printer_DP803  -> other Stepper Settings grids, code only used for LB701?
                 case EPrinterType.printer_LB701:
                 case EPrinterType.printer_LB702_UV: 
-                case EPrinterType.printer_LB702_WB: 
+                case EPrinterType.printer_LB702_WB:
+				case EPrinterType.printer_LB703_UV:
                 case EPrinterType.printer_LH702: 
                 case EPrinterType.printer_DP803: 
                                                     MainGrid.RowDefinitions[0].Height = GridLength.Auto;

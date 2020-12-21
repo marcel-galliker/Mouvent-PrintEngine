@@ -226,6 +226,7 @@ void fluid_set_config(void)
 	{
 	case printer_LB701:
 	case printer_LB702_UV:	
+	case printer_LB703_UV:	
 	case printer_LH702:
 							_FluidToScales[0] = SCALE(1,1);	// Cyan 
 							_FluidToScales[1] = SCALE(1,2);	// Magenta

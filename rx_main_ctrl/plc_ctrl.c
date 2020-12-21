@@ -364,7 +364,8 @@ static void _plc_set_par(SPrintQueueItem *pItem, SPlcPar *pPlcPar)
 	{
 		case printer_LB701:		_UnwinderLenMin = 10; break;	
 		case printer_LB702_UV:	_UnwinderLenMin = 10; break;	
-		case printer_LB702_WB:	_UnwinderLenMin = 20; break;	
+		case printer_LB702_WB:	_UnwinderLenMin = 20; break;
+		case printer_LB703_UV:	_UnwinderLenMin = 10; break;	
 		case printer_LH702:		_UnwinderLenMin = 10; break;	
 		case printer_DP803:		_UnwinderLenMin = 30; break;	
 		default: _UnwinderLenMin = 0;			
@@ -1232,6 +1233,7 @@ static void _plc_set_config()
 		
 	case printer_LB701:
 	case printer_LB702_UV:
+	case printer_LB703_UV:
 		sys_set_axes_name( 1, "Unwinder");
 		sys_set_axes_name( 2, "PrinterIN");
 		sys_set_axes_name( 3, "PrinterOut");

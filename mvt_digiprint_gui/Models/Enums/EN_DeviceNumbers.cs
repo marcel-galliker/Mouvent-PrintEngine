@@ -105,6 +105,7 @@ namespace RX_DigiPrint.Models.Enums
                                                     case EPrinterType.printer_LB701:        cnt=4; break;
                                                     case EPrinterType.printer_LB702_UV:     cnt=4; break;
                                                     case EPrinterType.printer_LB702_WB:     cnt=4; break;
+													case EPrinterType.printer_LB703_UV:     cnt=4; break;
                                                     case EPrinterType.printer_LH702:        cnt=4; break;
                                                     case EPrinterType.printer_DP803:        cnt=4; break;
                                                     case EPrinterType.printer_cleaf:        cnt=4; break;

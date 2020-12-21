@@ -220,6 +220,7 @@ int	 enc_set_config(int restart)
 	case printer_test_table:	_Encoder[0].webOffset_mm=110; break;
 	case printer_LB701:
 	case printer_LB702_UV:
+	case printer_LB703_UV:
 	case printer_LH702:
 	case printer_cleaf:			_Encoder[0].webOffset_mm=10;  break;
 	case printer_LB702_WB:		_Encoder[0].webOffset_mm=10+RX_Config.printer.offset.versoDist;
@@ -331,10 +332,29 @@ static void _enc_start_printing(int no, SPrintQueueItem *pitem, int restart)
 								}
 								break;
 		
-	case printer_LB702_UV:		msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_ROTATIVE; msg.diameter[0]=78; msg.diameter[1]=74; break;	
-	case printer_LB702_WB:		msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_ROTATIVE; msg.diameter[0]=78; msg.diameter[1]=74; break;	
-	case printer_LH702:			msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_ROTATIVE; msg.diameter[0]=78; msg.diameter[1]=74; 
-								break;
+    case printer_LB702_WB:
+    case printer_LH702:
+    case printer_LB702_UV:
+        msg.orientation = FALSE;
+        msg.scanning = FALSE;
+        msg.incPerMeter = 971253;
+        msg.pos_actual = 0;
+        msg.correction = CORR_ROTATIVE;
+        msg.diameter[0] = 78;
+        msg.diameter[1] = 74;
+        break;
+
+
+	// due to fpga the diameter should be between 70 and 85 (real diameter of LB730 are 130 and 125), so we transform 130/125 to 78/75
+    case printer_LB703_UV:
+        msg.orientation = FALSE;
+        msg.scanning = FALSE;
+        msg.incPerMeter = 606072;
+        msg.pos_actual = 0;
+        msg.correction = CORR_ROTATIVE;
+        msg.diameter[0] = 75;
+        msg.diameter[1] = 78;
+        break;
 
 	case printer_DP803:			msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; msg.correction=CORR_ROTATIVE;
 								msg.diameter[0] = 74; 

@@ -178,7 +178,7 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
 		info.headUpInput_2 =  _Status[2].info.headUpInput_0;
 		info.headUpInput_3 =  _Status[3].info.headUpInput_0;
 	}
-	else if (RX_Config.printer.type==printer_LB702_WB || RX_Config.printer.type==printer_LB702_UV) 
+	else if (RX_Config.printer.type==printer_LB702_WB || RX_Config.printer.type==printer_LB702_UV || RX_Config.printer.type==printer_LB703_UV) 
 	{
 		info.headUpInput_0 = _Status[0].info.z_in_ref; //_Status[0].info.headUpInput_0 && _Status[0].info.headUpInput_1;
 		info.headUpInput_1 = _Status[1].info.z_in_ref; //_Status[1].info.headUpInput_0 && _Status[1].info.headUpInput_1;

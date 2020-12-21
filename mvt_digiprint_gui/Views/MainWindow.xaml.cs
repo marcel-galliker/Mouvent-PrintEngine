@@ -184,7 +184,8 @@ namespace RX_DigiPrint.Views
             bool lb = RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB701 
                 ||    RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB702_UV
                 ||    RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB702_WB
-                ||    RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LH702
+                || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB703_UV
+                || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LH702
                 ||    RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_DP803;
            
             bool pq = (lb||tx); // &&  RxGlobals.PrintSystem.PrinterType!=EPrinterType.printer_LH702;
@@ -229,6 +230,11 @@ namespace RX_DigiPrint.Views
                     case EPrinterType.printer_LB702_WB:
                         MachineName.Text="LB 702 WB";
 					    TabMachine.Content = new LB702WBView.LB702WBView();
+                        break;
+
+                    case EPrinterType.printer_LB703_UV:
+                        MachineName.Text = "LB 703 UV";
+                        TabMachine.Content = new LB702UVView.LB702UV_View();
                         break;
 
                     case EPrinterType.printer_LH702:

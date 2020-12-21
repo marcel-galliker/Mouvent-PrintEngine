@@ -93,7 +93,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
                                                             break;
 
                 case EPrinterType.printer_LB701:
-                case EPrinterType.printer_LB702_UV:         this.Visibility         = Visibility.Collapsed;
+				case EPrinterType.printer_LB702_UV: 
+                case EPrinterType.printer_LB703_UV:         this.Visibility         = Visibility.Collapsed;
                                                             Encoder.Visibility      = Visibility.Collapsed;
                                                             Angle.Visibility        = Visibility.Collapsed;
                                                             Belt.Visibility         = Visibility.Collapsed;

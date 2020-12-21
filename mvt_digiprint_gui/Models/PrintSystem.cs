@@ -149,6 +149,7 @@ namespace RX_DigiPrint.Models
                 case EPrinterType.printer_LB701:			return true;
 	            case EPrinterType.printer_LB702_UV:			return true;
 	            case EPrinterType.printer_LH702:			return true;
+				case EPrinterType.printer_LB703_UV:			return true;
 	         // case EPrinterType.printer_LB702_WB:			return true;
 	            default:                                    return false;
 	            }
