@@ -371,6 +371,7 @@ cl_program C_rx_AlignFilter::MakeProgram(int KernelSourceID, cl_context context,
 
 		exit(-1);
 	}
+
 	return Program;
 }
 
@@ -540,6 +541,66 @@ bool C_rx_AlignFilter::CreateKernels(cl_program Program)
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
 			printf("%6.66f\tCreateKernels: Could not create OpenCL Kernel ColorShowHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		return false;
+	}
+
+	//Create RGB-Block Histogram-Kernel
+	ClRGBBlockHistogramKernel = clCreateKernel(Program, "RGBBlockHistogram", &cl_Error);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.66f\tCreateKernels: Could not create OpenCL Kernel RGBBlockHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		return false;
+	}
+
+	//Create Show RGBHistogram-Kernel Version
+	ClShowRGBHistogramKernel = clCreateKernel(Program, "ShowRGBHistogram", &cl_Error);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.66f\tCreateKernels: Could not create OpenCL Kernel ShowRGBHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		return false;
+	}
+
+	//Create Join RGBHistogram-Kernel
+	ClJoinRGBHistogramKernel = clCreateKernel(Program, "JoinRGBHistogram", &cl_Error);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.66f\tCreateKernels: Could not create OpenCL Kernel JoinRGBHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		return false;
+	}
+
+	//Create Smoothen Histogram-Kernel
+	ClSmoothenRGBHistogramKernel = clCreateKernel(Program, "SmoothenRGBHistogram", &cl_Error);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.66f\tCreateKernels: Could not create OpenCL Kernel SmoothenRGBHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		return false;
 	}

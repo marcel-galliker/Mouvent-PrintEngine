@@ -24,15 +24,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\rx_common_lib_cs\rx_common_lib_cs.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Reference Include="DirectShowLib-2005">
       <HintPath>DirectShowLib-2005.dll</HintPath>
     </Reference>
     <Reference Include="PresentationFramework">
       <HintPath>..\..\..\..\..\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5\PresentationFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="rx_common_lib_cs">
+      <HintPath>..\..\rx_common_lib_cs\_out\Release_x64\rx_common_lib_cs.dll</HintPath>
     </Reference>
     <Reference Include="System.Windows.Forms">
       <HintPath>C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Windows.Forms.dll</HintPath>

@@ -1334,6 +1334,7 @@ namespace RX_DigiPrint.Services
             
             public UInt32	powerStepStatus;	
 	        public Int32	motorPosition;
+	        public Int32	stopPos;
 	        public UInt32	motorVoltage;
 	        public UInt32	motorMoveCurrent;
 	        public UInt32	motorHoldCurrent;

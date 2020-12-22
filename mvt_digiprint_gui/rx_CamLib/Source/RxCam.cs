@@ -40,6 +40,7 @@ namespace rx_CamLib
 
         public enum ENCamCallBackInfo
         {
+            StartLinesContinuous        =  7,
             RegisterCorr                =  6,
             StitchCorr                  =  5,
             AngleCorr                   =  4,
@@ -63,7 +64,8 @@ namespace rx_CamLib
             MeasureMode_StartLines  = 2,
             MeasureMode_Angle       = 3,
             MeasureMode_Stitch      = 4,
-            MeasureMode_Register    = 5
+            MeasureMode_Register    = 5,
+            MeasureMode_StartLinesCont = 6
         }
 
         public enum ENDisplayMode
@@ -78,14 +80,17 @@ namespace rx_CamLib
             BinarizeMode_Off            = 0,
             BinarizeMode_Manual         = 1,
             BinarizeMode_Auto           = 2,
-            BinarizeMode_ColorAdaptive  = 3
+            BinarizeMode_ColorAdaptive  = 3,
+            BinarizeMode_RGB            = 4     //Experimental
         }
 
-        public struct MeasureDataStruct
+        public struct CallBackDataStruct
         {
-            public float DPosX;         //Center of pattern offset X to center of camera
-            public float DPosY;         //Center of pattern offset Y to center of camera
-            public float Correction;    //Needed correction in Revolutions (Angle, Stitch) or μm (Register)
+            public ENCamResult CamResult;   //Error or other details
+            public float DPosX;             //Center of pattern offset X to center of camera, Angle, Stitch, Register: μm, StartLines: px
+            public float DPosY;             //Center of pattern offset Y to center of camera, Angle, Stitch, Register: μm, StartLines: px
+            public float Value_1;           //Angle, Stitch, Register: Correction Value in Rev or μm (Register), StartLines: number of lines
+            public float Value_2;           //Angle, Stitch, Register: 0, StartLines: Lines lyout (Top/Right: 1, Covering: 2, Bottom/Left: 3)  
         };
 
         private DsDevice[] DeviceList = null;
@@ -105,6 +110,7 @@ namespace rx_CamLib
         private MessageWindow MsgWindow;
         private IntPtr pMsgWindow = IntPtr.Zero;
         private IFrx_AlignFilter halignFilter = null;
+        private StreamCaps CurrentCaps = null;
 
         //Callback from Filters
         private const int WM_APP = 0x8000;                  //Definitions from Windows.h
@@ -117,6 +123,7 @@ namespace rx_CamLib
         private const int WP_Angle = 101;
         private const int WP_Stitch = 102;
         private const int WP_Register = 103;
+        private const int WP_StartLinesCont = 104;
 
         //Property Display
         [DllImport("oleaut32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
@@ -156,16 +163,16 @@ namespace rx_CamLib
 
         #region Public Interface
 
-        public delegate void CameraCallBack(ENCamCallBackInfo CallBackInfo, string ExtraInfo = "");
+        public delegate void CameraCallBack(ENCamCallBackInfo CallBackInfo, CallBackDataStruct CallBackData);
         public event CameraCallBack CamCallBack = null;
 
         public delegate void PositionMeasuredCallback(int angle, int stich, int encoder);
 
-        /// <summary>
-        /// Get version of library
-        /// </summary>
-        /// <returns>Version</returns>
-        public string GetLibVersion()
+		/// <summary>
+		/// Get version of library
+		/// </summary>
+		/// <returns>Version</returns>
+		public string GetLibVersion()
         {
             return typeof(RxCam).Assembly.GetName().Version.ToString();
         }
@@ -249,7 +256,8 @@ namespace rx_CamLib
             }
 
             CameraRunning = true;
-            CamCallBack?.Invoke(ENCamCallBackInfo.CameraStarted);
+            CallBackDataStruct CallbackData = new CallBackDataStruct();
+            CamCallBack?.Invoke(ENCamCallBackInfo.CameraStarted, CallbackData);
             return ENCamResult.OK;
         }
 
@@ -273,6 +281,122 @@ namespace rx_CamLib
         public ENCamResult StopCamera()
         {
             if (CameraRunning) return StopGraph(); 
+            return ENCamResult.OK;
+        }
+
+        /// <summary>
+        /// Returns a list with all possible stream settings for the selected camera
+        /// </summary>
+        /// <returns>null if not successful</returns>
+        public List<StreamCaps> GetCamStreamCapsList()
+        {
+            int hResult = 0;
+            IPin SrcCapPin = null;
+            List<StreamCaps> list = new List<StreamCaps>();
+
+            if (Camera == null) return null;
+
+            bool DummyChain = false;
+            if (SourceFilter == null)
+            {
+                //Build DummyChain
+                if (!CreateDummyChain(ref SrcCapPin)) return null;
+                DummyChain = true;
+            }
+            else
+            {
+                hResult = DsFindPin(SourceFilter, ref SrcCapPin, PinCategory.Capture);
+                if (hResultError(hResult)) return null;
+            }
+
+            IAMStreamConfig videoConfig = SrcCapPin as IAMStreamConfig;
+            int capsCount, capSize;
+            hResult = videoConfig.GetNumberOfCapabilities(out capsCount, out capSize);
+
+            VideoInfoHeader VIHeader = new VideoInfoHeader();
+            IntPtr pSC = Marshal.AllocHGlobal(capSize);
+
+            AMMediaType mt = null;
+
+            List<Guid> GuidList = new List<Guid>();
+            List<int> FrameRates = new List<int>();
+            for (int i = 0; i < capsCount; ++i)
+            {
+                StreamCaps Resolution = new StreamCaps();
+                hResult = videoConfig.GetStreamCaps(i, out mt, pSC);
+                if (hResultError(hResult)) continue;
+                Resolution.Mediasubtype = mt.subType;
+                if (mt.formatType.ToString() == "05589f80-c356-11ce-bf01-00aa0055595a") //only VideoInfoHeader(1)
+                {
+                    Marshal.PtrToStructure(mt.formatPtr, VIHeader);
+                    Resolution.FrameRate = (int)((float)10000000 / VIHeader.AvgTimePerFrame);
+                    Resolution.Resolution = new System.Drawing.Point(VIHeader.BmiHeader.Width, VIHeader.BmiHeader.Height);
+                    list.Add(Resolution);
+                }
+            }
+
+            Marshal.FreeCoTaskMem(mt.formatPtr);
+            Marshal.FreeHGlobal(pSC);
+
+            if (DummyChain) { if (!RemoveDummyChain()) return null; }
+
+            return list;
+        }
+
+        /// <summary>
+        /// Returns the currently active stream settings
+        /// </summary>
+        /// <returns>null if not successful</returns>
+        public StreamCaps GetCamStreamCaps()
+        {
+            int hResult = 0;
+            IPin SrcCapPin = null;
+            StreamCaps StreamCaps = new StreamCaps();
+
+            if (Camera == null) return null;
+
+            bool DummyChain = false;
+            if (SourceFilter == null)
+            {
+                //Build DummyChain
+                if (!CreateDummyChain(ref SrcCapPin)) return null;
+                DummyChain = true;
+            }
+            else
+            {
+                hResult = DsFindPin(SourceFilter, ref SrcCapPin, PinCategory.Capture);
+                if (hResultError(hResult)) return null;
+            }
+
+            hResult = DsFindPin(SourceFilter, ref SrcCapPin, PinCategory.Capture);
+            if (hResultError(hResult)) return null;
+
+            IAMStreamConfig StreamConfig1 = (IAMStreamConfig)SrcCapPin;
+            VideoInfoHeader VIHeader = new VideoInfoHeader();
+            AMMediaType mt = null;
+            hResult = StreamConfig1.GetFormat(out mt);
+            if (hResultError(hResult)) return null;
+            Marshal.PtrToStructure(mt.formatPtr, VIHeader);
+            StreamCaps.Mediasubtype = mt.subType;
+            StreamCaps.FrameRate = (int)((float)10000000 / VIHeader.AvgTimePerFrame);
+            StreamCaps.Resolution = new System.Drawing.Point(VIHeader.BmiHeader.Width, VIHeader.BmiHeader.Height);
+
+            Marshal.FreeCoTaskMem(mt.formatPtr);
+
+            if (DummyChain) { if (!RemoveDummyChain()) return null; }
+
+            return StreamCaps;
+        }
+
+        /// <summary>
+        /// Sets stream settings for next start of selected camera
+        /// </summary>
+        /// <param name="StreamCaps"></param>
+        /// <returns>0: for success or error code</returns>
+        public ENCamResult SetCamStreamCaps(StreamCaps StreamCaps)
+        {
+            if (CameraRunning) return ENCamResult.Cam_alreadyRunning;
+            CurrentCaps = StreamCaps;
             return ENCamResult.OK;
         }
 
@@ -303,6 +427,30 @@ namespace rx_CamLib
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="ShowHistogram"></param>
+        /// <returns>0: for success or error code</returns>
+        public ENCamResult ShowHistogram(bool ShowHistogram)
+        {
+            if (!CameraRunning) return ENCamResult.Cam_notRunning;
+            halignFilter.ShowHistogram(ShowHistogram);
+            return ENCamResult.OK;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="ShowProcessImage"></param>
+        /// <returns>0: for success or error code</returns>
+        public ENCamResult ShowProcessImage(bool ShowProcessImage)
+        {
+            if (!CameraRunning) return ENCamResult.Cam_notRunning;
+            halignFilter.SetShowOriginalImage(!ShowProcessImage);
+            return ENCamResult.OK;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="BinarizeMode"></param>
         /// <returns>0: for success or error code</returns>
         public ENCamResult SetBinarizationMode(ENBinarizeMode BinarizeMode)
@@ -313,7 +461,29 @@ namespace rx_CamLib
         }
 
         /// <summary>
-        /// 
+        /// returns the currently used threshold
+        /// </summary>
+        /// <returns>current threshold or 0 if not available</returns>
+        public UInt32 GetThreshold()
+        {
+            if (!CameraRunning) return 0;
+            return halignFilter.GetThreshold();
+        }
+
+        /// <summary>
+        /// Manual binarisation threshod (0 - 255)
+        /// </summary>
+        /// <param name="Threshold"></param>
+        /// <returns>0: for success or error code</returns>
+        public ENCamResult SetThreshold(UInt32 Threshold)
+        {
+            if (!CameraRunning) return ENCamResult.Cam_notRunning;
+            halignFilter.SetThreshold(Threshold);
+            return ENCamResult.OK;
+        }
+
+        /// <summary>
+        /// sets the minimal lentgh/width ration for a blob to be accepted as a line
         /// </summary>
         /// <param name="AspectLimit"></param>
         /// <returns>0: for success or error code</returns>
@@ -325,9 +495,9 @@ namespace rx_CamLib
         }
 
         /// <summary>
-        /// 
+        /// Executes the desired number of measurements, returns result and center position of pattern through CameraCallBack 
         /// </summary>
-        /// <param name="NumMeasures"></param>
+        /// <param name="NumMeasures">number of measurements to be taken</param>
         /// <returns>0: for success or error code</returns>
         public ENCamResult DoMeasures(UInt32 NumMeasures)
         {
@@ -340,7 +510,7 @@ namespace rx_CamLib
         }
 
         /// <summary>
-        /// 
+        /// Sets measurement to "Upside-Down", default = false
         /// </summary>
         /// <param name="UpsideDown"></param>
         /// <returns>0: for success or error code</returns>
@@ -361,6 +531,40 @@ namespace rx_CamLib
             if (!CameraRunning) return ENCamResult.Cam_notRunning;
             halignFilter.SetLinesHorizontal(Horizontal);
             return ENCamResult.OK;
+        }
+
+        /// <summary>
+        /// Checks for white lines on dark background, default = false (vertical)
+        /// </summary>
+        /// <param name="Inverse"></param>
+        /// <returns>0: for success or error code</returns>
+        public ENCamResult SetLinesInverse(bool Inverse)
+        {
+            if (!CameraRunning) return ENCamResult.Cam_notRunning;
+            halignFilter.SetInverse(Inverse);
+            return ENCamResult.OK;
+        }
+
+        /// <summary>
+        /// set the minimum number of lines to be detected as Start-Lines
+        /// </summary>
+        /// <param name="MinNumStartLines"></param>
+        /// <returns></returns>
+        public ENCamResult SetMinNumStartLines(UInt32 MinNumStartLines)
+        {
+            if (!CameraRunning) return ENCamResult.Cam_notRunning;
+            halignFilter.SetMinNumStartLines(MinNumStartLines);
+            return ENCamResult.OK;
+        }
+
+        public void SetDebug(bool DebugOn)
+        {
+            if (CameraRunning) halignFilter.SetDebug(DebugOn);
+        }
+
+        public void ShowFrameTime(bool FrameTime)
+        {
+            if (CameraRunning) halignFilter.SetFrameTiming(FrameTime);
         }
 
         #endregion
@@ -398,7 +602,8 @@ namespace rx_CamLib
                                     }
                                     if (!CamStillHere)
                                     {
-                                        CamCallBack?.Invoke(ENCamCallBackInfo.USB_CameraDisconnected);
+                                        CallBackDataStruct CallbackData = new CallBackDataStruct();
+                                        CamCallBack?.Invoke(ENCamCallBackInfo.USB_CameraDisconnected, CallbackData);
                                         StopCamera();
                                     }
                                 }
@@ -424,7 +629,8 @@ namespace rx_CamLib
                             {
                                 if (CameraRunning)
                                 {
-                                    CamCallBack?.Invoke(ENCamCallBackInfo.DS_CaptureDeviceLost);
+                                    CallBackDataStruct CallbackData = new CallBackDataStruct();
+                                    CamCallBack?.Invoke(ENCamCallBackInfo.DS_CaptureDeviceLost, CallbackData);
                                     StopCamera();
                                 }
                                 break;
@@ -433,7 +639,8 @@ namespace rx_CamLib
                             {
                                 if (CameraRunning)
                                 {
-                                    CamCallBack?.Invoke(ENCamCallBackInfo.DS_ErrorAbotedDisplay);
+                                    CallBackDataStruct CallbackData = new CallBackDataStruct();
+                                    CamCallBack?.Invoke(ENCamCallBackInfo.DS_ErrorAbotedDisplay, CallbackData);
                                     StopCamera();
                                 }
                                 break;
@@ -442,7 +649,8 @@ namespace rx_CamLib
                             {
                                 if (CameraRunning)
                                 {
-                                    CamCallBack?.Invoke(ENCamCallBackInfo.DS_ErrorAbotedDisplay);
+                                    CallBackDataStruct CallbackData = new CallBackDataStruct();
+                                    CamCallBack?.Invoke(ENCamCallBackInfo.DS_ErrorAbotedDisplay, CallbackData);
                                     StopCamera();
                                 }
                                 break;
@@ -451,7 +659,8 @@ namespace rx_CamLib
                             {
                                 if (CameraRunning)
                                 {
-                                    CamCallBack?.Invoke(ENCamCallBackInfo.DS_ErrorAbotedDisplay);
+                                    CallBackDataStruct CallbackData = new CallBackDataStruct();
+                                    CamCallBack?.Invoke(ENCamCallBackInfo.DS_ErrorAbotedDisplay, CallbackData);
                                     StopCamera();
                                 }
                                 break;
@@ -460,7 +669,8 @@ namespace rx_CamLib
                             {
                                 if (CameraRunning)
                                 {
-                                    CamCallBack?.Invoke(ENCamCallBackInfo.VMR_ReconnectionFailed);
+                                    CallBackDataStruct CallbackData = new CallBackDataStruct();
+                                    CamCallBack?.Invoke(ENCamCallBackInfo.VMR_ReconnectionFailed, CallbackData);
                                     StopCamera();
                                 }
                                 break;
@@ -469,7 +679,8 @@ namespace rx_CamLib
                             {
                                 if (CameraRunning)
                                 {
-                                    CamCallBack?.Invoke(ENCamCallBackInfo.DS_CaptureDeviceLost);
+                                    CallBackDataStruct CallbackData = new CallBackDataStruct();
+                                    CamCallBack?.Invoke(ENCamCallBackInfo.DS_CaptureDeviceLost, CallbackData);
                                     StopCamera();
                                 }
                                 break;
@@ -482,34 +693,35 @@ namespace rx_CamLib
                 //rx_AlignFilter Messages
                 case WM_APP_ALIGNEV:
                 {
-                    MeasureDataStruct CorrectionData;
+                    CallBackDataStruct CallBackData;
                     ENCamResult Result;
 
                     switch (WParam)
                     {
                         case WP_StartLines:
-                            CamCallBack?.Invoke(ENCamCallBackInfo.StartLinesDetected, Msg.LParam.ToInt64().ToString());
+                            Result = GetMeasureData(out CallBackData);
+                            CallBackData.CamResult = Result;
+                            CamCallBack?.Invoke(ENCamCallBackInfo.StartLinesDetected, CallBackData);
+                            break;
+                        case WP_StartLinesCont:
+                            Result = GetMeasureData(out CallBackData);
+                            CallBackData.CamResult = Result;
+                            CamCallBack?.Invoke(ENCamCallBackInfo.StartLinesContinuous, CallBackData);
                             break;
                         case WP_Angle:
-                            Result = GetMeasureData(out CorrectionData);
-                            if(Result == ENCamResult.OK)
-                                CamCallBack?.Invoke(ENCamCallBackInfo.AngleCorr, CorrectionData.Correction.ToString() + ";" +
-                                    CorrectionData.DPosX.ToString() + ";" + CorrectionData.DPosY.ToString());
-                            else CamCallBack?.Invoke(ENCamCallBackInfo.NoDataFromFilter, Result.ToString());
+                            Result = GetMeasureData(out CallBackData);
+                            CallBackData.CamResult = Result;
+                            CamCallBack?.Invoke(ENCamCallBackInfo.AngleCorr, CallBackData);
                             break;
                         case WP_Stitch:
-                            Result = GetMeasureData(out CorrectionData);
-                            if (Result == ENCamResult.OK)
-                                CamCallBack?.Invoke(ENCamCallBackInfo.StitchCorr, CorrectionData.Correction.ToString() + ";" +
-                                    CorrectionData.DPosX.ToString() + ";" + CorrectionData.DPosY.ToString());
-                            else CamCallBack?.Invoke(ENCamCallBackInfo.NoDataFromFilter, Result.ToString());
+                            Result = GetMeasureData(out CallBackData);
+                            CallBackData.CamResult = Result;
+                            CamCallBack?.Invoke(ENCamCallBackInfo.StitchCorr, CallBackData);
                             break;
                         case WP_Register:
-                            Result = GetMeasureData(out CorrectionData);
-                            if (Result == ENCamResult.OK)
-                                CamCallBack?.Invoke(ENCamCallBackInfo.RegisterCorr, CorrectionData.Correction.ToString() + ";" +
-                                    CorrectionData.DPosX.ToString() + ";" + CorrectionData.DPosY.ToString());
-                            else CamCallBack?.Invoke(ENCamCallBackInfo.NoDataFromFilter, Result.ToString());
+                            Result = GetMeasureData(out CallBackData);
+                            CallBackData.CamResult = Result;
+                            CamCallBack?.Invoke(ENCamCallBackInfo.RegisterCorr, CallBackData);
                             break;
                     }
                     break;
@@ -525,33 +737,12 @@ namespace rx_CamLib
                 //Capture Pin for Properties
                 IPin SrcCapPin = null;
 
-                //Standard Filter Chain
-                if (MediaControl != null)
-                {
-                    hResult = Marshal.ReleaseComObject(MediaControl);
-                    if (hResultError(hResult)) return ENCamResult.Error;
-                    MediaControl = null;
-                }
-                if (FilterGraph2 != null)
-                {
-                    FilterGraph2 = null;
-                }
-                if (CaptureGraph != null)
-                {
-                    hResult = Marshal.ReleaseComObject(CaptureGraph);
-                    if (hResultError(hResult)) return ENCamResult.Error;
-                    CaptureGraph = null;
-                }
 
-                FilterGraph2 = (IFilterGraph2)new FilterGraph();
-                MediaControl = (IMediaControl)FilterGraph2 as IMediaControl;
-                CaptureGraph = (ICaptureGraphBuilder2)new CaptureGraphBuilder2();
-
-                hResult = CaptureGraph.SetFiltergraph(FilterGraph2);
-                if (hResultError(hResult)) return ENCamResult.Error;
+                if (!BuildFilterChain()) return ENCamResult.Error;
 
                 if (!InsertVMR(hwnd)) return ENCamResult.Error;
                 if (!InsertCamera(out SrcCapPin)) return ENCamResult.Error;
+                if (!SetStreamCaps(SrcCapPin)) return ENCamResult.Error;
                 if (InsertAlignFilter() != ENCamResult.OK) return ENCamResult.Error;
 
                 if (!ConnectCamToAlign(SrcCapPin)) return ENCamResult.Error;
@@ -570,7 +761,8 @@ namespace rx_CamLib
             }
             catch (Exception excep)
             {
-                CamCallBack?.Invoke(ENCamCallBackInfo.CouldNotBuildGraph, excep.Message);
+                CallBackDataStruct callBackData = new CallBackDataStruct();
+                CamCallBack?.Invoke(ENCamCallBackInfo.CouldNotBuildGraph, callBackData);
                 return ENCamResult.Error;
             }
 
@@ -580,7 +772,6 @@ namespace rx_CamLib
         private ENCamResult StopGraph()
         {
             int hResult;
-//            IFrx_AlignFilter halignFilter = CamGlobals.AlignFilter.Handle;
 
             halignFilter.SetFrameTiming(false);
             halignFilter.SetDebug(false);
@@ -637,12 +828,45 @@ namespace rx_CamLib
             }
             catch (Exception excep)
             {
-                CamCallBack?.Invoke(ENCamCallBackInfo.GraphNotStoppedCorrectly, excep.Message);
+                CallBackDataStruct callBackData = new CallBackDataStruct();
+                CamCallBack?.Invoke(ENCamCallBackInfo.GraphNotStoppedCorrectly, callBackData);
                 return ENCamResult.Error;
             }
 
             CameraRunning = false;
             return ENCamResult.OK;
+        }
+
+        private bool BuildFilterChain()
+        {
+            //Standard Filter Chain
+            int hResult = 0;
+
+            if (MediaControl != null)
+            {
+                hResult = Marshal.ReleaseComObject(MediaControl);
+                if (hResultError(hResult)) return false;
+                MediaControl = null;
+            }
+            if (FilterGraph2 != null)
+            {
+                FilterGraph2 = null;
+            }
+            if (CaptureGraph != null)
+            {
+                hResult = Marshal.ReleaseComObject(CaptureGraph);
+                if (hResultError(hResult)) return false;
+                CaptureGraph = null;
+            }
+
+            FilterGraph2 = (IFilterGraph2)new FilterGraph();
+            MediaControl = (IMediaControl)FilterGraph2 as IMediaControl;
+            CaptureGraph = (ICaptureGraphBuilder2)new CaptureGraphBuilder2();
+
+            hResult = CaptureGraph.SetFiltergraph(FilterGraph2);
+            if (hResultError(hResult)) return false;
+
+            return true;
         }
 
         private bool InsertVMR(IntPtr hwnd)
@@ -712,6 +936,31 @@ namespace rx_CamLib
 
             hResult = DsFindPin(SourceFilter, ref SrcCapPin, PinCategory.Capture);
             if (hResultError(hResult)) return false;
+
+            return true;
+        }
+
+        private bool SetStreamCaps(IPin SrcCapPin)
+        {
+            int hRes = 0;
+
+            if (CurrentCaps != null)
+            {
+                IAMStreamConfig StreamConfig1 = (IAMStreamConfig)SrcCapPin;
+                VideoInfoHeader VIHeader = new VideoInfoHeader();
+                AMMediaType mt = null;
+                hRes = StreamConfig1.GetFormat(out mt);
+                if (hResultError(hRes)) return false;
+
+                Marshal.PtrToStructure(mt.formatPtr, VIHeader);
+                VIHeader.BmiHeader.Width = Convert.ToInt32(CurrentCaps.Resolution.X);
+                VIHeader.BmiHeader.Height = Convert.ToInt32(CurrentCaps.Resolution.Y);
+                Marshal.StructureToPtr(VIHeader, mt.formatPtr, true);
+                mt.subType = CurrentCaps.Mediasubtype;
+                hRes = StreamConfig1.SetFormat(mt);
+                if (hResultError(hRes)) return false;
+                Marshal.FreeCoTaskMem(mt.formatPtr);
+            }
 
             return true;
         }
@@ -918,6 +1167,50 @@ namespace rx_CamLib
             return -1;  //Pin not found
         }
 
+        private bool CreateDummyChain(ref IPin SrcCapPin)
+        {
+            //Build DummyChain
+            if (!BuildFilterChain()) return false;
+            if (!InsertCamera(out SrcCapPin)) return false;
+
+            return true;
+        }
+
+        private bool RemoveDummyChain()
+        {
+            int hResult = 0;
+
+            //Remove DummyChain
+            IEnumFilters pFilterEnum;
+            hResult = FilterGraph2.EnumFilters(out pFilterEnum);
+            if (hResultError(hResult)) return false;
+            IBaseFilter[] filters = new IBaseFilter[1];
+            IntPtr pfetched = Marshal.AllocCoTaskMem(4);
+
+            while (pFilterEnum.Next(1, filters, pfetched) == 0)
+            {
+                hResult = FilterGraph2.RemoveFilter(filters[0]);
+                if (hResultError(hResult)) return false;
+                hResult = pFilterEnum.Reset();
+                if (hResultError(hResult)) return false;
+                hResult = Marshal.ReleaseComObject(filters[0]);
+                if (hResultError(hResult)) return false;
+                filters[0] = null;
+            }
+            hResult = Marshal.ReleaseComObject(pFilterEnum);
+            if (hResultError(hResult)) return false;
+            Marshal.FreeCoTaskMem(pfetched);
+            pfetched = IntPtr.Zero;
+            hResult = FilterGraph2.Abort();
+            if (hResultError(hResult)) return false;
+            hResult = Marshal.ReleaseComObject(FilterGraph2);
+            if (hResultError(hResult)) return false;
+            FilterGraph2 = null;
+            MediaControl = null;
+
+            return true;
+        }
+
         private bool hResultError(int hResult)
         {
             LastDsErrorMsg = DsError.GetErrorText(hResult);
@@ -985,24 +1278,26 @@ namespace rx_CamLib
 
         }
 
-        private ENCamResult GetMeasureData(out MeasureDataStruct MeasureData)
+        private ENCamResult GetMeasureData(out CallBackDataStruct MeasureData)
         {
-            MeasureData = new MeasureDataStruct();
+            MeasureData = new CallBackDataStruct();
 
             //Raw data list
-            List<MeasureDataStruct> CorrectionList;
+            List<CallBackDataStruct> CorrectionList;
             ENCamResult DataResult = GetMeasureDataList(out CorrectionList);
             if (DataResult != ENCamResult.OK) return DataResult;
 
             //Average within 1 sigma
-            AverageData(CorrectionList, ref MeasureData);
+            if(CorrectionList.Count > 1)
+                AverageData(CorrectionList, ref MeasureData);
+            else MeasureData = CorrectionList[0];
 
             return ENCamResult.OK;
         }
 
-        private ENCamResult GetMeasureDataList(out List<MeasureDataStruct> MeasureDataList)
+        private ENCamResult GetMeasureDataList(out List<CallBackDataStruct> MeasureDataList)
         {
-            MeasureDataList = new List<MeasureDataStruct>();
+            MeasureDataList = new List<CallBackDataStruct>();
             UInt32 DataListSize32 = 0;
             System.Timers.Timer tmr_Timeout = new System.Timers.Timer();
             tmr_Timeout.Elapsed += new System.Timers.ElapsedEventHandler(TimerElapsed);
@@ -1027,7 +1322,7 @@ namespace rx_CamLib
             tmr_Timeout.Elapsed -= TimerElapsed;
 
             //Allocate memory
-            IntPtr unmanaged_pInList = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(MeasureDataStruct)) * (int)DataListSize32);
+            IntPtr unmanaged_pInList = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(CallBackDataStruct)) * (int)DataListSize32);
             //Get Data from Filter
             int DataListSize = (int)DataListSize32;
             if (!halignFilter.GetMeasureResults(unmanaged_pInList, out DataListSize32)) return ENCamResult.Filter_NoData;
@@ -1041,49 +1336,56 @@ namespace rx_CamLib
             IntPtr current = unmanaged_pInList;
             for (int i = 0; i < DataListSize32; i++)
             {
-                MeasureDataList.Add((MeasureDataStruct)Marshal.PtrToStructure(current, typeof(MeasureDataStruct)));
-                Marshal.DestroyStructure(current, typeof(MeasureDataStruct));
-                current = (IntPtr)((long)current + Marshal.SizeOf(typeof(MeasureDataStruct)));
+                MeasureDataList.Add((CallBackDataStruct)Marshal.PtrToStructure(current, typeof(CallBackDataStruct)));
+                Marshal.DestroyStructure(current, typeof(CallBackDataStruct));
+                current = (IntPtr)((long)current + Marshal.SizeOf(typeof(CallBackDataStruct)));
             }
             Marshal.FreeHGlobal(unmanaged_pInList);
 
             return ENCamResult.OK;
         }
 
-        private void AverageData(List<MeasureDataStruct> CorrectionList, ref MeasureDataStruct MeasureData)
+        private void AverageData(List<CallBackDataStruct> CorrectionList, ref CallBackDataStruct MeasureData)
         {
             //Average Data within 1 sigma
 
             //Mean
-            float MeanCorr = 0;
+            float MeanV1 = 0;
+            float MeanV2 = 0;
             float MeanDX = 0;
             float MeanDY = 0;
             for (int i = 0; i < CorrectionList.Count; i++)
             {
-                MeanCorr += CorrectionList[i].Correction;
+                MeanV1 += CorrectionList[i].Value_1;
+                MeanV2 += CorrectionList[i].Value_2;
                 MeanDX += CorrectionList[i].DPosX;
                 MeanDY += CorrectionList[i].DPosY;
             }
-            MeanCorr /= CorrectionList.Count;
+            MeanV1 /= CorrectionList.Count;
+            MeanV2 /= CorrectionList.Count;
             MeanDX /= CorrectionList.Count;
             MeanDY /= CorrectionList.Count;
 
             //Variance
-            double VarCorr = 0;
+            double VarV1 = 0;
+            double VarV2 = 0;
             double VarDX = 0;
             double VarDY = 0;
             for (int i = 0; i < CorrectionList.Count; i++)
             {
-                VarCorr += Math.Pow(CorrectionList[i].Correction - MeanCorr, 2);
+                VarV1 += Math.Pow(CorrectionList[i].Value_1 - MeanV1, 2);
+                VarV2 += Math.Pow(CorrectionList[i].Value_2 - MeanV2, 2);
                 VarDX += Math.Pow(CorrectionList[i].DPosX - MeanDX, 2);
                 VarDY += Math.Pow(CorrectionList[i].DPosY - MeanDY, 2);
             }
-            VarCorr /= CorrectionList.Count;
+            VarV1 /= CorrectionList.Count;
+            VarV2 /= CorrectionList.Count;
             VarDX /= CorrectionList.Count;
             VarDY /= CorrectionList.Count;
 
             //StdDev
-            VarCorr = Math.Sqrt(VarCorr);
+            VarV1 = Math.Sqrt(VarV1);
+            VarV2 = Math.Sqrt(VarV1);
             VarDX = Math.Sqrt(VarDX);
             VarDY = Math.Sqrt(VarDY);
 
@@ -1091,20 +1393,24 @@ namespace rx_CamLib
             int Counter = 0;
             for (int i = 0; i < CorrectionList.Count; i++)
             {
-                if (CorrectionList[i].Correction <= MeanCorr + VarCorr &&
-                   CorrectionList[i].Correction >= MeanCorr - VarCorr &&
-                   CorrectionList[i].DPosX <= MeanDX + VarDX &&
-                   CorrectionList[i].DPosX >= MeanDX - VarDX &&
-                   CorrectionList[i].DPosY <= MeanDY + VarDY &&
-                   CorrectionList[i].DPosY >= MeanDY - VarDY)
+                if (CorrectionList[i].Value_1 <= MeanV1 + VarV1 &&
+                    CorrectionList[i].Value_1 >= MeanV1 - VarV1 &&
+                    CorrectionList[i].Value_2 <= MeanV2 + VarV2 &&
+                    CorrectionList[i].Value_2 >= MeanV2 - VarV2 &&
+                    CorrectionList[i].DPosX <= MeanDX + VarDX &&
+                    CorrectionList[i].DPosX >= MeanDX - VarDX &&
+                    CorrectionList[i].DPosY <= MeanDY + VarDY &&
+                    CorrectionList[i].DPosY >= MeanDY - VarDY)
                 {
                     Counter++;
-                    MeasureData.Correction += CorrectionList[i].Correction;
+                    MeasureData.Value_1 += CorrectionList[i].Value_1;
+                    MeasureData.Value_2 += CorrectionList[i].Value_2;
                     MeasureData.DPosX += CorrectionList[i].DPosX;
                     MeasureData.DPosY += CorrectionList[i].DPosY;
                 }
             }
-            MeasureData.Correction /= Counter;
+            MeasureData.Value_1 /= Counter;
+            MeasureData.Value_2 /= Counter;
             MeasureData.DPosX /= Counter;
             MeasureData.DPosY /= Counter;
         }
@@ -1116,104 +1422,8 @@ namespace rx_CamLib
         }
 
 
-        //--- GetCamStreamCapsList ------------------------------------
-        public List<StreamCaps> GetCamStreamCapsList()
-        {
-            int hRes = 0;
-            IPin SrcCapPin = null;
-            List<StreamCaps> list = new List<StreamCaps>();
 
-            if(SourceFilter == null) return null;
 
-            hRes = DsFindPin(SourceFilter, ref SrcCapPin, PinCategory.Capture);
-            if (hResultError(hRes)) return null;
-
-            IAMStreamConfig videoConfig = SrcCapPin as IAMStreamConfig;
-            int capsCount, capSize;
-            hRes = videoConfig.GetNumberOfCapabilities(out capsCount, out capSize);
-
-            VideoInfoHeader VIHeader = new VideoInfoHeader();
-            IntPtr pSC = Marshal.AllocHGlobal(capSize);
-
-            AMMediaType mt = null;
-
-            List<Guid> GuidList = new List<Guid>();
-            List<int> FrameRates = new List<int>();
-            for (int i = 0; i < capsCount; ++i)
-            {
-                StreamCaps Resolution = new StreamCaps();
-                hRes = videoConfig.GetStreamCaps(i, out mt, pSC);
-                if (hResultError(hRes)) continue;
-                Resolution.Mediasubtype = mt.subType;
-                if (mt.formatType.ToString() == "05589f80-c356-11ce-bf01-00aa0055595a") //only VideoInfoHeader(1)
-                {
-                    Marshal.PtrToStructure(mt.formatPtr, VIHeader);
-                    Resolution.FrameRate = (int)((float)10000000 / VIHeader.AvgTimePerFrame);
-                    Resolution.Resolution = new System.Drawing.Point(VIHeader.BmiHeader.Width, VIHeader.BmiHeader.Height);
-                    list.Add(Resolution);
-                }
-            }
-
-            Marshal.FreeCoTaskMem(mt.formatPtr);
-            Marshal.FreeHGlobal(pSC);
-
-            return list;
-        }
-
-        public StreamCaps GetCamStreamCaps()
-        {
-            int hRes = 0;
-            IPin SrcCapPin = null;
-            StreamCaps StreamCaps = new StreamCaps();
-
-            if (SourceFilter == null) return null;
-
-            hRes = DsFindPin(SourceFilter, ref SrcCapPin, PinCategory.Capture);
-            if (hResultError(hRes)) return null;
-            IAMStreamConfig StreamConfig1 = (IAMStreamConfig)SrcCapPin;
-            VideoInfoHeader VIHeader = new VideoInfoHeader();
-            AMMediaType mt = null;
-            hRes = StreamConfig1.GetFormat(out mt);
-            if (hResultError(hRes)) return null;
-            Marshal.PtrToStructure(mt.formatPtr, VIHeader);
-            StreamCaps.Mediasubtype = mt.subType;
-            StreamCaps.FrameRate = (int)((float)10000000 / VIHeader.AvgTimePerFrame);
-            StreamCaps.Resolution = new System.Drawing.Point(VIHeader.BmiHeader.Width, VIHeader.BmiHeader.Height);
-
-            Marshal.FreeCoTaskMem(mt.formatPtr);
-
-            return StreamCaps;
-        }
-
-        private ENCamResult SetCamStreamCaps(StreamCaps StreamCaps)
-        {
-            int hRes = 0;
-
-            if (SourceFilter == null) return ENCamResult.Error;
-
-            IPin SrcCapPin = null;
-            hRes = DsFindPin(SourceFilter, ref SrcCapPin, PinCategory.Capture);
-            if (hResultError(hRes)) return LastDsErrorNum = ENCamResult.Error;
-            IAMStreamConfig StreamConfig1 = (IAMStreamConfig)SrcCapPin;
-            VideoInfoHeader VIHeader = new VideoInfoHeader();
-            AMMediaType mt = null;
-            hRes = StreamConfig1.GetFormat(out mt);
-            if (hResultError(hRes)) return LastDsErrorNum = ENCamResult.Error;
-
-            if (StreamCaps!=null)
-			{
-                Marshal.PtrToStructure(mt.formatPtr, VIHeader);
-                VIHeader.BmiHeader.Width = Convert.ToInt32(StreamCaps.Resolution.X);
-                VIHeader.BmiHeader.Height = Convert.ToInt32(StreamCaps.Resolution.Y);
-                Marshal.StructureToPtr(VIHeader, mt.formatPtr, true);
-                mt.subType = StreamCaps.Mediasubtype;
-                hRes = StreamConfig1.SetFormat(mt);
-                if (hResultError(hRes)) return LastDsErrorNum = ENCamResult.Error;
-                Marshal.FreeCoTaskMem(mt.formatPtr);
-			}
-
-            return ENCamResult.OK;
-        }
 
         /*
         private int SetCamCapSetting(CamDeviceSettings CamCap)

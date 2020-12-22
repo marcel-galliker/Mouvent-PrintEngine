@@ -20,6 +20,7 @@ namespace RX_DigiPrint.Views.SetupAssistView
 			InitializeComponent();
 
 			DataContext = RxGlobals.SetupAssist;
+			BTN_Continue.DataContext = RxGlobals.SA_StateMachine;
 			RxGlobals.PrinterStatus.PropertyChanged += PrinterStatusChanged;
 			PrinterStatusChanged(this, null);
 		}

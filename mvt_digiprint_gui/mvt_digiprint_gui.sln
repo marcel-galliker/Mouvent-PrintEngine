@@ -32,6 +32,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "rx_CamLib", "rx_CamLib\rx_CamLib.csproj", "{33B52D28-FB27-4D38-BFF7-E078359E677E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{97412D0E-6CD1-4E4E-92F9-1460DEEDB44A} = {97412D0E-6CD1-4E4E-92F9-1460DEEDB44A}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rx_AlignFilter", "rx_AlignFilter\rx_AlignFilter.vcxproj", "{DF0DFCB4-2D19-450C-81C4-74493DD4009D}"
 EndProject
@@ -286,22 +289,22 @@ Global
 		{33B52D28-FB27-4D38-BFF7-E078359E677E}.Release|x86.ActiveCfg = Release|Any CPU
 		{33B52D28-FB27-4D38-BFF7-E078359E677E}.Release|x86.Build.0 = Release|Any CPU
 		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug|Any CPU.ActiveCfg = Debug|Win32
-		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
-		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug|Mixed Platforms.Build.0 = Debug|Win32
-		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug|Win32.ActiveCfg = Debug|Win32
-		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug|Win32.Build.0 = Debug|Win32
-		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug|x64.ActiveCfg = Debug|x64
-		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug|x64.Build.0 = Debug|x64
-		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug|x86.ActiveCfg = Debug|Win32
-		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug|x86.Build.0 = Debug|Win32
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug|Mixed Platforms.ActiveCfg = Release|Win32
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug|Mixed Platforms.Build.0 = Release|Win32
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug|Win32.ActiveCfg = Release|Win32
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug|Win32.Build.0 = Release|Win32
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug|x64.ActiveCfg = Release|x64
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug|x64.Build.0 = Release|x64
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug|x86.ActiveCfg = Release|Win32
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug|x86.Build.0 = Release|Win32
 		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug-Remote|Any CPU.ActiveCfg = Debug|Win32
 		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug-Remote|Any CPU.Build.0 = Debug|Win32
 		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug-Remote|Mixed Platforms.ActiveCfg = Debug|Win32
 		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug-Remote|Mixed Platforms.Build.0 = Debug|Win32
 		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug-Remote|Win32.ActiveCfg = Debug|Win32
 		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug-Remote|Win32.Build.0 = Debug|Win32
-		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug-Remote|x64.ActiveCfg = Debug|x64
-		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug-Remote|x64.Build.0 = Debug|x64
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug-Remote|x64.ActiveCfg = Release|x64
+		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug-Remote|x64.Build.0 = Release|x64
 		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug-Remote|x86.ActiveCfg = Debug|Win32
 		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Debug-Remote|x86.Build.0 = Debug|Win32
 		{DF0DFCB4-2D19-450C-81C4-74493DD4009D}.Release|Any CPU.ActiveCfg = Release|Win32

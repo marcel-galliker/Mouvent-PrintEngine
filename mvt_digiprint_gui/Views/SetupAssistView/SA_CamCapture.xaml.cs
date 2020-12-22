@@ -40,6 +40,7 @@ namespace RX_DigiPrint.Views.SetupAssistView
 				}
 				_Camera.SetVideoRectangle(CameraCapture.ClientRectangle);
 				CameraCapture_Grid.DataContext = CamGlobals.AlignFilter;
+				CallbackInfo.DataContext	   = RxGlobals.SA_StateMachine;
 			}
 			else if(ret == ENCamResult.Filter_NotRegistered)
 			{

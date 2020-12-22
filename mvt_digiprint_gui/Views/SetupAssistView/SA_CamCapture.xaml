@@ -16,6 +16,7 @@
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto" x:Name="CameraCapture_Height"/>
             <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,5">
@@ -49,7 +50,7 @@
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
             </Grid.RowDefinitions>
-            
+
             <StackPanel  Orientation="Horizontal">
                 <TextBlock Text="Threshold: "/>
                 <TextBlock Text="{Binding Threshold}" Width="50"/>
@@ -57,5 +58,6 @@
 
             <Slider Grid.Row="1" Minimum="0" Maximum="255" Value="{Binding Threshold}" x:Name="ThresholdSlider"/>
         </Grid>
+        <TextBlock Grid.Row="3" x:Name="CallbackInfo" Text="{Binding CallbackInfo}" />
     </Grid>
 </UserControl>

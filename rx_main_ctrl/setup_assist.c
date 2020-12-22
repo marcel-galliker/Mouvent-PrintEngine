@@ -87,7 +87,7 @@ static void* _sa_tick_thread(void *lpParameter)
 		if (_SaSocket!=INVALID_SOCKET) 
 		{
 			int ret=sok_send_2(&_SaSocket, CMD_STATUS_GET, 0, NULL);
-			TrPrintfL(TRUE, "SetupAssist: CMD_STATUS_GET socket=%d, ret=%d", _SaSocket, ret);
+		//	TrPrintfL(TRUE, "SetupAssist: CMD_STATUS_GET socket=%d, ret=%d", _SaSocket, ret);
 			if (_Timeout>0 && --_Timeout==0) Error(ERR_CONT, 0, "Setup Assistant Scanner timeout");
 		}
 		rx_sleep(1000);
@@ -113,10 +113,11 @@ static int _sa_handle_msg(RX_SOCKET socket, void *msg, int len, struct sockaddr 
 //--- _do_sa_stat ---------------------------------------------------------------
 static int _do_sa_stat(RX_SOCKET socket, SSetupAssist_StatusMsg	*pstat)
 {
-	TrPrintfL(TRUE, "SetupAssist: Got Status");
+//	TrPrintfL(TRUE, "SetupAssist: Got Status");
 	memcpy(&_Status, pstat, sizeof(_Status));
 	_Status.hdr.msgId = REP_SETUP_ASSIST_STAT;
 	_Status.motor.position = (INT32)(pstat->motor.position*_microns2steps);
+	_Status.motor.stopPos  = (INT32)(pstat->motor.stopPos *_microns2steps);
 	if (!_Status.motor.moving && _Timeout<MOVE_TIEMOUT) _Timeout=0;
 	gui_send_msg(INVALID_SOCKET, &_Status);
 	return REPLY_OK;
@@ -166,7 +167,8 @@ void sa_handle_gui_msg(RX_SOCKET socket, void *pmsg_)
 									cmd.hdr.msgLen = sizeof(cmd);
 									cmd.hdr.msgId  = CMD_MOTOR_MOVE;
 									cmd.steps	   = (INT32)((double)pmsg->steps/_microns2steps);
-									cmd.speed	   = 200;
+									if (pmsg->speed) cmd.speed = pmsg->speed;
+									else			 cmd.speed = 200;
 									cmd.acc		   = 100;
 									cmd.current	   = 300;
 									sok_send(&_SaSocket, &cmd);

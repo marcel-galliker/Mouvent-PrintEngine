@@ -129,7 +129,9 @@ namespace RX_Common
         {
          //   return val;
 
-            if (val==null || val[0]<'0' || val[0]>'9') return val;
+            if (val==null || (val[0]!='-' && (val[0]<'0' || val[0]>'9'))) return val;
+
+            if (Rx.StrToInt32(val)==1431677568) return "----";
 
             if (factor!=1.0)
             {
@@ -143,11 +145,22 @@ namespace RX_Common
             int pos = val.IndexOf('.');
             if (pos<0)   
                 pos = val.Length;
-            for (i=0; i<pos; i++)
-            {
-                str.Append(val[i]);
-                if ((i+1<pos) && ((pos-i)%3)==1) str.Append('\'');
-            }
+            if (val[0]=='-')
+			{
+                for (i=0; i<pos; i++)
+                {
+                    str.Append(val[i]);
+                    if ((i+2<pos) && ((pos-i-1)%3)==1) str.Append('\'');
+                }
+			}
+            else
+			{
+                for (i=0; i<pos; i++)
+                {
+                    str.Append(val[i]);
+                    if ((i+1<pos) && ((pos-i)%3)==1) str.Append('\'');
+                }
+			}
             if (decimals>0)
             {
                 str.Append('.'); pos++;
