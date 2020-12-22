@@ -507,6 +507,7 @@ static void _step_set_config(int no)
 	cfg.use_printhead_en   = (RX_Config.printer.type==printer_LH702) && str_start(RX_Hostname, "LH702");
 	cfg.material_thickness = RX_Config.stepper.material_thickness;
 	cfg.boardNo=no;
+    cfg.headsPerColor	   = RX_Config.headsPerColor;
 		
 	if (RX_Config.printer.type==printer_LH702 && !str_start(RX_Hostname, "LH702")) cfg.printerType = printer_LB702_UV;
 

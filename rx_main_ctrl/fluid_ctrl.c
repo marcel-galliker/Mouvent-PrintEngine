@@ -696,12 +696,16 @@ static void _control(int fluidNo)
                 case ctrl_purge_step1:		if ((!lbrob && step_lift_in_top_pos()) || (lbrob && steplb_rob_in_wipe_pos(no / 2, rob_fct_purge_all)))  // steplb_lift_in_up_pos_individually(no / 2))
 											{
 												if (_txrob && _PurgeFluidNo < 0 && !steptx_rob_wash_done()) break;
-												plc_to_purge_pos();
+												
                                                 if (RX_Config.printer.type == printer_test_table_seon)
                                                 {
                                                     drive_move_waste();
                                                 }
-												_send_ctrlMode(no, ctrl_purge_step2, TRUE);																										
+                                                if (!RX_PrinterStatus.scanner_off)
+												{
+                                                    plc_to_purge_pos();
+													_send_ctrlMode(no, ctrl_purge_step2, TRUE);
+                                                }
 											}
 											// else if (lbrob && !RX_StepperStatus.info.moving && RX_StepperStatus.robinfo.moving) steplb_rob_to_wipe_pos(no/2, HeadNo + rob_fct_purge_head0);
 											break;
@@ -760,7 +764,7 @@ static void _control(int fluidNo)
 												{
 	                                                _send_ctrlMode(-1, ctrl_print, TRUE);
 													_PurgeCtrlMode = ctrl_undef;
-													if (!RX_StepperStatus.robinfo.moving && rx_def_is_tx(RX_Config.printer.type) && step_active(1)) step_empty_waste();
+													if (!RX_StepperStatus.robinfo.moving && rx_def_is_tx(RX_Config.printer.type) && step_active(1)) step_empty_waste(0);
                                                 }											
                                             }
                                             else if (_LeakTest)
@@ -880,7 +884,7 @@ static void _control_flush(void)
         case ctrl_cap_step3:	if (steptx_rob_cap_flush_prepared()) _FluidCtrlMode = ctrl_flush_step1;
 								break;
 
-        case ctrl_flush_step1:	if (step_lift_in_up_pos() && (steptx_rob_cap_flush_prepared() || !_txrob)) 
+        case ctrl_flush_step1:	if (step_lift_in_up_pos() && (steptx_rob_cap_flush_prepared() || !_txrob) && !RX_PrinterStatus.scanner_off) 
 								{
 									plc_to_purge_pos();
 									_FluidCtrlMode=ctrl_flush_step2;
@@ -1385,3 +1389,4 @@ static int _fluid_get_flush_time(int flush_cycle)
 			time_s = RX_Config.inkSupply[i].ink.flushTime[flush_cycle];
 	}
 	return time_s;
+}

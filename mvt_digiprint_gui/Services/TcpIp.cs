@@ -915,6 +915,7 @@ namespace RX_DigiPrint.Services
 	        public Int32		adjust_pos;
 	        public Int32		use_printhead_en;
             public Int32        material_thickness;
+            public Int32        headsPerColor;
 
             [MarshalAs(UnmanagedType.ByValArray, SizeConst =4)]
             public SRobotOffsets[] robot;

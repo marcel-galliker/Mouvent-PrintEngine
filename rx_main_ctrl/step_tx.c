@@ -527,7 +527,7 @@ static void _steptx_rob_control(void)
 				
 	case ctrl_vacuum_step5:		if (step_rob_wipe_done(ctrl_vacuum))
 								{
-                                    if (RX_Config.printer.type == printer_TX404)
+                                    if (RX_Config.printer.type == printer_TX404 && RX_Config.headsPerColor == 4)
                                     {
                                         _RobotCtrlMode = ctrl_vacuum_step8;
                                         _RisingEdge = FALSE;
@@ -571,7 +571,7 @@ static void _steptx_rob_control(void)
 				
 	case ctrl_vacuum_step9:		if (step_rob_wipe_done(ctrl_vacuum))
 								{
-                                    if (RX_Config.printer.type == printer_TX404)
+                                    if (RX_Config.printer.type == printer_TX404 && RX_Config.headsPerColor == 4)
                                     {
                                         _RobotCtrlMode = ctrl_vacuum_step13;
                                     }
