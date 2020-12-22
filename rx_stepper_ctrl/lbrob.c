@@ -146,7 +146,7 @@ void lbrob_init(void)
     memset(&_ParCable_drive_purge, 0, sizeof(SMovePar));
 
     // config for referencing cable pull motor (motor 4)
-    _ParCable_ref.speed = 1000;
+    _ParCable_ref.speed = 4000;
     _ParCable_ref.accel = 4000;
     _ParCable_ref.current_acc = 260.0;
     _ParCable_ref.current_run = 260.0;
@@ -160,7 +160,7 @@ void lbrob_init(void)
     // config for moving normal with cable pull motor (motor 4)
     // This commands that use this config need to start the motor with the
     // special encoder mode
-    _ParCable_drive.speed = 5000;
+    _ParCable_drive.speed = 4000;
     _ParCable_drive.accel = 8000;
     _ParCable_drive.current_acc = 400.0;        // max 420
     _ParCable_drive.current_run = 400.0;        // max 420
@@ -170,7 +170,7 @@ void lbrob_init(void)
     _ParCable_drive.enc_bwd = TRUE;
     _ParCable_drive.encCheck = chk_std;
 
-    _ParCable_drive_slow.speed = 1000;
+    _ParCable_drive_slow.speed = 5000;
     _ParCable_drive_slow.accel = 8000;
     _ParCable_drive_slow.current_acc = 400.0;   // max 420
     _ParCable_drive_slow.current_run = 400.0;   // max 420
@@ -442,7 +442,7 @@ void lbrob_main(int ticks, int menu)
                 _Old_RobFunction = _RobFunction;
                 _CmdRunning = FALSE;
                 _CmdRunning_old = FALSE;
-                if (!RX_StepperStatus.screwerinfo.y_in_ref || !RX_RobiStatus.isInGarage)
+                if (/*!RX_StepperStatus.screwerinfo.y_in_ref || */!RX_RobiStatus.isInGarage && robi_off())
                 {
                     _CmdRunning_Robi = CMD_ROBI_MOVE_TO_GARAGE;
                     _NewCmd = CMD_ROB_MOVE_POS;
@@ -846,7 +846,7 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         RX_StepperStatus.robinfo.ref_done = FALSE;
         int val = FALSE;
         lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &val);
-        robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_STOP, NULL);
+        if (!robi_off()) robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_STOP, NULL);
         break;
 
     case CMD_ROB_REFERENCE:
@@ -867,7 +867,7 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             }
             break;
         }
-        else if (!RX_StepperStatus.screwerinfo.z_in_down)
+        else if (!RX_StepperStatus.screwerinfo.z_in_down && !robi_off())
         {
             _CmdRunning_Robi = CMD_ROBI_MOVE_Z_DOWN;
             _NewCmd = msgId;
@@ -1023,7 +1023,7 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
     {
         _RobFunction = fct;
         
-        if (!RX_StepperStatus.screwerinfo.z_in_down)
+        if (!RX_StepperStatus.screwerinfo.z_in_down && !robi_off())
         {
             _CmdRunning_Robi = CMD_ROBI_MOVE_Z_DOWN;
             _NewCmd = msgId;
@@ -1098,7 +1098,7 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
                 }
                 return;
             }
-            else if(_Old_RobFunction == rob_fct_wipe && ((_WipeSide >= wipe_right && !RX_StepperStatus.screwerinfo.wipe_right_up) || (_WipeSide == wipe_left && !RX_StepperStatus.screwerinfo.wipe_left_up)))
+            else if(_Old_RobFunction == rob_fct_wipe && ((_WipeSide >= wipe_right && !RX_StepperStatus.screwerinfo.wipe_right_up) || (_WipeSide == wipe_left && !RX_StepperStatus.screwerinfo.wipe_left_up)) && !robi_off())
             {
                 if (_WipeSide >= wipe_right)
                 {
@@ -1191,6 +1191,7 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
     static int correction_value;
     static int wait_time = 0;
     int pos_min;
+    if (robi_off()) return;
 
     screwNr = headAdjustment.printbarNo * HEADS_PER_COLOR * SCREWS_PER_HEAD + headAdjustment.headNo * SCREWS_PER_HEAD + headAdjustment.axis + 1;
     screwSteps = headAdjustment.steps;
@@ -1415,6 +1416,8 @@ static void _search_all_screws()
     int test;
     int pos_min;
     int pos;
+    if (robi_off()) return;
+    
     if ((!RX_StepperStatus.info.moving && !RX_StepperStatus.robinfo.moving && !RX_StepperStatus.screwerinfo.moving))
     {
         if (_SearchScrewNr >= HEADS_PER_COLOR * COLORS_PER_STEPPER * SCREWS_PER_HEAD)

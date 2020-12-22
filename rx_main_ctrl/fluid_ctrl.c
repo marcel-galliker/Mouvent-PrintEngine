@@ -942,7 +942,7 @@ static void _control(int fluidNo)
                                             }
 											break;
 
-                case ctrl_wash_step3:		if (RX_StepperStatus.robot_used)
+                case ctrl_wash_step3:		if (RX_StepperStatus.robot_used) 
 											{
 											    //if (RX_PrinterStatus.printState == ps_pause) _send_ctrlMode(no, ctrl_print, TRUE);
                                                 if (_EndCtrlMode[no] == ctrl_print)			_send_ctrlMode(no, ctrl_print, TRUE);
@@ -1182,7 +1182,7 @@ void fluid_send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
         if (no == -1)
 		{
 		    for (int i = 0; i < RX_Config.inkSupplyCnt; i++)
-		        flushed |= _Flushed & (0x1 << i);
+                if (*RX_Config.inkSupply[i].ink.fileName) flushed |= _Flushed & (0x1 << i);
 		}
 		else flushed = _Flushed & (0x1 << no);
 

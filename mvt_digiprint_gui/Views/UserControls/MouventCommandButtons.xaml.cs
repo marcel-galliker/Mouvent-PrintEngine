@@ -205,7 +205,7 @@ namespace RX_DigiPrint.Views.UserControls
                 bool canFlush=false;
                 foreach(InkSupply inkSupply in RxGlobals.InkSupply.List)
                     if (inkSupply.InkType!=null) canFlush |= inkSupply.InkType.CanFlush;
-                canFlush=false;
+                //canFlush=false;
                 if (canFlush)
 				{
                     FlushWindow wnd = new FlushWindow();

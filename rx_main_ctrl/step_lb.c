@@ -125,6 +125,10 @@ int	 steplb_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen
 			case CMD_LIFT_CAPPING_POS:
 			case CMD_LIFT_REFERENCE:
 			case CMD_ROB_REFERENCE:
+                        if (cmd == CMD_LIFT_UP_POS) 
+                        {
+                            Error(LOG, 0, "Send UP-Command");
+                        }
 						sok_send_2(&_step_socket[no], cmd, 0, NULL);
 						break;
 		
@@ -211,7 +215,7 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
             }
         }
     };
-    if (_step_socket[0] == INVALID_SOCKET)
+    if (_step_socket[0] == INVALID_SOCKET || _step_socket[0] == 0)
         robinfo.auto_cap = TRUE;
     else
         robinfo.auto_cap = _Status[0].robinfo.auto_cap;
