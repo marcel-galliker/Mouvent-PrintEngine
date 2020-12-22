@@ -442,7 +442,7 @@ void lbrob_main(int ticks, int menu)
                 _Old_RobFunction = _RobFunction;
                 _CmdRunning = FALSE;
                 _CmdRunning_old = FALSE;
-                if (/*!RX_StepperStatus.screwerinfo.y_in_ref || */!RX_RobiStatus.isInGarage && robi_off())
+                if (!RX_StepperStatus.screwerinfo.y_in_ref || !RX_RobiStatus.isInGarage)
                 {
                     _CmdRunning_Robi = CMD_ROBI_MOVE_TO_GARAGE;
                     _NewCmd = CMD_ROB_MOVE_POS;
@@ -846,7 +846,7 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         RX_StepperStatus.robinfo.ref_done = FALSE;
         int val = FALSE;
         lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &val);
-        if (!robi_off()) robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_STOP, NULL);
+        robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_STOP, NULL);
         break;
 
     case CMD_ROB_REFERENCE:
@@ -867,7 +867,7 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             }
             break;
         }
-        else if (!RX_StepperStatus.screwerinfo.z_in_down && !robi_off())
+        else if (!RX_StepperStatus.screwerinfo.z_in_down)
         {
             _CmdRunning_Robi = CMD_ROBI_MOVE_Z_DOWN;
             _NewCmd = msgId;
@@ -1023,7 +1023,7 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
     {
         _RobFunction = fct;
         
-        if (!RX_StepperStatus.screwerinfo.z_in_down && !robi_off())
+        if (!RX_StepperStatus.screwerinfo.z_in_down)
         {
             _CmdRunning_Robi = CMD_ROBI_MOVE_Z_DOWN;
             _NewCmd = msgId;
@@ -1098,7 +1098,7 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
                 }
                 return;
             }
-            else if(_Old_RobFunction == rob_fct_wipe && ((_WipeSide >= wipe_right && !RX_StepperStatus.screwerinfo.wipe_right_up) || (_WipeSide == wipe_left && !RX_StepperStatus.screwerinfo.wipe_left_up)) && !robi_off())
+            else if(_Old_RobFunction == rob_fct_wipe && ((_WipeSide >= wipe_right && !RX_StepperStatus.screwerinfo.wipe_right_up) || (_WipeSide == wipe_left && !RX_StepperStatus.screwerinfo.wipe_left_up)))
             {
                 if (_WipeSide >= wipe_right)
                 {
@@ -1191,7 +1191,6 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
     static int correction_value;
     static int wait_time = 0;
     int pos_min;
-    if (robi_off()) return;
 
     screwNr = headAdjustment.printbarNo * HEADS_PER_COLOR * SCREWS_PER_HEAD + headAdjustment.headNo * SCREWS_PER_HEAD + headAdjustment.axis + 1;
     screwSteps = headAdjustment.steps;
@@ -1416,7 +1415,6 @@ static void _search_all_screws()
     int test;
     int pos_min;
     int pos;
-    if (robi_off()) return;
     
     if ((!RX_StepperStatus.info.moving && !RX_StepperStatus.robinfo.moving && !RX_StepperStatus.screwerinfo.moving))
     {

@@ -274,7 +274,7 @@ void lb702_main(int ticks, int menu)
             RX_StepperStatus.info.z_in_ref = (cmd == CMD_LIFT_REFERENCE && RX_StepperStatus.info.ref_done);
             RX_StepperStatus.info.z_in_up = (cmd == CMD_LIFT_UP_POS && RX_StepperStatus.info.ref_done);
             RX_StepperStatus.info.z_in_print = (cmd == CMD_LIFT_PRINT_POS && RX_StepperStatus.info.ref_done && !_CmdRunningRobi);
-            RX_StepperStatus.info.z_in_cap = (cmd == CMD_LIFT_CAPPING_POS && RX_StepperStatus.info.ref_done /*&& RX_StepperStatus.screwerinfo.y_in_ref*/ && (RX_RobiStatus.isInGarage || robi_off()));
+            RX_StepperStatus.info.z_in_cap = (cmd == CMD_LIFT_CAPPING_POS && RX_StepperStatus.info.ref_done && RX_StepperStatus.screwerinfo.y_in_ref && RX_RobiStatus.isInGarage);
             RX_StepperStatus.info.z_in_wash = (cmd == CMD_LIFT_WASH_POS && RX_StepperStatus.info.ref_done);
             RX_StepperStatus.info.z_in_screw = (cmd == CMD_LIFT_SCREW && RX_StepperStatus.info.ref_done);
         }
@@ -496,7 +496,7 @@ static void _lb702_move_to_pos(int cmd, int pos0, int pos1)
 {
     RX_StepperStatus.cmdRunning = cmd;
     if (cmd == _NewCmd) _NewCmd = 0;
-    if (RX_StepperStatus.robot_used && !_CmdRunningRobi && (/*!RX_StepperStatus.screwerinfo.y_in_ref ||*/ !RX_RobiStatus.isInGarage && !robi_off()) && RX_StepperStatus.cmdRunning != CMD_LIFT_REFERENCE && RX_StepperStatus.cmdRunning != CMD_LIFT_SCREW && !robi_off())
+    if (RX_StepperStatus.robot_used && !_CmdRunningRobi && (!RX_StepperStatus.screwerinfo.y_in_ref || !RX_RobiStatus.isInGarage) && RX_StepperStatus.cmdRunning != CMD_LIFT_REFERENCE && RX_StepperStatus.cmdRunning != CMD_LIFT_SCREW)
     {
         _CmdRunningRobi = CMD_ROBI_MOVE_TO_GARAGE;
         _NewCmd = cmd;
@@ -511,8 +511,8 @@ static void _lb702_move_to_pos(int cmd, int pos0, int pos1)
         lbrob_handle_ctrl_msg(INVALID_SOCKET, _CmdRunningRobi, NULL);
 		_NewCmd = cmd;
 	}
-    else if ((((cmd == CMD_LIFT_PRINT_POS || cmd == CMD_LIFT_UP_POS || cmd == CMD_LIFT_CLUSTER_CHANGE) && (RX_RobiStatus.isInGarage || robi_off()) /*&& RX_StepperStatus.screwerinfo.y_in_ref */&& RX_StepperStatus.info.x_in_ref) ||
-                 ((cmd == CMD_LIFT_CAPPING_POS || cmd == CMD_LIFT_WASH_POS) && (RX_RobiStatus.isInGarage || robi_off())/* && RX_StepperStatus.screwerinfo.y_in_ref*/) || cmd == CMD_LIFT_SCREW || cmd == CMD_LIFT_REFERENCE) && 
+    else if ((((cmd == CMD_LIFT_PRINT_POS || cmd == CMD_LIFT_UP_POS || cmd == CMD_LIFT_CLUSTER_CHANGE) && RX_RobiStatus.isInGarage && RX_StepperStatus.screwerinfo.y_in_ref && RX_StepperStatus.info.x_in_ref) ||
+                 ((cmd == CMD_LIFT_CAPPING_POS || cmd == CMD_LIFT_WASH_POS) && RX_RobiStatus.isInGarage && RX_StepperStatus.screwerinfo.y_in_ref) || cmd == CMD_LIFT_SCREW || cmd == CMD_LIFT_REFERENCE) && 
                  !RX_StepperStatus.screwerinfo.moving)
 	{
 		Error(LOG, 0, "Move Command %08x", cmd);
@@ -591,7 +591,7 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									{
 										val0 = -1*_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_back  - _PrintHeight);
 										val1 = -1*_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_front - _PrintHeight);
-                                        if ((/*!RX_StepperStatus.screwerinfo.y_in_ref || */!RX_RobiStatus.isInGarage && !robi_off()) && RX_StepperStatus.robot_used)
+                                        if ((!RX_StepperStatus.screwerinfo.y_in_ref || !RX_RobiStatus.isInGarage) && RX_StepperStatus.robot_used)
                                         {
                                             if (!RX_StepperStatus.info.z_in_ref || RX_StepperStatus.cmdRunning==CMD_LIFT_REFERENCE)
                                             {

@@ -140,14 +140,14 @@ int pc_start_printing(void)
 		spool_start_printing();
 		step_set_config();
 		if (!RX_StepperStatus.info.z_in_print 
-		&& (rx_def_is_tx(RX_Config.printer.type) || (RX_Config.printer.type==printer_LH702 && plc_in_simu())))
+		&& (rx_def_is_tx(RX_Config.printer.type) || (RX_Config.printer.type==printer_LH702 && plc_in_simu()) || rx_def_is_lb(RX_Config.printer.type)))
 		{
 			step_handle_gui_msg(INVALID_SOCKET, CMD_LIFT_PRINT_POS, NULL, 0);				
 		}
 		
 		TrPrintfL(TRUE, "pc_start_printing: ref_done=%d", RX_StepperStatus.info.ref_done);		
 		
-		if (rx_def_is_lb(RX_Config.printer.type))
+		/*if (rx_def_is_lb(RX_Config.printer.type))
 		{
 			if(!RX_StepperStatus.info.ref_done)
 			{
@@ -159,7 +159,7 @@ int pc_start_printing(void)
 				TrPrintfL(TRUE, "pc_start_printing: CMD_LIFT_UP_POS");		
 				step_handle_gui_msg(INVALID_SOCKET, CMD_LIFT_UP_POS, NULL, 0);										
 			}
-		}
+		}*/
 		_Scanning = rx_def_is_scanning(RX_Config.printer.type);
 		_PreloadCnt = 5;
 		memset(&_Item, 0, sizeof(_Item));

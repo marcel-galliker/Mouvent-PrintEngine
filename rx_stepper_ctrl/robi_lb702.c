@@ -855,8 +855,3 @@ static void _set_moving_variables(void)
     RX_StepperStatus.screwerinfo.wipe_left_up = FALSE;
     RX_StepperStatus.screwerinfo.wipe_right_up = FALSE;
 }
-
-int robi_off(void)
-{
-    return TRUE;
-}
