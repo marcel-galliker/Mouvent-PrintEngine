@@ -1289,6 +1289,7 @@ typedef struct SStepperCfg
 	INT32			adjust_pos;
 	INT32			use_printhead_en;	// if true use PRINTHEAD_EN to allow head going down
 	INT32			material_thickness;
+	INT32			headsPerColor;
 	
 	SRobotOffsets	robot[4];
 } SStepperCfg;

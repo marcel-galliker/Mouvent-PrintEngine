@@ -82,24 +82,34 @@
 #define POS_CENTER_OFFSET		(0.001+0.002) // 0.001 // in m
 #define POS_SHIFT_CNT			7
 #define POS_SHIFT_REF			(SHIFT_STEPS_PER_METER*0)
-#define POS_SHIFT_CENTER_801	(SHIFT_STEPS_PER_METER*(0.024-0.002))
-#define POS_SHIFT_START			(SHIFT_STEPS_PER_METER*(0.024-0.024))
-#define POS_SHIFT_START_404		(SHIFT_STEPS_PER_METER*(0.024-0.012))
+
+// Start positions
+#define POS_SHIFT_START			(SHIFT_STEPS_PER_METER * (0.024 - 0.024))
+#define POS_SHIFT_START_404		(SHIFT_STEPS_PER_METER * (0.024 - 0.012))
+#define POS_SHIFT_START_404_2	(SHIFT_STEPS_PER_METER * (0.024 - 0.018))
+
+// Center positions
+#define POS_SHIFT_CENTER_801	(SHIFT_STEPS_PER_METER * (0.024-0.002))
+#define POS_SHIFT_CENTER_802	(SHIFT_STEPS_PER_METER * (0.024 + 0.020))
+#define POS_SHIFT_CENTER_404	(SHIFT_STEPS_PER_METER * (0.024 + 0.046))
+#define POS_SHIFT_CENTER_404_2	(SHIFT_STEPS_PER_METER * (0.024 + 0.042))
+
+// End positions
 #define POS_SHIFT_END_801		(SHIFT_STEPS_PER_METER*(0.024+0.023))
-#define POS_SHIFT_CENTER_802	(SHIFT_STEPS_PER_METER*(0.024+0.020))
 #define POS_SHIFT_END_802		(SHIFT_STEPS_PER_METER*(0.024+0.067))
-#define POS_SHIFT_CENTER_404	(SHIFT_STEPS_PER_METER*(0.024+0.046))
 #define POS_SHIFT_END_404		(SHIFT_STEPS_PER_METER*(0.024+0.170))
+#define POS_SHIFT_END_404_2		(SHIFT_STEPS_PER_METER*(0.024+0.073))
+
+// Max turn positions
 #define POS_SHIFT_MAX_TURN		(SHIFT_STEPS_PER_METER*(0.024+0.055))
 #define POS_SHIFT_MAX_TURN_404	(SHIFT_STEPS_PER_METER*(0.024+0.085))
 
+// Shift positions
 #define SHIFT_POS_REF		0
 #define SHIFT_POS_CENTER	1
 #define SHIFT_POS_START		2
 #define SHIFT_POS_END		3
 #define SHIFT_POS_MAX_TURN	4
-
-#define POS_SHIFT_CENTER	 POS_SHIFT_CENTER_801
 
 // Inputs
 #define ROT_STORED_IN		0
@@ -206,7 +216,6 @@ static int _TimeWastePumpStart = 0;
 //--- prototypes --------------------------------------------
 //static void _txrob_turn_screw_to_pos(int screw, int steps);
 static void _txrob_error_reset(void);
-static void _txrob_send_status(RX_SOCKET);
 static void _txrob_control(RX_SOCKET socket, EnFluidCtrlMode ctrlMode);
 
 static int  _rot_rev_2_steps(int rev);
@@ -226,8 +235,6 @@ static int  _wipe_done(void);
 static int  _wash_done(void);
 static int  _vacuum_done(void);
 static int  _vacuum_in_change(void);
-
-static int _robot_left(void);
 
 //--- txrob_init --------------------------------------
 void txrob_init(void)
@@ -329,7 +336,7 @@ void txrob_init(void)
         POS_SHIFT[SHIFT_POS_END] = POS_SHIFT_END_802;
 		_TimeFillCap = 25;		// seconds
 	}
-    else if (RX_StepperCfg.printerType == printer_TX404)
+    else if (RX_StepperCfg.printerType == printer_TX404 && RX_StepperCfg.headsPerColor == 4)
     {
         POS_SHIFT[SHIFT_POS_START] = POS_SHIFT_START_404;
         POS_SHIFT[SHIFT_POS_CENTER] = POS_SHIFT_CENTER_404;
@@ -337,6 +344,14 @@ void txrob_init(void)
         POS_SHIFT[SHIFT_POS_MAX_TURN] = POS_SHIFT_MAX_TURN_404;
         _TimeFillCap = 25; // seconds
     }
+	else if (RX_StepperCfg.printerType == printer_TX404 && RX_StepperCfg.headsPerColor == 2)
+	{
+		POS_SHIFT[SHIFT_POS_START] = POS_SHIFT_START_404_2;
+		POS_SHIFT[SHIFT_POS_CENTER] = POS_SHIFT_CENTER_404_2;
+		POS_SHIFT[SHIFT_POS_END] = POS_SHIFT_END_404_2;
+		POS_SHIFT[SHIFT_POS_MAX_TURN] = POS_SHIFT_MAX_TURN_404;
+		_TimeFillCap = 25; // seconds
+	}
 }
 
 //---_rot_pos_check --------------------------------------------------------------
@@ -647,11 +662,19 @@ void txrob_main(int ticks, int menu)
 				loc_move_pos = 2; // start
 				_WipeWaiting = TRUE;
 				break;
-				
+
 			case rob_fct_tilt: // Tilt
-				TrPrintfL(TRUE, "ROB_FUNCTION_TILT done");
-				_RobFunction = rob_fct_cap;	//0; // Robot in cap
-				RX_StepperStatus.robinfo.cap_ready = TRUE;
+				if (_step_rob_in_capping())
+				{
+					TrPrintfL(TRUE, "ROB_FUNCTION_TILT done");
+					_RobFunction = rob_fct_cap; // 0; // Robot in cap
+					RX_StepperStatus.robinfo.cap_ready = TRUE;
+				}
+				else
+				{
+					Error(ERR_CONT, 0, "Capping not in position");
+					RX_StepperStatus.robinfo.ref_done = FALSE;
+				}
 				break;
 				
 			case rob_fct_vacuum_change:
@@ -1088,7 +1111,7 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 				else if (pos == rob_fct_tilt)																												pos = POS_ROT[CAP_POS];
 				else if (pos == rob_fct_vacuum_all)
 				{
-                    if (RX_StepperCfg.printerType == printer_TX404)
+                    if (RX_StepperCfg.printerType == printer_TX404 && RX_StepperCfg.headsPerColor == 4)
                         _VacuumState = rob_vacuum_all;
                     if (_VacuumState == rob_vacuum_all)																										pos = POS_ROT[VAC_POS];
 					else if (_VacuumState == rob_vacuum_1_to_4)																								pos = POS_ROT[VAC_POS_1_TO_4_TO_ALL];
@@ -1138,14 +1161,15 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                         pos = POS_SHIFT[SHIFT_POS_START];
                     else if (abs(POS_SHIFT[SHIFT_POS_START] - motor_get_step(MOTOR_SHIFT) <= MOTOR_SHIFT_VAR))																	
                         pos = POS_SHIFT[SHIFT_POS_END];
-					else																																			pos = POS_SHIFT[pos];
+					else
+						pos = POS_SHIFT[pos];
 	
 				}
 
                 if (_VacuumState == rob_vacuum_all)
                 {
                     _ParShiftWet.speed = _SpeedShift;
-                    if (RX_StepperCfg.printerType == printer_TX404) _VacuumState = rob_vacuum_1_to_4;
+                    if (RX_StepperCfg.printerType == printer_TX404 && RX_StepperCfg.headsPerColor == 4) _VacuumState = rob_vacuum_1_to_4;
                 }
 				else								_ParShiftWet.speed = SPEED_SLOW_SHIFT;
 				motors_move_to_step(MOTOR_SHIFT_BITS, &_ParShiftWet, pos);
@@ -1156,10 +1180,9 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 				if (_RobFunction == rob_fct_vacuum || _RobFunction == rob_fct_vacuum_all)
 				{
 					if (abs(POS_SHIFT[SHIFT_POS_END] - motor_get_step(MOTOR_SHIFT)) <= MOTOR_SHIFT_VAR	|| 
-                            (abs(POS_SHIFT[SHIFT_POS_MAX_TURN] - motor_get_step(MOTOR_SHIFT)) <= MOTOR_SHIFT_VAR && RX_StepperCfg.printerType != printer_TX404))	
+                            (abs(POS_SHIFT[SHIFT_POS_MAX_TURN] - motor_get_step(MOTOR_SHIFT)) <= MOTOR_SHIFT_VAR && (RX_StepperCfg.printerType != printer_TX404 || RX_StepperCfg.headsPerColor != 4)))	
                         pos = POS_SHIFT[SHIFT_POS_END];
-					else if (abs(POS_SHIFT[SHIFT_POS_START] - motor_get_step(MOTOR_SHIFT)) <= MOTOR_SHIFT_VAR || 
-                            (abs(POS_SHIFT[SHIFT_POS_MAX_TURN] - motor_get_step(MOTOR_SHIFT)) <= MOTOR_SHIFT_VAR && RX_StepperCfg.printerType == printer_TX404))		
+					else if (abs(POS_SHIFT[SHIFT_POS_START] - motor_get_step(MOTOR_SHIFT)) <= MOTOR_SHIFT_VAR || (abs(POS_SHIFT[SHIFT_POS_MAX_TURN] - motor_get_step(MOTOR_SHIFT)) <= MOTOR_SHIFT_VAR && RX_StepperCfg.printerType == printer_TX404 && RX_StepperCfg.headsPerColor == 4))		
                         pos = POS_SHIFT[SHIFT_POS_START];
 					else																																			
                         pos = POS_SHIFT[pos];
@@ -1325,14 +1348,7 @@ void	_txrob_error_reset(void)
 	// use: ErrorFlag (ERR_CONT, (UINT32*)&_Error[isNo],  1,  0, "InkSupply[%d] Ink Tank Sensor Error", isNo+1);
 }
 
-//--- _txrob_send_status --------------------------------------------------
-static void _txrob_send_status(RX_SOCKET socket)
-{
-	static RX_SOCKET _socket = INVALID_SOCKET;
-	if (socket != INVALID_SOCKET) _socket = socket;
-	if (_socket != INVALID_SOCKET) sok_send_2(&_socket, REP_STEPPER_STAT, sizeof(RX_StepperStatus), &RX_StepperStatus);
-}
-
+//--- _step_rob_in_wipe -----------------------------------------
 static int _step_rob_in_wipe(void)
 {
 	if (RX_StepperStatus.robinfo.move_ok == TRUE && RX_StepperStatus.robinfo.moving == FALSE && abs(POS_ROT[WIPE_POS] - motor_get_step(MOTOR_ROT)) <= MOTOR_ROT_VAR && RX_StepperStatus.robinfo.rob_in_wipe)
@@ -1342,6 +1358,7 @@ static int _step_rob_in_wipe(void)
 	return FALSE;
 }
 
+//--- _step_rob_in_wash ------------------------------------------
 static int _step_rob_in_wash(void)
 {
 	if (RX_StepperStatus.robinfo.move_ok == TRUE && RX_StepperStatus.robinfo.moving == FALSE && abs(POS_ROT[WASH_POS] - motor_get_step(MOTOR_ROT)) <= MOTOR_ROT_VAR && RX_StepperStatus.robinfo.rob_in_wash)
@@ -1351,6 +1368,7 @@ static int _step_rob_in_wash(void)
 	return FALSE;
 }
 
+//--- _step_rob_in_vacuum --------------------------------------------
 static int _step_rob_in_vacuum(void)
 {
 	if (RX_StepperStatus.robinfo.move_ok == TRUE && RX_StepperStatus.robinfo.moving == FALSE && abs(POS_ROT[VAC_POS] - motor_get_step(MOTOR_ROT)) <= MOTOR_ROT_VAR && RX_StepperStatus.robinfo.rob_in_vac)
@@ -1360,6 +1378,7 @@ static int _step_rob_in_vacuum(void)
 	return FALSE;
 }
 
+//--- _step_rob_in_capping -----------------------------------
 static int _step_rob_in_capping(void)
 {
 	if (RX_StepperStatus.robinfo.moving == FALSE && abs(POS_ROT[CAP_POS] - motor_get_step(MOTOR_ROT)) <= MOTOR_ROT_VAR && RX_StepperStatus.robinfo.rob_in_cap)
@@ -1369,6 +1388,7 @@ static int _step_rob_in_capping(void)
 	return FALSE;
 }
 
+//--- _wipe_done ----------------------------------------------
 static int _wipe_done(void)
 {
 	if (RX_StepperStatus.robinfo.move_ok == TRUE && RX_StepperStatus.robinfo.moving == FALSE && abs(POS_ROT[WIPE_POS] - motor_get_step(MOTOR_ROT)) <= MOTOR_ROT_VAR && _WipeWaiting == FALSE)
@@ -1378,6 +1398,7 @@ static int _wipe_done(void)
 	return FALSE;
 }
 
+//--- _wash_done ---------------------------------------------
 static int _wash_done(void)
 {
 	if (RX_StepperStatus.robinfo.move_ok == TRUE && RX_StepperStatus.robinfo.moving == FALSE && abs(POS_ROT[WASH_POS] - motor_get_step(MOTOR_ROT)) <= MOTOR_ROT_VAR && abs(POS_SHIFT[3] - motor_get_step(MOTOR_SHIFT) <= MOTOR_SHIFT_VAR))
@@ -1387,6 +1408,7 @@ static int _wash_done(void)
 	return FALSE;
 }
 
+//--- _vacuum_done ---------------------------------------------
 static int _vacuum_done(void)
 {
 	if ((RX_StepperStatus.robinfo.moving == FALSE) && abs(POS_ROT[VAC_POS] - motor_get_step(MOTOR_ROT)) <= MOTOR_ROT_VAR && _VacuumWaiting == FALSE)
@@ -1396,19 +1418,13 @@ static int _vacuum_done(void)
 	return FALSE;
 }
 
+//--- _vacuum_in_change ---------------------------------------------
 static int _vacuum_in_change(void)
 {
 	if (RX_StepperStatus.robinfo.moving == FALSE && ((abs(POS_ROT[CAP_POS] - motor_get_step(MOTOR_ROT)) <= MOTOR_ROT_VAR && _VacuumState == rob_vacuum_5_to_8) || (abs(POS_ROT[WASH_POS] - motor_get_step(MOTOR_ROT)) <= MOTOR_ROT_VAR && _VacuumState == rob_vacuum_1_to_4)))
 	{
 		return TRUE;
 	}
-}
-
-static int _robot_left(void)
-{
-	int position = _shift_steps_2_micron(POS_SHIFT_CENTER);
-	if (RX_StepperStatus.posX <= position + 10) return TRUE;
-	else return FALSE;
 }
 
 

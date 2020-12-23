@@ -689,8 +689,11 @@ static void _control(int fluidNo)
 													break;
 												}
 												*/
-												plc_to_purge_pos();
-												_send_ctrlMode(no, ctrl_purge_step2, TRUE);																										
+												if (!RX_PrinterStatus.scanner_off)
+												{
+													plc_to_purge_pos();
+													_send_ctrlMode(no, ctrl_purge_step2, TRUE);
+												}																								
 											}
 											// else if (lbrob && !RX_StepperStatus.info.moving && RX_StepperStatus.robinfo.moving) steplb_rob_to_wipe_pos(no/2, HeadNo + rob_fct_purge_head0);
 											break;
@@ -811,7 +814,7 @@ static void _control_flush(void)
         case ctrl_cap_step3:	if (steptx_rob_cap_flush_prepared()) _FluidCtrlMode = ctrl_flush_step1;
 								break;
 
-        case ctrl_flush_step1:	if (step_lift_in_up_pos() && (steptx_rob_cap_flush_prepared() || !_txrob)) 
+        case ctrl_flush_step1:	if (step_lift_in_up_pos() && (steptx_rob_cap_flush_prepared() || !_txrob) && !RX_PrinterStatus.scanner_off)
 								{
 									plc_to_purge_pos();
 									_FluidCtrlMode=ctrl_flush_step2;
