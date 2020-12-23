@@ -439,11 +439,12 @@ void step_rob_stop()
 	}
 }
 
-void step_empty_waste(void)
+void step_empty_waste(int time)
 {
     switch (_StepperType)
     {
     case STEPPER_TX:	steptx_rob_empty_waste(); break;
+	case STEPPER_LB:	steplb_rob_empty_waste(time); break;
     default: break;
     }
 }

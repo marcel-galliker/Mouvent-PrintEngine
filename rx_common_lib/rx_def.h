@@ -138,11 +138,11 @@ void rx_def_init();
 
 #define WAKEUP_BAR_LEN		128	// dots to wakeup lazy jets
 
-#define SCREW_X_LEFT		-18700		// -17700	// um
-#define SCREW_X_RIGHT		74300		// 75300	// um       // SCREW_X_LEFT + 93000
+#define SCREW_X_LEFT		-19200		// -17700	// um
+#define SCREW_X_RIGHT		73800		// 75300	// um       // SCREW_X_LEFT + 93000
 
-#define SCREW_Y_FRONT		55100 // um
-#define SCREW_Y_BACK		38700  // um       // SCREW_Y_BACK + 16400
+#define SCREW_Y_FRONT		53500 // um
+#define SCREW_Y_BACK		37100  // um       // SCREW_Y_FRONT - 16400
 
 //--- simple value ----------------------------------------------	
 typedef struct SValue

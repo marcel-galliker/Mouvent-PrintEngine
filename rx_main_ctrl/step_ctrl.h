@@ -56,7 +56,7 @@ void step_rob_wipe_start(EnFluidCtrlMode mode);
 int  step_rob_wipe_done(EnFluidCtrlMode mode);
 
 void step_rob_stop(void);
-void step_empty_waste(void);
+void step_empty_waste(int time);
 
 void step_set_autocapMode(int state);
 	
