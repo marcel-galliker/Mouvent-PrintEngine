@@ -23,17 +23,12 @@ namespace RX_DigiPrint.Views.Density
             DataContext = _Density;
         }
 
-        //--- Save_Clicked ---------------------------------------------
-        public void Save_Clicked(object sender, RoutedEventArgs e)
-        {
-            _Density.Save();
-        }
 
         private void LoadFile_Clicked(object sender, RoutedEventArgs e)
         {
-            TcpIp.SDensityValuesMsg msg = new TcpIp.SDensityValuesMsg();
-            msg.values.head = _Density.GetHeadNumber();
-            RxGlobals.RxInterface.SendMsg(TcpIp.CMD_GET_DENSITY_VAL, ref msg);
+            TcpIp.SDensityMsg msg = new TcpIp.SDensityMsg();
+            msg.head = _Density.GetHeadNumber();
+            RxGlobals.RxInterface.SendMsg(TcpIp.CMD_GET_DENSITY, ref msg);
         }
 
         private void DensityValueBox_GotFocus(object sender, RoutedEventArgs e)

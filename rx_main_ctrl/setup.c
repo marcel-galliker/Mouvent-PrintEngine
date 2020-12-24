@@ -221,10 +221,10 @@ int setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action)
 						int head  = n%MAX_HEADS_BOARD;
 						UCHAR	voltage;
 						setup_chapter(file, "Head", h, action);
-						if (RX_HBStatus[board].head[head].eeprom_mvt.voltage) voltage=RX_HBStatus[board].head[head].eeprom_mvt.voltage;
+						if (RX_HBStatus[board].head[head].eeprom_density.voltage) voltage=RX_HBStatus[board].head[head].eeprom_density.voltage;
 						else voltage=(UCHAR)RX_HBStatus[board].head[head].eeprom.voltage;
                         setup_uchar(file, "voltage", action, &voltage, 0);
-						setup_int16_arr(file, "density",  action, RX_HBStatus[board].head[head].eeprom_mvt.densityValue, MAX_DENSITY_VALUES, 0);
+						setup_int16_arr(file, "density",  action, RX_HBStatus[board].head[head].eeprom_density.densityValue, MAX_DENSITY_VALUES, 0);
 						setup_chapter(file, "..", -1, action);
 					}
 					setup_chapter(file, "..", -1, action);

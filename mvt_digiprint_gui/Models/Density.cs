@@ -65,20 +65,17 @@ namespace RX_DigiPrint.Models
             
         }
 
-        public void Save()
+        public void Save(ref TcpIp.SDensityMsg msg)
         {
             if (RxGlobals.PrintSystem.HeadsPerColor > 0)
             {
-                TcpIp.SDensityValuesMsg msg = new TcpIp.SDensityValuesMsg();
-                msg.values.value = new Int16[_cnt];
-                msg.values.head = HeadNumber;
-                msg.values.voltage = _Voltage;
+                msg.head = HeadNumber;
+                msg.data.densityValue = new Int16[_cnt];
+                msg.data.voltage = _Voltage;
                 for (int i = 0; i < _cnt; i++)
                 {
-                    msg.values.value[i] = DensityList[i].Value;
+                    msg.data.densityValue[i] = DensityList[i].Value;
                 }
-
-                RxGlobals.RxInterface.SendMsg(TcpIp.CMD_SET_DENSITY_VAL, ref msg);
             }
 
             Changed = false;

@@ -22,6 +22,9 @@
 #define EEPROM_MAX_ADR			4096
 #define EEPROM_USER_DATA_START	512
 
+#define EEPROM_MVT_ADDR			  0
+#define EEPROM_DENSITY_ADDR		128
+
 #define EXE_BLOCK_SIZE			512
 
 //--- Nios Configuration ---------------------------------------------
@@ -32,6 +35,47 @@ typedef struct SExecutable
 	BYTE	blkData[EXE_BLOCK_SIZE];
 } SExecutable;
 
+#define MAX_DISABLED_JETS	32
+#define MAX_DENSITY_VALUES	(2+10)
+
+#pragma pack(1)
+// eeprom page size: 32 Bytes
+typedef struct
+ {
+	INT16	angle;	// 0=undef
+	INT16	dist;	// 0=undef
+	UINT8	crc;
+ } SRobInfo;
+
+typedef struct
+{
+	UINT16	clusterNo;				// 0x00
+	UINT16	flowResistance;			// 0x02
+	UINT8	flowResistanceCRC;		// 0x04
+	UINT32	_dropletsPrinted_old;	//  0x05..0x08
+	UINT8	_dropletsPrintedCRC_old;	//	0x09
+	INT16	_disabledJets[MAX_DISABLED_JETS];	// 0x0a..0x4b
+	UINT8	_disabledJetsCRC;					//	0x4a
+	INT16	_densityValue[MAX_DENSITY_VALUES];	// 0x4b..0x62
+	UINT8	_densityValueCRC;					// 0x63
+	UINT8	_voltage;							// 0x64: Firepulse voltage
+	UINT8	_voltageCRC;						// 0x65
+	UINT64	dropletsPrinted;					// 0x66..0x6d
+	UINT8	dropletsPrintedCRC;					// 0x6e
+	SRobInfo	robot;
+	UINT8	filler[12];
+} SHeadEEpromMvt;	// size must be <=0x80!!
+
+typedef struct // size must be a multiple of 32!
+{
+	INT16	densityValue[MAX_DENSITY_VALUES];	// 0x00..0x17
+	INT16	disabledJets[MAX_DISABLED_JETS];	// 0x18..0x57
+	UINT8	voltage;							// 0x58: Firepulse voltage
+	UINT8	filler[6];
+	UINT8	crc;								// 0x59
+} SHeadEEpromDensity;
+
+#pragma pack()
 
 //*** memory written by ARM processor ****************************************
 
@@ -45,16 +89,18 @@ typedef union SNiosHeadCmd
 		UINT32	error_reset:1;			// 	01: 
 		UINT32	exe_valid:1;			// 	02:
 		UINT32	firepulse_on:1;			// 	03:
-#define WRITE_USER_EEPROM	(1<<4)
-		UINT32	write_user_eeprom0:1;	// 	04:
-		UINT32	write_user_eeprom1:1;	// 	05:
-		UINT32	write_user_eeprom2:1;	// 	06:
-		UINT32	write_user_eeprom3:1;	// 	07:
-		UINT32	debug:1;				// 	08:
+
+		UINT32	cmd_04:1;	// 	04:
+		UINT32	cmd_05:1;	// 	05:
+		UINT32	cmd_06:1;	// 	06:
+		UINT32	cmd_07:1;	// 	07:
+
+		UINT32	cmd_08:1;	// 	08:
 		UINT32	cmd_09:1;				// 	09:
 		UINT32	cmd_10:1;				// 	10:
 		UINT32	cmd_11:1;				// 	11:
-		UINT32	cmd_12:1;				// 	12:
+
+		UINT32	debug:1;				// 	12:
 		UINT32	cmd_13:1;				// 	13:
 		UINT32	cmd_14:1;				// 	14:
 		UINT32	cmd_15:1;				// 	15:
@@ -81,11 +127,20 @@ typedef struct SNiosCfg
 {
 	SNiosHeadCmd	cmd;
 	SConditionerCfg_mcu	cond[MAX_HEADS_BOARD];
+	BYTE			eeprom_fuji_readCnt[MAX_HEADS_BOARD];
+	BYTE			eeprom_mvt_readCnt[MAX_HEADS_BOARD];
+    BYTE			eeprom_mvt_writeCnt[MAX_HEADS_BOARD];
+	BYTE			eeprom_density_readCnt[MAX_HEADS_BOARD];
+	BYTE			eeprom_density_writeCnt[MAX_HEADS_BOARD];
 
 	union
 	{
 		SExecutable		exe;
-		BYTE			user_eeprom[MAX_HEADS_BOARD][EEPROM_DATA_SIZE];
+		struct 
+		{
+			SHeadEEpromMvt			eeprom_mvt[MAX_HEADS_BOARD];
+			SHeadEEpromDensity		eeprom_density[MAX_HEADS_BOARD];
+		};
 	};
 } SNiosCfg;
 
@@ -198,10 +253,16 @@ typedef struct SNiosStat
 	SNiosHeadErr	error;
 	INT32			QSYS_id;
 	INT32			QSYS_timestamp;
-	BYTE			head_eeprom[MAX_HEADS_BOARD][EEPROM_DATA_SIZE];
-	BYTE			user_eeprom[MAX_HEADS_BOARD][EEPROM_DATA_SIZE];
-	BYTE			eeprom_valid;	// one flag per head 
-	
+	BYTE			eeprom_fuji_readCnt[MAX_HEADS_BOARD];
+	BYTE			eeprom_fuji[MAX_HEADS_BOARD][EEPROM_DATA_SIZE];
+	BYTE			eeprom_mvt_readCnt[MAX_HEADS_BOARD];
+    BYTE			eeprom_mvt_writeCnt[MAX_HEADS_BOARD];
+	SHeadEEpromMvt	eeprom_mvt[MAX_HEADS_BOARD];
+	BYTE			eeprom_density_readCnt[MAX_HEADS_BOARD];
+	BYTE			eeprom_density_writeCnt[MAX_HEADS_BOARD];
+	INT32			eeprom_density_writeRes[MAX_HEADS_BOARD];
+
+	SHeadEEpromDensity	eeprom_density[MAX_HEADS_BOARD];
 	//--- other status --------------------
 	UINT32			alive;
 	INT32			u_firepulse;

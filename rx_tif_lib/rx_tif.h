@@ -35,6 +35,7 @@ int tif_get_info	(const char *path, STiffInfo *pinfo);
 int tif_load_full	(const char *path, SColorSplitCfg *psplit, int splitCnt, SBmpInfo *pinfo);
 // int tif_get_size	(const char *path, UINT32 spacePx, UINT32 *width, UINT32 *height, UINT8 *bitsPerPixel);
 int tif_get_size	(const char *path, UINT32 page, UINT32 spacePx, UINT32 *width, UINT32 *height, UINT8 *bitsPerPixel);
+UINT32 tif_get_used_colors(const char *path);
 int tif_load_mt		(SPageId *id, const char *filedir, const char *filename, int printMode, UINT32 spacePx, SColorSplitCfg *psplit, int splitCnt, BYTE* buffer[MAX_COLORS], SBmpInfo *pinfo, progress_fct progress);
 int tif_load		(SPageId *id, const char *filedir, const char *filename, int printMode, UINT32 spacePx, INT32 wakeupLen, SColorSplitCfg *psplit, int splitCnt, BYTE* buffer[MAX_COLORS], SBmpInfo *pinfo, progress_fct progress);
 int tif_load_simple	(const char *path, BYTE **buffer, int bufsize, SBmpInfo *info);

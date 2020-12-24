@@ -171,13 +171,9 @@
 #define CMD_HEAD_FLUID_CTRL_MODE 0x01000104
 #define REP_HEAD_FLUID_CTRL_MODE 0x02000104
 
-#define CMD_GET_DISABLED_JETS	0x01000105
-#define REP_GET_DISABLED_JETS	0x02000105
-#define CMD_SET_DISABLED_JETS	0x01000106
-
-#define CMD_GET_DENSITY_VAL		0x01000107
-#define REP_GET_DENSITY_VAL		0x02000107
-#define CMD_SET_DENSITY_VAL		0x01000108
+#define CMD_GET_DENSITY			0x01000107
+#define REP_GET_DENSITY			0x02000107
+#define CMD_SET_DENSITY			0x01000108
 #define CMD_SET_ROB_POS			0x01000109
 
 #define CMD_ENCODER_CFG			0x01000111
@@ -656,20 +652,12 @@ typedef struct
 	INT32			colorOffset[MAX_COLORS];
 } SPrinterCfgMsg;
 
-typedef struct SDensityValuesMsg
+typedef struct SDensityMsg
 {
 	SMsgHdr	hdr;
 	int		head;
-	UINT8	voltage;
-	INT16	value[MAX_DENSITY_VALUES];
-} SDensityValuesMsg;
-
-typedef struct SDisabledJetsMsg
-{
-	SMsgHdr	hdr;
-	int		head;
-	INT16	disabledJets[MAX_DISABLED_JETS];
-} SDisabledJetsMsg;
+	SHeadEEpromDensity data;
+} SDensityMsg;
 
 typedef struct SRobPositionMsg
 {

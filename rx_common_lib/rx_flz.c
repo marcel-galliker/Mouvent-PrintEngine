@@ -156,6 +156,23 @@ int flz_get_info(const char *path, UINT32 page, SFlzInfo *pflzinfo)
 	return REPLY_ERROR;
 }
 
+//--- flz_get_used_colors ----------------------------
+UINT32 flz_get_used_colors(const char *path)
+{
+	UINT32 usedColors=0;
+	int color;
+	char filepath[MAX_PATH];
+
+	for (color = 0; color < MAX_COLORS; color++)
+	{
+		if (!RX_Color[color].lastLine) continue;
+
+		_flz_color_path(path, 0, "", RX_ColorNameShort(color), filepath);
+		if (rx_file_exists(filepath)) usedColors |= 1<<color;
+	}
+	return usedColors;
+}
+
 //--- flz_get_size ----------------------------------------------------------------------
 int flz_get_size(const char *path, UINT32 page, UINT32 spacePx, UINT32 *width, UINT32 *height, UINT8 *bitsPerPixel)
 {

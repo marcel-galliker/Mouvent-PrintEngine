@@ -17,6 +17,7 @@
 #include "rx_sok.h"
 #include "rx_trace.h"
 #include "gui_svr.h"
+#include "lh702_ctrl.h"
 #include "ctr.h"
 
 #include <time.h>
@@ -42,7 +43,6 @@ static int		_jobLen;
 
 //--- prototypes ---------------------------------------
 static void _calc_check(time_t time, UCHAR *check);
-static void _calc_reset_key(char *machineName, UCHAR *key);
 static void _ctr_save(int reset, char *machineName);
 
 //--- ctr_init --------------------------------------
@@ -76,7 +76,7 @@ void ctr_init(void)
 	_Manipulated = (strcmp(check1, check2))!=0;
 	if (_Manipulated)
 	{
-		_calc_reset_key(RX_Hostname, check2);
+		ctr_calc_reset_key(RX_Hostname, check2);
 		if (!strcmp(check1, check2))
 		{
 			_Manipulated = FALSE;
@@ -85,7 +85,9 @@ void ctr_init(void)
 	}
 	if (_Manipulated && !rx_def_is_test(RX_Config.printer.type)) 
 		Error(ERR_CONT, 0, "Counters manipulated");
-	
+
+	lh702_ctr_init();
+
 	_ctr_save(FALSE, NULL);	
 }
 
@@ -101,8 +103,8 @@ static void _calc_check(time_t time, UCHAR *check)
 	rx_hash_mem_str((UCHAR*)&ctr, sizeof(ctr), check);
 }
 
-//--- _calc_reset_key -----------------------------------------
-static void _calc_reset_key(char *machineName, UCHAR *key)
+//--- ctr_calc_reset_key -----------------------------------------
+void ctr_calc_reset_key(char *machineName, UCHAR *key)
 {
 	char str[MAX_PATH];
 
@@ -126,7 +128,7 @@ void ctr_tick(void)
 }
 
 //--- ctr_add -------------------------------------------
-void ctr_add(int mm)
+void ctr_add(int mm, UINT32 colors)
 {
     int encoderOffset=0; 
 	if (rx_def_is_tx(RX_Config.printer.type)) encoderOffset=RX_Spooler.maxOffsetPx;
@@ -141,7 +143,9 @@ void ctr_add(int mm)
         }
 		RX_PrinterStatus.counterTotal	+= mm;
 		RX_PrinterStatus.counterAct		+= mm;
-    }  
+    }
+
+	lh702_ctr_add(mm, colors);
 }
 
 //--- ctr_reset_jobLen ---------------
@@ -157,17 +161,18 @@ void ctr_reset(void)
 	_ctr_save(FALSE, NULL);
 }
 
-//--- ctr_calc_reset_key -------------------------------------------
-void ctr_calc_reset_key(char *machineName)
+//--- ctr_print_reset_key -------------------------------------------
+void ctr_print_reset_key(char *machineName)
 {
 	UINT64	macAddr;
 	UCHAR   key[64];
+
 	sok_get_mac_address(DEVICE_NAME, &macAddr);
 	//printf("Mac-Addr: %08x%08x\n", macAddr >> 32, macAddr);
 
 //	if (macAddr==0x0000f7b6bf661fc8 || macAddr == 0x0000397db0eaf108)
 	{
-		_calc_reset_key(machineName, key);
+		ctr_calc_reset_key(machineName, key);
 		printf("KEY:\n%s\n", key);
 	}
 }
@@ -201,7 +206,7 @@ static void _ctr_save(int reset, char *machineName)
 			if (reset)
 			{
 				time = rx_get_system_sec();
-				_calc_reset_key(name, check);
+				ctr_calc_reset_key(name, check);
 			}
 			else if (_Manipulated) 
 			{
@@ -229,4 +234,5 @@ static void _ctr_save(int reset, char *machineName)
 	//	rx_file_set_readonly(PATH_USER FILENAME_COUNTERS, TRUE);
 		rx_file_set_mtime(PATH_USER FILENAME_COUNTERS, time);
 	}
+	lh702_ctr_save(reset, machineName);
 }

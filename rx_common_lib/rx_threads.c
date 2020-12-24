@@ -131,6 +131,48 @@ int rx_process_start	(const char *process, const char *params)
 }
 #endif
 
+//--- rx_popen -----------------------------------------
+HANDLE rx_popen(const char *cmd)
+{
+	SECURITY_ATTRIBUTES		sa;
+	STARTUPINFOA			startuopInfo;
+	PROCESS_INFORMATION		processInfo;
+	HANDLE					stream_rd = NULL;
+	HANDLE					stream_wr = NULL;
+	int		ret;
+	 
+	//--- create the pipe -------------------
+	sa.nLength = sizeof(SECURITY_ATTRIBUTES); 
+	sa.bInheritHandle = TRUE; 
+	sa.lpSecurityDescriptor = NULL; 
+
+	if ( !CreatePipe(&stream_rd, &stream_wr, &sa, 0) ) 
+	{
+		printf("StdoutRd CreatePipe"); 
+		return NULL;
+	}
+
+	if ( !SetHandleInformation(stream_rd, HANDLE_FLAG_INHERIT, 0) )
+	{
+		printf("Stdout SetHandleInformation"); 
+		return NULL;
+	}
+
+	//--- create the process ----------------------------------
+	memset(&startuopInfo, 0, sizeof(startuopInfo));
+	startuopInfo.cb			= sizeof(startuopInfo);
+	startuopInfo.dwFlags	= STARTF_USESTDHANDLES;
+	startuopInfo.hStdOutput = stream_wr;
+	startuopInfo.hStdError  = stream_wr;
+
+	ret = CreateProcessA(NULL, (char*)cmd, NULL, NULL, TRUE, NORMAL_PRIORITY_CLASS | CREATE_NO_WINDOW, NULL, NULL, &startuopInfo, &processInfo);
+
+	CloseHandle(stream_wr);
+	CloseHandle(processInfo.hProcess);
+    CloseHandle(processInfo.hThread);
+	return stream_rd;
+}
+
 //--- rx_process_get_id -------------------------------
 int rx_process_get_id	(const char *process, const char *arg)
 {
@@ -199,7 +241,8 @@ void   rx_exit(int exitCode)
 int rx_process_running_cnt(const char *process, const char *arg)//, HANDLE *phandle, HMODULE *pmodule)
 {
 	int start, count=0;
-	FILE *file;
+	DWORD len;
+	HANDLE file;
 	char str[100];
 
 	for (start = (int)strlen(process); start > 0; start--)
@@ -211,14 +254,14 @@ int rx_process_running_cnt(const char *process, const char *arg)//, HANDLE *phan
 		}
 	}
 
-	file = _popen("tasklist.exe", "r");
+	file = rx_popen("tasklist.exe");
 	if (file)
 	{
-		while (fgets(str, sizeof(str), file))
+		while (ReadFile( file, str, sizeof(str), &len, NULL))
 		{
-			if (str_start(str, &process[start])) count++;
+			if (strstr(str, &process[start])) count++;
 		}
-		fclose(file);
+		CloseHandle(file);
 	}
 	return count;
 }

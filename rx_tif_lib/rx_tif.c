@@ -199,6 +199,24 @@ int tif_get_size(const char *path, UINT32 page, UINT32 spacePx, UINT32 *width, U
 	return REPLY_NOT_FOUND;
 }
 
+
+//--- tif_get_used_colors -----------------------------------------------
+UINT32 tif_get_used_colors(const char *path)
+{
+	UINT32 usedColors=0;
+	int color;
+	char filepath[MAX_PATH];
+	
+	for (color = 0; color < MAX_COLORS; color++)
+	{
+		if (!RX_Color[color].lastLine) continue;
+
+		_tif_color_path(path, 0, "", RX_ColorNameShort(color), filepath);
+		if (rx_file_exists(filepath)) usedColors |= 1<<color;
+	}
+	return usedColors;	
+}
+
 //--- tif_get_info --------------------------------------------------------------------------------------
 int tif_get_info(const char *path, STiffInfo *pinfo)
 {

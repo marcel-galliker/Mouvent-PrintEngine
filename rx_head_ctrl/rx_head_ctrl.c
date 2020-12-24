@@ -21,6 +21,7 @@
 #include "rx_trace.h"
 #include "version.h"
 #include "args.h"
+#include "EEprom.h"
 #include "nios.h"
 #include "conditioner.h"
 #include "fpga.h"
@@ -102,10 +103,10 @@ void handle_menu(char *str)
 	else if (no=str_start(str, "resetinkctr"))	
 	{
 		cond_volume_printed(atoi(&str[no]), 0);
-		cond_reset_droplets_printed(atoi(&str[no]));
+		eeprom_reset_droplets_printed(atoi(&str[no]));
 	}
-	else if (no=str_start(str,"ra"))			cond_set_rob_pos(str[no]-'0', str_to_screw(&str[no+1]), 0);
-	else if (no=str_start(str,"rd"))			cond_set_rob_pos(str[no]-'0', 0, str_to_screw(&str[no+1]));
+	else if (no=str_start(str,"ra"))			eeprom_set_rob_pos(str[no]-'0', str_to_screw(&str[no+1]), 0);
+	else if (no=str_start(str,"rd"))			eeprom_set_rob_pos(str[no]-'0', 0, str_to_screw(&str[no+1]));
 	else
 	{
 		no = str[1] - '0';
@@ -161,6 +162,7 @@ void handle_menu(char *str)
 		// todo remove from final software -> toggle meniscus error check	
 		case 'M': cond_toggle_meniscus_check();				break;
 							
+ //       case 'a':	eeprom_test(str[1]-'0'); break;
 		// Only for DEBUGGING purposes
 		// Parameters for tuning the Conditioner's PID controller
 

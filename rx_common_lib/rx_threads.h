@@ -47,7 +47,7 @@ int    rx_process_execute		(const char *process, const char *outPath, int timeou
 int    rx_process_get_id		(const char *process, const char *arg);
 int    rx_process_kill 			(const char *process, const char *arg);
 int    rx_process_running_cnt	(const char *process, const char *arg);
-
+HANDLE rx_popen					(const char *process);
 int	   rx_core_cnt				(void);
 int	   rx_get_maxnumthreads(void *dummy);
 

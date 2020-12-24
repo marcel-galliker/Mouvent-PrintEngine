@@ -28,4 +28,9 @@ void lh702_abort_printing(void);
 
 void lh702_error_reset(void);
 
+void lh702_ctr_init();
+void lh702_ctr_add(int mm, UINT32 colors);
+void lh702_ctr_save(int reset, char *machineName);
+
+
 

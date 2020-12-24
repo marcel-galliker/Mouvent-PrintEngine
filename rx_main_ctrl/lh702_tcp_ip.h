@@ -80,6 +80,9 @@ typedef struct SLH702_State
 	INT32	dist;			// in microns
 	INT32	lateral;		// in microns
 	INT32	copies_printed;
+	INT32	meters_k;
+	INT32	meters_color;
+	INT32	meters_color_w;
 } SLH702_State;
 
 //--- SLH702_Message --------------------------

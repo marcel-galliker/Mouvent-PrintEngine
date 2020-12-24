@@ -13,6 +13,7 @@
 
 #include "rx_ink_common.h"
 #include "nios_def_fluid.h"
+#include "nios_def_head.h"
 #include "cond_def_head.h"
 
 #ifdef __cplusplus
@@ -98,6 +99,7 @@ void rx_def_init();
 #define FILENAME_SPLICE_PAR		"splicepar.xml"
 #define FILENAME_HEAD_PRESOUT	"head_presout.xml"
 #define FILENAME_COUNTERS		".counters.xml"
+#define FILENAME_COUNTERS_LH702	".counters_lh702.xml"
 
 //--- defines ---------------------------------
 
@@ -117,8 +119,6 @@ void rx_def_init();
 #define MAX_SCALES			(MAX_COLORS+2)
 #define MAX_HEADS_COLOR		48
 #define MAX_HEAD_DIST		(INK_SUPPLY_CNT*MAX_HEADS_INKCYLINDER) // 288
-#define MAX_DISABLED_JETS	32
-#define MAX_DENSITY_VALUES	(2+10)
 #define MAX_DENSITY_FACTORS	(2048+128)
 	
 #define HEAD_BOARD_CNT		(MAX_HEAD_DIST/MAX_HEADS_BOARD) // head boards per print bar
@@ -269,10 +269,11 @@ typedef struct SPrintQueueItem
 	UINT8	srcBitsPerPixel;
 	INT32	firstPage;
 	INT32	lastPage;
-	INT8	singlePage;
+	INT8	singlePage;  // used?
 	INT32	copies;
 	INT8	collate;
 	INT8	variable;	// variable data job
+
 	UINT8	state;
 			#define PQ_STATE_UNDEF		0
 			#define PQ_STATE_QUEUED		1
@@ -343,6 +344,7 @@ typedef struct SPrintQueueItem
 
 	char    dots[4];
 	INT8	wakeup;
+	UINT32	usedColors;
 
 //	UINT16	previewOrientation;
 } SPrintQueueItem;
@@ -540,6 +542,11 @@ typedef struct SPrinterStatus
 	UINT32			actSpeed;
 	INT64			counterAct;	// [mm]
     INT64			counterTotal;	// [mm]
+    INT64			counterLH702[3];	    // [mm]
+		#define CTR_LH702_K			0
+		#define CTR_LH702_COLOR		1
+		#define CTR_LH702_COLOR_W	2
+
 }  SPrinterStatus;
 
 //--- SSpoolerCfg ----------------------------------
@@ -766,26 +773,6 @@ typedef struct
 	UINT16			badJets[8];
 } SHeadEEpromInfo;
 
-typedef struct
-{
-	UINT16	clusterNo;			//	0x00
-	UINT16	flowResistance;		//	0x02
-	UINT8	flowResistanceCRC;	//	0x04
-	UINT32	dropletsPrinted_old;	//  0x05..0x08
-	UINT8	dropletsPrintedCRC_old;	//	0x09
-	INT16	disabledJets[MAX_DISABLED_JETS];	// 0x0a..0x4b
-	UINT8	disabledJetsCRC;					//	0x4a
-	INT16	densityValue[MAX_DENSITY_VALUES];	// 0x4b..0x62
-	UINT8	densityValueCRC;					// 0x63
-	UINT8	voltage;							// 0x64: Firepulse voltage
-	UINT8	voltageCRC;							// 0x65
-	UINT64	dropletsPrinted;					// 0x66..0x6d
-	UINT8	dropletsPrintedCRC;					// 0x6e
-	INT16	rob_angle;							// 0x6f..0x70	// 0=undef
-	INT16	rob_dist;							// 0x71..0x72	// 0=undef
-	UINT8	rob_CRC;							// 0x73
-	UINT8	res_74[0x80-0x74];	
-} SHeadEEpromMvt;	// size must be 0x80!!
 	
 typedef struct SHeadStat
 {	
@@ -829,6 +816,7 @@ typedef struct SHeadStat
 	
 	SHeadEEpromInfo	eeprom;
 	SHeadEEpromMvt	eeprom_mvt;
+	SHeadEEpromDensity	eeprom_density;
 } SHeadStat;
 
 typedef struct SHeadBoardCfg

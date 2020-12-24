@@ -620,7 +620,7 @@ static void _send_ink_def(int headNo, char *dots, int screenOnPrinter)
 				memcpy(msg.dots, dots, sizeof(msg.dots));
 				
 				no = headNo*HEAD_CNT+n;
-				if (screenOnPrinter && RX_HBStatus[headNo].head[n].eeprom_mvt.voltage)	msg.fpVoltage = RX_HBStatus[headNo].head[n].eeprom_mvt.voltage;
+				if (screenOnPrinter && RX_HBStatus[headNo].head[n].eeprom_density.voltage)	msg.fpVoltage = RX_HBStatus[headNo].head[n].eeprom_density.voltage;
 				else if (RX_Config.headFpVoltage[no]) msg.fpVoltage = RX_Config.headFpVoltage[no];
 				else msg.fpVoltage = RX_HBStatus[headNo].head[n].eeprom.voltage;
 				
@@ -628,7 +628,9 @@ static void _send_ink_def(int headNo, char *dots, int screenOnPrinter)
                 Error(LOG, 0, "Head %s: FirepulseVoltage=%d%% (mvt=%d, fuji=%d)",
 					RX_Config.headBoard[headNo].head[n].name,
 					msg.fpVoltage,
-					RX_HBStatus[headNo].head[n].eeprom_mvt.voltage, 
+					screenOnPrinter,
+					RX_Config.headFpVoltage[no],
+					RX_HBStatus[headNo].head[n].eeprom_density.voltage, 
 					RX_HBStatus[headNo].head[n].eeprom.voltage);
 				*/
 
@@ -849,16 +851,9 @@ void ctrl_send_head_cfg(void)
 }
 
 //--- ctrl_set_density_values ------------------------------------------
-void ctrl_set_density_values(SDensityValuesMsg *pmsg)
+void ctrl_set_density(SDensityMsg *pmsg)
 {
-	Error(LOG, 0, "ctrl_set_density_values head=%d", pmsg->head);
-	sok_send(&_HeadCtrl[pmsg->head/MAX_HEADS_BOARD].socket, pmsg);
-}
-
-//--- ctrl_set_disalbled_jets ------------------------------------------
-void ctrl_set_disalbled_jets(SDisabledJetsMsg *pmsg)
-{
-	Error(LOG, 0, "SDisabledJetsMsg head=%d", pmsg->head);
+	Error(LOG, 0, "ctrl_set_density head=%d", pmsg->head);
 	sok_send(&_HeadCtrl[pmsg->head/MAX_HEADS_BOARD].socket, pmsg);
 }
 
